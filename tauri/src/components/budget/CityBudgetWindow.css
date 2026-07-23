@@ -1,0 +1,479 @@
+/* ==========================================================================
+   CityBudgetWindow.css - New Refactored Style with Modern Dark Glassmorphism
+   ========================================================================== */
+
+.budget-window {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: #e2e8f0;
+  font-family: 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* ヘッダー */
+.budget-window__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: rgba(30, 41, 59, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.budget-window__reserves-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.budget-window__reserves-card-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+}
+
+.budget-window__reserves-card-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #38bdf8;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+}
+
+.budget-window__period-info {
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* メイン 3カラム レイアウト: 左=Tier別カテゴリカード / 中央=Sankey+棒グラフ / 右=施設明細 */
+.budget-window__split-container {
+  display: flex;
+  flex: 1;
+  min-height: 0; /* スクロール可能にするために必要 */
+}
+
+/* 左カラム: 維持優先度(Tier)ごとにグループ化したカテゴリカード */
+.budget-window__left-pane {
+  flex: 30;
+  min-width: 240px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Tierグループの枠。Tier 1(最優先維持)が最上段に並ぶ。 */
+.budget-tier-group {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 8px;
+  background: rgba(30, 41, 59, 0.2);
+}
+
+.budget-tier-group__title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.02em;
+  margin-bottom: 6px;
+}
+
+/* Tierごとの枠色: 維持優先度が高い(数字が小さい)ほど明るい */
+.budget-tier-group--tier1 {
+  border-color: rgba(56, 189, 248, 0.35);
+}
+.budget-tier-group--tier1 .budget-tier-group__title {
+  color: #38bdf8;
+}
+.budget-tier-group--tier2 {
+  border-color: rgba(14, 165, 233, 0.22);
+}
+.budget-tier-group--tier2 .budget-tier-group__title {
+  color: #7dd3fc;
+}
+.budget-tier-group--tier3 {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+.budget-tier-group--tier4 {
+  border-color: rgba(255, 255, 255, 0.06);
+}
+.budget-tier-group--tier4 .budget-tier-group__title {
+  color: #64748b;
+}
+
+.budget-tier-group__cards {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* カテゴリカード: カテゴリ名 + 予算比率スライダーのみのシンプルな構成 */
+.budget-category-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: rgba(30, 41, 59, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 左側のカテゴリアイコン枠(正方形)。画像が無いカテゴリは空枠のまま表示する。 */
+.budget-category-card__icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.budget-category-card__icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* 右側: タイトル + スライダーの縦積み。横幅の余りを全部使う。 */
+.budget-category-card__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.budget-category-card:hover:not(.budget-category-card--active) {
+  background: rgba(30, 41, 59, 0.45);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.budget-category-card--active {
+  background: rgba(14, 165, 233, 0.1);
+  border-color: rgba(14, 165, 233, 0.35);
+}
+
+.budget-category-card__name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.budget-category-card__slider-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.budget-category-card__slider {
+  flex: 1;
+  min-width: 60px;
+  accent-color: #3b82f6;
+}
+
+.budget-category-card__slider-value {
+  font-size: 0.72rem;
+  color: #cbd5e1;
+  font-family: monospace;
+  width: 40px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+/* 中央カラム: 上=財政Sankey、下=必要金額vs予算額の棒グラフ */
+.budget-window__center-pane {
+  flex: 40;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.15);
+}
+
+/* 上段: 財政Sankey。中央カラムを上下分割した上側。 */
+.budget-window__sankey-section {
+  flex: 0 0 42%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 12px 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* 下段: 必要金額 vs 予算額の比較棒グラフ */
+.budget-window__bars-section {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 12px 8px;
+}
+
+.budget-window__bars-chart {
+  flex: 1;
+  min-height: 0;
+}
+
+/* 中央カラムの各セクション見出し(Sankey/棒グラフ共通) */
+.budget-window__section-title {
+  margin: 0 0 4px 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #9ca3af;
+  letter-spacing: 0.02em;
+}
+
+/* 収支フローSankeyの見出し行: タイトル + タブ切り替え(来期見込み/前期実績) */
+.budget-window__sankey-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+  flex-shrink: 0;
+}
+
+.budget-window__sankey-title {
+  margin: 0;
+}
+
+.budget-window__sankey-tabs {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.budget-window__sankey-tab {
+  padding: 3px 10px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.budget-window__sankey-tab:hover:not(.budget-window__sankey-tab--active) {
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+}
+
+.budget-window__sankey-tab--active {
+  background: #0ea5e9;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+/* 右カラム: 選択カテゴリの施設明細(上下いっぱい) */
+.budget-window__right-pane {
+  flex: 30;
+  background: rgba(15, 23, 42, 0.2);
+  display: flex;
+  flex-direction: column;
+  min-width: 220px;
+}
+
+.budget-agent-table-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.budget-agent-title {
+  margin: 0 0 12px 0;
+  font-size: 0.9rem;
+  color: #e2e8f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 8px;
+}
+
+.budget-agent-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.budget-agent-table thead {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+  flex-shrink: 0;
+}
+
+.budget-agent-table tbody {
+  display: block;
+  width: 100%;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.budget-agent-table tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.budget-agent-table__header {
+  text-align: left;
+  padding: 6px 8px;
+  color: #94a3b8;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.budget-agent-table__header--num {
+  text-align: right;
+}
+
+.budget-agent-table__cell {
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  color: #cbd5e1;
+  vertical-align: middle;
+}
+
+.budget-agent-table__cell--name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.budget-agent-table__cell--num {
+  text-align: right;
+  font-family: monospace;
+}
+
+.budget-agent-table__row:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* 合計行の特別スタイル */
+.budget-agent-table__row--total {
+  background: rgba(255, 255, 255, 0.05);
+  font-weight: 700;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.budget-agent-table__cell--total {
+  color: #ffffff;
+  font-size: 0.8rem;
+}
+
+.budget-agent-table__cell--empty {
+  padding: 20px 8px;
+  text-align: center;
+  color: #64748b;
+  font-style: italic;
+}
+
+/* フッター */
+.budget-window__footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 20px;
+  background: rgba(30, 41, 59, 0.4);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.budget-window__confirm-btn {
+  padding: 10px 28px;
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.budget-window__confirm-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(14, 165, 233, 0.35);
+  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+}
+
+.budget-window__confirm-btn:disabled {
+  opacity: 0.5;
+  background: #334155;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* 読み込み/エラー状態 */
+.budget-window__loading,
+.budget-window__error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.budget-window__error {
+  color: #f87171;
+}
+
+.budget-agent-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.budget-agent-name-line {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.budget-util-note {
+  font-size: 0.65rem;
+  color: #64748b;
+  margin-top: 1px;
+}
+
+/* 資金不足による自動調整バナー */
+.budget-window__auto-adjust-banner {
+  margin: 4px 8px;
+  padding: 6px 12px;
+  background: rgba(234, 179, 8, 0.15);
+  border: 1px solid #eab308;
+  border-radius: 6px;
+  color: #fde68a;
+  font-size: 0.8rem;
+  text-align: center;
+}

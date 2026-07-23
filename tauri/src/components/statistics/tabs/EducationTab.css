@@ -1,0 +1,387 @@
+.edu-tab {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  color: #e2e8f0;
+  box-sizing: border-box;
+}
+
+.edu-tab__header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 12px;
+  background: rgba(15, 23, 42, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.scope-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scope-selector__label {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.scope-selector__select {
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: #f1f5f9;
+  font-size: 11px;
+  padding: 4px 8px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.scope-selector__select:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.edu-tab__body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  gap: 16px;
+  padding: 16px;
+  background: #0f172a;
+}
+
+/* 左半分: 縦積み（グラフ横並び＋学校一覧） */
+.edu-tab__left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* グラフ横並び行 */
+.edu-tab__charts-row {
+  display: flex;
+  flex: 1;
+  gap: 12px;
+  min-height: 0;
+}
+
+/* 学校一覧エリア */
+.edu-tab__schools {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* 右半分: スキルカードをタイル状（2列）に並べる（全高さ使用、スクロール） */
+.edu-tab__right {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 12px;
+  overflow-y: auto;
+  padding-right: 4px;
+  min-width: 0;
+}
+
+/* カード共通 */
+.edu-card {
+  flex: 1;
+  background: rgba(30, 41, 59, 0.5);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.edu-card--half {
+  flex: 1;
+}
+
+.edu-card__title {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+  color: #38bdf8;
+  border-left: 3px solid #38bdf8;
+  padding-left: 8px;
+}
+
+.edu-card__chart-container-level {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  gap: 4px;
+}
+
+.edu-card__chart-container-radar {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 円グラフのカスタム凡例（下部に横並び） */
+.edu-legend {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 0 8px;
+}
+
+.edu-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.edu-legend__bullet {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.edu-legend__label {
+  color: #94a3b8;
+  flex-grow: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.edu-legend__value {
+  font-weight: 600;
+  color: #f1f5f9;
+  flex-shrink: 0;
+}
+
+/* 学校一覧 */
+.edu-schools-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+}
+
+.edu-schools-list__title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #cbd5e1;
+  border-left: 3px solid #38bdf8;
+  padding-left: 8px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.edu-schools-list__count {
+  font-size: 11px;
+  font-weight: 400;
+  color: #8ba3bb;
+}
+
+.edu-schools-list__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: rgba(26, 34, 48, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+}
+
+.edu-schools-list__empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  min-height: 60px;
+  padding: 16px;
+  color: #5a6f86;
+  font-size: 11px;
+}
+
+.edu-schools-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.edu-schools-table thead {
+  position: sticky;
+  top: 0;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(4px);
+  z-index: 1;
+}
+
+.edu-schools-table th {
+  text-align: left;
+  padding: 6px 10px;
+  font-weight: 600;
+  color: #94a3b8;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 10px;
+}
+
+.edu-schools-table td {
+  padding: 6px 10px;
+  color: #e2e8f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  vertical-align: middle;
+}
+
+.edu-schools-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.edu-schools-table__cell--name {
+  max-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.edu-schools-table__cell--muted {
+  color: #8ba3bb;
+  font-size: 10px;
+}
+
+.edu-schools-table__cell--meter {
+  width: 120px;
+}
+
+.edu-schools-table .entity-link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #4ea1ff;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.edu-schools-table .entity-link:hover {
+  text-decoration: underline;
+  color: #7cb9ff;
+}
+
+/* 専門スキルカード（タイル状に並ぶ1枚分） */
+.edu-skill-card {
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  min-height: 0;
+  transition: transform 0.2s, border-color 0.2s, background-color 0.2s;
+}
+
+.edu-skill-card:hover {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: rgba(56, 189, 248, 0.2);
+  transform: translateY(-1px);
+}
+
+.edu-skill-card__title {
+  font-size: 11.5px;
+  font-weight: 600;
+  margin: 0;
+  color: #f8fafc;
+  flex-shrink: 0;
+}
+
+.edu-skill-card__chart-w {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+/* 教育キャパシティ（充足率メーター） */
+.edu-skill-card__capacity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 8px;
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.edu-skill-card__capacity-label {
+  font-size: 9px;
+  color: #8ba3bb;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.edu-no-capacity {
+  font-size: 9px;
+  color: #475569;
+}
+
+/* スクロールバーのカスタマイズ */
+.edu-tab__right::-webkit-scrollbar,
+.edu-schools-list__body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.edu-tab__right::-webkit-scrollbar-track,
+.edu-schools-list__body::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.3);
+  border-radius: 4px;
+}
+
+.edu-tab__right::-webkit-scrollbar-thumb,
+.edu-schools-list__body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.edu-tab__right::-webkit-scrollbar-thumb:hover,
+.edu-schools-list__body::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ローディング・エラー */
+.stats-tab-loading,
+.stats-tab-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.stats-tab-error {
+  color: #ef4444;
+}

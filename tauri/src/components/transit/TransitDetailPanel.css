@@ -1,0 +1,65 @@
+/* ==========================================================================
+   TransitDetailPanel.css - 路線詳細パネル(右パネル)
+   体裁の大部分は AgentDetailPanel.css(agent-detail-*)を共有し、
+   ここでは公共交通固有のボタン・区間一覧のみを定義する。
+   ========================================================================== */
+
+.transit-detail__save-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 7px 12px;
+  border: none;
+  border-radius: 6px;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+.transit-detail__save-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.transit-detail__save-btn:not(:disabled):hover {
+  filter: brightness(1.12);
+}
+
+.transit-detail__delete-btn {
+  width: 100%;
+  padding: 7px 12px;
+  border: 1px solid rgba(239, 68, 68, 0.6);
+  border-radius: 6px;
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+  font-weight: 600;
+  cursor: pointer;
+}
+.transit-detail__delete-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.transit-detail__delete-btn:not(:disabled):hover {
+  background: rgba(239, 68, 68, 0.28);
+}
+
+.transit-detail__pause-reason {
+  margin: 8px 0 0;
+  padding: 7px 10px;
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  border-radius: 6px;
+  background: rgba(245, 158, 11, 0.12);
+  color: #fcd34d;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.transit-detail__segments {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.transit-detail__segment {
+  padding: 4px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 0.8rem;
+}

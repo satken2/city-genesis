@@ -1,0 +1,645 @@
+/**
+ * 統合施政スコア＆達成目標ダッシュボード スタイルシート
+ *
+ * 全画面を上下に3:2で分割し、カード、レーダー、棒グラフを綺麗に収めるデザイン。
+ */
+
+.achieve-dashboard {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  padding: 12px;
+  gap: 12px;
+}
+
+/* ==================== 上部エリア (3/5): 施政スコア分析 ==================== */
+.achieve-dashboard__upper {
+  flex: 3.2;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+
+/* 上段: 数値サマリー & レーダーチャート */
+.achieve-dashboard__row-top {
+  flex: 1.3;
+  display: flex;
+  gap: 10px;
+  min-height: 0;
+}
+
+.achieve-dashboard__summary {
+  flex: 1.3;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.achieve-dashboard__radar {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* 下段: スコア構成 & レーダー & 災害一覧の3列レイアウト */
+.achieve-dashboard__row-bottom {
+  flex: 1;
+  display: flex;
+  gap: 10px;
+  min-height: 0;
+}
+
+/* 共通タイトル */
+.achieve-dashboard__section-title {
+  margin: 0 0 6px 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #9db0c5;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 数値サマリーカードレイアウト */
+.score-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.score-summary-card {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.score-summary-card--main {
+  grid-column: span 2;
+  background: rgba(78, 161, 255, 0.03);
+  border-color: rgba(78, 161, 255, 0.12);
+}
+
+.score-summary-card__label {
+  font-size: 0.68rem;
+  color: #7b8fa5;
+  font-weight: 600;
+}
+
+.score-summary-card__value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  margin: 1px 0;
+}
+
+.score-summary-card__value {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #f6fbff;
+  line-height: 1.1;
+}
+
+.score-summary-card--main .score-summary-card__value {
+  font-size: 1.5rem;
+  color: #4ea1ff;
+}
+
+.score-summary-card__unit {
+  font-size: 0.7rem;
+  color: #7b8fa5;
+  font-weight: 600;
+}
+
+.score-summary-card__breakdown {
+  display: flex;
+  gap: 8px;
+  font-size: 0.68rem;
+  color: #9db0c5;
+  margin-top: 2px;
+  flex-wrap: wrap;
+}
+
+.score-summary-card__penalty {
+  color: #ef4444;
+  font-weight: 700;
+}
+
+/* チャート用コンテナー */
+.achieve-dashboard__chart-container {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ==================== スコア履歴（上段右側の棒グラフ） ==================== */
+.achieve-dashboard__history {
+  flex: 2;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* ==================== スコア構成ウォーターフォール（recharts BarChart） ==================== */
+.achieve-dashboard__waterfall {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* ==================== 災害一覧パネル ==================== */
+.achieve-dashboard__disasters {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.disaster-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.disaster-list__empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: #5a6f86;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.disaster-card {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.disaster-card__header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.disaster-card__badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+
+.disaster-card__badge--building {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.disaster-card__badge--path {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.disaster-card__id {
+  font-size: 0.68rem;
+  color: #7b8fa5;
+  font-weight: 600;
+}
+
+.disaster-card__details {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.68rem;
+}
+
+.disaster-card__zone {
+  color: #9db0c5;
+}
+
+.disaster-card__deaths {
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.disaster-card__deaths--zero {
+  color: #5a6f86;
+  font-weight: 600;
+}
+
+.achieve-dashboard__chart-container-bar {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+
+.achieve-dashboard__no-chart {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: #5a6f86;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+/* 棒グラフ用カスタムツールチップ */
+.bar-chart-tooltip {
+  background: #131b26;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.74rem;
+  color: #e5eef9;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.bar-chart-tooltip__epoch {
+  margin: 0 0 3px 0;
+  font-weight: 700;
+  color: #9db0c5;
+}
+
+.bar-chart-tooltip__val {
+  margin: 1px 0;
+}
+
+.bar-chart-tooltip__val span {
+  font-weight: 700;
+  color: #4ea1ff;
+}
+
+/* ==================== 下部エリア (2/5): 達成目標カード一覧 ==================== */
+.achieve-dashboard__lower {
+  flex: 2;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.achieve-dashboard__quest-count {
+  font-size: 0.74rem;
+  color: #7b8fa5;
+  margin-left: 6px;
+  font-weight: 600;
+}
+
+.achieve-dashboard__add-quest-btn {
+  margin-left: auto;
+  padding: 3px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: normal;
+  color: #fff;
+  background: #3b82f6;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.achieve-dashboard__add-quest-btn:hover {
+  background: #2563eb;
+}
+
+.achieve-dashboard__quest-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 8px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 2px;
+}
+
+.achieve-dashboard__empty-quests {
+  grid-column: 1 / -1;
+  padding: 20px 12px;
+  color: #5a6f86;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+/* 目標カード — 銀色パネルで他の紺系グラフから目立たせる */
+.quest-grid-card {
+  background: linear-gradient(160deg, #dfe5ee 0%, #c4ccd9 100%);
+  border: 1px solid #9aa6b8;
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: background 0.12s, border-color 0.12s, transform 0.12s;
+  min-width: 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.quest-grid-card:hover {
+  background: linear-gradient(160deg, #eaeef6 0%, #d2d9e5 100%);
+  border-color: #7c889c;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
+}
+
+.quest-grid-card--completed {
+  border-color: #10b981;
+  background: linear-gradient(160deg, #d6f0e3 0%, #b7e4cc 100%);
+}
+
+.quest-grid-card--completed:hover {
+  border-color: #0e9c75;
+  background: linear-gradient(160deg, #e2f7eb 0%, #c8eeda 100%);
+}
+
+.quest-grid-card--editable {
+  cursor: pointer;
+}
+
+.quest-grid-card__top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.quest-grid-card__delete-btn {
+  flex-shrink: 0;
+  margin-left: auto;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  font-size: 0.7rem;
+  line-height: 1;
+  color: #7c889c;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.quest-grid-card__delete-btn:hover:not(:disabled) {
+  color: #fff;
+  background: #ef4444;
+}
+
+.quest-grid-card__delete-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.quest-grid-card__badge {
+  width: 14px;
+  height: 14px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.quest-grid-card__check {
+  color: #10b981;
+  font-weight: 700;
+  font-size: 0.78rem;
+}
+
+.quest-grid-card__circle {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1.5px solid #2a313e;
+}
+
+.quest-grid-card__name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #1a1f2a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.quest-grid-card__desc {
+  margin: 0;
+  font-size: 0.68rem;
+  color: #2a313e;
+  line-height: 1.35;
+  height: 2.7em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.quest-grid-card__progress-area {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.quest-grid-card__bar-track {
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+}
+
+.quest-grid-card__bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.quest-grid-card__values {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  font-size: 0.68rem;
+  color: #3a4250;
+  font-weight: 600;
+}
+
+.quest-grid-card__current {
+  color: #11151c;
+  font-weight: 700;
+}
+
+.quest-grid-card__operator {
+  color: #4a5364;
+}
+
+.quest-grid-card__target {
+  color: #11151c;
+  font-weight: 700;
+}
+
+.quest-grid-card__pct {
+  margin-left: auto;
+  color: #3a4250;
+}
+
+/* ==================== 共通ステータス ==================== */
+.achieve-window__loading,
+.achieve-window__error {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 20px;
+  color: #9db0c5;
+  font-size: 0.85rem;
+}
+
+.achieve-window__error {
+  color: #ff7171;
+}
+
+/* ── クエストカードの新ステータス・メタ情報(locked / failed / tier / category / 条件節) ── */
+
+/* locked: 先行クエスト未達成。グレーで沈ませる */
+.quest-grid-card--locked {
+  opacity: 0.55;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+/* failed: 期限切れ。赤系の縁取り */
+.quest-grid-card--failed {
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.quest-grid-card__lock {
+  font-size: 0.85rem;
+}
+
+.quest-grid-card__cross {
+  color: #ef4444;
+  font-weight: 700;
+}
+
+/* tier バッジ(silver / gold) */
+.quest-grid-card__tier {
+  flex-shrink: 0;
+  padding: 1px 8px;
+  border-radius: 8px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.quest-grid-card__tier--gold {
+  background: linear-gradient(135deg, #f0c040, #e8a020);
+  color: #402800;
+}
+
+.quest-grid-card__tier--silver {
+  background: linear-gradient(135deg, #e0e8f0, #98a8c0);
+  color: #202838;
+}
+
+/* メタ情報行: カテゴリ・期限・報酬のチップ */
+.quest-grid-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.quest-grid-card__meta-chip {
+  padding: 1px 8px;
+  border-radius: 8px;
+  font-size: 0.64rem;
+  color: #9db0c5;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.quest-grid-card__meta-chip--deadline {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.quest-grid-card__meta-chip--reward {
+  color: #6cd47f;
+  background: rgba(108, 212, 127, 0.1);
+}
+
+/* locked / failed の注記文 */
+.quest-grid-card__locked-note,
+.quest-grid-card__failed-note {
+  margin: 0;
+  font-size: 0.7rem;
+  color: #7b8fa5;
+}
+
+.quest-grid-card__failed-note {
+  color: #e87878;
+}
+
+/* 条件節1行分(現在値 演算子 目標値 + モード補足) */
+.quest-grid-card__clause {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.75rem;
+}
+
+.quest-grid-card__streak,
+.quest-grid-card__mode {
+  font-size: 0.62rem;
+  color: #7b8fa5;
+}
+
+.quest-grid-card__clause-ok {
+  color: #10b981;
+  font-weight: 700;
+  font-size: 0.7rem;
+}

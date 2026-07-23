@@ -1,0 +1,24 @@
+{
+  "zone": {
+    "titleWithId": "District #{{id}}",
+    "newDistrict": "New District",
+    "basicInfo": "Basic Info",
+    "area": "Area",
+    "averageWage": "Average Wage",
+    "averageRent": "Average Rent",
+    "averageLandPrice": "Average Land Price",
+    "zonePopulation": "Population",
+    "daytimePopulation": "Daytime Population",
+    "unemploymentRate": "Unemployment Rate",
+    "spaceAmount": "Floor Occupancy",
+    "restrictions": "District Regulations",
+    "nameLabel": "District Name",
+    "namePlaceholder": "Enter district name",
+    "enterEditMode": "Edit District",
+    "saveChanges": "Save",
+    "cancelEdit": "Cancel",
+    "selectedPaths": "Paths selected",
+    "paintedPaths": "Painted",
+    "noPathsYet": "Select roads in the 3D view to define the district"
+  }
+}

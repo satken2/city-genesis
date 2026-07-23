@@ -1,0 +1,202 @@
+/**
+ * チュートリアルウィンドウのスタイル
+ *
+ * ヒントバーと同様のダークガラスデザインを採用し、画面上部中央に固定表示する。
+ * タイトルバーや×ボタンは持たず、ヒントバーの直下に配置される。
+ */
+
+.tutorial-root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  pointer-events: none;
+  z-index: 9998;
+}
+
+.tutorial-frame {
+  width: 100%;
+  min-height: 160px;
+  max-height: 200px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: linear-gradient(
+    180deg,
+    rgba(22, 34, 52, 0.96) 0%,
+    rgba(14, 24, 38, 0.99) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  pointer-events: auto;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* 画像＋テキストの横並びコンテナ */
+.tutorial-frame-content {
+  display: flex;
+  flex-direction: row;
+  gap: 14px;
+  flex: 1;
+  min-height: 0;
+}
+
+/* 左側の画像配置領域 */
+.tutorial-step-image {
+  flex-shrink: 0;
+  width: 100px;
+  height: 100px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+}
+
+.tutorial-step-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* 右側のテキスト・ボタン配置領域 */
+.tutorial-step-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.tutorial-step-number {
+  font-size: 11px;
+  color: #9db0c5;
+  font-family: "Segoe UI", sans-serif;
+  letter-spacing: 0.5px;
+}
+
+.tutorial-step-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #e5eef9;
+  font-family: "Segoe UI", sans-serif;
+  line-height: 1.35;
+}
+
+.tutorial-step-description {
+  font-size: 13px;
+  color: #93a9c0;
+  font-family: "Segoe UI", sans-serif;
+  line-height: 1.5;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+/* ボタンと進捗を含む下部エリア */
+.tutorial-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.tutorial-complete-button {
+  padding: 6px 16px;
+  border: 1px solid rgba(78, 161, 255, 0.4);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(26, 95, 180, 0.6), rgba(28, 113, 216, 0.6));
+  color: #e5eef9;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: "Segoe UI", sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.tutorial-complete-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(26, 95, 180, 0.85), rgba(28, 113, 216, 0.85));
+  border-color: rgba(78, 161, 255, 0.7);
+}
+
+.tutorial-complete-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tutorial-status {
+  font-size: 12px;
+  color: #9db0c5;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.tutorial-status--error {
+  color: #f13b49;
+}
+
+.tutorial-status--success {
+  color: #22c55e;
+}
+
+/* 進捗インジケーター（枠内の下部に配置） */
+.tutorial-progress {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  pointer-events: auto;
+}
+
+.tutorial-progress-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  transition: background 0.3s ease;
+}
+
+.tutorial-progress-dot--active {
+  background: #4ea1ff;
+}
+
+.tutorial-progress-dot--completed {
+  background: #22c55e;
+}
+
+/* チュートリアル完了時の表示 */
+.tutorial-completed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+}
+
+.tutorial-completed-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #22c55e;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.tutorial-completed-sub {
+  font-size: 13px;
+  color: #93a9c0;
+  font-family: "Segoe UI", sans-serif;
+}

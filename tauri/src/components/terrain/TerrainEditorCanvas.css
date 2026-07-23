@@ -1,0 +1,380 @@
+.terrain-editor-root {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background-color: #0d0d14;
+  color: #e0e0e0;
+  overflow: hidden;
+}
+
+/* 左ツールパネル。カード形式の編集UIを配置する(3Dプレビューは別ウィンドウのため含まない)。 */
+.terrain-editor-tools {
+  flex: 0 0 600px;
+  width: 600px;
+  height: 100%;
+  background-color: #16161c;
+  border-right: 1px solid #2a2a35;
+  padding: 16px 12px;
+  overflow: hidden;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+/* タイトルと「3Dプレビューを開く」ボタンを横並びにする行 */
+.terrain-editor-tools-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #2a2a35;
+  flex: 0 0 auto;
+}
+
+.terrain-editor-tools-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #a0c8ff;
+}
+
+/* カード配置領域。左カラム(メタデータ＋自動編集)と右カラム(手動編集)の2列。残り高さいっぱいに広げてスクロールする。 */
+.terrain-editor-cards-area {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  display: flex;
+  gap: 10px;
+}
+
+.terrain-editor-cards-left {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.terrain-editor-cards-right {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* カード本体の外観 */
+.terrain-editor-card {
+  background-color: #1a1a26;
+  border: 1px solid #282833;
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.terrain-editor-card-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #9aa0b0;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #24242e;
+}
+
+/* 編集ツールのセクション区切り(手動編集カード内での区切り用) */
+.terrain-editor-section {
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #24242e;
+}
+
+.terrain-editor-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.terrain-editor-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9aa0b0;
+  margin-bottom: 6px;
+}
+
+/* モード/範囲指定/編集方法の選択ボタン群 */
+.terrain-editor-toggle-group {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.terrain-editor-toggle-group-vertical {
+  flex-direction: column;
+}
+
+.terrain-editor-toggle-btn {
+  flex: 1 1 0;
+  padding: 5px 6px;
+  font-size: 11px;
+  color: #c8c8d0;
+  background-color: #1c1c24;
+  border: 1px solid #30303c;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.terrain-editor-toggle-btn:hover {
+  border-color: #4a4a5a;
+}
+
+.terrain-editor-toggle-btn.selected {
+  background-color: #2a3a52;
+  border-color: #5a8fd6;
+  color: #a0c8ff;
+}
+
+/* パラメータ入力の行 */
+.terrain-editor-param-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.terrain-editor-param-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.terrain-editor-param-label {
+  font-size: 11px;
+  color: #b0b0bc;
+  flex: 1 1 auto;
+}
+
+.terrain-editor-select {
+  flex: 0 0 auto;
+  background-color: #1c1c24;
+  color: #e0e0e0;
+  border: 1px solid #30303c;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 11px;
+}
+
+.terrain-editor-hint {
+  font-size: 10px;
+  color: #777;
+  line-height: 1.5;
+  margin-top: 3px;
+}
+
+.terrain-editor-hint--success {
+  color: #8fd69a;
+}
+
+.terrain-editor-hint--error {
+  color: #f0a0a0;
+}
+
+.terrain-editor-text-input {
+  flex: 0 0 auto;
+  width: 110px;
+  background-color: #1c1c24;
+  color: #e0e0e0;
+  border: 1px solid #30303c;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 11px;
+}
+
+.terrain-editor-text-input:disabled {
+  color: #666;
+}
+
+.terrain-editor-meta-readonly {
+  font-size: 10px;
+  color: #777;
+  line-height: 1.5;
+}
+
+.terrain-editor-polygon-count {
+  font-size: 11px;
+  color: #a0c8ff;
+}
+
+.terrain-editor-selection-status {
+  font-size: 11px;
+  color: #a0c8ff;
+  font-weight: 600;
+}
+
+/* アクションボタン */
+.terrain-editor-action-buttons {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.terrain-editor-action-buttons-vertical {
+  flex-direction: column;
+}
+
+.terrain-editor-btn {
+  flex: 1 1 0;
+  padding: 6px 6px;
+  font-size: 11px;
+  color: #e0e0e0;
+  background-color: #23232d;
+  border: 1px solid #383846;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.terrain-editor-btn:hover:not(:disabled) {
+  border-color: #5a5a6e;
+}
+
+.terrain-editor-btn:disabled {
+  color: #666;
+  cursor: not-allowed;
+}
+
+.terrain-editor-btn-confirm {
+  background-color: #2a4a2e;
+  border-color: #4a8f52;
+  color: #b8f0c0;
+}
+
+.terrain-editor-btn-confirm:hover:not(:disabled) {
+  border-color: #6ad07a;
+}
+
+/* マップリサイズ操作用のコンパクトな行 */
+.terrain-editor-resize-row {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.terrain-editor-resize-row .terrain-editor-select {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.terrain-editor-resize-row .terrain-editor-btn {
+  flex: 0 0 auto;
+}
+
+/* キャンバス領域。ディスプレイいっぱいに広げる。 */
+.terrain-editor-canvas-wrap {
+  flex: 1 1 auto;
+  position: relative;
+  min-width: 0;
+  height: 100%;
+}
+
+.terrain-editor-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+.terrain-editor-canvas:active {
+  cursor: grabbing;
+}
+
+/* ロード中・エラーの中央メッセージ */
+.terrain-editor-msg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 14px 24px;
+  background-color: rgba(20, 20, 28, 0.9);
+  border: 1px solid #333;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #ccc;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.terrain-editor-msg--error {
+  color: #f0a0a0;
+  background-color: rgba(58, 31, 31, 0.95);
+  border-color: #5a2a2a;
+}
+
+/* 左下: カーソル座標 */
+.terrain-editor-coord-overlay {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  padding: 6px 10px;
+  background-color: rgba(0, 0, 0, 0.55);
+  border-radius: 4px;
+  font-family: Consolas, Menlo, monospace;
+  font-size: 12px;
+  color: #c0c0c0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* 右下: ズーム倍率 */
+.terrain-editor-zoom-overlay {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  padding: 6px 10px;
+  background-color: rgba(0, 0, 0, 0.55);
+  border-radius: 4px;
+  font-family: Consolas, Menlo, monospace;
+  font-size: 12px;
+  color: #c0c0c0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* タブ切り替えバーのスタイル */
+.terrain-editor-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #2a2a35;
+  flex: 0 0 auto;
+}
+
+.terrain-editor-tab {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #8a8a98;
+  background-color: #1a1a24;
+  border: 1px solid #30303c;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.terrain-editor-tab:hover:not(:disabled) {
+  color: #c8c8d0;
+  border-color: #4a4a5a;
+  background-color: #20202a;
+}
+
+.terrain-editor-tab.active {
+  background-color: #2a3a52;
+  border-color: #5a8fd6;
+  color: #a0c8ff;
+}
+
+.terrain-editor-tab:disabled {
+  color: #555;
+  cursor: not-allowed;
+}
+

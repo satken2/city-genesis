@@ -1,0 +1,19 @@
+# 車種ごとの描画モデル・バリアント定義(任意)。
+# VehicleModelConfig が読み込む。定義した車種は Models/Vehicles/{type}/{variant} を
+# ModelManager 経由で解決し、seed で1つを選んで描画する(同一車種内でランダムに複数 fbx)。
+# 未定義の車種は Models/Vehicles/{type} → 汎用車 → 単純な箱、の順にフォールバックする。
+#
+# 車種ID(Constants.VEHICLE_*): 10=乗用車, 11=トラック, 12=バス, 13=商用車
+#
+# 例(fbx を Assets/Resources/Models/Vehicles/10/0.prefab, /1.prefab として配置した場合):
+# vehicles:
+#   10:
+#     variants: [0, 1, 2]
+#   11:
+#     variants: [0]
+#   12:
+#     variants: [0]
+#   13:
+#     variants: [0]
+
+vehicles:

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Debug Props Viewer</title>
+<script>
+  var API_BASE = new URLSearchParams(window.location.search).get('api_base') || window.location.origin;
+</script>
+<link rel="stylesheet" href="css/debug_common.css">
+<style>
+.content-wrap{display:flex;flex:1;overflow:hidden}
+.outer-tabs{background:var(--bg-mantle);padding:8px 0;display:flex;flex-direction:column;gap:2px;overflow-y:auto;flex-shrink:0;border-right:2px solid var(--bg-surface0);min-width:180px}
+.outer-tab{padding:6px 12px;background:var(--bg-surface0);color:var(--subtext);cursor:pointer;border-radius:4px 0 0 4px;border:1px solid var(--border);border-right:none;white-space:nowrap;font-size:12px}
+.outer-tab:hover{background:var(--bg-surface1)}
+.outer-tab.active{background:var(--bg-base);color:var(--accent);border-right:2px solid var(--bg-base);margin-right:-2px}
+.main-area{flex:1;position:relative;overflow:hidden}
+.snap-panel{position:absolute;inset:0;display:flex;flex-direction:column}
+.snap-panel.hidden{visibility:hidden;pointer-events:none}
+.snap-name{display:none}
+.inner-tabs{padding:4px 8px;display:flex;gap:4px;flex-shrink:0;background:var(--bg-base);border-bottom:1px solid var(--bg-surface0);flex-wrap:wrap}
+.inner-tab{padding:3px 10px;background:var(--bg-surface0);color:var(--subtext);cursor:pointer;border-radius:var(--radius);border:1px solid var(--border)}
+.inner-tab:hover{background:var(--bg-surface1)}
+.inner-tab.active{background:var(--accent);color:var(--bg-base)}
+.table-area{flex:1;position:relative;overflow:hidden}
+.table-panel{position:absolute;inset:0;overflow:auto}
+.table-panel.hidden{visibility:hidden;pointer-events:none}
+table{border-collapse:collapse;width:max-content}
+th,td{border:1px solid var(--border);padding:2px 6px;white-space:nowrap;width:120px;min-width:120px;max-width:120px;overflow:hidden;text-overflow:ellipsis}
+th{background:var(--bg-surface0);color:var(--accent);position:sticky;top:0;z-index:2;font-weight:600;font-size:10px}
+td{background:var(--bg-base);height:18px}
+td.rid,th.rid{background:var(--bg-surface0);color:var(--subtext);position:sticky;left:0;z-index:1;font-weight:600;width:60px;min-width:60px;max-width:60px}
+th.rid{z-index:3}
+td.changed{background:#3e2348;color:var(--red)}
+td.removed{background:#2a1f1f;color:var(--bg-surface2)}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Debug Props Viewer</h1>
+  <button onclick="load()">Reload</button>
+  <button onclick="clear()">Clear</button>
+</div>
+
+<div class="content-wrap">
+  <div class="outer-tabs" id="otabs"></div>
+  <div class="main-area" id="main"><div class="empty-msg">Loading...</div></div>
+</div>
+
+<script>
+let data=[], actO=-1, actT='', built=new Map(), builtKeys=new Set();
+
+function fmt(v){
+  if(v==null) return '';
+  if(typeof v==='number') return Number.isInteger(v)?String(v):v.toFixed(4);
+  return String(v);
+}
+
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function bkey(si,tn){ return si+':'+tn; }
+
+function load(){
+  fetch(API_BASE + '/api/v1/debug/snapshots').then(r=>r.json()).then(d=>{
+    data=d; render();
+  }).catch(()=>{
+    document.getElementById('main').innerHTML='<div class="empty-msg">Error</div>';
+  });
+}
+
+function clear(){
+  fetch(API_BASE + '/api/v1/debug/snapshots',{method:'DELETE'}).then(()=>{
+    data=[]; actO=-1; actT=''; built.clear(); builtKeys.clear(); render();
+  });
+}
+
+function render(){
+  const ot=document.getElementById('otabs');
+  const main=document.getElementById('main');
+
+  if(!data.length){
+    ot.innerHTML='';
+    main.innerHTML='<div class="empty-msg">No snapshots.</div>';
+    return;
+  }
+
+  ot.innerHTML=data.map((s,i)=>
+    '<div class="outer-tab'+(i===actO?' active':'')+'" onclick="selO('+i+')">#'+s.counter+' \u2014 '+esc(s.snap_name)+'</div>'
+  ).join('');
+
+  main.innerHTML='';
+
+  data.forEach((snap,i)=>{
+    let panel=built.get(i);
+    if(!panel){
+      if(!actT) actT=Object.keys(snap.tables)[0]||'';
+      panel=mkPanel(snap,i);
+      built.set(i,panel);
+    }
+    if(i===actO) panel.classList.remove('hidden');
+    else panel.classList.add('hidden');
+    main.appendChild(panel);
+  });
+
+  if(actO<0){ actO=0; selO(0); }
+  else { buildTable(actO,actT); }
+}
+
+function mkPanel(snap,idx){
+  const p=document.createElement('div');
+  p.className='snap-panel';
+
+  const nm=document.createElement('div');
+  nm.className='snap-name';
+  nm.textContent='#'+snap.counter+' \u2014 '+snap.snap_name;
+  p.appendChild(nm);
+
+  const tabs=document.createElement('div');
+  tabs.className='inner-tabs';
+  const tnames=Object.keys(snap.tables);
+
+  tnames.forEach(tn=>{
+    const t=document.createElement('div');
+    t.className='inner-tab'+(tn===actT?' active':'');
+    t.textContent=tn;
+    t.onclick=()=>selI(tn);
+    tabs.appendChild(t);
+  });
+  p.appendChild(tabs);
+
+  const area=document.createElement('div');
+  area.className='table-area';
+
+  // テーブルの中身は空のコンテナだけ作成し、実際のDOMは表示時に遅延構築する
+  tnames.forEach(tn=>{
+    const tp=document.createElement('div');
+    tp.className='table-panel';
+    tp.dataset.table=tn;
+    if(tn!==actT) tp.classList.add('hidden');
+    area.appendChild(tp);
+  });
+
+  p.appendChild(area);
+  return p;
+}
+
+const ROW_HEIGHT = 18;
+const OVERSCAN = 10;
+
+function buildTable(si,tn){
+  const k=bkey(si,tn);
+  if(builtKeys.has(k)) {
+    renderVisibleRows(si, tn);
+    return;
+  }
+  builtKeys.add(k);
+
+  const snap=data[si];
+  if(!snap) return;
+  const td=snap.tables[tn];
+  if(!td) return;
+
+  const panel=built.get(si);
+  if(!panel) return;
+  const tp=panel.querySelector('.table-panel[data-table="'+tn+'"]');
+  if(!tp) return;
+
+  const parts=['<table><thead><tr><th class="rid">ID</th>'];
+  td.properties.forEach(c=>{
+    parts.push('<th>'+esc(c)+'</th>');
+  });
+  parts.push('</tr></thead><tbody></tbody></table>');
+  tp.innerHTML=parts.join('');
+
+  let ticking = false;
+  tp.onscroll = () => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        renderVisibleRows(si, tn);
+        ticking = false;
+      });
+      ticking = true;
+    }
+  };
+
+  renderVisibleRows(si, tn);
+}
+
+function renderVisibleRows(si, tn) {
+  const snap=data[si];
+  if(!snap) return;
+  const td=snap.tables[tn];
+  if(!td) return;
+
+  const panel=built.get(si);
+  if(!panel) return;
+  const tp=panel.querySelector('.table-panel[data-table="'+tn+'"]');
+  if(!tp) return;
+  const tbody=tp.querySelector('tbody');
+  if(!tbody) return;
+
+  const totalRows = td.ids.length;
+  const scrollTop = tp.scrollTop;
+  const clientHeight = tp.clientHeight || 500;
+
+  let start = Math.floor(scrollTop / ROW_HEIGHT) - OVERSCAN;
+  if (start < 0) start = 0;
+  let end = Math.ceil((scrollTop + clientHeight) / ROW_HEIGHT) + OVERSCAN;
+  if (end > totalRows) end = totalRows;
+
+  const numCols = td.properties.length + 1;
+  const parts = [];
+
+  if (start > 0) {
+    parts.push('<tr style="height: ' + (start * ROW_HEIGHT) + 'px"><td colspan="' + numCols + '" style="padding:0;border:none;height:' + (start * ROW_HEIGHT) + 'px"></td></tr>');
+  }
+
+  for (let i = start; i < end; i++) {
+    const id = td.ids[i];
+    parts.push('<tr><td class="rid">'+esc(id)+'</td>');
+    const rv=td.values[id]||{};
+    const rc=td.changed[id]||{};
+    td.properties.forEach(c=>{
+      const v=rv[c];
+      const ch=rc[c];
+      let cls='';
+      if(ch && (v===null||v===undefined||v==='')) cls=' class="removed"';
+      else if(ch) cls=' class="changed"';
+      parts.push('<td'+cls+'>'+esc(fmt(v))+'</td>');
+    });
+    parts.push('</tr>');
+  }
+
+  const remaining = totalRows - end;
+  if (remaining > 0) {
+    parts.push('<tr style="height: ' + (remaining * ROW_HEIGHT) + 'px"><td colspan="' + numCols + '" style="padding:0;border:none;height:' + (remaining * ROW_HEIGHT) + 'px"></td></tr>');
+  }
+
+  tbody.innerHTML = parts.join('');
+}
+
+function selO(i){
+  let scrollTop=0, scrollLeft=0;
+  if(actO>=0){
+    const curPanel=built.get(actO);
+    if(curPanel){
+      const curTp=curPanel.querySelector('.table-panel:not(.hidden)');
+      if(curTp){ scrollTop=curTp.scrollTop; scrollLeft=curTp.scrollLeft; }
+    }
+  }
+
+  actO=i;
+  document.querySelectorAll('.outer-tab').forEach((t,ti)=>{
+    t.className='outer-tab'+(ti===i?' active':'');
+  });
+  built.forEach((panel,key)=>{
+    if(parseInt(key)===i){
+      panel.classList.remove('hidden');
+      // 切り替え先パネルのアクティブな内部テーブルを遅延構築してからスクロール位置を復元する
+      buildTable(i,actT);
+      const tp=panel.querySelector('.table-panel:not(.hidden)');
+      if(tp){ tp.scrollTop=scrollTop; tp.scrollLeft=scrollLeft; }
+    } else {
+      panel.classList.add('hidden');
+    }
+  });
+}
+
+function selI(tn){
+  actT=tn;
+  built.forEach((panel,si)=>{
+    panel.querySelectorAll('.inner-tab').forEach(t=>{
+      t.className='inner-tab'+(t.textContent===tn?' active':'');
+    });
+    panel.querySelectorAll('.table-panel').forEach(tp=>{
+      if(tp.dataset.table===tn){
+        // 切り替え先のテーブルを遅延構築してから表示する
+        buildTable(si,tn);
+        tp.classList.remove('hidden');
+      } else {
+        tp.classList.add('hidden');
+      }
+    });
+  });
+}
+
+load();
+</script>
+</body>
+</html>

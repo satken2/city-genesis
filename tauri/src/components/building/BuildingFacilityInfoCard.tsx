@@ -1,0 +1,108 @@
+/**
+ * 施設情報カード(ディスパッチャ)
+ *
+ * 建物建設パネルで表示する「施設情報」カード。建設情報カードと違い、内容は経済主体エージェントの
+ * type(TYPE_STANDARD / TYPE_BUILDING / インフラ生産施設 など)によって異なる。
+ *
+ * ここは type を見て専用の子コンポーネントへ委譲するディスパッチャに徹する。AgentDetailPanel が
+ * type ごとに専用パネルへ委譲するのと同じ構成。type ごとの詳細な表示内容を追加する場合は、
+ * switch に case を 1 つ増やし、対応する子コンポーネントを足すだけでよい。
+ *
+ * 現状:
+ *   - TYPE_STANDARD … StandardFacilityInfo(推定生産量・雇用人数・稼働コスト)
+ *   - それ以外       … default フォールバック(null。カード枠自体を出さない)
+ */
+
+import { useTranslation } from "react-i18next";
+import type { AgentMasterEntry } from "../../types";
+import { TYPE_STANDARD } from "../../constants";
+import { Money } from "../common/Money";
+
+type BuildingFacilityInfoCardProps = {
+  /** 選択中バリアントのマスターデータ。type による出し分けに使う。 */
+  variantData: AgentMasterEntry | null;
+  /** TYPE_STANDARD のときの推定最大生産量。 */
+  estimatedMaxProduction: number | null;
+  /** TYPE_STANDARD のときの推定雇用人数。 */
+  estimatedEmployment: number | null;
+  /** TYPE_STANDARD のときの推定稼働コスト。 */
+  estimatedOperatingCost: number | null;
+  /** 建設コスト取得中フラグ。 */
+  isCostLoading: boolean;
+};
+
+export function BuildingFacilityInfoCard({
+  variantData,
+  estimatedMaxProduction,
+  estimatedEmployment,
+  estimatedOperatingCost,
+  isCostLoading,
+}: BuildingFacilityInfoCardProps) {
+  switch (variantData?.type) {
+    case TYPE_STANDARD:
+      return (
+        <StandardFacilityInfo
+          estimatedMaxProduction={estimatedMaxProduction}
+          estimatedEmployment={estimatedEmployment}
+          estimatedOperatingCost={estimatedOperatingCost}
+          isCostLoading={isCostLoading}
+        />
+      );
+    // 今後: case TYPE_BUILDING(フロア内訳), インフラ生産施設(効果範囲) などを追加する。
+    default:
+      return null;
+  }
+}
+
+/* ---- TYPE_STANDARD(一般施設)の施設情報 ---- */
+
+type StandardFacilityInfoProps = {
+  estimatedMaxProduction: number | null;
+  estimatedEmployment: number | null;
+  estimatedOperatingCost: number | null;
+  isCostLoading: boolean;
+};
+
+/** 一般施設(TYPE_STANDARD)の施設情報: 最大稼働時の推定生産量・雇用人数・稼働コスト。 */
+function StandardFacilityInfo({
+  estimatedMaxProduction,
+  estimatedEmployment,
+  estimatedOperatingCost,
+  isCostLoading,
+}: StandardFacilityInfoProps) {
+  const { t } = useTranslation();
+
+  return (
+    <div className="bc-section">
+      <div className="bc-section-title">{t("building_construction.facilityInfo")}</div>
+      <div className="bc-info-grid">
+        <span className="bc-info-label">{t("building_construction.estimatedMaxProduction")}</span>
+        <span className="bc-info-value">
+          {isCostLoading
+            ? t("common.loading")
+            : estimatedMaxProduction != null
+            ? Math.round(estimatedMaxProduction).toLocaleString()
+            : "—"}
+        </span>
+
+        <span className="bc-info-label">{t("building_construction.estimatedEmployment")}</span>
+        <span className="bc-info-value">
+          {isCostLoading
+            ? t("common.loading")
+            : estimatedEmployment != null
+            ? t("building_construction.unitPeopleValue", { value: Math.round(estimatedEmployment) })
+            : "—"}
+        </span>
+
+        <span className="bc-info-label">{t("building_construction.estimatedOperatingCost")}</span>
+        <span className="bc-info-value">
+          {isCostLoading
+            ? t("common.loading")
+            : estimatedOperatingCost != null
+            ? <Money value={estimatedOperatingCost} unit />
+            : "—"}
+        </span>
+      </div>
+    </div>
+  );
+}

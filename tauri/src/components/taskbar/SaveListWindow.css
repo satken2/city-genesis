@@ -1,0 +1,311 @@
+/**
+ * セーブデータ一覧ウィンドウのスタイル定義
+ *
+ * ロード画面として別ウィンドウで開くセーブデータ一覧。
+ * 各セーブデータのメタデータ(都市名・人口・エポック・保存日時)をカード形式で表示し、
+ * ロードボタンで選択したセーブデータを読み込む。
+ * 既存のダークテーマ（紺色系・半透明）に統一する。
+ */
+
+.save-list-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+/**
+ * セーブデータがない場合の空状態メッセージ
+ */
+.save-list-empty {
+  text-align: center;
+  color: #6b8299;
+  padding: 40px 16px;
+  font-size: 0.88rem;
+}
+
+/**
+ * セーブデータカードのリストコンテナ
+ */
+.save-list-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/**
+ * 個別のセーブデータカード
+ * 現在のデータ(current)は枠線をアクセントカラーで強調する
+ */
+.save-list-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  gap: 4px 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.save-list-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/**
+ * 現在読み込み中のセーブデータを示すハイライト
+ */
+.save-list-card--current {
+  border-color: #4ea1ff;
+  border-width: 2px;
+  padding: 11px 13px;
+  background: rgba(78, 161, 255, 0.1);
+  box-shadow: 0 0 0 1px rgba(78, 161, 255, 0.35),
+    0 0 12px rgba(78, 161, 255, 0.25);
+}
+
+.save-list-card--current:hover {
+  background: rgba(78, 161, 255, 0.15);
+}
+
+/**
+ * カード1行目: 都市名 + ロードボタン
+ */
+.save-list-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  grid-column: 1 / -1;
+}
+
+.save-list-card-name {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #d0dde9;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.save-list-card-current-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(78, 161, 255, 0.2);
+  color: #4ea1ff;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/**
+ * ロードボタン
+ * カードの右側に配置する小さなボタン
+ */
+.save-list-card-load-btn {
+  padding: 4px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-color: rgba(78, 161, 255, 0.3);
+  color: #4ea1ff;
+  border-radius: 6px;
+}
+
+.save-list-card-load-btn:hover:not(:disabled) {
+  background: rgba(78, 161, 255, 0.15);
+  border-color: rgba(78, 161, 255, 0.5);
+}
+
+.save-list-card-load-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/**
+ * カード右側のボタン群(ロード・削除)
+ */
+.save-list-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/**
+ * 削除ボタン
+ * 破壊的操作のため赤系で明示する
+ */
+.save-list-card-delete-btn {
+  padding: 4px 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-color: rgba(220, 80, 70, 0.3);
+  color: #e87068;
+  border-radius: 6px;
+}
+
+.save-list-card-delete-btn:hover:not(:disabled) {
+  background: rgba(220, 80, 70, 0.15);
+  border-color: rgba(220, 80, 70, 0.5);
+}
+
+.save-list-card-delete-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/**
+ * カード2行目: メタデータ(人口・ゲーム内日付)
+ */
+.save-list-card-meta {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 0.76rem;
+  color: #6b8299;
+}
+
+/**
+ * カード3行目: 保存日時(実時間)を独立した行で表示する
+ */
+.save-list-card-savedat {
+  grid-column: 1 / -1;
+  font-size: 0.76rem;
+  color: #6b8299;
+}
+
+/**
+ * ステータスメッセージ
+ * ロード処理の結果を一覧の下に表示する
+ */
+.save-list-status {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+
+.save-list-status--success {
+  background: rgba(46, 160, 67, 0.15);
+  border: 1px solid rgba(46, 160, 67, 0.3);
+  color: #6bcc7a;
+}
+
+.save-list-status--error {
+  background: rgba(220, 80, 70, 0.15);
+  border: 1px solid rgba(220, 80, 70, 0.3);
+  color: #e87068;
+}
+
+.save-list-status--info {
+  background: rgba(78, 161, 255, 0.1);
+  border: 1px solid rgba(78, 161, 255, 0.2);
+  color: #8bb8e0;
+}
+
+/**
+ * 確認ダイアログ
+ * ロード実行前にユーザーに確認するオーバーレイ
+ */
+.save-list-confirm-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 14, 24, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  border-radius: 0 0 8px 8px;
+}
+
+.save-list-confirm-box {
+  background: linear-gradient(180deg, #1e2d42 0%, #162030 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 320px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.save-list-confirm-text {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: #d0dde9;
+}
+
+.save-list-confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.save-list-confirm-actions button {
+  padding: 6px 20px;
+  font-size: 0.85rem;
+}
+
+.save-list-confirm-yes {
+  border-color: rgba(78, 161, 255, 0.4) !important;
+  color: #4ea1ff !important;
+}
+
+.save-list-confirm-yes:hover {
+  background: rgba(78, 161, 255, 0.15) !important;
+}
+
+/**
+ * 削除確認ダイアログの「削除」ボタン
+ * 破壊的操作のため赤系で強調する
+ */
+.save-list-confirm-delete {
+  border-color: rgba(220, 80, 70, 0.4) !important;
+  color: #e87068 !important;
+}
+
+.save-list-confirm-delete:hover {
+  background: rgba(220, 80, 70, 0.15) !important;
+}
+
+/**
+ * ローディング表示
+ */
+.save-list-loading {
+  text-align: center;
+  color: #6b8299;
+  padding: 32px;
+  font-size: 0.85rem;
+}
+
+/**
+ * セーブデータ一覧のヘッダーアクション領域
+ */
+.save-list-header-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+}
+
+.save-list-open-folder-btn {
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #a4bccc;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.save-list-open-folder-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+

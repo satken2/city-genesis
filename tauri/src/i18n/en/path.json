@@ -1,0 +1,92 @@
+{
+  "path": {
+    "titleWithId": "Path #{{id}}",
+    "zoneName": "District",
+    "followTerrain": "Terrain Follow",
+    "followTerrainFollow": "Yes (overridden)",
+    "followTerrainNone": "No (overridden)",
+    "durability": "Durability",
+    "noise": "Noise",
+    "airPollution": "Air Pollution",
+    "overrideMaxSpeed": "Override speed limit",
+    "maxSpeed": "Speed Limit",
+    "utilization": "Utilization",
+    "trafficByVehicle": "Traffic",
+    "category": {
+      "0": "Walking",
+      "1": "Road",
+      "2": "Rail",
+      "unknown": "Unknown"
+    },
+    "action": {
+      "delete": "Delete",
+      "editShape": "Edit Shape",
+      "repair": "Repair",
+      "rebuild": "Rebuild",
+      "startConstruction": "Start Construction",
+      "stopConstruction": "Suspend Construction"
+    },
+    "pendingWarning": "This road is planned. Please command to start construction.",
+    "alerts": {
+      "title": "Alerts",
+      "constructionShortage": {
+        "title": "Construction Service Shortage",
+        "description": "Construction budget is insufficient, causing delays in construction."
+      },
+      "accident": {
+        "title": "Traffic Accident!",
+        "description": "A traffic accident has occurred on the road."
+      }
+    },
+    "tabConstructionInfo": "Construction",
+    "tabBasicInfo": "Basic Info"
+  },
+  "path_construction": {
+    "title": "Path Construction",
+    "constructionSpeed": "Construction Speed",
+    "combinedType": "Combined Paths",
+    "selectType": "-- Select Type --",
+    "selectTypeFirst": "Please select a type",
+    "noVariants": "No variants available",
+    "variantInfo": "Width {{width}}m / {{lanes}} lanes",
+    "shape": "Shape",
+    "elevation": "Elevation (Y)",
+    "embankmentHeight": "Embankment Height",
+    "followTerrain": "Terrain Follow",
+    "followTerrainDefault": "Default",
+    "followTerrainFollow": "Follow",
+    "followTerrainNone": "No Follow",
+    "followTerrainHelp": "When set to No Follow, sections crossing hills automatically become cuts/tunnels and sections spanning valleys become bridges.",
+    "confirm": "Confirm",
+    "confirming": "Confirming...",
+    "confirmFailedUnknown": "Failed to confirm the path. Please modify the shape and try again.",
+    "cancel": "Cancel",
+    "reset": "Reset",
+    "noNodesYet": "Place a path to begin",
+    "costRatioHelp": "Building roads on elevated or underground structures, or over complex terrain, increases the construction cost.",
+    "placedContinue": "Path placed. Place the next path.",
+    "platformSide": "Platform Side",
+    "platformSideOutside": "Outside",
+    "platformSideInside": "Inside",
+    "platformSideBoth": "Both",
+    "platformSideHint": "Inside/outside is relative to the traffic hand. Setting both tracks of a double-track line to inside creates an island platform",
+    "rail": {
+      "selectRailTypeFirst": "Please select a rail type",
+      "trackType": "Structure",
+      "trackNormal": "Normal",
+      "trackBridge": "Bridge",
+      "trackStation": "Station",
+      "electrified": "Electrified",
+      "electrifiedOn": "Electrified",
+      "electrifiedOff": "Non-electrified",
+      "electrifiedFixed": "Electrification cannot be toggled for this structure",
+      "variant": "Type",
+      "noVariantForCombo": "No track matches this combination",
+      "trackCount": "Tracks",
+      "direction": "Direction",
+      "dirForward": "Forward",
+      "dirBackward": "Backward",
+      "dirBoth": "Both ways"
+    }
+  }
+}

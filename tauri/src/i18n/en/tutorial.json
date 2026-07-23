@@ -1,0 +1,189 @@
+{
+  "tutorial": {
+    "startButton": "Start",
+    "step1": {
+      "title": "Welcome",
+      "description": "Welcome! As the mayor of this city, you will dedicate yourself to its development. I'll teach you the basics of city building!"
+    },
+    "step2": {
+      "title": "Place a Road",
+      "description": "First, you need a road. Select the road icon from the toolbar, choose \"2-lane Local Street\" from the \"Street\" category, and place it. Long roads take more time to build, so let's start with a short one."
+    },
+    "step3": {
+      "title": "Set the City Budget",
+      "description": "Let's set the city budget to prioritize funding for road construction. Open the budget window from the taskbar, and reduce budgets for other categories so that you can allocate more budget to the construction category (you need to allocate 95% or more to construction). You can set the budget by dragging the slider boundaries at the top or by entering numbers directly in the text box for each category."
+    },
+    "step4": {
+      "title": "Complete the Road",
+      "description": "The road is still under construction. It takes time to actually begin and complete. Let's advance time and wait for it. Press the \"Start\" button on the toolbar to progress time. Construction incurs monthly costs while underway."
+    },
+    "step5": {
+      "title": "Create a Parcel",
+      "description": "The road is complete! Now let's create a parcel to build on. Select the parcel icon from the toolbar and use \"Create Along Road\". When you see red outlines along the road, press confirm to create the parcels."
+    },
+    "step6": {
+      "title": "Build a Building",
+      "description": "Now you can build! Select the building icon from the toolbar and choose \"Apartment\" from the \"Residential\" category. You can select any of the parcels you just created as the construction site."
+    },
+    "step7": {
+      "title": "Complete the Building",
+      "description": "Like roads, buildings don't complete instantly. It's still under construction, so advance time and wait for it to finish."
+    },
+    "scenario2": {
+      "title": "Set Up Districts",
+      "description": "Learn how to divide your city into districts and set building regulations for each one.",
+      "step1": {
+        "title": "What Is a District?",
+        "description": "In this tutorial you'll learn how to set up districts in your city and configure regulations, such as zoning, on a per-district basis."
+      },
+      "step2": {
+        "title": "Create a District",
+        "description": "A district is a unit for dividing your city into areas, and you assign it to the roads within the city. Press the district button on the taskbar to enter district edit mode. You'll see the whole city currently forms a single district. In the 3D view, with the Create tool (the default; switch tools by holding Ctrl), click the road in the top right to turn that road—and the land parcels facing it—into a new district. (Completion: the top-right road belongs to a new district.)"
+      },
+      "step3": {
+        "title": "District Created",
+        "description": "You've split off part of the city as a new district. Districts let you aggregate figures such as prices and population per district, and apply building regulations to the district as a whole."
+      },
+      "step4": {
+        "title": "Show Natural Resources",
+        "description": "Let's check whether this district's area contains natural resources. Click the eye icon at the bottom left of the taskbar to switch display modes. Select the natural resources tab and turn the display of natural resources on. (Completion: natural resources are shown.)"
+      },
+      "step5": {
+        "title": "Open District Details",
+        "description": "You can see there's an ore vein where you created the new district. This area looks like a good spot for a quarry. Click the label of the district you just created to open its detail panel. (Completion: the district detail panel is open.)"
+      },
+      "step6": {
+        "title": "Set Building Regulations",
+        "description": "Using the building regulations near the bottom of the panel, you can choose which buildings may be built on the parcels in this district. We only want quarries here, so click every building other than the quarry to disable them. (Completion: only the quarry is allowed in the new district.)"
+      },
+      "step7": {
+        "title": "Check a Parcel",
+        "description": "You've set building regulations for the district. Let's confirm they are reflected on the parcels inside it. Click a parcel within the district to open its detail panel. (Completion: the parcel detail panel is open.)"
+      },
+      "step8": {
+        "title": "Regulation Applied",
+        "description": "Looking near the bottom of the parcel panel, you can see the district's regulation allowing only quarries is reflected here. You can no longer build anything other than a quarry on this parcel."
+      }
+    },
+    "scenario3": {
+      "title": "Build the Infrastructure",
+      "description": "Learn how to deliver electricity to your city by building power plants, substations, and power lines.",
+      "step1": {
+        "title": "About Infrastructure",
+        "description": "In this tutorial, you will learn how to build the infrastructure that supplies electricity to your city. Press \"Start\" to continue."
+      },
+      "step2": {
+        "title": "Check the House",
+        "description": "There is a house in this city, but it is not yet supplied with electricity. Click the house to open its details and confirm that no electricity is being supplied."
+      },
+      "step3": {
+        "title": "Build a Solar Power Plant",
+        "description": "To generate electricity, you first need a power plant. This city does not have one yet. There is a large plot of land on the west side of the city, so select \"Solar Power Plant\" from the building panel and construct it there."
+      },
+      "step4": {
+        "title": "Skipping Construction",
+        "description": "Normally a power plant takes time to finish, but since this is a tutorial we will skip the construction. Press \"Done\" and the solar power plant will be completed immediately."
+      },
+      "step5": {
+        "title": "Build a Substation",
+        "description": "The solar power plant is complete. However, the high-voltage current it produces cannot be used directly by households. You need to place a substation near where the power is used to convert it into usable electricity. There is an empty plot next to the house, so build a \"Substation\" there."
+      },
+      "step6": {
+        "title": "Lay a Power Line",
+        "description": "To send high-voltage current from the power plant to the substation, lay a \"High-Voltage Power Line\". Each facility has a dedicated \"connection terminal\" node, so snap one end of the line to the solar power plant's terminal and the other end to the substation's terminal."
+      },
+      "step7": {
+        "title": "Confirm the Power Supply",
+        "description": "The infrastructure is now in place. Advance time and confirm that the substation is receiving high-voltage current."
+      },
+      "step8": {
+        "title": "Infrastructure Complete",
+        "description": "Well done. The high-voltage current generated by the power plant is sent through the power line to the substation, which converts it into electricity and supplies it to the city — this is the two-stage structure of the power infrastructure. Other infrastructure such as water supply works the same way."
+      }
+    },
+    "complete": {
+      "title": "Tutorial Complete",
+      "description": "Congratulations! You have completed the tutorial. Returning to the menu.",
+      "button": "Return to Menu"
+    },
+    "completeButton": "Completed",
+    "checking": "Verifying...",
+    "failed": "Condition not met. Please try again.",
+    "completed": "Tutorial complete! Well done.",
+    "stepProgress": "Step {{current}} / {{total}}"
+  },
+  "tips": {
+    "todaysTips": "Today's Tips",
+    "gotIt": "Got It",
+    "nextTip": "Next Tip",
+    "items": {
+      "tip1": {
+        "title": "The Epoch System",
+        "description": "In this game, you can take your time to plan budgets and construction before advancing time. The city's state won't change until you click 'Run Simulation'."
+      },
+      "tip2": {
+        "title": "Maintaining Public Facilities",
+        "description": "Public facilities like fire and police stations degrade over time. Lacking maintenance budget reduces their efficiency, or in the worst case, causes them to collapse."
+      },
+      "tip3": {
+        "title": "Road Connections & Parcels",
+        "description": "Parcels belong to districts based on the road they face. Buildings cannot be constructed on unconnected parcels, preventing any economic activity."
+      },
+      "tip4": {
+        "title": "Citizen Needs & QOL",
+        "description": "Citizens live by consuming products like food, healthcare, and entertainment. When these are supplied sufficiently, their Quality of Life (QOL) improves."
+      },
+      "tip5": {
+        "title": "Approximate Simulation",
+        "description": "To keep the game running smoothly even as cities grow huge, traffic and supply/demand are calculated using approximate mathematical models instead of simulating every single car and citizen individually."
+      },
+      "tip6": {
+        "title": "Build Fire Stations in the City",
+        "description": "Fire stations should be near where buildings are dense. A station on the outskirts won't make it in time when it counts."
+      },
+      "tip7": {
+        "title": "Slow Down on Curves",
+        "description": "Set lower speed limits on roads with sharp curves. Roads that are too fast see a lot more accidents."
+      },
+      "tip8": {
+        "title": "Schools Make Cities Prosper",
+        "description": "Educating citizens opens the door to more advanced industries. If you want hospitals and factories, start by investing in schools."
+      },
+      "tip9": {
+        "title": "Don't Forget Maintenance",
+        "description": "Buildings deteriorate and can collapse if left alone. Open the budget panel and make sure your maintenance allocation isn't sitting at zero."
+      },
+      "tip10": {
+        "title": "Fire Spreads",
+        "description": "Fires can spread to neighboring buildings in dense areas. Spread your fire stations across different parts of the city rather than clustering them."
+      },
+      "tip11": {
+        "title": "Spread Police Stations Too",
+        "description": "Like fire stations, police stations lose effectiveness with distance. Build them near areas where crime is rising."
+      },
+      "tip12": {
+        "title": "Use Immigration Filters",
+        "description": "You can set immigration requirements in the Regulation window. Filtering by skill or age lets you attract the kind of residents your city needs."
+      },
+      "tip13": {
+        "title": "Districts Help You Stay Organized",
+        "description": "Grouping roads into districts lets you view stats and set regulations by area. Once your city starts growing, districts become essential."
+      },
+      "tip14": {
+        "title": "Better Safe Than Sorry",
+        "description": "If critical infrastructure shuts down due to accidents or disasters, the city's economy will take a massive hit. Build redundant facilities to keep backups ready."
+      }
+    }
+  },
+  "hint": {
+    "buildingConstruction": "Select a parcel to plan a building. It takes some time from planning to completion.",
+    "parcelCreation": "Create parcels where buildings can be constructed. Select the creation method and location.",
+    "pathConstruction": "Construct roads and railways. Click on the terrain in the 3D view: left-click to add vertices, right-click to confirm the shape, and drag vertices to reposition them. Hold Ctrl to open the settings menu (curve/straight and snapping). Use 3/4 keys to change embankment/cut height.",
+    "pathConstructionElevated": "Construct roads and railways. Click on the terrain in the 3D view: left-click to add vertices, right-click to confirm the shape, and drag vertices to reposition them. Hold Ctrl to open the settings menu (curve/straight and snapping). Use PageUp/PageDown or 1/2 to change height, and 3/4 keys to change embankment/cut height.",
+    "districtEdit": "Create and expand \"districts\", the units for regulations and statistics. Hold Ctrl in the 3D view to switch tools. Create tool: click a road to create a new district containing that road and the parcels facing it. Expand tool: Shift+drag from an existing district to sweep in roads and their facing parcels. Right-click to select a district. Press the button again to exit.",
+    "terrainUnlock": "Click a cell on the terrain to unlock it. Unlocked cells will display high-resolution terrain.",
+    "bulldozer": "Bulldozer mode. Left-click to remove empty parcels, planned buildings, and planned roads. Press the button again to exit.",
+    "cityBudget": "Decide how to allocate the funds earned from taxes and business operations for the next period. When the government purchases materials for road construction or public facility operations, it can only do so within the budget decided here. If the budget is insufficient, employees of public facilities may be dismissed. As a general rule, plan to use up all the cash you earn rather than saving it, and give it back to the city.",
+    "resourceEdit": "Create a natural resource area. Select a resource type, then click on the terrain. Left-click to add a vertex, click an edge to insert a vertex, and right-click to remove a vertex. Drag a vertex to reposition it."
+  }
+}

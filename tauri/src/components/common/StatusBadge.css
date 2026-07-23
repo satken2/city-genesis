@@ -1,0 +1,10 @@
+/* ステータスバッジ（共通）。背景色・文字色はインラインスタイルで指定する */
+.status-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  line-height: 1.5;
+}

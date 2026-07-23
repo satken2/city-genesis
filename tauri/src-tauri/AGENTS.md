@@ -1,0 +1,30 @@
+# src-tauri フォルダ
+
+Tauri(Rust)側のプログラム。ウィンドウ管理とUnityとのMMF(MemoryMappedFile) IPCを担当する。
+
+## ファイル一覧
+
+| ファイル | 内容 |
+| --- | --- |
+| `src/lib.rs` | Tauriコマンド定義の集約と起動処理。ウィンドウレジストリ・ミューテックスグループのロード、バックエンド/グラフィックの起動コマンド解決 |
+| `src/window.rs` | ウィンドウ管理の本体。`open_window`(レジストリ定義に基づくポップアップ生成、single/multiple/single_per_entityのインスタンスポリシー、ミューテックスルール適用)、通知キュー、ローディングウィンドウ、`launch_graphic`、`record_window_geometry`(起動中の位置・サイズ記憶)、`close_window_by_label`(ウィンドウを閉じた際の後始末処理 - 編集モードから通常モードへの復帰、接続端子や接道のハイライト消去など) |
+| `src/ipc.rs` | UnityとのMMF IPC実装。リーダーループ、書き込み(Mutex/Event同期)、`send_to_parent`(Unity宛て送信)。容量8192バイトの固定バッファ |
+| `src/messages.rs` | `Envelope`等のメッセージ型定義。**Unity側`Assets/Scripts/IPC/IpcEnvelope.cs`と構造を一致させる必要がある** |
+| `src/state.rs` | プロセス全体の共有状態 |
+| `src/settings.rs` | アプリ設定の永続化 |
+| `config/window-registry.json` | 全ポップアップウィンドウの定義(タイトル、サイズ、ポリシー)。**新しいウィンドウを追加したらここに定義を足す** |
+| `config/window-mutex-groups.json` | 同時に開けないウィンドウのグループ定義 |
+| `tools/height_map_bin2npy.py` | 地形エディタの`.npy`エクスポートで実行するPythonスクリプト(`tools/AGENTS.md`参照。配布物に同梱) |
+
+## 知らないとわからないこと
+
+- Reactコンポーネントから別ウィンドウを開く処理は、Tauriコマンド`open_window`の呼び出しに行き着く。ウィンドウの実体管理(ラベル採番、二重起動防止)はすべてRust側にある。また、ウィンドウが閉じられる際の後始末（エディタを閉じたときに `STATE_NORMAL` に戻す、詳細パネルを閉じたときにインフラ接続マーカーや接道表示を消去するなど）も `window.rs` の `close_window_by_label` で自動的に行う。これにより Webview が突然シャットダウンしても Unity 側の状態が取り残されるのを防ぐ。
+- **ポップアップウィンドウのクローズは「破棄」ではなく「非表示化して再利用待ち」が既定動作**(`MAX_HIDDEN_WINDOWS=10` の LRU)。`close_window_by_label` はWebView2を破棄せず `hide()` し、`OpenWindowState.hidden=true` + `AppState.hidden_lru` に追加する。これによりユーザが同じウィンドウ種別を開き直したとき、新規WebView2起動(約0.4秒)を回避して `show()` + `set_focus()` + `window-context-updated` emit だけで済み、体感的に瞬時に開く。非表示ウィンドウが上限を超えると最古のものから本当に破棄される。`open_window` の再利用優先度は (1) 同一 `instance_key` の非表示ウィンドウ → (2) 任意の非表示ポップアップ(window_type/entity/params/title を上書きして転用) → (3) 新規生成。Tauriはラベル変更不可なので、(2)の転用ではラベルは不変(Reactは `window-context-updated` イベントで新しいcontextを受けて再レンダリングする)。クローズ時の副作用(STATE_NORMAL復帰など)は非表示化の時点で実行済みで、LRU上限による破棄時には再実行されない。**再利用でもReactパネルの状態は必ずリセットされる**: `OpenWindowState.open_seq`(世代番号)を非表示→再表示(1)と転用(2)のたびにインクリメントして `WindowContextDto` で配信し、React側(`App.tsx`)が再マウントキーに含めているため。表示中ウィンドウへの再オープン要求(単なるフォーカス移動)ではインクリメントしない。これが無いと、マウント時に1回だけフェッチ/初期化するパネル(例: 建物建設パネルの市庁舎ゲート判定)が前回オープン時の古いstateを引きずる。
+- ポップアップウィンドウの位置・サイズは**プロセス起動中のみ**`AppState.saved_geometries`(window_type別)に記憶され、再オープン時に復元される。`WindowEvent::Resized`/`Moved`でリアルタイム保存。ドック配置(layout指定)ウィンドウはサイズのみ、自由配置ウィンドウは位置とサイズの両方が復元される。永続化はされない。新規・再利用の両方で同じレイアウト計算(`compute_window_geometry`)を通る。
+- Unityとの通信内容を変えるときは、Rust側(`ipc.rs`/`messages.rs`)・TS側(`src/utils/ipc.ts`)・Unity側(`IpcClient.cs`)の三箇所と、`genesis-docs`のIPC仕様ドキュメントを揃えて更新する。
+- 地形エディタの作業コピーは `AppData/UrbanGenesis/terrain_editor/{map_id}/` 配下に保存される(`copy_terrain_for_editor` / `load_terrain_editor_data` / `save_terrain_editor_data` / `list_terrain_editor_maps` / `delete_terrain_editor_map` / `export_terrain_as_npy` コマンド)。`app_local_data_dir()` の親ディレクトリに `UrbanGenesis/` を結合して解決する(`terrain_editor_dir`)。これはバックエンドの saves/templates と同じ `UrbanGenesis/` ルートを共有するが Tauri 独自の管理領域。`save_terrain_editor_data` はUI側で編集済みの標高データ(float16 LE、base64)とメタデータを受け取り `meta.json` / `near.bin` に書き戻す。渡された `map_id` のディレクトリへ書くだけなので、ロード時と異なる `map_id` を渡せば別名保存になる。バックエンドやゲームのセーブデータには一切書き戻さない。
+- `list_terrain_editor_maps` は `terrain_editor/` 配下の全 `{map_id}` ディレクトリの meta.json を読んで一覧を返す。`EditorWindow.tsx` の「編集途中のデータを開く」機能がこれを使い、`copy_terrain_for_editor` を経由せず直接 `open_registered_window` することで、バックエンドからの再取得(＝編集内容の上書き)を避けて既存の作業コピーを再オープンする。各エントリの `thumbnail.png`(存在すれば)もbase64エンコードして`thumbnail_base64`に含めて返す。Tauriのアセットプロトコル設定を追加せずに`<img>`へそのまま渡せるようにするための設計。
+- `export_terrain_as_npy` は編集中の標高データを一時ディレクトリに `meta.json` / `near.bin` として書き出し、アプリに同梱した `tools/height_map_bin2npy.py`(実体は `genesis-core/tools/height_map_bin2npy.py` の複製。詳細は `tools/AGENTS.md`)をユーザー環境の `python`/`python3` コマンドで実行して `.npy` に変換する。出力先パスはフロント側で `@tauri-apps/plugin-dialog` の保存ダイアログにより選択させる。ユーザー環境に Python と numpy がインストール済みであることが前提で、このアプリ自体はPythonをバンドルしない。変換成功後、出力先(`out_path`)と同じディレクトリに `terrain_maps.yaml` があれば、`upsert_terrain_yaml_entry` がそのマップ(引数`map_id`)のエントリをテキストベースで追記/上書きする(同じ`id`が既にあれば上書き)。戻り値の`yaml_updated`(bool)で見つかったかどうかをフロントに伝え、`terrain_maps.yaml`が見つからなかった場合はフロント側(`TerrainEditorCanvas.tsx`)が`showNotification`で通知する。`upsert_terrain_yaml_entry`はserde_yamlでパース→再シリアライズする方式ではなく、行単位のテキスト置換で対象ブロック(`{map_id}:`行と、直前の連続するコメント行〜次のトップレベルキーの手前まで)だけを差し替えるため、既存の他エントリのコメントや空行区切りを保持する。
+- サムネイル画像(160x120のPNG)は `save_terrain_editor_data` / `export_terrain_as_npy` の両方が任意引数 `thumbnail_base64` を受け取り、それぞれ `thumbnail.png`(作業コピー内)/ `.npyと同名で拡張子だけ.png`(エクスポート先と同じ場所)として書き出す。画像自体の生成はRust側では行わず、フロントエンド(`src/components/terrain/terrainThumbnail.ts`の`captureTerrainThumbnail`)がthree.jsのオフスクリーンレンダリングで生成してbase64として渡す。
+- 水面(海面以外の湖など)は `save_terrain_editor_data` / `export_terrain_as_npy` の任意引数 `water_surfaces`(GeoJSONライクな配列)で受け取る。`save_terrain_editor_data` は作業コピーの `meta.json` に `water_surfaces` として保持し(`load_terrain_editor_data` が返す)、`export_terrain_as_npy` は `.npyと同名で拡張子だけ.water.json`(`{"version":1,"water_surfaces":[...]}`)として同じ場所に書き出す(サムネイルPNGと同じ命名規則。空でも書き出して古い水面が残らないようにする)。genesis-core側の `terrain_registry.get_water_surfaces_path` がこの命名規則を前提に読む。仕様の正は `genesis-docs/docs/geometries/D_地形形状.md §D.10`。
+- 川は水面と同じ方式で、`save_terrain_editor_data` / `export_terrain_as_npy` の任意引数 `rivers`(RiverPayloadの配列。centerline/widths/surface_offsets/footprint)で受け取る。`save_terrain_editor_data` は作業コピーの `meta.json` に `rivers` として保持し(`load_terrain_editor_data` が返す)、`export_terrain_as_npy` は `.npyと同名で拡張子だけ.rivers.json`(`{"version":1,"rivers":[...]}`)として同じ場所に書き出す(空でも書き出して古い川が残らないようにする)。川床の彫り込み自体は標高データ(near.bin/.npy)に焼き込み済みで、このサイドカーは水面リボン描画用スプラインと建設不可判定用footprintを持つ。バックエンド/Unity側の読み込みは将来実装。仕様の正は `genesis-docs/docs/geometries/D_地形形状.md §D.11`。

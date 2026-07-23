@@ -1,0 +1,30 @@
+/*
+ * 需要情報コンポーネント(DemandInfoPanel)のスタイル
+ *
+ * 商品ごとの需要量・獲得量を表形式で表示する。
+ * 数値列は右揃えにして桁の比較しやすさを確保する。
+ */
+
+.demand-info-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.demand-info-table th {
+  color: #93a9c0;
+  font-weight: 600;
+  text-align: left;
+  padding: 4px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.demand-info-table td {
+  padding: 4px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.demand-info-num {
+  text-align: right;
+  white-space: nowrap;
+}

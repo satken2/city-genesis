@@ -1,0 +1,62 @@
+/**
+ * ヒントバーのスタイル定義
+ *
+ * 画面上部中央に固定された、角丸枠のヒント表示バー。
+ * タスクバーと同じダークテーマカラー（紺色系）で統一し、
+ * 半透明＋ブラー効果で背景との区別をつけつつ目立ちすぎないようにしている。
+ */
+
+.hintbar-root {
+  position: fixed;
+  top: 4px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/**
+ * ヒントバーの本体フレーム
+ * ウィンドウサイズが画面の 65% にぴったり合うよう、幅は 100% でウィンドウいっぱいに広げる。
+ * 角丸（border-radius）でポップアップ感を出す。
+ * テキストが 2 行程度収まるよう min-height を確保する。
+ * backdrop-filter で背景をぼかし、重なっても読みやすくする。
+ */
+.hintbar-frame {
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    180deg,
+    rgba(22, 34, 52, 0.94) 0%,
+    rgba(14, 24, 38, 0.98) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  backdrop-filter: blur(16px);
+  pointer-events: auto;
+  box-sizing: border-box;
+}
+
+/**
+ * ヒントテキストのスタイル
+ * 長いテキストが来た場合に 2 行でクランプ（省略）し、
+ * 行の高さを確保して読みやすくする。
+ */
+.hintbar-text {
+  color: #e5eef9;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 13px;
+  line-height: 1.55;
+  text-align: center;
+  word-break: break-word;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}

@@ -1,0 +1,191 @@
+/**
+ * 人口タブのスタイル
+ *
+ * 上部に集計範囲プルダウン＋現在人口、下部を左75%（時系列3グラフ縦並び）と
+ * 右25%（人口ピラミッド）に分割する。既存ウィンドウのダークテーマに合わせる。
+ */
+
+.pop-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  min-height: 0;
+}
+
+/* ========== 上部ヘッダ ========== */
+
+.pop-tab__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pop-tab__scope {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pop-tab__scope-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.pop-tab__scope-select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: #e2e8f0;
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 6px 10px;
+  cursor: pointer;
+  min-width: 160px;
+}
+
+.pop-tab__scope-select:focus {
+  outline: none;
+  border-color: rgba(78, 161, 255, 0.5);
+}
+
+.pop-tab__current {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.pop-tab__current-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #7b8fa5;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.pop-tab__current-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  font-variant-numeric: tabular-nums;
+}
+
+.pop-tab__current-unit {
+  font-size: 0.75rem;
+  color: #5a6f86;
+}
+
+.pop-tab__current-immig {
+  margin-left: 8px;
+  font-size: 0.78rem;
+  color: #f59e0b;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ========== 下部本体: 左右分割 ========== */
+
+.pop-tab__body {
+  display: flex;
+  gap: 14px;
+  flex: 1;
+  min-height: 0;
+}
+
+.pop-tab__charts {
+  flex: 0 0 75%;
+  max-width: 75%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+
+.pop-tab__pyramid {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 0;
+}
+
+/* ========== 個別グラフ ========== */
+
+.pop-chart {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.pop-chart__title {
+  margin: 0 0 2px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.pop-chart__area {
+  flex: 1;
+  min-height: 0;
+}
+
+.pop-chart__empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: #5a6f86;
+  font-size: 0.78rem;
+}
+
+/* ========== 人口ピラミッド ========== */
+
+.pop-pyramid__legend {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pop-pyramid__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.pop-pyramid__legend-item i {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.pop-pyramid__sides {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: #7b8fa5;
+}
+
+.pop-pyramid__area {
+  flex: 1;
+  min-height: 0;
+}
+
+/* ========== ローディング・エラー ========== */
+
+.pop-tab__loading,
+.pop-tab__error {
+  display: grid;
+  place-items: center;
+  height: 200px;
+  color: #9db0c5;
+}
+
+.pop-tab__error {
+  color: #ff7171;
+}

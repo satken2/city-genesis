@@ -1,0 +1,133 @@
+/**
+ * 保健衛生タブのスタイル
+ *
+ * 上部に集計範囲のプルダウン、中部に平均寿命の時系列折れ線グラフ（全幅）、
+ * 下部を左右2列（栄養充足度分布と医療充足度分布）に等分割してレイアウトする。
+ * 既存ウィンドウのダークテーマ（rgba(30,41,59,...) / #e2e8f0 系）に統一。
+ */
+
+.health-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  min-height: 0;
+}
+
+/* ========== 上部ヘッダ ========== */
+
+.health-tab__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.health-tab__scope {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.health-tab__scope-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.health-tab__scope-select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: #e2e8f0;
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 6px 10px;
+  cursor: pointer;
+  min-width: 160px;
+  transition: border-color 0.12s;
+}
+
+.health-tab__scope-select:focus {
+  outline: none;
+  border-color: rgba(78, 161, 255, 0.5);
+}
+
+/* ========== チャートコンテナ ========== */
+
+.health-tab__top-chart {
+  flex: 0 0 auto;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 16px;
+}
+
+.health-tab__bottom-row {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ========== 個別グラフ ========== */
+
+.health-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+.health-chart--half {
+  flex: 1;
+  min-width: 0;
+}
+
+.health-chart__title {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  border-left: 3px solid #3b82f6;
+  padding-left: 8px;
+}
+
+.health-chart--half:nth-child(1) .health-chart__title {
+  border-left-color: #10b981; /* 栄養はグリーン */
+}
+
+.health-chart--half:nth-child(2) .health-chart__title {
+  border-left-color: #06b6d4; /* 医療はシアン */
+}
+
+.health-chart__area {
+  flex: 1;
+  min-height: 0;
+  background: rgba(26, 34, 48, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.health-chart__empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: #5a6f86;
+  font-size: 0.78rem;
+}
+
+/* ========== ローディング・エラー ========== */
+
+.health-tab__loading,
+.health-tab__error {
+  display: grid;
+  place-items: center;
+  height: 200px;
+  color: #9db0c5;
+  font-size: 0.85rem;
+}
+
+.health-tab__error {
+  color: #ff7171;
+}

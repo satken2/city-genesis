@@ -1,0 +1,259 @@
+.god-edit {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ---- ヘッダー ---- */
+.god-edit-header {
+  flex-shrink: 0;
+}
+
+.god-edit-header-row {
+  display: flex;
+  gap: 8px;
+}
+
+.god-edit-select {
+  flex: 0 0 140px;
+  padding: 4px 6px;
+  font-size: 0.85rem;
+  background: var(--panel-bg, #1e1e2e);
+  color: var(--text, #e0e0e0);
+  border: 1px solid var(--border, #444);
+  border-radius: 4px;
+}
+
+.god-edit-input {
+  flex: 1;
+  padding: 4px 6px;
+  font-size: 0.85rem;
+  background: var(--panel-bg, #1e1e2e);
+  color: var(--text, #e0e0e0);
+  border: 1px solid var(--border, #444);
+  border-radius: 4px;
+}
+
+.god-edit-input:disabled {
+  opacity: 0.5;
+}
+
+.god-edit-load-btn {
+  flex-shrink: 0;
+  padding: 4px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  background: #3b82f6;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.god-edit-load-btn:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.god-edit-load-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---- エラー / メッセージ ---- */
+.god-edit-error {
+  color: #f87171;
+  font-size: 0.8rem;
+  background: rgba(248, 113, 113, 0.1);
+  padding: 6px 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.god-edit-message {
+  color: #4ade80;
+  font-size: 0.8rem;
+  background: rgba(74, 222, 128, 0.1);
+  padding: 6px 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.god-edit-loading {
+  color: var(--muted, #888);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 16px 0;
+}
+
+/* ---- フィールド一覧 ---- */
+.god-edit-fields {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.god-edit-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.god-edit-field--dirty {
+  background: rgba(250, 204, 21, 0.08);
+}
+
+.god-edit-field-label {
+  flex: 0 0 150px;
+  font-size: 0.78rem;
+  color: var(--muted, #888);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.god-edit-field-control {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.god-edit-field-input {
+  flex: 1;
+  padding: 2px 6px;
+  font-size: 0.82rem;
+  background: var(--panel-bg, #1e1e2e);
+  color: var(--text, #e0e0e0);
+  border: 1px solid var(--border, #555);
+  border-radius: 3px;
+}
+
+.god-edit-field-input--readonly {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.god-edit-field-dirty-mark {
+  color: #facc15;
+  font-weight: bold;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  width: 12px;
+}
+
+.god-edit-field-type-badge {
+  font-size: 0.65rem;
+  color: var(--muted, #666);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1px 5px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.god-edit-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.god-edit-checkbox {
+  cursor: pointer;
+}
+
+.god-edit-checkbox-text {
+  font-size: 0.82rem;
+  color: var(--text, #e0e0e0);
+}
+
+/* ---- 操作ボタン ---- */
+.god-edit-actions {
+  flex-shrink: 0;
+  display: flex;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border, #444);
+}
+
+.god-edit-btn {
+  flex: 1;
+  padding: 8px 0;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.god-edit-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.god-edit-btn--save {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.god-edit-btn--save:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.god-edit-btn--delete {
+  background: #ef4444;
+  color: #fff;
+}
+
+.god-edit-btn--delete:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.god-edit-field--textarea {
+  align-items: flex-start;
+}
+
+.god-edit-field--textarea .god-edit-field-label {
+  margin-top: 6px;
+}
+
+.god-edit-textarea-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.god-edit-field-textarea {
+  flex: 1;
+  padding: 4px 6px;
+  font-family: Consolas, Monaco, monospace;
+  font-size: 0.82rem;
+  background: var(--panel-bg, #1e1e2e);
+  color: var(--text, #e0e0e0);
+  border: 1px solid var(--border, #555);
+  border-radius: 3px;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.god-edit-field-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.god-edit-field-textarea--error {
+  border-color: #ef4444;
+}
+
+.god-edit-field-error-text {
+  color: #f87171;
+  font-size: 0.72rem;
+}

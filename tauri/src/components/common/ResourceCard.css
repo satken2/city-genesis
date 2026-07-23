@@ -1,0 +1,75 @@
+/**
+ * 天然資源カードの共通スタイル
+ */
+
+.resource-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 8px 12px;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.resource-card--clickable {
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.resource-card--clickable:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(78, 161, 255, 0.4);
+}
+
+.resource-card--clickable:active {
+  background: rgba(78, 161, 255, 0.12);
+}
+
+/* アイコン */
+.resource-card__icon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* テキスト・メーター部分 */
+.resource-card__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.resource-card__name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #f0f6ff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.resource-card__amount {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 残量率(%) 右端表示 */
+.resource-card__pct {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #cbd5e1;
+  font-variant-numeric: tabular-nums;
+  min-width: 3.5em;
+  text-align: right;
+  flex-shrink: 0;
+}

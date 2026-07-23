@@ -1,0 +1,102 @@
+/*
+ * debug_common.css
+ * Debug画面共通スタイル（Catppuccin Mocha ベースのダークテーマ）
+ * debug_props / path_build で共有する。
+ */
+
+:root {
+  --bg-base: #1e1e2e;
+  --bg-mantle: #181825;
+  --bg-surface0: #313244;
+  --bg-surface1: #45475a;
+  --bg-surface2: #585b70;
+  --text: #cdd6f4;
+  --subtext: #a6adc8;
+  --accent: #89b4fa;
+  --overlay0: #6c7086;
+  --red: #f38ba8;
+  --peach: #fab387;
+  --yellow: #f9e2af;
+  --green: #a6e3a1;
+  --mauve: #cba6f7;
+  --teal: #94e2d5;
+  --border: #45475a;
+  --radius: 3px;
+  --font-mono: Consolas, Menlo, monospace;
+  --font-size: 11px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-mono);
+  font-size: var(--font-size);
+  background: var(--bg-base);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ---- ヘッダー ---- */
+.header {
+  background: var(--bg-surface0);
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+.header h1 {
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 600;
+}
+.header button,
+.btn {
+  font-family: var(--font-mono);
+  font-size: var(--font-size);
+  padding: 3px 10px;
+  border: 1px solid var(--bg-surface2);
+  background: var(--bg-surface1);
+  color: var(--text);
+  cursor: pointer;
+  border-radius: var(--radius);
+}
+.header button:hover,
+.btn:hover {
+  background: var(--bg-surface2);
+}
+
+/* ---- スクロールバー (WebKit) ---- */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-mantle); }
+::-webkit-scrollbar-thumb { background: var(--bg-surface1); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--bg-surface2); }
+
+/* ---- プルダウン（OSの白背景ドロップダウンで文字が見えなくなるのを防ぐ） ---- */
+select {
+  font-family: var(--font-mono);
+  font-size: var(--font-size);
+  background: var(--bg-surface0);
+  color: var(--text);
+  border: 1px solid var(--bg-surface2);
+  border-radius: var(--radius);
+  padding: 3px 5px;
+  cursor: pointer;
+  outline: none;
+}
+
+select option {
+  background: var(--bg-surface0);
+  color: var(--text);
+}
+
+/* ---- 共通ユーティリティ ---- */
+.empty-msg {
+  padding: 20px;
+  color: var(--bg-surface2);
+  text-align: center;
+}

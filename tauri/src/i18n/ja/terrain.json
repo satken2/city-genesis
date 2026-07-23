@@ -1,0 +1,34 @@
+{
+  "terrainUnlock": {
+    "title": "地形セル開放",
+    "selectCell": "地形セルを選択してください",
+    "cellSelected": "セル ({{x}}, {{z}}) が選択されました",
+    "alreadyAcquired": "セル ({{x}}, {{z}}) は解放済みです",
+    "confirm": "確定",
+    "cancel": "キャンセル",
+    "acquiring": "開放中...",
+    "acquireSuccess": "セルを開放しました",
+    "acquireError": "開放に失敗しました"
+  },
+  "terrain3dPreview": {
+    "waitingForEditor": "地形エディタからの読み込みを待っています…"
+  },
+  "editor": {
+    "terrainTab": "地形エディタ",
+    "scenarioTab": "シナリオエディタ",
+    "addNewTerrain": "新しい地形を追加",
+    "creating": "作成中...",
+    "createFailed": "新しい地形の作成に失敗しました",
+    "copying": "コピー中...",
+    "copyFailed": "地形データの取得に失敗しました",
+    "localMapsTitle": "編集途中のデータを開く",
+    "opening": "開いています...",
+    "openLocalFailed": "作業コピーを開けませんでした",
+    "deleteLocalMap": "この作業コピーを削除",
+    "confirmDeleteLocalMap": "この作業コピーを削除しますか？この操作は取り消せません。",
+    "confirmDelete": "削除",
+    "cancelDelete": "キャンセル",
+    "deleting": "削除中...",
+    "deleteLocalFailed": "作業コピーの削除に失敗しました"
+  }
+}

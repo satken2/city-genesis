@@ -1,0 +1,85 @@
+.terrain-unlock-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.terrain-unlock-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 4px;
+  color: #ffffff;
+}
+
+.terrain-unlock-hint {
+  font-size: 13px;
+  color: #cccccc;
+  margin: 0;
+}
+
+.terrain-unlock-warn {
+  color: #fbbf24;
+}
+
+.terrain-unlock-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.terrain-unlock-cell {
+  font-size: 14px;
+  color: #ffffff;
+  margin: 0;
+}
+
+.terrain-unlock-confirm-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: #3b82f6;
+  color: #ffffff;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.terrain-unlock-confirm-btn:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.terrain-unlock-confirm-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.terrain-unlock-message {
+  font-size: 13px;
+  color: #4ade80;
+  margin: 0;
+}
+
+.terrain-unlock-error {
+  font-size: 13px;
+  color: #f87171;
+  margin: 0;
+}
+
+.terrain-unlock-close-btn {
+  margin-top: auto;
+  padding: 8px 16px;
+  border: 1px solid #555555;
+  border-radius: 4px;
+  background-color: transparent;
+  color: #cccccc;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.terrain-unlock-close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}

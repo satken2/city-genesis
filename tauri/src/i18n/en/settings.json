@@ -1,0 +1,89 @@
+{
+  "settings": {
+    "title": "Settings",
+    "fontSize": {
+      "label": "Font Size",
+      "large": "Large",
+      "medium": "Medium",
+      "small": "Small",
+      "custom": "Custom",
+      "preview": "Current size"
+    },
+    "monitor": {
+      "label": "Display",
+      "prev": "Previous Display",
+      "next": "Next Display"
+    },
+    "language": {
+      "label": "Language",
+      "ja": "日本語",
+      "en": "English"
+    },
+    "volume": {
+      "label": "Volume",
+      "master": "Master Volume",
+      "bgm": "BGM",
+      "sfx": "Sound Effects"
+    },
+    "compute": {
+      "label": "Compute",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "GPU Active",
+      "statusInactive": "CPU Active",
+      "restartRequired": "Backend will restart after changing this setting",
+      "restarting": "Restarting...",
+      "restartFailed": "Restart failed",
+      "restartUnavailable": "Settings saved. Changes will take effect the next time the game starts",
+      "confirmRestart": "Switch compute mode to {mode}? The backend will restart."
+    },
+    "windowReset": {
+      "label": "Window Position & Size",
+      "button": "Reset Window Size and Position"
+    }
+  },
+  "saveLoad": {
+    "newGame": "New Game",
+    "overwriteSave": "Overwrite Save",
+    "saveAs": "Save As",
+    "load": "Load",
+    "quitGame": "Quit Game",
+    "returnToTop": "Return to Top Menu",
+    "saving": "Saving...",
+    "loading": "Loading...",
+    "shuttingDown": "Shutting down...",
+    "saveSuccess": "Save completed",
+    "loadSuccess": "Load completed",
+    "newGameSuccess": "New game started",
+    "saveFailed": "Save failed",
+    "loadFailed": "Load failed",
+    "confirmNewGame": "Current data will be lost. Start a new game?",
+    "confirmQuitGame": "Are you sure you want to quit? Unsaved progress will be lost.",
+    "confirmReturnToTop": "Return to the top menu? Unsaved progress will be lost.",
+    "confirmLoad": "Load this save data?",
+    "confirm": "Yes",
+    "cancel": "No",
+    "debugInit": "Debug Init"
+  },
+  "saveList": {
+    "title": "Save Data List",
+    "noSaves": "No save data found",
+    "currentSave": "Current Data",
+    "population": "Population",
+    "epoch": "Epoch",
+    "inGameDate": "Date",
+    "savedAt": "Saved At",
+    "loadButton": "Load",
+    "deleteButton": "Delete",
+    "confirmLoad": "Load this save data?",
+    "confirmDelete": "Delete this save data? This cannot be undone.",
+    "confirm": "Yes",
+    "cancel": "No",
+    "loading": "Loading...",
+    "loadFailed": "Load failed",
+    "loadSuccess": "Load completed",
+    "deleteFailed": "Delete failed",
+    "deleteSuccess": "Save data deleted",
+    "openFolderButton": "Open Save Folder"
+  }
+}

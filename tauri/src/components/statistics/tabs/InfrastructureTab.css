@@ -1,0 +1,348 @@
+/* 統計ウィンドウ「インフラ網」タブのスタイル(他タブと同じダークテーマ基調) */
+
+.infra-tab {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  background-color: #0b0f19;
+  color: #f3f4f6;
+}
+
+.infra-tab__title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  color: #ffffff;
+  border-left: 4px solid #eab308;
+  padding-left: 10px;
+  line-height: 1.2;
+}
+
+/* 製品切り替えボタン群 */
+.infra-tab__products {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.infra-tab__product-btn {
+  background: rgba(22, 29, 43, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: #9ca3af;
+  font-size: 12px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.infra-tab__product-btn:hover {
+  color: #e5e7eb;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.infra-tab__product-btn--active {
+  color: #0b0f19;
+  background: #eab308;
+  border-color: #eab308;
+  font-weight: 700;
+}
+
+/* 2カラムレイアウト: 左=サマリー、右=地図 */
+.infra-tab__grid {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+}
+
+.infra-tab__col-left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+
+.infra-tab__col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+/* 地図コンテナ。CityMapCanvas は親のサイズに追従するため高さを確定させる */
+.infra-tab__map {
+  flex: 1;
+  min-height: 320px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* カード共通(他タブのガラスモーフィズム基調に合わせる) */
+.infra-card {
+  background: rgba(22, 29, 43, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+}
+
+.infra-card--list {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.infra-card__title {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.infra-card__badge {
+  background: #ef4444;
+  color: #ffffff;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 8px;
+}
+
+.infra-card__empty {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+/* サマリー(ラベル+値) */
+.infra-summary {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.infra-summary__row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.infra-summary__row dt {
+  color: #9ca3af;
+}
+
+.infra-summary__row dd {
+  margin: 0;
+  font-family: monospace;
+  color: #e5e7eb;
+  font-weight: 600;
+}
+
+/* 充足率バー */
+.infra-fulfillment-track {
+  height: 10px;
+  background-color: #111827;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 10px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.infra-fulfillment-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease-out;
+}
+
+.infra-summary__counts {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 11px;
+  color: #8ba3bb;
+}
+
+/* インフラ施設リスト(接続済み・未接続を問わず全件) */
+.infra-facility-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.infra-facility-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.infra-facility-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.infra-facility-list__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: #d1d5db;
+  font-size: 12px;
+  padding: 5px 4px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.infra-facility-list__item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.infra-facility-list__item:hover .infra-facility-list__name {
+  text-decoration: underline;
+}
+
+/* 未接続の施設は赤系で強調 */
+.infra-facility-list__item--disconnected {
+  color: #f87171;
+}
+
+.infra-facility-list__item--disconnected:hover {
+  background: rgba(239, 68, 68, 0.12);
+}
+
+/* 接続状態ドット */
+.infra-facility-list__dot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.infra-facility-list__dot--connected {
+  background: #10b981;
+}
+
+.infra-facility-list__dot--disconnected {
+  background: #ef4444;
+}
+
+/* 施設名(可変幅・省略) */
+.infra-facility-list__name {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 種別(生産/消費) */
+.infra-facility-list__kind {
+  flex: 0 0 auto;
+  font-size: 10px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* 凡例 */
+.infra-legend {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  color: #8ba3bb;
+  align-items: center;
+}
+
+.infra-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.infra-legend__gradient {
+  display: inline-block;
+  width: 44px;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, hsl(190, 85%, 55%), hsl(95, 85%, 55%), hsl(0, 85%, 55%));
+}
+
+/* 流れの縞模様(地図上のアニメーションと同じ向き・雰囲気のスウォッチ。
+   prefers-reduced-motion では静止する) */
+.infra-legend__stripes {
+  display: inline-block;
+  width: 44px;
+  height: 8px;
+  border-radius: 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.85) 0 5px,
+    hsl(190, 85%, 35%) 5px 12px
+  );
+  background-size: 12px 100%;
+  animation: infra-legend-stripes-flow 6.5s linear infinite;
+}
+
+@keyframes infra-legend-stripes-flow {
+  from {
+    background-position-x: 0;
+  }
+  to {
+    background-position-x: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .infra-legend__stripes {
+    animation: none;
+  }
+}
+
+.infra-legend__marker {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 1px solid #0b0f19;
+}
+
+.infra-legend__marker--circle {
+  border-radius: 50%;
+}
+
+.infra-legend__marker--diamond {
+  transform: rotate(45deg);
+}
+
+/* ローディング・エラー状態 */
+.infra-tab__loading,
+.infra-tab__error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.infra-tab__error {
+  color: #f87171;
+}

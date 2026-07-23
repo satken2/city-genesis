@@ -1,0 +1,216 @@
+/**
+ * スポーンデバッグタブ（開発者専用）の共有スタイル。
+ * DebugAgentSpawnTab / DebugBuildingSpawnTab の両タブが使用する。
+ * 他の統計タブと同じダークテーマのカードレイアウトに合わせる。
+ */
+
+.debug-spawn-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+/*
+ * 建物タブ専用の修飾子: タブ全体はスクロールさせず、常にウィンドウの
+ * 高さいっぱいにチャートを収める。スクロールが必要なのは右側の
+ * 最新エポック表（.debug-spawn-table-scroll--fill）のみとする。
+ * min-height:0 を子孫のflex/gridアイテムに連鎖させることで、
+ * チャート領域が利用可能な高さに収まるよう縮小できるようにする。
+ */
+.debug-spawn-tab--fixed {
+  overflow-y: hidden;
+  min-height: 0;
+}
+
+.debug-spawn-tab__title {
+  margin: 0;
+  font-size: 15px;
+  color: #dbe7f3;
+}
+
+.debug-spawn-tab__loading,
+.debug-spawn-tab__error {
+  padding: 16px;
+  color: #8ba3bb;
+  font-size: 12px;
+}
+
+/* 全体レイアウト: 左3/4（チャート群）+ 右1/4（最新エポックの表） */
+.debug-spawn-layout {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+.debug-spawn-layout__main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.debug-spawn-layout__side {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.debug-spawn-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 親カラムの残り高さいっぱいに広がるカード（右表・建物タブの単独チャート用） */
+.debug-spawn-card--fill {
+  flex: 1;
+  min-height: 0;
+}
+
+.debug-spawn-card__title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9cb3cb;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.debug-spawn-card__meta {
+  font-weight: 400;
+  color: #64748b;
+  font-size: 10px;
+}
+
+/* カード見出しと絞り込みセレクタを横並びにするヘッダ */
+.debug-spawn-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.debug-spawn-card__header .debug-spawn-control {
+  flex: 0 1 260px;
+}
+
+.debug-spawn-card__chart {
+  width: 100%;
+  height: 240px;
+}
+
+/*
+ * 単独チャートのカード（建物タブ）ではカードの残り高さいっぱいに伸ばす。
+ * min-height を固定値にすると小さいウィンドウでタブ全体がスクロール
+ * せざるを得なくなるため、0にして利用可能な高さまで自由に縮められるようにする。
+ */
+.debug-spawn-card__chart--tall {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+}
+
+.debug-spawn-card__no-data {
+  padding: 24px 0;
+  text-align: center;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.debug-spawn-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.debug-spawn-control__label {
+  font-size: 11px;
+  color: #8ba3bb;
+  white-space: nowrap;
+}
+
+.debug-spawn-control__select {
+  flex: 1;
+  min-width: 0;
+  background: #1a2230;
+  color: #dbe7f3;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  font-size: 11px;
+  padding: 3px 6px;
+}
+
+.debug-spawn-table-scroll {
+  overflow-y: auto;
+  max-height: 260px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+}
+
+/* 右カラムの表はカードの残り高さいっぱいまでスクロール領域を広げる */
+.debug-spawn-table-scroll--fill {
+  flex: 1;
+  max-height: none;
+  min-height: 0;
+}
+
+.debug-spawn-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  color: #c4d3e3;
+}
+
+.debug-spawn-table th {
+  position: sticky;
+  top: 0;
+  background: #1a2230;
+  color: #8ba3bb;
+  text-align: left;
+  padding: 4px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-weight: 600;
+}
+
+.debug-spawn-table td {
+  padding: 3px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.debug-spawn-table__num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 行クリックでグラフ対象を切り替えられる表 */
+.debug-spawn-table--clickable tbody tr {
+  cursor: pointer;
+}
+
+.debug-spawn-table--clickable tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* グラフ表示中（選択中）のバリアント行を強調する */
+.debug-spawn-table__row--selected td {
+  background: rgba(78, 161, 255, 0.12);
+}
+
+/* 正スコア（=建設が成立する）またはスポーン実績ありの行を強調する */
+.debug-spawn-table__row--positive td {
+  color: #6ee7b7;
+}

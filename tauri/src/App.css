@@ -1,0 +1,381 @@
+:root {
+  color: #e5eef9;
+  background: transparent;
+  font-family: "Segoe UI", sans-serif;
+  font-size: var(--font-size-base, 15px);
+  line-height: 1.35;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  background: transparent;
+}
+
+select {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+  padding: 0.4rem 0.6rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+select option {
+  background: #182231;
+  color: #f6fbff;
+}
+
+button {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  font: inherit;
+}
+
+button:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.popup-shell {
+  height: 100%;
+  display: grid;
+  grid-template-rows: 32px 1fr;
+  background: linear-gradient(180deg, #182231 0%, #101723 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.host-shell {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #0d1320;
+  color: #dbe8f4;
+}
+
+.titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 0 0 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(12, 20, 32, 0.95);
+}
+
+.titlebar-drag-region {
+  min-width: 0;
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: grab;
+  user-select: none;
+}
+
+.titlebar-drag-region:active {
+  cursor: grabbing;
+}
+
+.titlebar-text {
+  display: flex;
+  flex: 1;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.titlebar-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.titlebar-actions {
+  display: flex;
+  gap: 0;
+  flex-shrink: 0;
+  height: 100%;
+}
+
+.titlebar-close-button {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  background: #981120;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background 0.1s;
+  margin-right: 4px;
+}
+
+.titlebar-close-button:hover {
+  background: #f13b49;
+}
+
+.titlebar-close-button img {
+  width: 12px;
+  height: 12px;
+  filter: brightness(0) invert(1);
+}
+
+.ghost-button {
+  padding: 0.36rem 0.7rem;
+  font-size: 0.8rem;
+}
+
+.content {
+  overflow: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* =========================================================================
+ * agent-detail 系列の共通レイアウトシステム
+ *
+ * 経済主体詳細・土地区画詳細・パス詳細・地区詳細・市民詳細など、複数の
+ * 詳細パネルが `.agent-detail` をルートクラスとして共有する。これらは
+ * 遅延ロードされる別チャンクで描画されるため、共通スタイルはメイン
+ * バンドルに含め常に先行して読み込まれるようにする(FOUC防止)。
+ *
+ * また `align-content: start` を明示する。これは CSS Grid の既定値
+ * `align-content: normal` が `start` に解決される spec だが、
+ * ブラウザ実装によっては `stretch` に解決される可能性も考慮し、
+ * 内容が確実に上寄せされるよう明示する。
+ * ========================================================================= */
+
+.agent-detail {
+  display: grid;
+  gap: 8px;
+  height: 100%;
+  align-content: start;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.agent-detail-back {
+  padding: 2px 8px;
+  font-size: 0.72rem;
+  width: fit-content;
+}
+
+.agent-detail-muted {
+  color: #9db0c5;
+  font-size: 0.76rem;
+}
+
+.agent-detail-error {
+  border-radius: 8px;
+  padding: 8px;
+  background: rgba(193, 62, 62, 0.16);
+  border: 1px solid rgba(255, 113, 113, 0.3);
+}
+
+.agent-detail-section {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.agent-detail-section-title {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #c5d4e3;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+  margin-top: 0;
+}
+
+.agent-detail-grid {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 0;
+  align-items: stretch;
+}
+
+.agent-detail-label {
+  color: #93a9c0;
+  font-weight: 600;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  padding: 5px 12px 5px 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  min-height: 28px;
+  box-sizing: border-box;
+}
+
+.agent-detail-value {
+  font-size: 0.8rem;
+  word-break: break-all;
+  display: flex;
+  align-items: center;
+  padding: 5px 0 5px 12px;
+  min-height: 28px;
+  box-sizing: border-box;
+}
+
+/* empty_shell: タイトルバー以下を意図的に空にする */
+.content-empty-shell {
+  flex: 1;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.content-iframe {
+  overflow: hidden;
+}
+
+.html-panel-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+.panel,
+.host-panel {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.host-panel {
+  width: min(720px, 100%);
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.panel-header h2,
+.host-panel h1 {
+  margin: 0;
+  font-size: 0.86rem;
+}
+
+.status-grid,
+.meta-grid {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 10px;
+}
+
+.status-grid div {
+  display: contents;
+}
+
+.status-grid dt,
+.meta-label {
+  color: #93a9c0;
+  font-weight: 600;
+}
+
+.status-grid dd,
+.meta-value {
+  margin: 0;
+  word-break: break-all;
+}
+
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.json-view {
+  margin: 0;
+  padding: 8px;
+  border-radius: 8px;
+  overflow: auto;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 0.8rem;
+}
+
+.muted {
+  color: #9db0c5;
+}
+
+.error-box {
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(193, 62, 62, 0.16);
+  border: 1px solid rgba(255, 113, 113, 0.3);
+}
+
+/**
+ * エンティティリンクの共通スタイル
+ * ZoneLink・AgentLink などのクリック可能なエンティティ参照で使用する
+ * 青系のアクセントカラーでリンクっぽさを表現する
+ */
+.entity-link {
+  padding: 2px 6px;
+  font-size: 0.8rem;
+  border-radius: 5px;
+  cursor: pointer;
+  color: #4ea1ff;
+  border-color: rgba(78, 161, 255, 0.3);
+}
+
+.entity-link:hover {
+  background: rgba(78, 161, 255, 0.12);
+}
+
+/**
+ * God Edit 起動ボタン
+ * 各詳細パネルの下部に表示される、神編集ウィンドウを開くためのボタン。
+ * template_mode が有効な場合のみ表示される。
+ */
+.god-edit-open-btn {
+  width: 100%;
+  padding: 8px 0;
+  margin-top: 12px;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: 4px;
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.god-edit-open-btn:hover {
+  background: rgba(245, 158, 11, 0.2);
+}

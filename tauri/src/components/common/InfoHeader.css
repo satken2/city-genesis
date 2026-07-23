@@ -1,0 +1,112 @@
+.info-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-header-icon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 4px;
+}
+
+/* iconLabel指定時のアイコン縁取り枠。
+   黄色の角丸枠でアイコンを囲み、下側のパディングを多めにとって
+   その余白部分にラベル(公共施設など)を黒文字で表示する。 */
+.info-header-icon-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  background: #facc15;
+  border-radius: 9px;
+  padding: 3px 3px 4px;
+}
+
+.info-header-icon-frame .info-header-icon {
+  /* 枠側で縁取るため、アイコン自身の余白は枠のパディングに任せる */
+  border-radius: 6px;
+}
+
+.info-header-icon-frame-label {
+  /* 枠の下部余白に収める小さめのラベル。英語(Public Facility)は2行に折り返す */
+  max-width: 48px;
+  font-size: 0.56rem;
+  font-weight: 700;
+  line-height: 1.15;
+  color: #000000;
+  text-align: center;
+  padding-top: 2px;
+}
+
+.info-header-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.info-header-status {
+  display: flex;
+  align-items: center;
+  border-radius: 5px;
+  padding: 2px 8px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  width: 100%;
+}
+
+.info-header-status--progress {
+  padding: 0;
+  overflow: hidden;
+}
+
+.info-header-progress-bar {
+  position: relative;
+  width: 100%;
+  height: 20px;
+  border-radius: 5px;
+  overflow: hidden;
+  background-color: #374151;
+}
+
+.info-header-progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.info-header-progress-label {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0 6px;
+  font-size: 0.68rem;
+  white-space: nowrap;
+}
+
+.info-header-name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.info-header-variant {
+  font-size: 0.74rem;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -1,0 +1,62 @@
+{
+  "common": {
+    "loading": "読み込み中...",
+    "fetchError": "データの取得に失敗しました",
+    "noData": "データなし",
+    "history": "履歴",
+    "currency": "{{value, number}}",
+    "daysSinceEpoch": "1800年1月1日から{{days}}日経過",
+    "close": "閉じる",
+    "sqm": "{{value}} m²",
+    "save": "保存",
+    "saving": "保存中...",
+    "confirm": "確定",
+    "cancel": "キャンセル",
+    "processing": "処理中...",
+    "minutes": "分"
+  },
+  "status": {
+    "0": "計画中",
+    "1": "稼働中",
+    "2": "停止中",
+    "3": "建設計画中",
+    "4": "建設中",
+    "5": "解体計画中",
+    "6": "解体中",
+    "7": "完了",
+    "8": "中止",
+    "9": "空き家",
+    "10": "倒壊",
+    "11": "着工保留中"
+  },
+  "spaceType": {
+    "0": "その他",
+    "1": "住居",
+    "2": "商業施設",
+    "3": "倉庫・工場",
+    "4": "オフィス",
+    "5": "農場"
+  },
+  "resource": {
+    "basicInfo": "基本情報",
+    "resourceName": "資源名",
+    "currentAmount": "現在量",
+    "consumptionAmount": "消費量",
+    "consumptionTrend": "消費量推移",
+    "amountTrend": "残量推移",
+    "recoveryAmount": "回復量",
+    "maxAmount": "最大量",
+    "unknownResource": "不明な資源"
+  },
+  "errors": {
+    "TERRAIN_NOT_ACQUIRED": "まだ調査していないエリアです。先に地形セルを開放してください。",
+    "UNKNOWN_ERROR": "エラーが発生しました。",
+    "CREATEPATH_INVALID_GEOMETRY": "パスの形状が無効です。始点と終点を確認してください。",
+    "CREATEPATH_OUTSIDE_COASTLINE": "海岸線の外側にパスを敷設することはできません。",
+    "CREATEPATH_MULTIPLE_INTERSECTIONS": "同じ道路と複数回交差しています。別の経路を選択してください。",
+    "CREATEPATH_ELEVATION_INTERSECTION": "立体交差が検出されました。高さを変更してください。",
+    "PATH_TOO_FEW_POINTS": "2点以上のポイントが必要です。",
+    "PATH_MAX_SPAN_EXCEEDED": "ノード間の距離が長すぎます。中間点を追加してください。",
+    "PATH_ELEVATION_CONFLICT": "立体交差が検出されました。高さを変更してください。"
+  }
+}

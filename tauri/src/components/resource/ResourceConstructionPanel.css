@@ -1,0 +1,157 @@
+/**
+ * 資源編集パネル専用スタイル
+ *
+ * PathConstructionPanel.css / BuildingConstructionPanel.css と同一のレイアウトパターン。
+ * ポップアップウィンドウ内の単列レイアウトに最適化している。
+ */
+
+/* ---- ルートレイアウト ---- */
+.pc-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ---- セクション ---- */
+.pc-section {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.pc-section-title {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #c5d4e3;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+/* ---- セレクトボックス ---- */
+.pc-select {
+  width: 100%;
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.pc-select:focus {
+  border-color: #4ea1ff;
+}
+
+.pc-select option {
+  background: #182231;
+  color: #f6fbff;
+}
+
+/* ---- 設定セクション ---- */
+.pc-settings-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.pc-settings-label {
+  font-size: 0.72rem;
+  color: #c5d4e3;
+  min-width: max-content;
+}
+
+.pc-stepper-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ---- 情報表示グリッド ---- */
+.pc-info-grid {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  grid-auto-rows: 22px;
+  gap: 3px 10px;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.pc-info-label {
+  color: #93a9c0;
+  font-weight: 600;
+  font-size: 0.72rem;
+  line-height: 22px;
+}
+
+.pc-info-value {
+  font-size: 0.72rem;
+  color: inherit;
+  font-family: "Consolas", "Menlo", monospace;
+  line-height: 22px;
+}
+
+.pc-no-nodes-message {
+  font-size: 0.72rem;
+  color: #93a9c0;
+  text-align: center;
+  padding: 8px;
+}
+
+/* ---- アクションボタン ---- */
+.pc-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.pc-btn {
+  flex: 1;
+  min-width: 60px;
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 0.72rem;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+  cursor: pointer;
+  border-radius: 6px;
+  text-align: center;
+  transition: background 0.15s ease;
+}
+
+.pc-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.pc-btn-confirm {
+  background: #4ea1ff;
+  color: #ffffff;
+  border-color: #4ea1ff;
+  font-weight: 600;
+}
+
+.pc-btn-confirm:hover {
+  opacity: 0.85;
+}
+
+.pc-btn-confirm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---- ローディング/empty ---- */
+.pc-muted {
+  color: #9db0c5;
+  font-size: 0.76rem;
+  text-align: center;
+  padding: 8px;
+}

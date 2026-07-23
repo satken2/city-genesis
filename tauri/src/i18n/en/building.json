@@ -1,0 +1,11 @@
+{
+  "building": {
+    "type": "Building Type",
+    "durability": "Durability",
+    "floors": "Floors",
+    "floorsValue": "{{floors}}F (Floor Area {{area, number}}㎡)",
+    "heightLabel": "Height: {{value}}m",
+    "baseAreaLabel": "Base Area: {{area, number}}㎡",
+    "underMaintenance": "Under Maintenance"
+  }
+}

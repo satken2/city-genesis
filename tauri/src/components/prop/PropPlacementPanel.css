@@ -1,0 +1,37 @@
+/**
+ * プロップ配置パネル専用スタイル
+ *
+ * 基本レイアウト(pc-*)は資源編集パネル(ResourceConstructionPanel.css)と共有し、
+ * ここではプロップ配置固有のモード切替トグルのスタイルのみを定義する。
+ */
+
+/* ---- 配置モード切替トグル(個別 / 範囲) ---- */
+.pp-mode-toggle {
+  display: flex;
+  gap: 6px;
+}
+
+.pp-mode-btn {
+  flex: 1;
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 0.72rem;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+  cursor: pointer;
+  border-radius: 6px;
+  text-align: center;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.pp-mode-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.pp-mode-btn.active {
+  background: #4ea1ff;
+  color: #ffffff;
+  border-color: #4ea1ff;
+  font-weight: 600;
+}

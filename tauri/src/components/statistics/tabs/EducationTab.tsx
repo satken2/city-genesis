@@ -1,0 +1,445 @@
+import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { invoke } from "@tauri-apps/api/core";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { useEpochCachedStats } from "../useEpochCache";
+import { UsageMeter } from "./AccidentsTab";
+import "./EducationTab.css";
+
+// --- バックエンド GET /api/v1/stats/education のレスポンス型 ---
+
+type DistributionPoint = {
+  bin: string;
+  count: number;
+};
+
+type SkillCardData = {
+  skill_id: number;
+  skill_name: string;
+  distribution: DistributionPoint[];
+  capacity: number;
+  enrolled: number;
+};
+
+type EducationLevelDistribution = {
+  uneducated: number;
+  elementary: number;
+  higher: number;
+};
+
+type SkillAverages = {
+  base: number;
+  physical: number;
+  office: number;
+  retail: number;
+  technology: number;
+  medical: number;
+};
+
+type SchoolItem = {
+  id: number;
+  name: string;
+  zone_id: number;
+  zone_name: string;
+  total_capacity: number;
+  enrolled: number;
+  utilization_rate: number;
+};
+
+type Scope = {
+  zone_id: number | null;
+  name: string | null;
+  education_level_distribution: EducationLevelDistribution;
+  skill_averages: SkillAverages;
+  skill_cards: SkillCardData[];
+  schools: SchoolItem[];
+};
+
+type EducationStats = {
+  epoch: number;
+  scopes: Scope[];
+};
+
+// --- 配色定義 ---
+const COLOR_LEVEL_HIGHER = "#3b82f6";     // 高等教育: 青
+const COLOR_LEVEL_ELEMENTARY = "#10b981"; // 初等教育: 緑
+const COLOR_LEVEL_UNEDUCATED = "#ef4444"; // 未修了: 赤
+
+const COLOR_RADAR_FILL = "#06b6d4";      // レーダー塗りつぶし: シアン
+const COLOR_RADAR_STROKE = "#22d3ee";    // レーダー線: 明るいシアン
+
+const COLOR_DIST_BAR = "#6366f1";        // 分布グラフの棒: インディゴ
+
+const getBinColor = (binStr: string) => {
+  const parts = binStr.split("-");
+  if (parts.length === 2) {
+    const start = parseFloat(parts[0]);
+    const end = parseFloat(parts[1]);
+    const mid = (start + end) / 2;
+    if (mid < 0.5) {
+      return COLOR_LEVEL_UNEDUCATED;
+    } else if (mid >= 1.5) {
+      return COLOR_LEVEL_HIGHER;
+    } else {
+      return COLOR_LEVEL_ELEMENTARY;
+    }
+  }
+  return COLOR_DIST_BAR;
+};
+
+const TOOLTIP_STYLE = {
+  background: "#1a2230",
+  border: "1px solid rgba(255,255,255,0.1)",
+  borderRadius: "4px",
+  fontSize: "11px",
+};
+
+export function EducationTab({ apiBaseUrl }: { apiBaseUrl: string }) {
+  const { t } = useTranslation();
+  const { data, loading, error } = useEpochCachedStats<EducationStats>(
+    apiBaseUrl,
+    "/api/v1/stats/education"
+  );
+
+  const [selectedScopeKey, setSelectedScopeKey] = useState("city");
+
+  const scopes = data?.scopes ?? [];
+
+  // プルダウン選択されている Scope を探す
+  const currentScope = useMemo(() => {
+    if (selectedScopeKey === "city") {
+      return scopes.find((s) => s.zone_id === null);
+    }
+    return scopes.find((s) => String(s.zone_id) === selectedScopeKey);
+  }, [scopes, selectedScopeKey]);
+
+  // 建物(agent)詳細ウィンドウを開く
+  const openAgentDetail = (agentId: number) => {
+    void invoke("open_registered_window", {
+      windowType: "agent_detail",
+      entityId: String(agentId),
+    });
+  };
+
+  if (loading) {
+    return <div className="stats-tab-loading">{t("statistics.loading", "読み込み中...")}</div>;
+  }
+
+  if (error || !currentScope) {
+    return (
+      <div className="stats-tab-error">
+        {t("statistics.error", "データの取得に失敗しました。")}
+      </div>
+    );
+  }
+
+  const schools = currentScope.schools ?? [];
+
+  // --- 教育水準データの整形 ---
+  const levelData = [
+    {
+      name: t("statistics.education.uneducated", "未修了"),
+      value: currentScope.education_level_distribution.uneducated,
+      color: COLOR_LEVEL_UNEDUCATED,
+    },
+    {
+      name: t("statistics.education.elementary", "初等教育"),
+      value: currentScope.education_level_distribution.elementary,
+      color: COLOR_LEVEL_ELEMENTARY,
+    },
+    {
+      name: t("statistics.education.higher", "高等教育"),
+      value: currentScope.education_level_distribution.higher,
+      color: COLOR_LEVEL_HIGHER,
+    },
+  ].filter((d) => d.value > 0);
+
+  // --- 労働スキルレーダーチャートデータの整形 ---
+  const skillRadarData = [
+    {
+      subject: t("statistics.skills.base", "基礎"),
+      value: currentScope.skill_averages.base,
+    },
+    {
+      subject: t("statistics.skills.physical", "肉体"),
+      value: currentScope.skill_averages.physical,
+    },
+    {
+      subject: t("statistics.skills.office", "事務"),
+      value: currentScope.skill_averages.office,
+    },
+    {
+      subject: t("statistics.skills.retail", "接客"),
+      value: currentScope.skill_averages.retail,
+    },
+    {
+      subject: t("statistics.skills.technology", "技術"),
+      value: currentScope.skill_averages.technology,
+    },
+    {
+      subject: t("statistics.skills.medical", "医療"),
+      value: currentScope.skill_averages.medical,
+    },
+  ];
+
+  // スキルIDに応じた表示名マッピング
+  const getSkillDisplayName = (name: string) => {
+    switch (name) {
+      case "base":
+        return t("statistics.skills.baseName", "基礎スキル");
+      case "physical":
+        return t("statistics.skills.physicalName", "肉体労働スキル");
+      case "office":
+        return t("statistics.skills.officeName", "事務作業スキル");
+      case "retail":
+        return t("statistics.skills.retailName", "接客スキル");
+      case "technology":
+        return t("statistics.skills.technologyName", "工学技術スキル");
+      case "medical":
+        return t("statistics.skills.medicalName", "医療スキル");
+      default:
+        return name;
+    }
+  };
+
+  // 学校一覧テーブルの描画
+  const renderSchoolTable = () => (
+    <section className="edu-schools-list">
+      <h3 className="edu-schools-list__title">
+        {t("statistics.education.schoolsTitle", "教育機関一覧")}
+        <span className="edu-schools-list__count">({schools.length})</span>
+      </h3>
+      <div className="edu-schools-list__body">
+        {schools.length > 0 ? (
+          <table className="edu-schools-table">
+            <thead>
+              <tr>
+                <th>{t("statistics.columnAgent", "施設")}</th>
+                <th>{t("statistics.columnDistrict", "所在地区")}</th>
+                <th>{t("statistics.education.occupancyRate", "充足率")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {schools.map((school) => (
+                <tr key={`school-${school.id}`}>
+                  <td className="edu-schools-table__cell edu-schools-table__cell--name">
+                    <button
+                      type="button"
+                      className="entity-link"
+                      onClick={() => openAgentDetail(school.id)}
+                    >
+                      {school.name}
+                    </button>
+                  </td>
+                  <td className="edu-schools-table__cell edu-schools-table__cell--muted">
+                    {school.zone_name || `地区#${school.zone_id}`}
+                  </td>
+                  <td className="edu-schools-table__cell edu-schools-table__cell--meter">
+                    <UsageMeter usage_ratio={school.utilization_rate} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="edu-schools-list__empty">
+            {t("statistics.education.noSchools", "教育機関がありません")}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+
+  return (
+    <div className="edu-tab">
+      {/* 上部ヘッダー（集計範囲選択） */}
+      <header className="edu-tab__header">
+        <div className="scope-selector">
+          <label htmlFor="edu-scope-select" className="scope-selector__label">
+            {t("statistics.scopeLabel", "集計範囲:")}
+          </label>
+          <select
+            id="edu-scope-select"
+            className="scope-selector__select"
+            value={selectedScopeKey}
+            onChange={(e) => setSelectedScopeKey(e.target.value)}
+          >
+            <option value="city">{t("statistics.cityWide", "都市全体")}</option>
+            {scopes
+              .filter((s) => s.zone_id !== null)
+              .map((s) => (
+                <option key={s.zone_id} value={String(s.zone_id)}>
+                  {s.name || `${t("statistics.zone", "地区")} ${s.zone_id}`}
+                </option>
+              ))}
+          </select>
+        </div>
+      </header>
+
+      {/* メインレイアウト（左半分と右半分） */}
+      <div className="edu-tab__body">
+        {/* 左半分: グラフ横並び（上） + 学校一覧（下） */}
+        <div className="edu-tab__left">
+          {/* 教育水準円グラフ + 労働スキルレーダーチャート 横並び */}
+          <div className="edu-tab__charts-row">
+            <div className="edu-card edu-card--half">
+              <h3 className="edu-card__title">
+                {t("statistics.education.levelTitle", "教育水準分布")}
+              </h3>
+              <div className="edu-card__chart-container-level">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={levelData}
+                      cx="50%"
+                      cy="45%"
+                      innerRadius={35}
+                      outerRadius={60}
+                      paddingAngle={3}
+                      dataKey="value"
+                    >
+                      {levelData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={TOOLTIP_STYLE}
+                      formatter={(value: any) => [
+                        `${value} ${t("statistics.people", "人")}`,
+                        t("statistics.count", "人数"),
+                      ]}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+                {/* カスタム凡例 */}
+                <div className="edu-legend">
+                  {levelData.map((d, index) => (
+                    <div key={index} className="edu-legend__item">
+                      <span
+                        className="edu-legend__bullet"
+                        style={{ backgroundColor: d.color }}
+                      />
+                      <span className="edu-legend__label">{d.name}</span>
+                      <span className="edu-legend__value">{d.value}人</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="edu-card edu-card--half">
+              <h3 className="edu-card__title">
+                {t("statistics.education.skillsRadarTitle", "労働スキルレベル (平均値)")}
+              </h3>
+              <div className="edu-card__chart-container-radar">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart cx="50%" cy="50%" outerRadius="75%" data={skillRadarData}>
+                    <PolarGrid stroke="#374151" />
+                    <PolarAngleAxis
+                      dataKey="subject"
+                      tick={{ fill: "#9ca3af", fontSize: 10 }}
+                    />
+                    <PolarRadiusAxis
+                      angle={30}
+                      domain={[0, 2.0]}
+                      tick={{ fill: "#6b7280", fontSize: 8 }}
+                    />
+                    <Radar
+                      name="Average Skill"
+                      dataKey="value"
+                      stroke={COLOR_RADAR_STROKE}
+                      fill={COLOR_RADAR_FILL}
+                      fillOpacity={0.25}
+                    />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          {/* 学校一覧 */}
+          <div className="edu-tab__schools">
+            {renderSchoolTable()}
+          </div>
+        </div>
+
+        {/* 右半分: 労働スキルごとのカードをタイル状（2列）に並べる */}
+        <div className="edu-tab__right">
+          {currentScope.skill_cards.map((card) => {
+            const hasCapacity = card.capacity > 0;
+
+            return (
+              <div key={card.skill_id} className="edu-skill-card">
+                <h4 className="edu-skill-card__title">
+                  {getSkillDisplayName(card.skill_name)}
+                </h4>
+                <div className="edu-skill-card__chart-w">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={card.distribution}
+                      layout="vertical"
+                      margin={{ top: 2, right: 10, left: -25, bottom: 2 }}
+                      barCategoryGap={0}
+                    >
+                      <XAxis type="number" hide />
+                      <YAxis
+                        dataKey="bin"
+                        type="category"
+                        tick={{ fill: "#9ca3af", fontSize: 8 }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <Tooltip
+                        contentStyle={TOOLTIP_STYLE}
+                        formatter={(value: any) => [
+                          `${value} ${t("statistics.people", "人")}`,
+                          t("statistics.count", "人数"),
+                        ]}
+                      />
+                      <Bar dataKey="count" radius={[0, 2, 2, 0]}>
+                        {card.distribution.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={getBinColor(entry.bin)} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* 教育キャパシティ（充足率）はメーター表示のみ */}
+                <div className="edu-skill-card__capacity">
+                  {hasCapacity ? (
+                    <>
+                      <UsageMeter usage_ratio={card.enrolled / card.capacity} />
+                      <span className="edu-skill-card__capacity-label">
+                        {card.enrolled}/{card.capacity} {t("statistics.people", "人")}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="edu-no-capacity">
+                      {t("statistics.education.noCapacity", "受け入れ定員なし")}
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}

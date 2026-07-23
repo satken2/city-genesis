@@ -1,0 +1,222 @@
+.finance-window {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background: #0f1622;
+  color: #e2e8f0;
+  padding: 16px;
+  box-sizing: border-box;
+  gap: 16px;
+  overflow: hidden;
+}
+
+.finance-window-loading,
+.finance-window-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 14px;
+  color: #8ba3bb;
+  background: #0f1622;
+}
+
+.finance-window-error {
+  color: #ef4444;
+}
+
+/* 左ペイン */
+.finance-window__left-pane {
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.finance-window__left-bottom-space {
+  flex-grow: 1;
+}
+
+/* カード共通 */
+.finance-card {
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 14px;
+  backdrop-filter: blur(10px);
+}
+
+.finance-card__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #38bdf8;
+  margin: 0 0 12px 0;
+  border-left: 3px solid #38bdf8;
+  padding-left: 8px;
+}
+
+/* サマリ表示 */
+.finance-summary-list {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.finance-summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+  padding-bottom: 6px;
+}
+
+.finance-summary-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.finance-summary-item dt {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.finance-summary-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0;
+}
+
+/* スライダー & 入力 */
+.finance-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.finance-slider-container {
+  width: 100%;
+}
+
+.finance-slider {
+  width: 100%;
+  height: 6px;
+  background: #1e293b;
+  border-radius: 3px;
+  outline: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.finance-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fbbf24;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.finance-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.finance-input-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+
+.finance-number-input {
+  flex-grow: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #f8fafc;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: right;
+  width: 100%;
+}
+
+.finance-number-input::-webkit-outer-spin-button,
+.finance-number-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.finance-input-unit {
+  font-size: 10px;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.finance-status-saving {
+  font-size: 10px;
+  color: #10b981;
+  text-align: right;
+  margin-top: 4px;
+}
+
+/* 右ペイン */
+.finance-window__right-pane {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.finance-charts-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 12px;
+  height: 100%;
+}
+
+.finance-chart-card {
+  background: rgba(30, 41, 59, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.finance-chart-card--empty {
+  background: transparent;
+  border: none;
+}
+
+.finance-chart-card__title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  margin: 0 0 6px 0;
+}
+
+.finance-chart-card__graph {
+  flex-grow: 1;
+  width: 100%;
+  height: 100%;
+}
+
+/* 空表示 */
+.finance-charts-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  font-size: 13px;
+  color: #64748b;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}

@@ -1,0 +1,14 @@
+{
+  "employment": {
+    "requiredSkill": "要求スキル",
+    "wage": "賃金",
+    "quota": "必要労働力",
+    "totalLabor": "雇用済み労働力",
+    "employees": "従業員リスト",
+    "hired": "雇用済み",
+    "vacant": "未充足",
+    "noQuota": "労働力必要なし",
+    "noEmployees": "従業員はいません",
+    "statusTitle": "雇用状況"
+  }
+}

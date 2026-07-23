@@ -1,0 +1,16 @@
+{
+  "supply": {
+    "product": "Supply Product",
+    "amount": "Supply Amount",
+    "price": "Supply Price",
+    "production": "Production",
+    "soldAmount": "Sold Amount",
+    "profitRate": "Profit Rate"
+  },
+  "demand": {
+    "product": "Product",
+    "demandAmount": "Demand",
+    "receivedAmount": "Acquired",
+    "acquiredAmount": "Inventory"
+  }
+}

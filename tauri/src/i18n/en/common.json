@@ -1,0 +1,62 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "fetchError": "Failed to fetch data",
+    "noData": "No data",
+    "history": "History",
+    "currency": "{{value, number}}",
+    "daysSinceEpoch": "{{days}} days since Jan 1, 1800",
+    "close": "Close",
+    "sqm": "{{value}} m²",
+    "save": "Save",
+    "saving": "Saving...",
+    "minutes": "mins",
+    "processing": "Processing...",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  },
+  "status": {
+    "0": "Pending",
+    "1": "Active",
+    "2": "Paused",
+    "3": "Construction Planned",
+    "4": "Constructing",
+    "5": "Demolition Planned",
+    "6": "Demolishing",
+    "7": "Completed",
+    "8": "Canceled",
+    "9": "Vacant",
+    "10": "Collapsed",
+    "11": "Pending Construction"
+  },
+  "spaceType": {
+    "0": "Other",
+    "1": "Residence",
+    "2": "Retail",
+    "3": "Factory",
+    "4": "Office",
+    "5": "Farm"
+  },
+  "resource": {
+    "basicInfo": "Basic Info",
+    "resourceName": "Resource Name",
+    "currentAmount": "Current Amount",
+    "consumptionAmount": "Consumption",
+    "consumptionTrend": "Consumption Trend",
+    "amountTrend": "Amount Trend",
+    "recoveryAmount": "Recovery",
+    "maxAmount": "Max Amount",
+    "unknownResource": "Unknown Resource"
+  },
+  "errors": {
+    "TERRAIN_NOT_ACQUIRED": "This area has not been surveyed yet. Please unlock the terrain cell first.",
+    "UNKNOWN_ERROR": "An error occurred.",
+    "CREATEPATH_INVALID_GEOMETRY": "The path geometry is invalid. Please check the start and end points.",
+    "CREATEPATH_OUTSIDE_COASTLINE": "Paths cannot be placed outside the coastline.",
+    "CREATEPATH_MULTIPLE_INTERSECTIONS": "The path intersects the same road multiple times. Please choose a different route.",
+    "CREATEPATH_ELEVATION_INTERSECTION": "An elevation intersection was detected. Please adjust the height.",
+    "PATH_TOO_FEW_POINTS": "At least 2 points are required.",
+    "PATH_MAX_SPAN_EXCEEDED": "The distance between nodes is too long. Please add intermediate points.",
+    "PATH_ELEVATION_CONFLICT": "An elevation intersection was detected. Please adjust the height."
+  }
+}

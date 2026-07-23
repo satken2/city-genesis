@@ -1,0 +1,36 @@
+/*
+ * インフラ接続セクション(InfraConnectionPanel)のスタイル
+ *
+ * 授受するインフラ財ごとに、接続状態と受領量をまとめた
+ * 緑(接続済み)/赤(未接続)のバッジを縦に並べて表示する。
+ */
+
+.infra-connection-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.infra-connection-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 12px;
+  border-radius: 999px;
+}
+
+.infra-connection-badge--connected {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.infra-connection-badge--disconnected {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.infra-connection-received {
+  font-weight: 600;
+}

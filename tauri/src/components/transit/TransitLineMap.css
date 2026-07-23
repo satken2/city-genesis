@@ -1,0 +1,49 @@
+/**
+ * 路線図(TransitLineMap)のスタイル
+ * 詳細パネルのセクション内に埋め込むので、高さは固定値でビューポートを与える。
+ */
+
+.transit-line-map {
+  position: relative;
+  width: 100%;
+  /* 詳細パネルの横幅に対して十分な地図視認性を確保する高さ。
+     小さすぎると停留所マーカーが密集して読めなくなるため、ある程度の高さを保証する。 */
+  height: 280px;
+  margin-top: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  overflow: hidden;
+  background: #181825;
+}
+
+.transit-line-map__canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* 凡例(現状は何も表示しないが、将来の方向・種別色説明用のプレースホルダ) */
+.transit-line-map__legend {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  display: flex;
+  gap: 8px;
+  pointer-events: none;
+  font-size: 11px;
+  color: #cdd6f4;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.transit-line-map__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.transit-line-map__legend-line {
+  display: inline-block;
+  width: 16px;
+  height: 3px;
+  border-radius: 2px;
+}

@@ -1,0 +1,79 @@
+/* 公共/公営施設コントロールパネル */
+
+.pf-panel {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.pf-panel__title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #9db0c5;
+  letter-spacing: 0.02em;
+}
+
+/* カード内の操作ボタン列。ボタン自体のスタイルは AgentOperationPanel.css の
+   .operation-panel / .operation-btn を再利用する。カード内では上下の余白を詰める。 */
+.pf-panel .operation-panel {
+  padding: 0;
+}
+
+/* 放棄チェックボックス */
+.pf-panel__abandon {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 4px 8px;
+  cursor: pointer;
+}
+
+.pf-panel__abandon input {
+  grid-row: 1 / span 2;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #ff8c3c;
+}
+
+.pf-panel__abandon-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #f6fbff;
+}
+
+.pf-panel__abandon-hint {
+  grid-column: 2;
+  font-size: 0.72rem;
+  color: #8a9bb0;
+  line-height: 1.2;
+}
+
+/* 修繕閾値ラベル(参照表示のみ) */
+.pf-panel__threshold {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pf-panel__threshold-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #9db0c5;
+}
+
+.pf-panel__threshold-value {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #4ea1ff;
+}
+
+/* 削除ボタンの左側に隙間を空ける */
+.pf-panel .operation-btn--delete {
+  margin-left: 12px;
+}

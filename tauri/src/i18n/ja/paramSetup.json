@@ -1,0 +1,375 @@
+{
+  "paramSetup": {
+    "title": "ゲームパラメータ設定",
+    "description": "基本的にはデフォルト値推奨です。変更したい場合のみ調整してください。",
+    "skip": "スキップ",
+    "start": "ゲーム開始",
+    "apply": "適用して閉じる",
+    "close": "閉じる",
+    "loading": "読み込み中...",
+    "reload": "再読み込み",
+    "reloadHint": "バックエンドの初期化が完了してから再読み込みすると最新の値が反映されます",
+    "fetchError": "パラメータの取得に失敗しました",
+    "category": {
+      "population": "人口・移民",
+      "citizen": "市民生活",
+      "economy": "経済",
+      "labor": "労働・賃金",
+      "education": "教育",
+      "construction": "建設・不動産",
+      "environment": "環境",
+      "traffic": "交通"
+    },
+    "param": {
+      "TFR_TARGET": {
+        "label": "合計特殊出生率 (TFR) 目標",
+        "desc": "世帯が目標とする出生率。高いほど子供が生まれやすい。"
+      },
+      "MARRIAGE_RATE": {
+        "label": "婚姻率",
+        "desc": "市民が結婚するベース確率の係数。大きいほど結婚しやすい。"
+      },
+      "MIN_CHILDBEARING_AGE": {
+        "label": "出産可能最低年齢",
+        "desc": "子供が生まれる最低年齢。この年齢未満では出産が発生しない。"
+      },
+      "MAX_CHILDBEARING_AGE": {
+        "label": "出産可能最高年齢",
+        "desc": "子供が生まれる最高年齢。この年齢を超えると出産が発生しない。"
+      },
+      "INFLOW_MARRIRD_RATIO": {
+        "label": "移民世帯の婚姻率",
+        "desc": "移民世帯が都市に流入する際に夫婦である確率。"
+      },
+      "INFLOW_CHILDREN1_RATIO": {
+        "label": "第1子保有率（移民）",
+        "desc": "移民世帯スポーン時に子供を1人持つ確率。"
+      },
+      "INFLOW_CHILDREN2_RATIO": {
+        "label": "第2子保有率（移民）",
+        "desc": "移民世帯スポーン時に子供を2人持つ確率。"
+      },
+      "INFLOW_CHILDREN3_RATIO": {
+        "label": "第3子保有率（移民）",
+        "desc": "移民世帯スポーン時に子供を3人持つ確率。"
+      },
+      "IMMIGRATION_MIN_COUNT": {
+        "label": "最低移民世帯数（1エポック）",
+        "desc": "1エポックあたりの最低移民流入世帯数。小都市での補正用。"
+      },
+      "IMMIGRATION_STOP_UNEMPLOYMENT": {
+        "label": "移民停止失業率",
+        "desc": "この失業率以上になると移民の流入が停止する。"
+      },
+      "IMMIGRATION_ADULT_AGE_MIN": {
+        "label": "移民成人の最小年齢",
+        "desc": "移民として流入する成人の最小年齢。"
+      },
+      "IMMIGRATION_ADULT_AGE_MAX": {
+        "label": "移民成人の最大年齢",
+        "desc": "移民として流入する成人の最大年齢。"
+      },
+      "LIFESPAN_FACTOR": {
+        "label": "寿命係数",
+        "desc": "市民の最大寿命に掛かる係数。1.08でおよそ100歳、1.06で150歳が上限になる。"
+      },
+      "SPACE_SINGLE": {
+        "label": "単身世帯の居住スペース (m²)",
+        "desc": "単身世帯が必要とする最低居住面積。"
+      },
+      "ADD_SPACE_MARRIED": {
+        "label": "配偶者分の追加スペース (m²)",
+        "desc": "夫婦世帯において単身より必要になる追加居住面積。"
+      },
+      "ADD_SPACE_CHILDREN": {
+        "label": "子供1人あたりの追加スペース (m²)",
+        "desc": "子供が1人いるごとに増加する居住面積。"
+      },
+      "HOUSEHOLD_RENT_INCOME_RATIO": {
+        "label": "家賃収入比（支払可能上限）",
+        "desc": "世帯収入に対して支払える家賃の最大比率。0.3なら収入の30%まで充てられる。"
+      },
+      "HOUSEHOLD_TIGHT_BUDGET_RATIO": {
+        "label": "可処分所得下限比率",
+        "desc": "世帯が最低限確保しようとする裁量所得の比率。低すぎると生活が破綻しやすい。"
+      },
+      "HOUSEHOLD_DECIDE_MOVE_COUNT": {
+        "label": "転居判断エポック数",
+        "desc": "住環境に不満を持ってから転居を決断するまでのエポック数。"
+      },
+      "HOUSEHOLD_SHACK_COUNT": {
+        "label": "ホームレス転落エポック数",
+        "desc": "住居を失ってからホームレス状態になるまでのエポック数。"
+      },
+      "QOL_WEIGHT_NUTRITION": {
+        "label": "QoLウェイト：栄養",
+        "desc": "生活水準スコア算出時の栄養充足度の重み（自動正規化される）。"
+      },
+      "QOL_WEIGHT_HEALTHCARE": {
+        "label": "QoLウェイト：医療",
+        "desc": "生活水準スコア算出時の医療充足度の重み（自動正規化される）。"
+      },
+      "QOL_WEIGHT_ENTERTAINMENT": {
+        "label": "QoLウェイト：娯楽",
+        "desc": "生活水準スコア算出時の娯楽充足度の重み（自動正規化される）。"
+      },
+      "AVERAGE_WAGE": {
+        "label": "平均賃金（基準値）",
+        "desc": "シミュレーション開始時の基準平均賃金。"
+      },
+      "AVERAGE_RENT": {
+        "label": "平均家賃（基準値）",
+        "desc": "シミュレーション開始時の基準平均家賃（1日あたり1m²あたり）。"
+      },
+      "MIN_PROFIT_RATE": {
+        "label": "最低利益率",
+        "desc": "企業が操業継続するための最低利益率。"
+      },
+      "SPAWN_PROFIT_RATE_THRESHOLD": {
+        "label": "新規参入許可最低利益率",
+        "desc": "この利益率を上回る市場にのみ新規企業がスポーンする。過剰出店の抑制用。"
+      },
+      "DIVIDEND_PAYOUT_RATIO": {
+        "label": "配当支払比率",
+        "desc": "企業利益のうち家計へ配当する割合。"
+      },
+      "MIN_PRODUCTION_LIMIT": {
+        "label": "最低生産量比率",
+        "desc": "総需要に対する最低生産量の比率。"
+      },
+      "MAX_LONGRUN_BONUS_DAYS": {
+        "label": "長期稼働ボーナス最大日数",
+        "desc": "企業が長期稼働することで得るボーナスの上限日数。"
+      },
+      "EXPORT_COMPETITIVENESS_ZERO_RATIO": {
+        "label": "輸出競争力ゼロ比率",
+        "desc": "域外価格よりこの割合だけ高いと輸出競争力がゼロになる。0.5なら+50%で競争力消滅。"
+      },
+      "SPAWN_LABOR_CAP_RATIO": {
+        "label": "スポーン時労働力消費上限",
+        "desc": "新規企業スポーン時に都市の余剰労働力から一度に消費できる最大比率。"
+      },
+      "DEVELOPER_PROFIT_RATIO": {
+        "label": "不動産デベロッパー利益率",
+        "desc": "不動産開発による利益の比率。"
+      },
+      "INVESTMENT_DEPRECIATION_RATE": {
+        "label": "設備減価償却率",
+        "desc": "設備投資の資本ストックに対する毎エポックの減価償却率。"
+      },
+      "WORK_HOURS": {
+        "label": "1日の労働時間 (h)",
+        "desc": "市民が1日に働く標準時間数。"
+      },
+      "NORMAL_LABOR_UTILITY": {
+        "label": "基準労働力活用度",
+        "desc": "標準価格算定時の労働力活用度。1.0で完全活用。"
+      },
+      "HIGH_SKILL_BOUNDARY": {
+        "label": "高スキル境界値",
+        "desc": "この値を超えると高スキル労働者として扱われる。"
+      },
+      "MAX_BASE_SKILL": {
+        "label": "基礎スキル最大値",
+        "desc": "初等教育で到達できる最大スキル値。"
+      },
+      "MAX_SKILL": {
+        "label": "スキル上限値",
+        "desc": "市民が習得できる最大スキル値（高等教育・就労経験を含む）。"
+      },
+      "WAGE_OVERSTAFFED_THRESHOLD": {
+        "label": "過剰雇用時の賃金引下げ閾値",
+        "desc": "過剰雇用率がこれを超えると賃金を引き下げる（labor_surplus / quota で評価）。"
+      },
+      "WAGE_UNDERSTAFFED_THRESHOLD": {
+        "label": "人手不足時の賃金引上げ閾値",
+        "desc": "人手不足かつ応募者ゼロの状態がこれを超えると賃金を引き上げる。"
+      },
+      "ELEMENTARY_START_AGE": {
+        "label": "初等教育開始年齢",
+        "desc": "子供が初等教育（小学校相当）を開始する年齢。"
+      },
+      "ELEMENTARY_END_AGE": {
+        "label": "初等教育終了年齢",
+        "desc": "初等教育が終了する年齢（高校卒業相当）。"
+      },
+      "UNIVERSITY_END_AGE": {
+        "label": "大学卒業・独立年齢",
+        "desc": "高等教育を修了して世帯から独立する年齢。"
+      },
+      "MIN_WORKING_AGE": {
+        "label": "就労可能最低年齢",
+        "desc": "この年齢未満の市民は求職対象・失業率集計の対象外。"
+      },
+      "EDUCATION_CAPACITY_PER_FLOOR": {
+        "label": "教育施設の収容人数（m²あたり）",
+        "desc": "延床面積1m²あたりの受け入れ可能な生徒数。"
+      },
+      "SCHOOL_SEARCH_MAX_DISTANCE": {
+        "label": "通学可能最大距離（分）",
+        "desc": "通学先の学校を探す際の最大距離（分換算）。"
+      },
+      "BUILDING_FLOOR_LIMIT": {
+        "label": "高層化コスト急増閾値（階）",
+        "desc": "この階数を超えると建設費用が急激に上昇する。超高層ビルの建設を抑制する効果がある。"
+      },
+      "FLOOR_PENALTY_FACTOR": {
+        "label": "階数ペナルティ係数",
+        "desc": "高層化コストペナルティの係数。大きいほど高層ペナルティが小さくなる。"
+      },
+      "DEMOLITION_RATE": {
+        "label": "取り壊し効率比",
+        "desc": "取り壊しは新規建設と比べてどの程度効率的か（倍率）。"
+      },
+      "REAL_ESTATE_SUPPLY_SURPLUS_RATE": {
+        "label": "不動産供給余剰率",
+        "desc": "不動産市場で常に確保する余剰供給の比率。"
+      },
+      "CONSTRUCTION_DEMAND_MIN_RATIO": {
+        "label": "建設需要最小比率",
+        "desc": "総需要に対する建設需要の最小比率。"
+      },
+      "CONSTRUCTION_DEMAND_MAX_RATIO": {
+        "label": "建設需要最大比率",
+        "desc": "総需要に対する建設需要の最大比率。"
+      },
+      "COLLAPSE_BASE_RATE": {
+        "label": "倒壊基準年間確率",
+        "desc": "耐用度0.5の建物が1年間に倒壊する基準確率。"
+      },
+      "COLLAPSE_SHAPE": {
+        "label": "倒壊確率ワイブル形状パラメータ",
+        "desc": "大きいほど耐用年数付近で倒壊確率が急増する。"
+      },
+      "MAINTENANCE_DURABILITY_THRESHOLD": {
+        "label": "修繕判定の耐用度閾値",
+        "desc": "この耐用度未満の建物が修繕の対象になる。"
+      },
+      "MAINTENANCE_COST_RATIO": {
+        "label": "修繕コスト比率",
+        "desc": "修繕コストを新規建設コストに対する比率で表したもの。"
+      },
+      "MAINTENANCE_BASE_PROB_ANNUAL": {
+        "label": "修繕移行基準年間確率",
+        "desc": "修繕対象建物が実際に修繕に入る基準年間確率。"
+      },
+      "DEMOLITION_DURABILITY_THRESHOLD": {
+        "label": "一時停止建物の取り壊し閾値",
+        "desc": "停止中の建物がこの耐用度を下回ると取り壊し対象になる。"
+      },
+      "DEMOLITION_BASE_RATE_ANNUAL": {
+        "label": "一時停止建物の取り壊し年間確率",
+        "desc": "停止中かつ取り壊し対象の建物が1年間に取り壊される基準確率。"
+      },
+      "SHUTDOWN_GRACE_PERIOD_DAYS": {
+        "label": "シャットダウン猶予期間（日）",
+        "desc": "建物竣工後にシャットダウン判定が免除される日数。テナント集積の猶予期間。"
+      },
+      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
+        "label": "初期建設負債（m²あたり）",
+        "desc": "建物の延床面積1m²あたりの初期建設負債（マイナスreserves）。"
+      },
+      "NOISE_ROAD_TRAFFIC_COEFF": {
+        "label": "道路交通騒音係数",
+        "desc": "道路交通量が騒音ヒートマップに与える係数。大きいほど道路沿いが騒がしくなる。"
+      },
+      "NOISE_PED_TRAFFIC_COEFF": {
+        "label": "歩行者交通騒音係数",
+        "desc": "歩行者交通量が騒音ヒートマップに与える係数。"
+      },
+      "PED_NOISE_THRESHOLD": {
+        "label": "歩行者騒音発生閾値",
+        "desc": "歩行者交通量がこの値を超えた分だけ騒音に寄与する。"
+      },
+      "NOISE_BLUR_SIGMA_M": {
+        "label": "騒音拡散範囲 (m)",
+        "desc": "騒音ヒートマップのガウスぼかし半径。大きいほど広範囲に拡散する。"
+      },
+      "NOISE_SATURATION_LEVEL": {
+        "label": "騒音飽和レベル",
+        "desc": "騒音ヒートマップの最大値。これを超えた騒音は頭打ちになる。"
+      },
+      "POLLUTION_ROAD_TRAFFIC_COEFF": {
+        "label": "道路交通大気汚染係数",
+        "desc": "道路交通量が大気汚染ヒートマップに与える係数。"
+      },
+      "POLLUTION_BLUR_SIGMA_M": {
+        "label": "大気汚染拡散範囲 (m)",
+        "desc": "大気汚染ヒートマップのガウスぼかし半径。"
+      },
+      "POLLUTION_SATURATION_LEVEL": {
+        "label": "大気汚染飽和レベル",
+        "desc": "大気汚染ヒートマップの最大値。"
+      },
+      "UNEMPLOYMENT_CRIME_WEIGHT": {
+        "label": "失業の犯罪ウェイト",
+        "desc": "失業率が治安ヒートマップに与える重み。大きいほど失業が治安悪化に直結する。"
+      },
+      "CRIME_BLUR_SIGMA_M": {
+        "label": "犯罪拡散範囲 (m)",
+        "desc": "治安ヒートマップのガウスぼかし半径。"
+      },
+      "CRIME_SATURATION_LEVEL": {
+        "label": "犯罪飽和レベル",
+        "desc": "治安ヒートマップの最大値。"
+      },
+      "LIVING_MULTIPLIER_MIN": {
+        "label": "住環境マルチプライヤー下限",
+        "desc": "住環境が最悪のときの家賃乗数下限。"
+      },
+      "LIVING_MULTIPLIER_MAX": {
+        "label": "住環境マルチプライヤー上限",
+        "desc": "住環境が理想的なときの家賃乗数上限。"
+      },
+      "PEDESTRIAN_SPEED": {
+        "label": "歩行者速度 (km/h)",
+        "desc": "歩行者の移動速度。経路探索コストの計算に使用される。"
+      },
+      "PATH_KASOKU_LENGTH": {
+        "label": "自動車加速距離 (m)",
+        "desc": "自動車の加速に使用する距離。短い道路での速度計算に影響する。"
+      },
+      "PATH_ACTIVE_HOURS": {
+        "label": "道路の1日あたり稼働時間 (h)",
+        "desc": "道路が1日に稼働している時間数。交通量の換算に使用される。"
+      },
+      "ROAD_MANY_TRAFFIC_THRESHOLD": {
+        "label": "道路交通量ボーナス飽和閾値",
+        "desc": "道路交通量がこの値以上で小売店への交通ボーナスが最大になる。"
+      },
+      "PED_MANY_TRAFFIC_THRESHOLD": {
+        "label": "歩行者交通量ボーナス飽和閾値",
+        "desc": "歩行者交通量がこの値以上で小売店への歩行者ボーナスが最大になる。"
+      },
+      "RESOURCE_EFFICIENCY_THRESHOLD": {
+        "label": "天然資源効率閾値",
+        "desc": "天然資源残量率がこの値以上で採掘効率をほぼ1.0に保つ。未満は急落する。"
+      }
+    }
+  },
+  "newGame": {
+    "fromTerrain": "地形から始める",
+    "fromScenario": "シナリオから始める",
+    "loading": "読み込み中...",
+    "noTerrainMaps": "利用可能な地形がありません",
+    "noTemplates": "利用可能なシナリオがありません",
+    "starting": "開始中...",
+    "startFailed": "開始に失敗しました",
+    "confirmTitle": "ゲーム設定の確認",
+    "cityNameLabel": "都市名",
+    "cityNamePlaceholder": "都市名を入力（任意）",
+    "languageLabel": "都市の言語",
+    "languageNote": "※後から変更することはできません",
+    "simulationDaysLabel": "シミュレーション日数",
+    "simulationDaysNote": "※後から変更することはできません",
+    "days7": "7日",
+    "days30": "30日",
+    "startButton": "開始",
+    "backButton": "戻る",
+    "tutorialBadge": "チュートリアル",
+    "tutorialName": "道路と建物を作ろう",
+    "tutorialDesc": "都市の基盤となる道路や建物を作る方法を学びます。",
+    "lockedHint": "🔒 チュートリアルクリアで解放",
+    "tutorialNoTerrain": "地形データが見つかりません。インストール状態を確認してください。"
+  }
+}

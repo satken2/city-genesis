@@ -1,0 +1,5 @@
+/* 金額のコンパクト表示。桁揃えのため等幅数字を使う。 */
+.money {
+  font-variant-numeric: tabular-nums;
+  cursor: help; /* 正確な金額をツールチップで見られることを示す */
+}

@@ -1,0 +1,90 @@
+/**
+ * パス詳細パネルのスタイル
+ *
+ * .agent-detail-* 共通レイアウトシステムは App.css で定義済み。
+ * ここにはパス固有のスタイルのみを定義する。
+ */
+
+/* === 所属地区変更ドロップダウン === */
+
+.zone-change-select {
+  font-size: 0.8rem;
+  line-height: 22px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #c5d4e3;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 0 4px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.zone-change-select:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.zone-change-select:focus {
+  outline: none;
+  border-color: rgba(100, 180, 255, 0.6);
+}
+
+.zone-change-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.zone-change-error {
+  font-size: 0.72rem;
+  color: #ff7171;
+  margin-top: 2px;
+}
+
+/* === 未着工警告バナー === */
+
+.pending-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
+
+.pending-banner--active {
+  padding: 10px 14px;
+  background: rgba(255, 159, 26, 0.08);
+  border: 1px solid rgba(255, 159, 26, 0.25);
+  border-radius: 6px;
+}
+
+.pending-banner__text {
+  font-size: 0.8rem;
+  color: #ffb03a;
+  font-weight: 500;
+}
+
+.pending-banner__btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #ff9f1a;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.pending-banner__btn:hover {
+  background: #ffb03a;
+}
+
+.pending-banner__btn img {
+  width: 12px;
+  height: 12px;
+}
+
+

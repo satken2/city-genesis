@@ -1,0 +1,26 @@
+agents:
+  100:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1048:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1050:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1054:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  1055:
+    model: true
+    prebuilt: true
+    variants:
+      - 0

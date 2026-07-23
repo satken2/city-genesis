@@ -1,0 +1,1 @@
+S:/city/genesis/city-genesis/unity/Assets/Scripts/Editors/AGENTS.md

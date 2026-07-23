@@ -1,0 +1,73 @@
+{
+  "settings": [
+    "settings"
+  ],
+  "path_detail": [
+    "path_detail",
+    "zone_detail"
+  ],
+  "zone_detail": [
+    "path_detail",
+    "zone_detail"
+  ],
+  "agent_detail": [
+    "agent_detail"
+  ],
+  "parcel_detail": [
+    "parcel_detail"
+  ],
+  "resource_detail": [
+    "resource_detail"
+  ],
+  "city_map": [
+    "city_map"
+  ],
+  "building_construction": [
+    "building_construction"
+  ],
+  "city_budget": [
+    "city_budget"
+  ],
+  "city_tax": [
+    "city_tax"
+  ],
+  "city_regulation": [
+    "city_regulation"
+  ],
+  "city_statistics": [
+    "city_statistics"
+  ],
+  "parcel_creation": [
+    "parcel_creation"
+  ],
+  "natural_resources": [
+    "natural_resources"
+  ],
+  "city_hall": [
+    "city_hall"
+  ],
+  "display_options": [
+    "display_options"
+  ],
+  "achievements": [
+    "achievements"
+  ],
+  "debug_data": [
+    "debug_data"
+  ],
+  "path_build": [
+    "path_build"
+  ],
+  "resource_edit": [
+    "resource_edit"
+  ],
+  "save_load": [
+    "save_load"
+  ],
+  "save_list": [
+    "save_list"
+  ],
+  "epoch_confirm": [
+    "epoch_confirm"
+  ]
+}

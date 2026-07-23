@@ -1,0 +1,52 @@
+/**
+ * 建設可能建物種別マスク入力のスタイル
+ *
+ * アイコン付きトグルボタンを横並びのグリッドで配置する。
+ * アクティブ状態のボタンは枠線と背景色でハイライトされる。
+ * disabled 時はグレーアウト表示になる。
+ */
+
+.bd-mask-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.bd-mask-grid--disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.bd-mask-btn {
+  width: 36px;
+  height: 36px;
+  padding: 3px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  transition: background 0.1s, border-color 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bd-mask-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.bd-mask-btn--active {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: #22c55e;
+}
+
+.bd-mask-btn--active:hover:not(:disabled) {
+  background: rgba(34, 197, 94, 0.3);
+}
+
+.bd-mask-btn-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}

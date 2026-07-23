@@ -1,0 +1,38 @@
+.operation-panel {
+  display: flex;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.operation-btn {
+  width: 32px;
+  height: 32px;
+  padding: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.operation-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.operation-btn:active:not(:disabled) {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.operation-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.operation-btn img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}

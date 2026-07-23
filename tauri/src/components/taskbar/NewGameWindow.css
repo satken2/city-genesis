@@ -1,0 +1,359 @@
+/**
+ * ニューゲームウィンドウのスタイル
+ *
+ * 2段構成のセクションを縦に並べ、各セクション内では大きめのタイルを横に並べて表示する。
+ * タイルは将来的にサムネイル画像を配置できる構造とし、
+ * 現状は色付きのプレースホルダー四角で代用する。
+ *
+ * タイル選択後は設定確認モーダル（.new-game-confirm）に切り替わり、
+ * 都市名・言語・シミュレーション日数を入力してからゲームを開始する。
+ */
+
+.new-game-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 20px;
+  height: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.new-game-loading,
+.new-game-empty {
+  text-align: center;
+  padding: 24px;
+  color: #888;
+  font-size: 14px;
+}
+
+/* =========================================================================
+ * タイル選択画面
+ * ========================================================================= */
+
+.new-game-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.new-game-section-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #e0e0e0;
+  border-bottom: 1px solid #444;
+  padding-bottom: 8px;
+}
+
+.new-game-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.new-game-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 160px;
+  padding: 12px;
+  gap: 8px;
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  color: inherit;
+  text-align: center;
+}
+
+.new-game-tile:hover:not(:disabled) {
+  background-color: #333;
+  border-color: #666;
+}
+
+.new-game-tile:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.new-game-tile-image {
+  width: 136px;
+  height: 96px;
+  border-radius: 4px;
+  background-size: cover;
+  background-position: center;
+  /* <img>でサムネイル画像(160x120)を表示する場合の枠へのフィット指定。
+     プレースホルダー用のdiv(背景色のみ)には影響しない。 */
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* 地形マップ用のプレースホルダー色（緑系） */
+.new-game-tile-image--terrain {
+  background-color: #3a6b3a;
+}
+
+/* テンプレート用のプレースホルダー色（青系） */
+.new-game-tile-image--template {
+  background-color: #3a4a6b;
+}
+
+/* チュートリアルミッション用のプレースホルダー色（金系） */
+.new-game-tile-image--tutorial {
+  background: linear-gradient(135deg, #3a4a6b 0%, #4a5a2a 100%);
+}
+
+.new-game-tile-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #e0e0e0;
+  line-height: 1.3;
+}
+
+.new-game-tile-desc {
+  font-size: 12px;
+  color: #aaa;
+  line-height: 1.3;
+}
+
+/* チュートリアルミッション（テンプレートの1番目）のタイルスタイル */
+.new-game-tile--tutorial {
+  border-color: #4ea1ff;
+  background: linear-gradient(180deg, #1e2e4a 0%, #2a2a2a 100%);
+}
+
+.new-game-tile--tutorial:hover:not(:disabled) {
+  border-color: #6ab4ff;
+  background: linear-gradient(180deg, #243a58 0%, #333 100%);
+}
+
+/* チュートリアルバッジ: タイル内の右上に配置するラベル */
+.new-game-tile-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background-color: #4ea1ff;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* ロック表示: チュートリアル未クリア時にシナリオタイルに表示する小さなラベル */
+.new-game-tile-lock {
+  font-size: 11px;
+  color: #aaa;
+  line-height: 1.3;
+  opacity: 0.8;
+}
+
+/* =========================================================================
+ * 設定確認モーダル
+ * ========================================================================= */
+
+.new-game-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 8px 0;
+}
+
+.new-game-confirm-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #e0e0e0;
+  text-align: center;
+}
+
+/* 個別フィールド */
+.new-game-confirm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.new-game-confirm-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ccc;
+}
+
+.new-game-confirm-input {
+  padding: 10px 12px;
+  font-size: 14px;
+  background-color: #1e1e1e;
+  border: 1px solid #555;
+  border-radius: 6px;
+  color: #e0e0e0;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.new-game-confirm-input::placeholder {
+  color: #666;
+}
+
+.new-game-confirm-input:focus {
+  border-color: #6a9fd8;
+}
+
+.new-game-confirm-input:disabled {
+  opacity: 0.6;
+}
+
+/* 言語選択ボタン群 */
+.new-game-confirm-language {
+  display: flex;
+  gap: 8px;
+}
+
+.new-game-confirm-lang-btn {
+  flex: 1;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: #ccc;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.new-game-confirm-lang-btn:hover:not(:disabled) {
+  background-color: #333;
+  border-color: #666;
+}
+
+.new-game-confirm-lang-btn.active {
+  background-color: #1e3a5f;
+  border-color: #4a7ab5;
+  color: #a0c8ff;
+}
+
+.new-game-confirm-lang-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* シミュレーション日数選択ボタン群 */
+.new-game-confirm-days {
+  display: flex;
+  gap: 8px;
+}
+
+.new-game-confirm-days-btn {
+  flex: 1;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  color: #ccc;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.new-game-confirm-days-btn:hover:not(:disabled) {
+  background-color: #333;
+  border-color: #666;
+}
+
+.new-game-confirm-days-btn.active {
+  background-color: #1e4a1e;
+  border-color: #4a8a4a;
+  color: #a0ffa0;
+}
+
+.new-game-confirm-days-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 注釈テキスト（「※後から変更できません」など） */
+.new-game-confirm-note {
+  font-size: 12px;
+  color: #888;
+}
+
+/* アクションボタン群 */
+.new-game-confirm-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.new-game-confirm-btn {
+  padding: 10px 28px;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.new-game-confirm-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.new-game-confirm-btn--back {
+  background-color: #3a3a3a;
+  color: #ccc;
+}
+
+.new-game-confirm-btn--back:hover:not(:disabled) {
+  background-color: #444;
+}
+
+.new-game-confirm-btn--start {
+  background-color: #2a6b3a;
+  color: #e0e0e0;
+}
+
+.new-game-confirm-btn--start:hover:not(:disabled) {
+  background-color: #3a8a4a;
+}
+
+/* =========================================================================
+ * ステータスメッセージ
+ * ========================================================================= */
+
+.new-game-status {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.new-game-status--info {
+  background-color: #1e3a5f;
+  color: #a0c8ff;
+}
+
+.new-game-status--success {
+  background-color: #1e4a1e;
+  color: #a0ffa0;
+}
+
+.new-game-status--error {
+  background-color: #4a1e1e;
+  color: #ffa0a0;
+}

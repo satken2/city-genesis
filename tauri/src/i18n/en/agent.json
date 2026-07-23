@@ -1,0 +1,113 @@
+{
+  "agent": {
+    "title": "Agent Details",
+    "back": "Back",
+    "publicFacility": "Public Facility",
+    "publicFacilityPanel": {
+      "title": "Public Facility"
+    },
+    "abandon": "Abandon",
+    "abandonHint": "Give up upkeep and let it decay without repairs",
+    "repairThreshold": "Repair threshold",
+    "activeFrom": "Established",
+    "reserves": "Reserves",
+    "revenues": "Revenue",
+    "expenses": "Expenses",
+    "zone": "District",
+    "building": "Building",
+    "rent": "Rent",
+    "floorOccupancy": "Floor Occupancy",
+    "tenants": "Tenants",
+    "tabBasicInfo": "Basic Info",
+    "utilizationTarget": "Target Utilization",
+    "constructionSpeed": "Construction Speed",
+    "constructionCostPerEpoch": "Construction Cost / Epoch",
+    "remainingConstruction": "Remaining Duration",
+    "remainingEpochs": "~{{n}} epochs",
+    "tabBuildingInfo": "Building Info",
+    "tabHouseholdInfo": "Household",
+    "tabTradeInfo": "Trade",
+    "tabEmploymentInfo": "Employment",
+    "action": {
+      "purchase": "Purchase",
+      "bulldoze": "Bulldoze",
+      "cancelBulldoze": "Cancel Demolition",
+      "pause": "Pause",
+      "resume": "Resume",
+      "delete": "Delete",
+      "repair": "Repair",
+      "rebuild": "Rebuild",
+      "edit": "Edit",
+      "startConstruction": "Start Construction",
+      "stopConstruction": "Suspend Construction"
+    },
+    "pendingWarning": "This building is planned. Please command to start construction.",
+    "alerts": {
+      "title": "Alerts",
+      "constructionShortage": {
+        "title": "Construction Service Shortage",
+        "description": "Construction budget is insufficient, causing delays in construction."
+      },
+      "onFire": {
+        "title": "Fire Incident!",
+        "description": "A fire has broken out in the building."
+      },
+      "accidentalFire": {
+        "title": "Accidental Fire",
+        "description": "An accidental minor fire occurred but was kept small."
+      },
+      "infraDisconnected": {
+        "title": "Not Connected to Infrastructure Network",
+        "description": "No infrastructure path is connected to this facility's terminal. It cannot send or receive supplies until it is connected to the network."
+      }
+    },
+    "infra": {
+      "title": "Infrastructure Connection",
+      "connected": "Connected",
+      "disconnected": "Disconnected",
+      "received": "Received"
+    },
+    "tabConstructionInfo": "Construction",
+    "demolitionCostPerEpoch": "Demolition Cost / Epoch",
+    "remainingDemolition": "Remaining Demolition"
+  },
+  "agentList": {
+    "filterType": "Type",
+    "filterVariant": "Variant",
+    "filterZone": "Zone",
+    "allVariants": "All variants",
+    "allZones": "All zones",
+    "resultCount": "{{count}} results",
+    "capped": "(of {{total}} total)",
+    "loading": "Loading...",
+    "noResults": "No matching agents",
+    "colStatus": "Status",
+    "colVariant": "Variant",
+    "colName": "Name",
+    "colProduct": "Product",
+    "colPrice": "Price",
+    "colProduction": "Production",
+    "colStock": "Stock",
+    "colSold": "Sold",
+    "colWageHigh": "High-skill wage",
+    "colWageStd": "Standard wage",
+    "colWageLow": "Low-skill wage",
+    "colWage": "Wages",
+    "colEmployment": "Employment",
+    "colUtilization": "Utilization",
+    "colBdType": "Building type",
+    "colDurability": "Durability",
+    "colRent": "Rent",
+    "colFloors": "Floors",
+    "colFloorArea": "Floor area",
+    "colOccupancy": "Occupancy",
+    "colFamilyType": "Family type",
+    "colDiscretionaryIncome": "Disposable income",
+    "colSatisNutrition": "Nutrition",
+    "colSatisHealthcare": "Healthcare",
+    "colSatisEntertainment": "Entertainment",
+    "colSatisResidential": "Residential",
+    "colAutomobile": "Car",
+    "colEnrollment": "Enrollment"
+  }
+}

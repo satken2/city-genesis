@@ -1,0 +1,82 @@
+/**
+ * 3本組横棒グラフのスタイル
+ *
+ * 各カテゴリ行に3本の細い横棒（前回計画・前回実績・今回計画）を縦に積んで表示する。
+ * カラム幅が狭いため、バーとラベルはコンパクトにまとめる。
+ */
+
+.budget-actual-graph {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
+}
+
+/* 凡例: 3種類の棒の意味を示す */
+.budget-actual-graph__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.budget-actual-graph__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.6rem;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+.budget-actual-graph__legend-mark {
+  display: inline-block;
+  width: 12px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.budget-actual-graph__legend-mark--budget {
+  background: rgba(148, 163, 184, 0.3);
+}
+
+.budget-actual-graph__legend-mark--actual {
+  background: rgba(148, 163, 184, 0.6);
+}
+
+.budget-actual-graph__legend-mark--current {
+  background: rgb(148, 163, 184);
+}
+
+/* 3本の棒を縦に積むコンテナ */
+.budget-actual-graph__bars {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* カテゴリ1行: ラベル(左) + 3本棒(右) */
+.budget-actual-graph__row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.budget-actual-graph__cat-label {
+  font-size: 0.6rem;
+  color: #cbd5e1;
+  white-space: nowrap;
+  width: 32px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+/* 個別の横棒 */
+.budget-actual-graph__bar {
+  height: 8px;
+  border-radius: 2px;
+  min-width: 0;
+  transition: width 0.15s ease;
+}

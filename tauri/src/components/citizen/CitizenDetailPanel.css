@@ -1,0 +1,18 @@
+/* スキルのレーダーチャート。パネル幅に収まるよう中央寄せで配置する。 */
+.citizen-skill-chart {
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+/* 犯罪性向の行。メーターと数値を横並びで表示する。 */
+.citizen-criminality {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.citizen-criminality-meter {
+  flex: 1;
+  min-width: 0;
+}

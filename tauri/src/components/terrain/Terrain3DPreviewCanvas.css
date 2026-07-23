@@ -1,0 +1,28 @@
+.terrain-3d-preview-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #0d0d14;
+  overflow: hidden;
+}
+
+.terrain-3d-preview-canvas-wrap {
+  width: 100%;
+  height: 100%;
+}
+
+.terrain-3d-preview-canvas-wrap canvas {
+  display: block;
+}
+
+.terrain-3d-preview-hint {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 6px 10px;
+  background-color: rgba(20, 20, 28, 0.8);
+  border: 1px solid #2a2a35;
+  border-radius: 4px;
+  color: #a0c8ff;
+  font-size: 13px;
+}

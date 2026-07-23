@@ -1,0 +1,115 @@
+site_name: City Genesis Docs
+# TODO: site_url を Cloudflare Pages の実際のURLに更新してください
+# 例: https://city-genesis-docs.pages.dev/
+site_url: https://city-genesis-docs.pages.dev/
+site_description: City Genesis - 都市建造経済シミュレーションゲームの設計ドキュメント
+repo_url: https://github.com/satken2/genesis-docs
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  language: ja
+  custom_dir: docs/overrides
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: ダークモードに切り替え
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: ライトモードに切り替え
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - toc.follow
+  font:
+    text: Noto Sans JP
+    code: JetBrains Mono
+
+nav:
+  - ホーム: index.md
+  - 経済シミュレーション:
+    - 全体概要: economics/1_全体概要.md
+    - 経済主体: economics/2_経済主体.md
+    - 道路網: economics/3_道路網.md
+    - 地区と土地区画: economics/4_地区と土地区画.md
+    - 公共交通機関: economics/6_公共交通機関.md
+    - 金融システム: economics/7_金融システム.md
+    - 商品市場: economics/8_商品市場.md
+    - 生産活動: economics/9_生産活動.md
+    - 消費活動: economics/10_消費活動.md
+    - 建物: economics/12_建物.md
+    - 不動産市場: economics/13_不動産市場.md
+    - 世帯: economics/15_世帯.md
+    - 労働市場: economics/16_労働市場.md
+    - 教育: economics/17_教育.md
+    - 移民: economics/18_移民.md
+    - 住環境: economics/19_住環境.md
+    - 事故と災害: economics/20_事故と災害.md
+    - 天然資源: economics/21_天然資源.md
+    - 予算管理: economics/22_予算管理.md
+    - 施政スコア: economics/23_施政スコア.md
+    - 達成クエスト: economics/24_達成クエスト.md
+    - インフラ網: economics/26_インフラ網.md
+    - 自然発生スプロール: economics/28_自然発生スプロール.md
+  - 幾何・グラフィック:
+    - パス形状: geometries/A_パス形状.md
+    - 土地形状: geometries/B_土地形状.md
+    - 建物形状: geometries/C_建物形状.md
+    - 地形形状: geometries/D_地形形状.md
+    - LOD処理: geometries/E_LOD処理.md
+    - 建物メッシュの生成: geometries/F_建物メッシュの生成.md
+    - 道路メッシュの生成: geometries/G_道路メッシュの生成.md
+    - バックエンドデータロード: geometries/H_バックエンドデータロード.md
+    - 建物パーツ作成マニュアル: geometries/I_建物パーツ作成マニュアル.md
+    - パスの交差処理: geometries/J_パスの交差処理.md
+    - Unity差分ロード整理: geometries/K_Unity差分ロード整理.md
+    - 地形データ作成マニュアル: geometries/L_地形データ作成マニュアル.md
+    - 地形プロップ: geometries/M_地形プロップ.md
+    - 線路メッシュの生成: geometries/N_線路メッシュの生成.md
+    - 車両の走行描画: geometries/O_車両の走行描画.md
+    - マテリアル共有とエクスポート: geometries/P_マテリアル共有とエクスポート.md
+  - プログラム連携:
+    - IPC連携: programs/IPC連携の整理.md
+    - コンポーネント連携: programs/コンポーネント連携.md
+    - Unity入力制御: programs/Unity入力制御.md
+    - アラートフラグ管理: programs/アラートフラグ管理.md
+    - ファイル配置: programs/ファイル配置.md
+  - API Reference: api/index.html
+
+plugins:
+  - search:
+      lang:
+        - ja
+        - en
+  - i18n:
+      docs_structure: suffix
+      languages:
+        - locale: ja
+          name: 日本語
+          default: true
+          build: true
+        - locale: en
+          name: English
+          build: true
+
+extra_css:
+  - stylesheets/extra.css
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/satken2/genesis-docs
+      name: GitHub
+

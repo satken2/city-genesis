@@ -1,0 +1,206 @@
+/**
+ * 経済推移タブのスタイル
+ *
+ * 2列x2行の4分割グリッドでコントロールパネル・直近数値表示・価格推移グラフ・
+ * Sankeyダイアグラム・需給推移グラフを配置する。
+ * 上段左セルはさらに内部で左右2分割(左=プルダウン、右=直近エポック数値)する。
+ * テーマ・配色・カード装飾は TradeTab.css と同じダークテーマガラスモーフィズム。
+ */
+
+.economy-trend-tab {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  background-color: #0b0f19;
+  color: #f3f4f6;
+}
+
+.economy-trend-tab__title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  color: #ffffff;
+  border-left: 4px solid #fbbf24;
+  padding-left: 10px;
+  line-height: 1.2;
+}
+
+/* 2列x2行グリッド(4分割)。各セルは均等高さとする。 */
+.economy-trend-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+/* カード共通スタイル(ガラスモーフィズム & ダークテーマ) */
+.economy-trend-card {
+  background: rgba(22, 29, 43, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+  min-height: 0;
+}
+
+.economy-trend-card__title {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.economy-trend-card__chart-container {
+  flex: 1;
+  min-height: 120px;
+  position: relative;
+}
+
+.economy-trend-card__no-data {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/*
+ * 上段左セル専用スタイル。
+ * カード内部を左右2分割(左=プルダウン群、右=直近エポック数値)する。
+ * カード自体の padding は .economy-trend-card に任せ、内側の .economy-trend-topleft が
+ * 残りの領域を埋めるようにする。
+ */
+.economy-trend-card--top-left {
+  padding: 16px;
+}
+
+.economy-trend-topleft {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) 1.4fr;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+.economy-trend-topleft__controls {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  justify-content: flex-start;
+  min-width: 0;
+}
+
+/*
+ * 直近エポック数値表示部。
+ * 左側のプルダウン群との境界を区切るために左ボーダーを引く。
+ */
+.economy-trend-topleft__stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  padding-left: 12px;
+  min-width: 0;
+}
+
+/* 直近エポック数値の定義リスト(ラベル+値) */
+.economy-trend-stats {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.economy-trend-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.economy-trend-stat dt {
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.economy-trend-stat dd {
+  margin: 0;
+  color: #f3f4f6;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.economy-trend-control {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.economy-trend-control__label {
+  font-size: 12px;
+  color: #9ca3af;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.economy-trend-control__select {
+  width: 100%;
+  padding: 6px 8px;
+  background-color: #111827;
+  color: #e5e7eb;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  font-size: 13px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.economy-trend-control__select:focus {
+  outline: none;
+  border-color: #fbbf24;
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2);
+}
+
+.economy-trend-control__note {
+  font-size: 11px;
+  color: #fbbf24;
+  background-color: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin-top: 4px;
+}
+
+/* ローディング・エラー状態 */
+.economy-trend-tab__loading,
+.economy-trend-tab__error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.economy-trend-tab__error {
+  color: #f87171;
+}

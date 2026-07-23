@@ -1,0 +1,413 @@
+/**
+ * 公共施設一覧ウィンドウのスタイル
+ *
+ * 暗色テーマを前提とした配色。
+ * 縦2分割構成:
+ *  - 上半分: 公共サービス価格表（regulated製品ごとの価格統制・需給）
+ *  - 下半分: 公共施設一覧テーブル（タブ切替でグループ表示、クリックで詳細表示）
+ *
+ * 文字サイズは統計ウィンドウ（CityStatisticsWindow）の .biz-table / .econ-table に揃える。
+ */
+
+.pf-window {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: #e2e8f0;
+  font-size: 0.82rem;
+  padding: 12px;
+  gap: 12px;
+}
+
+.pf-window__title {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #e2e8f0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  padding-bottom: 4px;
+}
+
+/* 縦2分割レイアウト（上: 公共サービス表 / 下: 公共施設リスト） */
+
+.pf-window__top,
+.pf-window__bottom {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: 12px;
+}
+
+.pf-window__bottom {
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+  padding-top: 12px;
+}
+
+.pf-window__loading,
+.pf-window__error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+.pf-window__error {
+  color: #f87171;
+}
+
+/* ========== 下半分: 施設タブ ========== */
+
+.pf-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  padding-bottom: 4px;
+}
+
+.pf-tabs__tab {
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  color: #94a3b8;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.pf-tabs__tab:hover {
+  color: #cbd5e1;
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.pf-tabs__tab--active {
+  color: #e2e8f0;
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* ========== 下半分: 施設一覧テーブル ========== */
+
+.pf-list {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.pf-list__empty {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  padding: 24px 0;
+  text-align: center;
+}
+
+.pf-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  color: #e2e8f0;
+}
+
+.pf-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #1a2230;
+  padding: 9px 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.74rem;
+  color: #8ba3bb;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  user-select: none;
+}
+
+.pf-th--right {
+  text-align: right !important;
+}
+
+.pf-th--center {
+  text-align: center !important;
+}
+
+/* ソート可能な列ヘッダ */
+.pf-th--sortable {
+  cursor: pointer;
+  transition: color 0.12s;
+}
+
+.pf-th--sortable:hover {
+  color: #cbd5e1;
+}
+
+.pf-th--active {
+  color: #4ea1ff;
+}
+
+.pf-th__arrow {
+  margin-left: 4px;
+  font-size: 0.66rem;
+  opacity: 0.65;
+}
+
+.pf-table tbody td {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  white-space: nowrap;
+}
+
+.pf-td--right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.pf-td--center {
+  text-align: center;
+}
+
+.pf-col-id {
+  color: #94a3b8;
+  font-variant-numeric: tabular-nums;
+}
+
+.pf-row {
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.pf-row:hover {
+  background: rgba(78, 161, 255, 0.08);
+}
+
+/* ========== 上半分: 公共サービス価格表 ========== */
+
+.psp-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.psp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.psp-table thead th {
+  position: sticky;
+  top: 0;
+  background: rgba(15, 23, 42, 0.95);
+  color: #8ba3bb;
+  font-weight: 600;
+  font-size: 0.74rem;
+  text-align: center;
+  padding: 9px 8px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+  white-space: nowrap;
+}
+
+.psp-table__th-name {
+  text-align: left;
+}
+
+.psp-table__th-num {
+  text-align: right;
+}
+
+.psp-table tbody tr {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  height: 48px;
+}
+
+.psp-table td {
+  padding: 6px 8px;
+  vertical-align: middle;
+}
+
+.psp-table__name {
+  color: #e2e8f0;
+  max-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.psp-table__center {
+  text-align: center;
+}
+
+.psp-table__num {
+  text-align: right;
+  color: #94a3b8;
+  font-family: monospace;
+  white-space: nowrap;
+}
+
+.psp-row__unit {
+  color: #64748b;
+  font-size: 0.7rem;
+  margin-left: 2px;
+}
+
+.psp-table__center input {
+  cursor: pointer;
+}
+
+.psp-row__input {
+  width: 72px;
+  box-sizing: border-box;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 3px;
+  color: #38bdf8;
+  font-family: monospace;
+  font-size: 0.75rem;
+  padding: 2px 4px;
+  text-align: right;
+}
+
+.psp-row__input:focus {
+  outline: none;
+  border-color: rgba(59, 130, 246, 0.6);
+}
+
+.psp-row__avg {
+  color: #38bdf8;
+  font-family: monospace;
+  font-size: 0.75rem;
+}
+
+/* 価格方式セレクタ（固定価格 / 原価比率） */
+.psp-row__mode {
+  box-sizing: border-box;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 3px;
+  color: #e2e8f0;
+  font-size: 0.74rem;
+  padding: 2px 4px;
+  cursor: pointer;
+}
+
+.psp-row__mode:focus {
+  outline: none;
+  border-color: rgba(59, 130, 246, 0.6);
+}
+
+/* 価格/比率の入力欄と実効価格表示 */
+.psp-row__value {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.psp-row__value-input {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+}
+
+.psp-row__times {
+  color: #64748b;
+  font-family: monospace;
+  font-size: 0.75rem;
+}
+
+.psp-row__effective {
+  color: #94a3b8;
+  font-family: monospace;
+  font-size: 0.68rem;
+}
+
+/* 需給グラフ */
+
+.psp-table__th-graph {
+  text-align: left;
+  min-width: 180px;
+}
+
+.psp-table__graph-cell {
+  vertical-align: middle;
+}
+
+.psp-status-gauge {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.psp-status-gauge__labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: monospace;
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+.psp-status-gauge__label {
+  white-space: nowrap;
+}
+
+.psp-status-gauge__label--production {
+  color: #38bdf8;
+}
+
+.psp-status-gauge__label--demand {
+  color: #fcd34d;
+}
+
+.psp-status-gauge__label--capacity {
+  color: #94a3b8;
+}
+
+.psp-status-gauge__track {
+  position: relative;
+  height: 10px;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.psp-status-gauge__bar--production {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, #0284c7, #38bdf8);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  z-index: 1;
+}
+
+.psp-status-gauge__bar--demand {
+  position: absolute;
+  left: 0;
+  top: 3px;
+  height: 4px;
+  background: #fcd34d;
+  border-radius: 1px;
+  transition: width 0.3s ease;
+  z-index: 2;
+  opacity: 0.95;
+}
+
+.psp-status-gauge__bar--demand.psp-status-gauge__bar--over {
+  background: linear-gradient(90deg, #ef4444, #f87171);
+  box-shadow: 0 0 4px rgba(239, 68, 68, 0.5);
+}

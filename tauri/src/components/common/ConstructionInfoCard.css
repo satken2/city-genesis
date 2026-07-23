@@ -1,0 +1,67 @@
+/**
+ * 建設情報カード(共通部品)のスタイル
+ *
+ * 建物/パスの建設パネル・詳細パネルの両方に埋め込まれるため、
+ * ホスト側のクラス(bc-* / pc-* / agent-detail-*)には依存しない。
+ * 見た目は詳細パネル系の情報グリッド(枠付き・等幅フォント)に合わせている。
+ */
+
+.construction-info-title {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #c5d4e3;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.construction-info-grid {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  grid-auto-rows: 22px;
+  gap: 3px 10px;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.construction-info-label {
+  color: #93a9c0;
+  font-weight: 600;
+  font-size: 0.72rem;
+  line-height: 22px;
+}
+
+.construction-info-value {
+  font-size: 0.72rem;
+  color: inherit;
+  font-family: "Consolas", "Menlo", monospace;
+  line-height: 22px;
+}
+
+/* 推定建設コストの右に出す「x1.3」の倍率バッジ。背景色は割高度合い(緑→黄→赤) */
+.construction-cost-ratio-badge {
+  color: #fff;
+  border-radius: 4px;
+  padding: 1px 4px;
+  font-size: 0.72rem;
+  margin-left: 6px;
+  font-weight: bold;
+  display: inline-block;
+  vertical-align: middle;
+  cursor: help;
+}
+
+/* 「来期の建設予算の X%」の注記 */
+.construction-budget-note {
+  font-size: 0.7rem;
+  color: #93a9c0;
+  margin-top: 4px;
+}
+
+/* 1エポックコスト・残り期間ブロック(見積もりグリッドの下に間隔を空けて置く) */
+.construction-per-epoch {
+  margin-top: 8px;
+}

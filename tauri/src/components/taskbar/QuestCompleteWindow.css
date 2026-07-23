@@ -1,0 +1,275 @@
+/**
+ * クエスト達成通知ウィンドウのスタイル定義
+ *
+ * エポック実行後に notify="modal" のクエストが新規達成された場合に表示される。
+ * 暗めの背景にファンファーレ音効（tada.wav）・紙吹雪と共にポップアップする。
+ * tier（gold / silver / bronze）ごとに枠色・グロー・バッジの配色を変える。
+ */
+
+.quest-complete-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: quest-complete-fade-in 0.3s ease-out;
+  overflow: hidden;
+}
+
+@keyframes quest-complete-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ── 紙吹雪 ── */
+
+.quest-complete-confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.quest-complete-confetti-piece {
+  position: absolute;
+  top: -12px;
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  opacity: 0;
+  animation-name: quest-complete-confetti-fall;
+  animation-timing-function: ease-in;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+}
+
+@keyframes quest-complete-confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(105vh) rotate(540deg);
+    opacity: 0.6;
+  }
+}
+
+/* ── カード本体 ── */
+
+.quest-complete-card {
+  position: relative;
+  background: linear-gradient(135deg, #1a2a4a 0%, #0f1b33 100%);
+  border: 2px solid #f0c040;
+  border-radius: 12px;
+  padding: 32px 40px 24px;
+  max-width: 420px;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 0 30px rgba(240, 192, 64, 0.3);
+  animation: quest-complete-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* tier ごとの枠色・グロー */
+.quest-complete-card--gold {
+  border-color: #f0c040;
+  box-shadow: 0 0 40px rgba(240, 192, 64, 0.45);
+}
+
+.quest-complete-card--silver {
+  border-color: #c0c8d8;
+  box-shadow: 0 0 30px rgba(192, 200, 216, 0.35);
+}
+
+.quest-complete-card--bronze {
+  border-color: #c08850;
+  box-shadow: 0 0 26px rgba(192, 136, 80, 0.3);
+}
+
+@keyframes quest-complete-pop {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ── tier バッジ ── */
+
+.quest-complete-tier {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 3px 16px;
+  border-radius: 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.quest-complete-tier--gold {
+  background: linear-gradient(135deg, #f0c040, #e8a020);
+  color: #402800;
+}
+
+.quest-complete-tier--silver {
+  background: linear-gradient(135deg, #e0e8f0, #98a8c0);
+  color: #202838;
+}
+
+.quest-complete-tier--bronze {
+  background: linear-gradient(135deg, #d8a068, #a87040);
+  color: #301800;
+}
+
+.quest-complete-title {
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #f0c040;
+  margin: 0;
+}
+
+.quest-complete-card--silver .quest-complete-title {
+  color: #d8e0ec;
+}
+
+.quest-complete-card--bronze .quest-complete-title {
+  color: #d8a068;
+}
+
+.quest-complete-subtitle {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #b0c4de;
+  margin: 0;
+}
+
+/* ── クエスト内容 ── */
+
+.quest-complete-item {
+  background: rgba(240, 192, 64, 0.08);
+  border: 1px solid rgba(240, 192, 64, 0.25);
+  border-radius: 8px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.quest-complete-item-name {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #e8d48a;
+  text-align: center;
+}
+
+.quest-complete-item-desc {
+  font-size: 0.82rem;
+  color: #a0b8d0;
+  text-align: center;
+}
+
+/* 達成時の実測値（実測値 比較演算子 目標値） */
+.quest-complete-values {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-top: 6px;
+}
+
+.quest-complete-value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.quest-complete-value-current {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.quest-complete-value-sep {
+  font-size: 0.85rem;
+  color: #7b8fa5;
+}
+
+.quest-complete-value-target {
+  font-size: 0.95rem;
+  color: #9db0c5;
+}
+
+/* 達成報酬（交付金） */
+.quest-complete-reward {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: rgba(108, 212, 127, 0.12);
+  border: 1px solid rgba(108, 212, 127, 0.3);
+}
+
+.quest-complete-reward-label {
+  font-size: 0.78rem;
+  color: #8fd0a0;
+}
+
+.quest-complete-reward-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #6cd47f;
+}
+
+/* 複数達成時のページ位置 */
+.quest-complete-pager {
+  text-align: center;
+  font-size: 0.78rem;
+  color: #7b8fa5;
+}
+
+.quest-complete-close {
+  align-self: center;
+  padding: 8px 32px;
+  border: none;
+  border-radius: 6px;
+  background: #f0c040;
+  color: #1a2a4a;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.quest-complete-close:hover {
+  background: #f5d060;
+}
+
+.quest-complete-card--silver .quest-complete-close {
+  background: #c0c8d8;
+  color: #202838;
+}
+
+.quest-complete-card--silver .quest-complete-close:hover {
+  background: #d8e0ec;
+}
+
+.quest-complete-card--bronze .quest-complete-close {
+  background: #c08850;
+  color: #301800;
+}
+
+.quest-complete-card--bronze .quest-complete-close:hover {
+  background: #d8a068;
+}

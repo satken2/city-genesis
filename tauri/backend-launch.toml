@@ -1,0 +1,4 @@
+# バックエンド（genesis-core）の起動コマンド。
+# GPU切替による再起動時に genesis-ui がこのコマンドでバックエンドを起動する。
+# {port} は api_base_url から抽出したポート番号で置換される。
+launch_command = 'venv\Scripts\python.exe api.py'

@@ -1,0 +1,343 @@
+/**
+ * 建物建設パネル専用スタイル
+ *
+ * ポップアップウィンドウ内の単列レイアウトに最適化している。
+ */
+
+/* ---- ルートレイアウト ---- */
+.bc-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ---- セクション ---- */
+.bc-section {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.bc-section-title {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #c5d4e3;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+/* ---- セレクトボックス ---- */
+.bc-select {
+  width: 100%;
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.bc-select:focus {
+  border-color: #4ea1ff;
+}
+
+.bc-select option {
+  background: #182231;
+  color: #f6fbff;
+}
+
+.bc-empty-variants {
+  padding: 12px;
+  color: #93a9c0;
+  text-align: center;
+  font-size: 0.65rem;
+}
+
+/* ---- 説明文（アイコン＋枠付き） ---- */
+.bc-description-frame {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.bc-description-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.bc-description-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.bc-description-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #f6fbff;
+  margin-bottom: 4px;
+}
+
+.bc-description-text {
+  font-size: 0.72rem;
+  color: #93a9c0;
+  line-height: 1.5;
+}
+
+/* 敷地未選択時のプロンプトはアイコンなしで中央寄せ */
+.bc-parcel-prompt {
+  text-align: center;
+}
+
+/* ---- 敷地選択メッセージ ---- */
+.bc-parcel-message {
+  font-size: 0.72rem;
+  color: #93a9c0;
+  text-align: center;
+  padding: 8px;
+}
+
+.bc-parcel-message.active {
+  color: #4ea1ff;
+}
+
+/* ---- 形状プレビューセクション ---- */
+.bc-canvas-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  width: 100%;
+  aspect-ratio: 1;
+  background: rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+/* ---- 情報表示グリッド (枠線付き) ---- */
+.bc-info-grid {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  grid-auto-rows: 22px;
+  gap: 3px 10px;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.bc-info-label {
+  color: #93a9c0;
+  font-weight: 600;
+  font-size: 0.72rem;
+  line-height: 22px;
+}
+
+.bc-info-value {
+  font-size: 0.72rem;
+  color: inherit;
+  font-family: "Consolas", "Menlo", monospace;
+  line-height: 22px;
+}
+
+/* ---- ステッパーセクション ---- */
+.bc-stepper-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bc-stepper-unit {
+  font-size: 0.72rem;
+  color: #93a9c0;
+}
+
+/* ---- 外観乱数スライダーセクション ---- */
+.bc-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.bc-slider-row:last-child {
+  margin-bottom: 0;
+}
+
+.bc-slider-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #93a9c0;
+  width: 12px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.bc-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: #45475a;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.bc-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #4ea1ff;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.bc-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #4ea1ff;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+.bc-slider-value {
+  font-size: 0.72rem;
+  color: #93a9c0;
+  font-family: "Consolas", "Menlo", monospace;
+  width: 36px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ---- 階数・建ぺい率の左右2カラム ---- */
+.bc-split-row {
+  display: flex;
+  gap: 12px;
+}
+
+.bc-split-col {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---- 建設予算割合のインライン表示 (1か月の建設コストの右) ---- */
+.bc-budget-ratio-inline {
+  margin-left: 6px;
+  color: #93a9c0;
+  font-size: 0.68rem;
+}
+
+/* ---- アクションボタン (パネル下部に固定) ---- */
+.bc-action-bar {
+  position: sticky;
+  bottom: 0;
+  /* スクロール時に下の内容が透けないよう、パネルと同系色で塗りつぶす */
+  background: #182231;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: none;
+}
+
+.bc-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.bc-btn {
+  flex: 1;
+  min-width: 60px;
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 0.72rem;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+  cursor: pointer;
+  border-radius: 6px;
+  text-align: center;
+  transition: background 0.15s ease;
+}
+
+.bc-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.bc-btn-confirm {
+  background: #4ea1ff;
+  color: #ffffff;
+  border-color: #4ea1ff;
+  font-weight: 600;
+}
+
+.bc-btn-confirm:hover {
+  opacity: 0.85;
+}
+
+.bc-btn-confirm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---- ローディング/empty ---- */
+.bc-muted {
+  color: #9db0c5;
+  font-size: 0.76rem;
+  text-align: center;
+  padding: 8px;
+}
+
+/* ---- 直接配置モードの設置不可メッセージ ---- */
+.bc-direct-invalid {
+  color: #ff8a8a;
+  font-weight: 600;
+}
+
+/* ---- インフラ施設の効果範囲の凡例 ---- */
+.bc-effect-range-legend {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border: 1px solid rgba(80, 200, 120, 0.35);
+  border-radius: 6px;
+  background: rgba(80, 200, 120, 0.08);
+  font-size: 0.76rem;
+  color: #cfe6d6;
+}
+
+.bc-effect-range-legend-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.bc-effect-range-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.6;
+}
+
+.bc-effect-range-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  flex: 0 0 auto;
+}
+
+/* 領域フィル: 半透明の緑（Unity側のオーバーレイ色に合わせる） */
+.bc-effect-range-swatch-area {
+  background: rgba(80, 200, 120, 0.35);
+  border: 1px solid rgba(80, 200, 120, 0.7);
+}

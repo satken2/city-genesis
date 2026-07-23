@@ -1,0 +1,485 @@
+/**
+ * 道路建設パネル専用スタイル
+ *
+ * BuildingConstructionPanel.css と同一のレイアウトパターン。
+ * ポップアップウィンドウ内の単列レイアウトに最適化している。
+ */
+
+/* ---- ルートレイアウト ---- */
+.pc-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ---- セクション ---- */
+.pc-section {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.pc-section-title {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #c5d4e3;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+/* ---- セレクトボックス ---- */
+.pc-select {
+  width: 100%;
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.pc-select:focus {
+  border-color: #4ea1ff;
+}
+
+.pc-select option {
+  background: #182231;
+  color: #f6fbff;
+}
+
+.pc-empty-variants {
+  padding: 12px;
+  color: #93a9c0;
+  text-align: center;
+  font-size: 0.65rem;
+}
+
+/* ---- 説明文（アイコン＋枠付き） ---- */
+.pc-description-frame {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.pc-description-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.pc-description-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.pc-description-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #f6fbff;
+  margin-bottom: 4px;
+}
+
+.pc-description-text {
+  font-size: 0.72rem;
+  color: #93a9c0;
+  line-height: 1.5;
+}
+
+/* ---- プレビューセクション ---- */
+/* 横幅いっぱい・高さ固定の横長プレビュー。道路は水平方向に長い形状が多いため、
+   正方形より横長の方が空間効率が良い。 */
+.pc-canvas-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  width: 100%;
+  height: 160px;
+  background: rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.pc-no-nodes-message {
+  font-size: 0.72rem;
+  color: #93a9c0;
+  text-align: center;
+  padding: 8px;
+}
+
+/* ---- 設定セクション ---- */
+.pc-settings-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.pc-settings-label {
+  font-size: 0.72rem;
+  color: #c5d4e3;
+  min-width: max-content;
+}
+
+.pc-stepper-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pc-stepper-unit {
+  font-size: 0.72rem;
+  color: #93a9c0;
+}
+
+/* ---- アクションボタン ---- */
+/* パネル下部固定のアクションバー。内容がスクロールしても常に見えるよう
+   sticky で最下部に貼り付ける。margin-top: auto により内容が短くても
+   パネルの底に押し出され、パネル背景と同色の下地で背後の内容を隠す。 */
+.pc-action-bar {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  padding: 10px 12px;
+  background: #182231;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  z-index: 2;
+}
+
+.pc-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.pc-btn {
+  flex: 1;
+  min-width: 60px;
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 0.72rem;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+  cursor: pointer;
+  border-radius: 6px;
+  text-align: center;
+  transition: background 0.15s ease;
+}
+
+.pc-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.pc-btn-confirm {
+  background: #4ea1ff;
+  color: #ffffff;
+  border-color: #4ea1ff;
+  font-weight: 600;
+}
+
+.pc-btn-confirm:hover {
+  opacity: 0.85;
+}
+
+.pc-btn-confirm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---- ローディング/empty ---- */
+.pc-muted {
+  color: #9db0c5;
+  font-size: 0.76rem;
+  text-align: center;
+  padding: 8px;
+}
+
+/* ---- 吸着設定（アイコンボタン） ---- */
+.pc-snapping-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pc-snap-btn {
+  width: 36px;
+  height: 36px;
+  padding: 4px;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: border-color 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+  opacity: 0.45;
+}
+
+.pc-snap-btn:hover {
+  background: rgba(255, 255, 255, 0.10);
+  opacity: 0.7;
+}
+
+.pc-snap-btn.active {
+  border-color: #4ea1ff;
+  background: rgba(78, 161, 255, 0.12);
+  opacity: 1;
+}
+
+.pc-snap-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+/* ---- 曲線/直線切替トグル ---- */
+.pc-curve-toggle {
+  position: relative;
+  width: 72px;
+  height: 36px;
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  padding: 0;
+  overflow: hidden;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.pc-curve-toggle.curved {
+  border-color: #4ea1ff;
+  background: rgba(78, 161, 255, 0.10);
+}
+
+.pc-curve-toggle-indicator {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 32px;
+  height: 28px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.15);
+  display: grid;
+  place-items: center;
+  transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pc-curve-toggle.curved .pc-curve-toggle-indicator {
+  left: 36px;
+  background: rgba(78, 161, 255, 0.35);
+}
+
+.pc-curve-toggle-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+/* ---- 駅パスのホーム設置側（外側/内側/両側）セグメントトグル ---- */
+.pc-platform-side-group {
+  display: flex;
+  gap: 4px;
+}
+
+.pc-platform-side-btn {
+  padding: 6px 12px;
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.pc-platform-side-btn.active {
+  border-color: #4ea1ff;
+  background: rgba(78, 161, 255, 0.18);
+}
+
+/* ---- カテゴリ選択(道路/軌道/インフラ) ---- */
+.pc-category-group {
+  display: flex;
+  gap: 6px;
+}
+
+.pc-category-btn {
+  flex: 1;
+  padding: 8px 6px;
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f6fbff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.pc-category-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.pc-category-btn.active {
+  border-color: #4ea1ff;
+  background: rgba(78, 161, 255, 0.18);
+}
+
+.pc-category-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---- 種別ボタン(道路種別/鉄道種別/track_type/電化) ---- */
+.pc-type-group {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.pc-type-group-compact {
+  flex: 1;
+  justify-content: flex-start;
+}
+
+.pc-type-btn {
+  flex: 1;
+  min-width: 56px;
+  padding: 6px 10px;
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f6fbff;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.pc-type-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.pc-type-btn.active {
+  border-color: #4ea1ff;
+  background: rgba(78, 161, 255, 0.18);
+}
+
+.pc-type-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---- 軌道の設定行(構造/電化/線路数/進行方向/線路間隔) ---- */
+.pc-rail-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.pc-rail-field > .pc-settings-label {
+  min-width: 56px;
+}
+
+/* ---- 電化の左右スライドスイッチ(ON/OFF) ---- */
+.pc-switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 46px;
+  height: 24px;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.pc-switch.on {
+  border-color: #4ea1ff;
+  background: rgba(78, 161, 255, 0.35);
+}
+
+.pc-switch:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* つまみ。OFFで左、ONで右へスライドする。 */
+.pc-switch-thumb {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #f6fbff;
+  transition: left 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pc-switch.on .pc-switch-thumb {
+  left: 23px;
+}
+
+.pc-switch-status {
+  font-size: 0.72rem;
+  color: #c5d4e3;
+}
+
+/* ---- 進行方向の矢印列 ---- */
+.pc-track-direction-row {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.pc-track-arrow {
+  width: 28px;
+  height: 32px;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f6fbff;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.pc-track-arrow:hover:not(:disabled) {
+  background: rgba(78, 161, 255, 0.14);
+  border-color: #4ea1ff;
+}
+
+.pc-track-arrow:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 進行方向ボタンの矢印画像(順方向=上矢印 / 逆方向=下矢印 / 両方向=両矢印) */
+.pc-track-arrow-img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+/* ---- Dev モックセクション ---- */
+.pc-dev-note {
+  font-size: 0.55rem;
+  color: #585b70;
+  margin-top: 4px;
+}
