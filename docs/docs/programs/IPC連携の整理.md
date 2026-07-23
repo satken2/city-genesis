@@ -149,8 +149,8 @@ genesis-core は起動時にポート5000から順に空きポートを探し、
 
 この動的に決定したポート番号は、以降の UI および Graphic プログラムに対して正しく伝達される必要がある。伝達の経路は以下の通り。
 
-1. **genesis-core → genesis-ui**: 環境変数 `GENESIS_UI_API_BASE_URL` に `http://localhost:{ポート番号}` を設定してから `config.toml` の `[ui] launch_command` を実行する。
-2. **genesis-ui → city-genesis/unity**: `graphic-launch.json` の `launch_command` の末尾に `--api-base-url http://localhost:{ポート番号}` を追加してから Unity を起動する。
+1. **genesis-core → city-genesis/tauri**: 環境変数 `GENESIS_UI_API_BASE_URL` に `http://localhost:{ポート番号}` を設定してから `config.toml` の `[ui] launch_command` を実行する。
+2. **city-genesis/tauri → city-genesis/unity**: `graphic-launch.json` の `launch_command` の末尾に `--api-base-url http://localhost:{ポート番号}` を追加してから Unity を起動する。
 3. **city-genesis/unity**: `AppRoot.Start()` でコマンドライン引数 `--api-base-url` をパースし、`ApiClient.BASE_URL` を上書きする。以降、全ての HTTP 通信はこの `BASE_URL` を参照する。
 
 ## 各プログラムの起動シーケンス
@@ -165,13 +165,13 @@ genesis-core (main.py)
   │
   └─ サーバー起動完了後:
       ├─ スプラッシュ破棄
-      └─ config.toml の [ui] launch_command から genesis-ui を起動
+      └─ config.toml の [ui] launch_command から city-genesis/tauri を起動
          └─ 環境変数 GENESIS_UI_API_BASE_URL = http://localhost:{ポート}
          （異常終了時は3秒後に自動再起動。正常終了(code 0)は監視終了）
 ```
 
 ```
-genesis-ui (Tauri/Rust)
+city-genesis/tauri (Tauri/Rust)
   │
   ├─ 環境変数 GENESIS_UI_API_BASE_URL を読み込み、以降の API 通信先とする
   ├─ 設定読み込み: window-registry.json, window-mutex-groups.json, graphic-launch.json

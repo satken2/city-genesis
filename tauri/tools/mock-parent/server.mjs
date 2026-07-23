@@ -2,7 +2,7 @@ import http from "node:http";
 import net from "node:net";
 import { URL } from "node:url";
 
-const PIPE_NAME = process.env.GENESIS_UI_PIPE_NAME || "\\\\.\\pipe\\genesis-ui-ipc";
+const PIPE_NAME = process.env.GENESIS_UI_PIPE_NAME || "\\\\.\\pipe\\city-genesis/tauri-ipc";
 const HTTP_PORT = Number(process.env.GENESIS_UI_MOCK_PARENT_PORT || 18765);
 
 let tauriSocket = null;

@@ -1,5 +1,5 @@
 {
-  "name": "genesis-ui",
+  "name": "city-genesis/tauri",
   "private": true,
   "version": "0.1.0",
   "type": "module",

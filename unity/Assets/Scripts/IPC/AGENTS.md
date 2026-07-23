@@ -1,6 +1,6 @@
 # IPC フォルダ
 
-Tauri製UI(genesis-uiレポジトリ)とのMemoryMappedFile(MMF)によるプロセス間通信を担当する。
+Tauri製UI(city-genesis/tauriレポジトリ)とのMemoryMappedFile(MMF)によるプロセス間通信を担当する。
 HTTP(バックエンド通信)とは別系統であることに注意。UnityとUIの間のやり取り(クリックした建物の詳細ウィンドウを開く、編集モードの切り替え等)はすべてここを通る。
 
 ## ファイル一覧
@@ -9,7 +9,7 @@ HTTP(バックエンド通信)とは別系統であることに注意。Unityと
 | --- | --- |
 | `IpcClient.cs` | 高レベルクライアント(シングルトン)。型付きのemit/subscribe APIを提供。受信イベントはUpdate()でメインスレッドにディスパッチされる(**MMF読み取りは別スレッドなので、購読ハンドラ内からUnity APIを直接呼んで良いのはこのディスパッチのおかげ**) |
 | `IpcTransport.cs` | MmfReader/MmfWriter。MMFの低レベル読み書き |
-| `IpcEnvelope.cs` | メッセージの封筒構造。**genesis-ui側の`src-tauri/src/messages.rs`のEnvelopeと同一構造を保つ必要がある** |
+| `IpcEnvelope.cs` | メッセージの封筒構造。**city-genesis/tauri側の`src-tauri/src/messages.rs`のEnvelopeと同一構造を保つ必要がある** |
 | `IpcEventHandler.cs` | 受信イベントの処理 |
 | `IpcStateCoordinator.cs` | ゲーム状態(編集モード等)の同期 |
 | `IpcViewCoordinator.cs` | ビュー(表示モード)の同期 |
@@ -18,7 +18,7 @@ HTTP(バックエンド通信)とは別系統であることに注意。Unityと
 ## 新しいIPCイベントを追加する手順
 
 1. `IpcClient.cs`に型付きイベント(`event Action<...> OnXxx`)または送信メソッドを追加
-2. genesis-ui側にも対応する送受信を追加(`genesis-ui/src/utils/ipc.ts`と`genesis-ui/src-tauri/src/`)
+2. city-genesis/tauri側にも対応する送受信を追加(`city-genesis/tauri/src/utils/ipc.ts`と`city-genesis/tauri/src-tauri/src/`)
 3. IPCプロトコルは両コンポーネントの開発契約なので、`genesis-docs`のprograms配下のIPC仕様ドキュメントも更新する
 
 ## 編集モードのステート同期(参考)

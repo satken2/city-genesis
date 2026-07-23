@@ -1,5 +1,5 @@
 [package]
-name = "genesis-ui"
+name = "city-genesis/tauri"
 version = "0.1.0"
 description = "A Tauri App"
 authors = ["you"]

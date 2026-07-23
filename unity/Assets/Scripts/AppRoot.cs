@@ -21,7 +21,7 @@ public class AppRoot : MonoBehaviour
         UnityEngine.Debug.Log("AppRoot: Starting app...");
 
         // コマンドライン引数からバックエンドの API ベース URL を読み取る。
-        // genesis-ui から起動された場合、--api-base-url が付与される。
+        // city-genesis/tauri から起動された場合、--api-base-url が付与される。
         // 指定がない場合は ApiClient.BASE_URL の初期値（localhost:5000）がそのまま使用される。
         string[] args = Environment.GetCommandLineArgs();
         UnityEngine.Debug.Log($"AppRoot: Raw arguments: {string.Join(" ", args)}");

@@ -1,4 +1,4 @@
-# Unity 実行ファイルのパス(genesis-ui.exe のあるディレクトリ基準の相対パス、または絶対パス)。
+# Unity 実行ファイルのパス(city-genesis/tauri.exe のあるディレクトリ基準の相対パス、または絶対パス)。
 # shell を経由せず直接起動されるため、`cmd /c "..."` 形式は使えない。
 # 開発時(tauri dev で GENESIS_GRAPHIC_EXTERNAL 未設定)にのみ使用される。
 launch_command = '..\Graphics\Realcity.exe'

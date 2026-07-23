@@ -79,7 +79,7 @@ pub struct AppState {
     /// 末尾が最も最近に非表示にされたもの。open_window はこの中から再利用候補を探し、
     /// MAX_HIDDEN_WINDOWS を超えると先頭(最古)から本当に破棄する。
     pub hidden_lru: VecDeque<String>,
-    /// バックエンドプロセス（genesis-core）。genesis-ui から起動した場合に保持する。
+    /// バックエンドプロセス（genesis-core）。city-genesis/tauri から起動した場合に保持する。
     /// genesis.py 経由で起動された場合は None。
     pub backend_process: Option<Child>,
     /// バックエンドの起動コマンド。backend-launch.toml から読み込む。

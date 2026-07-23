@@ -17,7 +17,7 @@ DEST_JSON = REPO_ROOT / "docs" / "api" / "openapi.json"
 DEST_HTML = REPO_ROOT / "docs" / "api" / "index.html"
 TEMPLATE_HTML = REPO_ROOT / "docs" / "api" / "_template.html"
 DEFAULT_SOURCE = "http://localhost:5000/openapi.json"
-FALLBACK_PATH = REPO_ROOT.parent / "realcity-unity" / "openapi.json"
+FALLBACK_PATH = REPO_ROOT.parent / "unity" / "openapi.json"
 PLACEHOLDER = "/* __OPENAPI_SPEC_PLACEHOLDER__ */"
 
 

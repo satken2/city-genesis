@@ -991,7 +991,7 @@ fn export_terrain_as_npy(
         .map_err(|e| format!("変換スクリプトの解決に失敗しました: {e}"))?;
 
     let tmp_dir = std::env::temp_dir().join(format!(
-        "genesis-ui-npy-export-{}",
+        "city-genesis/tauri-npy-export-{}",
         uuid::Uuid::new_v4()
     ));
     std::fs::create_dir_all(&tmp_dir).map_err(|e| format!("一時ディレクトリの作成に失敗しました: {e}"))?;
@@ -1968,17 +1968,17 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
 }
 
 /// ログ出力を初期化する。
-/// 実行ファイルと同じディレクトリに genesis-ui.log を作成し、
+/// 実行ファイルと同じディレクトリに city-genesis/tauri.log を作成し、
 /// 標準出力とファイルの両方に DEBUG レベル以上のログを出力する。
 /// Windows の本番ビルドではコンソールが表示されないため、ファイルログが重要となる。
 fn setup_logging() -> Result<(), fern::InitError> {
     let log_path = if let Ok(exe_path) = std::env::current_exe() {
         exe_path
             .parent()
-            .map(|p| p.join("genesis-ui.log"))
-            .unwrap_or_else(|| "genesis-ui.log".into())
+            .map(|p| p.join("city-genesis/tauri.log"))
+            .unwrap_or_else(|| "city-genesis/tauri.log".into())
     } else {
-        "genesis-ui.log".into()
+        "city-genesis/tauri.log".into()
     };
 
     fern::Dispatch::new()
