@@ -56,5 +56,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "city-genesis/unity.slnx"
+    "dotnet.defaultSolution": "unity.slnx"
 }
