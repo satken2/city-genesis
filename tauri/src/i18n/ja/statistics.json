@@ -241,6 +241,8 @@
     "debugSpawnCounterRentNegative": "家賃ゼロでも赤字",
     "debugSpawnCounterRentBelowMarket": "家賃競争力不足",
     "debugSpawnCounterMaterials": "原材料不足",
+    "debugSpawnCounterMaterialsCapacity": "原材料の調達可能量不足",
+    "debugSpawnCounterCapital": "資本調達不能",
     "debugSpawnCounterHighSkillLabor": "高スキル人材不足",
     "debugSpawnCounterGeneralLabor": "一般労働力不足",
     "debugSpawnCounterBelowMinQty": "最低稼働量未満",

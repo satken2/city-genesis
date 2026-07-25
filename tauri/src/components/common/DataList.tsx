@@ -15,9 +15,17 @@ type DataListProps = {
   values: number[];
   /** 値のフォーマット関数。未指定の場合は数値をそのまま表示 */
   formatter?: (value: number) => string;
+  /**
+   * チャート描画値のクランプ範囲 [min, max]。
+   * 利益率のように意味のある値域が決まっているデータで、履歴に含まれる
+   * 外れ値（例: 過去セーブに残るクランプ前の異常値）がY軸スケールを
+   * 支配して他の値が潰れるのを防ぐ。棒の高さだけをクランプし、
+   * ツールチップと最新値表示には生値をそのまま使う。
+   */
+  clampRange?: [number, number];
 };
 
-export function DataList({ values, formatter }: DataListProps) {
+export function DataList({ values, formatter, clampRange }: DataListProps) {
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -33,9 +41,13 @@ export function DataList({ values, formatter }: DataListProps) {
 
   // For chronological order (oldest on left, newest on right), we copy and reverse values
   const chronologicalValues = [...values].reverse();
+  // value はチャートの棒の高さ（clampRange 指定時はクランプ済み）、raw はツールチップ用の生値
   const chartData = chronologicalValues.map((v, i) => ({
     index: i + 1,
-    value: v,
+    value: clampRange
+      ? Math.min(Math.max(v, clampRange[0]), clampRange[1])
+      : v,
+    raw: v,
   }));
 
   return (
@@ -91,7 +103,8 @@ export function DataList({ values, formatter }: DataListProps) {
                 <Tooltip
                   content={({ payload }) => {
                     if (!payload || !payload.length) return null;
-                    const raw = payload[0]?.value;
+                    // クランプ済みの棒の高さではなく生値を表示する
+                    const raw = payload[0]?.payload?.raw;
                     const display = formatter
                       ? formatter(Number(raw ?? 0))
                       : String(raw ?? "");

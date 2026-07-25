@@ -241,6 +241,8 @@
     "debugSpawnCounterRentNegative": "Unprofitable at zero rent",
     "debugSpawnCounterRentBelowMarket": "Rent competitiveness",
     "debugSpawnCounterMaterials": "Material shortage",
+    "debugSpawnCounterMaterialsCapacity": "Material procurement capacity",
+    "debugSpawnCounterCapital": "Capital financing",
     "debugSpawnCounterHighSkillLabor": "High-skill labor shortage",
     "debugSpawnCounterGeneralLabor": "General labor shortage",
     "debugSpawnCounterBelowMinQty": "Below minimum scale",

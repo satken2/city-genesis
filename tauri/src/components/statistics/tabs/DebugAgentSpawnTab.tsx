@@ -63,6 +63,8 @@ const BLOCKER_SERIES: Array<{ key: string; labelKey: string; color: string }> = 
   { key: "rent_negative", labelKey: "statistics.debugSpawnCounterRentNegative", color: "#ef4444" },
   { key: "rent_below_market", labelKey: "statistics.debugSpawnCounterRentBelowMarket", color: "#f59e0b" },
   { key: "materials", labelKey: "statistics.debugSpawnCounterMaterials", color: "#a16207" },
+  { key: "materials_capacity", labelKey: "statistics.debugSpawnCounterMaterialsCapacity", color: "#854d0e" },
+  { key: "capital", labelKey: "statistics.debugSpawnCounterCapital", color: "#0f766e" },
   { key: "high_skill_labor", labelKey: "statistics.debugSpawnCounterHighSkillLabor", color: "#8b5cf6" },
   { key: "general_labor", labelKey: "statistics.debugSpawnCounterGeneralLabor", color: "#c084fc" },
   { key: "below_min_qty", labelKey: "statistics.debugSpawnCounterBelowMinQty", color: "#0ea5e9" },
