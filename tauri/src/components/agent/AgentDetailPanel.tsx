@@ -53,6 +53,7 @@ import { BuildingInfoPanel } from "./BuildingInfoPanel";
 import { HouseholdInfoPanel } from "./HouseholdInfoPanel";
 import { DemandInfoPanel } from "./DemandInfoPanel";
 import { SupplyInfoPanel } from "./SupplyInfoPanel";
+import { CargoInfoPanel } from "./CargoInfoPanel";
 import { InfraConnectionPanel } from "./InfraConnectionPanel";
 import { EducationInfoPanel } from "./EducationInfoPanel";
 import { EmploymentInfoPanel } from "./EmploymentInfoPanel";
@@ -216,6 +217,7 @@ export function AgentDetailPanel({
     const showEducationInfo = agentData.type === TYPE_EDUCATION;
     const hasBasicInfoTab = showBasicInfo || showEducationInfo;
     const hasHouseholdInfoTab = showHouseholdInfo;
+    const hasCargoInfoTab = isImportOrExport;
 
     const showBuildingPanel = agentData.is_bd;
     const showBuildingDetails = agentData.type === TYPE_BUILDING;
@@ -259,6 +261,7 @@ export function AgentDetailPanel({
       if (showConstructionTab) availableIds.push("construction");
     } else {
       if (hasBasicInfoTab) availableIds.push("basic");
+      if (hasCargoInfoTab) availableIds.push("cargo");
       if (hasBuildingInfoTab) availableIds.push("building");
       if (hasHouseholdInfoTab) availableIds.push("household");
       if (hasTradeInfoTab) availableIds.push("trade");
@@ -327,6 +330,8 @@ export function AgentDetailPanel({
   const hasBasicInfoTab = showBasicInfo || showEducationInfo;
   const hasHouseholdInfoTab = showHouseholdInfo;
 
+  const hasCargoInfoTab = isImportOrExport;
+
   const showBuildingPanel = agentData.is_bd;
   const showBuildingDetails = agentData.type === TYPE_BUILDING;
   const hasBuildingInfoTab = showBuildingPanel || showBuildingDetails;
@@ -368,6 +373,9 @@ export function AgentDetailPanel({
   } else {
     if (hasBasicInfoTab) {
       tabs.push({ id: "basic", label: t("agent.tabBasicInfo", "基本情報") });
+    }
+    if (hasCargoInfoTab) {
+      tabs.push({ id: "cargo", label: t("agent.tabCargoInfo", "荷役情報") });
     }
     if (hasBuildingInfoTab) {
       tabs.push({ id: "building", label: t("agent.tabBuildingInfo", "建物情報") });
@@ -583,6 +591,10 @@ export function AgentDetailPanel({
                 <EducationInfoPanel agent={agentData} />
               )}
             </>
+          )}
+
+          {activeTab === "cargo" && hasCargoInfoTab && !isPreConstruction && (
+            <CargoInfoPanel agent={agentData} apiBaseUrl={apiBaseUrl} />
           )}
 
           {activeTab === "building" && hasBuildingInfoTab && !isPreConstruction && (

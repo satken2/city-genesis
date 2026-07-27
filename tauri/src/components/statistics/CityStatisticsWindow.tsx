@@ -21,6 +21,7 @@ import { EmploymentTab } from "./tabs/EmploymentTab";
 import { TradeTab } from "./tabs/TradeTab";
 import { AccidentsTab } from "./tabs/AccidentsTab";
 import { BusinessTab } from "./tabs/BusinessTab";
+import { BusinessHistoryTab } from "./tabs/BusinessHistoryTab";
 import { CommuteTab } from "./tabs/CommuteTab";
 import { RealEstateTab } from "./tabs/RealEstateTab";
 import { InfrastructureTab } from "./tabs/InfrastructureTab";
@@ -45,6 +46,7 @@ const TABS: TabDef[] = [
   { id: "trade", icon: "trade", labelKey: "statistics.tabTrade" },
   { id: "accidents", icon: "accidents", labelKey: "statistics.tabAccidents" },
   { id: "business", icon: "business", labelKey: "statistics.tabBusiness" },
+  { id: "businessHistory", icon: "businessHistory", labelKey: "statistics.tabBusinessHistory" },
   { id: "commute", icon: "commute", labelKey: "statistics.tabCommute" },
   { id: "realestate", icon: "realestate", labelKey: "statistics.tabRealEstate" },
   { id: "infrastructure", icon: "infrastructure", labelKey: "statistics.tabInfrastructure" },
@@ -181,6 +183,16 @@ function TabIcon({ icon, className }: { icon: string; className?: string }) {
       </svg>
     );
   }
+  if (icon === "businessHistory") {
+    // 開店・閉店履歴: 時計を巻き戻す「履歴」アイコン
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3.5 12a8.5 8.5 0 1 0 2.9-6.4L3 8.5" />
+        <path d="M3 3.5v5h5" />
+        <path d="M12 8v4.2l2.8 1.8" />
+      </svg>
+    );
+  }
   if (icon === "commute") {
     // 往復や人の移動を表現する双方向垂直矢印のプレミアムなデザイン
     return (
@@ -299,6 +311,7 @@ export function CityStatisticsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         {activeTab === "trade" && <TradeTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "accidents" && <AccidentsTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "business" && <BusinessTab apiBaseUrl={apiBaseUrl} />}
+        {activeTab === "businessHistory" && <BusinessHistoryTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "commute" && <CommuteTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "realestate" && <RealEstateTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "infrastructure" && <InfrastructureTab apiBaseUrl={apiBaseUrl} />}

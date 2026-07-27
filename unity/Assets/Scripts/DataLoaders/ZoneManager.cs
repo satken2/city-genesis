@@ -85,6 +85,13 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
     private bool areZonesLoaded = false;
     private bool isZoneLoadInProgress = false;
 
+    /// <summary>
+    /// ロード進行中に RequestZoneRefresh が呼ばれた場合の追加リロード予約。
+    /// 進行中のロードは古いスナップショットを取得している可能性があるため、
+    /// 完了後にもう一度リロードして最新状態に追随する。
+    /// </summary>
+    private bool zoneRefreshQueued = false;
+
     // カメラ変化検知によるUI位置更新間引き用
     private Vector3 lastCamPos = Vector3.negativeInfinity;
     private Quaternion lastCamRot = Quaternion.identity;
@@ -230,6 +237,25 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
     }
 
     /// <summary>
+    /// 全地区を version 差分で再取得する。version が変わった地区のみ再描画される。
+    /// エポック完了・編集確定後の CellDataLoader.ReloadAllData から呼ばれる。
+    ///
+    /// 地区はエポックごとにシステムが自動で作成・統合・分離し、ポリゴンも変化する
+    /// (地区整合性フェーズ)。LoadCells は「未ロード時と強制時のみ再取得」の設計のため、
+    /// ReloadAllData の isForce=false 経路では地区が二度と更新されない。
+    /// エポック由来の地区の増減・変形はこのメソッドで追随する。
+    /// </summary>
+    public void RequestZoneRefresh()
+    {
+        if (isZoneLoadInProgress)
+        {
+            zoneRefreshQueued = true;
+            return;
+        }
+        StartCoroutine(LoadAllZones());
+    }
+
+    /// <summary>
     /// version 差分をバイパスして全地区を再取得・再描画する。
     /// 地区編集の確定後(道路の地区割り当て変更後)に呼ぶ。地区の拡張では侵食された側の地区や、
     /// 空になって消滅した地区も含めて複数地区のポリゴンが同時に変わるため、version 差分に頼らず
@@ -301,6 +327,14 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         // 枠線やラベルの位置が強制的に再計算される。
         lastCamPos = Vector3.negativeInfinity;
         Debug.Log($"ZoneManager: ゾーン一覧を読み込みました count={receivedIds.Count}");
+
+        // ロード中に RequestZoneRefresh が予約されていたら、最新状態へ追随するため
+        // もう一度リロードする(今回のロードは予約時点より古いスナップショットの可能性がある)。
+        if (zoneRefreshQueued)
+        {
+            zoneRefreshQueued = false;
+            StartCoroutine(LoadAllZones());
+        }
     }
 
     private void SyncZones(HashSet<int> receivedIds)

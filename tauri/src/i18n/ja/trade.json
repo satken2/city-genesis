@@ -12,5 +12,22 @@
     "demandAmount": "需要量",
     "receivedAmount": "獲得量",
     "acquiredAmount": "在庫"
+  },
+  "cargo": {
+    "title": "荷役情報",
+    "importDescription": "この拠点は域外から商品を輸入し、都市内の市場へ供給します。",
+    "exportDescription": "この拠点は都市内で生産された商品を買い取り、域外へ輸出します。",
+    "capacity": "取扱能力",
+    "perEpoch": "/エポック",
+    "totalHandled": "総取扱量",
+    "utilization": "稼働率",
+    "productsTitle": "品目別の取扱量",
+    "handledImport": "販売量",
+    "handledExport": "買取量",
+    "allocation": "割当量",
+    "priceImport": "販売単価",
+    "priceExport": "買取単価",
+    "lost": "売り逃し",
+    "noProducts": "取扱品目がありません"
   }
 }

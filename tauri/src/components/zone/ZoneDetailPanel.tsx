@@ -16,7 +16,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import type { ZoneData, ZoneResponse } from "../../types";
-import { buildApiUrl } from "../../utils/api";
+import { buildApiUrl, fetchApi } from "../../utils/api";
 import { useTemplateMode } from "../../hooks/useTemplateMode";
 import { InfoHeader } from "../common/InfoHeader";
 import { DataList } from "../common/DataList";
@@ -50,6 +50,34 @@ export function ZoneDetailPanel({
     limit_volume_ratio: null,
     limit_height: null,
   });
+
+  // 管理状態(自動管理/確定)のトグル送信中フラグと失敗表示
+  const [managementBusy, setManagementBusy] = useState(false);
+  const [managementError, setManagementError] = useState(false);
+
+  // 地区のピン(確定)/ピン解除(自動管理へ戻す)。
+  // auto_managed を明示指定した PATCH は、バックエンド側で名前・規制編集による
+  // 昇格処理を経由せず送信値がそのまま反映される(ピン操作の専用経路)。
+  const toggleAutoManaged = async () => {
+    if (!zoneData || managementBusy) return;
+    setManagementBusy(true);
+    setManagementError(false);
+    try {
+      const data = await fetchApi<ZoneResponse>(
+        buildApiUrl(apiBaseUrl, "/api/v1/zones/{id}", String(zoneData.zone_id)),
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ auto_managed: zoneData.auto_managed ? 0 : 1 }),
+        }
+      );
+      setZoneData(data.zone);
+    } catch {
+      setManagementError(true);
+    } finally {
+      setManagementBusy(false);
+    }
+  };
 
   // 地区詳細パネルの開閉状態をチュートリアル用の localStorage フラグに反映する。
   // チュートリアル(シナリオ2)のステップ判定はバックエンドから観測できない
@@ -128,6 +156,52 @@ export function ZoneDetailPanel({
         name={displayName}
         showStatus={false}
       />
+
+      {/* Management state section (2状態モデル: 自動管理/確定) */}
+      <section className="agent-detail-section">
+        <h3 className="agent-detail-section-title">
+          {t("zone.managementState", "管理状態")}
+        </h3>
+        <div className="zone-mgmt-row">
+          <span
+            className={
+              zoneData.auto_managed
+                ? "zone-mgmt-badge zone-mgmt-badge-auto"
+                : "zone-mgmt-badge zone-mgmt-badge-confirmed"
+            }
+          >
+            {zoneData.auto_managed
+              ? t("zone.autoManaged", "自動管理")
+              : t("zone.confirmed", "確定済み")}
+          </span>
+          <button
+            className="zone-mgmt-toggle-btn"
+            type="button"
+            disabled={managementBusy}
+            onClick={() => void toggleAutoManaged()}
+          >
+            {zoneData.auto_managed
+              ? t("zone.pinAction", "この地区を確定する")
+              : t("zone.unpinAction", "自動管理に戻す")}
+          </button>
+        </div>
+        <p className="zone-mgmt-desc">
+          {zoneData.auto_managed
+            ? t(
+                "zone.autoManagedDesc",
+                "道路網の変化に合わせて、システムがこの地区の統合を自動で行うことがあります"
+              )
+            : t(
+                "zone.confirmedDesc",
+                "この地区の形状がシステムによって組み替えられることはありません（道路の追加による成長は行われます）"
+              )}
+        </p>
+        {managementError && (
+          <p className="zone-mgmt-error">
+            {t("zone.managementUpdateFailed", "管理状態の更新に失敗しました")}
+          </p>
+        )}
+      </section>
 
       {/* Basic info section */}
       <section className="agent-detail-section">

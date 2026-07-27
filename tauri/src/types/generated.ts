@@ -497,6 +497,8 @@ export type ZoneData = {
   name: string;
   /** 地区の識別色（#RRGGBB） */
   color: string;
+  /** ユーザーが形状確定前の地区か */
+  auto_managed: boolean;
   /** 地区面積（m2） */
   area: number;
   /** 中心点座標 [x, z] */

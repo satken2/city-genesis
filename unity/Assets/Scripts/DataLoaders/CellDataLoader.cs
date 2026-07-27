@@ -615,6 +615,11 @@ public class CellDataLoader : MonoBehaviour
             LodCellSets cellSets = CalculateLodCellSets();
             UpdateManagers(cellSets, isForce: false, forceManagerUpdate: true);
         }
+        // 地区は全件スナップショット方式(ZoneManager.LoadCells は未ロード時と強制時のみ
+        // 再取得)のため、上の isForce=false 経路ではリロードされない。エポックごとの
+        // 地区の自動作成・統合・分離とポリゴン変化に追随するため、ここで明示的に
+        // version 差分リロードを要求する(変化のない地区の再描画はスキップされる)。
+        zoneManager?.RequestZoneRefresh();
         // エポック完了後や編集確定後のデータ再取得に追随して、アラートアイコンも更新する。
         // クールダウンにより短時間の連続呼び出しは間引かれる。
         AlertManager.Instance?.Refresh();

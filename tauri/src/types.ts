@@ -206,6 +206,8 @@ export type ZoneData = {
   polygon: number[][];
   area: number;
   center_point: number[];
+  /** true=自動管理地区(システムが統合しうる) / false=確定地区(ユーザー確定済み) */
+  auto_managed: boolean;
   allowed_bd_mask: number;
   limit_coverage_ratio: number | null;
   limit_volume_ratio: number | null;

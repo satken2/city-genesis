@@ -12,5 +12,22 @@
     "demandAmount": "Demand",
     "receivedAmount": "Acquired",
     "acquiredAmount": "Inventory"
+  },
+  "cargo": {
+    "title": "Cargo Operations",
+    "importDescription": "This hub imports goods from outside the region and supplies them to the city's markets.",
+    "exportDescription": "This hub buys goods produced in the city and exports them out of the region.",
+    "capacity": "Throughput Capacity",
+    "perEpoch": "/epoch",
+    "totalHandled": "Total Handled",
+    "utilization": "Utilization",
+    "productsTitle": "Handled Volume by Product",
+    "handledImport": "Sold",
+    "handledExport": "Purchased",
+    "allocation": "Allocated",
+    "priceImport": "Selling Price",
+    "priceExport": "Purchase Price",
+    "lost": "Lost Sales",
+    "noProducts": "No products handled"
   }
 }

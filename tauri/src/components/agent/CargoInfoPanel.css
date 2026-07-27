@@ -1,0 +1,133 @@
+/*
+ * 荷役情報コンポーネント(CargoInfoPanel)のスタイル
+ *
+ * 品目別の取扱量を「薄い帯=割当量、濃い帯=取扱実績」の二重横棒で表示する。
+ * 実績の帯は割当の帯より少し低くし、100%充足でも塗り分けが判別できるようにする
+ * (FloorOccupancyBarと同じ視覚ルール)。
+ * 色は輸入(cargo--import)=青、輸出(cargo--export)=緑で系統を分ける。
+ */
+
+.cargo-description {
+  margin: 0 0 10px;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: #93a9c0;
+}
+
+.cargo-unit-suffix {
+  margin-left: 2px;
+  font-size: 0.7rem;
+  color: #93a9c0;
+}
+
+.cargo-products-title {
+  margin: 14px 0 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #c6d4e2;
+}
+
+/* 凡例 */
+.cargo-legend {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-size: 0.7rem;
+  color: #93a9c0;
+}
+
+.cargo-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cargo-legend__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+/* 品目行 */
+.cargo-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cargo-row__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 3px;
+  font-size: 0.8rem;
+}
+
+.cargo-row__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cargo-row__values {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  color: #c6d4e2;
+}
+
+/* 棒グラフ: トラック(全幅) > 割当量(薄) > 実績(濃) の入れ子 */
+.cargo-row__track {
+  height: 14px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.cargo-row__allocation {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  border-radius: 3px;
+}
+
+.cargo-row__handled {
+  height: 10px;
+  border-radius: 2px;
+  margin-left: 1px;
+}
+
+.cargo-row__sub {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 2px;
+  font-size: 0.7rem;
+  color: #93a9c0;
+}
+
+.cargo-row__lost {
+  color: #e8a06a;
+}
+
+/* 輸入=青系 */
+.cargo--import .cargo-row__allocation,
+.cargo--import .cargo-legend__swatch--allocation {
+  background-color: rgba(78, 161, 255, 0.22);
+}
+
+.cargo--import .cargo-row__handled,
+.cargo--import .cargo-legend__swatch--handled {
+  background-color: rgba(78, 161, 255, 0.85);
+}
+
+/* 輸出=緑系 */
+.cargo--export .cargo-row__allocation,
+.cargo--export .cargo-legend__swatch--allocation {
+  background-color: rgba(52, 211, 153, 0.22);
+}
+
+.cargo--export .cargo-row__handled,
+.cargo--export .cargo-legend__swatch--handled {
+  background-color: rgba(52, 211, 153, 0.85);
+}

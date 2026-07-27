@@ -25,6 +25,7 @@
     "remainingConstruction": "Remaining Duration",
     "remainingEpochs": "~{{n}} epochs",
     "tabBuildingInfo": "Building Info",
+    "tabCargoInfo": "Cargo",
     "tabHouseholdInfo": "Household",
     "tabTradeInfo": "Trade",
     "tabEmploymentInfo": "Employment",

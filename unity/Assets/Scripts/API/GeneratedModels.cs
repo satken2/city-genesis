@@ -522,6 +522,8 @@ namespace GeneratedModels
         public string name;
         /// <summary>地区の識別色（#RRGGBB）</summary>
         public string color;
+        /// <summary>ユーザーが形状確定前の地区か</summary>
+        public bool auto_managed;
         /// <summary>地区面積（m2）</summary>
         public float area;
         /// <summary>中心点座標 [x, z]</summary>

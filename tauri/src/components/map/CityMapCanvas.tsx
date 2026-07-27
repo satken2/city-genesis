@@ -180,6 +180,8 @@ type ApiPathItem = {
 type ApiPolygonItem = {
   polygon?: [number, number][] | null;
   center_point?: number[] | null;
+  /** 地区のみ: 1/true=自動管理地区、0/false=確定地区。枠線の実線/破線の描き分けに使う */
+  auto_managed?: boolean | number;
 };
 
 /** 道路の描画区分。streetは歩道(PATH_WALKWAY)も含む */
@@ -203,7 +205,10 @@ type VectorState = {
   railPath: Path2D | null;
   parcelPath: Path2D | null;
   buildingPath: Path2D | null;
-  zonePath: Path2D | null;
+  /** 確定地区(auto_managed=0)の枠線。実線で描く */
+  zonePathConfirmed: Path2D | null;
+  /** 自動管理地区(auto_managed=1)の枠線。破線で描き「まだ仮の区割り」であることを示す */
+  zonePathAuto: Path2D | null;
   /** bbox取得を要求した範囲。カバレッジ判定に使う */
   fetchedBounds: CityMapBounds | null;
   /** 取得済みのデータ種別 */
@@ -757,7 +762,8 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         railPath: null,
         parcelPath: null,
         buildingPath: null,
-        zonePath: null,
+        zonePathConfirmed: null,
+        zonePathAuto: null,
         fetchedBounds: null,
         fetchedKinds: new Set(),
         loading: false,
@@ -886,13 +892,20 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           ctx.stroke(coastPath);
         }
 
-        // 地区の枠線(破線で他の枠線と区別する)
-        if (L.zoneBorders && vec.zonePath) {
+        // 地区の枠線。確定地区=実線、自動管理地区=破線で描き分ける
+        // (自動管理地区はシステムが統合しうる「仮の区割り」であることを視覚的に伝える)
+        if (L.zoneBorders) {
           ctx.strokeStyle = COLOR_ZONE;
           ctx.lineWidth = px(2);
-          ctx.setLineDash([px(8), px(6)]);
-          ctx.stroke(vec.zonePath);
-          ctx.setLineDash([]);
+          if (vec.zonePathConfirmed) {
+            ctx.setLineDash([]);
+            ctx.stroke(vec.zonePathConfirmed);
+          }
+          if (vec.zonePathAuto) {
+            ctx.setLineDash([px(8), px(6)]);
+            ctx.stroke(vec.zonePathAuto);
+            ctx.setLineDash([]);
+          }
         }
 
         // 土地区画(枠線のみ)
@@ -1179,7 +1192,14 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
                   { signal: abort.signal }
                 );
                 vec.zones = data.zones ?? [];
-                vec.zonePath = buildPolygonPath(vec.zones, false);
+                vec.zonePathConfirmed = buildPolygonPath(
+                  vec.zones.filter((zn) => !zn.auto_managed),
+                  false
+                );
+                vec.zonePathAuto = buildPolygonPath(
+                  vec.zones.filter((zn) => !!zn.auto_managed),
+                  false
+                );
                 return;
               }
               const url = buildApiUrl(

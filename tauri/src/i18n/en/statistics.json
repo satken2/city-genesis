@@ -140,6 +140,26 @@
     },
     "tabAccidents": "Incidents & Accidents",
     "tabBusiness": "Businesses",
+    "tabBusinessHistory": "Openings & Closures",
+    "businessHistory": {
+      "subTabOpen": "Openings",
+      "subTabClose": "Closures",
+      "columnDate": "Date",
+      "columnVariant": "Industry",
+      "columnName": "Name",
+      "columnFloorArea": "Floor Area",
+      "columnDuration": "Lifespan",
+      "columnReserves": "Cash at Closure",
+      "columnReason": "Reason",
+      "unitArea": "m²",
+      "unitDays": "{{days}} days",
+      "reason": {
+        "deficit_paused": "Suspended (deficit)",
+        "deficit_closed": "Shut down (deficit)"
+      },
+      "noOpens": "No openings recorded",
+      "noCloses": "No closures recorded"
+    },
     "tabNaturalResources": "Natural Resources",
     "resourceSelectLabel": "Resource",
     "noResources": "No natural resources in this city",

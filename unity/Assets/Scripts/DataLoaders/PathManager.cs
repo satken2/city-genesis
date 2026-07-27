@@ -221,6 +221,20 @@ public class PathManager : BaseApiDataManager
     private HashSet<int> fetchingIntersectionNodeIds = new HashSet<int>();
 
     /// <summary>
+    /// 1ノードの交差点メッシュ生成を許容する接続パス数の上限。
+    /// 交差点ポリゴン計算（IntersectionPolygonUtil）は接続パスの全ペアで交差領域を取る
+    /// O(N²)処理のため、バックエンドのデータ異常で1ノードに大量のパスが接続していると
+    /// 計算がメインスレッドを占有しエディタごとフリーズする。正常な交差点は高々十数本
+    /// なので、上限超過は異常データとみなして交差点メッシュの生成を諦める。
+    /// </summary>
+    private const int MAX_INTERSECTION_CONNECTED_PATHS = 32;
+
+    /// <summary>
+    /// 接続パス数の上限超過を警告済みのノードID。同一ノードへの再警告スパムを防ぐ。
+    /// </summary>
+    private HashSet<int> overloadedIntersectionNodeIds = new HashSet<int>();
+
+    /// <summary>
     /// LoadLodCells で起動したコルーチンを追跡し、新たなカメラ移動時にキャンセルする。
     /// </summary>
     private List<Coroutine> activeLodCoroutines = new List<Coroutine>();
@@ -487,6 +501,7 @@ public class PathManager : BaseApiDataManager
         cellPathLod.Clear();
         awaitingIntersectionNodes.Clear();
         fetchingIntersectionNodeIds.Clear();
+        overloadedIntersectionNodeIds.Clear();
         queuedTerrainFollowPathIds.Clear();
         pendingTrackNeighborRebuildIds.Clear();
     }
@@ -3262,6 +3277,24 @@ public class PathManager : BaseApiDataManager
 
         Vector3 absolutePos = nodeData.GetAbsolutePosition();
         List<PathSummary> connectedPaths = GetPathsConnectedToNode(nodeId);
+
+        // 接続パス数の防衛的上限（MAX_INTERSECTION_CONNECTED_PATHS のコメント参照）。
+        // 超過ノードは awaitingIntersectionNodes にも積まない（パス追加のたびに
+        // 再評価しても成功する見込みがないため）。
+        if (connectedPaths.Count > MAX_INTERSECTION_CONNECTED_PATHS)
+        {
+            if (overloadedIntersectionNodeIds.Add(nodeId))
+            {
+                Debug.LogError($"[PathManager] nodeId={nodeId} の接続パス数({connectedPaths.Count})が" +
+                               $"上限({MAX_INTERSECTION_CONNECTED_PATHS})を超えています。" +
+                               $"バックエンドのデータ異常が疑われるため交差点メッシュを生成しません。");
+            }
+            RemoveNodeIntersectionMesh(nodeId);
+            awaitingIntersectionNodes.Remove(nodeId);
+            return;
+        }
+        overloadedIntersectionNodeIds.Remove(nodeId);
+
         // 相対Y≠0のノード（高架同士の平面交差）では、交差点メッシュ・切断点を地形基準ではなく
         // ノード絶対Yの水平面として生成させる（RoadIntersectionMeshGenerator 参照）。
         NodeMeshResult meshResult = NodeMeshFactory.GenerateNodeMesh(nodeId, absolutePos, connectedPaths, nodeData.GetRelativeHeight());

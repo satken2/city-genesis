@@ -140,6 +140,26 @@
     },
     "tabAccidents": "事件・事故",
     "tabBusiness": "店舗・企業",
+    "tabBusinessHistory": "開店・閉店履歴",
+    "businessHistory": {
+      "subTabOpen": "開店",
+      "subTabClose": "閉店",
+      "columnDate": "日付",
+      "columnVariant": "業種",
+      "columnName": "名称",
+      "columnFloorArea": "床面積",
+      "columnDuration": "持続日数",
+      "columnReserves": "閉鎖時現預金",
+      "columnReason": "理由",
+      "unitArea": "㎡",
+      "unitDays": "{{days}}日",
+      "reason": {
+        "deficit_paused": "赤字により休止",
+        "deficit_closed": "赤字により撤退"
+      },
+      "noOpens": "開店の記録はありません",
+      "noCloses": "閉店の記録はありません"
+    },
     "tabNaturalResources": "天然資源",
     "resourceSelectLabel": "資源",
     "noResources": "この都市に天然資源はありません",
