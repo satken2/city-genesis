@@ -225,13 +225,13 @@
         "label": "不動産供給余剰率",
         "desc": "不動産市場で常に確保する余剰供給の比率。"
       },
-      "CONSTRUCTION_DEMAND_MIN_RATIO": {
-        "label": "建設需要最小比率",
-        "desc": "総需要に対する建設需要の最小比率。"
+      "CONSTRUCTION_DEMAND_SITE_AREA_MIN": {
+        "label": "開発誘発の標準敷地面積下限",
+        "desc": "開発誘発パルスの標準開発敷地面積の下限(m²)。地区の需要密度に乗じて1エポックの建設需要規模を決める。"
       },
-      "CONSTRUCTION_DEMAND_MAX_RATIO": {
-        "label": "建設需要最大比率",
-        "desc": "総需要に対する建設需要の最大比率。"
+      "CONSTRUCTION_DEMAND_SITE_AREA_MAX": {
+        "label": "開発誘発の標準敷地面積上限",
+        "desc": "開発誘発パルスの標準開発敷地面積の上限(m²)。大きいほど1回の開発規模が大きくなる。"
       },
       "COLLAPSE_BASE_RATE": {
         "label": "倒壊基準年間確率",

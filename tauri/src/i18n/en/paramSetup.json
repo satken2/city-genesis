@@ -225,13 +225,13 @@
         "label": "Real Estate Supply Surplus Rate",
         "desc": "Fraction of surplus supply always maintained in the real estate market."
       },
-      "CONSTRUCTION_DEMAND_MIN_RATIO": {
-        "label": "Construction Demand Minimum Ratio",
-        "desc": "Minimum construction demand as a fraction of total demand."
+      "CONSTRUCTION_DEMAND_SITE_AREA_MIN": {
+        "label": "Development Pulse Site Area Min",
+        "desc": "Minimum standard development site area (m²) for the construction demand pulse. Multiplied by the zone's demand density to size each epoch's construction demand."
       },
-      "CONSTRUCTION_DEMAND_MAX_RATIO": {
-        "label": "Construction Demand Maximum Ratio",
-        "desc": "Maximum construction demand as a fraction of total demand."
+      "CONSTRUCTION_DEMAND_SITE_AREA_MAX": {
+        "label": "Development Pulse Site Area Max",
+        "desc": "Maximum standard development site area (m²) for the construction demand pulse. Larger values allow bigger single developments."
       },
       "COLLAPSE_BASE_RATE": {
         "label": "Collapse Base Annual Rate",
