@@ -27,11 +27,21 @@ public static class CoastlineStore
     /// <summary>陸地境界リングが1つ以上存在するかどうか。</summary>
     public static bool HasCoastline => rings.Count > 0;
 
+    /// <summary>
+    /// 海岸線データの世代番号。SetFromGeoJson / Clear のたびに増える。
+    /// 海岸線から導出したジオメトリ（岸壁クリップ用の陸地領域など）のキャッシュ無効化に使う。
+    /// </summary>
+    public static int Version { get; private set; }
+
+    /// <summary>保持しているリングの読み取り専用ビュー。Vector2 の x=ワールドX、y=ワールドZ。</summary>
+    public static IReadOnlyList<Vector2[]> Rings => rings;
+
     /// <summary>保持しているデータを破棄する。セッション切り替え時などに呼ぶ。</summary>
     public static void Clear()
     {
         rings.Clear();
         IsLoaded = false;
+        Version++;
     }
 
     /// <summary>
@@ -49,6 +59,7 @@ public static class CoastlineStore
             CollectRings(coordinates, rings);
         }
         IsLoaded = true;
+        Version++;
     }
 
     private static void CollectRings(JToken token, List<Vector2[]> output)

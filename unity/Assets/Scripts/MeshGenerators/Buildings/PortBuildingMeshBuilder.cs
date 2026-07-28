@@ -1,27 +1,31 @@
 using UnityEngine;
 using System.Collections.Generic;
 using GeneratedModels;
+using NetTopologySuite.Geometries;
 
 /// <summary>
 /// 海岸の岸壁（MODEL_PORT）のメッシュ生成器。
 ///
 /// 海岸土地区画（PARCEL_SHORE）に立地する港湾（BUILDING_PORT）に適用する。
-/// building_shape=SHAPE_FULL の底面ポリゴン（=海岸線でクリップ済みの土地区画形状。海側境界が海岸線曲線）を
-/// 海岸線でカットし、厚みのある板（岸壁スラブ）を上下に押し出して生成する。
+/// バックエンドは海岸区画のポリゴンを海岸線でクリップせず元の形状のまま保持する（B_土地形状 B.5）。
+/// building_shape=SHAPE_FULL の底面ポリゴン（=土地区画の元形状。海側にはみ出している）の外周と
+/// 海岸線の交点から岸壁の左端A・右端Bを求め、それぞれを海側へ突き出した2点を結ぶ**直線**で
+/// 底面をカットした形状（海側境界は常に直線）を、厚みのある板（岸壁スラブ）として上下に押し出して生成する。
 /// モジュラーの壁・角パーツは使わず、純粋にプロシージャルにスラブを作る。
 ///
-/// visual_variant(1)/visual_variant2 … 岸壁の左端/右端の突き出し量（0=海岸線ぴったり、1=区画外周の弦まで）
-/// visual_variant3 … 海面からの高さ（0=海面0m、1=10m）
+/// visual_variant(1)/visual_variant2 … 岸壁の左端/右端の突き出し量（0=最小突き出し、1=区画の海側いっぱいまで）
+/// 上面の高さは海面から2m固定（visual_variant3 は使わない）。
+/// 上面は敷地全体の地面パネル(draw_floor)と同じ floor マテリアルで床続きに描画し、側面/下面は ceil を使う。
 ///
 /// 詳細仕様は genesis-docs/docs/geometries/F_建物メッシュの生成.md §18 を参照。
 /// </summary>
 public class PortBuildingMeshBuilder : IBuildingMeshGenerator
 {
-    /// <summary>visual_variant3=1.0 のときの海面からの高さ(m)。</summary>
-    private const float MAX_HEIGHT = 10f;
+    /// <summary>岸壁上面の海面からの高さ(m)。visual_variant によらず固定。</summary>
+    private const float QUAY_TOP_HEIGHT = 2f;
 
-    /// <summary>底面の辺が海岸線に接していると判定する距離閾値(m)。</summary>
-    private const float COAST_EDGE_THRESHOLD = 3f;
+    /// <summary>突き出し量の下限（区画の海側奥行きに対する比率）。visual_variant=0 でも岸壁はこの割合だけ海へ張り出す。</summary>
+    private const float MIN_PROTRUSION_RATIO = 0.2f;
 
     public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic = false)
     {
@@ -36,7 +40,6 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         string prefix = BuildingMeshUtils.ResolveModelNaming(buildingData).Prefix;
         float variant1 = Mathf.Clamp01(buildingData.visual_variant);
         float variant2 = Mathf.Clamp01(buildingData.visual_variant2);
-        float variant3 = Mathf.Clamp01(buildingData.visual_variant3);
 
         // center_point のワールド座標（バックエンド座標）と地形高さ。
         // ModularBuildingMeshBuilder と同じ取得経路（HeightmapTextureManager.GetTerrainHeight）を使い、
@@ -50,13 +53,14 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
             centerPointWorld = new Vector3(cx, cy, cz);
         }
 
-        // 1. 海側境界（海岸線エッジ）を特定し、visual_variant1/2 で突き出しを補間した岸壁フットプリントを得る。
+        // 1. 海岸線との交点から左端A・右端Bを求め、visual_variant1/2 の突き出しを反映した
+        //    直線カットで岸壁フットプリントを得る。
         Vector2[] quayFootprint = BuildQuayFootprint(footprint, centerPointWorld, variant1, variant2, out Vector2 seawardDir);
 
         // 2. スラブ上面のローカルY。
-        //    上面のワールドY = 海面(0m) + visual_variant3 × 10m。GameObject は center_point 位置の地形高さに
+        //    上面のワールドY = 海面(0m) + 2m 固定。GameObject は center_point 位置の地形高さに
         //    配置されるため、ローカルYは centerPointWorld.y を差し引く。
-        float topLocalY = variant3 * MAX_HEIGHT - centerPointWorld.y;
+        float topLocalY = QUAY_TOP_HEIGHT - centerPointWorld.y;
 
         // 3. スラブメッシュ（上面=topLocalY、下面=各頂点の地形=海底高さ）。subMesh0=上面、subMesh1=側面+下面。
         Mesh slabMesh = BuildSlabMesh(quayFootprint, topLocalY, centerPointWorld);
@@ -69,16 +73,36 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         List<Material> materials = new List<Material>();
         List<Mesh> temporaryMeshes = new List<Mesh>();
 
-        // スラブのマテリアル: 上面=ceil、側面/下面=floor（無ければデフォルトマテリアル）。
-        Material topMaterial = BuildingMeshUtils.SelectRoofMaterial(prefix, 0, null);
-        Material sideMaterial = BuildingMeshUtils.SelectFloorMaterial(prefix, 0, null);
+        // スラブのマテリアル: 上面=floor（敷地全体の地面パネルと同一マテリアルで床続きにする）、
+        // 側面/下面=ceil（岸壁の壁面）。地面パネルが無効(draw_floor未設定等)の場合は floor パーツ直参照、
+        // それも無ければデフォルトマテリアル。
+        Material floorMaterial = BuildingMeshUtils.ResolveFloorMaterialFromMaster(buildingData, prefix);
+        Material topMaterial = floorMaterial != null ? floorMaterial : BuildingMeshUtils.SelectFloorMaterial(prefix, 0, null);
+        Material sideMaterial = BuildingMeshUtils.SelectRoofMaterial(prefix, 0, null);
+        UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
+            $"[PortBMB] agent={buildingData.agent_id} prefix={prefix} " +
+            $"topMat={(topMaterial != null ? topMaterial.name : "null")} sideMat={(sideMaterial != null ? sideMaterial.name : "null")} " +
+            $"floorPanel={(floorMaterial != null ? "あり" : "なし")} topY={topLocalY:F2} vv=({variant1:F2},{variant2:F2})");
         AppendMesh(slabMesh, new[] { topMaterial, sideMaterial }, combineInstances, materials);
         temporaryMeshes.Add(slabMesh);
 
         // 4. 塔屋（岸壁中央・海側境界方向・上面高さ）。
         PlaceRoofprop(prefix, quayFootprint, seawardDir, topLocalY, combineInstances, materials, temporaryMeshes);
 
-        // 5. メッシュ結合。
+        // 5. 敷地の装飾（フェンス・タイル・地面パネル）。モジュラー/prebuilt と共通の処理で、
+        //    地面パネルは draw_floor=yes のとき敷地（土地区画）全体に地形追従で描かれ、
+        //    岸壁上面と同一の floor マテリアルで床続きになる。
+        Vector2[] fenceFootprint = BuildingMeshUtils.ResolveParcelContext(
+            buildingData, useParcelAltitude: false, out _, out _);
+        Vector2[] sitePolygon = (fenceFootprint != null && fenceFootprint.Length >= 3) ? fenceFootprint : footprint;
+        ModularBodyBuilder.GenerateSiteDecorations(
+            prefix, 0,
+            fenceFootprint, sitePolygon, sitePolygon,
+            floorMaterial,
+            centerPointWorld, deformToTerrain: isDynamic,
+            combineInstances, materials, temporaryMeshes);
+
+        // 6. メッシュ結合。
         Mesh finalMesh = new Mesh();
         finalMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         finalMesh.CombineMeshes(combineInstances.ToArray(), false, true);
@@ -90,20 +114,87 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
             Object.Destroy(temp);
         }
 
-        // 6. コライダー（岸壁フットプリントを上面高さまで押し出し）。
+        // 7. コライダー（岸壁フットプリントを上面高さまで押し出し）。
         Mesh colliderMesh = BuildingMeshBuilder.GenerateColliderMesh(quayFootprint, Mathf.Max(0.1f, topLocalY));
 
         var result = new BuildingMeshResult(finalMesh, materials.ToArray(), colliderMesh);
         return BuildingMeshBuilder.MergeSubMeshes(result);
     }
 
+    // 海岸線リングを偶奇合成した陸地領域（NTS Geometry、ワールド座標）のキャッシュ。
+    // 海岸線はセッション中不変なので、CoastlineStore.Version が変わったときだけ再構築する。
+    private static Geometry cachedLandGeometry;
+    private static int cachedCoastlineVersion = -1;
+
     /// <summary>
-    /// 底面ポリゴンの海側境界（海岸線エッジ）を特定し、visual_variant1/2 に応じて
-    /// 海岸線位置 ↔ 区画外周の弦の間で突き出しを補間した「岸壁フットプリント」を生成する。
-    /// 海岸線が未ロード、または海側境界を特定できない場合は元の底面をそのまま返す
-    /// （=海岸線を無視した、土地区画なりの岸壁）。
+    /// 海岸線の全リングから陸地領域の NTS ジオメトリを構築して返す（キャッシュ付き）。
+    /// リングは外周と穴（湖）を区別せず保持されているため、偶奇合成（XOR）で陸地領域になる
+    /// （<see cref="CoastlineStore.IsLand"/> の even-odd 判定と同じ解釈）。
+    /// 陸地が存在しない場合は null を返す。
     /// </summary>
-    /// <param name="seawardDir">海側境界の向き（左端A→右端B）。塔屋の向きに使う。</param>
+    private static Geometry GetLandGeometry()
+    {
+        if (cachedCoastlineVersion == CoastlineStore.Version)
+        {
+            return cachedLandGeometry;
+        }
+        cachedCoastlineVersion = CoastlineStore.Version;
+        cachedLandGeometry = null;
+
+        var gf = new GeometryFactory();
+        Geometry land = null;
+        foreach (Vector2[] ring in CoastlineStore.Rings)
+        {
+            if (ring == null || ring.Length < 3)
+            {
+                continue;
+            }
+            // NTS の LinearRing は始点と終点の厳密一致を要求するため、
+            // 終端が始点と（ほぼ）同じでも必ず始点の複製で閉じる。
+            bool closed = (ring[0] - ring[ring.Length - 1]).sqrMagnitude < 1e-6f;
+            int count = ring.Length + (closed ? 0 : 1);
+            var coords = new Coordinate[count];
+            for (int i = 0; i < ring.Length; i++)
+            {
+                coords[i] = new Coordinate(ring[i].x, ring[i].y);
+            }
+            coords[count - 1] = new Coordinate(ring[0].x, ring[0].y);
+
+            Geometry poly;
+            try
+            {
+                poly = gf.CreatePolygon(coords);
+                if (!poly.IsValid)
+                {
+                    poly = poly.Buffer(0);
+                }
+            }
+            catch (System.Exception)
+            {
+                continue;
+            }
+            if (poly.IsEmpty)
+            {
+                continue;
+            }
+            land = land == null ? poly : land.SymmetricDifference(poly);
+        }
+        cachedLandGeometry = land;
+        return land;
+    }
+
+    /// <summary>
+    /// 底面ポリゴン（center_point 相対のローカル座標）から岸壁フットプリントを生成する。
+    ///
+    /// 底面外周と海岸線（陸地境界）の交点のうち最も離れた2点を岸壁の左端A・右端Bとし、
+    /// それぞれを海側へ visual_variant1/2 に応じた距離だけ突き出した A'・B' を結ぶ直線で
+    /// 底面をカットして陸側を残す。海側境界は海岸線をなぞらず、常に1本の直線になる。
+    /// 突き出し距離 = lerp(MIN_PROTRUSION_RATIO, 1, variant) × 奥行き上限
+    /// （奥行き上限 = 弦A-Bから底面の海側最遠頂点までの距離）。
+    /// カットは底面ポリゴンとの交差なので、岸壁は常に土地区画の範囲内に収まる。
+    /// 海岸線未ロード・交点2つ未満・海側頂点なし・幾何演算失敗の場合は元の底面をそのまま返す。
+    /// </summary>
+    /// <param name="seawardDir">海側境界（直線エッジ）の向き（A'→B'）。塔屋の向きに使う。</param>
     private static Vector2[] BuildQuayFootprint(Vector2[] footprint, Vector3 centerPointWorld,
         float variant1, float variant2, out Vector2 seawardDir)
     {
@@ -112,87 +203,212 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
 
         if (!CoastlineStore.IsLoaded || !CoastlineStore.HasCoastline)
         {
+            UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
+                $"[PortBMB] 海岸線未ロード (IsLoaded={CoastlineStore.IsLoaded})。カットせず元形状を使用");
             return (Vector2[])footprint.Clone();
         }
 
-        // 各辺の中点をワールド座標に変換し、海岸線に接しているか（海側か）を判定する。
-        bool[] isSea = new bool[n];
-        int seaCount = 0;
-        for (int i = 0; i < n; i++)
+        Geometry land = GetLandGeometry();
+        if (land == null || land.IsEmpty)
         {
-            Vector2 mid = (footprint[i] + footprint[(i + 1) % n]) * 0.5f;
-            float wx = mid.x + centerPointWorld.x;
-            float wz = mid.y + centerPointWorld.z;
-            if (CoastlineStore.IsNearCoastline(wx, wz, COAST_EDGE_THRESHOLD))
+            return (Vector2[])footprint.Clone();
+        }
+
+        try
+        {
+            var gf = new GeometryFactory();
+            var coords = new Coordinate[n + 1];
+            for (int i = 0; i < n; i++)
             {
-                isSea[i] = true;
-                seaCount++;
+                coords[i] = new Coordinate(footprint[i].x + centerPointWorld.x, footprint[i].y + centerPointWorld.z);
             }
-        }
-
-        // 海側境界が無い／全周が海なら、カットせず元形状を使う。
-        if (seaCount == 0 || seaCount >= n)
-        {
-            return (Vector2[])footprint.Clone();
-        }
-
-        // 最長の連続した海側ラン（巡回）を探す。陸地に挟まれた海岸線エッジ列を1本の海側境界とみなす。
-        int bestStart = -1, bestLen = 0;
-        for (int i = 0; i < n; i++)
-        {
-            if (isSea[i] && !isSea[(i + n - 1) % n])
+            coords[n] = new Coordinate(coords[0].X, coords[0].Y);
+            Geometry footprintPoly = gf.CreatePolygon(coords);
+            if (!footprintPoly.IsValid)
             {
-                int len = 0;
-                int k = i;
-                while (isSea[k] && len < n)
+                footprintPoly = footprintPoly.Buffer(0);
+            }
+
+            // 底面外周と海岸線の交点を列挙し、最も離れた2点を左端A・右端Bとする。
+            var hits = new List<Vector2>();
+            CollectCoordinates(footprintPoly.Boundary.Intersection(land.Boundary), hits);
+            if (hits.Count < 2)
+            {
+                UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
+                    $"[PortBMB] 底面外周と海岸線の交点が{hits.Count}点のためカットせず元形状を使用（全域が陸または海）");
+                return (Vector2[])footprint.Clone();
+            }
+            Vector2 a = Vector2.zero, b = Vector2.zero;
+            float bestSq = -1f;
+            for (int i = 0; i < hits.Count; i++)
+            {
+                for (int j = i + 1; j < hits.Count; j++)
                 {
-                    len++;
-                    k = (k + 1) % n;
-                }
-                if (len > bestLen)
-                {
-                    bestLen = len;
-                    bestStart = i;
+                    float sq = (hits[i] - hits[j]).sqrMagnitude;
+                    if (sq > bestSq)
+                    {
+                        bestSq = sq;
+                        a = hits[i];
+                        b = hits[j];
+                    }
                 }
             }
+            if (bestSq < 1f)
+            {
+                return (Vector2[])footprint.Clone();
+            }
+
+            // 海側方向の決定: 陸地に含まれない底面頂点が、弦A-Bに対して平均的に存在する側を海側とする。
+            Vector2 u = (b - a).normalized;
+            Vector2 perp = new Vector2(-u.y, u.x);
+            float sideSum = 0f;
+            var seaOffsets = new List<float>();
+            for (int i = 0; i < n; i++)
+            {
+                float wx = footprint[i].x + centerPointWorld.x;
+                float wz = footprint[i].y + centerPointWorld.z;
+                if (!CoastlineStore.IsLand(wx, wz))
+                {
+                    float s = Vector2.Dot(new Vector2(wx, wz) - a, perp);
+                    sideSum += s;
+                    seaOffsets.Add(s);
+                }
+            }
+            if (seaOffsets.Count == 0)
+            {
+                UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
+                    "[PortBMB] 海側の底面頂点が無いためカットせず元形状を使用");
+                return (Vector2[])footprint.Clone();
+            }
+            if (sideSum < 0f)
+            {
+                perp = -perp;
+                for (int i = 0; i < seaOffsets.Count; i++)
+                {
+                    seaOffsets[i] = -seaOffsets[i];
+                }
+            }
+            // A→B を「海を左手に見る」向きへ正規化し、左端=A(variant1)・右端=B(variant2) の対応を決定的にする。
+            if (Vector2.Dot(perp, new Vector2(-u.y, u.x)) < 0f)
+            {
+                Vector2 tmp = a;
+                a = b;
+                b = tmp;
+                u = -u;
+            }
+
+            // 突き出しの奥行き上限 = 弦から底面の海側最遠頂点までの距離。
+            float maxDepth = 0f;
+            foreach (float s in seaOffsets)
+            {
+                if (s > maxDepth)
+                {
+                    maxDepth = s;
+                }
+            }
+            if (maxDepth < 0.5f)
+            {
+                return (Vector2[])footprint.Clone();
+            }
+
+            float depthLeft = Mathf.Lerp(MIN_PROTRUSION_RATIO, 1f, variant1) * maxDepth;
+            float depthRight = Mathf.Lerp(MIN_PROTRUSION_RATIO, 1f, variant2) * maxDepth;
+            Vector2 aOut = a + perp * depthLeft;
+            Vector2 bOut = b + perp * depthRight;
+            Vector2 edgeDir = (bOut - aOut).normalized;
+
+            // カット線 A'-B' の陸側半平面（十分大きな矩形）と底面の交差 = 岸壁フットプリント。
+            const float L = 1e4f;
+            Vector2 r1 = aOut - edgeDir * L;
+            Vector2 r2 = bOut + edgeDir * L;
+            Vector2 r3 = r2 - perp * L;
+            Vector2 r4 = r1 - perp * L;
+            Geometry landSideRect = gf.CreatePolygon(new[]
+            {
+                new Coordinate(r1.x, r1.y),
+                new Coordinate(r2.x, r2.y),
+                new Coordinate(r3.x, r3.y),
+                new Coordinate(r4.x, r4.y),
+                new Coordinate(r1.x, r1.y),
+            });
+
+            Geometry quay = footprintPoly.Intersection(landSideRect);
+            if (quay == null || quay.IsEmpty || quay.Area < 1.0)
+            {
+                return (Vector2[])footprint.Clone();
+            }
+            Polygon best = null;
+            for (int i = 0; i < quay.NumGeometries; i++)
+            {
+                if (quay.GetGeometryN(i) is Polygon p && (best == null || p.Area > best.Area))
+                {
+                    best = p;
+                }
+            }
+            if (best == null)
+            {
+                return (Vector2[])footprint.Clone();
+            }
+
+            // 外周リングをローカル座標へ戻す。閉路の重複点と 1cm 未満の近接重複点は
+            // 三角形分割の縮退を避けるため取り除く。
+            Coordinate[] ring = best.ExteriorRing.Coordinates;
+            var result = new List<Vector2>(ring.Length);
+            for (int i = 0; i < ring.Length - 1; i++)
+            {
+                var v = new Vector2((float)ring[i].X - centerPointWorld.x, (float)ring[i].Y - centerPointWorld.z);
+                if (result.Count > 0 && (v - result[result.Count - 1]).sqrMagnitude < 1e-4f)
+                {
+                    continue;
+                }
+                result.Add(v);
+            }
+            while (result.Count > 1 && (result[0] - result[result.Count - 1]).sqrMagnitude < 1e-4f)
+            {
+                result.RemoveAt(result.Count - 1);
+            }
+            if (result.Count < 3)
+            {
+                return (Vector2[])footprint.Clone();
+            }
+
+            Vector2[] quayFootprint = result.ToArray();
+            if (BuildingMeshUtils.SignedArea(quayFootprint) < 0f)
+            {
+                System.Array.Reverse(quayFootprint);
+            }
+
+            seawardDir = edgeDir;
+            UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
+                $"[PortBMB] 直線カット適用: 頂点 {n}→{quayFootprint.Length}, 突き出し 左{depthLeft:F1}m/右{depthRight:F1}m (上限{maxDepth:F1}m)");
+            return quayFootprint;
         }
-        if (bestStart < 0)
+        catch (System.Exception ex)
         {
+            Debug.LogWarning($"[PortBMB] 岸壁の直線カットに失敗しました: {ex.Message}。元の形状を使用します。");
             return (Vector2[])footprint.Clone();
         }
+    }
 
-        // 海側エッジ run = 辺 [bestStart .. bestStart+bestLen-1]。
-        // 海側頂点 = 頂点 [bestStart .. bestStart+bestLen]（巡回）。両端 A/B が陸側境界との接続点。
-        int vCount = bestLen + 1;
-        int[] seaVerts = new int[vCount];
-        for (int i = 0; i < vCount; i++)
+    /// <summary>Geometry（Point / MultiPoint / LineString / Collection）から頂点座標を再帰的に収集する。</summary>
+    private static void CollectCoordinates(Geometry geom, List<Vector2> output)
+    {
+        if (geom == null || geom.IsEmpty)
         {
-            seaVerts[i] = (bestStart + i) % n;
+            return;
         }
-
-        Vector2 a = footprint[seaVerts[0]];
-        Vector2 b = footprint[seaVerts[vCount - 1]];
-        seawardDir = b - a;
-
-        // 海側頂点の弧長を計算し、A(0.0)〜B(1.0) のパラメータ frac を求める。
-        float[] cumulative = new float[vCount];
-        cumulative[0] = 0f;
-        for (int i = 1; i < vCount; i++)
+        if (geom is GeometryCollection)
         {
-            cumulative[i] = cumulative[i - 1] + Vector2.Distance(footprint[seaVerts[i - 1]], footprint[seaVerts[i]]);
+            for (int i = 0; i < geom.NumGeometries; i++)
+            {
+                CollectCoordinates(geom.GetGeometryN(i), output);
+            }
+            return;
         }
-        float total = cumulative[vCount - 1];
-
-        Vector2[] result = (Vector2[])footprint.Clone();
-        for (int i = 0; i < vCount; i++)
+        foreach (Coordinate c in geom.Coordinates)
         {
-            float frac = total > 1e-5f ? cumulative[i] / total : (float)i / Mathf.Max(1, vCount - 1);
-            Vector2 chordPoint = Vector2.Lerp(a, b, frac);  // 弦（最大突き出し線）上の対応点
-            float weight = Mathf.Lerp(variant1, variant2, frac);  // 突き出し量（左端=variant1、右端=variant2）
-            Vector2 original = footprint[seaVerts[i]];  // 海岸線上の元頂点
-            result[seaVerts[i]] = Vector2.Lerp(original, chordPoint, weight);
+            output.Add(new Vector2((float)c.X, (float)c.Y));
         }
-        return result;
     }
 
     /// <summary>

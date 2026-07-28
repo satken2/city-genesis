@@ -1355,6 +1355,8 @@ MonoBehaviour:
   PathType: 1
   PathSubtype: 2
   Curved: 1
+  PlatformSide: 0
+  PathFollowTerrainOverride: -1
   pointCircleRadius: 8
   existingNodeHalfSize: 4
   dashedLineThickness: 2

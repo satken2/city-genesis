@@ -113,7 +113,7 @@ public static class LocalConstants
     /// </summary>
     public const string CONSTRUCTION_COMMON_PREFIX = "common";
 
-    public const bool UNITY_LOG_BUILDING = false; // BuildingMeshBuilder 等
+    public const bool UNITY_LOG_BUILDING = true; // BuildingMeshBuilder 等
     public const bool UNITY_LOG_ROAD = false;     // RoadPath 等
     public const bool UNITY_LOG_LOADER = false;   // CellDataLoader / 各Manager のロード進行ログ
     public const bool UNITY_LOG_TIMING = false;   // [TIMING] 計測ログ

@@ -21,7 +21,7 @@ public class MasterDataStore : MonoBehaviour
 		public bool? building;
 		public int? space_type;
 		public Dictionary<string, float> space_limits = new();
-
+		
 		public int? bd_type;
 		public int? building_shape;
 		public int? model_type;
