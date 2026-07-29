@@ -24,11 +24,10 @@ import {
   sendEditConnectorHide,
 } from "../../utils/ipc";
 import { 
-  TYPE_BUILDING, 
-  TYPE_HOUSEHOLD, 
-  TYPE_IMPORT, 
-  TYPE_EXPORT, 
-  TYPE_STANDARD, 
+  TYPE_BUILDING,
+  TYPE_HOUSEHOLD,
+  TYPE_IMPORT,
+  TYPE_STANDARD,
   TYPE_EDUCATION,
   STATUS_SCHEDULED_CONSTRUCTION,
   STATUS_CONSTRUCTING,
@@ -210,8 +209,7 @@ export function AgentDetailPanel({
   useEffect(() => {
     if (!agentData) return;
 
-    const isImportOrExport =
-      agentData.type === TYPE_IMPORT || agentData.type === TYPE_EXPORT;
+    const isImportOrExport = agentData.type === TYPE_IMPORT;
     const showBasicInfo = !isImportOrExport;
     const showHouseholdInfo = agentData.type === TYPE_HOUSEHOLD;
     const showEducationInfo = agentData.type === TYPE_EDUCATION;
@@ -315,8 +313,7 @@ export function AgentDetailPanel({
     agentData.bd_type
   );
 
-  const isImportOrExport =
-    agentData.type === TYPE_IMPORT || agentData.type === TYPE_EXPORT;
+  const isImportOrExport = agentData.type === TYPE_IMPORT;
 
   const isPreConstruction = agentData.status === STATUS_SCHEDULED_CONSTRUCTION || agentData.status === STATUS_PENDING;
 

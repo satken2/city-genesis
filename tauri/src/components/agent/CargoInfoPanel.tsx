@@ -1,8 +1,9 @@
 /**
  * 荷役情報コンポーネント
  *
- * 輸出入拠点(TYPE_IMPORT/TYPE_EXPORT)の詳細パネルに表示される荷役情報セクション。
- * 拠点の共有スループット(取扱能力)・稼働率と、取り扱っている品目ごとの
+ * 輸出入拠点(TYPE_IMPORT)の詳細パネルに表示される荷役情報セクション。
+ * 拠点は単一の経済主体で輸入(都市への販売)と輸出(都市からの買取)の両方を担うため、
+ * 取扱能力・稼働率のサマリーに続けて、輸入・輸出それぞれの品目別の
  * 割当量・取扱実績を横棒グラフで表示する。
  *
  * データは専用エンドポイント GET /api/v1/agents/{id}/cargo から取得する
@@ -13,7 +14,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { AgentData } from "../../types";
+import type { AgentData, MasterData } from "../../types";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { DataList } from "../common/DataList";
@@ -28,9 +29,9 @@ type CargoProduct = {
 };
 
 type CargoInfoResponse = {
-  mode: "import" | "export";
   capacity_per_epoch: number;
-  products: CargoProduct[];
+  imports: CargoProduct[];
+  exports: CargoProduct[];
 };
 
 type CargoInfoPanelProps = {
@@ -43,62 +44,30 @@ function formatAmount(value: number): string {
   return value.toLocaleString(undefined, { maximumFractionDigits: 1 });
 }
 
-export function CargoInfoPanel({ agent, apiBaseUrl }: CargoInfoPanelProps) {
+type CargoDirectionSectionProps = {
+  direction: "import" | "export";
+  products: CargoProduct[];
+  masterData: MasterData | null;
+};
+
+/**
+ * 輸入または輸出の1方向ぶんの品目別グラフ。
+ * 色系統(輸入=青、輸出=緑)はラッパーの cargo--import / cargo--export クラスで切り替わる。
+ */
+function CargoDirectionSection({ direction, products, masterData }: CargoDirectionSectionProps) {
   const { t } = useTranslation();
-  const masterData = useMasterData();
-  const [cargo, setCargo] = useState<CargoInfoResponse | null>(null);
-  const [error, setError] = useState(false);
-
-  // 詳細パネルが経済主体を再取得するたびにagentの参照が変わるため、
-  // それに合わせて荷役情報も再取得する(エポック実行後の値の更新に追従する)
-  useEffect(() => {
-    const controller = new AbortController();
-    setError(false);
-    const url = buildApiUrl(apiBaseUrl, `/api/v1/agents/${agent.agent_id}/cargo`);
-    fetchApi<CargoInfoResponse>(url, { signal: controller.signal })
-      .then((res) => {
-        if (!controller.signal.aborted) setCargo(res);
-      })
-      .catch((err: unknown) => {
-        if (!controller.signal.aborted) {
-          console.error("Failed to fetch cargo info:", err);
-          setError(true);
-        }
-      });
-    return () => controller.abort();
-  }, [apiBaseUrl, agent]);
-
-  if (error) {
-    return (
-      <section className="agent-detail-section">
-        <h3 className="agent-detail-section-title">{t("cargo.title", "荷役情報")}</h3>
-        <p className="agent-detail-muted">{t("common.fetchError")}</p>
-      </section>
-    );
-  }
-
-  if (!cargo) {
-    return (
-      <section className="agent-detail-section">
-        <h3 className="agent-detail-section-title">{t("cargo.title", "荷役情報")}</h3>
-        <p className="agent-detail-muted">{t("common.loading")}</p>
-      </section>
-    );
-  }
-
-  const isImport = cargo.mode === "import";
-  const totalHandled = cargo.products.reduce((sum, p) => sum + p.handled, 0);
+  const isImport = direction === "import";
 
   // 棒グラフのスケールは全品目の最大値(割当量と実績の大きい方)に合わせる。
   // 品目ごとに単位が異なるため厳密な量の比較ではないが、
   // 「どの品目がこの拠点の主力か」を直感的に掴むための相対表示とする。
-  const maxValue = cargo.products.reduce(
+  const maxValue = products.reduce(
     (max, p) => Math.max(max, p.allocation, p.handled),
     0,
   );
 
   // 主力品目が上に来るように実績降順(同値なら割当降順)で並べる
-  const rows = [...cargo.products].sort(
+  const rows = [...products].sort(
     (a, b) => b.handled - a.handled || b.allocation - a.allocation,
   );
 
@@ -107,40 +76,12 @@ export function CargoInfoPanel({ agent, apiBaseUrl }: CargoInfoPanelProps) {
     : t("cargo.handledExport", "買取量");
 
   return (
-    <section className={`agent-detail-section cargo cargo--${cargo.mode}`}>
-      <h3 className="agent-detail-section-title">{t("cargo.title", "荷役情報")}</h3>
-
-      <p className="cargo-description">
+    <div className={`cargo--${direction}`}>
+      <h4 className="cargo-products-title">
         {isImport
-          ? t("cargo.importDescription", "この拠点は域外から商品を輸入し、都市内の市場へ供給します。")
-          : t("cargo.exportDescription", "この拠点は都市内で生産された商品を買い取り、域外へ輸出します。")}
-      </p>
-
-      <div className="agent-detail-grid">
-        <span className="agent-detail-label">{t("cargo.capacity", "取扱能力")}</span>
-        <span className="agent-detail-value">
-          {formatAmount(cargo.capacity_per_epoch)}
-          <span className="cargo-unit-suffix">{t("cargo.perEpoch", "/エポック")}</span>
-        </span>
-
-        <span className="agent-detail-label">{t("cargo.totalHandled", "総取扱量")}</span>
-        <span className="agent-detail-value">{formatAmount(totalHandled)}</span>
-
-        {agent.utilization != null && (
-          <>
-            <span className="agent-detail-label">{t("cargo.utilization", "稼働率")}</span>
-            <span className="agent-detail-value">
-              <DataList
-                values={agent.utilization}
-                formatter={(v) => `${(v * 100).toFixed(1)}%`}
-                clampRange={[0, 1]}
-              />
-            </span>
-          </>
-        )}
-      </div>
-
-      <h4 className="cargo-products-title">{t("cargo.productsTitle", "品目別の取扱量")}</h4>
+          ? t("cargo.importSectionTitle", "輸入(都市への販売)")
+          : t("cargo.exportSectionTitle", "輸出(都市からの買取)")}
+      </h4>
 
       {rows.length === 0 ? (
         <p className="agent-detail-muted">{t("cargo.noProducts", "取扱品目がありません")}</p>
@@ -203,6 +144,98 @@ export function CargoInfoPanel({ agent, apiBaseUrl }: CargoInfoPanelProps) {
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+export function CargoInfoPanel({ agent, apiBaseUrl }: CargoInfoPanelProps) {
+  const { t } = useTranslation();
+  const masterData = useMasterData();
+  const [cargo, setCargo] = useState<CargoInfoResponse | null>(null);
+  const [error, setError] = useState(false);
+
+  // 詳細パネルが経済主体を再取得するたびにagentの参照が変わるため、
+  // それに合わせて荷役情報も再取得する(エポック実行後の値の更新に追従する)
+  useEffect(() => {
+    const controller = new AbortController();
+    setError(false);
+    const url = buildApiUrl(apiBaseUrl, `/api/v1/agents/${agent.agent_id}/cargo`);
+    fetchApi<CargoInfoResponse>(url, { signal: controller.signal })
+      .then((res) => {
+        if (!controller.signal.aborted) setCargo(res);
+      })
+      .catch((err: unknown) => {
+        if (!controller.signal.aborted) {
+          console.error("Failed to fetch cargo info:", err);
+          setError(true);
+        }
+      });
+    return () => controller.abort();
+  }, [apiBaseUrl, agent]);
+
+  if (error) {
+    return (
+      <section className="agent-detail-section">
+        <h3 className="agent-detail-section-title">{t("cargo.title", "荷役情報")}</h3>
+        <p className="agent-detail-muted">{t("common.fetchError")}</p>
+      </section>
+    );
+  }
+
+  if (!cargo) {
+    return (
+      <section className="agent-detail-section">
+        <h3 className="agent-detail-section-title">{t("cargo.title", "荷役情報")}</h3>
+        <p className="agent-detail-muted">{t("common.loading")}</p>
+      </section>
+    );
+  }
+
+  const importHandled = cargo.imports.reduce((sum, p) => sum + p.handled, 0);
+  const exportHandled = cargo.exports.reduce((sum, p) => sum + p.handled, 0);
+
+  return (
+    <section className="agent-detail-section cargo">
+      <h3 className="agent-detail-section-title">{t("cargo.title", "荷役情報")}</h3>
+
+      <p className="cargo-description">
+        {t(
+          "cargo.description",
+          "この拠点は域外から商品を輸入して都市内の市場へ供給し、都市内の余剰生産物を買い取って域外へ輸出します。",
+        )}
+      </p>
+
+      <div className="agent-detail-grid">
+        <span className="agent-detail-label">{t("cargo.capacity", "取扱能力")}</span>
+        <span className="agent-detail-value">
+          {formatAmount(cargo.capacity_per_epoch)}
+          <span className="cargo-unit-suffix">
+            {t("cargo.perEpochPerDirection", "/エポック(輸出入それぞれ)")}
+          </span>
+        </span>
+
+        <span className="agent-detail-label">{t("cargo.importHandled", "輸入取扱量")}</span>
+        <span className="agent-detail-value">{formatAmount(importHandled)}</span>
+
+        <span className="agent-detail-label">{t("cargo.exportHandled", "輸出取扱量")}</span>
+        <span className="agent-detail-value">{formatAmount(exportHandled)}</span>
+
+        {agent.utilization != null && (
+          <>
+            <span className="agent-detail-label">{t("cargo.utilization", "稼働率")}</span>
+            <span className="agent-detail-value">
+              <DataList
+                values={agent.utilization}
+                formatter={(v) => `${(v * 100).toFixed(1)}%`}
+                clampRange={[0, 1]}
+              />
+            </span>
+          </>
+        )}
+      </div>
+
+      <CargoDirectionSection direction="import" products={cargo.imports} masterData={masterData} />
+      <CargoDirectionSection direction="export" products={cargo.exports} masterData={masterData} />
     </section>
   );
 }

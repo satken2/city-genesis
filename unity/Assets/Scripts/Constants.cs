@@ -30,9 +30,8 @@ public static class Constants
     public const int DEMAND_TIER1 = 1;
     public const int DEMAND_TIER2 = 2;
     public const int DEMAND_TIER3 = 3;
-    public const int VALUE_DFAULT = 0;
-    // 空き地区画の usage_id や未設定IDを示すセンチネル値。バックエンド consts.py の VALUE_NONE と一致(-1)。
     public const int VALUE_NONE = -1;
+    public const int VALUE_DFAULT = 0;
     public const int BUILDING_APARTMENT = 1;
     public const int BUILDING_HOUSE = 2;
     public const int BUILDING_RETAIL = 4;
@@ -80,7 +79,6 @@ public static class Constants
     public const int TYPE_CITY = 1;
     public const int TYPE_EDUCATION = 2;
     public const int TYPE_HOUSEHOLD = 3;
-    public const int TYPE_EXPORT = 4;
     public const int TYPE_IMPORT = 5;
     public const int TYPE_STANDARD = 10;
     public const int TYPE_BUILDING = 20;
@@ -92,7 +90,6 @@ public static class Constants
     public const int VARIANT_CENTRAL_BANK = 101;
     public const int VARIANT_ELEMENRATY_SCHOOL = 200;
     public const int VARIANT_HOUSEHOLD = 300;
-    public const int VARIANT_EXPORT = 400;
     public const int VARIANT_IMPORT = 500;
     public const int VARIANT_SOLAR_PLANT = 1054;
     public const int VARIANT_SUBSTATION = 1062;

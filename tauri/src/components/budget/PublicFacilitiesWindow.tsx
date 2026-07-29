@@ -213,11 +213,18 @@ function buildColumns(variant: CardVariant, t: TFn2): ColumnDef[] {
           sortValue: (a: PublicFacilityAgent) => a.capacity ?? 0,
         },
         {
-          key: "handling",
-          label: t("publicFacilities.handling"),
+          key: "import_handling",
+          label: t("publicFacilities.importHandling"),
           align: "right" as const,
-          render: (a: PublicFacilityAgent) => num(a.handling, 0),
-          sortValue: (a: PublicFacilityAgent) => a.handling ?? 0,
+          render: (a: PublicFacilityAgent) => num(a.import_handling, 0),
+          sortValue: (a: PublicFacilityAgent) => a.import_handling ?? 0,
+        },
+        {
+          key: "export_handling",
+          label: t("publicFacilities.exportHandling"),
+          align: "right" as const,
+          render: (a: PublicFacilityAgent) => num(a.export_handling, 0),
+          sortValue: (a: PublicFacilityAgent) => a.export_handling ?? 0,
         },
         {
           key: "utilization_rate",

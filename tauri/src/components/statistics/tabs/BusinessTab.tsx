@@ -23,7 +23,6 @@ import {
   TYPE_EDUCATION,
   TYPE_HOUSEHOLD,
   TYPE_IMPORT,
-  TYPE_EXPORT,
   FAMILY_SINGLE,
   FAMILY_COUPLE,
   FAMILY_FAMILY,
@@ -109,7 +108,6 @@ const SELECTABLE_TYPES: number[] = [
   TYPE_EDUCATION,
   TYPE_HOUSEHOLD,
   TYPE_IMPORT,
-  TYPE_EXPORT,
 ];
 
 const SKILL_ORDER = [0, 1, 2, 3, 4, 5];
@@ -662,6 +660,6 @@ function buildColumns(
     ];
   }
 
-  // TYPE_IMPORT / TYPE_EXPORT は共通列（ID・ステータス・名前）のみ。
+  // TYPE_IMPORT（輸出入拠点）は共通列（ID・ステータス・名前）のみ。
   return base;
 }

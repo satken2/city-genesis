@@ -4,6 +4,11 @@ agents:
     prebuilt: true
     variants:
       - 0
+  200:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
   1048:
     model: true
     prebuilt: true

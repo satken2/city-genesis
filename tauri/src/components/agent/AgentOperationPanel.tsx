@@ -14,7 +14,6 @@ import {
   TYPE_CITY,
   TYPE_HOUSEHOLD,
   TYPE_IMPORT,
-  TYPE_EXPORT,
 } from "../../constants";
 import purchaseIcon from "../../assets/images/purchase.png";
 import bulldozeIcon from "../../assets/images/bulldoze.png";
@@ -156,13 +155,11 @@ export function AgentOperationPanel({
   const canPurchase =
     !agent.public_facility &&
     agent.type !== TYPE_HOUSEHOLD &&
-    agent.type !== TYPE_IMPORT &&
-    agent.type !== TYPE_EXPORT;
+    agent.type !== TYPE_IMPORT;
 
   const canBulldoze =
     agent.public_facility ||
-    agent.type === TYPE_IMPORT ||
-    agent.type === TYPE_EXPORT;
+    agent.type === TYPE_IMPORT;
 
   const canPause =
     agent.public_facility && agent.is_bd && agent.status === STATUS_ACTIVE;

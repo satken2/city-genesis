@@ -16,7 +16,9 @@
     "occupancyRate": "Occupancy",
     "rent": "Rent",
     "capacity": "Capacity",
-    "handling": "Handling"
+    "handling": "Handling",
+    "importHandling": "Import Handling",
+    "exportHandling": "Export Handling"
   },
   "publicServicePrices": {
     "title": "Public Services",
