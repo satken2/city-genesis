@@ -5,7 +5,7 @@
  * 公共施設フラグ・活動開始日・準備金・収入・支出・ゾーン・所属建物を
  * ラベル付きグリッドで一覧表示する。
  *
- * 輸出入拠点(TYPE_TRADE)の経済主体には表示しない。
+ * 輸出入拠点(TYPE_IMPORT)の経済主体には表示しない。
  */
 
 import { useTranslation } from "react-i18next";

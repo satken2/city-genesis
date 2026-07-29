@@ -254,7 +254,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
   /**
    * 建物として建設可能なバリアント一覧 (building === true)
    * TYPE_BUILDING(共有建物)だけでなく、building=trueのTYPE_STANDARD(一般施設)、
-   * TYPE_EDUCATION(教育機関)、TYPE_TRADE(輸出入拠点)など、
+   * TYPE_EDUCATION(教育機関)、TYPE_IMPORT(輸出入拠点)など、
    * 全ての建設可能エージェントを含む。建物種類(bd_type)でグループ化して表示する。
    */
   const buildingVariants = useMemo(() => {
