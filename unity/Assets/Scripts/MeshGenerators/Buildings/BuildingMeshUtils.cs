@@ -222,6 +222,24 @@ public static class BuildingMeshUtils
     }
 
     /// <summary>
+    /// 窓や開口を持たない無地の壁面用のマテリアルを選択する。切妻屋根の妻壁のように、
+    /// プロシージャルに張った壁面へ「普通の壁と同じ材質」を与えるために使う。
+    /// `generic-wall` パーツはマテリアル参照専用（形状は使われない）。
+    /// 存在しない場合はフォールバック配列内の有効なマテリアル（＝躯体の壁パーツのもの。
+    /// 窓の意匠が乗るため見た目は妥協になる）、それも無ければ既定マテリアルを使う。
+    /// </summary>
+    public static Material SelectGenericWallMaterial(string prefix, int suffix, Material[] fallbackMaterials)
+    {
+        Material moduleMaterial = GetPartMaterialBySuffix(prefix, "generic-wall", suffix);
+        if (moduleMaterial != null) return moduleMaterial;
+
+        Material fallback = SelectFallbackMaterial(fallbackMaterials);
+        if (fallback != null) return fallback;
+
+        return BuildingMeshBuilder.GetDefaultBuildingMaterial();
+    }
+
+    /// <summary>
     /// 提供されたフォールバックマテリアル配列の中から、null でない最初のマテリアルを選択する。
     /// 全て null または配列が空の場合は null を返す。
     /// </summary>

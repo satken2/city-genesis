@@ -127,7 +127,7 @@ public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
                 case Constants.MODEL_MODULAR_GABLE:
                     // 壁・角・地面は FLAT と同じ。屋根だけ切妻にし、マテリアルは FLAT と同じ ceil パーツを使う。
                     roofResult = GableRoofBuilder.GenerateRoof(
-                        footprint, buildingHeight, prefix, resolvedSuffix,
+                        footprint, buildingHeight, floorHeight, prefix, resolvedSuffix,
                         allMaterials.Count > 0 ? allMaterials.ToArray() : null);
                     break;
                 case Constants.MODEL_MODULAR_FLAT:
@@ -155,6 +155,15 @@ public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
                 combineInstances, allMaterials, temporaryMeshes);
 
             UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[MBMB-DEBUG] After roofprop. combineInstances.Count={combineInstances.Count}");
+
+            // 4. エントランス
+            // SHAPE_FULL は最上階のみを描画するため、地上に壁が存在する場合(1階建て)に限って配置する。
+            if (buildingShape != Constants.SHAPE_FULL || floors == 1)
+            {
+                BuildingMeshBuilder.GenerateEntrance(
+                    prefix, resolvedSuffix, footprint,
+                    combineInstances, allMaterials, temporaryMeshes);
+            }
         }
 
         if (combineInstances.Count == 0)

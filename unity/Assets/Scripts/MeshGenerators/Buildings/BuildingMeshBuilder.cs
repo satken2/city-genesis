@@ -454,6 +454,78 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     /// <summary>
+    /// エントランス(entrance)を建物前面の辺の中央・地面レベルに配置する。
+    /// パーツ {prefix}/{suffix}/entrance が存在する場合のみ配置する(オプショナル)。
+    ///
+    /// - 前面の辺は底面ポリゴンの最初の辺(頂点0 → 頂点1)とする(塔屋の向き決定 §12.3 と同じ規約)。
+    /// - 原点は地面(ローカルY=0)かつ壁のアライメント面(前面の辺の直線上)。
+    ///   壁パーツと同じ場所・同じ回転規約(辺方向へ向けてY軸180°反転。GenerateWallSegments参照)で
+    ///   配置するため、壁パーツと同じ座標系で著作すれば壁面に重なる。
+    /// - スケールは一切行わない(実寸)。庇や階段が階高・辺長に引き伸ばされないため。
+    /// </summary>
+    public static void GenerateEntrance(string prefix, int suffix, Vector2[] footprint, List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
+    {
+        if (footprint == null || footprint.Length < 3)
+        {
+            return;
+        }
+
+        GameObject entranceModule = BuildingMeshUtils.GetPartNoPosition(prefix, "entrance", suffix, true);
+        if (entranceModule == null)
+        {
+            UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[BMB] エントランス: パーツなし ({prefix}/{suffix}/entrance)");
+            return;
+        }
+
+        MeshFilter mf = entranceModule.GetComponentInChildren<MeshFilter>();
+        if (mf == null || mf.sharedMesh == null) return;
+
+        Vector2 p0 = footprint[0];
+        Vector2 p1 = footprint[1];
+        Vector2 edge = p1 - p0;
+        if (edge.sqrMagnitude < 1e-6f) return;
+
+        Vector3 position3D = new Vector3((p0.x + p1.x) * 0.5f, 0f, (p0.y + p1.y) * 0.5f);
+
+        // 壁系パーツと同じ回転規約: 辺方向へ向けたうえでY軸まわりに180°反転する
+        float angle = Mathf.Atan2(edge.y, edge.x) * Mathf.Rad2Deg;
+        Quaternion rotation = Quaternion.Euler(0, -angle + 180f, 0);
+
+        Mesh meshInstance = Object.Instantiate(mf.sharedMesh);
+        Vector3[] vertices = meshInstance.vertices;
+        Matrix4x4 matrix = Matrix4x4.TRS(position3D, rotation, Vector3.one);
+        for (int v = 0; v < vertices.Length; v++)
+        {
+            vertices[v] = matrix.MultiplyPoint3x4(vertices[v]);
+        }
+        meshInstance.vertices = vertices;
+        meshInstance.RecalculateNormals();
+        meshInstance.RecalculateBounds();
+
+        int subMeshCount = meshInstance.subMeshCount;
+        Material[] moduleMaterials = BuildingMeshUtils.GetModuleMaterials(entranceModule);
+        for (int si = 0; si < subMeshCount; si++)
+        {
+            combineInstances.Add(new CombineInstance
+            {
+                mesh = meshInstance,
+                subMeshIndex = si,
+                transform = Matrix4x4.identity
+            });
+
+            Material mat = null;
+            if (moduleMaterials != null && moduleMaterials.Length > 0)
+            {
+                mat = moduleMaterials[Mathf.Min(si, moduleMaterials.Length - 1)];
+            }
+            allMaterials.Add(mat);
+        }
+        temporaryMeshes.Add(meshInstance);
+
+        UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[BMB] エントランス: 配置成功 ({prefix}/{suffix}/entrance)");
+    }
+
+    /// <summary>
     /// 底面形状と同じ形状の水平ポリゴンを指定高さに生成する。
     /// 屋上パネルや地面パネルの生成に使用する。
     /// </summary>
