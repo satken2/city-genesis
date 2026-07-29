@@ -613,7 +613,7 @@ export type MasterData = {
  * 基本情報は全施設が持つ。メトリクス項目は施設の種類（グループ）によって
  * 付与されるフィールドが異なり、未設定の場合は undefined になる。
  *   - 不動産（TYPE_BUILDING）: supply_floor / occupancy_rate / rent / balance / utilization_rate
- *   - 港湾（TYPE_IMPORT）: capacity / import_handling / export_handling / utilization_rate
+ *   - 港湾（TYPE_TRADE）: capacity / import_handling / export_handling / utilization_rate
  *   - サービス・公営（TYPE_STANDARD）: production / sold_amount / price / balance / utilization_rate
  *   - 市政府・教育: メトリクスなし（基本情報のみ）
  */

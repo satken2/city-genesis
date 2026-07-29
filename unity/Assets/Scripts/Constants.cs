@@ -79,7 +79,7 @@ public static class Constants
     public const int TYPE_CITY = 1;
     public const int TYPE_EDUCATION = 2;
     public const int TYPE_HOUSEHOLD = 3;
-    public const int TYPE_IMPORT = 4;
+    public const int TYPE_TRADE = 4;
     public const int TYPE_STANDARD = 10;
     public const int TYPE_BUILDING = 20;
     public const int VARIANT_ZONE_CONSTRUCTION = 0;

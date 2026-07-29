@@ -29,7 +29,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
     private const float MIN_PROTRUSION_RATIO = 0.2f;
 
     /// <summary>荷役クレーンの設置間隔（パーツ実寸幅に対する倍率）。1.0 だと隣同士が接するため余白を持たせる。</summary>
-    private const float CRANE_SPACING_RATIO = 1.5f;
+    private const float CRANE_SPACING_RATIO = 4.5f;
 
     /// <summary>1つの岸壁に並べる荷役クレーンの上限。巨大な岸壁でドローコールが膨らむのを防ぐ。</summary>
     private const int MAX_CRANE_COUNT = 8;

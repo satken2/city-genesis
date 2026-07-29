@@ -9,6 +9,16 @@ agents:
     prebuilt: false
     variants:
       - 0
+  401:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  403:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
   1048:
     model: true
     prebuilt: true
