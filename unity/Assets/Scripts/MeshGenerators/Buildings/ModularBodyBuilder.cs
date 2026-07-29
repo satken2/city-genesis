@@ -178,14 +178,16 @@ public static class ModularBodyBuilder
 
                     if (wallModule != null)
                     {
-                        Vector2 next_p = footprint[(i + 1) % n];
+                        Vector2 p3 = footprint[(i + 2) % n];
                         int nextPosition = (i + 1) % n + 1;
                         GameObject nextCornerModule = LoadPartWithFallback(prefix, cornerLevel, "c", nextPosition, resolvedSuffix, out _);
 
-                        GetCornerArmLengths(cornerModule, targetHeight, out float startOffset, out _);
-                        GetCornerArmLengths(nextCornerModule, targetHeight, out _, out float endOffset);
+                        // 壁の敷き詰め範囲は、両端の角パーツがこの辺へ実際に張り出す長さぶん内側へ狭める。
+                        // 手前側は頂点 p1 の角パーツの送り側アーム、奥側は頂点 p2 の角パーツの受け側アーム。
+                        float startOffset = MeasureCornerExtentAlongEdge(cornerModule, p0, p1, p2, targetHeight, true);
+                        float endOffset = MeasureCornerExtentAlongEdge(nextCornerModule, p1, p2, p3, targetHeight, false);
 
-                        List<SegmentMeshData> wallSegments = GenerateWallSegments(p1, next_p, floorY, wallModule, wallMaterials, targetHeight, startOffset, endOffset);
+                        List<SegmentMeshData> wallSegments = GenerateWallSegments(p1, p2, floorY, wallModule, wallMaterials, targetHeight, startOffset, endOffset);
                         UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[MBB] F{floor} 壁 pos{position}: {wallSegments.Count}セグメント, materials={FormatMaterials(wallMaterials)}");
                         foreach (var wallSegment in wallSegments)
                         {
@@ -290,8 +292,16 @@ public static class ModularBodyBuilder
 
                 if (wallModule != null)
                 {
-                    Vector2 next_p = fenceFootprint[(i + 1) % fn];
-                    List<SegmentMeshData> wallSegments = GenerateFenceSegments(p1, next_p, wallModule, wallMaterials);
+                    Vector2 p3 = fenceFootprint[(i + 2) % fn];
+                    int nextPosition = (i + 1) % fn + 1;
+                    GameObject nextCornerModule = LoadPartWithFallback(prefix, "fence", "c", nextPosition, suffix, out _);
+
+                    // 建物の壁と同じく、両端のフェンス角パーツが辺へ張り出す長さぶん内側から敷き詰める。
+                    // フェンス角は無スケール配置（targetHeight=0）なので、実寸がそのまま張り出し量になる。
+                    float startOffset = MeasureCornerExtentAlongEdge(cornerModule, p0, p1, p2, 0f, true);
+                    float endOffset = MeasureCornerExtentAlongEdge(nextCornerModule, p1, p2, p3, 0f, false);
+
+                    List<SegmentMeshData> wallSegments = GenerateFenceSegments(p1, p2, wallModule, wallMaterials, startOffset, endOffset);
                     foreach (var wallSegment in wallSegments)
                     {
                         if (wallSegment.IsValid)
@@ -810,72 +820,158 @@ public static class ModularBodyBuilder
     }
 
     /// <summary>
-    /// 角パーツのモデル（メッシュ）の形状を解析し、X軸およびZ軸に沿って伸びているローカルの長さ（アームの長さ）を計算して返す。
-    /// 実寸規格のパーツはXZ方向にスケールされないため、著作メッシュのアーム長がそのままワールド空間のオフセット長になる。
-    /// 旧規格(単位スケール)のパーツは従来どおりアーム長に targetHeight(等方スケール率)を掛ける。
-    /// モデルが存在しない、または形状情報が無効な場合は、従来通りのデフォルトの振る舞い（targetHeight）としてフォールバックする。
+    /// 角パーツを頂点 p1 に配置したとき、隣接する辺の方向へ実際に張り出す長さ(m)を返す。
+    /// 壁パーツの敷き詰め開始・終了位置（＝角パーツの終わり）を決めるために使う。
+    ///
+    /// ローカルX/Z軸のAABBを測るのではなく、**実際の配置と同じ回転・スケールを掛けた頂点を
+    /// 辺方向へ射影した最大値**を採る。これにより
+    /// - アームが +X/+Z・-X/-Z どちらの向きで著作されていても正しい値になる
+    /// - 庇や胴差しのような辺方向への造作も張り出しに含まれる
+    /// - 角パーツが無い場合は 0（＝辺いっぱいに壁を敷く）になる
+    /// ため、「壁が角パーツにめり込む／角パーツから離れる」事故が原理的に起きない。
+    ///
+    /// ボーン変形（GenerateSkinnedCorner）で角を開閉する場合でも、アームは辺と一緒に
+    /// リジッド回転する。そこで射影先には**バインドポーズ（内角90°）での辺の向き**
+    /// （二等分線から ±45°）を使う。変形前のメッシュを変形前の辺方向へ射影した値は、
+    /// 変形後のメッシュを実際の辺方向へ射影した値と一致するため、変形の実装詳細に依存しない。
     /// </summary>
-    private static void GetCornerArmLengths(GameObject cornerModule, float targetHeight, out float armLengthX, out float armLengthZ)
+    /// <param name="towardNext">true=送り側（p1→p2 の辺）、false=受け側（p0→p1 の辺）への張り出しを測る</param>
+    private static float MeasureCornerExtentAlongEdge(
+        GameObject cornerModule, Vector2 p0, Vector2 p1, Vector2 p2, float targetHeight, bool towardNext)
     {
-        armLengthX = targetHeight;
-        armLengthZ = targetHeight;
+        if (cornerModule == null) return 0f;
 
-        if (cornerModule == null)
-        {
-            return;
-        }
-
-        // 実際の配置（GenerateCornerSegment）は SkinnedMeshRenderer を優先して使うため、
-        // アーム長の計測もそれに揃える。skinned の sharedMesh はバインドポーズ（90°基準）で、
-        // アームがリジッド回転する限り曲げ後もアーム長は不変なのでオフセット計算に使える。
+        // 実際の配置（GenerateCornerCore）は SkinnedMeshRenderer を優先して使うため、計測もそれに揃える。
         Mesh sourceMesh = GetPartSourceMesh(cornerModule);
-        if (sourceMesh == null || sourceMesh.vertexCount == 0)
-        {
-            return;
-        }
+        if (sourceMesh == null || sourceMesh.vertexCount == 0) return 0f;
 
-        // アーム長は「頂点のX/Z方向の広がり」を絶対値の最大で測る。
-        // 正の座標だけを見ると、角パーツのアームが -X/-Z 方向を向くように著作された場合
-        // （回転0でエクスポートした角パーツ等）に maxX/maxZ が 0 になり、下の分岐で
-        // フォールバック(targetHeight=階高)が採用されて壁が階高ぶん離れてしまう。
-        Vector3[] vertices = sourceMesh.vertices;
-        float maxX = 0f;
-        float maxZ = 0f;
+        Quaternion rotation = ComputeCornerRotation(p0, p1, p2, out Vector2 bisector, out _);
+        Vector3 scale = DetermineCornerScale(sourceMesh, targetHeight);
 
+        // バインドポーズでの辺方向（二等分線から ±45°）。符号は「送り側の辺が二等分線の
+        // どちら回りにあるか」で決まるので、ポリゴンの巻き方向に依存せず求まる。
+        Vector2 v2 = (p2 - p1).normalized;
+        float side = (bisector.x * v2.y - bisector.y * v2.x) >= 0f ? 1f : -1f;
+        float bindAngleRad =
+            (Mathf.Atan2(bisector.y, bisector.x) * Mathf.Rad2Deg + side * (towardNext ? 45f : -45f)) * Mathf.Deg2Rad;
+        Vector3 edgeDir = new Vector3(Mathf.Cos(bindAngleRad), 0f, Mathf.Sin(bindAngleRad));
+
+        Vector3[] vertices = GetCachedPartVertices(sourceMesh);
+        float maxExtent = 0f;
         for (int i = 0; i < vertices.Length; i++)
         {
-            Vector3 v = vertices[i];
-            float ax = Mathf.Abs(v.x);
-            float az = Mathf.Abs(v.z);
-            if (ax > maxX) maxX = ax;
-            if (az > maxZ) maxZ = az;
+            Vector3 placed = rotation * Vector3.Scale(vertices[i], scale);
+            float t = placed.x * edgeDir.x + placed.z * edgeDir.z;
+            if (t > maxExtent) maxExtent = t;
         }
 
-        Vector3 size = sourceMesh.bounds.size;
-        bool isLegacyPart = Mathf.Max(size.x, size.z) < LEGACY_UNIT_PART_MAX_SIZE;
-
-        // 頂点の広がりが有効な極値を持つ場合のみ、ワールド空間のアーム長として採用する
-        if (maxX > 0.01f)
-        {
-            armLengthX = isLegacyPart ? maxX * targetHeight : maxX;
-        }
-        if (maxZ > 0.01f)
-        {
-            armLengthZ = isLegacyPart ? maxZ * targetHeight : maxZ;
-        }
+        return maxExtent;
     }
+
+    /// <summary>
+    /// 張り出し計測用の頂点配列キャッシュ。`Mesh.vertices` は呼ぶたびに配列を複製するため、
+    /// 階数×頂点数ぶん繰り返す計測ではGCを圧迫する。対象はプレハブアセットの共有メッシュで、
+    /// 破棄されず内容も不変なのでメッシュ単位でキャッシュしてよい。
+    /// </summary>
+    private static readonly Dictionary<Mesh, Vector3[]> partVertexCache = new Dictionary<Mesh, Vector3[]>();
+
+    private static Vector3[] GetCachedPartVertices(Mesh mesh)
+    {
+        if (!partVertexCache.TryGetValue(mesh, out Vector3[] vertices))
+        {
+            vertices = mesh.vertices;
+            partVertexCache[mesh] = vertices;
+        }
+        return vertices;
+    }
+
+    /// <summary>
+    /// 角パーツの配置回転（Y軸まわり）を求める。配置（GenerateCornerCore）と
+    /// 張り出し計測（MeasureCornerExtentAlongEdge）で必ず同じ値を使うための共通処理。
+    ///
+    /// 2辺の二等分線方向へ角パーツの正面を向ける。末尾の +135 は角パーツの著作向きに合わせた
+    /// オフセット（回転0でエクスポートされた角パーツはローカルの正面が Y 軸まわりに 135° ずれている）。
+    /// ボーン曲げはこの rotation とは独立に行われるため、この 135° は曲げに影響せず
+    /// 曲げ後の角全体の向きだけを補正する。
+    /// </summary>
+    /// <param name="bisector">2辺の二等分線（単位ベクトル）。退化時は辺 v2 の垂線</param>
+    /// <param name="interiorAngle">内角(度)。0〜360</param>
+    private static Quaternion ComputeCornerRotation(
+        Vector2 p0, Vector2 p1, Vector2 p2, out Vector2 bisector, out float interiorAngle)
+    {
+        Vector2 v1 = (p0 - p1).normalized;
+        Vector2 v2 = (p2 - p1).normalized;
+
+        interiorAngle = Vector2.SignedAngle(v2, v1);
+        if (interiorAngle < 0f) interiorAngle += 360f;
+
+        // 内角が 180°付近（2辺がほぼ一直線）だと v1+v2 がほぼ 0 になり normalized が
+        // NaN 化して回転が暴れる。その場合は辺 v2 に垂直な向きでフォールバックする。
+        Vector2 bisectorRaw = v1 + v2;
+        bisector = bisectorRaw.sqrMagnitude < 1e-6f
+            ? new Vector2(-v2.y, v2.x)
+            : bisectorRaw.normalized;
+
+        float bisectorAngle = Mathf.Atan2(bisector.y, bisector.x) * Mathf.Rad2Deg;
+        return Quaternion.Euler(0, -bisectorAngle + 90 + 135, 0);
+    }
+
+    /// <summary>辺の長さ・敷き詰め有効長を「実質ゼロ」とみなす閾値(m)。</summary>
+    private const float MIN_WALL_RUN_LENGTH = 0.01f;
 
     /// <summary>
     /// 辺セグメントのメッシュを生成する。
     /// 純粋に配置計算のみを行い、個別のユニットメッシュを返す（結合は行わない）。
     ///
     /// スケール規則: 壁パーツは高さが targetHeight(通常は階高、top階では実高さ)になるよう
-    /// Y方向のみスケールされ、幅(X)・奥行き(Z)は著作サイズのまま使われる。
+    /// Y方向のみスケールされ、奥行き(Z)は著作サイズのまま使われる。
     /// パーツの著作幅を1ユニットとして辺に敷き詰め、端数はXストレッチで均等に吸収する。
     /// 旧規格(単位スケール)のパーツは従来どおり等方スケールで互換描画する。
     /// </summary>
+    /// <param name="startOffset">辺の始点側で角パーツが占める長さ(m)。MeasureCornerExtentAlongEdge で求める</param>
+    /// <param name="endOffset">辺の終点側で角パーツが占める長さ(m)</param>
     public static List<SegmentMeshData> GenerateWallSegments(
         Vector2 p0, Vector2 p1, float floorY,
+        GameObject wallModule, Material[] sharedMaterials,
+        float targetHeight,
+        float startOffset, float endOffset)
+    {
+        return BuildWallRun(p0, p1, floorY, wallModule, sharedMaterials, targetHeight, startOffset, endOffset);
+    }
+
+    /// <summary>
+    /// フェンス用の辺セグメントメッシュを生成する。
+    /// 壁パーツの元のサイズを保ち、Y方向にはスケールしない（著作実寸のまま）。
+    /// 敷き詰めと端数の吸収は建物の壁と同じロジック（BuildWallRun）を使う。
+    /// </summary>
+    /// <param name="startOffset">辺の始点側でフェンス角パーツが占める長さ(m)</param>
+    /// <param name="endOffset">辺の終点側でフェンス角パーツが占める長さ(m)</param>
+    public static List<SegmentMeshData> GenerateFenceSegments(
+        Vector2 p0, Vector2 p1, GameObject wallModule, Material[] sharedMaterials,
+        float startOffset, float endOffset)
+    {
+        // targetHeight=0 は「Yスケールしない」を意味する（フェンス規約）。
+        return BuildWallRun(p0, p1, 0f, wallModule, sharedMaterials, 0f, startOffset, endOffset);
+    }
+
+    /// <summary>
+    /// 壁系パーツ（base/mid/top-w・fence-w・scaffold-wall）を1辺に敷き詰める共通処理。
+    ///
+    /// 配置の考え方:
+    /// 1. 辺の全長から両端の角パーツが占める長さ（startOffset / endOffset）を引いて「有効長」を求める。
+    ///    壁は角パーツが終わったところから始まり、次の角パーツが始まるところで終わる。
+    /// 2. 有効長をパーツの著作幅で割り、**四捨五入**で敷き詰め数を決める。切り捨てだと端数を
+    ///    引き伸ばす方向にしか吸収できず最大2倍まで間延びするため、縮小側も使って歪みを抑える。
+    /// 3. 有効長を敷き詰め数でちょうど割った幅を1スロットとし、X方向スケールでパーツをスロットへ
+    ///    合わせ込む。したがって合計は常に有効長と厳密に一致し、はみ出しも隙間も生じない。
+    /// 4. 各ユニットは**メッシュのX範囲がスロットに一致するよう**配置する。ピボットが幅の中央から
+    ///    ずれた（左右非対称な）パーツでも端がずれない。中央ピボットの標準パーツでは
+    ///    スロット中央に原点が来て従来と同じ結果になる。
+    ///
+    /// targetHeight が 0 以下の場合はYスケールを行わない（フェンス）。
+    /// </summary>
+    private static List<SegmentMeshData> BuildWallRun(
+        Vector2 p0, Vector2 p1, float baseY,
         GameObject wallModule, Material[] sharedMaterials,
         float targetHeight,
         float startOffset, float endOffset)
@@ -884,12 +980,11 @@ public static class ModularBodyBuilder
 
         if (wallModule == null) return segments;
 
-        Vector3 start = new Vector3(p0.x, floorY, p0.y);
-        Vector3 end = new Vector3(p1.x, floorY, p1.y);
-        Vector3 direction = (end - start).normalized;
+        Vector3 start = new Vector3(p0.x, baseY, p0.y);
+        Vector3 end = new Vector3(p1.x, baseY, p1.y);
         float totalLength = Vector3.Distance(start, end);
-
-        if (totalLength <= 0.001f) return segments;
+        if (totalLength <= MIN_WALL_RUN_LENGTH) return segments;
+        Vector3 direction = (end - start) / totalLength;
 
         MeshFilter mf = wallModule.GetComponentInChildren<MeshFilter>();
         SkinnedMeshRenderer smr = wallModule.GetComponentInChildren<SkinnedMeshRenderer>();
@@ -904,17 +999,20 @@ public static class ModularBodyBuilder
         }
         if (sourceMesh == null) return segments;
 
-        Vector3 originalSize = sourceMesh.bounds.size;
-        // bounds ではなく頂点から直接サイズを計算し、比較用にログに出す
-        Vector3 vertexBasedSize = ComputeVertexBoundsSize(sourceMesh);
+        Bounds bounds = sourceMesh.bounds;
+        Vector3 originalSize = bounds.size;
 
-        float effectiveLength = totalLength - (startOffset + endOffset);
+        // 角パーツが両端で占める分を差し引いた、壁を敷き詰める有効長。
+        float clampedStart = Mathf.Max(0f, startOffset);
+        float clampedEnd = Mathf.Max(0f, endOffset);
+        float effectiveLength = totalLength - (clampedStart + clampedEnd);
 
-        // 辺の長さが両端の角パーツのサイズ合計以下の場合、
-        // 壁を配置する有効な長さが存在しないため、壁パーツの配置をスキップする。
-        // これにより、マイナススケールによるメッシュの反転や位置ずれを防ぐ。
-        if (effectiveLength <= 0f)
+        // 辺が両端の角パーツで埋まってしまう短い辺では壁を置かない。
+        // 置くと角パーツへめり込み、マイナススケールでメッシュが反転する。
+        if (effectiveLength <= MIN_WALL_RUN_LENGTH)
         {
+            UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
+                $"[MBB-WALL] 有効長なし（角パーツで辺が埋まる）: totalLength={totalLength:F3} startOffset={clampedStart:F3} endOffset={clampedEnd:F3}");
             return segments;
         }
 
@@ -925,7 +1023,16 @@ public static class ModularBodyBuilder
         float unitActualLength;
 
         bool isLegacyPart = Mathf.Max(originalSize.x, originalSize.z) < LEGACY_UNIT_PART_MAX_SIZE;
-        if (isLegacyPart)
+        if (targetHeight <= 0f)
+        {
+            // フェンス: 高さ・奥行きとも著作実寸のまま（旧規格判定の対象外）
+            scaleY = 1f;
+            baseScaleX = 1f;
+            scaleZ = 1f;
+            unitActualLength = originalSize.x;
+            isLegacyPart = false;
+        }
+        else if (isLegacyPart)
         {
             // 旧規格(単位スケール)パーツ: 従来どおり高さを targetHeight に合わせる等方スケール。
             // ユニット幅も等方スケール後の幅になる(正方形タイル的な見た目)。
@@ -952,12 +1059,15 @@ public static class ModularBodyBuilder
             return segments;
         }
 
-        int numUnits = Mathf.Max(1, Mathf.FloorToInt(effectiveLength / unitActualLength));
+        // 四捨五入で敷き詰め数を決めることで、有効長が著作幅の 1.5 倍なら 2 枚を縮めて敷く。
+        // 最低1枚は必ず置く（隙間を作らないことを優先し、極端に短い辺では潰れた1枚になる）。
+        int numUnits = Mathf.Max(1, Mathf.RoundToInt(effectiveLength / unitActualLength));
 
-        float totalWallLength = numUnits * unitActualLength;
-        float xStretchFactor = effectiveLength / totalWallLength;
-
-        Vector3 scale = new Vector3(baseScaleX * xStretchFactor, scaleY, scaleZ);
+        // スロット幅は有効長を敷き詰め数でちょうど割った値。合計は厳密に有効長に一致する。
+        float slotLength = effectiveLength / numUnits;
+        float xStretchFactor = slotLength / unitActualLength;
+        float scaleX = baseScaleX * xStretchFactor;
+        Vector3 scale = new Vector3(scaleX, scaleY, scaleZ);
 
         // 辺の方向（direction）に合わせて、Y軸まわりの回転角度を計算する。
         // Quaternion.FromToRotation は対向方向での特異点（Y軸反転）が発生するため、
@@ -968,19 +1078,17 @@ public static class ModularBodyBuilder
         // 角パーツ（*-c、GenerateCornerCore）は二等分線ベースの向き決定なので対象外。
         Quaternion rotation = Quaternion.Euler(0, -angle + 180f, 0);
 
-        float finalUnitLength = unitActualLength * xStretchFactor;
-        Vector3 unitVector = direction * finalUnitLength;
-
-        Vector3 currentPos = start + direction * startOffset + unitVector * 0.5f;
+        // 180°反転配置によりローカル +X 側が辺の始点側に来る。原点をスロット始端から
+        // bounds.max.x ぶん進めると、メッシュのX範囲がスロットにちょうど収まる。
+        // 幅中央ピボットの標準パーツでは bounds.max.x = 幅/2 なのでスロット中央になる。
+        float pivotShift = bounds.max.x * scaleX;
 
         UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
-            $"[MBB-WALL] p0=({p0.x:F3},{p0.y:F3}) p1=({p1.x:F3},{p1.y:F3}) floorY={floorY:F3} targetHeight={targetHeight:F3} legacy={isLegacyPart}\n" +
-            $"[MBB-WALL]   totalLength={totalLength:F4} startOffset={startOffset:F4} endOffset={endOffset:F4} effectiveLength={effectiveLength:F4}\n" +
-            $"[MBB-WALL]   meshName={sourceMesh.name} boundsSize=({originalSize.x:F4},{originalSize.y:F4},{originalSize.z:F4}) vertexSize=({vertexBasedSize.x:F4},{vertexBasedSize.y:F4},{vertexBasedSize.z:F4})\n" +
-            $"[MBB-WALL]   scaleY={scaleY:F4} unitActualLength={unitActualLength:F4} numUnits={numUnits}\n" +
-            $"[MBB-WALL]   totalWallLength={totalWallLength:F4} xStretchFactor={xStretchFactor:F4}\n" +
-            $"[MBB-WALL]   finalScale=({scale.x:F4},{scale.y:F4},{scale.z:F4}) finalUnitLength={finalUnitLength:F4}\n" +
-            $"[MBB-WALL]   startPos=({start.x:F3},{start.y:F3},{start.z:F3}) currentPos=({currentPos.x:F3},{currentPos.y:F3},{currentPos.z:F3})"
+            $"[MBB-WALL] p0=({p0.x:F3},{p0.y:F3}) p1=({p1.x:F3},{p1.y:F3}) baseY={baseY:F3} targetHeight={targetHeight:F3} legacy={isLegacyPart}\n" +
+            $"[MBB-WALL]   totalLength={totalLength:F4} startOffset={clampedStart:F4} endOffset={clampedEnd:F4} effectiveLength={effectiveLength:F4}\n" +
+            $"[MBB-WALL]   meshName={sourceMesh.name} boundsSize=({originalSize.x:F4},{originalSize.y:F4},{originalSize.z:F4}) boundsCenterX={bounds.center.x:F4}\n" +
+            $"[MBB-WALL]   unitActualLength={unitActualLength:F4} numUnits={numUnits} slotLength={slotLength:F4} xStretchFactor={xStretchFactor:F4}\n" +
+            $"[MBB-WALL]   finalScale=({scale.x:F4},{scale.y:F4},{scale.z:F4}) pivotShift={pivotShift:F4}"
         );
 
         for (int i = 0; i < numUnits; i++)
@@ -991,6 +1099,7 @@ public static class ModularBodyBuilder
                 Mesh bakedMesh = new Mesh();
                 smr.BakeMesh(bakedMesh);
                 meshInstance = Object.Instantiate(bakedMesh);
+                Object.Destroy(bakedMesh);
             }
             else
             {
@@ -998,7 +1107,8 @@ public static class ModularBodyBuilder
             }
             Vector3[] vertices = meshInstance.vertices;
 
-            Matrix4x4 matrix = Matrix4x4.TRS(currentPos, rotation, scale);
+            Vector3 unitPos = start + direction * (clampedStart + i * slotLength + pivotShift);
+            Matrix4x4 matrix = Matrix4x4.TRS(unitPos, rotation, scale);
 
             for (int v = 0; v < vertices.Length; v++)
             {
@@ -1013,102 +1123,6 @@ public static class ModularBodyBuilder
                 Mesh = meshInstance,
                 Materials = sharedMaterials,
             });
-
-            currentPos += unitVector;
-        }
-
-        return segments;
-    }
-
-    /// <summary>
-    /// フェンス用の辺セグントメッシュを生成する。
-    /// 壁パーツの元のサイズを保ち、Y方向にはスケールしない。
-    /// X方向（辺の長さ方向）に引き伸ばして隙間を埋める。
-    /// </summary>
-    public static List<SegmentMeshData> GenerateFenceSegments(Vector2 p0, Vector2 p1, GameObject wallModule, Material[] sharedMaterials)
-    {
-        List<SegmentMeshData> segments = new List<SegmentMeshData>();
-        if (wallModule == null) return segments;
-
-        Vector3 start = new Vector3(p0.x, 0f, p0.y);
-        Vector3 end = new Vector3(p1.x, 0f, p1.y);
-        Vector3 direction = (end - start).normalized;
-        float totalLength = Vector3.Distance(start, end);
-
-        if (totalLength <= 0.001f) return segments;
-
-        MeshFilter mf = wallModule.GetComponentInChildren<MeshFilter>();
-        SkinnedMeshRenderer smr = wallModule.GetComponentInChildren<SkinnedMeshRenderer>();
-        Mesh sourceMesh = null;
-        if (mf != null && mf.sharedMesh != null)
-        {
-            sourceMesh = mf.sharedMesh;
-        }
-        else if (smr != null && smr.sharedMesh != null)
-        {
-            sourceMesh = smr.sharedMesh;
-        }
-        if (sourceMesh == null) return segments;
-
-        Vector3 originalSize = sourceMesh.bounds.size;
-        float cornerLength = originalSize.x;
-        float effectiveLength = totalLength - (2f * cornerLength);
-        if (effectiveLength < 0f) effectiveLength = totalLength;
-
-        float unitActualLength = originalSize.x;
-        int numUnits = Mathf.Max(1, Mathf.FloorToInt(effectiveLength / unitActualLength));
-        float totalWallLength = numUnits * unitActualLength;
-        float xStretchFactor = effectiveLength / totalWallLength;
-
-        Vector3 scale = new Vector3(xStretchFactor, 1f, 1f);
-
-        // 辺の方向（direction）に合わせて、Y軸まわりの回転角度を計算する。
-        // Quaternion.FromToRotation は対向方向での特異点（Y軸反転）が発生するため、
-        // Atan2 を用いて常に上向き（Y軸）を維持した水平回転を計算する。
-        float angle = Mathf.Atan2(direction.z, direction.x) * Mathf.Rad2Deg;
-        // 壁系パーツ（base/mid/top-w・fence-w・scaffold-wall）は、著作モデルの向きに合わせて
-        // 辺方向へ向けたうえで Y 軸まわりに 180° 反転して配置する。
-        // 角パーツ（*-c、GenerateCornerCore）は二等分線ベースの向き決定なので対象外。
-        Quaternion rotation = Quaternion.Euler(0, -angle + 180f, 0);
-
-        float finalUnitLength = unitActualLength * xStretchFactor;
-        Vector3 unitVector = direction * finalUnitLength;
-        Vector3 currentPos = start + direction * cornerLength + unitVector * 0.5f;
-        if (effectiveLength == totalLength)
-        {
-            currentPos = start + unitVector * 0.5f;
-        }
-
-        for (int i = 0; i < numUnits; i++)
-        {
-            Mesh meshInstance;
-            if (smr != null)
-            {
-                Mesh bakedMesh = new Mesh();
-                smr.BakeMesh(bakedMesh);
-                meshInstance = Object.Instantiate(bakedMesh);
-            }
-            else
-            {
-                meshInstance = Object.Instantiate(sourceMesh);
-            }
-            Vector3[] vertices = meshInstance.vertices;
-
-            Matrix4x4 matrix = Matrix4x4.TRS(currentPos, rotation, scale);
-            for (int v = 0; v < vertices.Length; v++)
-            {
-                vertices[v] = matrix.MultiplyPoint3x4(vertices[v]);
-            }
-            meshInstance.vertices = vertices;
-            meshInstance.RecalculateNormals();
-            meshInstance.RecalculateBounds();
-
-            segments.Add(new SegmentMeshData
-            {
-                Mesh = meshInstance,
-                Materials = sharedMaterials,
-            });
-            currentPos += unitVector;
         }
 
         return segments;
@@ -1126,9 +1140,9 @@ public static class ModularBodyBuilder
 
     /// <summary>
     /// 工事中建物の足場を生成する。**通常建物の壁・角と全く同じ配置ロジック**
-    /// （GenerateWallSegments / GenerateCornerSegment / GetCornerArmLengths）を、
+    /// （GenerateWallSegments / GenerateCornerSegment / MeasureCornerExtentAlongEdge）を、
     /// 建物フットプリント上でそのまま使い回す。角パーツのヒンジ（原点）はフットプリント頂点に
-    /// 一致し、壁は両端を角パーツのアーム長ぶん空けて配置される。オフセットは行わない。
+    /// 一致し、壁は両端を角パーツの張り出しぶん空けて配置される。オフセットは行わない。
     /// フェンスと違い各階を targetHeight(階高)へYスケールし、builtFloors 段ぶん生成する。
     /// wallModule / cornerModule は全辺・全頂点で共通の単一パーツ。
     /// </summary>
@@ -1147,15 +1161,6 @@ public static class ModularBodyBuilder
         if (footprint == null || footprint.Length < 3 || wallModule == null) return;
         int n = footprint.Length;
 
-        // 壁の両端に空ける角パーツのアーム長。全頂点で同一パーツなので、通常建物のように
-        // 「現在の角の startOffset・次の角の endOffset」を別々に取る必要はなく同じ値になる。
-        float startOffset = 0f;
-        float endOffset = 0f;
-        if (cornerModule != null)
-        {
-            GetCornerArmLengths(cornerModule, floorHeight, out startOffset, out endOffset);
-        }
-
         for (int level = 0; level < builtFloors; level++)
         {
             float floorY = level * floorHeight;
@@ -1165,8 +1170,14 @@ public static class ModularBodyBuilder
                 Vector2 p0 = footprint[(i + n - 1) % n];
                 Vector2 p1 = footprint[i];
                 Vector2 p2 = footprint[(i + 1) % n];
+                Vector2 p3 = footprint[(i + 2) % n];
 
-                // 壁: p1 → p2（通常建物と同じ GenerateWallSegments。両端を角アーム長ぶん空ける）
+                // 壁の両端に空ける角パーツの張り出し量。全頂点で同一パーツだが、張り出しは
+                // 内角に依存する（角パーツはボーンで開閉する）ため頂点ごとに測る。
+                float startOffset = MeasureCornerExtentAlongEdge(cornerModule, p0, p1, p2, floorHeight, true);
+                float endOffset = MeasureCornerExtentAlongEdge(cornerModule, p1, p2, p3, floorHeight, false);
+
+                // 壁: p1 → p2（通常建物と同じ GenerateWallSegments。両端を角の張り出しぶん空ける）
                 List<SegmentMeshData> wallSegments = GenerateWallSegments(
                     p1, p2, floorY, wallModule, wallMaterials, floorHeight, startOffset, endOffset);
                 foreach (var seg in wallSegments)
@@ -1183,24 +1194,6 @@ public static class ModularBodyBuilder
                 }
             }
         }
-    }
-
-    /// <summary>
-    /// メッシュの頂点から AABB のサイズを計算する。
-    /// bounds.size が正しくない場合の比較用。
-    /// </summary>
-    private static Vector3 ComputeVertexBoundsSize(Mesh mesh)
-    {
-        if (mesh == null || mesh.vertexCount == 0) return Vector3.zero;
-        Vector3[] verts = mesh.vertices;
-        Vector3 min = verts[0];
-        Vector3 max = verts[0];
-        for (int i = 1; i < verts.Length; i++)
-        {
-            min = Vector3.Min(min, verts[i]);
-            max = Vector3.Max(max, verts[i]);
-        }
-        return max - min;
     }
 
     /// <summary>
@@ -1252,16 +1245,9 @@ public static class ModularBodyBuilder
 
         Vector3 corner = new Vector3(p1.x, cornerY, p1.y);
 
-        Vector2 v1 = (p0 - p1).normalized;
-        Vector2 v2 = (p2 - p1).normalized;
-
-        float signedAngle = Vector2.SignedAngle(v2, v1);
-
-        float interiorAngle = signedAngle;
-        if (interiorAngle < 0)
-        {
-            interiorAngle += 360f;
-        }
+        // 向きは MeasureCornerExtentAlongEdge と共通の計算を使う（壁の敷き詰め開始位置は
+        // この回転を前提に角パーツの張り出しを測るため、両者がずれると壁と角がずれる）。
+        Quaternion rotation = ComputeCornerRotation(p0, p1, p2, out _, out float interiorAngle);
 
         if (interiorAngle > 180f)
         {
@@ -1269,21 +1255,6 @@ public static class ModularBodyBuilder
             // 可能性があるが、現状は補正せず警告のみに留める（意図的な挙動）。
             Debug.LogWarning($"ModularBodyBuilder: 内角が180°を超えています ({interiorAngle:F1}°)。凹多角形の可能性があります。");
         }
-
-        // 二等分線。内角が 180°付近（2辺がほぼ一直線）だと v1+v2 がほぼ 0 になり
-        // normalized が NaN 化して回転が暴れる。その場合は辺 v2 に垂直な向きで
-        // フォールバックし、破綻を防ぐ。
-        Vector2 bisectorRaw = v1 + v2;
-        Vector2 bisector = bisectorRaw.sqrMagnitude < 1e-6f
-            ? new Vector2(-v2.y, v2.x)
-            : bisectorRaw.normalized;
-        float bisectorAngle = Mathf.Atan2(bisector.y, bisector.x) * Mathf.Rad2Deg;
-        // -bisectorAngle + 90 は二等分線方向へ角パーツの正面を向ける幾何的な向き決定。
-        // 末尾の +135 は角パーツの著作向きに合わせたオフセット（回転0でエクスポートされた
-        // 角パーツはローカルの正面が Y 軸まわりに 135° ずれているため、それを打ち消す）。
-        // ボーン曲げ（GenerateSkinnedCorner）はこの rotation とは独立にワールドY軸で行われるため、
-        // この 135° は曲げに影響せず、曲げ後の角全体の向きだけを補正する。
-        Quaternion rotation = Quaternion.Euler(0, -bisectorAngle + 90 + 135, 0);
 
         SkinnedMeshRenderer prefabSmr = cornerModule.GetComponentInChildren<SkinnedMeshRenderer>();
         if (prefabSmr != null)

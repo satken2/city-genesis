@@ -613,7 +613,7 @@ export type MasterData = {
  * 基本情報は全施設が持つ。メトリクス項目は施設の種類（グループ）によって
  * 付与されるフィールドが異なり、未設定の場合は undefined になる。
  *   - 不動産（TYPE_BUILDING）: supply_floor / occupancy_rate / rent / balance / utilization_rate
- *   - 港湾（TYPE_IMPORT）: capacity / import_handling / export_handling / handling / utilization_rate
+ *   - 港湾（TYPE_TRADE）: capacity / import_handling / export_handling / utilization_rate
  *   - サービス・公営（TYPE_STANDARD）: production / sold_amount / price / balance / utilization_rate
  *   - 市政府・教育: メトリクスなし（基本情報のみ）
  */
@@ -631,9 +631,8 @@ export type PublicFacilityAgent = {
   supply_floor?: number;
   occupancy_rate?: number;
   rent?: number;
-  // 港湾系メトリクス（handling は輸入+輸出の合計、import/export_handling は方向別内訳）
+  // 港湾系メトリクス（取扱量は輸入・輸出それぞれ）
   capacity?: number;
-  handling?: number;
   import_handling?: number;
   export_handling?: number;
   // 共通メトリクス（複数グループで使用）

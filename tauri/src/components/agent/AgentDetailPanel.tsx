@@ -26,7 +26,7 @@ import {
 import { 
   TYPE_BUILDING,
   TYPE_HOUSEHOLD,
-  TYPE_IMPORT,
+  TYPE_TRADE,
   TYPE_STANDARD,
   TYPE_EDUCATION,
   STATUS_SCHEDULED_CONSTRUCTION,
@@ -209,7 +209,7 @@ export function AgentDetailPanel({
   useEffect(() => {
     if (!agentData) return;
 
-    const isImportOrExport = agentData.type === TYPE_IMPORT;
+    const isImportOrExport = agentData.type === TYPE_TRADE;
     const showBasicInfo = !isImportOrExport;
     const showHouseholdInfo = agentData.type === TYPE_HOUSEHOLD;
     const showEducationInfo = agentData.type === TYPE_EDUCATION;
@@ -313,7 +313,7 @@ export function AgentDetailPanel({
     agentData.bd_type
   );
 
-  const isImportOrExport = agentData.type === TYPE_IMPORT;
+  const isImportOrExport = agentData.type === TYPE_TRADE;
 
   const isPreConstruction = agentData.status === STATUS_SCHEDULED_CONSTRUCTION || agentData.status === STATUS_PENDING;
 

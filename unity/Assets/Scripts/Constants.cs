@@ -79,7 +79,7 @@ public static class Constants
     public const int TYPE_CITY = 1;
     public const int TYPE_EDUCATION = 2;
     public const int TYPE_HOUSEHOLD = 3;
-    public const int TYPE_IMPORT = 5;
+    public const int TYPE_TRADE = 4;
     public const int TYPE_STANDARD = 10;
     public const int TYPE_BUILDING = 20;
     public const int VARIANT_ZONE_CONSTRUCTION = 0;
@@ -90,7 +90,7 @@ public static class Constants
     public const int VARIANT_CENTRAL_BANK = 101;
     public const int VARIANT_ELEMENRATY_SCHOOL = 200;
     public const int VARIANT_HOUSEHOLD = 300;
-    public const int VARIANT_IMPORT = 500;
+    public const int VARIANT_IMPORT = 400;
     public const int VARIANT_SOLAR_PLANT = 1054;
     public const int VARIANT_SUBSTATION = 1062;
     public const int VARIANT_APARTMENT = 2001;
