@@ -16,6 +16,7 @@ using NetTopologySuite.Geometries;
 /// visual_variant(1)/visual_variant2 … 岸壁の左端/右端の突き出し量（0=最小突き出し、1=区画の海側いっぱいまで）
 /// 上面の高さは海面から2m固定（visual_variant3 は使わない）。
 /// 上面は敷地全体の地面パネル(draw_floor)と同じ floor マテリアルで床続きに描画し、側面/下面は ceil を使う。
+/// 水際（海側の直線エッジ）には荷役クレーン（port_crane）を等間隔に並べる。
 ///
 /// 詳細仕様は genesis-docs/docs/geometries/F_建物メッシュの生成.md §18 を参照。
 /// </summary>
@@ -26,6 +27,31 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
 
     /// <summary>突き出し量の下限（区画の海側奥行きに対する比率）。visual_variant=0 でも岸壁はこの割合だけ海へ張り出す。</summary>
     private const float MIN_PROTRUSION_RATIO = 0.2f;
+
+    /// <summary>荷役クレーンの設置間隔（パーツ実寸幅に対する倍率）。1.0 だと隣同士が接するため余白を持たせる。</summary>
+    private const float CRANE_SPACING_RATIO = 1.5f;
+
+    /// <summary>1つの岸壁に並べる荷役クレーンの上限。巨大な岸壁でドローコールが膨らむのを防ぐ。</summary>
+    private const int MAX_CRANE_COUNT = 8;
+
+    /// <summary>海側エッジ上とみなす距離の許容差(m)。カット直線と岸壁フットプリントの辺の照合に使う。</summary>
+    private const float SEAWARD_EDGE_EPSILON = 0.05f;
+
+    /// <summary>
+    /// 岸壁の海側境界（A'-B' の直線カットで生じたエッジ）を表す。
+    /// 塔屋の向きと荷役クレーンの配置に使う。カットできなかった建物では <see cref="Valid"/> が false。
+    /// 座標・方向はすべて center_point 基準のローカルXZ。
+    /// </summary>
+    private struct QuaySeawardEdge
+    {
+        public bool Valid;
+        /// <summary>カット直線上の基準点（突き出し後の左端 A'）。</summary>
+        public Vector2 Origin;
+        /// <summary>カット直線の向き（A'→B'）。</summary>
+        public Vector2 Dir;
+        /// <summary>カット直線に垂直な、海を向く単位法線。</summary>
+        public Vector2 Normal;
+    }
 
     public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic = false)
     {
@@ -55,7 +81,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
 
         // 1. 海岸線との交点から左端A・右端Bを求め、visual_variant1/2 の突き出しを反映した
         //    直線カットで岸壁フットプリントを得る。
-        Vector2[] quayFootprint = BuildQuayFootprint(footprint, centerPointWorld, variant1, variant2, out Vector2 seawardDir);
+        Vector2[] quayFootprint = BuildQuayFootprint(footprint, centerPointWorld, variant1, variant2, out QuaySeawardEdge seaward);
 
         // 2. スラブ上面のローカルY。
         //    上面のワールドY = 海面(0m) + 2m 固定。GameObject は center_point 位置の地形高さに
@@ -87,9 +113,12 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         temporaryMeshes.Add(slabMesh);
 
         // 4. 塔屋（岸壁中央・海側境界方向・上面高さ）。
-        PlaceRoofprop(prefix, quayFootprint, seawardDir, topLocalY, combineInstances, materials, temporaryMeshes);
+        PlaceRoofprop(prefix, quayFootprint, seaward.Dir, topLocalY, combineInstances, materials, temporaryMeshes);
 
-        // 5. 敷地の装飾（フェンス・タイル・地面パネル）。モジュラー/prebuilt と共通の処理で、
+        // 5. 荷役クレーン（水際の直線エッジに沿って等間隔）。
+        PlacePortCranes(prefix, quayFootprint, seaward, topLocalY, combineInstances, materials, temporaryMeshes);
+
+        // 6. 敷地の装飾（フェンス・タイル・地面パネル）。モジュラー/prebuilt と共通の処理で、
         //    地面パネルは draw_floor=yes のとき敷地（土地区画）全体に地形追従で描かれ、
         //    岸壁上面と同一の floor マテリアルで床続きになる。
         Vector2[] fenceFootprint = BuildingMeshUtils.ResolveParcelContext(
@@ -102,7 +131,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
             centerPointWorld, deformToTerrain: isDynamic,
             combineInstances, materials, temporaryMeshes);
 
-        // 6. メッシュ結合。
+        // 7. メッシュ結合。
         Mesh finalMesh = new Mesh();
         finalMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         finalMesh.CombineMeshes(combineInstances.ToArray(), false, true);
@@ -114,7 +143,8 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
             Object.Destroy(temp);
         }
 
-        // 7. コライダー（岸壁フットプリントを上面高さまで押し出し）。
+        // 8. コライダー（岸壁フットプリントを上面高さまで押し出し）。
+        //    クレーンのブームは海側へ張り出すがクリック対象には含めない（工事中のクレーン §19.7 と同じ割り切り）。
         Mesh colliderMesh = BuildingMeshBuilder.GenerateColliderMesh(quayFootprint, Mathf.Max(0.1f, topLocalY));
 
         var result = new BuildingMeshResult(finalMesh, materials.ToArray(), colliderMesh);
@@ -194,11 +224,11 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
     /// カットは底面ポリゴンとの交差なので、岸壁は常に土地区画の範囲内に収まる。
     /// 海岸線未ロード・交点2つ未満・海側頂点なし・幾何演算失敗の場合は元の底面をそのまま返す。
     /// </summary>
-    /// <param name="seawardDir">海側境界（直線エッジ）の向き（A'→B'）。塔屋の向きに使う。</param>
+    /// <param name="seaward">海側境界（直線カットで生じたエッジ）。塔屋の向きと荷役クレーンの配置に使う。カット不能時は Valid=false。</param>
     private static Vector2[] BuildQuayFootprint(Vector2[] footprint, Vector3 centerPointWorld,
-        float variant1, float variant2, out Vector2 seawardDir)
+        float variant1, float variant2, out QuaySeawardEdge seaward)
     {
-        seawardDir = Vector2.zero;
+        seaward = default;
         int n = footprint.Length;
 
         if (!CoastlineStore.IsLoaded || !CoastlineStore.HasCoastline)
@@ -378,7 +408,20 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
                 System.Array.Reverse(quayFootprint);
             }
 
-            seawardDir = edgeDir;
+            // 海側境界の記述。法線は「カット直線に垂直」かつ「海を向く側」を採る。
+            // 左右の突き出し量が違うと edgeDir は弦 A-B から傾くため、perp をそのまま使わず edgeDir から作り直す。
+            Vector2 cutNormal = new Vector2(edgeDir.y, -edgeDir.x);
+            if (Vector2.Dot(cutNormal, perp) < 0f)
+            {
+                cutNormal = -cutNormal;
+            }
+            seaward = new QuaySeawardEdge
+            {
+                Valid = true,
+                Origin = new Vector2(aOut.x - centerPointWorld.x, aOut.y - centerPointWorld.z),
+                Dir = edgeDir,
+                Normal = cutNormal,
+            };
             UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
                 $"[PortBMB] 直線カット適用: 頂点 {n}→{quayFootprint.Length}, 突き出し 左{depthLeft:F1}m/右{depthRight:F1}m (上限{maxDepth:F1}m)");
             return quayFootprint;
@@ -567,6 +610,90 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
             materials.Add(mat);
         }
         temporaryMeshes.Add(meshInstance);
+    }
+
+    /// <summary>
+    /// 荷役クレーン（port_crane）を岸壁の水際＝海側の直線エッジに沿って等間隔に並べる。
+    ///
+    /// パーツは一切スケールしない（実寸）。モデル原点が水際の境界線上・岸壁上面の高さに一致し、
+    /// ローカル+Z が海を向く（＝ローカルXが水際に沿う）ように回転させる。
+    /// 基数はエッジ長 ÷（パーツ実寸幅 × <see cref="CRANE_SPACING_RATIO"/>）で決まり、
+    /// エッジ全体に等間隔・両端の余白が等しくなるよう配置する。
+    /// クレーン1基の幅に満たない水際には置かない。
+    ///
+    /// 海側境界が特定できなかった建物（海岸線未ロード・カット不能）では水際が定まらないため配置しない。
+    /// </summary>
+    private static void PlacePortCranes(string prefix, Vector2[] quayFootprint, QuaySeawardEdge seaward, float topLocalY,
+        List<CombineInstance> combineInstances, List<Material> materials, List<Mesh> temporaryMeshes)
+    {
+        if (!seaward.Valid || quayFootprint == null || quayFootprint.Length < 3)
+        {
+            return;
+        }
+
+        GameObject cranePrefab = BuildingMeshUtils.GetPartNoPosition(prefix, "port_crane", 0, true);
+        if (cranePrefab == null)
+        {
+            return;
+        }
+
+        // 複数オブジェクト構成のFBXでも欠けないよう、プレハブ配下の全メッシュを結合して使う。
+        Mesh craneMesh = BuildingMeshUtils.CombineModuleMeshes(cranePrefab, out Material[] craneMaterials);
+        if (craneMesh == null)
+        {
+            return;
+        }
+        temporaryMeshes.Add(craneMesh);
+
+        float craneWidth = Mathf.Max(craneMesh.bounds.size.x, 0.5f);
+        float spacing = craneWidth * CRANE_SPACING_RATIO;
+        Quaternion rotation = Quaternion.LookRotation(new Vector3(seaward.Normal.x, 0f, seaward.Normal.y), Vector3.up);
+
+        int placed = 0;
+        int n = quayFootprint.Length;
+        for (int i = 0; i < n && placed < MAX_CRANE_COUNT; i++)
+        {
+            Vector2 p = quayFootprint[i];
+            Vector2 q = quayFootprint[(i + 1) % n];
+
+            // カット直線上に乗っている辺だけが水際。両端の法線方向オフセットが0とみなせるかで判定する。
+            if (Mathf.Abs(Vector2.Dot(p - seaward.Origin, seaward.Normal)) > SEAWARD_EDGE_EPSILON ||
+                Mathf.Abs(Vector2.Dot(q - seaward.Origin, seaward.Normal)) > SEAWARD_EDGE_EPSILON)
+            {
+                continue;
+            }
+
+            float length = (q - p).magnitude;
+            if (length < craneWidth)
+            {
+                continue;
+            }
+
+            int count = Mathf.Clamp(Mathf.FloorToInt(length / spacing), 1, MAX_CRANE_COUNT - placed);
+            Vector2 dir = (q - p) / length;
+            for (int c = 0; c < count; c++)
+            {
+                Vector2 at = p + dir * (length * (c + 0.5f) / count);
+                Matrix4x4 matrix = Matrix4x4.TRS(new Vector3(at.x, topLocalY, at.y), rotation, Vector3.one);
+                for (int s = 0; s < craneMesh.subMeshCount; s++)
+                {
+                    combineInstances.Add(new CombineInstance
+                    {
+                        mesh = craneMesh,
+                        subMeshIndex = s,
+                        transform = matrix
+                    });
+                    Material mat = (craneMaterials != null && craneMaterials.Length > 0)
+                        ? craneMaterials[Mathf.Min(s, craneMaterials.Length - 1)]
+                        : null;
+                    materials.Add(mat);
+                }
+                placed++;
+            }
+        }
+
+        UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
+            $"[PortBMB] 荷役クレーン: {placed}基配置 (幅{craneWidth:F1}m 間隔{spacing:F1}m)");
     }
 
     /// <summary>

@@ -44,7 +44,7 @@
                           │    │                      ├─ 1. 海岸線ポリゴンを取得
                           │    │                      ├─ 2. 底面ポリゴンを海岸線でカット（visual_variant1/2で突き出し量を補間）
                           │    │                      ├─ 3. 厚みのあるスラブを上下に押し出し
-                          │    │                      └─ 4. 塔屋を配置・結合・ベイク
+                          │    │                      └─ 4. 塔屋・荷役クレーンを配置・結合・ベイク
                           │    └─ その他             → BuildingMeshBuilder.GenerateSimpleBuilding（白い箱）
                           │
                                 ▼
@@ -125,7 +125,8 @@ Assets/Resources/Models/
 │   │       ├── generic-wall.prefab  # 無地の壁マテリアル用（切妻屋根の妻壁など）
 │   │       ├── tile.prefab          # タイルオブジェクト（MODEL_MODULAR_GROUND 専用）
 │   │       ├── roofprop.prefab      # 塔屋
-│   │       └── entrance.prefab      # エントランス（前面の辺の中央・地面レベル）
+│   │       ├── entrance.prefab      # エントランス（前面の辺の中央・地面レベル）
+│   │       └── port_crane.prefab    # 荷役クレーン（MODEL_PORT 専用。水際に実寸配置）
 │   ├── a{agent_variant}/
 │   │   └── {threshold}/
 │   │       ├── base-prebuilt.prefab
@@ -177,6 +178,7 @@ ceil             屋上マテリアル用
 floor            地面マテリアル用
 generic-wall     無地の壁マテリアル用（切妻屋根の妻壁。§8.3）
 tile             タイルオブジェクト（MODEL_MODULAR_GROUND 専用）
+port_crane       荷役クレーン（MODEL_PORT 専用。水際に実寸スケールなしで並べる。§18.6）
 scaffold-wall    足場の辺パーツ（工事中表示専用。§19）
 scaffold-corner  足場の角パーツ（工事中表示専用。§19）
 crane-base       クレーン最下段（工事中表示専用。§19）
@@ -724,7 +726,19 @@ A・B をそれぞれ海側方向（弦の法線）へ突き出した2点 A'・B
 
 `visual_variant` は岸壁の幾何（突き出し）に消費されるため、閾値フォルダ `suffix` の選択には使えない。塔屋を含むパーツは閾値 `0` のフォルダから取得する。
 
-### 18.6 マテリアル・敷地の地面パネル・コライダー
+### 18.6 荷役クレーン（port_crane）
+
+パーツ `{prefix}/0/port_crane` が存在する場合、岸壁の**水際＝海側の直線エッジ（§18.3 の A'-B' カットで生じた辺）** に沿ってガントリークレーン等の荷役機械を並べる。パーツが無ければ配置しない。
+
+- **配置場所** — 岸壁フットプリントのうち、カット直線上に乗っている辺。海岸線が取得できずカットできなかった建物（§18.2 のフォールバック）では水際が定まらないため配置しない。
+- **原点** — **モデル原点が水際の境界線上**に一致する。高さは岸壁上面と同じ `H`。ブームを海側へ張り出させるか、脚を陸側に置くかはモデル側の造形で決める。
+- **向き** — **ローカル +Z が海側**（＝ローカル X が水際に沿う）。
+- **スケール** — **一切しない（実寸）**。パーツの実寸幅（X）がそのまま設置間隔の基準になる。
+- **基数と間隔** — 設置間隔 = パーツ実寸幅 × 1.5。1つの辺に置く基数 = floor(辺長 ÷ 設置間隔)（最低1基、岸壁あたり最大8基）。辺全体に等間隔で、両端の余白が等しくなるよう配置する。**辺長がパーツ1基の幅に満たない水際には置かない**ため、小さな港では0基になる。
+
+クレーンのブームが海側へ張り出しても、コライダー（§18.7）には含めない。
+
+### 18.7 マテリアル・敷地の地面パネル・コライダー
 
 - **マテリアル** — 上面は `{prefix}-floor`、側面・下面は `{prefix}-ceil` のマテリアルを流用する。上面に floor を使うのは、後述の敷地全体の地面パネルと同一マテリアルにして、陸側の敷地と岸壁を一続きの床に見せるためである。該当パーツがなければ建物全体のデフォルトマテリアルを使う（§8.1・§9 と同方針）。
 - **敷地の地面パネル** — 他のモデルタイプと同様に、マスターの `draw_floor` が有効な建物では土地区画全体に地形追従の地面パネルを描画する（floor パーツを `a{variant}` → `b{bd_type}` → `common` で解決。モジュラー・既成建物と共通の敷地装飾処理）。フェンス・タイルパーツが存在する場合も同様に描画される。
@@ -823,6 +837,6 @@ builtFloors = clamp(ceil(progress01 × floors), 1, floors)
 | **`HouseRoofBuilder.cs`**                   | **static クラス**。住宅風三角屋根メッシュを生成して返す（今の `RoofMeshBuilder.GenerateExtrudedRoof` 相当）。                                                         |
 | **`GableRoofBuilder.cs`**                   | **static クラス**。切妻屋根メッシュ（厚みのある勾配面2枚＋妻壁）を生成して返す。屋根面と妻壁でサブメッシュ・マテリアルを分ける（§8.3）。                                                                                                                      |
 | **`PreBuiltBuildingMeshBuilder.cs`**        | `IBuildingMeshGenerator`。既成パーツ組み立て（今の `PreBuiltBuilding` のリネーム）。                                                                         |
-| **`PortBuildingMeshBuilder.cs`**            | `IBuildingMeshGenerator`。海岸線で底面ポリゴンをカットし、厚みのある岸壁スラブを押し出して塔屋を配置する（MODEL_PORT）。                                                            |
+| **`PortBuildingMeshBuilder.cs`**            | `IBuildingMeshGenerator`。海岸線で底面ポリゴンをカットし、厚みのある岸壁スラブを押し出して塔屋・荷役クレーンを配置する（MODEL_PORT）。                                                  |
 | **`ConstructingBuildingMeshBuilder.cs`**    | `IBuildingMeshGenerator`。工事中（STATUS_CONSTRUCTING）専用の「工事現場」メッシュ（土マウンド + 足場リング + クレーン）を生成する（§19）。model_type 分岐より先に status で分岐する。 |
 | **`DefaultBuilding.cs`**                    | フォールバック用（そのまま残す）。                                                                                                                        |
