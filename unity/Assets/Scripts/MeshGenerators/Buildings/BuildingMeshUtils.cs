@@ -525,9 +525,9 @@ public static class BuildingMeshUtils
     /// <summary>
     /// 指定プレフィックス配下で partName を suffix 走査して解決する(common へのフォールバックはしない)。
     /// suffix は標準閾値候補 0,100,...,1000 のうち variantNumber 以下でパーツが存在する最大値。
-    /// 見つからなければ null。
+    /// 見つからなければ null。マッシュアップ建物のパーツ解決(パーツごとの独立スキャン)にも使う。
     /// </summary>
-    private static GameObject GetPartBySuffixScan(string prefix, string partName, int variantNumber)
+    public static GameObject GetPartBySuffixScan(string prefix, string partName, int variantNumber)
     {
         int bestSuffix = -1;
         for (int suffix = 0; suffix <= 1000; suffix += 100)

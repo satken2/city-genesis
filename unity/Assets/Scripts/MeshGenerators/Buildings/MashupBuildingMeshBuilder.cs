@@ -1,0 +1,280 @@
+using UnityEngine;
+using System.Collections.Generic;
+using GeneratedModels;
+
+/// <summary>
+/// マッシュアップ建物（MODEL_MASHUP）のメッシュ生成器。
+/// 学校（校舎＋体育館）や変電所（管理棟＋変圧器）のような「1施設＝複数棟」の建物を、
+/// 土地区画を8m×8mセルに分割した配置計画（BuildingSummary.sub_buildings）に従って組み立てる。
+/// セル分割と棟の割り付けはバックエンドが解決済みで、Unity側には各サブ建物の
+/// 配置座標（center_point基準）・回転・階数だけが届く（セル分割ロジックは持たない）。
+///
+/// 各サブ建物は既成建物（MODEL_PREBUILT）と同じ積み上げロジックで組み立てる:
+/// - mashup-{model_prefix}-base-prebuilt … 1階部分。高さが階高になるようY方向のみスケール。XZは実寸。
+/// - mashup-{model_prefix}-mid-prebuilt  … 繰り返しフロア1階分。baseと同じくY方向のみ階高スケール。
+/// - mashup-{model_prefix}-top-prebuilt  … 頂部。一切スケールされず実寸のまま配置される。
+/// 階高はサブ建物ごとの height_per_floor（未指定なら建物本体の階高）を使う。
+/// パーツは prebuilt と異なり外観バリアントの閾値フォルダから解決する（パーツごとの独立スキャン）。
+/// 塔屋・エントランスは配置しない。
+///
+/// 接地は既成建物と同じく建物中心位置の地形標高（傾斜地対応 IsApplicableModelType の対象外・
+/// コンクリート基盤なし）。ただし区画が広く斜面にまたがることがあるため、各サブ建物のY位置は
+/// 自分の配置座標の地形標高（中心標高との差分）へ常時合わせる。
+///
+/// 敷地の装飾はフェンス（fence-w / fence-c）と地面パネル（floor、master の draw_floor=yes のみ）を
+/// 土地区画ポリゴンに沿って描画する。タイル（tile）は敷かない。
+/// コライダーは土地区画ポリゴンを描画された最大高さまで押し出す
+/// （区画のどこをクリックしても建物を選択できるようにするため）。
+/// </summary>
+public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
+{
+    /// <summary>
+    /// BuildingSummary からマッシュアップ建物メッシュを生成する。
+    /// isDynamic が true の場合、フェンス・地面パネルを地形に追従させる。
+    /// </summary>
+    public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic = false)
+    {
+        if (buildingData == null)
+        {
+            Debug.LogError("MashupBuildingMeshBuilder: buildingData が null です。");
+            return null;
+        }
+
+        BuildingMeshUtils.InitializeCache();
+
+        float floorHeight = BuildingMeshUtils.GetFloorHeight(buildingData);
+        string glbPrefix = BuildingMeshUtils.GetGlbPrefix1(buildingData);
+        int variantNumber = BuildingMeshUtils.ComputeVariantNumber(buildingData.visual_variant);
+
+        List<CombineInstance> combineInstances = new List<CombineInstance>();
+        List<Material> materials = new List<Material>();
+        List<Mesh> temporaryMeshes = new List<Mesh>();
+
+        // 土地区画ポリゴン（center_point基準ローカルXZ）と配置基準のワールド座標。
+        // マッシュアップ建物は中心位置の地形標高に接地するため useParcelAltitude は false。
+        Vector2[] fenceFootprint = BuildingMeshUtils.ResolveParcelContext(
+            buildingData, useParcelAltitude: false, out _, out Vector3 centerPointWorld);
+
+        // --- サブ建物の積み上げ ---
+        // maxTopY は描画された最も高いサブ建物の天端（ローカルY）。コライダーの高さに使う。
+        float maxTopY = 0f;
+        if (buildingData.sub_buildings != null)
+        {
+            foreach (SubBuildingPlacement placement in buildingData.sub_buildings)
+            {
+                if (placement == null || placement.position == null || placement.position.Length < 2
+                    || string.IsNullOrEmpty(placement.model_prefix))
+                {
+                    UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
+                        $"[Mashup] agent_id={buildingData.agent_id} の sub_buildings に不正なエントリがあるためスキップします。");
+                    continue;
+                }
+                float topY = GenerateSubBuilding(
+                    placement, glbPrefix, variantNumber, floorHeight, centerPointWorld,
+                    combineInstances, materials, temporaryMeshes);
+                maxTopY = Mathf.Max(maxTopY, topY);
+            }
+        }
+
+        // --- 敷地の装飾（フェンス・地面パネル）---
+        // モジュラー・既成建物と共通の処理。tilePolygon に null を渡してタイルは敷かない。
+        // 中心位置の地形標高に接地するため、超近景（isDynamic）では地形に追従させる。
+        Vector2[] footprint = (buildingData.polygonArray != null && buildingData.polygonArray.Length >= 3)
+            ? BuildingMeshUtils.GetFootprint(buildingData)
+            : null;
+        Vector2[] sitePolygon = (fenceFootprint != null && fenceFootprint.Length >= 3) ? fenceFootprint : footprint;
+        Material floorMaterial = BuildingMeshUtils.ResolveFloorMaterialFromMaster(buildingData, glbPrefix);
+        ModularBodyBuilder.GenerateSiteDecorations(
+            glbPrefix, 0,
+            fenceFootprint, null, sitePolygon,
+            floorMaterial,
+            centerPointWorld, deformToTerrain: isDynamic,
+            combineInstances, materials, temporaryMeshes);
+
+        if (combineInstances.Count == 0)
+        {
+            // サブ建物が未登録で敷地装飾パーツも無い場合は、建物底面の白い箱で存在だけ示す。
+            CleanupMeshes(temporaryMeshes);
+            return GenerateFallbackBox(buildingData);
+        }
+
+        Mesh finalMesh = new Mesh();
+        finalMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+        finalMesh.CombineMeshes(combineInstances.ToArray(), false, true);
+        finalMesh.RecalculateBounds();
+        finalMesh.RecalculateNormals();
+
+        CleanupMeshes(temporaryMeshes);
+
+        // コライダーは土地区画全体（取得できなければ建物底面）を描画された最大高さまで押し出す。
+        Vector2[] colliderFootprint = sitePolygon;
+        float colliderHeight = Mathf.Max(maxTopY, floorHeight);
+        Mesh colliderMesh = (colliderFootprint != null && colliderFootprint.Length >= 3)
+            ? BuildingMeshBuilder.GenerateColliderMesh(colliderFootprint, colliderHeight)
+            : null;
+
+        // セル数×パーツ数でサブメッシュが増えるため、同一マテリアルを統合してドローコールを抑える。
+        return BuildingMeshBuilder.MergeSubMeshes(new BuildingMeshResult(finalMesh, materials.ToArray(), colliderMesh));
+    }
+
+    /// <summary>
+    /// サブ建物1棟を prebuilt と同じ積み上げロジックで生成し、CombineInstance リストへ追加する。
+    /// </summary>
+    /// <returns>この棟の天端のローカルY（コライダー高さの算出に使う）。</returns>
+    private static float GenerateSubBuilding(
+        SubBuildingPlacement placement, string glbPrefix, int variantNumber, float floorHeight,
+        Vector3 centerPointWorld,
+        List<CombineInstance> combineInstances, List<Material> materials, List<Mesh> temporaryMeshes)
+    {
+        Vector2 xzOffset = new Vector2(placement.position[0], placement.position[1]);
+        int floors = Mathf.Max(1, placement.floors);
+        float subFloorHeight = (placement.height_per_floor.HasValue && placement.height_per_floor.Value > 0f)
+            ? placement.height_per_floor.Value
+            : floorHeight;
+
+        // rotation は prebuilt の前面辺（頂点0→1）の角度と同じ規約なので、同一の変換式で適用する。
+        Quaternion rotation = Quaternion.Euler(0, -placement.rotation + 90f, 0);
+
+        // 区画が斜面にまたがっても棟が浮かない・めり込まないよう、各棟のY基準は
+        // 自分の配置座標の地形標高とする（建物GameObjectは中心標高に置かれるため差分にする）。
+        float terrainY = HeightmapTextureManager.GetTerrainHeight(
+            new Vector3(centerPointWorld.x + xzOffset.x, 1000f, centerPointWorld.z + xzOffset.y));
+        float baseY = terrainY - centerPointWorld.y;
+
+        // パーツはパーツごとに閾値フォルダを独立スキャンして解決する（common へのフォールバックはしない）。
+        string modelPrefix = placement.model_prefix;
+        GameObject baseModule = BuildingMeshUtils.GetPartBySuffixScan(
+            glbPrefix, $"mashup-{modelPrefix}-base-prebuilt", variantNumber);
+        GameObject middleModule = BuildingMeshUtils.GetPartBySuffixScan(
+            glbPrefix, $"mashup-{modelPrefix}-mid-prebuilt", variantNumber);
+        GameObject topModule = BuildingMeshUtils.GetPartBySuffixScan(
+            glbPrefix, $"mashup-{modelPrefix}-top-prebuilt", variantNumber);
+
+        if (baseModule == null && middleModule == null && topModule == null)
+        {
+            Debug.LogWarning(
+                $"MashupBuildingMeshBuilder: サブ建物のプレハブが見つかりませんでした " +
+                $"(prefix={glbPrefix}, model_prefix={modelPrefix})。1セル分の白い箱で代替します。");
+            float boxHeight = floors * subFloorHeight;
+            AddFallbackCellBox(xzOffset, rotation, baseY, boxHeight, combineInstances, materials, temporaryMeshes);
+            return baseY + boxHeight;
+        }
+
+        // 各パーツのY位置は実際に描画したパーツの累積高さで決める（prebuilt と同じ規則）。
+        // base/mid が無い棟では top が接地する（完成済みモデルを top だけで表現できる）。
+        float stackY = baseY;
+
+        if (baseModule != null)
+        {
+            BuildingMeshUtils.AddStackedModule(baseModule, stackY, subFloorHeight,
+                combineInstances, materials, temporaryMeshes,
+                xzOffset: xzOffset, rotation: rotation, alignByOrigin: true);
+            stackY += subFloorHeight;
+        }
+
+        if (middleModule != null)
+        {
+            // base と top はそれぞれ1階分を消費し、mid は残りの階数分を埋める
+            int midCount = Mathf.Max(0, floors - (baseModule != null ? 1 : 0) - (topModule != null ? 1 : 0));
+            for (int i = 0; i < midCount; i++)
+            {
+                BuildingMeshUtils.AddStackedModule(middleModule, stackY, subFloorHeight,
+                    combineInstances, materials, temporaryMeshes,
+                    xzOffset: xzOffset, rotation: rotation, alignByOrigin: true);
+                stackY += subFloorHeight;
+            }
+        }
+
+        float topHeight = 0f;
+        if (topModule != null)
+        {
+            // top は無スケール実寸（fitHeight=null）
+            topHeight = BuildingMeshUtils.AddStackedModule(topModule, stackY, null,
+                combineInstances, materials, temporaryMeshes,
+                xzOffset: xzOffset, rotation: rotation, alignByOrigin: true);
+        }
+
+        return stackY + topHeight;
+    }
+
+    /// <summary>
+    /// パーツが1つも見つからないサブ建物の代替として、1セル分（MASHUP_CELL_SIZE四方）の
+    /// 白い箱を配置座標に置く。マテリアルは null を積み、EnsureMaterials が既定マテリアルで補完する。
+    /// </summary>
+    private static void AddFallbackCellBox(
+        Vector2 xzOffset, Quaternion rotation, float baseY, float height,
+        List<CombineInstance> combineInstances, List<Material> materials, List<Mesh> temporaryMeshes)
+    {
+        float half = Constants.MASHUP_CELL_SIZE * 0.5f;
+        Vector2[] localCorners =
+        {
+            new Vector2(-half, -half),
+            new Vector2(half, -half),
+            new Vector2(half, half),
+            new Vector2(-half, half),
+        };
+
+        // AddStackedModule と同じ変換順（回転→平行移動）でセル矩形を建物ローカル座標へ移す
+        Vector2[] rect = new Vector2[localCorners.Length];
+        for (int i = 0; i < localCorners.Length; i++)
+        {
+            Vector3 rotated = rotation * new Vector3(localCorners[i].x, 0f, localCorners[i].y);
+            rect[i] = new Vector2(rotated.x + xzOffset.x, rotated.z + xzOffset.y);
+        }
+
+        Mesh box = BuildingMeshBuilder.GenerateColliderMesh(rect, height);
+        if (box == null)
+        {
+            return;
+        }
+
+        if (!Mathf.Approximately(baseY, 0f))
+        {
+            Vector3[] vertices = box.vertices;
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                vertices[i].y += baseY;
+            }
+            box.vertices = vertices;
+        }
+        box.RecalculateNormals();
+        box.RecalculateBounds();
+
+        combineInstances.Add(new CombineInstance
+        {
+            mesh = box,
+            subMeshIndex = 0,
+            transform = Matrix4x4.identity,
+        });
+        materials.Add(null);
+        temporaryMeshes.Add(box);
+    }
+
+    /// <summary>
+    /// サブ建物も敷地装飾も1つも生成できなかった場合の白い箱フォールバック。
+    /// </summary>
+    private static BuildingMeshResult GenerateFallbackBox(BuildingSummary buildingData)
+    {
+        if (buildingData.polygonArray == null || buildingData.polygonArray.Length < 3)
+        {
+            Debug.LogWarning($"MashupBuildingMeshBuilder: polygon が不正なため空メッシュを返します (agent_id={buildingData.agent_id})。");
+            return new BuildingMeshResult(new Mesh(), null);
+        }
+
+        Vector2[] footprint = BuildingMeshUtils.GetFootprint(buildingData);
+        int floors = Mathf.Max(1, buildingData.floors ?? 1);
+        float floorHeight = BuildingMeshUtils.GetFloorHeight(buildingData);
+        return BuildingMeshBuilder.GenerateSimpleBuilding(footprint, floors, floorHeight);
+    }
+
+    private static void CleanupMeshes(List<Mesh> meshes)
+    {
+        foreach (var mesh in meshes)
+        {
+            if (mesh != null)
+            {
+                Object.Destroy(mesh);
+            }
+        }
+    }
+}

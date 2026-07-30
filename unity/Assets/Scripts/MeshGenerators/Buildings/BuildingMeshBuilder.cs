@@ -13,6 +13,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     private static readonly IBuildingMeshGenerator modularGenerator = new ModularBuildingMeshBuilder();
     private static readonly IBuildingMeshGenerator prebuiltGenerator = new PreBuiltBuildingMeshBuilder();
     private static readonly IBuildingMeshGenerator portGenerator = new PortBuildingMeshBuilder();
+    private static readonly IBuildingMeshGenerator mashupGenerator = new MashupBuildingMeshBuilder();
     private static readonly IBuildingMeshGenerator constructingGenerator = new ConstructingBuildingMeshBuilder();
 
     /// <summary>
@@ -52,6 +53,9 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
                 break;
             case Constants.MODEL_PORT:
                 result = portGenerator.Generate(buildingData, isDynamic);
+                break;
+            case Constants.MODEL_MASHUP:
+                result = mashupGenerator.Generate(buildingData, isDynamic);
                 break;
             default:
                 UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
@@ -840,7 +844,8 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// - 対象: MODEL_MODULAR_FLAT / HOUSE / GABLE。建物は parcel.altitude（接道の路面高さ）の
     ///   水平面に接地し、傾斜地の谷側の隙間は基盤（GenerateFoundationMesh）が埋める。
     /// - 対象外: MODEL_MODULAR_GROUND（畑・庭は地形に沿う地面表現）、MODEL_PREBUILT、
-    ///   MODEL_PORT（岸壁は独自の海底追従スラブを持つ）。これらは建物中心位置の地形標高に
+    ///   MODEL_PORT（岸壁は独自の海底追従スラブを持つ）、MODEL_MASHUP（各サブ建物が
+    ///   自分の配置座標の地形標高に個別に接地する）。これらは建物中心位置の地形標高に
     ///   直接接地し、基盤も生成しない。
     /// </summary>
     public static bool IsApplicableModelType(int modelType)

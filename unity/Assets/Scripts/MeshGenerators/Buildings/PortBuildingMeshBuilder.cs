@@ -18,7 +18,7 @@ using NetTopologySuite.Geometries;
 /// 上面は敷地全体の地面パネル(draw_floor)と同じ floor マテリアルで床続きに描画し、側面/下面は ceil を使う。
 /// 水際（海側の直線エッジ）には荷役クレーン（port_crane）を等間隔に並べる。
 ///
-/// 詳細仕様は genesis-docs/docs/geometries/F_建物メッシュの生成.md §18 を参照。
+/// 詳細仕様は genesis-docs/docs/geometries/F4_港湾岸壁のメッシュ生成.md を参照。
 /// </summary>
 public class PortBuildingMeshBuilder : IBuildingMeshGenerator
 {
