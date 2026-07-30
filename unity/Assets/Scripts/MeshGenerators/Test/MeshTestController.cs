@@ -204,6 +204,9 @@ public class MeshTestController : MonoBehaviour
     // ダミー海岸線: 底面を斜めに横切る直線 z = _coastBaseZ + COAST_SLOPE * x の +Z 側を海とする。
     // 傾きを付けるのは、岸壁の直線カットが軸に平行な場合しか動かない誤実装を検出しやすくするため。
     private const float COAST_SLOPE = 0.08f;
+    // 海側・陸側パネルの色。位置関係が分かることだけが目的なので単色で塗る。
+    private static readonly Color SEA_PANEL_COLOR = new Color(0.25f, 0.5f, 0.7f);
+    private static readonly Color LAND_PANEL_COLOR = new Color(0.45f, 0.5f, 0.42f);
     private bool _dummyCoastlineActive;
     private float _coastBaseZ;
 
@@ -253,10 +256,10 @@ public class MeshTestController : MonoBehaviour
         float zLeft = _coastBaseZ + COAST_SLOPE * (-extent);
         float zRight = _coastBaseZ + COAST_SLOPE * extent;
 
-        CreateGroundQuad(container, "SeaPlane", new Color(0.25f, 0.5f, 0.7f),
+        CreateGroundQuad(container, "SeaPlane", SEA_PANEL_COLOR,
             new Vector3(-extent, y, zLeft), new Vector3(extent, y, zRight),
             new Vector3(extent, y, zRight + span), new Vector3(-extent, y, zLeft + span));
-        CreateGroundQuad(container, "LandPlane", new Color(0.45f, 0.5f, 0.42f),
+        CreateGroundQuad(container, "LandPlane", LAND_PANEL_COLOR,
             new Vector3(-extent, y, zLeft - span), new Vector3(extent, y, zRight - span),
             new Vector3(extent, y, zRight), new Vector3(-extent, y, zLeft));
 
@@ -277,9 +280,23 @@ public class MeshTestController : MonoBehaviour
 
         var go = new GameObject(name);
         go.AddComponent<MeshFilter>().sharedMesh = mesh;
-        var renderer = go.AddComponent<MeshRenderer>();
-        renderer.sharedMaterial = new Material(Shader.Find("Standard")) { color = color };
+        go.AddComponent<MeshRenderer>().sharedMaterial = CreateSolidColorMaterial(name, color);
         go.transform.SetParent(container.transform, true);
+    }
+
+    /// <summary>
+    /// 単色マテリアルを生成する。本プロジェクトはURPなのでビルトインの Standard は
+    /// 描画できずマゼンタになるため、URP Lit を優先して解決する
+    /// (WaterSurfaceManager.ResolveWaterMaterial と同じ方針)。
+    /// 色はURPの _BaseColor とビルトインの _Color の両方へ、存在するものだけ設定する。
+    /// </summary>
+    private static Material CreateSolidColorMaterial(string name, Color color)
+    {
+        Shader shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+        var material = new Material(shader) { name = $"MeshTest_{name}" };
+        if (material.HasProperty("_BaseColor")) material.SetColor("_BaseColor", color);
+        if (material.HasProperty("_Color")) material.SetColor("_Color", color);
+        return material;
     }
 
     /// <summary>
