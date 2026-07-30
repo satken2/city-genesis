@@ -2,6 +2,7 @@
   "agent": {
     "title": "Agent Details",
     "back": "Back",
+    "editSubBuildings": "Edit Sub-Building Layout",
     "publicFacility": "Public Facility",
     "publicFacilityPanel": {
       "title": "Public Facility"

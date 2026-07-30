@@ -7,5 +7,15 @@
     "heightLabel": "高さ: {{value}}m",
     "baseAreaLabel": "建築面積: {{area, number}}㎡",
     "underMaintenance": "修繕中"
+  },
+  "mashup_edit": {
+    "hint": "カードを敷地へドラッグで配置 / ドラッグで移動 / Shift+ドラッグで回転 / Deleteキーで削除",
+    "sizeLabel": "{{width}}×{{height}}m",
+    "deleteSelected": "選択した棟を削除",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "saveFailed": "サブ建物配置の保存に失敗しました",
+    "noParcel": "この建物には土地区画がありません",
+    "noSubbuildings": "この建物種別にはサブ建物が定義されていません"
   }
 }

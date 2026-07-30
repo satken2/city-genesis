@@ -30,7 +30,8 @@
     "transit_management": "Public Transit",
     "transit_creation": "New Transit Line",
     "transit_detail": "Line Detail",
-    "prop_placement": "Prop Placement"
+    "prop_placement": "Prop Placement",
+    "mashup_edit": "Sub-Building Layout"
   },
   "cityMap": {
     "layers": {

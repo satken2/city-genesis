@@ -25,6 +25,7 @@ const ZoneDetailPanel = lazy(() => import("./components/zone/ZoneDetailPanel").t
 const PathConstructionPanel = lazy(() => import("./components/path/PathConstructionPanel").then(m => ({ default: m.PathConstructionPanel })));
 const PathDetailPanel = lazy(() => import("./components/path/PathDetailPanel").then(m => ({ default: m.PathDetailPanel })));
 const BuildingConstructionPanel = lazy(() => import("./components/building/BuildingConstructionPanel").then(m => ({ default: m.BuildingConstructionPanel })));
+const MashupEditPanel = lazy(() => import("./components/building/MashupEditPanel").then(m => ({ default: m.MashupEditPanel })));
 const ParcelCreationPanel = lazy(() => import("./components/parcel/ParcelCreationPanel").then(m => ({ default: m.ParcelCreationPanel })));
 const CityBudgetWindow = lazy(() => import("./components/budget/CityBudgetWindow").then(m => ({ default: m.CityBudgetWindow })));
 const PublicFacilitiesWindow = lazy(() => import("./components/budget/PublicFacilitiesWindow").then(m => ({ default: m.PublicFacilitiesWindow })));
@@ -71,7 +72,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * 専用パネルが実装されているウィンドウタイプのセット
  * これらのタイプはジェネリックな JSON 表示ではなく、専用コンポーネントでレンダリングする
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "path_build", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "settings", "citizen_detail", "top_page", "building_construction", "parcel_creation", "save_load", "save_list", "new_game", "template_editor", "resource_detail", "resource_edit", "prop_placement", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "epoch_result", "quest_complete", "terrain_unlock", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "path_build", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "settings", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "new_game", "template_editor", "resource_detail", "resource_edit", "prop_placement", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "epoch_result", "quest_complete", "terrain_unlock", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map"]);
 
 
 function App() {
@@ -363,6 +364,12 @@ function App() {
                     ? ((context.params as Record<string, unknown>).extra as Record<string, unknown>).editAgentId as number | undefined
                     : undefined
                 }
+              />
+            ) : context.window_type === "mashup_edit" ? (
+              <MashupEditPanel
+                apiBaseUrl={context.api_base_url}
+                initialEntityId={context.entity?.id ?? ""}
+                onClose={closeWindow}
               />
             ) : context.window_type === "parcel_creation" ? (
               <ParcelCreationPanel apiBaseUrl={context.api_base_url} />

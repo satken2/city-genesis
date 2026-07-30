@@ -2,6 +2,7 @@
   "agent": {
     "title": "経済主体詳細",
     "back": "戻る",
+    "editSubBuildings": "サブ建物の配置を編集",
     "publicFacility": "公共施設",
     "publicFacilityPanel": {
       "title": "公共/公営施設"

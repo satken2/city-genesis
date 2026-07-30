@@ -108,6 +108,32 @@ public class MasterDataStore : MonoBehaviour
 		public Dictionary<int, AgentMasterItem> agents;
 	}
 
+	/// <summary>
+	/// サブ建物マスター(subbuilding_master)の1棟分。
+	/// マッシュアップ建物(MODEL_MASHUP)の施設バリアントを構成する付属棟の定義。
+	/// 実ゲームでは配置計画も model_prefix の解決もバックエンドが行うため本編コードは
+	/// 参照しないが、メッシュテストシーンが配置計画を自前生成するために使う。
+	/// </summary>
+	[Serializable]
+	public class SubBuildingMasterItem
+	{
+		public int agent_variant;
+		public string display_name;
+		public bool primary;
+		public string model_prefix;
+		public float? width;
+		public float? height;
+		public int? max_floors;
+		public int? min_floors;
+		public float? height_per_floor;
+	}
+
+	[Serializable]
+	public class SubBuildingsResponse
+	{
+		public Dictionary<int, SubBuildingMasterItem> subbuildings;
+	}
+
 	[Serializable]
 	public class BuildingTypesResponse
 	{
@@ -157,6 +183,7 @@ public class MasterDataStore : MonoBehaviour
 
 	private Dictionary<string, ProductItem> productMasterByKey = new Dictionary<string, ProductItem>();
 	private Dictionary<int, AgentMasterItem> agentMasterById = new Dictionary<int, AgentMasterItem>();
+	private Dictionary<int, SubBuildingMasterItem> subBuildingMasterById = new Dictionary<int, SubBuildingMasterItem>();
 	private Dictionary<int, PathMasterItem> pathMasterById = new Dictionary<int, PathMasterItem>();
 	private Dictionary<int, TransitMasterItem> transitMasterById = new Dictionary<int, TransitMasterItem>();
 	private Dictionary<int, PathTypeItem> pathTypesById = new Dictionary<int, PathTypeItem>();
@@ -213,6 +240,7 @@ public class MasterDataStore : MonoBehaviour
 		var transitReq = UnityWebRequest.Get($"{ApiClient.BASE_URL}/master/transit");
 		var pathTypesReq = UnityWebRequest.Get($"{ApiClient.BASE_URL}/master/path_types");
 		var agentsReq = UnityWebRequest.Get($"{ApiClient.BASE_URL}/master/agents");
+		var subBuildingsReq = UnityWebRequest.Get($"{ApiClient.BASE_URL}/master/subbuildings");
 		var buildingTypesReq = UnityWebRequest.Get($"{ApiClient.BASE_URL}/master/bd_types");
 		var parcelTypesReq = UnityWebRequest.Get($"{ApiClient.BASE_URL}/master/parcel_types");
 		var agentTypesReq = UnityWebRequest.Get($"{ApiClient.BASE_URL}/master/agent_types");
@@ -222,6 +250,7 @@ public class MasterDataStore : MonoBehaviour
 		var opTransit = transitReq.SendWebRequest();
 		var opPathTypes = pathTypesReq.SendWebRequest();
 		var opAgents = agentsReq.SendWebRequest();
+		var opSubBuildings = subBuildingsReq.SendWebRequest();
 		var opBuildingTypes = buildingTypesReq.SendWebRequest();
 		var opParcelTypes = parcelTypesReq.SendWebRequest();
 		var opAgentTypes = agentTypesReq.SendWebRequest();
@@ -232,6 +261,7 @@ public class MasterDataStore : MonoBehaviour
 		yield return opTransit;
 		yield return opPathTypes;
 		yield return opAgents;
+		yield return opSubBuildings;
 		yield return opBuildingTypes;
 		yield return opParcelTypes;
 		yield return opAgentTypes;
@@ -331,6 +361,25 @@ public class MasterDataStore : MonoBehaviour
 			Debug.LogError($"MasterDataStore: Failed to load agents master: {agentsReq.error}");
 		}
 
+		// Sub buildings (サブ建物マスター)
+		if (subBuildingsReq.result == UnityWebRequest.Result.Success)
+		{
+			try
+			{
+				var resp = JsonConvert.DeserializeObject<SubBuildingsResponse>(subBuildingsReq.downloadHandler.text);
+				subBuildingMasterById = resp?.subbuildings ?? new Dictionary<int, SubBuildingMasterItem>();
+				Debug.Log($"MasterDataStore: SubBuilding master loaded ({subBuildingMasterById.Count})");
+			}
+			catch (Exception e)
+			{
+				Debug.LogError($"MasterDataStore: Failed to parse subbuildings master: {e.Message}");
+			}
+		}
+		else
+		{
+			Debug.LogError($"MasterDataStore: Failed to load subbuildings master: {subBuildingsReq.error}");
+		}
+
 		// Building types
 		if (buildingTypesReq.result == UnityWebRequest.Result.Success)
 		{
@@ -394,6 +443,7 @@ public class MasterDataStore : MonoBehaviour
 			transitReq.result == UnityWebRequest.Result.Success &&
 			pathTypesReq.result == UnityWebRequest.Result.Success &&
 			agentsReq.result == UnityWebRequest.Result.Success &&
+			subBuildingsReq.result == UnityWebRequest.Result.Success &&
 			buildingTypesReq.result == UnityWebRequest.Result.Success &&
 			parcelTypesReq.result == UnityWebRequest.Result.Success &&
 			agentTypesReq.result == UnityWebRequest.Result.Success;
@@ -409,6 +459,25 @@ public class MasterDataStore : MonoBehaviour
 	public IReadOnlyDictionary<int, AgentMasterItem> GetAgentMasterDictionary()
 	{
 		return agentMasterById;
+	}
+
+	/// <summary>
+	/// 指定バリアントを構成するサブ建物の (subbuilding_id, 定義) 一覧を返す（未定義なら空リスト）。
+	/// バックエンド(MasterData.get_subbuilding_ids)のシート行順に合わせるため、ID昇順で返す。
+	/// 空リストのバリアントは「棟が分かれていない=1棟で建つ施設」を意味する。
+	/// </summary>
+	public List<KeyValuePair<int, SubBuildingMasterItem>> GetSubBuildingsForVariant(int agentVariant)
+	{
+		var result = new List<KeyValuePair<int, SubBuildingMasterItem>>();
+		foreach (var kvp in subBuildingMasterById)
+		{
+			if (kvp.Value != null && kvp.Value.agent_variant == agentVariant)
+			{
+				result.Add(kvp);
+			}
+		}
+		result.Sort((a, b) => a.Key.CompareTo(b.Key));
+		return result;
 	}
 
 	public PathMasterItem GetPathMaster(int pathVariant)

@@ -64,6 +64,7 @@ export type MasterData = {
   path_types: Record<number, PathTypeEntry>;
   agent_types: Record<number, AgentTypeEntry>;
   agents: Record<number, AgentMasterEntry>;
+  subbuildings: Record<number, SubBuildingMasterEntry>;
   products: Record<number, ProductMasterEntry>;
   paths: Record<number, PathMasterEntry>;
 };

@@ -36,7 +36,8 @@ import {
   ALERT_AGENT_CONSTRUCTION_SHORTAGE,
   ALERT_AGENT_ON_FIRE,
   ALERT_AGENT_ACCIDENTAL_FIRE,
-  ALERT_AGENT_INFRA_DISCONNECTED
+  ALERT_AGENT_INFRA_DISCONNECTED,
+  MODEL_MASHUP
 } from "../../constants";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { useTemplateMode } from "../../hooks/useTemplateMode";
@@ -320,6 +321,14 @@ export function AgentDetailPanel({
   /** マスターデータからバリアントの表示名を取得する */
   const variantName = masterData?.agents[agentData.variant]?.display_name;
 
+  /**
+   * マッシュアップ建物(MODEL_MASHUP)かどうか。該当する建物には、サブ建物(校舎・体育館などの棟)の
+   * 配置を編集する専用ウィンドウ(mashup_edit)を開くボタンを表示する。
+   */
+  const isMashupBuilding =
+    agentData.is_bd &&
+    masterData?.agents[agentData.variant]?.model_type === MODEL_MASHUP;
+
   // 各詳細セクションの表示条件
   const showBasicInfo = !isImportOrExport;
   const showHouseholdInfo = agentData.type === TYPE_HOUSEHOLD;
@@ -551,6 +560,22 @@ export function AgentDetailPanel({
           </div>
         );
       })()}
+
+      {/* マッシュアップ建物のサブ建物配置エディタを開くボタン */}
+      {isMashupBuilding && (
+        <button
+          className="agent-detail-mashup-edit-btn"
+          type="button"
+          onClick={() => {
+            void invoke("open_registered_window", {
+              windowType: "mashup_edit",
+              entityId: currentEntityId,
+            });
+          }}
+        >
+          {t("agent.editSubBuildings", "サブ建物の配置を編集")}
+        </button>
+      )}
 
       {/* 計画中のエージェントは既存データを表示する意味がないため、
           削除・編集ボタンだけを表示して詳細セクションは省略する（建設工事タブがある場合を除く）。 */}

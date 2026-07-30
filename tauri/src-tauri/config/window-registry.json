@@ -132,6 +132,15 @@
     "layout": "left_panel_narrow",
     "actions": []
   },
+  "mashup_edit": {
+    "title": "サブ建物の配置",
+    "width": 860,
+    "height": 680,
+    "resizable": true,
+    "policy": "single_per_entity",
+    "entity_type": "agent",
+    "actions": []
+  },
   "city_budget": {
     "title": "予算管理",
     "width": 800,

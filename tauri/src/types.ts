@@ -401,6 +401,28 @@ export type AgentMasterEntry = {
   default_width?: number;
   // 直接配置モードの初期底面（縦幅）、および resizable=false の固定底面の縦幅(m)。未設定は正方形。
   default_height?: number;
+  // 建物メッシュの生成方式(constants.ts の MODEL_* 定数)。MODEL_MASHUP(7)の建物は
+  // 複数のサブ建物(subbuildings マスター)で構成され、詳細パネルから配置エディタを開ける。
+  model_type?: number;
+};
+
+/**
+ * サブ建物マスター (subbuildings)
+ * マッシュアップ建物(MODEL_MASHUP)を構成する棟(校舎・体育館など)ごとの定義。
+ * agent_variant が所属先の施設バリアントを指す。
+ * width / height は底面寸法(m)で、未設定の棟はセル1つ分(MASHUP_CELL_SIZE 四方)として扱う。
+ */
+export type SubBuildingMasterEntry = {
+  display_name: string;
+  agent_variant: number;
+  /** 施設の顔となる主棟かどうか。配置ランダム生成時に前面(接道辺)へ必ず1棟置かれる */
+  primary?: boolean;
+  model_prefix?: string;
+  width?: number;
+  height?: number;
+  min_floors?: number;
+  max_floors?: number;
+  height_per_floor?: number;
 };
 
 /**
@@ -597,6 +619,7 @@ export type MasterData = {
   path_types: Record<number, PathTypeEntry>;
   agent_types: Record<number, AgentTypeEntry>;
   agents: Record<number, AgentMasterEntry>;
+  subbuildings: Record<number, SubBuildingMasterEntry>;
   products: Record<number, ProductMasterEntry>;
   paths: Record<number, PathMasterEntry>;
   transit: Record<number, TransitMasterEntry>;

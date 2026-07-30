@@ -7,5 +7,15 @@
     "heightLabel": "Height: {{value}}m",
     "baseAreaLabel": "Base Area: {{area, number}}㎡",
     "underMaintenance": "Under Maintenance"
+  },
+  "mashup_edit": {
+    "hint": "Drag a card onto the site to place / drag to move / Shift+drag to rotate / Delete key to remove",
+    "sizeLabel": "{{width}}×{{height}}m",
+    "deleteSelected": "Remove Selected",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saveFailed": "Failed to save the sub-building layout",
+    "noParcel": "This building has no land parcel",
+    "noSubbuildings": "No sub-buildings are defined for this building type"
   }
 }

@@ -84,5 +84,7 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 ## 注意点
 
 - `Test/` はメッシュ生成の確認用シーン専用(MeshTestController 等)。ゲーム本編からは参照されない。
+  - マッシュアップ建物(MODEL_MASHUP)は、実ゲームではバックエンドが生成する配置計画(sub_buildings)をテストでは `Test/TestSubBuildingLayout.cs` が自前生成する。これはバックエンド(genesis-core: `crud_buildings.generate_sub_building_layout` + `geo_buildings.generate_mashup_cells`)の移植なので、**バックエンド側の配置ロジックを変更したら移植も追従させる**こと。サブ建物マスターは MasterDataStore が `GET /master/subbuildings` からロードする(`GetSubBuildingsForVariant`。本編コードは未使用でテスト専用)。
+  - 港湾(MODEL_PORT)は、岸壁カットに必要な海岸線をテストではダミー注入する(MeshTestController が `CoastlineStore.SetFromGeoJson` へ底面を斜めに横切る巨大矩形リングを渡す。+Z側が海)。ダミーはサンプル破棄時に `CoastlineStore.Clear` で片付けられ、本編シーンへは持ち越されない。
 - RoadPath のマテリアルとミラーメッシュは**静的キャッシュ**(`MaterialCache` / `MirroredMeshCache`)でマテリアル名・メッシュ名単位に管理される。同じバリアントの道路パーツはキャッシュ済みインスタンスを共有するため、再生成時のメモリリークやドローコール増加は起きない。Zファイティング回避の `renderQueue + 1` もキャッシュ生成時に一度だけ適用される。
 - 道路系の冗長ログは `UnityLog.If(LocalConstants.UNITY_LOG_ROAD, ...)` を使うこと(常時 `Debug.Log` を呼ばない)。

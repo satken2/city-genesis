@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using Dreamteck.Splines;
 using GeneratedModels;
+using Newtonsoft.Json.Linq;
 
 public class MeshTestController : MonoBehaviour
 {
@@ -67,6 +68,9 @@ public class MeshTestController : MonoBehaviour
             TrackAdjacency.NeighborProvider = null;
         }
 
+        // 港湾テスト用に注入したダミー海岸線を片付ける(本編シーンへの持ち越し防止)。
+        ClearDummyCoastline();
+
         if (MasterDataStore.Instance != null)
         {
             MasterDataStore.Instance.OnInitialized -= OnMasterDataInitialized;
@@ -128,6 +132,35 @@ public class MeshTestController : MonoBehaviour
 
         var buildingData = CreateBuildingSummary(variant, floors, polygonCoords, vv, vv2, vv3);
 
+        int modelType = BuildingMeshBuilder.GetModelType(buildingData);
+
+        // マッシュアップ建物は配置計画(sub_buildings)が無いと白い箱になるため、
+        // バックエンドと同じアルゴリズムの移植(TestSubBuildingLayout)で自前生成する。
+        // テストでは底面ポリゴンをそのまま土地区画とみなす。
+        if (modelType == Constants.MODEL_MASHUP)
+        {
+            buildingData.sub_buildings = TestSubBuildingLayout.Generate(variant, ToVector2Polygon(polygonCoords));
+            if (buildingData.sub_buildings == null)
+            {
+                Debug.LogWarning($"[MeshTest] variant={variant} は subbuilding_master に棟定義が無いため、サブ建物なしで生成します。");
+            }
+            else
+            {
+                Debug.Log($"[MeshTest] マッシュアップ配置計画を生成: {buildingData.sub_buildings.Count}棟");
+            }
+        }
+
+        // 港湾は海岸線が無いと岸壁の直線カットが働かないため、生成前にダミー海岸線を注入する。
+        // それ以外の建物では過去のダミーを片付ける(Version が上がり岸壁側のキャッシュも無効化される)。
+        if (modelType == Constants.MODEL_PORT)
+        {
+            SetupDummyCoastline(height);
+        }
+        else
+        {
+            ClearDummyCoastline();
+        }
+
         BuildingMeshResult result = new BuildingMeshBuilder().Generate(buildingData);
         if (result == null || result.Mesh == null)
         {
@@ -149,7 +182,104 @@ public class MeshTestController : MonoBehaviour
             mc.sharedMesh = result.ColliderMesh;
         }
 
+        if (modelType == Constants.MODEL_PORT)
+        {
+            CreateSeaAndLandVisual(_generatedObject);
+        }
+
         PositionCamera(result.Mesh.bounds);
+    }
+
+    /// <summary>底面ポリゴン([x, z]配列の配列)を Vector2 配列へ変換する。</summary>
+    private static Vector2[] ToVector2Polygon(float[][] coords)
+    {
+        var polygon = new Vector2[coords.Length];
+        for (int i = 0; i < coords.Length; i++)
+        {
+            polygon[i] = new Vector2(coords[i][0], coords[i][1]);
+        }
+        return polygon;
+    }
+
+    // ダミー海岸線: 底面を斜めに横切る直線 z = _coastBaseZ + COAST_SLOPE * x の +Z 側を海とする。
+    // 傾きを付けるのは、岸壁の直線カットが軸に平行な場合しか動かない誤実装を検出しやすくするため。
+    private const float COAST_SLOPE = 0.08f;
+    private bool _dummyCoastlineActive;
+    private float _coastBaseZ;
+
+    /// <summary>
+    /// 港湾テスト用のダミー海岸線を CoastlineStore に注入する。
+    /// 陸地 = 巨大な矩形リング(上辺が海岸線の直線)で、底面(原点中心・奥行き depth)を
+    /// 海岸線が横切るよう、直線の高さは奥行きの3割の位置に置く(-Z 側が陸、+Z 側が海)。
+    /// 実ゲームでは TerrainManager.FetchCoastline がバックエンドから取得して格納する経路を、
+    /// テストでは同じ SetFromGeoJson で置き換える。
+    /// </summary>
+    private void SetupDummyCoastline(float depth)
+    {
+        _coastBaseZ = depth * 0.5f * 0.3f;
+        const float L = 3000f;
+        var ring = new JArray
+        {
+            new JArray(-L, -L),
+            new JArray(L, -L),
+            new JArray(L, _coastBaseZ + COAST_SLOPE * L),
+            new JArray(-L, _coastBaseZ - COAST_SLOPE * L),
+        };
+        CoastlineStore.SetFromGeoJson(new JArray { ring });
+        _dummyCoastlineActive = true;
+        Debug.Log($"[MeshTest] ダミー海岸線を注入しました (z≈{_coastBaseZ:F1}m, +Z側が海)");
+    }
+
+    /// <summary>注入したダミー海岸線を破棄し、CoastlineStore を未ロード状態へ戻す。</summary>
+    private void ClearDummyCoastline()
+    {
+        if (_dummyCoastlineActive)
+        {
+            CoastlineStore.Clear();
+            _dummyCoastlineActive = false;
+        }
+    }
+
+    /// <summary>
+    /// ダミー海岸線の位置が分かるよう、海側(+Z)に青、陸側(-Z)に緑がかった灰色の平面を敷く。
+    /// 2枚は海岸線の直線で接し重ならない(Zファイティング防止)。海面・地形とも高さ0の
+    /// テストシーンなので、どちらもわずかに沈めた高さに置いて岸壁スラブと干渉させない。
+    /// </summary>
+    private void CreateSeaAndLandVisual(GameObject container)
+    {
+        const float extent = 120f;  // 海岸線方向(±X)の広がり
+        const float span = 150f;    // 海側・陸側それぞれの奥行き
+        const float y = -0.02f;
+        float zLeft = _coastBaseZ + COAST_SLOPE * (-extent);
+        float zRight = _coastBaseZ + COAST_SLOPE * extent;
+
+        CreateGroundQuad(container, "SeaPlane", new Color(0.25f, 0.5f, 0.7f),
+            new Vector3(-extent, y, zLeft), new Vector3(extent, y, zRight),
+            new Vector3(extent, y, zRight + span), new Vector3(-extent, y, zLeft + span));
+        CreateGroundQuad(container, "LandPlane", new Color(0.45f, 0.5f, 0.42f),
+            new Vector3(-extent, y, zLeft - span), new Vector3(extent, y, zRight - span),
+            new Vector3(extent, y, zRight), new Vector3(-extent, y, zLeft));
+
+        CreateLabel(container, "海 Sea (+Z)", new Vector3(0f, 3f, _coastBaseZ + 30f));
+    }
+
+    /// <summary>4頂点(反時計回り・上向き)の単色平面を container の子として生成する。</summary>
+    private static void CreateGroundQuad(GameObject container, string name, Color color,
+        Vector3 v0, Vector3 v1, Vector3 v2, Vector3 v3)
+    {
+        var mesh = new Mesh
+        {
+            vertices = new[] { v0, v1, v2, v3 },
+            triangles = new[] { 0, 2, 1, 0, 3, 2 },
+        };
+        mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
+
+        var go = new GameObject(name);
+        go.AddComponent<MeshFilter>().sharedMesh = mesh;
+        var renderer = go.AddComponent<MeshRenderer>();
+        renderer.sharedMaterial = new Material(Shader.Find("Standard")) { color = color };
+        go.transform.SetParent(container.transform, true);
     }
 
     /// <summary>
@@ -1021,6 +1151,8 @@ public class MeshTestController : MonoBehaviour
             Destroy(_generatedObject);
             _generatedObject = null;
         }
+        // ダミー海岸線は港湾サンプルの表示中だけ存在させる(次の生成が港湾なら再注入される)
+        ClearDummyCoastline();
     }
 
     private BuildingSummary CreateBuildingSummary(int variant, int floors, float[][] polygon, float vv, float vv2, float vv3)

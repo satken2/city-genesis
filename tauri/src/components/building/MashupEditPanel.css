@@ -1,0 +1,153 @@
+/* マッシュアップ建物のサブ建物配置エディタ(MashupEditPanel)のスタイル */
+
+.me-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  min-height: 0;
+}
+
+.me-muted {
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+.me-error {
+  color: #f87171;
+  font-size: 0.85rem;
+}
+
+.me-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.me-header-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e5e7eb;
+}
+
+.me-header-hint {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+/* ---- サブ建物カード一覧 ---- */
+
+.me-cards {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 6px 2px;
+  flex-shrink: 0;
+}
+
+.me-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 10px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 6px;
+  background: rgba(148, 163, 184, 0.06);
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  flex-shrink: 0;
+}
+
+.me-card:hover {
+  border-color: rgba(148, 163, 184, 0.6);
+  background: rgba(148, 163, 184, 0.12);
+}
+
+/* 底面矩形のプレビュー枠。矩形自体は敷地キャンバスと同じ縮尺(実サイズ)で描く */
+.me-card-rect-frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 48px;
+}
+
+.me-card-rect {
+  border: 2px solid;
+  border-radius: 2px;
+  box-sizing: border-box;
+}
+
+.me-card-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #e5e7eb;
+  white-space: nowrap;
+}
+
+.me-card-size {
+  font-size: 0.7rem;
+  color: #94a3b8;
+}
+
+/* ---- 敷地キャンバス ---- */
+
+.me-canvas-container {
+  flex: 1;
+  min-height: 200px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.35);
+  overflow: hidden;
+}
+
+.me-canvas {
+  display: block;
+  touch-action: none;
+}
+
+/* ---- アクションボタン ---- */
+
+.me-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.me-actions-spacer {
+  flex: 1;
+}
+
+.me-btn {
+  padding: 8px 16px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  border-radius: 4px;
+  background: rgba(148, 163, 184, 0.1);
+  color: #e5e7eb;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.me-btn:hover:not(:disabled) {
+  background: rgba(148, 163, 184, 0.2);
+}
+
+.me-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.me-btn-confirm {
+  border-color: rgba(96, 165, 250, 0.5);
+  background: rgba(96, 165, 250, 0.18);
+  color: #93c5fd;
+}
+
+.me-btn-confirm:hover:not(:disabled) {
+  background: rgba(96, 165, 250, 0.3);
+}
