@@ -778,7 +778,15 @@ public static class ModularBodyBuilder
             }
         }
 
-        Debug.LogWarning($"[MBB]   {desc} → すべてのフォールバック失敗 (パーツなし)");
+        // 角パーツはどこにも用意されていない構成が正常系（角なし＝壁を辺いっぱいに敷く）なので警告しない。
+        if (type == "c")
+        {
+            UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[MBB]   {desc} → 角パーツなし（角を描画せず壁を端まで敷く）");
+        }
+        else
+        {
+            Debug.LogWarning($"[MBB]   {desc} → すべてのフォールバック失敗 (パーツなし)");
+        }
         materials = null;
         return null;
     }
