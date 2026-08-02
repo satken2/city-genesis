@@ -724,7 +724,10 @@ public static class ModularBodyBuilder
     }
 
     /// <summary>
-    /// パーツをロードする。位置フォールバック（w3→w1）とレベルフォールバック（base→mid, top→mid）を適用。
+    /// パーツをロードする。位置フォールバック（w3→w1）とレベルフォールバック
+    /// （base→mid, top→mid, fence→mid）を壁(w)・角(c)共通で適用する。
+    /// mid にも角パーツが無い建物では null を返し、角は描画されず、
+    /// 張り出し量が 0 になるため壁パーツが辺の端まで敷き詰められる（角は建物単位のオプトイン）。
     /// </summary>
     private static GameObject LoadPartWithFallback(string prefix, string level, string type, int position, int suffix, out Material[] materials)
     {

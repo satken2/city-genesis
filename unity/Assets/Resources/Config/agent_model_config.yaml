@@ -64,3 +64,18 @@ agents:
     prebuilt: true
     variants:
       - 0
+  2001:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  2007:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  2012:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
