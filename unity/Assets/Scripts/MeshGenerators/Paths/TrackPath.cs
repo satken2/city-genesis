@@ -20,22 +20,46 @@ using GeneratedModels;
 ///             （レール面上約5m）はプレハブ形状が持ち、コードは高さパラメータを持たない。
 ///   pole / beam ... 架線柱（柱）と架線ビーム（門型梁）。wire_spacing 間隔で左右に Instantiate 配置。
 ///   wall / pillar ... 防音壁・高架橋脚。道路とまったく同じ仕組み（RoadPathの共通ヘルパー）を使う。
-///   platform ... 駅パスのプラットフォーム。プレハブの原点を線路中心線に合わせ、モデル実寸のまま
-///             片側（または両側）に配置する（張り出し幅はプレハブ形状が持つ。マスターの
-///             platform_width はホームの有無と敷地・コライダー・柱/壁位置の算出にのみ使う）。
+///   platform / platform_wall / platform_panel ... 駅パスのプラットフォーム（3パーツ構成。下記）。
 ///
 /// 【駅パスのプラットフォーム】
 /// 駅パスの width は通常線路と同じ「線路コリドーの幅」であり、道床・軌道・交差点ハル・
 /// レールコネクタは通常線路とまったく同じに描かれる（前後の線路とシームレスに繋がる）。
-/// プラットフォームは platform_width ぶん道床の外へ張り出す追加パーツで、設置側はパスの
-/// platform_side（内側/外側/両側）で決まる。内側/外側→左右の解決は都市の通行方向
-/// （CityInfoStore.TrafficHand）と線路の走行方向（travel_direction）を基準に行う
+/// プラットフォームは platform_width ぶん道床の外へ張り出し、3つの要素で構成される:
+///   - platform（淵・線路側）  ... 縁（中心線から ±PLATFORM_EDGE_OFFSET＝1.5mの固定位置。
+///     道床コリドー端より線路側に突き出す）の造形を持つ実寸パーツ。黄線・点字ブロック・
+///     ホームドア・縁の垂直面・**ホームを支える支柱**。原点＝線路中心線・線路面で配置し、
+///     縁までの横位置とホーム面までの立ち上がりはプレハブ形状が持つ
+///   - デッキ（ホーム上面）    ... コードが動的生成する厚さ PLATFORM_DECK_THICKNESS（15cm）の
+///     宙に浮いた板（上面＝ホーム面 PLATFORM_SURFACE_ABOVE_SPLINE から PLATFORM_DECK_SINK
+///     沈めた高さ）。淵からホーム外縁まで platform_width ぶん張る。マテリアルは
+///     platform_panel プレハブ（マテリアル参照専用パーツ）から採取し、未配置なら共通コンクリート
+///   - platform_wall（外縁）   ... ホーム外縁（±(width/2+platform_width)）の壁・柵・ベンチを持つ
+///     実寸パーツ。原点＝線路中心線・線路面で配置し、外縁までの横位置はプレハブ形状が持つ。
+///     島式結合区間・他線路近接区間では省略される
+/// デッキの幅の正はマスターの platform_width、高さの正はコードの高さ定数
+/// （敷地・コライダーと描画が構造的に一致する）。淵・外縁プレハブは造形の横位置・
+/// 立ち上がり高さをマスター値・PLATFORM_SURFACE_ABOVE_SPLINE に一致させて作る規約
+/// （ずれるとデッキと食い違う。詳細は CreatePlatformSide のコメント参照）。
+/// 設置側はパスの platform_side（内側/外側/両側）で決まる。内側/外側→左右の解決は都市の
+/// 通行方向（CityInfoStore.TrafficHand）と線路の走行方向（travel_direction）を基準に行う
 /// （ResolvePlatformExtents。DIR_BACKWARD の線路は幾何フレームで左右が反転する）。
 /// この解決ロジックはバックエンドの敷地ポリゴン算出（geo_paths.get_platform_extension_widths）
 /// と鏡写しであり、片方だけ変えると敷地と見た目が食い違う。
-/// プラットフォームがある側では、防音壁を立てず（ホーム外縁の柵・壁はプレハブ造形が持つ）、
-/// 架線柱をホーム外縁の外側に立て、近接線路の結合描画（バラスト充填・壁省略）を無効化し、
-/// クリック判定コライダーをホーム込みの非対称幅にする。
+/// プラットフォームがある側では、防音壁を立てず（ホーム外縁は platform_wall が担う）、
+/// 架線柱をホーム外縁の外側に立て、クリック判定コライダーをホーム込みの非対称幅にする。
+///
+/// 【島式ホームの結合描画】
+/// 互いに向き合うホーム（上下線とも PLATFORM_SIDE_INSIDE 等）を持つほぼ平行な駅パスで、
+/// 道床エッジ間ギャップが両ホームの張り出し幅の合計以下なら、TrackAdjacency がホームの
+/// 結合を判定し（TrackCorridorInfo の Deck* / PlatformWallOmit）、
+///   - デッキ: path_idの小さい側が相手の淵まで全幅デッキを張り、相手側は張らない
+///     （1枚の島に見える。線路間隔の調整にも追従する）
+///   - platform_wall: 両側とも省略
+///   - 架線柱・架線ビーム: 最小path_idの線路が島全幅の外側に柱を立てて梁を渡す
+///     （道床結合の柱コリドー化と同じ主線路方式）
+/// として描画する。島式が成立しない近接（他線路の道床がホームに掛かる等）では
+/// platform_wall を省略し、デッキを相手道床の手前までクランプする。
 ///
 /// 電化（wire / pole / beam の配置）はマスターデータの wire_spacing で制御する
 /// （null または 0 以下なら非電化としてスキップ）。
@@ -75,6 +99,14 @@ public class TrackPath : IPathMeshGenerator
     private const float POLE_MARGIN = 0.5f;
 
     /// <summary>
+    /// プラットフォームの淵（デッキの線路側エッジ）の線路中心線からの距離(m)。
+    /// バリアントの width に依存しない固定値で、道床コリドー端（width/2）より線路側へ
+    /// 突き出す（車両限界ぎりぎりまで寄せた乗降縁）。淵（platform）プレハブの縁の造形位置と
+    /// デッキの線路側エッジ、島式結合での相手淵ラインの算出（TrackAdjacency）がこの値を共有する。
+    /// </summary>
+    public const float PLATFORM_EDGE_OFFSET = 1.5f;
+
+    /// <summary>
     /// 道床ギャップフィラーを両側の道床の内側に食い込ませる量(m)。
     /// エッジをぴったり合わせると計算誤差で線状の裂け目が出るため、少し重ねる。
     /// </summary>
@@ -92,6 +124,25 @@ public class TrackPath : IPathMeshGenerator
 
     /// <summary>これより短い防音壁の描画区間は生成しない(m)。結合境界での細切れ壁の防止。</summary>
     private const float MERGE_WALL_MIN_RUN_LENGTH = 1.0f;
+
+    /// <summary>
+    /// デッキ（ホーム上面）をホーム面の公称高さ（PLATFORM_SURFACE_ABOVE_SPLINE）から沈める量(m)。
+    /// 淵（platform）パーツの上面造形（黄線・点字ブロック）は公称面に置かれるため、
+    /// わずかに下げてZファイティングを避ける（点字ブロックが2cm浮き上がって見えるのは実物どおり）。
+    /// </summary>
+    private const float PLATFORM_DECK_SINK = 0.02f;
+
+    /// <summary>これより幅の狭いデッキは生成しない(m)。クランプで潰れた区間のスリバー防止。</summary>
+    private const float PLATFORM_DECK_MIN_WIDTH = 0.05f;
+
+    /// <summary>これより短いデッキの連続区間は生成しない(m)。</summary>
+    private const float PLATFORM_DECK_MIN_RUN_LENGTH = 1.0f;
+
+    /// <summary>
+    /// デッキ（ホーム上面の板）の厚さ(m)。デッキは地面まで覆う構造ではなく宙に浮いた
+    /// スラブとして張られ、ホームを支える支柱・立ち上がりは platform（淵）パーツの造形が持つ。
+    /// </summary>
+    private const float PLATFORM_DECK_THICKNESS = 0.15f;
 
     // 線路に歩道はないため、歩道セットバック（エンドキャップ用）は受け取るだけで使用しない。
     public PathMeshResult Generate(PathSummary pathData, List<Vector3> points, SidewalkSetback startSidewalkSetback = default, SidewalkSetback endSidewalkSetback = default)
@@ -122,32 +173,25 @@ public class TrackPath : IPathMeshGenerator
             points = PathManager.SubdividePointsWithTerrain(points, PathManager.TERRAIN_SAMPLE_INTERVAL, followTerrain);
         }
 
-        // 近接して並走する線路との結合コリドー（複線見え化）。
-        // 結合区間が無い・プロバイダ未設定（テストシーン等）なら null で、従来どおり単独描画になる。
+        // 近接して並走する線路との結合コリドー（複線見え化）と、駅パスのホームの
+        // 結合/干渉情報。結合区間が無い・プロバイダ未設定（テストシーン等）なら null で、
+        // 従来どおり単独描画になる（ホームは自幅の単独デッキ）。
+        // ホームがある側の道床結合（バラスト充填等）の抑止と島式ホームの結合判定は
+        // Compute 側が platformLeft / platformRight を見て行う。
         TrackCorridorInfo corridor = null;
         if (TrackAdjacency.NeighborProvider != null)
         {
             List<TrackNeighborInfo> trackNeighbors = TrackAdjacency.NeighborProvider(pathData);
             if (trackNeighbors != null && trackNeighbors.Count > 0)
             {
-                corridor = TrackAdjacency.Compute(pathData.path_id, points, width, wallWidth, trackNeighbors);
+                corridor = TrackAdjacency.Compute(pathData.path_id, points, width, wallWidth, platformLeft, platformRight, trackNeighbors);
             }
-        }
-
-        // プラットフォームがある側では結合描画（バラスト充填・壁の省略）を無効化する。
-        // ホームの下にギャップフィラーが張られたり、ホーム側の壁だけ省略されたりするのを防ぐ
-        // （通常、隣接線路はホーム幅より外に離れるため結合自体が成立しないが、
-        //  狭いホーム＋近接敷設の組み合わせで発動し得る）。
-        if (corridor != null)
-        {
-            if (platformLeft > 0f) SuppressCorridorSide(corridor, leftSide: true);
-            if (platformRight > 0f) SuppressCorridorSide(corridor, leftSide: false);
         }
 
         GameObject container = new GameObject($"Track_{pathData.path_id}");
         SplineComputer spline = RoadPath.BuildSpline(container, points, isCurved);
 
-        CreateTrackParts(container, spline, width, lanes, wallWidth, pillarSpacing, heightEditable, baseHeight, wireSpacing, pathData, corridor, platformLeft, platformRight);
+        CreateTrackParts(container, spline, points, width, lanes, wallWidth, pillarSpacing, heightEditable, baseHeight, wireSpacing, pathData, corridor, platformLeft, platformRight);
 
         // 一方通行線路には進行方向を示す矢印オーバーレイを付ける（双方向は何も出ない）。
         // 表示は道路敷設モード（STATE_EDIT_PATH）のみで、切替は TrackDirectionArrows が一括制御する。
@@ -232,29 +276,6 @@ public class TrackPath : IPathMeshGenerator
     }
 
     /// <summary>
-    /// 結合コリドーの指定側の結合情報を打ち消す（プラットフォームがある側用）。
-    /// その側の壁クリップ・バラスト充填が行われなくなり、柱の張り出しも自幅基準に戻る。
-    /// 反対側の結合描画には影響しない。
-    /// </summary>
-    private static void SuppressCorridorSide(TrackCorridorInfo corridor, bool leftSide)
-    {
-        int n = corridor.Points.Count;
-        bool[] covered = leftSide ? corridor.LeftCovered : corridor.RightCovered;
-        bool[] wallBlocked = leftSide ? corridor.LeftWallBlocked : corridor.RightWallBlocked;
-        float[] fillTo = leftSide ? corridor.LeftFillTo : corridor.RightFillTo;
-        float[] extent = leftSide ? corridor.LeftExtent : corridor.RightExtent;
-        for (int i = 0; i < n; i++)
-        {
-            covered[i] = false;
-            // プラットフォーム側は壁自体を立てないため壁ブロックは描画に影響しないが、
-            // コリドー情報の整合を保つために解除しておく。
-            wallBlocked[i] = false;
-            fillTo[i] = float.NaN;
-            extent[i] = corridor.OwnHalfWidth;
-        }
-    }
-
-    /// <summary>
     /// 指定した軌道インデックスの中心オフセット（スプライン中心線からの横方向距離）を返す。
     /// 道路の車線と同じ導出で、全幅を軌道数で等分した各帯の中央に軌道を置く。
     /// 例: 単線(width5, lanes1)=0、複線(width11, lanes2)=±2.75、複々線(width16, lanes4)=±2, ±6。
@@ -269,11 +290,13 @@ public class TrackPath : IPathMeshGenerator
     /// <summary>
     /// 線路パーツ（道床、軌道、架線、架線柱、防音壁、橋脚、プラットフォーム）をスプラインに沿って配置する。
     /// corridor（近接線路の結合コリドー。null可）が渡された場合、結合区間では
-    /// 道床のギャップ充填・防音壁の省略・架線柱/ビームのコリドー全幅化を行う。
+    /// 道床のギャップ充填・防音壁の省略・架線柱/ビームのコリドー全幅化と、
+    /// 島式ホームの結合描画（デッキ充填・platform_wall省略）を行う。
+    /// points はスプライン制御点と同一の描画点列（デッキの動的生成に使う）。
     /// platformLeft / platformRight は駅パスのプラットフォームの左右の張り出し幅
     /// （ResolvePlatformExtents で解決済み。0なら無し）。
     /// </summary>
-    private static void CreateTrackParts(GameObject container, SplineComputer spline, float width, int lanes, float wallWidth, float? pillarSpacing, bool heightEditable, float baseHeight, float? wireSpacing, PathSummary pathData, TrackCorridorInfo corridor = null, float platformLeft = 0f, float platformRight = 0f)
+    private static void CreateTrackParts(GameObject container, SplineComputer spline, List<Vector3> points, float width, int lanes, float wallWidth, float? pillarSpacing, bool heightEditable, float baseHeight, float? wireSpacing, PathSummary pathData, TrackCorridorInfo corridor = null, float platformLeft = 0f, float platformRight = 0f)
     {
         string variantBase = $"Models/Paths/p{pathData.path_variant}";
         string typeBase = $"Models/Paths/p{pathData.path_type}";
@@ -313,20 +336,13 @@ public class TrackPath : IPathMeshGenerator
         }
 
         // プラットフォーム（駅パスのみ: platform_width が設定されているバリアント）。
-        // プレハブの原点を線路中心線（スプライン中心）に一致させ、モデル実寸のまま配置する
-        // （幅スケールもピボット補正もしない＝ホームの張り出し量はプレハブ形状が持つ）。
-        // 「右側用パーツ」規約: 原型は原点から +X 側（進行方向右）へ張り出すよう作り、左側はXミラー。
-        // platformLeft / platformRight は「その側にホームがあるか」の判定にのみ使う（描画幅には使わない）。
-        // プレハブ未配置ならスキップ（オプショナルパーツ。道床だけの駅として描かれる）。
-        if (platformLeft > 0f)
+        // 淵（platform）・デッキ（動的生成）・外縁（platform_wall）の3要素で構成する
+        // （クラスコメント参照）。張り出し幅は platform_width、デッキの高さは
+        // RoadPartHeights.PLATFORM_SURFACE_ABOVE_SPLINE が正。淵・外縁プレハブは
+        // 原点＝線路面で、ホーム面までの立ち上がりをプレハブ形状が持つ。
+        if (platformLeft > 0f || platformRight > 0f)
         {
-            GameObject p = RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/platform", 0f, 0f, RoadPartHeights.PLATFORM_ABOVE_SPLINE, true, $"{typeBase}/platform", stretchToWidth: false, compensatePivot: false);
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[TrackPath] platform(左): {(p != null ? "生成成功" : "プレハブなし")}");
-        }
-        if (platformRight > 0f)
-        {
-            GameObject p = RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/platform", 0f, 0f, RoadPartHeights.PLATFORM_ABOVE_SPLINE, false, $"{typeBase}/platform", stretchToWidth: false, compensatePivot: false);
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[TrackPath] platform(右): {(p != null ? "生成成功" : "プレハブなし")}");
+            CreatePlatformParts(container, spline, points, corridor, width, platformLeft, platformRight, variantBase, typeBase);
         }
 
         // 架線系（電化バリアントのみ: wire_spacing が設定されている場合）
@@ -348,7 +364,7 @@ public class TrackPath : IPathMeshGenerator
         // 近接線路と結合している側は、線路間に壁を立てないよう結合区間を区間クリップで省略する
         // （分岐などで間隔が開き結合が解けた区間では壁が復活する）。
         // プラットフォームがある側には壁を立てない（乗降空間を防音壁で塞がないため。
-        // ホーム外縁の柵・壁が必要ならプレハブ造形が持つ）。ホームの無い側は通常どおり立てる。
+        // ホーム外縁の壁・柵は platform_wall が担う）。ホームの無い側は通常どおり立てる。
         if (wallWidth > 0f)
         {
             float wallCenterOffset = (width * 0.5f) + (wallWidth * 0.5f);
@@ -377,6 +393,333 @@ public class TrackPath : IPathMeshGenerator
     }
 
     /// <summary>
+    /// 駅パスのプラットフォーム一式（淵・デッキ・外縁）を左右それぞれに生成する。
+    /// デッキ用マテリアルは platform_panel プレハブ（マテリアル参照専用パーツ）から採取し、
+    /// 未配置なら共通コンクリートへフォールバックする（ホームは駅の視認性の本体のため、
+    /// 他のオプショナルパーツと違い「未配置＝スキップ」にはしない）。
+    /// </summary>
+    private static void CreatePlatformParts(GameObject container, SplineComputer spline, List<Vector3> points, TrackCorridorInfo corridor, float width, float platformLeft, float platformRight, string variantBase, string typeBase)
+    {
+        Material deckMaterial = null;
+        GameObject panelPrefab = LoadPrefab($"{variantBase}/platform_panel", $"{typeBase}/platform_panel");
+        MeshRenderer panelRenderer = panelPrefab != null ? panelPrefab.GetComponent<MeshRenderer>() : null;
+        if (panelRenderer != null && panelRenderer.sharedMaterial != null)
+        {
+            deckMaterial = RoadPath.GetOrCreateRoadMaterial(panelRenderer.sharedMaterial);
+        }
+        if (deckMaterial == null)
+        {
+            deckMaterial = BuildingMeshBuilder.GetCommonConcreteMaterial();
+            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[TrackPath] platform_panel プレハブなし: デッキは共通コンクリートで描画");
+        }
+
+        // デッキの動的生成にはコリドーと同じ「右方向・累積弧長」のフレームが必要。
+        // コリドーがあればその配列を共有し、無ければ（隣接線路なし）ここで計算する。
+        Vector3[] rightDir;
+        float[] cumLength;
+        if (corridor != null)
+        {
+            rightDir = corridor.RightDir;
+            cumLength = corridor.CumulativeLength;
+        }
+        else
+        {
+            ComputeStripFrames(points, out rightDir, out cumLength);
+        }
+
+        float halfWidth = width * 0.5f;
+        if (platformLeft > 0f)
+        {
+            CreatePlatformSide(container, spline, corridor, points, rightDir, cumLength, leftSide: true, halfWidth, platformLeft, deckMaterial, variantBase, typeBase);
+        }
+        if (platformRight > 0f)
+        {
+            CreatePlatformSide(container, spline, corridor, points, rightDir, cumLength, leftSide: false, halfWidth, platformRight, deckMaterial, variantBase, typeBase);
+        }
+    }
+
+    /// <summary>
+    /// 片側分のプラットフォーム（淵・デッキ・外縁）を生成する。
+    ///
+    /// プレハブのモデリング規約（RoadPartHeights のコメントも参照）:
+    /// 淵（platform）・外縁（platform_wall）とも**原点＝線路中心線（スプライン中心）・線路面**で、
+    /// 横方向の位置もプレハブ形状が持つ（コードはオフセットしない）。「右側用」として作り、
+    /// 左側はXミラー（原点が中心線にあるためミラーは中心線対称になる）:
+    ///   platform（淵）     ... 縁の造形をプレハブ内で X=+PLATFORM_EDGE_OFFSET（1.5m固定。
+    ///                        バリアントの width に依存しない）に置く。ホーム面までの
+    ///                        立ち上がり（縁の垂直面・ホームを支える支柱）と黄線・
+    ///                        点字ブロック等の上面造形もプレハブ形状が持ち、
+    ///                        上面造形の高さは PLATFORM_SURFACE_ABOVE_SPLINE と一致させる
+    ///                        （デッキは厚さ15cmの浮いた板で、支柱を生成しない）
+    ///   platform_wall（外縁）... 壁・柵・ベンチの本体をプレハブ内で X=+(width/2+platform_width)
+    ///                        （ホーム外縁）、ホーム面の高さから上に造形する。デッキの外縁の
+    ///                        小口（板の側面）と同一平面になる垂直面は持たせない（Zファイティング防止）
+    /// プレハブのX座標と PLATFORM_EDGE_OFFSET・マスターの width / platform_width がずれると
+    /// 淵・外縁がデッキと食い違うため、モデルはこれらの値に合わせて作る。
+    /// どちらも実寸配置（Xスケール・ピボット補正なし）で、未配置ならスキップ。
+    /// </summary>
+    private static void CreatePlatformSide(GameObject container, SplineComputer spline, TrackCorridorInfo corridor, List<Vector3> points, Vector3[] rightDir, float[] cumLength, bool leftSide, float halfWidth, float platformWidth, Material deckMaterial, string variantBase, string typeBase)
+    {
+        string sideLabel = leftSide ? "左" : "右";
+
+        // 淵（platform）: 原点を線路中心線に合わせ、設置面（線路面）で配置する。
+        GameObject edge = RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/platform", 0f, 0f, RoadPartHeights.PLATFORM_BASE_ABOVE_SPLINE, leftSide, $"{typeBase}/platform", stretchToWidth: false, compensatePivot: false);
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[TrackPath] platform 淵({sideLabel}): {(edge != null ? "生成成功" : "プレハブなし")}");
+
+        // デッキ（ホーム上面）: 淵（中心線から PLATFORM_EDGE_OFFSET）から外縁
+        // （width/2 + platform_width）まで水平の板を動的生成する。
+        int deckRuns = BuildPlatformDeckRuns(container, corridor, points, rightDir, cumLength, leftSide, PLATFORM_EDGE_OFFSET, halfWidth + platformWidth, deckMaterial);
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[TrackPath] platform デッキ({sideLabel}): {deckRuns}区間");
+
+        // 外縁（platform_wall）: 原点を線路中心線に合わせ、設置面（線路面）で配置する
+        // （外縁位置への横移動はプレハブ形状が持つ）。
+        // 島式結合区間・他線路近接区間は percent 区間クリップで省略する。
+        List<TrackCorridorInfo.PercentRange> ranges = corridor != null
+            ? corridor.GetPlatformWallPercentIntervals(leftSide, MERGE_WALL_MIN_RUN_LENGTH)
+            : new List<TrackCorridorInfo.PercentRange> { new TrackCorridorInfo.PercentRange { From = 0.0, To = 1.0 } };
+        foreach (var range in ranges)
+        {
+            RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/platform_wall", 0f, 0f, RoadPartHeights.PLATFORM_BASE_ABOVE_SPLINE, leftSide, $"{typeBase}/platform_wall", stretchToWidth: false, compensatePivot: false, clipFrom: range.From, clipTo: range.To);
+        }
+    }
+
+    /// <summary>
+    /// 点列に沿った「水平右方向・累積弧長」を計算する（結合コリドーが無い場合のデッキ生成用。
+    /// TrackAdjacency.Compute のフレーム計算と同じ導出）。
+    /// </summary>
+    private static void ComputeStripFrames(List<Vector3> points, out Vector3[] rightDir, out float[] cumLength)
+    {
+        int n = points.Count;
+        rightDir = new Vector3[n];
+        cumLength = new float[n];
+        float cum = 0f;
+        for (int i = 0; i < n; i++)
+        {
+            if (i > 0) cum += Vector3.Distance(points[i - 1], points[i]);
+            cumLength[i] = cum;
+            Vector3 fwd = points[Mathf.Min(i + 1, n - 1)] - points[Mathf.Max(i - 1, 0)];
+            fwd.y = 0f;
+            rightDir[i] = fwd.sqrMagnitude < 1e-6f
+                ? (i > 0 ? rightDir[i - 1] : Vector3.right)
+                : Vector3.Cross(Vector3.up, fwd.normalized);
+        }
+    }
+
+    /// <summary>
+    /// 指定側のデッキ（ホーム上面）を連続区間ごとに生成する。戻り値は生成した区間数。
+    /// nearLat は淵ライン（中心線から PLATFORM_EDGE_OFFSET の固定値）、defaultFar は
+    /// ホーム外縁（width/2 + platform_width）。外縁位置はコリドーの DeckFar
+    /// （NaN=張らない。島式の充填担当・クランプ反映済み）に従い、コリドーが無ければ
+    /// 全長を defaultFar で張る。
+    /// </summary>
+    private static int BuildPlatformDeckRuns(GameObject container, TrackCorridorInfo corridor, List<Vector3> points, Vector3[] rightDir, float[] cumLength, bool leftSide, float nearLat, float defaultFar, Material deckMaterial)
+    {
+        if (deckMaterial == null || points == null || points.Count < 2) return 0;
+
+        int n = points.Count;
+        float[] deckFar = corridor != null ? (leftSide ? corridor.LeftDeckFar : corridor.RightDeckFar) : null;
+        bool[] joined = corridor != null ? (leftSide ? corridor.LeftDeckJoined : corridor.RightDeckJoined) : null;
+
+        int runIndex = 0;
+        int i = 0;
+        while (i < n)
+        {
+            float far = deckFar != null ? deckFar[i] : defaultFar;
+            if (float.IsNaN(far) || far - nearLat < PLATFORM_DECK_MIN_WIDTH)
+            {
+                i++;
+                continue;
+            }
+            int s = i;
+            while (i < n)
+            {
+                float f = deckFar != null ? deckFar[i] : defaultFar;
+                if (float.IsNaN(f) || f - nearLat < PLATFORM_DECK_MIN_WIDTH) break;
+                i++;
+            }
+            int e = i - 1;
+
+            if (e - s < 1) continue;
+            if (cumLength[e] - cumLength[s] < PLATFORM_DECK_MIN_RUN_LENGTH) continue;
+
+            BuildPlatformDeckMesh(container, points, rightDir, cumLength, s, e, leftSide, nearLat, deckFar, joined, defaultFar, deckMaterial, runIndex++);
+        }
+        return runIndex;
+    }
+
+    /// <summary>
+    /// 点列区間 [s, e] に沿ったデッキのメッシュを生成する。デッキは厚さ
+    /// PLATFORM_DECK_THICKNESS の宙に浮いた板（スラブ）で、構成は
+    /// 「上面＋底面＋外縁の小口（垂直面）＋両端の妻面キャップ」。
+    /// 上面はホーム面（PLATFORM_SURFACE_ABOVE_SPLINE）から PLATFORM_DECK_SINK 沈めた水平面。
+    /// ホームを支える支柱・立ち上がりは platform（淵）パーツの造形が持つ（ここでは生成しない）。
+    /// 上面の淵側エッジは淵ライン（nearLat＝中心線から PLATFORM_EDGE_OFFSET の固定値）
+    /// ちょうどに置き、淵パーツの上面造形が2cm上から継ぎ目を覆う
+    /// （淵側の小口も淵パーツが覆うため生成しない）。
+    /// 外縁の小口は島式結合区間（joined）では張らない（相手線路の淵パーツが面を持つ）。
+    /// </summary>
+    private static void BuildPlatformDeckMesh(GameObject container, List<Vector3> points, Vector3[] rightDir, float[] cumLength, int s, int e, bool leftSide, float nearLat, float[] deckFar, bool[] joined, float defaultFar, Material material, int runIndex)
+    {
+        int count = e - s + 1;
+        float deckTop = RoadPartHeights.PLATFORM_SURFACE_ABOVE_SPLINE - PLATFORM_DECK_SINK;
+        float deckBottom = deckTop - PLATFORM_DECK_THICKNESS;
+        float sideSign = leftSide ? -1f : 1f;
+
+        var vertices = new List<Vector3>(count * 4 + 16);
+        var normals = new List<Vector3>(count * 4 + 16);
+        var uvs = new List<Vector2>(count * 4 + 16);
+        var triangles = new List<int>((count - 1) * 18 + 24);
+
+        // --- 上面・底面ストリップ ---
+        // 頂点は「横方向オフセットの小さい側 → 大きい側」の順に並べ、上向き面の巻き順を
+        // 道床ギャップフィラーと同じ規約で保つ（底面は巻き順を裏返して下向きに）。
+        // UVは横=オフセット・縦=弧長のメートル基準。
+        for (int k = 0; k < count; k++)
+        {
+            int idx = s + k;
+            float far = deckFar != null ? deckFar[idx] : defaultFar;
+            Vector3 basePos = points[idx] + Vector3.up * deckTop;
+            Vector3 right = rightDir[idx];
+            float lat0 = leftSide ? -far : nearLat;
+            float lat1 = leftSide ? -nearLat : far;
+            vertices.Add(basePos + right * lat0);
+            vertices.Add(basePos + right * lat1);
+            normals.Add(Vector3.up);
+            normals.Add(Vector3.up);
+            float v = cumLength[idx] * 0.25f;
+            uvs.Add(new Vector2(lat0 * 0.25f, v));
+            uvs.Add(new Vector2(lat1 * 0.25f, v));
+        }
+        int bottomBase = count * 2;
+        for (int k = 0; k < count; k++)
+        {
+            int idx = s + k;
+            float far = deckFar != null ? deckFar[idx] : defaultFar;
+            Vector3 basePos = points[idx] + Vector3.up * deckBottom;
+            Vector3 right = rightDir[idx];
+            float lat0 = leftSide ? -far : nearLat;
+            float lat1 = leftSide ? -nearLat : far;
+            vertices.Add(basePos + right * lat0);
+            vertices.Add(basePos + right * lat1);
+            normals.Add(Vector3.down);
+            normals.Add(Vector3.down);
+            float v = cumLength[idx] * 0.25f;
+            uvs.Add(new Vector2(lat0 * 0.25f, v));
+            uvs.Add(new Vector2(lat1 * 0.25f, v));
+        }
+        for (int k = 0; k < count - 1; k++)
+        {
+            int v0 = k * 2;       // 手前・小オフセット側
+            int v1 = k * 2 + 1;   // 手前・大オフセット側
+            int v2 = k * 2 + 2;   // 先・小オフセット側
+            int v3 = k * 2 + 3;   // 先・大オフセット側
+            triangles.Add(v0); triangles.Add(v2); triangles.Add(v1);
+            triangles.Add(v1); triangles.Add(v2); triangles.Add(v3);
+            // 底面は同じ並びで巻き順だけ裏返す
+            int b0 = bottomBase + v0, b1 = bottomBase + v1, b2 = bottomBase + v2, b3 = bottomBase + v3;
+            triangles.Add(b0); triangles.Add(b1); triangles.Add(b2);
+            triangles.Add(b1); triangles.Add(b3); triangles.Add(b2);
+        }
+
+        // --- 外縁の小口（垂直面） ---
+        // 両端点とも島式結合でないセグメントにのみ張る（結合区間は相手の淵が面を持つ）。
+        for (int k = 0; k < count - 1; k++)
+        {
+            int a = s + k;
+            int b = s + k + 1;
+            if (joined != null && (joined[a] || joined[b])) continue;
+
+            float farA = deckFar != null ? deckFar[a] : defaultFar;
+            float farB = deckFar != null ? deckFar[b] : defaultFar;
+            Vector3 latA = rightDir[a] * (sideSign * farA);
+            Vector3 latB = rightDir[b] * (sideSign * farB);
+            Vector3 topA = points[a] + Vector3.up * deckTop + latA;
+            Vector3 topB = points[b] + Vector3.up * deckTop + latB;
+            Vector3 botA = points[a] + Vector3.up * deckBottom + latA;
+            Vector3 botB = points[b] + Vector3.up * deckBottom + latB;
+
+            float u0 = cumLength[a] * 0.25f;
+            float u1 = cumLength[b] * 0.25f;
+            float vTop = deckTop * 0.25f;
+            float vBot = deckBottom * 0.25f;
+            AddDeckQuad(vertices, normals, uvs, triangles,
+                topA, topB, botB, botA,
+                rightDir[a] * sideSign,
+                new Vector2(u0, vTop), new Vector2(u1, vTop), new Vector2(u1, vBot), new Vector2(u0, vBot),
+                flip: leftSide);
+        }
+
+        // --- 妻面（両端のキャップ） ---
+        AddDeckEndCap(vertices, normals, uvs, triangles, points, rightDir, s, leftSide, nearLat, deckFar, defaultFar, deckTop, deckBottom, isEnd: false);
+        AddDeckEndCap(vertices, normals, uvs, triangles, points, rightDir, e, leftSide, nearLat, deckFar, defaultFar, deckTop, deckBottom, isEnd: true);
+
+        Mesh mesh = new Mesh { name = $"TrackPlatformDeck_{(leftSide ? "L" : "R")}_{runIndex}" };
+        mesh.SetVertices(vertices);
+        mesh.SetNormals(normals);
+        mesh.SetUVs(0, uvs);
+        mesh.SetTriangles(triangles, 0);
+        mesh.RecalculateBounds();
+
+        GameObject go = new GameObject(mesh.name);
+        go.transform.SetParent(container.transform, false);
+        go.AddComponent<MeshFilter>().sharedMesh = mesh;
+        go.AddComponent<MeshRenderer>().sharedMaterial = material;
+    }
+
+    /// <summary>
+    /// デッキの妻面キャップ1枚を追加する。淵ラインから外縁までの矩形を、板の上面から
+    /// 下面まで（厚さ分だけ）垂直に張る。法線は進行方向の外向き（始端=-forward、終端=+forward）。
+    /// </summary>
+    private static void AddDeckEndCap(List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> triangles, List<Vector3> points, Vector3[] rightDir, int idx, bool leftSide, float nearLat, float[] deckFar, float defaultFar, float deckTop, float deckBottom, bool isEnd)
+    {
+        int n = points.Count;
+        Vector3 fwd = points[Mathf.Min(idx + 1, n - 1)] - points[Mathf.Max(idx - 1, 0)];
+        fwd.y = 0f;
+        if (fwd.sqrMagnitude < 1e-6f) return;
+        fwd.Normalize();
+
+        float sideSign = leftSide ? -1f : 1f;
+        float far = deckFar != null ? deckFar[idx] : defaultFar;
+        Vector3 nearOff = rightDir[idx] * (sideSign * nearLat);
+        Vector3 farOff = rightDir[idx] * (sideSign * far);
+        Vector3 nearTop = points[idx] + Vector3.up * deckTop + nearOff;
+        Vector3 farTop = points[idx] + Vector3.up * deckTop + farOff;
+        Vector3 nearBot = points[idx] + Vector3.up * deckBottom + nearOff;
+        Vector3 farBot = points[idx] + Vector3.up * deckBottom + farOff;
+
+        float vTop = deckTop * 0.25f;
+        float vBot = deckBottom * 0.25f;
+        AddDeckQuad(vertices, normals, uvs, triangles,
+            nearTop, farTop, farBot, nearBot,
+            isEnd ? fwd : -fwd,
+            new Vector2(nearLat * 0.25f, vTop), new Vector2(far * 0.25f, vTop), new Vector2(far * 0.25f, vBot), new Vector2(nearLat * 0.25f, vBot),
+            flip: leftSide != isEnd);
+    }
+
+    /// <summary>
+    /// 四角形1枚を追加する。normal には表側の法線（外向き）をそのまま渡し、
+    /// flip は巻き順だけを裏返す（a,b,c,d の並びが法線側から見て反時計回りになる
+    /// 配置＝左側ミラー等の場合に true にして表裏を合わせる）。
+    /// </summary>
+    private static void AddDeckQuad(List<Vector3> vertices, List<Vector3> normals, List<Vector2> uvs, List<int> triangles, Vector3 a, Vector3 b, Vector3 c, Vector3 d, Vector3 normal, Vector2 uvA, Vector2 uvB, Vector2 uvC, Vector2 uvD, bool flip)
+    {
+        int baseIdx = vertices.Count;
+        vertices.Add(a); vertices.Add(b); vertices.Add(c); vertices.Add(d);
+        for (int i = 0; i < 4; i++) normals.Add(normal);
+        uvs.Add(uvA); uvs.Add(uvB); uvs.Add(uvC); uvs.Add(uvD);
+        if (!flip)
+        {
+            triangles.Add(baseIdx); triangles.Add(baseIdx + 1); triangles.Add(baseIdx + 2);
+            triangles.Add(baseIdx); triangles.Add(baseIdx + 2); triangles.Add(baseIdx + 3);
+        }
+        else
+        {
+            triangles.Add(baseIdx); triangles.Add(baseIdx + 2); triangles.Add(baseIdx + 1);
+            triangles.Add(baseIdx); triangles.Add(baseIdx + 3); triangles.Add(baseIdx + 2);
+        }
+    }
+
+    /// <summary>
     /// 架線柱（pole）と架線ビーム（beam）を wire_spacing 間隔でスプラインに沿って配置する。
     /// 交差点の切断面ぎりぎりに柱が立たないよう、両端から間隔の半分だけ内側に寄せる
     /// （街路樹の配置と同じ端部クリアランスの考え方）。
@@ -384,7 +727,9 @@ public class TrackPath : IPathMeshGenerator
     /// 近接線路との結合区間（corridor）では、コリドー内で最小path_idの線路（主線路）だけが
     /// コリドー全幅の左右端に柱を立てて梁を渡し、それ以外の線路はその地点の柱・梁を置かない。
     /// 主線路と他線路の柱位相（spacing の起点）は揃わないが、結合が解けた区間では
-    /// 各線路が自分の柱を従来どおり立てる。
+    /// 各線路が自分の柱を従来どおり立てる。島式ホームの結合区間も同じ主線路方式で、
+    /// コリドーの張り出し（Left/RightExtent）に島全幅（相手線路の外縁側ホーム込み）が
+    /// 反映済みのため、柱は島をまたいだ左右の外側に立ち、梁が駅全幅に渡る。
     ///
     /// プラットフォームがある側（platformLeft / platformRight > 0）では、柱がホームを
     /// 突き抜けないよう、ホーム外縁のさらに外側（+POLE_MARGIN）に立てる。

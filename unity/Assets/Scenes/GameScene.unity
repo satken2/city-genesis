@@ -1357,6 +1357,8 @@ MonoBehaviour:
   Curved: 1
   PlatformSide: 0
   PathFollowTerrainOverride: -1
+  LateralOffsets: []
+  TravelDirections: 
   pointCircleRadius: 8
   existingNodeHalfSize: 4
   dashedLineThickness: 2

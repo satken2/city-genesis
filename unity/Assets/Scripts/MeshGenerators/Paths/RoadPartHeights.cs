@@ -76,12 +76,21 @@ public static class RoadPartHeights
     public const float DIRECTION_ARROW_ABOVE_SPLINE = 0.45f;
 
     /// <summary>
-    /// 駅パスのプラットフォーム（platform）の下端のスプラインからの高さ。
-    /// 道床（body）の天端と同じ平面に置く（交差点の道床ハルとも面一）。
-    /// プレハブのピボット規約: platform は「設置面（下端）」がピボットで、ホーム面までの
-    /// 立ち上がり（レール面上約1.1m相当）はプレハブ形状が持つ（コードはホーム高さの
-    /// パラメータを持たない）。「右側用」として作り、乗降縁端は -X（軌道中心）方向を
-    /// 向ける。左側はXミラーで配置される（防音壁 wall と同じ規約）。
+    /// 駅パスのプラットフォームプレハブ（platform / platform_wall）の設置面（原点）の
+    /// スプラインからの高さ。プレハブのモデリング規約は**原点＝線路中心線・線路面**
+    /// （スプライン中心・スプライン基準面と同一平面）で、縁・外縁への横位置と
+    /// ホーム面までの立ち上がりはプレハブ形状が持つ（TrackPath.CreatePlatformSide 参照）。
+    /// 地形の微起伏に埋まる余裕として、下端は原点より少し下（-0.5m程度）まで造形しておく。
     /// </summary>
-    public const float PLATFORM_ABOVE_SPLINE = 0.1f;
+    public const float PLATFORM_BASE_ABOVE_SPLINE = 0.0f;
+
+    /// <summary>
+    /// 駅パスのホーム面（プラットフォーム上面の公称高さ）のスプラインからの高さ。
+    /// レール踏面（軌道基準面＋プレハブ形状の立ち上がり約0.2m）から約1.2mに相当する。
+    /// デッキ（ホーム上面。コードが動的生成する水平面）はこの面から PLATFORM_DECK_SINK
+    /// （TrackPath）だけ沈めて張られる。
+    /// **淵（platform）のホーム面の上面造形はプレハブ内で原点からこの定数と同じ高さ（1.5m）に
+    /// 造形する規約**。ずれるとデッキと淵の上面が食い違う。
+    /// </summary>
+    public const float PLATFORM_SURFACE_ABOVE_SPLINE = 1.5f;
 }

@@ -16,6 +16,15 @@ public class TrackNeighborInfo
 
     /// <summary>マスターデータの全幅（道床幅、m）。</summary>
     public float Width;
+
+    /// <summary>
+    /// プラットフォームの左右の張り出し幅(m)。左右はこの線路自身の幾何フレーム
+    /// （点列の start→end 方向）基準で、TrackPath.ResolvePlatformExtents で解決済み。
+    /// 駅パスでなければ両方0。島式ホームの結合判定（相手のホームが自分側を向いているか）に使う。
+    /// </summary>
+    public float PlatformLeft;
+
+    public float PlatformRight;
 }
 
 /// <summary>
@@ -88,6 +97,36 @@ public class TrackCorridorInfo
 
     public float[] RightFillTo;
 
+    /// <summary>
+    /// 左側プラットフォームのデッキ（ホーム上面）の外縁までの距離（自中心線からの正の距離）。
+    /// NaN はこの点でデッキを張らないことを意味する（その側にホームが無い、または
+    /// 島式結合区間でデッキの充填担当が相手線路の側）。
+    /// 通常値は「自半幅 + platform_width」で、島式結合区間の充填担当側では相手線路の
+    /// 淵ライン（相手中心線から TrackPath.PLATFORM_EDGE_OFFSET）まで、他線路の道床が
+    /// ホームに掛かる区間ではその手前までクランプされる。
+    /// なお淵側（線路側）のエッジは常に自中心線から PLATFORM_EDGE_OFFSET の固定値
+    /// （TrackPath 側が持つ）で、この配列は外縁側だけを表す。
+    /// </summary>
+    public float[] LeftDeckFar;
+
+    public float[] RightDeckFar;
+
+    /// <summary>
+    /// 左側デッキの外縁が島式結合で相手線路の淵に接続している点。
+    /// この点ではデッキの外側スカート（垂直面）を張らない（相手の淵パーツが面を持つ）。
+    /// </summary>
+    public bool[] LeftDeckJoined;
+
+    public bool[] RightDeckJoined;
+
+    /// <summary>
+    /// 左側の platform_wall（ホーム外縁の壁・柵・ベンチ）を省略する点。
+    /// 島式結合区間（ホームが相手と繋がる）と、他線路の道床がホーム外縁に掛かる区間。
+    /// </summary>
+    public bool[] LeftPlatformWallOmit;
+
+    public bool[] RightPlatformWallOmit;
+
     /// <summary>点列のどこかに結合区間が存在するか。false のコリドーは生成されない。</summary>
     public bool AnyCoverage;
 
@@ -118,10 +157,30 @@ public class TrackCorridorInfo
     /// </summary>
     public List<PercentRange> GetWallPercentIntervals(bool leftSide, float minRunLength)
     {
-        var result = new List<PercentRange>();
         bool[] covered = leftSide ? LeftCovered : RightCovered;
         bool[] blocked = leftSide ? LeftWallBlocked : RightWallBlocked;
-        int n = covered.Length;
+        return GetClearPercentIntervals(i => covered[i] || blocked[i], minRunLength);
+    }
+
+    /// <summary>
+    /// 指定側の platform_wall（ホーム外縁）を配置してよい連続区間をスプライン percent の
+    /// 区間として返す（島式結合区間・他線路の道床がホーム外縁に掛かる区間を除いた残り）。
+    /// </summary>
+    public List<PercentRange> GetPlatformWallPercentIntervals(bool leftSide, float minRunLength)
+    {
+        bool[] omit = leftSide ? LeftPlatformWallOmit : RightPlatformWallOmit;
+        return GetClearPercentIntervals(i => omit[i], minRunLength);
+    }
+
+    /// <summary>
+    /// isOmitted が false の連続区間をスプライン percent の区間として返す共通処理。
+    /// 区間境界はサンプル点の中間位置。minRunLength(m) 未満の細切れ区間は
+    /// スリバー防止のため出力しない。
+    /// </summary>
+    private List<PercentRange> GetClearPercentIntervals(System.Func<int, bool> isOmitted, float minRunLength)
+    {
+        var result = new List<PercentRange>();
+        int n = Points.Count;
         if (TotalLength <= 0f)
         {
             result.Add(new PercentRange { From = 0.0, To = 1.0 });
@@ -131,9 +190,9 @@ public class TrackCorridorInfo
         int i = 0;
         while (i < n)
         {
-            if (covered[i] || blocked[i]) { i++; continue; }
+            if (isOmitted(i)) { i++; continue; }
             int s = i;
-            while (i < n && !covered[i] && !blocked[i]) i++;
+            while (i < n && !isOmitted(i)) i++;
             int e = i - 1;
 
             float fromLen = (s == 0) ? 0f : (CumulativeLength[s - 1] + CumulativeLength[s]) * 0.5f;
@@ -174,6 +233,12 @@ public static class TrackAdjacency
     /// </summary>
     private const float WALL_BLOCK_CLEARANCE = 0.3f;
 
+    /// <summary>
+    /// 他線路の道床がプラットフォームに掛かる判定（島式結合が成立しない近接）の余裕(m)。
+    /// この距離まで道床が迫った区間は platform_wall を省略し、デッキを道床の手前までクランプする。
+    /// </summary>
+    private const float PLATFORM_ENCROACH_CLEARANCE = 0.3f;
+
     /// <summary>コリドーの1メンバー（自分自身または隣接線路）。O は自中心線からの符号付き横位置。</summary>
     private struct Member
     {
@@ -184,7 +249,7 @@ public static class TrackAdjacency
 
     /// <summary>
     /// 自線路の点列に沿って隣接線路との結合コリドーを計算する。
-    /// 結合区間も壁の物理ブロック区間も1点も無い場合は null を返す
+    /// 結合区間・壁の物理ブロック区間・ホームの結合/干渉区間が1点も無い場合は null を返す
     /// （呼び出し側は従来描画にフォールバック）。
     ///
     /// 各点で「自分＋閾値内の隣接候補」を横位置順に並べ、道床エッジ間ギャップが
@@ -193,8 +258,21 @@ public static class TrackAdjacency
     ///
     /// ownWallWidth は自線路の防音壁の幅（wall_width。null相当は0）。壁の物理ブロック判定
     /// （LeftWallBlocked / RightWallBlocked）の壁ゾーン算出に使う。
+    ///
+    /// ownPlatformLeft / ownPlatformRight は自線路のプラットフォーム張り出し幅
+    /// （TrackPath.ResolvePlatformExtents で解決済み。0なら無し）。ホームがある側では:
+    ///   - 道床結合（バラスト充填・壁省略・柱コリドー化のチェーン連結）は行わない
+    ///     （ホームの下にギャップフィラーが張られるのを防ぐ）
+    ///   - 代わりに島式ホームの結合を判定する: 互いに向き合うホームを持つほぼ平行な
+    ///     駅パス同士で、道床エッジ間ギャップが両ホームの張り出し幅の合計以下なら、
+    ///     デッキ（ホーム上面）を1枚に繋げて島式ホームとして描画する。
+    ///     デッキの充填はpath_idの小さい側が相手の道床エッジ（＝相手の淵）まで担当し、
+    ///     platform_wall は両側とも省略、架線柱は最小path_idの線路が島全幅の外側に立てる
+    ///     （道床結合の柱コリドー化と同じ主線路方式）
+    ///   - 島式が成立しない近接（張り出し幅の合計を超えるが道床がホームに掛かる等）では
+    ///     platform_wall を省略し、デッキを相手道床の手前までクランプする
     /// </summary>
-    public static TrackCorridorInfo Compute(int ownPathId, List<Vector3> ownPoints, float ownWidth, float ownWallWidth, List<TrackNeighborInfo> neighbors)
+    public static TrackCorridorInfo Compute(int ownPathId, List<Vector3> ownPoints, float ownWidth, float ownWallWidth, float ownPlatformLeft, float ownPlatformRight, List<TrackNeighborInfo> neighbors)
     {
         if (ownPoints == null || ownPoints.Count < 2 || neighbors == null || neighbors.Count == 0) return null;
 
@@ -216,6 +294,12 @@ public static class TrackAdjacency
             RightExtent = new float[n],
             LeftFillTo = new float[n],
             RightFillTo = new float[n],
+            LeftDeckFar = new float[n],
+            RightDeckFar = new float[n],
+            LeftDeckJoined = new bool[n],
+            RightDeckJoined = new bool[n],
+            LeftPlatformWallOmit = new bool[n],
+            RightPlatformWallOmit = new bool[n],
         };
 
         float cum = 0f;
@@ -227,6 +311,8 @@ public static class TrackAdjacency
             info.RightExtent[i] = ownHalf;
             info.LeftFillTo[i] = float.NaN;
             info.RightFillTo[i] = float.NaN;
+            info.LeftDeckFar[i] = ownPlatformLeft > 0f ? ownHalf + ownPlatformLeft : float.NaN;
+            info.RightDeckFar[i] = ownPlatformRight > 0f ? ownHalf + ownPlatformRight : float.NaN;
         }
         info.TotalLength = cum;
 
@@ -241,6 +327,7 @@ public static class TrackAdjacency
         float cosMaxAngle = Mathf.Cos(LocalConstants.TRACK_MERGE_MAX_ANGLE_DEG * Mathf.Deg2Rad);
         float cosMaxConvergeAngle = Mathf.Cos(LocalConstants.TRACK_MERGE_MAX_CONVERGE_ANGLE_DEG * Mathf.Deg2Rad);
         bool anyWallBlock = false;
+        bool anyPlatform = false;
         var members = new List<Member>(neighbors.Count + 1);
 
         for (int i = 0; i < n; i++)
@@ -259,6 +346,15 @@ public static class TrackAdjacency
 
             members.Clear();
             members.Add(new Member { O = 0f, Half = ownHalf, Id = ownPathId });
+
+            // プラットフォームの結合/干渉のサンプル単位の集計（左右それぞれ）。
+            // island*   ... 島式結合の相手がいるか・最寄りの相手道床エッジ・最小path_id・島全幅の外縁
+            // encroach* ... 島式が成立しない近接でデッキをクランプする位置（最小値）
+            bool islandLeft = false, islandRight = false;
+            float islandJoinLeft = float.MaxValue, islandJoinRight = float.MaxValue;
+            int islandMinIdLeft = int.MaxValue, islandMinIdRight = int.MaxValue;
+            float islandOuterLeft = 0f, islandOuterRight = 0f;
+            float encroachLeft = float.MaxValue, encroachRight = float.MaxValue;
 
             for (int j = 0; j < neighbors.Count; j++)
             {
@@ -280,6 +376,14 @@ public static class TrackAdjacency
                 if (Mathf.Abs(o) > MAX_SCAN_HALF_WIDTH) continue;
 
                 float nbHalf = nb.Width * 0.5f;
+                float cosAngle = Mathf.Abs(Vector3.Dot(fwd, nbTan));
+                float centerDist = delta.magnitude;
+
+                // 端点クランプの虚像: 最近接点が隣接線路の端点へのクランプで、かつ道床同士が
+                // 重なる距離まで近い場合は、交差点ハルで切られた相手の端点が自線路の中心線近傍
+                // （反対側＝外側のこともある）へ投影された幾何的な虚像。結合メンバー・島式結合の
+                // 判定から除外する（許すと合流ノードの手前で壁・ホームの描画が数サンプル分乱れる）。
+                bool endClampVirtual = clampedAtPolylineEnd && centerDist < ownHalf + nbHalf;
 
                 // 防音壁の物理ブロック判定（角度不問）。壁は他線路の道床の上に立ててはならない。
                 // 並走判定とは独立に、隣接線路の道床の横断面 [o-nbHalf, o+nbHalf] が自分の
@@ -302,28 +406,136 @@ public static class TrackAdjacency
                     }
                 }
 
+                // プラットフォームの結合/干渉判定（自分のホームがある側のみ）。
+                float myPlatform = o > 0f ? ownPlatformRight : ownPlatformLeft;
+                if (myPlatform > 0f)
+                {
+                    float absO = Mathf.Abs(o);
+                    float edgeGap = absO - ownHalf - nbHalf;
+
+                    // 相手のホームのうち「自分側を向いている張り出し幅」と「反対側（島の外縁側）の
+                    // 張り出し幅」。相手の幾何フレームの左右を、自分が相手のどちら側にいるかで
+                    // 自フレームへ読み替える（-delta = 相手の最近接点から自分への水平ベクトル）。
+                    Vector3 nbRight = Vector3.Cross(Vector3.up, nbTan);
+                    bool ownIsOnNbRight = Vector3.Dot(nbRight, -delta) > 0f;
+                    float nbFacingPlatform = ownIsOnNbRight ? nb.PlatformRight : nb.PlatformLeft;
+                    float nbOuterPlatform = ownIsOnNbRight ? nb.PlatformLeft : nb.PlatformRight;
+
+                    // 島式結合: 互いに向き合うホームを持つほぼ平行な駅パスで、道床エッジ間
+                    // ギャップが両ホームの張り出し幅の合計以下（＝デッキが届き合う距離）。
+                    bool island = !endClampVirtual && cosAngle >= cosMaxAngle
+                        && nbFacingPlatform > 0f
+                        && edgeGap > 0f && edgeGap <= myPlatform + nbFacingPlatform;
+                    if (island)
+                    {
+                        // デッキの充填先は相手の淵ライン（相手中心線から PLATFORM_EDGE_OFFSET の
+                        // 固定値。相手の淵パーツの縁の位置と一致し、継ぎ目を相手の淵が覆う）。
+                        float joinTo = absO - TrackPath.PLATFORM_EDGE_OFFSET;
+                        float outerTo = absO + nbHalf + nbOuterPlatform;
+                        if (o > 0f)
+                        {
+                            islandRight = true;
+                            if (joinTo < islandJoinRight) islandJoinRight = joinTo;
+                            if (nb.PathId < islandMinIdRight) islandMinIdRight = nb.PathId;
+                            if (outerTo > islandOuterRight) islandOuterRight = outerTo;
+                        }
+                        else
+                        {
+                            islandLeft = true;
+                            if (joinTo < islandJoinLeft) islandJoinLeft = joinTo;
+                            if (nb.PathId < islandMinIdLeft) islandMinIdLeft = nb.PathId;
+                            if (outerTo > islandOuterLeft) islandOuterLeft = outerTo;
+                        }
+                    }
+                    else if (edgeGap < myPlatform + PLATFORM_ENCROACH_CLEARANCE)
+                    {
+                        // 島式が成立しないままホーム（外縁の余裕込み）に他線路の道床が掛かる近接。
+                        // デッキを道床の手前までクランプする位置を記録する（角度不問）。
+                        float limit = absO - nbHalf - PLATFORM_ENCROACH_CLEARANCE;
+                        if (o > 0f) { if (limit < encroachRight) encroachRight = limit; }
+                        else { if (limit < encroachLeft) encroachLeft = limit; }
+                    }
+
+                    // 自分のホームがある側の線路は道床結合のチェーン連結に加えない
+                    // （ホームの下へのバラスト充填・柱コリドー化を防ぐ。ホーム側の結合は
+                    //  上の島式判定が担い、架線柱の島全幅化もそちらで行う）。
+                    continue;
+                }
+
                 // コリドーメンバー判定。ほぼ平行な並走（上り線・下り線で向きが逆でもよいので
                 // 絶対値で判定）に加え、合流・分岐で収束中の線路（角度差が転回制約と同じ45°以下）も、
                 // 道床エッジギャップが結合閾値以下まで近づいていればメンバーにする。
                 // 角度が揃いきるのを待つと、複線どうしの合流では道床が重なり始めてから
                 // ようやく結合が始まり、線路間の壁が相手の本体に被ってしまう。
-                float cosAngle = Mathf.Abs(Vector3.Dot(fwd, nbTan));
-                float centerDist = delta.magnitude;
                 bool parallel = cosAngle >= cosMaxAngle;
                 bool converging = !parallel && cosAngle >= cosMaxConvergeAngle
                     && (centerDist - nbHalf - ownHalf) <= LocalConstants.TRACK_MERGE_MAX_EDGE_GAP;
                 if (!parallel && !converging) continue;
 
-                // 端点クランプの虚像ガード: 最近接点が隣接線路の端点へのクランプで、かつ道床同士が
-                // 重なる距離まで近い場合は、交差点ハルで切られた相手の端点が自線路の中心線近傍
-                // （反対側＝外側のこともある）へ投影された幾何的な虚像なのでメンバーにしない。
-                // これを許すと合流ノードの手前で「外側に隣接線路がいる」と誤判定され、
-                // 外側の防音壁が数サンプル分だけ抜け落ちる（壁の途切れ）。
-                if (clampedAtPolylineEnd && centerDist < ownHalf + nbHalf) continue;
+                // 端点クランプの虚像ガード（上記 endClampVirtual）: 合流ノードの手前で
+                // 「外側に隣接線路がいる」と誤判定され、外側の防音壁が数サンプル分だけ
+                // 抜け落ちる（壁の途切れ）のを防ぐ。
+                if (endClampVirtual) continue;
 
                 if (Mathf.Abs(o) < 0.01f) continue;
 
                 members.Add(new Member { O = o, Half = nbHalf, Id = nb.PathId });
+            }
+
+            // プラットフォームの結合/干渉の確定（道床結合のメンバー有無に関わらず反映する）。
+            if (ownPlatformRight > 0f)
+            {
+                if (islandRight)
+                {
+                    anyPlatform = true;
+                    info.RightPlatformWallOmit[i] = true;
+                    if (ownPathId < islandMinIdRight)
+                    {
+                        // 自分が充填担当（最小path_id）: 相手の淵までデッキを張る。
+                        // さらに第三の線路が割り込む場合はその手前まででクランプする。
+                        info.RightDeckFar[i] = Mathf.Min(islandJoinRight, encroachRight);
+                        info.RightDeckJoined[i] = encroachRight >= islandJoinRight;
+                    }
+                    else
+                    {
+                        info.RightDeckFar[i] = float.NaN;
+                    }
+                    // 架線柱は最小path_idの線路が島全幅（相手の外縁側ホーム込み）の外側に立てる
+                    //（道床結合の柱コリドー化と同じ主線路方式）。
+                    info.RightExtent[i] = Mathf.Max(info.RightExtent[i], islandOuterRight);
+                    if (islandMinIdRight < ownPathId) info.SuppressPoleSet[i] = true;
+                }
+                else if (encroachRight < float.MaxValue)
+                {
+                    anyPlatform = true;
+                    info.RightPlatformWallOmit[i] = true;
+                    info.RightDeckFar[i] = Mathf.Min(info.RightDeckFar[i], encroachRight);
+                }
+            }
+            if (ownPlatformLeft > 0f)
+            {
+                if (islandLeft)
+                {
+                    anyPlatform = true;
+                    info.LeftPlatformWallOmit[i] = true;
+                    if (ownPathId < islandMinIdLeft)
+                    {
+                        info.LeftDeckFar[i] = Mathf.Min(islandJoinLeft, encroachLeft);
+                        info.LeftDeckJoined[i] = encroachLeft >= islandJoinLeft;
+                    }
+                    else
+                    {
+                        info.LeftDeckFar[i] = float.NaN;
+                    }
+                    info.LeftExtent[i] = Mathf.Max(info.LeftExtent[i], islandOuterLeft);
+                    if (islandMinIdLeft < ownPathId) info.SuppressPoleSet[i] = true;
+                }
+                else if (encroachLeft < float.MaxValue)
+                {
+                    anyPlatform = true;
+                    info.LeftPlatformWallOmit[i] = true;
+                    info.LeftDeckFar[i] = Mathf.Min(info.LeftDeckFar[i], encroachLeft);
+                }
             }
 
             if (members.Count <= 1) continue;
@@ -350,15 +562,17 @@ public static class TrackAdjacency
             if (lo == ownIdx && hi == ownIdx) continue;
 
             info.AnyCoverage = true;
-            info.LeftExtent[i] = -(members[lo].O - members[lo].Half);
-            info.RightExtent[i] = members[hi].O + members[hi].Half;
+            // 島式ホームの柱コリドー化（上の確定処理）が反対側で先に張り出しを広げている
+            // ことがあるため、上書きではなく最大値で合成する。
+            info.LeftExtent[i] = Mathf.Max(info.LeftExtent[i], -(members[lo].O - members[lo].Half));
+            info.RightExtent[i] = Mathf.Max(info.RightExtent[i], members[hi].O + members[hi].Half);
 
             int minId = ownPathId;
             for (int m = lo; m <= hi; m++)
             {
                 if (members[m].Id < minId) minId = members[m].Id;
             }
-            info.SuppressPoleSet[i] = minId < ownPathId;
+            if (minId < ownPathId) info.SuppressPoleSet[i] = true;
 
             if (lo < ownIdx)
             {
@@ -374,7 +588,7 @@ public static class TrackAdjacency
             }
         }
 
-        return (info.AnyCoverage || anyWallBlock) ? info : null;
+        return (info.AnyCoverage || anyWallBlock || anyPlatform) ? info : null;
     }
 
     /// <summary>点列のXZ AABBを margin 分拡張した Rect を返す（点列不正時は空Rect）。</summary>

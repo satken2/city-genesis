@@ -462,7 +462,11 @@ public class PathManager : BaseApiDataManager
     public override void ClearAllCells()
     {
         Debug.Log("PathManager: 全ノード・道路データをクリア");
-        
+
+        // 走行中のLODロードを止めてからクリアする。残しておくと、旧セッション宛の
+        // リクエストのレスポンスがクリア後に届き、キャッシュと空間ハッシュを再登録してしまう。
+        CancelActiveLodCoroutines();
+
         // ノード削除
         foreach (var obj in nodeObjectsCache.Values)
         {
@@ -489,6 +493,16 @@ public class PathManager : BaseApiDataManager
         pathDataCache.Clear();
         pathsByNodeIndex.Clear();
         pathVersionCache.Clear();
+
+        // 空間ハッシュは吸着判定と道路編集モードの背景オーバーレイ（既存パス表示）の
+        // 唯一の供給源。セルのアンロードは非表示化のみでここを消さないため、
+        // 残すと存在しないパス・ノードへ吸着してしまう。
+        nodeGrid?.Clear();
+        segmentGrid?.Clear();
+        // 背景オーバーレイはカメラ静止中 NodeDataVersion の変化でしか再構築されないため、
+        // クリアを通知しないと旧セッションのパス線が残り続ける。
+        NodeDataVersion++;
+
         ClearIntersectionMeshes();
         pathStartConnectionPoints.Clear();
         pathEndConnectionPoints.Clear();
@@ -504,6 +518,9 @@ public class PathManager : BaseApiDataManager
         overloadedIntersectionNodeIds.Clear();
         queuedTerrainFollowPathIds.Clear();
         pendingTrackNeighborRebuildIds.Clear();
+        cellsToKeepVisible.Clear();
+        deferredTerrainReadyCells.Clear();
+        deferTerrainTilePathRebuilds = false;
     }
 
     // ================================================================
@@ -1932,7 +1949,8 @@ public class PathManager : BaseApiDataManager
     }
 
     /// <summary>
-    /// TrackAdjacency.NeighborProvider の実体。指定線路の近接候補線路の描画点列と幅を返す。
+    /// TrackAdjacency.NeighborProvider の実体。指定線路の近接候補線路の描画点列と幅、
+    /// 駅パスならプラットフォームの左右張り出し幅（島式ホームの結合判定用）を返す。
     /// 点列は生成済みならキャッシュ(pathPointsCache)を使い、未生成（同一ロード内で
     /// 相手がまだ描画されていない等）なら CalculatePathPoints で算出する。
     /// 工事中(STATUS_CONSTRUCTING)の線路は完成パーツを描画しない（土ストリップ表示）ため
@@ -1953,11 +1971,24 @@ public class PathManager : BaseApiDataManager
             }
             if (points == null || points.Count < 2) continue;
 
+            // 駅パスのホーム張り出し幅を幾何フレーム（点列の start→end 方向）の左右へ解決する。
+            // TrackPath 側が自線路のホームと同じ規約で扱えるようにするため、
+            // 内側/外側→左右の解決（ResolvePlatformExtents）はここで済ませて渡す。
+            float platformLeft = 0f;
+            float platformRight = 0f;
+            var otherMaster = MasterDataStore.Instance != null ? MasterDataStore.Instance.GetPathMaster(other.path_variant) : null;
+            if (otherMaster != null && otherMaster.platform_width.HasValue && otherMaster.platform_width.Value > 0f)
+            {
+                TrackPath.ResolvePlatformExtents(other, otherMaster.platform_width.Value, out platformLeft, out platformRight);
+            }
+
             result.Add(new TrackNeighborInfo
             {
                 PathId = id,
                 Points = points,
                 Width = GetRoadWidth(other.path_variant),
+                PlatformLeft = platformLeft,
+                PlatformRight = platformRight,
             });
         }
         return result;

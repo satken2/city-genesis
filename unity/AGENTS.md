@@ -43,6 +43,13 @@
 `Constants.cs`はバックエンドのソースコードから自動生成されるフロント・バック共通定数なので、編集しないように。
 これらのファイルを編集する必要がある場合は、ユーザーに相談すること。 
 
+# モデルアセットの構成(FBXとミラープレハブ)
+
+- `Assets/Models` ... FBXソース(Buildings / Paths / Props)。
+- `Assets/Resources/Models` ... 上記と同一相対パスのラッパープレハブ。ランタイム(`Utils/ModelManager`)が `"Models/Buildings/{型}/{variant}/{パーツ}"` の文字列パスで `Resources.Load` するために必要。
+- **このミラーは手動で維持しない。** `Assets/Models` にFBXを追加・移動すると、エディタ拡張(`Assets/Editor/ModelPrefabGenerator.cs`)が対応プレハブを自動生成する。一括同期はメニュー `Tools/Model Prefabs/Sync All`、FBXの削除・移動で孤児化したプレハブは `Tools/Model Prefabs/Delete Orphans` で削除する(自動削除はしない)。
+- 自動生成されるプレハブはFBXをオーバーライドなしで包む純粋なラッパー。プレハブ側にコンポーネント追加やマテリアル差し替え等の手動編集を行った場合、同期ツールはそのプレハブを上書きせずスキップして警告する。
+
 # アーキテクチャの要点(まずこれを把握する)
 
 ## データロードとLODの全体像

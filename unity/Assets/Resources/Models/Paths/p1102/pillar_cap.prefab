@@ -10,15 +10,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: c992f106bf4025d458045c81b79448e1, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 618.93475
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c992f106bf4025d458045c81b79448e1, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.00001
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c992f106bf4025d458045c81b79448e1, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -298.75766
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c992f106bf4025d458045c81b79448e1, type: 3}
       propertyPath: m_LocalRotation.w
@@ -50,7 +50,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: c992f106bf4025d458045c81b79448e1, type: 3}
       propertyPath: m_Name
-      value: pillar_cap (1)
+      value: pillar_cap
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -44,6 +44,15 @@ public class SpatialHash<T>
         }
     }
 
+    /// <summary>
+    /// 登録済みの全要素を破棄する。セッション切り替え時に登録元のキャッシュと
+    /// 足並みを揃えて空にするために使う。cellSize は維持される。
+    /// </summary>
+    public void Clear()
+    {
+        buckets.Clear();
+    }
+
     public List<T> Query(Vector3 pos, float radius)
     {
         List<T> result = new List<T>();

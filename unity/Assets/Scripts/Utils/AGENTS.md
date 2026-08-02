@@ -6,7 +6,7 @@
 | --- | --- |
 | `FloatingOrigin.cs` | カメラが原点から閾値(5000)を超えて離れたら、全Transformを一括シフトして浮動小数点精度を保つ。**Unityのワールド座標はバックエンド座標と常に一致するとは限らない**ことの原因なので、座標を扱う処理は注意 |
 | `SpatialHash.cs` | 汎用の空間ハッシュ`SpatialHash<T>`。「半径r以内のオブジェクト候補抽出」はこれを使う(自前で全件走査しない) |
-| `ModelManager.cs` | glTF/glbモデルのロードとキャッシュ(シングルトン)。同じモデルを二度ロードしない |
+| `ModelManager.cs` | モデルのロードとキャッシュ(シングルトン)。persistentDataPathのglTF/glbを優先し、なければ`Resources/Models`配下のプレハブにフォールバック。同じモデルを二度ロードしない。Resources側のプレハブは`Assets/Models`のFBXから自動生成される(unity直下AGENTS.mdの「モデルアセットの構成」参照) |
 | `GeneratedModelUtils.cs` | 自動生成スキーマ(GeneratedModels)関連の補助 |
 | `AgentIconFactory.cs` / `BuildingIconFactory.cs` / `PathIconFactory.cs` / `AlertIconFactory.cs` | 各種アイコンの生成。AlertIconFactory は alert ビット種別ごとのアイコンを agent/path 別に管理(Dictionary キーは `(entityType, bit)`)。詳細は `genesis-docs/docs/programs/アラートフラグ管理.md` 参照 |
 | `InfraNetworkUtil.cs` | ノードの溶接互換(吸着可否)判定。バックエンドの溶接ルール(ビット積)をフロントで再現する。ノードの`type`はビットフラグ(NODE_ROAD/NODE_RAIL/…と、インフラ財ごとのビット`GetInfraNodeBit`のOR。バックエンド`MasterData.get_infra_node_bit`と一致)で、吸着は**「ノードのtypeマスク & パスのマスク(`GetRequiredNodeTypeForPath`=バックエンド`type_p2n`相当) が非0」**で判定する(`IsNodeSnappable` / `IsPathSnappable`)。網互換(電力vs水道)もこのビット積に畳み込まれており、旧`GetNodeInfraProducts`等の製品集合照合は廃止。マスクがインフラ財ビットを含むか(=インフラノード/インフラパスか)は`IsInfraMask` / `IsInfraPathVariant`で判定する。端子ノードの所属施設識別は依然`BuildingManager.TryGetInfraTerminalOwner`(建物側`infra_node_id`の逆引き)を使う(ノードAPIはownerを公開しない片方向参照)。TerrainInputHandlerのスナップとRoadPlanManagerのガイド描画・端子マーカーが使用 |
