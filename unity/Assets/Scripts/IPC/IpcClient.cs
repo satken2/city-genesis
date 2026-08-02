@@ -56,6 +56,9 @@ public class IpcClient : MonoBehaviour
     // 地形追従の個別設定(-1=未設定/0=非追従/1=追従)の変更。UIパネルのトグルを受けて、
     // 敷設中プレビューの地形追従・トンネル可視化を切り替えるために使用する。
     public event Action<int> OnEditPathSetFollowTerrain;
+    // 複合パス(軌道複線)の各線横オフセット(m)の変更。UIパネルの線路数変更を受けて、
+    // 敷設中プレビューの平行本数を切り替えるために使用する。空配列=単一パス。
+    public event Action<float[]> OnEditPathChangeLateralOffsets;
     public event Action OnEditResourceFinish;
     public event Action OnEditTransitFinish;
     // プロップ配置。change_settings は (rotation?, scale?, density?, seed?) を辞書で渡す。
@@ -288,6 +291,14 @@ public class IpcClient : MonoBehaviour
                         int followTerrain = GetParamInt(payload, "value");
                         Debug.Log($"IpcClient: edit_path:set_follow_terrain -> value={followTerrain}");
                         OnEditPathSetFollowTerrain?.Invoke(followTerrain);
+                    }
+                    break;
+
+                case "edit_path:change_lateral_offsets":
+                    {
+                        float[] lateralOffsets = GetParamFloat1D(payload, "lateral_offsets") ?? System.Array.Empty<float>();
+                        Debug.Log($"IpcClient: edit_path:change_lateral_offsets -> count={lateralOffsets.Length}");
+                        OnEditPathChangeLateralOffsets?.Invoke(lateralOffsets);
                     }
                     break;
 

@@ -192,8 +192,9 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
         await sendChangeDisplay("road", "plan");
         onClose();
       } else {
-        // 新規敷設: 連続設置モード。バリアント選択を維持して次のパスを配置できるようにする
-        pathConstruction.continuePlacement();
+        // 新規敷設: 連続設置モード。バリアント選択を維持して次のパスを配置できるようにする。
+        // 線路間隔の調整は確定したパス限りの設定なので、ここで既定へ戻す。
+        pathConstruction.continuePlacement(true);
         setIsConfirming(false);
         void showNotification({
           message: t("path_construction.placedContinue"),
@@ -219,7 +220,8 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
   /**
    * キャンセルボタンを押した際のハンドラ。
    * バリアント選択・カテゴリ選択は解除せず、Unity側に配置中の仮形状(まだ確定していない
-   * ノード列)だけをクリアして、同じバリアントで再び配置できる状態へ戻す。
+   * ノード列)だけをクリアして、同じバリアントで再び配置できる状態へ戻す
+   * (同じパスの引き直しを想定するため、線路間隔の調整も維持する)。
    * continuePlacement は配置状態をリセットしつつ STATE_EDIT_PATH を再送するため、
    * Unity側の仮形状が消え、敷設モードが維持される。
    */
@@ -361,6 +363,9 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
           trackType={pathConstruction.trackType}
           electrified={pathConstruction.electrified}
           trackCount={pathConstruction.trackCount}
+          trackSpacing={pathConstruction.trackSpacing}
+          canWidenSpacing={pathConstruction.canWidenTrackSpacing}
+          canShrinkSpacing={pathConstruction.canShrinkTrackSpacing}
           trackDirections={pathConstruction.trackDirections}
           trackTypeOptions={pathConstruction.railTrackTypeOptions}
           electrificationOptions={pathConstruction.railElectrificationOptions}
@@ -371,6 +376,7 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
           onToggleElectrified={pathConstruction.setElectrified}
           onSelectVariant={pathConstruction.selectVariant}
           onChangeTrackCount={pathConstruction.changeTrackCount}
+          onAdjustSpacing={pathConstruction.adjustTrackSpacing}
           onCycleDirection={pathConstruction.cycleTrackDirection}
           disabled={editPathId != null}
         />
@@ -530,6 +536,11 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
               path_type: pathConstruction.unityPathType,
               path_variant: pathConstruction.unityPathVariant,
               path_id: editPathId ?? null,
+              // 角度設定モードからの復帰でSTATE_EDIT_PATHを再送する際、軌道複線の
+              // 平行プレビューが単線に戻らないようオフセット列も渡す(無指定は空リセット扱い)
+              lateral_offsets: pathConstruction.railComponents
+                ? pathConstruction.railComponents.map((c) => c.lateral_offset ?? 0)
+                : [],
             }}
             onStartSetAngleMode={handleStartSetAngleMode}
             onEndSetAngleMode={handleEndSetAngleMode}

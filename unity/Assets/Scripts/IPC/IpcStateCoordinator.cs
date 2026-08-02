@@ -75,6 +75,10 @@ public class IpcStateCoordinator : MonoBehaviour
             ZoneEditContext.Instance.Exit();
         }
 
+        // 一方通行線路の進行方向矢印は道路敷設モードでのみ表示する
+        // （既存線路に向きの対を作って接続する際の編集支援表示のため）。
+        TrackDirectionArrows.SetVisible(state == "STATE_EDIT_PATH");
+
         switch (state)
         {
             case "STATE_NORMAL":
@@ -328,6 +332,9 @@ public class IpcStateCoordinator : MonoBehaviour
         {
             // IPCパラメータからpath_type / path_variant / path_idを読み取って設定する
             int? pathId = null;
+            // 複合パス(軌道複線)の各線横オフセット。paramsに無ければ単一パス(空)へ必ず戻す
+            // (前回の敷設セッションのオフセットが残ると道路等でも複線プレビューされてしまう)。
+            float[] lateralOffsets = System.Array.Empty<float>();
             if (ipcParams != null)
             {
                 if (ipcParams.TryGetValue("path_id", out object pidObj) && pidObj != null)
@@ -355,7 +362,15 @@ public class IpcStateCoordinator : MonoBehaviour
                     roadPlanManager.PlatformSide = Convert.ToInt32(psObj);
                     Debug.Log($"IpcStateCoordinator: platform_side = {roadPlanManager.PlatformSide}");
                 }
+                // 複合パス(軌道複線)の各線横オフセット。敷設モード初期化時の初期値として渡す
+                // (以後の線路数変更は edit_path:change_lateral_offsets で逐次反映される)。
+                if (ipcParams.TryGetValue("lateral_offsets", out object loObj) && loObj != null)
+                {
+                    lateralOffsets = ReadFloatArray(loObj);
+                    Debug.Log($"IpcStateCoordinator: lateral_offsets = {lateralOffsets.Length}本");
+                }
             }
+            roadPlanManager.LateralOffsets = lateralOffsets;
 
             roadPlanManager.InitializeRoadPlacement(pathId);
         }
@@ -879,6 +894,33 @@ public class IpcStateCoordinator : MonoBehaviour
     }
 
     /// <summary>
+    /// ipcParams から取り出した値(JArray または IEnumerable)を float 配列へ変換する。
+    /// ReadIntArray の float 版(lateral_offsets のように小数を含む配列に使う)。
+    /// </summary>
+    private static float[] ReadFloatArray(object value)
+    {
+        if (value is Newtonsoft.Json.Linq.JArray jArr)
+        {
+            var list = new List<float>(jArr.Count);
+            foreach (var token in jArr)
+            {
+                list.Add((float)token);
+            }
+            return list.ToArray();
+        }
+        if (value is System.Collections.IEnumerable en && !(value is string))
+        {
+            var list = new List<float>();
+            foreach (var item in en)
+            {
+                if (item != null) list.Add(Convert.ToSingle(item, System.Globalization.CultureInfo.InvariantCulture));
+            }
+            return list.ToArray();
+        }
+        return System.Array.Empty<float>();
+    }
+
+    /// <summary>
     /// edit_parcel:start_shape_edit: UI側から形状編集開始を受信。
     /// ステート変更なしで直接 ParcelShapeEditManager を初期化する。
     /// </summary>
@@ -1090,6 +1132,10 @@ public class IpcStateCoordinator : MonoBehaviour
         // 表示状態の記憶をクリア
         var viewCoordinator = FindAnyObjectByType<IpcViewCoordinator>();
         viewCoordinator?.ClearNormalStateMemory();
+
+        // 道路敷設モード中のリセットで進行方向矢印の表示フラグが残らないようにする
+        // （リセット後に再生成された線路の矢印が通常表示に出てしまうのを防ぐ）。
+        TrackDirectionArrows.SetVisible(false);
 
         // 各データマネージャーおよび内部状態キャッシュ、各種ストアを完全にクリア
         if (CellDataLoader.Instance != null)

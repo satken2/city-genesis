@@ -4,8 +4,9 @@
  * 「鉄道(PATH_TRACK)」「モノレール(PATH_MONORAIL)」「ロープウェイ(PATH_ROPEWAY)」を選び、
  * さらに track_type(通常/橋梁/駅)と電化スイッチで対象を絞り込む。同じ組み合わせでも
  * 複数の線路規格がありうるため、最後に道路と同じプルダウンで最終バリアントを確定する。
- * そのうえで線路数(1〜10)・各線の進行方向を指定して複線を構成する
- * (線路間隔はバリアントのマスター幅から自動で決まるため、パネルでは指定しない)。
+ * そのうえで線路数(1〜10)・線路間隔・各線の進行方向を指定して複線を構成する。
+ * 線路間隔の既定はバリアントのマスター幅で、広げる/縮めるボタンで一定範囲内を
+ * 調整できる(パス1本確定ごとに既定へ戻る)。単線では間隔が意味を持たないため非表示。
  *
  * 電化は左右にスライドするON/OFFスイッチで切り替える。電化・非電化のバリアントが
  * 分かれているのは鉄道(PATH_TRACK)だけなので、スイッチは鉄道選択時のみ表示する。
@@ -44,6 +45,10 @@ type RailVariantSelectorProps = {
   trackType: number;
   electrified: boolean;
   trackCount: number;
+  /** 実効の線路間隔(m)。表示専用で、変更は onAdjustSpacing 経由で行う。 */
+  trackSpacing: number;
+  canWidenSpacing: boolean;
+  canShrinkSpacing: boolean;
   trackDirections: number[];
   trackTypeOptions: number[];
   electrificationOptions: { hasElectrified: boolean; hasNonElectrified: boolean };
@@ -56,6 +61,8 @@ type RailVariantSelectorProps = {
   onToggleElectrified: (val: boolean) => void;
   onSelectVariant: (variantId: number) => void;
   onChangeTrackCount: (n: number) => void;
+  /** 線路間隔を1段階 広げる(+1)/縮める(-1)。 */
+  onAdjustSpacing: (direction: 1 | -1) => void;
   onCycleDirection: (index: number) => void;
   disabled?: boolean;
 };
@@ -66,6 +73,9 @@ export function RailVariantSelector({
   trackType,
   electrified,
   trackCount,
+  trackSpacing,
+  canWidenSpacing,
+  canShrinkSpacing,
   trackDirections,
   trackTypeOptions,
   electrificationOptions,
@@ -76,6 +86,7 @@ export function RailVariantSelector({
   onToggleElectrified,
   onSelectVariant,
   onChangeTrackCount,
+  onAdjustSpacing,
   onCycleDirection,
   disabled = false,
 }: RailVariantSelectorProps) {
@@ -240,6 +251,36 @@ export function RailVariantSelector({
                   />
                 </div>
               </div>
+
+              {/*
+                線路間隔。既定はバリアントのマスター幅(=コリドーが隙間なく隣接)で、
+                広げる/縮めるボタンで一定範囲内を調整する。パス1本確定ごとに既定へ戻る。
+                単線では意味を持たないため非表示。
+              */}
+              {trackCount >= 2 && (
+                <div className="pc-rail-field">
+                  <span className="pc-settings-label">
+                    {t("path_construction.rail.trackSpacing", "線路間隔")}
+                  </span>
+                  <button
+                    type="button"
+                    className="pc-spacing-btn"
+                    disabled={disabled || !canShrinkSpacing}
+                    onClick={() => onAdjustSpacing(-1)}
+                  >
+                    {t("path_construction.rail.spacingShrink", "縮める")}
+                  </button>
+                  <span className="pc-spacing-value">{trackSpacing.toFixed(1)} m</span>
+                  <button
+                    type="button"
+                    className="pc-spacing-btn"
+                    disabled={disabled || !canWidenSpacing}
+                    onClick={() => onAdjustSpacing(1)}
+                  >
+                    {t("path_construction.rail.spacingWiden", "広げる")}
+                  </button>
+                </div>
+              )}
 
               {/*
                 進行方向(線路数ぶんの画像ボタン)。

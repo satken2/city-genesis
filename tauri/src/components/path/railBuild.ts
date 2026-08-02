@@ -2,8 +2,9 @@
  * 軌道(線路・モノレール・ロープウェイ)の複線敷設ロジック
  *
  * 建設パネルの軌道カテゴリでは、プリセットの複合パス(combined_paths)を選ぶ代わりに、
- * プレイヤーが「線路数・各線の進行方向」を直接指定して複線を構成する。
- * 線路間隔はバリアントのマスター幅(width)から自動で決まる(コリドーが隙間なく隣接)。
+ * プレイヤーが「線路数・各線の進行方向・線路間隔」を直接指定して複線を構成する。
+ * 線路間隔の既定はバリアントのマスター幅(width)(=コリドーが隙間なく隣接)で、
+ * パネルの広げる/縮めるボタンで一定範囲内を調整できる。
  * 本モジュールはその設定から、1本の中心線を平行な単線パス群へ展開するための
  * コンポーネント定義(CombinedPathComponent 相当)を生成する純粋関数群を提供する。
  *
@@ -41,10 +42,32 @@ export const MAX_TRACK_COUNT = 10;
 
 /**
  * 線路間隔のフォールバック値(m)。
- * 間隔は通常バリアントのマスター幅(width)をそのまま使う(=各線のコリドーが隙間なく隣接する)。
+ * 間隔の既定はバリアントのマスター幅(width)(=各線のコリドーが隙間なく隣接する)。
  * マスターに width が無い異常時のみこの値を使う。
  */
 export const FALLBACK_TRACK_SPACING = 4;
+
+/** 線路間隔の広げる/縮めるボタン1回あたりの増減量(m) */
+export const TRACK_SPACING_STEP = 0.5;
+
+/**
+ * 線路間隔の調整可能範囲(既定間隔=マスター幅に対する倍率)。
+ * 下限を幅の半分まで許すのは、コリドーを重ねて敷いても近接線路の結合描画
+ * (道床フィラー)が働き、実物の複線らしい狭い間隔で見せられるため。
+ */
+export const TRACK_SPACING_MIN_FACTOR = 0.5;
+export const TRACK_SPACING_MAX_FACTOR = 3;
+
+/**
+ * 既定間隔 base(m) と調整量 delta(m) から実効の線路間隔を返す。
+ * base の [TRACK_SPACING_MIN_FACTOR, TRACK_SPACING_MAX_FACTOR] 倍の範囲へクランプする。
+ */
+export function clampTrackSpacing(base: number, delta: number): number {
+  return Math.min(
+    base * TRACK_SPACING_MAX_FACTOR,
+    Math.max(base * TRACK_SPACING_MIN_FACTOR, base + delta)
+  );
+}
 
 /** path_type が軌道カテゴリ(鉄道・モノレール・ロープウェイ)かを返す。 */
 export function isRailType(type: number | null | undefined): boolean {

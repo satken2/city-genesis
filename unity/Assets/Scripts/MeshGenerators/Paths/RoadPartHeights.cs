@@ -69,6 +69,13 @@ public static class RoadPartHeights
     public const float OVERHEAD_ABOVE_SPLINE = 0.12f;
 
     /// <summary>
+    /// 一方通行線路の進行方向矢印（TrackDirectionArrows）の面のスプラインからの高さ。
+    /// レール踏面（軌道基準面＋プレハブ形状の立ち上がり約0.2m）より上に浮かせ、
+    /// 上空視点の編集モードでレールに隠れず視認できるようにする。
+    /// </summary>
+    public const float DIRECTION_ARROW_ABOVE_SPLINE = 0.45f;
+
+    /// <summary>
     /// 駅パスのプラットフォーム（platform）の下端のスプラインからの高さ。
     /// 道床（body）の天端と同じ平面に置く（交差点の道床ハルとも面一）。
     /// プレハブのピボット規約: platform は「設置面（下端）」がピボットで、ホーム面までの

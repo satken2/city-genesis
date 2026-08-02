@@ -19,6 +19,7 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnEditPathFinish += HandleEditPathFinish;
             IpcClient.Instance.OnEditPathChangePlatformSide += HandleEditPathChangePlatformSide;
             IpcClient.Instance.OnEditPathSetFollowTerrain += HandleEditPathSetFollowTerrain;
+            IpcClient.Instance.OnEditPathChangeLateralOffsets += HandleEditPathChangeLateralOffsets;
             IpcClient.Instance.OnEditResourceFinish += HandleEditResourceFinish;
             IpcClient.Instance.OnEditTransitFinish += HandleEditTransitFinish;
             IpcClient.Instance.OnEditPropChangeSettings += HandleEditPropChangeSettings;
@@ -43,6 +44,7 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnEditPathFinish -= HandleEditPathFinish;
             IpcClient.Instance.OnEditPathChangePlatformSide -= HandleEditPathChangePlatformSide;
             IpcClient.Instance.OnEditPathSetFollowTerrain -= HandleEditPathSetFollowTerrain;
+            IpcClient.Instance.OnEditPathChangeLateralOffsets -= HandleEditPathChangeLateralOffsets;
             IpcClient.Instance.OnEditResourceFinish -= HandleEditResourceFinish;
             IpcClient.Instance.OnEditTransitFinish -= HandleEditTransitFinish;
             IpcClient.Instance.OnEditPropChangeSettings -= HandleEditPropChangeSettings;
@@ -127,6 +129,20 @@ public class IpcEventHandler : MonoBehaviour
         if (rpm != null)
         {
             rpm.SetFollowTerrain(value);
+        }
+    }
+
+    /// <summary>
+    /// edit_path.change_lateral_offsets → RoadPlanManager.SetLateralOffsets()
+    /// UIパネルの線路数変更を受けて、敷設中の複合パス(軌道複線)プレビューの
+    /// 平行本数・間隔を即座に切り替える。空配列は単一パスに戻すことを意味する。
+    /// </summary>
+    private void HandleEditPathChangeLateralOffsets(float[] lateralOffsets)
+    {
+        var rpm = GetRoadPlanManager();
+        if (rpm != null)
+        {
+            rpm.SetLateralOffsets(lateralOffsets);
         }
     }
 

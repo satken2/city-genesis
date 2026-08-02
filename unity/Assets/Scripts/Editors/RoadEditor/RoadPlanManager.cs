@@ -66,6 +66,15 @@ public class RoadPlanManager : MonoBehaviour
     public int PathFollowTerrainOverride = Constants.VALUE_NONE;
 
     /// <summary>
+    /// 複合パス(軌道複線)プレビュー用の各線の横オフセット(m。敷設方向右が正)。
+    /// 空なら単一パスとして中心線1本をプレビューする。
+    /// 確定時の平行展開はUI(Tauri)側が行うため、Unityはプレビュー描画にのみ使う。
+    /// 初期値は `world:change_state`(STATE_EDIT_PATH)の `lateral_offsets` params で渡され、
+    /// 敷設中の線路数変更は `edit_path:change_lateral_offsets` で逐次通知される。
+    /// </summary>
+    public float[] LateralOffsets = System.Array.Empty<float>();
+
+    /// <summary>
     /// 編集対象の既存パスID。0 の場合は新規作成モード。
     /// </summary>
     private int pathId = 0;
@@ -374,6 +383,27 @@ public class RoadPlanManager : MonoBehaviour
         PlatformSide = side;
         // 点列やパラメータは変わらないが platform_side が変わったので、
         // RoadRenderer 側の重複判定を通過させて再生成させる。
+        Update3DPreview();
+    }
+
+    /// <summary>
+    /// 複合パス(軌道複線)プレビューの各線横オフセットを設定し、プレビューメッシュへ即座に反映する。
+    /// UIパネルの線路数変更(edit_path:change_lateral_offsets)から呼ばれる。
+    /// 敷設セッション中(配置中・編集中)に切り替えても、その場で平行プレビューの本数が更新される。
+    /// </summary>
+    public void SetLateralOffsets(float[] offsets)
+    {
+        float[] normalized = offsets ?? System.Array.Empty<float>();
+        if (LateralOffsets.Length == normalized.Length)
+        {
+            bool same = true;
+            for (int i = 0; i < normalized.Length; i++)
+            {
+                if (Mathf.Abs(LateralOffsets[i] - normalized[i]) > 1e-4f) { same = false; break; }
+            }
+            if (same) return;
+        }
+        LateralOffsets = normalized;
         Update3DPreview();
     }
 
@@ -2371,7 +2401,7 @@ public class RoadPlanManager : MonoBehaviour
         if (renderPoints.Count >= 2)
         {
             bool isValid = CheckElevationIntersections().Count == 0;
-            roadRenderer.UpdateRoadPreview(renderPoints, PathType, PathSubtype, Curved, isValid, PlatformSide);
+            roadRenderer.UpdateRoadPreview(renderPoints, PathType, PathSubtype, Curved, isValid, PlatformSide, LateralOffsets);
         }
         else
         {

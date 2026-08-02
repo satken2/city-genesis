@@ -222,19 +222,20 @@ public static class ModularBodyBuilder
         // --- 敷地の装飾（フェンス・タイル・地面パネル）---
         // フェンスは全 modelType で描画を試行し、タイルは MODEL_MODULAR_GROUND のみ。
         // 地面パネルは master の draw_floor=yes の建物のみ（floorMaterial が非nullのときだけ）描画する。
-        // GROUND は建物本体を持たないため、区画ポリゴン(fenceFootprint)があればタイル・地面の対象にする。
+        // タイル・地面パネルの対象は土地区画ポリゴン(fenceFootprint)全体。建物底面だけに張ると
+        // パネルが建物本体の真下に隠れて見えないため。区画が取得できない場合は建物底面へフォールバックする。
         // 傾斜地対応の対象建物(IsApplicableModelType=FLAT/HOUSE/GABLE)は建物本体こそ水平面+
         // コンクリート基盤で接地するが、敷地の装飾（フェンス・タイル・地面パネル）は地形に追従させる。
         // 追従計算は centerPointWorld.y 基準（IsApplicableModelType では parcel.altitude、
         // それ以外は地形標高）で、BuildingManager.UpdateBuildingHeight の配置高さと一致する。
         bool deformToTerrain = isDynamic;
-        Vector2[] groundPolygon = isGroundModel && fenceFootprint != null && fenceFootprint.Length >= 3
+        Vector2[] sitePolygon = fenceFootprint != null && fenceFootprint.Length >= 3
             ? fenceFootprint : footprint;
         GenerateSiteDecorations(
             prefix, resolvedSuffix,
             fenceFootprint,
-            isGroundModel ? groundPolygon : null,
-            groundPolygon,
+            isGroundModel ? sitePolygon : null,
+            sitePolygon,
             floorMaterial,
             centerPointWorld, deformToTerrain,
             combineInstances, allMaterials, temporaryMeshes);

@@ -514,6 +514,23 @@ export async function sendSetPlatformSide(platformSide: number): Promise<void> {
 }
 
 /**
+ * `edit_path.change_lateral_offsets`
+ * パス敷設モードにおいて、複合パス(軌道複線)の各線の横オフセット(m。敷設方向右が正)を変更する。
+ * Unity側は敷設中プレビューメッシュを各オフセット位置の平行パス群として即座に描き直す
+ * (敷設セッション中に線路数を変えてもノード列を維持したまま本数だけ更新される)。
+ * 空配列は単一パス(中心線1本のプレビュー)に戻すことを意味する。
+ * 初期値は STATE_EDIT_PATH の lateral_offsets params で渡す。
+ */
+export async function sendEditPathChangeLateralOffsets(lateralOffsets: number[]): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "path_build",
+    entity: null,
+    action: "edit_path:change_lateral_offsets",
+    params: { lateral_offsets: lateralOffsets },
+  });
+}
+
+/**
  * `edit_path.set_follow_terrain`
  * パス敷設モードにおいて、地形追従の個別設定(-1=未設定[バリアント既定]/0=非追従/1=追従)を変更する。
  * Unity側は敷設中プレビューの地形追従・トンネル可視化を即座に切り替える(真実源はUnity側で、

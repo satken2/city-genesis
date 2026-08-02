@@ -7,8 +7,9 @@
  * 選択は3カテゴリ(道路 road / 軌道 rail / インフラ infra)に分かれる。
  *   - 道路・インフラ: path_type を選び、プルダウンで単一バリアントを選ぶ(selectedVariant)。
  *   - 軌道: 鉄道/モノレール/ロープウェイ + track_type(通常/橋梁/駅) + 電化スイッチ(鉄道のみ)で
- *     候補を絞り、プルダウンで単線バリアントを確定し、線路数・進行方向で複線を構成する。
- *     線路間隔はバリアントのマスター幅から自動で決まる。
+ *     候補を絞り、プルダウンで単線バリアントを確定し、線路数・進行方向・線路間隔で複線を構成する。
+ *     線路間隔の既定はバリアントのマスター幅で、広げる/縮めるボタンで一定範囲内を
+ *     調整できる(パス1本確定ごとに既定へ戻る)。
  *     複線は中心線を平行な単線パス群へ展開して一括敷設する(railComponents)。
  *     ロープウェイは道路と同じ「両方向の単一パス1本」扱いで、複線展開しない。
  *
@@ -40,6 +41,7 @@ import {
   sendSetPlatformSide,
   sendEditPathChangeNode,
   sendEditPathChangeEmbankment,
+  sendEditPathChangeLateralOffsets,
   sendEditPathSetFollowTerrain,
   IPC_EVENT_EDIT_PATH_SELECT_NODE,
   IPC_EVENT_EDIT_PATH_UPDATE_SHAPE,
@@ -62,6 +64,10 @@ import {
   MIN_TRACK_COUNT,
   MAX_TRACK_COUNT,
   FALLBACK_TRACK_SPACING,
+  TRACK_SPACING_STEP,
+  TRACK_SPACING_MIN_FACTOR,
+  TRACK_SPACING_MAX_FACTOR,
+  clampTrackSpacing,
   isRailType,
   variantTrackType,
   isElectrifiedVariant,
@@ -72,6 +78,7 @@ import {
   defaultTravelDirections,
   cycleDirection,
   buildRailComponents,
+  computeLateralOffsets,
 } from "./railBuild";
 
 /** 地形追従の個別設定の「未設定」(バリアント既定に従う)を表すセンチネル。バックエンド VALUE_NONE と一致。 */
@@ -192,6 +199,8 @@ export function usePathConstruction(
   const [trackType, setTrackType] = useState<number>(TRACK_NORMAL);
   const [electrified, setElectrified] = useState<boolean>(false);
   const [trackCount, setTrackCount] = useState<number>(2);
+  // 線路間隔の調整量(m)。実効間隔 = マスター幅 + この値(クランプあり)。パス1本確定ごとに0へ戻す。
+  const [trackSpacingDelta, setTrackSpacingDelta] = useState<number>(0);
   // 各線の進行方向のユーザー上書き(null=既定を使う)。長さは trackCount に一致させる。
   const [directionOverrides, setDirectionOverrides] = useState<(number | null)[]>([null, null]);
   // 都市の通行方向。既定の進行方向の左右割り当てに使う。既定は左側通行。
@@ -233,8 +242,10 @@ export function usePathConstruction(
 
   /**
    * Unity(グラフィックプログラム)に渡す代表バリアント。
-   * 軌道複線でも Unity は中心線を1本の代表バリアントで描画し、
-   * 平行な単線群への展開は confirmPath / コスト見積り側で行う。
+   * 軌道複線でも Unity の敷設操作(ノード配置)は中心線1本を対象とし、
+   * 確定・コスト見積りの平行展開は confirmPath / コスト見積り側で行う。
+   * 3Dプレビューの複線表示は、別途 lateral_offsets(STATE_EDIT_PATH params と
+   * edit_path:change_lateral_offsets)で各線のオフセットを渡して行う。
    */
   const unityPathVariant = selectedVariant;
   const unityPathType = useMemo((): number | null => {
@@ -277,13 +288,35 @@ export function usePathConstruction(
   }, [trackCount, trafficHand, directionOverrides]);
 
   /**
-   * 線路間隔(m)。プレイヤーは調整せず、バリアントのマスター幅(width)をそのまま使う
+   * 線路間隔の既定値(m)。バリアントのマスター幅(width)をそのまま使う
    * (=各線のコリドーが隙間なく隣接する)。width 未定義の異常時のみフォールバック値。
    */
-  const trackSpacing = useMemo(() => {
+  const trackSpacingBase = useMemo(() => {
     const w = selectedVariantData?.width;
     return typeof w === "number" && w > 0 ? w : FALLBACK_TRACK_SPACING;
   }, [selectedVariantData]);
+
+  /**
+   * 実効の線路間隔(m)。既定値に広げる/縮めるボタンの調整量を加え、
+   * 既定値の [TRACK_SPACING_MIN_FACTOR, TRACK_SPACING_MAX_FACTOR] 倍の範囲へクランプする。
+   */
+  const trackSpacing = useMemo(
+    () => clampTrackSpacing(trackSpacingBase, trackSpacingDelta),
+    [trackSpacingBase, trackSpacingDelta]
+  );
+
+  /** 線路間隔をボタン1回分(TRACK_SPACING_STEP)だけ広げる(+1)/縮める(-1)。 */
+  const adjustTrackSpacing = useCallback((direction: 1 | -1) => {
+    setTrackSpacingDelta(
+      (prev) =>
+        clampTrackSpacing(trackSpacingBase, prev + direction * TRACK_SPACING_STEP) -
+        trackSpacingBase
+    );
+  }, [trackSpacingBase]);
+
+  // クランプ端に達したら該当ボタンを無効化するための判定(浮動小数の等値比較を避ける)。
+  const canShrinkTrackSpacing = trackSpacing > trackSpacingBase * TRACK_SPACING_MIN_FACTOR + 1e-9;
+  const canWidenTrackSpacing = trackSpacing < trackSpacingBase * TRACK_SPACING_MAX_FACTOR - 1e-9;
 
   /**
    * 軌道複線を中心線から展開するためのコンポーネント群。
@@ -322,6 +355,24 @@ export function usePathConstruction(
   /* ---- 選択・敷設モードの制御 ---- */
 
   /**
+   * Unityの3Dプレビューへ渡す複合パス(軌道複線)の各線横オフセット(m)を求める。
+   * 軌道の新規敷設のみ非空で、道路・インフラ・ロープウェイ・既存パス編集は
+   * 空配列(=中心線1本の単一プレビュー)。railComponents と同じ条件・同じ導出
+   * (線路間隔=マスター幅+調整量)だが、STATE_EDIT_PATH 送信時点では
+   * selectedVariant がまだ更新されていないため variantId 引数で直接計算する。
+   * spacingDelta は継続配置(continuePlacement)が間隔リセット後の値を state 更新を
+   * 待たずに同じ呼び出しで使うための上書き引数。省略時は現在の調整量を使う。
+   */
+  const lateralOffsetsForVariant = useCallback((variantId: number, spacingDelta: number = trackSpacingDelta): number[] => {
+    const data = masterData?.paths?.[variantId];
+    if (pathId != null || !data || !isRailType(data.type) || data.type === PATH_ROPEWAY) {
+      return [];
+    }
+    const base = typeof data.width === "number" && data.width > 0 ? data.width : FALLBACK_TRACK_SPACING;
+    return computeLateralOffsets(trackCount, clampTrackSpacing(base, spacingDelta));
+  }, [masterData, pathId, trackCount, trackSpacingDelta]);
+
+  /**
    * バリアントを選び、Unity を敷設モード(STATE_EDIT_PATH)に遷移させる。
    * 道路・インフラは選択コンポーネントから直接呼ばれ、軌道は
    * 鉄道種別/track_type/電化の解決結果から下の useEffect が呼ぶ。
@@ -345,10 +396,13 @@ export function usePathConstruction(
       // 駅パスのホーム設置側の初期値。敷設モード初期化時にUnityへ渡し、
       // 以後の切り替えは下の useEffect が edit_path:change_platform_side で逐次反映する。
       platform_side: platformSide,
+      // 軌道複線の各線横オフセットの初期値。3Dプレビューを平行N本で描かせる。
+      // 以後の線路数変更は下の useEffect が edit_path:change_lateral_offsets で逐次反映する。
+      lateral_offsets: lateralOffsetsForVariant(variantId),
     }).catch((err) => {
       console.error("[usePathConstruction] sendChangeState failed:", err);
     });
-  }, [masterData, pathId, platformSide]);
+  }, [masterData, pathId, platformSide, lateralOffsetsForVariant]);
 
   /**
    * 軌道: 鉄道種別/track_type/電化 が変わったら単線バリアントを解決して敷設モードを更新する。
@@ -378,6 +432,7 @@ export function usePathConstruction(
     setSelectedType(null);
     setSelectedVariant(null);
     setRailType(null);
+    setTrackSpacingDelta(0);
     setHeight(0);
     setEmbankmentHeight(0);
     setSelectedNodeIndex(-1);
@@ -505,10 +560,16 @@ export function usePathConstruction(
   /**
    * 連続設置: 1本目のパス確定後に、選択中のバリアント・軌道設定を維持したまま
    * パス配置状態だけをクリアし、Unity を再び STATE_EDIT_PATH に戻す。
+   * resetTrackSpacing=true(確定後)のときは線路間隔の調整量も既定へ戻す。
+   * キャンセル(同じパスの引き直し)では維持するため false で呼ぶ。
    */
-  const continuePlacement = useCallback(() => {
+  const continuePlacement = useCallback((resetTrackSpacing: boolean = false) => {
     if (selectedVariant === null) return;
     const variantData = masterData?.paths?.[selectedVariant];
+    // STATE_EDIT_PATH の初期オフセットにリセット後の間隔を使うため、
+    // state 更新(非同期)とは別に、明示的な調整量を lateralOffsetsForVariant へ渡す。
+    const nextSpacingDelta = resetTrackSpacing ? 0 : trackSpacingDelta;
+    if (resetTrackSpacing) setTrackSpacingDelta(0);
     const defaultHeight = Math.max(0, variantData?.min_height ?? 0);
     setHeight(defaultHeight);
     setEmbankmentHeight(0);
@@ -529,10 +590,11 @@ export function usePathConstruction(
       path_variant: selectedVariant,
       path_id: pathId ?? null,
       platform_side: platformSide,
+      lateral_offsets: lateralOffsetsForVariant(selectedVariant, nextSpacingDelta),
     }).catch((err) => {
       console.error("[usePathConstruction] sendChangeState (continue) failed:", err);
     });
-  }, [selectedVariant, masterData, pathId, platformSide]);
+  }, [selectedVariant, masterData, pathId, platformSide, trackSpacingDelta, lateralOffsetsForVariant]);
 
   /**
    * 現在のパス形状をバックエンドに送信して確定する。
@@ -745,6 +807,21 @@ export function usePathConstruction(
       });
     return () => controller.abort();
   }, [apiBaseUrl]);
+
+  /* ---- 軌道複線の横オフセット列の変更をUnityへ逐次通知 ---- */
+  // 線路数(trackCount)の変更は配置中ノードを保つため Unity 敷設モードを再初期化しない。
+  // そのため STATE_EDIT_PATH の初期値とは別に、railComponents のオフセット列が変わる
+  // たび change_lateral_offsets を送り、3Dプレビューの平行本数を追従させる。
+  // 非軌道(railComponents=null)は空配列で単一プレビューへ戻す(同値はUnity側が無視する)。
+  useEffect(() => {
+    if (selectedVariant === null) return;
+    const offsets = railComponents
+      ? railComponents.map((c) => c.lateral_offset ?? 0)
+      : [];
+    sendEditPathChangeLateralOffsets(offsets).catch((err) => {
+      console.error("[usePathConstruction] sendEditPathChangeLateralOffsets failed:", err);
+    });
+  }, [railComponents, selectedVariant]);
 
   /* ---- ホーム設置側の変更をUnityへ逐次通知 ---- */
   // 駅バリアント選択中にホーム設置側トグルを切り替えたら、敷設中プレビューメッシュの
@@ -999,6 +1076,10 @@ export function usePathConstruction(
     trackType,
     electrified,
     trackCount,
+    trackSpacing,
+    canWidenTrackSpacing,
+    canShrinkTrackSpacing,
+    adjustTrackSpacing,
     trackDirections,
     trafficHand,
     railComponents,

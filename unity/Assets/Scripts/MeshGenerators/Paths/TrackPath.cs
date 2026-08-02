@@ -44,6 +44,10 @@ using GeneratedModels;
 /// ノード（分岐器・平面交差）のレール描画は TrackIntersectionMeshGenerator が
 /// RailConnectorSpec として幾何情報を計算し、本クラスの CreateRailConnectorObject が実体化する。
 ///
+/// 一方通行の線路（travel_direction が DIR_FORWARD / DIR_BACKWARD）には進行方向を示す
+/// 矢印オーバーレイ（TrackDirectionArrows）を子として付ける。表示は道路敷設モード
+/// （STATE_EDIT_PATH）のみ（詳細は TrackDirectionArrows のクラスコメント参照）。
+///
 /// 【近接線路の結合描画（複線見え化）】
 /// 内部データに「複線」の単位は無く、複線は一方通行の単線線路を2本並べて表現される。
 /// XZ・Yともに近接して並走する線路（TrackAdjacency.Compute が判定。閾値は
@@ -142,6 +146,10 @@ public class TrackPath : IPathMeshGenerator
         SplineComputer spline = RoadPath.BuildSpline(container, points, isCurved);
 
         CreateTrackParts(container, spline, width, lanes, wallWidth, pillarSpacing, heightEditable, baseHeight, wireSpacing, pathData, corridor, platformLeft, platformRight);
+
+        // 一方通行線路には進行方向を示す矢印オーバーレイを付ける（双方向は何も出ない）。
+        // 表示は道路敷設モード（STATE_EDIT_PATH）のみで、切替は TrackDirectionArrows が一括制御する。
+        TrackDirectionArrows.Create(container, spline, pathData.travel_direction);
 
         // コライダーはクリック判定用のストリップ（道路と同じ）。プラットフォームがある場合は
         // ホーム込みの全幅にし、中心をホーム側へずらした非対称ストリップにする。
