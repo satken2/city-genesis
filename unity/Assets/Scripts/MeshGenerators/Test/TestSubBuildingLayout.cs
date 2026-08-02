@@ -44,7 +44,8 @@ public static class TestSubBuildingLayout
     /// <summary>
     /// サブ建物の配置計画をランダム生成する。
     ///
-    /// 区画をセルへ決定論的に分割し、primary の棟を前面(最長辺)へ必ず1棟配置したうえで、
+    /// 区画をセルへ決定論的に分割し、優先度順に配置する:
+    /// primary の棟を前面(最長辺)へ必ず1棟 → sole の棟を必ず1棟だけ(収まらなければ諦める) →
     /// その他の棟を充填率が FILL_RATIO に達するまでランダムに配置する(同じ棟の複数配置あり)。
     ///
     /// Returns:
@@ -103,17 +104,32 @@ public static class TestSubBuildingLayout
             return new List<SubBuildingPlacement>();
         }
 
-        // 残りの棟は、充填率が目標に達するまでランダムに選んで置いていく。
-        // 占有セルは増える一方なので、一度どこにも収まらなくなった棟は候補から外してよい。
-        int fillTarget = Mathf.CeilToInt(grid.Cells.Count * FILL_RATIO);
+        // sole の棟は必ず1棟だけ配置する。優先度は primary の次で、primary 配置後の
+        // 空きに収まらない場合は配置を諦める(primary と違い全体を失敗させない)。
+        // primary と sole は「1棟だけ」の棟なので、以降のランダム充填プールに入れない。
         var pool = new List<KeyValuePair<int, MasterDataStore.SubBuildingMasterItem>>();
         for (int i = 0; i < subs.Count; i++)
         {
-            if (i != primaryIndex)
+            if (i == primaryIndex)
+            {
+                continue;
+            }
+            if (subs[i].Value.sole)
+            {
+                if (!TryPlace(subs[i], preferFront: false, grid, occupied, placements, agentFloorHeight))
+                {
+                    Debug.LogWarning($"[MeshTest] soleサブ建物{subs[i].Key}が区画に収まりませんでした。");
+                }
+            }
+            else
             {
                 pool.Add(subs[i]);
             }
         }
+
+        // 残りの棟は、充填率が目標に達するまでランダムに選んで置いていく。
+        // 占有セルは増える一方なので、一度どこにも収まらなくなった棟は候補から外してよい。
+        int fillTarget = Mathf.CeilToInt(grid.Cells.Count * FILL_RATIO);
         while (pool.Count > 0 && occupied.Count < fillTarget)
         {
             int pick = Random.Range(0, pool.Count);
@@ -204,13 +220,16 @@ public static class TestSubBuildingLayout
         return (distance, candidate.anchor.j, candidate.anchor.i, candidate.rotated ? 1 : 0);
     }
 
-    /// <summary>サブ建物の底面(width×height)が専有するセル数 (接道辺方向, 奥行き方向) を返す。</summary>
+    /// <summary>
+    /// サブ建物の底面が専有するセル数 (前面辺方向, 奥行き方向) を返す。
+    /// マスターの width / height はセル数単位(1単位=MASHUP_CELL_SIZE m)。未定義は1セル、端数は切り上げ。
+    /// </summary>
     private static (int cellW, int cellH) CellSpan(MasterDataStore.SubBuildingMasterItem sub)
     {
-        float width = (sub.width.HasValue && sub.width.Value > 0f) ? sub.width.Value : Constants.MASHUP_CELL_SIZE;
-        float height = (sub.height.HasValue && sub.height.Value > 0f) ? sub.height.Value : Constants.MASHUP_CELL_SIZE;
-        int cellW = Mathf.Max(1, Mathf.CeilToInt(width / Constants.MASHUP_CELL_SIZE - 1e-6f));
-        int cellH = Mathf.Max(1, Mathf.CeilToInt(height / Constants.MASHUP_CELL_SIZE - 1e-6f));
+        float width = (sub.width.HasValue && sub.width.Value > 0f) ? sub.width.Value : 1f;
+        float height = (sub.height.HasValue && sub.height.Value > 0f) ? sub.height.Value : 1f;
+        int cellW = Mathf.Max(1, Mathf.CeilToInt(width - 1e-6f));
+        int cellH = Mathf.Max(1, Mathf.CeilToInt(height - 1e-6f));
         return (cellW, cellH);
     }
 

@@ -108,6 +108,8 @@ namespace GeneratedModels
         public List<object> center_point;
         /// <summary>ステータス（計画中・建設中・稼働中など。consts.py の STATUS_* を参照）</summary>
         public int status;
+        /// <summary>マッシュアップ建物のサブ建物配置リスト。棟ごとの subbuilding_id / model_prefix / position[x,z] / rotation / floors / height_per_floor サーバーサイドで計算されるフィールド。型は動的。</summary>
+        public object sub_buildings;
         /// <summary>階数</summary>
         public int? floors;
         /// <summary>建物カテゴリ（住宅・農場など。2の冪のカテゴリ値）</summary>

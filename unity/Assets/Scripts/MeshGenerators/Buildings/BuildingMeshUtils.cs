@@ -622,7 +622,8 @@ public static class BuildingMeshUtils
     /// prebuilt建物(base/mid/top-prebuilt)とクレーン(crane-base/mid/top)の積み上げに共通で使う。
     ///
     /// - fitHeight を指定した場合はモジュール高さがその値になるようY方向のみスケールする(XZは実寸のまま)。
-    ///   null の場合は一切スケールしない(top系パーツ用)。
+    ///   null の場合は一切スケールしない。prebuilt建物は全パーツが null(実寸)で、
+    ///   工事中のクレーンだけが base/mid を階高へ合わせる。
     /// - 高さ方向の基準は alignByOrigin で切り替える:
     ///   - false(既定・prebuilt): FBXのピボット位置に依存せず積むため、メッシュ下端(bounds.min.y)を
     ///     baseY に揃える。fitHeight はメッシュ全高(bounds.size.y)に対して合わせる。

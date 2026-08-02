@@ -48,7 +48,11 @@ pub fn record_window_geometry(app: &AppHandle, state: &SharedState, label: &str,
     }
 
     let scale = win.scale_factor().unwrap_or(1.0);
-    let Some(size) = win.outer_size().map(|s| s.to_logical::<f64>(scale)).ok() else {
+    // サイズは内側(クライアント領域)基準で記憶する。復元側は inner_size / set_size という
+    // 内側基準のAPIを使うため、外枠基準で記憶すると開き直すたびに枠の厚み分だけ膨張する
+    // (装飾なしでもリサイズ可能ウィンドウは不可視のリサイズ枠を持つ)。
+    // 位置は outer_position / set_position のどちらも外枠基準なのでそのままでよい。
+    let Some(size) = win.inner_size().map(|s| s.to_logical::<f64>(scale)).ok() else {
         return;
     };
 

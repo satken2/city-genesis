@@ -10,10 +10,12 @@ using GeneratedModels;
 /// 配置座標（center_point基準）・回転・階数だけが届く（セル分割ロジックは持たない）。
 ///
 /// 各サブ建物は既成建物（MODEL_PREBUILT）と同じ積み上げロジックで組み立てる:
-/// - mashup-{model_prefix}-base-prebuilt … 1階部分。高さが階高になるようY方向のみスケール。XZは実寸。
-/// - mashup-{model_prefix}-mid-prebuilt  … 繰り返しフロア1階分。baseと同じくY方向のみ階高スケール。
-/// - mashup-{model_prefix}-top-prebuilt  … 頂部。一切スケールされず実寸のまま配置される。
+/// - mashup-{model_prefix}-base-prebuilt … 1階部分。一切スケールされず実寸のまま配置される。
+/// - mashup-{model_prefix}-mid-prebuilt  … 繰り返しフロア1階分。高さが階高になるようY方向のみスケール。
+/// - mashup-{model_prefix}-top-prebuilt  … 頂部。実寸のまま配置される。
 /// 階高はサブ建物ごとの height_per_floor（未指定なら建物本体の階高）を使う。
+/// 積み上げ位置は常に階高グリッドで、スケールしない base / top の実寸とのズレは
+/// 隙間・埋もれとして許容する。
 /// パーツは prebuilt と異なり外観バリアントの閾値フォルダから解決する（パーツごとの独立スキャン）。
 /// 塔屋・エントランスは配置しない。
 ///
@@ -128,6 +130,7 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
     {
         Vector2 xzOffset = new Vector2(placement.position[0], placement.position[1]);
         int floors = Mathf.Max(1, placement.floors);
+        // mid パーツのYスケール目標と、パーツが1つも無い棟の白い箱の高さに使う。
         float subFloorHeight = (placement.height_per_floor.HasValue && placement.height_per_floor.Value > 0f)
             ? placement.height_per_floor.Value
             : floorHeight;
@@ -160,15 +163,19 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
             return baseY + boxHeight;
         }
 
-        // 各パーツのY位置は実際に描画したパーツの累積高さで決める（prebuilt と同じ規則）。
-        // base/mid が無い棟では top が接地する（完成済みモデルを top だけで表現できる）。
+        // base / top は実寸のまま（fitHeight=null）、mid だけ階高へYスケールする。
+        // Y位置は常に階高グリッドに乗せ、base/top の実寸とのズレは隙間・埋もれとして許容する
+        // （prebuilt と同じ規則）。段を進めるのは存在するパーツだけなので、base/mid が無い棟では
+        // top が接地する（完成済みモデルを top だけで表現できる）。
         float stackY = baseY;
+        float maxDrawnTop = baseY;
 
         if (baseModule != null)
         {
-            BuildingMeshUtils.AddStackedModule(baseModule, stackY, subFloorHeight,
+            float drawn = BuildingMeshUtils.AddStackedModule(baseModule, stackY, null,
                 combineInstances, materials, temporaryMeshes,
                 xzOffset: xzOffset, rotation: rotation, alignByOrigin: true);
+            maxDrawnTop = Mathf.Max(maxDrawnTop, stackY + drawn);
             stackY += subFloorHeight;
         }
 
@@ -182,19 +189,19 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
                     combineInstances, materials, temporaryMeshes,
                     xzOffset: xzOffset, rotation: rotation, alignByOrigin: true);
                 stackY += subFloorHeight;
+                maxDrawnTop = Mathf.Max(maxDrawnTop, stackY);
             }
         }
 
-        float topHeight = 0f;
         if (topModule != null)
         {
-            // top は無スケール実寸（fitHeight=null）
-            topHeight = BuildingMeshUtils.AddStackedModule(topModule, stackY, null,
+            float drawn = BuildingMeshUtils.AddStackedModule(topModule, stackY, null,
                 combineInstances, materials, temporaryMeshes,
                 xzOffset: xzOffset, rotation: rotation, alignByOrigin: true);
+            maxDrawnTop = Mathf.Max(maxDrawnTop, stackY + drawn);
         }
 
-        return stackY + topHeight;
+        return maxDrawnTop;
     }
 
     /// <summary>

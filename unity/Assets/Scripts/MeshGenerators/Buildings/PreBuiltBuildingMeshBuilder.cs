@@ -7,17 +7,20 @@ using GeneratedModels;
 /// base-prebuilt / mid-prebuilt / top-prebuilt のパーツを下から積み上げて建物を組み立てる。
 ///
 /// パーツの意味とスケール規則:
-/// - base-prebuilt … 1階部分。高さが階高(height_per_floor)になるようY方向のみスケールされる。XZは実寸のまま。
-/// - mid-prebuilt  … 繰り返しフロア1階分。baseと同じくY方向のみ階高スケール。XZは実寸のまま。
-/// - top-prebuilt  … 頂部。一切スケールされず実寸のまま配置される（尖塔や完成済みモデル丸ごとに使う）。
+/// - base-prebuilt … 1階部分。一切スケールされず実寸のまま配置される。
+/// - mid-prebuilt  … 繰り返しフロア1階分。**高さが階高(height_per_floor)になるようY方向のみ
+///   スケールされる**（XZは実寸のまま）。積み増す枚数で建物の高さを調整する中層なので、
+///   モジュラー建物の mid レベルと同じ規約にそろえている。
+/// - top-prebuilt  … 頂部。実寸のまま配置される（尖塔や完成済みモデル丸ごとに使う）。
 ///
 /// 積み上げ規則:
 /// - base と top はそれぞれ論理階数(floors)のうち1階分を消費し、mid は残りの階数分繰り返される。
-/// - 各パーツのY位置は「実際に描画したパーツの累積高さ」で決まる。ファイルが存在しないパーツは
-///   描画も階の消費もスキップ…ではなく、階の消費は「ファイルが存在するパーツ」だけが行う。
-///   このため base/mid が無い建物では top が接地する（完成済みモデルを top だけで表現できる）。
-/// - top の実寸が1階分より大きい場合、描画上の建物はシミュレーション上の高さ
-///   (floors × 階高)より高くなるが、これは仕様として許容する。
+/// - 各パーツのY位置は**常に階高グリッド**（段 × 階高）に乗る。スケールしない base / top の
+///   実寸が階高と食い違うぶんは、上の段との隙間や埋もれになるが、これは仕様として許容する。
+/// - 段を進めるのは「ファイルが存在するパーツ」だけなので、base/mid が無い建物では
+///   top が接地する（完成済みモデルを top だけで表現できる）。
+/// - コライダーは描画された実際の天端に合わせるため、top や base が論理高さ(floors × 階高)を
+///   はみ出してもクリックできる。
 /// - 積み上げの天面を塞ぐパネルは生成しない。prebuilt パーツはモジュラーの壁パーツと違い
 ///   完成された3Dモデルなので、上から見える面はモデル側で閉じておくこと。
 ///
@@ -66,9 +69,12 @@ public class PreBuiltBuildingMeshBuilder : IBuildingMeshGenerator
         List<Mesh> temporaryMeshes = new List<Mesh>();
 
         // --- 積み上げ ---
-        // 各パーツのY位置は floors からの絶対計算ではなく、実際に描画したパーツの累積高さで決める。
-        // これにより base/mid が存在しない建物でも top が浮かず接地する。
+        // 各パーツは階高グリッドに乗せて積む。段を進めるのは「ファイルが存在するパーツ」だけなので、
+        // base/mid が存在しない建物でも top が浮かず接地する。
+        // maxDrawnTop は実際に描画されたメッシュの天端（コライダー高さに使う）。
+        // スケールしない base/top の実寸が階高と食い違うぶんは隙間や埋もれになるが、これは仕様。
         float stackY = 0f;
+        float maxDrawnTop = 0f;
 
         Vector2[] footprint = (buildingData.polygonArray != null && buildingData.polygonArray.Length >= 3)
             ? BuildingMeshUtils.GetFootprint(buildingData)
@@ -82,10 +88,12 @@ public class PreBuiltBuildingMeshBuilder : IBuildingMeshGenerator
             rotation = Quaternion.Euler(0, -edgeAngle + 90f, 0);
         }
 
+        // fitHeight=null は「スケールせず実寸で置く」を意味する（base / top）。mid だけ階高へYスケールする。
+        // モデルの原点を地面（または前段の天面）の高さに揃えて積むため alignByOrigin: true を指定する。
         if (baseModule != null)
         {
-            // モデルの原点を地面（または前段の天面）の高さに揃えて積み上げるため、alignByOrigin: true を指定する。
-            BuildingMeshUtils.AddStackedModule(baseModule, stackY, floorHeight, combineInstances, materials, temporaryMeshes, rotation: rotation, alignByOrigin: true);
+            float drawn = BuildingMeshUtils.AddStackedModule(baseModule, stackY, null, combineInstances, materials, temporaryMeshes, rotation: rotation, alignByOrigin: true);
+            maxDrawnTop = Mathf.Max(maxDrawnTop, stackY + drawn);
             stackY += floorHeight;
         }
 
@@ -95,18 +103,16 @@ public class PreBuiltBuildingMeshBuilder : IBuildingMeshGenerator
             int midCount = Mathf.Max(0, floors - (baseModule != null ? 1 : 0) - (topModule != null ? 1 : 0));
             for (int i = 0; i < midCount; i++)
             {
-                // モデルの原点を前段の天面の高さに揃えて積み上げるため、alignByOrigin: true を指定する。
                 BuildingMeshUtils.AddStackedModule(middleModule, stackY, floorHeight, combineInstances, materials, temporaryMeshes, rotation: rotation, alignByOrigin: true);
                 stackY += floorHeight;
+                maxDrawnTop = Mathf.Max(maxDrawnTop, stackY);
             }
         }
 
-        // --- top(実寸・スケールなし) ---
-        float topHeight = 0f;
         if (topModule != null)
         {
-            // モデルの原点を積み上げ天面（base/mid がない場合は地面）の高さに揃えて配置するため、alignByOrigin: true を指定する。
-            topHeight = BuildingMeshUtils.AddStackedModule(topModule, stackY, null, combineInstances, materials, temporaryMeshes, rotation: rotation, alignByOrigin: true);
+            float drawn = BuildingMeshUtils.AddStackedModule(topModule, stackY, null, combineInstances, materials, temporaryMeshes, rotation: rotation, alignByOrigin: true);
+            maxDrawnTop = Mathf.Max(maxDrawnTop, stackY + drawn);
         }
 
         // --- 敷地の装飾（フェンス・タイル・地面パネル）---
@@ -141,10 +147,10 @@ public class PreBuiltBuildingMeshBuilder : IBuildingMeshGenerator
 
         CleanupMeshes(temporaryMeshes);
 
-        // コライダーは描画された実高さに合わせる。top が論理高さ(floors × 階高)を超えて
-        // はみ出す場合(風力発電所など)でもクリックできるようにするため。
+        // コライダーは描画された実高さに合わせる。パーツの実寸が論理高さ(floors × 階高)を
+        // 超えてはみ出す場合(風力発電所など)でもクリックできるようにするため。
         Vector2[] colliderFootprint = footprint;
-        float colliderHeight = Mathf.Max(stackY + topHeight, floorHeight);
+        float colliderHeight = Mathf.Max(maxDrawnTop, floorHeight);
         Mesh colliderMesh = BuildingMeshBuilder.GenerateColliderMesh(colliderFootprint, colliderHeight);
 
         return new BuildingMeshResult(finalMesh, materials.ToArray(), colliderMesh);

@@ -417,8 +417,12 @@ export type SubBuildingMasterEntry = {
   agent_variant: number;
   /** 施設の顔となる主棟かどうか。配置ランダム生成時に前面(接道辺)へ必ず1棟置かれる */
   primary?: boolean;
+  /** 配置ランダム生成時に必ず1棟だけ置かれる単独棟かどうか(primaryの次に優先。空きが無ければ置かれない) */
+  sole?: boolean;
   model_prefix?: string;
+  /** 底面の幅(セル数単位。1単位=MASHUP_CELL_SIZE m。未定義は1セル) */
   width?: number;
+  /** 底面の奥行き(同上) */
   height?: number;
   min_floors?: number;
   max_floors?: number;

@@ -114,6 +114,11 @@ public class MeshTestController : MonoBehaviour
         }
     }
 
+    // マッシュアップ建物のテストで底面(=土地区画)に使う固定サイズ。
+    // 最大の棟(4×6セル)に加えて他の棟も並べられるよう、9セル×6セル(72m×48m)を確保する。
+    private const float MASHUP_PARCEL_WIDTH = Constants.MASHUP_CELL_SIZE * 9f;
+    private const float MASHUP_PARCEL_DEPTH = Constants.MASHUP_CELL_SIZE * 6f;
+
     private void GenerateBuilding()
     {
         if (buildingPanel == null) return;
@@ -128,11 +133,22 @@ public class MeshTestController : MonoBehaviour
         float height = buildingPanel.Height;
         int shapeType = buildingPanel.ShapeType;
 
+        // model_type はバリアントだけで決まるため、底面ポリゴンを作る前に判定できる。
+        int modelType = BuildingMeshBuilder.GetModelType(new BuildingSummary { variant = variant });
+
+        // マッシュアップ建物の底面は建物本体ではなく複数の棟を並べる土地区画なので、
+        // 入力サイズのままだと最大の棟(4×6セル=32m×48m)すら収まらず配置に失敗する。
+        // 主要な棟が確実に収まる広さの区画を固定で与える。
+        if (modelType == Constants.MODEL_MASHUP)
+        {
+            width = MASHUP_PARCEL_WIDTH;
+            height = MASHUP_PARCEL_DEPTH;
+            Debug.Log($"[MeshTest] マッシュアップ建物のため、底面を土地区画サイズ({width}m×{height}m)に固定します。");
+        }
+
         float[][] polygonCoords = GeneratePolygonCoords(width, height, shapeType);
 
         var buildingData = CreateBuildingSummary(variant, floors, polygonCoords, vv, vv2, vv3);
-
-        int modelType = BuildingMeshBuilder.GetModelType(buildingData);
 
         // マッシュアップ建物は配置計画(sub_buildings)が無いと白い箱になるため、
         // バックエンドと同じアルゴリズムの移植(TestSubBuildingLayout)で自前生成する。

@@ -120,9 +120,10 @@ public class MasterDataStore : MonoBehaviour
 		public int agent_variant;
 		public string display_name;
 		public bool primary;
+		public bool sole;      // 配置ランダム生成で必ず1棟だけ置かれる単独棟(primaryの次に優先)
 		public string model_prefix;
-		public float? width;
-		public float? height;
+		public float? width;   // 底面の幅(セル数単位。1単位=MASHUP_CELL_SIZE m。未定義は1セル)
+		public float? height;  // 底面の奥行き(同上)
 		public int? max_floors;
 		public int? min_floors;
 		public float? height_per_floor;

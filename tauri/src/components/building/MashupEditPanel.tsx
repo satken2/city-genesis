@@ -81,9 +81,12 @@ function colorForSubbuilding(subbuildingId: number): string {
   return SUBBUILDING_COLORS[index];
 }
 
-/** サブ建物の底面寸法(m)。マスター未定義の棟はセル1つ分として扱う(バックエンドと同じ規約)。 */
+/**
+ * サブ建物の底面寸法(m)。マスターの width / height はセル数単位(1単位=MASHUP_CELL_SIZE m)で
+ * 定義されており、未定義の棟はセル1つ分として扱う(バックエンドと同じ規約)。
+ */
 function subbuildingSize(entry: SubBuildingMasterEntry | undefined): [number, number] {
-  return [entry?.width ?? MASHUP_CELL_SIZE, entry?.height ?? MASHUP_CELL_SIZE];
+  return [(entry?.width ?? 1) * MASHUP_CELL_SIZE, (entry?.height ?? 1) * MASHUP_CELL_SIZE];
 }
 
 /**
@@ -152,7 +155,7 @@ export function MashupEditPanel({ apiBaseUrl, initialEntityId, onClose }: Mashup
   const [isLoaded, setIsLoaded] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const resizeObserverRef = useRef<ResizeObserver | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [canvasSize, setCanvasSize] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
 
@@ -235,15 +238,23 @@ export function MashupEditPanel({ apiBaseUrl, initialEntityId, onClose }: Mashup
 
   /* ---- キャンバスサイズの追従 ---- */
 
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+  /**
+   * 敷地キャンバスの器のサイズ監視。マスターデータと建物情報が揃うまではローディング表示に
+   * 差し替わっていて器が存在しないため、マウント時の useEffect ではなくコールバックrefで
+   * 監視を開始する(要素が実際に生成された瞬間に張り、外れた瞬間に切る)。
+   */
+  const setCanvasContainerRef = useCallback((container: HTMLDivElement | null) => {
+    resizeObserverRef.current?.disconnect();
+    if (!container) {
+      resizeObserverRef.current = null;
+      return;
+    }
     const observer = new ResizeObserver((entries) => {
       const rect = entries[0]?.contentRect;
       if (rect) setCanvasSize({ width: Math.floor(rect.width), height: Math.floor(rect.height) });
     });
     observer.observe(container);
-    return () => observer.disconnect();
+    resizeObserverRef.current = observer;
   }, []);
 
   /* ---- ビュー変換(敷地全体をキャンバスへフィット) ---- */
@@ -649,7 +660,7 @@ export function MashupEditPanel({ apiBaseUrl, initialEntityId, onClose }: Mashup
       )}
 
       {/* 敷地キャンバス */}
-      <div className="me-canvas-container" ref={containerRef}>
+      <div className="me-canvas-container" ref={setCanvasContainerRef}>
         <canvas
           ref={canvasRef}
           className="me-canvas"

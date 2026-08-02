@@ -1,7 +1,6 @@
 // Assets/Scripts/MeshGenerators/Buildings/ModularBodyBuilder.cs
 using UnityEngine;
 using System.Collections.Generic;
-using System.Text;
 
 /// <summary>
 /// モジュラーパーツ組み立てによる建物の壁・角・地面パネルを生成するクラス。
@@ -27,9 +26,8 @@ public static class ModularBodyBuilder
         public int ResolvedSuffix;
 
         /// <summary>
-        /// 躯体の描画上の高さ(m)。通常は floors × floorHeight だが、top階専用パーツ(top-w1)が
-        /// 実在する建物では最上階がパーツの著作高さのまま描画されるため、
-        /// (floors - 1) × floorHeight + top階の実高さ となる。
+        /// 躯体の高さ(m) = floors × 階高。パーツの配置は常にこの階高グリッドに乗るため、
+        /// スケールしない1階・最上階のパーツの著作高さとは無関係に決まる。
         /// 屋根・塔屋の配置Yやコライダー高さはこの値を使うこと。
         /// </summary>
         public float BuildingHeight;
@@ -38,29 +36,36 @@ public static class ModularBodyBuilder
     }
 
     /// <summary>
-    /// 旧規格(単位スケール)パーツの判定閾値(m)。
-    /// パーツのXZ実寸がこの値未満の場合、「1×1で作って階高で等倍スケールする」旧規格の
-    /// アセット(またはcm単位でエクスポートされた極小メッシュ)とみなし、従来どおりの
-    /// 等方スケールで互換描画する。実寸規格のパーツ(壁タイル幅・角アーム長は現実的に
-    /// 0.3m以上になる)はY方向のみ階高スケールされ、XZは著作サイズのまま配置される。
+    /// 壁・角パーツをYスケールしないことを表す targetHeight の値。
+    /// 1階(base)・最上階(top)・フェンスはこの規約で著作高さのまま描画される。
+    /// 中層(mid)の階と工事中の足場だけは階高に合わせるため正の targetHeight を渡す。
     /// </summary>
-    private const float LEGACY_UNIT_PART_MAX_SIZE = 0.3f;
-
-    /// <summary>旧規格パーツの警告を1メッシュ名につき1回に抑えるための記録。</summary>
-    private static readonly HashSet<string> warnedLegacyParts = new HashSet<string>();
+    private const float NO_Y_SCALE = 0f;
 
     /// <summary>
-    /// 旧規格(単位スケール)パーツを検出した際の警告。同じメッシュ名では1回だけ出力する。
+    /// 実寸として不自然に小さいパーツを検出する閾値(m)。
+    /// パーツはスケールされないため、cm単位や1×1の単位スケールでエクスポートされたFBXは
+    /// そのまま極小メッシュとして描画されてしまう。気づけるよう警告を出す。
     /// </summary>
-    private static void WarnLegacyPartOnce(Mesh mesh)
+    private const float SUSPICIOUS_PART_SIZE = 0.3f;
+
+    /// <summary>寸法が疑わしいパーツの警告を1メッシュ名につき1回に抑えるための記録。</summary>
+    private static readonly HashSet<string> warnedUndersizedParts = new HashSet<string>();
+
+    /// <summary>
+    /// XZ実寸が極端に小さいパーツを検出したら警告する。同じメッシュ名では1回だけ出力する。
+    /// 描画は補正せず著作サイズのまま行う（実寸で再エクスポートするのが正しい対処）。
+    /// </summary>
+    private static void WarnUndersizedPartOnce(Mesh mesh)
     {
         if (mesh == null) return;
-        string key = mesh.name;
-        if (warnedLegacyParts.Contains(key)) return;
-        warnedLegacyParts.Add(key);
+        Vector3 size = mesh.bounds.size;
+        if (Mathf.Max(size.x, size.z) >= SUSPICIOUS_PART_SIZE) return;
+        if (!warnedUndersizedParts.Add(mesh.name)) return;
         Debug.LogWarning(
-            $"[MBB] 旧規格(単位スケール)のパーツを検出: mesh='{key}' size={mesh.bounds.size}。" +
-            $"等方スケールで互換描画します。実寸(メートル単位)で再エクスポートしてください。");
+            $"[MBB] 寸法が極端に小さいパーツを検出: mesh='{mesh.name}' size={size}。" +
+            $"パーツはスケールされないためこのサイズのまま描画されます。" +
+            $"実寸(1ユニット=1m)で再エクスポートしてください。");
     }
 
     /// <summary>
@@ -81,7 +86,7 @@ public static class ModularBodyBuilder
     /// <param name="footprint">建物底面の頂点列（CCW）</param>
     /// <param name="floors">階数</param>
     /// <param name="prefix">パーツのプレフィックス（b{bd_type} または a{variant}）</param>
-    /// <param name="floorHeight">1階あたりの高さ</param>
+    /// <param name="floorHeight">1階あたりの高さ。各階の床面Y（階 × 階高）と躯体高さを決める。中層(mid)の階の壁・角はこの高さへYスケールされるが、1階・最上階のパーツはスケールされない。</param>
     /// <param name="visual_variant">外観バリアント（閾値フォルダの選択に使用）</param>
     /// <param name="building_shape">建物の形状タイプ（SHAPE_FULL の場合は最上階のみを処理する）</param>
     /// <param name="modelType">モデルタイプ。MODEL_MODULAR_GROUND の場合は建物本体を描画せず fence のみを描画する。</param>
@@ -127,13 +132,10 @@ public static class ModularBodyBuilder
         List<Material> allMaterials = new List<Material>();
         List<Mesh> temporaryMeshes = new List<Mesh>();
 
-        // --- top階の実高さ解決 ---
-        // top階専用の壁パーツ(top-w1)が実在する場合(midへのレベルフォールバックではない場合)、
-        // 最上階はY方向スケールを行わずパーツの著作高さのまま描画する。
-        // 背の高い装飾的な最上階(クラウン)を表現するための仕様。
-        // 旧規格(単位スケール)のtopパーツは実寸情報を持たないため通常どおり階高スケールする。
-        float topFloorHeight = ResolveTopFloorHeight(prefix, resolvedSuffix, floors, floorHeight);
-        float resolvedBuildingHeight = (floors - 1) * floorHeight + topFloorHeight;
+        // 躯体の高さは常に階高グリッドで決まる（各階の床面Y = 階 × 階高）。
+        // パーツをスケールしない1階・最上階では、パーツの著作高さが階高と食い違うぶん
+        // 上の階との間に隙間ができたり、上の階のパーツに埋もれたりするが、これは仕様。
+        float resolvedBuildingHeight = floors * floorHeight;
 
         // --- 建物部分（base / mid / top）---
         if (!isGroundModel)
@@ -158,8 +160,12 @@ public static class ModularBodyBuilder
             {
                 float floorY = floor * floorHeight;
 
-                // 最上階はtop階の実高さ(top-w1が実在すれば著作高さ、無ければ階高)を目標高さにする
-                float targetHeight = (floor == floors - 1) ? topFloorHeight : floorHeight;
+                string level = (floor == 0) ? "base" : (floor == floors - 1) ? "top" : "mid";
+
+                // 中層の階だけ階高へYスケールし、1階・最上階は著作高さのまま描画する。
+                // 判定は「階のレベル」で行うので、base/top のパーツが無くて mid-w1 等へ
+                // フォールバックした1階・最上階もスケールされない。
+                float targetHeight = (level == "mid") ? floorHeight : NO_Y_SCALE;
 
                 for (int i = 0; i < n; i++)
                 {
@@ -168,19 +174,14 @@ public static class ModularBodyBuilder
                     Vector2 p1 = footprint[i];
                     Vector2 p2 = footprint[(i + 1) % n];
 
-                    string wallLevel, cornerLevel;
-                    if (floor == 0) { wallLevel = "base"; cornerLevel = "base"; }
-                    else if (floor == floors - 1) { wallLevel = "top"; cornerLevel = "top"; }
-                    else { wallLevel = "mid"; cornerLevel = "mid"; }
-
-                    GameObject wallModule = LoadPartWithFallback(prefix, wallLevel, "w", position, resolvedSuffix, out Material[] wallMaterials);
-                    GameObject cornerModule = LoadPartWithFallback(prefix, cornerLevel, "c", position, resolvedSuffix, out Material[] cornerMaterials);
+                    GameObject wallModule = LoadPartWithFallback(prefix, level, "w", position, resolvedSuffix, out Material[] wallMaterials);
+                    GameObject cornerModule = LoadPartWithFallback(prefix, level, "c", position, resolvedSuffix, out Material[] cornerMaterials);
 
                     if (wallModule != null)
                     {
                         Vector2 p3 = footprint[(i + 2) % n];
                         int nextPosition = (i + 1) % n + 1;
-                        GameObject nextCornerModule = LoadPartWithFallback(prefix, cornerLevel, "c", nextPosition, resolvedSuffix, out _);
+                        GameObject nextCornerModule = LoadPartWithFallback(prefix, level, "c", nextPosition, resolvedSuffix, out _);
 
                         // 壁の敷き詰め範囲は、両端の角パーツがこの辺へ実際に張り出す長さぶん内側へ狭める。
                         // 手前側は頂点 p1 の角パーツの送り側アーム、奥側は頂点 p2 の角パーツの受け側アーム。
@@ -361,43 +362,30 @@ public static class ModularBodyBuilder
     }
 
     /// <summary>
-    /// top階の描画高さを解決する。
-    /// top階専用の壁パーツ(top-w1)が実寸規格で実在する場合はその著作高さを返し、
-    /// 存在しない・旧規格(単位スケール)・階数1(最下階=baseになるためtop階が無い)の場合は
-    /// 通常の階高を返す。
+    /// 壁パーツのソースメッシュを取得する。実配置(BuildWallRun)と同じく MeshFilter を優先する。
     /// </summary>
-    private static float ResolveTopFloorHeight(string prefix, int resolvedSuffix, int floors, float floorHeight)
+    private static Mesh GetWallSourceMesh(GameObject module)
     {
-        if (floors < 2)
+        if (module == null) return null;
+
+        MeshFilter mf = module.GetComponentInChildren<MeshFilter>();
+        if (mf != null && mf.sharedMesh != null)
         {
-            return floorHeight;
+            return mf.sharedMesh;
         }
 
-        if (!BuildingMeshUtils.HasPart(prefix, "top", "w", 1, resolvedSuffix))
+        SkinnedMeshRenderer smr = module.GetComponentInChildren<SkinnedMeshRenderer>();
+        if (smr != null && smr.sharedMesh != null)
         {
-            return floorHeight;
+            return smr.sharedMesh;
         }
 
-        GameObject topWall = BuildingMeshUtils.GetPart(prefix, "top", "w", 1, resolvedSuffix, true);
-        Mesh mesh = GetPartSourceMesh(topWall);
-        if (mesh == null)
-        {
-            return floorHeight;
-        }
-
-        Vector3 size = mesh.bounds.size;
-        bool isLegacy = Mathf.Max(size.x, size.z) < LEGACY_UNIT_PART_MAX_SIZE;
-        if (isLegacy || size.y <= 0.01f)
-        {
-            return floorHeight;
-        }
-
-        return size.y;
+        return null;
     }
 
     /// <summary>
-    /// パーツプレハブの計測用ソースメッシュを取得する。
-    /// 実配置(GenerateCornerCore等)と同じく SkinnedMeshRenderer を優先する。
+    /// 角パーツプレハブの計測用ソースメッシュを取得する。
+    /// 実配置(GenerateCornerCore)と同じく SkinnedMeshRenderer を優先する。
     /// </summary>
     private static Mesh GetPartSourceMesh(GameObject module)
     {
@@ -923,10 +911,10 @@ public static class ModularBodyBuilder
     /// 辺セグメントのメッシュを生成する。
     /// 純粋に配置計算のみを行い、個別のユニットメッシュを返す（結合は行わない）。
     ///
-    /// スケール規則: 壁パーツは高さが targetHeight(通常は階高、top階では実高さ)になるよう
-    /// Y方向のみスケールされ、奥行き(Z)は著作サイズのまま使われる。
-    /// パーツの著作幅を1ユニットとして辺に敷き詰め、端数はXストレッチで均等に吸収する。
-    /// 旧規格(単位スケール)のパーツは従来どおり等方スケールで互換描画する。
+    /// スケール規則: 奥行き(Z)は常に著作サイズのまま。高さ(Y)は targetHeight が正の場合だけ
+    /// そこへ合わせ（中層の階・工事中の足場）、NO_Y_SCALE のときは著作高さのまま
+    /// （1階・最上階・フェンス）。パーツの著作幅を1ユニットとして辺に敷き詰め、端数はXストレッチで
+    /// 均等に吸収する。
     /// </summary>
     /// <param name="startOffset">辺の始点側で角パーツが占める長さ(m)。MeasureCornerExtentAlongEdge で求める</param>
     /// <param name="endOffset">辺の終点側で角パーツが占める長さ(m)</param>
@@ -950,8 +938,7 @@ public static class ModularBodyBuilder
         Vector2 p0, Vector2 p1, GameObject wallModule, Material[] sharedMaterials,
         float startOffset, float endOffset)
     {
-        // targetHeight=0 は「Yスケールしない」を意味する（フェンス規約）。
-        return BuildWallRun(p0, p1, 0f, wallModule, sharedMaterials, 0f, startOffset, endOffset);
+        return BuildWallRun(p0, p1, 0f, wallModule, sharedMaterials, NO_Y_SCALE, startOffset, endOffset);
     }
 
     /// <summary>
@@ -968,7 +955,8 @@ public static class ModularBodyBuilder
     ///    ずれた（左右非対称な）パーツでも端がずれない。中央ピボットの標準パーツでは
     ///    スロット中央に原点が来て従来と同じ結果になる。
     ///
-    /// targetHeight が 0 以下の場合はYスケールを行わない（フェンス）。
+    /// targetHeight が 0 以下の場合はYスケールを行わない（1階・最上階の壁・フェンス）。
+    /// 正の値を渡すのは中層の階と工事中の足場で、その場合のみ高さを targetHeight へ合わせる。
     /// </summary>
     private static List<SegmentMeshData> BuildWallRun(
         Vector2 p0, Vector2 p1, float baseY,
@@ -986,17 +974,8 @@ public static class ModularBodyBuilder
         if (totalLength <= MIN_WALL_RUN_LENGTH) return segments;
         Vector3 direction = (end - start) / totalLength;
 
-        MeshFilter mf = wallModule.GetComponentInChildren<MeshFilter>();
         SkinnedMeshRenderer smr = wallModule.GetComponentInChildren<SkinnedMeshRenderer>();
-        Mesh sourceMesh = null;
-        if (mf != null && mf.sharedMesh != null)
-        {
-            sourceMesh = mf.sharedMesh;
-        }
-        else if (smr != null && smr.sharedMesh != null)
-        {
-            sourceMesh = smr.sharedMesh;
-        }
+        Mesh sourceMesh = GetWallSourceMesh(wallModule);
         if (sourceMesh == null) return segments;
 
         Bounds bounds = sourceMesh.bounds;
@@ -1016,41 +995,13 @@ public static class ModularBodyBuilder
             return segments;
         }
 
-        float sourceHeight = Mathf.Max(originalSize.y, 0.001f);
-        float scaleY;
-        float baseScaleX;
-        float scaleZ;
-        float unitActualLength;
+        WarnUndersizedPartOnce(sourceMesh);
 
-        bool isLegacyPart = Mathf.Max(originalSize.x, originalSize.z) < LEGACY_UNIT_PART_MAX_SIZE;
-        if (targetHeight <= 0f)
-        {
-            // フェンス: 高さ・奥行きとも著作実寸のまま（旧規格判定の対象外）
-            scaleY = 1f;
-            baseScaleX = 1f;
-            scaleZ = 1f;
-            unitActualLength = originalSize.x;
-            isLegacyPart = false;
-        }
-        else if (isLegacyPart)
-        {
-            // 旧規格(単位スケール)パーツ: 従来どおり高さを targetHeight に合わせる等方スケール。
-            // ユニット幅も等方スケール後の幅になる(正方形タイル的な見た目)。
-            WarnLegacyPartOnce(sourceMesh);
-            float uniformScale = targetHeight / sourceHeight;
-            scaleY = uniformScale;
-            baseScaleX = uniformScale;
-            scaleZ = uniformScale;
-            unitActualLength = originalSize.x * uniformScale;
-        }
-        else
-        {
-            // 実寸規格パーツ: 高さのみ targetHeight に合わせ、幅・奥行きは著作サイズを維持する
-            scaleY = targetHeight / sourceHeight;
-            baseScaleX = 1f;
-            scaleZ = 1f;
-            unitActualLength = originalSize.x;
-        }
+        // 高さは targetHeight が正のときだけそこへ合わせ、幅・奥行きは常に著作サイズを維持する。
+        // targetHeight <= 0（建物本体の壁・フェンス）は著作高さのまま描画する。
+        float sourceHeight = Mathf.Max(originalSize.y, 0.001f);
+        float scaleY = targetHeight > 0f ? targetHeight / sourceHeight : 1f;
+        float unitActualLength = originalSize.x;
 
         // ユニット幅が無効(ほぼ0)だと配置数の計算が発散するため、描画をスキップする
         if (unitActualLength <= 0.001f)
@@ -1066,8 +1017,8 @@ public static class ModularBodyBuilder
         // スロット幅は有効長を敷き詰め数でちょうど割った値。合計は厳密に有効長に一致する。
         float slotLength = effectiveLength / numUnits;
         float xStretchFactor = slotLength / unitActualLength;
-        float scaleX = baseScaleX * xStretchFactor;
-        Vector3 scale = new Vector3(scaleX, scaleY, scaleZ);
+        float scaleX = xStretchFactor;
+        Vector3 scale = new Vector3(scaleX, scaleY, 1f);
 
         // 辺の方向（direction）に合わせて、Y軸まわりの回転角度を計算する。
         // Quaternion.FromToRotation は対向方向での特異点（Y軸反転）が発生するため、
@@ -1084,7 +1035,7 @@ public static class ModularBodyBuilder
         float pivotShift = bounds.max.x * scaleX;
 
         UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
-            $"[MBB-WALL] p0=({p0.x:F3},{p0.y:F3}) p1=({p1.x:F3},{p1.y:F3}) baseY={baseY:F3} targetHeight={targetHeight:F3} legacy={isLegacyPart}\n" +
+            $"[MBB-WALL] p0=({p0.x:F3},{p0.y:F3}) p1=({p1.x:F3},{p1.y:F3}) baseY={baseY:F3} targetHeight={targetHeight:F3}\n" +
             $"[MBB-WALL]   totalLength={totalLength:F4} startOffset={clampedStart:F4} endOffset={clampedEnd:F4} effectiveLength={effectiveLength:F4}\n" +
             $"[MBB-WALL]   meshName={sourceMesh.name} boundsSize=({originalSize.x:F4},{originalSize.y:F4},{originalSize.z:F4}) boundsCenterX={bounds.center.x:F4}\n" +
             $"[MBB-WALL]   unitActualLength={unitActualLength:F4} numUnits={numUnits} slotLength={slotLength:F4} xStretchFactor={xStretchFactor:F4}\n" +
@@ -1134,8 +1085,8 @@ public static class ModularBodyBuilder
     /// </summary>
     public static SegmentMeshData GenerateFenceCorner(Vector2 p0, Vector2 p1, Vector2 p2, GameObject cornerModule, Material[] sharedMaterials)
     {
-        // 本体角と同じロジック。フェンスは floorY=0・無スケール(targetHeight=0)で配置する。
-        return GenerateCornerCore(p0, p1, p2, 0f, cornerModule, sharedMaterials, 0f);
+        // 本体角と同じロジック。フェンスは floorY=0・無スケールで配置する。
+        return GenerateCornerCore(p0, p1, p2, 0f, cornerModule, sharedMaterials, NO_Y_SCALE);
     }
 
     /// <summary>
@@ -1207,26 +1158,20 @@ public static class ModularBodyBuilder
 
     /// <summary>
     /// 角パーツに適用するスケールを決定する。
-    /// - targetHeight が 0 以下 … 無スケール（フェンス角）
-    /// - 実寸規格のパーツ … 高さが targetHeight になるようY方向のみスケール。XZは著作サイズを維持
-    /// - 旧規格(単位スケール)のパーツ … 従来どおり targetHeight の等方スケール
-    ///   （旧規格はアーム長1.0・高さ1.0で作られ、floorHeight倍で実寸化する前提だったため）
+    /// - targetHeight が 0 以下 … 無スケール（1階・最上階の角、フェンス角。著作高さのまま描画）
+    /// - targetHeight が正 … 高さが targetHeight になるようY方向のみスケール（中層の階、工事中の足場）。
+    ///   XZは常に著作サイズを維持する。
     /// </summary>
     private static Vector3 DetermineCornerScale(Mesh sourceMesh, float targetHeight)
     {
+        WarnUndersizedPartOnce(sourceMesh);
+
         if (targetHeight <= 0f)
         {
             return Vector3.one;
         }
 
         Vector3 size = sourceMesh != null ? sourceMesh.bounds.size : Vector3.zero;
-        bool isLegacyPart = Mathf.Max(size.x, size.z) < LEGACY_UNIT_PART_MAX_SIZE;
-        if (isLegacyPart)
-        {
-            WarnLegacyPartOnce(sourceMesh);
-            return new Vector3(targetHeight, targetHeight, targetHeight);
-        }
-
         float sourceHeight = Mathf.Max(size.y, 0.001f);
         return new Vector3(1f, targetHeight / sourceHeight, 1f);
     }
@@ -1305,7 +1250,7 @@ public static class ModularBodyBuilder
     /// <summary>
     /// スキンメッシュの角を生成（ボーン変形対応）。
     /// 建物の底面形状の角度に合わせてボーンを回転させる。
-    /// scale は DetermineCornerScale で決定済みのスケール（実寸規格=Yのみ / 旧規格=等方）。
+    /// scale は DetermineCornerScale で決定済みのスケール（無スケール、または足場のYのみスケール）。
     /// </summary>
     private static Mesh GenerateSkinnedCorner(Vector3 position, Quaternion rotation, float angle, SkinnedMeshRenderer smr, Vector3 scale)
     {
