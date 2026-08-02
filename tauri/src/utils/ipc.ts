@@ -515,18 +515,23 @@ export async function sendSetPlatformSide(platformSide: number): Promise<void> {
 
 /**
  * `edit_path.change_lateral_offsets`
- * パス敷設モードにおいて、複合パス(軌道複線)の各線の横オフセット(m。敷設方向右が正)を変更する。
+ * パス敷設モードにおいて、複合パス(軌道複線)の各線の横オフセット(m。敷設方向右が正)と
+ * 進行方向(DIR_*)を変更する。両配列は index 対応で同じ長さ。
  * Unity側は敷設中プレビューメッシュを各オフセット位置の平行パス群として即座に描き直す
  * (敷設セッション中に線路数を変えてもノード列を維持したまま本数だけ更新される)。
- * 空配列は単一パス(中心線1本のプレビュー)に戻すことを意味する。
- * 初期値は STATE_EDIT_PATH の lateral_offsets params で渡す。
+ * 進行方向は駅バリアントのホーム設置側の解決(TrackPath.ResolvePlatformExtents)と
+ * 進行方向矢印の表示に使われる。空配列は単一パス(中心線1本のプレビュー)に戻すことを意味する。
+ * 初期値は STATE_EDIT_PATH の lateral_offsets / travel_directions params で渡す。
  */
-export async function sendEditPathChangeLateralOffsets(lateralOffsets: number[]): Promise<void> {
+export async function sendEditPathChangeLateralOffsets(
+  lateralOffsets: number[],
+  travelDirections: number[],
+): Promise<void> {
   await invoke("send_window_action", {
     windowType: "path_build",
     entity: null,
     action: "edit_path:change_lateral_offsets",
-    params: { lateral_offsets: lateralOffsets },
+    params: { lateral_offsets: lateralOffsets, travel_directions: travelDirections },
   });
 }
 

@@ -75,6 +75,14 @@ public class RoadPlanManager : MonoBehaviour
     public float[] LateralOffsets = System.Array.Empty<float>();
 
     /// <summary>
+    /// 複合パス(軌道複線)プレビュー用の各線の進行方向(Constants.DIR_*)。LateralOffsets と
+    /// index対応の同じ並び。駅バリアントのプレビューでホーム設置側の解決
+    /// (TrackPath.ResolvePlatformExtents)が走行方向を参照するため、オフセット列と対で保持する。
+    /// 要素が無い線は DIR_BOTH(双方向)として扱われる。
+    /// </summary>
+    public int[] TravelDirections = System.Array.Empty<int>();
+
+    /// <summary>
     /// 編集対象の既存パスID。0 の場合は新規作成モード。
     /// </summary>
     private int pathId = 0;
@@ -387,23 +395,34 @@ public class RoadPlanManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 複合パス(軌道複線)プレビューの各線横オフセットを設定し、プレビューメッシュへ即座に反映する。
-    /// UIパネルの線路数変更(edit_path:change_lateral_offsets)から呼ばれる。
-    /// 敷設セッション中(配置中・編集中)に切り替えても、その場で平行プレビューの本数が更新される。
+    /// 複合パス(軌道複線)プレビューの各線横オフセット・進行方向を設定し、プレビューメッシュへ
+    /// 即座に反映する。UIパネルの線路数・進行方向の変更(edit_path:change_lateral_offsets)から呼ばれる。
+    /// 敷設セッション中(配置中・編集中)に切り替えても、その場で平行プレビューの本数・
+    /// ホーム設置側・進行方向矢印が更新される。
     /// </summary>
-    public void SetLateralOffsets(float[] offsets)
+    public void SetLateralOffsets(float[] offsets, int[] directions)
     {
         float[] normalized = offsets ?? System.Array.Empty<float>();
-        if (LateralOffsets.Length == normalized.Length)
+        int[] normalizedDirs = directions ?? System.Array.Empty<int>();
+        bool same = LateralOffsets.Length == normalized.Length
+            && TravelDirections.Length == normalizedDirs.Length;
+        if (same)
         {
-            bool same = true;
             for (int i = 0; i < normalized.Length; i++)
             {
                 if (Mathf.Abs(LateralOffsets[i] - normalized[i]) > 1e-4f) { same = false; break; }
             }
-            if (same) return;
         }
+        if (same)
+        {
+            for (int i = 0; i < normalizedDirs.Length; i++)
+            {
+                if (TravelDirections[i] != normalizedDirs[i]) { same = false; break; }
+            }
+        }
+        if (same) return;
         LateralOffsets = normalized;
+        TravelDirections = normalizedDirs;
         Update3DPreview();
     }
 
@@ -1539,7 +1558,26 @@ public class RoadPlanManager : MonoBehaviour
         {
             terrainInputHandler = FindAnyObjectByType<TerrainInputHandler>();
         }
-        if (terrainInputHandler != null)
+
+        // 軌道複線(0以外の横オフセットあり)の敷設中は、ノード/パス吸着をオフセット考慮版に
+        // 差し替える。素朴に中心線を既存線路へ吸着させると全線路が横にズレて接続できないため、
+        // 「グループ内のいずれかの線路が吸着対象に乗る」中心線位置へ吸着させる。
+        // グリッド吸着が有効な間は共通スナップと同じ序列でグリッドを最優先する。
+        bool offsetSnapApplied = false;
+        if (HasNonZeroLateralOffsets()
+            && !(TerrainInputHandler.EnableGridSnapping && GridOverlay.Instance != null)
+            && TryOffsetAwareRailSnap(basePos, out Vector3 offsetSnapped, out float offsetSnapRelHeight))
+        {
+            basePos = offsetSnapped;
+            lastSnapWasElevated = true;
+            lastSnapRelHeight = offsetSnapRelHeight;
+            offsetSnapApplied = true;
+        }
+
+        // オフセット考慮吸着がヒットしたら共通のノード/パス吸着は行わない
+        // (吸着後の中心線位置は既存線路から横オフセット分離れており、共通スナップに通すと
+        //  その既存線路の中心線へ引き戻されてしまうため)。
+        if (!offsetSnapApplied && terrainInputHandler != null)
         {
             basePos = terrainInputHandler.ApplySnapping(basePos, PathSubtype, out lastSnapWasElevated, out lastSnapRelHeight, snapThreshold);
         }
@@ -1682,6 +1720,235 @@ public class RoadPlanManager : MonoBehaviour
         rightAngleSnapSnappedPos = snapped;
 
         return snapped;
+    }
+
+    // =====================================================================
+    // 軌道複線のオフセット考慮吸着
+    // =====================================================================
+
+    /// <summary>オフセット考慮吸着で点ターゲット(ノード/端点)の接線を探す近傍セグメント検索半径(m)。</summary>
+    private const float OFFSET_SNAP_TANGENT_SEARCH_RADIUS = 2.0f;
+
+    /// <summary>セグメント端点が点ターゲットに接しているとみなすXZ距離(m)。</summary>
+    private const float OFFSET_SNAP_TOUCH_TOLERANCE = 0.5f;
+
+    /// <summary>
+    /// 軌道複線(0以外の横オフセットを持つ平行敷設)の最中かどうか。
+    /// オフセット考慮吸着(TryOffsetAwareRailSnap)を使うかの判定。
+    /// 単線([0]のみ)・道路・既存パス編集(空配列)は対象外で、従来の共通スナップを使う
+    /// (単線はオフセット0なので両者は同じ結果になる)。
+    /// </summary>
+    private bool HasNonZeroLateralOffsets()
+    {
+        if (LateralOffsets == null) return false;
+        foreach (float offset in LateralOffsets)
+        {
+            if (Mathf.Abs(offset) > 0.01f) return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// 軌道複線敷設用のオフセット考慮吸着。
+    ///
+    /// 複線グループの内部表現は「グループ中心線」1本のポリラインだが、確定時には
+    /// 平行な単線パス群に分解されて保存され、既存パス側に「グループ」の実体は残らない。
+    /// そのため中心線をそのまま既存線路の中心線へ吸着させると、全線路が横に
+    /// 半間隔ズレて1本も接続できない。ここでは吸着対象(ノード/建設中端点/セグメント)の
+    /// 位置Eとその接線tから「グループ内のいずれかの線路(横オフセットo)がEにちょうど乗る
+    /// 中心線位置 C = E ± perp(t)·o」を候補として列挙し、生カーソルに最も近い候補へ吸着する。
+    ///
+    /// - 既存グループの中心付近にカーソルを置くと、左右の線路それぞれから導かれる候補が
+    ///   同じ位置に重なるため、同構成のグループ延長では全線路の端点が一致する。
+    /// - 接線の向き(±t)は始点クリック時点では敷設方向が未確定で決められないため、
+    ///   両符号の候補を列挙して実際の敷設方向に委ねる(対称なオフセット配列では同一集合)。
+    /// - ノード系優先→セグメントの序列、網互換フィルタ、ノード/パス吸着フラグ、
+    ///   高架相対高さの引き継ぎは共通スナップ(TerrainInputHandler.ApplySnapping)と揃える。
+    ///   ゾーン頂点吸着だけは対象外(軌道敷設では実用場面がないため)。
+    /// </summary>
+    private bool TryOffsetAwareRailSnap(Vector3 basePos, out Vector3 snapped, out float snapRelHeight)
+    {
+        snapped = basePos;
+        snapRelHeight = 0f;
+        if (pathManager == null) return false;
+        if (!TerrainInputHandler.EnableNodeSnapping && !TerrainInputHandler.EnablePathSnapping) return false;
+
+        // 吸着対象は候補位置からオフセット分離れているため、検索半径を最大オフセットぶん広げる
+        float maxOffset = 0f;
+        foreach (float offset in LateralOffsets)
+        {
+            maxOffset = Mathf.Max(maxOffset, Mathf.Abs(offset));
+        }
+        float searchRadius = snapThreshold + maxOffset;
+
+        float bestDist = snapThreshold;
+        bool found = false;
+
+        // ノード・建設中端点(共通スナップと同じくノード系を優先し、当たればセグメントは見ない)
+        if (TerrainInputHandler.EnableNodeSnapping)
+        {
+            var nodes = pathManager.QueryNearbyNodes(basePos, searchRadius);
+            if (nodes != null)
+            {
+                foreach (var node in nodes)
+                {
+                    if (!InfraNetworkUtil.IsNodeSnappable(node, PathSubtype, pathManager)) continue;
+                    EvaluatePointTargetOffsetCandidates(basePos, node.GetAbsolutePosition(), ref bestDist, ref snapped, ref snapRelHeight, ref found);
+                }
+            }
+
+            // 建設が完了するまで端点にノードが作られないため、計画中/建設中パスの
+            // start_point / end_point を直接判定対象とする(共通スナップの
+            // FindNearestConstructionEndpoint と同じ理由)。
+            EvaluateConstructionEndpointOffsetCandidates(basePos, searchRadius, ref bestDist, ref snapped, ref snapRelHeight, ref found);
+
+            if (found) return true;
+        }
+
+        // パスセグメント(横オフセット分平行移動した線への射影として吸着)
+        if (TerrainInputHandler.EnablePathSnapping)
+        {
+            var segments = pathManager.QueryNearbySegments(basePos, searchRadius);
+            if (segments != null)
+            {
+                foreach (var seg in segments)
+                {
+                    if (seg.path != null && !InfraNetworkUtil.IsPathSnappable(seg.path.path_variant, PathSubtype)) continue;
+                    Vector3 dir = seg.b - seg.a;
+                    dir.y = 0f;
+                    if (dir.sqrMagnitude < 1e-6f) continue;
+                    dir.Normalize();
+                    Vector3 perp = new Vector3(-dir.z, 0f, dir.x);
+                    foreach (float offset in LateralOffsets)
+                    {
+                        for (int sign = -1; sign <= 1; sign += 2)
+                        {
+                            Vector3 shift = perp * (offset * sign);
+                            Vector3 candidate = TerrainInputHandler.GetClosestPointOnSegment(seg.a - shift, seg.b - shift, basePos);
+                            float dist = Vector2.Distance(new Vector2(basePos.x, basePos.z), new Vector2(candidate.x, candidate.z));
+                            if (dist < bestDist)
+                            {
+                                bestDist = dist;
+                                snapped = candidate;
+                                snapRelHeight = candidate.y - Utils.GetGroundHeight(candidate);
+                                found = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return found;
+    }
+
+    /// <summary>
+    /// 点ターゲット(既存ノード/建設中パス端点)に対するオフセット考慮吸着の候補を評価する。
+    /// ターゲットに接するパスの接線ごとに候補 C = ターゲット ± perp(接線)·オフセット を列挙し、
+    /// 生カーソルに最も近い候補で最良値を更新する。接線はターゲットの近傍セグメントのうち
+    /// 端点が一致するものを使い(交差点では全アームを試す)、無ければ最寄りセグメントで代用する。
+    /// </summary>
+    private void EvaluatePointTargetOffsetCandidates(Vector3 basePos, Vector3 targetPos, ref float bestDist, ref Vector3 bestPos, ref float bestRelHeight, ref bool found)
+    {
+        var segs = pathManager.QueryNearbySegments(targetPos, OFFSET_SNAP_TANGENT_SEARCH_RADIUS);
+        if (segs == null || segs.Count == 0) return;
+
+        float relHeight = targetPos.y - Utils.GetGroundHeight(targetPos);
+        Vector2 targetXZ = new Vector2(targetPos.x, targetPos.z);
+
+        bool anyTouching = false;
+        Vector3 fallbackDir = Vector3.zero;
+        float fallbackDist = float.MaxValue;
+        foreach (var seg in segs)
+        {
+            if (seg.path != null && !InfraNetworkUtil.IsPathSnappable(seg.path.path_variant, PathSubtype)) continue;
+            Vector3 dir = seg.b - seg.a;
+            dir.y = 0f;
+            if (dir.sqrMagnitude < 1e-6f) continue;
+
+            float distA = Vector2.Distance(targetXZ, new Vector2(seg.a.x, seg.a.z));
+            float distB = Vector2.Distance(targetXZ, new Vector2(seg.b.x, seg.b.z));
+            if (Mathf.Min(distA, distB) <= OFFSET_SNAP_TOUCH_TOLERANCE)
+            {
+                anyTouching = true;
+                EvaluateTangentOffsetCandidates(basePos, targetPos, dir, relHeight, ref bestDist, ref bestPos, ref bestRelHeight, ref found);
+            }
+            else if (!anyTouching)
+            {
+                Vector3 closest = TerrainInputHandler.GetClosestPointOnSegment(seg.a, seg.b, targetPos);
+                float d = Vector2.Distance(targetXZ, new Vector2(closest.x, closest.z));
+                if (d < fallbackDist)
+                {
+                    fallbackDist = d;
+                    fallbackDir = dir;
+                }
+            }
+        }
+        if (!anyTouching && fallbackDir.sqrMagnitude > 1e-6f)
+        {
+            EvaluateTangentOffsetCandidates(basePos, targetPos, fallbackDir, relHeight, ref bestDist, ref bestPos, ref bestRelHeight, ref found);
+        }
+    }
+
+    /// <summary>
+    /// 点ターゲットと接線方向1本に対する候補 C = ターゲット ± perp·オフセット を列挙し最良値を更新する。
+    /// 候補のYは「候補位置の地形高さ + ターゲットの相対高さ」(高架端点からの延長で高さを引き継ぐ)。
+    /// </summary>
+    private void EvaluateTangentOffsetCandidates(Vector3 basePos, Vector3 targetPos, Vector3 tangent, float relHeight, ref float bestDist, ref Vector3 bestPos, ref float bestRelHeight, ref bool found)
+    {
+        Vector3 dir = tangent.normalized;
+        Vector3 perp = new Vector3(-dir.z, 0f, dir.x);
+        foreach (float offset in LateralOffsets)
+        {
+            for (int sign = -1; sign <= 1; sign += 2)
+            {
+                Vector3 candidate = targetPos + perp * (offset * sign);
+                float dist = Vector2.Distance(new Vector2(basePos.x, basePos.z), new Vector2(candidate.x, candidate.z));
+                if (dist < bestDist)
+                {
+                    bestDist = dist;
+                    candidate.y = Utils.GetGroundHeight(candidate) + relHeight;
+                    bestPos = candidate;
+                    bestRelHeight = relHeight;
+                    found = true;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 計画中/建設中パスの端点(start_point / end_point)に対するオフセット考慮吸着の候補を評価する。
+    /// </summary>
+    private void EvaluateConstructionEndpointOffsetCandidates(Vector3 basePos, float searchRadius, ref float bestDist, ref Vector3 bestPos, ref float bestRelHeight, ref bool found)
+    {
+        var allPaths = pathManager.GetAllPaths();
+        if (allPaths == null) return;
+
+        foreach (var path in allPaths)
+        {
+            if (path.status != Constants.STATUS_SCHEDULED_CONSTRUCTION &&
+                path.status != Constants.STATUS_PENDING &&
+                path.status != Constants.STATUS_CONSTRUCTING)
+            {
+                continue;
+            }
+            if (!InfraNetworkUtil.IsPathSnappable(path.path_variant, PathSubtype)) continue;
+
+            EvaluateEndpointOffsetCandidates(basePos, GeneratedModelUtils.ToFloatList(path.start_point), searchRadius, ref bestDist, ref bestPos, ref bestRelHeight, ref found);
+            EvaluateEndpointOffsetCandidates(basePos, GeneratedModelUtils.ToFloatList(path.end_point), searchRadius, ref bestDist, ref bestPos, ref bestRelHeight, ref found);
+        }
+    }
+
+    /// <summary>[x, 相対高さ, z] 形式の端点1つ分を絶対座標に組み立てて点ターゲット候補の評価へ渡す。</summary>
+    private void EvaluateEndpointOffsetCandidates(Vector3 basePos, List<float> pointList, float searchRadius, ref float bestDist, ref Vector3 bestPos, ref float bestRelHeight, ref bool found)
+    {
+        if (pointList == null || pointList.Count < 2) return;
+        float x = pointList[0];
+        float z = pointList[pointList.Count - 1];
+        float rel = pointList.Count >= 3 ? pointList[1] : 0f;
+        if (Vector2.Distance(new Vector2(basePos.x, basePos.z), new Vector2(x, z)) > searchRadius) return;
+        Vector3 endpoint = new Vector3(x, Utils.GetGroundHeight(new Vector3(x, 0f, z)) + rel, z);
+        EvaluatePointTargetOffsetCandidates(basePos, endpoint, ref bestDist, ref bestPos, ref bestRelHeight, ref found);
     }
 
     /// <summary>
@@ -2401,7 +2668,7 @@ public class RoadPlanManager : MonoBehaviour
         if (renderPoints.Count >= 2)
         {
             bool isValid = CheckElevationIntersections().Count == 0;
-            roadRenderer.UpdateRoadPreview(renderPoints, PathType, PathSubtype, Curved, isValid, PlatformSide, LateralOffsets);
+            roadRenderer.UpdateRoadPreview(renderPoints, PathType, PathSubtype, Curved, isValid, PlatformSide, LateralOffsets, TravelDirections);
         }
         else
         {

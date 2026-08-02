@@ -29,11 +29,13 @@ using GeneratedModels;
 /// レールコネクタは通常線路とまったく同じに描かれる（前後の線路とシームレスに繋がる）。
 /// プラットフォームは platform_width ぶん道床の外へ張り出す追加パーツで、設置側はパスの
 /// platform_side（内側/外側/両側）で決まる。内側/外側→左右の解決は都市の通行方向
-/// （CityInfoStore.TrafficHand）を基準に行う（ResolvePlatformExtents）。この解決ロジックは
-/// バックエンドの敷地ポリゴン算出（geo_paths.get_platform_extension_widths）と鏡写しであり、
-/// 片方だけ変えると敷地と見た目が食い違う。
-/// プラットフォームがある側では、架線柱をホーム外縁の外側に立て、近接線路の結合描画
-/// （バラスト充填・壁省略）を無効化し、クリック判定コライダーをホーム込みの非対称幅にする。
+/// （CityInfoStore.TrafficHand）と線路の走行方向（travel_direction）を基準に行う
+/// （ResolvePlatformExtents。DIR_BACKWARD の線路は幾何フレームで左右が反転する）。
+/// この解決ロジックはバックエンドの敷地ポリゴン算出（geo_paths.get_platform_extension_widths）
+/// と鏡写しであり、片方だけ変えると敷地と見た目が食い違う。
+/// プラットフォームがある側では、防音壁を立てず（ホーム外縁の柵・壁はプレハブ造形が持つ）、
+/// 架線柱をホーム外縁の外側に立て、近接線路の結合描画（バラスト充填・壁省略）を無効化し、
+/// クリック判定コライダーをホーム込みの非対称幅にする。
 ///
 /// 電化（wire / pole / beam の配置）はマスターデータの wire_spacing で制御する
 /// （null または 0 以下なら非電化としてスキップ）。
@@ -190,13 +192,19 @@ public class TrackPath : IPathMeshGenerator
     }
 
     /// <summary>
-    /// パスの platform_side（内側/外側/両側）と都市の通行方向（CityInfoStore.TrafficHand）から、
-    /// プラットフォームの左右の張り出し幅(m)を解決する。左右はスプライン進行方向
-    /// （start→end。right = Cross(up, forward)）基準。
+    /// パスの platform_side（内側/外側/両側）・都市の通行方向（CityInfoStore.TrafficHand）・
+    /// 線路の走行方向（travel_direction）から、プラットフォームの左右の張り出し幅(m)を解決する。
+    /// 左右はスプライン進行方向（start→end。right = Cross(up, forward)）基準。
     ///
     /// 「内側」とは複線（一方通行の単線線路2本）における相手線路側のことで、
-    /// 左側通行では相手線路が進行方向の右側に来るため 内側=右、右側通行では 内側=左。
+    /// 左側通行では相手線路が走行方向の右側に来るため 内側=走行方向右、右側通行では 内側=走行方向左。
     /// 上下線の両方に内側を指定すると線路間にホームが向き合う島式ホームになる。
+    ///
+    /// 内側/外側は走行方向基準の概念なので、走行フレームで解決した左右を幾何フレーム
+    /// （スプライン進行方向）へ変換する。DIR_BACKWARD の線路は幾何の end→start 方向へ
+    /// 走行するため左右が反転する（複線の上下線は幾何方向が同じで走行方向だけ逆のため、
+    /// 反転しないと両線のホームが同じ側に出てしまう）。双方向（DIR_BOTH）の単線は
+    /// 敷設方向に運行上の意味がないため、幾何方向をそのまま走行方向とみなす。
     ///
     /// この解決ロジックはバックエンドの敷地ポリゴン算出
     /// （geo_paths.get_platform_extension_widths）の鏡写し。片方だけ変えると
@@ -218,6 +226,7 @@ public class TrackPath : IPathMeshGenerator
 
         bool insideIsRight = CityInfoStore.TrafficHand == Constants.TRAFFIC_HAND_LEFT;
         bool platformIsRight = (side == Constants.PLATFORM_SIDE_INSIDE) == insideIsRight;
+        if (pathData.travel_direction == Constants.DIR_BACKWARD) platformIsRight = !platformIsRight;
         if (platformIsRight) rightWidth = platformWidth;
         else leftWidth = platformWidth;
     }
@@ -237,8 +246,8 @@ public class TrackPath : IPathMeshGenerator
         for (int i = 0; i < n; i++)
         {
             covered[i] = false;
-            // 壁の物理ブロックも解除する。プラットフォーム側の壁はホームの外縁のさらに外に
-            // 立つため、道床基準の壁ゾーンで判定したブロックは位置が合わない。
+            // プラットフォーム側は壁自体を立てないため壁ブロックは描画に影響しないが、
+            // コリドー情報の整合を保つために解除しておく。
             wallBlocked[i] = false;
             fillTo[i] = float.NaN;
             extent[i] = corridor.OwnHalfWidth;
@@ -338,18 +347,24 @@ public class TrackPath : IPathMeshGenerator
         // 防音壁: 道路と同じ「右側用パーツ」規約（左側はXミラー）で道床の外側に立てる。
         // 近接線路と結合している側は、線路間に壁を立てないよう結合区間を区間クリップで省略する
         // （分岐などで間隔が開き結合が解けた区間では壁が復活する）。
-        // プラットフォームがある側では、壁はホームの外縁のさらに外側に立てる。
+        // プラットフォームがある側には壁を立てない（乗降空間を防音壁で塞がないため。
+        // ホーム外縁の柵・壁が必要ならプレハブ造形が持つ）。ホームの無い側は通常どおり立てる。
         if (wallWidth > 0f)
         {
-            float wallCenterOffsetLeft = (width * 0.5f) + platformLeft + (wallWidth * 0.5f);
-            float wallCenterOffsetRight = (width * 0.5f) + platformRight + (wallWidth * 0.5f);
-            foreach (var range in GetWallPercentRanges(corridor, leftSide: true))
+            float wallCenterOffset = (width * 0.5f) + (wallWidth * 0.5f);
+            if (platformLeft <= 0f)
             {
-                RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, -wallCenterOffsetLeft, RoadPartHeights.WALL_ABOVE_SPLINE, true, $"{typeBase}/wall", clipFrom: range.From, clipTo: range.To);
+                foreach (var range in GetWallPercentRanges(corridor, leftSide: true))
+                {
+                    RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, -wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, true, $"{typeBase}/wall", clipFrom: range.From, clipTo: range.To);
+                }
             }
-            foreach (var range in GetWallPercentRanges(corridor, leftSide: false))
+            if (platformRight <= 0f)
             {
-                RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, wallCenterOffsetRight, RoadPartHeights.WALL_ABOVE_SPLINE, false, $"{typeBase}/wall", clipFrom: range.From, clipTo: range.To);
+                foreach (var range in GetWallPercentRanges(corridor, leftSide: false))
+                {
+                    RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, false, $"{typeBase}/wall", clipFrom: range.From, clipTo: range.To);
+                }
             }
         }
 

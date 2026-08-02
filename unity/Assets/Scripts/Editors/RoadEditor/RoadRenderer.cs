@@ -26,6 +26,7 @@ public class RoadRenderer : MonoBehaviour
     private bool lastIsValid;
     private int lastPlatformSide;
     private float[] lastLateralOffsets;
+    private int[] lastTravelDirections;
     private bool hasPreviewState = false;
 
     /// <summary>
@@ -68,10 +69,14 @@ public class RoadRenderer : MonoBehaviour
     /// lateralOffsets は複合パス(軌道複線)の各線の横オフセット(m。敷設方向右が正)。
     /// null/空なら受け取った点列を中心線とする単一パスとして描き、要素があれば
     /// 中心線を各オフセットで平行移動した位置に1本ずつ(=複線なら2本)プレビューを生成する。
+    /// travelDirections は各線の進行方向(Constants.DIR_*。lateralOffsets とindex対応)。
+    /// 駅バリアントのホーム設置側の解決(TrackPath.ResolvePlatformExtents)が走行方向を
+    /// 参照するため、確定後と同じ側にホームを張り出させるのに必要。要素が無い線は
+    /// DIR_BOTH(双方向)として扱う。
     /// 確定時にUI側が平行な単線パス群へ展開して敷設するのと同じ見た目にするための機構で、
     /// 敷設済み線路同士の結合描画(TrackAdjacency)はプレビューには適用されない。
     /// </summary>
-    public void UpdateRoadPreview(List<Vector3> subdividePoints, int pathType, int pathSubtype, bool curved = true, bool isValid = true, int platformSide = Constants.PLATFORM_SIDE_OUTSIDE, float[] lateralOffsets = null)
+    public void UpdateRoadPreview(List<Vector3> subdividePoints, int pathType, int pathSubtype, bool curved = true, bool isValid = true, int platformSide = Constants.PLATFORM_SIDE_OUTSIDE, float[] lateralOffsets = null, int[] travelDirections = null)
     {
         if (previewMeshFilter == null || previewMeshRenderer == null) return;
 
@@ -89,6 +94,7 @@ public class RoadRenderer : MonoBehaviour
             lastCurved == curved && lastIsValid == isValid &&
             lastPlatformSide == platformSide &&
             OffsetsApproximatelyEqual(lastLateralOffsets, lateralOffsets) &&
+            IntArraysEqual(lastTravelDirections, travelDirections) &&
             PointsApproximatelyEqual(lastPreviewPoints, subdividePoints))
         {
             return;
@@ -112,7 +118,7 @@ public class RoadRenderer : MonoBehaviour
         if (lateralOffsets == null || lateralOffsets.Length == 0)
         {
             // 単一パス: 受け取った点列をそのまま中心線として1本生成する
-            GenerateComponentPreview(subdividePoints, pathType, pathSubtype, curved, platformSide, activeMaterial, null);
+            GenerateComponentPreview(subdividePoints, pathType, pathSubtype, curved, platformSide, Constants.DIR_BOTH, activeMaterial, null);
         }
         else
         {
@@ -121,10 +127,12 @@ public class RoadRenderer : MonoBehaviour
             GameObject container = new GameObject("RoadPreviewComponents");
             container.transform.SetParent(previewMeshFilter.transform, false);
             currentPreviewObject = container;
-            foreach (float lateral in lateralOffsets)
+            for (int i = 0; i < lateralOffsets.Length; i++)
             {
-                List<Vector3> offsetPoints = OffsetPolylineLateral(subdividePoints, lateral);
-                GenerateComponentPreview(offsetPoints, pathType, pathSubtype, curved, platformSide, activeMaterial, container);
+                List<Vector3> offsetPoints = OffsetPolylineLateral(subdividePoints, lateralOffsets[i]);
+                int travelDirection = (travelDirections != null && i < travelDirections.Length)
+                    ? travelDirections[i] : Constants.DIR_BOTH;
+                GenerateComponentPreview(offsetPoints, pathType, pathSubtype, curved, platformSide, travelDirection, activeMaterial, container);
             }
         }
 
@@ -138,6 +146,7 @@ public class RoadRenderer : MonoBehaviour
         lastIsValid = isValid;
         lastPlatformSide = platformSide;
         lastLateralOffsets = lateralOffsets != null ? (float[])lateralOffsets.Clone() : null;
+        lastTravelDirections = travelDirections != null ? (int[])travelDirections.Clone() : null;
         hasPreviewState = true;
     }
 
@@ -146,8 +155,10 @@ public class RoadRenderer : MonoBehaviour
     /// parent=null なら単一パスとして currentPreviewObject / previewMeshFilter に直接設定し、
     /// parent が指定されていれば複合パスの1本としてその配下にぶら下げる。
     /// PathMeshFactory へは実パスと同じ経路で仮の PathSummary を渡す。
+    /// travelDirection(Constants.DIR_*)も仮 PathSummary に載せるため、駅バリアントの
+    /// ホーム設置側の解決と一方通行線路の進行方向矢印が確定後と同じ見た目になる。
     /// </summary>
-    private void GenerateComponentPreview(List<Vector3> componentPoints, int pathType, int pathSubtype, bool curved, int platformSide, Material activeMaterial, GameObject parent)
+    private void GenerateComponentPreview(List<Vector3> componentPoints, int pathType, int pathSubtype, bool curved, int platformSide, int travelDirection, Material activeMaterial, GameObject parent)
     {
         Vector3 startPos = componentPoints[0];
         Vector3 endPos = componentPoints[componentPoints.Count - 1];
@@ -175,6 +186,7 @@ public class RoadRenderer : MonoBehaviour
             waypoints = waypointsList,
             curved = curved,
             platform_side = platformSide,
+            travel_direction = travelDirection,
             start_point = new List<object> { (object)startPos.x, (object)startRelY, (object)startPos.z },
             end_point = new List<object> { (object)endPos.x, (object)endRelY, (object)endPos.z }
         };
@@ -315,6 +327,22 @@ public class RoadRenderer : MonoBehaviour
         for (int i = 0; i < lenA; i++)
         {
             if (Mathf.Abs(a[i] - b[i]) > 1e-4f) return false;
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// 2つのint配列(進行方向列)が同一かどうかを判定する（プレビュー再生成の重複判定用）。
+    /// null と空配列はどちらも「指定なし」を意味するため同一とみなす。
+    /// </summary>
+    private static bool IntArraysEqual(int[] a, int[] b)
+    {
+        int lenA = a?.Length ?? 0;
+        int lenB = b?.Length ?? 0;
+        if (lenA != lenB) return false;
+        for (int i = 0; i < lenA; i++)
+        {
+            if (a[i] != b[i]) return false;
         }
         return true;
     }

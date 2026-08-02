@@ -36,6 +36,7 @@ import { GridSettingsPanel } from "./GridSettingsPanel";
 import type { GridDisplayMode } from "./GridSettingsPanel";
 import { isInfraPathType } from "../../local-constants";
 import {
+  DIR_BOTH,
   PLATFORM_SIDE_OUTSIDE,
   PLATFORM_SIDE_INSIDE,
   PLATFORM_SIDE_BOTH,
@@ -537,9 +538,13 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
               path_variant: pathConstruction.unityPathVariant,
               path_id: editPathId ?? null,
               // 角度設定モードからの復帰でSTATE_EDIT_PATHを再送する際、軌道複線の
-              // 平行プレビューが単線に戻らないようオフセット列も渡す(無指定は空リセット扱い)
+              // 平行プレビューが単線に戻らないようオフセット列・進行方向列も渡す
+              // (無指定は空リセット扱い)
               lateral_offsets: pathConstruction.railComponents
                 ? pathConstruction.railComponents.map((c) => c.lateral_offset ?? 0)
+                : [],
+              travel_directions: pathConstruction.railComponents
+                ? pathConstruction.railComponents.map((c) => c.travel_direction ?? DIR_BOTH)
                 : [],
             }}
             onStartSetAngleMode={handleStartSetAngleMode}

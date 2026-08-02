@@ -332,9 +332,10 @@ public class IpcStateCoordinator : MonoBehaviour
         {
             // IPCパラメータからpath_type / path_variant / path_idを読み取って設定する
             int? pathId = null;
-            // 複合パス(軌道複線)の各線横オフセット。paramsに無ければ単一パス(空)へ必ず戻す
+            // 複合パス(軌道複線)の各線横オフセット・進行方向。paramsに無ければ単一パス(空)へ必ず戻す
             // (前回の敷設セッションのオフセットが残ると道路等でも複線プレビューされてしまう)。
             float[] lateralOffsets = System.Array.Empty<float>();
+            int[] travelDirections = System.Array.Empty<int>();
             if (ipcParams != null)
             {
                 if (ipcParams.TryGetValue("path_id", out object pidObj) && pidObj != null)
@@ -362,15 +363,20 @@ public class IpcStateCoordinator : MonoBehaviour
                     roadPlanManager.PlatformSide = Convert.ToInt32(psObj);
                     Debug.Log($"IpcStateCoordinator: platform_side = {roadPlanManager.PlatformSide}");
                 }
-                // 複合パス(軌道複線)の各線横オフセット。敷設モード初期化時の初期値として渡す
-                // (以後の線路数変更は edit_path:change_lateral_offsets で逐次反映される)。
+                // 複合パス(軌道複線)の各線横オフセット・進行方向。敷設モード初期化時の初期値として渡す
+                // (以後の線路数・進行方向の変更は edit_path:change_lateral_offsets で逐次反映される)。
                 if (ipcParams.TryGetValue("lateral_offsets", out object loObj) && loObj != null)
                 {
                     lateralOffsets = ReadFloatArray(loObj);
                     Debug.Log($"IpcStateCoordinator: lateral_offsets = {lateralOffsets.Length}本");
                 }
+                if (ipcParams.TryGetValue("travel_directions", out object tdObj) && tdObj != null)
+                {
+                    travelDirections = ReadIntArray(tdObj);
+                }
             }
             roadPlanManager.LateralOffsets = lateralOffsets;
+            roadPlanManager.TravelDirections = travelDirections;
 
             roadPlanManager.InitializeRoadPlacement(pathId);
         }

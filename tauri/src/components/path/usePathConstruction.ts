@@ -373,6 +373,20 @@ export function usePathConstruction(
   }, [masterData, pathId, trackCount, trackSpacingDelta]);
 
   /**
+   * Unityの3Dプレビューへ渡す複合パス(軌道複線)の各線の進行方向(DIR_*)を求める。
+   * lateralOffsetsForVariant と同じ条件で判定し、非空になる場合は同じ本数・同じ並びの
+   * trackDirections を返す。駅バリアントのプレビューでホーム設置側の解決
+   * (TrackPath.ResolvePlatformExtents)が走行方向を参照するため、オフセット列と対で渡す。
+   */
+  const travelDirectionsForVariant = useCallback((variantId: number): number[] => {
+    const data = masterData?.paths?.[variantId];
+    if (pathId != null || !data || !isRailType(data.type) || data.type === PATH_ROPEWAY) {
+      return [];
+    }
+    return trackDirections;
+  }, [masterData, pathId, trackDirections]);
+
+  /**
    * バリアントを選び、Unity を敷設モード(STATE_EDIT_PATH)に遷移させる。
    * 道路・インフラは選択コンポーネントから直接呼ばれ、軌道は
    * 鉄道種別/track_type/電化の解決結果から下の useEffect が呼ぶ。
@@ -396,13 +410,14 @@ export function usePathConstruction(
       // 駅パスのホーム設置側の初期値。敷設モード初期化時にUnityへ渡し、
       // 以後の切り替えは下の useEffect が edit_path:change_platform_side で逐次反映する。
       platform_side: platformSide,
-      // 軌道複線の各線横オフセットの初期値。3Dプレビューを平行N本で描かせる。
-      // 以後の線路数変更は下の useEffect が edit_path:change_lateral_offsets で逐次反映する。
+      // 軌道複線の各線横オフセット・進行方向の初期値。3Dプレビューを平行N本で描かせる。
+      // 以後の線路数・進行方向の変更は下の useEffect が edit_path:change_lateral_offsets で逐次反映する。
       lateral_offsets: lateralOffsetsForVariant(variantId),
+      travel_directions: travelDirectionsForVariant(variantId),
     }).catch((err) => {
       console.error("[usePathConstruction] sendChangeState failed:", err);
     });
-  }, [masterData, pathId, platformSide, lateralOffsetsForVariant]);
+  }, [masterData, pathId, platformSide, lateralOffsetsForVariant, travelDirectionsForVariant]);
 
   /**
    * 軌道: 鉄道種別/track_type/電化 が変わったら単線バリアントを解決して敷設モードを更新する。
@@ -591,10 +606,11 @@ export function usePathConstruction(
       path_id: pathId ?? null,
       platform_side: platformSide,
       lateral_offsets: lateralOffsetsForVariant(selectedVariant, nextSpacingDelta),
+      travel_directions: travelDirectionsForVariant(selectedVariant),
     }).catch((err) => {
       console.error("[usePathConstruction] sendChangeState (continue) failed:", err);
     });
-  }, [selectedVariant, masterData, pathId, platformSide, trackSpacingDelta, lateralOffsetsForVariant]);
+  }, [selectedVariant, masterData, pathId, platformSide, trackSpacingDelta, lateralOffsetsForVariant, travelDirectionsForVariant]);
 
   /**
    * 現在のパス形状をバックエンドに送信して確定する。
@@ -808,17 +824,21 @@ export function usePathConstruction(
     return () => controller.abort();
   }, [apiBaseUrl]);
 
-  /* ---- 軌道複線の横オフセット列の変更をUnityへ逐次通知 ---- */
-  // 線路数(trackCount)の変更は配置中ノードを保つため Unity 敷設モードを再初期化しない。
-  // そのため STATE_EDIT_PATH の初期値とは別に、railComponents のオフセット列が変わる
-  // たび change_lateral_offsets を送り、3Dプレビューの平行本数を追従させる。
+  /* ---- 軌道複線の横オフセット列・進行方向列の変更をUnityへ逐次通知 ---- */
+  // 線路数(trackCount)・進行方向の変更は配置中ノードを保つため Unity 敷設モードを再初期化しない。
+  // そのため STATE_EDIT_PATH の初期値とは別に、railComponents のオフセット列・進行方向列が
+  // 変わるたび change_lateral_offsets を送り、3Dプレビュー(平行本数・ホーム設置側・
+  // 進行方向矢印)を追従させる。
   // 非軌道(railComponents=null)は空配列で単一プレビューへ戻す(同値はUnity側が無視する)。
   useEffect(() => {
     if (selectedVariant === null) return;
     const offsets = railComponents
       ? railComponents.map((c) => c.lateral_offset ?? 0)
       : [];
-    sendEditPathChangeLateralOffsets(offsets).catch((err) => {
+    const directions = railComponents
+      ? railComponents.map((c) => c.travel_direction ?? DIR_BOTH)
+      : [];
+    sendEditPathChangeLateralOffsets(offsets, directions).catch((err) => {
       console.error("[usePathConstruction] sendEditPathChangeLateralOffsets failed:", err);
     });
   }, [railComponents, selectedVariant]);

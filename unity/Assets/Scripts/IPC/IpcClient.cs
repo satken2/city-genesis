@@ -56,9 +56,10 @@ public class IpcClient : MonoBehaviour
     // 地形追従の個別設定(-1=未設定/0=非追従/1=追従)の変更。UIパネルのトグルを受けて、
     // 敷設中プレビューの地形追従・トンネル可視化を切り替えるために使用する。
     public event Action<int> OnEditPathSetFollowTerrain;
-    // 複合パス(軌道複線)の各線横オフセット(m)の変更。UIパネルの線路数変更を受けて、
-    // 敷設中プレビューの平行本数を切り替えるために使用する。空配列=単一パス。
-    public event Action<float[]> OnEditPathChangeLateralOffsets;
+    // 複合パス(軌道複線)の各線横オフセット(m)と進行方向(DIR_*)の変更。UIパネルの
+    // 線路数・進行方向の変更を受けて、敷設中プレビューの平行本数・ホーム設置側・
+    // 進行方向矢印を切り替えるために使用する。両配列はindex対応。空配列=単一パス。
+    public event Action<float[], int[]> OnEditPathChangeLateralOffsets;
     public event Action OnEditResourceFinish;
     public event Action OnEditTransitFinish;
     // プロップ配置。change_settings は (rotation?, scale?, density?, seed?) を辞書で渡す。
@@ -297,8 +298,9 @@ public class IpcClient : MonoBehaviour
                 case "edit_path:change_lateral_offsets":
                     {
                         float[] lateralOffsets = GetParamFloat1D(payload, "lateral_offsets") ?? System.Array.Empty<float>();
+                        int[] travelDirections = GetParamInt1D(payload, "travel_directions") ?? System.Array.Empty<int>();
                         Debug.Log($"IpcClient: edit_path:change_lateral_offsets -> count={lateralOffsets.Length}");
-                        OnEditPathChangeLateralOffsets?.Invoke(lateralOffsets);
+                        OnEditPathChangeLateralOffsets?.Invoke(lateralOffsets, travelDirections);
                     }
                     break;
 
@@ -1213,6 +1215,42 @@ public class IpcClient : MonoBehaviour
                 for (int i = 0; i < jArr.Count; i++)
                 {
                     result[i] = (float)jArr[i];
+                }
+                return result;
+            }
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// ペイロードのparamsから1次元int配列を取得する。
+    /// JObject と Dictionary&lt;string, object&gt; の両方に対応する。
+    /// </summary>
+    private static int[] GetParamInt1D(Dictionary<string, object> payload, string key)
+    {
+        if (payload.TryGetValue("params", out object paramsObj))
+        {
+            Newtonsoft.Json.Linq.JArray jArr = null;
+
+            if (paramsObj is Newtonsoft.Json.Linq.JObject jParams
+                && jParams.TryGetValue(key, out var jVal)
+                && jVal is Newtonsoft.Json.Linq.JArray arr)
+            {
+                jArr = arr;
+            }
+            else if (paramsObj is Dictionary<string, object> @params
+                && @params.TryGetValue(key, out object val)
+                && val is Newtonsoft.Json.Linq.JArray arr2)
+            {
+                jArr = arr2;
+            }
+
+            if (jArr != null)
+            {
+                var result = new int[jArr.Count];
+                for (int i = 0; i < jArr.Count; i++)
+                {
+                    result[i] = (int)jArr[i];
                 }
                 return result;
             }
