@@ -1,0 +1,105 @@
+/**
+ * 建築規制入力フィールド群(RestrictionFields)のスタイル
+ *
+ * 土地区画パネルと地区パネルの双方から使う共有コンポーネントのため、
+ * 各パネルのCSSではなくコンポーネント側に置く。
+ * (パネルはウィンドウごとに遅延ロードされ、他パネルのCSSは読み込まれない)
+ */
+
+.restriction-label--disabled {
+  opacity: 0.45;
+}
+
+.restriction-fields {
+  margin-top: 4px;
+}
+
+/**
+ * 数値入力と右側の単位ラベルを横並びにする
+ */
+.restriction-input-with-suffix {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.restriction-input-unit {
+  font-size: 0.78rem;
+  color: #93a9c0;
+  white-space: nowrap;
+  line-height: 22px;
+}
+
+.restriction-input {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  color: #e2eaf2;
+  font-size: 0.8rem;
+  padding: 2px 4px;
+  line-height: 18px;
+}
+
+/**
+ * 3桁程度の数値入力用に幅を抑える
+ */
+.restriction-input--narrow {
+  width: 3rem;
+  min-width: 3rem;
+  max-width: 3rem;
+  box-sizing: border-box;
+  text-align: right;
+  /* スピンボタンを隠して幅を確保し、3桁程度の入力に合わせる */
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.restriction-input--narrow::-webkit-outer-spin-button,
+.restriction-input--narrow::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.restriction-input:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.restriction-input:focus:not(:disabled) {
+  outline: none;
+  border-color: rgba(99, 179, 237, 0.6);
+}
+
+/* === 保存ボタン行 === */
+
+.restriction-save-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.restriction-save-error {
+  color: #fc8181;
+  font-size: 0.76rem;
+}
+
+.restriction-save-btn {
+  padding: 4px 14px;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  background: rgba(34, 197, 94, 0.18);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  color: #86efac;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.restriction-save-btn:hover:not(:disabled) {
+  background: rgba(34, 197, 94, 0.28);
+}
+
+.restriction-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

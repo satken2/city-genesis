@@ -10,8 +10,12 @@ using GeneratedModels;
 /// 短命オブジェクトのため、BaseApiDataManager のセル単位ロードには載せず、PathManager が既に
 /// ロード済みの pathDataCache を読んで独立に動く。
 ///
-/// 挙動: 描画範囲(カメラ注視点+半径)の境界から交通量に応じてスポーン → 交差点で交差先道路の
-/// 交通量に応じて確率的に分岐(travel_direction を尊重) → 範囲外でデスポーン。
+/// 挙動: 描画範囲(カメラ注視点+半径)内の各パスに「目標台数 = 交通量 × 範囲内の長さ × 密度係数」を
+/// 定め、不足分をパス上のランダム地点(沿道の建物から出てきた車)へ確率的に補充する。
+/// 交差点では交差先道路の交通量に応じて確率的に分岐(travel_direction を尊重)し、乗り換え先が
+/// 目標超過なら超過度に応じた確率で「沿道の建物に到着した」とみなしてデスポーンする。
+/// これにより各パスの車密度が path_traffic に比例した水準へ自己調整され、交通量の少ない道路に
+/// 車が滞留し続けることがない。範囲外へ出た車もデスポーンする。
 /// 信号待ち・当たり判定は考慮しない。当面は単純な箱で描画(VehicleModelResolver 参照)。
 /// </summary>
 public class VehicleManager : MonoBehaviour
@@ -27,12 +31,16 @@ public class VehicleManager : MonoBehaviour
     [SerializeField] private float despawnMargin = 80f;
 
     [Header("スポーン/密度")]
-    [Tooltip("path_traffic 値 → 1秒あたり期待スポーン数への変換係数。実データのスケールに応じて調整。")]
-    [SerializeField] private float spawnRateK = 0.02f;
+    [Tooltip("path_traffic 値 → 目標密度[台/m]への変換係数。目標台数 = 交通量 × 範囲内の長さ × この値。実データのスケールに応じて調整。")]
+    [SerializeField] private float trafficDensityK = 0.002f;
+    [Tooltip("目標台数への不足分を1秒あたりこの割合で補充する(値が大きいほど速く適正密度に達する)。")]
+    [SerializeField] private float spawnFillRate = 1.0f;
+    [Tooltip("目標超過パスへ乗り換えた車が沿道到着(途中降車)する確率の強さ。0=無効。")]
+    [SerializeField] private float arrivalDespawnStrength = 1.0f;
     [Tooltip("同時に存在できる車の最大数(全体クランプ)。")]
     [SerializeField] private int maxActiveVehicles = 300;
-    [Tooltip("流入パスの再スキャン間隔[秒]。")]
-    [SerializeField] private float entryScanInterval = 0.5f;
+    [Tooltip("範囲内パスの再スキャン間隔[秒]。")]
+    [SerializeField] private float rangeScanInterval = 0.5f;
 
     [Header("走行")]
     [Tooltip("基準速度[m/s]。車種係数と個体ばらつきが乗る。")]
@@ -51,15 +59,21 @@ public class VehicleManager : MonoBehaviour
     private readonly Dictionary<string, Queue<GameObject>> pool = new Dictionary<string, Queue<GameObject>>();
     private Transform container;
 
-    // 流入パス(範囲境界を跨ぐ道路)のキャッシュ。
-    private struct EntryPath
+    // 範囲内パス(描画円と交わる走行可能道路)のキャッシュ。sIn/sOut は円内区間の始点距離[m]。
+    private struct RangePath
     {
         public int pathId;
-        public bool forward;   // 進行向き(true=start→end)
-        public float startS;   // スポーン始点距離[m]
+        public float sIn;
+        public float sOut;
     }
-    private readonly List<EntryPath> entryPaths = new List<EntryPath>();
-    private float entryScanTimer;
+    private readonly List<RangePath> rangePaths = new List<RangePath>();
+    // 範囲内パスのID集合。交通量0で目標を持たないパスも含む(途中降車判定の対象識別に使う)。
+    private readonly HashSet<int> rangePathIds = new HashSet<int>();
+    // (パス, 車種) → 目標台数。スキャンごとに再構築。キーは PathTypeKey。
+    private readonly Dictionary<long, float> targetByPathType = new Dictionary<long, float>();
+    // (パス, 車種) → 現在の走行台数。スポーン/乗り換え/デスポーンで増減し、スキャンとは独立に維持。
+    private readonly Dictionary<long, int> countByPathType = new Dictionary<long, int>();
+    private float rangeScanTimer;
 
     // path_traffic をリフレクションで読むためのフィールド情報(スキーマ未更新でも落ちないため)。
     private static readonly FieldInfo TrafficField = typeof(PathSummary).GetField("path_traffic");
@@ -72,8 +86,6 @@ public class VehicleManager : MonoBehaviour
         { Constants.VEHICLE_BUS, 0.8f },
         { Constants.VEHICLE_COMMERCIAL, 0.9f },
     };
-
-    private const float TrafficEpsilon = 0.01f; // 交通量0の道路も分岐候補に残すための微小重み。
 
     private void Awake()
     {
@@ -103,7 +115,7 @@ public class VehicleManager : MonoBehaviour
 
         Vector3 center = GetRangeCenter();
 
-        RefreshEntryPathsIfNeeded(dt, center);
+        RefreshRangePathsIfNeeded(dt, center);
         SpawnTick(dt);
         MoveAndDespawn(dt, center);
     }
@@ -119,89 +131,82 @@ public class VehicleManager : MonoBehaviour
         return Vector3.zero;
     }
 
-    // ---- 流入パスのスキャン ------------------------------------------------
+    // ---- 範囲内パスのスキャン ----------------------------------------------
 
-    private void RefreshEntryPathsIfNeeded(float dt, Vector3 center)
+    private void RefreshRangePathsIfNeeded(float dt, Vector3 center)
     {
-        entryScanTimer -= dt;
-        if (entryScanTimer > 0f) return;
-        entryScanTimer = entryScanInterval;
+        rangeScanTimer -= dt;
+        if (rangeScanTimer > 0f) return;
+        rangeScanTimer = rangeScanInterval;
 
-        entryPaths.Clear();
-        float r2 = renderRadius * renderRadius;
+        rangePaths.Clear();
+        rangePathIds.Clear();
+        targetByPathType.Clear();
 
         foreach (PathSummary path in pathManager.GetAllPaths())
         {
             if (path == null) continue;
             if (!IsDrivableRoad(path) || path.status != Constants.STATUS_ACTIVE) continue;
             if (!pathManager.TryGetPathPolyline(path.path_id, out var pts) || pts.Count < 2) continue;
+            if (!TryComputeInsideInterval(pts, center, out float sIn, out float sOut)) continue;
 
-            bool startInside = XZDistSqr(pts[0], center) <= r2;
-            bool endInside = XZDistSqr(pts[pts.Count - 1], center) <= r2;
-            if (startInside == endInside) continue; // 両端が同じ側 → 境界を跨がない
+            rangePathIds.Add(path.path_id);
 
-            // 外側の端から内側へ入る向きでスポーンさせる。
-            // start が外側 → forward(start→end)、end が外側 → backward(end→start)。
-            bool forward = !startInside;
-            if (!DirectionAllowsEntry(path.travel_direction, forward)) continue;
+            // 目標台数 = 交通量 × 範囲内の長さ × 密度係数。円外にはみ出す部分は目標に含めない。
+            float insideLen = sOut - sIn;
+            bool hasTarget = false;
+            foreach (int vt in Constants.ROAD_VEHICLE_KEYS)
+            {
+                float traffic = GetPathTraffic(path, vt);
+                if (traffic <= 0f) continue;
+                targetByPathType[PathTypeKey(path.path_id, vt)] = traffic * trafficDensityK * insideLen;
+                hasTarget = true;
+            }
 
-            float startS = ComputeBoundaryStartS(pts, center, forward);
-            entryPaths.Add(new EntryPath { pathId = path.path_id, forward = forward, startS = startS });
+            // 全車種で交通量0のパスは目標を持たないためスポーン対象から外す(範囲内判定には残す)。
+            if (hasTarget) rangePaths.Add(new RangePath { pathId = path.path_id, sIn = sIn, sOut = sOut });
         }
     }
 
-    // 描画範囲の境界(半径=renderRadius)とパスの交点までの距離[m]を求め、そこをスポーン始点にする。
-    // 隣接頂点の距離を線形補間して交点を近似するため、長い直線区間でも境界上にスポーンする。
-    private float ComputeBoundaryStartS(List<Vector3> pts, Vector3 center, bool forward)
+    // パス中心線のうち描画円(半径=renderRadius)の内側にある区間 [sIn, sOut] を求める。
+    // 円との交点は隣接頂点の距離を線形補間して近似する。パスが円を複数回出入りする場合は
+    // 「最初の進入点〜最後の退出点」で1区間に丸める(稀なケースであり演出用途では許容)。
+    private bool TryComputeInsideInterval(List<Vector3> pts, Vector3 center, out float sIn, out float sOut)
     {
-        var cum = BuildCumulative(pts);
         float r = renderRadius;
-        int n = pts.Count;
-
-        if (forward)
-        {
-            // start(外側)→end。外側→内側に変わる区間 [i-1, i] の交点。
-            for (int i = 1; i < n; i++)
-            {
-                float d0 = XZDist(pts[i - 1], center);
-                float d1 = XZDist(pts[i], center);
-                if (d1 <= r)
-                {
-                    float denom = d0 - d1;
-                    float u = denom > 1e-4f ? Mathf.Clamp01((d0 - r) / denom) : 0f;
-                    return cum[i - 1] + u * (cum[i] - cum[i - 1]);
-                }
-            }
-            return cum[n - 1];
-        }
-        else
-        {
-            // end(外側)→start。ジオメトリ順で内側→外側に変わる区間 [i, i+1] の交点。
-            for (int i = n - 2; i >= 0; i--)
-            {
-                float d0 = XZDist(pts[i + 1], center);
-                float d1 = XZDist(pts[i], center);
-                if (d1 <= r)
-                {
-                    float denom = d0 - d1;
-                    float u = denom > 1e-4f ? Mathf.Clamp01((r - d1) / denom) : 0f;
-                    return cum[i] + u * (cum[i + 1] - cum[i]);
-                }
-            }
-            return cum[0];
-        }
-    }
-
-    private static List<float> BuildCumulative(List<Vector3> pts)
-    {
-        var cum = new List<float>(pts.Count) { 0f };
         float acc = 0f;
+        float dPrev = XZDist(pts[0], center);
+        bool inside = dPrev <= r;
+        sIn = inside ? 0f : -1f;
+        sOut = -1f;
+
         for (int i = 1; i < pts.Count; i++)
         {
-            acc += Vector3.Distance(pts[i - 1], pts[i]);
-            cum.Add(acc);
+            float segLen = Vector3.Distance(pts[i - 1], pts[i]);
+            float dCur = XZDist(pts[i], center);
+
+            if (!inside && dCur <= r)
+            {
+                float denom = dPrev - dCur;
+                float u = denom > 1e-4f ? Mathf.Clamp01((dPrev - r) / denom) : 0f;
+                if (sIn < 0f) sIn = acc + u * segLen;
+                inside = true;
+            }
+            else if (inside && dCur > r)
+            {
+                float denom = dCur - dPrev;
+                float u = denom > 1e-4f ? Mathf.Clamp01((r - dPrev) / denom) : 0f;
+                sOut = acc + u * segLen;
+                inside = false;
+            }
+
+            acc += segLen;
+            dPrev = dCur;
         }
-        return cum;
+        if (inside) sOut = acc;
+
+        // 1m未満の掠り(円周をわずかに横切るだけ)はスポーン区間として扱わない。
+        return sIn >= 0f && sOut - sIn > 1f;
     }
 
     // ---- スポーン ----------------------------------------------------------
@@ -210,28 +215,36 @@ public class VehicleManager : MonoBehaviour
     {
         if (active.Count >= maxActiveVehicles) return;
 
-        foreach (var entry in entryPaths)
+        foreach (var rp in rangePaths)
         {
-            PathSummary path = pathManager.GetPathData(entry.pathId);
-            if (path == null) continue;
-
             foreach (int vt in Constants.ROAD_VEHICLE_KEYS)
             {
-                float traffic = GetPathTraffic(path, vt);
-                if (traffic <= 0f) continue;
+                if (!targetByPathType.TryGetValue(PathTypeKey(rp.pathId, vt), out float target)) continue;
+                int actual = countByPathType.TryGetValue(PathTypeKey(rp.pathId, vt), out int c) ? c : 0;
+                float deficit = target - actual;
+                if (deficit <= 0f) continue;
 
-                float p = traffic * spawnRateK * dt; // 期待スポーン数(この frame)
+                // 不足分を spawnFillRate[1/s] で埋める確率スポーン(フレームレート非依存のポアソン過程)。
+                float p = deficit * spawnFillRate * dt;
                 if (UnityEngine.Random.value < p)
                 {
-                    if (SpawnVehicle(entry, vt) && active.Count >= maxActiveVehicles) return;
+                    if (SpawnVehicle(rp, vt) && active.Count >= maxActiveVehicles) return;
                 }
             }
         }
     }
 
-    private bool SpawnVehicle(EntryPath entry, int vehicleType)
+    private bool SpawnVehicle(RangePath rp, int vehicleType)
     {
-        if (!pathManager.TryGetPathPolyline(entry.pathId, out var pts) || pts.Count < 2) return false;
+        PathSummary path = pathManager.GetPathData(rp.pathId);
+        if (path == null) return false;
+        if (!pathManager.TryGetPathPolyline(rp.pathId, out var pts) || pts.Count < 2) return false;
+
+        // 走行向きは travel_direction が許す向き。双方向ならランダム。
+        bool forward;
+        if (path.travel_direction == Constants.DIR_FORWARD) forward = true;
+        else if (path.travel_direction == Constants.DIR_BACKWARD) forward = false;
+        else forward = UnityEngine.Random.value < 0.5f;
 
         int seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
         int variantId = VehicleModelResolver.PickVariantId(vehicleType, seed);
@@ -243,10 +256,12 @@ public class VehicleManager : MonoBehaviour
             speed = baseSpeed * SpeedFactorFor(vehicleType) * UnityEngine.Random.Range(0.85f, 1.15f),
             go = AcquireInstance(vehicleType, variantId),
         };
-        vehicle.SetPath(entry.pathId, pts, entry.forward, entry.startS);
+        // スポーン位置は範囲内区間のランダムな地点(沿道の建物から出てきた車を表す)。
+        vehicle.SetPath(rp.pathId, pts, forward, UnityEngine.Random.Range(rp.sIn, rp.sOut));
 
         PlaceVehicle(vehicle);
         active.Add(vehicle);
+        IncrementCount(rp.pathId, vehicleType);
         return true;
     }
 
@@ -289,7 +304,8 @@ public class VehicleManager : MonoBehaviour
         v.go.transform.SetPositionAndRotation(pos, Quaternion.LookRotation(tangent, Vector3.up));
     }
 
-    // ノード到達時に次のパスへ乗り換える。乗り換え先が無ければ false(=デスポーン)。
+    // ノード到達時に次のパスへ乗り換える。false を返すとデスポーン
+    // (行き止まり・乗り換え先なし、または途中降車=沿道の建物への到着)。
     private bool TransitionAtNode(Vehicle v)
     {
         PathSummary current = pathManager.GetPathData(v.pathId);
@@ -316,31 +332,71 @@ public class VehicleManager : MonoBehaviour
 
             if (!DirectionAllowsEntry(cand.travel_direction, forward)) continue;
 
-            float weight = GetPathTraffic(cand, v.vehicleType) + TrafficEpsilon;
+            float weight = GetPathTraffic(cand, v.vehicleType);
             candidates.Add((cand, forward, weight));
             totalWeight += weight;
         }
 
         if (candidates.Count == 0) return false;
 
-        // 交通量に応じた重み付きランダムで分岐先を選ぶ。
-        float pick = UnityEngine.Random.value * totalWeight;
-        foreach (var c in candidates)
+        // 交通量のある候補があれば交通量比例の重み付きランダム、全候補が交通量0なら均等で選ぶ。
+        // 交通量0の道路に微小重みで常時混ぜると袋小路への流入が累積するため、0候補は
+        // 「他に行き先が無いとき」だけの逃げ道とする。
+        (PathSummary path, bool forward, float weight) chosen = candidates[candidates.Count - 1];
+        if (totalWeight <= 0f)
         {
-            pick -= c.weight;
-            if (pick <= 0f)
+            chosen = candidates[UnityEngine.Random.Range(0, candidates.Count)];
+        }
+        else
+        {
+            float pick = UnityEngine.Random.value * totalWeight;
+            foreach (var c in candidates)
             {
-                if (!pathManager.TryGetPathPolyline(c.path.path_id, out var pts) || pts.Count < 2) return false;
-                v.SetPath(c.path.path_id, pts, c.forward);
-                return true;
+                pick -= c.weight;
+                if (pick <= 0f) { chosen = c; break; }
             }
         }
 
-        // 数値誤差で選ばれなかった場合は最後の候補に入る。
-        var last = candidates[candidates.Count - 1];
-        if (!pathManager.TryGetPathPolyline(last.path.path_id, out var lastPts) || lastPts.Count < 2) return false;
-        v.SetPath(last.path.path_id, lastPts, last.forward);
+        // 途中降車: 乗り換え先が範囲内かつ目標台数を超過するなら、超過度に応じた確率で
+        // 「沿道の建物に到着した」とみなしてデスポーンする。目標を持たない(交通量0の)パスは
+        // 目標0として扱われ、arrivalDespawnStrength=1 ならほぼ確実に降車する。
+        // この自己調整により、下流ほど交通量が減る道路では実際に車が減っていく。
+        if (rangePathIds.Contains(chosen.path.path_id))
+        {
+            long key = PathTypeKey(chosen.path.path_id, v.vehicleType);
+            float target = targetByPathType.TryGetValue(key, out float t) ? t : 0f;
+            int actual = countByPathType.TryGetValue(key, out int c2) ? c2 : 0;
+            if (actual + 1 > target)
+            {
+                float pArrive = arrivalDespawnStrength * (1f - target / (actual + 1));
+                if (UnityEngine.Random.value < pArrive) return false;
+            }
+        }
+
+        if (!pathManager.TryGetPathPolyline(chosen.path.path_id, out var pts) || pts.Count < 2) return false;
+        DecrementCount(v.pathId, v.vehicleType);
+        v.SetPath(chosen.path.path_id, pts, chosen.forward);
+        IncrementCount(v.pathId, v.vehicleType);
         return true;
+    }
+
+    // ---- 台数カウンタ ------------------------------------------------------
+
+    // (パスID, 車種) を1つのキーに畳む。車種IDは Constants.VEHICLE_* で 256 未満。
+    private static long PathTypeKey(int pathId, int vehicleType) => ((long)pathId << 8) | (uint)vehicleType;
+
+    private void IncrementCount(int pathId, int vehicleType)
+    {
+        long key = PathTypeKey(pathId, vehicleType);
+        countByPathType[key] = countByPathType.TryGetValue(key, out int c) ? c + 1 : 1;
+    }
+
+    private void DecrementCount(int pathId, int vehicleType)
+    {
+        long key = PathTypeKey(pathId, vehicleType);
+        if (!countByPathType.TryGetValue(key, out int c)) return;
+        if (c <= 1) countByPathType.Remove(key);
+        else countByPathType[key] = c - 1;
     }
 
     // ---- プール ------------------------------------------------------------
@@ -372,6 +428,7 @@ public class VehicleManager : MonoBehaviour
             }
             queue.Enqueue(v.go);
         }
+        DecrementCount(v.pathId, v.vehicleType);
         active.RemoveAt(index);
     }
 
@@ -428,7 +485,7 @@ public class VehicleManager : MonoBehaviour
     private void OnGUI()
     {
         if (!showDebugOverlay) return;
-        GUI.Label(new Rect(10, 10, 300, 20), $"Vehicles: {active.Count} / {maxActiveVehicles}  entries: {entryPaths.Count}  hand: {(trafficHand == 0 ? "L" : "R")}");
+        GUI.Label(new Rect(10, 10, 360, 20), $"Vehicles: {active.Count} / {maxActiveVehicles}  rangePaths: {rangePaths.Count}  hand: {(trafficHand == 0 ? "L" : "R")}");
     }
 
     // GET /api/v1/city のレスポンス(必要フィールドのみ)。

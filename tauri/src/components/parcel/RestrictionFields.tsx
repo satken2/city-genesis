@@ -1,7 +1,8 @@
 /**
- * 土地区画の規制入力フィールド群コンポーネント
+ * 建築規制の入力フィールド群コンポーネント
  *
- * restriction_override=true の場合にのみ有効になる規制関連の入力フィールドをまとめたもの。
+ * 土地区画パネル(restriction_override=true のときのみ有効)と
+ * 地区パネルの双方で使う、規制関連の入力フィールドをまとめたもの。
  * - 建設可能建物種別マスク(AllowedBdMaskInput)
  * - 建ぺい率上限
  * - 容積率上限
@@ -16,6 +17,7 @@
 
 import { useTranslation } from "react-i18next";
 import { AllowedBdMaskInput } from "./AllowedBdMaskInput";
+import "./RestrictionFields.css";
 
 export type RestrictionValues = {
   allowed_bd_mask: number;
@@ -179,12 +181,12 @@ export function RestrictionFields({
         </div>
       </div>
       {onSave && (
-        <div className="parcel-save-row">
+        <div className="restriction-save-row">
           {saveError && (
-            <span className="parcel-save-error">{saveError}</span>
+            <span className="restriction-save-error">{saveError}</span>
           )}
           <button
-            className="parcel-save-btn"
+            className="restriction-save-btn"
             type="button"
             onClick={() => void onSave()}
             disabled={saving}

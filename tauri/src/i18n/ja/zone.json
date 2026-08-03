@@ -20,6 +20,8 @@
     "pinAction": "この地区を確定する",
     "unpinAction": "自動管理に戻す",
     "managementUpdateFailed": "管理状態の更新に失敗しました",
+    "restrictionPromoteNote": "建築規制を変更して保存すると、この地区は確定済みになります",
+    "restrictionUpdateFailed": "地区規制の更新に失敗しました",
     "nameLabel": "地区名",
     "namePlaceholder": "地区名を入力",
     "enterEditMode": "地区を編集",

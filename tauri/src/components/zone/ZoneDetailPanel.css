@@ -96,6 +96,14 @@
   color: #fca5a5;
 }
 
+/* 規制編集による確定地区への昇格を事前に伝える注記 */
+.zone-restriction-note {
+  margin: 0 0 8px;
+  font-size: 12px;
+  opacity: 0.75;
+  line-height: 1.5;
+}
+
 .zone-edit-name-input {
   width: 100%;
   padding: 6px 10px;

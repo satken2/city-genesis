@@ -2,12 +2,9 @@
  * 地区(Zone)詳細パネル
  *
  * window_type="zone_detail" のポップアップウィンドウで表示する専用パネル。
- * 2つのモードをサポートする:
+ * 基本情報の表示に加えて、管理状態(自動管理/確定)の切り替えと建築規制の編集を行う。
  *
- * - view: 既存地区の表示（名前と規制は読み取り専用）
- * - edit: 既存地区の編集（名前と建築規制をPATCH）
- *
- * 編集モードでは名前と建築規制のみ編集可能である。
+ * 建築規制の編集はバックエンド側で自動管理地区を確定地区へ昇格させる(auto_managed=0)。
  * 所属道路の割り当て変更はタスクバーの地区編集モード(3DビューのCtrlラジアルメニュー)で行うため、
  * このパネルでは扱わない。
  */
@@ -54,6 +51,45 @@ export function ZoneDetailPanel({
   // 管理状態(自動管理/確定)のトグル送信中フラグと失敗表示
   const [managementBusy, setManagementBusy] = useState(false);
   const [managementError, setManagementError] = useState(false);
+
+  // 建築規制の保存中フラグと失敗表示
+  const [restrictionSaving, setRestrictionSaving] = useState(false);
+  const [restrictionSaveError, setRestrictionSaveError] = useState<string | null>(null);
+
+  // 建築規制の保存。auto_managed を送らないため、バックエンド側で
+  // 自動管理地区は確定地区へ昇格する(レスポンスの zone で管理状態バッジも更新される)。
+  const saveRestrictions = async () => {
+    if (!zoneData || restrictionSaving) return;
+    setRestrictionSaving(true);
+    setRestrictionSaveError(null);
+    try {
+      const data = await fetchApi<ZoneResponse>(
+        buildApiUrl(apiBaseUrl, "/api/v1/zones/{id}", String(zoneData.zone_id)),
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            allowed_bd_mask: restrictionValues.allowed_bd_mask,
+            limit_coverage_ratio: restrictionValues.limit_coverage_ratio,
+            limit_volume_ratio: restrictionValues.limit_volume_ratio,
+            limit_height: restrictionValues.limit_height,
+          }),
+        }
+      );
+      const zone = data.zone;
+      setZoneData(zone);
+      setRestrictionValues({
+        allowed_bd_mask: zone.allowed_bd_mask ?? 0,
+        limit_coverage_ratio: zone.limit_coverage_ratio ?? null,
+        limit_volume_ratio: zone.limit_volume_ratio ?? null,
+        limit_height: zone.limit_height ?? null,
+      });
+    } catch {
+      setRestrictionSaveError(t("zone.restrictionUpdateFailed", "地区規制の更新に失敗しました"));
+    } finally {
+      setRestrictionSaving(false);
+    }
+  };
 
   // 地区のピン(確定)/ピン解除(自動管理へ戻す)。
   // auto_managed を明示指定した PATCH は、バックエンド側で名前・規制編集による
@@ -249,13 +285,25 @@ export function ZoneDetailPanel({
         />
       </section>
 
-      {/* Restriction fields — always disabled as edit mode is removed */}
+      {/* Restriction fields */}
       <RestrictionFields
         title={t("zone.restrictions", "地区規制")}
         values={restrictionValues}
         onChange={setRestrictionValues}
-        disabled={true}
-      />
+        disabled={restrictionSaving}
+        onSave={() => void saveRestrictions()}
+        saving={restrictionSaving}
+        saveError={restrictionSaveError}
+      >
+        {zoneData.auto_managed ? (
+          <p className="zone-restriction-note">
+            {t(
+              "zone.restrictionPromoteNote",
+              "建築規制を変更して保存すると、この地区は確定済みになります"
+            )}
+          </p>
+        ) : null}
+      </RestrictionFields>
 
       {templateMode && (
         <button
