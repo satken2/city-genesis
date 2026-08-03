@@ -461,6 +461,14 @@ public class RoadPlanManager : MonoBehaviour
     {
         // curve_allowed=false のバリアント(送電線など)では曲線化を拒否する
         Curved = curved && IsCurveAllowed();
+        // 曲線モードでは接続先の既存パスへ滑らかにつなぐため「直線延長」吸着を自動でONにする
+        // (端点制御点の延長方向整列がこのフラグでゲートされている)。不要ならラジアルメニューでOFFにできる。
+        if (Curved)
+        {
+            TerrainInputHandler.EnableStraightLineSnapping = true;
+        }
+        // 曲線⇔直線の切り替えで端点整列の適用有無も変わるため制御点を再計算する
+        RecomputeAllControlPoints();
         InvalidateShapeCache();
         Update3DPreview();
         EmitShapeUpdate();
@@ -493,6 +501,12 @@ public class RoadPlanManager : MonoBehaviour
         // 曲線許可バリアントは曲線モードをデフォルトとする(曲線/直線の真実源はUnity側)。
         // 既存パス編集の場合は LoadExistingPath でバックエンドの curved 値に上書きされる。
         Curved = IsCurveAllowed();
+        // 曲線モードで開始する場合は「直線延長」吸着を自動でONにする(端点制御点の
+        // 延長方向整列がこのフラグでゲートされているため。SetCurved と同じ方針)。
+        if (Curved)
+        {
+            TerrainInputHandler.EnableStraightLineSnapping = true;
+        }
         InvalidateShapeCache();
         existingElevSegCache.Clear();
         bgDirty = true;
@@ -536,6 +550,11 @@ public class RoadPlanManager : MonoBehaviour
 
                 points.Clear();
                 Curved = response.curved && IsCurveAllowed();
+                // 曲線パスの編集中も「直線延長」吸着を自動でONにする(新規敷設と同じ方針)。
+                if (Curved)
+                {
+                    TerrainInputHandler.EnableStraightLineSnapping = true;
+                }
                 // 地形追従の個別上書きを復元する（スキーマ再生成前は VALUE_NONE=未設定になり、
                 // バリアント既定に従う。height_editable=false のバリアントでは意味を持たない）。
                 PathFollowTerrainOverride = response.GetFollowTerrain();
@@ -1070,30 +1089,33 @@ public class RoadPlanManager : MonoBehaviour
     /// <summary>
     /// 始点・終点が既存パスの終端に接続している場合、その端点のベジエ制御点を
     /// 既存パスの延長線方向へ吸着させ、接続部で道路が折れないようにする（フロント側の親切設計）。
+    /// 「直線延長」吸着フラグ(TerrainInputHandler.EnableStraightLineSnapping)がONのときのみ
+    /// 適用する（曲線モードON時に自動でONになる。OFFにすれば描いた方向がそのまま使われる）。
+    /// 自動計算された接線と延長線の角度差が PATH_TANGENT_ALIGN_MAX_ANGLE_DEG を超える場合は、
+    /// 明らかに別方向へ引いたものとみなして整列せずユーザーの方向を尊重する。
     /// RecomputeAllControlPoints の自動計算結果を上書きする形で適用し、
     /// 制御点の長さ（アンカーからの距離）は自動計算値を維持して向きだけを揃える。
-    /// 延長線の向き(±)は自動計算されたハンドルと同じ側（内積が正の側）を採用し、
-    /// 新規道路が意図せず折り返さないようにする。
+    /// 確定送信される制御点にもこの結果が載るため、バックエンドに保存される形状と一致する。
     /// </summary>
     private void AlignEndpointControlsToExistingPaths()
     {
+        if (!TerrainInputHandler.EnableStraightLineSnapping) return;
         if (points.Count < 2) return;
 
         // 始点: control_out を延長方向へ吸着
         {
             var pt = points[0];
-            if (pt.control_out.HasValue
-                && TryGetExistingPathExtensionDir(pt.position, out Vector3 dir))
+            if (pt.control_out.HasValue)
             {
                 Vector3 cur = pt.control_out.Value - pt.position;
                 cur.y = 0f;
                 float len = cur.magnitude;
-                if (len > 1e-4f)
+                if (len > 1e-4f
+                    && TryGetExistingPathExtensionDir(pt.position, cur, out Vector3 aligned))
                 {
                     // 制御点のYはアンカーの相対高さ（標高）を維持する。地面へ潰すと
                     // 高架接続部で端点ハンドルが地面に落ちベジエが垂れ下がる。
                     float anchorRelY = pt.position.y - Utils.GetGroundHeight(pt.position);
-                    Vector3 aligned = Vector3.Dot(cur, dir) >= 0f ? dir : -dir;
                     Vector3 newOut = pt.position + aligned * len;
                     newOut.y = Utils.GetGroundHeight(newOut) + anchorRelY;
                     pt.control_out = newOut;
@@ -1106,17 +1128,16 @@ public class RoadPlanManager : MonoBehaviour
         {
             int last = points.Count - 1;
             var pt = points[last];
-            if (pt.control_in.HasValue
-                && TryGetExistingPathExtensionDir(pt.position, out Vector3 dir))
+            if (pt.control_in.HasValue)
             {
                 Vector3 cur = pt.control_in.Value - pt.position;
                 cur.y = 0f;
                 float len = cur.magnitude;
-                if (len > 1e-4f)
+                if (len > 1e-4f
+                    && TryGetExistingPathExtensionDir(pt.position, cur, out Vector3 aligned))
                 {
                     // 制御点のYはアンカーの相対高さ（標高）を維持する（始点側と同様）。
                     float anchorRelY = pt.position.y - Utils.GetGroundHeight(pt.position);
-                    Vector3 aligned = Vector3.Dot(cur, dir) >= 0f ? dir : -dir;
                     Vector3 newIn = pt.position + aligned * len;
                     newIn.y = Utils.GetGroundHeight(newIn) + anchorRelY;
                     pt.control_in = newIn;
@@ -1127,23 +1148,31 @@ public class RoadPlanManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 指定ワールド位置(XZ)に端点を持つ既存パスセグメントを探し、その延長方向
-    /// （セグメントの遠端 → 近端(=pos) 方向、XZ平面・正規化）を返す。
+    /// 指定ワールド位置(XZ)に端点を持つ既存パスセグメントを探し、handleDir（自動計算された
+    /// 端点ハンドル方向）に最も角度が近い延長方向（XZ平面・正規化・±の向き解決済み）を返す。
     /// 新規パスの端点が既存パスの終端に接続するとき、接続部を滑らかにするために
     /// 端点の制御点をこの方向へ吸着させる用途で使う。
-    /// pos が端点にほぼ一致するセグメントのみ対象とし（中間で交差しているだけのパスは無視）、
-    /// 網互換でない相手・編集中パス自身のセグメントは除外する
-    /// （自分の方向に吸着して折り返すのを防ぐ）。
+    ///
+    /// - pos が端点にほぼ一致するセグメントのみ候補とする（中間で交差しているだけのパスは無視）。
+    /// - 網互換でない相手・編集中パス自身のセグメントは除外する（自分の方向に吸着して折り返すのを防ぐ）。
+    /// - 候補が複数ある場合（交差点への接続など）は handleDir との角度差が最小のものを採用する。
+    /// - 最小角度差が PATH_TANGENT_ALIGN_MAX_ANGLE_DEG を超える場合は false
+    ///   （ユーザーが明らかに別方向へ引いており、整列すると描いた曲線を壊すため）。
+    /// - 延長線の向き(±)は handleDir と同じ側（内積が正の側）を採用し、意図せぬ折り返しを防ぐ。
     /// </summary>
-    private bool TryGetExistingPathExtensionDir(Vector3 pos, out Vector3 extensionDir)
+    private bool TryGetExistingPathExtensionDir(Vector3 pos, Vector3 handleDir, out Vector3 extensionDir)
     {
         extensionDir = Vector3.zero;
         if (pathManager == null) return false;
 
+        Vector3 handleFlat = new Vector3(handleDir.x, 0f, handleDir.z);
+        if (handleFlat.sqrMagnitude < 1e-8f) return false;
+        handleFlat.Normalize();
+
         var segs = pathManager.QueryNearbySegments(pos, snapThreshold);
         if (segs == null) return false;
 
-        float bestEndpointDist = snapThreshold;
+        float bestAngle = float.MaxValue;
         bool found = false;
         foreach (var seg in segs)
         {
@@ -1160,13 +1189,19 @@ public class RoadPlanManager : MonoBehaviour
             if (dA <= dB) { near = seg.a; far = seg.b; endpointDist = dA; }
             else { near = seg.b; far = seg.a; endpointDist = dB; }
 
-            // pos がセグメントの端点にほぼ一致する場合のみ延長方向として採用する
-            if (endpointDist < bestEndpointDist)
+            // pos がセグメントの端点にほぼ一致する場合のみ延長方向の候補とする
+            if (endpointDist >= snapThreshold) continue;
+
+            Vector3 dir = new Vector3(near.x - far.x, 0f, near.z - far.z);
+            if (dir.sqrMagnitude < 1e-6f) continue;
+            dir.Normalize();
+
+            Vector3 candidate = Vector3.Dot(handleFlat, dir) >= 0f ? dir : -dir;
+            float angle = Vector3.Angle(handleFlat, candidate);
+            if (angle <= Constants.PATH_TANGENT_ALIGN_MAX_ANGLE_DEG && angle < bestAngle)
             {
-                Vector3 dir = new Vector3(near.x - far.x, 0f, near.z - far.z);
-                if (dir.sqrMagnitude < 1e-6f) continue;
-                extensionDir = dir.normalized;
-                bestEndpointDist = endpointDist;
+                bestAngle = angle;
+                extensionDir = candidate;
                 found = true;
             }
         }

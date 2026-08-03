@@ -212,6 +212,7 @@ export const TRAFFIC_HAND_RIGHT: number = 1;
 export const PLATFORM_SIDE_OUTSIDE: number = 0;
 export const PLATFORM_SIDE_INSIDE: number = 1;
 export const PLATFORM_SIDE_BOTH: number = 2;
+export const PATH_TANGENT_ALIGN_MAX_ANGLE_DEG: number = 20.0;
 export const PAYMENT_MARKET: number = 0;
 export const PAYMENT_RENT: number = 1;
 export const PAYMENT_SALARY: number = 2;

@@ -217,6 +217,7 @@ public static class Constants
     public const int PLATFORM_SIDE_OUTSIDE = 0;
     public const int PLATFORM_SIDE_INSIDE = 1;
     public const int PLATFORM_SIDE_BOTH = 2;
+    public const float PATH_TANGENT_ALIGN_MAX_ANGLE_DEG = 20.0f;
     public const int PAYMENT_MARKET = 0;
     public const int PAYMENT_RENT = 1;
     public const int PAYMENT_SALARY = 2;
