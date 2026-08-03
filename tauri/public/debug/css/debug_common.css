@@ -1,7 +1,7 @@
 /*
  * debug_common.css
  * Debug画面共通スタイル（Catppuccin Mocha ベースのダークテーマ）
- * debug_props / path_build で共有する。
+ * path_build など debug/ 配下の静的HTMLで共有する。
  */
 
 :root {

@@ -279,16 +279,6 @@
     "empty_shell": false,
     "actions": []
   },
-  "debug_data": {
-    "title": "Debug Data Viewer",
-    "width": 1000,
-    "height": 700,
-    "resizable": true,
-    "policy": "single",
-    "html_path": "debug/debug_props.html",
-    "maximized": true,
-    "actions": []
-  },
   "path_build": {
     "title": "Path Construction",
     "width": 800,

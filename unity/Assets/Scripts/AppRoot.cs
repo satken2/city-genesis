@@ -11,7 +11,13 @@ public class AppRoot : MonoBehaviour
     {
         // バックグラウンド実行を許可する
         Application.runInBackground = true;        
-        // VSync破損時のGPU使用率暴走を防ぐため、ターゲットフレームレートを60に設定
+        // フレームレート上限は vSync ではなく targetFrameRate で制御する。
+        // Unity の仕様で vSyncCount が 1 以上だと targetFrameRate は無視される。
+        // 本ゲームは Unity ウィンドウが Tauri の UI ウィンドウに覆われる構成のため、
+        // occluded 状態では Present が vblank 待ちをせず vSync による抑制が消える。
+        // その状態でも GPU 使用率が暴走しないよう、vSync を明示的に無効化して
+        // targetFrameRate による上限を必ず有効にする。
+        QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = 60;
         DontDestroyOnLoad(gameObject); 
     }

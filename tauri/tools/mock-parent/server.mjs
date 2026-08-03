@@ -376,7 +376,6 @@ function renderHtml() {
             <option value="city_map">city_map</option>
             <option value="city_budget">city_budget</option>
             <option value="city_regulation">city_regulation</option>
-            <option value="debug_data">debug_data</option>
             <option value="settings">settings</option>
             <option value="citizen_detail">citizen_detail</option>
             <option value="top_page">top_page</option>

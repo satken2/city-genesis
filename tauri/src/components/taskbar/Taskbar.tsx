@@ -541,23 +541,6 @@ export function Taskbar() {
             />
           </button>
         )}
-        {debugExecution && (
-          <button
-            id="debug_data"
-            className={getBtnClassName("debug_data", "taskbar-tray-icon")}
-            type="button"
-            title={t("taskbar.trayDebugData")}
-            style={{ padding: "4px" }}
-            onClick={() => void openRegisteredWindow("debug_data")}
-          >
-            <img
-              src={iconUrl("tray_data.png")}
-              alt={t("taskbar.trayDebugData")}
-              className="taskbar-tray-icon-img"
-              draggable={false}
-            />
-          </button>
-        )}
         {TRAY_ICONS.map((icon) => (
           <button
             key={icon.id}
