@@ -44,7 +44,7 @@
     "speedUnit": "km/h",
     "unknownType": "不明",
     "buildingRegulationTitle": "建築規制",
-    "buildingRegulationDescription": "都市全体の建築規制を設定します。新設区画にはここで設定した規制が適用されます。",
+    "buildingRegulationDescription": "新しく作られる地区の建築規制の初期値を設定します。既存の地区には反映されないため、変更は地区パネルから行ってください。",
     "limitHeight": "高さ規制",
     "limitVolumeRatio": "容積率",
     "limitCoverageRatio": "建ぺい率",

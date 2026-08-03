@@ -22,6 +22,7 @@
     "managementUpdateFailed": "Failed to update the management state",
     "restrictionPromoteNote": "Saving a change to the building regulations marks this district as confirmed",
     "restrictionUpdateFailed": "Failed to update the district regulations",
+    "restrictionRequired": "Coverage ratio, floor area ratio and height cannot be empty",
     "nameLabel": "District Name",
     "namePlaceholder": "Enter district name",
     "enterEditMode": "Edit District",

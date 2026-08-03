@@ -15,6 +15,9 @@
  * - 都市全体の建築規制（高さ規制・容積率・建ぺい率）を設定する
  * - 初期値は GET /api/v1/city/regulations から取得
  * - 保存は PATCH /api/v1/city/regulations で一括更新する
+ * - ここでの設定は「これ以降に作成される地区の既定値」であり、既存の地区・土地区画には
+ *   遡及しない（既存地区の変更は地区詳細パネルから行う）
+ * - 容積率・建ぺい率は API では比率（1.0 = 100%）だが、入力欄ではパーセント表記で扱う
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -75,6 +78,33 @@ type ImmigrationRegulations = {
  * 移民規制は bool/dict 型を含むため、建築規制の数値ハンドラはこのキーのみを扱う。
  */
 type BuildingRegKey = "limit_volume_ratio" | "limit_height" | "limit_coverage_ratio";
+
+/**
+ * 入力欄でパーセント表記に変換する建築規制のキー。
+ * API は比率（容積率 30.0 = 3000%、建ぺい率 0.5 = 50%）で保持するが、
+ * 建ぺい率・容積率は日本の建築規制の慣習どおりパーセントで表示・編集する。
+ * limit_height はメートル単位なので変換対象外。
+ */
+const PERCENT_REG_KEYS = new Set<BuildingRegKey>([
+  "limit_volume_ratio",
+  "limit_coverage_ratio",
+]);
+
+/**
+ * API の値を入力欄の表示単位へ変換する。
+ * パーセント換算で 30.000000000000004 のような誤差が出ないよう小数第2位で丸める。
+ */
+function toDisplayUnit(key: BuildingRegKey, apiValue: number): number {
+  if (!PERCENT_REG_KEYS.has(key)) return apiValue;
+  return Math.round(apiValue * 100 * 100) / 100;
+}
+
+/**
+ * 入力欄の表示単位を API の値へ変換する。
+ */
+function toApiUnit(key: BuildingRegKey, displayValue: number): number {
+  return PERCENT_REG_KEYS.has(key) ? displayValue / 100 : displayValue;
+}
 
 /**
  * 編集中の制限速度を保持する型
@@ -337,19 +367,22 @@ export function CityRegulationWindow({
 
   /* ==== 建築規制変更ハンドラ ==== */
 
+  /**
+   * 入力欄の値（表示単位）を受け取り、API 単位に変換して編集中値に格納する
+   */
   const handleRegulationChange = useCallback(
     (key: BuildingRegKey, rawValue: string) => {
       const parsed = parseFloat(rawValue);
       if (isNaN(parsed) || parsed < 0) return;
-      setPendingRegulations((prev) => ({ ...prev, [key]: parsed }));
+      setPendingRegulations((prev) => ({ ...prev, [key]: toApiUnit(key, parsed) }));
     },
     [],
   );
 
   /**
-   * 建築規制の表示値を取得する
+   * 建築規制の現在値を API 単位で取得する（編集中値を優先）
    */
-  const getRegulationDisplay = useCallback(
+  const getRegulationValue = useCallback(
     (key: BuildingRegKey): number => {
       if (key in pendingRegulations) {
         return pendingRegulations[key]!;
@@ -363,14 +396,22 @@ export function CityRegulationWindow({
   );
 
   /**
+   * 建築規制の入力欄に表示する値（表示単位）を取得する
+   */
+  const getRegulationDisplay = useCallback(
+    (key: BuildingRegKey): number => toDisplayUnit(key, getRegulationValue(key)),
+    [getRegulationValue],
+  );
+
+  /**
    * 建築規制が初期値から変更されているかを判定する
    */
   const isRegulationModified = useCallback(
     (key: BuildingRegKey): boolean => {
       if (!cityRegulations) return false;
-      return getRegulationDisplay(key) !== cityRegulations[key];
+      return getRegulationValue(key) !== cityRegulations[key];
     },
-    [getRegulationDisplay, cityRegulations],
+    [getRegulationValue, cityRegulations],
   );
 
   /* ==== 移民規制ハンドラ ==== */
@@ -746,10 +787,11 @@ export function CityRegulationWindow({
                 {t("regulation.limitVolumeRatio")}
               </span>
               <div className="regulation-building-row__input-group">
+                {/* 容積率は 100% を大きく超える（例: 商業地域 3000%）ため上限を設けない */}
                 <input
                   type="number"
                   min={0}
-                  step={0.1}
+                  step={10}
                   className={[
                     "regulation-building-input",
                     isRegulationModified("limit_volume_ratio") && "regulation-building-input--modified",
@@ -780,8 +822,8 @@ export function CityRegulationWindow({
                 <input
                   type="number"
                   min={0}
-                  max={1}
-                  step={0.01}
+                  max={100}
+                  step={1}
                   className={[
                     "regulation-building-input",
                     isRegulationModified("limit_coverage_ratio") && "regulation-building-input--modified",

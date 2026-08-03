@@ -44,7 +44,7 @@
     "speedUnit": "km/h",
     "unknownType": "Unknown",
     "buildingRegulationTitle": "Building Regulations",
-    "buildingRegulationDescription": "Set city-wide building regulations. These will apply to newly created parcels.",
+    "buildingRegulationDescription": "Set the default building regulations for newly created districts. Existing districts are not affected; change those from the district panel.",
     "limitHeight": "Height Limit",
     "limitVolumeRatio": "Volume Ratio",
     "limitCoverageRatio": "Coverage Ratio",

@@ -10,8 +10,9 @@
  *
  * disabled=true の場合はすべてのフィールドが非活性になる。
  *
- * 建ぺい率・容積率は API では 0.0〜1.0 の比率で保持するが、
- * 入力欄では 100 倍したパーセント値(0〜100 相当)として表示・編集する。
+ * 建ぺい率・容積率は API では比率(1.0 = 100%)で保持するが、
+ * 入力欄では 100 倍したパーセント値として表示・編集する。
+ * 建ぺい率は 100% が上限だが、容積率は 100% を大きく超える(例: 3000%)ため上限を設けない。
  * 高さはメートル単位のまま入力し、右隣に単位ラベルを付ける。
  */
 
@@ -152,8 +153,7 @@ export function RestrictionFields({
               className="restriction-input restriction-input--narrow"
               type="number"
               min={0}
-              max={100}
-              step={0.1}
+              step={10}
               value={ratioToPercentInputString(values.limit_volume_ratio)}
               onChange={(e) => handleVolumePercentChange(e.target.value)}
               disabled={disabled}

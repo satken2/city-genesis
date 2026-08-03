@@ -58,8 +58,20 @@ export function ZoneDetailPanel({
 
   // 建築規制の保存。auto_managed を送らないため、バックエンド側で
   // 自動管理地区は確定地区へ昇格する(レスポンスの zone で管理状態バッジも更新される)。
+  // 地区の規制は「未設定」を持てない(土地区画が引き継ぐ値の元になるため)ので、
+  // 空欄のまま保存しようとした場合は送信前に弾く。
   const saveRestrictions = async () => {
     if (!zoneData || restrictionSaving) return;
+    if (
+      restrictionValues.limit_coverage_ratio == null ||
+      restrictionValues.limit_volume_ratio == null ||
+      restrictionValues.limit_height == null
+    ) {
+      setRestrictionSaveError(
+        t("zone.restrictionRequired", "建ぺい率・容積率・高さは空にできません")
+      );
+      return;
+    }
     setRestrictionSaving(true);
     setRestrictionSaveError(null);
     try {
