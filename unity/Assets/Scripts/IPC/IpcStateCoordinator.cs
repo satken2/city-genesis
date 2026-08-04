@@ -135,11 +135,6 @@ public class IpcStateCoordinator : MonoBehaviour
                 WindowUtil.BringToForeground();
                 break;
 
-            case "STATE_EDIT_STATION":
-                ApplyStateEditStation(ipcParams);
-                WindowUtil.BringToForeground();
-                break;
-
             case "STATE_EDIT_CONNECTOR":
                 // 接続点編集モード。編集開始/終了のトグルボタンを持つ AgentDetailPanel を
                 // 前面に残す必要があるため、他ステートと異なり WindowUtil.BringToForeground() は
@@ -235,13 +230,6 @@ public class IpcStateCoordinator : MonoBehaviour
         if (propPlacementManager != null)
         {
             propPlacementManager.FinishPlacement();
-        }
-
-        // 駅舎設置を終了(ゴーストを片付ける)
-        var stationPlacementManager = FindAnyObjectByType<StationPlacementManager>();
-        if (stationPlacementManager != null)
-        {
-            stationPlacementManager.FinishPlacement();
         }
 
         // 建物建設モードを終了する。
@@ -825,48 +813,6 @@ public class IpcStateCoordinator : MonoBehaviour
         propPlacementManager.InitializePlacement(placementMode, propType, rotation, scale, density, seed);
 
         Debug.Log($"IpcStateCoordinator: プロップ配置モード -> prop_type={propType}, mode={placementMode}");
-    }
-
-    /// <summary>
-    /// STATE_EDIT_STATION: 駅舎設置モード
-    /// ipcParams には UI 側で選択された駅舎モデル house_variant が含まれる。
-    /// StationPlacementManager を初期化する(無ければ動的生成)。確定送信
-    /// (PATCH /api/v1/stations/{id})は UI(Tauri)側が行い、本コーディネータはモード設定のみ担う。
-    /// </summary>
-    private void ApplyStateEditStation(Dictionary<string, object> ipcParams)
-    {
-        // InputMode: 駅舎設置プリセット(地形クリックで駅パス近傍に配置)。
-        if (InputSystemManager.Instance != null)
-        {
-            InputSystemManager.Instance.SetModePreset(InputModePreset.STATION_PLACEMENT);
-        }
-
-        // VisualMode: 計画表示。プラットフォーム(駅パス)が見える状態にしてスナップ先を確認できる。
-        if (VisualModeHandler.Instance != null)
-        {
-            VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_BOUNDARY);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_PLAN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_PLAN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
-        }
-
-        int houseVariant = 0;
-        if (ipcParams != null &&
-            ipcParams.TryGetValue("house_variant", out object hvObj) && hvObj != null)
-        {
-            houseVariant = Convert.ToInt32(hvObj);
-        }
-
-        // StationPlacementManager を初期化(無ければ動的生成)。
-        var stationPlacementManager = FindAnyObjectByType<StationPlacementManager>();
-        if (stationPlacementManager == null)
-        {
-            var go = new GameObject("StationPlacementManager");
-            stationPlacementManager = go.AddComponent<StationPlacementManager>();
-        }
-        stationPlacementManager.InitializePlacement(houseVariant);
-
-        Debug.Log($"IpcStateCoordinator: 駅舎設置モード -> house_variant={houseVariant}");
     }
 
     /// <summary>

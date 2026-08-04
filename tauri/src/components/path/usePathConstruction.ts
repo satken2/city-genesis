@@ -318,7 +318,9 @@ export function usePathConstruction(
    */
   const railComponents = useMemo((): CombinedPathComponent[] | null => {
     if (!isRail || selectedVariant === null || pathId != null) return null;
-    if (selectedVariantData?.type === PATH_ROPEWAY) return null;
+    // 複線展開するのは線路・モノレールだけ。ロープウェイ・駅舎パスなど
+    // それ以外の type は単一パス扱い。
+    if (selectedVariantData?.type === PATH_ROPEWAY || !isRailType(selectedVariantData?.type)) return null;
     return buildRailComponents(selectedVariant, trackCount, trackSpacing, trackDirections);
   }, [isRail, selectedVariant, selectedVariantData, pathId, trackCount, trackSpacing, trackDirections]);
 

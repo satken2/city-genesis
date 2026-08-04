@@ -198,20 +198,6 @@
     },
     "actions": []
   },
-  "station_detail": {
-    "title": "駅詳細",
-    "width": 460,
-    "height": 560,
-    "resizable": true,
-    "policy": "single_per_entity",
-    "entity_type": "station",
-    "layout": "right_panel",
-    "fetch": {
-      "method": "GET",
-      "path_template": "/api/v1/stations/{id}"
-    },
-    "actions": []
-  },
   "city_regulation": {
     "title": "規制",
     "width": 800,

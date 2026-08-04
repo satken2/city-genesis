@@ -5,7 +5,7 @@
 ## 基本フロー
 
 1. **イベント取得**: `InputHandler.cs`(Scripts直下ではなくこのフォルダ。シングルトン)が毎フレーム、カメラからマウス位置へRayを飛ばす。`Physics.RaycastAll` を距離順にソートし、入力モードが `MODE_NONE` のオブジェクトは**貫通**して次のヒットを採用する。
-2. **対象判定**: ヒットした GameObject の**タグ**でタイプを判定する(`BuildingObject` / `ParcelObject` / `PathObject` / `PathNode` / `ZoneObject` / `StationObject` / `SeaObject`)。地形は `Terrain` コンポーネントの有無で判定するが、**海面(Sea)は `Terrain` コンポーネントを持たないため `SeaObject` タグで代用する**(詳細は後述)。※名前プレフィックスではない。
+2. **対象判定**: ヒットした GameObject の**タグ**でタイプを判定する(`BuildingObject` / `ParcelObject` / `PathObject` / `PathNode` / `ZoneObject` / `SeaObject`)。地形は `Terrain` コンポーネントの有無で判定するが、**海面(Sea)は `Terrain` コンポーネントを持たないため `SeaObject` タグで代用する**(詳細は後述)。※名前プレフィックスではない。
 3. **地形ヒットの区画への差し替え(フォールバック)**: 最初の有効ヒットが地形(TERRAIN)で、かつ区画(PARCEL)の入力モードが `MODE_NONE` でない場合、`ParcelManager.GetParcelIdAtPoint(ヒット点)` でヒット点XZを含む区画ポリゴンを2D内外判定で探し、見つかればディスパッチ先をその区画GameObjectに差し替える。**起伏地形では区画のMeshCollider(上面はポリゴン角の頂点でしか地形をサンプルしない)が地形の下に埋まり、レイキャストでは手前の地形が必ず勝って区画を選択できないため。** 区画コライダーが地形より上に出ている平地では従来どおりレイキャストが先に区画を拾う。判定はセル逆引きインデックス(`ParcelManager.parcelIdsByCell`)＋BBOXで絞り込むため全区画走査は発生しない。
 4. **ハンドラ呼び出し**: 対象オブジェクトから `GetComponent<IInputHandler>()` でハンドラを取得し、`onClick / onRightClick / onHoverStart / onHover / onHoverEnd` を呼ぶ。引数には「そのオブジェクトタイプの現在の入力モード」が渡される。クリック/右クリック候補は `RaycastHit` ではなく「対象GameObject＋ヒット点」で保持される(上記の差し替えに対応するため。マウスアップまでに対象が破棄された場合は発火しない)。
 
@@ -28,11 +28,10 @@
 | --- | --- | --- |
 | `BuildingInputHandler.cs` | BuildingManager が建物生成時に AddComponent | `buildingId` を保持。クリックでIPC経由の詳細ウィンドウ表示など |
 | `ParcelInputHandler.cs` | ParcelManager | `parcelId` を保持 |
-| `PathInputHandler.cs` | PathManager | `pathId` を保持。地区編集モードのドラッグ割当(`onZoneDragHover/End`)も担当 |
+| `PathInputHandler.cs` | PathManager (駅舎パスの建屋コライダーには `StationHousePath` が同じ三点セットを付与) | `pathId` を保持。地区編集モードのドラッグ割当(`onZoneDragHover/End`)も担当 |
 | `NodeInputHandler.cs` | 道路編集系 | ドラッグイベント(`onDragStart/Update/End`)を持つ |
 | `TerrainInputHandler.cs` | TerrainManager が各Terrainタイル生成時に AddComponent / `InputHandler.Start` が `SeaObject` タグの海面に AddComponent | 何もない地面のクリック。道路の点配置などはここ経由。海面(Sea)も `SeaObject` タグを付与の上このハンドラで同じく処理する。**建物の直接配置**: `MODE_BUILDING_CONSTRUCTION` の地形クリック(=どの区画にも属さない地点。区画内は上記フォールバックで ParcelInputHandler へ差し替えられる)を `BuildingPlanManager.OnTerrainClickDirect` へ渡し、`edit_building:select_point` でUIへ地点を通知する(UIが矩形底面をプレビューして直接配置する) |
 | `ZoneInputHander.cs` | - | 地区クリック |
-| `StationInputHandler.cs` | StationManager が駅舎生成時に AddComponent | `stationId` を保持。通常モードのクリックで駅詳細パネル(`station_detail`)を開く。編集系プリセットでは `InputObjectType.STATION` が MODE_NONE になり無反応(駅舎は単独削除不可のためブルドーザ対象外) |
 
 - マウス位置のワールド座標は `InputHandler.posX / posZ`(地形ヒットがなければ y=0 平面との交点)。`InputSystemManager.GetMousePosition()` でも取れる。
 - **吸着フラグの真実源は `TerrainInputHandler` の static 変数群**(`EnableNodeSnapping`/`EnablePathSnapping`/`EnableGridSnapping`/`EnableRightAngleSnapping`/`EnableStraightLineSnapping`): 切り替えは3Dビュー側のCtrlラジアルメニュー(`Editors/RoadEditor/RoadEditControlMenu`)が行い、UIパネルからの`view:set_snapping`イベントは廃止済み。グリッド吸着はグリッド表示と連動(`GridOverlay`が表示切替時に自動でON/OFF)。グリッド角度設定モード中は`GridSetManager`が全フラグを退避して「ノード吸着のみON」にし、終了時に復元する。static初期値が既定値(Node=T/Path=T/他=F)で、敷設モードの出入りを跨いで値が保持される仕様。

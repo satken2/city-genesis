@@ -27,6 +27,7 @@ import { resolvePathIcon } from "../../utils/pathIcon";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import {
   PATH_STREET,
+  PATH_STATION_HOUSE,
   STATUS_SCHEDULED_CONSTRUCTION,
   STATUS_CONSTRUCTING,
   STATUS_PENDING,
@@ -37,6 +38,7 @@ import {
 } from "../../constants";
 import { InfoHeader } from "../common/InfoHeader";
 import { ZoneLink } from "../common/ZoneLink";
+import { StationInfoSection } from "./StationInfoSection";
 import { PathConditionPanel } from "./PathConditionPanel";
 import { PathTrafficPanel } from "./PathTrafficPanel";
 import { PathOperationPanel } from "./PathOperationPanel";
@@ -230,6 +232,10 @@ export function PathDetailPanel({
   /** マスターデータからパスバリアントの表示名を取得する */
   const variantName = masterData?.paths[pathData.path_variant]?.display_name;
 
+  // 駅舎パス(=駅)なら駅情報セクション(駅名変更・所属ホーム・発着路線)を表示する。
+  const isStationHouse =
+    masterData?.paths[pathData.path_variant]?.type === PATH_STATION_HOUSE;
+
   /**
    * パスの表示名はIDベースで生成する。
    * name が設定されている場合はそちらを優先する。
@@ -254,6 +260,15 @@ export function PathDetailPanel({
         apiBaseUrl={apiBaseUrl}
         onActionPerformed={() => setRefreshKey((k) => k + 1)}
       />
+
+      {isStationHouse && (
+        <StationInfoSection
+          apiBaseUrl={apiBaseUrl}
+          pathId={pathData.path_id}
+          pathName={displayName}
+          onRenamed={() => setRefreshKey((k) => k + 1)}
+        />
+      )}
 
       {(() => {
         const hasShortage = pathData.alert ? (pathData.alert & ALERT_PATH_CONSTRUCTION_SHORTAGE) !== 0 : false;

@@ -1,9 +1,8 @@
-/* 駅詳細パネル固有のスタイル。共通の体裁は AgentDetailPanel.css を共有する。 */
+/* 駅情報セクション(パス詳細パネル内)固有のスタイル。共通の体裁は AgentDetailPanel.css を共有する。 */
 
 /* ホーム・路線の1行。リンクと補足情報(長さ・状態)を左右に配置する。
    agent-detail-grid の2列レイアウトを跨ぐため、行自体は grid-column を全幅にする。 */
-.station-detail__platform-row,
-.station-detail__line-row {
+.station-info__row {
   grid-column: 1 / -1;
   display: flex;
   align-items: center;
@@ -12,21 +11,33 @@
   min-height: 26px;
 }
 
-.station-detail__platform-meta {
+.station-info__meta {
   color: #93a9c0;
   font-size: 0.76rem;
   white-space: nowrap;
 }
 
+.station-info__subtitle {
+  margin: 10px 0 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #c5d4e3;
+}
+
+.station-info__count {
+  margin-left: 6px;
+  opacity: 0.7;
+}
+
 /* ---- 駅名変更 ---- */
-.station-detail__name-display,
-.station-detail__rename {
+.station-info__name-display,
+.station-info__rename {
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
 
-.station-detail__rename-input {
+.station-info__rename-input {
   flex: 1;
   min-width: 0;
   font-size: 0.8rem;
@@ -38,11 +49,11 @@
   outline: none;
 }
 
-.station-detail__rename-input:focus {
+.station-info__rename-input:focus {
   border-color: #4ea1ff;
 }
 
-.station-detail__rename-btn {
+.station-info__rename-btn {
   font-size: 0.68rem;
   padding: 3px 8px;
   border: 1px solid rgba(255, 255, 255, 0.18);
@@ -54,16 +65,12 @@
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 
-.station-detail__rename-btn:hover:not(:disabled) {
+.station-info__rename-btn:hover:not(:disabled) {
   background: rgba(78, 161, 255, 0.16);
   border-color: #4ea1ff;
 }
 
-.station-detail__rename-btn:disabled {
+.station-info__rename-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-.station-detail__house-model {
-  color: #93a9c0;
 }

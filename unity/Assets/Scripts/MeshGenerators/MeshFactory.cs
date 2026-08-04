@@ -102,7 +102,8 @@ public interface IPathMeshGenerator
 /// PathSummary から道路(または線路等)のメッシュを生成するファクトリクラス。
 ///
 /// メッシュ生成器は path_master の model_type で切り替える:
-///   "default" → RoadPath, "track" → TrackPath, "none" → メッシュ生成なし。
+///   "default" → RoadPath, "track" → TrackPath, "station_house" → StationHousePath,
+///   "none" → メッシュ生成なし。
 /// model_type が未設定（旧マスター）の場合は path_type から推論して後方互換を保つ。
 /// </summary>
 public static class PathMeshFactory
@@ -116,6 +117,7 @@ public static class PathMeshFactory
     // model_type → 生成器のマッピング
     private static readonly RoadPath roadGenerator = new RoadPath();
     private static readonly TrackPath trackGenerator = new TrackPath();
+    private static readonly StationHousePath stationHouseGenerator = new StationHousePath();
 
     public static PathMeshResult GeneratePathMesh(GeneratedModels.PathSummary pathData, List<Vector3> points, SidewalkSetback startSidewalkSetback = default, SidewalkSetback endSidewalkSetback = default)
     {
@@ -138,6 +140,9 @@ public static class PathMeshFactory
         {
             case "track":
                 return trackGenerator.Generate(pathData, points, startSidewalkSetback, endSidewalkSetback);
+            case "station_house":
+                // 駅舎パス（連絡橋 + 両終端の建屋）。クリックは他のパスと同じ PathObject として受ける。
+                return stationHouseGenerator.Generate(pathData, points, startSidewalkSetback, endSidewalkSetback);
             case "none":
                 // メッシュ生成なし（経路探索専用パス等）
                 UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[PathMeshFactory] model_type=none: メッシュ生成スキップ (variant={pathData.path_variant})");

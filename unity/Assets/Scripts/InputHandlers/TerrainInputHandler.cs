@@ -239,15 +239,6 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
                     }
                 }
                 break;
-            case InputMode.MODE_EDIT_STATION:
-                {
-                    var stationPlacementManager = FindAnyObjectByType<StationPlacementManager>();
-                    if (stationPlacementManager != null)
-                    {
-                        stationPlacementManager.OnTerrainLeftClick(clickPosition);
-                    }
-                }
-                break;
             case InputMode.MODE_EDIT_CONNECTOR:
                 // 接続点編集モードでは地形クリックは何もしない(端子の移動はドラッグでのみ行う)
                 break;
@@ -446,15 +437,6 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
                     if (propPlacementManager != null)
                     {
                         propPlacementManager.OnTerrainHover(finalPosition);
-                    }
-                }
-                break;
-            case InputMode.MODE_EDIT_STATION:
-                {
-                    var stationPlacementManager = FindAnyObjectByType<StationPlacementManager>();
-                    if (stationPlacementManager != null)
-                    {
-                        stationPlacementManager.OnTerrainHover(finalPosition);
                     }
                 }
                 break;

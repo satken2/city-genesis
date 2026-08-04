@@ -39,7 +39,7 @@
       },
       "noStationHouse": {
         "title": "No Station Building",
-        "description": "This platform has no station building. Place one from the Station Building tab of the Track Construction panel."
+        "description": "This platform does not belong to any station. Draw a station building line across it from the Station Building tab of the Track Construction panel."
       }
     },
     "tabConstructionInfo": "Construction",
@@ -93,17 +93,7 @@
     "platformTab": "Platform",
     "houseTab": "Station Building",
     "house": {
-      "hint": "Picking a station building model enters placement mode. Click near a platform to set its position.",
-      "selectModel": "Station Building Model",
-      "selectModelPlaceholder": "-- Select a model --",
-      "noModels": "No station building models available",
-      "cancel": "Cancel",
-      "confirm": "Confirm",
-      "confirming": "Confirming...",
-      "plannedAt": "Placement planned",
-      "placePrompt": "Click near a platform to set the placement position",
-      "placed": "Station building placed.",
-      "confirmFailedUnknown": "Failed to place the station building. Please change the position and try again."
+      "hint": "Draw the station building line. Platforms crossed by the line belong to this station. Buildings are placed at both ends of the line, connected by an overhead bridge."
     }
   }
 }

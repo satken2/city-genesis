@@ -540,9 +540,6 @@ pub async fn handle_incoming_message(
         "edit_prop:update_shape" => {
             let _ = app.emit("edit_prop:update_shape", envelope.payload);
         }
-        "edit_station:update_candidate" => {
-            let _ = app.emit("edit_station:update_candidate", envelope.payload);
-        }
         "view:current_state" => {
             let _ = app.emit("view:current_state", envelope.payload);
         }

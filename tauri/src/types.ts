@@ -338,20 +338,6 @@ export type PropMasterEntry = {
 };
 
 /**
- * 駅舎モデルマスター (station_houses)
- * プレイヤーが手動で選択して駅に設置する駅舎の種別ごとの定義。
- * width / depth はフットプリント(土地占有)の寸法(m)。model はグラフィック(Unity)側で
- * 読み込む 3Dモデルのキー。未指定の場合は Unity 側がバリアントID(house_variant)から
- * 解決する(Resources/Models/Stations/{id})。
- */
-export type StationHouseMasterEntry = {
-  display_name: string;
-  width?: number;
-  depth?: number;
-  model?: string;
-};
-
-/**
  * 経済主体種別マスター (agent_types)
  */
 export type AgentTypeEntry = {
@@ -525,6 +511,13 @@ export type PathMasterEntry = {
    * 未定義・空配列はインフラ財配送網に参加しない(非電化軌道・一般道路など)。
    */
   infra_products?: number[];
+  /**
+   * 駅舎パス(type=PATH_STATION_HOUSE)の両終端に置かれる専有エリア(建屋)の寸法(m)。
+   * house_width は線と直交方向、house_depth は線に沿う方向。master.yaml の
+   * house_width / house_depth に対応する(駅舎以外のバリアントでは未定義)。
+   */
+  house_width?: number | null;
+  house_depth?: number | null;
 };
 
 /**
@@ -645,7 +638,6 @@ export type MasterData = {
   budget_categories: Record<number, BudgetCategoryEntry>;
   resource_types: Record<number, ResourceTypeEntry>;
   prop_types: Record<number, PropMasterEntry>;
-  station_houses: Record<number, StationHouseMasterEntry>;
 };
 
 /**

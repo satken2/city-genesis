@@ -1,7 +1,7 @@
 /**
  * 軌道建設パネル専用スタイル
  *
- * 鉄道種別プルダウン・タブバー(軌道 / プラットフォーム / 駅舎)・駅舎設置の候補表示のみを定義する。
+ * 鉄道種別プルダウン・タブバー(軌道 / プラットフォーム / 駅舎)のみを定義する。
  * それ以外のセクション・ボタン等は道路建設パネル(PathConstructionPanel.css)の
  * pc-* クラスをそのまま共有する。
  */
@@ -48,34 +48,4 @@
 .tc-tab.active {
   border-color: #4ea1ff;
   background: rgba(78, 161, 255, 0.18);
-}
-
-/* ---- 駅舎設置の候補表示 ---- */
-.tc-house-candidate {
-  border: 1px solid rgba(78, 161, 255, 0.4);
-  border-radius: 6px;
-  padding: 10px 12px;
-  background: rgba(78, 161, 255, 0.08);
-}
-
-.tc-house-candidate-title {
-  font-size: 0.65rem;
-  font-weight: 600;
-  color: #93a9c0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 4px;
-}
-
-.tc-house-candidate-station {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #f6fbff;
-}
-
-.tc-house-candidate-coord {
-  font-size: 0.72rem;
-  color: #c5d4e3;
-  font-family: "Consolas", "Menlo", monospace;
-  margin-top: 2px;
 }

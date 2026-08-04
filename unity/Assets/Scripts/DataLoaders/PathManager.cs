@@ -4088,6 +4088,20 @@ public class PathMasterItem
     public float? platform_width;
 
     /// <summary>
+    /// 駅舎パス(PATH_STATION_HOUSE)の両終端の専有エリア(建屋)の横幅(m)。
+    /// 終端セグメントと直交方向の寸法。null は STATION_HOUSE_DEFAULT_WIDTH 扱い。
+    /// 駅舎以外のバリアントは null。
+    /// </summary>
+    public float? house_width;
+
+    /// <summary>
+    /// 駅舎パス(PATH_STATION_HOUSE)の両終端の専有エリア(建屋)の奥行き(m)。
+    /// 終端セグメントに沿う方向の寸法。null は STATION_HOUSE_DEFAULT_DEPTH 扱い。
+    /// 駅舎以外のバリアントは null。
+    /// </summary>
+    public float? house_depth;
+
+    /// <summary>
     /// 3D描画用の高さオフセット(m)。パスの相対高さ(relY)から base_height を引いた高さで3Dメッシュを描画する。
     /// バックエンドのロジック・交差判定は relY をそのまま使うため base_height の影響を受けない。
     ///

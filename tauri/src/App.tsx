@@ -33,7 +33,6 @@ const PublicFacilitiesWindow = lazy(() => import("./components/budget/PublicFaci
 const TransitManagementWindow = lazy(() => import("./components/transit/TransitManagementWindow").then(m => ({ default: m.TransitManagementWindow })));
 const TransitCreationPanel = lazy(() => import("./components/transit/TransitCreationPanel").then(m => ({ default: m.TransitCreationPanel })));
 const TransitDetailPanel = lazy(() => import("./components/transit/TransitDetailPanel").then(m => ({ default: m.TransitDetailPanel })));
-const StationDetailPanel = lazy(() => import("./components/station/StationDetailPanel").then(m => ({ default: m.StationDetailPanel })));
 const SettingsWindow = lazy(() => import("./components/taskbar/SettingsWindow").then(m => ({ default: m.SettingsWindow })));
 const SaveLoadWindow = lazy(() => import("./components/taskbar/SaveLoadWindow").then(m => ({ default: m.SaveLoadWindow })));
 const SaveListWindow = lazy(() => import("./components/taskbar/SaveListWindow").then(m => ({ default: m.SaveListWindow })));
@@ -74,7 +73,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * 専用パネルが実装されているウィンドウタイプのセット
  * これらのタイプはジェネリックな JSON 表示ではなく、専用コンポーネントでレンダリングする
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "path_build", "track_build", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "station_detail", "settings", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "new_game", "template_editor", "resource_detail", "resource_edit", "prop_placement", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "epoch_result", "quest_complete", "terrain_unlock", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "path_build", "track_build", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "settings", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "new_game", "template_editor", "resource_detail", "resource_edit", "prop_placement", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "epoch_result", "quest_complete", "terrain_unlock", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map"]);
 
 
 function App() {
@@ -390,12 +389,6 @@ function App() {
               <TransitCreationPanel apiBaseUrl={context.api_base_url} onClose={closeWindow} />
             ) : context.window_type === "transit_detail" ? (
               <TransitDetailPanel
-                apiBaseUrl={context.api_base_url}
-                pathTemplate={context.definition.fetch!.path_template}
-                initialEntityId={context.entity?.id ?? ""}
-              />
-            ) : context.window_type === "station_detail" ? (
-              <StationDetailPanel
                 apiBaseUrl={context.api_base_url}
                 pathTemplate={context.definition.fetch!.path_template}
                 initialEntityId={context.entity?.id ?? ""}

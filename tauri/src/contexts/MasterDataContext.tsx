@@ -61,7 +61,6 @@ const MASTER_ENDPOINTS: { key: keyof MasterData; path: string }[] = [
   { key: "budget_categories", path: "/api/v1/master/budgets" },
   { key: "resource_types", path: "/api/v1/master/resource_types" },
   { key: "prop_types", path: "/api/v1/master/prop_types" },
-  { key: "station_houses", path: "/api/v1/master/station_houses" },
 ];
 
 /**
