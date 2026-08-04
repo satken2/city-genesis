@@ -9,7 +9,7 @@
  * 設置状態・乗降統計を表示する。駅名変更や駅舎の設置UIは別途(現段階では表示のみ)。
  */
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { buildApiUrl, fetchApi } from "../../utils/api";
@@ -48,9 +48,11 @@ type StationDetail = {
   name: string;
   version: number;
   center_point: [number, number] | null;
-  /** 駅舎の設置情報。未設置(野ざらしの停留場)は null */
+  /** 駅舎の設置情報。未設置(野ざらしの停留場)は null(用地確保中も null) */
   house: StationHouse | null;
-  /** 駅舎モデルの代表バリアント(所属ホームから導出)。所属ゼロなら null */
+  /** 駅舎の設置予約中(用地確保のため整地待ち)。true の間は house は null。 */
+  house_pending: boolean;
+  /** 設置する駅舎モデルのバリアント(station_houses のキー)。未選択なら null */
   house_variant: number | null;
   paths: StationPlatform[];
   lines: StationLine[];
@@ -94,6 +96,12 @@ export function StationDetailPanel({
   const [station, setStation] = useState<StationDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  /* ---- 駅名変更 ---- */
+  const [editingName, setEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState("");
+  const [nameSaving, setNameSaving] = useState(false);
 
   const url = buildApiUrl(apiBaseUrl, pathTemplate, initialEntityId);
 
@@ -114,7 +122,34 @@ export function StationDetailPanel({
         }
       });
     return () => controller.abort();
-  }, [url]);
+  }, [url, refreshKey]);
+
+  /**
+   * 駅名を PATCH /api/v1/stations/{id} {name} で保存し、成功したら再取得する
+   * (パス詳細パネルの地区変更と同じ PATCH→再取得パターン)。
+   */
+  const handleRenameSave = useCallback(() => {
+    if (!station || nameSaving) return;
+    const next = nameInput.trim();
+    if (next === "" || next === station.name) {
+      setEditingName(false);
+      return;
+    }
+    setNameSaving(true);
+    fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/stations/{id}", String(station.station_id)), {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: next }),
+    })
+      .then(() => {
+        setEditingName(false);
+        setRefreshKey((k) => k + 1);
+      })
+      .catch((err) => {
+        console.error("failed to rename station", err);
+      })
+      .finally(() => setNameSaving(false));
+  }, [station, nameInput, nameSaving, apiBaseUrl]);
 
   if (loading) {
     return <p className="agent-detail-muted">{t("common.loading")}</p>;
@@ -130,10 +165,10 @@ export function StationDetailPanel({
 
   const displayName =
     station.name && station.name !== "" ? station.name : `#${station.station_id}`;
-  // 駅舎モデルの代表バリアント名(=最上位グレードのホームの表示名)を種別として表示する。
+  // プレイヤーが選択した駅舎モデルの表示名を種別として表示する(未設置は空)。
   const variantName =
     station.house_variant != null
-      ? masterData?.paths[station.house_variant]?.display_name ?? ""
+      ? masterData?.station_houses[station.house_variant]?.display_name ?? ""
       : "";
 
   return (
@@ -150,7 +185,47 @@ export function StationDetailPanel({
         <h3 className="agent-detail-section-title">{t("station.basicInfo")}</h3>
         <div className="agent-detail-grid">
           <span className="agent-detail-label">{t("station.name")}</span>
-          <span className="agent-detail-value">{displayName}</span>
+          <span className="agent-detail-value">
+            {editingName ? (
+              <span className="station-detail__rename">
+                <input
+                  className="station-detail__rename-input"
+                  type="text"
+                  value={nameInput}
+                  autoFocus
+                  disabled={nameSaving}
+                  onChange={(e) => setNameInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleRenameSave();
+                    else if (e.key === "Escape") setEditingName(false);
+                  }}
+                />
+                <button
+                  className="station-detail__rename-btn"
+                  type="button"
+                  disabled={nameSaving}
+                  onClick={handleRenameSave}
+                >
+                  {t("station.renameSave")}
+                </button>
+              </span>
+            ) : (
+              <span className="station-detail__name-display">
+                {displayName}
+                <button
+                  className="station-detail__rename-btn"
+                  type="button"
+                  title={t("station.rename")}
+                  onClick={() => {
+                    setNameInput(station.name);
+                    setEditingName(true);
+                  }}
+                >
+                  {t("station.rename")}
+                </button>
+              </span>
+            )}
+          </span>
           <span className="agent-detail-label">{t("station.platformCount")}</span>
           <span className="agent-detail-value">{station.paths.length}</span>
           <span className="agent-detail-label">{t("station.ridership")}</span>
@@ -159,7 +234,19 @@ export function StationDetailPanel({
           </span>
           <span className="agent-detail-label">{t("station.house")}</span>
           <span className="agent-detail-value">
-            {station.house ? t("station.housePlaced") : t("station.houseNone")}
+            {/* 設置状態: 用地確保中 → 設置済み → 未設置。設置済み/予約中はモデル名も併記する。 */}
+            {station.house_pending
+              ? t("station.housePending")
+              : station.house
+                ? t("station.housePlaced")
+                : t("station.houseNone")}
+            {(station.house || station.house_pending) && station.house_variant != null &&
+              masterData?.station_houses[station.house_variant]?.display_name && (
+                <span className="station-detail__house-model">
+                  {" "}
+                  ({masterData.station_houses[station.house_variant]!.display_name})
+                </span>
+              )}
           </span>
         </div>
       </section>

@@ -212,6 +212,8 @@ export const TRAFFIC_HAND_RIGHT: number = 1;
 export const PLATFORM_SIDE_OUTSIDE: number = 0;
 export const PLATFORM_SIDE_INSIDE: number = 1;
 export const PLATFORM_SIDE_BOTH: number = 2;
+export const STATION_HOUSE_DEFAULT_WIDTH: number = 24.0;
+export const STATION_HOUSE_DEFAULT_DEPTH: number = 16.0;
 export const PATH_TANGENT_ALIGN_MAX_ANGLE_DEG: number = 20.0;
 export const PAYMENT_MARKET: number = 0;
 export const PAYMENT_RENT: number = 1;
@@ -269,6 +271,7 @@ export const ALERT_AGENT_CRIME_SIGN: number = 16;
 export const ALERT_AGENT_INFRA_DISCONNECTED: number = 32;
 export const ALERT_PATH_CONSTRUCTION_SHORTAGE: number = 1;
 export const ALERT_PATH_ACCIDENT: number = 2;
+export const ALERT_PATH_NO_STATION_HOUSE: number = 4;
 
 export const VEHICLE_TO_TRAFFIC: Record<number, number> = {
   0: 0,

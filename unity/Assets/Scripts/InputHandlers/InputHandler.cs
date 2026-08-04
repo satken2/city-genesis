@@ -52,6 +52,9 @@ public static class InputMode
     // ブルドーザ(オブジェクト削除)モード。空き地区画・計画中の建物/道路を
     // 左クリックまたは左ドラッグ(ペイント式)で削除する。実処理は RemovalManager が担う。
     public const int MODE_REMOVE = 17;
+    // 駅舎(Station house)設置モード。地形クリックで駅パス近傍に駅舎を配置する。
+    // 実処理(スナップ・ゴースト・候補通知)は StationPlacementManager が担う。
+    public const int MODE_EDIT_STATION = 18;
 }
 
 /// <summary>
@@ -78,6 +81,9 @@ public static class InputModePreset
     // ブルドーザ(オブジェクト削除)モードのプリセット。建物・区画・道路・地形を
     // すべて MODE_REMOVE にして削除対象として拾えるようにする。
     public const int REMOVE_OBJECTS = 16;
+    // 駅舎設置モードのプリセット。地形のみ MODE_EDIT_STATION にし、駅パスへの
+    // スナップとゴースト表示は StationPlacementManager が地形ホバーから行う。
+    public const int STATION_PLACEMENT = 17;
 }
 
 /// <summary>
@@ -1351,6 +1357,19 @@ public class InputHandler : MonoBehaviour
                 SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
                 SetMode(InputObjectType.ZONE, InputMode.MODE_NONE);
                 Debug.Log("InputHandler: プロップ配置モードプリセットを設定しました");
+                break;
+
+            case InputModePreset.STATION_PLACEMENT:
+                // 駅舎設置は地形クリックで行う。最寄りの駅パス(プラットフォーム)への
+                // スナップとゴースト表示は StationPlacementManager が地形ホバーから担う。
+                SetMode(InputObjectType.TERRAIN, InputMode.MODE_EDIT_STATION);
+                SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
+                SetMode(InputObjectType.STATION, InputMode.MODE_NONE);
+                SetMode(InputObjectType.PATH, InputMode.MODE_NONE);
+                SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
+                SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
+                SetMode(InputObjectType.ZONE, InputMode.MODE_NONE);
+                Debug.Log("InputHandler: 駅舎設置モードプリセットを設定しました");
                 break;
 
             case InputModePreset.CONNECTOR_EDIT:

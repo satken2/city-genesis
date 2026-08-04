@@ -217,6 +217,8 @@ public static class Constants
     public const int PLATFORM_SIDE_OUTSIDE = 0;
     public const int PLATFORM_SIDE_INSIDE = 1;
     public const int PLATFORM_SIDE_BOTH = 2;
+    public const float STATION_HOUSE_DEFAULT_WIDTH = 24.0f;
+    public const float STATION_HOUSE_DEFAULT_DEPTH = 16.0f;
     public const float PATH_TANGENT_ALIGN_MAX_ANGLE_DEG = 20.0f;
     public const int PAYMENT_MARKET = 0;
     public const int PAYMENT_RENT = 1;
@@ -274,6 +276,7 @@ public static class Constants
     public const int ALERT_AGENT_INFRA_DISCONNECTED = 32;
     public const int ALERT_PATH_CONSTRUCTION_SHORTAGE = 1;
     public const int ALERT_PATH_ACCIDENT = 2;
+    public const int ALERT_PATH_NO_STATION_HOUSE = 4;
 
     public static readonly Dictionary<int, int> VEHICLE_TO_TRAFFIC = new Dictionary<int, int>
     {

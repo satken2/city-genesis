@@ -25,6 +25,8 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnEditPropChangeSettings += HandleEditPropChangeSettings;
             IpcClient.Instance.OnEditPropFinish += HandleEditPropFinish;
             IpcClient.Instance.OnEditPropReset += HandleEditPropReset;
+            IpcClient.Instance.OnEditStationChangeVariant += HandleEditStationChangeVariant;
+            IpcClient.Instance.OnEditStationFinish += HandleEditStationFinish;
             IpcClient.Instance.OnEditBuildingUpdateShape += HandleEditBuildingUpdateShape;
             IpcClient.Instance.OnEditBuildingUpdateFloors += HandleEditBuildingUpdateFloors;
             IpcClient.Instance.OnEditBuildingUpdateVisualVariant += HandleEditBuildingUpdateVisualVariant;
@@ -50,6 +52,8 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnEditPropChangeSettings -= HandleEditPropChangeSettings;
             IpcClient.Instance.OnEditPropFinish -= HandleEditPropFinish;
             IpcClient.Instance.OnEditPropReset -= HandleEditPropReset;
+            IpcClient.Instance.OnEditStationChangeVariant -= HandleEditStationChangeVariant;
+            IpcClient.Instance.OnEditStationFinish -= HandleEditStationFinish;
             IpcClient.Instance.OnEditBuildingUpdateShape -= HandleEditBuildingUpdateShape;
             IpcClient.Instance.OnEditBuildingUpdateFloors -= HandleEditBuildingUpdateFloors;
             IpcClient.Instance.OnEditBuildingUpdateVisualVariant -= HandleEditBuildingUpdateVisualVariant;
@@ -229,6 +233,37 @@ public class IpcEventHandler : MonoBehaviour
         if (ppm != null)
         {
             ppm.ResetPlacement();
+        }
+    }
+
+    /// <summary>
+    /// edit_station.change_variant → StationPlacementManager.OnChangeVariant()
+    /// UI側で駅舎モデル(house_variant)を切り替えたとき、ゴーストを新しいモデルに作り直す。
+    /// </summary>
+    private void HandleEditStationChangeVariant(int houseVariant)
+    {
+        var spm = FindAnyObjectByType<StationPlacementManager>();
+        if (spm != null)
+        {
+            spm.OnChangeVariant(houseVariant);
+        }
+    }
+
+    /// <summary>
+    /// edit_station.finish → StationPlacementManager.FinishPlacement() + CellDataLoader.ReloadAllData()
+    /// UI側が PATCH /api/v1/stations/{id} を送った後に届く。ゴーストを片付け、差分リロードで
+    /// 設置済み(または設置予定→設置確定後)の駅舎を描画する。
+    /// </summary>
+    private void HandleEditStationFinish()
+    {
+        var spm = FindAnyObjectByType<StationPlacementManager>();
+        if (spm != null)
+        {
+            spm.FinishPlacement();
+        }
+        if (CellDataLoader.Instance != null)
+        {
+            CellDataLoader.Instance.ReloadAllData();
         }
     }
 

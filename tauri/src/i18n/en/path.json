@@ -36,6 +36,10 @@
       "accident": {
         "title": "Traffic Accident!",
         "description": "A traffic accident has occurred on the road."
+      },
+      "noStationHouse": {
+        "title": "No Station Building",
+        "description": "This platform has no station building. Place one from the Station Building tab of the Track Construction panel."
       }
     },
     "tabConstructionInfo": "Construction",
@@ -90,6 +94,25 @@
       "dirForward": "Forward",
       "dirBackward": "Backward",
       "dirBoth": "Both ways"
+    }
+  },
+  "track_construction": {
+    "trackTab": "Track",
+    "platformTab": "Platform",
+    "houseTab": "Station Building",
+    "house": {
+      "hint": "Pick a station building model, press Place, then click near a platform to set its position.",
+      "selectModel": "Station Building Model",
+      "selectModelPlaceholder": "-- Select a model --",
+      "noModels": "No station building models available",
+      "place": "Place",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "confirming": "Confirming...",
+      "plannedAt": "Placement planned",
+      "placePrompt": "Click near a platform to set the placement position",
+      "placed": "Station building placed.",
+      "confirmFailedUnknown": "Failed to place the station building. Please change the position and try again."
     }
   }
 }

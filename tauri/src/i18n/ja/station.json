@@ -1,14 +1,20 @@
 {
-  "basicInfo": "基本情報",
-  "name": "駅名",
-  "platformCount": "ホーム数",
-  "ridership": "乗降者数(推定)",
-  "house": "駅舎",
-  "housePlaced": "設置済み",
-  "houseNone": "未設置",
-  "platforms": "ホーム一覧",
-  "lines": "発着路線",
-  "noLines": "発着する路線はありません",
-  "lineRunning": "運行中",
-  "lineSuspended": "運休"
+  "station": {
+    "basicInfo": "基本情報",
+    "name": "駅名",
+    "rename": "変更",
+    "renameSave": "保存",
+    "platformCount": "ホーム数",
+    "ridership": "乗降者数(推定)",
+    "house": "駅舎",
+    "housePlaced": "設置済み",
+    "houseNone": "未設置",
+    "housePending": "設置予定(用地確保中)",
+    "housePendingNotice": "駅舎の設置には用地の確保が必要です。次のエポック実行後に駅舎が現れます。",
+    "platforms": "ホーム一覧",
+    "lines": "発着路線",
+    "noLines": "発着する路線はありません",
+    "lineRunning": "運行中",
+    "lineSuspended": "運休"
+  }
 }

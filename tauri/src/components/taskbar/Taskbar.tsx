@@ -71,6 +71,7 @@ type TrayIconDef = {
 
 const MENU_ICONS: MenuIconDef[] = [
   { id: "road", src: "menu_road.png", tooltipKey: "taskbar.menuRoad", padding: "4px", windowType: "path_build" },
+  { id: "track", src: "menu_road.png", tooltipKey: "taskbar.menuTrack", padding: "4px", windowType: "track_build" },
   { id: "land", src: "menu_land.png", tooltipKey: "taskbar.menuLand", padding: "4px", windowType: "parcel_creation" },
   { id: "district", src: "menu_district.png", tooltipKey: "taskbar.menuDistrict", padding: "4px" },
   { id: "construction", src: "menu_construction.png", tooltipKey: "taskbar.menuConstruction", padding: "4px", windowType: "building_construction" },
@@ -97,6 +98,7 @@ const TRAY_ICONS: TrayIconDef[] = [
  */
 const EDIT_MODE_WINDOW_TYPES = new Set<string>([
   "path_build",
+  "track_build",
   "parcel_creation",
   "building_construction",
   "transit_management",

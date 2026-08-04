@@ -22,28 +22,17 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useMasterData } from "../../contexts/MasterDataContext";
-import { NumberStepper } from "../common/NumberStepper";
-import { ConstructionInfoCard } from "../common/ConstructionInfoCard";
 
 import { setHintbarText } from "../../utils/hintbar";
-import { resolvePathIcon } from "../../utils/pathIcon";
 import { showNotification } from "../../utils/notification";
 import { ApiError } from "../../utils/api";
-import { usePathConstruction, FOLLOW_TERRAIN_UNSET } from "./usePathConstruction";
+import { usePathConstruction } from "./usePathConstruction";
 import { sendEditPathFinish, sendSetGrid, sendChangeDisplay, sendChangeState, sendFocusGraphic, IPC_EVENT_VIEW_GRID_TOGGLED } from "../../utils/ipc";
-import { PathShapeMapPreview } from "./PathShapeMapPreview";
-import { GridSettingsPanel } from "./GridSettingsPanel";
 import type { GridDisplayMode } from "./GridSettingsPanel";
 import { isInfraPathType } from "../../local-constants";
-import {
-  DIR_BOTH,
-  PLATFORM_SIDE_OUTSIDE,
-  PLATFORM_SIDE_INSIDE,
-  PLATFORM_SIDE_BOTH,
-} from "../../constants";
 import { RoadVariantSelector } from "./RoadVariantSelector";
 import { InfraVariantSelector } from "./InfraVariantSelector";
-import { RailVariantSelector } from "./RailVariantSelector";
+import { PathBuildSections } from "./PathBuildSections";
 import type { PathCategory } from "./usePathConstruction";
 import "./PathConstructionPanel.css";
 
@@ -125,28 +114,6 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
     (next: PathCategory) => {
       // 同じカテゴリを再クリックしたら解除(選択なし)に戻す
       pathConstruction.onCategoryChange(pathConstruction.category === next ? null : next);
-    },
-    [pathConstruction]
-  );
-
-  /**
-   * 標高ステッパー変更ハンドラ。
-   * 入力欄で1文字入力するごとにフォーカスが外れる問題を防ぐため、ここでは
-   * sendFocusGraphic() による Unity へのフォーカス強制は行わない。
-   */
-  const handleHeightChange = useCallback(
-    (value: number) => {
-      pathConstruction.updateHeight(value);
-    },
-    [pathConstruction]
-  );
-
-  /**
-   * 盛土ステッパー変更ハンドラ。標高と同様に sendFocusGraphic() は呼ばない。
-   */
-  const handleEmbankmentHeightChange = useCallback(
-    (value: number) => {
-      pathConstruction.updateEmbankmentHeight(value);
     },
     [pathConstruction]
   );
@@ -313,12 +280,11 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
 
   return (
     <div className="pc-layout" onClick={handlePanelClick}>
-      {/* カテゴリ選択(道路/軌道/インフラ) */}
+      {/* カテゴリ選択(道路/インフラ)。軌道は専用の軌道建設パネル(track_build)へ分離した。 */}
       <div className="pc-section">
         <div className="pc-category-group">
           {([
             { key: "road", label: t("path_construction.category.road", "道路") },
-            { key: "rail", label: t("path_construction.category.rail", "軌道") },
             { key: "infra", label: t("path_construction.category.infra", "インフラ") },
           ] as { key: PathCategory; label: string }[]).map((c) => (
             <button
@@ -357,268 +323,30 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
           disabled={editPathId != null}
         />
       )}
-      {pathConstruction.category === "rail" && (
-        <RailVariantSelector
-          masterData={masterData}
-          railType={pathConstruction.railType}
-          trackType={pathConstruction.trackType}
-          electrified={pathConstruction.electrified}
-          trackCount={pathConstruction.trackCount}
-          trackSpacing={pathConstruction.trackSpacing}
-          canWidenSpacing={pathConstruction.canWidenTrackSpacing}
-          canShrinkSpacing={pathConstruction.canShrinkTrackSpacing}
-          trackDirections={pathConstruction.trackDirections}
-          trackTypeOptions={pathConstruction.railTrackTypeOptions}
-          electrificationOptions={pathConstruction.railElectrificationOptions}
-          railVariantOptions={pathConstruction.railVariantOptions}
-          selectedVariant={pathConstruction.selectedVariant}
-          onSelectRailType={pathConstruction.selectRailType}
-          onSelectTrackType={pathConstruction.selectTrackType}
-          onToggleElectrified={pathConstruction.setElectrified}
-          onSelectVariant={pathConstruction.selectVariant}
-          onChangeTrackCount={pathConstruction.changeTrackCount}
-          onAdjustSpacing={pathConstruction.adjustTrackSpacing}
-          onCycleDirection={pathConstruction.cycleTrackDirection}
-          disabled={editPathId != null}
-        />
-      )}
-
-      {/* 説明文 */}
-      {pathConstruction.selectedVariantData && (
-        <div className="pc-section">
-          <div className="pc-description-frame">
-            <img
-              src={resolvePathIcon(pathConstruction.selectedVariantData.type)}
-              alt={pathConstruction.selectedVariantData.display_name}
-              className="pc-description-icon"
-              draggable={false}
-            />
-            <div className="pc-description-body">
-              <div className="pc-description-name">{pathConstruction.selectedVariantData.display_name}</div>
-              <div className="pc-description-text">
-                {pathConstruction.selectedVariantData.description || "—"}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/*
-        形状セクション。曲線/直線・吸着の操作はUnity側(Ctrlラジアルメニュー)へ移管したが、
-        標高・盛土は既存ノードを選んで数値で微調整する用途があるためステッパーを残す。
-        ホーム設置側は建設時にしか指定できないためここに置く。
-        高さ編集不可(街路)かつインフラでない場合でも盛土は使えるので、いずれかを持つとき表示する。
+        バリアント選択より下の共通ボディ(説明文・形状・グリッド・プレビュー・コスト・
+        確定/キャンセル)は軌道建設パネルと共有する PathBuildSections に集約している。
+        道路/インフラではホーム設置側トグルは出さない(showPlatformSide=false)。
       */}
-      {pathConstruction.selectedVariant !== null &&
-        (pathConstruction.heightEditable || !pathConstruction.isInfrastructure || pathConstruction.hasPlatform) && (
-        <div className="pc-section">
-          <div className="pc-section-title">{t("path_construction.shape", "形状")}</div>
-
-          {/*
-            標高（相対高さ）。height_editable=true のバリアント(高架道路・地下鉄用線路など)のみ表示。
-            下限はマスターの min_height。負の値を持つバリアント(地下)だけが高さ<0に建設できる。
-          */}
-          {pathConstruction.heightEditable && (
-            <div className="pc-settings-row">
-              <span className="pc-settings-label">{t("path_construction.elevation", "標高 (Y)")}</span>
-              <div className="pc-stepper-row">
-                <NumberStepper
-                  value={pathConstruction.height}
-                  onChange={handleHeightChange}
-                  min={pathConstruction.selectedVariantData?.min_height ?? 0}
-                  max={500}
-                  step={1}
-                  integerOnly={true}
-                />
-                <span className="pc-stepper-unit">m</span>
-              </div>
-            </div>
-          )}
-
-          {/*
-            地形追従の個別設定。height_editable のバリアントのみ表示。
-            「非追従」にすると、丘に差し掛かる区間が自動的に切り通し・トンネルになり、
-            谷を渡る区間は橋になる（手動で標高を刻む必要がなくなる）。
-            未設定はバリアント既定に従う。
-          */}
-          {pathConstruction.heightEditable && (
-            <div className="pc-settings-row">
-              <span className="pc-settings-label">{t("path_construction.followTerrain", "地形追従")}</span>
-              <div className="pc-platform-side-group">
-                {[
-                  { value: FOLLOW_TERRAIN_UNSET, label: t("path_construction.followTerrainDefault", "既定") },
-                  { value: 1, label: t("path_construction.followTerrainFollow", "追従") },
-                  { value: 0, label: t("path_construction.followTerrainNone", "非追従") },
-                ].map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    className={`pc-platform-side-btn ${pathConstruction.followTerrain === option.value ? "active" : ""}`}
-                    onClick={() => pathConstruction.setFollowTerrain(option.value)}
-                    title={t(
-                      "path_construction.followTerrainHelp",
-                      "非追従にすると、丘に差し掛かる区間は自動的に切り通し・トンネルに、谷を渡る区間は橋になります。",
-                    )}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/*
-            盛土・切土(-5〜+5m)。インフラパス(送電線・導水管)は地形変形を伴わないため非表示。
-            道路のY座標は0のまま、着工時にこの高さだけDynamicティアの地形を変形させる。
-            地形追従しない(非追従)パスは盛土と概念的に相容れないため非表示にする。
-          */}
-          {!pathConstruction.isInfrastructure && pathConstruction.followTerrain !== 0 && (
-            <div className="pc-settings-row">
-              <span className="pc-settings-label">{t("path_construction.embankmentHeight", "盛土高さ")}</span>
-              <div className="pc-stepper-row">
-                <NumberStepper
-                  value={pathConstruction.embankmentHeight}
-                  onChange={handleEmbankmentHeightChange}
-                  min={-5}
-                  max={5}
-                  step={1}
-                  integerOnly={true}
-                />
-                <span className="pc-stepper-unit">m</span>
-              </div>
-            </div>
-          )}
-
-          {/*
-            駅パスのホーム設置側（platform_width を持つバリアントのみ表示）。
-            「内側/外側」は都市の通行方向を基準に解決される（左側通行なら内側=進行方向右）。
-            複線（単線2本）の上下線とも内側にすると島式ホーム、外側にすると相対式ホームになる。
-            建設時にのみ指定でき、建設後の変更はできない。
-          */}
-          {pathConstruction.hasPlatform && (
-            <div className="pc-settings-row">
-              <span className="pc-settings-label">{t("path_construction.platformSide", "ホーム設置側")}</span>
-              <div className="pc-platform-side-group">
-                {[
-                  { value: PLATFORM_SIDE_OUTSIDE, label: t("path_construction.platformSideOutside", "外側") },
-                  { value: PLATFORM_SIDE_INSIDE, label: t("path_construction.platformSideInside", "内側") },
-                  { value: PLATFORM_SIDE_BOTH, label: t("path_construction.platformSideBoth", "両側") },
-                ].map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    className={`pc-platform-side-btn ${pathConstruction.platformSide === option.value ? "active" : ""}`}
-                    onClick={() => pathConstruction.setPlatformSide(option.value)}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* グリッド設定（バリアント選択後のみ表示） */}
-      {pathConstruction.selectedVariant !== null && (
-        <div className="pc-section">
-          <GridSettingsPanel
-            mode={gridMode}
-            size={gridSize}
-            angle={gridAngle}
-            onModeChange={setGridMode}
-            onSizeChange={setGridSize}
-            onAngleChange={setGridAngle}
-            onOriginChange={setGridOrigin}
-            originalState="STATE_EDIT_PATH"
-            originalExtra={{
-              // 複合パス選択中はUI専用の擬似タイプではなく、Unityが解釈できる
-              // 代表バリアント(先頭コンポーネント)のタイプ/バリアントを渡す
-              path_type: pathConstruction.unityPathType,
-              path_variant: pathConstruction.unityPathVariant,
-              path_id: editPathId ?? null,
-              // 角度設定モードからの復帰でSTATE_EDIT_PATHを再送する際、軌道複線の
-              // 平行プレビューが単線に戻らないようオフセット列・進行方向列も渡す
-              // (無指定は空リセット扱い)
-              lateral_offsets: pathConstruction.railComponents
-                ? pathConstruction.railComponents.map((c) => c.lateral_offset ?? 0)
-                : [],
-              travel_directions: pathConstruction.railComponents
-                ? pathConstruction.railComponents.map((c) => c.travel_direction ?? DIR_BOTH)
-                : [],
-            }}
-            onStartSetAngleMode={handleStartSetAngleMode}
-            onEndSetAngleMode={handleEndSetAngleMode}
-          />
-        </div>
-      )}
-
-      {/* 形状プレビュー（パネル最下部に配置） */}
-      {pathConstruction.selectedVariant !== null && (
-        <div className="pc-section">
-          <div className="pc-section-title">
-            {t("building_construction.shapePreview", "形状プレビュー")}
-          </div>
-          {pathConstruction.nodes.length === 0 || !apiBaseUrl ? (
-            <div className="pc-no-nodes-message">
-              {t("path_construction.noNodesYet")}
-            </div>
-          ) : (
-            <div className="pc-canvas-section">
-              <PathShapeMapPreview
-                apiBaseUrl={apiBaseUrl}
-                nodes={pathConstruction.nodes}
-                curveMode={pathConstruction.curveMode}
-                startControl={pathConstruction.startControl}
-                endControl={pathConstruction.endControl}
-                waypointControls={pathConstruction.waypointControls}
-                lateralOffsets={
-                  pathConstruction.railComponents
-                    ? pathConstruction.railComponents.map((c) => c.lateral_offset ?? 0)
-                    : undefined
-                }
-              />
-            </div>
-          )}
-
-          {/* 推定建設コスト(詳細パネルと共通のカード。標準コスト倍率はバッジで表示) */}
-          {pathConstruction.nodes.length >= 2 && (
-            <div style={{ marginTop: 10 }}>
-              <ConstructionInfoCard
-                estimatedCost={pathConstruction.estimatedCost}
-                standardCost={pathConstruction.estimatedStandardCost}
-                costRatioHelp={t("path_construction.costRatioHelp")}
-                estimatedDurationDays={pathConstruction.estimatedDurationDays}
-                isCostLoading={pathConstruction.isCostLoading}
-                nextEpochConstructionBudget={pathConstruction.nextEpochConstructionBudget}
-              />
-            </div>
-          )}
-        </div>
-      )}
-
-      {/*
-        アクションボタン（キャンセル/確定）。
-        パネル下部に固定表示し、内容がスクロールしても常に見えるようにする
-        (position: sticky; bottom: 0)。バリアント選択後のみ表示する。
-      */}
-      {pathConstruction.selectedVariant !== null && (
-        <div className="pc-action-bar">
-          <div className="pc-actions">
-            <button className="pc-btn" type="button" onClick={handleCancel}>
-              {t("path_construction.cancel")}
-            </button>
-            <button
-              className="pc-btn pc-btn-confirm"
-              disabled={pathConstruction.nodes.length < 2 || isConfirming}
-              type="button"
-              onClick={handleConfirm}
-            >
-              {isConfirming ? t("path_construction.confirming") : t("path_construction.confirm")}
-            </button>
-          </div>
-        </div>
-      )}
+      <PathBuildSections
+        pc={pathConstruction}
+        apiBaseUrl={apiBaseUrl}
+        editPathId={editPathId ?? null}
+        gridMode={gridMode}
+        gridSize={gridSize}
+        gridAngle={gridAngle}
+        onGridModeChange={setGridMode}
+        onGridSizeChange={setGridSize}
+        onGridAngleChange={setGridAngle}
+        onGridOriginChange={setGridOrigin}
+        onStartSetAngleMode={handleStartSetAngleMode}
+        onEndSetAngleMode={handleEndSetAngleMode}
+        isConfirming={isConfirming}
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
+        showPlatformSide={false}
+      />
     </div>
   );
 }

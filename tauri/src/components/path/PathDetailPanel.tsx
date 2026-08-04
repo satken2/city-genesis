@@ -32,7 +32,8 @@ import {
   STATUS_PENDING,
   STATUS_DEMOLISHING,
   ALERT_PATH_CONSTRUCTION_SHORTAGE,
-  ALERT_PATH_ACCIDENT
+  ALERT_PATH_ACCIDENT,
+  ALERT_PATH_NO_STATION_HOUSE
 } from "../../constants";
 import { InfoHeader } from "../common/InfoHeader";
 import { ZoneLink } from "../common/ZoneLink";
@@ -257,7 +258,10 @@ export function PathDetailPanel({
       {(() => {
         const hasShortage = pathData.alert ? (pathData.alert & ALERT_PATH_CONSTRUCTION_SHORTAGE) !== 0 : false;
         const hasAccident = pathData.alert ? (pathData.alert & ALERT_PATH_ACCIDENT) !== 0 : false;
-        const hasAlerts = hasShortage || hasAccident;
+        // 駅パス(プラットフォーム)に駅舎が未設置。station_id 相当のフィールドは PathData に無いため、
+        // 判定はアラートビットのみで行う(軌道建設パネルの駅舎タブで設置を促す)。
+        const hasNoStationHouse = pathData.alert ? (pathData.alert & ALERT_PATH_NO_STATION_HOUSE) !== 0 : false;
+        const hasAlerts = hasShortage || hasAccident || hasNoStationHouse;
         if (!hasAlerts) return null;
 
         return (
@@ -281,6 +285,17 @@ export function PathDetailPanel({
                 </div>
                 <div className="agent-detail-alert-desc">
                   {t("path.alerts.accident.description")}
+                </div>
+              </div>
+            )}
+            {hasNoStationHouse && (
+              <div className="agent-detail-alert-card">
+                <div className="agent-detail-alert-title">
+                  <img src={shortageIcon} alt="no station house" className="agent-detail-alert-icon" />
+                  {t("path.alerts.noStationHouse.title")}
+                </div>
+                <div className="agent-detail-alert-desc">
+                  {t("path.alerts.noStationHouse.description")}
                 </div>
               </div>
             )}

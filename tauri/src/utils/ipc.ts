@@ -27,6 +27,7 @@ export type GraphicState =
   | "STATE_EDIT_TRANSIT"
   | "STATE_EDIT_PROP"
   | "STATE_EDIT_CONNECTOR"
+  | "STATE_EDIT_STATION"
   | "STATE_REMOVE_OBJECTS";
 
 /* ---- ui -> graphic 方向の送信 ---- */
@@ -430,6 +431,35 @@ export async function sendEditPropReset(): Promise<void> {
 }
 
 /**
+ * `edit_station:change_variant`
+ * 駅舎設置モードにおいて、選択中の駅舎モデル(house_variant)が変わったことを Unity へ通知し、
+ * カーソル追従のゴーストを新しいモデルに作り直させる。
+ */
+export async function sendEditStationChangeVariant(houseVariant: number): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "track_build",
+    entity: null,
+    action: "edit_station:change_variant",
+    params: { house_variant: houseVariant },
+  });
+}
+
+/**
+ * `edit_station:finish`
+ * 駅舎設置モードを終了し、Unity 側でゴーストを片付けてデータをリロードする。駅舎の設置は
+ * PATCH /api/v1/stations/{id} を Tauri(UI)側が直接行うため、このイベントは送信成功後の
+ * 後始末のみを担う(プロップ配置の `edit_prop:finish` と同じ役割)。
+ */
+export async function sendEditStationFinish(): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "track_build",
+    entity: null,
+    action: "edit_station:finish",
+    params: {},
+  });
+}
+
+/**
  * `session.reset`
  * 現在の3Dオブジェクトや地形のデータを全てクリアする。
  */
@@ -748,3 +778,11 @@ export const IPC_EVENT_EDIT_PROP_UPDATE_INSTANCES = "edit_prop:update_instances"
  * PropPlacementPanel がこれを受けて頂点数の表示と POST 用のポリゴンを更新する。
  */
 export const IPC_EVENT_EDIT_PROP_UPDATE_SHAPE = "edit_prop:update_shape";
+
+/**
+ * 駅舎設置モードにおいて、左クリックで候補位置が確定した(Unity → UI)。
+ * ペイロードは { path_id, position: [x, z], rotation, house_variant }。
+ * TrackConstructionPanel(駅舎タブ)がこれを受けて、path_id から所属駅を解決し、
+ * 確定ボタンで PATCH /api/v1/stations/{id} に駅舎の設置情報を送る。
+ */
+export const IPC_EVENT_EDIT_STATION_UPDATE_CANDIDATE = "edit_station:update_candidate";

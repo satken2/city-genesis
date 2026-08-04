@@ -66,6 +66,9 @@ public class IpcClient : MonoBehaviour
     public event Action<Dictionary<string, object>> OnEditPropChangeSettings;
     public event Action OnEditPropFinish;
     public event Action OnEditPropReset;
+    // 駅舎設置: UI からの駅舎モデル変更(int=house_variant)と確定/終了。
+    public event Action<int> OnEditStationChangeVariant;
+    public event Action OnEditStationFinish;
     public event Action<Vector3?> OnGameStart;
     public event Action OnGameEnd;
     // 接道(front_path)の矢印表示。土地区画詳細パネルの開閉に対応する。
@@ -337,6 +340,21 @@ public class IpcClient : MonoBehaviour
                     {
                         Debug.Log("IpcClient: edit_prop:reset received");
                         OnEditPropReset?.Invoke();
+                    }
+                    break;
+
+                case "edit_station:change_variant":
+                    {
+                        // 駅舎モデル(house_variant)の変更。ゴーストを作り直す。
+                        int variant = GetParamInt(payload, "house_variant");
+                        OnEditStationChangeVariant?.Invoke(variant);
+                    }
+                    break;
+
+                case "edit_station:finish":
+                    {
+                        Debug.Log("IpcClient: edit_station:finish received");
+                        OnEditStationFinish?.Invoke();
                     }
                     break;
 
@@ -875,6 +893,25 @@ public class IpcClient : MonoBehaviour
         };
 
         SendEnvelope("edit_prop:update_shape", payload);
+    }
+
+    /// <summary>
+    /// edit_station:update_candidate イベントを送信する。
+    /// 駅舎設置モードで左クリックにより候補位置が確定したことを UI に通知する。
+    /// UI は path_id から所属駅を解決し、確定ボタンで PATCH /api/v1/stations/{id} を送る。
+    /// position は [x, z]、rotation は Y軸回転(度)、house_variant は駅舎モデルID。
+    /// </summary>
+    public void EmitEditStationUpdateCandidate(int pathId, float x, float z, float rotation, int houseVariant)
+    {
+        var payload = new Dictionary<string, object>
+        {
+            ["path_id"] = pathId,
+            ["position"] = new List<float> { x, z },
+            ["rotation"] = rotation,
+            ["house_variant"] = houseVariant
+        };
+
+        SendEnvelope("edit_station:update_candidate", payload);
     }
 
     /// <summary>

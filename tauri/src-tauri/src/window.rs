@@ -440,6 +440,7 @@ pub async fn open_window(app: AppHandle, state: SharedState, payload: OpenWindow
 const EDIT_MODE_WINDOW_TYPES: &[&str] = &[
     "parcel_creation",
     "path_build",
+    "track_build",
     "building_construction",
     "terrain_unlock",
 ];

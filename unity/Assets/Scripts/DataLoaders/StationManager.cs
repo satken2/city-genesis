@@ -19,10 +19,13 @@ public class StationItem
     public int version;
     // 駅の中心点 [x, z](所属ホームの中心点平均)。駅舎未設置の駅では表示位置の代わりにはしない。
     public List<float> center_point;
-    // 駅舎の設置情報。未設置(野ざらしの停留場)は null。
+    // 駅舎の設置情報。未設置(野ざらしの停留場)・設置予定(用地の更地化待ち)は null。
+    // 設置が確定した駅舎だけが非 null になり、このマネージャで実体化される。
     public StationHouseItem house;
-    // 駅舎モデルの代表バリアント(所属ホームの path_variant から導出される)。所属ゼロなら null。
+    // 駅舎モデル(プレイヤーが手動選択した station_house_master のID)。未設置は null。
     public int? house_variant;
+    // 用地の更地化待ち(買収・取り壊し進行中)なら true。この間 house は null で描画されない。
+    public bool house_pending;
 }
 
 [Serializable]

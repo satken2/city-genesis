@@ -9,6 +9,7 @@
     "transit_detail": "路線詳細",
     "station_detail": "駅詳細",
     "prop_placement": "プロップ配置",
+    "track_build": "軌道建設",
     "mashup_edit": "サブ建物の配置"
   },
   "cityMap": {
@@ -34,6 +35,7 @@
     "menuMap": "マップ",
     "menuConstruction": "建設",
     "menuRoad": "道路",
+    "menuTrack": "軌道建設",
     "menuTransport": "公共交通機関",
     "menuBudget": "予算管理",
     "menuPublic": "公共施設",

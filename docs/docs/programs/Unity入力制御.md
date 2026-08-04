@@ -46,6 +46,7 @@ Rayが命中したオブジェクトはTagまたはコンポーネントの有�
 | `MODE_EDIT_RESOURCE` | 12 | 資源エリア編集モード |
 | `MODE_EDIT_TRANSIT` | 13 | 公共交通設置モード |
 | `MODE_EDIT_PROP` | 14 | プロップ配置モード（個別配置・範囲散布） |
+| `MODE_EDIT_STATION` | 18 | 駅舎設置モード（駅パス近傍に駅舎を配置） |
 
 接続点編集（`STATE_EDIT_CONNECTOR`）では専用のモード定数を追加せず、既存の `MODE_EDIT`（=7、既存オブジェクトの編集モード）を NODE に適用して接続端子ノードをドラッグ移動する。
 
@@ -66,6 +67,7 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 | `UNLOCK_CELL` | UNLOCK_CELL | NONE | NONE | NONE | NONE | NONE |
 | `PARCEL_SHAPE_EDIT` | PARCEL_SHAPE_EDIT | NONE | NONE | NONE | NONE | NONE |
 | `PROP_PLACEMENT` | EDIT_PROP | NONE | NONE | NONE | NONE | NONE |
+| `STATION_PLACEMENT` | EDIT_STATION | NONE | NONE | NONE | NONE | NONE |
 | `CONNECTOR_EDIT` | NONE | NONE | EDIT | NONE | NONE | NONE |
 
 表の「—」はプリセットで明示的に設定されないオブジェクトタイプを示す（前回の設定が維持される）。
@@ -73,6 +75,8 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 `CONNECTOR_EDIT` は `STATE_EDIT_CONNECTOR`（接続点編集）で適用され、NODE のみを `MODE_EDIT`（ドラッグ移動）にして施設の接続端子ノード（`infra_node_id` / `depot_node_id`）を移動できるようにする。対象ノードの強調表示と、非電化の路線専用ノードへの `NodeInputHandler` 後付けは `ConnectorEditManager` が担う。ドラッグ確定時は `NodeInputHandler` が `PATCH /api/v1/nodes/{node_id}` を送り、パスが接続済みのノードはバックエンドが移動を拒否して元位置に戻る。詳細は `IPC連携の整理.md` の `STATE_EDIT_CONNECTOR` を参照。
 
 `PROP_PLACEMENT` は `STATE_EDIT_PROP`（プロップ配置）で適用され、地形クリックでプロップを配置する。`IpcStateCoordinator.ApplyStateEditProp` が `PropPlacementManager` を動的生成し、個別配置（`edit_prop:update_instances`）／範囲散布（`edit_prop:update_shape`）のモードごとに処理する。詳細は `IPC連携の整理.md` の `STATE_EDIT_PROP` を参照。
+
+`STATION_PLACEMENT` は `STATE_EDIT_STATION`（駅舎設置）で適用され、地形ホバーで最寄りの駅パス（`platform_width` を持つバリアント）にスナップして駅舎モデルの半透明ゴーストを表示し、左クリックで候補位置を確定する。`IpcStateCoordinator.ApplyStateEditStation` が `StationPlacementManager` を動的生成し、候補確定を `edit_station:update_candidate`（`{path_id, position, rotation, house_variant}`）で UI へ通知する。設置の確定送信（`PATCH /api/v1/stations/{id}`）は UI（Tauri）側が行い、成功後に `edit_station:finish` でゴーストの片付けと差分リロードを促す（プロップ配置と同じ責務分担）。詳細は `IPC連携の整理.md` の `STATE_EDIT_STATION` を参照。
 
 ## 3. 入力フロー
 
@@ -139,6 +143,7 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 | `MODE_EDIT_RESOURCE` | `ResourceAreaEditManager.OnTerrainLeftClick` に委譲 | 同右 | 同 `OnTerrainHover` に委譲 |
 | `MODE_EDIT_TRANSIT` | `TransitPlanManager.OnTerrainLeftClick` に委譲 | 同右 | 同 `OnTerrainHover` に委譲 |
 | `MODE_EDIT_PROP` | `PropPlacementManager.OnTerrainLeftClick` に委譲（個別=1個配置／範囲=頂点追加） | 同右（個別=直近取消／範囲=直近頂点取消） | 同 `OnTerrainHover` に委譲（個別=ゴースト追従） |
+| `MODE_EDIT_STATION` | `StationPlacementManager.OnTerrainLeftClick` に委譲（駅舎の候補位置を確定） | — | 同 `OnTerrainHover` に委譲（最寄り駅パスへスナップして駅舎ゴーストを表示） |
 
 ### 4.2. PathInputHandler（道路）
 
@@ -291,6 +296,8 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 | `STATE_EDIT_PARCEL` | プロパティに応じて切替 | `ParcelEditorManager` の初期化 |
 | `STATE_EDIT_PARCEL_SHAPE` | `PARCEL_SHAPE_EDIT` | `ParcelShapeEditManager.InitializeEditMode` |
 | `STATE_UNLOCK_CELL` | `UNLOCK_CELL` | — |
+| `STATE_EDIT_PROP` | `PROP_PLACEMENT` | `PropPlacementManager` の初期化（個別配置／範囲散布） |
+| `STATE_EDIT_STATION` | `STATION_PLACEMENT` | `StationPlacementManager.InitializePlacement`（駅舎モデル `house_variant` を渡す） |
 | `STATE_EDIT_CONNECTOR` | `CONNECTOR_EDIT` | `ConnectorEditManager.EnterEditMode`（接続端子ノードの強調＋ドラッグ有効化） |
 
 ## 10. スナップ

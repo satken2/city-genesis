@@ -36,6 +36,10 @@
       "accident": {
         "title": "交通事故発生！",
         "description": "道路で交通事故が発生しました。"
+      },
+      "noStationHouse": {
+        "title": "駅舎がありません",
+        "description": "このプラットフォームには駅舎が設置されていません。軌道建設パネルの駅舎タブから設置してください。"
       }
     },
     "tabConstructionInfo": "建設工事",
@@ -90,6 +94,25 @@
       "dirForward": "順方向",
       "dirBackward": "逆方向",
       "dirBoth": "両方向"
+    }
+  },
+  "track_construction": {
+    "trackTab": "軌道",
+    "platformTab": "プラットフォーム",
+    "houseTab": "駅舎",
+    "house": {
+      "hint": "駅舎モデルを選んで[設置]を押し、プラットフォーム付近をクリックして位置を指定します。",
+      "selectModel": "駅舎モデル",
+      "selectModelPlaceholder": "-- モデルを選択 --",
+      "noModels": "駅舎モデルがありません",
+      "place": "設置",
+      "cancel": "キャンセル",
+      "confirm": "確定",
+      "confirming": "確定中...",
+      "plannedAt": "設置予定",
+      "placePrompt": "プラットフォーム付近をクリックして設置位置を指定してください",
+      "placed": "駅舎を設置しました。",
+      "confirmFailedUnknown": "駅舎の設置に失敗しました。位置を変更して再度お試しください。"
     }
   }
 }
