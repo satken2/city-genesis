@@ -3,8 +3,9 @@
  *
  * 道路建設(PathConstructionPanel)と軌道建設(TrackConstructionPanel)は、
  * バリアント選択UI(カテゴリ別セレクタ)より下のセクション ——
- * 説明文・形状(標高/地形追従/盛土/ホーム設置側)・グリッド設定・形状プレビュー・
+ * 形状(標高/地形追従/盛土/ホーム設置側)・グリッド設定・形状プレビュー・
  * コストカード・確定/キャンセルのアクションバー —— が完全に共通である。
+ * 説明カード(PathVariantDescription)はパネルごとに表示位置が違うためここには含めない。
  * この重複(~250行)を避けるため、その共通ボディをこのコンポーネントへ切り出し、
  * 両パネルから `usePathConstruction` の結果とグリッド状態・確定/キャンセルハンドラを
  * 受け取って描画する。
@@ -20,7 +21,6 @@ import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { NumberStepper } from "../common/NumberStepper";
 import { ConstructionInfoCard } from "../common/ConstructionInfoCard";
-import { resolvePathIcon } from "../../utils/pathIcon";
 import { PathShapeMapPreview } from "./PathShapeMapPreview";
 import { GridSettingsPanel } from "./GridSettingsPanel";
 import type { GridDisplayMode } from "./GridSettingsPanel";
@@ -106,26 +106,6 @@ export function PathBuildSections({
 
   return (
     <>
-      {/* 説明文 */}
-      {pc.selectedVariantData && (
-        <div className="pc-section">
-          <div className="pc-description-frame">
-            <img
-              src={resolvePathIcon(pc.selectedVariantData.type)}
-              alt={pc.selectedVariantData.display_name}
-              className="pc-description-icon"
-              draggable={false}
-            />
-            <div className="pc-description-body">
-              <div className="pc-description-name">{pc.selectedVariantData.display_name}</div>
-              <div className="pc-description-text">
-                {pc.selectedVariantData.description || "—"}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/*
         形状セクション。曲線/直線・吸着の操作はUnity側(Ctrlラジアルメニュー)へ移管したが、
         標高・盛土は既存ノードを選んで数値で微調整する用途があるためステッパーを残す。

@@ -6,8 +6,9 @@
  *
  * 選択は3カテゴリ(道路 road / 軌道 rail / インフラ infra)に分かれる。
  *   - 道路・インフラ: path_type を選び、プルダウンで単一バリアントを選ぶ(selectedVariant)。
- *   - 軌道: 鉄道/モノレール/ロープウェイ + track_type(通常/橋梁/駅) + 電化スイッチ(鉄道のみ)で
- *     候補を絞り、プルダウンで単線バリアントを確定し、線路数・進行方向・線路間隔で複線を構成する。
+ *   - 軌道: 構造(通常/橋梁/駅)・電化/非電化の違いもバリアントの違いとして扱い、
+ *     規格プルダウンで単線バリアントを確定して、線路数・進行方向・線路間隔で複線を構成する
+ *     (候補の絞り込みは軌道建設パネル側の鉄道種別プルダウン・タブが行う)。
  *     線路間隔の既定はバリアントのマスター幅で、広げる/縮めるボタンで一定範囲内を
  *     調整できる(パス1本確定ごとに既定へ戻る)。
  *     複線は中心線を平行な単線パス群へ展開して一括敷設する(railComponents)。
@@ -52,7 +53,6 @@ import {
   PATH_ROPEWAY,
   PLATFORM_SIDE_OUTSIDE,
   TRAFFIC_HAND_LEFT,
-  TRACK_NORMAL,
 } from "../../constants";
 import { isInfraPathType } from "../../local-constants";
 import {
@@ -69,12 +69,6 @@ import {
   TRACK_SPACING_MAX_FACTOR,
   clampTrackSpacing,
   isRailType,
-  variantTrackType,
-  isElectrifiedVariant,
-  resolveRailVariant,
-  railVariantsForCombo,
-  availableTrackTypes,
-  electrificationOptions,
   defaultTravelDirections,
   cycleDirection,
   buildRailComponents,
@@ -195,9 +189,6 @@ export function usePathConstruction(
   const [rawWaypointControls, setRawWaypointControls] = useState<WaypointControls[]>([]);
 
   /* ---- 軌道(複線)敷設の設定 ---- */
-  const [railType, setRailType] = useState<number | null>(null);
-  const [trackType, setTrackType] = useState<number>(TRACK_NORMAL);
-  const [electrified, setElectrified] = useState<boolean>(false);
   const [trackCount, setTrackCount] = useState<number>(2);
   // 線路間隔の調整量(m)。実効間隔 = マスター幅 + この値(クランプあり)。パス1本確定ごとに0へ戻す。
   const [trackSpacingDelta, setTrackSpacingDelta] = useState<number>(0);
@@ -331,27 +322,6 @@ export function usePathConstruction(
     return buildRailComponents(selectedVariant, trackCount, trackSpacing, trackDirections);
   }, [isRail, selectedVariant, selectedVariantData, pathId, trackCount, trackSpacing, trackDirections]);
 
-  /** 現在の軌道カテゴリで選べる track_type 一覧 */
-  const railTrackTypeOptions = useMemo(() => {
-    return railType != null ? availableTrackTypes(masterData, railType) : [];
-  }, [masterData, railType]);
-
-  /**
-   * 現在の(鉄道種別, track_type, 電化)に一致する最終バリアントの候補一覧。
-   * 同じ組み合わせでも複数の線路規格がありうるため、パネルはこれをプルダウンで表示し、
-   * プレイヤーに最終バリアントを選ばせる。新規敷設の軌道カテゴリでのみ意味を持つ。
-   */
-  const railVariantOptions = useMemo(() => {
-    if (!isRail || railType == null || pathId != null) return [];
-    return railVariantsForCombo(masterData, railType, trackType, electrified);
-  }, [isRail, railType, trackType, electrified, masterData, pathId]);
-
-  /** 電化トグルの操作可否(電化・非電化の両バリアントが存在するときだけ切替可能) */
-  const railElectrificationOptions = useMemo(() => {
-    if (railType == null) return { hasElectrified: false, hasNonElectrified: false };
-    return electrificationOptions(masterData, railType, trackType);
-  }, [masterData, railType, trackType]);
-
   /* ---- 選択・敷設モードの制御 ---- */
 
   /**
@@ -388,21 +358,13 @@ export function usePathConstruction(
 
   /**
    * バリアントを選び、Unity を敷設モード(STATE_EDIT_PATH)に遷移させる。
-   * 道路・インフラは選択コンポーネントから直接呼ばれ、軌道は
-   * 鉄道種別/track_type/電化の解決結果から下の useEffect が呼ぶ。
+   * 道路・インフラ・軌道とも、選択コンポーネントのプルダウンから直接呼ばれる。
    * 曲線モードの初期化(曲線許可なら curved、不許可なら straight)はUnity側の
    * InitializeRoadPlacement が行い、update_shape の is_curved で同期される。
    */
   const selectVariant = useCallback((variantId: number) => {
     setSelectedVariant(variantId);
     const variantData = masterData?.paths?.[variantId];
-    // 軌道バリアントを直接読み込んだとき(既存パス編集の復元など)は、
-    // 鉄道種別/track_type/電化 の各ボタン状態を実バリアントに合わせて同期する。
-    if (variantData && isRailType(variantData.type)) {
-      setRailType(variantData.type);
-      setTrackType(variantTrackType(variantData));
-      setElectrified(isElectrifiedVariant(variantData));
-    }
     sendChangeState("STATE_EDIT_PATH", {
       path_type: variantData?.type ?? null,
       path_variant: variantId,
@@ -419,34 +381,12 @@ export function usePathConstruction(
     });
   }, [masterData, pathId, platformSide, lateralOffsetsForVariant, travelDirectionsForVariant]);
 
-  /**
-   * 軌道: 鉄道種別/track_type/電化 が変わったら単線バリアントを解決して敷設モードを更新する。
-   * 線路数・進行方向・線路間隔は同じ中心線バリアントのまま複線展開だけを変えるので、ここでは扱わない
-   * (それらの変更で Unity 敷設モードを再初期化しないため、配置中のノードが消えない)。
-   */
-  useEffect(() => {
-    // 既存パス編集(pathId!=null)は読み込んだ単一パスをそのまま編集するため、
-    // 種別/track_type/電化 からの再解決は行わない(選択が上書きされるのを防ぐ)。
-    if (pathId != null || category !== "rail" || railType == null) return;
-    const resolved = resolveRailVariant(masterData, railType, trackType, electrified);
-    if (resolved) {
-      if (resolved.id !== selectedVariant) {
-        selectVariant(resolved.id);
-      }
-    } else {
-      setSelectedVariant(null);
-    }
-    // selectedVariant / selectVariant は意図的に依存に含めない(解決キーの変化時のみ再解決する)。
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category, railType, trackType, electrified, masterData, pathId]);
-
   /* ---- カテゴリ/種別の選択ハンドラ ---- */
 
   /** 選択・配置状態をクリアして Unity を通常状態へ戻す(カテゴリは変えない)。 */
   const clearSelection = useCallback(() => {
     setSelectedType(null);
     setSelectedVariant(null);
-    setRailType(null);
     setTrackSpacingDelta(0);
     setHeight(0);
     setEmbankmentHeight(0);
@@ -476,41 +416,6 @@ export function usePathConstruction(
     // 既存パス編集の読み込み経路(onTypeChange → selectVariant)からも呼ばれるため、
     // 未設定ならカテゴリを type から補完する。
     setCategory((prev) => prev ?? categoryOfType(type));
-    if (type != null && isRailType(type)) {
-      setRailType(type);
-    }
-  }, []);
-
-  /** 軌道カテゴリ: 鉄道種別(鉄道/モノレール/ロープウェイ)を選ぶ。 */
-  const selectRailType = useCallback((type: number) => {
-    const availTT = availableTrackTypes(masterData, type);
-    const nextTrackType = availTT.includes(trackType) ? trackType : (availTT[0] ?? TRACK_NORMAL);
-    const opts = electrificationOptions(masterData, type, nextTrackType);
-    let nextElec = electrified;
-    if (nextElec && !opts.hasElectrified) nextElec = false;
-    if (!nextElec && !opts.hasNonElectrified) nextElec = opts.hasElectrified;
-    setCategory("rail");
-    setSelectedType(type);
-    setRailType(type);
-    setTrackType(nextTrackType);
-    setElectrified(nextElec);
-    setDirectionOverrides(Array(trackCount).fill(null));
-  }, [masterData, trackType, electrified, trackCount]);
-
-  /** 軌道カテゴリ: track_type(通常/橋梁/駅)を選ぶ。 */
-  const selectTrackType = useCallback((tt: number) => {
-    if (railType == null) return;
-    const opts = electrificationOptions(masterData, railType, tt);
-    let nextElec = electrified;
-    if (nextElec && !opts.hasElectrified) nextElec = false;
-    if (!nextElec && !opts.hasNonElectrified) nextElec = opts.hasElectrified;
-    setTrackType(tt);
-    setElectrified(nextElec);
-  }, [masterData, railType, electrified]);
-
-  /** 軌道カテゴリ: 電化トグル。 */
-  const setElectrifiedChecked = useCallback((val: boolean) => {
-    setElectrified(val);
   }, []);
 
   /** 軌道カテゴリ: 線路数(1〜10)。既定の進行方向を引き直す(上書きはクリア)。 */
@@ -1092,9 +997,6 @@ export function usePathConstruction(
     followTerrain,
     setFollowTerrain,
     // 軌道(複線)設定
-    railType,
-    trackType,
-    electrified,
     trackCount,
     trackSpacing,
     canWidenTrackSpacing,
@@ -1103,12 +1005,6 @@ export function usePathConstruction(
     trackDirections,
     trafficHand,
     railComponents,
-    railTrackTypeOptions,
-    railElectrificationOptions,
-    railVariantOptions,
-    selectRailType,
-    selectTrackType,
-    setElectrified: setElectrifiedChecked,
     changeTrackCount,
     cycleTrackDirection,
     // コスト

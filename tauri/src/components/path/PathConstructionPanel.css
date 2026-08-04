@@ -341,16 +341,11 @@
   cursor: not-allowed;
 }
 
-/* ---- 種別ボタン(道路種別/鉄道種別/track_type/電化) ---- */
+/* ---- 種別ボタン(道路種別/インフラ種別) ---- */
 .pc-type-group {
   display: flex;
   gap: 4px;
   flex-wrap: wrap;
-}
-
-.pc-type-group-compact {
-  flex: 1;
-  justify-content: flex-start;
 }
 
 .pc-type-btn {
@@ -380,7 +375,7 @@
   cursor: not-allowed;
 }
 
-/* ---- 軌道の設定行(構造/電化/線路数/進行方向/線路間隔) ---- */
+/* ---- 軌道の設定行(規格/線路数/進行方向/線路間隔) ---- */
 .pc-rail-field {
   display: flex;
   align-items: center;
@@ -388,53 +383,13 @@
   margin-top: 10px;
 }
 
+/* セクション先頭の設定行はセクション自身の余白があるため、上マージンを持たせない。 */
+.pc-section > .pc-rail-field:first-child {
+  margin-top: 0;
+}
+
 .pc-rail-field > .pc-settings-label {
   min-width: 56px;
-}
-
-/* ---- 電化の左右スライドスイッチ(ON/OFF) ---- */
-.pc-switch {
-  position: relative;
-  flex-shrink: 0;
-  width: 46px;
-  height: 24px;
-  padding: 0;
-  border: 2px solid rgba(255, 255, 255, 0.14);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.06);
-  cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease;
-}
-
-.pc-switch.on {
-  border-color: #4ea1ff;
-  background: rgba(78, 161, 255, 0.35);
-}
-
-.pc-switch:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* つまみ。OFFで左、ONで右へスライドする。 */
-.pc-switch-thumb {
-  position: absolute;
-  top: 1px;
-  left: 1px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #f6fbff;
-  transition: left 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.pc-switch.on .pc-switch-thumb {
-  left: 23px;
-}
-
-.pc-switch-status {
-  font-size: 0.72rem;
-  color: #c5d4e3;
 }
 
 /* ---- 線路間隔の広げる/縮めるボタンと現在値 ---- */

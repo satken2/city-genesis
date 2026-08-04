@@ -32,6 +32,7 @@ import type { GridDisplayMode } from "./GridSettingsPanel";
 import { isInfraPathType } from "../../local-constants";
 import { RoadVariantSelector } from "./RoadVariantSelector";
 import { InfraVariantSelector } from "./InfraVariantSelector";
+import { PathVariantDescription } from "./PathVariantDescription";
 import { PathBuildSections } from "./PathBuildSections";
 import type { PathCategory } from "./usePathConstruction";
 import "./PathConstructionPanel.css";
@@ -324,9 +325,12 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
         />
       )}
 
+      {/* 選択中バリアントの説明カード */}
+      <PathVariantDescription entry={pathConstruction.selectedVariantData} />
+
       {/*
-        バリアント選択より下の共通ボディ(説明文・形状・グリッド・プレビュー・コスト・
-        確定/キャンセル)は軌道建設パネルと共有する PathBuildSections に集約している。
+        説明カードより下の共通ボディ(形状・グリッド・プレビュー・コスト・確定/キャンセル)は
+        軌道建設パネルと共有する PathBuildSections に集約している。
         道路/インフラではホーム設置側トグルは出さない(showPlatformSide=false)。
       */}
       <PathBuildSections

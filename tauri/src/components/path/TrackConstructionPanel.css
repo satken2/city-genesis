@@ -1,17 +1,31 @@
 /**
  * 軌道建設パネル専用スタイル
  *
- * タブバー(軌道 / プラットフォーム / 駅舎)と駅舎設置の候補表示のみを定義する。
+ * 鉄道種別プルダウン・タブバー(軌道 / プラットフォーム / 駅舎)・駅舎設置の候補表示のみを定義する。
  * それ以外のセクション・ボタン等は道路建設パネル(PathConstructionPanel.css)の
  * pc-* クラスをそのまま共有する。
  */
 
+/* ---- 鉄道種別プルダウン(パネル最上段) ---- */
+.tc-railtype-bar {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* タブより上位の選択であることが分かるよう、他のプルダウンより大きく見せる。 */
+.tc-railtype-select {
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 8px 10px;
+}
+
 /* ---- タブバー ---- */
+/* 直下のセクション(規格プルダウン等)がタブの内容そのものなので、下罫線で区切らない。 */
 .tc-tabbar {
   display: flex;
   gap: 4px;
   padding: 8px 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .tc-tab {

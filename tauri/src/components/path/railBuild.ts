@@ -33,7 +33,7 @@ import {
 /** 軌道カテゴリに属する path_type(鉄道・モノレール・ロープウェイ) */
 export const RAIL_TYPES: readonly number[] = [PATH_TRACK, PATH_MONORAIL, PATH_ROPEWAY];
 
-/** track_type ボタンの並び順(通常→橋梁→駅) */
+/** 規格プルダウンにおける構造(track_type)の並び順(通常→橋梁→駅) */
 export const TRACK_TYPE_ORDER: readonly number[] = [TRACK_NORMAL, TRACK_BRIDGE, TRACK_STATION];
 
 /** 線路数の下限・上限(パネルのステッパー) */
@@ -84,84 +84,50 @@ export function isElectrifiedVariant(entry: PathMasterEntry | null | undefined):
   return !!entry?.infra_products?.includes(PRODUCT_HIGH_ELECTRICITY);
 }
 
+/** 実際にバリアントが存在する軌道カテゴリ(鉄道/モノレール/ロープウェイ)を規定順で返す。 */
+export function availableRailTypes(masterData: MasterData | null): number[] {
+  if (!masterData?.paths) return [];
+  const present = new Set<number>();
+  for (const key in masterData.paths) {
+    const data = masterData.paths[key];
+    if (isRailType(data.type)) present.add(data.type);
+  }
+  return RAIL_TYPES.filter((type) => present.has(type));
+}
+
 /**
- * (軌道カテゴリ, track_type, 電化) に一致する単線バリアントを全て返す。
- * 同一の種別・構造・電化でも、線路規格の違い(地上/高架/地下、軌間・設計速度など)で
- * 複数のバリアントが存在しうるため、パネルのプルダウンで最終バリアントをプレイヤーに選ばせる。
- * 並び順は、高さで地上/高架/地下を表現できる height_editable=true を優先し、次点でID昇順。
+ * (軌道カテゴリ, 許可する track_type 群) に一致する単線バリアントを全て返す。
+ * 構造(通常/橋梁)・電化/非電化・線路規格(地上/高架/地下、軌間・設計速度など)の違いは
+ * すべてバリアントの違いとして1本のプルダウンに並べ、プレイヤーに直接選ばせる。
+ * 並び順は 構造(通常→橋梁→駅) → 非電化→電化 → 高さで地上/高架/地下を表現できる
+ * height_editable=true を優先 → ID昇順。
  */
-export function railVariantsForCombo(
+export function railVariantsForTrackTypes(
   masterData: MasterData | null,
   railType: number,
-  trackType: number,
-  electrified: boolean
+  trackTypes: readonly number[]
 ): { id: number; data: PathMasterEntry }[] {
   if (!masterData?.paths) return [];
   const matches: { id: number; data: PathMasterEntry }[] = [];
   for (const key in masterData.paths) {
     const data = masterData.paths[key];
     if (data.type !== railType) continue;
-    if (variantTrackType(data) !== trackType) continue;
-    if (isElectrifiedVariant(data) !== electrified) continue;
+    if (!trackTypes.includes(variantTrackType(data))) continue;
     matches.push({ id: parseInt(key), data });
   }
   matches.sort((a, b) => {
+    const ta = TRACK_TYPE_ORDER.indexOf(variantTrackType(a.data));
+    const tb = TRACK_TYPE_ORDER.indexOf(variantTrackType(b.data));
+    if (ta !== tb) return ta - tb;
+    const ea = isElectrifiedVariant(a.data) ? 1 : 0;
+    const eb = isElectrifiedVariant(b.data) ? 1 : 0;
+    if (ea !== eb) return ea - eb;
     const ha = a.data.height_editable ? 0 : 1;
     const hb = b.data.height_editable ? 0 : 1;
     if (ha !== hb) return ha - hb;
     return a.id - b.id;
   });
   return matches;
-}
-
-/**
- * (軌道カテゴリ, track_type, 電化) から敷設する単線バリアントの既定値を1つ解決する。
- * railVariantsForCombo の並び順の先頭(＝高さ編集可能を優先、次点でID昇順)を採る。
- * 一致が無ければ null。プルダウンで別のバリアントを選ぶ前の初期選択に使う。
- */
-export function resolveRailVariant(
-  masterData: MasterData | null,
-  railType: number,
-  trackType: number,
-  electrified: boolean
-): { id: number; data: PathMasterEntry } | null {
-  const matches = railVariantsForCombo(masterData, railType, trackType, electrified);
-  return matches.length > 0 ? matches[0] : null;
-}
-
-/** ある軌道カテゴリで選択可能な track_type の一覧(バリアントが存在するもののみ、規定順)。 */
-export function availableTrackTypes(masterData: MasterData | null, railType: number): number[] {
-  if (!masterData?.paths) return [];
-  const present = new Set<number>();
-  for (const key in masterData.paths) {
-    const data = masterData.paths[key];
-    if (data.type === railType) present.add(variantTrackType(data));
-  }
-  return TRACK_TYPE_ORDER.filter((tt) => present.has(tt));
-}
-
-/**
- * ある(軌道カテゴリ, track_type)で電化トグルを操作できるか。
- * 電化・非電化の両方のバリアントが存在するときだけトグルが意味を持つ。
- * どちらか一方しか無い場合は、その存在する側に固定される(hasElectrified で判定)。
- */
-export function electrificationOptions(
-  masterData: MasterData | null,
-  railType: number,
-  trackType: number
-): { hasElectrified: boolean; hasNonElectrified: boolean } {
-  let hasElectrified = false;
-  let hasNonElectrified = false;
-  if (masterData?.paths) {
-    for (const key in masterData.paths) {
-      const data = masterData.paths[key];
-      if (data.type !== railType) continue;
-      if (variantTrackType(data) !== trackType) continue;
-      if (isElectrifiedVariant(data)) hasElectrified = true;
-      else hasNonElectrified = true;
-    }
-  }
-  return { hasElectrified, hasNonElectrified };
 }
 
 /**

@@ -2,18 +2,24 @@
  * 軌道建設パネル
  *
  * window_type="track_build" のポップアップウィンドウで表示する専用パネル。
- * 道路建設(PathConstructionPanel)から軌道関連を分離し、3つのタブで構成する。
+ * 道路建設(PathConstructionPanel)から軌道関連を分離し、上から
+ * 「鉄道種別プルダウン → タブ → 規格プルダウン」の3段で対象を絞り込む。
  *
+ * 鉄道種別プルダウン(鉄道/モノレール/ロープウェイ)はタブより上位の選択で、タブを切り替えても保持する。
+ * タブは3つ:
  *   - 軌道タブ:        通常(TRACK_NORMAL)・橋梁(TRACK_BRIDGE)の線路を敷設する。
  *   - プラットフォームタブ: 駅(TRACK_STATION)の線路を敷設する(ホーム設置側の指定あり)。
  *   - 駅舎タブ:        駅(近接するプラットフォーム群)に駅舎モデルを設置する。
  *
  * 軌道・プラットフォームタブは usePathConstruction をカテゴリ="rail"に固定して駆動し、
- * 許可する track_type だけが異なる。バリアント選択より下の共通ボディ(形状・グリッド・
- * プレビュー・コスト・確定/キャンセル)は道路建設パネルと共有する PathBuildSections に集約している。
+ * 許可する track_type だけが異なる。構造(通常/橋梁)・電化/非電化は独立した設定ではなく
+ * 「規格」プルダウンの選択肢(=バリアント)として並べ、選んだバリアントが唯一の正となる。
+ * 規格選択より下の共通ボディ(形状・グリッド・プレビュー・コスト・確定/キャンセル)は
+ * 道路建設パネルと共有する PathBuildSections に集約している。
  *
  * 駅舎タブは2段階(Unityプレビュー → Tauri確定)で設置する:
- *   1. モデルを選び[設置]で STATE_EDIT_STATION に入る(house_variant を渡す)。
+ *   1. モデルを選ぶと即座に STATE_EDIT_STATION へ入る(house_variant を渡す)。
+ *      選択をプレースホルダへ戻すと設置モードを抜ける。
  *   2. Unityがカーソル追従ゴーストを最寄りのプラットフォームにスナップして描画し、
  *      クリックで候補位置(edit_station:update_candidate)を通知してくる。
  *   3. 候補の path_id から所属駅を解決して表示し、[確定]で
@@ -47,7 +53,10 @@ import {
 } from "../../utils/ipc";
 import type { GridDisplayMode } from "./GridSettingsPanel";
 import { RailVariantSelector } from "./RailVariantSelector";
+import { RailTrackLayoutSettings } from "./RailTrackLayoutSettings";
+import { PathVariantDescription } from "./PathVariantDescription";
 import { PathBuildSections } from "./PathBuildSections";
+import { availableRailTypes, railVariantsForTrackTypes } from "./railBuild";
 import { TRACK_NORMAL, TRACK_BRIDGE, TRACK_STATION } from "../../constants";
 import "./PathConstructionPanel.css";
 import "./TrackConstructionPanel.css";
@@ -84,6 +93,9 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
   const pc = usePathConstruction(masterData, apiBaseUrl, null);
 
   const [tab, setTab] = useState<TrackTab>("track");
+  // 鉄道種別(鉄道/モノレール/ロープウェイ)はタブより上位の絞り込みなので、
+  // タブ切り替えで選択が失われないようパネル側で保持する。
+  const [railType, setRailType] = useState<number | null>(null);
 
   /* ---- グリッド設定状態（デフォルト非表示。道路建設パネルと同じ挙動） ---- */
   const [gridMode, setGridMode] = useState<GridDisplayMode>("off");
@@ -135,15 +147,16 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
     }
   }, []);
 
-  /* ---- タブごとに許可する track_type ---- */
-  // 軌道タブ=通常/橋梁、プラットフォームタブ=駅。RailVariantSelector にはこの絞り込み結果だけを渡す。
+  /* ---- 鉄道種別・タブから規格プルダウンの候補を絞り込む ---- */
+  // 軌道タブ=通常/橋梁、プラットフォームタブ=駅。構造・電化の違いも候補の一部として並べる。
   const allowedTrackTypes = useMemo(
     () => (tab === "platform" ? [TRACK_STATION] : [TRACK_NORMAL, TRACK_BRIDGE]),
     [tab],
   );
-  const filteredTrackTypeOptions = useMemo(
-    () => pc.railTrackTypeOptions.filter((tt) => allowedTrackTypes.includes(tt)),
-    [pc.railTrackTypeOptions, allowedTrackTypes],
+  const railTypeOptions = useMemo(() => availableRailTypes(masterData), [masterData]);
+  const variantOptions = useMemo(
+    () => (railType == null ? [] : railVariantsForTrackTypes(masterData, railType, allowedTrackTypes)),
+    [masterData, railType, allowedTrackTypes],
   );
 
   /* ---- 初回マウント時にカテゴリを軌道へ固定する ---- */
@@ -153,25 +166,31 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* ---- 現在のタブで許可されない track_type を選んでいたら、許可される先頭へ寄せる ---- */
-  // 鉄道種別を選ぶと hook 側の既定 track_type は通常(availTT[0])になるため、
-  // プラットフォームタブでは駅へ、逆もまた許可集合へ補正する。
+  /* ---- 鉄道種別の既定値(マスターに存在する先頭の種別=鉄道) ---- */
   useEffect(() => {
-    if (tab === "house" || pc.railType == null) return;
-    if (!allowedTrackTypes.includes(pc.trackType)) {
-      const first = filteredTrackTypeOptions[0];
-      if (first != null && first !== pc.trackType) {
-        pc.selectTrackType(first);
-      }
+    if (railType == null && railTypeOptions.length > 0) {
+      setRailType(railTypeOptions[0]);
     }
+  }, [railType, railTypeOptions]);
+
+  /* ---- 選択中の規格が現在の候補から外れたら、候補の先頭を選び直す ---- */
+  // 鉄道種別の変更・タブ切り替え(=許可する構造の変更)で候補が入れ替わったときに、
+  // 敷設対象を必ず候補内のバリアントへ揃える。
+  useEffect(() => {
+    if (tab === "house" || variantOptions.length === 0) return;
+    if (pc.selectedVariant != null && variantOptions.some((v) => v.id === pc.selectedVariant)) return;
+    pc.selectVariant(variantOptions[0].id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab, pc.railType, pc.trackType, filteredTrackTypeOptions]);
+  }, [tab, variantOptions, pc.selectedVariant]);
 
   /* ---- 駅舎設置を終了して STATE_NORMAL に戻す ---- */
+  // モデル選択が設置モードの入口を兼ねるため、終了時はプルダウンもプレースホルダへ戻す
+  // (同じモデルを選び直しても onChange が発火して再入場できるようにするため)。
   const endHousePlacement = useCallback(() => {
     setPlacing(false);
     setCandidate(null);
     setResolvedStation(null);
+    setHouseVariant(null);
     void sendChangeState("STATE_NORMAL", {}, "track_build");
   }, []);
 
@@ -188,7 +207,7 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
         pc.onCategoryChange(null);
       } else {
         // 軌道タブ(通常/橋梁)⇔プラットフォームタブ(駅)の切替。
-        // track_type の許可集合が変わるため、選択をリセットして再入する。
+        // 規格の候補集合が変わるため選択をリセットし、上の useEffect が新しい候補の先頭を選び直す。
         pc.onCategoryChange("rail");
       }
       setTab(next);
@@ -268,25 +287,27 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
     };
   }, [resolveStation]);
 
-  /* ---- 駅舎モデルの選択・設置開始 ---- */
+  /* ---- 駅舎モデルの選択(=設置モードの開始・終了) ---- */
+  // モデルの選択が設置モードの開始操作を兼ね、プレースホルダへ戻す操作が終了を兼ねる。
   const handleHouseVariantChange = useCallback(
     (v: number | null) => {
-      setHouseVariant(v);
-      // 設置中にモデルを変えたら、Unityのゴーストを新しいモデルへ作り直させる。
-      if (placing && v != null) {
-        void sendEditStationChangeVariant(v);
+      if (v == null) {
+        endHousePlacement();
+        return;
       }
+      setHouseVariant(v);
+      if (placing) {
+        // 設置中のモデル変更は、Unityのゴーストを新しいモデルへ作り直させるだけにする。
+        void sendEditStationChangeVariant(v);
+        return;
+      }
+      setCandidate(null);
+      setResolvedStation(null);
+      void sendChangeState("STATE_EDIT_STATION", { house_variant: v }, "track_build");
+      setPlacing(true);
     },
-    [placing],
+    [placing, endHousePlacement],
   );
-
-  const startHousePlacement = useCallback(() => {
-    if (houseVariant == null) return;
-    setCandidate(null);
-    setResolvedStation(null);
-    void sendChangeState("STATE_EDIT_STATION", { house_variant: houseVariant }, "track_build");
-    setPlacing(true);
-  }, [houseVariant]);
 
   /* ---- 駅舎の確定(PATCH → 後始末) ---- */
   const confirmHouse = useCallback(async () => {
@@ -311,6 +332,7 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
       setPlacing(false);
       setCandidate(null);
       setResolvedStation(null);
+      setHouseVariant(null);
       const pending = res?.updated?.house_pending === true;
       void showNotification({
         message: pending
@@ -405,6 +427,24 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
 
   return (
     <div className="pc-layout" onClick={handlePanelClick}>
+      {/* 鉄道種別(鉄道 / モノレール / ロープウェイ)。タブより上位の絞り込み。 */}
+      <div className="tc-railtype-bar">
+        <select
+          className="pc-select tc-railtype-select"
+          value={railType ?? ""}
+          onChange={(e) => {
+            const val = e.target.value;
+            if (val) setRailType(parseInt(val));
+          }}
+        >
+          {railTypeOptions.map((type) => (
+            <option key={type} value={type}>
+              {masterData.path_types[type]?.display_name ?? `Type ${type}`}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {/* タブバー(軌道 / プラットフォーム / 駅舎) */}
       <div className="tc-tabbar">
         {([
@@ -470,59 +510,45 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
             </div>
           )}
 
-          {/* アクション */}
-          <div className="pc-action-bar">
-            <div className="pc-actions">
-              {placing ? (
-                <>
-                  <button className="pc-btn" type="button" onClick={endHousePlacement}>
-                    {t("track_construction.house.cancel", "キャンセル")}
-                  </button>
-                  <button
-                    className="pc-btn pc-btn-confirm"
-                    type="button"
-                    disabled={!candidate || !resolvedStation || isConfirmingHouse}
-                    onClick={() => void confirmHouse()}
-                  >
-                    {isConfirmingHouse
-                      ? t("track_construction.house.confirming", "確定中...")
-                      : t("track_construction.house.confirm", "確定")}
-                  </button>
-                </>
-              ) : (
+          {/* アクション(設置モード中のみ。開始はモデル選択が兼ねる) */}
+          {placing && (
+            <div className="pc-action-bar">
+              <div className="pc-actions">
+                <button className="pc-btn" type="button" onClick={endHousePlacement}>
+                  {t("track_construction.house.cancel", "キャンセル")}
+                </button>
                 <button
                   className="pc-btn pc-btn-confirm"
                   type="button"
-                  disabled={houseVariant == null}
-                  onClick={startHousePlacement}
+                  disabled={!candidate || !resolvedStation || isConfirmingHouse}
+                  onClick={() => void confirmHouse()}
                 >
-                  {t("track_construction.house.place", "設置")}
+                  {isConfirmingHouse
+                    ? t("track_construction.house.confirming", "確定中...")
+                    : t("track_construction.house.confirm", "確定")}
                 </button>
-              )}
+              </div>
             </div>
-          </div>
+          )}
         </>
       ) : (
         /* ---- 軌道タブ / プラットフォームタブ ---- */
         <>
           <RailVariantSelector
-            masterData={masterData}
-            railType={pc.railType}
-            trackType={pc.trackType}
-            electrified={pc.electrified}
+            variantOptions={variantOptions}
+            selectedVariant={pc.selectedVariant}
+            onSelectVariant={pc.selectVariant}
+          />
+
+          <PathVariantDescription entry={pc.selectedVariantData} />
+
+          <RailTrackLayoutSettings
+            railType={railType}
             trackCount={pc.trackCount}
             trackSpacing={pc.trackSpacing}
             canWidenSpacing={pc.canWidenTrackSpacing}
             canShrinkSpacing={pc.canShrinkTrackSpacing}
             trackDirections={pc.trackDirections}
-            trackTypeOptions={filteredTrackTypeOptions}
-            electrificationOptions={pc.railElectrificationOptions}
-            railVariantOptions={pc.railVariantOptions}
-            selectedVariant={pc.selectedVariant}
-            onSelectRailType={pc.selectRailType}
-            onSelectTrackType={pc.selectTrackType}
-            onToggleElectrified={pc.setElectrified}
-            onSelectVariant={pc.selectVariant}
             onChangeTrackCount={pc.changeTrackCount}
             onAdjustSpacing={pc.adjustTrackSpacing}
             onCycleDirection={pc.cycleTrackDirection}
