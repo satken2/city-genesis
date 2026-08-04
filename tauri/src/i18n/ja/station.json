@@ -1,0 +1,14 @@
+{
+  "basicInfo": "基本情報",
+  "name": "駅名",
+  "platformCount": "ホーム数",
+  "ridership": "乗降者数(推定)",
+  "house": "駅舎",
+  "housePlaced": "設置済み",
+  "houseNone": "未設置",
+  "platforms": "ホーム一覧",
+  "lines": "発着路線",
+  "noLines": "発着する路線はありません",
+  "lineRunning": "運行中",
+  "lineSuspended": "運休"
+}

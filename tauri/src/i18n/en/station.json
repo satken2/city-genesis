@@ -1,0 +1,14 @@
+{
+  "basicInfo": "Basic Info",
+  "name": "Station Name",
+  "platformCount": "Platforms",
+  "ridership": "Ridership (est.)",
+  "house": "Station Building",
+  "housePlaced": "Built",
+  "houseNone": "Not built",
+  "platforms": "Platform List",
+  "lines": "Serving Lines",
+  "noLines": "No lines serve this station",
+  "lineRunning": "Running",
+  "lineSuspended": "Suspended"
+}

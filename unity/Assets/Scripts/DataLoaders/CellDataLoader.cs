@@ -15,6 +15,7 @@ public class CellDataLoader : MonoBehaviour
     public HeightmapTextureManager heightmapTextureManager;
     public ResourceManager resourceManager;
     public PropManager propManager;
+    public StationManager stationManager;
 
     // オブジェクトを作成するシーン
     private UnityEngine.SceneManagement.Scene targetScene;
@@ -129,6 +130,14 @@ public class CellDataLoader : MonoBehaviour
             GameObject go = new GameObject("PropManager");
             DontDestroyOnLoad(go);
             propManager = go.AddComponent<PropManager>();
+        }
+
+        if (stationManager == null) stationManager = FindAnyObjectByType<StationManager>();
+        if (stationManager == null)
+        {
+            GameObject go = new GameObject("StationManager");
+            DontDestroyOnLoad(go);
+            stationManager = go.AddComponent<StationManager>();
         }
 
         // HeightmapTextureManager の初期化。
@@ -390,6 +399,11 @@ public class CellDataLoader : MonoBehaviour
             UnityLog.If(LocalConstants.UNITY_LOG_LOADER, "CellDataLoader: プロップのリロード開始");
             propManager.LoadLodCells(cellSets, isForce);
         }
+        if (stationManager != null)
+        {
+            UnityLog.If(LocalConstants.UNITY_LOG_LOADER, "CellDataLoader: 駅舎のリロード開始");
+            stationManager.LoadLodCells(cellSets, isForce);
+        }
 
         // 2/3. 地形(near/far/dynamic)のリロード
         if (terrainManager != null)
@@ -536,6 +550,13 @@ public class CellDataLoader : MonoBehaviour
         if (propManager != null && meshRebuildCells.Count > 0)
         {
             yield return propManager.AdjustPropHeightsForCellsCoroutine(meshRebuildCells);
+        }
+
+        // 4.5. 駅舎のY座標追従。駅舎も常に地表に貼り付くためY座標の再設定のみ行う。
+        //    (StartCoroutine ではなく IEnumerator を直接 yield return する。理由は上と同じ)
+        if (stationManager != null && meshRebuildCells.Count > 0)
+        {
+            yield return stationManager.AdjustStationHeightsForCellsCoroutine(meshRebuildCells);
         }
 
         // 正常完了: 処理したセルを未処理集合から取り除く。
@@ -688,6 +709,7 @@ public class CellDataLoader : MonoBehaviour
         terrainManager?.ClearAllCells();
         resourceManager?.ClearAllCells();
         propManager?.ClearAllCells();
+        stationManager?.ClearAllCells();
 
         // CPU高さ配列と地形高さのフレームキャッシュを無効化する。
         // 無効化しないと、次のセーブのロード中に前のマップの標高が

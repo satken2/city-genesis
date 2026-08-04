@@ -1,0 +1,19 @@
+/* 駅詳細パネル固有のスタイル。共通の体裁は AgentDetailPanel.css を共有する。 */
+
+/* ホーム・路線の1行。リンクと補足情報(長さ・状態)を左右に配置する。
+   agent-detail-grid の2列レイアウトを跨ぐため、行自体は grid-column を全幅にする。 */
+.station-detail__platform-row,
+.station-detail__line-row {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 26px;
+}
+
+.station-detail__platform-meta {
+  color: #93a9c0;
+  font-size: 0.76rem;
+  white-space: nowrap;
+}

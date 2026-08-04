@@ -17,6 +17,8 @@ public static class InputObjectType
     public const int TERRAIN = 5;
     public const int ZONE = 6;
     public const int PROP = 7;
+    // 駅舎(StationManagerが生成する駅の建屋オブジェクト)。クリックで駅詳細パネルを開く。
+    public const int STATION = 8;
 }
 
 /// <summary>
@@ -104,7 +106,8 @@ public class InputHandler : MonoBehaviour
         { InputObjectType.PATH, InputMode.MODE_NORMAL },
         { InputObjectType.NODE, InputMode.MODE_NORMAL },
         { InputObjectType.TERRAIN, InputMode.MODE_NORMAL },
-        { InputObjectType.ZONE, InputMode.MODE_NORMAL }
+        { InputObjectType.ZONE, InputMode.MODE_NORMAL },
+        { InputObjectType.STATION, InputMode.MODE_NORMAL }
     };
 
     // イベントコールバック
@@ -745,6 +748,7 @@ public class InputHandler : MonoBehaviour
         if (obj.CompareTag("PathObject")) return InputObjectType.PATH;
         if (obj.CompareTag("PathNode")) return InputObjectType.NODE;
         if (obj.CompareTag("ZoneObject")) return InputObjectType.ZONE;
+        if (obj.CompareTag("StationObject")) return InputObjectType.STATION;
         if (obj.CompareTag("SeaObject")) return InputObjectType.TERRAIN;
         if (obj.GetComponent<Terrain>() != null) return InputObjectType.TERRAIN;
 
@@ -1206,6 +1210,7 @@ public class InputHandler : MonoBehaviour
 
             case InputModePreset.ROAD_CONSTRUCTION:
                 SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
+                SetMode(InputObjectType.STATION, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PATH, InputMode.MODE_NONE);
                 SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
@@ -1215,6 +1220,7 @@ public class InputHandler : MonoBehaviour
 
             case InputModePreset.BUILDING_CONSTRUCTION:
                 SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
+                SetMode(InputObjectType.STATION, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PATH, InputMode.MODE_NONE);
                 SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PARCEL, InputMode.MODE_BUILDING_CONSTRUCTION);
@@ -1228,6 +1234,7 @@ public class InputHandler : MonoBehaviour
 
             case InputModePreset.PARCEL_CREATION_POINT:
                 SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
+                SetMode(InputObjectType.STATION, InputMode.MODE_NONE);
                 SetMode(InputObjectType.TERRAIN, InputMode.MODE_PARCEL_CREATION_POINT);
                 SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PATH, InputMode.MODE_NONE);
@@ -1236,6 +1243,7 @@ public class InputHandler : MonoBehaviour
 
             case InputModePreset.PARCEL_CREATION_PATH:
                 SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
+                SetMode(InputObjectType.STATION, InputMode.MODE_NONE);
                 SetMode(InputObjectType.TERRAIN, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PATH, InputMode.MODE_PARCEL_CREATION_PATH);
@@ -1244,6 +1252,7 @@ public class InputHandler : MonoBehaviour
 
             case InputModePreset.PARCEL_CREATION_SPLIT:
                 SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
+                SetMode(InputObjectType.STATION, InputMode.MODE_NONE);
                 SetMode(InputObjectType.TERRAIN, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PARCEL, InputMode.MODE_PARCEL_CREATION_SPLIT);
                 SetMode(InputObjectType.PATH, InputMode.MODE_NONE);
@@ -1255,6 +1264,7 @@ public class InputHandler : MonoBehaviour
                 SetMode(InputObjectType.ZONE, InputMode.MODE_ZONE_EDIT);
                 SetMode(InputObjectType.TERRAIN, InputMode.MODE_ZONE_EDIT);
                 SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
+                SetMode(InputObjectType.STATION, InputMode.MODE_NONE);
                 SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
                 Debug.Log("InputHandler: 地区編集モードプリセットを設定しました");
@@ -1263,6 +1273,7 @@ public class InputHandler : MonoBehaviour
             case InputModePreset.UNLOCK_CELL:
                 SetMode(InputObjectType.TERRAIN, InputMode.MODE_UNLOCK_CELL);
                 SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
+                SetMode(InputObjectType.STATION, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PATH, InputMode.MODE_NONE);
                 SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
@@ -1273,6 +1284,7 @@ public class InputHandler : MonoBehaviour
             case InputModePreset.PARCEL_SHAPE_EDIT:
                 SetMode(InputObjectType.TERRAIN, InputMode.MODE_PARCEL_SHAPE_EDIT);
                 SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
+                SetMode(InputObjectType.STATION, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PATH, InputMode.MODE_NONE);
                 SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
@@ -1283,6 +1295,7 @@ public class InputHandler : MonoBehaviour
             case InputModePreset.SET_GRID:
                 SetMode(InputObjectType.TERRAIN, InputMode.MODE_SET_GRID);
                 SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
+                SetMode(InputObjectType.STATION, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PATH, InputMode.MODE_NONE);
                 SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
@@ -1293,6 +1306,7 @@ public class InputHandler : MonoBehaviour
             case InputModePreset.EDIT_RESOURCE:
                 SetMode(InputObjectType.TERRAIN, InputMode.MODE_EDIT_RESOURCE);
                 SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
+                SetMode(InputObjectType.STATION, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PATH, InputMode.MODE_NONE);
                 SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
@@ -1305,6 +1319,7 @@ public class InputHandler : MonoBehaviour
                 // 貫通(MODE_NONE)させて地形ヒットを採用し、ParcelAreaEditManager 側で処理する。
                 SetMode(InputObjectType.TERRAIN, InputMode.MODE_PARCEL_CREATION_POLYGON);
                 SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
+                SetMode(InputObjectType.STATION, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PATH, InputMode.MODE_NONE);
                 SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
@@ -1317,6 +1332,7 @@ public class InputHandler : MonoBehaviour
                 // 地形ヒットを採用し、TransitPlanManager 側で下地パスへ射影吸着する。
                 SetMode(InputObjectType.TERRAIN, InputMode.MODE_EDIT_TRANSIT);
                 SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
+                SetMode(InputObjectType.STATION, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PATH, InputMode.MODE_NONE);
                 SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
@@ -1329,6 +1345,7 @@ public class InputHandler : MonoBehaviour
                 // PropPlacementManager 側でモード(individual/scatter)ごとに処理を振り分ける。
                 SetMode(InputObjectType.TERRAIN, InputMode.MODE_EDIT_PROP);
                 SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
+                SetMode(InputObjectType.STATION, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PATH, InputMode.MODE_NONE);
                 SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
@@ -1346,6 +1363,7 @@ public class InputHandler : MonoBehaviour
                 SetMode(InputObjectType.TERRAIN, InputMode.MODE_EDIT_CONNECTOR);
                 SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
                 SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
+                SetMode(InputObjectType.STATION, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PATH, InputMode.MODE_NONE);
                 SetMode(InputObjectType.ZONE, InputMode.MODE_NONE);
@@ -1362,6 +1380,8 @@ public class InputHandler : MonoBehaviour
                 SetMode(InputObjectType.TERRAIN, InputMode.MODE_REMOVE);
                 SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
                 SetMode(InputObjectType.ZONE, InputMode.MODE_NONE);
+                // 駅舎は単独で削除できない(所属ホームの全喪失で駅ごと自動消滅する)ため対象外。
+                SetMode(InputObjectType.STATION, InputMode.MODE_NONE);
                 Debug.Log("InputHandler: ブルドーザ(オブジェクト削除)モードプリセットを設定しました");
                 break;
 
@@ -1380,7 +1400,8 @@ public class InputHandler : MonoBehaviour
             InputObjectType.PATH,
             InputObjectType.NODE,
             InputObjectType.TERRAIN,
-            InputObjectType.ZONE
+            InputObjectType.ZONE,
+            InputObjectType.STATION
         };
 
         foreach (int objectType in objectTypes)
@@ -1406,6 +1427,7 @@ public class InputHandler : MonoBehaviour
             case InputObjectType.TERRAIN: return "地面";
             case InputObjectType.ZONE: return "地区";
             case InputObjectType.PROP: return "プロップ";
+            case InputObjectType.STATION: return "駅舎";
             default: return "不明";
         }
     }

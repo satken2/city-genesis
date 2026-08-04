@@ -139,6 +139,14 @@
 - 生成・破棄・高さ調整はすべて `PerformanceConfig.FrameBudgetMs` のフレーム予算でコルーチン分散する。1散布レコードあたりの生成上限は5000(超過は警告して打ち切り)。
 - 未実装(別タスク): GPUインスタンシング等による数万本規模の軽量描画(現状は1本=1GameObject)、既存プロップの削除UI。
 
+## 駅舎 (StationManager.cs)
+
+- 役割: 駅(Station。近接する駅パス群をバックエンドが自動で束ねた概念)を `GET /stations?bbox=` から取得し、**駅舎が設置されている駅(`house` が非null)だけ**を建屋GameObjectとして実体化する。プラットフォーム自体の描画は PathManager / TrackPath の担当で、このマネージャーは建屋のみを扱う。
+- ロード方式は PropManager と同型: nearCells のマージBBOXで一括取得し、version 差分更新・応答に含まれないレコードの破棄・セル逆引きインデックス(`stationIdsByCell`)・フレーム予算分散を行う。エポック完了後の `ReloadAllData` で駅舎の設置・移設・撤去・駅の統合が反映される。
+- **プレハブ解決**: `Resources/Models/Stations/{house_variant}` → `Models/Stations/default` の順にフォールバック。どちらも無ければ**プリミティブの仮箱(10×6×8)で代替表示**する(アセット整備前でも位置とクリックを確認できるようにするため。variantごとに1回警告)。`house_variant` はバックエンドが所属ホームのバリアントから導出する代表値。
+- **クリックで駅詳細パネル**: 生成時に `StationObject` タグ+`ObjectIdInfo`+`StationInputHandler`+コライダー(プレハブに無ければレンダラーバウンズからBoxCollider)を付与。通常モードのクリックで `EmitSelectObject("station_detail", "station", id)` を送る。編集系プリセットでは `InputObjectType.STATION` が MODE_NONE に設定されクリック無効。
+- **地形追従**: 生成時に `HeightmapTextureManager.GetTerrainHeight` でYをサンプルし、`CellDataLoader.TerrainFollowUpCoroutine` から `AdjustStationHeightsForCellsCoroutine` が呼ばれてY座標を再設定する(プロップと同じY再設定のみ。個体単位try/catchの規約も同じ)。
+
 ## 高さ取得APIの使い分け
 
 - 原則 `HeightmapTextureManager.GetTerrainHeight(pos)` を使う。CPU高さ配列(1m解像度、マップが大きい場合はセル解像度)の O(1) ルックアップで、未構築時・サンプリング結果が0の場合は `Utils.GetGroundHeight` にフォールバックする。

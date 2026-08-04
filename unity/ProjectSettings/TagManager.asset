@@ -14,6 +14,7 @@ TagManager:
   - BuildingObject
   - ZoneObject
   - SeaObject
+  - StationObject
   layers:
   - Default
   - TransparentFX

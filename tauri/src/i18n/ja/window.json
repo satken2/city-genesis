@@ -7,6 +7,7 @@
     "transit_management": "公共交通",
     "transit_creation": "公共交通の新設",
     "transit_detail": "路線詳細",
+    "station_detail": "駅詳細",
     "prop_placement": "プロップ配置",
     "mashup_edit": "サブ建物の配置"
   },
