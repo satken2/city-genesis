@@ -220,7 +220,7 @@ public static class Constants
     public const int PLATFORM_SIDE_BOTH = 2;
     public const float STATION_HOUSE_DEFAULT_WIDTH = 24.0f;
     public const float STATION_HOUSE_DEFAULT_DEPTH = 16.0f;
-    public const float STATION_HOUSE_TRACK_CLEARANCE_MARGIN = 1.0f;
+    public const float STATION_HOUSE_TRACK_CLEARANCE_MARGIN = 0.1f;
     public const float STATION_HOUSE_TRACK_SEARCH_RADIUS = 150.0f;
     public const float PATH_TANGENT_ALIGN_MAX_ANGLE_DEG = 20.0f;
     public const int PAYMENT_MARKET = 0;

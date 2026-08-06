@@ -11,7 +11,10 @@ using GeneratedModels;
 ///      直線で結ぶ(地形追従の細分化はしない)。**デッキの地上高・橋脚は body プレハブの
 ///      造形が持つ**(原点=地面。実寸配置で幅も引き伸ばさない)。
 ///   2. 建屋: 両終端の専有エリア矩形に駅舎モデル(Models/Stations/{variant}/body)を置き、
-///      矩形の範囲に地面パネル(floor パーツのマテリアル)を張る。
+///      矩形の範囲に地面パネル(floor パーツのマテリアル)を張る。矩形は終端から外側へ
+///      広がり(内側の辺が終端の上)、マスターの house_offset ぶん横へずれる。**モデルの原点は
+///      矩形の内側の辺の中点(modelOrigin。スライドが無ければパスの端点そのもの)に置く**
+///      (奥行きの広がりも横ずれもプレハブの造形が持つため)。桁もこの位置まで伸ばす。
 ///
 /// 専有エリア矩形の位置はバックエンド(geo_station_house.py)と同一の決定的アルゴリズムで
 /// 算出する(ComputeEndFootprints)。バックエンド側を変更する場合は必ずここも揃えること。
@@ -35,10 +38,17 @@ public class StationHousePath : IPathMeshGenerator
 
     /// <summary>
     /// 専有エリア矩形(建屋フットプリント)。center/direction は XZ 平面(Vector2.y = z)。
+    ///
+    /// center は house_offset ぶん横へずらした後の矩形中心(=土地を占有する位置)。
+    /// modelOrigin は矩形の内側の辺の中点で、**建屋プレハブの原点をここに置く**。
+    /// 線路を避けるスライドが無ければ modelOrigin は駅舎パスの端点そのものであり、
+    /// スライドした場合は連絡橋もこの位置まで伸びる。プレハブは奥行き・横ずれとも
+    /// 造形が持つ前提なので、コード側で中心へ寄せたり house_offset を足したりしない。
     /// </summary>
     public struct StationHouseFootprint
     {
         public Vector2 center;
+        public Vector2 modelOrigin;
         public Vector2 direction;
         public float rotationDeg;
         public float width;
@@ -58,8 +68,10 @@ public class StationHousePath : IPathMeshGenerator
 
         GameObject container = new GameObject($"StationHouse_{pathData.path_id}");
 
+        List<StationHouseFootprint> footprints = ComputeEndFootprints(pathData);
+
         // ---- 連絡橋(桁) ----
-        List<Vector3> anchors = BuildBridgeAnchorPoints(pathData, points);
+        List<Vector3> anchors = BuildBridgeAnchorPoints(pathData, points, footprints);
         SplineComputer spline = RoadPath.BuildSpline(container, anchors, false);
 
         string bodyPath = $"Models/Paths/p{pathData.path_variant}/body";
@@ -92,7 +104,7 @@ public class StationHousePath : IPathMeshGenerator
         }
 
         // ---- 両終端の建屋 ----
-        foreach (var footprint in ComputeEndFootprints(pathData))
+        foreach (var footprint in footprints)
         {
             CreateHouseObject(container.transform, pathData, footprint);
         }
@@ -109,8 +121,11 @@ public class StationHousePath : IPathMeshGenerator
     /// そのXZ直下の地形標高に置き、アンカー間は直線で結ぶ(地形追従の細分化は行わない)。
     /// デッキの地上高は body プレハブの造形が持つため、ここでは持ち上げない。
     /// アンカーが取得できない場合(縮退データ)は渡された点列を同じ規則で接地して使う。
+    ///
+    /// 専有エリアが線路を避けて外側へスライドした場合は、橋も建屋の取り付き位置
+    /// (footprint.modelOrigin)まで延長する。橋が終端で切れて建屋まで届かないのを防ぐ。
     /// </summary>
-    private static List<Vector3> BuildBridgeAnchorPoints(PathSummary pathData, List<Vector3> points)
+    private static List<Vector3> BuildBridgeAnchorPoints(PathSummary pathData, List<Vector3> points, List<StationHouseFootprint> footprints)
     {
         var anchors = new List<Vector3>();
 
@@ -144,7 +159,27 @@ public class StationHousePath : IPathMeshGenerator
                 anchors.Add(MakeDeckPoint(p.x, p.z));
             }
         }
+
+        // 建屋の取り付き位置までの延長(footprints は start側・end側の順)。
+        if (anchors.Count >= 2 && footprints != null && footprints.Count == 2)
+        {
+            Vector2 startOrigin = footprints[0].modelOrigin;
+            Vector2 endOrigin = footprints[1].modelOrigin;
+            if (!IsSameXZ(anchors[0], startOrigin))
+            {
+                anchors.Insert(0, MakeDeckPoint(startOrigin.x, startOrigin.y));
+            }
+            if (!IsSameXZ(anchors[anchors.Count - 1], endOrigin))
+            {
+                anchors.Add(MakeDeckPoint(endOrigin.x, endOrigin.y));
+            }
+        }
         return anchors;
+    }
+
+    private static bool IsSameXZ(Vector3 anchor, Vector2 xz)
+    {
+        return Mathf.Abs(anchor.x - xz.x) < 1e-3f && Mathf.Abs(anchor.z - xz.y) < 1e-3f;
     }
 
     private static Vector3 MakeDeckPoint(float x, float z)
@@ -188,11 +223,15 @@ public class StationHousePath : IPathMeshGenerator
     // =====================================================================
 
     /// <summary>
-    /// 建屋を専有エリア矩形の中心に配置する。プレハブは
-    /// Models/Stations/{variant}/body → Models/Stations/body の順に解決し、
-    /// スケールは一切かけない(建物パーツ実寸規約)。無ければ仮箱
+    /// 建屋を配置する。プレハブは Models/Stations/{variant}/body → Models/Stations/body の
+    /// 順に解決し、スケールは一切かけない(建物パーツ実寸規約)。無ければ仮箱
     /// (house_width × FALLBACK_HOUSE_HEIGHT × house_depth。仮箱のみスケール可)で代替する。
-    /// Y は矩形中心の地形標高に接地する。専有エリアの地面パネルも同じ位置に張る。
+    ///
+    /// 配置位置は**プレハブが modelOrigin(矩形の内側の辺の中点=スライドが無ければ
+    /// 駅舎パスの端点そのもの)、仮箱が矩形そのものの center**。プレハブは奥行き方向の
+    /// 広がりも横ずれも造形が持つ前提なので原点をそのまま置き、仮箱は矩形の寸法を
+    /// 可視化する代替表示なので矩形の位置に置く。
+    /// Y はそれぞれの位置の地形標高に接地する。専有エリアの地面パネルは矩形の範囲に張る。
     /// </summary>
     private static void CreateHouseObject(Transform parent, PathSummary pathData, StationHouseFootprint footprint)
     {
@@ -201,9 +240,11 @@ public class StationHousePath : IPathMeshGenerator
         GameObject prefab = ResolveStationPart(pathData.path_variant, "body");
 
         GameObject go;
+        Vector2 position;
         if (prefab != null)
         {
             go = Object.Instantiate(prefab, parent);
+            position = footprint.modelOrigin;
         }
         else
         {
@@ -211,11 +252,12 @@ public class StationHousePath : IPathMeshGenerator
             go = GameObject.CreatePrimitive(PrimitiveType.Cube);
             go.transform.SetParent(parent, false);
             go.transform.localScale = new Vector3(footprint.width, FALLBACK_HOUSE_HEIGHT, footprint.depth);
+            position = footprint.center;
         }
         go.name = "House";
 
-        float groundY = HeightmapTextureManager.GetTerrainHeight(new Vector3(footprint.center.x, 1000f, footprint.center.y));
-        go.transform.localPosition = new Vector3(footprint.center.x, groundY, footprint.center.y);
+        float groundY = HeightmapTextureManager.GetTerrainHeight(new Vector3(position.x, 1000f, position.y));
+        go.transform.localPosition = new Vector3(position.x, groundY, position.y);
         go.transform.localRotation = Quaternion.Euler(0f, footprint.rotationDeg, 0f);
         go.SetActive(true);
 
@@ -366,10 +408,12 @@ public class StationHousePath : IPathMeshGenerator
 
             List<Vector2> intervals = CollectOccupiedIntervals(pathManager, tip, dir, houseWidth, houseOffset, pathData.path_id);
             float sIn = ResolveSlideDistance(intervals, houseDepth);
+            Vector2 innerCenter = tip + dir * sIn;
 
             result.Add(new StationHouseFootprint
             {
-                center = tip + dir * (sIn + houseDepth / 2f) + RightAxis(dir) * houseOffset,
+                center = innerCenter + dir * (houseDepth / 2f) + RightAxis(dir) * houseOffset,
+                modelOrigin = innerCenter,
                 direction = dir,
                 rotationDeg = Mathf.Atan2(dir.x, dir.y) * Mathf.Rad2Deg,
                 width = houseWidth,
@@ -454,29 +498,34 @@ public class StationHousePath : IPathMeshGenerator
     }
 
     /// <summary>
-    /// 線路パスの中心線からの占有半幅(クリアランス込み)を返す。
-    /// 線路コリドーの半幅にプラットフォーム幅(存在すれば)と余白を足した保守的な値。
-    /// platform_side による非対称は無視して両側に platform_width を見込む
-    /// (バックエンド _rail_clearance と同一の近似。決定性を優先する)。
+    /// 線路パスの中心線から左右それぞれへの占有半幅を返す(m)。線路コリドーの半幅に、
+    /// プラットフォームの片側張り出し幅(TrackPath.ResolvePlatformExtents で解決)を
+    /// 足した値で、バックエンドの敷地ポリゴンと同じ形を表す。左右は幾何の進行方向
+    /// (始点→終点)基準(バックエンド _rail_side_extents と同一)。
+    /// プラットフォームは片側にしか無いため、両側に platform_width を見込むと
+    /// ホームの無い側で常にホーム1本ぶんの無駄な隙間が空く。
     /// </summary>
-    private static float RailClearance(int railVariant)
+    private static void RailSideExtents(PathSummary rail, out float extLeft, out float extRight)
     {
-        var master = MasterDataStore.Instance != null ? MasterDataStore.Instance.GetPathMaster(railVariant) : null;
+        var master = MasterDataStore.Instance != null ? MasterDataStore.Instance.GetPathMaster(rail.path_variant) : null;
         float half = ((master != null && master.width > 0f) ? master.width : 5f) / 2f;
-        if (master != null && master.platform_width.HasValue && master.platform_width.Value > 0f)
-        {
-            half += master.platform_width.Value;
-        }
-        return half + Constants.STATION_HOUSE_TRACK_CLEARANCE_MARGIN;
+        float platformWidth = (master != null && master.platform_width.HasValue) ? master.platform_width.Value : 0f;
+        TrackPath.ResolvePlatformExtents(rail, platformWidth, out float platformLeft, out float platformRight);
+        extLeft = half + platformLeft;
+        extRight = half + platformRight;
     }
 
     /// <summary>
     /// 終端周辺の軌道系パスが s 軸(終端の外向き方向)上に占有する区間のリストを返す。
-    /// 終端 tip を原点、direction を +s、その右手を +lat とする座標系で、横方向距離が
-    /// 「専有エリア半幅 + 線路クリアランス」以内にある線路セグメントを s 軸へ射影し、
-    /// クリアランスぶん広げた区間 (x=s_min, y=s_max) として収集する
+    /// 終端 tip を原点、direction を +s、その右手を +lat とする座標系で、専有エリアの
+    /// 横幅の帯に掛かる線路セグメントを s 軸へ射影し、線路の占有帯のぶん広げた区間
+    /// (x=s_min, y=s_max) として収集する
     /// (バックエンド _occupied_intervals と同一。セグメント供給は PathManager の空間ハッシュ)。
-    /// 横方向コリドーは houseOffset ぶんずれた矩形の位置を中心に取る。
+    ///
+    /// 線路の占有帯は中心線から左右非対称(ホームのある側だけ広い)で、その広がりは
+    /// 線路セグメントの右方向を s 軸・lat 軸へ射影した成分 (cs, cr) に応じて
+    /// 各軸へ `占有半幅 × |成分|` として分配される。横方向コリドーは houseOffset ぶん
+    /// ずれた矩形の位置を中心に取る。
     /// </summary>
     private static List<Vector2> CollectOccupiedIntervals(PathManager pathManager, Vector2 tip, Vector2 direction, float houseWidth, float houseOffset, int excludePathId)
     {
@@ -484,6 +533,8 @@ public class StationHousePath : IPathMeshGenerator
         if (pathManager == null) return intervals;
 
         Vector2 right = RightAxis(direction);
+        float hw = houseWidth / 2f;
+        float margin = Constants.STATION_HOUSE_TRACK_CLEARANCE_MARGIN;
         var segments = pathManager.QueryNearbySegments(
             new Vector3(tip.x, 0f, tip.y), Constants.STATION_HOUSE_TRACK_SEARCH_RADIUS);
 
@@ -494,36 +545,44 @@ public class StationHousePath : IPathMeshGenerator
             if (rail.path_type != Constants.PATH_TRACK && rail.path_type != Constants.PATH_MONORAIL) continue;
             if (excludePathId != 0 && rail.path_id == excludePathId) continue;
 
-            float clearance = RailClearance(rail.path_variant);
-            float latLimit = houseWidth / 2f + clearance;
+            Vector2 u = new Vector2(seg.b.x - seg.a.x, seg.b.z - seg.a.z);
+            if (u.magnitude < 1e-9f) continue;
+            u.Normalize();
+
+            RailSideExtents(rail, out float extLeft, out float extRight);
+            // 線路セグメントの右方向。占有帯は左へ extLeft、右へ extRight 広がる。
+            Vector2 railRight = new Vector2(u.y, -u.x);
+            float cs = railRight.x * direction.x + railRight.y * direction.y;
+            float cr = railRight.x * right.x + railRight.y * right.y;
+            float extSPlus = (cs >= 0f ? extRight : extLeft) * Mathf.Abs(cs) + margin;
+            float extSMinus = (cs >= 0f ? extLeft : extRight) * Mathf.Abs(cs) + margin;
+            float extLatPlus = (cr >= 0f ? extRight : extLeft) * Mathf.Abs(cr) + margin;
+            float extLatMinus = (cr >= 0f ? extLeft : extRight) * Mathf.Abs(cr) + margin;
 
             float la = (seg.a.x - tip.x) * right.x + (seg.a.z - tip.y) * right.y - houseOffset;
             float lb = (seg.b.x - tip.x) * right.x + (seg.b.z - tip.y) * right.y - houseOffset;
             float sa = (seg.a.x - tip.x) * direction.x + (seg.a.z - tip.y) * direction.y;
             float sb = (seg.b.x - tip.x) * direction.x + (seg.b.z - tip.y) * direction.y;
 
-            // 横方向コリドー |lat| <= latLimit にセグメントをクリップする。
-            if (la > latLimit && lb > latLimit) continue;
-            if (la < -latLimit && lb < -latLimit) continue;
+            // 占有帯が専有エリアの横幅に掛かる中心線の範囲 lat ∈ [lo, hi] へクリップする。
+            float lo = -hw - extLatPlus;
+            float hi = hw + extLatMinus;
+            if ((la < lo && lb < lo) || (la > hi && lb > hi)) continue;
 
             float t0 = 0f, t1 = 1f;
             float dl = lb - la;
             if (Mathf.Abs(dl) > 1e-9f)
             {
-                for (int boundIndex = 0; boundIndex < 2; boundIndex++)
-                {
-                    float bound = boundIndex == 0 ? latLimit : -latLimit;
-                    float sign = boundIndex == 0 ? 1f : -1f;
-                    float tCross = (bound - la) / dl;
-                    if (sign * la > sign * bound) t0 = Mathf.Max(t0, tCross); // a が境界の外側
-                    if (sign * lb > sign * bound) t1 = Mathf.Min(t1, tCross); // b が境界の外側
-                }
+                float tLo = (lo - la) / dl;
+                float tHi = (hi - la) / dl;
+                t0 = Mathf.Max(t0, Mathf.Min(tLo, tHi));
+                t1 = Mathf.Min(t1, Mathf.Max(tLo, tHi));
             }
             if (t0 > t1) continue;
 
             float s0 = sa + (sb - sa) * t0;
             float s1 = sa + (sb - sa) * t1;
-            intervals.Add(new Vector2(Mathf.Min(s0, s1) - clearance, Mathf.Max(s0, s1) + clearance));
+            intervals.Add(new Vector2(Mathf.Min(s0, s1) - extSMinus, Mathf.Max(s0, s1) + extSPlus));
         }
         return intervals;
     }
