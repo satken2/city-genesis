@@ -7,9 +7,11 @@ using GeneratedModels;
 /// 駅舎パス(PATH_STATION_HOUSE, model_type="station_house")のメッシュ生成器。
 ///
 /// 駅舎はウェイポイント付き折れ線のパスで、描画は次の2要素で構成される:
-///   1. 連絡橋: 線に沿った桁。各アンカー点を「地形標高 + マスター height(橋デッキの地上高)」へ
-///      持ち上げ、アンカー間を水平スパンで結ぶ(single_span と同じ構成)。柱(pillar)で支える。
-///   2. 建屋: 両終端の専有エリア矩形に駅舎モデル(Models/Stations/{variant})を置く。
+///   1. 連絡橋: 線に沿った桁。各アンカー点を「そのXZ直下の地形標高」に置き、アンカー間を
+///      直線で結ぶ(地形追従の細分化はしない)。**デッキの地上高・橋脚は body プレハブの
+///      造形が持つ**(原点=地面。実寸配置で幅も引き伸ばさない)。
+///   2. 建屋: 両終端の専有エリア矩形に駅舎モデル(Models/Stations/{variant}/body)を置き、
+///      矩形の範囲に地面パネル(floor パーツのマテリアル)を張る。
 ///
 /// 専有エリア矩形の位置はバックエンド(geo_station_house.py)と同一の決定的アルゴリズムで
 /// 算出する(ComputeEndFootprints)。バックエンド側を変更する場合は必ずここも揃えること。
@@ -24,9 +26,6 @@ using GeneratedModels;
 public class StationHousePath : IPathMeshGenerator
 {
     private const string PATH_TAG = "PathObject";
-
-    // マスターに height が無い場合の橋デッキの地上高(m)。
-    private const float DEFAULT_DECK_HEIGHT = 5f;
 
     // 建屋プレハブ欠落時の仮箱の高さ(m)。仮箱のみスケール可(プレハブは実寸規約)。
     private const float FALLBACK_HOUSE_HEIGHT = 8f;
@@ -55,35 +54,40 @@ public class StationHousePath : IPathMeshGenerator
         }
 
         RoadPath.GetPathMasterParams(pathData, out float width, out _, out _, out _, out _, out _, out _,
-            out float? pillarSpacing, out _, out _, out _);
-        float deckHeight = GetDeckHeight(pathData.path_variant);
+            out _, out _, out _, out bool singleSpan);
 
         GameObject container = new GameObject($"StationHouse_{pathData.path_id}");
 
         // ---- 連絡橋(桁) ----
-        List<Vector3> anchors = BuildBridgeAnchorPoints(pathData, points, deckHeight);
+        List<Vector3> anchors = BuildBridgeAnchorPoints(pathData, points);
         SplineComputer spline = RoadPath.BuildSpline(container, anchors, false);
 
-        string variantBase = $"Models/Paths/p{pathData.path_variant}";
-        string typeBase = $"Models/Paths/p{pathData.path_type}";
+        string bodyPath = $"Models/Paths/p{pathData.path_variant}/body";
+        string bodyFallbackPath = $"Models/Paths/p{pathData.path_type}/body";
 
-        GameObject bridgeBody = RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/body", width,
-            0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/body", singleSpan: true);
+        // 桁は実寸配置(stretchToWidth:false)。マスターの width は敷地ポリゴンとコライダーの幅で、
+        // 桁の断面はプレハブ形状が持つため、幅に合わせて引き伸ばしてはいけない。
+        // 敷き方はマスターの single_span に従う。false(既定)なら body プレハブをZ実寸のまま
+        // 折れ線に沿って敷き詰め、true なら1枚を全長へ引き伸ばす。引き伸ばしはZ分割を持たない
+        // プレハブだとアンカー間の弦になり、ウェイポイントを素通りして始点と終点が直結された
+        // 形になるため、造形のある桁では single_span=false にする。
+        // タイル長の上限は設けない(折れ線スプラインは縦カーブを持たず弦誤差が出ないため)。
+        GameObject bridgeBody = RoadPath.CreateSplineMesh(container, spline, bodyPath, width,
+            0f, RoadPartHeights.STATION_BRIDGE_BASE_ABOVE_SPLINE, false, bodyFallbackPath,
+            stretchToWidth: false, singleSpan: singleSpan, maxTileLength: 0f);
         if (bridgeBody == null)
         {
             bridgeBody = RoadPath.CreateFallbackRoadBody(container, spline, width);
         }
 
-        if (pillarSpacing.HasValue && pillarSpacing.Value > 0f)
-        {
-            RoadPath.GeneratePillars(container, spline, pillarSpacing.Value, 0f, pathData, variantBase, typeBase);
-        }
-
         // 橋の帯のクリック用コライダーメッシュ。他のパスと同様に PathMeshResult.Mesh として
         // 返し、PathManager が pathGO 側にコライダー・タグ・ハンドラを装着する。
+        // スプラインは地面にあり桁は上空に描かれるため、プレハブの天端の高さぶん持ち上げて
+        // 実際に見えているデッキの位置でクリックを受ける。
         Mesh bridgeColliderMesh = RoadPath.BuildColliderMeshFromSpline(spline, width);
         if (bridgeColliderMesh != null)
         {
+            OffsetMeshY(bridgeColliderMesh, GetBodyTopHeight(bodyPath, bodyFallbackPath));
             bridgeColliderMesh.name = $"StationHouseBridgeCollider_{pathData.path_id}";
         }
 
@@ -100,31 +104,20 @@ public class StationHousePath : IPathMeshGenerator
     // 連絡橋
     // =====================================================================
 
-    /// <summary>マスターの height(橋デッキの地上高)を返す。未定義は既定値。</summary>
-    private static float GetDeckHeight(int pathVariant)
-    {
-        var master = MasterDataStore.Instance != null ? MasterDataStore.Instance.GetPathMaster(pathVariant) : null;
-        if (master != null && master.height.HasValue && master.height.Value > 0f)
-        {
-            return master.height.Value;
-        }
-        return DEFAULT_DECK_HEIGHT;
-    }
-
     /// <summary>
     /// 連絡橋のスプラインアンカー点を構築する。各アンカー(始点・ウェイポイント・終点)を
-    /// そのXZ直下の地形標高 + deckHeight へ持ち上げ、アンカー間は水平スパンで結ぶ
-    /// (地形追従の細分化は行わない。single_span の桁橋と同じ考え方)。
-    /// アンカーが取得できない場合(縮退データ)は渡された点列を同じ規則で持ち上げて使う。
+    /// そのXZ直下の地形標高に置き、アンカー間は直線で結ぶ(地形追従の細分化は行わない)。
+    /// デッキの地上高は body プレハブの造形が持つため、ここでは持ち上げない。
+    /// アンカーが取得できない場合(縮退データ)は渡された点列を同じ規則で接地して使う。
     /// </summary>
-    private static List<Vector3> BuildBridgeAnchorPoints(PathSummary pathData, List<Vector3> points, float deckHeight)
+    private static List<Vector3> BuildBridgeAnchorPoints(PathSummary pathData, List<Vector3> points)
     {
         var anchors = new List<Vector3>();
 
         var startList = pathData.GetStartPointList();
         if (startList != null && startList.Count >= 2)
         {
-            anchors.Add(MakeDeckPoint(startList[0], startList[startList.Count - 1], deckHeight));
+            anchors.Add(MakeDeckPoint(startList[0], startList[startList.Count - 1]));
         }
 
         var waypointList = pathData.GetWaypointList();
@@ -133,14 +126,14 @@ public class StationHousePath : IPathMeshGenerator
             foreach (var wp in waypointList)
             {
                 if (wp.position == null || wp.position.Length < 2) continue;
-                anchors.Add(MakeDeckPoint(wp.position[0], wp.position[wp.position.Length - 1], deckHeight));
+                anchors.Add(MakeDeckPoint(wp.position[0], wp.position[wp.position.Length - 1]));
             }
         }
 
         var endList = pathData.GetEndPointList();
         if (endList != null && endList.Count >= 2)
         {
-            anchors.Add(MakeDeckPoint(endList[0], endList[endList.Count - 1], deckHeight));
+            anchors.Add(MakeDeckPoint(endList[0], endList[endList.Count - 1]));
         }
 
         if (anchors.Count < 2)
@@ -148,16 +141,46 @@ public class StationHousePath : IPathMeshGenerator
             anchors.Clear();
             foreach (var p in points)
             {
-                anchors.Add(MakeDeckPoint(p.x, p.z, deckHeight));
+                anchors.Add(MakeDeckPoint(p.x, p.z));
             }
         }
         return anchors;
     }
 
-    private static Vector3 MakeDeckPoint(float x, float z, float deckHeight)
+    private static Vector3 MakeDeckPoint(float x, float z)
     {
         float groundY = HeightmapTextureManager.GetTerrainHeight(new Vector3(x, 1000f, z));
-        return new Vector3(x, groundY + deckHeight, z);
+        return new Vector3(x, groundY + RoadPartHeights.ROAD_SPLINE_OFFSET, z);
+    }
+
+    /// <summary>
+    /// body プレハブのメッシュ天端(ローカルY最大値)を返す。桁の高さはプレハブ形状が
+    /// 持つため、コライダーをデッキ位置へ持ち上げる量として使う。プレハブが無ければ0
+    /// (フォールバックの白ストリップはスプライン面に描かれる)。
+    /// </summary>
+    private static float GetBodyTopHeight(string bodyPath, string fallbackPath)
+    {
+        if (ModelManager.Instance == null) return 0f;
+
+        GameObject prefab = ModelManager.Instance.GetModel(bodyPath, suppressWarning: true)
+            ?? ModelManager.Instance.GetModel(fallbackPath, suppressWarning: true);
+        var mf = prefab != null ? prefab.GetComponent<MeshFilter>() : null;
+        if (mf == null || mf.sharedMesh == null) return 0f;
+        return Mathf.Max(0f, mf.sharedMesh.bounds.max.y);
+    }
+
+    /// <summary>メッシュの全頂点をY方向へ平行移動する。</summary>
+    private static void OffsetMeshY(Mesh mesh, float offsetY)
+    {
+        if (mesh == null || Mathf.Approximately(offsetY, 0f)) return;
+
+        Vector3[] vertices = mesh.vertices;
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            vertices[i].y += offsetY;
+        }
+        mesh.vertices = vertices;
+        mesh.RecalculateBounds();
     }
 
     // =====================================================================
@@ -166,19 +189,16 @@ public class StationHousePath : IPathMeshGenerator
 
     /// <summary>
     /// 建屋を専有エリア矩形の中心に配置する。プレハブは
-    /// Models/Stations/{variant} → Models/Stations/default の順に解決し、
+    /// Models/Stations/{variant}/body → Models/Stations/body の順に解決し、
     /// スケールは一切かけない(建物パーツ実寸規約)。無ければ仮箱
     /// (house_width × FALLBACK_HOUSE_HEIGHT × house_depth。仮箱のみスケール可)で代替する。
-    /// Y は矩形中心の地形標高に接地する。
+    /// Y は矩形中心の地形標高に接地する。専有エリアの地面パネルも同じ位置に張る。
     /// </summary>
     private static void CreateHouseObject(Transform parent, PathSummary pathData, StationHouseFootprint footprint)
     {
-        GameObject prefab = null;
-        if (ModelManager.Instance != null)
-        {
-            prefab = ModelManager.Instance.GetModel($"Models/Stations/{pathData.path_variant}", suppressWarning: true)
-                ?? ModelManager.Instance.GetModel("Models/Stations/default", suppressWarning: true);
-        }
+        CreateFootprintFloor(parent, pathData, footprint);
+
+        GameObject prefab = ResolveStationPart(pathData.path_variant, "body");
 
         GameObject go;
         if (prefab != null)
@@ -207,6 +227,62 @@ public class StationHousePath : IPathMeshGenerator
         {
             SetupPathClick(col.gameObject, pathData);
         }
+    }
+
+    /// <summary>
+    /// 駅舎パーツを Models/Stations/{variant}/{partName} → Models/Stations/{partName} の順に
+    /// 解決する。バリアント専用フォルダに置けばそれが優先され、無ければ全駅舎共通の
+    /// Stations 直下のパーツを使う。どちらにも無ければ null。
+    /// </summary>
+    private static GameObject ResolveStationPart(int pathVariant, string partName)
+    {
+        if (ModelManager.Instance == null) return null;
+
+        return ModelManager.Instance.GetModel($"Models/Stations/{pathVariant}/{partName}", suppressWarning: true)
+            ?? ModelManager.Instance.GetModel($"Models/Stations/{partName}", suppressWarning: true);
+    }
+
+    /// <summary>
+    /// 専有エリア矩形に地面パネルを張る。建物の地面パネル
+    /// (F_建物メッシュの生成 §8.1)と同じ扱いで、floor パーツはマテリアルの供給元にすぎず、
+    /// 面そのものはポリゴンから生成する。**floor パーツがどこにも無ければ描画しない**
+    /// (既定マテリアルへはフォールバックしない=不要なスラブを敷かない)。
+    /// 面は常に地形へ追従させる(専有エリアは数十mの矩形で、水平に張ると傾斜地で埋没・浮きが出る)。
+    /// </summary>
+    private static void CreateFootprintFloor(Transform parent, PathSummary pathData, StationHouseFootprint footprint)
+    {
+        GameObject floorPart = ResolveStationPart(pathData.path_variant, "floor");
+        if (floorPart == null) return;
+
+        Material[] materials = BuildingMeshUtils.GetModuleMaterials(floorPart);
+        if (materials == null || materials.Length == 0 || materials[0] == null) return;
+
+        // 矩形の4隅を「中心を原点とする回転なしのローカルXZ」で組み立てる
+        // (ModularBodyBuilder の地面パネルと同じ座標規約)。頂点順はCCW
+        // (耳切り分割とパネルの巻き順反転がCCW入力を前提とするため。CWで渡すと法線が下を向く)。
+        Vector2 dir = footprint.direction;
+        Vector2 halfDepth = dir * (footprint.depth / 2f);
+        Vector2 halfWidth = RightAxis(dir) * (footprint.width / 2f);
+        var polygon = new Vector2[]
+        {
+            halfWidth - halfDepth,
+            halfWidth + halfDepth,
+            -halfWidth + halfDepth,
+            -halfWidth - halfDepth,
+        };
+
+        float groundY = HeightmapTextureManager.GetTerrainHeight(new Vector3(footprint.center.x, 1000f, footprint.center.y));
+        Vector3 centerWorld = new Vector3(footprint.center.x, groundY, footprint.center.y);
+
+        Mesh mesh = ModularBodyBuilder.GenerateTerrainConformingFloorMesh(polygon, centerWorld);
+        if (mesh == null) return;
+        mesh.name = $"StationHouseFloor_{pathData.path_id}";
+
+        GameObject go = new GameObject("Floor");
+        go.transform.SetParent(parent, false);
+        go.transform.localPosition = centerWorld;
+        go.AddComponent<MeshFilter>().mesh = mesh;
+        go.AddComponent<MeshRenderer>().sharedMaterial = materials[0];
     }
 
     /// <summary>
@@ -253,7 +329,7 @@ public class StationHousePath : IPathMeshGenerator
     {
         if (missingHousePrefabWarnedVariants.Add(pathVariant))
         {
-            Debug.LogWarning($"[StationHousePath] Prefab not found: Models/Stations/{pathVariant} (仮箱で代替表示します)");
+            Debug.LogWarning($"[StationHousePath] Prefab not found: Models/Stations/{pathVariant}/body (仮箱で代替表示します)");
         }
     }
 
@@ -266,7 +342,9 @@ public class StationHousePath : IPathMeshGenerator
     ///
     /// バックエンド geo_station_house.station_house_end_rects と同一のアルゴリズム:
     /// 終端の外向き方向を s 軸とする1次元の区間回避問題として、周辺の軌道系パスの
-    /// 占有区間を避ける最小の中心位置 s0 を決定的に解く。
+    /// 占有区間を避ける最小の内側の辺の位置 s_in を決定的に解く。矩形は終端から
+    /// 外側へ広がる(内側の辺が終端の上に乗る)ため、中心は s_in + 奥行き半分の位置で、
+    /// さらに house_offset ぶん横(外向き方向を向いて右が正)へずれる。
     /// 敷設プレビューの仮 PathSummary(path_id=0)でも動作する(自パス除外は path_id が
     /// 一致するときだけスキップ)。
     /// </summary>
@@ -274,7 +352,7 @@ public class StationHousePath : IPathMeshGenerator
     {
         var result = new List<StationHouseFootprint>();
 
-        GetHouseDimensions(pathData.path_variant, out float houseWidth, out float houseDepth);
+        GetHouseFootprintParams(pathData.path_variant, out float houseWidth, out float houseDepth, out float houseOffset);
         List<Vector2> anchors = PathAnchorPoints2D(pathData);
         if (anchors.Count < 2) return result;
 
@@ -286,12 +364,12 @@ public class StationHousePath : IPathMeshGenerator
             if (!TryGetEndpointOutwardDir(anchors, atEnd, out Vector2 dir)) continue;
             Vector2 tip = atEnd ? anchors[anchors.Count - 1] : anchors[0];
 
-            List<Vector2> intervals = CollectOccupiedIntervals(pathManager, tip, dir, houseWidth, pathData.path_id);
-            float s0 = ResolveSlideDistance(intervals, houseDepth);
+            List<Vector2> intervals = CollectOccupiedIntervals(pathManager, tip, dir, houseWidth, houseOffset, pathData.path_id);
+            float sIn = ResolveSlideDistance(intervals, houseDepth);
 
             result.Add(new StationHouseFootprint
             {
-                center = tip + dir * s0,
+                center = tip + dir * (sIn + houseDepth / 2f) + RightAxis(dir) * houseOffset,
                 direction = dir,
                 rotationDeg = Mathf.Atan2(dir.x, dir.y) * Mathf.Rad2Deg,
                 width = houseWidth,
@@ -302,17 +380,26 @@ public class StationHousePath : IPathMeshGenerator
     }
 
     /// <summary>
-    /// 駅舎バリアントの専有エリア寸法 (width, depth) を返す(m)。
-    /// width は終端セグメントと直交方向、depth は終端セグメントに沿う方向。
-    /// マスターに寸法が無いときは既定値にフォールバックする(バックエンド get_house_dimensions と同一)。
+    /// 外向き方向 dir に対する右手方向(XZ平面)。rotationDeg で回した建屋のローカル+X軸に一致する。
+    /// house_offset の正方向であり、矩形の横幅の張り出し方向でもある。
     /// </summary>
-    public static void GetHouseDimensions(int pathVariant, out float width, out float depth)
+    private static Vector2 RightAxis(Vector2 dir) => new Vector2(dir.y, -dir.x);
+
+    /// <summary>
+    /// 駅舎バリアントの専有エリアのパラメータ (width, depth, offset) を返す(m)。
+    /// width は終端セグメントと直交方向、depth は終端セグメントに沿う方向の寸法、
+    /// offset は矩形を横方向へずらす量(外向き方向を向いて右が正)。
+    /// マスターに寸法が無いときは既定値、オフセットが無いときは0にフォールバックする
+    /// (バックエンド get_house_footprint_params と同一)。
+    /// </summary>
+    public static void GetHouseFootprintParams(int pathVariant, out float width, out float depth, out float offset)
     {
         var master = MasterDataStore.Instance != null ? MasterDataStore.Instance.GetPathMaster(pathVariant) : null;
         width = (master != null && master.house_width.HasValue && master.house_width.Value > 0f)
             ? master.house_width.Value : Constants.STATION_HOUSE_DEFAULT_WIDTH;
         depth = (master != null && master.house_depth.HasValue && master.house_depth.Value > 0f)
             ? master.house_depth.Value : Constants.STATION_HOUSE_DEFAULT_DEPTH;
+        offset = (master != null && master.house_offset.HasValue) ? master.house_offset.Value : 0f;
     }
 
     /// <summary>パスのアンカー点(始点・ウェイポイント・終点)を XZ の2Dリストで返す。</summary>
@@ -385,17 +472,18 @@ public class StationHousePath : IPathMeshGenerator
 
     /// <summary>
     /// 終端周辺の軌道系パスが s 軸(終端の外向き方向)上に占有する区間のリストを返す。
-    /// 終端 tip を原点、direction を +s とする座標系で、横方向距離が
+    /// 終端 tip を原点、direction を +s、その右手を +lat とする座標系で、横方向距離が
     /// 「専有エリア半幅 + 線路クリアランス」以内にある線路セグメントを s 軸へ射影し、
     /// クリアランスぶん広げた区間 (x=s_min, y=s_max) として収集する
     /// (バックエンド _occupied_intervals と同一。セグメント供給は PathManager の空間ハッシュ)。
+    /// 横方向コリドーは houseOffset ぶんずれた矩形の位置を中心に取る。
     /// </summary>
-    private static List<Vector2> CollectOccupiedIntervals(PathManager pathManager, Vector2 tip, Vector2 direction, float houseWidth, int excludePathId)
+    private static List<Vector2> CollectOccupiedIntervals(PathManager pathManager, Vector2 tip, Vector2 direction, float houseWidth, float houseOffset, int excludePathId)
     {
         var intervals = new List<Vector2>();
         if (pathManager == null) return intervals;
 
-        Vector2 perp = new Vector2(-direction.y, direction.x);
+        Vector2 right = RightAxis(direction);
         var segments = pathManager.QueryNearbySegments(
             new Vector3(tip.x, 0f, tip.y), Constants.STATION_HOUSE_TRACK_SEARCH_RADIUS);
 
@@ -409,8 +497,8 @@ public class StationHousePath : IPathMeshGenerator
             float clearance = RailClearance(rail.path_variant);
             float latLimit = houseWidth / 2f + clearance;
 
-            float la = (seg.a.x - tip.x) * perp.x + (seg.a.z - tip.y) * perp.y;
-            float lb = (seg.b.x - tip.x) * perp.x + (seg.b.z - tip.y) * perp.y;
+            float la = (seg.a.x - tip.x) * right.x + (seg.a.z - tip.y) * right.y - houseOffset;
+            float lb = (seg.b.x - tip.x) * right.x + (seg.b.z - tip.y) * right.y - houseOffset;
             float sa = (seg.a.x - tip.x) * direction.x + (seg.a.z - tip.y) * direction.y;
             float sb = (seg.b.x - tip.x) * direction.x + (seg.b.z - tip.y) * direction.y;
 
@@ -465,19 +553,19 @@ public class StationHousePath : IPathMeshGenerator
     }
 
     /// <summary>
-    /// 専有エリア(奥行き houseDepth)の中心 s0 を、線路占有区間を避ける最小値で返す。
-    /// 候補は「終端そのもの(s0=0)」と「各占有区間の終端 + 奥行き半分」で、
+    /// 専有エリアの内側の辺の位置 s_in を、線路占有区間を避ける最小値で返す。
+    /// 矩形は s 軸上で [s_in, s_in + houseDepth] を占める(s_in=0 が「内側の辺が終端の上に
+    /// 乗る」初期位置)。候補は「終端そのもの(s_in=0)」と「各占有区間の終端」で、
     /// 区間と重ならない最小の候補を採用する(バックエンド _resolve_slide_distance と同一)。
     /// </summary>
     private static float ResolveSlideDistance(List<Vector2> intervals, float houseDepth)
     {
         List<Vector2> merged = MergeIntervals(intervals);
-        float half = houseDepth / 2f;
 
         var candidates = new List<float> { 0f };
         foreach (var interval in merged)
         {
-            candidates.Add(interval.y + half);
+            candidates.Add(interval.y);
         }
         candidates.Sort();
 
@@ -485,7 +573,7 @@ public class StationHousePath : IPathMeshGenerator
         {
             if (cand < 0f) continue;
             bool free = true;
-            float lo = cand - half, hi = cand + half;
+            float lo = cand, hi = cand + houseDepth;
             foreach (var interval in merged)
             {
                 if (lo < interval.y && hi > interval.x)

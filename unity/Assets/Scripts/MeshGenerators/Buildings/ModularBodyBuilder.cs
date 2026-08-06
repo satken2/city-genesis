@@ -424,8 +424,11 @@ public static class ModularBodyBuilder
     /// 各頂点の高さは center_point 位置での地形高さ（centerPointWorld.y）を基準にローカル座標化する。
     /// GameObject が center_point 位置の高さに配置されることを前提とする
     /// （BuildingManager.CreateOrUpdateBuildingObject の配置高さと対応）。
+    ///
+    /// 建物以外の地面パネル（駅舎パスの専有エリア＝StationHousePath）からも共有する。
+    /// footprint は中心を原点とするローカルXZ、回転なしの座標系で渡すこと。
     /// </summary>
-    private static Mesh GenerateTerrainConformingFloorMesh(Vector2[] footprint, Vector3 centerPointWorld)
+    public static Mesh GenerateTerrainConformingFloorMesh(Vector2[] footprint, Vector3 centerPointWorld)
     {
         if (footprint == null || footprint.Length < 3) return null;
 

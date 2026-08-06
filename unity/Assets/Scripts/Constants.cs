@@ -206,10 +206,10 @@ public static class Constants
     public const int PATH_TRACK = 4;
     public const int PATH_MONORAIL = 5;
     public const int PATH_ROPEWAY = 6;
-    public const int PATH_STATION_HOUSE = 7;
     public const int PATH_TRANSPORT = 10;
     public const int PATH_ELECTRICITY = 11;
     public const int PATH_WATER = 12;
+    public const int PATH_STATION_HOUSE = 20;
     public const int DIR_BOTH = 0;
     public const int DIR_FORWARD = 1;
     public const int DIR_BACKWARD = 2;

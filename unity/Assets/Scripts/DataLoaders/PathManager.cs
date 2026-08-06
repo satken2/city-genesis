@@ -2197,6 +2197,10 @@ public class PathManager : BaseApiDataManager
     /// </summary>
     private static bool UsesTunnelMesh(PathSummary path, List<Vector3> points)
     {
+        // 駅舎パスは生成器が各アンカーを「地形標高 + マスター height」へ持ち上げて桁を架けるため、
+        // 点列(地表基準)での深さ判定は意味を持たない。区間分割すると分割数ぶん橋と建屋が
+        // 二重生成されるので対象外にする。
+        if (PathMeshFactory.GetModelType(path) == "station_house") return false;
         if (TunnelSectionUtil.IsUndergroundPath(path)) return true;
         if (GetPathFollowTerrain(path)) return false;
         float clearance = TunnelSectionUtil.GetClearanceHeight(path.path_variant);
@@ -4096,10 +4100,19 @@ public class PathMasterItem
 
     /// <summary>
     /// 駅舎パス(PATH_STATION_HOUSE)の両終端の専有エリア(建屋)の奥行き(m)。
-    /// 終端セグメントに沿う方向の寸法。null は STATION_HOUSE_DEFAULT_DEPTH 扱い。
+    /// 終端セグメントに沿う方向の寸法で、矩形は終端から**外側へ**この長さぶん広がる
+    /// (内側の辺が終端の上に乗る)。null は STATION_HOUSE_DEFAULT_DEPTH 扱い。
     /// 駅舎以外のバリアントは null。
     /// </summary>
     public float? house_depth;
+
+    /// <summary>
+    /// 駅舎パス(PATH_STATION_HOUSE)の専有エリア(建屋)の横方向オフセット(m)。
+    /// 終端の外向き方向を向いて右が正(=建屋のローカル+X方向)で、両終端の建屋が
+    /// 同じ向き関係でずれる。連絡橋の取り付き位置に対して建屋の造形が偏心している
+    /// バリアントで使う。null・0 は横ずれなし。駅舎以外のバリアントは null。
+    /// </summary>
+    public float? house_offset;
 
     /// <summary>
     /// 3D描画用の高さオフセット(m)。パスの相対高さ(relY)から base_height を引いた高さで3Dメッシュを描画する。

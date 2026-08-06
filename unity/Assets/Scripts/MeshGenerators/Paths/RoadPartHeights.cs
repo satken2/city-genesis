@@ -85,6 +85,14 @@ public static class RoadPartHeights
     public const float PLATFORM_BASE_ABOVE_SPLINE = 0.0f;
 
     /// <summary>
+    /// 駅舎パスの連絡橋（body）の設置面（原点）のスプラインからの高さ。
+    /// プレハブのモデリング規約は**原点＝地面（スプライン基準面）**で、
+    /// デッキの地上高・橋脚の立ち上がりはすべてプレハブ形状が持つ
+    /// （架線柱・プラットフォームと同じ考え方。コードは桁の高さを持たない）。
+    /// </summary>
+    public const float STATION_BRIDGE_BASE_ABOVE_SPLINE = 0.0f;
+
+    /// <summary>
     /// 駅パスのホーム面（プラットフォーム上面の公称高さ）のスプラインからの高さ。
     /// レール踏面（軌道基準面＋プレハブ形状の立ち上がり約0.2m）から約1.2mに相当する。
     /// デッキ（ホーム上面。コードが動的生成する水平面）はこの面から PLATFORM_DECK_SINK

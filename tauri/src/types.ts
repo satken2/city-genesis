@@ -512,12 +512,16 @@ export type PathMasterEntry = {
    */
   infra_products?: number[];
   /**
-   * 駅舎パス(type=PATH_STATION_HOUSE)の両終端に置かれる専有エリア(建屋)の寸法(m)。
-   * house_width は線と直交方向、house_depth は線に沿う方向。master.yaml の
-   * house_width / house_depth に対応する(駅舎以外のバリアントでは未定義)。
+   * 駅舎パス(type=PATH_STATION_HOUSE)の両終端に置かれる専有エリア(建屋)の寸法(m)と
+   * 横方向オフセット(m)。house_width は線と直交方向、house_depth は線に沿う方向で、
+   * 矩形は終端から外側へ house_depth ぶん広がる(内側の辺が終端の上に乗る)。
+   * house_offset は矩形の横ずれで、終端の外向き方向を向いて右が正。
+   * master.yaml の house_width / house_depth / house_offset に対応する
+   * (駅舎以外のバリアントでは未定義)。
    */
   house_width?: number | null;
   house_depth?: number | null;
+  house_offset?: number | null;
 };
 
 /**

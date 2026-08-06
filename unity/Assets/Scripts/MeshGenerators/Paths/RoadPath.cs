@@ -193,7 +193,12 @@ public class RoadPath : IPathMeshGenerator
     /// プレハブの原点自体に意味があり、それをスプライン中心線基準の座標としてそのまま使いたい
     /// パーツ（駅のプラットフォーム＝原点が線路中心線）で使う。
     /// </param>
-    public static GameObject CreateSplineMesh(GameObject parent, SplineComputer spline, string prefabName, float width, float centerOffsetX, float offsetY, bool mirrorX = false, string fallbackPrefabName = null, bool isDashed = false, bool stretchToWidth = true, double clipFrom = 0.0, double clipTo = 1.0, bool singleSpan = false, bool compensatePivot = true)
+    /// <param name="maxTileLength">
+    /// Extrude配置の1タイルの上限長（m）。既定は MAX_EXTRUDE_TILE_LENGTH（弦誤差抑制用）。
+    /// 0以下を渡すと上限なし＝プレハブのZ実寸をそのままタイル長にする。縦カーブを持たない
+    /// 折れ線スプライン（駅舎パスの連絡橋など）で、造形単位を著作サイズのまま並べたいときに使う。
+    /// </param>
+    public static GameObject CreateSplineMesh(GameObject parent, SplineComputer spline, string prefabName, float width, float centerOffsetX, float offsetY, bool mirrorX = false, string fallbackPrefabName = null, bool isDashed = false, bool stretchToWidth = true, double clipFrom = 0.0, double clipTo = 1.0, bool singleSpan = false, bool compensatePivot = true, float maxTileLength = MAX_EXTRUDE_TILE_LENGTH)
     {
         // プレハブのロード
         GameObject prefab = null;
@@ -365,7 +370,8 @@ public class RoadPath : IPathMeshGenerator
                 }
 
                 // タイル数は autoCount（メッシュのZ長基準）ではなく、弦誤差を抑えるための
-                // 上限タイル長(MAX_EXTRUDE_TILE_LENGTH)から明示的に決める（同定数のコメント参照）。
+                // 上限タイル長(maxTileLength。既定 MAX_EXTRUDE_TILE_LENGTH)から明示的に決める
+                // （同定数のコメント参照）。上限なし(0以下)ならプレハブのZ実寸がタイル長になる。
                 // single_span の場合はタイル化せず count=1 とし、メッシュ両端のZ頂点が
                 // スプライン始点・終点に写像されることでアンカー点間の弦（直線スパン）になる。
                 channel.autoCount = false;
@@ -375,7 +381,7 @@ public class RoadPath : IPathMeshGenerator
                 }
                 else
                 {
-                    float tileLen = Mathf.Min(meshLenZ, MAX_EXTRUDE_TILE_LENGTH);
+                    float tileLen = maxTileLength > 0f ? Mathf.Min(meshLenZ, maxTileLength) : meshLenZ;
                     float clippedLen = splineLen * (float)System.Math.Max(0.0, clipTo - clipFrom);
                     channel.count = Mathf.Max(1, Mathf.RoundToInt(clippedLen / tileLen));
                 }
