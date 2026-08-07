@@ -314,6 +314,66 @@ export async function sendHideParcelFrontPath(): Promise<void> {
 }
 
 /**
+ * パス干渉ハイライトのペイロード。バックエンドの
+ * `compute_path_interference` / `GET|POST /api/v1/paths/interference` と同形。
+ * 区画は着工可否の4分類、建物は当該区画に立地する agent_id、
+ * パスは立体交差する既存 path_id。
+ */
+export type PathInterferenceHighlight = {
+  parcels: {
+    blocking: number[];
+    removable: number[];
+    shavable: number[];
+    exempt: number[];
+  };
+  building_ids: number[];
+  colliding_path_ids: number[];
+};
+
+/**
+ * `world:highlight_objects`
+ * 計画中パスが干渉する区画・建物・既存パスを Unity の3Dビュー上でハイライト表示する。
+ * 区画は分類ごとに色分け(blocking=赤/removable=橙/shavable=黄/exempt=なし)、
+ * 建物とパスは警告色で強調する。敷設中の形状確定時・確定ボタン押下時
+ * (windowType="path_build")と、着工前パスの詳細パネル表示時
+ * (windowType="path_detail")の双方から送る。
+ */
+export async function sendHighlightObjects(
+  interference: PathInterferenceHighlight,
+  windowType: string = "path_build",
+): Promise<void> {
+  await invoke("send_window_action", {
+    windowType,
+    entity: null,
+    action: "world:highlight_objects",
+    params: {
+      // ハイライトの発信元。Unity側はソースごとに独立レイヤーで保持し、
+      // あるウィンドウのクリアが別ウィンドウのハイライトを消さないようにする。
+      source: windowType,
+      parcels: interference.parcels,
+      building_ids: interference.building_ids,
+      colliding_path_ids: interference.colliding_path_ids,
+    },
+  });
+}
+
+/**
+ * `world:clear_highlights`
+ * `world:highlight_objects` で表示した干渉ハイライトのうち、この発信元(windowType)の
+ * ぶんだけを消す。敷設終了・詳細パネルを閉じたときに送る。
+ */
+export async function sendClearHighlights(
+  windowType: string = "path_build",
+): Promise<void> {
+  await invoke("send_window_action", {
+    windowType,
+    entity: null,
+    action: "world:clear_highlights",
+    params: { source: windowType },
+  });
+}
+
+/**
  * `edit_connector:show`
  * 経済主体詳細パネル(AgentDetailPanel)の表示中、施設の接続端子ノード
  * (インフラ接続点 infra_node_id / 走行網接続点 depot_node_id) を Unity の3Dビュー上に

@@ -71,6 +71,8 @@ export type CityMapLayerVisibility = {
   parcels: boolean;
   /** 建物の底面形状 */
   buildings: boolean;
+  /** 駅(同じ駅舎に所属するプラットフォーム群の凸包) */
+  stations: boolean;
   /** 地区の枠線 */
   zoneBorders: boolean;
   /** 標高に応じた色分け */
@@ -89,6 +91,7 @@ export const DEFAULT_CITY_MAP_LAYERS: CityMapLayerVisibility = {
   railways: true,
   parcels: true,
   buildings: true,
+  stations: true,
   zoneBorders: true,
   elevation: true,
   contours: false,
@@ -174,6 +177,10 @@ type ApiPathItem = {
   end_control?: number[] | null;
   /** ベジエ曲線かどうか(1=曲線/0=直線・折れ線)。曲線のみ補間して描く */
   curved?: boolean | number;
+  /** パスの占有ポリゴン [[x,z],...](ワールド座標)。駅の凸包描画に使う */
+  polygon?: [number, number][] | null;
+  /** 所属する駅舎パスのID。プラットフォームのみ有効で、未所属・非プラットフォームは0以下 */
+  house_path_id?: number;
 };
 
 /** polygonを持つエンティティ(土地区画・地区・建物)の共通形 */
@@ -205,6 +212,8 @@ type VectorState = {
   railPath: Path2D | null;
   parcelPath: Path2D | null;
   buildingPath: Path2D | null;
+  /** 駅の凸包(駅舎ごとにまとめたプラットフォーム群の凸包)。半透明の面で描く */
+  stationHullPath: Path2D | null;
   /** 確定地区(auto_managed=0)の枠線。実線で描く */
   zonePathConfirmed: Path2D | null;
   /** 自動管理地区(auto_managed=1)の枠線。破線で描き「まだ仮の区割り」であることを示す */
@@ -252,6 +261,9 @@ const COLOR_COASTLINE = "#89dceb";
 const COLOR_ZONE = "#89b4fa";
 const COLOR_PARCEL = "#585b70";
 const COLOR_BUILDING = "#cba6f7";
+/* 駅の凸包(同じ駅舎に所属するプラットフォーム群の外接凸包)。薄いピンクの面で
+ * 「1つの駅」の範囲を示す */
+const COLOR_STATION = "#f38ba8";
 /* 道路は実幅の面として描くため、種別ごとの塗り色を持つ。
  * 幹線街路は非幹線よりやや明るい灰にして道路網の骨格を読み取れるようにする */
 const COLOR_STREET = "#82858f";
@@ -594,6 +606,69 @@ function buildPolygonPath(items: ApiPolygonItem[], localPolygon: boolean): Path2
 }
 
 /**
+ * 点群の凸包を反時計回り(Andrewのmonotone chain法)で返す。
+ * 3点未満はそのまま返す。駅(プラットフォーム群)の外接ポリゴン算出に使う。
+ */
+function convexHull(pts: [number, number][]): [number, number][] {
+  if (pts.length < 3) return pts.slice();
+  const p = [...pts].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cross = (o: [number, number], a: [number, number], b: [number, number]) =>
+    (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lower: [number, number][] = [];
+  for (const pt of p) {
+    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], pt) <= 0) lower.pop();
+    lower.push(pt);
+  }
+  const upper: [number, number][] = [];
+  for (let i = p.length - 1; i >= 0; i--) {
+    const pt = p[i];
+    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], pt) <= 0) upper.pop();
+    upper.push(pt);
+  }
+  // 各chainの末尾は始点と重複するため落とす
+  lower.pop();
+  upper.pop();
+  return lower.concat(upper);
+}
+
+/**
+ * 「駅」を表すPath2Dを構築する([[29_駅と駅舎]]のロジック)。
+ * プラットフォーム(=マスターの platform_width が正の駅パス)を所属駅舎(house_path_id)
+ * ごとにまとめ、同じ駅舎に属する全プラットフォームの占有ポリゴン頂点の凸包を
+ * 1つの閉ポリゴンとして描く。どの駅舎にも所属しないプラットフォームは描かない。
+ * プラットフォームが1本だけの駅舎はそのホームの矩形がそのまま凸包になる。
+ */
+function buildStationHullPath(paths: ApiPathItem[], md: MasterData | null): Path2D | null {
+  // house_path_id → その駅舎に所属する全プラットフォームのポリゴン頂点
+  const groups = new Map<number, [number, number][]>();
+  for (const p of paths) {
+    const houseId = p.house_path_id ?? 0;
+    if (houseId <= 0) continue;
+    const pw = md?.paths?.[p.path_variant]?.platform_width;
+    if (!(typeof pw === "number" && pw > 0)) continue; // プラットフォーム(駅パス)のみ
+    const poly = p.polygon;
+    if (!poly || poly.length < 2) continue;
+    let acc = groups.get(houseId);
+    if (!acc) {
+      acc = [];
+      groups.set(houseId, acc);
+    }
+    for (const v of poly) acc.push([v[0], v[1]]);
+  }
+  if (groups.size === 0) return null;
+
+  const path = new Path2D();
+  for (const verts of groups.values()) {
+    const hull = convexHull(verts);
+    if (hull.length < 3) continue;
+    path.moveTo(hull[0][0], hull[0][1]);
+    for (let i = 1; i < hull.length; i++) path.lineTo(hull[i][0], hull[i][1]);
+    path.closePath();
+  }
+  return path;
+}
+
+/**
  * 海岸線API(GeoJSONライク)のPolygon/MultiPolygonをPath2Dへ変換する。
  * 外周リング(陸地の外縁)に加え、内周リング(穴)も描く。穴は内陸の湖・池など
  * 水面ポリゴンが陸地から差し引かれてできたものであり、これを描くことで
@@ -761,6 +836,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         railPath: null,
         parcelPath: null,
         buildingPath: null,
+        stationHullPath: null,
         zonePathConfirmed: null,
         zonePathAuto: null,
         fetchedBounds: null,
@@ -912,6 +988,19 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           ctx.strokeStyle = COLOR_PARCEL;
           ctx.lineWidth = px(1);
           ctx.stroke(vec.parcelPath);
+        }
+
+        // 駅(同じ駅舎に所属するプラットフォーム群の凸包)。薄いピンクの面+枠線で
+        // 「1つの駅」の範囲を示す。プラットフォーム(線路)はこの上に描かれる。
+        if (L.stations && vec.stationHullPath) {
+          ctx.globalAlpha = 0.22;
+          ctx.fillStyle = COLOR_STATION;
+          ctx.fill(vec.stationHullPath);
+          ctx.globalAlpha = 1.0;
+          ctx.strokeStyle = COLOR_STATION;
+          ctx.lineWidth = px(1.5);
+          ctx.setLineDash([]);
+          ctx.stroke(vec.stationHullPath);
         }
 
         // 建物の底面形状(半透明塗り + 枠線)
@@ -1118,7 +1207,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       const neededKinds = (): VectorKind[] => {
         const L = layersRef.current;
         const kinds: VectorKind[] = [];
-        if (L.trunkRoads || L.allRoads || L.railways) kinds.push("paths");
+        if (L.trunkRoads || L.allRoads || L.railways || L.stations) kinds.push("paths");
         if (L.parcels) kinds.push("parcels");
         if (L.buildings) kinds.push("buildings");
         if (L.zoneBorders) kinds.push("zones");
@@ -1173,6 +1262,9 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         const rank = (b: RoadBand) => (b.kind === "motorway" ? 2 : b.trunk ? 1 : 0);
         vec.roadBands = [...bands.values()].sort((a, b) => rank(a) - rank(b));
         vec.railPath = hasRail ? rail : null;
+        // 駅(駅舎ごとにまとめたプラットフォーム群の凸包)。platform_width判定に
+        // マスターデータが要るため、道路分類と同じタイミングで再構築する。
+        vec.stationHullPath = buildStationHullPath(vec.paths, md);
       };
 
       const loadVectors = async (kinds: VectorKind[], bounds: CityMapBounds) => {

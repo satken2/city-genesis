@@ -102,6 +102,11 @@ public class RoadPlanManager : MonoBehaviour
     private const float DISTANCE_START_FADE = 280f;
     private const float DISTANCE_INVISIBLE = 480f;
 
+    // 建物干渉のローカル推定用。コリドーBBOX絞り込みの追加マージンと、
+    // フットプリント塗りつぶしを地形から浮かせるオフセット（Zファイト回避）。
+    private const float BuildingInterferenceMargin = 2f;
+    private const float BuildingInterferenceHeightOffset = 0.06f;
+
     // =====================================================================
     // インフラ接続端子マーカー（赤い逆四角錐）の定数
     // =====================================================================
@@ -189,6 +194,8 @@ public class RoadPlanManager : MonoBehaviour
     private List<Vector3> cachedRenderPoints;
     private List<(int segIndex, PathSegment otherSeg)> cachedElevationViolations;
     private List<int> cachedMaxSpanViolations;
+    // 敷設中パスと干渉する建物のフットプリント（ワールドXZポリゴン）のローカル推定キャッシュ。
+    private List<List<Vector3>> cachedBuildingInterference;
 
     // 既存パスの立体交差判定用セグメントキャッシュ。
     // 編集中は既存パスが変化しないため、一度構築したセグメントを再利用する。
@@ -199,6 +206,7 @@ public class RoadPlanManager : MonoBehaviour
         cachedRenderPoints = null;
         cachedElevationViolations = null;
         cachedMaxSpanViolations = null;
+        cachedBuildingInterference = null;
     }
 
     public bool IsEditMode => phase == RoadEditorPhase.Editing;
@@ -921,13 +929,21 @@ public class RoadPlanManager : MonoBehaviour
     /// </summary>
     public bool IsMouseOverEditHandle(Vector2 screenPos, Camera cam)
     {
-        if (!IsEditMode) return false;
+        // [DIAG] ドラッグ掴み判定の実態を可視化する一時ログ。原因特定後に削除する。
+        // 計画中パス編集で「掴めない/カメラが動く」場合、ここで phase・points 数・hit 種別を確認する。
+        if (!IsEditMode)
+        {
+            Debug.Log($"[DIAG] IsMouseOverEditHandle: phase={phase} points={points.Count} → false (not Editing)");
+            return false;
+        }
         if (cam == null) return false;
 
         RoadOverlayHit hit = hitDetector.TestHit(screenPos, points, cam);
-        return hit.type == HitTargetType.Point ||
-               hit.type == HitTargetType.ControlIn ||
-               hit.type == HitTargetType.ControlOut;
+        bool over = hit.type == HitTargetType.Point ||
+                    hit.type == HitTargetType.ControlIn ||
+                    hit.type == HitTargetType.ControlOut;
+        Debug.Log($"[DIAG] IsMouseOverEditHandle: phase={phase} points={points.Count} hit={hit.type} cam={(cam != null ? cam.name : "null")} → {over}");
+        return over;
     }
 
     // =====================================================================
@@ -967,7 +983,8 @@ public class RoadPlanManager : MonoBehaviour
         InvalidateShapeCache();
         RecomputeAllControlPoints();
         Update3DPreview();
-        EmitShapeUpdate();
+        // finalized=true で送り、UI側に権威あるバックエンド干渉問い合わせを促す。
+        EmitShapeUpdate(finalized: true);
         PlaySound(finalizeShapeSound);
         Debug.Log($"RoadPlanManager: 形状確定 ({points.Count}点) → Editingフェーズ");
     }
@@ -2061,6 +2078,7 @@ public class RoadPlanManager : MonoBehaviour
         DrawTunnelSections(cam);
         DrawMaxSpanWarnings(cam);
         DrawElevationIntersections(cam);
+        DrawBuildingInterference(cam);
 
         overlayRenderer.EndFrame(cam);
     }
@@ -2976,7 +2994,7 @@ public class RoadPlanManager : MonoBehaviour
     /// 送信するY座標は地面高さを差し引いた相対高さとする。
     /// UI側ではこの相対高さをそのままバックエンド送信に使用する。
     /// </summary>
-    private void EmitShapeUpdate()
+    private void EmitShapeUpdate(bool finalized = false)
     {
         if (IpcClient.Instance == null) return;
 
@@ -3024,7 +3042,7 @@ public class RoadPlanManager : MonoBehaviour
             embankmentHeights.Add(pt.embankmentHeight);
         }
 
-        IpcClient.Instance.EmitEditPathUpdateShape(pathId, PathType, pointsList, startControl, endControl, embankmentHeights, waypointControls, Curved, PathFollowTerrainOverride);
+        IpcClient.Instance.EmitEditPathUpdateShape(pathId, PathType, pointsList, startControl, endControl, embankmentHeights, waypointControls, Curved, PathFollowTerrainOverride, finalized);
     }
 
     // =====================================================================
@@ -3645,6 +3663,201 @@ public class RoadPlanManager : MonoBehaviour
                 Color faded = warningColor;
                 faded.a *= 0.5f;
                 overlayRenderer.AddSolidLine(otherSeg.a, otherSeg.b, faded, dashedLineThickness * 2.5f);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 敷設中パスの敷地コリドー(中心線をパス幅で膨らませた帯)と重なる建物を
+    /// フロント側でローカル推定し、そのフットプリントを返す。
+    ///
+    /// バックエンドへ問い合わせず BuildingManager の空間インデックス + 建物フットプリント
+    /// (BuildingSummary.polygonArray はワールドXZ絶対座標)で幾何判定するため、
+    /// ドラッグ追従でリアルタイムに使える。所有権・収用可否は判別せず、幾何的な重なりの
+    /// 推定にとどまる(権威判定は確定時のバックエンド問い合わせ)。編集中はキャッシュする。
+    /// </summary>
+    private List<List<Vector3>> CheckBuildingInterference()
+    {
+        if (cachedBuildingInterference != null)
+            return cachedBuildingInterference;
+
+        var result = new List<List<Vector3>>();
+        cachedBuildingInterference = result;
+
+        if (BuildingManager.Instance == null || pathManager == null) return result;
+
+        // GetRenderPoints() はキャッシュ共有参照のため複製してから編集する。
+        var centerline = new List<Vector3>(GetRenderPoints());
+        // 配置中は確定済みアンカーに加え、スナップ済みホバー位置を暫定終点として繋ぎ、
+        // ドラッグ追従で干渉をリアルタイム表示する（ホバー移動で毎回キャッシュ無効化される）。
+        if (phase == RoadEditorPhase.Placing && points.Count >= 1)
+        {
+            if (centerline.Count == 0 ||
+                (centerline[centerline.Count - 1] - hoverWorldPosition).sqrMagnitude > 0.01f)
+            {
+                centerline.Add(hoverWorldPosition);
+            }
+        }
+        if (centerline.Count < 2) return result;
+
+        float halfWidth = pathManager.GetRoadWidth(PathSubtype) * 0.5f;
+        if (halfWidth <= 0f) return result;
+
+        // コリドーのBBOX(中心線のXZ範囲をhalfWidth+マージンで膨らませる)で候補を絞る。
+        float minX = float.MaxValue, minZ = float.MaxValue;
+        float maxX = float.MinValue, maxZ = float.MinValue;
+        foreach (var p in centerline)
+        {
+            if (p.x < minX) minX = p.x;
+            if (p.x > maxX) maxX = p.x;
+            if (p.z < minZ) minZ = p.z;
+            if (p.z > maxZ) maxZ = p.z;
+        }
+        float margin = halfWidth + BuildingInterferenceMargin;
+        var candidates = BuildingManager.Instance.QueryBuildingIdsInBounds(
+            minX - margin, minZ - margin, maxX + margin, maxZ + margin);
+
+        foreach (int buildingId in candidates)
+        {
+            var summary = BuildingManager.Instance.GetBuildingSummary(buildingId);
+            float[][] poly = summary?.polygonArray;
+            if (poly == null || poly.Length < 3) continue;
+
+            var footprint = new List<Vector2>(poly.Length);
+            foreach (var v in poly)
+            {
+                if (v != null && v.Length >= 2) footprint.Add(new Vector2(v[0], v[1]));
+            }
+            if (footprint.Count < 3) continue;
+
+            if (CorridorOverlapsPolygon(centerline, halfWidth, footprint))
+            {
+                var worldPoly = new List<Vector3>(footprint.Count);
+                foreach (var f in footprint)
+                {
+                    worldPoly.Add(new Vector3(f.x, 0f, f.y));
+                }
+                result.Add(worldPoly);
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// 中心線をhalfWidthで膨らませたコリドーが、指定フットプリント(XZポリゴン)と重なるか。
+    /// (a)フットプリント頂点が中心線から halfWidth 以内、(b)中心線頂点がフットプリント内、
+    /// (c)中心線セグメントとフットプリント辺が交差、のいずれかで重なりとみなす近似。
+    /// </summary>
+    private static bool CorridorOverlapsPolygon(List<Vector3> centerline, float halfWidth, List<Vector2> footprint)
+    {
+        float halfWidthSq = halfWidth * halfWidth;
+
+        // (a) フットプリント頂点が中心線コリドー内(いずれかのセグメントから halfWidth 以内)
+        for (int fi = 0; fi < footprint.Count; fi++)
+        {
+            Vector2 fp = footprint[fi];
+            for (int ci = 0; ci < centerline.Count - 1; ci++)
+            {
+                Vector2 a = new Vector2(centerline[ci].x, centerline[ci].z);
+                Vector2 b = new Vector2(centerline[ci + 1].x, centerline[ci + 1].z);
+                if (SqDistancePointToSegmentXZ(fp, a, b) <= halfWidthSq) return true;
+            }
+        }
+
+        // (b) 中心線頂点がフットプリント内部
+        for (int ci = 0; ci < centerline.Count; ci++)
+        {
+            if (PointInPolygonXZ(new Vector2(centerline[ci].x, centerline[ci].z), footprint)) return true;
+        }
+
+        // (c) 中心線セグメントとフットプリント辺の交差
+        for (int ci = 0; ci < centerline.Count - 1; ci++)
+        {
+            Vector3 a = centerline[ci];
+            Vector3 b = centerline[ci + 1];
+            for (int fi = 0; fi < footprint.Count; fi++)
+            {
+                Vector2 f0 = footprint[fi];
+                Vector2 f1 = footprint[(fi + 1) % footprint.Count];
+                if (SegmentsIntersectXZ(a, b,
+                        new Vector3(f0.x, 0f, f0.y), new Vector3(f1.x, 0f, f1.y),
+                        out _, out _))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>点Pから線分ABまでのXZ平面上の距離の2乗。</summary>
+    private static float SqDistancePointToSegmentXZ(Vector2 p, Vector2 a, Vector2 b)
+    {
+        Vector2 ab = b - a;
+        float lenSq = ab.sqrMagnitude;
+        if (lenSq < 1e-9f) return (p - a).sqrMagnitude;
+        float t = Mathf.Clamp01(Vector2.Dot(p - a, ab) / lenSq);
+        Vector2 proj = a + t * ab;
+        return (p - proj).sqrMagnitude;
+    }
+
+    /// <summary>点PがXZポリゴン内部にあるか（レイキャスティング法）。</summary>
+    private static bool PointInPolygonXZ(Vector2 p, List<Vector2> poly)
+    {
+        bool inside = false;
+        int n = poly.Count;
+        for (int i = 0, j = n - 1; i < n; j = i++)
+        {
+            Vector2 pi = poly[i];
+            Vector2 pj = poly[j];
+            if (((pi.y > p.y) != (pj.y > p.y)) &&
+                (p.x < (pj.x - pi.x) * (p.y - pi.y) / (pj.y - pi.y) + pi.x))
+            {
+                inside = !inside;
+            }
+        }
+        return inside;
+    }
+
+    /// <summary>
+    /// ローカル推定した干渉建物のフットプリントを警告色でオーバーレイ表示する。
+    /// バックエンドの権威結果が来ると HighlightManager 側の色分けで上書きされる。
+    /// </summary>
+    private void DrawBuildingInterference(Camera cam)
+    {
+        if (overlayRenderer == null) return;
+
+        var footprints = CheckBuildingInterference();
+        if (footprints.Count == 0) return;
+
+        Color fillColor = new Color(1f, 0.2f, 0.2f, 0.35f);
+        Color outlineColor = new Color(1f, 0.2f, 0.2f, 0.9f);
+        Vector3 camPos = cam.transform.position;
+        Vector3 camFwd = cam.transform.forward;
+
+        foreach (var footprint in footprints)
+        {
+            if (footprint.Count < 3) continue;
+
+            // 各頂点を地形高さに載せる（少し浮かせてZファイト回避）
+            var worldPoints = new List<Vector3>(footprint.Count);
+            foreach (var pt in footprint)
+            {
+                float y = Utils.GetGroundHeight(new Vector3(pt.x, 1000f, pt.z)) + BuildingInterferenceHeightOffset;
+                worldPoints.Add(new Vector3(pt.x, y, pt.z));
+            }
+
+            overlayRenderer.AddPolygon(worldPoints, fillColor);
+
+            // 外周線
+            for (int i = 0; i < worldPoints.Count; i++)
+            {
+                Vector3 a = worldPoints[i];
+                Vector3 b = worldPoints[(i + 1) % worldPoints.Count];
+                if (Vector3.Dot(a - camPos, camFwd) >= 0f || Vector3.Dot(b - camPos, camFwd) >= 0f)
+                {
+                    overlayRenderer.AddSolidLine(a, b, outlineColor, dashedLineThickness * 2f);
+                }
             }
         }
     }

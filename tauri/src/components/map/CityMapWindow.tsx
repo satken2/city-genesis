@@ -29,6 +29,7 @@ const LAYER_ORDER: (keyof CityMapLayerVisibility)[] = [
   "zoneBorders",
   "parcels",
   "buildings",
+  "stations",
   "allRoads",
   "trunkRoads",
   "railways",

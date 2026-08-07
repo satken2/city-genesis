@@ -289,6 +289,8 @@ export type PathSummary = {
   travel_direction: number;
   /** 駅ホームの設置側（外側/内側/両側） */
   platform_side: number;
+  /** 所属する駅舎パスのID（プラットフォームのみ有効。未所属/非プラットフォームは0以下） */
+  house_path_id: number;
   /** 地形に追従してパスを変形させるかどうか */
   follow_terrain: boolean;
   /** 始点ノードのID */

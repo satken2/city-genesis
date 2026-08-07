@@ -22,6 +22,8 @@ import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import type { NearbyZoneEntry, PathData } from "../../types";
 import { buildApiUrl } from "../../utils/api";
+import { sendHighlightObjects, sendClearHighlights } from "../../utils/ipc";
+import type { PathInterferenceHighlight } from "../../utils/ipc";
 import { useTemplateMode } from "../../hooks/useTemplateMode";
 import { resolvePathIcon } from "../../utils/pathIcon";
 import { useMasterData } from "../../contexts/MasterDataContext";
@@ -117,6 +119,36 @@ export function PathDetailPanel({
       setConstructionSpeed(100);
     }
   }, [pathData]);
+
+  // 着工前パスを開いている間、干渉する区画・建物・既存パスを3Dビュー上で自動ハイライトする。
+  // バックエンドが既に持つ権威データ(GET /paths/{id}/interference)を取得して Unity へ送る。
+  // 建設済み/建設中パスは干渉が無意味なので何もしない。閉じる/状態遷移でクリアする。
+  useEffect(() => {
+    if (!apiBaseUrl || !pathData || !isPreConstruction) return;
+    const pathId = pathData.path_id;
+    let cancelled = false;
+    const controller = new AbortController();
+    fetch(`${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/${pathId}/interference`, {
+      signal: controller.signal,
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json() as Promise<PathInterferenceHighlight>;
+      })
+      .then((data) => {
+        if (!cancelled) void sendHighlightObjects(data, "path_detail");
+      })
+      .catch((err: unknown) => {
+        if (!controller.signal.aborted) {
+          console.error("[PathDetailPanel] interference fetch failed:", err);
+        }
+      });
+    return () => {
+      cancelled = true;
+      controller.abort();
+      void sendClearHighlights("path_detail");
+    };
+  }, [apiBaseUrl, pathData, isPreConstruction]);
 
   /** 建設スピード(utilization_target)を PATCH する（値は％整数）。 */
   const handleConstructionSpeedChange = useCallback(() => {

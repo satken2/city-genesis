@@ -1066,6 +1066,32 @@ public class BuildingManager : BaseApiDataManager
     }
 
     /// <summary>
+    /// 指定したワールドXZ矩形に重なるセルに登録された建物IDを収集する。
+    /// パス敷設中のローカル干渉推定など、近傍建物の候補を全件走査せず絞り込むために使う
+    /// （buildingIdsByCell によるO(セル数)の空間絞り込み）。
+    /// </summary>
+    public HashSet<int> QueryBuildingIdsInBounds(float minX, float minZ, float maxX, float maxZ)
+    {
+        var result = new HashSet<int>();
+        float cellSize = TerrainManager.CellSize;
+        int cx0 = Mathf.FloorToInt(minX / cellSize);
+        int cx1 = Mathf.FloorToInt(maxX / cellSize);
+        int cz0 = Mathf.FloorToInt(minZ / cellSize);
+        int cz1 = Mathf.FloorToInt(maxZ / cellSize);
+        for (int cx = cx0; cx <= cx1; cx++)
+        {
+            for (int cz = cz0; cz <= cz1; cz++)
+            {
+                if (buildingIdsByCell.TryGetValue(new Vector2Int(cx, cz), out HashSet<int> ids))
+                {
+                    foreach (int id in ids) result.Add(id);
+                }
+            }
+        }
+        return result;
+    }
+
+    /// <summary>
     /// 指定IDの建物データキャッシュを取得する。
     /// multi_agentスキーマ(visual_variant等を含む)でロードされているため、
     /// BuildingPlanManagerの編集モード初期値取得などで外観バリアントを読むために使われる。

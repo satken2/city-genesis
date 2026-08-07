@@ -69,6 +69,7 @@ const MAP_LAYERS: Partial<CityMapLayerVisibility> = {
   railways: true,
   parcels: true,
   buildings: true,
+  stations: true,
   zoneBorders: false,
   elevation: false,
   contours: false,

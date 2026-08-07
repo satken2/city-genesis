@@ -44,9 +44,12 @@ import {
   sendEditPathChangeEmbankment,
   sendEditPathChangeLateralOffsets,
   sendEditPathSetFollowTerrain,
+  sendHighlightObjects,
+  sendClearHighlights,
   IPC_EVENT_EDIT_PATH_SELECT_NODE,
   IPC_EVENT_EDIT_PATH_UPDATE_SHAPE,
 } from "../../utils/ipc";
+import type { PathInterferenceHighlight } from "../../utils/ipc";
 import { fetchApi } from "../../utils/api";
 import {
   DIR_BOTH,
@@ -410,6 +413,10 @@ export function usePathConstruction(
     setEndControl(null);
     setRawWaypointControls([]);
     setEstimatedCost(null);
+    // 敷設をリセット/中止するので、干渉ハイライトも消す。
+    sendClearHighlights("path_build").catch((err) => {
+      console.error("[usePathConstruction] sendClearHighlights failed:", err);
+    });
     sendChangeState("STATE_NORMAL").catch((err) => {
       console.error("[usePathConstruction] sendChangeState (clear) failed:", err);
     });
@@ -537,6 +544,84 @@ export function usePathConstruction(
    * 平行パス群へ展開し、travel_direction を設定して1回のPOSTで一括作成する。
    * それ以外(道路・インフラ・単一パス・既存パス編集)は従来どおり単一パスとして送る。
    */
+  /* ---- パス干渉の権威問い合わせ & ハイライト ---- */
+
+  // 生ジオメトリ body で POST /paths/interference を叩き、結果を Unity へハイライト送信する。
+  // 敷設中のローカル推定表示とは別に、形状確定時・確定ボタン押下時の権威判定に使う。
+  const queryInterferenceAndHighlight = useCallback(
+    async (body: Record<string, unknown>): Promise<void> => {
+      if (!apiBaseUrl) return;
+      try {
+        const res = await fetchApi<PathInterferenceHighlight>(
+          `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/interference`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          }
+        );
+        if (res) await sendHighlightObjects(res, "path_build");
+      } catch (err) {
+        console.error("[usePathConstruction] interference query failed:", err);
+      }
+    },
+    [apiBaseUrl]
+  );
+
+  // 形状確定(is_finalized)受信時に、そのペイロードから干渉問い合わせbodyを組み立てて発火する。
+  // リスナーは一度だけ登録され closure が stale になるため、最新stateを見る実体を ref に載せる。
+  const finalizeInterferenceRef = useRef<
+    (payload: {
+      is_curved?: boolean;
+      follow_terrain?: number;
+      selected_points?: number[][];
+      start_control?: number[];
+      end_control?: number[];
+      embankment_heights?: number[];
+      waypoint_controls?: Array<{ control_in?: number[] | null; control_out?: number[] | null }>;
+    }) => void
+  >(() => {});
+  finalizeInterferenceRef.current = (payload) => {
+    if (selectedVariant === null) return;
+    const pts = payload.selected_points;
+    if (!pts || pts.length < 2) return;
+    const isCurved = payload.is_curved === true;
+    // 座標は Unity が既にバックエンド系 [x, relY, z] で送っている(construction-cost と同形)。
+    const body: Record<string, unknown> = {
+      path_variant: selectedVariant,
+      start_point: pts[0],
+      end_point: pts[pts.length - 1],
+      curved: isCurved,
+    };
+    if (isCurved && payload.start_control) body.start_control = payload.start_control;
+    if (isCurved && payload.end_control) body.end_control = payload.end_control;
+    const waypoints = pts.slice(1, -1);
+    if (waypoints.length > 0) {
+      const wcs = payload.waypoint_controls;
+      body.waypoints = waypoints.map((pt, i) => {
+        const wc = isCurved && Array.isArray(wcs) ? wcs[i] : undefined;
+        if (wc && (wc.control_in || wc.control_out)) {
+          return {
+            position: pt,
+            control_in: wc.control_in ?? null,
+            control_out: wc.control_out ?? null,
+          };
+        }
+        return pt;
+      });
+    }
+    if (Array.isArray(payload.embankment_heights) && payload.embankment_heights.length > 0) {
+      body.embankment_heights = payload.embankment_heights;
+    }
+    if (
+      typeof payload.follow_terrain === "number" &&
+      payload.follow_terrain !== FOLLOW_TERRAIN_UNSET
+    ) {
+      body.follow_terrain = payload.follow_terrain;
+    }
+    void queryInterferenceAndHighlight(body);
+  };
+
   const confirmPath = useCallback(async (): Promise<void> => {
     if (!apiBaseUrl || selectedVariant === null || rawPoints.length < 2) {
       throw new Error("Invalid state for path confirmation");
@@ -620,6 +705,9 @@ export function usePathConstruction(
         return data;
       });
 
+      // 確定ボタン押下時の権威ある干渉ハイライト（複線は中心線代表=先頭コンポーネントで問い合わせる）。
+      void queryInterferenceAndHighlight(pathsPayload[0]);
+
       const res = await fetchApi<{ paths: Array<{ path_temp_id: string | null; path_id: number }> }>(
         `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/`,
         {
@@ -691,6 +779,9 @@ export function usePathConstruction(
       pathData.follow_terrain = followTerrain;
     }
 
+    // 確定ボタン押下時の権威ある干渉ハイライト（pathData はそのまま干渉問い合わせbodyになる）。
+    void queryInterferenceAndHighlight(pathData);
+
     if (pathId != null) {
       // 既存パス更新
       await fetchApi(`${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/${pathId}`, {
@@ -716,7 +807,7 @@ export function usePathConstruction(
         });
       }
     }
-  }, [apiBaseUrl, selectedVariant, rawPoints, rawEmbankmentHeights, curveMode, startControl, endControl, rawWaypointControls, pathId, railComponents, hasPlatform, platformSide, followTerrain]);
+  }, [apiBaseUrl, selectedVariant, rawPoints, rawEmbankmentHeights, curveMode, startControl, endControl, rawWaypointControls, pathId, railComponents, hasPlatform, platformSide, followTerrain, queryInterferenceAndHighlight]);
 
   /* ---- 都市の通行方向を取得(既定の進行方向割り当てに使う) ---- */
   useEffect(() => {
@@ -808,6 +899,7 @@ export function usePathConstruction(
         path_type: number;
         is_curved: boolean;
         follow_terrain?: number;
+        is_finalized?: boolean;
         selected_points?: number[][];
         start_control?: number[];
         end_control?: number[];
@@ -818,6 +910,12 @@ export function usePathConstruction(
         }>;
       }>(IPC_EVENT_EDIT_PATH_UPDATE_SHAPE, (event) => {
         console.log("[usePathConstruction] edit_path.update_shape", event.payload);
+
+        // 形状確定(右クリック)なら、このペイロードから権威あるバックエンド干渉問い合わせを1回発火する。
+        // 同ペイロードに確定形状(selected_points)が載っているため、stateの更新を待たず即問い合わせる。
+        if (event.payload.is_finalized) {
+          finalizeInterferenceRef.current(event.payload);
+        }
 
         // 曲線モードはUnity側が真実源。点列の有無にかかわらず必ず同期する
         // (敷設モード初期化直後は空点列+is_curvedだけが届く)。
@@ -886,6 +984,9 @@ export function usePathConstruction(
     return () => {
       unlistenSelectNode?.();
       unlistenUpdateShape?.();
+      // パネル(敷設)のアンマウント時に、敷設由来の干渉ハイライトを確実に消す。
+      // source="path_build" のみ消すので、別ウィンドウ(詳細パネル)のハイライトは残る。
+      void sendClearHighlights("path_build");
     };
   }, []);
 

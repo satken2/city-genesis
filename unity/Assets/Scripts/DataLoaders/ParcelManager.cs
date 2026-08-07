@@ -118,6 +118,13 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     /// <summary>現在マウスオーバー中のパーセルID。-1 のときはハイライトなし。</summary>
     private int highlightedParcelId = -1;
 
+    /// <summary>
+    /// パス干渉ハイライト対象の区画ID → 塗りつぶし色。
+    /// 計画中パスが収用/干渉する区画を分類ごとの色で塗る（HighlightManager が設定）。
+    /// マウスオーバーの単一ハイライトとは独立したレイヤーで、両方同時に描画され得る。
+    /// </summary>
+    private Dictionary<int, Color> interferenceParcelColors = new Dictionary<int, Color>();
+
     // カメラ変化検知による枠線更新間引き用
     private Vector3 lastCamPos = Vector3.negativeInfinity;
     private Quaternion lastCamRot = Quaternion.identity;
@@ -985,7 +992,19 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         // ハイライト対象パーセルの塗りつぶしポリゴン
         if (highlightedParcelId >= 0 && parcelIdToOutlineIndex.TryGetValue(highlightedParcelId, out int hlIdx))
         {
-            DrawHighlightPolygon(cam, outlines[hlIdx]);
+            DrawHighlightPolygon(cam, outlines[hlIdx], HighlightColor);
+        }
+
+        // パス干渉ハイライト対象の区画を分類色で塗りつぶす（マウスオーバーとは独立）
+        if (interferenceParcelColors.Count > 0)
+        {
+            foreach (var kv in interferenceParcelColors)
+            {
+                if (parcelIdToOutlineIndex.TryGetValue(kv.Key, out int ifIdx))
+                {
+                    DrawHighlightPolygon(cam, outlines[ifIdx], kv.Value);
+                }
+            }
         }
 
         // データ可視化モードかどうかを判定
@@ -1049,7 +1068,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     /// <summary>
     /// ハイライト対象パーセルのポリゴンをワールド座標のまま塗りつぶし描画に追加する。
     /// </summary>
-    private void DrawHighlightPolygon(Camera cam, ParcelOutlineData outline)
+    private void DrawHighlightPolygon(Camera cam, ParcelOutlineData outline, Color color)
     {
         Vector3[] pts = outline.worldPoints;
         List<Vector3> worldPoints = new List<Vector3>(pts.Length);
@@ -1063,7 +1082,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
         if (worldPoints.Count >= 3)
         {
-            overlayRenderer.AddPolygon(worldPoints, HighlightColor);
+            overlayRenderer.AddPolygon(worldPoints, color);
         }
     }
 
@@ -1314,6 +1333,27 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     public void ClearHighlightedParcel()
     {
         highlightedParcelId = -1;
+        lastCamPos = Vector3.negativeInfinity;
+    }
+
+    /// <summary>
+    /// パス干渉の区画ハイライトを設定する。区画ID→塗りつぶし色のマップを丸ごと差し替える。
+    /// 計画中パスが収用/干渉する区画を分類色（blocking=赤/removable=橙/shavable=黄）で塗る。
+    /// マウスオーバーの単一ハイライトとは独立で共存する。HighlightManager から呼ぶ。
+    /// </summary>
+    public void SetInterferenceParcels(Dictionary<int, Color> parcelColors)
+    {
+        interferenceParcelColors = parcelColors ?? new Dictionary<int, Color>();
+        lastCamPos = Vector3.negativeInfinity;
+    }
+
+    /// <summary>
+    /// パス干渉の区画ハイライトを全て解除する。敷設終了・詳細パネルを閉じたときに呼ぶ。
+    /// </summary>
+    public void ClearInterferenceParcels()
+    {
+        if (interferenceParcelColors.Count == 0) return;
+        interferenceParcelColors.Clear();
         lastCamPos = Vector3.negativeInfinity;
     }
 

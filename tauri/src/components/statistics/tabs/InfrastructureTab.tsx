@@ -519,6 +519,7 @@ export function InfrastructureTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                 allRoads: true,
                 railways: false,
                 buildings: false,
+                stations: false,
                 parcels: false,
                 contours: false,
                 grid: false,

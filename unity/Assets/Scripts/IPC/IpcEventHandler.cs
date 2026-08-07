@@ -9,6 +9,7 @@ public class IpcEventHandler : MonoBehaviour
     private BuildingPlanManager _buildingPlanManager;
     private ResourceAreaEditManager _resourceAreaEditManager;
     private ParcelManager _parcelManager;
+    private readonly HighlightManager _highlightManager = new HighlightManager();
 
     private void OnEnable()
     {
@@ -32,6 +33,8 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnEditBuildingUpdateDirectParams += HandleEditBuildingUpdateDirectParams;
             IpcClient.Instance.OnParcelShowFrontPath += HandleParcelShowFrontPath;
             IpcClient.Instance.OnParcelHideFrontPath += HandleParcelHideFrontPath;
+            IpcClient.Instance.OnWorldHighlightObjects += HandleWorldHighlightObjects;
+            IpcClient.Instance.OnWorldClearHighlights += HandleWorldClearHighlights;
         }
     }
 
@@ -57,6 +60,8 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnEditBuildingUpdateDirectParams -= HandleEditBuildingUpdateDirectParams;
             IpcClient.Instance.OnParcelShowFrontPath -= HandleParcelShowFrontPath;
             IpcClient.Instance.OnParcelHideFrontPath -= HandleParcelHideFrontPath;
+            IpcClient.Instance.OnWorldHighlightObjects -= HandleWorldHighlightObjects;
+            IpcClient.Instance.OnWorldClearHighlights -= HandleWorldClearHighlights;
         }
     }
 
@@ -322,6 +327,25 @@ public class IpcEventHandler : MonoBehaviour
         {
             pm.HideFrontPathIndicator();
         }
+    }
+
+    /// <summary>
+    /// world:highlight_objects → HighlightManager.Apply()
+    /// 計画中パスが干渉する区画・建物・既存パスを3Dビュー上でハイライトする。
+    /// 敷設の形状確定/確定ボタン、着工前パスの詳細パネル表示から送られる。
+    /// </summary>
+    private void HandleWorldHighlightObjects(string source, PathInterferencePayload interference)
+    {
+        _highlightManager.Apply(source, interference);
+    }
+
+    /// <summary>
+    /// world:clear_highlights → HighlightManager.Clear()
+    /// 指定発信元の干渉ハイライトを解除する。敷設終了・詳細パネルを閉じたときに送られる。
+    /// </summary>
+    private void HandleWorldClearHighlights(string source)
+    {
+        _highlightManager.Clear(source);
     }
 
     private RoadPlanManager GetRoadPlanManager()

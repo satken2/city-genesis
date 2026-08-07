@@ -75,6 +75,11 @@ public class IpcClient : MonoBehaviour
     // AgentDetailPanel の開閉・表示エージェント変更に対応する（読み取り専用の強調表示）。
     public event Action<int, int, int> OnEditConnectorShow;
     public event Action OnEditConnectorHide;
+    // 計画中パスが干渉する区画・建物・既存パスのハイライト表示。
+    // 敷設の形状確定/確定ボタン、着工前パスの詳細パネル表示に対応する。
+    // 第1引数はハイライトの発信元(source/windowType)。ソースごとに独立レイヤーで扱う。
+    public event Action<string, PathInterferencePayload> OnWorldHighlightObjects;
+    public event Action<string> OnWorldClearHighlights;
 
     /// <summary>
     /// Tauriからsystem.readyを受信済みかどうか。
@@ -437,6 +442,31 @@ public class IpcClient : MonoBehaviour
                     OnParcelHideFrontPath?.Invoke();
                     break;
 
+                case "world:highlight_objects":
+                    {
+                        string source = GetParamString(payload, "source") ?? "default";
+                        var parcelsToken = GetParamToken(payload, "parcels");
+                        int[] buildingIds = GetParamInt1D(payload, "building_ids");
+                        int[] collidingPathIds = GetParamInt1D(payload, "colliding_path_ids");
+                        var interference = PathInterferencePayload.FromParams(
+                            parcelsToken, buildingIds, collidingPathIds);
+                        Debug.Log(
+                            $"IpcClient: world:highlight_objects [{source}] -> " +
+                            $"parcels(b={interference.BlockingParcels.Count},r={interference.RemovableParcels.Count}," +
+                            $"s={interference.ShavableParcels.Count},e={interference.ExemptParcels.Count}), " +
+                            $"buildings={interference.BuildingIds.Count}, paths={interference.CollidingPathIds.Count}");
+                        OnWorldHighlightObjects?.Invoke(source, interference);
+                    }
+                    break;
+
+                case "world:clear_highlights":
+                    {
+                        string source = GetParamString(payload, "source") ?? "default";
+                        Debug.Log($"IpcClient: world:clear_highlights [{source}]");
+                        OnWorldClearHighlights?.Invoke(source);
+                    }
+                    break;
+
                 case "session:reset":
                     Debug.Log("IpcClient: session:reset");
                     OnSessionReset?.Invoke();
@@ -628,7 +658,8 @@ public class IpcClient : MonoBehaviour
         List<float> embankmentHeights = null,
         List<Dictionary<string, object>> waypointControls = null,
         bool isCurved = false,
-        int followTerrain = Constants.VALUE_NONE)
+        int followTerrain = Constants.VALUE_NONE,
+        bool finalized = false)
     {
         var payload = new Dictionary<string, object>
         {
@@ -638,6 +669,9 @@ public class IpcClient : MonoBehaviour
             // 地形追従の個別設定を常送する（真実源はUnity側）。UIは確定送信のペイロードで
             // VALUE_NONE 以外のときだけ follow_terrain を積む。
             ["follow_terrain"] = followTerrain,
+            // 形状確定（Placing→Editing、右クリック）で true。UI はこのとき権威ある
+            // バックエンド干渉問い合わせを1回発火する。ドラッグ中の更新では false。
+            ["is_finalized"] = finalized,
         };
 
         if (selectedPoints != null)

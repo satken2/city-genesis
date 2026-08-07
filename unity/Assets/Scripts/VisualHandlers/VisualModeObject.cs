@@ -73,6 +73,9 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     private bool isHovered = false;
     private bool isPreview = false; // プレビューモードかどうか
     private int tempZoneId = 0; // ドラッグ中の一時的な地区ID（ゾーン色分けプレビュー用）
+    // パス干渉ハイライトの色。値があるとプレビュー以外の全表示に優先して塗る。
+    // HighlightManager が計画中パスの干渉オブジェクト（建物・既存パス）へ設定する。
+    private Color? interferenceColor = null;
 
     private void Awake()
     {
@@ -192,6 +195,19 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     }
 
     /// <summary>
+    /// パス干渉ハイライトの色を設定する。null で解除。
+    /// 計画中パスが干渉する建物・既存パスを、HighlightManager が警告色で塗るために使う。
+    /// プレビュー以外のあらゆる表示（ホバー・ステータス・データ可視化）に優先する。
+    /// </summary>
+    public void SetInterferenceHighlight(Color? color)
+    {
+        // Color? の等価比較で無駄な再描画を避ける
+        if (interferenceColor == color) return;
+        interferenceColor = color;
+        UpdateVisuals();
+    }
+
+    /// <summary>
     /// ホバー状態を設定する
     /// </summary>
     public void SetHover(bool hover)
@@ -250,6 +266,22 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
         {
             SetRenderersEnabled(true);
             if (!preventMaterialChange) ApplyMaterialToAllSubmeshes(previewMaterial);
+            return;
+        }
+
+        // 1.5. パス干渉ハイライト（プレビュー以外の全表示に優先）。
+        // 計画中パスが干渉する建物・既存パスを警告色で塗り、他の色分けを上書きする。
+        if (interferenceColor.HasValue && !preventMaterialChange)
+        {
+            SetRenderersEnabled(true);
+            if (objectType == InputObjectType.BUILDING)
+            {
+                ApplyBuildingColorOverlay(interferenceColor.Value);
+            }
+            else
+            {
+                ApplyColorToRenderers(interferenceColor.Value);
+            }
             return;
         }
 
