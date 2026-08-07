@@ -5,12 +5,15 @@ import type { PathData } from "../../types";
 import {
   STATUS_TEMPORARY,
   STATUS_SCHEDULED_CONSTRUCTION,
+  STATUS_ACTIVE,
   STATUS_COLLAPSED,
   STATUS_PENDING,
   STATUS_CONSTRUCTING,
+  STATUS_DEMOLISHING,
 } from "../../constants";
 import { sendSessionReload } from "../../utils/ipc";
 import trashIcon from "../../assets/images/ui/trash.png";
+import bulldozeIcon from "../../assets/images/bulldoze.png";
 import editIcon from "../../assets/images/ui/edit.png";
 import repairIcon from "../../assets/images/ui/repair.png";
 import rocketIcon from "../../assets/images/ui/rocket.png";
@@ -92,6 +95,28 @@ export function PathOperationPanel({
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
     } catch (err) {
       console.error("Repair failed:", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // 稼働中のパスを取り壊す（市政府所有のためプレイヤーが自由に解体できる）。専用
+  // エンドポイント（POST /demolish）を叩くと STATUS_DEMOLISHING へ遷移し、以降は建設
+  // サービス財を消費して解体工事が進み、完了でパスが削除される。取り壊し中に再度押すと
+  // DELETE /demolish で解体を取りやめ、STATUS_ACTIVE へ戻す（両者をトグルする）。
+  // ステータス（＝3D描画）が変わるため Unity にデータの再ロードを指示する。
+  async function handleDemolish() {
+    setLoading(true);
+    const isDemolishing = path.status === STATUS_DEMOLISHING;
+    try {
+      const res = await fetch(`${base}/api/v1/paths/${path.path_id}/demolish`, {
+        method: isDemolishing ? "DELETE" : "POST",
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await sendSessionReload();
+      onActionPerformed();
+    } catch (err) {
+      console.error("Demolish failed:", err);
     } finally {
       setLoading(false);
     }
@@ -192,15 +217,30 @@ export function PathOperationPanel({
               <img src={pendingIcon} alt={t("path.action.stopConstruction")} />
             </button>
           )}
-          <button
-            className="operation-btn"
-            type="button"
-            title={t("path.action.repair")}
-            disabled={loading || !!path.under_maintenance}
-            onClick={() => void handleRepair()}
-          >
-            <img src={repairIcon} alt={t("path.action.repair")} />
-          </button>
+          {/* 取り壊し: 市政府所有のパスをプレイヤーが解体する。稼働中↔取り壊し中を
+              トグルし、取り壊し中は「取り壊し解除」として機能する。 */}
+          {(path.status === STATUS_ACTIVE || path.status === STATUS_DEMOLISHING) && (
+            <button
+              className="operation-btn"
+              type="button"
+              title={path.status === STATUS_DEMOLISHING ? t("path.action.cancelBulldoze") : t("path.action.bulldoze")}
+              disabled={loading}
+              onClick={() => void handleDemolish()}
+            >
+              <img src={bulldozeIcon} alt={t("path.action.bulldoze")} />
+            </button>
+          )}
+          {path.status !== STATUS_DEMOLISHING && (
+            <button
+              className="operation-btn"
+              type="button"
+              title={t("path.action.repair")}
+              disabled={loading || !!path.under_maintenance}
+              onClick={() => void handleRepair()}
+            >
+              <img src={repairIcon} alt={t("path.action.repair")} />
+            </button>
+          )}
         </>
       )}
     </div>

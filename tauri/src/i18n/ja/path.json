@@ -24,7 +24,9 @@
       "repair": "修繕",
       "rebuild": "再建",
       "startConstruction": "着工",
-      "stopConstruction": "保留"
+      "stopConstruction": "保留",
+      "bulldoze": "取り壊し",
+      "cancelBulldoze": "取り壊し解除"
     },
     "pendingWarning": "この道路は計画中です。着工を指示してください。",
     "alerts": {
@@ -67,6 +69,7 @@
     "cancel": "キャンセル",
     "reset": "リセット",
     "noNodesYet": "道路を敷設してください",
+    "costInfo": "建設費用",
     "costRatioHelp": "高架道路や地下道路、あるいは複雑な地形の上に道路を建設すると、建設コストが上がります。",
     "placedContinue": "パスを配置しました。次のパスを配置してください。",
     "platformSide": "ホーム設置側",

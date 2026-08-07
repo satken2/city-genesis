@@ -3,8 +3,8 @@
  *
  * 道路建設(PathConstructionPanel)と軌道建設(TrackConstructionPanel)は、
  * バリアント選択UI(カテゴリ別セレクタ)より下のセクション ——
- * 形状(標高/地形追従/盛土/ホーム設置側)・グリッド設定・形状プレビュー・
- * コストカード・確定/キャンセルのアクションバー —— が完全に共通である。
+ * 形状(標高/地形追従/盛土/ホーム設置側)・グリッド設定・
+ * 建設費用カード(パス長/推定コスト/工期)・確定/キャンセルのアクションバー —— が完全に共通である。
  * 説明カード(PathVariantDescription)はパネルごとに表示位置が違うためここには含めない。
  * この重複(~250行)を避けるため、その共通ボディをこのコンポーネントへ切り出し、
  * 両パネルから `usePathConstruction` の結果とグリッド状態・確定/キャンセルハンドラを
@@ -21,7 +21,6 @@ import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { NumberStepper } from "../common/NumberStepper";
 import { ConstructionInfoCard } from "../common/ConstructionInfoCard";
-import { PathShapeMapPreview } from "./PathShapeMapPreview";
 import { GridSettingsPanel } from "./GridSettingsPanel";
 import type { GridDisplayMode } from "./GridSettingsPanel";
 import { FOLLOW_TERRAIN_UNSET, usePathConstruction } from "./usePathConstruction";
@@ -37,7 +36,6 @@ export type PathBuildState = ReturnType<typeof usePathConstruction>;
 
 type PathBuildSectionsProps = {
   pc: PathBuildState;
-  apiBaseUrl?: string;
   /** 既存パス編集のID。新規敷設では null。グリッドの原状復帰パラメータに使う。 */
   editPathId: number | null;
 
@@ -67,7 +65,6 @@ type PathBuildSectionsProps = {
 
 export function PathBuildSections({
   pc,
-  apiBaseUrl,
   editPathId,
   gridMode,
   gridSize,
@@ -256,46 +253,30 @@ export function PathBuildSections({
         </div>
       )}
 
-      {/* 形状プレビュー（パネル最下部に配置） */}
+      {/*
+        建設費用セクション(パネル最下部)。形状プレビューは廃止し、パス長・推定コスト・
+        工期などの数値情報に集約した。ノードが2点そろうまではコストを算出できないため
+        敷設を促すメッセージを出す。
+      */}
       {pc.selectedVariant !== null && (
         <div className="pc-section">
           <div className="pc-section-title">
-            {t("building_construction.shapePreview", "形状プレビュー")}
+            {t("path_construction.costInfo", "建設費用")}
           </div>
-          {pc.nodes.length === 0 || !apiBaseUrl ? (
+          {pc.nodes.length < 2 ? (
             <div className="pc-no-nodes-message">
               {t("path_construction.noNodesYet")}
             </div>
           ) : (
-            <div className="pc-canvas-section">
-              <PathShapeMapPreview
-                apiBaseUrl={apiBaseUrl}
-                nodes={pc.nodes}
-                curveMode={pc.curveMode}
-                startControl={pc.startControl}
-                endControl={pc.endControl}
-                waypointControls={pc.waypointControls}
-                lateralOffsets={
-                  pc.railComponents
-                    ? pc.railComponents.map((c) => c.lateral_offset ?? 0)
-                    : undefined
-                }
-              />
-            </div>
-          )}
-
-          {/* 推定建設コスト(詳細パネルと共通のカード。標準コスト倍率はバッジで表示) */}
-          {pc.nodes.length >= 2 && (
-            <div style={{ marginTop: 10 }}>
-              <ConstructionInfoCard
-                estimatedCost={pc.estimatedCost}
-                standardCost={pc.estimatedStandardCost}
-                costRatioHelp={t("path_construction.costRatioHelp")}
-                estimatedDurationDays={pc.estimatedDurationDays}
-                isCostLoading={pc.isCostLoading}
-                nextEpochConstructionBudget={pc.nextEpochConstructionBudget}
-              />
-            </div>
+            <ConstructionInfoCard
+              pathLength={pc.pathLength}
+              estimatedCost={pc.estimatedCost}
+              standardCost={pc.estimatedStandardCost}
+              costRatioHelp={t("path_construction.costRatioHelp")}
+              estimatedDurationDays={pc.estimatedDurationDays}
+              isCostLoading={pc.isCostLoading}
+              nextEpochConstructionBudget={pc.nextEpochConstructionBudget}
+            />
           )}
         </div>
       )}

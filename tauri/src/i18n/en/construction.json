@@ -6,6 +6,7 @@
     "floorArea": "Total Floor Area",
     "unitMeter": "m",
     "unitSqm": "m²",
+    "pathLength": "Path Length",
     "estimatedCost": "Estimated Construction Cost",
     "estimatedDuration": "Estimated Construction Period",
     "durationDays": "{{value}} days",

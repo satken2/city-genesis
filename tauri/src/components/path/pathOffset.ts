@@ -4,8 +4,8 @@
  * 複合パスは、プレイヤーが引いた1本の中心線を各コンポーネントの
  * lateral_offset(横方向)・height_offset(高さ方向)でオフセットした
  * 平行パス群に展開して敷設される。本モジュールはその展開計算を担い、
- * 敷設プレビュー(PathShapeMapPreview)と確定送信(usePathConstruction.confirmPath)の
- * 両方から同じ関数を使うことで、プレビューと実際の敷設位置を一致させる。
+ * 確定送信(usePathConstruction.confirmPath)から使うことで、コスト見積りと
+ * 実際の敷設位置を一致させる。
  *
  * 座標系: ワールドX-Z平面(Y=高さ)。横方向オフセットは敷設方向(始点→終点)に
  * 向かって右が正(master.yaml combined_paths の lateral_offset の規約と同じ)。

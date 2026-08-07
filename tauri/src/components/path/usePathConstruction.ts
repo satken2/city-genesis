@@ -60,6 +60,7 @@ import {
   offsetControlPoint,
   offsetPolyline3D,
 } from "./pathOffset";
+import { computePathLength } from "./pathLength";
 import {
   MIN_TRACK_COUNT,
   MAX_TRACK_COUNT,
@@ -323,6 +324,15 @@ export function usePathConstruction(
     if (selectedVariantData?.type === PATH_ROPEWAY || !isRailType(selectedVariantData?.type)) return null;
     return buildRailComponents(selectedVariant, trackCount, trackSpacing, trackDirections);
   }, [isRail, selectedVariant, selectedVariantData, pathId, trackCount, trackSpacing, trackDirections]);
+
+  /**
+   * 敷設中パス(中心線)の水平長(m)。ノードが2点未満なら null。
+   * 建設費用セクションで長さを表示するために使う。曲線はベジエ弧長を近似する。
+   */
+  const pathLength = useMemo(
+    () => computePathLength(nodes, curveMode, startControl, endControl, rawWaypointControls),
+    [nodes, curveMode, startControl, endControl, rawWaypointControls],
+  );
 
   /* ---- 選択・敷設モードの制御 ---- */
 
@@ -1017,6 +1027,7 @@ export function usePathConstruction(
     costSimulationDays,
     nextEpochConstructionBudget,
     isCostLoading,
+    pathLength,
     // 選択・敷設
     onCategoryChange,
     onTypeChange,

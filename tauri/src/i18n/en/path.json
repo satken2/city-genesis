@@ -24,7 +24,9 @@
       "repair": "Repair",
       "rebuild": "Rebuild",
       "startConstruction": "Start Construction",
-      "stopConstruction": "Suspend Construction"
+      "stopConstruction": "Suspend Construction",
+      "bulldoze": "Bulldoze",
+      "cancelBulldoze": "Cancel Demolition"
     },
     "pendingWarning": "This road is planned. Please command to start construction.",
     "alerts": {
@@ -67,6 +69,7 @@
     "cancel": "Cancel",
     "reset": "Reset",
     "noNodesYet": "Place a path to begin",
+    "costInfo": "Construction Cost",
     "costRatioHelp": "Building roads on elevated or underground structures, or over complex terrain, increases the construction cost.",
     "placedContinue": "Path placed. Place the next path.",
     "platformSide": "Platform Side",

@@ -6,6 +6,7 @@
     "floorArea": "延床面積",
     "unitMeter": "m",
     "unitSqm": "m²",
+    "pathLength": "パス長",
     "estimatedCost": "推定建設コスト",
     "estimatedDuration": "推定建設期間",
     "durationDays": "{{value}}日",

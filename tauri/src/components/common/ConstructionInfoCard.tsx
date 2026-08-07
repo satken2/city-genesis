@@ -43,6 +43,8 @@ type ConstructionInfoCardProps = {
   totalHeight?: number | null;
   /** 延床面積(m²)。undefined なら行ごと非表示、null なら "—" */
   totalFloorArea?: number | null;
+  /** パス長(m)。undefined なら行ごと非表示(建物系)、null なら "—"(パス系で未確定) */
+  pathLength?: number | null;
   /** 推定建設コスト(総額) */
   estimatedCost: number | null;
   /** 完全に平坦な地形で建設した場合の標準コスト。倍率バッジの分母 */
@@ -64,6 +66,7 @@ export function ConstructionInfoCard({
   buildingArea,
   totalHeight,
   totalFloorArea,
+  pathLength,
   estimatedCost,
   standardCost,
   costRatioHelp,
@@ -107,6 +110,17 @@ export function ConstructionInfoCard({
             <span className="construction-info-value">
               {totalFloorArea != null
                 ? `${totalFloorArea.toFixed(1)} ${t("construction.unitSqm")}`
+                : "—"}
+            </span>
+          </>
+        )}
+
+        {pathLength !== undefined && (
+          <>
+            <span className="construction-info-label">{t("construction.pathLength")}</span>
+            <span className="construction-info-value">
+              {pathLength != null
+                ? `${pathLength.toFixed(1)} ${t("construction.unitMeter")}`
                 : "—"}
             </span>
           </>

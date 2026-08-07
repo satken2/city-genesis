@@ -335,7 +335,6 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
       */}
       <PathBuildSections
         pc={pathConstruction}
-        apiBaseUrl={apiBaseUrl}
         editPathId={editPathId ?? null}
         gridMode={gridMode}
         gridSize={gridSize}

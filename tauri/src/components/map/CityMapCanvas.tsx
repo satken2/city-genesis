@@ -530,8 +530,7 @@ function appendPolyline(path: Path2D, pts: [number, number][]): void {
  * アンカー点列を滑らかな曲線としてPath2Dへ追加する(曲線パス curved=1 用)。
  * controls に保存済みのベジエ制御点(ユーザーがドラッグで調整した値)があれば
  * それを優先し、無い箇所はCatmull-Rom由来の制御点(隣接アンカー差分の1/6)で補う。
- * 補完式は建設パネルの曲線プレビュー(PathShapeMapPreview)およびバックエンドの
- * 自動補完(_auto_fill_controls)と同じ計算。
+ * 補完式はバックエンドの自動補完(_auto_fill_controls)と同じ計算。
  */
 function appendSmoothPolyline(
   path: Path2D,

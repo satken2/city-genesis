@@ -358,7 +358,6 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
 
       <PathBuildSections
         pc={pc}
-        apiBaseUrl={apiBaseUrl}
         editPathId={null}
         gridMode={gridMode}
         gridSize={gridSize}
