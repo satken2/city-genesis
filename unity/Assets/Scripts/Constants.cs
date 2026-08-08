@@ -158,6 +158,7 @@ public static class Constants
     public const int LEDGER_TRANSPORT = 11;
     public const int LEDGER_LAND_SALE = 12;
     public const int LEDGER_LAND_ACQUISITION = 13;
+    public const int LEDGER_LAND_PURCHASE = 14;
     public const int LEDGER_CONSUMPTION_TAX = 31;
     public const int LEDGER_INCOME_TAX = 32;
     public const int LEDGER_IMPORT_TAX = 33;

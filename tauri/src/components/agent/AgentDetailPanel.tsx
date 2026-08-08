@@ -63,6 +63,9 @@ import { BuildingConstructionInfoPanel } from "./BuildingConstructionInfoPanel";
 import "./AgentDetailPanel.css";
 import rocketIcon from "../../assets/images/ui/rocket.png";
 
+/** 買収交渉中のアイコン縁取り色。公共施設の黄色と区別するためのオレンジ */
+const ACQUISITION_FRAME_COLOR = "#f97316";
+
 type AgentDetailPanelProps = {
   apiBaseUrl: string;
   pathTemplate: string;
@@ -318,6 +321,9 @@ export function AgentDetailPanel({
 
   const isPreConstruction = agentData.status === STATUS_SCHEDULED_CONSTRUCTION || agentData.status === STATUS_PENDING;
 
+  /** 立地する土地区画が道路建設などのために市政府と買収交渉中か */
+  const underAcquisition = agentData.under_acquisition === true;
+
   /** マスターデータからバリアントの表示名を取得する */
   const variantName = masterData?.agents[agentData.variant]?.display_name;
 
@@ -419,8 +425,13 @@ export function AgentDetailPanel({
         name={agentData.name}
         constructionProgress={agentData.construction_progress}
         iconLabel={
-          agentData.public_facility ? t("agent.publicFacility") : undefined
+          underAcquisition
+            ? t("agent.underAcquisition")
+            : agentData.public_facility
+              ? t("agent.publicFacility")
+              : undefined
         }
+        iconFrameColor={underAcquisition ? ACQUISITION_FRAME_COLOR : undefined}
       />
 
       {/* 未着工（保留）状態の警告バナー */}

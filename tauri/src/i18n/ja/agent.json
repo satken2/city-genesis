@@ -4,6 +4,7 @@
     "back": "戻る",
     "editSubBuildings": "サブ建物の配置を編集",
     "publicFacility": "公共施設",
+    "underAcquisition": "買収交渉中",
     "publicFacilityPanel": {
       "title": "公共/公営施設"
     },

@@ -165,6 +165,8 @@ namespace GeneratedModels
         public float attraction;
         /// <summary>公共建物の放棄フラグ（0/1）。放棄すると自動修繕の対象外になる</summary>
         public bool? abandoned;
+        /// <summary>建物が立地する区画が買収交渉中であるか サーバーサイドで計算されるフィールド。型は動的。</summary>
+        public object under_acquisition;
         /// <summary>公共施設かどうか（0=民間/1=公共）</summary>
         public bool public_facility;
         /// <summary>インフラ網への接続端子ノードのID</summary>

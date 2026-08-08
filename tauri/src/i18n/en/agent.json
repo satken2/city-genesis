@@ -4,6 +4,7 @@
     "back": "Back",
     "editSubBuildings": "Edit Sub-Building Layout",
     "publicFacility": "Public Facility",
+    "underAcquisition": "Acquiring Land",
     "publicFacilityPanel": {
       "title": "Public Facility"
     },

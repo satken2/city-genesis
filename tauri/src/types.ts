@@ -75,6 +75,8 @@ export type AgentData = {
   construction_progress: number;
   created_date?: number;
   parcel_id?: number;
+  /** 立地する土地区画が買収交渉中か(区画側の under_acquisition をバックエンドが解決した値) */
+  under_acquisition?: boolean;
   attraction?: number;
   durability?: number;
   floors?: number;
@@ -254,6 +256,8 @@ export type ParcelData = {
   owner_agent_name: string | null;
   land_price: number;
   restriction_override: boolean;
+  /** 道路建設などのために市政府と買収交渉中か。成立するまで区画は民間所有のまま */
+  under_acquisition: boolean;
   allowed_bd_mask: number;
   limit_coverage_ratio: number | null;
   limit_volume_ratio: number | null;

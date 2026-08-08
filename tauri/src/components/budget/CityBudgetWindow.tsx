@@ -33,23 +33,26 @@ import {
 import "./CityBudgetWindow.css";
 
 type BudgetAgent = {
-  kind?: "agent" | "path";
+  kind?: "agent" | "path" | "parcel";
   agent_id?: number;
   path_id?: number;
+  parcel_id?: number;
   name: string;
   category_id: number;
   variant?: number;
   status: number;
   actual_expense: number;
   projected_expense: number;
-  utilization_target: number;
+  utilization_target?: number;
   construction_cost_per_epoch?: number;
   remaining_epochs?: number | null;
 };
 
-/** エージェント/道路を一意に識別するキー（稼働率の編集state・PATCH対象の識別に使う） */
+/** エージェント/道路/土地区画を一意に識別するキー（稼働率の編集state・PATCH対象の識別に使う） */
 function rowKey(a: BudgetAgent): string {
-  return a.kind === "path" ? `path:${a.path_id}` : `agent:${a.agent_id}`;
+  if (a.kind === "path") return `path:${a.path_id}`;
+  if (a.kind === "parcel") return `parcel:${a.parcel_id}`;
+  return `agent:${a.agent_id}`;
 }
 
 /**
@@ -109,7 +112,7 @@ function getCategoryTier(key: string, tiers: Record<string, number>): number {
   }
   const cId = Number(key);
   if (cId === 10) return 4; // 貯蓄: 最初に削減（希望0のため実質無効）
-  if (cId === 8) return 3; // 建設
+  if (cId === 8 || cId === 14) return 3; // 建設・用地買収
   if ([3, 4, 5, 7, 11].includes(cId)) return 2; // 教育・治安・消防・その他・交通
   return 1; // 医療・インフラ・修繕: 最優先維持
 }
