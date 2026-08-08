@@ -12,18 +12,18 @@ public static class VisualMode
     public const int MODE_HIDDEN = 1;           // 非表示
     public const int MODE_BOUNDARY = 2;         // 境界表示(パーセル用)
     public const int MODE_HIGHLIGHT_OWNER = 3;  // 所有者ハイライト表示
-    public const int MODE_PLAN = 4;             // 計画中のものも表示
 }
 
 /// <summary>
-/// ビジュアルモードのプリセットを示す定数
+/// 色モード(VisualMode/VisualModeEx)と直交する表示フラグのビット定数。
+/// 「計画中の表示」「公共施設ハイライト」は色モードと独立にON/OFFできるため、
+/// モード値ではなくフラグとして VisualModeHandler が別系統で保持する。
 /// </summary>
-public static class VisualModePreset
+public static class VisualFlag
 {
-    public const int DEFAULT = 0;       // 建物/道路表示、パーセル非表示
-    public const int PARCEL_EDIT = 1;   // パーセル境界表示
-    public const int OWNER_VIEW = 2;    // 市政府所有物件をハイライト
-    public const int PLAN_VIEW = 3;    // 計画中の建物や道路を表示
+    public const int NONE = 0;
+    public const int SHOW_PLAN = 1 << 0;         // 計画中(TEMPORARY/PENDING/SCHEDULED)のオブジェクトを表示する
+    public const int HIGHLIGHT_PUBLIC = 1 << 1;  // 公共施設を半透明ハイライトする(BUILDINGのみ有効)
 }
 
 /// <summary>
@@ -42,12 +42,24 @@ public class VisualModeHandler : MonoBehaviour
     // UI側(Tauri)の初期表示設定(非表示)と状態を同期させるため、土地区画(PARCEL)の初期値は非表示に設定する。
     private Dictionary<int, int> objectTypeModes = new Dictionary<int, int>
     {
-        { InputObjectType.BUILDING, VisualMode.MODE_PLAN },
+        { InputObjectType.BUILDING, VisualMode.MODE_NORMAL },
         { InputObjectType.PARCEL, VisualMode.MODE_HIDDEN },
-        { InputObjectType.PATH, VisualMode.MODE_PLAN },
+        { InputObjectType.PATH, VisualMode.MODE_NORMAL },
         { InputObjectType.NODE, VisualMode.MODE_NORMAL },
         { InputObjectType.TERRAIN, VisualMode.MODE_NORMAL },
         { InputObjectType.ZONE, VisualMode.MODE_HIDDEN }
+    };
+
+    // オブジェクトタイプごとの表示フラグ(VisualFlag のビット和)。
+    // UI側(Tauri)の初期表示設定(計画中=ON)と一致させるため、建物と道路は SHOW_PLAN を初期値にする。
+    private Dictionary<int, int> objectTypeFlags = new Dictionary<int, int>
+    {
+        { InputObjectType.BUILDING, VisualFlag.SHOW_PLAN },
+        { InputObjectType.PARCEL, VisualFlag.NONE },
+        { InputObjectType.PATH, VisualFlag.SHOW_PLAN },
+        { InputObjectType.NODE, VisualFlag.NONE },
+        { InputObjectType.TERRAIN, VisualFlag.NONE },
+        { InputObjectType.ZONE, VisualFlag.NONE }
     };
 
     // オブジェクトタイプごとの登録されたビジュアルオブジェクト（HashSetで高速化）
@@ -62,12 +74,12 @@ public class VisualModeHandler : MonoBehaviour
     };
 
     // 前回のモード（差分更新用）
-    // UI側の初期表示設定との同期を維持するため、前回のモードの初期値も非表示に合わせる。
+    // UI側の初期表示設定との同期を維持するため、前回のモードの初期値も objectTypeModes に合わせる。
     private Dictionary<int, int> previousModes = new Dictionary<int, int>
     {
-        { InputObjectType.BUILDING, VisualMode.MODE_PLAN },
+        { InputObjectType.BUILDING, VisualMode.MODE_NORMAL },
         { InputObjectType.PARCEL, VisualMode.MODE_HIDDEN },
-        { InputObjectType.PATH, VisualMode.MODE_PLAN },
+        { InputObjectType.PATH, VisualMode.MODE_NORMAL },
         { InputObjectType.NODE, VisualMode.MODE_NORMAL },
         { InputObjectType.TERRAIN, VisualMode.MODE_NORMAL },
         { InputObjectType.ZONE, VisualMode.MODE_HIDDEN }
@@ -75,9 +87,6 @@ public class VisualModeHandler : MonoBehaviour
 
     // 処理中のコルーチン管理
     private Dictionary<int, Coroutine> activeUpdateCoroutines = new Dictionary<int, Coroutine>();
-
-    // プリセット保存・復元用（オブジェクトタイプごとのモードのスナップショット）
-    private Dictionary<int, int> savedObjectTypeModes = new Dictionary<int, int>();
 
     private void Awake()
     {
@@ -160,6 +169,39 @@ public class VisualModeHandler : MonoBehaviour
     public int GetMode(int objectType)
     {
         return objectTypeModes.ContainsKey(objectType) ? objectTypeModes[objectType] : VisualMode.MODE_NORMAL;
+    }
+
+    /// <summary>
+    /// 表示フラグ(VisualFlag のビット和)を設定する。
+    /// 色モードとは独立した系統で、変更時は現在の色モードのまま全対象オブジェクトへ再通知する。
+    /// VisualModeObject 側が ApplyVisualMode 内で GetFlags をプル参照して表示を決めるため、
+    /// IVisualModeHandler インターフェースの変更は不要（フラグと無関係な PARCEL/ZONE には影響しない）。
+    /// </summary>
+    public void SetFlags(int objectType, int flags)
+    {
+        if (!objectTypeFlags.ContainsKey(objectType)) return;
+
+        // 差分チェック：前回と同じフラグなら何もしない
+        if (objectTypeFlags[objectType] == flags) return;
+
+        objectTypeFlags[objectType] = flags;
+
+        // 既存の更新処理を停止し、現在の色モードのまま分散処理で再通知する
+        if (activeUpdateCoroutines.ContainsKey(objectType) && activeUpdateCoroutines[objectType] != null)
+        {
+            StopCoroutine(activeUpdateCoroutines[objectType]);
+        }
+        activeUpdateCoroutines[objectType] = StartCoroutine(NotifyObjectsBatched(objectType, GetMode(objectType)));
+
+        if (enableDebugLog)
+        {
+            Debug.Log($"VisualModeHandler: {GetObjectTypeName(objectType)} のフラグを {flags} に変更 (対象: {registeredObjects[objectType].Count} オブジェクト)");
+        }
+    }
+
+    public int GetFlags(int objectType)
+    {
+        return objectTypeFlags.ContainsKey(objectType) ? objectTypeFlags[objectType] : VisualFlag.NONE;
     }
 
     private IEnumerator NotifyObjectsBatched(int objectType, int mode)
@@ -256,7 +298,6 @@ public class VisualModeHandler : MonoBehaviour
             case VisualMode.MODE_HIDDEN: return "非表示";
             case VisualMode.MODE_BOUNDARY: return "境界表示";
             case VisualMode.MODE_HIGHLIGHT_OWNER: return "ハイライト表示";
-            case VisualMode.MODE_PLAN: return "計画表示";
             case VisualModePath.UTILIZATION: return "交通量色分け";
             case VisualModePath.SPEED: return "制限速度色分け";
             case VisualModePath.PEDESTRIAN: return "歩行者量色分け";

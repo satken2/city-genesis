@@ -892,13 +892,13 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
    * 先に STATE_NORMAL に戻してから表示モードを切り替える。
    * STATE_NORMAL でないと view:change_view の変更が _normalStateMemory に記憶されず、
    * 後から Rust 側が STATE_NORMAL を送った際に default に戻ってしまうため。
-   * 最後に、ユーザーが建設結果を確認できるよう計画表示に切り替えてパネルを閉じる。
+   * 最後に、ユーザーが建設結果を確認できるよう計画中表示をONにしてパネルを閉じる。
    */
   async function finishAfterConfirm() {
     await sendEditBuildingUpdateEffectRange(null).catch(() => {});
     await sendSessionReload();
     await sendChangeState("STATE_NORMAL");
-    await sendChangeDisplay("building", "plan");
+    await sendChangeDisplay("building", "default", null, ["plan"]);
     onClose();
   }
 

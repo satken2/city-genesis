@@ -23,6 +23,8 @@ function syncResourceTutorialFlag(mode: string): void {
 export type DisplaySelection = {
   mode: string;
   subMode: string | null;
+  /** ONになっている表示トグルのID集合。色モードと独立してUnityへ flags(CSV) として送られる。 */
+  flags: string[];
 };
 
 export type DisplayState = Record<string, DisplaySelection>;
@@ -30,7 +32,11 @@ export type DisplayState = Record<string, DisplaySelection>;
 function buildInitialState(): DisplayState {
   const state: DisplayState = {};
   for (const layer of DISPLAY_LAYERS) {
-    state[layer.id] = { mode: layer.defaultMode, subMode: null };
+    state[layer.id] = {
+      mode: layer.defaultMode,
+      subMode: null,
+      flags: layer.defaultFlags ?? [],
+    };
   }
   return state;
 }
@@ -38,6 +44,7 @@ function buildInitialState(): DisplayState {
 type LayerStatePayload = {
   mode: string;
   sub_mode: string | null;
+  flags: string | null;
 };
 
 type CurrentStatePayload = {
@@ -49,21 +56,55 @@ export function useDisplayOptions() {
 
   const selectMode = useCallback(
     (layerId: string, mode: string, subMode?: string) => {
-      setSelections((prev) => ({
-        ...prev,
-        [layerId]: { mode, subMode: subMode ?? null },
-      }));
+      setSelections((prev) => {
+        // 色モードの変更でトグル状態を巻き戻さないよう、現在の flags を維持して送信する
+        const flags = prev[layerId]?.flags ?? [];
+
+        sendChangeDisplay(layerId, mode, subMode, flags).catch((err) => {
+          console.error("[useDisplayOptions] sendChangeDisplay failed:", err);
+        });
+
+        return {
+          ...prev,
+          [layerId]: { mode, subMode: subMode ?? null, flags },
+        };
+      });
 
       if (layerId === "resource") {
         syncResourceTutorialFlag(mode);
       }
-
-      sendChangeDisplay(layerId, mode, subMode).catch((err) => {
-        console.error("[useDisplayOptions] sendChangeDisplay failed:", err);
-      });
     },
     [],
   );
+
+  /**
+   * 表示トグル(計画中表示・公共施設ハイライト等)のON/OFFを反転する。
+   * 色モード・サブモードは現在値を維持したままUnityへ送信する。
+   */
+  const toggleFlag = useCallback((layerId: string, flagId: string) => {
+    setSelections((prev) => {
+      const current = prev[layerId];
+      if (!current) return prev;
+
+      const flags = current.flags.includes(flagId)
+        ? current.flags.filter((f) => f !== flagId)
+        : [...current.flags, flagId];
+
+      sendChangeDisplay(
+        layerId,
+        current.mode,
+        current.subMode ?? undefined,
+        flags,
+      ).catch((err) => {
+        console.error("[useDisplayOptions] sendChangeDisplay failed:", err);
+      });
+
+      return {
+        ...prev,
+        [layerId]: { ...current, flags },
+      };
+    });
+  }, []);
 
   // マウント時にUnityへ表示状態を問い合わせ、レスポンスで同期する
   // リスナー登録をawaitしてからクエリを送信し、応答がリスナーに届くことを保証する
@@ -86,6 +127,7 @@ export function useDisplayOptions() {
                 next[layerId] = {
                   mode: state.mode,
                   subMode: state.sub_mode || null,
+                  flags: state.flags ? state.flags.split(",") : [],
                 };
                 if (layerId === "resource") {
                   syncResourceTutorialFlag(state.mode);
@@ -116,5 +158,5 @@ export function useDisplayOptions() {
     };
   }, []);
 
-  return { selections, selectMode };
+  return { selections, selectMode, toggleFlag };
 }

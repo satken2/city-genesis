@@ -103,13 +103,11 @@
     "modeGridDot": "ドット",
     "modeGridLine": "ライン",
     "modeRoadDefault": "通常表示",
-    "modeRoadPlan": "計画中道路",
     "modeRoadTraffic": "交通量色分け",
     "modeRoadSpeed": "速度規制色分け",
     "modeRoadDurability": "耐久度色分け",
     "modeRoadZone": "所属地区色分け",
     "modeBuildingDefault": "通常表示",
-    "modeBuildingPlan": "計画中建物",
     "modeBuildingFloor": "フロア色分け",
     "modeBuildingZone": "所属地区色分け",
     "modeBuildingDurability": "耐久度色分け",
@@ -139,6 +137,9 @@
     "subBdPort": "港湾",
     "subBdOther": "その他",
     "subBdPublic": "公共施設",
+    "toggleShowPlanRoad": "計画中の道路を表示",
+    "toggleShowPlanBuilding": "計画中の建物を表示",
+    "toggleHighlightPublic": "公共施設をハイライト",
     "showContours": "等高線を表示"
   },
   "grid_settings": {

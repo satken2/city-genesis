@@ -64,11 +64,24 @@ export type DisplayMode = {
   subModes?: DisplaySubMode[];
 };
 
+/**
+ * 色モード(modes)と独立にON/OFFできる表示トグル。
+ * 有効なトグルIDの集合は view:change_view の flags(CSV)としてUnityへ送られる。
+ */
+export type DisplayToggle = {
+  id: string;
+  labelKey: string;
+  icon: string;
+};
+
 export type DisplayLayer = {
   id: string;
   titleKey: string;
   defaultMode: string;
+  /** 初期状態でONのトグルID。省略時は全トグルOFF。 */
+  defaultFlags?: string[];
   modes: DisplayMode[];
+  toggles?: DisplayToggle[];
 };
 
 // ---- セクション定義 ----
@@ -104,10 +117,10 @@ export const DISPLAY_LAYERS: DisplayLayer[] = [
   {
     id: "road",
     titleKey: "display.layerRoad",
-    defaultMode: "plan",
+    defaultMode: "default",
+    defaultFlags: ["plan"],
     modes: [
       { id: "default", tooltipKey: "display.modeRoadDefault", icon: "visual/normal.png" },
-      { id: "plan", tooltipKey: "display.modeRoadPlan", icon: "visual/plan.png" },
       {
         id: "traffic_color",
         tooltipKey: "display.modeRoadTraffic",
@@ -123,14 +136,17 @@ export const DISPLAY_LAYERS: DisplayLayer[] = [
       { id: "zone_color", tooltipKey: "display.modeRoadZone", icon: "visual/region.png" },
       { id: "hidden", tooltipKey: "display.modeHidden", icon: "visual/invisible.png" },
     ],
+    toggles: [
+      { id: "plan", labelKey: "display.toggleShowPlanRoad", icon: "visual/plan.png" },
+    ],
   },
   {
     id: "building",
     titleKey: "display.layerBuilding",
-    defaultMode: "plan",
+    defaultMode: "default",
+    defaultFlags: ["plan"],
     modes: [
       { id: "default", tooltipKey: "display.modeBuildingDefault", icon: "visual/normal.png" },
-      { id: "plan", tooltipKey: "display.modeBuildingPlan", icon: "visual/plan.png" },
       {
         id: "floor_color",
         tooltipKey: "display.modeBuildingFloor",
@@ -147,6 +163,10 @@ export const DISPLAY_LAYERS: DisplayLayer[] = [
       { id: "zone_color", tooltipKey: "display.modeBuildingZone", icon: "visual/region.png" },
       { id: "durability_color", tooltipKey: "display.modeBuildingDurability", icon: "visual/durability.png" },
       { id: "hidden", tooltipKey: "display.modeHidden", icon: "visual/invisible.png" },
+    ],
+    toggles: [
+      { id: "plan", labelKey: "display.toggleShowPlanBuilding", icon: "visual/plan.png" },
+      { id: "public", labelKey: "display.toggleHighlightPublic", icon: "buildings/bd_512.png" },
     ],
   },
   {

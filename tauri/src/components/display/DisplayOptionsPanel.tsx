@@ -60,12 +60,6 @@ type LegendInfo = {
 function getLegendInfo(layerId: string, modeId: string): LegendInfo {
   if (layerId === "road") {
     switch (modeId) {
-      case "plan":
-        return {
-          type: "color",
-          description: "建設予定の道路を表示します",
-          items: [{ color: "#ffffff", label: "計画中道路" }],
-        };
       case "traffic_color":
         return {
           type: "meter",
@@ -98,18 +92,15 @@ function getLegendInfo(layerId: string, modeId: string): LegendInfo {
       case "hidden":
         return { type: "none", description: "道路を非表示にします" };
       default:
-        return { type: "none", description: "道路を通常表示します" };
+        return {
+          type: "none",
+          description: "道路を通常表示します。計画中の道路の表示は下のスイッチで切り替えます",
+        };
     }
   }
 
   if (layerId === "building") {
     switch (modeId) {
-      case "plan":
-        return {
-          type: "color",
-          description: "建設予定の建物を表示します",
-          items: [{ color: "#ffffff", label: "計画中建物" }],
-        };
       case "floor_color":
         return {
           type: "color",
@@ -136,7 +127,11 @@ function getLegendInfo(layerId: string, modeId: string): LegendInfo {
       case "hidden":
         return { type: "none", description: "建物を非表示にします" };
       default:
-        return { type: "none", description: "建物を通常表示します" };
+        return {
+          type: "none",
+          description:
+            "建物を通常表示します。計画中の建物の表示と公共施設のハイライトは下のスイッチで切り替えます",
+        };
     }
   }
 
@@ -345,7 +340,7 @@ function TransitSection({
 }
 
 export function DisplayOptionsPanel({ apiBaseUrl: _apiBaseUrl }: DisplayOptionsPanelProps) {
-  const { selections, selectMode } = useDisplayOptions();
+  const { selections, selectMode, toggleFlag } = useDisplayOptions();
   const [activeTabId, setActiveTabId] = useState<string>(TAB_ORDER[0]);
   const { t } = useTranslation();
 
@@ -405,6 +400,7 @@ export function DisplayOptionsPanel({ apiBaseUrl: _apiBaseUrl }: DisplayOptionsP
                   layer={activeLayer}
                   selection={activeSelection}
                   onSelect={selectMode}
+                  onToggleFlag={toggleFlag}
                 />
               )}
             </div>
@@ -425,10 +421,12 @@ function LayerSection({
   layer,
   selection,
   onSelect,
+  onToggleFlag,
 }: {
   layer: DisplayLayer;
   selection: DisplaySelection;
   onSelect: (layerId: string, mode: string, subMode?: string) => void;
+  onToggleFlag: (layerId: string, flagId: string) => void;
 }) {
   const { t } = useTranslation();
   const selectedModeDef = layer.modes.find((m) => m.id === selection.mode);
@@ -464,6 +462,32 @@ function LayerSection({
               }}
             />
           ))}
+        </div>
+      )}
+      {layer.toggles && layer.toggles.length > 0 && (
+        <div className="do-toggle-list">
+          {layer.toggles.map((toggle) => {
+            const isEnabled = selection.flags.includes(toggle.id);
+            return (
+              <div
+                key={toggle.id}
+                className={`do-alert-card ${isEnabled ? "enabled" : ""}`}
+                onClick={() => {
+                  playSound(clickSrc);
+                  onToggleFlag(layer.id, toggle.id);
+                }}
+              >
+                <img
+                  src={resolveDisplayIcon(toggle.icon)}
+                  alt=""
+                  className="do-alert-card-icon"
+                  draggable={false}
+                />
+                <span className="do-alert-card-text">{t(toggle.labelKey)}</span>
+                <div className="do-alert-card-toggle" />
+              </div>
+            );
+          })}
         </div>
       )}
       {layer.id === "terrain" && (

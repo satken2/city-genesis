@@ -24,7 +24,9 @@ public class IpcClient : MonoBehaviour
 
     // ---- 受信イベント（ui -> graphic）----
     public event Action<string, Dictionary<string, object>> OnWorldChangeState;
-    public event Action<string, string, string> OnViewChangeView;
+    // (layer, mode, subMode, flags)。flags は "plan,public" 形式のCSVで、
+    // null は「現在のフラグを維持」を意味するため ?? "" で潰さずそのまま渡す。
+    public event Action<string, string, string, string> OnViewChangeView;
     // パス敷設パネルからのノード標高・盛土変更。曲線/直線・吸着はUnity側のラジアルメニューが
     // 真実源だが、標高・盛土は既存ノードを選択して数値で微調整する用途があるため、
     // パネルのステッパー(UI→Unity)とUnityキー操作の双方向で編集できるようにしている。
@@ -261,10 +263,11 @@ public class IpcClient : MonoBehaviour
                         string layer = GetParamString(payload, "layer");
                         string mode = GetParamString(payload, "mode");
                         string subMode = GetParamString(payload, "sub_mode");
+                        string flags = GetParamString(payload, "flags");
                         if (layer != null && mode != null)
                         {
-                            Debug.Log($"IpcClient: view:change_view -> layer={layer}, mode={mode}, sub_mode={subMode}");
-                            OnViewChangeView?.Invoke(layer, mode, subMode ?? "");
+                            Debug.Log($"IpcClient: view:change_view -> layer={layer}, mode={mode}, sub_mode={subMode}, flags={flags ?? "(keep)"}");
+                            OnViewChangeView?.Invoke(layer, mode, subMode ?? "", flags);
                         }
                     }
                     break;

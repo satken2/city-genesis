@@ -152,41 +152,52 @@ public class VisualModeToggleUI : MonoBehaviour
 
     /// <summary>
     /// 建物ボタン押下時の処理。
-    /// 通常表示 -&gt; 計画表示 -&gt; 非表示 -&gt; 通常表示 の3値を循環する。
+    /// 「通常+計画中表示 → 通常のみ → 非表示」の3状態を循環する。
     /// </summary>
     private void OnBuildingButtonClicked()
     {
-        int current = visualModeHandler.GetMode(InputObjectType.BUILDING);
-        int next = GetNextCyclicMode(current,
-            VisualMode.MODE_NORMAL, VisualMode.MODE_PLAN, VisualMode.MODE_HIDDEN);
-
-        visualModeHandler.SetMode(InputObjectType.BUILDING, next);
+        CyclePlanVisibility(InputObjectType.BUILDING);
         RefreshButtonImage(buildingButton, InputObjectType.BUILDING);
     }
 
     /// <summary>
     /// 道路ボタン押下時の処理。
-    /// 通常表示 -&gt; 計画表示 -&gt; 非表示 -&gt; 通常表示 の3値を循環する。
+    /// 「通常+計画中表示 → 通常のみ → 非表示」の3状態を循環する。
     /// </summary>
     private void OnPathButtonClicked()
     {
-        int current = visualModeHandler.GetMode(InputObjectType.PATH);
-        int next = GetNextCyclicMode(current,
-            VisualMode.MODE_NORMAL, VisualMode.MODE_PLAN, VisualMode.MODE_HIDDEN);
-
-        visualModeHandler.SetMode(InputObjectType.PATH, next);
+        CyclePlanVisibility(InputObjectType.PATH);
         RefreshButtonImage(pathButton, InputObjectType.PATH);
     }
 
     /// <summary>
-    /// 3値のモードを順に循環させる。
-    /// 現在値が first であれば second、second であれば third、それ以外は first を返す。
+    /// 建物/道路ボタン共通の循環処理。
+    /// 計画中の表示は色モードではなく独立フラグ(VisualFlag.SHOW_PLAN)なので、
+    /// モードとフラグの両方を組み合わせて3状態を表現する。SHOW_PLAN 以外のフラグは維持する。
     /// </summary>
-    private int GetNextCyclicMode(int current, int first, int second, int third)
+    private void CyclePlanVisibility(int objectType)
     {
-        if (current == first) return second;
-        if (current == second) return third;
-        return first;
+        int mode = visualModeHandler.GetMode(objectType);
+        int flags = visualModeHandler.GetFlags(objectType);
+        bool showPlan = (flags & VisualFlag.SHOW_PLAN) != 0;
+
+        if (mode != VisualMode.MODE_HIDDEN && showPlan)
+        {
+            // 通常+計画中 → 通常のみ
+            visualModeHandler.SetFlags(objectType, flags & ~VisualFlag.SHOW_PLAN);
+            visualModeHandler.SetMode(objectType, VisualMode.MODE_NORMAL);
+        }
+        else if (mode != VisualMode.MODE_HIDDEN)
+        {
+            // 通常のみ → 非表示
+            visualModeHandler.SetMode(objectType, VisualMode.MODE_HIDDEN);
+        }
+        else
+        {
+            // 非表示 → 通常+計画中
+            visualModeHandler.SetFlags(objectType, flags | VisualFlag.SHOW_PLAN);
+            visualModeHandler.SetMode(objectType, VisualMode.MODE_NORMAL);
+        }
     }
 
     /// <summary>
@@ -292,20 +303,18 @@ public class VisualModeToggleUI : MonoBehaviour
                 return mode == VisualMode.MODE_BOUNDARY ? parcelVisibleSprite : parcelHiddenSprite;
 
             case InputObjectType.BUILDING:
-                switch (mode)
-                {
-                    case VisualMode.MODE_NORMAL: return buildingVisibleSprite;
-                    case VisualMode.MODE_PLAN: return buildingPlanSprite;
-                    default: return buildingHiddenSprite;
-                }
+            {
+                if (mode != VisualMode.MODE_NORMAL) return buildingHiddenSprite;
+                bool showPlan = (visualModeHandler.GetFlags(objectType) & VisualFlag.SHOW_PLAN) != 0;
+                return showPlan ? buildingPlanSprite : buildingVisibleSprite;
+            }
 
             case InputObjectType.PATH:
-                switch (mode)
-                {
-                    case VisualMode.MODE_NORMAL: return pathVisibleSprite;
-                    case VisualMode.MODE_PLAN: return pathPlanSprite;
-                    default: return pathHiddenSprite;
-                }
+            {
+                if (mode != VisualMode.MODE_NORMAL) return pathHiddenSprite;
+                bool showPlan = (visualModeHandler.GetFlags(objectType) & VisualFlag.SHOW_PLAN) != 0;
+                return showPlan ? pathPlanSprite : pathVisibleSprite;
+            }
 
             default:
                 return null;

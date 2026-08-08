@@ -13,6 +13,11 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     /// </summary>
     private static readonly Color DurabilityMinColor = new Color(1f, 0.267f, 0.267f);
 
+    /// <summary>
+    /// 公共施設ハイライトの色。UI凡例の公共施設色（#f44336）に合わせた半透明の赤。
+    /// </summary>
+    private static readonly Color PublicFacilityHighlightColor = new Color(0.957f, 0.263f, 0.212f, 0.55f);
+
     [Tooltip("このオブジェクトの種類(InputObjectType)を指定します")]
     public int objectType;
 
@@ -258,8 +263,10 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     {
         if (targetRenderers == null || targetRenderers.Count == 0) return;
 
-        // モードの取得
+        // モードとフラグの取得。
+        // 色モード(currentMode)は排他1択、表示フラグ(flags)は色モードと独立したON/OFF集合。
         int currentMode = modeOverride ?? (VisualModeHandler.Instance != null ? VisualModeHandler.Instance.GetMode(objectType) : VisualMode.MODE_NORMAL);
+        int flags = VisualModeHandler.Instance != null ? VisualModeHandler.Instance.GetFlags(objectType) : VisualFlag.SHOW_PLAN;
 
         // 1. プレビューモードの処理（最優先）
         if (isPreview)
@@ -314,8 +321,9 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
         // 深度書き込みと影を有効にした灰色マテリアルで立体感を保つ。
         if (objectStatus == Constants.STATUS_TEMPORARY || objectStatus == Constants.STATUS_SCHEDULED_CONSTRUCTION || objectStatus == Constants.STATUS_PENDING)
         {
-            // MODE_PLAN の時のみ表示
-            if (currentMode == VisualMode.MODE_PLAN)
+            // SHOW_PLAN フラグが立っている時のみ表示する。
+            // ただし色モードが非表示のときは計画中も含めて全て隠す。
+            if ((flags & VisualFlag.SHOW_PLAN) != 0 && currentMode != VisualMode.MODE_HIDDEN)
             {
                 SetRenderersEnabled(true);
                 EnableCollider(true);
@@ -336,6 +344,31 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
 
         // 4. 通常ステータス(ACTIVE)の処理
         EnableCollider(true);
+
+        // 4.1. 公共施設ハイライト（色モードと独立したフラグ）。
+        // 対象は稼働中の公共施設のみで、どの色モードよりも優先して固定色の半透明オーバーレイを被せる。
+        // マテリアル差し替え方式のため色分けとの真の合成はできず、「公共施設だけ強調色」となる。
+        // 非表示モードだけはハイライトより強い（隠している建物を光らせない）。
+        if (objectType == InputObjectType.BUILDING
+            && (flags & VisualFlag.HIGHLIGHT_PUBLIC) != 0
+            && currentMode != VisualMode.MODE_HIDDEN
+            && !preventMaterialChange)
+        {
+            var publicStats = GetComponent<VisualBuildingStats>();
+            if (publicStats != null && publicStats.publicFacility)
+            {
+                SetRenderersEnabled(true);
+                if (isHovered)
+                {
+                    ApplyMaterialToAllSubmeshes(highlightMaterial);
+                }
+                else
+                {
+                    ApplyBuildingColorOverlay(PublicFacilityHighlightColor, isSemiTransparent: true);
+                }
+                return;
+            }
+        }
 
         switch (currentMode)
         {
@@ -595,7 +628,6 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
                 break;
 
             case VisualMode.MODE_NORMAL:
-            case VisualMode.MODE_PLAN:
             default:
                 SetRenderersEnabled(true);
 

@@ -376,3 +376,19 @@
   transform: translateX(16px);
 }
 
+/* ---- 色モードと独立した表示トグル(計画中表示・公共施設ハイライト等) ---- */
+/* カード本体はアラートタブの .do-alert-card 系スタイルを流用し、モード行の下に少し詰めて並べる */
+
+.do-toggle-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-top: 14px;
+}
+
+.do-toggle-list .do-alert-card {
+  min-height: 42px;
+  padding: 6px 12px;
+}
+

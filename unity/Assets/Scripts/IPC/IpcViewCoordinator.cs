@@ -13,8 +13,8 @@ public class IpcViewCoordinator : MonoBehaviour
         { "terrain", "default" },
         { "grid", "hidden" },
         { "cell", "hidden" },
-        { "road", "plan" },
-        { "building", "plan" },
+        { "road", "default" },
+        { "building", "default" },
         { "parcel", "border" },
         { "district", "hidden" },
         { "environment", "hidden" },
@@ -27,6 +27,17 @@ public class IpcViewCoordinator : MonoBehaviour
     private Dictionary<string, string> _layerSubModes = new Dictionary<string, string>();
 
     /// <summary>
+    /// レイヤーごとの表示フラグ(CSV文字列。例 "plan,public")。
+    /// 色モードと独立したON/OFF集合で、現状 road / building レイヤーのみが使用する。
+    /// UI側の初期値(計画中=ON)と一致させる。
+    /// </summary>
+    private Dictionary<string, string> _layerFlags = new Dictionary<string, string>
+    {
+        { "road", "plan" },
+        { "building", "plan" }
+    };
+
+    /// <summary>
     /// 現在のステート。HandleViewChange で STATE_NORMAL 中の変更のみ記憶するために使用する。
     /// </summary>
     private string _currentState = "STATE_NORMAL";
@@ -36,7 +47,7 @@ public class IpcViewCoordinator : MonoBehaviour
     /// 次に STATE_NORMAL に戻ったとき、この記憶を復元する。
     /// STATE_NORMAL 以外での変更は記憶しない。
     /// </summary>
-    private Dictionary<string, (string mode, string subMode)> _normalStateMemory = new Dictionary<string, (string, string)>();
+    private Dictionary<string, (string mode, string subMode, string flags)> _normalStateMemory = new Dictionary<string, (string, string, string)>();
 
     private void OnEnable()
     {
@@ -54,9 +65,9 @@ public class IpcViewCoordinator : MonoBehaviour
         }
     }
 
-    private void HandleViewChange(string layer, string mode, string subMode)
+    private void HandleViewChange(string layer, string mode, string subMode, string flags)
     {
-        Debug.Log($"IpcViewCoordinator: view.change_view -> layer={layer}, mode={mode}, sub_mode={subMode}");
+        Debug.Log($"IpcViewCoordinator: view.change_view -> layer={layer}, mode={mode}, sub_mode={subMode}, flags={flags ?? "(keep)"}");
 
         _layerModes[layer] = mode;
         if (subMode != null && subMode.Length > 0)
@@ -68,11 +79,26 @@ public class IpcViewCoordinator : MonoBehaviour
             _layerSubModes.Remove(layer);
         }
 
+        // flags は null=現在値を維持 / ""=全OFF / それ以外=CSVで指定されたフラグ集合。
+        // 「維持」は、建設パネル等がモードだけ切り替える旧来の呼び出しでトグル状態を壊さないための仕様。
+        if (flags != null)
+        {
+            if (flags.Length > 0)
+            {
+                _layerFlags[layer] = flags;
+            }
+            else
+            {
+                _layerFlags.Remove(layer);
+            }
+        }
+        string effectiveFlags = _layerFlags.TryGetValue(layer, out var f) ? f : "";
+
         // STATE_NORMAL 中の変更のみ記憶する。
         if (_currentState == "STATE_NORMAL")
         {
-            _normalStateMemory[layer] = (mode, subMode);
-            Debug.Log($"HandleViewChange: STATE_NORMAL 中の変更を記憶 -> {layer}={mode}, sub={subMode ?? "(none)"}");
+            _normalStateMemory[layer] = (mode, subMode, effectiveFlags);
+            Debug.Log($"HandleViewChange: STATE_NORMAL 中の変更を記憶 -> {layer}={mode}, sub={subMode ?? "(none)"}, flags={effectiveFlags}");
         }
 
         if (VisualModeHandler.Instance == null) return;
@@ -92,11 +118,11 @@ public class IpcViewCoordinator : MonoBehaviour
                 break;
 
             case "road":
-                ApplyRoadMode(mode, subMode);
+                ApplyRoadMode(mode, subMode, effectiveFlags);
                 break;
 
             case "building":
-                ApplyBuildingMode(mode, subMode);
+                ApplyBuildingMode(mode, subMode, effectiveFlags);
                 break;
 
             case "parcel":
@@ -164,13 +190,14 @@ public class IpcViewCoordinator : MonoBehaviour
                 // 地区が表示されていると誤クリックで地区パネルが開き、
                 // パネルを閉じた際に道路敷設がキャンセルされる恐れがあるため。
                 _layerModes["parcel"] = "border";
-                _layerModes["road"] = "plan";
-                _layerModes["building"] = "plan";
+                _layerModes["road"] = "default";
+                _layerModes["building"] = "default";
                 _layerModes["district"] = "hidden";
                 _layerSubModes.Remove("parcel");
                 _layerSubModes.Remove("road");
                 _layerSubModes.Remove("building");
                 _layerSubModes.Remove("district");
+                SetPlanOnlyFlags();
                 break;
 
             case "STATE_EDIT_BUILDING":
@@ -202,38 +229,45 @@ public class IpcViewCoordinator : MonoBehaviour
                     _layerModes["parcel"] = "border";
                     _layerSubModes.Remove("parcel");
                 }
-                _layerModes["road"] = "plan";
-                _layerModes["building"] = "plan";
+                _layerModes["road"] = "default";
+                _layerModes["building"] = "default";
                 _layerModes["district"] = "border_icon";
                 _layerSubModes.Remove("road");
                 _layerSubModes.Remove("building");
                 _layerSubModes.Remove("district");
+                SetPlanOnlyFlags();
                 break;
             }
 
             case "STATE_EDIT_PARCEL":
                 _layerModes["parcel"] = "border";
-                _layerModes["road"] = "plan";
-                _layerModes["building"] = "plan";
+                _layerModes["road"] = "default";
+                _layerModes["building"] = "default";
                 _layerModes["district"] = "border_icon";
                 _layerSubModes.Remove("parcel");
                 _layerSubModes.Remove("road");
                 _layerSubModes.Remove("building");
                 _layerSubModes.Remove("district");
+                SetPlanOnlyFlags();
                 break;
 
             case "STATE_EDIT_ZONE":
+                // 地区編集中は道路・建物とも地区色分けにして所属地区を可視化する。
+                // 計画中の表示は編集の邪魔になるためOFF。
                 _layerModes["parcel"] = "border";
                 _layerModes["road"] = "zone_color";
-                _layerModes["building"] = "plan";
+                _layerModes["building"] = "zone_color";
                 _layerModes["district"] = "border_icon";
                 _layerSubModes.Remove("parcel");
                 _layerSubModes.Remove("road");
                 _layerSubModes.Remove("building");
                 _layerSubModes.Remove("district");
+                _layerFlags.Remove("road");
+                _layerFlags.Remove("building");
                 break;
 
             case "STATE_UNLOCK_CELL":
+                // セル開放中は現況の街並みだけを見せたいので、計画中の表示もOFFにする。
                 _layerModes["parcel"] = "hidden";
                 _layerModes["road"] = "default";
                 _layerModes["building"] = "default";
@@ -242,47 +276,52 @@ public class IpcViewCoordinator : MonoBehaviour
                 _layerSubModes.Remove("road");
                 _layerSubModes.Remove("building");
                 _layerSubModes.Remove("district");
+                _layerFlags.Remove("road");
+                _layerFlags.Remove("building");
                 break;
 
             case "STATE_EDIT_TRANSIT":
-                // 公共交通の路線設置中は道路建設と同じ計画表示にし、地区は非表示にする。
+                // 公共交通の路線設置中は道路建設と同じ計画中表示にし、地区は非表示にする。
                 // 公共交通レイヤー(transit)は、設置対象の路線種別が見えるよう表示は維持する
                 // (実際の表示種別集合は UI 側パネルが view.change_view で明示指定する)。
                 _layerModes["parcel"] = "border";
-                _layerModes["road"] = "plan";
-                _layerModes["building"] = "plan";
+                _layerModes["road"] = "default";
+                _layerModes["building"] = "default";
                 _layerModes["district"] = "hidden";
                 _layerSubModes.Remove("parcel");
                 _layerSubModes.Remove("road");
                 _layerSubModes.Remove("building");
                 _layerSubModes.Remove("district");
+                SetPlanOnlyFlags();
                 break;
 
             case "STATE_MERGE_PATH":
             case "STATE_SPLIT_PATH":
-                // パスの結合相手・分割点の選択中は道路敷設と同じ計画表示にし、地区は非表示にする
+                // パスの結合相手・分割点の選択中は道路敷設と同じ計画中表示にし、地区は非表示にする
                 // (地区が表示されていると誤クリックで地区パネルが開き、選択操作が中断されるため)。
                 _layerModes["parcel"] = "border";
-                _layerModes["road"] = "plan";
-                _layerModes["building"] = "plan";
+                _layerModes["road"] = "default";
+                _layerModes["building"] = "default";
                 _layerModes["district"] = "hidden";
                 _layerSubModes.Remove("parcel");
                 _layerSubModes.Remove("road");
                 _layerSubModes.Remove("building");
                 _layerSubModes.Remove("district");
+                SetPlanOnlyFlags();
                 break;
 
             case "STATE_REMOVE_OBJECTS":
-                // ブルドーザ(削除)モードは道路敷設と同じ計画表示にし、地区は非表示にする。
+                // ブルドーザ(削除)モードは道路敷設と同じ計画中表示にし、地区は非表示にする。
                 // 区画は境界線表示にして、空き地(削除対象)が見えるようにする。
                 _layerModes["parcel"] = "border";
-                _layerModes["road"] = "plan";
-                _layerModes["building"] = "plan";
+                _layerModes["road"] = "default";
+                _layerModes["building"] = "default";
                 _layerModes["district"] = "hidden";
                 _layerSubModes.Remove("parcel");
                 _layerSubModes.Remove("road");
                 _layerSubModes.Remove("building");
                 _layerSubModes.Remove("district");
+                SetPlanOnlyFlags();
                 break;
 
             default:
@@ -292,6 +331,17 @@ public class IpcViewCoordinator : MonoBehaviour
 
         Debug.Log($"IpcViewCoordinator: SyncFromState -> {state} (currentState was {_currentState})");
         NotifyStateChanged();
+    }
+
+    /// <summary>
+    /// 編集系ステートの標準フラグ「計画中の表示のみON」を道路・建物に設定する。
+    /// 公共施設ハイライト等の他フラグは編集の邪魔になるため一時的にOFFにする
+    /// (STATE_NORMAL 復帰時に _normalStateMemory から復元される)。
+    /// </summary>
+    private void SetPlanOnlyFlags()
+    {
+        _layerFlags["road"] = "plan";
+        _layerFlags["building"] = "plan";
     }
 
     /// <summary>
@@ -306,7 +356,7 @@ public class IpcViewCoordinator : MonoBehaviour
         {
             if (_normalStateMemory.TryGetValue(layer, out var mem))
             {
-                Debug.Log($"RestoreNormalLayerModes: {layer} は記憶あり -> mode={mem.mode}, sub={mem.subMode ?? "(none)"}");
+                Debug.Log($"RestoreNormalLayerModes: {layer} は記憶あり -> mode={mem.mode}, sub={mem.subMode ?? "(none)"}, flags={mem.flags ?? "(none)"}");
                 _layerModes[layer] = mem.mode;
                 if (!string.IsNullOrEmpty(mem.subMode))
                 {
@@ -316,6 +366,14 @@ public class IpcViewCoordinator : MonoBehaviour
                 {
                     _layerSubModes.Remove(layer);
                 }
+                if (!string.IsNullOrEmpty(mem.flags))
+                {
+                    _layerFlags[layer] = mem.flags;
+                }
+                else
+                {
+                    _layerFlags.Remove(layer);
+                }
             }
             else
             {
@@ -323,12 +381,14 @@ public class IpcViewCoordinator : MonoBehaviour
                 switch (layer)
                 {
                     case "building":
-                        _layerModes[layer] = "plan";
+                        _layerModes[layer] = "default";
                         _layerSubModes.Remove(layer);
+                        _layerFlags[layer] = "plan";
                         break;
                     case "road":
-                        _layerModes[layer] = "plan";
+                        _layerModes[layer] = "default";
                         _layerSubModes.Remove(layer);
+                        _layerFlags[layer] = "plan";
                         break;
                     case "parcel":
                         _layerModes[layer] = "hidden";
@@ -363,19 +423,20 @@ public class IpcViewCoordinator : MonoBehaviour
         foreach (var kvp in _layerModes)
         {
             string sub = _layerSubModes.TryGetValue(kvp.Key, out var s) ? s : null;
-            ApplyLayerMode(kvp.Key, kvp.Value, sub);
+            string flags = _layerFlags.TryGetValue(kvp.Key, out var f) ? f : "";
+            ApplyLayerMode(kvp.Key, kvp.Value, sub, flags);
         }
     }
 
-    private void ApplyLayerMode(string layer, string mode, string subMode)
+    private void ApplyLayerMode(string layer, string mode, string subMode, string flags)
     {
         switch (layer)
         {
             case "terrain": ApplyTerrainMode(mode, subMode); break;
             case "grid": ApplyGridMode(mode); break;
             case "cell": ApplyCellMode(mode); break;
-            case "road": ApplyRoadMode(mode, subMode); break;
-            case "building": ApplyBuildingMode(mode, subMode); break;
+            case "road": ApplyRoadMode(mode, subMode, flags); break;
+            case "building": ApplyBuildingMode(mode, subMode, flags); break;
             case "parcel": ApplyParcelMode(mode, subMode); break;
             case "district": ApplyDistrictMode(mode); break;
             case "environment": ApplyEnvironmentMode(mode); break;
@@ -403,10 +464,12 @@ public class IpcViewCoordinator : MonoBehaviour
         foreach (var kvp in _layerModes)
         {
             string sub = _layerSubModes.ContainsKey(kvp.Key) ? _layerSubModes[kvp.Key] : null;
+            string flags = _layerFlags.ContainsKey(kvp.Key) ? _layerFlags[kvp.Key] : null;
             layers[kvp.Key] = new Dictionary<string, string>
             {
                 { "mode", kvp.Value },
-                { "sub_mode", sub ?? "" }
+                { "sub_mode", sub ?? "" },
+                { "flags", flags ?? "" }
             };
         }
 
@@ -464,15 +527,15 @@ public class IpcViewCoordinator : MonoBehaviour
         }
     }
 
-    private void ApplyRoadMode(string mode, string subMode)
+    private void ApplyRoadMode(string mode, string subMode, string flags)
     {
+        // 計画中表示などのフラグは色モードと独立に適用する
+        VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, ParseFlags(flags));
+
         switch (mode)
         {
             case "default":
                 VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
-                break;
-            case "plan":
-                VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_PLAN);
                 break;
             case "traffic_color":
                 int trafficMode = subMode switch
@@ -499,15 +562,15 @@ public class IpcViewCoordinator : MonoBehaviour
         }
     }
 
-    private void ApplyBuildingMode(string mode, string subMode)
+    private void ApplyBuildingMode(string mode, string subMode, string flags)
     {
+        // 計画中表示・公共施設ハイライトのフラグは色モードと独立に適用する
+        VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, ParseFlags(flags));
+
         switch (mode)
         {
             case "default":
                 VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
-                break;
-            case "plan":
-                VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_PLAN);
                 break;
             case "floor_color":
                 int floorMode = subMode switch
@@ -532,6 +595,30 @@ public class IpcViewCoordinator : MonoBehaviour
                 VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_HIDDEN);
                 break;
         }
+    }
+
+    /// <summary>
+    /// フラグのCSV文字列("plan,public" 形式)を VisualFlag のビット和に変換する。
+    /// 未知のフラグIDは無視する。
+    /// </summary>
+    private static int ParseFlags(string flags)
+    {
+        int result = VisualFlag.NONE;
+        if (string.IsNullOrEmpty(flags)) return result;
+
+        foreach (var part in flags.Split(','))
+        {
+            switch (part.Trim())
+            {
+                case "plan":
+                    result |= VisualFlag.SHOW_PLAN;
+                    break;
+                case "public":
+                    result |= VisualFlag.HIGHLIGHT_PUBLIC;
+                    break;
+            }
+        }
+        return result;
     }
 
     private void ApplyParcelMode(string mode, string subMode)

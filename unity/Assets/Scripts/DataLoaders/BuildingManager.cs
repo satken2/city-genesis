@@ -1349,8 +1349,8 @@ public class BuildingManager : BaseApiDataManager
 
         if (mr != null && (buildingData.status == Constants.STATUS_SCHEDULED_CONSTRUCTION || buildingData.status == Constants.STATUS_PENDING))
         {
-            int mode = VisualModeHandler.Instance != null ? VisualModeHandler.Instance.GetMode(InputObjectType.BUILDING) : VisualMode.MODE_NORMAL;
-            mr.enabled = (mode == VisualMode.MODE_PLAN);
+            int flags = VisualModeHandler.Instance != null ? VisualModeHandler.Instance.GetFlags(InputObjectType.BUILDING) : VisualFlag.SHOW_PLAN;
+            mr.enabled = (flags & VisualFlag.SHOW_PLAN) != 0;
         }
 
         // 辞書は即座に新しいオブジェクトに更新する。

@@ -126,13 +126,11 @@
     "modeGridDot": "Dot",
     "modeGridLine": "Line",
     "modeRoadDefault": "Default View",
-    "modeRoadPlan": "Planned Roads",
     "modeRoadTraffic": "Traffic Coloring",
     "modeRoadSpeed": "Speed Limit Coloring",
     "modeRoadDurability": "Durability Coloring",
     "modeRoadZone": "District Coloring",
     "modeBuildingDefault": "Default View",
-    "modeBuildingPlan": "Planned Buildings",
     "modeBuildingFloor": "Floor Coloring",
     "modeBuildingZone": "District Coloring",
     "modeBuildingDurability": "Durability Coloring",
@@ -162,6 +160,9 @@
     "subBdPort": "Port",
     "subBdOther": "Other",
     "subBdPublic": "Public Facility",
+    "toggleShowPlanRoad": "Show Planned Roads",
+    "toggleShowPlanBuilding": "Show Planned Buildings",
+    "toggleHighlightPublic": "Highlight Public Facilities",
     "showContours": "Show Contour Lines"
   },
   "grid_settings": {

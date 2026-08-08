@@ -314,8 +314,10 @@ public class IpcStateCoordinator : MonoBehaviour
         if (VisualModeHandler.Instance != null)
         {
             VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_BOUNDARY);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_PLAN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_PLAN);
+            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.SHOW_PLAN);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.SHOW_PLAN);
             VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
         }
 
@@ -364,8 +366,10 @@ public class IpcStateCoordinator : MonoBehaviour
         if (VisualModeHandler.Instance != null)
         {
             VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_BOUNDARY);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_PLAN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_PLAN);
+            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.SHOW_PLAN);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.SHOW_PLAN);
             VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
         }
 
@@ -459,8 +463,10 @@ public class IpcStateCoordinator : MonoBehaviour
         if (VisualModeHandler.Instance != null)
         {
             VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_BOUNDARY);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_PLAN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_PLAN);
+            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.SHOW_PLAN);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.SHOW_PLAN);
             VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
         }
 
@@ -567,8 +573,10 @@ public class IpcStateCoordinator : MonoBehaviour
         {
             int parcelMode = BuildingPlanManager.BdTypeToParcelFilterMode(currentBdType);
             VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, parcelMode);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_PLAN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_PLAN);
+            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.SHOW_PLAN);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.SHOW_PLAN);
             VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_NORMAL);
         }
 
@@ -645,13 +653,15 @@ public class IpcStateCoordinator : MonoBehaviour
             InputSystemManager.Instance.SetModePreset(InputModePreset.ZONE_EDIT);
         }
 
-        // VisualMode: 計画表示
+        // VisualMode: 地区色分け表示。計画中表示・公共施設ハイライトは編集の邪魔になるためOFF
         if (VisualModeHandler.Instance != null)
         {
             VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualModeParcel.ZONE_COLOR);
             VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualModePath.ZONE_COLOR);
             VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualModeBuilding.ZONE_COLOR);
             VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.NONE);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.NONE);
         }
     }
 
@@ -702,8 +712,10 @@ public class IpcStateCoordinator : MonoBehaviour
         if (VisualModeHandler.Instance != null)
         {
             VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_BOUNDARY);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_PLAN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_PLAN);
+            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.SHOW_PLAN);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.SHOW_PLAN);
             VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
         }
 
@@ -788,8 +800,10 @@ public class IpcStateCoordinator : MonoBehaviour
         if (VisualModeHandler.Instance != null)
         {
             VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_BOUNDARY);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_PLAN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_PLAN);
+            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.SHOW_PLAN);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.SHOW_PLAN);
             VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
         }
 
@@ -826,8 +840,10 @@ public class IpcStateCoordinator : MonoBehaviour
         if (VisualModeHandler.Instance != null)
         {
             VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_BOUNDARY);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_PLAN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_PLAN);
+            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.SHOW_PLAN);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.SHOW_PLAN);
             VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
         }
 
@@ -864,8 +880,10 @@ public class IpcStateCoordinator : MonoBehaviour
         if (VisualModeHandler.Instance != null)
         {
             VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_BOUNDARY);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_PLAN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_PLAN);
+            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.SHOW_PLAN);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.SHOW_PLAN);
             VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
         }
 
@@ -914,8 +932,10 @@ public class IpcStateCoordinator : MonoBehaviour
         if (VisualModeHandler.Instance != null)
         {
             VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_BOUNDARY);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_PLAN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_PLAN);
+            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.SHOW_PLAN);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.SHOW_PLAN);
             VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
         }
 
@@ -1082,8 +1102,10 @@ public class IpcStateCoordinator : MonoBehaviour
         if (VisualModeHandler.Instance != null)
         {
             VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_BOUNDARY);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_PLAN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_PLAN);
+            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.SHOW_PLAN);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.SHOW_PLAN);
             VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
         }
 
@@ -1139,13 +1161,15 @@ public class IpcStateCoordinator : MonoBehaviour
             InputSystemManager.Instance.SetModePreset(InputModePreset.UNLOCK_CELL);
         }
 
-        // VisualMode: 通常表示（地形オーバーレイはそのまま）
+        // VisualMode: 通常表示（地形オーバーレイはそのまま）。計画中表示も含めて現況の街並みだけを見せる
         if (VisualModeHandler.Instance != null)
         {
             VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_HIDDEN);
             VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
             VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
             VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.NONE);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.NONE);
         }
 
         // 道路エディタを終了状態に戻す
@@ -1173,8 +1197,10 @@ public class IpcStateCoordinator : MonoBehaviour
         if (VisualModeHandler.Instance != null)
         {
             VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_BOUNDARY);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_PLAN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_PLAN);
+            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.SHOW_PLAN);
+            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.SHOW_PLAN);
             VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
         }
 

@@ -36,17 +36,26 @@ export type GraphicState =
 /**
  * `view.change_view`
  * 表示オプションで選択した表示モードをグラフィックプログラムに通知する。
+ * flags は色モードと独立した表示トグル("plan"=計画中表示, "public"=公共施設ハイライト)の
+ * ID配列で、CSVに結合して送信する。省略(未指定)時は null を送り、
+ * Unity側は「現在のフラグを維持」と解釈する(空配列は「全トグルOFF」の明示指定)。
  */
 export async function sendChangeDisplay(
   layer: string,
   mode: string,
   subMode?: string | null,
+  flags?: string[] | null,
 ): Promise<void> {
   await invoke("send_window_action", {
     windowType: "display_options",
     entity: null,
     action: "view:change_view",
-    params: { layer, mode, sub_mode: subMode ?? null },
+    params: {
+      layer,
+      mode,
+      sub_mode: subMode ?? null,
+      flags: flags != null ? flags.join(",") : null,
+    },
   });
 }
 

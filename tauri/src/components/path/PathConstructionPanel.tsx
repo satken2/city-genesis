@@ -157,8 +157,8 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
         // 後から Rust 側が STATE_NORMAL を送った際に default に戻ってしまうため。
         await sendChangeState("STATE_NORMAL");
         await sendSetGrid("off");
-        // 道路を作成したので、ユーザーが建設結果を確認できるよう計画表示に切り替える。
-        await sendChangeDisplay("road", "plan");
+        // 道路を作成したので、ユーザーが建設結果を確認できるよう計画中表示をONにする。
+        await sendChangeDisplay("road", "default", null, ["plan"]);
         onClose();
       } else {
         // 新規敷設: 連続設置モード。バリアント選択を維持して次のパスを配置できるようにする。
