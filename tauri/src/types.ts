@@ -397,7 +397,9 @@ export type AgentMasterEntry = {
   max_space?: number;
   max_floors?: number;
   min_floors?: number;
-  constant_production?: boolean;
+  // 余力倍率。正値の施設は「平滑化した直面需要 × 余力倍率 × 稼働率目標」を生産目標とする
+  // 公共余力方式で、稼働率目標スライダーの表示対象になる。未設定/0 は通常の需要追従計画。
+  production_headroom?: number;
   // 底面形状の可変可否。false のとき底面は default_width × default_height の矩形で固定される
   // （建ぺい率や区画形状による底面生成を行わない）。未設定は可変(従来挙動)。
   resizable?: boolean;

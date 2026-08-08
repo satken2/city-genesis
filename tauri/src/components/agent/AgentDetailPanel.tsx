@@ -476,10 +476,10 @@ export function AgentDetailPanel({
 
       {(() => {
         const agentMaster = masterData?.agents[agentData.variant];
-        const isConstantProduction = agentMaster?.constant_production === true;
+        const isHeadroomFacility = (agentMaster?.production_headroom ?? 0) > 0;
         // 建設中の建物は utilization_target を「建設スピード」として調整できる（最大500%）。
         const isConstructing = agentData.status === STATUS_CONSTRUCTING;
-        if (!isConstructing && !isConstantProduction) return null;
+        if (!isConstructing && !isHeadroomFacility) return null;
 
         const sliderMax = isConstructing ? 500 : 100;
 
