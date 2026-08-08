@@ -15,7 +15,7 @@
 | `TunnelSectionUtil.cs` | 地下パス(トンネル)の区間分類。地下判定(`IsUndergroundPath`=負の相対Yアンカーを持つか)、点列の描画区間分割(`SplitDrawableRuns`: 深さ=地形標高−道路Yがクリアランス高さ`height`を超える区間を除外し坑口位置を返す)、トンネル区間の抽出(`CollectTunnelRuns`: 道路エディタのプレビュー用)、**トンネル区間の有無判定(`HasTunnelSection`: 相対Y=0の非追従パスが丘に潜るかを安価に判定。地下メッシュ経路/Far非表示のゲート)**。**`SplitRuns`系と`HasTunnelSection`は`pathFollowsTerrain`引数を取り、falseのとき地表張り付きショートカット(`IsOnGround`)を無効化して常に深さ評価する**(地表近くを通る非追従デッキが誤って追従扱いされ丘の隆起を見逃すのを防ぐ)。バックエンド`geo_path_depth.py`(`path_uses_depth_classification`)と同一の分類定義。PathManager/RoadPath/RoadPlanManagerが使用 |
 | `MultiValueTableBuilder.cs` | 複数値テーブルUIの構築 |
 | ObjectIdInfo.cs | GameObjectのメタデータ(id/status/isFarObject/role)を保持するコンポーネント。名前の文字列パースに代わる安全なデータ参照手段として各Managerが使用する |
-| OverlayMeshRenderer.cs | オーバーレイ用メッシュ描画。`Custom/OverlayLine` シェーダーを使用し、地形へのめり込みを防ぐためデフォルトで負のデプスオフセット（Offset -1, -20）が設定されている。 |
+| OverlayMeshRenderer.cs | オーバーレイ用メッシュ描画。`Custom/OverlayLine` シェーダーを使用し、地形へのめり込みを防ぐためデフォルトで負のデプスオフセット（Offset -1, -20）が設定されている。`AddPreTriangulated` は単色版と**頂点色版**の2種(頂点色版はグラデーション表現用)。シェーダーのマテリアルプロパティで `_ZTest`(既定LEqual)、`_SrcBlend`/`_DstBlend`(既定はアルファブレンド。`_DstBlend=One` で加算=光の表現)、`_Tint`(頂点色に乗算。`SetTint` でメッシュを作り直さず明滅させる)を制御できる。 |
 | StackedBreakdownMeter.cs | 積み上げメーター表示 |
 | `UILineRenderer.cs` | UI上の線描画 |
 | `UISoundEffectPlayer.cs` | 効果音再生 |

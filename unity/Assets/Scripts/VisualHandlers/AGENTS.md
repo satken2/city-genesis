@@ -6,7 +6,7 @@
 ## 仕組み
 
 - `VisualModeHandler`(シングルトン)がオブジェクトタイプ(`InputObjectType`)ごとに現在の**色モード**(`SetMode`/`GetMode`)と**表示フラグ**(`SetFlags`/`GetFlags`、`VisualFlag` のビット和)を保持し、登録済みの `IVisualModeHandler` 群へ `ApplyVisualMode(mode)` を通知する。
-- **色モードとフラグは直交する2系統**: 色モードは排他1択(通常/色分け各種/非表示)、フラグは独立ON/OFF(計画中表示 `SHOW_PLAN` / 公共施設ハイライト `HIGHLIGHT_PUBLIC`)。フラグは `ApplyVisualMode` の引数には乗らず、`VisualModeObject` が `GetFlags` をプル参照する(そのため `IVisualModeHandler` インターフェースはフラグを知らない。ParcelManager/ZoneManager にも影響しない)。
+- **色モードとフラグは直交する2系統**: 色モードは排他1択(通常/色分け各種/非表示)、フラグは独立ON/OFF(計画中表示 `SHOW_PLAN` / 公共施設ハイライト `HIGHLIGHT_PUBLIC`)。フラグは `ApplyVisualMode` の引数には乗らず、`VisualModeObject` と `PublicFacilityGlowOverlay` が `GetFlags` をプル参照する(そのため `IVisualModeHandler` インターフェースはフラグを知らない。ParcelManager/ZoneManager にも影響しない)。
 - モード/フラグ変更時の通知は1フレームあたり `batchSize`(既定100)件ずつのバッチ処理。**一括変更しても即座に全部は切り替わらない。**
 - `SetMode` / `SetFlags` は前回と同じ値ならスキップする(差分チェック)。
 - Destroy済み参照は10秒ごとの `PeriodicCleanup` で除去される。
@@ -24,9 +24,19 @@
 - **ステータス連動**: `SetStatus(status)` で設定されたオブジェクトステータスがモードより優先される。
   - `STATUS_CONSTRUCTING` → 常に表示+**オリジナルマテリアル**(ホバー中はハイライト)。メッシュ自体が専用の「工事現場」表示(土マウンド/土ストリップ+足場+クレーン等。`ConstructingBuildingMeshBuilder` / `PathManager.GenerateConstructingPathMesh`)のため、旧仕様の `ConstructionMaterial`(黄色)一括上塗りは廃止。マテリアルアセット自体は `ConstructionDirt` 未配置時のフォールバック先(`BuildingMeshBuilder.GetConstructionDirtMaterial`)として存続している
   - `STATUS_TEMPORARY` / `STATUS_PENDING` / `STATUS_SCHEDULED_CONSTRUCTION` → `VisualFlag.SHOW_PLAN` が立っている(かつ色モードが非表示でない)ときだけ表示(temporary=赤 `PendingMaterial` / pending・planned=灰色 `PlannedMaterial`)。フラグOFFまたは非表示モードではRendererとコライダーが無効化される。**どちらも不透明(ZWrite有効・影あり)**。半透明ゴースト表示は形状が読み取れないため廃止した
-- **公共施設ハイライト(`VisualFlag.HIGHLIGHT_PUBLIC`)**: 稼働中(ACTIVE)の建物のうち `VisualBuildingStats.publicFacility`(=バックエンドの `public_facility`)が真のものへ、どの色モードよりも優先して固定色(#f44336系)の半透明オーバーレイを被せる。マテリアル差し替え方式のため色分けとの合成はできず「公共施設だけ強調色」になる。優先順位: プレビュー > 干渉ハイライト > 建設中/計画中ステータス > ホバー > 公共ハイライト > 色モード(非表示モードだけは公共ハイライトより強い)。
+- **公共施設ハイライト(`VisualFlag.HIGHLIGHT_PUBLIC`)は `VisualModeObject` の責務ではない**。建物のマテリアルは触らず、`PublicFacilityGlowOverlay` が敷地の土地区画形状に光を描く(下記)。そのため色モード(地区別色塗り・耐久度色分け等)と同時に成立する。
 - ホバーハイライトは `SetHover(true/false)`(InputHandler系から呼ばれる)。
 - 数値ベースの色分けは `MaterialPropertyBlock`(_BaseColor/_Color)で行い、マテリアルのインスタンス化を避けている。
+
+## PublicFacilityGlowOverlay(公共施設ハイライト)
+
+- `VisualFlag.HIGHLIGHT_PUBLIC` の描画専任の常駐オーバーレイ。`BuildingManager.Awake` の `PublicFacilityGlowOverlay.Ensure()` で自動生成される(シーンへの事前配置は不要・多重生成なし)。
+- **VisualModeHandler には登録しない**。`ApplyVisualMode` のバッチ通知は建物数が多いと末尾のオブジェクトまで数秒かかるため、`Update` で `GetFlags`/`GetMode` を直接ポーリングして有効・無効を決める。
+- 表示条件は「フラグON かつ 建物の色モードが非表示でない」+ 建物が `public_facility` かつ `STATUS_ACTIVE`。
+- 描画は敷地の土地区画ポリゴンに沿った「地面フィル + 上端で透明になる光の柱」。柱の高さは区画の対角長に比例(10〜34m)。マテリアルは `Custom/OverlayLine` の `_ZTest=Always` + 加算合成(`_DstBlend=One`)。
+- **敷地の解決は建物中心からの空間判定(`ParcelManager.GetParcelIdAtPoint`)**。`GET /buildings/` の `multi_agent` スキーマには `parcel_id` が含まれないため `BuildingSummary.parcel_id` は当てにできない(区画が未ロードなら建物底面ポリゴンにフォールバック)。
+- メッシュはカメラ非依存なので毎フレーム作らず 0.4 秒間隔で再構築(建物・区画のストリーミング追従はこの周期)。明滅はメッシュではなくマテリアルの `_Tint` を毎フレーム更新して表現する。
+- **`public_facility` は `multi_agent` スキーマに追加されるまで常に false**(=光らない)。endpoint_schemas シートへの行追加と `generate_models.py` の再生成が前提。
 
 ## モード定数
 

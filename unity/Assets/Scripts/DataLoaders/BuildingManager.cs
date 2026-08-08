@@ -136,6 +136,8 @@ public class BuildingManager : BaseApiDataManager
 
         BuildingMeshUtils.InitializeCache();
         TerrainManager.OnTerrainTileReady += OnTerrainTileReadyHandler;
+        // 公共施設ハイライトの光オーバーレイ(建物データを参照する常駐描画)を用意する。
+        PublicFacilityGlowOverlay.Ensure();
         // 視野外のため生成を遅延した詳細メッシュを消化する常駐ワーカー。
         StartCoroutine(DetailGenerationWorker());
     }

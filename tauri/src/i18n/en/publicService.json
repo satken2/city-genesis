@@ -1,6 +1,5 @@
 {
   "publicFacilities": {
-    "title": "Public Facilities",
     "selectCategory": "Select a category",
     "tabRealEstate": "Real estate",
     "tabPublicStandard": "Public facilities",
@@ -8,6 +7,7 @@
     "tabPort": "Port",
     "tabCity": "City gov.",
     "production": "Production",
+    "productionCapacity": "Production capacity",
     "soldAmount": "Sold",
     "price": "Price",
     "balance": "Balance",
@@ -21,8 +21,6 @@
     "exportHandling": "Export Handling"
   },
   "publicServicePrices": {
-    "title": "Public Services",
-    "product": "Product",
     "priceMode": "Pricing",
     "modeFixed": "Fixed",
     "modeCostRatio": "Cost ratio",
@@ -35,7 +33,6 @@
     "maxDemand": "Est. max demand",
     "demand": "Demand",
     "production": "Production",
-    "empty": "No regulated products",
     "supplyStatus": "Supply & Demand"
   },
   "regulation": {

@@ -130,7 +130,7 @@ function getLegendInfo(layerId: string, modeId: string): LegendInfo {
         return {
           type: "none",
           description:
-            "建物を通常表示します。計画中の建物の表示と公共施設のハイライトは下のスイッチで切り替えます",
+            "建物を通常表示します。計画中の建物の表示と公共施設のハイライト(敷地を黄色い光で示します)は下のスイッチで切り替えます",
         };
     }
   }

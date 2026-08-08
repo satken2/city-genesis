@@ -5,12 +5,13 @@ using UnityEngine;
 using GeneratedModels;
 
 /// <summary>
-/// カメラ周辺の道路に、path_traffic(車種別交通量)と travel_direction(走行方向)に応じて
-/// 車を走らせるクライアント側シミュレータ。サーバー永続オブジェクトではなく手続き的に生成する
-/// 短命オブジェクトのため、BaseApiDataManager のセル単位ロードには載せず、PathManager が既に
+/// カメラ周辺の道路に、path_traffic(車種別交通量、1日あたりの通過トリップ数)と
+/// travel_direction(走行方向)に応じて車を走らせるクライアント側シミュレータ。
+/// サーバー永続オブジェクトではなく手続き的に生成する短命オブジェクトのため、
+/// BaseApiDataManager のセル単位ロードには載せず、PathManager が既に
 /// ロード済みの pathDataCache を読んで独立に動く。
 ///
-/// 挙動: 描画範囲(カメラ注視点+半径)内の各パスに「目標台数 = 交通量 × 範囲内の長さ × 密度係数」を
+/// 挙動: 描画範囲(カメラ注視点+半径)内の各パスに「目標台数 = 交通量[台/日] × 範囲内の長さ × 密度係数」を
 /// 定め、不足分をパス上のランダム地点(沿道の建物から出てきた車)へ確率的に補充する。
 /// 交差点では交差先道路の交通量に応じて確率的に分岐(travel_direction を尊重)し、乗り換え先が
 /// 目標超過なら超過度に応じた確率で「沿道の建物に到着した」とみなしてデスポーンする。
@@ -31,7 +32,7 @@ public class VehicleManager : MonoBehaviour
     [SerializeField] private float despawnMargin = 80f;
 
     [Header("スポーン/密度")]
-    [Tooltip("path_traffic 値 → 目標密度[台/m]への変換係数。目標台数 = 交通量 × 範囲内の長さ × この値。実データのスケールに応じて調整。")]
+    [Tooltip("path_traffic 値(台/日) → 目標密度[台/m]への変換係数。目標台数 = 交通量 × 範囲内の長さ × この値。物理的な同時存在台数よりかなり誇張した演出値であり、見た目の賑わいで調整する。")]
     [SerializeField] private float trafficDensityK = 0.002f;
     [Tooltip("目標台数への不足分を1秒あたりこの割合で補充する(値が大きいほど速く適正密度に達する)。")]
     [SerializeField] private float spawnFillRate = 1.0f;

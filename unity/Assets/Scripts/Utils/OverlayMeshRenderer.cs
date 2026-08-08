@@ -81,6 +81,8 @@ public class OverlayMeshRenderer : MonoBehaviour
     {
         public List<Vector3> verts;
         public Color color;
+        /// <summary>頂点ごとの色。null のときは color を全頂点に適用する。</summary>
+        public List<Color> vertexColors;
     }
 
     private List<LineEntry> frameLines = new List<LineEntry>(512);
@@ -105,6 +107,16 @@ public class OverlayMeshRenderer : MonoBehaviour
         mesh = new Mesh();
         mesh.MarkDynamic();
         meshFilter.mesh = mesh;
+    }
+
+    /// <summary>
+    /// 頂点色に乗算される全体色（_Tint）を設定する。
+    /// メッシュを作り直さずに明滅アニメーションを行うために使う。
+    /// </summary>
+    public void SetTint(Color tint)
+    {
+        if (meshRenderer == null) return;
+        meshRenderer.material.SetColor("_Tint", tint);
     }
 
     /// <summary>
@@ -236,7 +248,7 @@ public class OverlayMeshRenderer : MonoBehaviour
 
         foreach (var pt in framePreTriangulated)
         {
-            AddPreTriangulatedMesh(pt.verts, pt.color);
+            AddPreTriangulatedMesh(pt.verts, pt.color, pt.vertexColors);
         }
 
         mesh.Clear();
@@ -413,6 +425,23 @@ public class OverlayMeshRenderer : MonoBehaviour
     }
 
     /// <summary>
+    /// 事前に三角形分割済みの頂点リストを、頂点ごとの色付きでフレームキューに追加する。
+    /// 光のグラデーション（地面側は濃く、上端で透明）のように面内で色が変わる表現に使う。
+    /// vertexColors は triangleVerts と同数でなければ無視される。
+    /// </summary>
+    public void AddPreTriangulated(List<Vector3> triangleVerts, List<Color> vertexColors)
+    {
+        if (triangleVerts == null || triangleVerts.Count < 3) return;
+        if (vertexColors == null || vertexColors.Count != triangleVerts.Count) return;
+        framePreTriangulated.Add(new PreTriangulatedEntry
+        {
+            verts = triangleVerts,
+            color = Color.white,
+            vertexColors = vertexColors
+        });
+    }
+
+    /// <summary>
     /// ポリゴンをトライアングルファンで追加する。
     /// 頂点はワールド座標のまま使用する。
     /// </summary>
@@ -437,15 +466,16 @@ public class OverlayMeshRenderer : MonoBehaviour
 
     /// <summary>
     /// 事前三角形分割済みの頂点リスト（3頂点×N三角形）をメッシュに追加する。
+    /// vertexColors が与えられている場合は頂点ごとの色を使う。
     /// </summary>
-    private void AddPreTriangulatedMesh(List<Vector3> triangleVerts, Color color)
+    private void AddPreTriangulatedMesh(List<Vector3> triangleVerts, Color color, List<Color> vertexColors = null)
     {
         if (triangleVerts == null || triangleVerts.Count < 3) return;
         int startIdx = verts.Count;
         for (int i = 0; i < triangleVerts.Count; i++)
         {
             verts.Add(triangleVerts[i]);
-            colors.Add(color);
+            colors.Add(vertexColors != null ? vertexColors[i] : color);
         }
         for (int i = 0; i + 2 < triangleVerts.Count; i += 3)
         {

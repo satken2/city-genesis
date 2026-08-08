@@ -1,6 +1,5 @@
 {
   "publicFacilities": {
-    "title": "公共施設",
     "selectCategory": "カテゴリを選択してください",
     "tabRealEstate": "不動産",
     "tabPublicStandard": "公営施設",
@@ -8,6 +7,7 @@
     "tabPort": "港湾施設",
     "tabCity": "市政府",
     "production": "生産量",
+    "productionCapacity": "生産キャパシティ",
     "soldAmount": "売却量",
     "price": "価格",
     "balance": "収支",
@@ -21,8 +21,6 @@
     "exportHandling": "輸出取扱量"
   },
   "publicServicePrices": {
-    "title": "公共サービス",
-    "product": "製品",
     "priceMode": "価格方式",
     "modeFixed": "固定価格",
     "modeCostRatio": "原価比率",
@@ -35,7 +33,6 @@
     "maxDemand": "想定最大需要",
     "demand": "需要量",
     "production": "生産量",
-    "empty": "規制対象の製品がありません",
     "supplyStatus": "需給とキャパシティ"
   },
   "regulation": {

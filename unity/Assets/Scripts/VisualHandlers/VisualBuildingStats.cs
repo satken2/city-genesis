@@ -21,15 +21,11 @@ public class VisualBuildingStats : MonoBehaviour
     /// </summary>
     public int spaceTypes;
 
-    // 市政府が建てた/所有する公共施設かどうか。「公共施設ハイライト」フラグの対象判定に使う。
-    public bool publicFacility;
-
     public void InitFrom(BuildingSummary data)
     {
         rent = data.rent.HasValue ? data.rent.Value : 0f;
         durability = data.durability ?? 0f;
         spaceTypes = data.space_types;
         zone_id = data.zone_id;
-        publicFacility = data.public_facility;
     }
 }

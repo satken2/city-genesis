@@ -20,13 +20,13 @@
 
 ### 交通量 `path_traffic`
 
-パスごとに記録される**車種別**の交通量。`VEHICLE_*`（`VEHICLE_STANDARD=10` 乗用車 / `VEHICLE_TRUCK=11` トラック / `VEHICLE_BUS=12` バス / `VEHICLE_COMMERCIAL=13` 商用車 …）をキーとする dict である。この値が目標台数と交差点での分岐確率の重みになる。
+パスごとに記録される**車種別**の交通量。`VEHICLE_*`（`VEHICLE_STANDARD=10` 乗用車 / `VEHICLE_TRUCK=11` トラック / `VEHICLE_BUS=12` バス / `VEHICLE_COMMERCIAL=13` 商用車 …）をキーとする dict で、値は**1日あたりにそのパスを通過するトリップ数**（台/日、[道路網](../economics/3_道路網.md) 参照）である。この値が目標台数と交差点での分岐確率の重みになる。
 
 - **目標台数**: 範囲内パス（O.4）× 車種ごとに、目標台数 = `path_traffic[車種] × 範囲内の長さ[m] × trafficDensityK` とする。スポーン・途中降車はこの目標との差分で駆動される。
 - **分岐の重み**: 交差点で次のパスを選ぶとき、各候補パスの `path_traffic[車種]` を重みにした重み付きランダムで曲がる方向を決める。
 
 !!! note "バルク配信について"
-    `path_traffic` は現状パス詳細（`PathData`）にのみ含まれ、バルクのパス一覧（bbox の `PathSummary`）には載っていない。車描画はパス一覧を使うため、`PathSummary` に `path_traffic` を追加して配信する必要がある。Unity 側は**リフレクションで読み取り、フィールドが未追加でも落ちない**（無ければ集計値 `utilization` を乗用車の代替として使う暫定 degrade）実装とし、スキーマ追加後に自動で車種別精度になる。
+    `path_traffic` はパス詳細（`PathData`）とバルクのパス一覧（bbox の `PathSummary`）の両方に含まれる。Unity 側は**リフレクションで読み取り、フィールドが無いスキーマでも落ちない**（無ければ集計値 `utilization` を乗用車の代替として使う暫定 degrade）実装になっている。
 
 ### 走行方向 `travel_direction`
 
@@ -140,9 +140,9 @@ VehicleManager（毎フレーム: 範囲内パス抽出+目標台数算出 → �
 | `baseSpeed` | 12 m/s | 基準速度（車種係数・個体ばらつきが乗る） |
 | `laneOffset` | 2.5m | 中心線からの車線オフセット |
 
-`path_traffic` はスケール不定の抽象量のため、`trafficDensityK` と `maxActiveVehicles` は実データに合わせて調整する前提である。
+`path_traffic` は1日あたりの通過トリップ数（台/日）である。`trafficDensityK` は物理的な同時存在台数（台/日を活動時間で割り走行時間を掛けた値）よりかなり大きい**演出用の誇張係数**であり、見た目の賑わいが適切になるよう `maxActiveVehicles` とあわせて調整する前提である。
 
 ## O.8. 現在の実装状況と今後
 
 - 実装済み: 目標密度ベースの不足補充スポーン（道路途中からの発生）／中心線走行（左側通行のレーンオフセット）／交差点の確率分岐（`travel_direction` 尊重）／目標超過時の途中降車デスポーン／範囲外デスポーン／プール／箱フォールバック描画／`traffic_hand` の city 設定・配信。
-- 未実装（拡張余地）: `PathSummary` への `path_traffic` 追加（追加までは `utilization` 代替で degrade 動作）／車種別・車種内ランダムの fbx プレハブ（`Models/Vehicles/...` と `vehicle_model_config.yaml` の実データ）／通行方向（左右）の変更UI／線路上の車両描画（同じ仕組みを `RAIL_VEHICLE_KEYS` と線路型に差し替えて拡張可能）。
+- 未実装（拡張余地）: 車種別・車種内ランダムの fbx プレハブ（`Models/Vehicles/...` と `vehicle_model_config.yaml` の実データ）／通行方向（左右）の変更UI／線路上の車両描画（同じ仕組みを `RAIL_VEHICLE_KEYS` と線路型に差し替えて拡張可能）。

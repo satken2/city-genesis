@@ -11,7 +11,8 @@
     "overrideMaxSpeed": "Override speed limit",
     "maxSpeed": "Speed Limit",
     "utilization": "Utilization",
-    "trafficByVehicle": "Traffic",
+    "trafficByVehicle": "Traffic (per day)",
+    "trafficUnitPerDay": "/day",
     "category": {
       "0": "Walking",
       "1": "Road",

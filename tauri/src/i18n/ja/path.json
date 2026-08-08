@@ -11,7 +11,8 @@
     "overrideMaxSpeed": "制限速度を個別に設定",
     "maxSpeed": "制限速度",
     "utilization": "利用率",
-    "trafficByVehicle": "交通量",
+    "trafficByVehicle": "交通量(1日あたり)",
+    "trafficUnitPerDay": "/日",
     "category": {
       "0": "徒歩",
       "1": "道路",

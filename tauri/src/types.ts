@@ -656,7 +656,8 @@ export type MasterData = {
  * 付与されるフィールドが異なり、未設定の場合は undefined になる。
  *   - 不動産（TYPE_BUILDING）: supply_floor / occupancy_rate / rent / balance / utilization_rate
  *   - 港湾（TYPE_TRADE）: capacity / import_handling / export_handling / utilization_rate
- *   - サービス・公営（TYPE_STANDARD）: production / sold_amount / price / balance / utilization_rate
+ *   - サービス・公営（TYPE_STANDARD）: production_capacity / production / sold_amount / price
+ *                                     / balance / utilization_rate
  *   - 市政府・教育: メトリクスなし（基本情報のみ）
  */
 export type PublicFacilityAgent = {
@@ -666,6 +667,8 @@ export type PublicFacilityAgent = {
   status: number;
   reserves: number;
   // サービス・公営系メトリクス
+  // production_capacity はスペース制約なし（space_need<=0）の施設で null になる。
+  production_capacity?: number | null;
   production?: number;
   sold_amount?: number;
   price?: number;

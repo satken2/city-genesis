@@ -118,6 +118,8 @@ namespace GeneratedModels
         public object space_types;
         /// <summary>耐久度（0.0〜1.0 1.0=新品）</summary>
         public float? durability;
+        /// <summary>公共施設かどうか（0=民間/1=公共）</summary>
+        public bool public_facility;
         /// <summary>稼働率（直近エポックのスロット）</summary>
         public List<float> utilization;
         /// <summary>建設進捗率（0〜100%） サーバーサイドで計算されるフィールド。型は動的。</summary>

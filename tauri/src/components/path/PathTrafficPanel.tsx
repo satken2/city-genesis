@@ -7,7 +7,7 @@
  * - override_max_speed: 都市のデフォルト制限速度をこのパスで上書きするかどうか
  * - max_speed: override_max_speed が true の場合のみ編集可能な制限速度(km/h)
  * - utilization: 現在の利用率をメーターで表示する
- * - path_traffic: 車両種別ごとの交通量を表形式で表示する
+ * - path_traffic: 車両種別ごとの交通量(1日あたりの通過トリップ数)を表形式で表示する
  *
  * 制限速度設定の変更は「保存」ボタン押下時に PATCH リクエストとして送信する。
  */
@@ -202,7 +202,11 @@ export function PathTrafficPanel({ path, apiBaseUrl, onSaved }: PathTrafficPanel
                   {rows.map(({ key, displayName, count }) => (
                     <tr key={key}>
                       <td className="path-traffic-vehicle">{displayName}</td>
-                      <td className="path-traffic-count">{count}</td>
+                      {/* 交通量は日次の実数(端数あり)なので小数1桁で丸めて単位を付ける */}
+                      <td className="path-traffic-count">
+                        {count.toLocaleString(undefined, { maximumFractionDigits: 1 })}
+                        {t("path.trafficUnitPerDay", "/日")}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

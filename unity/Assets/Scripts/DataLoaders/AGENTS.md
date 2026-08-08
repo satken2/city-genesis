@@ -108,7 +108,8 @@
 - メッシュコライダーは `Physics.BakeMesh` を `Task.Run` でベイクしてから割り当てる(`SetColliderAsync`)。道路も同様。
 - **工事中(STATUS_CONSTRUCTING)の建物は毎エポック version が上がり再生成される**: 工事中の建物は進捗に応じた「工事現場」メッシュ(土マウンド+足場+クレーン。`ConstructingBuildingMeshBuilder`、MeshGenerators/AGENTS.md参照)で描画され、バックエンドの建設進捗フェーズ(`progress.py`)が進捗の増えたエポックで version を bump するため、既存の version 差分ロードだけで足場が毎エポック伸びる(BuildingManager側に専用処理は無い)。
 - **インフラ接続端子ノードの逆引きインデックス (`buildingIdByInfraNodeId`)**: 端子ノードID(`agents.infra_node_id`)→建物agent_id のインデックス。ノードAPIは所属施設(owner)を公開しない片方向参照の設計のため、フロントの端子ノード識別(スナップ判定・端子マーカー・網互換判定)はこのインデックス経由の `TryGetInfraTerminalOwner` で行う。`buildingDataCache` への登録は必ず `RegisterBuildingDataToCache` を通し、削除は `SyncBuildingsInCells` / `ClearAllCells` で同期すること(`RegisterBuildingCell` 等と同じ管理規約)。
-- **土地区画の逆引きインデックス (`buildingIdsByParcel`)**: 区画ID(`agents.parcel_id`)→その区画上の建物agent_id集合。地区拡張ドラッグ中に「街路に面する区画」から「その区画上の建物」を解決し地区色を波及させるために使う(`GetBuildingIdsByParcel`)。`buildingIdByInfraNodeId` と同じ管理規約で、登録は `RegisterBuildingDataToCache`(parcel_id 変更時は旧マッピング除去)、削除は `SyncBuildingsInCells` / `ClearAllCells` で同期する。
+- **公共施設ハイライトの光オーバーレイは BuildingManager が起動する**: `Awake` の `PublicFacilityGlowOverlay.Ensure()`。描画本体は `VisualHandlers/PublicFacilityGlowOverlay.cs`(建物データをポーリングし、敷地の土地区画形状に黄色い光を描く。詳細は VisualHandlers/AGENTS.md)。
+- **土地区画の逆引きインデックス (`buildingIdsByParcel`)**: 区画ID(`agents.parcel_id`)→その区画上の建物agent_id集合。地区拡張ドラッグ中に「街路に面する区画」から「その区画上の建物」を解決し地区色を波及させるために使う(`GetBuildingIdsByParcel`)。`buildingIdByInfraNodeId` と同じ管理規約で、登録は `RegisterBuildingDataToCache`(parcel_id 変更時は旧マッピング除去)、削除は `SyncBuildingsInCells` / `ClearAllCells` で同期する。**ただし `GET /buildings/` の `multi_agent` スキーマに `parcel_id` が無いため、一括ロードされた建物の `parcel_id` は常に0でこのインデックスは実質空**(単体取得の建物だけが入る)。区画から建物を引く必要がある処理は、endpoint_schemas シートへの `parcel_id` 行追加まではこのインデックスに依存できない(`PublicFacilityGlowOverlay` は `ParcelManager.GetParcelIdAtPoint` による空間判定で回避している)。
 
 ## 区画 (ParcelManager.cs) / 地区 (ZoneManager.cs) / 天然資源 (ResourceManager.cs)
 

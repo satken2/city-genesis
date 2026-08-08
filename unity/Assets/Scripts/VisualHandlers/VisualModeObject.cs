@@ -13,11 +13,6 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     /// </summary>
     private static readonly Color DurabilityMinColor = new Color(1f, 0.267f, 0.267f);
 
-    /// <summary>
-    /// 公共施設ハイライトの色。UI凡例の公共施設色（#f44336）に合わせた半透明の赤。
-    /// </summary>
-    private static readonly Color PublicFacilityHighlightColor = new Color(0.957f, 0.263f, 0.212f, 0.55f);
-
     [Tooltip("このオブジェクトの種類(InputObjectType)を指定します")]
     public int objectType;
 
@@ -343,32 +338,10 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
         }
 
         // 4. 通常ステータス(ACTIVE)の処理
+        // 公共施設ハイライト(VisualFlag.HIGHLIGHT_PUBLIC)はここでは扱わない。
+        // 建物のマテリアルではなく敷地の土地区画形状に光を描く独立オーバーレイ
+        // (PublicFacilityGlowOverlay)が担当するため、どの色モードとも共存する。
         EnableCollider(true);
-
-        // 4.1. 公共施設ハイライト（色モードと独立したフラグ）。
-        // 対象は稼働中の公共施設のみで、どの色モードよりも優先して固定色の半透明オーバーレイを被せる。
-        // マテリアル差し替え方式のため色分けとの真の合成はできず、「公共施設だけ強調色」となる。
-        // 非表示モードだけはハイライトより強い（隠している建物を光らせない）。
-        if (objectType == InputObjectType.BUILDING
-            && (flags & VisualFlag.HIGHLIGHT_PUBLIC) != 0
-            && currentMode != VisualMode.MODE_HIDDEN
-            && !preventMaterialChange)
-        {
-            var publicStats = GetComponent<VisualBuildingStats>();
-            if (publicStats != null && publicStats.publicFacility)
-            {
-                SetRenderersEnabled(true);
-                if (isHovered)
-                {
-                    ApplyMaterialToAllSubmeshes(highlightMaterial);
-                }
-                else
-                {
-                    ApplyBuildingColorOverlay(PublicFacilityHighlightColor, isSemiTransparent: true);
-                }
-                return;
-            }
-        }
 
         switch (currentMode)
         {

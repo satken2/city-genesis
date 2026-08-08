@@ -105,6 +105,8 @@ export type AgentSummary = {
   space_types?: any;
   /** 耐久度（0.0〜1.0 1.0=新品） */
   durability?: number;
+  /** 公共施設かどうか（0=民間/1=公共） */
+  public_facility: boolean;
   /** 稼働率（直近エポックのスロット） */
   utilization?: number[];
   /** 建設進捗率（0〜100%） (サーバーサイドで計算されるフィールド。型は動的。) */
