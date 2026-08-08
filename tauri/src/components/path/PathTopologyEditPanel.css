@@ -1,0 +1,109 @@
+/**
+ * パスの結合・分割セクションのスタイル
+ *
+ * パス詳細パネル内で操作中だけ表示される枠付きセクション。
+ * 選択待ち・プレビュー・エラーの3状態を1つの枠の中で切り替えて見せる。
+ */
+
+.path-topology-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0 4px;
+  padding: 10px 12px;
+  background: rgba(64, 174, 255, 0.08);
+  border: 1px solid rgba(64, 174, 255, 0.28);
+  border-radius: 6px;
+}
+
+.path-topology-title {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #7cc7ff;
+}
+
+.path-topology-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: rgba(246, 251, 255, 0.75);
+}
+
+.path-topology-waiting {
+  margin: 0;
+  font-size: 0.75rem;
+  color: rgba(246, 251, 255, 0.55);
+}
+
+.path-topology-error {
+  padding: 6px 8px;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: #ff9a9a;
+  background: rgba(255, 80, 80, 0.1);
+  border: 1px solid rgba(255, 80, 80, 0.3);
+  border-radius: 4px;
+}
+
+.path-topology-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+  font-size: 0.78rem;
+}
+
+.path-topology-label {
+  color: rgba(246, 251, 255, 0.7);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.path-topology-value {
+  color: #f6fbff;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 結合後・分割後という「操作の結果」の行は強調する */
+.path-topology-label--total,
+.path-topology-value--total {
+  font-weight: 700;
+  color: #7cc7ff;
+}
+
+.path-topology-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.path-topology-btn {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #f6fbff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.path-topology-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.path-topology-btn--confirm {
+  color: #06212f;
+  background: #40aeff;
+  border-color: transparent;
+}
+
+.path-topology-btn--confirm:hover:not(:disabled) {
+  background: #6ec3ff;
+}
+
+.path-topology-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

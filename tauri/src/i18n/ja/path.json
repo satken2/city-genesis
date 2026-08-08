@@ -26,7 +26,27 @@
       "startConstruction": "着工",
       "stopConstruction": "保留",
       "bulldoze": "取り壊し",
-      "cancelBulldoze": "取り壊し解除"
+      "cancelBulldoze": "取り壊し解除",
+      "merge": "隣のパスと結合",
+      "split": "パスを分割"
+    },
+    "topology": {
+      "mergeTitle": "パスの結合",
+      "splitTitle": "パスの分割",
+      "mergeHint": "3Dビューで結合する相手のパスをクリックしてください。端点を共有し、そこに他のパスが繋がっていない同じ種類のパスだけが選べます。",
+      "splitHint": "3Dビューで分割したい地点をクリックしてください。分割点はパスの中心線上に置かれます。",
+      "waitingSelection": "3Dビューでの選択を待っています。",
+      "checking": "確認中...",
+      "submitting": "実行中...",
+      "thisPath": "このパス",
+      "mergedLength": "結合後の長さ",
+      "beforeLength": "分割前の長さ",
+      "firstSegment": "分割後（始点側）",
+      "secondSegment": "分割後（終点側）",
+      "meters": "{{value}} m",
+      "confirmMerge": "結合する",
+      "confirmSplit": "分割する",
+      "cancel": "キャンセル"
     },
     "pendingWarning": "この道路は計画中です。着工を指示してください。",
     "alerts": {

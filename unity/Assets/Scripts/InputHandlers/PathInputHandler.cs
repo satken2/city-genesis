@@ -66,6 +66,14 @@ public class PathInputHandler : MonoBehaviour, IInputHandler
             case InputMode.MODE_REMOVE:
                 RemovalManager.Instance?.TryRemove(InputObjectType.PATH, pathId);
                 break;
+            case InputMode.MODE_PATH_MERGE:
+                PathTopologyEditManager.Instance?.OnPathClickedForMerge(pathId);
+                break;
+            case InputMode.MODE_PATH_SPLIT:
+                // 分割点はクリック地点を対象パスの中心線へ射影して決めるため、
+                // クリックされたパスがどれかに関わらずマネージャの射影結果を使う。
+                PathTopologyEditManager.Instance?.OnClickForSplit();
+                break;
             case InputMode.MODE_NONE:
                 // 何もしない
                 break;
@@ -86,6 +94,25 @@ public class PathInputHandler : MonoBehaviour, IInputHandler
             {
                 visualModeObject.SetHover(true);
             }
+            return;
+        }
+
+        // パス結合の相手選択モードでは、結合できる候補パスのみハイライトする
+        if (mode == InputMode.MODE_PATH_MERGE)
+        {
+            if (PathTopologyEditManager.Instance != null
+                && PathTopologyEditManager.Instance.IsMergeCandidate(pathId)
+                && visualModeObject != null)
+            {
+                visualModeObject.SetHover(true);
+                TooltipManager.Instance?.Show("クリックでこのパスと結合");
+            }
+            return;
+        }
+
+        // パス分割の分割点選択モードでは、マーカー表示が案内を担うためホバー色は付けない
+        if (mode == InputMode.MODE_PATH_SPLIT)
+        {
             return;
         }
 
@@ -140,7 +167,7 @@ public class PathInputHandler : MonoBehaviour, IInputHandler
             visualModeObject.SetHover(false);
         }
 
-        if (mode == InputMode.MODE_ZONE_EDIT)
+        if (mode == InputMode.MODE_ZONE_EDIT || mode == InputMode.MODE_PATH_MERGE)
         {
             TooltipManager.Instance?.Hide();
         }

@@ -883,7 +883,11 @@ public class PathManager : BaseApiDataManager
                     continue;
                 }
 
-                TryRebuildPathOnce(p, tier, updateIntersections: true, forceRebuild: tier == LodTier.Dynamic, reason: "api");
+                // ここへ来るのは version が変わった(＝見た目が変わった)パスと新規パスだけなので、
+                // 必ずメッシュを作り直す。forceRebuild を落とすと、CreateOrUpdatePath の
+                // 「ステータスが同じなら既存オブジェクトを使い回す」分岐に入り、結合・分割・造り替えの
+                // ように形状だけが変わった稼働中パスが古いメッシュのまま残る。
+                TryRebuildPathOnce(p, tier, updateIntersections: true, forceRebuild: true, reason: "api");
 
                 if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.FrameBudgetMs)
                 {
@@ -903,7 +907,8 @@ public class PathManager : BaseApiDataManager
             foreach (var path in highPriorityPaths)
             {
                 LodTier tier = batchPathTiers.TryGetValue(path.path_id, out LodTier storedTier) ? storedTier : DeterminePathLodTier(path, nearSet, dynamicSet);
-                TryRebuildPathOnce(path, tier, updateIntersections: false, forceRebuild: tier == LodTier.Dynamic, reason: "api-high");
+                // version 差分で選ばれたパスのみが積まれているため、"api" と同じく必ず作り直す。
+                TryRebuildPathOnce(path, tier, updateIntersections: false, forceRebuild: true, reason: "api-high");
 
                 if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.FrameBudgetMs)
                 {
@@ -990,7 +995,8 @@ public class PathManager : BaseApiDataManager
             if (path == null) continue;
 
             LodTier tier = batchPathTiers.TryGetValue(path.path_id, out LodTier storedTier) ? storedTier : DeterminePathLodTier(path, nearSet, dynamicSet);
-            TryRebuildPathOnce(path, tier, updateIntersections: false, forceRebuild: tier == LodTier.Dynamic, reason: "api-low");
+            // version 差分で選ばれたパスのみが積まれているため、"api" と同じく必ず作り直す。
+            TryRebuildPathOnce(path, tier, updateIntersections: false, forceRebuild: true, reason: "api-low");
 
             if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.FrameBudgetMs)
             {
@@ -1224,7 +1230,7 @@ public class PathManager : BaseApiDataManager
 
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"PathManager: 再描画 path{path.path_id} tier={tier} reason={reason}");
         if (tier == LodTier.Far)
-            CreateOrUpdateFarPath(path);
+            CreateOrUpdateFarPath(path, forceRebuild);
         else
             CreateOrUpdatePath(path, updateIntersections, forceRebuild);
 
@@ -1359,7 +1365,7 @@ public class PathManager : BaseApiDataManager
         }
     }
 
-    private void CreateOrUpdateFarPath(PathSummary path)
+    private void CreateOrUpdateFarPath(PathSummary path, bool forceRebuild = false)
     {
         SavePathToCache(path);
 
@@ -1387,8 +1393,9 @@ public class PathManager : BaseApiDataManager
                 var existingIdInfo = existingPath.GetComponent<ObjectIdInfo>();
                 int currentStatus = existingIdInfo != null ? existingIdInfo.status : 0;
                 bool existingIsFar = existingIdInfo != null && existingIdInfo.isFarObject;
-                // Near詳細オブジェクトの誤再利用を防ぐため、遠景オブジェクトであることを確認する
-                if (currentStatus == path.status && existingIsFar)
+                // Near詳細オブジェクトの誤再利用を防ぐため、遠景オブジェクトであることを確認する。
+                // forceRebuild（version が変わった＝形状が変わり得る）のときは使い回さず作り直す。
+                if (!forceRebuild && currentStatus == path.status && existingIsFar)
                 {
                     // プールから再利用: 非表示だったオブジェクトを再表示
                     if (!existingPath.activeSelf)
@@ -3021,6 +3028,36 @@ public class PathManager : BaseApiDataManager
         RemovePathFromCache(path.path_id);
         if (path.start_node_id > 0) UpdateNodeIntersectionMesh(path.start_node_id);
         if (path.end_node_id > 0) UpdateNodeIntersectionMesh(path.end_node_id);
+    }
+
+    /// <summary>
+    /// 指定パスのローカルなキャッシュとGameObjectを即座に破棄する。
+    ///
+    /// 結合(merge)のようにバックエンドでパスが消える操作の直後に、差分リロードの
+    /// 「レスポンスに含まれないパスを消す」判定(SyncPathsInCells)を待たずに確実に消すために使う。
+    /// リロードは非同期のコルーチンで、途中でキャンセルされると削除判定まで到達しないことがある。
+    /// </summary>
+    public void RemovePathLocally(int pathId)
+    {
+        if (!pathObjectsCache.TryGetValue(pathId, out GameObject obj)) return;
+
+        if (pathDataCache.TryGetValue(pathId, out PathSummary removedPath))
+        {
+            // 撤去した線路と並走していた線路の結合を解くため、通過セルキャッシュを消す前に積む。
+            EnqueueAdjacentTrackNeighborRebuilds(removedPath);
+        }
+
+        UnregisterPathDataById(pathId);
+        UnregisterPathCells(pathId);
+        UnregisterPathSegments(pathId);
+        pathStartConnectionPoints.Remove(pathId);
+        pathEndConnectionPoints.Remove(pathId);
+        pathStartSidewalkSetbacks.Remove(pathId);
+        pathEndSidewalkSetbacks.Remove(pathId);
+        pathVersionCache.Remove(pathId);
+
+        if (obj != null) Destroy(obj);
+        pathObjectsCache.Remove(pathId);
     }
 
     private void UnregisterPathDataById(int pathId)

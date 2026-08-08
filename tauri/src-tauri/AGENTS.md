@@ -7,7 +7,7 @@ Tauri(Rust)側のプログラム。ウィンドウ管理とUnityとのMMF(Memory
 | ファイル | 内容 |
 | --- | --- |
 | `src/lib.rs` | Tauriコマンド定義の集約と起動処理。ウィンドウレジストリ・ミューテックスグループのロード、バックエンド/グラフィックの起動コマンド解決 |
-| `src/window.rs` | ウィンドウ管理の本体。`open_window`(レジストリ定義に基づくポップアップ生成、single/multiple/single_per_entityのインスタンスポリシー、ミューテックスルール適用)、通知キュー、ローディングウィンドウ、`launch_graphic`、`record_window_geometry`(起動中の位置・サイズ記憶)、`close_window_by_label`(ウィンドウを閉じた際の後始末処理 - 編集モードから通常モードへの復帰、接続端子・接道・パス干渉ハイライトの消去など) |
+| `src/window.rs` | ウィンドウ管理の本体。`open_window`(レジストリ定義に基づくポップアップ生成、single/multiple/single_per_entityのインスタンスポリシー、ミューテックスルール適用)、通知キュー、ローディングウィンドウ、`launch_graphic`、`record_window_geometry`(起動中の位置・サイズ記憶)、`close_window_by_label`(ウィンドウを閉じた際の後始末処理 - 編集モードから通常モードへの復帰、接続端子・接道・パス干渉ハイライトの消去、パス結合/分割の対象選択モードの打ち切り`edit_path:cancel_topology_edit`など) |
 | `src/ipc.rs` | UnityとのMMF IPC実装。リーダーループ、書き込み(Mutex/Event同期)、`send_to_parent`(Unity宛て送信)。容量8192バイトの固定バッファ |
 | `src/messages.rs` | `Envelope`等のメッセージ型定義。**Unity側`Assets/Scripts/IPC/IpcEnvelope.cs`と構造を一致させる必要がある** |
 | `src/state.rs` | プロセス全体の共有状態 |

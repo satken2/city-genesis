@@ -152,7 +152,9 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         // 道路/鉄道建設モードは RoadPlanManager が自前の吸着半径(snapThreshold)とバリアント
         // フィルタで一度だけ吸着する。ここで共通吸着(インスタンス既定半径・フィルタなし)を
         // 掛けると二重吸着になり、RoadPlanManager 側の半径設定が一切効かなくなる。
-        if (mode != InputMode.MODE_ROAD_CONSTRUCTION)
+        // パス分割の分割点選択も共通吸着を掛けない(端点ノードへ引き寄せられると常に
+        // 端点近傍の分割になって拒否されるため。onHover 側と条件を揃える)。
+        if (mode != InputMode.MODE_ROAD_CONSTRUCTION && mode != InputMode.MODE_PATH_SPLIT)
         {
             clickPosition = ApplySnapping(clickPosition);
         }
@@ -249,6 +251,10 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
                 // ブルドーザモードでの素の地形クリックは何もしない。
                 // 地形に埋もれた空き区画は InputHandler の地形→区画置換で
                 // ParcelInputHandler.onClick(MODE_REMOVE) に差し替えられて処理される。
+                break;
+            case InputMode.MODE_PATH_SPLIT:
+                // パス脇の地形クリックも分割点の指定として受ける(中心線への垂線の足を採る)。
+                PathTopologyEditManager.Instance?.OnClickForSplit();
                 break;
             default:
                 HandleNormalClick(clickPosition, mode);
@@ -359,8 +365,12 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         // 道路/鉄道建設モードも共通吸着を掛けない。RoadPlanManager.OnTerrainHover が自前の
         // 吸着半径(snapThreshold)で吸着しプレビューを描くため、ここで二重吸着すると
         // RoadPlanManager 側の半径設定が効かなくなる。
+        // パス分割の分割点選択も共通吸着を掛けない。ノード吸着(半径10m)が効くと、対象パスの
+        // 端点ノード付近でカーソルが端点へ引き寄せられ、常に「端点に近すぎる」分割になって
+        // バックエンドに拒否されるため。分割点は中心線への射影(PathTopologyEditManager)で決める。
         bool skipSnap = mode == InputMode.MODE_EDIT_CONNECTOR
-                     || mode == InputMode.MODE_ROAD_CONSTRUCTION;
+                     || mode == InputMode.MODE_ROAD_CONSTRUCTION
+                     || mode == InputMode.MODE_PATH_SPLIT;
         Vector3 finalPosition = skipSnap
             ? basePosition
             : ApplySnapping(basePosition);

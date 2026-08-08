@@ -45,6 +45,7 @@
 
 - 全マネージャー共通: オブジェクトごとにバックエンドの `version` をキャッシュし(`pathVersionCache` 等)、API応答のversionが同じなら**再生成をスキップ**する(非表示なら再表示するだけ)。
 - ただし**HTTP取得そのものはカメラ移動や `ReloadAllData` のたびにBBOX内全件行われる**。versionはあくまで描画スキップ用。
+- **version差分で再生成すると決めたオブジェクトは `forceRebuild: true` で作り直すこと。** `PathManager.CreateOrUpdatePath` / `CreateOrUpdateFarPath` には「ステータスが同じで既存オブジェクトがあれば、メッシュを作り直さず使い回して return する」プーリング分岐があり、`forceRebuild` を落とすとここに吸い込まれる。**ステータスが変わらず形状だけが変わる操作(パスの結合・分割・造り替え)で、versionは上がっているのに古いメッシュが残り続ける**原因になる(`LoadMergedPaths` のフェーズ2は version が変わったパスしか通らないので、そこからの呼び出しは常に `forceRebuild: true`)。
 - `CellDataLoader.ReloadAllData()`: 道路・建物・地区の作成/編集確定後に呼ばれる差分更新(カメラが動かなくても全マネージャーを更新)。
 - `CellDataLoader.ForceReloadAllData()`: 全オブジェクトをDestroyして完全再取得。開放済みセル一覧も再取得する(しないと全セルが未開放扱いになりDynamicにならない)。
 

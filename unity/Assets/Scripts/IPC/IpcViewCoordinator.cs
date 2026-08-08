@@ -258,6 +258,20 @@ public class IpcViewCoordinator : MonoBehaviour
                 _layerSubModes.Remove("district");
                 break;
 
+            case "STATE_MERGE_PATH":
+            case "STATE_SPLIT_PATH":
+                // パスの結合相手・分割点の選択中は道路敷設と同じ計画表示にし、地区は非表示にする
+                // (地区が表示されていると誤クリックで地区パネルが開き、選択操作が中断されるため)。
+                _layerModes["parcel"] = "border";
+                _layerModes["road"] = "plan";
+                _layerModes["building"] = "plan";
+                _layerModes["district"] = "hidden";
+                _layerSubModes.Remove("parcel");
+                _layerSubModes.Remove("road");
+                _layerSubModes.Remove("building");
+                _layerSubModes.Remove("district");
+                break;
+
             case "STATE_REMOVE_OBJECTS":
                 // ブルドーザ(削除)モードは道路敷設と同じ計画表示にし、地区は非表示にする。
                 // 区画は境界線表示にして、空き地(削除対象)が見えるようにする。

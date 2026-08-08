@@ -488,6 +488,16 @@ pub async fn handle_incoming_message(
         "edit_path:update_shape" => {
             let _ = app.emit("edit_path:update_shape", envelope.payload);
         }
+        "edit_path:select_merge_target" => {
+            // パス結合の相手選択モードで選ばれたパスをパス詳細パネルへ中継する。
+            // パネルは結合プレビュー(dry_run)を取得して長さを表示し、確定を待つ。
+            let _ = app.emit("edit_path:select_merge_target", envelope.payload);
+        }
+        "edit_path:select_split_point" => {
+            // パス分割の分割点選択モードで選ばれた地点をパス詳細パネルへ中継する。
+            // パネルは分割プレビュー(dry_run)を取得して前半・後半の長さを表示し、確定を待つ。
+            let _ = app.emit("edit_path:select_split_point", envelope.payload);
+        }
         "edit_building:select_parcel" => {
             let _ = app.emit("edit_building:select_parcel", envelope.payload);
         }

@@ -26,7 +26,27 @@
       "startConstruction": "Start Construction",
       "stopConstruction": "Suspend Construction",
       "bulldoze": "Bulldoze",
-      "cancelBulldoze": "Cancel Demolition"
+      "cancelBulldoze": "Cancel Demolition",
+      "merge": "Merge with adjacent path",
+      "split": "Split path"
+    },
+    "topology": {
+      "mergeTitle": "Merge Paths",
+      "splitTitle": "Split Path",
+      "mergeHint": "Click the path to merge with in the 3D view. Only paths of the same type that share an endpoint with no other path attached can be selected.",
+      "splitHint": "Click the point to split at in the 3D view. The split point is placed on the path centerline.",
+      "waitingSelection": "Waiting for a selection in the 3D view.",
+      "checking": "Checking...",
+      "submitting": "Working...",
+      "thisPath": "This path",
+      "mergedLength": "Length after merge",
+      "beforeLength": "Length before split",
+      "firstSegment": "After split (start side)",
+      "secondSegment": "After split (end side)",
+      "meters": "{{value}} m",
+      "confirmMerge": "Merge",
+      "confirmSplit": "Split",
+      "cancel": "Cancel"
     },
     "pendingWarning": "This road is planned. Please command to start construction.",
     "alerts": {

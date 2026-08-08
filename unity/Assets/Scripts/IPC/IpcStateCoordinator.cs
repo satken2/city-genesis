@@ -29,6 +29,8 @@ public class IpcStateCoordinator : MonoBehaviour
             IpcClient.Instance.OnZoneUpdated += HandleZoneUpdated;
             IpcClient.Instance.OnEditConnectorShow += HandleEditConnectorShow;
             IpcClient.Instance.OnEditConnectorHide += HandleEditConnectorHide;
+            IpcClient.Instance.OnEditPathCancelTopologyEdit += HandleEditPathCancelTopologyEdit;
+            IpcClient.Instance.OnEditPathFinishTopologyEdit += HandleEditPathFinishTopologyEdit;
         }
     }
 
@@ -48,6 +50,8 @@ public class IpcStateCoordinator : MonoBehaviour
             IpcClient.Instance.OnZoneUpdated -= HandleZoneUpdated;
             IpcClient.Instance.OnEditConnectorShow -= HandleEditConnectorShow;
             IpcClient.Instance.OnEditConnectorHide -= HandleEditConnectorHide;
+            IpcClient.Instance.OnEditPathCancelTopologyEdit -= HandleEditPathCancelTopologyEdit;
+            IpcClient.Instance.OnEditPathFinishTopologyEdit -= HandleEditPathFinishTopologyEdit;
         }
     }
 
@@ -73,6 +77,15 @@ public class IpcStateCoordinator : MonoBehaviour
         if (state != "STATE_EDIT_ZONE" && ZoneEditContext.Instance != null && ZoneEditContext.Instance.IsActive)
         {
             ZoneEditContext.Instance.Exit();
+        }
+
+        // パス結合/分割の選択モードから別モードへ直接遷移した場合にも、候補パスの着色と
+        // 分割点マーカーを確実に片付ける(STATE_NORMAL 経由なら ApplyStateNormal 内でも
+        // 終了するが冪等なので問題ない)。
+        if (state != "STATE_MERGE_PATH" && state != "STATE_SPLIT_PATH"
+            && PathTopologyEditManager.Instance != null && PathTopologyEditManager.Instance.IsActive)
+        {
+            PathTopologyEditManager.Instance.EndMode();
         }
 
         // 一方通行線路の進行方向矢印は道路敷設モードでのみ表示する
@@ -145,6 +158,15 @@ public class IpcStateCoordinator : MonoBehaviour
             case "STATE_REMOVE_OBJECTS":
                 ApplyStateRemoveObjects(ipcParams);
                 WindowUtil.BringToForeground();
+                break;
+
+            case "STATE_MERGE_PATH":
+            case "STATE_SPLIT_PATH":
+                // パス結合/分割の対象選択モード。選択結果の長さを見て確定するパネル
+                // (PathDetailPanel)を操作し続ける必要があるため、接続点編集と同じく
+                // WindowUtil.BringToForeground() は呼ばない(Unityを最前面にすると
+                // パネルが操作できなくなる)。
+                ApplyStatePathTopologyEdit(state, ipcParams);
                 break;
 
             default:
@@ -264,6 +286,13 @@ public class IpcStateCoordinator : MonoBehaviour
         {
             RemovalManager.Instance.EndRemovalMode();
         }
+
+        // パス結合/分割の選択モードを終了する(候補パスの着色・分割点マーカーを消す)。
+        // 確定・キャンセルのいずれもUI側は STATE_NORMAL への遷移を送ってくる。
+        if (PathTopologyEditManager.Instance != null)
+        {
+            PathTopologyEditManager.Instance.EndMode();
+        }
     }
 
     /// <summary>
@@ -299,6 +328,115 @@ public class IpcStateCoordinator : MonoBehaviour
         }
         removalManager.SetClickSound(trashSound);
         removalManager.BeginRemovalMode();
+    }
+
+    /// <summary>
+    /// STATE_MERGE_PATH / STATE_SPLIT_PATH: パスの結合相手・分割点の選択モード。
+    /// ipcParams の path_id はパス詳細パネルで開いている操作対象パス
+    /// (結合では survivor、分割では分割元)。
+    ///
+    /// 表示は道路敷設モードと同じ「計画表示・地区非表示」に揃え、対象パスと候補パスの
+    /// 色分け・分割点マーカーは PathTopologyEditManager が担う。
+    /// </summary>
+    private void ApplyStatePathTopologyEdit(string state, Dictionary<string, object> ipcParams)
+    {
+        bool isMerge = state == "STATE_MERGE_PATH";
+
+        int pathId = 0;
+        if (ipcParams != null && ipcParams.TryGetValue("path_id", out object pidObj) && pidObj != null)
+        {
+            pathId = Convert.ToInt32(pidObj);
+        }
+        if (pathId <= 0)
+        {
+            Debug.LogWarning($"IpcStateCoordinator: {state} に path_id が指定されていません");
+            return;
+        }
+
+        // InputMode: 結合はパスのみ、分割はパス＋地形(パス脇からも分割点を指せる)を拾う
+        if (InputSystemManager.Instance != null)
+        {
+            InputSystemManager.Instance.SetModePreset(
+                isMerge ? InputModePreset.PATH_MERGE : InputModePreset.PATH_SPLIT);
+        }
+
+        // VisualMode: 対象・候補のパスが見えるように計画表示にし、地区は誤クリック防止で非表示
+        if (VisualModeHandler.Instance != null)
+        {
+            VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_BOUNDARY);
+            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_PLAN);
+            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_PLAN);
+            VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
+        }
+
+        var manager = PathTopologyEditManager.Instance;
+        if (manager == null)
+        {
+            var go = new GameObject("PathTopologyEditManager");
+            manager = go.AddComponent<PathTopologyEditManager>();
+        }
+
+        if (isMerge) manager.BeginMergeMode(pathId);
+        else manager.BeginSplitMode(pathId);
+    }
+
+    /// <summary>
+    /// edit_path:finish_topology_edit: パスの結合/分割が確定した(UIがバックエンドへの送信に成功した)。
+    ///
+    /// 選択モードの終了・結合で消えたパスの即時破棄・通常モードへの復帰・データ再取得を
+    /// 1つのハンドラでこの順に行う。`session:reload` と `world:change_state` を別々に送ると、
+    /// 非同期の差分リロード(コルーチン)と状態遷移が前後して表示が更新されないことがあるため、
+    /// 道路敷設の `edit_path:finish` と同じく1イベントにまとめてある。
+    ///
+    /// removedPathId は結合で吸収されて消えたパスID(分割時は0)。差分リロードの
+    /// 「レスポンスに含まれないパスを消す」判定を待たずに確実に消すために明示的に渡す。
+    /// </summary>
+    private void HandleEditPathFinishTopologyEdit(int removedPathId)
+    {
+        PathTopologyEditManager.Instance?.EndMode();
+
+        if (removedPathId > 0)
+        {
+            FindAnyObjectByType<PathManager>()?.RemovePathLocally(removedPathId);
+        }
+
+        ApplyStateNormal();
+
+        var coordinator = FindAnyObjectByType<IpcViewCoordinator>();
+        if (coordinator != null)
+        {
+            coordinator.SyncFromState("STATE_NORMAL");
+            coordinator.ApplyAllLayerModes();
+        }
+
+        // 再取得は最後に開始する(この後に状態遷移が割り込むと、進行中の差分リロードの
+        // コルーチンが取り消されて削除・再生成が中途半端に終わる)。
+        CellDataLoader.Instance?.ReloadAllData();
+    }
+
+    /// <summary>
+    /// edit_path:cancel_topology_edit: パス詳細パネルのウィンドウが閉じられた。
+    /// 結合/分割の対象選択モード中なら打ち切って通常モードへ戻す。
+    ///
+    /// パネルのウィンドウは閉じても破棄されず非表示(再利用待ち)になるだけで React の
+    /// アンマウント処理が走らないため、パネル側の後始末だけに任せると選択モードのまま
+    /// 入力が固まる。選択モード中でなければ何もしない(ブルドーザ等、他のモードを
+    /// 巻き込まないため専用イベントにしてある)。
+    /// </summary>
+    private void HandleEditPathCancelTopologyEdit()
+    {
+        var manager = PathTopologyEditManager.Instance;
+        if (manager == null || !manager.IsActive) return;
+
+        manager.EndMode();
+        ApplyStateNormal();
+
+        var coordinator = FindAnyObjectByType<IpcViewCoordinator>();
+        if (coordinator != null)
+        {
+            coordinator.SyncFromState("STATE_NORMAL");
+            coordinator.ApplyAllLayerModes();
+        }
     }
 
     /// <summary>

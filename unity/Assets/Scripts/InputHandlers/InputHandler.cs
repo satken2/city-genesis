@@ -50,6 +50,12 @@ public static class InputMode
     // ブルドーザ(オブジェクト削除)モード。空き地区画・計画中の建物/道路を
     // 左クリックまたは左ドラッグ(ペイント式)で削除する。実処理は RemovalManager が担う。
     public const int MODE_REMOVE = 17;
+    // パス結合(merge)の相手選択モード。詳細パネルで開いているパスと共有ノードで繋がる
+    // 候補パスだけをクリックできる。候補判定と選択通知は PathTopologyEditManager が担う。
+    public const int MODE_PATH_MERGE = 18;
+    // パス分割(split)の分割点選択モード。対象パスの中心線へ射影した点を分割点として選ぶ。
+    // 射影・マーカー描画・選択通知は PathTopologyEditManager が担う。
+    public const int MODE_PATH_SPLIT = 19;
 }
 
 /// <summary>
@@ -76,6 +82,11 @@ public static class InputModePreset
     // ブルドーザ(オブジェクト削除)モードのプリセット。建物・区画・道路・地形を
     // すべて MODE_REMOVE にして削除対象として拾えるようにする。
     public const int REMOVE_OBJECTS = 16;
+    // パス結合の相手選択プリセット。パスだけをクリック可能にする。
+    public const int PATH_MERGE = 17;
+    // パス分割の分割点選択プリセット。パスと地形をクリック可能にする
+    // (パスから少し外れた地点でも垂線の足で分割点を選べるようにするため)。
+    public const int PATH_SPLIT = 18;
 }
 
 /// <summary>
@@ -766,9 +777,11 @@ public class InputHandler : MonoBehaviour
 
         int currentMode = GetModeForObjectType(objectType);
 
-        // ブルドーザ(削除)モードはクリックのみ対応。ドラッグは無効化し、
-        // 誤って RoadPlanManager 等のドラッグ処理へフォールバックしないよう即座に return する。
-        if (currentMode == InputMode.MODE_REMOVE)
+        // ブルドーザ(削除)モードとパス結合/分割の選択モードはクリックのみ対応。ドラッグは
+        // 無効化し、誤って RoadPlanManager 等のドラッグ処理へフォールバックしないよう即座に return する。
+        if (currentMode == InputMode.MODE_REMOVE
+            || currentMode == InputMode.MODE_PATH_MERGE
+            || currentMode == InputMode.MODE_PATH_SPLIT)
         {
             return;
         }
@@ -847,8 +860,8 @@ public class InputHandler : MonoBehaviour
     {
         int currentMode = GetModeForObjectType(InputObjectType.TERRAIN);
 
-        // ブルドーザ(削除)モードはクリックのみ対応。地形ドラッグは開始しない。
-        if (currentMode == InputMode.MODE_REMOVE)
+        // ブルドーザ(削除)モードとパス分割の分割点選択はクリックのみ対応。地形ドラッグは開始しない。
+        if (currentMode == InputMode.MODE_REMOVE || currentMode == InputMode.MODE_PATH_SPLIT)
         {
             return;
         }
@@ -1363,6 +1376,29 @@ public class InputHandler : MonoBehaviour
                 SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
                 SetMode(InputObjectType.ZONE, InputMode.MODE_NONE);
                 Debug.Log("InputHandler: ブルドーザ(オブジェクト削除)モードプリセットを設定しました");
+                break;
+
+            case InputModePreset.PATH_MERGE:
+                // パス結合の相手選択。候補パスのクリックだけを受け、他は誤操作防止で無効化する。
+                SetMode(InputObjectType.PATH, InputMode.MODE_PATH_MERGE);
+                SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
+                SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
+                SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
+                SetMode(InputObjectType.TERRAIN, InputMode.MODE_NONE);
+                SetMode(InputObjectType.ZONE, InputMode.MODE_NONE);
+                Debug.Log("InputHandler: パス結合の相手選択モードプリセットを設定しました");
+                break;
+
+            case InputModePreset.PATH_SPLIT:
+                // パス分割の分割点選択。対象パス上のクリックに加え、パスの脇の地形クリックも
+                // 受けて中心線への垂線の足を分割点にする(バックエンドの射影と同じ考え方)。
+                SetMode(InputObjectType.PATH, InputMode.MODE_PATH_SPLIT);
+                SetMode(InputObjectType.TERRAIN, InputMode.MODE_PATH_SPLIT);
+                SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
+                SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
+                SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
+                SetMode(InputObjectType.ZONE, InputMode.MODE_NONE);
+                Debug.Log("InputHandler: パス分割の分割点選択モードプリセットを設定しました");
                 break;
 
             default:

@@ -50,6 +50,16 @@ public class IpcClient : MonoBehaviour
     public event Action OnSessionForceReload;
     public event Action<int> OnZoneUpdated;
     public event Action OnEditPathFinish;
+    // パス結合/分割の対象選択モードの打ち切り。パス詳細パネルのウィンドウが閉じられたときに
+    // Rust側(window.rs)が送る。ウィンドウは破棄されず非表示になるだけでReactのアンマウント
+    // 処理が走らないため、パネル任せにすると選択モードに入ったまま入力が固まる。
+    // 選択モード中でなければ何もしない(他のモードを巻き込まないための専用イベント)。
+    public event Action OnEditPathCancelTopologyEdit;
+    // パス結合/分割の確定完了通知。引数は結合で消えたパスID(分割時は0)。
+    // 選択モードの終了・消えたパスの即時破棄・通常モードへの復帰・データ再取得を
+    // 1イベントでまとめて行う(session:reload と world:change_state を別々に送ると、
+    // 非同期の差分リロードと状態遷移が競合して表示が更新されないことがある)。
+    public event Action<int> OnEditPathFinishTopologyEdit;
     // 駅パスのホーム設置側(Constants.PLATFORM_SIDE_*)の変更。UIパネルのトグルを受けて、
     // 敷設中プレビューのプラットフォーム張り出し側を切り替えるために使用する。
     public event Action<int> OnEditPathChangePlatformSide;
@@ -281,6 +291,21 @@ public class IpcClient : MonoBehaviour
                     {
                         Debug.Log("IpcClient: edit_path:finish received");
                         OnEditPathFinish?.Invoke();
+                    }
+                    break;
+
+                case "edit_path:cancel_topology_edit":
+                    {
+                        Debug.Log("IpcClient: edit_path:cancel_topology_edit received");
+                        OnEditPathCancelTopologyEdit?.Invoke();
+                    }
+                    break;
+
+                case "edit_path:finish_topology_edit":
+                    {
+                        int removedPathId = GetParamInt(payload, "removed_path_id");
+                        Debug.Log($"IpcClient: edit_path:finish_topology_edit -> removed_path_id={removedPathId}");
+                        OnEditPathFinishTopologyEdit?.Invoke(removedPathId);
                     }
                     break;
 
@@ -638,6 +663,38 @@ public class IpcClient : MonoBehaviour
         };
 
         SendEnvelope("edit_path:select_node", payload);
+    }
+
+    /// <summary>
+    /// edit_path:select_merge_target イベントを送信する。
+    /// パス結合の相手選択モード(STATE_MERGE_PATH)で、結合相手のパスが選ばれたことをUIに通知する。
+    /// UIはこのIDで結合プレビュー(POST /paths/merge の dry_run)を取得し、長さを表示してから確定する。
+    /// </summary>
+    public void EmitPathMergeTargetSelected(int pathId, string pathName)
+    {
+        var payload = new Dictionary<string, object>
+        {
+            ["path_id"] = pathId,
+            ["path_name"] = pathName ?? ""
+        };
+
+        SendEnvelope("edit_path:select_merge_target", payload);
+    }
+
+    /// <summary>
+    /// edit_path:select_split_point イベントを送信する。
+    /// パス分割の分割点選択モード(STATE_SPLIT_PATH)で、分割点が選ばれたことをUIに通知する。
+    /// 座標は対象パスの中心線へ射影済みの [x, y, z]。UIはこの地点で分割プレビュー
+    /// (POST /paths/{id}/split の dry_run)を取得し、前半・後半の長さを表示してから確定する。
+    /// </summary>
+    public void EmitPathSplitPointSelected(Vector3 position)
+    {
+        var payload = new Dictionary<string, object>
+        {
+            ["point"] = new List<float> { position.x, position.y, position.z }
+        };
+
+        SendEnvelope("edit_path:select_split_point", payload);
     }
 
     /// <summary>

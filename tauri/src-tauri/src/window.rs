@@ -548,6 +548,16 @@ pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) 
                 "world:clear_highlights".to_string(),
                 json!({ "source": "path_detail" }),
             );
+            // パスの結合/分割の対象選択モード中だった場合に打ち切って通常モードへ戻す。
+            // 同じ理由(アンマウント処理が走らない)で、パネル任せにすると選択モードのまま
+            // 3Dビューの入力が固まる。Unity側は選択モード中でなければ何もしない。
+            let _ = ipc::send_ui_action(
+                state,
+                wt.clone(),
+                None,
+                "edit_path:cancel_topology_edit".to_string(),
+                json!({}),
+            );
         }
     }
 

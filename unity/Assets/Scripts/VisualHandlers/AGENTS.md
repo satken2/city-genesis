@@ -22,7 +22,7 @@
 - `preventMaterialChange`: 表示/非表示のみ制御しマテリアルを変えない(交差点メッシュ等)。SpriteRenderer・TextMeshPro・進行方向矢印(`TrackDirectionArrows`付きレンダラー)は自動的に対象外。
 - **ステータス連動**: `SetStatus(status)` で設定されたオブジェクトステータスがモードより優先される。
   - `STATUS_CONSTRUCTING` → 常に表示+**オリジナルマテリアル**(ホバー中はハイライト)。メッシュ自体が専用の「工事現場」表示(土マウンド/土ストリップ+足場+クレーン等。`ConstructingBuildingMeshBuilder` / `PathManager.GenerateConstructingPathMesh`)のため、旧仕様の `ConstructionMaterial`(黄色)一括上塗りは廃止。マテリアルアセット自体は `ConstructionDirt` 未配置時のフォールバック先(`BuildingMeshBuilder.GetConstructionDirtMaterial`)として存続している
-  - `STATUS_TEMPORARY` / `STATUS_PENDING` / `STATUS_SCHEDULED_CONSTRUCTION` → `MODE_PLAN` のときだけ表示(temporary/pending=赤 / planned=青マテリアル)。それ以外のモードではRendererとコライダーが無効化される
+  - `STATUS_TEMPORARY` / `STATUS_PENDING` / `STATUS_SCHEDULED_CONSTRUCTION` → `MODE_PLAN` のときだけ表示(temporary=赤 `PendingMaterial` / pending・planned=灰色 `PlannedMaterial`)。それ以外のモードではRendererとコライダーが無効化される。**どちらも不透明(ZWrite有効・影あり)**。半透明ゴースト表示は形状が読み取れないため廃止した
 - ホバーハイライトは `SetHover(true/false)`(InputHandler系から呼ばれる)。
 - 数値ベースの色分けは `MaterialPropertyBlock`(_BaseColor/_Color)で行い、マテリアルのインスタンス化を避けている。
 

@@ -63,9 +63,14 @@
 - MODE_EDIT_TRANSIT = 13 (公共交通の停留所配置。`TerrainInputHandler` が `TransitPlanManager` へ委譲。ドラッグ移動は `InputHandler.StartTerrainDrag/UpdateDrag/EndDrag` が資源編集と同様に `IsMouseOverStop`/`ProcessMouseDrag` へ振り分ける)
 - MODE_EDIT_PROP = 14 (プロップ配置。`TerrainInputHandler` が `PropPlacementManager` へ委譲)
 - MODE_PARCEL_CREATION_POLYGON = 16 (土地区画の任意ポリゴン作成=`parcel_creation_mode="manual"`。地形クリックで頂点を打ち・右クリックで仮確定・頂点ドラッグで調整する。資源エリア編集(MODE_EDIT_RESOURCE)と同じ地形ドラッグ方式で、`TerrainInputHandler` が `ParcelAreaEditManager` へ委譲。ドラッグ移動は `StartTerrainDrag/UpdateDrag/EndDrag` が `IsMouseOverVertex`/`ProcessMouseDrag` へ振り分ける。※定数値15は先に定義済みの MODE_EDIT_CONNECTOR が使用しているため16)
+- MODE_REMOVE = 17 (ブルドーザ=オブジェクト削除。空き地区画・計画中の建物/道路をクリック/ドラッグで削除。実処理は `RemovalManager`)
+- MODE_PATH_MERGE = 18 (パス結合の相手選択。`PathInputHandler.onClick` が `PathTopologyEditManager.OnPathClickedForMerge` へ委譲し、候補パス以外のクリックは弾かれる。ホバーハイライトも候補のみ)
+- MODE_PATH_SPLIT = 19 (パス分割の分割点選択。PATH と TERRAIN の両方をこのモードにし、どちらのクリックも `PathTopologyEditManager.OnClickForSplit` へ委譲する〔パス脇の地形クリックでも中心線への垂線の足が分割点になる〕。**`TerrainInputHandler` の共通吸着 `ApplySnapping` はこのモードで適用しない**——ノード吸着で端点へ引き寄せられると常に「端点に近すぎる」分割になりバックエンドに拒否されるため)
 - MODE_EDIT_CONNECTOR = 15 (施設の接続端子ノード=インフラ/走行網接続点のドラッグ移動編集。マーカー=逆四角錐はノード実体の上空に浮くオーバーレイのためコライダーへのレイキャストではなく地形ドラッグとして受け、**掴み開始は `ConnectorEditManager.ProcessMouseDrag` の初回呼び出しの遅延グラブ**(上記の罠参照。`StartTerrainDrag` 経由は地形コライダーが無い場合のフォールバックのみ)。当たり判定 `IsMouseOverConnector` は「ノード地表点〜マーカー天面のスクリーン線分」との距離で行い、半径はズームに応じて拡大(最低45px)。NODEは`MODE_NONE`でレイキャスト貫通させる。`TerrainInputHandler.onHover` はこのモードで吸着(`ApplySnapping`)を適用しない(ドラッグ中の端子が自分自身の旧キャッシュ位置へ吸着し続けるため)。**`CameraController.IsMouseOverEditHandle` にもマーカー判定を足さないと、先に走る(`DefaultExecutionOrder(-100)`)カメラドラッグが掴みを奪う**)
 
-プリセット(`InputModePreset`): ALL_NONE / ALL_NORMAL / ROAD_CONSTRUCTION / BUILDING_CONSTRUCTION / PARCEL_CREATION_POINT / PARCEL_CREATION_PATH / PARCEL_CREATION_SPLIT / ZONE_EDIT / UNLOCK_CELL / PARCEL_SHAPE_EDIT / SET_GRID / EDIT_RESOURCE / TRANSIT_CONSTRUCTION / PROP_PLACEMENT / CONNECTOR_EDIT / PARCEL_CREATION_POLYGON(=任意ポリゴン作成。地形のみ`MODE_PARCEL_CREATION_POLYGON`)
+プリセット(`InputModePreset`): ALL_NONE / ALL_NORMAL / ROAD_CONSTRUCTION / BUILDING_CONSTRUCTION / PARCEL_CREATION_POINT / PARCEL_CREATION_PATH / PARCEL_CREATION_SPLIT / ZONE_EDIT / UNLOCK_CELL / PARCEL_SHAPE_EDIT / SET_GRID / EDIT_RESOURCE / TRANSIT_CONSTRUCTION / PROP_PLACEMENT / CONNECTOR_EDIT / PARCEL_CREATION_POLYGON(=任意ポリゴン作成。地形のみ`MODE_PARCEL_CREATION_POLYGON`) / REMOVE_OBJECTS / PATH_MERGE(=パスのみ`MODE_PATH_MERGE`) / PATH_SPLIT(=パスと地形が`MODE_PATH_SPLIT`)
+
+**クリックのみでドラッグを持たないモードは `StartDrag` / `StartTerrainDrag` の冒頭で明示的に return させること**(MODE_REMOVE / MODE_PATH_MERGE / MODE_PATH_SPLIT)。しないと既定経路でドラッグ状態に入り、`RoadPlanManager` 等のドラッグ処理へフォールバックする。
 
 編集モードに入るときは通常、入力モード(ここ)とビジュアルモード(`VisualHandlers/VisualModeHandler`)をセットで切り替える。
 

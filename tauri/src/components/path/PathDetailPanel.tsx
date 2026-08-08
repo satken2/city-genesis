@@ -44,6 +44,8 @@ import { StationInfoSection } from "./StationInfoSection";
 import { PathConditionPanel } from "./PathConditionPanel";
 import { PathTrafficPanel } from "./PathTrafficPanel";
 import { PathOperationPanel } from "./PathOperationPanel";
+import { PathTopologyEditPanel } from "./PathTopologyEditPanel";
+import type { PathTopologyEditMode } from "./PathTopologyEditPanel";
 import { PathConstructionInfoPanel } from "./PathConstructionInfoPanel";
 import shortageIcon from "../../assets/images/ui/agent_panel/bribery.png";
 import accidentIcon from "../../assets/images/ui/agent_panel/car-accident.png";
@@ -71,6 +73,8 @@ export function PathDetailPanel({
   // 建設中の道路の「建設スピード」(utilization_target, ％整数) と建設コスト/期間。
   const [constructionSpeed, setConstructionSpeed] = useState<number>(100);
   const [statusSaving, setStatusSaving] = useState(false);
+  // 進行中のパス結合/分割の操作。null 以外の間は3Dビューが対象選択モードになっている。
+  const [topologyEditMode, setTopologyEditMode] = useState<PathTopologyEditMode | null>(null);
 
   const url = buildApiUrl(apiBaseUrl, pathTemplate, initialEntityId);
 
@@ -291,7 +295,25 @@ export function PathDetailPanel({
         path={pathData}
         apiBaseUrl={apiBaseUrl}
         onActionPerformed={() => setRefreshKey((k) => k + 1)}
+        topologyEditMode={topologyEditMode}
+        onStartTopologyEdit={(mode) =>
+          // 同じボタンをもう一度押したら操作をやめる(3Dビューも通常モードへ戻る)。
+          setTopologyEditMode((current) => (current === mode ? null : mode))
+        }
       />
+
+      {/* 結合・分割の操作中: 3Dビューでの対象選択と長さの確認・確定を担うセクション。
+          モードを切り替えたときに選択状態を持ち越さないよう key でリマウントする。 */}
+      {topologyEditMode && (
+        <PathTopologyEditPanel
+          key={topologyEditMode}
+          apiBaseUrl={apiBaseUrl}
+          path={pathData}
+          mode={topologyEditMode}
+          onClose={() => setTopologyEditMode(null)}
+          onCompleted={() => setRefreshKey((k) => k + 1)}
+        />
+      )}
 
       {isStationHouse && (
         <StationInfoSection

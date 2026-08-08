@@ -27,7 +27,9 @@ export type GraphicState =
   | "STATE_EDIT_TRANSIT"
   | "STATE_EDIT_PROP"
   | "STATE_EDIT_CONNECTOR"
-  | "STATE_REMOVE_OBJECTS";
+  | "STATE_REMOVE_OBJECTS"
+  | "STATE_MERGE_PATH"
+  | "STATE_SPLIT_PATH";
 
 /* ---- ui -> graphic 方向の送信 ---- */
 
@@ -612,6 +614,56 @@ export async function sendEditPathSetFollowTerrain(value: number): Promise<void>
 }
 
 /**
+ * `world.change_state` (STATE_MERGE_PATH)
+ * パス結合の相手選択モードを開始する。Unity は指定パスと共有ノードで繋がる候補パスを
+ * 色分けし、クリックされた1本を `edit_path:select_merge_target` で返す。
+ * pathId は結合後に残る側(survivor)＝パス詳細パネルで開いているパス。
+ */
+export async function sendStartPathMerge(pathId: number): Promise<void> {
+  await sendChangeState("STATE_MERGE_PATH", { path_id: pathId }, "path_detail");
+}
+
+/**
+ * `world.change_state` (STATE_SPLIT_PATH)
+ * パス分割の分割点選択モードを開始する。Unity はカーソルを対象パスの中心線へ射影した点を
+ * マーカー表示し、クリックされた点を `edit_path:select_split_point` で返す。
+ */
+export async function sendStartPathSplit(pathId: number): Promise<void> {
+  await sendChangeState("STATE_SPLIT_PATH", { path_id: pathId }, "path_detail");
+}
+
+/**
+ * `world.change_state` (STATE_NORMAL)
+ * パス結合/分割の選択モードをキャンセルする(確定せずに閉じたときの後始末)。
+ * Unity 側は候補パスの着色と分割点マーカーをクリアして通常モードへ戻る。
+ * 確定時は再描画までまとめて行う `sendFinishPathTopologyEdit` を使うこと。
+ */
+export async function sendEndPathTopologyEdit(): Promise<void> {
+  await sendChangeState("STATE_NORMAL", undefined, "path_detail");
+}
+
+/**
+ * `edit_path.finish_topology_edit`
+ * パスの結合/分割の確定送信に成功したことを通知する。Unity 側は選択モードの終了・
+ * 消えたパスの破棄・通常モードへの復帰・データ再取得を1つのハンドラでまとめて行う。
+ *
+ * `session:reload` と `world:change_state` を別々に送ると、非同期の差分リロードと
+ * 状態遷移が前後して表示が更新されないことがあるため、道路敷設の `edit_path:finish` と
+ * 同じく単一イベントにしてある。
+ *
+ * removedPathId は結合で吸収されて消えたパスのID(分割時は0)。差分リロードの削除判定を
+ * 待たずに確実に3Dから消すために渡す。
+ */
+export async function sendFinishPathTopologyEdit(removedPathId: number): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "path_detail",
+    entity: null,
+    action: "edit_path:finish_topology_edit",
+    params: { removed_path_id: removedPathId },
+  });
+}
+
+/**
  * `view.set_grid`
  * グリッドの表示有無や設定をグラフィックプログラムに通知する。
  * ドット表示モードは廃止済み。
@@ -717,6 +769,20 @@ export const IPC_EVENT_EDIT_PATH_SELECT_NODE = "edit_path:select_node";
 
 /** パス敷設モードにおいて、敷設中パスの形状が変更された */
 export const IPC_EVENT_EDIT_PATH_UPDATE_SHAPE = "edit_path:update_shape";
+
+/**
+ * パス結合の相手選択モード(STATE_MERGE_PATH)で、結合相手のパスが選ばれた(Unity → UI)。
+ * ペイロードは { path_id: number; path_name: string }。
+ * パス詳細パネルがこれを受けて結合プレビュー(dry_run)を取得し、長さを表示して確定を待つ。
+ */
+export const IPC_EVENT_EDIT_PATH_SELECT_MERGE_TARGET = "edit_path:select_merge_target";
+
+/**
+ * パス分割の分割点選択モード(STATE_SPLIT_PATH)で、分割点が選ばれた(Unity → UI)。
+ * ペイロードは { point: [x, y, z] }(対象パスの中心線へ射影済み)。
+ * パス詳細パネルがこれを受けて分割プレビュー(dry_run)を取得し、前半・後半の長さを表示する。
+ */
+export const IPC_EVENT_EDIT_PATH_SELECT_SPLIT_POINT = "edit_path:select_split_point";
 
 /** 建物建設モードにおいて、土地区画を選択した */
 export const IPC_EVENT_EDIT_BUILDING_SELECT_PARCEL = "edit_building:select_parcel";

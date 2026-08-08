@@ -26,6 +26,16 @@
   background: rgba(255, 255, 255, 0.24);
 }
 
+/* 結合・分割のように「押している間モードが継続する」ボタンのON表示 */
+.operation-btn--on {
+  background: rgba(64, 174, 255, 0.35);
+  border-color: rgba(124, 199, 255, 0.7);
+}
+
+.operation-btn--on:hover:not(:disabled) {
+  background: rgba(64, 174, 255, 0.45);
+}
+
 .operation-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;

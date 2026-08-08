@@ -12,12 +12,15 @@ import {
   STATUS_DEMOLISHING,
 } from "../../constants";
 import { sendSessionReload } from "../../utils/ipc";
+import type { PathTopologyEditMode } from "./PathTopologyEditPanel";
 import trashIcon from "../../assets/images/ui/trash.png";
 import bulldozeIcon from "../../assets/images/bulldoze.png";
 import editIcon from "../../assets/images/ui/edit.png";
 import repairIcon from "../../assets/images/ui/repair.png";
 import rocketIcon from "../../assets/images/ui/rocket.png";
 import pendingIcon from "../../assets/images/ui/pending.png";
+import mergeIcon from "../../assets/images/ui/path_merge.svg";
+import splitIcon from "../../assets/images/ui/path_split.svg";
 import "./PathOperationPanel.css";
 
 async function openPathEdit(pathId: number) {
@@ -31,6 +34,14 @@ type PathOperationPanelProps = {
   path: PathData;
   apiBaseUrl: string;
   onActionPerformed: () => void;
+  /**
+   * パスの結合・分割の操作を開始する。実際の対象選択は3Dビュー(Unity)で行うため、
+   * ここではモードを親(PathDetailPanel)に伝えるだけで、
+   * 選択待ちのセクション表示と確定送信は PathTopologyEditPanel が担う。
+   */
+  onStartTopologyEdit: (mode: PathTopologyEditMode) => void;
+  /** 現在進行中の結合/分割操作(なければ null)。ボタンのON表示に使う。 */
+  topologyEditMode: PathTopologyEditMode | null;
 };
 
 const PRE_CONSTRUCTION = new Set([STATUS_TEMPORARY, STATUS_SCHEDULED_CONSTRUCTION, STATUS_PENDING]);
@@ -39,6 +50,8 @@ export function PathOperationPanel({
   path,
   apiBaseUrl,
   onActionPerformed,
+  onStartTopologyEdit,
+  topologyEditMode,
 }: PathOperationPanelProps) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
@@ -240,6 +253,30 @@ export function PathOperationPanel({
             >
               <img src={repairIcon} alt={t("path.action.repair")} />
             </button>
+          )}
+          {/* 結合・分割は交通ネットワーク上の操作で、稼働中のパスにのみ意味がある
+              (バックエンドも STATUS_ACTIVE 以外を拒否する)。 */}
+          {path.status === STATUS_ACTIVE && (
+            <>
+              <button
+                className={`operation-btn${topologyEditMode === "merge" ? " operation-btn--on" : ""}`}
+                type="button"
+                title={t("path.action.merge")}
+                disabled={loading}
+                onClick={() => onStartTopologyEdit("merge")}
+              >
+                <img src={mergeIcon} alt={t("path.action.merge")} />
+              </button>
+              <button
+                className={`operation-btn${topologyEditMode === "split" ? " operation-btn--on" : ""}`}
+                type="button"
+                title={t("path.action.split")}
+                disabled={loading}
+                onClick={() => onStartTopologyEdit("split")}
+              >
+                <img src={splitIcon} alt={t("path.action.split")} />
+              </button>
+            </>
           )}
         </>
       )}

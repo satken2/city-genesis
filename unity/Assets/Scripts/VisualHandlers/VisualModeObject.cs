@@ -22,7 +22,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     [Tooltip("pendingステータス用の赤いマテリアル")]
     [SerializeField] private Material pendingMaterial;
 
-    [Tooltip("plannedステータス用の青いマテリアル")]
+    [Tooltip("plannedステータス用の灰色マテリアル")]
     [SerializeField] private Material plannedMaterial;
 
     [Tooltip("constructionステータス用の黄色いマテリアル")]
@@ -310,6 +310,8 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
         }
 
         // 3. 計画中（Pending/Planned）ステータスの処理
+        // 計画中は不透明の単一マテリアルで塗る。半透明にすると建物の形状が読み取れないため、
+        // 深度書き込みと影を有効にした灰色マテリアルで立体感を保つ。
         if (objectStatus == Constants.STATUS_TEMPORARY || objectStatus == Constants.STATUS_SCHEDULED_CONSTRUCTION || objectStatus == Constants.STATUS_PENDING)
         {
             // MODE_PLAN の時のみ表示
