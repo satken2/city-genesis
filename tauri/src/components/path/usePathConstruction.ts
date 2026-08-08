@@ -706,7 +706,8 @@ export function usePathConstruction(
       });
 
       // 確定ボタン押下時の権威ある干渉ハイライト（複線は中心線代表=先頭コンポーネントで問い合わせる）。
-      void queryInterferenceAndHighlight(pathsPayload[0]);
+      // 送信完了を待ってから作成する(成功後のクリアより後にハイライトが届くと赤表示が残留するため)。
+      await queryInterferenceAndHighlight(pathsPayload[0]);
 
       const res = await fetchApi<{ paths: Array<{ path_temp_id: string | null; path_id: number }> }>(
         `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/`,
@@ -716,6 +717,10 @@ export function usePathConstruction(
           body: JSON.stringify({ paths: pathsPayload }),
         }
       );
+      // 作成に成功したら敷設由来のハイライトを消す(以後の計画中パスの干渉表示は、
+      // 直後に開く詳細パネルが source="path_detail" で担う)。失敗時は例外でここに
+      // 到達せず、赤表示が確定できない理由を示し続ける。
+      void sendClearHighlights("path_build");
       if (res && res.paths && res.paths.length > 0) {
         const firstPath = res.paths[0];
         void invoke("open_registered_window", {
@@ -780,7 +785,8 @@ export function usePathConstruction(
     }
 
     // 確定ボタン押下時の権威ある干渉ハイライト（pathData はそのまま干渉問い合わせbodyになる）。
-    void queryInterferenceAndHighlight(pathData);
+    // 送信完了を待ってから作成する(成功後のクリアより後にハイライトが届くと赤表示が残留するため)。
+    await queryInterferenceAndHighlight(pathData);
 
     if (pathId != null) {
       // 既存パス更新
@@ -807,6 +813,10 @@ export function usePathConstruction(
         });
       }
     }
+    // 確定に成功したら敷設由来のハイライトを消す(以後の計画中パスの干渉表示は、
+    // 直後に開く詳細パネルが source="path_detail" で担う)。失敗時は例外でここに
+    // 到達せず、赤表示が確定できない理由を示し続ける。
+    void sendClearHighlights("path_build");
   }, [apiBaseUrl, selectedVariant, rawPoints, rawEmbankmentHeights, curveMode, startControl, endControl, rawWaypointControls, pathId, railComponents, hasPlatform, platformSide, followTerrain, queryInterferenceAndHighlight]);
 
   /* ---- 都市の通行方向を取得(既定の進行方向割り当てに使う) ---- */

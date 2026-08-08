@@ -304,6 +304,7 @@ namespace GeneratedModels
         public Dictionary<string, float> path_traffic;
         /// <summary>通行方向（双方向/start→end/end→start）</summary>
         public int travel_direction;
+        public int? house_path_id;
         /// <summary>駅ホームの設置側（外側/内側/両側）</summary>
         public int platform_side;
         /// <summary>地形に追従してパスを変形させるかどうか</summary>
@@ -495,6 +496,7 @@ namespace GeneratedModels
         public Dictionary<string, float> agent_multiplier;
         /// <summary>地区の法規制を区画側で上書きしているか（0/1）</summary>
         public bool restriction_override;
+        public bool under_acquisition;
         /// <summary>建築可能な建物カテゴリのビットフラグ（bd_type値のOR）</summary>
         public int allowed_bd_mask;
         /// <summary>建蔽率の上限</summary>

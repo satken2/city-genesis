@@ -3672,7 +3672,8 @@ public class RoadPlanManager : MonoBehaviour
     /// フロント側でローカル推定し、そのフットプリントを返す。
     ///
     /// バックエンドへ問い合わせず BuildingManager の空間インデックス + 建物フットプリント
-    /// (BuildingSummary.polygonArray はワールドXZ絶対座標)で幾何判定するため、
+    /// (BuildingSummary.polygonArray は center_point 相対のローカルXZ座標。
+    /// center_point を加算してワールドXZへ変換してから判定する)で幾何判定するため、
     /// ドラッグ追従でリアルタイムに使える。所有権・収用可否は判別せず、幾何的な重なりの
     /// 推定にとどまる(権威判定は確定時のバックエンド問い合わせ)。編集中はキャッシュする。
     /// </summary>
@@ -3723,10 +3724,16 @@ public class RoadPlanManager : MonoBehaviour
             float[][] poly = summary?.polygonArray;
             if (poly == null || poly.Length < 3) continue;
 
+            // polygonArray は center_point 相対(ミニマップ・メッシュ生成と同じ規約)のため、
+            // center_point を加算してワールドXZへ変換する。center_point 欠損時は位置を
+            // 確定できないので判定対象から外す(相対座標のまま扱うと地図中心に誤検出が出る)。
+            float[] cp = summary.centerPointArray;
+            if (cp == null || cp.Length < 2) continue;
+
             var footprint = new List<Vector2>(poly.Length);
             foreach (var v in poly)
             {
-                if (v != null && v.Length >= 2) footprint.Add(new Vector2(v[0], v[1]));
+                if (v != null && v.Length >= 2) footprint.Add(new Vector2(v[0] + cp[0], v[1] + cp[1]));
             }
             if (footprint.Count < 3) continue;
 

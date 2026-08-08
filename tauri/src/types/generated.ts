@@ -287,10 +287,9 @@ export type PathSummary = {
   path_traffic: Record<string, number>;
   /** 通行方向（双方向/start→end/end→start） */
   travel_direction: number;
+  house_path_id?: number;
   /** 駅ホームの設置側（外側/内側/両側） */
   platform_side: number;
-  /** 所属する駅舎パスのID（プラットフォームのみ有効。未所属/非プラットフォームは0以下） */
-  house_path_id: number;
   /** 地形に追従してパスを変形させるかどうか */
   follow_terrain: boolean;
   /** 始点ノードのID */
@@ -474,6 +473,7 @@ export type ParcelData = {
   agent_multiplier: Record<string, number>;
   /** 地区の法規制を区画側で上書きしているか（0/1） */
   restriction_override: boolean;
+  under_acquisition: boolean;
   /** 建築可能な建物カテゴリのビットフラグ（bd_type値のOR） */
   allowed_bd_mask: number;
   /** 建蔽率の上限 */

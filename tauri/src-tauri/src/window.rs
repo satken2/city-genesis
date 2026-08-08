@@ -493,14 +493,22 @@ pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) 
             }
             if wt == "path_build" {
                 // 道路建設パネルが閉じられた場合、描画されているグリッドを確実に非表示にする。
-                // WebViewが破棄されることでReact側のアンマウント処理によるクリーンアップ送信が届かない場合があるため、
-                // Rustのウィンドウクローズ処理側で明示的にオフを送る。
+                // ウィンドウは非表示(再利用待ち)になるだけでReact側のアンマウント処理による
+                // クリーンアップ送信が走らないため、Rustのウィンドウクローズ処理側で明示的にオフを送る。
                 let _ = ipc::send_ui_action(
                     state,
                     wt.clone(),
                     None,
                     "view:set_grid".to_string(),
                     json!({ "mode": "off" }),
+                );
+                // 敷設由来の干渉ハイライト(source="path_build")も同じ理由でここで消す。
+                let _ = ipc::send_ui_action(
+                    state,
+                    wt.clone(),
+                    None,
+                    "world:clear_highlights".to_string(),
+                    json!({ "source": "path_build" }),
                 );
             }
         } else if wt == "agent_detail" {
@@ -528,6 +536,17 @@ pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) 
                 None,
                 "parcel:hide_front_path".to_string(),
                 json!({}),
+            );
+        } else if wt == "path_detail" {
+            // パス詳細パネルが閉じられたとき、着工前パスの干渉ハイライトをクリアする。
+            // ウィンドウは非表示(再利用待ち)になるだけでReact側のアンマウント処理による
+            // クリーンアップ送信が走らないため、クローズ処理側で明示的に送る。
+            let _ = ipc::send_ui_action(
+                state,
+                wt.clone(),
+                None,
+                "world:clear_highlights".to_string(),
+                json!({ "source": "path_detail" }),
             );
         }
     }
