@@ -29,7 +29,6 @@ import {
   FiscalSankey,
   buildFiscalSankeyData,
   buildBusinessRevenueItems,
-  buildLandSaleRevenueItem,
   buildLandAcquisitionSpendItem,
   TAX_REVENUE_META,
   spendCategoryColor,
@@ -309,10 +308,8 @@ export function CityTaxWindow({
   /**
    * 財政Sankey用データ(参照表示: 前エポック歳入 → 資金 → 前エポック支出実績)。
    * 歳入は税(31〜35)に加え、公営事業収入(コストカテゴリキー1〜7に計上される公共サービス
-   * 売上・公営住宅家賃)と払い下げ収入(税外収入)も左側に描く。
+   * 売上・公営住宅家賃)も左側に描く。
    * 支出は予算カテゴリ実績に加え、収用補償(予算枠外の税外支出。前エポック実績)も右側に描く。
-   * 前エポックの実績どうしを対比するため、払い下げ収入と収用補償を両方表示する
-   * (予算枠を描く予算ウィンドウは払い下げ収入のみ)。
    * TODO: 将来的には税率スライダーの変更に応じて税収を近似予測して左側へ反映する。
    */
   const sankeyChart = useMemo(() => {
@@ -328,8 +325,6 @@ export function CityTaxWindow({
         masterData?.budget_categories,
         t,
       ),
-      // 払い下げ収入(市有地を民間へ売却した土地代)。前エポックの税外収入として左側に描く。
-      buildLandSaleRevenueItem(fiscalData.total_revenue, t),
     ];
     const budgetCategories = masterData?.budget_categories ?? {};
     const spends: FiscalFlowItem[] = [

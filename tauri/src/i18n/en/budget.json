@@ -18,7 +18,7 @@
     "tier2": "Tier 2 (Keep Second)",
     "tier3": "Tier 3 (Keep Third)",
     "tier4": "Tier 4 (Cut First)",
-    "requiredVsBudgetTitle": "Required vs. Budget by Category",
+    "breakdownCompareTitle": "Required vs. Confirmed Budget Breakdown",
     "total": "Total",
     "confirmBudget": "Confirm Budget",
     "confirming": "Sending...",
@@ -44,7 +44,7 @@
     "agentName": "Agent",
     "nextProjected": "Next Projected",
     "nextProjectedShort": "Required Amount",
-    "budgetAmountLabel": "Budget Amount",
+    "confirmedBudgetLabel": "Confirmed Budget",
     "noAgentsInCategory": "No agents in this category",
     "category": {
       "1": "City Hall",
@@ -90,7 +90,6 @@
     "surplus": "Carryover",
     "deficit": "Savings Drawdown (Deficit)",
     "categoryRevenue": "{{category}} revenue",
-    "landSaleRevenue": "Land Sale",
     "landAcquisitionExpense": "Expropriation",
     "noData": "No fiscal data to display"
   },

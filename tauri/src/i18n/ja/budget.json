@@ -18,7 +18,7 @@
     "tier2": "Tier 2 (2番目に維持)",
     "tier3": "Tier 3 (3番目に維持)",
     "tier4": "Tier 4 (維持不要)",
-    "requiredVsBudgetTitle": "カテゴリ別 必要金額と予算額",
+    "breakdownCompareTitle": "必要金額と確定予算の内訳",
     "total": "合計",
     "confirmBudget": "予算を確定",
     "confirming": "送信中...",
@@ -44,7 +44,7 @@
     "agentName": "エージェント",
     "nextProjected": "次見込み",
     "nextProjectedShort": "必要金額",
-    "budgetAmountLabel": "予算額",
+    "confirmedBudgetLabel": "確定予算",
     "noAgentsInCategory": "このカテゴリに所属するエージェントはいません",
     "category": {
       "1": "市政",
@@ -90,7 +90,6 @@
     "surplus": "繰越",
     "deficit": "貯蓄取り崩し(赤字)",
     "categoryRevenue": "{{category}}事業収入",
-    "landSaleRevenue": "払い下げ収入",
     "landAcquisitionExpense": "収用補償",
     "noData": "表示できる収支データがありません"
   },

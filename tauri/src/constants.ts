@@ -151,7 +151,6 @@ export const LEDGER_CONSTRUCTION: number = 8;
 export const LEDGER_MAINTENANCE: number = 9;
 export const LEDGER_RESERVE: number = 10;
 export const LEDGER_TRANSPORT: number = 11;
-export const LEDGER_LAND_SALE: number = 12;
 export const LEDGER_LAND_ACQUISITION: number = 13;
 export const LEDGER_LAND_PURCHASE: number = 14;
 export const LEDGER_CONSUMPTION_TAX: number = 31;

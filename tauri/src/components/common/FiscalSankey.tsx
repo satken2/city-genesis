@@ -14,7 +14,7 @@
  */
 
 import { ResponsiveContainer, Sankey } from "recharts";
-import { LEDGER_LAND_SALE, LEDGER_LAND_ACQUISITION } from "../../constants";
+import { LEDGER_LAND_ACQUISITION } from "../../constants";
 import "./FiscalSankey.css";
 
 /** residual(繰越/取り崩し)ノードの色 */
@@ -26,10 +26,7 @@ export const FISCAL_COLOR_POOL = "#64748b"; // Slate Gray
 /** 貯蓄(LEDGER_RESERVE)の台帳キー。支出カテゴリではないため歳出の実績集計から除外する。 */
 export const FISCAL_LEDGER_RESERVE_KEY = "10";
 
-/**
- * 土地取引(税外の歳入・歳出)ノードの色。払い下げ収入(歳入)と収用補償(歳出)を
- * 同系色の土色にして「土地取引」であることを一目でわかるようにする。
- */
+/** 収用補償(税外の歳出)ノードの色。土色にして「土地取引」であることを一目でわかるようにする。 */
 const FISCAL_COLOR_LAND = "#b08968"; // Earth Brown
 
 /**
@@ -87,30 +84,11 @@ export function buildBusinessRevenueItems(
 }
 
 /**
- * 払い下げ収入(税外の歳入)のSankeyフロー項目を構築する。
- *
- * 市有地を民間の着工へ売却したときの土地代(市→民間の売却)が、バックエンドの
- * total_revenue の LEDGER_LAND_SALE キーに計上される。税でも公営事業収入でもない
- * 独立した税外収入のため、専用の土色ノードで歳入側に描く。
- * value<=0(払い下げのなかったエポック)のときは buildFiscalSankeyData 側で除外される。
- */
-export function buildLandSaleRevenueItem(
-  totalRevenue: Record<string, number>,
-  t: TranslateFn,
-): FiscalFlowItem {
-  return {
-    label: t("fiscalSankey.landSaleRevenue", { defaultValue: "払い下げ収入" }),
-    value: totalRevenue[String(LEDGER_LAND_SALE)] ?? 0,
-    color: FISCAL_COLOR_LAND,
-  };
-}
-
-/**
  * 収用補償(税外の歳出)のSankeyフロー項目を構築する。
  *
  * 市が民間所有の土地区画を収用したときに所有者へ支払う土地代(市→所有者の補償)が、
  * バックエンドの total_expense の LEDGER_LAND_ACQUISITION キーに計上される。予算
- * カテゴリ外の税外支出のため、払い下げ収入と同系色の土色ノードで歳出側に描く。
+ * カテゴリ外の税外支出のため、土色(FISCAL_COLOR_LAND)のノードで歳出側に描く。
  * 予算枠ではなく実支出のため、前エポック実績を描く税率ウィンドウでのみ使用する
  * (次エポックの予算枠を描く予算ウィンドウでは使用しない)。
  * value<=0(収用のなかったエポック)のときは buildFiscalSankeyData 側で除外される。

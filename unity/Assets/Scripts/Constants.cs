@@ -156,7 +156,6 @@ public static class Constants
     public const int LEDGER_MAINTENANCE = 9;
     public const int LEDGER_RESERVE = 10;
     public const int LEDGER_TRANSPORT = 11;
-    public const int LEDGER_LAND_SALE = 12;
     public const int LEDGER_LAND_ACQUISITION = 13;
     public const int LEDGER_LAND_PURCHASE = 14;
     public const int LEDGER_CONSUMPTION_TAX = 31;

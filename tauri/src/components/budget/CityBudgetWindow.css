@@ -56,7 +56,7 @@
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* メイン 3カラム レイアウト: 左=Tier別カテゴリカード / 中央=Sankey+棒グラフ / 右=施設明細 */
+/* メイン 2分割レイアウト: 左1/3=Tier別カテゴリカード / 右2/3=内訳バー+施設明細+Sankey */
 .budget-window__split-container {
   display: flex;
   flex: 1;
@@ -65,7 +65,7 @@
 
 /* 左カラム: 維持優先度(Tier)ごとにグループ化したカテゴリカード */
 .budget-window__left-pane {
-  flex: 30;
+  flex: 1;
   min-width: 240px;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   overflow-y: auto;
@@ -202,42 +202,58 @@
   text-align: right;
 }
 
-/* 中央カラム: 上=財政Sankey、下=必要金額vs予算額の棒グラフ */
-.budget-window__center-pane {
-  flex: 40;
-  min-width: 280px;
+/* 右エリア: 上=内訳積み上げバー、下=施設明細+財政Sankeyの左右分割 */
+.budget-window__right-area {
+  flex: 2;
+  min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  min-height: 0;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(15, 23, 42, 0.15);
 }
 
-/* 上段: 財政Sankey。中央カラムを上下分割した上側。 */
-.budget-window__sankey-section {
-  flex: 0 0 42%;
-  min-height: 0;
+/* 上段: 必要金額/確定予算のカテゴリ別内訳積み上げバー(上下2本)。
+   チャート高さは固定(凡例2行分を含む)で、残りの縦幅は下段に譲る。 */
+.budget-window__breakdown-section {
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   padding: 12px 12px 4px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* 下段: 必要金額 vs 予算額の比較棒グラフ */
-.budget-window__bars-section {
+.budget-window__breakdown-chart {
+  height: 180px;
+}
+
+/* 下段: 左=選択カテゴリの施設明細、右=財政Sankey の左右分割 */
+.budget-window__bottom-row {
   flex: 1;
   min-height: 0;
   display: flex;
-  flex-direction: column;
-  padding: 12px 12px 8px;
 }
 
-.budget-window__bars-chart {
+/* 下段左: 選択カテゴリの施設明細 */
+.budget-window__agents-pane {
   flex: 1;
-  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.2);
 }
 
-/* 中央カラムの各セクション見出し(Sankey/棒グラフ共通) */
+/* 下段右: 財政Sankey */
+.budget-window__sankey-section {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 12px 4px;
+}
+
+/* 右エリアの各セクション見出し(内訳バー/Sankey共通) */
 .budget-window__section-title {
   margin: 0 0 4px 0;
   font-size: 0.72rem;
@@ -286,15 +302,6 @@
   background: #0ea5e9;
   border-color: rgba(255, 255, 255, 0.1);
   color: #ffffff;
-}
-
-/* 右カラム: 選択カテゴリの施設明細(上下いっぱい) */
-.budget-window__right-pane {
-  flex: 30;
-  background: rgba(15, 23, 42, 0.2);
-  display: flex;
-  flex-direction: column;
-  min-width: 220px;
 }
 
 .budget-agent-table-wrapper {

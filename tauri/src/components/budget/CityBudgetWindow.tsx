@@ -17,13 +17,11 @@ import {
   YAxis,
   Tooltip as RechartsTooltip,
   Legend,
-  Cell,
 } from "recharts";
 import {
   FiscalSankey,
   buildFiscalSankeyData,
   buildBusinessRevenueItems,
-  buildLandSaleRevenueItem,
   buildLandAcquisitionSpendItem,
   getActualSpendingValue,
   TAX_REVENUE_META,
@@ -367,32 +365,30 @@ export function CityBudgetWindow({
   // 配分後に現金が変動した場合などはサーバ側の実結果のみが真になるため、両方を見る。
   const autoAdjusted = derived.autoAdjusted || Boolean(budgetData?.budget_auto_adjusted);
 
-  // カテゴリ別の「必要金額（基準額）」と「予算額（Tier自動調整込みの配分予定額）」の
-  // 比較棒グラフ用データ。予算額はスライダー操作に即座に追随し、資金不足の自動調整で
-  // 希望額（基準額×比率）より削られたカテゴリは reduced=true になって警告色で描かれる。
-  const barChartData = useMemo(() => {
-    return sortedCategories
-      .filter((c) => String(c.id) !== LEDGER_RESERVE_KEY)
-      .map((c) => {
-        const key = String(c.id);
-        const required = baseAmounts[key] ?? 0;
-        const ratio = Math.min(
-          Math.max((pendingRatios[key] ?? 100) / 100, 0),
-          RATIO_MAX_PERCENT / 100,
-        );
-        const desired = required * ratio;
-        const budget = pendingBudgets[key] ?? 0;
-        return {
-          key,
-          name: t(`budget.category.${c.id}`, {
-            defaultValue: categories.find((cc) => cc.id === c.id)?.display_name,
-          }),
-          required,
-          budget,
-          reduced: budget < desired - 1e-6,
-        };
-      });
-  }, [sortedCategories, categories, baseAmounts, pendingRatios, pendingBudgets, t]);
+  // 内訳積み上げバーの列となるカテゴリ(貯蓄を除く全予算カテゴリ)。
+  const breakdownCategories = useMemo(
+    () => sortedCategories.filter((c) => String(c.id) !== LEDGER_RESERVE_KEY),
+    [sortedCategories],
+  );
+
+  // 「必要金額内訳」と「確定予算内訳」の横向き積み上げバー用データ(行=2本、列=カテゴリ別金額)。
+  // 上段=必要金額(フル稼働必要額の単純積み上げ)、下段=確定予算(比率×基準額をTier自動調整で
+  // 現金内に収めた配分結果)。同一X軸で上下に並ぶため、資金不足時にどのカテゴリが
+  // どれだけ削られたかを見比べられる。スライダー操作には確定予算側が即座に追随する。
+  const breakdownChartData = useMemo(() => {
+    const requiredRow: Record<string, number | string> = {
+      name: t("budget.nextProjectedShort", { defaultValue: "必要金額" }),
+    };
+    const budgetRow: Record<string, number | string> = {
+      name: t("budget.confirmedBudgetLabel", { defaultValue: "確定予算" }),
+    };
+    for (const c of breakdownCategories) {
+      const key = String(c.id);
+      requiredRow[key] = baseAmounts[key] ?? 0;
+      budgetRow[key] = pendingBudgets[key] ?? 0;
+    }
+    return [requiredRow, budgetRow];
+  }, [breakdownCategories, baseAmounts, pendingBudgets, t]);
 
   const filteredAgents = useMemo(() => {
     if (!budgetAgents) return [];
@@ -421,7 +417,7 @@ export function CityBudgetWindow({
   /**
    * 財政Sankey用データ(タブ「来期見込み」: 前エポック歳入 → 資金プール → 次エポック支出予定)。
    * 歳入は税(31〜35)に加え、公営事業収入(コストカテゴリキー1〜7に計上される公共サービス
-   * 売上・公営住宅家賃)と払い下げ収入(税外収入。市有地を民間へ売却した土地代)も描く。
+   * 売上・公営住宅家賃)も描く。
    * 収用補償は予算枠で計画される支出ではない実支出のため、支出側が予算枠(pendingBudgets)の
    * この予算ウィンドウでは描かない(前エポック実績を描く「前期実績」タブでのみ描く)。
    * 右側(支出)は編集中の pendingBudgets を参照するため、予算バーを操作すると即座に再描画される。
@@ -439,8 +435,6 @@ export function CityBudgetWindow({
         masterData?.budget_categories,
         t,
       ),
-      // 払い下げ収入(市有地を民間へ売却した土地代)。前エポックの税外収入として左側に描く。
-      buildLandSaleRevenueItem(budgetData.total_revenue, t),
     ];
     // 貯蓄(10)は支出カテゴリではないため支出側ノードに含めない（余剰は surplus ノードが表す）。
     const spends: FiscalFlowItem[] = sortedCategories
@@ -481,7 +475,6 @@ export function CityBudgetWindow({
         masterData?.budget_categories,
         t,
       ),
-      buildLandSaleRevenueItem(budgetData.total_revenue, t),
     ];
     const budgetCategories = masterData?.budget_categories ?? {};
     const spends: FiscalFlowItem[] = [
@@ -611,66 +604,22 @@ export function CityBudgetWindow({
           })}
         </div>
 
-        {/* 中央カラム: 上=財政Sankey、下=カテゴリ別の必要金額と予算額の比較棒グラフ */}
-        <div className="budget-window__center-pane">
-          {/* 上段: 財政Sankey。「来期見込み」(前税収→資金→次支出予定、破線)と
-              「前期実績」(前税収→資金→前支出実績、税率ウィンドウと同一内容)をタブで切り替える。 */}
-          <div className="budget-window__sankey-section">
-            <div className="budget-window__sankey-header">
-              <h3 className="budget-window__section-title budget-window__sankey-title">
-                {t("fiscalSankey.title", { defaultValue: "収支フロー" })}
-              </h3>
-              <div className="budget-window__sankey-tabs" role="tablist">
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={sankeyTab === "projected"}
-                  className={[
-                    "budget-window__sankey-tab",
-                    sankeyTab === "projected" && "budget-window__sankey-tab--active",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  onClick={() => setSankeyTab("projected")}
-                >
-                  {t("fiscalSankey.projectedTab", { defaultValue: "来期見込み" })}
-                </button>
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={sankeyTab === "actual"}
-                  className={[
-                    "budget-window__sankey-tab",
-                    sankeyTab === "actual" && "budget-window__sankey-tab--active",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  onClick={() => setSankeyTab("actual")}
-                >
-                  {t("fiscalSankey.actualTab", { defaultValue: "前期実績" })}
-                </button>
-              </div>
-            </div>
-            <FiscalSankey
-              chart={sankeyTab === "projected" ? projectedSankeyChart : actualSankeyChart}
-              linkStyle={sankeyTab === "projected" ? "planned" : "solid"}
-              noDataLabel={t("fiscalSankey.noData", { defaultValue: "表示できる収支データがありません" })}
-            />
-          </div>
-          {/* 下段: 必要金額(基準額) vs 予算額(Tier自動調整込みの配分予定額)の比較棒グラフ。
-              スライダー操作に即座に追随し、資金不足の自動調整で希望額より削られたカテゴリの
-              予算額バーは警告色(オレンジ)で描かれる。 */}
-          <div className="budget-window__bars-section">
+        {/* 右エリア: 上=必要金額/確定予算の内訳バー、下=施設明細+財政Sankeyの左右分割 */}
+        <div className="budget-window__right-area">
+          {/* 上段: カテゴリ別の内訳積み上げバー2本(上=必要金額、下=確定予算)。
+              同一X軸で上下に並べ、資金不足の自動調整による削減幅を見比べられる。
+              セグメント色は下段Sankeyの支出側と同じ spendCategoryColor で統一する。 */}
+          <div className="budget-window__breakdown-section">
             <h3 className="budget-window__section-title">
-              {t("budget.requiredVsBudgetTitle", { defaultValue: "カテゴリ別 必要金額と予算額" })}
+              {t("budget.breakdownCompareTitle", { defaultValue: "必要金額と確定予算の内訳" })}
             </h3>
-            <div className="budget-window__bars-chart">
+            <div className="budget-window__breakdown-chart">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                  data={barChartData}
+                  data={breakdownChartData}
                   layout="vertical"
                   margin={{ top: 0, right: 16, left: 4, bottom: 0 }}
-                  barCategoryGap="22%"
+                  barCategoryGap="24%"
                 >
                   <XAxis
                     type="number"
@@ -696,86 +645,128 @@ export function CityBudgetWindow({
                     cursor={{ fill: "rgba(255, 255, 255, 0.04)" }}
                   />
                   <Legend wrapperStyle={{ fontSize: 10 }} />
-                  <Bar
-                    dataKey="required"
-                    name={t("budget.nextProjectedShort", { defaultValue: "必要金額" })}
-                    fill="#64748b"
-                    barSize={7}
-                  />
-                  <Bar
-                    dataKey="budget"
-                    name={t("budget.budgetAmountLabel", { defaultValue: "予算額" })}
-                    barSize={7}
-                  >
-                    {barChartData.map((row) => (
-                      <Cell key={row.key} fill={row.reduced ? "#f59e0b" : "#38bdf8"} />
-                    ))}
-                  </Bar>
+                  {breakdownCategories.map((c) => (
+                    <Bar
+                      key={c.id}
+                      dataKey={String(c.id)}
+                      stackId="breakdown"
+                      name={t(`budget.category.${c.id}`, { defaultValue: c.display_name })}
+                      fill={spendCategoryColor(c.id)}
+                    />
+                  ))}
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
-        </div>
 
-        {/* 右カラム: 選択カテゴリのエージェント明細(上下いっぱい) */}
-        <div className="budget-window__right-pane">
-          <div className="budget-agent-table-wrapper">
-            <div className="budget-agent-title-row">
-              <h3 className="budget-agent-title">
-                {t(`budget.category.${activeCategoryId}`, {
-                  defaultValue: categories.find((c) => c.id === activeCategoryId)?.display_name
-                })} {t("budget.details", { defaultValue: "詳細" })}
-              </h3>
+          {/* 下段: 左=選択カテゴリの施設明細、右=財政Sankey */}
+          <div className="budget-window__bottom-row">
+            {/* 下段左: 選択カテゴリのエージェント明細 */}
+            <div className="budget-window__agents-pane">
+              <div className="budget-agent-table-wrapper">
+                <div className="budget-agent-title-row">
+                  <h3 className="budget-agent-title">
+                    {t(`budget.category.${activeCategoryId}`, {
+                      defaultValue: categories.find((c) => c.id === activeCategoryId)?.display_name
+                    })} {t("budget.details", { defaultValue: "詳細" })}
+                  </h3>
+                </div>
+
+                <table className="budget-agent-table">
+                  <thead>
+                    <tr>
+                      <th className="budget-agent-table__header">{t("budget.agentName", { defaultValue: "エージェント" })}</th>
+                      <th className="budget-agent-table__header budget-agent-table__header--num">{t("budget.prevActual", { defaultValue: "前実績" })}</th>
+                      <th className="budget-agent-table__header budget-agent-table__header--num">{t("budget.nextProjected", { defaultValue: "次見込み" })}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="budget-agent-table__row--total">
+                      <td className="budget-agent-table__cell budget-agent-table__cell--total">{t("budget.total", { defaultValue: "合計" })}</td>
+                      <td className="budget-agent-table__cell budget-agent-table__cell--num budget-agent-table__cell--total">
+                        <Money value={agentsTotal.actual} unit />
+                      </td>
+                      <td className="budget-agent-table__cell budget-agent-table__cell--num budget-agent-table__cell--total">
+                        <Money value={agentsTotal.projected} unit />
+                      </td>
+                    </tr>
+                    {filteredAgents.map((agent) => (
+                      <tr key={agent.rowKeyStr} className="budget-agent-table__row">
+                        <td className="budget-agent-table__cell budget-agent-table__cell--name" title={agent.name}>
+                          <div className="budget-agent-name-line">{agent.name}</div>
+                          {agent.status === STATUS_CONSTRUCTING && agent.remaining_epochs != null && (
+                            <div className="budget-util-note">
+                              {t("budget.remainingEpochs", {
+                                defaultValue: "残り約{{n}}エポック",
+                                n: Math.ceil(agent.remaining_epochs),
+                              })}
+                            </div>
+                          )}
+                        </td>
+                        <td className="budget-agent-table__cell budget-agent-table__cell--num">
+                          <Money value={agent.actual_expense} unit />
+                        </td>
+                        <td className="budget-agent-table__cell budget-agent-table__cell--num">
+                          <Money value={agent.projected_preview} unit />
+                        </td>
+                      </tr>
+                    ))}
+                    {filteredAgents.length === 0 && (
+                      <tr>
+                        <td colSpan={3} className="budget-agent-table__cell--empty">
+                          {t("budget.noAgentsInCategory", { defaultValue: "このカテゴリに所属するエージェントはいません" })}
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
-            <table className="budget-agent-table">
-              <thead>
-                <tr>
-                  <th className="budget-agent-table__header">{t("budget.agentName", { defaultValue: "エージェント" })}</th>
-                  <th className="budget-agent-table__header budget-agent-table__header--num">{t("budget.prevActual", { defaultValue: "前実績" })}</th>
-                  <th className="budget-agent-table__header budget-agent-table__header--num">{t("budget.nextProjected", { defaultValue: "次見込み" })}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="budget-agent-table__row--total">
-                  <td className="budget-agent-table__cell budget-agent-table__cell--total">{t("budget.total", { defaultValue: "合計" })}</td>
-                  <td className="budget-agent-table__cell budget-agent-table__cell--num budget-agent-table__cell--total">
-                    <Money value={agentsTotal.actual} unit />
-                  </td>
-                  <td className="budget-agent-table__cell budget-agent-table__cell--num budget-agent-table__cell--total">
-                    <Money value={agentsTotal.projected} unit />
-                  </td>
-                </tr>
-                {filteredAgents.map((agent) => (
-                  <tr key={agent.rowKeyStr} className="budget-agent-table__row">
-                    <td className="budget-agent-table__cell budget-agent-table__cell--name" title={agent.name}>
-                      <div className="budget-agent-name-line">{agent.name}</div>
-                      {agent.status === STATUS_CONSTRUCTING && agent.remaining_epochs != null && (
-                        <div className="budget-util-note">
-                          {t("budget.remainingEpochs", {
-                            defaultValue: "残り約{{n}}エポック",
-                            n: Math.ceil(agent.remaining_epochs),
-                          })}
-                        </div>
-                      )}
-                    </td>
-                    <td className="budget-agent-table__cell budget-agent-table__cell--num">
-                      <Money value={agent.actual_expense} unit />
-                    </td>
-                    <td className="budget-agent-table__cell budget-agent-table__cell--num">
-                      <Money value={agent.projected_preview} unit />
-                    </td>
-                  </tr>
-                ))}
-                {filteredAgents.length === 0 && (
-                  <tr>
-                    <td colSpan={3} className="budget-agent-table__cell--empty">
-                      {t("budget.noAgentsInCategory", { defaultValue: "このカテゴリに所属するエージェントはいません" })}
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+            {/* 下段右: 財政Sankey。「来期見込み」(前税収→資金→次支出予定、破線)と
+                「前期実績」(前税収→資金→前支出実績、税率ウィンドウと同一内容)をタブで切り替える。 */}
+            <div className="budget-window__sankey-section">
+              <div className="budget-window__sankey-header">
+                <h3 className="budget-window__section-title budget-window__sankey-title">
+                  {t("fiscalSankey.title", { defaultValue: "収支フロー" })}
+                </h3>
+                <div className="budget-window__sankey-tabs" role="tablist">
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={sankeyTab === "projected"}
+                    className={[
+                      "budget-window__sankey-tab",
+                      sankeyTab === "projected" && "budget-window__sankey-tab--active",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    onClick={() => setSankeyTab("projected")}
+                  >
+                    {t("fiscalSankey.projectedTab", { defaultValue: "来期見込み" })}
+                  </button>
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={sankeyTab === "actual"}
+                    className={[
+                      "budget-window__sankey-tab",
+                      sankeyTab === "actual" && "budget-window__sankey-tab--active",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    onClick={() => setSankeyTab("actual")}
+                  >
+                    {t("fiscalSankey.actualTab", { defaultValue: "前期実績" })}
+                  </button>
+                </div>
+              </div>
+              <FiscalSankey
+                chart={sankeyTab === "projected" ? projectedSankeyChart : actualSankeyChart}
+                linkStyle={sankeyTab === "projected" ? "planned" : "solid"}
+                noDataLabel={t("fiscalSankey.noData", { defaultValue: "表示できる収支データがありません" })}
+              />
+            </div>
           </div>
         </div>
 
