@@ -11,8 +11,10 @@ using GeneratedModels;
 /// BaseApiDataManager のセル単位ロードには載せず、PathManager が既に
 /// ロード済みの pathDataCache を読んで独立に動く。
 ///
-/// 挙動: 描画範囲(カメラ注視点+半径)内の各パスに「目標台数 = 交通量[台/日] × 範囲内の長さ × 密度係数」を
+/// 挙動: 描画範囲(カメラ注視点+半径)内の各パスに「目標台数 = 物理的な同時存在台数 × 演出倍率」を
 /// 定め、不足分をパス上のランダム地点(沿道の建物から出てきた車)へ確率的に補充する。
+/// 物理台数は 流量[台/s](交通量[台/日]÷活動秒数) × 区間通過時間[s] で求まる期待値で、
+/// 実スケールではほぼ0台のため timeExaggeration で時間を圧縮して見た目の賑わいを作る。
 /// 交差点では交差先道路の交通量に応じて確率的に分岐(travel_direction を尊重)し、乗り換え先が
 /// 目標超過なら超過度に応じた確率で「沿道の建物に到着した」とみなしてデスポーンする。
 /// これにより各パスの車密度が path_traffic に比例した水準へ自己調整され、交通量の少ない道路に
@@ -32,8 +34,10 @@ public class VehicleManager : MonoBehaviour
     [SerializeField] private float despawnMargin = 80f;
 
     [Header("スポーン/密度")]
-    [Tooltip("path_traffic 値(台/日) → 目標密度[台/m]への変換係数。目標台数 = 交通量 × 範囲内の長さ × この値。物理的な同時存在台数よりかなり誇張した演出値であり、見た目の賑わいで調整する。")]
-    [SerializeField] private float trafficDensityK = 0.002f;
+    [Tooltip("時間圧縮の演出倍率。1=物理的に正確な同時存在台数(交通量[台/日]を活動時間で流したときに範囲内に居る期待台数)で、実スケールではほぼ0台になるため、この倍率で賑わいを誇張する。")]
+    [SerializeField] private float timeExaggeration = LocalConstants.VEHICLE_TIME_EXAGGERATION;
+    [Tooltip("交通が流れる1日の活動時間[h]。バックエンドの PATH_ACTIVE_HOURS と同じ値を保つ(LocalConstants 参照)。")]
+    [SerializeField] private float activeHoursPerDay = LocalConstants.VEHICLE_ACTIVE_HOURS_PER_DAY;
     [Tooltip("目標台数への不足分を1秒あたりこの割合で補充する(値が大きいほど速く適正密度に達する)。")]
     [SerializeField] private float spawnFillRate = 1.0f;
     [Tooltip("目標超過パスへ乗り換えた車が沿道到着(途中降車)する確率の強さ。0=無効。")]
@@ -153,14 +157,19 @@ public class VehicleManager : MonoBehaviour
 
             rangePathIds.Add(path.path_id);
 
-            // 目標台数 = 交通量 × 範囲内の長さ × 密度係数。円外にはみ出す部分は目標に含めない。
+            // 目標台数 = 物理的な同時存在台数 × 演出倍率。円外にはみ出す部分は目標に含めない。
+            // 物理台数 = 流量[台/s](=交通量[台/日]÷活動秒数) × 区間通過時間[s](=範囲内の長さ÷車速)。
+            // 実スケールでは1台未満になるため timeExaggeration で時間を圧縮して賑わいを出す。
             float insideLen = sOut - sIn;
+            float activeSeconds = Mathf.Max(1f, activeHoursPerDay * 3600f);
             bool hasTarget = false;
             foreach (int vt in Constants.ROAD_VEHICLE_KEYS)
             {
                 float traffic = GetPathTraffic(path, vt);
                 if (traffic <= 0f) continue;
-                targetByPathType[PathTypeKey(path.path_id, vt)] = traffic * trafficDensityK * insideLen;
+                float vehicleSpeed = Mathf.Max(0.1f, baseSpeed * SpeedFactorFor(vt));
+                float physicalCount = (traffic / activeSeconds) * (insideLen / vehicleSpeed);
+                targetByPathType[PathTypeKey(path.path_id, vt)] = physicalCount * timeExaggeration;
                 hasTarget = true;
             }
 
