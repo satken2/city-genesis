@@ -276,6 +276,8 @@ export function PathBuildSections({
               estimatedDurationDays={pc.estimatedDurationDays}
               isCostLoading={pc.isCostLoading}
               nextEpochConstructionBudget={pc.nextEpochConstructionBudget}
+              supplyRatio={pc.supplyRatio}
+              expectedDurationDays={pc.expectedDurationDays}
             />
           )}
         </div>

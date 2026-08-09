@@ -18,12 +18,21 @@
  *   翻訳済み文字列を costRatioHelp で受け取る。
  * - nextEpochConstructionBudget を渡すと「来期の建設予算の X%」の注記を出す(建設パネル用)。
  * - perEpoch を渡すと「1エポックのコスト・残り期間」ブロックを表示する(建設中・解体中の詳細パネル用)。
+ * - supplyRatio / expectedDurationDays を渡すと、都市の建設サービス供給力から見た
+ *   需給見通しを表示する(建設パネル用)。充足率が SUPPLY_RATIO_OK 未満のときだけ
+ *   「見込み建設期間」の行と警告バナーが付く(閾値は下記の定数)。
  */
 
 import { useTranslation } from "react-i18next";
 import { Money } from "./Money";
 import { costRatioColor } from "../../utils/costRatio";
 import "./ConstructionInfoCard.css";
+
+// 建設サービス充足率(construction_supply_ratio)の表示閾値。
+// OK 以上: 表示なし / MILD 以上: 黄色の注意 / MILD 未満: オレンジの警告。
+// ゲームルールではなく表示上の区切りのため、UI側の定数として持つ。
+const SUPPLY_RATIO_OK = 0.9;
+const SUPPLY_RATIO_MILD = 0.5;
 
 type ConstructionPerEpochInfo = {
   /** 1エポックあたりの建設(解体)コスト */
@@ -57,6 +66,10 @@ type ConstructionInfoCardProps = {
   isCostLoading: boolean;
   /** 来期の建設予算。渡すと予算に対する割合の注記を表示する */
   nextEpochConstructionBudget?: number | null;
+  /** 建設サービス財の調達充足率(0〜1)。1.0=推定建設期間どおりに進む見込み */
+  supplyRatio?: number | null;
+  /** 充足率を織り込んだ見込み建設期間(日) */
+  expectedDurationDays?: number | null;
   /** 建設中・解体中の実績情報。渡すと1エポックコスト・残り期間ブロックを表示する */
   perEpoch?: ConstructionPerEpochInfo;
 };
@@ -73,9 +86,19 @@ export function ConstructionInfoCard({
   estimatedDurationDays,
   isCostLoading,
   nextEpochConstructionBudget,
+  supplyRatio,
+  expectedDurationDays,
   perEpoch,
 }: ConstructionInfoCardProps) {
   const { t } = useTranslation();
+
+  // 建設サービスの需給警告レベル。充足率が十分(OK以上)なら何も表示しない。
+  const supplyShortageLevel: "mild" | "severe" | null =
+    !isCostLoading && supplyRatio != null && supplyRatio < SUPPLY_RATIO_OK
+      ? supplyRatio < SUPPLY_RATIO_MILD
+        ? "severe"
+        : "mild"
+      : null;
 
   return (
     <div className="construction-info-card">
@@ -156,7 +179,32 @@ export function ConstructionInfoCard({
             ? t("construction.durationDays", { value: Math.ceil(estimatedDurationDays) })
             : "—"}
         </span>
+
+        {/* 都市の建設能力から見た見込み建設期間。充足率が十分なときは行ごと出さない */}
+        {supplyShortageLevel && expectedDurationDays != null && (
+          <>
+            <span className="construction-info-label">
+              {t("construction.expectedDuration")}
+            </span>
+            <span
+              className={`construction-info-value construction-supply-value-${supplyShortageLevel}`}
+            >
+              {t("construction.expectedDurationDays", {
+                value: Math.ceil(expectedDurationDays),
+              })}
+            </span>
+          </>
+        )}
       </div>
+
+      {/* 建設サービスの供給不足警告 */}
+      {supplyShortageLevel && (
+        <div className={`construction-supply-note construction-supply-note-${supplyShortageLevel}`}>
+          {supplyShortageLevel === "severe"
+            ? t("construction.supplyShortageSevere")
+            : t("construction.supplyShortageMild")}
+        </div>
+      )}
 
       {/* 来期の建設予算に対する推定建設コストの割合(建設パネルでの意思決定支援用) */}
       {!isCostLoading

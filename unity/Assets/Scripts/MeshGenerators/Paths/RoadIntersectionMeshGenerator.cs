@@ -591,10 +591,12 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
     private static Material LoadRoadMaterial(List<PathSummary> paths)
     {
         // 交差点のアスファルトは、接続道路のうち代表バリアント（variant番号が最大の道路）の
-        // body プレハブのマテリアルを使い、道路本体と見た目を揃える。
+        // 路面マテリアルを使い、道路本体と見た目を揃える。
+        // 舗装路と未舗装路が交わるノードでは variant 番号の大きい未舗装路が代表になり、
+        // 交差点も土の路面になる（舗装路どうしならアスファルト）。
         // RoadPath と同じマテリアルキャッシュ（Resources同名マテリアルの再割当＋renderQueue調整）を
         // 経由することで、交差点内だけ舗装の色味や描画設定が変わるのを防ぐ。
-        if (ModelManager.Instance != null && paths != null)
+        if (paths != null)
         {
             // 道路と線路が混在するノード（踏切）では道路側の舗装を優先する
             // （線路バリアントは番号が大きく、単純な最大variant選択だと踏切全体が
@@ -623,24 +625,39 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
 
             if (selectedPath != null)
             {
-                GameObject prefab = ModelManager.Instance.GetModel($"Models/Paths/p{selectedPath.path_variant}/body")
-                    ?? ModelManager.Instance.GetModel($"Models/Paths/p{selectedPath.path_type}/body");
-                MeshRenderer renderer = prefab != null ? prefab.GetComponent<MeshRenderer>() : null;
-                if (renderer != null && renderer.sharedMaterial != null)
+                // マスターの body_material（Resources直下の .mat 名）が路面マテリアルの正。
+                // プレハブのマテリアル名に依存せずシートだけで交差点の路面を差し替えられる。
+                var master = MasterDataStore.Instance != null ? MasterDataStore.Instance.GetPathMaster(selectedPath.path_variant) : null;
+                Material masterMaterial = master != null ? RoadPath.GetOrCreateRoadMaterialByName(master.body_material) : null;
+                if (masterMaterial != null)
                 {
-                    Material bodyMaterial = RoadPath.GetOrCreateRoadMaterial(renderer.sharedMaterial);
-                    if (bodyMaterial != null)
+                    return masterMaterial;
+                }
+
+                // body_material 未設定のバリアントは body プレハブのマテリアルから解決する。
+                if (ModelManager.Instance != null)
+                {
+                    GameObject prefab = ModelManager.Instance.GetModel($"Models/Paths/p{selectedPath.path_variant}/body")
+                        ?? ModelManager.Instance.GetModel($"Models/Paths/p{selectedPath.path_type}/body");
+                    MeshRenderer renderer = prefab != null ? prefab.GetComponent<MeshRenderer>() : null;
+                    if (renderer != null && renderer.sharedMaterial != null)
                     {
-                        return bodyMaterial;
+                        Material bodyMaterial = RoadPath.GetOrCreateRoadMaterial(renderer.sharedMaterial);
+                        if (bodyMaterial != null)
+                        {
+                            return bodyMaterial;
+                        }
                     }
                 }
             }
         }
 
-        Material material = Resources.Load<Material>("PATH_ASPHALT");
+        // マスターもプレハブも解決できない場合の保険。共有プールを経由して
+        // renderQueue 補正まで通常道路と揃える。
+        Material material = RoadPath.GetOrCreateRoadMaterialByName("PATH_ASPHALT");
         if (material == null)
         {
-            material = Resources.Load<Material>("NodeMaterial");
+            material = RoadPath.GetOrCreateRoadMaterialByName("NodeMaterial");
         }
         return material;
     }
@@ -666,6 +683,13 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         mesh.name = meshName;
         mesh.SetVertices(vertices);
         mesh.SetTriangles(triangles, 0);
+        // 頂点カラーのアルファを「縁マスク」として読む道路マテリアル(未舗装路の
+        // Custom/PathDirt)があるため、白(α=1＝侵食なし)を明示設定する。
+        // 未設定メッシュへ供給される既定値に依存すると、交差点が丸ごと切り抜かれて
+        // 消える事故になりうる。
+        Color[] colors = new Color[vertices.Count];
+        Array.Fill(colors, Color.white);
+        mesh.SetColors(colors);
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
         mesh.RecalculateTangents();

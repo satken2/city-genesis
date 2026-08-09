@@ -31,25 +31,42 @@ public class RoadPath : IPathMeshGenerator
     {
         if (source == null) return null;
         string key = source.name;
-        if (MaterialCache.TryGetValue(key, out Material cached))
+
+        Material fromResources = GetOrCreateRoadMaterialByName(key);
+        if (fromResources != null) return fromResources;
+
+        // Resources に同名マテリアルが無いので、FBX由来のマテリアルを複製して共有プールに載せる。
+        Material targetMat = new Material(source);
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath]   マテリアルキャッシュ生成(clone): '{key}'");
+        RegisterRoadMaterial(key, targetMat);
+        return targetMat;
+    }
+
+    /// <summary>
+    /// マテリアル名だけを手がかりに、道路パーツ用のマテリアルをキャッシュ経由で取得する。
+    /// マスターデータで路面のマテリアルを名指しする経路（交差点アスファルトの body_material）で使う。
+    /// Resources 直下に同名の .mat が無ければ null を返す（呼び出し側でフォールバックすること）。
+    /// </summary>
+    public static Material GetOrCreateRoadMaterialByName(string materialName)
+    {
+        if (string.IsNullOrEmpty(materialName)) return null;
+        if (MaterialCache.TryGetValue(materialName, out Material cached))
             return cached;
 
-        Material loadedMat = Resources.Load<Material>(key);
-        Material targetMat;
-        if (loadedMat != null)
-        {
-            targetMat = new Material(loadedMat);
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath]   マテリアルキャッシュ生成(Resources): '{key}'");
-        }
-        else
-        {
-            targetMat = new Material(source);
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath]   マテリアルキャッシュ生成(clone): '{key}'");
-        }
-        int baseQueue = targetMat.renderQueue < 0 ? targetMat.shader.renderQueue : targetMat.renderQueue;
-        targetMat.renderQueue = baseQueue + 1;
-        MaterialCache[key] = targetMat;
+        Material loadedMat = Resources.Load<Material>(materialName);
+        if (loadedMat == null) return null;
+
+        Material targetMat = new Material(loadedMat);
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath]   マテリアルキャッシュ生成(Resources): '{materialName}'");
+        RegisterRoadMaterial(materialName, targetMat);
         return targetMat;
+    }
+
+    private static void RegisterRoadMaterial(string key, Material material)
+    {
+        int baseQueue = material.renderQueue < 0 ? material.shader.renderQueue : material.renderQueue;
+        material.renderQueue = baseQueue + 1;
+        MaterialCache[key] = material;
     }
 
     private static Material GetFallbackStandardMaterial()
@@ -783,11 +800,21 @@ public class RoadPath : IPathMeshGenerator
         float lineOffsetY = RoadPartHeights.LINE_ABOVE_SPLINE;
 
         // Side Lines (道路脇の実線)
-        // 左側は mirrorX で反転させ、プレハブが非対称でも左右対称に見えるようにする。
-        GameObject leftLine = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, -sideLineCenterOffset, lineOffsetY, true, $"{typeBase}/line");
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] side line(左): {(leftLine != null ? "生成成功" : "生成失敗")}");
-        GameObject rightLine = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, sideLineCenterOffset, lineOffsetY, false, $"{typeBase}/line");
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] side line(右): {(rightLine != null ? "生成成功" : "生成失敗")}");
+        // side_width=0 は「区画線を持たない道路」を意味するため、側線も中央線も一切引かない
+        // （線の太さは side_width から導くので、0 のまま描くと潰れたメッシュになる）。
+        bool hasLine = sideWidth > 0f;
+        if (hasLine)
+        {
+            // 左側は mirrorX で反転させ、プレハブが非対称でも左右対称に見えるようにする。
+            GameObject leftLine = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, -sideLineCenterOffset, lineOffsetY, true, $"{typeBase}/line");
+            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] side line(左): {(leftLine != null ? "生成成功" : "生成失敗")}");
+            GameObject rightLine = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, sideLineCenterOffset, lineOffsetY, false, $"{typeBase}/line");
+            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] side line(右): {(rightLine != null ? "生成成功" : "生成失敗")}");
+        }
+        else
+        {
+            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[RoadPath] sideWidth <= 0: 区画線なし");
+        }
 
         // 中央分離帯（center）の配置。中央分離帯があればセンターラインは不要。
         // 中央分離帯のパーツがなければ line パーツにフォールバックする。
@@ -795,7 +822,7 @@ public class RoadPath : IPathMeshGenerator
         if (centerWidth > 0f)
         {
             GameObject centerObj = CreateSplineMesh(container, spline, $"{variantBase}/center", centerWidth, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/center");
-            if (centerObj == null)
+            if (centerObj == null && hasLine)
             {
                 UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[RoadPath] center パーツなし。line にフォールバック。");
                 centerObj = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, 0f, lineOffsetY, false, $"{typeBase}/line");
@@ -805,7 +832,11 @@ public class RoadPath : IPathMeshGenerator
         }
 
         // センターライン・通行帯線
-        if (hasCenterObj)
+        if (!hasLine)
+        {
+            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[RoadPath] sideWidth <= 0: 中央線・車線境界線なし");
+        }
+        else if (hasCenterObj)
         {
             // 中央分離帯あり: センターラインは不要。
             // 中央分離帯と側線の間をレーン数で等分し、境界に点線を配置する。
@@ -855,6 +886,11 @@ public class RoadPath : IPathMeshGenerator
                     GameObject rightDash = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, -offsetX, lineOffsetY + RoadPartHeights.CENTER_LINE_EXTRA, false, $"{typeBase}/line", isDashed: true);
                     UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] lane line[{i}] offsetX={offsetX:F3} (左): {(leftDash != null ? "生成成功" : "生成失敗")}, (右): {(rightDash != null ? "生成成功" : "生成失敗")}");
                 }
+            }
+            else if (lanes <= 1)
+            {
+                // 1車線: 分ける対向車線が存在しないため、中央線も車線境界線も引かない。
+                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[RoadPath] lanes <= 1: 中央線・車線境界線なし");
             }
             else
             {

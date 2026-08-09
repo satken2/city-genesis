@@ -4,6 +4,8 @@
 
 パーツの制作規格・座標系は [[I_建物パーツ作成マニュアル]]、メッシュ組み立ては [[F_建物メッシュの生成]]、パックとしての配布（base / DLC / Mod）とアセット形式の方針は [[追加コンテンツとアセットパック]] を前提とする。
 
+「生成器が各面にどのマテリアルを割り当てるか」（供給元とフォールバック順）は [[R_マテリアルの解決]] に分離してある。本ドキュメントは、そこで解決された**マテリアル実体を1つに集約する**ための仕組みと制作規約を扱う。
+
 ---
 
 ## 1. なぜマテリアル共有が要るのか
@@ -28,7 +30,7 @@
 
 経路 c が本ドキュメントの中心概念である。実装例：
 
-- **道路** `RoadPath.GetOrCreateRoadMaterial(source)`：`source.name` をキーにキャッシュを引き、無ければ**同名の `Resources` マテリアルを `Resources.Load<Material>(name)` で探して**採用（無ければ source をクローン）、以後そのキーで共有する。
+- **道路** `RoadPath.GetOrCreateRoadMaterial(source)`：`source.name` をキーにキャッシュを引き、無ければ**同名の `Resources` マテリアルを `Resources.Load<Material>(name)` で探して**採用（無ければ source をクローン）、以後そのキーで共有する。マテリアル名を直接渡す入口（`GetOrCreateRoadMaterialByName`）もあり、パスマスターの `body_material` で名指しされた交差点アスファルトが**同じプール**を引く（＝道路本体と同名なら1実体に集約される）。
 - **住宅屋根** `HouseRoofBuilder`：`B02_ROOF_01`〜`10` の名前配列を持ち、`Resources/B02/{name}.mat` を名前キーの `RoofMaterialCache` 経由でロード・共有する。実体の共有 `.mat` は `Assets/Resources/B02/` に配置済み。
 
 ### 2.1 未カバー：建物の壁・角パーツ（glTF 経路）

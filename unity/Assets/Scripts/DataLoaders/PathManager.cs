@@ -4187,6 +4187,14 @@ public class PathMasterItem
     public bool? curve_allowed;
 
     /// <summary>
+    /// 路面の見た目を代表するマテリアル名（`Assets/Resources/` 直下の .mat 名）。
+    /// 交差点アスファルトが「舗装路どうしならアスファルト、未舗装路が絡めば土」のように
+    /// 接続道路の路面に合わせて塗り分けるために参照する。
+    /// null・空文字なら body プレハブのマテリアルから解決する（従来動作）。
+    /// </summary>
+    public string body_material;
+
+    /// <summary>
     /// スパン（アンカー間区間）が地形追従するか。false のバリアント（桁橋など）は
     /// relY=0 のスパンでも地形に吸着せず、アンカー絶対標高のみからの補間で
     /// 水平デッキを構成する（掘割・谷の上を跨げる）。

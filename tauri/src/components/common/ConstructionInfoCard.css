@@ -65,3 +65,33 @@
 .construction-per-epoch {
   margin-top: 8px;
 }
+
+/* 見込み建設期間の値。警告レベルに応じて色を変える */
+.construction-supply-value-mild {
+  color: #eab308;
+}
+
+.construction-supply-value-severe {
+  color: #f97316;
+}
+
+/* 建設サービスの供給不足警告バナー */
+.construction-supply-note {
+  font-size: 0.7rem;
+  line-height: 1.5;
+  margin-top: 6px;
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+.construction-supply-note-mild {
+  color: #eab308;
+  background: rgba(234, 179, 8, 0.08);
+  border: 1px solid rgba(234, 179, 8, 0.35);
+}
+
+.construction-supply-note-severe {
+  color: #f97316;
+  background: rgba(249, 115, 22, 0.08);
+  border: 1px solid rgba(249, 115, 22, 0.35);
+}

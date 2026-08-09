@@ -89,6 +89,7 @@ nav:
     - 車両の走行描画: geometries/O_車両の走行描画.md
     - マテリアル共有とエクスポート: geometries/P_マテリアル共有とエクスポート.md
     - 駅舎パスのメッシュ生成: geometries/Q_駅舎パスのメッシュ生成.md
+    - マテリアルの解決: geometries/R_マテリアルの解決.md
   - プログラム連携:
     - IPC連携: programs/IPC連携の整理.md
     - コンポーネント連携: programs/コンポーネント連携.md

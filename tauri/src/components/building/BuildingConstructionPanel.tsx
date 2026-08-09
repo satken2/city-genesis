@@ -114,6 +114,10 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
   const [estimatedStandardCost, setEstimatedStandardCost] = useState<number | null>(null);
   // 推定建設期間(日)。道路パネルと同じ枠組みで表示する。
   const [estimatedDurationDays, setEstimatedDurationDays] = useState<number | null>(null);
+  // 建設サービス財の調達充足率(0〜1)と、それを織り込んだ見込み建設期間(日)。
+  // 充足率が低い都市では建設が推定期間どおりに進まないため、警告表示に使う。
+  const [supplyRatio, setSupplyRatio] = useState<number | null>(null);
+  const [expectedDurationDays, setExpectedDurationDays] = useState<number | null>(null);
   // TYPE_STANDARD(一般施設)のときのみ返る、最大稼働時の推定生産量・雇用人数・稼働コスト(いずれもsimulation_daysあたり)。
   const [estimatedMaxProduction, setEstimatedMaxProduction] = useState<number | null>(null);
   const [estimatedEmployment, setEstimatedEmployment] = useState<number | null>(null);
@@ -388,6 +392,8 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       setEstimatedCost(null);
       setEstimatedStandardCost(null);
       setEstimatedDurationDays(null);
+      setSupplyRatio(null);
+      setExpectedDurationDays(null);
       setEstimatedMaxProduction(null);
       setEstimatedEmployment(null);
       setEstimatedOperatingCost(null);
@@ -417,6 +423,8 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
           setEstimatedCost(data.estimated_construction_cost ?? null);
           setEstimatedStandardCost(data.standard_construction_cost ?? null);
           setEstimatedDurationDays(data.estimated_duration_days ?? null);
+          setSupplyRatio(data.construction_supply_ratio ?? null);
+          setExpectedDurationDays(data.expected_duration_days ?? null);
           // 生産系の3項目はTYPE_STANDARDのときのみ返るため、未定義なら null にリセットする。
           setEstimatedMaxProduction(data.estimated_max_production ?? null);
           setEstimatedEmployment(data.estimated_employment ?? null);
@@ -429,6 +437,8 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
           setEstimatedCost(null);
           setEstimatedStandardCost(null);
           setEstimatedDurationDays(null);
+          setSupplyRatio(null);
+          setExpectedDurationDays(null);
           setEstimatedMaxProduction(null);
           setEstimatedEmployment(null);
           setEstimatedOperatingCost(null);
@@ -598,6 +608,8 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         setEstimatedCost(data.estimated_construction_cost ?? null);
         setEstimatedStandardCost(data.standard_construction_cost ?? null);
         setEstimatedDurationDays(data.estimated_duration_days ?? null);
+        setSupplyRatio(data.construction_supply_ratio ?? null);
+        setExpectedDurationDays(data.expected_duration_days ?? null);
         setEstimatedMaxProduction(data.estimated_max_production ?? null);
         setEstimatedEmployment(data.estimated_employment ?? null);
         setEstimatedOperatingCost(data.estimated_operating_cost ?? null);
@@ -1431,6 +1443,8 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
             costRatioHelp={t("building_construction.costRatioHelp")}
             estimatedDurationDays={estimatedDurationDays}
             isCostLoading={isCostLoading}
+            supplyRatio={supplyRatio}
+            expectedDurationDays={expectedDurationDays}
           />
         </div>
       )}
