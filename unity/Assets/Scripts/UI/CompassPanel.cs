@@ -283,34 +283,38 @@ public class CompassPanel : MonoBehaviour
     }
 
     /// <summary>
-    /// リグを規定のワールド座標へ戻し、子(ケース・カード・カメラ)の位置も組み直す。
-    /// カメラのローカル位置は直後のApplyViewが設定するため、ここでは触らない。
+    /// リグを規定のワールド座標へ戻し、部品のローカル位置も組み直す。
+    /// カメラと「N」の向きは直後のApplyViewが設定するため、ここでは触らない。
     /// </summary>
     private void RestoreRigTransforms()
     {
         rig.transform.position = RigWorldPosition;
         rig.transform.rotation = Quaternion.identity;
-        foreach (Transform child in rig.transform)
-        {
-            if (compassCamera != null && child == compassCamera.transform) continue;
-            child.localPosition = Vector3.zero;
-        }
+        if (needleTransform != null) needleTransform.localPosition = Vector3.zero;
+        if (labelTransform != null) labelTransform.localPosition = LabelLocalPosition;
     }
 
     /// <summary>
-    /// カードを方位に合わせて回し、専用カメラを俯角に合わせて周回させる。
+    /// 針を方位に合わせて回し、専用カメラを俯角に合わせて周回させる。
     /// カメラは常にリグの-Z側から見るため、画面の上がワールド+Z(北)になる。
+    /// 「N」は針と一緒に回った先で、カメラと同じ向きに揃えて正面から読める状態にする
+    /// (メッシュのローカル+Zがカメラの奥方向を向くとき、文字が反転せず正しく見える)。
     /// </summary>
     private void ApplyView(float yaw, float viewPitch)
     {
-        if (cardTransform != null)
+        if (needleTransform != null)
         {
-            cardTransform.localRotation = Quaternion.Euler(0f, -yaw, 0f);
+            needleTransform.localRotation = Quaternion.Euler(0f, -yaw, 0f);
         }
 
         float rad = viewPitch * Mathf.Deg2Rad;
         Vector3 offset = new Vector3(0f, Mathf.Sin(rad), -Mathf.Cos(rad)) * CameraDistance;
         compassCamera.transform.localPosition = offset;
         compassCamera.transform.localRotation = Quaternion.LookRotation(-offset.normalized, Vector3.up);
+
+        if (labelTransform != null)
+        {
+            labelTransform.rotation = compassCamera.transform.rotation;
+        }
     }
 }
