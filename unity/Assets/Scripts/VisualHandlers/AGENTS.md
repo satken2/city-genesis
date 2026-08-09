@@ -45,7 +45,8 @@
   - `VisualModePath` (100番台): 交通量・速度・歩行者量・耐久度・所属地区色分け(`ZONE_COLOR=104`)
   - `VisualModeParcel` (200番台): 地価、建築可能フィルタ各種、所属地区色分け(`ZONE_COLOR=210`) — ParcelManager が処理
   - `VisualModeBuilding` (300番台): 人口・家賃・耐久度・フロア種別色分け、所属地区色分け(`ZONE_COLOR=309`)
-  - `VisualModeTerrain` (400番台) / `VisualModeEnvironment` (500番台)
+  - `VisualModeTerrain` (400番台): 透過・標高色分け — `VisualTerrainObject` が処理(`TRANSPARENT` のみ非表示、他は表示)
+  - `VisualModeEnvironment` (500番台): 騒音・大気汚染ヒートマップ。**定数と `IpcViewCoordinator.ApplyEnvironmentMode` の分岐はあるが描画側の実装が無い**ため、TERRAIN にこのモードを設定しても見た目は変わらない(`VisualTerrainObject` の `default` に落ちて表示のまま)。環境スコアは土地区画ごとのスコアがAPIで公開されているだけで、面として描くための都市全体のビットマップはバックエンドが公開していない。2Dの都市マップ側は区画の塗り分けで代替している
 - 統計値の供給源は `VisualPathStats` / `VisualBuildingStats` / `VisualParcelStats`(各マネージャーが生成時に `InitFrom(summary)` で初期化)。`VisualBuildingObject` / `VisualParcelObject` が色決定ロジックを持つ。
 - **所属地区色分け(`ZONE_COLOR`)**: 道路・建物・区画の各レイヤーに存在する。地区の識別色はバックエンドの `zone.color`(HEX文字列)を `ZoneManager.GetZoneColor(zoneId)` で Color に変換して使用する(旧4色パレットではない)。道路は `VisualPathStats.zone_id`、建物は `VisualBuildingStats.zone_id` から所属地区を取得する。区画は `ParcelSummary` に zone_id がないため、`ZoneManager.GetZoneIdAtPoint(区画中心)` で空間的に所属地区を判定する。地区編集中のドラッグプレビュー(`ZoneEditContext.PREVIEW_SENTINEL`)のみ旧パレット(`VisualModeObject.zoneMaterials`)を使う。
 - **地区拡張ドラッグ中の一時色付け(tempZoneId)**: 地区編集の拡張ツールでShift+ドラッグ中、なぞった道路・面する区画・その上の建物へ地区色を**フロントだけで**波及させる(バックエンド通信なし)。道路・建物は `VisualModeObject.SetTempZoneId`(ZONE_COLOR時に `ResolveEffectiveZoneId` が tempZoneId を最優先)、**区画は VisualModeObject を持たないため `ParcelManager.SetTempZoneOverride`**(`ResolveDataVisColor` の ZONE_COLOR で `GetZoneIdAtPoint` より優先)で色付ける。一時色付けした対象は `ZoneEditContext` の台帳(道路/建物)+ ParcelManager の `tempZoneOverrides`(区画)で追跡し、ドラッグ確定(成功/失敗の両方)・キャンセル・モード終了で `ZoneEditContext.ClearDragTempVisuals` が `ClearTempZoneId` / `ClearTempZoneOverrides` を呼んで明示的に戻す。**リロード任せにしてはいけない**(送信失敗時はversion不変でリロードが再描画せず一時色が残るため)。
