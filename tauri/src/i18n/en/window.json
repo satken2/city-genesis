@@ -57,6 +57,12 @@
       "sunshine": "Sunlight",
       "noData": "Heatmap not computed (no epoch run yet)"
     },
+    "compass": {
+      "north": "N",
+      "east": "E",
+      "south": "S",
+      "west": "W"
+    },
     "fitView": "Fit View",
     "reload": "Reload"
   },

@@ -34,6 +34,12 @@
       "sunshine": "日照",
       "noData": "ヒートマップ未計算(エポック未実行)"
     },
+    "compass": {
+      "north": "北",
+      "east": "東",
+      "south": "南",
+      "west": "西"
+    },
     "fitView": "全体表示",
     "reload": "再読み込み"
   },

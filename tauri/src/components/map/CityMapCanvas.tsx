@@ -42,12 +42,18 @@
  *   - 幹線道路の判定はマスターデータ(paths[variant].trunk)で行う
  *     (自動車専用道路はtrunkフラグにかかわらず常に幹線扱い)。
  *
+ * 方位コンパス(showCompass):
+ *   地図は常に北(ワールド+Z)が画面上の固定ビューなので、コンパスも回転しない
+ *   固定のSVGとしてキャンバスの右上に重ねる。Canvasには描かずDOM要素として置くため、
+ *   地図の再描画やビュー変換の影響を受けない。
+ *
  * 上位コンポーネントはref(CityMapCanvasHandle)経由で全体表示リセットと
  * データ再読み込みを指示でき、overlayDrawコールバックでワールド座標系の
  * 重ね描き(敷設中の道路・路線図など)を行える。
  */
 
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import type { MasterData } from "../../types";
@@ -118,8 +124,9 @@ export type CityMapHeatmapStats = {
   kind: CityMapHeatmapActiveKind;
   /**
    * 悪さスコアの実値レンジ(0=最良〜1=最悪)。
-   * 塗り色はこのレンジを両端いっぱいに引き伸ばした相対値なので、
-   * 色の濃さをエポック間で比較するにはこのレンジを併せて見る必要がある。
+   * noise/pollution/crimeの塗り色はこのレンジを両端いっぱいに引き伸ばした相対値
+   * なので、色の濃さをエポック間で比較するにはこのレンジを併せて見る必要がある。
+   * sunshineは常にmin=0/max=1の固定スケール(絶対値)で返る。
    */
   min: number;
   max: number;
@@ -163,6 +170,11 @@ export type CityMapCanvasProps = {
   initialBounds?: CityMapBounds;
   /** マウスによるパン・ズーム操作を許可するか(埋め込みプレビューではfalse推奨) */
   interactive?: boolean;
+  /**
+   * 方位コンパスを右上に重ねるか。省略時はinteractiveに追従する
+   * (単体で読む地図には出し、路線図の下敷きのような静的な埋め込み背景には出さない)。
+   */
+  showCompass?: boolean;
   /**
    * 各レイヤーの描画後に呼ばれる重ね描きコールバック。
    * ctxにはワールド座標系のビュー変換が適用済みなので、ワールド座標のまま
@@ -232,6 +244,8 @@ type ApiPolygonItem = {
 /**
  * ヒートマップAPI(GET /api/v1/city/noise, /pollution, /crime, /sunshine)のレスポンス。
  * valuesはmin〜maxを0〜65535へ線形正規化したuint16で、parcel_idsと同じ並び。
+ * noise/pollution/crimeはそのエポックのmin〜maxへの相対正規化、sunshineは
+ * min=0/max=1の固定スケール(絶対値。影時間割合ベース)で返る。
  * ヒートマップ未計算(エポック未実行)のときは両配列が空でmin/maxも返らない。
  */
 type ApiHeatmap = {
@@ -842,6 +856,114 @@ function coversWithMargin(outer: CityMapBounds, inner: CityMapBounds, marginRati
 }
 
 /* ============================================================================
+ * 方位コンパス(固定オーバーレイ)
+ * ========================================================================== */
+
+/** コンパスSVGの一辺(px)。地図の右上に重ねる */
+const COMPASS_SIZE = 76;
+/** コンパスSVGのviewBox一辺。図形の座標はすべてこの正方形内で定義する */
+const COMPASS_VIEW = 100;
+/** 風配図の中心 */
+const COMPASS_C = COMPASS_VIEW / 2;
+/** 花弁のくびれ半径。隣り合う方位はこの半径上の点を共有する */
+const COMPASS_WAIST = 11;
+
+/** 風配図の花弁1枚(三角形)。明暗2枚で1方位を構成し、立体的な陰影に見せる */
+type CompassPetal = { points: string; fill: string };
+
+/* 花弁の色。北だけ赤系にして一目で北が分かるようにし、他方位は無彩色にする。
+ * 各方位を反時計回り側=明・時計回り側=暗の2枚に割ることで、平面のSVGでも
+ * 折り紙のような陰影が付く(古典的な風配図の描き方) */
+const COMPASS_FILL_NORTH_LIGHT = "#f38ba8";
+const COMPASS_FILL_NORTH_DARK = "#9d4055";
+const COMPASS_FILL_LIGHT = "#cdd6f4";
+const COMPASS_FILL_DARK = "#585b70";
+
+/** 中心からの極座標(北=0の時計回り・度)をSVG座標へ変換する。SVGはY軸が下向き */
+function compassPolar(angleDeg: number, radius: number): string {
+  const rad = (angleDeg * Math.PI) / 180;
+  return `${COMPASS_C + Math.sin(rad) * radius},${COMPASS_C - Math.cos(rad) * radius}`;
+}
+
+/**
+ * 風配図の花弁(8方位×明暗2枚=16三角形)を生成する。
+ * 1方位は「中心・先端・くびれ点」の三角形2枚からなり、くびれ点(方位から±22.5°・
+ * 半径COMPASS_WAIST)を隣の方位と共有するため、隙間も重なりもなく星形が閉じる。
+ * 主方位(N/E/S/W)は長く、間方位(NE等)は短くする。
+ */
+function buildCompassPetals(): CompassPetal[] {
+  const petals: CompassPetal[] = [];
+  for (let i = 0; i < 8; i++) {
+    const angle = i * 45;
+    const tip = compassPolar(angle, i % 2 === 0 ? 35 : 20);
+    const center = `${COMPASS_C},${COMPASS_C}`;
+    const north = i === 0;
+    petals.push({
+      points: `${center} ${tip} ${compassPolar(angle - 22.5, COMPASS_WAIST)}`,
+      fill: north ? COMPASS_FILL_NORTH_LIGHT : COMPASS_FILL_LIGHT,
+    });
+    petals.push({
+      points: `${center} ${tip} ${compassPolar(angle + 22.5, COMPASS_WAIST)}`,
+      fill: north ? COMPASS_FILL_NORTH_DARK : COMPASS_FILL_DARK,
+    });
+  }
+  return petals;
+}
+
+/** 花弁は固定図形なのでモジュールロード時に1度だけ組み立てる */
+const COMPASS_PETALS = buildCompassPetals();
+
+/** 方位ラベルの配置(中心からの半径44の位置)。北=0の時計回り(度) */
+const COMPASS_LABELS: { key: string; angle: number; north?: boolean }[] = [
+  { key: "cityMap.compass.north", angle: 0, north: true },
+  { key: "cityMap.compass.east", angle: 90 },
+  { key: "cityMap.compass.south", angle: 180 },
+  { key: "cityMap.compass.west", angle: 270 },
+];
+
+/**
+ * 地図の右上に重ねる方位コンパス。
+ * 地図は常に北(ワールド+Z)が画面上の固定ビューなので、向きを変える必要がなく
+ * 完全に静的なSVGでよい。マウス操作は下のキャンバスへ透過させる。
+ */
+function MapCompass() {
+  const { t } = useTranslation();
+  return (
+    <svg
+      viewBox={`0 0 ${COMPASS_VIEW} ${COMPASS_VIEW}`}
+      width={COMPASS_SIZE}
+      height={COMPASS_SIZE}
+      style={{ position: "absolute", top: 10, right: 10, pointerEvents: "none" }}
+      aria-hidden="true"
+    >
+      <circle cx={COMPASS_C} cy={COMPASS_C} r={47} fill="rgba(13,13,20,0.72)" stroke="#45475a" strokeWidth={1.5} />
+      <circle cx={COMPASS_C} cy={COMPASS_C} r={39} fill="none" stroke="#45475a" strokeWidth={1} />
+      {COMPASS_PETALS.map((petal, i) => (
+        <polygon key={i} points={petal.points} fill={petal.fill} />
+      ))}
+      <circle cx={COMPASS_C} cy={COMPASS_C} r={3} fill="#1e1e2e" stroke="#cdd6f4" strokeWidth={1} />
+      {COMPASS_LABELS.map((label) => {
+        const rad = (label.angle * Math.PI) / 180;
+        return (
+          <text
+            key={label.key}
+            x={COMPASS_C + Math.sin(rad) * 43}
+            y={COMPASS_C - Math.cos(rad) * 43}
+            textAnchor="middle"
+            dominantBaseline="central"
+            fontSize={12}
+            fontWeight={label.north ? 700 : 500}
+            fill={label.north ? COMPASS_FILL_NORTH_LIGHT : "#bac2de"}
+          >
+            {t(label.key)}
+          </text>
+        );
+      })}
+    </svg>
+  );
+}
+
+/* ============================================================================
  * コンポーネント本体
  * ========================================================================== */
 
@@ -853,6 +975,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       heatmap = "none",
       initialBounds,
       interactive = true,
+      showCompass,
       overlayDraw,
       overlayVersion,
       animatedOverlayDraw,
@@ -1824,6 +1947,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           ref={animCanvasRef}
           style={{ position: "absolute", inset: 0, display: "block", pointerEvents: "none" }}
         />
+        {(showCompass ?? interactive) && <MapCompass />}
       </div>
     );
   }

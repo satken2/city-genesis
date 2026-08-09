@@ -19,7 +19,7 @@
   - VisualHandlers      ... 3D空間内の建物・道路等の「見せ方」(表示/非表示/ハイライト等)の一括管理。(詳細はVisualHandlers/AGENTS.md)
   - IPC                 ... Tauri製UIとのMemoryMappedFile通信。(詳細はIPC/AGENTS.md)
   - Utils               ... 各種ユーティリティ。新しい汎用処理を書く前に必ず確認。(詳細はUtils/AGENTS.md)
-  - UI                  ... 3D側のUI部品(ツールチップ、モード表示、汎用ラジアルメニュー`RadialMenu/RadialMenuController`=トリガーキー押下でカーソル位置から項目が円形展開しキー離しでトグル、汎用カーソル追従HUD`CursorStatusHud`=現在設定のアイコン列+テキストを常時表示)。※ゲームのメインUIはこのレポジトリではなくcity-genesis/tauri(Tauri)にある
+  - UI                  ... 3D側のUI部品(ツールチップ、モード表示、汎用ラジアルメニュー`RadialMenu/RadialMenuController`=トリガーキー押下でカーソル位置から項目が円形展開しキー離しでトグル、汎用カーソル追従HUD`CursorStatusHud`=現在設定のアイコン列+テキストを常時表示、立体方位磁針`CompassPanel`+メッシュ生成`CompassRoseMesh`=専用カメラでレンダーテクスチャに描いてRawImageへ貼る方式。実体はワールド上空(0,100000,0)の専用レイヤー`Compass`(6)に置き本編カメラから隔離する。筐体は固定でカードだけが本編カメラのヨーの逆に回り、俯角も追従する。カメラ角が変わったフレームだけ描き直す)。※ゲームのメインUIはこのレポジトリではなくcity-genesis/tauri(Tauri)にある
   - Grid                ... グリッドオーバーレイ表示
   - GameStateManager.cs ... グローバルなゲーム状態の管理(シングルトン)。状態変化イベントの購読。
   - MasterDataStore.cs  ... バックエンドから取得したマスターデータの保持。道路幅・車線数などの描画パラメータはここを正とする。

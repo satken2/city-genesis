@@ -1300,8 +1300,9 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
     /// <summary>
     /// 環境スコアの色を解決する。スコア未取得の区画は塗らない(null)。
-    /// スコアはそのエポックの最小値〜最大値を 0〜1 まで引き伸ばした相対値なので、
-    /// 色の濃さは都市内での相対的な悪さを表す。
+    /// 騒音・大気汚染・治安のスコアはそのエポックの最小値〜最大値を 0〜1 まで
+    /// 引き伸ばした相対値(色の濃さ=都市内での相対的な悪さ)。日照だけは
+    /// 0〜1 固定の絶対値(影時間割合ベース)で、色の濃さがそのまま絶対水準を表す。
     /// </summary>
     private Color? ResolveEnvironmentColor(int mode, int parcelId, Color low, Color high)
     {
