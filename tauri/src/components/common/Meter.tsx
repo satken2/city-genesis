@@ -19,6 +19,8 @@ type MeterProps = {
    * バーの長さはどちらも値そのものを表す。
    */
   polarity?: "positive" | "negative";
+  /** 塗り色の明示指定。省略時は value から自動決定（getMeterColor） */
+  color?: string;
 };
 
 /**
@@ -31,12 +33,12 @@ function getMeterColor(value: number): string {
   return "#ef4444";
 }
 
-export function Meter({ value, label, polarity = "positive" }: MeterProps) {
+export function Meter({ value, label, polarity = "positive", color }: MeterProps) {
   const clampedValue = Math.max(0, Math.min(1, value));
   const percentage = Math.round(clampedValue * 100);
-  const fillColor = getMeterColor(
-    polarity === "negative" ? 1 - clampedValue : clampedValue
-  );
+  const fillColor =
+    color ??
+    getMeterColor(polarity === "negative" ? 1 - clampedValue : clampedValue);
 
   return (
     <div className="meter">

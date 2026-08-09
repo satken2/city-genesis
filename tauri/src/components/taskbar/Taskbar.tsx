@@ -25,6 +25,7 @@ import { sendSessionForceReload, sendSessionReload, sendChangeState, sendChangeD
 import { setHintbarText } from "../../utils/hintbar";
 import { formatEpochDate } from "../../utils/date";
 import { BgmManager } from "../../utils/bgm";
+import { BudgetMiniMeter } from "./BudgetMiniMeter";
 import "./Taskbar.css";
 
 function formatDate(daysSinceEpoch: number, locale: string): string {
@@ -570,6 +571,11 @@ export function Taskbar() {
           </button>
         ))}
       </div>
+
+      <BudgetMiniMeter
+        apiBaseUrl={apiBaseUrl}
+        onOpen={() => void openRegisteredWindow("city_budget")}
+      />
 
       <div className="taskbar-time">
         <span className="taskbar-time-city">{cityName || "—"}</span>
