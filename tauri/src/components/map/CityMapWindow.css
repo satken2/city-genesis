@@ -55,6 +55,42 @@
   color: #cdd6f4;
 }
 
+/* ---- ヒートマップ切り替え(排他選択のセグメント) ---- */
+
+.city-map-window__heatmap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.city-map-window__heatmap-label {
+  margin-right: 2px;
+  font-size: 0.72rem;
+  color: #6c7a94;
+  white-space: nowrap;
+}
+
+.city-map-heatmap-btn {
+  padding: 3px 10px;
+  border: 1px solid #2a3149;
+  border-radius: 12px;
+  background: #1b2135;
+  font-size: 0.75rem;
+  color: #93a9c0;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.city-map-heatmap-btn:hover {
+  border-color: #4f6ba8;
+}
+
+.city-map-heatmap-btn--on {
+  background: #26324f;
+  border-color: #4f6ba8;
+  color: #cdd6f4;
+}
+
 .city-map-window__actions {
   display: flex;
   gap: 6px;
@@ -101,4 +137,38 @@
 
 .city-map-window__status-zoom {
   color: #cdd6f4;
+}
+
+/* ヒートマップの凡例オーバーレイ(左下。ステータス表示と重ならない位置) */
+.city-map-window__legend {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(15, 20, 32, 0.75);
+  font-size: 0.72rem;
+  color: #93a9c0;
+  pointer-events: none;
+}
+
+.city-map-window__legend-title {
+  color: #cdd6f4;
+}
+
+.city-map-window__legend-value {
+  font-family: Consolas, Menlo, monospace;
+}
+
+.city-map-window__legend-bar {
+  width: 96px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.city-map-window__legend-empty {
+  color: #6c7a94;
 }

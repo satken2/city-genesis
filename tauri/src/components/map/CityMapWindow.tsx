@@ -15,7 +15,10 @@ import { useTranslation } from "react-i18next";
 import {
   CityMapCanvas,
   DEFAULT_CITY_MAP_LAYERS,
+  getHeatmapRampStops,
   type CityMapCanvasHandle,
+  type CityMapHeatmapKind,
+  type CityMapHeatmapStats,
   type CityMapLayerVisibility,
 } from "./CityMapCanvas";
 import "./CityMapWindow.css";
@@ -35,6 +38,9 @@ const LAYER_ORDER: (keyof CityMapLayerVisibility)[] = [
   "railways",
 ];
 
+/** ヒートマップ切り替えの表示順。複数レイヤーと違い1つだけ選ぶ排他選択 */
+const HEATMAP_ORDER: CityMapHeatmapKind[] = ["none", "noise", "pollution"];
+
 export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t } = useTranslation();
   const mapRef = useRef<CityMapCanvasHandle>(null);
@@ -44,6 +50,8 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const [layers, setLayers] = useState<CityMapLayerVisibility>({
     ...DEFAULT_CITY_MAP_LAYERS,
   });
+  const [heatmap, setHeatmap] = useState<CityMapHeatmapKind>("none");
+  const [heatmapStats, setHeatmapStats] = useState<CityMapHeatmapStats | null>(null);
 
   const toggleLayer = useCallback((key: keyof CityMapLayerVisibility) => {
     setLayers((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -84,6 +92,24 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
             </label>
           ))}
         </div>
+        {/* ヒートマップ。2種を重ねると色が混ざって読めないため排他選択にする */}
+        <div className="city-map-window__heatmap">
+          <span className="city-map-window__heatmap-label">
+            {t("cityMap.heatmap.title")}
+          </span>
+          {HEATMAP_ORDER.map((kind) => (
+            <button
+              key={kind}
+              type="button"
+              className={`city-map-heatmap-btn ${
+                heatmap === kind ? "city-map-heatmap-btn--on" : ""
+              }`}
+              onClick={() => setHeatmap(kind)}
+            >
+              {t(`cityMap.heatmap.${kind}`)}
+            </button>
+          ))}
+        </div>
         <div className="city-map-window__actions">
           <button
             type="button"
@@ -108,10 +134,43 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
           ref={mapRef}
           apiBaseUrl={apiBaseUrl}
           layers={layers}
+          heatmap={heatmap}
           interactive
           onCursorWorldPos={handleCursor}
           onZoomChange={handleZoom}
+          onHeatmapStats={setHeatmapStats}
         />
+        {/* ヒートマップの凡例。塗り色はエポックごとのmin〜maxを両端まで
+            引き伸ばした相対値なので、実値レンジを併記して絶対水準を伝える */}
+        {heatmapStats && (
+          <div className="city-map-window__legend">
+            {heatmapStats.count === 0 ? (
+              <span className="city-map-window__legend-empty">
+                {t("cityMap.heatmap.noData")}
+              </span>
+            ) : (
+              <>
+                <span className="city-map-window__legend-title">
+                  {t(`cityMap.heatmap.${heatmapStats.kind}`)}
+                </span>
+                <span className="city-map-window__legend-value">
+                  {heatmapStats.min.toFixed(2)}
+                </span>
+                <span
+                  className="city-map-window__legend-bar"
+                  style={{
+                    background: `linear-gradient(to right, ${getHeatmapRampStops(
+                      heatmapStats.kind
+                    ).join(", ")})`,
+                  }}
+                />
+                <span className="city-map-window__legend-value">
+                  {heatmapStats.max.toFixed(2)}
+                </span>
+              </>
+            )}
+          </div>
+        )}
         {/* ステータスオーバーレイ(カーソルのワールド座標とズーム率) */}
         <div className="city-map-window__status">
           <span ref={coordRef}>---, ---</span>

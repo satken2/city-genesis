@@ -48,6 +48,13 @@
       "contours": "Contour Lines",
       "grid": "Grid"
     },
+    "heatmap": {
+      "title": "Heatmap",
+      "none": "Off",
+      "noise": "Noise",
+      "pollution": "Air Pollution",
+      "noData": "Heatmap not computed (no epoch run yet)"
+    },
     "fitView": "Fit View",
     "reload": "Reload"
   },

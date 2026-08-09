@@ -25,6 +25,13 @@
       "contours": "等高線",
       "grid": "グリッド"
     },
+    "heatmap": {
+      "title": "ヒートマップ",
+      "none": "なし",
+      "noise": "騒音",
+      "pollution": "大気汚染",
+      "noData": "ヒートマップ未計算(エポック未実行)"
+    },
     "fitView": "全体表示",
     "reload": "再読み込み"
   },
