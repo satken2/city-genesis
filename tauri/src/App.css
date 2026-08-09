@@ -51,6 +51,43 @@ button:hover {
   background: rgba(255, 255, 255, 0.14);
 }
 
+/* =========================================================================
+ * スクロールバー(全ウィンドウ共通)
+ *
+ * WebView2(Chromium/Edge)の既定はコンテンツの上に重なるオーバーレイ式
+ * スクロールバーで、パネル右端の値・ボタン・入力欄が隠れて操作できなくなる。
+ * ::-webkit-scrollbar を定義した要素は従来型(レイアウト幅を占める)
+ * スクロールバーに切り替わるため、全スクロール領域に共通で当てて重なりを防ぐ。
+ *
+ * 標準プロパティの scrollbar-width / scrollbar-color を併用すると
+ * Chromium ではそちらが優先されて ::-webkit-scrollbar の指定が無効化されるため、
+ * 混在させないこと。
+ * ========================================================================= */
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.34);
+}
+
+/* 縦横のスクロールバーが交差する角。既定の白い四角が浮くため透明にする。 */
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 .popup-shell {
   height: 100%;
   display: grid;

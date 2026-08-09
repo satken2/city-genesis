@@ -99,6 +99,19 @@
   margin-top: 4px;
 }
 
+/* === 環境セクションのメーター一覧 === */
+/* ラベル幅を揃えないと項目ごとにバーの開始位置がずれて比較しづらいため、最小幅を与える。 */
+.parcel-environment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.parcel-environment-list .meter-label {
+  min-width: 5.5em;
+}
+
 /* === 横断パス（地下埋設・上空高架）の注記 === */
 /* has_crossing_path=1 の区画に表示する案内。民間建物がスポーンしない理由を伝える。 */
 .parcel-crossing-note {

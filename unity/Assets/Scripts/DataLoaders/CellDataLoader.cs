@@ -133,8 +133,19 @@ public class CellDataLoader : MonoBehaviour
 
         // HeightmapTextureManager の初期化。
         // TerrainManager への参照を設定し、地形の全量ロード完了後にCPU高さ配列を構築する。
+        // シーン未配置の場合はここで生成する(ResourceManager/PropManager と同じ自己生成パターン)。
+        // 未配置のままだと Instance が null となり、TerrainManager の高さ書き込みが
+        // 全てスキップされてCPU高さ配列・GPU高さテクスチャの両方が沈黙する
+        // (GetTerrainHeight は Utils.GetGroundHeight へフォールバックするため
+        // ゲームは一見正常に動き、シェーダーの地形追従だけが効かなくなる)。
         if (heightmapTextureManager == null) heightmapTextureManager = FindAnyObjectByType<HeightmapTextureManager>();
-        if (heightmapTextureManager != null && terrainManager != null)
+        if (heightmapTextureManager == null)
+        {
+            GameObject go = new GameObject("HeightmapTextureManager");
+            DontDestroyOnLoad(go);
+            heightmapTextureManager = go.AddComponent<HeightmapTextureManager>();
+        }
+        if (terrainManager != null)
         {
             heightmapTextureManager.Initialize(terrainManager);
         }

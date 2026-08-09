@@ -32,6 +32,7 @@ import { AgentLink } from "../common/AgentLink";
 import { ResourceCard } from "../common/ResourceCard";
 import { RestrictionFields, type RestrictionValues } from "./RestrictionFields";
 import { ParcelOperationPanel } from "./ParcelOperationPanel";
+import { ParcelEnvironmentSection } from "./ParcelEnvironmentSection";
 import {
   sendEditParcelCancelShapeEdit,
   sendEditParcelFinishShapeEdit,
@@ -577,6 +578,12 @@ export function ParcelDetailPanel({
           )}
         </div>
       </section>
+
+      {/* 環境セクション(区画固有の日照・大気汚染・騒音・犯罪) */}
+      <ParcelEnvironmentSection
+        apiBaseUrl={apiBaseUrl}
+        parcelId={parcelData.parcel_id}
+      />
 
       {/* 割り当てられている天然資源セクション */}
       {(() => {

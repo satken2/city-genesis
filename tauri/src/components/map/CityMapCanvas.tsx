@@ -30,7 +30,7 @@
  *     面として描く(街路=灰、自動車専用道路=黄、線路=茶の線)。
  *
  * ヒートマップ(heatmap propで1種別だけ選ぶ排他表示):
- *   騒音・大気汚染の環境スコアを土地区画の塗り分けで表現する。APIが返すのは
+ *   騒音・大気汚染・治安・日照の環境スコアを土地区画の塗り分けで表現する。APIが返すのは
  *   区画中心でサンプリング済みの区画単位スコアなので、塗る単位も区画になる
  *   (発生源の広がりを面で見せる都市全体のビットマップは公開されていない)。
  *   2種を重ねると色が混ざって読めなくなるため、複数ONにできるレイヤーとは分ける。
@@ -108,7 +108,7 @@ export const DEFAULT_CITY_MAP_LAYERS: CityMapLayerVisibility = {
  * ヒートマップの種別。土地区画を環境スコアで塗り分ける。
  * 2種を重ねると色が混ざって読めなくなるため、レイヤーとは別の排他選択とする。
  */
-export type CityMapHeatmapKind = "none" | "noise" | "pollution";
+export type CityMapHeatmapKind = "none" | "noise" | "pollution" | "crime" | "sunshine";
 
 /** ヒートマップの実データを持つ種別(noneを除く) */
 export type CityMapHeatmapActiveKind = Exclude<CityMapHeatmapKind, "none">;
@@ -230,7 +230,7 @@ type ApiPolygonItem = {
 };
 
 /**
- * ヒートマップAPI(GET /api/v1/city/noise, /pollution)のレスポンス。
+ * ヒートマップAPI(GET /api/v1/city/noise, /pollution, /crime, /sunshine)のレスポンス。
  * valuesはmin〜maxを0〜65535へ線形正規化したuint16で、parcel_idsと同じ並び。
  * ヒートマップ未計算(エポック未実行)のときは両配列が空でmin/maxも返らない。
  */
@@ -357,17 +357,23 @@ const HEATMAP_ALPHA = 0.5;
 
 /**
  * 種別ごとのカラーランプ(低い=悪さが小さい → 高い=悪さが大きい)。
- * 騒音は暖色、大気汚染は紫系にして、どちらを表示中か色だけで判別できるようにする。
+ * 騒音=橙、大気汚染=紫、治安=赤、日照=薄黄(日向)→青灰(影)と色相を分け、
+ * どれを表示中か色だけで判別できるようにする。
+ * 両端の色は表示パネルの区画色分け(騒音/大気汚染/治安/日照)の凡例と一致させる。
  */
 const HEATMAP_RAMPS: Record<CityMapHeatmapActiveKind, [number, number, number][]> = {
-  noise: [[253, 230, 138], [249, 115, 22], [190, 18, 60]],
-  pollution: [[209, 231, 221], [168, 85, 247], [76, 29, 149]],
+  noise: [[253, 230, 138], [251, 146, 60], [230, 81, 0]],
+  pollution: [[209, 231, 221], [149, 82, 191], [74, 20, 140]],
+  crime: [[255, 205, 210], [229, 87, 87], [183, 28, 28]],
+  sunshine: [[255, 245, 157], [144, 164, 174], [55, 71, 79]],
 };
 
 /** ヒートマップ種別ごとの取得先エンドポイント */
 const HEATMAP_ENDPOINT: Record<CityMapHeatmapActiveKind, string> = {
   noise: "/api/v1/city/noise",
   pollution: "/api/v1/city/pollution",
+  crime: "/api/v1/city/crime",
+  sunshine: "/api/v1/city/sunshine",
 };
 
 /** グリッドの間隔(m)。セル境界はterrain設定のcell_sizeを使う */
@@ -1106,7 +1112,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           }
         }
 
-        // ヒートマップ(騒音・大気汚染)。土地区画を環境スコアで塗り分ける。
+        // ヒートマップ(騒音・大気汚染・治安・日照)。土地区画を環境スコアで塗り分ける。
         // 地形の上・道路や建物の下に敷くことで、都市インフラの読み取りを妨げずに
         // 「どのあたりが悪いか」を面で見せる。
         if (heat.binPaths) {

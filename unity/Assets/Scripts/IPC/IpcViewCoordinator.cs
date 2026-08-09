@@ -17,7 +17,6 @@ public class IpcViewCoordinator : MonoBehaviour
         { "building", "default" },
         { "parcel", "border" },
         { "district", "hidden" },
-        { "environment", "hidden" },
         { "resource", "hidden" },
         { "alert", "visible" },
         { "transit", "default" },
@@ -131,10 +130,6 @@ public class IpcViewCoordinator : MonoBehaviour
 
             case "district":
                 ApplyDistrictMode(mode);
-                break;
-
-            case "environment":
-                ApplyEnvironmentMode(mode);
                 break;
 
             case "resource":
@@ -350,7 +345,7 @@ public class IpcViewCoordinator : MonoBehaviour
     /// </summary>
     private void RestoreNormalLayerModes()
     {
-        string[] targetLayers = { "building", "road", "parcel", "district", "terrain", "grid", "cell", "environment", "resource", "alert" };
+        string[] targetLayers = { "building", "road", "parcel", "district", "terrain", "grid", "cell", "resource", "alert" };
 
         foreach (var layer in targetLayers)
         {
@@ -406,7 +401,7 @@ public class IpcViewCoordinator : MonoBehaviour
                         _layerModes[layer] = "visible";
                         _layerSubModes.Remove(layer);
                         break;
-                    // terrain, grid, cell, environment, resource は記憶がなければ現在の値を維持（初期値が設定済み）
+                    // terrain, grid, cell, resource は記憶がなければ現在の値を維持（初期値が設定済み）
                 }
             }
         }
@@ -439,7 +434,6 @@ public class IpcViewCoordinator : MonoBehaviour
             case "building": ApplyBuildingMode(mode, subMode, flags); break;
             case "parcel": ApplyParcelMode(mode, subMode); break;
             case "district": ApplyDistrictMode(mode); break;
-            case "environment": ApplyEnvironmentMode(mode); break;
             case "resource": ApplyResourceMode(mode); break;
             case "transit": ApplyTransitMode(mode, subMode); break;
             case "prop": ApplyPropMode(mode); break;
@@ -637,6 +631,18 @@ public class IpcViewCoordinator : MonoBehaviour
             case "zone_color":
                 VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualModeParcel.ZONE_COLOR);
                 break;
+            case "noise_color":
+                VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualModeParcel.NOISE);
+                break;
+            case "air_pollution_color":
+                VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualModeParcel.AIR_POLLUTION);
+                break;
+            case "crime_color":
+                VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualModeParcel.CRIME);
+                break;
+            case "sunshine_color":
+                VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualModeParcel.SUNSHINE);
+                break;
             case "buildable_color":
                 int filterMode = subMode switch
                 {
@@ -666,23 +672,6 @@ public class IpcViewCoordinator : MonoBehaviour
                 break;
             case "border_icon":
                 VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_NORMAL);
-                break;
-        }
-    }
-
-    private void ApplyEnvironmentMode(string mode)
-    {
-        // 環境ヒートマップは Terrain レイヤーの拡張モードとして扱う。
-        switch (mode)
-        {
-            case "hidden":
-                VisualModeHandler.Instance.SetMode(InputObjectType.TERRAIN, VisualMode.MODE_NORMAL);
-                break;
-            case "noise_heatmap":
-                VisualModeHandler.Instance.SetMode(InputObjectType.TERRAIN, VisualModeEnvironment.NOISE_HEATMAP);
-                break;
-            case "air_pollution_heatmap":
-                VisualModeHandler.Instance.SetMode(InputObjectType.TERRAIN, VisualModeEnvironment.AIR_POLLUTION_HEATMAP);
                 break;
         }
     }

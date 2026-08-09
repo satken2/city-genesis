@@ -27,6 +27,10 @@ public static class VisualModeParcel
     public const int FILTER_MINE = 208;     // 鉱山
     public const int FILTER_PORT = 209;     // 港湾
     public const int ZONE_COLOR = 210;      // 所属地区色分け (区画を地区ごとの色で塗る)
+    public const int NOISE = 211;           // 騒音 0..1 -> 薄黄→濃橙
+    public const int AIR_POLLUTION = 212;   // 大気汚染 0..1 -> 薄緑灰→濃紫
+    public const int CRIME = 213;           // 治安の悪さ 0..1 -> 薄赤→濃赤
+    public const int SUNSHINE = 214;        // 日照の悪さ(影時間割合) 0..1 -> 薄黄→濃青灰
 }
 
 public static class VisualModeBuilding
@@ -47,11 +51,5 @@ public static class VisualModeTerrain
 {
     public const int TRANSPARENT = 400;  // 透過表示
     public const int ELEVATION = 401;    // 標高による色分け
-}
-
-public static class VisualModeEnvironment
-{
-    public const int NOISE_HEATMAP = 500;          // 騒音ヒートマップ
-    public const int AIR_POLLUTION_HEATMAP = 501;   // 大気汚染ヒートマップ
 }
 

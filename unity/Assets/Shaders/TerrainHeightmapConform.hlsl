@@ -45,10 +45,14 @@ float SampleTerrainHeight(float3 worldPos)
     if (_GpuTerrainConform < 0.5)
         return 0.0;
 
-    // ワールドXZ → テクスチャUV
+    // ワールドXZ → テクスチャUV。
+    // テクセル(i,j)の値は「ワールド格子点 原点+(i,j)×解像度」の標高なので、
+    // 格子点がテクセル中心に一致するよう半テクセルずらす。
+    // これによりGPUのバイリニア補間が HeightmapTextureManager.SampleHeight の
+    // CPUバイリニア補間と一致する。
     float2 uv;
-    uv.x = (worldPos.x - _MapOriginXZ.x) / _TerrainHeightmapSize.x;
-    uv.y = (worldPos.z - _MapOriginXZ.y) / _TerrainHeightmapSize.y;
+    uv.x = (worldPos.x - _MapOriginXZ.x) / _TerrainHeightmapSize.x + 0.5 / _TerrainHeightmapSize.z;
+    uv.y = (worldPos.z - _MapOriginXZ.y) / _TerrainHeightmapSize.y + 0.5 / _TerrainHeightmapSize.w;
 
     // テクスチャ座標をクランプして境界外アクセスを防ぐ
     uv = saturate(uv);

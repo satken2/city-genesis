@@ -387,6 +387,30 @@ public class RoadPath : IPathMeshGenerator
                 }
                 UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath]   チャンネル設定: offset=({offsetX:F3}, {offsetY:F3}), scale={scaleX:F3}, count={channel.count} (singleSpan={singleSpan}, clip={clipFrom:F3}〜{clipTo:F3})");
             }
+
+            // ===== 生成前の頂点数バジェットガード =====
+            // SplineMesh の生成頂点数は「パーツの頂点数 × タイル数(count)」で決まる。
+            // Z実寸が極端に小さいFBX(cm単位エクスポート等)や高密度なFBXに差し替えられると
+            // count×頂点数が爆発し、Unity標準メッシュの上限(65535頂点)を超えて Dreamteck が
+            // 毎フレームエラーを出し続け、エディタが操作不能になる(既往障害)。
+            // 上限内に収まるよう count をクランプし、パーツ1個で超える場合は生成自体を中止する。
+            if (mf != null && mf.sharedMesh != null)
+            {
+                const int SPLINE_MESH_VERTEX_BUDGET = 60000;
+                int partVerts = mf.sharedMesh.vertexCount;
+                if (partVerts > SPLINE_MESH_VERTEX_BUDGET)
+                {
+                    Debug.LogError($"[RoadPath] パーツ '{prefabName}' の頂点数({partVerts})が単体でSplineMeshの上限({SPLINE_MESH_VERTEX_BUDGET})を超えています。生成を中止します。軽量なモデルで再エクスポートしてください。");
+                    UnityEngine.Object.Destroy(go);
+                    return null;
+                }
+                if (partVerts > 0 && (long)partVerts * channel.count > SPLINE_MESH_VERTEX_BUDGET)
+                {
+                    int clampedCount = Mathf.Max(1, SPLINE_MESH_VERTEX_BUDGET / partVerts);
+                    Debug.LogWarning($"[RoadPath] パーツ '{prefabName}' のタイル数 {channel.count} は頂点数上限を超えるため {clampedCount} にクランプします(1個あたり頂点{partVerts}、Z実寸={meshLenZ:F3}m)。Z実寸が異常に小さい場合はcm単位でエクスポートされたFBXの疑いがあります(1 Blenderユニット=1mで再エクスポートすること)。");
+                    channel.count = clampedCount;
+                }
+            }
         }
 
         splineMesh.updateMethod = SplineUser.UpdateMethod.Update;

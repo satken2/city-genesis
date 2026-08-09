@@ -2460,6 +2460,13 @@ public class TerrainManager : BaseApiDataManager
     public int GetMapWidth() => terrainSettings?.map_width ?? 10000;
     public int GetMapHeight() => terrainSettings?.map_height ?? 10000;
 
+    /// <summary>
+    /// ロード済み(可視)の地形タイル一覧。キーはUnityセルインデックス。
+    /// HeightmapTextureManager が移動窓ハイトマップの切り出し元として参照する。
+    /// 列挙中にロード処理と競合しないよう、yield をまたがず同一フレーム内で列挙を完了させること。
+    /// </summary>
+    public System.Collections.Generic.IReadOnlyDictionary<Vector2Int, Terrain> LoadedTerrainTiles => terrainTiles;
+
     public int GetCellsX() => terrainSettings != null ? terrainSettings.map_width / terrainSettings.cell_size : 20;
     public int GetCellsY() => terrainSettings != null ? terrainSettings.map_height / terrainSettings.cell_size : 20;
     public float GetCellSize() => terrainSettings?.cell_size ?? CellSize;

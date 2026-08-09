@@ -1,7 +1,15 @@
 {
   "parcel": {
     "titleWithId": "Parcel #{{id}}",
+    "basicInfo": "Basic Info",
     "assignedResources": "Natural Resources",
+    "environment": "Environment",
+    "envSunshine": "Sunlight",
+    "envAirPollution": "Air Pollution",
+    "envNoise": "Noise",
+    "envCrime": "Crime",
+    "envNoData": "Environment scores are computed when an epoch runs. Not computed yet.",
+    "restrictions": "District Regulations",
     "zoneName": "District",
     "landPrice": "Land Price",
     "area": "Area",

@@ -178,6 +178,10 @@ export const DISPLAY_LAYERS: DisplayLayer[] = [
       { id: "border", tooltipKey: "display.modeParcelBorder", icon: "visual/frame.png" },
       { id: "land_price_color", tooltipKey: "display.modeParcelLandPrice", icon: "visual/price.png" },
       { id: "zone_color", tooltipKey: "display.modeParcelZone", icon: "visual/region.png" },
+      { id: "noise_color", tooltipKey: "display.modeParcelNoise", icon: "visual/heatmap.png" },
+      { id: "air_pollution_color", tooltipKey: "display.modeParcelAirPollution", icon: "visual/heatmap.png" },
+      { id: "crime_color", tooltipKey: "display.modeParcelCrime", icon: "visual/heatmap.png" },
+      { id: "sunshine_color", tooltipKey: "display.modeParcelSunshine", icon: "visual/heatmap.png" },
       {
         id: "buildable_color",
         tooltipKey: "display.modeParcelBuildable",
@@ -213,16 +217,6 @@ export const DISPLAY_LAYERS: DisplayLayer[] = [
     modes: [
       { id: "hidden", tooltipKey: "display.modeHidden", icon: "visual/invisible.png" },
       { id: "visible", tooltipKey: "display.modeResourceVisible", icon: "visual/normal.png" },
-    ],
-  },
-  {
-    id: "environment",
-    titleKey: "display.layerEnvironment",
-    defaultMode: "hidden",
-    modes: [
-      { id: "hidden", tooltipKey: "display.modeHidden", icon: "visual/invisible.png" },
-      { id: "noise_heatmap", tooltipKey: "display.modeEnvNoise", icon: "visual/heatmap.png" },
-      { id: "air_pollution_heatmap", tooltipKey: "display.modeEnvAirPollution", icon: "visual/heatmap.png" },
     ],
   },
   {

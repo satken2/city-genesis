@@ -13,6 +13,12 @@ type MeterProps = {
   value: number;
   /** メーターの左側に表示するラベル */
   label?: string;
+  /**
+   * 値の向き。"positive"（既定）は値が大きいほど良い指標（耐久度・充足度など）、
+   * "negative"は値が大きいほど悪い指標（騒音・大気汚染・犯罪など）で、色の対応が反転する。
+   * バーの長さはどちらも値そのものを表す。
+   */
+  polarity?: "positive" | "negative";
 };
 
 /**
@@ -25,10 +31,12 @@ function getMeterColor(value: number): string {
   return "#ef4444";
 }
 
-export function Meter({ value, label }: MeterProps) {
+export function Meter({ value, label, polarity = "positive" }: MeterProps) {
   const clampedValue = Math.max(0, Math.min(1, value));
   const percentage = Math.round(clampedValue * 100);
-  const fillColor = getMeterColor(clampedValue);
+  const fillColor = getMeterColor(
+    polarity === "negative" ? 1 - clampedValue : clampedValue
+  );
 
   return (
     <div className="meter">

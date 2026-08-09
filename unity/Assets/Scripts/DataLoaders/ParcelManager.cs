@@ -88,6 +88,18 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     private GameObject overlayMeshObj;
     private OverlayMeshRenderer overlayRenderer;
 
+    /// <summary>
+    /// データ可視化(色分けフィル)専用のオーバーレイ。
+    /// 枠線・ハイライト用の overlayRenderer(_ZTest=Always)と違い、
+    /// 深度テストあり(LEqual)の地形追従シェーダー Custom/OverlayFillTerrainConform で描画する。
+    /// シェーダーがGPUテッセレーションで三角形を細分化し、全頂点を地形高さ+リフトに
+    /// 張り付けるため、CPU側は単純なポリゴンを投げるだけで
+    /// 「地形より上(起伏でも埋もれない)・建物より下(壁に隠れる)・
+    /// 地表すれすれの floor パーツより上」の深度関係になる。
+    /// </summary>
+    private GameObject dataVisMeshObj;
+    private OverlayMeshRenderer dataVisRenderer;
+
     private const float LINE_THICKNESS = 1.0f;
     private Color parcelLineColor = new Color(0.8f, 0.8f, 0.8f, 1f);
 
@@ -171,6 +183,21 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     private int currentParcelVisualMode = VisualMode.MODE_NORMAL;
 
     /// <summary>
+    /// 環境スコア(騒音・大気汚染・治安)の parcel_id → 0〜1 の相対値。
+    /// バックエンドは区画中心でサンプリング済みのスコアを都市全体分まとめて返すため、
+    /// 区画のbbox取得とは独立にモードごと1回だけ取得して引き当てる。
+    /// </summary>
+    private readonly Dictionary<int, float> environmentScores = new Dictionary<int, float>();
+
+    /// <summary>environmentScores が保持しているモード(0=未取得)</summary>
+    private int loadedEnvironmentMode = 0;
+
+    /// <summary>取得を要求したモード。応答時に一致しなければ結果を捨てる</summary>
+    private int requestedEnvironmentMode = 0;
+
+    private Coroutine environmentCoroutine;
+
+    /// <summary>
     /// パーセルの VisualParcelObject キャッシュ。
     /// 毎フレームの GetComponent 呼び出しを回避するため、
     /// CreateOrUpdateParcelObject で登録し、削除時にクリアする。
@@ -179,12 +206,6 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
     /// <summary>データ可視化ポリゴンの基本α値。ホバーハイライトと同じ透過度</summary>
     private const float DataVisAlpha = 0.6f;
-
-    /// <summary>
-    /// データ可視化の箱型ポリゴンの高さ（メートル）。
-    /// 地形へのめり込みを防ぎ、遠距離からでも視認できるようにする。
-    /// </summary>
-    private const float DataVisBoxHeight = 1.0f;
 
     // 距離に応じた透明度の設定（ゲーム空間メートル。Terrain の遠方LOD表示距離に近いスケールに合わせる）
     private const float DISTANCE_FULL_VISIBLE = 150f;
@@ -240,6 +261,15 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         // 代儝: オーバーレイが丘の裏や手前の建物を貫通してX線状に見える(強調表示用途なので許容)。
         mat.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
         overlayRenderer.Initialize(mat);
+
+        // データ可視化(色分けフィル)専用レンダラー。overlayMeshObj の子にして表示ON/OFFを連動させる。
+        // シェーダーは深度テストあり(LEqual)の Custom/OverlayFillTerrainConform。
+        // GPUテッセレーション+高さマップ追従で三角形内部まで常に地形+リフトの高さになるため、
+        // 深度テストありでも地形の起伏に埋もれず、建物には自然に隠れる。
+        dataVisMeshObj = new GameObject("ParcelDataVisMesh");
+        dataVisMeshObj.transform.SetParent(overlayMeshObj.transform, false);
+        dataVisRenderer = dataVisMeshObj.AddComponent<OverlayMeshRenderer>();
+        dataVisRenderer.Initialize(new Material(Shader.Find("Custom/OverlayFillTerrainConform")));
     }
 
     public void RemoveParcel(int parcelId)
@@ -457,6 +487,10 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         if (overlayRenderer != null)
         {
             overlayRenderer.ClearMesh();
+        }
+        if (dataVisRenderer != null)
+        {
+            dataVisRenderer.ClearMesh();
         }
 
         loadedCells.Clear();
@@ -914,17 +948,78 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         }
     }
 
+    /// <summary>
+    /// 環境スコア色分けモードに対応する取得先エンドポイント。対象外モードは null。
+    /// </summary>
+    private static string ResolveEnvironmentEndpoint(int mode)
+    {
+        switch (mode)
+        {
+            case VisualModeParcel.NOISE: return "/city/noise";
+            case VisualModeParcel.AIR_POLLUTION: return "/city/pollution";
+            case VisualModeParcel.CRIME: return "/city/crime";
+            case VisualModeParcel.SUNSHINE: return "/city/sunshine";
+            default: return null;
+        }
+    }
+
+    /// <summary>
+    /// 環境スコア色分けモードに切り替わったとき、そのモードのスコアを取得する。
+    /// エポック実行で値が変わるため、同じモードを選び直したときは取得し直す。
+    /// </summary>
+    private void RequestEnvironmentScores(int mode)
+    {
+        string endpoint = ResolveEnvironmentEndpoint(mode);
+        requestedEnvironmentMode = endpoint != null ? mode : 0;
+        if (endpoint == null) return;
+
+        if (environmentCoroutine != null) StopCoroutine(environmentCoroutine);
+        environmentCoroutine = StartCoroutine(FetchEnvironmentScoresCoroutine(mode, endpoint));
+    }
+
+    private IEnumerator FetchEnvironmentScoresCoroutine(int mode, string endpoint)
+    {
+        yield return ApiClient.Get<EnvironmentHeatmapResponse>(
+            endpoint,
+            data =>
+            {
+                // 取得完了までに別モードへ切り替わっていた場合はレスポンスを破棄する。
+                if (requestedEnvironmentMode != mode) return;
+
+                environmentScores.Clear();
+                var ids = data?.parcel_ids;
+                var values = data?.values;
+                if (ids != null && values != null)
+                {
+                    int count = Mathf.Min(ids.Count, values.Count);
+                    for (int i = 0; i < count; i++)
+                    {
+                        environmentScores[ids[i]] = values[i] / 65535f;
+                    }
+                }
+                loadedEnvironmentMode = mode;
+                ForceOutlineRedraw();
+            },
+            error => Debug.LogError($"ParcelManager: Failed to fetch environment scores ({endpoint}): {error}"));
+        environmentCoroutine = null;
+    }
+
     public void ApplyVisualMode(int mode)
     {
         EnsureOverlayRenderer();
 
         currentParcelVisualMode = mode;
 
+        // 環境スコアの色分けはバックエンドから別途取得した値を使うため、
+        // モード切り替えのタイミングで取得を仕掛ける。
+        RequestEnvironmentScores(mode);
+
         // データ可視化モードでは枠線も描画し、さらに色付きポリゴンを重ねる。
         // MODE_HIDDEN ではオーバーレイ全体を非表示にする。
         bool shouldShowOverlay = mode != VisualMode.MODE_HIDDEN;
         if (overlayMeshObj != null)
         {
+            // dataVisMeshObj は overlayMeshObj の子のため、表示ON/OFFはここで連動する。
             overlayMeshObj.SetActive(shouldShowOverlay);
         }
 
@@ -968,6 +1063,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         if (outlines.Count == 0)
         {
             overlayRenderer.ClearMesh();
+            dataVisRenderer.ClearMesh();
             return;
         }
 
@@ -988,6 +1084,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         Plane nearPlane = new Plane(camFwd, camPos + camFwd * nearClipWithMargin);
 
         overlayRenderer.BeginFrame();
+        dataVisRenderer.BeginFrame();
 
         // ハイライト対象パーセルの塗りつぶしポリゴン
         if (highlightedParcelId >= 0 && parcelIdToOutlineIndex.TryGetValue(highlightedParcelId, out int hlIdx))
@@ -1063,6 +1160,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         DrawFrontPathArrow(nearPlane);
 
         overlayRenderer.EndFrame(cam);
+        dataVisRenderer.EndFrame(cam);
     }
 
     /// <summary>
@@ -1087,11 +1185,13 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     }
 
     /// <summary>
-    /// データ可視化モードに応じてパーセルを箱型ポリゴンとして描画する。
+    /// データ可視化モードに応じてパーセルを色付きポリゴンとして描画する。
     /// UIの凡例定義（DisplayOptionsPanel の getLegendInfo）と同じ配色を使用する。
     /// FILTER系モードでは建築不可のパーセルは描画しない（透明）。
-    /// 地形へのめり込みを防ぐため、底面を地形に沿わせた上で
-    /// DataVisBoxHeight メートルの高さを持つ箱として描画する。
+    /// 描画先は dataVisRenderer(Custom/OverlayFillTerrainConform)。三角形内部の
+    /// 地形追従はシェーダーのテッセレーションが担うため、CPU側は区画ポリゴンの
+    /// 単純なファン分割を投げるだけでよい(頂点Yは高さマップ未アップロード時の
+    /// フォールバック値として枠線と同じ角の地形高さを使う)。
     /// </summary>
     private void DrawDataVisPolygon(ParcelOutlineData outline, float alpha)
     {
@@ -1112,51 +1212,17 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         Vector3[] pts = outline.worldPoints;
         if (pts.Length < 3) return;
 
-        // 各頂点の底面Y座標（地形追従）と天面Y座標（底面 + 高さ）を求める
-        float[] bottomY = new float[pts.Length];
-        float[] topY = new float[pts.Length];
-        for (int i = 0; i < pts.Length; i++)
-        {
-            float ground = Utils.GetGroundHeight(new Vector3(pts[i].x, 1000f, pts[i].z));
-            bottomY[i] = ground + HighlightHeightOffset;
-            topY[i] = bottomY[i] + DataVisBoxHeight;
-        }
-
-        // 箱型メッシュの頂点リストを構築（3頂点×N三角形）
-        List<Vector3> triVerts = new List<Vector3>(pts.Length * 18);
-
-        // 天面（ファン分割）
+        List<Vector3> triVerts = new List<Vector3>((pts.Length - 2) * 3);
         for (int i = 1; i < pts.Length - 1; i++)
         {
-            triVerts.Add(new Vector3(pts[0].x, topY[0], pts[0].z));
-            triVerts.Add(new Vector3(pts[i].x, topY[i], pts[i].z));
-            triVerts.Add(new Vector3(pts[i + 1].x, topY[i + 1], pts[i + 1].z));
+            triVerts.Add(pts[0]);
+            triVerts.Add(pts[i]);
+            triVerts.Add(pts[i + 1]);
         }
 
-        // 底面（ファン分割・裏向き）
-        for (int i = 1; i < pts.Length - 1; i++)
+        if (triVerts.Count >= 3)
         {
-            triVerts.Add(new Vector3(pts[0].x, bottomY[0], pts[0].z));
-            triVerts.Add(new Vector3(pts[i + 1].x, bottomY[i + 1], pts[i + 1].z));
-            triVerts.Add(new Vector3(pts[i].x, bottomY[i], pts[i].z));
-        }
-
-        // 側面（各辺ごとに2三角形）
-        for (int i = 0; i < pts.Length; i++)
-        {
-            int next = (i + 1) % pts.Length;
-            Vector3 bl = new Vector3(pts[i].x, bottomY[i], pts[i].z);
-            Vector3 br = new Vector3(pts[next].x, bottomY[next], pts[next].z);
-            Vector3 tl = new Vector3(pts[i].x, topY[i], pts[i].z);
-            Vector3 tr = new Vector3(pts[next].x, topY[next], pts[next].z);
-
-            triVerts.Add(bl); triVerts.Add(tl); triVerts.Add(tr);
-            triVerts.Add(bl); triVerts.Add(tr); triVerts.Add(br);
-        }
-
-        if (triVerts.Count >= 9)
-        {
-            overlayRenderer.AddPreTriangulated(triVerts, color);
+            dataVisRenderer.AddPreTriangulated(triVerts, color);
         }
     }
 
@@ -1215,9 +1281,33 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
                 return IsBuildable(stats, Constants.BUILDING_PORT) ? HexToColor(0x00, 0xbc, 0xd4) : (Color?)null;
             case VisualModeParcel.FILTER_OTHER:
                 return IsBuildable(stats, Constants.BUILDING_OTHER) ? HexToColor(0x9e, 0x9e, 0x9e) : (Color?)null;
+            case VisualModeParcel.NOISE:
+                // UI凡例: 薄黄(#fde68a) → 濃橙(#e65100)
+                return ResolveEnvironmentColor(mode, parcelId, HexToColor(0xfd, 0xe6, 0x8a), HexToColor(0xe6, 0x51, 0x00));
+            case VisualModeParcel.AIR_POLLUTION:
+                // UI凡例: 薄緑灰(#d1e7dd) → 濃紫(#4a148c)
+                return ResolveEnvironmentColor(mode, parcelId, HexToColor(0xd1, 0xe7, 0xdd), HexToColor(0x4a, 0x14, 0x8c));
+            case VisualModeParcel.CRIME:
+                // UI凡例: 薄赤(#ffcdd2) → 濃赤(#b71c1c)
+                return ResolveEnvironmentColor(mode, parcelId, HexToColor(0xff, 0xcd, 0xd2), HexToColor(0xb7, 0x1c, 0x1c));
+            case VisualModeParcel.SUNSHINE:
+                // UI凡例: 薄黄(#fff59d 日向) → 濃青灰(#37474f 影)
+                return ResolveEnvironmentColor(mode, parcelId, HexToColor(0xff, 0xf5, 0x9d), HexToColor(0x37, 0x47, 0x4f));
             default:
                 return null;
         }
+    }
+
+    /// <summary>
+    /// 環境スコアの色を解決する。スコア未取得の区画は塗らない(null)。
+    /// スコアはそのエポックの最小値〜最大値を 0〜1 まで引き伸ばした相対値なので、
+    /// 色の濃さは都市内での相対的な悪さを表す。
+    /// </summary>
+    private Color? ResolveEnvironmentColor(int mode, int parcelId, Color low, Color high)
+    {
+        if (loadedEnvironmentMode != mode) return null;
+        if (!environmentScores.TryGetValue(parcelId, out float score)) return null;
+        return Color.Lerp(low, high, Mathf.Clamp01(score));
     }
 
     /// <summary>

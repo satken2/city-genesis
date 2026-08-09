@@ -16,7 +16,7 @@ type DisplayOptionsPanelProps = {
 
 /**
  * 表示パネルの縦タブ順序。
- * UI上は「建物→道路→区画→地区→地形→グリッド→セル→環境」の順で並べる。
+ * UI上は「建物→道路→区画→地区→地形→グリッド→セル」の順で並べる。
  */
 const TAB_ORDER = [
   "building",
@@ -29,7 +29,6 @@ const TAB_ORDER = [
   "terrain",
   "alert",
   "cell",
-  "environment",
 ];
 
 /** 凡例の種別。 */
@@ -164,6 +163,40 @@ function getLegendInfo(layerId: string, modeId: string): LegendInfo {
             { color: "#f44336", label: "公共施設" },
           ],
         };
+      // 環境スコアは区画中心でサンプリングされた値で、色はそのエポックの
+      // 最小値〜最大値を両端まで引き伸ばした相対値(都市内での相対的な悪さ)。
+      case "noise_color":
+        return {
+          type: "meter",
+          description: "区画の騒音の悪さで色分けします。エポック実行後に反映されます",
+          meterStartColor: "#fde68a",
+          meterEndColor: "#e65100",
+          meterLabel: "← 騒音 →",
+        };
+      case "air_pollution_color":
+        return {
+          type: "meter",
+          description: "区画の大気汚染の悪さで色分けします。エポック実行後に反映されます",
+          meterStartColor: "#d1e7dd",
+          meterEndColor: "#4a148c",
+          meterLabel: "← 大気汚染 →",
+        };
+      case "crime_color":
+        return {
+          type: "meter",
+          description: "区画の治安の悪さで色分けします。エポック実行後に反映されます",
+          meterStartColor: "#ffcdd2",
+          meterEndColor: "#b71c1c",
+          meterLabel: "← 治安の悪さ →",
+        };
+      case "sunshine_color":
+        return {
+          type: "meter",
+          description: "区画の日当たりの悪さ(周辺の建物の影になっている時間の割合)で色分けします。エポック実行後に反映されます",
+          meterStartColor: "#fff59d",
+          meterEndColor: "#37474f",
+          meterLabel: "← 日照の悪さ →",
+        };
       case "hidden":
         return { type: "none", description: "区画を非表示にします" };
       case "border":
@@ -198,7 +231,6 @@ function getLegendInfo(layerId: string, modeId: string): LegendInfo {
     terrain: "地形の標高や透明度を変更して表示します。",
     alert: "街のアラートの表示設定を変更します。",
     cell: "セル単位の境界表示を切り替えます。",
-    environment: "騒音や大気汚染などの環境情報を表示します。",
     transit: "設置済みの公共交通路線を種別色の帯で表示します。路線種別ごとに表示/非表示を切り替えられます。",
     prop: "プロップの表示/非表示を切り替えます。",
   };

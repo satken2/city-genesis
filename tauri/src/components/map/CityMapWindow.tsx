@@ -39,7 +39,7 @@ const LAYER_ORDER: (keyof CityMapLayerVisibility)[] = [
 ];
 
 /** ヒートマップ切り替えの表示順。複数レイヤーと違い1つだけ選ぶ排他選択 */
-const HEATMAP_ORDER: CityMapHeatmapKind[] = ["none", "noise", "pollution"];
+const HEATMAP_ORDER: CityMapHeatmapKind[] = ["none", "noise", "pollution", "crime", "sunshine"];
 
 export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t } = useTranslation();

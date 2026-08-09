@@ -42,6 +42,12 @@ Unityのグラフィックの上に透明なWebViewウィンドウとして重�
 | `tutorial.ts` | チュートリアルの表示制御 |
 | `agentIcon.ts` / `parcelIcon.ts` / `pathIcon.ts` / `resourceIcon.ts` | 各種アイコン画像の解決 |
 
+# スクロールバー(全ウィンドウ共通)
+
+WebView2(Chromium/Edge)の既定はコンテンツに重なるオーバーレイ式スクロールバーで、パネル右端の値やボタンが隠れて操作できなくなる。これを避けるため`App.css`で`*::-webkit-scrollbar`系を定義し、**全スクロール領域を従来型(レイアウト幅を占める)スクロールバーに切り替えている**。個別コンポーネントで独自のスクロールバー幅・色が必要なときだけ、そのセレクタで`::-webkit-scrollbar`を上書きする(統計ウィンドウの各タブが例)。
+
+標準プロパティの`scrollbar-width` / `scrollbar-color`は使わないこと。Chromiumではそれらが指定された要素で`::-webkit-scrollbar`の指定が無効化され、オーバーレイ表示に戻る場合がある。
+
 # 多言語対応
 
 全体的に、多言語対応できるように作ってね。

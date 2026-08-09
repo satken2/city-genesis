@@ -1,7 +1,15 @@
 {
   "parcel": {
     "titleWithId": "土地区画 #{{id}}",
+    "basicInfo": "基本情報",
     "assignedResources": "天然資源",
+    "environment": "環境",
+    "envSunshine": "日照",
+    "envAirPollution": "大気汚染",
+    "envNoise": "騒音",
+    "envCrime": "犯罪",
+    "envNoData": "環境はエポック実行時に計算されます。まだ計算されていません。",
+    "restrictions": "地区規制",
     "zoneName": "所属地区",
     "landPrice": "地価",
     "area": "面積",

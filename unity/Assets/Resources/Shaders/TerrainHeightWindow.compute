@@ -1,0 +1,60 @@
+// 移動窓ハイトマップの切り出しコンピュートシェーダー。
+//
+// HeightmapTextureManager がカメラ周辺のロード済み地形タイル
+// (TerrainData.heightmapTexture)から、シェーダー地形追従用の
+// 1m解像度の窓テクスチャ(RFloat、ワールド標高mを直接格納)を作るために使う。
+//
+// テクセル(i,j)は「ワールド座標 (_DestWorldOrigin + (i,j)×_TexelSize) の標高」を保持する
+// (グリッド点規約。TerrainHeightmapConform.hlsl の半テクセル補正サンプリングと対応)。
+// ラスタライズを使わないため、プラットフォームごとのレンダーターゲット上下反転の影響を受けない。
+
+#pragma kernel BlitTile
+#pragma kernel ClearWindow
+
+RWTexture2D<float> _WindowTex;
+
+// Unityの地形ハイトマップ(R16 UNorm)。格納値は 0〜0.5 が 0〜size.y に対応する。
+Texture2D<float4> _TileHeightmap;
+SamplerState linearClampSampler;
+
+int2 _WindowRes;
+int2 _DestOffset;
+int2 _DestSize;
+float2 _DestWorldOrigin;
+float _TexelSize;
+float2 _TileWorldOrigin;
+float2 _TileWorldSize;
+float _TileHeightScale;
+float _TileBaseY;
+int _TileHeightmapRes;
+
+// TerrainData.heightmapTexture は最大値0.5でエンコードされているため2倍で実高さに戻す。
+#define HEIGHT_DECODE_SCALE 2.0
+
+[numthreads(8, 8, 1)]
+void BlitTile(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= (uint)_DestSize.x || id.y >= (uint)_DestSize.y)
+        return;
+
+    int2 p = _DestOffset + int2(id.xy);
+    float2 world = _DestWorldOrigin + float2(id.xy) * _TexelSize;
+
+    // タイルハイトマップのサンプルsは「タイル原点 + s×(タイルサイズ/(解像度-1))」の標高。
+    // 目的のワールド座標に対応するサンプル位置を求め、テクセル中心規約のUVへ変換する。
+    float2 grid = (world - _TileWorldOrigin) / _TileWorldSize * (_TileHeightmapRes - 1);
+    float2 uv = (grid + 0.5) / _TileHeightmapRes;
+
+    float encoded = _TileHeightmap.SampleLevel(linearClampSampler, uv, 0).r;
+    float worldHeight = encoded * HEIGHT_DECODE_SCALE * _TileHeightScale + _TileBaseY;
+
+    _WindowTex[p] = worldHeight;
+}
+
+[numthreads(8, 8, 1)]
+void ClearWindow(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= (uint)_WindowRes.x || id.y >= (uint)_WindowRes.y)
+        return;
+    _WindowTex[int2(id.xy)] = 0.0;
+}
