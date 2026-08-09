@@ -65,6 +65,16 @@
       "terrain_not_acquired": "Cannot build on unacquired land",
       "incompatible_parcel_type": "This building cannot be built on this terrain",
       "generic": "Cannot build here"
+    },
+    "copyExisting": "Copy an existing building",
+    "copyMode": "Copy construction",
+    "copySelectParcelHint": "Select a parcel to copy the building onto",
+    "copyPlaceable": "Can be built on this parcel (faithful copies get a build-cost discount)",
+    "copyInvalid": {
+      "does_not_fit": "The source building's footprint does not fit on this parcel",
+      "incompatible_parcel_type": "This building cannot be built on this parcel type",
+      "regulation": "Blocked by building regulations",
+      "generic": "Cannot build on this parcel"
     }
   },
   "resource_construction": {

@@ -31,6 +31,7 @@ public class IpcStateCoordinator : MonoBehaviour
             IpcClient.Instance.OnEditConnectorHide += HandleEditConnectorHide;
             IpcClient.Instance.OnEditPathCancelTopologyEdit += HandleEditPathCancelTopologyEdit;
             IpcClient.Instance.OnEditPathFinishTopologyEdit += HandleEditPathFinishTopologyEdit;
+            IpcClient.Instance.OnBuildingConstructionPickSource += HandleBuildingConstructionPickSource;
         }
     }
 
@@ -52,7 +53,32 @@ public class IpcStateCoordinator : MonoBehaviour
             IpcClient.Instance.OnEditConnectorHide -= HandleEditConnectorHide;
             IpcClient.Instance.OnEditPathCancelTopologyEdit -= HandleEditPathCancelTopologyEdit;
             IpcClient.Instance.OnEditPathFinishTopologyEdit -= HandleEditPathFinishTopologyEdit;
+            IpcClient.Instance.OnBuildingConstructionPickSource -= HandleBuildingConstructionPickSource;
         }
+    }
+
+    /// <summary>
+    /// 既存建物コピー建設: コピー元建物の選択モードへ入る。
+    /// 建物だけをクリック可能(MODE_PICK_BUILDING)にし、選択されると BuildingInputHandler が
+    /// building_construction:copy_source を UI へ送る。以降は UI 主導で STATE_EDIT_BUILDING へ遷移する。
+    /// </summary>
+    private void HandleBuildingConstructionPickSource()
+    {
+        if (InputSystemManager.Instance != null)
+        {
+            InputSystemManager.Instance.SetModePreset(InputModePreset.PICK_BUILDING);
+        }
+
+        // 全建物をクリック・ホバー対象にする(計画中建物は含めない: 稼働中/建設済みの実在建物をコピー元とする)。
+        if (VisualModeHandler.Instance != null)
+        {
+            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
+            VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_NORMAL);
+        }
+
+        Debug.Log("IpcStateCoordinator: コピー元建物の選択モードに入りました");
     }
 
     /// <summary>

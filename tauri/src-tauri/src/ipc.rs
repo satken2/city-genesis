@@ -510,6 +510,12 @@ pub async fn handle_incoming_message(
         "edit_building:invalid_parcel" => {
             let _ = app.emit("edit_building:invalid_parcel", envelope.payload);
         }
+        "building_construction:copy_source" => {
+            // 既存建物コピー建設: コピー元選択モードで選ばれた建物の variant / floors /
+            // visual_variant を建物建設パネルへ中継する。パネルはこれをシードして
+            // STATE_EDIT_BUILDING の区画選択フローへ遷移する。
+            let _ = app.emit("building_construction:copy_source", envelope.payload);
+        }
         "edit_building:update_direct_angle" => {
             // 直接配置モード: 中ボタンドラッグによる回転が終了(リリース)し、
             // Unity側が確定した回転角(度)をUIへ中継する。UIは回転ステッパーを更新する。

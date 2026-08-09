@@ -36,6 +36,9 @@ public class BuildingInputHandler : MonoBehaviour, IInputHandler
             case InputMode.MODE_REMOVE:
                 RemovalManager.Instance?.TryRemove(InputObjectType.BUILDING, buildingId);
                 break;
+            case InputMode.MODE_PICK_BUILDING:
+                HandlePickBuildingClick();
+                break;
             case InputMode.MODE_ROAD_CONSTRUCTION:
                 // 建設モード時は建物クリックは無効
                 break;
@@ -100,6 +103,36 @@ public class BuildingInputHandler : MonoBehaviour, IInputHandler
         {
             IpcClient.Instance.EmitSelectObject("agent_detail", "agent", buildingId.ToString());
         }
+    }
+
+    /// <summary>
+    /// 既存建物コピー建設のコピー元選択。クリックされた建物の variant / floors / visual_variant を
+    /// キャッシュ済みの BuildingSummary から読み取り、building_construction:copy_source として UI へ通知する。
+    /// 実際のフットプリント寸法はバックエンドがコピー元 agent_id から導出するため送らない。
+    /// </summary>
+    private void HandlePickBuildingClick()
+    {
+        if (IpcClient.Instance == null) return;
+
+        var summary = BuildingManager.Instance != null
+            ? BuildingManager.Instance.GetBuildingSummary(buildingId)
+            : null;
+        if (summary == null)
+        {
+            Debug.LogWarning($"BuildingInputHandler: コピー元建物 {buildingId} のサマリが取得できませんでした");
+            return;
+        }
+
+        int floors = summary.floors ?? 1;
+        IpcClient.Instance.EmitBuildingConstructionCopySource(
+            buildingId,
+            summary.variant,
+            floors,
+            summary.visual_variant,
+            summary.visual_variant2,
+            summary.visual_variant3
+        );
+        Debug.Log($"BuildingInputHandler: コピー元建物 {buildingId} を選択 (variant={summary.variant}, floors={floors})");
     }
 
     private void HandleBuildingConstructionClick()

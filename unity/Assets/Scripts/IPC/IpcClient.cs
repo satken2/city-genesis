@@ -39,6 +39,8 @@ public class IpcClient : MonoBehaviour
     // 直接配置モードの矩形パラメータ(width, depth, angle, floors)。UI側の入力変更を受けて、
     // Unityがカーソル追従のリアルタイム矩形ゴーストを描画するために使用する。
     public event Action<float, float, float, int> OnEditBuildingUpdateDirectParams;
+    // 既存建物コピー建設: コピー元建物の選択モード開始要求(UI→Unity)。
+    public event Action OnBuildingConstructionPickSource;
     public event Action<string, float[][][], float[][]> OnEditParcelUpdatePreview;
     public event Action<int, float[][]> OnEditParcelStartShapeEdit;
     public event Action OnEditParcelCancelShapeEdit;
@@ -423,6 +425,14 @@ public class IpcClient : MonoBehaviour
                     }
                     break;
 
+                case "building_construction:pick_source":
+                    {
+                        // 既存建物コピー建設: コピー元建物の選択モード開始要求。
+                        Debug.Log("IpcClient: building_construction:pick_source");
+                        OnBuildingConstructionPickSource?.Invoke();
+                    }
+                    break;
+
                 case "edit_parcel:update_preview":
                     {
                         string mode = GetParamString(payload, "mode") ?? "empty_area";
@@ -648,6 +658,27 @@ public class IpcClient : MonoBehaviour
         }
 
         SendEnvelope("world:select_object", payload);
+    }
+
+    /// <summary>
+    /// building_construction:copy_source イベントを送信する。
+    /// 既存建物コピー建設のコピー元選択モード(MODE_PICK_BUILDING)で建物が選ばれたことを UI へ通知する。
+    /// UI はこの variant / floors / visual_variant をパネルへシードし、STATE_EDIT_BUILDING の
+    /// 区画選択フローへ遷移する。実寸フットプリントはバックエンドが source_agent_id から導出する。
+    /// </summary>
+    public void EmitBuildingConstructionCopySource(int sourceAgentId, int variant, int floors, float vv1, float vv2, float vv3)
+    {
+        var payload = new Dictionary<string, object>
+        {
+            ["source_agent_id"] = sourceAgentId,
+            ["variant"] = variant,
+            ["floors"] = floors,
+            ["visual_variant"] = vv1,
+            ["visual_variant2"] = vv2,
+            ["visual_variant3"] = vv3
+        };
+
+        SendEnvelope("building_construction:copy_source", payload);
     }
 
     /// <summary>

@@ -35,10 +35,12 @@ import {
   sendEditBuildingUpdateDirectParams,
   sendFocusGraphic,
   sendSessionReload,
+  sendPickCopySource,
   IPC_EVENT_EDIT_BUILDING_SELECT_PARCEL,
   IPC_EVENT_EDIT_BUILDING_SELECT_POINT,
   IPC_EVENT_EDIT_BUILDING_INVALID_PARCEL,
   IPC_EVENT_EDIT_BUILDING_UPDATE_DIRECT_ANGLE,
+  IPC_EVENT_BUILDING_CONSTRUCTION_COPY_SOURCE,
 } from "../../utils/ipc";
 import type { EffectRangeRegion } from "../../utils/ipc";
 import { fetchApi, ApiError } from "../../utils/api";
@@ -120,6 +122,14 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
   // 選択中の施設がインフラ供給施設(効果範囲を持つ)で、効果範囲を3D表示中かどうか。
   // 効果範囲の凡例表示の出し分けに使う。
   const [effectRangeActive, setEffectRangeActive] = useState(false);
+
+  // 既存建物コピー建設: コピー元の agent_id。非nullのときコピーモード。
+  // このモードでは元建物の実寸フットプリントを固定コピーし、忠実コピー(バリアント・階数一致)なら
+  // バックエンドが建設体積を割引く。フットプリントが対象区画に収まるかはバックエンドが判定し、
+  // preview の valid / invalid_reason を copyValid / copyInvalidReason で受ける。
+  const [copySourceAgentId, setCopySourceAgentId] = useState<number | null>(null);
+  const [copyValid, setCopyValid] = useState(false);
+  const [copyInvalidReason, setCopyInvalidReason] = useState<string | null>(null);
 
   const [cityHallPlaced, setCityHallPlaced] = useState<boolean>(true);
   const [templateMode, setTemplateMode] = useState<boolean>(false);
@@ -296,6 +306,8 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
 
   /** 現在直接配置モード(土地区画外クリック)かどうか。pickedPosition が非nullなら直接配置。 */
   const isDirectMode = pickedPosition !== null;
+  /** 現在コピー建設モード(既存建物の実寸フットプリントを固定コピー)かどうか。 */
+  const isCopyMode = copySourceAgentId !== null;
   /** 選択中バリアントの底面が可変か。false のとき底面は default_width 四方の正方形で固定。 */
   const isResizable = selectedVariantData?.resizable ?? true;
   /** 直接配置の初期底面サイズ(default_width × default_height)。 */
@@ -320,24 +332,28 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
   /* ---- プレビュー取得 ---- */
 
   const fetchPreview = useCallback(
-    async (variant: number, pId: number, f: number, cr: number, signal?: AbortSignal) => {
+    async (variant: number, pId: number, f: number, cr: number, copySrc: number | null, signal?: AbortSignal) => {
       const url = `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/buildings/preview`;
+      // コピーモードでは copy_source_agent_id を送り、元建物の実寸フットプリントを固定コピーする。
+      // このとき建ぺい率(coverage_ratio)は使わず、収まり判定(valid/invalid_reason)が返る。
+      const body = copySrc != null
+        ? { copy_source_agent_id: copySrc, parcel_id: pId, floors: f }
+        : { variant, parcel_id: pId, floors: f, coverage_ratio: cr };
       try {
         const result = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            variant,
-            parcel_id: pId,
-            floors: f,
-            coverage_ratio: cr,
-          }),
+          body: JSON.stringify(body),
           signal,
         });
         if (!result.ok) throw new Error(`HTTP ${result.status}`);
-        const data: BuildingPreviewData = await result.json();
+        const data: BuildingPreviewData & { valid?: boolean; invalid_reason?: string | null } = await result.json();
         if (!signal?.aborted) {
           setBuildingPreview(data);
+          if (copySrc != null) {
+            setCopyValid(data.valid ?? false);
+            setCopyInvalidReason(data.invalid_reason ?? null);
+          }
           // バックエンドから取得した形状データをUnity側に送信し、3Dプレビューを表示する
           sendEditBuildingUpdateShape(
             data.polygon,
@@ -362,9 +378,9 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
   useEffect(() => {
     if (selectedVariant === null || parcelId === null) return;
     const controller = new AbortController();
-    void fetchPreview(selectedVariant, parcelId, floors, coverageRatio, controller.signal);
+    void fetchPreview(selectedVariant, parcelId, floors, coverageRatio, copySourceAgentId, controller.signal);
     return () => controller.abort();
-  }, [selectedVariant, parcelId, floors, coverageRatio, fetchPreview]);
+  }, [selectedVariant, parcelId, floors, coverageRatio, copySourceAgentId, fetchPreview]);
 
   /* ---- 推定建設コストの取得 ---- */
   useEffect(() => {
@@ -389,6 +405,8 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         parcel_id: parcelId,
         floors,
         construction_ratio: coverageRatio,
+        // コピーモードでは copy_source_agent_id を送り、忠実コピーなら割引後コストを受け取る。
+        ...(copySourceAgentId != null ? { copy_source_agent_id: copySourceAgentId } : {}),
       }),
       signal: controller.signal,
     })
@@ -421,7 +439,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       });
 
     return () => controller.abort();
-  }, [selectedVariant, parcelId, floors, coverageRatio, apiBaseUrl]);
+  }, [selectedVariant, parcelId, floors, coverageRatio, copySourceAgentId, apiBaseUrl]);
 
   /* ---- インフラ施設の効果範囲の取得と3D可視化 ---- */
 
@@ -657,6 +675,10 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       setPickedPosition(null);
       setDirectValid(false);
       setDirectInvalidReason(null);
+      // コピーモードの状態もリセットする。
+      setCopySourceAgentId(null);
+      setCopyValid(false);
+      setCopyInvalidReason(null);
     }
   }, [selectedVariant]);
 
@@ -739,6 +761,52 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
 
     return () => { unlisten?.(); };
   }, [appWindow, selectedVariant, t]);
+
+  /* ---- IPCイベントリスナー: コピー元建物の選択 (Unity → UI) ---- */
+
+  /**
+   * 既存建物コピー建設のコピー元選択モードで建物が選ばれたら、その variant / floors /
+   * visual_variant をパネルへシードし、コピーモードに入って区画選択フローへ遷移する。
+   * バリアント未選択の状態(=コピーボタンが押せる状態)から入るため、selectedVariant で
+   * ガードせず常時購読する。
+   */
+  useEffect(() => {
+    if (!masterData) return;
+
+    let unlisten: (() => void) | undefined;
+
+    appWindow
+      .listen<{
+        source_agent_id: number;
+        variant: number;
+        floors: number;
+        visual_variant?: number;
+        visual_variant2?: number;
+        visual_variant3?: number;
+      }>(IPC_EVENT_BUILDING_CONSTRUCTION_COPY_SOURCE, (event) => {
+        console.log("[BuildingConstruction] building_construction.copy_source", event.payload);
+        const p = event.payload;
+        const entry = masterData.agents[p.variant];
+        setSelectedBdType(entry?.bd_type ?? null);
+        setSelectedVariant(p.variant);
+        setFloors(p.floors);
+        setCopySourceAgentId(p.source_agent_id);
+        setCopyValid(false);
+        setCopyInvalidReason(null);
+        // 見た目を完全コピーする(visual_variant1/2/3)。以降 buildVisualVariantFields で送信される。
+        if (p.visual_variant != null) setVisualVariant(p.visual_variant);
+        if (p.visual_variant2 != null) setVisualVariant2(p.visual_variant2);
+        if (p.visual_variant3 != null) setVisualVariant3(p.visual_variant3);
+        // 区画選択フローへ遷移する(新規建設。agent_id は付けない)。
+        sendChangeState("STATE_EDIT_BUILDING", { building_variant: p.variant, agent_id: null }).catch((err) => {
+          console.error("[BuildingConstruction] sendChangeState (copy) failed:", err);
+        });
+      })
+      .then((fn) => { unlisten = fn; })
+      .catch(console.error);
+
+    return () => { unlisten?.(); };
+  }, [appWindow, masterData]);
 
   /* ---- IPCイベントリスナー: 直接配置の回転角更新 (Unity → UI) ---- */
 
@@ -943,6 +1011,8 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
             variant: selectedVariant,
             construction_ratio: coverageRatio,
             floors,
+            // コピーモードでは元建物の実寸フットプリントを固定コピーし、忠実コピーなら割引く。
+            ...(copySourceAgentId != null ? { copy_source_agent_id: copySourceAgentId } : {}),
             ...buildVisualVariantFields(),
           }),
         });
@@ -1077,6 +1147,22 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
             ))}
           </select>
         )}
+        {/* 既存建物をコピー: バリアント未選択のときだけ表示する。押すと Unity が
+            コピー元建物の選択モードに入り、選ばれた建物の見た目・階数・フットプリントを取り込む。 */}
+        {selectedVariant === null && editAgentId == null && !isCityHallPlacedGateActive && (
+          <button
+            className="bc-btn"
+            type="button"
+            style={{ marginTop: 10 }}
+            onClick={() => {
+              sendPickCopySource().catch((err) => {
+                console.error("[BuildingConstruction] sendPickCopySource failed:", err);
+              });
+            }}
+          >
+            {t("building_construction.copyExisting")}
+          </button>
+        )}
       </div>
 
       {/* 説明文 */}
@@ -1134,6 +1220,32 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
                             defaultValue: t("building_construction.directInvalid.generic"),
                           })
                         : t("building_construction.directInvalid.generic")}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* コピー建設モードの情報パネル(割引・収まり可否の表示) */}
+          {isCopyMode && (
+            <div className="bc-description-frame" style={{ marginTop: 10 }}>
+              <div className="bc-description-body">
+                <div className="bc-description-name">
+                  {t("building_construction.copyMode")}
+                </div>
+                <div className="bc-description-text">
+                  {parcelId === null ? (
+                    t("building_construction.copySelectParcelHint")
+                  ) : copyValid ? (
+                    t("building_construction.copyPlaceable")
+                  ) : (
+                    <span className="bc-direct-invalid">
+                      {copyInvalidReason
+                        ? t(`building_construction.copyInvalid.${copyInvalidReason}`, {
+                            defaultValue: t("building_construction.copyInvalid.generic"),
+                          })
+                        : t("building_construction.copyInvalid.generic")}
                     </span>
                   )}
                 </div>
@@ -1210,8 +1322,9 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
                 <span className="bc-stepper-unit">{t("building_construction.unitFloors")}</span>
               </div>
             </div>
-            {/* 建ぺい率は底面可変(resizable)の建物のみ。固定底面の建物では非表示。 */}
-            {isResizable && (
+            {/* 建ぺい率は底面可変(resizable)の建物のみ。固定底面の建物・コピーモードでは非表示。
+                コピーモードでは元建物の実寸フットプリントを固定コピーするため建ぺい率は使わない。 */}
+            {isResizable && !isCopyMode && (
               <div className="bc-split-col">
                 <div className="bc-section-title">{t("building_construction.coverageRatio")}</div>
                 <div className="bc-stepper-row">
@@ -1365,7 +1478,14 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
             <button
               className="bc-btn bc-btn-confirm"
               // 区画モードは区画選択済み、直接配置モードは設置可能(directValid)なら確定できる。
-              disabled={isDirectMode ? !directValid : parcelId === null}
+              // コピーモードは区画選択済みかつフットプリントが収まる(copyValid)なら確定できる。
+              disabled={
+                isDirectMode
+                  ? !directValid
+                  : isCopyMode
+                    ? parcelId === null || !copyValid
+                    : parcelId === null
+              }
               type="button"
               onClick={async () => {
                 if (isDirectMode) {

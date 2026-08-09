@@ -56,6 +56,10 @@ public static class InputMode
     // パス分割(split)の分割点選択モード。対象パスの中心線へ射影した点を分割点として選ぶ。
     // 射影・マーカー描画・選択通知は PathTopologyEditManager が担う。
     public const int MODE_PATH_SPLIT = 19;
+    // 既存建物コピー建設の「コピー元建物」選択モード。建物だけをクリック可能にし、
+    // クリックされた建物の variant / floors / visual_variant を UI へ通知する(建設はしない)。
+    // 通知は BuildingInputHandler が building_construction:copy_source として送る。
+    public const int MODE_PICK_BUILDING = 20;
 }
 
 /// <summary>
@@ -87,6 +91,8 @@ public static class InputModePreset
     // パス分割の分割点選択プリセット。パスと地形をクリック可能にする
     // (パスから少し外れた地点でも垂線の足で分割点を選べるようにするため)。
     public const int PATH_SPLIT = 18;
+    // 既存建物コピー建設のコピー元選択プリセット。建物だけをクリック可能にする。
+    public const int PICK_BUILDING = 19;
 }
 
 /// <summary>
@@ -1399,6 +1405,17 @@ public class InputHandler : MonoBehaviour
                 SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
                 SetMode(InputObjectType.ZONE, InputMode.MODE_NONE);
                 Debug.Log("InputHandler: パス分割の分割点選択モードプリセットを設定しました");
+                break;
+
+            case InputModePreset.PICK_BUILDING:
+                // 既存建物コピー建設のコピー元選択。建物クリックだけを受け、他は無効化する。
+                SetMode(InputObjectType.BUILDING, InputMode.MODE_PICK_BUILDING);
+                SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
+                SetMode(InputObjectType.PATH, InputMode.MODE_NONE);
+                SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
+                SetMode(InputObjectType.TERRAIN, InputMode.MODE_NONE);
+                SetMode(InputObjectType.ZONE, InputMode.MODE_NONE);
+                Debug.Log("InputHandler: コピー元建物選択モードプリセットを設定しました");
                 break;
 
             default:

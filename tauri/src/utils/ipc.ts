@@ -194,6 +194,21 @@ export async function sendEditBuildingUpdateVisualVariant(
 }
 
 /**
+ * `building_construction:pick_source`
+ * 既存建物コピー建設で、コピー元建物の選択モードを Unity 側で開始させる。
+ * Unity は建物だけをクリック可能(MODE_PICK_BUILDING)にし、建物が選ばれると
+ * `building_construction:copy_source` を UI へ返す。
+ */
+export async function sendPickCopySource(): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "building_construction",
+    entity: null,
+    action: "building_construction:pick_source",
+    params: {},
+  });
+}
+
+/**
  * インフラ供給施設の効果範囲(領域)の形。
  * - 円: {type:"circle", center:[x,z], radius}
  * - 不定形: {type:"polygon", polygons:[{exterior:[[x,z],...], holes:[[[x,z],...],...]}]}
@@ -805,6 +820,13 @@ export const IPC_EVENT_EDIT_BUILDING_SELECT_POINT = "edit_building:select_point"
 
 /** 建物建設モードにおいて、選択中の建物種類と互換性のない土地区画がクリックされた */
 export const IPC_EVENT_EDIT_BUILDING_INVALID_PARCEL = "edit_building:invalid_parcel";
+
+/**
+ * 既存建物コピー建設のコピー元選択モードで、コピー元の建物が選択された。
+ * ペイロードは { source_agent_id, variant, floors, visual_variant, visual_variant2, visual_variant3 }。
+ * パネルはこれをシードして STATE_EDIT_BUILDING の区画選択フローへ遷移する。
+ */
+export const IPC_EVENT_BUILDING_CONSTRUCTION_COPY_SOURCE = "building_construction:copy_source";
 
 /**
  * 直接配置モードにおいて、中ボタンドラッグによる回転が終了(リリース)し、

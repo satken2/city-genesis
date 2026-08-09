@@ -65,6 +65,16 @@
       "terrain_not_acquired": "未開放の土地には建設できません",
       "incompatible_parcel_type": "この場所の地形にはこの建物を建設できません",
       "generic": "この場所には建設できません"
+    },
+    "copyExisting": "既存建物をコピー",
+    "copyMode": "コピー建設",
+    "copySelectParcelHint": "コピー先の土地区画を選択してください",
+    "copyPlaceable": "この土地区画に建設できます（忠実コピーなら建設費割引）",
+    "copyInvalid": {
+      "does_not_fit": "コピー元建物のフットプリントがこの土地区画に収まりません",
+      "incompatible_parcel_type": "この土地区画の種類にはこの建物を建設できません",
+      "regulation": "建築規制に抵触するため建設できません",
+      "generic": "この土地区画には建設できません"
     }
   },
   "resource_construction": {
