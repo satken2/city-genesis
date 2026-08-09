@@ -888,6 +888,7 @@ GameObject:
   - component: {fileID: 338143478}
   - component: {fileID: 338143480}
   - component: {fileID: 338143479}
+  - component: {fileID: 338143481}
   m_Layer: 5
   m_Name: CompassPanel
   m_TagString: Untagged
@@ -927,7 +928,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.30588236}
+  m_Color: {r: 0, g: 0, b: 0, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -952,6 +953,24 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 338143477}
   m_CullTransparentMesh: 1
+--- !u!114 &338143481
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 338143477}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c568776d1bc8ed5448b6479651d307e2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CompassPanel
+  targetImage: {fileID: 0}
+  renderTextureSize: 256
+  compassModelPrefab: {fileID: 0}
+  compassLayerName: Compass
+  minViewPitch: 22
+  maxViewPitch: 78
 --- !u!1 &340431636
 GameObject:
   m_ObjectHideFlags: 0
