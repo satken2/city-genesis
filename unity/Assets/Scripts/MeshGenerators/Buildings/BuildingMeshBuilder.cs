@@ -14,7 +14,9 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     private static readonly IBuildingMeshGenerator prebuiltGenerator = new PreBuiltBuildingMeshBuilder();
     private static readonly IBuildingMeshGenerator portGenerator = new PortBuildingMeshBuilder();
     private static readonly IBuildingMeshGenerator mashupGenerator = new MashupBuildingMeshBuilder();
-    private static readonly IBuildingMeshGenerator constructingGenerator = new ConstructingBuildingMeshBuilder();
+    private static readonly IBuildingMeshGenerator constructingGenerator = new ConstructingBuildingMeshBuilder(ConstructionSiteProfile.Construction);
+    private static readonly IBuildingMeshGenerator demolishingGenerator = new ConstructingBuildingMeshBuilder(ConstructionSiteProfile.Demolition);
+    private static readonly IBuildingMeshGenerator collapsedGenerator = new CollapsedBuildingMeshBuilder();
 
     /// <summary>
     /// BuildingSummary から建物メッシュを生成する。
@@ -29,12 +31,22 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
             return null;
         }
 
-        // 工事中(STATUS_CONSTRUCTING)は model_type に関わらず専用の「工事現場」メッシュ
-        // （土マウンド + 足場 + クレーン）で描画する。model_type 分岐より先に判定することで
-        // Near/Far・DetailWorker・直接呼び出しの全生成経路をカバーする。
+        // 工事中/解体中/倒壊は model_type に関わらず専用メッシュで描画する。model_type 分岐より
+        // 先に status で判定することで Near/Far・DetailWorker・直接呼び出しの全生成経路をカバーする。
+        // - 建設中(STATUS_CONSTRUCTING): 土マウンド + 足場 + クレーン
+        // - 解体中(STATUS_DEMOLISHING): 土マウンド + 色違い足場 + ショベルカー（建設中と同一ロジック・パーツ差分のみ）
+        // - 倒壊(STATUS_COLLAPSED): 瓦礫マウンド + 任意の倒壊片
         if (buildingData.status == Constants.STATUS_CONSTRUCTING)
         {
             return EnsureMaterials(constructingGenerator.Generate(buildingData, isDynamic));
+        }
+        if (buildingData.status == Constants.STATUS_DEMOLISHING)
+        {
+            return EnsureMaterials(demolishingGenerator.Generate(buildingData, isDynamic));
+        }
+        if (buildingData.status == Constants.STATUS_COLLAPSED)
+        {
+            return EnsureMaterials(collapsedGenerator.Generate(buildingData, isDynamic));
         }
 
         int modelType = GetModelType(buildingData);
@@ -878,6 +890,26 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
             cachedConstructionDirtMaterial = GetDefaultBuildingMaterial();
         }
         return cachedConstructionDirtMaterial;
+    }
+
+    private static Material cachedCollapsedRubbleMaterial;
+
+    /// <summary>
+    /// 倒壊(STATUS_COLLAPSED)の瓦礫マテリアル(Resources/CollapsedRubble)を返す。
+    /// アセットが未配置の場合は、工事現場の土マテリアル(GetConstructionDirtMaterial・
+    /// さらにその先のフォールバック込み)へ委譲し、表示が成立するようにする。
+    /// </summary>
+    public static Material GetCollapsedRubbleMaterial()
+    {
+        if (cachedCollapsedRubbleMaterial != null) return cachedCollapsedRubbleMaterial;
+
+        cachedCollapsedRubbleMaterial = Resources.Load<Material>("CollapsedRubble");
+        if (cachedCollapsedRubbleMaterial == null)
+        {
+            Debug.LogWarning("BuildingMeshBuilder: Resources/CollapsedRubble が見つかりません。工事現場の土マテリアルにフォールバックします。");
+            cachedCollapsedRubbleMaterial = GetConstructionDirtMaterial();
+        }
+        return cachedCollapsedRubbleMaterial;
     }
 
     private static Material cachedCommonConcreteMaterial;

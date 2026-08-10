@@ -287,14 +287,15 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
             return;
         }
 
-        // 2. 建設中ステータスの処理
-        // 建設中は常に表示する。メッシュ自体が専用の「工事現場」表示
-        // （土マウンド/土ストリップ + 足場 + クレーン + 柱 + 坑口）なので、
-        // マテリアルの上塗りは行わずオリジナルの見た目をそのまま出す
-        // （旧仕様の ConstructionMaterial(黄色)一括適用は廃止。マテリアル自体は
-        //   ConstructionDirt 未配置時のフォールバック先として存続している）。
+        // 2. 建設中/解体中/倒壊ステータスの処理
+        // これらは常に表示する。メッシュ自体が専用の表示
+        // （建設中/解体中=土マウンド/土ストリップ + 足場 + 建機 + 柱 + 坑口、
+        //   倒壊=瓦礫マウンド + 倒壊片）なので、色モードの上塗りは行わず
+        // オリジナルの見た目をそのまま出す（色分けで塗り潰すと現場/瓦礫の表現が消える）。
         // ホバー中は通常ステータスと同様にハイライトする。
-        if (objectStatus == Constants.STATUS_CONSTRUCTING)
+        if (objectStatus == Constants.STATUS_CONSTRUCTING
+            || objectStatus == Constants.STATUS_DEMOLISHING
+            || objectStatus == Constants.STATUS_COLLAPSED)
         {
             SetRenderersEnabled(true);
             if (!preventMaterialChange)

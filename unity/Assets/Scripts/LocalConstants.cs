@@ -105,6 +105,18 @@ public static class LocalConstants
     /// <summary>工事中パスの土ストリップに道路幅へ加算する余白幅(m)。</summary>
     public const float CONSTRUCTION_PATH_DIRT_EXTRA_WIDTH = 1.0f;
 
+    /// <summary>倒壊(STATUS_COLLAPSED)の瓦礫マウンドの基本厚み(m)。工事中の土マウンド(CONSTRUCTION_DIRT_THICKNESS)より厚く盛る。</summary>
+    public const float CONSTRUCTION_RUBBLE_THICKNESS = 0.8f;
+
+    /// <summary>倒壊の瓦礫マウンド上面のノイズ凹凸の振幅(m)。土(CONSTRUCTION_DIRT_BUMP_AMPLITUDE)より荒くして瓦礫らしくする。</summary>
+    public const float CONSTRUCTION_RUBBLE_BUMP_AMPLITUDE = 0.7f;
+
+    /// <summary>倒壊片(collapse パーツ)を footprint AABB へフィットさせる際のXZ充填率。1未満で区画内側に余白を残す。</summary>
+    public const float COLLAPSE_FRAGMENT_FILL = 0.9f;
+
+    /// <summary>倒壊片の高さ上限(m)。モデルがこれより高ければY方向に縮めて瓦礫を低く保つ。</summary>
+    public const float COLLAPSE_FRAGMENT_MAX_HEIGHT = 3.0f;
+
     /// <summary>
     /// 全建物共通の「標準パーツ」のprefixフォルダ名。
     /// scaffold/craneパーツはバリアント(a{variant})→建物タイプ(b{bd_type})→このフォルダ

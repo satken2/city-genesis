@@ -78,6 +78,8 @@ nav:
       - 港湾岸壁: geometries/F4_港湾岸壁のメッシュ生成.md
       - 工事中建物: geometries/F5_工事中建物のメッシュ生成.md
       - マッシュアップ建物: geometries/F6_マッシュアップ建物のメッシュ生成.md
+      - 解体中建物: geometries/F7_解体中建物のメッシュ生成.md
+      - 倒壊建物: geometries/F8_倒壊建物のメッシュ生成.md
     - 道路メッシュの生成: geometries/G_道路メッシュの生成.md
     - バックエンドデータロード: geometries/H_バックエンドデータロード.md
     - 建物パーツ作成マニュアル: geometries/I_建物パーツ作成マニュアル.md

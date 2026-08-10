@@ -22,7 +22,7 @@
 - `useChildRenderers` / `ignoreSelfRenderer`: 道路や建物は子オブジェクト(SplineMeshのパーツ等)にRendererがあるため、両方trueにして子だけを対象にするのが通例。
 - `preventMaterialChange`: 表示/非表示のみ制御しマテリアルを変えない(交差点メッシュ等)。SpriteRenderer・TextMeshPro・進行方向矢印(`TrackDirectionArrows`付きレンダラー)は自動的に対象外。
 - **ステータス連動**: `SetStatus(status)` で設定されたオブジェクトステータスがモードより優先される。
-  - `STATUS_CONSTRUCTING` → 常に表示+**オリジナルマテリアル**(ホバー中はハイライト)。メッシュ自体が専用の「工事現場」表示(土マウンド/土ストリップ+足場+クレーン等。`ConstructingBuildingMeshBuilder` / `PathManager.GenerateConstructingPathMesh`)のため、旧仕様の `ConstructionMaterial`(黄色)一括上塗りは廃止。マテリアルアセット自体は `ConstructionDirt` 未配置時のフォールバック先(`BuildingMeshBuilder.GetConstructionDirtMaterial`)として存続している
+  - `STATUS_CONSTRUCTING` / `STATUS_DEMOLISHING` / `STATUS_COLLAPSED` → 常に表示+**オリジナルマテリアル**(ホバー中はハイライト)。メッシュ自体が専用の表示(建設中/解体中=土マウンド/土ストリップ+足場+建機等、`ConstructingBuildingMeshBuilder` / `PathManager.GenerateConstructingPathMesh`。倒壊=瓦礫マウンド+倒壊片、`CollapsedBuildingMeshBuilder`)のため、色モードで塗り潰さずオリジナルを出す(旧仕様の `ConstructionMaterial`(黄色)一括上塗りは廃止)。マテリアルアセット自体は `ConstructionDirt` 未配置時のフォールバック先(`BuildingMeshBuilder.GetConstructionDirtMaterial`)として存続している
   - `STATUS_TEMPORARY` / `STATUS_PENDING` / `STATUS_SCHEDULED_CONSTRUCTION` → `VisualFlag.SHOW_PLAN` が立っている(かつ色モードが非表示でない)ときだけ表示(temporary=赤 `PendingMaterial` / pending・planned=灰色 `PlannedMaterial`)。フラグOFFまたは非表示モードではRendererとコライダーが無効化される。**どちらも不透明(ZWrite有効・影あり)**。半透明ゴースト表示は形状が読み取れないため廃止した
 - **公共施設ハイライト(`VisualFlag.HIGHLIGHT_PUBLIC`)は `VisualModeObject` の責務ではない**。建物のマテリアルは触らず、`PublicFacilityGlowOverlay` が敷地の土地区画形状に光を描く(下記)。そのため色モード(地区別色塗り・耐久度色分け等)と同時に成立する。
 - ホバーハイライトは `SetHover(true/false)`(InputHandler系から呼ばれる)。

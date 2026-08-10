@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using GeneratedModels;
 
 /// <summary>
-/// 工事中(STATUS_CONSTRUCTING)の建物の「工事現場」メッシュ生成器。
+/// 工事現場（建設中 STATUS_CONSTRUCTING / 解体中 STATUS_DEMOLISHING）の「工事現場」メッシュ生成器。
 /// model_type に関わらず、BuildingMeshBuilder.Generate の冒頭で status により
 /// このビルダーへ分岐する（完成品のメッシュは一切生成しない）。
+///
+/// 建設中と解体中は構成も積み上げロジックも全く同じで、使用するパーツと建機の種別だけが違う。
+/// その差分は <see cref="ConstructionSiteProfile"/>（コンストラクタで受け取る）に集約し、
+/// 1つのビルダーを両状態で共用する。
 ///
 /// 生成物:
 /// - 土マウンド … 敷地（土地区画ポリゴン。無ければ建物底面）全体を覆う、厚みと
@@ -13,28 +17,40 @@ using GeneratedModels;
 ///   （未配置時は ConstructionMaterial → BuildingMaterial にフォールバック）。
 /// - 基盤 … 完成品と同じ「建物底面をY方向に押し出した土台」（BuildingMeshBuilder.GenerateFoundationMesh）を
 ///   土マテリアルで生成する。傾斜地対応の対象 model_type（IsApplicableModelType）のみ。
-/// - 足場リング … scaffold-wall / scaffold-corner パーツを建物底面ポリゴンの外周に沿って
+/// - 足場リング … profile の scaffold 壁/角パーツを建物底面ポリゴンの外周に沿って
 ///   フェンスと同型のロジックで配置した1階分のリングを、工事進捗に応じた階数
 ///   (builtFloors) 分Y方向に積み上げる。
-/// - クレーン … crane-base / crane-mid / crane-top パーツを prebuilt と同じ規則で積み上げる。
-///   base/mid はY方向のみ階高スケール、top は完全実寸（Yスケールなし）。
-///   一定階数(CONSTRUCTION_CRANE_MIN_FLOORS)以上の建物にのみ立てる。
+/// - 建機 … profile の MachineKind により分岐する。
+///   StackedCrane（建設中）: crane-base / crane-mid / crane-top を prebuilt と同じ規則で垂直に積む。
+///     base/mid はY方向のみ階高スケール、top は完全実寸。一定階数(MachineMinFloors)以上の建物のみ。
+///   GroundVehicle（解体中）: ショベルカーをマウンド上面に実寸で1台据える（階数ゲートなし）。
 ///
 /// パーツのフォールバック: a{variant} → b{bd_type}（既存の prefix 解決）→ 標準パーツ
 /// Models/Buildings/common/（BuildingMeshUtils.GetPartWithCommonFallback）。
 /// パーツ・マテリアルのアセットが未配置でも破綻しないオプショナル設計
-/// （scaffold/craneはスキップ、土はフォールバックマテリアルで描画される）。
+/// （scaffold/建機はスキップ、土はフォールバックマテリアルで描画される）。
 ///
 /// 工事進捗はAPIの construction_progress（= 調達済み建設体積の百分率。サーバー計算）を使う。
 /// 進捗が増えるとバックエンドが version を bump するため、毎エポックの差分ロードで
-/// このビルダーが再実行され、足場・クレーンが伸びていく。
+/// このビルダーが再実行され、足場・建機が伸びていく（解体中も同一ロジック）。
 ///
 /// 既知の割り切り:
-/// - MODEL_MODULAR_GROUND（畑・庭）と MODEL_PORT（岸壁）は土マウンドのみ（足場・クレーンなし）。
+/// - MODEL_MODULAR_GROUND（畑・庭）と MODEL_PORT（岸壁）は土マウンドのみ（足場・建機なし）。
 /// - MODEL_PORT では敷地が海岸線を含むため、土が海面上に描かれることがある。
 /// </summary>
 public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
 {
+    private readonly ConstructionSiteProfile profile;
+
+    /// <summary>
+    /// 建設中/解体中の共用ビルダー。profile で使用パーツと建機種別を切り替える。
+    /// profile が null の場合は建設中プリセットにフォールバックする。
+    /// </summary>
+    public ConstructingBuildingMeshBuilder(ConstructionSiteProfile profile)
+    {
+        this.profile = profile ?? ConstructionSiteProfile.Construction;
+    }
+
     public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic = false)
     {
         if (buildingData == null)
@@ -115,18 +131,30 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
             float visualVariant = buildingData.visual_variant;
 
             AddScaffoldRings(footprint, prefix, visualVariant, floorHeight, builtFloors,
+                profile.ScaffoldWallPart, profile.ScaffoldCornerPart,
                 combineInstances, allMaterials, temporaryMeshes);
 
-            if (floors >= LocalConstants.CONSTRUCTION_CRANE_MIN_FLOORS)
+            // 建機。profile の種別で分岐する（建設中=タワークレーン / 解体中=地上のショベルカー）。
+            // GroundVehicle は MachineMinFloors=0 なので階数に関わらず据える。
+            if (floors >= profile.MachineMinFloors)
             {
-                AddCrane(footprint, prefix, visualVariant, buildingData.visual_variant2, floorHeight, builtFloors,
-                    combineInstances, allMaterials, temporaryMeshes);
+                if (profile.MachineKind == SiteMachineKind.StackedCrane)
+                {
+                    AddCrane(footprint, prefix, visualVariant, buildingData.visual_variant2, floorHeight, builtFloors,
+                        profile.CraneBasePart, profile.CraneMidPart, profile.CraneTopPart,
+                        combineInstances, allMaterials, temporaryMeshes);
+                }
+                else // GroundVehicle
+                {
+                    AddGroundMachine(footprint, prefix, visualVariant, buildingData.visual_variant2,
+                        profile.GroundMachinePart, combineInstances, allMaterials, temporaryMeshes);
+                }
             }
 
             // 施工済み階の天面を footprint 形状のパネル(ceil マテリアル)で塞ぐ。
             // 足場リングは中空なので、これが無いと建物内部が上から覗けてしまう。
             AddConstructionCeil(footprint, prefix, visualVariant, builtFloors * floorHeight,
-                combineInstances, allMaterials, temporaryMeshes);
+                profile.CeilPart, combineInstances, allMaterials, temporaryMeshes);
         }
 
         if (combineInstances.Count == 0)
@@ -166,23 +194,23 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
     // ------------------------------------------------------------------
 
     /// <summary>
-    /// 足場（scaffold-wall / scaffold-corner）を builtFloors 段ぶん生成して登録する。
+    /// 足場（profile の 壁/角パーツ）を builtFloors 段ぶん生成して登録する。
     /// 配置は通常建物の壁・角と全く同じロジック（ModularBodyBuilder.GenerateScaffoldSegments）を
-    /// フットプリント上でそのまま使う。scaffold-wall が無ければ何もしない。
+    /// フットプリント上でそのまま使う。壁パーツが無ければ何もしない。
     /// </summary>
     private static void AddScaffoldRings(Vector2[] footprint, string prefix, float visualVariant,
-        float floorHeight, int builtFloors,
+        float floorHeight, int builtFloors, string wallPart, string cornerPart,
         List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
     {
-        GameObject wallModule = BuildingMeshUtils.GetPartWithCommonFallback(prefix, "scaffold-wall", visualVariant);
+        GameObject wallModule = BuildingMeshUtils.GetPartWithCommonFallback(prefix, wallPart, visualVariant);
         if (wallModule == null)
         {
-            UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[CBMB] 足場: scaffold-wall パーツなし (prefix={prefix})。足場をスキップします。");
+            UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[CBMB] 足場: {wallPart} パーツなし (prefix={prefix})。足場をスキップします。");
             return;
         }
         Material[] wallMaterials = BuildingMeshUtils.GetModuleMaterials(wallModule);
 
-        GameObject cornerModule = BuildingMeshUtils.GetPartWithCommonFallback(prefix, "scaffold-corner", visualVariant);
+        GameObject cornerModule = BuildingMeshUtils.GetPartWithCommonFallback(prefix, cornerPart, visualVariant);
         Material[] cornerMaterials = cornerModule != null ? BuildingMeshUtils.GetModuleMaterials(cornerModule) : null;
 
         ModularBodyBuilder.GenerateScaffoldSegments(
@@ -196,6 +224,7 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
     /// デフォルト建物マテリアルにフォールバックする。prebuilt の積み上げ天面（§17）と同じ考え方。
     /// </summary>
     private static void AddConstructionCeil(Vector2[] footprint, string prefix, float visualVariant, float height,
+        string ceilPartName,
         List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
     {
         if (footprint == null || footprint.Length < 3) return;
@@ -204,7 +233,7 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
         if (ceilMesh == null) return;
 
         Material ceilMat = null;
-        GameObject ceilPart = BuildingMeshUtils.GetPartWithCommonFallback(prefix, "ceil", visualVariant);
+        GameObject ceilPart = BuildingMeshUtils.GetPartWithCommonFallback(prefix, ceilPartName, visualVariant);
         if (ceilPart != null)
         {
             Material[] mats = BuildingMeshUtils.GetModuleMaterials(ceilPart);
@@ -218,33 +247,17 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     // ------------------------------------------------------------------
-    // クレーン
+    // 建機（クレーン / 地上建機）
     // ------------------------------------------------------------------
 
     /// <summary>
-    /// クレーン（crane-base / crane-mid / crane-top）を prebuilt と同じ積み上げ規則で登録する。
-    /// 総段数は builtFloors + CONSTRUCTION_CRANE_EXTRA_LEVELS（工事進捗に連動し、常に建物より
-    /// 少し高く伸びる）。base は最下段1段分・mid は残り段数分（いずれもY方向のみ階高スケール）、
-    /// top は頂部に完全実寸で載せる。base と mid が両方無い場合は何もしない
-    /// （top だけあると接地したジブになってしまうため）。
+    /// 建機の設置位置と向きを決める（クレーン・地上建機で共通）。
     /// 位置は footprint 重心 + visual_variant2 シードのオフセット、向きは最初の辺に合わせた
     /// Yaw（いずれも塔屋 GenerateRoofprop と同じ決め方）。
     /// </summary>
-    private static void AddCrane(Vector2[] footprint, string prefix, float visualVariant, float visualVariant2,
-        float floorHeight, int builtFloors,
-        List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
+    private static void ComputeMachinePlacement(Vector2[] footprint, float visualVariant2,
+        out Vector2 xzOffset, out Quaternion rotation)
     {
-        GameObject baseModule = BuildingMeshUtils.GetPartWithCommonFallback(prefix, "crane-base", visualVariant);
-        GameObject midModule = BuildingMeshUtils.GetPartWithCommonFallback(prefix, "crane-mid", visualVariant);
-        GameObject topModule = BuildingMeshUtils.GetPartWithCommonFallback(prefix, "crane-top", visualVariant);
-
-        if (baseModule == null && midModule == null)
-        {
-            UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[CBMB] クレーン: crane-base / crane-mid パーツなし (prefix={prefix})。クレーンをスキップします。");
-            return;
-        }
-
-        // 位置と向き（塔屋と同じシードロジック）
         Vector2 centroid = Vector2.zero;
         for (int i = 0; i < footprint.Length; i++)
         {
@@ -255,11 +268,36 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
         float seed = Mathf.Clamp01(visualVariant2);
         float angle = seed * Mathf.PI * 2f;
         const float radius = 0.5f;
-        Vector2 xzOffset = new Vector2(centroid.x + Mathf.Cos(angle) * radius, centroid.y + Mathf.Sin(angle) * radius);
+        xzOffset = new Vector2(centroid.x + Mathf.Cos(angle) * radius, centroid.y + Mathf.Sin(angle) * radius);
 
         Vector2 firstEdge = footprint.Length >= 2 ? (footprint[1] - footprint[0]).normalized : Vector2.right;
         float edgeAngle = Mathf.Atan2(firstEdge.y, firstEdge.x) * Mathf.Rad2Deg;
-        Quaternion rotation = Quaternion.Euler(0, -edgeAngle + 90, 0);
+        rotation = Quaternion.Euler(0, -edgeAngle + 90, 0);
+    }
+
+    /// <summary>
+    /// タワークレーン（base/mid/top パーツ）を prebuilt と同じ積み上げ規則で登録する。
+    /// 総段数は builtFloors + CONSTRUCTION_CRANE_EXTRA_LEVELS（工事進捗に連動し、常に建物より
+    /// 少し高く伸びる）。base は最下段1段分・mid は残り段数分（いずれもY方向のみ階高スケール）、
+    /// top は頂部に完全実寸で載せる。base と mid が両方無い場合は何もしない
+    /// （top だけあると接地したジブになってしまうため）。
+    /// </summary>
+    private static void AddCrane(Vector2[] footprint, string prefix, float visualVariant, float visualVariant2,
+        float floorHeight, int builtFloors,
+        string basePart, string midPart, string topPart,
+        List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
+    {
+        GameObject baseModule = BuildingMeshUtils.GetPartWithCommonFallback(prefix, basePart, visualVariant);
+        GameObject midModule = BuildingMeshUtils.GetPartWithCommonFallback(prefix, midPart, visualVariant);
+        GameObject topModule = BuildingMeshUtils.GetPartWithCommonFallback(prefix, topPart, visualVariant);
+
+        if (baseModule == null && midModule == null)
+        {
+            UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[CBMB] クレーン: {basePart} / {midPart} パーツなし (prefix={prefix})。クレーンをスキップします。");
+            return;
+        }
+
+        ComputeMachinePlacement(footprint, visualVariant2, out Vector2 xzOffset, out Quaternion rotation);
 
         int totalLevels = builtFloors + LocalConstants.CONSTRUCTION_CRANE_EXTRA_LEVELS;
         float stackY = 0f;
@@ -293,6 +331,30 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
         }
     }
 
+    /// <summary>
+    /// 地上建機（ショベルカー等）を1台、マウンド上面に実寸で据える。
+    /// クレーンのように段積みはせず、Yスケールもしない。位置・向きはクレーンと同じシードロジック。
+    /// パーツが無ければ何もしない（オプショナル）。
+    /// </summary>
+    private static void AddGroundMachine(Vector2[] footprint, string prefix, float visualVariant, float visualVariant2,
+        string machinePart,
+        List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
+    {
+        GameObject machineModule = BuildingMeshUtils.GetPartWithCommonFallback(prefix, machinePart, visualVariant);
+        if (machineModule == null)
+        {
+            UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[CBMB] 地上建機: {machinePart} パーツなし (prefix={prefix})。建機をスキップします。");
+            return;
+        }
+
+        ComputeMachinePlacement(footprint, visualVariant2, out Vector2 xzOffset, out Quaternion rotation);
+
+        // マウンド上面（土の基本厚み分）に、モデル原点(y=0)=接地点として実寸で1台載せる。
+        // fitHeight=null でYスケールせず、alignByOrigin=true で原点を接地させる。
+        BuildingMeshUtils.AddStackedModule(machineModule, LocalConstants.CONSTRUCTION_DIRT_THICKNESS, null,
+            combineInstances, allMaterials, temporaryMeshes, xzOffset, rotation, alignByOrigin: true);
+    }
+
     // ------------------------------------------------------------------
     // 土マウンド
     // ------------------------------------------------------------------
@@ -310,7 +372,11 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
     /// 4. isDynamic（超近景セル）の場合は各頂点に地形高さの差分を加算して地形追従する
     ///    （フェンス・地面パネルと同じ2段階追従の慣習）。
     /// </summary>
-    private static Mesh GenerateDirtMoundMesh(Vector2[] localPolygon, Vector3 centerPointWorld, bool isDynamic)
+    /// <param name="thickness">上面の基本厚み(m)。倒壊の瓦礫マウンドは土より厚くするためオーバーライドする。</param>
+    /// <param name="bumpAmplitude">上面ノイズ凹凸の振幅(m)。瓦礫は土より荒くするためオーバーライドする。</param>
+    internal static Mesh GenerateDirtMoundMesh(Vector2[] localPolygon, Vector3 centerPointWorld, bool isDynamic,
+        float thickness = LocalConstants.CONSTRUCTION_DIRT_THICKNESS,
+        float bumpAmplitude = LocalConstants.CONSTRUCTION_DIRT_BUMP_AMPLITUDE)
     {
         if (localPolygon == null || localPolygon.Length < 3) return null;
 
@@ -325,8 +391,7 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
             localVerts, baseTriangles, LocalConstants.CONSTRUCTION_DIRT_MAX_EDGE);
 
         // --- 頂点の高さを決定 ---
-        float thickness = LocalConstants.CONSTRUCTION_DIRT_THICKNESS;
-        float bumpAmp = LocalConstants.CONSTRUCTION_DIRT_BUMP_AMPLITUDE;
+        float bumpAmp = bumpAmplitude;
         float edgeFade = LocalConstants.CONSTRUCTION_DIRT_EDGE_FADE;
 
         int vertexCount = localVerts.Count;
