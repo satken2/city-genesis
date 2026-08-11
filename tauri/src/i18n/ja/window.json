@@ -78,7 +78,9 @@
     "menuParameterEdit": "パラメータ編集",
     "menuPropPlacement": "プロップ配置",
     "menuExecute": "開始",
-    "executeConfirm": "エポックを進めますか？"
+    "executeConfirm": "エポックを進めますか？",
+    "budgetMeterLabel": "予算",
+    "budgetMeterTooltip": "予算見込み / 現預金"
   },
   "topmenu": {
     "editor": "エディタ",

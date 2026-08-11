@@ -587,7 +587,7 @@ pub async fn handle_incoming_message(
             let _ = app.emit("graphic-reconnected", envelope.payload);
         }
         "notification:show" => {
-            if let Some(win) = app.get_webview_window("taskbar") {
+            if let Some(win) = app.get_webview_window(crate::window::LABEL_COCKPIT) {
                 let _ = win.emit("show-toast", &envelope.payload);
             }
         }

@@ -14,7 +14,7 @@
  * ボタンを無効化させる(受信側は Taskbar.tsx)。
  *
  * エポック実行完了後は、結果や達成クエストを**別の独立したウィンドウ**として開く
- * (タスクバーから他のウィンドウを開くのと同じ open_registered_window 経由)。
+ * (HUDから他のウィンドウを開くのと同じ open_registered_window 経由)。
  * こうすることで各ウィンドウは window-registry のサイズで Rust 側により中央配置される。
  * 1. epoch_result ウィンドウ … レスポンスに epoch_report が含まれる場合。達成クエストも引き継ぐ
  *    (結果を確認して閉じた後、notify="modal" のクエストがあればお祝いウィンドウが続く)。

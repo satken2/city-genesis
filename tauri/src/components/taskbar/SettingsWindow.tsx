@@ -1,13 +1,14 @@
 /**
  * 設定ウィンドウコンポーネント
  *
- * タスクバーまたはトップメニューの設定ボタンから開くポップアップウィンドウ。
+ * システムトレイまたはトップメニューの設定ボタンから開くポップアップウィンドウ。
  * ウィンドウのタイトルバーは App.tsx の titlebar コンポーネントが担当するため、
  * 本コンポーネント内にはタイトルや閉じるボタンを含めない。
  *
  * 設定項目:
  * - 文字サイズ: プリセット（大・中・小）またはカスタム入力（8〜32px）
- * - ディスプレイ: タスクバーを別のモニターに移動する
+ * - ディスプレイ: HUD(アイコンパネル・コックピット・システムトレイ)を別のモニターに移動する
+ * - ヒントバー: 画面上部のヒントバーの表示/非表示
  * - 言語: 日本語 / 英語 を切り替える
  * - 音量: マスターボリューム・BGM・サウンドエフェクトのスライダー（ダミー）
  */
@@ -53,6 +54,9 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     return initial;
   });
 
+  /** 画面上部のヒントバーを表示するか。設定ファイルに未記録の場合は表示扱い。 */
+  const [hintbarVisible, setHintbarVisible] = useState(true);
+
   /** GPU設定の状態: enabled=config.tomlの設定, active=実際にCuPyが動作中 */
   const [gpuEnabled, setGpuEnabled] = useState(false);
   const [gpuActive, setGpuActive] = useState(false);
@@ -84,6 +88,7 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         if (settings.volumes) {
           setVolumes((prev) => ({ ...prev, ...settings.volumes }));
         }
+        setHintbarVisible(settings.hintbar_visible !== false);
       })
       .catch((err) => {
         console.error("failed to load settings", err);
@@ -123,7 +128,7 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
 
   /**
    * ディスプレイ切替ボタン押下時の処理
-   * direction が 1 なら次のモニター、-1 なら前のモニターにタスクバーを移動する。
+   * direction が 1 なら次のモニター、-1 なら前のモニターにHUDを移動する。
    * Rust 側で monitor_index は既に設定ファイルに保存されるため、
    * フロントエンド側では追加の保存処理は不要。
    */
@@ -165,6 +170,16 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       setFontSize(parsed);
       void persistCurrentSettings({ font_size: parsed });
     }
+  }
+
+  /**
+   * ヒントバーの表示切り替え処理
+   * 設定ファイルへの保存で発行される settings-updated イベントを
+   * ヒントバーウィンドウが受け取り、その場で表示/非表示が切り替わる。
+   */
+  function handleHintbarVisibleChange(next: boolean) {
+    setHintbarVisible(next);
+    void persistCurrentSettings({ hintbar_visible: next });
   }
 
   /**
@@ -314,6 +329,27 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
             {t("settings.windowReset.button")}
           </button>
         </div>
+      </section>
+
+      <section className="settings-section">
+        <h3 className="settings-section-title">
+          {t("settings.hintbar.label")}
+        </h3>
+        <div className="settings-toggle-options">
+          {([true, false] as const).map((value) => (
+            <button
+              key={value ? "show" : "hide"}
+              className={`settings-toggle-btn ${hintbarVisible === value ? "active" : ""}`}
+              onClick={() => handleHintbarVisibleChange(value)}
+              type="button"
+            >
+              {t(value ? "settings.hintbar.show" : "settings.hintbar.hide")}
+            </button>
+          ))}
+        </div>
+        <p className="settings-preview-text">
+          {t("settings.hintbar.description")}
+        </p>
       </section>
 
       <section className="settings-section">

@@ -60,7 +60,9 @@ const GodEditPanel = lazy(() => import("./components/debug/GodEditPanel").then(m
 // EpochReport は型のみ参照するため、実体をバンドルに含めない type-only import で取得する
 import type { EpochReport } from "./components/taskbar/EpochResultWindow";
 
-import { Taskbar } from "./components/taskbar/Taskbar";
+import { IconPanel } from "./components/hud/IconPanel";
+import { Cockpit } from "./components/hud/Cockpit";
+import { SystemTray } from "./components/hud/SystemTray";
 import { TopMenu } from "./components/topmenu/TopMenu";
 import { LoadingWindow } from "./components/loading/LoadingWindow";
 import { ParameterSetupWindow } from "./components/parameter-setup/ParameterSetupWindow";
@@ -85,14 +87,18 @@ function App() {
   const [openWindowCount, setOpenWindowCount] = useState<number>(0);
   const [queryState, setQueryState] = useState<QueryState>({ status: "idle" });
   const [actionState, setActionState] = useState<string>("");
-  const [windowKind, setWindowKind] = useState<"host" | "taskbar" | "topmenu" | "loading" | "popup" | "notification" | "hintbar" | "parameter-setup" | "tutorial" | "tips">("host");
+  const [windowKind, setWindowKind] = useState<"host" | "icon-panel" | "cockpit" | "system-tray" | "topmenu" | "loading" | "popup" | "notification" | "hintbar" | "parameter-setup" | "tutorial" | "tips">("host");
 
   useEffect(() => {
     let disposed = false;
     const initialize = async () => {
       const label = appWindow.label;
-      if (label === "taskbar") {
-        setWindowKind("taskbar");
+      if (label === "icon-panel") {
+        setWindowKind("icon-panel");
+      } else if (label === "cockpit") {
+        setWindowKind("cockpit");
+      } else if (label === "system-tray") {
+        setWindowKind("system-tray");
       } else if (label === "topmenu") {
         setWindowKind("topmenu");
       } else if (label === "loading") {
@@ -117,7 +123,9 @@ function App() {
         setOpenWindowCount(status.open_window_count);
       }
 
-      if (label !== "main" && label !== "taskbar" && label !== "topmenu" && label !== "notification" && label !== "tips") {
+      // HUD3枚・トップメニュー・通知・Tipsは window-registry のポップアップではないため context を持たない
+      const contextlessLabels = ["main", "icon-panel", "cockpit", "system-tray", "topmenu", "notification", "tips"];
+      if (!contextlessLabels.includes(label)) {
         const initialContext = await invoke<WindowContext>("get_window_context");
         if (!disposed) {
           setContext(initialContext);
@@ -252,8 +260,12 @@ function App() {
     <MasterDataProvider apiBaseUrl={apiBaseUrl}>
       {windowKind === "topmenu" ? (
         <TopMenu />
-      ) : windowKind === "taskbar" ? (
-        <Taskbar />
+      ) : windowKind === "icon-panel" ? (
+        <IconPanel />
+      ) : windowKind === "cockpit" ? (
+        <Cockpit />
+      ) : windowKind === "system-tray" ? (
+        <SystemTray />
       ) : windowKind === "hintbar" ? (
         <Hintbar />
       ) : windowKind === "tutorial" ? (

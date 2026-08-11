@@ -155,7 +155,7 @@ export function ParameterSetupWindow({ apiBaseUrl }: ParameterSetupWindowProps) 
   const [busy, setBusy] = useState(false);
   const [fetching, setFetching] = useState(false);
   const [fetchError, setFetchError] = useState(false);
-  // ゲーム内編集モード（テンプレート作成モード中に Taskbar から開いた再編集）かどうか。
+  // ゲーム内編集モード（テンプレート作成モード中にアイコンパネルから開いた再編集）かどうか。
   // 初期セットアップ（新規ゲーム開始）では false。編集モードでは完了しても game:start を
   // 送らず、ウィンドウを閉じるだけにする。
   const [editMode, setEditMode] = useState(false);

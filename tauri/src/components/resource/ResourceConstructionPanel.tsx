@@ -2,8 +2,8 @@
  * 資源編集パネル
  *
  * window_type="resource_edit" のポップアップウィンドウで表示する専用パネル。
- * テンプレート作成モード(template_mode)専用の機能で、タスクバーのボタンも
- * template_mode が ON のときのみ表示される(Taskbar.tsx参照)。
+ * テンプレート作成モード(template_mode)専用の機能で、アイコンパネルのボタンも
+ * template_mode が ON のときのみ表示される(hud/IconPanel.tsx参照)。
  * PathConstructionPanel と同じ単列レイアウト。
  *
  * 操作フロー:

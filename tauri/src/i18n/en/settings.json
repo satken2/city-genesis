@@ -14,6 +14,12 @@
       "prev": "Previous Display",
       "next": "Next Display"
     },
+    "hintbar": {
+      "label": "Hint Bar",
+      "show": "Show",
+      "hide": "Hide",
+      "description": "Bar at the top of the screen that shows operation hints"
+    },
     "language": {
       "label": "Language",
       "ja": "日本語",

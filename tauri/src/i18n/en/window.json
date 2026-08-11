@@ -101,7 +101,9 @@
     "menuParameterEdit": "Edit Parameters",
     "menuPropPlacement": "Prop Placement",
     "menuExecute": "Execute",
-    "executeConfirm": "Advance the epoch?"
+    "executeConfirm": "Advance the epoch?",
+    "budgetMeterLabel": "Budget",
+    "budgetMeterTooltip": "Projected budget / cash on hand"
   },
   "topmenu": {
     "editor": "Editor",

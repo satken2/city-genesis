@@ -9,7 +9,7 @@ const SETTINGS_FILE_NAME: &str = "settings.json";
 /**
  * アプリケーション設定を表す構造体
  *
- * 言語、フォントサイズ、音量、タスクバー表示モニターなどの
+ * 言語、フォントサイズ、音量、タスクバー表示モニター、ヒントバー表示可否などの
  * ユーザー設定を一元管理する。
  * serde の default 属性により、設定ファイルに項目が存在しない場合でも
  * 安全にデシリアライズできる。
@@ -21,6 +21,7 @@ pub struct AppSettings {
     pub font_size: f64,
     pub volumes: HashMap<String, u8>,
     pub monitor_index: usize,
+    pub hintbar_visible: bool,
 }
 
 impl Default for AppSettings {
@@ -34,6 +35,7 @@ impl Default for AppSettings {
             font_size: 15.0,
             volumes,
             monitor_index: 0,
+            hintbar_visible: true,
         }
     }
 }

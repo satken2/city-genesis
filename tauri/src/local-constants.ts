@@ -6,7 +6,7 @@
 /**
  * `tauri build` でバンドルされた本番 UI（配布用 exe に相当）で動作しているとき true。
  * `tauri dev`（Vite 開発サーバ経由の実行）では false。
- * 開発時は Unity との Named Pipe が無くてもバックエンド API だけでトップメニュー／タスクバーの表示を検証できるようにする。
+ * 開発時は Unity との Named Pipe が無くてもバックエンド API だけでトップメニュー／HUDの表示を検証できるようにする。
  */
 export const IS_PACKAGED_PRODUCTION_UI = import.meta.env.PROD;
 

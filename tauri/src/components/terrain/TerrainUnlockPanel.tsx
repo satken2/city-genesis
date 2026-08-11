@@ -5,7 +5,7 @@
  * 地形セルを選択してバックエンドの POST /api/v1/terrain/acquire-cell で開放する。
  *
  * 操作フロー:
- *   1. タスクバーの pixels アイコンをクリックしてパネルを開く
+ *   1. コックピットの pixels アイコンをクリックしてパネルを開く
  *   2. 同時に Unity に STATE_UNLOCK_CELL を送信し、地形セル選択モードに入る
  *   3. Unity で地形セルをクリックすると unlock_cell:select_cell イベントが通知される
  *   4. 未開放セルの場合は座標と確定ボタンを表示する

@@ -6,7 +6,8 @@ Unityのグラフィックの上に透明なWebViewウィンドウとして重�
 
 # アーキテクチャ(知らないと絶対わからない)
 
-- **1つのReactアプリ(`src/App.tsx`)が全ウィンドウを描画する。** Tauriのウィンドウラベル(`main` / `taskbar` / `topmenu` / `loading` / `notification` / `hintbar` / `tutorial` / `parameter-setup` / `tips` / それ以外=popup)によって`windowKind`が決まり、描画内容が分岐する。
+- **1つのReactアプリ(`src/App.tsx`)が全ウィンドウを描画する。** Tauriのウィンドウラベル(`main` / `icon-panel` / `cockpit` / `system-tray` / `topmenu` / `loading` / `notification` / `hintbar` / `tutorial` / `parameter-setup` / `tips` / それ以外=popup)によって`windowKind`が決まり、描画内容が分岐する。
+- **ゲーム中に常駐するHUDは3枚のウィンドウに分かれている**(`icon-panel`=画面左端の縦並びメニュー、`cockpit`=画面下部中央、`system-tray`=画面右下)。Unityの3Dビューに重ねる透明ウィンドウは、見た目が透明な領域でもクリックをWebViewが吸ってしまうため、**パネルの実面積ぴったりのウィンドウに分割する必要がある**(1枚の全画面ウィンドウにはできない)。生成・配置・表示切替はRust側(`window.rs`の`create_hud_windows` / `layout_hud_windows` / `set_hud_visible`)、中身は`src/components/hud/`。
 - **ポップアップパネルはすべて `React.lazy` で遅延インポートされる。** メインバンドルから重い依存(`three.js` / `recharts`)を切り離し、新規ウィンドウ起動時のJSパース量を減らすため。ポップアップの `<section>` 内は `<Suspense key={`${window_type}:${entity_id}:${label}`}>` で囲まれ、context切り替え時に内部コンポーネントが確実に再マウントされる(各Panelが `initialEntityId` を `useState` 初期値に取る実装のため、prop変更を追跡できないことを補う)。新しいパネルを追加するときも `lazy(() => import(...))` の形式で追加すること。
 - ポップアップウィンドウの種類(サイズ、単一/複数インスタンスのポリシー等)は`src-tauri/config/window-registry.json`で定義される。同時に開けないウィンドウの組は`window-mutex-groups.json`で定義される。
 - 各ウィンドウは起動時にTauriコマンド`get_window_context`で自分の`WindowContext`(ウィンドウタイプ、対象エンティティ等)を取得する。
@@ -36,7 +37,7 @@ Unityのグラフィックの上に透明なWebViewウィンドウとして重�
 | `api.ts` | バックエンドHTTP通信の共通窓口。`fetchApi<T>()`と`buildApiUrl()`。**fetchを直接書かないこと**。fetchApiはAcceptヘッダでMessagePackを受け入れ宣言し、バックエンドの対応エンドポイント(bbox一括取得系)からはバイナリで受信して`@msgpack/msgpack`でデコードする(Content-Typeで自動判別。呼び出し側は形式を意識しない) |
 | `ipc.ts` | Unityへのイベント送信(`sendChangeState`, `sendEditBuildingConfirm`等)。**Unityに何か伝えたいときはここに関数を追加する** |
 | `notification.ts` | 通知ウィンドウの表示(`showNotification`) |
-| `cityNotifications.ts` | L1通知(タスクバー重大通知)の共通処理。`fetchL1Notifications`(GET /api/v1/notifications)・`formatL1NotificationMessage`(i18nキー`notifications.types.<type>`への差し込み。未知typeはフォールバック)・`NOTIFICATION_ENTITY_WINDOW_TYPES`(通知対象→詳細ウィンドウの対応表)。TaskbarとCityNotificationsWindowが共用 |
+| `cityNotifications.ts` | L1通知(重大通知)の共通処理。`fetchL1Notifications`(GET /api/v1/notifications)・`formatL1NotificationMessage`(i18nキー`notifications.types.<type>`への差し込み。未知typeはフォールバック)・`NOTIFICATION_ENTITY_WINDOW_TYPES`(通知対象→詳細ウィンドウの対応表)。コックピット(hud/Cockpit.tsx)とCityNotificationsWindowが共用 |
 | `hintbar.ts` | 画面下部ヒントバーのテキスト設定 |
 | `settings.ts` | アプリ設定のロード・保存 |
 | `playSound.ts` | 効果音再生 |
@@ -88,11 +89,13 @@ UI側で独自に定義する定数は`local-constants.ts`に定義する。
 ソースコードのコメントは、日本語で丁寧に書いてください。後から読んでもわかるように。 
 「今回、この変更をした理由」(前回からの差分に関するコメント)は書かない。あくまで、「現在の仕様とその理由」にフォーカスしたコメントを書くこと。
 
-# トップメニューとタスクバーの表示条件
+# トップメニューとHUDの表示条件
 
 バックエンドの `GET /api/v1/sessions` が返す `current_save_id` は、**サーバ起動直後・セッション作成 API をまだ呼んでいない間**は JSON の `null` になる。`POST /api/v1/sessions` で新規セッションを作ると、ファイル保存の前から UUID 文字列が入る（`null` のままではない）。
 
-トップメニュー／タスクバーの WebView ウィンドウの表示は `TopMenu.tsx`・`Taskbar.tsx` のポーリングが決める。どちらの実行形態（`tauri build` でパッケージした本番 UI も `tauri dev` の開発実行も）とも、`current_save_id` のみで表示を切り替える。`current_save_id` が `null` の間はトップメニューを表示し、非 `null` の間はタスクバーを表示する。
+トップメニュー／HUD の WebView ウィンドウの表示は `TopMenu.tsx`・`hud/useHudSession.ts` のポーリング受信が決める。どちらの実行形態（`tauri build` でパッケージした本番 UI も `tauri dev` の開発実行も）とも、`current_save_id` のみで表示を切り替える。`current_save_id` が `null` の間はトップメニューを表示し、非 `null` の間はHUD3枚を表示する。Rust側も同じ条件で `set_hud_visible` を呼ぶ(二重だが、片方の取りこぼしで出たまま/消えたままになるのを防ぐため両方残している)。
+
+ヒントバーの表示は「セッションがロード済み(`current_save_id` が非 `null`)」かつ「設定 `hintbar_visible` が真」のANDで決まる。ゲーム開始時にネイティブウィンドウを出すのは Rust 側の `show_hintbar_if_enabled`(設定を見て show/hide を判断する唯一の入口。`hintbar.show()` を直接呼ばないこと)で、設定変更の即時反映は `Hintbar.tsx` が `settings-updated` イベントを受けて `show()`/`hide()` する。
 
 # 実行環境
 

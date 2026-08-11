@@ -111,7 +111,7 @@ export function SaveListWindow({ apiBaseUrl, onClose }: SaveListWindowProps) {
   /**
    * セーブデータのロード実行
    * Rust 側の start_load_game コマンドを呼び出し、
-   * Unity 起動 → Loading 表示 → バックエンドロード → ポーリング待機 → Taskbar 表示
+   * Unity 起動 → Loading 表示 → バックエンドロード → ポーリング待機 → HUD 表示
    * という一連のフローを Rust 側に委譲する。
    */
   const handleLoad = useCallback(

@@ -120,7 +120,7 @@ export function FontSizeProvider({ children }: { children: ReactNode }) {
    * 他ウィンドウからのフォントサイズ変更イベントをリッスンする
    *
    * Tauriのemitは全ウィンドウにイベントを配送するため、
-   * タスクバーで変更したフォントサイズがポップアップにも即座に反映される。
+   * 設定ウィンドウで変更したフォントサイズがポップアップにも即座に反映される。
    */
   useEffect(() => {
     const unlisten = listen<number>(EVENT_FONT_SIZE_CHANGED, (event) => {

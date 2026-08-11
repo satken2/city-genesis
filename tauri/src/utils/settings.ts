@@ -5,13 +5,15 @@ import { emit } from "@tauri-apps/api/event";
  * アプリケーション設定の型定義
  *
  * Rust 側の settings::AppSettings と対応する。
- * 言語、フォントサイズ、音量、タスクバー表示モニターなどを含む。
+ * 言語、フォントサイズ、音量、タスクバー表示モニター、ヒントバー表示可否などを含む。
  */
 export type AppSettings = {
   language: string;
   font_size: number;
   volumes: Record<string, number>;
   monitor_index: number;
+  /** 画面上部のヒントバーを表示するか */
+  hintbar_visible: boolean;
 };
 
 /**

@@ -544,7 +544,7 @@ export async function sendSessionReload(): Promise<void> {
 /**
  * `session.force_reload`
  * すべての3Dオブジェクトを消去してからバックエンドからデータを取得し、再描画する。
- * タスクバーのリロードボタンなど、明示的に全オブジェクトを作り直したい場合に使用する。
+ * システムトレイのリロードボタンなど、明示的に全オブジェクトを作り直したい場合に使用する。
  */
 export async function sendSessionForceReload(): Promise<void> {
   await invoke("send_window_action", {

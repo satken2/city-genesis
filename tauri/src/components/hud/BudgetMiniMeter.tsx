@@ -1,8 +1,8 @@
 /**
- * 予算ミニメーター（タスクバー常駐）
+ * 予算ミニメーター（コックピット常駐）
  *
  * 市政府の「使用可能な現預金」に対する「予算見込み額（フル稼働必要額）」の割合を、
- * 常時タスクバー右側に表示する小型メーター。プレイヤーが CityBudgetWindow を開かなくても
+ * 常時コックピットに表示する小型メーター。プレイヤーが CityBudgetWindow を開かなくても
  * 資金繰りが健全か（見込み費用が現預金に収まっているか）を一目で把握できる。
  *
  * - メーター全体の横幅 = 現預金、色塗り幅 = 予算見込み額（ratio = 見込み / 現預金）
@@ -135,13 +135,9 @@ export function BudgetMiniMeter({
       type="button"
       className={`budget-mini-meter${over ? " budget-mini-meter--over" : ""}`}
       onClick={onOpen}
-      title={t("taskbar.budgetMeterTooltip", {
-        defaultValue: "予算見込み / 現預金",
-      })}
+      title={t("taskbar.budgetMeterTooltip")}
     >
-      <span className="budget-mini-meter__label">
-        {t("taskbar.budgetMeterLabel", { defaultValue: "予算" })}
-      </span>
+      <span className="budget-mini-meter__label">{t("taskbar.budgetMeterLabel")}</span>
       <div className="budget-mini-meter__bar">
         {hasData ? (
           <Meter value={ratio} color={fillColor} />

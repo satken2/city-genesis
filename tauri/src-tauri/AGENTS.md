@@ -7,7 +7,7 @@ Tauri(Rust)側のプログラム。ウィンドウ管理とUnityとのMMF(Memory
 | ファイル | 内容 |
 | --- | --- |
 | `src/lib.rs` | Tauriコマンド定義の集約と起動処理。ウィンドウレジストリ・ミューテックスグループのロード、バックエンド/グラフィックの起動コマンド解決 |
-| `src/window.rs` | ウィンドウ管理の本体。`open_window`(レジストリ定義に基づくポップアップ生成、single/multiple/single_per_entityのインスタンスポリシー、ミューテックスルール適用)、通知キュー、ローディングウィンドウ、`launch_graphic`、`record_window_geometry`(起動中の位置・サイズ記憶)、`close_window_by_label`(ウィンドウを閉じた際の後始末処理 - 編集モードから通常モードへの復帰、接続端子・接道・パス干渉ハイライトの消去、パス結合/分割の対象選択モードの打ち切り`edit_path:cancel_topology_edit`など) |
+| `src/window.rs` | ウィンドウ管理の本体。HUD(常駐パネル)の生成・配置・表示切替(`create_hud_windows` / `layout_hud_windows` / `set_hud_visible` / `resize_icon_panel`)、`open_window`(レジストリ定義に基づくポップアップ生成、single/multiple/single_per_entityのインスタンスポリシー、ミューテックスルール適用)、通知キュー、ローディングウィンドウ、`launch_graphic`、`record_window_geometry`(起動中の位置・サイズ記憶)、`close_window_by_label`(ウィンドウを閉じた際の後始末処理 - 編集モードから通常モードへの復帰、接続端子・接道・パス干渉ハイライトの消去、パス結合/分割の対象選択モードの打ち切り`edit_path:cancel_topology_edit`など) |
 | `src/ipc.rs` | UnityとのMMF IPC実装。リーダーループ、書き込み(Mutex/Event同期)、`send_to_parent`(Unity宛て送信)。容量8192バイトの固定バッファ |
 | `src/messages.rs` | `Envelope`等のメッセージ型定義。**Unity側`Assets/Scripts/IPC/IpcEnvelope.cs`と構造を一致させる必要がある** |
 | `src/state.rs` | プロセス全体の共有状態 |
@@ -18,6 +18,9 @@ Tauri(Rust)側のプログラム。ウィンドウ管理とUnityとのMMF(Memory
 
 ## 知らないとわからないこと
 
+- **ゲーム中に常駐するHUDは3枚のウィンドウ(`icon-panel` / `cockpit` / `system-tray`)に分かれている。** Unityの3Dビューに重ねる透明ウィンドウは、見た目が透明な領域でもクリックをWebViewが吸ってしまうため、パネルの実面積ぴったりのウィンドウに分割する必要がある(1枚の全画面ウィンドウにはできない)。位置とサイズの定数は`window.rs`冒頭にまとまっている。**新しいウィンドウラベルを足したら`capabilities/default.json`の`windows`にも必ず追加すること**(漏れるとそのウィンドウからTauriコマンドを呼べない)。
+- **ポップアップの配置計算はHUDの占有領域を避ける。** `HUD_LEFT_RESERVED`(左端のアイコンパネル幅)だけ左ドック(`left_panel` / `left_panel_narrow` / `left_top`)を右へずらし、丈と中央寄せは`HUD_BOTTOM_RESERVED`(下部中央のコックピット高)を引く。右サイドパネルと通知トーストだけは中央のコックピットと重ならないため、薄い`HUD_RIGHT_BOTTOM_RESERVED`(右下のシステムトレイ高)で足りる。HUDのサイズを変えたらこれらの定数だけ直せば全ポップアップに反映される。
+- **アイコンパネルの高さだけはRust側で決められない**(アイコン数がテンプレートモードで変わる)。React側が実測して`resize_icon_panel`コマンドで通知し、`layout_hud_windows`が上下中央寄せで再配置する。
 - Reactコンポーネントから別ウィンドウを開く処理は、Tauriコマンド`open_window`の呼び出しに行き着く。ウィンドウの実体管理(ラベル採番、二重起動防止)はすべてRust側にある。また、ウィンドウが閉じられる際の後始末（エディタを閉じたときに `STATE_NORMAL` に戻す、詳細パネルを閉じたときにインフラ接続マーカーや接道表示を消去するなど）も `window.rs` の `close_window_by_label` で自動的に行う。これにより Webview が突然シャットダウンしても Unity 側の状態が取り残されるのを防ぐ。
 - **ポップアップウィンドウのクローズは「破棄」ではなく「非表示化して再利用待ち」が既定動作**(`MAX_HIDDEN_WINDOWS=10` の LRU)。`close_window_by_label` はWebView2を破棄せず `hide()` し、`OpenWindowState.hidden=true` + `AppState.hidden_lru` に追加する。これによりユーザが同じウィンドウ種別を開き直したとき、新規WebView2起動(約0.4秒)を回避して `show()` + `set_focus()` + `window-context-updated` emit だけで済み、体感的に瞬時に開く。非表示ウィンドウが上限を超えると最古のものから本当に破棄される。`open_window` の再利用優先度は (1) 同一 `instance_key` の非表示ウィンドウ → (2) 任意の非表示ポップアップ(window_type/entity/params/title を上書きして転用) → (3) 新規生成。Tauriはラベル変更不可なので、(2)の転用ではラベルは不変(Reactは `window-context-updated` イベントで新しいcontextを受けて再レンダリングする)。クローズ時の副作用(STATE_NORMAL復帰など)は非表示化の時点で実行済みで、LRU上限による破棄時には再実行されない。**再利用でもReactパネルの状態は必ずリセットされる**: `OpenWindowState.open_seq`(世代番号)を非表示→再表示(1)と転用(2)のたびにインクリメントして `WindowContextDto` で配信し、React側(`App.tsx`)が再マウントキーに含めているため。表示中ウィンドウへの再オープン要求(単なるフォーカス移動)ではインクリメントしない。これが無いと、マウント時に1回だけフェッチ/初期化するパネル(例: 建物建設パネルの市庁舎ゲート判定)が前回オープン時の古いstateを引きずる。
 - ポップアップウィンドウの位置・サイズは**プロセス起動中のみ**`AppState.saved_geometries`(window_type別)に記憶され、再オープン時に復元される。`WindowEvent::Resized`/`Moved`でリアルタイム保存。ドック配置(layout指定)ウィンドウはサイズのみ、自由配置ウィンドウは位置とサイズの両方が復元される。永続化はされない。新規・再利用の両方で同じレイアウト計算(`compute_window_geometry`)を通る。**記憶するサイズは内側(クライアント領域)基準**: 復元側の `inner_size` / `set_size` が内側基準のため、`outer_size` で記憶すると開き直すたびに枠の厚み分ウィンドウが膨張する(装飾なしでもリサイズ可能ウィンドウは不可視のリサイズ枠を持つ)。位置は `outer_position` / `set_position` のどちらも外枠基準で一致している。

@@ -1,0 +1,105 @@
+/**
+ * HUD(アイコンパネル・コックピット・システムトレイ)の共通スタイル
+ *
+ * 3枚のウィンドウはそれぞれパネルの実面積ぴったりのサイズで生成されるため、
+ * パネル本体はウィンドウいっぱいに広がり、角丸と縁でUnityの3Dビューから浮いて見せる。
+ * 既存のダークテーマ(紺色系)に合わせる。
+ */
+
+/* ─── パネル本体の共通の見た目 ─── */
+
+.hud-panel {
+  display: flex;
+  background: linear-gradient(
+    180deg,
+    rgba(18, 28, 44, 0.92) 0%,
+    rgba(12, 20, 32, 0.96) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(16px);
+  user-select: none;
+  color: #e5eef9;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 13px;
+}
+
+/*
+ * エポック実行中の無効化状態。
+ * pointer-events: none で全ボタンのクリックを一括で無効化し、
+ * opacity を下げて操作不能であることを視覚的に示す。
+ */
+.hud-disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* ─── アイコンボタンの共通枠 ─── */
+
+.hud-icon-btn {
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.12s;
+  padding: 4px;
+}
+
+.hud-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.hud-icon-btn:disabled {
+  opacity: 0.3;
+  pointer-events: none;
+  filter: grayscale(100%);
+  cursor: not-allowed;
+}
+
+.hud-icon-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* トグル系ボタン(ブルドーザ・地区編集)のアクティブ表示 */
+.hud-icon-btn--active {
+  background: rgba(233, 84, 32, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(233, 84, 32, 0.8);
+}
+
+.hud-icon-btn--active:hover {
+  background: rgba(233, 84, 32, 0.45);
+}
+
+/* ─── チュートリアル用ハイライト ─── */
+
+@keyframes hud-organic-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(28, 113, 216, 0.4);
+  }
+  50% {
+    transform: scale(1.12);
+    box-shadow: 0 0 16px 4px rgba(28, 113, 216, 0.8);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(28, 113, 216, 0.4);
+  }
+}
+
+.hud-highlighted-btn {
+  animation: hud-organic-pulse 1.8s infinite ease-in-out;
+  position: relative;
+  z-index: 10;
+}
+
+.hud-icon-btn.hud-highlighted-btn {
+  background: rgba(28, 113, 216, 0.25);
+  border: 1px solid rgba(28, 113, 216, 0.6);
+}

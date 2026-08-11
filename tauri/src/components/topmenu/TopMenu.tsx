@@ -107,7 +107,7 @@ export function TopMenu() {
    * デバッグ初期化ボタン押下時の処理。
    *
    * Rust 側の start_debug_init を呼び出し、Unity 起動 → LoadingWindow 表示 →
-   * バックエンド POST → ポーリング待機 → Taskbar 表示 の一連のフローを実行する。
+   * バックエンド POST → ポーリング待機 → HUD 表示 の一連のフローを実行する。
    */
   async function handleDebugInit() {
     try {

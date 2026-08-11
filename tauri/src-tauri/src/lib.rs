@@ -84,9 +84,6 @@ fn load_backend_launch_command() -> String {
     std::env::var("GENESIS_BACKEND_COMMAND").unwrap_or_default()
 }
 
-/// タスクバーの高さ（論理ピクセル）
-const TASKBAR_HEIGHT: f64 = 54.0;
-
 /// トップメニューのサイズ
 const TOPMENU_WIDTH: f64 = 800.0;
 const TOPMENU_HEIGHT: f64 = 600.0;
@@ -117,16 +114,12 @@ fn get_connection_status(state: tauri::State<'_, SharedState>) -> Value {
     window::get_connection_status(state.inner())
 }
 
-/// タスクバーの現在の状態を返す
-/// フロントエンドのTaskbarコンポーネントが初期化時に呼び出す
+/// アイコンパネルの高さをReact側の実測値に合わせる。
+/// アイコン数がテンプレートモードの有無で変わるため、中身の高さが変わるたびに
+/// React(`IconPanel`)から通知させ、ウィンドウに透明な余白ができないようにする。
 #[tauri::command]
-fn get_taskbar_state(state: tauri::State<'_, SharedState>) -> Value {
-    let guard = state.lock();
-    serde_json::json!({
-        "monitorIndex": guard.current_monitor_index,
-        "gameTime": guard.game_time,
-        "apiBaseUrl": guard.api_base_url,
-    })
+fn resize_icon_panel(app: tauri::AppHandle, state: tauri::State<'_, SharedState>, height: f64) {
+    window::resize_icon_panel(&app, state.inner(), height);
 }
 
 /// トップメニューの初期状態を返す
@@ -139,7 +132,7 @@ fn get_topmenu_state(state: tauri::State<'_, SharedState>) -> Value {
     })
 }
 
-/// タスクバーとトップメニューを別のモニターに移動する
+/// HUD(アイコンパネル・コックピット・システムトレイ)とトップメニューを別のモニターに移動する
 /// directionが1なら次のモニター、-1なら前のモニターに移動する
 /// モニターが1つしかない場合は何もしない
 #[tauri::command]
@@ -169,16 +162,8 @@ fn switch_monitor(app: tauri::AppHandle, state: tauri::State<'_, SharedState>, d
     let monitor_size = monitor.size().to_logical::<f64>(scale);
     let monitor_pos = monitor.position().to_logical::<f64>(scale);
 
-    // タスクバーを対象モニターの最下部に移動する
-    let taskbar = app.get_webview_window("taskbar")
-        .ok_or("taskbar window not found")?;
-    taskbar.set_size(tauri::LogicalSize::new(monitor_size.width, TASKBAR_HEIGHT))
-        .map_err(|err| err.to_string())?;
-    taskbar.set_position(tauri::LogicalPosition::new(
-        monitor_pos.x,
-        monitor_pos.y + monitor_size.height - TASKBAR_HEIGHT,
-    ))
-        .map_err(|err| err.to_string())?;
+    // HUD3枚(左端のアイコンパネル・下部中央のコックピット・右下のシステムトレイ)を対象モニターへ移動する
+    window::layout_hud_windows(&app, &monitors, new_index, None);
 
     // ヒントバーも同じモニターの上部中央に移動する。
     if let Some(hintbar) = app.get_webview_window("hintbar") {
@@ -201,7 +186,7 @@ fn switch_monitor(app: tauri::AppHandle, state: tauri::State<'_, SharedState>, d
     }
 
     // トップメニューも同じモニターの中央に移動する。
-    // ゲーム終了後にトップメニューが表示された際、タスクバーと同じモニターに
+    // ゲーム終了後にトップメニューが表示された際、HUDと同じモニターに
     // 出現するよう、ここで位置を同期しておく。
     if let Some(topmenu) = app.get_webview_window("topmenu") {
         let topmenu_x = monitor_pos.x + (monitor_size.width - TOPMENU_WIDTH) / 2.0;
@@ -224,6 +209,21 @@ fn load_app_settings(app: tauri::AppHandle) -> Result<settings::AppSettings, Str
 #[tauri::command]
 fn save_app_settings(app: tauri::AppHandle, settings: settings::AppSettings) -> Result<(), String> {
     settings::save_settings(&app, &settings)
+}
+
+/// ヒントバーウィンドウをユーザー設定に従って表示/非表示にする。
+///
+/// ゲーム開始時にヒントバーを出す箇所は複数あるため、
+/// 「設定で非表示にしているなら出さない」という判断をここに集約する。
+/// 設定変更時の即時反映は Hintbar コンポーネント側が `settings-updated` を受けて行う。
+fn show_hintbar_if_enabled(app: &tauri::AppHandle) {
+    if let Some(hintbar) = app.get_webview_window("hintbar") {
+        if settings::load_settings(app).hintbar_visible {
+            let _ = hintbar.show();
+        } else {
+            let _ = hintbar.hide();
+        }
+    }
 }
 
 /// `window-registry.json` のキーに対応するポップアップを開く（タスクバーのショートカット用）
@@ -259,7 +259,7 @@ fn launch_graphic(state: tauri::State<'_, SharedState>) -> Result<String, String
 /// 新規ゲームセッションを開始する。
 /// Unity を起動し、topmenu を隠して loading を表示した後、
 /// バックエンドに POST /api/v1/sessions を送信する。
-/// バックエンドの準備完了はポーリングスレッドが検知し、自動的に taskbar を表示する。
+/// バックエンドの準備完了はポーリングスレッドが検知し、自動的にHUDを表示する。
 #[tauri::command]
 async fn start_new_game(
     app: tauri::AppHandle,
@@ -1532,12 +1532,8 @@ fn finish_parameter_setup(
         guard.current_monitor_index
     };
     window::close_parameter_setup_window(&app);
-    if let Some(taskbar) = app.get_webview_window("taskbar") {
-        let _ = taskbar.show();
-    }
-    if let Some(hintbar) = app.get_webview_window("hintbar") {
-        let _ = hintbar.show();
-    }
+    window::set_hud_visible(&app, true);
+    show_hintbar_if_enabled(&app);
     send_game_start_ipc(state.inner(), &app, camera_pos);
 
     // close_parameter_setup_window の直後に builder.build() を呼ぶと、
@@ -1875,21 +1871,13 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                             log::error!("[session-poll] パラメータ設定ウィンドウ表示失敗: {e}");
                             // フォールバック: 通常フローで game:start を送信
                             send_game_start_ipc(&state, &app, camera_pos);
-                            if let Some(taskbar) = app.get_webview_window("taskbar") {
-                                let _ = taskbar.show();
-                            }
-                            if let Some(hintbar) = app.get_webview_window("hintbar") {
-                                let _ = hintbar.show();
-                            }
+                            window::set_hud_visible(&app, true);
+                            show_hintbar_if_enabled(&app);
                         }
                     } else {
                         // テンプレートモード、チュートリアルモード、またはローディング中でない（外部セッション）: 通常フロー
-                        if let Some(taskbar) = app.get_webview_window("taskbar") {
-                            let _ = taskbar.show();
-                        }
-                        if let Some(hintbar) = app.get_webview_window("hintbar") {
-                            let _ = hintbar.show();
-                        }
+                        window::set_hud_visible(&app, true);
+                        show_hintbar_if_enabled(&app);
                         // チュートリアルミッションから開始した場合はチュートリアルウィンドウを表示する。
                         // ヒントバーの直下に配置され、ステップ形式で操作ガイドを提供する。
                         // show() でネイティブウィンドウを表示した後、tutorial:show イベントを
@@ -1922,10 +1910,8 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                     // Tips ウィンドウを非表示にする/閉じる
                     window::close_tips_window(&app);
 
-                    // Taskbar・Hintbar を隠して topmenu を表示
-                    if let Some(taskbar) = app.get_webview_window("taskbar") {
-                        let _ = taskbar.hide();
-                    }
+                    // HUD・Hintbar を隠して topmenu を表示
+                    window::set_hud_visible(&app, false);
                     if let Some(hintbar) = app.get_webview_window("hintbar") {
                         let _ = hintbar.hide();
                     }
@@ -2079,28 +2065,11 @@ pub fn run() {
             .build()
             .expect("failed to create topmenu window");
 
-            // タスクバーウィンドウを target_monitor の最下部に生成する。
-            // 初期状態では非表示。Taskbar コンポーネントがパイプ接続と GET /api/v1/sessions の current_save_id を見て表示する。
-            let taskbar_x = pos.x;
-            let taskbar_y = pos.y + size.height - TASKBAR_HEIGHT;
-
-            let _taskbar = WebviewWindowBuilder::new(
-                app,
-                "taskbar",
-                WebviewUrl::App("index.html".into()),
-            )
-            .title("Genesis Taskbar")
-            .decorations(false)
-            .transparent(true)
-            .shadow(false)
-            .always_on_top(true)
-            .skip_taskbar(true)
-            .resizable(false)
-            .visible(false)
-            .inner_size(size.width, TASKBAR_HEIGHT)
-            .position(taskbar_x, taskbar_y)
-            .build()
-            .expect("failed to create taskbar window");
+            // HUDウィンドウ3枚(左端のアイコンパネル・下部中央のコックピット・右下のシステムトレイ)を
+            // target_monitor 上に生成する。初期状態では非表示で、
+            // GET /api/v1/sessions の current_save_id が非nullになったポーリングで表示される。
+            window::create_hud_windows(app.handle(), &monitors, monitor_index)
+                .expect("failed to create HUD windows");
 
             // ヒントバーウィンドウを target_monitor の上部中央に生成する。
             // 初期状態では表示。セッション未ロード時に session-state イベントで非表示となる。
@@ -2165,7 +2134,7 @@ pub fn run() {
             let notification_width = 320.0;
             let notification_max_height = 200.0;
             let notification_x = pos.x + size.width - notification_width - notification_margin;
-            let notification_y = pos.y + size.height - TASKBAR_HEIGHT - notification_max_height - notification_margin;
+            let notification_y = pos.y + size.height - window::HUD_RIGHT_BOTTOM_RESERVED - notification_max_height - notification_margin;
 
             let _notification = WebviewWindowBuilder::new(
                 app,
@@ -2192,7 +2161,7 @@ pub fn run() {
             move |window, event| {
                 match event {
                     // ウィンドウの×ボタン(Alt+F4含む)。
-                    // - main/topmenu/taskbar はアプリの主要サーフェスなので、
+                    // - main/topmenu/HUD3枚 はアプリの主要サーフェスなので、
                     //   閉じる操作を「アプリ全体の終了要求」として扱い、
                     //   終了シーケンス(Unity通知→バックエンド統括shutdown→自終了)に合流させる。
                     // - open_windows 管理下のポップアップは既存の hide+LRU 再利用
@@ -2201,7 +2170,10 @@ pub fn run() {
                     WindowEvent::CloseRequested { api, .. } => {
                         let label = window.label().to_string();
                         match label.as_str() {
-                            "main" | "topmenu" | "taskbar" => {
+                            "main" | "topmenu"
+                            | window::LABEL_ICON_PANEL
+                            | window::LABEL_COCKPIT
+                            | window::LABEL_SYSTEM_TRAY => {
                                 api.prevent_close();
                                 let app = window.app_handle().clone();
                                 let state = event_state.clone();
@@ -2256,7 +2228,7 @@ pub fn run() {
             close_current_window,
             send_window_action,
             get_connection_status,
-            get_taskbar_state,
+            resize_icon_panel,
             get_topmenu_state,
             switch_monitor,
             open_registered_window,

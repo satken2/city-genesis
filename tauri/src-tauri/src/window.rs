@@ -6,10 +6,162 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
 use tauri::{AppHandle, Emitter, LogicalPosition, LogicalSize, Manager, Monitor, WebviewUrl, WebviewWindowBuilder};
 
-/// タスクバーの高さ（lib.rsと同じ値）
-const TASKBAR_HEIGHT: f64 = 54.0;
+/// HUD(ゲーム中に画面へ常駐する操作パネル群)のウィンドウラベル。
+/// 3枚に分かれているのは、Unityの3Dビューの上に重ねる透明ウィンドウでは
+/// 「見た目が透明な領域でもクリックがWebViewに吸われる」ため、
+/// パネルの実面積だけを覆うウィンドウに分割する必要があるから。
+pub const LABEL_ICON_PANEL: &str = "icon-panel";
+pub const LABEL_COCKPIT: &str = "cockpit";
+pub const LABEL_SYSTEM_TRAY: &str = "system-tray";
+pub const HUD_WINDOW_LABELS: [&str; 3] = [LABEL_ICON_PANEL, LABEL_COCKPIT, LABEL_SYSTEM_TRAY];
+
+/// HUD各パネルと画面端・他ウィンドウとの間隔
+pub const HUD_MARGIN: f64 = 8.0;
+
+/// アイコンパネル(画面左端・縦並びのメニューアイコン)の幅
+pub const ICON_PANEL_WIDTH: f64 = 54.0;
+/// アイコンパネルの初期高さ。実際の高さはアイコン数で変わるため、
+/// React側が `resize_icon_panel` コマンドで実測値を通知して上書きする。
+pub const ICON_PANEL_DEFAULT_HEIGHT: f64 = 660.0;
+
+/// コックピット(画面下部中央・常用ツール/都市名日付/予算メータ/アラート/エポック実行)のサイズ
+pub const COCKPIT_WIDTH: f64 = 520.0;
+pub const COCKPIT_HEIGHT: f64 = 76.0;
+
+/// システムトレイ(画面右下・設定/セーブ/リロード)のサイズ
+pub const SYSTEM_TRAY_WIDTH: f64 = 176.0;
+pub const SYSTEM_TRAY_HEIGHT: f64 = 40.0;
+
+/// 画面下部中央でコックピットが占有する高さ(画面下端からコックピット上端まで)。
+/// ポップアップの中央寄せや下部中央パネルの配置はこの分だけ上に詰める。
+pub const HUD_BOTTOM_RESERVED: f64 = COCKPIT_HEIGHT + HUD_MARGIN;
+
+/// 画面右下でシステムトレイが占有する高さ。右サイドパネルの丈はこれだけ避ける
+/// (コックピットは中央にあり右サイドパネルとは重ならないため、こちらの薄い方を使う)。
+pub const HUD_RIGHT_BOTTOM_RESERVED: f64 = SYSTEM_TRAY_HEIGHT + HUD_MARGIN;
+
+/// 画面左端でアイコンパネルが占有する幅(画面左端からパネル右端まで)。
+/// 左ドックのウィンドウはこの分だけ右へずらす。
+pub const HUD_LEFT_RESERVED: f64 = ICON_PANEL_WIDTH + HUD_MARGIN;
 
 static NEXT_WINDOW_ID: AtomicU64 = AtomicU64::new(1);
+
+/// HUDウィンドウのタイトルと初期サイズ。
+/// アイコンパネルの高さだけは中身のアイコン数で変わるため、ここでは既定値を返し、
+/// 実際の高さは React 側の実測値(`resize_icon_panel`)で上書きされる。
+fn hud_window_spec(label: &str) -> (&'static str, f64, f64) {
+    match label {
+        LABEL_ICON_PANEL => ("Genesis Icon Panel", ICON_PANEL_WIDTH, ICON_PANEL_DEFAULT_HEIGHT),
+        LABEL_COCKPIT => ("Genesis Cockpit", COCKPIT_WIDTH, COCKPIT_HEIGHT),
+        _ => ("Genesis System Tray", SYSTEM_TRAY_WIDTH, SYSTEM_TRAY_HEIGHT),
+    }
+}
+
+/// HUDウィンドウ3枚を生成する。初期状態は非表示で、
+/// セッション開始時に `set_hud_visible` で表示される。
+pub fn create_hud_windows(
+    app: &AppHandle,
+    monitors: &[Monitor],
+    monitor_index: usize,
+) -> Result<(), String> {
+    for label in HUD_WINDOW_LABELS {
+        let (title, width, height) = hud_window_spec(label);
+        WebviewWindowBuilder::new(app, label, WebviewUrl::App("index.html".into()))
+            .title(title)
+            .decorations(false)
+            .transparent(true)
+            .shadow(false)
+            .always_on_top(true)
+            .skip_taskbar(true)
+            .resizable(false)
+            .visible(false)
+            .inner_size(width, height)
+            .build()
+            .map_err(|e| format!("failed to create {label} window: {e}"))?;
+    }
+    layout_hud_windows(app, monitors, monitor_index, None);
+    Ok(())
+}
+
+/// HUD各ウィンドウを対象モニターの定位置(左端中央・下部中央・右下)へ配置する。
+///
+/// `icon_panel_height` はアイコンパネルの高さの明示指定。None のときは現在の
+/// ウィンドウ高さ(=React側が実測して通知済みの値)を維持したまま位置だけ取り直す。
+pub fn layout_hud_windows(
+    app: &AppHandle,
+    monitors: &[Monitor],
+    monitor_index: usize,
+    icon_panel_height: Option<f64>,
+) {
+    let Some(monitor) = monitors.get(monitor_index) else {
+        return;
+    };
+    let scale = monitor.scale_factor();
+    let m_size = monitor.size().to_logical::<f64>(scale);
+    let m_pos = monitor.position().to_logical::<f64>(scale);
+
+    // アイコンパネル: 画面左端に縦置きし、上下方向は中央寄せにする
+    if let Some(win) = app.get_webview_window(LABEL_ICON_PANEL) {
+        let current = win
+            .inner_size()
+            .ok()
+            .map(|s| s.to_logical::<f64>(scale).height)
+            .filter(|h| *h > 1.0)
+            .unwrap_or(ICON_PANEL_DEFAULT_HEIGHT);
+        let height = icon_panel_height
+            .unwrap_or(current)
+            .clamp(1.0, m_size.height - HUD_MARGIN * 2.0);
+        let _ = win.set_size(LogicalSize::new(ICON_PANEL_WIDTH, height));
+        let _ = win.set_position(LogicalPosition::new(
+            m_pos.x + HUD_MARGIN,
+            m_pos.y + (m_size.height - height) / 2.0,
+        ));
+    }
+
+    // コックピット: 画面下部中央
+    if let Some(win) = app.get_webview_window(LABEL_COCKPIT) {
+        let _ = win.set_size(LogicalSize::new(COCKPIT_WIDTH, COCKPIT_HEIGHT));
+        let _ = win.set_position(LogicalPosition::new(
+            m_pos.x + (m_size.width - COCKPIT_WIDTH) / 2.0,
+            m_pos.y + m_size.height - COCKPIT_HEIGHT - HUD_MARGIN,
+        ));
+    }
+
+    // システムトレイ: 画面右下
+    if let Some(win) = app.get_webview_window(LABEL_SYSTEM_TRAY) {
+        let _ = win.set_size(LogicalSize::new(SYSTEM_TRAY_WIDTH, SYSTEM_TRAY_HEIGHT));
+        let _ = win.set_position(LogicalPosition::new(
+            m_pos.x + m_size.width - SYSTEM_TRAY_WIDTH - HUD_MARGIN,
+            m_pos.y + m_size.height - SYSTEM_TRAY_HEIGHT - HUD_MARGIN,
+        ));
+    }
+}
+
+/// HUDウィンドウ3枚をまとめて表示/非表示する。
+/// セッション(=プレイ中の都市)の有無に連動させる。
+pub fn set_hud_visible(app: &AppHandle, visible: bool) {
+    for label in HUD_WINDOW_LABELS {
+        if let Some(win) = app.get_webview_window(label) {
+            let _ = if visible { win.show() } else { win.hide() };
+        }
+    }
+}
+
+/// アイコンパネルの高さをReact側の実測値に合わせる。
+/// アイコン数はテンプレートモードの有無で変わり、Rust側からは分からないため、
+/// 中身の高さが変わるたびにReactから通知させて透明な余白が出ないようにする。
+pub fn resize_icon_panel(app: &AppHandle, state: &SharedState, height: f64) {
+    let monitor_index = {
+        let guard = state.lock();
+        guard.current_monitor_index
+    };
+    let monitors: Vec<_> = app
+        .available_monitors()
+        .unwrap_or_default()
+        .into_iter()
+        .collect();
+    layout_hud_windows(app, &monitors, monitor_index, Some(height));
+}
 
 /// 指定レイアウトが画面端に固定されるドック配置かどうか。
 /// ドック配置ウィンドウは位置を記憶せず、レイアウト計算で再配置される。
@@ -84,6 +236,9 @@ pub fn record_window_geometry(app: &AppHandle, state: &SharedState, label: &str,
 /// の両方から呼ばれる共通ロジック。レイアウト計算を一元化することで、新規・再利用の
 /// どちらでも同じ位置・サイズが適用される。
 ///
+/// ドック配置は常駐HUD(左のアイコンパネル・下部中央のコックピット・右下のシステムトレイ)を
+/// 避けた領域に収める。左ドックは `HUD_LEFT_RESERVED` だけ右へ寄せ、丈は下部の占有分を引く。
+///
 /// - ドック配置(LeftPanel/RightPanel/BottomCenter/LeftTop): モニター情報を基準に位置を決定する。
 ///   saved_geometry があればサイズを上書きする(位置はレイアウトに従う)。
 /// - 自由配置(Default): saved_geometry があれば位置とサイズをそのまま復元する。
@@ -103,20 +258,20 @@ fn compute_window_geometry(
     if definition.layout == WindowLayout::LeftPanel
         || definition.layout == WindowLayout::LeftPanelNarrow
     {
-        // 左サイドパネル: モニターの左端に上下いっぱいに配置する
+        // 左サイドパネル: アイコンパネルの右隣に上下いっぱいに配置する
         if let Some(monitor) = monitor {
             let scale = monitor.scale_factor();
             let m_size = monitor.size().to_logical::<f64>(scale);
             let m_pos = monitor.position().to_logical::<f64>(scale);
 
-            let margin = 8.0;
+            let margin = HUD_MARGIN;
             let width_ratio = if definition.layout == WindowLayout::LeftPanelNarrow {
                 0.2
             } else {
                 0.4
             };
             let computed_width = (m_size.width * width_ratio).round();
-            let computed_height = m_size.height - TASKBAR_HEIGHT - margin * 2.0;
+            let computed_height = m_size.height - HUD_BOTTOM_RESERVED - margin * 2.0;
 
             // 記憶済みサイズがあればそれを優先する（位置はレイアウトに従う）
             let panel_width = saved_geometry.map(|g| g.width).unwrap_or(computed_width);
@@ -124,7 +279,7 @@ fn compute_window_geometry(
 
             return (
                 LogicalSize::new(panel_width, panel_height),
-                LogicalPosition::new(m_pos.x + margin, m_pos.y + margin),
+                LogicalPosition::new(m_pos.x + HUD_LEFT_RESERVED + margin, m_pos.y + margin),
             );
         }
     } else if definition.layout == WindowLayout::RightPanel {
@@ -134,9 +289,9 @@ fn compute_window_geometry(
             let m_size = monitor.size().to_logical::<f64>(scale);
             let m_pos = monitor.position().to_logical::<f64>(scale);
 
-            let margin = 8.0;
+            let margin = HUD_MARGIN;
             let computed_width = (m_size.width * 0.20).round();
-            let computed_height = m_size.height - TASKBAR_HEIGHT - margin * 2.0;
+            let computed_height = m_size.height - HUD_RIGHT_BOTTOM_RESERVED - margin * 2.0;
 
             // 記憶済みサイズがあればそれを優先する。右端配置なので位置は幅に依存する。
             let panel_width = saved_geometry.map(|g| g.width).unwrap_or(computed_width);
@@ -152,13 +307,13 @@ fn compute_window_geometry(
         }
     } else if definition.layout == WindowLayout::BottomCenter {
         // 画面下部中央パネル: モニター幅の指定比率(未指定時55%)、高さはレジストリ値を使用
-        // タスクバーの直上に配置する
+        // コックピットの直上に配置する
         if let Some(monitor) = monitor {
             let scale = monitor.scale_factor();
             let m_size = monitor.size().to_logical::<f64>(scale);
             let m_pos = monitor.position().to_logical::<f64>(scale);
 
-            let margin = 8.0;
+            let margin = HUD_MARGIN;
             let width_ratio = definition.width_ratio.unwrap_or(0.55);
             let computed_width = (m_size.width * width_ratio).round();
             let computed_height = definition.height as f64;
@@ -168,7 +323,7 @@ fn compute_window_geometry(
             let panel_height = saved_geometry.map(|g| g.height).unwrap_or(computed_height);
 
             let x = m_pos.x + (m_size.width - panel_width) / 2.0;
-            let y = m_pos.y + m_size.height - TASKBAR_HEIGHT - panel_height - margin;
+            let y = m_pos.y + m_size.height - HUD_BOTTOM_RESERVED - panel_height - margin;
 
             return (
                 LogicalSize::new(panel_width, panel_height),
@@ -176,19 +331,19 @@ fn compute_window_geometry(
             );
         }
     } else if definition.layout == WindowLayout::LeftTop {
-        // 左上配置: モニターの左端・上端に配置し、サイズはレジストリ値を使用
+        // 左上配置: アイコンパネルの右隣・画面上端に配置し、サイズはレジストリ値を使用
         if let Some(monitor) = monitor {
             let scale = monitor.scale_factor();
             let m_pos = monitor.position().to_logical::<f64>(scale);
 
-            let margin = 8.0;
+            let margin = HUD_MARGIN;
             // 記憶済みサイズがあればそれを優先する（位置は左上レイアウトに従う）
             let w = saved_geometry.map(|g| g.width).unwrap_or(definition.width as f64);
             let h = saved_geometry.map(|g| g.height).unwrap_or(definition.height as f64);
 
             return (
                 LogicalSize::new(w, h),
-                LogicalPosition::new(m_pos.x + margin, m_pos.y + margin),
+                LogicalPosition::new(m_pos.x + HUD_LEFT_RESERVED + margin, m_pos.y + margin),
             );
         }
     } else {
@@ -208,13 +363,13 @@ fn compute_window_geometry(
             (Some(rw), Some(rh), Some(monitor)) if rw > 0.0 && rh > 0.0 => {
                 let scale = monitor.scale_factor();
                 let m_size = monitor.size().to_logical::<f64>(scale);
-                let work_h = (m_size.height - TASKBAR_HEIGHT).max(100.0);
+                let work_h = (m_size.height - HUD_BOTTOM_RESERVED).max(100.0);
                 ((m_size.width * rw).round(), (work_h * rh).round())
             }
             _ => (definition.width as f64, definition.height as f64),
         };
 
-        // 親から明示的な位置指定があればそれを使い、なければタスクバーと同じモニターの中央に配置する
+        // 親から明示的な位置指定があればそれを使い、なければHUDと同じモニターの中央に配置する
         let pos = if let Some(position) = payload.params.as_ref().and_then(|p| p.preferred_position.as_ref()) {
             if let (Some(x), Some(y)) = (position.x, position.y) {
                 LogicalPosition::new(x, y)
@@ -223,7 +378,7 @@ fn compute_window_geometry(
                 let m_size = monitor.size().to_logical::<f64>(scale);
                 let m_pos = monitor.position().to_logical::<f64>(scale);
                 let x = m_pos.x + (m_size.width - win_w) / 2.0;
-                let y = m_pos.y + (m_size.height - TASKBAR_HEIGHT - win_h) / 2.0;
+                let y = m_pos.y + (m_size.height - HUD_BOTTOM_RESERVED - win_h) / 2.0;
                 LogicalPosition::new(x, y)
             } else {
                 LogicalPosition::new(0.0, 0.0)
@@ -233,7 +388,7 @@ fn compute_window_geometry(
             let m_size = monitor.size().to_logical::<f64>(scale);
             let m_pos = monitor.position().to_logical::<f64>(scale);
             let x = m_pos.x + (m_size.width - win_w) / 2.0;
-            let y = m_pos.y + (m_size.height - TASKBAR_HEIGHT - win_h) / 2.0;
+            let y = m_pos.y + (m_size.height - HUD_BOTTOM_RESERVED - win_h) / 2.0;
             LogicalPosition::new(x, y)
         } else {
             LogicalPosition::new(0.0, 0.0)
@@ -637,11 +792,11 @@ fn make_instance_key(window_type: &str, entity: Option<&EntityRef>) -> String {
 }
 
 pub fn on_window_destroyed(app: &AppHandle, state: &SharedState, label: &str) {
-    // main・taskbar・topmenu・notification・hintbar・tutorial・parameter-setup・tips は管理対象外なのでスキップする。
+    // main・HUD3枚・topmenu・notification・hintbar・tutorial・parameter-setup・tips は管理対象外なのでスキップする。
     // notification・hintbar・tutorial は open_windows に登録されない専用ウィンドウのため、
     // 削除処理を行うと誤った popup-count-changed イベントが発行されてしまう。
     if label == "main"
-        || label == "taskbar"
+        || HUD_WINDOW_LABELS.contains(&label)
         || label == "topmenu"
         || label == "notification"
         || label == "hintbar"
@@ -875,7 +1030,7 @@ pub fn close_tips_window(app: &AppHandle) {
 }
 
 /// 通知ポップアップの横幅（論理ピクセル）。
-/// タスクバー上に重ならないよう、右端から一定のマージンを空けて配置する。
+/// システムトレイに重ならないよう、右端から一定のマージンを空けて配置する。
 const NOTIFICATION_WIDTH: f64 = 320.0;
 
 /// 通知ポップアップの最小高さ（論理ピクセル）。
@@ -984,7 +1139,7 @@ fn create_notification_window(app: &AppHandle, state: &SharedState) -> Result<ta
 
         let margin = 16.0;
         let x = m_pos.x + m_size.width - NOTIFICATION_WIDTH - margin;
-        let y = m_pos.y + m_size.height - TASKBAR_HEIGHT - NOTIFICATION_MAX_HEIGHT - margin;
+        let y = m_pos.y + m_size.height - HUD_RIGHT_BOTTOM_RESERVED - NOTIFICATION_MAX_HEIGHT - margin;
         builder = builder.position(x, y);
     }
 
@@ -1043,7 +1198,7 @@ pub fn resize_notification_window(app: &AppHandle, state: &SharedState, height: 
 
         let margin = 16.0;
         let x = m_pos.x + m_size.width - NOTIFICATION_WIDTH - margin;
-        let y = m_pos.y + m_size.height - TASKBAR_HEIGHT - clamped_height - margin;
+        let y = m_pos.y + m_size.height - HUD_RIGHT_BOTTOM_RESERVED - clamped_height - margin;
 
         win.set_size(LogicalSize::new(NOTIFICATION_WIDTH, clamped_height))
             .map_err(|e| e.to_string())?;
@@ -1151,102 +1306,18 @@ pub fn reset_window_geometries(app: &AppHandle, state: &SharedState) -> Result<(
             continue;
         };
 
-        let mut size = None;
-        let mut pos = None;
+        // 記憶を消した直後の状態＝「初めて開いたときの配置」なので、
+        // 新規オープンと同じ計算(saved_geometry なし)をそのまま使う。
+        let payload = OpenWindowPayload {
+            window_type: window_type.clone(),
+            entity: None,
+            params: None,
+        };
+        let (size, pos) =
+            compute_window_geometry(definition, &payload, None, &monitors, monitor_index);
 
-        if definition.layout == WindowLayout::LeftPanel
-            || definition.layout == WindowLayout::LeftPanelNarrow
-        {
-            if let Some(monitor) = monitors.get(monitor_index) {
-                let scale = monitor.scale_factor();
-                let m_size = monitor.size().to_logical::<f64>(scale);
-                let m_pos = monitor.position().to_logical::<f64>(scale);
-
-                let margin = 8.0;
-                let width_ratio = if definition.layout == WindowLayout::LeftPanelNarrow {
-                    0.2
-                } else {
-                    0.4
-                };
-                let computed_width = (m_size.width * width_ratio).round();
-                let computed_height = m_size.height - TASKBAR_HEIGHT - margin * 2.0;
-
-                size = Some((computed_width, computed_height));
-                pos = Some((m_pos.x + margin, m_pos.y + margin));
-            }
-        } else if definition.layout == WindowLayout::RightPanel {
-            if let Some(monitor) = monitors.get(monitor_index) {
-                let scale = monitor.scale_factor();
-                let m_size = monitor.size().to_logical::<f64>(scale);
-                let m_pos = monitor.position().to_logical::<f64>(scale);
-
-                let margin = 8.0;
-                let computed_width = (m_size.width * 0.20).round();
-                let computed_height = m_size.height - TASKBAR_HEIGHT - margin * 2.0;
-
-                size = Some((computed_width, computed_height));
-                pos = Some((
-                    m_pos.x + m_size.width - computed_width - margin,
-                    m_pos.y + margin,
-                ));
-            }
-        } else if definition.layout == WindowLayout::BottomCenter {
-            if let Some(monitor) = monitors.get(monitor_index) {
-                let scale = monitor.scale_factor();
-                let m_size = monitor.size().to_logical::<f64>(scale);
-                let m_pos = monitor.position().to_logical::<f64>(scale);
-
-                let margin = 8.0;
-                let width_ratio = definition.width_ratio.unwrap_or(0.55);
-                let computed_width = (m_size.width * width_ratio).round();
-                let computed_height = definition.height as f64;
-
-                size = Some((computed_width, computed_height));
-                let x = m_pos.x + (m_size.width - computed_width) / 2.0;
-                let y = m_pos.y + m_size.height - TASKBAR_HEIGHT - computed_height - margin;
-                pos = Some((x, y));
-            }
-        } else if definition.layout == WindowLayout::LeftTop {
-            if let Some(monitor) = monitors.get(monitor_index) {
-                let scale = monitor.scale_factor();
-                let m_pos = monitor.position().to_logical::<f64>(scale);
-
-                let margin = 8.0;
-                size = Some((definition.width as f64, definition.height as f64));
-                pos = Some((m_pos.x + margin, m_pos.y + margin));
-            }
-        } else {
-            let (win_w, win_h) = match (
-                definition.width_ratio,
-                definition.height_ratio,
-                monitors.get(monitor_index),
-            ) {
-                (Some(rw), Some(rh), Some(monitor)) if rw > 0.0 && rh > 0.0 => {
-                    let scale = monitor.scale_factor();
-                    let m_size = monitor.size().to_logical::<f64>(scale);
-                    let work_h = (m_size.height - TASKBAR_HEIGHT).max(100.0);
-                    ((m_size.width * rw).round(), (work_h * rh).round())
-                }
-                _ => (definition.width as f64, definition.height as f64),
-            };
-
-            size = Some((win_w, win_h));
-            if let Some(monitor) = monitors.get(monitor_index) {
-                let scale = monitor.scale_factor();
-                let m_size = monitor.size().to_logical::<f64>(scale);
-                let m_pos = monitor.position().to_logical::<f64>(scale);
-                let x = m_pos.x + (m_size.width - win_w) / 2.0;
-                let y = m_pos.y + (m_size.height - TASKBAR_HEIGHT - win_h) / 2.0;
-                pos = Some((x, y));
-            }
-        }
-
-        if let Some((w, h)) = size {
-            let _ = window.set_size(LogicalSize::new(w, h));
-        }
-        if let Some((x, y)) = pos {
-            let _ = window.set_position(LogicalPosition::new(x, y));
-        }
+        let _ = window.set_size(size);
+        let _ = window.set_position(pos);
     }
 
     Ok(())

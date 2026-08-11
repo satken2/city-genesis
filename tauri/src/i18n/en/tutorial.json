@@ -11,7 +11,7 @@
     },
     "step3": {
       "title": "Set the City Budget",
-      "description": "Let's set the city budget to prioritize funding for road construction. Open the budget window from the taskbar, and reduce budgets for other categories so that you can allocate more budget to the construction category (you need to allocate 95% or more to construction). You can set the budget by dragging the slider boundaries at the top or by entering numbers directly in the text box for each category."
+      "description": "Let's set the city budget to prioritize funding for road construction. Open the budget window from the icon panel on the left edge of the screen, and reduce budgets for other categories so that you can allocate more budget to the construction category (you need to allocate 95% or more to construction). You can set the budget by dragging the slider boundaries at the top or by entering numbers directly in the text box for each category."
     },
     "step4": {
       "title": "Complete the Road",
@@ -38,7 +38,7 @@
       },
       "step2": {
         "title": "Create a District",
-        "description": "A district is a unit for dividing your city into areas, and you assign it to the roads within the city. Press the district button on the taskbar to enter district edit mode. You'll see the whole city currently forms a single district. In the 3D view, with the Create tool (the default; switch tools by holding Ctrl), click the road in the top right to turn that road—and the land parcels facing it—into a new district. (Completion: the top-right road belongs to a new district.)"
+        "description": "A district is a unit for dividing your city into areas, and you assign it to the roads within the city. Press the district button on the icon panel on the left edge of the screen to enter district edit mode. You'll see the whole city currently forms a single district. In the 3D view, with the Create tool (the default; switch tools by holding Ctrl), click the road in the top right to turn that road—and the land parcels facing it—into a new district. (Completion: the top-right road belongs to a new district.)"
       },
       "step3": {
         "title": "District Created",
@@ -46,7 +46,7 @@
       },
       "step4": {
         "title": "Show Natural Resources",
-        "description": "Let's check whether this district's area contains natural resources. Click the eye icon at the bottom left of the taskbar to switch display modes. Select the natural resources tab and turn the display of natural resources on. (Completion: natural resources are shown.)"
+        "description": "Let's check whether this district's area contains natural resources. Click the eye icon in the cockpit at the bottom center of the screen to switch display modes. Select the natural resources tab and turn the display of natural resources on. (Completion: natural resources are shown.)"
       },
       "step5": {
         "title": "Open District Details",

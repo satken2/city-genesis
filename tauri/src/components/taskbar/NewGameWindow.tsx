@@ -238,7 +238,7 @@ export function NewGameWindow({
   /**
    * 設定確認モーダルで「開始」を押した時のハンドラ。
    * Rust 側の create_session を呼び出し、Unity 起動 → LoadingWindow 表示 →
-   * バックエンド POST → ポーリング待機 → Taskbar 表示 のフローを実行する。
+   * バックエンド POST → ポーリング待機 → HUD 表示 のフローを実行する。
    */
   const handleConfirmStart = useCallback(async () => {
     if (!confirmSelection) return;
