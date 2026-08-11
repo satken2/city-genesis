@@ -1,7 +1,7 @@
 /**
  * コックピット(画面下部中央)のスタイル
  *
- * 左から [常用ツール2x2] [都市名 / 日付・予算メータ] [アラート] [エポック処理開始] の横並び。
+ * 左から [常用ツール2x2] [都市名・施政スコア / 日付・予算メータ の2x2] [アラート] [エポック処理開始] の横並び。
  * ウィンドウはこのパネルの実寸ぴったりで生成されるため、パネルは常にウィンドウいっぱいに広がる。
  */
 
@@ -29,32 +29,33 @@
   border-radius: 4px;
 }
 
-/* ─── 都市名・日付・予算メータ ─── */
+/* ─── 都市名・施政スコア・日付・予算メータ(4分割) ─── */
 
+/*
+ * 左列=文字情報(上:都市名 / 下:日付)、右列=メータ(上:施政スコア / 下:予算)の2x2。
+ * align-self: stretch で .cockpit の align-items:center を打ち消し、
+ * 常用ツール列と同じ丈(パネルの上下いっぱい)にする。
+ * 右列は auto 幅で、2つのメータのうち広い方に揃う(バーの右端が縦に揃う)。
+ */
 .cockpit-status {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 3px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: 1fr 1fr;
+  align-self: stretch;
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 2px;
   flex: 1;
   min-width: 0;
 }
 
 .cockpit-city {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 13px;
   color: #e5eef9;
-  text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.cockpit-status-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
 }
 
 .cockpit-date {

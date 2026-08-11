@@ -74,6 +74,8 @@ type CollapseItem = {
   zone_id: number;
   death_count: number;
   is_path: boolean;
+  // 倒壊原因("fire"=焼失 / "aging"=老朽倒壊)
+  cause?: string;
 };
 
 type StationItem = {
@@ -658,6 +660,7 @@ export function AccidentsTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                         <thead>
                           <tr>
                             <th>{t("statistics.columnTarget")}</th>
+                            <th>{t("statistics.columnCause")}</th>
                             <th className="accidents-table__th--num">
                               {t("statistics.columnDeaths")}
                             </th>
@@ -681,6 +684,11 @@ export function AccidentsTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                                     {item.name || `#${item.id}`}
                                   </button>
                                 )}
+                              </td>
+                              <td className="accidents-table__cell">
+                                {item.cause === "fire"
+                                  ? t("statistics.collapseCauseFire")
+                                  : t("statistics.collapseCauseAging")}
                               </td>
                               <td className="accidents-table__cell accidents-table__cell--num">
                                 {item.death_count}

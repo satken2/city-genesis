@@ -2,7 +2,7 @@
  * コックピット(画面下部中央の常駐パネル)
  *
  * プレイ中に最も頻繁に見る情報と操作を1枚に集約する。
- *   [常用ツール4種(2行2列)] [都市名 / 日付・予算メータ] [アラート] [エポック処理開始]
+ *   [常用ツール4種(2行2列)] [都市名・施政スコア / 日付・予算メータ(2行2列)] [アラート] [エポック処理開始]
  *
  * - 常用ツール: 表示切替・都市マップ・地形セル開放・ブルドーザ。
  *   ブルドーザはウィンドウを開かずUnityの削除ステートに入る常駐モードで、
@@ -30,6 +30,7 @@ import {
   type L1Notification,
 } from "../../utils/cityNotifications";
 import { BudgetMiniMeter } from "./BudgetMiniMeter";
+import { ScoreMiniMeter } from "./ScoreMiniMeter";
 import { TOOL_ICONS, iconUrl, openRegisteredWindow, type HudIconDef } from "./hudCommon";
 import { setHudMode, useHudMode } from "./hudMode";
 import { useHudSession, useTutorialHighlight } from "./useHudSession";
@@ -210,10 +211,9 @@ export function Cockpit() {
 
       <div className="cockpit-status">
         <span className="cockpit-city">{cityName || "—"}</span>
-        <div className="cockpit-status-row">
-          <span className="cockpit-date">{formattedDate}</span>
-          <BudgetMiniMeter apiBaseUrl={apiBaseUrl} onOpen={() => void openRegisteredWindow("city_budget")} />
-        </div>
+        <ScoreMiniMeter onOpen={() => void openRegisteredWindow("achievements")} />
+        <span className="cockpit-date">{formattedDate}</span>
+        <BudgetMiniMeter apiBaseUrl={apiBaseUrl} onOpen={() => void openRegisteredWindow("city_budget")} />
       </div>
 
       <button

@@ -295,7 +295,8 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
         // ホバー中は通常ステータスと同様にハイライトする。
         if (objectStatus == Constants.STATUS_CONSTRUCTING
             || objectStatus == Constants.STATUS_DEMOLISHING
-            || objectStatus == Constants.STATUS_COLLAPSED)
+            || objectStatus == Constants.STATUS_COLLAPSED
+            || objectStatus == Constants.STATUS_COLLAPSED_FIRE)
         {
             SetRenderersEnabled(true);
             if (!preventMaterialChange)

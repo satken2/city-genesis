@@ -18,7 +18,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { Meter } from "../common/Meter";
-import "./BudgetMiniMeter.css";
+import "./hud.css";
 
 /** 貯蓄カテゴリ。見込み額の集計から除外する（CityBudgetWindow の LEDGER_RESERVE_KEY と同一）。 */
 const LEDGER_RESERVE_CATEGORY = 10;
@@ -133,16 +133,16 @@ export function BudgetMiniMeter({
   return (
     <button
       type="button"
-      className={`budget-mini-meter${over ? " budget-mini-meter--over" : ""}`}
+      className={`hud-mini-meter${over ? " hud-mini-meter--alert" : ""}`}
       onClick={onOpen}
       title={t("taskbar.budgetMeterTooltip")}
     >
-      <span className="budget-mini-meter__label">{t("taskbar.budgetMeterLabel")}</span>
-      <div className="budget-mini-meter__bar">
+      <span className="hud-mini-meter__label">{t("taskbar.budgetMeterLabel")}</span>
+      <div className="hud-mini-meter__bar">
         {hasData ? (
           <Meter value={ratio} color={fillColor} />
         ) : (
-          <span className="budget-mini-meter__placeholder">—</span>
+          <span className="hud-mini-meter__placeholder">—</span>
         )}
       </div>
     </button>

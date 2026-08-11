@@ -279,8 +279,8 @@ public class AlertManager : MonoBehaviour
     {
         if (item.center_point == null || item.center_point.Count < 2) return;
 
-        // status=STATUS_COLLAPSED か、アラートビットが1つ以上立っていなければアイコン不要。
-        bool isCollapsed = item.status == Constants.STATUS_COLLAPSED;
+        // status が廃墟(倒壊・焼失)か、アラートビットが1つ以上立っていなければアイコン不要。
+        bool isCollapsed = System.Array.IndexOf(Constants.STATUSES_RUIN, item.status) >= 0;
         if (!isCollapsed && item.alert == 0) return;
 
         // アイコンを表示すべきワールド座標を計算。
@@ -323,7 +323,7 @@ public class AlertManager : MonoBehaviour
             _icons[key] = existingList;
         }
 
-        // status == STATUS_COLLAPSED の場合は倒壊アイコンを追加。
+        // status が廃墟(倒壊・焼失)の場合は倒壊アイコンを追加。
         if (isCollapsed)
         {
             Sprite collapsedSprite = AlertIconFactory.Instance.GetIconForStatusCollapsed(entityType);

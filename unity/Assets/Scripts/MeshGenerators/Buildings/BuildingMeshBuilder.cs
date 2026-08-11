@@ -31,11 +31,12 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
             return null;
         }
 
-        // 工事中/解体中/倒壊は model_type に関わらず専用メッシュで描画する。model_type 分岐より
+        // 工事中/解体中/廃墟は model_type に関わらず専用メッシュで描画する。model_type 分岐より
         // 先に status で判定することで Near/Far・DetailWorker・直接呼び出しの全生成経路をカバーする。
         // - 建設中(STATUS_CONSTRUCTING): 土マウンド + 足場 + クレーン
         // - 解体中(STATUS_DEMOLISHING): 土マウンド + 色違い足場 + ショベルカー（建設中と同一ロジック・パーツ差分のみ）
-        // - 倒壊(STATUS_COLLAPSED): 瓦礫マウンド + 任意の倒壊片
+        // - 廃墟(STATUS_COLLAPSED=老朽倒壊 / STATUS_COLLAPSED_FIRE=焼失): 瓦礫マウンド + 任意の倒壊片。
+        //   焼失は焦げた瓦礫マテリアルで描き分ける（ビルダー内で status により選択）。
         if (buildingData.status == Constants.STATUS_CONSTRUCTING)
         {
             return EnsureMaterials(constructingGenerator.Generate(buildingData, isDynamic));
@@ -44,7 +45,8 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         {
             return EnsureMaterials(demolishingGenerator.Generate(buildingData, isDynamic));
         }
-        if (buildingData.status == Constants.STATUS_COLLAPSED)
+        if (buildingData.status == Constants.STATUS_COLLAPSED
+            || buildingData.status == Constants.STATUS_COLLAPSED_FIRE)
         {
             return EnsureMaterials(collapsedGenerator.Generate(buildingData, isDynamic));
         }
@@ -910,6 +912,26 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
             cachedCollapsedRubbleMaterial = GetConstructionDirtMaterial();
         }
         return cachedCollapsedRubbleMaterial;
+    }
+
+    private static Material cachedBurnedRubbleMaterial;
+
+    /// <summary>
+    /// 焼失(STATUS_COLLAPSED_FIRE)の焦げた瓦礫マテリアル(Resources/CollapsedRubbleBurned)を返す。
+    /// アセットが未配置の場合は通常の瓦礫マテリアル(GetCollapsedRubbleMaterial・
+    /// さらにその先のフォールバック込み)へ委譲し、表示が成立するようにする。
+    /// </summary>
+    public static Material GetBurnedRubbleMaterial()
+    {
+        if (cachedBurnedRubbleMaterial != null) return cachedBurnedRubbleMaterial;
+
+        cachedBurnedRubbleMaterial = Resources.Load<Material>("CollapsedRubbleBurned");
+        if (cachedBurnedRubbleMaterial == null)
+        {
+            Debug.LogWarning("BuildingMeshBuilder: Resources/CollapsedRubbleBurned が見つかりません。通常の瓦礫マテリアルにフォールバックします。");
+            cachedBurnedRubbleMaterial = GetCollapsedRubbleMaterial();
+        }
+        return cachedBurnedRubbleMaterial;
     }
 
     private static Material cachedCommonConcreteMaterial;

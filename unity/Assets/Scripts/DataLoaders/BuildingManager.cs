@@ -549,9 +549,11 @@ public class BuildingManager : BaseApiDataManager
         {
             VisualEffectManager.Instance.PlayConstructionComplete(position);
         }
-        // アクティブ (STATUS_ACTIVE) から 倒壊 (STATUS_COLLAPSED) または 解体 (STATUS_DEMOLISHING) への遷移
-        else if (oldStatus == Constants.STATUS_ACTIVE && 
-                 (newStatus == Constants.STATUS_COLLAPSED || newStatus == Constants.STATUS_DEMOLISHING))
+        // アクティブ (STATUS_ACTIVE) から 廃墟 (倒壊・焼失) または 解体 (STATUS_DEMOLISHING) への遷移
+        else if (oldStatus == Constants.STATUS_ACTIVE &&
+                 (newStatus == Constants.STATUS_COLLAPSED
+                  || newStatus == Constants.STATUS_COLLAPSED_FIRE
+                  || newStatus == Constants.STATUS_DEMOLISHING))
         {
             VisualEffectManager.Instance.PlayDemolition(position);
         }

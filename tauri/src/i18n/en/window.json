@@ -103,7 +103,9 @@
     "menuExecute": "Execute",
     "executeConfirm": "Advance the epoch?",
     "budgetMeterLabel": "Budget",
-    "budgetMeterTooltip": "Projected budget / cash on hand"
+    "budgetMeterTooltip": "Projected budget / cash on hand",
+    "scoreMeterLabel": "Score",
+    "scoreMeterTooltip": "City governance score"
   },
   "topmenu": {
     "editor": "Editor",

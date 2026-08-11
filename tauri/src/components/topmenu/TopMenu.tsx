@@ -183,11 +183,11 @@ export function TopMenu() {
       <button
         className="topmenu-btn topmenu-btn-github"
         onClick={handleGitHub}
-        aria-label="satken2/genesis-graphic"
-        title="satken2/genesis-graphic"
+        aria-label="satken2/city-genesis"
+        title="satken2/city-genesis"
       >
         <img src={githubIcon} alt="GitHub" className="topmenu-github-icon" />
-        <span className="topmenu-github-label">satken2/genesis-graphic</span>
+        <span className="topmenu-github-label">satken2/city-genesis</span>
       </button>
 
       {/**

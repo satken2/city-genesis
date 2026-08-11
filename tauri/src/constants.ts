@@ -22,6 +22,7 @@ export const STATUS_CANCELED: number = 8;
 export const STATUS_EMPTY: number = 9;
 export const STATUS_COLLAPSED: number = 10;
 export const STATUS_PENDING: number = 11;
+export const STATUS_COLLAPSED_FIRE: number = 12;
 export const DEMAND_TIER1: number = 1;
 export const DEMAND_TIER2: number = 2;
 export const DEMAND_TIER3: number = 3;
@@ -301,7 +302,10 @@ export const STATUS_NAME_MAP: Record<number, string> = {
   9: "取り壊し済",
   10: "倒壊",
   11: "着工保留中",
+  12: "焼失",
 };
+
+export const STATUSES_RUIN: number[] = [10, 12];
 
 export const ALL_ROUTES: number[] = [0, 1];
 

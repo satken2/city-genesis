@@ -76,6 +76,54 @@
   background: rgba(233, 84, 32, 0.45);
 }
 
+/* ─── ミニメーター(コックピットに並ぶピル風のメーターウィジェット) ─── */
+
+/*
+ * ラベルとメーターバーを左右に振り分けたピル。
+ * コックピットでは幅の異なる複数のミニメーターを縦に並べるため、
+ * space-between でバーを右端に寄せ、親グリッドの列幅に伸びてもバー同士が揃うようにする。
+ */
+.hud-mini-meter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.15);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.hud-mini-meter:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* 警告状態(予算オーバーなど)はウィジェット全体の枠線を赤くする */
+.hud-mini-meter--alert {
+  border-color: #ef4444;
+}
+
+.hud-mini-meter__label {
+  font-weight: 600;
+  font-size: 12px;
+  color: #e5eef9;
+}
+
+/* Meter の .meter-bar は flex:1 / min-width:60px のため、幅を持つラッパで囲んで固定幅にする */
+.hud-mini-meter__bar {
+  width: 84px;
+  display: flex;
+  align-items: center;
+}
+
+.hud-mini-meter__placeholder {
+  font-size: 12px;
+  color: #8ba3bb;
+}
+
 /* ─── チュートリアル用ハイライト ─── */
 
 @keyframes hud-organic-pulse {

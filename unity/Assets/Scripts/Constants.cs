@@ -27,6 +27,7 @@ public static class Constants
     public const int STATUS_EMPTY = 9;
     public const int STATUS_COLLAPSED = 10;
     public const int STATUS_PENDING = 11;
+    public const int STATUS_COLLAPSED_FIRE = 12;
     public const int DEMAND_TIER1 = 1;
     public const int DEMAND_TIER2 = 2;
     public const int DEMAND_TIER3 = 3;
@@ -307,8 +308,11 @@ public static class Constants
         { STATUS_CANCELED, "中止" },
         { STATUS_EMPTY, "取り壊し済" },
         { STATUS_COLLAPSED, "倒壊" },
-        { STATUS_PENDING, "着工保留中" }
+        { STATUS_PENDING, "着工保留中" },
+        { STATUS_COLLAPSED_FIRE, "焼失" }
     };
+
+    public static readonly int[] STATUSES_RUIN = new int[] { STATUS_COLLAPSED, STATUS_COLLAPSED_FIRE };
 
     public static readonly int[] ALL_ROUTES = new int[] { ROUTE_PEDESTRIAN, ROUTE_AUTOMOBILE };
 

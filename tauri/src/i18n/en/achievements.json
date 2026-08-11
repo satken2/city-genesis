@@ -38,6 +38,8 @@
     "disasterTypeBuilding": "Building",
     "disasterTypePath": "Road",
     "disasterZone": "Zone",
+    "disasterCauseFire": "Fire",
+    "disasterCauseAging": "Aging",
     "disasterDeaths": " deaths",
     "addQuest": "Add Quest",
     "deleteQuest": "Delete Quest",

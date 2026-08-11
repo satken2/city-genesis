@@ -50,6 +50,8 @@ type CollapseEvent = {
   zone_id: number;
   death_count: number;
   is_path: boolean;
+  // 倒壊原因("fire"=焼失 / "aging"=老朽倒壊)
+  cause?: string;
 };
 
 type ScoreDetail = {
@@ -443,6 +445,11 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                     <div className="disaster-card__header">
                       <span className={`disaster-card__badge ${evt.is_path ? "disaster-card__badge--path" : "disaster-card__badge--building"}`}>
                         {evt.is_path ? t("achievements.disasterTypePath") : t("achievements.disasterTypeBuilding")}
+                      </span>
+                      <span className="disaster-card__badge">
+                        {evt.cause === "fire"
+                          ? t("achievements.disasterCauseFire")
+                          : t("achievements.disasterCauseAging")}
                       </span>
                       <span className="disaster-card__id">#{evt.agent_id}</span>
                     </div>

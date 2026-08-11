@@ -38,8 +38,7 @@
     ],
     "resources": [
       "../graphic-launch.toml",
-      "../backend-launch.toml",
-      "tools/height_map_bin2npy.py"
+      "../backend-launch.toml"
     ]
   }
 }

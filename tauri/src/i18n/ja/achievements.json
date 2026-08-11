@@ -38,6 +38,8 @@
     "disasterTypeBuilding": "建物",
     "disasterTypePath": "道路",
     "disasterZone": "地区",
+    "disasterCauseFire": "焼失",
+    "disasterCauseAging": "老朽倒壊",
     "disasterDeaths": "人死亡",
     "addQuest": "クエスト追加",
     "deleteQuest": "クエスト削除",

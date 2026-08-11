@@ -25,11 +25,13 @@
  *     明示的にクリアするまで保持される。ブラシ/ポリゴンの内側は常に重み1.0で確定し、
  *     境界のなじませ(線形/滑らか/ガウス減衰)は内側を減衰させるのではなく、境界の外側へ
  *     「境界のぼかし幅」の分だけにじみ出すように効かせる(選択(範囲指定方法)側で選ぶ)。
- *   - 自動編集: 侵食シミュレーションを適用する。選択範囲があればその範囲を起点に、
- *     なければマップ全体へ適用する(手動編集で選択マスクを作ってから実行する)。水流侵食
- *     (雨粒パーティクルが斜面を削りながら流れて谷筋・堆積を作る)と熱侵食(安息角を
- *     超える崖・急斜面が崩れてなだらかになる)の2種類。アルゴリズム本体は
- *     terrainErosion.ts に分離されており、本ファイルはパラメータUIと実行後の
+ *   - 自動編集: 侵食シミュレーションと海底生成を適用する。選択範囲があればその範囲を
+ *     起点(海底生成は書き換え対象の制限)に、なければマップ全体へ適用する(手動編集で
+ *     選択マスクを作ってから実行する)。水流侵食(雨粒パーティクルが斜面を削りながら
+ *     流れて谷筋・堆積を作る)、熱侵食(安息角を超える崖・急斜面が崩れてなだらかになる)、
+ *     海底生成(海面が一律0mのデータの海マスを、海岸からの距離に応じた水深へ彫り下げて
+ *     陸と連続する海底を作る)の3種類。アルゴリズム本体は terrainErosion.ts /
+ *     terrainSeaFloor.ts に分離されており、本ファイルはパラメータUIと実行後の
  *     再描画(テクスチャ・等高線・3Dプレビュー送信)のみを担当する。
  */
 
@@ -71,6 +73,7 @@ import {
   applyThermalErosion,
   applyHydraulicErosion,
 } from "./terrainErosion";
+import { type SeaFloorParams, applySeaFloor } from "./terrainSeaFloor";
 import {
   type RiverGenParams,
   type GeneratedRiver,
@@ -1103,6 +1106,9 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   // ミラーしない。細かい係数は terrainErosion.ts 側の内部定数を参照。
   const [thermalParams, setThermalParams] = useState<ThermalErosionParams>({ talusAngleDeg: 33, iterations: 50 });
   const [hydraulicParams, setHydraulicParams] = useState<HydraulicErosionParams>({ droplets: 50000, erodeStrength: 0.3 });
+  const [seaFloorParams, setSeaFloorParams] = useState<SeaFloorParams>({ seaLevelThreshold: 0, shelfSlopePercent: 2, maxDepth: 50 });
+  // 海底生成の直近実行で書き換えたマス数。0は「海とみなせるマスが無かった」の診断表示に使う。nullは未実行。
+  const [seaFloorModifiedCount, setSeaFloorModifiedCount] = useState<number | null>(null);
 
   // --- Undo / Redo ---
   // rivers も標高と一緒にスナップショットする。川床の彫り込みを Undo したときに、
@@ -2140,6 +2146,22 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   }
 
   /**
+   * 「海底生成」実行ボタン: 標高が判定値以下のマスを海とみなし、海岸線からの距離に
+   * 応じた水深プロファイルへ彫り下げる。国土地理院DEMのように海面が一律0mのデータを
+   * 取り込んだとき、陸の地形と連続する自然な海底を一括生成するための操作。
+   * 選択範囲があればその範囲内のマスのみ書き換える(湖など海にしたくない0m地帯の保護用)。
+   */
+  function runSeaFloorGeneration() {
+    const s = settingsRef.current;
+    const elev = elevRef.current;
+    if (!s || !elev) return;
+    pushUndoState();
+    const modified = applySeaFloor(elev, s.rows, s.cols, s.spacing, seaFloorParams, buildErosionRegion());
+    setSeaFloorModifiedCount(modified);
+    finishErosion(s, elev);
+  }
+
+  /**
    * 標高配列と新しいマップ寸法を与えて、地形テクスチャ・選択キャンバス・等高線・グリッド・
    * settingsRef を一括で再構築する。マップリサイズ時とロード時の共通処理。
    * 標高レンジ(minLand, maxLand)も再計算し、resetView() と draw() も行う。
@@ -2395,8 +2417,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
    * 保存先パスは @tauri-apps/plugin-dialog の保存ダイアログでユーザーに選ばせ、
    * その後 Tauriコマンド export_terrain_as_npy に現在の標高データ(メモリ上の elev 配列)を
    * そのまま渡す。「保存」ボタン(作業コピーへの書き戻し)とは独立しており、事前の保存操作は
-   * 不要。変換は同梱の height_map_bin2npy.py をユーザー環境の python コマンドで実行して行うため、
-   * Python と numpy がインストール済みであることが前提となる。
+   * 不要。.npy への変換はRust側が自前で行う(外部プロセスに依存しない)。
    * サムネイル画像(160x120のPNG)もこの時点の標高データから生成し、.npyと同じファイル名
    * (拡張子だけ.png)で同じ場所に書き出す。
    */
@@ -2993,6 +3014,66 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                     >
                       {t("terrainEditor.autoRun", { defaultValue: "実行" })}
                     </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* 海底生成: 海面一律0mのデータ(国土地理院DEM等)の海マスを、海岸からの距離に応じた水深へ彫り下げる */}
+              <div className="terrain-editor-section">
+                <div className="terrain-editor-section-title">{t("terrainEditor.autoSeaFloor", { defaultValue: "海底生成(海0mを深くする)" })}</div>
+                <div className="terrain-editor-param-group">
+                  <div className="terrain-editor-param-row">
+                    <span className="terrain-editor-param-label">{t("terrainEditor.seaFloorThreshold", { defaultValue: "海とみなす標高(m)" })}</span>
+                    <NumberStepper
+                      value={seaFloorParams.seaLevelThreshold}
+                      onChange={(v) => setSeaFloorParams((p) => ({ ...p, seaLevelThreshold: v }))}
+                      min={-50}
+                      max={50}
+                      step={0.5}
+                      integerOnly={false}
+                    />
+                  </div>
+                  <div className="terrain-editor-param-row">
+                    <span className="terrain-editor-param-label">{t("terrainEditor.seaFloorSlope", { defaultValue: "海岸の海底勾配(%)" })}</span>
+                    <NumberStepper
+                      value={seaFloorParams.shelfSlopePercent}
+                      onChange={(v) => setSeaFloorParams((p) => ({ ...p, shelfSlopePercent: v }))}
+                      min={0.1}
+                      max={20}
+                      step={0.1}
+                      integerOnly={false}
+                    />
+                  </div>
+                  <div className="terrain-editor-param-row">
+                    <span className="terrain-editor-param-label">{t("terrainEditor.seaFloorMaxDepth", { defaultValue: "最大水深(m)" })}</span>
+                    <NumberStepper
+                      value={seaFloorParams.maxDepth}
+                      onChange={(v) => setSeaFloorParams((p) => ({ ...p, maxDepth: v }))}
+                      min={5}
+                      max={500}
+                      step={5}
+                    />
+                  </div>
+                  <div className="terrain-editor-action-buttons">
+                    <button
+                      type="button"
+                      className="terrain-editor-btn"
+                      disabled={status !== "ready"}
+                      onClick={runSeaFloorGeneration}
+                    >
+                      {t("terrainEditor.autoRun", { defaultValue: "実行" })}
+                    </button>
+                  </div>
+                  {seaFloorModifiedCount === 0 && (
+                    <div className="terrain-editor-hint terrain-editor-hint--error">
+                      {t("terrainEditor.seaFloorNoTarget", { defaultValue: "海とみなせるマスがありませんでした。「海とみなす標高」を調整してください" })}
+                    </div>
+                  )}
+                  <div className="terrain-editor-hint">
+                    {t("terrainEditor.seaFloorHint", {
+                      defaultValue:
+                        "標高が判定値以下のマスを海とみなし、海岸から沖へ向かって指定勾配で深くします(最大水深へ滑らかに漸近)。海面が一律0mのデータ(国土地理院DEM等)から自然な海底を作る用途です。湖など海にしたくない0m地帯がある場合は、先に海側だけを範囲選択してから実行してください",
+                    })}
                   </div>
                 </div>
               </div>

@@ -27,7 +27,8 @@
     "8": "Canceled",
     "9": "Vacant",
     "10": "Collapsed",
-    "11": "Pending Construction"
+    "11": "Pending Construction",
+    "12": "Burned Down"
   },
   "spaceType": {
     "0": "Other",

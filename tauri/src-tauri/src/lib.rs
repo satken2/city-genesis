@@ -946,18 +946,15 @@ struct ExportTerrainResult {
 
 /// 地形エディタで編集中の標高データを、バックエンドが読み込める .npy ファイルへ変換して書き出す。
 ///
-/// 変換処理は Nuitka ビルド対象外の genesis-core/tools/height_map_bin2npy.py と同一の内容を
-/// アプリに同梱した tools/height_map_bin2npy.py を、ユーザー環境の python コマンドで実行することで行う
-/// (ユーザー環境に Python と numpy がインストール済みであることが前提)。
-/// 変換元データは一時ディレクトリに meta.json / near.bin として書き出し、変換後に削除する
-/// (AppData の作業コピー自体は変更しない)。
+/// フロントエンドから受け取る標高データは既に .npy の data 部と同じ float16 リトルエンディアンの
+/// 生バイト列なので、変換は build_npy_float16 でヘッダを被せるだけで完結する(外部プロセスや
+/// 一時ファイルは介さない)。
 ///
 /// エクスポート先と同じディレクトリに terrain_maps.yaml が存在する場合は、そのマップのエントリを
 /// 追記(同じ map_id が既にあれば上書き)する。存在しなければ何もせず、戻り値の yaml_updated を
 /// false にしてフロントエンドに伝える(フロントエンド側で「見つからない」旨の通知を出す)。
 #[tauri::command]
 fn export_terrain_as_npy(
-    app: tauri::AppHandle,
     map_id: String,
     map_width: f64,
     map_height: f64,
@@ -985,37 +982,9 @@ fn export_terrain_as_npy(
         ));
     }
 
-    let script_path = app
-        .path()
-        .resolve("tools/height_map_bin2npy.py", tauri::path::BaseDirectory::Resource)
-        .map_err(|e| format!("変換スクリプトの解決に失敗しました: {e}"))?;
-
-    let tmp_dir = std::env::temp_dir().join(format!(
-        "city-genesis/tauri-npy-export-{}",
-        uuid::Uuid::new_v4()
-    ));
-    std::fs::create_dir_all(&tmp_dir).map_err(|e| format!("一時ディレクトリの作成に失敗しました: {e}"))?;
-    let tmp_meta = tmp_dir.join("meta.json");
-    let tmp_bin = tmp_dir.join("near.bin");
-
-    let meta = serde_json::json!({
-        "map_width": map_width,
-        "map_height": map_height,
-        "near_spacing": near_spacing,
-        "far_spacing": far_spacing,
-        "cell_size": cell_size,
-        "grid_rows": grid_rows,
-        "grid_cols": grid_cols,
-    });
-
-    let run_result = std::fs::write(&tmp_meta, meta.to_string())
-        .and_then(|_| std::fs::write(&tmp_bin, &bytes))
-        .map_err(|e| format!("一時ファイルの書き込みに失敗しました: {e}"))
-        .and_then(|_| run_bin2npy_script(&script_path, &tmp_meta, &tmp_bin, &out_path));
-
-    let _ = std::fs::remove_dir_all(&tmp_dir);
-
-    run_result?;
+    let npy = build_npy_float16(&bytes, grid_rows as usize, grid_cols as usize);
+    std::fs::write(&out_path, &npy)
+        .map_err(|e| format!(".npyファイルの書き込みに失敗しました: {e}"))?;
 
     // サムネイル画像は .npy と同じファイル名(拡張子だけ.png)で同じディレクトリに書き出す。
     // これは genesis-core側の terrain_registry が「.npyの拡張子をpngに置き換えた名前」を
@@ -1219,48 +1188,30 @@ fn upsert_terrain_yaml_entry(
     std::fs::write(yaml_path, output).map_err(|e| format!("terrain_maps.yaml の書き込みに失敗しました: {e}"))
 }
 
-/// height_map_bin2npy.py を python / python3 の順で試行実行する。
-/// 両方とも起動できなければ Python 未インストールの旨のエラーを返す。
-fn run_bin2npy_script(
-    script_path: &std::path::Path,
-    meta_path: &std::path::Path,
-    bin_path: &std::path::Path,
-    out_path: &str,
-) -> Result<(), String> {
-    let args = [
-        script_path.as_os_str(),
-        std::ffi::OsStr::new("--meta"),
-        meta_path.as_os_str(),
-        std::ffi::OsStr::new("--bin"),
-        bin_path.as_os_str(),
-        std::ffi::OsStr::new("--out"),
-        std::ffi::OsStr::new(out_path),
-    ];
+/// float16(リトルエンディアン)の生バイト列に NumPy の .npy(バージョン1.0)ヘッダを被せる。
+///
+/// 構造は「マジック(\x93NUMPY) + バージョン(1,0) + ヘッダ長(u16 LE) + ヘッダ辞書 + データ部」。
+/// ヘッダ辞書は改行で終わるASCII文字列で、データ部が64バイト境界から始まるよう空白で詰める
+/// (numpy自身の書き出し規約。np.load は境界に依存しないが、既存の assets/*.npy と
+/// バイナリ互換な体裁にしておく)。
+///
+/// dtype は '<f2' 固定。バックエンド(terrain_registry.build_near_map)は np.load した配列を
+/// float32へキャストしてから使うため、海底の負の標高もそのまま保持される。
+fn build_npy_float16(data: &[u8], rows: usize, cols: usize) -> Vec<u8> {
+    let dict = format!("{{'descr': '<f2', 'fortran_order': False, 'shape': ({rows}, {cols}), }}");
+    // マジック6 + バージョン2 + ヘッダ長2 = 10バイトの後に辞書が続く。辞書末尾の改行1バイトを
+    // 含めた長さを64の倍数へ切り上げた差分が、詰める空白の数になる。
+    let unpadded = 10 + dict.len() + 1;
+    let header_len = dict.len() + 1 + (64 - unpadded % 64) % 64;
 
-    let mut last_err: Option<String> = None;
-    for python_cmd in ["python", "python3"] {
-        match std::process::Command::new(python_cmd).args(args).output() {
-            Ok(output) => {
-                if output.status.success() {
-                    return Ok(());
-                }
-                return Err(format!(
-                    "{} の実行に失敗しました: {}",
-                    python_cmd,
-                    String::from_utf8_lossy(&output.stderr)
-                ));
-            }
-            Err(e) => {
-                last_err = Some(e.to_string());
-                continue;
-            }
-        }
-    }
-
-    Err(format!(
-        "python / python3 コマンドの起動に失敗しました。Pythonがインストールされ、PATHが通っているか確認してください: {}",
-        last_err.unwrap_or_default()
-    ))
+    let mut out = Vec::with_capacity(10 + header_len + data.len());
+    out.extend_from_slice(b"\x93NUMPY\x01\x00");
+    out.extend_from_slice(&(header_len as u16).to_le_bytes());
+    out.extend_from_slice(dict.as_bytes());
+    out.resize(10 + header_len - 1, b' ');
+    out.push(b'\n');
+    out.extend_from_slice(data);
+    out
 }
 
 /// デバッグ初期化を実行してゲームセッションを開始する。

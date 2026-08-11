@@ -27,7 +27,7 @@ import {
   STATUS_TEMPORARY,
   STATUS_SCHEDULED_CONSTRUCTION,
   STATUS_SCHEDULED_DEMOLITION,
-  STATUS_COLLAPSED,
+  STATUSES_RUIN,
   STATUS_CONSTRUCTING,
   STATUS_PENDING,
   TYPE_CITY,
@@ -199,7 +199,7 @@ export function PublicFacilityPanel({
 
   const status = agent.status;
   const isPreConstruction = PRE_CONSTRUCTION.has(status);
-  const isCollapsed = status === STATUS_COLLAPSED;
+  const isCollapsed = STATUSES_RUIN.includes(status);
   const isBuilding = agent.is_bd;
   const isAbandoned = !!agent.abandoned;
   // 稼働中/停止中は放棄・修繕・停止開始トグルの操作対象となる状態。
