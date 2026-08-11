@@ -15,7 +15,7 @@
  * iconPaddingフィールドで個別に調整可能にしている
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { listen } from "@tauri-apps/api/event";
@@ -25,7 +25,14 @@ import { sendSessionForceReload, sendSessionReload, sendChangeState, sendChangeD
 import { setHintbarText } from "../../utils/hintbar";
 import { formatEpochDate } from "../../utils/date";
 import { BgmManager } from "../../utils/bgm";
+import { showNotification } from "../../utils/notification";
+import {
+  fetchL1Notifications,
+  formatL1NotificationMessage,
+  type L1Notification,
+} from "../../utils/cityNotifications";
 import { BudgetMiniMeter } from "./BudgetMiniMeter";
+import crisisIcon from "../../assets/images/ui/crisis.png";
 import "./Taskbar.css";
 
 function formatDate(daysSinceEpoch: number, locale: string): string {
@@ -87,10 +94,14 @@ const MENU_ICONS: MenuIconDef[] = [
 ];
 
 const TRAY_ICONS: TrayIconDef[] = [
+  { id: "notifications", src: "tray_notifications.png", tooltipKey: "notifications.trayTooltip", padding: "4px" },
   { id: "settings", src: "tray_settings.png", tooltipKey: "taskbar.traySettings", padding: "4px" },
   { id: "save", src: "tray_save.png", tooltipKey: "taskbar.traySave", padding: "4px" },
   { id: "reload", src: "tray_reload.png", tooltipKey: "taskbar.trayReload", padding: "4px" },
 ];
+
+/** L1通知(重大通知)のポーリング間隔(ミリ秒)。通知は基本的にエポック実行で変わるため長めでよい。 */
+const L1_NOTIFICATION_POLL_INTERVAL_MS = 30_000;
 
 /**
  * クリックすると Unity の描画ステートを変更する編集モード系ウィンドウの種別。
@@ -130,6 +141,14 @@ export function Taskbar() {
   // チュートリアル用の無効化・ハイライト状態
   const [tutorialActive, setTutorialActive] = useState(false);
   const [tutorialTarget, setTutorialTarget] = useState<string | undefined>(undefined);
+
+  // L1通知(今すぐ対処が必要な重大事象)の現在有効な一覧。
+  // 1件以上あるとトレイの通知アイコンを点滅させ、件数バッジを出す。
+  const [l1Notifications, setL1Notifications] = useState<L1Notification[]>([]);
+  // 前回取得時の通知ID集合。新規発生分だけをトーストするための差分キー。
+  // null は「未取得(初回)」を表し、初回取得分はトーストしない
+  // (セーブロード直後に復元された既存通知で鳴らさないため)。
+  const l1PrevIdsRef = useRef<Set<string> | null>(null);
 
   // BGM管理クラスのライフサイクル管理
   useEffect(() => {
@@ -198,6 +217,10 @@ export function Taskbar() {
           // ブルドーザ・地区編集トグルもリセットして表示をそろえる。
           setBulldozerActive(false);
           setDistrictActive(false);
+          // 別セーブをロードし直したとき、旧セーブの通知が新セーブの「新規発生」として
+          // トーストされないよう、L1通知の差分状態もリセットする。
+          setL1Notifications([]);
+          l1PrevIdsRef.current = null;
         }
         setVisible(shouldShow);
         setApiBaseUrl(payload.apiBaseUrl);
@@ -257,6 +280,51 @@ export function Taskbar() {
       unlistenEpoch?.();
     };
   }, [appWindow]);
+
+  /**
+   * L1通知(重大通知)のポーリング取得。
+   * - 通知が1件以上あるとき、トレイの通知アイコンを点滅させ件数バッジを出す
+   * - 前回取得時に無かった id の通知は「新規発生分」として右下トーストでも知らせる
+   *   (初回取得分はロード済み状態の復元なのでトーストしない)
+   * - エポック実行終了(epochExecuting: true→false)で本エフェクトが再実行され、
+   *   実行直後の最新状態を即時反映する(実行中はポーリング自体を止める)
+   */
+  useEffect(() => {
+    if (!apiBaseUrl || epochExecuting) return;
+    const controller = new AbortController();
+    let cancelled = false;
+
+    async function refresh() {
+      try {
+        const items = await fetchL1Notifications(apiBaseUrl, controller.signal);
+        if (cancelled) return;
+        setL1Notifications(items);
+        const prevIds = l1PrevIdsRef.current;
+        if (prevIds !== null) {
+          for (const item of items) {
+            if (!prevIds.has(item.id)) {
+              void showNotification({
+                message: formatL1NotificationMessage(t, item),
+                iconPath: crisisIcon,
+                durationMs: 8000,
+              });
+            }
+          }
+        }
+        l1PrevIdsRef.current = new Set(items.map((item) => item.id));
+      } catch {
+        // 取得失敗(中断含む)は前回値を保持し、画面をちらつかせない(BudgetMiniMeterと同方針)。
+      }
+    }
+
+    void refresh();
+    const timer = setInterval(() => void refresh(), L1_NOTIFICATION_POLL_INTERVAL_MS);
+    return () => {
+      cancelled = true;
+      controller.abort();
+      clearInterval(timer);
+    };
+  }, [apiBaseUrl, epochExecuting, t]);
 
   async function openRegisteredWindow(typeKey: string) {
     try {
@@ -548,12 +616,18 @@ export function Taskbar() {
           <button
             key={icon.id}
             id={icon.id}
-            className={getBtnClassName(icon.id, "taskbar-tray-icon")}
+            className={`${getBtnClassName(icon.id, "taskbar-tray-icon")}${
+              icon.id === "notifications" && l1Notifications.length > 0
+                ? " taskbar-tray-icon--alert"
+                : ""
+            }`}
             type="button"
             title={t(icon.tooltipKey)}
             style={{ padding: icon.padding }}
             onClick={() => {
-              if (icon.id === "settings") {
+              if (icon.id === "notifications") {
+                void openRegisteredWindow("city_notifications");
+              } else if (icon.id === "settings") {
                 void openRegisteredWindow("settings");
               } else if (icon.id === "save") {
                 void openRegisteredWindow("save_load");
@@ -568,6 +642,9 @@ export function Taskbar() {
               className="taskbar-tray-icon-img"
               draggable={false}
             />
+            {icon.id === "notifications" && l1Notifications.length > 0 && (
+              <span className="taskbar-tray-badge">{l1Notifications.length}</span>
+            )}
           </button>
         ))}
       </div>

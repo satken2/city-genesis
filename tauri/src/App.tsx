@@ -49,6 +49,7 @@ const CityStatisticsWindow = lazy(() => import("./components/statistics/CityStat
 const CityFinancialPolicyWindow = lazy(() => import("./components/statistics/CityFinancialPolicyWindow").then(m => ({ default: m.CityFinancialPolicyWindow })));
 const DisplayOptionsPanel = lazy(() => import("./components/display/DisplayOptionsPanel").then(m => ({ default: m.DisplayOptionsPanel })));
 const EpochConfirmWindow = lazy(() => import("./components/taskbar/EpochConfirmWindow").then(m => ({ default: m.EpochConfirmWindow })));
+const CityNotificationsWindow = lazy(() => import("./components/notification/CityNotificationsWindow").then(m => ({ default: m.CityNotificationsWindow })));
 const EpochResultWindow = lazy(() => import("./components/taskbar/EpochResultWindow").then(m => ({ default: m.EpochResultWindow })));
 const QuestCompleteWindow = lazy(() => import("./components/taskbar/QuestCompleteWindow").then(m => ({ default: m.QuestCompleteWindow })));
 const TerrainUnlockPanel = lazy(() => import("./components/terrain/TerrainUnlockPanel").then(m => ({ default: m.TerrainUnlockPanel })));
@@ -73,7 +74,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * 専用パネルが実装されているウィンドウタイプのセット
  * これらのタイプはジェネリックな JSON 表示ではなく、専用コンポーネントでレンダリングする
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "path_build", "track_build", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "settings", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "new_game", "template_editor", "resource_detail", "resource_edit", "prop_placement", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "epoch_result", "quest_complete", "terrain_unlock", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "path_build", "track_build", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "settings", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "new_game", "template_editor", "resource_detail", "resource_edit", "prop_placement", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "epoch_result", "quest_complete", "terrain_unlock", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map"]);
 
 
 function App() {
@@ -432,6 +433,8 @@ function App() {
               <DisplayOptionsPanel apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "epoch_confirm" ? (
               <EpochConfirmWindow apiBaseUrl={context.api_base_url} onClose={closeWindow} />
+            ) : context.window_type === "city_notifications" ? (
+              <CityNotificationsWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "epoch_result" ? (
               (() => {
                 // エポック実行結果は epoch_confirm ウィンドウから params.extra 経由で渡される。

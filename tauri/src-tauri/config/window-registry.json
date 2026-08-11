@@ -368,6 +368,14 @@
     "policy": "single",
     "actions": []
   },
+  "city_notifications": {
+    "title": "重大通知",
+    "width": 480,
+    "height": 520,
+    "resizable": true,
+    "policy": "single",
+    "actions": []
+  },
   "epoch_result": {
     "title": "エポック実行結果",
     "width": 1230,

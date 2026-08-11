@@ -193,6 +193,47 @@
   pointer-events: none;
 }
 
+/* ─── L1通知(重大通知)アイコンの点滅と件数バッジ ─── */
+
+/* 未解決のL1通知が1件以上あるとき、通知アイコンを赤系パルスで点滅させる */
+@keyframes alert-pulse {
+  0% {
+    background: rgba(239, 68, 68, 0.15);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    background: rgba(239, 68, 68, 0.4);
+    box-shadow: 0 0 10px 2px rgba(239, 68, 68, 0.8);
+  }
+  100% {
+    background: rgba(239, 68, 68, 0.15);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+}
+
+.taskbar-tray-icon--alert {
+  position: relative;
+  animation: alert-pulse 1.2s infinite ease-in-out;
+}
+
+/* 通知件数バッジ(アイコン右上に重ねる) */
+.taskbar-tray-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: 7px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 14px;
+  text-align: center;
+  pointer-events: none;
+}
+
 /* ─── ゲーム内時間表示（都市名＋日付） ─── */
 
 .taskbar-time {

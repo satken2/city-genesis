@@ -1,0 +1,19 @@
+{
+  "notifications": {
+    "trayTooltip": "重大通知",
+    "description": "今すぐ対処が必要な重大な問題の一覧です。行をクリックすると対象の詳細を開きます。",
+    "empty": "現在、対処が必要な重大な問題はありません",
+    "loadFailed": "通知の取得に失敗しました",
+    "types": {
+      "resource_runway": "資源「{{name}}」があと約{{remaining_epochs}}エポックで枯渇する見込みです",
+      "resource_depleted": "資源「{{name}}」が枯渇しました",
+      "facility_inoperative": "公共施設「{{name}}」が運営できていません",
+      "infra_facility_down": "インフラ施設「{{name}}」が停止しています",
+      "infra_disconnected": "{{count}}件の施設がインフラ網に接続されていません",
+      "collapse": "{{count}}件の建物・道路が倒壊しました",
+      "collapse_with_deaths": "{{count}}件の建物・道路が倒壊し、{{deaths}}人が死亡しました",
+      "deaths_traffic": "交通事故により{{count}}人が死亡しました",
+      "unknown": "重大な事象が発生しました"
+    }
+  }
+}

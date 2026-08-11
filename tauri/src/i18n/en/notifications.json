@@ -1,0 +1,19 @@
+{
+  "notifications": {
+    "trayTooltip": "Critical Alerts",
+    "description": "Critical problems that require immediate attention. Click a row to open its details.",
+    "empty": "No critical problems require attention right now",
+    "loadFailed": "Failed to load notifications",
+    "types": {
+      "resource_runway": "Resource \"{{name}}\" is expected to be depleted in about {{remaining_epochs}} epochs",
+      "resource_depleted": "Resource \"{{name}}\" has been depleted",
+      "facility_inoperative": "Public facility \"{{name}}\" is not operating",
+      "infra_facility_down": "Infrastructure facility \"{{name}}\" is out of service",
+      "infra_disconnected": "{{count}} facilities are disconnected from the infrastructure network",
+      "collapse": "{{count}} buildings/roads have collapsed",
+      "collapse_with_deaths": "{{count}} buildings/roads have collapsed, killing {{deaths}} people",
+      "deaths_traffic": "{{count}} people died in traffic accidents",
+      "unknown": "A critical event has occurred"
+    }
+  }
+}

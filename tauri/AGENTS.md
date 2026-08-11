@@ -36,6 +36,7 @@ Unityのグラフィックの上に透明なWebViewウィンドウとして重�
 | `api.ts` | バックエンドHTTP通信の共通窓口。`fetchApi<T>()`と`buildApiUrl()`。**fetchを直接書かないこと**。fetchApiはAcceptヘッダでMessagePackを受け入れ宣言し、バックエンドの対応エンドポイント(bbox一括取得系)からはバイナリで受信して`@msgpack/msgpack`でデコードする(Content-Typeで自動判別。呼び出し側は形式を意識しない) |
 | `ipc.ts` | Unityへのイベント送信(`sendChangeState`, `sendEditBuildingConfirm`等)。**Unityに何か伝えたいときはここに関数を追加する** |
 | `notification.ts` | 通知ウィンドウの表示(`showNotification`) |
+| `cityNotifications.ts` | L1通知(タスクバー重大通知)の共通処理。`fetchL1Notifications`(GET /api/v1/notifications)・`formatL1NotificationMessage`(i18nキー`notifications.types.<type>`への差し込み。未知typeはフォールバック)・`NOTIFICATION_ENTITY_WINDOW_TYPES`(通知対象→詳細ウィンドウの対応表)。TaskbarとCityNotificationsWindowが共用 |
 | `hintbar.ts` | 画面下部ヒントバーのテキスト設定 |
 | `settings.ts` | アプリ設定のロード・保存 |
 | `playSound.ts` | 効果音再生 |

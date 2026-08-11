@@ -1,5 +1,6 @@
 {
   "windowType": {
+    "city_notifications": "Critical Alerts",
     "city_map": "City Map",
     "agent_detail": "Agent Details",
     "parcel_detail": "Parcel Details",
