@@ -710,6 +710,7 @@ public class IpcStateCoordinator : MonoBehaviour
             case "empty_area":
             case "tile":
             case "random":
+            case "block":
                 preset = InputModePreset.PARCEL_CREATION_POINT;
                 break;
             case "along_path":
@@ -754,6 +755,7 @@ public class IpcStateCoordinator : MonoBehaviour
                 case "empty_area":
                 case "tile":
                 case "random":
+                case "block":
                     parcelEditorManager.EnablePointSelectionMode();
                     break;
                 case "along_path":

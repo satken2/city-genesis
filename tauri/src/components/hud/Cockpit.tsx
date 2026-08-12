@@ -7,14 +7,14 @@
  * - 常用ツール: 表示切替・都市マップ・地形セル開放・ブルドーザ。
  *   ブルドーザはウィンドウを開かずUnityの削除ステートに入る常駐モードで、
  *   アイコンパネルの地区編集と排他(`hudMode`でウィンドウをまたいで共有)。
- * - アラート: L1通知(今すぐ対処が必要な重大事象)が1件以上あると点滅+件数バッジを出し、
- *   新規発生分は右下トーストでも知らせる。
+ * - アラート: L1通知(今すぐ対処が必要な重大事象)が1件以上あると点滅+件数バッジを出す。
+ *   点滅で気づける以上プレイヤーの操作を遮る必要はないため、トーストは出さない。
  *
  * BGMの再生と、3Dビューでのオブジェクト選択に応じたウィンドウ表示は、
  * HUDの中で常に1枚だけ存在するこのウィンドウが受け持つ(多重再生・多重オープンを避けるため)。
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useTranslation } from "react-i18next";
@@ -23,18 +23,12 @@ import { sendChangeState, IPC_EVENT_WORLD_SELECT_OBJECT } from "../../utils/ipc"
 import { setHintbarText } from "../../utils/hintbar";
 import { formatEpochDate } from "../../utils/date";
 import { BgmManager } from "../../utils/bgm";
-import { showNotification } from "../../utils/notification";
-import {
-  fetchL1Notifications,
-  formatL1NotificationMessage,
-  type L1Notification,
-} from "../../utils/cityNotifications";
+import { fetchL1Notifications, type L1Notification } from "../../utils/cityNotifications";
 import { BudgetMiniMeter } from "./BudgetMiniMeter";
 import { ScoreMiniMeter } from "./ScoreMiniMeter";
 import { TOOL_ICONS, iconUrl, openRegisteredWindow, type HudIconDef } from "./hudCommon";
 import { setHudMode, useHudMode } from "./hudMode";
 import { useHudSession, useTutorialHighlight } from "./useHudSession";
-import crisisIcon from "../../assets/images/ui/crisis.png";
 import "./hud.css";
 import "./Cockpit.css";
 
@@ -47,12 +41,8 @@ export function Cockpit() {
   const mode = useHudMode();
   const getBtnClassName = useTutorialHighlight();
 
-  // L1通知(今すぐ対処が必要な重大事象)の現在有効な一覧。
+  // L1通知(今すぐ対処が必要な重大事象)の現在有効な一覧。件数バッジと点滅の判定に使う。
   const [l1Notifications, setL1Notifications] = useState<L1Notification[]>([]);
-  // 前回取得時の通知ID集合。新規発生分だけをトーストするための差分キー。
-  // null は「未取得(初回)」を表し、初回取得分はトーストしない
-  // (セーブロード直後に復元された既存通知で鳴らさないため)。
-  const l1PrevIdsRef = useRef<Set<string> | null>(null);
 
   // BGM管理クラスのライフサイクル管理
   useEffect(() => {
@@ -90,19 +80,17 @@ export function Cockpit() {
     };
   }, []);
 
-  // 別セーブをロードし直したとき、旧セーブの通知が新セーブの「新規発生」として
-  // トーストされないよう、セッションが切れたら差分状態もリセットする。
+  // セッションが切れたら通知一覧を空にし、別セーブをロードし直したときに
+  // 旧セーブの件数バッジが残らないようにする。
   useEffect(() => {
     if (visible) return;
     setL1Notifications([]);
-    l1PrevIdsRef.current = null;
   }, [visible]);
 
   /**
    * L1通知(重大通知)のポーリング取得。
    * - 通知が1件以上あるとき、アラートアイコンを点滅させ件数バッジを出す
-   * - 前回取得時に無かった id の通知は「新規発生分」として右下トーストでも知らせる
-   *   (初回取得分はロード済み状態の復元なのでトーストしない)
+   *   (通知の内容はアイコンをクリックして開く一覧ウィンドウで確認する)
    * - エポック実行終了(epochExecuting: true→false)で本エフェクトが再実行され、
    *   実行直後の最新状態を即時反映する(実行中はポーリング自体を止める)
    */
@@ -116,19 +104,6 @@ export function Cockpit() {
         const items = await fetchL1Notifications(apiBaseUrl, controller.signal);
         if (cancelled) return;
         setL1Notifications(items);
-        const prevIds = l1PrevIdsRef.current;
-        if (prevIds !== null) {
-          for (const item of items) {
-            if (!prevIds.has(item.id)) {
-              void showNotification({
-                message: formatL1NotificationMessage(t, item),
-                iconPath: crisisIcon,
-                durationMs: 8000,
-              });
-            }
-          }
-        }
-        l1PrevIdsRef.current = new Set(items.map((item) => item.id));
       } catch {
         // 取得失敗(中断含む)は前回値を保持し、画面をちらつかせない(BudgetMiniMeterと同方針)。
       }
@@ -141,7 +116,7 @@ export function Cockpit() {
       controller.abort();
       clearInterval(timer);
     };
-  }, [apiBaseUrl, epochExecuting, t]);
+  }, [apiBaseUrl, epochExecuting]);
 
   /**
    * ブルドーザ(オブジェクト削除)モードのトグル。

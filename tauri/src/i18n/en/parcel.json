@@ -58,6 +58,7 @@
     "modeAlongPath": "Along Road",
     "modeTile": "Tile-like",
     "modeRandom": "Random",
+    "modeBlock": "Whole Block",
     "modeManual": "Freeform Polygon",
     "modeSplitRect": "Rectangle Split",
     "modeSplitRandom": "Random Split",
@@ -66,6 +67,11 @@
     "height": "Length",
     "alongPathWidth": "Width",
     "alongPathDepth": "Depth",
+    "blockSearchWidth": "Search Extent (W)",
+    "blockSearchHeight": "Search Extent (H)",
+    "lotWidth": "Frontage Lot Width",
+    "lotDepth": "Frontage Lot Depth",
+    "jitter": "Jitter",
     "angle": "Angle",
     "side": "Side",
     "sideLeft": "Left",
@@ -87,6 +93,7 @@
     "polygonReady": "Polygon finalized ({{count}}) — drag vertices to adjust",
     "unitSqm": "m²",
     "unitMeter": "m",
-    "unitDegree": "°"
+    "unitDegree": "°",
+    "unitPercent": "%"
   }
 }

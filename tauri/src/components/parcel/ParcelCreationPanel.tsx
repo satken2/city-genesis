@@ -33,9 +33,17 @@ type CreationMode =
   | "along_path"
   | "tile"
   | "random"
+  | "block"
   | "manual"
   | "split_rectangle"
   | "split_random";
+
+/** 地点選択で空き領域を探索するモード（Unity側は PARCEL_CREATION_POINT プリセット） */
+const POINT_MODES: CreationMode[] = ["empty_area", "tile", "random", "block"];
+
+function isPointCreationMode(mode: CreationMode | null): boolean {
+  return mode !== null && POINT_MODES.includes(mode);
+}
 
 const CREATION_SECTIONS = [
   {
@@ -60,6 +68,13 @@ const CREATION_SECTIONS = [
         mode: "random" as CreationMode,
         icon: "creation_4.png",
         tooltipKey: "parcel_creation.modeRandom",
+      },
+      {
+        // ブロック一括: 道路に囲まれたブロックを選択し、周縁の沿道区画+中央埋めを
+        // 一括生成する。アイコンは暫定で流用中。
+        mode: "block" as CreationMode,
+        icon: "creation_2.png",
+        tooltipKey: "parcel_creation.modeBlock",
       },
       {
         // 任意ポリゴン作成。頂点を打ってポリゴンを描く。アイコンは暫定で流用中。
@@ -112,6 +127,12 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
   const [height, setHeight] = useState(20);
   const [angle, setAngle] = useState(0);
   const [side, setSide] = useState<"left" | "right">("left");
+
+  // block(ブロック一括)モード用: 沿道区画の幅・奥行き
+  const [lotWidth, setLotWidth] = useState(10);
+  const [lotDepth, setLotDepth] = useState(20);
+  // random / split_random / block 共通: 区画幅のゆらぎ(%)
+  const [jitterPct, setJitterPct] = useState(25);
 
   const [pickedPosition, setPickedPosition] = useState<number[] | null>(null);
   const [selectedPathId, setSelectedPathId] = useState<number | null>(null);
@@ -188,6 +209,23 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
           average_area: area,
           dry_run: true,
         };
+        if (selectedMode === "random") {
+          payload.jitter = jitterPct / 100;
+        }
+      } else if (selectedMode === "block") {
+        if (!pickedPosition) return;
+        payload = {
+          mode: "block",
+          picked_position: pickedPosition,
+          width,
+          height,
+          angle,
+          lot_width: lotWidth,
+          lot_depth: lotDepth,
+          average_area: area,
+          jitter: jitterPct / 100,
+          dry_run: true,
+        };
       } else {
         if (selectedParcelId == null) return;
         payload = {
@@ -196,6 +234,9 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
           average_area: area,
           dry_run: true,
         };
+        if (selectedMode === "split_random") {
+          payload.jitter = jitterPct / 100;
+        }
       }
 
       setPreviewLoading(true);
@@ -216,7 +257,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
 
           const previewPolygons = items.map((item) => item.polygon);
           const originalPolygon =
-            selectedMode !== "empty_area" && selectedMode !== "along_path" && selectedMode !== "tile" && selectedMode !== "random"
+            !isPointCreationMode(selectedMode) && selectedMode !== "along_path"
               ? (data.original_parcel as { polygon?: number[][] } | undefined)?.polygon ?? null
               : null;
           void sendEditParcelUpdatePreview(selectedMode, previewPolygons, originalPolygon);
@@ -245,13 +286,13 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
         }
       }
     },
-    [selectedMode, pickedPosition, selectedPathId, selectedParcelId, side, width, height, angle, area, baseUrl]
+    [selectedMode, pickedPosition, selectedPathId, selectedParcelId, side, width, height, angle, area, lotWidth, lotDepth, jitterPct, baseUrl]
   );
 
   /* ---- 選択結果が届いたらプレビューを取得 ---- */
 
   useEffect(() => {
-    const isPointMode = selectedMode === "empty_area" || selectedMode === "tile" || selectedMode === "random";
+    const isPointMode = isPointCreationMode(selectedMode);
     const isPathMode = selectedMode === "along_path";
     const isParcelMode = selectedMode === "split_rectangle" || selectedMode === "split_random";
 
@@ -276,15 +317,14 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
     return () => controller.abort();
   }, [selectedMode, selectedPathId, side, width, height, fetchPreview]);
 
-  /* ---- 地点指定系のパラメータ変更監視 (empty_area / tile / random) ---- */
+  /* ---- 地点指定系のパラメータ変更監視 (empty_area / tile / random / block) ---- */
   useEffect(() => {
-    const isPointMode = selectedMode === "empty_area" || selectedMode === "tile" || selectedMode === "random";
-    if (!isPointMode || pickedPosition == null) return;
+    if (!isPointCreationMode(selectedMode) || pickedPosition == null) return;
 
     const controller = new AbortController();
     void fetchPreview(controller.signal);
     return () => controller.abort();
-  }, [selectedMode, pickedPosition, width, height, angle, area, fetchPreview]);
+  }, [selectedMode, pickedPosition, width, height, angle, area, lotWidth, lotDepth, jitterPct, fetchPreview]);
 
   /* ---- IPC イベントリスナー ---- */
 
@@ -404,6 +444,15 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
       setAngle(0);
       setManualPolygon([]);
       setManualFinalized(false);
+      // 探索矩形サイズのモード別既定値。block はブロック全体が探索矩形に
+      // 収まる必要があるため、他の地点指定系より大きめにする。
+      if (mode === "block") {
+        setWidth(150);
+        setHeight(150);
+      } else if (mode === "empty_area" || mode === "tile" || mode === "random") {
+        setWidth(10);
+        setHeight(20);
+      }
       sendChangeState("STATE_EDIT_PARCEL", { parcel_creation_mode: mode }, "parcel_creation").catch((err) => {
         console.error("[ParcelCreation] sendChangeState failed:", err);
       });
@@ -469,6 +518,22 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
         angle,
         average_area: area,
       };
+      if (selectedMode === "random") {
+        payload.jitter = jitterPct / 100;
+      }
+    } else if (selectedMode === "block") {
+      if (!pickedPosition) return;
+      payload = {
+        mode: "block",
+        picked_position: pickedPosition,
+        width,
+        height,
+        angle,
+        lot_width: lotWidth,
+        lot_depth: lotDepth,
+        average_area: area,
+        jitter: jitterPct / 100,
+      };
     } else if (selectedMode === "manual") {
       if (manualPolygon.length < 3) return;
       payload = {
@@ -482,6 +547,9 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
         parcel_id: selectedParcelId,
         average_area: area,
       };
+      if (selectedMode === "split_random") {
+        payload.jitter = jitterPct / 100;
+      }
     }
 
     setStatusMessage(null);
@@ -523,7 +591,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
 
   /* ---- 選択状態の判定 ---- */
 
-  const isPointMode = selectedMode === "empty_area" || selectedMode === "tile" || selectedMode === "random";
+  const isPointMode = isPointCreationMode(selectedMode);
   const isPathMode = selectedMode === "along_path";
   const isParcelMode = selectedMode === "split_rectangle" || selectedMode === "split_random";
   const isManualMode = selectedMode === "manual";
@@ -623,6 +691,59 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
               </>
             )}
 
+            {selectedMode === "block" && (
+              <>
+                <div className="pc-input-row">
+                  <span className="pc-input-label">{t("parcel_creation.blockSearchWidth")}</span>
+                  <NumberStepper
+                    value={width}
+                    onChange={setWidth}
+                    min={20}
+                    max={400}
+                    step={10}
+                    integerOnly={false}
+                  />
+                  <span className="pc-input-unit">{t("parcel_creation.unitMeter")}</span>
+                </div>
+                <div className="pc-input-row">
+                  <span className="pc-input-label">{t("parcel_creation.blockSearchHeight")}</span>
+                  <NumberStepper
+                    value={height}
+                    onChange={setHeight}
+                    min={20}
+                    max={400}
+                    step={10}
+                    integerOnly={false}
+                  />
+                  <span className="pc-input-unit">{t("parcel_creation.unitMeter")}</span>
+                </div>
+                <div className="pc-input-row">
+                  <span className="pc-input-label">{t("parcel_creation.lotWidth")}</span>
+                  <NumberStepper
+                    value={lotWidth}
+                    onChange={setLotWidth}
+                    min={4}
+                    max={50}
+                    step={1}
+                    integerOnly={false}
+                  />
+                  <span className="pc-input-unit">{t("parcel_creation.unitMeter")}</span>
+                </div>
+                <div className="pc-input-row">
+                  <span className="pc-input-label">{t("parcel_creation.lotDepth")}</span>
+                  <NumberStepper
+                    value={lotDepth}
+                    onChange={setLotDepth}
+                    min={5}
+                    max={100}
+                    step={1}
+                    integerOnly={false}
+                  />
+                  <span className="pc-input-unit">{t("parcel_creation.unitMeter")}</span>
+                </div>
+              </>
+            )}
+
             {selectedMode === "along_path" && (
               <>
                 <div className="pc-input-row">
@@ -675,7 +796,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
               </>
             )}
 
-            {(selectedMode === "tile" || selectedMode === "random" || selectedMode === "split_rectangle" || selectedMode === "split_random") && (
+            {(selectedMode === "tile" || selectedMode === "random" || selectedMode === "block" || selectedMode === "split_rectangle" || selectedMode === "split_random") && (
               <div className="pc-input-row">
                 <span className="pc-input-label">{t("parcel_creation.area")}</span>
                 <NumberStepper
@@ -690,8 +811,23 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
               </div>
             )}
 
+            {(selectedMode === "random" || selectedMode === "block" || selectedMode === "split_random") && (
+              <div className="pc-input-row">
+                <span className="pc-input-label">{t("parcel_creation.jitter")}</span>
+                <NumberStepper
+                  value={jitterPct}
+                  onChange={setJitterPct}
+                  min={0}
+                  max={50}
+                  step={5}
+                  integerOnly={true}
+                />
+                <span className="pc-input-unit">{t("parcel_creation.unitPercent")}</span>
+              </div>
+            )}
+
             {/* 選択状態 */}
-            {(selectedMode === "empty_area" || selectedMode === "tile" || selectedMode === "random") && (
+            {isPointMode && (
               <div className={`pc-selection-message ${pickedPosition ? "active" : "waiting"}`}>
                 {pickedPosition
                   ? t("parcel_creation.pointSelected")
@@ -749,7 +885,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
               />
             ) : (
               <div className="pc-preview-message">
-                {(selectedMode === "empty_area" || selectedMode === "tile" || selectedMode === "random") && t("parcel_creation.selectPoint")}
+                {isPointMode && t("parcel_creation.selectPoint")}
                 {selectedMode === "along_path" && t("parcel_creation.selectPath")}
                 {(selectedMode === "split_rectangle" || selectedMode === "split_random") && t("parcel_creation.selectParcel")}
               </div>

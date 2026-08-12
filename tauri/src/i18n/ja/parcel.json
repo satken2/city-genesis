@@ -58,6 +58,7 @@
     "modeAlongPath": "道路沿いに作成",
     "modeTile": "タイル状",
     "modeRandom": "ランダム",
+    "modeBlock": "ブロック一括",
     "modeManual": "任意ポリゴン",
     "modeSplitRect": "矩形分割",
     "modeSplitRandom": "ランダム分割",
@@ -66,6 +67,11 @@
     "height": "長さ",
     "alongPathWidth": "幅",
     "alongPathDepth": "奥行き",
+    "blockSearchWidth": "探索範囲(横)",
+    "blockSearchHeight": "探索範囲(縦)",
+    "lotWidth": "沿道区画の幅",
+    "lotDepth": "沿道区画の奥行き",
+    "jitter": "ゆらぎ",
     "angle": "角度",
     "side": "配置",
     "sideLeft": "左側",
@@ -87,6 +93,7 @@
     "polygonReady": "ポリゴンを確定済み ({{count}} 点) — 頂点をドラッグして調整できます",
     "unitSqm": "㎡",
     "unitMeter": "m",
-    "unitDegree": "°"
+    "unitDegree": "°",
+    "unitPercent": "%"
   }
 }
