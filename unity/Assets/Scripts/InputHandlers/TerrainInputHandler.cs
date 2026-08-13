@@ -724,9 +724,10 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
             NodeData snappedNode = FindNearestNode(basePosition, actualThreshold, pathManager, out snappedPos, drawingPathVariant);
             if (snappedNode != null)
             {
-                // 吸着ノードの絶対Yには高架の標高が載っているので相対高さを取り出す
+                // 標高の引き継ぎはノードが保持する相対高さをそのまま使う
+                // (絶対Y−地形サンプルの逆算は高さ源の差がノイズとして乗る)
                 snappedToElevatable = true;
-                snapRelHeight = snappedPos.y - Utils.GetGroundHeight(snappedPos);
+                snapRelHeight = snappedNode.GetRelativeHeight();
                 return snappedPos;
             }
 
@@ -751,9 +752,14 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
             int segmentIndex;
             if (FindNearestPathSegment(basePosition, actualThreshold, pathManager, out snappedPos, out snappedPath, out segmentIndex, drawingPathVariant))
             {
-                // 吸着点の絶対Yには高架セグメントの標高が載っているので相対高さを取り出す
+                // 標高の引き継ぎは吸着先パスのアンカー相対Yを吸着点で補間して求める。
+                // 描画ポリラインの絶対Y−地形サンプルの逆算は禁止
+                // (GetRelativeHeightAtPoint のコメント参照。地面のパスへの吸着でも
+                //  端点が地下/空中扱いになり、インフラのT字タップが無言で不成立になる)
                 snappedToElevatable = true;
-                snapRelHeight = snappedPos.y - Utils.GetGroundHeight(snappedPos);
+                snapRelHeight = snappedPath != null
+                    ? snappedPath.GetRelativeHeightAtPoint(snappedPos.x, snappedPos.z)
+                    : 0f;
                 return snappedPos;
             }
         }

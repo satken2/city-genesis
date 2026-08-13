@@ -335,6 +335,15 @@ public static class BuildingMeshUtils
             footprint[i] = new Vector2(buildingData.polygonArray[i][0], buildingData.polygonArray[i][1]);
         }
 
+        // 区画全面を使う建物(農地など)はバックエンドが区画ポリゴンをそのまま底面に採用する
+        // ため、建物ポリゴンにも区画由来の縮退頂点(共線・重複)が入り得る。壁・角の配置が
+        // 破綻しないよう区画と同じ間引きを通す。間引きで3頂点未満になる場合は生データを使う。
+        Vector2[] sanitized = SanitizeRingPolygon(footprint);
+        if (sanitized != null)
+        {
+            footprint = sanitized;
+        }
+
         // 頂点の並びをCCW(反時計回り)に正規化
         if (BuildingMeshUtils.SignedArea(footprint) < 0f)
         {
@@ -484,12 +493,13 @@ public static class BuildingMeshUtils
             float[][] poly = parcel.GetPolygonArray();
             if (poly != null && poly.Length >= 3)
             {
-                parcelFootprint = new Vector2[poly.Length];
+                Vector2[] raw = new Vector2[poly.Length];
                 for (int i = 0; i < poly.Length; i++)
                 {
-                    parcelFootprint[i] = new Vector2(poly[i][0] - cx, poly[i][1] - cz);
+                    raw[i] = new Vector2(poly[i][0] - cx, poly[i][1] - cz);
                 }
-                if (SignedArea(parcelFootprint) < 0f)
+                parcelFootprint = SanitizeRingPolygon(raw);
+                if (parcelFootprint != null && SignedArea(parcelFootprint) < 0f)
                 {
                     System.Array.Reverse(parcelFootprint);
                 }
@@ -497,6 +507,88 @@ public static class BuildingMeshUtils
         }
 
         return parcelFootprint;
+    }
+
+    /// <summary>縮退辺とみなす辺長(m)。これ未満しか離れていない頂点は同一点として除去する。</summary>
+    private const float RING_MIN_EDGE_LENGTH = 0.01f;
+
+    /// <summary>ほぼ一直線とみなす方向変化角(度)。これ未満の中間頂点は共線として除去する。</summary>
+    private const float RING_COLLINEAR_ANGLE_DEG = 5f;
+
+    /// <summary>
+    /// 輪ポリゴン(建物底面・土地区画)をメッシュ生成用に正規化する。バックエンドのポリゴンは
+    /// 「閉じた輪」の契約(B_土地形状.md)であり、shapely 由来の閉環重複(末尾=先頭)や、
+    /// 道路用地の切り取り・区画整形で入る「ほぼ一直線上の中間頂点」を含むことがある
+    /// (区画全面を使う建物では底面=区画ポリゴンなので建物側にも同じ縮退が入る)。
+    /// これらをそのまま壁・角の配置(1頂点=1角パーツ)に使うと、ゼロ長辺では内角が
+    /// 計算不能になって角パーツが閉じた X 字に折れ、内角180°付近では角パーツが開ききって
+    /// 壁の線を横切る形に暴れる。①縮退辺(閉環重複を含む)の頂点、②方向変化が閾値未満の
+    /// 共線頂点を除去し、除去後3頂点未満なら null を返す(呼び出し側でフォールバックする)。
+    /// </summary>
+    private static Vector2[] SanitizeRingPolygon(Vector2[] ring)
+    {
+        if (ring == null || ring.Length < 3) return null;
+
+        List<Vector2> dedup = new List<Vector2>(ring.Length);
+        foreach (Vector2 p in ring)
+        {
+            if (dedup.Count == 0 || (p - dedup[dedup.Count - 1]).magnitude >= RING_MIN_EDGE_LENGTH)
+            {
+                dedup.Add(p);
+            }
+        }
+        // 輪の綴じ目(末尾→先頭)側の縮退辺。shapely の閉環重複はここで落ちる。
+        while (dedup.Count >= 2 && (dedup[0] - dedup[dedup.Count - 1]).magnitude < RING_MIN_EDGE_LENGTH)
+        {
+            dedup.RemoveAt(dedup.Count - 1);
+        }
+        if (dedup.Count < 3) return null;
+
+        // 共線頂点の判定は「最後に残した頂点からの方向」と「次辺の方向」の差で行う。
+        // 各頂点単独の方向変化で判定すると、緩いカーブ上の頂点(1個ずつは閾値未満でも
+        // 累積すると大きく曲がる)が全滅して弧が弦に潰れるため、累積変化が閾値を超えた
+        // 時点で頂点を残す方式にしている。走査の開始点(アンカー)は方向変化が最大の
+        // 頂点=確実な角にして、カーブの途中から走査が始まるのを防ぐ。
+        int n = dedup.Count;
+        int anchor = 0;
+        float maxTurn = -1f;
+        for (int i = 0; i < n; i++)
+        {
+            Vector2 prev = dedup[(i + n - 1) % n];
+            Vector2 curr = dedup[i];
+            Vector2 next = dedup[(i + 1) % n];
+            float turn = Vector2.Angle(curr - prev, next - curr);
+            if (turn > maxTurn)
+            {
+                maxTurn = turn;
+                anchor = i;
+            }
+        }
+
+        List<int> keptIndices = new List<int>(n) { anchor };
+        Vector2 lastKept = dedup[anchor];
+        for (int k = 1; k < n; k++)
+        {
+            int idx = (anchor + k) % n;
+            Vector2 curr = dedup[idx];
+            Vector2 next = dedup[(anchor + k + 1) % n];
+            if (Vector2.Angle(curr - lastKept, next - curr) >= RING_COLLINEAR_ANGLE_DEG)
+            {
+                keptIndices.Add(idx);
+                lastKept = curr;
+            }
+        }
+        if (keptIndices.Count < 3) return null;
+
+        // アンカーは走査の開始点にすぎないので、出力は元の頂点順で返す。
+        // 頂点0=前面の辺(エントランス・塔屋の向き、壁・角の位置番号)の規約を保つため。
+        keptIndices.Sort();
+        Vector2[] result = new Vector2[keptIndices.Count];
+        for (int i = 0; i < keptIndices.Count; i++)
+        {
+            result[i] = dedup[keptIndices[i]];
+        }
+        return result;
     }
 
     /// <summary>

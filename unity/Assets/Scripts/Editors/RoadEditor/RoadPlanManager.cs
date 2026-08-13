@@ -1845,7 +1845,7 @@ public class RoadPlanManager : MonoBehaviour
                 foreach (var node in nodes)
                 {
                     if (!InfraNetworkUtil.IsNodeSnappable(node, PathSubtype, pathManager)) continue;
-                    EvaluatePointTargetOffsetCandidates(basePos, node.GetAbsolutePosition(), ref bestDist, ref snapped, ref snapRelHeight, ref found);
+                    EvaluatePointTargetOffsetCandidates(basePos, node.GetAbsolutePosition(), node.GetRelativeHeight(), ref bestDist, ref snapped, ref snapRelHeight, ref found);
                 }
             }
 
@@ -1882,7 +1882,11 @@ public class RoadPlanManager : MonoBehaviour
                             {
                                 bestDist = dist;
                                 snapped = candidate;
-                                snapRelHeight = candidate.y - Utils.GetGroundHeight(candidate);
+                                // 標高は元パス中心線上の対応点(candidate + shift)のアンカー相対Y補間から
+                                // 引き継ぐ(描画Y−地形サンプルの逆算はノイズが乗るため使わない)
+                                snapRelHeight = seg.path != null
+                                    ? seg.path.GetRelativeHeightAtPoint(candidate.x + shift.x, candidate.z + shift.z)
+                                    : 0f;
                                 found = true;
                             }
                         }
@@ -1900,12 +1904,14 @@ public class RoadPlanManager : MonoBehaviour
     /// 生カーソルに最も近い候補で最良値を更新する。接線はターゲットの近傍セグメントのうち
     /// 端点が一致するものを使い(交差点では全アームを試す)、無ければ最寄りセグメントで代用する。
     /// </summary>
-    private void EvaluatePointTargetOffsetCandidates(Vector3 basePos, Vector3 targetPos, ref float bestDist, ref Vector3 bestPos, ref float bestRelHeight, ref bool found)
+    private void EvaluatePointTargetOffsetCandidates(Vector3 basePos, Vector3 targetPos, float targetRelHeight, ref float bestDist, ref Vector3 bestPos, ref float bestRelHeight, ref bool found)
     {
         var segs = pathManager.QueryNearbySegments(targetPos, OFFSET_SNAP_TANGENT_SEARCH_RADIUS);
         if (segs == null || segs.Count == 0) return;
 
-        float relHeight = targetPos.y - Utils.GetGroundHeight(targetPos);
+        // 標高はターゲット(ノード/端点)が保持する相対高さをそのまま引き継ぐ
+        // (絶対Y−地形サンプルの逆算は高さ源の差がノイズとして乗る)
+        float relHeight = targetRelHeight;
         Vector2 targetXZ = new Vector2(targetPos.x, targetPos.z);
 
         bool anyTouching = false;
@@ -2000,7 +2006,7 @@ public class RoadPlanManager : MonoBehaviour
         float rel = pointList.Count >= 3 ? pointList[1] : 0f;
         if (Vector2.Distance(new Vector2(basePos.x, basePos.z), new Vector2(x, z)) > searchRadius) return;
         Vector3 endpoint = new Vector3(x, Utils.GetGroundHeight(new Vector3(x, 0f, z)) + rel, z);
-        EvaluatePointTargetOffsetCandidates(basePos, endpoint, ref bestDist, ref bestPos, ref bestRelHeight, ref found);
+        EvaluatePointTargetOffsetCandidates(basePos, endpoint, rel, ref bestDist, ref bestPos, ref bestRelHeight, ref found);
     }
 
     /// <summary>

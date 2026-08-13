@@ -715,11 +715,16 @@ public class IpcViewCoordinator : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// アラートレイヤーの表示フィルタを適用する。
+    /// subMode はアラート種別のビットマスク(下位バイト=ALERT_AGENT_*、
+    /// 上位バイト=ALERT_PATH_* を ALERT_PATH_MASK_SHIFT シフトしたもの)。未指定なら全種別表示。
+    /// </summary>
     private void ApplyAlertMode(string mode, string subMode = null)
     {
         if (AlertManager.Instance != null)
         {
-            int mask = 27;
+            int mask = AlertManager.DefaultFilterMask;
             if (!string.IsNullOrEmpty(subMode))
             {
                 int.TryParse(subMode, out mask);

@@ -5,6 +5,19 @@ import type { DisplayLayer, DisplayMode } from "./displayConstants";
 import type { DisplaySelection } from "./useDisplayOptions";
 import { useDisplayOptions } from "./useDisplayOptions";
 import { useMasterData } from "../../contexts/MasterDataContext";
+import {
+  ALERT_AGENT_CONSTRUCTION_SHORTAGE,
+  ALERT_AGENT_ON_FIRE,
+  ALERT_AGENT_ACCIDENTAL_FIRE,
+  ALERT_AGENT_CRIME,
+  ALERT_AGENT_CRIME_SIGN,
+  ALERT_AGENT_INFRA_DISCONNECTED,
+  ALERT_PATH_CONSTRUCTION_SHORTAGE,
+  ALERT_PATH_ACCIDENT,
+  ALERT_PATH_NO_STATION_HOUSE,
+  ALERT_PATH_MASK_SHIFT,
+  ALERT_DISPLAY_RUIN,
+} from "../../constants";
 import { resolveTransitIcon } from "../../utils/pathIcon";
 import { playSound } from "../../utils/playSound";
 import clickSrc from "../../assets/sounds/click.mp3";
@@ -230,7 +243,7 @@ function getLegendInfo(layerId: string, modeId: string): LegendInfo {
   const dummyDescriptions: Record<string, string> = {
     district: "地区の枠線と名称・アイコンを表示します。地区ごとの色分けは建物/区画/道路の「地区別色塗り」モードを使います。",
     terrain: "地形の標高や透明度を変更して表示します。",
-    alert: "街のアラートの表示設定を変更します。",
+    alert: "街のアラートを種別ごとに表示/非表示できます。上6件が建物、次の3件が道路、最後が倒壊・焼失した廃墟のアイコンです。",
     cell: "セル単位の境界表示を切り替えます。",
     transit: "設置済みの公共交通路線を種別色の帯で表示します。路線種別ごとに表示/非表示を切り替えられます。",
     prop: "プロップの表示/非表示を切り替えます。",
@@ -241,28 +254,28 @@ function getLegendInfo(layerId: string, modeId: string): LegendInfo {
   };
 }
 
+/**
+ * アラート表示フィルタのカード定義。consts.py の ALERT_AGENT_* / ALERT_PATH_* を全種類網羅する。
+ * 建物(agent)と道路(path)はビット値が重複するため、フィルタマスク上では道路ビットを
+ * ALERT_PATH_MASK_SHIFT だけ上位へずらして名前空間を分ける(Unity の AlertManager と同じ規約)。
+ * 末尾の ALERT_DISPLAY_RUIN だけは alert ビットではなく status(廃墟)由来のアイコンの表示可否で、
+ * 建物・道路の両方に効く。
+ */
 const ALERT_CARDS = [
-  {
-    bit: 1,
-    icon: "alerts/bribery.png",
-    text: "資金不足により建設が停滞しています",
-  },
-  {
-    bit: 2,
-    icon: "alerts/fire.png",
-    text: "火災が発生しています",
-  },
-  {
-    bit: 8,
-    icon: "alerts/shooting.png",
-    text: "犯罪が発生しています",
-  },
-  {
-    bit: 16,
-    icon: "alerts/siren.png",
-    text: "犯罪が抑止されました",
-  },
+  { bit: ALERT_AGENT_CONSTRUCTION_SHORTAGE, icon: "alerts/bribery.png", labelKey: "display.alertAgentConstructionShortage" },
+  { bit: ALERT_AGENT_ON_FIRE, icon: "alerts/fire.png", labelKey: "display.alertAgentOnFire" },
+  { bit: ALERT_AGENT_ACCIDENTAL_FIRE, icon: "alerts/smoke.png", labelKey: "display.alertAgentAccidentalFire" },
+  { bit: ALERT_AGENT_CRIME, icon: "alerts/shooting.png", labelKey: "display.alertAgentCrime" },
+  { bit: ALERT_AGENT_CRIME_SIGN, icon: "alerts/siren.png", labelKey: "display.alertAgentCrimeSign" },
+  { bit: ALERT_AGENT_INFRA_DISCONNECTED, icon: "alerts/electricity.png", labelKey: "display.alertAgentInfraDisconnected" },
+  { bit: ALERT_PATH_CONSTRUCTION_SHORTAGE << ALERT_PATH_MASK_SHIFT, icon: "alerts/road.png", labelKey: "display.alertPathConstructionShortage" },
+  { bit: ALERT_PATH_ACCIDENT << ALERT_PATH_MASK_SHIFT, icon: "alerts/car-accident.png", labelKey: "display.alertPathAccident" },
+  { bit: ALERT_PATH_NO_STATION_HOUSE << ALERT_PATH_MASK_SHIFT, icon: "transport/t_train.png", labelKey: "display.alertPathNoStationHouse" },
+  { bit: ALERT_DISPLAY_RUIN, icon: "alerts/rubble.png", labelKey: "display.alertDisplayRuin" },
 ];
+
+/** 全種別ONのマスク。subMode 未設定時の既定値で、Unity 側の既定値と一致させる。 */
+const ALERT_MASK_ALL = ALERT_CARDS.reduce((mask, card) => mask | card.bit, 0);
 
 function AlertSection({
   selection,
@@ -271,7 +284,8 @@ function AlertSection({
   selection: DisplaySelection;
   onSelect: (layerId: string, mode: string, subMode?: string) => void;
 }) {
-  const currentMask = selection.subMode ? parseInt(selection.subMode, 10) : 27;
+  const { t } = useTranslation();
+  const currentMask = selection.subMode ? parseInt(selection.subMode, 10) : ALERT_MASK_ALL;
 
   const handleToggle = (bit: number) => {
     playSound(clickSrc);
@@ -295,7 +309,7 @@ function AlertSection({
               className="do-alert-card-icon"
               draggable={false}
             />
-            <span className="do-alert-card-text">{card.text}</span>
+            <span className="do-alert-card-text">{t(card.labelKey)}</span>
             <div className="do-alert-card-toggle" />
           </div>
         );

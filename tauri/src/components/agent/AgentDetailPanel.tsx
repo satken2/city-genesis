@@ -476,7 +476,8 @@ export function AgentDetailPanel({
 
       {(() => {
         const agentMaster = masterData?.agents[agentData.variant];
-        const isHeadroomFacility = (agentMaster?.production_headroom ?? 0) > 0;
+        // 余力方式(>0)・定量方式(<0)とも稼働率目標がプレイヤーのレバーになる
+        const isHeadroomFacility = (agentMaster?.production_headroom ?? 0) !== 0;
         // 建設中の建物は utilization_target を「建設スピード」として調整できる（最大500%）。
         const isConstructing = agentData.status === STATUS_CONSTRUCTING;
         if (!isConstructing && !isHeadroomFacility) return null;

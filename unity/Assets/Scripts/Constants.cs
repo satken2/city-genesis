@@ -281,6 +281,8 @@ public static class Constants
     public const int ALERT_PATH_CONSTRUCTION_SHORTAGE = 1;
     public const int ALERT_PATH_ACCIDENT = 2;
     public const int ALERT_PATH_NO_STATION_HOUSE = 4;
+    public const int ALERT_PATH_MASK_SHIFT = 8;
+    public const int ALERT_DISPLAY_RUIN = 65536;
 
     public static readonly Dictionary<int, int> VEHICLE_TO_TRAFFIC = new Dictionary<int, int>
     {

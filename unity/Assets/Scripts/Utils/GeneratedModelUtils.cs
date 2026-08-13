@@ -270,6 +270,67 @@ public static class PathSummaryExtensions
     }
 
     /// <summary>
+    /// パス中心線上の指定XZ位置における相対高さ(地形からの高さ)を返す。
+    /// アンカー列(始点→ウェイポイント→終点)の相対Yを、XZ最近傍のアンカー区間上で線形補間する。
+    /// 吸着でパスの標高を引き継ぐ際は必ずこのメソッドを使うこと。
+    /// 「描画ポリラインの絶対Y − 地形サンプル」の逆算は、折れ線チャード中間の地形起伏・
+    /// 描画用オフセット・高さ源(CPU配列/Terrain.SampleHeight)の不一致がすべて標高ノイズとして
+    /// 混入し、地面のパス(相対Y=0)へ吸着しただけで端点が地下/空中扱いになるため禁止。
+    /// base_height を持つバリアント(送電線など)でも、描画Yではなくバックエンドの相対Yを返す。
+    /// </summary>
+    public static float GetRelativeHeightAtPoint(this GeneratedModels.PathSummary p, float x, float z)
+    {
+        var anchorX = new List<float>();
+        var anchorZ = new List<float>();
+        var anchorRel = new List<float>();
+
+        void AddAnchor(List<float> pt)
+        {
+            if (pt == null || pt.Count < 2) return;
+            anchorX.Add(pt[0]);
+            anchorZ.Add(pt[pt.Count - 1]);
+            anchorRel.Add(pt.Count >= 3 ? pt[1] : 0f);
+        }
+
+        AddAnchor(p.GetStartPointList());
+        var waypoints = p.GetWaypointList();
+        if (waypoints != null)
+        {
+            foreach (var wp in waypoints)
+            {
+                if (wp?.position == null || wp.position.Length < 2) continue;
+                anchorX.Add(wp.position[0]);
+                anchorZ.Add(wp.position[wp.position.Length - 1]);
+                anchorRel.Add(wp.GetRelativeHeight());
+            }
+        }
+        AddAnchor(p.GetEndPointList());
+
+        if (anchorRel.Count == 0) return 0f;
+        if (anchorRel.Count == 1) return anchorRel[0];
+
+        var pXZ = new Vector2(x, z);
+        float bestDistSqr = float.MaxValue;
+        float bestRel = anchorRel[0];
+        for (int i = 0; i < anchorRel.Count - 1; i++)
+        {
+            var a = new Vector2(anchorX[i], anchorZ[i]);
+            var b = new Vector2(anchorX[i + 1], anchorZ[i + 1]);
+            Vector2 ab = b - a;
+            float lenSqr = ab.sqrMagnitude;
+            float t = lenSqr > 1e-6f ? Mathf.Clamp01(Vector2.Dot(pXZ - a, ab) / lenSqr) : 0f;
+            Vector2 closest = a + ab * t;
+            float distSqr = (pXZ - closest).sqrMagnitude;
+            if (distSqr < bestDistSqr)
+            {
+                bestDistSqr = distSqr;
+                bestRel = Mathf.Lerp(anchorRel[i], anchorRel[i + 1], t);
+            }
+        }
+        return bestRel;
+    }
+
+    /// <summary>
     /// center_point を float[] に変換する。
     /// </summary>
     public static float[] GetCenterPointArray(this GeneratedModels.PathSummary p)

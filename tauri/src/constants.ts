@@ -276,6 +276,8 @@ export const ALERT_AGENT_INFRA_DISCONNECTED: number = 32;
 export const ALERT_PATH_CONSTRUCTION_SHORTAGE: number = 1;
 export const ALERT_PATH_ACCIDENT: number = 2;
 export const ALERT_PATH_NO_STATION_HOUSE: number = 4;
+export const ALERT_PATH_MASK_SHIFT: number = 8;
+export const ALERT_DISPLAY_RUIN: number = 65536;
 
 export const VEHICLE_TO_TRAFFIC: Record<number, number> = {
   0: 0,

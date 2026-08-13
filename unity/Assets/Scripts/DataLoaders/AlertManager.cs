@@ -35,6 +35,12 @@ using UnityEngine.UI;
 /// 適切なSpriteを取得する。未設定ビットのSpriteはnullになり、そのビットのアイコンは
 /// スキップされる。
 ///
+/// 表示フィルタ
+/// ------------
+/// UI(表示パネルのアラートタブ)から view:change_view の sub_mode でビットマスクが届く。
+/// ALERT_AGENT_* と ALERT_PATH_* は同じビット値を使うため、マスク上では path 側を
+/// Constants.ALERT_PATH_MASK_SHIFT だけ上位へずらして名前空間を分ける。
+///
 /// リフレッシュタイミング
 /// --------------------
 /// - game:end IPC 受信時(エポック完走後): GameStateManager から Refresh(forceRefresh: true) を呼ぶ。
@@ -52,7 +58,39 @@ public class AlertManager : MonoBehaviour
 {
     public static AlertManager Instance { get; private set; }
 
-    private int _filterMask = 27; // デフォルトですべてON (1 | 2 | 8 | 16)
+    /// <summary>建物(agent)のアラートビット一覧。アイコンを並べる順序でもある。</summary>
+    private static readonly int[] AGENT_ALERT_BITS =
+    {
+        Constants.ALERT_AGENT_CONSTRUCTION_SHORTAGE,
+        Constants.ALERT_AGENT_ON_FIRE,
+        Constants.ALERT_AGENT_ACCIDENTAL_FIRE,
+        Constants.ALERT_AGENT_CRIME,
+        Constants.ALERT_AGENT_CRIME_SIGN,
+        Constants.ALERT_AGENT_INFRA_DISCONNECTED,
+    };
+
+    /// <summary>道路(path)のアラートビット一覧。アイコンを並べる順序でもある。</summary>
+    private static readonly int[] PATH_ALERT_BITS =
+    {
+        Constants.ALERT_PATH_CONSTRUCTION_SHORTAGE,
+        Constants.ALERT_PATH_ACCIDENT,
+        Constants.ALERT_PATH_NO_STATION_HOUSE,
+    };
+
+    /// <summary>全種別を表示するフィルタマスク。UI から指定が来るまでの既定値。</summary>
+    public static readonly int DefaultFilterMask = BuildFullFilterMask();
+
+    private static int BuildFullFilterMask()
+    {
+        int mask = Constants.ALERT_DISPLAY_RUIN;
+        foreach (int bit in AGENT_ALERT_BITS) mask |= bit;
+        foreach (int bit in PATH_ALERT_BITS) mask |= bit << Constants.ALERT_PATH_MASK_SHIFT;
+        return mask;
+    }
+
+    // 表示フィルタ。下位バイトに ALERT_AGENT_*、上位バイト(ALERT_PATH_MASK_SHIFT シフト)に ALERT_PATH_* を載せる。
+    // agent と path でビット値が重複するための名前空間分離で、UI(DisplayOptionsPanel)も同じ規約でマスクを組む。
+    private int _filterMask = DefaultFilterMask;
 
     public void SetFilterMask(int mask)
     {
@@ -261,27 +299,48 @@ public class AlertManager : MonoBehaviour
         }
         foreach (var key in toRemove)
         {
-            foreach (var iconGO in _icons[key])
-            {
-                if (iconGO != null) Destroy(iconGO);
-            }
-            _icons.Remove(key);
-            _worldPositions.Remove(key);
-            _baseScreenPositions.Remove(key);
-            _isBehindCache.Remove(key);
+            DestroyIcons(key);
         }
 
         // 直ちにスクリーン座標を更新するため、カメラ位置トラッキングをリセット。
         _lastCamPos = Vector3.negativeInfinity;
     }
 
+    /// <summary>
+    /// 指定キーのアイコンを破棄し、位置・スクリーン座標のキャッシュごと登録を消す。
+    /// キャッシュを残すと `_icons` との件数不一致でスクリーン座標更新が毎フレーム走る。
+    /// </summary>
+    private void DestroyIcons(string key)
+    {
+        if (_icons.TryGetValue(key, out var iconList))
+        {
+            foreach (var iconGO in iconList)
+            {
+                if (iconGO != null) Destroy(iconGO);
+            }
+            _icons.Remove(key);
+        }
+        _worldPositions.Remove(key);
+        _baseScreenPositions.Remove(key);
+        _isBehindCache.Remove(key);
+    }
+
     private void UpdateIcons(string key, AlertItem item, string entityType)
     {
         if (item.center_point == null || item.center_point.Count < 2) return;
 
-        // status が廃墟(倒壊・焼失)か、アラートビットが1つ以上立っていなければアイコン不要。
-        bool isCollapsed = System.Array.IndexOf(Constants.STATUSES_RUIN, item.status) >= 0;
-        if (!isCollapsed && item.alert == 0) return;
+        // 廃墟(倒壊・焼失)アイコンは alert ビットではなく status 由来。撤去するまで出続けるため、
+        // 表示フィルタの専用ビット ALERT_DISPLAY_RUIN で agent/path まとめてON/OFFできる。
+        bool isRuin = System.Array.IndexOf(Constants.STATUSES_RUIN, item.status) >= 0;
+        bool showRuin = isRuin && (_filterMask & Constants.ALERT_DISPLAY_RUIN) != 0;
+        List<int> activeBits = EnumerateActiveBits(item.alert, entityType);
+
+        // 表示対象が1つも無ければ(フィルタで全て落ちた場合を含む)、残っているアイコンを破棄して終了する。
+        if (!showRuin && activeBits.Count == 0)
+        {
+            DestroyIcons(key);
+            return;
+        }
 
         // アイコンを表示すべきワールド座標を計算。
         // 建物の場合は建物メッシュ高さを加えて屋上より上に出す。道路の場合は地形高さ+オフセット。
@@ -323,8 +382,8 @@ public class AlertManager : MonoBehaviour
             _icons[key] = existingList;
         }
 
-        // status が廃墟(倒壊・焼失)の場合は倒壊アイコンを追加。
-        if (isCollapsed)
+        // 廃墟アイコン。
+        if (showRuin)
         {
             Sprite collapsedSprite = AlertIconFactory.Instance.GetIconForStatusCollapsed(entityType);
             if (collapsedSprite != null)
@@ -335,7 +394,6 @@ public class AlertManager : MonoBehaviour
         }
 
         // アラートビットアイコン。
-        List<int> activeBits = EnumerateActiveBits(item.alert, entityType);
         foreach (int bit in activeBits)
         {
             Sprite sprite = entityType == "agent"
@@ -350,8 +408,7 @@ public class AlertManager : MonoBehaviour
         if (existingList.Count == 0)
         {
             // 全ビットのSpriteが未設定等でアイコンが1つも無かった場合、エントリごと削除。
-            _icons.Remove(key);
-            _worldPositions.Remove(key);
+            DestroyIcons(key);
         }
     }
 
@@ -377,32 +434,20 @@ public class AlertManager : MonoBehaviour
     }
 
     /// <summary>
-    /// alert ビットフラグから立っているビット値のリストを抽出する。
-    /// entityType に応じて agent/path 用のビット定数のみを対象とする。
-    /// STATUS_CONSTRUCTING による建設中アイコンはここではなく UpdateIcons で処理する。
+    /// alert ビットフラグのうち、立っていてかつ表示フィルタで有効なビット値を抽出する。
+    /// path のフィルタビットは上位バイトに置かれているため、比較前にマスク側をシフトして下ろす。
+    /// STATUS_* による廃墟アイコンはここではなく UpdateIcons で処理する。
     /// </summary>
     private List<int> EnumerateActiveBits(int alert, string entityType)
     {
-        var bits = new List<int>(4);
-        if (entityType == "agent")
+        bool isAgent = entityType == "agent";
+        int[] targetBits = isAgent ? AGENT_ALERT_BITS : PATH_ALERT_BITS;
+        int filter = isAgent ? _filterMask : (_filterMask >> Constants.ALERT_PATH_MASK_SHIFT);
+
+        var bits = new List<int>(targetBits.Length);
+        foreach (int bit in targetBits)
         {
-            if ((alert & Constants.ALERT_AGENT_CONSTRUCTION_SHORTAGE) != 0 && (Constants.ALERT_AGENT_CONSTRUCTION_SHORTAGE & _filterMask) != 0)
-                bits.Add(Constants.ALERT_AGENT_CONSTRUCTION_SHORTAGE);
-            if ((alert & Constants.ALERT_AGENT_ON_FIRE) != 0 && (Constants.ALERT_AGENT_ON_FIRE & _filterMask) != 0)
-                bits.Add(Constants.ALERT_AGENT_ON_FIRE);
-            if ((alert & Constants.ALERT_AGENT_ACCIDENTAL_FIRE) != 0 && (Constants.ALERT_AGENT_ON_FIRE & _filterMask) != 0) // 火災トグルと連動
-                bits.Add(Constants.ALERT_AGENT_ACCIDENTAL_FIRE);
-            if ((alert & Constants.ALERT_AGENT_CRIME) != 0 && (Constants.ALERT_AGENT_CRIME & _filterMask) != 0)
-                bits.Add(Constants.ALERT_AGENT_CRIME);
-            if ((alert & Constants.ALERT_AGENT_CRIME_SIGN) != 0 && (Constants.ALERT_AGENT_CRIME_SIGN & _filterMask) != 0)
-                bits.Add(Constants.ALERT_AGENT_CRIME_SIGN);
-        }
-        else // "path"
-        {
-            if ((alert & Constants.ALERT_PATH_CONSTRUCTION_SHORTAGE) != 0 && (Constants.ALERT_PATH_CONSTRUCTION_SHORTAGE & _filterMask) != 0)
-                bits.Add(Constants.ALERT_PATH_CONSTRUCTION_SHORTAGE);
-            if ((alert & Constants.ALERT_PATH_ACCIDENT) != 0) // 交通事故は常に表示
-                bits.Add(Constants.ALERT_PATH_ACCIDENT);
+            if ((alert & bit) != 0 && (filter & bit) != 0) bits.Add(bit);
         }
         return bits;
     }

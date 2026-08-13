@@ -40,6 +40,10 @@ public class AlertIconFactory : MonoBehaviour
     [SerializeField] private Sprite agentOnFireIcon;
     [Tooltip("ALERT_AGENT_ACCIDENTAL_FIRE ビット用アイコン。失火（小火）の建物に表示。")]
     [SerializeField] private Sprite agentAccidentalFireIcon;
+    [Tooltip("ALERT_AGENT_CRIME ビット用アイコン。犯罪が発生した建物に表示。")]
+    [SerializeField] private Sprite agentCrimeIcon;
+    [Tooltip("ALERT_AGENT_CRIME_SIGN ビット用アイコン。犯罪の兆候(被害度が閾値以下)がある建物に表示。")]
+    [SerializeField] private Sprite agentCrimeSignIcon;
     [Tooltip("ALERT_AGENT_INFRA_DISCONNECTED ビット用アイコン。インフラ網に未接続の稼働中インフラ施設(発電所・変電所など)に表示。")]
     [SerializeField] private Sprite agentInfraDisconnectedIcon;
 
@@ -48,6 +52,8 @@ public class AlertIconFactory : MonoBehaviour
     [SerializeField] private Sprite pathConstructionShortageIcon;
     [Tooltip("ALERT_PATH_ACCIDENT ビット用アイコン。道路上で事故が発生している場合に表示。")]
     [SerializeField] private Sprite pathAccidentIcon;
+    [Tooltip("ALERT_PATH_NO_STATION_HOUSE ビット用アイコン。どの駅舎パスにも属していない駅ホームに表示。")]
+    [SerializeField] private Sprite pathNoStationHouseIcon;
 
     // (entityType, bit) → Sprite。entityType は "agent" または "path"。
     private Dictionary<(string, int), Sprite> _alertIcons;
@@ -77,9 +83,12 @@ public class AlertIconFactory : MonoBehaviour
             _alertIcons[("agent", Constants.ALERT_AGENT_CONSTRUCTION_SHORTAGE)] = agentConstructionShortageIcon;
             _alertIcons[("agent", Constants.ALERT_AGENT_ON_FIRE)]               = agentOnFireIcon;
             _alertIcons[("agent", Constants.ALERT_AGENT_ACCIDENTAL_FIRE)]       = agentAccidentalFireIcon != null ? agentAccidentalFireIcon : agentOnFireIcon;
+            _alertIcons[("agent", Constants.ALERT_AGENT_CRIME)]                 = agentCrimeIcon;
+            _alertIcons[("agent", Constants.ALERT_AGENT_CRIME_SIGN)]            = agentCrimeSignIcon;
             _alertIcons[("agent", Constants.ALERT_AGENT_INFRA_DISCONNECTED)]    = agentInfraDisconnectedIcon;
             _alertIcons[("path",  Constants.ALERT_PATH_CONSTRUCTION_SHORTAGE)] = pathConstructionShortageIcon;
             _alertIcons[("path",  Constants.ALERT_PATH_ACCIDENT)]              = pathAccidentIcon;
+            _alertIcons[("path",  Constants.ALERT_PATH_NO_STATION_HOUSE)]      = pathNoStationHouseIcon;
         }
         catch (Exception e)
         {

@@ -207,9 +207,9 @@ export function PublicFacilityPanel({
   const isPaused = status === STATUS_PAUSED;
 
   // 稼働率目標スライダーの表示条件(従来のカードと同一)。
-  // 建設中は「建設スピード」(最大500%)、余力方式の施設は「稼働率目標」(最大100%)。
+  // 建設中は「建設スピード」(最大500%)、余力方式(>0)・定量方式(<0)の施設は「稼働率目標」(最大100%)。
   const agentMaster = masterData?.agents[agent.variant];
-  const isHeadroomFacility = (agentMaster?.production_headroom ?? 0) > 0;
+  const isHeadroomFacility = (agentMaster?.production_headroom ?? 0) !== 0;
   const isConstructing = status === STATUS_CONSTRUCTING;
   const showSlider = isConstructing || isHeadroomFacility;
   const sliderMax = isConstructing ? 500 : 100;
