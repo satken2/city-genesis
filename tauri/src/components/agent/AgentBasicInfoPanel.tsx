@@ -45,7 +45,7 @@ export function AgentBasicInfoPanel({
           {t("agent.activeFrom")}
         </span>
         <span className="agent-detail-value">
-          <EpochDate daysSinceEpoch={agent.active_from} />
+          <EpochDate daysSinceEpoch={agent.status_from} />
         </span>
 
         <span className="agent-detail-label">

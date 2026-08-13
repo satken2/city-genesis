@@ -63,7 +63,7 @@ export type AgentData = {
   /** 現在のステータスになった理由(REASON_*)。0(REASON_NONE)は通常遷移 */
   status_reason?: number;
   alert?: number;
-  active_from: number;
+  status_from: number;
   reserves: number;
   revenues: number[];
   expenses: number[];
