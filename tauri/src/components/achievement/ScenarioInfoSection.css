@@ -1,0 +1,134 @@
+/**
+ * シナリオ情報セクションのスタイル
+ *
+ * 達成目標ウィンドウの先頭に置く横一杯のバンド。スコア分析・達成目標の縦比率を
+ * 崩さないよう、伸縮せず(flex-shrink:0)、高さの上限を決めて内部スクロールさせる。
+ * 意匠は同ウィンドウのカード（薄い白の面＋細い枠）に揃える。
+ */
+
+.scenario-info {
+  flex-shrink: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.scenario-info__title {
+  margin: 0 0 6px 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #9db0c5;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ==================== 編集フォーム（テンプレート作成モード） ==================== */
+
+.scenario-info__form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scenario-info__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scenario-info__label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #a4bccc;
+}
+
+.scenario-info__input,
+.scenario-info__textarea {
+  padding: 6px 8px;
+  font-size: 0.8rem;
+  font-family: inherit;
+  line-height: 1.6;
+  background-color: #10161f;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  color: #e0e0e0;
+  outline: none;
+  resize: vertical;
+}
+
+.scenario-info__input:focus,
+.scenario-info__textarea:focus {
+  border-color: #4ea1ff;
+}
+
+.scenario-info__input:disabled,
+.scenario-info__textarea:disabled {
+  opacity: 0.6;
+}
+
+.scenario-info__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.scenario-info__save-btn {
+  padding: 6px 18px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background-color: #2a6b3a;
+  border: none;
+  border-radius: 6px;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.scenario-info__save-btn:hover:not(:disabled) {
+  background-color: #3a8a4a;
+}
+
+.scenario-info__save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.scenario-info__result {
+  font-size: 0.75rem;
+  color: #7fd18f;
+}
+
+.scenario-info__result--error {
+  color: #ef7f7f;
+}
+
+/* ==================== 読み取り表示（通常プレイ） ==================== */
+
+.scenario-info__read {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scenario-info__read-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #e0e0e0;
+}
+
+.scenario-info__read-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* 作成者が入力した改行をそのまま活かす */
+.scenario-info__read-text {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: #c8d8e8;
+  white-space: pre-wrap;
+}

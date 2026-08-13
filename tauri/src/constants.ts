@@ -224,6 +224,7 @@ export const STATION_HOUSE_DEFAULT_DEPTH: number = 16.0;
 export const STATION_HOUSE_TRACK_CLEARANCE_MARGIN: number = 0.1;
 export const STATION_HOUSE_TRACK_SEARCH_RADIUS: number = 150.0;
 export const PATH_TANGENT_ALIGN_MAX_ANGLE_DEG: number = 20.0;
+export const INFRA_TAP_HEIGHT_TOLERANCE: number = 3.0;
 export const PAYMENT_MARKET: number = 0;
 export const PAYMENT_RENT: number = 1;
 export const PAYMENT_SALARY: number = 2;

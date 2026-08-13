@@ -353,8 +353,8 @@
   },
   "new_game": {
     "title": "ニューゲーム",
-    "width": 800,
-    "height": 640,
+    "width": 1280,
+    "height": 800,
     "resizable": true,
     "policy": "single",
     "empty_shell": true,
@@ -404,8 +404,8 @@
 
   "template_editor": {
     "title": "エディタ",
-    "width": 800,
-    "height": 640,
+    "width": 1280,
+    "height": 800,
     "resizable": true,
     "policy": "single",
     "empty_shell": true,

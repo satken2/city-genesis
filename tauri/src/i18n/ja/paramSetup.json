@@ -370,6 +370,15 @@
     "tutorialName": "道路と建物を作ろう",
     "tutorialDesc": "都市の基盤となる道路や建物を作る方法を学びます。",
     "lockedHint": "🔒 チュートリアルクリアで解放",
-    "tutorialNoTerrain": "地形データが見つかりません。インストール状態を確認してください。"
+    "tutorialNoTerrain": "地形データが見つかりません。インストール状態を確認してください。",
+    "detailPlaceholder": "左の一覧から地形またはシナリオを選んでください。",
+    "detailMapLabel": "マップ",
+    "detailMapSizeLabel": "マップサイズ",
+    "detailObjectiveLabel": "達成条件",
+    "detailNoDescription": "このシナリオには説明が設定されていません。",
+    "terrainDetailDesc": "何もない土地から都市を築きます。達成条件はなく、好きなように発展させられます。",
+    "tutorialObjective": "チュートリアルのすべてのステップを完了する。",
+    "startTerrainButton": "この地形で始める",
+    "startScenarioButton": "このシナリオを始める"
   }
 }

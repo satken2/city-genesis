@@ -2,21 +2,28 @@
  * ニューゲームウィンドウコンポーネント
  *
  * トップメニューの「ニューゲーム」ボタンから開かれるポップアップウィンドウ。
- * 以下の2つのセクションを縦に並べて表示する:
+ * 左右2カラム構成で、左に選択肢の一覧、右に固定幅の詳細パネルを置く。
+ *
+ * 左カラム（一覧）は2つのセクションを縦に並べる:
  *
  * 1. 地形から始める … バックエンドの assets/terrain_maps.yaml に登録された地形マップ一覧を
- *    タイル表示し、クリックで設定確認モーダルを表示する。
- *    チュートリアル未クリアでも選択可能。
+ *    タイル表示する。チュートリアル未クリアでも選択可能。
  * 2. シナリオから始める … チュートリアルミッション（常に表示）と
  *    バックエンドのテンプレート一覧を並べて表示する。
- *    チュートリアルミッションは最初の地形マップ（与論島）をチュートリアルONでロードする。
- *    テンプレートシナリオはチュートリアルクリア後に選択可能になる。
+ *    チュートリアルミッションは平坦な地形マップ（flat）をチュートリアルONでロードする。
  *
- * タイルクリック後は「ゲーム設定の確認」モーダルが開き、
+ * 一覧のタイルはサムネイルと名前だけを出す。説明・達成条件は右カラムに集約する。
+ *
+ * 右カラム（詳細パネル）はタイルをクリックして選択した対象の内容を表示する。
+ * サムネイルを大きく出し、その下にタイトル・説明・舞台となるマップ・達成条件を並べる。
+ * シナリオの説明文・達成条件はテンプレート作成者が記入するフリーテキストで、
+ * セーブデータのメタデータ（GET /api/v1/saves?template=true）に含まれる。
+ *
+ * 詳細パネルの開始ボタンで「ゲーム設定の確認」画面に切り替わり、
  * 都市名・都市の言語・シミュレーション日数を設定してからゲームを開始する。
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { loadAppSettings } from "../../utils/settings";
@@ -43,6 +50,9 @@ type TerrainMapEntry = {
 /**
  * テンプレート（シナリオ）セーブデータのメタデータエントリ
  * GET /api/v1/saves?template=true の各要素の型
+ *
+ * scenario_* と terrain_map_* はシナリオ紹介用の項目。
+ * これらの項目を持たない時期に保存されたテンプレートも読めるよう、すべて省略可能とする。
  */
 type TemplateEntry = {
   id: string;
@@ -54,6 +64,11 @@ type TemplateEntry = {
   saved_at: string;
   is_scenario: boolean;
   language: string;
+  scenario_title?: string;
+  scenario_description?: string;
+  scenario_objective?: string;
+  terrain_map_id?: string;
+  terrain_map_name?: string;
 };
 
 /**
@@ -62,6 +77,38 @@ type TemplateEntry = {
 type StatusMessage = {
   text: string;
   type: "success" | "error" | "info";
+};
+
+/**
+ * 詳細パネルに表示する選択対象。
+ * 一覧のタイルをクリックすると設定される（この時点ではまだゲームは始まらない）。
+ */
+type Selection =
+  | { kind: "terrain"; id: string }
+  | { kind: "tutorial"; id: string }
+  | { kind: "template"; id: string };
+
+/**
+ * 詳細パネルの描画に必要な項目へ正規化した表示データ。
+ * 地形・チュートリアル・テンプレートで供給元が異なるため、パネル側は
+ * この形だけを知っていればよいようにする。
+ */
+type DetailView = {
+  /** サムネイルとして使う地形マップID。解決できない場合は null（プレースホルダー表示） */
+  terrainMapId: string | null;
+  /** サムネイルが無いときに使うプレースホルダーのCSS修飾子 */
+  placeholderModifier: string;
+  title: string;
+  description: string;
+  /** 舞台となるマップ名。地形選択時は自明なので null */
+  mapName: string | null;
+  /** マップサイズの表示文字列（例: 7000m × 6000m）。不明なら null */
+  mapSize: string | null;
+  /** 達成条件のフリーテキスト。未設定なら null */
+  objective: string | null;
+  /** 開始ボタンのラベル */
+  startLabel: string;
+  onStart: () => void;
 };
 
 /**
@@ -92,6 +139,18 @@ const AVAILABLE_LANGUAGES = ["ja", "en"] as const;
  */
 const SIMULATION_DAYS_OPTIONS = [7, 30] as const;
 
+/**
+ * 地形マップ定義の settings から「幅m × 高さm」の表示文字列を組み立てる。
+ * map_width / map_height はメートル単位の整数。欠けている場合は null を返す。
+ */
+function formatMapSize(settings: Record<string, unknown> | undefined): string | null {
+  if (!settings) return null;
+  const width = settings.map_width;
+  const height = settings.map_height;
+  if (typeof width !== "number" || typeof height !== "number") return null;
+  return `${width.toLocaleString()}m × ${height.toLocaleString()}m`;
+}
+
 export function NewGameWindow({
   apiBaseUrl,
   onClose,
@@ -103,6 +162,9 @@ export function NewGameWindow({
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<StatusMessage | null>(null);
+
+  // 詳細パネルに表示中の選択対象
+  const [selection, setSelection] = useState<Selection | null>(null);
 
   // 設定確認モーダルの表示状態
   const [confirmSelection, setConfirmSelection] = useState<ConfirmSelection | null>(null);
@@ -153,11 +215,10 @@ export function NewGameWindow({
   }, [apiBaseUrl]);
 
   /**
-   * 地形タイルクリック時のハンドラ。
-   * 設定確認モーダルを開き、デフォルト値をセットする。
+   * 地形での開始。設定確認モーダルを開き、デフォルト値をセットする。
    * チュートリアル未クリアでも選択可能。
    */
-  const handleSelectTerrain = useCallback(
+  const handleStartTerrain = useCallback(
     async (mapId: string) => {
       const settings = await loadAppSettings();
       setCityName("");
@@ -177,11 +238,10 @@ export function NewGameWindow({
   );
 
   /**
-   * シナリオタイルクリック時のハンドラ（チュートリアル以外）。
+   * テンプレート（シナリオ）での開始。
    * 設定確認モーダルを開き、テンプレートの既存値をデフォルトとしてセットする。
-   * チュートリアル未クリアの場合は呼ばれない（ボタンが disabled）。
    */
-  const handleSelectTemplate = useCallback(
+  const handleStartTemplate = useCallback(
     async (template: TemplateEntry) => {
       const settings = await loadAppSettings();
       const defaultLang = template.language || settings.language || i18n.language;
@@ -203,14 +263,14 @@ export function NewGameWindow({
   );
 
   /**
-   * チュートリアルミッションタイルクリック時のハンドラ。
+   * チュートリアルミッションでの開始。
    * チュートリアルは常に平坦な地形マップ(`flat`)をチュートリアルモードでロードする。
    * チュートリアルは道路・地区・建物の操作手順を学ぶためのものであり、
    * 地形の起伏に左右されず常に同じ初期状態から始められるよう、
    * assets/terrain_maps.yaml で定義された `flat` マップを明示的に選択する。
    * `flat` マップが取得できていない場合はエラーメッセージを表示する。
    */
-  const handleSelectTutorial = useCallback(async (tutorialId: string) => {
+  const handleStartTutorial = useCallback(async (tutorialId: string) => {
     const terrainMap = terrainMaps.find((m) => m.id === "flat");
     if (!terrainMap) {
       setStatus({
@@ -234,6 +294,76 @@ export function NewGameWindow({
       tutorialId,
     });
   }, [terrainMaps, i18n, t]);
+
+  /**
+   * 選択中の対象を詳細パネル用の表示データへ正規化する。
+   * 選択が無い、または選択対象が一覧から消えた場合は null を返す。
+   */
+  const detail = useMemo<DetailView | null>(() => {
+    if (!selection) return null;
+
+    if (selection.kind === "terrain") {
+      const map = terrainMaps.find((m) => m.id === selection.id);
+      if (!map) return null;
+      return {
+        terrainMapId: map.id,
+        placeholderModifier: "new-game-detail-image--terrain",
+        title: map.name,
+        description: t("newGame.terrainDetailDesc"),
+        mapName: null,
+        mapSize: formatMapSize(map.settings),
+        objective: null,
+        startLabel: t("newGame.startTerrainButton"),
+        onStart: () => void handleStartTerrain(map.id),
+      };
+    }
+
+    if (selection.kind === "tutorial") {
+      const scenario = TUTORIAL_SCENARIOS.find((s) => s.id === selection.id);
+      if (!scenario) return null;
+      const flatMap = terrainMaps.find((m) => m.id === "flat");
+      return {
+        // チュートリアルは専用の絵柄を持つため、地形サムネイルは使わない。
+        terrainMapId: null,
+        placeholderModifier: `new-game-detail-image--tutorial new-game-detail-image--${scenario.id}`,
+        title: t(scenario.titleKey),
+        description: t(scenario.descriptionKey),
+        mapName: flatMap ? flatMap.name : null,
+        mapSize: formatMapSize(flatMap?.settings),
+        objective: t("newGame.tutorialObjective"),
+        startLabel: t("newGame.startScenarioButton"),
+        onStart: () => void handleStartTutorial(scenario.id),
+      };
+    }
+
+    const template = templates.find((tmpl) => tmpl.id === selection.id);
+    if (!template) return null;
+    const terrainMap = template.terrain_map_id
+      ? terrainMaps.find((m) => m.id === template.terrain_map_id)
+      : undefined;
+    return {
+      terrainMapId: template.terrain_map_id || null,
+      placeholderModifier: "new-game-detail-image--template",
+      title:
+        template.scenario_title ||
+        template.city_name ||
+        `Template ${template.id.slice(0, 8)}`,
+      description: template.scenario_description || t("newGame.detailNoDescription"),
+      mapName: terrainMap?.name || template.terrain_map_name || null,
+      mapSize: formatMapSize(terrainMap?.settings),
+      objective: template.scenario_objective || null,
+      startLabel: t("newGame.startScenarioButton"),
+      onStart: () => void handleStartTemplate(template),
+    };
+  }, [
+    selection,
+    terrainMaps,
+    templates,
+    t,
+    handleStartTerrain,
+    handleStartTemplate,
+    handleStartTutorial,
+  ]);
 
   /**
    * 設定確認モーダルで「開始」を押した時のハンドラ。
@@ -264,7 +394,7 @@ export function NewGameWindow({
       });
       setBusy(false);
     }
-  }, [t, onClose, confirmSelection, cityName, language, simulationDays]);
+  }, [t, onClose, confirmSelection, cityName, language, simulationDays, isScenarioEditor]);
 
   /**
    * 設定確認モーダルを閉じてタイル選択画面に戻る
@@ -277,7 +407,7 @@ export function NewGameWindow({
   // 設定確認モーダル表示中
   if (confirmSelection) {
     return (
-      <div className="new-game-body">
+      <div className="new-game-body new-game-body--confirm">
         <div className="new-game-confirm">
           <h2 className="new-game-confirm-title">{t("newGame.confirmTitle")}</h2>
 
@@ -370,86 +500,153 @@ export function NewGameWindow({
 
   // タイル選択画面
   return (
-    <div className="new-game-body">
-      {loading ? (
-        <div className="new-game-loading">{t("newGame.loading")}</div>
-      ) : (
-        <>
-          {/* 地形から始めるセクション（チュートリアル未クリアでも選択可能） */}
-          <section className="new-game-section">
-            <h2 className="new-game-section-title">{t("newGame.fromTerrain")}</h2>
-            {terrainMaps.length === 0 ? (
-              <div className="new-game-empty">{t("newGame.noTerrainMaps")}</div>
-            ) : (
+    <div className="new-game-body new-game-body--select">
+      <div className="new-game-list">
+        {loading ? (
+          <div className="new-game-loading">{t("newGame.loading")}</div>
+        ) : (
+          <>
+            {/* 地形から始めるセクション（チュートリアル未クリアでも選択可能） */}
+            <section className="new-game-section">
+              <h2 className="new-game-section-title">{t("newGame.fromTerrain")}</h2>
+              {terrainMaps.length === 0 ? (
+                <div className="new-game-empty">{t("newGame.noTerrainMaps")}</div>
+              ) : (
+                <div className="new-game-tiles">
+                  {terrainMaps.map((map) => (
+                    <button
+                      key={map.id}
+                      className={`new-game-tile ${
+                        selection?.kind === "terrain" && selection.id === map.id ? "selected" : ""
+                      }`}
+                      onClick={() => setSelection({ kind: "terrain", id: map.id })}
+                      disabled={busy}
+                      type="button"
+                      title={map.name}
+                    >
+                      <TerrainMapThumbnail apiBaseUrl={apiBaseUrl} mapId={map.id} />
+                      <span className="new-game-tile-name">{map.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* シナリオセクション（チュートリアル + テンプレートを統合） */}
+            <section className="new-game-section">
+              <h2 className="new-game-section-title">{t("newGame.fromScenario")}</h2>
               <div className="new-game-tiles">
-                {terrainMaps.map((map) => (
+                {/* チュートリアルミッション: 常に表示、常に選択可能 */}
+                {!isScenarioEditor &&
+                  TUTORIAL_SCENARIOS.map((scenario) => (
+                    <button
+                      key={scenario.id}
+                      className={`new-game-tile new-game-tile--tutorial ${
+                        selection?.kind === "tutorial" && selection.id === scenario.id
+                          ? "selected"
+                          : ""
+                      }`}
+                      onClick={() => setSelection({ kind: "tutorial", id: scenario.id })}
+                      disabled={busy}
+                      type="button"
+                      title={t(scenario.titleKey)}
+                    >
+                      <span className="new-game-tile-badge">{t("newGame.tutorialBadge")}</span>
+                      <div className={`new-game-tile-image new-game-tile-image--tutorial new-game-tile-image--${scenario.id}`} />
+                      <span className="new-game-tile-name">{t(scenario.titleKey)}</span>
+                    </button>
+                  ))
+                }
+
+                {/* テンプレートシナリオ: 常に選択可能 */}
+                {templates.map((tmpl) => (
                   <button
-                    key={map.id}
-                    className="new-game-tile"
-                    onClick={() => void handleSelectTerrain(map.id)}
+                    key={tmpl.id}
+                    className={`new-game-tile ${
+                      selection?.kind === "template" && selection.id === tmpl.id ? "selected" : ""
+                    }`}
+                    onClick={() => setSelection({ kind: "template", id: tmpl.id })}
                     disabled={busy}
                     type="button"
-                    title={map.name}
+                    title={tmpl.scenario_title || tmpl.city_name || tmpl.id}
                   >
-                    <TerrainMapThumbnail apiBaseUrl={apiBaseUrl} mapId={map.id} />
-                    <span className="new-game-tile-name">{map.name}</span>
+                    {tmpl.terrain_map_id ? (
+                      <TerrainMapThumbnail apiBaseUrl={apiBaseUrl} mapId={tmpl.terrain_map_id} />
+                    ) : (
+                      <div className="new-game-tile-image new-game-tile-image--template" />
+                    )}
+                    <span className="new-game-tile-name">
+                      {tmpl.scenario_title || tmpl.city_name || `Template ${tmpl.id.slice(0, 8)}`}
+                    </span>
                   </button>
                 ))}
               </div>
+
+              {/* テンプレートがない場合の空状態メッセージ */}
+              {templates.length === 0 && (
+                <div className="new-game-empty">{t("newGame.noTemplates")}</div>
+              )}
+            </section>
+          </>
+        )}
+      </div>
+
+      {/* 詳細パネル（固定幅） */}
+      <aside className="new-game-detail">
+        {detail ? (
+          <>
+            {detail.terrainMapId ? (
+              <TerrainMapThumbnail
+                apiBaseUrl={apiBaseUrl}
+                mapId={detail.terrainMapId}
+                className="new-game-detail-image"
+                placeholderModifier={detail.placeholderModifier}
+              />
+            ) : (
+              <div className={`new-game-detail-image ${detail.placeholderModifier}`} />
             )}
-          </section>
 
-          {/* シナリオセクション（チュートリアル + テンプレートを統合） */}
-          <section className="new-game-section">
-            <h2 className="new-game-section-title">{t("newGame.fromScenario")}</h2>
-            <div className="new-game-tiles">
-              {/* チュートリアルミッション: 常に表示、常に選択可能 */}
-              {!isScenarioEditor &&
-                TUTORIAL_SCENARIOS.map((scenario) => (
-                  <button
-                    key={scenario.id}
-                    className="new-game-tile new-game-tile--tutorial"
-                    onClick={() => void handleSelectTutorial(scenario.id)}
-                    disabled={busy}
-                    type="button"
-                    title={t(scenario.titleKey)}
-                  >
-                    <span className="new-game-tile-badge">{t("newGame.tutorialBadge")}</span>
-                    <div className={`new-game-tile-image new-game-tile-image--tutorial new-game-tile-image--${scenario.id}`} />
-                    <span className="new-game-tile-name">{t(scenario.titleKey)}</span>
-                    <span className="new-game-tile-desc">{t(scenario.descriptionKey)}</span>
-                  </button>
-                ))
-              }
+            <div className="new-game-detail-content">
+              <h2 className="new-game-detail-title">{detail.title}</h2>
+              <p className="new-game-detail-desc">{detail.description}</p>
 
-              {/* テンプレートシナリオ: 常に選択可能 */}
-              {templates.map((tmpl) => (
-                <button
-                  key={tmpl.id}
-                  className="new-game-tile"
-                  onClick={() => void handleSelectTemplate(tmpl)}
-                  disabled={busy}
-                  type="button"
-                  title={tmpl.city_name || tmpl.id}
-                >
-                  <div className="new-game-tile-image new-game-tile-image--template" />
-                  <span className="new-game-tile-name">
-                    {tmpl.city_name || `Template ${tmpl.id.slice(0, 8)}`}
-                  </span>
-                  <span className="new-game-tile-desc">
-                    {t("saveList.population")}: {tmpl.population.toLocaleString()}
-                  </span>
-                </button>
-              ))}
+              {detail.mapName && (
+                <div className="new-game-detail-block">
+                  <h3 className="new-game-detail-block-title">{t("newGame.detailMapLabel")}</h3>
+                  <p className="new-game-detail-block-text">{detail.mapName}</p>
+                </div>
+              )}
+
+              {detail.mapSize && (
+                <div className="new-game-detail-block">
+                  <h3 className="new-game-detail-block-title">{t("newGame.detailMapSizeLabel")}</h3>
+                  <p className="new-game-detail-block-text">{detail.mapSize}</p>
+                </div>
+              )}
+
+              {detail.objective && (
+                <div className="new-game-detail-block">
+                  <h3 className="new-game-detail-block-title">
+                    {t("newGame.detailObjectiveLabel")}
+                  </h3>
+                  <p className="new-game-detail-block-text">{detail.objective}</p>
+                </div>
+              )}
             </div>
 
-            {/* テンプレートがない場合の空状態メッセージ */}
-            {templates.length === 0 && (
-              <div className="new-game-empty">{t("newGame.noTemplates")}</div>
-            )}
-          </section>
-        </>
-      )}
+            <button
+              className="new-game-detail-start"
+              onClick={detail.onStart}
+              disabled={busy}
+              type="button"
+            >
+              {detail.startLabel}
+            </button>
+          </>
+        ) : (
+          <div className="new-game-detail-placeholder">{t("newGame.detailPlaceholder")}</div>
+        )}
+      </aside>
 
       {status && (
         <div className={`new-game-status new-game-status--${status.type}`}>

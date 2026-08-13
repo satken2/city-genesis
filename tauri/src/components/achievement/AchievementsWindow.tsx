@@ -20,6 +20,7 @@ import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { useTemplateMode } from "../../hooks/useTemplateMode";
+import { ScenarioInfoSection } from "./ScenarioInfoSection";
 import type { Quest, QuestClauseState } from "../../types";
 import {
   Radar,
@@ -222,6 +223,9 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
 
   return (
     <div className="achieve-dashboard">
+      {/* シナリオ紹介文（テンプレート作成モードでは編集フォーム） */}
+      <ScenarioInfoSection apiBaseUrl={apiBaseUrl} templateMode={templateMode} />
+
       {/* 上部エリア (3/5): 施政スコア分析 */}
       <div className="achieve-dashboard__upper">
         
