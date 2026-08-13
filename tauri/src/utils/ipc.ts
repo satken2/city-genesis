@@ -245,6 +245,9 @@ export async function sendEditBuildingUpdateEffectRange(
  * 土地区画作成モードにおいて、プレビュー形状をUnity側の2Dオーバーレイに描画する。
  * UI側でバックエンドからプレビューを取得した後、ポリゴンデータをUnityに送信する。
  *
+ * 一括作成モードでは数百区画ぶんのポリゴンを載せるため、MMFの容量を圧迫しないよう
+ * 座標を1cm精度に丸めて送る（オーバーレイ描画専用の値であり、確定はバックエンドが行う）。
+ *
  * @param mode 作成モード（empty_area / along_path / split_rectangle 等）
  * @param previewPolygons プレビュー区画のポリゴン配列 [ [ [x,y,z], ... ], ... ]
  * @param originalPolygon 元区画のポリゴン（分割モード時）。省略可。
@@ -254,14 +257,15 @@ export async function sendEditParcelUpdatePreview(
   previewPolygons: number[][][],
   originalPolygon?: number[][] | null,
 ): Promise<void> {
+  const roundPoint = (point: number[]) => point.map((v) => Math.round(v * 100) / 100);
   await invoke("send_window_action", {
     windowType: "parcel_creation",
     entity: null,
     action: "edit_parcel:update_preview",
     params: {
       mode,
-      preview_polygons: previewPolygons,
-      original_polygon: originalPolygon ?? null,
+      preview_polygons: previewPolygons.map((polygon) => polygon.map(roundPoint)),
+      original_polygon: originalPolygon ? originalPolygon.map(roundPoint) : null,
     },
   });
 }

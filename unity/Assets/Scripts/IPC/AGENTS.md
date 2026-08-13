@@ -30,6 +30,7 @@ HTTP(バックエンド通信)とは別系統であることに注意。Unityと
 
 ## 知らないとわからないこと
 
+- **MMFの容量`CAPACITY`(1MiB)は`MmfReader`/`MmfWriter`とtauri側`src-tauri/src/ipc.rs`の同名定数の3箇所を必ず揃えること。** 共有メモリは両プロセスとも`CreateOrOpen`で開くため先に起動した側のサイズが採用され、食い違うと片側だけが範囲外を読む。1メッセージがバッファに収まらないと送信側が失敗し、**受信側は何も起きないだけなので「UIは動くがUnityだけ更新が止まる」というサイレント故障になる**(土地区画の一括作成プレビューは数百区画ぶんのポリゴンを載せるため、旧8KBでは広い範囲を指定すると必ず溢れていた)。
 - イベント名は`source`/`destination`と`event`文字列で識別される。エンベロープの用語上、Unity側は"parent"と呼ばれる(Tauri側の`send_to_parent`はUnity宛て送信のこと)。
 - **曲線/直線・吸着の設定系イベントは廃止済み**: `edit_path:change_curved` / `view:set_snapping` は存在しない。曲線/直線・吸着の真実源はUnity側(Ctrlラジアルメニュー、`Editors/RoadEditor/RoadEditControlMenu`)にあり、曲線モードは `edit_path:update_shape` の `is_curved`(点列が空でも常送)としてUIへ逆流する。
 - **標高・盛土はパネルにもステッパーが残る**: `edit_path:change_node`(標高) / `edit_path:change_embankment`(盛土)はUIパネルのステッパー変更をUnityへ送るイベントとして現存(`OnEditPathChangeNode`/`OnEditPathChangeEmbankment`→`RoadPlanManager.OnChangeNodeFromIpc`/`OnChangeEmbankmentFromIpc`)。node_index=-1 は次回配置ノードの値を指す。逆にUnityのキー操作や選択で値が変わると `edit_path:select_node`(標高・盛土を含む)でパネルへ返す双方向同期。既存ノードを選んで数値で微調整する用途のため両方に口を残している。

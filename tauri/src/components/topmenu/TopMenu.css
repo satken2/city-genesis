@@ -29,53 +29,48 @@
   z-index: 1;
 }
 
-/* 共通ボタン（Loadボタンなど） */
+/**
+ * 共通ボタン（Loadボタンなど）。
+ * 枠線・発光を持たないベタ塗りの四角で、落ち影だけで背景のスプラッシュ画像から浮かせる。
+ */
 .topmenu-btn {
   padding: 16px 40px;
   font-size: 1.1rem;
   font-weight: 600;
-  
-  /* 変更点：背景を極力暗く・透明にして回路を透かす */
-  background: rgba(10, 20, 35, 0.4); 
-  border: 1px solid rgba(130, 190, 255, 0.4); /* 背景の回路に近い水色の細い枠 */
-  color: #a0c4ff; /* 文字色もほんのり水色に */
-  
-  /* 発光エフェクト */
-  text-shadow: 0 0 8px rgba(160, 196, 255, 0.4); /* 文字自体を光らせる */
-  box-shadow: 0 0 15px rgba(130, 190, 255, 0.1), inset 0 0 15px rgba(130, 190, 255, 0.1);
-  backdrop-filter: blur(3px); /* 軽くぼかして文字の視認性を確保 */
-  
+
+  background: #16202e;
+  border: none;
+  color: #a0c4ff;
+
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.55);
+
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   text-align: center;
-  border-radius: 4px; /* サイバー感に合わせてもう少し角張らせる */
+  border-radius: 0;
 }
 
 .topmenu-btn:hover {
-  background: rgba(30, 60, 100, 0.6);
-  border-color: rgba(130, 190, 255, 0.8);
+  background: #22344c;
   color: #ffffff;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
-  box-shadow: 0 0 20px rgba(130, 190, 255, 0.4), inset 0 0 15px rgba(130, 190, 255, 0.2);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.6);
   transform: translateY(-2px);
 }
 
+/* 押し込み表現。浮きを戻して影も浅くする */
 .topmenu-btn:active {
-  transform: scale(0.98);
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
 }
 
 /* New Gameボタン（Primary）は少しだけ明るくして目立たせる */
 .topmenu-btn-primary {
-  background: rgba(30, 60, 95, 0.5);
-  border: 1px solid rgba(130, 190, 255, 0.7);
+  background: #1d3a5c;
   color: #ffffff;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
 
 .topmenu-btn-primary:hover {
-  background: rgba(45, 85, 130, 0.7);
-  border-color: #a0c4ff;
-  box-shadow: 0 0 25px rgba(130, 190, 255, 0.6), inset 0 0 20px rgba(130, 190, 255, 0.3);
+  background: #2c5687;
 }
 
 /**
@@ -94,13 +89,11 @@
   justify-content: center;
   margin-top: 0;
   background: #2c2c3c;
-  border-color: rgba(255, 255, 255, 0.08);
   color: #9cb3cb;
 }
 
 .topmenu-btn-quit:hover {
   background: #5a2a2a;
-  border-color: rgba(255, 113, 113, 0.3);
   color: #ff8888;
 }
 
@@ -137,13 +130,11 @@
   align-items: center;
   justify-content: center;
   background: #2c2c3c;
-  border-color: rgba(255, 255, 255, 0.08);
   color: #9cb3cb;
 }
 
 .topmenu-btn-options:hover {
   background: #3d557a;
-  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .topmenu-options-icon {
@@ -155,10 +146,15 @@
 /**
  * GitHub ボタン。
  * ウィンドウ下部中央に配置し、アイコンとリポジトリ名を横に並べる。
+ * 共通ボタンの不透明・角ばった見た目は適用せず、半透明角丸の発光スタイルを個別に指定する。
  */
 .topmenu-btn-github {
   position: absolute;
   background-color: #e5eef9;
+  border: 1px solid rgba(130, 190, 255, 0.4);
+  border-radius: 4px;
+  box-shadow: 0 0 15px rgba(130, 190, 255, 0.1), inset 0 0 15px rgba(130, 190, 255, 0.1);
+  backdrop-filter: blur(3px);
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
@@ -179,10 +175,13 @@
  */
 .topmenu-btn-github:active {
   transform: translateX(-50%) scale(0.98);
+  box-shadow: 0 0 15px rgba(130, 190, 255, 0.1), inset 0 0 15px rgba(130, 190, 255, 0.1);
 }
 
 .topmenu-btn-github:hover {
   transform: translateX(-50%) translateY(-2px);
+  background: rgba(30, 60, 100, 0.6);
+  box-shadow: 0 0 20px rgba(130, 190, 255, 0.4), inset 0 0 15px rgba(130, 190, 255, 0.2);
 }
 
 .topmenu-github-icon {

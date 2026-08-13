@@ -80,6 +80,7 @@
     "selectPath": "パスを選択してください",
     "selectParcel": "土地区画を選択してください",
     "previewLoading": "プレビュー取得中...",
+    "previewSendFailed": "3Dビューへのプレビュー転送に失敗しました（区画数が多すぎます）。探索範囲を狭めるか平均面積を大きくしてください",
     "confirm": "作成を確定",
     "clear": "クリア",
     "creating": "作成中...",

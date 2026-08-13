@@ -25,8 +25,11 @@ use windows_sys::Win32::System::Threading::*;
 
 static NEXT_ID: AtomicU64 = AtomicU64::new(1);
 
+// 共有メモリのサイズ。Unity側 Assets/Scripts/IPC/IpcTransport.cs の CAPACITY と必ず一致させること
+// (CreateOrOpen は先に起動した側のサイズが採用されるため、食い違うと片側だけ範囲外を読む)。
+// 土地区画の一括作成プレビューのようにポリゴンを数百件送るメッセージがあるため8KBでは足りない。
 #[cfg(target_os = "windows")]
-const CAPACITY: usize = 8192;
+const CAPACITY: usize = 1024 * 1024;
 #[cfg(target_os = "windows")]
 const HEADER_SIZE: usize = 8;
 #[cfg(target_os = "windows")]

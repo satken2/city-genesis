@@ -34,7 +34,10 @@ internal static class IpcMutexUtil
 /// </summary>
 public class MmfReader : IDisposable
 {
-    private const int CAPACITY = 8192;
+    // 共有メモリのサイズ。tauri側 src-tauri/src/ipc.rs の CAPACITY と必ず一致させること
+    // (CreateOrOpenは先に起動した側のサイズが採用されるため、食い違うと片側だけ範囲外を読む)。
+    // 土地区画の一括作成プレビューのようにポリゴンを数百件送るメッセージがあるため8KBでは足りない。
+    private const int CAPACITY = 1024 * 1024;
     private const int HEADER_SIZE = 8;
     private const int BUFFER_SIZE = CAPACITY - HEADER_SIZE;
 
@@ -173,7 +176,8 @@ public class MmfReader : IDisposable
 /// </summary>
 public class MmfWriter : IDisposable
 {
-    private const int CAPACITY = 8192;
+    // MmfReader.CAPACITY と同値。tauri側 src-tauri/src/ipc.rs の CAPACITY とも一致させること。
+    private const int CAPACITY = 1024 * 1024;
     private const int HEADER_SIZE = 8;
     private const int BUFFER_SIZE = CAPACITY - HEADER_SIZE;
 

@@ -45,6 +45,25 @@ function isPointCreationMode(mode: CreationMode | null): boolean {
   return mode !== null && POINT_MODES.includes(mode);
 }
 
+/**
+ * width / height 入力のモード別の初期値と入力レンジ。
+ *
+ * 同じ2つの入力欄でも意味がモードによって違う。empty_area と along_path は
+ * 区画そのものの寸法だが、tile / random / block は矩形内を複数区画で敷き詰める
+ * 「まとめて造成する街区の広さ」なので桁が1つ違う（block はブロック全体が
+ * 矩形に収まる必要がある）。モード切替時に必ず初期値へ戻し、前のモードの値が
+ * レンジ外のまま残らないようにする。
+ */
+const SIZE_INPUT_PRESETS: Record<string, { width: number; height: number; min: number; max: number; step: number }> = {
+  empty_area: { width: 10, height: 20, min: 1, max: 200, step: 1 },
+  along_path: { width: 10, height: 20, min: 1, max: 100, step: 1 },
+  tile: { width: 200, height: 200, min: 1, max: 400, step: 10 },
+  random: { width: 200, height: 200, min: 1, max: 400, step: 10 },
+  block: { width: 200, height: 200, min: 20, max: 400, step: 10 },
+};
+
+const DEFAULT_SIZE_INPUT = SIZE_INPUT_PRESETS.empty_area;
+
 const CREATION_SECTIONS = [
   {
     titleKey: "parcel_creation.sectionCreate",
@@ -168,6 +187,27 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
     };
   }, [t]);
 
+  /* ---- プレビュー転送 ---- */
+
+  /**
+   * プレビュー形状をUnityの3Dオーバーレイへ送る。
+   *
+   * MMFは1メッセージあたりの上限を持つため、区画数が多すぎると送信が失敗する。
+   * 握り潰すとパネル内の2Dプレビューだけが更新され「3Dだけ止まった」ように見えるので、
+   * 失敗は必ず通知する。
+   */
+  const pushPreviewToUnity = useCallback(
+    async (mode: CreationMode, polygons: number[][][], original: number[][] | null) => {
+      try {
+        await sendEditParcelUpdatePreview(mode, polygons, original);
+      } catch (err) {
+        console.error("[ParcelCreation] sendEditParcelUpdatePreview failed:", err);
+        showNotification({ message: t("parcel_creation.previewSendFailed"), durationMs: 5000 });
+      }
+    },
+    [t]
+  );
+
   /* ---- プレビュー取得 ---- */
 
   const fetchPreview = useCallback(
@@ -260,7 +300,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
             !isPointCreationMode(selectedMode) && selectedMode !== "along_path"
               ? (data.original_parcel as { polygon?: number[][] } | undefined)?.polygon ?? null
               : null;
-          void sendEditParcelUpdatePreview(selectedMode, previewPolygons, originalPolygon);
+          void pushPreviewToUnity(selectedMode, previewPolygons, originalPolygon);
         }
       } catch (err) {
         if (!signal?.aborted) {
@@ -286,7 +326,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
         }
       }
     },
-    [selectedMode, pickedPosition, selectedPathId, selectedParcelId, side, width, height, angle, area, lotWidth, lotDepth, jitterPct, baseUrl]
+    [selectedMode, pickedPosition, selectedPathId, selectedParcelId, side, width, height, angle, area, lotWidth, lotDepth, jitterPct, baseUrl, pushPreviewToUnity, t]
   );
 
   /* ---- 選択結果が届いたらプレビューを取得 ---- */
@@ -444,14 +484,10 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
       setAngle(0);
       setManualPolygon([]);
       setManualFinalized(false);
-      // 探索矩形サイズのモード別既定値。block はブロック全体が探索矩形に
-      // 収まる必要があるため、他の地点指定系より大きめにする。
-      if (mode === "block") {
-        setWidth(150);
-        setHeight(150);
-      } else if (mode === "empty_area" || mode === "tile" || mode === "random") {
-        setWidth(10);
-        setHeight(20);
+      const preset = SIZE_INPUT_PRESETS[mode];
+      if (preset) {
+        setWidth(preset.width);
+        setHeight(preset.height);
       }
       sendChangeState("STATE_EDIT_PARCEL", { parcel_creation_mode: mode }, "parcel_creation").catch((err) => {
         console.error("[ParcelCreation] sendChangeState failed:", err);
@@ -612,6 +648,9 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
     return null;
   }, []);
 
+  const sizeInput =
+    (selectedMode && SIZE_INPUT_PRESETS[selectedMode]) || DEFAULT_SIZE_INPUT;
+
   /* ---- レンダリング ---- */
 
   return (
@@ -657,9 +696,9 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
                   <NumberStepper
                     value={width}
                     onChange={setWidth}
-                    min={1}
-                    max={200}
-                    step={1}
+                    min={sizeInput.min}
+                    max={sizeInput.max}
+                    step={sizeInput.step}
                     integerOnly={false}
                   />
                   <span className="pc-input-unit">{t("parcel_creation.unitMeter")}</span>
@@ -669,9 +708,9 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
                   <NumberStepper
                     value={height}
                     onChange={setHeight}
-                    min={1}
-                    max={200}
-                    step={1}
+                    min={sizeInput.min}
+                    max={sizeInput.max}
+                    step={sizeInput.step}
                     integerOnly={false}
                   />
                   <span className="pc-input-unit">{t("parcel_creation.unitMeter")}</span>
@@ -698,9 +737,9 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
                   <NumberStepper
                     value={width}
                     onChange={setWidth}
-                    min={20}
-                    max={400}
-                    step={10}
+                    min={sizeInput.min}
+                    max={sizeInput.max}
+                    step={sizeInput.step}
                     integerOnly={false}
                   />
                   <span className="pc-input-unit">{t("parcel_creation.unitMeter")}</span>
@@ -710,9 +749,9 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
                   <NumberStepper
                     value={height}
                     onChange={setHeight}
-                    min={20}
-                    max={400}
-                    step={10}
+                    min={sizeInput.min}
+                    max={sizeInput.max}
+                    step={sizeInput.step}
                     integerOnly={false}
                   />
                   <span className="pc-input-unit">{t("parcel_creation.unitMeter")}</span>
@@ -751,9 +790,9 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
                   <NumberStepper
                     value={width}
                     onChange={setWidth}
-                    min={1}
-                    max={100}
-                    step={1}
+                    min={sizeInput.min}
+                    max={sizeInput.max}
+                    step={sizeInput.step}
                     integerOnly={false}
                   />
                   <span className="pc-input-unit">{t("parcel_creation.unitMeter")}</span>
@@ -763,9 +802,9 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
                   <NumberStepper
                     value={height}
                     onChange={setHeight}
-                    min={1}
-                    max={100}
-                    step={1}
+                    min={sizeInput.min}
+                    max={sizeInput.max}
+                    step={sizeInput.step}
                     integerOnly={false}
                   />
                   <span className="pc-input-unit">{t("parcel_creation.unitMeter")}</span>

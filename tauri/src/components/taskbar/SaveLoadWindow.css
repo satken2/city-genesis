@@ -2,9 +2,12 @@
  * セーブ・ロードウィンドウのスタイル定義
  *
  * システムトレイのセーブアイコンから開くウィンドウ。
- * 4つのアクションボタン(ニューゲーム・上書きセーブ・別名セーブ・ロード)と
+ * アクションボタン群(ニューゲーム・上書きセーブ・別名セーブ・ロード・トップへ戻る・終了)と
  * 処理結果のステータスメッセージを表示する。
- * 既存のダークテーマ（紺色系・半透明）に統一する。
+ *
+ * 意匠はトップメニューと揃える: 枠線・発光を持たないベタ塗りの四角で、
+ * 落ち影だけで面の高さを表現する。操作の性質(通常・主操作・破壊的)は
+ * 枠線の色ではなく塗りの色で区別する。
  */
 
 .save-load-body {
@@ -18,7 +21,7 @@
 
 /**
  * アクションボタングリッド
- * 2x2のグリッドで4つのボタンを配置する
+ * 2列のグリッドでボタンを並べる
  */
 .save-load-actions {
   display: grid;
@@ -28,28 +31,36 @@
 
 /**
  * 各アクションボタン
- * アイコン的な見た目にするため、縦方向にテキストを中央揃えにする
+ * ベタ塗りの矩形タイル。高さを揃えて面として並べる
  */
 .save-load-action-btn {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 56px;
   padding: 14px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.06);
+  border: none;
+  border-radius: 0;
+  background: #1b2635;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   color: #c8d8e8;
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.12s, border-color 0.12s;
+  transition: background 0.12s, box-shadow 0.12s, transform 0.12s;
   text-align: center;
   line-height: 1.3;
 }
 
 .save-load-action-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: #26374d;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55);
+  transform: translateY(-2px);
+}
+
+.save-load-action-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
 }
 
 .save-load-action-btn:disabled {
@@ -58,29 +69,29 @@
 }
 
 /**
- * ニューゲームボタン
- * 現在のデータが失われる操作なので警告色で示す
+ * ニューゲーム・終了ボタン
+ * 現在のデータが失われる操作なので警告色のベタ塗りで示す
  */
 .save-load-action-btn--danger {
-  border-color: rgba(220, 80, 70, 0.3);
+  background: #4a2020;
+  color: #f0c4c4;
 }
 
 .save-load-action-btn--danger:hover:not(:disabled) {
-  background: rgba(220, 80, 70, 0.12);
-  border-color: rgba(220, 80, 70, 0.5);
+  background: #6b2b2b;
 }
 
 /**
  * ロードボタン
- * 別ウィンドウ(save_list)を開くためアクセントカラーで示す
+ * 別ウィンドウ(save_list)を開く主操作なのでアクセント色のベタ塗りで示す
  */
 .save-load-action-btn--accent {
-  border-color: rgba(78, 161, 255, 0.3);
+  background: #1d3a5c;
+  color: #ffffff;
 }
 
 .save-load-action-btn--accent:hover:not(:disabled) {
-  background: rgba(78, 161, 255, 0.12);
-  border-color: rgba(78, 161, 255, 0.5);
+  background: #2c5687;
 }
 
 /**
@@ -89,28 +100,25 @@
  */
 .save-load-status {
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: 0;
   font-size: 0.82rem;
   line-height: 1.4;
   min-height: 20px;
 }
 
 .save-load-status--success {
-  background: rgba(46, 160, 67, 0.15);
-  border: 1px solid rgba(46, 160, 67, 0.3);
-  color: #6bcc7a;
+  background: #1e4a1e;
+  color: #d2ffd2;
 }
 
 .save-load-status--error {
-  background: rgba(220, 80, 70, 0.15);
-  border: 1px solid rgba(220, 80, 70, 0.3);
-  color: #e87068;
+  background: #4a1e1e;
+  color: #ffd2d2;
 }
 
 .save-load-status--info {
-  background: rgba(78, 161, 255, 0.1);
-  border: 1px solid rgba(78, 161, 255, 0.2);
-  color: #8bb8e0;
+  background: #1e3a5f;
+  color: #cfe2ff;
 }
 
 /**
@@ -125,13 +133,13 @@
   align-items: center;
   justify-content: center;
   z-index: 10;
-  border-radius: 0 0 8px 8px;
 }
 
 .save-load-confirm-box {
-  background: linear-gradient(180deg, #1e2d42 0%, #162030 100%);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
+  background: #16202e;
+  border: none;
+  border-radius: 0;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65);
   padding: 24px;
   max-width: 320px;
   text-align: center;
@@ -152,16 +160,28 @@
   justify-content: center;
 }
 
+/* 全体既定(枠線+角丸)の打ち消しを含むため、キャンセル側もここで定義する */
 .save-load-confirm-actions button {
-  padding: 6px 20px;
+  padding: 8px 22px;
   font-size: 0.85rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 0;
+  background: #2c3646;
+  color: #c8d8e8;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  transition: background 0.12s;
 }
 
-.save-load-confirm-yes {
-  border-color: rgba(220, 80, 70, 0.4) !important;
-  color: #e87068 !important;
+.save-load-confirm-actions button:hover {
+  background: #3a4759;
 }
 
-.save-load-confirm-yes:hover {
-  background: rgba(220, 80, 70, 0.2) !important;
+.save-load-confirm-actions .save-load-confirm-yes {
+  background: #6b2b2b;
+  color: #ffffff;
+}
+
+.save-load-confirm-actions .save-load-confirm-yes:hover {
+  background: #8a3838;
 }

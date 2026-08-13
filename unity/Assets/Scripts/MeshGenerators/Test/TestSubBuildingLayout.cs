@@ -42,15 +42,19 @@ public static class TestSubBuildingLayout
     }
 
     /// <summary>
-    /// サブ建物の配置計画をランダム生成する。
+    /// サブ建物の配置計画を生成する。
     ///
     /// 区画をセルへ決定論的に分割し、優先度順に配置する:
-    /// primary の棟を前面(最長辺)へ必ず1棟 → sole の棟を必ず1棟だけ(収まらなければ諦める) →
-    /// その他の棟を充填率が FILL_RATIO に達するまでランダムに配置する(同じ棟の複数配置あり)。
+    /// 先頭(ID最小)の棟=施設の顔の1棟目を前面(最長辺)へ必ず配置 →
+    /// 各棟の最低配置数(min_count)を充足 →
+    /// 充填率が FILL_RATIO に達するまで weight(棟数比)÷(配置済み棟数+1) が最大の棟を
+    /// 1棟ずつ追加する(D'Hondt方式。max_count 超過・収まらない棟は候補から外れる)。
+    /// 棟数の構成は決定論で、位置と階数だけがランダム。同じ棟種の2棟目以降は
+    /// 既存の同種棟に隣接する位置を優先する(クラスタリング)。
     ///
     /// Returns:
     ///     subbuilding_master に棟定義が無いバリアント・マスター未初期化は null(=通常の1棟建物)。
-    ///     区画が小さくセルが取れない・primary が収まらない場合は空リスト。
+    ///     区画が小さくセルが取れない・顔の棟が収まらない場合は空リスト。
     /// </summary>
     /// <param name="variant">建物バリアント</param>
     /// <param name="parcelPolygon">土地区画とみなすポリゴン(中心原点のローカルXZ座標)</param>
@@ -89,75 +93,130 @@ public static class TestSubBuildingLayout
         }
         catch (KeyNotFoundException) { }
 
-        var occupied = new HashSet<(int i, int j)>();
-        var placements = new List<SubBuildingPlacement>();
-
-        // primary は施設の顔となる棟なので、前面(前面辺)に最も近い候補へ必ず置く。
-        int primaryIndex = subs.FindIndex(kvp => kvp.Value.primary);
-        if (primaryIndex < 0)
+        var state = new LayoutState
         {
-            primaryIndex = 0;
+            Grid = grid,
+            AgentFloorHeight = agentFloorHeight,
+        };
+        foreach (var kvp in subs)
+        {
+            state.Counts[kvp.Key] = 0;
+            state.CellsBySub[kvp.Key] = new HashSet<(int i, int j)>();
         }
-        if (!TryPlace(subs[primaryIndex], preferFront: true, grid, occupied, placements, agentFloorHeight))
+
+        // 先頭(ID最小)の棟が施設の顔で、1棟目を前面(前面辺)に最も近い候補へ必ず置く。
+        // 収まらない区画では配置計画全体を諦める(敷地装飾のみの描画になる)。
+        if (!TryPlace(subs[0], preferFront: true, state))
         {
-            Debug.LogWarning($"[MeshTest] primaryサブ建物{subs[primaryIndex].Key}が区画に収まりませんでした。");
+            Debug.LogWarning($"[MeshTest] 先頭のサブ建物{subs[0].Key}が区画に収まりませんでした。");
             return new List<SubBuildingPlacement>();
         }
 
-        // sole の棟は必ず1棟だけ配置する。優先度は primary の次で、primary 配置後の
-        // 空きに収まらない場合は配置を諦める(primary と違い全体を失敗させない)。
-        // primary と sole は「1棟だけ」の棟なので、以降のランダム充填プールに入れない。
-        var pool = new List<KeyValuePair<int, MasterDataStore.SubBuildingMasterItem>>();
-        for (int i = 0; i < subs.Count; i++)
+        // 各棟の最低配置数を満たす(顔として配置済みの1棟も数に入る)。空きに収まらない棟は
+        // 警告して諦める(顔の棟と違い全体を失敗させない)。
+        foreach (var kvp in subs)
         {
-            if (i == primaryIndex)
+            (int minCount, _) = CountBounds(kvp.Value);
+            while (state.Counts[kvp.Key] < minCount)
             {
-                continue;
-            }
-            if (subs[i].Value.sole)
-            {
-                if (!TryPlace(subs[i], preferFront: false, grid, occupied, placements, agentFloorHeight))
+                if (!TryPlace(kvp, preferFront: false, state))
                 {
-                    Debug.LogWarning($"[MeshTest] soleサブ建物{subs[i].Key}が区画に収まりませんでした。");
+                    Debug.LogWarning($"[MeshTest] サブ建物{kvp.Key}が区画に収まりませんでした" +
+                        $"(最低配置数{minCount}のうち{state.Counts[kvp.Key]}棟で打ち切り)。");
+                    break;
                 }
             }
-            else
-            {
-                pool.Add(subs[i]);
-            }
         }
 
-        // 残りの棟は、充填率が目標に達するまでランダムに選んで置いていく。
-        // 占有セルは増える一方なので、一度どこにも収まらなくなった棟は候補から外してよい。
+        // 充填率が目標に達するまで、weight(棟数比)の比率を保つ棟を1棟ずつ追加する。
+        // 「weight ÷ (配置済み棟数 + 1) が最大の棟」を選ぶ D'Hondt 方式で、同値は
+        // subs の並び(ID昇順)の先頭を採る。占有セルは増える一方なので、
+        // 一度どこにも収まらなくなった棟は候補から外してよい。
+        var pool = subs.FindAll(kvp => Weight(kvp.Value) > 0f);
         int fillTarget = Mathf.CeilToInt(grid.Cells.Count * FILL_RATIO);
-        while (pool.Count > 0 && occupied.Count < fillTarget)
+        while (state.Occupied.Count < fillTarget)
         {
-            int pick = Random.Range(0, pool.Count);
-            if (!TryPlace(pool[pick], preferFront: false, grid, occupied, placements, agentFloorHeight))
+            int bestIndex = -1;
+            float bestQuotient = 0f;
+            for (int i = 0; i < pool.Count; i++)
             {
-                pool.RemoveAt(pick);
+                (_, int? maxCount) = CountBounds(pool[i].Value);
+                if (maxCount.HasValue && state.Counts[pool[i].Key] >= maxCount.Value)
+                {
+                    continue;
+                }
+                float quotient = Weight(pool[i].Value) / (state.Counts[pool[i].Key] + 1);
+                if (quotient > bestQuotient)
+                {
+                    bestQuotient = quotient;
+                    bestIndex = i;
+                }
+            }
+            if (bestIndex < 0)
+            {
+                break;
+            }
+            if (!TryPlace(pool[bestIndex], preferFront: false, state))
+            {
+                pool.RemoveAt(bestIndex);
             }
         }
 
-        return placements;
+        return state.Placements;
+    }
+
+    /// <summary>
+    /// 配置処理の途中経過。バックエンド generate_sub_building_layout のローカル変数群に対応する。
+    /// </summary>
+    private class LayoutState
+    {
+        public MashupGrid Grid;
+        public float? AgentFloorHeight;
+        public HashSet<(int i, int j)> Occupied = new HashSet<(int i, int j)>();
+        public List<SubBuildingPlacement> Placements = new List<SubBuildingPlacement>();
+        public Dictionary<int, int> Counts = new Dictionary<int, int>();                                  // 棟種→配置済み棟数
+        public Dictionary<int, HashSet<(int i, int j)>> CellsBySub = new Dictionary<int, HashSet<(int i, int j)>>();  // 棟種→占有セル(クラスタリング用)
+        public Dictionary<int, bool> FirstRotated = new Dictionary<int, bool>();                          // 棟種→1棟目の向き(整列用)
+    }
+
+    /// <summary>配置ウェイト(棟数比)。未定義は1.0、負値は0扱い。</summary>
+    private static float Weight(MasterDataStore.SubBuildingMasterItem sub)
+    {
+        return Mathf.Max(0f, sub.weight ?? 1f);
+    }
+
+    /// <summary>
+    /// 棟の (最低配置数, 最大配置数) を返す。
+    /// min_count / max_count 未定義は下限0・上限無制限(null)。矛盾した定義(max &lt; min)は
+    /// 下限を優先して上限を引き上げる。
+    /// </summary>
+    private static (int minCount, int? maxCount) CountBounds(MasterDataStore.SubBuildingMasterItem sub)
+    {
+        int minCount = sub.min_count ?? 0;
+        int? maxCount = sub.max_count;
+        if (maxCount.HasValue)
+        {
+            maxCount = Mathf.Max(maxCount.Value, minCount);
+        }
+        return (minCount, maxCount);
     }
 
     /// <summary>
     /// 指定の棟を1つ配置する。収まる場所が無ければ false。
     /// preferFront=true では前面辺に最も近い候補(同距離はグリッド座標で決定論的に解決)、
-    /// false ではランダムな候補を選ぶ。向きはグリッド沿いと90°回転の両方を試す。
+    /// false では同種棟への隣接候補(クラスタリング)を優先した上でランダムな候補を選ぶ。
+    /// 向きはグリッド沿いと90°回転の両方を試す。
     /// </summary>
     private static bool TryPlace(
-        KeyValuePair<int, MasterDataStore.SubBuildingMasterItem> sub, bool preferFront,
-        MashupGrid grid, HashSet<(int i, int j)> occupied, List<SubBuildingPlacement> placements,
-        float? agentFloorHeight)
+        KeyValuePair<int, MasterDataStore.SubBuildingMasterItem> sub, bool preferFront, LayoutState state)
     {
+        MashupGrid grid = state.Grid;
         (int cellW, int cellH) = CellSpan(sub.Value);
 
         var candidates = new List<((int i, int j) anchor, int w, int h, bool rotated)>();
         foreach ((bool rotated, int w, int h) in new[] { (false, cellW, cellH), (true, cellH, cellW) })
         {
-            foreach ((int i, int j) anchor in FindBlockAnchors(grid.Cells, occupied, w, h))
+            foreach ((int i, int j) anchor in FindBlockAnchors(grid.Cells, state.Occupied, w, h))
             {
                 candidates.Add((anchor, w, h, rotated));
             }
@@ -184,21 +243,28 @@ public static class TestSubBuildingLayout
         }
         else
         {
-            chosen = candidates[Random.Range(0, candidates.Count)];
+            var narrowed = ClusterCandidates(sub.Key, candidates, state);
+            chosen = narrowed[Random.Range(0, narrowed.Count)];
         }
 
         for (int a = 0; a < chosen.w; a++)
         {
             for (int b = 0; b < chosen.h; b++)
             {
-                occupied.Add((chosen.anchor.i + a, chosen.anchor.j + b));
+                state.Occupied.Add((chosen.anchor.i + a, chosen.anchor.j + b));
+                state.CellsBySub[sub.Key].Add((chosen.anchor.i + a, chosen.anchor.j + b));
             }
+        }
+        state.Counts[sub.Key]++;
+        if (!state.FirstRotated.ContainsKey(sub.Key))
+        {
+            state.FirstRotated[sub.Key] = chosen.rotated;
         }
 
         Vector2 blockCenter = BlockCenter(grid, chosen.anchor.i, chosen.anchor.j, chosen.w, chosen.h);
         int minFloors = Mathf.Max(1, sub.Value.min_floors ?? 1);
         int maxFloors = Mathf.Max(minFloors, sub.Value.max_floors ?? minFloors);
-        placements.Add(new SubBuildingPlacement
+        state.Placements.Add(new SubBuildingPlacement
         {
             subbuilding_id = sub.Key,
             model_prefix = sub.Value.model_prefix,
@@ -206,12 +272,56 @@ public static class TestSubBuildingLayout
             position = new[] { blockCenter.x, blockCenter.y },
             rotation = grid.Angle + (chosen.rotated ? 90f : 0f),
             floors = Random.Range(minFloors, maxFloors + 1),
-            height_per_floor = sub.Value.height_per_floor ?? agentFloorHeight,
+            height_per_floor = sub.Value.height_per_floor ?? state.AgentFloorHeight,
         });
         return true;
     }
 
-    /// <summary>primary の前面寄せ判定キー。(前面辺への距離, j, i, 回転) の昇順比較で決定論的に選ぶ。</summary>
+    /// <summary>
+    /// 同種棟の2棟目以降の候補を、既存の同種棟に隣接する位置へ絞り込む(クラスタリング)。
+    /// 既存棟のセルに4近傍で接する候補だけを残し、さらに向き(90°回転の有無)が1棟目と
+    /// 揃う候補があればそちらを優先する。該当が無ければ絞り込まない
+    /// (孤立した空きにしか置けない場合でも配置自体は成立させる)。
+    /// </summary>
+    private static List<((int i, int j) anchor, int w, int h, bool rotated)> ClusterCandidates(
+        int subbuildingId, List<((int i, int j) anchor, int w, int h, bool rotated)> candidates,
+        LayoutState state)
+    {
+        HashSet<(int i, int j)> anchorCells = state.CellsBySub[subbuildingId];
+        if (anchorCells.Count == 0)
+        {
+            return candidates;
+        }
+
+        var adjacent = new List<((int i, int j) anchor, int w, int h, bool rotated)>();
+        foreach (var candidate in candidates)
+        {
+            bool touches = false;
+            for (int a = 0; a < candidate.w && !touches; a++)
+            {
+                for (int b = 0; b < candidate.h && !touches; b++)
+                {
+                    int ci = candidate.anchor.i + a;
+                    int cj = candidate.anchor.j + b;
+                    touches = anchorCells.Contains((ci + 1, cj)) || anchorCells.Contains((ci - 1, cj))
+                        || anchorCells.Contains((ci, cj + 1)) || anchorCells.Contains((ci, cj - 1));
+                }
+            }
+            if (touches)
+            {
+                adjacent.Add(candidate);
+            }
+        }
+        if (adjacent.Count == 0)
+        {
+            return candidates;
+        }
+
+        var aligned = adjacent.FindAll(c => c.rotated == state.FirstRotated[subbuildingId]);
+        return aligned.Count > 0 ? aligned : adjacent;
+    }
+
+    /// <summary>顔の棟の前面寄せ判定キー。(前面辺への距離, j, i, 回転) の昇順比較で決定論的に選ぶ。</summary>
     private static (float d, int j, int i, int r) FrontKey(
         ((int i, int j) anchor, int w, int h, bool rotated) candidate, MashupGrid grid)
     {
@@ -360,7 +470,7 @@ public static class TestSubBuildingLayout
         return inside;
     }
 
-    /// <summary>点から線分 a-b までの距離を返す。primary の前面寄せ判定に使う。</summary>
+    /// <summary>点から線分 a-b までの距離を返す。顔の棟の前面寄せ判定に使う。</summary>
     private static float DistanceToSegment(Vector2 point, Vector2 a, Vector2 b)
     {
         Vector2 ab = b - a;

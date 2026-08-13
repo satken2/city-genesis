@@ -119,14 +119,15 @@ public class MasterDataStore : MonoBehaviour
 	{
 		public int agent_variant;
 		public string display_name;
-		public bool primary;
-		public bool sole;      // 配置ランダム生成で必ず1棟だけ置かれる単独棟(primaryの次に優先)
 		public string model_prefix;
-		public float? width;   // 底面の幅(セル数単位。1単位=MASHUP_CELL_SIZE m。未定義は1セル)
-		public float? height;  // 底面の奥行き(同上)
+		public float? width;     // 底面の幅(セル数単位。1単位=MASHUP_CELL_SIZE m。未定義は1セル)
+		public float? height;    // 底面の奥行き(同上)
 		public int? max_floors;
 		public int? min_floors;
 		public float? height_per_floor;
+		public float? weight;    // 配置生成の棟数比(未定義は1.0、0で比率充填の対象外)
+		public int? min_count;   // 最低配置数(未定義は0)
+		public int? max_count;   // 最大配置数(未定義は無制限)。施設の顔(前面配置)は先頭(ID最小)の棟
 	}
 
 	[Serializable]
