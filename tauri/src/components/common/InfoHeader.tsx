@@ -22,6 +22,8 @@ type InfoHeaderProps = {
   iconSrc: string;
   /** ステータスコード */
   status?: number;
+  /** 現在のステータスになった理由(REASON_*)。0(REASON_NONE)以外はバッジに括弧書きで併記する */
+  statusReason?: number;
   /** バリアント名(種別名)。ステータスと名称の間に表示する */
   variantName?: string;
   /** エンティティ名 */
@@ -39,6 +41,7 @@ type InfoHeaderProps = {
 export function InfoHeader({
   iconSrc,
   status,
+  statusReason,
   variantName,
   name,
   constructionProgress,
@@ -48,9 +51,14 @@ export function InfoHeader({
 }: InfoHeaderProps) {
   const { t } = useTranslation();
   const style = status !== undefined ? STATUS_STYLE_MAP[status] ?? { bg: "#6b7280", text: "#ffffff" } : { bg: "#6b7280", text: "#ffffff" };
-  const statusLabel = status !== undefined ? t(`status.${status}`, {
-    defaultValue: `Status ${status}`,
-  }) : "";
+  const reasonLabel =
+    statusReason !== undefined && statusReason !== 0
+      ? t(`reason.${statusReason}`, { defaultValue: "" })
+      : "";
+  const statusLabel = status !== undefined
+    ? t(`status.${status}`, { defaultValue: `Status ${status}` })
+      + (reasonLabel ? `（${reasonLabel}）` : "")
+    : "";
   const progress = Math.max(0, Math.min(100, constructionProgress ?? 0));
 
   return (

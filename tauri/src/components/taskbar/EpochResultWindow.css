@@ -5,13 +5,13 @@
  * 兄弟ウィンドウとして見た目の一貫性を保つ。
  *
  * レイアウト構成:
- * - ヘッダ: 左上に大きく日付、右側に為替レート
+ * - ヘッダ: 左上に大きく日付
  * - クエストストリップ: 達成・失敗・達成間近のクエストチップ(横並び・折返し)
- * - メインエリア: 左(人口動態・予算執行) + 中央(統計3×3タイル) + 右(建設状況) の3カラム
- * - 左カラム: 市民動態グラフ と 予算執行状況グラフ+現預金 を縦積み
- * - 中央カラム: 統計タイル(物価/所得/失業率/3充足度/火災/交通事故/犯罪)
- * - 右カラム: 建設中の道路 と 建設中の公共施設(各固定高スクロール領域)を縦積み
+ * - メインエリア: 統計タイル(主役・空き領域を敷き詰める) + 建設状況 の2カラム
  * - フッタ: 閉じるボタン
+ *
+ * 統計タイルは「水準の警戒色(タイル全体の色 = 絶対基準)」と
+ * 「変動方向の矢印(色 = 指標の極性)」の2系統の視覚効果を持つ。
  */
 
 .epoch-result-root {
@@ -117,7 +117,7 @@
   flex-shrink: 0;
 }
 
-/* ── ヘッダ: 日付(左・大) + 為替レート(右) */
+/* ── ヘッダ: 日付(左・大) */
 .epoch-result-header {
   display: flex;
   align-items: flex-end;
@@ -145,22 +145,36 @@
   color: #8ba3bb;
 }
 
-/* ── 建設状況(右カラム内で縦積み): 道路 と 公共施設 */
-.epoch-result-section-paths,
-.epoch-result-section-buildings {
-  flex: 1 1 0;
+/* ── メインエリア: 統計タイル + 建設状況 の2カラム */
+.epoch-result-main {
+  display: flex;
+  gap: 14px;
+  flex: 1;
+  min-height: 0;
+}
+
+.epoch-result-col {
+  min-width: 0;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 14px;
 }
 
-.epoch-result-construction-scroll {
-  /* 建設進捗テーブルをスクロール領域に収める。
-     右カラムの高さに合わせて伸縮し、残りの空き領域を埋める。 */
+/* 統計は主役なので広く取り、建設状況は一覧が読める幅で固定寄りにする。 */
+.epoch-result-col-stats {
+  flex: 3 1 0;
+}
+
+.epoch-result-col-right {
   flex: 1 1 0;
-  min-height: 80px;
-  overflow-y: auto;
+  min-width: 300px;
+  max-width: 420px;
+}
+
+.epoch-result-col > .epoch-result-section {
+  flex: 1 1 0;
+  min-height: 0;
 }
 
 .epoch-result-section {
@@ -173,11 +187,24 @@
   background: rgba(255, 255, 255, 0.04);
 }
 
+/* セクション見出し行(タイトル + 補助説明) */
+.epoch-result-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .epoch-result-section-title {
   margin: 0;
   font-size: 0.88rem;
   font-weight: 600;
   color: #b0c4de;
+}
+
+.epoch-result-section-note {
+  font-size: 0.74rem;
+  color: #8ba3bb;
 }
 
 .epoch-result-empty {
@@ -187,7 +214,108 @@
   color: #8ba3bb;
 }
 
-/* ── 建設進捗テーブル */
+/* ── 統計タイル: 空き領域をグリッドで敷き詰める ── */
+.epoch-result-stat-grid {
+  display: grid;
+  /* 既定のウィンドウ幅で4列×3行(タイル12枚)がぴったり埋まる下限幅。
+     ウィンドウを広げれば自動で列数が増える。 */
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-auto-rows: minmax(84px, 1fr);
+  gap: 10px;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.epoch-result-stat-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 6px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  text-align: center;
+  min-width: 0;
+}
+
+/* 水準の警戒色(絶対基準)。失業率が高い・充足度が低い・事故が多い等でタイル全体を着色する。 */
+.epoch-result-stat-tile-warn {
+  border-color: rgba(240, 192, 64, 0.5);
+  background: rgba(240, 192, 64, 0.09);
+}
+
+.epoch-result-stat-tile-danger {
+  border-color: rgba(232, 120, 120, 0.65);
+  background: rgba(232, 120, 120, 0.14);
+}
+
+.epoch-result-stat-label {
+  font-size: 0.76rem;
+  color: #8ba3bb;
+}
+
+/* 値と変動矢印を横並びにする。矢印が無いタイルでも値の位置がぶれないよう中央寄せ。 */
+.epoch-result-stat-value-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.epoch-result-stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #e5eef9;
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.epoch-result-stat-tile-warn .epoch-result-stat-value {
+  color: #f0c040;
+}
+
+.epoch-result-stat-tile-danger .epoch-result-stat-value {
+  color: #ff9a9a;
+}
+
+/* タイル値の下の補助テキスト(人口増減・為替レートの変動幅など) */
+.epoch-result-stat-sub {
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  color: #c8d8e8;
+}
+
+/* ── 変動方向の矢印。色は指標の極性で決まる(緑=良い方向 / 赤=悪い方向 / 灰=横ばい・中立) */
+.epoch-result-trend {
+  flex: 0 0 auto;
+}
+
+.epoch-result-trend-good {
+  color: #6cd47f;
+}
+
+.epoch-result-trend-bad {
+  color: #e87878;
+}
+
+.epoch-result-trend-neutral {
+  color: #8ba3bb;
+}
+
+/* ── 建設状況(道路・公共施設の統合リスト) */
+.epoch-result-construction-scroll {
+  /* 建設進捗テーブルをスクロール領域に収め、カードの残りの高さを埋める。 */
+  flex: 1 1 0;
+  min-height: 80px;
+  overflow-y: auto;
+}
+
 .epoch-result-table {
   width: 100%;
   border-collapse: collapse;
@@ -207,8 +335,8 @@
   background: #1a2230;
 }
 
-.epoch-result-th-name { width: 40%; }
-.epoch-result-th-status { width: 22%; }
+.epoch-result-th-name { width: 42%; }
+.epoch-result-th-status { width: 20%; }
 .epoch-result-th-progress { width: 38%; }
 
 .epoch-result-tr:hover {
@@ -226,6 +354,33 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* 道路と公共施設を1つのリストにまとめているため、種別をバッジで区別する */
+.epoch-result-kind-badge {
+  display: inline-block;
+  margin-right: 5px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.epoch-result-kind-badge-path {
+  color: #c8d8e8;
+  border: 1px solid rgba(200, 216, 232, 0.35);
+  background: rgba(200, 216, 232, 0.08);
+}
+
+.epoch-result-kind-badge-agent {
+  color: #9ec8ff;
+  border: 1px solid rgba(74, 158, 255, 0.45);
+  background: rgba(74, 158, 255, 0.1);
+}
+
+.epoch-result-name-text {
+  vertical-align: middle;
 }
 
 .epoch-result-td-status {
@@ -300,82 +455,6 @@
   background: rgba(240, 192, 64, 0.08);
 }
 
-/* ── 左カラム内: 市民動態 と 予算執行状況(縦積み) */
-.epoch-result-section-pop,
-.epoch-result-section-budget {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.epoch-result-pop-summary {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 4px 8px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  border-radius: 4px;
-  margin-bottom: 2px;
-}
-
-.epoch-result-pop-summary-label {
-  font-size: 0.8rem;
-  color: #8ba3bb;
-}
-
-.epoch-result-pop-summary-values {
-  font-size: 0.86rem;
-  font-weight: 600;
-  color: #e5eef9;
-}
-
-.epoch-result-pop-delta-plus {
-  color: #6cd47f;
-  margin-left: 6px;
-}
-
-.epoch-result-pop-delta-minus {
-  color: #e87878;
-  margin-left: 6px;
-}
-
-.epoch-result-chart-container {
-  /* 左カラムのセクションが空き領域いっぱいに伸びるのに合わせ、
-     グラフも残りの高さを埋めるように伸縮させる(最低150px)。 */
-  width: 100%;
-  flex: 1 1 auto;
-  min-height: 150px;
-  position: relative;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 6px;
-  padding: 8px 4px 4px 4px;
-  box-sizing: border-box;
-}
-
-/* ── 市政府の現預金(予算執行状況グラフの下に表示) */
-.epoch-result-reserves {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 4px 8px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  border-radius: 4px;
-}
-
-.epoch-result-reserves-label {
-  font-size: 0.8rem;
-  color: #8ba3bb;
-}
-
-.epoch-result-reserves-value {
-  font-size: 0.92rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: #e5eef9;
-}
-
 /* ── 閉じるボタン */
 .epoch-result-buttons {
   display: flex;
@@ -406,90 +485,4 @@
 
 .epoch-result-close:hover:not(:disabled) {
   background: #2e7de8;
-}
-
-/* ── メインエリア: 左(人口/予算) + 中央(統計) + 右(建設) の3カラム */
-.epoch-result-main {
-  display: flex;
-  gap: 14px;
-  flex: 1;
-  min-height: 0;
-}
-
-.epoch-result-col {
-  flex: 1 1 0;
-  min-width: 0;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-/* 左・右カラムのセクションカードは空き領域いっぱいに伸ばして高さを分け合う。
-   中央(統計)カラムはタイルの実寸に合わせて上詰めにするため伸ばさない。 */
-.epoch-result-col-left > .epoch-result-section,
-.epoch-result-col-right > .epoch-result-section {
-  flex: 1 1 0;
-  min-height: 0;
-}
-
-.epoch-result-col-center > .epoch-result-section {
-  flex: 0 0 auto;
-}
-
-/* ── 統計タイル(3列グリッド。為替レートを含む10枚=4行) */
-.epoch-result-stat-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  align-content: start; /* 上詰め */
-}
-
-/* 各タイルは正方形。中身(ラベル+値)は中央寄せ。 */
-.epoch-result-stat-tile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 8px 6px;
-  aspect-ratio: 1 / 1;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 6px;
-  text-align: center;
-}
-
-.epoch-result-stat-label {
-  font-size: 0.76rem;
-  color: #8ba3bb;
-}
-
-.epoch-result-stat-value {
-  font-size: 1.25rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: #e5eef9;
-  line-height: 1.1;
-}
-
-/* 事故・災害系(火災/交通事故/犯罪)が非0のときは値を警告色で強調する */
-.epoch-result-stat-tile-warn .epoch-result-stat-value {
-  color: #e87878;
-}
-
-/* タイル値の下の補助テキスト(為替レートの変動幅など) */
-.epoch-result-stat-sub {
-  font-size: 0.78rem;
-  font-variant-numeric: tabular-nums;
-  color: #c8d8e8;
-}
-
-/* 通貨安(レート上昇)=赤 / 通貨高(レート下落)=緑 */
-.epoch-result-stat-sub-up {
-  color: #e87878;
-}
-
-.epoch-result-stat-sub-down {
-  color: #6cd47f;
 }

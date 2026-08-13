@@ -329,9 +329,9 @@ public class AlertManager : MonoBehaviour
     {
         if (item.center_point == null || item.center_point.Count < 2) return;
 
-        // 廃墟(倒壊・焼失)アイコンは alert ビットではなく status 由来。撤去するまで出続けるため、
+        // 廃墟(倒壊)アイコンは alert ビットではなく status 由来。撤去するまで出続けるため、
         // 表示フィルタの専用ビット ALERT_DISPLAY_RUIN で agent/path まとめてON/OFFできる。
-        bool isRuin = System.Array.IndexOf(Constants.STATUSES_RUIN, item.status) >= 0;
+        bool isRuin = item.status == Constants.STATUS_COLLAPSED;
         bool showRuin = isRuin && (_filterMask & Constants.ALERT_DISPLAY_RUIN) != 0;
         List<int> activeBits = EnumerateActiveBits(item.alert, entityType);
 

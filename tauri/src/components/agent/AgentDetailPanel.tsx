@@ -421,6 +421,7 @@ export function AgentDetailPanel({
       <InfoHeader
         iconSrc={iconSrc}
         status={agentData.status}
+        statusReason={agentData.status_reason}
         variantName={variantName}
         name={agentData.name}
         constructionProgress={agentData.construction_progress}

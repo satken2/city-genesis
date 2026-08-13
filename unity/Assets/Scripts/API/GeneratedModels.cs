@@ -108,6 +108,8 @@ namespace GeneratedModels
         public List<object> center_point;
         /// <summary>ステータス（計画中・建設中・稼働中など。consts.py の STATUS_* を参照）</summary>
         public int status;
+        /// <summary>現在のステータスになった理由（REASON_*）</summary>
+        public int status_reason;
         /// <summary>マッシュアップ建物のサブ建物配置リスト。棟ごとの subbuilding_id / model_prefix / position[x,z] / rotation / floors / height_per_floor サーバーサイドで計算されるフィールド。型は動的。</summary>
         public object sub_buildings;
         /// <summary>階数</summary>
@@ -151,11 +153,13 @@ namespace GeneratedModels
         public int variant;
         /// <summary>ステータス（計画中・建設中・稼働中など。STATUS_*）</summary>
         public int status;
+        /// <summary>現在のステータスになった理由（REASON_*）</summary>
+        public int status_reason;
         /// <summary>警告フラグのビット和（int16。consts.py の ALERT_AGENT_* を参照）</summary>
         public int alert;
         /// <summary>作成日（YYYYMMDD）</summary>
         public int created_date;
-        /// <summary>稼働を開始した日（YYYYMMDD）</summary>
+        /// <summary>現在のステータスになった日（1800-01-01起算の経過日数）</summary>
         public int active_from;
         /// <summary>手持ち資金（内部通貨建て）</summary>
         public int reserves;

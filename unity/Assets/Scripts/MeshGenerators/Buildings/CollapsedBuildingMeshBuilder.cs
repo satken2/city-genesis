@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using GeneratedModels;
 
 /// <summary>
-/// 廃墟(STATUS_COLLAPSED=老朽倒壊 / STATUS_COLLAPSED_FIRE=焼失)の建物の「瓦礫」メッシュ生成器。
+/// 廃墟(STATUS_COLLAPSED)の建物の「瓦礫」メッシュ生成器。
 /// model_type に関わらず、BuildingMeshBuilder.Generate の冒頭で status により
 /// このビルダーへ分岐する（完成品のメッシュは一切生成しない）。
-/// 焼失は瓦礫マウンドのマテリアルを焦げた瓦礫(CollapsedRubbleBurned)に差し替えて描き分ける。
+/// 焼失(status_reason == REASON_FIRE)は瓦礫マウンドのマテリアルを
+/// 焦げた瓦礫(CollapsedRubbleBurned)に差し替えて描き分ける。
 ///
 /// 生成物:
 /// - 瓦礫マウンド … 敷地（土地区画ポリゴン。無ければ建物底面）全体を覆う、厚みと Perlinノイズの
@@ -59,8 +60,8 @@ public class CollapsedBuildingMeshBuilder : IBuildingMeshGenerator
         List<Mesh> temporaryMeshes = new List<Mesh>();
 
         // --- 1. 瓦礫マウンド（土マウンド生成を瓦礫パラメータで流用） ---
-        // 焼失(STATUS_COLLAPSED_FIRE)は焦げた瓦礫マテリアルで老朽倒壊と描き分ける
-        Material rubbleMaterial = (buildingData.status == Constants.STATUS_COLLAPSED_FIRE)
+        // 焼失(status_reason == REASON_FIRE)は焦げた瓦礫マテリアルで老朽倒壊と描き分ける
+        Material rubbleMaterial = (buildingData.status_reason == Constants.REASON_FIRE)
             ? BuildingMeshBuilder.GetBurnedRubbleMaterial()
             : BuildingMeshBuilder.GetCollapsedRubbleMaterial();
         Mesh moundMesh = ConstructingBuildingMeshBuilder.GenerateDirtMoundMesh(

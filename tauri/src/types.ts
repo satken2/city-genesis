@@ -60,6 +60,8 @@ export type AgentData = {
   type: number;
   variant: number;
   status: number;
+  /** 現在のステータスになった理由(REASON_*)。0(REASON_NONE)は通常遷移 */
+  status_reason?: number;
   alert?: number;
   active_from: number;
   reserves: number;

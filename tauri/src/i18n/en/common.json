@@ -27,8 +27,14 @@
     "8": "Canceled",
     "9": "Vacant",
     "10": "Collapsed",
-    "11": "Pending Construction",
-    "12": "Burned Down"
+    "11": "Pending Construction"
+  },
+  "reason": {
+    "1": "Fire",
+    "2": "Aging",
+    "3": "Deficit",
+    "4": "Low Utilization",
+    "5": "Mayor's Decision"
   },
   "spaceType": {
     "0": "Other",

@@ -4,15 +4,23 @@
  * エポック実行完了後に別ウィンドウとして開かれ、バックエンドの
  * POST /api/v1/epochs レスポンスの epoch_report フィールドを受け取って表示する。
  *
- * レイアウトはヘッダ + クエストストリップ + 横3分割のメインエリア + フッタ(閉じるボタン):
- * - ヘッダ: 左上に大きく現在のゲーム内日付(実行後)、右に為替レート(前後)
+ * レイアウトはヘッダ + クエストストリップ + 横2分割のメインエリア + フッタ(閉じるボタン):
+ * - ヘッダ: 左上に大きく現在のゲーム内日付(実行後)
  * - クエストストリップ: このエポックで達成したクエスト(お祝いウィンドウの予告)と、
  *   達成間近(進捗70%以上)のアクティブなクエストの進捗バーを横並びで表示する。
  *   達成間近は GET /api/v1/quests のサーバ計算 progress を使う。
- * - 左カラム: 市民動態(前後人口と出生/死亡/転入/転出のブレイクダウン縦棒グラフ)と
- *             予算執行状況(前エポック計画・実績の縦棒グラフ + 市政府現預金)を縦に並べる
- * - 中央カラム: 統計タイル(3×3)。物価/所得/失業率/医療・栄養・娯楽充足度/火災/交通事故/犯罪
- * - 右カラム: 建設状況(建設中の道路・建設中の公共施設)を縦に並べる
+ * - 左(主役): 統計タイル。人口/GDP/物価/所得/失業率/医療・栄養・娯楽充足度/
+ *   火災/交通事故/犯罪/為替レートを、空き領域いっぱいのグリッドで敷き詰める。
+ * - 右カラム: 建設状況(道路と公共施設を種別バッジ付きの単一リストにまとめたもの)
+ *
+ * 統計タイルは2種類の視覚効果を持つ。この2つは独立した軸である。
+ * - 変動方向(矢印): バックエンドが返す指標ごとの履歴(`statistics.history`、直近
+ *   `trend_window` エポック分)の回帰傾きで、上昇(斜め上)/横ばい(横)/下降(斜め下)を示す。
+ *   1エポックの差分は振れ幅が大きく毎回向きが反転するため、窓の傾きで判定する。
+ *   矢印の色は指標の極性(値が増えて嬉しいか)で決まり、緑=good / 赤=bad / 灰=中立。
+ * - 水準の警戒色(タイル自体の色): 現在値の絶対基準による評価。相対的な傾向がどうであれ
+ *   「失業率15%」のような水準そのものが危険な状態を赤で示す。しきい値はこのファイルの
+ *   UI定数(STAT_*_WARN / STAT_*_DANGER)。
  *
  * 閉じるボタンで親から渡された onClose を呼ぶ。notify="modal" の達成クエストがあれば
  * 親側で引き続き QuestCompleteWindow を表示する(結果→お祝いの連続演出)。
@@ -22,20 +30,9 @@ import { useTranslation } from "react-i18next";
 import { emit } from "@tauri-apps/api/event";
 import { EpochDate } from "../common/EpochDate";
 import { STATUS_STYLE_MAP } from "../../local-constants";
-import { useMasterData } from "../../contexts/MasterDataContext";
 import { buildApiUrl, fetchApi } from "../../utils/api";
-import type { BudgetCategoryEntry, Quest, QuestNotification } from "../../types";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-  Cell,
-  Legend
-} from "recharts";
+import { formatCompactAmount } from "../../utils/money";
+import type { Quest, QuestNotification } from "../../types";
 import "./EpochResultWindow.css";
 
 export type ConstructionProgressItem = {
@@ -64,17 +61,26 @@ export type ExchangeRateReport = {
   after: number;
 };
 
-/** エポック実行完了時点の都市統計。中央の統計タイル(3×3)に表示する。 */
+/** エポック実行完了時点の都市統計。統計タイルに表示する。 */
 export type StatisticsReport = {
   price: number;                   // 小売財(GOODS_RETAIL)の平均価格
-  income: number;                  // 稼働中世帯の平均収入
+  income: number;                  // 世帯の平均収入
   unemployment_rate: number;       // 失業率(0..1比率)
   avg_healthcare: number;          // 世帯平均の医療充足度(0..1)
   avg_nutrition: number;           // 世帯平均の栄養充足度(0..1)
   avg_entertainment: number;       // 世帯平均の娯楽充足度(0..1)
+  gdp: number;                     // 直近完了エポックの名目GDP
   fire_count: number;              // 実行エポック合計の火災件数
   traffic_accident_count: number;  // 実行エポック合計の交通事故件数
   crime_count: number;             // 実行エポック合計の犯罪件数
+  /** history の窓幅(エポック数)。「直近Nエポックの傾向」の N。 */
+  trend_window?: number;
+  /**
+   * 指標ごとの時系列(古い→新しい、末尾が直近完了エポック)。
+   * 都市の歴史が窓より短い場合、古い側は null で埋まる。キーは統計値のキー名と
+   * `population` を加えたもの。
+   */
+  history?: Record<string, (number | null)[]>;
 };
 
 export type EpochReport = {
@@ -82,32 +88,6 @@ export type EpochReport = {
   population: PopulationReport;
   exchange_rate: ExchangeRateReport;
   statistics: StatisticsReport;
-};
-
-export type BudgetHistoryEntry = {
-  epoch: number;
-  revenues: Record<string, number>;
-};
-
-export type BudgetData = {
-  budgets: Record<string, number>;
-  prev_budgets: Record<string, number>;
-  total_expense: Record<string, number>;
-  total_revenue: Record<string, number>;
-  budget_tiers?: Record<string, number>;
-  history?: BudgetHistoryEntry[];
-};
-
-type CityAgentData = {
-  economic_agent: {
-    reserves: number;
-  };
-};
-
-type CityData = {
-  city: {
-    city_agent_id: number;
-  };
 };
 
 type EpochResultWindowProps = {
@@ -127,6 +107,89 @@ type EpochResultWindowProps = {
 /** 「達成間近」としてストリップに表示する進捗率のしきい値 */
 const NEAR_COMPLETION_THRESHOLD = 0.7;
 
+/**
+ * 水準の警戒色のしきい値(絶対基準)。
+ * 失業率・事故災害件数は「多いほど悪い」、充足度は「少ないほど悪い」。
+ */
+const STAT_UNEMPLOYMENT_WARN = 0.08;
+const STAT_UNEMPLOYMENT_DANGER = 0.15;
+const STAT_SATISFACTION_WARN = 0.6;
+const STAT_SATISFACTION_DANGER = 0.4;
+const STAT_INCIDENT_WARN = 1;
+const STAT_INCIDENT_DANGER = 5;
+
+/**
+ * 事故災害の件数タイルは複数エポックまとめ実行の合計値なので、しきい値も実行エポック数で
+ * 引き伸ばす(1エポックあたり STAT_INCIDENT_* 件を基準にする)。
+ */
+const scaleIncidentThreshold = (threshold: number, epochCount: number) =>
+  threshold * Math.max(1, epochCount);
+
+/** トレンド判定に必要な最小データ点数。都市が若く履歴が足りないうちは矢印を出さない。 */
+const MIN_TREND_POINTS = 3;
+/** 窓全体の相対変化(平均値に対する比)がこの値未満なら横ばいとみなす。 */
+const TREND_FLAT_RATIO = 0.02;
+
+/** タイルの水準評価。normal=通常 / warn=注意(橙) / danger=危険(赤) */
+type StatTone = "normal" | "warn" | "danger";
+/** 変動方向。none=履歴不足で判定不能 */
+type TrendDirection = "up" | "flat" | "down" | "none";
+/** 指標の極性(値が増えるのは良いことか)。矢印の色分けに使う。 */
+type StatPolarity = "up-good" | "up-bad" | "neutral";
+/** 矢印の色。good=緑 / bad=赤 / neutral=灰 */
+type TrendTone = "good" | "bad" | "neutral";
+
+/** 値が大きいほど悪い指標の水準評価。 */
+function toneAbove(value: number, warn: number, danger: number): StatTone {
+  if (value >= danger) return "danger";
+  if (value >= warn) return "warn";
+  return "normal";
+}
+
+/** 値が小さいほど悪い指標の水準評価。 */
+function toneBelow(value: number, warn: number, danger: number): StatTone {
+  if (value <= danger) return "danger";
+  if (value <= warn) return "warn";
+  return "normal";
+}
+
+/**
+ * 履歴系列から変動方向を判定する。
+ *
+ * 最小二乗法で1エポックあたりの傾きを求め、窓全体の変化量を系列平均で割った
+ * 相対変化として評価する(指標ごとに単位も桁も違うため、絶対量では比較できない)。
+ * null(都市の歴史より古いスロット)は除外し、残り点数が足りなければ判定しない。
+ */
+function computeTrend(series: (number | null)[] | undefined): TrendDirection {
+  const values = (series ?? []).filter(
+    (v): v is number => typeof v === "number" && Number.isFinite(v),
+  );
+  if (values.length < MIN_TREND_POINTS) return "none";
+
+  const n = values.length;
+  const meanX = (n - 1) / 2;
+  const meanY = values.reduce((sum, v) => sum + v, 0) / n;
+  let covariance = 0;
+  let variance = 0;
+  values.forEach((y, i) => {
+    covariance += (i - meanX) * (y - meanY);
+    variance += (i - meanX) ** 2;
+  });
+  if (variance === 0) return "none";
+
+  const span = (covariance / variance) * (n - 1); // 窓全体での変化量
+  const ratio = span / Math.max(Math.abs(meanY), 1e-9);
+  if (Math.abs(ratio) < TREND_FLAT_RATIO) return "flat";
+  return ratio > 0 ? "up" : "down";
+}
+
+/** 変動方向と指標の極性から矢印の色を決める。 */
+function resolveTrendTone(direction: TrendDirection, polarity: StatPolarity): TrendTone {
+  if (direction === "flat" || direction === "none" || polarity === "neutral") return "neutral";
+  const isGood = polarity === "up-good" ? direction === "up" : direction === "down";
+  return isGood ? "good" : "bad";
+}
+
 export function EpochResultWindow({
   report,
   epochCount,
@@ -136,10 +199,8 @@ export function EpochResultWindow({
   completedQuests = [],
   failedQuests = [],
 }: EpochResultWindowProps) {
-  const { t } = useTranslation();
-  const masterData = useMasterData();
-  const [budgetData, setBudgetData] = useState<BudgetData | null>(null);
-  const [cityReserves, setCityReserves] = useState<number | null>(null);
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === "ja" ? "ja-JP" : "en-US";
   const [nearQuests, setNearQuests] = useState<Quest[]>([]);
 
   // エポック結果画面の表示中は専用BGM (bgm-result.mp3) に切り替える
@@ -149,39 +210,6 @@ export function EpochResultWindow({
       void emit("bgm:release", { id: "epoch_result" });
     };
   }, []);
-
-  useEffect(() => {
-    const baseUrl = apiBaseUrl.replace(/\/+$/, "");
-    fetch(`${baseUrl}/api/v1/city/budgets`)
-      .then((res) => res.json())
-      .then((data) => setBudgetData(data))
-      .catch((err) => console.error("failed to fetch budget data", err));
-  }, [apiBaseUrl]);
-
-  // 市政府の現預金(reserves)を取得する。
-  // /api/v1/city から city_agent_id を取得し、
-  // /api/v1/agents/{id} の economic_agent.reserves を読み取る。
-  useEffect(() => {
-    const controller = new AbortController();
-    (async () => {
-      try {
-        const cityRes = await fetchApi<CityData>(
-          buildApiUrl(apiBaseUrl, "/api/v1/city"),
-          { signal: controller.signal },
-        );
-        const agentData = await fetchApi<CityAgentData>(
-          buildApiUrl(apiBaseUrl, `/api/v1/agents/${cityRes.city.city_agent_id}`),
-          { signal: controller.signal },
-        );
-        setCityReserves(agentData.economic_agent.reserves);
-      } catch (err) {
-        if (!controller.signal.aborted) {
-          console.error("failed to fetch city reserves", err);
-        }
-      }
-    })();
-    return () => controller.abort();
-  }, [apiBaseUrl]);
 
   // 達成間近(進捗70%以上・アクティブ・隠しでない)のクエストを取得する。
   // 「あと少しで達成」を見せて次のエポックの動機付けにする。
@@ -219,17 +247,8 @@ export function EpochResultWindow({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [apiBaseUrl]);
 
-  const categories = useMemo(() => {
-    if (!masterData?.budget_categories) return [];
-    return Object.entries(masterData.budget_categories).map(([id, entry]) => ({
-      id: Number(id),
-      display_name: (entry as BudgetCategoryEntry).display_name,
-    }));
-  }, [masterData?.budget_categories]);
-
-  // entity_type→id 昇順でソートされたリストを道路/建物で分ける
-  const paths = report.construction_progress.filter((x) => x.entity_type === "path");
-  const buildings = report.construction_progress.filter((x) => x.entity_type === "agent");
+  // 建設状況は道路・公共施設を分けず、種別バッジ付きの単一リストとして表示する。
+  const constructionItems = report.construction_progress;
 
   // 人口増減(後-前)。表示の+/-色分けに使用する
   const populationDelta = report.population.after - report.population.before;
@@ -237,111 +256,128 @@ export function EpochResultWindow({
   // 為替レート増減(後-前)。通貨安(レート上昇)で正、通貨高(レート下落)で負。
   const fxDelta = report.exchange_rate.after - report.exchange_rate.before;
 
-  // 人口動態のブレイクダウンデータ (出生, 死亡, 転入, 転出, 増減値)
-  const popChartData = useMemo(() => {
-    return [
-      {
-        name: t("epochResult.births"),
-        value: report.population.births,
-        fill: "#6cd47f",
-      },
-      {
-        name: t("epochResult.deaths"),
-        value: -report.population.deaths,
-        fill: "#e87878",
-      },
-      {
-        name: t("epochResult.immigrations"),
-        value: report.population.immigrations,
-        fill: "#6cd47f",
-      },
-      {
-        name: t("epochResult.emigrations"),
-        value: -report.population.emigrations,
-        fill: "#e87878",
-      },
-      {
-        name: "実質増減",
-        value: populationDelta,
-        fill: populationDelta >= 0 ? "#4a9eff" : "#e87878",
-      },
-    ];
-  }, [report.population, populationDelta, t]);
-
-  // 予算執行状況データ (計画と実績)
-  const budgetChartData = useMemo(() => {
-    if (!budgetData || categories.length === 0) return [];
-    return categories
-      .filter((cat) => cat.id !== 10) // 貯蓄（ID: 10）は支出カテゴリではないため除外
-      .sort((a, b) => a.id - b.id)
-      .map((cat) => {
-        const key = String(cat.id);
-        const plan = budgetData.prev_budgets[key] ?? 0;
-        const actual = budgetData.total_expense[key] ?? 0;
-        return {
-          name: t(`budget.category.${cat.id}`, { defaultValue: cat.display_name }),
-          plan: Math.round(plan),
-          actual: Math.round(actual),
-        };
-      });
-  }, [budgetData, categories, t]);
-
-  // 統計タイル(3×3)の表示データ。行順に: 物価/所得/失業率, 医療/栄養/娯楽, 火災/交通事故/犯罪。
-  // 事故・災害系(火災/交通事故/犯罪)は件数が非0のとき警告色(赤)で強調する。
   const stats = report.statistics;
+  const trendWindow = stats.trend_window ?? 0;
+
+  // 統計タイルの表示データ。値・水準の警戒色・変動方向の3点を1タイルにまとめる。
   const statTiles = useMemo(() => {
+    const history = stats.history ?? {};
     const pct = (v: number) => `${Math.round(v * 100)}%`;
-    return [
+    const signed = (v: number) => `${v >= 0 ? "+" : ""}${v.toLocaleString()}`;
+    const incidentWarn = scaleIncidentThreshold(STAT_INCIDENT_WARN, epochCount);
+    const incidentDanger = scaleIncidentThreshold(STAT_INCIDENT_DANGER, epochCount);
+
+    const specs: {
+      key: string;
+      label: string;
+      value: string;
+      sub?: string;
+      tone: StatTone;
+      polarity: StatPolarity;
+    }[] = [
       {
+        key: "population",
+        label: t("epochResult.statPopulation"),
+        value: report.population.after.toLocaleString(),
+        sub: signed(populationDelta),
+        tone: "normal",
+        polarity: "up-good",
+      },
+      {
+        key: "gdp",
+        label: t("epochResult.statGdp"),
+        value: formatCompactAmount(stats.gdp, locale),
+        tone: "normal",
+        polarity: "up-good",
+      },
+      {
+        key: "price",
         label: t("epochResult.statPrice"),
         value: stats.price.toLocaleString(undefined, { maximumFractionDigits: 1 }),
+        tone: "normal",
+        polarity: "neutral",
       },
       {
+        key: "income",
         label: t("epochResult.statIncome"),
         value: t("common.currency", { value: Math.round(stats.income) }),
+        tone: "normal",
+        polarity: "up-good",
       },
       {
+        key: "unemployment_rate",
         label: t("epochResult.statUnemployment"),
         value: `${(stats.unemployment_rate * 100).toFixed(1)}%`,
+        tone: toneAbove(stats.unemployment_rate, STAT_UNEMPLOYMENT_WARN, STAT_UNEMPLOYMENT_DANGER),
+        polarity: "up-bad",
       },
-      { label: t("epochResult.statHealthcare"), value: pct(stats.avg_healthcare) },
-      { label: t("epochResult.statNutrition"), value: pct(stats.avg_nutrition) },
-      { label: t("epochResult.statEntertainment"), value: pct(stats.avg_entertainment) },
       {
+        key: "avg_healthcare",
+        label: t("epochResult.statHealthcare"),
+        value: pct(stats.avg_healthcare),
+        tone: toneBelow(stats.avg_healthcare, STAT_SATISFACTION_WARN, STAT_SATISFACTION_DANGER),
+        polarity: "up-good",
+      },
+      {
+        key: "avg_nutrition",
+        label: t("epochResult.statNutrition"),
+        value: pct(stats.avg_nutrition),
+        tone: toneBelow(stats.avg_nutrition, STAT_SATISFACTION_WARN, STAT_SATISFACTION_DANGER),
+        polarity: "up-good",
+      },
+      {
+        key: "avg_entertainment",
+        label: t("epochResult.statEntertainment"),
+        value: pct(stats.avg_entertainment),
+        tone: toneBelow(stats.avg_entertainment, STAT_SATISFACTION_WARN, STAT_SATISFACTION_DANGER),
+        polarity: "up-good",
+      },
+      {
+        key: "fire_count",
         label: t("epochResult.statFire"),
         value: stats.fire_count.toLocaleString(),
-        tone: stats.fire_count > 0 ? "warn" : undefined,
+        tone: toneAbove(stats.fire_count, incidentWarn, incidentDanger),
+        polarity: "up-bad",
       },
       {
+        key: "traffic_accident_count",
         label: t("epochResult.statTraffic"),
         value: stats.traffic_accident_count.toLocaleString(),
-        tone: stats.traffic_accident_count > 0 ? "warn" : undefined,
+        tone: toneAbove(stats.traffic_accident_count, incidentWarn, incidentDanger),
+        polarity: "up-bad",
       },
       {
+        key: "crime_count",
         label: t("epochResult.statCrime"),
         value: stats.crime_count.toLocaleString(),
-        tone: stats.crime_count > 0 ? "warn" : undefined,
+        tone: toneAbove(stats.crime_count, incidentWarn, incidentDanger),
+        polarity: "up-bad",
       },
       {
-        // 為替レート。値の下に前エポックからの変動を色付きで併記する。
-        // 通貨安(レート上昇)=赤、通貨高(レート下落)=緑(旧ヘッダ表示の配色を踏襲)。
+        // 為替レートは実行前後の変動幅を補助表示する。通貨安(レート上昇)を bad とする。
+        key: "exchange_rate",
         label: t("epochResult.exchangeRate"),
         value: report.exchange_rate.after.toFixed(4),
         sub: `${fxDelta >= 0 ? "+" : ""}${fxDelta.toFixed(4)}`,
-        subTone: fxDelta > 0 ? "up" : fxDelta < 0 ? "down" : undefined,
+        tone: "normal",
+        polarity: "up-bad",
       },
-    ] as {
-      label: string;
-      value: string;
-      tone?: "warn";
-      sub?: string;
-      subTone?: "up" | "down";
-    }[];
-  }, [stats, report.exchange_rate.after, fxDelta, t]);
+    ];
+
+    return specs.map((spec) => {
+      const direction = computeTrend(history[spec.key]);
+      return {
+        ...spec,
+        direction,
+        trendTone: resolveTrendTone(direction, spec.polarity),
+        trendLabel: t(`epochResult.trend.${direction}`),
+      };
+    });
+  }, [stats, report.population.after, report.exchange_rate.after, populationDelta, fxDelta, epochCount, locale, t]);
 
   return (
     <div className="epoch-result-root">
-      {/* ヘッダ: 左上に大きく日付(為替レートは統計タイルへ移動) */}
+      {/* ヘッダ: 左上に大きく日付 */}
       <header className="epoch-result-header">
         <div className="epoch-result-date-block">
           <EpochDate daysSinceEpoch={currentDate} />
@@ -353,7 +389,7 @@ export function EpochResultWindow({
         </div>
       </header>
 
-      {/* クエストストリップ: 達成(お祝いの予告)・失敗・達成間近をチップで横並び表示する */}
+      {/* クエストストリップ: 達成・失敗・達成間近をチップで横並び表示する */}
       {(completedQuests.length > 0 || failedQuests.length > 0 || nearQuests.length > 0) && (
         <div className="epoch-result-quest-strip">
           {completedQuests.map((q) => (
@@ -397,141 +433,46 @@ export function EpochResultWindow({
         </div>
       )}
 
-      {/* メインエリア: 左(人口/予算) + 中央(統計) + 右(建設) の3カラム */}
+      {/* メインエリア: 統計タイル(主役) + 建設状況 の2カラム */}
       <div className="epoch-result-main">
-        {/* ── 左カラム: 市民動態 + 予算執行状況 ── */}
-        <div className="epoch-result-col epoch-result-col-left">
-          {/* 市民動態 */}
-          <section className="epoch-result-section epoch-result-section-pop">
-            <h3 className="epoch-result-section-title">{t("epochResult.sectionPopulation")}</h3>
-            <div className="epoch-result-pop-summary">
-              <span className="epoch-result-pop-summary-label">人口推移:</span>
-              <span className="epoch-result-pop-summary-values">
-                {report.population.before.toLocaleString()} ➔ {report.population.after.toLocaleString()}
-                <span
-                  className={
-                    populationDelta >= 0
-                      ? "epoch-result-pop-delta-plus"
-                      : "epoch-result-pop-delta-minus"
-                  }
-                >
-                  ({populationDelta >= 0 ? "+" : ""}{populationDelta.toLocaleString()})
-                </span>
-              </span>
-            </div>
-            {/* 移民の応募数（世帯）と許可数（人数）。審査前の応募と実際にスポーンした人数を比較できる。
-                移民が発生しなかったエポックでは両方0になるため、非表示にする。 */}
-            {(report.population.immigration_applicants ?? 0) > 0 || report.population.immigrations > 0 ? (
-              <div className="epoch-result-pop-summary">
-                <span className="epoch-result-pop-summary-label">{t("epochResult.immigrationStatus")}:</span>
-                <span className="epoch-result-pop-summary-values">
-                  {t("epochResult.immigrationApplicants", { households: (report.population.immigration_applicants ?? 0).toLocaleString() })}
-                  {" / "}
-                  {t("epochResult.immigrationApproved", { people: report.population.immigrations.toLocaleString() })}
-                </span>
-              </div>
-            ) : null}
-            <div className="epoch-result-chart-container">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={popChartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                  <XAxis dataKey="name" stroke="#8ba3bb" fontSize={10} tickLine={false} />
-                  <YAxis stroke="#8ba3bb" fontSize={10} tickLine={false} />
-                  <Tooltip
-                    contentStyle={{
-                      background: "#1a2230",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      borderRadius: "4px",
-                    }}
-                    labelStyle={{ color: "#fff" }}
-                  />
-                  <Bar dataKey="value" radius={[3, 3, 0, 0]}>
-                    {popChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </section>
-
-          {/* 予算執行状況 */}
-          <section className="epoch-result-section epoch-result-section-budget">
-            <h3 className="epoch-result-section-title">予算執行状況 (前回計画 vs 実績)</h3>
-            {budgetData ? (
-              <div className="epoch-result-chart-container">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={budgetChartData} margin={{ top: 5, right: 5, left: -10, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                    <XAxis dataKey="name" stroke="#8ba3bb" fontSize={9} tickLine={false} />
-                    <YAxis stroke="#8ba3bb" fontSize={9} tickLine={false} />
-                    <Tooltip
-                      contentStyle={{
-                        background: "#1a2230",
-                        border: "1px solid rgba(255,255,255,0.1)",
-                        borderRadius: "4px",
-                      }}
-                      labelStyle={{ color: "#fff" }}
-                      formatter={(value: any) => [Math.round(value).toLocaleString(), ""]}
-                    />
-                    <Legend
-                      verticalAlign="top"
-                      height={20}
-                      iconSize={8}
-                      wrapperStyle={{ fontSize: 9, marginTop: -5 }}
-                    />
-                    <Bar dataKey="plan" name="予算計画" fill="rgba(74, 158, 255, 0.4)" radius={[2, 2, 0, 0]} />
-                    <Bar dataKey="actual" name="支出実績" fill="#4a9eff" radius={[2, 2, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            ) : (
-              <p className="epoch-result-empty">{t("common.loading")}</p>
-            )}
-            {/* 市政府の現預金(残金)。予算執行状況グラフの下に表示する */}
-            <div className="epoch-result-reserves">
-              <span className="epoch-result-reserves-label">{t("epochResult.cityReserves")}</span>
-              <span className="epoch-result-reserves-value">
-                {cityReserves != null
-                  ? t("common.currency", { value: Math.round(cityReserves) })
-                  : t("common.loading")}
-              </span>
-            </div>
-          </section>
-        </div>{/* /.epoch-result-col-left */}
-
-        {/* ── 中央カラム: 統計タイル(3×3) ── */}
-        <div className="epoch-result-col epoch-result-col-center">
+        {/* ── 統計タイル ── */}
+        <div className="epoch-result-col epoch-result-col-stats">
           <section className="epoch-result-section epoch-result-section-stats">
-            <h3 className="epoch-result-section-title">{t("epochResult.sectionStatistics")}</h3>
+            <div className="epoch-result-section-head">
+              <h3 className="epoch-result-section-title">{t("epochResult.sectionStatistics")}</h3>
+              {trendWindow > 0 ? (
+                <span className="epoch-result-section-note">
+                  {t("epochResult.trendLegend", { count: trendWindow })}
+                </span>
+              ) : null}
+            </div>
             <div className="epoch-result-stat-grid">
               {statTiles.map((tile) => (
                 <StatTile
-                  key={tile.label}
+                  key={tile.key}
                   label={tile.label}
                   value={tile.value}
-                  tone={tile.tone}
                   sub={tile.sub}
-                  subTone={tile.subTone}
+                  tone={tile.tone}
+                  direction={tile.direction}
+                  trendTone={tile.trendTone}
+                  trendTitle={
+                    trendWindow > 0
+                      ? t("epochResult.trendHint", { count: trendWindow, trend: tile.trendLabel })
+                      : tile.trendLabel
+                  }
                 />
               ))}
             </div>
           </section>
-        </div>{/* /.epoch-result-col-center */}
+        </div>{/* /.epoch-result-col-stats */}
 
-        {/* ── 右カラム: 建設状況(道路 + 公共施設) ── */}
+        {/* ── 右カラム: 建設状況(道路・公共施設の統合リスト) ── */}
         <div className="epoch-result-col epoch-result-col-right">
-          <section className="epoch-result-section epoch-result-section-paths">
-            <h3 className="epoch-result-section-title">{t("epochResult.sectionPaths")}</h3>
+          <section className="epoch-result-section epoch-result-section-construction">
+            <h3 className="epoch-result-section-title">{t("epochResult.sectionConstruction")}</h3>
             <div className="epoch-result-construction-scroll">
-              <ConstructionTable items={paths} />
-            </div>
-          </section>
-
-          <section className="epoch-result-section epoch-result-section-buildings">
-            <h3 className="epoch-result-section-title">{t("epochResult.sectionBuildings")}</h3>
-            <div className="epoch-result-construction-scroll">
-              <ConstructionTable items={buildings} />
+              <ConstructionTable items={constructionItems} />
             </div>
           </section>
         </div>{/* /.epoch-result-col-right */}
@@ -548,42 +489,72 @@ export function EpochResultWindow({
 }
 
 /**
- * 統計タイル1枚。ラベル(小)+値(大)を中央寄せで表示する。
- * tone="warn" のとき値を警告色(赤)で強調する(火災・交通事故・犯罪が非0のとき)。
- * sub を渡すと値の下に補助テキストを表示する(為替レートの変動幅など)。
- * subTone="up"(赤)/"down"(緑)で補助テキストに色を付ける。
+ * 変動方向を表す矢印。横(横ばい)・斜め上(上昇)・斜め下(下降)の3種を、
+ * 同一形状の回転だけで描き分ける。色は CSS クラス(currentColor)で与える。
+ * direction="none"(履歴不足)のときは何も描かない。
+ */
+function TrendArrow({
+  direction,
+  tone,
+}: {
+  direction: TrendDirection;
+  tone: TrendTone;
+}): ReactNode {
+  if (direction === "none") return null;
+  const angle = direction === "up" ? -35 : direction === "down" ? 35 : 0;
+  return (
+    <svg
+      className={`epoch-result-trend epoch-result-trend-${tone}`}
+      viewBox="0 0 24 24"
+      width="20"
+      height="20"
+      aria-hidden={true}
+    >
+      <g transform={`rotate(${angle} 12 12)`} fill="none" stroke="currentColor" strokeWidth="2.4">
+        <line x1="4" y1="12" x2="18" y2="12" strokeLinecap="round" />
+        <polyline points="13,7 19,12 13,17" strokeLinecap="round" strokeLinejoin="round" />
+      </g>
+    </svg>
+  );
+}
+
+/**
+ * 統計タイル1枚。ラベル(小)+値(大)+変動矢印を中央寄せで表示する。
+ * tone は現在値の絶対基準による水準評価で、warn/danger のときタイル全体を着色する。
+ * sub を渡すと値の下に補助テキストを表示する(人口の増減、為替レートの変動幅など)。
  */
 function StatTile({
   label,
   value,
-  tone,
   sub,
-  subTone,
+  tone,
+  direction,
+  trendTone,
+  trendTitle,
 }: {
   label: string;
   value: string;
-  tone?: "warn";
   sub?: string;
-  subTone?: "up" | "down";
+  tone: StatTone;
+  direction: TrendDirection;
+  trendTone: TrendTone;
+  trendTitle: string;
 }): ReactNode {
-  const subClass =
-    subTone === "up"
-      ? "epoch-result-stat-sub epoch-result-stat-sub-up"
-      : subTone === "down"
-        ? "epoch-result-stat-sub epoch-result-stat-sub-down"
-        : "epoch-result-stat-sub";
   return (
-    <div className={tone === "warn" ? "epoch-result-stat-tile epoch-result-stat-tile-warn" : "epoch-result-stat-tile"}>
+    <div className={`epoch-result-stat-tile epoch-result-stat-tile-${tone}`} title={trendTitle}>
       <span className="epoch-result-stat-label">{label}</span>
-      <span className="epoch-result-stat-value">{value}</span>
-      {sub != null ? <span className={subClass}>{sub}</span> : null}
+      <span className="epoch-result-stat-value-row">
+        <span className="epoch-result-stat-value">{value}</span>
+        <TrendArrow direction={direction} tone={trendTone} />
+      </span>
+      {sub != null ? <span className="epoch-result-stat-sub">{sub}</span> : null}
     </div>
   );
 }
 
 /**
- * 建設進捗のテーブル表示。
- * 列: 名前 / ステータス(after_status でバッジ表示) / 進捗(バー+テキスト)。
+ * 建設進捗のテーブル表示(道路・公共施設の統合リスト)。
+ * 列: 名前(種別バッジ付き) / ステータス(after_status でバッジ表示) / 進捗(バー+テキスト)。
  * リストが空の場合は「対象なし」メッセージを表示する。
  */
 function ConstructionTable({
@@ -610,10 +581,15 @@ function ConstructionTable({
         {items.map((item) => {
           const displayName = item.name || `#${item.id}`;
           const statusStyle = STATUS_STYLE_MAP[item.after_status] ?? { bg: "#6b7280", text: "#ffffff" };
+          const kindLabel =
+            item.entity_type === "path" ? t("epochResult.kindPath") : t("epochResult.kindBuilding");
           return (
             <tr key={`${item.entity_type}-${item.id}`} className="epoch-result-tr">
               <td className="epoch-result-td epoch-result-td-name" title={displayName}>
-                {displayName}
+                <span className={`epoch-result-kind-badge epoch-result-kind-badge-${item.entity_type}`}>
+                  {kindLabel}
+                </span>
+                <span className="epoch-result-name-text">{displayName}</span>
               </td>
               <td className="epoch-result-td epoch-result-td-status">
                 <span

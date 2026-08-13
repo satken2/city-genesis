@@ -11,7 +11,7 @@
     "abandon": "Abandon",
     "abandonHint": "Give up upkeep and let it decay without repairs",
     "repairThreshold": "Repair threshold",
-    "activeFrom": "Established",
+    "activeFrom": "Status Since",
     "reserves": "Reserves",
     "revenues": "Revenue",
     "expenses": "Expenses",

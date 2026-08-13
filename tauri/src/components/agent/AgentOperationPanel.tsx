@@ -8,7 +8,7 @@ import {
   STATUS_TEMPORARY,
   STATUS_SCHEDULED_CONSTRUCTION,
   STATUS_SCHEDULED_DEMOLITION,
-  STATUSES_RUIN,
+  STATUS_COLLAPSED,
   STATUS_PENDING,
   TYPE_DEFAULT,
   TYPE_CITY,
@@ -171,7 +171,7 @@ export function AgentOperationPanel({
     agent.public_facility && !agent.under_maintenance;
 
   // 廃墟(倒壊・焼失)は修繕ではなく「再建」の対象となる。市政府所有の公共施設に限る。
-  const isCollapsed = STATUSES_RUIN.includes(agent.status);
+  const isCollapsed = agent.status === STATUS_COLLAPSED;
   const canReconstruct = agent.public_facility && agent.is_bd && isCollapsed;
 
   return (

@@ -74,7 +74,6 @@ import {
   STATUS_CANCELED,
   STATUS_EMPTY,
   STATUS_COLLAPSED,
-  STATUS_COLLAPSED_FIRE,
   PATH_ELECTRICITY,
   PATH_WATER,
 } from "./constants";
@@ -117,7 +116,6 @@ export const STATUS_STYLE_MAP: Record<
   [STATUS_CANCELED]: { bg: "#6b7280", text: "#ffffff" },
   [STATUS_EMPTY]: { bg: "#6b7280", text: "#ffffff" },
   [STATUS_COLLAPSED]: { bg: "#ef4444", text: "#ffffff" },
-  [STATUS_COLLAPSED_FIRE]: { bg: "#7f1d1d", text: "#ffffff" },
 };
 
 /**

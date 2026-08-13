@@ -95,6 +95,8 @@ export type AgentSummary = {
   center_point?: any[];
   /** ステータス（計画中・建設中・稼働中など。consts.py の STATUS_* を参照） */
   status: number;
+  /** 現在のステータスになった理由（REASON_*） */
+  status_reason: number;
   /** マッシュアップ建物のサブ建物配置リスト。棟ごとの subbuilding_id / model_prefix / position[x,z] / rotation / floors / height_per_floor (サーバーサイドで計算されるフィールド。型は動的。) */
   sub_buildings?: any;
   /** 階数 */
@@ -136,6 +138,8 @@ export type AgentData = {
   variant: number;
   /** ステータス（計画中・建設中・稼働中など。STATUS_*） */
   status: number;
+  /** 現在のステータスになった理由（REASON_*） */
+  status_reason: number;
   /** 警告フラグのビット和（int16。consts.py の ALERT_AGENT_* を参照） */
   alert: number;
   /** 作成日（YYYYMMDD） */
