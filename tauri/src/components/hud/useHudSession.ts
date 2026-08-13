@@ -51,6 +51,7 @@ export function useHudSession(): HudSession {
 
   useEffect(() => {
     let unlistenSession: (() => void) | undefined;
+    let unlistenRename: (() => void) | undefined;
     let unlistenEpoch: (() => void) | undefined;
 
     listen<SessionStatePayload>("session-state", (event) => {
@@ -79,6 +80,16 @@ export function useHudSession(): HudSession {
       })
       .catch(console.error);
 
+    // 都市名の変更。セッションポーリングの次の周回を待たずに表示へ反映する
+    // (送信元は city_rename ウィンドウ = CityRenameWindow.tsx)。
+    listen<{ name: string }>("city:renamed", (event) => {
+      setCityName(event.payload.name);
+    })
+      .then((fn) => {
+        unlistenRename = fn;
+      })
+      .catch(console.error);
+
     // エポック実行の開始/終了。送信元は epoch_confirm ウィンドウ(EpochConfirmWindow.tsx)。
     appWindow
       .listen<{ executing: boolean }>("epoch:executing", (event) => {
@@ -91,6 +102,7 @@ export function useHudSession(): HudSession {
 
     return () => {
       unlistenSession?.();
+      unlistenRename?.();
       unlistenEpoch?.();
     };
   }, [appWindow]);

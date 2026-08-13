@@ -33,6 +33,17 @@ import { STATUS_STYLE_MAP } from "../../local-constants";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { formatCompactAmount } from "../../utils/money";
 import type { Quest, QuestNotification } from "../../types";
+import populationIcon from "../../assets/images/population.png";
+import gdpIcon from "../../assets/images/menu/menu_stat.png";
+import priceIcon from "../../assets/images/visual/price.png";
+import incomeIcon from "../../assets/images/purchase.png";
+import unemploymentIcon from "../../assets/images/citizen.png";
+import healthcareIcon from "../../assets/images/visual/health.png";
+import fireIcon from "../../assets/images/alerts/fire.png";
+import trafficIcon from "../../assets/images/alerts/car-accident.png";
+import crimeIcon from "../../assets/images/alerts/shooting.png";
+import exchangeIcon from "../../assets/images/menu/menu_finance.png";
+import placeholderIcon from "../../assets/images/ui/help.png";
 import "./EpochResultWindow.css";
 
 export type ConstructionProgressItem = {
@@ -129,6 +140,25 @@ const scaleIncidentThreshold = (threshold: number, epochCount: number) =>
 const MIN_TREND_POINTS = 3;
 /** 窓全体の相対変化(平均値に対する比)がこの値未満なら横ばいとみなす。 */
 const TREND_FLAT_RATIO = 0.02;
+
+/**
+ * タイルのアイコン。専用の画像が用意されていない指標(栄養・娯楽)は、
+ * 未整備であることが分かるようプレースホルダ(?アイコン)を出しておく。
+ */
+const STAT_ICONS: Record<string, string> = {
+  population: populationIcon,
+  gdp: gdpIcon,
+  price: priceIcon,
+  income: incomeIcon,
+  unemployment_rate: unemploymentIcon,
+  avg_healthcare: healthcareIcon,
+  avg_nutrition: placeholderIcon,
+  avg_entertainment: placeholderIcon,
+  fire_count: fireIcon,
+  traffic_accident_count: trafficIcon,
+  crime_count: crimeIcon,
+  exchange_rate: exchangeIcon,
+};
 
 /** タイルの水準評価。normal=通常 / warn=注意(橙) / danger=危険(赤) */
 type StatTone = "normal" | "warn" | "danger";
@@ -450,6 +480,7 @@ export function EpochResultWindow({
               {statTiles.map((tile) => (
                 <StatTile
                   key={tile.key}
+                  icon={STAT_ICONS[tile.key] ?? placeholderIcon}
                   label={tile.label}
                   value={tile.value}
                   sub={tile.sub}
@@ -506,8 +537,8 @@ function TrendArrow({
     <svg
       className={`epoch-result-trend epoch-result-trend-${tone}`}
       viewBox="0 0 24 24"
-      width="20"
-      height="20"
+      width="16"
+      height="16"
       aria-hidden={true}
     >
       <g transform={`rotate(${angle} 12 12)`} fill="none" stroke="currentColor" strokeWidth="2.4">
@@ -519,11 +550,12 @@ function TrendArrow({
 }
 
 /**
- * 統計タイル1枚。ラベル(小)+値(大)+変動矢印を中央寄せで表示する。
+ * 統計タイル1枚。[アイコン][ラベル+値][変動矢印]の横並びで、行の高さを抑えた密なタイルにする。
  * tone は現在値の絶対基準による水準評価で、warn/danger のときタイル全体を着色する。
- * sub を渡すと値の下に補助テキストを表示する(人口の増減、為替レートの変動幅など)。
+ * sub を渡すと値の右に補助テキストを添える(人口の増減、為替レートの変動幅など)。
  */
 function StatTile({
+  icon,
   label,
   value,
   sub,
@@ -532,6 +564,7 @@ function StatTile({
   trendTone,
   trendTitle,
 }: {
+  icon: string;
   label: string;
   value: string;
   sub?: string;
@@ -542,12 +575,15 @@ function StatTile({
 }): ReactNode {
   return (
     <div className={`epoch-result-stat-tile epoch-result-stat-tile-${tone}`} title={trendTitle}>
-      <span className="epoch-result-stat-label">{label}</span>
-      <span className="epoch-result-stat-value-row">
-        <span className="epoch-result-stat-value">{value}</span>
-        <TrendArrow direction={direction} tone={trendTone} />
+      <img className="epoch-result-stat-icon" src={icon} alt="" aria-hidden={true} />
+      <span className="epoch-result-stat-body">
+        <span className="epoch-result-stat-label">{label}</span>
+        <span className="epoch-result-stat-value-row">
+          <span className="epoch-result-stat-value">{value}</span>
+          {sub != null ? <span className="epoch-result-stat-sub">{sub}</span> : null}
+        </span>
       </span>
-      {sub != null ? <span className="epoch-result-stat-sub">{sub}</span> : null}
+      <TrendArrow direction={direction} tone={trendTone} />
     </div>
   );
 }

@@ -16,6 +16,7 @@
     "save_load": "Save / Load",
     "save_list": "Save Data List",
     "new_game": "New Game",
+    "city_rename": "Rename City",
     "resource_detail": "Resource Details",
     "achievements": "Achievements",
     "city_regulation": "Regulations",
@@ -66,6 +67,10 @@
     },
     "fitView": "Fit View",
     "reload": "Reload"
+  },
+  "cityRename": {
+    "label": "City name",
+    "tooltip": "Click to rename the city"
   },
   "taskbar": {
     "prevMonitor": "Move to previous display",

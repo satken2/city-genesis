@@ -185,7 +185,14 @@ export function Cockpit() {
       </div>
 
       <div className="cockpit-status">
-        <span className="cockpit-city">{cityName || "—"}</span>
+        <button
+          className="cockpit-city"
+          type="button"
+          title={t("cityRename.tooltip")}
+          onClick={() => void openRegisteredWindow("city_rename")}
+        >
+          {cityName || "—"}
+        </button>
         <ScoreMiniMeter onOpen={() => void openRegisteredWindow("achievements")} />
         <span className="cockpit-date">{formattedDate}</span>
         <BudgetMiniMeter apiBaseUrl={apiBaseUrl} onOpen={() => void openRegisteredWindow("city_budget")} />

@@ -1,0 +1,84 @@
+/**
+ * 都市名変更ウィンドウのスタイル
+ * 入力欄1つとボタン2つだけの小さなウィンドウで、ボタンは右下に寄せる。
+ */
+
+.city-rename {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.city-rename-label {
+  font-size: 13px;
+  color: #cccccc;
+}
+
+.city-rename-input {
+  padding: 8px 10px;
+  border: 1px solid #555555;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.city-rename-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.city-rename-input:disabled {
+  opacity: 0.6;
+}
+
+.city-rename-error {
+  margin: 0;
+  font-size: 13px;
+  color: #f87171;
+}
+
+.city-rename-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.city-rename-save-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: #3b82f6;
+  color: #ffffff;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.city-rename-save-btn:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.city-rename-save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.city-rename-cancel-btn {
+  padding: 8px 16px;
+  border: 1px solid #555555;
+  border-radius: 4px;
+  background-color: transparent;
+  color: #cccccc;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.city-rename-cancel-btn:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
