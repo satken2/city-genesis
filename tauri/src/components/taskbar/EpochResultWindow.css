@@ -1,13 +1,14 @@
 /**
  * エポック実行結果ウィンドウのスタイル定義
  *
- * EpochConfirmWindow.css のトークン(色・余白・タイポ)を踏襲し、
- * 兄弟ウィンドウとして見た目の一貫性を保つ。
+ * 意匠はニューゲームウィンドウ(NewGameWindow.css)と揃える: 枠線・角丸・発光を持たない
+ * ベタ塗りの四角で、落ち影だけで面の高さを表現し、強調は左端の実線ブロックで示す。
+ * 配色・影は App.css の共通トークン(--flat-*)を参照する(直値を書かないこと)。
  *
  * レイアウト構成:
  * - ヘッダ: 左上に大きく日付
  * - クエストストリップ: 達成・失敗・達成間近のクエストチップ(横並び・折返し)
- * - メインエリア: 統計タイル(主役・空き領域を敷き詰める) + 建設状況 の2カラム
+ * - メインエリア: 統計タイル(上詰め・実寸) + 建設状況(高さいっぱい) の2カラム
  * - フッタ: 閉じるボタン
  *
  * 統計タイルは「水準の警戒色(タイル全体の色 = 絶対基準)」と
@@ -15,106 +16,12 @@
  */
 
 .epoch-result-root {
-  padding: 20px 24px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 14px;
   height: 100%;
   box-sizing: border-box;
-}
-
-/* ── クエストストリップ: 達成・失敗・達成間近のチップを横並びで表示 ── */
-.epoch-result-quest-strip {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.epoch-result-quest-chip {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.04);
-  max-width: 320px;
-}
-
-/* 達成チップ: tier色の縁取りで「お祝いが続く」ことを予告する */
-.epoch-result-quest-chip--completed {
-  border-color: rgba(240, 192, 64, 0.6);
-  background: rgba(240, 192, 64, 0.1);
-}
-
-.epoch-result-quest-chip--completed.epoch-result-quest-chip--silver {
-  border-color: rgba(192, 200, 216, 0.6);
-  background: rgba(192, 200, 216, 0.1);
-}
-
-.epoch-result-quest-chip--completed.epoch-result-quest-chip--bronze {
-  border-color: rgba(192, 136, 80, 0.6);
-  background: rgba(192, 136, 80, 0.1);
-}
-
-.epoch-result-quest-chip--failed {
-  border-color: rgba(232, 120, 120, 0.5);
-  background: rgba(232, 120, 120, 0.08);
-}
-
-.epoch-result-quest-chip--near {
-  border-color: rgba(74, 158, 255, 0.4);
-  background: rgba(74, 158, 255, 0.06);
-}
-
-.epoch-result-quest-chip-icon {
-  font-weight: 700;
-}
-
-.epoch-result-quest-chip--completed .epoch-result-quest-chip-icon {
-  color: #6cd47f;
-}
-
-.epoch-result-quest-chip--failed .epoch-result-quest-chip-icon {
-  color: #e87878;
-}
-
-.epoch-result-quest-chip-name {
-  color: #e5eef9;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.epoch-result-quest-chip-label {
-  color: #9db0c5;
-  font-size: 0.72rem;
-  white-space: nowrap;
-}
-
-/* 達成間近チップの進捗バー */
-.epoch-result-quest-chip-bar {
-  width: 70px;
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.08);
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.epoch-result-quest-chip-bar-fill {
-  display: block;
-  height: 100%;
-  border-radius: 3px;
-  background: #4a9eff;
-}
-
-.epoch-result-quest-chip-pct {
-  color: #8ba3bb;
-  font-size: 0.72rem;
-  flex-shrink: 0;
 }
 
 /* ── ヘッダ: 日付(左・大) */
@@ -134,21 +41,107 @@
 
 /* EpochDate コンポーネント(span.epoch-date)を大きく上書き表示する */
 .epoch-result-date-block .epoch-date {
-  font-size: 1.7rem;
-  font-weight: 700;
-  line-height: 1.1;
-  color: #e5eef9;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--flat-text);
 }
 
 .epoch-result-date-sub {
-  font-size: 0.78rem;
-  color: #8ba3bb;
+  font-size: 12px;
+  color: var(--flat-text-muted);
+}
+
+/* ── クエストストリップ: 達成・失敗・達成間近のチップを横並びで表示 ── */
+.epoch-result-quest-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* チップも枠なしのベタ塗り。種別は左端の実線ブロックで示す。 */
+.epoch-result-quest-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 14px;
+  font-size: 12px;
+  background-color: var(--flat-raised);
+  box-shadow: var(--flat-shadow-sm);
+  max-width: 320px;
+}
+
+.epoch-result-quest-chip--completed {
+  box-shadow: inset 4px 0 0 var(--flat-warn), var(--flat-shadow-sm);
+}
+
+.epoch-result-quest-chip--completed.epoch-result-quest-chip--silver {
+  box-shadow: inset 4px 0 0 #c0c8d8, var(--flat-shadow-sm);
+}
+
+.epoch-result-quest-chip--completed.epoch-result-quest-chip--bronze {
+  box-shadow: inset 4px 0 0 #c08850, var(--flat-shadow-sm);
+}
+
+.epoch-result-quest-chip--failed {
+  box-shadow: inset 4px 0 0 var(--flat-danger), var(--flat-shadow-sm);
+}
+
+.epoch-result-quest-chip--near {
+  box-shadow: inset 4px 0 0 var(--flat-accent), var(--flat-shadow-sm);
+}
+
+.epoch-result-quest-chip-icon {
+  font-weight: 600;
+}
+
+.epoch-result-quest-chip--completed .epoch-result-quest-chip-icon {
+  color: var(--flat-good);
+}
+
+.epoch-result-quest-chip--failed .epoch-result-quest-chip-icon {
+  color: var(--flat-danger);
+}
+
+.epoch-result-quest-chip-name {
+  color: var(--flat-text);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.epoch-result-quest-chip-label {
+  color: var(--flat-text-muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* 達成間近チップの進捗バー */
+.epoch-result-quest-chip-bar {
+  width: 70px;
+  height: 6px;
+  background-color: var(--flat-sunken);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.epoch-result-quest-chip-bar-fill {
+  display: block;
+  height: 100%;
+  background-color: var(--flat-accent);
+}
+
+.epoch-result-quest-chip-pct {
+  color: var(--flat-text-muted);
+  font-size: 11px;
+  flex-shrink: 0;
 }
 
 /* ── メインエリア: 統計タイル + 建設状況 の2カラム */
 .epoch-result-main {
   display: flex;
-  gap: 14px;
+  gap: 16px;
   flex: 1;
   min-height: 0;
 }
@@ -158,7 +151,7 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 .epoch-result-col-stats {
@@ -186,11 +179,10 @@
 .epoch-result-section {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
+  gap: 10px;
+  padding: 14px 16px;
+  background-color: var(--flat-surface);
+  box-shadow: var(--flat-shadow);
 }
 
 /* セクション見出し行(タイトル + 補助説明) */
@@ -201,23 +193,26 @@
   gap: 12px;
 }
 
+/* 見出しは左端の実線ブロックで段を示す(ニューゲームウィンドウと同じ規約) */
 .epoch-result-section-title {
   margin: 0;
-  font-size: 0.88rem;
+  padding: 2px 0 2px 10px;
+  font-size: 15px;
   font-weight: 600;
-  color: #b0c4de;
+  color: var(--flat-text);
+  box-shadow: inset 4px 0 0 var(--flat-accent);
 }
 
 .epoch-result-section-note {
-  font-size: 0.74rem;
-  color: #8ba3bb;
+  font-size: 11px;
+  color: var(--flat-text-muted);
 }
 
 .epoch-result-empty {
   margin: 0;
   padding: 4px 0;
-  font-size: 0.82rem;
-  color: #8ba3bb;
+  font-size: 13px;
+  color: var(--flat-text-muted);
 }
 
 /* ── 統計タイル: 実寸のまま並べる(高さを引き伸ばさない) ── */
@@ -239,10 +234,21 @@
   align-items: center;
   gap: 8px;
   padding: 6px 8px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 6px;
+  background-color: var(--flat-raised);
+  box-shadow: var(--flat-shadow-sm);
   min-width: 0;
+}
+
+/* 水準の警戒色(絶対基準)。面の色と左端の実線ブロックで、相対トレンド(矢印)とは
+   別軸の「今の水準そのものが良くない」ことを示す。 */
+.epoch-result-stat-tile-warn {
+  background-color: var(--flat-warn-surface);
+  box-shadow: inset 4px 0 0 var(--flat-warn), var(--flat-shadow-sm);
+}
+
+.epoch-result-stat-tile-danger {
+  background-color: var(--flat-danger-surface);
+  box-shadow: inset 4px 0 0 var(--flat-danger), var(--flat-shadow-sm);
 }
 
 .epoch-result-stat-icon {
@@ -260,21 +266,10 @@
   min-width: 0;
 }
 
-/* 水準の警戒色(絶対基準)。失業率が高い・充足度が低い・事故が多い等でタイル全体を着色する。 */
-.epoch-result-stat-tile-warn {
-  border-color: rgba(240, 192, 64, 0.5);
-  background: rgba(240, 192, 64, 0.09);
-}
-
-.epoch-result-stat-tile-danger {
-  border-color: rgba(232, 120, 120, 0.65);
-  background: rgba(232, 120, 120, 0.14);
-}
-
 .epoch-result-stat-label {
-  font-size: 0.7rem;
-  line-height: 1.2;
-  color: #8ba3bb;
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--flat-text-label);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -289,29 +284,29 @@
 }
 
 .epoch-result-stat-value {
-  font-size: 1.02rem;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: #e5eef9;
-  line-height: 1.1;
+  color: var(--flat-text);
+  line-height: 1.2;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .epoch-result-stat-tile-warn .epoch-result-stat-value {
-  color: #f0c040;
+  color: var(--flat-warn);
 }
 
 .epoch-result-stat-tile-danger .epoch-result-stat-value {
-  color: #ff9a9a;
+  color: var(--flat-danger);
 }
 
 /* 値に添える補助テキスト(人口増減・為替レートの変動幅など) */
 .epoch-result-stat-sub {
-  font-size: 0.68rem;
+  font-size: 11px;
   font-variant-numeric: tabular-nums;
-  color: #9db0c5;
+  color: var(--flat-text-muted);
   white-space: nowrap;
 }
 
@@ -321,15 +316,15 @@
 }
 
 .epoch-result-trend-good {
-  color: #6cd47f;
+  color: var(--flat-good);
 }
 
 .epoch-result-trend-bad {
-  color: #e87878;
+  color: var(--flat-danger);
 }
 
 .epoch-result-trend-neutral {
-  color: #8ba3bb;
+  color: var(--flat-text-muted);
 }
 
 /* ── 建設状況(道路・公共施設の統合リスト) */
@@ -344,63 +339,64 @@
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  font-size: 0.82rem;
+  font-size: 13px;
 }
 
+/* 罫線は引かず、ヘッダは面の色で区別する(枠なしの意匠) */
 .epoch-result-th {
   text-align: left;
-  padding: 4px 6px;
-  font-size: 0.76rem;
+  padding: 5px 6px;
+  font-size: 11px;
   font-weight: 600;
-  color: #8ba3bb;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--flat-text-label);
   position: sticky;
   top: 0;
-  background: #1a2230;
+  background-color: var(--flat-surface);
 }
 
-.epoch-result-th-name { width: 42%; }
+.epoch-result-th-name { width: 44%; }
 .epoch-result-th-status { width: 20%; }
-.epoch-result-th-progress { width: 38%; }
+.epoch-result-th-progress { width: 36%; }
+
+/* 行の区切りは罫線ではなく交互の面の色で示す */
+.epoch-result-tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.03);
+}
 
 .epoch-result-tr:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background-color: var(--flat-raised);
 }
 
 .epoch-result-td {
-  padding: 5px 6px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 6px;
   vertical-align: middle;
 }
 
 .epoch-result-td-name {
-  color: #e5eef9;
+  color: var(--flat-text-body);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* 道路と公共施設を1つのリストにまとめているため、種別をバッジで区別する */
+/* 道路と公共施設を1つのリストにまとめているため、種別をベタ塗りのラベルで区別する */
 .epoch-result-kind-badge {
   display: inline-block;
-  margin-right: 5px;
+  margin-right: 6px;
   padding: 1px 5px;
-  border-radius: 4px;
-  font-size: 0.68rem;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 500;
   vertical-align: middle;
 }
 
 .epoch-result-kind-badge-path {
-  color: #c8d8e8;
-  border: 1px solid rgba(200, 216, 232, 0.35);
-  background: rgba(200, 216, 232, 0.08);
+  background-color: #2c3646;
+  color: var(--flat-text-body);
 }
 
 .epoch-result-kind-badge-agent {
-  color: #9ec8ff;
-  border: 1px solid rgba(74, 158, 255, 0.45);
-  background: rgba(74, 158, 255, 0.1);
+  background-color: var(--flat-selected);
+  color: #ffffff;
 }
 
 .epoch-result-name-text {
@@ -419,9 +415,8 @@
 .epoch-result-status-badge {
   display: inline-block;
   padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 0.72rem;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 500;
   white-space: nowrap;
 }
 
@@ -433,14 +428,13 @@
   min-width: 0;
 }
 
-/* 進捗バー: 100%基準で before(薄)→after(濃) を重ね描き */
+/* 進捗バー: 沈んだ溝の上に before(暗)→after(アクセント) を重ね描き */
 .epoch-result-progress-bar {
   position: relative;
   flex: 1;
   height: 7px;
   min-width: 40px;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 4px;
+  background-color: var(--flat-sunken);
   overflow: hidden;
 }
 
@@ -449,7 +443,7 @@
   top: 0;
   left: 0;
   height: 100%;
-  background: rgba(139, 163, 187, 0.45);
+  background-color: #3a4759;
 }
 
 .epoch-result-progress-after {
@@ -457,26 +451,24 @@
   top: 0;
   left: 0;
   height: 100%;
-  background: linear-gradient(90deg, #1c71d8, #4a9eff);
+  background-color: var(--flat-accent);
 }
 
 .epoch-result-progress-text {
   flex: 0 0 auto;
-  font-size: 0.74rem;
+  font-size: 11px;
   font-variant-numeric: tabular-nums;
-  color: #c8d8e8;
+  color: var(--flat-text-body);
   white-space: nowrap;
 }
 
 .epoch-result-completed {
   flex: 0 0 auto;
   padding: 1px 5px;
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: #f0c040;
-  border: 1px solid rgba(240, 192, 64, 0.6);
-  border-radius: 4px;
-  background: rgba(240, 192, 64, 0.08);
+  font-size: 11px;
+  font-weight: 500;
+  background-color: var(--flat-warn);
+  color: #0e1520;
 }
 
 /* ── 閉じるボタン */
@@ -488,25 +480,26 @@
 }
 
 .epoch-result-btn {
-  padding: 8px 28px;
+  padding: 10px 28px;
   border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  border-radius: 0;
+  box-shadow: var(--flat-shadow);
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s, opacity 0.15s;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
 }
 
 .epoch-result-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
 .epoch-result-close {
-  background: #1c71d8;
-  color: #fff;
+  background-color: var(--flat-selected);
+  color: #ffffff;
 }
 
 .epoch-result-close:hover:not(:disabled) {
-  background: #2e7de8;
+  background-color: var(--flat-selected-hover);
 }

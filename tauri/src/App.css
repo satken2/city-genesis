@@ -10,6 +10,38 @@
   box-sizing: border-box;
 }
 
+/* =========================================================================
+ * フラット意匠の共通トークン
+ *
+ * トップメニュー系(ニューゲーム・セーブ/ロード・エポック結果)の意匠。
+ * 枠線・角丸・発光を使わず、ベタ塗りの四角と落ち影だけで面の高さを表す。
+ * 強調は「左端の実線ブロック」(box-shadow: inset 4px 0 0 アクセント色)で示す。
+ *
+ * 同じ配色を直値で持つ先行実装(NewGameWindow / SaveListWindow / SaveLoadWindow)が
+ * あるが値は同一。新しくこの意匠のウィンドウを作るときは直値ではなくここを参照し、
+ * 色を変えるときもここを直すこと。
+ * ========================================================================= */
+:root {
+  --flat-surface: #16202e;          /* パネル・カードの面 */
+  --flat-raised: #1b2635;           /* パネル上のタイル・ボタン */
+  --flat-raised-hover: #26374d;
+  --flat-sunken: #10161f;           /* 入力欄・進捗バーの溝 */
+  --flat-selected: #2c5687;         /* 選択中・主要ボタン */
+  --flat-selected-hover: #3a6ba8;
+  --flat-accent: #4ea1ff;
+  --flat-text: #e0e0e0;             /* 見出し・値 */
+  --flat-text-body: #c8d8e8;
+  --flat-text-label: #a4bccc;
+  --flat-text-muted: #6b8299;
+  --flat-good: #6cd47f;
+  --flat-warn: #f0c040;
+  --flat-warn-surface: #3a2f16;
+  --flat-danger: #ff9a9a;
+  --flat-danger-surface: #3d1f22;
+  --flat-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --flat-shadow-sm: 0 3px 8px rgba(0, 0, 0, 0.45);
+}
+
 html,
 body,
 #root {

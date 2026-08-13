@@ -50,6 +50,14 @@ WebView2(Chromium/Edge)の既定はコンテンツに重なるオーバーレイ
 
 標準プロパティの`scrollbar-width` / `scrollbar-color`は使わないこと。Chromiumではそれらが指定された要素で`::-webkit-scrollbar`の指定が無効化され、オーバーレイ表示に戻る場合がある。
 
+# フラット意匠の共通トークン(--flat-*)
+
+トップメニュー系のウィンドウ(ニューゲーム・セーブ/ロード・エポック結果)は**枠線・角丸・発光を使わず、ベタ塗りの四角と落ち影だけで面の高さを表す**意匠で統一している。強調は枠ではなく**左端の実線ブロック**(`box-shadow: inset 4px 0 0 var(--flat-accent)`)で示す。
+
+配色・影は`App.css`の`:root`にある`--flat-*`(面`--flat-surface`/`--flat-raised`/`--flat-sunken`、選択`--flat-selected`、文字`--flat-text*`、状態`--flat-good`/`--flat-warn`/`--flat-danger`とその面色、影`--flat-shadow`/`--flat-shadow-sm`)が唯一の正。**この意匠のUIを新設・改修するときは直値ではなくこの変数を参照すること**(色を変えるときもここを直す)。`NewGameWindow.css` / `SaveListWindow.css` / `SaveLoadWindow.css` は変数化前の実装で同じ値を直値で持っており、触る機会があれば変数へ寄せる。
+
+なお`App.css`の`.panel` / `button`など旧来のグローバルスタイルは角丸・枠線を持つ別系統なので、この意匠のウィンドウでは`border: none; border-radius: 0`で明示的に打ち消す。
+
 # 多言語対応
 
 全体的に、多言語対応できるように作ってね。
