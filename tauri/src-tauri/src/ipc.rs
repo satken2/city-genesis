@@ -533,6 +533,12 @@ pub async fn handle_incoming_message(
         "edit_parcel:select_parcel" => {
             let _ = app.emit("edit_parcel:select_parcel", envelope.payload);
         }
+        "edit_parcel:set_mode" => {
+            // 3Dビューのラジアルメニュー(Ctrl)で土地区画の作成モードが切り替わったことを
+            // 作成パネルへ中継する。作成モードの真実源はUnity側にあり、パネルは入力欄の構成と
+            // 選択済み表示をこれに合わせる(モード据え置きで届いた場合は「選択のリセット」の意味)。
+            let _ = app.emit("edit_parcel:set_mode", envelope.payload);
+        }
         "edit_parcel:update_shape" => {
             let _ = app.emit("edit_parcel:update_shape", envelope.payload);
         }

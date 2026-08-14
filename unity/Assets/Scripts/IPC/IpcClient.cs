@@ -42,6 +42,8 @@ public class IpcClient : MonoBehaviour
     // 既存建物コピー建設: コピー元建物の選択モード開始要求(UI→Unity)。
     public event Action OnBuildingConstructionPickSource;
     public event Action<string, float[][][], float[][]> OnEditParcelUpdatePreview;
+    public event Action OnEditParcelResetSelection;
+    public event Action<float, float> OnEditParcelSetRectParams;
     public event Action<int, float[][]> OnEditParcelStartShapeEdit;
     public event Action OnEditParcelCancelShapeEdit;
     // 形状編集の終了通知。UI側が PATCH /parcels/{id} の保存に成功した後に送信される
@@ -443,6 +445,24 @@ public class IpcClient : MonoBehaviour
                         float[][] originalPolygon = GetParamFloat2D(payload, "original_polygon");
                         Debug.Log($"IpcClient: edit_parcel:update_preview -> mode={mode}, previewCount={previewPolygons?.Length ?? 0}");
                         OnEditParcelUpdatePreview?.Invoke(mode, previewPolygons, originalPolygon);
+                    }
+                    break;
+
+                case "edit_parcel:reset_selection":
+                    {
+                        // 作成の確定後・クリア後に届く「選択だけ捨てて同じモードで続行」指示。
+                        // これがあるおかげで1回作るたびに作成モードを抜けずに済む(連続作成)。
+                        Debug.Log("IpcClient: edit_parcel:reset_selection");
+                        OnEditParcelResetSelection?.Invoke();
+                    }
+                    break;
+
+                case "edit_parcel:set_rect_params":
+                    {
+                        // 回転ドラッグ中のローカル矩形プレビューに使う幅・奥行き(パネルの入力値)。
+                        float width = GetParamFloat(payload, "width");
+                        float height = GetParamFloat(payload, "height");
+                        OnEditParcelSetRectParams?.Invoke(width, height);
                     }
                     break;
 
@@ -891,6 +911,22 @@ public class IpcClient : MonoBehaviour
         };
 
         SendEnvelope("edit_parcel:select_point", payload);
+    }
+
+    /// <summary>
+    /// edit_parcel:set_mode イベントを送信する。
+    /// 3Dビューのラジアルメニュー(ParcelEditControlMenu)で作成モードが切り替わったことをUIに通知する。
+    /// 作成モードの真実源はUnity側(ParcelEditorManager.CurrentMode)にあり、UIの作成パネルは
+    /// これを受けて入力欄の構成(幅・奥行き・平均面積など)と選択状態の表示を合わせる。
+    /// </summary>
+    public void EmitEditParcelSetMode(string mode)
+    {
+        var payload = new Dictionary<string, object>
+        {
+            ["mode"] = mode ?? ""
+        };
+
+        SendEnvelope("edit_parcel:set_mode", payload);
     }
 
     /// <summary>

@@ -108,11 +108,21 @@ public abstract class PolygonAreaEditManager : MonoBehaviour
         }
         UpdateOverlay();
 
-        if (InputUtil.KeyWasPressedThisFrame(Key.Escape))
+        if (CancelOnEscape && InputUtil.KeyWasPressedThisFrame(Key.Escape))
         {
             CancelEditMode();
         }
     }
+
+    /// <summary>
+    /// Escキーを「編集キャンセル＝通常入力モードへ復帰」として扱うかどうか。
+    /// 土地区画の任意ポリゴン作成のように、Escの意味(＝作成モードは維持したまま
+    /// 選択をリセット)を上位のマネージャが持つ場合は false を返させる。
+    /// true のまま両方が処理すると、上位が選択を作り直した直後にここが
+    /// `InputModePreset.ALL_NORMAL` へ戻してしまい、編集モードに入ったまま
+    /// クリックが一切効かない状態になる。
+    /// </summary>
+    protected virtual bool CancelOnEscape => true;
 
     // =====================================================================
     // Canvas / Overlay セットアップ

@@ -300,7 +300,7 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 | `STATE_EDIT_PATH` | `ROAD_CONSTRUCTION` | `RoadPlanManager.InitializeRoadPlacement` |
 | `STATE_EDIT_BUILDING` | `BUILDING_CONSTRUCTION` | `BuildingPlanManager` の初期化 |
 | `STATE_EDIT_ZONE` | `ZONE_EDIT` | `ZoneEditContext.EnterCreateMode` または `EnterEditMode`（道路のみ地区色分け表示にし、地区枠線を強調） |
-| `STATE_EDIT_PARCEL` | プロパティに応じて切替 | `ParcelEditorManager` の初期化 |
+| `STATE_EDIT_PARCEL` | 作成方法に応じて切替 | `ParcelEditorManager.EnterCreationMode`（作成方法の切り替えはUnity側のCtrlラジアルメニュー`ParcelEditControlMenu`が担い、プリセットも同メソッドが切り替える） |
 | `STATE_EDIT_PARCEL_SHAPE` | `PARCEL_SHAPE_EDIT` | `ParcelShapeEditManager.InitializeEditMode` |
 | `STATE_UNLOCK_CELL` | `UNLOCK_CELL` | — |
 | `STATE_EDIT_PROP` | `PROP_PLACEMENT` | `PropPlacementManager` の初期化（個別配置／範囲散布） |
@@ -355,3 +355,26 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
   `IsSessionActive` をポーリングしてHUDの登録/解除とCtrl検知を行う。
   曲線モードのトグル結果は `edit_path:update_shape` の `is_curved` としてUIへ逆流し、
   UI側の確定送信（`curved`）・形状プレビュー・コスト見積りが追従する。
+
+同じ仕組みを地区編集（`ZoneEditControlMenu`。7章）と土地区画作成（`ParcelEditControlMenu`。12章）でも使う。
+
+## 12. 土地区画作成の操作モデル
+
+土地区画作成モード（`STATE_EDIT_PARCEL`）は「作成方法の切り替えは3Dビュー、数値と確定はパネル」という分担になっている。
+作成方法の真実源は `ParcelEditorManager.CurrentMode` で、`ParcelEditControlMenu`（Ctrlラジアル）で切り替える。
+
+| 作成方法 | 3Dビューでの操作 |
+|---------|----------------|
+| 単一区画（`empty_area`） | 地点をクリック。続けてドラッグすると角度を変えられる |
+| 道路沿いに作成（`along_path`） | 街路をクリック |
+| タイル状（`tile`）／ランダム（`random`） | 地点をクリック（矩形の探索範囲。ドラッグで角度） |
+| ブロック一括（`block`） | 道路に囲まれたブロック内の地点をクリック |
+| 任意ポリゴン（`manual`） | 左クリックで頂点を打ち、右クリックで仮確定（以降は頂点ドラッグで調整） |
+| 矩形分割（`split_rectangle`）／ランダム分割（`split_random`） | 分割する既存区画をクリック |
+
+- 作成方法を切り替えると入力プリセットと選択状態がその場でリセットされ、`edit_parcel:set_mode` でパネルへ通知される。
+- **Esc は選択のリセット**で、作成モードからは抜けない（同じ方法で選び直せる）。パネル側の選択表示も
+  `edit_parcel:set_mode`（モード据え置き）で一緒にリセットされる。
+- **確定してもモードから抜けない**。パネルの確定後に届く `edit_parcel:reset_selection` で選択だけを捨て、
+  そのまま次の地点／道路／区画をクリックして連続作成できる。
+- カーソル脇のHUDには現在の作成方法と次の操作（未選択なら「地点をクリック」等、選択済みなら「パネルで確定」）を出す。

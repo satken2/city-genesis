@@ -68,6 +68,10 @@ HUDは**3枚の専用Tauriウィンドウ**に分かれている。Unityの3Dビ
 
 `ParcelDetailPanel`の基本情報の直後に、区画固有の環境スコアを`common/Meter`で4本表示する。データ源は**都市全体のヒートマップAPI(`/city/noise`等)ではなく`GET /api/v1/parcels/{id}/environment`**(詳細パネルのたびに全区画分を取得しないための単体取得口)。返る値はいずれも`[0,1]`の**悪さ度合い**(0=理想、1=最悪)なので、大気汚染・騒音・犯罪は値そのままで`polarity="negative"`、**日照だけは「影の時間割合」なので`1 - value`に反転して**日当たりの良さとして描く。エポック未実行だと全要素nullで返るため、その場合はメーターを出さず注記を出す。
 
+### 土地区画作成パネル(parcel/ParcelCreationPanel)の作成方法はUnity側が真実源
+
+**ウィンドウを開いた時点で`STATE_EDIT_PARCEL`(既定=`empty_area`)へ入る**(3DビューのCtrlラジアルメニューは作成モード中しか開かないため、タイルを押すまでモードに入らないと「ホイールが出ない」)。作成方法の真実源はUnity(`ParcelEditorManager.CurrentMode`)で、**Unity起点の切り替えだけが`edit_parcel:set_mode`で届く**(パネルのタイルは`world:change_state`で依頼しつつ楽観的に自分の状態も更新する。両方向で通知すると往復ループになる)。同じモードで`set_mode`が届いたら「選択のリセット」(3DビューでEsc/同じ方法を選び直した)の意味で、選択状態だけ捨てて幅・奥行き等の入力値は保持する(モードが変わったときだけ`SIZE_INPUT_PRESETS`の初期値へ戻す——モードによって幅/奥行きの意味と桁が違うため)。**確定してもモードから抜けない**: 成功後は`STATE_NORMAL`を送らず、`edit_parcel:reset_selection`で3D側の選択も捨てて連続作成に戻る(パネルを閉じたときだけ`STATE_NORMAL`)。地点指定系では幅・奥行きを`edit_parcel:set_rect_params`でUnityへ送り、角度ドラッグ中のローカル矩形プレビューを入力値に合わせる。
+
 ### 道路建設パネル(path/)の設定系はUnity移管済み
 
 曲線/直線・吸着5種の設定UIは`PathConstructionPanel`に**無い**(Unity側のCtrlラジアルメニュー・カーソルHUDが担う)。復活させないこと。曲線モード(`usePathConstruction`の`curveMode`)は`edit_path:update_shape`の`is_curved`受信が唯一の書き込み元で、確定送信の`curved`・コスト見積り・形状プレビューがこれを参照する。**標高・盛土のステッパーはパネルに残す**(既存ノードを選んで数値で微調整する用途のため)。表示値は`edit_path:select_node`受信で選択ノード(node_id=-1は次回配置値)の値に同期し、ステッパー変更を`sendEditPathChangeNode`/`sendEditPathChangeEmbankment`でUnityへ送り返す双方向同期(Unityのキー操作でもHUD・パネル双方に反映される)。パネルが持つのはカテゴリ/バリアント選択・標高/盛土・ホーム設置側・グリッド設定(サイズ/角度。表示状態はUnityの`view:grid_toggled`受信で同期)・形状プレビュー・コスト・確定/キャンセル。軌道複線(線路数≥2)は確定時にUI側が中心線を平行な単線パス群へ展開して一括POSTするが、Unityの3Dプレビューにも複線が見えるよう、各線の横オフセット列を`STATE_EDIT_PATH`の`lateral_offsets` params(初期値)と`edit_path:change_lateral_offsets`(線路数変更時の逐次通知。配置中ノードは維持される)でUnityへ渡す(`usePathConstruction`の`lateralOffsetsForVariant`とrailComponents監視effect)。

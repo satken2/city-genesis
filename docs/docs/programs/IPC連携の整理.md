@@ -82,6 +82,9 @@ Offset  8: Ring buffer data (8184 bytes)
 | `edit_parcel:select_point`      | `graphic -> ui`  | 土地区画作成モードにおいて、3Dビュー上の地点がクリックされた       |
 | `edit_parcel:select_path`       | `graphic -> ui`  | 土地区画作成モードにおいて、パスが選択された                |
 | `edit_parcel:select_parcel`     | `graphic -> ui`  | 土地区画作成モードにおいて、既存土地区画が選択された            |
+| `edit_parcel:set_mode`          | `graphic -> ui`  | 土地区画作成モードにおいて、3DビューのCtrlラジアルメニューで作成方法（`mode`＝`empty_area` / `along_path` / `tile` / `random` / `block` / `manual` / `split_rectangle` / `split_random`）が切り替わった。**作成方法の真実源はUnity側**で、UIの作成パネルはこれを受けて入力欄の構成と選択済み表示を合わせる。**現在と同じ `mode` で届いた場合は「選択のリセット」**（3DビューでEscを押した／同じ方法を選び直した）を意味し、パネルは選択状態だけを捨てて幅・奥行き等の入力値は保持する。パネルのタイルから切り替えたときは `world:change_state` で依頼するためこのイベントは返らない |
+| `edit_parcel:reset_selection`   | `ui -> graphic`  | 土地区画作成モードにおいて、作成方法は維持したまま3Dビュー側の選択・プレビュー・描きかけのポリゴンだけを捨てる。UIが作成を確定した直後と「クリア」ボタンで送る。**確定してもモードから抜けないため**、ユーザーはパネルへ戻らずそのまま3Dビューをクリックして連続作成できる。確定・クリアのボタンはパネル側にありフォーカスがパネルへ移っているので、Unityは受信時に自分のウィンドウを前面へ戻す |
+| `edit_parcel:set_rect_params`   | `ui -> graphic`  | 土地区画作成モード（地点指定系）において、矩形の `width` / `height` をUnityへ同期する。用途は「地点を選んだあとの角度ドラッグ中にUnityがローカル計算で描く矩形プレビュー」をパネルの入力値と一致させることだけで、確定形状は `edit_parcel:update_preview` が正 |
 | `edit_parcel:start_shape_edit`  | `ui -> graphic`  | 土地区画形状編集モードを開始する（parcel_id, polygon）       |
 | `edit_parcel:cancel_shape_edit` | `ui -> graphic`  | 土地区画形状編集モードをキャンセルして通常モードに戻す          |
 | `edit_parcel:finish_shape_edit` | `ui -> graphic`  | 土地区画形状編集モードを終了する。UI側が `PATCH /api/v1/parcels/{id}` でポリゴンの保存に成功した後に送信され、Unity側の編集状態をリセットしてデータをリロードする（`edit_path:finish` と同じ役割） |

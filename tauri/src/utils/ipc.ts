@@ -271,6 +271,39 @@ export async function sendEditParcelUpdatePreview(
 }
 
 /**
+ * `edit_parcel:reset_selection`
+ * 土地区画作成モードにおいて、作成モードは維持したまま3Dビュー側の選択とプレビューだけを捨てる。
+ *
+ * 作成を確定した直後・「クリア」ボタン押下時に送る。**確定してもモードから抜けない**ため、
+ * ユーザーはパネルに戻らずそのまま3Dビューをクリックし続けて次の区画を作れる
+ * （作成モードの切り替え自体はUnity側のCtrlラジアルメニューが行う）。
+ */
+export async function sendEditParcelResetSelection(): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "parcel_creation",
+    entity: null,
+    action: "edit_parcel:reset_selection",
+    params: {},
+  });
+}
+
+/**
+ * `edit_parcel:set_rect_params`
+ * 土地区画作成モードの矩形パラメータ（幅・奥行き）をUnityへ送る。
+ *
+ * 用途は「地点を選んだあとの角度ドラッグ中に3Dビューが描くローカル矩形プレビュー」を
+ * パネルの入力値に合わせることだけで、確定形状はバックエンドのプレビュー（`edit_parcel:update_preview`）が正。
+ */
+export async function sendEditParcelSetRectParams(width: number, height: number): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "parcel_creation",
+    entity: null,
+    action: "edit_parcel:set_rect_params",
+    params: { width, height },
+  });
+}
+
+/**
  * `edit_parcel:start_shape_edit`
  * 土地区画形状編集モードを開始する。
  * Unity側で指定された土地区画の頂点を編集できる状態に遷移する。
@@ -862,6 +895,17 @@ export const IPC_EVENT_EDIT_PARCEL_SELECT_PATH = "edit_parcel:select_path";
 
 /** 土地区画作成モードにおいて、既存土地区画が選択された (split 系用) */
 export const IPC_EVENT_EDIT_PARCEL_SELECT_PARCEL = "edit_parcel:select_parcel";
+
+/**
+ * 土地区画作成モードにおいて、3Dビューのラジアルメニュー(Ctrl)で作成モードが切り替わった (Unity → UI)。
+ * ペイロードは { mode }（`empty_area` / `along_path` / … / `split_random`）。
+ *
+ * 作成モードの真実源はUnity側(`ParcelEditorManager.CurrentMode`)で、作成パネルはこれを受けて
+ * 入力欄の構成と選択済み表示を合わせる。**現在と同じモードで届いた場合は「選択のリセット」**
+ * （3DビューでEscを押した／同じモードを選び直した）を意味し、パネルは選択状態だけを捨てて
+ * 幅・奥行きなどの入力値は保持する。
+ */
+export const IPC_EVENT_EDIT_PARCEL_SET_MODE = "edit_parcel:set_mode";
 
 /** 土地区画作成モード（empty_area）において、3Dビュー上で矩形の角度が変更された */
 export const IPC_EVENT_EDIT_PARCEL_UPDATE_ROTATION = "edit_parcel:update_rotation";

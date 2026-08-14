@@ -641,21 +641,15 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
 
     private void Update()
     {
-        // パーセルエディターが有効で、いずれかの選択モードが有効な場合のEscキー処理
-        if (parcelEditorManager != null && parcelEditorManager.enabled)
+        // Escキーによる選択のリセット自体は ParcelEditorManager.Update が行う
+        // (作成モードからは抜けず、同じモードで選び直せる)。
+        // ここは地形ホバーで出しているマーカーを消すだけ。このコンポーネントは
+        // 地形タイルごとに付くため、条件は軽く保つこと。
+        if (parcelEditorManager != null
+            && parcelEditorManager.IsActive
+            && InputUtil.KeyWasPressedThisFrame(Key.Escape))
         {
-            if (parcelEditorManager.IsPointSelectionMode() || 
-                parcelEditorManager.IsPathSelectionMode() || 
-                parcelEditorManager.IsParcelSelectionMode())
-            {
-                // Escキーでキャンセル
-                if (InputUtil.KeyWasPressedThisFrame(Key.Escape))
-                {
-                    parcelEditorManager.ClearWorldSelectionState();
-                    parcelEditorManager.ClearPreview();
-                    HideMarker();
-                }
-            }
+            HideMarker();
         }
     }
 
