@@ -19,9 +19,12 @@ public class IpcStateCoordinator : MonoBehaviour
         {
             IpcClient.Instance.OnWorldChangeState += HandleChangeState;
             IpcClient.Instance.OnEditParcelUpdatePreview += HandleEditParcelUpdatePreview;
+            IpcClient.Instance.OnEditParcelResetSelection += HandleEditParcelResetSelection;
+            IpcClient.Instance.OnEditParcelSetRectParams += HandleEditParcelSetRectParams;
             IpcClient.Instance.OnEditParcelStartShapeEdit += HandleEditParcelStartShapeEdit;
             IpcClient.Instance.OnEditParcelCancelShapeEdit += HandleEditParcelCancelShapeEdit;
             IpcClient.Instance.OnEditParcelFinishShapeEdit += HandleEditParcelFinishShapeEdit;
+            IpcClient.Instance.OnEditZoneFinishMerge += HandleEditZoneFinishMerge;
             IpcClient.Instance.OnSessionReset += HandleSessionReset;
             IpcClient.Instance.OnSessionReload += HandleSessionReload;
             IpcClient.Instance.OnSessionForceReload += HandleSessionForceReload;
@@ -41,9 +44,12 @@ public class IpcStateCoordinator : MonoBehaviour
         {
             IpcClient.Instance.OnWorldChangeState -= HandleChangeState;
             IpcClient.Instance.OnEditParcelUpdatePreview -= HandleEditParcelUpdatePreview;
+            IpcClient.Instance.OnEditParcelResetSelection -= HandleEditParcelResetSelection;
+            IpcClient.Instance.OnEditParcelSetRectParams -= HandleEditParcelSetRectParams;
             IpcClient.Instance.OnEditParcelStartShapeEdit -= HandleEditParcelStartShapeEdit;
             IpcClient.Instance.OnEditParcelCancelShapeEdit -= HandleEditParcelCancelShapeEdit;
             IpcClient.Instance.OnEditParcelFinishShapeEdit -= HandleEditParcelFinishShapeEdit;
+            IpcClient.Instance.OnEditZoneFinishMerge -= HandleEditZoneFinishMerge;
             IpcClient.Instance.OnSessionReset -= HandleSessionReset;
             IpcClient.Instance.OnSessionReload -= HandleSessionReload;
             IpcClient.Instance.OnSessionForceReload -= HandleSessionForceReload;
@@ -103,6 +109,14 @@ public class IpcStateCoordinator : MonoBehaviour
         if (state != "STATE_EDIT_ZONE" && ZoneEditContext.Instance != null && ZoneEditContext.Instance.IsActive)
         {
             ZoneEditContext.Instance.Exit();
+        }
+
+        // 土地区画作成モードから他ステートへ直接遷移した場合にも作成モードを終了させる。
+        // これを怠ると ParcelEditControlMenu(Ctrlラジアル)とカーソルHUDが別モードでも生き残る
+        // (STATE_NORMAL 経由なら ApplyStateNormal 内でも終了するが冪等なので問題ない)。
+        if (state != "STATE_EDIT_PARCEL" && ParcelEditorManager.Instance != null && ParcelEditorManager.Instance.IsActive)
+        {
+            ParcelEditorManager.Instance.ExitCreationMode();
         }
 
         // パス結合/分割の選択モードから別モードへ直接遷移した場合にも、候補パスの着色と
@@ -290,11 +304,11 @@ public class IpcStateCoordinator : MonoBehaviour
             buildingPlanManager.SetBuildingMode(false);
         }
 
-        // 土地区画作成プレビューをクリア
+        // 土地区画作成モードを終了する(選択・プレビュー・Ctrlラジアル/カーソルHUDを片付ける)
         var parcelEditorManager = FindAnyObjectByType<ParcelEditorManager>();
         if (parcelEditorManager != null)
         {
-            parcelEditorManager.ClearWorldSelectionState();
+            parcelEditorManager.ExitCreationMode();
         }
 
         // 接続点編集モードを終了する（マーカーは読み取り専用ハイライトに戻す）。
@@ -679,12 +693,15 @@ public class IpcStateCoordinator : MonoBehaviour
             InputSystemManager.Instance.SetModePreset(InputModePreset.ZONE_EDIT);
         }
 
-        // VisualMode: 地区色分け表示。計画中表示・公共施設ハイライトは編集の邪魔になるためOFF
+        // VisualMode: 地区編集の主役は「道路の地区色」と「地区の枠線」の2つだけにする。
+        // 区画・建物まで地区色で塗ると画面が地区色で埋まって道路の所属変化が読み取れなくなるため、
+        // どちらも通常表示のままにする(地区の広がりは枠線が示す)。
+        // 計画中表示・公共施設ハイライトは編集の邪魔になるためOFF。
         if (VisualModeHandler.Instance != null)
         {
-            VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualModeParcel.ZONE_COLOR);
+            VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_NORMAL);
             VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualModePath.ZONE_COLOR);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualModeBuilding.ZONE_COLOR);
+            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
             VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_NORMAL);
             VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.NONE);
             VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.NONE);
@@ -693,46 +710,16 @@ public class IpcStateCoordinator : MonoBehaviour
 
     /// <summary>
     /// STATE_EDIT_PARCEL: 土地区画作成モード
-    /// ipcParams には UI側で選択された parcel_creation_mode が含まれる。
-    /// モードに応じて InputModePreset を切り替える。
+    /// ipcParams には UI側で選択された parcel_creation_mode が含まれる(省略時は既定モード)。
+    /// 以後の作成方法の切り替えは3DビューのCtrlラジアルメニュー(ParcelEditControlMenu)が行い、
+    /// このステートは「作成モードに入る」ことと表示モードの設定だけを担う。
     /// </summary>
     private void ApplyStateEditParcel(Dictionary<string, object> ipcParams)
     {
-        string creationMode = "empty_area";
+        string creationMode = ParcelEditorManager.DefaultMode;
         if (ipcParams != null && ipcParams.TryGetValue("parcel_creation_mode", out object modeObj) && modeObj != null)
         {
             creationMode = modeObj.ToString();
-        }
-
-        int preset;
-        switch (creationMode)
-        {
-            case "empty_area":
-            case "tile":
-            case "random":
-            case "block":
-                preset = InputModePreset.PARCEL_CREATION_POINT;
-                break;
-            case "along_path":
-                preset = InputModePreset.PARCEL_CREATION_PATH;
-                break;
-            case "split_rectangle":
-            case "split_random":
-            case "split_perimeter":
-                preset = InputModePreset.PARCEL_CREATION_SPLIT;
-                break;
-            case "manual":
-                preset = InputModePreset.PARCEL_CREATION_POLYGON;
-                break;
-            default:
-                preset = InputModePreset.PARCEL_CREATION_POINT;
-                break;
-        }
-
-        // InputMode: 土地区画作成プリセット
-        if (InputSystemManager.Instance != null)
-        {
-            InputSystemManager.Instance.SetModePreset(preset);
         }
 
         // VisualMode: 計画表示（Parcelは境界線表示、Path/Buildingは計画表示）
@@ -746,57 +733,28 @@ public class IpcStateCoordinator : MonoBehaviour
             VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
         }
 
-        // ParcelEditorManagerにモードを通知
+        // 作成モードの適用(入力プリセットの切り替え・選択状態のリセット・任意ポリゴンの初期化)は
+        // 真実源である ParcelEditorManager に集約されている。Unity側のラジアルメニューからの
+        // 切り替えとまったく同じ経路を通す(片方だけ直す実装差を作らないため)。
         var parcelEditorManager = FindAnyObjectByType<ParcelEditorManager>();
-        if (parcelEditorManager != null)
+        if (parcelEditorManager == null)
         {
-            switch (creationMode)
-            {
-                case "empty_area":
-                case "tile":
-                case "random":
-                case "block":
-                    parcelEditorManager.EnablePointSelectionMode();
-                    break;
-                case "along_path":
-                    parcelEditorManager.EnablePathSelectionMode();
-                    break;
-                case "split_rectangle":
-                case "split_random":
-                case "split_perimeter":
-                    parcelEditorManager.EnableParcelSelectionMode();
-                    break;
-                case "manual":
-                    // 任意ポリゴン作成では選択系の ParcelEditorManager は使わないため無効化する。
-                    parcelEditorManager.ClearWorldSelectionState();
-                    break;
-            }
+            Debug.LogError("IpcStateCoordinator: ParcelEditorManagerが見つかりません");
+            return;
         }
+        parcelEditorManager.EnterCreationMode(creationMode);
 
-        // 任意ポリゴン作成モードでは、頂点配置・ドラッグでポリゴンを組み立てる
-        // ParcelAreaEditManager を新規作成モードで初期化する(無ければ動的生成。資源エリア編集と同じ枠組み)。
-        // それ以外のモードに切り替わったときは、STATE_NORMAL を経由せず直接モード変更される
-        // (作成パネルでのモード切替)ケースに備え、残っている任意ポリゴンのオーバーレイを消す。
-        if (creationMode == "manual")
+        // 作成モード切替のCtrlラジアルメニュー+カーソルHUDのドライバを同じGameObjectに常駐させる
+        // (地区編集の ZoneEditControlMenu と同じ構成。ドライバは IsActive をポーリングして
+        //  自律的に開閉するため、ここでは初期化のみ行えばよい)。
+        var controlMenu = parcelEditorManager.GetComponent<ParcelEditControlMenu>();
+        if (controlMenu == null)
         {
-            var parcelAreaEditManager = FindAnyObjectByType<ParcelAreaEditManager>();
-            if (parcelAreaEditManager == null)
-            {
-                var go = new GameObject("ParcelAreaEditManager");
-                parcelAreaEditManager = go.AddComponent<ParcelAreaEditManager>();
-            }
-            parcelAreaEditManager.InitializeCreateMode();
+            controlMenu = parcelEditorManager.gameObject.AddComponent<ParcelEditControlMenu>();
         }
-        else
-        {
-            var parcelAreaEditManager = FindAnyObjectByType<ParcelAreaEditManager>();
-            if (parcelAreaEditManager != null)
-            {
-                parcelAreaEditManager.FinishEditMode();
-            }
-        }
+        controlMenu.Initialize(parcelEditorManager);
 
-        Debug.Log($"IpcStateCoordinator: 土地区画作成モード -> {creationMode} (preset={preset})");
+        Debug.Log($"IpcStateCoordinator: 土地区画作成モード -> {creationMode}");
     }
 
     /// <summary>
@@ -1178,6 +1136,17 @@ public class IpcStateCoordinator : MonoBehaviour
     }
 
     /// <summary>
+    /// edit_zone:finish_merge: UI側の地区統合の確定/取消の結果通知。
+    /// merged=true なら UI が POST /zones/{id}/merge を送信済みなので、地区・道路を再取得する
+    /// (地区編集モードはそのまま継続する。統合はモードを抜ける操作ではないため)。
+    /// </summary>
+    private void HandleEditZoneFinishMerge(bool merged)
+    {
+        Debug.Log($"IpcStateCoordinator: 地区統合の結果を受信 merged={merged}");
+        ZoneEditContext.Instance?.OnMergeFinished(merged);
+    }
+
+    /// <summary>
     /// STATE_UNLOCK_CELL: 地形セル開放モード
     /// 地形クリックでセルを選択し、UI側で開放確定を行う。
     /// </summary>
@@ -1318,6 +1287,35 @@ public class IpcStateCoordinator : MonoBehaviour
         }
 
         Debug.Log($"IpcStateCoordinator: プレビュー描画 -> mode={mode}, parcels={parcelPolygons.Count}");
+    }
+
+    /// <summary>
+    /// edit_parcel:reset_selection: 作成モードを維持したまま選択とプレビューだけを捨てる。
+    /// UIが作成を確定した直後・「クリア」ボタン押下時に送られ、3Dビューをそのまま
+    /// クリックし続けて次の区画を作れるようにする(1回作るたびにモードを抜けないための要)。
+    /// </summary>
+    private void HandleEditParcelResetSelection()
+    {
+        var parcelEditorManager = FindAnyObjectByType<ParcelEditorManager>();
+        if (parcelEditorManager == null) return;
+        parcelEditorManager.ResetSelection();
+
+        // 確定・クリアのボタンはTauriのパネル側にあるため、押した時点でフォーカスはパネルにある。
+        // 次の操作は3Dビューのクリックなので、ステート遷移時と同じくUnityを前面へ戻して
+        // 「押した直後にそのままクリックで次を作る」流れを切らさない。
+        WindowUtil.BringToForeground();
+    }
+
+    /// <summary>
+    /// edit_parcel:set_rect_params: 作成パネルの幅・奥行きの入力値を受け取る。
+    /// 角度ドラッグ中のローカル矩形プレビューをパネルの設定値に合わせるためだけに使う
+    /// (確定形状はバックエンドのプレビューが正)。
+    /// </summary>
+    private void HandleEditParcelSetRectParams(float width, float height)
+    {
+        var parcelEditorManager = FindAnyObjectByType<ParcelEditorManager>();
+        if (parcelEditorManager == null) return;
+        parcelEditorManager.SetRectPreviewSize(width, height);
     }
 
     /// <summary>

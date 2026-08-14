@@ -30,6 +30,10 @@
     "cancelEdit": "Cancel",
     "selectedPaths": "Paths selected",
     "paintedPaths": "Painted",
-    "noPathsYet": "Select roads in the 3D view to define the district"
+    "noPathsYet": "Select roads in the 3D view to define the district",
+    "mergeConfirm": "Merge \"{{source}}\" into \"{{target}}\". The source district disappears along with its regulation settings.",
+    "mergeAction": "Merge",
+    "mergeFailed": "Failed to merge districts (districts that are not adjacent cannot be merged)",
+    "mergeNoRequest": "No district selected to merge"
   }
 }

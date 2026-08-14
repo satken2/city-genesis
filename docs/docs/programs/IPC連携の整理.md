@@ -74,12 +74,17 @@ Offset  8: Ring buffer data (8184 bytes)
 | `edit_building:update_floors`   | `ui -> graphic`  | 建物建設モードにおいて、建物の階数を変更した                |
 | `edit_building:update_visual_variant` | `ui -> graphic` | 建物建設モードにおいて、外観バリアント(visual_variant1/2/3)を変更した |
 | `edit_building:update_effect_range` | `ui -> graphic` | 建物建設モードにおいて、選択中インフラ供給施設(変電所・下水処理場・電波塔など)の効果範囲を3D上に可視化する。`region`(効果範囲の領域。円 `{"type":"circle","center":[x,z],"radius":r}` または不定形 `{"type":"polygon","polygons":[{"exterior":[[x,z]...],"holes":[...]}...]}`。null のときは表示クリア)を含む。値はバックエンドの `POST /api/v1/buildings/preview-effect-range` から取得する。効果範囲は面(フィル)と境界線で可視化し、効果範囲内の土地区画のハイライトは行わない |
-| `edit_zone:selected`            | `graphic -> ui`  | 地区編集モードで選択中地区が変化した（右クリック選択 / Shift+左クリック新規作成 / 選択解除）。`zone_id`=0 は選択なし |
+| `edit_zone:selected`            | `graphic -> ui`  | 地区編集モードで選択中地区（拡張先・統合先）が変化した（右クリック選択 / 新規作成後の自動選択 / 選択解除）。`zone_id`=0 は選択なし |
+| `edit_zone:request_merge`       | `graphic -> ui`  | 地区編集モードの「地区の統合」で統合元と統合先が決まった（`target_zone_id`, `target_zone_name`, `source_zone_id`, `source_zone_name`）。地区がひとつ消える不可逆操作のためUnityは送信せず、常駐する `icon-panel` ウィンドウがこれを受けて確定専用の小ウィンドウ（`zone_merge`）を開き、そこの確定ボタンでUIが `POST /api/v1/zones/{id}/merge` を送る |
+| `edit_zone:finish_merge`        | `ui -> graphic`  | 地区統合の確定／取消の結果（`merged`=1/0）。1 のときUIは送信済みで、Unityは地区・道路を再取得して統合結果を反映する。0 は取消で確定待ちを解除するだけ（確定ウィンドウが×で閉じられたときもRust側が 0 を送る）。いずれも地区編集モードは継続する |
 | `input:query_modes`             | `ui -> graphic`  | デバッグ用: 各オブジェクト種別の入力/表示モードを問い合わせる       |
 | `input:current_modes`           | `graphic -> ui`  | `input:query_modes`への応答、現在の入力/表示モード情報を返す      |
 | `edit_parcel:select_point`      | `graphic -> ui`  | 土地区画作成モードにおいて、3Dビュー上の地点がクリックされた       |
 | `edit_parcel:select_path`       | `graphic -> ui`  | 土地区画作成モードにおいて、パスが選択された                |
 | `edit_parcel:select_parcel`     | `graphic -> ui`  | 土地区画作成モードにおいて、既存土地区画が選択された            |
+| `edit_parcel:set_mode`          | `graphic -> ui`  | 土地区画作成モードにおいて、3DビューのCtrlラジアルメニューで作成方法（`mode`＝`empty_area` / `along_path` / `tile` / `random` / `block` / `manual` / `split_rectangle` / `split_random`）が切り替わった。**作成方法の真実源はUnity側**で、UIの作成パネルはこれを受けて入力欄の構成と選択済み表示を合わせる。**現在と同じ `mode` で届いた場合は「選択のリセット」**（3DビューでEscを押した／同じ方法を選び直した）を意味し、パネルは選択状態だけを捨てて幅・奥行き等の入力値は保持する。パネルのタイルから切り替えたときは `world:change_state` で依頼するためこのイベントは返らない |
+| `edit_parcel:reset_selection`   | `ui -> graphic`  | 土地区画作成モードにおいて、作成方法は維持したまま3Dビュー側の選択・プレビュー・描きかけのポリゴンだけを捨てる。UIが作成を確定した直後と「クリア」ボタンで送る。**確定してもモードから抜けないため**、ユーザーはパネルへ戻らずそのまま3Dビューをクリックして連続作成できる。確定・クリアのボタンはパネル側にありフォーカスがパネルへ移っているので、Unityは受信時に自分のウィンドウを前面へ戻す |
+| `edit_parcel:set_rect_params`   | `ui -> graphic`  | 土地区画作成モード（地点指定系）において、矩形の `width` / `height` をUnityへ同期する。用途は「地点を選んだあとの角度ドラッグ中にUnityがローカル計算で描く矩形プレビュー」をパネルの入力値と一致させることだけで、確定形状は `edit_parcel:update_preview` が正 |
 | `edit_parcel:start_shape_edit`  | `ui -> graphic`  | 土地区画形状編集モードを開始する（parcel_id, polygon）       |
 | `edit_parcel:cancel_shape_edit` | `ui -> graphic`  | 土地区画形状編集モードをキャンセルして通常モードに戻す          |
 | `edit_parcel:finish_shape_edit` | `ui -> graphic`  | 土地区画形状編集モードを終了する。UI側が `PATCH /api/v1/parcels/{id}` でポリゴンの保存に成功した後に送信され、Unity側の編集状態をリセットしてデータをリロードする（`edit_path:finish` と同じ役割） |

@@ -2,8 +2,16 @@
  * 土地区画作成パネル
  *
  * window_type="parcel_creation" のポップアップウィンドウで表示する専用パネル。
- * 作成・分割モードを選択し、パラメータ入力 → Unity上で地点/パス/区画選択 →
- * プレビュー → 確定/クリア のフローを行う。
+ *
+ * 操作フローは「3Dビュー主導・パネルは数値と確定」:
+ *   ウィンドウを開くと即座に土地区画作成モード(STATE_EDIT_PARCEL)へ入り、
+ *   **作成モードの切り替えはUnity側のCtrlラジアルメニュー**が行う(道路敷設・地区編集と同型)。
+ *   パネルは幅・奥行き・平均面積などの数値入力とプレビュー、確定ボタンを担当する。
+ *   確定してもモードから抜けず、選択だけリセットして連続作成できる。
+ *
+ * 作成モードの真実源はUnity側(`ParcelEditorManager.CurrentMode`)にあるため、パネルの
+ * モードタイルは「もう一つの入口」であり、押すと `world:change_state` でUnityへ依頼し、
+ * 実際の切り替え結果は `edit_parcel:set_mode` で返ってくる(逆流させないこと)。
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -14,10 +22,13 @@ import {
   sendChangeState,
   sendChangeDisplay,
   sendEditParcelUpdatePreview,
+  sendEditParcelResetSelection,
+  sendEditParcelSetRectParams,
   sendSessionReload,
   IPC_EVENT_EDIT_PARCEL_SELECT_POINT,
   IPC_EVENT_EDIT_PARCEL_SELECT_PATH,
   IPC_EVENT_EDIT_PARCEL_SELECT_PARCEL,
+  IPC_EVENT_EDIT_PARCEL_SET_MODE,
   IPC_EVENT_EDIT_PARCEL_UPDATE_ROTATION,
   IPC_EVENT_EDIT_PARCEL_UPDATE_CREATION_SHAPE,
 } from "../../utils/ipc";
@@ -63,6 +74,9 @@ const SIZE_INPUT_PRESETS: Record<string, { width: number; height: number; min: n
 };
 
 const DEFAULT_SIZE_INPUT = SIZE_INPUT_PRESETS.empty_area;
+
+/** ウィンドウを開いた直後の作成モード（Unity側 ParcelEditorManager.DefaultMode と一致させる） */
+const DEFAULT_CREATION_MODE: CreationMode = "empty_area";
 
 const CREATION_SECTIONS = [
   {
@@ -140,10 +154,11 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
   const { t } = useTranslation();
   const appWindow = useMemo(() => getCurrentWindow(), []);
 
-  const [selectedMode, setSelectedMode] = useState<CreationMode | null>(null);
+  // 作成モードは常にどれか1つが選ばれている(未選択状態を持たない)。真実源はUnity側。
+  const [selectedMode, setSelectedMode] = useState<CreationMode>(DEFAULT_CREATION_MODE);
   const [area, setArea] = useState(100);
-  const [width, setWidth] = useState(10);
-  const [height, setHeight] = useState(20);
+  const [width, setWidth] = useState(DEFAULT_SIZE_INPUT.width);
+  const [height, setHeight] = useState(DEFAULT_SIZE_INPUT.height);
   const [angle, setAngle] = useState(0);
   const [side, setSide] = useState<"left" | "right">("left");
 
@@ -169,6 +184,65 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
 
   const selectedModeRef = useRef(selectedMode);
   selectedModeRef.current = selectedMode;
+
+  /* ---- 選択・モードのリセット ---- */
+
+  /**
+   * 3Dビューでの選択（地点/パス/区画/ポリゴン）とプレビューだけを捨てる。
+   * 幅・奥行きなどの入力値は保持する（連続作成では同じ寸法で作り続けるのが普通のため）。
+   */
+  const clearSelectionState = useCallback(() => {
+    setPickedPosition(null);
+    setSelectedPathId(null);
+    setSelectedParcelId(null);
+    setPreviewData(null);
+    setAngle(0);
+    setManualPolygon([]);
+    setManualFinalized(false);
+  }, []);
+
+  /**
+   * 作成モードの切り替えをパネルの状態へ反映する（IPCは送らない）。
+   * モードによって width/height の意味と桁が変わるため、モードが変わったときだけ
+   * 入力値をそのモードの初期値へ戻す（同じモードでの「選び直し」では保持する）。
+   */
+  const applyModeSelection = useCallback(
+    (mode: CreationMode) => {
+      const changed = selectedModeRef.current !== mode;
+      selectedModeRef.current = mode;
+      setSelectedMode(mode);
+      setStatusMessage(null);
+      clearSelectionState();
+      if (changed) {
+        const preset = SIZE_INPUT_PRESETS[mode];
+        if (preset) {
+          setWidth(preset.width);
+          setHeight(preset.height);
+        }
+      }
+    },
+    [clearSelectionState]
+  );
+
+  /* ---- 起動時に作成モードへ入る ---- */
+
+  /**
+   * ウィンドウを開いた時点で STATE_EDIT_PARCEL に入る。
+   * 3Dビュー側のCtrlラジアルメニュー（作成モードの切り替え）は作成モード中しか開かないため、
+   * パネルのタイルを押すまでモードに入らないと「ホイールが出ない」状態になってしまう。
+   */
+  useEffect(() => {
+    sendChangeState(
+      "STATE_EDIT_PARCEL",
+      { parcel_creation_mode: DEFAULT_CREATION_MODE },
+      "parcel_creation"
+    ).catch((err) => {
+      console.error("[ParcelCreation] sendChangeState failed:", err);
+    });
+    sendChangeDisplay("parcel", "border").catch((err) => {
+      console.error("[ParcelCreation] sendChangeDisplay failed:", err);
+    });
+  }, []);
 
   /* ---- ヒントバー表示 ---- */
 
@@ -212,7 +286,6 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
 
   const fetchPreview = useCallback(
     async (signal?: AbortSignal) => {
-      if (!selectedMode) return;
       // manual(任意ポリゴン)はバックエンドのプレビュー取得を使わず、Unity上のオーバーレイと
       // パネル内キャンバスで直接プレビューするため、ここでは何もしない。
       if (selectedMode === "manual") return;
@@ -369,13 +442,25 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
   /* ---- IPC イベントリスナー ---- */
 
   useEffect(() => {
-    if (!selectedMode) return;
-
     let unlistenPoint: (() => void) | undefined;
     let unlistenPath: (() => void) | undefined;
     let unlistenParcel: (() => void) | undefined;
     let unlistenRotation: (() => void) | undefined;
     let unlistenShape: (() => void) | undefined;
+    let unlistenMode: (() => void) | undefined;
+
+    // 3DビューのCtrlラジアルメニューで作成モードが切り替わった（＝真実源が動いた）通知。
+    // 同じモードで届いた場合は「3DビューでEscを押した／同じモードを選び直した」= 選択のリセット。
+    appWindow
+      .listen<{ mode: string }>(IPC_EVENT_EDIT_PARCEL_SET_MODE, (event) => {
+        const mode = event.payload?.mode as CreationMode | undefined;
+        if (!mode) return;
+        applyModeSelection(mode);
+      })
+      .then((fn) => {
+        unlistenMode = fn;
+      })
+      .catch(console.error);
 
     appWindow
       .listen<{ position: number[] }>(IPC_EVENT_EDIT_PARCEL_SELECT_POINT, (event) => {
@@ -430,101 +515,65 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
       unlistenParcel?.();
       unlistenRotation?.();
       unlistenShape?.();
+      unlistenMode?.();
     };
-  }, [appWindow, selectedMode]);
+  }, [appWindow, applyModeSelection]);
 
-  /* ---- モード選択解除時のリセット ---- */
+  /* ---- 矩形プレビューのパラメータ同期 ---- */
 
+  /**
+   * 地点指定系モードでは、地点を選んだあとの角度ドラッグ中に3Dビューがローカル計算で
+   * 矩形プレビューを描く。その寸法をパネルの入力値と一致させるために送る
+   * （バックエンド由来の正式なプレビューは `edit_parcel:update_preview` が別途上書きする）。
+   */
   useEffect(() => {
-    if (selectedMode === null) {
-      setPickedPosition(null);
-      setSelectedPathId(null);
-      setSelectedParcelId(null);
-      setPreviewData(null);
-      setStatusMessage(null);
-      setAngle(0);
-      setManualPolygon([]);
-      setManualFinalized(false);
-    }
-  }, [selectedMode]);
+    if (!isPointCreationMode(selectedMode)) return;
+    void sendEditParcelSetRectParams(width, height);
+  }, [selectedMode, width, height]);
 
   /* ---- パネル閉じた時のクリーンアップ ---- */
 
   useEffect(() => {
     return () => {
-      const mode = selectedModeRef.current ?? "empty_area";
-      void sendEditParcelUpdatePreview(mode, [], null);
-
-      if (selectedModeRef.current !== null) {
-        void sendChangeState("STATE_NORMAL", undefined, "parcel_creation");
-      }
+      void sendEditParcelUpdatePreview(selectedModeRef.current, [], null);
+      void sendChangeState("STATE_NORMAL", undefined, "parcel_creation");
       void sendChangeDisplay("parcel", "hidden");
     };
   }, []);
 
   /* ---- ハンドラ ---- */
 
+  /**
+   * モードタイルのクリック。パネル側の状態を先に切り替えてから `world:change_state` で
+   * Unityへ切り替えを依頼する（UI起点の切り替えは `edit_parcel:set_mode` で折り返らないため、
+   * ここで反映しないとタイルの選択表示が動かない。逆にUnity起点＝ラジアルメニューでの
+   * 切り替えだけが `edit_parcel:set_mode` で届く）。
+   * 選択中のタイルをもう一度押した場合は「選び直し」= 選択のリセットになる。
+   */
   function handleModeClick(mode: CreationMode) {
     if (selectedMode === mode) {
-      setSelectedMode(null);
-      sendChangeState("STATE_NORMAL", undefined, "parcel_creation").catch((err) => {
-        console.error("[ParcelCreation] sendChangeState failed:", err);
-      });
-      sendChangeDisplay("parcel", "hidden").catch((err) => {
-        console.error("[ParcelCreation] sendChangeDisplay failed:", err);
-      });
-      void sendEditParcelUpdatePreview(mode, [], null);
-    } else {
-      setSelectedMode(mode);
-      setPreviewData(null);
-      setPickedPosition(null);
-      setSelectedPathId(null);
-      setSelectedParcelId(null);
-      setStatusMessage(null);
-      setAngle(0);
-      setManualPolygon([]);
-      setManualFinalized(false);
-      const preset = SIZE_INPUT_PRESETS[mode];
-      if (preset) {
-        setWidth(preset.width);
-        setHeight(preset.height);
-      }
-      sendChangeState("STATE_EDIT_PARCEL", { parcel_creation_mode: mode }, "parcel_creation").catch((err) => {
-        console.error("[ParcelCreation] sendChangeState failed:", err);
-      });
-      sendChangeDisplay("parcel", "border").catch((err) => {
-        console.error("[ParcelCreation] sendChangeDisplay failed:", err);
-      });
-    }
-  }
-
-  function handleClear() {
-    setPickedPosition(null);
-    setSelectedPathId(null);
-    setSelectedParcelId(null);
-    setPreviewData(null);
-    setStatusMessage(null);
-    setAngle(0);
-
-    if (selectedMode === "manual") {
-      // 任意ポリゴンはUnity側(ParcelAreaEditManager)が頂点を保持しているため、
-      // 編集モードへの再遷移で InitializeCreateMode を呼び直してポリゴンをリセットする。
-      setManualPolygon([]);
-      setManualFinalized(false);
-      sendChangeState("STATE_EDIT_PARCEL", { parcel_creation_mode: "manual" }, "parcel_creation").catch((err) => {
-        console.error("[ParcelCreation] sendChangeState failed:", err);
-      });
+      handleClear();
       return;
     }
+    applyModeSelection(mode);
+    sendChangeState("STATE_EDIT_PARCEL", { parcel_creation_mode: mode }, "parcel_creation").catch((err) => {
+      console.error("[ParcelCreation] sendChangeState failed:", err);
+    });
+  }
 
-    if (selectedMode) {
-      void sendEditParcelUpdatePreview(selectedMode, [], null);
-    }
+  /**
+   * 選択のリセット。3Dビュー側の選択・プレビュー・描きかけのポリゴンも
+   * `edit_parcel:reset_selection` で同時に捨てて、同じモードのまま選び直せる状態に戻す。
+   */
+  function handleClear() {
+    clearSelectionState();
+    setStatusMessage(null);
+
+    void sendEditParcelUpdatePreview(selectedMode, [], null);
+    void sendEditParcelResetSelection();
   }
 
   async function handleConfirm() {
-    if (!selectedMode) return;
-
     let payload: Record<string, unknown>;
     if (selectedMode === "empty_area") {
       if (!pickedPosition) return;
@@ -597,12 +646,13 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
       });
       setStatusMessage("success");
 
+      // 確定しても作成モードから抜けない。プレビューと選択だけ捨てて、
+      // ユーザーはそのまま3Dビューをクリックして次の区画を作れる（連続作成）。
+      // 幅・奥行きなどの入力値は保持する。
       void sendEditParcelUpdatePreview(selectedMode, [], null);
       void sendSessionReload();
-      setSelectedMode(null);
-
-      await sendChangeState("STATE_NORMAL", undefined, "parcel_creation");
-      await sendChangeDisplay("parcel", "border");
+      clearSelectionState();
+      void sendEditParcelResetSelection();
     } catch (err) {
       console.error("Failed to create parcels:", err);
       setStatusMessage("error");
@@ -655,8 +705,9 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
 
   return (
     <div className="pc-layout">
-      {/* セクション分けされたバリアント選択 */}
+      {/* セクション分けされたバリアント選択（3DビューのCtrlラジアルメニューと同じ状態を指す） */}
       <div className="pc-sections-container">
+        <p className="pc-mode-hint">{t("parcel_creation.modeWheelHint")}</p>
         {CREATION_SECTIONS.map((section) => (
           <div key={section.titleKey} className="pc-section-group">
             <h3 className="pc-section-title">{t(section.titleKey)}</h3>
@@ -953,9 +1004,15 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
       {/* ステータスメッセージ */}
       {statusMessage && (
         <div className={`pc-status ${statusMessage}`}>
-          {statusMessage === "success"
-            ? t("parcel_creation.createSuccess")
-            : t("parcel_creation.createFailed")}
+          {statusMessage === "success" ? (
+            <>
+              {t("parcel_creation.createSuccess")}
+              {/* 確定でモードを抜けなくなったので、次に何ができるかを明示する */}
+              <div className="pc-status-note">{t("parcel_creation.confirmContinuous")}</div>
+            </>
+          ) : (
+            t("parcel_creation.createFailed")
+          )}
         </div>
       )}
 

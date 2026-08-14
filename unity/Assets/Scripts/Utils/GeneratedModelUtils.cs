@@ -438,7 +438,7 @@ public static class ParcelSummaryExtensions
     /// PathSummaryExtensions.GetPlatformSide と同じく、endpoint_schemas シートの
     /// multi_parcel 未更新（=GeneratedModels.cs の ParcelSummary にフィールドが無い）でも
     /// コンパイル・実行が落ちないための措置。フィールドが無い間・値が無い間は 0 を返し、
-    /// 呼び出し側（地区拡張ドラッグの面区画解決）は「面区画なし」として振る舞う。
+    /// 呼び出し側（接道街路→面区画の逆引き）は「面区画なし」として振る舞う。
     /// スキーマ再生成後は自動的に実データを返すようになる（直接参照への置き換えも可）。
     /// </summary>
     private static readonly System.Reflection.FieldInfo FrontPathIdField =

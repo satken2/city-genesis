@@ -42,9 +42,6 @@ public class RadialMenuController : MonoBehaviour
     private static Sprite circleSprite;
     private static Sprite ringSprite;
 
-    /// <summary>日本語対応の中央ラベル・代替テキスト用フォント(全インスタンス共有)。</summary>
-    private static Font uiFont;
-
     private Canvas canvas;
     private RectTransform menuRoot;
     private Text centerLabel;
@@ -344,32 +341,14 @@ public class RadialMenuController : MonoBehaviour
     }
 
     /// <summary>
-    /// 中央ラベル・代替テキスト用の日本語対応フォントを返す(全インスタンス共有でキャッシュ)。
+    /// 中央ラベル・代替テキスト用の日本語対応フォントを返す。
     /// 項目ラベルに日本語(地区編集の「新規地区の作成」等)を使うため、組み込みの LegacyRuntime.ttf
-    /// (日本語グリフ非対応)ではなくOSの多言語フォントを優先する。存在しなければ LegacyRuntime.ttf。
+    /// (日本語グリフ非対応)ではなくOSの多言語フォントを優先する(`UiFontProvider`)。
     /// ASCIIラベル(道路編集)でも問題なく描画できるため既存の利用にも影響しない。
-    /// (ZoneManager.CreateZoneLabelUI と同じ優先フォントリスト)
     /// </summary>
     private static Font GetUIFont(int fontSize)
     {
-        if (uiFont == null)
-        {
-            string[] preferredFonts = new string[] {
-                "Yu Gothic UI",
-                "Meiryo",
-                "Microsoft YaHei UI",
-                "Malgun Gothic",
-                "Leelawadee UI",
-                "Segoe UI",
-                "Arial"
-            };
-            uiFont = Font.CreateDynamicFontFromOSFont(preferredFonts, fontSize);
-            if (uiFont == null)
-            {
-                uiFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            }
-        }
-        return uiFont;
+        return UiFontProvider.GetFont(fontSize);
     }
 
     private static float EaseOutBack(float t)

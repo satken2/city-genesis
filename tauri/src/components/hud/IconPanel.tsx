@@ -13,9 +13,15 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { useTranslation } from "react-i18next";
 
-import { sendChangeState, sendChangeDisplay, sendSessionReload } from "../../utils/ipc";
+import {
+  IPC_EVENT_EDIT_ZONE_REQUEST_MERGE,
+  sendChangeState,
+  sendChangeDisplay,
+  sendSessionReload,
+} from "../../utils/ipc";
 import { setHintbarText } from "../../utils/hintbar";
 import {
   EDIT_MODE_WINDOW_TYPES,
@@ -56,6 +62,43 @@ export function IconPanel() {
     observer.observe(element);
     return () => observer.disconnect();
   }, [visible]);
+
+  /**
+   * 地区編集モードの「地区の統合」で、統合元・統合先が決まったときにUnityから届く要求を受け、
+   * 確定ウィンドウ(`zone_merge`)を開く。
+   *
+   * 地区編集モードは自前のウィンドウを持たない常駐モードなので、Unityからは直接ウィンドウを
+   * 開けない。常駐しているこのアイコンパネルが中継役になる。イベントを受けてからウィンドウを
+   * 開く順序ではパネル側の購読が間に合わないため、統合内容はイベントではなく
+   * `params.extra.pendingMerge` としてウィンドウコンテキストに載せて渡す。
+   */
+  useEffect(() => {
+    const unlistenPromise = listen<{
+      target_zone_id?: number;
+      target_zone_name?: string;
+      source_zone_id?: number;
+      source_zone_name?: string;
+    }>(IPC_EVENT_EDIT_ZONE_REQUEST_MERGE, (event) => {
+      const payload = event.payload ?? {};
+      if (!payload.target_zone_id || !payload.source_zone_id) return;
+      void invoke("open_registered_window", {
+        windowType: "zone_merge",
+        params: {
+          extra: {
+            pendingMerge: {
+              targetZoneId: payload.target_zone_id,
+              targetZoneName: payload.target_zone_name ?? "",
+              sourceZoneId: payload.source_zone_id,
+              sourceZoneName: payload.source_zone_name ?? "",
+            },
+          },
+        },
+      }).catch(console.error);
+    });
+    return () => {
+      void unlistenPromise.then((unlisten) => unlisten());
+    };
+  }, []);
 
   /**
    * 地区編集モードのトグル。ウィンドウを開かない常駐モード

@@ -26,6 +26,14 @@ public class ParcelAreaEditManager : PolygonAreaEditManager
     protected override Color VertexColor => new Color(0.45f, 0.7f, 1f);
 
     /// <summary>
+    /// Escは <see cref="ParcelEditorManager"/> が「作成モードは維持したまま選択をリセット」
+    /// として処理する(描きかけのポリゴンを捨ててもう一度描き始める)。
+    /// ここで基底の「編集キャンセル＝通常入力モードへ復帰」を走らせると、
+    /// 作成モードのまま入力プリセットだけ通常に戻り、クリックが効かなくなる。
+    /// </summary>
+    protected override bool CancelOnEscape => false;
+
+    /// <summary>
     /// 現在のポリゴンを edit_parcel:update_creation_shape でUIへ通知する。
     /// 土地区画作成パネルは頂点数3以上かつ仮確定済み(finalized)を確定可能条件とするため、
     /// polygon に加えて finalized も送る。

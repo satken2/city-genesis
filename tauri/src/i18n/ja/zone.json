@@ -30,6 +30,10 @@
     "cancelEdit": "キャンセル",
     "selectedPaths": "道路選択済み",
     "paintedPaths": "塗りつぶし済み",
-    "noPathsYet": "3Dビューで道路を選択して地区を設定してください"
+    "noPathsYet": "3Dビューで道路を選択して地区を設定してください",
+    "mergeConfirm": "「{{source}}」を「{{target}}」に統合します。統合元の地区は消滅し、その規制設定も失われます。",
+    "mergeAction": "統合する",
+    "mergeFailed": "地区の統合に失敗しました（隣接していない地区同士は統合できません）",
+    "mergeNoRequest": "統合する地区が選択されていません"
   }
 }

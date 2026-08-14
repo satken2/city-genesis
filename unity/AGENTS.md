@@ -19,7 +19,7 @@
   - VisualHandlers      ... 3D空間内の建物・道路等の「見せ方」(表示/非表示/ハイライト等)の一括管理。(詳細はVisualHandlers/AGENTS.md)
   - IPC                 ... Tauri製UIとのMemoryMappedFile通信。(詳細はIPC/AGENTS.md)
   - Utils               ... 各種ユーティリティ。新しい汎用処理を書く前に必ず確認。(詳細はUtils/AGENTS.md)
-  - UI                  ... 3D側のUI部品(ツールチップ、モード表示、汎用ラジアルメニュー`RadialMenu/RadialMenuController`=トリガーキー押下でカーソル位置から項目が円形展開しキー離しでトグル、汎用カーソル追従HUD`CursorStatusHud`=現在設定のアイコン列+テキストを常時表示、立体方位磁針`CompassPanel`+メッシュ生成`CompassNeedleMesh`=専用カメラでレンダーテクスチャに描いてRawImageへ貼る方式。実体はワールド上空(0,100000,0)の専用レイヤー`Compass`(6)に置き本編カメラから隔離する。表示物は北を指す赤い四角錐と「N」の文字だけで、四角錐が本編カメラのヨーの逆に回り俯角も追従する(「N」は先端に付いて回りつつ常にカメラ正面を向く)。カメラ角が変わったフレームだけ描き直す)。※ゲームのメインUIはこのレポジトリではなくcity-genesis/tauri(Tauri)にある
+  - UI                  ... 3D側のUI部品(ツールチップ、モード表示、汎用ラジアルメニュー`RadialMenu/RadialMenuController`=トリガーキー押下でカーソル位置から項目が円形展開しキー離しでトグル、汎用カーソル追従HUD`CursorStatusHud`=現在設定のアイコン列+テキストを常時表示(アイコンは`tint`指定で任意色に塗れる=地区編集の色チップ。テキストは`UiFontProvider`の多言語フォントで日本語も表示可)、多言語フォント供給`UiFontProvider`=OSの多言語フォントを優先しキャッシュして返す(RadialMenu・CursorStatusHud・地区名ラベルが共用)、立体方位磁針`CompassPanel`+メッシュ生成`CompassNeedleMesh`=専用カメラでレンダーテクスチャに描いてRawImageへ貼る方式。実体はワールド上空(0,100000,0)の専用レイヤー`Compass`(6)に置き本編カメラから隔離する。表示物は北を指す赤い四角錐と「N」の文字だけで、四角錐が本編カメラのヨーの逆に回り俯角も追従する(「N」は先端に付いて回りつつ常にカメラ正面を向く)。カメラ角が変わったフレームだけ描き直す)。※ゲームのメインUIはこのレポジトリではなくcity-genesis/tauri(Tauri)にある
   - Grid                ... グリッドオーバーレイ表示
   - GameStateManager.cs ... グローバルなゲーム状態の管理(シングルトン)。状態変化イベントの購読。
   - MasterDataStore.cs  ... バックエンドから取得したマスターデータの保持。道路幅・車線数などの描画パラメータはここを正とする。
@@ -120,7 +120,7 @@ CameraCellChecker(視線中心セルの変化検知)
 - **区画のセル逆引きインデックス (`ParcelManager.parcelIdsByCell`)**:
   マウス位置から区画を解決する `ParcelManager.GetParcelIdAtPoint`(起伏地形で区画コライダーが地形に埋まった場合の InputHandler のフォールバック)が、マウス移動フレームごとに全区画のポリゴン内外判定を線形走査しないための逆引きインデックス。区画の登録は `RegisterParcelDataForLines`(内部で `RegisterParcelSpatialIndex`)、削除は `RemoveParcel` / `ClearAllCells` を通して同期すること。
 - **接道街路の逆引きインデックス (`ParcelManager.parcelIdsByFrontPath`)** と **区画の逆引きインデックス (`BuildingManager.buildingIdsByParcel`)**:
-  地区拡張ドラッグ中に「なぞった街路→面する区画→その区画上の建物」をフロントだけで解決して地区色を波及させるための逆引きインデックス(全区画・全建物の線形走査を避ける)。前者は `RegisterParcelSpatialIndex` / `UnregisterParcelSpatialIndex` / `ClearAllCells`、後者は `RegisterBuildingDataToCache`(parcel_id変更時は旧マッピング除去) / `SyncBuildingsInCells` / `ClearAllCells` を通して同期すること。
+  「この道路に面している区画」「この区画の上に建っている建物」を全件走査なしで解決するための逆引きインデックス。前者は `RegisterParcelSpatialIndex` / `UnregisterParcelSpatialIndex` / `ClearAllCells`、後者は `RegisterBuildingDataToCache`(parcel_id変更時は旧マッピング除去) / `SyncBuildingsInCells` / `ClearAllCells` を通して同期すること。
 - **カメラ非依存のオーバーレイメッシュは毎フレーム再構築しない (`TerrainManager.UpdateCellOverlayIfActive`)**:
   開放済みセルの境界点線(`OverlayMeshRenderer` によるワールド固定幅の点線)はカメラに依存しない静的ジオメトリなので、毎フレーム `BeginFrame`〜`EndFrame` でメッシュを作り直すと、カメラ静止・入力なしのアイドル時でも無駄なCPU/GPU(頂点構築＋メッシュ再アップロード)を消費する。境界の変化(`borderSegmentsDirty`)や表示切り替え(`ShowCellBordersAndLabels` の変化)があったフレームだけ再構築し、それ以外は既存メッシュをそのまま描画すること。カメラに追従してビルボードやスクリーン幅換算が必要なオーバーレイ(パーセル枠線等)はこの限りではなく、カメラ移動閾値でガードする。
 

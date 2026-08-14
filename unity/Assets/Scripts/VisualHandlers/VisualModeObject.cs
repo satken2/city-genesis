@@ -31,9 +31,6 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     [Tooltip("プレビュー表示用のマテリアル")]
     [SerializeField] private Material previewMaterial;
 
-    [Tooltip("所属地区色分け用マテリアル（4色）")]
-    [SerializeField] private Material[] zoneMaterials = new Material[4];
-
     [Tooltip("道路の交通量・耐久度など数値ベース色分けに使用する白色ベースマテリアル")]
     [SerializeField] private Material pathColorMaterial;
 
@@ -152,15 +149,6 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
         if (constructionMaterial == null) constructionMaterial = Resources.Load<Material>("ConstructionMaterial");
         if (previewMaterial == null) previewMaterial = Resources.Load<Material>("PreviewBuildingMaterial");
 
-        // 所属地区色分け用マテリアルをロード
-        for (int i = 0; i < 4; i++)
-        {
-            if (zoneMaterials[i] == null)
-            {
-                zoneMaterials[i] = Resources.Load<Material>($"ZoneMaterial{i + 1}");
-            }
-        }
-
         // 道路の数値ベース色分け用マテリアル
         if (pathColorMaterial == null) pathColorMaterial = Resources.Load<Material>("PathColorMaterial");
 
@@ -220,8 +208,9 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     }
 
     /// <summary>
-    /// ドラッグ中の一時的な地区IDを設定する。
-    /// ZONE_COLORモード時に、この値が優先されて表示される。
+    /// 一時的な地区IDを設定する。ZONE_COLORモード時に、この値が優先されて表示される。
+    /// 地区編集モードで道路をクリックした直後、バックエンドの応答を待たずに
+    /// 適用先の地区色(新規作成なら ZoneEditContext.PREVIEW_SENTINEL)を先行表示するために使う。
     /// </summary>
     public void SetTempZoneId(int zoneId)
     {
@@ -799,8 +788,8 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     /// <summary>
     /// 道路に地区識別色を適用する。
     /// 通常時はバックエンドの zone.color を道路のベース白色マテリアル + PropertyBlock で塗る。
-    /// 地区編集中のドラッグプレビュー(PREVIEW_SENTINEL)は未確定のため、
-    /// 編集コンテキストのプレビュー用パレット色(zoneMaterials)を使う。
+    /// 地区編集中の新規地区プレビュー(PREVIEW_SENTINEL)はまだ地区が存在しないため、
+    /// 編集コンテキストがこれから作る地区に使う色(ZoneEditContext.PreviewColor)で塗る。
     /// 所属地区がない道路はオリジナルマテリアルに戻す。
     /// </summary>
     private void ApplyZoneColorToPath()
@@ -810,10 +799,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
         if (effectiveZoneId == ZoneEditContext.PREVIEW_SENTINEL)
         {
             var ctx = ZoneEditContext.Instance;
-            int colorIdx = ctx != null ? ctx.PreviewColorIndex : 0;
-            colorIdx = Mathf.Clamp(colorIdx, 0, zoneMaterials.Length - 1);
-            Material zoneMat = zoneMaterials[colorIdx];
-            ApplyMaterialToAllSubmeshes(zoneMat != null ? zoneMat : null, true);
+            ApplyColorToRenderers(ctx != null ? ctx.PreviewColor : Color.cyan);
         }
         else if (effectiveZoneId > 0 && ZoneManager.Instance != null)
         {

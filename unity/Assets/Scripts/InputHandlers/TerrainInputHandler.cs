@@ -181,7 +181,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
                 }
                 break;
             case InputMode.MODE_ZONE_EDIT:
-                // 地区編集モードでは terrain クリックは無効（パスクリックと地区ドラッグのみ有効）
+                HandleZoneEditTerrainClick();
                 break;
             case InputMode.MODE_UNLOCK_CELL:
                 HandleUnlockCellClick(clickPosition);
@@ -282,7 +282,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
                 }
                 break;
             case InputMode.MODE_ZONE_EDIT:
-                // 地区編集モードでは terrain 右クリックは無効
+                HandleZoneEditTerrainRightClick();
                 break;
             case InputMode.MODE_PARCEL_SHAPE_EDIT:
                 {
@@ -505,6 +505,41 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
     }
 
     /// <summary>
+    /// 地区編集モードでの地形左クリック。
+    /// 地区の内側(=地区ポリゴンの中)をクリックしたときだけ意味を持ち、統合ツールでは
+    /// そこの地区を選択中地区へ統合するようUIへ要求する。
+    /// 作成・拡張は「どの街路を対象にするか」を指す必要があるため、地形クリックでは何もしない。
+    /// </summary>
+    private void HandleZoneEditTerrainClick()
+    {
+        var ctx = ZoneEditContext.Instance;
+        if (ctx == null || ctx.CurrentTool != ZoneEditTool.Merge) return;
+
+        int hoveredZoneId = InputHandler.Instance != null ? InputHandler.Instance.HoveredZoneId : -1;
+        if (hoveredZoneId <= 0)
+        {
+            TooltipManager.Instance?.Show("統合する地区の上をクリックしてください");
+            return;
+        }
+        if (ctx.SelectedZoneId <= 0)
+        {
+            TooltipManager.Instance?.Show("先に右クリックで統合先の地区を選択してください");
+            return;
+        }
+        ctx.RequestMerge(hoveredZoneId);
+    }
+
+    /// <summary>
+    /// 地区編集モードでの地形右クリック。カーソル下の地区を操作対象(拡張先・統合先)に選ぶ。
+    /// 地区の外で右クリックした場合は選択を解除する。
+    /// </summary>
+    private void HandleZoneEditTerrainRightClick()
+    {
+        int hoveredZoneId = InputHandler.Instance != null ? InputHandler.Instance.HoveredZoneId : -1;
+        ZoneEditContext.Instance?.SelectZone(hoveredZoneId > 0 ? hoveredZoneId : 0);
+    }
+
+    /// <summary>
     /// 地形セル開放モード時のクリック処理。
     /// クリック位置からセル座標を計算し、開放済みかどうかを判定してIPCでUIに通知する。
     /// </summary>
@@ -606,21 +641,15 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
 
     private void Update()
     {
-        // パーセルエディターが有効で、いずれかの選択モードが有効な場合のEscキー処理
-        if (parcelEditorManager != null && parcelEditorManager.enabled)
+        // Escキーによる選択のリセット自体は ParcelEditorManager.Update が行う
+        // (作成モードからは抜けず、同じモードで選び直せる)。
+        // ここは地形ホバーで出しているマーカーを消すだけ。このコンポーネントは
+        // 地形タイルごとに付くため、条件は軽く保つこと。
+        if (parcelEditorManager != null
+            && parcelEditorManager.IsActive
+            && InputUtil.KeyWasPressedThisFrame(Key.Escape))
         {
-            if (parcelEditorManager.IsPointSelectionMode() || 
-                parcelEditorManager.IsPathSelectionMode() || 
-                parcelEditorManager.IsParcelSelectionMode())
-            {
-                // Escキーでキャンセル
-                if (InputUtil.KeyWasPressedThisFrame(Key.Escape))
-                {
-                    parcelEditorManager.ClearWorldSelectionState();
-                    parcelEditorManager.ClearPreview();
-                    HideMarker();
-                }
-            }
+            HideMarker();
         }
     }
 

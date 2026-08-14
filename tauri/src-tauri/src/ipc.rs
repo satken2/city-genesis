@@ -533,6 +533,12 @@ pub async fn handle_incoming_message(
         "edit_parcel:select_parcel" => {
             let _ = app.emit("edit_parcel:select_parcel", envelope.payload);
         }
+        "edit_parcel:set_mode" => {
+            // 3Dビューのラジアルメニュー(Ctrl)で土地区画の作成モードが切り替わったことを
+            // 作成パネルへ中継する。作成モードの真実源はUnity側にあり、パネルは入力欄の構成と
+            // 選択済み表示をこれに合わせる(モード据え置きで届いた場合は「選択のリセット」の意味)。
+            let _ = app.emit("edit_parcel:set_mode", envelope.payload);
+        }
         "edit_parcel:update_shape" => {
             let _ = app.emit("edit_parcel:update_shape", envelope.payload);
         }
@@ -552,6 +558,12 @@ pub async fn handle_incoming_message(
         }
         "edit_zone:selected" => {
             let _ = app.emit("edit_zone:selected", envelope.payload);
+        }
+        "edit_zone:request_merge" => {
+            // 地区編集モードの統合ツールで統合元・統合先が決まったことをUIへ中継する。
+            // 地区がひとつ消える不可逆操作なので、Unityは送信せず地区詳細パネルの確定ボタンを待つ
+            // (アイコンパネルがこれを受けて統合先の地区詳細ウィンドウを開く)。
+            let _ = app.emit("edit_zone:request_merge", envelope.payload);
         }
         "edit_prop:update_instances" => {
             let _ = app.emit("edit_prop:update_instances", envelope.payload);

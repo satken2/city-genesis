@@ -42,11 +42,16 @@ public class IpcClient : MonoBehaviour
     // 既存建物コピー建設: コピー元建物の選択モード開始要求(UI→Unity)。
     public event Action OnBuildingConstructionPickSource;
     public event Action<string, float[][][], float[][]> OnEditParcelUpdatePreview;
+    public event Action OnEditParcelResetSelection;
+    public event Action<float, float> OnEditParcelSetRectParams;
     public event Action<int, float[][]> OnEditParcelStartShapeEdit;
     public event Action OnEditParcelCancelShapeEdit;
     // 形状編集の終了通知。UI側が PATCH /parcels/{id} の保存に成功した後に送信される
     // (バックエンドへの送信自体はUI側が行う。edit_path:finish と同じ役割)。
     public event Action OnEditParcelFinishShapeEdit;
+    // 地区統合の確定/取消の通知(UI→Unity)。UI側が POST /zones/{id}/merge を送り終えた後、
+    // または確定パネルでキャンセルされたときに送られる。引数は統合が実行されたかどうか。
+    public event Action<bool> OnEditZoneFinishMerge;
     public event Action<string, float, float, float?, float?> OnViewSetGrid;
     public event Action OnSystemShutdown;
     public event Action OnSessionReset;
@@ -443,6 +448,24 @@ public class IpcClient : MonoBehaviour
                     }
                     break;
 
+                case "edit_parcel:reset_selection":
+                    {
+                        // 作成の確定後・クリア後に届く「選択だけ捨てて同じモードで続行」指示。
+                        // これがあるおかげで1回作るたびに作成モードを抜けずに済む(連続作成)。
+                        Debug.Log("IpcClient: edit_parcel:reset_selection");
+                        OnEditParcelResetSelection?.Invoke();
+                    }
+                    break;
+
+                case "edit_parcel:set_rect_params":
+                    {
+                        // 回転ドラッグ中のローカル矩形プレビューに使う幅・奥行き(パネルの入力値)。
+                        float width = GetParamFloat(payload, "width");
+                        float height = GetParamFloat(payload, "height");
+                        OnEditParcelSetRectParams?.Invoke(width, height);
+                    }
+                    break;
+
                 case "edit_parcel:start_shape_edit":
                     {
                         int parcelId = GetParamInt(payload, "parcel_id");
@@ -464,6 +487,15 @@ public class IpcClient : MonoBehaviour
                         // UI側が PATCH /parcels/{id} の保存に成功した後に届く終了通知。
                         Debug.Log("IpcClient: edit_parcel:finish_shape_edit");
                         OnEditParcelFinishShapeEdit?.Invoke();
+                    }
+                    break;
+
+                case "edit_zone:finish_merge":
+                    {
+                        // UI側の地区統合の確定(送信済み)/取消の結果。
+                        bool merged = GetParamInt(payload, "merged") != 0;
+                        Debug.Log($"IpcClient: edit_zone:finish_merge -> merged={merged}");
+                        OnEditZoneFinishMerge?.Invoke(merged);
                     }
                     break;
 
@@ -882,6 +914,22 @@ public class IpcClient : MonoBehaviour
     }
 
     /// <summary>
+    /// edit_parcel:set_mode イベントを送信する。
+    /// 3Dビューのラジアルメニュー(ParcelEditControlMenu)で作成モードが切り替わったことをUIに通知する。
+    /// 作成モードの真実源はUnity側(ParcelEditorManager.CurrentMode)にあり、UIの作成パネルは
+    /// これを受けて入力欄の構成(幅・奥行き・平均面積など)と選択状態の表示を合わせる。
+    /// </summary>
+    public void EmitEditParcelSetMode(string mode)
+    {
+        var payload = new Dictionary<string, object>
+        {
+            ["mode"] = mode ?? ""
+        };
+
+        SendEnvelope("edit_parcel:set_mode", payload);
+    }
+
+    /// <summary>
     /// edit_parcel:select_path イベントを送信する。
     /// 土地区画作成モード（along_path）において、パスが選択されたことをUIに通知する。
     /// </summary>
@@ -908,6 +956,25 @@ public class IpcClient : MonoBehaviour
         };
 
         SendEnvelope("edit_zone:selected", payload);
+    }
+
+    /// <summary>
+    /// edit_zone:request_merge イベントを送信する。
+    /// 地区編集モードの統合ツールで「統合元」と「統合先」が決まったことをUIに通知する。
+    /// 統合は地区がひとつ消える不可逆操作のため、Unityは送信せずUIの確定ボタンを待つ
+    /// (実際の POST /zones/{id}/merge はUI側が行い、結果が edit_zone:finish_merge で戻る)。
+    /// </summary>
+    public void EmitEditZoneRequestMerge(int targetZoneId, string targetZoneName, int sourceZoneId, string sourceZoneName)
+    {
+        var payload = new Dictionary<string, object>
+        {
+            ["target_zone_id"] = targetZoneId,
+            ["target_zone_name"] = targetZoneName ?? "",
+            ["source_zone_id"] = sourceZoneId,
+            ["source_zone_name"] = sourceZoneName ?? ""
+        };
+
+        SendEnvelope("edit_zone:request_merge", payload);
     }
 
     /// <summary>

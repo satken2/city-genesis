@@ -683,6 +683,18 @@ pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) 
                 "world:change_state".to_string(),
                 json!({ "state": "STATE_NORMAL" }),
             );
+        } else if wt == "zone_merge" {
+            // 地区統合の確定ウィンドウが(確定も取消もされずに)閉じられたとき、
+            // Unity 側の確定待ちを取消として解除する。ウィンドウは非表示(再利用待ち)に
+            // なるだけでReact側のアンマウント処理が走らないため、パネル任せにすると
+            // 統合待ちのまま取り残される。
+            let _ = ipc::send_ui_action(
+                state,
+                wt.clone(),
+                None,
+                "edit_zone:finish_merge".to_string(),
+                json!({ "merged": 0 }),
+            );
         } else if wt == "parcel_detail" {
             // 土地区画詳細パネルが閉じられたとき、接道表示をクリアする。
             let _ = ipc::send_ui_action(

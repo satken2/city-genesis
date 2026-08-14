@@ -93,6 +93,14 @@
       }
     ]
   },
+  "zone_merge": {
+    "title": "地区の統合",
+    "width": 420,
+    "height": 240,
+    "resizable": false,
+    "policy": "single",
+    "actions": []
+  },
   "resource_detail": {
     "title": "Resource Details",
     "width": 460,
@@ -409,7 +417,6 @@
     "layout": "left_top",
     "actions": []
   },
-
   "template_editor": {
     "title": "エディタ",
     "width": 1280,

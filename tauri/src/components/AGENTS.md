@@ -47,6 +47,7 @@ HUDは**3枚の専用Tauriウィンドウ**に分かれている。Unityの3Dビ
 
 - **ミニメータ(コックピットのピル風ウィジェット)**は`hud.css`の`.hud-mini-meter`系クラスを共有する(ラベル左・バー右で、親グリッドの列幅に伸びてもバー同士が縦に揃う)。`BudgetMiniMeter`=予算見込み/現預金でオーバー時は`--alert`で赤枠、`ScoreMiniMeter`=施政スコア(**スコア定義の見直し中につき値を持たない空メーター**。クリックで`achievements`ウィンドウを開く)。
 - **共有部品**: `useHudSession`(session-stateの受信=表示可否/都市名/日付/テンプレートモード/市庁舎ロック/エポック実行中)、`useTutorialHighlight`(チュートリアルのハイライト対象)、`hudCommon.ts`(アイコン定義とウィンドウを開くヘルパ)、`hudMode.ts`。
+- **地区編集の「地区の統合」の確定は `IconPanel` が中継して専用の小ウィンドウに出す**: 地区編集モードは自前のウィンドウを持たない常駐モードでUnityから直接ウィンドウを開けないため、Unityが3Dビューで統合元・統合先を決めた時点で送る `edit_zone:request_merge` を、常駐している `IconPanel` が受けて `zone_merge` ウィンドウ(`zone/ZoneMergeConfirmWindow`)を `params.extra.pendingMerge` 付きで開く。確定時は `POST /api/v1/zones/{id}/merge` を送って結果を `sendEditZoneFinishMerge(true)` でUnityへ返す。**イベントを投げてからウィンドウを開く順序ではパネルの購読が間に合わない**ため、統合内容はイベントではなくウィンドウコンテキストで渡している。**×で閉じられた場合の取消送信は Rust 側(`window.rs` のクローズ処理で `edit_zone:finish_merge {merged:0}`)が担う**(ウィンドウは非表示になるだけでReactのアンマウント処理が走らず、パネル任せだとUnityが統合待ちのまま取り残されるため)。
 - **ブルドーザ(コックピット)と地区編集(アイコンパネル)は排他の常駐モード**だが、別ウィンドウにボタンがある。状態はTauriのグローバルイベント `hud:mode_changed` を真実源として `hudMode.ts` が全HUDウィンドウで同期する。**モードの副作用(Unityへの`STATE_*`送信・ヒントバー文言・セッションリロード)は操作した側のコンポーネントが実行し、他ウィンドウは表示を合わせるだけ**。
 - **アイコンパネルの高さはReactの実測値でウィンドウに反映する**(`ResizeObserver` → Tauriコマンド `resize_icon_panel`)。アイコン数がテンプレートモードで変わるため。`IconPanel.css`で高さを固定してはならない(ウィンドウ丈との相互参照でリサイズが往復する)。
 - **BGM再生と3Dビューのオブジェクト選択受信は`Cockpit`が受け持つ**。HUD3枚で同じ処理を走らせると多重再生・多重オープンになるため、常に1枚だけ存在するウィンドウに寄せている。
@@ -66,6 +67,10 @@ HUDは**3枚の専用Tauriウィンドウ**に分かれている。Unityの3Dビ
 ### 土地区画詳細パネルの環境セクション(parcel/ParcelEnvironmentSection)
 
 `ParcelDetailPanel`の基本情報の直後に、区画固有の環境スコアを`common/Meter`で4本表示する。データ源は**都市全体のヒートマップAPI(`/city/noise`等)ではなく`GET /api/v1/parcels/{id}/environment`**(詳細パネルのたびに全区画分を取得しないための単体取得口)。返る値はいずれも`[0,1]`の**悪さ度合い**(0=理想、1=最悪)なので、大気汚染・騒音・犯罪は値そのままで`polarity="negative"`、**日照だけは「影の時間割合」なので`1 - value`に反転して**日当たりの良さとして描く。エポック未実行だと全要素nullで返るため、その場合はメーターを出さず注記を出す。
+
+### 土地区画作成パネル(parcel/ParcelCreationPanel)の作成方法はUnity側が真実源
+
+**ウィンドウを開いた時点で`STATE_EDIT_PARCEL`(既定=`empty_area`)へ入る**(3DビューのCtrlラジアルメニューは作成モード中しか開かないため、タイルを押すまでモードに入らないと「ホイールが出ない」)。作成方法の真実源はUnity(`ParcelEditorManager.CurrentMode`)で、**Unity起点の切り替えだけが`edit_parcel:set_mode`で届く**(パネルのタイルは`world:change_state`で依頼しつつ楽観的に自分の状態も更新する。両方向で通知すると往復ループになる)。同じモードで`set_mode`が届いたら「選択のリセット」(3DビューでEsc/同じ方法を選び直した)の意味で、選択状態だけ捨てて幅・奥行き等の入力値は保持する(モードが変わったときだけ`SIZE_INPUT_PRESETS`の初期値へ戻す——モードによって幅/奥行きの意味と桁が違うため)。**確定してもモードから抜けない**: 成功後は`STATE_NORMAL`を送らず、`edit_parcel:reset_selection`で3D側の選択も捨てて連続作成に戻る(パネルを閉じたときだけ`STATE_NORMAL`)。地点指定系では幅・奥行きを`edit_parcel:set_rect_params`でUnityへ送り、角度ドラッグ中のローカル矩形プレビューを入力値に合わせる。
 
 ### 道路建設パネル(path/)の設定系はUnity移管済み
 
