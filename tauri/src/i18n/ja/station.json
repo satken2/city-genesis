@@ -2,8 +2,6 @@
   "station": {
     "sectionTitle": "駅",
     "name": "駅名",
-    "rename": "変更",
-    "renameSave": "保存",
     "ridership": "乗降者数(推定)",
     "platforms": "ホーム一覧",
     "noPlatforms": "所属するホームはありません(線と交差したプラットフォームが所属します)",

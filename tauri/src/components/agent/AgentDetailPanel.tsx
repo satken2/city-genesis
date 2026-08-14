@@ -151,6 +151,22 @@ export function AgentDetailPanel({
     }
   };
 
+  /**
+   * 名称を変更する。市が管理する公共施設だけがプレイヤーによる改名の対象で、
+   * 民間の経済主体(店舗・世帯など)の名称は変更できない。
+   */
+  const handleNameSave = async (next: string) => {
+    const url = buildApiUrl(apiBaseUrl, pathTemplate, currentEntityId);
+    const updated = await fetchApi<AgentResponse>(url, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name: next }),
+    });
+    setAgentData(updated.economic_agent);
+  };
+
   /** 着工と保留を切り替えるトグルハンドラ */
   const handleStatusToggle = async (checked: boolean) => {
     if (!agentData || statusSaving) return;
@@ -428,6 +444,7 @@ export function AgentDetailPanel({
               : undefined
         }
         iconFrameColor={underAcquisition ? ACQUISITION_FRAME_COLOR : undefined}
+        onNameSave={agentData.public_facility ? handleNameSave : undefined}
       />
 
       {/* 未着工（保留）状態の警告バナー */}

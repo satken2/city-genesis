@@ -35,6 +35,12 @@ using UnityEngine.UI;
 /// 適切なSpriteを取得する。未設定ビットのSpriteはnullになり、そのビットのアイコンは
 /// スキップされる。
 ///
+/// アイコンで表現しないビット
+/// --------------------------
+/// 火災系の2ビット(ALERT_AGENT_ON_FIRE / ALERT_AGENT_ACCIDENTAL_FIRE)はアイコンではなく
+/// 3Dパーティクル(炎・煙)で表現する。本マネージャはAPI応答をそのまま FireEffectManager へ
+/// 渡すだけで、アイコンは生成しない(表示フィルタと表示トグルには追従させる)。
+///
 /// 表示フィルタ
 /// ------------
 /// UI(表示パネルのアラートタブ)から view:change_view の sub_mode でビットマスクが届く。
@@ -62,11 +68,20 @@ public class AlertManager : MonoBehaviour
     private static readonly int[] AGENT_ALERT_BITS =
     {
         Constants.ALERT_AGENT_CONSTRUCTION_SHORTAGE,
-        Constants.ALERT_AGENT_ON_FIRE,
-        Constants.ALERT_AGENT_ACCIDENTAL_FIRE,
         Constants.ALERT_AGENT_CRIME,
         Constants.ALERT_AGENT_CRIME_SIGN,
         Constants.ALERT_AGENT_INFRA_DISCONNECTED,
+    };
+
+    /// <summary>
+    /// 建物(agent)のうち、アイコンではなく3Dパーティクルで表現するアラートビット一覧。
+    /// アイコンは作らないが、表示フィルタのマスクには含める(表示パネルのトグルで
+    /// 炎・煙の表示をON/OFFできるようにするため)。
+    /// </summary>
+    private static readonly int[] AGENT_VFX_BITS =
+    {
+        Constants.ALERT_AGENT_ON_FIRE,
+        Constants.ALERT_AGENT_ACCIDENTAL_FIRE,
     };
 
     /// <summary>道路(path)のアラートビット一覧。アイコンを並べる順序でもある。</summary>
@@ -84,6 +99,7 @@ public class AlertManager : MonoBehaviour
     {
         int mask = Constants.ALERT_DISPLAY_RUIN;
         foreach (int bit in AGENT_ALERT_BITS) mask |= bit;
+        foreach (int bit in AGENT_VFX_BITS) mask |= bit;
         foreach (int bit in PATH_ALERT_BITS) mask |= bit << Constants.ALERT_PATH_MASK_SHIFT;
         return mask;
     }
@@ -114,6 +130,10 @@ public class AlertManager : MonoBehaviour
             if (_uiCanvasRoot != null)
             {
                 _uiCanvasRoot.SetActive(_isVisible);
+            }
+            if (FireEffectManager.Instance != null)
+            {
+                FireEffectManager.Instance.IsVisible = _isVisible;
             }
         }
     }
@@ -217,9 +237,20 @@ public class AlertManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 全てのアラートアイコンをクリアする。ForceReloadAllData 等で一括破棄したい場合に使う。
+    /// 全てのアラート表現(アイコンと火災エフェクト)をクリアする。
+    /// ForceReloadAllData 等で一括破棄したい場合に使う。
     /// </summary>
     public void ClearAll()
+    {
+        ClearIcons();
+        if (FireEffectManager.Instance != null)
+        {
+            FireEffectManager.Instance.ClearAll();
+        }
+    }
+
+    /// <summary>アイコンだけをクリアする。火災エフェクトは FireEffectManager が別に保持する。</summary>
+    private void ClearIcons()
     {
         foreach (var kvp in _icons)
         {
@@ -261,13 +292,21 @@ public class AlertManager : MonoBehaviour
 
     private void ApplyAlerts(AlertsResponse response)
     {
+        // 火災エフェクトはアイコン用のCanvasにもAlertIconFactoryにも依存しないため、
+        // アイコン側の前提が揃っているかに関わらず先に同期する。
+        if (FireEffectManager.Instance != null)
+        {
+            FireEffectManager.Instance.IsVisible = _isVisible;
+            FireEffectManager.Instance.ApplyAlerts(response.agents, _filterMask);
+        }
+
         EnsureUICanvas();
         if (_uiCanvasRect == null) return;
 
         if (AlertIconFactory.Instance == null)
         {
-            // AlertIconFactory がシーンに存在しない場合は表示できない。
-            ClearAll();
+            // AlertIconFactory がシーンに存在しない場合はアイコンを表示できない。
+            ClearIcons();
             return;
         }
 

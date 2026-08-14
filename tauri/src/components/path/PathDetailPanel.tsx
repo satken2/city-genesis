@@ -21,7 +21,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import type { NearbyZoneEntry, PathData } from "../../types";
-import { buildApiUrl } from "../../utils/api";
+import { buildApiUrl, fetchApi } from "../../utils/api";
 import { sendHighlightObjects, sendClearHighlights } from "../../utils/ipc";
 import type { PathInterferenceHighlight } from "../../utils/ipc";
 import { useTemplateMode } from "../../hooks/useTemplateMode";
@@ -171,6 +171,20 @@ export function PathDetailPanel({
       .catch((err) => console.error("Failed to update construction speed:", err));
   }, [pathData, apiBaseUrl, constructionSpeed]);
 
+  /**
+   * 名称(道路名・駅名)を変更する。パスはすべて市が敷設する公共物なので常に変更できる。
+   * 成功後はパス詳細を再取得し、駅情報セクションなど名称を参照する箇所も更新する。
+   */
+  const handleNameSave = useCallback(async (next: string) => {
+    if (!pathData) return;
+    await fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/paths/{id}", String(pathData.path_id)), {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: next }),
+    });
+    setRefreshKey((k) => k + 1);
+  }, [pathData, apiBaseUrl]);
+
   /** 着工と保留を切り替えるトグルハンドラ */
   const handleStatusToggle = useCallback((checked: boolean) => {
     if (!pathData || statusSaving) return;
@@ -293,6 +307,8 @@ export function PathDetailPanel({
         variantName={variantName}
         name={displayName}
         constructionProgress={pathData.construction_progress ?? undefined}
+        onNameSave={handleNameSave}
+        nameValue={pathData.name}
       />
 
       <PathOperationPanel

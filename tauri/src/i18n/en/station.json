@@ -2,8 +2,6 @@
   "station": {
     "sectionTitle": "Station",
     "name": "Station Name",
-    "rename": "Rename",
-    "renameSave": "Save",
     "ridership": "Ridership (est.)",
     "platforms": "Platform List",
     "noPlatforms": "No platforms belong to this station (platforms crossed by the line belong here)",

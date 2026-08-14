@@ -1,0 +1,84 @@
+/* 編集可能なトグル式ラベル。表示時は「テキスト+えんぴつ」、編集時は「入力欄+保存/キャンセル」。
+   エラー文言だけは行を折り返して下段に出すため wrap を許可する。 */
+.editable-label {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.editable-label__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.editable-label__icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 2px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.editable-label__icon-btn:hover {
+  opacity: 1;
+  background: rgba(78, 161, 255, 0.16);
+}
+
+.editable-label__icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+.editable-label__input {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+  padding: 3px 6px;
+  outline: none;
+}
+
+.editable-label__input:focus {
+  border-color: #4ea1ff;
+}
+
+.editable-label__btn {
+  font-size: 0.68rem;
+  padding: 3px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #c5d4e3;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.editable-label__btn:hover:not(:disabled) {
+  background: rgba(78, 161, 255, 0.16);
+  border-color: #4ea1ff;
+}
+
+.editable-label__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.editable-label__error {
+  flex-basis: 100%;
+  font-size: 0.7rem;
+  color: #ff9a9a;
+}

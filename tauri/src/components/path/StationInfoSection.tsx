@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { useMasterData } from "../../contexts/MasterDataContext";
+import { EditableLabel } from "../common/EditableLabel";
 import { PathLink } from "../common/PathLink";
 import { STATUS_ACTIVE } from "../../constants";
 import "./StationInfoSection.css";
@@ -78,11 +79,6 @@ export function StationInfoSection({
 
   const [info, setInfo] = useState<StationInfo | null>(null);
 
-  /* ---- 駅名変更 ---- */
-  const [editingName, setEditingName] = useState(false);
-  const [nameInput, setNameInput] = useState("");
-  const [nameSaving, setNameSaving] = useState(false);
-
   useEffect(() => {
     const controller = new AbortController();
     fetchApi<StationInfo>(
@@ -101,28 +97,14 @@ export function StationInfoSection({
   }, [apiBaseUrl, pathId]);
 
   /** 駅名(=パスの name)を PATCH で保存し、成功したら親にパス詳細を再取得させる。 */
-  const handleRenameSave = useCallback(() => {
-    if (nameSaving) return;
-    const next = nameInput.trim();
-    if (next === "" || next === pathName) {
-      setEditingName(false);
-      return;
-    }
-    setNameSaving(true);
-    fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/paths/{id}", String(pathId)), {
+  const handleRenameSave = useCallback(async (next: string) => {
+    await fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/paths/{id}", String(pathId)), {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: next }),
-    })
-      .then(() => {
-        setEditingName(false);
-        onRenamed();
-      })
-      .catch((err) => {
-        console.error("failed to rename station", err);
-      })
-      .finally(() => setNameSaving(false));
-  }, [apiBaseUrl, pathId, pathName, nameInput, nameSaving, onRenamed]);
+    });
+    onRenamed();
+  }, [apiBaseUrl, pathId, onRenamed]);
 
   return (
     <section className="agent-detail-section">
@@ -130,45 +112,7 @@ export function StationInfoSection({
       <div className="agent-detail-grid">
         <span className="agent-detail-label">{t("station.name")}</span>
         <span className="agent-detail-value">
-          {editingName ? (
-            <span className="station-info__rename">
-              <input
-                className="station-info__rename-input"
-                type="text"
-                value={nameInput}
-                autoFocus
-                disabled={nameSaving}
-                onChange={(e) => setNameInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleRenameSave();
-                  else if (e.key === "Escape") setEditingName(false);
-                }}
-              />
-              <button
-                className="station-info__rename-btn"
-                type="button"
-                disabled={nameSaving}
-                onClick={handleRenameSave}
-              >
-                {t("station.renameSave")}
-              </button>
-            </span>
-          ) : (
-            <span className="station-info__name-display">
-              {pathName}
-              <button
-                className="station-info__rename-btn"
-                type="button"
-                title={t("station.rename")}
-                onClick={() => {
-                  setNameInput(pathName);
-                  setEditingName(true);
-                }}
-              >
-                {t("station.rename")}
-              </button>
-            </span>
-          )}
+          <EditableLabel value={pathName} onSave={handleRenameSave} />
         </span>
         <span className="agent-detail-label">{t("station.ridership")}</span>
         <span className="agent-detail-value">

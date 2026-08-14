@@ -10,6 +10,8 @@
     "sqm": "{{value}} m²",
     "save": "保存",
     "saving": "保存中...",
+    "rename": "名称を変更",
+    "renameFailed": "名称の変更に失敗しました",
     "confirm": "確定",
     "cancel": "キャンセル",
     "processing": "処理中...",

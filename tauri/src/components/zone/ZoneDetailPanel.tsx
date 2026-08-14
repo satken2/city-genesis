@@ -103,6 +103,21 @@ export function ZoneDetailPanel({
     }
   };
 
+  // 地区名の変更。地区は市の行政区画なので常に変更できる。
+  // 名称の編集はバックエンド側で自動管理地区を確定地区へ昇格させる(規制の編集と同じ扱い)。
+  const saveName = async (next: string) => {
+    if (!zoneData) return;
+    const data = await fetchApi<ZoneResponse>(
+      buildApiUrl(apiBaseUrl, "/api/v1/zones/{id}", String(zoneData.zone_id)),
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: next }),
+      }
+    );
+    setZoneData(data.zone);
+  };
+
   // 地区のピン(確定)/ピン解除(自動管理へ戻す)。
   // auto_managed を明示指定した PATCH は、バックエンド側で名前・規制編集による
   // 昇格処理を経由せず送信値がそのまま反映される(ピン操作の専用経路)。
@@ -203,6 +218,8 @@ export function ZoneDetailPanel({
         variantName={t("zone.label", "地区")}
         name={displayName}
         showStatus={false}
+        onNameSave={saveName}
+        nameValue={zoneData.name ?? ""}
       />
 
       {/* Management state section (2状態モデル: 自動管理/確定) */}

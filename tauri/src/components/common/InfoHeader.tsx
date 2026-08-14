@@ -11,10 +11,15 @@
  * iconLabel を指定すると、アイコンを角丸枠で縁取りし、
  * 枠の下部にラベルを黒文字で表示する(公共施設の明示などに使用)。
  * 枠色は既定で黄色。iconFrameColor を渡すと用途ごとに色分けできる。
+ *
+ * onNameSave を渡すと名称がトグル式の編集可能ラベル(EditableLabel)になる。
+ * 名称を変更できるのはプレイヤーが管理する対象(公共施設・パス・地区)だけなので、
+ * 変更可否の判断は呼び出し側が行い、ハンドラの有無で表現する。
  */
 
 import { useTranslation } from "react-i18next";
 import { STATUS_STYLE_MAP } from "../../local-constants";
+import { EditableLabel } from "./EditableLabel";
 import "./InfoHeader.css";
 
 type InfoHeaderProps = {
@@ -36,6 +41,10 @@ type InfoHeaderProps = {
   iconLabel?: string;
   /** 縁取り枠の色(CSSカラー)。未指定なら黄色 */
   iconFrameColor?: string;
+  /** 名称の保存処理。指定すると名称が編集可能ラベルになる。失敗時は例外を投げること */
+  onNameSave?: (next: string) => Promise<void> | void;
+  /** 名称編集時の初期値。name がID表記へのフォールバックの場合に生の名称を渡す */
+  nameValue?: string;
 };
 
 export function InfoHeader({
@@ -48,6 +57,8 @@ export function InfoHeader({
   showStatus = true,
   iconLabel,
   iconFrameColor,
+  onNameSave,
+  nameValue,
 }: InfoHeaderProps) {
   const { t } = useTranslation();
   const style = status !== undefined ? STATUS_STYLE_MAP[status] ?? { bg: "#6b7280", text: "#ffffff" } : { bg: "#6b7280", text: "#ffffff" };
@@ -103,7 +114,16 @@ export function InfoHeader({
         {variantName && (
           <span className="info-header-variant">{variantName}</span>
         )}
-        <span className="info-header-name">{name}</span>
+        {onNameSave ? (
+          <EditableLabel
+            value={nameValue ?? name}
+            displayText={name}
+            textClassName="info-header-name"
+            onSave={onNameSave}
+          />
+        ) : (
+          <span className="info-header-name">{name}</span>
+        )}
       </div>
     </div>
   );

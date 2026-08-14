@@ -10,6 +10,8 @@
     "sqm": "{{value}} m²",
     "save": "Save",
     "saving": "Saving...",
+    "rename": "Rename",
+    "renameFailed": "Failed to rename",
     "minutes": "mins",
     "processing": "Processing...",
     "cancel": "Cancel",

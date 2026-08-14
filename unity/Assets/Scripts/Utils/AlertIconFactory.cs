@@ -16,6 +16,9 @@ using UnityEngine.Serialization;
 /// フィールドを追加し、InitializeAlertIcons() で Dictionary に登録すること。
 /// 建設中アイコン(GetIconForStatusConstructing)はアラートビットではなく
 /// status == STATUS_CONSTRUCTING の場合に利用される。
+///
+/// 火災系の2ビット(ALERT_AGENT_ON_FIRE / ALERT_AGENT_ACCIDENTAL_FIRE)はアイコンを持たない。
+/// 3Dパーティクル(FireEffectManager / FireEffectFactory)で表現するため、ここには登録しない。
 /// </summary>
 public class AlertIconFactory : MonoBehaviour
 {
@@ -36,10 +39,6 @@ public class AlertIconFactory : MonoBehaviour
     [Header("Agent Alert Icons (by bit)")]
     [Tooltip("ALERT_AGENT_CONSTRUCTION_SHORTAGE ビット用アイコン。建設サービス財の調達不足に表示。")]
     [SerializeField] private Sprite agentConstructionShortageIcon;
-    [Tooltip("ALERT_AGENT_ON_FIRE ビット用アイコン。火災発生中の建物に表示。")]
-    [SerializeField] private Sprite agentOnFireIcon;
-    [Tooltip("ALERT_AGENT_ACCIDENTAL_FIRE ビット用アイコン。失火（小火）の建物に表示。")]
-    [SerializeField] private Sprite agentAccidentalFireIcon;
     [Tooltip("ALERT_AGENT_CRIME ビット用アイコン。犯罪が発生した建物に表示。")]
     [SerializeField] private Sprite agentCrimeIcon;
     [Tooltip("ALERT_AGENT_CRIME_SIGN ビット用アイコン。犯罪の兆候(被害度が閾値以下)がある建物に表示。")]
@@ -81,8 +80,6 @@ public class AlertIconFactory : MonoBehaviour
         try
         {
             _alertIcons[("agent", Constants.ALERT_AGENT_CONSTRUCTION_SHORTAGE)] = agentConstructionShortageIcon;
-            _alertIcons[("agent", Constants.ALERT_AGENT_ON_FIRE)]               = agentOnFireIcon;
-            _alertIcons[("agent", Constants.ALERT_AGENT_ACCIDENTAL_FIRE)]       = agentAccidentalFireIcon != null ? agentAccidentalFireIcon : agentOnFireIcon;
             _alertIcons[("agent", Constants.ALERT_AGENT_CRIME)]                 = agentCrimeIcon;
             _alertIcons[("agent", Constants.ALERT_AGENT_CRIME_SIGN)]            = agentCrimeSignIcon;
             _alertIcons[("agent", Constants.ALERT_AGENT_INFRA_DISCONNECTED)]    = agentInfraDisconnectedIcon;

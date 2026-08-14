@@ -162,12 +162,23 @@
 - **1オブジェクトに複数ビットが立っている場合はアイコンを水平に並べる**: 並べ方 `ZoneManager.cs:763` と同じ `(i - (count-1)/2f) * alertIconHorizontalSpacing` 式で中央揃えファンアウト。
 - **アイコンSpriteの選択は AlertIconFactory が担当**: `AlertIconFactory.Instance.GetIconForAgent(bit)` / `GetIconForPath(bit)` を呼び出す。AgentとPathで同じビット値(例: CONSTRUCTION_SHORTAGE=1)でも別のアイコンを割り当てられるよう、ファクトリ内部は `Dictionary<(string entityType, int bit), Sprite>` で保持する。未設定ビットのSpriteはnullになりそのビットのアイコンはスキップされる。AlertIconFactory は BuildingIconFactory / AgentIconFactory / PathIconFactory と同じく `Utils/AlertIconFactory.cs` に配置し、Inspector から名前付き `[SerializeField] Sprite` を割り当てるパターンに従う。
 - **表示フィルタのマスクは agent/path で名前空間を分ける**: UI(表示パネルのアラートタブ)から `view:change_view` の `sub_mode` にビットマスクが届き、`ApplyAlertMode` → `SetFilterMask` に渡る。`ALERT_AGENT_*` と `ALERT_PATH_*` は同じビット値(1/2/4…)を使うため、マスクでは **下位バイト=agent、上位バイト=path(`Constants.ALERT_PATH_MASK_SHIFT`=8シフト)** に分離する。`EnumerateActiveBits` は path のとき比較前にマスクを右シフトして下ろす。既定値は `AlertManager.DefaultFilterMask`(全種別ON)で、`ApplyAlertMode` の未指定時もこれを使う(定数の直書き禁止)。**アラート定数を追加したら `AGENT_ALERT_BITS` / `PATH_ALERT_BITS` の配列とUI側の `ALERT_CARDS` に足すこと**(配列に無いビットは無言で表示されない)。
+- **火災系2ビットはアイコンを作らず `FireEffectManager` に委譲する**: `ALERT_AGENT_ON_FIRE` / `ALERT_AGENT_ACCIDENTAL_FIRE` は `AGENT_ALERT_BITS` ではなく `AGENT_VFX_BITS` に置く。この配列は `DefaultFilterMask` には含めるがアイコン生成には使わないため、表示パネルのトグルはそのまま炎・煙のON/OFFとして効く。`ApplyAlerts` は**アイコン用Canvas/AlertIconFactory の準備前に**火災側へ応答を渡すこと(火災エフェクトはどちらにも依存しないため、シーンにIconFactoryが無くても動く)。`ClearAll` は火災エフェクトも破棄する全消去、`ClearIcons` はアイコンのみ。
 - **廃墟(倒壊)アイコンだけは alert ビットではなく status 由来**: `STATUS_COLLAPSED` の対象は `alert==0` でもバックエンドの `/alerts` が返す(`services/utility/alert.py`)。廃墟は撤去するまで消えず出っぱなしになるため、表示フィルタ専用ビット `Constants.ALERT_DISPLAY_RUIN`(65536。エンティティの `alert` には決して立たない)でON/OFFする。agent/path 共通の1ビット。
 - **フィルタで表示対象が0になった対象はアイコンを破棄する**: `UpdateIcons` は「廃墟表示OFF かつ有効ビット0」なら `DestroyIcons(key)` して抜ける。`/alerts` の応答に含まれる=`newKeys` に入るため、ApplyAlerts 末尾の削除スイープでは消えない。`DestroyIcons` は `_worldPositions` / `_baseScreenPositions` / `_isBehindCache` も揃えて消すこと(`_baseScreenPositions` を残すと `_icons` との件数不一致でスクリーン座標更新が毎フレーム走る)。
 - アイコンサイズは `alertIconSize`(既定100px、シーンでは65px)で Inspector 調整可能。Canvas の `sortingOrder` は `canvasSortingOrder`(既定70)で ZoneManager(60)・旧ConstructionWarning(65)より前面、Tooltip(100)より奥。
 - **リフレッシュタイミング**: `CellDataLoader.ReloadAllData()` 完了後(エポック完了/編集確定後)、`ForceReloadAllDataCoroutine()` 完了後(全量再取得)、`OnCameraCellChanged()` でティア変更セルがあるとき。`Refresh()` は `refreshCooldownSeconds` で間引かれる。`forceRefresh=true` で強制可能(全量リロード時のみ使用)。
 - Image の `raycastTarget=false` により、uGUIの Raycast に干渉しない。3D オブジェクト用の InputHandler には Collider/Tag を持たないのでそちらにも影響しない。
 - 詳細・設計理由は `genesis-docs/docs/programs/アラートフラグ管理.md` 参照。
+
+## 火災エフェクト (FireEffectManager.cs)
+
+- 役割: 火災系アラートビットを3Dパーティクルで描く。`ON_FIRE`=炎+火の粉+黒煙+明滅する点光源、`ACCIDENTAL_FIRE`=薄い白煙のみ。両方立っていれば本格火災を優先するが、**`STATUS_COLLAPSED` の建物は瓦礫のくすぶり(白煙)に落とす**。
+- **HTTP取得は持たない**: `AlertManager.ApplyAlerts` が `GET /api/v1/alerts` の応答をそのまま `ApplyAlerts(agents, filterMask)` で渡す(同じ情報のためにリクエストを2本投げない)。表示トグル `IsVisible` も `AlertManager` から伝播する。
+- **エフェクトは建物GameObjectの子にしない**: 建物はLODの個数上限(`maxDetailedBuildingObjects`)で破棄され得るため、子にすると炎まで消える。ワールド座標の専用ルート下に置く。
+- **既に燃えている建物のエフェクトは作り直さない**: `ApplyAlerts` はカメラのセル跨ぎ(0.5秒間隔)でも呼ばれる。作り直すと煙柱が根元から生え直して目立つため、再生成は種別変更時と寸法が `REBUILD_SIZE_RATIO` 倍以上変わったときだけ。
+- 規模の解決は「底面ポリゴンの外接矩形(中心から遠い側の辺)」と「描画中メッシュのAABB上端 → 階数×階高 → 既定値」。建物未ロードでも既定値で成立する。
+- `TransitOverlayManager` 等と同じく `[RuntimeInitializeOnLoadMethod(AfterSceneLoad)]` で自己生成するため、シーンへの事前配置は不要。
+- 詳細は `genesis-docs/docs/geometries/S_火災エフェクトの描画.md` 参照。
 
 ## 公共交通オーバーレイ (TransitOverlayManager.cs)
 
