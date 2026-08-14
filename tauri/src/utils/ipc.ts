@@ -316,6 +316,22 @@ export async function sendEditParcelFinishShapeEdit(): Promise<void> {
 }
 
 /**
+ * `edit_zone:finish_merge`
+ * 地区編集モードの地区統合について、UI側での確定/取消の結果を Unity へ返す。
+ * merged=true は「UI側が POST /api/v1/zones/{id}/merge の送信に成功した」の意味で、
+ * Unity は地区・道路を再取得して統合結果を描画へ反映する。
+ * merged=false は取消で、Unity は確定待ち状態を解除するだけ(地区編集モードは継続)。
+ */
+export async function sendEditZoneFinishMerge(merged: boolean): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "zone_merge",
+    entity: null,
+    action: "edit_zone:finish_merge",
+    params: { merged: merged ? 1 : 0 },
+  });
+}
+
+/**
  * `parcel:show_front_path`
  * 土地区画詳細パネルの表示中、選択中区画の接道(front_path)を Unity の3Dビュー上に
  * 青い矢印で可視化するよう指示する。矢印は接道辺の境界をまたぐように描画される。
@@ -872,6 +888,15 @@ export const IPC_EVENT_EDIT_PARCEL_UPDATE_SHAPE = "edit_parcel:update_shape";
 
 /** 地区編集モードで選択中地区が変化した通知(Unity → UI)。zone_id=0 は選択なし。 */
 export const IPC_EVENT_EDIT_ZONE_SELECTED = "edit_zone:selected";
+
+/**
+ * 地区編集モードの統合ツールで、統合元と統合先が決まった通知(Unity → UI)。
+ * ペイロードは { target_zone_id, target_zone_name, source_zone_id, source_zone_name }。
+ * 地区がひとつ消える不可逆操作のため Unity は送信せず、アイコンパネルがこれを受けて
+ * 確定専用の小ウィンドウ(`zone_merge`)を開き、そこの確定ボタンで UI が送信する
+ * (結果は `sendEditZoneFinishMerge` で Unity へ返す)。
+ */
+export const IPC_EVENT_EDIT_ZONE_REQUEST_MERGE = "edit_zone:request_merge";
 
 /** 3Dビュー上でオブジェクトが選択された */
 export const IPC_EVENT_WORLD_SELECT_OBJECT = "world:select_object";

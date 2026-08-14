@@ -91,13 +91,12 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 - `InputHandler` は `CameraController.IsMouseDragging` がtrueの間、ホバーをクリアし、ペンディング中のクリック・ドラッグを破棄する。
 - `CameraController` は `IsPendingDrag` の間は `InputHandler` 側のクリック候補記録を許容する（`IsPendingDrag` は `IsMouseDragging` ではない）。
 - 編集ハンドル（道路の制御点や土地区画の頂点）上でドラッグを開始した場合、`CameraController` はドラッグを開始しない。
-- 地区編集モード中は `CameraController` の左ドラッグ移動を無効化する。
+### 3.3. ドラッグを持たないモード
 
-### 3.3. 地区ドラッグ
-
-地区編集モード（`MODE_ZONE_EDIT`）では、地形または道路オブジェクト上で左ドラッグを開始した際に、マウス位置が地区ポリゴン内であれば地区ドラッグとして処理される。
-地区ドラッグ中はホバーしている道路をハイライトし、ドラッグ終了時にその道路を地区に追加する。
-地区ドラッグはノードドラッグや地形ドラッグよりも優先される。
+ブルドーザ（`MODE_REMOVE`）、パス結合・分割の対象選択（`MODE_PATH_MERGE` / `MODE_PATH_SPLIT`）、地区編集（`MODE_ZONE_EDIT`）はクリックのみで操作する。
+これらのモードでは `StartDrag` / `StartTerrainDrag` の冒頭で即座に return し、ドラッグ状態に入らない
+（入らないと既定の経路で道路エディタのドラッグ処理へフォールバックしてしまう）。
+地区編集の左ドラッグは通常どおりカメラの移動になる。
 
 ### 3.4. 起伏地形での土地区画選択（地形ヒットの区画への差し替え）
 
@@ -223,7 +222,6 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 - UI上をクリックした場合
 - 右クリック回転中の場合
 - 編集ハンドル上をクリックした場合
-- 地区編集モード中の場合
 
 カメラドラッグではドラッグ開始時のカメラ位置・回転を保存し、現在のマウス位置を保存したカメラ状態で地面に投影して差分を計算する。
 これによりカメラの移動と地面座標の計算の間にフィードバックループが生じるのを防ぐ。
@@ -255,17 +253,31 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 ## 7. 地区編集の状態管理
 
 `ZoneEditContext` は地区編集モードの状態を管理するシングルトンである。
-新規作成モードと既存編集モードの2つの状態を持つ。
+ツールは3つあり、Ctrlラジアルメニュー（`ZoneEditControlMenu`。後述の11章と同じ仕組み）で切り替える。
 
-| 状態 | `IsActive` | `CurrentZoneId` | 意味 |
-|------|-----------|----------------|------|
-| 非アクティブ | `false` | `null` | 地区編集モードでない |
-| 新規作成 | `true` | `null` | クリック・ドラッグで新規地区に道路を追加 |
-| 既存編集 | `true` | `int` | クリック・ドラッグで既存地区に道路を追加 |
+| ツール | 右クリック | 左クリック |
+|-------|-----------|-----------|
+| 新規地区の作成（`Create`） | 対象地区を選択（拡張ツールへ切替） | クリックした街路を含む新規地区を作成する |
+| 既存地区の拡張（`Expand`） | 拡張先の地区を選択 | クリックした街路を選択中の地区へ取り込む |
+| 地区の統合（`Merge`） | 統合先の地区を選択 | クリックした地区を選択中の地区へ統合する（UIの確定を挟む） |
 
-新規作成モードでは、1本目の道路をクリックすると追加選択フェーズ（`isInClickMultiSelect`）に入り、
-以降のクリックで接続された `PATH_STREET` を追加・トグルできる。
-既存編集モードでは、クリックで道路を選択し、ドラッグで道路を地区に追加する。
+**3ツール共通で「右クリックで対象地区を選ぶ → 左クリックで適用」**という操作モデルになっている。
+右クリックの対象は道路（その道路の `zone_id`）と地区の面（カーソル下の地区ポリゴン）の両方で、
+地区の外で右クリックするか Esc を押すと選択が解除される。
+
+選択中の地区は次の2か所で常に示される。
+
+- **カーソル脇のHUD**（`CursorStatusHud`）: 現在ツールのアイコン＋選択中地区の識別色チップ＋地区名。
+  新規作成ツールのときは「これから作る地区の色」を表示する（色はツールを選び直すたびに引き直される）。
+- **3Dビューの枠線**: 地区編集中は地区枠線を太く・地形や建物に隠れないように描き、選択中の地区はさらに太くする。
+
+新規作成の識別色はUnityが決めて `POST /api/v1/zones/` の `color` として送るため、
+カーソル脇に提示した色がそのまま作られる地区の色になる。
+
+作成と拡張はUnityが直接バックエンドへ送信する（3Dジェスチャで完結する操作）。
+統合だけは地区がひとつ消える不可逆操作のため、Unityは `edit_zone:request_merge` をUIへ送るだけにし、
+確定専用の小ウィンドウ（`zone_merge`）の確定ボタンでUI側が `POST /api/v1/zones/{id}/merge` を送る
+（結果は `edit_zone:finish_merge` で戻る）。
 
 ## 8. 土地区画形状編集のドラッグ処理
 
@@ -287,7 +299,7 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 | `STATE_NORMAL` | `ALL_NORMAL` | 各エディタの終了処理 |
 | `STATE_EDIT_PATH` | `ROAD_CONSTRUCTION` | `RoadPlanManager.InitializeRoadPlacement` |
 | `STATE_EDIT_BUILDING` | `BUILDING_CONSTRUCTION` | `BuildingPlanManager` の初期化 |
-| `STATE_EDIT_ZONE` | `ZONE_EDIT` | `ZoneEditContext.EnterCreateMode` または `EnterEditMode` |
+| `STATE_EDIT_ZONE` | `ZONE_EDIT` | `ZoneEditContext.EnterCreateMode` または `EnterEditMode`（道路のみ地区色分け表示にし、地区枠線を強調） |
 | `STATE_EDIT_PARCEL` | プロパティに応じて切替 | `ParcelEditorManager` の初期化 |
 | `STATE_EDIT_PARCEL_SHAPE` | `PARCEL_SHAPE_EDIT` | `ParcelShapeEditManager.InitializeEditMode` |
 | `STATE_UNLOCK_CELL` | `UNLOCK_CELL` | — |

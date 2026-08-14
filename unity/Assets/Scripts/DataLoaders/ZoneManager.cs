@@ -39,22 +39,37 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
     }
     private Dictionary<int, List<ZoneLineEntry>> zoneLinesByZone = new Dictionary<int, List<ZoneLineEntry>>();
 
-    /// <summary>
-    /// 地区編集中のプレビュー枠線データ。
-    /// ZonePolygonPreview から設定され、本番のzoneLinesByZoneとは別に
-    /// 破線で描画される。キャンセル時や確定後にクリアされる。
-    /// </summary>
-    public class PreviewLineEntry
-    {
-        public Vector3 worldA;
-        public Vector3 worldB;
-    }
-    private List<PreviewLineEntry> previewLines = new List<PreviewLineEntry>();
-    private Color previewLineColor = Color.yellow;
-    private float previewLineThickness = 6f;
-
     private const float LINE_THICKNESS = 5f;
-    private Color zoneLineColor = new Color(0.2f, 0.8f, 1f, 1f); // シアン色
+
+    /// <summary>地区編集モード中の枠線の太さ。通常表示より太くして境界を主役にする。</summary>
+    private const float EDIT_LINE_THICKNESS = 8f;
+
+    /// <summary>地区編集モード中、選択中(拡張先・統合先)の地区の枠線の太さ。</summary>
+    private const float SELECTED_LINE_THICKNESS = 13f;
+
+    /// <summary>
+    /// 枠線を地区の内側へ寄せる量(メートル)。
+    /// 隣り合う地区は境界の街路を共有するためポリゴンの辺がぴったり重なり、
+    /// セットバックしないと2本の枠線が同じ位置に描かれてどちらの色か分からなくなる。
+    /// 内側へずらすことで、境界では2本の線が平行に並んで両方の地区色が読める。
+    /// </summary>
+    private const float OUTLINE_SETBACK = 3.0f;
+
+    /// <summary>
+    /// セットバックのマイター長の上限(セットバック量に対する倍率)。
+    /// 鋭角の頂点では内側オフセットのマイター長が発散するため、ここで打ち切る。
+    /// </summary>
+    private const float OUTLINE_MITER_LIMIT = 4.0f;
+
+    /// <summary>
+    /// 地区編集モード中かどうか(SetEditOutlineMode で切り替える)。
+    /// ONの間は枠線を太くし、マテリアルの _ZTest=Always で地形・建物に隠れないようにする。
+    /// 通常プレイ中は深度テストを残す(全マップの枠線が山や建物を透けて見えると煩雑なため)。
+    /// </summary>
+    private bool editOutlineMode = false;
+
+    /// <summary>地区編集モードで選択中(拡張先・統合先)の地区ID。0 は未選択。</summary>
+    private int selectedZoneId = 0;
 
     private GameObject uiCanvasRoot;
     private Canvas uiCanvas;
@@ -62,6 +77,11 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
 
     private GameObject overlayMeshObj;
     private OverlayMeshRenderer overlayRenderer;
+
+    /// <summary>
+    /// 枠線用マテリアルのインスタンス。地区編集モードの切替で _ZTest を差し替えるため保持する。
+    /// </summary>
+    private Material overlayLineMaterial;
 
     /// <summary>
     /// 地区編集モードで既存地区にホバーした際の半透明フィル描画用レンダラ。
@@ -410,8 +430,49 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         overlayMeshObj = new GameObject("ZoneOverlayMesh");
         DontDestroyOnLoad(overlayMeshObj);
         overlayRenderer = overlayMeshObj.AddComponent<OverlayMeshRenderer>();
-        Material mat = new Material(Shader.Find("Custom/OverlayLine"));
-        overlayRenderer.Initialize(mat);
+        overlayLineMaterial = new Material(Shader.Find("Custom/OverlayLine"));
+        ApplyOutlineDepthTest();
+        overlayRenderer.Initialize(overlayLineMaterial);
+    }
+
+    /// <summary>
+    /// 枠線マテリアルの深度テストを、現在のモードに合わせて設定する。
+    /// 地区編集中は Always(8) にして地形・建物に埋もれず常に手前へ描き、
+    /// 通常プレイ中は既定の LEqual(4) に戻す。
+    /// </summary>
+    private void ApplyOutlineDepthTest()
+    {
+        if (overlayLineMaterial == null) return;
+        overlayLineMaterial.SetFloat(
+            "_ZTest",
+            (float)(editOutlineMode
+                ? UnityEngine.Rendering.CompareFunction.Always
+                : UnityEngine.Rendering.CompareFunction.LessEqual));
+    }
+
+    /// <summary>
+    /// 地区編集モードの枠線表示(太線＋深度テスト無効)を切り替える。
+    /// ZoneEditContext の EnterCreateMode / EnterEditMode / Exit から呼ばれる。
+    /// </summary>
+    public void SetEditOutlineMode(bool enabled)
+    {
+        if (editOutlineMode == enabled) return;
+        editOutlineMode = enabled;
+        ApplyOutlineDepthTest();
+        // 太さが変わるためオーバーレイを次のUpdateで必ず描き直す
+        lastCamPos = Vector3.negativeInfinity;
+    }
+
+    /// <summary>
+    /// 地区編集モードで選択中(拡張先・統合先)の地区を設定する。
+    /// 選択中の地区は枠線をさらに太く描き、カーソルHUDの色チップと合わせて
+    /// 「いまどの地区に対して操作しているか」を3Dビュー上で示す。0 で選択解除。
+    /// </summary>
+    public void SetSelectedZone(int zoneId)
+    {
+        if (selectedZoneId == zoneId) return;
+        selectedZoneId = zoneId;
+        lastCamPos = Vector3.negativeInfinity;
     }
 
     /// <summary>
@@ -613,23 +674,8 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         text.text = zone.name;
         text.fontSize = 35;
 
-        // OSにインストールされたフォントから、多言語対応のものを優先して使用する。
-        // 指定したフォント名のうち、OSに存在する最初のフォントが動的に生成される。
-        // Yu Gothic UI / Meiryo は日本語・英語・数字に加え、キリル文字・アラビア文字・
-        // タイ文字・CJK統合漢字など広範囲のグリフを含むWindows標準フォントである。
-        // Microsoft YaHei UI（簡体字中国語）、Malgun Gothic（韓国語）、Leelawadee UI（タイ語）、
-        // Segoe UI / Arial もフォールバック候補として指定し、表示環境に応じた最適なフォントを選択する。
-        string[] preferredFonts = new string[] {
-            "Yu Gothic UI",
-            "Meiryo",
-            "Microsoft YaHei UI",
-            "Malgun Gothic",
-            "Leelawadee UI",
-            "Segoe UI",
-            "Arial"
-        };
-        Font osFont = Font.CreateDynamicFontFromOSFont(preferredFonts, text.fontSize);
-        text.font = osFont != null ? osFont : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        // 地区名は多言語を含むため、OSの多言語対応フォントを優先して使用する(UiFontProvider)。
+        text.font = UiFontProvider.GetFont(text.fontSize);
         text.color = Color.white;
         text.alignment = TextAnchor.MiddleCenter;
 
@@ -722,6 +768,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
 
     /// <summary>
     /// ゾーンのアウトラインライン（枠線）をワールド座標付きで生成する。
+    /// 隣接地区と線が重ならないよう、ポリゴンを OUTLINE_SETBACK だけ内側へオフセットしてから描く。
     /// 地形起伏に追従するため、長いセグメントは細分化して各端点の地面高さをサンプリングする。
     /// 実際の描画は OverlayMeshRenderer で行う。
     /// </summary>
@@ -732,14 +779,17 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         float[][] polygon = zone.GetPolygonArray();
         if (polygon == null || polygon.Length < 3) return;
 
+        Vector2[] outline = BuildSetbackOutline(polygon, OUTLINE_SETBACK);
+        if (outline == null) return;
+
         // 1. 枠線の生成（地形起伏に対応するため、長いセグメントは分割）
         var entries = new List<ZoneLineEntry>();
-        for (int i = 0; i < polygon.Length; i++)
+        for (int i = 0; i < outline.Length; i++)
         {
-            int nextI = (i + 1) % polygon.Length;
+            int nextI = (i + 1) % outline.Length;
 
-            Vector2 p1 = new Vector2(polygon[i][0], polygon[i][1]);
-            Vector2 p2 = new Vector2(polygon[nextI][0], polygon[nextI][1]);
+            Vector2 p1 = outline[i];
+            Vector2 p2 = outline[nextI];
 
             float dist = Vector2.Distance(p1, p2);
             const float maxSegmentLength = 5.0f;
@@ -766,39 +816,84 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         zoneLinesByZone[zone.zone_id] = entries;
     }
 
+    /// <summary>
+    /// 地区ポリゴン(XZ平面)を、指定量だけ内側へ平行オフセットした輪郭を返す。
+    ///
+    /// 各頂点を「前後の辺の内向き法線を平均した方向」へ、マイター長
+    /// (= 1/dot(二等分方向, 辺の内向き法線)) を掛けた距離だけ動かす。これにより両辺が
+    /// ちょうど setback だけ平行移動した位置で交わる(標準的なマイターオフセット)。
+    /// 鋭角の頂点ではマイター長が発散するため OUTLINE_MITER_LIMIT で打ち切る。
+    ///
+    /// 細長い地区でオフセット量が幅を超えると輪郭が裏返る(自己交差する)が、地区は道路で
+    /// 囲まれた面なのでセットバック(3m)に対して十分な幅がある前提とし、簡易オフセットに留める。
+    /// </summary>
+    private static Vector2[] BuildSetbackOutline(float[][] polygon, float setback)
+    {
+        int n = polygon.Length;
+        var src = new Vector2[n];
+        for (int i = 0; i < n; i++)
+        {
+            float[] p = polygon[i];
+            if (p == null || p.Length < 2) return null;
+            src[i] = new Vector2(p[0], p[1]);
+        }
+
+        // 符号付き面積で巻き方向を判定する。内向きの法線は巻き方向で左右が入れ替わる。
+        float area2 = 0f;
+        for (int i = 0; i < n; i++)
+        {
+            Vector2 a = src[i];
+            Vector2 b = src[(i + 1) % n];
+            area2 += a.x * b.y - b.x * a.y;
+        }
+        // 反時計回り(area2>0)なら、進行方向の左が内側。時計回りなら右が内側。
+        float inwardSign = area2 > 0f ? 1f : -1f;
+
+        var result = new Vector2[n];
+        for (int i = 0; i < n; i++)
+        {
+            Vector2 prev = src[(i - 1 + n) % n];
+            Vector2 cur = src[i];
+            Vector2 next = src[(i + 1) % n];
+
+            Vector2 dirIn = (cur - prev);
+            Vector2 dirOut = (next - cur);
+            if (dirIn.sqrMagnitude < 1e-8f || dirOut.sqrMagnitude < 1e-8f)
+            {
+                result[i] = cur;
+                continue;
+            }
+            dirIn.Normalize();
+            dirOut.Normalize();
+
+            // 進行方向に対する左法線 (-y, x)。inwardSign で内向きへ揃える。
+            Vector2 nIn = new Vector2(-dirIn.y, dirIn.x) * inwardSign;
+            Vector2 nOut = new Vector2(-dirOut.y, dirOut.x) * inwardSign;
+
+            Vector2 bisector = nIn + nOut;
+            if (bisector.sqrMagnitude < 1e-8f)
+            {
+                // 折り返し(180°)の頂点はマイターが定義できないので、片側の法線で逃がす
+                result[i] = cur + nOut * setback;
+                continue;
+            }
+            bisector.Normalize();
+
+            // マイター長 = 1 / cos(半角) = 1 / dot(bisector, 法線)
+            float cos = Vector2.Dot(bisector, nOut);
+            float miter = Mathf.Abs(cos) < 1e-4f ? OUTLINE_MITER_LIMIT : 1f / cos;
+            miter = Mathf.Clamp(miter, -OUTLINE_MITER_LIMIT, OUTLINE_MITER_LIMIT);
+
+            result[i] = cur + bisector * (setback * miter);
+        }
+        return result;
+    }
+
     private void RemoveZoneLines(int zoneId)
     {
         if (zoneLinesByZone.ContainsKey(zoneId))
         {
             zoneLinesByZone.Remove(zoneId);
-        }
-    }
-
-    /// <summary>
-    /// プレビュー用の枠線データを設定する。
-    /// ZonePolygonPreview から呼び出され、地区編集中のリアルタイムプレビューに使用される。
-    /// 本番の地区枠線（zoneLinesByZone）とは独立して管理される。
-    /// </summary>
-    public void SetPreviewLines(List<PreviewLineEntry> lines, Color color, float thickness)
-    {
-        previewLines = lines ?? new List<PreviewLineEntry>();
-        previewLineColor = color;
-        previewLineThickness = thickness;
-    }
-
-    /// <summary>
-    /// プレビュー用の枠線データをクリアする。
-    /// キャンセル時や確定後に呼び出される。
-    /// クリア後もオーバーレイに前フレームの描画が残るため、
-    /// カメラ位置のトラッキングをリセットして次のUpdateで
-    /// 必ず再描画が行われるようにする。
-    /// </summary>
-    public void ClearPreviewLines()
-    {
-        if (previewLines.Count > 0)
-        {
-            previewLines.Clear();
-            lastCamPos = Vector3.negativeInfinity;
         }
     }
 
@@ -817,10 +912,9 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         Quaternion currentCamRot = cam.transform.rotation;
         bool posChanged = Vector3.Distance(currentCamPos, lastCamPos) > CAMERA_POS_THRESHOLD;
         bool rotChanged = Quaternion.Angle(currentCamRot, lastCamRot) > CAMERA_ROT_THRESHOLD;
-        // カメラが動いていない場合、本番の枠線位置は変わらないため通常はスキップする。
-        // ただし地区編集中のプレビュー枠線が存在する場合は、リアルタイム描画のために
-        // 更新を継続する必要がある。
-        if (!posChanged && !rotChanged && previewLines.Count == 0)
+        // カメラが動いていない場合、枠線の位置もラベルの位置も変わらないためスキップする
+        // (枠線の太さ・選択地区の変化で描き直しが要るときは lastCamPos をリセットしてある)。
+        if (!posChanged && !rotChanged)
         {
             return;
         }
@@ -840,12 +934,17 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         {
             overlayRenderer.BeginFrame();
 
-            // 枠線を描画
+            // 枠線を描画。地区編集中は太く(選択中の地区はさらに太く)して境界を主役にする。
             foreach (var kvp in zoneLinesByZone)
             {
                 int zoneId = kvp.Key;
                 var entries = kvp.Value;
                 Color outlineColor = GetZoneColor(zoneId, 1f); // 100% 不透明度
+                float thickness = LINE_THICKNESS;
+                if (editOutlineMode)
+                {
+                    thickness = (zoneId == selectedZoneId) ? SELECTED_LINE_THICKNESS : EDIT_LINE_THICKNESS;
+                }
                 for (int i = 0; i < entries.Count; i++)
                 {
                     ZoneLineEntry entry = entries[i];
@@ -867,37 +966,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
                         if (da < 0f) ca = p; else cb = p;
                     }
 
-                    overlayRenderer.AddSolidLine(ca, cb, outlineColor, LINE_THICKNESS);
-                }
-            }
-
-            // プレビュー枠線の描画（地区編集中のリアルタイムConvexHullプレビュー）
-            // 本番の地区枠線と同じOverlayMeshRendererで破線として描画される。
-            // プレビューはキャンセル時や確定時にクリアされる。
-            if (previewLines.Count > 0)
-            {
-                for (int i = 0; i < previewLines.Count; i++)
-                {
-                    PreviewLineEntry entry = previewLines[i];
-
-                    Vector3 ca = entry.worldA;
-                    Vector3 cb = entry.worldB;
-
-                    float da = nearPlane.GetDistanceToPoint(ca);
-                    float db = nearPlane.GetDistanceToPoint(cb);
-
-                    if (da < 0f && db < 0f)
-                        continue;
-
-                    if (da < 0f || db < 0f)
-                    {
-                        Vector3 dir = cb - ca;
-                        float t = da / (da - db);
-                        Vector3 p = ca + dir * t;
-                        if (da < 0f) ca = p; else cb = p;
-                    }
-
-                    overlayRenderer.AddDashedLine(ca, cb, previewLineColor, previewLineThickness);
+                    overlayRenderer.AddSolidLine(ca, cb, outlineColor, thickness);
                 }
             }
 

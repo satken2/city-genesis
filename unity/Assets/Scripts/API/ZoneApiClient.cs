@@ -102,6 +102,14 @@ public class CreateZoneRequest
     /// </summary>
     public int[] path_ids;
     public string name;
+
+    /// <summary>
+    /// 地区の識別色("#rrggbb")。地区編集モードのUnityが作成前にカーソル脇へ提示した色を
+    /// そのまま送り、提示した色と実際に作られる地区の色を一致させる。
+    /// null を送るとバックエンドがランダム生成する(NullValueHandling.Ignore でキーごと省かれる)。
+    /// </summary>
+    public string color;
+
     public int? allowed_bd_mask;
     public float? limit_volume_ratio;
     public float? limit_height;

@@ -36,8 +36,8 @@ public class BuildingManager : BaseApiDataManager
 
     /// <summary>
     /// 土地区画ID（agents.parcel_id）→ その区画に建つ建物agent_idの集合の逆引きインデックス。
-    /// 地区拡張ドラッグ中に「街路に面する区画」から「その区画上の建物」をフロントだけで解決し、
-    /// 地区色を波及させるために使う。buildingDataCache への登録は必ず RegisterBuildingDataToCache を通し、
+    /// 「この区画の上に建っている建物」を全建物走査なしで解決するために使う。
+    /// buildingDataCache への登録は必ず RegisterBuildingDataToCache を通し、
     /// 削除は SyncBuildingsInCells / ClearAllCells で同期すること（buildingIdByInfraNodeId と同じ管理規約）。
     /// </summary>
     private Dictionary<int, HashSet<int>> buildingIdsByParcel = new Dictionary<int, HashSet<int>>();
@@ -1152,7 +1152,7 @@ public class BuildingManager : BaseApiDataManager
 
     /// <summary>
     /// 指定した土地区画に建つ建物のagent_id集合を返す。
-    /// 地区拡張ドラッグ中に、街路に面する区画上の建物へ地区色を波及させるために使う。
+    /// 「この区画の上に建っている建物」を全建物走査なしで解決するための汎用の逆引き。
     /// 該当が無ければ空集合を返す。
     /// </summary>
     public IReadOnlyCollection<int> GetBuildingIdsByParcel(int parcelId)

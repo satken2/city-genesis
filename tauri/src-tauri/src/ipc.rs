@@ -553,6 +553,12 @@ pub async fn handle_incoming_message(
         "edit_zone:selected" => {
             let _ = app.emit("edit_zone:selected", envelope.payload);
         }
+        "edit_zone:request_merge" => {
+            // 地区編集モードの統合ツールで統合元・統合先が決まったことをUIへ中継する。
+            // 地区がひとつ消える不可逆操作なので、Unityは送信せず地区詳細パネルの確定ボタンを待つ
+            // (アイコンパネルがこれを受けて統合先の地区詳細ウィンドウを開く)。
+            let _ = app.emit("edit_zone:request_merge", envelope.payload);
+        }
         "edit_prop:update_instances" => {
             let _ = app.emit("edit_prop:update_instances", envelope.payload);
         }

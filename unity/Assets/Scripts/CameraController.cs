@@ -290,12 +290,7 @@ public class CameraController : MonoBehaviour
         bool shiftHeld = InputUtil.KeyPressed(Key.LeftShift) || InputUtil.KeyPressed(Key.RightShift);
         if (shiftHeld && InputUtil.KeyWasPressedThisFrame(Key.F))
         {
-            // 地区拡張の Shift+ドラッグ中は F がフライモードトグルに化けないよう抑止する
-            // (ドラッグは InputHandler のフライモードゲートでキャンセルされるが、二重の安全策)。
-            if (InputHandler.Instance == null || !InputHandler.Instance.IsZoneDragActive)
-            {
-                ToggleFlyMode();
-            }
+            ToggleFlyMode();
             ClampPositionToCityBoundary();
             return;
         }
@@ -1168,17 +1163,6 @@ public class CameraController : MonoBehaviour
         if (InputUtil.LeftMouseWasPressedThisFrame)
         {
             if (isPointerOverUI || isMouseRotating)
-            {
-                return;
-            }
-
-            // 地区編集モード中の Shift+左ドラッグは地区拡張ジェスチャなのでカメラパンを開始しない。
-            // CameraController は DefaultExecutionOrder(-100) で InputHandler より先に走るため、
-            // ここで候補を握ってしまうと同じ 5px 閾値の競争でカメラが必ず勝ってしまう。
-            // 素の左ドラッグ(Shiftなし)は従来どおりカメラパンとして扱う。
-            if ((InputUtil.KeyPressed(Key.LeftShift) || InputUtil.KeyPressed(Key.RightShift))
-                && InputHandler.Instance != null
-                && InputHandler.Instance.GetMode(InputObjectType.TERRAIN) == InputMode.MODE_ZONE_EDIT)
             {
                 return;
             }

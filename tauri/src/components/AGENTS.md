@@ -47,6 +47,7 @@ HUDは**3枚の専用Tauriウィンドウ**に分かれている。Unityの3Dビ
 
 - **ミニメータ(コックピットのピル風ウィジェット)**は`hud.css`の`.hud-mini-meter`系クラスを共有する(ラベル左・バー右で、親グリッドの列幅に伸びてもバー同士が縦に揃う)。`BudgetMiniMeter`=予算見込み/現預金でオーバー時は`--alert`で赤枠、`ScoreMiniMeter`=施政スコア(**スコア定義の見直し中につき値を持たない空メーター**。クリックで`achievements`ウィンドウを開く)。
 - **共有部品**: `useHudSession`(session-stateの受信=表示可否/都市名/日付/テンプレートモード/市庁舎ロック/エポック実行中)、`useTutorialHighlight`(チュートリアルのハイライト対象)、`hudCommon.ts`(アイコン定義とウィンドウを開くヘルパ)、`hudMode.ts`。
+- **地区編集の「地区の統合」の確定は `IconPanel` が中継して専用の小ウィンドウに出す**: 地区編集モードは自前のウィンドウを持たない常駐モードでUnityから直接ウィンドウを開けないため、Unityが3Dビューで統合元・統合先を決めた時点で送る `edit_zone:request_merge` を、常駐している `IconPanel` が受けて `zone_merge` ウィンドウ(`zone/ZoneMergeConfirmWindow`)を `params.extra.pendingMerge` 付きで開く。確定時は `POST /api/v1/zones/{id}/merge` を送って結果を `sendEditZoneFinishMerge(true)` でUnityへ返す。**イベントを投げてからウィンドウを開く順序ではパネルの購読が間に合わない**ため、統合内容はイベントではなくウィンドウコンテキストで渡している。**×で閉じられた場合の取消送信は Rust 側(`window.rs` のクローズ処理で `edit_zone:finish_merge {merged:0}`)が担う**(ウィンドウは非表示になるだけでReactのアンマウント処理が走らず、パネル任せだとUnityが統合待ちのまま取り残されるため)。
 - **ブルドーザ(コックピット)と地区編集(アイコンパネル)は排他の常駐モード**だが、別ウィンドウにボタンがある。状態はTauriのグローバルイベント `hud:mode_changed` を真実源として `hudMode.ts` が全HUDウィンドウで同期する。**モードの副作用(Unityへの`STATE_*`送信・ヒントバー文言・セッションリロード)は操作した側のコンポーネントが実行し、他ウィンドウは表示を合わせるだけ**。
 - **アイコンパネルの高さはReactの実測値でウィンドウに反映する**(`ResizeObserver` → Tauriコマンド `resize_icon_panel`)。アイコン数がテンプレートモードで変わるため。`IconPanel.css`で高さを固定してはならない(ウィンドウ丈との相互参照でリサイズが往復する)。
 - **BGM再生と3Dビューのオブジェクト選択受信は`Cockpit`が受け持つ**。HUD3枚で同じ処理を走らせると多重再生・多重オープンになるため、常に1枚だけ存在するウィンドウに寄せている。

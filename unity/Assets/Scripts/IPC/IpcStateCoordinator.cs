@@ -22,6 +22,7 @@ public class IpcStateCoordinator : MonoBehaviour
             IpcClient.Instance.OnEditParcelStartShapeEdit += HandleEditParcelStartShapeEdit;
             IpcClient.Instance.OnEditParcelCancelShapeEdit += HandleEditParcelCancelShapeEdit;
             IpcClient.Instance.OnEditParcelFinishShapeEdit += HandleEditParcelFinishShapeEdit;
+            IpcClient.Instance.OnEditZoneFinishMerge += HandleEditZoneFinishMerge;
             IpcClient.Instance.OnSessionReset += HandleSessionReset;
             IpcClient.Instance.OnSessionReload += HandleSessionReload;
             IpcClient.Instance.OnSessionForceReload += HandleSessionForceReload;
@@ -44,6 +45,7 @@ public class IpcStateCoordinator : MonoBehaviour
             IpcClient.Instance.OnEditParcelStartShapeEdit -= HandleEditParcelStartShapeEdit;
             IpcClient.Instance.OnEditParcelCancelShapeEdit -= HandleEditParcelCancelShapeEdit;
             IpcClient.Instance.OnEditParcelFinishShapeEdit -= HandleEditParcelFinishShapeEdit;
+            IpcClient.Instance.OnEditZoneFinishMerge -= HandleEditZoneFinishMerge;
             IpcClient.Instance.OnSessionReset -= HandleSessionReset;
             IpcClient.Instance.OnSessionReload -= HandleSessionReload;
             IpcClient.Instance.OnSessionForceReload -= HandleSessionForceReload;
@@ -679,12 +681,15 @@ public class IpcStateCoordinator : MonoBehaviour
             InputSystemManager.Instance.SetModePreset(InputModePreset.ZONE_EDIT);
         }
 
-        // VisualMode: 地区色分け表示。計画中表示・公共施設ハイライトは編集の邪魔になるためOFF
+        // VisualMode: 地区編集の主役は「道路の地区色」と「地区の枠線」の2つだけにする。
+        // 区画・建物まで地区色で塗ると画面が地区色で埋まって道路の所属変化が読み取れなくなるため、
+        // どちらも通常表示のままにする(地区の広がりは枠線が示す)。
+        // 計画中表示・公共施設ハイライトは編集の邪魔になるためOFF。
         if (VisualModeHandler.Instance != null)
         {
-            VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualModeParcel.ZONE_COLOR);
+            VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_NORMAL);
             VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualModePath.ZONE_COLOR);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualModeBuilding.ZONE_COLOR);
+            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
             VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_NORMAL);
             VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.NONE);
             VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.NONE);
@@ -1175,6 +1180,17 @@ public class IpcStateCoordinator : MonoBehaviour
             shapeEditManager.CompleteEditMode();
         }
         ApplyStateNormal();
+    }
+
+    /// <summary>
+    /// edit_zone:finish_merge: UI側の地区統合の確定/取消の結果通知。
+    /// merged=true なら UI が POST /zones/{id}/merge を送信済みなので、地区・道路を再取得する
+    /// (地区編集モードはそのまま継続する。統合はモードを抜ける操作ではないため)。
+    /// </summary>
+    private void HandleEditZoneFinishMerge(bool merged)
+    {
+        Debug.Log($"IpcStateCoordinator: 地区統合の結果を受信 merged={merged}");
+        ZoneEditContext.Instance?.OnMergeFinished(merged);
     }
 
     /// <summary>

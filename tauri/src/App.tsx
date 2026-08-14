@@ -22,6 +22,7 @@ const AgentDetailPanel = lazy(() => import("./components/agent/AgentDetailPanel"
 const CitizenDetailPanel = lazy(() => import("./components/citizen/CitizenDetailPanel").then(m => ({ default: m.CitizenDetailPanel })));
 const ParcelDetailPanel = lazy(() => import("./components/parcel/ParcelDetailPanel").then(m => ({ default: m.ParcelDetailPanel })));
 const ZoneDetailPanel = lazy(() => import("./components/zone/ZoneDetailPanel").then(m => ({ default: m.ZoneDetailPanel })));
+const ZoneMergeConfirmWindow = lazy(() => import("./components/zone/ZoneMergeConfirmWindow").then(m => ({ default: m.ZoneMergeConfirmWindow })));
 const PathConstructionPanel = lazy(() => import("./components/path/PathConstructionPanel").then(m => ({ default: m.PathConstructionPanel })));
 const TrackConstructionPanel = lazy(() => import("./components/path/TrackConstructionPanel").then(m => ({ default: m.TrackConstructionPanel })));
 const PathDetailPanel = lazy(() => import("./components/path/PathDetailPanel").then(m => ({ default: m.PathDetailPanel })));
@@ -60,6 +61,7 @@ const CityMapWindow = lazy(() => import("./components/map/CityMapWindow").then(m
 const GodEditPanel = lazy(() => import("./components/debug/GodEditPanel").then(m => ({ default: m.GodEditPanel })));
 // EpochReport は型のみ参照するため、実体をバンドルに含めない type-only import で取得する
 import type { EpochReport } from "./components/taskbar/EpochResultWindow";
+import type { PendingZoneMerge } from "./components/zone/ZoneMergeConfirmWindow";
 
 import { IconPanel } from "./components/hud/IconPanel";
 import { Cockpit } from "./components/hud/Cockpit";
@@ -77,7 +79,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * 専用パネルが実装されているウィンドウタイプのセット
  * これらのタイプはジェネリックな JSON 表示ではなく、専用コンポーネントでレンダリングする
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "path_build", "track_build", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "settings", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "new_game", "city_rename", "template_editor", "resource_detail", "resource_edit", "prop_placement", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "epoch_result", "quest_complete", "terrain_unlock", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "zone_merge", "path_build", "track_build", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "settings", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "new_game", "city_rename", "template_editor", "resource_detail", "resource_edit", "prop_placement", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "epoch_result", "quest_complete", "terrain_unlock", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map"]);
 
 
 function App() {
@@ -343,6 +345,16 @@ function App() {
                 apiBaseUrl={context.api_base_url}
                 pathTemplate={context.definition.fetch!.path_template}
                 initialEntityId={context.entity?.id ?? ""}
+              />
+            ) : context.window_type === "zone_merge" ? (
+              <ZoneMergeConfirmWindow
+                apiBaseUrl={context.api_base_url}
+                pendingMerge={
+                  (context.params as Record<string, unknown> | null)?.extra
+                    ? ((context.params as Record<string, unknown>).extra as Record<string, unknown>).pendingMerge as PendingZoneMerge | undefined
+                    : undefined
+                }
+                onClose={closeWindow}
               />
             ) : context.window_type === "path_detail" ? (
               <PathDetailPanel

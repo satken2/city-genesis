@@ -20,7 +20,6 @@
 | `UILineRenderer.cs` | UI上の線描画 |
 | `UISoundEffectPlayer.cs` | 効果音再生 |
 | `WindowUtil.cs` | ウィンドウ操作 |
-| `ZonePolygonPreview.cs` | 地区ポリゴンのプレビュー表示 |
 
 `Utils.cs`(Scripts直下)にも以下の汎用処理がある:
 - `ApplyDepthOffsetShader(MeshRenderer, contextName)` ... DepthOffsetSimpleLitシェーダーを一括適用(キャッシュ付き)。PathManager / BuildingManager から使用。

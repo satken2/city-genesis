@@ -151,8 +151,6 @@ public class InputHandler : MonoBehaviour
     private Vector3 pendingClickScreenPos;
     private bool hasPendingTerrainClick = false;
     private Vector3 pendingTerrainClickScreenPos;
-    private bool pendingZoneDrag = false;
-    private int pendingZoneDragId = -1;
     private const float CLICK_DRAG_THRESHOLD = 5f; // ピクセル
 
     // 右クリック候補（押下時に記録し、リリース時にカメラ回転ドラッグが確定しなかった
@@ -165,9 +163,12 @@ public class InputHandler : MonoBehaviour
     private bool hasPendingTerrainRightClick = false;
     private Vector3 pendingRightClickScreenPos;
 
-    // 地区ドラッグ関連
-    private bool isZoneDrag = false;
-    private int draggedZoneId = -1;
+    /// <summary>
+    /// 地区編集モード中に、カーソルが内側にある地区のID(なければ -1)。
+    /// 毎フレームの地区ポリゴン内外判定は地区編集モード中のみ行う(通常プレイでは常に -1)。
+    /// 地形クリックからカーソル下の地区を解決する `TerrainInputHandler` が参照する。
+    /// </summary>
+    public int HoveredZoneId => hoveredZoneId;
     private int hoveredZoneId = -1;
     private Ray lastRay;
 
@@ -178,7 +179,6 @@ public class InputHandler : MonoBehaviour
     private ParcelShapeEditManager cachedParcelShapeEditManager;
     private ResourceAreaEditManager cachedResourceAreaEditManager;
     private ParcelManager cachedParcelManager;
-    private PathManager cachedPathManager;
 
     private void Awake()
     {
@@ -198,7 +198,6 @@ public class InputHandler : MonoBehaviour
         cachedParcelShapeEditManager = FindAnyObjectByType<ParcelShapeEditManager>();
         cachedResourceAreaEditManager = FindAnyObjectByType<ResourceAreaEditManager>();
         cachedParcelManager = FindAnyObjectByType<ParcelManager>();
-        cachedPathManager = FindAnyObjectByType<PathManager>();
 
         // 海面(Sea)オブジェクトにTerrainInputHandlerを付与する。
         // SeaはTerrainManagerが管理しない板ポリゴンでTerrainコンポーネントを持たないため、
@@ -226,8 +225,6 @@ public class InputHandler : MonoBehaviour
             hasPendingTerrainClick = false;
             hasPendingRightClick = false;
             hasPendingTerrainRightClick = false;
-            pendingZoneDrag = false;
-            CancelZoneDrag();
             return;
         }
 
@@ -242,22 +239,6 @@ public class InputHandler : MonoBehaviour
             hasPendingTerrainClick = false;
             hasPendingRightClick = false;
             hasPendingTerrainRightClick = false;
-            pendingZoneDrag = false;
-            CancelZoneDrag();
-            return;
-        }
-
-        // 地区拡張ドラッグ中にマウスを離したフレームは、この後の「UI上ゲート」「カメラドラッグゲート」で
-        // release フレームが握りつぶされてドラッグが宙ぶらりん(commit も cancel もされず
-        // isZoneDrag=true のまま)になるのを防ぐため、ここで確実にドラッグ終了処理を行う。
-        // 地区編集では地区名ラベル(クリック可能=GraphicRaycaster対象)が地区中心に表示されるため、
-        // 拡張ドラッグの終点がラベル上に重なると下の IsPointerOverGameObject ゲートに掛かって
-        // EndDrag が飛ばされ、バックエンドへの一括割当(POST /paths/batch-zone)が送られないバグがあった。
-        // (フライモード・ラジアルメニュー中は上のゲートで既に CancelZoneDrag 済みなのでここには来ない。
-        //  地区ドラッグの終端処理は EndDrag 内でマウス位置から直接レイキャストするため posX/posZ 更新前でも正しい)
-        if (isZoneDrag && InputUtil.LeftMouseWasReleasedThisFrame && Camera.main != null)
-        {
-            EndDrag();
             return;
         }
 
@@ -271,7 +252,6 @@ public class InputHandler : MonoBehaviour
             hasPendingTerrainClick = false;
             hasPendingRightClick = false;
             hasPendingTerrainRightClick = false;
-            pendingZoneDrag = false;
             return;
         }
 
@@ -289,7 +269,6 @@ public class InputHandler : MonoBehaviour
             hasPendingTerrainClick = false;
             hasPendingRightClick = false;
             hasPendingTerrainRightClick = false;
-            pendingZoneDrag = false;
             return;
         }
 
@@ -301,13 +280,13 @@ public class InputHandler : MonoBehaviour
             return;
         }
 
-        // 地区編集モード中の Esc は進行中の地区拡張ドラッグのみをキャンセルする
+        // 地区編集モード中の Esc は選択中地区(拡張先・統合先)の選択だけを解除する
         // (モード自体の終了は従来どおりUI起点の STATE_NORMAL に委ねる)。
-        // レイ不変フレームでもドラッグ中は下の早期リターンに達しないため、ここで先に処理する。
+        // レイ不変フレームでも押下は拾いたいため、下の早期リターンより先に処理する。
         if (GetModeForObjectType(InputObjectType.TERRAIN) == InputMode.MODE_ZONE_EDIT
             && InputUtil.KeyWasPressedThisFrame(Key.Escape))
         {
-            CancelZoneDrag();
+            ZoneEditContext.Instance?.SelectZone(0);
         }
 
         // カメラからマウス位置へRayを飛ばす
@@ -351,15 +330,18 @@ public class InputHandler : MonoBehaviour
             // ホバー中の既存地区を半透明フィルでハイライトする(ホバー地区が変わった時のみ再生成)。
             ZoneManager.Instance?.SetHoverFillZone(hoveredZoneId);
 
-            // 地区内部のツールチップは拡張ツール時のみ表示する
-            // (作成ツールは道路クリックが主操作。パスホバー優先のためパスがホバー中でない場合のみ)。
-            bool isExpandTool = zoneEditCtx != null && zoneEditCtx.CurrentTool == ZoneEditTool.Expand;
+            // 地区内部のツールチップ(パスホバー優先のため、パスがホバー中でない場合のみ)。
+            // 地区の面をクリックして意味があるのは統合ツールだけなので、それ以外は地区名だけ出す。
             if (hoveredZoneId >= 0 && hoveredZoneId != prevHoveredZoneId && currentHoveredObjectType != InputObjectType.PATH)
             {
-                if (isExpandTool)
+                if (hoveredZoneId > 0)
                 {
                     string zoneName = ZoneManager.Instance?.GetZoneName(hoveredZoneId) ?? "";
-                    TooltipManager.Instance?.Show($"{zoneName}\nShift+ドラッグで地区を拡張");
+                    bool isMergeTool = zoneEditCtx != null && zoneEditCtx.CurrentTool == ZoneEditTool.Merge;
+                    string action = isMergeTool
+                        ? "左クリックで統合 / 右クリックで統合先に選択"
+                        : "右クリックでこの地区を選択";
+                    TooltipManager.Instance?.Show($"{zoneName}\n{action}");
                 }
                 else
                 {
@@ -440,30 +422,6 @@ public class InputHandler : MonoBehaviour
                 pendingClickPoint = validHitPoint;
                 pendingClickObjectType = validHitObjectType;
                 pendingClickScreenPos = InputUtil.MousePosition;
-
-                // 地区拡張のShift+ドラッグ候補を記録する。条件は:
-                // Shift押下 / 地区編集がアクティブ / 拡張ツール / ドラッグ起点の地区が解決できる /
-                // 地形モードが地区編集(MODE_ZONE_EDIT)。起点地区は「地区ポリゴン内部」または
-                // 「地区所属の道路上」で解決する(ResolveZoneDragSourceZone)。
-                // Shift無し(素のドラッグ)はカメラパンに任せ、地区ドラッグを開始しない。
-                int terrainModeForZoneDrag = GetModeForObjectType(InputObjectType.TERRAIN);
-                int sourceZoneId = ResolveZoneDragSourceZone(validHitObject, validHitObjectType);
-                bool shiftHeld = InputUtil.KeyPressed(Key.LeftShift) || InputUtil.KeyPressed(Key.RightShift);
-                var zoneDragCtx = ZoneEditContext.Instance;
-                bool isZoneDragTarget = shiftHeld
-                    && zoneDragCtx != null && zoneDragCtx.IsActive
-                    && zoneDragCtx.CurrentTool == ZoneEditTool.Expand
-                    && sourceZoneId > 0
-                    && terrainModeForZoneDrag == InputMode.MODE_ZONE_EDIT;
-                if (isZoneDragTarget)
-                {
-                    pendingZoneDrag = true;
-                    pendingZoneDragId = sourceZoneId;
-                }
-                else
-                {
-                    pendingZoneDrag = false;
-                }
             }
 
             // 右クリック候補を記録する（即座に発火しない）。
@@ -488,16 +446,6 @@ public class InputHandler : MonoBehaviour
             {
                 hasPendingTerrainClick = true;
                 pendingTerrainClickScreenPos = InputUtil.MousePosition;
-                // レイキャストが何にもヒットしなかった場合は、起点地区は「地区ポリゴン内部」のみで解決する。
-                // Shift+拡張ツール+地区編集モードのときだけ地区拡張ドラッグ候補にする。
-                bool shiftHeldTerrain = InputUtil.KeyPressed(Key.LeftShift) || InputUtil.KeyPressed(Key.RightShift);
-                var zoneDragCtxTerrain = ZoneEditContext.Instance;
-                pendingZoneDrag = shiftHeldTerrain
-                    && zoneDragCtxTerrain != null && zoneDragCtxTerrain.IsActive
-                    && zoneDragCtxTerrain.CurrentTool == ZoneEditTool.Expand
-                    && hoveredZoneId > 0
-                    && GetModeForObjectType(InputObjectType.TERRAIN) == InputMode.MODE_ZONE_EDIT;
-                pendingZoneDragId = hoveredZoneId;
             }
 
             // 右クリック候補を記録する（地形）。リリース時に移動量が閾値未満の場合のみ発火する。
@@ -515,20 +463,11 @@ public class InputHandler : MonoBehaviour
             if (CameraController.Instance != null && CameraController.Instance.IsMouseDragging)
             {
                 hasPendingClick = false;
-                pendingZoneDrag = false;
             }
             else if ((InputUtil.MousePosition - pendingClickScreenPos).magnitude >= CLICK_DRAG_THRESHOLD)
             {
                 hasPendingClick = false;
-                // 地形ヒット時に地区ポリゴン内でドラッグが開始された場合は地区ドラッグを優先する
-                if (pendingZoneDrag)
-                {
-                    StartZoneDrag(pendingZoneDragId);
-                }
-                else
-                {
-                    StartDrag(pendingClickObject, pendingClickPoint, pendingClickObjectType);
-                }
+                StartDrag(pendingClickObject, pendingClickPoint, pendingClickObjectType);
             }
         }
         if (hasPendingTerrainClick)
@@ -536,19 +475,11 @@ public class InputHandler : MonoBehaviour
             if (CameraController.Instance != null && CameraController.Instance.IsMouseDragging)
             {
                 hasPendingTerrainClick = false;
-                pendingZoneDrag = false;
             }
             else if ((InputUtil.MousePosition - pendingTerrainClickScreenPos).magnitude >= CLICK_DRAG_THRESHOLD)
             {
                 hasPendingTerrainClick = false;
-                if (pendingZoneDrag)
-                {
-                    StartZoneDrag(pendingZoneDragId);
-                }
-                else
-                {
-                    StartTerrainDrag();
-                }
+                StartTerrainDrag();
             }
         }
 
@@ -571,7 +502,6 @@ public class InputHandler : MonoBehaviour
             {
                 HandleTerrainClick();
                 hasPendingTerrainClick = false;
-                pendingZoneDrag = false;
             }
 
             // ドラッグ終了
@@ -783,11 +713,13 @@ public class InputHandler : MonoBehaviour
 
         int currentMode = GetModeForObjectType(objectType);
 
-        // ブルドーザ(削除)モードとパス結合/分割の選択モードはクリックのみ対応。ドラッグは
-        // 無効化し、誤って RoadPlanManager 等のドラッグ処理へフォールバックしないよう即座に return する。
+        // ブルドーザ(削除)・パス結合/分割の選択・地区編集はクリックのみ対応。ドラッグは
+        // 無効化し、誤って RoadPlanManager 等のドラッグ処理へフォールバックしないよう即座に return する
+        // (地区編集の左ドラッグはカメラパンに任せる)。
         if (currentMode == InputMode.MODE_REMOVE
             || currentMode == InputMode.MODE_PATH_MERGE
-            || currentMode == InputMode.MODE_PATH_SPLIT)
+            || currentMode == InputMode.MODE_PATH_SPLIT
+            || currentMode == InputMode.MODE_ZONE_EDIT)
         {
             return;
         }
@@ -805,69 +737,14 @@ public class InputHandler : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 地区ポリゴン上でドラッグを開始する。拡張元地区を固定する。
-    /// ドラッグ中になぞった道路は追加予定リストへ溜まり、EndDrag で一括割り当てされる。
-    /// </summary>
-    private void StartZoneDrag(int zoneId)
-    {
-        isDragging = true;
-        isZoneDrag = true;
-        draggedZoneId = zoneId;
-        draggedObject = null;
-        draggedObjectType = -1;
-        dragStartPosition = new Vector3(posX, 0, posZ);
-    }
-
-    /// <summary>
-    /// 地区拡張ドラッグの起点となる「拡張元地区ID」を解決する。
-    /// (1) マウス位置が地区ポリゴン内部にある(hoveredZoneId>0)ならその地区。
-    /// (2) さもなくばヒット対象が道路で、その道路が地区に所属している(zone_id>0)ならその地区
-    ///     (=地区に含まれる道路上からもドラッグを開始できる)。
-    /// (3) どちらでもなければ -1。
-    /// </summary>
-    private int ResolveZoneDragSourceZone(GameObject hitObject, int hitType)
-    {
-        if (hoveredZoneId > 0) return hoveredZoneId;
-
-        if (hitType == InputObjectType.PATH && hitObject != null && cachedPathManager != null)
-        {
-            var pathHandler = hitObject.GetComponent<PathInputHandler>();
-            if (pathHandler != null)
-            {
-                var pathData = cachedPathManager.GetPathData(pathHandler.pathId);
-                if (pathData != null && pathData.zone_id > 0) return pathData.zone_id;
-            }
-        }
-        return -1;
-    }
-
-    /// <summary>
-    /// 進行中の地区拡張ドラッグをキャンセルする(コミットせずに破棄)。
-    /// 追加予定リスト・一時色付け・プレビューを全て元に戻し、ドラッグ状態を解除する。
-    /// フライモード/ラジアルメニューへの遷移や Esc 押下から呼ばれる。
-    /// </summary>
-    private void CancelZoneDrag()
-    {
-        if (!isZoneDrag) return;
-        ZoneEditContext.Instance?.ClearDragPendingPaths();
-        ZoneEditContext.Instance?.ClearDragTempVisuals();
-        isZoneDrag = false;
-        draggedZoneId = -1;
-        isDragging = false;
-        draggedObject = null;
-        draggedObjectType = -1;
-    }
-
-    /// <summary>地区拡張ドラッグが進行中か(CameraController のフライモードトグル抑止判定に使う)。</summary>
-    public bool IsZoneDragActive => isZoneDrag;
-
     private void StartTerrainDrag()
     {
         int currentMode = GetModeForObjectType(InputObjectType.TERRAIN);
 
-        // ブルドーザ(削除)モードとパス分割の分割点選択はクリックのみ対応。地形ドラッグは開始しない。
-        if (currentMode == InputMode.MODE_REMOVE || currentMode == InputMode.MODE_PATH_SPLIT)
+        // ブルドーザ(削除)・パス分割の分割点選択・地区編集はクリックのみ対応。地形ドラッグは開始しない。
+        if (currentMode == InputMode.MODE_REMOVE
+            || currentMode == InputMode.MODE_PATH_SPLIT
+            || currentMode == InputMode.MODE_ZONE_EDIT)
         {
             return;
         }
@@ -994,25 +871,7 @@ public class InputHandler : MonoBehaviour
     {
         Vector3 currentPosition = new Vector3(posX, 0, posZ);
 
-        if (isZoneDrag)
-        {
-            // 地区ドラッグ中はパスを探してハイライト
-            Ray ray = Camera.main.ScreenPointToRay(InputUtil.MousePosition);
-            RaycastHit[] hits = Physics.RaycastAll(ray, rayDistance, rayLayerMask);
-            Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
-
-            foreach (var hit in hits)
-            {
-                int objectType = GetObjectType(hit.collider.gameObject);
-                if (objectType == InputObjectType.PATH)
-                {
-                    var pathHandler = hit.collider.GetComponent<PathInputHandler>();
-                    pathHandler?.onZoneDragHover(draggedZoneId);
-                    break;
-                }
-            }
-        }
-        else if (draggedObjectType == InputObjectType.NODE && draggedObject != null)
+        if (draggedObjectType == InputObjectType.NODE && draggedObject != null)
         {
             var nodeHandler = draggedObject.GetComponent<NodeInputHandler>();
             nodeHandler?.onDragUpdate(currentPosition);
@@ -1070,33 +929,7 @@ public class InputHandler : MonoBehaviour
         {
             Vector3 endPosition = new Vector3(posX, 0, posZ);
 
-            if (isZoneDrag)
-            {
-                // 地区ドラッグ終了: マウス下にパスがあればハイライトを解除する
-                Ray ray = Camera.main.ScreenPointToRay(InputUtil.MousePosition);
-                RaycastHit[] hits = Physics.RaycastAll(ray, rayDistance, rayLayerMask);
-                Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
-
-                foreach (var hit in hits)
-                {
-                    int objectType = GetObjectType(hit.collider.gameObject);
-                    if (objectType == InputObjectType.PATH)
-                    {
-                        var pathHandler = hit.collider.GetComponent<PathInputHandler>();
-                        pathHandler?.onZoneDragEnd(draggedZoneId);
-                        break;
-                    }
-                }
-
-                // ドラッグ中になぞった道路を拡張元地区へ一括で割り当てる。
-                // パス上以外(地形など)で離した場合にも確定させるため、レイキャスト結果に
-                // 依存せずここで必ずコミットする。
-                ZoneEditContext.Instance?.CommitDragPendingPaths(draggedZoneId);
-
-                isZoneDrag = false;
-                draggedZoneId = -1;
-            }
-            else if (draggedObjectType == InputObjectType.NODE && draggedObject != null)
+            if (draggedObjectType == InputObjectType.NODE && draggedObject != null)
             {
                 var nodeHandler = draggedObject.GetComponent<NodeInputHandler>();
                 nodeHandler?.onDragEnd(endPosition);

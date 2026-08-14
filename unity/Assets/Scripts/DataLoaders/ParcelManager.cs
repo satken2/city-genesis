@@ -62,22 +62,12 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
     /// <summary>
     /// 接道街路ID（front_path_id）→ その街路に面する区画IDの集合。
-    /// 地区拡張ドラッグ中に「なぞった街路に面する区画」をフロントだけで解決するための逆引きインデックス
-    /// （バックエンド通信なしで区画・建物へ地区色を波及させる）。
+    /// 「この道路に面している区画」を全区画走査なしで解決するための逆引きインデックス。
     /// 登録は RegisterParcelSpatialIndex、削除は UnregisterParcelSpatialIndex / ClearAllCells で同期する
     /// （parcelIdsByCell と同じ全件走査回避パターン）。front_path_id は parcels の VERSION_TRIGGER_PROPS に
     /// 含まれるため、接道変更時は version が上がり CreateOrUpdateParcelObject 経由で再登録される。
     /// </summary>
     private Dictionary<int, HashSet<int>> parcelIdsByFrontPath = new Dictionary<int, HashSet<int>>();
-
-    /// <summary>
-    /// 地区拡張ドラッグ中の一時的なゾーン上書き（区画ID→ゾーンID）。
-    /// 区画は VisualModeObject を持たず ParcelManager のオーバーレイ描画で色付けするため、
-    /// ドラッグ中の一時色は VisualModeObject.tempZoneId ではなくこの辞書で表現する。
-    /// ZONE_COLOR モードの色解決（ResolveDataVisColor）で GetZoneIdAtPoint より優先して参照される。
-    /// SetTempZoneOverride / ClearTempZoneOverrides で更新し、いずれも ForceOutlineRedraw で即時反映する。
-    /// </summary>
-    private Dictionary<int, int> tempZoneOverrides = new Dictionary<int, int>();
 
     /// <summary>
     /// バックエンドから取得した区画のversionをキャッシュする。
@@ -482,7 +472,6 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         parcelSpatialCache.Clear();
         parcelIdsByCell.Clear();
         parcelIdsByFrontPath.Clear();
-        tempZoneOverrides.Clear();
 
         if (overlayRenderer != null)
         {
@@ -756,7 +745,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
     /// <summary>
     /// 指定した街路（front_path_id）に面する区画IDの集合を返す。
-    /// 地区拡張ドラッグ中に、なぞった街路に面する区画をフロントだけで解決するために使う。
+    /// 「この道路に面している区画」をバックエンド通信なしで解決するための汎用の逆引き。
     /// front_path_id 未取得（スキーマ未再生成）の場合は常に空集合を返す。
     /// </summary>
     public IReadOnlyCollection<int> GetParcelIdsByFrontPath(int pathId)
@@ -766,26 +755,6 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
             return ids;
         }
         return System.Array.Empty<int>();
-    }
-
-    /// <summary>
-    /// 区画に一時的なゾーン上書きを設定する（地区拡張ドラッグ中の色プレビュー用）。
-    /// ZONE_COLOR モードの色解決で GetZoneIdAtPoint より優先される。
-    /// </summary>
-    public void SetTempZoneOverride(int parcelId, int zoneId)
-    {
-        tempZoneOverrides[parcelId] = zoneId;
-        ForceOutlineRedraw();
-    }
-
-    /// <summary>
-    /// 区画の一時ゾーン上書きを全て解除する（ドラッグ確定・キャンセル時）。
-    /// </summary>
-    public void ClearTempZoneOverrides()
-    {
-        if (tempZoneOverrides.Count == 0) return;
-        tempZoneOverrides.Clear();
-        ForceOutlineRedraw();
     }
 
     /// <summary>
@@ -1235,8 +1204,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     /// - 港湾（FILTER_PORT）は沿岸土地区画（PARCEL_SHORE）にのみ建設可能
     /// - それ以外は通常土地区画（PARCEL_LAND）にのみ建設可能
     ///
-    /// ZONE_COLOR モードでは、まず地区拡張ドラッグ中の一時上書き(tempZoneOverrides)を参照し、
-    /// あればその地区色を返す。無ければ worldCenter(パーセル中心のワールド座標)から
+    /// ZONE_COLOR モードでは、worldCenter(パーセル中心のワールド座標)から
     /// 所属地区を空間判定(ZoneManager.GetZoneIdAtPoint)で求め、その地区の識別色を返す。
     /// ParcelSummary には zone_id が含まれないため、地区は空間的に解決する。
     /// どの地区にも属さない区画は null を返して描画をスキップする。
@@ -1254,11 +1222,6 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
             case VisualModeParcel.ZONE_COLOR:
             {
                 if (ZoneManager.Instance == null) return null;
-                // ドラッグ中の一時上書きを最優先（バックエンド通信前のプレビュー色）
-                if (tempZoneOverrides.TryGetValue(parcelId, out int tempZoneId) && tempZoneId > 0)
-                {
-                    return ZoneManager.Instance.GetZoneColor(tempZoneId);
-                }
                 int zoneId = ZoneManager.Instance.GetZoneIdAtPoint(worldCenter);
                 if (zoneId <= 0) return null;
                 return ZoneManager.Instance.GetZoneColor(zoneId);

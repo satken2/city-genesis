@@ -1,0 +1,95 @@
+/**
+ * 地区の統合の確定ウィンドウのスタイル
+ *
+ * 「統合元 → 統合先」を1行で見せ、説明文とボタン2つだけを置く小さなウィンドウ。
+ * 不可逆操作であることが伝わるよう、確定ボタンだけ警告色にする。
+ */
+
+.zone-merge {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.zone-merge-muted {
+  padding: 16px;
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+.zone-merge-pair {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  flex-wrap: wrap;
+}
+
+.zone-merge-arrow {
+  color: #d97706;
+}
+
+/* 消える側は打ち消し線で「無くなる方」だと一目で分かるようにする */
+.zone-merge-source {
+  text-decoration: line-through;
+  opacity: 0.8;
+}
+
+.zone-merge-desc {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.zone-merge-error {
+  margin: 0;
+  font-size: 12px;
+  color: #fca5a5;
+}
+
+.zone-merge-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.zone-merge-confirm-btn,
+.zone-merge-cancel-btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.zone-merge-confirm-btn {
+  border: none;
+  background-color: #d97706;
+  color: #ffffff;
+}
+
+.zone-merge-confirm-btn:hover:not(:disabled) {
+  background-color: #b45309;
+}
+
+.zone-merge-cancel-btn {
+  border: 1px solid #555555;
+  background-color: transparent;
+  color: #cccccc;
+}
+
+.zone-merge-cancel-btn:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.zone-merge-confirm-btn:disabled,
+.zone-merge-cancel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

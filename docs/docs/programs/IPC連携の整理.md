@@ -74,7 +74,9 @@ Offset  8: Ring buffer data (8184 bytes)
 | `edit_building:update_floors`   | `ui -> graphic`  | 建物建設モードにおいて、建物の階数を変更した                |
 | `edit_building:update_visual_variant` | `ui -> graphic` | 建物建設モードにおいて、外観バリアント(visual_variant1/2/3)を変更した |
 | `edit_building:update_effect_range` | `ui -> graphic` | 建物建設モードにおいて、選択中インフラ供給施設(変電所・下水処理場・電波塔など)の効果範囲を3D上に可視化する。`region`(効果範囲の領域。円 `{"type":"circle","center":[x,z],"radius":r}` または不定形 `{"type":"polygon","polygons":[{"exterior":[[x,z]...],"holes":[...]}...]}`。null のときは表示クリア)を含む。値はバックエンドの `POST /api/v1/buildings/preview-effect-range` から取得する。効果範囲は面(フィル)と境界線で可視化し、効果範囲内の土地区画のハイライトは行わない |
-| `edit_zone:selected`            | `graphic -> ui`  | 地区編集モードで選択中地区が変化した（右クリック選択 / Shift+左クリック新規作成 / 選択解除）。`zone_id`=0 は選択なし |
+| `edit_zone:selected`            | `graphic -> ui`  | 地区編集モードで選択中地区（拡張先・統合先）が変化した（右クリック選択 / 新規作成後の自動選択 / 選択解除）。`zone_id`=0 は選択なし |
+| `edit_zone:request_merge`       | `graphic -> ui`  | 地区編集モードの「地区の統合」で統合元と統合先が決まった（`target_zone_id`, `target_zone_name`, `source_zone_id`, `source_zone_name`）。地区がひとつ消える不可逆操作のためUnityは送信せず、常駐する `icon-panel` ウィンドウがこれを受けて確定専用の小ウィンドウ（`zone_merge`）を開き、そこの確定ボタンでUIが `POST /api/v1/zones/{id}/merge` を送る |
+| `edit_zone:finish_merge`        | `ui -> graphic`  | 地区統合の確定／取消の結果（`merged`=1/0）。1 のときUIは送信済みで、Unityは地区・道路を再取得して統合結果を反映する。0 は取消で確定待ちを解除するだけ（確定ウィンドウが×で閉じられたときもRust側が 0 を送る）。いずれも地区編集モードは継続する |
 | `input:query_modes`             | `ui -> graphic`  | デバッグ用: 各オブジェクト種別の入力/表示モードを問い合わせる       |
 | `input:current_modes`           | `graphic -> ui`  | `input:query_modes`への応答、現在の入力/表示モード情報を返す      |
 | `edit_parcel:select_point`      | `graphic -> ui`  | 土地区画作成モードにおいて、3Dビュー上の地点がクリックされた       |
