@@ -55,14 +55,26 @@ type TranslateFn = (key: string, options?: Record<string, unknown>) => string;
  * するため、フロントの i18n 追加が遅れても表示自体は壊れない。
  */
 export function formatL1NotificationMessage(t: TranslateFn, notification: L1Notification): string {
-  // 倒壊は死者の有無で文言が変わるため、キーを分けて差し込む。
+  // 倒壊は死者の有無、公共施設の運営不能は原因(params.reason)で文言キーが変わる。
   let typeKey = notification.type;
   if (notification.type === "collapse" && Number(notification.params.deaths ?? 0) > 0) {
     typeKey = "collapse_with_deaths";
   }
+  const reason = notification.params.reason;
+  if (
+    notification.type === "facility_inoperative" &&
+    typeof reason === "string" &&
+    reason !== "unknown"
+  ) {
+    typeKey = `facility_inoperative_${reason}`;
+  }
   return t(`notifications.types.${typeKey}`, {
     ...notification.params,
-    defaultValue: t("notifications.types.unknown"),
+    // 未知の reason は原因なしの汎用文言へ、未知の type は unknown へ段階的に落とす。
+    defaultValue: t(`notifications.types.${notification.type}`, {
+      ...notification.params,
+      defaultValue: t("notifications.types.unknown"),
+    }),
   });
 }
 

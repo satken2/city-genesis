@@ -12,9 +12,11 @@ import {
   ALERT_AGENT_CRIME,
   ALERT_AGENT_CRIME_SIGN,
   ALERT_AGENT_INFRA_DISCONNECTED,
+  ALERT_AGENT_ICON_BITS,
   ALERT_PATH_CONSTRUCTION_SHORTAGE,
   ALERT_PATH_ACCIDENT,
   ALERT_PATH_NO_STATION_HOUSE,
+  ALERT_PATH_ICON_BITS,
   ALERT_PATH_MASK_SHIFT,
   ALERT_DISPLAY_RUIN,
 } from "../../constants";
@@ -243,7 +245,7 @@ function getLegendInfo(layerId: string, modeId: string): LegendInfo {
   const dummyDescriptions: Record<string, string> = {
     district: "地区の枠線と名称・アイコンを表示します。地区ごとの色分けは建物/区画/道路の「地区別色塗り」モードを使います。",
     terrain: "地形の標高や透明度を変更して表示します。",
-    alert: "街のアラートを種別ごとに表示/非表示できます。上6件が建物、次の3件が道路、最後が倒壊・焼失した廃墟のアイコンです。",
+    alert: "街のアラートを種別ごとに表示/非表示できます。建物・道路のアラートアイコンと、倒壊・焼失した廃墟のアイコンが対象です。",
     cell: "セル単位の境界表示を切り替えます。",
     transit: "設置済みの公共交通路線を種別色の帯で表示します。路線種別ごとに表示/非表示を切り替えられます。",
     prop: "プロップの表示/非表示を切り替えます。",
@@ -255,22 +257,30 @@ function getLegendInfo(layerId: string, modeId: string): LegendInfo {
 }
 
 /**
- * アラート表示フィルタのカード定義。consts.py の ALERT_AGENT_* / ALERT_PATH_* を全種類網羅する。
+ * アラート表示フィルタのカード定義。掲載対象は consts.py の
+ * ALERT_AGENT_ICON_BITS / ALERT_PATH_ICON_BITS(=Unityのビルボードアイコン表示対象)で、
+ * 詳細パネル専用の生産ボトルネック系ビットはここには出さない。
  * 建物(agent)と道路(path)はビット値が重複するため、フィルタマスク上では道路ビットを
  * ALERT_PATH_MASK_SHIFT だけ上位へずらして名前空間を分ける(Unity の AlertManager と同じ規約)。
  * 末尾の ALERT_DISPLAY_RUIN だけは alert ビットではなく status(廃墟)由来のアイコンの表示可否で、
  * 建物・道路の両方に効く。
  */
 const ALERT_CARDS = [
-  { bit: ALERT_AGENT_CONSTRUCTION_SHORTAGE, icon: "alerts/bribery.png", labelKey: "display.alertAgentConstructionShortage" },
-  { bit: ALERT_AGENT_ON_FIRE, icon: "alerts/fire.png", labelKey: "display.alertAgentOnFire" },
-  { bit: ALERT_AGENT_ACCIDENTAL_FIRE, icon: "alerts/smoke.png", labelKey: "display.alertAgentAccidentalFire" },
-  { bit: ALERT_AGENT_CRIME, icon: "alerts/shooting.png", labelKey: "display.alertAgentCrime" },
-  { bit: ALERT_AGENT_CRIME_SIGN, icon: "alerts/siren.png", labelKey: "display.alertAgentCrimeSign" },
-  { bit: ALERT_AGENT_INFRA_DISCONNECTED, icon: "alerts/electricity.png", labelKey: "display.alertAgentInfraDisconnected" },
-  { bit: ALERT_PATH_CONSTRUCTION_SHORTAGE << ALERT_PATH_MASK_SHIFT, icon: "alerts/road.png", labelKey: "display.alertPathConstructionShortage" },
-  { bit: ALERT_PATH_ACCIDENT << ALERT_PATH_MASK_SHIFT, icon: "alerts/car-accident.png", labelKey: "display.alertPathAccident" },
-  { bit: ALERT_PATH_NO_STATION_HOUSE << ALERT_PATH_MASK_SHIFT, icon: "transport/t_train.png", labelKey: "display.alertPathNoStationHouse" },
+  ...[
+    { bit: ALERT_AGENT_CONSTRUCTION_SHORTAGE, icon: "alerts/bribery.png", labelKey: "display.alertAgentConstructionShortage" },
+    { bit: ALERT_AGENT_ON_FIRE, icon: "alerts/fire.png", labelKey: "display.alertAgentOnFire" },
+    { bit: ALERT_AGENT_ACCIDENTAL_FIRE, icon: "alerts/smoke.png", labelKey: "display.alertAgentAccidentalFire" },
+    { bit: ALERT_AGENT_CRIME, icon: "alerts/shooting.png", labelKey: "display.alertAgentCrime" },
+    { bit: ALERT_AGENT_CRIME_SIGN, icon: "alerts/siren.png", labelKey: "display.alertAgentCrimeSign" },
+    { bit: ALERT_AGENT_INFRA_DISCONNECTED, icon: "alerts/electricity.png", labelKey: "display.alertAgentInfraDisconnected" },
+  ].filter((card) => ALERT_AGENT_ICON_BITS.includes(card.bit)),
+  ...[
+    { bit: ALERT_PATH_CONSTRUCTION_SHORTAGE, icon: "alerts/road.png", labelKey: "display.alertPathConstructionShortage" },
+    { bit: ALERT_PATH_ACCIDENT, icon: "alerts/car-accident.png", labelKey: "display.alertPathAccident" },
+    { bit: ALERT_PATH_NO_STATION_HOUSE, icon: "transport/t_train.png", labelKey: "display.alertPathNoStationHouse" },
+  ]
+    .filter((card) => ALERT_PATH_ICON_BITS.includes(card.bit))
+    .map((card) => ({ ...card, bit: card.bit << ALERT_PATH_MASK_SHIFT })),
   { bit: ALERT_DISPLAY_RUIN, icon: "alerts/rubble.png", labelKey: "display.alertDisplayRuin" },
 ];
 

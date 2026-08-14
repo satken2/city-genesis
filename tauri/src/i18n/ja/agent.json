@@ -62,6 +62,30 @@
       "infraDisconnected": {
         "title": "インフラ網未接続",
         "description": "この施設の接続端子にインフラパスが接続されていません。網に接続されるまで供給・受け取りができません。"
+      },
+      "crime": {
+        "title": "犯罪発生",
+        "description": "この建物で犯罪が発生しました。"
+      },
+      "crimeSign": {
+        "title": "犯罪の兆候",
+        "description": "この建物で犯罪の兆候が確認されました。治安の悪化に注意してください。"
+      },
+      "laborShortage": {
+        "title": "労働力不足",
+        "description": "従業員が不足しており、生産・サービス提供が計画を下回っています。"
+      },
+      "materialShortage": {
+        "title": "原材料不足",
+        "description": "原材料の調達が不足しており、生産・サービス提供が計画を下回っています。"
+      },
+      "highSkillShortage": {
+        "title": "専門人材不足",
+        "description": "必要な高スキル人材を確保できておらず、稼働できません。"
+      },
+      "budgetCapped": {
+        "title": "予算不足",
+        "description": "割り当てられた予算が必要額を大きく下回っており、稼働を縮小しています。予算配分を見直してください。"
       }
     },
     "infra": {

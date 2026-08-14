@@ -284,11 +284,16 @@ public static class Constants
     public const int ALERT_AGENT_CRIME = 8;
     public const int ALERT_AGENT_CRIME_SIGN = 16;
     public const int ALERT_AGENT_INFRA_DISCONNECTED = 32;
+    public const int ALERT_AGENT_LABOR_SHORTAGE = 64;
+    public const int ALERT_AGENT_MATERIAL_SHORTAGE = 128;
+    public const int ALERT_AGENT_HIGH_SKILL_SHORTAGE = 256;
+    public const int ALERT_AGENT_BUDGET_CAPPED = 512;
     public const int ALERT_PATH_CONSTRUCTION_SHORTAGE = 1;
     public const int ALERT_PATH_ACCIDENT = 2;
     public const int ALERT_PATH_NO_STATION_HOUSE = 4;
     public const int ALERT_PATH_MASK_SHIFT = 8;
     public const int ALERT_DISPLAY_RUIN = 65536;
+    public const float ALERT_BUDGET_CAPPED_SCALE_THRESHOLD = 0.5f;
 
     public static readonly Dictionary<int, int> VEHICLE_TO_TRAFFIC = new Dictionary<int, int>
     {
@@ -330,4 +335,8 @@ public static class Constants
     public static readonly int[] RAIL_VEHICLE_KEYS = new int[] { VEHICLE_METRO_TRAIN, VEHICLE_PASSANGER_TRAIN, VEHICLE_FREIGHT_TRAIN, VEHICLE_HIGH_SPEED_TRAIN };
 
     public static readonly int[] TENANT_TYPES = new int[] { SPACE_RESIDENCE, SPACE_RETAIL, SPACE_FACTORY, SPACE_OFFICE };
+
+    public static readonly int[] ALERT_AGENT_ICON_BITS = new int[] { ALERT_AGENT_CONSTRUCTION_SHORTAGE, ALERT_AGENT_ON_FIRE, ALERT_AGENT_ACCIDENTAL_FIRE, ALERT_AGENT_CRIME, ALERT_AGENT_CRIME_SIGN, ALERT_AGENT_INFRA_DISCONNECTED };
+
+    public static readonly int[] ALERT_PATH_ICON_BITS = new int[] { ALERT_PATH_CONSTRUCTION_SHORTAGE, ALERT_PATH_ACCIDENT, ALERT_PATH_NO_STATION_HOUSE };
 }

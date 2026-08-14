@@ -62,6 +62,30 @@
       "infraDisconnected": {
         "title": "Not Connected to Infrastructure Network",
         "description": "No infrastructure path is connected to this facility's terminal. It cannot send or receive supplies until it is connected to the network."
+      },
+      "crime": {
+        "title": "Crime Occurred",
+        "description": "A crime has occurred at this building."
+      },
+      "crimeSign": {
+        "title": "Signs of Crime",
+        "description": "Signs of crime have been observed at this building. Watch out for worsening public safety."
+      },
+      "laborShortage": {
+        "title": "Labor Shortage",
+        "description": "Not enough workers are employed, so production and services are falling short of the plan."
+      },
+      "materialShortage": {
+        "title": "Material Shortage",
+        "description": "Raw material procurement is insufficient, so production and services are falling short of the plan."
+      },
+      "highSkillShortage": {
+        "title": "Skilled Staff Shortage",
+        "description": "The required highly skilled staff cannot be secured, so this facility cannot operate."
+      },
+      "budgetCapped": {
+        "title": "Budget Shortfall",
+        "description": "The allocated budget is far below the required amount, so operations have been scaled down. Review the budget allocation."
       }
     },
     "infra": {

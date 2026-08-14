@@ -279,11 +279,16 @@ export const ALERT_AGENT_ACCIDENTAL_FIRE: number = 4;
 export const ALERT_AGENT_CRIME: number = 8;
 export const ALERT_AGENT_CRIME_SIGN: number = 16;
 export const ALERT_AGENT_INFRA_DISCONNECTED: number = 32;
+export const ALERT_AGENT_LABOR_SHORTAGE: number = 64;
+export const ALERT_AGENT_MATERIAL_SHORTAGE: number = 128;
+export const ALERT_AGENT_HIGH_SKILL_SHORTAGE: number = 256;
+export const ALERT_AGENT_BUDGET_CAPPED: number = 512;
 export const ALERT_PATH_CONSTRUCTION_SHORTAGE: number = 1;
 export const ALERT_PATH_ACCIDENT: number = 2;
 export const ALERT_PATH_NO_STATION_HOUSE: number = 4;
 export const ALERT_PATH_MASK_SHIFT: number = 8;
 export const ALERT_DISPLAY_RUIN: number = 65536;
+export const ALERT_BUDGET_CAPPED_SCALE_THRESHOLD: number = 0.5;
 
 export const VEHICLE_TO_TRAFFIC: Record<number, number> = {
   0: 0,
@@ -323,3 +328,7 @@ export const ROAD_VEHICLE_KEYS: number[] = [10, 11, 12, 13];
 export const RAIL_VEHICLE_KEYS: number[] = [20, 21, 22, 23];
 
 export const TENANT_TYPES: number[] = [2, 4, 8, 16];
+
+export const ALERT_AGENT_ICON_BITS: number[] = [1, 2, 4, 8, 16, 32];
+
+export const ALERT_PATH_ICON_BITS: number[] = [1, 2, 4];

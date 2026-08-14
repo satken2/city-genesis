@@ -33,20 +33,15 @@ import {
   STATUS_CONSTRUCTING,
   STATUS_PENDING,
   STATUS_DEMOLISHING,
-  ALERT_AGENT_CONSTRUCTION_SHORTAGE,
-  ALERT_AGENT_ON_FIRE,
-  ALERT_AGENT_ACCIDENTAL_FIRE,
-  ALERT_AGENT_INFRA_DISCONNECTED,
   MODEL_MASHUP
 } from "../../constants";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { useTemplateMode } from "../../hooks/useTemplateMode";
 import { useConstructionBudgetRow } from "../../hooks/useConstructionBudgetRow";
-import shortageIcon from "../../assets/images/ui/agent_panel/bribery.png";
-import fireIcon from "../../assets/images/ui/agent_panel/fire.png";
 import { resolveAgentIcon } from "../../utils/agentIcon";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { InfoHeader } from "../common/InfoHeader";
+import { AgentAlertsPanel } from "./AgentAlertsPanel";
 import { AgentBasicInfoPanel } from "./AgentBasicInfoPanel";
 import { BuildingInfo } from "./BuildingInfo";
 import { BuildingInfoPanel } from "./BuildingInfoPanel";
@@ -515,64 +510,7 @@ export function AgentDetailPanel({
       </>
       )}
 
-      {(() => {
-        const hasShortage = agentData.alert ? (agentData.alert & ALERT_AGENT_CONSTRUCTION_SHORTAGE) !== 0 : false;
-        const hasFire = agentData.alert ? (agentData.alert & ALERT_AGENT_ON_FIRE) !== 0 : false;
-        const hasAccidentalFire = agentData.alert ? (agentData.alert & ALERT_AGENT_ACCIDENTAL_FIRE) !== 0 : false;
-        const hasInfraDisconnected = agentData.alert ? (agentData.alert & ALERT_AGENT_INFRA_DISCONNECTED) !== 0 : false;
-        const hasAlerts = hasShortage || hasFire || hasAccidentalFire || hasInfraDisconnected;
-        if (!hasAlerts) return null;
-
-        return (
-          <div className="agent-detail-alerts">
-            {hasShortage && (
-              <div className="agent-detail-alert-card">
-                <div className="agent-detail-alert-title">
-                  <img src={shortageIcon} alt="shortage" className="agent-detail-alert-icon" />
-                  {t("agent.alerts.constructionShortage.title")}
-                </div>
-                <div className="agent-detail-alert-desc">
-                  {t("agent.alerts.constructionShortage.description")}
-                </div>
-              </div>
-            )}
-            {hasFire && (
-              <div className="agent-detail-alert-card">
-                <div className="agent-detail-alert-title">
-                  <img src={fireIcon} alt="fire" className="agent-detail-alert-icon" />
-                  {t("agent.alerts.onFire.title")}
-                </div>
-                <div className="agent-detail-alert-desc">
-                  {t("agent.alerts.onFire.description")}
-                </div>
-              </div>
-            )}
-            {hasAccidentalFire && (
-              <div className="agent-detail-alert-card">
-                <div className="agent-detail-alert-title">
-                  <img src={fireIcon} alt="fire" className="agent-detail-alert-icon" />
-                  {t("agent.alerts.accidentalFire.title")}
-                </div>
-                <div className="agent-detail-alert-desc">
-                  {t("agent.alerts.accidentalFire.description")}
-                </div>
-              </div>
-            )}
-            {hasInfraDisconnected && (
-              <div className="agent-detail-alert-card">
-                <div className="agent-detail-alert-title">
-                  {/* インフラ未接続の専用アイコンは未制作のため、当面は不足系アイコンを流用する */}
-                  <img src={shortageIcon} alt="infra disconnected" className="agent-detail-alert-icon" />
-                  {t("agent.alerts.infraDisconnected.title")}
-                </div>
-                <div className="agent-detail-alert-desc">
-                  {t("agent.alerts.infraDisconnected.description")}
-                </div>
-              </div>
-            )}
-          </div>
-        );
-      })()}
+      <AgentAlertsPanel alert={agentData.alert} />
 
       {/* マッシュアップ建物のサブ建物配置エディタを開くボタン */}
       {isMashupBuilding && (

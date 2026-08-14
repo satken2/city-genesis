@@ -49,6 +49,10 @@ import type { PathTopologyEditMode } from "./PathTopologyEditPanel";
 import { PathConstructionInfoPanel } from "./PathConstructionInfoPanel";
 import shortageIcon from "../../assets/images/ui/agent_panel/bribery.png";
 import accidentIcon from "../../assets/images/ui/agent_panel/car-accident.png";
+// アラートカード・建設スピードの体裁は経済主体パネルと共有する。各パネルは遅延読み込み
+// (App.tsx の lazy)でCSSもチャンク単位に分割されるため、共有元を明示的に import しないと
+// 当該チャンクが読み込まれていないウィンドウでスタイルが当たらない。
+import "../agent/AgentDetailPanel.css";
 import "./PathDetailPanel.css";
 import rocketIcon from "../../assets/images/ui/rocket.png";
 
