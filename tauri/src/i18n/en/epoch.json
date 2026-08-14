@@ -21,6 +21,16 @@
     "progressFormat": "{{before}}% → {{after}}%",
     "completed": "Completed",
     "sectionStatistics": "Statistics",
+    "sectionScore": "Score",
+    "scoreGain": "Gains",
+    "scoreLoss": "Penalties",
+    "questProgress": "{{completed}} / {{total}} achieved",
+    "questState": {
+      "completed": "Achieved",
+      "active": "In progress",
+      "locked": "Locked",
+      "failed": "Failed"
+    },
     "trendLegend": "Arrows show the trend over the last {{count}} epochs",
     "trendHint": "Trend over the last {{count}} epochs: {{trend}}",
     "trend": {

@@ -9,8 +9,13 @@
  * - クエストストリップ: このエポックで達成したクエスト(お祝いウィンドウの予告)と、
  *   達成間近(進捗70%以上)のアクティブなクエストの進捗バーを横並びで表示する。
  *   達成間近は GET /api/v1/quests のサーバ計算 progress を使う。
- * - 左(主役): 統計タイル。人口/GDP/物価/所得/失業率/医療・栄養・娯楽充足度/
- *   火災/交通事故/犯罪/為替レートを、空き領域いっぱいのグリッドで敷き詰める。
+ * - 左(主役): 達成目標 / 統計タイル / スコア を縦に並べる。左カラムの各ブロックは
+ *   カード(枠)を持たない。中身のタイルがカードなので、入れ子にすると二重枠になるため。
+ *   - 達成目標: 全目標をチェックマーク1個ずつで表し、達成のみ色付きにした簡易表示。
+ *     ホバーで目標名と状態の一覧をポップアップする(GET /api/v1/quests)。
+ *   - 統計: 人口/GDP/物価/所得/失業率/医療・栄養・娯楽充足度/火災/交通事故/犯罪/為替レート。
+ *   - スコア: 当期スコアとその構成(生活水準+住環境-災害ペナルティ)。GET /api/v1/score の
+ *     latest を、達成目標ウィンドウと同じ内訳で軽量に描く(グラフライブラリは使わない)。
  * - 右カラム: 建設状況(道路と公共施設を種別バッジ付きの単一リストにまとめたもの)
  *
  * 統計タイルは2種類の視覚効果を持つ。この2つは独立した軸である。
@@ -92,6 +97,18 @@ export type StatisticsReport = {
    * `population` を加えたもの。
    */
   history?: Record<string, (number | null)[]>;
+};
+
+/**
+ * GET /api/v1/score の latest のうち、スコアブロックで使う項目だけを持つ型。
+ * 達成目標ウィンドウ(AchievementsWindow)が使う全項目は必要ないため部分定義にしている。
+ */
+type ScoreLatest = {
+  city_score: number;
+  city_score_qol: number;
+  city_score_env: number;
+  city_score_cumulative: number;
+  city_score_collapse_penalty: number;
 };
 
 export type EpochReport = {
@@ -231,7 +248,8 @@ export function EpochResultWindow({
 }: EpochResultWindowProps) {
   const { t, i18n } = useTranslation();
   const locale = i18n.language === "ja" ? "ja-JP" : "en-US";
-  const [nearQuests, setNearQuests] = useState<Quest[]>([]);
+  const [quests, setQuests] = useState<Quest[]>([]);
+  const [scoreLatest, setScoreLatest] = useState<ScoreLatest | null>(null);
 
   // エポック結果画面の表示中は専用BGM (bgm-result.mp3) に切り替える
   useEffect(() => {
@@ -241,8 +259,7 @@ export function EpochResultWindow({
     };
   }, []);
 
-  // 達成間近(進捗70%以上・アクティブ・隠しでない)のクエストを取得する。
-  // 「あと少しで達成」を見せて次のエポックの動機付けにする。
+  // 達成目標の一覧(達成状況の簡易表示と達成間近ストリップの元データ)を取得する。
   useEffect(() => {
     const controller = new AbortController();
     (async () => {
@@ -251,31 +268,54 @@ export function EpochResultWindow({
           buildApiUrl(apiBaseUrl, "/api/v1/quests"),
           { signal: controller.signal },
         );
-        const completedIds = new Set(completedQuests.map((q) => q.id));
-        setNearQuests(
-          data.quests
-            .filter(
-              (q) =>
-                q.status === "active" &&
-                !q.hidden &&
-                !q.is_force_completable &&
-                !completedIds.has(q.id) &&
-                q.progress >= NEAR_COMPLETION_THRESHOLD &&
-                q.progress < 1,
-            )
-            .sort((a, b) => b.progress - a.progress)
-            .slice(0, 4),
-        );
+        setQuests(data.quests);
       } catch (err) {
         if (!controller.signal.aborted) {
-          console.error("failed to fetch quests for near-completion strip", err);
+          console.error("failed to fetch quests", err);
         }
       }
     })();
     return () => controller.abort();
+  }, [apiBaseUrl]);
+
+  // 施政スコア(当期スコアとその構成)を取得する。
+  useEffect(() => {
+    const controller = new AbortController();
+    (async () => {
+      try {
+        const data = await fetchApi<{ latest: ScoreLatest }>(
+          buildApiUrl(apiBaseUrl, "/api/v1/score"),
+          { signal: controller.signal },
+        );
+        setScoreLatest(data.latest ?? null);
+      } catch (err) {
+        if (!controller.signal.aborted) {
+          console.error("failed to fetch city score", err);
+        }
+      }
+    })();
+    return () => controller.abort();
+  }, [apiBaseUrl]);
+
+  // 達成間近(進捗70%以上・アクティブ・隠しでない)のクエスト。
+  // 「あと少しで達成」を見せて次のエポックの動機付けにする。
+  const nearQuests = useMemo(() => {
+    const completedIds = new Set(completedQuests.map((q) => q.id));
+    return quests
+      .filter(
+        (q) =>
+          q.status === "active" &&
+          !q.hidden &&
+          !q.is_force_completable &&
+          !completedIds.has(q.id) &&
+          q.progress >= NEAR_COMPLETION_THRESHOLD &&
+          q.progress < 1,
+      )
+      .sort((a, b) => b.progress - a.progress)
+      .slice(0, 4);
     // completedQuests は epoch_confirm から一度だけ渡される静的な配列のため依存に含めない
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiBaseUrl]);
+  }, [quests]);
 
   // 建設状況は道路・公共施設を分けず、種別バッジ付きの単一リストとして表示する。
   const constructionItems = report.construction_progress;
@@ -288,6 +328,24 @@ export function EpochResultWindow({
 
   const stats = report.statistics;
   const trendWindow = stats.trend_window ?? 0;
+
+  // 達成目標の簡易表示用データ。1目標=チェックマーク1個で、達成済みだけ色が付く。
+  // 隠し目標は達成するまで名前を伏せる(達成目標ウィンドウと同じ扱い)。
+  const questSummary = useMemo(() => {
+    const items: QuestCheckItem[] = quests.map((q) => ({
+      id: q.id,
+      name: q.hidden && q.status !== "completed" ? t("achievements.hiddenQuestName") : q.name,
+      state:
+        q.status === "completed"
+          ? "completed"
+          : q.status === "failed"
+            ? "failed"
+            : q.status === "locked"
+              ? "locked"
+              : "active",
+    }));
+    return { items, completedCount: items.filter((i) => i.state === "completed").length };
+  }, [quests, t]);
 
   // 統計タイルの表示データ。値・水準の警戒色・変動方向の3点を1タイルにまとめる。
   const statTiles = useMemo(() => {
@@ -463,11 +521,26 @@ export function EpochResultWindow({
         </div>
       )}
 
-      {/* メインエリア: 統計タイル(主役) + 建設状況 の2カラム */}
+      {/* メインエリア: 達成目標/統計/スコア(主役) + 建設状況 の2カラム */}
       <div className="epoch-result-main">
-        {/* ── 統計タイル ── */}
+        {/* ── 左カラム: 枠を持たないブロックを縦に並べる ── */}
         <div className="epoch-result-col epoch-result-col-stats">
-          <section className="epoch-result-section epoch-result-section-stats">
+          {/* 達成目標: チェックマークの並びで達成数だけを見せる簡易表示 */}
+          <section className="epoch-result-block">
+            <div className="epoch-result-section-head">
+              <h3 className="epoch-result-section-title">{t("achievements.title")}</h3>
+              <span className="epoch-result-section-note">
+                {t("epochResult.questProgress", {
+                  completed: questSummary.completedCount,
+                  total: questSummary.items.length,
+                })}
+              </span>
+            </div>
+            <QuestCheckStrip items={questSummary.items} />
+          </section>
+
+          {/* 統計タイル */}
+          <section className="epoch-result-block">
             <div className="epoch-result-section-head">
               <h3 className="epoch-result-section-title">{t("epochResult.sectionStatistics")}</h3>
               {trendWindow > 0 ? (
@@ -496,6 +569,14 @@ export function EpochResultWindow({
               ))}
             </div>
           </section>
+
+          {/* スコア: 当期スコアとその構成 */}
+          <section className="epoch-result-block">
+            <div className="epoch-result-section-head">
+              <h3 className="epoch-result-section-title">{t("epochResult.sectionScore")}</h3>
+            </div>
+            <ScoreBlock latest={scoreLatest} />
+          </section>
         </div>{/* /.epoch-result-col-stats */}
 
         {/* ── 右カラム: 建設状況(道路・公共施設の統合リスト) ── */}
@@ -514,6 +595,125 @@ export function EpochResultWindow({
         <button className="epoch-result-btn epoch-result-close" onClick={onClose} type="button">
           {t("common.close")}
         </button>
+      </div>
+    </div>
+  );
+}
+
+/** 達成目標の簡易表示1件分。state はチェックマークの見た目を決める。 */
+type QuestCheckItem = {
+  id: number;
+  name: string;
+  state: "completed" | "active" | "locked" | "failed";
+};
+
+/**
+ * 達成目標の簡易表示。1目標につきチェックマークを1個並べ、達成済みだけ色を付ける
+ * (未達成・未解放・失敗はグレー)。個数以上の情報は出さない代わりに、
+ * ホバーで「どれが達成できているのか」の一覧をポップアップする。
+ */
+function QuestCheckStrip({ items }: { items: QuestCheckItem[] }): ReactNode {
+  const { t } = useTranslation();
+
+  if (items.length === 0) {
+    return <p className="epoch-result-empty">{t("achievements.noQuests")}</p>;
+  }
+
+  return (
+    <div className="epoch-result-quest-checks">
+      <div className="epoch-result-quest-check-row">
+        {items.map((item) => (
+          <span
+            key={item.id}
+            className={`epoch-result-quest-check epoch-result-quest-check--${item.state}`}
+            aria-hidden={true}
+          >
+            &#10003;
+          </span>
+        ))}
+      </div>
+      {/* ホバー時のみ表示する内訳。目標数が多いと縦に伸びるためスクロールさせる。 */}
+      <div className="epoch-result-quest-popup" role="tooltip">
+        {items.map((item) => (
+          <div key={item.id} className="epoch-result-quest-popup-row">
+            <span className={`epoch-result-quest-check epoch-result-quest-check--${item.state}`}>
+              &#10003;
+            </span>
+            <span className="epoch-result-quest-popup-name">{item.name}</span>
+            <span className="epoch-result-quest-popup-state">
+              {t(`epochResult.questState.${item.state}`)}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * スコアブロック。当期スコア(大きい数値)と、その構成を1本の帯で示す。
+ *
+ * 構成は達成目標ウィンドウのウォーターフォールと同じ内訳
+ * (生活水準 + 住環境 - 災害ペナルティ = 最終スコア)で、加点(生活水準・住環境)と
+ * 減点(災害ペナルティ)を上下2行の帯に分けて描く。2行の尺度は共通(加点合計=100%)。
+ */
+function ScoreBlock({ latest }: { latest: ScoreLatest | null }): ReactNode {
+  const { t } = useTranslation();
+
+  if (!latest) {
+    return <p className="epoch-result-empty">{t("common.loading")}</p>;
+  }
+
+  const fmt = (v: number) => v.toLocaleString(undefined, { maximumFractionDigits: 1 });
+  const qol = latest.city_score_qol;
+  const env = latest.city_score_env;
+  const penalty = latest.city_score_collapse_penalty;
+  const gross = qol + env;
+  const pct = (v: number) => (gross > 0 ? Math.min(100, Math.max(0, (v / gross) * 100)) : 0);
+
+  return (
+    <div className="epoch-result-score">
+      <div className="epoch-result-score-head">
+        <span className="epoch-result-score-label">{t("achievements.currentScore")}</span>
+        <span className="epoch-result-score-value">{fmt(latest.city_score)}</span>
+        <span className="epoch-result-score-unit">{t("achievements.points")}</span>
+        <span className="epoch-result-score-cumulative">
+          {t("achievements.cumulativeScore")} {fmt(latest.city_score_cumulative)}
+          {t("achievements.points")}
+        </span>
+      </div>
+
+      {/* 加点と減点で行を分ける。2行は同じ尺度(加点合計=100%)なので、
+          帯の長さをそのまま比べればペナルティの重さが分かる。 */}
+      <div className="epoch-result-score-rows">
+        <span className="epoch-result-score-row-label">{t("epochResult.scoreGain")}</span>
+        <div className="epoch-result-score-bar">
+          <span className="epoch-result-score-seg epoch-result-score-qol" style={{ width: `${pct(qol)}%` }} />
+          <span className="epoch-result-score-seg epoch-result-score-env" style={{ width: `${pct(env)}%` }} />
+        </div>
+
+        <span className="epoch-result-score-row-label">{t("epochResult.scoreLoss")}</span>
+        <div className="epoch-result-score-bar">
+          <span
+            className="epoch-result-score-seg epoch-result-score-penalty"
+            style={{ width: `${pct(penalty)}%` }}
+          />
+        </div>
+      </div>
+
+      <div className="epoch-result-score-legend">
+        <span className="epoch-result-score-legend-item">
+          <span className="epoch-result-score-swatch epoch-result-score-qol" />
+          {t("achievements.qolScore")} +{fmt(qol)}
+        </span>
+        <span className="epoch-result-score-legend-item">
+          <span className="epoch-result-score-swatch epoch-result-score-env" />
+          {t("achievements.envScore")} +{fmt(env)}
+        </span>
+        <span className="epoch-result-score-legend-item">
+          <span className="epoch-result-score-swatch epoch-result-score-penalty" />
+          {t("achievements.collapsePenalty")} {penalty > 0 ? `-${fmt(penalty)}` : "0"}
+        </span>
       </div>
     </div>
   );
