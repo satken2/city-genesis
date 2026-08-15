@@ -1,0 +1,65 @@
+/**
+ * 公共サービス充足度メーター(コックピット常駐)のスタイル
+ *
+ * コックピットの内寸(ウィンドウ76px − パネルの上下padding 8px − 枠線1px = 58px)から
+ * このウィジェット自身の上下padding 3px を引いた52pxに収まるよう、
+ * トラック34px + 隙間3px + アイコン14px の縦積みで組む。
+ * ウィジェット全体が1つのボタンなので、棒の隙間を押しても公共施設ウィンドウが開く。
+ */
+
+.psg {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  align-self: stretch;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 3px 6px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.psg:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* 棒1本ぶんの列(上=グラフエリア、下=アイコン) */
+.psg-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 20px;
+}
+
+/*
+ * グラフエリア。この枠の高さがそのまま供給キャパシティを表すため、
+ * 4本とも同じ高さで固定する(サービスごとに単位が違い、絶対量の横比較には意味が無い)。
+ */
+.psg-track {
+  position: relative;
+  width: 100%;
+  height: 34px;
+  border-radius: 2px;
+  background: rgba(148, 163, 184, 0.16);
+  overflow: hidden;
+}
+
+/* 需要量。下端から伸ばす。色(逼迫度)はコンポーネント側でインライン指定する */
+.psg-fill {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  transition: height 0.2s;
+}
+
+.psg-icon {
+  width: 14px;
+  height: 14px;
+  fill: #8ba3bb;
+  pointer-events: none;
+}

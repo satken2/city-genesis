@@ -196,6 +196,19 @@
   flex-wrap: wrap;
 }
 
+/*
+ * 価格の概念を持たないインフラ財（高圧電力・高圧水道）で、価格入力欄の代わりに出す注記。
+ * 需給ドーナツを右端へ押しやらないよう、入力欄群と同じく余った幅を占める。
+ */
+.psp-card__note {
+  flex: 1 1 240px;
+  margin: 0;
+  align-self: center;
+  color: #8ba3bb;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
 .psp-card__gauge {
   display: flex;
   flex-direction: column;

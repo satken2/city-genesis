@@ -2,11 +2,13 @@
  * コックピット(画面下部中央の常駐パネル)
  *
  * プレイ中に最も頻繁に見る情報と操作を1枚に集約する。
- *   [常用ツール4種(2行2列)] [都市名・施政スコア / 日付・予算メータ(2行2列)] [アラート] [エポック処理開始]
+ *   [常用ツール4種(2行2列)] [公共サービス充足度] [都市名・施政スコア / 日付・予算メータ(2行2列)] [アラート] [エポック処理開始]
  *
  * - 常用ツール: 表示切替・都市マップ・地形セル開放・ブルドーザ。
  *   ブルドーザはウィンドウを開かずUnityの削除ステートに入る常駐モードで、
  *   アイコンパネルの地区編集と排他(`hudMode`でウィンドウをまたいで共有)。
+ * - 公共サービス充足度: 電力・水道などの需要/供給キャパシティを縦棒で常時表示する。
+ *   クリックで公共施設ウィンドウを開く。
  * - アラート: L1通知(今すぐ対処が必要な重大事象)が1件以上あると点滅+件数バッジを出す。
  *   点滅で気づける以上プレイヤーの操作を遮る必要はないため、トーストは出さない。
  *
@@ -25,6 +27,7 @@ import { formatEpochDate } from "../../utils/date";
 import { BgmManager } from "../../utils/bgm";
 import { fetchL1Notifications, type L1Notification } from "../../utils/cityNotifications";
 import { BudgetMiniMeter } from "./BudgetMiniMeter";
+import { PublicServiceGauges } from "./PublicServiceGauges";
 import { ScoreMiniMeter } from "./ScoreMiniMeter";
 import { TOOL_ICONS, iconUrl, openRegisteredWindow, type HudIconDef } from "./hudCommon";
 import { setHudMode, useHudMode } from "./hudMode";
@@ -183,6 +186,12 @@ export function Cockpit() {
           );
         })}
       </div>
+
+      <PublicServiceGauges
+        apiBaseUrl={apiBaseUrl}
+        epochExecuting={epochExecuting}
+        onOpen={() => void openRegisteredWindow("public_facilities")}
+      />
 
       <div className="cockpit-status">
         <button

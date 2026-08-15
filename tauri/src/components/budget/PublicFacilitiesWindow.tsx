@@ -9,6 +9,8 @@
  *       （固定価格または原価への乗率）の入力・製造原価・想定最大需要・需給ドーナツを表示する。
  *       市場変動は無く、必ず固定価格か原価比率のいずれかで統制される。
  *       公共サービスを持たないタブ（製品別タブ以外）ではこのカードは出さず、下の一覧だけになる。
+ *       インフラ財（高圧電力・高圧水道）は市場外で配送され価格の概念を持たないため、
+ *       価格の入力欄は出さず注記に置き換え、需給ドーナツだけを描く。
  * - 下: そのカテゴリに属する施設の一覧テーブル。列ヘッダのクリックでフロントエンド側ソートを行い、
  *       行クリックで経済主体詳細ウィンドウを開く。
  */
@@ -23,6 +25,8 @@ import type {
   PublicFacilityAgent,
   PublicServicePrice,
   PublicServicePriceMode,
+  PublicServiceSupply,
+  PublicServiceSupplyData,
 } from "../../types";
 import "./PublicFacilitiesWindow.css";
 
@@ -401,6 +405,8 @@ function SupplyDonut({ production, demand, capacity, unit }: SupplyDonutProps) {
 type ServicePriceCardProps = {
   product: RegulatedProduct;
   row?: PublicServicePrice;
+  /** 需給とキャパシティ。価格を持たないインフラ財を含む全 regulated 製品に存在する */
+  supply?: PublicServiceSupply;
   /** 価格/比率入力の編集途中の文字列。未編集なら undefined */
   draft?: string;
   onDraftChange: (value: string) => void;
@@ -411,10 +417,15 @@ type ServicePriceCardProps = {
 /**
  * 製品ひとつぶんの価格統制カード。
  * 価格方式・設定値・製造原価・想定最大需要と、需給ドーナツ（生産量 / 需要量 / 供給キャパシティ）を並べる。
+ *
+ * 価格行（row）を持たない製品はインフラ財（高圧電力・高圧水道）で、市場外で配送され
+ * 金銭授受も無いため価格の概念を持たない。この場合は左半分を注記に差し替え、
+ * 設定しても反映されない入力欄を出さない。需給ドーナツはどちらでも描く。
  */
 function ServicePriceCard({
   product,
   row,
+  supply,
   draft,
   onDraftChange,
   onModeChange,
@@ -438,86 +449,90 @@ function ServicePriceCard({
 
   return (
     <div className="psp-card">
-      <div className="psp-card__fields">
-        <div className="psp-field">
-          <span className="psp-field__label">
-            {t("publicServicePrices.priceMode")}
-          </span>
-          <select
-            className="psp-row__mode"
-            value={mode}
-            onChange={(e) =>
-              onModeChange(e.target.value as PublicServicePriceMode)
-            }
-          >
-            <option value="fixed">{t("publicServicePrices.modeFixed")}</option>
-            <option value="cost_ratio">
-              {t("publicServicePrices.modeCostRatio")}
-            </option>
-          </select>
-        </div>
+      {row ? (
+        <div className="psp-card__fields">
+          <div className="psp-field">
+            <span className="psp-field__label">
+              {t("publicServicePrices.priceMode")}
+            </span>
+            <select
+              className="psp-row__mode"
+              value={mode}
+              onChange={(e) =>
+                onModeChange(e.target.value as PublicServicePriceMode)
+              }
+            >
+              <option value="fixed">{t("publicServicePrices.modeFixed")}</option>
+              <option value="cost_ratio">
+                {t("publicServicePrices.modeCostRatio")}
+              </option>
+            </select>
+          </div>
 
-        <div className="psp-field">
-          <span className="psp-field__label">
-            {t("publicServicePrices.value")}
-          </span>
-          <div className="psp-field__control">
-            {isRatio && <span className="psp-row__times">×</span>}
-            <input
-              type="number"
-              className="psp-row__input"
-              value={valueText}
-              min={0}
-              step={isRatio ? 0.05 : 1}
-              onChange={(e) => onDraftChange(e.target.value)}
-              onBlur={onCommit}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  onCommit();
-                  (e.target as HTMLInputElement).blur();
-                }
-              }}
-            />
-            {isRatio && (
-              <span
-                className="psp-row__effective"
-                title={t("publicServicePrices.effectivePrice")}
-              >
-                = {Math.round(effectivePrice).toLocaleString()}
-              </span>
-            )}
+          <div className="psp-field">
+            <span className="psp-field__label">
+              {t("publicServicePrices.value")}
+            </span>
+            <div className="psp-field__control">
+              {isRatio && <span className="psp-row__times">×</span>}
+              <input
+                type="number"
+                className="psp-row__input"
+                value={valueText}
+                min={0}
+                step={isRatio ? 0.05 : 1}
+                onChange={(e) => onDraftChange(e.target.value)}
+                onBlur={onCommit}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    onCommit();
+                    (e.target as HTMLInputElement).blur();
+                  }
+                }}
+              />
+              {isRatio && (
+                <span
+                  className="psp-row__effective"
+                  title={t("publicServicePrices.effectivePrice")}
+                >
+                  = {Math.round(effectivePrice).toLocaleString()}
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="psp-field">
+            <span className="psp-field__label">
+              {t("publicServicePrices.unitCost")}
+            </span>
+            <span className="psp-field__num">
+              {Math.round(row.unit_cost).toLocaleString()}
+              <span className="psp-row__unit">/{product.unit}</span>
+            </span>
+          </div>
+
+          <div className="psp-field">
+            <span className="psp-field__label">
+              {t("publicServicePrices.maxDemand")}
+            </span>
+            <span className="psp-field__num">
+              {Math.round(row.max_demand).toLocaleString()}
+              <span className="psp-row__unit">{product.unit}</span>
+            </span>
           </div>
         </div>
-
-        <div className="psp-field">
-          <span className="psp-field__label">
-            {t("publicServicePrices.unitCost")}
-          </span>
-          <span className="psp-field__num">
-            {Math.round(row?.unit_cost ?? 0).toLocaleString()}
-            <span className="psp-row__unit">/{product.unit}</span>
-          </span>
-        </div>
-
-        <div className="psp-field">
-          <span className="psp-field__label">
-            {t("publicServicePrices.maxDemand")}
-          </span>
-          <span className="psp-field__num">
-            {Math.round(row?.max_demand ?? 0).toLocaleString()}
-            <span className="psp-row__unit">{product.unit}</span>
-          </span>
-        </div>
-      </div>
+      ) : (
+        <p className="psp-card__note">{t("publicServicePrices.noPriceInfra")}</p>
+      )}
 
       <div className="psp-card__gauge">
         <span className="psp-field__label">
           {t("publicServicePrices.supplyStatus")}
         </span>
         <SupplyDonut
-          production={row?.production ?? 0}
-          demand={row?.demand ?? 0}
-          capacity={row?.supply_capacity ?? 0}
+          production={supply?.production ?? 0}
+          demand={supply?.demand ?? 0}
+          capacity={supply?.supply_capacity ?? 0}
           unit={product.unit}
         />
       </div>
@@ -542,6 +557,10 @@ export function PublicFacilitiesWindow({
   const [servicePrices, setServicePrices] = useState<
     Record<number, PublicServicePrice>
   >({});
+  // 公共サービスの需給（需給ドーナツの唯一の元データ）。価格を持たないインフラ財も含む。
+  const [serviceSupplies, setServiceSupplies] = useState<
+    Record<number, PublicServiceSupply>
+  >({});
   // 価格/比率テキストボックスの編集中の文字列（product_id -> 入力値）。
   // fixed モードでは固定価格、cost_ratio モードでは原価への乗率の編集途中の文字列を保持する。
   const [valueDrafts, setValueDrafts] = useState<Record<number, string>>({});
@@ -555,13 +574,17 @@ export function PublicFacilitiesWindow({
 
     async function loadData() {
       try {
-        const [facilitiesRes, pricesRes] = await Promise.all([
+        const [facilitiesRes, pricesRes, supplyRes] = await Promise.all([
           fetchApi<PublicFacilitiesData>(
             buildApiUrl(apiBaseUrl, "/api/v1/city/budgets/public-facilities"),
             { signal: controller.signal },
           ),
           fetchApi<PublicServicePricesData>(
             buildApiUrl(apiBaseUrl, "/api/v1/city/public-service-prices"),
+            { signal: controller.signal },
+          ),
+          fetchApi<PublicServiceSupplyData>(
+            buildApiUrl(apiBaseUrl, "/api/v1/city/public-service-supply"),
             { signal: controller.signal },
           ),
         ]);
@@ -571,6 +594,11 @@ export function PublicFacilitiesWindow({
           priceMap[row.product_id] = row;
         }
         setServicePrices(priceMap);
+        const supplyMap: Record<number, PublicServiceSupply> = {};
+        for (const row of supplyRes.services) {
+          supplyMap[row.product_id] = row;
+        }
+        setServiceSupplies(supplyMap);
       } catch (err) {
         if (!controller.signal.aborted) {
           setError(err instanceof Error ? err.message : "Unknown error");
@@ -782,6 +810,7 @@ export function PublicFacilitiesWindow({
           <ServicePriceCard
             product={activeProduct}
             row={servicePrices[activeProduct.id]}
+            supply={serviceSupplies[activeProduct.id]}
             draft={valueDrafts[activeProduct.id]}
             onDraftChange={(value) =>
               setValueDrafts((prev) => ({ ...prev, [activeProduct.id]: value }))

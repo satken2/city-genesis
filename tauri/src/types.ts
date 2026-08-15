@@ -713,6 +713,25 @@ export type PublicServicePrice = {
   production: number;
 };
 
+/**
+ * 公共サービスの需給1行分
+ * バックエンド GET /api/v1/city/public-service-supply の各エントリ
+ *
+ * regulated（価格統制対象）な製品ごとの供給キャパシティ・需要量・生産量。
+ * 価格の概念を持たないインフラ財（高圧電力・高圧水道）も含まれる点が
+ * PublicServicePrice との違いで、需給の表示はすべてこちらを見る。
+ */
+export type PublicServiceSupply = {
+  product_id: number;
+  supply_capacity: number;
+  demand: number;
+  production: number;
+};
+
+export type PublicServiceSupplyData = {
+  services: PublicServiceSupply[];
+};
+
 // ---------------------------------------------------------------------------
 // 達成クエスト（quest）
 // バックエンドの app/services/crud/crud_quests.py と対になる型定義。

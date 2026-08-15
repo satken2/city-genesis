@@ -33,7 +33,17 @@
     "maxDemand": "想定最大需要",
     "demand": "需要量",
     "production": "生産量",
-    "supplyStatus": "需給とキャパシティ"
+    "supplyStatus": "需給とキャパシティ",
+    "noPriceInfra": "インフラ財は市場外で配送され金銭授受も無いため、価格の概念を持ちません。"
+  },
+  "publicServiceGauge": {
+    "tooltip": "公共サービスの充足度(需要 / 供給キャパシティ)",
+    "services": {
+      "302": "水道",
+      "303": "電力",
+      "401": "高圧電力",
+      "402": "高圧水道"
+    }
   },
   "regulation": {
     "speedLimitTitle": "制限速度",

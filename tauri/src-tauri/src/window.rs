@@ -24,8 +24,9 @@ pub const ICON_PANEL_WIDTH: f64 = 54.0;
 /// React側が `resize_icon_panel` コマンドで実測値を通知して上書きする。
 pub const ICON_PANEL_DEFAULT_HEIGHT: f64 = 660.0;
 
-/// コックピット(画面下部中央・常用ツール/都市名日付/予算メータ/アラート/エポック実行)のサイズ
-pub const COCKPIT_WIDTH: f64 = 520.0;
+/// コックピット(画面下部中央・常用ツール/公共サービス充足度/都市名日付/予算メータ/アラート/エポック実行)のサイズ。
+/// ウィンドウはパネルの実寸ぴったりで作るため、中身を増やしたらこの幅も広げる必要がある。
+pub const COCKPIT_WIDTH: f64 = 640.0;
 pub const COCKPIT_HEIGHT: f64 = 76.0;
 
 /// システムトレイ(画面右下・設定/セーブ/リロード)のサイズ

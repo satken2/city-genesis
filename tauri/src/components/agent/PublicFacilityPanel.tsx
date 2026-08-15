@@ -7,17 +7,16 @@
  *
  * - 操作ボタン: 修繕/再建・停止/開始(トグル)・取り壊し。計画中は削除・編集。
  *   停止と開始は同一ボタンでアイコンを切り替えるトグルとして実装する。
- * - 稼働率目標スライダー(建設中は「建設スピード」、定常生産施設は「稼働率目標」)。
+ * - 稼働率目標(建設中は「建設スピード」、定常生産施設は「稼働率目標」)。
+ *   通常は数値のみを表示し、その数値をクリックしたときだけスライダーを展開する。
  * - 放棄チェックボックス(建物のみ)。放棄すると自動修繕の対象外になり、稼働中なら停止する。
- * - 修繕閾値の表示(放棄されていない建物のみ)。都市共通の設定値を参照表示するだけで、
- *   ここでは編集しない(編集は規制ウィンドウで行う)。
  *
- * 非建物の公共施設(公営サービス事業者など)は放棄できず、修繕・停止/開始・修繕閾値も
+ * 非建物の公共施設(公営サービス事業者など)は放棄できず、修繕・停止/開始も
  * 対象外のため、取り壊し(計画中は削除)のみを表示する。
  * 市政府(TYPE_CITY)は恒久的な存在であり操作を持たないため、このカード自体を表示しない。
  */
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import type { AgentData, AgentResponse } from "../../types";
@@ -32,7 +31,8 @@ import {
   STATUS_PENDING,
   TYPE_CITY,
 } from "../../constants";
-import { buildApiUrl, fetchApi } from "../../utils/api";
+import { fetchApi } from "../../utils/api";
+import { sendSessionReload } from "../../utils/ipc";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import bulldozeIcon from "../../assets/images/bulldoze.png";
 import pauseIcon from "../../assets/images/ui/pause.png";
@@ -84,30 +84,10 @@ export function PublicFacilityPanel({
   const { t } = useTranslation();
   const masterData = useMasterData();
   const [loading, setLoading] = useState(false);
-  // 都市共通の修繕閾値(0〜1)。修繕閾値ラベルの表示にのみ使う参照値。
-  const [cityRepairThreshold, setCityRepairThreshold] = useState<number | null>(null);
+  // 稼働率目標スライダーの展開状態。既定は閉じており、数値をクリックしたときだけ開く。
+  const [sliderOpen, setSliderOpen] = useState(false);
 
   const base = apiBaseUrl.replace(/\/+$/, "");
-
-  // 修繕閾値ラベル用に都市共通の設定値を取得する。放棄されていない建物にのみ
-  // 表示するため、その条件を満たすときだけ取得すれば十分だが、状態遷移で表示条件が
-  // 変わっても値を持っておけるよう、マウント時に一度だけ取得しておく。
-  useEffect(() => {
-    const controller = new AbortController();
-    fetchApi<{ city: { repair_threshold?: number } }>(
-      buildApiUrl(apiBaseUrl, "/api/v1/city"),
-      { signal: controller.signal },
-    )
-      .then((res) => {
-        if (!controller.signal.aborted) {
-          setCityRepairThreshold(res.city.repair_threshold ?? null);
-        }
-      })
-      .catch(() => {
-        if (!controller.signal.aborted) setCityRepairThreshold(null);
-      });
-    return () => controller.abort();
-  }, [apiBaseUrl]);
 
   // 市政府(TYPE_CITY)は恒久的な存在であり操作を持たないため、カードを表示しない。
   if (agent.type === TYPE_CITY) {
@@ -132,11 +112,16 @@ export function PublicFacilityPanel({
     }
   }
 
+  // 計画中(保留・着工予定)の施設を削除する。バックエンドから消えても Unity 側の
+  // 3Dオブジェクトはデータを取り直すまで残り続けるため、削除成功後に session:reload を
+  // 送って差分同期させる(取得結果に含まれない建物は Unity 側で破棄される)。
+  // 削除済みのエージェントを再取得しても 404 になるだけなので onActionPerformed は呼ばず、
+  // ウィンドウを閉じる。
   async function handleDelete() {
     setLoading(true);
     try {
       await fetchApi(agentUrl, { method: "DELETE" });
-      onActionPerformed();
+      await sendSessionReload();
       try {
         await invoke("close_current_window");
       } catch {
@@ -214,9 +199,8 @@ export function PublicFacilityPanel({
   const showSlider = isConstructing || isHeadroomFacility;
   const sliderMax = isConstructing ? 500 : 100;
 
-  // 放棄チェックボックスと修繕閾値ラベルは建物かつ稼働中/停止中のときのみ表示する。
+  // 放棄チェックボックスは建物かつ稼働中/停止中のときのみ表示する。
   const showAbandon = isBuilding && isRunningState;
-  const showThreshold = isBuilding && isRunningState && !isAbandoned;
 
   return (
     <div className="pf-panel">
@@ -353,22 +337,33 @@ export function PublicFacilityPanel({
                 ? t("agent.constructionSpeed", "建設スピード")
                 : t("agent.utilizationTarget", "稼働率目標")}
             </span>
-            <span className="agent-detail-utilization-target-value">
-              {utilizationTarget}%
-            </span>
+            {/* 数値自体がスライダーの開閉ボタン。既定は閉じており、
+                クリックしたときだけスライダーを展開する。 */}
+            <button
+              type="button"
+              className="pf-panel__util-value"
+              aria-expanded={sliderOpen}
+              onClick={() => setSliderOpen((open) => !open)}
+            >
+              <span className="agent-detail-utilization-target-value">
+                {utilizationTarget}%
+              </span>
+            </button>
           </div>
-          <div className="agent-detail-utilization-target-slider-container">
-            <input
-              type="range"
-              min="0"
-              max={sliderMax}
-              value={utilizationTarget}
-              onChange={(e) => setUtilizationTarget(Number(e.target.value))}
-              onMouseUp={onUtilizationCommit}
-              onTouchEnd={onUtilizationCommit}
-              className="agent-detail-utilization-target-slider"
-            />
-          </div>
+          {sliderOpen && (
+            <div className="agent-detail-utilization-target-slider-container">
+              <input
+                type="range"
+                min="0"
+                max={sliderMax}
+                value={utilizationTarget}
+                onChange={(e) => setUtilizationTarget(Number(e.target.value))}
+                onMouseUp={onUtilizationCommit}
+                onTouchEnd={onUtilizationCommit}
+                className="agent-detail-utilization-target-slider"
+              />
+            </div>
+          )}
           {isConstructing && (
             <div className="agent-detail-grid" style={{ marginTop: 6 }}>
               <span className="agent-detail-label">
@@ -415,19 +410,6 @@ export function PublicFacilityPanel({
             )}
           </span>
         </label>
-      )}
-
-      {showThreshold && (
-        <div className="pf-panel__threshold">
-          <span className="pf-panel__threshold-label">
-            {t("agent.repairThreshold", "修繕閾値")}
-          </span>
-          <span className="pf-panel__threshold-value">
-            {cityRepairThreshold != null
-              ? `${Math.round(cityRepairThreshold * 100)}%`
-              : "—"}
-          </span>
-        </div>
       )}
     </div>
   );

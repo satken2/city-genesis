@@ -54,23 +54,22 @@
   line-height: 1.2;
 }
 
-/* 修繕閾値ラベル(参照表示のみ) */
-.pf-panel__threshold {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* 稼働率目標の数値ボタン。クリックでスライダーを開閉する */
+.pf-panel__util-value {
+  background: none;
+  border: none;
+  padding: 0 2px;
+  cursor: pointer;
+  border-bottom: 1px dashed rgba(78, 161, 255, 0.5);
+  line-height: 1.2;
 }
 
-.pf-panel__threshold-label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #9db0c5;
+.pf-panel__util-value:hover {
+  border-bottom-color: #4ea1ff;
 }
 
-.pf-panel__threshold-value {
-  font-size: 0.85rem;
-  font-weight: bold;
-  color: #4ea1ff;
+.pf-panel__util-value[aria-expanded="true"] {
+  border-bottom-style: solid;
 }
 
 /* 削除ボタンの左側に隙間を空ける */

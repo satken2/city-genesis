@@ -33,7 +33,17 @@
     "maxDemand": "Est. max demand",
     "demand": "Demand",
     "production": "Production",
-    "supplyStatus": "Supply & Demand"
+    "supplyStatus": "Supply & Demand",
+    "noPriceInfra": "Infrastructure goods are delivered outside the market with no money changing hands, so they have no price."
+  },
+  "publicServiceGauge": {
+    "tooltip": "Public service adequacy (demand / supply capacity)",
+    "services": {
+      "302": "Water",
+      "303": "Electricity",
+      "401": "High-voltage electricity",
+      "402": "High-pressure water"
+    }
   },
   "regulation": {
     "speedLimitTitle": "Speed Limits",

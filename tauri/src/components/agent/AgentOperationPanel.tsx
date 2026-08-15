@@ -15,6 +15,7 @@ import {
   TYPE_HOUSEHOLD,
   TYPE_TRADE,
 } from "../../constants";
+import { sendSessionReload } from "../../utils/ipc";
 import purchaseIcon from "../../assets/images/purchase.png";
 import bulldozeIcon from "../../assets/images/bulldoze.png";
 import pauseIcon from "../../assets/images/ui/pause.png";
@@ -56,7 +57,12 @@ export function AgentOperationPanel({
   const isPreConstruction = PRE_CONSTRUCTION.has(agent.status);
   const base = apiBaseUrl.replace(/\/+$/, "");
 
-  async function handleAction(method: string, body?: Record<string, unknown>) {
+  /** 成功したら true を返す(呼び出し側が後続処理の実行可否を判断できるようにする)。 */
+  async function handleAction(
+    method: string,
+    body?: Record<string, unknown>,
+    notify: boolean = true,
+  ): Promise<boolean> {
     setLoading(true);
     try {
       const res = await fetch(`${base}/api/v1/agents/${agent.agent_id}`, {
@@ -65,16 +71,25 @@ export function AgentOperationPanel({
         body: body ? JSON.stringify(body) : undefined,
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      onActionPerformed();
+      if (notify) onActionPerformed();
+      return true;
     } catch (err) {
       console.error("Operation failed:", err);
+      return false;
     } finally {
       setLoading(false);
     }
   }
 
+  // 計画中の主体を削除する。バックエンドから消えても Unity 側の3Dオブジェクトは
+  // データを取り直すまで残り続けるため、削除成功後に session:reload を送って差分同期
+  // させる(取得結果に含まれない建物は Unity 側で破棄される)。
+  // 削除済みのエージェントを再取得しても 404 になるだけなので onActionPerformed は
+  // 呼ばず(notify=false)、バックエンドに拒否された場合はウィンドウも閉じない。
   async function handleDelete() {
-    await handleAction("DELETE");
+    const ok = await handleAction("DELETE", undefined, false);
+    if (!ok) return;
+    await sendSessionReload();
     try {
       await invoke("close_current_window");
     } catch {
