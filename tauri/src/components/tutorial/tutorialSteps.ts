@@ -11,6 +11,9 @@ import { fetchApi } from "../../utils/api";
 import { sendSessionReload } from "../../utils/ipc";
 import {
   PATH_STREET,
+  PATH_TRACK,
+  PATH_STATION_HOUSE,
+  TRACK_STATION,
   STATUS_ACTIVE,
   STATUS_SCHEDULED_CONSTRUCTION,
   STATUS_CONSTRUCTING,
@@ -19,6 +22,7 @@ import {
   VARIANT_SUBSTATION,
   PATH_VARIANT_GRID,
   PRODUCT_HIGH_ELECTRICITY,
+  PRODUCT_METRO_VEHICLE,
 } from "../../constants";
 import { isInfraPathType } from "../../local-constants";
 import type {
@@ -127,6 +131,13 @@ type InfraBuilding = {
    * インフラパスの端点をこのノードへ接続すると施設がインフラ網に参加する。
    */
   infra_node_id?: number;
+  /**
+   * 車両基地の「走行網への接続端子ノード」のID(車両基地でなければ -1)。
+   * 鉄道車両基地は電力も受け取るため、バックエンドは infra_node_id と同一の
+   * 「共用接続ノード」(線路ビット + 電力ビット)を生成する。したがって引き込み線路の
+   * 端点も高圧送電線の端点も、この1つのノードへ溶接できる。
+   */
+  depot_node_id?: number;
 };
 
 /** シナリオ3のステップ判定で参照するパスの最小限のプロパティ。 */
@@ -152,12 +163,154 @@ async function findBuildingByVariant(
 }
 
 /** 建物が「建設予定・建設中・稼働中」のいずれかであるかを判定する。 */
-function isBuildingPlacedOrActive(status: number | undefined): boolean {
+function isPlacedOrActive(status: number | undefined): boolean {
   return (
     status === STATUS_SCHEDULED_CONSTRUCTION ||
     status === STATUS_CONSTRUCTING ||
     status === STATUS_ACTIVE
   );
+}
+
+/* ==========================================================================
+ * シナリオ4「鉄道を建設しよう」の共通ヘルパー
+ *
+ * 鉄道は「電化線路 / プラットフォーム / 駅舎」がいずれも path_master のバリアントで
+ * 表現されるため、判定でバリアント ID を直接書かず、マスターの属性
+ * (type / track_type / infra_products)から毎回引き当てる。
+ * ========================================================================== */
+
+/** GET /api/v1/master/paths のバリアント定義のうち、判定に使う項目だけを持つ型。 */
+type PathMasterEntryLite = {
+  type?: number;
+  track_type?: number;
+  infra_products?: number[];
+};
+
+/** GET /api/v1/master/transit のエントリのうち、判定に使う項目だけを持つ型。 */
+type TransitMasterEntryLite = {
+  transit_path_id?: number;
+  route_path_variants?: number[];
+};
+
+/** パスバリアントのマスターを取得する。 */
+async function fetchPathMaster(base: string): Promise<Record<string, PathMasterEntryLite>> {
+  const master = await fetchApi<{ paths: Record<string, PathMasterEntryLite> }>(
+    `${base}/api/v1/master/paths`
+  );
+  return master.paths ?? {};
+}
+
+/** 条件に合致する path_variant の集合をマスターから解決する。 */
+function pathVariantsWhere(
+  master: Record<string, PathMasterEntryLite>,
+  predicate: (entry: PathMasterEntryLite) => boolean
+): Set<number> {
+  const result = new Set<number>();
+  for (const [variantId, entry] of Object.entries(master)) {
+    if (predicate(entry)) result.add(Number(variantId));
+  }
+  return result;
+}
+
+/**
+ * 電化された走行用の軌道(高圧電力を流すバリアント)かどうか。
+ * 構造(通常/橋梁/高架)は問わないが、駅の軌道であるプラットフォームは除く。
+ */
+function isElectrifiedTrack(entry: PathMasterEntryLite): boolean {
+  return (
+    entry.type === PATH_TRACK &&
+    entry.track_type !== TRACK_STATION &&
+    (entry.infra_products ?? []).includes(PRODUCT_HIGH_ELECTRICITY)
+  );
+}
+
+/** 電化されたプラットフォーム(駅の軌道)バリアントかどうか。 */
+function isElectrifiedPlatform(entry: PathMasterEntryLite): boolean {
+  return (
+    entry.type === PATH_TRACK &&
+    entry.track_type === TRACK_STATION &&
+    (entry.infra_products ?? []).includes(PRODUCT_HIGH_ELECTRICITY)
+  );
+}
+
+/**
+ * 鉄道車両基地の agent variant をマスターから解決する。
+ * 「メトロ車両(PRODUCT_METRO_VEHICLE)を supply する施設」が鉄道車両基地であり、
+ * バス車庫(バス車両を supply)とはここで区別される。見つからなければ null。
+ */
+async function resolveRailDepotVariant(base: string): Promise<number | null> {
+  const master = await fetchApi<{ agents: Record<string, { supply?: number }> }>(
+    `${base}/api/v1/master/agents`
+  );
+  const found = Object.entries(master.agents ?? {}).find(
+    ([, entry]) => entry.supply === PRODUCT_METRO_VEHICLE
+  );
+  return found ? Number(found[0]) : null;
+}
+
+/** 鉄道車両基地の建物を取得する。マスター未整備・未建設なら null。 */
+async function findRailDepot(base: string): Promise<InfraBuilding | null> {
+  const variant = await resolveRailDepotVariant(base);
+  if (variant == null) return null;
+  return findBuildingByVariant(base, variant);
+}
+
+/**
+ * 条件に合致するパスをまとめて稼働中(ACTIVE)にする。
+ *
+ * チュートリアルでは工期を待たせずに次のステップへ進ませたいため、建設ステップの
+ * onComplete から呼んで「建設計画中」のパスを即完成扱いにする(template_mode で
+ * ステータス制限をバイパスする)。1本でも変更したら Unity に再ロードを指示する。
+ * 解体予定など建設以外のステータスのパスを巻き込まないよう、対象は
+ * 「建設予定・建設中」のパスに限る。
+ */
+async function activatePathsWhere(
+  base: string,
+  predicate: (path: PathListResponse["paths"][number]) => boolean
+): Promise<void> {
+  const data = await fetchApi<PathListResponse>(`${base}/api/v1/paths`);
+  const targets = data.paths.filter(
+    (p) => predicate(p) && p.status !== STATUS_ACTIVE && isPlacedOrActive(p.status)
+  );
+  for (const path of targets) {
+    await fetchApi(`${base}/api/v1/paths/${path.path_id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: STATUS_ACTIVE }),
+    });
+  }
+  if (targets.length > 0) {
+    await sendSessionReload().catch(() => {});
+  }
+}
+
+/** 軌道(線路・プラットフォーム)をまとめて稼働中にする。 */
+async function activateAllTracks(base: string): Promise<void> {
+  await activatePathsWhere(base, (p) => p.path_type === PATH_TRACK);
+}
+
+/**
+ * 鉄道の路線種別(transit_master)の transit_path_id 集合を返す。
+ * 「走行網に軌道(PATH_TRACK)を含む種別」を鉄道路線とみなす。
+ */
+async function resolveRailTransitVariants(base: string): Promise<Set<number>> {
+  const [pathMaster, transitMaster] = await Promise.all([
+    fetchPathMaster(base),
+    fetchApi<{ transit: Record<string, TransitMasterEntryLite> }>(
+      `${base}/api/v1/master/transit`
+    ),
+  ]);
+  const trackVariants = pathVariantsWhere(pathMaster, (e) => e.type === PATH_TRACK);
+  const result = new Set<number>();
+  for (const entry of Object.values(transitMaster.transit ?? {})) {
+    const runsOnTrack = (entry.route_path_variants ?? []).some((v) =>
+      trackVariants.has(Number(v))
+    );
+    if (runsOnTrack && entry.transit_path_id != null) {
+      result.add(Number(entry.transit_path_id));
+    }
+  }
+  return result;
 }
 
 /**
@@ -470,7 +623,7 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
           const base = normalizeBaseUrl(apiBaseUrl);
           try {
             const solar = await findBuildingByVariant(base, VARIANT_SOLAR_PLANT);
-            return solar != null && isBuildingPlacedOrActive(solar.status);
+            return solar != null && isPlacedOrActive(solar.status);
           } catch {
             return false;
           }
@@ -512,7 +665,7 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
           const base = normalizeBaseUrl(apiBaseUrl);
           try {
             const substation = await findBuildingByVariant(base, VARIANT_SUBSTATION);
-            return substation != null && isBuildingPlacedOrActive(substation.status);
+            return substation != null && isPlacedOrActive(substation.status);
           } catch {
             return false;
           }
@@ -592,6 +745,246 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
         image: getStepImage(8),
         titleKey: "tutorial.scenario3.step8.title",
         descriptionKey: "tutorial.scenario3.step8.description",
+        validate: async (): Promise<boolean> => true,
+        targetElementId: undefined,
+      },
+    ],
+  },
+  {
+    // シナリオ4「鉄道を建設しよう」。
+    // 初期状態は「東西に貫く道路 + 太陽光発電所だけがある更地の都市」(tutorialSetup)。
+    // 線路 → 車両基地 → 引き込み線 → 送電線 → プラットフォーム → 駅舎 → 路線 の順に
+    // 鉄道一式を建設させ、鉄道が複数の要素の組み合わせで成り立つことを学ばせる。
+    // 各建設ステップの onComplete で対象を即完成(ACTIVE)にする。プラットフォームの
+    // 停留所判定(POST /transit/lines)が稼働中のパスしか受け付けないため、
+    // 工期を待たずに次のステップへ進めるにはこの代行が必須となる。
+    id: "scenario4",
+    titleKey: "tutorial.scenario4.title",
+    descriptionKey: "tutorial.scenario4.description",
+    steps: [
+      {
+        // イントロ(検証なし)
+        id: 1,
+        image: getStepImage(1),
+        titleKey: "tutorial.scenario4.step1.title",
+        descriptionKey: "tutorial.scenario4.step1.description",
+        buttonTextKey: "tutorial.startButton",
+        validate: async (): Promise<boolean> => true,
+        targetElementId: undefined,
+      },
+      {
+        // 電化された地上線路を敷設する。
+        // 完了条件: 電化軌道バリアントのパスが1本以上存在すること。
+        id: 2,
+        image: getStepImage(2),
+        titleKey: "tutorial.scenario4.step2.title",
+        descriptionKey: "tutorial.scenario4.step2.description",
+        validate: async (apiBaseUrl: string): Promise<boolean> => {
+          const base = normalizeBaseUrl(apiBaseUrl);
+          try {
+            const master = await fetchPathMaster(base);
+            const electrified = pathVariantsWhere(master, isElectrifiedTrack);
+            if (electrified.size === 0) return false;
+            const data = await fetchApi<PathListResponse>(`${base}/api/v1/paths`);
+            return data.paths.some(
+              (p) =>
+                electrified.has(p.path_variant) && isPlacedOrActive(p.status)
+            );
+          } catch {
+            return false;
+          }
+        },
+        onComplete: async (apiBaseUrl: string): Promise<void> => {
+          await activateAllTracks(normalizeBaseUrl(apiBaseUrl));
+        },
+        targetElementId: "track",
+      },
+      {
+        // 鉄道車両基地を空き区画に建設する。
+        // 完了条件: 鉄道車両基地が建設予定/建設中/稼働中のいずれかで存在すること。
+        id: 3,
+        image: getStepImage(3),
+        titleKey: "tutorial.scenario4.step3.title",
+        descriptionKey: "tutorial.scenario4.step3.description",
+        validate: async (apiBaseUrl: string): Promise<boolean> => {
+          const base = normalizeBaseUrl(apiBaseUrl);
+          try {
+            const depot = await findRailDepot(base);
+            return depot != null && isPlacedOrActive(depot.status);
+          } catch {
+            return false;
+          }
+        },
+        onComplete: async (apiBaseUrl: string): Promise<void> => {
+          const base = normalizeBaseUrl(apiBaseUrl);
+          const depot = await findRailDepot(base);
+          if (depot?.agent_id != null && depot.status !== STATUS_ACTIVE) {
+            await fetchApi(`${base}/api/v1/agents/${depot.agent_id}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ status: STATUS_ACTIVE }),
+            });
+            await sendSessionReload().catch(() => {});
+          }
+        },
+        targetElementId: "construction",
+      },
+      {
+        // 車両基地の接続端子ノードから本線まで引き込み線を敷設する。
+        // 完了条件: 車両基地の接続端子ノードを端点に持つ軌道パスが1本以上あること。
+        // 端点をノードに置くとバックエンドの端点溶接で接続される(=走行網に参加する)。
+        id: 4,
+        image: getStepImage(4),
+        titleKey: "tutorial.scenario4.step4.title",
+        descriptionKey: "tutorial.scenario4.step4.description",
+        validate: async (apiBaseUrl: string): Promise<boolean> => {
+          const base = normalizeBaseUrl(apiBaseUrl);
+          try {
+            const depot = await findRailDepot(base);
+            const nodeId = depot?.depot_node_id ?? -1;
+            if (nodeId <= 0) return false;
+            const data = await fetchApi<PathListResponse>(`${base}/api/v1/paths`);
+            return data.paths.some(
+              (p) =>
+                p.path_type === PATH_TRACK &&
+                (p.start_node_id === nodeId || p.end_node_id === nodeId)
+            );
+          } catch {
+            return false;
+          }
+        },
+        onComplete: async (apiBaseUrl: string): Promise<void> => {
+          await activateAllTracks(normalizeBaseUrl(apiBaseUrl));
+        },
+        targetElementId: "track",
+      },
+      {
+        // 太陽光発電所から車両基地の共用接続ノードまで高圧送電線を敷設する。
+        // 完了条件: 発電所のインフラ端子と車両基地の共用端子のそれぞれに、
+        // 高圧送電線が1本以上接続されていること(途中で分岐・中継しても成立する)。
+        // 車両基地の共用端子には引き込み線も溶接済みなので、ここが繋がると
+        // 発電所 → 送電線 → 車両基地 → 引き込み線 → 電化線路 と電気が回る。
+        id: 5,
+        image: getStepImage(5),
+        titleKey: "tutorial.scenario4.step5.title",
+        descriptionKey: "tutorial.scenario4.step5.description",
+        validate: async (apiBaseUrl: string): Promise<boolean> => {
+          const base = normalizeBaseUrl(apiBaseUrl);
+          try {
+            const [solar, depot] = await Promise.all([
+              findBuildingByVariant(base, VARIANT_SOLAR_PLANT),
+              findRailDepot(base),
+            ]);
+            const solarNode = solar?.infra_node_id ?? -1;
+            const depotNode = depot?.infra_node_id ?? -1;
+            if (solarNode <= 0 || depotNode <= 0) return false;
+
+            const pathData = await fetchApi<{ paths: InfraPath[] }>(
+              `${base}/api/v1/paths`
+            );
+            const touchesNode = (nodeId: number): boolean =>
+              pathData.paths.some(
+                (p) =>
+                  isInfraPathType(p.path_type) &&
+                  p.path_variant === PATH_VARIANT_GRID &&
+                  (p.start_node_id === nodeId || p.end_node_id === nodeId)
+              );
+            return touchesNode(solarNode) && touchesNode(depotNode);
+          } catch {
+            return false;
+          }
+        },
+        onComplete: async (apiBaseUrl: string): Promise<void> => {
+          const base = normalizeBaseUrl(apiBaseUrl);
+          await activatePathsWhere(base, (p) => isInfraPathType(p.path_type));
+        },
+        targetElementId: "road",
+      },
+      {
+        // 電化プラットフォーム(駅の軌道)を敷設する。
+        // 完了条件: 電化プラットフォームのバリアントのパスが1本以上存在すること。
+        id: 6,
+        image: getStepImage(6),
+        titleKey: "tutorial.scenario4.step6.title",
+        descriptionKey: "tutorial.scenario4.step6.description",
+        validate: async (apiBaseUrl: string): Promise<boolean> => {
+          const base = normalizeBaseUrl(apiBaseUrl);
+          try {
+            const master = await fetchPathMaster(base);
+            const platforms = pathVariantsWhere(master, isElectrifiedPlatform);
+            if (platforms.size === 0) return false;
+            const data = await fetchApi<PathListResponse>(`${base}/api/v1/paths`);
+            return data.paths.some(
+              (p) => platforms.has(p.path_variant) && isPlacedOrActive(p.status)
+            );
+          } catch {
+            return false;
+          }
+        },
+        onComplete: async (apiBaseUrl: string): Promise<void> => {
+          await activateAllTracks(normalizeBaseUrl(apiBaseUrl));
+        },
+        targetElementId: "track",
+      },
+      {
+        // 駅舎パスをプラットフォームと交差するように敷設する。
+        // 完了条件: 駅舎パス(PATH_STATION_HOUSE)が1本以上存在すること。
+        id: 7,
+        image: getStepImage(7),
+        titleKey: "tutorial.scenario4.step7.title",
+        descriptionKey: "tutorial.scenario4.step7.description",
+        validate: async (apiBaseUrl: string): Promise<boolean> => {
+          const base = normalizeBaseUrl(apiBaseUrl);
+          try {
+            const data = await fetchApi<PathListResponse>(`${base}/api/v1/paths`);
+            return data.paths.some(
+              (p) =>
+                p.path_type === PATH_STATION_HOUSE && isPlacedOrActive(p.status)
+            );
+          } catch {
+            return false;
+          }
+        },
+        onComplete: async (apiBaseUrl: string): Promise<void> => {
+          const base = normalizeBaseUrl(apiBaseUrl);
+          // 路線の停留所は「稼働中の」プラットフォーム上にしか置けないため、
+          // 駅舎とプラットフォームの双方をここで完成させておく。
+          await activatePathsWhere(
+            base,
+            (p) => p.path_type === PATH_STATION_HOUSE || p.path_type === PATH_TRACK
+          );
+        },
+        targetElementId: "track",
+      },
+      {
+        // 鉄道路線を新設する。
+        // 完了条件: 走行網に軌道を含む路線種別(=鉄道路線)の路線が1つ以上存在すること。
+        id: 8,
+        image: getStepImage(8),
+        titleKey: "tutorial.scenario4.step8.title",
+        descriptionKey: "tutorial.scenario4.step8.description",
+        validate: async (apiBaseUrl: string): Promise<boolean> => {
+          const base = normalizeBaseUrl(apiBaseUrl);
+          try {
+            const railVariants = await resolveRailTransitVariants(base);
+            const data = await fetchApi<{ lines: { path_variant?: number }[] }>(
+              `${base}/api/v1/transit/lines`
+            );
+            return (data.lines ?? []).some(
+              (line) => line.path_variant != null && railVariants.has(line.path_variant)
+            );
+          } catch {
+            return false;
+          }
+        },
+        targetElementId: "transport",
+      },
+      {
+        // まとめ(検証なし)
+        id: 9,
+        image: getStepImage(9),
+        titleKey: "tutorial.scenario4.step9.title",
+        descriptionKey: "tutorial.scenario4.step9.description",
         validate: async (): Promise<boolean> => true,
         targetElementId: undefined,
       },

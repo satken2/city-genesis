@@ -107,7 +107,7 @@ type ScoreLatest = {
   city_score: number;
   city_score_qol: number;
   city_score_env: number;
-  city_score_cumulative: number;
+  city_score_per_household: number;
   city_score_collapse_penalty: number;
 };
 
@@ -677,9 +677,8 @@ function ScoreBlock({ latest }: { latest: ScoreLatest | null }): ReactNode {
         <span className="epoch-result-score-label">{t("achievements.currentScore")}</span>
         <span className="epoch-result-score-value">{fmt(latest.city_score)}</span>
         <span className="epoch-result-score-unit">{t("achievements.points")}</span>
-        <span className="epoch-result-score-cumulative">
-          {t("achievements.cumulativeScore")} {fmt(latest.city_score_cumulative)}
-          {t("achievements.points")}
+        <span className="epoch-result-score-per-household">
+          {t("achievements.perHouseholdScore")} {latest.city_score_per_household.toFixed(2)}
         </span>
       </div>
 

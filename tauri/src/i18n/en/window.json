@@ -110,7 +110,7 @@
     "budgetMeterLabel": "Budget",
     "budgetMeterTooltip": "Projected budget / cash on hand",
     "scoreMeterLabel": "Score",
-    "scoreMeterTooltip": "City governance score"
+    "scoreMeterTooltip": "Governance score (per household, max 2.0)"
   },
   "topmenu": {
     "editor": "Editor",

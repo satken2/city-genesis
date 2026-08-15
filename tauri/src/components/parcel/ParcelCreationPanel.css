@@ -213,13 +213,6 @@
   color: #f38ba8;
 }
 
-/* 成功メッセージに添える「モードは継続する」の注記 */
-.pc-status-note {
-  margin-top: 2px;
-  font-size: 0.66rem;
-  color: #93a9c0;
-}
-
 /* ---- 開発用モック ---- */
 .pc-dev-section {
   padding: 8px 12px;

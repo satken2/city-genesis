@@ -439,7 +439,7 @@
   color: var(--flat-text-label);
 }
 
-.epoch-result-score-cumulative {
+.epoch-result-score-per-household {
   margin-left: auto;
   font-size: 11px;
   font-variant-numeric: tabular-nums;

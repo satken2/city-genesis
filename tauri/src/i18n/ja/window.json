@@ -87,7 +87,7 @@
     "budgetMeterLabel": "予算",
     "budgetMeterTooltip": "予算見込み / 現預金",
     "scoreMeterLabel": "スコア",
-    "scoreMeterTooltip": "施政スコア"
+    "scoreMeterTooltip": "施政スコア（1世帯あたり / 満点2.0）"
   },
   "topmenu": {
     "editor": "エディタ",

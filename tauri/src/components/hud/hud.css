@@ -112,6 +112,13 @@
   color: #e5eef9;
 }
 
+/* メーター横に添える数値(施政スコアの1世帯あたり値など)。等幅で桁揺れによる横伸びを防ぐ */
+.hud-mini-meter__value {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: #e5eef9;
+}
+
 /* Meter の .meter-bar は flex:1 / min-width:60px のため、幅を持つラッパで囲んで固定幅にする */
 .hud-mini-meter__bar {
   width: 84px;

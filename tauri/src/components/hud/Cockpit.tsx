@@ -193,7 +193,7 @@ export function Cockpit() {
         >
           {cityName || "—"}
         </button>
-        <ScoreMiniMeter onOpen={() => void openRegisteredWindow("achievements")} />
+        <ScoreMiniMeter apiBaseUrl={apiBaseUrl} onOpen={() => void openRegisteredWindow("achievements")} />
         <span className="cockpit-date">{formattedDate}</span>
         <BudgetMiniMeter apiBaseUrl={apiBaseUrl} onOpen={() => void openRegisteredWindow("city_budget")} />
       </div>

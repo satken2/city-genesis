@@ -1004,15 +1004,9 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
       {/* ステータスメッセージ */}
       {statusMessage && (
         <div className={`pc-status ${statusMessage}`}>
-          {statusMessage === "success" ? (
-            <>
-              {t("parcel_creation.createSuccess")}
-              {/* 確定でモードを抜けなくなったので、次に何ができるかを明示する */}
-              <div className="pc-status-note">{t("parcel_creation.confirmContinuous")}</div>
-            </>
-          ) : (
-            t("parcel_creation.createFailed")
-          )}
+          {statusMessage === "success"
+            ? t("parcel_creation.createSuccess")
+            : t("parcel_creation.createFailed")}
         </div>
       )}
 

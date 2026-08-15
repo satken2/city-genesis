@@ -21,6 +21,7 @@ import {
   PATH_STREET,
   PARCEL_LAND,
   VARIANT_APARTMENT,
+  VARIANT_SOLAR_PLANT,
 } from "../../constants";
 import type { PathListResponse } from "../../types/generated";
 
@@ -66,6 +67,14 @@ export const TUTORIAL_FLAG_PARCEL_PANEL_OPEN = "tutorial2_parcel_panel_open";
 export const TUTORIAL3_SOLAR_PARCEL_KEY = "tutorial3_solar_parcel_id";
 export const TUTORIAL3_SUBSTATION_PARCEL_KEY = "tutorial3_substation_parcel_id";
 export const TUTORIAL3_HOUSE_PARCEL_KEY = "tutorial3_house_parcel_id";
+
+/**
+ * シナリオ4「鉄道を建設しよう」で構築した土地区画の ID を記録する localStorage キー。
+ * - SOLAR_PARCEL: 最初から太陽光発電所が建っている区画(電化線路の電源)
+ * - DEPOT_PARCEL: 空き区画。プレイヤーがここに鉄道車両基地を建てる
+ */
+export const TUTORIAL4_SOLAR_PARCEL_KEY = "tutorial4_solar_parcel_id";
+export const TUTORIAL4_DEPOT_PARCEL_KEY = "tutorial4_depot_parcel_id";
 
 /**
  * H 型道路網のノード ID。
@@ -528,37 +537,192 @@ async function setupInfraScenario(apiBaseUrl: string): Promise<void> {
 
   // 5. 民家(集合住宅)を右端の区画に建設し、template_mode で即 ACTIVE(完成)にする
   if (houseParcelId != null) {
-    try {
-      const master = await fetchApi<AgentMasterResponse>(`${base}/api/v1/master/agents`);
-      const apartment = master.agents?.[String(VARIANT_APARTMENT)] ?? {};
-      const agentType = apartment.type;
-      const minFloors = apartment.min_floors ?? 1;
+    await createCompletedBuilding(base, houseParcelId, VARIANT_APARTMENT);
+  }
 
-      // 建物作成は必須5フィールド(parcel_id, type, variant, construction_ratio, floors)を要求する。
-      // type と階数下限はマスターから解決し、数値のハードコードを避ける。
-      const created = await fetchApi<BuildingCreateResponse>(`${base}/api/v1/buildings`, {
-        method: "POST",
+  // Unity 側に最新状態を再ロードさせる
+  await sendSessionReload().catch(() => {});
+}
+
+/**
+ * 指定区画に建物を建設し、template_mode で即 ACTIVE(完成)にする。
+ *
+ * 建物作成は必須5フィールド(parcel_id, type, variant, construction_ratio, floors)を要求する。
+ * type と階数下限はマスターから解決し、数値のハードコードを避ける。
+ * 失敗はチュートリアル全体を止めないよう握りつぶし、null を返す。
+ */
+async function createCompletedBuilding(
+  base: string,
+  parcelId: number,
+  variant: number
+): Promise<number | null> {
+  try {
+    const master = await fetchApi<AgentMasterResponse>(`${base}/api/v1/master/agents`);
+    const entry = master.agents?.[String(variant)] ?? {};
+
+    const created = await fetchApi<BuildingCreateResponse>(`${base}/api/v1/buildings`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        parcel_id: parcelId,
+        type: entry.type,
+        variant,
+        construction_ratio: 1.0,
+        floors: entry.min_floors ?? 1,
+      }),
+    });
+
+    // 建設をスキップして即完成扱いにする(template_mode でステータス制限をバイパス)
+    if (created.agent_id != null) {
+      await fetchApi(`${base}/api/v1/agents/${created.agent_id}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          parcel_id: houseParcelId,
-          type: agentType,
-          variant: VARIANT_APARTMENT,
-          construction_ratio: 1.0,
-          floors: minFloors,
-        }),
+        body: JSON.stringify({ status: STATUS_ACTIVE }),
       });
-
-      // 建設をスキップして即完成扱いにする(template_mode でステータス制限をバイパス)
-      if (created.agent_id != null) {
-        await fetchApi(`${base}/api/v1/agents/${created.agent_id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: STATUS_ACTIVE }),
-        });
-      }
-    } catch (e) {
-      console.warn("[tutorialSetup] 民家の建設に失敗:", e);
+      return created.agent_id;
     }
+    return null;
+  } catch (e) {
+    console.warn(`[tutorialSetup] バリアント ${variant} の建設に失敗:`, e);
+    return null;
+  }
+}
+
+/**
+ * シナリオ4「鉄道を建設しよう」の道路・土地区画の座標定義。
+ * シナリオ3と同様、flat マップの海岸線内に収めるため全要素を x,z ∈ [-200, 200] に置く。
+ * 中央を東西に貫く1本の長い道路の北側(z>0)に2つの区画を並べ、
+ * その更に北側の空き地をプレイヤーが線路を敷くための用地として空けておく。
+ * 座標は道路端点が [x, y, z](街路なので y は常に 0)、区画ポリゴンは [x, z] の2次元。
+ */
+const RAIL_ROAD_START: [number, number, number] = [-200, 0, 0];
+const RAIL_ROAD_END: [number, number, number] = [200, 0, 0];
+
+/** シナリオ4の道路端点ノード ID(自動採番との衝突を避けた固定値)。 */
+const RAIL_ROAD_NODE = {
+  LEFT: 9201,
+  RIGHT: 9202,
+} as const;
+
+/**
+ * 2つの土地区画のポリゴン([x, z] の頂点列)。前面(道路側)の辺を街路のすぐ脇(z=2)に置く。
+ * - SOLAR: 最初から太陽光発電所が建っている区画。電化線路へ電気を送る電源になる。
+ * - DEPOT: 空き区画。プレイヤーが鉄道車両基地(min_space 400m²)を建てる。
+ * 施設の接続端子ノードは「区画の道路と反対側の辺の中点」に生成されるため、
+ * 送電線・引き込み線を引く先はそれぞれ (-104, 34) と (-20, 42) 付近になる。
+ */
+const RAIL_SOLAR_POLYGON: [number, number][] = [
+  [-120, 2],
+  [-88, 2],
+  [-88, 34],
+  [-120, 34],
+];
+const RAIL_DEPOT_POLYGON: [number, number][] = [
+  [-40, 2],
+  [0, 2],
+  [0, 42],
+  [-40, 42],
+];
+
+/**
+ * バックエンドが既にシナリオ4の初期状態を持っているかを判定する。
+ * 初期配置の太陽光発電所が存在すれば構築済みとみなす(冪等性の担保)。
+ */
+async function isRailAlreadyBuilt(base: string): Promise<boolean> {
+  try {
+    const data = await fetchApi<{ buildings: { variant?: number }[] }>(
+      `${base}/api/v1/buildings`
+    );
+    return data.buildings.some((b) => b.variant === VARIANT_SOLAR_PLANT);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * シナリオ4「鉄道を建設しよう」の初期状態を構築する。
+ *
+ * 1. 都市中央を東西に貫く長い道路を1本 POST し、template_mode で直接 ACTIVE に PATCH する。
+ * 2. その道路を含む地区を作成し、以降に作る土地区画の所属地区を確定させる。
+ * 3. 道路の北側に2つの区画(発電所用・車両基地用)を作成する。
+ * 4. 太陽光発電所を発電所用区画に建設し、template_mode で即 ACTIVE(完成)にする。
+ *
+ * 「電源(発電所)だけが用意された更地の都市」を再現し、プレイヤーに
+ * 線路 → 車両基地 → 引き込み線 → 送電線 → プラットフォーム → 駅舎 → 路線
+ * の順で鉄道一式を建設させる。
+ */
+async function setupRailScenario(apiBaseUrl: string): Promise<void> {
+  const base = normalizeBaseUrl(apiBaseUrl);
+
+  if (await isRailAlreadyBuilt(base)) {
+    return;
+  }
+
+  const streetVariant = await resolveStreetVariant(base);
+
+  // 1. 東西に貫く長い道路を1本作成する
+  const createRes = await fetchApi<{ paths: { path_temp_id: string; path_id: number }[] }>(
+    `${base}/api/v1/paths`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        paths: [
+          {
+            path_temp_id: "main_road",
+            path_type: PATH_STREET,
+            path_variant: streetVariant,
+            start_point: RAIL_ROAD_START,
+            end_point: RAIL_ROAD_END,
+            curved: false,
+          },
+        ],
+      }),
+    }
+  );
+
+  const roadId = createRes.paths.find((p) => p.path_temp_id === "main_road")?.path_id;
+  if (roadId == null) {
+    console.warn("[tutorialSetup] 道路の作成に失敗したため初期化を中断します");
+    return;
+  }
+
+  // 2. 道路を ACTIVE 化し、端点ノード ID を割り当てる(template_mode で無検証反映)
+  await fetchApi(`${base}/api/v1/paths/${roadId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      status: STATUS_ACTIVE,
+      start_node_id: RAIL_ROAD_NODE.LEFT,
+      end_node_id: RAIL_ROAD_NODE.RIGHT,
+    }),
+  });
+
+  // 3. 道路を含む地区を作成する(土地区画の所属地区を確定させるため)
+  try {
+    await fetchApi(`${base}/api/v1/zones`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ path_ids: [roadId] }),
+    });
+  } catch (e) {
+    console.warn("[tutorialSetup] 地区の作成に失敗:", e);
+  }
+
+  // 4. 2つの土地区画(発電所用・車両基地用)を作成し、ID を記録する
+  const solarParcelId = await createTutorialParcel(base, RAIL_SOLAR_POLYGON);
+  const depotParcelId = await createTutorialParcel(base, RAIL_DEPOT_POLYGON);
+
+  if (solarParcelId != null) {
+    localStorage.setItem(TUTORIAL4_SOLAR_PARCEL_KEY, String(solarParcelId));
+  }
+  if (depotParcelId != null) {
+    localStorage.setItem(TUTORIAL4_DEPOT_PARCEL_KEY, String(depotParcelId));
+  }
+
+  // 5. 太陽光発電所を建設し、即完成(ACTIVE)にする。電化線路の電源になる。
+  if (solarParcelId != null) {
+    await createCompletedBuilding(base, solarParcelId, VARIANT_SOLAR_PLANT);
   }
 
   // Unity 側に最新状態を再ロードさせる
@@ -572,6 +736,7 @@ async function setupInfraScenario(apiBaseUrl: string): Promise<void> {
 const SCENARIO_SETUPS: Record<string, (apiBaseUrl: string) => Promise<void>> = {
   scenario2: setupDistrictScenario,
   scenario3: setupInfraScenario,
+  scenario4: setupRailScenario,
 };
 
 /**

@@ -4,9 +4,13 @@
  * ウィンドウ全体を上下に分割し、都市の成長度合と課題を一目で把握できるようにリニューアル。
  *
  * - 上部エリア (3/5): 施政スコア分析
- *   - 上段・左: 当期スコア、累積スコア、集計世帯数、ペナルティ等の数値表示。
+ *   - 上段・左: 当期スコア、1世帯あたりスコア、集計世帯数、ペナルティ等の数値表示。
  *   - 上段・右: 世帯満足度5軸（栄養、医療、娯楽、居住、住環境）のレーダーチャート。
- *   - 下段: 過去エポックごとのスコア推移（棒グラフ）。
+ *   - 下段: 過去エポックごとのスコア推移（棒グラフ）＋1世帯あたりスコアの推移（面グラフ）。
+ *
+ * 累積スコアは扱わない。単調増加でしかなく施政の良し悪しを表さないためで、
+ * 都市の規模は人口・GDP（統計ウィンドウ）で測る。代わりに人口と独立な指標である
+ * 「1世帯あたりスコア」（0.0〜2.0）を主指標として据える。
  * - 下部エリア (2/5): 達成目標（クエスト）カード一覧
  *   - カードグリッド形式で、各目標の進捗率・ステータスを一目で確認可能。
  *   - 進捗はサーバ計算の progress（0..1）を使い、複数条件（clause_states）は行ごとに表示する。
@@ -45,6 +49,13 @@ type QuestsResponse = {
   quests: Quest[];
 };
 
+/**
+ * 1世帯が都市スコアに貢献しうる最大値。
+ * qol_score(最大1.0) + 正規化 env_score(最大1.0) の合計であり、スコア式から定まる固定値。
+ * 1世帯あたりスコアのグラフ軸の上限に使う（ScoreMiniMeter と同じ値）。
+ */
+const MAX_SCORE_PER_HOUSEHOLD = 2.0;
+
 type CollapseEvent = {
   agent_id: number;
   variant: number;
@@ -60,7 +71,7 @@ type ScoreDetail = {
   city_score: number;
   city_score_qol: number;
   city_score_env: number;
-  city_score_cumulative: number;
+  city_score_per_household: number;
   city_score_collapse_penalty: number;
   city_score_household_count: number;
   city_score_avg_nutrition: number;
@@ -73,7 +84,7 @@ type ScoreDetail = {
 type ScoreHistoryItem = {
   epoch: number;
   city_score: number;
-  city_score_cumulative: number;
+  city_score_per_household: number;
 };
 
 type ScoreResponse = {
@@ -210,12 +221,12 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       ]
     : [];
 
-  // 棒グラフ用データ構築
+  // 棒グラフ用データ構築。棒=都市スコア合計（規模を含む絶対量）、面=1世帯あたり（規模と独立）。
   const barData = scoreData
     ? scoreData.history.map((h) => ({
         name: t("achievements.epochLabel", { epoch: h.epoch }),
         score: Math.round(h.city_score * 10) / 10,
-        cumulative: Math.round(h.city_score_cumulative * 10) / 10,
+        perHousehold: Math.round(h.city_score_per_household * 100) / 100,
       }))
     : [];
 
@@ -254,10 +265,10 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                 </div>
 
                 <div className="score-summary-card score-summary-card--sub">
-                  <span className="score-summary-card__label">{t("achievements.cumulativeScore")}</span>
+                  <span className="score-summary-card__label">{t("achievements.perHouseholdScore")}</span>
                   <div className="score-summary-card__value-row">
-                    <span className="score-summary-card__value">{latest.city_score_cumulative.toLocaleString(undefined, { maximumFractionDigits: 1 })}</span>
-                    <span className="score-summary-card__unit">{t("achievements.points")}</span>
+                    <span className="score-summary-card__value">{latest.city_score_per_household.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <span className="score-summary-card__unit">/ {MAX_SCORE_PER_HOUSEHOLD.toFixed(1)}</span>
                   </div>
                 </div>
 
@@ -295,8 +306,11 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                       axisLine={{ stroke: "rgba(255, 255, 255, 0.08)" }}
                       tickLine={false}
                     />
+                    {/* 左軸は1世帯あたりスコア。満点(2.0)固定にして、
+                        「どの水準にいるか」がエポックをまたいでも同じ高さで読めるようにする */}
                     <YAxis
                       yAxisId="left"
+                      domain={[0, MAX_SCORE_PER_HOUSEHOLD]}
                       tick={{ fill: "#c4873a", fontSize: 10 }}
                       axisLine={{ stroke: "rgba(255, 255, 255, 0.08)" }}
                       tickLine={false}
@@ -311,7 +325,7 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                     <Tooltip
                       content={({ active, payload }) => {
                         if (active && payload && payload.length) {
-                          const data = payload[0].payload as { name: string; score: number; cumulative: number };
+                          const data = payload[0].payload as { name: string; score: number; perHousehold: number };
                           return (
                             <div className="bar-chart-tooltip">
                               <p className="bar-chart-tooltip__epoch">{data.name}</p>
@@ -319,7 +333,7 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                                 {t("achievements.currentScore")}: <span>{data.score} {t("achievements.points")}</span>
                               </p>
                               <p className="bar-chart-tooltip__val">
-                                {t("achievements.cumulativeScore")}: <span>{data.cumulative} {t("achievements.points")}</span>
+                                {t("achievements.perHouseholdScore")}: <span>{data.perHousehold.toFixed(2)}</span>
                               </p>
                             </div>
                           );
@@ -329,7 +343,7 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                     />
                     <Area
                       yAxisId="left"
-                      dataKey="cumulative"
+                      dataKey="perHousehold"
                       stroke="#f59e0b"
                       strokeWidth={1.5}
                       fill="url(#areaGrad)"
