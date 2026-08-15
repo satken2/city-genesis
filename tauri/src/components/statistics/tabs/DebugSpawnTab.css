@@ -214,3 +214,30 @@
 .debug-spawn-table__row--positive td {
   color: #6ee7b7;
 }
+
+/* 関門のしきい値を超えて参入不能になっている数値（想定初期資本 > 与信集中限度など） */
+.debug-spawn-table__num--over {
+  color: #f87171;
+}
+
+/*
+ * 表の外に置く補足行（業種によらない都市共通のしきい値など）。
+ * 表の見出しと本体の間に挟むため、余白は詰めめにする。
+ */
+.debug-spawn-note {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 10px;
+  color: #8ba3bb;
+}
+
+/* 「ラベル: 値」の対が途中で折り返さないようにまとめる単位 */
+.debug-spawn-note__item {
+  white-space: nowrap;
+}
+
+.debug-spawn-note__value {
+  color: #c4d3e3;
+  font-variant-numeric: tabular-nums;
+}

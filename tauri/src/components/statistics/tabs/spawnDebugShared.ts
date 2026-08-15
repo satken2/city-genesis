@@ -34,7 +34,8 @@ export type ConstructionRecord = {
 };
 
 /** 経済主体スポーンの業種別評価メトリクス（SpawnPhase が毎エポック記録）。
- *  需要系（demand_* / effective_demand）は全地区の合算、best_* は全地区の最良値。
+ *  需要系（demand_* / effective_demand）は全地区の合算、best_* は全地区の最良値、
+ *  capital_need は全地区の最小値。
  *  評価が早期打ち切りされた業種ではキー自体が存在しないことがある。 */
 export type AgentSpawnMetrics = {
   /** 国内潜在需要の合算（既存供給を差し引いた残余需要ベース） */
@@ -51,6 +52,9 @@ export type AgentSpawnMetrics = {
   best_profit_rate?: number;
   /** 最低稼働量（マスター由来で地区非依存） */
   min_qty?: number;
+  /** 想定初期資本（運転資金＋専用建物の建設費）の最小値。
+   *  レコードの credit_limit を超える業種は「資本調達不能」で参入できない */
+  capital_need?: number;
 };
 
 /** GET /api/v1/stats/spawn_debug の経済主体スポーン履歴1レコード。
@@ -60,6 +64,12 @@ export type AgentSpawnRecord = {
   date: number;
   variants: Record<string, Record<string, number>>;
   metrics?: Record<string, AgentSpawnMetrics>;
+  /** 案件ごとの与信集中限度（円）。業種によらない都市共通のスカラーで、
+   *  max(民間預金総額 × SPAWN_CREDIT_CONCENTRATION_LIMIT, SPAWN_CREDIT_FLOOR) */
+  credit_limit?: number;
+  /** 与信集中限度の分母である民間預金総額（円）。
+   *  一般施設・共有建物・世帯の正の現金残高の合計 */
+  private_deposits?: number;
 };
 
 /** GET /api/v1/stats/spawn_debug のレスポンス全体 */

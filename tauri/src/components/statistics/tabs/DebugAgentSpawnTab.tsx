@@ -16,6 +16,9 @@
  *   需要が最低稼働量を上回り、競争力・利益率が上がっていく様子から
  *   「その業種があとどれぐらいで参入しそうか」を観測できる。
  * - 右: 最新エポックの業種別スコア表。行クリックで左のグラフの業種を切り替える。
+ *   表の見出し直下には資本調達の関門（与信集中限度と、その分母である民間預金総額）を
+ *   出す。限度額は業種によらない都市共通の値なので列にはせず、各業種の想定初期資本
+ *   （列「初期資本」）と見比べる形にしている。限度超過の業種は赤字で示す。
  *
  * 業種セレクタは左の上下チャートと右表の選択状態を共有する。
  * 「全業種（合算）」選択時、メトリクスは需要系の合算のみ表示する
@@ -104,6 +107,8 @@ type LatestAgentRow = {
   demand: number | null;
   competitiveness: number | null;
   profitRate: number | null;
+  /** 想定初期資本（運転資金＋専用建物の建設費）。資本審査に到達しなかった業種は null */
+  capitalNeed: number | null;
   spawned: number;
 };
 
@@ -227,6 +232,8 @@ export function DebugAgentSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   // メトリクス（需要・競争力・利益率）とカウンタ（実現数）を1行にまとめ、
   // 利益率降順（未記録は末尾）に並べる。
   const latestRecord = data?.agent_spawn[data.agent_spawn.length - 1] ?? null;
+  // 資本調達の判定線（業種共通）。表の想定初期資本の超過判定にも使う。
+  const creditLimit = latestRecord?.credit_limit ?? null;
   const latestRows = useMemo((): LatestAgentRow[] => {
     if (!latestRecord) return [];
     const metrics = latestRecord.metrics ?? {};
@@ -253,6 +260,7 @@ export function DebugAgentSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
         demand,
         competitiveness: compCandidates.length > 0 ? Math.max(...compCandidates) : null,
         profitRate: m.best_profit_rate ?? null,
+        capitalNeed: m.capital_need ?? null,
         spawned:
           (c["spawned"] ?? 0) + (c["reused_paused"] ?? 0) + (c["dedicated_registered"] ?? 0),
       };
@@ -425,6 +433,27 @@ export function DebugAgentSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
             <h3 className="debug-spawn-card__title">
               {t("statistics.debugSpawnAgentLatestTable")}
             </h3>
+            {/* 資本調達の関門。業種共通の判定線なので表の外に1行で示す。
+                与信集中限度 = max(民間預金総額 × 集中限度率, 床値) であり、
+                床値が効いている創設期は限度が預金比では読めないため両方を出す。 */}
+            {latestRecord?.credit_limit !== undefined && (
+              <div className="debug-spawn-note">
+                <span className="debug-spawn-note__item">
+                  {t("statistics.debugSpawnCreditLimit")}:{" "}
+                  <span className="debug-spawn-note__value">
+                    {formatCompact(latestRecord.credit_limit)}
+                  </span>
+                </span>
+                {latestRecord.private_deposits !== undefined && (
+                  <span className="debug-spawn-note__item">
+                    {t("statistics.debugSpawnPrivateDeposits")}:{" "}
+                    <span className="debug-spawn-note__value">
+                      {formatCompact(latestRecord.private_deposits)}
+                    </span>
+                  </span>
+                )}
+              </div>
+            )}
             {latestRows.length > 0 ? (
               <div className="debug-spawn-table-scroll debug-spawn-table-scroll--fill">
                 <table className="debug-spawn-table debug-spawn-table--clickable">
@@ -434,6 +463,7 @@ export function DebugAgentSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                       <th>{t("statistics.debugSpawnColDemand")}</th>
                       <th>{t("statistics.debugSpawnColCompetitiveness")}</th>
                       <th>{t("statistics.debugSpawnColProfitRate")}</th>
+                      <th>{t("statistics.debugSpawnColCapitalNeed")}</th>
                       <th>{t("statistics.debugSpawnColSpawned")}</th>
                     </tr>
                   </thead>
@@ -462,6 +492,23 @@ export function DebugAgentSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                         <td className="debug-spawn-table__num">
                           {row.profitRate !== null
                             ? formatCoefficient(row.profitRate)
+                            : "-"}
+                        </td>
+                        {/* 想定初期資本。与信集中限度を超えていれば資本調達不能で
+                            参入できないため、その行だけ赤字で示す。 */}
+                        <td
+                          className={[
+                            "debug-spawn-table__num",
+                            creditLimit !== null &&
+                              row.capitalNeed !== null &&
+                              row.capitalNeed > creditLimit &&
+                              "debug-spawn-table__num--over",
+                          ]
+                            .filter(Boolean)
+                            .join(" ")}
+                        >
+                          {row.capitalNeed !== null
+                            ? formatCompact(row.capitalNeed)
                             : "-"}
                         </td>
                         <td className="debug-spawn-table__num">{row.spawned}</td>
