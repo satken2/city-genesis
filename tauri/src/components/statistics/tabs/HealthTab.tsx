@@ -181,7 +181,7 @@ export function HealthTab({ apiBaseUrl }: { apiBaseUrl: string }) {
       <div className="health-tab__top-row">
         <section className="health-chart health-chart--lifespan">
           <h3 className="health-chart__title">{t("statistics.averageLifespan")}</h3>
-          <div className="health-chart__area" style={{ height: "220px" }}>
+          <div className="health-chart__area">
             {hasHistory ? (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={scope.history} margin={CHART_MARGIN}>
@@ -231,7 +231,7 @@ export function HealthTab({ apiBaseUrl }: { apiBaseUrl: string }) {
               </span>
             )}
           </h3>
-          <div className="health-chart__area" style={{ height: "220px" }}>
+          <div className="health-chart__area">
             {scope.death_age_distribution == null ? (
               // 地区スコープでは死因別×年齢帯のデータを記録していない
               <div className="health-chart__empty">
@@ -306,7 +306,7 @@ export function HealthTab({ apiBaseUrl }: { apiBaseUrl: string }) {
         {/* 左半分: 栄養充足度分布 */}
         <section className="health-chart health-chart--half">
           <h3 className="health-chart__title">{t("statistics.nutritionSatisfaction")}</h3>
-          <div className="health-chart__area" style={{ height: "280px" }}>
+          <div className="health-chart__area">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 layout="vertical"
@@ -343,7 +343,7 @@ export function HealthTab({ apiBaseUrl }: { apiBaseUrl: string }) {
         {/* 右半分: 医療充足度分布 */}
         <section className="health-chart health-chart--half">
           <h3 className="health-chart__title">{t("statistics.healthcareSatisfaction")}</h3>
-          <div className="health-chart__area" style={{ height: "280px" }}>
+          <div className="health-chart__area">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 layout="vertical"

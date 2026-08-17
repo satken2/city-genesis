@@ -57,10 +57,16 @@
 
 /* ========== チャートコンテナ ========== */
 
+/*
+ * 上下2段は等分（flex: 1）。グラフ面 .health-chart__area は flex: 1（＝flex-basis: 0）で
+ * 親の高さを埋める作りなので、段の高さが内容依存（flex-basis: auto）になると
+ * 高さ0に潰れ、ResponsiveContainer が何も描画しなくなる。段には必ず確定した高さを与えること。
+ */
 .health-tab__top-row {
   display: flex;
   gap: 20px;
-  flex: 0 0 auto;
+  flex: 1;
+  min-height: 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   padding-bottom: 16px;
 }
