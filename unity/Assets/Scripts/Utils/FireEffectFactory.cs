@@ -106,21 +106,22 @@ public static class FireEffectFactory
 
         var main = ps.main;
         main.duration = 6f;
-        main.startLifetime = new ParticleSystem.MinMaxCurve(0.55f, 1.25f);
-        main.startSpeed = new ParticleSystem.MinMaxCurve(Mathf.Max(1.8f, r * 0.5f), Mathf.Max(3.4f, r * 1.05f));
-        main.startSize = new ParticleSystem.MinMaxCurve(Mathf.Max(1.4f, r * 0.55f), Mathf.Max(2.8f, r * 1.05f));
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.8f, 1.7f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(Mathf.Max(1f, r * 0.26f), Mathf.Max(1.9f, r * 0.55f));
+        main.startSize = new ParticleSystem.MinMaxCurve(Mathf.Max(1.1f, r * 0.42f), Mathf.Max(2.1f, r * 0.8f));
         main.startRotation = new ParticleSystem.MinMaxCurve(-0.22f, 0.22f);
-        main.gravityModifier = -0.08f;
+        main.gravityModifier = -0.04f;
 
         var emission = ps.emission;
         emission.rateOverTime = Mathf.Clamp(r * r * 0.85f, 24f, 150f);
 
         // 屋根だけでなく上層階の開口部からも噴き出している見え方にするため、
-        // 発生源は建物上部を覆う厚みのある箱にする。
+        // 発生源は建物上部を覆う厚みのある箱にする。底面いっぱいに広げると
+        // 建物より炎の方が大きく見えてしまうので、XZは底面より内側に収める。
         var shape = ps.shape;
         shape.shapeType = ParticleSystemShapeType.Box;
-        shape.scale = new Vector3(r * 1.7f, h * 0.42f, r * 1.7f);
-        shape.position = new Vector3(0f, h * 0.78f, 0f);
+        shape.scale = new Vector3(r * 0.85f, h * 0.3f, r * 0.85f);
+        shape.position = new Vector3(0f, h * 0.8f, 0f);
 
         SetColorOverLifetime(ps,
             new[]
@@ -145,7 +146,7 @@ public static class FireEffectFactory
             new Keyframe(0.28f, 1.00f),
             new Keyframe(1f, 0.20f)));
 
-        SetNoise(ps, strength: Mathf.Max(0.6f, r * 0.32f), frequency: 0.55f, scrollSpeed: 1.2f, octaves: 2);
+        SetNoise(ps, strength: Mathf.Max(0.4f, r * 0.18f), frequency: 0.4f, scrollSpeed: 0.55f, octaves: 2);
     }
 
     /// <summary>火の粉。炎から舞い上がる細かい光点。</summary>
@@ -158,18 +159,18 @@ public static class FireEffectFactory
 
         var main = ps.main;
         main.duration = 6f;
-        main.startLifetime = new ParticleSystem.MinMaxCurve(1.6f, 3.4f);
-        main.startSpeed = new ParticleSystem.MinMaxCurve(Mathf.Max(2.5f, r * 0.9f), Mathf.Max(5f, r * 1.7f));
-        main.startSize = new ParticleSystem.MinMaxCurve(0.10f, 0.32f);
-        main.gravityModifier = -0.18f;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(2.2f, 4.2f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(Mathf.Max(1.3f, r * 0.45f), Mathf.Max(2.6f, r * 0.9f));
+        main.startSize = new ParticleSystem.MinMaxCurve(0.09f, 0.28f);
+        main.gravityModifier = -0.1f;
 
         var emission = ps.emission;
-        emission.rateOverTime = Mathf.Clamp(r * 1.5f, 5f, 26f);
+        emission.rateOverTime = Mathf.Clamp(r * 1.2f, 4f, 20f);
 
         var shape = ps.shape;
         shape.shapeType = ParticleSystemShapeType.Box;
-        shape.scale = new Vector3(r * 1.5f, h * 0.3f, r * 1.5f);
-        shape.position = new Vector3(0f, h * 0.82f, 0f);
+        shape.scale = new Vector3(r * 0.75f, h * 0.24f, r * 0.75f);
+        shape.position = new Vector3(0f, h * 0.84f, 0f);
 
         SetColorOverLifetime(ps,
             new[]
@@ -186,7 +187,7 @@ public static class FireEffectFactory
                 new GradientAlphaKey(0.00f, 1.00f),
             });
 
-        SetNoise(ps, strength: Mathf.Max(0.8f, r * 0.9f), frequency: 0.3f, scrollSpeed: 1.6f, octaves: 2);
+        SetNoise(ps, strength: Mathf.Max(0.45f, r * 0.45f), frequency: 0.22f, scrollSpeed: 0.8f, octaves: 2);
 
         // 上昇の軌跡を持たせると点ではなく「飛んでいる火の粉」に見える。
         var renderer = ps.GetComponent<ParticleSystemRenderer>();
@@ -204,19 +205,21 @@ public static class FireEffectFactory
         ParticleSystem ps = AddSystem(root, "Smoke", _smokeMaterial, 180);
 
         var main = ps.main;
-        main.duration = 8f;
-        main.startLifetime = new ParticleSystem.MinMaxCurve(4.5f, 8f);
-        main.startSpeed = new ParticleSystem.MinMaxCurve(Mathf.Max(2.2f, r * 0.5f), Mathf.Max(4f, r * 0.95f));
-        main.startSize = new ParticleSystem.MinMaxCurve(Mathf.Max(2.5f, r * 0.9f), Mathf.Max(4.5f, r * 1.6f));
+        // prewarm は duration ぶんだけ空回しするため、寿命の上限に合わせておかないと
+        // 表示された瞬間に煙柱が上まで伸びきらない。
+        main.duration = 11f;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(6f, 11f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(Mathf.Max(1.1f, r * 0.24f), Mathf.Max(2f, r * 0.45f));
+        main.startSize = new ParticleSystem.MinMaxCurve(Mathf.Max(1.6f, r * 0.5f), Mathf.Max(2.8f, r * 0.85f));
         main.startRotation = new ParticleSystem.MinMaxCurve(-Mathf.PI, Mathf.PI);
-        main.gravityModifier = -0.05f;
+        main.gravityModifier = -0.03f;
 
         var emission = ps.emission;
-        emission.rateOverTime = Mathf.Clamp(r * 1.1f, 7f, 34f);
+        emission.rateOverTime = Mathf.Clamp(r * 0.9f, 5f, 26f);
 
         var shape = ps.shape;
         shape.shapeType = ParticleSystemShapeType.Box;
-        shape.scale = new Vector3(r * 1.2f, h * 0.1f, r * 1.2f);
+        shape.scale = new Vector3(r * 0.5f, h * 0.06f, r * 0.5f);
         shape.position = new Vector3(0f, h * 1.0f, 0f);
 
         SetColorOverLifetime(ps,
@@ -235,13 +238,13 @@ public static class FireEffectFactory
             });
 
         SetSizeOverLifetime(ps, new AnimationCurve(
-            new Keyframe(0f, 0.55f),
-            new Keyframe(0.45f, 1.60f),
-            new Keyframe(1f, 2.80f)));
+            new Keyframe(0f, 0.50f),
+            new Keyframe(0.45f, 1.10f),
+            new Keyframe(1f, 1.70f)));
 
-        SetRotationOverLifetime(ps, degreesPerSecond: 22f);
-        SetNoise(ps, strength: Mathf.Max(0.5f, r * 0.45f), frequency: 0.25f, scrollSpeed: 0.5f, octaves: 2);
-        SetDrift(ps, spec.Drift, speed: 1.4f);
+        SetRotationOverLifetime(ps, degreesPerSecond: 8f);
+        SetSwayNoise(ps, strength: Mathf.Max(0.6f, r * 0.35f), frequency: 0.12f, scrollSpeed: 0.16f);
+        SetDrift(ps, spec.Drift, speed: 0.6f);
     }
 
     /// <summary>失火の白煙。炎は伴わず、細く立ち上るだけ。</summary>
@@ -253,19 +256,19 @@ public static class FireEffectFactory
         ParticleSystem ps = AddSystem(root, "Smoke", _smokeMaterial, 90);
 
         var main = ps.main;
-        main.duration = 6f;
-        main.startLifetime = new ParticleSystem.MinMaxCurve(3.2f, 6f);
-        main.startSpeed = new ParticleSystem.MinMaxCurve(1f, 2.2f);
-        main.startSize = new ParticleSystem.MinMaxCurve(Mathf.Max(1f, r * 0.35f), Mathf.Max(1.8f, r * 0.6f));
+        main.duration = 9f;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(5f, 9f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(0.5f, 1.2f);
+        main.startSize = new ParticleSystem.MinMaxCurve(Mathf.Max(0.8f, r * 0.26f), Mathf.Max(1.4f, r * 0.45f));
         main.startRotation = new ParticleSystem.MinMaxCurve(-Mathf.PI, Mathf.PI);
-        main.gravityModifier = -0.03f;
+        main.gravityModifier = -0.02f;
 
         var emission = ps.emission;
         emission.rateOverTime = Mathf.Clamp(r * 0.5f, 2.5f, 12f);
 
         var shape = ps.shape;
         shape.shapeType = ParticleSystemShapeType.Box;
-        shape.scale = new Vector3(r * 0.45f, h * 0.06f, r * 0.45f);
+        shape.scale = new Vector3(r * 0.22f, h * 0.04f, r * 0.22f);
         shape.position = new Vector3(0f, h * 0.98f, 0f);
 
         SetColorOverLifetime(ps,
@@ -284,12 +287,12 @@ public static class FireEffectFactory
 
         SetSizeOverLifetime(ps, new AnimationCurve(
             new Keyframe(0f, 0.35f),
-            new Keyframe(0.5f, 1.30f),
-            new Keyframe(1f, 2.20f)));
+            new Keyframe(0.5f, 1.00f),
+            new Keyframe(1f, 1.60f)));
 
-        SetRotationOverLifetime(ps, degreesPerSecond: 14f);
-        SetNoise(ps, strength: Mathf.Max(0.4f, r * 0.22f), frequency: 0.3f, scrollSpeed: 0.6f, octaves: 2);
-        SetDrift(ps, spec.Drift, speed: 0.9f);
+        SetRotationOverLifetime(ps, degreesPerSecond: 6f);
+        SetSwayNoise(ps, strength: Mathf.Max(0.35f, r * 0.2f), frequency: 0.13f, scrollSpeed: 0.14f);
+        SetDrift(ps, spec.Drift, speed: 0.4f);
     }
 
     /// <summary>
@@ -388,6 +391,28 @@ public static class FireEffectFactory
         noise.octaveCount = octaves;
         // 周波数に応じて強度を抑え、細かい揺らぎが暴れないようにする。
         noise.damping = true;
+    }
+
+    /// <summary>
+    /// 煙が「ゆらゆらと立ち上る」揺らぎを設定する。
+    ///
+    /// 低周波・低スクロール速度で大きくゆっくり揺らすため、周波数に強度を比例させる
+    /// `damping` は切る(有効のままだと低周波では揺れがほとんど出ない)。
+    /// さらに軸を分離して**水平方向だけ強く揺らす**。Y方向まで同じ強度で揺らすと
+    /// 上昇速度が波打ち、ゆらゆらではなく上下に痙攣する動きになる。
+    /// </summary>
+    private static void SetSwayNoise(ParticleSystem ps, float strength, float frequency, float scrollSpeed)
+    {
+        var noise = ps.noise;
+        noise.enabled = true;
+        noise.frequency = frequency;
+        noise.scrollSpeed = scrollSpeed;
+        noise.octaveCount = 1;
+        noise.damping = false;
+        noise.separateAxes = true;
+        noise.strengthX = strength;
+        noise.strengthY = strength * 0.2f;
+        noise.strengthZ = strength;
     }
 
     private static void SetDrift(ParticleSystem ps, Vector2 drift, float speed)

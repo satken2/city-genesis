@@ -56,7 +56,10 @@ import { AgentOperationPanel } from "./AgentOperationPanel";
 import { PublicFacilityPanel } from "./PublicFacilityPanel";
 import { BuildingConstructionInfoPanel } from "./BuildingConstructionInfoPanel";
 import "./AgentDetailPanel.css";
+// アイコンボタン(.operation-panel / .operation-btn)を借りるため明示的に読み込む
+import "./AgentOperationPanel.css";
 import rocketIcon from "../../assets/images/ui/rocket.png";
+import subBuildingIcon from "../../assets/images/buildings/bd_16.png";
 
 /** 買収交渉中のアイコン縁取り色。公共施設の黄色と区別するためのオレンジ */
 const ACQUISITION_FRAME_COLOR = "#f97316";
@@ -529,20 +532,27 @@ export function AgentDetailPanel({
 
       <AgentAlertsPanel alert={agentData.alert} />
 
-      {/* マッシュアップ建物のサブ建物配置エディタを開くボタン */}
+      {/* マッシュアップ建物のサブ建物配置エディタを開くボタン。
+          操作系は他のパネルと同じアイコンボタンに揃え、名称はツールチップに持たせる。 */}
       {isMashupBuilding && (
-        <button
-          className="agent-detail-mashup-edit-btn"
-          type="button"
-          onClick={() => {
-            void invoke("open_registered_window", {
-              windowType: "mashup_edit",
-              entityId: currentEntityId,
-            });
-          }}
-        >
-          {t("agent.editSubBuildings", "サブ建物の配置を編集")}
-        </button>
+        <div className="operation-panel">
+          <button
+            className="operation-btn"
+            type="button"
+            title={t("agent.editSubBuildings", "サブ建物の配置を編集")}
+            onClick={() => {
+              void invoke("open_registered_window", {
+                windowType: "mashup_edit",
+                entityId: currentEntityId,
+              });
+            }}
+          >
+            <img
+              src={subBuildingIcon}
+              alt={t("agent.editSubBuildings", "サブ建物の配置を編集")}
+            />
+          </button>
+        </div>
       )}
 
       {/* 計画中のエージェントは既存データを表示する意味がないため、

@@ -5,11 +5,13 @@
  * 従来は「稼働率目標」専用カードだった領域を、公共施設の各種操作をまとめた
  * コントロールパネルへ拡張したもの。以下をひとつのカードに集約する。
  *
- * - 操作ボタン: 修繕/再建・停止/開始(トグル)・取り壊し。計画中は削除・編集。
+ * - 操作ボタン: 修繕/再建・停止/開始(トグル)・放棄(トグル)・取り壊し。計画中は削除・編集。
  *   停止と開始は同一ボタンでアイコンを切り替えるトグルとして実装する。
- * - 稼働率目標(建設中は「建設スピード」、定常生産施設は「稼働率目標」)。
- *   通常は数値のみを表示し、その数値をクリックしたときだけスライダーを展開する。
- * - 放棄チェックボックス(建物のみ)。放棄すると自動修繕の対象外になり、稼働中なら停止する。
+ * - 稼働率目標(建設中は「建設スピード」、定常生産施設は「稼働率目標」)。同じボタン列の
+ *   右端に「アイコン+現在値」のボタンとして置き、押したときだけスライダーを展開する。
+ *
+ * 放棄は維持を諦めた状態であり、放棄中は放棄解除以外の操作をすべて無効化する
+ * (修繕・停止/開始・取り壊しはいずれも「維持している施設」への操作のため)。
  *
  * 非建物の公共施設(公営サービス事業者など)は放棄できず、修繕・停止/開始も
  * 対象外のため、取り壊し(計画中は削除)のみを表示する。
@@ -42,6 +44,7 @@ import repairIcon from "../../assets/images/ui/repair.png";
 import editIcon from "../../assets/images/ui/edit.png";
 import rocketIcon from "../../assets/images/ui/rocket.png";
 import pendingIcon from "../../assets/images/ui/pending.png";
+import abandonIcon from "../../assets/images/alerts/rubble.png";
 import "./AgentOperationPanel.css";
 import "./PublicFacilityPanel.css";
 
@@ -63,6 +66,29 @@ type PublicFacilityPanelProps = {
 };
 
 const PRE_CONSTRUCTION = new Set([STATUS_TEMPORARY, STATUS_SCHEDULED_CONSTRUCTION, STATUS_PENDING]);
+
+/** 稼働率目標/建設スピードのメーターアイコン。専用画像が未用意のためインラインSVGで置く。 */
+function UtilizationIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path
+        d="M4 17a8 8 0 1 1 16 0"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M12 17 16.5 11.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+      />
+      <circle cx="12" cy="17" r="1.7" fill="currentColor" />
+    </svg>
+  );
+}
 
 async function openBuildingEdit(agentId: number) {
   await invoke("open_registered_window", {
@@ -190,6 +216,8 @@ export function PublicFacilityPanel({
   // 稼働中/停止中は放棄・修繕・停止開始トグルの操作対象となる状態。
   const isRunningState = status === STATUS_ACTIVE || status === STATUS_PAUSED;
   const isPaused = status === STATUS_PAUSED;
+  // 放棄中は「維持している施設」への操作(修繕・停止/開始・取り壊し・着工)を受け付けない。
+  const lockedByAbandon = loading || isAbandoned;
 
   // 稼働率目標スライダーの表示条件(従来のカードと同一)。
   // 建設中は「建設スピード」(最大500%)、余力方式(>0)・定量方式(<0)の施設は「稼働率目標」(最大100%)。
@@ -198,9 +226,6 @@ export function PublicFacilityPanel({
   const isConstructing = status === STATUS_CONSTRUCTING;
   const showSlider = isConstructing || isHeadroomFacility;
   const sliderMax = isConstructing ? 500 : 100;
-
-  // 放棄チェックボックスは建物かつ稼働中/停止中のときのみ表示する。
-  const showAbandon = isBuilding && isRunningState;
 
   return (
     <div className="pf-panel">
@@ -254,7 +279,7 @@ export function PublicFacilityPanel({
                 className="operation-btn"
                 type="button"
                 title={t("agent.action.rebuild")}
-                disabled={loading || !isBuilding}
+                disabled={lockedByAbandon || !isBuilding}
                 onClick={() => void handleReconstruct()}
               >
                 <img src={repairIcon} alt={t("agent.action.rebuild")} />
@@ -265,10 +290,9 @@ export function PublicFacilityPanel({
                 type="button"
                 title={t("agent.action.repair")}
                 disabled={
-                  loading ||
+                  lockedByAbandon ||
                   !isBuilding ||
                   !isRunningState ||
-                  isAbandoned ||
                   !!agent.under_maintenance
                 }
                 onClick={() => void handleRepair()}
@@ -283,7 +307,7 @@ export function PublicFacilityPanel({
                 className="operation-btn"
                 type="button"
                 title={t("agent.action.stopConstruction")}
-                disabled={loading}
+                disabled={lockedByAbandon}
                 onClick={() => void handleToggleStatus()}
               >
                 <img src={pendingIcon} alt={t("agent.action.stopConstruction")} />
@@ -298,7 +322,7 @@ export function PublicFacilityPanel({
                 title={
                   isPaused ? t("agent.action.resume") : t("agent.action.pause")
                 }
-                disabled={loading || !isRunningState || isAbandoned}
+                disabled={lockedByAbandon || !isRunningState}
                 onClick={() => void handleToggleActive()}
               >
                 <img
@@ -312,6 +336,30 @@ export function PublicFacilityPanel({
               </button>
             )}
 
+            {/* 放棄トグル。建物のみ。押下中(放棄中)は他の操作ボタンが無効になるため、
+                この操作だけは放棄中も押せる状態を維持する。 */}
+            {isBuilding && (
+              <button
+                className={[
+                  "operation-btn",
+                  isAbandoned && "operation-btn--active",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                type="button"
+                aria-pressed={isAbandoned}
+                title={
+                  isAbandoned
+                    ? t("agent.action.cancelAbandon")
+                    : `${t("agent.abandon")}(${t("agent.abandonHint")})`
+                }
+                disabled={loading || !isRunningState}
+                onClick={() => void handleAbandonToggle(!isAbandoned)}
+              >
+                <img src={abandonIcon} alt={t("agent.abandon")} />
+              </button>
+            )}
+
             <button
               className="operation-btn"
               type="button"
@@ -320,96 +368,82 @@ export function PublicFacilityPanel({
                   ? t("agent.action.cancelBulldoze")
                   : t("agent.action.bulldoze")
               }
-              disabled={loading}
+              disabled={lockedByAbandon}
               onClick={() => void handleBulldoze()}
             >
               <img src={bulldozeIcon} alt={t("agent.action.bulldoze")} />
             </button>
           </>
         )}
+
+        {/* 稼働率目標。ボタン列の右端に寄せ、アイコン+現在値だけを出す。
+            キャプションは持たず、押したときにスライダーを展開する。 */}
+        {showSlider && (
+          <button
+            type="button"
+            className="operation-btn operation-btn--util"
+            aria-expanded={sliderOpen}
+            title={
+              isConstructing
+                ? t("agent.constructionSpeed", "建設スピード")
+                : t("agent.utilizationTarget", "稼働率目標")
+            }
+            onClick={() => setSliderOpen((open) => !open)}
+          >
+            <UtilizationIcon />
+            <span className="operation-btn__util-value">
+              {utilizationTarget}%
+            </span>
+          </button>
+        )}
       </div>
 
-      {showSlider && (
-        <div className="agent-detail-utilization-target">
-          <div className="agent-detail-utilization-target-header">
-            <span className="agent-detail-utilization-target-title">
-              {isConstructing
-                ? t("agent.constructionSpeed", "建設スピード")
-                : t("agent.utilizationTarget", "稼働率目標")}
-            </span>
-            {/* 数値自体がスライダーの開閉ボタン。既定は閉じており、
-                クリックしたときだけスライダーを展開する。 */}
-            <button
-              type="button"
-              className="pf-panel__util-value"
-              aria-expanded={sliderOpen}
-              onClick={() => setSliderOpen((open) => !open)}
-            >
-              <span className="agent-detail-utilization-target-value">
-                {utilizationTarget}%
-              </span>
-            </button>
-          </div>
-          {sliderOpen && (
-            <div className="agent-detail-utilization-target-slider-container">
-              <input
-                type="range"
-                min="0"
-                max={sliderMax}
-                value={utilizationTarget}
-                onChange={(e) => setUtilizationTarget(Number(e.target.value))}
-                onMouseUp={onUtilizationCommit}
-                onTouchEnd={onUtilizationCommit}
-                className="agent-detail-utilization-target-slider"
-              />
-            </div>
-          )}
-          {isConstructing && (
-            <div className="agent-detail-grid" style={{ marginTop: 6 }}>
-              <span className="agent-detail-label">
-                {t("agent.constructionCostPerEpoch", "1エポックの建設コスト")}
-              </span>
-              <span className="agent-detail-value">
-                {constructionCostPerEpoch != null
-                  ? t("common.currency", {
-                      value: Math.round(constructionCostPerEpoch),
-                    })
-                  : "—"}
-              </span>
-              <span className="agent-detail-label">
-                {t("agent.remainingConstruction", "残り建設期間")}
-              </span>
-              <span className="agent-detail-value">
-                {remainingEpochs != null
-                  ? t("agent.remainingEpochs", {
-                      defaultValue: "約{{n}}エポック",
-                      n: Math.ceil(remainingEpochs),
-                    })
-                  : "—"}
-              </span>
-            </div>
-          )}
+      {/* キャプションはスライダーを開いたときだけ出す(閉じている間はボタンの
+          ツールチップが担う)。スライダーの左に置いて何のつまみかを示す。 */}
+      {showSlider && sliderOpen && (
+        <div className="agent-detail-utilization-target-slider-container">
+          <span className="agent-detail-utilization-target-title">
+            {isConstructing
+              ? t("agent.constructionSpeed", "建設スピード")
+              : t("agent.utilizationTarget", "稼働率目標")}
+          </span>
+          <input
+            type="range"
+            min="0"
+            max={sliderMax}
+            value={utilizationTarget}
+            onChange={(e) => setUtilizationTarget(Number(e.target.value))}
+            onMouseUp={onUtilizationCommit}
+            onTouchEnd={onUtilizationCommit}
+            className="agent-detail-utilization-target-slider"
+          />
         </div>
       )}
 
-      {showAbandon && (
-        <label className="pf-panel__abandon">
-          <input
-            type="checkbox"
-            checked={isAbandoned}
-            disabled={loading}
-            onChange={(e) => void handleAbandonToggle(e.target.checked)}
-          />
-          <span className="pf-panel__abandon-text">
-            {t("agent.abandon", "放棄")}
+      {isConstructing && (
+        <div className="agent-detail-grid">
+          <span className="agent-detail-label">
+            {t("agent.constructionCostPerEpoch", "1エポックの建設コスト")}
           </span>
-          <span className="pf-panel__abandon-hint">
-            {t(
-              "agent.abandonHint",
-              "維持を放棄し、修繕を行わず老朽化に任せます",
-            )}
+          <span className="agent-detail-value">
+            {constructionCostPerEpoch != null
+              ? t("common.currency", {
+                  value: Math.round(constructionCostPerEpoch),
+                })
+              : "—"}
           </span>
-        </label>
+          <span className="agent-detail-label">
+            {t("agent.remainingConstruction", "残り建設期間")}
+          </span>
+          <span className="agent-detail-value">
+            {remainingEpochs != null
+              ? t("agent.remainingEpochs", {
+                  defaultValue: "約{{n}}エポック",
+                  n: Math.ceil(remainingEpochs),
+                })
+              : "—"}
+          </span>
+        </div>
       )}
     </div>
   );

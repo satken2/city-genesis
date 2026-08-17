@@ -29,8 +29,8 @@ const POLL_INTERVAL_MS = 10_000;
 const MAX_SCORE_PER_HOUSEHOLD = 2.0;
 
 type ScoreResponse = {
-  latest: {
-    city_score_per_household: number;
+  latest?: {
+    city_score_per_household?: number;
   };
 };
 
@@ -57,7 +57,10 @@ export function ScoreMiniMeter({
           { signal: controller.signal },
         );
         if (cancelled) return;
-        setPerHousehold(res.latest.city_score_per_household);
+        // 数値以外(欠落・null)は空メーター扱いにする。コックピットは常駐ウィンドウで
+        // 描画中の例外がHUD1枚まるごとの消失になるため、値の型はここで確定させる。
+        const value = res.latest?.city_score_per_household;
+        setPerHousehold(typeof value === "number" && Number.isFinite(value) ? value : null);
       } catch {
         // 取得失敗（中断含む）は前回値を保持し、画面をちらつかせない（BudgetMiniMeterと同方針）。
       }

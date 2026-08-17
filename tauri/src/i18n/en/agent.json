@@ -41,7 +41,8 @@
       "rebuild": "Rebuild",
       "edit": "Edit",
       "startConstruction": "Start Construction",
-      "stopConstruction": "Suspend Construction"
+      "stopConstruction": "Suspend Construction",
+      "cancelAbandon": "Cancel Abandonment"
     },
     "pendingWarning": "This building is planned. Please command to start construction.",
     "alerts": {

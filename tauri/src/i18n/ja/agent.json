@@ -41,7 +41,8 @@
       "rebuild": "再建",
       "edit": "編集",
       "startConstruction": "着工",
-      "stopConstruction": "保留"
+      "stopConstruction": "保留",
+      "cancelAbandon": "放棄を解除"
     },
     "pendingWarning": "この建物は計画中です。着工を指示してください。",
     "alerts": {

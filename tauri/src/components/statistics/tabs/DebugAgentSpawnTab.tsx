@@ -17,8 +17,10 @@
  *   「その業種があとどれぐらいで参入しそうか」を観測できる。
  * - 右: 最新エポックの業種別スコア表。行クリックで左のグラフの業種を切り替える。
  *   表の見出し直下には資本調達の関門（与信集中限度と、その分母である民間預金総額）を
- *   出す。限度額は業種によらない都市共通の値なので列にはせず、各業種の想定初期資本
- *   （列「初期資本」）と見比べる形にしている。限度超過の業種は赤字で示す。
+ *   出す。限度額は業種によらない都市共通の値なので列にはせず、各業種の最低稼働規模の
+ *   想定初期資本（列「最低初期資本」）と見比べる形にしている。限度超過の業種は赤字で
+ *   示す（限度内の業種は与信で賄える規模に自動縮小されて参入する。縮小後の規模は
+ *   列「評価規模」）。
  *
  * 業種セレクタは左の上下チャートと右表の選択状態を共有する。
  * 「全業種（合算）」選択時、メトリクスは需要系の合算のみ表示する
@@ -91,6 +93,7 @@ const METRIC_SERIES: Array<{
   { key: "demand_domestic", labelKey: "statistics.debugSpawnMetricDemandDomestic", color: "#4ea1ff", axis: "amount", summable: true },
   { key: "demand_export", labelKey: "statistics.debugSpawnMetricDemandExport", color: "#a78bfa", axis: "amount", summable: true },
   { key: "effective_demand", labelKey: "statistics.debugSpawnMetricEffectiveDemand", color: "#10b981", axis: "amount", summable: true },
+  { key: "assumed_qty", labelKey: "statistics.debugSpawnMetricAssumedQty", color: "#22d3ee", axis: "amount", summable: false },
   { key: "min_qty", labelKey: "statistics.debugSpawnMetricMinQty", color: "#94a3b8", axis: "amount", summable: false, dash: "5 4" },
   { key: "best_domestic_competitiveness", labelKey: "statistics.debugSpawnMetricDomesticCompetitiveness", color: "#f59e0b", axis: "coefficient", summable: false },
   { key: "best_export_competitiveness", labelKey: "statistics.debugSpawnMetricExportCompetitiveness", color: "#f97316", axis: "coefficient", summable: false },
@@ -107,8 +110,11 @@ type LatestAgentRow = {
   demand: number | null;
   competitiveness: number | null;
   profitRate: number | null;
-  /** 想定初期資本（運転資金＋専用建物の建設費）。資本審査に到達しなかった業種は null */
+  /** 最低稼働規模の想定初期資本（運転資金＋専用建物の建設費）。
+   *  与信集中限度との比較で参入可否が決まる。資本審査に到達しなかった業種は null */
   capitalNeed: number | null;
+  /** 資本・労働・物理上限クリップ後の評価規模（エポック生産量）。未評価の業種は null */
+  assumedQty: number | null;
   spawned: number;
 };
 
@@ -261,6 +267,7 @@ export function DebugAgentSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
         competitiveness: compCandidates.length > 0 ? Math.max(...compCandidates) : null,
         profitRate: m.best_profit_rate ?? null,
         capitalNeed: m.capital_need ?? null,
+        assumedQty: m.assumed_qty ?? null,
         spawned:
           (c["spawned"] ?? 0) + (c["reused_paused"] ?? 0) + (c["dedicated_registered"] ?? 0),
       };
@@ -464,6 +471,7 @@ export function DebugAgentSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                       <th>{t("statistics.debugSpawnColCompetitiveness")}</th>
                       <th>{t("statistics.debugSpawnColProfitRate")}</th>
                       <th>{t("statistics.debugSpawnColCapitalNeed")}</th>
+                      <th>{t("statistics.debugSpawnColAssumedQty")}</th>
                       <th>{t("statistics.debugSpawnColSpawned")}</th>
                     </tr>
                   </thead>
@@ -494,8 +502,9 @@ export function DebugAgentSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                             ? formatCoefficient(row.profitRate)
                             : "-"}
                         </td>
-                        {/* 想定初期資本。与信集中限度を超えていれば資本調達不能で
-                            参入できないため、その行だけ赤字で示す。 */}
+                        {/* 最低稼働規模の想定初期資本。与信集中限度を超えていれば
+                            資本調達不能で参入できないため、その行だけ赤字で示す
+                            （限度内なら規模側が与信で賄える範囲に自動縮小される）。 */}
                         <td
                           className={[
                             "debug-spawn-table__num",
@@ -509,6 +518,11 @@ export function DebugAgentSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                         >
                           {row.capitalNeed !== null
                             ? formatCompact(row.capitalNeed)
+                            : "-"}
+                        </td>
+                        <td className="debug-spawn-table__num">
+                          {row.assumedQty !== null
+                            ? formatCompact(row.assumedQty)
                             : "-"}
                         </td>
                         <td className="debug-spawn-table__num">{row.spawned}</td>

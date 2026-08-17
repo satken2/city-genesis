@@ -98,11 +98,11 @@
 .agent-detail-utilization-target {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  padding: 8px 12px;
+  border-radius: 6px;
+  padding: 4px 8px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   margin-top: 4px;
 }
 
@@ -113,13 +113,14 @@
 }
 
 .agent-detail-utilization-target-title {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 600;
   color: #9db0c5;
+  white-space: nowrap;
 }
 
 .agent-detail-utilization-target-value {
-  font-size: 0.85rem;
+  font-size: 0.72rem;
   font-weight: bold;
   color: #4ea1ff;
 }
@@ -127,11 +128,12 @@
 .agent-detail-utilization-target-slider-container {
   display: flex;
   align-items: center;
+  gap: 8px;
 }
 
 .agent-detail-utilization-target-slider {
   flex: 1;
-  height: 6px;
+  height: 5px;
   -webkit-appearance: none;
   background: rgba(255, 255, 255, 0.15);
   border-radius: 3px;
@@ -141,8 +143,8 @@
 
 .agent-detail-utilization-target-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: #4ea1ff;
   cursor: pointer;
@@ -201,26 +203,6 @@
   width: 12px;
   height: 12px;
 }
-
-/* マッシュアップ建物のサブ建物配置エディタを開くボタン */
-.agent-detail-mashup-edit-btn {
-  width: 100%;
-  padding: 8px 0;
-  margin-top: 10px;
-  border: 1px solid rgba(96, 165, 250, 0.4);
-  border-radius: 4px;
-  background: rgba(96, 165, 250, 0.1);
-  color: #60a5fa;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.agent-detail-mashup-edit-btn:hover {
-  background: rgba(96, 165, 250, 0.2);
-}
-
 
 
 

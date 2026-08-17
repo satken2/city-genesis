@@ -59,7 +59,7 @@ public class FireEffectManager : MonoBehaviour
     public bool enableFireLights = true;
 
     [Tooltip("光源の明滅の速さ。")]
-    public float lightFlickerSpeed = 6.5f;
+    public float lightFlickerSpeed = 3f;
 
     [Tooltip("光源の明滅の深さ(0=明滅なし、1=消灯まで振れる)。")]
     [Range(0f, 1f)] public float lightFlickerDepth = 0.35f;
