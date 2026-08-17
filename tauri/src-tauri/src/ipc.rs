@@ -582,6 +582,11 @@ pub async fn handle_incoming_message(
             // 道路建設パネルがグリッド設定UIの表示状態を同期するために受信する。
             let _ = app.emit("view:grid_toggled", envelope.payload);
         }
+        "camera:state" => {
+            // 3Dカメラの現在位置と視線方位を2D都市マップへ中継する。
+            // camera:query_state への応答で、問い合わせ1回につき1回だけ流れる。
+            let _ = app.emit("camera:state", envelope.payload);
+        }
         "system:ping" => {
             send_to_parent(
                 &state,

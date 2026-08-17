@@ -11,8 +11,9 @@
  * | `cockpit` | `Cockpit` | 画面下部中央 | 常用ツール4種・都市名と日付・施政スコア/予算メータ・アラート・エポック実行 |
  * | `system-tray` | `SystemTray` | 画面右下 | 設定・セーブ・リロード |
  *
- * 各アイコンのパディングは画像サイズの差を吸収するため、
- * padding フィールドで個別に調整可能にしている。
+ * コックピット・システムトレイのアイコンは背景板の上に画像を直接置くため、
+ * 画像サイズの差を padding フィールドで個別に吸収する
+ * (アイコンパネルはCSSで描いたボタン枠の中に画像を敷き詰めるので指定しない)。
  */
 
 import { invoke } from "@tauri-apps/api/core";
@@ -29,7 +30,8 @@ export type HudIconDef = {
   id: string;
   src: string;
   tooltipKey: string;
-  padding: string;
+  /** アイコン画像の内側余白。画像を枠いっぱいに描く箇所(アイコンパネル)では指定しない */
+  padding?: string;
   /** クリックで開くウィンドウタイプ(未設定ならクリック無効、またはコンポーネント側で個別処理) */
   windowType?: string;
 };
@@ -37,21 +39,22 @@ export type HudIconDef = {
 /**
  * アイコンパネル(画面左端)に縦並びで置くメニューアイコン。
  * 上から機能グループ順(建設系 → 交通系 → 市政系 → 情報系)に並べる。
+ *
+ * 予算(`city_budget`)・公共施設(`public_facilities`)・達成目標(`achievements`)はここに置かない。
+ * いずれもコックピットのメータ(予算ミニメータ・公共サービス充足度・スコアミニメータ)が
+ * 常時その状況を表示しており、そのままクリックで開くため、入口を二重に持たせない。
  */
 export const MENU_ICONS: HudIconDef[] = [
-  { id: "road", src: "menu_road.png", tooltipKey: "taskbar.menuRoad", padding: "4px", windowType: "path_build" },
-  { id: "track", src: "menu_road.png", tooltipKey: "taskbar.menuTrack", padding: "4px", windowType: "track_build" },
-  { id: "land", src: "menu_land.png", tooltipKey: "taskbar.menuLand", padding: "4px", windowType: "parcel_creation" },
-  { id: "district", src: "menu_district.png", tooltipKey: "taskbar.menuDistrict", padding: "4px" },
-  { id: "construction", src: "menu_construction.png", tooltipKey: "taskbar.menuConstruction", padding: "4px", windowType: "building_construction" },
-  { id: "transport", src: "menu_transport.png", tooltipKey: "taskbar.menuTransport", padding: "4px", windowType: "transit_management" },
-  { id: "budget", src: "menu_budget.png", tooltipKey: "taskbar.menuBudget", padding: "4px", windowType: "city_budget" },
-  { id: "public", src: "menu_public.png", tooltipKey: "taskbar.menuPublic", padding: "4px", windowType: "public_facilities" },
-  { id: "regulation", src: "menu_regulation.png", tooltipKey: "taskbar.menuRegulation", padding: "4px", windowType: "city_regulation" },
-  { id: "city", src: "menu_city.png", tooltipKey: "taskbar.menuCity", padding: "4px", windowType: "city_hall" },
-  { id: "finance", src: "menu_finance.png", tooltipKey: "taskbar.menuFinance", padding: "4px", windowType: "financial_policy" },
-  { id: "stat", src: "menu_stat.png", tooltipKey: "taskbar.menuStat", padding: "4px", windowType: "city_statistics" },
-  { id: "achieve", src: "menu_achieve.png", tooltipKey: "taskbar.menuAchieve", padding: "4px", windowType: "achievements" },
+  { id: "road", src: "menu_road.png", tooltipKey: "taskbar.menuRoad", windowType: "path_build" },
+  { id: "track", src: "menu_road.png", tooltipKey: "taskbar.menuTrack", windowType: "track_build" },
+  { id: "land", src: "menu_land.png", tooltipKey: "taskbar.menuLand", windowType: "parcel_creation" },
+  { id: "district", src: "menu_district.png", tooltipKey: "taskbar.menuDistrict" },
+  { id: "construction", src: "menu_construction.png", tooltipKey: "taskbar.menuConstruction", windowType: "building_construction" },
+  { id: "transport", src: "menu_transport.png", tooltipKey: "taskbar.menuTransport", windowType: "transit_management" },
+  { id: "regulation", src: "menu_regulation.png", tooltipKey: "taskbar.menuRegulation", windowType: "city_regulation" },
+  { id: "city", src: "menu_city.png", tooltipKey: "taskbar.menuCity", windowType: "city_hall" },
+  { id: "finance", src: "menu_finance.png", tooltipKey: "taskbar.menuFinance", windowType: "financial_policy" },
+  { id: "stat", src: "menu_stat.png", tooltipKey: "taskbar.menuStat", windowType: "city_statistics" },
 ];
 
 /**

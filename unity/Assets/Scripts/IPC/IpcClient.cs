@@ -621,6 +621,11 @@ public class IpcClient : MonoBehaviour
                     }
                     break;
 
+                case "camera:query_state":
+                    Debug.Log("IpcClient: camera:query_state");
+                    EmitCameraState();
+                    break;
+
                 case "edit_connector:show":
                     {
                         int agentId = GetParamInt(payload, "agent_id");
@@ -1129,6 +1134,35 @@ public class IpcClient : MonoBehaviour
         };
 
         SendEnvelope("view:grid_toggled", payload);
+    }
+
+    /// <summary>
+    /// camera:state イベントを送信する(camera:query_state への応答)。
+    /// 3Dカメラの現在位置と視線の方位を2D都市マップへ通知する。
+    /// yaw は北(ワールド+Z)を0とする時計回りの度。真下を向いているときは視線の水平成分が
+    /// 消えるため、カメラのY軸回転(=画面上方向の方位)で代用する。
+    /// </summary>
+    public void EmitCameraState()
+    {
+        Camera cam = CameraController.Instance != null
+            ? CameraController.Instance.GetComponent<Camera>()
+            : Camera.main;
+        if (cam == null) return;
+
+        Transform tr = cam.transform;
+        Vector3 forward = tr.forward;
+        Vector2 flatForward = new Vector2(forward.x, forward.z);
+        float yaw = flatForward.sqrMagnitude < 1e-6f
+            ? tr.eulerAngles.y
+            : Mathf.Atan2(flatForward.x, flatForward.y) * Mathf.Rad2Deg;
+
+        var payload = new Dictionary<string, object>
+        {
+            ["position"] = new List<float> { tr.position.x, tr.position.y, tr.position.z },
+            ["yaw"] = yaw
+        };
+
+        SendEnvelope("camera:state", payload);
     }
 
     /// <summary>

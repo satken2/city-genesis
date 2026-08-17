@@ -822,6 +822,22 @@ export async function sendSystemShutdown(): Promise<void> {
 }
 
 /**
+ * `camera.query_state`
+ * 3Dカメラの現在位置と視線方位を問い合わせる(応答は `camera:state`)。
+ *
+ * カメラの追従表示は行わない(常時配信はMMFを無駄に埋めるため)。2D都市マップが
+ * 開かれたときと再読み込みのときにこれを送り、そのときのカメラ位置を1回だけ描く。
+ */
+export async function sendCameraQueryState(): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "city_map",
+    entity: null,
+    action: "camera:query_state",
+    params: {},
+  });
+}
+
+/**
  * `view.query_state`
  * グラフィックプログラムに現在の表示状態を問い合わせる。
  */
@@ -923,6 +939,13 @@ export const IPC_EVENT_EDIT_PARCEL_UPDATE_CREATION_SHAPE = "edit_parcel:update_c
 
 /** 表示オプションパネルの状態問い合わせに対するレスポンス */
 export const IPC_EVENT_VIEW_CURRENT_STATE = "view:current_state";
+
+/**
+ * 3Dビューのカメラ状態(Unity → UI)。`sendCameraQueryState()` への応答。
+ * ペイロードは `{ position: [x,y,z], yaw: number }` で、yaw は北(ワールド+Z)を0とする
+ * 時計回りの度。2D都市マップがこれを受けてカメラ位置マーカーを重ね描きする。
+ */
+export const IPC_EVENT_CAMERA_STATE = "camera:state";
 
 /** 地形セル開放モードでセルが選択された */
 export const IPC_EVENT_UNLOCK_CELL_SELECT = "unlock_cell:select_cell";

@@ -1,7 +1,7 @@
 /**
  * アイコンパネル(画面左端に縦並びの常駐メニュー)
  *
- * 各種メニューウィンドウ(道路・建設・予算・統計…)を開くアイコンを縦一列に並べる。
+ * 各種メニューウィンドウ(道路・建設・規制・統計…)を開くアイコンを縦一列に並べる。
  * 地区編集だけはウィンドウを開かず、Unityを地区編集ステートにする常駐モードのトグル
  * (ブルドーザと排他。状態は `hudMode` でコックピットと共有する)。
  *
@@ -158,7 +158,6 @@ export function IconPanel() {
             type="button"
             title={t(icon.tooltipKey)}
             aria-pressed={icon.id === "district" ? active : undefined}
-            style={{ padding: icon.padding }}
             disabled={isLocked && icon.id !== "construction"}
             onClick={() => void handleIconClick(icon)}
           >

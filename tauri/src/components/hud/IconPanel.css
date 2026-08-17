@@ -1,32 +1,81 @@
 /**
  * アイコンパネル(画面左端の縦並びメニュー)のスタイル
  *
- * 背景は透明で、アイコンだけが3Dビューの上に浮いて見える。
- * 背景板が無いと明るい地形の上でアイコンが埋もれるため、画像に落ち影を付けて輪郭を出す。
+ * パネル自体の背景は透明で、ボタン1個ずつが3Dビューの上に浮いて見える。
+ * ボタンの枠(角丸・面の陰影・落ち影)はCSSで描き、アイコン画像は余白ゼロで枠いっぱいに敷く
+ * (画像自体に枠や影を持たせないため、アイコン素材を差し替えても見た目が揃う)。
  *
  * 高さはアイコン数で決まる(=ウィンドウ丈をReactの実測値に合わせる)ため、
  * ここで height を指定してはならない。指定するとウィンドウ丈との相互参照になり、
  * ResizeObserver → resize_icon_panel → ウィンドウリサイズ の無限ループになる。
+ *
+ * セレクタを`.hud-icon-btn`との2クラス以上にしているのは、共通スタイル(`hud.css`)の
+ * 背景・パディング・hover を確実に上書きするため。CSSはチャンク単位で分割されて
+ * 読み込み順が保証されないので、同点の詳細度に頼ってはならない。
  */
 
 .icon-panel {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   padding: 4px;
   width: 100%;
   user-select: none;
 }
 
-.icon-panel-slot {
+.hud-icon-btn.icon-panel-slot {
   width: 45px;
   height: 45px;
   flex-shrink: 0;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(30, 44, 66, 0.94) 0%, rgba(14, 22, 36, 0.96) 100%);
+  /* 縁取りは inset の影で描く。border だと画像の描画領域が枠線分だけ縮んで隙間が出る */
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  transition: background 0.12s, box-shadow 0.12s, transform 0.12s;
 }
 
-.icon-panel-slot .hud-icon-img {
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
+.hud-icon-btn.icon-panel-slot:hover {
+  background: linear-gradient(180deg, rgba(44, 62, 90, 0.96) 0%, rgba(24, 36, 54, 0.98) 100%);
+  box-shadow:
+    0 3px 9px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+}
+
+/* 押下中は面を沈める(落ち影を弱めて1px下げる) */
+.hud-icon-btn.icon-panel-slot:active {
+  transform: translateY(1px);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+/* トグルON(地区編集)は橙の面色で示す */
+.hud-icon-btn.icon-panel-slot.hud-icon-btn--active {
+  background: linear-gradient(180deg, rgba(233, 84, 32, 0.6) 0%, rgba(176, 56, 16, 0.68) 100%);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 1px rgba(255, 176, 136, 0.85);
+}
+
+.hud-icon-btn.icon-panel-slot.hud-icon-btn--active:hover {
+  background: linear-gradient(180deg, rgba(246, 104, 52, 0.7) 0%, rgba(196, 66, 22, 0.78) 100%);
+}
+
+/*
+ * チュートリアルのハイライト対象(点滅は`hud.css`のアニメーション)。
+ * 共通スタイルが付ける border は打ち消す。枠線を足すと画像の描画領域が縮んでアイコンが揺れる。
+ */
+.hud-icon-btn.icon-panel-slot.hud-highlighted-btn {
+  border: none;
+  background: linear-gradient(180deg, rgba(38, 124, 224, 0.6) 0%, rgba(20, 78, 152, 0.7) 100%);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 1px rgba(150, 200, 255, 0.85);
 }
 
 /* テンプレートモード専用アイコン群の区切り線 */

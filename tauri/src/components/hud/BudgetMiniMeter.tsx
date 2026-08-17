@@ -70,9 +70,12 @@ function getFillColor(ratio: number): string {
 export function BudgetMiniMeter({
   apiBaseUrl,
   onOpen,
+  extraClassName,
 }: {
   apiBaseUrl: string;
   onOpen: () => void;
+  /** 呼び出し側が足すクラス(チュートリアルのハイライト)。予算はアイコンパネルではなくここが入口 */
+  extraClassName?: string;
 }) {
   const { t } = useTranslation();
   const [reserves, setReserves] = useState<number | null>(null);
@@ -133,7 +136,8 @@ export function BudgetMiniMeter({
   return (
     <button
       type="button"
-      className={`hud-mini-meter${over ? " hud-mini-meter--alert" : ""}`}
+      id="budget"
+      className={`hud-mini-meter${over ? " hud-mini-meter--alert" : ""}${extraClassName ? ` ${extraClassName}` : ""}`}
       onClick={onOpen}
       title={t("taskbar.budgetMeterTooltip")}
     >
