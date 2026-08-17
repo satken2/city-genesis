@@ -7,7 +7,10 @@
  *
  * レイアウト:
  * - 上部: 集計範囲（都市全体／各地区）のプルダウン。
- * - 中部 (上半分): 平均寿命グラフ（折れ線グラフ）。死亡した市民の平均年齢推移。
+ * - 中部 (上半分): 左右2カラム
+ *     - 左側 (50%): 平均寿命グラフ（折れ線グラフ）。死亡した市民の平均年齢推移。
+ *     - 右側 (50%): 死亡年齢分布グラフ（5歳刻み年齢帯×死因別の積み上げ横棒グラフ）。
+ *       都市全体でのみ集計されるため、地区スコープ選択時は案内文を表示する。
  * - 下部 (下半分): 左右2カラム
  *     - 左側 (50%): 栄養充足度グラフ（世帯の nutrition 分布、横向き棒グラフ、隙間なし）。
  *     - 右側 (50%): 医療充足度グラフ（世帯の healthcare 分布、横向き棒グラフ、隙間なし）。
@@ -24,6 +27,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  Legend,
   ResponsiveContainer,
 } from "recharts";
 import { useEpochCachedStats } from "../useEpochCache";
@@ -41,12 +45,31 @@ type DistributionPoint = {
   count: number;
 };
 
+/** 死亡年齢分布の1年齢帯分。band 以外のキーは死因別の死亡者数 */
+type DeathAgeBand = {
+  band: string;
+  natural: number;
+  starvation: number;
+  orphan: number;
+  traffic: number;
+  collapse: number;
+};
+
+type DeathAgeDistribution = {
+  /** 合算対象になった履歴エポック数 */
+  epochs: number;
+  /** 年齢帯昇順 (0-4 → 85+) */
+  bands: DeathAgeBand[];
+};
+
 type Scope = {
   zone_id: number | null;
   name: string | null;
   history: HistoryPoint[];
   nutrition_distribution: DistributionPoint[];
   healthcare_distribution: DistributionPoint[];
+  /** 死因別×年齢帯別の死亡者数。都市全体スコープのみ。地区スコープは null */
+  death_age_distribution: DeathAgeDistribution | null;
 };
 
 type HealthStats = {
@@ -58,6 +81,22 @@ type HealthStats = {
 const COLOR_LIFESPAN = "#3b82f6"; // 寿命: ブルー
 const COLOR_NUTRITION = "#10b981"; // 栄養: エメラルドグリーン
 const COLOR_HEALTHCARE = "#06b6d4"; // 医療: シアン
+
+/**
+ * 死亡年齢分布の死因別カラー。
+ * ダーク面 (#1e293b) に対して明度帯・彩度・CVD(色覚多様性)分離・コントラストを
+ * 検証済みのカテゴリカルパレット。積み上げ順＝この配列順（隣接ペアで検証済み）。
+ */
+const DEATH_CAUSES = [
+  { key: "natural", labelKey: "statistics.deathCauseNatural", color: "#3b82f6" },
+  { key: "starvation", labelKey: "statistics.deathCauseStarvation", color: "#d97706" },
+  { key: "orphan", labelKey: "statistics.deathCauseOrphan", color: "#8b5cf6" },
+  { key: "traffic", labelKey: "statistics.deathCauseTraffic", color: "#0891b2" },
+  { key: "collapse", labelKey: "statistics.deathCauseCollapse", color: "#dc2626" },
+] as const;
+
+/** 積み上げセグメント間の区切り線。チャート面の背景色に合わせる */
+const STACK_STROKE = "#1e293b";
 
 const CHART_MARGIN = { top: 10, right: 15, left: 5, bottom: 5 };
 const Y_AXIS_WIDTH = 40;
@@ -88,6 +127,13 @@ export function HealthTab({ apiBaseUrl }: { apiBaseUrl: string }) {
       data.scopes.find((s) => scopeKey(s) === selectedKey) ?? data.scopes[0]
     );
   }, [data, selectedKey]);
+
+  // 死亡年齢分布は高齢帯を上にして表示するため降順 (85+ → 0-4) に並べ替える。
+  const deathAgeData = useMemo<DeathAgeBand[]>(() => {
+    const dist = scope?.death_age_distribution;
+    if (!dist) return [];
+    return [...dist.bands].reverse();
+  }, [scope]);
 
   if (loading) {
     return <div className="health-tab__loading">{t("common.loading")}</div>;
@@ -131,13 +177,13 @@ export function HealthTab({ apiBaseUrl }: { apiBaseUrl: string }) {
         </div>
       </header>
 
-      {/* ===== 中部: 平均寿命推移 (上半分) ===== */}
-      <div className="health-tab__top-chart">
-        <section className="health-chart">
+      {/* ===== 中部: 平均寿命推移 (左) ＋ 死亡年齢分布 (右) ===== */}
+      <div className="health-tab__top-row">
+        <section className="health-chart health-chart--lifespan">
           <h3 className="health-chart__title">{t("statistics.averageLifespan")}</h3>
-          <div className="health-chart__area" style={{ height: "200px" }}>
+          <div className="health-chart__area" style={{ height: "220px" }}>
             {hasHistory ? (
-              <ResponsiveContainer width="100%" height={180}>
+              <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={scope.history} margin={CHART_MARGIN}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                   <XAxis dataKey="epoch" tick={AXIS_TICK} tickLine={false} />
@@ -169,6 +215,87 @@ export function HealthTab({ apiBaseUrl }: { apiBaseUrl: string }) {
               </ResponsiveContainer>
             ) : (
               <div className="health-chart__empty">{t("statistics.noData")}</div>
+            )}
+          </div>
+        </section>
+
+        {/* 死亡年齢分布: 5歳刻み年齢帯 (85+ が最上段) × 死因別の積み上げ横棒グラフ */}
+        <section className="health-chart health-chart--deaths">
+          <h3 className="health-chart__title">
+            {t("statistics.deathAgeDistribution")}
+            {scope.death_age_distribution && scope.death_age_distribution.epochs > 0 && (
+              <span className="health-chart__subtitle">
+                {t("statistics.deathAgeDistributionEpochs", {
+                  count: scope.death_age_distribution.epochs,
+                })}
+              </span>
+            )}
+          </h3>
+          <div className="health-chart__area" style={{ height: "220px" }}>
+            {scope.death_age_distribution == null ? (
+              // 地区スコープでは死因別×年齢帯のデータを記録していない
+              <div className="health-chart__empty">
+                {t("statistics.deathAgeDistributionCityOnly")}
+              </div>
+            ) : deathAgeData.every((b) =>
+                DEATH_CAUSES.every((c) => b[c.key] === 0)
+              ) ? (
+              <div className="health-chart__empty">{t("statistics.noData")}</div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  layout="vertical"
+                  data={deathAgeData}
+                  barCategoryGap={1}
+                  margin={{ top: 0, right: 15, left: 0, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
+                  <XAxis
+                    type="number"
+                    tick={AXIS_TICK}
+                    tickLine={false}
+                    allowDecimals={false}
+                    tickFormatter={(v: number) => v.toLocaleString()}
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="band"
+                    width={40}
+                    tick={{ fontSize: 8, fill: "#8ba3bb" }}
+                    tickLine={false}
+                    interval={0}
+                  />
+                  <Tooltip
+                    contentStyle={TOOLTIP_STYLE}
+                    labelStyle={{ color: "#fff" }}
+                    formatter={(value: any, name: any) => {
+                      const cause = DEATH_CAUSES.find((c) => c.key === name);
+                      return [
+                        `${Number(value).toLocaleString()} ${t("statistics.people")}`,
+                        cause ? t(cause.labelKey) : String(name),
+                      ];
+                    }}
+                  />
+                  <Legend
+                    wrapperStyle={{ fontSize: 10 }}
+                    iconSize={8}
+                    formatter={(value: string) => {
+                      const cause = DEATH_CAUSES.find((c) => c.key === value);
+                      return cause ? t(cause.labelKey) : value;
+                    }}
+                  />
+                  {DEATH_CAUSES.map((cause) => (
+                    <Bar
+                      key={cause.key}
+                      dataKey={cause.key}
+                      stackId="deaths"
+                      fill={cause.color}
+                      stroke={STACK_STROKE}
+                      strokeWidth={1}
+                    />
+                  ))}
+                </BarChart>
+              </ResponsiveContainer>
             )}
           </div>
         </section>
