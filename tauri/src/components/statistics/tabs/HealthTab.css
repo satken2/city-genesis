@@ -1,7 +1,8 @@
 /**
  * 保健衛生タブのスタイル
  *
- * 上部に集計範囲のプルダウン、中部に平均寿命の時系列折れ線グラフ（全幅）、
+ * 上部に集計範囲のプルダウン、中部を左右2列（平均寿命の時系列折れ線グラフと
+ * 死因別×年齢帯別の死亡年齢分布の積み上げ横棒グラフ）、
  * 下部を左右2列（栄養充足度分布と医療充足度分布）に等分割してレイアウトする。
  * 既存ウィンドウのダークテーマ（rgba(30,41,59,...) / #e2e8f0 系）に統一。
  */
@@ -56,10 +57,30 @@
 
 /* ========== チャートコンテナ ========== */
 
-.health-tab__top-chart {
+.health-tab__top-row {
+  display: flex;
+  gap: 20px;
   flex: 0 0 auto;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   padding-bottom: 16px;
+}
+
+/* 上段の2グラフ（平均寿命・死亡年齢分布）は左右等分 */
+.health-chart--lifespan,
+.health-chart--deaths {
+  flex: 1;
+  min-width: 0;
+}
+
+.health-chart--deaths .health-chart__title {
+  border-left-color: #dc2626; /* 死亡はレッド */
+}
+
+.health-chart__subtitle {
+  margin-left: 8px;
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: #8ba3bb;
 }
 
 .health-tab__bottom-row {
@@ -92,11 +113,11 @@
   padding-left: 8px;
 }
 
-.health-chart--half:nth-child(1) .health-chart__title {
+.health-tab__bottom-row .health-chart--half:nth-child(1) .health-chart__title {
   border-left-color: #10b981; /* 栄養はグリーン */
 }
 
-.health-chart--half:nth-child(2) .health-chart__title {
+.health-tab__bottom-row .health-chart--half:nth-child(2) .health-chart__title {
   border-left-color: #06b6d4; /* 医療はシアン */
 }
 
