@@ -208,9 +208,9 @@
   },
   "city_regulation": {
     "title": "規制",
-    "width": 800,
+    "width": 400,
     "height": 600,
-    "width_ratio": 0.65,
+    "width_ratio": 0.33,
     "height_ratio": 0.8,
     "resizable": true,
     "policy": "single",

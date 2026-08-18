@@ -2,115 +2,46 @@
  * 規制ウィンドウコンポーネント
  *
  * 都市全体の規制・ポリシー設定を管理するウィンドウ。
- * 「制限速度」と「建築規制」の2つのセクションをタイル状に並べて表示する。
+ * 「制限速度」「建築規制」「補修設定」「移民規制」の4タブ構成で、
+ * このコンポーネントはデータの取得・編集中値の保持・保存とタブ切替だけを担い、
+ * 各タブの描画は `tabs/` 配下のコンポーネントに委ねる。
  *
- * 制限速度セクション:
- * - path_variant（道路のバリアント）ごとに制限速度 (km/h) を設定する
- * - バリアント名はマスターデータ (useMasterData().paths) から取得
- * - 初期表示値は city.max_speed に設定があればそれ、なければ master の default_speed_limit
- * - path_type ごとにグループ化し、開閉可能なアコーディオン形式で表示する
- * - 保存は PATCH /api/v1/city で max_speed 辞書を一括更新する
+ * 保存ボタンはタブ共通で1つだけ持ち、押すと全タブの変更をまとめて送信する。
+ * 表示していないタブの変更を見落とさないよう、未保存の変更があるタブには印を付ける。
  *
- * 建築規制セクション:
- * - 都市全体の建築規制（高さ規制・容積率・建ぺい率）を設定する
- * - 初期値は GET /api/v1/city/regulations から取得
- * - 保存は PATCH /api/v1/city/regulations で一括更新する
- * - ここでの設定は「これ以降に作成される地区の既定値」であり、既存の地区・土地区画には
- *   遡及しない（既存地区の変更は地区詳細パネルから行う）
- * - 容積率・建ぺい率は API では比率（1.0 = 100%）だが、入力欄ではパーセント表記で扱う
+ * 保存先は2系統:
+ * - PATCH /api/v1/city … 制限速度 (max_speed)・補修閾値 (repair_threshold*)
+ * - PATCH /api/v1/city/regulations … 建築規制・移民規制
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { useMasterData } from "../../contexts/MasterDataContext";
-import type { PathMasterEntry, SkillEntry } from "../../types";
+import type { PathMasterEntry } from "../../types";
+import type {
+  BuildingRegKey,
+  CityData,
+  ImmigrationRegulations,
+  PathVariantInfo,
+  RegulationsData,
+  SpeedMap,
+} from "./regulationTypes";
+import { FALLBACK_SPEED_LIMIT, SpeedLimitTab } from "./tabs/SpeedLimitTab";
+import { BUILDING_REG_KEYS, BuildingRegulationTab } from "./tabs/BuildingRegulationTab";
+import { RepairTab, type RepairTarget } from "./tabs/RepairTab";
+import { IMMIGRATION_SCALAR_KEYS, ImmigrationTab } from "./tabs/ImmigrationTab";
 import "./CityRegulationWindow.css";
 
-/**
- * GET /api/v1/city レスポンスの city オブジェクト型
- * max_speed 以外のフィールドは本コンポーネントでは使用しない
- */
-type CityData = {
-  city: {
-    max_speed: Record<string, number>;
-    repair_threshold?: number;
-    repair_threshold_path?: number;
-  };
-};
+/** タブの並び。ラベルは各セクションの見出しをそのまま使う */
+const TABS = [
+  { id: "speed", labelKey: "regulation.speedLimitTitle" },
+  { id: "building", labelKey: "regulation.buildingRegulationTitle" },
+  { id: "repair", labelKey: "regulation.repairTitle" },
+  { id: "immigration", labelKey: "regulation.immigrationTitle" },
+] as const;
 
-/**
- * GET /api/v1/city/regulations レスポンスの型
- * 建築規制（容積率・高さ制限・建ぺい率）と移民規制を含む。
- */
-type RegulationsData = {
-  limit_volume_ratio: number;
-  limit_height: number;
-  limit_coverage_ratio: number;
-  // 移民規制（プレイヤーが政策として設定する受け入れ条件）
-  immigration_age_min: number;
-  immigration_age_max: number;
-  immigration_allow_single: boolean;
-  immigration_allow_married_no_children: boolean;
-  immigration_allow_with_children: boolean;
-  immigration_gender_policy: number; // 0=制限なし, 1=男性のみ(世帯主), 2=女性のみ(世帯主)
-  immigration_skill_thresholds: Record<string, number>; // skill_id(文字列) → 最低値
-  immigration_quota: number; // 1エポックあたり上限人数。0=無制限
-};
-
-/**
- * 移民規制の編集中値を保持する型。
- * 建築規制と異なり bool / dict 型のフィールドを含むため、pendingRegulations とは別に管理する。
- */
-type ImmigrationRegulations = {
-  immigration_age_min: number;
-  immigration_age_max: number;
-  immigration_allow_single: boolean;
-  immigration_allow_married_no_children: boolean;
-  immigration_allow_with_children: boolean;
-  immigration_gender_policy: number;
-  immigration_skill_thresholds: Record<string, number>;
-  immigration_quota: number;
-};
-
-/**
- * 建築規制（数値型）のキー。
- * 移民規制は bool/dict 型を含むため、建築規制の数値ハンドラはこのキーのみを扱う。
- */
-type BuildingRegKey = "limit_volume_ratio" | "limit_height" | "limit_coverage_ratio";
-
-/**
- * 入力欄でパーセント表記に変換する建築規制のキー。
- * API は比率（容積率 30.0 = 3000%、建ぺい率 0.5 = 50%）で保持するが、
- * 建ぺい率・容積率は日本の建築規制の慣習どおりパーセントで表示・編集する。
- * limit_height はメートル単位なので変換対象外。
- */
-const PERCENT_REG_KEYS = new Set<BuildingRegKey>([
-  "limit_volume_ratio",
-  "limit_coverage_ratio",
-]);
-
-/**
- * API の値を入力欄の表示単位へ変換する。
- * パーセント換算で 30.000000000000004 のような誤差が出ないよう小数第2位で丸める。
- */
-function toDisplayUnit(key: BuildingRegKey, apiValue: number): number {
-  if (!PERCENT_REG_KEYS.has(key)) return apiValue;
-  return Math.round(apiValue * 100 * 100) / 100;
-}
-
-/**
- * 入力欄の表示単位を API の値へ変換する。
- */
-function toApiUnit(key: BuildingRegKey, displayValue: number): number {
-  return PERCENT_REG_KEYS.has(key) ? displayValue / 100 : displayValue;
-}
-
-/**
- * 編集中の制限速度を保持する型
- * キーは path_variant の ID（数値文字列）、値は km/h
- */
-type SpeedMap = Record<string, number>;
+type TabId = (typeof TABS)[number]["id"];
 
 export function CityRegulationWindow({
   apiBaseUrl,
@@ -122,161 +53,55 @@ export function CityRegulationWindow({
   const { t } = useTranslation();
   const masterData = useMasterData();
 
+  const [activeTab, setActiveTab] = useState<TabId>("speed");
+
+  /** 制限速度。確定値と編集中値（キーは path_variant の ID 文字列、値は km/h） */
   const [cityMaxSpeed, setCityMaxSpeed] = useState<SpeedMap>({});
   const [pendingSpeeds, setPendingSpeeds] = useState<SpeedMap>({});
 
   /**
-   * 補修閾値の確定値（APIから取得）
-   * repair_threshold: 公共建物の補修を開始する耐久度の閾値
-   * repair_threshold_path: 道路の補修を開始する耐久度の閾値
-   *
-   * APIでは0-1の比率でやり取りするが、UI上では0-100のパーセント表記で扱う。
-   * ロード時に100倍、保存時に1/100に変換する。
+   * 補修閾値の確定値・編集中値（編集していない対象は null）
+   * building=公共建物、path=道路。
+   * API では 0〜1 の比率でやり取りするが、UI 上では 0〜100 のパーセント表記で保持する。
    */
-  const [cityRepairThreshold, setCityRepairThreshold] = useState<number>(30);
-  const [cityRepairThresholdPath, setCityRepairThresholdPath] = useState<number>(30);
-  /** 補修閾値の編集中値 */
-  const [pendingRepairThreshold, setPendingRepairThreshold] = useState<number | null>(null);
-  const [pendingRepairThresholdPath, setPendingRepairThresholdPath] = useState<number | null>(null);
+  const [cityRepair, setCityRepair] = useState<Record<RepairTarget, number>>({
+    building: 30,
+    path: 30,
+  });
+  const [pendingRepair, setPendingRepair] = useState<Record<RepairTarget, number | null>>({
+    building: null,
+    path: null,
+  });
+
+  /** 建築規制の確定値・編集中値（編集中値は API 単位。キーが無い項目は確定値を使う） */
+  const [cityRegulations, setCityRegulations] = useState<RegulationsData | null>(null);
+  const [pendingRegulations, setPendingRegulations] = useState<Partial<RegulationsData>>({});
+
+  /**
+   * 移民規制の確定値・編集中値
+   * bool / dict 型のフィールドを含むため建築規制とは別に管理する。
+   */
+  const [cityImmigration, setCityImmigration] = useState<ImmigrationRegulations | null>(null);
+  const [pendingImmigration, setPendingImmigration] = useState<Partial<ImmigrationRegulations>>({});
 
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   /**
-   * 建築規制の現在値（APIから取得した確定値）
+   * マスターデータから取得した全パスバリアントの一覧（ID順）
+   * 保存ペイロードは除外対象も含めた全バリアント分を送るため、ここでは絞り込まない。
    */
-  const [cityRegulations, setCityRegulations] = useState<RegulationsData | null>(null);
-  /**
-   * 建築規制の編集中値
-   * キーが存在しない場合は cityRegulations の値を表示する
-   */
-  const [pendingRegulations, setPendingRegulations] = useState<Partial<RegulationsData>>({});
-
-  /**
-   * 移民規制の現在値（APIから取得した確定値）
-   * bool / dict 型のフィールドを含むため建築規制とは別に管理する。
-   */
-  const [cityImmigration, setCityImmigration] = useState<ImmigrationRegulations | null>(null);
-  /**
-   * 移民規制の編集中値
-   * キーが存在しない場合は cityImmigration の値を表示する。
-   * skill_thresholds は部分更新するため、オブジェクトのコピーを作って差し替える。
-   */
-  const [pendingImmigration, setPendingImmigration] = useState<Partial<ImmigrationRegulations>>({});
-
-  /**
-   * 制限速度セクションで開いている path_type グループの ID セット
-   * デフォルトでは全グループを閉じておく（量が増えた際の視認性を考慮）
-   */
-  const [expandedGroups, setExpandedGroups] = useState<Set<number>>(new Set());
-
-  /**
-   * マスターデータから取得した全パスバリアントの一覧
-   * ID順でソートし、display_name と default_speed_limit を持つ
-   */
-  const pathVariants = useMemo(() => {
+  const pathVariants = useMemo<PathVariantInfo[]>(() => {
     if (!masterData?.paths) return [];
     return Object.entries(masterData.paths)
       .map(([id, entry]) => ({
         id: Number(id),
         display_name: (entry as PathMasterEntry).display_name,
         type: (entry as PathMasterEntry).type,
-        default_speed_limit: (entry as PathMasterEntry).default_speed_limit ?? 40,
+        default_speed_limit: (entry as PathMasterEntry).default_speed_limit ?? FALLBACK_SPEED_LIMIT,
       }))
       .sort((a, b) => a.id - b.id);
   }, [masterData?.paths]);
-
-  /**
-   * 除外するパス種別のIDセット
-   * 制限速度の設定対象から除外する
-   * - 0: 通常 (PATH_DEFAULT) - 基本的なパス
-   * - 3: 歩道 (PATH_WALKWAY) - 歩行者专用
-   * - 5: 公共交通 (PATH_TRANSPORT) - 公共交通パス
-   */
-  const excludedPathTypeIds = useMemo(() => new Set([0, 3, 5]), []);
-
-  /**
-   * マスターデータから取得した全スキル一覧
-   * 移民規制のスキル要件スライダーを描画するために使用する。
-   * ID順でソートし、display_name を持つ。
-   */
-  const skillEntries = useMemo(() => {
-    if (!masterData?.skills) return [];
-    return Object.entries(masterData.skills)
-      .map(([id, entry]) => ({
-        id: Number(id),
-        display_name: (entry as SkillEntry).display_name,
-      }))
-      .sort((a, b) => a.id - b.id);
-  }, [masterData?.skills]);
-
-  /**
-   * パス種別マスター (path_types) を取得し、ID→表示名のマップを作成する
-   * バリアントをグループ化して表示する際のヘッダ用
-   * 除外対象のpath_typeはマップに含めない
-   */
-  const pathTypeNames = useMemo(() => {
-    if (!masterData?.path_types) return {} as Record<number, string>;
-    const result: Record<number, string> = {};
-    for (const [id, entry] of Object.entries(masterData.path_types)) {
-      const typeId = Number(id);
-      if (excludedPathTypeIds.has(typeId)) continue;
-      result[typeId] = (entry as { display_name: string }).display_name;
-    }
-    return result;
-  }, [masterData?.path_types, excludedPathTypeIds]);
-
-  /**
-   * バリアントを path_type ごとにグループ化する
-   * キー: path_type ID、値: そのタイプに属するバリアント配列
-   * 除外対象の path_type はグループに含めない
-   */
-  const groupedVariants = useMemo(() => {
-    const groups = new Map<number, typeof pathVariants>();
-    for (const variant of pathVariants) {
-      if (excludedPathTypeIds.has(variant.type)) continue;
-      const existing = groups.get(variant.type);
-      if (existing) {
-        existing.push(variant);
-      } else {
-        groups.set(variant.type, [variant]);
-      }
-    }
-    return groups;
-  }, [pathVariants, excludedPathTypeIds]);
-
-  /**
-   * バリアントの現在の表示速度を取得する
-   * city.max_speed にオーバーライドがあればその値、
-   * なければマスターデータの default_speed_limit を返す
-   */
-  const getDisplaySpeed = useCallback(
-    (variantId: number): number => {
-      const key = String(variantId);
-      if (key in pendingSpeeds) {
-        return pendingSpeeds[key];
-      }
-      if (key in cityMaxSpeed) {
-        return cityMaxSpeed[key];
-      }
-      const variant = pathVariants.find((v) => v.id === variantId);
-      return variant?.default_speed_limit ?? 40;
-    },
-    [pendingSpeeds, cityMaxSpeed, pathVariants],
-  );
-
-  /**
-   * バリアントの速度が初期値（master の default_speed_limit）から変更されているかを判定する
-   * 値が変更されている場合に入力欄のスタイルを変えるなどで利用する
-   */
-  const isModified = useCallback(
-    (variantId: number): boolean => {
-      const variant = pathVariants.find((v) => v.id === variantId);
-      const defaultValue = variant?.default_speed_limit ?? 40;
-      return getDisplaySpeed(variantId) !== defaultValue;
-    },
-    [getDisplaySpeed, pathVariants],
-  );
 
   /* ==== 初期データ読み込み ==== */
 
@@ -286,14 +111,12 @@ export function CityRegulationWindow({
     async function loadCityData() {
       try {
         const [cityRes, regulationsRes] = await Promise.all([
-          fetchApi<CityData>(
-            buildApiUrl(apiBaseUrl, "/api/v1/city"),
-            { signal: controller.signal },
-          ),
-          fetchApi<RegulationsData>(
-            buildApiUrl(apiBaseUrl, "/api/v1/city/regulations"),
-            { signal: controller.signal },
-          ),
+          fetchApi<CityData>(buildApiUrl(apiBaseUrl, "/api/v1/city"), {
+            signal: controller.signal,
+          }),
+          fetchApi<RegulationsData>(buildApiUrl(apiBaseUrl, "/api/v1/city/regulations"), {
+            signal: controller.signal,
+          }),
         ]);
 
         const maxSpeed: SpeedMap = {};
@@ -303,20 +126,17 @@ export function CityRegulationWindow({
         setCityMaxSpeed(maxSpeed);
         setPendingSpeeds(maxSpeed);
 
-        // 補修閾値を読み込む（APIの0-1比率を0-100パーセントに変換）
-        if (cityRes.city.repair_threshold != null) {
-          setCityRepairThreshold(cityRes.city.repair_threshold * 100);
-        }
-        if (cityRes.city.repair_threshold_path != null) {
-          setCityRepairThresholdPath(cityRes.city.repair_threshold_path * 100);
-        }
-        setPendingRepairThreshold(null);
-        setPendingRepairThresholdPath(null);
+        // 補修閾値は API の 0〜1 比率を 0〜100 パーセントへ変換して保持する
+        setCityRepair((prev) => ({
+          building: cityRes.city.repair_threshold != null ? cityRes.city.repair_threshold * 100 : prev.building,
+          path: cityRes.city.repair_threshold_path != null ? cityRes.city.repair_threshold_path * 100 : prev.path,
+        }));
+        setPendingRepair({ building: null, path: null });
 
         setCityRegulations(regulationsRes);
         setPendingRegulations({});
 
-        // 移民規制フィールドを別stateに切り出して保持する。
+        // 移民規制フィールドを別 state に切り出して保持する。
         // レスポンスは1つの RegulationsData だが、bool/dict 型を含むため編集中値は分けて管理する。
         setCityImmigration({
           immigration_age_min: regulationsRes.immigration_age_min,
@@ -340,171 +160,32 @@ export function CityRegulationWindow({
     return () => controller.abort();
   }, [apiBaseUrl]);
 
-  /* ==== 速度変更ハンドラ ==== */
+  /* ==== 変更ハンドラ ==== */
 
-  const handleSpeedChange = useCallback(
-    (variantId: number, rawValue: string) => {
-      const parsed = parseFloat(rawValue);
-      if (isNaN(parsed) || parsed < 0) return;
-      setPendingSpeeds((prev) => ({ ...prev, [String(variantId)]: parsed }));
-    },
-    [],
-  );
-
-  /* ==== アコーディオン開閉ハンドラ ==== */
-
-  const toggleGroup = useCallback((typeId: number) => {
-    setExpandedGroups((prev) => {
-      const next = new Set(prev);
-      if (next.has(typeId)) {
-        next.delete(typeId);
-      } else {
-        next.add(typeId);
-      }
-      return next;
-    });
+  const handleSpeedChange = useCallback((variantId: number, rawValue: string) => {
+    const parsed = parseFloat(rawValue);
+    if (isNaN(parsed) || parsed < 0) return;
+    setPendingSpeeds((prev) => ({ ...prev, [String(variantId)]: parsed }));
   }, []);
 
-  /* ==== 建築規制変更ハンドラ ==== */
+  const handleRegulationChange = useCallback((key: BuildingRegKey, apiValue: number) => {
+    setPendingRegulations((prev) => ({ ...prev, [key]: apiValue }));
+  }, []);
 
-  /**
-   * 入力欄の値（表示単位）を受け取り、API 単位に変換して編集中値に格納する
-   */
-  const handleRegulationChange = useCallback(
-    (key: BuildingRegKey, rawValue: string) => {
-      const parsed = parseFloat(rawValue);
-      if (isNaN(parsed) || parsed < 0) return;
-      setPendingRegulations((prev) => ({ ...prev, [key]: toApiUnit(key, parsed) }));
-    },
-    [],
-  );
+  const handleRepairChange = useCallback((target: RepairTarget, value: number) => {
+    setPendingRepair((prev) => ({ ...prev, [target]: value }));
+  }, []);
 
-  /**
-   * 建築規制の現在値を API 単位で取得する（編集中値を優先）
-   */
-  const getRegulationValue = useCallback(
-    (key: BuildingRegKey): number => {
-      if (key in pendingRegulations) {
-        return pendingRegulations[key]!;
-      }
-      if (cityRegulations) {
-        return cityRegulations[key];
-      }
-      return 0;
-    },
-    [pendingRegulations, cityRegulations],
-  );
-
-  /**
-   * 建築規制の入力欄に表示する値（表示単位）を取得する
-   */
-  const getRegulationDisplay = useCallback(
-    (key: BuildingRegKey): number => toDisplayUnit(key, getRegulationValue(key)),
-    [getRegulationValue],
-  );
-
-  /**
-   * 建築規制が初期値から変更されているかを判定する
-   */
-  const isRegulationModified = useCallback(
-    (key: BuildingRegKey): boolean => {
-      if (!cityRegulations) return false;
-      return getRegulationValue(key) !== cityRegulations[key];
-    },
-    [getRegulationValue, cityRegulations],
-  );
-
-  /* ==== 移民規制ハンドラ ==== */
-
-  /* ==== 補修閾値ハンドラ ==== */
-
-  /**
-   * 補修閾値の表示値を取得する（編集中値を優先）
-   */
-  const getRepairThresholdDisplay = useCallback(
-    (isPath: boolean): number => {
-      if (isPath) {
-        return pendingRepairThresholdPath ?? cityRepairThresholdPath;
-      }
-      return pendingRepairThreshold ?? cityRepairThreshold;
-    },
-    [pendingRepairThreshold, cityRepairThreshold, pendingRepairThresholdPath, cityRepairThresholdPath],
-  );
-
-  /**
-   * 補修閾値が初期値から変更されているか
-   */
-  const isRepairThresholdModified = useCallback(
-    (isPath: boolean): boolean => {
-      if (isPath) {
-        return (pendingRepairThresholdPath ?? cityRepairThresholdPath) !== cityRepairThresholdPath;
-      }
-      return (pendingRepairThreshold ?? cityRepairThreshold) !== cityRepairThreshold;
-    },
-    [pendingRepairThreshold, cityRepairThreshold, pendingRepairThresholdPath, cityRepairThresholdPath],
-  );
-
-  const handleRepairThresholdChange = useCallback(
-    (isPath: boolean, rawValue: string) => {
-      const parsed = parseFloat(rawValue);
-      if (isNaN(parsed) || parsed < 0 || parsed > 100) return;
-      if (isPath) {
-        setPendingRepairThresholdPath(parsed);
-      } else {
-        setPendingRepairThreshold(parsed);
-      }
-    },
-    [],
-  );
-
-  /**
-   * 移民規制の現在の表示値（スカラー項目）を取得する。
-   * 編集中値があればそれを、なければ API から取得した確定値を返す。
-   */
-  const getImmScalar = useCallback(
-    <K extends keyof ImmigrationRegulations>(key: K): ImmigrationRegulations[K] | undefined => {
-      if (key in pendingImmigration) {
-        return pendingImmigration[key];
-      }
-      return cityImmigration ? cityImmigration[key] : undefined;
-    },
-    [pendingImmigration, cityImmigration],
-  );
-
-  /**
-   * 指定スキルIDの要件閾値（表示値）を取得する。
-   * スライダーの現在位置として使う。未設定の場合は 0。
-   */
-  const getSkillThreshold = useCallback(
-    (skillId: number): number => {
-      const key = String(skillId);
-      const pending = pendingImmigration.immigration_skill_thresholds;
-      if (pending && key in pending) {
-        return pending[key];
-      }
-      return cityImmigration?.immigration_skill_thresholds[key] ?? 0;
-    },
-    [pendingImmigration, cityImmigration],
-  );
-
-  /**
-   * 移民規制の number 項目（年齢・性別ポリシー・クオータ）の変更ハンドラ
-   */
   const handleImmNumberChange = useCallback(
     (
       key: "immigration_age_min" | "immigration_age_max" | "immigration_gender_policy" | "immigration_quota",
-      rawValue: string,
+      value: number,
     ) => {
-      const parsed = parseInt(rawValue, 10);
-      if (isNaN(parsed) || parsed < 0) return;
-      setPendingImmigration((prev) => ({ ...prev, [key]: parsed }));
+      setPendingImmigration((prev) => ({ ...prev, [key]: value }));
     },
     [],
   );
 
-  /**
-   * 移民規制の bool 項目（世帯構成の許可フラグ）の変更ハンドラ
-   */
   const handleImmBoolChange = useCallback(
     (
       key: "immigration_allow_single" | "immigration_allow_married_no_children" | "immigration_allow_with_children",
@@ -516,45 +197,73 @@ export function CityRegulationWindow({
   );
 
   /**
-   * スキル要件スライダーの変更ハンドラ。
+   * スキル要件スライダーの変更。
    * skill_thresholds は一部だけ更新するため、既存辞書をコピーして差し替える。
    */
   const handleSkillThresholdChange = useCallback(
-    (skillId: number, rawValue: number) => {
-      const key = String(skillId);
+    (skillId: number, value: number) => {
       setPendingImmigration((prev) => {
-        const current = prev.immigration_skill_thresholds ?? cityImmigration?.immigration_skill_thresholds ?? {};
+        const current =
+          prev.immigration_skill_thresholds ?? cityImmigration?.immigration_skill_thresholds ?? {};
         return {
           ...prev,
-          immigration_skill_thresholds: { ...current, [key]: rawValue },
+          immigration_skill_thresholds: { ...current, [String(skillId)]: value },
         };
       });
     },
     [cityImmigration],
   );
 
+  /* ==== 未保存の変更の判定 ==== */
+
   /**
-   * 移民規制の指定項目が初期値から変更されているかを判定する。
-   * skill_thresholds は辞書の内容を比較する。
+   * タブごとの「未保存の変更があるか」。
+   * 保存ボタンが1つしかないため、表示していないタブの編集をタブの印で気付けるようにする。
    */
-  const isImmModified = useCallback(
-    (key: keyof ImmigrationRegulations): boolean => {
-      if (!cityImmigration) return false;
-      const pending = pendingImmigration[key];
-      if (pending === undefined) return false;
-      if (key !== "immigration_skill_thresholds") {
-        return pending !== cityImmigration[key];
+  const dirtyTabs = useMemo<Record<TabId, boolean>>(() => {
+    const speed = Object.entries(pendingSpeeds).some(([key, value]) => {
+      if (key in cityMaxSpeed) return value !== cityMaxSpeed[key];
+      // 確定値に無いバリアントはマスターの既定速度が現在値
+      const variant = pathVariants.find((v) => String(v.id) === key);
+      return value !== (variant?.default_speed_limit ?? FALLBACK_SPEED_LIMIT);
+    });
+
+    const building =
+      cityRegulations != null &&
+      BUILDING_REG_KEYS.some((key) => (pendingRegulations[key] ?? cityRegulations[key]) !== cityRegulations[key]);
+
+    const repair = (["building", "path"] as RepairTarget[]).some(
+      (target) => pendingRepair[target] != null && pendingRepair[target] !== cityRepair[target],
+    );
+
+    let immigration = false;
+    if (cityImmigration) {
+      immigration = IMMIGRATION_SCALAR_KEYS.some(
+        (key) => (pendingImmigration[key] ?? cityImmigration[key]) !== cityImmigration[key],
+      );
+      // スキル要件は辞書なので、両者のキーを合わせて中身を比較する
+      const pendingSkills = pendingImmigration.immigration_skill_thresholds;
+      if (!immigration && pendingSkills) {
+        const citySkills = cityImmigration.immigration_skill_thresholds;
+        const allKeys = new Set([...Object.keys(pendingSkills), ...Object.keys(citySkills)]);
+        immigration = Array.from(allKeys).some((k) => (pendingSkills[k] ?? 0) !== (citySkills[k] ?? 0));
       }
-      const pendingDict = pending as Record<string, number>;
-      const cityDict = cityImmigration[key] as Record<string, number>;
-      const allKeys = new Set([...Object.keys(pendingDict), ...Object.keys(cityDict)]);
-      for (const k of allKeys) {
-        if ((pendingDict[k] ?? 0) !== (cityDict[k] ?? 0)) return true;
-      }
-      return false;
-    },
-    [pendingImmigration, cityImmigration],
-  );
+    }
+
+    return { speed, building, repair, immigration };
+  }, [
+    pendingSpeeds,
+    cityMaxSpeed,
+    pathVariants,
+    pendingRegulations,
+    cityRegulations,
+    pendingRepair,
+    cityRepair,
+    pendingImmigration,
+    cityImmigration,
+  ]);
+
+  const hasUnsavedChanges = TABS.some((tab) => dirtyTabs[tab.id]);
 
   /* ==== 保存 ==== */
 
@@ -563,54 +272,40 @@ export function CityRegulationWindow({
     setError(null);
 
     try {
-      // 制限速度のペイロードを構築
+      // 制限速度は差分ではなく全バリアント分を送る
       const speedPayload: Record<string, number> = {};
       for (const variant of pathVariants) {
         const key = String(variant.id);
-        speedPayload[key] = pendingSpeeds[key] ?? variant.default_speed_limit ?? 40;
+        speedPayload[key] = pendingSpeeds[key] ?? variant.default_speed_limit;
       }
 
       // PATCH /api/v1/city に送るペイロード（制限速度 + 補修閾値）
-      const cityPatchPayload: Record<string, unknown> = {
-        max_speed: speedPayload,
-      };
-      if (isRepairThresholdModified(false)) {
-        // UIの0-100パーセントをAPIの0-1比率に変換
-        cityPatchPayload.repair_threshold = (pendingRepairThreshold ?? cityRepairThreshold) / 100;
+      // 補修閾値は UI の 0〜100 パーセントを API の 0〜1 比率へ戻す
+      const cityPatchPayload: Record<string, unknown> = { max_speed: speedPayload };
+      if (pendingRepair.building != null) {
+        cityPatchPayload.repair_threshold = pendingRepair.building / 100;
       }
-      if (isRepairThresholdModified(true)) {
-        cityPatchPayload.repair_threshold_path = (pendingRepairThresholdPath ?? cityRepairThresholdPath) / 100;
+      if (pendingRepair.path != null) {
+        cityPatchPayload.repair_threshold_path = pendingRepair.path / 100;
       }
 
-      // 建築規制 + 移民規制のペイロードを構築
+      // 建築規制 + 移民規制のペイロード。
       // 移民規制は bool/dict 型のフィールドを含むため、Partial<RegulationsData> ではなく
       // Record<string, unknown> で保持して JSON 送信する。
       const regulationPayload: Record<string, unknown> = {};
       if (cityRegulations) {
-        for (const key of (["limit_volume_ratio", "limit_height", "limit_coverage_ratio"] as BuildingRegKey[])) {
+        for (const key of BUILDING_REG_KEYS) {
           regulationPayload[key] = pendingRegulations[key] ?? cityRegulations[key];
         }
       }
-      // 移民規制フィールドをペイロードに追加する。
-      // 編集中値があればそれを、なければ API 取得値を使う。
       if (cityImmigration) {
-        const immScalarKeys = [
-          "immigration_age_min",
-          "immigration_age_max",
-          "immigration_allow_single",
-          "immigration_allow_married_no_children",
-          "immigration_allow_with_children",
-          "immigration_gender_policy",
-          "immigration_quota",
-        ] as const;
-        for (const key of immScalarKeys) {
+        for (const key of IMMIGRATION_SCALAR_KEYS) {
           regulationPayload[key] = pendingImmigration[key] ?? cityImmigration[key];
         }
         regulationPayload.immigration_skill_thresholds =
           pendingImmigration.immigration_skill_thresholds ?? cityImmigration.immigration_skill_thresholds;
       }
 
-      // 両方のAPIを並列で呼び出す（補修閾値は PATCH /api/v1/city に含める）
       const [speedRes, regulationRes] = await Promise.all([
         fetch(buildApiUrl(apiBaseUrl, "/api/v1/city"), {
           method: "PATCH",
@@ -637,492 +332,91 @@ export function CityRegulationWindow({
     } finally {
       setIsSaving(false);
     }
-  }, [apiBaseUrl, pendingSpeeds, pathVariants, cityRegulations, pendingRegulations, cityImmigration, pendingImmigration, onClose, pendingRepairThreshold, cityRepairThreshold, pendingRepairThresholdPath, cityRepairThresholdPath, isRepairThresholdModified]);
+  }, [
+    apiBaseUrl,
+    pathVariants,
+    pendingSpeeds,
+    pendingRepair,
+    cityRegulations,
+    pendingRegulations,
+    cityImmigration,
+    pendingImmigration,
+    onClose,
+  ]);
 
   /* ==== レンダリング ==== */
 
   if (error && Object.keys(cityMaxSpeed).length === 0 && !cityRegulations) {
-    return (
-      <div className="regulation-window__error">{error}</div>
-    );
+    return <div className="regulation-window__error">{error}</div>;
   }
 
   if (pathVariants.length === 0 || !cityRegulations || !cityImmigration) {
-    return (
-      <div className="regulation-window__loading">{t("common.loading")}</div>
-    );
+    return <div className="regulation-window__loading">{t("common.loading")}</div>;
   }
 
   return (
     <div className="regulation-window">
-      <div className="regulation-window__columns">
-        {/* 左の列: 制限速度 */}
-        <div className="regulation-column">
-          {/* 制限速度セクション */}
-          <section className="regulation-tile">
-          <h3 className="regulation-tile__title">
-            {t("regulation.speedLimitTitle")}
-          </h3>
-          <p className="regulation-tile__description">
-            {t("regulation.speedLimitDescription")}
-          </p>
+      <nav className="regulation-window__tabs">
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            className={[
+              "regulation-tab",
+              tab.id === activeTab && "regulation-tab--active",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            onClick={() => setActiveTab(tab.id)}
+          >
+            <span className="regulation-tab__label">{t(tab.labelKey)}</span>
+            {dirtyTabs[tab.id] && (
+              <span className="regulation-tab__dot" title={t("regulation.unsavedChanges")} />
+            )}
+          </button>
+        ))}
+      </nav>
 
-          <div className="regulation-speed-list">
-            {Array.from(groupedVariants.entries()).map(([typeId, variants]) => {
-              const isExpanded = expandedGroups.has(typeId);
-              return (
-                <div key={typeId} className="regulation-speed-group">
-                  <button
-                    type="button"
-                    className="regulation-speed-group__header"
-                    onClick={() => toggleGroup(typeId)}
-                    aria-expanded={isExpanded}
-                  >
-                    <span className="regulation-speed-group__toggle-icon">
-                      {isExpanded ? "▼" : "▶"}
-                    </span>
-                    <h4 className="regulation-speed-group__label">
-                      {pathTypeNames[typeId] ?? t("regulation.unknownType")}
-                    </h4>
-                    <span className="regulation-speed-group__count">
-                      {variants.length}
-                    </span>
-                  </button>
-                  {isExpanded && (
-                    <div className="regulation-speed-group__content">
-                      {variants.map((variant) => (
-                        <div key={variant.id} className="regulation-speed-row">
-                          <span
-                            className={[
-                              "regulation-speed-row__name",
-                              isModified(variant.id) && "regulation-speed-row__name--modified",
-                            ]
-                              .filter(Boolean)
-                              .join(" ")}
-                            title={variant.display_name}
-                          >
-                            {variant.display_name}
-                          </span>
-                          <div className="regulation-speed-row__input-group">
-                            <input
-                              type="number"
-                              min={0}
-                              step={1}
-                              className={[
-                                "regulation-speed-input",
-                                isModified(variant.id) && "regulation-speed-input--modified",
-                              ]
-                                .filter(Boolean)
-                                .join(" ")}
-                              value={getDisplaySpeed(variant.id)}
-                              onChange={(e) => handleSpeedChange(variant.id, e.target.value)}
-                            />
-                            <span className="regulation-speed-unit">
-                              {t("regulation.speedUnit")}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </section>
-        </div>
-
-        {/* 真ん中の列: 建築規制 ＆ 補修設定 */}
-        <div className="regulation-column">
-          {/* 建築規制セクション */}
-          <section className="regulation-tile">
-          <h3 className="regulation-tile__title">
-            {t("regulation.buildingRegulationTitle")}
-          </h3>
-          <p className="regulation-tile__description">
-            {t("regulation.buildingRegulationDescription")}
-          </p>
-
-          <div className="regulation-building-list">
-            <div className="regulation-building-row">
-              <span
-                className={[
-                  "regulation-building-row__name",
-                  isRegulationModified("limit_height") && "regulation-building-row__name--modified",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-              >
-                {t("regulation.limitHeight")}
-              </span>
-              <div className="regulation-building-row__input-group">
-                <input
-                  type="number"
-                  min={0}
-                  step={0.5}
-                  className={[
-                    "regulation-building-input",
-                    isRegulationModified("limit_height") && "regulation-building-input--modified",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  value={getRegulationDisplay("limit_height")}
-                  onChange={(e) => handleRegulationChange("limit_height", e.target.value)}
-                />
-                <span className="regulation-building-unit">
-                  {t("parcel.unitMeter")}
-                </span>
-              </div>
-            </div>
-
-            <div className="regulation-building-row">
-              <span
-                className={[
-                  "regulation-building-row__name",
-                  isRegulationModified("limit_volume_ratio") && "regulation-building-row__name--modified",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-              >
-                {t("regulation.limitVolumeRatio")}
-              </span>
-              <div className="regulation-building-row__input-group">
-                {/* 容積率は 100% を大きく超える（例: 商業地域 3000%）ため上限を設けない */}
-                <input
-                  type="number"
-                  min={0}
-                  step={10}
-                  className={[
-                    "regulation-building-input",
-                    isRegulationModified("limit_volume_ratio") && "regulation-building-input--modified",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  value={getRegulationDisplay("limit_volume_ratio")}
-                  onChange={(e) => handleRegulationChange("limit_volume_ratio", e.target.value)}
-                />
-                <span className="regulation-building-unit">
-                  {t("parcel.unitPercent")}
-                </span>
-              </div>
-            </div>
-
-            <div className="regulation-building-row">
-              <span
-                className={[
-                  "regulation-building-row__name",
-                  isRegulationModified("limit_coverage_ratio") && "regulation-building-row__name--modified",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-              >
-                {t("regulation.limitCoverageRatio")}
-              </span>
-              <div className="regulation-building-row__input-group">
-                <input
-                  type="number"
-                  min={0}
-                  max={100}
-                  step={1}
-                  className={[
-                    "regulation-building-input",
-                    isRegulationModified("limit_coverage_ratio") && "regulation-building-input--modified",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  value={getRegulationDisplay("limit_coverage_ratio")}
-                  onChange={(e) => handleRegulationChange("limit_coverage_ratio", e.target.value)}
-                />
-                <span className="regulation-building-unit">
-                  {t("parcel.unitPercent")}
-                </span>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 補修設定セクション */}
-        <section className="regulation-tile">
-          <h3 className="regulation-tile__title">
-            {t("regulation.repairTitle")}
-          </h3>
-          <p className="regulation-tile__description">
-            {t("regulation.repairDescription")}
-          </p>
-
-          <div className="regulation-building-list">
-            <div className="regulation-building-row">
-              <span
-                className={[
-                  "regulation-building-row__name",
-                  isRepairThresholdModified(false) && "regulation-building-row__name--modified",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-              >
-                {t("regulation.repairThresholdBuilding")}
-              </span>
-              <div className="regulation-building-row__input-group">
-                <input
-                  type="number"
-                  min={0}
-                  max={100}
-                  step={5}
-                  className={[
-                    "regulation-building-input",
-                    isRepairThresholdModified(false) && "regulation-building-input--modified",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  value={getRepairThresholdDisplay(false)}
-                  onChange={(e) => handleRepairThresholdChange(false, e.target.value)}
-                />
-                <span className="regulation-building-unit">
-                  {t("parcel.unitPercent")}
-                </span>
-              </div>
-            </div>
-
-            <div className="regulation-building-row">
-              <span
-                className={[
-                  "regulation-building-row__name",
-                  isRepairThresholdModified(true) && "regulation-building-row__name--modified",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-              >
-                {t("regulation.repairThresholdPath")}
-              </span>
-              <div className="regulation-building-row__input-group">
-                <input
-                  type="number"
-                  min={0}
-                  max={100}
-                  step={5}
-                  className={[
-                    "regulation-building-input",
-                    isRepairThresholdModified(true) && "regulation-building-input--modified",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  value={getRepairThresholdDisplay(true)}
-                  onChange={(e) => handleRepairThresholdChange(true, e.target.value)}
-                />
-                <span className="regulation-building-unit">
-                  {t("parcel.unitPercent")}
-                </span>
-              </div>
-            </div>
-          </div>
-        </section>
-        </div>
-
-        {/* 右の列: 移民規制 */}
-        <div className="regulation-column">
-          {/* 移民規制セクション */}
-          <section className="regulation-tile">
-          <h3 className="regulation-tile__title">
-            {t("regulation.immigrationTitle")}
-          </h3>
-          <p className="regulation-tile__description">
-            {t("regulation.immigrationDescription")}
-          </p>
-
-          <div className="regulation-immigration-list">
-            {/* 世帯主の年齢範囲 */}
-            <div className="regulation-immigration-row">
-              <span
-                className={[
-                  "regulation-immigration-row__name",
-                  (isImmModified("immigration_age_min") || isImmModified("immigration_age_max")) &&
-                    "regulation-immigration-row__name--modified",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-              >
-                {t("regulation.immigrationAgeRange")}
-              </span>
-              <div className="regulation-immigration-row__input-group">
-                <input
-                  type="number"
-                  min={0}
-                  max={120}
-                  step={1}
-                  className={[
-                    "regulation-immigration-input",
-                    isImmModified("immigration_age_min") && "regulation-immigration-input--modified",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  value={getImmScalar("immigration_age_min") ?? 20}
-                  onChange={(e) => handleImmNumberChange("immigration_age_min", e.target.value)}
-                />
-                <span className="regulation-immigration-separator">〜</span>
-                <input
-                  type="number"
-                  min={0}
-                  max={120}
-                  step={1}
-                  className={[
-                    "regulation-immigration-input",
-                    isImmModified("immigration_age_max") && "regulation-immigration-input--modified",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  value={getImmScalar("immigration_age_max") ?? 50}
-                  onChange={(e) => handleImmNumberChange("immigration_age_max", e.target.value)}
-                />
-              </div>
-            </div>
-
-            {/* 世帯構成 */}
-            <div className="regulation-immigration-row regulation-immigration-row--check">
-              <span className="regulation-immigration-row__name">
-                {t("regulation.immigrationHouseholdComposition")}
-              </span>
-              <div className="regulation-immigration-checkboxes">
-                <label className="regulation-immigration-checkbox">
-                  <input
-                    type="checkbox"
-                    checked={getImmScalar("immigration_allow_single") ?? true}
-                    onChange={(e) => handleImmBoolChange("immigration_allow_single", e.target.checked)}
-                  />
-                  <span className={isImmModified("immigration_allow_single") ? "regulation-immigration-checkbox--modified" : ""}>
-                    {t("regulation.immigrationAllowSingle")}
-                  </span>
-                </label>
-                <label className="regulation-immigration-checkbox">
-                  <input
-                    type="checkbox"
-                    checked={getImmScalar("immigration_allow_married_no_children") ?? true}
-                    onChange={(e) => handleImmBoolChange("immigration_allow_married_no_children", e.target.checked)}
-                  />
-                  <span className={isImmModified("immigration_allow_married_no_children") ? "regulation-immigration-checkbox--modified" : ""}>
-                    {t("regulation.immigrationAllowMarriedNoChildren")}
-                  </span>
-                </label>
-                <label className="regulation-immigration-checkbox">
-                  <input
-                    type="checkbox"
-                    checked={getImmScalar("immigration_allow_with_children") ?? true}
-                    onChange={(e) => handleImmBoolChange("immigration_allow_with_children", e.target.checked)}
-                  />
-                  <span className={isImmModified("immigration_allow_with_children") ? "regulation-immigration-checkbox--modified" : ""}>
-                    {t("regulation.immigrationAllowWithChildren")}
-                  </span>
-                </label>
-              </div>
-            </div>
-
-            {/* 性別（世帯主） */}
-            <div className="regulation-immigration-row">
-              <span
-                className={[
-                  "regulation-immigration-row__name",
-                  isImmModified("immigration_gender_policy") && "regulation-immigration-row__name--modified",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-              >
-                {t("regulation.immigrationGenderPolicy")}
-              </span>
-              <select
-                className="regulation-immigration-select"
-                value={getImmScalar("immigration_gender_policy") ?? 0}
-                onChange={(e) => handleImmNumberChange("immigration_gender_policy", e.target.value)}
-              >
-                <option value={0}>{t("regulation.immigrationGenderAny")}</option>
-                <option value={1}>{t("regulation.immigrationGenderMale")}</option>
-                <option value={2}>{t("regulation.immigrationGenderFemale")}</option>
-              </select>
-            </div>
-
-            {/* スキル要件（OR条件） */}
-            <div className="regulation-immigration-skills">
-              <span className="regulation-immigration-skills__title">
-                {t("regulation.immigrationSkillThresholds")}
-              </span>
-              <p className="regulation-immigration-skills__hint">
-                {t("regulation.immigrationSkillHint")}
-              </p>
-              <div className="regulation-skill-list">
-                {skillEntries.map((skill) => {
-                  const value = getSkillThreshold(skill.id);
-                  const cityValue = cityImmigration?.immigration_skill_thresholds[String(skill.id)] ?? 0;
-                  const modified = value !== cityValue;
-                  return (
-                    <div key={skill.id} className="regulation-skill-row">
-                      <span
-                        className={[
-                          "regulation-skill-row__name",
-                          modified && "regulation-skill-row__name--modified",
-                        ]
-                          .filter(Boolean)
-                          .join(" ")}
-                      >
-                        {skill.display_name}
-                      </span>
-                      <div className="regulation-skill-row__control">
-                        <input
-                          type="range"
-                          min={0}
-                          max={1.5}
-                          step={0.05}
-                          className="regulation-skill-slider"
-                          value={value}
-                          onChange={(e) => handleSkillThresholdChange(skill.id, parseFloat(e.target.value))}
-                        />
-                        <span className="regulation-skill-value">{value.toFixed(2)}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* 受け入れ上限人数（クオータ） */}
-            <div className="regulation-immigration-row">
-              <span
-                className={[
-                  "regulation-immigration-row__name",
-                  isImmModified("immigration_quota") && "regulation-immigration-row__name--modified",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-              >
-                {t("regulation.immigrationQuota")}
-              </span>
-              <div className="regulation-immigration-row__input-group">
-                <input
-                  type="number"
-                  min={0}
-                  step={1}
-                  className={[
-                    "regulation-immigration-input",
-                    isImmModified("immigration_quota") && "regulation-immigration-input--modified",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  value={getImmScalar("immigration_quota") ?? 0}
-                  onChange={(e) => handleImmNumberChange("immigration_quota", e.target.value)}
-                />
-                <span className="regulation-immigration-separator">
-                  {t("regulation.immigrationQuotaUnit")}
-                </span>
-              </div>
-            </div>
-            <p className="regulation-immigration-quota-hint">
-              {t("regulation.immigrationQuotaHint")}
-            </p>
-          </div>
-        </section>
-        </div>
+      <div className="regulation-window__content">
+        {activeTab === "speed" && (
+          <SpeedLimitTab
+            pathVariants={pathVariants}
+            cityMaxSpeed={cityMaxSpeed}
+            pendingSpeeds={pendingSpeeds}
+            onChange={handleSpeedChange}
+          />
+        )}
+        {activeTab === "building" && (
+          <BuildingRegulationTab
+            cityRegulations={cityRegulations}
+            pendingRegulations={pendingRegulations}
+            onChange={handleRegulationChange}
+          />
+        )}
+        {activeTab === "repair" && (
+          <RepairTab
+            cityThresholds={cityRepair}
+            pendingThresholds={pendingRepair}
+            onChange={handleRepairChange}
+          />
+        )}
+        {activeTab === "immigration" && (
+          <ImmigrationTab
+            cityImmigration={cityImmigration}
+            pendingImmigration={pendingImmigration}
+            onNumberChange={handleImmNumberChange}
+            onBoolChange={handleImmBoolChange}
+            onSkillThresholdChange={handleSkillThresholdChange}
+          />
+        )}
       </div>
 
       {error && <div className="regulation-window__error-inline">{error}</div>}
 
       <div className="regulation-window__footer">
+        {hasUnsavedChanges && (
+          <span className="regulation-window__unsaved">{t("regulation.unsavedChanges")}</span>
+        )}
         <button
           className="regulation-window__save-btn"
           onClick={handleSave}

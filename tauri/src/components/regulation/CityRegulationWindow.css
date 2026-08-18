@@ -2,58 +2,84 @@
  * 規制ウィンドウのスタイル
  *
  * 暗色テーマを前提とした配色。
- * セクション（タイル）を CSS grid で配置し、将来的にセクション追加に対応する。
- * 各タイル内は path_type ごとにグループ化してバリアントの制限速度入力欄を並べる。
- * 建築規制セクションは高さ規制・容積率・建ぺい率の入力欄を縦に並べる。
+ * 上部に横並びのタブバー、その下に選択中タブの内容（スクロール領域）、
+ * 最下部に全タブ共通の保存ボタンを置く3段構成。
+ * タブの見出しがセクション名を兼ねるため、内容側に見出しは持たせない。
  */
 
 .regulation-window {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 8px;
+  height: 100%;
+  overflow: hidden;
   color: #e2e8f0;
   font-size: 0.8rem;
-  overflow-y: auto;
-  max-height: 100%;
 }
 
-/* カラム配置。複数カラムを flex で並べる */
-.regulation-window__columns {
+/* ========== タブバー ========== */
+
+.regulation-window__tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 2px;
+  flex: 0 0 auto;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
 }
 
-.regulation-column {
-  flex: 1 1 320px;
+.regulation-tab {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #94a3b8;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
 
-/* 個別タイル */
-.regulation-tile {
+.regulation-tab:hover {
+  color: #cbd5e1;
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.regulation-tab--active {
+  color: #e2e8f0;
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* 未保存の変更があるタブに付ける印。保存ボタンが全タブ共通で1つしかないため、
+   表示していないタブの編集を取りこぼさないようにする */
+.regulation-tab__dot {
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #38bdf8;
+}
+
+/* ========== タブの内容 ========== */
+
+.regulation-window__content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 10px;
-  background: rgba(30, 41, 59, 0.6);
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  border-radius: 8px;
+  padding: 10px 6px 10px 2px;
 }
 
-.regulation-tile__title {
-  margin: 0;
-  font-size: 0.9rem;
-  color: #cbd5e1;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
-  padding-bottom: 6px;
-}
-
-.regulation-tile__description {
-  margin: 0 0 2px 0;
-  font-size: 0.7rem;
+.regulation-pane__description {
+  margin: 0 0 4px 0;
+  font-size: 0.72rem;
   color: #64748b;
 }
 
@@ -278,12 +304,20 @@
   border-radius: 4px;
 }
 
-/* フッター（保存ボタン） */
+/* フッター（保存ボタン）。全タブ共通で1つだけ持つ */
 .regulation-window__footer {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: 10px;
+  flex: 0 0 auto;
   padding-top: 8px;
   border-top: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.regulation-window__unsaved {
+  font-size: 0.72rem;
+  color: #38bdf8;
 }
 
 .regulation-window__save-btn {

@@ -135,7 +135,7 @@ export function TopMenu() {
   }
 
   async function handleGitHub() {
-    await openUrl("https://github.com/satken2/genesis-core");
+    await openUrl("https://github.com/satken2/city-genesis");
   }
 
   return (
