@@ -1918,6 +1918,12 @@ fn setup_logging() -> Result<(), fern::InitError> {
         "city-genesis/tauri.log".into()
     };
 
+    // fern はディレクトリを作らないため、親ディレクトリを先に用意する。
+    // これがないと開発ビルド(target/debug 直下)ではログ初期化が必ず失敗する。
+    if let Some(parent) = log_path.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+
     fern::Dispatch::new()
         .format(|out, message, record| {
             out.finish(format_args!(
