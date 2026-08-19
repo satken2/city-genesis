@@ -122,8 +122,8 @@ body プレハブのマテリアルで描かれる（`body_material` は body �
 
 | パーツ | 供給先の面 | 解決順 |
 | --- | --- | --- |
-| `ceil` | 平屋根の屋上パネル、切妻屋根の屋根面、施工済み階の天面、岸壁の側面・下面 | `ceil` パーツ → 呼び出し側が渡すフォールバック配列（＝躯体の壁マテリアル）の先頭の非 null → `Resources/BuildingMaterial` |
-| `generic-wall` | 切妻屋根の妻壁 | `generic-wall` パーツ → フォールバック配列 → `Resources/BuildingMaterial` |
+| `ceil` | 平屋根の屋上パネル、住宅風三角屋根・切妻屋根・片流れ屋根の屋根面、施工済み階の天面、岸壁の側面・下面 | `ceil` パーツ → 呼び出し側が渡すフォールバック配列（＝躯体の壁マテリアル）の先頭の非 null → `Resources/BuildingMaterial` |
+| `generic-wall` | 切妻屋根・片流れ屋根の妻壁 | `generic-wall` パーツ → フォールバック配列 → `Resources/BuildingMaterial` |
 | `floor` | 地面パネル、岸壁の上面 | §3.3 |
 
 これらは建物本体と同じ閾値フォルダ（[[F_建物メッシュの生成]] §4）から取得する。
@@ -159,13 +159,7 @@ null → 地面パネルを描画しない（既定マテリアルへはフォ�
 | コンクリート基盤（傾斜地の谷側を埋める柱状の押し出し） | `Resources/COMMON_CONCRETE` → `Resources/BuildingMaterial` |
 | 工事現場の土（建物の土マウンド／パスの土ストリップ共用） | `Resources/ConstructionDirt` → `Resources/ConstructionMaterial` → `Resources/BuildingMaterial` |
 
-### 3.5 住宅風三角屋根の例外
-
-`MODEL_MODULAR_HOUSE` の屋根だけは `ceil` パーツを使わず、`B02_ROOF_01`〜`B02_ROOF_10` の
-固定名リストから `visual_variant` で1つ選び、`Resources/B02/{名前}` →`Resources/{名前}` の順に
-ロードする（名前キーの静的キャッシュ付き）。同じ外観バリアントの住宅は同一実体を共有する。
-
-### 3.6 最終保険とサブメッシュ統合
+### 3.5 最終保険とサブメッシュ統合
 
 - **`EnsureMaterials`** — `BuildingMeshBuilder.Generate` の戻り値に対して必ず走る最後の保険。
   マテリアル配列が null／空なら `Resources/BuildingMaterial` を1つ割り当て、配列内の null 要素も

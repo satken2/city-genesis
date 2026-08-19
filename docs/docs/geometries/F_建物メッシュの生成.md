@@ -13,6 +13,7 @@
 | **MODEL_MODULAR_FLAT**   | モジュラーパーツ組み立て + 平屋根     | [[F1_モジュラー建物のメッシュ生成]] §1                                                                                                |
 | **MODEL_MODULAR_HOUSE**  | モジュラーパーツ組み立て + 住宅風三角屋根 | [[F1_モジュラー建物のメッシュ生成]] §2                                                                                                |
 | **MODEL_MODULAR_GABLE**  | モジュラーパーツ組み立て + 切妻屋根    | [[F1_モジュラー建物のメッシュ生成]] §3                                                                                                |
+| **MODEL_MODULAR_SHED**   | モジュラーパーツ組み立て + 片流れ屋根   | [[F1_モジュラー建物のメッシュ生成]] §4。粗末な小屋・仮設物置など、トタン板1枚を一方向に傾けた粗末な屋根の建物用                                                       |
 | **MODEL_MODULAR_GROUND** | モジュラーパーツ組み立て（地面用途）     | [[F2_地面アセットのメッシュ生成]]。建物本体は描画せず、フェンス・地面パネル・タイルオブジェクトを土地区画の形状に沿って配置する                                                     |
 | **MODEL_PREBUILT**       | 既成パーツ組み立て              | [[F3_既成建物のメッシュ生成]]。電波塔やオブジェ、銅像、観覧車など、通常の建物とは全く異なる形状の建物に適用する                                                             |
 | **MODEL_PORT**           | 厚みのある板（岸壁）をプロシージャル生成   | [[F4_港湾岸壁のメッシュ生成]]。海岸土地区画（PARCEL_SHORE）の港湾（BUILDING_PORT）用。モジュラーの壁・角パーツは使わない                                            |
@@ -41,7 +42,7 @@ model_type とは別軸で、status が `STATUS_CONSTRUCTING` の建物はすべ
                           ├─ model_type で分岐
                           │    ├─ MODEL_MODULAR_* → ModularBuildingMeshBuilder（F1 / F2）
                           │    │                      ├─ 1. ModularBodyBuilder で壁・地面を生成
-                          │    │                      ├─ 2. FlatRoofBuilder / HouseRoofBuilder / GableRoofBuilder で屋根を生成
+                          │    │                      ├─ 2. FlatRoofBuilder / HouseRoofBuilder / GableRoofBuilder / ShedRoofBuilder で屋根を生成
                           │    │                      ├─ 3. 塔屋を配置
                           │    │                      └─ 4. 結合・ベイク
                           │    ├─ MODEL_PREBUILT    → PreBuiltBuildingMeshBuilder（F3）
@@ -107,7 +108,7 @@ N辺ポリゴンのとき：
 
 接地高（建物の接地面の標高）は model_type によって異なる。
 
-- **MODEL_MODULAR_FLAT / HOUSE / GABLE** — 所属する土地区画の基準標高（`parcel.altitude`）。
+- **MODEL_MODULAR_FLAT / HOUSE / GABLE / SHED** — 所属する土地区画の基準標高（`parcel.altitude`）。
   傾斜地でも建物は水平面に接地し、谷側にできる地形との隙間は基盤（§8.2）が埋める。
   区画が取得できない場合は `center_point` 位置の地形標高にフォールバックする。
 - **それ以外（MODEL_MODULAR_GROUND / MODEL_PREBUILT / MODEL_PORT / MODEL_MASHUP）** — `center_point` 位置の地形標高。
@@ -509,7 +510,7 @@ CCW ポリゴンでは凸頂点の内角は 0°〜180°。
 隙間ができて建物が浮いて見える。この隙間を埋めるため、建物の底面ポリゴン（`footprint`）を
 Y方向に押し出した柱状のコンクリート基盤を生成する。
 
-- **対象** — MODEL_MODULAR_FLAT / HOUSE / GABLE のみ。
+- **対象** — MODEL_MODULAR_FLAT / HOUSE / GABLE / SHED のみ。
   MODEL_MODULAR_GROUND・MODEL_PREBUILT・MODEL_PORT・MODEL_MASHUP は基盤を生成しない
   （§2.4 の接地規則で地形標高に直接接地する。土地区画の形状を押し出すこともしない）。
 - **形状** — 上面 = 建物の接地面（ローカルY=0。地面パネルのわずかに下）、
@@ -547,7 +548,7 @@ X方向（辺の長さ方向）については、建物の壁と同じ敷き詰�
 
 ### 9.4 地形追従
 
-フェンスと地面パネルとタイルオブジェクトは、**超近景（Dynamic）LODセルの場合のみ**、配置場所の地形に沿って曲げる。それ以外のセル（NearやFarセルなど）に属する場合は、変形は行わず、水平な状態で配置される。この地形追従は**すべての model_type の敷地装飾**が対象である。傾斜地対応の建物（MODEL_MODULAR_FLAT / HOUSE / GABLE）は建物本体こそ基準標高（§2.4）の水平面に接地しコンクリート基盤（§8.2）で谷側を埋めるが、その敷地装飾（フェンス・タイル・地面パネル）は地形に追従させる。追従の基準高さは建物 `center_point` の配置高さ（傾斜地対応の建物では §2.4 の基準標高、それ以外では地形標高）で、建物GameObjectの配置高さと一致する。
+フェンスと地面パネルとタイルオブジェクトは、**超近景（Dynamic）LODセルの場合のみ**、配置場所の地形に沿って曲げる。それ以外のセル（NearやFarセルなど）に属する場合は、変形は行わず、水平な状態で配置される。この地形追従は**すべての model_type の敷地装飾**が対象である。傾斜地対応の建物（MODEL_MODULAR_FLAT / HOUSE / GABLE / SHED）は建物本体こそ基準標高（§2.4）の水平面に接地しコンクリート基盤（§8.2）で谷側を埋めるが、その敷地装飾（フェンス・タイル・地面パネル）は地形に追従させる。追従の基準高さは建物 `center_point` の配置高さ（傾斜地対応の建物では §2.4 の基準標高、それ以外では地形標高）で、建物GameObjectの配置高さと一致する。
 
 Dynamicセルかどうかの判定はメッシュ生成器側では行わない。ロード処理（`BuildingManager`）が確定済みのティアを `isDynamic` 引数としてメッシュ生成器に渡す。LODロード中はティア表の更新がロード完了後になるため、生成器側からティア表を参照すると古い値を読んでしまうからである。
 
@@ -593,7 +594,7 @@ Dynamicセルかどうかの判定はメッシュ生成器側では行わない�
 ### 11.1 配置条件
 
 パーツ `entrance` が存在する場合のみ、建物1棟につき1つ配置する。なければ配置しない。
-対象は MODEL_MODULAR_FLAT / HOUSE / GABLE（MODEL_MODULAR_GROUND は建物本体を持たないため対象外）。
+対象は MODEL_MODULAR_FLAT / HOUSE / GABLE / SHED（MODEL_MODULAR_GROUND は建物本体を持たないため対象外）。
 `building_shape = SHAPE_FULL` の建物は最上階のみを描画する（[[F1_モジュラー建物のメッシュ生成]] §4）ため、地上に壁が存在する1階建ての場合に限って配置する。
 
 ### 11.2 位置と向き
@@ -636,7 +637,7 @@ Dynamicセルかどうかの判定はメッシュ生成器側では行わない�
 
 | model_type | ポリゴン | 高さ |
 | --- | --- | --- |
-| MODEL_MODULAR_FLAT / HOUSE / GABLE | 建物底面 | 躯体の高さ（`floors × height_per_floor`） |
+| MODEL_MODULAR_FLAT / HOUSE / GABLE / SHED | 建物底面 | 躯体の高さ（`floors × height_per_floor`） |
 | MODEL_MODULAR_GROUND | 土地区画 | `floorHeight`（[[F2_地面アセットのメッシュ生成]] §4） |
 | MODEL_PREBUILT | 建物底面 | 描画された実高さ（[[F3_既成建物のメッシュ生成]] §4） |
 | MODEL_PORT | 岸壁フットプリント | 岸壁上面の高さ（[[F4_港湾岸壁のメッシュ生成]] §7） |
@@ -654,7 +655,8 @@ Dynamicセルかどうかの判定はメッシュ生成器側では行わない�
 
 - 各階の床面Y（`階 × height_per_floor`）と躯体の高さ（`floors × height_per_floor`）（§6.4）
 - 中層の壁・角・`mid-prebuilt` のYスケール目標高さ（§6.3・[[F3_既成建物のメッシュ生成]] §1）
-- 切妻屋根の棟の高さ（その半分。[[F1_モジュラー建物のメッシュ生成]] §3）
+- 住宅風三角屋根・切妻屋根の棟の高さ、片流れ屋根の立ち上がり（[[F1_モジュラー建物のメッシュ生成]] §2〜§4）。
+  いずれも**建物高さではなく階高**に比例させ、階数の多い建物だけ屋根が巨大にならないようにする
 - 白い箱フォールバックの高さ（`floors × height_per_floor`）
 - `MODEL_MODULAR_GROUND` のコライダー高さ（[[F2_地面アセットのメッシュ生成]] §4）
 - 工事中の足場・クレーンの1段の高さ（[[F5_工事中建物のメッシュ生成]]）
@@ -672,11 +674,12 @@ Dynamicセルかどうかの判定はメッシュ生成器側では行わない�
 | **`ModularBuildingMeshBuilder.cs`**         | `IBuildingMeshGenerator`。`ModularBodyBuilder` で壁・地面を生成 → `***RoofBuilder` で屋根を生成 → 塔屋を配置 → 結合・ベイク（[[F1_モジュラー建物のメッシュ生成]] / [[F2_地面アセットのメッシュ生成]]）。 |
 | **`ModularBodyBuilder.cs`**                 | **static クラス**。モジュラーパーツの壁・角・地面パネルを配置し、CombineInstance / Material / tempMesh リストを返す。敷地装飾（フェンス・タイル・地面パネル）の生成は既成建物・工事中とも共通。 |
 | **`FlatRoofBuilder.cs`**                    | **static クラス**。平らな屋上パネルを生成して返す。                                                                                                          |
-| **`HouseRoofBuilder.cs`**                   | **static クラス**。住宅風三角屋根メッシュを生成して返す。                                                         |
+| **`HouseRoofBuilder.cs`**                   | **static クラス**。住宅風三角屋根（寄棟状）メッシュを生成して返す。マテリアルは切妻・平屋根と同じ `ceil` パーツ（[[F1_モジュラー建物のメッシュ生成]] §2）。 |
 | **`GableRoofBuilder.cs`**                   | **static クラス**。切妻屋根メッシュ（厚みのある勾配面2枚＋妻壁）を生成して返す。屋根面と妻壁でサブメッシュ・マテリアルを分ける（[[F1_モジュラー建物のメッシュ生成]] §3）。 |
+| **`ShedRoofBuilder.cs`**                    | **static クラス**。片流れ屋根メッシュ（薄い勾配面1枚＋妻壁）を生成して返す。サブメッシュ・マテリアルの分け方は切妻屋根と同じ（[[F1_モジュラー建物のメッシュ生成]] §4）。 |
 | **`PreBuiltBuildingMeshBuilder.cs`**        | `IBuildingMeshGenerator`。既成パーツ組み立て（[[F3_既成建物のメッシュ生成]]）。                                                                         |
 | **`PortBuildingMeshBuilder.cs`**            | `IBuildingMeshGenerator`。海岸線で底面ポリゴンをカットし、厚みのある岸壁スラブを押し出して塔屋・荷役クレーンを配置する（[[F4_港湾岸壁のメッシュ生成]]）。                                                  |
 | **`MashupBuildingMeshBuilder.cs`**          | `IBuildingMeshGenerator`。`sub_buildings` の配置計画に従い、複数のサブ建物を既成パーツと同じ積み上げ規則で配置する（[[F6_マッシュアップ建物のメッシュ生成]]）。                                        |
 | **`ConstructingBuildingMeshBuilder.cs`**    | `IBuildingMeshGenerator`。工事中専用の「工事現場」メッシュ（土マウンド + 足場リング + クレーン）を生成する（[[F5_工事中建物のメッシュ生成]]）。model_type 分岐より先に status で分岐する。 |
 | **`DefaultBodyBuilder.cs`**                 | **static クラス**。モジュラーパーツが一切存在しない場合のフォールバック躯体。底面ポリゴンを高さまで押し出した壁面と地面パネルを生成する（屋根は屋根ビルダーが担当）。 |
-| **`BuildingMeshUtils.cs`**                  | **static クラス**。パーツの存在確認・パス解決（`common` フォールバック含む）、プレハブ配下の全メッシュ結合、閾値 suffix の解決、積み上げモジュール配置などの共通処理。 |
+| **`BuildingMeshUtils.cs`**                  | **static クラス**。パーツの存在確認・パス解決（`common` フォールバック含む）、プレハブ配下の全メッシュ結合、閾値 suffix の解決、積み上げモジュール配置などの共通処理。屋根ビルダーが共有するポリゴン幾何（`OffsetPolygonOutward` = 軒の出の輪郭、`TryResolveMinAreaRect` = 最小面積外接矩形）もここに置く。 |

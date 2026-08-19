@@ -326,6 +326,144 @@ public static class BuildingMeshUtils
         return area * 0.5f;
     }
 
+    /// <summary>
+    /// 多角形（CCW）を外側へ一定距離オフセットする。各頂点を隣り合う2辺の外向き法線の
+    /// 二等分方向へ移動し、鋭角の頂点で角が痩せないよう移動量を 1/cos で割り増しする。
+    /// 屋根の軒の出（けらば・軒先の張り出し）の輪郭を作るために、各屋根ビルダーが共有する。
+    /// </summary>
+    public static Vector2[] OffsetPolygonOutward(Vector2[] polygon, float offset)
+    {
+        if (polygon == null || polygon.Length < 3)
+        {
+            return null;
+        }
+
+        int count = polygon.Length;
+        Vector2[] offsetPoints = new Vector2[count];
+
+        for (int i = 0; i < count; i++)
+        {
+            Vector2 prev = polygon[(i - 1 + count) % count];
+            Vector2 curr = polygon[i];
+            Vector2 next = polygon[(i + 1) % count];
+
+            Vector2 prevDir = curr - prev;
+            Vector2 nextDir = next - curr;
+            if (prevDir.sqrMagnitude < 1e-6f || nextDir.sqrMagnitude < 1e-6f)
+            {
+                offsetPoints[i] = curr;
+                continue;
+            }
+
+            Vector2 prevNorm = prevDir.normalized;
+            Vector2 nextNorm = nextDir.normalized;
+            Vector2 prevOutward = new Vector2(prevNorm.y, -prevNorm.x);
+            Vector2 nextOutward = new Vector2(nextNorm.y, -nextNorm.x);
+            Vector2 bisector = prevOutward + nextOutward;
+
+            if (bisector.sqrMagnitude < 1e-6f)
+            {
+                offsetPoints[i] = curr + nextOutward * offset;
+                continue;
+            }
+
+            Vector2 offsetDir = bisector.normalized;
+            float alignment = Mathf.Clamp(Vector2.Dot(offsetDir, prevOutward), 0.1f, 1f);
+            offsetPoints[i] = curr + offsetDir * (offset / alignment);
+        }
+
+        return offsetPoints;
+    }
+
+    /// <summary>
+    /// 多角形の最小面積外接矩形（回転キャリパー）を求め、長辺方向と短辺方向を返す。
+    /// 切妻屋根は長辺方向を棟線に、片流れ屋根は短辺方向を傾斜方向に使う。
+    /// </summary>
+    /// <param name="polygon">対象の多角形</param>
+    /// <param name="center">外接矩形の中心</param>
+    /// <param name="longDir">長辺方向（正規化済み）</param>
+    /// <param name="shortDir">短辺方向（長辺と直交、正規化済み）</param>
+    /// <param name="halfLength">長辺方向の半長</param>
+    /// <param name="halfWidth">短辺方向の半幅</param>
+    /// <returns>方向を決められない退化ポリゴンでは false</returns>
+    public static bool TryResolveMinAreaRect(Vector2[] polygon,
+        out Vector2 center, out Vector2 longDir, out Vector2 shortDir,
+        out float halfLength, out float halfWidth)
+    {
+        center = Vector2.zero;
+        longDir = Vector2.right;
+        shortDir = Vector2.up;
+        halfLength = 0f;
+        halfWidth = 0f;
+
+        if (polygon == null || polygon.Length < 3)
+        {
+            return false;
+        }
+
+        int n = polygon.Length;
+        float bestArea = float.MaxValue;
+        bool found = false;
+
+        for (int i = 0; i < n; i++)
+        {
+            Vector2 edge = polygon[(i + 1) % n] - polygon[i];
+            if (edge.sqrMagnitude < 1e-6f)
+            {
+                continue;
+            }
+
+            Vector2 axisX = edge.normalized;
+            Vector2 axisY = new Vector2(-axisX.y, axisX.x);
+
+            float minX = float.MaxValue, maxX = float.MinValue;
+            float minY = float.MaxValue, maxY = float.MinValue;
+            for (int j = 0; j < n; j++)
+            {
+                float x = Vector2.Dot(polygon[j], axisX);
+                float y = Vector2.Dot(polygon[j], axisY);
+                if (x < minX) minX = x;
+                if (x > maxX) maxX = x;
+                if (y < minY) minY = y;
+                if (y > maxY) maxY = y;
+            }
+
+            float sizeX = maxX - minX;
+            float sizeY = maxY - minY;
+            if (sizeX < 1e-4f || sizeY < 1e-4f)
+            {
+                continue;
+            }
+
+            float area = sizeX * sizeY;
+            if (area >= bestArea)
+            {
+                continue;
+            }
+
+            bestArea = area;
+            found = true;
+            center = axisX * ((minX + maxX) * 0.5f) + axisY * ((minY + maxY) * 0.5f);
+
+            if (sizeX >= sizeY)
+            {
+                longDir = axisX;
+                shortDir = axisY;
+                halfLength = sizeX * 0.5f;
+                halfWidth = sizeY * 0.5f;
+            }
+            else
+            {
+                longDir = axisY;
+                shortDir = axisX;
+                halfLength = sizeY * 0.5f;
+                halfWidth = sizeX * 0.5f;
+            }
+        }
+
+        return found && halfWidth > 1e-3f && halfLength > 1e-3f;
+    }
+
     public static Vector2[] GetFootprint(BuildingSummary buildingData)
     {
         // 底面の座標をVector2配列へ格納

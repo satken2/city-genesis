@@ -55,6 +55,7 @@ public static class Constants
     public const int MODEL_PREBUILT = 5;
     public const int MODEL_PORT = 6;
     public const int MODEL_MASHUP = 7;
+    public const int MODEL_MODULAR_SHED = 8;
     public const float MASHUP_CELL_SIZE = 8.0f;
     public const int FAMILY_SINGLE = 1;
     public const int FAMILY_COUPLE = 2;

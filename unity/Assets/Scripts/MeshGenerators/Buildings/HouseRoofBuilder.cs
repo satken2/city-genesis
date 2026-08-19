@@ -3,32 +3,40 @@ using UnityEngine;
 using System.Collections.Generic;
 
 /// <summary>
-/// 住宅風の三角屋根（切妻屋根）のメッシュを生成するクラス。
-/// 建物底面を少し拡張したポリゴンから棟線を求め、二段構成で屋根を押し出してメッシュ化する。
+/// 住宅風の三角屋根（寄棟状）のメッシュを生成するクラス。
+/// 建物底面を軒の出だけ広げたポリゴンから棟線を求め、底面の各頂点を棟線へ射影して傾斜面を張る。
+///
+/// 幾何もマテリアルも他の屋根（平屋根・切妻屋根）と同じ規約に従う。すなわち棟の立ち上がりは
+/// **階高**基準の固定比率（建物高さに比例させない）で、軒の出は固定長、マテリアルは `ceil`
+/// パーツから解決する。
 /// </summary>
 public static class HouseRoofBuilder
 {
-    private static readonly string[] RoofMaterialKeys = new[]
-    {
-        "B02_ROOF_01", "B02_ROOF_02", "B02_ROOF_03", "B02_ROOF_04", "B02_ROOF_05",
-        "B02_ROOF_06", "B02_ROOF_07", "B02_ROOF_08", "B02_ROOF_09", "B02_ROOF_10"
-    };
+    /// <summary>
+    /// 棟の立ち上がり（壁の天端から棟までの高さ）を決める、階高に対する比率。
+    /// 建物高さに比例させると階数の多い建物だけ屋根が巨大になるため、切妻屋根
+    /// （<see cref="GableRoofBuilder"/>）と同じく階高基準に固定して街並みの屋根の高さを揃える。
+    /// </summary>
+    private const float RiseFloorHeightRatio = 0.5f;
 
-    private static readonly string[] RoofMaterialPathFormats = new[]
-    {
-        "B02/{0}",
-        "{0}"
-    };
+    /// <summary>軒の出（m）。壁面から屋根面が張り出す量。切妻屋根と同じ値。</summary>
+    private const float EaveOverhang = 0.4f;
 
-    private static readonly Dictionary<string, Material> RoofMaterialCache = new Dictionary<string, Material>();
+    /// <summary>棟線の両端を内側へ引き込む量を決める、棟の立ち上がりに対する比率。</summary>
+    private const float RidgeSetbackRiseRatio = 2f;
 
     /// <summary>
-    /// 建物底面を少し拡張したポリゴンから棟線を求め、二段構成で三角屋根を押し出してメッシュ化する。
+    /// 建物底面を軒の出だけ広げたポリゴンから棟線を求め、三角屋根を押し出してメッシュ化する。
     /// </summary>
     /// <param name="footprint">建物底面の頂点（CCW）</param>
-    /// <param name="baseHeight">屋根底面の高さ（建物高さ）</param>
-    /// <param name="visualVariant">屋根マテリアル選択用バリアント</param>
-    public static BuildingMeshResult GenerateRoof(Vector2[] footprint, float baseHeight, float visualVariant = 0f)
+    /// <param name="baseHeight">屋根底面の高さ＝壁の天端（躯体の描画高さ）</param>
+    /// <param name="floorHeight">1階あたりの高さ。棟の立ち上がりはこの半分に固定する。</param>
+    /// <param name="prefix">モデルのプレフィックス（ceil パーツ解決用）</param>
+    /// <param name="resolvedSuffix">解決済みのサフィックス（ceil パーツ解決用）</param>
+    /// <param name="fallbackMaterials">ceil パーツが無い場合のフォールバックマテリアル</param>
+    public static BuildingMeshResult GenerateRoof(
+        Vector2[] footprint, float baseHeight, float floorHeight,
+        string prefix, int resolvedSuffix, Material[] fallbackMaterials)
     {
         if (footprint == null || footprint.Length < 3)
         {
@@ -36,11 +44,8 @@ public static class HouseRoofBuilder
             return null;
         }
 
-        const float roofOffsetScale = 0.15f;
-        const float roofRiseFactor = 0.6f;
-
-        // 底面を少し縮小／拡張して屋根の底面ポリゴンを作る
-        Vector2[] roofBaseFootprint = OffsetPolygonOutward(footprint, baseHeight * roofOffsetScale);
+        // 底面を軒の出だけ外側へ広げて屋根の底面ポリゴンを作る
+        Vector2[] roofBaseFootprint = BuildingMeshUtils.OffsetPolygonOutward(footprint, EaveOverhang);
         if (roofBaseFootprint == null || roofBaseFootprint.Length < 3)
         {
             roofBaseFootprint = footprint;
@@ -56,12 +61,12 @@ public static class HouseRoofBuilder
             axisPoints = new[] { s, m, e };
         }
 
-        // 棟線を上下に持ち上げた屋根形状
-        float roofRise = baseHeight * roofRiseFactor;
+        // 棟線を持ち上げた屋根形状。立ち上がりは建物高さではなく階高で決める。
+        float roofRise = (floorHeight > 0f ? floorHeight : LocalConstants.FLOOR_HEIGHT) * RiseFloorHeightRatio;
         float roofTopHeight = baseHeight + roofRise;
 
         // 棟線の両端だけセットバックする
-        float ridgeSetback = roofRise * 2f;
+        float ridgeSetback = roofRise * RidgeSetbackRiseRatio;
         ApplyRidgeSetback(axisPoints, ridgeSetback);
 
         int baseVertexCount = roofBaseFootprint.Length;
@@ -118,9 +123,8 @@ public static class HouseRoofBuilder
         roofMesh.normals = normals.ToArray();
         roofMesh.RecalculateBounds();
 
-        Material roofMaterial = SelectRoofMaterial(visualVariant);
-        Material[] materials = roofMaterial != null ? new[] { roofMaterial } : null;
-        return new BuildingMeshResult(roofMesh, materials);
+        Material roofMaterial = BuildingMeshUtils.SelectRoofMaterial(prefix, resolvedSuffix, fallbackMaterials);
+        return new BuildingMeshResult(roofMesh, roofMaterial != null ? new[] { roofMaterial } : null);
     }
 
     // 棟線ポリラインの「両端だけ」を内側にセットバックする。
@@ -450,90 +454,5 @@ public static class HouseRoofBuilder
         }
 
         return best;
-    }
-
-    private static Vector2[] OffsetPolygonOutward(Vector2[] footprint, float offset)
-    {
-        if (footprint == null || footprint.Length < 3)
-        {
-            return null;
-        }
-
-        int count = footprint.Length;
-        Vector2[] offsetPoints = new Vector2[count];
-
-        for (int i = 0; i < count; i++)
-        {
-            Vector2 prev = footprint[(i - 1 + count) % count];
-            Vector2 curr = footprint[i];
-            Vector2 next = footprint[(i + 1) % count];
-
-            Vector2 prevDir = (curr - prev);
-            Vector2 nextDir = (next - curr);
-            if (prevDir.sqrMagnitude < 1e-6f || nextDir.sqrMagnitude < 1e-6f)
-            {
-                offsetPoints[i] = curr;
-                continue;
-            }
-
-            Vector2 prevNorm = prevDir.normalized;
-            Vector2 nextNorm = nextDir.normalized;
-            Vector2 prevOutward = new Vector2(prevNorm.y, -prevNorm.x);
-            Vector2 nextOutward = new Vector2(nextNorm.y, -nextNorm.x);
-            Vector2 bisector = prevOutward + nextOutward;
-
-            if (bisector.sqrMagnitude < 1e-6f)
-            {
-                offsetPoints[i] = curr + nextOutward * offset;
-                continue;
-            }
-
-            Vector2 offsetDir = bisector.normalized;
-            float alignment = Mathf.Clamp(Vector2.Dot(offsetDir, prevOutward), 0.1f, 1f);
-            offsetPoints[i] = curr + offsetDir * (offset / alignment);
-        }
-
-        return offsetPoints;
-    }
-
-    private static Material SelectRoofMaterial(float visualVariant)
-    {
-        if (RoofMaterialKeys == null || RoofMaterialKeys.Length == 0)
-        {
-            return null;
-        }
-
-        float normalized = Mathf.Clamp01(visualVariant);
-        int materialCount = RoofMaterialKeys.Length;
-        int rawIndex = Mathf.RoundToInt(normalized * materialCount);
-        int selectedIndex = Mathf.Clamp(rawIndex - 1, 0, materialCount - 1);
-        return LoadRoofMaterial(RoofMaterialKeys[selectedIndex]);
-    }
-
-    private static Material LoadRoofMaterial(string key)
-    {
-        if (string.IsNullOrEmpty(key))
-        {
-            return null;
-        }
-
-        if (RoofMaterialCache.TryGetValue(key, out Material cached))
-        {
-            return cached;
-        }
-
-        Material material = null;
-        foreach (string format in RoofMaterialPathFormats)
-        {
-            string path = string.Format(format, key);
-            material = Resources.Load<Material>(path);
-            if (material != null)
-            {
-                break;
-            }
-        }
-
-        RoofMaterialCache[key] = material;
-        return material;
     }
 }

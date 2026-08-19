@@ -116,7 +116,7 @@ public static class GableRoofBuilder
 
         // 棟線の向きと半幅は「壁の外周」から決める。軒の出を含めた輪郭から決めると、
         // 屋根面が壁の天端を通らなくなり妻壁の高さが合わなくなる。
-        if (!TryResolveRidgeFrame(normalized, out Vector2 center, out Vector2 ridgeDir,
+        if (!BuildingMeshUtils.TryResolveMinAreaRect(normalized, out Vector2 center, out Vector2 ridgeDir,
                 out Vector2 widthDir, out _, out float halfWidth))
         {
             // 方向を決められない退化ポリゴンは平屋根にフォールバックする
@@ -132,7 +132,7 @@ public static class GableRoofBuilder
         var frame = new RoofFrame(center, ridgeDir, widthDir, baseHeight + rise, slope, baseHeight);
 
         // 軒の出だけ外側に広げたポリゴンが屋根板の輪郭になる。
-        Vector2[] eaveFootprint = OffsetPolygonOutward(normalized, EaveOverhang);
+        Vector2[] eaveFootprint = BuildingMeshUtils.OffsetPolygonOutward(normalized, EaveOverhang);
         if (eaveFootprint == null || eaveFootprint.Length < 3)
         {
             eaveFootprint = normalized;
@@ -348,134 +348,5 @@ public static class GableRoofBuilder
         float slopeDistance = Mathf.Sqrt(acrossRidge * acrossRidge +
             (position.y - frame.BaseHeight) * (position.y - frame.BaseHeight));
         buffers.Uvs.Add(new Vector2(alongRidge * UvScale, slopeDistance * UvScale));
-    }
-
-    /// <summary>
-    /// ポリゴンの最小面積外接矩形（回転キャリパー）を求め、長辺方向を棟線方向として返す。
-    /// </summary>
-    /// <param name="center">外接矩形の中心</param>
-    /// <param name="ridgeDir">棟線方向（長辺方向、正規化済み）</param>
-    /// <param name="widthDir">棟線と直交する方向（短辺方向、正規化済み）</param>
-    /// <param name="halfLength">棟線方向の半長</param>
-    /// <param name="halfWidth">棟線と直交する方向の半幅</param>
-    private static bool TryResolveRidgeFrame(Vector2[] polygon,
-        out Vector2 center, out Vector2 ridgeDir, out Vector2 widthDir,
-        out float halfLength, out float halfWidth)
-    {
-        center = Vector2.zero;
-        ridgeDir = Vector2.right;
-        widthDir = Vector2.up;
-        halfLength = 0f;
-        halfWidth = 0f;
-
-        int n = polygon.Length;
-        float bestArea = float.MaxValue;
-        bool found = false;
-
-        for (int i = 0; i < n; i++)
-        {
-            Vector2 edge = polygon[(i + 1) % n] - polygon[i];
-            if (edge.sqrMagnitude < 1e-6f)
-            {
-                continue;
-            }
-
-            Vector2 axisX = edge.normalized;
-            Vector2 axisY = new Vector2(-axisX.y, axisX.x);
-
-            float minX = float.MaxValue, maxX = float.MinValue;
-            float minY = float.MaxValue, maxY = float.MinValue;
-            for (int j = 0; j < n; j++)
-            {
-                float x = Vector2.Dot(polygon[j], axisX);
-                float y = Vector2.Dot(polygon[j], axisY);
-                if (x < minX) minX = x;
-                if (x > maxX) maxX = x;
-                if (y < minY) minY = y;
-                if (y > maxY) maxY = y;
-            }
-
-            float sizeX = maxX - minX;
-            float sizeY = maxY - minY;
-            if (sizeX < 1e-4f || sizeY < 1e-4f)
-            {
-                continue;
-            }
-
-            float area = sizeX * sizeY;
-            if (area >= bestArea)
-            {
-                continue;
-            }
-
-            bestArea = area;
-            found = true;
-            center = axisX * ((minX + maxX) * 0.5f) + axisY * ((minY + maxY) * 0.5f);
-
-            // 長辺を棟線方向にする
-            if (sizeX >= sizeY)
-            {
-                ridgeDir = axisX;
-                widthDir = axisY;
-                halfLength = sizeX * 0.5f;
-                halfWidth = sizeY * 0.5f;
-            }
-            else
-            {
-                ridgeDir = axisY;
-                widthDir = axisX;
-                halfLength = sizeY * 0.5f;
-                halfWidth = sizeX * 0.5f;
-            }
-        }
-
-        return found && halfWidth > 1e-3f && halfLength > 1e-3f;
-    }
-
-    /// <summary>
-    /// ポリゴン（CCW）を外側に一定距離オフセットする（各頂点の角の二等分方向へ移動）。
-    /// </summary>
-    private static Vector2[] OffsetPolygonOutward(Vector2[] footprint, float offset)
-    {
-        if (footprint == null || footprint.Length < 3)
-        {
-            return null;
-        }
-
-        int count = footprint.Length;
-        Vector2[] offsetPoints = new Vector2[count];
-
-        for (int i = 0; i < count; i++)
-        {
-            Vector2 prev = footprint[(i - 1 + count) % count];
-            Vector2 curr = footprint[i];
-            Vector2 next = footprint[(i + 1) % count];
-
-            Vector2 prevDir = curr - prev;
-            Vector2 nextDir = next - curr;
-            if (prevDir.sqrMagnitude < 1e-6f || nextDir.sqrMagnitude < 1e-6f)
-            {
-                offsetPoints[i] = curr;
-                continue;
-            }
-
-            Vector2 prevNorm = prevDir.normalized;
-            Vector2 nextNorm = nextDir.normalized;
-            Vector2 prevOutward = new Vector2(prevNorm.y, -prevNorm.x);
-            Vector2 nextOutward = new Vector2(nextNorm.y, -nextNorm.x);
-            Vector2 bisector = prevOutward + nextOutward;
-
-            if (bisector.sqrMagnitude < 1e-6f)
-            {
-                offsetPoints[i] = curr + nextOutward * offset;
-                continue;
-            }
-
-            Vector2 offsetDir = bisector.normalized;
-            float alignment = Mathf.Clamp(Vector2.Dot(offsetDir, prevOutward), 0.1f, 1f);
-            offsetPoints[i] = curr + offsetDir * (offset / alignment);
-        }
-
-        return offsetPoints;
     }
 }

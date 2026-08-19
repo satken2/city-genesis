@@ -58,6 +58,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
             case Constants.MODEL_MODULAR_FLAT:
             case Constants.MODEL_MODULAR_HOUSE:
             case Constants.MODEL_MODULAR_GABLE:
+            case Constants.MODEL_MODULAR_SHED:
             case Constants.MODEL_MODULAR_GROUND:
                 result = modularGenerator.Generate(buildingData, isDynamic);
                 break;
@@ -854,7 +855,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// 傾斜地対応（区画基準標高への接地 + 底面フットプリントを押し出したコンクリート基盤の生成）の
     /// 対象となる model_type かどうかを返す。
     ///
-    /// - 対象: MODEL_MODULAR_FLAT / HOUSE / GABLE。建物は parcel.altitude（接道の路面高さ）の
+    /// - 対象: MODEL_MODULAR_FLAT / HOUSE / GABLE / SHED。建物は parcel.altitude（接道の路面高さ）の
     ///   水平面に接地し、傾斜地の谷側の隙間は基盤（GenerateFoundationMesh）が埋める。
     /// - 対象外: MODEL_MODULAR_GROUND（畑・庭は地形に沿う地面表現）、MODEL_PREBUILT、
     ///   MODEL_PORT（岸壁は独自の海底追従スラブを持つ）、MODEL_MASHUP（各サブ建物が
@@ -865,7 +866,8 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     {
         return modelType == Constants.MODEL_MODULAR_FLAT ||
                modelType == Constants.MODEL_MODULAR_HOUSE ||
-               modelType == Constants.MODEL_MODULAR_GABLE;
+               modelType == Constants.MODEL_MODULAR_GABLE ||
+               modelType == Constants.MODEL_MODULAR_SHED;
     }
 
     private static Material cachedConstructionDirtMaterial;

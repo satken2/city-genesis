@@ -120,13 +120,20 @@ public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
             switch (modelType)
             {
                 case Constants.MODEL_MODULAR_HOUSE:
-                    UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[MBMB-DEBUG] Calling HouseRoofBuilder.GenerateRoof(buildingHeight={buildingHeight}, visual_variant={visual_variant})");
-                    roofResult = HouseRoofBuilder.GenerateRoof(footprint, buildingHeight, visual_variant);
-                    UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[MBMB-DEBUG] HouseRoofBuilder result: {(roofResult == null ? "null" : $"Mesh={roofResult.Mesh != null}, Materials={roofResult.Materials?.Length}")}");
+                    // 壁・角・地面は FLAT と同じ。屋根だけ住宅風の寄棟にし、マテリアルは FLAT と同じ ceil パーツを使う。
+                    roofResult = HouseRoofBuilder.GenerateRoof(
+                        footprint, buildingHeight, floorHeight, prefix, resolvedSuffix,
+                        allMaterials.Count > 0 ? allMaterials.ToArray() : null);
                     break;
                 case Constants.MODEL_MODULAR_GABLE:
                     // 壁・角・地面は FLAT と同じ。屋根だけ切妻にし、マテリアルは FLAT と同じ ceil パーツを使う。
                     roofResult = GableRoofBuilder.GenerateRoof(
+                        footprint, buildingHeight, floorHeight, prefix, resolvedSuffix,
+                        allMaterials.Count > 0 ? allMaterials.ToArray() : null);
+                    break;
+                case Constants.MODEL_MODULAR_SHED:
+                    // 壁・角・地面は FLAT と同じ。屋根だけ片流れ（トタン屋根）にする。
+                    roofResult = ShedRoofBuilder.GenerateRoof(
                         footprint, buildingHeight, floorHeight, prefix, resolvedSuffix,
                         allMaterials.Count > 0 ? allMaterials.ToArray() : null);
                     break;
