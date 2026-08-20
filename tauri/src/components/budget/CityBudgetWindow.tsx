@@ -96,6 +96,17 @@ type CityAgentData = {
 
 const LEDGER_RESERVE_KEY = "10";
 
+/**
+ * 市政カテゴリ(1)。現状これに属する実支出主体が存在しない(地区代表エージェントの
+ * 建設サービス支出は建設(8)/修繕(9)へ付け替え済み、市政府自体は運営費を持たない)ため、
+ * 空カテゴリとしてプレイヤーには表示しない。バックエンドの定数・マスター行は将来の
+ * 拡張(市庁舎の運営費など)のため温存されており、予算導出上は常に¥0で無害。
+ */
+const LEDGER_CITYHALL_KEY = "1";
+
+/** プレイヤーに表示しない予算カテゴリ(貯蓄=支出枠ではない、市政=空カテゴリ) */
+const HIDDEN_CATEGORY_KEYS = new Set([LEDGER_RESERVE_KEY, LEDGER_CITYHALL_KEY]);
+
 
 
 /**
@@ -365,9 +376,9 @@ export function CityBudgetWindow({
   // 配分後に現金が変動した場合などはサーバ側の実結果のみが真になるため、両方を見る。
   const autoAdjusted = derived.autoAdjusted || Boolean(budgetData?.budget_auto_adjusted);
 
-  // 内訳積み上げバーの列となるカテゴリ(貯蓄を除く全予算カテゴリ)。
+  // 内訳積み上げバーの列となるカテゴリ(貯蓄・市政を除く全予算カテゴリ)。
   const breakdownCategories = useMemo(
-    () => sortedCategories.filter((c) => String(c.id) !== LEDGER_RESERVE_KEY),
+    () => sortedCategories.filter((c) => !HIDDEN_CATEGORY_KEYS.has(String(c.id))),
     [sortedCategories],
   );
 
@@ -437,8 +448,9 @@ export function CityBudgetWindow({
       ),
     ];
     // 貯蓄(10)は支出カテゴリではないため支出側ノードに含めない（余剰は surplus ノードが表す）。
+    // 市政(1)は空カテゴリのため非表示。
     const spends: FiscalFlowItem[] = sortedCategories
-      .filter((c) => String(c.id) !== LEDGER_RESERVE_KEY)
+      .filter((c) => !HIDDEN_CATEGORY_KEYS.has(String(c.id)))
       .map((c) => ({
         label: t(`budget.category.${c.id}`, { defaultValue: c.display_name }),
         value: pendingBudgets[String(c.id)] ?? 0,
@@ -546,7 +558,7 @@ export function CityBudgetWindow({
           {TIER_ORDER.map((tier) => {
             const tierCategories = sortedCategories.filter(
               (cat) =>
-                String(cat.id) !== LEDGER_RESERVE_KEY &&
+                !HIDDEN_CATEGORY_KEYS.has(String(cat.id)) &&
                 getCategoryTier(String(cat.id), tiers) === tier,
             );
             if (tierCategories.length === 0) return null;
