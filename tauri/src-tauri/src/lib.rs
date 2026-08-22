@@ -658,6 +658,10 @@ struct TerrainEditorData {
     /// 各要素は {id, kind, centerline, widths, surface_offsets, footprint}(RiverPayload)。
     /// 未設定なら空配列。仕様の正は genesis-docs/docs/geometries/D_地形形状.md §D.11。
     rivers: serde_json::Value,
+    /// 天然資源エリアの一覧。meta.json の resources をそのまま返す。
+    /// 各要素は {id, resource_type, max_amount, recovery_rate, polygon(GeoJSONライク)}
+    /// (ResourceAreaPayload)。未設定なら空配列。仕様の正は同 §D.12。
+    resources: serde_json::Value,
 }
 
 #[tauri::command]
@@ -716,6 +720,10 @@ fn load_terrain_editor_data(
             .unwrap_or_else(|| serde_json::Value::Array(Vec::new())),
         rivers: meta
             .get("rivers")
+            .cloned()
+            .unwrap_or_else(|| serde_json::Value::Array(Vec::new())),
+        resources: meta
+            .get("resources")
             .cloned()
             .unwrap_or_else(|| serde_json::Value::Array(Vec::new())),
     })
@@ -884,6 +892,7 @@ fn save_terrain_editor_data(
     thumbnail_base64: Option<String>,
     water_surfaces: Option<serde_json::Value>,
     rivers: Option<serde_json::Value>,
+    resources: Option<serde_json::Value>,
 ) -> Result<(), String> {
     use base64::Engine;
     let bytes = base64::engine::general_purpose::STANDARD
@@ -901,10 +910,11 @@ fn save_terrain_editor_data(
     let map_dir = terrain_editor_dir(&app)?.join(&map_id);
     std::fs::create_dir_all(&map_dir).map_err(|e| e.to_string())?;
 
-    // 水面ポリゴン(海面以外の湖など)と川は作業コピーの meta.json に保持する。
+    // 水面ポリゴン(海面以外の湖など)・川・天然資源エリアは作業コピーの meta.json に保持する。
     // 未指定なら空配列を書く。
     let water_surfaces = water_surfaces.unwrap_or_else(|| serde_json::Value::Array(Vec::new()));
     let rivers = rivers.unwrap_or_else(|| serde_json::Value::Array(Vec::new()));
+    let resources = resources.unwrap_or_else(|| serde_json::Value::Array(Vec::new()));
     let meta = serde_json::json!({
         "map_id": map_id,
         "map_width": map_width,
@@ -916,6 +926,7 @@ fn save_terrain_editor_data(
         "grid_cols": grid_cols,
         "water_surfaces": water_surfaces,
         "rivers": rivers,
+        "resources": resources,
     });
     std::fs::write(map_dir.join("meta.json"), meta.to_string())
         .map_err(|e| format!("meta.json の書き込みに失敗しました: {e}"))?;
@@ -968,6 +979,7 @@ fn export_terrain_as_npy(
     thumbnail_base64: Option<String>,
     water_surfaces: Option<serde_json::Value>,
     rivers: Option<serde_json::Value>,
+    resources: Option<serde_json::Value>,
 ) -> Result<ExportTerrainResult, String> {
     use base64::Engine;
     let bytes = base64::engine::general_purpose::STANDARD
@@ -1030,6 +1042,23 @@ fn export_terrain_as_npy(
         let rivers_path = std::path::Path::new(&out_path).with_extension("rivers.json");
         std::fs::write(&rivers_path, rivers_doc.to_string())
             .map_err(|e| format!("川定義ファイルの書き込みに失敗しました: {e}"))?;
+    }
+
+    // 天然資源エリアは .npy と同じファイル名(拡張子だけ .resources.json)で同じディレクトリに
+    // 書き出す(.water.json と同じ命名規則・方針)。genesis-core側の terrain_registry が
+    // この命名規則を前提に読み込み、新規都市の初期化時に資源エンティティとして配置する。
+    // 資源が無くてもファイルを書き出し、以前のエクスポートで残った古い資源が読まれ続けるのを防ぐ。
+    // 仕様の正は D_地形形状.md §D.12。
+    {
+        let resources = resources.unwrap_or_else(|| serde_json::Value::Array(Vec::new()));
+        let resources_doc = serde_json::json!({
+            "version": 1,
+            "resources": resources,
+        });
+        // out_path が "map_foo.npy" なら "map_foo.resources.json" にする。
+        let resources_path = std::path::Path::new(&out_path).with_extension("resources.json");
+        std::fs::write(&resources_path, resources_doc.to_string())
+            .map_err(|e| format!("資源定義ファイルの書き込みに失敗しました: {e}"))?;
     }
 
     log::info!("[export_terrain_as_npy] out_path={} へエクスポートしました", out_path);

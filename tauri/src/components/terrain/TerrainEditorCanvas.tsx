@@ -33,6 +33,15 @@
  *     陸と連続する海底を作る)の3種類。アルゴリズム本体は terrainErosion.ts /
  *     terrainSeaFloor.ts に分離されており、本ファイルはパラメータUIと実行後の
  *     再描画(テクスチャ・等高線・3Dプレビュー送信)のみを担当する。
+ *
+ * 地形編集・水面編集・川編集に加えて「資源編集」タブがあり、天然資源エリア(鉱脈・油田
+ * などのポリゴン領域)を水面と同じ作図フローでオーサリングできる。資源は経済シミュレー
+ * ションのエンティティだが、埋蔵資源は地形と密接に結び付く(山に鉱脈、平野に水源など)
+ * ため、地形マップ固有のオーサリング済みデータとしてここで定義する。定義した資源は
+ * meta.json / サイドカーJSON(map_xxx.resources.json)に永続化され、バックエンドが
+ * 新規都市の初期化時(init_game)に読み込んで資源エンティティとして配置する。
+ * 資源種別の一覧はマスターデータ(resource_master)に依存するため、バックエンドが
+ * 起動していない場合は資源種別を選択できない(既存の資源の表示・削除は可能)。
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -43,10 +52,12 @@ import { save as saveFileDialog } from "@tauri-apps/plugin-dialog";
 import { showNotification } from "../../utils/notification";
 import { NumberStepper } from "../common/NumberStepper";
 import { NEW_TERRAIN_INITIAL_ELEVATION_M } from "../../local-constants";
+import { useMasterData } from "../../contexts/MasterDataContext";
 import {
   type TerrainEditorData,
   type WaterSurfacePayload,
   type RiverPayload,
+  type ResourceAreaPayload,
   type GridRect,
   type Terrain3DRequestStatePayload,
   type Terrain3DFullStatePayload,
@@ -140,6 +151,19 @@ type EditorWaterSurface = { id: string; waterLevel: number; points: WorldPoint[]
  *   - depthCoef: この川を彫るときの深さ係数。生成時の既定値から川ごとに調整できる。
  */
 type EditorRiver = GeneratedRiver & { params: RiverGenParams; carved: boolean; depthCoef: number };
+
+/**
+ * 地形エディタ内での天然資源エリア1件分の内部表現。
+ * points は外周ポリゴンの頂点(ワールド座標XZ)。保存・エクスポート時に GeoJSON ライクな
+ * ResourceAreaPayload へ変換する。種別の表示名はマスターデータから都度解決するため持たない。
+ */
+type EditorResourceArea = {
+  id: string;
+  resourceType: number;
+  maxAmount: number;
+  recoveryRate: number;
+  points: WorldPoint[];
+};
 
 /** 等高線間隔を標高レンジに応じて見やすい値に自動選択する(ビュー全体を映した基準ズームでの間隔) */
 function pickContourInterval(range: number): number {
@@ -870,6 +894,85 @@ function strokeWaterSurfaces(
 }
 
 /**
+ * 資源種別ごとの描画色([塗り, 外周線])。種別IDを本数で割った余りで循環させる
+ * (種別はマスターデータ由来で増減しうるため、固定の対応表ではなくパレット方式にする)。
+ */
+const RESOURCE_AREA_COLORS: [string, string][] = [
+  ["rgba(255,170,60,0.28)", "rgba(255,195,110,0.95)"],
+  ["rgba(185,120,255,0.28)", "rgba(205,155,255,0.95)"],
+  ["rgba(255,95,95,0.28)", "rgba(255,135,135,0.95)"],
+  ["rgba(95,220,140,0.28)", "rgba(135,240,170,0.95)"],
+  ["rgba(240,215,80,0.28)", "rgba(250,230,130,0.95)"],
+  ["rgba(80,225,225,0.28)", "rgba(130,240,240,0.95)"],
+];
+
+/** 資源種別IDに対応する描画色([塗り, 外周線])を返す */
+function resourceAreaColors(resourceType: number): [string, string] {
+  const idx = Math.abs(Math.trunc(resourceType)) % RESOURCE_AREA_COLORS.length;
+  return RESOURCE_AREA_COLORS[idx];
+}
+
+/**
+ * 天然資源エリアを2Dキャンバスへ描画する。draw() 内でビュー変換適用後に呼ぶ。
+ * 確定済みのエリアは種別ごとの色で塗りつぶし+外周線+中心の種別ラベルを描き、
+ * 作図中(資源編集タブ)の未確定ポリゴンはマウス追従線付きの破線で描く。
+ * ラベルの表示名はマスターデータ未取得時のフォールバックを含めて呼び出し側が解決する。
+ */
+function strokeResourceAreas(
+  ctx: CanvasRenderingContext2D,
+  areas: EditorResourceArea[],
+  labelFor: (resourceType: number) => string,
+  inProgressPoints: WorldPoint[],
+  mouse: WorldPoint | null,
+  lineWidth: number
+): void {
+  for (const area of areas) {
+    if (area.points.length < 3) continue;
+    const [fill, stroke] = resourceAreaColors(area.resourceType);
+    ctx.beginPath();
+    ctx.moveTo(area.points[0].x, area.points[0].z);
+    for (let i = 1; i < area.points.length; i++) ctx.lineTo(area.points[i].x, area.points[i].z);
+    ctx.closePath();
+    ctx.fillStyle = fill;
+    ctx.fill();
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = lineWidth;
+    ctx.stroke();
+
+    // 種別ラベルを重心に描く(フォントサイズはズームに追従して画面上でほぼ一定になる)
+    let cx = 0;
+    let cz = 0;
+    for (const p of area.points) { cx += p.x; cz += p.z; }
+    cx /= area.points.length;
+    cz /= area.points.length;
+    ctx.fillStyle = stroke;
+    ctx.font = `${lineWidth * 9}px sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(labelFor(area.resourceType), cx, cz);
+  }
+
+  // 作図中の資源ポリゴン(未確定)。水面の作図中表示と同じ構成でオレンジ系にする。
+  if (inProgressPoints.length > 0) {
+    ctx.strokeStyle = "rgba(255,195,110,0.95)";
+    ctx.fillStyle = "rgba(255,195,110,0.95)";
+    ctx.lineWidth = lineWidth;
+    ctx.beginPath();
+    ctx.moveTo(inProgressPoints[0].x, inProgressPoints[0].z);
+    for (let i = 1; i < inProgressPoints.length; i++) ctx.lineTo(inProgressPoints[i].x, inProgressPoints[i].z);
+    if (mouse) ctx.lineTo(mouse.x, mouse.z);
+    if (inProgressPoints.length >= 3) ctx.closePath();
+    ctx.stroke();
+    const r = lineWidth * 3;
+    for (const p of inProgressPoints) {
+      ctx.beginPath();
+      ctx.arc(p.x, p.z, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+}
+
+/**
  * 川を2Dキャンバスへ描画する。draw() 内でビュー変換適用後に呼ぶ。
  * 彫り込み済みの川は「川幅の半透明帯 + 濃青の中心線」、未彫り込み(計算直後)の川は
  * 明るい水色の破線で描き分ける。帯の幅は各川の平均幅を使う(セグメントごとに lineWidth を
@@ -924,6 +1027,9 @@ function strokeRivers(
 
 export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   const { t } = useTranslation();
+  // 資源編集タブの種別プルダウン・種別ラベル表示に使う(resource_master 由来)。
+  // 地形エディタ自体はバックエンド非依存で動くため、未取得(null)でも他タブは全機能が使える。
+  const masterData = useMasterData();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const coordOverlayRef = useRef<HTMLDivElement | null>(null);
   const zoomOverlayRef = useRef<HTMLDivElement | null>(null);
@@ -1030,8 +1136,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   const [hasSelection, setHasSelection] = useState(false);
 
   // --- アクティブな編集タブのステート ---
-  // 地形編集・水面編集・川編集を排他的に切り替える。
-  const [activeTab, setActiveTab] = useState<"terrain" | "water" | "river">("terrain");
+  // 地形編集・水面編集・川編集・資源編集を排他的に切り替える。
+  const [activeTab, setActiveTab] = useState<"terrain" | "water" | "river" | "resource">("terrain");
 
   // --- 水面(海面以外の湖など)のUI状態 ---
   // 水面モードON中は、左クリックが水面ポリゴンの頂点追加・右クリックが形状の確定(閉じる)になる
@@ -1047,6 +1153,23 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   // 作成済み水面の枚数と、作図中ポリゴンの頂点数(ボタン表示用。実体は各ref)。
   const [waterSurfaceCount, setWaterSurfaceCount] = useState(0);
   const [waterPointCount, setWaterPointCount] = useState(0);
+
+  // --- 天然資源エリアのUI状態 ---
+  // 資源編集タブがアクティブな間は、左クリック=資源ポリゴンの頂点追加・右クリック=形状の
+  // 確定(閉じる)になる(水面編集と同じ2段階: 形状を閉じる→種別・埋蔵量等を設定→確定)。
+  // 実体は resourceAreasRef / resourcePointsRef。
+  const [resourceMode, setResourceMode] = useState(false);
+  // 次に作成する資源のパラメータ。種別はマスターデータ(resource_master)から選ぶ。
+  const [resourceTypeInput, setResourceTypeInput] = useState<number | null>(null);
+  const [resourceMaxAmountInput, setResourceMaxAmountInput] = useState(1000);
+  const [resourceRecoveryRateInput, setResourceRecoveryRateInput] = useState(0);
+  // 作図中の資源ポリゴンが「閉じた(形状確定済み)」状態か(水面の waterPolygonClosed と同じ)。
+  const [resourcePolygonClosed, setResourcePolygonClosed] = useState(false);
+  // 作図中ポリゴンの頂点数と、作成済み資源の一覧表示用ミラー(実体は resourceAreasRef)。
+  const [resourcePointCount, setResourcePointCount] = useState(0);
+  const [resourceList, setResourceList] = useState<
+    { id: string; resourceType: number; maxAmount: number; recoveryRate: number }[]
+  >([]);
 
   // --- 川編集のUI状態 ---
   // 川は「流路を計算」→一覧に未彫り込みとして追加→一覧で個別に削除・深さ調整・
@@ -1113,6 +1236,10 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   // --- Undo / Redo ---
   // rivers も標高と一緒にスナップショットする。川床の彫り込みを Undo したときに、
   // 地形だけ戻って川リストが残る(またはその逆の)不整合を防ぐため。
+  // 水面・資源エリアもスナップショットする。マップリサイズが標高と一緒にこれらの
+  // ワールド座標を平行移動するため、リサイズを Undo したときに地形だけ戻って
+  // 水面・資源がズレたまま残る不整合を防ぐ(各リストは常にイミュータブルに差し替える
+  // 運用なので、配列の浅いコピーでスナップショットとして成立する)。
   type UndoState = {
     elev: Float32Array;
     mapWidth: number;
@@ -1121,6 +1248,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     rows: number;
     cols: number;
     rivers: EditorRiver[];
+    waterSurfaces: EditorWaterSurface[];
+    resourceAreas: EditorResourceArea[];
   };
   const MAX_UNDO = 5;
   const undoStackRef = useRef<UndoState[]>([]);
@@ -1139,6 +1268,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       rows: s.rows,
       cols: s.cols,
       rivers: riversRef.current.slice(),
+      waterSurfaces: waterSurfacesRef.current.slice(),
+      resourceAreas: resourceAreasRef.current.slice(),
     });
     if (undoStackRef.current.length > MAX_UNDO) undoStackRef.current.shift();
     redoStackRef.current = [];
@@ -1160,12 +1291,16 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         rows: s.rows,
         cols: s.cols,
         rivers: riversRef.current.slice(),
+        waterSurfaces: waterSurfacesRef.current.slice(),
+        resourceAreas: resourceAreasRef.current.slice(),
       });
       if (redoStackRef.current.length > MAX_UNDO) redoStackRef.current.shift();
     }
-    // rebuildTerrainVisuals が末尾で3Dプレビューへ全状態(川を含む)を送るため、
-    // 川リストは先に復元しておく。
+    // rebuildTerrainVisuals が末尾で3Dプレビューへ全状態(川・水面を含む)を送るため、
+    // 川・水面・資源のリストは先に復元しておく。
     restoreRivers(target.rivers);
+    restoreWaterSurfaces(target.waterSurfaces);
+    restoreResourceAreas(target.resourceAreas);
     rebuildTerrainVisuals(target.elev, target.mapWidth, target.mapHeight, target.spacing, target.rows, target.cols);
   }
 
@@ -1184,10 +1319,14 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         rows: s.rows,
         cols: s.cols,
         rivers: riversRef.current.slice(),
+        waterSurfaces: waterSurfacesRef.current.slice(),
+        resourceAreas: resourceAreasRef.current.slice(),
       });
       if (undoStackRef.current.length > MAX_UNDO) undoStackRef.current.shift();
     }
     restoreRivers(target.rivers);
+    restoreWaterSurfaces(target.waterSurfaces);
+    restoreResourceAreas(target.resourceAreas);
     rebuildTerrainVisuals(target.elev, target.mapWidth, target.mapHeight, target.spacing, target.rows, target.cols);
   }
 
@@ -1206,6 +1345,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     waterMode,
     waterLevelInput,
     waterPolygonClosed,
+    resourceMode,
+    resourcePolygonClosed,
   });
   useEffect(() => {
     toolStateRef.current = {
@@ -1221,8 +1362,10 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       waterMode,
       waterLevelInput,
       waterPolygonClosed,
+      resourceMode,
+      resourcePolygonClosed,
     };
-  }, [shape, operation, brushParams, selectionFalloff, raiseLowerParams, flattenParams, noiseParams, featherWidth, polygonClosed, waterMode, waterLevelInput, waterPolygonClosed]);
+  }, [shape, operation, brushParams, selectionFalloff, raiseLowerParams, flattenParams, noiseParams, featherWidth, polygonClosed, waterMode, waterLevelInput, waterPolygonClosed, resourceMode, resourcePolygonClosed]);
 
   // 現在のブラシ中心(ワールド座標)。マウス移動の度に更新されるため ref で保持する。
   const brushWorldPosRef = useRef<WorldPoint | null>(null);
@@ -1240,6 +1383,33 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   // 未彫り込み(計算直後)と彫り込み済みの両方を carved フラグつきで持つ。
   // 保存・エクスポート・3Dプレビュー送信の対象になるのは彫り込み済みの川のみ。
   const riversRef = useRef<EditorRiver[]>([]);
+
+  // === 天然資源エリアの実体 ===
+  // 作成済み資源エリアの一覧と、資源編集タブで作図中(未確定)の頂点列。
+  // 3Dプレビューへは送らない(資源は標高・水面と違い3D形状を持たないため)。
+  const resourceAreasRef = useRef<EditorResourceArea[]>([]);
+  const resourcePointsRef = useRef<WorldPoint[]>([]);
+
+  // 資源種別の表示名の対応表。draw()(イベントハンドラのクロージャから呼ばれ、React state を
+  // 直接読めない)がラベル描画に使うため、マスターデータの変化を ref へミラーする。
+  // マスターデータ未取得の間は空のままで、ラベルは「#種別ID」へフォールバックする。
+  const resourceTypeNamesRef = useRef<Record<number, string>>({});
+  useEffect(() => {
+    const names: Record<number, string> = {};
+    if (masterData) {
+      for (const [id, entry] of Object.entries(masterData.resource_types)) {
+        names[Number(id)] = entry.display_name;
+      }
+    }
+    resourceTypeNamesRef.current = names;
+    if (status === "ready") draw();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [masterData, status]);
+
+  /** 資源種別IDの表示名を返す(マスターデータ未取得・未知の種別は「#ID」表記) */
+  function resourceTypeLabel(resourceType: number): string {
+    return resourceTypeNamesRef.current[resourceType] ?? `#${resourceType}`;
+  }
 
   /** 範囲指定方法をポリゴン以外に切り替えたら、未確定の頂点をクリアする */
   useEffect(() => {
@@ -1420,10 +1590,11 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     }
 
     // ブラシ/ポリゴンのプレビュー(常時表示。モード切替を廃止したため編集ツールは常に有効)。
-    // 水面モード中は標高編集のブラシ/ポリゴンプレビューは表示しない(操作が水面作図に切り替わるため)。
+    // 水面モード・資源モード中は標高編集のブラシ/ポリゴンプレビューは表示しない
+    // (操作が水面/資源の作図に切り替わるため)。
     const previewLineW = 1.5 / v.zoom;
-    if (ts.waterMode) {
-      // 水面モードでは何も描かない(水面自体は下の strokeWaterSurfaces で描く)。
+    if (ts.waterMode || ts.resourceMode) {
+      // 水面/資源モードでは何も描かない(それぞれ下の strokeWaterSurfaces / strokeResourceAreas で描く)。
     } else if (ts.shape === "polygon") {
       strokePolygonPreview(ctx, polygonPointsRef.current, ts.polygonClosed ? null : brushWorldPosRef.current, previewLineW);
     } else if (brushWorldPosRef.current) {
@@ -1442,6 +1613,16 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
 
     // 川。彫り込み済みは濃青の帯+中心線、未彫り込み(計算直後)は水色の破線。
     strokeRivers(ctx, riversRef.current, previewLineW);
+
+    // 天然資源エリア。確定済みは常に表示し、作図中の頂点は資源編集タブのときだけ追従表示する。
+    strokeResourceAreas(
+      ctx,
+      resourceAreasRef.current,
+      resourceTypeLabel,
+      ts.resourceMode ? resourcePointsRef.current : [],
+      ts.resourceMode && !ts.resourcePolygonClosed ? brushWorldPosRef.current : null,
+      previewLineW
+    );
 
     ctx.restore();
 
@@ -1618,19 +1799,26 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
 
   /**
    * 編集タブを切り替える。
-   * 水面編集タブに切り替えた場合は自動的に水面追加モード(waterMode)をONにし、
-   * 他のタブに切り替えた場合はOFFにして作図中(未確定)の頂点を破棄する。
+   * 水面編集/資源編集タブに切り替えた場合は対応する作図モード(waterMode/resourceMode)を
+   * ONにし、他のタブに切り替えた場合はOFFにして作図中(未確定)の頂点を破棄する。
    * 川編集タブではポインタ操作を地形編集と同じ範囲選択(降雨範囲の指定に使う)のままにする。
    * 未彫り込みの川はタブを離れても破棄しない(一覧から個別に彫る途中の状態を保つため)。
    */
-  function handleTabChange(tab: "terrain" | "water" | "river") {
+  function handleTabChange(tab: "terrain" | "water" | "river" | "resource") {
     setActiveTab(tab);
     setWaterMode(tab === "water");
+    setResourceMode(tab === "resource");
     if (tab !== "water") {
       // 水面編集モードを解除する際は、作図中の未確定の頂点データを破棄する
       waterPointsRef.current = [];
       setWaterPointCount(0);
       setWaterPolygonClosed(false);
+    }
+    if (tab !== "resource") {
+      // 資源編集モードを解除する際も同様に、作図中の未確定の頂点データを破棄する
+      resourcePointsRef.current = [];
+      setResourcePointCount(0);
+      setResourcePolygonClosed(false);
     }
     draw();
   }
@@ -1739,6 +1927,127 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       result.push({
         id: ws.id ?? `water_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
         waterLevel: typeof ws.water_level === "number" ? ws.water_level : 0,
+        points: exterior.map((c) => ({ x: c[0], z: c[1] })),
+      });
+    }
+    return result;
+  }
+
+  /* ============================================================================
+   * 天然資源エリアの作成(資源編集タブ)
+   *
+   * 作図フローは水面と同じ2段階(左クリックで頂点追加→右クリックで形状を閉じる→
+   * 種別・埋蔵量上限・回復率を設定して「資源を確定」で1件として登録)。
+   * 登録した資源は保存(meta.json)・エクスポート(サイドカー map_xxx.resources.json)の
+   * 対象になり、バックエンドが新規都市の初期化時に資源エンティティとして配置する。
+   * ========================================================================== */
+
+  /** 資源編集タブで、作図中の資源ポリゴンに頂点を追加する(形状を閉じる前のみ)。 */
+  function addResourcePoint(wx: number, wz: number) {
+    resourcePointsRef.current = [...resourcePointsRef.current, { x: wx, z: wz }];
+    setResourcePointCount(resourcePointsRef.current.length);
+    draw();
+  }
+
+  /** 作図中(未確定)の資源ポリゴンの頂点をクリアする。 */
+  function clearResourcePoints() {
+    resourcePointsRef.current = [];
+    setResourcePointCount(0);
+    setResourcePolygonClosed(false);
+    draw();
+  }
+
+  /** resourceAreasRef の内容を一覧表示用 state(resourceList)へミラーする。資源リストを変更したら必ず呼ぶ。 */
+  function syncResourceListState() {
+    setResourceList(
+      resourceAreasRef.current.map((area) => ({
+        id: area.id,
+        resourceType: area.resourceType,
+        maxAmount: area.maxAmount,
+        recoveryRate: area.recoveryRate,
+      })),
+    );
+  }
+
+  /** 資源リストを丸ごと差し替える(ロード・Undo/Redo の復元用) */
+  function restoreResourceAreas(areas: EditorResourceArea[]) {
+    resourceAreasRef.current = areas;
+    syncResourceListState();
+  }
+
+  /** 水面リストを丸ごと差し替える(Undo/Redo の復元用) */
+  function restoreWaterSurfaces(surfaces: EditorWaterSurface[]) {
+    waterSurfacesRef.current = surfaces;
+    setWaterSurfaceCount(surfaces.length);
+  }
+
+  /**
+   * 閉じた(形状確定済みの)資源ポリゴン(頂点3つ以上)を、現在の種別・埋蔵量上限・回復率で
+   * 1件の資源エリアとして登録する。「資源を確定」ボタンから呼ぶ。種別未選択なら何もしない
+   * (ボタン側も無効化されている)。
+   */
+  function confirmResourceArea() {
+    const poly = resourcePointsRef.current;
+    if (poly.length < 3 || resourceTypeInput === null) return;
+    const area: EditorResourceArea = {
+      id: `resource_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+      resourceType: resourceTypeInput,
+      maxAmount: resourceMaxAmountInput,
+      recoveryRate: resourceRecoveryRateInput,
+      points: poly.map((p) => ({ x: p.x, z: p.z })),
+    };
+    resourceAreasRef.current = [...resourceAreasRef.current, area];
+    syncResourceListState();
+    resourcePointsRef.current = [];
+    setResourcePointCount(0);
+    setResourcePolygonClosed(false);
+    draw();
+  }
+
+  /** 資源エリアを1件削除する。 */
+  function removeResourceArea(id: string) {
+    resourceAreasRef.current = resourceAreasRef.current.filter((area) => area.id !== id);
+    syncResourceListState();
+    draw();
+  }
+
+  /** 作成済みの資源エリアをすべて削除する。作図中の頂点も破棄する。 */
+  function clearAllResourceAreas() {
+    resourceAreasRef.current = [];
+    syncResourceListState();
+    clearResourcePoints();
+  }
+
+  /** 内部表現の資源エリア一覧を、保存用の GeoJSON ライク(ResourceAreaPayload)に変換する。 */
+  function serializeResourceAreas(): ResourceAreaPayload[] {
+    return resourceAreasRef.current.map((area) => ({
+      id: area.id,
+      resource_type: area.resourceType,
+      max_amount: area.maxAmount,
+      recovery_rate: area.recoveryRate,
+      polygon: {
+        type: "Polygon" as const,
+        coordinates: [area.points.map((p) => [p.x, p.z])],
+      },
+    }));
+  }
+
+  /** meta.json / サイドカーから読み込んだ ResourceAreaPayload 配列を内部表現へ変換する。 */
+  function deserializeResourceAreas(payload: ResourceAreaPayload[] | undefined): EditorResourceArea[] {
+    if (!Array.isArray(payload)) return [];
+    const result: EditorResourceArea[] = [];
+    for (const ra of payload) {
+      const polygon = ra?.polygon;
+      if (!polygon || polygon.type !== "Polygon") continue;
+      // Polygon の coordinates は [外周, 穴...]。エディタでは外周のみを扱う。
+      const exterior = (polygon.coordinates as number[][][])[0];
+      if (!Array.isArray(exterior) || exterior.length < 3) continue;
+      if (typeof ra.resource_type !== "number") continue;
+      result.push({
+        id: ra.id ?? `resource_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+        resourceType: ra.resource_type,
+        maxAmount: typeof ra.max_amount === "number" ? ra.max_amount : 1000,
+        recoveryRate: typeof ra.recovery_rate === "number" ? ra.recovery_rate : 0,
         points: exterior.map((c) => ({ x: c[0], z: c[1] })),
       });
     }
@@ -2249,10 +2558,41 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   }
 
   /**
+   * ワールド座標を持つベクター系の編集データ(水面・川・資源エリア・各作図中の頂点列)を
+   * (dx, dz) だけ平行移動する。マップリサイズ専用の補正処理。
+   *
+   * ワールド座標の原点はマップ中心なので、端へのセル追加/削除でマップ寸法が変わると、
+   * 同じ地形コンテンツのワールド座標が step/2 だけずれる。標高配列は handleResizeMap が
+   * 行・列の詰め替えで追従させるが、ベクター系は座標そのものを持つため、ここで同じ量だけ
+   * 動かして地形との位置関係を保つ。各リストはイミュータブルに差し替える(Undoスタックが
+   * 浅いコピーのスナップショットを保持しており、要素をin-placeで書き換えるとスナップ
+   * ショットまで壊れるため)。
+   */
+  function shiftVectorFeatures(dx: number, dz: number) {
+    if (dx === 0 && dz === 0) return;
+    waterSurfacesRef.current = waterSurfacesRef.current.map((ws) => ({
+      ...ws,
+      points: ws.points.map((p) => ({ x: p.x + dx, z: p.z + dz })),
+    }));
+    riversRef.current = riversRef.current.map((river) => ({
+      ...river,
+      points: river.points.map((p) => ({ ...p, x: p.x + dx, z: p.z + dz })),
+    }));
+    resourceAreasRef.current = resourceAreasRef.current.map((area) => ({
+      ...area,
+      points: area.points.map((p) => ({ x: p.x + dx, z: p.z + dz })),
+    }));
+    waterPointsRef.current = waterPointsRef.current.map((p) => ({ x: p.x + dx, z: p.z + dz }));
+    resourcePointsRef.current = resourcePointsRef.current.map((p) => ({ x: p.x + dx, z: p.z + dz }));
+    polygonPointsRef.current = polygonPointsRef.current.map((p) => ({ x: p.x + dx, z: p.z + dz }));
+  }
+
+  /**
    * マップサイズをセル単位で変更する(追加/削除)。
    * map_width/map_height は 2*cell_size 刻みで増減する。
    * 追加時は新規エリアを新規地形作成時と同じ初期標高(`NEW_TERRAIN_INITIAL_ELEVATION_M`、海面より低い)で埋め、
-   * 削除時は指定端から切り落とす。
+   * 削除時は指定端から切り落とす。水面・川・資源エリアなどのベクター系データは
+   * shiftVectorFeatures で標高配列と同じだけ平行移動し、地形との位置関係を保つ。
    */
   function handleResizeMap() {
     const s = settingsRef.current;
@@ -2337,6 +2677,18 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       }
     }
 
+    // 既存の地形コンテンツはワールド原点(マップ中心)から見て step/2 だけ平行移動する
+    // (例: 上端に追加→中心が新規エリア側へ寄るため、既存コンテンツは反対側へ半分ずれる)。
+    // 標高の詰め替え(上のループ)と同じずれ量をベクター系データにも適用する。
+    const half = stepMeters / 2;
+    let shiftX = 0;
+    let shiftZ = 0;
+    if (resizeEdge === "left") shiftX = resizeAction === "add" ? half : -half;
+    else if (resizeEdge === "right") shiftX = resizeAction === "add" ? -half : half;
+    else if (resizeEdge === "bottom") shiftZ = resizeAction === "add" ? half : -half;
+    else shiftZ = resizeAction === "add" ? -half : half;
+    shiftVectorFeatures(shiftX, shiftZ);
+
     rebuildTerrainVisuals(newElev, newMapWidth, newMapHeight, s.spacing, newRows, newCols);
 
     setResizeStatus("ok");
@@ -2403,6 +2755,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         thumbnailBase64,
         waterSurfaces: serializeWaterSurfaces(),
         rivers: serializeRivers(),
+        resources: serializeResourceAreas(),
       });
       setSaveStatus("saved");
     } catch (error) {
@@ -2469,6 +2822,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         thumbnailBase64,
         waterSurfaces: serializeWaterSurfaces(),
         rivers: serializeRivers(),
+        resources: serializeResourceAreas(),
       });
       setExportStatus("exported");
       // エクスポート先にterrain_maps.yamlが見つからなかった場合は、通知ポップアップで知らせる。
@@ -2545,6 +2899,12 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         restoreRivers(deserializeRivers(data.rivers));
         setRiverPreviewStats(null);
 
+        // 作業コピー(meta.json)に保存されている天然資源エリアを復元する。
+        restoreResourceAreas(deserializeResourceAreas(data.resources));
+        resourcePointsRef.current = [];
+        setResourcePointCount(0);
+        setResourcePolygonClosed(false);
+
         setStatus("ready");
       } catch (error) {
         if (cancelled) return;
@@ -2613,12 +2973,16 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     function onDown(e: MouseEvent) {
       const ts = toolStateRef.current;
 
-      // 右ボタン: 水面モード中は作図中の水面ポリゴン(頂点3つ以上)の「形状」を確定(閉じる)する。
-      // ここでは水面としては登録せず、水位を設定してから「水面を確定」ボタンで登録する2段階。
+      // 右ボタン: 水面/資源モード中は作図中のポリゴン(頂点3つ以上)の「形状」を確定(閉じる)する。
+      // ここでは登録まで行わず、パラメータ(水位/資源種別等)を設定してから確定ボタンで登録する2段階。
       // 通常時はポリゴン描画中(頂点3つ以上)ならポリゴン作成を完了(閉じる)する。それ以外は何もしない。
       if (e.button === 2) {
         if (ts.waterMode) {
           if (waterPointsRef.current.length >= 3 && !ts.waterPolygonClosed) setWaterPolygonClosed(true);
+          return;
+        }
+        if (ts.resourceMode) {
+          if (resourcePointsRef.current.length >= 3 && !ts.resourcePolygonClosed) setResourcePolygonClosed(true);
           return;
         }
         if (ts.shape === "polygon" && polygonPointsRef.current.length >= 3 && !ts.polygonClosed) {
@@ -2680,6 +3044,9 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         if (ts.waterMode) {
           // 水面モード: 形状を閉じる前のみ、左クリックで水面ポリゴンの頂点を追加する。
           if (!ts.waterPolygonClosed) addWaterPoint(wx, wz);
+        } else if (ts.resourceMode) {
+          // 資源モード: 形状を閉じる前のみ、左クリックで資源ポリゴンの頂点を追加する。
+          if (!ts.resourcePolygonClosed) addResourcePoint(wx, wz);
         } else if (ts.shape === "polygon") {
           if (!ts.polygonClosed) {
             addPolygonPoint(wx, wz);
@@ -2790,6 +3157,14 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
             disabled={status !== "ready"}
           >
             {t("terrainEditor.tabRiver", { defaultValue: "川編集" })}
+          </button>
+          <button
+            type="button"
+            className={`terrain-editor-tab ${activeTab === "resource" ? "active" : ""}`}
+            onClick={() => handleTabChange("resource")}
+            disabled={status !== "ready"}
+          >
+            {t("terrainEditor.tabResource", { defaultValue: "資源編集" })}
           </button>
         </div>
 
@@ -3175,6 +3550,177 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                   </div>
                 </div>
               </div>
+            )}
+
+            {/* 資源編集カード群(作図 → パラメータ設定 → 作成済み一覧) */}
+            {activeTab === "resource" && (
+              <>
+                <div className="terrain-editor-card">
+                  <div className="terrain-editor-card-title">{t("terrainEditor.resourceTitle", { defaultValue: "天然資源エリア" })}</div>
+                  <div className="terrain-editor-section">
+                    <div className="terrain-editor-hint">
+                      {t("terrainEditor.resourceHint", {
+                        defaultValue:
+                          "資源編集タブがアクティブのときは資源追加モードになり、左クリックで資源ポリゴンの頂点を追加、右クリック(または「形状を確定」)で形状を閉じます(3点以上)。左ドラッグで画面移動。形状を閉じたあと、種別・埋蔵量上限・回復率を設定して「資源を確定」で1件の資源エリアとして登録します。登録した資源はこのマップで新規都市を始めたときに配置されます",
+                      })}
+                    </div>
+                    {!masterData && (
+                      <div className="terrain-editor-hint terrain-editor-hint--error">
+                        {t("terrainEditor.resourceMasterUnavailable", {
+                          defaultValue:
+                            "マスターデータを取得できないため資源種別を選択できません(バックエンド未起動?)。既存の資源の確認・削除は可能です",
+                        })}
+                      </div>
+                    )}
+                    <div className="terrain-editor-param-row">
+                      <span className="terrain-editor-param-label">{t("terrainEditor.resourceType", { defaultValue: "資源種別" })}</span>
+                      <select
+                        className="terrain-editor-select"
+                        value={resourceTypeInput ?? ""}
+                        onChange={(e) => setResourceTypeInput(e.target.value ? parseInt(e.target.value) : null)}
+                        disabled={status !== "ready" || !masterData}
+                      >
+                        <option value="">{t("terrainEditor.resourceTypeUnselected", { defaultValue: "(選択してください)" })}</option>
+                        {masterData &&
+                          Object.entries(masterData.resource_types).map(([id, entry]) => (
+                            <option key={id} value={id}>
+                              {entry.display_name}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+                    <div className="terrain-editor-param-row">
+                      <span className="terrain-editor-param-label">{t("terrainEditor.resourceMaxAmount", { defaultValue: "埋蔵量上限" })}</span>
+                      <NumberStepper
+                        value={resourceMaxAmountInput}
+                        onChange={setResourceMaxAmountInput}
+                        min={1}
+                        max={10000000}
+                        step={100}
+                        integerOnly={true}
+                        disabled={status !== "ready"}
+                      />
+                    </div>
+                    <div className="terrain-editor-param-row">
+                      <span className="terrain-editor-param-label">{t("terrainEditor.resourceRecoveryRate", { defaultValue: "回復率(1日あたり)" })}</span>
+                      <NumberStepper
+                        value={resourceRecoveryRateInput}
+                        onChange={setResourceRecoveryRateInput}
+                        min={0}
+                        max={1}
+                        step={0.001}
+                        integerOnly={false}
+                        disabled={status !== "ready"}
+                      />
+                    </div>
+                    <div className="terrain-editor-hint">
+                      {t("terrainEditor.resourceRecoveryHint", {
+                        defaultValue: "回復率0は採取した分だけ枯渇する非再生資源(鉱脈・油田など)になります",
+                      })}
+                    </div>
+                    <div className="terrain-editor-polygon-count">
+                      {resourcePolygonClosed
+                        ? t("terrainEditor.resourceShapeClosed", { defaultValue: "形状を確定しました。種別・埋蔵量を設定して「資源を確定」を押してください" })
+                        : t("terrainEditor.resourceVertexCount", { defaultValue: `作図中の頂点数: ${resourcePointCount}`, count: resourcePointCount })}
+                    </div>
+                    <div className="terrain-editor-action-buttons">
+                      {!resourcePolygonClosed ? (
+                        <>
+                          <button
+                            type="button"
+                            className="terrain-editor-btn terrain-editor-btn-confirm"
+                            disabled={!resourceMode || resourcePointCount < 3}
+                            onClick={() => setResourcePolygonClosed(true)}
+                          >
+                            {t("terrainEditor.resourceCloseShape", { defaultValue: "形状を確定" })}
+                          </button>
+                          <button
+                            type="button"
+                            className="terrain-editor-btn"
+                            disabled={!resourceMode || resourcePointCount === 0}
+                            onClick={clearResourcePoints}
+                          >
+                            {t("terrainEditor.resourceClearPoints", { defaultValue: "作図クリア" })}
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            className="terrain-editor-btn terrain-editor-btn-confirm"
+                            disabled={!resourceMode || resourceTypeInput === null}
+                            onClick={confirmResourceArea}
+                          >
+                            {t("terrainEditor.resourceConfirm", { defaultValue: "資源を確定" })}
+                          </button>
+                          <button
+                            type="button"
+                            className="terrain-editor-btn"
+                            disabled={!resourceMode}
+                            onClick={clearResourcePoints}
+                          >
+                            {t("terrainEditor.resourceClearPoints", { defaultValue: "作図クリア" })}
+                          </button>
+                        </>
+                      )}
+                    </div>
+                    {resourcePolygonClosed && resourceTypeInput === null && (
+                      <div className="terrain-editor-hint">
+                        {t("terrainEditor.resourceTypeRequired", { defaultValue: "資源種別を選択すると確定できます" })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 作成済みの資源エリア一覧カード */}
+                <div className="terrain-editor-card">
+                  <div className="terrain-editor-card-title">{t("terrainEditor.resourceListTitle", { defaultValue: "作成済みの資源" })}</div>
+                  <div className="terrain-editor-section">
+                    {resourceList.length === 0 ? (
+                      <div className="terrain-editor-hint">
+                        {t("terrainEditor.resourceListEmpty", { defaultValue: "作成済みの資源はありません" })}
+                      </div>
+                    ) : (
+                      <>
+                        {resourceList.map((area, idx) => (
+                          <div key={area.id} className="terrain-editor-param-group">
+                            <div className="terrain-editor-param-row">
+                              <span className="terrain-editor-param-label">
+                                {t("terrainEditor.resourceListItem", {
+                                  defaultValue: `資源${idx + 1}: ${resourceTypeLabel(area.resourceType)}`,
+                                  index: idx + 1,
+                                  name: resourceTypeLabel(area.resourceType),
+                                })}
+                              </span>
+                              <span className="terrain-editor-selection-status">
+                                {t("terrainEditor.resourceListItemDetail", {
+                                  defaultValue: `上限${area.maxAmount} / 回復${area.recoveryRate}`,
+                                  maxAmount: area.maxAmount,
+                                  recoveryRate: area.recoveryRate,
+                                })}
+                              </span>
+                            </div>
+                            <div className="terrain-editor-action-buttons">
+                              <button
+                                type="button"
+                                className="terrain-editor-btn"
+                                onClick={() => removeResourceArea(area.id)}
+                              >
+                                {t("terrainEditor.resourceDeleteOne", { defaultValue: "削除" })}
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                        <div className="terrain-editor-action-buttons">
+                          <button type="button" className="terrain-editor-btn" onClick={clearAllResourceAreas}>
+                            {t("terrainEditor.resourceDeleteAll", { defaultValue: "すべての資源を削除" })}
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </>
             )}
 
             {/* 川編集カード群(降雨範囲 → 自動生成 → 作成済み一覧) */}

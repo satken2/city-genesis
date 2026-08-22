@@ -50,6 +50,24 @@ export type RiverPayload = {
   footprint: WaterPolygonGeoJson;
 };
 
+/**
+ * 天然資源エリア1件分の保存契約。
+ * 地形エディタの meta.json / サイドカーJSON(map_xxx.resources.json)と、バックエンド
+ * (terrain_registry.load_map_resources → init_game での資源エンティティ生成)で共通の契約。
+ * 経済シミュレーション上の意味(埋蔵量・回復率・分配)は genesis-docs/docs/economics/21_天然資源.md、
+ * サイドカーの仕様の正は genesis-docs/docs/geometries/D_地形形状.md §D.12。
+ */
+export type ResourceAreaPayload = {
+  id: string;
+  /** 資源種別(resource_master のキー)。提供物資(product_id)は種別からバックエンドが導出する */
+  resource_type: number;
+  /** 埋蔵量上限。作成直後の埋蔵量はこの値と同値(満タン)で初期化される */
+  max_amount: number;
+  /** 埋蔵量上限に対する1日あたりの回復割合。0.0 は回復しない非再生資源(鉱脈・油田など) */
+  recovery_rate: number;
+  polygon: WaterPolygonGeoJson;
+};
+
 /** バックエンドの地形エディタ用データ取得コマンドの戻り値型 */
 export type TerrainEditorData = {
   map_id: string;
@@ -66,6 +84,8 @@ export type TerrainEditorData = {
   water_surfaces: WaterSurfacePayload[];
   /** 川の一覧。未設定なら空配列。 */
   rivers: RiverPayload[];
+  /** 天然資源エリアの一覧。未設定なら空配列。 */
+  resources: ResourceAreaPayload[];
 };
 
 /** float16(IEEE 754 half)のビット表現を float32 相当に変換する */
