@@ -278,6 +278,7 @@
     "debugSpawnCounterGeneralLabor": "General labor shortage",
     "debugSpawnCounterBelowMinQty": "Below minimum scale",
     "debugSpawnCounterDedicatedPending": "Dedicated facility pending",
+    "debugSpawnCounterNoBuildableParcel": "No buildable parcel type",
     "debugSpawnVariantSelect": "Building variant",
     "debugSpawnBestScore": "Best score",
     "debugSpawnSpawnedCount": "Spawned",

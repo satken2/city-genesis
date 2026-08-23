@@ -85,4 +85,5 @@ export function formatL1NotificationMessage(t: TranslateFn, notification: L1Noti
 export const NOTIFICATION_ENTITY_WINDOW_TYPES: Record<string, string> = {
   agent: "agent_detail",
   resource: "resource_detail",
+  zone: "zone_detail",
 };

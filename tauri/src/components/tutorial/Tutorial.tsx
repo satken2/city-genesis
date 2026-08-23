@@ -257,6 +257,16 @@ export function Tutorial() {
 
     setCheckState("checking");
     try {
+      // 検証の前提を整える処理(例: 工期スキップによるパスの即時完成)を先に実行する。
+      // 端点ノードの接続など「完成したパスにしか現れない状態」を検証条件にするステップは、
+      // ここで完成させておかないと何度押しても条件を満たせない。
+      // 前提整備の失敗は検証を止めない(条件未達として通常どおり不合格になる)。
+      try {
+        await step.prepare?.(apiBaseUrl);
+      } catch (e) {
+        console.error("Tutorial step prepare failed:", e);
+      }
+
       const passed = await step.validate(apiBaseUrl);
       if (passed) {
         // 検証成功時、ステップ固有の副作用(例: 建設スキップによる強制稼働)を実行する。

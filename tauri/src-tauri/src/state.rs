@@ -85,6 +85,12 @@ pub struct AppState {
     /// バックエンドの起動コマンド。backend-launch.toml から読み込む。
     /// {port} プレースホルダーを含む場合、実際のポート番号で置換して起動する。
     pub backend_launch_command: String,
+    /// Graphic(Unity) から system:graphic_ready を一度でも受信したかどうか。
+    /// 2回目以降の受信は「クラッシュ後の自動再起動」を意味し、前セッションに
+    /// 依存するポップアップの一掃が必要になる。初回受信(通常起動)では、
+    /// Unity より先に起動した UI 側でユーザーが開いているウィンドウ
+    /// (ロード画面など)を巻き込んで閉じないために区別する。
+    pub graphic_ready_seen: bool,
 }
 
 #[derive(Clone)]
@@ -138,6 +144,7 @@ impl SharedState {
             hidden_lru: VecDeque::new(),
             backend_process: None,
             backend_launch_command,
+            graphic_ready_seen: false,
         })))
     }
 

@@ -11,6 +11,8 @@
     "daytimePopulation": "Daytime Population",
     "unemploymentRate": "Unemployment Rate",
     "spaceAmount": "Floor Occupancy",
+    "slotStarvationTitle": "Waiting tenants cannot be housed",
+    "slotStarvationWarning": "\"{{tenant}}\" needs at least {{required}} m2 of floor space in a single building, but the largest buildable in this district is {{max}} m2. Provide a larger parcel.",
     "restrictions": "District Regulations",
     "managementState": "Management",
     "autoManaged": "Auto-managed",

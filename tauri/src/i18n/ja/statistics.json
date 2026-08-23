@@ -278,6 +278,7 @@
     "debugSpawnCounterGeneralLabor": "一般労働力不足",
     "debugSpawnCounterBelowMinQty": "最低稼働量未満",
     "debugSpawnCounterDedicatedPending": "専用施設が建設中",
+    "debugSpawnCounterNoBuildableParcel": "立地可能な区画なし",
     "debugSpawnVariantSelect": "建物バリアント",
     "debugSpawnBestScore": "最高スコア",
     "debugSpawnSpawnedCount": "スポーン数",

@@ -22,6 +22,10 @@
  * また、notify="toast" の達成クエストと期限切れで失敗したクエスト(failed_quests)は、
  * ウィンドウを開かず通知ポップアップ(showNotification)で軽く知らせる。
  * いずれの場合も、確認ウィンドウ自身は役目を終えて onClose で閉じる。
+ *
+ * バックエンドが実行を拒否した場合(403=Steam未認証のエポック上限、503=シャットダウン中 等)や
+ * 通信エラーの場合は、通知とタスクバー無効化を解除して確認ウィンドウを再表示する。
+ * エラーレスポンス時はさらに、その理由を通知ポップアップで表示する。
  */
 
 import { useEffect, useState } from "react";
@@ -30,6 +34,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { emit } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import { sendSessionReload } from "../../utils/ipc";
+import { logInfoToFile } from "../../utils/log";
 import { showNotification, dismissNotification } from "../../utils/notification";
 import { formatEpochDate } from "../../utils/date";
 import type { QuestNotification } from "../../types";
@@ -76,6 +81,9 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
 
   async function handleConfirm() {
     setExecuting(true);
+    // このフローは失敗しても画面に何も出ないまま止まりうるため、
+    // どの await まで到達したかをファイルログに記録して本番で追跡できるようにする。
+    logInfoToFile(`epoch confirm: start count=${epochCount}`);
     // 実行中はタスクバーのボタンを無効化させるため、ウィンドウ間イベントを送る。
     await emit("epoch:executing", { executing: true });
     // 確認ウィンドウを一旦消し、右下に実行中通知を出す。
@@ -88,9 +96,35 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
 
     try {
       const baseUrl = apiBaseUrl.replace(/\/+$/, "");
+      logInfoToFile(`epoch confirm: POST ${baseUrl}/api/v1/epochs?count=${epochCount}`);
       const res = await fetch(`${baseUrl}/api/v1/epochs?count=${epochCount}`, { method: "POST" });
+      logInfoToFile(`epoch confirm: response status=${res.status}`);
+      if (!res.ok) {
+        // バックエンドが実行を拒否した場合。レポート無しの成功として扱うと結果ウィンドウも
+        // エラーも出ない無言の失敗になるため、ここで理由を必ずユーザーに可視化する。
+        const body = await res.json().catch(() => null);
+        const reason = typeof body?.error === "string" ? body.error : `HTTP ${res.status}`;
+        // console.error は main.tsx によりファイルログへERROR転送されるので本番でも追跡できる。
+        console.error(`epoch confirm: rejected status=${res.status} reason=${reason}`);
+        await dismissNotification();
+        await emit("epoch:executing", { executing: false });
+        await getCurrentWindow().show().catch((err) => {
+          console.warn("failed to show epoch_confirm window", err);
+        });
+        // 403はSteam未認証時のエポック数上限に固有のステータスなので専用文言で案内する。
+        void showNotification({
+          message:
+            res.status === 403
+              ? t("epochConfirm.errorSteamLimit")
+              : t("epochConfirm.errorFailed", { reason }),
+          durationMs: 8000,
+        });
+        setExecuting(false);
+        return;
+      }
       const data = await res.json();
       await sendSessionReload();
+      logInfoToFile(`epoch confirm: done epoch=${data.epoch ?? "?"}`);
 
       // 実行完了。通知を消し、タスクバーを再有効化する。
       await dismissNotification();
@@ -131,6 +165,7 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
             },
           },
         });
+        logInfoToFile("epoch confirm: epoch_result window opened");
       } else if (modalQuests.length > 0) {
         // レポートが無くお祝い対象のクエストだけある場合は、クエストウィンドウを直接開く。
         await invoke("open_registered_window", {

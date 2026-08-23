@@ -77,22 +77,6 @@ export const TUTORIAL4_SOLAR_PARCEL_KEY = "tutorial4_solar_parcel_id";
 export const TUTORIAL4_DEPOT_PARCEL_KEY = "tutorial4_depot_parcel_id";
 
 /**
- * H 型道路網のノード ID。
- * template_mode では PATCH でノード ID を直接指定できるため、
- * 交差点(NL/NR)を共有する形で 6 個の端点ノードを割り当てて H 形状を表現する。
- * 自動生成されるノード ID(小さな整数から採番される)との衝突を避けるため、
- * 十分大きな値を用いる。
- */
-const NODE = {
-  TL: 9001, // 左上端点
-  BL: 9002, // 左下端点
-  NL: 9003, // 左の交差点(縦棒と横棒の接点)
-  TR: 9004, // 右上端点
-  BR: 9005, // 右下端点
-  NR: 9006, // 右の交差点(縦棒と横棒の接点)
-} as const;
-
-/**
  * H 型道路網の座標定義。
  * flat マップの初期解放セル(おおよそ x,z ∈ [-500, 500])の内側に収まるよう配置する。
  * 座標は [x, y, z](y は地面からの高さで、街路は常に 0)。
@@ -108,53 +92,22 @@ type RoadDef = {
   tempId: string;
   start: [number, number, number];
   end: [number, number, number];
-  startNode: number;
-  endNode: number;
 };
 
 /**
  * H を構成する 5 本の道路。
- * 左右の縦棒はそれぞれ交差点(NL/NR)で上下 2 本に分割され、
- * 横棒 1 本が両交差点を結ぶ。合計 5 本。
+ * 左右の縦棒はそれぞれ交差点で上下 2 本に分割され、横棒 1 本が両交差点を結ぶ。合計 5 本。
+ * 端点座標を共有させておけば、ACTIVE 化の際にバックエンドの交差処理が
+ * 共有点へ実ノードを1つ作って両方の道路を溶接するため、H の連結性はそれで成立する。
  * "right_top"(右上の道路)がチュートリアルで新しい地区に分割される対象であり、
  * 天然資源(鉱脈)もこの道路に重なるように配置する。
  */
 const ROADS: RoadDef[] = [
-  {
-    tempId: "left_top",
-    start: [LEFT_X, 0, TOP_Z],
-    end: [LEFT_X, 0, MID_Z],
-    startNode: NODE.TL,
-    endNode: NODE.NL,
-  },
-  {
-    tempId: "left_bottom",
-    start: [LEFT_X, 0, MID_Z],
-    end: [LEFT_X, 0, BOTTOM_Z],
-    startNode: NODE.NL,
-    endNode: NODE.BL,
-  },
-  {
-    tempId: "crossbar",
-    start: [LEFT_X, 0, MID_Z],
-    end: [RIGHT_X, 0, MID_Z],
-    startNode: NODE.NL,
-    endNode: NODE.NR,
-  },
-  {
-    tempId: "right_top",
-    start: [RIGHT_X, 0, MID_Z],
-    end: [RIGHT_X, 0, TOP_Z],
-    startNode: NODE.NR,
-    endNode: NODE.TR,
-  },
-  {
-    tempId: "right_bottom",
-    start: [RIGHT_X, 0, MID_Z],
-    end: [RIGHT_X, 0, BOTTOM_Z],
-    startNode: NODE.NR,
-    endNode: NODE.BR,
-  },
+  { tempId: "left_top", start: [LEFT_X, 0, TOP_Z], end: [LEFT_X, 0, MID_Z] },
+  { tempId: "left_bottom", start: [LEFT_X, 0, MID_Z], end: [LEFT_X, 0, BOTTOM_Z] },
+  { tempId: "crossbar", start: [LEFT_X, 0, MID_Z], end: [RIGHT_X, 0, MID_Z] },
+  { tempId: "right_top", start: [RIGHT_X, 0, MID_Z], end: [RIGHT_X, 0, TOP_Z] },
+  { tempId: "right_bottom", start: [RIGHT_X, 0, MID_Z], end: [RIGHT_X, 0, BOTTOM_Z] },
 ];
 
 /** 土地区画を道路の左右に生成する際の幅(道路方向)と奥行き(道路から離れる方向) */
@@ -228,7 +181,8 @@ async function isAlreadyBuilt(base: string): Promise<boolean> {
  * シナリオ2「地区設定をしよう」の初期状態を構築する。
  *
  * 1. H型の5本の街路を POST し、template_mode で直接 ACTIVE に PATCH する
- *    (このときノード ID も割り当てて H の連結性を表現する)。
+ *    (端点ノードの生成・溶接はバックエンドのアクティブ化カスケードが行うため、
+ *    端点座標を共有させるだけで H の連結性が成立する)。
  * 2. 5本すべてを1つの地区(初期地区)にまとめる。
  * 3. 各道路の左右に土地区画を生成する。
  * 4. 右上の道路とその土地区画に重なるように鉱脈(天然資源)を配置する。
@@ -267,7 +221,8 @@ async function setupDistrictScenario(apiBaseUrl: string): Promise<void> {
     if (m.path_temp_id != null) idByTemp.set(m.path_temp_id, m.path_id);
   }
 
-  // 2. 各道路を ACTIVE 化し、ノード ID を割り当てる(template_mode で無検証反映)
+  // 2. 各道路を ACTIVE 化する。端点ノードの生成・溶接はバックエンドの
+  // アクティブ化カスケード(交差処理)が行うため、ノード ID は指定しない。
   const allPathIds: number[] = [];
   for (const r of ROADS) {
     const pathId = idByTemp.get(r.tempId);
@@ -276,11 +231,7 @@ async function setupDistrictScenario(apiBaseUrl: string): Promise<void> {
     await fetchApi(`${base}/api/v1/paths/${pathId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        status: STATUS_ACTIVE,
-        start_node_id: r.startNode,
-        end_node_id: r.endNode,
-      }),
+      body: JSON.stringify({ status: STATUS_ACTIVE }),
     });
   }
 
@@ -356,16 +307,6 @@ async function setupDistrictScenario(apiBaseUrl: string): Promise<void> {
  */
 const INFRA_ROAD_START: [number, number, number] = [-200, 0, 0];
 const INFRA_ROAD_END: [number, number, number] = [200, 0, 0];
-
-/**
- * インフラシナリオの道路端点ノード ID。
- * template_mode では PATCH でノード ID を直接指定できるため、
- * 自動採番(小さな整数)との衝突を避けて十分大きな固定値を割り当てる。
- */
-const INFRA_ROAD_NODE = {
-  LEFT: 9101,
-  RIGHT: 9102,
-} as const;
 
 /**
  * 3つの土地区画のポリゴン([x, z] の頂点列)。すべて x,z ∈ [-200, 200] に収める。
@@ -454,7 +395,7 @@ async function createTutorialParcel(
  * シナリオ3「インフラを整備しよう」の初期状態を構築する。
  *
  * 1. 都市中央を東西に貫く長い道路を1本 POST し、template_mode で直接 ACTIVE に PATCH する
- *    (このときノード ID も割り当てて経路グラフ上の端点を確定する)。
+ *    (端点ノードの生成はバックエンドのアクティブ化カスケードが行う)。
  * 2. その道路を含む地区を作成し、以降に作る土地区画の所属地区を確定させる。
  * 3. 道路の左端に広い区画(太陽光発電所用)、右端に2つの区画(民家用・変電所用)を作成する。
  * 4. 民家(集合住宅)を右端の一方の区画に建設し、template_mode で即 ACTIVE(完成)にする。
@@ -498,15 +439,11 @@ async function setupInfraScenario(apiBaseUrl: string): Promise<void> {
     return;
   }
 
-  // 2. 道路を ACTIVE 化し、端点ノード ID を割り当てる(template_mode で無検証反映)
+  // 2. 道路を ACTIVE 化する。端点ノードの生成はバックエンドのアクティブ化カスケードに任せる。
   await fetchApi(`${base}/api/v1/paths/${roadId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      status: STATUS_ACTIVE,
-      start_node_id: INFRA_ROAD_NODE.LEFT,
-      end_node_id: INFRA_ROAD_NODE.RIGHT,
-    }),
+    body: JSON.stringify({ status: STATUS_ACTIVE }),
   });
 
   // 3. 道路を含む地区を作成する(土地区画の所属地区を確定させるため)
@@ -598,12 +535,6 @@ async function createCompletedBuilding(
 const RAIL_ROAD_START: [number, number, number] = [-200, 0, 0];
 const RAIL_ROAD_END: [number, number, number] = [200, 0, 0];
 
-/** シナリオ4の道路端点ノード ID(自動採番との衝突を避けた固定値)。 */
-const RAIL_ROAD_NODE = {
-  LEFT: 9201,
-  RIGHT: 9202,
-} as const;
-
 /**
  * 2つの土地区画のポリゴン([x, z] の頂点列)。前面(道路側)の辺を街路のすぐ脇(z=2)に置く。
  * - SOLAR: 最初から太陽光発電所が建っている区画。電化線路へ電気を送る電源になる。
@@ -687,15 +618,11 @@ async function setupRailScenario(apiBaseUrl: string): Promise<void> {
     return;
   }
 
-  // 2. 道路を ACTIVE 化し、端点ノード ID を割り当てる(template_mode で無検証反映)
+  // 2. 道路を ACTIVE 化する。端点ノードの生成はバックエンドのアクティブ化カスケードに任せる。
   await fetchApi(`${base}/api/v1/paths/${roadId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      status: STATUS_ACTIVE,
-      start_node_id: RAIL_ROAD_NODE.LEFT,
-      end_node_id: RAIL_ROAD_NODE.RIGHT,
-    }),
+    body: JSON.stringify({ status: STATUS_ACTIVE }),
   });
 
   // 3. 道路を含む地区を作成する(土地区画の所属地区を確定させるため)

@@ -12,7 +12,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
-import type { ZoneData, ZoneResponse } from "../../types";
+import type { ZoneData, ZoneResponse, ZoneSlotStarvation } from "../../types";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { useTemplateMode } from "../../hooks/useTemplateMode";
 import { InfoHeader } from "../common/InfoHeader";
@@ -40,6 +40,10 @@ export function ZoneDetailPanel({
   const [zoneData, setZoneData] = useState<ZoneData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // 区画サイズ不足で建設できない入居待ち需要(GET /zones/{id} のみが返す付帯情報。
+  // PATCH のレスポンスには含まれないため、初回取得値を保持し続ける)
+  const [slotStarvation, setSlotStarvation] = useState<ZoneSlotStarvation[]>([]);
 
   const [restrictionValues, setRestrictionValues] = useState<RestrictionValues>({
     allowed_bd_mask: 0,
@@ -171,6 +175,7 @@ export function ZoneDetailPanel({
         if (!controller.signal.aborted) {
           const zone = data.zone;
           setZoneData(zone);
+          setSlotStarvation(data.slot_starvation ?? []);
           setRestrictionValues({
             allowed_bd_mask: zone.allowed_bd_mask ?? 0,
             limit_coverage_ratio: zone.limit_coverage_ratio ?? null,
@@ -312,6 +317,27 @@ export function ZoneDetailPanel({
           supplyLabel={t("common.supply", "供給")}
           demandLabel={t("common.demand", "需要")}
         />
+        {/* 区画サイズ不足の警告: 入居待ちテナントがいるのに、地区内のどの区画でも
+            必要な床面積を1棟で確保できず建設が止まっている状態(スロット飢餓) */}
+        {slotStarvation.length > 0 && (
+          <div className="zone-starvation-warning">
+            <p className="zone-starvation-warning-title">
+              {t("zone.slotStarvationTitle", "建設できない入居待ち需要があります")}
+            </p>
+            {slotStarvation.map((item) => (
+              <p
+                key={`${item.space_type}-${item.variant}`}
+                className="zone-starvation-warning-row"
+              >
+                {t("zone.slotStarvationWarning", {
+                  tenant: item.tenant_name,
+                  required: Math.ceil(item.required),
+                  max: Math.floor(item.max_capacity),
+                })}
+              </p>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Restriction fields */}

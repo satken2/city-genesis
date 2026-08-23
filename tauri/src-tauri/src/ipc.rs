@@ -599,11 +599,22 @@ pub async fn handle_incoming_message(
         "system:graphic_ready" => {
             // Unity の起動完了通知。初回起動と、クラッシュ後にスーパーバイザ
             // (genesis.py)が Unity を自動再起動した場合の両方で送られてくる。
+            // ポップアップの一掃は2回目以降(=クラッシュ後の再起動)に限る。
             // 再起動時は前セッションの編集モードや選択対象に依存するポップアップが
-            // 無効になっているため一掃する(初回起動時は0件で無害＝冪等)。
+            // 無効になっているため一掃が必要だが、初回起動時に一掃すると、
+            // Unity より先に起動が完了した UI でユーザーが操作中のウィンドウ
+            // (トップメニューから開いたロード画面など)まで閉じてしまう。
             // データ再同期は Unity 自身がバックエンドから行うため、ここでは
             // 表示リセットとフロントエンドへの通知のみを行う。
-            window::close_all_popup_windows(&app, &state);
+            let is_reconnect = {
+                let mut guard = state.lock();
+                let seen = guard.graphic_ready_seen;
+                guard.graphic_ready_seen = true;
+                seen
+            };
+            if is_reconnect {
+                window::close_all_popup_windows(&app, &state);
+            }
             let _ = app.emit("graphic-reconnected", envelope.payload);
         }
         "notification:show" => {

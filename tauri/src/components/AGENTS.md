@@ -56,6 +56,7 @@ HUDは**3枚の専用Tauriウィンドウ**に分かれている。Unityの3Dビ
 - **アイコンパネルの高さはReactの実測値でウィンドウに反映する**(`ResizeObserver` → Tauriコマンド `resize_icon_panel`)。アイコン数がテンプレートモードで変わるため。`IconPanel.css`で高さを固定してはならない(ウィンドウ丈との相互参照でリサイズが往復する)。
 - **BGM再生と3Dビューのオブジェクト選択受信は`Cockpit`が受け持つ**。HUD3枚で同じ処理を走らせると多重再生・多重オープンになるため、常に1枚だけ存在するウィンドウに寄せている。
 - チュートリアルのハイライト対象ID(`road` / `budget` / `land` / `construction` / `district` / `track` / `transport` / `visibility` / `execute`)はHUDのウィンドウをまたぐが、各ウィンドウは自分が持つIDにだけ反応する。**IDの持ち主はアイコンパネルとは限らない**(`budget`=コックピットの予算ミニメータ、`visibility`/`execute`=コックピット)。アイコンを削除・移動するときは`tutorial/tutorialSteps.ts`の`targetElementId`が指す先が消えていないか確認すること(消えるとハイライトがどこにも出ないまま進行する)。
+- **チュートリアルのステップは`prepare`(検証前)→`validate`(判定)→`onComplete`(合格後)の順に呼ばれる**(`tutorial/Tutorial.tsx`の`handleComplete`)。**パスの端点ノード(`start_node_id`/`end_node_id`)はパスが稼働中になった瞬間にしか割り当たらない**ため、「施設の接続端子ノードに線が繋がっているか」を条件にするステップ(送電線・引き込み線)は、工期スキップの`activatePathsWhere`を`onComplete`ではなく**`prepare`に置かないと永久に条件を満たせない**(プレイヤーが正しく敷設しても、判定時点のパスは建設中で端点が`-1`のまま)。`onComplete`は「合格のご褒美として代行する処理」専用。
 
 ## 新しいウィンドウの追加手順
 

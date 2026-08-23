@@ -96,6 +96,14 @@ export interface TutorialStep {
   /** i18n 翻訳キー: 完了ボタンのテキスト。未指定時は "tutorial.completeButton" */
   buttonTextKey?: string;
   /**
+   * 検証の直前に呼ばれる前提整備フック(任意)。
+   * 「完成したパスにしか現れない状態」を検証条件にするステップで、対象を先に完成させるために使う。
+   * 端点ノードの接続はパスが稼働中(ACTIVE)になった瞬間にしか確定しないため、
+   * 工期スキップをここで行わないと、正しく敷設しても検証が永久に通らない。
+   * ここでの失敗は検証を止めない(呼び出し側で握りつぶす)。
+   */
+  prepare?: (apiBaseUrl: string) => Promise<void>;
+  /**
    * 完了ボタン押下時に呼ばれる検証関数。
    * バックエンド API にアクセスして条件を満たしているか確認する。
    * @param apiBaseUrl バックエンド API のベース URL
@@ -677,12 +685,15 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
         // 完了条件: 両施設の「接続端子ノード」(施設設置時に自動生成され infra_node_id で
         // 観測できる)のそれぞれに、高圧送電線パスが1本以上接続されていること。
         // 端点をノードに置くとバックエンドの端点溶接で接続される(=網に参加する)。
-        // ※ 現状はプレイヤーがインフラパスを敷設するパネルが未実装のため、このステップは
-        //   まだ満たせない。パネル実装後にそのまま判定が通るようロジックを先に用意しておく。
+        // 溶接は稼働中になった瞬間にしか起こらないため、判定前に工期をスキップする。
         id: 6,
         image: getStepImage(6),
         titleKey: "tutorial.scenario3.step6.title",
         descriptionKey: "tutorial.scenario3.step6.description",
+        prepare: async (apiBaseUrl: string): Promise<void> => {
+          const base = normalizeBaseUrl(apiBaseUrl);
+          await activatePathsWhere(base, (p) => isInfraPathType(p.path_type));
+        },
         validate: async (apiBaseUrl: string): Promise<boolean> => {
           const base = normalizeBaseUrl(apiBaseUrl);
           try {
@@ -833,10 +844,14 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
         // 車両基地の接続端子ノードから本線まで引き込み線を敷設する。
         // 完了条件: 車両基地の接続端子ノードを端点に持つ軌道パスが1本以上あること。
         // 端点をノードに置くとバックエンドの端点溶接で接続される(=走行網に参加する)。
+        // 溶接は稼働中になった瞬間にしか起こらないため、判定前に工期をスキップする。
         id: 4,
         image: getStepImage(4),
         titleKey: "tutorial.scenario4.step4.title",
         descriptionKey: "tutorial.scenario4.step4.description",
+        prepare: async (apiBaseUrl: string): Promise<void> => {
+          await activateAllTracks(normalizeBaseUrl(apiBaseUrl));
+        },
         validate: async (apiBaseUrl: string): Promise<boolean> => {
           const base = normalizeBaseUrl(apiBaseUrl);
           try {
@@ -853,9 +868,6 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
             return false;
           }
         },
-        onComplete: async (apiBaseUrl: string): Promise<void> => {
-          await activateAllTracks(normalizeBaseUrl(apiBaseUrl));
-        },
         targetElementId: "track",
       },
       {
@@ -864,10 +876,15 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
         // 高圧送電線が1本以上接続されていること(途中で分岐・中継しても成立する)。
         // 車両基地の共用端子には引き込み線も溶接済みなので、ここが繋がると
         // 発電所 → 送電線 → 車両基地 → 引き込み線 → 電化線路 と電気が回る。
+        // 溶接は稼働中になった瞬間にしか起こらないため、判定前に工期をスキップする。
         id: 5,
         image: getStepImage(5),
         titleKey: "tutorial.scenario4.step5.title",
         descriptionKey: "tutorial.scenario4.step5.description",
+        prepare: async (apiBaseUrl: string): Promise<void> => {
+          const base = normalizeBaseUrl(apiBaseUrl);
+          await activatePathsWhere(base, (p) => isInfraPathType(p.path_type));
+        },
         validate: async (apiBaseUrl: string): Promise<boolean> => {
           const base = normalizeBaseUrl(apiBaseUrl);
           try {
@@ -893,10 +910,6 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
           } catch {
             return false;
           }
-        },
-        onComplete: async (apiBaseUrl: string): Promise<void> => {
-          const base = normalizeBaseUrl(apiBaseUrl);
-          await activatePathsWhere(base, (p) => isInfraPathType(p.path_type));
         },
         targetElementId: "road",
       },

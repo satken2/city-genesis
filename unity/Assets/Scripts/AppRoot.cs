@@ -71,7 +71,8 @@ public class AppRoot : MonoBehaviour
 
         // Tauri へ起動完了を通知する。初回起動と、クラッシュ後にスーパーバイザ
         // (genesis.py)が Unity を自動再起動した場合の両方で毎回送信する。
-        // Tauri 側はこれを受けてポップアップ一掃などの表示リセットを行う(冪等)。
+        // Tauri 側は2回目以降の受信(=クラッシュ後の再起動)でのみポップアップを
+        // 一掃する。初回はユーザーが操作中のロード画面などを閉じないため何もしない。
         IpcClient.Instance?.EmitGraphicReady();
 
         // マスターデータの初期化。シーン内に手動配置されたインスタンスの Initialize を呼び出す。

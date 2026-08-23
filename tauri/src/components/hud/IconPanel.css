@@ -2,8 +2,13 @@
  * アイコンパネル(画面左端の縦並びメニュー)のスタイル
  *
  * パネル自体の背景は透明で、ボタン1個ずつが3Dビューの上に浮いて見える。
- * ボタンの枠(角丸・面の陰影・落ち影)はCSSで描き、アイコン画像は余白ゼロで枠いっぱいに敷く
+ * ボタンの面(角丸・落ち影)はCSSで描き、アイコン画像は内側にパディングを取って収める
  * (画像自体に枠や影を持たせないため、アイコン素材を差し替えても見た目が揃う)。
+ * 面はグラデーションを使わず単色にする。アイコン素材が濃淡のあるカラーイラストなので、
+ * 面にも濃淡があると縦一列に並べたとき全体がぼやけて見えるため。
+ *
+ * 幅はウィンドウ側が固定で持つ(`window.rs` の `ICON_PANEL_WIDTH`)。ボタン寸法を変えたら
+ * 「ボタン幅+パネルの左右パディング」が一致するようにそちらも直すこと。
  *
  * 高さはアイコン数で決まる(=ウィンドウ丈をReactの実測値に合わせる)ため、
  * ここで height を指定してはならない。指定するとウィンドウ丈との相互参照になり、
@@ -18,52 +23,43 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   padding: 4px;
   width: 100%;
   user-select: none;
 }
 
 .hud-icon-btn.icon-panel-slot {
-  width: 45px;
-  height: 45px;
+  width: 50px;
+  height: 50px;
   flex-shrink: 0;
-  padding: 0;
+  padding: 3px;
   overflow: hidden;
-  border-radius: 10px;
-  background: linear-gradient(180deg, rgba(30, 44, 66, 0.94) 0%, rgba(14, 22, 36, 0.96) 100%);
-  /* 縁取りは inset の影で描く。border だと画像の描画領域が枠線分だけ縮んで隙間が出る */
-  box-shadow:
-    0 2px 6px rgba(0, 0, 0, 0.55),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  border-radius: 5px;
+  background: rgba(22, 33, 51, 0.95);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
   transition: background 0.12s, box-shadow 0.12s, transform 0.12s;
 }
 
 .hud-icon-btn.icon-panel-slot:hover {
-  background: linear-gradient(180deg, rgba(44, 62, 90, 0.96) 0%, rgba(24, 36, 54, 0.98) 100%);
-  box-shadow:
-    0 3px 9px rgba(0, 0, 0, 0.6),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+  background: rgba(34, 49, 72, 0.97);
+  box-shadow: 0 3px 9px rgba(0, 0, 0, 0.6);
 }
 
 /* 押下中は面を沈める(落ち影を弱めて1px下げる) */
 .hud-icon-btn.icon-panel-slot:active {
   transform: translateY(1px);
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.5),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 /* トグルON(地区編集)は橙の面色で示す */
 .hud-icon-btn.icon-panel-slot.hud-icon-btn--active {
-  background: linear-gradient(180deg, rgba(233, 84, 32, 0.6) 0%, rgba(176, 56, 16, 0.68) 100%);
-  box-shadow:
-    0 2px 6px rgba(0, 0, 0, 0.55),
-    inset 0 0 0 1px rgba(255, 176, 136, 0.85);
+  background: rgba(205, 70, 24, 0.64);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
 }
 
 .hud-icon-btn.icon-panel-slot.hud-icon-btn--active:hover {
-  background: linear-gradient(180deg, rgba(246, 104, 52, 0.7) 0%, rgba(196, 66, 22, 0.78) 100%);
+  background: rgba(221, 85, 37, 0.74);
 }
 
 /*
@@ -72,10 +68,8 @@
  */
 .hud-icon-btn.icon-panel-slot.hud-highlighted-btn {
   border: none;
-  background: linear-gradient(180deg, rgba(38, 124, 224, 0.6) 0%, rgba(20, 78, 152, 0.7) 100%);
-  box-shadow:
-    0 2px 6px rgba(0, 0, 0, 0.55),
-    inset 0 0 0 1px rgba(150, 200, 255, 0.85);
+  background: rgba(29, 101, 188, 0.65);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
 }
 
 /* テンプレートモード専用アイコン群の区切り線 */

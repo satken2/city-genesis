@@ -18,8 +18,10 @@ pub const HUD_WINDOW_LABELS: [&str; 3] = [LABEL_ICON_PANEL, LABEL_COCKPIT, LABEL
 /// HUD各パネルと画面端・他ウィンドウとの間隔
 pub const HUD_MARGIN: f64 = 8.0;
 
-/// アイコンパネル(画面左端・縦並びのメニューアイコン)の幅
-pub const ICON_PANEL_WIDTH: f64 = 54.0;
+/// アイコンパネル(画面左端・縦並びのメニューアイコン)の幅。
+/// `IconPanel.css` のボタン寸法(50px)+ パネルの左右パディング(4px×2)と一致させること。
+/// 足りないとボタンが切れ、余ると透明領域がクリックを吸ってUnityを操作できなくなる。
+pub const ICON_PANEL_WIDTH: f64 = 58.0;
 /// アイコンパネルの初期高さ。実際の高さはアイコン数で変わるため、
 /// React側が `resize_icon_panel` コマンドで実測値を通知して上書きする。
 pub const ICON_PANEL_DEFAULT_HEIGHT: f64 = 660.0;
@@ -144,6 +146,27 @@ pub fn set_hud_visible(app: &AppHandle, visible: bool) {
     for label in HUD_WINDOW_LABELS {
         if let Some(win) = app.get_webview_window(label) {
             let _ = if visible { win.show() } else { win.hide() };
+        }
+    }
+    // WebView2では hide()→show() をまたぐと生成時の always_on_top 指定が
+    // 効かなくなることがあるため、表示のたびに再適用する。
+    if visible {
+        reassert_hud_topmost(app);
+    }
+}
+
+/// HUD常駐ウィンドウ群(HUD3枚+ヒントバー)のtopmost(最前面)指定を再適用する。
+///
+/// topmostは生成時に一度指定しただけでは維持されない:
+/// - Unityがフルスクリーン扱いでフォアグラウンドになると、シェルがゲームを
+///   最前面バンドへ押し込み、topmostのHUDが裏に回ることがある
+/// - WebView2では hide()→show() をまたぐとtopmostが外れることがある
+/// 冪等かつ安価な呼び出しなので、フォーカス移動などの機会に雑に呼び直してよい。
+/// 非表示ウィンドウに適用しても表示はされない(SWP_SHOWWINDOWは立たない)ため無害。
+pub fn reassert_hud_topmost(app: &AppHandle) {
+    for label in HUD_WINDOW_LABELS.iter().copied().chain(std::iter::once("hintbar")) {
+        if let Some(win) = app.get_webview_window(label) {
+            let _ = win.set_always_on_top(true);
         }
     }
 }
@@ -919,6 +942,9 @@ pub fn hide_loading_window(app: &AppHandle) {
 /// edit_mode=true … テンプレート作成モード中の再編集（完了しても game:start を送らない）。
 /// どちらのモードで開いたかを state に記録し、React 側が起動時に問い合わせる。
 /// 既に開いている場合はモードだけ更新して前面へ出す。
+///
+/// メインスレッドから呼んではならない(`builder.build()` がイベントループ待ちでデッドロックする)。
+/// Tauriコマンド経由なら `async fn`、それ以外なら別スレッドから呼ぶこと。
 pub fn open_parameter_setup_window(
     app: &AppHandle,
     state: &SharedState,

@@ -275,6 +275,9 @@ async fn start_new_game(
         let _ = topmenu.hide();
     }
 
+    // ゲーム開始の確定に伴い、開いているポップアップを全て閉じる
+    window::close_all_popup_windows(&app, state.inner());
+
     // loading を表示
     window::show_loading_window(&app, state.inner())?;
 
@@ -350,14 +353,7 @@ async fn create_session(
     }
 
     // 開いているポップアップを全て閉じる（NewGameWindow など）
-    {
-        let guard = state.lock();
-        let labels: Vec<String> = guard.open_windows.keys().cloned().collect();
-        drop(guard);
-        for label in labels {
-            let _ = window::close_window_by_label(&app, state.inner(), &label);
-        }
-    }
+    window::close_all_popup_windows(&app, state.inner());
 
     window::show_loading_window(&app, state.inner())?;
 
@@ -463,6 +459,11 @@ async fn start_load_game(
     if let Some(topmenu) = app.get_webview_window("topmenu") {
         let _ = topmenu.hide();
     }
+
+    // ロードの確定に伴い、開いているポップアップを全て閉じる。
+    // ロード画面自体のほか、ゲーム中に別のセーブデータをロードし直した場合は
+    // 前セッションの詳細パネル等がロード後のデータと無関係になるため一掃する。
+    window::close_all_popup_windows(&app, state.inner());
 
     window::show_loading_window(&app, state.inner())?;
 
@@ -1259,6 +1260,9 @@ async fn start_debug_init(
         let _ = topmenu.hide();
     }
 
+    // ゲーム開始の確定に伴い、開いているポップアップを全て閉じる
+    window::close_all_popup_windows(&app, state.inner());
+
     window::show_loading_window(&app, state.inner())?;
 
     {
@@ -1529,10 +1533,14 @@ fn finish_parameter_setup(
     Ok(())
 }
 
-/// テンプレート作成モード中に Taskbar からパラメータ設定ウィンドウを「編集モード」で開く。
+/// テンプレート作成モード中にアイコンパネルからパラメータ設定ウィンドウを「編集モード」で開く。
 /// 初期セットアップとは異なり、完了しても game:start は送らずウィンドウを閉じるだけになる。
+///
+/// 同期コマンドにしてはならない。Tauri は同期コマンドをメインスレッドで実行するが、
+/// その先の `builder.build()` はウィンドウ生成をメインスレッドのイベントループへ投げて
+/// 完了を待つため、自分でイベントループを塞いだまま待ち続けてアプリ全体がフリーズする。
 #[tauri::command]
-fn open_parameter_edit_window(
+async fn open_parameter_edit_window(
     app: tauri::AppHandle,
     state: tauri::State<'_, SharedState>,
 ) -> Result<(), String> {
@@ -1967,6 +1975,9 @@ fn setup_logging() -> Result<(), fern::InitError> {
         // reqwest 内部の接続ログはポーリングのたびに大量に出るため、
         // reqwest クレート単体では Warn 以上のみ出力する。
         .level_for("reqwest", log::LevelFilter::Warn)
+        // tao はイベントループの冗長な DEBUG (NewEvents/RedrawEventsCleared) を
+        // 常時吐き続けてログを埋めるため、Warn 以上のみ出力する。
+        .level_for("tao", log::LevelFilter::Warn)
         .chain(std::io::stdout())
         .chain(fern::log_file(log_path)?)
         .apply()?;
@@ -1979,6 +1990,14 @@ fn setup_logging() -> Result<(), fern::InitError> {
 #[tauri::command]
 fn log_frontend_error(message: String) {
     log::error!("[frontend] {}", message);
+}
+
+/// フロントエンドからの情報ログを受け取るコマンド。
+/// エポック実行のように「失敗しても画面に何も出ず無言で止まりうる」フローの
+/// 進行記録に使う(本番ビルドではWebViewのconsoleを確認できないため)。
+#[tauri::command]
+fn log_frontend_info(message: String) {
+    log::info!("[frontend] {}", message);
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -2205,6 +2224,12 @@ pub fn run() {
                             true,
                         );
                     }
+                    // どれかのTauriウィンドウがフォーカスを失った=多くはUnityの3Dビューを
+                    // クリックした瞬間。Unityがフルスクリーン扱いでフォアグラウンドになると
+                    // topmostのHUDが裏に回ることがあるため、このタイミングで打ち直す。
+                    WindowEvent::Focused(false) => {
+                        window::reassert_hud_topmost(window.app_handle());
+                    }
                     _ => {}
                 }
             }
@@ -2230,6 +2255,7 @@ pub fn run() {
             load_app_settings,
             save_app_settings,
             log_frontend_error,
+            log_frontend_info,
             show_notification,
             dismiss_notification,
             resize_notification_window,

@@ -2,6 +2,8 @@
  * アイコンパネル(画面左端に縦並びの常駐メニュー)
  *
  * 各種メニューウィンドウ(道路・建設・規制・統計…)を開くアイコンを縦一列に並べる。
+ * 並び順・アイコン画像・開くウィンドウはすべて `hudCommon.ts` の `MENU_ICONS` が正で、
+ * ここはその定義どおりに描くだけ(アイコンの追加はMENU_ICONSに1行足せば済む)。
  * 地区編集だけはウィンドウを開かず、Unityを地区編集ステートにする常駐モードのトグル
  * (ブルドーザと排他。状態は `hudMode` でコックピットと共有する)。
  *
@@ -11,7 +13,7 @@
  * (合わせないと透明な余白がクリックを吸ってUnityを操作できなくなる)。
  */
 
-import { useCallback, useEffect, useRef } from "react";
+import { Fragment, useCallback, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { useTranslation } from "react-i18next";
@@ -133,83 +135,50 @@ export function IconPanel() {
         await toggleDistrict();
         return;
       }
+      // Tauriコマンド直呼びのアイコンは Unity の状態に触れないため、
+      // 常駐モードもヒントバーもそのまま維持する。
+      if (icon.command) {
+        await invoke(icon.command).catch(console.error);
+        return;
+      }
       if (!icon.windowType) return;
       // 編集モード系ウィンドウを開くと Unity が STATE を上書きするため、常駐モードを解除する。
       if (EDIT_MODE_WINDOW_TYPES.has(icon.windowType)) {
         await setHudMode(null);
       }
-      await setHintbarText("");
+      await setHintbarText(icon.hintKey ? t(icon.hintKey) : "");
       await openRegisteredWindow(icon.windowType);
     },
-    [toggleDistrict],
+    [toggleDistrict, t],
   );
 
   if (!visible) return null;
 
+  const icons = MENU_ICONS.filter((icon) => templateMode || !icon.templateOnly);
+
   return (
     <nav ref={panelRef} className={`icon-panel ${epochExecuting ? "hud-disabled" : ""}`}>
-      {MENU_ICONS.map((icon) => {
+      {icons.map((icon, index) => {
         const active = icon.id === "district" && mode === "district";
+        // 製作者向け操作の先頭に区切り線を入れて、通常プレイのメニューと見た目で分ける。
+        const startsTemplateGroup = icon.templateOnly && !icons[index - 1]?.templateOnly;
         return (
-          <button
-            key={icon.id}
-            id={icon.id}
-            className={`${getBtnClassName(icon.id, "hud-icon-btn icon-panel-slot")}${active ? " hud-icon-btn--active" : ""}`}
-            type="button"
-            title={t(icon.tooltipKey)}
-            aria-pressed={icon.id === "district" ? active : undefined}
-            disabled={isLocked && icon.id !== "construction"}
-            onClick={() => void handleIconClick(icon)}
-          >
-            <img src={iconUrl(icon.src)} alt={t(icon.tooltipKey)} className="hud-icon-img" draggable={false} />
-          </button>
+          <Fragment key={icon.id}>
+            {startsTemplateGroup && <div className="icon-panel-divider" />}
+            <button
+              id={icon.id}
+              className={`${getBtnClassName(icon.id, "hud-icon-btn icon-panel-slot")}${active ? " hud-icon-btn--active" : ""}`}
+              type="button"
+              title={t(icon.tooltipKey)}
+              aria-pressed={icon.id === "district" ? active : undefined}
+              disabled={isLocked && !icon.enabledWhenLocked}
+              onClick={() => void handleIconClick(icon)}
+            >
+              <img src={iconUrl(icon.src)} alt={t(icon.tooltipKey)} className="hud-icon-img" draggable={false} />
+            </button>
+          </Fragment>
         );
       })}
-
-      <button
-        id="prop_placement"
-        className={getBtnClassName("prop_placement", "hud-icon-btn icon-panel-slot")}
-        type="button"
-        title={t("taskbar.menuPropPlacement")}
-        disabled={isLocked}
-        onClick={async () => {
-          await setHudMode(null);
-          await setHintbarText(t("prop_placement.hint"));
-          await openRegisteredWindow("prop_placement");
-        }}
-      >
-        <img src={iconUrl("menu_land.png")} alt={t("taskbar.menuPropPlacement")} className="hud-icon-img" draggable={false} />
-      </button>
-
-      {templateMode && (
-        <>
-          <div className="icon-panel-divider" />
-          <button
-            id="resource_edit"
-            className={getBtnClassName("resource_edit", "hud-icon-btn icon-panel-slot")}
-            type="button"
-            title={t("taskbar.menuResourceEdit")}
-            disabled={isLocked}
-            onClick={async () => {
-              await setHudMode(null);
-              await setHintbarText(t("hint.resourceEdit"));
-              await openRegisteredWindow("resource_edit");
-            }}
-          >
-            <img src={iconUrl("pixels.png")} alt={t("taskbar.menuResourceEdit")} className="hud-icon-img" draggable={false} />
-          </button>
-          <button
-            id="parameter_edit"
-            className={getBtnClassName("parameter_edit", "hud-icon-btn icon-panel-slot")}
-            type="button"
-            title={t("taskbar.menuParameterEdit")}
-            disabled={isLocked}
-            onClick={() => void invoke("open_parameter_edit_window")}
-          >
-            <img src={iconUrl("tray_settings.png")} alt={t("taskbar.menuParameterEdit")} className="hud-icon-img" draggable={false} />
-          </button>
-        </>
-      )}
     </nav>
   );
 }

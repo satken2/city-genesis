@@ -17,6 +17,7 @@
       "collapse": "{{count}}件の建物・道路が倒壊しました",
       "collapse_with_deaths": "{{count}}件の建物・道路が倒壊し、{{deaths}}人が死亡しました",
       "deaths_traffic": "交通事故により{{count}}人が死亡しました",
+      "tenant_blocked_by_parcel_size": "地区「{{zone_name}}」で「{{tenant_name}}」が入居できる建物を建てられません（必要{{required}}m2、区画の最大{{max_capacity}}m2）。より大きな土地区画が必要です",
       "unknown": "重大な事象が発生しました"
     }
   }

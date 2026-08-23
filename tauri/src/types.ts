@@ -230,10 +230,29 @@ export type ZoneData = {
 };
 
 /**
+ * 区画サイズ不足で建設できない入居待ち需要(スロット飢餓の立地不能レポート)の1件分。
+ * ConstructionPhase が毎エポック再構築する揮発値のため、ロード直後は空になる。
+ */
+export type ZoneSlotStarvation = {
+  space_type: number;
+  variant: number;
+  /** 入居待ちテナントの業種名(マスターの display_name) */
+  tenant_name: string;
+  /** 1棟あたりで必要な床面積(m2) */
+  required: number;
+  /** 地区内の建築パターンで実現できる1棟あたり最大容量(m2) */
+  max_capacity: number;
+  /** 入居待ちテナント数 */
+  count: number;
+};
+
+/**
  * API /api/v1/zones/{id} のレスポンス全体
  */
 export type ZoneResponse = {
   zone: ZoneData;
+  /** GET /zones/{id} のみが返す付帯情報(一覧系レスポンスには含まれない) */
+  slot_starvation?: ZoneSlotStarvation[];
 };
 
 /**

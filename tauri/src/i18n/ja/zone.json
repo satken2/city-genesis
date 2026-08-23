@@ -11,6 +11,8 @@
     "daytimePopulation": "昼間人口",
     "unemploymentRate": "失業率",
     "spaceAmount": "フロア占有量",
+    "slotStarvationTitle": "建設できない入居待ち需要があります",
+    "slotStarvationWarning": "「{{tenant}}」の入居には1棟あたり{{required}}m2以上の床が必要ですが、この地区の区画で建てられる最大は{{max}}m2です。より大きな土地区画を用意してください。",
     "restrictions": "地区規制",
     "managementState": "管理状態",
     "autoManaged": "自動管理",

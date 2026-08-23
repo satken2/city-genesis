@@ -1211,8 +1211,9 @@ public class IpcClient : MonoBehaviour
 
     /// <summary>
     /// system:graphic_ready イベントを送信する。
-    /// Unity の起動完了(初回起動・クラッシュ後の自動再起動とも)を Tauri に通知し、
-    /// Tauri 側でポップアップ一掃などの表示リセットを行わせる(受信側は冪等)。
+    /// Unity の起動完了(初回起動・クラッシュ後の自動再起動とも)を Tauri に通知する。
+    /// Tauri 側は2回目以降の受信(=クラッシュ後の再起動)でのみポップアップを一掃する
+    /// (初回はユーザーが操作中のロード画面などを閉じないため表示に触れない)。
     /// </summary>
     public void EmitGraphicReady()
     {

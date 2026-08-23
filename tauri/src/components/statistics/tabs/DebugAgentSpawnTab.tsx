@@ -74,6 +74,7 @@ const BLOCKER_SERIES: Array<{ key: string; labelKey: string; color: string }> = 
   { key: "general_labor", labelKey: "statistics.debugSpawnCounterGeneralLabor", color: "#c084fc" },
   { key: "below_min_qty", labelKey: "statistics.debugSpawnCounterBelowMinQty", color: "#0ea5e9" },
   { key: "dedicated_pending", labelKey: "statistics.debugSpawnCounterDedicatedPending", color: "#334155" },
+  { key: "no_buildable_parcel", labelKey: "statistics.debugSpawnCounterNoBuildableParcel", color: "#78716c" },
 ];
 
 /**

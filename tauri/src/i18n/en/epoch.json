@@ -6,7 +6,9 @@
     "message": "Execute the simulation and advance one epoch?",
     "no": "No",
     "yes": "Yes",
-    "executing": "Running simulation..."
+    "executing": "Running simulation...",
+    "errorSteamLimit": "Steam verification could not be confirmed, so no more epochs can be run. (Up to 10 epochs can be played without verification.)",
+    "errorFailed": "Failed to run the epoch: {{reason}}"
   },
   "epochResult": {
     "epochCountSuffix": "({{count}} Epochs)",
