@@ -14,8 +14,7 @@
     "renameFailed": "Failed to rename",
     "minutes": "mins",
     "processing": "Processing...",
-    "cancel": "Cancel",
-    "confirm": "Confirm"
+    "cancel": "Cancel"
   },
   "status": {
     "0": "Pending",
@@ -47,10 +46,7 @@
     "5": "Farm"
   },
   "resource": {
-    "basicInfo": "Basic Info",
-    "resourceName": "Resource Name",
     "currentAmount": "Current Amount",
-    "consumptionAmount": "Consumption",
     "consumptionTrend": "Consumption Trend",
     "amountTrend": "Amount Trend",
     "recoveryAmount": "Recovery",

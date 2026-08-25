@@ -1,0 +1,13 @@
+{
+  "station": {
+    "sectionTitle": "車站",
+    "name": "車站名稱",
+    "ridership": "乘降人數（估算）",
+    "platforms": "月台列表",
+    "noPlatforms": "沒有歸屬的月台（與路線相交的月台會歸屬於此）",
+    "lines": "停靠路線",
+    "noLines": "沒有停靠的路線",
+    "lineRunning": "行駛中",
+    "lineSuspended": "停駛"
+  }
+}

@@ -9,7 +9,7 @@
  * - 文字サイズ: プリセット（大・中・小）またはカスタム入力（8〜32px）
  * - ディスプレイ: HUD(アイコンパネル・コックピット・システムトレイ)を別のモニターに移動する
  * - ヒントバー: 画面上部のヒントバーの表示/非表示
- * - 言語: 日本語 / 英語 を切り替える
+ * - 言語: 対応言語（utils/locale.ts の SUPPORTED_LANGUAGES）を切り替える
  * - 音量: マスターボリューム・BGM・サウンドエフェクトのスライダー（ダミー）
  */
 
@@ -19,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import { FONT_SIZE_PRESETS, useFontSize } from "../../contexts/FontSizeContext";
 import { loadAppSettings, saveAppSettings, type AppSettings } from "../../utils/settings";
 import { fetchApi, ApiError } from "../../utils/api";
+import { SUPPORTED_LANGUAGES, isSupportedLanguage } from "../../utils/locale";
 import "./SettingsWindow.css";
 
 /**
@@ -71,7 +72,7 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     loadAppSettings()
       .then((settings) => {
         if (cancelled) return;
-        if (settings.language === "ja" || settings.language === "en") {
+        if (isSupportedLanguage(settings.language)) {
           void i18n.changeLanguage(settings.language);
         }
         if (
@@ -357,7 +358,7 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
           {t("settings.language.label")}
         </h3>
         <div className="settings-language-options">
-          {(["ja", "en"] as const).map((lang) => (
+          {SUPPORTED_LANGUAGES.map((lang) => (
             <button
               key={lang}
               className={`settings-language-btn ${i18n.language === lang ? "active" : ""}`}

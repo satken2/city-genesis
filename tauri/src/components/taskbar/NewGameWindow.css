@@ -362,6 +362,7 @@
 /* 言語選択ボタン群 */
 .new-game-confirm-language {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -375,6 +376,7 @@
 .new-game-confirm-days-btn {
   flex: 1;
   padding: 10px 16px;
+  white-space: nowrap;
   font-size: 14px;
   font-weight: 500;
   background-color: #1b2635;
@@ -389,6 +391,11 @@
 .new-game-confirm-lang-btn:hover:not(:disabled),
 .new-game-confirm-days-btn:hover:not(:disabled) {
   background-color: #26374d;
+}
+
+/* 言語は選択肢が多いため、3列前後で折り返す幅を基準にする */
+.new-game-confirm-lang-btn {
+  flex: 1 1 28%;
 }
 
 .new-game-confirm-lang-btn.active {

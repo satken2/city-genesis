@@ -1,0 +1,21 @@
+{
+  "building": {
+    "type": "建築類型",
+    "durability": "耐久度",
+    "floors": "樓層數",
+    "floorsValue": "{{floors}}層（樓地板面積{{area, number}}㎡）",
+    "heightLabel": "高度：{{value}}m",
+    "baseAreaLabel": "建築面積：{{area, number}}㎡",
+    "underMaintenance": "修繕中"
+  },
+  "mashup_edit": {
+    "hint": "將卡片拖到用地上配置 / 拖曳移動 / Shift+拖曳旋轉 / Delete鍵刪除",
+    "sizeLabel": "{{width}}×{{height}}m",
+    "deleteSelected": "刪除所選建築",
+    "cancel": "取消",
+    "save": "儲存",
+    "saveFailed": "附屬建築配置儲存失敗",
+    "noParcel": "此建築沒有對應的地塊",
+    "noSubbuildings": "此建築類型沒有定義附屬建築"
+  }
+}

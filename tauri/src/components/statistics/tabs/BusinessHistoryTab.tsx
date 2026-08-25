@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { useEpochCachedStats } from "../useEpochCache";
 import { useMasterData } from "../../../contexts/MasterDataContext";
 import { formatEpochDate } from "../../../utils/date";
+import { resolveIntlLocale } from "../../../utils/locale";
 import { formatCompactAmount } from "../../../utils/money";
 import "./BusinessHistoryTab.css";
 
@@ -71,7 +72,7 @@ export function BusinessHistoryTab({ apiBaseUrl }: { apiBaseUrl: string }) {
     );
   }
 
-  const locale = i18n.language === "ja" ? "ja-JP" : "en-US";
+  const locale = resolveIntlLocale(i18n.language);
   const variantName = (variant: number): string =>
     masterData?.agents[variant]?.display_name ?? `#${variant}`;
   const formatDate = (date: number): string => formatEpochDate(date, locale);

@@ -1,0 +1,21 @@
+{
+  "building": {
+    "type": "Tipo de edificio",
+    "durability": "Durabilidad",
+    "floors": "Pisos",
+    "floorsValue": "{{floors}} pisos (superficie construida {{area, number}} ㎡)",
+    "heightLabel": "Altura: {{value}} m",
+    "baseAreaLabel": "Área de desplante: {{area, number}} ㎡",
+    "underMaintenance": "En reparación"
+  },
+  "mashup_edit": {
+    "hint": "Arrastra una tarjeta al predio para colocarla / arrastra para mover / Shift+arrastrar para rotar / tecla Supr para eliminar",
+    "sizeLabel": "{{width}}×{{height}} m",
+    "deleteSelected": "Eliminar el anexo seleccionado",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "saveFailed": "No se pudo guardar la distribución de anexos",
+    "noParcel": "Este edificio no tiene parcela",
+    "noSubbuildings": "No hay anexos definidos para este tipo de edificio"
+  }
+}

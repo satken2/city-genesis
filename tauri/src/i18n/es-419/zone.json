@@ -1,0 +1,28 @@
+{
+  "zone": {
+    "titleWithId": "Distrito n.º {{id}}",
+    "basicInfo": "Información básica",
+    "area": "Superficie",
+    "zonePopulation": "Población residente",
+    "daytimePopulation": "Población diurna",
+    "spaceAmount": "Superficie ocupada",
+    "slotStarvationTitle": "Hay demanda en espera que no puede construirse",
+    "slotStarvationWarning": "Para alojar a «{{tenant}}» se necesitan al menos {{required}} m2 de piso por edificio, pero el máximo construible en las parcelas de este distrito es {{max}} m2. Prepara una parcela más grande.",
+    "restrictions": "Normativa del distrito",
+    "managementState": "Estado de gestión",
+    "autoManaged": "Gestión automática",
+    "confirmed": "Fijado",
+    "autoManagedDesc": "El sistema puede fusionar este distrito automáticamente conforme cambia la red vial",
+    "confirmedDesc": "El sistema no reorganizará la forma de este distrito (sí puede crecer al agregarse calles)",
+    "pinAction": "Fijar este distrito",
+    "unpinAction": "Volver a gestión automática",
+    "managementUpdateFailed": "No se pudo actualizar el estado de gestión",
+    "restrictionPromoteNote": "Si cambias y guardas la normativa de construcción, este distrito quedará fijado",
+    "restrictionUpdateFailed": "No se pudo actualizar la normativa del distrito",
+    "restrictionRequired": "El coeficiente de ocupación, el coeficiente de construcción y la altura no pueden quedar vacíos",
+    "mergeConfirm": "Se fusionará «{{source}}» en «{{target}}». El distrito de origen desaparecerá junto con su normativa.",
+    "mergeAction": "Fusionar",
+    "mergeFailed": "No se pudieron fusionar los distritos (los distritos no colindantes no pueden fusionarse)",
+    "mergeNoRequest": "No se ha seleccionado un distrito para fusionar"
+  }
+}

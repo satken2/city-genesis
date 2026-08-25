@@ -1,0 +1,96 @@
+{
+  "settings": {
+    "title": "Ajustes",
+    "fontSize": {
+      "label": "Tamaño de letra",
+      "large": "Grande",
+      "medium": "Mediano",
+      "small": "Chico",
+      "custom": "Personalizado",
+      "preview": "Tamaño actual"
+    },
+    "monitor": {
+      "label": "Pantalla",
+      "prev": "Pantalla anterior",
+      "next": "Pantalla siguiente"
+    },
+    "hintbar": {
+      "label": "Barra de sugerencias",
+      "show": "Mostrar",
+      "hide": "Ocultar",
+      "description": "Barra en la parte superior que muestra sugerencias de uso"
+    },
+    "language": {
+      "label": "Idioma",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어"
+    },
+    "volume": {
+      "label": "Volumen",
+      "master": "Volumen general",
+      "bgm": "Música",
+      "sfx": "Efectos de sonido"
+    },
+    "compute": {
+      "label": "Procesamiento",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "GPU activa",
+      "statusInactive": "CPU activa",
+      "restartRequired": "El servidor se reiniciará al cambiar este ajuste",
+      "restarting": "Reiniciando...",
+      "restartFailed": "No se pudo reiniciar",
+      "restartUnavailable": "Ajustes guardados. Los cambios se aplicarán al iniciar el juego la próxima vez",
+      "confirmRestart": "Se cambiará el procesamiento a {mode}. ¿Reiniciar el servidor?"
+    },
+    "windowReset": {
+      "label": "Posición y tamaño de las ventanas",
+      "button": "Restablecer tamaño y posición de las ventanas"
+    }
+  },
+  "saveLoad": {
+    "newGame": "Partida nueva",
+    "overwriteSave": "Sobrescribir partida",
+    "saveAs": "Guardar como",
+    "load": "Cargar",
+    "quitGame": "Salir del juego",
+    "returnToTop": "Volver al menú principal",
+    "saving": "Guardando...",
+    "loading": "Cargando...",
+    "shuttingDown": "Cerrando...",
+    "saveSuccess": "Se guardó correctamente",
+    "newGameSuccess": "Se inició una partida nueva",
+    "saveFailed": "No se pudo guardar",
+    "loadFailed": "No se pudo cargar",
+    "confirmNewGame": "Se perderán los datos actuales. ¿Iniciar una partida nueva?",
+    "confirmQuitGame": "¿Salir del juego? El progreso actual no se guarda automáticamente.",
+    "confirmReturnToTop": "¿Volver al menú principal? El progreso actual no se guarda automáticamente.",
+    "confirm": "Sí",
+    "cancel": "No",
+    "debugInit": "Debug Init"
+  },
+  "saveList": {
+    "noSaves": "No hay partidas guardadas",
+    "currentSave": "Datos actuales",
+    "population": "Población",
+    "inGameDate": "Fecha",
+    "savedAt": "Fecha de guardado",
+    "loadButton": "Cargar",
+    "deleteButton": "Eliminar",
+    "confirmLoad": "¿Cargar esta partida guardada?",
+    "confirmDelete": "¿Eliminar esta partida guardada? Esta acción no se puede deshacer.",
+    "confirm": "Sí",
+    "cancel": "No",
+    "loading": "Cargando...",
+    "loadFailed": "No se pudo cargar",
+    "loadSuccess": "Se cargó correctamente",
+    "deleteFailed": "No se pudo eliminar",
+    "deleteSuccess": "Se eliminó la partida guardada",
+    "openFolderButton": "Mostrar la carpeta"
+  }
+}

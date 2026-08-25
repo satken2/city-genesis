@@ -1,6 +1,5 @@
 {
   "publicFacilities": {
-    "selectCategory": "カテゴリを選択してください",
     "tabRealEstate": "不動産",
     "tabPublicStandard": "公営施設",
     "tabEducation": "教育機関",
@@ -16,7 +15,6 @@
     "occupancyRate": "入居率",
     "rent": "家賃",
     "capacity": "キャパシティ",
-    "handling": "取扱量",
     "importHandling": "輸入取扱量",
     "exportHandling": "輸出取扱量"
   },
@@ -28,7 +26,6 @@
     "effectivePrice": "実効価格",
     "price": "公共サービス価格",
     "unitCost": "製造原価",
-    "averagePrice": "市場平均価格",
     "supplyCapacity": "供給キャパシティ",
     "maxDemand": "想定最大需要",
     "demand": "需要量",

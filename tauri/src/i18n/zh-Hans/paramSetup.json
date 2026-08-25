@@ -1,0 +1,381 @@
+{
+  "paramSetup": {
+    "title": "游戏参数设置",
+    "description": "基本上推荐使用默认值。仅在需要更改时进行调整。",
+    "skip": "跳过",
+    "start": "开始游戏",
+    "apply": "应用并关闭",
+    "close": "关闭",
+    "loading": "加载中...",
+    "reload": "重新载入",
+    "reloadHint": "在后端初始化完成后重新载入，即可反映最新的数值",
+    "fetchError": "参数获取失败",
+    "category": {
+      "population": "人口・移民",
+      "citizen": "市民生活",
+      "economy": "经济",
+      "labor": "劳动・工资",
+      "education": "教育",
+      "construction": "建设・不动产",
+      "environment": "环境",
+      "traffic": "交通"
+    },
+    "param": {
+      "TFR_TARGET": {
+        "label": "总和生育率（TFR）目标",
+        "desc": "家庭所追求的生育率。数值越高越容易生育。"
+      },
+      "MARRIAGE_RATE": {
+        "label": "结婚率",
+        "desc": "市民结婚的基础概率系数。数值越大越容易结婚。"
+      },
+      "MIN_CHILDBEARING_AGE": {
+        "label": "可生育最低年龄",
+        "desc": "可以生育的最低年龄。低于该年龄不会发生生育。"
+      },
+      "MAX_CHILDBEARING_AGE": {
+        "label": "可生育最高年龄",
+        "desc": "可以生育的最高年龄。超过该年龄不会发生生育。"
+      },
+      "INFLOW_MARRIRD_RATIO": {
+        "label": "移民家庭的已婚比例",
+        "desc": "移民家庭流入城市时为夫妻的概率。"
+      },
+      "INFLOW_CHILDREN1_RATIO": {
+        "label": "第1个子女持有率（移民）",
+        "desc": "移民家庭生成时拥有1个子女的概率。"
+      },
+      "INFLOW_CHILDREN2_RATIO": {
+        "label": "第2个子女持有率（移民）",
+        "desc": "移民家庭生成时拥有2个子女的概率。"
+      },
+      "INFLOW_CHILDREN3_RATIO": {
+        "label": "第3个子女持有率（移民）",
+        "desc": "移民家庭生成时拥有3个子女的概率。"
+      },
+      "IMMIGRATION_MIN_COUNT": {
+        "label": "最低移民家庭数（每纪元）",
+        "desc": "每纪元最低的移民流入家庭数。用于小城市的修正。"
+      },
+      "IMMIGRATION_STOP_UNEMPLOYMENT": {
+        "label": "移民停止失业率",
+        "desc": "失业率达到该值以上时，移民流入停止。"
+      },
+      "IMMIGRATION_ADULT_AGE_MIN": {
+        "label": "成年移民的最小年龄",
+        "desc": "作为移民流入的成年人的最小年龄。"
+      },
+      "IMMIGRATION_ADULT_AGE_MAX": {
+        "label": "成年移民的最大年龄",
+        "desc": "作为移民流入的成年人的最大年龄。"
+      },
+      "LIFESPAN_FACTOR": {
+        "label": "寿命系数",
+        "desc": "作用于市民最大寿命的系数。1.08时上限约100岁，1.06时约150岁。"
+      },
+      "SPACE_SINGLE": {
+        "label": "单身家庭的居住面积（m²）",
+        "desc": "单身家庭所需的最低居住面积。"
+      },
+      "ADD_SPACE_MARRIED": {
+        "label": "配偶所需的额外面积（m²）",
+        "desc": "夫妻家庭相较单身家庭额外需要的居住面积。"
+      },
+      "ADD_SPACE_CHILDREN": {
+        "label": "每个子女的额外面积（m²）",
+        "desc": "每增加1个子女所增加的居住面积。"
+      },
+      "HOUSEHOLD_RENT_INCOME_RATIO": {
+        "label": "房租收入比（可支付上限）",
+        "desc": "相对于家庭收入可支付房租的最大比例。0.3表示最多可用收入的30%。"
+      },
+      "HOUSEHOLD_TIGHT_BUDGET_RATIO": {
+        "label": "可支配收入下限比率",
+        "desc": "家庭力求保留的最低裁量收入比例。过低会导致生活容易崩溃。"
+      },
+      "HOUSEHOLD_DECIDE_MOVE_COUNT": {
+        "label": "决定搬迁的纪元数",
+        "desc": "从对居住环境不满到决定搬迁所经过的纪元数。"
+      },
+      "HOUSEHOLD_SHACK_COUNT": {
+        "label": "沦为无家可归的纪元数",
+        "desc": "从失去住所到进入无家可归状态所经过的纪元数。"
+      },
+      "QOL_WEIGHT_NUTRITION": {
+        "label": "生活质量权重：营养",
+        "desc": "计算生活水平评分时营养充足度的权重（会自动归一化）。"
+      },
+      "QOL_WEIGHT_HEALTHCARE": {
+        "label": "生活质量权重：医疗",
+        "desc": "计算生活水平评分时医疗充足度的权重（会自动归一化）。"
+      },
+      "QOL_WEIGHT_ENTERTAINMENT": {
+        "label": "生活质量权重：娱乐",
+        "desc": "计算生活水平评分时娱乐充足度的权重（会自动归一化）。"
+      },
+      "AVERAGE_WAGE": {
+        "label": "平均工资（基准值）",
+        "desc": "模拟开始时的基准平均工资。"
+      },
+      "AVERAGE_RENT": {
+        "label": "平均房租（基准值）",
+        "desc": "模拟开始时的基准平均房租（每日每平方米）。"
+      },
+      "MIN_PROFIT_RATE": {
+        "label": "最低利润率",
+        "desc": "企业维持经营所需的最低利润率。"
+      },
+      "SPAWN_PROFIT_RATE_THRESHOLD": {
+        "label": "允许新进入的最低利润率",
+        "desc": "只有利润率高于该值的市场才会生成新企业。用于抑制过度开店。"
+      },
+      "DIVIDEND_PAYOUT_RATIO": {
+        "label": "分红支付比率",
+        "desc": "企业利润中分配给家庭的比例。"
+      },
+      "MIN_PRODUCTION_LIMIT": {
+        "label": "最低产量比率",
+        "desc": "相对于总需求的最低产量比例。"
+      },
+      "MAX_LONGRUN_BONUS_DAYS": {
+        "label": "长期运营加成最大天数",
+        "desc": "企业因长期运营而获得加成的天数上限。"
+      },
+      "EXPORT_COMPETITIVENESS_ZERO_RATIO": {
+        "label": "出口竞争力归零比例",
+        "desc": "价格高于域外价格达到该比例时，出口竞争力归零。0.5表示高出50%即失去竞争力。"
+      },
+      "SPAWN_LABOR_CAP_RATIO": {
+        "label": "生成时劳动力消耗上限",
+        "desc": "新企业生成时可一次性消耗城市剩余劳动力的最大比例。"
+      },
+      "DEVELOPER_PROFIT_RATIO": {
+        "label": "房地产开发商利润率",
+        "desc": "房地产开发所得利润的比例。"
+      },
+      "INVESTMENT_DEPRECIATION_RATE": {
+        "label": "设备折旧率",
+        "desc": "设备投资资本存量每纪元的折旧率。"
+      },
+      "WORK_HOURS": {
+        "label": "每日劳动时间（h）",
+        "desc": "市民每日工作的标准小时数。"
+      },
+      "NORMAL_LABOR_UTILITY": {
+        "label": "基准劳动力利用度",
+        "desc": "计算标准价格时的劳动力利用度。1.0为完全利用。"
+      },
+      "HIGH_SKILL_BOUNDARY": {
+        "label": "高技能分界值",
+        "desc": "超过该值即视为高技能劳动者。"
+      },
+      "MAX_BASE_SKILL": {
+        "label": "基础技能最大值",
+        "desc": "通过初等教育可达到的最大技能值。"
+      },
+      "MAX_SKILL": {
+        "label": "技能上限值",
+        "desc": "市民可习得的最大技能值（含高等教育与工作经验）。"
+      },
+      "WAGE_OVERSTAFFED_THRESHOLD": {
+        "label": "冗员时降薪阈值",
+        "desc": "冗员率超过该值时下调工资（以 labor_surplus / quota 评估）。"
+      },
+      "WAGE_UNDERSTAFFED_THRESHOLD": {
+        "label": "人手不足时涨薪阈值",
+        "desc": "人手不足且无人应聘的状态超过该值时上调工资。"
+      },
+      "ELEMENTARY_START_AGE": {
+        "label": "初等教育开始年龄",
+        "desc": "儿童开始接受初等教育（相当于小学）的年龄。"
+      },
+      "ELEMENTARY_END_AGE": {
+        "label": "初等教育结束年龄",
+        "desc": "初等教育结束的年龄（相当于高中毕业）。"
+      },
+      "UNIVERSITY_END_AGE": {
+        "label": "大学毕业・独立年龄",
+        "desc": "完成高等教育并从家庭独立的年龄。"
+      },
+      "MIN_WORKING_AGE": {
+        "label": "可就业最低年龄",
+        "desc": "低于该年龄的市民不纳入求职对象与失业率统计。"
+      },
+      "EDUCATION_CAPACITY_PER_FLOOR": {
+        "label": "教育设施的容纳人数（每m²）",
+        "desc": "每1平方米建筑面积可接收的学生人数。"
+      },
+      "SCHOOL_SEARCH_MAX_DISTANCE": {
+        "label": "可通学最大距离（分钟）",
+        "desc": "寻找就读学校时的最大距离（换算为分钟）。"
+      },
+      "BUILDING_FLOOR_LIMIT": {
+        "label": "高层化成本骤增阈值（层）",
+        "desc": "超过该层数后建设费用急剧上升。可抑制超高层建筑的建设。"
+      },
+      "FLOOR_PENALTY_FACTOR": {
+        "label": "层数惩罚系数",
+        "desc": "高层化成本惩罚的系数。数值越大，高层惩罚越小。"
+      },
+      "DEMOLITION_RATE": {
+        "label": "拆除效率比",
+        "desc": "拆除相较于新建的效率倍率。"
+      },
+      "REAL_ESTATE_SUPPLY_SURPLUS_RATE": {
+        "label": "不动产供给余量率",
+        "desc": "不动产市场中始终保留的余量供给比例。"
+      },
+      "CONSTRUCTION_DEMAND_SITE_AREA_MIN": {
+        "label": "开发诱发的标准用地面积下限",
+        "desc": "开发诱发脉冲的标准开发用地面积下限（m²）。与地区的需求密度相乘，决定单个纪元的建设需求规模。"
+      },
+      "CONSTRUCTION_DEMAND_SITE_AREA_MAX": {
+        "label": "开发诱发的标准用地面积上限",
+        "desc": "开发诱发脉冲的标准开发用地面积上限（m²）。数值越大，单次开发规模越大。"
+      },
+      "COLLAPSE_BASE_RATE": {
+        "label": "倒塌基准年概率",
+        "desc": "耐久度0.5的建筑在1年内倒塌的基准概率。"
+      },
+      "COLLAPSE_SHAPE": {
+        "label": "倒塌概率韦伯形状参数",
+        "desc": "数值越大，在使用年限附近倒塌概率上升越急剧。"
+      },
+      "MAINTENANCE_DURABILITY_THRESHOLD": {
+        "label": "修缮判定的耐久度阈值",
+        "desc": "耐久度低于该值的建筑成为修缮对象。"
+      },
+      "MAINTENANCE_COST_RATIO": {
+        "label": "修缮成本比率",
+        "desc": "修缮成本相对于新建成本的比例。"
+      },
+      "MAINTENANCE_BASE_PROB_ANNUAL": {
+        "label": "进入修缮的基准年概率",
+        "desc": "修缮对象建筑实际进入修缮的基准年概率。"
+      },
+      "DEMOLITION_DURABILITY_THRESHOLD": {
+        "label": "停业建筑的拆除阈值",
+        "desc": "停业中的建筑耐久度低于该值时成为拆除对象。"
+      },
+      "DEMOLITION_BASE_RATE_ANNUAL": {
+        "label": "停业建筑的年拆除概率",
+        "desc": "停业且属于拆除对象的建筑在1年内被拆除的基准概率。"
+      },
+      "SHUTDOWN_GRACE_PERIOD_DAYS": {
+        "label": "停业判定宽限期（日）",
+        "desc": "建筑竣工后免于停业判定的天数。用于给租户聚集留出缓冲期。"
+      },
+      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
+        "label": "初始建设负债（每m²）",
+        "desc": "建筑每1平方米建筑面积的初始建设负债（负的现金存款）。"
+      },
+      "NOISE_ROAD_TRAFFIC_COEFF": {
+        "label": "道路交通噪音系数",
+        "desc": "道路交通量对噪音热力图的影响系数。数值越大沿街越吵。"
+      },
+      "NOISE_PED_TRAFFIC_COEFF": {
+        "label": "行人交通噪音系数",
+        "desc": "行人交通量对噪音热力图的影响系数。"
+      },
+      "PED_NOISE_THRESHOLD": {
+        "label": "行人噪音产生阈值",
+        "desc": "行人交通量超过该值的部分才会贡献噪音。"
+      },
+      "NOISE_BLUR_SIGMA_M": {
+        "label": "噪音扩散范围（m）",
+        "desc": "噪音热力图的高斯模糊半径。数值越大扩散范围越广。"
+      },
+      "NOISE_SATURATION_LEVEL": {
+        "label": "噪音饱和水平",
+        "desc": "噪音热力图的最大值。超过该值的噪音将封顶。"
+      },
+      "POLLUTION_ROAD_TRAFFIC_COEFF": {
+        "label": "道路交通大气污染系数",
+        "desc": "道路交通量对大气污染热力图的影响系数。"
+      },
+      "POLLUTION_BLUR_SIGMA_M": {
+        "label": "大气污染扩散范围（m）",
+        "desc": "大气污染热力图的高斯模糊半径。"
+      },
+      "POLLUTION_SATURATION_LEVEL": {
+        "label": "大气污染饱和水平",
+        "desc": "大气污染热力图的最大值。"
+      },
+      "UNEMPLOYMENT_CRIME_WEIGHT": {
+        "label": "失业的犯罪权重",
+        "desc": "失业率对治安热力图的权重。数值越大失业越直接导致治安恶化。"
+      },
+      "CRIME_BLUR_SIGMA_M": {
+        "label": "犯罪扩散范围（m）",
+        "desc": "治安热力图的高斯模糊半径。"
+      },
+      "CRIME_SATURATION_LEVEL": {
+        "label": "犯罪饱和水平",
+        "desc": "治安热力图的最大值。"
+      },
+      "LIVING_MULTIPLIER_MIN": {
+        "label": "居住环境乘数下限",
+        "desc": "居住环境最差时的房租乘数下限。"
+      },
+      "LIVING_MULTIPLIER_MAX": {
+        "label": "居住环境乘数上限",
+        "desc": "居住环境理想时的房租乘数上限。"
+      },
+      "PEDESTRIAN_SPEED": {
+        "label": "行人速度（km/h）",
+        "desc": "行人的移动速度。用于计算路径搜索成本。"
+      },
+      "PATH_KASOKU_LENGTH": {
+        "label": "汽车加速距离（m）",
+        "desc": "汽车加速所用的距离。影响短道路的速度计算。"
+      },
+      "PATH_ACTIVE_HOURS": {
+        "label": "道路每日运行时间（h）",
+        "desc": "道路每日处于运行状态的小时数。用于交通量换算。"
+      },
+      "ROAD_MANY_TRAFFIC_THRESHOLD": {
+        "label": "道路交通量加成饱和阈值",
+        "desc": "道路交通量达到该值以上时，对零售店的交通加成达到最大。"
+      },
+      "PED_MANY_TRAFFIC_THRESHOLD": {
+        "label": "行人交通量加成饱和阈值",
+        "desc": "行人交通量达到该值以上时，对零售店的行人加成达到最大。"
+      },
+      "RESOURCE_EFFICIENCY_THRESHOLD": {
+        "label": "天然资源效率阈值",
+        "desc": "天然资源剩余率在该值以上时开采效率保持接近1.0，低于该值则急剧下降。"
+      }
+    }
+  },
+  "newGame": {
+    "fromTerrain": "从地形开始",
+    "fromScenario": "从剧本开始",
+    "loading": "加载中...",
+    "noTerrainMaps": "没有可用的地形",
+    "noTemplates": "没有可用的剧本",
+    "starting": "开始中...",
+    "startFailed": "开始失败",
+    "confirmTitle": "游戏设置确认",
+    "cityNameLabel": "城市名称",
+    "cityNamePlaceholder": "输入城市名称（可选）",
+    "languageLabel": "城市的语言",
+    "languageNote": "※之后无法更改",
+    "simulationDaysLabel": "模拟天数",
+    "simulationDaysNote": "※之后无法更改",
+    "startButton": "开始",
+    "backButton": "返回",
+    "tutorialBadge": "新手教程",
+    "tutorialName": "来建造道路和建筑吧",
+    "tutorialDesc": "学习如何建造作为城市基础的道路与建筑。",
+    "tutorialNoTerrain": "找不到地形数据。请检查安装状态。",
+    "detailPlaceholder": "请从左侧列表中选择地形或剧本。",
+    "detailMapLabel": "地图",
+    "detailMapSizeLabel": "地图尺寸",
+    "detailObjectiveLabel": "达成条件",
+    "detailNoDescription": "该剧本没有设置说明。",
+    "terrainDetailDesc": "从一无所有的土地上建设城市。没有达成条件，可以随心所欲地发展。",
+    "tutorialObjective": "完成新手教程的所有步骤。",
+    "startTerrainButton": "使用该地形开始",
+    "startScenarioButton": "开始该剧本"
+  }
+}

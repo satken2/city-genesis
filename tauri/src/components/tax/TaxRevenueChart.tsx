@@ -23,6 +23,7 @@ import {
 } from "recharts";
 import { TAX_REVENUE_META } from "../common/FiscalSankey";
 import { formatCompactAmount, formatExactAmount } from "../../utils/money";
+import { resolveIntlLocale } from "../../utils/locale";
 
 /** history 1エポック分。revenues は台帳キー(文字列)→実績額。 */
 export type TaxRevenueHistoryEntry = {
@@ -47,7 +48,7 @@ const TOOLTIP_STYLE = {
 
 export function TaxRevenueChart({ data }: TaxRevenueChartProps) {
   const { t, i18n } = useTranslation();
-  const locale = i18n.language;
+  const locale = resolveIntlLocale(i18n.language);
 
   if (!data || data.length === 0) {
     return <div className="tax-window__chart-empty">{t("common.noData")}</div>;

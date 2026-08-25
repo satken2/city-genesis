@@ -1,0 +1,14 @@
+{
+  "employment": {
+    "requiredSkill": "요구 스킬",
+    "wage": "임금",
+    "quota": "필요 노동력",
+    "totalLabor": "고용된 노동력",
+    "employees": "종업원 목록",
+    "hired": "고용됨",
+    "vacant": "미충원",
+    "noQuota": "노동력 불필요",
+    "noEmployees": "종업원이 없습니다",
+    "statusTitle": "고용 현황"
+  }
+}

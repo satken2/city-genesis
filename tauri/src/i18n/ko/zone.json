@@ -1,0 +1,28 @@
+{
+  "zone": {
+    "titleWithId": "지구 #{{id}}",
+    "basicInfo": "기본 정보",
+    "area": "면적",
+    "zonePopulation": "거주 인구",
+    "daytimePopulation": "주간 인구",
+    "spaceAmount": "층 점유량",
+    "slotStarvationTitle": "건설할 수 없는 입주 대기 수요가 있습니다",
+    "slotStarvationWarning": "「{{tenant}}」이(가) 입주하려면 1개 동당 {{required}}m2 이상의 바닥이 필요하지만, 이 지구의 구획에서 지을 수 있는 최대는 {{max}}m2입니다. 더 큰 토지 구획을 마련하세요.",
+    "restrictions": "지구 규제",
+    "managementState": "관리 상태",
+    "autoManaged": "자동 관리",
+    "confirmed": "확정됨",
+    "autoManagedDesc": "도로망의 변화에 맞춰 시스템이 이 지구를 자동으로 통합할 수 있습니다",
+    "confirmedDesc": "이 지구의 형상이 시스템에 의해 재편되지 않습니다(도로 추가로 인한 성장은 이루어집니다)",
+    "pinAction": "이 지구를 확정",
+    "unpinAction": "자동 관리로 되돌리기",
+    "managementUpdateFailed": "관리 상태 갱신에 실패했습니다",
+    "restrictionPromoteNote": "건축 규제를 변경해 저장하면 이 지구는 확정됨 상태가 됩니다",
+    "restrictionUpdateFailed": "지구 규제 갱신에 실패했습니다",
+    "restrictionRequired": "건폐율・용적률・높이는 비워 둘 수 없습니다",
+    "mergeConfirm": "「{{source}}」을(를) 「{{target}}」에 통합합니다. 통합 원본 지구는 사라지고 그 규제 설정도 함께 사라집니다.",
+    "mergeAction": "통합",
+    "mergeFailed": "지구 통합에 실패했습니다(인접하지 않은 지구끼리는 통합할 수 없습니다)",
+    "mergeNoRequest": "통합할 지구가 선택되지 않았습니다"
+  }
+}

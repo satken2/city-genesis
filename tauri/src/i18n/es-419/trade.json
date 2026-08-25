@@ -1,0 +1,33 @@
+{
+  "supply": {
+    "product": "Producto ofrecido",
+    "amount": "Cantidad ofrecida",
+    "price": "Precio de venta",
+    "soldAmount": "Cantidad vendida",
+    "profitRate": "Margen de ganancia"
+  },
+  "demand": {
+    "product": "Producto",
+    "demandAmount": "Demanda",
+    "receivedAmount": "Cantidad obtenida",
+    "acquiredAmount": "Inventario"
+  },
+  "cargo": {
+    "title": "Operaciones de carga",
+    "description": "Este puerto importa mercancías desde fuera de la región para abastecer los mercados de la ciudad, y compra la producción excedente de la ciudad para exportarla.",
+    "capacity": "Capacidad de manejo",
+    "perEpochPerDirection": "/época (por cada sentido)",
+    "importHandled": "Volumen importado",
+    "exportHandled": "Volumen exportado",
+    "utilization": "Utilización",
+    "importSectionTitle": "Importación (venta a la ciudad)",
+    "exportSectionTitle": "Exportación (compra a la ciudad)",
+    "handledImport": "Vendido",
+    "handledExport": "Comprado",
+    "allocation": "Asignación",
+    "priceImport": "Precio de venta unitario",
+    "priceExport": "Precio de compra unitario",
+    "lost": "Ventas perdidas",
+    "noProducts": "No hay productos manejados"
+  }
+}

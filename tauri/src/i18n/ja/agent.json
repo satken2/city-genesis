@@ -1,6 +1,5 @@
 {
   "agent": {
-    "title": "経済主体詳細",
     "back": "戻る",
     "editSubBuildings": "サブ建物の配置を編集",
     "publicFacility": "公共施設",
@@ -94,9 +93,7 @@
       "disconnected": "未接続",
       "received": "受入れ量"
     },
-    "tabConstructionInfo": "建設工事",
-    "demolitionCostPerEpoch": "1エポックの解体コスト",
-    "remainingDemolition": "残り解体期間"
+    "tabConstructionInfo": "建設工事"
   },
   "agentList": {
     "filterType": "タイプ",
@@ -116,9 +113,6 @@
     "colProduction": "生産量",
     "colStock": "在庫量",
     "colSold": "売却量",
-    "colWageHigh": "高技能賃金",
-    "colWageStd": "標準賃金",
-    "colWageLow": "低技能賃金",
     "colWage": "賃金",
     "colEmployment": "雇用",
     "colUtilization": "稼働率",

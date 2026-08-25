@@ -1,0 +1,13 @@
+{
+  "station": {
+    "sectionTitle": "Estación",
+    "name": "Nombre de la estación",
+    "ridership": "Pasajeros (estimado)",
+    "platforms": "Lista de andenes",
+    "noPlatforms": "No hay andenes asignados a esta estación (se asignan los andenes que cruza la línea)",
+    "lines": "Líneas que la sirven",
+    "noLines": "Ninguna línea la sirve",
+    "lineRunning": "En servicio",
+    "lineSuspended": "Suspendida"
+  }
+}

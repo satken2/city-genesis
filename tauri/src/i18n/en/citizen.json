@@ -1,6 +1,5 @@
 {
   "citizen": {
-    "title": "Citizen Details",
     "basicInfo": "Basic Info",
     "age": "Age",
     "ageValue": "{{age}} years old",

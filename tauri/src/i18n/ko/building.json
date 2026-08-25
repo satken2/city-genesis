@@ -1,0 +1,21 @@
+{
+  "building": {
+    "type": "건물 타입",
+    "durability": "내구도",
+    "floors": "층수",
+    "floorsValue": "{{floors}}층(연면적 {{area, number}}㎡)",
+    "heightLabel": "높이: {{value}}m",
+    "baseAreaLabel": "건축 면적: {{area, number}}㎡",
+    "underMaintenance": "수선 중"
+  },
+  "mashup_edit": {
+    "hint": "카드를 부지로 드래그해 배치 / 드래그로 이동 / Shift+드래그로 회전 / Delete 키로 삭제",
+    "sizeLabel": "{{width}}×{{height}}m",
+    "deleteSelected": "선택한 동 삭제",
+    "cancel": "취소",
+    "save": "저장",
+    "saveFailed": "부속 건물 배치 저장에 실패했습니다",
+    "noParcel": "이 건물에는 토지 구획이 없습니다",
+    "noSubbuildings": "이 건물 종류에는 부속 건물이 정의되어 있지 않습니다"
+  }
+}

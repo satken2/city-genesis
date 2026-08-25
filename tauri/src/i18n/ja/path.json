@@ -51,7 +51,6 @@
     },
     "pendingWarning": "この道路は計画中です。着工を指示してください。",
     "alerts": {
-      "title": "アラート",
       "constructionShortage": {
         "title": "建設サービス不足",
         "description": "建設予算が不足しているため、工事が遅延しています。"
@@ -65,17 +64,13 @@
         "description": "このプラットフォームはどの駅にも所属していません。軌道建設パネルの駅舎タブから、このプラットフォームを跨ぐ駅舎の線を敷設してください。"
       }
     },
-    "tabConstructionInfo": "建設工事",
-    "tabBasicInfo": "基本情報"
+    "tabConstructionInfo": "建設工事"
   },
   "path_construction": {
-    "title": "道路建設",
     "constructionSpeed": "建設スピード",
-    "combinedType": "複合パス",
     "selectType": "-- 種別を選択 --",
     "selectTypeFirst": "種別を選択してください",
     "noVariants": "該当なし",
-    "variantInfo": "幅{{width}}m / {{lanes}}車線",
     "shape": "形状",
     "elevation": "標高 (Y)",
     "embankmentHeight": "盛土高さ",
@@ -88,7 +83,6 @@
     "confirming": "確定中...",
     "confirmFailedUnknown": "道路の確定に失敗しました。形状を変更して再度お試しください。",
     "cancel": "キャンセル",
-    "reset": "リセット",
     "noNodesYet": "道路を敷設してください",
     "costInfo": "建設費用",
     "costRatioHelp": "高架道路や地下道路、あるいは複雑な地形の上に道路を建設すると、建設コストが上がります。",
@@ -97,16 +91,13 @@
     "platformSideOutside": "外側",
     "platformSideInside": "内側",
     "platformSideBoth": "両側",
-    "platformSideHint": "内側/外側は通行方向基準。複線の上下線とも内側にすると島式ホームになります",
     "rail": {
-      "variant": "規格",
       "parallel": "並走",
       "noVariantForCombo": "この組み合わせに対応する線路がありません",
       "trackCount": "線路数",
       "trackSpacing": "線路間隔",
       "spacingWiden": "広げる",
       "spacingShrink": "縮める",
-      "direction": "進行方向",
       "dirForward": "順方向",
       "dirBackward": "逆方向",
       "dirBoth": "両方向"

@@ -1,0 +1,34 @@
+{
+  "terrainUnlock": {
+    "title": "Liberar celda de terreno",
+    "selectCell": "Selecciona una celda de terreno",
+    "cellSelected": "Se seleccionó la celda ({{x}}, {{z}})",
+    "alreadyAcquired": "La celda ({{x}}, {{z}}) ya está liberada",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "acquiring": "Liberando...",
+    "acquireSuccess": "Celda liberada",
+    "acquireError": "No se pudo liberar"
+  },
+  "terrain3dPreview": {
+    "waitingForEditor": "Esperando datos del editor de terreno…"
+  },
+  "editor": {
+    "terrainTab": "Editor de terreno",
+    "scenarioTab": "Editor de escenarios",
+    "addNewTerrain": "Agregar un terreno nuevo",
+    "creating": "Creando...",
+    "createFailed": "No se pudo crear el terreno nuevo",
+    "copying": "Copiando...",
+    "copyFailed": "No se pudieron obtener los datos del terreno",
+    "localMapsTitle": "Abrir datos en edición",
+    "opening": "Abriendo...",
+    "openLocalFailed": "No se pudo abrir la copia de trabajo",
+    "deleteLocalMap": "Eliminar esta copia de trabajo",
+    "confirmDeleteLocalMap": "¿Eliminar esta copia de trabajo? Esta acción no se puede deshacer.",
+    "confirmDelete": "Eliminar",
+    "cancelDelete": "Cancelar",
+    "deleting": "Eliminando...",
+    "deleteLocalFailed": "No se pudo eliminar la copia de trabajo"
+  }
+}

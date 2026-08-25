@@ -7,6 +7,7 @@ import { resolveLedgerIcon } from "../../utils/ledgerIcon";
 import { STATUS_CONSTRUCTING } from "../../constants";
 import type { BudgetCategoryEntry } from "../../types";
 import { formatEpochDateRange } from "../../utils/date";
+import { resolveIntlLocale } from "../../utils/locale";
 import { Money } from "../common/Money";
 import { formatCompactAmount } from "../../utils/money";
 import {
@@ -515,7 +516,7 @@ export function CityBudgetWindow({
     );
   }, [budgetData, masterData, t]);
 
-  const locale = i18n.language === "ja" ? "ja-JP" : "en-US";
+  const locale = resolveIntlLocale(i18n.language);
   const nextEpochStart = currentDate;
   const nextEpochEnd = currentDate + simulationDays;
   const nextPeriod = formatEpochDateRange(nextEpochStart, nextEpochEnd, locale, { hideDay: true, simulationDays });

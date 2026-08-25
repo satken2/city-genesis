@@ -24,6 +24,7 @@ import { useTranslation } from "react-i18next";
 import { sendChangeState, IPC_EVENT_WORLD_SELECT_OBJECT } from "../../utils/ipc";
 import { setHintbarText } from "../../utils/hintbar";
 import { formatEpochDate } from "../../utils/date";
+import { resolveIntlLocale } from "../../utils/locale";
 import { BgmManager } from "../../utils/bgm";
 import { fetchL1Notifications, type L1Notification } from "../../utils/cityNotifications";
 import { BudgetMiniMeter } from "./BudgetMiniMeter";
@@ -158,7 +159,7 @@ export function Cockpit() {
 
   if (!visible) return null;
 
-  const locale = i18n.language === "ja" ? "ja-JP" : "en-US";
+  const locale = resolveIntlLocale(i18n.language);
   const formattedDate = currentDate != null ? formatEpochDate(currentDate, locale) : "—";
   const alertCount = l1Notifications.length;
 

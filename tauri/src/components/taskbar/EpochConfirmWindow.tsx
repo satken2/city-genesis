@@ -37,6 +37,7 @@ import { sendSessionReload } from "../../utils/ipc";
 import { logInfoToFile } from "../../utils/log";
 import { showNotification, dismissNotification } from "../../utils/notification";
 import { formatEpochDate } from "../../utils/date";
+import { resolveIntlLocale } from "../../utils/locale";
 import type { QuestNotification } from "../../types";
 import nextIcon from "../../assets/images/next.png";
 import "./EpochConfirmWindow.css";
@@ -73,7 +74,7 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
       .catch(console.error);
   }, [apiBaseUrl]);
 
-  const locale = i18n.language === "ja" ? "ja-JP" : "en-US";
+  const locale = resolveIntlLocale(i18n.language);
   const currentDateStr = city ? formatDate(city.current_date, locale) : "—";
   const nextDateStr = city
     ? formatDate(city.current_date + city.simulation_days * epochCount, locale)

@@ -1,0 +1,13 @@
+{
+  "station": {
+    "sectionTitle": "역",
+    "name": "역 이름",
+    "ridership": "승하차 인원(추정)",
+    "platforms": "승강장 목록",
+    "noPlatforms": "소속된 승강장이 없습니다(노선과 교차한 승강장이 소속됩니다)",
+    "lines": "발착 노선",
+    "noLines": "발착하는 노선이 없습니다",
+    "lineRunning": "운행 중",
+    "lineSuspended": "운휴"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "station": {
+    "sectionTitle": "车站",
+    "name": "车站名称",
+    "ridership": "乘降人数（估算）",
+    "platforms": "站台列表",
+    "noPlatforms": "没有归属的站台（与线路相交的站台会归属于此）",
+    "lines": "停靠线路",
+    "noLines": "没有停靠的线路",
+    "lineRunning": "运行中",
+    "lineSuspended": "停运"
+  }
+}

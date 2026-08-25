@@ -1,0 +1,134 @@
+{
+  "agent": {
+    "back": "Retour",
+    "editSubBuildings": "Modifier la disposition des annexes",
+    "publicFacility": "Service public",
+    "underAcquisition": "Acquisition du terrain en cours",
+    "publicFacilityPanel": {
+      "title": "Équipement public"
+    },
+    "abandon": "Abandonner",
+    "abandonHint": "Renonce à l'entretien et laisse le bâtiment se dégrader sans réparation",
+    "activeFrom": "Statut depuis",
+    "reserves": "Trésorerie",
+    "revenues": "Recettes",
+    "expenses": "Dépenses",
+    "zone": "Quartier",
+    "building": "Bâtiment",
+    "rent": "Loyer",
+    "floorOccupancy": "Surface occupée",
+    "tenants": "Occupants",
+    "tabBasicInfo": "Informations générales",
+    "utilizationTarget": "Taux d'utilisation visé",
+    "constructionSpeed": "Vitesse de construction",
+    "constructionCostPerEpoch": "Coût de chantier par époque",
+    "remainingConstruction": "Durée restante",
+    "remainingEpochs": "environ {{n}} époques",
+    "tabBuildingInfo": "Bâtiment",
+    "tabCargoInfo": "Manutention",
+    "tabHouseholdInfo": "Ménage",
+    "tabTradeInfo": "Offre et demande",
+    "tabEmploymentInfo": "Emploi",
+    "action": {
+      "purchase": "Acquérir",
+      "bulldoze": "Démolir",
+      "cancelBulldoze": "Annuler la démolition",
+      "pause": "Suspendre",
+      "resume": "Reprendre",
+      "delete": "Supprimer",
+      "repair": "Réparer",
+      "rebuild": "Reconstruire",
+      "edit": "Modifier",
+      "startConstruction": "Lancer le chantier",
+      "stopConstruction": "Mettre le chantier en attente",
+      "cancelAbandon": "Annuler l'abandon"
+    },
+    "pendingWarning": "Ce bâtiment est à l'état de projet. Ordonnez le démarrage du chantier.",
+    "alerts": {
+      "title": "Alertes",
+      "constructionShortage": {
+        "title": "Manque de services de construction",
+        "description": "Le budget de construction est insuffisant, les travaux prennent du retard."
+      },
+      "onFire": {
+        "title": "Incendie !",
+        "description": "Un incendie s'est déclaré dans le bâtiment."
+      },
+      "accidentalFire": {
+        "title": "Départ de feu",
+        "description": "Un départ de feu accidentel a eu lieu, mais il a pu être circonscrit."
+      },
+      "infraDisconnected": {
+        "title": "Non raccordé au réseau d'infrastructure",
+        "description": "Aucune voie d'infrastructure n'atteint la borne de cette installation. Elle ne peut ni fournir ni recevoir tant qu'elle n'est pas raccordée au réseau."
+      },
+      "crime": {
+        "title": "Délit commis",
+        "description": "Un délit a été commis dans ce bâtiment."
+      },
+      "crimeSign": {
+        "title": "Signes de délinquance",
+        "description": "Des signes de délinquance ont été relevés dans ce bâtiment. Surveillez la dégradation de la sécurité."
+      },
+      "laborShortage": {
+        "title": "Manque de main-d'œuvre",
+        "description": "Les effectifs employés sont insuffisants : la production et les services restent en deçà du plan."
+      },
+      "materialShortage": {
+        "title": "Manque de matières premières",
+        "description": "L'approvisionnement en matières premières est insuffisant : la production et les services restent en deçà du plan."
+      },
+      "highSkillShortage": {
+        "title": "Manque de personnel qualifié",
+        "description": "Le personnel hautement qualifié requis n'a pas pu être recruté : l'installation ne peut pas fonctionner."
+      },
+      "budgetCapped": {
+        "title": "Budget insuffisant",
+        "description": "Le budget alloué est très inférieur au montant nécessaire, l'activité a été réduite. Revoyez la répartition budgétaire."
+      }
+    },
+    "infra": {
+      "title": "Raccordement aux réseaux",
+      "connected": "Raccordé",
+      "disconnected": "Non raccordé",
+      "received": "Quantité reçue"
+    },
+    "tabConstructionInfo": "Chantier"
+  },
+  "agentList": {
+    "filterType": "Type",
+    "filterVariant": "Variante",
+    "filterZone": "Quartier",
+    "allVariants": "Toutes les variantes",
+    "allZones": "Tous les quartiers",
+    "resultCount": "{{count}} résultats",
+    "capped": "(sur {{total}} au total)",
+    "loading": "Chargement...",
+    "noResults": "Aucun agent correspondant",
+    "colStatus": "Statut",
+    "colVariant": "Variante",
+    "colName": "Nom",
+    "colProduct": "Produit",
+    "colPrice": "Prix",
+    "colProduction": "Production",
+    "colStock": "Stock",
+    "colSold": "Ventes",
+    "colWage": "Salaires",
+    "colEmployment": "Emploi",
+    "colUtilization": "Utilisation",
+    "colBdType": "Type de bâtiment",
+    "colDurability": "Durabilité",
+    "colRent": "Loyer",
+    "colFloors": "Étages",
+    "colFloorArea": "Surface de plancher",
+    "colOccupancy": "Taux d'occupation",
+    "colFamilyType": "Type de ménage",
+    "colDiscretionaryIncome": "Revenu disponible",
+    "colSatisNutrition": "Alimentation",
+    "colSatisHealthcare": "Santé",
+    "colSatisEntertainment": "Loisirs",
+    "colSatisResidential": "Logement",
+    "colAutomobile": "Automobile",
+    "colEnrollment": "Scolarisation"
+  }
+}

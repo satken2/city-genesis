@@ -1,0 +1,114 @@
+{
+  "path": {
+    "titleWithId": "경로 #{{id}}",
+    "zoneName": "소속 지구",
+    "followTerrain": "지형 추종",
+    "followTerrainFollow": "함(개별 설정)",
+    "followTerrainNone": "안 함(개별 설정)",
+    "durability": "내구도",
+    "noise": "소음",
+    "airPollution": "대기 오염",
+    "overrideMaxSpeed": "제한 속도를 개별 설정",
+    "maxSpeed": "제한 속도",
+    "utilization": "이용률",
+    "trafficByVehicle": "교통량(1일당)",
+    "trafficUnitPerDay": "/일",
+    "category": {
+      "0": "도보",
+      "1": "도로",
+      "2": "철도",
+      "unknown": "알 수 없음"
+    },
+    "action": {
+      "delete": "삭제",
+      "editShape": "형상 편집",
+      "repair": "수선",
+      "rebuild": "재건",
+      "startConstruction": "착공",
+      "stopConstruction": "보류",
+      "bulldoze": "철거",
+      "cancelBulldoze": "철거 취소",
+      "merge": "옆 경로와 결합",
+      "split": "경로 분할"
+    },
+    "topology": {
+      "mergeTitle": "경로 결합",
+      "splitTitle": "경로 분할",
+      "mergeHint": "3D 뷰에서 결합할 상대 경로를 클릭하세요. 끝점을 공유하고 그곳에 다른 경로가 연결되어 있지 않은 같은 종류의 경로만 선택할 수 있습니다.",
+      "splitHint": "3D 뷰에서 분할하고 싶은 지점을 클릭하세요. 분할점은 경로의 중심선 위에 놓입니다.",
+      "waitingSelection": "3D 뷰에서의 선택을 기다리고 있습니다.",
+      "checking": "확인 중...",
+      "submitting": "실행 중...",
+      "thisPath": "이 경로",
+      "mergedLength": "결합 후의 길이",
+      "beforeLength": "분할 전의 길이",
+      "firstSegment": "분할 후(시작점 쪽)",
+      "secondSegment": "분할 후(끝점 쪽)",
+      "meters": "{{value}} m",
+      "confirmMerge": "결합",
+      "confirmSplit": "분할",
+      "cancel": "취소"
+    },
+    "pendingWarning": "이 도로는 계획 중입니다. 착공을 지시하세요.",
+    "alerts": {
+      "constructionShortage": {
+        "title": "건설 서비스 부족",
+        "description": "건설 예산이 부족하여 공사가 지연되고 있습니다."
+      },
+      "accident": {
+        "title": "교통사고 발생!",
+        "description": "도로에서 교통사고가 발생했습니다."
+      },
+      "noStationHouse": {
+        "title": "역사가 없습니다",
+        "description": "이 승강장은 어느 역에도 속해 있지 않습니다. 궤도 건설 패널의 역사 탭에서 이 승강장을 가로지르는 역사 선을 부설하세요."
+      }
+    },
+    "tabConstructionInfo": "건설 공사"
+  },
+  "path_construction": {
+    "constructionSpeed": "건설 속도",
+    "selectType": "-- 종류 선택 --",
+    "selectTypeFirst": "종류를 선택하세요",
+    "noVariants": "해당 없음",
+    "shape": "형상",
+    "elevation": "표고 (Y)",
+    "embankmentHeight": "성토 높이",
+    "followTerrain": "지형 추종",
+    "followTerrainDefault": "기본",
+    "followTerrainFollow": "추종",
+    "followTerrainNone": "비추종",
+    "followTerrainHelp": "비추종으로 하면 언덕에 걸리는 구간은 자동으로 절토・터널이 되고, 골짜기를 건너는 구간은 다리가 됩니다.",
+    "confirm": "확정",
+    "confirming": "확정 중...",
+    "confirmFailedUnknown": "도로 확정에 실패했습니다. 형상을 변경해 다시 시도하세요.",
+    "cancel": "취소",
+    "noNodesYet": "도로를 부설하세요",
+    "costInfo": "건설 비용",
+    "costRatioHelp": "고가 도로나 지하 도로, 또는 복잡한 지형 위에 도로를 건설하면 건설 비용이 올라갑니다.",
+    "placedContinue": "경로를 배치했습니다. 다음 경로를 배치하세요.",
+    "platformSide": "승강장 설치 측",
+    "platformSideOutside": "바깥쪽",
+    "platformSideInside": "안쪽",
+    "platformSideBoth": "양쪽",
+    "rail": {
+      "parallel": "병주",
+      "noVariantForCombo": "이 조합에 대응하는 선로가 없습니다",
+      "trackCount": "선로 수",
+      "trackSpacing": "선로 간격",
+      "spacingWiden": "넓히기",
+      "spacingShrink": "좁히기",
+      "dirForward": "순방향",
+      "dirBackward": "역방향",
+      "dirBoth": "양방향"
+    }
+  },
+  "track_construction": {
+    "trackTab": "궤도",
+    "platformTab": "승강장",
+    "houseTab": "역사",
+    "house": {
+      "hint": "역사 선을 부설합니다. 선과 교차한 승강장이 이 역사의 역에 소속됩니다. 선의 양 끝에 역사 건물이 놓이고, 선을 따라 연결 다리가 놓입니다."
+    }
+  }
+}

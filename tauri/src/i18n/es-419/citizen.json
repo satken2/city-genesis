@@ -1,0 +1,44 @@
+{
+  "citizen": {
+    "basicInfo": "Información básica",
+    "age": "Edad",
+    "ageValue": "{{age}} años",
+    "gender": "Sexo",
+    "male": "Hombre",
+    "female": "Mujer",
+    "maritalStatus": "Estado civil",
+    "single": "Soltero(a)",
+    "married": "Casado(a)",
+    "household": "Hogar",
+    "workEducation": "Trabajo y educación",
+    "employer": "Lugar de trabajo",
+    "unemployed": "Sin empleo",
+    "school": "Centro educativo",
+    "notEnrolled": "No estudia",
+    "major": "Especialidad",
+    "higherEducation": "Educación superior",
+    "graduated": "Concluida",
+    "notGraduated": "No concluida",
+    "skills": "Habilidades",
+    "publicSafety": "Seguridad",
+    "criminality": "Tendencia delictiva",
+    "commuteTime": "Tiempo de traslado"
+  },
+  "household": {
+    "familyType": "Tipo de hogar",
+    "familySingle": "Unipersonal",
+    "familyCouple": "Pareja",
+    "familyFamily": "Familia",
+    "familySenior": "Adultos mayores",
+    "hasAutomobile": "Con automóvil",
+    "noAutomobile": "Sin automóvil",
+    "discretionaryIncome": "Ingreso disponible",
+    "satisNutrition": "Cobertura nutricional",
+    "satisHealthcare": "Cobertura sanitaria",
+    "satisEntertainment": "Cobertura de ocio",
+    "members": "Integrantes del hogar"
+  },
+  "education": {
+    "people": "personas"
+  }
+}

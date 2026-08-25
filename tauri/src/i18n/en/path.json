@@ -51,7 +51,6 @@
     },
     "pendingWarning": "This road is planned. Please command to start construction.",
     "alerts": {
-      "title": "Alerts",
       "constructionShortage": {
         "title": "Construction Service Shortage",
         "description": "Construction budget is insufficient, causing delays in construction."
@@ -65,17 +64,13 @@
         "description": "This platform does not belong to any station. Draw a station building line across it from the Station Building tab of the Track Construction panel."
       }
     },
-    "tabConstructionInfo": "Construction",
-    "tabBasicInfo": "Basic Info"
+    "tabConstructionInfo": "Construction"
   },
   "path_construction": {
-    "title": "Path Construction",
     "constructionSpeed": "Construction Speed",
-    "combinedType": "Combined Paths",
     "selectType": "-- Select Type --",
     "selectTypeFirst": "Please select a type",
     "noVariants": "No variants available",
-    "variantInfo": "Width {{width}}m / {{lanes}} lanes",
     "shape": "Shape",
     "elevation": "Elevation (Y)",
     "embankmentHeight": "Embankment Height",
@@ -88,7 +83,6 @@
     "confirming": "Confirming...",
     "confirmFailedUnknown": "Failed to confirm the path. Please modify the shape and try again.",
     "cancel": "Cancel",
-    "reset": "Reset",
     "noNodesYet": "Place a path to begin",
     "costInfo": "Construction Cost",
     "costRatioHelp": "Building roads on elevated or underground structures, or over complex terrain, increases the construction cost.",
@@ -97,16 +91,13 @@
     "platformSideOutside": "Outside",
     "platformSideInside": "Inside",
     "platformSideBoth": "Both",
-    "platformSideHint": "Inside/outside is relative to the traffic hand. Setting both tracks of a double-track line to inside creates an island platform",
     "rail": {
-      "variant": "Type",
       "parallel": "Parallel Tracks",
       "noVariantForCombo": "No track matches this combination",
       "trackCount": "Tracks",
       "trackSpacing": "Spacing",
       "spacingWiden": "Widen",
       "spacingShrink": "Narrow",
-      "direction": "Direction",
       "dirForward": "Forward",
       "dirBackward": "Backward",
       "dirBoth": "Both ways"

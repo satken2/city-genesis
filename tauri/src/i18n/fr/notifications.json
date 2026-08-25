@@ -1,0 +1,24 @@
+{
+  "notifications": {
+    "trayTooltip": "Alertes critiques",
+    "description": "Liste des problèmes graves nécessitant une action immédiate. Cliquez sur une ligne pour ouvrir le détail concerné.",
+    "empty": "Aucun problème grave ne nécessite d'action pour le moment",
+    "loadFailed": "Échec de la récupération des alertes",
+    "types": {
+      "resource_runway": "La ressource « {{name}} » devrait être épuisée dans environ {{remaining_epochs}} époques",
+      "resource_depleted": "La ressource « {{name}} » est épuisée",
+      "facility_inoperative": "L'équipement public « {{name}} » ne fonctionne pas",
+      "facility_inoperative_labor": "L'équipement public « {{name}} » ne fonctionne pas faute de main-d'œuvre",
+      "facility_inoperative_material": "L'équipement public « {{name}} » ne fonctionne pas faute de matières premières",
+      "facility_inoperative_high_skill": "L'équipement public « {{name}} » ne fonctionne pas faute de personnel qualifié",
+      "facility_inoperative_budget": "L'équipement public « {{name}} » tourne au ralenti faute de budget",
+      "infra_facility_down": "L'installation d'infrastructure « {{name}} » est à l'arrêt",
+      "infra_disconnected": "{{count}} installations ne sont pas raccordées au réseau d'infrastructure",
+      "collapse": "{{count}} bâtiments ou routes se sont effondrés",
+      "collapse_with_deaths": "{{count}} bâtiments ou routes se sont effondrés, faisant {{deaths}} morts",
+      "deaths_traffic": "{{count}} personnes sont mortes dans des accidents de la route",
+      "tenant_blocked_by_parcel_size": "Dans le quartier « {{zone_name}} », aucun bâtiment pouvant accueillir « {{tenant_name}} » ne peut être construit (il faut {{required}} m2, le maximum de la parcelle est {{max_capacity}} m2). Une parcelle plus grande est nécessaire",
+      "unknown": "Un événement critique est survenu"
+    }
+  }
+}

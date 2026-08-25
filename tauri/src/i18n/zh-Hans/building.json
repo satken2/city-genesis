@@ -1,0 +1,21 @@
+{
+  "building": {
+    "type": "建筑类型",
+    "durability": "耐久度",
+    "floors": "层数",
+    "floorsValue": "{{floors}}层（建筑面积{{area, number}}㎡）",
+    "heightLabel": "高度：{{value}}m",
+    "baseAreaLabel": "占地面积：{{area, number}}㎡",
+    "underMaintenance": "修缮中"
+  },
+  "mashup_edit": {
+    "hint": "将卡片拖到用地上放置 / 拖动移动 / Shift+拖动旋转 / Delete键删除",
+    "sizeLabel": "{{width}}×{{height}}m",
+    "deleteSelected": "删除所选建筑",
+    "cancel": "取消",
+    "save": "保存",
+    "saveFailed": "附属建筑布局保存失败",
+    "noParcel": "该建筑没有对应的地块",
+    "noSubbuildings": "该建筑类型没有定义附属建筑"
+  }
+}

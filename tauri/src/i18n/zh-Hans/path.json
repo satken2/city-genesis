@@ -1,0 +1,114 @@
+{
+  "path": {
+    "titleWithId": "路径 #{{id}}",
+    "zoneName": "所属地区",
+    "followTerrain": "地形追随",
+    "followTerrainFollow": "追随（单独设置）",
+    "followTerrainNone": "不追随（单独设置）",
+    "durability": "耐久度",
+    "noise": "噪音",
+    "airPollution": "大气污染",
+    "overrideMaxSpeed": "单独设置限速",
+    "maxSpeed": "限速",
+    "utilization": "使用率",
+    "trafficByVehicle": "交通量（每日）",
+    "trafficUnitPerDay": "/日",
+    "category": {
+      "0": "步行",
+      "1": "道路",
+      "2": "铁路",
+      "unknown": "未知"
+    },
+    "action": {
+      "delete": "删除",
+      "editShape": "编辑形状",
+      "repair": "修缮",
+      "rebuild": "重建",
+      "startConstruction": "开工",
+      "stopConstruction": "暂缓施工",
+      "bulldoze": "拆除",
+      "cancelBulldoze": "取消拆除",
+      "merge": "与相邻路径合并",
+      "split": "分割路径"
+    },
+    "topology": {
+      "mergeTitle": "路径合并",
+      "splitTitle": "路径分割",
+      "mergeHint": "请在3D视图中点击要合并的对象路径。只能选择共享端点、且该端点上没有连接其他路径的同类型路径。",
+      "splitHint": "请在3D视图中点击要分割的地点。分割点将放置在路径的中心线上。",
+      "waitingSelection": "正在等待3D视图中的选择。",
+      "checking": "确认中...",
+      "submitting": "执行中...",
+      "thisPath": "此路径",
+      "mergedLength": "合并后的长度",
+      "beforeLength": "分割前的长度",
+      "firstSegment": "分割后（起点侧）",
+      "secondSegment": "分割后（终点侧）",
+      "meters": "{{value}} m",
+      "confirmMerge": "合并",
+      "confirmSplit": "分割",
+      "cancel": "取消"
+    },
+    "pendingWarning": "该道路尚处于规划中。请下达开工指令。",
+    "alerts": {
+      "constructionShortage": {
+        "title": "建设服务不足",
+        "description": "建设预算不足，工程进度延迟。"
+      },
+      "accident": {
+        "title": "交通事故发生！",
+        "description": "道路上发生了交通事故。"
+      },
+      "noStationHouse": {
+        "title": "没有站房",
+        "description": "该站台不属于任何车站。请在轨道建设面板的站房标签页中，铺设跨越该站台的站房线路。"
+      }
+    },
+    "tabConstructionInfo": "建设工程"
+  },
+  "path_construction": {
+    "constructionSpeed": "建设速度",
+    "selectType": "-- 请选择种类 --",
+    "selectTypeFirst": "请选择种类",
+    "noVariants": "无符合项",
+    "shape": "形状",
+    "elevation": "海拔 (Y)",
+    "embankmentHeight": "填土高度",
+    "followTerrain": "地形追随",
+    "followTerrainDefault": "默认",
+    "followTerrainFollow": "追随",
+    "followTerrainNone": "不追随",
+    "followTerrainHelp": "设为不追随后，穿越丘陵的区段会自动变为堑壕・隧道，跨越山谷的区段会变为桥梁。",
+    "confirm": "确定",
+    "confirming": "确定中...",
+    "confirmFailedUnknown": "道路确定失败。请修改形状后重试。",
+    "cancel": "取消",
+    "noNodesYet": "请铺设道路",
+    "costInfo": "建设费用",
+    "costRatioHelp": "建造高架道路、地下道路，或在复杂地形上建造道路，会提高建设成本。",
+    "placedContinue": "已放置路径。请放置下一条路径。",
+    "platformSide": "站台设置侧",
+    "platformSideOutside": "外侧",
+    "platformSideInside": "内侧",
+    "platformSideBoth": "两侧",
+    "rail": {
+      "parallel": "并行",
+      "noVariantForCombo": "没有对应该组合的线路",
+      "trackCount": "线路数",
+      "trackSpacing": "线路间距",
+      "spacingWiden": "加宽",
+      "spacingShrink": "收窄",
+      "dirForward": "顺方向",
+      "dirBackward": "逆方向",
+      "dirBoth": "双方向"
+    }
+  },
+  "track_construction": {
+    "trackTab": "轨道",
+    "platformTab": "站台",
+    "houseTab": "站房",
+    "house": {
+      "hint": "铺设站房线路。与该线路相交的站台将归属于此站房所在的车站。线路两端会放置站房建筑，并沿线架设连接桥。"
+    }
+  }
+}

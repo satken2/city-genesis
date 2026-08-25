@@ -1,0 +1,44 @@
+{
+  "citizen": {
+    "basicInfo": "基本資訊",
+    "age": "年齡",
+    "ageValue": "{{age}}歲",
+    "gender": "性別",
+    "male": "男性",
+    "female": "女性",
+    "maritalStatus": "婚姻狀況",
+    "single": "未婚",
+    "married": "已婚",
+    "household": "所屬家庭",
+    "workEducation": "就業・教育",
+    "employer": "工作單位",
+    "unemployed": "無業",
+    "school": "就讀學校",
+    "notEnrolled": "未就學",
+    "major": "專業技能",
+    "higherEducation": "高等教育",
+    "graduated": "已完成",
+    "notGraduated": "未完成",
+    "skills": "技能",
+    "publicSafety": "治安",
+    "criminality": "犯罪傾向",
+    "commuteTime": "通勤時間"
+  },
+  "household": {
+    "familyType": "家庭類型",
+    "familySingle": "單身",
+    "familyCouple": "夫妻",
+    "familyFamily": "家庭",
+    "familySenior": "高齡",
+    "hasAutomobile": "擁有汽車",
+    "noAutomobile": "沒有汽車",
+    "discretionaryIncome": "可支配所得",
+    "satisNutrition": "營養滿足度",
+    "satisHealthcare": "醫療滿足度",
+    "satisEntertainment": "娛樂滿足度",
+    "members": "家庭成員"
+  },
+  "education": {
+    "people": "人"
+  }
+}

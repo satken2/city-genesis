@@ -1,0 +1,58 @@
+{
+  "epochConfirm": {
+    "currentDate": "현재 날짜",
+    "afterDate": "실행 후 날짜",
+    "epochCount": "에포크 수",
+    "message": "이번 턴의 작업을 마치고 시간을 진행하시겠습니까?",
+    "no": "아니오",
+    "yes": "예",
+    "executing": "에포크 실행 중...",
+    "errorSteamLimit": "Steam 인증을 확인할 수 없어 더 이상 에포크를 실행할 수 없습니다. (미인증 상태에서는 10에포크까지 플레이할 수 있습니다)",
+    "errorFailed": "에포크 실행에 실패했습니다: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "({{count}}에포크 실행)",
+    "exchangeRate": "환율",
+    "sectionConstruction": "건설 상황",
+    "kindPath": "도로",
+    "kindBuilding": "시설",
+    "columnName": "명칭",
+    "columnStatus": "상태",
+    "columnProgress": "진척도",
+    "noItems": "대상 없음",
+    "progressFormat": "{{before}}% → {{after}}%",
+    "completed": "완성",
+    "sectionStatistics": "통계",
+    "sectionScore": "점수",
+    "scoreGain": "가점",
+    "scoreLoss": "감점",
+    "questProgress": "{{completed}} / {{total}} 달성",
+    "questState": {
+      "completed": "달성",
+      "active": "진행 중",
+      "locked": "미해금",
+      "failed": "실패"
+    },
+    "trendLegend": "화살표는 최근 {{count}}에포크의 추세",
+    "trendHint": "최근 {{count}}에포크의 추세: {{trend}}",
+    "trend": {
+      "up": "상승 추세",
+      "flat": "보합",
+      "down": "하락 추세",
+      "none": "이력이 부족합니다"
+    },
+    "statPopulation": "인구",
+    "statGdp": "GDP",
+    "statPrice": "물가",
+    "statIncome": "소득",
+    "statUnemployment": "실업률",
+    "statHealthcare": "의료 충족도",
+    "statNutrition": "영양 충족도",
+    "statEntertainment": "여가 충족도",
+    "statFire": "화재",
+    "statTraffic": "교통사고",
+    "statCrime": "범죄",
+    "questCompleted": "달성!",
+    "questFailed": "기한 초과"
+  }
+}

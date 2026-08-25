@@ -1,0 +1,58 @@
+{
+  "epochConfirm": {
+    "currentDate": "当前日期",
+    "afterDate": "执行后的日期",
+    "epochCount": "纪元数",
+    "message": "完成本回合的操作并推进时间吗？",
+    "no": "否",
+    "yes": "是",
+    "executing": "纪元执行中...",
+    "errorSteamLimit": "无法确认Steam认证，因此无法继续执行纪元。（未认证状态下最多可游玩10个纪元）",
+    "errorFailed": "纪元执行失败：{{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "（执行了{{count}}个纪元）",
+    "exchangeRate": "汇率",
+    "sectionConstruction": "建设状况",
+    "kindPath": "道路",
+    "kindBuilding": "设施",
+    "columnName": "名称",
+    "columnStatus": "状态",
+    "columnProgress": "进度",
+    "noItems": "无对象",
+    "progressFormat": "{{before}}% → {{after}}%",
+    "completed": "完成",
+    "sectionStatistics": "统计",
+    "sectionScore": "评分",
+    "scoreGain": "加分",
+    "scoreLoss": "扣分",
+    "questProgress": "已达成 {{completed}} / {{total}}",
+    "questState": {
+      "completed": "已达成",
+      "active": "进行中",
+      "locked": "未解锁",
+      "failed": "失败"
+    },
+    "trendLegend": "箭头表示最近{{count}}个纪元的趋势",
+    "trendHint": "最近{{count}}个纪元的趋势：{{trend}}",
+    "trend": {
+      "up": "上升趋势",
+      "flat": "持平",
+      "down": "下降趋势",
+      "none": "历史数据不足"
+    },
+    "statPopulation": "人口",
+    "statGdp": "GDP",
+    "statPrice": "物价",
+    "statIncome": "收入",
+    "statUnemployment": "失业率",
+    "statHealthcare": "医疗满足度",
+    "statNutrition": "营养满足度",
+    "statEntertainment": "娱乐满足度",
+    "statFire": "火灾",
+    "statTraffic": "交通事故",
+    "statCrime": "犯罪",
+    "questCompleted": "达成！",
+    "questFailed": "已超期"
+  }
+}

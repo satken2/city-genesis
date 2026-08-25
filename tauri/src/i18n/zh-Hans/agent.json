@@ -1,0 +1,134 @@
+{
+  "agent": {
+    "back": "返回",
+    "editSubBuildings": "编辑附属建筑布局",
+    "publicFacility": "公共设施",
+    "underAcquisition": "征地协商中",
+    "publicFacilityPanel": {
+      "title": "公共/公营设施"
+    },
+    "abandon": "放弃",
+    "abandonHint": "放弃维护，不再修缮，任其老化",
+    "activeFrom": "当前状态起始日",
+    "reserves": "现金存款",
+    "revenues": "收入",
+    "expenses": "支出",
+    "zone": "所属地区",
+    "building": "入驻建筑",
+    "rent": "房租",
+    "floorOccupancy": "楼面占用量",
+    "tenants": "入驻租户",
+    "tabBasicInfo": "基本信息",
+    "utilizationTarget": "利用率目标",
+    "constructionSpeed": "建设速度",
+    "constructionCostPerEpoch": "每纪元建设成本",
+    "remainingConstruction": "剩余工期",
+    "remainingEpochs": "约{{n}}个纪元",
+    "tabBuildingInfo": "建筑信息",
+    "tabCargoInfo": "装卸信息",
+    "tabHouseholdInfo": "家庭信息",
+    "tabTradeInfo": "供需・交易",
+    "tabEmploymentInfo": "雇佣信息",
+    "action": {
+      "purchase": "收购",
+      "bulldoze": "拆除",
+      "cancelBulldoze": "取消拆除",
+      "pause": "暂停",
+      "resume": "恢复",
+      "delete": "删除",
+      "repair": "修缮",
+      "rebuild": "重建",
+      "edit": "编辑",
+      "startConstruction": "开工",
+      "stopConstruction": "暂缓施工",
+      "cancelAbandon": "取消放弃"
+    },
+    "pendingWarning": "该建筑尚处于规划中。请下达开工指令。",
+    "alerts": {
+      "title": "警报",
+      "constructionShortage": {
+        "title": "建设服务不足",
+        "description": "建设预算不足，工程进度延迟。"
+      },
+      "onFire": {
+        "title": "火灾发生！",
+        "description": "建筑内发生火灾。"
+      },
+      "accidentalFire": {
+        "title": "失火（小火）",
+        "description": "建筑内发生失火，但已控制在小范围内。"
+      },
+      "infraDisconnected": {
+        "title": "未接入基础设施网络",
+        "description": "该设施的接线端子没有连接基础设施路径。在接入网络之前无法供给或接收。"
+      },
+      "crime": {
+        "title": "发生犯罪",
+        "description": "该建筑发生了犯罪。"
+      },
+      "crimeSign": {
+        "title": "犯罪征兆",
+        "description": "该建筑出现犯罪征兆。请注意治安恶化。"
+      },
+      "laborShortage": {
+        "title": "劳动力不足",
+        "description": "员工人数不足，生产与服务供给低于计划。"
+      },
+      "materialShortage": {
+        "title": "原材料不足",
+        "description": "原材料采购不足，生产与服务供给低于计划。"
+      },
+      "highSkillShortage": {
+        "title": "专业人才不足",
+        "description": "未能确保所需的高技能人才，无法运营。"
+      },
+      "budgetCapped": {
+        "title": "预算不足",
+        "description": "分配的预算远低于所需金额，已缩减运营规模。请重新审视预算分配。"
+      }
+    },
+    "infra": {
+      "title": "基础设施连接",
+      "connected": "已连接",
+      "disconnected": "未连接",
+      "received": "接收量"
+    },
+    "tabConstructionInfo": "建设工程"
+  },
+  "agentList": {
+    "filterType": "类型",
+    "filterVariant": "变体",
+    "filterZone": "地区",
+    "allVariants": "所有变体",
+    "allZones": "所有地区",
+    "resultCount": "{{count}}项",
+    "capped": "(共{{total}}项中)",
+    "loading": "加载中...",
+    "noResults": "没有符合条件的经济主体",
+    "colStatus": "状态",
+    "colVariant": "变体",
+    "colName": "名称",
+    "colProduct": "产品",
+    "colPrice": "价格",
+    "colProduction": "产量",
+    "colStock": "库存量",
+    "colSold": "售出量",
+    "colWage": "工资",
+    "colEmployment": "雇佣",
+    "colUtilization": "利用率",
+    "colBdType": "建筑类型",
+    "colDurability": "耐久度",
+    "colRent": "租金",
+    "colFloors": "层数",
+    "colFloorArea": "建筑面积",
+    "colOccupancy": "入驻率",
+    "colFamilyType": "家庭类型",
+    "colDiscretionaryIncome": "可支配收入",
+    "colSatisNutrition": "营养",
+    "colSatisHealthcare": "医疗",
+    "colSatisEntertainment": "娱乐",
+    "colSatisResidential": "居住",
+    "colAutomobile": "私家车",
+    "colEnrollment": "在籍情况"
+  }
+}

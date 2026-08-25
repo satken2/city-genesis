@@ -12,7 +12,6 @@
     "saving": "保存中...",
     "rename": "名称を変更",
     "renameFailed": "名称の変更に失敗しました",
-    "confirm": "確定",
     "cancel": "キャンセル",
     "processing": "処理中...",
     "minutes": "分"
@@ -47,10 +46,7 @@
     "5": "農場"
   },
   "resource": {
-    "basicInfo": "基本情報",
-    "resourceName": "資源名",
     "currentAmount": "現在量",
-    "consumptionAmount": "消費量",
     "consumptionTrend": "消費量推移",
     "amountTrend": "残量推移",
     "recoveryAmount": "回復量",

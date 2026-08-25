@@ -1,0 +1,67 @@
+{
+  "common": {
+    "loading": "載入中...",
+    "fetchError": "資料取得失敗",
+    "noData": "無資料",
+    "history": "歷史紀錄",
+    "currency": "{{value, number}}",
+    "daysSinceEpoch": "自1800年1月1日起第{{days}}天",
+    "close": "關閉",
+    "sqm": "{{value}} m²",
+    "save": "儲存",
+    "saving": "儲存中...",
+    "rename": "重新命名",
+    "renameFailed": "重新命名失敗",
+    "minutes": "分鐘",
+    "processing": "處理中...",
+    "cancel": "取消"
+  },
+  "status": {
+    "0": "規劃中",
+    "1": "營運中",
+    "2": "已停業",
+    "3": "已列入建設計畫",
+    "4": "建設中",
+    "5": "已列入拆除計畫",
+    "6": "拆除中",
+    "7": "已完成",
+    "8": "已中止",
+    "9": "閒置",
+    "10": "已倒塌",
+    "11": "等待開工"
+  },
+  "reason": {
+    "1": "火災倒塌",
+    "2": "老化",
+    "3": "虧損經營",
+    "4": "使用率過低",
+    "5": "市長決定"
+  },
+  "spaceType": {
+    "0": "其他",
+    "1": "住宅",
+    "2": "商業設施",
+    "3": "倉庫・工廠",
+    "4": "辦公",
+    "5": "農場"
+  },
+  "resource": {
+    "currentAmount": "目前儲量",
+    "consumptionTrend": "消耗量走勢",
+    "amountTrend": "剩餘量走勢",
+    "recoveryAmount": "恢復量",
+    "maxAmount": "最大儲量",
+    "unknownResource": "未知資源"
+  },
+  "errors": {
+    "TERRAIN_NOT_ACQUIRED": "此區域尚未勘查。請先解鎖對應的地形單元。",
+    "UNKNOWN_ERROR": "發生錯誤。",
+    "CREATEPATH_INVALID_GEOMETRY": "路徑形狀無效。請確認起點與終點。",
+    "CREATEPATH_OUTSIDE_COASTLINE": "無法在海岸線之外鋪設路徑。",
+    "CREATEPATH_MULTIPLE_INTERSECTIONS": "與同一條道路多次相交。請選擇其他路線。",
+    "CREATEPATH_ELEVATION_INTERSECTION": "偵測到立體交叉。請調整高度。",
+    "PATH_TOO_FEW_POINTS": "至少需要2個點。",
+    "PATH_MAX_SPAN_EXCEEDED": "節點間距過長。請新增中間點。",
+    "PATH_ELEVATION_CONFLICT": "偵測到立體交叉。請調整高度。"
+  }
+}

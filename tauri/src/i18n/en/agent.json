@@ -1,6 +1,5 @@
 {
   "agent": {
-    "title": "Agent Details",
     "back": "Back",
     "editSubBuildings": "Edit Sub-Building Layout",
     "publicFacility": "Public Facility",
@@ -94,9 +93,7 @@
       "disconnected": "Disconnected",
       "received": "Received"
     },
-    "tabConstructionInfo": "Construction",
-    "demolitionCostPerEpoch": "Demolition Cost / Epoch",
-    "remainingDemolition": "Remaining Demolition"
+    "tabConstructionInfo": "Construction"
   },
   "agentList": {
     "filterType": "Type",
@@ -116,9 +113,6 @@
     "colProduction": "Production",
     "colStock": "Stock",
     "colSold": "Sold",
-    "colWageHigh": "High-skill wage",
-    "colWageStd": "Standard wage",
-    "colWageLow": "Low-skill wage",
     "colWage": "Wages",
     "colEmployment": "Employment",
     "colUtilization": "Utilization",

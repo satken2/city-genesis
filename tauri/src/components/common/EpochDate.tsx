@@ -8,6 +8,7 @@
 
 import { useTranslation } from "react-i18next";
 import { formatEpochDate } from "../../utils/date";
+import { resolveIntlLocale } from "../../utils/locale";
 
 type EpochDateProps = {
   /** 1800年1月1日からの経過日数 */
@@ -21,7 +22,7 @@ type EpochDateProps = {
 export function EpochDate({ daysSinceEpoch, hideDay, simulationDays }: EpochDateProps) {
   const { i18n, t } = useTranslation();
 
-  const locale = i18n.language === "ja" ? "ja-JP" : "en-US";
+  const locale = resolveIntlLocale(i18n.language);
   const formatted = formatEpochDate(daysSinceEpoch, locale, { hideDay, simulationDays });
 
   return (

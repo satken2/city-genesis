@@ -1,0 +1,58 @@
+{
+  "epochConfirm": {
+    "currentDate": "目前日期",
+    "afterDate": "執行後的日期",
+    "epochCount": "紀元數",
+    "message": "完成本回合的作業並推進時間嗎？",
+    "no": "否",
+    "yes": "是",
+    "executing": "紀元執行中...",
+    "errorSteamLimit": "無法確認Steam認證，因此無法繼續執行紀元。（未認證狀態下最多可遊玩10個紀元）",
+    "errorFailed": "紀元執行失敗：{{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "（執行了{{count}}個紀元）",
+    "exchangeRate": "匯率",
+    "sectionConstruction": "建設狀況",
+    "kindPath": "道路",
+    "kindBuilding": "設施",
+    "columnName": "名稱",
+    "columnStatus": "狀態",
+    "columnProgress": "進度",
+    "noItems": "無對象",
+    "progressFormat": "{{before}}% → {{after}}%",
+    "completed": "完成",
+    "sectionStatistics": "統計",
+    "sectionScore": "評分",
+    "scoreGain": "加分",
+    "scoreLoss": "扣分",
+    "questProgress": "已達成 {{completed}} / {{total}}",
+    "questState": {
+      "completed": "已達成",
+      "active": "進行中",
+      "locked": "未解鎖",
+      "failed": "失敗"
+    },
+    "trendLegend": "箭頭表示最近{{count}}個紀元的趨勢",
+    "trendHint": "最近{{count}}個紀元的趨勢：{{trend}}",
+    "trend": {
+      "up": "上升趨勢",
+      "flat": "持平",
+      "down": "下降趨勢",
+      "none": "歷史資料不足"
+    },
+    "statPopulation": "人口",
+    "statGdp": "GDP",
+    "statPrice": "物價",
+    "statIncome": "所得",
+    "statUnemployment": "失業率",
+    "statHealthcare": "醫療滿足度",
+    "statNutrition": "營養滿足度",
+    "statEntertainment": "娛樂滿足度",
+    "statFire": "火災",
+    "statTraffic": "交通事故",
+    "statCrime": "犯罪",
+    "questCompleted": "達成！",
+    "questFailed": "已逾期"
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "path": {
+    "titleWithId": "Voie n° {{id}}",
+    "zoneName": "Quartier",
+    "followTerrain": "Suivi du terrain",
+    "followTerrainFollow": "Oui (réglage individuel)",
+    "followTerrainNone": "Non (réglage individuel)",
+    "durability": "Durabilité",
+    "noise": "Bruit",
+    "airPollution": "Pollution de l'air",
+    "overrideMaxSpeed": "Définir la limitation de vitesse individuellement",
+    "maxSpeed": "Limitation de vitesse",
+    "utilization": "Utilisation",
+    "trafficByVehicle": "Trafic (par jour)",
+    "trafficUnitPerDay": "/jour",
+    "category": {
+      "0": "Piéton",
+      "1": "Route",
+      "2": "Rail",
+      "unknown": "Inconnu"
+    },
+    "action": {
+      "delete": "Supprimer",
+      "editShape": "Modifier la forme",
+      "repair": "Réparer",
+      "rebuild": "Reconstruire",
+      "startConstruction": "Lancer le chantier",
+      "stopConstruction": "Mettre en attente",
+      "bulldoze": "Démolir",
+      "cancelBulldoze": "Annuler la démolition",
+      "merge": "Fusionner avec la voie voisine",
+      "split": "Diviser la voie"
+    },
+    "topology": {
+      "mergeTitle": "Fusion de voies",
+      "splitTitle": "Division de voie",
+      "mergeHint": "Cliquez dans la vue 3D sur la voie à fusionner. Seules les voies de même type partageant une extrémité à laquelle aucune autre voie n'est raccordée peuvent être choisies.",
+      "splitHint": "Cliquez dans la vue 3D sur le point de division. Le point est placé sur l'axe de la voie.",
+      "waitingSelection": "En attente d'une sélection dans la vue 3D.",
+      "checking": "Vérification...",
+      "submitting": "Exécution...",
+      "thisPath": "Cette voie",
+      "mergedLength": "Longueur après fusion",
+      "beforeLength": "Longueur avant division",
+      "firstSegment": "Après division (côté départ)",
+      "secondSegment": "Après division (côté arrivée)",
+      "meters": "{{value}} m",
+      "confirmMerge": "Fusionner",
+      "confirmSplit": "Diviser",
+      "cancel": "Annuler"
+    },
+    "pendingWarning": "Cette route est à l'état de projet. Ordonnez le démarrage du chantier.",
+    "alerts": {
+      "constructionShortage": {
+        "title": "Manque de services de construction",
+        "description": "Le budget de construction est insuffisant, les travaux prennent du retard."
+      },
+      "accident": {
+        "title": "Accident de la route !",
+        "description": "Un accident de la circulation s'est produit sur la route."
+      },
+      "noStationHouse": {
+        "title": "Aucun bâtiment de gare",
+        "description": "Ce quai n'est rattaché à aucune gare. Depuis l'onglet Bâtiment de gare du panneau de construction ferroviaire, tracez une ligne de gare traversant ce quai."
+      }
+    },
+    "tabConstructionInfo": "Chantier"
+  },
+  "path_construction": {
+    "constructionSpeed": "Vitesse de construction",
+    "selectType": "-- Choisir le type --",
+    "selectTypeFirst": "Choisissez un type",
+    "noVariants": "Aucun résultat",
+    "shape": "Forme",
+    "elevation": "Altitude (Y)",
+    "embankmentHeight": "Hauteur du remblai",
+    "followTerrain": "Suivi du terrain",
+    "followTerrainDefault": "Par défaut",
+    "followTerrainFollow": "Suivre",
+    "followTerrainNone": "Ne pas suivre",
+    "followTerrainHelp": "Sans suivi, les tronçons qui traversent des collines deviennent automatiquement des tranchées ou des tunnels, et ceux qui franchissent des vallées deviennent des ponts.",
+    "confirm": "Valider",
+    "confirming": "Validation...",
+    "confirmFailedUnknown": "Échec de la validation de la voie. Modifiez la forme et réessayez.",
+    "cancel": "Annuler",
+    "noNodesYet": "Tracez une voie",
+    "costInfo": "Coût de construction",
+    "costRatioHelp": "Construire des voies en viaduc ou en souterrain, ou sur un terrain complexe, augmente le coût de la construction.",
+    "placedContinue": "Voie placée. Placez la voie suivante.",
+    "platformSide": "Côté du quai",
+    "platformSideOutside": "Extérieur",
+    "platformSideInside": "Intérieur",
+    "platformSideBoth": "Des deux côtés",
+    "rail": {
+      "parallel": "Voies parallèles",
+      "noVariantForCombo": "Aucune voie ferrée ne correspond à cette combinaison",
+      "trackCount": "Nombre de voies",
+      "trackSpacing": "Écartement entre voies",
+      "spacingWiden": "Élargir",
+      "spacingShrink": "Resserrer",
+      "dirForward": "Sens aller",
+      "dirBackward": "Sens retour",
+      "dirBoth": "Deux sens"
+    }
+  },
+  "track_construction": {
+    "trackTab": "Voie ferrée",
+    "platformTab": "Quai",
+    "houseTab": "Bâtiment de gare",
+    "house": {
+      "hint": "Tracez la ligne du bâtiment de gare. Les quais traversés par cette ligne sont rattachés à cette gare. Un bâtiment est placé à chaque extrémité de la ligne, reliés par une passerelle le long de celle-ci."
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "building": {
+    "type": "Type de bâtiment",
+    "durability": "Durabilité",
+    "floors": "Étages",
+    "floorsValue": "{{floors}} étages (surface de plancher {{area, number}} ㎡)",
+    "heightLabel": "Hauteur : {{value}} m",
+    "baseAreaLabel": "Emprise au sol : {{area, number}} ㎡",
+    "underMaintenance": "En réparation"
+  },
+  "mashup_edit": {
+    "hint": "Glissez une carte sur le terrain pour la placer / glissez pour déplacer / Maj+glisser pour pivoter / touche Suppr pour retirer",
+    "sizeLabel": "{{width}}×{{height}} m",
+    "deleteSelected": "Supprimer l'annexe sélectionnée",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "saveFailed": "Échec de l'enregistrement de la disposition des annexes",
+    "noParcel": "Ce bâtiment n'a pas de parcelle",
+    "noSubbuildings": "Aucune annexe n'est définie pour ce type de bâtiment"
+  }
+}

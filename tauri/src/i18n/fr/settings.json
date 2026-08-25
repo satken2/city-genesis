@@ -1,0 +1,96 @@
+{
+  "settings": {
+    "title": "Paramètres",
+    "fontSize": {
+      "label": "Taille du texte",
+      "large": "Grande",
+      "medium": "Moyenne",
+      "small": "Petite",
+      "custom": "Personnalisée",
+      "preview": "Taille actuelle"
+    },
+    "monitor": {
+      "label": "Écran",
+      "prev": "Écran précédent",
+      "next": "Écran suivant"
+    },
+    "hintbar": {
+      "label": "Barre d'astuces",
+      "show": "Afficher",
+      "hide": "Masquer",
+      "description": "Barre en haut de l'écran qui affiche des astuces d'utilisation"
+    },
+    "language": {
+      "label": "Langue",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어"
+    },
+    "volume": {
+      "label": "Volume",
+      "master": "Volume général",
+      "bgm": "Musique",
+      "sfx": "Effets sonores"
+    },
+    "compute": {
+      "label": "Calcul",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "GPU activé",
+      "statusInactive": "CPU activé",
+      "restartRequired": "Le serveur redémarrera après la modification de ce réglage",
+      "restarting": "Redémarrage...",
+      "restartFailed": "Échec du redémarrage",
+      "restartUnavailable": "Paramètres enregistrés. Les changements prendront effet au prochain démarrage du jeu",
+      "confirmRestart": "Basculer le calcul sur {mode} ? Le serveur va redémarrer."
+    },
+    "windowReset": {
+      "label": "Position et taille des fenêtres",
+      "button": "Réinitialiser la taille et la position des fenêtres"
+    }
+  },
+  "saveLoad": {
+    "newGame": "Nouvelle partie",
+    "overwriteSave": "Écraser la sauvegarde",
+    "saveAs": "Enregistrer sous",
+    "load": "Charger",
+    "quitGame": "Quitter le jeu",
+    "returnToTop": "Revenir au menu principal",
+    "saving": "Enregistrement...",
+    "loading": "Chargement...",
+    "shuttingDown": "Fermeture...",
+    "saveSuccess": "Sauvegarde terminée",
+    "newGameSuccess": "Nouvelle partie démarrée",
+    "saveFailed": "Échec de la sauvegarde",
+    "loadFailed": "Échec du chargement",
+    "confirmNewGame": "Les données actuelles seront perdues. Démarrer une nouvelle partie ?",
+    "confirmQuitGame": "Quitter le jeu ? La progression actuelle n'est pas sauvegardée automatiquement.",
+    "confirmReturnToTop": "Revenir au menu principal ? La progression actuelle n'est pas sauvegardée automatiquement.",
+    "confirm": "Oui",
+    "cancel": "Non",
+    "debugInit": "Debug Init"
+  },
+  "saveList": {
+    "noSaves": "Aucune sauvegarde",
+    "currentSave": "Données actuelles",
+    "population": "Population",
+    "inGameDate": "Date",
+    "savedAt": "Date de sauvegarde",
+    "loadButton": "Charger",
+    "deleteButton": "Supprimer",
+    "confirmLoad": "Charger cette sauvegarde ?",
+    "confirmDelete": "Supprimer cette sauvegarde ? Cette action est irréversible.",
+    "confirm": "Oui",
+    "cancel": "Non",
+    "loading": "Chargement...",
+    "loadFailed": "Échec du chargement",
+    "loadSuccess": "Chargement terminé",
+    "deleteFailed": "Échec de la suppression",
+    "deleteSuccess": "Sauvegarde supprimée",
+    "openFolderButton": "Afficher le dossier"
+  }
+}

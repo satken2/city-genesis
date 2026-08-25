@@ -1,0 +1,232 @@
+{
+  "tutorial": {
+    "startButton": "Empezar",
+    "step1": {
+      "title": "Bienvenido",
+      "description": "¡Bienvenido! Como alcalde de esta ciudad, te encargarás de impulsar su desarrollo. ¡Vamos a enseñarte lo básico de la construcción urbana!"
+    },
+    "step2": {
+      "title": "Coloquemos una calle",
+      "description": "Lo primero que hace falta es una calle. Para construirla, elige el icono de calles en la barra de herramientas, selecciona «Calle residencial de dos carriles» en la categoría «Vialidad» y colócala. Las calles largas tardan más en construirse, así que por ahora coloca una calle corta."
+    },
+    "step3": {
+      "title": "Configuremos el presupuesto de la ciudad",
+      "description": "Para destinar dinero de forma prioritaria a la obra vial, configuremos el presupuesto de la ciudad. Abre la ventana de presupuesto desde el panel de iconos de la izquierda y reduce las demás categorías para poder destinar más a la categoría de construcción (el presupuesto de construcción debe quedar en el 95 % o más del total). Puedes ajustarlo arrastrando los límites de la barra deslizante superior o escribiendo cifras en las cajas de texto de cada partida."
+    },
+    "step4": {
+      "title": "Terminemos la calle",
+      "description": "La calle todavía está «en proyecto». Tras iniciar la obra pasará un tiempo hasta que quede terminada. Avancemos el tiempo y esperemos a que se complete. Pulsa el botón «Iniciar» de la barra de herramientas para avanzar un poco el tiempo. Durante la obra se paga un costo de construcción cada mes."
+    },
+    "step5": {
+      "title": "Creemos parcelas",
+      "description": "La calle ya está lista. Ahora creemos las parcelas donde levantar edificios. Elige el icono de parcelas en la barra de herramientas y crea parcelas con «A lo largo de la calle». Cuando aparezcan los contornos rojos junto a la calle, confirma con el botón para crearlas."
+    },
+    "step6": {
+      "title": "Construyamos un edificio",
+      "description": "Por fin podemos construir. Elige el icono de edificios en la barra de herramientas y selecciona «Vivienda colectiva» dentro de la categoría «Vivienda colectiva». Puedes elegir como sitio de obra cualquiera de las parcelas que acabas de crear."
+    },
+    "step7": {
+      "title": "Terminemos el edificio",
+      "description": "El edificio, igual que la calle, no se termina de inmediato. Todavía está en proyecto, así que avancemos el tiempo y esperemos a que se complete."
+    },
+    "scenario2": {
+      "title": "Configuremos los distritos",
+      "description": "Aprende a dividir la ciudad en distritos y a definir normativa de construcción para cada uno.",
+      "step1": {
+        "title": "Qué es un distrito",
+        "description": "En este tutorial aprenderás a definir distritos en la ciudad y a configurar normativas y otros ajustes por distrito."
+      },
+      "step2": {
+        "title": "Creemos un distrito",
+        "description": "El distrito es la unidad con la que se divide la ciudad y se define sobre las calles que la componen. Pulsa el botón de distritos en el panel de iconos de la izquierda para entrar en el modo de edición de distritos. Verás que ahora toda la ciudad forma un solo distrito. En la vista 3D, con la herramienta de creación (estado inicial; se cambia con el menú que aparece al mantener Ctrl), haz clic en la calle de arriba a la derecha para convertir esa calle y las parcelas que dan a ella en un distrito nuevo."
+      },
+      "step3": {
+        "title": "El distrito quedó dividido",
+        "description": "Has separado una parte de la ciudad como distrito nuevo. Al crear distritos puedes consultar precios, población y otros datos por distrito, y definir normativa de construcción para todo el distrito."
+      },
+      "step4": {
+        "title": "Mostremos los recursos naturales",
+        "description": "Veamos si hay recursos naturales dentro de este distrito. Haz clic en el icono del ojo en la cabina, al centro de la parte inferior de la pantalla, para cambiar el modo de visualización. Selecciona la pestaña de recursos naturales y actívalos."
+      },
+      "step5": {
+        "title": "Abramos el detalle del distrito",
+        "description": "Resulta que en el distrito recién creado hay una veta mineral. Parece buena idea destinar esta zona a una cantera. Haz clic en la etiqueta del distrito recién creado para abrir su panel de detalle."
+      },
+      "step6": {
+        "title": "Definamos la normativa de construcción",
+        "description": "En la normativa de construcción, en la parte baja del panel, puedes elegir qué edificios pueden levantarse en las parcelas de este distrito. Como aquí solo queremos canteras, haz clic en todos los demás edificios para desactivarlos."
+      },
+      "step7": {
+        "title": "Revisemos una parcela",
+        "description": "Ya definiste la normativa del distrito. Comprobemos que se aplica a las parcelas que contiene. Haz clic en una parcela del distrito para abrir su panel de detalle."
+      },
+      "step8": {
+        "title": "La normativa se aplicó",
+        "description": "Si miras la parte baja del panel de la parcela, verás que se refleja la restricción del distrito que solo permite canteras. En esta parcela ya no se puede construir nada que no sea una cantera."
+      }
+    },
+    "scenario3": {
+      "title": "Construyamos la infraestructura",
+      "description": "Aprende a llevar electricidad a la ciudad mediante centrales, subestaciones y líneas de transmisión.",
+      "step1": {
+        "title": "Qué es desarrollar infraestructura",
+        "description": "En este tutorial aprenderás a construir la infraestructura necesaria para abastecer de electricidad a la ciudad. Pulsa «Iniciar» para continuar."
+      },
+      "step2": {
+        "title": "Revisemos la vivienda",
+        "description": "En esta ciudad ya hay una vivienda construida, pero todavía no recibe electricidad. Haz clic en ella para abrir su información y comprobar que no tiene suministro eléctrico."
+      },
+      "step3": {
+        "title": "Construyamos una central solar",
+        "description": "Para generar electricidad hace falta primero una central. Esta ciudad aún no tiene ninguna. Hay un terreno amplio al oeste de la ciudad: elige «Central solar» en el panel de edificios y constrúyela ahí."
+      },
+      "step4": {
+        "title": "Nos saltamos la obra",
+        "description": "Normalmente una central tarda en construirse, pero como esto es un tutorial nos saltaremos la obra. Si pulsas «Ya terminé», la central solar quedará lista de inmediato."
+      },
+      "step5": {
+        "title": "Construyamos una subestación",
+        "description": "La central solar ya está lista. Sin embargo, la corriente de alta tensión que genera no puede usarse directamente en los hogares. Hace falta colocar una subestación cerca del punto de consumo para convertirla en electricidad doméstica. Hay un terreno libre junto a la vivienda: construye ahí una «Subestación»."
+      },
+      "step6": {
+        "title": "Tendamos la línea de transmisión",
+        "description": "Para llevar la corriente de alta tensión de la central a la subestación, instalaremos una «Línea de alta tensión». Tanto la central como la subestación tienen un nodo de «terminal de conexión»: engancha un extremo de la línea al terminal de la central solar y el otro al de la subestación."
+      },
+      "step7": {
+        "title": "Comprobemos el suministro eléctrico",
+        "description": "Con esto la infraestructura queda lista. Avanza el tiempo y comprueba que la subestación recibe la corriente de alta tensión."
+      },
+      "step8": {
+        "title": "Infraestructura completada",
+        "description": "¡Buen trabajo! La central genera corriente de alta tensión, la línea de transmisión la lleva hasta la subestación y esta la convierte en electricidad para la ciudad: esa es la estructura en dos etapas de la infraestructura eléctrica. Con el mismo mecanismo puedes desarrollar otras infraestructuras, como el agua potable."
+      }
+    },
+    "scenario4": {
+      "title": "Construyamos un ferrocarril",
+      "description": "Aprende a poner en servicio una línea ferroviaria preparando en orden las vías, el depósito, la línea de transmisión, el andén y el edificio de estación.",
+      "step1": {
+        "title": "El ferrocarril funciona por combinación",
+        "description": "En este tutorial aprenderás a llevar el ferrocarril a la ciudad. Un ferrocarril no funciona solo con tender vías. Hace falta un depósito que aporte los trenes, una línea de transmisión que alimente la vía electrificada, un andén y un edificio de estación para que suban y bajen los pasajeros, y una línea que haga circular los trenes: solo con todo eso reunido se pone en marcha. Esta ciudad solo cuenta con calles y una central solar. Pulsa «Empezar» y vamos construyéndolo por partes."
+      },
+      "step2": {
+        "title": "Tendamos las vías",
+        "description": "Primero, la vía por donde circularán los trenes. Abre «Construcción ferroviaria» en el panel de iconos de la izquierda y, en la pestaña «Vía férrea», elige «Vía electrificada de superficie». Una sola vía es vía única, así que para ir y volver hace falta doble vía. Pon el número de vías «paralelas» en 2 y tiéndelas rectas en dirección este-oeste sobre el terreno libre al norte (al fondo) de la calle. En la vista 3D, el clic izquierdo añade vértices y el derecho confirma."
+      },
+      "step3": {
+        "title": "Construyamos el depósito",
+        "description": "Aunque haya vías, sin trenes que circulen el ferrocarril no funciona. Los trenes se suministran a la línea desde el depósito. En «Construcción» del panel de iconos elige «Depósito ferroviario» y constrúyelo en la parcela libre preparada junto a la calle. Normalmente tarda en terminarse, pero como es un tutorial quedará listo de inmediato con el botón de finalizar."
+      },
+      "step4": {
+        "title": "Conectemos con una vía de acceso",
+        "description": "El depósito no puede sacar trenes si no está conectado a la vía. El depósito cuenta con un nodo de «terminal de conexión». Elige de nuevo «Vía electrificada de superficie» en «Construcción ferroviaria» (basta con una sola vía) y tiende desde ese terminal una vía de acceso hasta la línea principal. Engancha un extremo al terminal del depósito y el otro a la vía principal."
+      },
+      "step5": {
+        "title": "Conectemos la línea de transmisión",
+        "description": "Una vía electrificada solo puede mover trenes cuando circula electricidad por la catenaria. Abre «Calles» en el panel de iconos, elige «Línea de transmisión» en «Electricidad» dentro de la pestaña «Infraestructura» y conecta el terminal de la central solar con el terminal del depósito. El terminal del depósito es compartido y acepta tanto vías como líneas de transmisión, de modo que si la electricidad llega ahí se distribuye por la vía de acceso a toda la red ferroviaria."
+      },
+      "step6": {
+        "title": "Construyamos el andén",
+        "description": "Ahora el andén donde los pasajeros esperan el tren. En la pestaña «Andén» de «Construcción ferroviaria» elige «Andén ferroviario electrificado de superficie» y tiéndelo, corto, en un tramo intermedio de la línea principal. El andén también es un tipo de vía, así que la clave es tenderlo de forma que empalme suavemente con la línea principal. Con el lado del andén puedes elegir de qué lado de la vía se coloca."
+      },
+      "step7": {
+        "title": "Construyamos el edificio de estación",
+        "description": "Con solo el andén, este todavía no pertenece a ninguna estación. En la pestaña «Edificio de estación» de «Construcción ferroviaria» elige «Estación elevada sencilla» y traza una línea que cruce el andén que acabas de tender. Los andenes que crucen esa línea se agruparán en una misma estación y en ambos extremos de la línea se levantarán los edificios de la estación."
+      },
+      "step8": {
+        "title": "Pongamos la línea en servicio",
+        "description": "Por último, crearemos la línea que hará circular los trenes. Abre «Transporte público» en el panel de iconos y pulsa «＋ Nueva línea». Elige «Línea ferroviaria de media distancia» como tipo de línea y haz clic sobre el andén en la vista 3D para colocar una parada. Define la tarifa y el intervalo, y pulsa «Crear» para inaugurarla."
+      },
+      "step9": {
+        "title": "Ferrocarril inaugurado",
+        "description": "¡Buen trabajo! Tender la vía, suministrar trenes desde el depósito, llevar electricidad con la línea de transmisión, formar la estación con andén y edificio, y hacer pasar una línea por encima: el ferrocarril funciona gracias a la suma de todos esos elementos. Ahora solo tienes que avanzar el tiempo para que los trenes empiecen a circular y lleguen los ingresos por tarifa. Los alrededores de la estación ganan en comodidad, así que intenta concentrar ahí vivienda y comercio."
+      }
+    },
+    "complete": {
+      "title": "Tutorial completado",
+      "description": "¡Felicidades! Con esto termina el tutorial. Volveremos al menú.",
+      "button": "Volver al menú"
+    },
+    "completeButton": "Ya terminé",
+    "checking": "Comprobando...",
+    "failed": "No se cumplen las condiciones. Inténtalo de nuevo.",
+    "completed": "¡Tutorial completado! Buen trabajo.",
+    "stepProgress": "Paso {{current}} / {{total}}"
+  },
+  "tips": {
+    "todaysTips": "Consejo del día",
+    "gotIt": "Cerrar",
+    "items": {
+      "tip1": {
+        "title": "El dinero circula",
+        "description": "El gasto de alguien siempre es el ingreso de alguien más. Gasta la recaudación sin reparos y haz girar la economía de la ciudad."
+      },
+      "tip2": {
+        "title": "La larga batalla por la seguridad",
+        "description": "Quien crece en un mal entorno suele conservar la mala conducta de adulto. Mejorar la seguridad requiere el esfuerzo de varias generaciones."
+      },
+      "tip3": {
+        "title": "Abran paso",
+        "description": "Si los vehículos de emergencia llegan tarde, los daños son mayores. Cuida que las calles por donde suelen circular no se congestionen."
+      },
+      "tip4": {
+        "title": "Imprime dinero",
+        "description": "¿Falta dinero? Con tu autoridad de alcalde puedes imprimir todo el que quieras. Pero cuidado con la inflación: la subida de precios empeora el ánimo de la gente."
+      },
+      "tip5": {
+        "title": "Un camino escarpado",
+        "description": "Trazar calles o infraestructura por pendientes pronunciadas cuesta mucho. Elige rutas lo más planas posible."
+      },
+      "tip6": {
+        "title": "Planifica antes de usar",
+        "description": "Desarrollar la red eléctrica o de agua lleva tiempo. Anticipa el crecimiento y construye la infraestructura con un plan."
+      },
+      "tip7": {
+        "title": "Vísteme despacio, que llevo prisa",
+        "description": "Subir los límites de velocidad aumenta los accidentes. Apuesta por curvas amables y límites moderados."
+      },
+      "tip8": {
+        "title": "Invertir en el futuro",
+        "description": "La industria avanzada necesita personal con estudios superiores. Tómate tu tiempo para formar talento."
+      },
+      "tip9": {
+        "title": "Que dure mucho",
+        "description": "Los incendios y el colapso de la infraestructura empeoran mucho el ánimo de la gente. Reserva presupuesto suficiente para reparaciones y bomberos y evita las desgracias evitables."
+      },
+      "tip10": {
+        "title": "El fuego se propaga",
+        "description": "Las zonas con edificios muy juntos son vulnerables al fuego. Construye una ciudad ordenada."
+      },
+      "tip11": {
+        "title": "A excavar",
+        "description": "Localiza los recursos del subsuelo e instala allí la minería. Y piensa también en la estrategia de salida cuando se agoten."
+      },
+      "tip12": {
+        "title": "El árbol del dinero",
+        "description": "El alcalde también puede construir viviendas y locales comerciales. Levanta instalaciones municipales en las mejores ubicaciones y haz una fortuna."
+      },
+      "tip13": {
+        "title": "Exprime la recaudación",
+        "description": "Ajusta los impuestos con detalle. No solo financian la gestión de la ciudad: también sirven para controlar qué sectores se desarrollan."
+      },
+      "tip14": {
+        "title": "Respaldo",
+        "description": "Si un accidente o desastre detiene una instalación de infraestructura, el golpe a la economía urbana es grande. Duplica las instalaciones críticas para tener un respaldo listo."
+      },
+      "tip15": {
+        "title": "Nada de crecer a lo loco",
+        "description": "Si no hay suficientes parcelas para la demanda, aparecerán calles y parcelas de forma desordenada. Urbaniza con un plan y evita la formación de barrios marginales."
+      }
+    }
+  },
+  "hint": {
+    "buildingConstruction": "Selecciona una parcela para proyectar un edificio. Desde que lo proyectas hasta que la obra concluye pasa un tiempo.",
+    "parcelCreation": "Abre el menú de rueda con Ctrl para elegir el método de creación y haz clic en la vista 3D para indicar el objetivo. Ajusta las dimensiones en el panel y confirma.",
+    "pathConstruction": "Construye calles y vías férreas. Haz clic en el terreno de la vista 3D. El clic izquierdo añade vértices, el derecho confirma la forma, y los vértices se mueven arrastrándolos. Manteniendo Ctrl se abre el menú de ajustes (curva/recta y anclaje). Con las teclas 3/4 cambias la altura de terraplén y desmonte.",
+    "pathConstructionElevated": "Construye calles y vías férreas. Haz clic en el terreno de la vista 3D. El clic izquierdo añade vértices, el derecho confirma la forma, y los vértices se mueven arrastrándolos. Manteniendo Ctrl se abre el menú de ajustes (curva/recta y anclaje). Con RePág/AvPág o las teclas 1/2 cambias la altura, y con 3/4 la de terraplén y desmonte.",
+    "districtEdit": "Puedes crear, ampliar y fusionar los «distritos» que sirven de unidad para normativas y estadísticas. En la vista 3D, mantén Ctrl para cambiar de herramienta. Herramienta de creación: al hacer clic izquierdo en una calle se crea un distrito nuevo con ese color (el color cambia cada vez que eliges la herramienta). Herramienta de ampliación: con clic derecho eliges el distrito de destino y con clic izquierdo en una calle la incorporas a él. Herramienta de fusión: con clic derecho eliges el distrito de destino y con clic izquierdo el distrito que quieres fusionar, y se abre el panel de confirmación. El color y el nombre del distrito seleccionado se muestran junto al cursor. Pulsa de nuevo el botón para salir.",
+    "terrainUnlock": "Haz clic en las celdas del terreno para liberarlas. En las celdas liberadas se muestra el terreno en alta resolución.",
+    "bulldozer": "Modo bulldozer. Con el clic izquierdo puedes eliminar terrenos baldíos y edificios o calles en proyecto. Pulsa de nuevo el botón para salir.",
+    "cityBudget": "Decide cómo repartir en el siguiente periodo los fondos obtenidos por impuestos y actividades. Cuando el gobierno compra insumos para obra vial o para operar servicios públicos, solo puede hacerlo dentro del presupuesto definido aquí. Además, si el presupuesto no alcanza, puede haber despidos de personal en los servicios públicos.",
+    "resourceEdit": "Crea áreas de recursos naturales. Elige el tipo de recurso y haz clic en el terreno. El clic izquierdo añade vértices, al hacer clic en una arista se inserta un vértice y con el clic derecho se elimina. Arrastrando puedes mover la posición de los vértices."
+  }
+}

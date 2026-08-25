@@ -27,6 +27,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { loadAppSettings } from "../../utils/settings";
+import { SUPPORTED_LANGUAGES } from "../../utils/locale";
 import { TUTORIAL_SCENARIOS } from "../tutorial/tutorialSteps";
 import { TerrainMapThumbnail } from "../common/TerrainMapThumbnail";
 import "./NewGameWindow.css";
@@ -132,7 +133,7 @@ type ConfirmSelection = {
  * ゲームで使用可能な言語の一覧
  * Tauri側の設定と同じ言語セットを提供する
  */
-const AVAILABLE_LANGUAGES = ["ja", "en"] as const;
+const AVAILABLE_LANGUAGES = SUPPORTED_LANGUAGES;
 
 /**
  * シミュレーション日数の選択肢

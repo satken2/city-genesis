@@ -84,7 +84,6 @@
     "previewSendFailed": "Could not send the preview to the 3D view (too many parcels). Narrow the search extent or raise the average area.",
     "confirm": "Confirm Creation",
     "clear": "Clear",
-    "creating": "Creating...",
     "createSuccess": "Parcels created successfully",
     "createFailed": "Failed to create parcels",
     "pointSelected": "Point selected",

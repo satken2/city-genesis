@@ -1,0 +1,58 @@
+{
+  "epochConfirm": {
+    "currentDate": "Fecha actual",
+    "afterDate": "Fecha tras la ejecución",
+    "epochCount": "Número de épocas",
+    "message": "¿Terminar el trabajo de este turno y avanzar el tiempo?",
+    "no": "No",
+    "yes": "Sí",
+    "executing": "Ejecutando la época...",
+    "errorSteamLimit": "No se pudo verificar la autenticación de Steam, por lo que no es posible ejecutar más épocas. (Sin verificar se puede jugar hasta 10 épocas).",
+    "errorFailed": "No se pudo ejecutar la época: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "({{count}} épocas ejecutadas)",
+    "exchangeRate": "Tipo de cambio",
+    "sectionConstruction": "Estado de las obras",
+    "kindPath": "Calle",
+    "kindBuilding": "Instalación",
+    "columnName": "Nombre",
+    "columnStatus": "Estado",
+    "columnProgress": "Avance",
+    "noItems": "Sin elementos",
+    "progressFormat": "{{before}}% → {{after}}%",
+    "completed": "Terminado",
+    "sectionStatistics": "Estadísticas",
+    "sectionScore": "Puntaje",
+    "scoreGain": "Puntos ganados",
+    "scoreLoss": "Puntos perdidos",
+    "questProgress": "{{completed}} / {{total}} alcanzados",
+    "questState": {
+      "completed": "Alcanzado",
+      "active": "En curso",
+      "locked": "Bloqueado",
+      "failed": "Fallido"
+    },
+    "trendLegend": "Las flechas muestran la tendencia de las últimas {{count}} épocas",
+    "trendHint": "Tendencia de las últimas {{count}} épocas: {{trend}}",
+    "trend": {
+      "up": "Al alza",
+      "flat": "Estable",
+      "down": "A la baja",
+      "none": "Historial insuficiente"
+    },
+    "statPopulation": "Población",
+    "statGdp": "PIB",
+    "statPrice": "Precios",
+    "statIncome": "Ingresos",
+    "statUnemployment": "Desempleo",
+    "statHealthcare": "Cobertura sanitaria",
+    "statNutrition": "Cobertura nutricional",
+    "statEntertainment": "Cobertura de ocio",
+    "statFire": "Incendios",
+    "statTraffic": "Accidentes de tránsito",
+    "statCrime": "Delitos",
+    "questCompleted": "¡Alcanzado!",
+    "questFailed": "Plazo vencido"
+  }
+}

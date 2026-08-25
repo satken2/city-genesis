@@ -8,6 +8,7 @@ import closeIcon from "./assets/images/ui/close.png";
 import type { QueryState, QuestNotification, WindowContext, WindowDefinition } from "./types";
 import { buildApiUrl } from "./utils/api";
 import { loadAppSettings } from "./utils/settings";
+import { isSupportedLanguage } from "./utils/locale";
 
 /**
  * ポップアップパネル群の遅延インポート定義
@@ -138,7 +139,7 @@ function App() {
       // 設定ファイルから言語を復元する
       try {
         const settings = await loadAppSettings();
-        if (settings.language === "ja" || settings.language === "en") {
+        if (isSupportedLanguage(settings.language)) {
           await i18n.changeLanguage(settings.language);
         }
       } catch {

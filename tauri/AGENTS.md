@@ -22,7 +22,7 @@ Unityのグラフィックの上に透明なWebViewウィンドウとして重�
   - contexts/          ... MasterDataContext(マスターデータ), FontSizeContext
   - hooks/             ... 共通Reactフック(useTemplateMode=テンプレートモード判定, useConstructionBudgetRow=建設中/解体中の1エポックコスト・残りエポック数の取得)
   - utils/             ... 共通処理(下記の一覧参照)
-  - i18n/              ... 多言語リソース(ja/*.json・en/*.json をドメインごとに分割。index.tsがglobで集約)
+  - i18n/              ... 多言語リソース(言語ディレクトリごとにドメイン別JSONを配置。index.tsがglobで集約)
   - types.ts           ... 共通型定義(WindowContext, AgentData等)
   - constants.ts       ... 自動生成の定数(編集禁止)
   - local-constants.ts ... UI側で独自定義する定数
@@ -40,6 +40,9 @@ Unityのグラフィックの上に透明なWebViewウィンドウとして重�
 | `log.ts` | Rust側ファイルログ(実行ファイル横の`city-genesis/tauri.log`)へのINFO転送(`logInfoToFile`)。本番でconsoleが見えないため、無言で止まりうる重要フロー(エポック実行など)の進行記録に使う。なお未キャッチ例外・unhandledrejection・`console.error`は`main.tsx`が自動で同ログへERROR転送する |
 | `cityNotifications.ts` | L1通知(重大通知)の共通処理。`fetchL1Notifications`(GET /api/v1/notifications)・`formatL1NotificationMessage`(i18nキー`notifications.types.<type>`への差し込み。未知typeはフォールバック)・`NOTIFICATION_ENTITY_WINDOW_TYPES`(通知対象→詳細ウィンドウの対応表)。コックピット(hud/Cockpit.tsx)とCityNotificationsWindowが共用 |
 | `hintbar.ts` | 画面下部ヒントバーのテキスト設定 |
+| `locale.ts` | 対応言語(`SUPPORTED_LANGUAGES`)と、言語コード→`Intl`用ロケールの変換(`resolveIntlLocale`)・検証(`isSupportedLanguage`)。詳細は「多言語対応」の節 |
+| `date.ts` | ゲーム内仮想暦(1ヶ月=30日/1年=360日)の整形。`formatEpochDate` / `formatEpochDateRange` |
+| `money.ts` | 金額の整形。`formatCompactAmount`(有効3桁のコンパクト表記) / `formatExactAmount`(3桁区切り) |
 | `settings.ts` | アプリ設定のロード・保存 |
 | `playSound.ts` | 効果音再生 |
 | `tutorial.ts` | チュートリアルの表示制御 |
@@ -63,7 +66,14 @@ WebView2(Chromium/Edge)の既定はコンテンツに重なるオーバーレイ
 
 全体的に、多言語対応できるように作ってね。
 表示文字列はreact-i18nextの`useTranslation()`(`t("key")`)を使い、文字列のハードコード禁止。
-翻訳リソースは`src/i18n/ja/`・`src/i18n/en/`配下にドメインごとのJSONへ分割している(例: `agent.json`, `budget.json`, `statistics.json`)。各ファイルはトップレベル名前空間をそのまま含み、`index.ts`が`import.meta.glob`で全ファイルを単一の`translation`名前空間へ集約する(キー参照は従来どおり`t("agent.foo")`)。**キーを追加するときは、その名前空間を含むファイルの`ja`・`en`両方に必ず追加する**こと。新しいトップレベル名前空間を足す場合は既存のドメインファイルに入れるか、新規ファイルを作れば自動で拾われる。
+
+対応言語は`src/utils/locale.ts`の`SUPPORTED_LANGUAGES`が唯一の正で、`ja` / `en` / `es-419` / `zh-Hans` / `zh-Hant` / `fr` / `ko`の7つ。**日本語が原本**で、他言語はそこから訳す。設定ウィンドウ・ニューゲームの言語選択肢もこの配列をそのまま並べるため、言語を増やすときはここに足す(表示名は`settings.language.<コード>`)。中国語は語彙が字体で異なるため地域ではなく字体で分けている。
+
+翻訳リソースは`src/i18n/<言語コード>/`配下にドメインごとのJSONへ分割している(例: `agent.json`, `budget.json`, `statistics.json`)。各ファイルはトップレベル名前空間をそのまま含み、`index.ts`が`import.meta.glob("./*/*.json")`で全言語・全ファイルを取得し、言語ごとに単一の`translation`名前空間へ集約する(キー参照は従来どおり`t("agent.foo")`)。**キーを追加するときは、その名前空間を含むファイルを全言語ぶん必ず更新する**こと。新しいトップレベル名前空間を足す場合は既存のドメインファイルに入れるか、全言語に同名の新規ファイルを作れば自動で拾われる。
+
+キーの過不足と`{{変数}}`の食い違いは`tools/check_i18n_parity.py`で検査できる(日本語を基準に全言語を突き合わせる)。翻訳リソースを触ったら実行すること。
+
+数値・日付の整形に渡すロケールは`resolveIntlLocale(i18n.language)`(`src/utils/locale.ts`)で解決する。**`i18n.language`を直接`Intl`やtoLocaleStringへ渡さないこと**(言語コードと地域付きロケールの対応表がここに集約されている)。ゲーム内の仮想暦の整形は`src/utils/date.ts`が担当し、月名は`Intl`から引くので言語追加時の手当ては不要(年月日の並びだけ言語系統ごとに分岐している)。
 
 # マスターデータについて
 

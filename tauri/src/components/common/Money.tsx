@@ -8,6 +8,7 @@
 
 import { useTranslation } from "react-i18next";
 import { formatCompactAmount, formatExactAmount } from "../../utils/money";
+import { resolveIntlLocale } from "../../utils/locale";
 import "./Money.css";
 
 type MoneyProps = {
@@ -21,7 +22,7 @@ type MoneyProps = {
 
 export function Money({ value, unit = false, className }: MoneyProps) {
   const { i18n } = useTranslation();
-  const locale = i18n.language === "ja" ? "ja-JP" : "en-US";
+  const locale = resolveIntlLocale(i18n.language);
   return (
     <span
       className={className ? `money ${className}` : "money"}

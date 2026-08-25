@@ -1,0 +1,67 @@
+{
+  "common": {
+    "loading": "加载中...",
+    "fetchError": "数据获取失败",
+    "noData": "无数据",
+    "history": "历史记录",
+    "currency": "{{value, number}}",
+    "daysSinceEpoch": "自1800年1月1日起第{{days}}天",
+    "close": "关闭",
+    "sqm": "{{value}} m²",
+    "save": "保存",
+    "saving": "保存中...",
+    "rename": "重命名",
+    "renameFailed": "重命名失败",
+    "minutes": "分钟",
+    "processing": "处理中...",
+    "cancel": "取消"
+  },
+  "status": {
+    "0": "规划中",
+    "1": "运营中",
+    "2": "已停运",
+    "3": "已列入建设计划",
+    "4": "建设中",
+    "5": "已列入拆除计划",
+    "6": "拆除中",
+    "7": "已完成",
+    "8": "已中止",
+    "9": "空置",
+    "10": "已倒塌",
+    "11": "等待开工"
+  },
+  "reason": {
+    "1": "火灾倒塌",
+    "2": "老化",
+    "3": "亏损经营",
+    "4": "利用率过低",
+    "5": "市长决定"
+  },
+  "spaceType": {
+    "0": "其他",
+    "1": "住宅",
+    "2": "商业设施",
+    "3": "仓库・工厂",
+    "4": "办公",
+    "5": "农场"
+  },
+  "resource": {
+    "currentAmount": "当前储量",
+    "consumptionTrend": "消耗量走势",
+    "amountTrend": "剩余量走势",
+    "recoveryAmount": "恢复量",
+    "maxAmount": "最大储量",
+    "unknownResource": "未知资源"
+  },
+  "errors": {
+    "TERRAIN_NOT_ACQUIRED": "该区域尚未勘察。请先解锁对应的地形单元。",
+    "UNKNOWN_ERROR": "发生错误。",
+    "CREATEPATH_INVALID_GEOMETRY": "路径形状无效。请检查起点与终点。",
+    "CREATEPATH_OUTSIDE_COASTLINE": "无法在海岸线之外铺设路径。",
+    "CREATEPATH_MULTIPLE_INTERSECTIONS": "与同一条道路多次相交。请选择其他路线。",
+    "CREATEPATH_ELEVATION_INTERSECTION": "检测到立体交叉。请调整高度。",
+    "PATH_TOO_FEW_POINTS": "至少需要2个点。",
+    "PATH_MAX_SPAN_EXCEEDED": "节点间距过长。请添加中间点。",
+    "PATH_ELEVATION_CONFLICT": "检测到立体交叉。请调整高度。"
+  }
+}

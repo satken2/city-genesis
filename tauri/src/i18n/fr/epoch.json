@@ -1,0 +1,58 @@
+{
+  "epochConfirm": {
+    "currentDate": "Date actuelle",
+    "afterDate": "Date après exécution",
+    "epochCount": "Nombre d'époques",
+    "message": "Terminer le travail de ce tour et faire avancer le temps ?",
+    "no": "Non",
+    "yes": "Oui",
+    "executing": "Exécution de l'époque...",
+    "errorSteamLimit": "L'authentification Steam n'a pas pu être vérifiée : aucune époque supplémentaire ne peut être exécutée. (Sans vérification, 10 époques au maximum sont jouables.)",
+    "errorFailed": "Échec de l'exécution de l'époque : {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "({{count}} époques exécutées)",
+    "exchangeRate": "Taux de change",
+    "sectionConstruction": "État des chantiers",
+    "kindPath": "Route",
+    "kindBuilding": "Installation",
+    "columnName": "Nom",
+    "columnStatus": "Statut",
+    "columnProgress": "Avancement",
+    "noItems": "Aucun élément",
+    "progressFormat": "{{before}} % → {{after}} %",
+    "completed": "Achevé",
+    "sectionStatistics": "Statistiques",
+    "sectionScore": "Score",
+    "scoreGain": "Points gagnés",
+    "scoreLoss": "Points perdus",
+    "questProgress": "{{completed}} / {{total}} atteints",
+    "questState": {
+      "completed": "Atteint",
+      "active": "En cours",
+      "locked": "Verrouillé",
+      "failed": "Échoué"
+    },
+    "trendLegend": "Les flèches indiquent la tendance des {{count}} dernières époques",
+    "trendHint": "Tendance des {{count}} dernières époques : {{trend}}",
+    "trend": {
+      "up": "En hausse",
+      "flat": "Stable",
+      "down": "En baisse",
+      "none": "Historique insuffisant"
+    },
+    "statPopulation": "Population",
+    "statGdp": "PIB",
+    "statPrice": "Prix",
+    "statIncome": "Revenus",
+    "statUnemployment": "Chômage",
+    "statHealthcare": "Couverture sanitaire",
+    "statNutrition": "Couverture alimentaire",
+    "statEntertainment": "Couverture des loisirs",
+    "statFire": "Incendies",
+    "statTraffic": "Accidents de la route",
+    "statCrime": "Délinquance",
+    "questCompleted": "Atteint !",
+    "questFailed": "Échéance dépassée"
+  }
+}

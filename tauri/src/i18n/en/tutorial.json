@@ -155,7 +155,6 @@
   "tips": {
     "todaysTips": "Today's Tips",
     "gotIt": "Got It",
-    "nextTip": "Next Tip",
     "items": {
       "tip1": {
         "title": "The Epoch System",
@@ -212,6 +211,10 @@
       "tip14": {
         "title": "Better Safe Than Sorry",
         "description": "If critical infrastructure shuts down due to accidents or disasters, the city's economy will take a massive hit. Build redundant facilities to keep backups ready."
+      },
+      "tip15": {
+        "title": "Don't Let It Sprawl",
+        "description": "When there are not enough parcels for the demand, roads and parcels appear on their own in a disorderly way. Develop the city deliberately to keep slums from forming."
       }
     }
   },

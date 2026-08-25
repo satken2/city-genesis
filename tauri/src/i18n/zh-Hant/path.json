@@ -1,0 +1,114 @@
+{
+  "path": {
+    "titleWithId": "路徑 #{{id}}",
+    "zoneName": "所屬地區",
+    "followTerrain": "地形追隨",
+    "followTerrainFollow": "追隨（個別設定）",
+    "followTerrainNone": "不追隨（個別設定）",
+    "durability": "耐久度",
+    "noise": "噪音",
+    "airPollution": "空氣污染",
+    "overrideMaxSpeed": "個別設定速限",
+    "maxSpeed": "速限",
+    "utilization": "使用率",
+    "trafficByVehicle": "交通量（每日）",
+    "trafficUnitPerDay": "/日",
+    "category": {
+      "0": "步行",
+      "1": "道路",
+      "2": "鐵路",
+      "unknown": "未知"
+    },
+    "action": {
+      "delete": "刪除",
+      "editShape": "編輯形狀",
+      "repair": "修繕",
+      "rebuild": "重建",
+      "startConstruction": "開工",
+      "stopConstruction": "暫緩施工",
+      "bulldoze": "拆除",
+      "cancelBulldoze": "取消拆除",
+      "merge": "與相鄰路徑合併",
+      "split": "分割路徑"
+    },
+    "topology": {
+      "mergeTitle": "路徑合併",
+      "splitTitle": "路徑分割",
+      "mergeHint": "請在3D視圖中點擊要合併的對象路徑。只能選擇共用端點、且該端點上沒有連接其他路徑的同類型路徑。",
+      "splitHint": "請在3D視圖中點擊要分割的地點。分割點將放置在路徑的中心線上。",
+      "waitingSelection": "正在等待3D視圖中的選擇。",
+      "checking": "確認中...",
+      "submitting": "執行中...",
+      "thisPath": "此路徑",
+      "mergedLength": "合併後的長度",
+      "beforeLength": "分割前的長度",
+      "firstSegment": "分割後（起點側）",
+      "secondSegment": "分割後（終點側）",
+      "meters": "{{value}} m",
+      "confirmMerge": "合併",
+      "confirmSplit": "分割",
+      "cancel": "取消"
+    },
+    "pendingWarning": "此道路尚在規劃中。請下達開工指令。",
+    "alerts": {
+      "constructionShortage": {
+        "title": "建設服務不足",
+        "description": "建設預算不足，工程進度延遲。"
+      },
+      "accident": {
+        "title": "交通事故發生！",
+        "description": "道路上發生了交通事故。"
+      },
+      "noStationHouse": {
+        "title": "沒有站房",
+        "description": "此月台不屬於任何車站。請在軌道建設面板的站房分頁中，鋪設跨越此月台的站房路線。"
+      }
+    },
+    "tabConstructionInfo": "建設工程"
+  },
+  "path_construction": {
+    "constructionSpeed": "建設速度",
+    "selectType": "-- 請選擇種類 --",
+    "selectTypeFirst": "請選擇種類",
+    "noVariants": "無符合項目",
+    "shape": "形狀",
+    "elevation": "海拔 (Y)",
+    "embankmentHeight": "填土高度",
+    "followTerrain": "地形追隨",
+    "followTerrainDefault": "預設",
+    "followTerrainFollow": "追隨",
+    "followTerrainNone": "不追隨",
+    "followTerrainHelp": "設為不追隨後，穿越丘陵的區段會自動變為塹壕・隧道，跨越山谷的區段會變為橋梁。",
+    "confirm": "確定",
+    "confirming": "確定中...",
+    "confirmFailedUnknown": "道路確定失敗。請修改形狀後重試。",
+    "cancel": "取消",
+    "noNodesYet": "請鋪設道路",
+    "costInfo": "建設費用",
+    "costRatioHelp": "建造高架道路、地下道路，或在複雜地形上建造道路，會提高建設成本。",
+    "placedContinue": "已配置路徑。請配置下一條路徑。",
+    "platformSide": "月台設置側",
+    "platformSideOutside": "外側",
+    "platformSideInside": "內側",
+    "platformSideBoth": "兩側",
+    "rail": {
+      "parallel": "並行",
+      "noVariantForCombo": "沒有對應此組合的軌道",
+      "trackCount": "軌道數",
+      "trackSpacing": "軌道間距",
+      "spacingWiden": "加寬",
+      "spacingShrink": "縮窄",
+      "dirForward": "順方向",
+      "dirBackward": "逆方向",
+      "dirBoth": "雙方向"
+    }
+  },
+  "track_construction": {
+    "trackTab": "軌道",
+    "platformTab": "月台",
+    "houseTab": "站房",
+    "house": {
+      "hint": "鋪設站房路線。與此路線相交的月台將歸屬於此站房所在的車站。路線兩端會放置站房建築，並沿線架設連接橋。"
+    }
+  }
+}

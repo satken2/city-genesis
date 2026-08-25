@@ -25,6 +25,7 @@ import {
   type L1Notification,
 } from "../../utils/cityNotifications";
 import { formatEpochDate } from "../../utils/date";
+import { resolveIntlLocale } from "../../utils/locale";
 import crisisIcon from "../../assets/images/ui/crisis.png";
 import "./CityNotificationsWindow.css";
 
@@ -52,7 +53,7 @@ export function CityNotificationsWindow({ apiBaseUrl }: CityNotificationsWindowP
     return () => controller.abort();
   }, [apiBaseUrl]);
 
-  const locale = i18n.language === "ja" ? "ja-JP" : "en-US";
+  const locale = resolveIntlLocale(i18n.language);
 
   /** 通知対象のエンティティ詳細ウィンドウを開く(対応表に無い種別は何もしない)。 */
   async function openEntityDetail(notification: L1Notification) {

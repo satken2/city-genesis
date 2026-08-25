@@ -84,7 +84,6 @@
     "previewSendFailed": "3Dビューへのプレビュー転送に失敗しました（区画数が多すぎます）。探索範囲を狭めるか平均面積を大きくしてください",
     "confirm": "作成を確定",
     "clear": "クリア",
-    "creating": "作成中...",
     "createSuccess": "土地区画を作成しました",
     "createFailed": "作成に失敗しました",
     "pointSelected": "地点を選択済み",

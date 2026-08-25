@@ -1,0 +1,33 @@
+{
+  "supply": {
+    "product": "Produit fourni",
+    "amount": "Quantité fournie",
+    "price": "Prix de vente",
+    "soldAmount": "Quantité vendue",
+    "profitRate": "Taux de marge"
+  },
+  "demand": {
+    "product": "Produit",
+    "demandAmount": "Demande",
+    "receivedAmount": "Quantité obtenue",
+    "acquiredAmount": "Stock"
+  },
+  "cargo": {
+    "title": "Manutention",
+    "description": "Ce pôle importe des marchandises de l'extérieur de la région pour approvisionner les marchés de la ville, et rachète la production excédentaire de la ville pour l'exporter.",
+    "capacity": "Capacité de traitement",
+    "perEpochPerDirection": "/époque (pour chaque sens)",
+    "importHandled": "Volume importé",
+    "exportHandled": "Volume exporté",
+    "utilization": "Utilisation",
+    "importSectionTitle": "Importations (vendues à la ville)",
+    "exportSectionTitle": "Exportations (achetées à la ville)",
+    "handledImport": "Vendu",
+    "handledExport": "Acheté",
+    "allocation": "Quantité allouée",
+    "priceImport": "Prix de vente unitaire",
+    "priceExport": "Prix d'achat unitaire",
+    "lost": "Ventes manquées",
+    "noProducts": "Aucun produit traité"
+  }
+}

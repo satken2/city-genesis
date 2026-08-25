@@ -1,6 +1,5 @@
 {
   "citizen": {
-    "title": "市民詳細",
     "basicInfo": "基本情報",
     "age": "年齢",
     "ageValue": "{{age}}歳",

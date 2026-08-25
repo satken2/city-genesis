@@ -1,0 +1,134 @@
+{
+  "agent": {
+    "back": "返回",
+    "editSubBuildings": "編輯附屬建築配置",
+    "publicFacility": "公共設施",
+    "underAcquisition": "徵地協商中",
+    "publicFacilityPanel": {
+      "title": "公共／公營設施"
+    },
+    "abandon": "放棄",
+    "abandonHint": "放棄維護，不再修繕，任其老化",
+    "activeFrom": "目前狀態起始日",
+    "reserves": "現金存款",
+    "revenues": "收入",
+    "expenses": "支出",
+    "zone": "所屬地區",
+    "building": "進駐建築",
+    "rent": "房租",
+    "floorOccupancy": "樓地板占用量",
+    "tenants": "進駐租戶",
+    "tabBasicInfo": "基本資訊",
+    "utilizationTarget": "使用率目標",
+    "constructionSpeed": "建設速度",
+    "constructionCostPerEpoch": "每紀元建設成本",
+    "remainingConstruction": "剩餘工期",
+    "remainingEpochs": "約{{n}}個紀元",
+    "tabBuildingInfo": "建築資訊",
+    "tabCargoInfo": "裝卸資訊",
+    "tabHouseholdInfo": "家庭資訊",
+    "tabTradeInfo": "供需・交易",
+    "tabEmploymentInfo": "僱用資訊",
+    "action": {
+      "purchase": "收購",
+      "bulldoze": "拆除",
+      "cancelBulldoze": "取消拆除",
+      "pause": "暫停",
+      "resume": "恢復",
+      "delete": "刪除",
+      "repair": "修繕",
+      "rebuild": "重建",
+      "edit": "編輯",
+      "startConstruction": "開工",
+      "stopConstruction": "暫緩施工",
+      "cancelAbandon": "取消放棄"
+    },
+    "pendingWarning": "此建築尚在規劃中。請下達開工指令。",
+    "alerts": {
+      "title": "警報",
+      "constructionShortage": {
+        "title": "建設服務不足",
+        "description": "建設預算不足，工程進度延遲。"
+      },
+      "onFire": {
+        "title": "火災發生！",
+        "description": "建築內發生火災。"
+      },
+      "accidentalFire": {
+        "title": "失火（小火）",
+        "description": "建築內發生失火，但已控制在小範圍內。"
+      },
+      "infraDisconnected": {
+        "title": "未接入基礎設施網路",
+        "description": "此設施的接線端子沒有連接基礎設施路徑。在接入網路之前無法供給或接收。"
+      },
+      "crime": {
+        "title": "發生犯罪",
+        "description": "此建築發生了犯罪。"
+      },
+      "crimeSign": {
+        "title": "犯罪徵兆",
+        "description": "此建築出現犯罪徵兆。請注意治安惡化。"
+      },
+      "laborShortage": {
+        "title": "勞動力不足",
+        "description": "員工人數不足，生產與服務供給低於計畫。"
+      },
+      "materialShortage": {
+        "title": "原物料不足",
+        "description": "原物料採購不足，生產與服務供給低於計畫。"
+      },
+      "highSkillShortage": {
+        "title": "專業人才不足",
+        "description": "未能確保所需的高技能人才，無法營運。"
+      },
+      "budgetCapped": {
+        "title": "預算不足",
+        "description": "分配的預算遠低於所需金額，已縮減營運規模。請重新檢視預算分配。"
+      }
+    },
+    "infra": {
+      "title": "基礎設施連接",
+      "connected": "已連接",
+      "disconnected": "未連接",
+      "received": "接收量"
+    },
+    "tabConstructionInfo": "建設工程"
+  },
+  "agentList": {
+    "filterType": "類型",
+    "filterVariant": "變體",
+    "filterZone": "地區",
+    "allVariants": "所有變體",
+    "allZones": "所有地區",
+    "resultCount": "{{count}}項",
+    "capped": "(共{{total}}項中)",
+    "loading": "載入中...",
+    "noResults": "沒有符合條件的經濟主體",
+    "colStatus": "狀態",
+    "colVariant": "變體",
+    "colName": "名稱",
+    "colProduct": "產品",
+    "colPrice": "價格",
+    "colProduction": "產量",
+    "colStock": "庫存量",
+    "colSold": "售出量",
+    "colWage": "薪資",
+    "colEmployment": "僱用",
+    "colUtilization": "使用率",
+    "colBdType": "建築類型",
+    "colDurability": "耐久度",
+    "colRent": "租金",
+    "colFloors": "樓層數",
+    "colFloorArea": "樓地板面積",
+    "colOccupancy": "進駐率",
+    "colFamilyType": "家庭類型",
+    "colDiscretionaryIncome": "可支配所得",
+    "colSatisNutrition": "營養",
+    "colSatisHealthcare": "醫療",
+    "colSatisEntertainment": "娛樂",
+    "colSatisResidential": "居住",
+    "colAutomobile": "自用車",
+    "colEnrollment": "在籍狀況"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "terrainUnlock": {
+    "title": "解锁地形单元",
+    "selectCell": "请选择地形单元",
+    "cellSelected": "已选择单元 ({{x}}, {{z}})",
+    "alreadyAcquired": "单元 ({{x}}, {{z}}) 已解锁",
+    "confirm": "确定",
+    "cancel": "取消",
+    "acquiring": "解锁中...",
+    "acquireSuccess": "已解锁该单元",
+    "acquireError": "解锁失败"
+  },
+  "terrain3dPreview": {
+    "waitingForEditor": "正在等待地形编辑器的数据…"
+  },
+  "editor": {
+    "terrainTab": "地形编辑器",
+    "scenarioTab": "剧本编辑器",
+    "addNewTerrain": "添加新地形",
+    "creating": "创建中...",
+    "createFailed": "新地形创建失败",
+    "copying": "复制中...",
+    "copyFailed": "地形数据获取失败",
+    "localMapsTitle": "打开编辑中的数据",
+    "opening": "正在打开...",
+    "openLocalFailed": "无法打开工作副本",
+    "deleteLocalMap": "删除该工作副本",
+    "confirmDeleteLocalMap": "确定删除该工作副本吗？此操作无法撤销。",
+    "confirmDelete": "删除",
+    "cancelDelete": "取消",
+    "deleting": "删除中...",
+    "deleteLocalFailed": "工作副本删除失败"
+  }
+}

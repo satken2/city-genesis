@@ -1,0 +1,33 @@
+{
+  "supply": {
+    "product": "供给产品",
+    "amount": "供给量",
+    "price": "供给价格",
+    "soldAmount": "售出量",
+    "profitRate": "利润率"
+  },
+  "demand": {
+    "product": "商品",
+    "demandAmount": "需求量",
+    "receivedAmount": "获得量",
+    "acquiredAmount": "库存"
+  },
+  "cargo": {
+    "title": "装卸信息",
+    "description": "该口岸从域外进口商品供应给城市内的市场，并收购城市内的过剩产品出口到域外。",
+    "capacity": "处理能力",
+    "perEpochPerDirection": "/纪元（进出口各自）",
+    "importHandled": "进口处理量",
+    "exportHandled": "出口处理量",
+    "utilization": "利用率",
+    "importSectionTitle": "进口（向城市销售）",
+    "exportSectionTitle": "出口（从城市收购）",
+    "handledImport": "销售量",
+    "handledExport": "收购量",
+    "allocation": "分配量",
+    "priceImport": "销售单价",
+    "priceExport": "收购单价",
+    "lost": "错失销售",
+    "noProducts": "没有经营的品目"
+  }
+}

@@ -23,7 +23,12 @@
     "language": {
       "label": "言語",
       "ja": "日本語",
-      "en": "English"
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어"
     },
     "volume": {
       "label": "音量",
@@ -59,24 +64,20 @@
     "loading": "読み込み中...",
     "shuttingDown": "終了処理中...",
     "saveSuccess": "保存が完了しました",
-    "loadSuccess": "読み込みが完了しました",
     "newGameSuccess": "新しいゲームを開始しました",
     "saveFailed": "保存に失敗しました",
     "loadFailed": "読み込みに失敗しました",
     "confirmNewGame": "現在のデータは失われます。新しいゲームを開始しますか？",
     "confirmQuitGame": "ゲームを終了しますか？現在の進行状況は自動保存されません。",
     "confirmReturnToTop": "トップメニューに戻りますか？現在の進行状況は自動保存されません。",
-    "confirmLoad": "このセーブデータを読み込みますか？",
     "confirm": "はい",
     "cancel": "いいえ",
     "debugInit": "Debug Init"
   },
   "saveList": {
-    "title": "セーブデータ一覧",
     "noSaves": "セーブデータがありません",
     "currentSave": "現在のデータ",
     "population": "人口",
-    "epoch": "エポック",
     "inGameDate": "日付",
     "savedAt": "保存日時",
     "loadButton": "ロード",

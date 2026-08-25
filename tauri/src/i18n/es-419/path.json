@@ -1,0 +1,114 @@
+{
+  "path": {
+    "titleWithId": "Vía n.º {{id}}",
+    "zoneName": "Distrito",
+    "followTerrain": "Seguimiento del terreno",
+    "followTerrainFollow": "Sí (ajuste individual)",
+    "followTerrainNone": "No (ajuste individual)",
+    "durability": "Durabilidad",
+    "noise": "Ruido",
+    "airPollution": "Contaminación del aire",
+    "overrideMaxSpeed": "Definir el límite de velocidad individualmente",
+    "maxSpeed": "Límite de velocidad",
+    "utilization": "Utilización",
+    "trafficByVehicle": "Tránsito (por día)",
+    "trafficUnitPerDay": "/día",
+    "category": {
+      "0": "Peatonal",
+      "1": "Carretera",
+      "2": "Ferrocarril",
+      "unknown": "Desconocido"
+    },
+    "action": {
+      "delete": "Eliminar",
+      "editShape": "Editar la forma",
+      "repair": "Reparar",
+      "rebuild": "Reconstruir",
+      "startConstruction": "Iniciar obra",
+      "stopConstruction": "Suspender obra",
+      "bulldoze": "Demoler",
+      "cancelBulldoze": "Cancelar demolición",
+      "merge": "Unir con la vía contigua",
+      "split": "Dividir la vía"
+    },
+    "topology": {
+      "mergeTitle": "Unión de vías",
+      "splitTitle": "División de vía",
+      "mergeHint": "Haz clic en la vía con la que deseas unir en la vista 3D. Solo pueden elegirse vías del mismo tipo que comparten un extremo sin otras vías conectadas ahí.",
+      "splitHint": "Haz clic en el punto de división en la vista 3D. El punto se coloca sobre el eje de la vía.",
+      "waitingSelection": "Esperando una selección en la vista 3D.",
+      "checking": "Comprobando...",
+      "submitting": "Ejecutando...",
+      "thisPath": "Esta vía",
+      "mergedLength": "Longitud tras la unión",
+      "beforeLength": "Longitud antes de dividir",
+      "firstSegment": "Tras dividir (lado inicial)",
+      "secondSegment": "Tras dividir (lado final)",
+      "meters": "{{value}} m",
+      "confirmMerge": "Unir",
+      "confirmSplit": "Dividir",
+      "cancel": "Cancelar"
+    },
+    "pendingWarning": "Esta calle está en proyecto. Ordena el inicio de la obra.",
+    "alerts": {
+      "constructionShortage": {
+        "title": "Falta de servicios de construcción",
+        "description": "El presupuesto de obra es insuficiente y los trabajos están retrasados."
+      },
+      "accident": {
+        "title": "¡Accidente de tránsito!",
+        "description": "Ocurrió un accidente de tránsito en la calle."
+      },
+      "noStationHouse": {
+        "title": "No hay edificio de estación",
+        "description": "Este andén no pertenece a ninguna estación. Desde la pestaña de edificio de estación del panel de construcción ferroviaria, traza una línea de estación que cruce este andén."
+      }
+    },
+    "tabConstructionInfo": "Obra"
+  },
+  "path_construction": {
+    "constructionSpeed": "Velocidad de construcción",
+    "selectType": "-- Selecciona el tipo --",
+    "selectTypeFirst": "Selecciona un tipo",
+    "noVariants": "Sin coincidencias",
+    "shape": "Forma",
+    "elevation": "Altitud (Y)",
+    "embankmentHeight": "Altura del terraplén",
+    "followTerrain": "Seguimiento del terreno",
+    "followTerrainDefault": "Predeterminado",
+    "followTerrainFollow": "Seguir",
+    "followTerrainNone": "No seguir",
+    "followTerrainHelp": "Si eliges no seguir, los tramos que atraviesan colinas se convierten automáticamente en trincheras o túneles, y los que cruzan valles en puentes.",
+    "confirm": "Confirmar",
+    "confirming": "Confirmando...",
+    "confirmFailedUnknown": "No se pudo confirmar la vía. Modifica la forma e inténtalo de nuevo.",
+    "cancel": "Cancelar",
+    "noNodesYet": "Traza una vía",
+    "costInfo": "Costo de construcción",
+    "costRatioHelp": "Construir vías elevadas o subterráneas, o sobre terrenos complejos, aumenta el costo de la obra.",
+    "placedContinue": "Vía colocada. Coloca la siguiente vía.",
+    "platformSide": "Lado del andén",
+    "platformSideOutside": "Exterior",
+    "platformSideInside": "Interior",
+    "platformSideBoth": "Ambos lados",
+    "rail": {
+      "parallel": "Vías paralelas",
+      "noVariantForCombo": "No hay vía férrea que corresponda a esta combinación",
+      "trackCount": "Número de vías",
+      "trackSpacing": "Separación entre vías",
+      "spacingWiden": "Ampliar",
+      "spacingShrink": "Reducir",
+      "dirForward": "Sentido de ida",
+      "dirBackward": "Sentido contrario",
+      "dirBoth": "Ambos sentidos"
+    }
+  },
+  "track_construction": {
+    "trackTab": "Vía férrea",
+    "platformTab": "Andén",
+    "houseTab": "Edificio de estación",
+    "house": {
+      "hint": "Traza la línea del edificio de estación. Los andenes que cruce la línea pertenecerán a esta estación. En ambos extremos de la línea se colocan los edificios y a lo largo de ella se tiende un puente de conexión."
+    }
+  }
+}

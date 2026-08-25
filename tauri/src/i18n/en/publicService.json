@@ -1,6 +1,5 @@
 {
   "publicFacilities": {
-    "selectCategory": "Select a category",
     "tabRealEstate": "Real estate",
     "tabPublicStandard": "Public facilities",
     "tabEducation": "Education",
@@ -16,7 +15,6 @@
     "occupancyRate": "Occupancy",
     "rent": "Rent",
     "capacity": "Capacity",
-    "handling": "Handling",
     "importHandling": "Import Handling",
     "exportHandling": "Export Handling"
   },
@@ -28,7 +26,6 @@
     "effectivePrice": "Effective price",
     "price": "Service price",
     "unitCost": "Unit cost",
-    "averagePrice": "Market avg.",
     "supplyCapacity": "Supply cap.",
     "maxDemand": "Est. max demand",
     "demand": "Demand",

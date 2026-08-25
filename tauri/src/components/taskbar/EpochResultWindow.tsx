@@ -37,6 +37,7 @@ import { EpochDate } from "../common/EpochDate";
 import { STATUS_STYLE_MAP } from "../../local-constants";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { formatCompactAmount } from "../../utils/money";
+import { resolveIntlLocale } from "../../utils/locale";
 import type { Quest, QuestNotification } from "../../types";
 import populationIcon from "../../assets/images/population.png";
 import gdpIcon from "../../assets/images/menu/menu_stat.png";
@@ -247,7 +248,7 @@ export function EpochResultWindow({
   failedQuests = [],
 }: EpochResultWindowProps) {
   const { t, i18n } = useTranslation();
-  const locale = i18n.language === "ja" ? "ja-JP" : "en-US";
+  const locale = resolveIntlLocale(i18n.language);
   const [quests, setQuests] = useState<Quest[]>([]);
   const [scoreLatest, setScoreLatest] = useState<ScoreLatest | null>(null);
 

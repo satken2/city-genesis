@@ -1,0 +1,134 @@
+{
+  "agent": {
+    "back": "Volver",
+    "editSubBuildings": "Editar distribución de anexos",
+    "publicFacility": "Servicio público",
+    "underAcquisition": "Negociando la compra del terreno",
+    "publicFacilityPanel": {
+      "title": "Instalación pública"
+    },
+    "abandon": "Abandonar",
+    "abandonHint": "Renuncia al mantenimiento y deja que se deteriore sin reparaciones",
+    "activeFrom": "Estado desde",
+    "reserves": "Efectivo disponible",
+    "revenues": "Ingresos",
+    "expenses": "Gastos",
+    "zone": "Distrito",
+    "building": "Edificio",
+    "rent": "Alquiler",
+    "floorOccupancy": "Superficie ocupada",
+    "tenants": "Inquilinos",
+    "tabBasicInfo": "Información básica",
+    "utilizationTarget": "Utilización objetivo",
+    "constructionSpeed": "Velocidad de construcción",
+    "constructionCostPerEpoch": "Costo de obra por época",
+    "remainingConstruction": "Duración restante",
+    "remainingEpochs": "aprox. {{n}} épocas",
+    "tabBuildingInfo": "Edificio",
+    "tabCargoInfo": "Carga",
+    "tabHouseholdInfo": "Hogar",
+    "tabTradeInfo": "Oferta y demanda",
+    "tabEmploymentInfo": "Empleo",
+    "action": {
+      "purchase": "Comprar",
+      "bulldoze": "Demoler",
+      "cancelBulldoze": "Cancelar demolición",
+      "pause": "Pausar",
+      "resume": "Reanudar",
+      "delete": "Eliminar",
+      "repair": "Reparar",
+      "rebuild": "Reconstruir",
+      "edit": "Editar",
+      "startConstruction": "Iniciar obra",
+      "stopConstruction": "Suspender obra",
+      "cancelAbandon": "Cancelar abandono"
+    },
+    "pendingWarning": "Este edificio está en proyecto. Ordena el inicio de la obra.",
+    "alerts": {
+      "title": "Alertas",
+      "constructionShortage": {
+        "title": "Falta de servicios de construcción",
+        "description": "El presupuesto de obra es insuficiente y los trabajos están retrasados."
+      },
+      "onFire": {
+        "title": "¡Incendio!",
+        "description": "Se ha declarado un incendio en el edificio."
+      },
+      "accidentalFire": {
+        "title": "Conato de incendio",
+        "description": "Se produjo un incendio accidental, pero se logró contener."
+      },
+      "infraDisconnected": {
+        "title": "Sin conexión a la red de infraestructura",
+        "description": "Ninguna vía de infraestructura llega a la terminal de esta instalación. No podrá enviar ni recibir suministros hasta conectarse a la red."
+      },
+      "crime": {
+        "title": "Delito cometido",
+        "description": "Se cometió un delito en este edificio."
+      },
+      "crimeSign": {
+        "title": "Indicios de delincuencia",
+        "description": "Se detectaron indicios de delincuencia en este edificio. Vigila el deterioro de la seguridad."
+      },
+      "laborShortage": {
+        "title": "Falta de mano de obra",
+        "description": "No hay suficientes trabajadores contratados, por lo que la producción y los servicios quedan por debajo de lo planeado."
+      },
+      "materialShortage": {
+        "title": "Falta de insumos",
+        "description": "El abastecimiento de materia prima es insuficiente, por lo que la producción y los servicios quedan por debajo de lo planeado."
+      },
+      "highSkillShortage": {
+        "title": "Falta de personal especializado",
+        "description": "No se logró conseguir el personal altamente calificado necesario, por lo que la instalación no puede operar."
+      },
+      "budgetCapped": {
+        "title": "Presupuesto insuficiente",
+        "description": "El presupuesto asignado está muy por debajo de lo requerido y la operación se ha reducido. Revisa la asignación presupuestal."
+      }
+    },
+    "infra": {
+      "title": "Conexión de infraestructura",
+      "connected": "Conectado",
+      "disconnected": "Sin conexión",
+      "received": "Cantidad recibida"
+    },
+    "tabConstructionInfo": "Obra"
+  },
+  "agentList": {
+    "filterType": "Tipo",
+    "filterVariant": "Variante",
+    "filterZone": "Distrito",
+    "allVariants": "Todas las variantes",
+    "allZones": "Todos los distritos",
+    "resultCount": "{{count}} resultados",
+    "capped": "(de {{total}} en total)",
+    "loading": "Cargando...",
+    "noResults": "No hay agentes que coincidan",
+    "colStatus": "Estado",
+    "colVariant": "Variante",
+    "colName": "Nombre",
+    "colProduct": "Producto",
+    "colPrice": "Precio",
+    "colProduction": "Producción",
+    "colStock": "Inventario",
+    "colSold": "Vendido",
+    "colWage": "Salarios",
+    "colEmployment": "Empleo",
+    "colUtilization": "Utilización",
+    "colBdType": "Tipo de edificio",
+    "colDurability": "Durabilidad",
+    "colRent": "Renta",
+    "colFloors": "Pisos",
+    "colFloorArea": "Superficie construida",
+    "colOccupancy": "Ocupación",
+    "colFamilyType": "Tipo de hogar",
+    "colDiscretionaryIncome": "Ingreso disponible",
+    "colSatisNutrition": "Nutrición",
+    "colSatisHealthcare": "Salud",
+    "colSatisEntertainment": "Entretenimiento",
+    "colSatisResidential": "Vivienda",
+    "colAutomobile": "Automóvil",
+    "colEnrollment": "Inscripción"
+  }
+}

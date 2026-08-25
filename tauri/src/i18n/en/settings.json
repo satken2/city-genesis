@@ -23,7 +23,12 @@
     "language": {
       "label": "Language",
       "ja": "日本語",
-      "en": "English"
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어"
     },
     "volume": {
       "label": "Volume",
@@ -59,24 +64,20 @@
     "loading": "Loading...",
     "shuttingDown": "Shutting down...",
     "saveSuccess": "Save completed",
-    "loadSuccess": "Load completed",
     "newGameSuccess": "New game started",
     "saveFailed": "Save failed",
     "loadFailed": "Load failed",
     "confirmNewGame": "Current data will be lost. Start a new game?",
     "confirmQuitGame": "Are you sure you want to quit? Unsaved progress will be lost.",
     "confirmReturnToTop": "Return to the top menu? Unsaved progress will be lost.",
-    "confirmLoad": "Load this save data?",
     "confirm": "Yes",
     "cancel": "No",
     "debugInit": "Debug Init"
   },
   "saveList": {
-    "title": "Save Data List",
     "noSaves": "No save data found",
     "currentSave": "Current Data",
     "population": "Population",
-    "epoch": "Epoch",
     "inGameDate": "Date",
     "savedAt": "Saved At",
     "loadButton": "Load",

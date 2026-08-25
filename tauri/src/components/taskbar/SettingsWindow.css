@@ -164,6 +164,11 @@
   gap: 8px;
 }
 
+/* 言語は選択肢が多く、各国語の表記もそのまま出すため1行に収まらない。折り返して並べる */
+.settings-language-options {
+  flex-wrap: wrap;
+}
+
 .settings-language-btn,
 .settings-toggle-btn {
   padding: 8px 16px;

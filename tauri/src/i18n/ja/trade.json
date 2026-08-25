@@ -3,7 +3,6 @@
     "product": "供給製品",
     "amount": "供給量",
     "price": "供給価格",
-    "production": "生産量",
     "soldAmount": "売却量",
     "profitRate": "利益率"
   },

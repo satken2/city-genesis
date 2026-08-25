@@ -1,0 +1,232 @@
+{
+  "tutorial": {
+    "startButton": "Commencer",
+    "step1": {
+      "title": "Bienvenue",
+      "description": "Bienvenue ! En tant que maire de cette ville, vous allez œuvrer à son développement. Nous allons vous enseigner les bases de la construction urbaine !"
+    },
+    "step2": {
+      "title": "Traçons une route",
+      "description": "Il faut d'abord une route. Pour en construire une, choisissez l'icône des routes dans la barre d'outils, sélectionnez « Rue résidentielle à deux voies » dans la catégorie « Voirie » et tracez-la. Les routes longues demandent plus de temps de chantier : commencez par une route courte."
+    },
+    "step3": {
+      "title": "Réglons le budget de la ville",
+      "description": "Pour consacrer les fonds en priorité au chantier routier, réglons le budget de la ville. Ouvrez la fenêtre du budget depuis le panneau d'icônes à gauche et réduisez les autres catégories afin de pouvoir allouer davantage à la catégorie construction (le budget de construction doit atteindre au moins 95 % du total). Vous pouvez ajuster en faisant glisser les limites de la barre du haut ou en saisissant des chiffres dans les champs de chaque poste."
+    },
+    "step4": {
+      "title": "Terminons la route",
+      "description": "La route est encore « en projet ». Une fois le chantier lancé, il faudra un certain temps avant qu'elle soit terminée. Faisons avancer le temps et attendons son achèvement. Appuyez sur le bouton « Démarrer » de la barre d'outils pour avancer un peu. Pendant les travaux, un coût de construction est prélevé chaque mois."
+    },
+    "step5": {
+      "title": "Créons des parcelles",
+      "description": "La route est terminée. Créons maintenant les parcelles sur lesquelles construire des bâtiments. Choisissez l'icône des parcelles dans la barre d'outils et créez-les avec « Le long de la route ». Lorsque des contours rouges apparaissent le long de la route, validez avec le bouton pour créer les parcelles."
+    },
+    "step6": {
+      "title": "Construisons un bâtiment",
+      "description": "Nous pouvons enfin construire. Choisissez l'icône des bâtiments dans la barre d'outils et sélectionnez « Logement collectif » dans la catégorie « Logement collectif ». Vous pouvez choisir comme site de chantier n'importe laquelle des parcelles que vous venez de créer."
+    },
+    "step7": {
+      "title": "Terminons le bâtiment",
+      "description": "Comme la route, le bâtiment ne se termine pas immédiatement. Il est encore en projet : faites avancer le temps et attendez son achèvement."
+    },
+    "scenario2": {
+      "title": "Configurons les quartiers",
+      "description": "Apprenez à découper la ville en quartiers et à définir une réglementation de construction pour chacun.",
+      "step1": {
+        "title": "Qu'est-ce qu'un quartier",
+        "description": "Dans ce tutoriel, vous apprendrez à définir des quartiers dans la ville et à régler la réglementation et d'autres paramètres à l'échelle du quartier."
+      },
+      "step2": {
+        "title": "Créons un quartier",
+        "description": "Le quartier est l'unité de découpage de la ville et se définit sur les routes qui la composent. Appuyez sur le bouton des quartiers dans le panneau d'icônes à gauche pour entrer en mode d'édition des quartiers. Vous verrez que toute la ville ne forme actuellement qu'un seul quartier. Dans la vue 3D, avec l'outil de création (état initial ; on change d'outil via le menu obtenu en maintenant Ctrl), cliquez sur la route en haut à droite pour ériger cette route et les parcelles qui la bordent en nouveau quartier."
+      },
+      "step3": {
+        "title": "Le quartier est découpé",
+        "description": "Vous avez détaché une partie de la ville en un nouveau quartier. Créer des quartiers permet d'agréger les prix, la population et d'autres données par quartier, et de définir une réglementation de construction pour l'ensemble du quartier."
+      },
+      "step4": {
+        "title": "Affichons les ressources naturelles",
+        "description": "Voyons s'il y a des ressources naturelles dans le périmètre de ce quartier. Cliquez sur l'icône en forme d'œil dans le cockpit, en bas au centre de l'écran, pour changer de mode d'affichage. Sélectionnez l'onglet des ressources naturelles et activez leur affichage."
+      },
+      "step5": {
+        "title": "Ouvrons le détail du quartier",
+        "description": "On constate qu'un filon se trouve à l'emplacement du quartier nouvellement créé. Cette zone semble se prêter à une carrière. Cliquez sur l'étiquette du nouveau quartier pour ouvrir son panneau de détail."
+      },
+      "step6": {
+        "title": "Définissons la réglementation de construction",
+        "description": "Dans la réglementation de construction, en bas du panneau, vous pouvez choisir quels bâtiments sont autorisés sur les parcelles de ce quartier. Ici, nous ne voulons que des carrières : cliquez sur tous les autres bâtiments pour les désactiver."
+      },
+      "step7": {
+        "title": "Vérifions une parcelle",
+        "description": "La réglementation du quartier est définie. Vérifions qu'elle s'applique bien aux parcelles qu'il contient. Cliquez sur une parcelle du quartier pour ouvrir son panneau de détail."
+      },
+      "step8": {
+        "title": "La réglementation est appliquée",
+        "description": "En regardant le bas du panneau de la parcelle, vous voyez que la restriction définie au niveau du quartier — n'autoriser que les carrières — est bien répercutée. Sur cette parcelle, il n'est plus possible de construire autre chose qu'une carrière."
+      }
+    },
+    "scenario3": {
+      "title": "Aménageons les infrastructures",
+      "description": "Apprenez à acheminer l'électricité jusqu'à la ville à l'aide d'une centrale, d'un poste électrique et de lignes de transmission.",
+      "step1": {
+        "title": "Qu'est-ce que l'aménagement des infrastructures",
+        "description": "Dans ce tutoriel, vous apprendrez à aménager l'infrastructure nécessaire pour alimenter la ville en électricité. Appuyez sur « Démarrer » pour continuer."
+      },
+      "step2": {
+        "title": "Examinons la maison",
+        "description": "Une maison est déjà construite dans cette ville, mais elle n'est pas encore alimentée en électricité. Cliquez dessus pour ouvrir ses informations détaillées et constater l'absence d'alimentation."
+      },
+      "step3": {
+        "title": "Construisons une centrale solaire",
+        "description": "Pour produire de l'électricité, il faut d'abord une centrale. Cette ville n'en a aucune. Un vaste terrain se trouve à l'ouest de la ville : choisissez « Centrale solaire » dans le panneau des bâtiments et construisez-la là."
+      },
+      "step4": {
+        "title": "Nous passons le chantier",
+        "description": "Normalement, une centrale met du temps à être achevée, mais comme il s'agit d'un tutoriel, nous passons le chantier. En appuyant sur « J'ai terminé », la centrale solaire sera immédiatement achevée."
+      },
+      "step5": {
+        "title": "Construisons un poste électrique",
+        "description": "La centrale solaire est achevée. Cependant, le courant haute tension qu'elle produit ne peut pas être utilisé tel quel dans les foyers. Il faut placer un poste électrique près du lieu de consommation pour le convertir en électricité domestique. Un terrain libre jouxte la maison : construisez-y un « Poste électrique »."
+      },
+      "step6": {
+        "title": "Posons la ligne de transmission",
+        "description": "Pour acheminer le courant haute tension de la centrale vers le poste, nous allons poser une « Ligne haute tension ». La centrale et le poste disposent chacun d'un nœud « borne de raccordement » : accrochez une extrémité de la ligne à la borne de la centrale solaire et l'autre à celle du poste électrique."
+      },
+      "step7": {
+        "title": "Vérifions l'alimentation électrique",
+        "description": "L'aménagement de l'infrastructure est terminé. Faites avancer le temps et vérifiez que le poste électrique reçoit bien le courant haute tension."
+      },
+      "step8": {
+        "title": "Aménagement terminé",
+        "description": "Bravo ! La centrale produit du courant haute tension, la ligne de transmission l'achemine jusqu'au poste électrique, et celui-ci le convertit en électricité pour la ville : voilà la structure en deux étages de l'infrastructure électrique. Le même mécanisme permet d'aménager d'autres réseaux, comme l'eau potable."
+      }
+    },
+    "scenario4": {
+      "title": "Construisons un chemin de fer",
+      "description": "Apprenez à mettre une ligne ferroviaire en service en préparant tour à tour la voie, le dépôt, la ligne de transmission, le quai et le bâtiment de gare.",
+      "step1": {
+        "title": "Le chemin de fer fonctionne par assemblage",
+        "description": "Dans ce tutoriel, vous apprendrez à faire passer le chemin de fer dans la ville. Poser des rails ne suffit pas à faire circuler des trains. Il faut un dépôt qui fournit le matériel roulant, une ligne de transmission qui alimente la voie électrifiée, un quai et un bâtiment de gare pour la montée et la descente des voyageurs, et enfin une ligne qui fait rouler les trains : tout cela réuni, le système se met en marche. Cette ville ne dispose que de routes et d'une centrale solaire. Appuyez sur « Commencer » et construisons tout cela dans l'ordre."
+      },
+      "step2": {
+        "title": "Posons la voie",
+        "description": "D'abord la voie sur laquelle rouleront les trains. Ouvrez « Construction ferroviaire » dans le panneau d'icônes à gauche et, dans l'onglet « Voie ferrée », choisissez « Voie électrifiée de surface ». Une voie seule est une voie unique : pour un aller-retour, il faut une double voie. Réglez le nombre de voies « parallèles » sur 2, puis posez-les bien droites d'est en ouest sur le terrain libre au nord (au fond) de la route. Dans la vue 3D, le clic gauche ajoute des sommets et le clic droit valide."
+      },
+      "step3": {
+        "title": "Construisons le dépôt",
+        "description": "Même avec une voie, sans matériel roulant le chemin de fer ne fonctionne pas. Les rames sont fournies à la ligne depuis le dépôt. Dans « Construction » du panneau d'icônes, choisissez « Dépôt ferroviaire » et construisez-le sur la parcelle libre prévue le long de la route. Normalement l'achèvement prend du temps, mais comme il s'agit d'un tutoriel, le bouton de finalisation le termine immédiatement."
+      },
+      "step4": {
+        "title": "Raccordons par une voie de desserte",
+        "description": "Le dépôt ne peut pas faire sortir de rames s'il n'est pas relié à la voie. Le dépôt dispose d'un nœud « borne de raccordement ». Choisissez de nouveau « Voie électrifiée de surface » dans « Construction ferroviaire » (une seule voie suffit) et posez depuis cette borne une voie de desserte jusqu'à la ligne principale. Accrochez une extrémité à la borne du dépôt et l'autre à la voie principale."
+      },
+      "step5": {
+        "title": "Raccordons la ligne de transmission",
+        "description": "Une voie électrifiée ne peut faire circuler des trains que si la caténaire est sous tension. Ouvrez « Routes » dans le panneau d'icônes, choisissez « Ligne de transmission » sous « Électricité » dans l'onglet « Infrastructures » et reliez la borne de raccordement de la centrale solaire à celle du dépôt. La borne du dépôt est mutualisée : elle accepte aussi bien les voies que les lignes de transmission, de sorte qu'une fois l'électricité arrivée là, elle se diffuse par la voie de desserte à tout le réseau ferré."
+      },
+      "step6": {
+        "title": "Construisons le quai",
+        "description": "Vient ensuite le quai où les voyageurs attendent le train. Dans l'onglet « Quai » de « Construction ferroviaire », choisissez « Quai ferroviaire électrifié de surface » et posez-en un court au milieu de la ligne principale. Le quai est lui aussi une sorte de voie : l'astuce est de le poser de façon à ce qu'il se raccorde en douceur à la ligne principale. Le côté du quai permet de choisir de quel côté de la voie il se place."
+      },
+      "step7": {
+        "title": "Construisons le bâtiment de gare",
+        "description": "Avec le quai seul, celui-ci n'appartient encore à aucune gare. Dans l'onglet « Bâtiment de gare » de « Construction ferroviaire », choisissez « Gare passerelle simple » et tracez une ligne qui croise le quai que vous venez de poser. Les quais croisés par cette ligne seront regroupés en une même gare, et les bâtiments de gare s'élèveront aux deux extrémités de la ligne."
+      },
+      "step8": {
+        "title": "Mettons la ligne en service",
+        "description": "Enfin, créons la ligne qui fera circuler les trains. Ouvrez « Transports publics » dans le panneau d'icônes et appuyez sur « ＋ Nouvelle ligne ». Choisissez « Ligne ferroviaire moyenne distance » comme type de ligne et cliquez sur le quai dans la vue 3D pour y placer un arrêt. Fixez le tarif et l'intervalle, puis appuyez sur « Créer » pour l'inaugurer."
+      },
+      "step9": {
+        "title": "Chemin de fer inauguré",
+        "description": "Bravo ! Poser la voie, fournir le matériel depuis le dépôt, acheminer l'électricité par la ligne de transmission, former la gare avec un quai et un bâtiment, puis y faire passer une ligne : le chemin de fer fonctionne grâce à l'empilement de tous ces éléments. Il ne reste qu'à faire avancer le temps pour que les trains se mettent à rouler et que les recettes tarifaires arrivent. Les abords de la gare deviennent attractifs : essayez d'y concentrer logements et commerces."
+      }
+    },
+    "complete": {
+      "title": "Tutoriel terminé",
+      "description": "Félicitations ! Le tutoriel est terminé. Retour au menu.",
+      "button": "Revenir au menu"
+    },
+    "completeButton": "J'ai terminé",
+    "checking": "Vérification...",
+    "failed": "Les conditions ne sont pas remplies. Réessayez.",
+    "completed": "Tutoriel terminé ! Beau travail.",
+    "stepProgress": "Étape {{current}} / {{total}}"
+  },
+  "tips": {
+    "todaysTips": "Astuce du jour",
+    "gotIt": "Fermer",
+    "items": {
+      "tip1": {
+        "title": "L'argent circule",
+        "description": "La dépense des uns est toujours le revenu des autres. Dépensez les recettes fiscales sans hésiter et faites tourner l'économie de la ville."
+      },
+      "tip2": {
+        "title": "Le long combat pour la sécurité",
+        "description": "Un habitant élevé dans un mauvais environnement conserve souvent une conduite problématique à l'âge adulte. Améliorer la sécurité demande l'effort de plusieurs générations."
+      },
+      "tip3": {
+        "title": "Laissez passer",
+        "description": "Si les véhicules de secours arrivent en retard, les dégâts s'aggravent. Veillez à ce que les routes qu'ils empruntent souvent ne soient pas embouteillées."
+      },
+      "tip4": {
+        "title": "Faites tourner la planche à billets",
+        "description": "L'argent manque ? Votre autorité de maire vous permet d'en imprimer autant que vous voulez. Attention toutefois à l'inflation : la hausse des prix dégrade le moral des habitants."
+      },
+      "tip5": {
+        "title": "Un chemin escarpé",
+        "description": "Faire passer routes et réseaux sur des pentes raides coûte cher. Choisissez des tracés aussi plats que possible."
+      },
+      "tip6": {
+        "title": "Prévoyez avant d'utiliser",
+        "description": "L'aménagement de l'électricité et de l'eau prend du temps. Anticipez la croissance et développez les réseaux avec méthode."
+      },
+      "tip7": {
+        "title": "Qui va lentement va sûrement",
+        "description": "Relever les limitations de vitesse augmente les accidents. Privilégiez de belles courbes et des limitations raisonnables."
+      },
+      "tip8": {
+        "title": "Investir dans l'avenir",
+        "description": "L'industrie de pointe a besoin de personnel formé dans l'enseignement supérieur. Prenez le temps de former les talents."
+      },
+      "tip9": {
+        "title": "Faites durer",
+        "description": "Les incendies et l'effondrement des infrastructures dégradent fortement le moral des habitants. Prévoyez un budget d'entretien et de secours confortable pour prévenir les drames évitables."
+      },
+      "tip10": {
+        "title": "Le feu se propage",
+        "description": "Les zones où les bâtiments sont serrés résistent mal au feu. Bâtissez une ville ordonnée."
+      },
+      "tip11": {
+        "title": "Creusez sans relâche",
+        "description": "Repérez l'emplacement des ressources du sous-sol et implantez-y l'activité minière. Pensez aussi à la stratégie de sortie une fois le gisement épuisé."
+      },
+      "tip12": {
+        "title": "L'arbre à billets",
+        "description": "Le maire peut lui aussi construire logements et commerces. Installez des équipements municipaux sur les meilleurs emplacements et faites fortune."
+      },
+      "tip13": {
+        "title": "Pressez le citron",
+        "description": "Réglez la fiscalité dans le détail. L'impôt ne finance pas seulement la gestion de la ville : il sert aussi à orienter quels secteurs se développent."
+      },
+      "tip14": {
+        "title": "Sauvegarde",
+        "description": "Si un accident ou une catastrophe arrête une installation d'infrastructure, l'économie urbaine en souffre lourdement. Doublez les installations critiques pour disposer d'une solution de secours."
+      },
+      "tip15": {
+        "title": "Pas de laisser-faire",
+        "description": "Si les parcelles ne suffisent pas à la demande, routes et parcelles apparaissent de façon désordonnée. Aménagez la ville avec méthode pour éviter la formation de bidonvilles."
+      }
+    }
+  },
+  "hint": {
+    "buildingConstruction": "Sélectionnez une parcelle pour projeter un bâtiment. Un certain temps s'écoule entre le projet et l'achèvement du chantier.",
+    "parcelCreation": "Maintenez Ctrl pour ouvrir le menu radial et choisir la méthode de création, puis cliquez dans la vue 3D pour désigner la cible. Ajustez les dimensions dans le panneau et validez.",
+    "pathConstruction": "Construisez des routes ou des voies ferrées. Cliquez sur le terrain dans la vue 3D. Le clic gauche ajoute des sommets, le clic droit valide la forme, et les sommets se déplacent par glisser. Maintenir Ctrl ouvre le menu de réglages (courbe/droite, accrochage). Les touches 3/4 modifient la hauteur de remblai et de déblai.",
+    "pathConstructionElevated": "Construisez des routes ou des voies ferrées. Cliquez sur le terrain dans la vue 3D. Le clic gauche ajoute des sommets, le clic droit valide la forme, et les sommets se déplacent par glisser. Maintenir Ctrl ouvre le menu de réglages (courbe/droite, accrochage). Page préc./Page suiv. ou les touches 1/2 modifient la hauteur, et les touches 3/4 la hauteur de remblai et de déblai.",
+    "districtEdit": "Vous pouvez créer, étendre et fusionner les « quartiers », unité de référence des réglementations et des statistiques. Dans la vue 3D, maintenez Ctrl pour changer d'outil. Outil de création : un clic gauche sur une route crée un quartier de cette couleur (la couleur change à chaque sélection de l'outil). Outil d'extension : le clic droit choisit le quartier de destination, le clic gauche sur une route l'y intègre. Outil de fusion : le clic droit choisit le quartier de destination, le clic gauche sur le quartier à fusionner ouvre le panneau de validation. La couleur et le nom du quartier sélectionné s'affichent à côté du curseur. Appuyez de nouveau sur le bouton pour quitter.",
+    "terrainUnlock": "Cliquez sur les cellules du terrain pour les débloquer. Les cellules débloquées affichent le terrain en haute résolution.",
+    "bulldozer": "Mode bulldozer. Le clic gauche supprime les terrains vides ainsi que les bâtiments et routes en projet. Appuyez de nouveau sur le bouton pour quitter.",
+    "cityBudget": "Décidez de la répartition, pour la période suivante, des fonds tirés de l'impôt et de l'exploitation. Lorsque la municipalité achète des biens pour construire des routes ou exploiter des équipements publics, elle ne peut le faire que dans la limite du budget défini ici. De plus, si l'enveloppe est insuffisante, du personnel des équipements publics peut être licencié.",
+    "resourceEdit": "Créez des zones de ressources naturelles. Choisissez le type de ressource, puis cliquez sur le terrain. Le clic gauche ajoute un sommet, un clic sur une arête y insère un sommet, et le clic droit supprime un sommet. Le glisser déplace les sommets."
+  }
+}

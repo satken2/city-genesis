@@ -1,0 +1,28 @@
+{
+  "zone": {
+    "titleWithId": "Quartier n° {{id}}",
+    "basicInfo": "Informations générales",
+    "area": "Superficie",
+    "zonePopulation": "Population résidente",
+    "daytimePopulation": "Population diurne",
+    "spaceAmount": "Surface occupée",
+    "slotStarvationTitle": "Des occupants en attente ne peuvent pas être logés",
+    "slotStarvationWarning": "L'installation de « {{tenant}} » exige au moins {{required}} m2 de plancher dans un seul bâtiment, mais le maximum constructible sur les parcelles de ce quartier est de {{max}} m2. Prévoyez une parcelle plus grande.",
+    "restrictions": "Réglementation du quartier",
+    "managementState": "Mode de gestion",
+    "autoManaged": "Gestion automatique",
+    "confirmed": "Figé",
+    "autoManagedDesc": "Le système peut fusionner automatiquement ce quartier au gré des évolutions du réseau routier",
+    "confirmedDesc": "La forme de ce quartier ne sera pas réorganisée par le système (la croissance liée à de nouvelles routes reste possible)",
+    "pinAction": "Figer ce quartier",
+    "unpinAction": "Revenir à la gestion automatique",
+    "managementUpdateFailed": "Échec de la mise à jour du mode de gestion",
+    "restrictionPromoteNote": "Modifier puis enregistrer la réglementation de construction fige ce quartier",
+    "restrictionUpdateFailed": "Échec de la mise à jour de la réglementation du quartier",
+    "restrictionRequired": "L'emprise au sol, le COS et la hauteur ne peuvent pas être vides",
+    "mergeConfirm": "« {{source}} » sera fusionné dans « {{target}} ». Le quartier d'origine disparaîtra, ainsi que sa réglementation.",
+    "mergeAction": "Fusionner",
+    "mergeFailed": "Échec de la fusion des quartiers (des quartiers non adjacents ne peuvent pas être fusionnés)",
+    "mergeNoRequest": "Aucun quartier sélectionné pour la fusion"
+  }
+}

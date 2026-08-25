@@ -1,0 +1,67 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "fetchError": "No se pudieron obtener los datos",
+    "noData": "Sin datos",
+    "history": "Historial",
+    "currency": "{{value, number}}",
+    "daysSinceEpoch": "{{days}} días desde el 1 de enero de 1800",
+    "close": "Cerrar",
+    "sqm": "{{value}} m²",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "rename": "Cambiar nombre",
+    "renameFailed": "No se pudo cambiar el nombre",
+    "minutes": "min",
+    "processing": "Procesando...",
+    "cancel": "Cancelar"
+  },
+  "status": {
+    "0": "En planeación",
+    "1": "En operación",
+    "2": "Detenido",
+    "3": "Construcción planeada",
+    "4": "En construcción",
+    "5": "Demolición planeada",
+    "6": "En demolición",
+    "7": "Completado",
+    "8": "Cancelado",
+    "9": "Desocupado",
+    "10": "Derrumbado",
+    "11": "Inicio de obra pendiente"
+  },
+  "reason": {
+    "1": "Derrumbe por incendio",
+    "2": "Deterioro",
+    "3": "Pérdidas",
+    "4": "Baja utilización",
+    "5": "Decisión del alcalde"
+  },
+  "spaceType": {
+    "0": "Otro",
+    "1": "Vivienda",
+    "2": "Comercio",
+    "3": "Bodega / Fábrica",
+    "4": "Oficina",
+    "5": "Granja"
+  },
+  "resource": {
+    "currentAmount": "Cantidad actual",
+    "consumptionTrend": "Tendencia de consumo",
+    "amountTrend": "Tendencia de reservas",
+    "recoveryAmount": "Recuperación",
+    "maxAmount": "Cantidad máxima",
+    "unknownResource": "Recurso desconocido"
+  },
+  "errors": {
+    "TERRAIN_NOT_ACQUIRED": "Esta área aún no ha sido explorada. Primero libera la celda de terreno.",
+    "UNKNOWN_ERROR": "Ocurrió un error.",
+    "CREATEPATH_INVALID_GEOMETRY": "La forma de la vía no es válida. Revisa el punto inicial y el final.",
+    "CREATEPATH_OUTSIDE_COASTLINE": "No se pueden trazar vías fuera de la línea costera.",
+    "CREATEPATH_MULTIPLE_INTERSECTIONS": "La vía cruza la misma calle varias veces. Elige otro trazado.",
+    "CREATEPATH_ELEVATION_INTERSECTION": "Se detectó un cruce a desnivel. Ajusta la altura.",
+    "PATH_TOO_FEW_POINTS": "Se requieren al menos 2 puntos.",
+    "PATH_MAX_SPAN_EXCEEDED": "La distancia entre nodos es demasiado larga. Agrega puntos intermedios.",
+    "PATH_ELEVATION_CONFLICT": "Se detectó un cruce a desnivel. Ajusta la altura."
+  }
+}
