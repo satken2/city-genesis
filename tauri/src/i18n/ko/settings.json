@@ -1,6 +1,12 @@
 {
   "settings": {
     "title": "설정",
+    "groups": {
+      "general": "일반",
+      "display": "화면",
+      "sound": "사운드",
+      "system": "시스템"
+    },
     "fontSize": {
       "label": "글자 크기",
       "large": "큼",
@@ -50,7 +56,7 @@
     },
     "windowReset": {
       "label": "창 위치・크기",
-      "button": "창 크기와 위치 초기화"
+      "action": "초기화"
     }
   },
   "saveLoad": {

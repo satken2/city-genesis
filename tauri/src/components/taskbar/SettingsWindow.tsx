@@ -5,21 +5,32 @@
  * ウィンドウのタイトルバーは App.tsx の titlebar コンポーネントが担当するため、
  * 本コンポーネント内にはタイトルや閉じるボタンを含めない。
  *
- * 設定項目:
- * - 文字サイズ: プリセット（大・中・小）またはカスタム入力（8〜32px）
- * - ディスプレイ: HUD(アイコンパネル・コックピット・システムトレイ)を別のモニターに移動する
- * - ヒントバー: 画面上部のヒントバーの表示/非表示
- * - 言語: 対応言語（utils/locale.ts の SUPPORTED_LANGUAGES）を切り替える
- * - 音量: マスターボリューム・BGM・サウンドエフェクトのスライダー（ダミー）
+ * 設定項目は4つのグループに分けて並べる:
+ * - 一般: 言語（対応言語は utils/locale.ts の SUPPORTED_LANGUAGES）、
+ *   文字サイズ（プリセット大・中・小またはカスタム入力 8〜32px）、ヒントバーの表示
+ * - 画面: HUD(アイコンパネル・コックピット・システムトレイ)を別のモニターに移動する、
+ *   ウィンドウ位置・サイズのリセット
+ * - サウンド: マスターボリューム・BGM・サウンドエフェクトのスライダー（ダミー）
+ * - システム: 演算処理のCPU/GPU切り替え
  */
 
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useTranslation } from "react-i18next";
 import { FONT_SIZE_PRESETS, useFontSize } from "../../contexts/FontSizeContext";
 import { loadAppSettings, saveAppSettings, type AppSettings } from "../../utils/settings";
 import { fetchApi, ApiError } from "../../utils/api";
-import { SUPPORTED_LANGUAGES, isSupportedLanguage } from "../../utils/locale";
+import {
+  SUPPORTED_LANGUAGES,
+  isSupportedLanguage,
+  resolveSupportedLanguage,
+} from "../../utils/locale";
 import "./SettingsWindow.css";
 
 /**
@@ -35,12 +46,47 @@ const VOLUME_KEYS = [
   { key: "sfx", defaultValue: 70 },
 ] as const;
 
+/** 文字サイズのカスタム入力で受け付ける範囲(px) */
+const FONT_SIZE_MIN = 8;
+const FONT_SIZE_MAX = 32;
+
+/**
+ * 設定1項目分の行
+ * 左に項目名と補足文、右に操作UIを置く。
+ * stretch を立てると操作UIが横幅いっぱいに伸びる(音量スライダー用)。
+ */
+function SettingsRow({
+  label,
+  description,
+  stretch = false,
+  children,
+}: {
+  label: string;
+  description?: ReactNode;
+  stretch?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <div className={`settings-row ${stretch ? "settings-row--stretch" : ""}`}>
+      <div className="settings-row-label">
+        <span className="settings-row-name">{label}</span>
+        {description != null && <span className="settings-row-desc">{description}</span>}
+      </div>
+      <div className="settings-row-control">{children}</div>
+    </div>
+  );
+}
+
 export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t, i18n } = useTranslation();
   const { fontSize, setFontSize, presetKey } = useFontSize();
-  const [customInput, setCustomInput] = useState(
-    presetKey == null ? String(fontSize) : "",
-  );
+
+  /**
+   * カスタム入力欄の文字列。
+   * 入力途中の未確定な値(空文字や範囲外)を保持するために state を分けており、
+   * プリセット選択時と入力確定時に現在のフォントサイズへ揃える。
+   */
+  const [customInput, setCustomInput] = useState(String(fontSize));
 
   /**
    * 音量はダミー実装。
@@ -77,14 +123,11 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         }
         if (
           Number.isFinite(settings.font_size) &&
-          settings.font_size >= 8 &&
-          settings.font_size <= 32
+          settings.font_size >= FONT_SIZE_MIN &&
+          settings.font_size <= FONT_SIZE_MAX
         ) {
           setFontSize(settings.font_size);
-          const pk = Object.entries(FONT_SIZE_PRESETS).find(
-            ([, v]) => v === settings.font_size,
-          )?.[0];
-          setCustomInput(pk == null ? String(settings.font_size) : "");
+          setCustomInput(String(settings.font_size));
         }
         if (settings.volumes) {
           setVolumes((prev) => ({ ...prev, ...settings.volumes }));
@@ -151,12 +194,12 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
 
   /**
    * プリセットボタン押下時の処理
-   * カスタム入力欄をクリアしてプリセット値を適用し、設定ファイルに保存する。
+   * プリセット値を適用し、カスタム入力欄の表示もその値に揃える。
    */
   function handlePresetSelect(key: string) {
     const newSize = FONT_SIZE_PRESETS[key];
     setFontSize(newSize);
-    setCustomInput("");
+    setCustomInput(String(newSize));
     void persistCurrentSettings({ font_size: newSize });
   }
 
@@ -167,10 +210,18 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   function handleCustomChange(value: string) {
     setCustomInput(value);
     const parsed = Number(value);
-    if (Number.isFinite(parsed) && parsed >= 8 && parsed <= 32) {
+    if (Number.isFinite(parsed) && parsed >= FONT_SIZE_MIN && parsed <= FONT_SIZE_MAX) {
       setFontSize(parsed);
       void persistCurrentSettings({ font_size: parsed });
     }
+  }
+
+  /**
+   * カスタム入力欄からフォーカスが外れたときの処理
+   * 未確定の入力(空文字・範囲外)が残ると現在値と表示が食い違うため、実際の値へ戻す。
+   */
+  function handleCustomBlur() {
+    setCustomInput(String(fontSize));
   }
 
   /**
@@ -246,190 +297,184 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     }
   }
 
+  // プルダウンは必ずどれか1つが選ばれている状態にするため、地域付きコードを丸めて現在値にする
+  const currentLanguage = resolveSupportedLanguage(i18n.language);
+
   return (
     <div className="settings-body">
-      <section className="settings-section">
-        <h3 className="settings-section-title">
-          {t("settings.fontSize.label")}
-        </h3>
-
-        <div className="settings-font-size-options">
-          {PRESET_ORDER.map((key) => (
-            <button
-              key={key}
-              className={`settings-preset-btn ${presetKey === key ? "active" : ""}`}
-              onClick={() => handlePresetSelect(key)}
-              type="button"
-            >
-              {t(`settings.fontSize.${key}`)}
-              <span className="settings-preset-size">
-                {FONT_SIZE_PRESETS[key]}px
-              </span>
-            </button>
-          ))}
-
-          <div className="settings-custom-wrapper">
-            <label className="settings-custom-label">
-              {t("settings.fontSize.custom")}
-            </label>
-            <div className="settings-custom-input-row">
-              <input
-                className="settings-custom-input"
-                type="number"
-                min={8}
-                max={32}
-                step={1}
-                value={customInput}
-                onChange={(e) => handleCustomChange(e.target.value)}
-                placeholder={`${fontSize}`}
-              />
-              <span className="settings-custom-unit">px</span>
+      <section className="settings-group">
+        <h3 className="settings-group-title">{t("settings.groups.general")}</h3>
+        <div className="settings-card">
+          <SettingsRow label={t("settings.language.label")}>
+            <div className="settings-select-wrap">
+              <select
+                className="settings-select"
+                value={currentLanguage}
+                onChange={(e) => handleChangeLanguage(e.target.value)}
+              >
+                {SUPPORTED_LANGUAGES.map((lang) => (
+                  <option key={lang} value={lang}>
+                    {t(`settings.language.${lang}`)}
+                  </option>
+                ))}
+              </select>
             </div>
-          </div>
-        </div>
+          </SettingsRow>
 
-        <p className="settings-preview-text">
-          {t("settings.fontSize.preview")}: {fontSize}px
-        </p>
+          <SettingsRow
+            label={t("settings.fontSize.label")}
+            description={`${t("settings.fontSize.preview")}: ${fontSize}px`}
+          >
+            <div className="settings-seg">
+              {PRESET_ORDER.map((key) => (
+                <button
+                  key={key}
+                  className={`settings-seg-btn ${presetKey === key ? "active" : ""}`}
+                  onClick={() => handlePresetSelect(key)}
+                  type="button"
+                >
+                  {t(`settings.fontSize.${key}`)}
+                  <span className="settings-seg-sub">{FONT_SIZE_PRESETS[key]}px</span>
+                </button>
+              ))}
+            </div>
+            <input
+              className="settings-number"
+              type="number"
+              min={FONT_SIZE_MIN}
+              max={FONT_SIZE_MAX}
+              step={1}
+              value={customInput}
+              onChange={(e) => handleCustomChange(e.target.value)}
+              onBlur={handleCustomBlur}
+              title={t("settings.fontSize.custom")}
+              aria-label={t("settings.fontSize.custom")}
+            />
+            <span className="settings-unit">px</span>
+          </SettingsRow>
+
+          <SettingsRow
+            label={t("settings.hintbar.label")}
+            description={t("settings.hintbar.description")}
+          >
+            <div className="settings-seg">
+              {([true, false] as const).map((value) => (
+                <button
+                  key={value ? "show" : "hide"}
+                  className={`settings-seg-btn ${hintbarVisible === value ? "active" : ""}`}
+                  onClick={() => handleHintbarVisibleChange(value)}
+                  type="button"
+                >
+                  {t(value ? "settings.hintbar.show" : "settings.hintbar.hide")}
+                </button>
+              ))}
+            </div>
+          </SettingsRow>
+        </div>
       </section>
 
-      <section className="settings-section">
-        <h3 className="settings-section-title">
-          {t("settings.monitor.label")}
-        </h3>
-        <div className="settings-monitor-options">
-          <button
-            className="settings-monitor-btn"
-            onClick={() => void handleSwitchMonitor(1)}
-            type="button"
-            title={t("settings.monitor.prev")}
-          >
-            &#x2039; {t("settings.monitor.prev")}
-          </button>
-          <button
-            className="settings-monitor-btn"
-            onClick={() => void handleSwitchMonitor(-1)}
-            type="button"
-            title={t("settings.monitor.next")}
-          >
-            {t("settings.monitor.next")} &#x203A;
-          </button>
-        </div>
-      </section>
-
-      <section className="settings-section">
-        <h3 className="settings-section-title">
-          {t("settings.windowReset.label")}
-        </h3>
-        <div className="settings-monitor-options">
-          <button
-            className="settings-action-btn"
-            onClick={() => void handleResetWindowGeometries()}
-            type="button"
-          >
-            {t("settings.windowReset.button")}
-          </button>
-        </div>
-      </section>
-
-      <section className="settings-section">
-        <h3 className="settings-section-title">
-          {t("settings.hintbar.label")}
-        </h3>
-        <div className="settings-toggle-options">
-          {([true, false] as const).map((value) => (
+      <section className="settings-group">
+        <h3 className="settings-group-title">{t("settings.groups.display")}</h3>
+        <div className="settings-card">
+          <SettingsRow label={t("settings.monitor.label")}>
             <button
-              key={value ? "show" : "hide"}
-              className={`settings-toggle-btn ${hintbarVisible === value ? "active" : ""}`}
-              onClick={() => handleHintbarVisibleChange(value)}
+              className="settings-btn"
+              onClick={() => void handleSwitchMonitor(1)}
+              type="button"
+              title={t("settings.monitor.prev")}
+            >
+              <span className="settings-btn-chevron">&#x2039;</span> {t("settings.monitor.prev")}
+            </button>
+            <button
+              className="settings-btn"
+              onClick={() => void handleSwitchMonitor(-1)}
+              type="button"
+              title={t("settings.monitor.next")}
+            >
+              {t("settings.monitor.next")} <span className="settings-btn-chevron">&#x203A;</span>
+            </button>
+          </SettingsRow>
+
+          <SettingsRow label={t("settings.windowReset.label")}>
+            <button
+              className="settings-btn"
+              onClick={() => void handleResetWindowGeometries()}
               type="button"
             >
-              {t(value ? "settings.hintbar.show" : "settings.hintbar.hide")}
+              {t("settings.windowReset.action")}
             </button>
-          ))}
-        </div>
-        <p className="settings-preview-text">
-          {t("settings.hintbar.description")}
-        </p>
-      </section>
-
-      <section className="settings-section">
-        <h3 className="settings-section-title">
-          {t("settings.language.label")}
-        </h3>
-        <div className="settings-language-options">
-          {SUPPORTED_LANGUAGES.map((lang) => (
-            <button
-              key={lang}
-              className={`settings-language-btn ${i18n.language === lang ? "active" : ""}`}
-              onClick={() => handleChangeLanguage(lang)}
-              type="button"
-            >
-              {t(`settings.language.${lang}`)}
-            </button>
-          ))}
+          </SettingsRow>
         </div>
       </section>
 
-      <section className="settings-section">
-        <h3 className="settings-section-title">
-          {t("settings.volume.label")}
-        </h3>
-        <div className="settings-volume-list">
-          {VOLUME_KEYS.map((item) => (
-            <div key={item.key} className="settings-volume-row">
-              <label className="settings-volume-label">
-                {t(`settings.volume.${item.key}`)}
-              </label>
-              <div className="settings-volume-slider-wrapper">
+      <section className="settings-group">
+        <h3 className="settings-group-title">{t("settings.groups.sound")}</h3>
+        <div className="settings-card">
+          {VOLUME_KEYS.map((item) => {
+            const value = volumes[item.key] ?? item.defaultValue;
+            return (
+              <SettingsRow key={item.key} label={t(`settings.volume.${item.key}`)} stretch>
                 <input
-                  className="settings-volume-slider"
+                  className="settings-slider"
                   type="range"
                   min={0}
                   max={100}
-                  value={volumes[item.key] ?? item.defaultValue}
+                  value={value}
+                  style={{ "--settings-fill": `${value}%` } as CSSProperties}
                   onChange={(e) => handleVolumeChange(item.key, Number(e.target.value))}
                 />
-                <span className="settings-volume-value">
-                  {volumes[item.key] ?? item.defaultValue}%
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="settings-section">
-        <h3 className="settings-section-title">
-          {t("settings.compute.label")}
-        </h3>
-        <div className="settings-language-options">
-          {(["cpu", "gpu"] as const).map((mode) => {
-            const isGpu = mode === "gpu";
-            const isActive = isGpu ? gpuEnabled : !gpuEnabled;
-            return (
-              <button
-                key={mode}
-                className={`settings-language-btn ${isActive ? "active" : ""}`}
-                onClick={() => void handleGpuToggle(isGpu)}
-                disabled={gpuRestarting || gpuEnabled === isGpu}
-                type="button"
-              >
-                {t(`settings.compute.${mode}`)}
-              </button>
+                <span className="settings-slider-value">{value}%</span>
+              </SettingsRow>
             );
           })}
         </div>
-        <p className="settings-preview-text">
-          {gpuRestarting
-            ? t("settings.compute.restarting")
-            : gpuActive
-              ? t("settings.compute.statusActive")
-              : t("settings.compute.statusInactive")}
-        </p>
-        <p className="settings-preview-text" style={{ fontSize: "0.85em", opacity: 0.7 }}>
-          {t("settings.compute.restartRequired")}
-        </p>
+      </section>
+
+      <section className="settings-group">
+        <h3 className="settings-group-title">{t("settings.groups.system")}</h3>
+        <div className="settings-card">
+          <SettingsRow
+            label={t("settings.compute.label")}
+            description={
+              <>
+                <span
+                  className={`settings-status-dot ${
+                    gpuRestarting
+                      ? "settings-status-dot--busy"
+                      : gpuActive
+                        ? "settings-status-dot--on"
+                        : ""
+                  }`}
+                />
+                {gpuRestarting
+                  ? t("settings.compute.restarting")
+                  : gpuActive
+                    ? t("settings.compute.statusActive")
+                    : t("settings.compute.statusInactive")}
+                {" / "}
+                {t("settings.compute.restartRequired")}
+              </>
+            }
+          >
+            <div className="settings-seg">
+              {(["cpu", "gpu"] as const).map((mode) => {
+                const isGpu = mode === "gpu";
+                const isActive = isGpu ? gpuEnabled : !gpuEnabled;
+                return (
+                  <button
+                    key={mode}
+                    className={`settings-seg-btn ${isActive ? "active" : ""}`}
+                    onClick={() => void handleGpuToggle(isGpu)}
+                    disabled={gpuRestarting || gpuEnabled === isGpu}
+                    type="button"
+                  >
+                    {t(`settings.compute.${mode}`)}
+                  </button>
+                );
+              })}
+            </div>
+          </SettingsRow>
+        </div>
       </section>
     </div>
   );

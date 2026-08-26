@@ -50,15 +50,22 @@ export function isSupportedLanguage(value: unknown): value is SupportedLanguage 
 }
 
 /**
- * i18n.language を Intl 用ロケールへ変換する。
+ * 任意の言語コードを対応言語コードへ丸める。
  * i18next は "ja-JP" のような地域付きコードを返すことがあるため、
- * 完全一致しない場合は先頭の言語サブタグでも照合する。
+ * 完全一致しない場合は先頭の言語サブタグでも照合し、それでも該当が無ければ既定言語を返す。
+ * 「必ずどれか1つが選ばれている」プルダウンの現在値解決に使う。
  */
-export function resolveIntlLocale(language: string | undefined): string {
+export function resolveSupportedLanguage(language: string | undefined): SupportedLanguage {
   if (isSupportedLanguage(language)) {
-    return INTL_LOCALES[language];
+    return language;
   }
   const primary = (language ?? "").split("-")[0];
-  const matched = SUPPORTED_LANGUAGES.find((code) => code.split("-")[0] === primary);
-  return INTL_LOCALES[matched ?? DEFAULT_LANGUAGE];
+  return SUPPORTED_LANGUAGES.find((code) => code.split("-")[0] === primary) ?? DEFAULT_LANGUAGE;
+}
+
+/**
+ * i18n.language を Intl 用ロケールへ変換する。
+ */
+export function resolveIntlLocale(language: string | undefined): string {
+  return INTL_LOCALES[resolveSupportedLanguage(language)];
 }

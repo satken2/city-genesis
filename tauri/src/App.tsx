@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState, lazy, Suspense, type MouseEvent as ReactM
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { emit } from "@tauri-apps/api/event";
+import { emit, listen } from "@tauri-apps/api/event";
 import "./App.css";
 import closeIcon from "./assets/images/ui/close.png";
 import type { QueryState, QuestNotification, WindowContext, WindowDefinition } from "./types";
 import { buildApiUrl } from "./utils/api";
-import { loadAppSettings } from "./utils/settings";
+import { loadAppSettings, type AppSettings } from "./utils/settings";
 import { isSupportedLanguage } from "./utils/locale";
 
 /**
@@ -167,6 +167,28 @@ function App() {
       unlistenWindow?.();
     };
   }, [appWindow, i18n]);
+
+  /**
+   * 設定ウィンドウでの言語変更を、開いている全ウィンドウへ即時反映する。
+   *
+   * i18n インスタンスはウィンドウ(WebView)ごとに独立しているため、設定ウィンドウで
+   * changeLanguage しても他ウィンドウには伝播しない。設定保存時に全ウィンドウへ
+   * ブロードキャストされる `settings-updated` を各ウィンドウで受け直すことで、
+   * 常駐したまま再マウントされないHUD3枚・トップメニューにも反映される
+   * (これがないと次回起動まで旧言語のままになる)。
+   */
+  useEffect(() => {
+    const unlisten = listen<AppSettings>("settings-updated", (event) => {
+      const language = event.payload?.language;
+      if (isSupportedLanguage(language) && language !== i18n.language) {
+        void i18n.changeLanguage(language);
+      }
+    });
+
+    return () => {
+      void unlisten.then((fn) => fn());
+    };
+  }, [i18n]);
 
   useEffect(() => {
     if (!context) {

@@ -1,282 +1,358 @@
 /**
  * 設定ウィンドウのスタイル定義
  *
- * システムトレイまたはトップメニューの設定ボタンから開くウィンドウの中身。
- * 既存のダークテーマ（紺色系・半透明）に統一する。
+ * 意匠はトップメニュー系のウィンドウ(ニューゲーム・セーブ/ロード)と揃える:
+ * 枠線・角丸・発光を使わず、ベタ塗りの四角と落ち影だけで面の高さを表す。
+ * 配色は App.css の --flat-* トークンが唯一の正なので、直値を書かないこと。
+ *
+ * 構成は「グループ見出し + 設定行を積んだカード」の縦並び。
+ * 1行は左に項目名(と補足文)、右に操作UIを置く。行同士は2pxの隙間で分け、
+ * 隙間から沈んだ面色が覗くことで区切り線の代わりにする。
+ *
+ * 寸法は rem ではなく px で指定する。ルートのフォントサイズは本ウィンドウで
+ * 変更する設定項目そのものであり、rem だと文字サイズを変えた瞬間に
+ * 設定画面自体のレイアウトが崩れるため。
  */
 
 .settings-body {
-  padding: 16px;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
   height: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
-.settings-section {
-  margin-bottom: 20px;
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.settings-section:last-child {
-  margin-bottom: 0;
-}
-
-.settings-section-title {
-  margin: 0 0 10px;
-  font-size: 0.82rem;
+/* 見出しは左端の実線ブロックで段を示す */
+.settings-group-title {
+  margin: 0;
+  padding: 2px 0 2px 10px;
+  font-size: 14px;
   font-weight: 600;
-  color: #9cb3cb;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+  color: var(--flat-text);
+  box-shadow: inset 4px 0 0 var(--flat-accent);
 }
 
-.settings-font-size-options {
+/* 下地の沈んだ面が行間の隙間から覗き、罫線を引かずに行を分ける */
+.settings-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background-color: var(--flat-sunken);
+  box-shadow: var(--flat-shadow);
+}
+
+.settings-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  align-items: flex-start;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 12px 14px;
+  background-color: var(--flat-surface);
 }
 
-/**
- * プリセット選択ボタン
- * 選択中(active)のものはアクセントカラーで強調表示する
- */
-.settings-preset-btn {
+.settings-row-label {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 8px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #c8d8e8;
-  font-size: 0.85rem;
+  gap: 3px;
+  min-width: 0;
+}
+
+.settings-row-name {
+  font-size: 13px;
   font-weight: 600;
-  cursor: pointer;
-  transition: background 0.12s, border-color 0.12s;
+  color: var(--flat-text);
 }
 
-.settings-preset-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
+.settings-row-desc {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--flat-text-muted);
 }
 
-.settings-preset-btn.active {
-  border-color: rgba(78, 161, 255, 0.5);
-  background: rgba(78, 161, 255, 0.15);
-  color: #4ea1ff;
-}
-
-.settings-preset-size {
-  font-size: 0.7rem;
-  font-weight: 400;
-  color: #6b8299;
-}
-
-.settings-preset-btn.active .settings-preset-size {
-  color: rgba(78, 161, 255, 0.7);
-}
-
-/**
- * カスタム入力欄
- * プリセットにない任意のフォントサイズを数値入力する
- */
-.settings-custom-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.settings-custom-label {
-  font-size: 0.78rem;
-  color: #8ba3bb;
-}
-
-.settings-custom-input-row {
+/* 操作UIは右端に寄せる。行が狭いときは折り返して下段へ落ちる */
+.settings-row-control {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
-.settings-custom-input {
-  width: 64px;
-  padding: 4px 8px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #e5eef9;
-  font: inherit;
-  font-size: 0.85rem;
+/* 音量スライダーのように操作UIを横幅いっぱいに使う行 */
+.settings-row--stretch .settings-row-label {
+  flex: 0 0 150px;
+}
+
+.settings-row--stretch .settings-row-control {
+  flex: 1 1 180px;
+}
+
+/* =========================================================================
+ * セグメント選択(プリセット・二択・CPU/GPU で共用)
+ * ========================================================================= */
+
+/* 溝の上にボタンを2px間隔で並べ、ひと続きの操作系であることを示す */
+.settings-seg {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  background-color: var(--flat-sunken);
+}
+
+.settings-seg-btn {
+  min-width: 56px;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 0;
+  background-color: var(--flat-raised);
+  color: var(--flat-text-body);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.settings-seg-btn:hover:not(:disabled) {
+  background-color: var(--flat-raised-hover);
+}
+
+/* 選択中は下端の実線ブロックで示す(左端ブロックは横並びだと読み取りづらいため) */
+.settings-seg-btn.active {
+  background-color: var(--flat-selected);
+  color: #ffffff;
+  box-shadow: inset 0 -3px 0 var(--flat-accent);
+}
+
+.settings-seg-btn:disabled {
+  cursor: not-allowed;
+}
+
+/* 選択中でない無効ボタンだけを沈ませる(選択中は現在値の表示として色を保つ) */
+.settings-seg-btn:disabled:not(.active) {
+  opacity: 0.5;
+}
+
+/* プリセットの実サイズ(18pxなど)をラベルの下に小さく添える */
+.settings-seg-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+/* =========================================================================
+ * 数値入力・プルダウン・ボタン
+ * ========================================================================= */
+
+.settings-number {
+  width: 56px;
+  padding: 7px 8px;
+  border: none;
+  border-radius: 0;
+  background-color: var(--flat-sunken);
+  color: var(--flat-text);
+  font-family: inherit;
+  font-size: 12px;
+  text-align: right;
   outline: none;
-  transition: border-color 0.15s;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.settings-custom-input:focus {
-  border-color: rgba(78, 161, 255, 0.4);
+.settings-number:focus {
+  background-color: var(--flat-raised);
+  box-shadow: inset 0 -2px 0 var(--flat-accent);
 }
 
-.settings-custom-input::-webkit-inner-spin-button,
-.settings-custom-input::-webkit-outer-spin-button {
+/* スピンボタンは幅を食うだけで押しづらいので消す */
+.settings-number::-webkit-inner-spin-button,
+.settings-number::-webkit-outer-spin-button {
   appearance: none;
   margin: 0;
 }
 
-.settings-custom-unit {
-  font-size: 0.78rem;
-  color: #6b8299;
+.settings-unit {
+  font-size: 11px;
+  color: var(--flat-text-muted);
 }
 
-.settings-preview-text {
-  margin: 10px 0 0;
-  font-size: 0.75rem;
-  color: #6b8299;
-}
-
-/* ─── ディスプレイ切替 ─── */
-
-.settings-monitor-options {
-  display: flex;
-  gap: 8px;
-}
-
-.settings-monitor-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 8px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #c8d8e8;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.12s, border-color 0.12s;
-}
-
-.settings-monitor-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-/* ─── 言語切替・ON/OFF切替 ─── */
-
-.settings-language-options,
-.settings-toggle-options {
-  display: flex;
-  gap: 8px;
-}
-
-/* 言語は選択肢が多く、各国語の表記もそのまま出すため1行に収まらない。折り返して並べる */
-.settings-language-options {
-  flex-wrap: wrap;
-}
-
-.settings-language-btn,
-.settings-toggle-btn {
-  padding: 8px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #c8d8e8;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.12s, border-color 0.12s;
-}
-
-.settings-language-btn:hover,
-.settings-toggle-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.settings-language-btn.active,
-.settings-toggle-btn.active {
-  border-color: rgba(78, 161, 255, 0.5);
-  background: rgba(78, 161, 255, 0.15);
-  color: #4ea1ff;
-}
-
-/* ─── 音量スライダー ─── */
-
-.settings-volume-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.settings-volume-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.settings-volume-label {
-  width: 220px;
-  font-size: 0.85rem;
-  color: #c8d8e8;
-  flex-shrink: 0;
-}
-
-.settings-volume-slider-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-}
-
-.settings-volume-slider {
-  flex: 1;
-  height: 4px;
-  border-radius: 2px;
-  background: rgba(255, 255, 255, 0.12);
-  outline: none;
-  appearance: none;
-  cursor: pointer;
-}
-
-.settings-volume-slider::-webkit-slider-thumb {
-  appearance: none;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #4ea1ff;
-  cursor: pointer;
-  border: none;
-  box-shadow: 0 0 4px rgba(78, 161, 255, 0.4);
-}
-
-.settings-volume-slider::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #4ea1ff;
-  cursor: pointer;
-  border: none;
-  box-shadow: 0 0 4px rgba(78, 161, 255, 0.4);
-}
-
-.settings-volume-value {
-  width: 38px;
-  text-align: right;
-  font-size: 0.78rem;
-  color: #8ba3bb;
-  flex-shrink: 0;
-}
-
-.settings-action-btn {
+/* 三角マークを重ねるため、プルダウンは相対配置のラッパで包む */
+.settings-select-wrap {
+  position: relative;
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #c8d8e8;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.12s, border-color 0.12s;
-  width: 100%;
 }
 
-.settings-action-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
+.settings-select {
+  appearance: none;
+  min-width: 190px;
+  padding: 8px 32px 8px 12px;
+  border: none;
+  border-radius: 0;
+  background-color: var(--flat-raised);
+  color: var(--flat-text);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.settings-select:hover {
+  background-color: var(--flat-raised-hover);
+}
+
+.settings-select:focus {
+  box-shadow: inset 0 -2px 0 var(--flat-accent);
+}
+
+/* 展開中のリストはブラウザ描画なので、最低限の配色だけ合わせる */
+.settings-select option {
+  background-color: var(--flat-surface);
+  color: var(--flat-text);
+}
+
+.settings-select-wrap::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 13px;
+  width: 6px;
+  height: 6px;
+  margin-top: -5px;
+  border-right: 2px solid var(--flat-accent);
+  border-bottom: 2px solid var(--flat-accent);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.settings-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 0;
+  background-color: var(--flat-raised);
+  color: var(--flat-text-body);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.settings-btn:hover:not(:disabled) {
+  background-color: var(--flat-raised-hover);
+}
+
+.settings-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 左右の山括弧はラベルより一段明るくして方向を目立たせる */
+.settings-btn-chevron {
+  color: var(--flat-accent);
+  font-weight: 700;
+}
+
+/* =========================================================================
+ * 音量スライダー
+ * ========================================================================= */
+
+/* トラックを別要素として塗るため、input 自体は透明でつまみの高さぶんだけ確保する */
+.settings-slider {
+  appearance: none;
+  flex: 1;
+  min-width: 0;
+  height: 18px;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+}
+
+/* --settings-fill(現在値%)までをアクセント色で塗り、残りを溝色にする */
+.settings-slider::-webkit-slider-runnable-track {
+  height: 6px;
+  background: linear-gradient(
+    to right,
+    var(--flat-accent) 0 var(--settings-fill),
+    var(--flat-sunken) var(--settings-fill) 100%
+  );
+}
+
+.settings-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 10px;
+  height: 18px;
+  margin-top: -6px;
+  border: none;
+  border-radius: 0;
+  background-color: var(--flat-text);
+  transition: background-color 0.15s ease;
+}
+
+.settings-slider:hover::-webkit-slider-thumb,
+.settings-slider:active::-webkit-slider-thumb {
+  background-color: var(--flat-accent);
+}
+
+/* Firefox(開発時のLinux環境)向け。塗り分けは ::-moz-range-progress が担う */
+.settings-slider::-moz-range-track {
+  height: 6px;
+  background-color: var(--flat-sunken);
+}
+
+.settings-slider::-moz-range-progress {
+  height: 6px;
+  background-color: var(--flat-accent);
+}
+
+.settings-slider::-moz-range-thumb {
+  width: 10px;
+  height: 18px;
+  border: none;
+  border-radius: 0;
+  background-color: var(--flat-text);
+}
+
+.settings-slider-value {
+  width: 40px;
+  flex-shrink: 0;
+  text-align: right;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--flat-text-body);
+}
+
+/* =========================================================================
+ * 状態表示
+ * ========================================================================= */
+
+/* 補足文の先頭に置く状態ランプ。稼働中は緑、非稼働は消灯色 */
+.settings-status-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  vertical-align: baseline;
+  background-color: var(--flat-text-muted);
+}
+
+.settings-status-dot--on {
+  background-color: var(--flat-good);
+}
+
+.settings-status-dot--busy {
+  background-color: var(--flat-warn);
 }

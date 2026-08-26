@@ -1,6 +1,12 @@
 {
   "settings": {
     "title": "Settings",
+    "groups": {
+      "general": "General",
+      "display": "Display",
+      "sound": "Sound",
+      "system": "System"
+    },
     "fontSize": {
       "label": "Font Size",
       "large": "Large",
@@ -50,7 +56,7 @@
     },
     "windowReset": {
       "label": "Window Position & Size",
-      "button": "Reset Window Size and Position"
+      "action": "Reset"
     }
   },
   "saveLoad": {

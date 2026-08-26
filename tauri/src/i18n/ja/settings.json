@@ -1,6 +1,12 @@
 {
   "settings": {
     "title": "設定",
+    "groups": {
+      "general": "一般",
+      "display": "画面",
+      "sound": "サウンド",
+      "system": "システム"
+    },
     "fontSize": {
       "label": "文字サイズ",
       "large": "大",
@@ -50,7 +56,7 @@
     },
     "windowReset": {
       "label": "ウィンドウ位置・サイズ",
-      "button": "ウィンドウのサイズと位置をリセット"
+      "action": "リセット"
     }
   },
   "saveLoad": {

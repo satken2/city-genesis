@@ -1,6 +1,12 @@
 {
   "settings": {
     "title": "設定",
+    "groups": {
+      "general": "一般",
+      "display": "畫面",
+      "sound": "聲音",
+      "system": "系統"
+    },
     "fontSize": {
       "label": "文字大小",
       "large": "大",
@@ -50,7 +56,7 @@
     },
     "windowReset": {
       "label": "視窗位置與大小",
-      "button": "重設視窗大小與位置"
+      "action": "重設"
     }
   },
   "saveLoad": {

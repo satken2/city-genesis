@@ -40,7 +40,7 @@ Unityのグラフィックの上に透明なWebViewウィンドウとして重�
 | `log.ts` | Rust側ファイルログ(実行ファイル横の`city-genesis/tauri.log`)へのINFO転送(`logInfoToFile`)。本番でconsoleが見えないため、無言で止まりうる重要フロー(エポック実行など)の進行記録に使う。なお未キャッチ例外・unhandledrejection・`console.error`は`main.tsx`が自動で同ログへERROR転送する |
 | `cityNotifications.ts` | L1通知(重大通知)の共通処理。`fetchL1Notifications`(GET /api/v1/notifications)・`formatL1NotificationMessage`(i18nキー`notifications.types.<type>`への差し込み。未知typeはフォールバック)・`NOTIFICATION_ENTITY_WINDOW_TYPES`(通知対象→詳細ウィンドウの対応表)。コックピット(hud/Cockpit.tsx)とCityNotificationsWindowが共用 |
 | `hintbar.ts` | 画面下部ヒントバーのテキスト設定 |
-| `locale.ts` | 対応言語(`SUPPORTED_LANGUAGES`)と、言語コード→`Intl`用ロケールの変換(`resolveIntlLocale`)・検証(`isSupportedLanguage`)。詳細は「多言語対応」の節 |
+| `locale.ts` | 対応言語(`SUPPORTED_LANGUAGES`)と、言語コード→`Intl`用ロケールの変換(`resolveIntlLocale`)・検証(`isSupportedLanguage`)・対応言語コードへの丸め(`resolveSupportedLanguage`。`ja-JP`のような地域付きコードを`ja`へ寄せる。プルダウンの現在値解決に使う)。詳細は「多言語対応」の節 |
 | `date.ts` | ゲーム内仮想暦(1ヶ月=30日/1年=360日)の整形。`formatEpochDate` / `formatEpochDateRange` |
 | `money.ts` | 金額の整形。`formatCompactAmount`(有効3桁のコンパクト表記) / `formatExactAmount`(3桁区切り) |
 | `settings.ts` | アプリ設定のロード・保存 |
@@ -56,7 +56,7 @@ WebView2(Chromium/Edge)の既定はコンテンツに重なるオーバーレイ
 
 # フラット意匠の共通トークン(--flat-*)
 
-トップメニュー系のウィンドウ(ニューゲーム・セーブ/ロード・エポック結果)は**枠線・角丸・発光を使わず、ベタ塗りの四角と落ち影だけで面の高さを表す**意匠で統一している。強調は枠ではなく**左端の実線ブロック**(`box-shadow: inset 4px 0 0 var(--flat-accent)`)で示す。
+トップメニュー系のウィンドウ(ニューゲーム・セーブ/ロード・エポック結果・設定)は**枠線・角丸・発光を使わず、ベタ塗りの四角と落ち影だけで面の高さを表す**意匠で統一している。強調は枠ではなく**左端の実線ブロック**(`box-shadow: inset 4px 0 0 var(--flat-accent)`)で示す。
 
 配色・影は`App.css`の`:root`にある`--flat-*`(面`--flat-surface`/`--flat-raised`/`--flat-sunken`、選択`--flat-selected`、文字`--flat-text*`、状態`--flat-good`/`--flat-warn`/`--flat-danger`とその面色、影`--flat-shadow`/`--flat-shadow-sm`)が唯一の正。**この意匠のUIを新設・改修するときは直値ではなくこの変数を参照すること**(色を変えるときもここを直す)。`NewGameWindow.css` / `SaveListWindow.css` / `SaveLoadWindow.css` は変数化前の実装で同じ値を直値で持っており、触る機会があれば変数へ寄せる。
 
@@ -72,6 +72,8 @@ WebView2(Chromium/Edge)の既定はコンテンツに重なるオーバーレイ
 翻訳リソースは`src/i18n/<言語コード>/`配下にドメインごとのJSONへ分割している(例: `agent.json`, `budget.json`, `statistics.json`)。各ファイルはトップレベル名前空間をそのまま含み、`index.ts`が`import.meta.glob("./*/*.json")`で全言語・全ファイルを取得し、言語ごとに単一の`translation`名前空間へ集約する(キー参照は従来どおり`t("agent.foo")`)。**キーを追加するときは、その名前空間を含むファイルを全言語ぶん必ず更新する**こと。新しいトップレベル名前空間を足す場合は既存のドメインファイルに入れるか、全言語に同名の新規ファイルを作れば自動で拾われる。
 
 キーの過不足と`{{変数}}`の食い違いは`tools/check_i18n_parity.py`で検査できる(日本語を基準に全言語を突き合わせる)。翻訳リソースを触ったら実行すること。
+
+**i18nインスタンスはウィンドウ(WebView)ごとに独立している。** 各ウィンドウはマウント時に`loadAppSettings`で言語を復元し(`App.tsx`)、以降の変更は設定保存時にブロードキャストされる`settings-updated`イベントを`App.tsx`が受けて`changeLanguage`する。HUD3枚・トップメニューは常駐したまま再マウントされないため、この経路がないと再起動まで旧言語のままになる。
 
 数値・日付の整形に渡すロケールは`resolveIntlLocale(i18n.language)`(`src/utils/locale.ts`)で解決する。**`i18n.language`を直接`Intl`やtoLocaleStringへ渡さないこと**(言語コードと地域付きロケールの対応表がここに集約されている)。ゲーム内の仮想暦の整形は`src/utils/date.ts`が担当し、月名は`Intl`から引くので言語追加時の手当ては不要(年月日の並びだけ言語系統ごとに分岐している)。
 
