@@ -59,11 +59,18 @@
     "confirmFailed": "No se pudo construir",
     "directInvalid": {
       "overlap_parcel": "Se traslapa con una parcela existente",
+      "overlap_city_building": "Se traslapa con una instalación municipal o un sitio de construcción planificado",
       "overlap_path": "Se traslapa con una calle",
       "terrain_not_acquired": "No se puede construir en terreno no liberado",
       "incompatible_parcel_type": "Este edificio no se puede construir en este tipo de terreno",
       "generic": "No se puede construir en este lugar"
     },
+    "directAcquisitionRequired": "Se traslapa con {{count}} parcela(s) privada(s) (al confirmar se activará la adquisición automática)",
+    "directAcquisitionCost": "Costo estimado de adquisición: {{cost}}",
+    "acquisitionNoRequest": "No hay adquisición por confirmar",
+    "acquisitionConfirmDesc": "La ubicación se traslapa con {{count}} parcela(s) privada(s). El gobierno municipal adquirirá automáticamente los terrenos y demolerá los edificios existentes antes de iniciar la construcción (costo estimado de adquisición: {{cost}}).",
+    "acquisitionConfirmNote": "La adquisición avanza a lo largo de varias épocas y se paga con el presupuesto de compra de terrenos. El edificio permanece en planificación hasta que se complete.",
+    "acquisitionConfirmAction": "Adquirir y construir",
     "copyExisting": "Copiar un edificio existente",
     "copyMode": "Construcción por copia",
     "copySelectParcelHint": "Selecciona la parcela de destino de la copia",

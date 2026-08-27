@@ -59,11 +59,18 @@
     "confirmFailed": "建設失敗",
     "directInvalid": {
       "overlap_parcel": "與既有地塊重疊",
+      "overlap_city_building": "與市政設施或計畫建設用地重疊",
       "overlap_path": "與道路重疊",
       "terrain_not_acquired": "無法在未解鎖的土地上建設",
       "incompatible_parcel_type": "此處的地形無法建造此建築",
       "generic": "無法在此處建設"
     },
+    "directAcquisitionRequired": "與 {{count}} 個私有地塊重疊（確認後將自動收購）",
+    "directAcquisitionCost": "收購費用估算：{{cost}}",
+    "acquisitionNoRequest": "沒有需要確認的收購內容",
+    "acquisitionConfirmDesc": "放置位置與 {{count}} 個私有地塊重疊。市政府將自動收購用地並拆除既有建築後開始建設（收購費用估算：{{cost}}）。",
+    "acquisitionConfirmNote": "收購需要數個週期完成，費用由用地收購預算支付。在完成之前，建築將保持計畫狀態等待。",
+    "acquisitionConfirmAction": "收購並建設",
     "copyExisting": "複製既有建築",
     "copyMode": "複製建設",
     "copySelectParcelHint": "請選擇複製目標地塊",

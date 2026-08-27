@@ -59,11 +59,18 @@
     "confirmFailed": "Échec de la construction",
     "directInvalid": {
       "overlap_parcel": "Chevauche une parcelle existante",
+      "overlap_city_building": "Chevauche une installation municipale ou un site de construction planifié",
       "overlap_path": "Chevauche une route",
       "terrain_not_acquired": "Impossible de construire sur un terrain non débloqué",
       "incompatible_parcel_type": "Ce bâtiment ne peut pas être construit sur ce type de terrain",
       "generic": "Construction impossible à cet endroit"
     },
+    "directAcquisitionRequired": "Chevauche {{count}} parcelle(s) privée(s) (la confirmation déclenchera une acquisition automatique)",
+    "directAcquisitionCost": "Coût d'acquisition estimé : {{cost}}",
+    "acquisitionNoRequest": "Aucune acquisition à confirmer",
+    "acquisitionConfirmDesc": "L'emplacement chevauche {{count}} parcelle(s) privée(s). La municipalité acquerra automatiquement les terrains et démolira les bâtiments existants avant de commencer la construction (coût d'acquisition estimé : {{cost}}).",
+    "acquisitionConfirmNote": "L'acquisition se déroule sur plusieurs époques et est financée par le budget d'achat foncier. Le bâtiment reste planifié jusqu'à son achèvement.",
+    "acquisitionConfirmAction": "Acquérir et construire",
     "copyExisting": "Copier un bâtiment existant",
     "copyMode": "Construction par copie",
     "copySelectParcelHint": "Sélectionnez la parcelle de destination",

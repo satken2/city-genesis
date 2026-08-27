@@ -305,6 +305,13 @@
   font-weight: 600;
 }
 
+/* ---- 直接配置モードの買収必要メッセージ(承諾すれば確定できる警告状態) ---- */
+/* 買収交渉中表示(AgentDetailPanel の ACQUISITION_FRAME_COLOR)と同系のオレンジ */
+.bc-direct-acquisition {
+  color: #f97316;
+  font-weight: 600;
+}
+
 /* ---- インフラ施設の効果範囲の凡例 ---- */
 .bc-effect-range-legend {
   margin-top: 10px;

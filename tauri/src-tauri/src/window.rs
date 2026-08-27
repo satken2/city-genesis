@@ -690,6 +690,19 @@ pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) 
                     json!({ "source": "path_build" }),
                 );
             }
+            if wt == "building_construction" {
+                // 建物建設パネルが閉じられたとき、直接配置の干渉ハイライト
+                // (source="building_construction")を消す。ウィンドウは非表示(再利用待ち)に
+                // なるだけでReact側のアンマウント処理によるクリーンアップ送信が走らないため、
+                // クローズ処理側で明示的に送る(path_build と同じ理由)。
+                let _ = ipc::send_ui_action(
+                    state,
+                    wt.clone(),
+                    None,
+                    "world:clear_highlights".to_string(),
+                    json!({ "source": "building_construction" }),
+                );
+            }
         } else if wt == "agent_detail" {
             // 経済主体詳細パネルが閉じられたとき、接続端子のハイライトを消去し、
             // コネクタ編集モード中だった場合に通常モードへ戻す。

@@ -17,10 +17,11 @@
  *      既存建物の編集=PATCH /agents/{id})。成功後は session:reload で Unity に再描画させる
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import type { AgentMasterEntry, ParcelData } from "../../types";
 import { resolveAgentIcon } from "../../utils/agentIcon";
 import { resolveParcelIcon } from "../../utils/parcelIcon";
@@ -36,13 +37,15 @@ import {
   sendFocusGraphic,
   sendSessionReload,
   sendPickCopySource,
+  sendHighlightObjects,
+  sendClearHighlights,
   IPC_EVENT_EDIT_BUILDING_SELECT_PARCEL,
   IPC_EVENT_EDIT_BUILDING_SELECT_POINT,
   IPC_EVENT_EDIT_BUILDING_INVALID_PARCEL,
   IPC_EVENT_EDIT_BUILDING_UPDATE_DIRECT_ANGLE,
   IPC_EVENT_BUILDING_CONSTRUCTION_COPY_SOURCE,
 } from "../../utils/ipc";
-import type { EffectRangeRegion } from "../../utils/ipc";
+import type { EffectRangeRegion, PathInterferenceHighlight } from "../../utils/ipc";
 import { fetchApi, ApiError } from "../../utils/api";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { NumberStepper } from "../common/NumberStepper";
@@ -56,6 +59,14 @@ import "./BuildingConstructionPanel.css";
 // 直接配置モードで default_width が未設定のバリアント用のフォールバック(m)。
 // バックエンド crud_buildings.DEFAULT_BUILDING_WIDTH と揃える。
 const DEFAULT_BUILDING_WIDTH = 20.0;
+
+// 干渉ハイライトの発信元(Unity HighlightManager のソースレイヤー名)。
+// このウィンドウの windowType と一致させる(クローズ時に window.rs がクリアを送るため)。
+const HIGHLIGHT_SOURCE = "building_construction";
+
+// 用地買収の確認ウィンドウ(BuildingDirectAcquisitionConfirmWindow)がOKで発火する
+// クロスウィンドウイベント。パネル側が購読して承諾つき確定を実行する。
+const EVENT_ACQUISITION_CONFIRMED = "building_direct:acquisition_confirmed";
 
 // 回転角(度)を [0, 360) に正規化する。回転ステッパーはマイナス・360超を許容するため、
 // 確定送信時にこの関数で mod 360 する(例: 450→90, -90→270)。
@@ -108,6 +119,14 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
   // 直接配置の設置可否(バックエンドの preview-direct が返す valid / invalid_reason)。
   const [directValid, setDirectValid] = useState(false);
   const [directInvalidReason, setDirectInvalidReason] = useState<string | null>(null);
+  // 民間区画との重なりを自動用地買収で解消すれば確定できる状態(preview-direct の
+  // requires_acquisition)。確定ボタンは押せるが、押下時に確認ウィンドウを挟む。
+  const [directRequiresAcquisition, setDirectRequiresAcquisition] = useState(false);
+  // 買収対象の件数と費用見積(requires_acquisition=True のときのみ非null)。
+  const [directAcquisition, setDirectAcquisition] = useState<{
+    count: number;
+    estimatedCost: number;
+  } | null>(null);
   const [buildingPreview, setBuildingPreview] = useState<BuildingPreviewData | null>(null);
   const [estimatedCost, setEstimatedCost] = useState<number | null>(null);
   // 完全に平坦な地形（傾斜ゼロ）で建てた場合の標準コスト。推定コストが標準の何倍かの表示に使う。
@@ -533,6 +552,13 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       area: number;
       valid: boolean;
       invalid_reason: string | null;
+      requires_acquisition?: boolean;
+      acquisition?: {
+        blocking_parcel_ids: number[];
+        count: number;
+        estimated_cost: number;
+      } | null;
+      interference?: PathInterferenceHighlight | null;
       width: number;
       depth: number;
       angle: number;
@@ -560,6 +586,26 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         });
         setDirectValid(data.valid);
         setDirectInvalidReason(data.invalid_reason ?? null);
+        setDirectRequiresAcquisition(data.requires_acquisition === true);
+        setDirectAcquisition(
+          data.requires_acquisition === true && data.acquisition
+            ? { count: data.acquisition.count, estimatedCost: data.acquisition.estimated_cost }
+            : null,
+        );
+        // 重なり区画・建物を道路敷設と同じ配色(blocking=赤など)で3Dハイライトする。
+        // 重なりがなければこの発信元のハイライトをクリアする。
+        const interference = data.interference;
+        const hasInterference =
+          interference != null &&
+          (interference.parcels.blocking.length > 0 ||
+            interference.parcels.removable.length > 0 ||
+            interference.parcels.shavable.length > 0 ||
+            interference.building_ids.length > 0);
+        if (hasInterference) {
+          void sendHighlightObjects(interference, HIGHLIGHT_SOURCE).catch(() => {});
+        } else {
+          void sendClearHighlights(HIGHLIGHT_SOURCE).catch(() => {});
+        }
         // resizable=false では要求サイズが default_width に強制されるため入力欄へ反映する
         // (無限ループを避けるため実値が異なるときだけ更新する)。
         if (Math.abs(data.width - rectWidth) > 1e-6) setRectWidth(data.width);
@@ -687,6 +733,9 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       setPickedPosition(null);
       setDirectValid(false);
       setDirectInvalidReason(null);
+      setDirectRequiresAcquisition(false);
+      setDirectAcquisition(null);
+      void sendClearHighlights(HIGHLIGHT_SOURCE).catch(() => {});
       // コピーモードの状態もリセットする。
       setCopySourceAgentId(null);
       setCopyValid(false);
@@ -976,6 +1025,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
    */
   async function finishAfterConfirm() {
     await sendEditBuildingUpdateEffectRange(null).catch(() => {});
+    await sendClearHighlights(HIGHLIGHT_SOURCE).catch(() => {});
     await sendSessionReload();
     await sendChangeState("STATE_NORMAL");
     await sendChangeDisplay("building", "default", null, ["plan"]);
@@ -1044,8 +1094,11 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
   /**
    * 直接配置モードの建設確定ハンドラ。UI が直接 POST /buildings/direct に送る。
    * バックエンドが矩形の土地区画を自動生成し、その全面に建物を作成する。
+   *
+   * acknowledgeAcquisition=true は、民間区画との重なりの自動用地買収をユーザーが
+   * 確認ウィンドウで承諾した場合のみ渡す(バックエンドは承諾なしの blocking を拒否する)。
    */
-  async function handleDirectConfirm() {
+  async function handleDirectConfirm(acknowledgeAcquisition = false) {
     if (selectedVariant === null || pickedPosition === null || selectedVariantData === null) return;
     const baseUrl = apiBaseUrl.replace(/\/+$/, "");
     try {
@@ -1061,6 +1114,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
           depth: rectDepth,
           // 回転角はマイナス・360超も入力可能なため、確定時に mod 360 で [0,360) に正規化する。
           angle: normalizeAngle(rectAngle),
+          ...(acknowledgeAcquisition ? { acknowledge_acquisition: true } : {}),
           ...buildVisualVariantFields(),
         }),
       });
@@ -1075,6 +1129,28 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       notifyConfirmError(err);
     }
   }
+
+  // 確認ウィンドウのOKイベント購読から最新の確定処理を呼ぶための ref。
+  // listen の useEffect を購読しっぱなしにしても、常に最新の state で確定できる。
+  const directConfirmRef = useRef<(acknowledge: boolean) => Promise<void>>();
+  directConfirmRef.current = handleDirectConfirm;
+
+  /* ---- クロスウィンドウイベント: 用地買収の確認ウィンドウのOK ---- */
+
+  /**
+   * BuildingDirectAcquisitionConfirmWindow でユーザーが「買収して建設」を押すと
+   * 発火する。直接配置モードが継続中(買収必要のプレビューが有効)の場合のみ、
+   * 承諾つきで確定を実行する。
+   */
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    listen(EVENT_ACQUISITION_CONFIRMED, () => {
+      void directConfirmRef.current?.(true);
+    })
+      .then((fn) => { unlisten = fn; })
+      .catch(console.error);
+    return () => { unlisten?.(); };
+  }, []);
 
   /**
    * パネル全体のクリックイベントを捕捉する共通のハンドラ。
@@ -1225,6 +1301,22 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
                 <div className="bc-description-text">
                   {directValid ? (
                     t("building_construction.directPlaceable")
+                  ) : directRequiresAcquisition ? (
+                    // 民間区画と重なるが、自動用地買収を承諾すれば確定できる状態。
+                    // 確定ボタン押下で確認ウィンドウが開く。
+                    <span className="bc-direct-acquisition">
+                      {t("building_construction.directAcquisitionRequired", {
+                        count: directAcquisition?.count ?? 0,
+                      })}
+                      {directAcquisition != null && (
+                        <>
+                          <br />
+                          {t("building_construction.directAcquisitionCost", {
+                            cost: Math.round(directAcquisition.estimatedCost).toLocaleString(),
+                          })}
+                        </>
+                      )}
+                    </span>
                   ) : (
                     <span className="bc-direct-invalid">
                       {directInvalidReason
@@ -1478,6 +1570,9 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
                 setBuildingPreview(null);
                 setDirectValid(false);
                 setDirectInvalidReason(null);
+                setDirectRequiresAcquisition(false);
+                setDirectAcquisition(null);
+                void sendClearHighlights(HIGHLIGHT_SOURCE).catch(() => {});
                 // Unity を建物建設モードのまま位置未確定の状態へ戻し、表示中のゴースト形状を消す。
                 sendChangeState("STATE_EDIT_BUILDING", {
                   building_variant: selectedVariant,
@@ -1491,11 +1586,12 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
             </button>
             <button
               className="bc-btn bc-btn-confirm"
-              // 区画モードは区画選択済み、直接配置モードは設置可能(directValid)なら確定できる。
+              // 区画モードは区画選択済み、直接配置モードは設置可能(directValid)、または
+              // 民間区画の自動買収で解消できる(directRequiresAcquisition)なら確定できる。
               // コピーモードは区画選択済みかつフットプリントが収まる(copyValid)なら確定できる。
               disabled={
                 isDirectMode
-                  ? !directValid
+                  ? !(directValid || directRequiresAcquisition)
                   : isCopyMode
                     ? parcelId === null || !copyValid
                     : parcelId === null
@@ -1503,7 +1599,24 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
               type="button"
               onClick={async () => {
                 if (isDirectMode) {
-                  await handleDirectConfirm();
+                  if (directRequiresAcquisition) {
+                    // 民間区画の自動買収が必要な位置は、即確定せず確認ウィンドウを挟む。
+                    // OK時に "building_direct:acquisition_confirmed" が飛んできて
+                    // 承諾つき確定(handleDirectConfirm(true))が実行される。
+                    void invoke("open_registered_window", {
+                      windowType: "building_direct_acquisition",
+                      params: {
+                        extra: {
+                          pendingAcquisition: {
+                            blockingCount: directAcquisition?.count ?? 0,
+                            estimatedCost: directAcquisition?.estimatedCost ?? 0,
+                          },
+                        },
+                      },
+                    });
+                  } else {
+                    await handleDirectConfirm();
+                  }
                 } else {
                   await handleParcelConfirm();
                 }

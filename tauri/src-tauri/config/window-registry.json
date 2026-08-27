@@ -101,6 +101,14 @@
     "policy": "single",
     "actions": []
   },
+  "building_direct_acquisition": {
+    "title": "用地買収の確認",
+    "width": 420,
+    "height": 280,
+    "resizable": false,
+    "policy": "single",
+    "actions": []
+  },
   "resource_detail": {
     "title": "Resource Details",
     "width": 460,
