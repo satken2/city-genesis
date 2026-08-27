@@ -969,12 +969,16 @@ public class IpcStateCoordinator : MonoBehaviour
     {
         int infraNodeId = 0;
         int depotNodeId = 0;
+        int agentId = 0;
         if (ipcParams != null)
         {
             if (ipcParams.TryGetValue("infra_node_id", out object inObj) && inObj != null)
                 infraNodeId = Convert.ToInt32(inObj);
             if (ipcParams.TryGetValue("depot_node_id", out object dnObj) && dnObj != null)
                 depotNodeId = Convert.ToInt32(dnObj);
+            // 施設ID。端子の可動範囲(施設が立地する土地区画)の解決に使う。
+            if (ipcParams.TryGetValue("agent_id", out object agObj) && agObj != null)
+                agentId = Convert.ToInt32(agObj);
         }
 
         // InputMode: 接続点編集プリセット（NODE=MODE_EDIT、他=MODE_NONE）
@@ -983,8 +987,8 @@ public class IpcStateCoordinator : MonoBehaviour
             InputSystemManager.Instance.SetModePreset(InputModePreset.CONNECTOR_EDIT);
         }
 
-        GetOrCreateConnectorEditManager().EnterEditMode(infraNodeId, depotNodeId);
-        Debug.Log($"IpcStateCoordinator: 接続点編集モード -> infra_node={infraNodeId}, depot_node={depotNodeId}");
+        GetOrCreateConnectorEditManager().EnterEditMode(infraNodeId, depotNodeId, agentId);
+        Debug.Log($"IpcStateCoordinator: 接続点編集モード -> infra_node={infraNodeId}, depot_node={depotNodeId}, agent={agentId}");
     }
 
     /// <summary>

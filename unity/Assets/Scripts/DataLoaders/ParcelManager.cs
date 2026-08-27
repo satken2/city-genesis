@@ -785,6 +785,92 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     }
 
     /// <summary>
+    /// 指定ワールド座標（XZ）が指定区画のポリゴン内にあるかを判定する。
+    /// 区画が未ロード（空間キャッシュに無い）場合は false を返す。
+    /// </summary>
+    public bool IsPointInParcel(int parcelId, Vector3 worldPos)
+    {
+        if (!parcelSpatialCache.TryGetValue(parcelId, out ParcelSpatialEntry entry)
+            || entry.polygon == null || entry.polygon.Length < 3)
+        {
+            return false;
+        }
+        return IsPointInPolygon(new Vector2(worldPos.x, worldPos.z), entry.polygon);
+    }
+
+    // 区画境界へクランプした点を境界からどれだけ内側へ寄せるか(m)。
+    // 境界線上ちょうどの座標は、バックエンド側の座標正規化(丸め)で僅かに区画外へ
+    // ずれて内包判定に落ちる可能性があるため、明確に内側へ寄せて送る。
+    private const float ParcelClampInnerMargin = 0.05f;
+
+    /// <summary>
+    /// ワールド座標（XZ）を指定区画のポリゴン内へクランプする。
+    /// 点が区画内ならそのまま、区画外ならポリゴン境界上の最近傍点（から僅かに内側へ
+    /// 寄せた点）を返す。Y座標は入力値を維持する。
+    /// 接続端子ノードの「施設が立地する区画内でのみ移動可」の制限（ConnectorEditManager）
+    /// のように、ドラッグ座標を区画内へ制限する用途で使う。
+    /// 区画が未ロード（空間キャッシュに無い）場合は false を返し、clamped には入力値を返す。
+    /// </summary>
+    public bool TryClampPointToParcel(int parcelId, Vector3 worldPos, out Vector3 clamped)
+    {
+        clamped = worldPos;
+        if (!parcelSpatialCache.TryGetValue(parcelId, out ParcelSpatialEntry entry)
+            || entry.polygon == null || entry.polygon.Length < 3)
+        {
+            return false;
+        }
+
+        Vector2 point = new Vector2(worldPos.x, worldPos.z);
+        if (IsPointInPolygon(point, entry.polygon))
+        {
+            return true;
+        }
+
+        // 区画外: 全エッジへの最近傍点のうち最短のものへ射影する。
+        float[][] polygon = entry.polygon;
+        float bestSqDist = float.PositiveInfinity;
+        Vector2 bestPoint = point;
+        for (int i = 0; i < polygon.Length; i++)
+        {
+            int next = (i + 1) % polygon.Length;
+            Vector2 a = new Vector2(polygon[i][0], polygon[i][1]);
+            Vector2 b = new Vector2(polygon[next][0], polygon[next][1]);
+            Vector2 candidate = NearestPointOnSegment(point, a, b);
+            float sqDist = (candidate - point).sqrMagnitude;
+            if (sqDist < bestSqDist)
+            {
+                bestSqDist = sqDist;
+                bestPoint = candidate;
+            }
+        }
+
+        // 境界点から進入方向（外部点→射影点）へ僅かに進めて確実に内側へ寄せる。
+        // 鋭角の角などで内側に入らなかった場合は境界点をそのまま使う。
+        Vector2 inward = bestPoint - point;
+        if (inward.sqrMagnitude > 1e-8f)
+        {
+            Vector2 nudged = bestPoint + inward.normalized * ParcelClampInnerMargin;
+            if (IsPointInPolygon(nudged, polygon))
+            {
+                bestPoint = nudged;
+            }
+        }
+
+        clamped = new Vector3(bestPoint.x, worldPos.y, bestPoint.y);
+        return true;
+    }
+
+    /// <summary>点 p から線分 [a,b] への最近傍点を返す。</summary>
+    private static Vector2 NearestPointOnSegment(Vector2 p, Vector2 a, Vector2 b)
+    {
+        Vector2 ab = b - a;
+        float lenSq = ab.sqrMagnitude;
+        if (lenSq < 1e-8f) return a;
+        float t = Mathf.Clamp01(Vector2.Dot(p - a, ab) / lenSq);
+        return a + ab * t;
+    }
+
+    /// <summary>
     /// 2Dの点が多角形の内部にあるかを判定する（ray casting algorithm。ZoneManager と同アルゴリズム）。
     /// polygon は [i][0]=X, [i][1]=Z のワールド座標。
     /// </summary>

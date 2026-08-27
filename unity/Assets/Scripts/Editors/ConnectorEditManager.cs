@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using GeneratedModels;
 
 /// <summary>
 /// 施設の接続端子ノード（インフラ接続点 = infra_node_id、走行網接続点 = depot_node_id）の
@@ -9,6 +10,9 @@ using UnityEngine;
 ///   上空に色付きマーカー（回転＋ボビング）を表示する。読み取り専用（ドラッグ不可）。
 /// - <see cref="EnterEditMode"/>: STATE_EDIT_CONNECTOR で呼ばれる。マーカーに加えて対象ノードへ
 ///   <see cref="NodeInputHandler"/> と端子ロールを付与し、MODE_EDIT でのドラッグ→PATCH を可能にする。
+///   端子は施設の敷地内の設備のため、ドラッグ移動は施設が立地する土地区画の範囲内へ
+///   クランプされ、編集中は対象区画がハイライト表示される（区画未ロード時はクランプ無効で、
+///   区画外への移動はバックエンドの PATCH バリデーションが拒否する）。
 /// - <see cref="Hide"/> / <see cref="ExitEditMode"/>: マーカーを消してノードの表示状態を元に戻す。
 ///
 /// インフラと走行網の接続点が同一ノードを指す共用接続ノード（電化した鉄道車両基地など）では
@@ -48,6 +52,16 @@ public class ConnectorEditManager : MonoBehaviour
     private int infraNodeId;
     private int depotNodeId;
     private bool editMode;
+
+    // 編集対象施設の agent_id と、その施設が立地する土地区画ID(-1=未解決)。
+    // 接続端子は施設の敷地内にある設備という位置づけのため、ドラッグ移動を
+    // この区画の範囲内へクランプする(バックエンドも区画外への PATCH を
+    // バリデーションで拒否する権威チェックを持つ)。区画が未ロード等で解決
+    // できない場合はクランプせず、バックエンドの拒否＋既存ロールバックに委ねる。
+    private int ownerAgentId;
+    private int ownerParcelId = -1;
+
+    private ParcelManager parcelManager;
 
     // アクティブにドラッグ中の端子ノードID(0=なし)。ドラッグ終了(ProcessMouseDragEnd)でクリアされる。
     private int draggingNodeId;
@@ -140,16 +154,19 @@ public class ConnectorEditManager : MonoBehaviour
 
     /// <summary>
     /// 接続点編集モードに入る。ハイライト表示に加え、対象ノードをドラッグ移動可能にする。
+    /// agentId は編集対象の施設。施設が立地する土地区画を解決してハイライト表示し、
+    /// 端子のドラッグ移動をその区画の範囲内へ制限する。
     /// </summary>
-    public void EnterEditMode(int infraNodeId, int depotNodeId)
+    public void EnterEditMode(int infraNodeId, int depotNodeId, int agentId)
     {
         ShowConnectors(infraNodeId, depotNodeId);
         editMode = true;
+        ResolveOwnerParcel(agentId, infraNodeId);
         foreach (var kv in entries)
         {
             EnsureDraggable(kv.Key, kv.Value);
         }
-        Debug.Log($"ConnectorEditManager: 接続点編集モード開始 -> infra={infraNodeId}, depot={depotNodeId}");
+        Debug.Log($"ConnectorEditManager: 接続点編集モード開始 -> infra={infraNodeId}, depot={depotNodeId}, agent={agentId}, parcel={ownerParcelId}");
     }
 
     /// <summary>
@@ -159,6 +176,7 @@ public class ConnectorEditManager : MonoBehaviour
     {
         if (editMode)
         {
+            ClearOwnerParcel();
             // 再ハイライト（NodeInputHandler の後付けは残すが、editMode=false により
             // IsMouseOverConnector が false を返すようになり、ドラッグ掴みは無効化される）。
             ShowConnectors(infraNodeId, depotNodeId);
@@ -171,10 +189,94 @@ public class ConnectorEditManager : MonoBehaviour
     public void Hide()
     {
         ClearMarkers();
+        ClearOwnerParcel();
         editMode = false;
         infraNodeId = 0;
         depotNodeId = 0;
     }
+
+    /// <summary>
+    /// 編集対象施設の立地区画を解決し、可動範囲として区画ハイライトを表示する。
+    /// agentId が未指定(0以下)の場合は端子ノードIDからの逆引き
+    /// (BuildingManager.TryGetInfraTerminalOwner)にフォールバックする。
+    /// 施設・区画が未ロード等で解決できなければ ownerParcelId = -1 のまま
+    /// (クランプ無効。移動可否はバックエンドの権威チェックに委ねる)。
+    /// </summary>
+    private void ResolveOwnerParcel(int agentId, int infraNodeId)
+    {
+        ownerAgentId = agentId;
+        ownerParcelId = -1;
+
+        var bm = BuildingManager.Instance;
+        BuildingSummary summary = null;
+        if (bm != null)
+        {
+            if (agentId > 0)
+            {
+                summary = bm.GetBuildingSummary(agentId);
+            }
+            if (summary == null && infraNodeId > 0)
+            {
+                bm.TryGetInfraTerminalOwner(infraNodeId, out summary);
+            }
+        }
+        if (summary == null)
+        {
+            Debug.LogWarning($"ConnectorEditManager: 施設 {agentId} が未ロードのため可動範囲(区画)を解決できません(クランプ無効)");
+            return;
+        }
+        if (summary.parcel_id <= 0)
+        {
+            // 区画を持たない施設(生成時に center_point フォールバックした端子)は制限なし。
+            return;
+        }
+
+        ownerParcelId = summary.parcel_id;
+        ownerAgentId = summary.agent_id;
+
+        // 可動範囲をプレイヤーへ見せるため、対象区画をハイライト表示する。
+        var pm = ParcelMgr;
+        if (pm != null)
+        {
+            pm.SetHighlightedParcel(ownerParcelId);
+        }
+    }
+
+    /// <summary>区画ハイライトを解除し、可動範囲の解決状態をリセットする。</summary>
+    private void ClearOwnerParcel()
+    {
+        if (ownerParcelId > 0)
+        {
+            var pm = ParcelMgr;
+            if (pm != null)
+            {
+                pm.ClearHighlightedParcel();
+            }
+        }
+        ownerAgentId = 0;
+        ownerParcelId = -1;
+    }
+
+    /// <summary>
+    /// ドラッグ座標を施設の立地区画の範囲内へクランプする。
+    /// 区画が未解決・未ロードの場合は入力座標をそのまま返す(バックエンドが区画外への
+    /// PATCH を拒否し、NodeInputHandler.SaveNodePosition のロールバックで元位置へ戻る)。
+    /// </summary>
+    private Vector3 ClampToOwnerParcel(Vector3 worldPos)
+    {
+        if (ownerParcelId <= 0) return worldPos;
+        var pm = ParcelMgr;
+        if (pm == null) return worldPos;
+        if (pm.TryClampPointToParcel(ownerParcelId, worldPos, out Vector3 clamped))
+        {
+            return clamped;
+        }
+        return worldPos;
+    }
+
+    private ParcelManager ParcelMgr => parcelManager != null
+        ? parcelManager
+        : (parcelManager = FindAnyObjectByType<ParcelManager>());
 
     /// <summary>
     /// 指定スクリーン座標が接続端子マーカー(逆四角錐)またはその直下(ノードまでの垂直の柱)の
@@ -234,6 +336,9 @@ public class ConnectorEditManager : MonoBehaviour
         }
         if (!entries.TryGetValue(draggingNodeId, out var e) || e.node == null) return;
 
+        // 端子は施設の敷地内の設備のため、ドラッグ位置を立地区画の範囲内へクランプする。
+        worldPos = ClampToOwnerParcel(worldPos);
+
         var handler = e.node.GetComponent<NodeInputHandler>();
         handler?.onDragUpdate(worldPos);
 
@@ -250,6 +355,9 @@ public class ConnectorEditManager : MonoBehaviour
         if (draggingNodeId <= 0) return;
         if (entries.TryGetValue(draggingNodeId, out var e) && e.node != null)
         {
+            // 確定位置も立地区画の範囲内へクランプする(ドラッグ中と同じ制限)。
+            worldPos = ClampToOwnerParcel(worldPos);
+
             // onDragEnd は transform.position.y を最終Yとして採用するため、
             // 最終XZ位置での「地形高さ + 相対高さ」を先に transform へ確定させておく。
             Vector3 p = e.node.transform.position;

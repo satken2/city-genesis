@@ -3724,11 +3724,32 @@ public class RoadPlanManager : MonoBehaviour
         var candidates = BuildingManager.Instance.QueryBuildingIdsInBounds(
             minX - margin, minZ - margin, maxX + margin, maxZ + margin);
 
+        // インフラを流せるバリアント(送電線・導水管・電化線路など)の敷設中は、同一網の
+        // インフラ需給施設を干渉対象から除外する。接続端子ノードは施設の立地区画内に
+        // あるため、端子への引き込みでパスが施設建物と重なるのは正常な配線形状であり、
+        // 警告する意味がない。バックエンド権威判定(compute_path_interference の
+        // building_ids)も同じ基準で除外するため、ローカル推定と権威ハイライトが揃う。
+        bool drawingInfraCarrier = InfraNetworkUtil.IsInfraPathType(PathType)
+            || InfraNetworkUtil.GetPathInfraProducts(PathSubtype) != null;
+
         foreach (int buildingId in candidates)
         {
             var summary = BuildingManager.Instance.GetBuildingSummary(buildingId);
             float[][] poly = summary?.polygonArray;
             if (poly == null || poly.Length < 3) continue;
+
+            // 同一網のインフラ施設かどうかは、施設の接続端子ノードの網ビットと敷設中
+            // バリアントの網互換(IsNodeSnappable と同じビット積)で判定する。
+            // 端子ノードが未ロードの場合は除外しない(安全側=従来通りハイライト表示)。
+            if (drawingInfraCarrier && summary.infra_node_id > 0)
+            {
+                var terminalNode = pathManager.GetNodeData(summary.infra_node_id);
+                if (terminalNode != null
+                    && InfraNetworkUtil.IsNodeSnappable(terminalNode, PathSubtype, pathManager))
+                {
+                    continue;
+                }
+            }
 
             // polygonArray は center_point 相対(ミニマップ・メッシュ生成と同じ規約)のため、
             // center_point を加算してワールドXZへ変換する。center_point 欠損時は位置を
