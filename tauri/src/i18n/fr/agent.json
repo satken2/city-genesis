@@ -93,7 +93,31 @@
       "disconnected": "Non raccordé",
       "received": "Quantité reçue"
     },
-    "tabConstructionInfo": "Chantier"
+    "tabConstructionInfo": "Chantier",
+    "tabEducationInfo": "Éducation",
+    "education": {
+      "totalStudents": "Élèves inscrits",
+      "totalCapacity": "Capacité totale",
+      "statusTitle": "Inscriptions",
+      "enrolled": "Inscrits",
+      "vacant": "Places libres",
+      "noCapacity": "Aucune capacité",
+      "countLabel": "Effectif",
+      "enrollmentBySkill": "Inscriptions par compétence",
+      "settingsTitle": "Quotas d'admission",
+      "settingsHint": "Définissez le poids d'allocation de chaque compétence. La capacité totale est répartie proportionnellement aux poids.",
+      "skillHeader": "Compétence",
+      "weightHeader": "Poids",
+      "previewHeader": "Capacité",
+      "save": "Enregistrer",
+      "saving": "Enregistrement...",
+      "saveFailed": "Échec de l'enregistrement",
+      "sumMustBePositive": "La somme des quotas doit être d'au moins 1",
+      "invalidWeight": "Les poids doivent être des entiers supérieurs ou égaux à 0",
+      "studentsList": "Liste des élèves",
+      "noStudents": "Aucun élève",
+      "showMore": "Afficher plus ({{count}})"
+    }
   },
   "agentList": {
     "filterType": "Type",

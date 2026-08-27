@@ -93,7 +93,31 @@
       "disconnected": "未接続",
       "received": "受入れ量"
     },
-    "tabConstructionInfo": "建設工事"
+    "tabConstructionInfo": "建設工事",
+    "tabEducationInfo": "教育",
+    "education": {
+      "totalStudents": "在籍生徒数",
+      "totalCapacity": "総定員",
+      "statusTitle": "在籍状況",
+      "enrolled": "在籍",
+      "vacant": "空き枠",
+      "noCapacity": "定員なし",
+      "countLabel": "人数",
+      "enrollmentBySkill": "スキル別の在籍状況",
+      "settingsTitle": "受け入れ枠の設定",
+      "settingsHint": "スキルごとの配分重みを設定します。総定員が重みに応じて按分されます。",
+      "skillHeader": "スキル",
+      "weightHeader": "重み",
+      "previewHeader": "定員",
+      "save": "保存",
+      "saving": "保存中...",
+      "saveFailed": "保存に失敗しました",
+      "sumMustBePositive": "枠の合計は1以上にしてください",
+      "invalidWeight": "重みは0以上の整数で入力してください",
+      "studentsList": "生徒リスト",
+      "noStudents": "生徒はいません",
+      "showMore": "さらに表示 ({{count}}人)"
+    }
   },
   "agentList": {
     "filterType": "タイプ",

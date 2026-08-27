@@ -50,7 +50,7 @@ import { DemandInfoPanel } from "./DemandInfoPanel";
 import { SupplyInfoPanel } from "./SupplyInfoPanel";
 import { CargoInfoPanel } from "./CargoInfoPanel";
 import { InfraConnectionPanel } from "./InfraConnectionPanel";
-import { EducationInfoPanel } from "./EducationInfoPanel";
+import { EducationTabPanel } from "./EducationTabPanel";
 import { EmploymentInfoPanel } from "./EmploymentInfoPanel";
 import { AgentOperationPanel } from "./AgentOperationPanel";
 import { PublicFacilityPanel } from "./PublicFacilityPanel";
@@ -230,8 +230,8 @@ export function AgentDetailPanel({
     const isImportOrExport = agentData.type === TYPE_TRADE;
     const showBasicInfo = !isImportOrExport;
     const showHouseholdInfo = agentData.type === TYPE_HOUSEHOLD;
-    const showEducationInfo = agentData.type === TYPE_EDUCATION;
-    const hasBasicInfoTab = showBasicInfo || showEducationInfo;
+    const hasBasicInfoTab = showBasicInfo;
+    const hasEducationInfoTab = agentData.type === TYPE_EDUCATION;
     const hasHouseholdInfoTab = showHouseholdInfo;
     const hasCargoInfoTab = isImportOrExport;
 
@@ -277,6 +277,7 @@ export function AgentDetailPanel({
       if (showConstructionTab) availableIds.push("construction");
     } else {
       if (hasBasicInfoTab) availableIds.push("basic");
+      if (hasEducationInfoTab) availableIds.push("education");
       if (hasCargoInfoTab) availableIds.push("cargo");
       if (hasBuildingInfoTab) availableIds.push("building");
       if (hasHouseholdInfoTab) availableIds.push("household");
@@ -352,8 +353,8 @@ export function AgentDetailPanel({
   // 各詳細セクションの表示条件
   const showBasicInfo = !isImportOrExport;
   const showHouseholdInfo = agentData.type === TYPE_HOUSEHOLD;
-  const showEducationInfo = agentData.type === TYPE_EDUCATION;
-  const hasBasicInfoTab = showBasicInfo || showEducationInfo;
+  const hasBasicInfoTab = showBasicInfo;
+  const hasEducationInfoTab = agentData.type === TYPE_EDUCATION;
   const hasHouseholdInfoTab = showHouseholdInfo;
 
   const hasCargoInfoTab = isImportOrExport;
@@ -399,6 +400,9 @@ export function AgentDetailPanel({
   } else {
     if (hasBasicInfoTab) {
       tabs.push({ id: "basic", label: t("agent.tabBasicInfo", "基本情報") });
+    }
+    if (hasEducationInfoTab) {
+      tabs.push({ id: "education", label: t("agent.tabEducationInfo", "教育") });
     }
     if (hasCargoInfoTab) {
       tabs.push({ id: "cargo", label: t("agent.tabCargoInfo", "荷役情報") });
@@ -580,17 +584,19 @@ export function AgentDetailPanel({
       {tabs.length > 0 && (
         <div className="agent-detail-tab-content">
           {activeTab === "basic" && hasBasicInfoTab && !isPreConstruction && (
-            <>
-              {showBasicInfo && (
-                <AgentBasicInfoPanel
-                  agent={agentData}
-                  onNavigate={navigateToAgent}
-                />
-              )}
-              {showEducationInfo && (
-                <EducationInfoPanel agent={agentData} />
-              )}
-            </>
+            <AgentBasicInfoPanel
+              agent={agentData}
+              onNavigate={navigateToAgent}
+            />
+          )}
+
+          {activeTab === "education" && hasEducationInfoTab && !isPreConstruction && (
+            <EducationTabPanel
+              agent={agentData}
+              apiBaseUrl={apiBaseUrl}
+              pathTemplate={pathTemplate}
+              onSaved={() => setRefreshKey((k) => k + 1)}
+            />
           )}
 
           {activeTab === "cargo" && hasCargoInfoTab && !isPreConstruction && (

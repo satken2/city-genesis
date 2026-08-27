@@ -116,6 +116,13 @@ export type AgentData = {
   qol_score?: number;
   has_automobile?: boolean;
   education_type?: Record<string, number>;
+  /**
+   * スキル別の在籍生徒数(スキルID→人数)。教育施設(TYPE_EDUCATION)のみ。
+   * endpoints.yaml(自動生成)に未収載のためバックエンドが手動注入する。
+   */
+  enrolled_by_skill?: Record<string, number>;
+  /** 総定員(延床面積由来)。教育施設(TYPE_EDUCATION)のみ手動注入される */
+  max_students?: number;
   is_evicted?: boolean;
   realestate_amount?: number;
   user_operations?: unknown[];
@@ -388,6 +395,8 @@ export type AgentMasterEntry = {
   building: boolean;
   description: string;
   space_type: number;
+  /** 教育施設(type=2)の高等教育フラグ。true=大学(受け入れ枠を編集可能) */
+  is_higher_education?: boolean;
   required_skill?: number;
   max_skill?: number;
   skilled_people?: number;

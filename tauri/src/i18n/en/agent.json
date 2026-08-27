@@ -93,7 +93,31 @@
       "disconnected": "Disconnected",
       "received": "Received"
     },
-    "tabConstructionInfo": "Construction"
+    "tabConstructionInfo": "Construction",
+    "tabEducationInfo": "Education",
+    "education": {
+      "totalStudents": "Enrolled students",
+      "totalCapacity": "Total capacity",
+      "statusTitle": "Enrollment",
+      "enrolled": "Enrolled",
+      "vacant": "Open seats",
+      "noCapacity": "No capacity",
+      "countLabel": "Count",
+      "enrollmentBySkill": "Enrollment by skill",
+      "settingsTitle": "Admission quotas",
+      "settingsHint": "Set the allocation weight for each skill. The total capacity is divided in proportion to the weights.",
+      "skillHeader": "Skill",
+      "weightHeader": "Weight",
+      "previewHeader": "Capacity",
+      "save": "Save",
+      "saving": "Saving...",
+      "saveFailed": "Failed to save",
+      "sumMustBePositive": "The total of the quotas must be at least 1",
+      "invalidWeight": "Weights must be integers of 0 or more",
+      "studentsList": "Student list",
+      "noStudents": "No students",
+      "showMore": "Show more ({{count}})"
+    }
   },
   "agentList": {
     "filterType": "Type",

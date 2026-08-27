@@ -93,7 +93,31 @@
       "disconnected": "미연결",
       "received": "수령량"
     },
-    "tabConstructionInfo": "건설 공사"
+    "tabConstructionInfo": "건설 공사",
+    "tabEducationInfo": "교육",
+    "education": {
+      "totalStudents": "재학생 수",
+      "totalCapacity": "총정원",
+      "statusTitle": "재적 현황",
+      "enrolled": "재학",
+      "vacant": "빈자리",
+      "noCapacity": "정원 없음",
+      "countLabel": "인원",
+      "enrollmentBySkill": "스킬별 재적 현황",
+      "settingsTitle": "모집 정원 설정",
+      "settingsHint": "스킬별 배분 가중치를 설정합니다. 총정원이 가중치에 따라 배분됩니다.",
+      "skillHeader": "스킬",
+      "weightHeader": "가중치",
+      "previewHeader": "정원",
+      "save": "저장",
+      "saving": "저장 중...",
+      "saveFailed": "저장에 실패했습니다",
+      "sumMustBePositive": "정원의 합계는 1 이상이어야 합니다",
+      "invalidWeight": "가중치는 0 이상의 정수로 입력해 주세요",
+      "studentsList": "학생 목록",
+      "noStudents": "학생이 없습니다",
+      "showMore": "더 보기 ({{count}}명)"
+    }
   },
   "agentList": {
     "filterType": "타입",

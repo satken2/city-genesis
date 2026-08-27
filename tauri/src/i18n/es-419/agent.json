@@ -93,7 +93,31 @@
       "disconnected": "Sin conexión",
       "received": "Cantidad recibida"
     },
-    "tabConstructionInfo": "Obra"
+    "tabConstructionInfo": "Obra",
+    "tabEducationInfo": "Educación",
+    "education": {
+      "totalStudents": "Estudiantes inscritos",
+      "totalCapacity": "Capacidad total",
+      "statusTitle": "Matrícula",
+      "enrolled": "Inscritos",
+      "vacant": "Cupos libres",
+      "noCapacity": "Sin capacidad",
+      "countLabel": "Cantidad",
+      "enrollmentBySkill": "Matrícula por habilidad",
+      "settingsTitle": "Cupos de admisión",
+      "settingsHint": "Define el peso de asignación de cada habilidad. La capacidad total se reparte en proporción a los pesos.",
+      "skillHeader": "Habilidad",
+      "weightHeader": "Peso",
+      "previewHeader": "Capacidad",
+      "save": "Guardar",
+      "saving": "Guardando...",
+      "saveFailed": "No se pudo guardar",
+      "sumMustBePositive": "La suma de los cupos debe ser al menos 1",
+      "invalidWeight": "Los pesos deben ser enteros mayores o iguales a 0",
+      "studentsList": "Lista de estudiantes",
+      "noStudents": "No hay estudiantes",
+      "showMore": "Mostrar más ({{count}})"
+    }
   },
   "agentList": {
     "filterType": "Tipo",

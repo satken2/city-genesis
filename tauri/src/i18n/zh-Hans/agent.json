@@ -93,7 +93,31 @@
       "disconnected": "未连接",
       "received": "接收量"
     },
-    "tabConstructionInfo": "建设工程"
+    "tabConstructionInfo": "建设工程",
+    "tabEducationInfo": "教育",
+    "education": {
+      "totalStudents": "在校学生数",
+      "totalCapacity": "总名额",
+      "statusTitle": "在校情况",
+      "enrolled": "在校",
+      "vacant": "空余名额",
+      "noCapacity": "无名额",
+      "countLabel": "人数",
+      "enrollmentBySkill": "按技能的在校情况",
+      "settingsTitle": "招生名额设置",
+      "settingsHint": "设置各技能的分配权重。总名额将按权重比例分配。",
+      "skillHeader": "技能",
+      "weightHeader": "权重",
+      "previewHeader": "名额",
+      "save": "保存",
+      "saving": "保存中...",
+      "saveFailed": "保存失败",
+      "sumMustBePositive": "名额总和必须至少为1",
+      "invalidWeight": "权重必须为0以上的整数",
+      "studentsList": "学生名单",
+      "noStudents": "暂无学生",
+      "showMore": "显示更多（{{count}}人）"
+    }
   },
   "agentList": {
     "filterType": "类型",
