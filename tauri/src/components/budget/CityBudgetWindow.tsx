@@ -9,25 +9,24 @@ import type { BudgetCategoryEntry } from "../../types";
 import { formatEpochDateRange } from "../../utils/date";
 import { resolveIntlLocale } from "../../utils/locale";
 import { Money } from "../common/Money";
-import { formatCompactAmount } from "../../utils/money";
+import { formatCompactAmount, formatExactAmount } from "../../utils/money";
 import {
   ResponsiveContainer,
   BarChart,
+  ComposedChart,
   Bar,
+  Line,
   XAxis,
   YAxis,
+  CartesianGrid,
+  ReferenceLine,
   Tooltip as RechartsTooltip,
   Legend,
 } from "recharts";
 import {
-  FiscalSankey,
-  buildFiscalSankeyData,
   buildBusinessRevenueItems,
-  buildLandAcquisitionSpendItem,
-  getActualSpendingValue,
   TAX_REVENUE_META,
   spendCategoryColor,
-  type FiscalFlowItem,
 } from "../common/FiscalSankey";
 import "./CityBudgetWindow.css";
 
@@ -60,6 +59,12 @@ function rowKey(a: BudgetAgent): string {
  */
 const RATIO_MAX_PERCENT = 150;
 
+/** 市政府の現預金のエポック末スナップショット1点（バックエンドの reserves_history の要素） */
+type ReservesHistoryPoint = {
+  epoch: number;
+  reserves: number;
+};
+
 type BudgetData = {
   budgets: Record<string, number>;
   prev_budgets: Record<string, number>;
@@ -78,20 +83,18 @@ type BudgetData = {
   savings_target?: number;
   savings?: number;
   budget_auto_adjusted?: boolean;
+  // 市政府の現預金のエポック末推移(古い順)と、現在(ユーザー操作フェーズ)の現預金。
+  reserves_history?: ReservesHistoryPoint[];
+  current_reserves?: number;
 };
 
 type CityData = {
   city: {
     city_agent_id: number;
+    epoch: number;
     current_date: number;
     simulation_days: number;
     is_early_game?: boolean;
-  };
-};
-
-type CityAgentData = {
-  economic_agent: {
-    reserves: number;
   };
 };
 
@@ -108,7 +111,25 @@ const LEDGER_CITYHALL_KEY = "1";
 /** プレイヤーに表示しない予算カテゴリ(貯蓄=支出枠ではない、市政=空カテゴリ) */
 const HIDDEN_CATEGORY_KEYS = new Set([LEDGER_RESERVE_KEY, LEDGER_CITYHALL_KEY]);
 
+/** 現金推移グラフに描く過去エポック数の上限(これより古い履歴は横軸が潰れるので切り捨てる) */
+const RESERVES_HISTORY_MAX = 24;
+/** 将来予測の傾きを最小二乗で求めるのに使う直近の点数(現在の点を含む) */
+const FORECAST_LOOKBACK = 6;
+/** 将来予測を描く先のエポック数 */
+const FORECAST_HORIZON = 4;
 
+/** 現金推移グラフの色。実績=濃い水色、現在=明るい水色、予測=灰色の点線。 */
+const COLOR_RESERVES_ACTUAL = "#0284c7";
+const COLOR_RESERVES_CURRENT = "#38bdf8";
+const COLOR_RESERVES_FORECAST = "#94a3b8";
+
+/** 収支バランスの棒(X軸カテゴリ)の識別子 */
+const BALANCE_ROW_REVENUE = "revenue";
+const BALANCE_ROW_EXPENSE = "expense";
+const BALANCE_ROW_PRE_COMPRESS = "preCompress";
+
+/** 収支バランスの「圧縮前の支出」バーの不透明度(薄く描いて確定支出と区別する) */
+const PRE_COMPRESS_OPACITY = 0.3;
 
 /**
  * カテゴリの維持優先度（Tier）を返す。
@@ -158,21 +179,37 @@ function computeBaseAmounts(
  * (現金)を超える場合は維持優先度の低い Tier 4→1 の順に削減して収める
  * （＝資金不足時の自動調整。Tier 1 が最後まで維持される）。
  * 基準額の合計が0の場合(初回エポック等)は全カテゴリ均等配分のブートストラップをミラーする。
+ *
+ * 返り値の desired は削減前のプレイヤー希望額であり、収支バランスの「圧縮前の支出」バー
+ * (現金不足で削られた分を薄く描く3本目の棒)のデータ源になる。
  */
 function deriveBudgets(
   ratiosPct: Record<string, number>,
   base: Record<string, number>,
   tiers: Record<string, number>,
   reserves: number,
-): { budgets: Record<string, number>; autoAdjusted: boolean } {
+): {
+  budgets: Record<string, number>;
+  desired: Record<string, number>;
+  autoAdjusted: boolean;
+} {
   const keys = Object.keys(base).filter((k) => k !== LEDGER_RESERVE_KEY);
 
   const budgets: Record<string, number> = {};
   for (const k of keys) budgets[k] = 0;
   budgets[LEDGER_RESERVE_KEY] = 0;
 
+  // プレイヤー希望額(削減前)。現金の多寡に関係なく 基準額 × 比率 で決まる。
+  const desired: Record<string, number> = {};
+  for (const k of keys) {
+    const b = Math.max(base[k] ?? 0, 0);
+    const ratio = Math.min(Math.max((ratiosPct[k] ?? 100) / 100, 0), RATIO_MAX_PERCENT / 100);
+    desired[k] = b * ratio;
+  }
+
   if (reserves <= 0) {
-    return { budgets, autoAdjusted: false };
+    // 債務超過: バックエンドは全予算を0にする(希望額はそのまま圧縮前として表示する)。
+    return { budgets, desired, autoAdjusted: false };
   }
 
   const totalBase = keys.reduce((s, k) => s + Math.max(base[k] ?? 0, 0), 0);
@@ -180,14 +217,10 @@ function deriveBudgets(
     // 実績も必要量も未捕捉(初回エポック等): バックエンドと同じく現金を均等配分する。
     const even = keys.length > 0 ? reserves / keys.length : 0;
     for (const k of keys) budgets[k] = even;
-    return { budgets, autoAdjusted: false };
+    return { budgets, desired: { ...budgets }, autoAdjusted: false };
   }
 
-  for (const k of keys) {
-    const b = Math.max(base[k] ?? 0, 0);
-    const ratio = Math.min(Math.max((ratiosPct[k] ?? 100) / 100, 0), RATIO_MAX_PERCENT / 100);
-    budgets[k] = b * ratio;
-  }
+  for (const k of keys) budgets[k] = desired[k];
 
   const available = Math.max(reserves, 0);
   const totalDesired = keys.reduce((s, k) => s + budgets[k], 0);
@@ -212,7 +245,148 @@ function deriveBudgets(
     }
   }
 
-  return { budgets, autoAdjusted };
+  return { budgets, desired, autoAdjusted };
+}
+
+/** 現金推移グラフの1行。実績・現在・予測はそれぞれ別系列にして色と線種を分ける。 */
+type ReservesChartRow = {
+  /** X軸ラベル(エポック番号) */
+  label: string;
+  /** 過去エポック末の確定現預金 */
+  actual?: number;
+  /** 現在(ユーザー操作フェーズ)の現預金。棒1本だけを明るい色で描くための別系列。 */
+  current?: number;
+  /** 直近トレンドの外挿値。現在の点にも同じ値を入れて点線を棒から繋げる。 */
+  forecast?: number;
+};
+
+/**
+ * 現金推移グラフのデータを組み立てる。
+ *
+ * 「過去エポック末の確定現預金(actual)」＋「現在の現預金(current)」の棒に続けて、
+ * 直近 FORECAST_LOOKBACK 点の最小二乗回帰で求めた1エポックあたりの増減(傾き)を
+ * FORECAST_HORIZON エポック先まで外挿した点線(forecast)を描く。予測は最後の実測値を
+ * 起点にするため、点線は必ず「現在」の棒の高さから始まる。
+ * 点が1つしかない(=まだエポックを回していない)場合は傾きを求められないので予測は描かない。
+ */
+function buildReservesChartData(
+  history: ReservesHistoryPoint[],
+  currentEpoch: number,
+  currentReserves: number,
+): ReservesChartRow[] {
+  const past = history.slice(-RESERVES_HISTORY_MAX);
+  const rows: ReservesChartRow[] = past.map((p) => ({
+    label: String(p.epoch),
+    actual: p.reserves,
+  }));
+  const currentRow: ReservesChartRow = {
+    label: String(currentEpoch),
+    current: currentReserves,
+  };
+  rows.push(currentRow);
+
+  // 回帰に使う実測値の並び(過去の確定値＋現在)。X座標は等間隔なので添字をそのまま使う。
+  const series = [...past.map((p) => p.reserves), currentReserves];
+  if (series.length < 2) return rows;
+
+  const window = series.slice(-FORECAST_LOOKBACK);
+  const n = window.length;
+  const meanX = (n - 1) / 2;
+  const meanY = window.reduce((s, v) => s + v, 0) / n;
+  let cov = 0;
+  let varX = 0;
+  for (let i = 0; i < n; i++) {
+    cov += (i - meanX) * (window[i] - meanY);
+    varX += (i - meanX) * (i - meanX);
+  }
+  const slope = varX > 0 ? cov / varX : 0;
+
+  // 点線の起点を現在の棒に合わせる(回帰直線の端点ではなく最後の実測値をアンカーにする)
+  currentRow.forecast = currentReserves;
+  for (let k = 1; k <= FORECAST_HORIZON; k++) {
+    rows.push({
+      label: String(currentEpoch + k),
+      forecast: currentReserves + slope * k,
+    });
+  }
+  return rows;
+}
+
+/** 収支バランスの積み上げ系列(1カテゴリ or 1税目) */
+type BalanceSeries = {
+  /** recharts の dataKey。収入=rev_*、確定支出=exp_*、圧縮前支出=pre_* */
+  key: string;
+  label: string;
+  color: string;
+};
+
+/** recharts がツールチップに渡す1系列分のペイロード(必要なフィールドだけを型付けする) */
+type ChartTooltipEntry = {
+  name?: string;
+  value?: number | string;
+  color?: string;
+  dataKey?: string | number;
+};
+
+/**
+ * 金額グラフ共通のツールチップ。
+ *
+ * recharts の既定ツールチップは、そのX位置に値を持たない系列(積み上げの相手側の棒や、
+ * 描画されていない予測線など)まで空行として並べてしまう。収支バランスは系列数が多く
+ * 空行だらけになるため、値のある系列だけに絞り、必要なら合計行(＝積み上げ棒全体の高さ)を
+ * 添える実装に差し替える。recharts が active / payload / label を注入する。
+ */
+function ChartValueTooltip({
+  active,
+  payload,
+  label,
+  locale,
+  totalLabel,
+  formatLabel,
+}: {
+  active?: boolean;
+  payload?: ChartTooltipEntry[];
+  label?: string | number;
+  /** 金額整形に使うロケール */
+  locale: string;
+  /** 指定すると、系列が2つ以上のときに合計行をこのラベルで表示する */
+  totalLabel?: string;
+  /** 見出し(X軸ラベル)の整形。未指定ならラベルをそのまま出す */
+  formatLabel?: (label: string | number | undefined) => string;
+}) {
+  if (!active || !payload || payload.length === 0) return null;
+  const items = payload.filter(
+    (p) => typeof p.value === "number" && Number.isFinite(p.value) && p.value !== 0,
+  );
+  if (items.length === 0) return null;
+  const total = items.reduce((sum, p) => sum + Number(p.value), 0);
+  return (
+    <div className="budget-chart-tooltip">
+      <div className="budget-chart-tooltip__label">
+        {formatLabel ? formatLabel(label) : label}
+      </div>
+      {items.map((p) => (
+        <div key={String(p.dataKey)} className="budget-chart-tooltip__row">
+          <span
+            className="budget-chart-tooltip__swatch"
+            style={{ background: p.color }}
+          />
+          <span className="budget-chart-tooltip__name">{p.name}</span>
+          <span className="budget-chart-tooltip__value">
+            {formatExactAmount(Number(p.value), locale, true)}
+          </span>
+        </div>
+      ))}
+      {totalLabel && items.length > 1 && (
+        <div className="budget-chart-tooltip__row budget-chart-tooltip__row--total">
+          <span className="budget-chart-tooltip__name">{totalLabel}</span>
+          <span className="budget-chart-tooltip__value">
+            {formatExactAmount(total, locale, true)}
+          </span>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function CityBudgetWindow({
@@ -227,16 +401,18 @@ export function CityBudgetWindow({
 
   const [budgetData, setBudgetData] = useState<BudgetData | null>(null);
   const [cityReserves, setCityReserves] = useState<number>(0);
+  const [currentEpoch, setCurrentEpoch] = useState<number>(0);
   const [currentDate, setCurrentDate] = useState<number>(0);
   const [simulationDays, setSimulationDays] = useState<number>(30);
   // プレイヤーの主入力：カテゴリ別「フル稼働必要額に対する比率(％整数、0〜150)」。
   const [pendingRatios, setPendingRatios] = useState<Record<string, number>>({});
   const [budgetAgents, setBudgetAgents] = useState<BudgetAgent[] | null>(null);
-  const [activeCategoryId, setActiveCategoryId] = useState<number>(1);
+  const [activeCategoryId, setActiveCategoryId] = useState<number>(0);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // 収支フローSankeyのタブ選択（"projected"=来期見込み、"actual"=前期実績）。
-  const [sankeyTab, setSankeyTab] = useState<"projected" | "actual">("projected");
+  // 予算比率スライダーの表示トグル。既定は非表示(％のワッペンだけを見る閲覧モード)で、
+  // 「編集」ボタンを押している間だけ全カードにスライダーが出る。
+  const [isEditingRatios, setIsEditingRatios] = useState(false);
 
   useEffect(() => {
     setHintbarText(t("hint.cityBudget"));
@@ -278,15 +454,11 @@ export function CityBudgetWindow({
           ),
         ]);
 
-        const cityAgentId = cityRes.city.city_agent_id;
-        const agentData = await fetchApi<CityAgentData>(
-          buildApiUrl(apiBaseUrl, `/api/v1/agents/${cityAgentId}`),
-          { signal: controller.signal },
-        );
-
         setBudgetData(budgetsRes);
-        const reserves = agentData.economic_agent.reserves;
-        setCityReserves(reserves);
+        // 現在の現預金は予算APIが市政府エージェントから解決して返すため、
+        // エージェント詳細APIを別途叩く必要はない。
+        setCityReserves(budgetsRes.current_reserves ?? 0);
+        setCurrentEpoch(cityRes.city.epoch);
         setCurrentDate(cityRes.city.current_date);
         setSimulationDays(cityRes.city.simulation_days);
         setBudgetAgents(agentsRes.agents);
@@ -315,6 +487,20 @@ export function CityBudgetWindow({
     loadData();
     return () => controller.abort();
   }, [apiBaseUrl, masterData]);
+
+  // 内訳積み上げバー・カテゴリカードの対象(貯蓄・市政を除く全予算カテゴリ)。
+  const visibleCategories = useMemo(
+    () => sortedCategories.filter((c) => !HIDDEN_CATEGORY_KEYS.has(String(c.id))),
+    [sortedCategories],
+  );
+
+  // 施設一覧に表示するカテゴリ。未選択(初期値0)や、カードの無い非表示カテゴリ
+  // (市政・貯蓄)を指している場合は表示対象の先頭へフォールバックする
+  // (カードが無いカテゴリは選び直せないため、そこへ留まらせない)。
+  const activeCategory = useMemo(() => {
+    if (visibleCategories.some((c) => c.id === activeCategoryId)) return activeCategoryId;
+    return visibleCategories[0]?.id ?? 0;
+  }, [visibleCategories, activeCategoryId]);
 
   const handleConfirmBudget = useCallback(async () => {
     setIsSaving(true);
@@ -359,8 +545,8 @@ export function CityBudgetWindow({
   // 左ペインのグループ分けと、資金不足時の自動調整プレビュー（deriveBudgets）に使う。
   const tiers = useMemo(() => budgetData?.budget_tiers ?? {}, [budgetData]);
 
-  // 予算導出の基準額（フル稼働必要額＝棒グラフの「必要金額」）。予算パネルの施設別リストと
-  // 同一の per施設値の合計として求めるため、グラフとリスト合計は常に一致する。
+  // 予算導出の基準額（フル稼働必要額）。予算パネルの施設別リストと
+  // 同一の per施設値の合計として求めるため、施設一覧の合計と常に一致する。
   const baseAmounts = useMemo(
     () => computeBaseAmounts(budgetAgents),
     [budgetAgents],
@@ -372,49 +558,137 @@ export function CityBudgetWindow({
     [pendingRatios, baseAmounts, tiers, cityReserves],
   );
   const pendingBudgets = derived.budgets;
+  const desiredBudgets = derived.desired;
   // バナーは「編集中のプレビューで自動調整が起きる」場合に加え、バックエンドが直近の配分で
   // 実際に自動調整した場合（budget_auto_adjusted）にも表示する。ロード直後は両者は一致するが、
   // 配分後に現金が変動した場合などはサーバ側の実結果のみが真になるため、両方を見る。
   const autoAdjusted = derived.autoAdjusted || Boolean(budgetData?.budget_auto_adjusted);
 
-  // 内訳積み上げバーの列となるカテゴリ(貯蓄・市政を除く全予算カテゴリ)。
-  const breakdownCategories = useMemo(
-    () => sortedCategories.filter((c) => !HIDDEN_CATEGORY_KEYS.has(String(c.id))),
-    [sortedCategories],
+  /**
+   * 現金推移グラフのデータ。過去エポック末の確定現預金＋現在の現預金の棒に、
+   * 直近トレンドを外挿した点線を繋げる。
+   */
+  const reservesChartData = useMemo(
+    () =>
+      buildReservesChartData(
+        budgetData?.reserves_history ?? [],
+        currentEpoch,
+        cityReserves,
+      ),
+    [budgetData?.reserves_history, currentEpoch, cityReserves],
   );
 
-  // 「必要金額内訳」と「確定予算内訳」の横向き積み上げバー用データ(行=2本、列=カテゴリ別金額)。
-  // 上段=必要金額(フル稼働必要額の単純積み上げ)、下段=確定予算(比率×基準額をTier自動調整で
-  // 現金内に収めた配分結果)。同一X軸で上下に並ぶため、資金不足時にどのカテゴリが
-  // どれだけ削られたかを見比べられる。スライダー操作には確定予算側が即座に追随する。
-  const breakdownChartData = useMemo(() => {
-    const requiredRow: Record<string, number | string> = {
-      name: t("budget.nextProjectedShort", { defaultValue: "必要金額" }),
-    };
-    const budgetRow: Record<string, number | string> = {
-      name: t("budget.confirmedBudgetLabel", { defaultValue: "確定予算" }),
-    };
-    for (const c of breakdownCategories) {
-      const key = String(c.id);
-      requiredRow[key] = baseAmounts[key] ?? 0;
-      budgetRow[key] = pendingBudgets[key] ?? 0;
+  /**
+   * 収支バランスの積み上げ系列とデータ行。
+   *
+   * X軸は「収入(前エポック実績)」「支出(次エポック予算)」の2本が基本で、現金不足で
+   * 希望額が削られている場合だけ「圧縮前(削減前の希望額)」の3本目が加わる。
+   * 収入側は税(TAX_REVENUE_META)＋公営事業収入(buildBusinessRevenueItems)、
+   * 支出側は編集中の予算枠(pendingBudgets)をカテゴリ別に積み上げる。支出側の色は
+   * 施設一覧・カテゴリカードと同じ spendCategoryColor で統一する。
+   * 値が0の系列は凡例が無駄に長くなるだけなので、系列ごと落とす。
+   */
+  const balanceChart = useMemo(() => {
+    if (!budgetData) {
+      return {
+        series: [] as BalanceSeries[],
+        preSeries: [] as BalanceSeries[],
+        rows: [] as Record<string, number | string>[],
+        totalRevenue: 0,
+        totalExpense: 0,
+        totalDesired: 0,
+        compressed: false,
+      };
     }
-    return [requiredRow, budgetRow];
-  }, [breakdownCategories, baseAmounts, pendingBudgets, t]);
+
+    const revenueRow: Record<string, number | string> = {
+      name: t("budget.balanceRevenue", { defaultValue: "収入" }),
+      row: BALANCE_ROW_REVENUE,
+    };
+    const expenseRow: Record<string, number | string> = {
+      name: t("budget.balanceExpense", { defaultValue: "支出" }),
+      row: BALANCE_ROW_EXPENSE,
+    };
+    const preRow: Record<string, number | string> = {
+      name: t("budget.balancePreCompress", { defaultValue: "圧縮前" }),
+      row: BALANCE_ROW_PRE_COMPRESS,
+    };
+
+    // --- 収入側: 税目 + 公営事業収入 ---
+    const revenueSeries: BalanceSeries[] = [];
+    let totalRevenue = 0;
+    for (const meta of TAX_REVENUE_META) {
+      const value = budgetData.total_revenue[meta.key] ?? 0;
+      totalRevenue += value;
+      if (value <= 0) continue;
+      const key = `rev_tax_${meta.key}`;
+      revenueSeries.push({ key, label: t(meta.labelKey), color: meta.color });
+      revenueRow[key] = value;
+    }
+    // 公営事業収入(公共サービス売上・公営住宅家賃)。支出側と同じカテゴリ粒度・同色で描く。
+    const businessItems = buildBusinessRevenueItems(
+      budgetData.total_revenue,
+      masterData?.budget_categories,
+      t,
+    );
+    businessItems.forEach((item, index) => {
+      totalRevenue += item.value;
+      if (item.value <= 0) return;
+      const key = `rev_biz_${index}`;
+      revenueSeries.push({ key, label: item.label, color: item.color });
+      revenueRow[key] = item.value;
+    });
+
+    // --- 支出側: カテゴリ別の確定予算と、削減前の希望額 ---
+    const expenseSeries: BalanceSeries[] = [];
+    const preSeries: BalanceSeries[] = [];
+    let totalExpense = 0;
+    let totalDesired = 0;
+    for (const c of visibleCategories) {
+      const catKey = String(c.id);
+      const budget = pendingBudgets[catKey] ?? 0;
+      const desired = desiredBudgets[catKey] ?? 0;
+      totalExpense += budget;
+      totalDesired += desired;
+      if (budget <= 0 && desired <= 0) continue;
+      const label = t(`budget.category.${c.id}`, { defaultValue: c.display_name });
+      const color = spendCategoryColor(c.id);
+      expenseSeries.push({ key: `exp_${catKey}`, label, color });
+      preSeries.push({ key: `pre_${catKey}`, label, color });
+      expenseRow[`exp_${catKey}`] = budget;
+      preRow[`pre_${catKey}`] = desired;
+    }
+
+    // 希望額が確定予算を上回っている＝現金不足で支出が圧縮された状態。
+    const compressed = totalDesired > totalExpense + 1;
+    const rows = compressed
+      ? [revenueRow, expenseRow, preRow]
+      : [revenueRow, expenseRow];
+
+    return {
+      series: [...revenueSeries, ...expenseSeries],
+      preSeries,
+      rows,
+      totalRevenue,
+      totalExpense,
+      totalDesired,
+      compressed,
+    };
+  }, [budgetData, masterData, visibleCategories, pendingBudgets, desiredBudgets, t]);
 
   const filteredAgents = useMemo(() => {
     if (!budgetAgents) return [];
-    const catId = activeCategoryId;
+    const catId = activeCategory;
     return budgetAgents
       .filter((agent) => agent.category_id === catId)
       .map((agent) => ({
         ...agent,
         rowKeyStr: rowKey(agent),
-        // 施設別の「必要金額」。この行の合計（agentsTotal.projected）はカードの
+        // 施設別の「必要金額」。この行の合計（agentsTotal.projected）はカテゴリの
         // 必要金額（baseAmounts[catId]）と常に一致する（同一の projected_expense を使うため）。
         projected_preview: agent.projected_expense,
       }));
-  }, [budgetAgents, activeCategoryId]);
+  }, [budgetAgents, activeCategory]);
 
   const agentsTotal = useMemo(() => {
     let actual = 0;
@@ -426,100 +700,13 @@ export function CityBudgetWindow({
     return { actual, projected };
   }, [filteredAgents]);
 
-  /**
-   * 財政Sankey用データ(タブ「来期見込み」: 前エポック歳入 → 資金プール → 次エポック支出予定)。
-   * 歳入は税(31〜35)に加え、公営事業収入(コストカテゴリキー1〜7に計上される公共サービス
-   * 売上・公営住宅家賃)も描く。
-   * 収用補償は予算枠で計画される支出ではない実支出のため、支出側が予算枠(pendingBudgets)の
-   * この予算ウィンドウでは描かない(前エポック実績を描く「前期実績」タブでのみ描く)。
-   * 右側(支出)は編集中の pendingBudgets を参照するため、予算バーを操作すると即座に再描画される。
-   */
-  const projectedSankeyChart = useMemo(() => {
-    if (!budgetData) return null;
-    const revenues: FiscalFlowItem[] = [
-      ...TAX_REVENUE_META.map((m) => ({
-        label: t(m.labelKey),
-        value: budgetData.total_revenue[m.key] ?? 0,
-        color: m.color,
-      })),
-      ...buildBusinessRevenueItems(
-        budgetData.total_revenue,
-        masterData?.budget_categories,
-        t,
-      ),
-    ];
-    // 貯蓄(10)は支出カテゴリではないため支出側ノードに含めない（余剰は surplus ノードが表す）。
-    // 市政(1)は空カテゴリのため非表示。
-    const spends: FiscalFlowItem[] = sortedCategories
-      .filter((c) => !HIDDEN_CATEGORY_KEYS.has(String(c.id)))
-      .map((c) => ({
-        label: t(`budget.category.${c.id}`, { defaultValue: c.display_name }),
-        value: pendingBudgets[String(c.id)] ?? 0,
-        color: spendCategoryColor(c.id),
-      }));
-    return buildFiscalSankeyData(
-      revenues,
-      { label: t("fiscalSankey.pool", { defaultValue: "資金" }) },
-      spends,
-      {
-        surplus: t("fiscalSankey.surplus", { defaultValue: "繰越" }),
-        deficit: t("fiscalSankey.deficit", { defaultValue: "貯蓄取り崩し(赤字)" }),
-      },
-    );
-  }, [budgetData, pendingBudgets, sortedCategories, masterData, t]);
-
-  /**
-   * 財政Sankey用データ(タブ「前期実績」: 前エポック歳入 → 資金プール → 前エポック支出実績)。
-   * 税率ウィンドウ(CityTaxWindow)のSankeyと同一内容。歳入側は「来期見込み」タブと同じだが、
-   * 支出側は予算枠(pendingBudgets)ではなく実支出(budgetData.total_expense、
-   * getActualSpendingValue)を使い、予算カテゴリ外の収用補償(buildLandAcquisitionSpendItem)も
-   * 前エポック実績として右側に加える。
-   */
-  const actualSankeyChart = useMemo(() => {
-    if (!budgetData) return null;
-    const revenues: FiscalFlowItem[] = [
-      ...TAX_REVENUE_META.map((m) => ({
-        label: t(m.labelKey),
-        value: budgetData.total_revenue[m.key] ?? 0,
-        color: m.color,
-      })),
-      ...buildBusinessRevenueItems(
-        budgetData.total_revenue,
-        masterData?.budget_categories,
-        t,
-      ),
-    ];
-    const budgetCategories = masterData?.budget_categories ?? {};
-    const spends: FiscalFlowItem[] = [
-      ...Object.entries(budgetCategories)
-        .map(([id, entry]) => ({ id: Number(id), entry }))
-        .sort((a, b) => a.id - b.id)
-        .map(({ id, entry }) => ({
-          label: t(`budget.category.${id}`, {
-            defaultValue: (entry as BudgetCategoryEntry).display_name,
-          }),
-          value: getActualSpendingValue(String(id), budgetData.total_expense),
-          color: spendCategoryColor(id),
-        })),
-      // 収用補償(市が民間から土地を収用した土地代)。予算カテゴリ外の税外支出だが、
-      // 前エポックの実支出として右側に加える。
-      buildLandAcquisitionSpendItem(budgetData.total_expense, t),
-    ];
-    return buildFiscalSankeyData(
-      revenues,
-      { label: t("fiscalSankey.pool", { defaultValue: "資金" }) },
-      spends,
-      {
-        surplus: t("fiscalSankey.surplus", { defaultValue: "繰越" }),
-        deficit: t("fiscalSankey.deficit", { defaultValue: "貯蓄取り崩し(赤字)" }),
-      },
-    );
-  }, [budgetData, masterData, t]);
-
   const locale = resolveIntlLocale(i18n.language);
   const nextEpochStart = currentDate;
   const nextEpochEnd = currentDate + simulationDays;
   const nextPeriod = formatEpochDateRange(nextEpochStart, nextEpochEnd, locale, { hideDay: true, simulationDays });
+
+  /** 収支差(収入 − 確定支出)。プラスなら黒字、マイナスなら現金の取り崩し。 */
+  const netBalance = balanceChart.totalRevenue - balanceChart.totalExpense;
 
   if (error) {
     return <div className="budget-window__error">{error}</div>;
@@ -549,138 +736,189 @@ export function CityBudgetWindow({
         </div>
       )}
 
-      {/* メインの3カラム分割: 左=Tier別カテゴリカード / 中央=Sankey+比較棒グラフ / 右=施設明細 */}
+      {/* メインの2分割: 左1/3=予算スライダー / 右2/3=現金推移+施設一覧+収支バランス */}
       <div className="budget-window__split-container">
 
         {/* 左カラム: 維持優先度(Tier)ごとにグループ化したカテゴリカード。
             Tier 1 が最優先維持、Tier 4 が資金不足時に最初に削減される。
-            カードの内容はカテゴリ名と予算比率スライダーのみ（金額は中央の棒グラフで見る）。 */}
+            各カードは右上のワッペンに比率(％)を出し、「編集」トグルON の間だけ
+            スライダーを表示する(閲覧時は数字だけで読める)。 */}
         <div className="budget-window__left-pane">
-          {TIER_ORDER.map((tier) => {
-            const tierCategories = sortedCategories.filter(
-              (cat) =>
-                !HIDDEN_CATEGORY_KEYS.has(String(cat.id)) &&
-                getCategoryTier(String(cat.id), tiers) === tier,
-            );
-            if (tierCategories.length === 0) return null;
-            return (
-              <div key={tier} className={`budget-tier-group budget-tier-group--tier${tier}`}>
-                <div className="budget-tier-group__title">{t(`budget.tier${tier}`)}</div>
-                <div className="budget-tier-group__cards">
-                  {tierCategories.map((cat) => {
-                    const catId = cat.id;
-                    const catKey = String(catId);
-                    const ratioPct = pendingRatios[catKey] ?? 100;
-                    const isSelected = activeCategoryId === catId;
-                    const iconUrl = resolveLedgerIcon(catId);
-                    return (
-                      <div
-                        key={catId}
-                        className={`budget-category-card ${isSelected ? "budget-category-card--active" : ""}`}
-                        onClick={() => setActiveCategoryId(catId)}
-                      >
-                        {/* 左: カテゴリアイコン(正方形)。画像が無いカテゴリは空枠。 */}
-                        <div className="budget-category-card__icon">
-                          {iconUrl && <img src={iconUrl} alt="" draggable={false} />}
-                        </div>
-                        {/* 右: タイトル + その下に予算スライダー */}
-                        <div className="budget-category-card__body">
-                          <span className="budget-category-card__name">
-                            {t(`budget.category.${catId}`, { defaultValue: cat.display_name })}
+          <div className="budget-window__pane-header">
+            <h3 className="budget-window__section-title">
+              {t("budget.allocationTitle", { defaultValue: "予算配分" })}
+            </h3>
+            <button
+              type="button"
+              className={[
+                "budget-window__edit-btn",
+                isEditingRatios && "budget-window__edit-btn--active",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              aria-pressed={isEditingRatios}
+              onClick={() => setIsEditingRatios((prev) => !prev)}
+            >
+              {isEditingRatios
+                ? t("budget.editRatiosDone", { defaultValue: "編集を終える" })
+                : t("budget.editRatios", { defaultValue: "編集" })}
+            </button>
+          </div>
+
+          <div className="budget-window__tier-list">
+            {TIER_ORDER.map((tier) => {
+              const tierCategories = visibleCategories.filter(
+                (cat) => getCategoryTier(String(cat.id), tiers) === tier,
+              );
+              if (tierCategories.length === 0) return null;
+              return (
+                <div key={tier} className={`budget-tier-group budget-tier-group--tier${tier}`}>
+                  <div className="budget-tier-group__title">{t(`budget.tier${tier}`)}</div>
+                  <div className="budget-tier-group__cards">
+                    {tierCategories.map((cat) => {
+                      const catId = cat.id;
+                      const catKey = String(catId);
+                      const ratioPct = pendingRatios[catKey] ?? 100;
+                      const isSelected = activeCategory === catId;
+                      const iconUrl = resolveLedgerIcon(catId);
+                      return (
+                        <div
+                          key={catId}
+                          className={`budget-category-card ${isSelected ? "budget-category-card--active" : ""}`}
+                          onClick={() => setActiveCategoryId(catId)}
+                        >
+                          {/* 右上のワッペン: 比率(％)。スライダー非表示時の唯一の数値表示。 */}
+                          <span className="budget-category-card__badge">
+                            {Math.round(ratioPct)}%
                           </span>
-                          {/* 予算スライダー: フル稼働必要額に対する比率(0〜150%) */}
-                          <div
-                            className="budget-category-card__slider-row"
-                            title={t("budget.ratioSliderHint", {
-                              defaultValue: "フル稼働時の見込み費用に対する割合(%)。100%で全施設が稼働率目標どおり稼働できる予算になる",
-                            })}
-                          >
-                            <input
-                              type="range"
-                              min={0}
-                              max={RATIO_MAX_PERCENT}
-                              step={5}
-                              value={Math.round(ratioPct)}
-                              onChange={(e) => handleRatioChange(catId, e.target.value)}
-                              className="budget-category-card__slider"
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                            <span className="budget-category-card__slider-value">{Math.round(ratioPct)}%</span>
+                          {/* 左: カテゴリアイコン(正方形)。画像が無いカテゴリは空枠。 */}
+                          <div className="budget-category-card__icon">
+                            {iconUrl && <img src={iconUrl} alt="" draggable={false} />}
+                          </div>
+                          {/* 右: タイトル + 配分額(+ 編集中はスライダー) */}
+                          <div className="budget-category-card__body">
+                            <span className="budget-category-card__name">
+                              {t(`budget.category.${catId}`, { defaultValue: cat.display_name })}
+                            </span>
+                            <span className="budget-category-card__amount">
+                              <Money value={pendingBudgets[catKey] ?? 0} unit />
+                            </span>
+                            {/* 予算スライダー: フル稼働必要額に対する比率(0〜150%) */}
+                            {isEditingRatios && (
+                              <div
+                                className="budget-category-card__slider-row"
+                                title={t("budget.ratioSliderHint", {
+                                  defaultValue: "フル稼働時の見込み費用に対する割合(%)。100%で全施設が稼働率目標どおり稼働できる予算になる",
+                                })}
+                              >
+                                <input
+                                  type="range"
+                                  min={0}
+                                  max={RATIO_MAX_PERCENT}
+                                  step={5}
+                                  value={Math.round(ratioPct)}
+                                  onChange={(e) => handleRatioChange(catId, e.target.value)}
+                                  className="budget-category-card__slider"
+                                  onClick={(e) => e.stopPropagation()}
+                                />
+                              </div>
+                            )}
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
-        {/* 右エリア: 上=必要金額/確定予算の内訳バー、下=施設明細+財政Sankeyの左右分割 */}
+        {/* 右エリア: 上=現金推移、下=施設一覧+収支バランスの左右分割 */}
         <div className="budget-window__right-area">
-          {/* 上段: カテゴリ別の内訳積み上げバー2本(上=必要金額、下=確定予算)。
-              同一X軸で上下に並べ、資金不足の自動調整による削減幅を見比べられる。
-              セグメント色は下段Sankeyの支出側と同じ spendCategoryColor で統一する。 */}
-          <div className="budget-window__breakdown-section">
+          {/* 上段: 市政府の現金(reserves)推移。過去エポック末の確定値＋現在を棒で、
+              直近トレンドの外挿を点線で描く。 */}
+          <div className="budget-window__reserves-section">
             <h3 className="budget-window__section-title">
-              {t("budget.breakdownCompareTitle", { defaultValue: "必要金額と確定予算の内訳" })}
+              {t("budget.reservesTrendTitle", { defaultValue: "現金推移" })}
             </h3>
-            <div className="budget-window__breakdown-chart">
+            <div className="budget-window__reserves-chart">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={breakdownChartData}
-                  layout="vertical"
-                  margin={{ top: 0, right: 16, left: 4, bottom: 0 }}
-                  barCategoryGap="24%"
+                <ComposedChart
+                  data={reservesChartData}
+                  margin={{ top: 4, right: 16, left: 0, bottom: 0 }}
                 >
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
                   <XAxis
-                    type="number"
+                    dataKey="label"
                     tick={{ fontSize: 10, fill: "#94a3b8" }}
-                    tickFormatter={(v) => formatCompactAmount(Number(v), locale, false)}
+                    tickLine={false}
                     stroke="rgba(255,255,255,0.15)"
                   />
                   <YAxis
-                    type="category"
-                    dataKey="name"
-                    width={76}
-                    tick={{ fontSize: 10, fill: "#cbd5e1" }}
+                    tick={{ fontSize: 10, fill: "#94a3b8" }}
+                    tickLine={false}
+                    width={52}
+                    tickFormatter={(v) => formatCompactAmount(Number(v), locale, false)}
                     stroke="rgba(255,255,255,0.15)"
                   />
                   <RechartsTooltip
-                    formatter={(value) => formatCompactAmount(Number(value), locale, true)}
-                    contentStyle={{
-                      background: "rgba(15, 23, 42, 0.95)",
-                      border: "1px solid rgba(255, 255, 255, 0.1)",
-                      borderRadius: 8,
-                      fontSize: 11,
-                    }}
+                    content={
+                      <ChartValueTooltip
+                        locale={locale}
+                        formatLabel={(label) =>
+                          t("budget.reservesEpochLabel", {
+                            defaultValue: "エポック {{n}}",
+                            n: label,
+                          })
+                        }
+                      />
+                    }
                     cursor={{ fill: "rgba(255, 255, 255, 0.04)" }}
                   />
                   <Legend wrapperStyle={{ fontSize: 10 }} />
-                  {breakdownCategories.map((c) => (
-                    <Bar
-                      key={c.id}
-                      dataKey={String(c.id)}
-                      stackId="breakdown"
-                      name={t(`budget.category.${c.id}`, { defaultValue: c.display_name })}
-                      fill={spendCategoryColor(c.id)}
-                    />
-                  ))}
-                </BarChart>
+                  {/* 債務超過(現預金マイナス)が一目でわかるようにゼロ線を引く */}
+                  <ReferenceLine y={0} stroke="rgba(248, 113, 113, 0.5)" />
+                  {/* 実績と現在は同じ stackId に載せることで、同じX位置で1本の棒として描かれる */}
+                  <Bar
+                    dataKey="actual"
+                    stackId="reserves"
+                    name={t("budget.reservesActual", { defaultValue: "エポック末実績" })}
+                    fill={COLOR_RESERVES_ACTUAL}
+                    isAnimationActive={false}
+                  />
+                  <Bar
+                    dataKey="current"
+                    stackId="reserves"
+                    name={t("budget.reservesCurrent", { defaultValue: "現在" })}
+                    fill={COLOR_RESERVES_CURRENT}
+                    isAnimationActive={false}
+                  />
+                  <Line
+                    type="linear"
+                    dataKey="forecast"
+                    name={t("budget.reservesForecast", { defaultValue: "予測(直近トレンド)" })}
+                    stroke={COLOR_RESERVES_FORECAST}
+                    strokeWidth={2}
+                    strokeDasharray="5 4"
+                    dot={{ r: 2, fill: COLOR_RESERVES_FORECAST }}
+                    connectNulls={false}
+                    isAnimationActive={false}
+                  />
+                </ComposedChart>
               </ResponsiveContainer>
             </div>
           </div>
 
-          {/* 下段: 左=選択カテゴリの施設明細、右=財政Sankey */}
+          {/* 下段: 左=選択カテゴリの施設一覧、右=収支バランス */}
           <div className="budget-window__bottom-row">
             {/* 下段左: 選択カテゴリのエージェント明細 */}
             <div className="budget-window__agents-pane">
               <div className="budget-agent-table-wrapper">
                 <div className="budget-agent-title-row">
                   <h3 className="budget-agent-title">
-                    {t(`budget.category.${activeCategoryId}`, {
-                      defaultValue: categories.find((c) => c.id === activeCategoryId)?.display_name
+                    {t(`budget.category.${activeCategory}`, {
+                      defaultValue: categories.find((c) => c.id === activeCategory)?.display_name
                     })} {t("budget.details", { defaultValue: "詳細" })}
                   </h3>
                 </div>
@@ -736,49 +974,97 @@ export function CityBudgetWindow({
               </div>
             </div>
 
-            {/* 下段右: 財政Sankey。「来期見込み」(前税収→資金→次支出予定、破線)と
-                「前期実績」(前税収→資金→前支出実績、税率ウィンドウと同一内容)をタブで切り替える。 */}
-            <div className="budget-window__sankey-section">
-              <div className="budget-window__sankey-header">
-                <h3 className="budget-window__section-title budget-window__sankey-title">
-                  {t("fiscalSankey.title", { defaultValue: "収支フロー" })}
+            {/* 下段右: 収支バランス。左の棒=収入(前エポック実績)、右の棒=支出(次エポック予算)。
+                現金不足で支出が圧縮された場合のみ、圧縮前の希望額を薄い3本目の棒で描く。 */}
+            <div className="budget-window__balance-section">
+              <div className="budget-window__balance-header">
+                <h3 className="budget-window__section-title">
+                  {t("budget.balanceTitle", { defaultValue: "収支バランス" })}
                 </h3>
-                <div className="budget-window__sankey-tabs" role="tablist">
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={sankeyTab === "projected"}
-                    className={[
-                      "budget-window__sankey-tab",
-                      sankeyTab === "projected" && "budget-window__sankey-tab--active",
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
-                    onClick={() => setSankeyTab("projected")}
-                  >
-                    {t("fiscalSankey.projectedTab", { defaultValue: "来期見込み" })}
-                  </button>
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={sankeyTab === "actual"}
-                    className={[
-                      "budget-window__sankey-tab",
-                      sankeyTab === "actual" && "budget-window__sankey-tab--active",
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
-                    onClick={() => setSankeyTab("actual")}
-                  >
-                    {t("fiscalSankey.actualTab", { defaultValue: "前期実績" })}
-                  </button>
-                </div>
+                <span className="budget-window__balance-note">
+                  {t("budget.balanceNote", {
+                    defaultValue: "収入=前エポック実績 / 支出=次エポック予算",
+                  })}
+                </span>
               </div>
-              <FiscalSankey
-                chart={sankeyTab === "projected" ? projectedSankeyChart : actualSankeyChart}
-                linkStyle={sankeyTab === "projected" ? "planned" : "solid"}
-                noDataLabel={t("fiscalSankey.noData", { defaultValue: "表示できる収支データがありません" })}
-              />
+              {/* 収支差のサマリ: 収入 − 支出。マイナスなら現金の取り崩しになる。 */}
+              <div className="budget-window__balance-summary">
+                <span className="budget-window__balance-summary-label">
+                  {t("budget.balanceNet", { defaultValue: "収支差" })}
+                </span>
+                <span
+                  className={[
+                    "budget-window__balance-summary-value",
+                    netBalance < 0
+                      ? "budget-window__balance-summary-value--deficit"
+                      : "budget-window__balance-summary-value--surplus",
+                  ].join(" ")}
+                >
+                  {netBalance >= 0 ? "+" : "-"}
+                  <Money value={Math.abs(netBalance)} unit />
+                </span>
+              </div>
+              <div className="budget-window__balance-chart">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={balanceChart.rows}
+                    margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
+                    barCategoryGap="28%"
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
+                    <XAxis
+                      dataKey="name"
+                      tick={{ fontSize: 11, fill: "#cbd5e1" }}
+                      tickLine={false}
+                      stroke="rgba(255,255,255,0.15)"
+                    />
+                    <YAxis
+                      tick={{ fontSize: 10, fill: "#94a3b8" }}
+                      tickLine={false}
+                      width={52}
+                      tickFormatter={(v) => formatCompactAmount(Number(v), locale, false)}
+                      stroke="rgba(255,255,255,0.15)"
+                    />
+                    <RechartsTooltip
+                      content={
+                        <ChartValueTooltip
+                          locale={locale}
+                          totalLabel={t("budget.total", { defaultValue: "合計" })}
+                        />
+                      }
+                      cursor={{ fill: "rgba(255, 255, 255, 0.04)" }}
+                    />
+                    <Legend wrapperStyle={{ fontSize: 10 }} />
+                    {balanceChart.series.map((s) => (
+                      <Bar
+                        key={s.key}
+                        dataKey={s.key}
+                        stackId="balance"
+                        name={s.label}
+                        fill={s.color}
+                        maxBarSize={72}
+                        isAnimationActive={false}
+                      />
+                    ))}
+                    {/* 圧縮前の支出。確定支出と同じ色を薄く描き、凡例には出さない
+                        (同じカテゴリが2重に並ぶため)。 */}
+                    {balanceChart.compressed &&
+                      balanceChart.preSeries.map((s) => (
+                        <Bar
+                          key={s.key}
+                          dataKey={s.key}
+                          stackId="balance"
+                          name={s.label}
+                          fill={s.color}
+                          fillOpacity={PRE_COMPRESS_OPACITY}
+                          legendType="none"
+                          maxBarSize={72}
+                          isAnimationActive={false}
+                        />
+                      ))}
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </div>
         </div>

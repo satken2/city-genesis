@@ -56,20 +56,63 @@
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* メイン 2分割レイアウト: 左1/3=Tier別カテゴリカード / 右2/3=内訳バー+施設明細+Sankey */
+/* メイン 2分割レイアウト: 左1/3=予算スライダー / 右2/3=現金推移+施設一覧+収支バランス */
 .budget-window__split-container {
   display: flex;
   flex: 1;
   min-height: 0; /* スクロール可能にするために必要 */
 }
 
-/* 左カラム: 維持優先度(Tier)ごとにグループ化したカテゴリカード */
+/* 左カラム: 見出し+編集トグル(固定) と、維持優先度(Tier)別カテゴリカード(スクロール) */
 .budget-window__left-pane {
   flex: 1;
   min-width: 240px;
+  min-height: 0;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 左ペインの見出し行: セクション名 + 予算スライダーの表示トグル */
+.budget-window__pane-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px 6px;
+  flex-shrink: 0;
+}
+
+/* 予算スライダーの表示トグル。OFFの間はワッペンの％だけを見る閲覧モードになる。 */
+.budget-window__edit-btn {
+  padding: 3px 12px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.budget-window__edit-btn:hover:not(.budget-window__edit-btn--active) {
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+}
+
+.budget-window__edit-btn--active {
+  background: #0ea5e9;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+/* Tierグループの縦積み。左ペインで縦スクロールするのはこの領域だけ。 */
+.budget-window__tier-list {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
-  padding: 12px;
+  padding: 0 12px 12px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -120,8 +163,9 @@
   gap: 6px;
 }
 
-/* カテゴリカード: カテゴリ名 + 予算比率スライダーのみのシンプルな構成 */
+/* カテゴリカード: アイコン + カテゴリ名/配分額(+編集中はスライダー) + 右上の比率ワッペン */
 .budget-category-card {
+  position: relative;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -173,12 +217,42 @@
 }
 
 .budget-category-card__name {
+  padding-right: 42px;
   font-size: 0.8rem;
   font-weight: 600;
   color: #f1f5f9;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* 右上の比率ワッペン。スライダー非表示時はこれが唯一の数値表示になる。 */
+.budget-category-card__badge {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  padding: 1px 6px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  font-family: monospace;
+  line-height: 1.4;
+  color: #cbd5e1;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.budget-category-card--active .budget-category-card__badge {
+  color: #e0f2fe;
+  border-color: rgba(14, 165, 233, 0.5);
+}
+
+/* 比率から導出された配分予算額。カテゴリ名の直下に小さく出す。 */
+.budget-category-card__amount {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  font-family: monospace;
 }
 
 .budget-category-card__slider-row {
@@ -193,16 +267,8 @@
   accent-color: #3b82f6;
 }
 
-.budget-category-card__slider-value {
-  font-size: 0.72rem;
-  color: #cbd5e1;
-  font-family: monospace;
-  width: 40px;
-  flex-shrink: 0;
-  text-align: right;
-}
 
-/* 右エリア: 上=内訳積み上げバー、下=施設明細+財政Sankeyの左右分割 */
+/* 右エリア: 上=現金推移、下=施設一覧+収支バランスの左右分割 */
 .budget-window__right-area {
   flex: 2;
   min-width: 0;
@@ -212,9 +278,8 @@
   background: rgba(15, 23, 42, 0.15);
 }
 
-/* 上段: 必要金額/確定予算のカテゴリ別内訳積み上げバー(上下2本)。
-   チャート高さは固定(凡例2行分を含む)で、残りの縦幅は下段に譲る。 */
-.budget-window__breakdown-section {
+/* 上段: 市政府の現金(reserves)推移。チャート高さは固定で、残りの縦幅は下段に譲る。 */
+.budget-window__reserves-section {
   flex: 0 0 auto;
   display: flex;
   flex-direction: column;
@@ -222,18 +287,18 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.budget-window__breakdown-chart {
-  height: 180px;
+.budget-window__reserves-chart {
+  height: 200px;
 }
 
-/* 下段: 左=選択カテゴリの施設明細、右=財政Sankey の左右分割 */
+/* 下段: 左=選択カテゴリの施設一覧、右=収支バランス の左右分割 */
 .budget-window__bottom-row {
   flex: 1;
   min-height: 0;
   display: flex;
 }
 
-/* 下段左: 選択カテゴリの施設明細 */
+/* 下段左: 選択カテゴリの施設一覧 */
 .budget-window__agents-pane {
   flex: 1;
   min-width: 0;
@@ -243,8 +308,8 @@
   background: rgba(15, 23, 42, 0.2);
 }
 
-/* 下段右: 財政Sankey */
-.budget-window__sankey-section {
+/* 下段右: 収支バランス(収入/支出の縦積み上げ棒) */
+.budget-window__balance-section {
   flex: 1;
   min-width: 0;
   min-height: 0;
@@ -253,7 +318,53 @@
   padding: 12px 12px 4px;
 }
 
-/* 右エリアの各セクション見出し(内訳バー/Sankey共通) */
+/* 収支バランスの見出し行: タイトル + 期間の但し書き */
+.budget-window__balance-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.budget-window__balance-note {
+  font-size: 0.65rem;
+  color: #64748b;
+}
+
+/* 収支差(収入 − 支出)のサマリ行 */
+.budget-window__balance-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 0 6px;
+  flex-shrink: 0;
+}
+
+.budget-window__balance-summary-label {
+  font-size: 0.7rem;
+  color: #94a3b8;
+}
+
+.budget-window__balance-summary-value {
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: monospace;
+}
+
+.budget-window__balance-summary-value--surplus {
+  color: #4ade80;
+}
+
+.budget-window__balance-summary-value--deficit {
+  color: #f87171;
+}
+
+.budget-window__balance-chart {
+  flex: 1;
+  min-height: 0;
+}
+
+/* 右エリアの各セクション見出し(現金推移/収支バランス/予算配分の共通スタイル) */
 .budget-window__section-title {
   margin: 0 0 4px 0;
   font-size: 0.72rem;
@@ -262,46 +373,52 @@
   letter-spacing: 0.02em;
 }
 
-/* 収支フローSankeyの見出し行: タイトル + タブ切り替え(来期見込み/前期実績) */
-.budget-window__sankey-header {
+/* 金額グラフ共通のツールチップ(ChartValueTooltip)。値のある系列だけを並べる。 */
+.budget-chart-tooltip {
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 0.68rem;
+  color: #e2e8f0;
+  pointer-events: none;
+}
+
+.budget-chart-tooltip__label {
+  font-weight: 700;
+  color: #f1f5f9;
+  margin-bottom: 4px;
+}
+
+.budget-chart-tooltip__row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 4px;
+  gap: 6px;
+  line-height: 1.6;
+}
+
+.budget-chart-tooltip__swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
   flex-shrink: 0;
 }
 
-.budget-window__sankey-title {
-  margin: 0;
-}
-
-.budget-window__sankey-tabs {
-  display: flex;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-.budget-window__sankey-tab {
-  padding: 3px 10px;
-  font-size: 0.68rem;
-  font-weight: 600;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 20px;
-  color: #94a3b8;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.budget-window__sankey-tab:hover:not(.budget-window__sankey-tab--active) {
-  background: rgba(255, 255, 255, 0.08);
+.budget-chart-tooltip__name {
+  flex: 1;
   color: #cbd5e1;
 }
 
-.budget-window__sankey-tab--active {
-  background: #0ea5e9;
-  border-color: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+.budget-chart-tooltip__value {
+  font-family: monospace;
+  text-align: right;
+}
+
+.budget-chart-tooltip__row--total {
+  margin-top: 3px;
+  padding-top: 3px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  font-weight: 700;
 }
 
 .budget-agent-table-wrapper {
