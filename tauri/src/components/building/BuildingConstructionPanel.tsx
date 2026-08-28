@@ -141,6 +141,13 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
   const [estimatedMaxProduction, setEstimatedMaxProduction] = useState<number | null>(null);
   const [estimatedEmployment, setEstimatedEmployment] = useState<number | null>(null);
   const [estimatedOperatingCost, setEstimatedOperatingCost] = useState<number | null>(null);
+  // 稼働コストの内訳(人件費・原料費)と支出元の予算カテゴリ(LEDGER_*)。
+  // ランニングコスト表示の内訳行・費目行として使う。総額 = 人件費 + 原料費(専用建物のため家賃なし)。
+  const [operatingWageCost, setOperatingWageCost] = useState<number | null>(null);
+  const [operatingMaterialCost, setOperatingMaterialCost] = useState<number | null>(null);
+  const [operatingCostCategory, setOperatingCostCategory] = useState<number | null>(null);
+  // 1エポックの日数。ランニングコストの「1エポック(n日)あたり」注記に使う。
+  const [costSimulationDays, setCostSimulationDays] = useState<number | null>(null);
   const [isCostLoading, setIsCostLoading] = useState(false);
   // 選択中の施設がインフラ供給施設(効果範囲を持つ)で、効果範囲を3D表示中かどうか。
   // 効果範囲の凡例表示の出し分けに使う。
@@ -416,6 +423,10 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       setEstimatedMaxProduction(null);
       setEstimatedEmployment(null);
       setEstimatedOperatingCost(null);
+      setOperatingWageCost(null);
+      setOperatingMaterialCost(null);
+      setOperatingCostCategory(null);
+      setCostSimulationDays(null);
       return;
     }
     const controller = new AbortController();
@@ -444,10 +455,14 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
           setEstimatedDurationDays(data.estimated_duration_days ?? null);
           setSupplyRatio(data.construction_supply_ratio ?? null);
           setExpectedDurationDays(data.expected_duration_days ?? null);
-          // 生産系の3項目はTYPE_STANDARDのときのみ返るため、未定義なら null にリセットする。
+          // 生産系の項目はTYPE_STANDARDのときのみ返るため、未定義なら null にリセットする。
           setEstimatedMaxProduction(data.estimated_max_production ?? null);
           setEstimatedEmployment(data.estimated_employment ?? null);
           setEstimatedOperatingCost(data.estimated_operating_cost ?? null);
+          setOperatingWageCost(data.operating_wage_cost ?? null);
+          setOperatingMaterialCost(data.operating_material_cost ?? null);
+          setOperatingCostCategory(data.operating_cost_category ?? null);
+          setCostSimulationDays(data.simulation_days ?? null);
         }
       })
       .catch((err) => {
@@ -461,6 +476,10 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
           setEstimatedMaxProduction(null);
           setEstimatedEmployment(null);
           setEstimatedOperatingCost(null);
+          setOperatingWageCost(null);
+          setOperatingMaterialCost(null);
+          setOperatingCostCategory(null);
+          setCostSimulationDays(null);
         }
       })
       .finally(() => {
@@ -659,6 +678,10 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         setEstimatedMaxProduction(data.estimated_max_production ?? null);
         setEstimatedEmployment(data.estimated_employment ?? null);
         setEstimatedOperatingCost(data.estimated_operating_cost ?? null);
+        setOperatingWageCost(data.operating_wage_cost ?? null);
+        setOperatingMaterialCost(data.operating_material_cost ?? null);
+        setOperatingCostCategory(data.operating_cost_category ?? null);
+        setCostSimulationDays(data.simulation_days ?? null);
       })
       .catch((err) => {
         if (!controller.signal.aborted) {
@@ -1548,6 +1571,10 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
           estimatedMaxProduction={estimatedMaxProduction}
           estimatedEmployment={estimatedEmployment}
           estimatedOperatingCost={estimatedOperatingCost}
+          operatingWageCost={operatingWageCost}
+          operatingMaterialCost={operatingMaterialCost}
+          operatingCostCategory={operatingCostCategory}
+          simulationDays={costSimulationDays}
           isCostLoading={isCostLoading}
         />
       )}

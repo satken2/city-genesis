@@ -151,6 +151,36 @@
   line-height: 22px;
 }
 
+/* ランニングコストの内訳行(人件費・原料費)。親行より一段インデントし、色を落とす。 */
+.bc-info-label--sub {
+  padding-left: 12px;
+  font-weight: 400;
+  color: #6f849b;
+}
+
+.bc-info-value--sub {
+  color: #a8b8c8;
+}
+
+/* 支出元予算カテゴリ行(費目アイコン + ラベル)。 */
+.bc-ledger-value {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: inherit;
+}
+
+.bc-ledger-icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+/* ランニングコストの前提注記(1エポックあたり・フル稼働時)。 */
+.bc-running-cost-note {
+  margin-top: 4px;
+}
+
 /* ---- ステッパーセクション ---- */
 .bc-stepper-row {
   display: flex;
