@@ -27,7 +27,20 @@ export type L1Notification = {
   created_date: number;
   params: Record<string, unknown>;
   entity: L1NotificationEntity | null;
+  /**
+   * 重要度。warning=築いた都市が崩壊する差し迫った危機(アイコン点滅+赤バッジ) /
+   * caution=放置しても壊れないが成長が止まる・徐々に荒廃する問題(点滅なしの黄バッジ)。
+   */
+  severity: "warning" | "caution";
 };
+
+/**
+ * caution(注意)通知かどうか。未知の severity(バックエンドが先行して新種を返した場合)は
+ * 安全側に倒して warning 扱いにする(重大な問題を控えめ表示に落とさないため)。
+ */
+export function isCautionNotification(notification: L1Notification): boolean {
+  return notification.severity === "caution";
+}
 
 type NotificationsResponse = {
   notifications: L1Notification[];

@@ -9,8 +9,11 @@
  *   アイコンパネルの地区編集と排他(`hudMode`でウィンドウをまたいで共有)。
  * - 公共サービス充足度: 電力・水道などの需要/供給キャパシティを縦棒で常時表示する。
  *   クリックで公共施設ウィンドウを開く。
- * - アラート: L1通知(今すぐ対処が必要な重大事象)が1件以上あると点滅+件数バッジを出す。
- *   点滅で気づける以上プレイヤーの操作を遮る必要はないため、トーストは出さない。
+ * - アラート: L1通知は重要度2階調で表現する。warning(都市崩壊の差し迫った危機)が
+ *   1件以上あると点滅+赤バッジ、caution(成長停止・緩慢な荒廃系)は点滅させず
+ *   黄バッジのみ出す。緊急でない問題でアイコンが点滅し続けると、本当の危機の
+ *   シグナルが薄まるため。点滅で気づける以上プレイヤーの操作を遮る必要はないため、
+ *   トーストは出さない。
  *
  * BGMの再生と、3Dビューでのオブジェクト選択に応じたウィンドウ表示は、
  * HUDの中で常に1枚だけ存在するこのウィンドウが受け持つ(多重再生・多重オープンを避けるため)。
@@ -26,7 +29,11 @@ import { setHintbarText } from "../../utils/hintbar";
 import { formatEpochDate } from "../../utils/date";
 import { resolveIntlLocale } from "../../utils/locale";
 import { BgmManager } from "../../utils/bgm";
-import { fetchL1Notifications, type L1Notification } from "../../utils/cityNotifications";
+import {
+  fetchL1Notifications,
+  isCautionNotification,
+  type L1Notification,
+} from "../../utils/cityNotifications";
 import { BudgetMiniMeter } from "./BudgetMiniMeter";
 import { PublicServiceGauges } from "./PublicServiceGauges";
 import { ScoreMiniMeter } from "./ScoreMiniMeter";
@@ -161,7 +168,10 @@ export function Cockpit() {
 
   const locale = resolveIntlLocale(i18n.language);
   const formattedDate = currentDate != null ? formatEpochDate(currentDate, locale) : "—";
-  const alertCount = l1Notifications.length;
+  // warning(都市崩壊の危機)だけが点滅+赤バッジを駆動する。caution(成長停止系)は
+  // 点滅しない黄バッジのみで、警告の緊急度シグナルを薄めないようにする。
+  const cautionCount = l1Notifications.filter(isCautionNotification).length;
+  const warningCount = l1Notifications.length - cautionCount;
 
   return (
     <div className={`hud-panel cockpit ${epochExecuting ? "hud-disabled" : ""}`}>
@@ -214,13 +224,16 @@ export function Cockpit() {
 
       <button
         id="notifications"
-        className={`${getBtnClassName("notifications", "hud-icon-btn cockpit-alert")}${alertCount > 0 ? " cockpit-alert--active" : ""}`}
+        className={`${getBtnClassName("notifications", "hud-icon-btn cockpit-alert")}${warningCount > 0 ? " cockpit-alert--active" : ""}`}
         type="button"
         title={t("notifications.trayTooltip")}
         onClick={() => void openRegisteredWindow("city_notifications")}
       >
         <img src={iconUrl("tray_notifications.png")} alt={t("notifications.trayTooltip")} className="hud-icon-img" draggable={false} />
-        {alertCount > 0 && <span className="cockpit-alert-badge">{alertCount}</span>}
+        {warningCount > 0 && <span className="cockpit-alert-badge">{warningCount}</span>}
+        {cautionCount > 0 && (
+          <span className="cockpit-alert-badge cockpit-alert-badge--caution">{cautionCount}</span>
+        )}
       </button>
 
       <button

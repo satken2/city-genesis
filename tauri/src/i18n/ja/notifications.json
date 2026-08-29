@@ -1,9 +1,13 @@
 {
   "notifications": {
-    "trayTooltip": "重大通知",
-    "description": "今すぐ対処が必要な重大な問題の一覧です。行をクリックすると対象の詳細を開きます。",
-    "empty": "現在、対処が必要な重大な問題はありません",
+    "trayTooltip": "都市の通知",
+    "description": "都市の危機（警告）と、放置すると成長が滞る問題（注意）の一覧です。行をクリックすると対象の詳細を開きます。",
+    "empty": "現在、対処が必要な問題はありません",
     "loadFailed": "通知の取得に失敗しました",
+    "sections": {
+      "warning": "警告 — 今すぐ対処が必要",
+      "caution": "注意 — 成長を妨げる問題"
+    },
     "types": {
       "resource_runway": "資源「{{name}}」があと約{{remaining_epochs}}エポックで枯渇する見込みです",
       "resource_depleted": "資源「{{name}}」が枯渇しました",
@@ -12,6 +16,7 @@
       "facility_inoperative_material": "公共施設「{{name}}」が原材料不足で運営できていません",
       "facility_inoperative_high_skill": "公共施設「{{name}}」が専門人材の不足で運営できていません",
       "facility_inoperative_budget": "公共施設「{{name}}」が予算不足で運営を縮小しています",
+      "education_low_enrollment": "教育機関「{{name}}」は学生が集まらず低稼働です（在籍{{enrolled}}人／定員{{max_students}}人）",
       "infra_facility_down": "インフラ施設「{{name}}」が停止しています",
       "infra_disconnected": "{{count}}件の施設がインフラ網に接続されていません",
       "collapse": "{{count}}件の建物・道路が倒壊しました",

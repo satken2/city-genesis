@@ -1,9 +1,13 @@
 {
   "notifications": {
-    "trayTooltip": "重要通知",
-    "description": "需要立即处理的重大问题列表。点击行可打开对应的详情。",
-    "empty": "目前没有需要处理的重大问题",
+    "trayTooltip": "城市通知",
+    "description": "城市危机（警告）与放任不管会阻碍发展的问题（注意）的列表。点击行可打开对应的详情。",
+    "empty": "目前没有需要处理的问题",
     "loadFailed": "通知获取失败",
+    "sections": {
+      "warning": "警告 — 需要立即处理",
+      "caution": "注意 — 阻碍发展的问题"
+    },
     "types": {
       "resource_runway": "资源「{{name}}」预计还有约{{remaining_epochs}}个纪元将枯竭",
       "resource_depleted": "资源「{{name}}」已枯竭",
@@ -12,6 +16,7 @@
       "facility_inoperative_material": "公共设施「{{name}}」因原材料不足而无法运营",
       "facility_inoperative_high_skill": "公共设施「{{name}}」因专业人才不足而无法运营",
       "facility_inoperative_budget": "公共设施「{{name}}」因预算不足而缩减运营",
+      "education_low_enrollment": "教育机构「{{name}}」招不到学生，处于低负荷运转（在读{{enrolled}}人/名额{{max_students}}人）",
       "infra_facility_down": "基础设施「{{name}}」已停止运转",
       "infra_disconnected": "有{{count}}处设施未接入基础设施网络",
       "collapse": "有{{count}}处建筑・道路倒塌",

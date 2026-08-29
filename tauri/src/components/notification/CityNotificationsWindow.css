@@ -24,6 +24,20 @@
   color: #8ba3bb;
 }
 
+/* 重要度セクション(警告/注意)。見出し+行リストの縦積み */
+.city-notifications-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.city-notifications-section-title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #8ba3bb;
+}
+
 .city-notifications-list {
   list-style: none;
   margin: 0;
@@ -49,6 +63,12 @@
   cursor: default;
 }
 
+/* 注意(caution)行は黄系にして、警告の赤系と一目で区別できるようにする */
+.city-notifications-row--caution {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.08);
+}
+
 .city-notifications-row--clickable {
   cursor: pointer;
   transition: background 0.12s;
@@ -56,6 +76,10 @@
 
 .city-notifications-row--clickable:hover {
   background: rgba(239, 68, 68, 0.18);
+}
+
+.city-notifications-row--caution.city-notifications-row--clickable:hover {
+  background: rgba(245, 158, 11, 0.18);
 }
 
 .city-notifications-row-icon {

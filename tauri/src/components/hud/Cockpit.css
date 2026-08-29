@@ -109,7 +109,7 @@
   animation: cockpit-alert-pulse 1.2s infinite ease-in-out;
 }
 
-/* 通知件数バッジ(アイコン右上に重ねる) */
+/* 通知件数バッジ(warning=赤。アイコン右上に重ねる) */
 .cockpit-alert-badge {
   position: absolute;
   top: -3px;
@@ -125,6 +125,17 @@
   line-height: 14px;
   text-align: center;
   pointer-events: none;
+}
+
+/*
+ * caution(注意)件数バッジ。warning の赤バッジと同時に出ることがあるため右下に置き、
+ * 点滅アニメーションの対象にもしない(緊急でない問題で緊急のシグナルを薄めない)。
+ */
+.cockpit-alert-badge--caution {
+  top: auto;
+  bottom: -3px;
+  background: #f59e0b;
+  color: #1c1508;
 }
 
 /* ─── エポック処理開始ボタン ─── */

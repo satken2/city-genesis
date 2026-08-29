@@ -1,9 +1,13 @@
 {
   "notifications": {
-    "trayTooltip": "Critical Alerts",
-    "description": "Critical problems that require immediate attention. Click a row to open its details.",
-    "empty": "No critical problems require attention right now",
+    "trayTooltip": "City Notifications",
+    "description": "Critical threats to the city (warnings) and issues that stall its growth (cautions). Click a row to open its details.",
+    "empty": "No problems require attention right now",
     "loadFailed": "Failed to load notifications",
+    "sections": {
+      "warning": "Warnings — immediate action required",
+      "caution": "Cautions — issues holding back growth"
+    },
     "types": {
       "resource_runway": "Resource \"{{name}}\" is expected to be depleted in about {{remaining_epochs}} epochs",
       "resource_depleted": "Resource \"{{name}}\" has been depleted",
@@ -12,6 +16,7 @@
       "facility_inoperative_material": "Public facility \"{{name}}\" is not operating due to a material shortage",
       "facility_inoperative_high_skill": "Public facility \"{{name}}\" is not operating due to a shortage of skilled staff",
       "facility_inoperative_budget": "Public facility \"{{name}}\" is running at reduced capacity due to a budget shortfall",
+      "education_low_enrollment": "Educational institution \"{{name}}\" is underused — few students are enrolled ({{enrolled}} of {{max_students}} seats)",
       "infra_facility_down": "Infrastructure facility \"{{name}}\" is out of service",
       "infra_disconnected": "{{count}} facilities are disconnected from the infrastructure network",
       "collapse": "{{count}} buildings/roads have collapsed",

@@ -1,9 +1,13 @@
 {
   "notifications": {
-    "trayTooltip": "Alertes critiques",
-    "description": "Liste des problèmes graves nécessitant une action immédiate. Cliquez sur une ligne pour ouvrir le détail concerné.",
-    "empty": "Aucun problème grave ne nécessite d'action pour le moment",
+    "trayTooltip": "Notifications de la ville",
+    "description": "Menaces critiques pour la ville (alertes) et problèmes qui freinent sa croissance (points de vigilance). Cliquez sur une ligne pour ouvrir le détail concerné.",
+    "empty": "Aucun problème ne nécessite d'action pour le moment",
     "loadFailed": "Échec de la récupération des alertes",
+    "sections": {
+      "warning": "Alertes — action immédiate requise",
+      "caution": "Vigilance — freins à la croissance"
+    },
     "types": {
       "resource_runway": "La ressource « {{name}} » devrait être épuisée dans environ {{remaining_epochs}} époques",
       "resource_depleted": "La ressource « {{name}} » est épuisée",
@@ -12,6 +16,7 @@
       "facility_inoperative_material": "L'équipement public « {{name}} » ne fonctionne pas faute de matières premières",
       "facility_inoperative_high_skill": "L'équipement public « {{name}} » ne fonctionne pas faute de personnel qualifié",
       "facility_inoperative_budget": "L'équipement public « {{name}} » tourne au ralenti faute de budget",
+      "education_low_enrollment": "L'établissement d'enseignement « {{name}} » est sous-utilisé — peu d'étudiants inscrits ({{enrolled}} sur {{max_students}} places)",
       "infra_facility_down": "L'installation d'infrastructure « {{name}} » est à l'arrêt",
       "infra_disconnected": "{{count}} installations ne sont pas raccordées au réseau d'infrastructure",
       "collapse": "{{count}} bâtiments ou routes se sont effondrés",

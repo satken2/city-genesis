@@ -1,10 +1,13 @@
 /**
  * 重大通知(L1通知)一覧ウィンドウ
  *
- * コックピットのアラートアイコンをクリックすると開く、現在有効なL1通知
- * (今すぐ対処しないと都市が壊れる重大事象)の一覧。
+ * コックピットのアラートアイコンをクリックすると開く、現在有効なL1通知の一覧。
  * データ源はバックエンドの GET /api/v1/notifications で、エポック末尾の
  * NotificationPhase が毎エポック再構築したリストをそのまま表示する。
+ *
+ * 通知は重要度2階調でセクション分けして表示する:
+ *   - 警告(warning): 築いた都市が崩壊する差し迫った危機。赤系の行
+ *   - 注意(caution): 放置しても壊れないが成長が止まる・徐々に荒廃する問題。黄系の行
  *
  * - 各行は「アイコン + 文言化したメッセージ + 発生日」で構成する
  * - 対象エンティティを持つ通知は行クリックで対応する詳細ウィンドウ
@@ -21,12 +24,14 @@ import { invoke } from "@tauri-apps/api/core";
 import {
   fetchL1Notifications,
   formatL1NotificationMessage,
+  isCautionNotification,
   NOTIFICATION_ENTITY_WINDOW_TYPES,
   type L1Notification,
 } from "../../utils/cityNotifications";
 import { formatEpochDate } from "../../utils/date";
 import { resolveIntlLocale } from "../../utils/locale";
 import crisisIcon from "../../assets/images/ui/crisis.png";
+import infoIcon from "../../assets/images/ui/info.png";
 import "./CityNotificationsWindow.css";
 
 type CityNotificationsWindowProps = {
@@ -71,19 +76,14 @@ export function CityNotificationsWindow({ apiBaseUrl }: CityNotificationsWindowP
     }
   }
 
-  return (
-    <div className="city-notifications-root">
-      <p className="city-notifications-description">{t("notifications.description")}</p>
-
-      {notifications === null ? (
-        <p className="city-notifications-empty">
-          {loadFailed ? t("notifications.loadFailed") : "…"}
-        </p>
-      ) : notifications.length === 0 ? (
-        <p className="city-notifications-empty">{t("notifications.empty")}</p>
-      ) : (
+  /** 通知1グループ(警告 or 注意)をセクション見出し付きで描画する。 */
+  function renderSection(titleKey: string, items: L1Notification[], caution: boolean) {
+    if (items.length === 0) return null;
+    return (
+      <section className="city-notifications-section">
+        <h3 className="city-notifications-section-title">{t(titleKey)}</h3>
         <ul className="city-notifications-list">
-          {notifications.map((notification) => {
+          {items.map((notification) => {
             const clickable =
               notification.entity != null &&
               NOTIFICATION_ENTITY_WINDOW_TYPES[notification.entity.type] != null;
@@ -91,12 +91,12 @@ export function CityNotificationsWindow({ apiBaseUrl }: CityNotificationsWindowP
               <li key={notification.id}>
                 <button
                   type="button"
-                  className={`city-notifications-row${clickable ? " city-notifications-row--clickable" : ""}`}
+                  className={`city-notifications-row${caution ? " city-notifications-row--caution" : ""}${clickable ? " city-notifications-row--clickable" : ""}`}
                   disabled={!clickable}
                   onClick={() => void openEntityDetail(notification)}
                 >
                   <img
-                    src={crisisIcon}
+                    src={caution ? infoIcon : crisisIcon}
                     alt=""
                     className="city-notifications-row-icon"
                     draggable={false}
@@ -112,6 +112,28 @@ export function CityNotificationsWindow({ apiBaseUrl }: CityNotificationsWindowP
             );
           })}
         </ul>
+      </section>
+    );
+  }
+
+  const warnings = (notifications ?? []).filter((n) => !isCautionNotification(n));
+  const cautions = (notifications ?? []).filter(isCautionNotification);
+
+  return (
+    <div className="city-notifications-root">
+      <p className="city-notifications-description">{t("notifications.description")}</p>
+
+      {notifications === null ? (
+        <p className="city-notifications-empty">
+          {loadFailed ? t("notifications.loadFailed") : "…"}
+        </p>
+      ) : notifications.length === 0 ? (
+        <p className="city-notifications-empty">{t("notifications.empty")}</p>
+      ) : (
+        <>
+          {renderSection("notifications.sections.warning", warnings, false)}
+          {renderSection("notifications.sections.caution", cautions, true)}
+        </>
       )}
     </div>
   );
