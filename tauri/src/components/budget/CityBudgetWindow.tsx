@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { setHintbarText } from "../../utils/hintbar";
+import { showNotification } from "../../utils/notification";
 import { resolveLedgerIcon } from "../../utils/ledgerIcon";
 import { STATUS_CONSTRUCTING } from "../../constants";
 import type { BudgetCategoryEntry } from "../../types";
@@ -58,6 +59,21 @@ function rowKey(a: BudgetAgent): string {
  * (100%超は見積もり誤差やエポック中の価格・賃金変動へのヘッドルーム)。
  */
 const RATIO_MAX_PERCENT = 150;
+
+/**
+ * 比率を変えてから自動保存(PATCH)するまでの待ち時間(ms)。
+ * PATCHはバックエンドで予算の再導出とPlanStdPhaseの再実行を伴うため、スライダーのドラッグ中に
+ * 毎ステップ送ると重い。スライダーを離した時点では待たずに送るので、これは
+ * キーボード操作など「離す」操作を伴わない変更のための保険。
+ */
+const AUTO_SAVE_DEBOUNCE_MS = 800;
+
+/** 比率マップが同値か(自動保存の要否判定。キー集合は初期化時に固定されるので値だけ比べる) */
+function ratiosEqual(a: Record<string, number>, b: Record<string, number>): boolean {
+  const keys = Object.keys(a);
+  if (keys.length !== Object.keys(b).length) return false;
+  return keys.every((k) => a[k] === b[k]);
+}
 
 /** 市政府の現預金のエポック末スナップショット1点（バックエンドの reserves_history の要素） */
 type ReservesHistoryPoint = {
@@ -389,13 +405,7 @@ function ChartValueTooltip({
   );
 }
 
-export function CityBudgetWindow({
-  apiBaseUrl,
-  onClose,
-}: {
-  apiBaseUrl: string;
-  onClose: () => void;
-}) {
+export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t, i18n } = useTranslation();
   const masterData = useMasterData();
 
@@ -413,6 +423,15 @@ export function CityBudgetWindow({
   // 予算比率スライダーの表示トグル。既定は非表示(％のワッペンだけを見る閲覧モード)で、
   // 「編集」ボタンを押している間だけ全カードにスライダーが出る。
   const [isEditingRatios, setIsEditingRatios] = useState(false);
+
+  // 自動保存の作業用。savedRatios=サーバが持っている比率(nullはロード完了前)、
+  // latestRatios=画面上の最新値、saveTimer=デバウンス待ちのタイマー、saving=送信中。
+  // 保存中に更に動かされた場合は完了後に最新値で送り直す(応答の追い越しでサーバが
+  // 古い比率のまま終わるのを防ぐ)。
+  const savedRatiosRef = useRef<Record<string, number> | null>(null);
+  const latestRatiosRef = useRef<Record<string, number>>({});
+  const saveTimerRef = useRef<number | null>(null);
+  const savingRef = useRef(false);
 
   useEffect(() => {
     setHintbarText(t("hint.cityBudget"));
@@ -476,6 +495,9 @@ export function CityBudgetWindow({
             );
           }
         }
+        // ロード直後はサーバと同値＝未変更。ここを起点に差分だけを自動保存する。
+        savedRatiosRef.current = ratios;
+        latestRatiosRef.current = ratios;
         setPendingRatios(ratios);
       } catch (err) {
         if (!controller.signal.aborted) {
@@ -502,43 +524,111 @@ export function CityBudgetWindow({
     return visibleCategories[0]?.id ?? 0;
   }, [visibleCategories, activeCategoryId]);
 
-  const handleConfirmBudget = useCallback(async () => {
+  // 遅延実行(デバウンス・アンマウント・保存完了後の追い送り)から常に最新の saveRatios を
+  // 呼ぶための参照。実体は下の effect で差し込む。
+  const saveRatiosRef = useRef<() => void>(() => {});
+
+  /**
+   * 画面上の比率をサーバへ反映する。確定ボタンは持たず、この関数がデバウンス・
+   * スライダーを離した時・編集終了時・ウィンドウを閉じた時に呼ばれる。
+   * 送信は毎回全カテゴリの比率を含む冪等なPATCHなので、取りこぼしても
+   * 次の1回で正しい状態に収束する。
+   */
+  const saveRatios = useCallback(async () => {
+    if (savingRef.current) return; // 進行中の保存の完了時に最新値で呼び直される
+    const ratios = latestRatiosRef.current;
+    const saved = savedRatiosRef.current;
+    if (saved === null || ratiosEqual(saved, ratios)) return;
+
+    savingRef.current = true;
+    savedRatiosRef.current = ratios;
     setIsSaving(true);
+    let ok = false;
     try {
       // 比率(％)を 0〜1.5 の割合に変換して送信する。
       // 実際の予算額と自動調整はバックエンドがフル稼働必要額から導出する。
       // 維持優先度（budget_tiers）は現状UIから編集できないため送信しない
       // （バックエンドの既定値/既存設定がそのまま維持される）。
       const ratioFractions: Record<string, number> = {};
-      for (const [k, pct] of Object.entries(pendingRatios)) {
+      for (const [k, pct] of Object.entries(ratios)) {
         ratioFractions[k] = Math.max(pct, 0) / 100;
       }
-      const res = await fetch(buildApiUrl(apiBaseUrl, "/api/v1/city/budgets"), {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          category_ratio: ratioFractions,
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
-      }
-
-      onClose();
+      const res = await fetchApi<BudgetData>(
+        buildApiUrl(apiBaseUrl, "/api/v1/city/budgets"),
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ category_ratio: ratioFractions }),
+        },
+      );
+      // サーバが再導出した予算枠・実効比率・自動調整フラグで表示を同期する。
+      setBudgetData(res);
+      ok = true;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save");
+      // 送信できなかった分は未保存に戻し、次の操作で再送されるようにする。
+      savedRatiosRef.current = saved;
+      showNotification({
+        message: t("budget.saveFailed", { defaultValue: "予算の保存に失敗しました" }),
+        durationMs: 4000,
+      });
+      console.error("Failed to save budget ratios", err);
     } finally {
+      savingRef.current = false;
       setIsSaving(false);
     }
-  }, [apiBaseUrl, pendingRatios, onClose]);
+    // 送信中に動かされた分を送り直す(失敗時は無限リトライになるので送らない)。
+    if (ok && !ratiosEqual(savedRatiosRef.current ?? {}, latestRatiosRef.current)) {
+      void saveRatiosRef.current();
+    }
+  }, [apiBaseUrl, t]);
+
+  useEffect(() => {
+    saveRatiosRef.current = () => void saveRatios();
+  }, [saveRatios]);
+
+  // 比率が変わったら少し待って自動保存する。連続操作のたびにタイマーを張り直すことで
+  // ドラッグ中の連続PATCHを1回にまとめる。
+  useEffect(() => {
+    latestRatiosRef.current = pendingRatios;
+    if (savedRatiosRef.current === null) return; // 初期ロード完了前
+    if (ratiosEqual(savedRatiosRef.current, pendingRatios)) return;
+    if (saveTimerRef.current !== null) window.clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = window.setTimeout(() => {
+      saveTimerRef.current = null;
+      void saveRatiosRef.current();
+    }, AUTO_SAVE_DEBOUNCE_MS);
+  }, [pendingRatios]);
+
+  /** デバウンスを待たずに即保存する(スライダーを離した・編集を終えた) */
+  const commitRatios = useCallback(() => {
+    if (saveTimerRef.current !== null) {
+      window.clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+    }
+    void saveRatiosRef.current();
+  }, []);
+
+  // アンマウント時の取りこぼし回収。ポップアップウィンドウは×で閉じても非表示になるだけで
+  // ここは走らないため、これは別ウィンドウへ使い回されたときの保険（通常は
+  // スライダーを離した時点で保存済み）。
+  useEffect(
+    () => () => {
+      if (saveTimerRef.current !== null) window.clearTimeout(saveTimerRef.current);
+      void saveRatiosRef.current();
+    },
+    [],
+  );
 
   // プレイヤーの比率入力（％）を更新する。全カテゴリ 0〜150 でクランプ。
+  // latestRatiosRef もここで同時に更新する: スライダーを離した瞬間(onPointerUp)の
+  // commitRatios は、直前の onChange による再レンダリング・effect を待たずに走りうるため。
   const handleRatioChange = useCallback((catId: number, valStr: string) => {
     let pct = parseFloat(valStr);
     if (isNaN(pct) || pct < 0) pct = 0;
     pct = Math.min(pct, RATIO_MAX_PERCENT);
-    setPendingRatios((prev) => ({ ...prev, [String(catId)]: pct }));
+    const next = { ...latestRatiosRef.current, [String(catId)]: pct };
+    latestRatiosRef.current = next;
+    setPendingRatios(next);
   }, []);
 
   // 各カテゴリの維持優先度（Tier）。現状UIからは編集できないため、サーバ設定の読み取り専用。
@@ -748,6 +838,12 @@ export function CityBudgetWindow({
             <h3 className="budget-window__section-title">
               {t("budget.allocationTitle", { defaultValue: "予算配分" })}
             </h3>
+            {/* 自動保存の送信中表示。確定ボタンが無いので、送信が走ったことはここでしか分からない。 */}
+            {isSaving && (
+              <span className="budget-window__saving-note">
+                {t("budget.autoSaving", { defaultValue: "保存中..." })}
+              </span>
+            )}
             <button
               type="button"
               className={[
@@ -757,7 +853,10 @@ export function CityBudgetWindow({
                 .filter(Boolean)
                 .join(" ")}
               aria-pressed={isEditingRatios}
-              onClick={() => setIsEditingRatios((prev) => !prev)}
+              onClick={() => {
+                setIsEditingRatios((prev) => !prev);
+                commitRatios(); // 編集を終える操作でデバウンス待ちを打ち切って確定させる
+              }}
             >
               {isEditingRatios
                 ? t("budget.editRatiosDone", { defaultValue: "編集を終える" })
@@ -820,6 +919,9 @@ export function CityBudgetWindow({
                                   onChange={(e) => handleRatioChange(catId, e.target.value)}
                                   className="budget-category-card__slider"
                                   onClick={(e) => e.stopPropagation()}
+                                  /* つまみを離した時点が「確定」。デバウンスを待たずに送る。 */
+                                  onPointerUp={commitRatios}
+                                  onBlur={commitRatios}
                                 />
                               </div>
                             )}
@@ -1069,18 +1171,6 @@ export function CityBudgetWindow({
           </div>
         </div>
 
-      </div>
-
-      {/* フッター */}
-      <div className="budget-window__footer">
-        <button
-          className="budget-window__confirm-btn"
-          onClick={handleConfirmBudget}
-          disabled={isSaving}
-          type="button"
-        >
-          {isSaving ? t("budget.confirming") : t("budget.confirmBudget")}
-        </button>
       </div>
     </div>
   );

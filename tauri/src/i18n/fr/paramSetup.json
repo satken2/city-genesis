@@ -362,6 +362,7 @@
     "languageNote": "* Ce choix ne pourra plus être modifié",
     "simulationDaysLabel": "Jours de simulation",
     "simulationDaysNote": "* Ce choix ne pourra plus être modifié",
+    "daysOption": "{{days}} jours",
     "startButton": "Démarrer",
     "backButton": "Retour",
     "tutorialBadge": "Tutoriel",

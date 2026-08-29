@@ -27,7 +27,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { loadAppSettings } from "../../utils/settings";
-import { SUPPORTED_LANGUAGES } from "../../utils/locale";
+import { SUPPORTED_LANGUAGES, resolveSupportedLanguage } from "../../utils/locale";
 import { TUTORIAL_SCENARIOS } from "../tutorial/tutorialSteps";
 import { TerrainMapThumbnail } from "../common/TerrainMapThumbnail";
 import "./NewGameWindow.css";
@@ -222,14 +222,15 @@ export function NewGameWindow({
   const handleStartTerrain = useCallback(
     async (mapId: string) => {
       const settings = await loadAppSettings();
+      const defaultLang = resolveSupportedLanguage(settings.language || i18n.language);
       setCityName("");
-      setLanguage(settings.language || i18n.language);
+      setLanguage(defaultLang);
       setSimulationDays(30);
       setConfirmSelection({
         terrainId: mapId,
         templateId: null,
         defaultCityName: "",
-        defaultLanguage: settings.language || i18n.language,
+        defaultLanguage: defaultLang,
         defaultSimulationDays: 30,
         isTutorial: false,
         tutorialId: null,
@@ -245,7 +246,9 @@ export function NewGameWindow({
   const handleStartTemplate = useCallback(
     async (template: TemplateEntry) => {
       const settings = await loadAppSettings();
-      const defaultLang = template.language || settings.language || i18n.language;
+      const defaultLang = resolveSupportedLanguage(
+        template.language || settings.language || i18n.language
+      );
       const defaultDays = template.simulation_days || 30;
       setCityName(template.city_name || "");
       setLanguage(defaultLang);
@@ -281,7 +284,7 @@ export function NewGameWindow({
       return;
     }
     const settings = await loadAppSettings();
-    const defaultLang = settings.language || i18n.language;
+    const defaultLang = resolveSupportedLanguage(settings.language || i18n.language);
     setCityName("");
     setLanguage(defaultLang);
     setSimulationDays(30);
@@ -432,18 +435,19 @@ export function NewGameWindow({
             <label className="new-game-confirm-label">
               {t("newGame.languageLabel")}
             </label>
-            <div className="new-game-confirm-language">
-              {AVAILABLE_LANGUAGES.map((lang) => (
-                <button
-                  key={lang}
-                  className={`new-game-confirm-lang-btn ${language === lang ? "active" : ""}`}
-                  onClick={() => setLanguage(lang)}
-                  disabled={busy}
-                  type="button"
-                >
-                  {t(`settings.language.${lang}`)}
-                </button>
-              ))}
+            <div className="new-game-confirm-select-wrap">
+              <select
+                className="new-game-confirm-select"
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                disabled={busy}
+              >
+                {AVAILABLE_LANGUAGES.map((lang) => (
+                  <option key={lang} value={lang}>
+                    {t(`settings.language.${lang}`)}
+                  </option>
+                ))}
+              </select>
             </div>
             <span className="new-game-confirm-note">{t("newGame.languageNote")}</span>
           </div>
@@ -462,7 +466,7 @@ export function NewGameWindow({
                   disabled={busy}
                   type="button"
                 >
-                  {t(`newGame.days${days}`)}
+                  {t("newGame.daysOption", { days })}
                 </button>
               ))}
             </div>

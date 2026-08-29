@@ -362,6 +362,7 @@
     "languageNote": "※나중에 변경할 수 없습니다",
     "simulationDaysLabel": "시뮬레이션 일수",
     "simulationDaysNote": "※나중에 변경할 수 없습니다",
+    "daysOption": "{{days}}일",
     "startButton": "시작",
     "backButton": "뒤로",
     "tutorialBadge": "튜토리얼",

@@ -362,6 +362,7 @@
     "languageNote": "※後から変更することはできません",
     "simulationDaysLabel": "シミュレーション日数",
     "simulationDaysNote": "※後から変更することはできません",
+    "daysOption": "{{days}}日",
     "startButton": "開始",
     "backButton": "戻る",
     "tutorialBadge": "チュートリアル",

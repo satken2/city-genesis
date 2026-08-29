@@ -268,6 +268,10 @@ export type AgentData = {
   education_type?: Record<string, any>;
   /** この学校に在籍している市民のリスト */
   students?: RefItem[];
+  /** 延床面積から算出される総定員（人）。教育施設のみ */
+  max_students?: number;
+  /** スキル別の在籍者数（スキルID→人数）。教育施設のみ (サーバーサイドで計算されるフィールド。型は動的。) */
+  enrolled_by_skill?: any;
 };
 
 export type PathSummary = {

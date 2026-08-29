@@ -440,7 +440,7 @@ function App() {
             ) : context.window_type === "parcel_creation" ? (
               <ParcelCreationPanel apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "city_budget" ? (
-              <CityBudgetWindow apiBaseUrl={context.api_base_url} onClose={closeWindow} />
+              <CityBudgetWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "public_facilities" ? (
               <PublicFacilitiesWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "transit_management" ? (

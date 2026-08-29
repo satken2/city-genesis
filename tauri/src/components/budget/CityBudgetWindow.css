@@ -83,6 +83,13 @@
   flex-shrink: 0;
 }
 
+/* 自動保存の送信中表示。編集トグルの左隣に控えめに出す。 */
+.budget-window__saving-note {
+  margin-left: auto;
+  font-size: 0.65rem;
+  color: #64748b;
+}
+
 /* 予算スライダーの表示トグル。OFFの間はワッペンの％だけを見る閲覧モードになる。 */
 .budget-window__edit-btn {
   padding: 3px 12px;
@@ -519,41 +526,6 @@
   text-align: center;
   color: #64748b;
   font-style: italic;
-}
-
-/* フッター */
-.budget-window__footer {
-  display: flex;
-  justify-content: flex-end;
-  padding: 12px 20px;
-  background: rgba(30, 41, 59, 0.4);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.budget-window__confirm-btn {
-  padding: 10px 28px;
-  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.budget-window__confirm-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(14, 165, 233, 0.35);
-  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
-}
-
-.budget-window__confirm-btn:disabled {
-  opacity: 0.5;
-  background: #334155;
-  cursor: not-allowed;
-  box-shadow: none;
 }
 
 /* 読み込み/エラー状態 */

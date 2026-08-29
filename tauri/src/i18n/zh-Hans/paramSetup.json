@@ -362,6 +362,7 @@
     "languageNote": "※之后无法更改",
     "simulationDaysLabel": "模拟天数",
     "simulationDaysNote": "※之后无法更改",
+    "daysOption": "{{days}}天",
     "startButton": "开始",
     "backButton": "返回",
     "tutorialBadge": "新手教程",
