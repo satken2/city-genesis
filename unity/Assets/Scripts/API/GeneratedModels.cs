@@ -283,6 +283,10 @@ namespace GeneratedModels
         public Dictionary<string, object> education_type;
         /// <summary>この学校に在籍している市民のリスト</summary>
         public List<RefItem> students;
+        /// <summary>延床面積から算出される総定員（人）。教育施設のみ</summary>
+        public int? max_students;
+        /// <summary>スキル別の在籍者数（スキルID→人数）。教育施設のみ サーバーサイドで計算されるフィールド。型は動的。</summary>
+        public object enrolled_by_skill;
     }
 
     [Serializable]
