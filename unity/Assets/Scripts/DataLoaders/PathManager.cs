@@ -1884,7 +1884,7 @@ public class PathManager : BaseApiDataManager
 
     /// <summary>
     /// MeshRendererに設定されたマテリアルのシェーダーを、Z-fighting防止用の
-    /// Custom/DepthOffsetSimpleLit に変更する。
+    /// Custom/DepthOffsetLit に変更する。
     /// materialプロパティを介してインスタンスをクローンし、元のアセットには影響を与えない。
     /// </summary>
     private static void ApplyDepthOffsetShader(MeshRenderer renderer)

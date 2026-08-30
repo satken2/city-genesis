@@ -159,7 +159,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
             buildingColorMaterial = Resources.Load<Material>("BuildingColorMaterial");
         }
         // Resourcesにも無い場合はフォールバックとしてBuildingMaterialを使用する。
-        // BuildingMaterialはDepthOffsetSimpleLitシェーダを使用しているため、
+        // BuildingMaterialはDepthOffsetLitシェーダを使用しているため、
         // 建物と同じZ-fighting対策が適用される。
         if (buildingColorMaterial == null)
         {

@@ -146,7 +146,7 @@ per-cellタイル（Far / Near / Dynamic）は、ベースY（`AttachTerrainTile
 
 | 描画対象 | シェーダー | Offset | 役割 |
 | --- | --- | --- | --- |
-| 建物・道路・フェンス等 | `Custom/DepthOffsetSimpleLit` | `-1, -1` | 地形より手前 |
+| 建物・道路・フェンス等 | `Custom/DepthOffsetLit` | `-1, -1` | 地形より手前 |
 | 海面・水面（湖など） | `Custom/DepthOffsetLit` | `-1, -1` | 地形より手前（水面が水底を覆う） |
 | 地形（Far/Near/Dynamicのper-cellタイル） | `Custom/DepthOffsetTerrainLit` | `1, 1` | per-cell地形 |
 | 超遠景陸地メッシュ（UltraFar） | `Custom/DepthOffsetSimpleLitFar` | `4, 4` | 最奥 |

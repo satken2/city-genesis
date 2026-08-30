@@ -23,6 +23,6 @@
 | `WindowUtil.cs` | ウィンドウ操作 |
 
 `Utils.cs`(Scripts直下)にも以下の汎用処理がある:
-- `ApplyDepthOffsetShader(MeshRenderer, contextName)` ... DepthOffsetSimpleLitシェーダーを一括適用(キャッシュ付き)。PathManager / BuildingManager から使用。
+- `ApplyDepthOffsetShader(MeshRenderer, contextName)` ... DepthOffsetLitシェーダー(URP Litベース+Offset -1,-1のZ-fighting対策バリアント)を一括適用(キャッシュ付き)。PathManager / BuildingManager から使用。
 - `DestroyObjectAfterFrames(MonoBehaviour, GameObject)` ... 2フレーム遅延でオブジェクト破棄(ポッピング防止)。各マネージャーから使用。
 - `CalculateAverageWidth(List<float>)` ... 幅リストの平均値を計算。歩道コネクタ等で使用。

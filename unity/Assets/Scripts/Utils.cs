@@ -174,13 +174,13 @@ public static class Utils
 
         if (cachedDepthOffsetShader == null)
         {
-            cachedDepthOffsetShader = Shader.Find("Custom/DepthOffsetSimpleLit");
+            cachedDepthOffsetShader = Shader.Find("Custom/DepthOffsetLit");
         }
         Shader offsetShader = cachedDepthOffsetShader;
         if (offsetShader == null)
         {
             string prefix = string.IsNullOrEmpty(contextName) ? "" : contextName + ": ";
-            Debug.LogWarning($"{prefix}Custom/DepthOffsetSimpleLit shader not found");
+            Debug.LogWarning($"{prefix}Custom/DepthOffsetLit shader not found");
             return;
         }
 

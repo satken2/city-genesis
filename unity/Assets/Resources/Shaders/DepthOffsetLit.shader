@@ -2,7 +2,9 @@
 // ForwardLit / GBuffer の両パスに "Offset -1, -1" を付与し、
 // このシェーダーを使うオブジェクトを同一深度の地形よりも手前(カメラ側)に描画する。
 //
-// 用途: 海面など、地形の標高0と同じワールドYに貼る平面オブジェクト。
+// 用途: 海面など地形の標高0と同じワールドYに貼る平面オブジェクトのほか、
+//   建物・道路のメッシュにも Utils.ApplyDepthOffsetShader が実行時に一括適用する
+//   (PBRライティングを保ったままZ-fightingを防ぐため)。
 //   - 地形シェーダー (Custom/DepthOffsetTerrainLit) は "Offset 1, 1" で遠ざけられる。
 //   - 本シェーダーは "Offset -1, -1" で手前に寄せる。
 //   - この差(2,2)により、Far/Near/Dynamicいずれのティアでも海面のZ-fightingが解消される。
