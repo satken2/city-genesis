@@ -49,6 +49,7 @@
 - `Assets/Resources/Models` ... 上記と同一相対パスのラッパープレハブ。ランタイム(`Utils/ModelManager`)が `"Models/Buildings/{型}/{variant}/{パーツ}"` の文字列パスで `Resources.Load` するために必要。
 - **このミラーは手動で維持しない。** `Assets/Models` にFBXを追加・移動すると、エディタ拡張(`Assets/Editor/ModelPrefabGenerator.cs`)が対応プレハブを自動生成する。一括同期はメニュー `Tools/Model Prefabs/Sync All`、FBXの削除・移動で孤児化したプレハブは `Tools/Model Prefabs/Delete Orphans` で削除する(自動削除はしない)。
 - 自動生成されるプレハブはFBXをオーバーライドなしで包む純粋なラッパー。プレハブ側にコンポーネント追加やマテリアル差し替え等の手動編集を行った場合、同期ツールはそのプレハブを上書きせずスキップして警告する。
+- **`Assets/Models` 配下のモデルは Read/Write Enabled(`ModelImporter.isReadable`)が必須。** ランタイムのメッシュ生成はパーツの頂点を読み出して配置行列を焼き込むため(`ModularBodyBuilder.BuildWallRun` / `BuildingMeshUtils.CombineModuleMeshes` / Dreamteck SplineMesh)、無効だと頂点が取れずエラーログだけ出して**そのパーツが無言で消える**(屋根・地面パネルはマテリアルしか使わないので残り、「壁だけ描画されない」という部分欠けになる)。Unityの既定値は無効なので、エディタ拡張(`Assets/Editor/ModelImportSettings.cs`)がインポート時に一律有効化する。既存アセットの一括修正はメニュー `Tools/Models/Enable Read-Write (Assets/Models)`、確認だけなら `Tools/Models/List Non-Readable Models`。
 
 # アーキテクチャの要点(まずこれを把握する)
 
