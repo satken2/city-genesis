@@ -39,6 +39,21 @@ agents:
     prebuilt: true
     variants:
       - 0
+  1051:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  1052:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1053:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
   1054:
     model: true
     prebuilt: false
@@ -74,7 +89,17 @@ agents:
     prebuilt: true
     variants:
       - 0
+  2000:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
   2001:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  2006:
     model: true
     prebuilt: false
     variants:
@@ -89,7 +114,22 @@ agents:
     prebuilt: false
     variants:
       - 0
+  2010:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
   2012:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  2014:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  2015:
     model: true
     prebuilt: false
     variants:
