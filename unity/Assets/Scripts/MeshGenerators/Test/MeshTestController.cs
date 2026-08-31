@@ -155,7 +155,7 @@ public class MeshTestController : MonoBehaviour
         // テストでは底面ポリゴンをそのまま土地区画とみなす。
         if (modelType == Constants.MODEL_MASHUP)
         {
-            buildingData.sub_buildings = TestSubBuildingLayout.Generate(variant, ToVector2Polygon(polygonCoords));
+            buildingData.sub_buildings = TestSubBuildingLayout.Generate(variant, ToVector2Polygon(polygonCoords), floors);
             if (buildingData.sub_buildings == null)
             {
                 Debug.LogWarning($"[MeshTest] variant={variant} は subbuilding_master に棟定義が無いため、サブ建物なしで生成します。");

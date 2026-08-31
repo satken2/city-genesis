@@ -49,8 +49,10 @@ public static class TestSubBuildingLayout
     /// 各棟の最低配置数(min_count)を充足 →
     /// 充填率が FILL_RATIO に達するまで weight(棟数比)÷(配置済み棟数+1) が最大の棟を
     /// 1棟ずつ追加する(D'Hondt方式。max_count 超過・収まらない棟は候補から外れる)。
-    /// 棟数の構成は決定論で、位置と階数だけがランダム。同じ棟種の2棟目以降は
+    /// 棟数の構成は決定論で、位置だけがランダム。同じ棟種の2棟目以降は
     /// 既存の同種棟に隣接する位置を優先する(クラスタリング)。
+    /// 棟の階数は親建物の floors を棟定義の min_floors〜max_floors でクランプして導出する
+    /// (バックエンドでは配信時の _attach_sub_buildings が同じ導出を行う)。
     ///
     /// Returns:
     ///     subbuilding_master に棟定義が無いバリアント・マスター未初期化は null(=通常の1棟建物)。
@@ -58,7 +60,8 @@ public static class TestSubBuildingLayout
     /// </summary>
     /// <param name="variant">建物バリアント</param>
     /// <param name="parcelPolygon">土地区画とみなすポリゴン(中心原点のローカルXZ座標)</param>
-    public static List<SubBuildingPlacement> Generate(int variant, Vector2[] parcelPolygon)
+    /// <param name="parentFloors">親建物の階数(棟ごとの階数の導出元)</param>
+    public static List<SubBuildingPlacement> Generate(int variant, Vector2[] parcelPolygon, int parentFloors)
     {
         if (MasterDataStore.Instance == null || !MasterDataStore.Instance.IsInitialized)
         {
@@ -97,6 +100,7 @@ public static class TestSubBuildingLayout
         {
             Grid = grid,
             AgentFloorHeight = agentFloorHeight,
+            ParentFloors = Mathf.Max(1, parentFloors),
         };
         foreach (var kvp in subs)
         {
@@ -172,6 +176,7 @@ public static class TestSubBuildingLayout
     {
         public MashupGrid Grid;
         public float? AgentFloorHeight;
+        public int ParentFloors;    // 親建物の階数(棟ごとの floors 導出元)
         public HashSet<(int i, int j)> Occupied = new HashSet<(int i, int j)>();
         public List<SubBuildingPlacement> Placements = new List<SubBuildingPlacement>();
         public Dictionary<int, int> Counts = new Dictionary<int, int>();                                  // 棟種→配置済み棟数
@@ -262,6 +267,7 @@ public static class TestSubBuildingLayout
         }
 
         Vector2 blockCenter = BlockCenter(grid, chosen.anchor.i, chosen.anchor.j, chosen.w, chosen.h);
+        // 棟の階数 = 親建物の floors を棟定義の階数範囲でクランプ(配信時導出と同じ規約)
         int minFloors = Mathf.Max(1, sub.Value.min_floors ?? 1);
         int maxFloors = Mathf.Max(minFloors, sub.Value.max_floors ?? minFloors);
         state.Placements.Add(new SubBuildingPlacement
@@ -271,7 +277,7 @@ public static class TestSubBuildingLayout
             // ポリゴンは区画中心原点のローカル座標なので、ブロック中心がそのまま相対positionになる
             position = new[] { blockCenter.x, blockCenter.y },
             rotation = grid.Angle + (chosen.rotated ? 90f : 0f),
-            floors = Random.Range(minFloors, maxFloors + 1),
+            floors = Mathf.Clamp(state.ParentFloors, minFloors, maxFloors),
             height_per_floor = sub.Value.height_per_floor ?? state.AgentFloorHeight,
         });
         return true;

@@ -4,7 +4,8 @@
  * window_type="mashup_edit" のポップアップウィンドウで表示する専用パネル。
  * マッシュアップ建物(MODEL_MASHUP)を構成するサブ建物(校舎・体育館などの棟)の配置を
  * 2Dキャンバス上で編集する。経済状態に影響しない見た目の編集のため、建物の status を
- * 問わずいつでも開ける。
+ * 問わずいつでも開ける。棟の階数はここでは編集できない(親建物の floors を棟定義の
+ * 階数範囲でクランプした値をバックエンドが配信時に導出する)。
  *
  * 画面構成:
  *   - 上部: 配置可能なサブ建物のカード一覧。底面矩形は敷地キャンバスと同じ縮尺(実サイズ)で描く
@@ -36,14 +37,16 @@ import { useMasterData } from "../../contexts/MasterDataContext";
 import { MASHUP_CELL_SIZE } from "../../constants";
 import "./MashupEditPanel.css";
 
-/** サブ建物1棟分の配置エントリ(GET/PUT /buildings/{id}/sub-buildings の形式) */
+/**
+ * サブ建物1棟分の配置エントリ(GET/PUT /buildings/{id}/sub-buildings の形式)。
+ * 棟の階数は編集対象外(親建物の floors からバックエンドが配信時に導出する)。
+ */
 type SubBuildingPlacement = {
   subbuilding_id: number;
   /** 建物中心基準の相対XZ座標 [x, z] */
   position: number[];
   /** XZ平面の回転角(度・+X基準の反時計回り) */
   rotation: number;
-  floors: number;
 };
 
 /** キャンバスのドラッグ操作の状態 */
@@ -198,13 +201,12 @@ export function MashupEditPanel({ apiBaseUrl, initialEntityId, onClose }: Mashup
         setCenterPoint(parcelRes.center_point);
         const facade = parcelRes.facade_edge_index;
         setFacadeEdgeIndex(Array.isArray(facade) ? facade : facade != null ? [facade] : []);
-        // 配信エントリには model_prefix 等の解決済みフィールドが含まれるため、編集対象の4項目だけを持つ
+        // 配信エントリには model_prefix 等の解決済みフィールドが含まれるため、編集対象の3項目だけを持つ
         setPlacements(
           (subRes.sub_buildings ?? []).map((p) => ({
             subbuilding_id: p.subbuilding_id,
             position: [p.position[0], p.position[1]],
             rotation: p.rotation ?? 0,
-            floors: p.floors ?? 1,
           })),
         );
         setIsLoaded(true);
@@ -373,13 +375,11 @@ export function MashupEditPanel({ apiBaseUrl, initialEntityId, onClose }: Mashup
 
     // 新規配置ドラッグ中のゴースト
     if (drag?.kind === "new" && drag.world) {
-      const entry = subbuildingById.get(drag.subbuildingId);
       drawPlacement(
         {
           subbuilding_id: drag.subbuildingId,
           position: [drag.world[0] - centerPoint[0], drag.world[1] - centerPoint[1]],
           rotation: 0,
-          floors: entry?.min_floors ?? 1,
         },
         { ghost: true },
       );
@@ -514,14 +514,12 @@ export function MashupEditPanel({ apiBaseUrl, initialEntityId, onClose }: Mashup
       const world = eventToWorld(e.clientX, e.clientY);
       setDrag(null);
       if (world && centerPoint) {
-        const entry = subbuildingById.get(drag.subbuildingId);
         setPlacements((prev) => [
           ...prev,
           {
             subbuilding_id: drag.subbuildingId,
             position: [world[0] - centerPoint[0], world[1] - centerPoint[1]],
             rotation: 0,
-            floors: entry?.min_floors ?? 1,
           },
         ]);
         setSelectedIndex(placements.length);
@@ -534,7 +532,7 @@ export function MashupEditPanel({ apiBaseUrl, initialEntityId, onClose }: Mashup
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
     };
-  }, [drag, eventToWorld, centerPoint, subbuildingById, placements.length]);
+  }, [drag, eventToWorld, centerPoint, placements.length]);
 
   /* ---- 選択中の棟の削除(Delete キー / ボタン) ---- */
 
@@ -573,7 +571,6 @@ export function MashupEditPanel({ apiBaseUrl, initialEntityId, onClose }: Mashup
             subbuilding_id: p.subbuilding_id,
             position: p.position,
             rotation: p.rotation,
-            floors: p.floors,
           })),
         }),
       });
