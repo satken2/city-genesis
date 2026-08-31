@@ -99,6 +99,8 @@ agents:
     prebuilt: false
     variants:
       - 0
+      - 400
+      - 700
   2006:
     model: true
     prebuilt: false
