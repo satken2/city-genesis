@@ -82,7 +82,7 @@ Offset  8: Ring buffer data (8184 bytes)
 | `input:query_modes`             | `ui -> graphic`  | デバッグ用: 各オブジェクト種別の入力/表示モードを問い合わせる       |
 | `input:current_modes`           | `graphic -> ui`  | `input:query_modes`への応答、現在の入力/表示モード情報を返す      |
 | `edit_parcel:select_point`      | `graphic -> ui`  | 土地区画作成モードにおいて、3Dビュー上の地点がクリックされた       |
-| `edit_parcel:select_path`       | `graphic -> ui`  | 土地区画作成モードにおいて、パスが選択された                |
+| `edit_parcel:select_path`       | `graphic -> ui`  | 土地区画作成モードにおいて、パスが選択された（`path_id`, `position`）。`position` はクリック地点をパス中心線へ射影した `[x, y, z]` で、作成範囲が「クリック地点」のときに「どこに区画を作るか」のアンカーになる（「パス全体」のときは使われない）。射影はUnity側でも行う＝3Dビューに出すマーカーの位置とバックエンドが作る位置を一致させるため |
 | `edit_parcel:select_parcel`     | `graphic -> ui`  | 土地区画作成モードにおいて、既存土地区画が選択された            |
 | `edit_parcel:set_mode`          | `graphic -> ui`  | 土地区画作成モードにおいて、3DビューのCtrlラジアルメニューで作成方法（`mode`＝`empty_area` / `along_path` / `tile` / `random` / `block` / `manual` / `split_rectangle` / `split_random`）が切り替わった。**作成方法の真実源はUnity側**で、UIの作成パネルはこれを受けて入力欄の構成と選択済み表示を合わせる。**現在と同じ `mode` で届いた場合は「選択のリセット」**（3DビューでEscを押した／同じ方法を選び直した）を意味し、パネルは選択状態だけを捨てて幅・奥行き等の入力値は保持する。パネルのタイルから切り替えたときは `world:change_state` で依頼するためこのイベントは返らない |
 | `edit_parcel:reset_selection`   | `ui -> graphic`  | 土地区画作成モードにおいて、作成方法は維持したまま3Dビュー側の選択・プレビュー・描きかけのポリゴンだけを捨てる。UIが作成を確定した直後と「クリア」ボタンで送る。**確定してもモードから抜けないため**、ユーザーはパネルへ戻らずそのまま3Dビューをクリックして連続作成できる。確定・クリアのボタンはパネル側にありフォーカスがパネルへ移っているので、Unityは受信時に自分のウィンドウを前面へ戻す |

@@ -77,8 +77,13 @@
     "side": "Position",
     "sideLeft": "Côté gauche",
     "sideRight": "Côté droit",
+    "alongPathScope": "Étendue",
+    "alongPathScopeWhole": "Voie entière",
+    "alongPathScopeSpot": "Point cliqué",
+    "alongPathCount": "Parcelles",
     "selectPoint": "Sélectionnez un point",
     "selectPath": "Sélectionnez une voie",
+    "selectPathSpot": "Cliquez sur la voie à l'endroit voulu",
     "selectParcel": "Sélectionnez une parcelle",
     "previewLoading": "Chargement de l'aperçu...",
     "previewSendFailed": "Impossible d'envoyer l'aperçu à la vue 3D (trop de parcelles). Réduisez la zone de recherche ou augmentez la superficie moyenne",
@@ -95,6 +100,7 @@
     "unitSqm": "m²",
     "unitMeter": "m",
     "unitDegree": "°",
-    "unitPercent": "%"
+    "unitPercent": "%",
+    "unitCount": ""
   }
 }

@@ -77,8 +77,13 @@
     "side": "Side",
     "sideLeft": "Left",
     "sideRight": "Right",
+    "alongPathScope": "Extent",
+    "alongPathScopeWhole": "Whole path",
+    "alongPathScopeSpot": "Clicked spot",
+    "alongPathCount": "Parcels",
     "selectPoint": "Click a point in the 3D view",
     "selectPath": "Select a path in the 3D view",
+    "selectPathSpot": "Click the road where you want the parcels",
     "selectParcel": "Select a parcel in the 3D view",
     "previewLoading": "Loading preview...",
     "previewSendFailed": "Could not send the preview to the 3D view (too many parcels). Narrow the search extent or raise the average area.",
@@ -95,6 +100,7 @@
     "unitSqm": "m²",
     "unitMeter": "m",
     "unitDegree": "°",
-    "unitPercent": "%"
+    "unitPercent": "%",
+    "unitCount": ""
   }
 }

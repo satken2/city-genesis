@@ -61,7 +61,7 @@ public class ParcelEditorManager : MonoBehaviour
         new ModeInfo { Id = "empty_area", Label = "単一区画", IconName = "parcel-single",
             Hint = "地点をクリック / ドラッグで角度", Kind = SelectionKind.Point, Preset = InputModePreset.PARCEL_CREATION_POINT },
         new ModeInfo { Id = "along_path", Label = "道路沿いに作成", IconName = "parcel-along-path",
-            Hint = "道路をクリック", Kind = SelectionKind.Path, Preset = InputModePreset.PARCEL_CREATION_PATH },
+            Hint = "区画を作る位置の道路をクリック", Kind = SelectionKind.Path, Preset = InputModePreset.PARCEL_CREATION_PATH },
         new ModeInfo { Id = "tile", Label = "タイル状", IconName = "parcel-tile",
             Hint = "地点をクリック / ドラッグで角度", Kind = SelectionKind.Point, Preset = InputModePreset.PARCEL_CREATION_POINT },
         new ModeInfo { Id = "random", Label = "ランダム", IconName = "parcel-random",
@@ -107,6 +107,19 @@ public class ParcelEditorManager : MonoBehaviour
     private int selectedParcelId = -1;
     private int selectedPathId = -1;
 
+    // along_path で選ばれた道路上のアンカー(クリック地点を中心線へ射影した点)。
+    // 作成範囲が「クリック地点」のとき、UIがどこに区画を作るかの基準になる。
+    private Vector3? selectedPathAnchor;
+    private Vector3 selectedPathAnchorTangent = Vector3.forward;
+
+    // アンカーマーカー用のオーバーレイ(PathTopologyEditManager の分割点マーカーと同型)。
+    private OverlayMeshRenderer anchorOverlayRenderer;
+    private GameObject anchorOverlayObj;
+
+    // アンカーマーカーの色と、道路を横切る棒の長さ(m)。
+    private static readonly Color AnchorMarkerColor = new Color(0.30f, 1.00f, 0.45f);
+    private const float AnchorMarkerHalfLength = 8f;
+
     // 選択された区画のプレビューデータ
     private List<Vector3> previewBlockOutline = new List<Vector3>();
     private List<List<Vector3>> previewParcels = new List<List<Vector3>>();
@@ -136,6 +149,7 @@ public class ParcelEditorManager : MonoBehaviour
     private void OnDestroy()
     {
         if (Instance == this) Instance = null;
+        if (anchorOverlayObj != null) Destroy(anchorOverlayObj);
     }
 
     void Start()
@@ -177,6 +191,53 @@ public class ParcelEditorManager : MonoBehaviour
         // 注：各種HandleXXXSelection関数はInputHandlerシステムから呼び出される形に修正
         // 実際の選択処理は各InputHandlerクラスで実行されるため、
         // ここでは特別な処理は不要
+    }
+
+    void LateUpdate()
+    {
+        DrawPathAnchorMarker();
+    }
+
+    /// <summary>
+    /// 道路沿い作成で選んだアンカー（クリック地点）に、道路を横切る棒と円のマーカーを描く。
+    /// アンカーが無いフレームでも空フレームを描いてマーカーを消す必要があるため、
+    /// オーバーレイを作ったあとは毎フレーム通す。
+    /// </summary>
+    private void DrawPathAnchorMarker()
+    {
+        if (anchorOverlayRenderer == null) return;
+        if (gameCamera == null) gameCamera = Camera.main;
+        if (gameCamera == null) return;
+
+        anchorOverlayRenderer.BeginFrame();
+
+        if (isActive && CurrentModeInfo.Kind == SelectionKind.Path && selectedPathAnchor.HasValue)
+        {
+            Vector3 anchor = selectedPathAnchor.Value + Vector3.up * 0.3f;
+            Vector3 normal = new Vector3(-selectedPathAnchorTangent.z, 0f, selectedPathAnchorTangent.x);
+            anchorOverlayRenderer.AddSolidLine(
+                anchor - normal * AnchorMarkerHalfLength,
+                anchor + normal * AnchorMarkerHalfLength,
+                AnchorMarkerColor, 3f);
+            anchorOverlayRenderer.AddCircle(anchor, 9f, AnchorMarkerColor);
+        }
+
+        anchorOverlayRenderer.EndFrame(gameCamera);
+    }
+
+    /// <summary>
+    /// アンカーマーカー用のオーバーレイを用意する。道路面や起伏に埋もれないよう
+    /// 深度テストを無効化する（RoadPlanManager のギズモと同じ扱い）。
+    /// </summary>
+    private void EnsureAnchorOverlay()
+    {
+        if (anchorOverlayObj != null) return;
+
+        anchorOverlayObj = new GameObject("ParcelPathAnchorOverlay");
+        anchorOverlayRenderer = anchorOverlayObj.AddComponent<OverlayMeshRenderer>();
+        Material mat = new Material(Shader.Find("Custom/OverlayLine"));
+        mat.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
+        anchorOverlayRenderer.Initialize(mat);
     }
 
     #region 作成モードの制御
@@ -341,6 +402,7 @@ public class ParcelEditorManager : MonoBehaviour
         currentAngle = 0f;
         selectedParcelId = -1;
         selectedPathId = -1;
+        selectedPathAnchor = null;
 
         // 視覚フィードバックをクリア
         ClearPreview();
@@ -449,21 +511,72 @@ public class ParcelEditorManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 道路が選択されたときの処理
+    /// 道路が選択されたときの処理。
+    ///
+    /// クリック地点はパスの中心線へ射影してから保持・通知する。UIの作成範囲が
+    /// 「クリック地点」のとき、この点がどのセルを作るかのアンカーになるため、
+    /// マーカーの見た目と実際に作られる位置を一致させる必要がある。
     /// </summary>
-    public void OnPathSelected(int pathId, Vector3[] waypoints)
+    public void OnPathSelected(int pathId, Vector3[] waypoints, Vector3 clickPosition)
     {
         selectedPathId = pathId;
-        Debug.Log($"道路が選択されました: Path_{pathId}");
+        selectedPathAnchor = ProjectOntoPath(pathId, clickPosition, out selectedPathAnchorTangent);
+        EnsureAnchorOverlay();
+        Debug.Log($"道路が選択されました: Path_{pathId} anchor={selectedPathAnchor}");
 
         // IPC: 土地区画作成モード用のパス選択イベントをUIに通知
         if (IpcClient.Instance != null)
         {
-            IpcClient.Instance.EmitEditParcelSelectPath(pathId);
+            IpcClient.Instance.EmitEditParcelSelectPath(pathId, selectedPathAnchor.Value);
         }
 
         // 選択モードを無効化
         pathSelectionMode = false;
+    }
+
+    /// <summary>
+    /// 点を指定パスの中心線へXZ平面で射影し、その位置での進行方向も返す。
+    /// 中心線を取得できない場合はクリック地点をそのまま返す
+    /// （バックエンド側でも射影されるため、作られる位置は破綻しない）。
+    /// </summary>
+    private Vector3 ProjectOntoPath(int pathId, Vector3 point, out Vector3 tangent)
+    {
+        tangent = Vector3.forward;
+
+        var pathManager = FindAnyObjectByType<PathManager>();
+        if (pathManager == null || !pathManager.TryGetPathPolyline(pathId, out List<Vector3> polyline))
+        {
+            return point;
+        }
+
+        Vector3 best = polyline[0];
+        float bestSqr = float.MaxValue;
+        for (int i = 0; i < polyline.Count - 1; i++)
+        {
+            Vector3 a = polyline[i];
+            Vector3 b = polyline[i + 1];
+            Vector2 ab = new Vector2(b.x - a.x, b.z - a.z);
+            float lenSqr = ab.sqrMagnitude;
+
+            float t = 0f;
+            if (lenSqr > 1e-6f)
+            {
+                t = Mathf.Clamp01(Vector2.Dot(new Vector2(point.x - a.x, point.z - a.z), ab) / lenSqr);
+            }
+            Vector3 candidate = Vector3.Lerp(a, b, t);
+
+            float dx = point.x - candidate.x;
+            float dz = point.z - candidate.z;
+            float sqr = dx * dx + dz * dz;
+            if (sqr < bestSqr)
+            {
+                bestSqr = sqr;
+                best = candidate;
+                Vector3 dir = new Vector3(b.x - a.x, 0f, b.z - a.z);
+                tangent = dir.sqrMagnitude > 1e-6f ? dir.normalized : Vector3.forward;
+            }
+        }
+        return best;
     }
 
     /// <summary>

@@ -221,19 +221,23 @@ public class PathInputHandler : MonoBehaviour, IInputHandler
             return;
         }
 
-        // ParcelEditorManagerに道路選択を通知
+        // ParcelEditorManagerに道路選択を通知(UIへの `edit_parcel:select_path` 送信も
+        // OnPathSelected が担う。クリック地点を中心線へ射影したアンカーを載せるため)
         var parcelEditorManager = FindAnyObjectByType<ParcelEditorManager>();
         if (parcelEditorManager != null)
         {
             Vector3[] waypoints = GetPathWaypoints(pathId);
-            parcelEditorManager.OnPathSelected(pathId, waypoints);
+            parcelEditorManager.OnPathSelected(pathId, waypoints, GetCursorWorldPosition());
         }
+    }
 
-        // IPC: 土地区画作成モード用のパス選択イベントをUIに直接通知
-        if (IpcClient.Instance != null)
-        {
-            IpcClient.Instance.EmitEditParcelSelectPath(pathId);
-        }
+    /// <summary>
+    /// カーソルのワールド座標(XZ)を返す。土地区画作成でどこをクリックしたかの基準になる。
+    /// </summary>
+    private Vector3 GetCursorWorldPosition()
+    {
+        if (InputHandler.Instance == null) return Vector3.zero;
+        return new Vector3(InputHandler.Instance.posX, 0f, InputHandler.Instance.posZ);
     }
 
     private void HandleBuildingConstructionClick()
@@ -271,7 +275,7 @@ public class PathInputHandler : MonoBehaviour, IInputHandler
         var parcelEditorManager = FindAnyObjectByType<ParcelEditorManager>();
         if (parcelEditorManager != null)
         {
-            parcelEditorManager.OnPathSelected(pathId, waypoints);
+            parcelEditorManager.OnPathSelected(pathId, waypoints, GetCursorWorldPosition());
         }
 
     }

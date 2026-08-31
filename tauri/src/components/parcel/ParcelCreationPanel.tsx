@@ -78,6 +78,12 @@ const DEFAULT_SIZE_INPUT = SIZE_INPUT_PRESETS.empty_area;
 /** ウィンドウを開いた直後の作成モード（Unity側 ParcelEditorManager.DefaultMode と一致させる） */
 const DEFAULT_CREATION_MODE: CreationMode = "empty_area";
 
+/**
+ * 道路沿い作成で、クリック地点まわりに1回で作れる区画数の上限。
+ * バックエンド側でも `geo_parcels.PATH_PARCEL_SPOT_MAX_COUNT` でクランプされる。
+ */
+const ALONG_PATH_MAX_COUNT = 5;
+
 const CREATION_SECTIONS = [
   {
     titleKey: "parcel_creation.sectionCreate",
@@ -172,6 +178,12 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
   const [selectedPathId, setSelectedPathId] = useState<number | null>(null);
   const [selectedParcelId, setSelectedParcelId] = useState<number | null>(null);
 
+  // along_path(道路沿い)の作成範囲。"whole"=パス全体、"spot"=クリック地点まわりの数区画。
+  // "spot" では 3Dビューでクリックした地点(pathAnchor)が作成位置の基準になる。
+  const [alongPathScope, setAlongPathScope] = useState<"whole" | "spot">("whole");
+  const [alongPathCount, setAlongPathCount] = useState(1);
+  const [pathAnchor, setPathAnchor] = useState<number[] | null>(null);
+
   // manual(任意ポリゴン)モード: Unityで編集中のポリゴン頂点列([x, z])と仮確定フラグ。
   const [manualPolygon, setManualPolygon] = useState<number[][]>([]);
   const [manualFinalized, setManualFinalized] = useState(false);
@@ -195,6 +207,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
     setPickedPosition(null);
     setSelectedPathId(null);
     setSelectedParcelId(null);
+    setPathAnchor(null);
     setPreviewData(null);
     setAngle(0);
     setManualPolygon([]);
@@ -303,6 +316,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
         };
       } else if (selectedMode === "along_path") {
         if (selectedPathId == null) return;
+        if (alongPathScope === "spot" && !pathAnchor) return;
         payload = {
           mode: "along_path",
           path_id: selectedPathId,
@@ -311,6 +325,10 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
           height,
           dry_run: true,
         };
+        if (alongPathScope === "spot") {
+          payload.anchor = pathAnchor;
+          payload.count = alongPathCount;
+        }
       } else if (selectedMode === "tile" || selectedMode === "random") {
         if (!pickedPosition) return;
         payload = {
@@ -399,7 +417,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
         }
       }
     },
-    [selectedMode, pickedPosition, selectedPathId, selectedParcelId, side, width, height, angle, area, lotWidth, lotDepth, jitterPct, baseUrl, pushPreviewToUnity, t]
+    [selectedMode, pickedPosition, selectedPathId, selectedParcelId, pathAnchor, alongPathScope, alongPathCount, side, width, height, angle, area, lotWidth, lotDepth, jitterPct, baseUrl, pushPreviewToUnity, t]
   );
 
   /* ---- 選択結果が届いたらプレビューを取得 ---- */
@@ -428,7 +446,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
     const controller = new AbortController();
     void fetchPreview(controller.signal);
     return () => controller.abort();
-  }, [selectedMode, selectedPathId, side, width, height, fetchPreview]);
+  }, [selectedMode, selectedPathId, pathAnchor, alongPathScope, alongPathCount, side, width, height, fetchPreview]);
 
   /* ---- 地点指定系のパラメータ変更監視 (empty_area / tile / random / block) ---- */
   useEffect(() => {
@@ -472,8 +490,11 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
       .catch(console.error);
 
     appWindow
-      .listen<{ path_id: number }>(IPC_EVENT_EDIT_PARCEL_SELECT_PATH, (event) => {
+      .listen<{ path_id: number; position?: number[] }>(IPC_EVENT_EDIT_PARCEL_SELECT_PATH, (event) => {
         setSelectedPathId(event.payload.path_id);
+        // 同じパスの別の場所をクリックし直したときも位置が変わればプレビューを取り直す。
+        // 配列は毎回新しい参照になるため、パラメータ監視の依存として機能する。
+        setPathAnchor(event.payload.position ?? null);
       })
       .then((fn) => {
         unlistenPath = fn;
@@ -586,6 +607,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
       };
     } else if (selectedMode === "along_path") {
       if (selectedPathId == null) return;
+      if (alongPathScope === "spot" && !pathAnchor) return;
       payload = {
         mode: "along_path",
         path_id: selectedPathId,
@@ -593,6 +615,10 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
         width,
         height,
       };
+      if (alongPathScope === "spot") {
+        payload.anchor = pathAnchor;
+        payload.count = alongPathCount;
+      }
     } else if (selectedMode === "tile" || selectedMode === "random") {
       if (!pickedPosition) return;
       payload = {
@@ -700,6 +726,12 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
 
   const sizeInput =
     (selectedMode && SIZE_INPUT_PRESETS[selectedMode]) || DEFAULT_SIZE_INPUT;
+
+  // 道路沿い作成の案内文。クリック地点モードでは「どこを」クリックするかが結果を左右する。
+  const alongPathSelectPromptKey =
+    alongPathScope === "spot"
+      ? "parcel_creation.selectPathSpot"
+      : "parcel_creation.selectPath";
 
   /* ---- レンダリング ---- */
 
@@ -883,6 +915,43 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
                     </label>
                   </div>
                 </div>
+                <div className="pc-input-row">
+                  <span className="pc-input-label">{t("parcel_creation.alongPathScope")}</span>
+                  <div className="pc-radio-group">
+                    <label className="pc-radio-label">
+                      <input
+                        type="radio"
+                        name="alongPathScope"
+                        checked={alongPathScope === "whole"}
+                        onChange={() => setAlongPathScope("whole")}
+                      />
+                      {t("parcel_creation.alongPathScopeWhole")}
+                    </label>
+                    <label className="pc-radio-label">
+                      <input
+                        type="radio"
+                        name="alongPathScope"
+                        checked={alongPathScope === "spot"}
+                        onChange={() => setAlongPathScope("spot")}
+                      />
+                      {t("parcel_creation.alongPathScopeSpot")}
+                    </label>
+                  </div>
+                </div>
+                {alongPathScope === "spot" && (
+                  <div className="pc-input-row">
+                    <span className="pc-input-label">{t("parcel_creation.alongPathCount")}</span>
+                    <NumberStepper
+                      value={alongPathCount}
+                      onChange={setAlongPathCount}
+                      min={1}
+                      max={ALONG_PATH_MAX_COUNT}
+                      step={1}
+                      integerOnly={true}
+                    />
+                    <span className="pc-input-unit">{t("parcel_creation.unitCount")}</span>
+                  </div>
+                )}
               </>
             )}
 
@@ -928,7 +997,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
               <div className={`pc-selection-message ${selectedPathId != null ? "active" : "waiting"}`}>
                 {selectedPathId != null
                   ? t("parcel_creation.pathSelected", { id: selectedPathId })
-                  : t("parcel_creation.selectPath")}
+                  : t(alongPathSelectPromptKey)}
               </div>
             )}
             {(selectedMode === "split_rectangle" || selectedMode === "split_random") && (
@@ -976,7 +1045,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
             ) : (
               <div className="pc-preview-message">
                 {isPointMode && t("parcel_creation.selectPoint")}
-                {selectedMode === "along_path" && t("parcel_creation.selectPath")}
+                {selectedMode === "along_path" && t(alongPathSelectPromptKey)}
                 {(selectedMode === "split_rectangle" || selectedMode === "split_random") && t("parcel_creation.selectParcel")}
               </div>
             )}

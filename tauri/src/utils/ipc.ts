@@ -906,7 +906,11 @@ export const IPC_EVENT_EDIT_BUILDING_UPDATE_DIRECT_ANGLE = "edit_building:update
 /** 土地区画作成モードにおいて、3Dビュー上の地点がクリックされた (empty_area 用) */
 export const IPC_EVENT_EDIT_PARCEL_SELECT_POINT = "edit_parcel:select_point";
 
-/** 土地区画作成モードにおいて、パスが選択された (along_path 用) */
+/**
+ * 土地区画作成モードにおいて、パスが選択された (along_path 用)。
+ * ペイロードは `{ path_id, position }` で、`position` はクリック地点をパス中心線へ
+ * 射影した [x, y, z]。作成範囲が「クリック地点」のとき、そこだけ区画を作るアンカーになる。
+ */
 export const IPC_EVENT_EDIT_PARCEL_SELECT_PATH = "edit_parcel:select_path";
 
 /** 土地区画作成モードにおいて、既存土地区画が選択された (split 系用) */

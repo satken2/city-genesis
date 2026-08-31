@@ -77,8 +77,13 @@
     "side": "배치",
     "sideLeft": "왼쪽",
     "sideRight": "오른쪽",
+    "alongPathScope": "생성 범위",
+    "alongPathScopeWhole": "경로 전체",
+    "alongPathScopeSpot": "클릭 지점",
+    "alongPathCount": "구획 수",
     "selectPoint": "지점을 선택하세요",
     "selectPath": "경로를 선택하세요",
+    "selectPathSpot": "구획을 만들 위치의 도로를 클릭하세요",
     "selectParcel": "토지 구획을 선택하세요",
     "previewLoading": "미리보기를 가져오는 중...",
     "previewSendFailed": "3D 뷰로 미리보기를 전송하지 못했습니다(구획 수가 너무 많습니다). 탐색 범위를 좁히거나 평균 면적을 키우세요",
@@ -95,6 +100,7 @@
     "unitSqm": "㎡",
     "unitMeter": "m",
     "unitDegree": "°",
-    "unitPercent": "%"
+    "unitPercent": "%",
+    "unitCount": "개"
   }
 }

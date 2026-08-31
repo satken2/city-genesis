@@ -77,8 +77,13 @@
     "side": "Ubicación",
     "sideLeft": "Lado izquierdo",
     "sideRight": "Lado derecho",
+    "alongPathScope": "Alcance",
+    "alongPathScopeWhole": "Vía completa",
+    "alongPathScopeSpot": "Punto marcado",
+    "alongPathCount": "Parcelas",
     "selectPoint": "Selecciona un punto",
     "selectPath": "Selecciona una vía",
+    "selectPathSpot": "Haz clic en la vía donde quieres las parcelas",
     "selectParcel": "Selecciona una parcela",
     "previewLoading": "Obteniendo la vista previa...",
     "previewSendFailed": "No se pudo enviar la vista previa a la vista 3D (demasiadas parcelas). Reduce el área de búsqueda o aumenta la superficie promedio",
@@ -95,6 +100,7 @@
     "unitSqm": "㎡",
     "unitMeter": "m",
     "unitDegree": "°",
-    "unitPercent": "%"
+    "unitPercent": "%",
+    "unitCount": ""
   }
 }

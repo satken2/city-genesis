@@ -77,8 +77,13 @@
     "side": "配置",
     "sideLeft": "左側",
     "sideRight": "右側",
+    "alongPathScope": "作成範囲",
+    "alongPathScopeWhole": "パス全体",
+    "alongPathScopeSpot": "クリック地点",
+    "alongPathCount": "区画数",
     "selectPoint": "地点を選択してください",
     "selectPath": "パスを選択してください",
+    "selectPathSpot": "区画を作る位置の道路をクリックしてください",
     "selectParcel": "土地区画を選択してください",
     "previewLoading": "プレビュー取得中...",
     "previewSendFailed": "3Dビューへのプレビュー転送に失敗しました（区画数が多すぎます）。探索範囲を狭めるか平均面積を大きくしてください",
@@ -95,6 +100,7 @@
     "unitSqm": "㎡",
     "unitMeter": "m",
     "unitDegree": "°",
-    "unitPercent": "%"
+    "unitPercent": "%",
+    "unitCount": "個"
   }
 }

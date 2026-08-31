@@ -77,8 +77,13 @@
     "side": "配置",
     "sideLeft": "左側",
     "sideRight": "右側",
+    "alongPathScope": "生成範圍",
+    "alongPathScopeWhole": "整條路徑",
+    "alongPathScopeSpot": "點擊位置",
+    "alongPathCount": "地塊數",
     "selectPoint": "請選擇地點",
     "selectPath": "請選擇路徑",
+    "selectPathSpot": "請點擊要生成地塊的道路位置",
     "selectParcel": "請選擇地塊",
     "previewLoading": "正在取得預覽...",
     "previewSendFailed": "向3D視圖傳送預覽失敗（地塊數量過多）。請縮小搜尋範圍或調大平均面積",
@@ -95,6 +100,7 @@
     "unitSqm": "㎡",
     "unitMeter": "m",
     "unitDegree": "°",
-    "unitPercent": "%"
+    "unitPercent": "%",
+    "unitCount": "個"
   }
 }

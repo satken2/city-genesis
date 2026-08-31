@@ -937,12 +937,15 @@ public class IpcClient : MonoBehaviour
     /// <summary>
     /// edit_parcel:select_path イベントを送信する。
     /// 土地区画作成モード（along_path）において、パスが選択されたことをUIに通知する。
+    /// position はクリック地点をパス中心線へ射影した点で、作成範囲が「クリック地点」の
+    /// ときにUIがそこだけ区画を作るためのアンカーになる（「パス全体」では使われない）。
     /// </summary>
-    public void EmitEditParcelSelectPath(int pathId)
+    public void EmitEditParcelSelectPath(int pathId, Vector3 position)
     {
         var payload = new Dictionary<string, object>
         {
-            ["path_id"] = pathId
+            ["path_id"] = pathId,
+            ["position"] = new List<float> { position.x, position.y, position.z }
         };
 
         SendEnvelope("edit_parcel:select_path", payload);
