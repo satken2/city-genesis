@@ -101,6 +101,11 @@ agents:
       - 0
       - 400
       - 700
+  2002:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
   2006:
     model: true
     prebuilt: false
