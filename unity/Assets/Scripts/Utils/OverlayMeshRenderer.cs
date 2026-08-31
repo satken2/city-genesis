@@ -105,6 +105,9 @@ public class OverlayMeshRenderer : MonoBehaviour
         meshRenderer.receiveShadows = false;
 
         mesh = new Mesh();
+        // 効果範囲フィルのような広域のセル敷き詰めでは頂点数が16bitインデックスの
+        // 上限(65535)を超え得るため、32bitインデックスで頂点数の制限を外す。
+        mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         mesh.MarkDynamic();
         meshFilter.mesh = mesh;
     }

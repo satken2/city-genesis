@@ -7,8 +7,12 @@ using GeneratedModels;
 /// インフラ供給施設(変電所・下水処理場・電波塔などサービス財を生産する施設)の効果範囲を
 /// 3D空間にオーバーレイ表示するコンポーネント。
 ///
-/// バックエンドの POST /api/v1/buildings/preview-effect-range が返す領域(円 or 不定形ポリゴン)を
-/// 受け取り、以下の2層を地形追従で描画する。
+/// 2種類の領域(円 or 不定形ポリゴン)を色分けして同時に描画する。
+///   - プレビュー領域(緑): 選択中の施設をそこへ建てた場合の効果範囲
+///     (バックエンドの POST /api/v1/buildings/preview-effect-range 由来)
+///   - 既存領域(青): 同じサービス財を供給する既存施設がカバー済みの効果範囲
+///     (GET /api/v1/buildings/effect-ranges 由来。複数施設ぶんの領域リスト)
+/// いずれの領域も以下の2層を地形追従で描画する。
 ///   1. 領域フィル: 効果範囲の面。まだ土地区画の無い原野も含めて範囲全体を半透明で塗る。
 ///      領域AABBをグリッドに切り、範囲内のセルを小さな四角形で敷き詰めることで、
 ///      任意形状(凹み・穴あり)でも破綻せず地形にも追従する。
@@ -29,10 +33,12 @@ public class EffectRangeOverlay : MonoBehaviour
     private OverlayMeshRenderer lineRenderer;
     private Camera cam;
 
-    // 効果範囲の面(半透明の緑)。
+    // プレビュー領域の面(半透明の緑)と外周・穴の輪郭。
     private static readonly Color FillColor = new Color(0.30f, 0.78f, 0.45f, 0.20f);
-    // 効果範囲の外周・穴の輪郭。
     private static readonly Color BoundaryColor = new Color(0.36f, 0.92f, 0.52f, 0.95f);
+    // 既存施設のカバー済み領域の面(半透明の青)と輪郭。UI凡例(BuildingConstructionPanel.css)の色と揃える。
+    private static readonly Color ExistingFillColor = new Color(0.27f, 0.59f, 0.94f, 0.15f);
+    private static readonly Color ExistingBoundaryColor = new Color(0.35f, 0.70f, 1.00f, 0.80f);
 
     private void Awake()
     {
@@ -71,6 +77,8 @@ public class EffectRangeOverlay : MonoBehaviour
     /// <summary>
     /// 効果範囲データを受け取り、フィル・境界を構築する。
     /// payload が null またはクリア指示なら表示を消す。
+    /// 既存領域(青)を先に、プレビュー領域(緑)を後に積むことで、重なった場所では
+    /// プレビュー側の色が視認しやすくなる。
     /// </summary>
     public void SetData(EffectRangePayload payload)
     {
@@ -88,36 +96,49 @@ public class EffectRangeOverlay : MonoBehaviour
         fillRenderer.BeginFrame();
         lineRenderer.BeginFrame();
 
-        EffectRangeRegionData region = payload.region;
-        if (region.type == "circle")
+        foreach (var existing in payload.existing)
         {
-            BuildCircleFill(region);
-            BuildCircleOutline(region);
+            BuildRegion(existing, ExistingFillColor, ExistingBoundaryColor);
         }
-        else
+        if (payload.HasPreviewRegion)
         {
-            BuildPolygonFill(region);
-            BuildPolygonOutline(region);
+            BuildRegion(payload.region, FillColor, BoundaryColor);
         }
 
         fillRenderer.EndFrame(cam);
         lineRenderer.EndFrame(cam);
     }
 
+    /// <summary>1つの領域(円 or ポリゴン)のフィルと境界線を指定色で構築する。</summary>
+    private void BuildRegion(EffectRangeRegionData region, Color fillColor, Color boundaryColor)
+    {
+        if (region == null || string.IsNullOrEmpty(region.type)) return;
+        if (region.type == "circle")
+        {
+            BuildCircleFill(region, fillColor);
+            BuildCircleOutline(region, boundaryColor);
+        }
+        else
+        {
+            BuildPolygonFill(region, fillColor);
+            BuildPolygonOutline(region, boundaryColor);
+        }
+    }
+
     // =====================================================================
     // 領域フィル(グリッド敷き詰め)
     // =====================================================================
 
-    private void BuildCircleFill(EffectRangeRegionData region)
+    private void BuildCircleFill(EffectRangeRegionData region, Color fillColor)
     {
         float r = region.radius;
         if (r <= 0f) return;
         Vector2 c = region.center;
         FillGrid(c.x - r, c.y - r, c.x + r, c.y + r,
-            (x, z) => (x - c.x) * (x - c.x) + (z - c.y) * (z - c.y) <= r * r);
+            (x, z) => (x - c.x) * (x - c.x) + (z - c.y) * (z - c.y) <= r * r, fillColor);
     }
 
-    private void BuildPolygonFill(EffectRangeRegionData region)
+    private void BuildPolygonFill(EffectRangeRegionData region, Color fillColor)
     {
         if (region.polygons == null || region.polygons.Count == 0) return;
         float minX = float.MaxValue, minZ = float.MaxValue, maxX = float.MinValue, maxZ = float.MinValue;
@@ -132,14 +153,14 @@ public class EffectRangeOverlay : MonoBehaviour
             }
         }
         if (minX > maxX) return;
-        FillGrid(minX, minZ, maxX, maxZ, (x, z) => PolygonRegionContains(region, x, z));
+        FillGrid(minX, minZ, maxX, maxZ, (x, z) => PolygonRegionContains(region, x, z), fillColor);
     }
 
     /// <summary>
     /// AABB(minX,minZ)-(maxX,maxZ)をグリッドに切り、中心が範囲内のセルを四角形で塗る。
     /// セルは小さいので四隅の地形高さを個別にサンプルすれば起伏に追従する。
     /// </summary>
-    private void FillGrid(float minX, float minZ, float maxX, float maxZ, System.Func<float, float, bool> inside)
+    private void FillGrid(float minX, float minZ, float maxX, float maxZ, System.Func<float, float, bool> inside, Color fillColor)
     {
         float span = Mathf.Max(maxX - minX, maxZ - minZ);
         if (span <= 0f) return;
@@ -160,7 +181,7 @@ public class EffectRangeOverlay : MonoBehaviour
                 quad.Add(GroundPoint(x + step, z));
                 quad.Add(GroundPoint(x + step, z + step));
                 quad.Add(GroundPoint(x, z + step));
-                fillRenderer.AddPolygon(quad, FillColor);
+                fillRenderer.AddPolygon(quad, fillColor);
             }
         }
     }
@@ -169,7 +190,7 @@ public class EffectRangeOverlay : MonoBehaviour
     // 境界アウトライン
     // =====================================================================
 
-    private void BuildCircleOutline(EffectRangeRegionData region)
+    private void BuildCircleOutline(EffectRangeRegionData region, Color boundaryColor)
     {
         float r = region.radius;
         if (r <= 0f) return;
@@ -181,17 +202,17 @@ public class EffectRangeOverlay : MonoBehaviour
             float a = (float)i / segments * Mathf.PI * 2f;
             ring.Add(new Vector2(c.x + Mathf.Cos(a) * r, c.y + Mathf.Sin(a) * r));
         }
-        DrawWorldRing(lineRenderer, ring, BoundaryColor, 1.6f, 6f);
+        DrawWorldRing(lineRenderer, ring, boundaryColor, 1.6f, 6f);
     }
 
-    private void BuildPolygonOutline(EffectRangeRegionData region)
+    private void BuildPolygonOutline(EffectRangeRegionData region, Color boundaryColor)
     {
         foreach (var poly in region.polygons)
         {
-            DrawWorldRing(lineRenderer, poly.exterior, BoundaryColor, 1.6f, 8f);
+            DrawWorldRing(lineRenderer, poly.exterior, boundaryColor, 1.6f, 8f);
             foreach (var hole in poly.holes)
             {
-                DrawWorldRing(lineRenderer, hole, BoundaryColor, 1.6f, 8f);
+                DrawWorldRing(lineRenderer, hole, boundaryColor, 1.6f, 8f);
             }
         }
     }
@@ -293,19 +314,42 @@ public class EffectRangePolygonData
 /// <summary>edit_building:update_effect_range のペイロード。</summary>
 public class EffectRangePayload
 {
-    public EffectRangeRegionData region;   // null またはクリア指示なら表示を消す
+    public EffectRangeRegionData region;   // プレビュー領域。null なら「プレビュー無し」
+    // 既存施設のカバー済み領域の一覧。空なら「既存表示無し」。
+    public List<EffectRangeRegionData> existing = new List<EffectRangeRegionData>();
 
-    public bool IsClear => region == null || string.IsNullOrEmpty(region.type);
+    /// <summary>プレビュー領域・既存領域のどちらも無い(=クリア指示)か。</summary>
+    public bool IsClear => !HasPreviewRegion && existing.Count == 0;
+
+    /// <summary>描画対象のプレビュー領域を持つか。</summary>
+    public bool HasPreviewRegion => region != null && !string.IsNullOrEmpty(region.type);
 
     /// <summary>
-    /// IPC の region トークン(JObject or null)からペイロードを組み立てる。
+    /// IPC の region トークン(JObject or null)と existing トークン(JArray or null)から
+    /// ペイロードを組み立てる。
     /// </summary>
-    public static EffectRangePayload FromJson(JToken regionToken)
+    public static EffectRangePayload FromJson(JToken regionToken, JToken existingToken = null)
     {
         var payload = new EffectRangePayload();
-        if (regionToken == null || regionToken.Type == JTokenType.Null) return payload;
+        payload.region = ParseRegion(regionToken);
+        var existingArr = existingToken as JArray;
+        if (existingArr != null)
+        {
+            foreach (var item in existingArr)
+            {
+                var r = ParseRegion(item);
+                if (r != null) payload.existing.Add(r);
+            }
+        }
+        return payload;
+    }
+
+    /// <summary>1領域ぶんの JObject をパースする。null や不正な形式なら null を返す。</summary>
+    private static EffectRangeRegionData ParseRegion(JToken regionToken)
+    {
+        if (regionToken == null || regionToken.Type == JTokenType.Null) return null;
         var obj = regionToken as JObject;
-        if (obj == null) return payload;
+        if (obj == null) return null;
 
         string type = (string)obj["type"];
         var region = new EffectRangeRegionData { type = type };
@@ -340,8 +384,7 @@ public class EffectRangePayload
                 }
             }
         }
-        payload.region = region;
-        return payload;
+        return region;
     }
 
     private static List<Vector2> ParseRing(JArray arr)

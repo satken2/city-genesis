@@ -48,6 +48,7 @@
     "unitPeopleValue": "{{value}}",
     "effectRangeTitle": "Effect Range",
     "effectRangeArea": "Area reached by supply",
+    "effectRangeExisting": "Area already covered by existing facilities",
     "invalidParcel": "This building cannot be constructed on this parcel.",
     "selectParcelHint": "Select a parcel for construction",
     "heightLimit": "Height Limit",

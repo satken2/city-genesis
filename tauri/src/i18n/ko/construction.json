@@ -48,6 +48,7 @@
     "unitPeopleValue": "{{value}}명",
     "effectRangeTitle": "효과 범위",
     "effectRangeArea": "공급이 닿는 범위",
+    "effectRangeExisting": "기존 시설이 이미 커버하는 범위",
     "invalidParcel": "이 건물은 이 토지 구획에 지을 수 없습니다",
     "selectParcelHint": "건설할 토지 구획을 선택하세요",
     "heightLimit": "높이 규제",

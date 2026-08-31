@@ -43,16 +43,17 @@
       "sfx": "サウンドエフェクト"
     },
     "compute": {
-      "label": "演算処理",
+      "label": "GPUアクセラレーション",
+      "comingSoon": "Coming soon",
       "cpu": "CPU",
       "gpu": "GPU",
       "statusActive": "GPU有効",
       "statusInactive": "CPU有効",
-      "restartRequired": "設定変更後にバックエンドを再起動します",
+      "restartRequired": "設定変更後にメインプログラムを再起動します",
       "restarting": "再起動中...",
       "restartFailed": "再起動に失敗しました",
       "restartUnavailable": "設定を保存しました。変更はゲームの次回起動時に反映されます",
-      "confirmRestart": "演算処理を{mode}に変更します。バックエンドを再起動してよろしいですか？"
+      "confirmRestart": "演算処理を{mode}に変更します。メインプログラムを再起動してよろしいですか？"
     },
     "windowReset": {
       "label": "ウィンドウ位置・サイズ",

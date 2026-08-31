@@ -43,16 +43,17 @@
       "sfx": "音效"
     },
     "compute": {
-      "label": "运算处理",
+      "label": "GPU 加速",
+      "comingSoon": "Coming soon",
       "cpu": "CPU",
       "gpu": "GPU",
       "statusActive": "GPU已启用",
       "statusInactive": "CPU已启用",
-      "restartRequired": "更改设置后将重启后端",
+      "restartRequired": "更改设置后将重启主程序",
       "restarting": "重启中...",
       "restartFailed": "重启失败",
       "restartUnavailable": "已保存设置。更改将在下次启动游戏时生效",
-      "confirmRestart": "将运算处理更改为{mode}。确定要重启后端吗？"
+      "confirmRestart": "将运算处理更改为{mode}。确定要重启主程序吗？"
     },
     "windowReset": {
       "label": "窗口位置与大小",

@@ -48,6 +48,7 @@
     "unitPeopleValue": "{{value}} personnes",
     "effectRangeTitle": "Zone d'influence",
     "effectRangeArea": "Zone desservie par la fourniture",
+    "effectRangeExisting": "Zone déjà couverte par les installations existantes",
     "invalidParcel": "Ce bâtiment ne peut pas être construit sur cette parcelle",
     "selectParcelHint": "Sélectionnez la parcelle où construire",
     "heightLimit": "Hauteur maximale",

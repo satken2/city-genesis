@@ -152,6 +152,11 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
   // 選択中の施設がインフラ供給施設(効果範囲を持つ)で、効果範囲を3D表示中かどうか。
   // 効果範囲の凡例表示の出し分けに使う。
   const [effectRangeActive, setEffectRangeActive] = useState(false);
+  // 新設プレビューの効果範囲領域(敷地/地点の選択後に preview-effect-range から取得)。
+  const [previewEffectRegion, setPreviewEffectRegion] = useState<EffectRangeRegion | null>(null);
+  // 選択中バリアントと同じサービス財を供給する既存施設の効果範囲一覧。
+  // カバー済みの場所と新設候補地を見比べられるよう、敷地選択前から3D表示する。
+  const [existingEffectRanges, setExistingEffectRanges] = useState<EffectRangeRegion[]>([]);
 
   // 既存建物コピー建設: コピー元の agent_id。非nullのときコピーモード。
   // このモードでは元建物の実寸フットプリントを固定コピーし、忠実コピー(バリアント・階数一致)なら
@@ -493,15 +498,15 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
 
   /**
    * インフラ供給施設(変電所・下水処理場・電波塔などサービス財を生産する施設)を選択して
-   * 敷地を選んだとき、その施設を建てた場合の効果範囲をバックエンドから取得し、
-   * Unity の 3D 上に可視化する。効果範囲は施設位置・地形・階数(電波塔の送信点高さ)で決まるため、
-   * これらが変わるたびに再取得する。効果範囲を持たない variant(通常建物)には restricted:false が返り、
-   * その場合は 3D 表示をクリアする。
+   * 敷地を選んだとき、その施設を建てた場合の効果範囲をバックエンドから取得する。
+   * 効果範囲は施設位置・地形・階数(電波塔の送信点高さ)で決まるため、
+   * これらが変わるたびに再取得する。効果範囲を持たない variant(通常建物)には restricted:false が返る。
+   * 3D への送信は既存施設の範囲と合わせて下の送信用 useEffect が一括で行う。
    */
   useEffect(() => {
     if (selectedVariant === null || parcelId === null) {
       setEffectRangeActive(false);
-      void sendEditBuildingUpdateEffectRange(null).catch(() => {});
+      setPreviewEffectRegion(null);
       return;
     }
     const controller = new AbortController();
@@ -523,24 +528,75 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         if (controller.signal.aborted) return;
         if (data.restricted && data.region) {
           setEffectRangeActive(true);
-          void sendEditBuildingUpdateEffectRange(data.region).catch((err) => {
-            console.error("[BuildingConstruction] sendEditBuildingUpdateEffectRange failed:", err);
-          });
+          setPreviewEffectRegion(data.region);
         } else {
           setEffectRangeActive(false);
-          void sendEditBuildingUpdateEffectRange(null).catch(() => {});
+          setPreviewEffectRegion(null);
         }
       })
       .catch((err) => {
         if (!controller.signal.aborted) {
           console.error("[BuildingConstruction] Failed to fetch effect range:", err);
           setEffectRangeActive(false);
-          void sendEditBuildingUpdateEffectRange(null).catch(() => {});
+          setPreviewEffectRegion(null);
         }
       });
 
     return () => controller.abort();
   }, [selectedVariant, parcelId, floors, apiBaseUrl]);
+
+  /* ---- 既存施設の効果範囲の取得 ---- */
+
+  /**
+   * バリアントを選択したら、同じサービス財を供給する既存施設(建設中含む)の効果範囲一覧を
+   * 取得する。敷地・階数には依存しないためバリアント選択時に一度だけ取得すればよい。
+   * 効果範囲の制限を持たない variant には restricted:false と空の ranges が返る。
+   */
+  useEffect(() => {
+    if (selectedVariant === null) {
+      setExistingEffectRanges([]);
+      return;
+    }
+    const controller = new AbortController();
+
+    fetchApi<{
+      restricted: boolean;
+      ranges: { agent_id: number; variant: number; region: EffectRangeRegion }[];
+    }>(
+      `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/buildings/effect-ranges?variant=${selectedVariant}`,
+      { signal: controller.signal },
+    )
+      .then((data) => {
+        if (controller.signal.aborted) return;
+        setExistingEffectRanges(
+          data.restricted ? data.ranges.map((r) => r.region) : [],
+        );
+      })
+      .catch((err) => {
+        if (!controller.signal.aborted) {
+          console.error("[BuildingConstruction] Failed to fetch existing effect ranges:", err);
+          setExistingEffectRanges([]);
+        }
+      });
+
+    return () => controller.abort();
+  }, [selectedVariant, apiBaseUrl]);
+
+  /* ---- 効果範囲(プレビュー+既存)の3D表示送信 ---- */
+
+  /**
+   * プレビュー領域か既存領域のいずれかが変わったら、両方をまとめて Unity へ送信する。
+   * 個別に送るとプレビュー側の更新が既存側の表示を消してしまうため、送信はここに一元化する。
+   * どちらも無ければクリア指示(null, null)になる。
+   */
+  useEffect(() => {
+    void sendEditBuildingUpdateEffectRange(
+      previewEffectRegion,
+      existingEffectRanges.length > 0 ? existingEffectRanges : null,
+    ).catch((err) => {
+      console.error("[BuildingConstruction] sendEditBuildingUpdateEffectRange failed:", err);
+    });
+  }, [previewEffectRegion, existingEffectRanges]);
 
   /* ---- アンマウント時に効果範囲表示をクリア ---- */
   useEffect(() => {
@@ -695,7 +751,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
     return () => controller.abort();
   }, [selectedVariant, pickedPosition, floors, rectWidth, rectDepth, rectAngle, apiBaseUrl]);
 
-  /* ---- 直接配置モード: インフラ施設の効果範囲の取得と3D可視化 ---- */
+  /* ---- 直接配置モード: インフラ施設の効果範囲の取得(3D送信は共通の送信用useEffectが行う) ---- */
   useEffect(() => {
     if (selectedVariant === null || pickedPosition === null) return;
     const controller = new AbortController();
@@ -713,17 +769,17 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         if (controller.signal.aborted) return;
         if (data.restricted && data.region) {
           setEffectRangeActive(true);
-          void sendEditBuildingUpdateEffectRange(data.region).catch(() => {});
+          setPreviewEffectRegion(data.region);
         } else {
           setEffectRangeActive(false);
-          void sendEditBuildingUpdateEffectRange(null).catch(() => {});
+          setPreviewEffectRegion(null);
         }
       })
       .catch((err) => {
         if (!controller.signal.aborted) {
           console.error("[BuildingConstruction] Failed to fetch direct effect range:", err);
           setEffectRangeActive(false);
-          void sendEditBuildingUpdateEffectRange(null).catch(() => {});
+          setPreviewEffectRegion(null);
         }
       });
 
@@ -1299,16 +1355,24 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
             </div>
           </div>
 
-          {/* インフラ施設の効果範囲の凡例（効果範囲を3D表示中のみ） */}
-          {effectRangeActive && (
+          {/* インフラ施設の効果範囲の凡例（プレビューか既存範囲のいずれかを3D表示中のみ） */}
+          {(effectRangeActive || existingEffectRanges.length > 0) && (
             <div className="bc-effect-range-legend">
               <div className="bc-effect-range-legend-title">
                 {t("building_construction.effectRangeTitle")}
               </div>
-              <div className="bc-effect-range-legend-row">
-                <span className="bc-effect-range-swatch bc-effect-range-swatch-area" />
-                {t("building_construction.effectRangeArea")}
-              </div>
+              {effectRangeActive && (
+                <div className="bc-effect-range-legend-row">
+                  <span className="bc-effect-range-swatch bc-effect-range-swatch-area" />
+                  {t("building_construction.effectRangeArea")}
+                </div>
+              )}
+              {existingEffectRanges.length > 0 && (
+                <div className="bc-effect-range-legend-row">
+                  <span className="bc-effect-range-swatch bc-effect-range-swatch-existing" />
+                  {t("building_construction.effectRangeExisting")}
+                </div>
+              )}
             </div>
           )}
 

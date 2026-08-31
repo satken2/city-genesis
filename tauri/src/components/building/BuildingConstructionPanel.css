@@ -378,3 +378,9 @@
   background: rgba(80, 200, 120, 0.35);
   border: 1px solid rgba(80, 200, 120, 0.7);
 }
+
+/* 既存施設のカバー済み範囲: 半透明の青（Unity側のオーバーレイ色に合わせる） */
+.bc-effect-range-swatch-existing {
+  background: rgba(70, 150, 240, 0.35);
+  border: 1px solid rgba(70, 150, 240, 0.7);
+}

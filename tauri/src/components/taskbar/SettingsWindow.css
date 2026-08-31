@@ -86,6 +86,28 @@
   flex-shrink: 0;
 }
 
+/* 項目名の右に添える「Coming soon」の札 */
+.settings-row-badge {
+  margin-left: 8px;
+  padding: 2px 6px;
+  background-color: var(--flat-sunken);
+  color: var(--flat-text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+
+/* 未提供の項目。項目名は読める濃さを残し、操作UIだけ沈めてクリックも通さない */
+.settings-row--disabled .settings-row-name {
+  color: var(--flat-text-muted);
+}
+
+.settings-row--disabled .settings-row-control {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
 /* 音量スライダーのように操作UIを横幅いっぱいに使う行 */
 .settings-row--stretch .settings-row-label {
   flex: 0 0 150px;

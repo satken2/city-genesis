@@ -223,12 +223,15 @@ export type EffectRangeRegion =
 
 /**
  * `edit_building.update_effect_range`
- * 建物建設モードにおいて、選択中インフラ施設の効果範囲を Unity の 3D 上に可視化する。
- * region が null の場合は効果範囲表示をクリアする（効果範囲を持たない variant を選んだとき、
- * バリアント選択を解除したとき、パネルを閉じたとき）。
+ * 建物建設モードにおいて、効果範囲を Unity の 3D 上に可視化する。2種類の領域を運ぶ。
+ * - region: 選択中インフラ施設を建てた場合の効果範囲（プレビュー。敷地選択後に決まる）
+ * - existing: 同じサービス財を供給する既存施設の効果範囲一覧（バリアント選択中は常時表示）
+ * region と existing がともに null/空 の場合は効果範囲表示をクリアする
+ * （効果範囲を持たない variant を選んだとき、バリアント選択を解除したとき、パネルを閉じたとき）。
  */
 export async function sendEditBuildingUpdateEffectRange(
   region: EffectRangeRegion | null,
+  existing: EffectRangeRegion[] | null = null,
 ): Promise<void> {
   await invoke("send_window_action", {
     windowType: "building_construction",
@@ -236,6 +239,7 @@ export async function sendEditBuildingUpdateEffectRange(
     action: "edit_building:update_effect_range",
     params: {
       region,
+      existing,
     },
   });
 }

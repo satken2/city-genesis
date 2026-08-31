@@ -43,16 +43,17 @@
       "sfx": "효과음"
     },
     "compute": {
-      "label": "연산 처리",
+      "label": "GPU 가속",
+      "comingSoon": "Coming soon",
       "cpu": "CPU",
       "gpu": "GPU",
       "statusActive": "GPU 사용 중",
       "statusInactive": "CPU 사용 중",
-      "restartRequired": "설정 변경 후 백엔드를 재시작합니다",
+      "restartRequired": "설정 변경 후 메인 프로그램을 재시작합니다",
       "restarting": "재시작 중...",
       "restartFailed": "재시작에 실패했습니다",
       "restartUnavailable": "설정을 저장했습니다. 변경 사항은 다음 게임 실행 시 반영됩니다",
-      "confirmRestart": "연산 처리를 {mode}(으)로 변경합니다. 백엔드를 재시작하시겠습니까?"
+      "confirmRestart": "연산 처리를 {mode}(으)로 변경합니다. 메인 프로그램을 재시작하시겠습니까?"
     },
     "windowReset": {
       "label": "창 위치・크기",

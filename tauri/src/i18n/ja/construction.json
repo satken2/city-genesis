@@ -48,6 +48,7 @@
     "unitPeopleValue": "{{value}}人",
     "effectRangeTitle": "効果範囲",
     "effectRangeArea": "供給が届く範囲",
+    "effectRangeExisting": "既存施設がカバー済みの範囲",
     "invalidParcel": "この建物はこの土地区画には建設できません",
     "selectParcelHint": "建設予定の土地区画を選択してください",
     "heightLimit": "高さ規制",

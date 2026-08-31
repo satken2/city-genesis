@@ -412,10 +412,12 @@ public class IpcClient : MonoBehaviour
                 case "edit_building:update_effect_range":
                     {
                         // インフラ施設の効果範囲(円 or 不定形ポリゴン)を受け取り、3D可視化する。
-                        // region が null のときはクリア指示。
+                        // region=プレビュー領域、existing=既存施設のカバー済み領域一覧。
+                        // 両方 null/空 のときはクリア指示。
                         var regionToken = GetParamToken(payload, "region");
-                        var effectRange = EffectRangePayload.FromJson(regionToken);
-                        Debug.Log($"IpcClient: edit_building:update_effect_range -> clear={effectRange.IsClear}");
+                        var existingToken = GetParamToken(payload, "existing");
+                        var effectRange = EffectRangePayload.FromJson(regionToken, existingToken);
+                        Debug.Log($"IpcClient: edit_building:update_effect_range -> clear={effectRange.IsClear}, existing={effectRange.existing.Count}");
                         OnEditBuildingUpdateEffectRange?.Invoke(effectRange);
                     }
                     break;

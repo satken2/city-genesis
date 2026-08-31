@@ -48,6 +48,7 @@
     "unitPeopleValue": "{{value}} personas",
     "effectRangeTitle": "Área de influencia",
     "effectRangeArea": "Zona a la que llega el suministro",
+    "effectRangeExisting": "Zona ya cubierta por instalaciones existentes",
     "invalidParcel": "Este edificio no se puede construir en esta parcela",
     "selectParcelHint": "Selecciona la parcela donde deseas construir",
     "heightLimit": "Límite de altura",

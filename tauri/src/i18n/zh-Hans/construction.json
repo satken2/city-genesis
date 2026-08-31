@@ -48,6 +48,7 @@
     "unitPeopleValue": "{{value}}人",
     "effectRangeTitle": "效果范围",
     "effectRangeArea": "供给可达范围",
+    "effectRangeExisting": "现有设施已覆盖的范围",
     "invalidParcel": "该建筑无法建在此地块上",
     "selectParcelHint": "请选择计划建设的地块",
     "heightLimit": "高度限制",

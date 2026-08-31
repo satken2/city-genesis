@@ -43,16 +43,17 @@
       "sfx": "Effets sonores"
     },
     "compute": {
-      "label": "Calcul",
+      "label": "Accélération GPU",
+      "comingSoon": "Coming soon",
       "cpu": "CPU",
       "gpu": "GPU",
       "statusActive": "GPU activé",
       "statusInactive": "CPU activé",
-      "restartRequired": "Le serveur redémarrera après la modification de ce réglage",
+      "restartRequired": "Le programme principal redémarrera après la modification de ce réglage",
       "restarting": "Redémarrage...",
       "restartFailed": "Échec du redémarrage",
       "restartUnavailable": "Paramètres enregistrés. Les changements prendront effet au prochain démarrage du jeu",
-      "confirmRestart": "Basculer le calcul sur {mode} ? Le serveur va redémarrer."
+      "confirmRestart": "Basculer le calcul sur {mode} ? Le programme principal va redémarrer."
     },
     "windowReset": {
       "label": "Position et taille des fenêtres",

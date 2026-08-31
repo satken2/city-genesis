@@ -48,6 +48,7 @@
     "unitPeopleValue": "{{value}}人",
     "effectRangeTitle": "效果範圍",
     "effectRangeArea": "供給可達範圍",
+    "effectRangeExisting": "既有設施已覆蓋的範圍",
     "invalidParcel": "此建築無法建於此地塊上",
     "selectParcelHint": "請選擇計畫建設的地塊",
     "heightLimit": "高度限制",

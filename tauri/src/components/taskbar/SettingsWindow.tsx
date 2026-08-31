@@ -11,7 +11,7 @@
  * - 画面: HUD(アイコンパネル・コックピット・システムトレイ)を別のモニターに移動する、
  *   ウィンドウ位置・サイズのリセット
  * - サウンド: マスターボリューム・BGM・サウンドエフェクトのスライダー（ダミー）
- * - システム: 演算処理のCPU/GPU切り替え
+ * - システム: GPUアクセラレーションのCPU/GPU切り替え
  */
 
 import {
@@ -51,25 +51,46 @@ const FONT_SIZE_MIN = 8;
 const FONT_SIZE_MAX = 32;
 
 /**
+ * GPUアクセラレーション設定を操作可能にするか。
+ * 提供準備が整うまで Coming soon の札を出して行ごと無効化する。
+ * true に戻すだけで状態取得・切り替え・再起動の一連の動作が復活する。
+ */
+const COMPUTE_SETTING_ENABLED: boolean = false;
+
+/**
  * 設定1項目分の行
  * 左に項目名と補足文、右に操作UIを置く。
  * stretch を立てると操作UIが横幅いっぱいに伸びる(音量スライダー用)。
+ * disabled は未提供の項目向けで、操作UIを沈ませてクリックも通さない。
  */
 function SettingsRow({
   label,
   description,
+  badge,
   stretch = false,
+  disabled = false,
   children,
 }: {
   label: string;
   description?: ReactNode;
+  badge?: string;
   stretch?: boolean;
+  disabled?: boolean;
   children: ReactNode;
 }) {
+  const modifiers = [
+    stretch ? "settings-row--stretch" : "",
+    disabled ? "settings-row--disabled" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
   return (
-    <div className={`settings-row ${stretch ? "settings-row--stretch" : ""}`}>
+    <div className={`settings-row ${modifiers}`}>
       <div className="settings-row-label">
-        <span className="settings-row-name">{label}</span>
+        <span className="settings-row-name">
+          {label}
+          {badge != null && <span className="settings-row-badge">{badge}</span>}
+        </span>
         {description != null && <span className="settings-row-desc">{description}</span>}
       </div>
       <div className="settings-row-control">{children}</div>
@@ -138,16 +159,18 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         console.error("failed to load settings", err);
       });
 
-    fetchApi<{ enabled: boolean; active: boolean }>(
-      `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/system/gpu-status`
-    )
-      .then((data) => {
-        if (!cancelled) {
-          setGpuEnabled(data.enabled);
-          setGpuActive(data.active);
-        }
-      })
-      .catch(() => {});
+    if (COMPUTE_SETTING_ENABLED) {
+      fetchApi<{ enabled: boolean; active: boolean }>(
+        `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/system/gpu-status`
+      )
+        .then((data) => {
+          if (!cancelled) {
+            setGpuEnabled(data.enabled);
+            setGpuActive(data.active);
+          }
+        })
+        .catch(() => {});
+    }
 
     return () => {
       cancelled = true;
@@ -435,25 +458,29 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         <div className="settings-card">
           <SettingsRow
             label={t("settings.compute.label")}
+            badge={COMPUTE_SETTING_ENABLED ? undefined : t("settings.compute.comingSoon")}
+            disabled={!COMPUTE_SETTING_ENABLED}
             description={
-              <>
-                <span
-                  className={`settings-status-dot ${
-                    gpuRestarting
-                      ? "settings-status-dot--busy"
-                      : gpuActive
-                        ? "settings-status-dot--on"
-                        : ""
-                  }`}
-                />
-                {gpuRestarting
-                  ? t("settings.compute.restarting")
-                  : gpuActive
-                    ? t("settings.compute.statusActive")
-                    : t("settings.compute.statusInactive")}
-                {" / "}
-                {t("settings.compute.restartRequired")}
-              </>
+              COMPUTE_SETTING_ENABLED ? (
+                <>
+                  <span
+                    className={`settings-status-dot ${
+                      gpuRestarting
+                        ? "settings-status-dot--busy"
+                        : gpuActive
+                          ? "settings-status-dot--on"
+                          : ""
+                    }`}
+                  />
+                  {gpuRestarting
+                    ? t("settings.compute.restarting")
+                    : gpuActive
+                      ? t("settings.compute.statusActive")
+                      : t("settings.compute.statusInactive")}
+                  {" / "}
+                  {t("settings.compute.restartRequired")}
+                </>
+              ) : undefined
             }
           >
             <div className="settings-seg">
@@ -465,7 +492,7 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                     key={mode}
                     className={`settings-seg-btn ${isActive ? "active" : ""}`}
                     onClick={() => void handleGpuToggle(isGpu)}
-                    disabled={gpuRestarting || gpuEnabled === isGpu}
+                    disabled={!COMPUTE_SETTING_ENABLED || gpuRestarting || gpuEnabled === isGpu}
                     type="button"
                   >
                     {t(`settings.compute.${mode}`)}
