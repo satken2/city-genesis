@@ -6,10 +6,20 @@ agents:
       - 0
   200:
     model: true
-    prebuilt: false
+    prebuilt: true
+    variants:
+      - 0
+  201:
+    model: true
+    prebuilt: true
     variants:
       - 0
   401:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  402:
     model: true
     prebuilt: false
     variants:
@@ -19,7 +29,32 @@ agents:
     prebuilt: false
     variants:
       - 0
+  1001:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  1016:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1017:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  1019:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
   1021:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1025:
     model: true
     prebuilt: true
     variants:
@@ -77,6 +112,11 @@ agents:
   1059:
     model: true
     prebuilt: true
+    variants:
+      - 0
+  1060:
+    model: true
+    prebuilt: false
     variants:
       - 0
   1062:
