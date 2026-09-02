@@ -51,6 +51,7 @@ export const MODEL_PREBUILT: number = 5;
 export const MODEL_PORT: number = 6;
 export const MODEL_MASHUP: number = 7;
 export const MODEL_MODULAR_SHED: number = 8;
+export const MODEL_RAIL_YARD: number = 9;
 export const MASHUP_CELL_SIZE: number = 8.0;
 export const FAMILY_SINGLE: number = 1;
 export const FAMILY_COUPLE: number = 2;

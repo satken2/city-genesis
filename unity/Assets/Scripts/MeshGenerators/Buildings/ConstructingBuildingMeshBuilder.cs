@@ -120,10 +120,11 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
         }
 
         // --- 3. 足場リングとクレーン ---
-        // 地面アセット（畑・庭）と岸壁には足場・クレーンを立てない（土のみの現場表現）
+        // 地面アセット（畑・庭）・岸壁・車両基地には足場・クレーンを立てない（土のみの現場表現）
         bool wantsStructures = footprint != null
             && modelType != Constants.MODEL_MODULAR_GROUND
-            && modelType != Constants.MODEL_PORT;
+            && modelType != Constants.MODEL_PORT
+            && modelType != Constants.MODEL_RAIL_YARD;
 
         if (wantsStructures)
         {

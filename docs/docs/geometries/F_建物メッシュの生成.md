@@ -18,6 +18,7 @@
 | **MODEL_PREBUILT**       | 既成パーツ組み立て              | [[F3_既成建物のメッシュ生成]]。電波塔やオブジェ、銅像、観覧車など、通常の建物とは全く異なる形状の建物に適用する                                                             |
 | **MODEL_PORT**           | 厚みのある板（岸壁）をプロシージャル生成   | [[F4_港湾岸壁のメッシュ生成]]。海岸土地区画（PARCEL_SHORE）の港湾（BUILDING_PORT）用。モジュラーの壁・角パーツは使わない                                            |
 | **MODEL_MASHUP**         | 複数のサブ建物を既成パーツで配置       | [[F6_マッシュアップ建物のメッシュ生成]]。学校（校舎＋体育館）のような複数棟の複合施設用。バックエンドが土地区画を8m×8mセルに分割して決めた配置計画（`sub_buildings`）に従い、各棟を既成パーツと同じ規則で積み上げる |
+| **MODEL_RAIL_YARD**      | 線路ユニットをプロシージャル配置       | [[F9_車両基地のメッシュ生成]]。鉄道車両基地用。並行線路・架線・車止め・検修庫を敷地に並べ、集約線路を接続端子ノード（`depot_node_id`）の位置へ曲線で収束させる |
 
 model_type とは別軸で、status が `STATUS_CONSTRUCTING` の建物はすべて「工事現場」メッシュに差し替わる（[[F5_工事中建物のメッシュ生成]]）。分岐は model_type 分岐より先にある。
 
@@ -48,6 +49,7 @@ model_type とは別軸で、status が `STATUS_CONSTRUCTING` の建物はすべ
                           │    ├─ MODEL_PREBUILT    → PreBuiltBuildingMeshBuilder（F3）
                           │    ├─ MODEL_PORT        → PortBuildingMeshBuilder（F4）
                           │    ├─ MODEL_MASHUP      → MashupBuildingMeshBuilder（F6）
+                          │    ├─ MODEL_RAIL_YARD   → RailYardBuildingMeshBuilder（F9）
                           │    └─ その他             → BuildingMeshBuilder.GenerateSimpleBuilding（白い箱）
                           │
                                 ▼
@@ -111,7 +113,7 @@ N辺ポリゴンのとき：
 - **MODEL_MODULAR_FLAT / HOUSE / GABLE / SHED** — 所属する土地区画の基準標高（`parcel.altitude`）。
   傾斜地でも建物は水平面に接地し、谷側にできる地形との隙間は基盤（§8.2）が埋める。
   区画が取得できない場合は `center_point` 位置の地形標高にフォールバックする。
-- **それ以外（MODEL_MODULAR_GROUND / MODEL_PREBUILT / MODEL_PORT / MODEL_MASHUP）** — `center_point` 位置の地形標高。
+- **それ以外（MODEL_MODULAR_GROUND / MODEL_PREBUILT / MODEL_PORT / MODEL_MASHUP / MODEL_RAIL_YARD）** — `center_point` 位置の地形標高。
   MODEL_MASHUP では、さらに各サブ建物が自分の配置座標の地形標高へ個別に接地する（[[F6_マッシュアップ建物のメッシュ生成]] §4）。
 
 ---
@@ -146,7 +148,13 @@ Assets/Resources/Models/
 │   │       ├── tile.prefab          # タイルオブジェクト（MODEL_MODULAR_GROUND 専用）
 │   │       ├── roofprop.prefab      # 塔屋
 │   │       ├── entrance.prefab      # エントランス（前面の辺の中央・地面レベル）
-│   │       └── port_crane.prefab    # 荷役クレーン（MODEL_PORT 専用。水際に実寸配置）
+│   │       ├── port_crane.prefab    # 荷役クレーン（MODEL_PORT 専用。水際に実寸配置）
+│   │       ├── yard_track.prefab    # 線路タイル（MODEL_RAIL_YARD 専用。+Zが線路方向）
+│   │       ├── yard_wire.prefab     # 架線タイル（同上。線路タイルと同一TRSで重ねる）
+│   │       ├── yard_pole.prefab     # 架線柱（同上。「右側用」著作）
+│   │       ├── yard_beam.prefab     # 門型梁（同上。著作幅6mを柱間へXスケール）
+│   │       ├── yard_stop.prefab     # 車止め（同上。行き止まり端に実寸配置）
+│   │       └── yard_shed.prefab     # 検修庫（同上。原点=XZ中心・Y=0接地）
 │   ├── a{agent_variant}/
 │   │   └── {threshold}/
 │   │       ├── base-prebuilt.prefab
@@ -203,6 +211,12 @@ floor            地面マテリアル用
 generic-wall     無地の壁マテリアル用（切妻屋根の妻壁。[[F1_モジュラー建物のメッシュ生成]] §3）
 tile             タイルオブジェクト（[[F2_地面アセットのメッシュ生成]] 専用）
 port_crane       荷役クレーン（[[F4_港湾岸壁のメッシュ生成]] §6 専用。水際に実寸スケールなしで並べる）
+yard_track       線路タイル（[[F9_車両基地のメッシュ生成]] 専用。以下 yard_* も同様）
+yard_wire        架線タイル
+yard_pole        架線柱（「右側用」著作。反対側はヨー180°配置）
+yard_beam        門型梁（唯一Xスケールされるパーツ。著作幅6m→柱間）
+yard_stop        車止め
+yard_shed        検修庫
 scaffold-wall    足場の辺パーツ（工事中表示専用。[[F5_工事中建物のメッシュ生成]] §4）
 scaffold-corner  足場の角パーツ（工事中表示専用。[[F5_工事中建物のメッシュ生成]] §4）
 crane-base       クレーン最下段（工事中表示専用。[[F5_工事中建物のメッシュ生成]] §5）
@@ -642,6 +656,7 @@ Dynamicセルかどうかの判定はメッシュ生成器側では行わない�
 | MODEL_PREBUILT | 建物底面 | 描画された実高さ（[[F3_既成建物のメッシュ生成]] §4） |
 | MODEL_PORT | 岸壁フットプリント | 岸壁上面の高さ（[[F4_港湾岸壁のメッシュ生成]] §7） |
 | MODEL_MASHUP | 土地区画 | 描画された最も高いサブ建物の天端（[[F6_マッシュアップ建物のメッシュ生成]] §6） |
+| MODEL_RAIL_YARD | 建物底面 | 固定 7m（架線柱の天端相当。[[F9_車両基地のメッシュ生成]] §7） |
 | 工事中（STATUS_CONSTRUCTING） | 建物底面 | 施工済み階の高さ（[[F5_工事中建物のメッシュ生成]] §7） |
 
 ---
@@ -680,6 +695,7 @@ Dynamicセルかどうかの判定はメッシュ生成器側では行わない�
 | **`PreBuiltBuildingMeshBuilder.cs`**        | `IBuildingMeshGenerator`。既成パーツ組み立て（[[F3_既成建物のメッシュ生成]]）。                                                                         |
 | **`PortBuildingMeshBuilder.cs`**            | `IBuildingMeshGenerator`。海岸線で底面ポリゴンをカットし、厚みのある岸壁スラブを押し出して塔屋・荷役クレーンを配置する（[[F4_港湾岸壁のメッシュ生成]]）。                                                  |
 | **`MashupBuildingMeshBuilder.cs`**          | `IBuildingMeshGenerator`。`sub_buildings` の配置計画に従い、複数のサブ建物を既成パーツと同じ積み上げ規則で配置する（[[F6_マッシュアップ建物のメッシュ生成]]）。                                        |
+| **`RailYardBuildingMeshBuilder.cs`**        | `IBuildingMeshGenerator`。フットプリントと接続端子ノード位置から並行線路・集約曲線・架線・検修庫をプロシージャルに配置する（[[F9_車両基地のメッシュ生成]]）。 |
 | **`ConstructingBuildingMeshBuilder.cs`**    | `IBuildingMeshGenerator`。工事中専用の「工事現場」メッシュ（土マウンド + 足場リング + クレーン）を生成する（[[F5_工事中建物のメッシュ生成]]）。model_type 分岐より先に status で分岐する。 |
 | **`DefaultBodyBuilder.cs`**                 | **static クラス**。モジュラーパーツが一切存在しない場合のフォールバック躯体。底面ポリゴンを高さまで押し出した壁面と地面パネルを生成する（屋根は屋根ビルダーが担当）。 |
 | **`BuildingMeshUtils.cs`**                  | **static クラス**。パーツの存在確認・パス解決（`common` フォールバック含む）、プレハブ配下の全メッシュ結合、閾値 suffix の解決、積み上げモジュール配置などの共通処理。屋根ビルダーが共有するポリゴン幾何（`OffsetPolygonOutward` = 軒の出の輪郭、`TryResolveMinAreaRect` = 最小面積外接矩形）もここに置く。 |

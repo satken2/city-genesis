@@ -14,6 +14,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     private static readonly IBuildingMeshGenerator prebuiltGenerator = new PreBuiltBuildingMeshBuilder();
     private static readonly IBuildingMeshGenerator portGenerator = new PortBuildingMeshBuilder();
     private static readonly IBuildingMeshGenerator mashupGenerator = new MashupBuildingMeshBuilder();
+    private static readonly IBuildingMeshGenerator railYardGenerator = new RailYardBuildingMeshBuilder();
     private static readonly IBuildingMeshGenerator constructingGenerator = new ConstructingBuildingMeshBuilder(ConstructionSiteProfile.Construction);
     private static readonly IBuildingMeshGenerator demolishingGenerator = new ConstructingBuildingMeshBuilder(ConstructionSiteProfile.Demolition);
     private static readonly IBuildingMeshGenerator collapsedGenerator = new CollapsedBuildingMeshBuilder();
@@ -70,6 +71,9 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
                 break;
             case Constants.MODEL_MASHUP:
                 result = mashupGenerator.Generate(buildingData, isDynamic);
+                break;
+            case Constants.MODEL_RAIL_YARD:
+                result = railYardGenerator.Generate(buildingData, isDynamic);
                 break;
             default:
                 UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,

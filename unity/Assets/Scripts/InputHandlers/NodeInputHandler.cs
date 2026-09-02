@@ -260,6 +260,10 @@ public class NodeInputHandler : MonoBehaviour, IInputHandler
                     {
                         pathManager.UpdateCachedNodePosition(nodeId, backendPosition);
                     }
+
+                    // 車両基地（MODEL_RAIL_YARD）は端子位置へ線路を収束させて描画するため、
+                    // 端子の移動が確定したら所属施設のメッシュを新しい位置で再生成する
+                    BuildingManager.Instance?.OnTerminalNodeMoved(nodeId);
                 }
                 else
                 {

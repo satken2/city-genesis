@@ -1179,6 +1179,26 @@ public class BuildingManager : BaseApiDataManager
             && building != null;
     }
 
+    /// <summary>
+    /// 接続端子ノードの移動確定後（PATCH /nodes/{id} 成功時）に呼ばれる。
+    /// 端子位置から敷地内の線路を組み立てる車両基地（MODEL_RAIL_YARD）は、
+    /// version が変わらなくても見た目がノード位置に依存するため、所属施設を
+    /// 逆引きして新しい端子位置でメッシュを再生成する。他の model_type は
+    /// 端子位置が見た目に影響しないので何もしない。
+    /// </summary>
+    public void OnTerminalNodeMoved(int nodeId)
+    {
+        if (!TryGetInfraTerminalOwner(nodeId, out BuildingSummary building))
+        {
+            return;
+        }
+        if (BuildingMeshBuilder.GetModelType(building) != Constants.MODEL_RAIL_YARD)
+        {
+            return;
+        }
+        CreateOrUpdateBuildingObject(building, IsBuildingInDynamicCell(building), forceRebuild: true);
+    }
+
     protected override void UnloadCell(Vector2Int cellIndex)
     {
         if (!buildingIdsByCell.TryGetValue(cellIndex, out HashSet<int> ids)) return;
