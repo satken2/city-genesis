@@ -166,7 +166,7 @@ public class TrackPath : IPathMeshGenerator
         // 一定間隔で中間点を補間し、地形高さを反映させる。
         // ウェイポイントの角は Broken 点として維持する（道路のような角の切断・充填は行わない。
         // 線路は通常 curved=true で滑らかに敷設される想定で、折れ線線路の角は簡易表現とする）。
-        if (!isCurved)
+        if (!isCurved && (points.Count == 2 || (pathData.GetWaypointList()?.Count ?? 0) > 0))
         {
             bool followTerrain = PathManager.GetPathFollowTerrain(pathData)
                 && AreAllAnchorsOnGround(pathData);
@@ -1016,24 +1016,17 @@ public class TrackPath : IPathMeshGenerator
         GameObject go = new GameObject($"RailConnector_{index}");
         go.transform.SetParent(parent, false);
 
-        // 計算済みのローカル点列（Yは基準面+TRACK_ABOVE_SPLINE込み）をそのままスプライン制御点にする。
-        SplineComputer spline = go.AddComponent<SplineComputer>();
-        SplinePoint[] splinePoints = new SplinePoint[connector.Points.Count];
-        for (int i = 0; i < connector.Points.Count; i++)
-        {
-            SplinePoint point = new SplinePoint(connector.Points[i]);
-            point.size = 1f;
-            point.color = Color.white;
-            point.type = SplinePoint.Type.SmoothMirrored;
-            splinePoints[i] = point;
-        }
-
-        spline.SetPoints(splinePoints, SplineComputer.Space.Local);
-        spline.type = Spline.Type.CatmullRom;
-        spline.sampleRate = 24;
-        spline.sampleMode = SplineComputer.SampleMode.Uniform;
-        spline.RebuildImmediate();
-
+        var points = new List<Vector3>(connector.Points);
+        // 端部の微小区間を断面の接線へ合わせ、再補間によるレール端の回転を防ぐ。
+        float head = Vector3.Distance(points[0], points[1]);
+        float tail = Vector3.Distance(points[points.Count - 1], points[points.Count - 2]);
+        if (connector.StartDirection.sqrMagnitude > 0f)
+            points[1] = new Vector3(points[0].x + connector.StartDirection.x * head, points[0].y + connector.StartSlope * head, points[0].z + connector.StartDirection.y * head);
+        if (connector.EndDirection.sqrMagnitude > 0f)
+            points[points.Count - 2] = new Vector3(points[points.Count - 1].x - connector.EndDirection.x * tail, points[points.Count - 1].y - connector.EndSlope * tail, points[points.Count - 1].z - connector.EndDirection.y * tail);
+        // BuildSpline はワールド点を受け取る。コネクタはノードローカル点なのでここで変換する。
+        for (int i = 0; i < points.Count; i++) points[i] = parent.TransformPoint(points[i]);
+        SplineComputer spline = RoadPath.BuildSpline(go, points, true);
         SplineMesh splineMesh = go.AddComponent<SplineMesh>();
         splineMesh.spline = spline;
         SplineMesh.Channel channel = splineMesh.AddChannel(prefabMf.sharedMesh, $"RailConnector_{index}");

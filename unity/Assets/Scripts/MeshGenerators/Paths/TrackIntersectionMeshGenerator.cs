@@ -5,7 +5,7 @@ using GeneratedModels;
 /// <summary>
 /// 線路（PATH_TRACK）・モノレール（PATH_MONORAIL）ノードのポイント（分岐器）・平面交差の描画を担う。
 ///
-/// 交差点の凸包（道床ハル）・切断点の計算とパス端の切り詰めは道路と共通で
+/// 交差点の共通外周（道床）・切断点の計算とパス端の切り詰めは道路と共通で
 /// RoadIntersectionMeshGenerator が行う（ハルのマテリアルも body プレハブ由来のため、
 /// 線路ノードでは自動的に道床の見た目になる）。本クラスは「どの線路ペアの間にレールを敷くか」の
 /// 判定と、コネクタ形状（RailConnectorSpec）の計算だけを追加で行う。
@@ -18,11 +18,7 @@ using GeneratedModels;
 /// これにより「見た目に敷かれているレール」と「経路探索で通れる方向」が一致し、
 /// Y字合流の折り返し側やダイヤモンドクロッシングの90°転回側にはレールが描かれない。
 ///
-/// 端点接線はアンカー（最寄りのウェイポイントまたは反対側端点）方向から導出する。
-/// Unityの CalculatePathPoints は始点・終点の制御点をAPIから受け取らず Catmull-Rom で
-/// 自動計算するため、端点における視覚上の接線方向はこのアンカー方向と一致する
-/// （バックエンド path_end_tangent の「制御点が退化している場合はウェイポイント方向」という
-/// フォールバック規則とも同旨）。
+/// 転回判定は制御点優先の論理端点接線、描画は切断断面の接線と勾配を使う。
 ///
 /// 道路と線路が混在するノード（踏切）でも、線路ペアが通行可能な向きならレールが
 /// アスファルトハルの上に敷かれ、踏切らしい見た目になる。
@@ -52,6 +48,8 @@ public static class TrackIntersectionMeshGenerator
     {
         public int PathId;
         public Vector2 Direction;
+        public Vector2 LogicalDirection;
+        public float Slope;
         public Vector2 ConnectionPoint;
         public bool NodeIsStart;
         public int Lanes;
@@ -67,7 +65,7 @@ public static class TrackIntersectionMeshGenerator
     /// <param name="connectionPoints">
     /// RoadIntersectionMeshGenerator が計算した、pathId → 交差点ハル縁の切断点（XZ平面）。
     /// </param>
-    public static List<RailConnectorSpec> BuildRailConnectorSpecs(int nodeId, Vector3 nodePosition, bool horizontalPlane, List<PathSummary> paths, Dictionary<int, Vector2> connectionPoints)
+    public static List<RailConnectorSpec> BuildRailConnectorSpecs(int nodeId, Vector3 nodePosition, bool horizontalPlane, List<PathSummary> paths, Dictionary<int, Vector2> connectionPoints, Dictionary<int, PathEndSection> sections = null)
     {
         if (paths == null || connectionPoints == null)
         {
@@ -84,6 +82,7 @@ public static class TrackIntersectionMeshGenerator
             Vector2 direction = directionPoint - nodePoint;
             if (direction.sqrMagnitude < 1e-6f) continue;
             direction.Normalize();
+            if (sections != null && sections.TryGetValue(path.path_id, out var section)) direction = section.Direction;
 
             TrackPath.GetTrackMasterParams(path, out float width, out int lanes, out _, out _, out _, out _, out _, out _);
 
@@ -91,6 +90,8 @@ public static class TrackIntersectionMeshGenerator
             {
                 PathId = path.path_id,
                 Direction = direction,
+                LogicalDirection = (directionPoint - nodePoint).normalized,
+                Slope = sections != null && sections.TryGetValue(path.path_id, out var slopeSection) ? slopeSection.Tangent.y / Mathf.Max(1e-5f, IntersectionPolygonUtil.XZ(slopeSection.Tangent).magnitude) : 0f,
                 ConnectionPoint = cut,
                 NodeIsStart = path.start_node_id == nodeId,
                 Lanes = Mathf.Max(1, lanes),
@@ -115,10 +116,11 @@ public static class TrackIntersectionMeshGenerator
             {
                 TrackEntry a = entries[i];
                 TrackEntry b = entries[j];
+                if (a.PathType != b.PathType) continue;
 
                 // A→Bの偏向角: 到着方向(-a.Direction)と発進方向(b.Direction)のなす角。
                 // B→Aも同じ角度になる（対称）ため、順序なしペアごとに1回だけ判定すればよい。
-                float cosDeflection = Vector2.Dot(-a.Direction, b.Direction);
+                float cosDeflection = Vector2.Dot(-a.LogicalDirection, b.LogicalDirection);
                 if (cosDeflection < cosLimit) continue;
 
                 AddConnectorsForPair(specs, a, b, nodePosition, horizontalPlane);
@@ -132,7 +134,7 @@ public static class TrackIntersectionMeshGenerator
     /// 通行可能と判定された線路ペア(A, B)の間に、軌道ごとのレールコネクタを追加する。
     /// 軌道の対応付けは、走行フレーム（A→Bへ進む向きの右手方向）での横位置の順序で行う
     /// （複線の直進では右側軌道どうし・左側軌道どうしが繋がる）。
-    /// 軌道数が異なるペアは中心線1本のコネクタで近似する（v1の簡易表現）。
+    /// 軌道数が異なるペアは横位置順を保つ多対一対応で、実際の全軌道端へ接続する。
     /// </summary>
     private static void AddConnectorsForPair(List<RailConnectorSpec> specs, TrackEntry a, TrackEntry b, Vector3 nodePosition, bool horizontalPlane)
     {
@@ -151,19 +153,18 @@ public static class TrackIntersectionMeshGenerator
         List<float> lateralsA = BuildSortedLaterals(a, signA);
         List<float> lateralsB = BuildSortedLaterals(b, signB);
 
-        // 軌道数が同じなら横位置順に1対1対応、異なるなら中心線1本で近似する。
-        int connectorCount;
-        if (lateralsA.Count == lateralsB.Count)
+        // 横位置の順序を保つ単調対応で全軌道端を接続する。軌道数の少ない側で合流する。
+        int connectorCount = Mathf.Max(lateralsA.Count, lateralsB.Count);
+        var mappedA = new List<float>();
+        var mappedB = new List<float>();
+        for (int k = 0; k < connectorCount; k++)
         {
-            connectorCount = lateralsA.Count;
+            float t = connectorCount == 1 ? 0f : (float)k / (connectorCount - 1);
+            mappedA.Add(lateralsA[Mathf.RoundToInt(t * (lateralsA.Count - 1))]);
+            mappedB.Add(lateralsB[Mathf.RoundToInt(t * (lateralsB.Count - 1))]);
         }
-        else
-        {
-            connectorCount = 1;
-            lateralsA = new List<float> { 0f };
-            lateralsB = new List<float> { 0f };
-        }
-
+        lateralsA = mappedA;
+        lateralsB = mappedB;
         Vector2 rightA = RightOf(travelA);
         Vector2 rightB = RightOf(travelB);
 
@@ -191,7 +192,7 @@ public static class TrackIntersectionMeshGenerator
                 points.Add(ToLocalTrackPoint(pt, nodePosition, horizontalPlane));
             }
 
-            specs.Add(new RailConnectorSpec(points, prefabSource.PathVariant, prefabSource.PathType));
+            specs.Add(new RailConnectorSpec(points, prefabSource.PathVariant, prefabSource.PathType) { StartDirection = travelA, EndDirection = travelB, StartSlope = -a.Slope, EndSlope = b.Slope });
         }
     }
 

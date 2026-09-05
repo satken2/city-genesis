@@ -2,450 +2,218 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using NetTopologySuite;
 using NetTopologySuite.Geometries;
 using GeneratedModels;
 
+/// <summary>道路本体と交差点が共用する切断断面。座標はワールド、Direction はノードから外向き。</summary>
+public sealed class PathEndSection
+{
+    public Vector3 Position;
+    public Vector2 Direction;
+    public Vector3 Tangent;
+    public Vector3 Normal => Vector3.Cross(Tangent, new Vector3(Direction.y, 0f, -Direction.x)).normalized;
+    public float Width;
+    public float Distance;
+    public float BodyDepth;
+    public Vector2 Center => new Vector2(Position.x, Position.z);
+    public Vector2 Left => new Vector2(-Direction.y, Direction.x);
+}
+
+/// <summary>隣り合う入口間の外周。道路面・歩道・壁が同じ輪郭を参照する。</summary>
+public sealed class IntersectionCorner
+{
+    public int FromPath;
+    public int ToPath;
+    public readonly List<Vector2> Points = new List<Vector2>();
+    public readonly List<Vector2> Directions = new List<Vector2>();
+}
+
 public static class IntersectionPolygonUtil
 {
-    private const float MinDirectionSqrMagnitude = 1e-6f;
-
-    // a, b: (x, z) を Vector2 で持つと仮定
-    private static Polygon MakeRoadRect(Vector2 a, Vector2 b, float width, GeometryFactory gf)
-    {
-        float ax = a.x;
-        float az = a.y;
-        float bx = b.x;
-        float bz = b.y;
-
-        float dx = bx - ax;
-        float dz = bz - az;
-        float length = Mathf.Sqrt(dx * dx + dz * dz);
-        if (length == 0f)
-        {
-            throw new ArgumentException("startPoint と endPoint が同じです。");
-        }
-
-        float ux = dx / length;
-        float uz = dz / length;
-        float nx = -uz;
-        float nz = ux;
-        float hw = width * 0.5f;
-
-        var c1 = new Coordinate(ax + nx * hw, az + nz * hw);
-        var c2 = new Coordinate(ax - nx * hw, az - nz * hw);
-        var c3 = new Coordinate(bx - nx * hw, bz - nz * hw);
-        var c4 = new Coordinate(bx + nx * hw, bz + nz * hw);
-
-        // ポリゴン閉じるために先頭を最後にも入れる
-        var coords = new[]
-        {
-            c1, c2, c3, c4, c1
-        };
-
-        return gf.CreatePolygon(coords);
-    }
-
     public class IntersectionCalculationResult
     {
         public Geometry Geometry { get; set; }
-        public Dictionary<int, Vector2> ConnectionPoints { get; set; } = new Dictionary<int, Vector2>();
+        public bool RequiresMoreSpace { get; set; }
+        public List<IntersectionCorner> Corners { get; } = new List<IntersectionCorner>();
+        public Dictionary<int, Vector2> ConnectionPoints { get; } = new Dictionary<int, Vector2>();
+        public Dictionary<int, PathEndSection> Sections { get; } = new Dictionary<int, PathEndSection>();
     }
 
     /// <summary>
-    /// 交差点ポリゴン生成
-    /// 戻り値は Polygon または MultiPolygon になり得るので Geometry を返す。
+    /// 入口断面を角度順に結ぶ。切断上限は呼び出し元が隣接ノードの接続状態から指定する。
+    /// 描画点列が供給される場合は、その点列上で断面を求めるため曲線の制御点を動かさない。
     /// </summary>
-    public static IntersectionCalculationResult ComputeIntersectionPolygon(
-        int intersectionNodeId,
-        Vector2 intersectionPos,   // (x, z)
-        List<PathSummary> paths,
-        GeometryFactory gf,
-        Func<PathSummary, float> widthResolver = null
-    )
+    public static IntersectionCalculationResult ComputeIntersectionPolygon(int intersectionNodeId,
+        Vector2 intersectionPos, List<PathSummary> paths, GeometryFactory gf,
+        Func<PathSummary, float> widthResolver = null, Func<PathSummary, List<Vector3>> pointResolver = null, Func<PathSummary, float> cutLimitResolver = null)
     {
-        double ix = intersectionPos.x;
-        double iz = intersectionPos.y;
-
-        // 交差点に接続している道路だけ抽出
-        var connectedPaths = new List<PathSummary>();
-        foreach (var p in paths)
+        var entries = new List<(PathSummary path, List<Vector3> points, float width, Vector2 direction)>();
+        foreach (var p in paths.OrderBy(p => p.path_id))
         {
-            if (p.start_node_id == intersectionNodeId || p.end_node_id == intersectionNodeId)
-            {
-                connectedPaths.Add(p);
-            }
+            if (p.start_node_id != intersectionNodeId && p.end_node_id != intersectionNodeId) continue;
+            float width = widthResolver != null ? widthResolver(p) : p.width;
+            if (width <= 0f) continue;
+            var source = pointResolver != null ? pointResolver(p) : SamplePlan(p);
+            if (source == null || source.Count < 2) continue;
+            var points = new List<Vector3>(source);
+            if (p.end_node_id == intersectionNodeId) points.Reverse();
+            Vector2 direction = XZ(points[1] - points[0]).normalized;
+            if (direction.sqrMagnitude < 1e-6f) continue;
+            entries.Add((p, points, width, direction));
         }
-
-        if (connectedPaths.Count < 2)
-        {
-            throw new ArgumentException("少なくとも2本の道路が必要です。");
-        }
-
-        // (PathSummary, 交差点側, 交差点側とは反対の端, 道路ポリゴン)
-        var roadPolys = new List<(PathSummary path, Vector2 intersectionSide, Vector2 outerSide, float width, Polygon poly)>();
-        foreach (var p in connectedPaths)
-        {
-            float resolvedWidth = widthResolver != null ? widthResolver(p) : p.width;
-            if (resolvedWidth <= 0f)
-            {
-                continue;
-            }
-
-            // 交差点中心座標（始点 or 終点）と、その直近の点（ウェイポイント or 反対側の端点）を取得して
-            // 道路の進入角度を決定する。
-            Vector2 intersectionSide;
-            Vector2 directionPoint; // 角度計算用の参照点
-
-            // 端点の座標
-            var sp = p.GetStartPointList();
-            var ep = p.GetEndPointList();
-            if (!TryGetPoint2D(sp, out Vector2 pStart) || !TryGetPoint2D(ep, out Vector2 pEnd))
-            {
-                Debug.LogWarning($"[IntersectionPolygonUtil] Node {intersectionNodeId}: path {p.path_id} has invalid endpoints. skipped.");
-                continue;
-            }
-
-            if (p.start_node_id == intersectionNodeId)
-            {
-                intersectionSide = pStart;
-                directionPoint = TryFindWaypointDirectionPoint(p.GetWaypointList(), intersectionSide, true, out Vector2 startWaypointPoint) ? startWaypointPoint : pEnd;
-            }
-            else
-            {
-                intersectionSide = pEnd;
-                directionPoint = TryFindWaypointDirectionPoint(p.GetWaypointList(), intersectionSide, false, out Vector2 endWaypointPoint) ? endWaypointPoint : pStart;
-            }
-
-            // 進行方向ベクトル
-            Vector2 dir = directionPoint - intersectionSide;
-            // ウェイポイントがノードと同じ座標に重なる場合は、元の端点方向を使う。
-            if (dir.sqrMagnitude < MinDirectionSqrMagnitude)
-            {
-                if (p.start_node_id == intersectionNodeId)
-                {
-                    dir = pEnd - pStart;
-                }
-                else
-                {
-                    dir = pStart - pEnd;
-                }
-            }
-
-            if (dir.sqrMagnitude < MinDirectionSqrMagnitude)
-            {
-                Debug.LogWarning($"[IntersectionPolygonUtil] Node {intersectionNodeId}: path {p.path_id} has no valid direction. skipped.");
-                continue;
-            }
-            dir.Normalize();
-
-            // 矩形生成用の「外側の点」を計算
-            // ウェイポイントが交差点に近い場合、そのまま使うと矩形が短くなりすぎて交差判定に失敗する可能性があるため、
-            // 元の道路長（あるいは十分な長さ）まで延長した点を使用する。
-            float originalLength = Vector2.Distance(pStart, pEnd);
-            // 交差計算のために最低限の長さを確保 (例えば道路幅の数倍あれば確実だが、元の長さがあれば概ねOK)
-            float length = Mathf.Max(originalLength, resolvedWidth * 5f);
-            
-            Vector2 outerSide = intersectionSide + dir * length;
-
-            var poly = MakeRoadRect(intersectionSide, outerSide, resolvedWidth, gf);
-            roadPolys.Add((p, intersectionSide, outerSide, resolvedWidth, poly));
-        }
-
-        if (roadPolys.Count < 2)
-        {
-            throw new ArgumentException("交差点計算に使える道路方向が2本未満です。");
-        }
-
-        // 全ての道路ペアで交差領域を取る
-        var pairInters = new List<Geometry>();
-        int n = roadPolys.Count;
-        for (int i = 0; i < n; i++)
-        {
-            for (int j = i + 1; j < n; j++)
-            {
-                // 3本以上の道路が集まる交差点において、ほぼ一直線に並ぶ道路ペアの交差判定を除外する。
-                // わずかに曲がった直進道路（例えば179.9度）の交差領域は無限遠まで伸びる超巨大な平行四辺形となり、
-                // それが交差点全体のサイズを異常に広げてしまうバグを防ぐため。
-                if (n >= 3)
-                {
-                    Vector2 dirI = (roadPolys[i].outerSide - roadPolys[i].intersectionSide).normalized;
-                    Vector2 dirJ = (roadPolys[j].outerSide - roadPolys[j].intersectionSide).normalized;
-                    if (Vector2.Dot(dirI, dirJ) < -0.95f)
-                    {
-                        continue;
-                    }
-                }
-
-                var polyI = roadPolys[i].poly;
-                var polyJ = roadPolys[j].poly;
-
-                var inter = polyI.Intersection(polyJ);
-                if (!inter.IsEmpty && inter.Area > 1e-6)
-                {
-                    pairInters.Add(inter);
-                }
-            }
-        }
-
         var result = new IntersectionCalculationResult();
-
-        // 1つも重なりがなければ交点のみ
-        if (pairInters.Count == 0)
+        if (entries.Count < 2) { result.Geometry = gf.CreatePoint(new Coordinate(intersectionPos.x, intersectionPos.y)); return result; }
+        float maxWidth = entries.Max(e => e.width);
+        foreach (var e in entries)
         {
-            Debug.LogWarning($"[IntersectionPolygonUtil] Node {intersectionNodeId}: no pair intersections, returning point.");
-            result.Geometry = gf.CreatePoint(new Coordinate(ix, iz));
-            // 接続点は計算できない（あるいは交差点中心とするか）が、
-            // 重なりがない＝交差点として成立していない可能性が高いので空で返す
-            return result;
+            float length = Length(e.points);
+            float cut = Math.Max(0.5f, maxWidth * 0.5f);
+            foreach (var other in entries)
+            {
+                if (other.path.path_id == e.path.path_id) continue;
+                float dot = Mathf.Clamp(Vector2.Dot(e.direction, other.direction), -1f, 1f);
+                float sin = Mathf.Sqrt(Mathf.Max(0f, 1f - dot * dot));
+                // 対向する道路は幅移行区間だけを必要とする。同方向の鋭角分岐は長さ上限で制限する。
+                if (dot > -0.98f)
+                    cut = Mathf.Max(cut, (other.width + e.width * Mathf.Max(0f, dot)) * 0.5f / Mathf.Max(0.1f, sin));
+            }
+            float limit = cutLimitResolver != null ? cutLimitResolver(e.path) : length * 0.95f;
+            cut = Mathf.Min(cut + maxWidth * 0.25f, Mathf.Max(0f, limit));
+            var section = AtDistance(e.points, cut);
+            section.Width = e.width;
+            result.Sections[e.path.path_id] = section;
+            result.ConnectionPoints[e.path.path_id] = section.Center;
         }
-
-        // unary_union 相当（順次 Union）
-        Geometry overlapRegion = pairInters[0];
-        for (int i = 1; i < pairInters.Count; i++)
+        var ordered = result.Sections.OrderBy(s => Mathf.Atan2(s.Value.Direction.y, s.Value.Direction.x)).ThenBy(s => s.Key).ToList();
+        var corners = new List<Coordinate>();
+        for (int i = 0; i < ordered.Count; i++)
         {
-            overlapRegion = overlapRegion.Union(pairInters[i]);
+            var pair = ordered[i];
+            var next = ordered[(i + 1) % ordered.Count];
+            var s = pair.Value; var n = next.Value;
+            Vector2 right = s.Center - s.Left * s.Width * 0.5f;
+            Vector2 left = s.Center + s.Left * s.Width * 0.5f;
+            Vector2 end = n.Center - n.Left * n.Width * 0.5f;
+            corners.Add(new Coordinate(right.x, right.y));
+            corners.Add(new Coordinate(left.x, left.y));
+            var corner = new IntersectionCorner { FromPath = pair.Key, ToPath = next.Key };
+            float length = Vector2.Distance(left, end);
+            Vector2 p1 = left - s.Direction * length / 3f;
+            Vector2 p2 = end - n.Direction * length / 3f;
+            int count = Mathf.Clamp(Mathf.CeilToInt(length / 0.5f), 4, 32);
+            for (int j = 0; j <= count; j++)
+            {
+                float t = (float)j / count, u = 1f - t;
+                Vector2 p = u*u*u*left + 3*u*u*t*p1 + 3*u*t*t*p2 + t*t*t*end;
+                Vector2 direction = (3*u*u*(p1-left) + 6*u*t*(p2-p1) + 3*t*t*(end-p2)).normalized;
+                corner.Points.Add(p); corner.Directions.Add(direction);
+                if (j > 0 && j < count) corners.Add(new Coordinate(p.x,p.y));
+            }
+            result.Corners.Add(corner);
         }
-
-        var clippedRoads = new List<Geometry>();
-        var terminalCorners = new List<Vector2>();
-
-        foreach (var rp in roadPolys)
+        corners.Add(corners[0].Copy());
+        var polygon = gf.CreatePolygon(corners.ToArray());
+        // 短すぎる枝を無理に修復すると入口断面が消えるため、接合に必要な空間不足を明示する。
+        bool valid = polygon.IsValid && polygon.Area > 1e-6;
+        if (valid) foreach (var section in result.Sections.Values)
         {
-            var p = rp.path;
-            var intersectionSide = rp.intersectionSide;
-            var outerSide = rp.outerSide;
-            var poly = rp.poly;
-
-            var inter = poly.Intersection(overlapRegion);
-            if (inter.IsEmpty || inter.Area < 1e-6)
-            {
-                continue;
-            }
-
-            // 交差点側の端点を start に固定
-            Vector2 start = intersectionSide;
-            Vector2 end = outerSide;
-
-            double sx = start.x;
-            double sz = start.y;
-            double ex = end.x;
-            double ez = end.y;
-
-            double vx = ex - sx;
-            double vz = ez - sz;
-            double vlen2 = vx * vx + vz * vz;
-            if (vlen2 == 0.0)
-            {
-                continue;
-            }
-
-            double vlen = Math.Sqrt(vlen2);
-            double maxT = 0.0;
-
-            // 交差領域の各頂点を道路方向に射影して最大距離を取る
-            foreach (var coord in CollectCoords(inter))
-            {
-                double x = coord.X;
-                double z = coord.Y;
-                double dx = x - sx;
-                double dz = z - sz;
-                double t = (dx * vx + dz * vz) / vlen;
-                if (t > maxT)
-                {
-                    maxT = t;
-                }
-            }
-
-            if (maxT <= 0.0)
-            {
-                continue;
-            }
-
-            double ux = vx / vlen;
-            double uz = vz / vlen;
-            double nx = -uz;
-            double nz = ux;
-
-            double hw = rp.width * 0.5;
-            double cutX = sx + ux * maxT;
-            double cutZ = sz + uz * maxT;
-
-            var corner1 = new Vector2(
-                (float)(cutX + nx * hw),
-                (float)(cutZ + nz * hw)
-            );
-            var corner2 = new Vector2(
-                (float)(cutX - nx * hw),
-                (float)(cutZ - nz * hw)
-            );
-            terminalCorners.Add(corner1);
-            terminalCorners.Add(corner2);
-
-            // 接続点を記録 (PathID -> Point)
-            result.ConnectionPoints[p.path_id] = new Vector2((float)cutX, (float)cutZ);
-
-            // 交差点側だけを残すための半平面ポリゴンを構築
-            double L = 1e4;
-            var hp1 = new Coordinate(cutX + nx * L, cutZ + nz * L);
-            var hp2 = new Coordinate(cutX - nx * L, cutZ - nz * L);
-            var hp3 = new Coordinate(cutX - nx * L - ux * L, cutZ - nz * L - uz * L);
-            var hp4 = new Coordinate(cutX + nx * L - ux * L, cutZ + nz * L - uz * L);
-
-            var halfPlane = gf.CreatePolygon(new[]
-            {
-                hp1, hp2, hp3, hp4, hp1
-            });
-
-            var clipped = poly.Intersection(halfPlane);
-            if (!clipped.IsEmpty && clipped.Area > 1e-6)
-            {
-                clippedRoads.Add(clipped);
-            }
+            var center = gf.CreatePoint(new Coordinate(section.Center.x, section.Center.y));
+            if (polygon.Boundary.Distance(center) > 0.001) { valid = false; break; }
         }
-
-        // クリップ済み道路群を union
-        Geometry basePoly;
-        if (clippedRoads.Count == 0)
+        result.RequiresMoreSpace = !valid;
+        result.Geometry = valid ? polygon : gf.CreatePoint(new Coordinate(intersectionPos.x, intersectionPos.y));
+        if (!valid)
         {
-            basePoly = overlapRegion;
+            result.Sections.Clear();
+            result.ConnectionPoints.Clear();
+            result.Corners.Clear();
         }
-        else
-        {
-            basePoly = clippedRoads[0];
-            for (int i = 1; i < clippedRoads.Count; i++)
-            {
-                basePoly = basePoly.Union(clippedRoads[i]);
-            }
-        }
-
-        // 終端面の外周多角形を凸包として union する。
-        // 交差点は各道路が重なった部分だけを足し合わせると内側に凹みが残りやすい。
-        // 接続断面の両端点群を凸包化して重ねることで、道路同士の間に発生する隙間を埋める。
-        if (terminalCorners.Count >= 3)
-        {
-            // Python 版と同様に安定ソートとなるよう OrderBy を使用し、角度が同じ点は半径・追加順で整列
-            var sortedCorners = terminalCorners
-                .Select((corner, index) =>
-                {
-                    double dxCorner = corner.x - ix;
-                    double dzCorner = corner.y - iz;
-                    double angle = Math.Atan2(dzCorner, dxCorner);
-                    double radiusSq = dxCorner * dxCorner + dzCorner * dzCorner;
-                    return new
-                    {
-                        Corner = corner,
-                        Angle = angle,
-                        RadiusSq = radiusSq,
-                        Index = index
-                    };
-                })
-                .OrderByDescending(item => item.Angle)
-                .ThenByDescending(item => item.RadiusSq)
-                .ThenBy(item => item.Index)
-                .Select(item => item.Corner)
-                .ToList();
-
-            var coords = new Coordinate[sortedCorners.Count + 1];
-            for (int i = 0; i < sortedCorners.Count; i++)
-            {
-                coords[i] = new Coordinate(sortedCorners[i].x, sortedCorners[i].y);
-            }
-            coords[coords.Length - 1] = new Coordinate(coords[0].X, coords[0].Y);
-
-            var endPolygon = gf.CreatePolygon(coords);
-            if (!endPolygon.IsEmpty && endPolygon.IsValid && endPolygon.Area > 1e-6)
-            {
-                basePoly = basePoly.Union(endPolygon).ConvexHull();
-            }
-        }
-
-        result.Geometry = basePoly;
         return result;
     }
 
-    private static bool TryGetPoint2D(List<float> point, out Vector2 result)
+    public static Vector2 XZ(Vector3 p) => new Vector2(p.x, p.z);
+    public static float Length(List<Vector3> points)
     {
-        result = Vector2.zero;
-        if (point == null || point.Count < 2)
-        {
-            return false;
-        }
-
-        float z = point.Count >= 3 ? point[2] : point[1];
-        result = new Vector2(point[0], z);
-        return true;
+        float length = 0f;
+        for (int i = 1; i < points.Count; i++) length += Vector2.Distance(XZ(points[i - 1]), XZ(points[i]));
+        return length;
     }
 
-    private static bool TryFindWaypointDirectionPoint(List<PathWaypoint> waypoints, Vector2 intersectionSide, bool fromStart, out Vector2 result)
+    public static PathEndSection AtDistance(List<Vector3> points, float distance)
     {
-        result = Vector2.zero;
-        if (waypoints == null || waypoints.Count == 0)
+        float remaining = distance;
+        for (int i = 1; i < points.Count; i++)
         {
-            return false;
+            Vector2 delta = XZ(points[i] - points[i - 1]);
+            float length = delta.magnitude;
+            if (length < 1e-6f) continue;
+            if (remaining <= length || i == points.Count - 1)
+                return new PathEndSection { Position = Vector3.Lerp(points[i - 1], points[i], remaining / length), Direction = delta / length, Tangent = (points[i] - points[i - 1]).normalized, Distance = distance };
+            remaining -= length;
         }
-
-        int index = fromStart ? 0 : waypoints.Count - 1;
-        int step = fromStart ? 1 : -1;
-        while (index >= 0 && index < waypoints.Count)
-        {
-            if (TryGetWaypointPoint2D(waypoints[index], out Vector2 point) && (point - intersectionSide).sqrMagnitude >= MinDirectionSqrMagnitude)
-            {
-                result = point;
-                return true;
-            }
-            index += step;
-        }
-
-        return false;
+        return new PathEndSection { Position = points[0], Direction = Vector2.up };
     }
 
-    private static bool TryGetWaypointPoint2D(PathWaypoint waypoint, out Vector2 result)
+    /// <summary>切断点へ最も近い経路位置を求め、元の点列の内側だけを保持する。</summary>
+    public static List<Vector3> Trim(List<Vector3> points, Vector3? start, Vector3? end)
     {
-        result = Vector2.zero;
-        if (waypoint == null || waypoint.position == null || waypoint.position.Length < 2)
+        if (points.Count < 2 || (!start.HasValue && !end.HasValue)) return points;
+        float total = Length(points);
+        float from = start.HasValue ? ProjectDistance(points, start.Value) : 0f;
+        float to = end.HasValue ? ProjectDistance(points, end.Value) : total;
+        if (to - from < 1e-5f) return points;
+        var result = new List<Vector3> { AtDistance(points, from).Position };
+        float distance = 0f;
+        for (int i = 1; i < points.Count - 1; i++)
         {
-            return false;
+            distance += Vector2.Distance(XZ(points[i - 1]), XZ(points[i]));
+            if (distance > from + 1e-5f && distance < to - 1e-5f) result.Add(points[i]);
         }
-
-        float z = waypoint.position.Length >= 3 ? waypoint.position[2] : waypoint.position[1];
-        result = new Vector2(waypoint.position[0], z);
-        return true;
+        result.Add(AtDistance(points, to).Position);
+        return result;
     }
 
-    /// <summary>
-    /// Shapely 版 collect_coords に相当
-    /// Geometry の頂点列を列挙
-    /// </summary>
-    private static IEnumerable<Coordinate> CollectCoords(Geometry geom)
+    private static float ProjectDistance(List<Vector3> points, Vector3 point)
     {
-        // Polygon, LineString 等の場合はそのまま座標列を返す
-        if (geom is Polygon || geom is LineString)
+        float best = float.PositiveInfinity, result = 0f, distance = 0f;
+        for (int i = 1; i < points.Count; i++)
         {
-            foreach (var c in geom.Coordinates)
-            {
-                yield return c;
-            }
+            Vector2 delta = XZ(points[i] - points[i - 1]);
+            float length = delta.magnitude;
+            if (length < 1e-6f) continue;
+            float t = Mathf.Clamp01(Vector2.Dot(XZ(point - points[i - 1]), delta) / (length * length));
+            float error = (XZ(point) - Vector2.Lerp(XZ(points[i - 1]), XZ(points[i]), t)).sqrMagnitude;
+            if (error < best) { best = error; result = distance + length * t; }
+            distance += length;
         }
-        // MultiPolygon, GeometryCollection の場合は再帰
-        else if (geom is MultiPolygon || geom is GeometryCollection)
+        return result;
+    }
+
+    /// <summary>テストシーン・折れ線の仮想ノード用。端点制御点を優先する平面ベジエ評価。</summary>
+    public static List<Vector3> SamplePlan(PathSummary path)
+    {
+        var start = path.GetStartPointList();
+        var end = path.GetEndPointList();
+        if (start == null || end == null || start.Count < 3 || end.Count < 3) return null;
+        var anchors = new List<Vector3> { new Vector3(start[0], start[1], start[2]) };
+        var waypoints = path.GetWaypointList();
+        if (waypoints != null) foreach (var w in waypoints) anchors.Add(new Vector3(w.position[0], w.position[1], w.position[2]));
+        anchors.Add(new Vector3(end[0], end[1], end[2]));
+        if (!path.curved) return anchors;
+        var result = new List<Vector3> { anchors[0] };
+        for (int i = 0; i < anchors.Count - 1; i++)
         {
-            for (int i = 0; i < geom.NumGeometries; i++)
-            {
-                var g = geom.GetGeometryN(i);
-                foreach (var c in CollectCoords(g))
-                {
-                    yield return c;
-                }
-            }
+            Vector3 p0 = anchors[i], p3 = anchors[i + 1];
+            Vector3 p1 = p0 + (anchors[Math.Min(i + 1, anchors.Count - 1)] - anchors[Math.Max(0, i - 1)]) / 6f;
+            Vector3 p2 = p3 - (anchors[Math.Min(i + 2, anchors.Count - 1)] - anchors[i]) / 6f;
+            if (anchors.Count == 2) { p1 = Vector3.Lerp(p0, p3, 1f / 3f); p2 = Vector3.Lerp(p0, p3, 2f / 3f); }
+            var c1 = i == 0 ? path.GetStartControlList()?.ToArray() : waypoints[i - 1].control_out;
+            var c2 = i == anchors.Count - 2 ? path.GetEndControlList()?.ToArray() : waypoints[i].control_in;
+            if (c1 != null && c1.Length >= 3) p1 = new Vector3(c1[0], c1[1], c1[2]);
+            if (c2 != null && c2.Length >= 3) p2 = new Vector3(c2[0], c2[1], c2[2]);
+            int count = Mathf.Max(2, Mathf.CeilToInt((Vector3.Distance(p0,p1) + Vector3.Distance(p1,p2) + Vector3.Distance(p2,p3)) / 1f));
+            for (int j = 1; j <= count; j++) { float t = (float)j / count, u = 1f - t; result.Add(u*u*u*p0 + 3*u*u*t*p1 + 3*u*t*t*p2 + t*t*t*p3); }
         }
-        else
-        {
-            // その他はひとまず Coordinates をそのまま出す
-            foreach (var c in geom.Coordinates)
-            {
-                yield return c;
-            }
-        }
+        return result;
     }
 }

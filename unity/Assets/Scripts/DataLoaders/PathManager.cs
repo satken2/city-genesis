@@ -2554,7 +2554,7 @@ public class PathManager : BaseApiDataManager
     /// 例: base_height=20 で relY=20 の送電線は、3D上は高さ0m（地面）として描画され、
     /// プレハブモデル自体が20mの高さを持つことで送電線が地上を這らないように見せる。
     /// </summary>
-    private List<Vector3> CalculatePathPoints(PathSummary path)
+    private List<Vector3> CalculatePathPoints(PathSummary path, bool trimIntersection = true)
     {
         List<Vector3> points = new List<Vector3>();
         var startPointList = path.GetStartPointList();
@@ -2574,8 +2574,7 @@ public class PathManager : BaseApiDataManager
         if (hasStart)
         {
             startPos = GetPathPointPosition(startPointList);
-            if (pathStartConnectionPoints.TryGetValue(path.path_id, out Vector3 connStart))
-                startPos = connStart;
+
             // 3D描画用に base_height を引く（バックエンドの relY はそのまま）。
             startPos.y -= baseHeight;
         }
@@ -2585,8 +2584,7 @@ public class PathManager : BaseApiDataManager
         if (hasEnd)
         {
             endPos = GetPathPointPosition(endPointList);
-            if (pathEndConnectionPoints.TryGetValue(path.path_id, out Vector3 connEnd))
-                endPos = connEnd;
+
             endPos.y -= baseHeight;
         }
 
@@ -2595,7 +2593,7 @@ public class PathManager : BaseApiDataManager
         // curved=False の場合はアンカー点間を直線で結び、地形に沿うように細分化する。
         // ウェイポイントで方向が変わる場合は、角の部分が潰れないよう接続断面を計算し、
         // セグメントを接続断面どうしで区切る。
-        if (!path.curved)
+        if (!path.curved || (MasterDataStore.Instance?.GetPathMaster(path.path_variant)?.single_span ?? false))
         {
             List<Vector3> anchorPoints = new List<Vector3>();
             anchorPoints.Add(startPos);
@@ -2654,8 +2652,15 @@ public class PathManager : BaseApiDataManager
             }
 
             anchorPoints.Add(endPos);
+            bool singleSpan = MasterDataStore.Instance?.GetPathMaster(path.path_variant)?.single_span ?? false;
+            if (anchorPoints.Count == 2 && !singleSpan)
+            {
+                bool followTerrain = GetPathFollowTerrain(path) && startPointList[1] == 0f && endPointList[1] == 0f;
+                var sampled = SubdividePointsWithTerrain(anchorPoints, TERRAIN_SAMPLE_INTERVAL, followTerrain);
+                return trimIntersection ? TrimIntersectionPoints(path, sampled) : sampled;
+            }
             // RoadPath.cs 等で角の処理を行ってから細分化するため、ここではそのまま返す
-            return anchorPoints;
+            return trimIntersection ? TrimIntersectionPoints(path, anchorPoints) : anchorPoints;
         }
 
         float startRelY = (startPointList != null && startPointList.Count >= 3) ? startPointList[1] : 0f;
@@ -2772,9 +2777,34 @@ public class PathManager : BaseApiDataManager
             }
         }
 
-        return points;
+        return trimIntersection ? TrimIntersectionPoints(path, points) : points;
     }
 
+    /// <summary>対向ノードにも交差点がある場合は両端へ切断距離を予約する。</summary>
+    private float GetIntersectionCutLimit(PathSummary path, int nodeId, List<Vector3> points)
+    {
+        int otherNode = path.start_node_id == nodeId ? path.end_node_id : path.start_node_id;
+        bool bothEnds = pathsByNodeIndex.TryGetValue(otherNode, out var connected) && connected.Count > 1;
+        float limit = IntersectionPolygonUtil.Length(points) * (bothEnds ? 0.45f : 0.95f);
+        bool singleSpan = MasterDataStore.Instance?.GetPathMaster(path.path_variant)?.single_span ?? false;
+        if ((!path.curved || singleSpan) && points.Count > 1)
+        {
+            var waypoints = path.GetWaypointList();
+            if (waypoints != null && waypoints.Count > 0)
+            {
+                int first = path.start_node_id == nodeId ? 0 : points.Count - 1;
+                int next = path.start_node_id == nodeId ? 1 : points.Count - 2;
+                limit = Mathf.Min(limit, Vector2.Distance(IntersectionPolygonUtil.XZ(points[first]), IntersectionPolygonUtil.XZ(points[next])) * 0.45f);
+            }
+        }
+        return limit;
+    }
+    private List<Vector3> TrimIntersectionPoints(PathSummary path, List<Vector3> points)
+    {
+        Vector3? start = pathStartConnectionPoints.TryGetValue(path.path_id, out var a) ? a : (Vector3?)null;
+        Vector3? end = pathEndConnectionPoints.TryGetValue(path.path_id, out var b) ? b : (Vector3?)null;
+        return IntersectionPolygonUtil.Trim(points, start, end);
+    }
     /// <summary>
     /// APIレスポンスの端点制御点 [x, 相対高さ, z] をUnity絶対座標へ変換する。
     /// 地形基準は制御点直下ではなく所属アンカー(始点/終点)直下の標高を使う。
@@ -3367,9 +3397,10 @@ public class PathManager : BaseApiDataManager
         }
         overloadedIntersectionNodeIds.Remove(nodeId);
 
-        // 相対Y≠0のノード（高架同士の平面交差）では、交差点メッシュ・切断点を地形基準ではなく
-        // ノード絶対Yの水平面として生成させる（RoadIntersectionMeshGenerator 参照）。
-        NodeMeshResult meshResult = NodeMeshFactory.GenerateNodeMesh(nodeId, absolutePos, connectedPaths, nodeData.GetRelativeHeight());
+        // 切断前の点列を共用し、本線の勾配と切断断面の高さを一致させる。
+        var originalPoints = new Dictionary<int, List<Vector3>>();
+        foreach (var p in connectedPaths) originalPoints[p.path_id] = CalculatePathPoints(p, false);
+        NodeMeshResult meshResult = NodeMeshFactory.GenerateNodeMesh(nodeId, absolutePos, connectedPaths, nodeData.GetRelativeHeight(), p => originalPoints[p.path_id], p => GetIntersectionCutLimit(p, nodeId, originalPoints[p.path_id]));
         if (meshResult == null || meshResult.Mesh == null)
         {
             Debug.LogWarning($"[PathManager] meshResult or mesh is null for nodeId={nodeId}, removing mesh.");
@@ -3405,7 +3436,10 @@ public class PathManager : BaseApiDataManager
         }
 
         MeshFilter mf = meshGO.GetComponent<MeshFilter>();
-        mf.mesh = meshResult.Mesh;
+        var owner = meshGO.GetComponent<IntersectionMeshOwner>() ?? meshGO.AddComponent<IntersectionMeshOwner>();
+        if (owner.OwnedMesh != null) Destroy(owner.OwnedMesh);
+        owner.OwnedMesh = meshResult.Mesh;
+        mf.sharedMesh = meshResult.Mesh;
 
         MeshRenderer mr = meshGO.GetComponent<MeshRenderer>();
         if (meshResult.Material != null)
@@ -3596,6 +3630,24 @@ public class PathManager : BaseApiDataManager
 
     private void RemoveNodeIntersectionMesh(int nodeId)
     {
+        // 交差点が消えたときは切断も解除する。以前の切断点を残すと道路端だけが欠ける。
+        foreach (var path in GetPathsConnectedToNode(nodeId))
+        {
+            bool changed = false;
+            if (path.start_node_id == nodeId)
+            {
+                changed = pathStartConnectionPoints.Remove(path.path_id);
+                pathStartSidewalkSetbacks.Remove(path.path_id);
+            }
+            if (path.end_node_id == nodeId)
+            {
+                changed |= pathEndConnectionPoints.Remove(path.path_id);
+                pathEndSidewalkSetbacks.Remove(path.path_id);
+            }
+            if (!changed || !pathObjectsCache.ContainsKey(path.path_id)) continue;
+            if (isLodPathBatchActive) deferredIntersectionPathRebuildIds.Add(path.path_id);
+            else CreateOrUpdatePath(path, false, true);
+        }
         if (nodeIntersectionMeshes.TryGetValue(nodeId, out var meshGO))
         {
             Destroy(meshGO);

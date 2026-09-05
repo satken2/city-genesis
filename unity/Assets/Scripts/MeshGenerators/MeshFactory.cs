@@ -375,6 +375,14 @@ public struct SidewalkSetback
 
 public class SidewalkConnectorSpec
 {
+    public string Part = "sidewalk";
+    public List<Vector2> Directions;
+    public Vector3 StartNormal = Vector3.up;
+    public Vector3 EndNormal = Vector3.up;
+    public Vector2 StartDirection;
+    public Vector2 EndDirection;
+    public int EndPrefabVariant = -1;
+    public int EndFallbackType = -1;
     public List<Vector3> Points { get; }
     public List<float> Widths { get; }
     public int PrefabVariant { get; }
@@ -397,6 +405,10 @@ public class SidewalkConnectorSpec
 /// </summary>
 public class RailConnectorSpec
 {
+    public float StartSlope;
+    public float EndSlope;
+    public Vector2 StartDirection;
+    public Vector2 EndDirection;
     public List<Vector3> Points { get; }
     public int PrefabVariant { get; }
     public int FallbackType { get; }
@@ -414,15 +426,15 @@ public class RailConnectorSpec
 /// </summary>
 public static class NodeMeshFactory
 {
-    private static INodeMeshGenerator defaultGenerator = new RoadIntersectionMeshGenerator();
+    private static RoadIntersectionMeshGenerator defaultGenerator = new RoadIntersectionMeshGenerator();
     
-    public static NodeMeshResult GenerateNodeMesh(int nodeId, Vector3 nodePosition, List<GeneratedModels.PathSummary> paths, float nodeRelativeY = 0f)
+    public static NodeMeshResult GenerateNodeMesh(int nodeId, Vector3 nodePosition, List<GeneratedModels.PathSummary> paths, float nodeRelativeY = 0f, System.Func<PathSummary, List<Vector3>> pointResolver = null, System.Func<PathSummary, float> cutLimitResolver = null)
     {
         if (paths == null || paths.Count < 2)
         {
             return null;
         }
 
-        return defaultGenerator.Generate(nodeId, nodePosition, paths, nodeRelativeY);
+        return defaultGenerator.GenerateWithSections(nodeId, nodePosition, paths, nodeRelativeY, pointResolver, cutLimitResolver);
     }
 }

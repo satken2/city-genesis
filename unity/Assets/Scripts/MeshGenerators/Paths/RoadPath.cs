@@ -10,7 +10,9 @@ using GeneratedModels;
 public class RoadPath : IPathMeshGenerator
 {
     private static readonly Dictionary<string, Material> MaterialCache = new Dictionary<string, Material>();
-    private static readonly Dictionary<string, Mesh> MirroredMeshCache = new Dictionary<string, Mesh>();
+    private static readonly Dictionary<Mesh, Mesh> MirroredMeshCache = new Dictionary<Mesh, Mesh>();
+    private static readonly Dictionary<(Mesh, float), Mesh> PartMeshCache = new Dictionary<(Mesh, float), Mesh>();
+    private static readonly Dictionary<Mesh, Mesh> BodyMeshCache = new Dictionary<Mesh, Mesh>();
     private static Material cachedFallbackMaterial;
 
     // Extrude配置の1タイルの最大長（m）。
@@ -77,10 +79,40 @@ public class RoadPath : IPathMeshGenerator
         return cachedFallbackMaterial;
     }
 
+    /// <summary>路面幅は桁の張り出しを含む全体 bounds ではなく、最上面の幅から求める。</summary>
+    public static Bounds GetBodySurfaceBounds(Mesh mesh)
+    {
+        Bounds bounds = mesh.bounds;
+        float left = float.PositiveInfinity, right = float.NegativeInfinity;
+        foreach (var vertex in mesh.vertices)
+        {
+            if (bounds.max.y - vertex.y > 0.002f) continue;
+            left = Mathf.Min(left, vertex.x);
+            right = Mathf.Max(right, vertex.x);
+        }
+        if (right - left < 0.001f) return bounds;
+        return new Bounds(new Vector3((left + right) * 0.5f, bounds.max.y, bounds.center.z),
+            new Vector3(right - left, 0f, bounds.size.z));
+    }
+
+    private static Mesh GetBodySurfaceMesh(Mesh source)
+    {
+        if (BodyMeshCache.TryGetValue(source, out var cached)) return cached;
+        var mesh = UnityEngine.Object.Instantiate(source);
+        // FBX の微小な原点誤差も吸収し、交差点と共有する路面の高さを y=0 に揃える。
+        var vertices = mesh.vertices;
+        float surfaceY = source.bounds.max.y;
+        for (int i = 0; i < vertices.Length; i++) vertices[i].y -= surfaceY;
+        mesh.vertices = vertices;
+        mesh.RecalculateBounds();
+        BodyMeshCache[source] = mesh;
+        return mesh;
+    }
+
     private static Mesh GetOrCreateMirroredMesh(Mesh originalMesh)
     {
         if (originalMesh == null) return null;
-        string key = originalMesh.name;
+        Mesh key = originalMesh;
         if (MirroredMeshCache.TryGetValue(key, out Mesh cached))
         {
             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath]   ミラーメッシュキャッシュヒット: '{key}'");
@@ -91,6 +123,27 @@ public class RoadPath : IPathMeshGenerator
         MirroredMeshCache[key] = mirrored;
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath]   ミラーメッシュキャッシュ生成: '{key}'");
         return mirrored;
+    }
+
+    /// <summary>同じモデル系列の路面原点を使い、付属パーツに含まれる路面高を二重加算しない。</summary>
+    public static Mesh GetRoadPartMesh(Mesh source, string resourcePath)
+    {
+        if (source == null) return null;
+        string part = resourcePath.Substring(resourcePath.LastIndexOf('/') + 1);
+        if (part != "sidewalk" && part != "line") return source;
+        string bodyPath = resourcePath.Substring(0, resourcePath.LastIndexOf('/') + 1) + "body";
+        var body = ModelManager.Instance?.GetModel(bodyPath)?.GetComponent<MeshFilter>()?.sharedMesh;
+        float surfaceY = body != null ? body.bounds.max.y : 0f;
+        if (Mathf.Abs(surfaceY) < 1e-6f) return source;
+        var key = (source, surfaceY);
+        if (PartMeshCache.TryGetValue(key, out var cached)) return cached;
+        var mesh = UnityEngine.Object.Instantiate(source);
+        var vertices = mesh.vertices;
+        for (int i = 0; i < vertices.Length; i++) vertices[i].y -= surfaceY;
+        mesh.vertices = vertices;
+        mesh.RecalculateBounds();
+        PartMeshCache[key] = mesh;
+        return mesh;
     }
 
     public PathMeshResult Generate(PathSummary pathData, List<Vector3> points, SidewalkSetback startSidewalkSetback = default, SidewalkSetback endSidewalkSetback = default)
@@ -126,7 +179,7 @@ public class RoadPath : IPathMeshGenerator
         // 中間点が存在しないため地形追従が機能しない。
         // 一定間隔で中間点を補間し、地形高さを反映させる。
         // single_span の場合は地形追従せず、アンカー点をそのままスプライン制御点にする。
-        if (!isCurved && !singleSpan)
+        if (!isCurved && !singleSpan && points.Count == 2)
         {
             var startList = pathData.GetStartPointList();
             var endList = pathData.GetEndPointList();
@@ -219,6 +272,7 @@ public class RoadPath : IPathMeshGenerator
     {
         // プレハブのロード
         GameObject prefab = null;
+        string resolvedPrefabName = prefabName;
         if (ModelManager.Instance == null)
         {
             Debug.LogWarning($"[RoadPath] ModelManager.Instance が null。プレハブ '{prefabName}' をロードできません。");
@@ -232,6 +286,7 @@ public class RoadPath : IPathMeshGenerator
                 prefab = ModelManager.Instance.GetModel(fallbackPrefabName);
                 if (prefab != null)
                 {
+                    resolvedPrefabName = fallbackPrefabName;
                     UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] フォールバック成功: '{fallbackPrefabName}' を使用");
                 }
             }
@@ -264,20 +319,22 @@ public class RoadPath : IPathMeshGenerator
 
         if(mf != null && mf.sharedMesh != null)
         {
-             Mesh meshToUse = mf.sharedMesh;
+             bool isBody = prefabName.EndsWith("/body", StringComparison.Ordinal);
+             Mesh meshToUse = isBody ? GetBodySurfaceMesh(mf.sharedMesh) : GetRoadPartMesh(mf.sharedMesh, resolvedPrefabName);
+             Bounds fittingBounds = isBody ? GetBodySurfaceBounds(meshToUse) : meshToUse.bounds;
              UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath]   メッシュ: '{mf.sharedMesh.name}', bounds={mf.sharedMesh.bounds.size}, vertexCount={mf.sharedMesh.vertexCount}");
 
              // ミラーリングが必要な場合はメッシュを複製して反転処理を行う
              if (mirrorX)
               {
-                  meshToUse = GetOrCreateMirroredMesh(mf.sharedMesh);
+                  meshToUse = GetOrCreateMirroredMesh(meshToUse);
               }
 
              // メッシュ付きでチャンネル追加
              channel = splineMesh.AddChannel(meshToUse, prefabName);
 
              // 元のメッシュ幅から適切なスケールを計算（実寸配置パーツはスケールしない）
-             float meshWidth = mf.sharedMesh.bounds.size.x;
+             float meshWidth = fittingBounds.size.x;
              if(stretchToWidth && meshWidth > 0.001f)
              {
                  scaleX = width / meshWidth;
@@ -285,7 +342,7 @@ public class RoadPath : IPathMeshGenerator
 
              // ピボット補正: ミラー時は bounds 中心のX符号も反転する。
              // compensatePivot=false のパーツ（プラットフォーム）はプレハブ原点をそのまま使うため補正しない。
-             float meshCenterX = mf.sharedMesh.bounds.center.x;
+             float meshCenterX = fittingBounds.center.x;
              if (mirrorX) meshCenterX = -meshCenterX;
              if (compensatePivot) pivotCompensationX = -(meshCenterX * scaleX);
              UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath]   scaleX計算: meshWidth={meshWidth:F3} → scaleX={scaleX:F3} (targetWidth={width}), pivotCompensationX={pivotCompensationX:F3}");
@@ -446,7 +503,7 @@ public class RoadPath : IPathMeshGenerator
 
     /// <summary>
     /// 点列からスプライン（SplineComputer）を構築する共通処理。
-    /// curved=true なら Catmull-Rom で滑らかに補間し、false なら角を維持した折れ線にする。
+    /// curved=true は内部点を Catmull-Rom 相当の Bézier で補間し、端の接線は切断断面に合わせる。
     /// RebuildImmediate 済みで返すため、直後の CalculateLength / Evaluate が正しい値を返す。
     /// </summary>
     public static SplineComputer BuildSpline(GameObject container, List<Vector3> points, bool isCurved)
@@ -463,13 +520,21 @@ public class RoadPath : IPathMeshGenerator
             p.color = Color.white;
             // curved=False の場合は角を維持し、直線で結ぶ
             p.type = isCurved ? SplinePoint.Type.SmoothMirrored : SplinePoint.Type.Broken;
+            if (isCurved)
+            {
+                p.type = SplinePoint.Type.Broken;
+                Vector3 tangent = (points[Mathf.Min(i + 1, points.Count - 1)] - points[Mathf.Max(0, i - 1)]) / 6f;
+                if (i == 0 || i == points.Count - 1) tangent *= 2f;
+                p.tangent = p.position - tangent;
+                p.tangent2 = p.position + tangent;
+            }
             splinePoints[i] = p;
         }
 
         spline.SetPoints(splinePoints);
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] スプラインポイント設定: {splinePoints.Length}点 curved={isCurved}");
 
-        spline.type = isCurved ? Spline.Type.CatmullRom : Spline.Type.Linear;
+        spline.type = isCurved ? Spline.Type.Bezier : Spline.Type.Linear;
         spline.sampleMode = SplineComputer.SampleMode.Uniform;
         spline.RebuildImmediate();
         return spline;
@@ -1071,7 +1136,7 @@ public class RoadPath : IPathMeshGenerator
     /// curved=False かつウェイポイントがある道路を生成する。
     /// セグメントごとに独立したスプラインを作り、角（ウェイポイント）では
     /// RoadIntersectionMeshGenerator と同じロジックで交差領域を計算し、
-    /// 接続断面で道路を区切る。角の部分は別途凸包メッシュで埋める。
+    /// 接続断面で道路を区切り、角を共通外周のメッシュで埋める。
     /// </summary>
     private PathMeshResult GenerateLinearPathWithCorners(PathSummary pathData, List<Vector3> points, SidewalkSetback startSidewalkSetback = default, SidewalkSetback endSidewalkSetback = default, bool singleSpan = false)
     {
@@ -1107,8 +1172,8 @@ public class RoadPath : IPathMeshGenerator
                 int pointIndex = i + 1;
                 var wp = waypoints[i];
                 Vector3 wpPos = points[pointIndex];
-                Vector3 prevPos = segmentEnds[pointIndex - 1]; // Use original points for direction
-                Vector3 nextPos = segmentStarts[pointIndex];
+                Vector3 prevPos = points[pointIndex - 1];
+                Vector3 nextPos = points[pointIndex + 1];
 
                 Vector2 dirA = (new Vector2(wpPos.x, wpPos.z) - new Vector2(prevPos.x, prevPos.z)).normalized;
                 Vector2 dirB = (new Vector2(nextPos.x, nextPos.z) - new Vector2(wpPos.x, wpPos.z)).normalized;
@@ -1144,10 +1209,10 @@ public class RoadPath : IPathMeshGenerator
                 };
 
                 List<PathSummary> dummyPaths = new List<PathSummary> { dummyA, dummyB };
-                // 高架（相対Y≠0）の折れ点では、角メッシュを地形基準でなく折れ点の高さの水平面で作る
-                // （交差点ノードの高架対応と同じ扱い）。
                 float wpRelY = (wp.position != null && wp.position.Length >= 3) ? wp.position[1] : 0f;
-                NodeMeshResult cornerResult = NodeMeshFactory.GenerateNodeMesh(-1, wpPos, dummyPaths, wpRelY);
+                NodeMeshResult cornerResult = NodeMeshFactory.GenerateNodeMesh(-1, wpPos, dummyPaths, wpRelY,
+                    p => new List<Vector3> { wpPos, p == dummyA ? prevPos : nextPos },
+                    p => Vector2.Distance(IntersectionPolygonUtil.XZ(wpPos), IntersectionPolygonUtil.XZ(p == dummyA ? prevPos : nextPos)) * 0.45f);
 
                 if (cornerResult != null)
                 {
@@ -1185,10 +1250,11 @@ public class RoadPath : IPathMeshGenerator
                         cornerObj.transform.position = wpPos;
                         MeshFilter mf = cornerObj.AddComponent<MeshFilter>();
                         mf.mesh = cornerResult.Mesh;
+                        cornerObj.AddComponent<IntersectionMeshOwner>().OwnedMesh = cornerResult.Mesh;
                         MeshRenderer mr = cornerObj.AddComponent<MeshRenderer>();
                         if (cornerResult.Material != null) mr.material = cornerResult.Material;
 
-                        if (sidewalkWidth > 0 && cornerResult.SidewalkConnectors != null && cornerResult.SidewalkConnectors.Count > 0)
+                        if (cornerResult.SidewalkConnectors != null && cornerResult.SidewalkConnectors.Count > 0)
                         {
                             GameObject sidewalkGO = new GameObject("Sidewalk");
                             sidewalkGO.transform.SetParent(cornerObj.transform, false);
@@ -1254,109 +1320,88 @@ public class RoadPath : IPathMeshGenerator
 
     /// <summary>
     /// 交差点や折れ点の角に配置する歩道コネクタ（SidewalkConnectorSpec）を、
-    /// 通常道路と同じ sidewalk プレハブを SplineMesh で曲げて生成する共通処理。
+    /// 通常道路と同じパーツの頂点を共通外周へ写し、幅だけを補間する。
     /// PathManager（交差点のノードメッシュ）と RoadPath（curved=false の折れ点）の両方から使う。
     /// マテリアルは GetOrCreateRoadMaterial のキャッシュを経由し、
     /// 通常道路の歩道と交差点内の歩道で色味・描画設定（renderQueue調整）が一致するようにする。
     /// </summary>
     public static void CreateSidewalkConnectorObject(Transform parent, SidewalkConnectorSpec connector, int index)
     {
-        if (connector == null || connector.Points == null || connector.Points.Count < 2)
+        if (connector?.Points == null || connector.Points.Count < 2 || ModelManager.Instance == null) return;
+        string part = connector.Part;
+        string resourcePath = $"Models/Paths/p{connector.PrefabVariant}/{part}";
+        GameObject prefab = ModelManager.Instance.GetModel(resourcePath);
+        if (prefab == null)
         {
-            return;
+            resourcePath = $"Models/Paths/p{connector.FallbackType}/{part}";
+            prefab = ModelManager.Instance.GetModel(resourcePath);
         }
-
-        GameObject prefab = null;
-        if (ModelManager.Instance != null)
+        Mesh source = prefab != null ? prefab.GetComponent<MeshFilter>()?.sharedMesh : null;
+        source = GetRoadPartMesh(source, resourcePath);
+        if (source == null) return;
+        Bounds bounds = source.bounds;
+        if (bounds.size.x < 1e-5f || bounds.size.z < 1e-5f) return;
+        float length = IntersectionPolygonUtil.Length(connector.Points);
+        if (length < 1e-5f) return;
+        GameObject endPrefab = connector.EndPrefabVariant >= 0
+            ? ModelManager.Instance.GetModel($"Models/Paths/p{connector.EndPrefabVariant}/{part}")
+                ?? ModelManager.Instance.GetModel($"Models/Paths/p{connector.EndFallbackType}/{part}") : prefab;
+        Mesh endSource = endPrefab != null ? endPrefab.GetComponent<MeshFilter>()?.sharedMesh : null;
+        float endHeight = endSource != null ? endSource.bounds.size.y : bounds.size.y;
+        int tiles = Mathf.Max(1, Mathf.CeilToInt(length / 0.5f));
+        Vector3[] original = source.vertices;
+        Vector2[] originalUv = source.uv;
+        var vertices = new List<Vector3>();
+        var uv = new List<Vector2>();
+        var indices = new List<int>[source.subMeshCount];
+        var sourceTriangles = new int[source.subMeshCount][];
+        for (int sub = 0; sub < sourceTriangles.Length; sub++) sourceTriangles[sub] = source.GetTriangles(sub);
+        for (int sub = 0; sub < indices.Length; sub++) indices[sub] = new List<int>();
+        for (int tile = 0; tile < tiles; tile++)
         {
-            // 歩道接続には、接続する道路のうち優先された variant の sidewalk プレハブを使う。
-            // variant 専用プレハブがない場合は、通常道路生成と同じく path_type 側へフォールバックする。
-            prefab = ModelManager.Instance.GetModel($"Models/Paths/p{connector.PrefabVariant}/sidewalk");
-            if (prefab == null)
+            int offset = vertices.Count;
+            foreach (var vertex in original)
             {
-                prefab = ModelManager.Instance.GetModel($"Models/Paths/p{connector.FallbackType}/sidewalk");
+                float t = (tile + (vertex.z - bounds.min.z) / bounds.size.z) / tiles;
+                EvaluateConnector(connector, t, out Vector3 position, out Vector2 forward, out float width);
+                Vector3 right = new Vector3(forward.y, 0f, -forward.x);
+                // 幅だけをX方向へ適用する。SplinePoint.sizeで高さまで変形させない。
+                float heightScale = bounds.size.y > 1e-5f ? Mathf.Lerp(bounds.size.y, endHeight, t*t*(3f-2f*t)) / bounds.size.y : 1f;
+                vertices.Add(position + right * ((vertex.x - bounds.center.x) * width / bounds.size.x) + Vector3.Slerp(connector.StartNormal, connector.EndNormal, t*t*(3f-2f*t)).normalized * (vertex.y * heightScale));
             }
+            for (int v = 0; v < original.Length; v++) uv.Add(v < originalUv.Length ? originalUv[v] : Vector2.zero);
+            for (int sub = 0; sub < indices.Length; sub++) foreach (int triangle in sourceTriangles[sub]) indices[sub].Add(offset + triangle);
         }
-
-        MeshFilter prefabMf = prefab != null ? prefab.GetComponent<MeshFilter>() : null;
-        if (prefabMf == null || prefabMf.sharedMesh == null)
-        {
-            Debug.LogWarning($"[RoadPath] 交差点歩道プレハブなし: variant={connector.PrefabVariant}, type={connector.FallbackType}");
-            return;
-        }
-
-        GameObject go = new GameObject($"SidewalkConnector_{index}");
+        var mesh = new Mesh { name = $"Intersection_{part}_{index}", indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
+        mesh.SetVertices(vertices); mesh.SetUVs(0, uv); mesh.subMeshCount = indices.Length;
+        for (int sub = 0; sub < indices.Length; sub++) mesh.SetTriangles(indices[sub], sub);
+        mesh.RecalculateNormals(); mesh.RecalculateTangents(); mesh.RecalculateBounds();
+        var go = new GameObject($"{part}_{index}");
         go.transform.SetParent(parent, false);
-
-        // 通常道路の歩道と同じく Dreamteck Splines の SplineMesh でプレハブを曲げる。
-        // 交差点角は短い曲線なので、計算済みのローカル点列をそのままスプライン制御点として使う。
-        SplineComputer spline = go.AddComponent<SplineComputer>();
-        SplinePoint[] splinePoints = new SplinePoint[connector.Points.Count];
-        float averageWidth = Utils.CalculateAverageWidth(connector.Widths);
-        if (averageWidth <= 0.001f) averageWidth = 0.5f;
-
-        for (int i = 0; i < connector.Points.Count; i++)
+        go.AddComponent<MeshFilter>().sharedMesh = mesh;
+        go.AddComponent<IntersectionMeshOwner>().OwnedMesh = mesh;
+        var renderer = go.AddComponent<MeshRenderer>();
+        var sourceRenderer = prefab.GetComponent<MeshRenderer>();
+        if (sourceRenderer != null)
         {
-            float w = connector.Widths != null && i < connector.Widths.Count ? connector.Widths[i] : averageWidth;
-            SplinePoint point = new SplinePoint(connector.Points[i]);
-            // SplinePoint.size はチャンネルのスケールに乗算されるため、平均幅を基準にした比率を入れる。
-            // これにより、歩道幅が異なる道路同士を結ぶ場合でも、曲線の中で幅が連続的に変化する。
-            point.size = Mathf.Max(0.01f, w / averageWidth);
-            point.color = Color.white;
-            point.type = SplinePoint.Type.SmoothMirrored;
-            splinePoints[i] = point;
+            var materials = sourceRenderer.sharedMaterials;
+            for (int i = 0; i < materials.Length; i++) materials[i] = GetOrCreateRoadMaterial(materials[i]);
+            renderer.sharedMaterials = materials;
         }
-
-        spline.SetPoints(splinePoints, SplineComputer.Space.Local);
-        spline.type = Spline.Type.CatmullRom;
-        spline.sampleRate = 24;
-        spline.sampleMode = SplineComputer.SampleMode.Uniform;
-        spline.RebuildImmediate();
-
-        SplineMesh splineMesh = go.AddComponent<SplineMesh>();
-        splineMesh.spline = spline;
-        SplineMesh.Channel channel = splineMesh.AddChannel(prefabMf.sharedMesh, $"SidewalkConnector_{index}");
-
-        // sidewalk プレハブは X 幅を実寸幅として扱う。平均歩道幅に合わせてチャンネル全体をスケールし、
-        // 局所的な幅の差は各 SplinePoint.size で補正する。
-        float meshWidth = prefabMf.sharedMesh.bounds.size.x;
-        float scaleX = meshWidth > 0.001f ? averageWidth / meshWidth : averageWidth;
-        channel.minScale = new Vector3(scaleX, 1f, 1f);
-        channel.maxScale = new Vector3(scaleX, 1f, 1f);
-
-        // スプライン点列は「歩道帯の中心線」を表す（RoadIntersectionMeshGenerator が生成）。
-        // プレハブのピボットが中心にない場合、そのまま置くと帯が横へずれるため、
-        // 直線道路の CreateSplineMesh と同じく bounds 中心がスプライン上に来るよう補正する。
-        // これを怠ると、交差点内の歩道だけ直線部の帯 [width/2 - sw, width/2] から外れる。
-        float meshCenterX = prefabMf.sharedMesh.bounds.center.x;
-        splineMesh.offset = new Vector3(-(meshCenterX * scaleX), 0f, 0f);
-        // 交差点角は短いため autoCount だと 1 分割になりやすい。
-        // 明示的に細かく分けることで、SplineMesh が曲線を追従できるだけの断面を確保する。
-        channel.autoCount = false;
-        channel.count = Mathf.Max(8, (connector.Points.Count - 1) * 2);
-
-        MeshRenderer prefabMr = prefab.GetComponent<MeshRenderer>();
-        MeshRenderer targetMr = go.GetComponent<MeshRenderer>();
-        if (targetMr == null) targetMr = go.AddComponent<MeshRenderer>();
-        if (prefabMr != null)
-        {
-            // 通常道路の歩道と同じマテリアルキャッシュを経由する。
-            // プレハブの sharedMaterials を直接使うと、FBX由来マテリアルと Resources 同名マテリアルの
-            // 解決結果が通常道路とずれ、交差点内だけ歩道の色味が微妙に変わる。
-            Material[] originalMaterials = prefabMr.sharedMaterials;
-            Material[] cachedMaterials = new Material[originalMaterials.Length];
-            for (int i = 0; i < originalMaterials.Length; i++)
-            {
-                cachedMaterials[i] = GetOrCreateRoadMaterial(originalMaterials[i]);
-            }
-            targetMr.sharedMaterials = cachedMaterials;
-        }
-
-        if (go.GetComponent<MeshFilter>() == null) go.AddComponent<MeshFilter>();
-        splineMesh.updateMethod = SplineUser.UpdateMethod.Update;
-        splineMesh.Rebuild();
     }
 
+    private static void EvaluateConnector(SidewalkConnectorSpec connector, float t, out Vector3 position, out Vector2 forward, out float width)
+    {
+        float f = Mathf.Clamp01(t) * (connector.Points.Count - 1);
+        int index = Mathf.Min(Mathf.FloorToInt(f), connector.Points.Count - 2);
+        float fraction = f - index;
+        position = Vector3.Lerp(connector.Points[index], connector.Points[index + 1], fraction);
+        forward = IntersectionPolygonUtil.XZ(connector.Points[index + 1] - connector.Points[index]).normalized;
+        if (connector.Directions != null) forward = Vector2.Lerp(connector.Directions[index], connector.Directions[index+1], fraction).normalized;
+        if (t <= 1e-5f && connector.StartDirection.sqrMagnitude > 0f) forward = connector.StartDirection;
+        if (t >= 1f - 1e-5f && connector.EndDirection.sqrMagnitude > 0f) forward = connector.EndDirection;
+        width = connector.Widths != null ? Mathf.Lerp(connector.Widths[index], connector.Widths[index + 1], fraction) : 0.5f;
+    }
     /// <summary>
     /// 指定セグメントの始点側のrelativeYをPathSummaryから取得する。
     /// </summary>
@@ -1756,5 +1801,16 @@ public class RoadPath : IPathMeshGenerator
             Debug.LogWarning($"[RoadPath] マスターデータなし (variant={pathData.path_variant})。デフォルト幅を使用。");
             lanes = Mathf.Max(1, Mathf.RoundToInt(width / 3.5f));
         }
+    }
+}
+
+
+/// <summary>手続き生成した交差点メッシュのみを所有し、共有プレハブのメッシュは破棄しない。</summary>
+public sealed class IntersectionMeshOwner : MonoBehaviour
+{
+    public Mesh OwnedMesh;
+    private void OnDestroy()
+    {
+        if (OwnedMesh != null) Destroy(OwnedMesh);
     }
 }

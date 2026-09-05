@@ -6,20 +6,16 @@ using NetTopologySuite.Geometries;
 
 /// <summary>
 /// 道路ノードに作られる交差点メッシュを生成します。
-/// 車道部分は各接続道路の幅から求めた凸包で作り、道路端点をその凸包の接続断面へ移動させます。
-/// 歩道部分は隣り合う道路の歩道端を結ぶ短いスプラインとして返し、通常道路と同じ sidewalk プレハブを曲げて配置します。
+/// 本線の切断断面と隣接入口間の外周を共有し、路面・付帯パーツを接合します。
+/// 歩道・壁・中央分離帯の接続または終端を幾何情報として返します。
 /// </summary>
 public class RoadIntersectionMeshGenerator : INodeMeshGenerator
 {
     private const float TriangulationEpsilon = 1e-5f;
-    // 歩道エンドキャップ（歩道なし道路が隣にある場合の丸め終端）の最小長。
-    // これより短いキャップは形状が潰れて見えるため生成しない。
-    private const float MinSidewalkEndCapLength = 0.3f;
-    // エンドキャップのために直線歩道を車道切断面から後退させる量の、歩道幅に対する係数。
-    // キャップは半円状に閉じるため、縦寸法はおおよそ歩道幅の半分あれば足りる。
-    private const float SidewalkEndCapSetbackFactor = 0.5f;
-
     public NodeMeshResult Generate(int nodeId, Vector3 nodePosition, List<PathSummary> paths, float nodeRelativeY = 0f)
+        => GenerateWithSections(nodeId, nodePosition, paths, nodeRelativeY);
+
+    public NodeMeshResult GenerateWithSections(int nodeId, Vector3 nodePosition, List<PathSummary> paths, float nodeRelativeY = 0f, Func<PathSummary, List<Vector3>> pointResolver = null, Func<PathSummary, float> cutLimitResolver = null)
     {
         if (paths == null || paths.Count < 2)
         {
@@ -42,17 +38,30 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
                 nodePos2D,
                 paths,
                 gf,
-                ResolveRoadWidth
+                ResolveRoadWidth, pointResolver, cutLimitResolver
             );
 
+            if (roadResult.RequiresMoreSpace)
+            {
+                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[Intersection] node={nodeId}: 接合区間が不足するため道路の切断を行いません。");
+                return null;
+            }
+            Dictionary<int, Vector3> connectionPoints = BuildSectionPoints(roadResult.Sections, nodePosition, horizontalPlane, pointResolver != null);
             Mesh roadMesh = ConvertGeometryToMesh(roadResult.Geometry, nodePosition, horizontalPlane, "RoadIntersection");
             if (roadMesh == null)
             {
                 return null;
             }
 
-            Dictionary<int, Vector3> connectionPoints = BuildConnectionPoints(roadResult.ConnectionPoints, nodePosition, horizontalPlane);
             Material roadMaterial = LoadRoadMaterial(paths);
+            foreach (var path in paths)
+            {
+                if (!roadResult.Sections.TryGetValue(path.path_id, out var section)) continue;
+                GameObject body = ModelManager.Instance?.GetModel($"Models/Paths/p{path.path_variant}/body")
+                    ?? ModelManager.Instance?.GetModel($"Models/Paths/p{path.path_type}/body");
+                var source = body != null ? body.GetComponent<MeshFilter>()?.sharedMesh : null;
+                section.BodyDepth = source != null ? source.bounds.size.y : 0f;
+            }
 
             List<SidewalkConnectorSpec> sidewalkConnectors = null;
             Dictionary<int, SidewalkSetback> sidewalkSetbacks = null;
@@ -62,14 +71,35 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
                 // 隣り合う道路の歩道端を結ぶ短いスプラインへ流し込む。これにより、歩道プレハブの形状、
                 // 厚み、マテリアル、UV の扱いを通常道路と揃えられる。
                 // 歩道が1本しかない場合でもエンドキャップ（丸め終端）を生成するため、1本から呼ぶ。
-                sidewalkConnectors = BuildSidewalkConnectorSpecs(nodeId, nodePosition, horizontalPlane, paths, roadResult.ConnectionPoints, out sidewalkSetbacks);
+                sidewalkConnectors = BuildSidewalkConnectorSpecs(nodeId, nodePosition, horizontalPlane, paths, roadResult.ConnectionPoints, out sidewalkSetbacks, roadResult.Sections, roadResult.Corners);
             }
 
+            sidewalkConnectors ??= new List<SidewalkConnectorSpec>();
+            BuildBoundaryParts(nodeId, nodePosition, horizontalPlane, paths, roadResult.Sections, sidewalkConnectors, roadResult.Corners);
             // 線路（PATH_TRACK/PATH_MONORAIL）が2本以上接続するノードでは、
             // ポイント（分岐器）・平面交差の表現として、転回制約を満たす通行可能ペアにのみ
             // レールコネクタを敷く（TrackIntersectionMeshGenerator参照）。
-            List<RailConnectorSpec> railConnectors = TrackIntersectionMeshGenerator.BuildRailConnectorSpecs(nodeId, nodePosition, horizontalPlane, paths, roadResult.ConnectionPoints);
+            List<RailConnectorSpec> railConnectors = TrackIntersectionMeshGenerator.BuildRailConnectorSpecs(nodeId, nodePosition, horizontalPlane, paths, roadResult.ConnectionPoints, roadResult.Sections);
 
+            sidewalkConnectors.RemoveAll(spec => spec.Part == "wall" && WallBlocksRail(spec, railConnectors));
+            var meshVertices = roadMesh.vertices;
+            for (int i = 0; i < meshVertices.Length; i++)
+            {
+                Vector3 world = meshVertices[i] + nodePosition;
+                meshVertices[i] = SectionSurfacePoint(world, roadResult.Sections, RoadPartHeights.BODY_ABOVE_SPLINE) - nodePosition;
+            }
+            roadMesh.vertices = meshVertices;
+            roadMesh.RecalculateNormals();
+            roadMesh.RecalculateBounds();
+            AddBodyShell(roadMesh, nodePosition, roadResult.Sections);
+            if (sidewalkConnectors != null) foreach (var connector in sidewalkConnectors)
+            {
+                connector.StartNormal = ClosestSectionNormal(connector.Points[0] + nodePosition, roadResult.Sections);
+                connector.EndNormal = ClosestSectionNormal(connector.Points[connector.Points.Count - 1] + nodePosition, roadResult.Sections);
+                AdjustConnectorHeight(connector.Points, nodePosition, roadResult.Sections, connector.Part == "line" ? RoadPartHeights.LINE_ABOVE_SPLINE : RoadPartHeights.SIDEWALK_ABOVE_SPLINE);
+            }
+            if (railConnectors != null) foreach (var connector in railConnectors)
+                AdjustConnectorHeight(connector.Points, nodePosition, roadResult.Sections, RoadPartHeights.TRACK_ABOVE_SPLINE);
             return new NodeMeshResult(roadMesh, roadMaterial, connectionPoints, sidewalkConnectors, railConnectors, sidewalkSetbacks);
         }
         catch (Exception ex)
@@ -94,26 +124,245 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         return baseY + RoadPartHeights.ROAD_SPLINE_OFFSET;
     }
 
-    private static Dictionary<int, Vector3> BuildConnectionPoints(Dictionary<int, Vector2> source, Vector3 nodePosition, bool horizontalPlane)
+    private static SidewalkConnectorSpec BuildEdgeConnector(IntersectionCorner corner, float aWidth, float bWidth,
+        int aVariant, int aType, int bVariant, int bType, Vector3 node, bool horizontalPlane, string part)
     {
-        if (source == null || source.Count == 0)
+        var points = new List<Vector3>(); var widths = new List<float>(); var directions = new List<Vector2>();
+        for (int i = 0; i < corner.Points.Count; i++)
         {
-            return null;
+            float t = (float)i / (corner.Points.Count - 1);
+            float width = Mathf.Lerp(aWidth, bWidth, t*t*(3f-2f*t));
+            Vector2 direction = corner.Directions[i];
+            Vector2 outward = new Vector2(direction.y, -direction.x);
+            Vector2 center = corner.Points[i] + outward * width * (part == "sidewalk" ? -0.5f : 0.5f);
+            points.Add(ToLocalTerrainPoint(center, node, horizontalPlane)); widths.Add(width); directions.Add(direction);
         }
-
-        Dictionary<int, Vector3> result = new Dictionary<int, Vector3>();
-        foreach (var kvp in source)
+        if (part == "sidewalk")
         {
-            // 接続点は PathManager によって道路のスプライン点（端点）へそのまま代入されるため、
-            // 高さは「スプライン点の基準面」で返す。路面上面の高さ（+BODY_ABOVE_SPLINE）で返すと、
-            // 道路の始端だけ他のスプライン点より一段高くなり、始端に不自然な盛り上がりができる。
-            // 高さは接続点自身の位置の地形標高から取り直す（交差点中心との微妙な標高差を吸収する）。
-            float y = SampleBaseSurfaceY(kvp.Value.x, kvp.Value.y, nodePosition, horizontalPlane);
-            result[kvp.Key] = new Vector3(kvp.Value.x, y, kvp.Value.y);
+            points.Reverse(); widths.Reverse(); directions.Reverse();
+            for (int i = 0; i < directions.Count; i++) directions[i] = -directions[i];
+            (aVariant,bVariant) = (bVariant,aVariant); (aType,bType) = (bType,aType);
+        }
+        return new SidewalkConnectorSpec(points,widths,aVariant,aType) { Part=part, Directions=directions,
+            StartDirection=directions[0], EndDirection=directions[directions.Count-1], EndPrefabVariant=bVariant, EndFallbackType=bType };
+    }
+    private static float ResolveWallWidth(PathSummary path, int nodeId, bool outwardLeft)
+    {
+        var master = MasterDataStore.Instance?.GetPathMaster(path.path_variant);
+        if (TrackIntersectionMeshGenerator.IsTrackType(path.path_type))
+        {
+            TrackPath.ResolvePlatformExtents(path, master?.platform_width ?? 0f, out float left, out float right);
+            bool splineLeft = path.start_node_id == nodeId ? outwardLeft : !outwardLeft;
+            if ((splineLeft ? left : right) > 0f) return 0f;
+        }
+        return Mathf.Max(0f, master?.wall_width ?? 0f);
+    }
+
+    private static bool WallBlocksRail(SidewalkConnectorSpec wall, List<RailConnectorSpec> rails)
+    {
+        if (rails == null) return false;
+        foreach (var rail in rails) foreach (var point in wall.Points)
+            for (int i = 1; i < rail.Points.Count; i++)
+            {
+                Vector2 a = IntersectionPolygonUtil.XZ(rail.Points[i-1]), b = IntersectionPolygonUtil.XZ(rail.Points[i]);
+                Vector2 delta = b-a;
+                float t = Mathf.Clamp01(Vector2.Dot(IntersectionPolygonUtil.XZ(point)-a,delta) / Mathf.Max(1e-6f,delta.sqrMagnitude));
+                if (Vector2.Distance(IntersectionPolygonUtil.XZ(point),a+delta*t) < TrackPath.PLATFORM_EDGE_OFFSET) return true;
+            }
+        return false;
+    }
+    private static void BuildBoundaryParts(int nodeId, Vector3 node, bool horizontalPlane, List<PathSummary> paths,
+        Dictionary<int, PathEndSection> sections, List<SidewalkConnectorSpec> specs, List<IntersectionCorner> corners)
+    {
+        var ordered = new List<PathSummary>();
+        foreach (var p in paths) if (sections.ContainsKey(p.path_id)) ordered.Add(p);
+        ordered.Sort((a,b) => Mathf.Atan2(sections[a.path_id].Direction.y, sections[a.path_id].Direction.x)
+            .CompareTo(Mathf.Atan2(sections[b.path_id].Direction.y, sections[b.path_id].Direction.x)));
+        for (int i = 0; i < ordered.Count; i++)
+        {
+            var a = ordered[i]; var b = ordered[(i + 1) % ordered.Count];
+            var sa = sections[a.path_id]; var sb = sections[b.path_id];
+
+
+            float wa = ResolveWallWidth(a, nodeId, true), wb = ResolveWallWidth(b, nodeId, false);
+            Vector2 start = sa.Center + sa.Left * (sa.Width + wa) * 0.5f;
+            Vector2 end = sb.Center - sb.Left * (sb.Width + wb) * 0.5f;
+            if (wa > 0f && wb > 0f)
+            {
+                var corner = corners.Find(c => c.FromPath == a.path_id && c.ToPath == b.path_id);
+                if (corner == null) continue;
+                var spec = BuildEdgeConnector(corner, wa, wb, a.path_variant, a.path_type, b.path_variant, b.path_type, node, horizontalPlane, "wall");
+                spec.EndPrefabVariant = b.path_variant; spec.EndFallbackType = b.path_type;
+                specs.Add(spec);
+            }
+            else
+            {
+                if (wa > 0f) specs.Add(MakeConnector(start, start - sa.Direction * Mathf.Min(wa * 2f, sa.Distance * 0.25f), -sa.Direction, -sa.Direction, wa, 0f, a.path_variant, a.path_type, node, horizontalPlane, "wall"));
+                if (wb > 0f) specs.Add(MakeConnector(end - sb.Direction * Mathf.Min(wb * 2f, sb.Distance * 0.25f), end, sb.Direction, sb.Direction, 0f, wb, b.path_variant, b.path_type, node, horizontalPlane, "wall"));
+            }
+        }
+        bool transition = ordered.Count == 2 && Vector2.Dot(sections[ordered[0].path_id].Direction, sections[ordered[1].path_id].Direction) < -0.8f;
+        foreach (var path in ordered)
+        {
+            if (TrackIntersectionMeshGenerator.IsTrackType(path.path_type)) continue;
+            var section = sections[path.path_id];
+            var master = MasterDataStore.Instance?.GetPathMaster(path.path_variant);
+            float width = Mathf.Max(0f, master?.center_width ?? 0f);
+            if (width <= 0f) continue;
+            var other = transition ? ordered[ordered[0] == path ? 1 : 0] : null;
+            float otherWidth = other != null ? Mathf.Max(0f, MasterDataStore.Instance?.GetPathMaster(other.path_variant)?.center_width ?? 0f) : 0f;
+            if (otherWidth > 0f)
+            {
+                if (path != ordered[0]) continue;
+                var otherSection = sections[other.path_id];
+                var spec = MakeConnector(section.Center, otherSection.Center, -section.Direction, otherSection.Direction,
+                    width, otherWidth, path.path_variant, path.path_type, node, horizontalPlane, "center");
+                spec.EndPrefabVariant = other.path_variant; spec.EndFallbackType = other.path_type;
+                specs.Add(spec);
+            }
+            else specs.Add(MakeConnector(section.Center, section.Center - section.Direction * Mathf.Min(width * 2f, section.Distance * 0.5f),
+                -section.Direction, -section.Direction, width, 0f, path.path_variant, path.path_type, node, horizontalPlane, "center"));
+        }
+        if (transition && !TrackIntersectionMeshGenerator.IsTrackType(ordered[0].path_type) && !TrackIntersectionMeshGenerator.IsTrackType(ordered[1].path_type))
+            BuildTransitionLines(ordered[0], ordered[1], sections, specs, node, horizontalPlane);
+    }
+
+    private static void BuildTransitionLines(PathSummary a, PathSummary b, Dictionary<int, PathEndSection> sections,
+        List<SidewalkConnectorSpec> specs, Vector3 node, bool horizontalPlane)
+    {
+        RoadPath.GetPathMasterParams(a, out float aw, out float asw, out float aside, out _, out int alanes, out _, out float acenter, out _, out _, out _, out _);
+        RoadPath.GetPathMasterParams(b, out float bw, out float bsw, out float bside, out _, out int blanes, out _, out float bcenter, out _, out _, out _, out _);
+        if (aside <= 0f || bside <= 0f) return;
+        var sa = sections[a.path_id]; var sb = sections[b.path_id];
+        float ae = aw * 0.5f - asw - aside * 0.5f, be = bw * 0.5f - bsw - bside * 0.5f;
+        for (int side = -1; side <= 1; side += 2)
+            specs.Add(MakeConnector(sa.Center + sa.Left * ae * side, sb.Center - sb.Left * be * side,
+                -sa.Direction, sb.Direction, aside * 0.3f, bside * 0.3f, a.path_variant, a.path_type, node, horizontalPlane, "line"));
+        if (acenter <= 0f && bcenter <= 0f)
+        {
+            int count = Mathf.Max(alanes, blanes);
+            for (int lane = 1; lane < count; lane++)
+            {
+                float t = (float)lane / count;
+                float ai = Mathf.Round(t * alanes), bi = Mathf.Round(t * blanes);
+                specs.Add(MakeConnector(sa.Center + sa.Left * Mathf.Lerp(-ae, ae, ai / Mathf.Max(1, alanes)),
+                    sb.Center - sb.Left * Mathf.Lerp(-be, be, bi / Mathf.Max(1, blanes)), -sa.Direction, sb.Direction,
+                    aside * 0.3f, bside * 0.3f, a.path_variant, a.path_type, node, horizontalPlane, "line"));
+            }
+        }
+    }
+    private static void AddBodyShell(Mesh mesh, Vector3 node, Dictionary<int, PathEndSection> sections)
+    {
+        var top = mesh.vertices; var topTriangles = mesh.triangles;
+        var vertices = new List<Vector3>(top); var triangles = new List<int>(topTriangles);
+        bool hasDepth = false;
+        for (int i = 0; i < top.Length; i++)
+        {
+            float weight = 0f, depth = 0f; Vector3 normal = Vector3.up;
+            foreach (var section in sections.Values)
+            {
+                Vector2 delta = IntersectionPolygonUtil.XZ(top[i]+node-Vector3.up*RoadPartHeights.BODY_ABOVE_SPLINE)-section.Center;
+                if (Mathf.Abs(Vector2.Dot(delta,section.Direction)) < 0.001f && Mathf.Abs(Vector2.Dot(delta,section.Left)) <= section.Width*0.5f+0.001f)
+                { depth=section.BodyDepth; weight=1f; normal=section.Normal; break; }
+                float distance = delta.sqrMagnitude;
+                float w = 1f / Mathf.Max(0.01f, distance);
+                depth += section.BodyDepth * w; weight += w;
+            }
+            depth /= Mathf.Max(1e-6f, weight);
+            hasDepth |= depth > 0.001f;
+            vertices.Add(top[i] - normal * depth);
+        }
+        if (!hasDepth) return;
+        for (int i = 0; i < topTriangles.Length; i += 3)
+        {
+            triangles.Add(top.Length + topTriangles[i]); triangles.Add(top.Length + topTriangles[i+2]); triangles.Add(top.Length + topTriangles[i+1]);
+        }
+        // 輪郭の入口断面は本線のbodyと接合するため閉じず、交差点外周だけに小口を張る。
+        for (int i = 0; i < top.Length; i++)
+        {
+            int j = (i+1) % top.Length;
+            bool mouth = false;
+            foreach (var section in sections.Values)
+            {
+                Vector2 a = IntersectionPolygonUtil.XZ(top[i]+node-Vector3.up*RoadPartHeights.BODY_ABOVE_SPLINE)-section.Center;
+                Vector2 b = IntersectionPolygonUtil.XZ(top[j]+node-Vector3.up*RoadPartHeights.BODY_ABOVE_SPLINE)-section.Center;
+                if (Mathf.Abs(Vector2.Dot(a,section.Direction)) < 0.02f && Mathf.Abs(Vector2.Dot(b,section.Direction)) < 0.02f) { mouth = true; break; }
+            }
+            if (mouth) continue;
+            int k = vertices.Count;
+            vertices.Add(top[i]); vertices.Add(top[j]); vertices.Add(vertices[top.Length+j]); vertices.Add(vertices[top.Length+i]);
+            triangles.Add(k); triangles.Add(k+1); triangles.Add(k+2); triangles.Add(k); triangles.Add(k+2); triangles.Add(k+3);
+        }
+        mesh.SetVertices(vertices); mesh.SetTriangles(triangles,0);
+        var colors = new Color[vertices.Count]; Array.Fill(colors,Color.white); mesh.colors=colors;
+        mesh.RecalculateNormals(); mesh.RecalculateBounds();
+    }
+    private static Vector3 ClosestSectionNormal(Vector3 point, Dictionary<int, PathEndSection> sections)
+    {
+        float best = float.PositiveInfinity; Vector3 normal = Vector3.up;
+        foreach (var section in sections.Values)
+        {
+            Vector2 delta = IntersectionPolygonUtil.XZ(point) - section.Center;
+            float distance = Mathf.Abs(Vector2.Dot(delta,section.Direction));
+            if (distance < best) { best = distance; normal = section.Normal; }
+        }
+        return normal;
+    }
+    private static Vector3 SectionSurfacePoint(Vector3 point, Dictionary<int, PathEndSection> sections, float offset)
+    {
+        PathEndSection nearest = null;
+        float nearestDistance = float.PositiveInfinity;
+        foreach (var s in sections.Values)
+        {
+            Vector2 delta = IntersectionPolygonUtil.XZ(point) - s.Center;
+            if (Mathf.Abs(Vector2.Dot(delta, s.Direction)) > 1e-4f) continue;
+            if (delta.sqrMagnitude < nearestDistance) { nearest = s; nearestDistance = delta.sqrMagnitude; }
+        }
+        if (nearest != null)
+        {
+            point.y = nearest.Position.y;
+            return point + Vector3.up * offset;
+        }
+        point.y = SectionHeight(point, sections) + offset;
+        return point;
+    }
+    private static float SectionHeight(Vector3 point, Dictionary<int, PathEndSection> sections)
+    {
+        float weighted = 0f, weight = 0f;
+        foreach (var section in sections.Values)
+        {
+            Vector2 delta = IntersectionPolygonUtil.XZ(point) - section.Center;
+            float along = Vector2.Dot(delta, section.Direction);
+            float across = Mathf.Max(0f, Mathf.Abs(Vector2.Dot(delta, section.Left)) - section.Width * 0.5f);
+            float distance = along * along + across * across;
+            if (distance < 1e-8f) return section.Position.y;
+            float w = 1f / distance;
+            weighted += section.Position.y * w;
+            weight += w;
+        }
+        return weighted / Mathf.Max(weight, 1e-8f);
+    }
+
+    private static void AdjustConnectorHeight(List<Vector3> points, Vector3 node, Dictionary<int, PathEndSection> sections, float offset)
+    {
+        for (int i = 0; i < points.Count; i++)
+        {
+            var p = points[i];
+            p = SectionSurfacePoint(p + node, sections, offset) - node;
+            points[i] = p;
+        }
+    }
+    private static Dictionary<int, Vector3> BuildSectionPoints(Dictionary<int, PathEndSection> sections, Vector3 nodePosition, bool horizontalPlane, bool absolute)
+    {
+        var result = new Dictionary<int, Vector3>();
+        foreach (var pair in sections)
+        {
+            var section = pair.Value;
+            if (!absolute) section.Position = new Vector3(section.Position.x, SampleBaseSurfaceY(section.Position.x, section.Position.z, nodePosition, horizontalPlane), section.Position.z);
+            result[pair.Key] = section.Position;
         }
         return result;
     }
-
     private static float ResolveRoadWidth(PathSummary path)
     {
         // 描画側の道路幅はマスターデータを正とする。PathSummary.width はバックエンド由来の値であり、
@@ -128,6 +377,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
 
     private static float ResolveSidewalkWidth(PathSummary path)
     {
+        if (TrackIntersectionMeshGenerator.IsTrackType(path.path_type)) return 0f;
         // sidewalk_width が 0 以下の道路は歩道を持たない道路として扱う。
         // マスターデータが読めない場合は、既存の RoadPath と同じ既定値を使う。
         var master = MasterDataStore.Instance != null ? MasterDataStore.Instance.GetPathMaster(path.path_variant) : null;
@@ -152,7 +402,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         public bool CanSidewalk;
     }
 
-    private static List<SidewalkConnectorSpec> BuildSidewalkConnectorSpecs(int nodeId, Vector3 nodePosition, bool horizontalPlane, List<PathSummary> paths, Dictionary<int, Vector2> connectionPoints, out Dictionary<int, SidewalkSetback> sidewalkSetbacks)
+    private static List<SidewalkConnectorSpec> BuildSidewalkConnectorSpecs(int nodeId, Vector3 nodePosition, bool horizontalPlane, List<PathSummary> paths, Dictionary<int, Vector2> connectionPoints, out Dictionary<int, SidewalkSetback> sidewalkSetbacks, Dictionary<int, PathEndSection> sections, List<IntersectionCorner> corners)
     {
         sidewalkSetbacks = null;
         if (connectionPoints == null || connectionPoints.Count == 0)
@@ -160,7 +410,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             return null;
         }
 
-        List<SidewalkRoadEntry> entries = BuildSidewalkRoadEntries(nodeId, paths, connectionPoints);
+        List<SidewalkRoadEntry> entries = BuildSidewalkRoadEntries(nodeId, paths, connectionPoints, sections);
         if (entries.Count == 0)
         {
             return null;
@@ -201,7 +451,9 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
 
             if (current.CanSidewalk && next.CanSidewalk)
             {
-                AddSpecIfValid(specs, BuildSidewalkConnectorSpec(nodePosition, horizontalPlane, current, next, sectorAngle));
+                                var corner = corners.Find(c => c.FromPath == current.PathId && c.ToPath == next.PathId);
+                if (corner != null) specs.Add(BuildEdgeConnector(corner, current.SidewalkWidth, next.SidewalkWidth,
+                    current.PathVariant, current.PathType, next.PathVariant, next.PathType, nodePosition, horizontalPlane, "sidewalk"));
             }
             else
             {
@@ -258,7 +510,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         }
     }
 
-    private static List<SidewalkRoadEntry> BuildSidewalkRoadEntries(int nodeId, List<PathSummary> paths, Dictionary<int, Vector2> connectionPoints)
+    private static List<SidewalkRoadEntry> BuildSidewalkRoadEntries(int nodeId, List<PathSummary> paths, Dictionary<int, Vector2> connectionPoints, Dictionary<int, PathEndSection> sections)
     {
         List<SidewalkRoadEntry> entries = new List<SidewalkRoadEntry>();
         foreach (var path in paths)
@@ -276,6 +528,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
                 continue;
             }
             direction.Normalize();
+            if (sections.TryGetValue(path.path_id, out var section)) direction = section.Direction;
 
             // 歩道を持たない道路や接続断面が計算できなかった道路もエントリには含める
             // （角度順の隣接判定で「歩道接続をブロックする道路」として必要）。
@@ -299,258 +552,85 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         return entries;
     }
 
-    /// <summary>
-    /// 歩道が交差点内へ続かない道路の歩道端を、交差点の少し手前で丸めて終端するエンドキャップを作る。
-    /// 隣（角度順で隣接するセクター側）の道路が歩道を持たない場合に使う。
-    ///
-    /// 直線側の歩道は setback の分だけ切断面より手前（道路外側）で clip され
-    /// （RoadPath.CreateRoadParts が SidewalkSetbacks を消費）、その空いた帯
-    /// [halfWidth - sidewalkWidth, halfWidth] の区間にこのキャップを敷く。
-    /// キャップは帯の中心線をスプラインとし、切断面に向かって幅を先細りさせることで
-    /// 丸まりながら収束する終端形状になる。交差点の内側へは入り込まない。
-    /// </summary>
-    /// <param name="isLeftSide">道路をノードから外向きに見たときの左側の歩道端か。</param>
-    /// <param name="setback">直線側の歩道を切断面から後退させるべき量（メートル）。生成失敗時は 0。</param>
+    /// <summary>道路外縁を中心とする四分円の扇形。縁石を外側へ回し、尖った先端を作らない。</summary>
     private static SidewalkConnectorSpec BuildSidewalkEndCapSpec(Vector3 nodePosition, bool horizontalPlane, SidewalkRoadEntry entry, bool isLeftSide, out float setback)
     {
         setback = 0f;
-        Vector2 lat = isLeftSide ? PerpendicularLeft(entry.Direction) : -PerpendicularLeft(entry.Direction);
-        float sw = entry.SidewalkWidth;
-
-        // 後退量は歩道幅の半分程度。交差点中心を越えて道路長を食い潰さないよう制限する。
-        Vector2 toNode = new Vector2(nodePosition.x, nodePosition.z) - entry.ConnectionPoint;
-        float maxLen = toNode.magnitude * 0.5f;
-        float capLen = Mathf.Min(Mathf.Max(sw * SidewalkEndCapSetbackFactor, MinSidewalkEndCapLength), maxLen);
-        if (capLen < MinSidewalkEndCapLength)
+        float width = entry.SidewalkWidth;
+        if (width <= 0f) return null;
+        Vector2 lateral = isLeftSide ? PerpendicularLeft(entry.Direction) : -PerpendicularLeft(entry.Direction);
+        Vector2 pivot = entry.ConnectionPoint + lateral * entry.RoadHalfWidth;
+        var points = new List<Vector3>();
+        var widths = new List<float>();
+        var directions = new List<Vector2>();
+        const int segments = 16;
+        for (int i = 0; i <= segments; i++)
         {
-            return null;
+            float angle = Mathf.PI * 0.5f * i / segments;
+            Vector2 radial = -lateral * Mathf.Cos(angle) - entry.Direction * Mathf.Sin(angle);
+            points.Add(ToLocalTerrainPoint(pivot + radial * width * 0.5f, nodePosition, horizontalPlane));
+            widths.Add(width);
+            directions.Add(PerpendicularLeft(radial));
         }
-        setback = capLen;
-
-        // 歩道帯 [halfWidth - sw, halfWidth] の中心線の、切断面上の位置。
-        // スプラインは縁石ではなく帯中心線に置く（実体化側はプレハブの bounds 中心を
-        // スプラインへ載せるため、直線部の帯位置と一致させるには中心線が必要）。
-        Vector2 bandCenterAtCut = entry.ConnectionPoint + lat * (entry.RoadHalfWidth - sw * 0.5f);
-
-        // キャップは切断面から道路外側へ capLen の区間（＝clip で後退した直線歩道の跡地）を占める。
-        Vector2 capOpen = bandCenterAtCut + entry.Direction * capLen; // 直線歩道の終端と突き合う全幅端
-        Vector2 capClose = bandCenterAtCut;                           // 切断面上で閉じる
-        List<Vector2> bandPoints = new List<Vector2>
+        // 左側用モデルの縁石(+X)を円弧側へ向ける。反対側は点列の進行方向を反転する。
+        if (Vector2.Dot(directions[0], -entry.Direction) < 0f)
         {
-            capOpen,
-            Vector2.Lerp(capOpen, capClose, 0.5f),
-            capClose,
-        };
-        List<float> widths = new List<float> { sw, sw * 0.7f, 0.05f };
-
-        // sidewalk プレハブは「縁石（道路中心側の面）が +X＝進行方向右側」（左側用パーツ）の規約。
-        // 縁石が道路の内側（-lat）を、外側端が道路境界側（+lat）を向く進行方向を選ぶ。
-        Vector2 requiredTravel = -PerpendicularLeft(lat);
-        if (Vector2.Dot(requiredTravel, capClose - capOpen) < 0f)
-        {
-            bandPoints.Reverse();
+            points.Reverse();
             widths.Reverse();
+            directions.Reverse();
         }
-
-        List<Vector3> points = new List<Vector3>(bandPoints.Count);
-        for (int i = 0; i < bandPoints.Count; i++)
+        return new SidewalkConnectorSpec(points, widths, entry.PathVariant, entry.PathType)
         {
-            points.Add(ToLocalTerrainPoint(bandPoints[i], nodePosition, horizontalPlane));
-        }
-        return new SidewalkConnectorSpec(points, widths, entry.PathVariant, entry.PathType);
+            Directions = directions,
+            StartDirection = directions[0],
+            EndDirection = directions[directions.Count - 1]
+        };
     }
-
-    internal static bool TryGetPathDirectionFromNode(int nodeId, PathSummary path, out Vector2 nodePoint, out Vector2 directionPoint)
+    public static bool TryGetPathDirectionFromNode(int nodeId, PathSummary path, out Vector2 nodePoint, out Vector2 directionPoint)
     {
-        nodePoint = Vector2.zero;
-        directionPoint = Vector2.zero;
-
-        List<float> start = path.GetStartPointList();
-        List<float> end = path.GetEndPointList();
-        if (start == null || start.Count < 3 || end == null || end.Count < 3)
+        nodePoint = directionPoint = Vector2.zero;
+        bool start = path.start_node_id == nodeId;
+        if (!start && path.end_node_id != nodeId) return false;
+        var anchor = start ? path.GetStartPointList() : path.GetEndPointList();
+        if (anchor == null || anchor.Count < 3) return false;
+        nodePoint = new Vector2(anchor[0], anchor[2]);
+        var refs = new List<Vector2>();
+        var control = start ? path.GetStartControlList() : path.GetEndControlList();
+        if (path.curved && control != null && control.Count >= 3) refs.Add(new Vector2(control[0], control[2]));
+        var waypoints = path.GetWaypointList();
+        if (waypoints != null && waypoints.Count > 0)
         {
-            return false;
+            var w = waypoints[start ? 0 : waypoints.Count - 1].position;
+            if (w != null && w.Length >= 3) refs.Add(new Vector2(w[0], w[2]));
         }
-
-        if (path.start_node_id == nodeId)
-        {
-            // 始点側ノードに接続している場合、最初のウェイポイントが道路の進入方向を最もよく表す。
-            // ウェイポイントがない直線道路では終点方向を使う。
-            nodePoint = new Vector2(start[0], start[2]);
-            var waypoints = path.GetWaypointList();
-            if (waypoints != null && waypoints.Count > 0)
-            {
-                var waypoint = waypoints[0];
-                directionPoint = new Vector2(waypoint.position[0], waypoint.position[2]);
-            }
-            else
-            {
-                directionPoint = new Vector2(end[0], end[2]);
-            }
-            return true;
-        }
-
-        if (path.end_node_id == nodeId)
-        {
-            // 終点側ノードに接続している場合は、最後のウェイポイントからノードへ入ってくる。
-            // ノードから外側へ向かう方向を得るため、最後のウェイポイントまたは始点を参照する。
-            nodePoint = new Vector2(end[0], end[2]);
-            var waypoints = path.GetWaypointList();
-            if (waypoints != null && waypoints.Count > 0)
-            {
-                var waypoint = waypoints[waypoints.Count - 1];
-                directionPoint = new Vector2(waypoint.position[0], waypoint.position[2]);
-            }
-            else
-            {
-                directionPoint = new Vector2(start[0], start[2]);
-            }
-            return true;
-        }
-
+        var other = start ? path.GetEndPointList() : path.GetStartPointList();
+        if (other != null && other.Count >= 3) refs.Add(new Vector2(other[0], other[2]));
+        foreach (var point in refs) if ((point - nodePoint).sqrMagnitude > 1e-6f) { directionPoint = point; return true; }
         return false;
     }
-
-    /// <summary>
-    /// 隣り合う2本の道路（角度順で current → next、間のセクターは current の左側・next の右側）の
-    /// 歩道同士を結ぶコネクタの spec を作る。
-    ///
-    /// 交差点隅を「2道路の切断断面線の交点 C を中心とした同心円弧」として構成する。
-    /// 各切断面上での歩道帯の外側端（＝道路境界）は C から見た半径 ρ の位置にあり、
-    /// スプラインは帯の中心線（半径 ρ - 歩道幅/2）に置く。弧の半径ベクトルが両端で
-    /// 切断面の横方向（lat）と一致するため、弧の接線＝直線部の進行方向となり C1 連続になる。
-    /// 対称な直交交差点では ρ=0 に退化し、弧は「交差点隅の点 C を中心にした半径＝歩道幅の
-    /// 四分円板」を掃く（これが期待される見た目）。
-    /// スプライン点が帯中心線なので、実体化側（RoadPath.CreateSidewalkConnectorObject）が
-    /// プレハブの bounds 中心をスプラインに載せると、直線部の歩道帯 [halfWidth-sw, halfWidth]
-    /// と正確に連続する。
-    /// </summary>
-    private static SidewalkConnectorSpec BuildSidewalkConnectorSpec(Vector3 nodePosition, bool horizontalPlane, SidewalkRoadEntry current, SidewalkRoadEntry next, float sectorAngle)
+    /// <summary>端点の方向を固定した移行部・終端の中心線を生成する。</summary>
+    private static SidewalkConnectorSpec MakeConnector(Vector2 start, Vector2 end, Vector2 startDirection, Vector2 endDirection,
+        float startWidth, float endWidth, int variant, int type, Vector3 node, bool horizontalPlane, string part = "sidewalk")
     {
-        // セクターに面する横方向（切断面に沿った、道路中心→このセクター側の単位ベクトル）
-        Vector2 latStart = PerpendicularLeft(current.Direction);
-        Vector2 latEnd = -PerpendicularLeft(next.Direction);
-
-        // 各切断面上の歩道帯の外側端＝道路境界の点。直線部の歩道帯はここまで届いている。
-        Vector2 startOuter = current.ConnectionPoint + latStart * current.RoadHalfWidth;
-        Vector2 endOuter = next.ConnectionPoint + latEnd * next.RoadHalfWidth;
-
-        float swStart = current.SidewalkWidth;
-        float swEnd = next.SidewalkWidth;
-
-        // 弧の掃引角。lat の向きは道路方向+90°/-90°なので、latStart→latEnd の回転角は
-        // sectorAngle - π（凸コーナーでは負＝時計回り）。
-        // セクターが平角に近い/超える場合（ほぼ一直線・reflex）は同心円弧が成立しないため直線帯にする。
-        float sweep = sectorAngle - Mathf.PI;
-
-        List<Vector2> bandPoints;
-        List<float> widths;
-
-        bool useArc = sweep < -0.05f;
-        if (useArc)
+        float length = Vector2.Distance(start, end);
+        float handle = length / 3f;
+        Vector2 p1 = start + startDirection * handle;
+        Vector2 p2 = end - endDirection * handle;
+        int count = Mathf.Clamp(Mathf.CeilToInt(length / 0.5f), 4, 128);
+        var points = new List<Vector3>();
+        var widths = new List<float>();
+        for (int i = 0; i <= count; i++)
         {
-            // 隅の中心 C = 2つの切断断面線（ConnectionPoint を通り lat 方向の直線）の交点。
-            // startOuter + latStart * s = endOuter + latEnd * u を解く。
-            Vector2 w = endOuter - startOuter;
-            float denom = Cross2(latStart, latEnd);
-            float s = Mathf.Abs(denom) > 1e-4f ? Cross2(w, latEnd) / denom : float.NaN;
-            if (float.IsNaN(s))
-            {
-                useArc = false;
-                bandPoints = null;
-                widths = null;
-            }
-            else
-            {
-                Vector2 c = startOuter + latStart * s;
-                // C から見た帯外側端の符号付き半径（lat 方向成分）。対称交差点では 0 に退化し得る。
-                float rhoStart = Vector2.Dot(startOuter - c, latStart);
-                float rhoEnd = Vector2.Dot(endOuter - c, latEnd);
-
-                // 鋭角セクター等で C が異常に遠い場合は数値誤差が大きくなるため直線帯へ逃がす。
-                float saneRadius = (current.RoadHalfWidth + next.RoadHalfWidth + swStart + swEnd) * 4f;
-                if (Mathf.Max(Mathf.Abs(rhoStart), Mathf.Abs(rhoEnd)) > saneRadius)
-                {
-                    useArc = false;
-                    bandPoints = null;
-                    widths = null;
-                }
-                else
-                {
-                    float angleStart = Mathf.Atan2(latStart.y, latStart.x);
-                    float centerRadiusStart = rhoStart - swStart * 0.5f;
-                    float centerRadiusEnd = rhoEnd - swEnd * 0.5f;
-                    float arcLenEstimate = Mathf.Abs(sweep) * Mathf.Max(Mathf.Abs(centerRadiusStart), Mathf.Abs(centerRadiusEnd));
-                    int steps = Mathf.Clamp(Mathf.CeilToInt(arcLenEstimate / 0.5f), 2, 32);
-
-                    bandPoints = new List<Vector2>(steps + 1);
-                    widths = new List<float>(steps + 1);
-                    for (int i = 0; i <= steps; i++)
-                    {
-                        float t = (float)i / steps;
-                        float ang = angleStart + sweep * t;
-                        Vector2 dir = new Vector2(Mathf.Cos(ang), Mathf.Sin(ang));
-                        float swT = Mathf.Lerp(swStart, swEnd, t);
-                        float rho = Mathf.Lerp(rhoStart, rhoEnd, t);
-                        // 帯中心線 = 外側端の符号付き半径から歩道幅の半分だけ内側
-                        bandPoints.Add(c + dir * (rho - swT * 0.5f));
-                        widths.Add(swT);
-                    }
-                }
-            }
+            float t = (float)i / count, u = 1f - t;
+            Vector2 p = u*u*u*start + 3*u*u*t*p1 + 3*u*t*t*p2 + t*t*t*end;
+            points.Add(ToLocalTerrainPoint(p, node, horizontalPlane));
+            widths.Add(Mathf.Lerp(startWidth, endWidth, t*t*(3f-2f*t)));
         }
-        else
+        return new SidewalkConnectorSpec(points, widths, variant, type)
         {
-            bandPoints = null;
-            widths = null;
-        }
-
-        if (!useArc || bandPoints == null)
-        {
-            // 直線帯フォールバック: 両切断面上の帯中心点を直線で結ぶ。
-            Vector2 startCenter = startOuter - latStart * (swStart * 0.5f);
-            Vector2 endCenter = endOuter - latEnd * (swEnd * 0.5f);
-            if ((endCenter - startCenter).sqrMagnitude < 1e-4f)
-            {
-                return null;
-            }
-            bandPoints = new List<Vector2>
-            {
-                startCenter,
-                Vector2.Lerp(startCenter, endCenter, 0.5f),
-                endCenter,
-            };
-            widths = new List<float> { swStart, (swStart + swEnd) * 0.5f, swEnd };
-        }
-
-        // sidewalk プレハブは「縁石（道路中心側の面）が +X＝進行方向右側」（左側用パーツ）の規約。
-        // 縁石が帯の内側（交差点中心側 = -latStart）を、外側端が道路境界側（+latStart）を
-        // 向く進行方向になるよう、必要なら反転する。
-        Vector2 requiredTravel = -PerpendicularLeft(latStart);
-        if (Vector2.Dot(requiredTravel, bandPoints[1] - bandPoints[0]) < 0f)
-        {
-            bandPoints.Reverse();
-            widths.Reverse();
-        }
-
-        List<Vector3> points = new List<Vector3>(bandPoints.Count);
-        for (int i = 0; i < bandPoints.Count; i++)
-        {
-            points.Add(ToLocalTerrainPoint(bandPoints[i], nodePosition, horizontalPlane));
-        }
-
-        // 見た目の基準となる sidewalk プレハブは、接続する2本の道路のうち variant 番号が大きい方を使う。
-        // 同じ交差点内に複数の歩道種別がある場合でも、角ごとに優先度の高い歩道表現へ合わせる。
-        SidewalkRoadEntry prefabSource = current.PathVariant >= next.PathVariant ? current : next;
-        return new SidewalkConnectorSpec(points, widths, prefabSource.PathVariant, prefabSource.PathType);
+            Part = part, StartDirection = startDirection, EndDirection = endDirection
+        };
     }
-
-    /// <summary>2Dベクトルの外積（z成分）。</summary>
-    private static float Cross2(Vector2 a, Vector2 b)
-    {
-        return a.x * b.y - a.y * b.x;
-    }
-
     private static Vector3 ToLocalTerrainPoint(Vector2 point, Vector3 nodePosition, bool horizontalPlane)
     {
         // 交差点オブジェクトの子として配置するため、スプライン点はノード基準のローカル座標に変換する。
@@ -745,7 +825,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         List<int> polygonTriangles = TriangulatePolygon(points);
         if (polygonTriangles.Count == 0)
         {
-            polygonTriangles = GenerateTriangleFanIndices(points.Length);
+            throw new InvalidOperationException("交差点の輪郭を三角形化できません。");
         }
 
         // Unity の XZ 平面では、2D 上で反時計回りの三角形をそのまま置くと法線が下向きになる。
@@ -828,18 +908,6 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             triangles.Add(vertexIndices[0]);
             triangles.Add(vertexIndices[1]);
             triangles.Add(vertexIndices[2]);
-        }
-        return triangles;
-    }
-
-    private static List<int> GenerateTriangleFanIndices(int vertexCount)
-    {
-        List<int> triangles = new List<int>();
-        for (int i = 1; i < vertexCount - 1; i++)
-        {
-            triangles.Add(0);
-            triangles.Add(i);
-            triangles.Add(i + 1);
         }
         return triangles;
     }
