@@ -296,6 +296,11 @@ public static class Constants
     public const int ALERT_PATH_MASK_SHIFT = 8;
     public const int ALERT_DISPLAY_RUIN = 65536;
     public const float ALERT_BUDGET_CAPPED_SCALE_THRESHOLD = 0.5f;
+    public const int PATH_EQUIPMENT_NONE = 0;
+    public const int PATH_EQUIPMENT_STANDARD = 1;
+    public const int PATH_UTILITY_NONE = 0;
+    public const int PATH_UTILITY_OVERHEAD = 1;
+    public const int PATH_UTILITY_UNDERGROUND = 2;
 
     public static readonly Dictionary<int, int> VEHICLE_TO_TRAFFIC = new Dictionary<int, int>
     {
@@ -341,4 +346,6 @@ public static class Constants
     public static readonly int[] ALERT_AGENT_ICON_BITS = new int[] { ALERT_AGENT_CONSTRUCTION_SHORTAGE, ALERT_AGENT_ON_FIRE, ALERT_AGENT_ACCIDENTAL_FIRE, ALERT_AGENT_CRIME, ALERT_AGENT_CRIME_SIGN, ALERT_AGENT_INFRA_DISCONNECTED };
 
     public static readonly int[] ALERT_PATH_ICON_BITS = new int[] { ALERT_PATH_CONSTRUCTION_SHORTAGE, ALERT_PATH_ACCIDENT, ALERT_PATH_NO_STATION_HOUSE };
+
+    public static readonly string[] PATH_EQUIPMENT_FIELDS = new string[] { "streetlight_type", "fence_type", "street_tree_type", "utility_mode" };
 }

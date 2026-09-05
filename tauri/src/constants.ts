@@ -291,6 +291,11 @@ export const ALERT_PATH_NO_STATION_HOUSE: number = 4;
 export const ALERT_PATH_MASK_SHIFT: number = 8;
 export const ALERT_DISPLAY_RUIN: number = 65536;
 export const ALERT_BUDGET_CAPPED_SCALE_THRESHOLD: number = 0.5;
+export const PATH_EQUIPMENT_NONE: number = 0;
+export const PATH_EQUIPMENT_STANDARD: number = 1;
+export const PATH_UTILITY_NONE: number = 0;
+export const PATH_UTILITY_OVERHEAD: number = 1;
+export const PATH_UTILITY_UNDERGROUND: number = 2;
 
 export const VEHICLE_TO_TRAFFIC: Record<number, number> = {
   0: 0,
@@ -334,3 +339,5 @@ export const TENANT_TYPES: number[] = [2, 4, 8, 16];
 export const ALERT_AGENT_ICON_BITS: number[] = [1, 2, 4, 8, 16, 32];
 
 export const ALERT_PATH_ICON_BITS: number[] = [1, 2, 4];
+
+export const PATH_EQUIPMENT_FIELDS: string[] = ["streetlight_type", "fence_type", "street_tree_type", "utility_mode"];

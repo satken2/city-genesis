@@ -417,9 +417,8 @@ public static class ModularBodyBuilder
 
     /// <summary>
     /// 地面パネルを地形に沿って傾斜させたメッシュを生成する。
-    /// 外周頂点間を1枚の大三角形が張ると区画内部の起伏を拾えず地形を突き抜けるため、ポリゴンを
-    /// 三角形分割したうえで長辺を中点分割して内部頂点を作り（BuildingMeshBuilder.SubdivideTrianglesByEdgeLength、
-    /// 最大辺長は LocalConstants.SITE_FLOOR_MAX_EDGE）、外周・内部を問わず全頂点を地形標高に合わせる。
+    /// 地形格子の三角形を敷地形状で切り抜き、内部も地形と同一平面になるようにする。
+    /// タイル未ロード時のみ SITE_FLOOR_MAX_EDGE による暫定分割を使い、地形到着後に再生成する。
     ///
     /// 各頂点の高さは center_point 位置での地形高さ（centerPointWorld.y）を基準にローカル座標化する。
     /// GameObject が center_point 位置の高さに配置されることを前提とする
@@ -431,6 +430,9 @@ public static class ModularBodyBuilder
     public static Mesh GenerateTerrainConformingFloorMesh(Vector2[] footprint, Vector3 centerPointWorld)
     {
         if (footprint == null || footprint.Length < 3) return null;
+
+        Mesh aligned = BuildingMeshBuilder.GenerateTerrainSurfaceMesh(footprint, centerPointWorld, GROUND_OFFSET);
+        if (aligned != null) return aligned;
 
         float baseGround = centerPointWorld.y;
 

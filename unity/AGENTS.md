@@ -90,7 +90,7 @@ CameraCellChecker(視線中心セルの変化検知)
 ## 地形高さの取得
 
 - 原則 `HeightmapTextureManager.GetTerrainHeight(pos)` を使う(CPU高さ配列のO(1)ルックアップ。未構築時・サンプリング結果が0の場合は `Utils.GetGroundHeight` にフォールバック)。
-- `Utils.GetGroundHeight` はフレーム単位キャッシュ付き。**Terrainタイル差し替え後は `Utils.InvalidateHeightCache()` を呼ばないと古い高さを返す。**
+- `Utils.GetGroundHeight` は同一XZ座標だけを共有するフレーム単位キャッシュ付き（近傍座標への丸めは行わない）。**Terrainタイル差し替え後は `Utils.InvalidateHeightCache()` を呼ばないと古い高さを返す。**
 
 ## オブジェクトの命名規則とタグ(変更禁止級の規約)
 

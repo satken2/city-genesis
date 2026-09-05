@@ -1,0 +1,14 @@
+{
+  "pathEquipment": {
+    "title": "道路設備",
+    "streetlight_type": "街灯",
+    "fence_type": "柵",
+    "street_tree_type": "街路樹",
+    "utility_mode": "配線方式",
+    "none": "なし",
+    "standard": "標準",
+    "overhead": "架空配線",
+    "underground": "地中配線",
+    "apply": "適用"
+  }
+}

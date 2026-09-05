@@ -96,8 +96,11 @@ public static class LocalConstants
     /// <summary>土マウンド上面の細分化で許容する最大辺長(m)。これより長い辺は中点分割され、凹凸用の内部頂点が作られる。</summary>
     public const float CONSTRUCTION_DIRT_MAX_EDGE = 3f;
 
-    /// <summary>地面パネル(floor)の地形追従細分化で許容する最大辺長(m)。これより長い辺は中点分割され、区画内部の起伏を拾う内部頂点が作られる。平面斜面では線形補間が厳密なので、この値を細かくしすぎても品質は上がらず頂点数だけ増える。</summary>
+    /// <summary>地形タイル未ロード時のfloor暫定メッシュの最大辺長(m)。ロード後は地形格子に合わせて切り抜くため使用しない。</summary>
     public const float SITE_FLOOR_MAX_EDGE = 6f;
+
+    /// <summary>Terrain自身の描画LODで許容する画面上の誤差。地表を覆うfloor・道路との形状差を抑える。</summary>
+    public const float TERRAIN_HEIGHTMAP_PIXEL_ERROR = 1f;
 
     /// <summary>土マウンド外周の凹凸フェード距離(m)。境界からこの距離以内は凹凸を減衰させ、外周頂点では0にする(隣接区画との隙間防止)。</summary>
     public const float CONSTRUCTION_DIRT_EDGE_FADE = 1.5f;

@@ -783,6 +783,120 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         return finalTriangles;
     }
 
+    /// <summary>
+    /// 敷地を地形格子の三角形で切り抜く。格子内部の高さも同じ三角形上で補間し、
+    /// 異なる三角形分割や双線形補間による地表との交差を防ぐ。
+    /// 地形未ロード時は null を返し、呼び出し側の暫定メッシュへフォールバックする。
+    /// </summary>
+    public static Mesh GenerateTerrainSurfaceMesh(Vector2[] footprint, Vector3 center, float offset)
+    {
+        if (!Utils.TryGetTerrainGrid(center, out Vector2 origin, out Vector2 spacing)) return null;
+        var source = TriangulateOrFan(footprint);
+        var vertices = new List<Vector3>();
+        var indices = new List<int>();
+        var vertexMap = new Dictionary<Vector2Int, int>();
+        var heights = new Dictionary<Vector2, float>();
+        var polygon = new List<Vector2>(8);
+        var scratch = new List<Vector2>(8);
+        Vector2 centerXZ = new Vector2(center.x, center.z);
+
+        float Height(Vector2 p)
+        {
+            if (!heights.TryGetValue(p, out float h))
+            {
+                h = Utils.GetGroundHeight(new Vector3(p.x, 0f, p.y));
+                heights.Add(p, h);
+            }
+            return h;
+        }
+
+        void Emit(Vector2 a, Vector2 b, Vector2 c, Vector2 p0, Vector2 p1, Vector2 p2)
+        {
+            polygon.Clear();
+            polygon.Add(p0);
+            polygon.Add(p1);
+            polygon.Add(p2);
+            ClipTerrainPolygon(ref polygon, ref scratch, a, b);
+            ClipTerrainPolygon(ref polygon, ref scratch, b, c);
+            ClipTerrainPolygon(ref polygon, ref scratch, c, a);
+            if (polygon.Count < 3) return;
+            float area = Cross(a, b, c);
+            float ha = Height(a), hb = Height(b), hc = Height(c);
+            int first = -1, previous = -1;
+            foreach (Vector2 p in polygon)
+            {
+                Vector2 local = p - centerXZ;
+                // 切り抜き元が異なる辺の交点を0.1mm単位で溶接し、法線の継ぎ目を防ぐ。
+                var key = new Vector2Int(Mathf.RoundToInt(local.x * 10000f), Mathf.RoundToInt(local.y * 10000f));
+                if (!vertexMap.TryGetValue(key, out int index))
+                {
+                    float h = (Cross(p, b, c) * ha + Cross(a, p, c) * hb + Cross(a, b, p) * hc) / area;
+                    index = vertices.Count;
+                    vertices.Add(new Vector3(local.x, h - center.y + offset, local.y));
+                    vertexMap.Add(key, index);
+                }
+                if (first < 0) first = index;
+                else if (previous >= 0 && first != previous && previous != index && first != index)
+                {
+                    indices.Add(first);
+                    indices.Add(index);
+                    indices.Add(previous);
+                }
+                previous = index;
+            }
+        }
+
+        for (int t = 0; t < source.Count; t += 3)
+        {
+            Vector2 a = footprint[source[t]] + centerXZ;
+            Vector2 b = footprint[source[t + 1]] + centerXZ;
+            Vector2 c = footprint[source[t + 2]] + centerXZ;
+            int x0 = Mathf.FloorToInt((Mathf.Min(a.x, Mathf.Min(b.x, c.x)) - origin.x) / spacing.x);
+            int x1 = Mathf.CeilToInt((Mathf.Max(a.x, Mathf.Max(b.x, c.x)) - origin.x) / spacing.x);
+            int z0 = Mathf.FloorToInt((Mathf.Min(a.y, Mathf.Min(b.y, c.y)) - origin.y) / spacing.y);
+            int z1 = Mathf.CeilToInt((Mathf.Max(a.y, Mathf.Max(b.y, c.y)) - origin.y) / spacing.y);
+            for (int z = z0; z < z1; z++)
+            {
+                for (int x = x0; x < x1; x++)
+                {
+                    Vector2 lo = origin + new Vector2(x * spacing.x, z * spacing.y);
+                    Vector2 hi = lo + spacing;
+                    Vector2 right = new Vector2(hi.x, lo.y);
+                    Vector2 top = new Vector2(lo.x, hi.y);
+                    Emit(lo, right, hi, a, b, c);
+                    Emit(lo, hi, top, a, b, c);
+                }
+            }
+        }
+        if (indices.Count == 0) return null;
+        var mesh = new Mesh { indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
+        mesh.SetVertices(vertices);
+        mesh.SetTriangles(indices, 0);
+        mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
+        return mesh;
+    }
+
+    private static void ClipTerrainPolygon(ref List<Vector2> input, ref List<Vector2> output, Vector2 a, Vector2 b)
+    {
+        output.Clear();
+        if (input.Count == 0) return;
+        Vector2 previous = input[input.Count - 1];
+        float previousSide = Cross(a, b, previous);
+        foreach (Vector2 current in input)
+        {
+            float side = Cross(a, b, current);
+            if ((side >= 0f) != (previousSide >= 0f))
+                output.Add(Vector2.LerpUnclamped(previous, current, previousSide / (previousSide - side)));
+            if (side >= 0f) output.Add(current);
+            previous = current;
+            previousSide = side;
+        }
+        var swap = input;
+        input = output;
+        output = swap;
+    }
+
     /// <summary>有向辺(a→b)を一意に表すキー。細分化・スカート境界判定で共有する。</summary>
     public static long EdgeKey(int a, int b) => ((long)a << 32) | (uint)b;
 

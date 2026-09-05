@@ -1043,6 +1043,7 @@ public class TerrainManager : BaseApiDataManager
                 pendingDestroyTimestamps[cellIndex] = Time.time;
             }
             terrainTiles.Remove(cellIndex);
+            Utils.InvalidateHeightCache();
             UpdateNeighborsForAdjacents(cellIndex);
         }
         // タイルの有無に関わらず記録を消す(全ティア失敗で None が記録されたままの
@@ -1071,6 +1072,7 @@ public class TerrainManager : BaseApiDataManager
             if (kvp.Value != null) DestroyTerrainTileObject(kvp.Value.gameObject);
         }
         terrainTiles.Clear();
+        Utils.InvalidateHeightCache();
         loadedCells.Clear();
         cellLodLevel.Clear();
         originalHeightsCache.Clear();
@@ -2161,6 +2163,7 @@ public class TerrainManager : BaseApiDataManager
 
         Buffer.BlockCopy(heights, rowStart * res * sizeof(float), strip, 0, rows * res * sizeof(float));
         tData.SetHeights(0, rowStart, strip);
+        Utils.InvalidateHeightCache();
     }
 
     /// <summary>
@@ -2186,6 +2189,7 @@ public class TerrainManager : BaseApiDataManager
 
         Terrain terrainComp = terrainGO.GetComponent<Terrain>();
         terrainComp.drawInstanced = false;
+        terrainComp.heightmapPixelError = LocalConstants.TERRAIN_HEIGHTMAP_PIXEL_ERROR;
         terrainComp.detailObjectDistance = 1000f;
         terrainComp.detailObjectDensity = 1f;
         terrainComp.treeBillboardDistance = 1000f;
@@ -2204,6 +2208,7 @@ public class TerrainManager : BaseApiDataManager
         //  解像度不一致の遺物タイルを差し替えるケースの防御として残す)
         terrainTiles.TryGetValue(cellIndex, out Terrain prevTerrain);
         terrainTiles[cellIndex] = terrainComp;
+        Utils.InvalidateHeightCache();
 
         ApplyTerrainMaterial(terrainComp, tData);
         ApplyUnlockOverlayToTerrain(cellIndex, terrainComp);

@@ -21,7 +21,7 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
   - **横方向の配置は「パーツ中心の位置」で指定し、プレハブのピボット位置(中心/端)の差は `CreateSplineMesh` が bounds 中心基準に自動補正する**。プレハブの高さ方向のピボット規約(body=路面上面、line/sidewalk/wall=下端、pillar/pillar_cap=上端(路面原点))は `RoadPartHeights.cs` と `genesis-docs/docs/geometries/G_道路メッシュの生成.md §6.4` を参照。
   - 左右非対称パーツの向き規約はパーツごとに異なる: **wall は「右側用」(右側=原型・左側=Xミラー)、sidewalk は「左側用」(縁石＝道路中心側の面が +X＝進行方向右側。左側=原型・右側=Xミラー)**。交差点内の歩道コネクタ/エンドキャップ(`RoadIntersectionMeshGenerator`)もこの sidewalk 規約でスプラインの進行方向を選ぶ。ミラーは `CreateMirroredMeshInternal` でX反転メッシュを複製(法線反転+三角形インデックス逆順)。**ミラーメッシュは静的キャッシュ(`MirroredMeshCache`)で元Meshの参照単位に再利用される**ため、同じプレハブから2回目以降は複製が発生しない。
   - **高さオフセットは `RoadPartHeights` の定数に集約されている**(スプライン点=地形+0.1、body=スプライン+0.1で路面上面=地形+0.2、line=+0.12 等)。ハードコードの高さ値を書かないこと。
-  - **Extrudeタイル長は `MAX_EXTRUDE_TILE_LENGTH`(2.5m)で上限を切る**(autoCountは使わない)。Z分割のないプレハブがタイル単位で弦近似され、縦カーブで他パーツと上下にずれるのを防ぐため。`CreateSplineMesh` の `maxTileLength` 引数で上書きでき、**0以下なら上限なし=プレハブのZ実寸をそのままタイル長にする**(縦カーブを持たない折れ線スプライン専用。駅舎パスの連絡橋で使う)。**`single_span=true`のバリアントは例外**: body をタイル化せず `count=1` で1枚引き伸ばし、アンカー点(柱)間の直線スパンにする（地形追従しない高架橋・桁橋用）。スプラインも地形追従細分化せずアンカー点のみで構築する。
+  - **Extrudeタイル長は `MAX_EXTRUDE_TILE_LENGTH`(1m)で上限を切る**(autoCountは使わない)。Z分割のないプレハブがタイル単位で弦近似され、縦カーブで他パーツと上下にずれるのを防ぐため。`CreateSplineMesh` の `maxTileLength` 引数で上書きでき、**0以下なら上限なし=プレハブのZ実寸をそのままタイル長にする**(縦カーブを持たない折れ線スプライン専用。駅舎パスの連絡橋で使う)。**`single_span=true`のバリアントは例外**: body をタイル化せず `count=1` で1枚引き伸ばし、アンカー点(柱)間の直線スパンにする（地形追従しない高架橋・桁橋用）。スプラインも地形追従細分化せずアンカー点のみで構築する。
 - 車線数・中央分離帯の有無でラインの本数/実線/点線が変わる(`CreateRoadParts`)。点線は SplineMesh の Place モードで等間隔配置。**ダッシュはZピボット補正+clipFrom/clipToで両端から半ダッシュ分内側に制限**し、道路端からの突き出しを防ぐ。
 - `PathMeshResult` の意味: `Mesh`=**コライダー用ストリップメッシュ**(描画用ではない)、`GeneratedObject`=描画用パーツ群のコンテナ、`ModulesCreated`=パーツ生成済みフラグ。コライダーは PathManager 側で `Physics.BakeMesh` を別スレッド実行してから装着される。
 - `curved=false`+ウェイポイントありの道路は `GenerateLinearPathWithCorners`: セグメントごとに独立スプラインを作り、角はダミーの PathSummary 2本を `NodeMeshFactory` に渡して交差点と同じロジックで切断・充填する。
@@ -63,6 +63,12 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 - 軌道は横位置順の多対一対応で全軌道端へ接続する。転回可否は論理端点接線（曲線は制御点優先）、描画は切断断面の接線・勾配を使う。線路とモノレールを相互接続しない。ホーム側・レール通路に干渉する壁は省略する。
 - 反対側も交差点なら各端45%、終端なら95%まで切断する。折れ線/single_spanは次のアンカーを越えない。空間不足・自己交差は`RequiresMoreSpace`で検出し、切断を見送る。近接交差点の一体化は未実装。
 - 仕様は`city-genesis/docs/docs/geometries/G_道路メッシュの生成.md`§11、数値検証は`unity/Tests/Intersections/run.ps1`。
+## 地表との整合
+
+- 道路の中心線サンプリング（`PathManager.TERRAIN_SAMPLE_INTERVAL`）とExtrudeタイル長は1m。保存曲線と相対高さは維持し、地形のサンプル間の起伏を拾う。
+- floorは `BuildingMeshBuilder.GenerateTerrainSurfaceMesh` で敷地を実タイルの格子三角形に切り抜く。対角線はXZ最小点→最大点、境界の高さも同じ三角形で補間する。`Utils.TryGetTerrainGrid` と実タイルの高さ取得を使う。0.1mm単位の交点溶接で法線の継ぎ目を抑える。地形未ロード時だけ従来の最大辺長6m分割へフォールバックする。
+- 数値・描画検証は `Tests/TerrainSurface/run-unity.ps1`。Terrain自身の描画LODも影響するため、頂点の高さ検査だけで完了にしない。
+
 ## 建物 (Buildings/)
 
 - **仕様ドキュメントは生成方式ごとに分かれている**: 共通(パーツ命名・バリアント解決・壁/角の敷き詰め・基盤・フェンス・塔屋・エントランス・コライダー)は `genesis-docs/docs/geometries/F_建物メッシュの生成.md`、方式固有は `F1_モジュラー建物`(屋根4種+SHAPE_FULL) / `F2_地面アセット`(GROUND) / `F3_既成建物`(PREBUILT) / `F4_港湾岸壁`(PORT) / `F5_工事中建物`(STATUS_CONSTRUCTING) / `F6_マッシュアップ建物`(MASHUP) / `F9_車両基地`(RAIL_YARD)。共通ロジックを触るときは F を、方式固有を触るときは該当ファイルを見る。
@@ -116,3 +122,7 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 - body の幅・横中心は GetBodySurfaceBounds の最上面（2mm許容）で測る。桁・スカートを含む全体boundsを使うと路面が公称幅より狭くなる。生成用共有メッシュで上面Yを0に補正する。SplineMeshの高さオフセットはワールド上方向、モデルの厚みは断面法線方向。
 
 歩道・ラインは採用したモデル系列のbody上面Yを引いた共有メッシュを使う（GetRoadPartMesh）。bodyだけをY=0へ補正すると、路面高を含むp2の付属パーツが0.5m浮く。歩道終端は道路外縁を扇の中心とし、縁石を外側へ90度回す。幅ゼロの尖端にしない。
+
+## 道路の付帯設備 (Paths/RoadEquipmentGenerator.cs)
+
+RoadPathの街路樹配置はRoadEquipmentGeneratorへ集約している。PathSummaryの設備4項目を参照し、masterの*_allowedで制限する。0は明示なしでモデルのフォールバックによって復活させない。街灯・電柱・箱・樹木は共通の距離配置・直立処理・近傍グリッドで重複回避。柵は歩道とは独立し、交差点切断面から3m手前で閉じる。標準簡易形状は材質ごとに結合しIntersectionMeshOwnerが所有。詳細・プレハブ規約・配線の制限はGドキュメント§8.6。

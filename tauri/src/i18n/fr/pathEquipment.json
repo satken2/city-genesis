@@ -1,0 +1,14 @@
+{
+  "pathEquipment": {
+    "title": "Équipements routiers",
+    "streetlight_type": "Éclairage public",
+    "fence_type": "Barrières",
+    "street_tree_type": "Arbres",
+    "utility_mode": "Réseaux",
+    "none": "Aucun",
+    "standard": "Standard",
+    "overhead": "Aériens",
+    "underground": "Souterrains",
+    "apply": "Appliquer"
+  }
+}

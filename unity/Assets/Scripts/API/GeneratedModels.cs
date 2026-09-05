@@ -347,6 +347,14 @@ namespace GeneratedModels
         public float utilization;
         /// <summary>耐久度（0.0〜1.0 1.0=新品）</summary>
         public float durability;
+        /// <summary>街灯の種類。0=なし、1=標準。道路ごとの保存値。</summary>
+        public int streetlight_type;
+        /// <summary>歩車道境界の柵。0=なし、1=標準。道路ごとの保存値。</summary>
+        public int fence_type;
+        /// <summary>街路樹の種類。0=なし、1=標準。道路ごとの保存値。</summary>
+        public int street_tree_type;
+        /// <summary>配線方式。0=なし、1=架空、2=地中。道路ごとの保存値。</summary>
+        public int utility_mode;
     }
 
     [Serializable]
@@ -428,6 +436,14 @@ namespace GeneratedModels
         public float width;
         /// <summary>パスの物理長（m）</summary>
         public float length;
+        /// <summary>街灯の種類。0=なし、1=標準。道路ごとの保存値。</summary>
+        public int streetlight_type;
+        /// <summary>歩車道境界の柵。0=なし、1=標準。道路ごとの保存値。</summary>
+        public int fence_type;
+        /// <summary>街路樹の種類。0=なし、1=標準。道路ごとの保存値。</summary>
+        public int street_tree_type;
+        /// <summary>配線方式。0=なし、1=架空、2=地中。道路ごとの保存値。</summary>
+        public int utility_mode;
     }
 
     [Serializable]

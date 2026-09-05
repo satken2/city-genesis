@@ -23,6 +23,8 @@
 | `WindowUtil.cs` | ウィンドウ操作 |
 
 `Utils.cs`(Scripts直下)にも以下の汎用処理がある:
+- `GetGroundHeight(Vector3)` ... 同一フレーム・同一XZ座標だけをキャッシュする実タイル高さ取得。近傍座標への丸めは禁止（傾斜地で問い合わせ順に依存する高さになる）。地形の更新・登録・除去時は `InvalidateHeightCache()` を呼ぶ。
+- `TryGetTerrainGrid(Vector3, out Vector2 origin, out Vector2 spacing)` ... 実タイルの格子原点と間隔。全タイル共通解像度の格子にfloorを合わせるために使う。
 - `ApplyDepthOffsetShader(MeshRenderer, contextName)` ... DepthOffsetLitシェーダー(URP Litベース+Offset -1,-1のZ-fighting対策バリアント)を一括適用(キャッシュ付き)。PathManager / BuildingManager から使用。
 - `DestroyObjectAfterFrames(MonoBehaviour, GameObject)` ... 2フレーム遅延でオブジェクト破棄(ポッピング防止)。各マネージャーから使用。
 - `CalculateAverageWidth(List<float>)` ... 幅リストの平均値を計算。歩道コネクタ等で使用。

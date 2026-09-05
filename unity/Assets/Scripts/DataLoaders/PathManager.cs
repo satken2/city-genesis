@@ -97,8 +97,8 @@ public class PathManager : BaseApiDataManager
     private const string PATH_TAG = "PathObject";
     private const string WAYPOINT_TAG = "PathWaypoint";
 
-    // 地形追従サンプリング間隔（メートル）
-    public const float TERRAIN_SAMPLE_INTERVAL = 5f;
+    // Dynamic地形の1m格子の起伏を拾い、サンプル間の尾根による路面の貫通を抑える。
+    public const float TERRAIN_SAMPLE_INTERVAL = 1f;
 
 
 
@@ -4137,6 +4137,15 @@ public struct PathSegment
 [System.Serializable]
 public class PathMasterItem
 {
+    public bool streetlight_type_allowed;
+    public int default_streetlight_type;
+    public bool fence_type_allowed;
+    public int default_fence_type;
+    public bool street_tree_type_allowed;
+    public int default_street_tree_type;
+    public bool utility_mode_allowed;
+    public int default_utility_mode;
+
     public int name;
     public float width;
     public float? sidewalk_width;

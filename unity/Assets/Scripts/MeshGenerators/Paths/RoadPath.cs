@@ -20,7 +20,7 @@ public class RoadPath : IPathMeshGenerator
     // Z方向の分割を持たないプレハブ（bodyは10mの箱）をそのままタイルにすると、
     // 縦カーブ（尾根・谷）でタイル全体が弦（直線）になり、細かく分割される他パーツ
     // （ラインなど）と上下にずれて貫通・浮きが発生する。タイル長を制限して弦誤差を抑える。
-    public const float MAX_EXTRUDE_TILE_LENGTH = 2.5f;
+    public const float MAX_EXTRUDE_TILE_LENGTH = 1f;
 
     /// <summary>
     /// 道路パーツ用のマテリアルをキャッシュ経由で取得する。
@@ -678,143 +678,6 @@ public class RoadPath : IPathMeshGenerator
     }
 
     /// <summary>
-    /// パスに沿って街路樹を配置します。
-    /// </summary>
-    private void GenerateTrees(GameObject container, SplineComputer spline, float spacing, float offset, List<Vector3> originalPoints, string pathBase, string fallbackPathBase)
-    {
-        if (spacing <= 0f)
-        {
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] 街路樹: spacing={spacing} は0以下のためスキップ");
-            return;
-        }
-
-        string treePath = $"{pathBase}/tree";
-        string fallbackTreePath = $"{fallbackPathBase}/tree";
-        GameObject treePrefab = null;
-        if (ModelManager.Instance != null)
-        {
-            treePrefab = ModelManager.Instance.GetModel(treePath);
-            if (treePrefab == null && !string.IsNullOrEmpty(fallbackTreePath))
-            {
-                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] 街路樹 '{treePath}' なし。フォールバック試行: '{fallbackTreePath}'");
-                treePrefab = ModelManager.Instance.GetModel(fallbackTreePath);
-                if (treePrefab != null)
-                {
-                    UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] 街路樹フォールバック成功: '{fallbackTreePath}'");
-                }
-            }
-        }
-
-        if (treePrefab == null)
-        {
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] 街路樹プレハブなし: '{treePath}' (フォールバック '{fallbackTreePath}' もなし)");
-            return;
-        }
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] 街路樹プレハブ取得成功: '{treePath}'");
-
-        float length = spline.CalculateLength();
-        if (length <= 0 || spline.sampleCount == 0)
-        {
-            Debug.LogWarning("[RoadPath] スプライン長が0以下、またはサンプル数が0。街路樹配置スキップ。");
-            return;
-        }
-
-        float cornerClearance = 0.5f;
-
-        // 道路の両端（交差点の切断面）ぎりぎりに木が立たないよう、
-        // 端から間隔の半分だけ内側から配置を始め、終端も同じだけ手前で打ち切る。
-        float endClearance = spacing * 0.5f;
-        if (length <= endClearance * 2f)
-        {
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[RoadPath] 街路樹: 道路が短すぎるため配置なし");
-            return;
-        }
-        double currentPercent = spline.Travel(0.0, endClearance, Spline.Direction.Forward);
-        double endPercent = spline.Travel(1.0, endClearance, Spline.Direction.Backward);
-        if (endPercent <= currentPercent)
-        {
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[RoadPath] 街路樹: 配置可能区間なし");
-            return;
-        }
-        int maxCount = Mathf.FloorToInt(length / spacing) + 2;
-        int currentCount = 0;
-        int placedCount = 0;
-
-        while (currentPercent <= endPercent && currentCount < maxCount)
-        {
-            SplineSample sample = spline.Evaluate(currentPercent);
-
-            if (!IsNearPathCorner(sample.position, originalPoints, cornerClearance))
-            {
-                PlaceSingleTree(container, treePrefab, sample, -offset);
-                PlaceSingleTree(container, treePrefab, sample, offset);
-                placedCount += 2;
-            }
-
-            double nextPercent = spline.Travel(currentPercent, spacing, Spline.Direction.Forward);
-
-            if (nextPercent <= currentPercent) break;
-
-            currentPercent = nextPercent;
-            currentCount++;
-        }
-
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] 街路樹配置完了: {placedCount}本 (iterations={currentCount})");
-    }
-
-    /// <summary>
-    /// パス制御点（角）付近かどうか。角付近では街路樹が重なりやすいため配置をスキップする。
-    /// </summary>
-    private static bool IsNearPathCorner(Vector3 worldPos, List<Vector3> pathControlPoints, float clearanceMeters)
-    {
-        if (pathControlPoints == null || pathControlPoints.Count == 0 || clearanceMeters <= 0f)
-        {
-            return false;
-        }
-
-        float clearSqr = clearanceMeters * clearanceMeters;
-        for (int i = 0; i < pathControlPoints.Count; i++)
-        {
-            Vector3 p = pathControlPoints[i];
-            float dx = worldPos.x - p.x;
-            float dz = worldPos.z - p.z;
-            if (dx * dx + dz * dz <= clearSqr)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private void PlaceSingleTree(GameObject container, GameObject prefab, SplineSample sample, float offset)
-    {
-        // 街路樹は地形の傾斜に追従して斜めに立たず、常にワールド上方向に対して垂直に立つ。
-        // 位置はスプライン接線の水平成分を向き軸にして横へずらし、回転はYawのみ（ピッチ・ロールなし）とする。
-        // これにより、坂道・カントの有無にかかわらず木が直立する。
-        Vector3 forward = sample.forward;
-        forward.y = 0f;
-        if (forward.sqrMagnitude < 0.0001f) forward = Vector3.forward;
-        forward.Normalize();
-
-        // 水平面上の右方向: WorldUp × 水平Forward。
-        // SplineSample の up はスプラインの連続性維持のため terrain-follow で傾くことがあるため、
-        // 常に固定の WorldUp を使い、樹の立ち位置が斜面に沿ってずれないようにする。
-        Vector3 right = Vector3.Cross(Vector3.up, forward).normalized;
-
-        Vector3 position = sample.position + (right * offset);
-
-        // Yawのみの回転（UpDown成分ゼロ）にして、木が垂直を保つようにする。
-        // 左右対称に見せるため、道路右側（offset > 0）の木はY軸で180°回転させる。
-        Quaternion yawRotation = Quaternion.LookRotation(forward, Vector3.up);
-        Quaternion extra = Quaternion.Euler(0f, offset > 0f ? 180f : 0f, 0f);
-
-        GameObject tree = UnityEngine.Object.Instantiate(prefab, container.transform);
-        tree.transform.position = position;
-        tree.transform.rotation = yawRotation * extra;
-    }
-
-    /// <summary>
     /// 道路パーツ（車道、ライン、歩道、街路樹、防音壁、中央分離帯）をスプラインに沿って配置する共通処理。
     /// Generate と GenerateLinearPathWithCorners の両方から呼び出される。
     /// </summary>
@@ -855,7 +718,6 @@ public class RoadPath : IPathMeshGenerator
 
         // 歩道は道路の端に覆いかぶさる帯 [width/2 - sidewalkWidth, width/2] を占める。
         // 街路樹は縁石（帯の内側端）から歩道幅の1/4程度外側に配置する。
-        float treeOffset = (width * 0.5f) - sidewalkWidth + (sidewalkWidth * 0.25f);
 
         // 道路脇の線は、歩道の内側端（縁石）から sideWidth/2 だけ内側に入った位置を中心として配置する。
         float sideLineCenterOffset = (width * 0.5f) - sidewalkWidth - (sideWidth * 0.5f);
@@ -1016,16 +878,7 @@ public class RoadPath : IPathMeshGenerator
             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[RoadPath] wallWidth <= 0: 壁なし");
         }
 
-        // 街路樹
-        if (treeSpacing.HasValue && treeSpacing.Value > 0)
-        {
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] 街路樹: spacing={treeSpacing.Value}m で配置開始");
-            GenerateTrees(container, spline, treeSpacing.Value, treeOffset, controlPoints, variantBase, typeBase);
-        }
-        else
-        {
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[RoadPath] 街路樹: spacing未指定のためスキップ");
-        }
+        RoadEquipmentGenerator.Generate(container, spline, pathData, width, sidewalkWidth, treeSpacing);
 
         // 柱
         // 地下パス（負の相対Yを持つ）は路面が地面より低く、路面支持の柱は不要なので配置しない
@@ -1635,7 +1488,7 @@ public class RoadPath : IPathMeshGenerator
     /// NaN も FloorInt 経由で不正なインデックスになるため 0 に落とす。
     /// スプラインを Evaluate/Project する際は必ずこれを通すこと。
     /// </summary>
-    private static double ClampSplinePercent(double percent)
+    public static double ClampSplinePercent(double percent)
     {
         if (double.IsNaN(percent)) return 0.0;
         if (percent < 0.0) return 0.0;

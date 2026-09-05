@@ -1,0 +1,14 @@
+{
+  "pathEquipment": {
+    "title": "도로 시설",
+    "streetlight_type": "가로등",
+    "fence_type": "울타리",
+    "street_tree_type": "가로수",
+    "utility_mode": "배선 방식",
+    "none": "없음",
+    "standard": "표준",
+    "overhead": "가공 배선",
+    "underground": "지중 배선",
+    "apply": "적용"
+  }
+}

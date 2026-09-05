@@ -42,6 +42,7 @@ import { InfoHeader } from "../common/InfoHeader";
 import { ZoneLink } from "../common/ZoneLink";
 import { StationInfoSection } from "./StationInfoSection";
 import { PathConditionPanel } from "./PathConditionPanel";
+import { PathEquipmentPanel } from "./PathEquipmentPanel";
 import { PathTrafficPanel } from "./PathTrafficPanel";
 import { PathOperationPanel } from "./PathOperationPanel";
 import { PathTopologyEditPanel } from "./PathTopologyEditPanel";
@@ -496,6 +497,7 @@ export function PathDetailPanel({
 
           {/* 物理状態セクション */}
           <PathConditionPanel path={pathData} />
+          <PathEquipmentPanel path={pathData} apiBaseUrl={apiBaseUrl} onSaved={setPathData} />
 
           {/* 交通・速度設定セクション */}
           <PathTrafficPanel

@@ -490,6 +490,15 @@ export type ProductMasterEntry = {
  * sidewalk_width, side_width, tree_spacing は未設定の場合にnullになる
  */
 export type PathMasterEntry = {
+  streetlight_type_allowed: boolean;
+  default_streetlight_type: number;
+  fence_type_allowed: boolean;
+  default_fence_type: number;
+  street_tree_type_allowed: boolean;
+  default_street_tree_type: number;
+  utility_mode_allowed: boolean;
+  default_utility_mode: number;
+
   display_name: string;
   description: string;
   sidewalk_width: number | null;
@@ -629,6 +638,11 @@ export type NearbyZoneEntry = {
  * バックエンドの実装によって値が含まれない場合がある(null を許容)
  */
 export type PathData = {
+  streetlight_type: number;
+  fence_type: number;
+  street_tree_type: number;
+  utility_mode: number;
+
   path_id: number;
   name: string;
   path_type: number;

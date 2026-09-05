@@ -100,3 +100,7 @@ HUDは**3枚の専用Tauriウィンドウ**に分かれている。Unityの3Dビ
 ### 軌道建設パネル(path/TrackConstructionPanel)の絞り込みは3段
 
 `track_build`ウィンドウは上から **鉄道種別プルダウン(鉄道/モノレール/ロープウェイ。タブより上位の選択で、タブを切り替えても保持する) → タブ(軌道=通常/橋梁 ・ プラットフォーム=駅 ・ 駅舎) → 規格プルダウン** の3段で敷設対象を絞り込む。**構造(通常/橋梁)・電化/非電化は独立した設定を持たず、すべて「規格」プルダウンの選択肢(=パスバリアント)として並べる**(表示はマスターの`display_name`そのまま)。したがって敷設対象の唯一の正は`usePathConstruction`の`selectedVariant`で、フック側にtrack_type・電化の状態は持たせない(復活させないこと)。候補一覧は`railBuild.railVariantsForTrackTypes`、鉄道種別の一覧は`railBuild.availableRailTypes`が返し、鉄道種別の変更・タブ切り替えで候補が入れ替わったらパネルのeffectが候補の先頭を`selectVariant`し直す。セクションの並びは **種別プルダウン → タブ → 規格プルダウン(`RailVariantSelector`) → 説明カード(`PathVariantDescription`) → 複線構成(`RailTrackLayoutSettings`=線路数・進行方向・線路間隔) → 形状以下(`PathBuildSections`)** で、区切り線は各`pc-section`の下罫線。**説明カードは道路建設パネルとは表示位置が違う(道路=バリアント選択の直下)ため`PathBuildSections`には入れず独立コンポーネントにしてある**。**駅舎タブも通常のパス敷設フロー**: 候補は`masterData.paths`のtype=PATH_STATION_HOUSEのバリアント(鉄道種別に依存しないため種別プルダウンは非表示)、カテゴリはnullのまま`selectVariant`→`confirmPath`で単一パスとして確定する(複線構成・ホーム設置側なし)。駅舎の専有エリア(建屋)の位置はバックエンドとUnityが線形・周辺線路から同一アルゴリズムで導出するため、パネル側の追加入力は無い。
+
+## 道路設備パネル
+
+path/PathEquipmentPanelは道路詳細から設備4項目を編集する。マスターの*_allowedで選択肢を制限し、適用時にPATCHしてsession:reloadを通知する。初期値の再適用はせず、取得したPathの保存値を表示する。文言は全7言語のpathEquipment.json。

@@ -1,0 +1,14 @@
+{
+  "pathEquipment": {
+    "title": "Road equipment",
+    "streetlight_type": "Streetlights",
+    "fence_type": "Fences",
+    "street_tree_type": "Street trees",
+    "utility_mode": "Utility wiring",
+    "none": "None",
+    "standard": "Standard",
+    "overhead": "Overhead",
+    "underground": "Underground",
+    "apply": "Apply"
+  }
+}

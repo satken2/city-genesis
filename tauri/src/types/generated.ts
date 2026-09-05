@@ -330,6 +330,14 @@ export type PathSummary = {
   utilization: number;
   /** 耐久度（0.0〜1.0 1.0=新品） */
   durability: number;
+  /** 街灯の種類。0=なし、1=標準。道路ごとの保存値。 */
+  streetlight_type: number;
+  /** 歩車道境界の柵。0=なし、1=標準。道路ごとの保存値。 */
+  fence_type: number;
+  /** 街路樹の種類。0=なし、1=標準。道路ごとの保存値。 */
+  street_tree_type: number;
+  /** 配線方式。0=なし、1=架空、2=地中。道路ごとの保存値。 */
+  utility_mode: number;
 };
 
 export type PathData = {
@@ -409,6 +417,14 @@ export type PathData = {
   width: number;
   /** パスの物理長（m） */
   length: number;
+  /** 街灯の種類。0=なし、1=標準。道路ごとの保存値。 */
+  streetlight_type: number;
+  /** 歩車道境界の柵。0=なし、1=標準。道路ごとの保存値。 */
+  fence_type: number;
+  /** 街路樹の種類。0=なし、1=標準。道路ごとの保存値。 */
+  street_tree_type: number;
+  /** 配線方式。0=なし、1=架空、2=地中。道路ごとの保存値。 */
+  utility_mode: number;
 };
 
 export type ParcelSummary = {

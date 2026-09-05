@@ -7,12 +7,11 @@ using System.Threading.Tasks;
 public static class Utils
 {
     /// <summary>
-    /// 地形高さのキャッシュ。キーは (x, z) を整数メートルグリッドに丸めた値。
-    /// 同一フレーム内で同じ座標付近への問い合わせを高速化する。
+    /// 地形高さのキャッシュ。同一フレームの同一XZ座標だけを共有する。
+    /// 近傍座標を丸めると、傾斜地で問い合わせ順により高さが変わってしまう。
     /// </summary>
-    private static Dictionary<long, float> heightCache = new Dictionary<long, float>();
+    private static Dictionary<Vector2, float> heightCache = new Dictionary<Vector2, float>();
     private static int cacheFrame = -1;
-    private const float CacheResolution = 1f;
 
     /// <summary>
     /// TerrainManager のキャッシュ参照。
@@ -48,9 +47,8 @@ public static class Utils
     }
 
     /// <summary>
-    /// 指定位置の地形高さを返す。同一フレームかつ近傍座標の場合はキャッシュを利用する。
-    /// キャッシュの解像度は CacheResolution（メートル）単位で丸められるため、
-    /// LOD差し替え直後など正確な高さが必要な場面では InvalidateHeightCache() を呼ぶこと。
+    /// 指定位置の地形高さを返す。同一フレームかつ同一XZ座標の場合はキャッシュを利用する。
+    /// タイルの高さ更新・差し替え時は InvalidateHeightCache() を呼ぶこと。
     /// </summary>
     public static float GetGroundHeight(Vector3 position)
     {
@@ -61,7 +59,7 @@ public static class Utils
             cacheFrame = frame;
         }
 
-        long key = PackGridKey(position.x, position.z);
+        var key = new Vector2(position.x, position.z);
         if (heightCache.TryGetValue(key, out float cached))
         {
             return cached;
@@ -108,13 +106,20 @@ public static class Utils
     }
 
     /// <summary>
-    /// (x, z) をグリッド座標に丸めて long 型キーにパックする。
+    /// 描画タイルの格子を返す。全タイルは共通解像度で境界格子を共有する。
+    /// 地表を覆うメッシュはこの格子と対角線に合わせて分割する。
     /// </summary>
-    private static long PackGridKey(float x, float z)
+    public static bool TryGetTerrainGrid(Vector3 position, out Vector2 origin, out Vector2 spacing)
     {
-        int gx = (int)Mathf.Round(x / CacheResolution);
-        int gz = (int)Mathf.Round(z / CacheResolution);
-        return ((long)gx << 32) | (uint)gz;
+        Terrain terrain = GetTerrainAtPosition(position);
+        origin = default;
+        spacing = default;
+        if (terrain == null || terrain.terrainData == null) return false;
+        var data = terrain.terrainData;
+        var pos = terrain.transform.position;
+        origin = new Vector2(pos.x, pos.z);
+        spacing = new Vector2(data.size.x, data.size.z) / (data.heightmapResolution - 1);
+        return spacing.x > 0f && spacing.y > 0f;
     }
 
     private static Terrain GetTerrainAtPosition(Vector3 position)

@@ -1,0 +1,14 @@
+{
+  "pathEquipment": {
+    "title": "道路设施",
+    "streetlight_type": "路灯",
+    "fence_type": "护栏",
+    "street_tree_type": "行道树",
+    "utility_mode": "布线方式",
+    "none": "无",
+    "standard": "标准",
+    "overhead": "架空线路",
+    "underground": "地下线路",
+    "apply": "应用"
+  }
+}
