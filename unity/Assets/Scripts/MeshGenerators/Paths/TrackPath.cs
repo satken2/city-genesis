@@ -195,6 +195,8 @@ public class TrackPath : IPathMeshGenerator
 
         GameObject container = new GameObject($"Track_{pathData.path_id}");
         SplineComputer spline = RoadPath.BuildSpline(container, points, isCurved);
+        // 道床・架線・防音壁の反復タイル長を曲率から決める(track/platform は著作長固定で影響しない)。
+        PathDrawContext.SetAdaptiveTileLength(PathDrawContext.ComputeAdaptiveTileLength(spline, RoadPath.MAX_EXTRUDE_TILE_LENGTH));
 
         CreateTrackParts(container, spline, points, width, lanes, wallWidth, pillarSpacing, heightEditable, baseHeight, wireSpacing, pathData, corridor, platformLeft, platformRight);
 
@@ -1131,6 +1133,16 @@ public class TrackPath : IPathMeshGenerator
         float tileLen = Mathf.Min(meshLenZ, RoadPath.MAX_EXTRUDE_TILE_LENGTH);
         channel.autoCount = false;
         channel.count = Mathf.Max(2, Mathf.RoundToInt(len / tileLen));
+
+        // 頂点数バジェットガード(RoadPath.CreateSplineMesh と同じ理由)。コネクタは通常軌道の
+        // 生成経路を通らないため、ここでもタイル数をクランプして16bitメッシュの上限超過を防ぐ。
+        int partVerts = prefabMf.sharedMesh.vertexCount;
+        if (partVerts > 0 && (long)partVerts * channel.count > RoadPath.SPLINE_MESH_VERTEX_BUDGET)
+        {
+            int clamped = Mathf.Max(1, RoadPath.SPLINE_MESH_VERTEX_BUDGET / partVerts);
+            Debug.LogWarning($"[TrackPath] レールコネクタのタイル数 {channel.count} は頂点数上限を超えるため {clamped} にクランプします(1個あたり頂点{partVerts})。");
+            channel.count = clamped;
+        }
 
         // マテリアルは通常軌道とキャッシュを共有し、交差点内だけ色味が変わるのを防ぐ。
         MeshRenderer prefabMr = prefab.GetComponent<MeshRenderer>();

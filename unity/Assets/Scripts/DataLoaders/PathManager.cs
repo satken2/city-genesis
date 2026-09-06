@@ -319,6 +319,192 @@ public class PathManager : BaseApiDataManager
     /// <summary>地形追従再生成キューを消化する常駐ワーカー。最初の投入時に起動する。</summary>
     private Coroutine terrainFollowRebuildWorker;
 
+    // ================================================================
+    // 描画LOD(パス1本ごとの詳細度。セルのデータティアとは独立)
+    // ================================================================
+
+    /// <summary>カメラ移動に応じてパスの描画LODを再判定する常駐ワーカー。最初のLODロードで起動する。</summary>
+    private Coroutine pathDrawLodWorker;
+
+    /// <summary>接写メッシュを持つパスIDの集合。DrawLodConfig.MAX_CLOSE_PATHS の母集団。</summary>
+    private readonly HashSet<int> closePathIds = new HashSet<int>();
+
+    /// <summary>描画LODを前回判定したときのカメラ位置。一定距離動いたときだけ再判定する。</summary>
+    private Vector3 lastPathDrawLodCameraPos = new Vector3(float.NaN, 0f, 0f);
+
+    /// <summary>
+    /// パスの望ましい描画LODと詳細描画区間を決める。
+    /// Farセルのパスは帯に固定し、Near/Dynamicセルではアンカー点列(始点・経由点・終点)への
+    /// 最近接距離で Close/Normal/Far を決める(ヒステリシスは既存オブジェクトの描画LODを基準にする)。
+    /// 長いパスは、カメラから DrawLodConfig.PATH_DETAIL_RANGE_DISTANCE 以内の部分だけを
+    /// 詳細区間 [detailFrom, detailTo](全長に対する割合)にし、残りは遠景の帯で描く。
+    /// </summary>
+    private DrawLod DeterminePathDrawLod(PathSummary path, LodTier tier, Vector3 camPos, out double detailFrom, out double detailTo)
+    {
+        detailFrom = 0.0;
+        detailTo = 1.0;
+        if (tier == LodTier.Far) return DrawLod.Far;
+
+        List<Vector3> anchors = BuildAnchorPolyline(path);
+        if (anchors.Count < 2) return DrawLod.Normal;
+
+        DrawLod current = DrawLod.Normal;
+        if (pathObjectsCache.TryGetValue(path.path_id, out GameObject existing) && existing != null)
+        {
+            current = DrawLodInfo.GetDrawLod(existing, DrawLod.Normal);
+        }
+        float minDist = DrawLodEvaluator.MinDistanceToPolyline(anchors, camPos);
+        bool allowClose = closePathIds.Contains(path.path_id) || closePathIds.Count < DrawLodConfig.MAX_CLOSE_PATHS;
+        DrawLod lod = DrawLodEvaluator.EvaluatePathByDistance(minDist, current, allowClose);
+        if (lod == DrawLod.Far) return lod;
+
+        // 詳細描画区間: アンカー点列を等間隔にサンプルし、距離内のサンプルの最小・最大割合を取る。
+        float total = 0f;
+        for (int i = 1; i < anchors.Count; i++) total += Vector3.Distance(anchors[i - 1], anchors[i]);
+        if (total < DrawLodConfig.PATH_DETAIL_RANGE_MIN_LENGTH) return lod;
+
+        const float sampleStep = 25f;
+        int samples = Mathf.Max(2, Mathf.CeilToInt(total / sampleStep) + 1);
+        double from = 1.0, to = 0.0;
+        float walked = 0f;
+        int seg = 0;
+        for (int i = 0; i < samples; i++)
+        {
+            float target = total * i / (samples - 1);
+            while (seg < anchors.Count - 2 && walked + Vector3.Distance(anchors[seg], anchors[seg + 1]) < target)
+            {
+                walked += Vector3.Distance(anchors[seg], anchors[seg + 1]);
+                seg++;
+            }
+            float segLen = Vector3.Distance(anchors[seg], anchors[seg + 1]);
+            float t = segLen > 1e-4f ? Mathf.Clamp01((target - walked) / segLen) : 0f;
+            Vector3 pos = Vector3.Lerp(anchors[seg], anchors[seg + 1], t);
+            if (Vector3.Distance(pos, camPos) <= DrawLodConfig.PATH_DETAIL_RANGE_DISTANCE)
+            {
+                double frac = (double)i / (samples - 1);
+                if (frac < from) from = frac;
+                if (frac > to) to = frac;
+            }
+        }
+        if (to < from)
+        {
+            // しきい値の境目でサンプルが1つも入らない場合は全長を詳細にする(次の再判定で落ちる)。
+            return lod;
+        }
+        // 端のサンプル1個分の余裕を持たせ、端が0/1に近ければ全長扱いにする。
+        double margin = 1.0 / (samples - 1);
+        from = System.Math.Max(0.0, from - margin);
+        to = System.Math.Min(1.0, to + margin);
+        if (from <= 0.02) from = 0.0;
+        if (to >= 0.98) to = 1.0;
+        detailFrom = from;
+        detailTo = to;
+        return lod;
+    }
+
+    /// <summary>始点・経由点・終点をワールド座標で結んだアンカー点列(描画LOD判定用の粗い形状)。</summary>
+    private List<Vector3> BuildAnchorPolyline(PathSummary path)
+    {
+        var result = new List<Vector3>();
+        var startList = path.GetStartPointList();
+        var endList = path.GetEndPointList();
+        if (startList == null || startList.Count < 2 || endList == null || endList.Count < 2) return result;
+        result.Add(GetPathPointPosition(startList));
+        var waypoints = path.GetWaypointList();
+        if (waypoints != null)
+        {
+            foreach (var wp in waypoints) result.Add(wp.GetAbsolutePosition());
+        }
+        result.Add(GetPathPointPosition(endList));
+        return result;
+    }
+
+    /// <summary>生成済みパスの描画LODと詳細区間が、望ましい値と実質的に一致しているか。</summary>
+    private static bool DrawLodMatches(GameObject pathGO, DrawLod lod, double detailFrom, double detailTo)
+    {
+        var info = pathGO != null ? pathGO.GetComponent<DrawLodInfo>() : null;
+        if (info == null) return lod == DrawLod.Normal && detailFrom <= 0.0 && detailTo >= 1.0;
+        if (info.drawLod != lod) return false;
+        if (lod == DrawLod.Far) return true;
+        return System.Math.Abs(info.detailFrom - detailFrom) <= DrawLodConfig.PATH_DETAIL_RANGE_REBUILD_TOLERANCE
+            && System.Math.Abs(info.detailTo - detailTo) <= DrawLodConfig.PATH_DETAIL_RANGE_REBUILD_TOLERANCE;
+    }
+
+    private void EnsureTerrainFollowRebuildWorker()
+    {
+        if (terrainFollowRebuildWorker == null)
+        {
+            terrainFollowRebuildWorker = StartCoroutine(TerrainFollowRebuildWorker());
+        }
+    }
+
+    /// <summary>
+    /// カメラ移動に応じて、生成済みパスの描画LODを再判定する常駐ワーカー。
+    /// 一定フレームごと・一定距離の移動があったときだけ全パスを走査し、望ましい描画LOD/詳細区間と
+    /// 食い違うパスを地形追従と同じ再生成キューへ積む(視野優先・フレーム予算で TerrainFollowRebuildWorker が消化する)。
+    /// 再生成が終わるまで旧オブジェクトは表示されたまま残る。
+    /// </summary>
+    private IEnumerator PathDrawLodReevaluationWorker()
+    {
+        while (true)
+        {
+            for (int i = 0; i < DrawLodConfig.REEVALUATE_INTERVAL_FRAMES; i++) yield return null;
+            if (pathObjectsCache.Count == 0 || isLodPathBatchActive) continue;
+
+            Camera cam = Camera.main;
+            if (cam == null) continue;
+            Vector3 camPos = cam.transform.position;
+            if (!float.IsNaN(lastPathDrawLodCameraPos.x)
+                && Vector3.Distance(camPos, lastPathDrawLodCameraPos) < DrawLodConfig.REEVALUATE_CAMERA_MOVE_DISTANCE)
+            {
+                continue;
+            }
+            lastPathDrawLodCameraPos = camPos;
+
+            bool queued = false;
+            foreach (var kvp in pathObjectsCache)
+            {
+                GameObject obj = kvp.Value;
+                if (obj == null || !obj.activeSelf) continue;
+                if (!pathDataCache.TryGetValue(kvp.Key, out PathSummary path)) continue;
+                LodTier tier = LodTier.Far;
+                foreach (var cell in GetPathCoveredCellsCached(path))
+                {
+                    if (cellPathLod.TryGetValue(cell, out LodTier t) && t > tier) tier = t;
+                }
+                DrawLod desired = DeterminePathDrawLod(path, tier, camPos, out double from, out double to);
+                if (DrawLodMatches(obj, desired, from, to)) continue;
+                queuedTerrainFollowPathIds.Add(kvp.Key);
+                queued = true;
+            }
+            if (queued) EnsureTerrainFollowRebuildWorker();
+        }
+    }
+
+    /// <summary>
+    /// 詳細区間の外側に遠景の帯を敷く。詳細パーツを敷かない区間(PathDrawContext)を、
+    /// 描画点列を割合で切り出した曲線どおりの帯で埋める。
+    /// </summary>
+    private void AddFarRemainderStrips(GameObject pathGO, List<Vector3> points, float width, double detailFrom, double detailTo)
+    {
+        void AddStrip(double from, double to, string name)
+        {
+            if (to - from <= 1e-4) return;
+            List<Vector3> slice = PathDrawContext.SlicePolylineByFraction(points, from, to);
+            Mesh mesh = PathMeshFactory.BuildStripMesh(slice, width);
+            if (mesh == null) return;
+            GameObject go = new GameObject(name);
+            go.transform.SetParent(pathGO.transform, false);
+            go.AddComponent<MeshFilter>().mesh = mesh;
+            MeshRenderer mr = go.AddComponent<MeshRenderer>();
+            Material mat = GetRoadMaterial();
+            if (mat != null) mr.material = mat;
+            ApplyDepthOffsetShader(mr);
+        }
+        AddStrip(0.0, detailFrom, "FarRemainder_Start");
+        AddStrip(detailTo, 1.0, "FarRemainder_End");
+    }
+
     /// <summary>
     /// 近接線路の結合描画（TrackAdjacency）のための再生成待ちキュー。
     /// 線路のデータ変更（新規・version変化・削除）があると、その近くに並走する既存線路の
@@ -473,6 +659,8 @@ public class PathManager : BaseApiDataManager
     public override void ClearAllCells()
     {
         Debug.Log("PathManager: 全ノード・道路データをクリア");
+        closePathIds.Clear();
+        DrawLodStats.ResetCounts(DrawLodStats.Category.Path);
 
         // 走行中のLODロードを止めてからクリアする。残しておくと、旧セッション宛の
         // リクエストのレスポンスがクリア後に届き、キャッシュと空間ハッシュを再登録してしまう。
@@ -547,6 +735,10 @@ public class PathManager : BaseApiDataManager
     {
         // 実行中の古いコルーチンをすべてキャンセル
         CancelActiveLodCoroutines();
+        if (pathDrawLodWorker == null)
+        {
+            pathDrawLodWorker = StartCoroutine(PathDrawLodReevaluationWorker());
+        }
 
         var allPathCells = new HashSet<Vector2Int>(cellSets.farCells);
         var nearSet = new HashSet<Vector2Int>(cellSets.nearCells);
@@ -1239,11 +1431,15 @@ public class PathManager : BaseApiDataManager
             return false;
         }
 
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"PathManager: 再描画 path{path.path_id} tier={tier} reason={reason}");
-        if (tier == LodTier.Far)
+        // データティアが Near/Dynamic でも、カメラから遠く小さく見えるパスは帯(Far)で描く。
+        Camera drawCam = Camera.main;
+        Vector3 drawCamPos = drawCam != null ? drawCam.transform.position : Vector3.zero;
+        DrawLod drawLod = DeterminePathDrawLod(path, tier, drawCamPos, out double detailFrom, out double detailTo);
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"PathManager: 再描画 path{path.path_id} tier={tier} draw={drawLod} range=({detailFrom:F2}〜{detailTo:F2}) reason={reason}");
+        if (drawLod == DrawLod.Far)
             CreateOrUpdateFarPath(path, forceRebuild);
         else
-            CreateOrUpdatePath(path, updateIntersections, forceRebuild);
+            CreateOrUpdatePath(path, updateIntersections, forceRebuild, drawLod, detailFrom, detailTo);
 
         return true;
     }
@@ -1326,9 +1522,11 @@ public class PathManager : BaseApiDataManager
 
             if (pathObjectsCache.TryGetValue(pathId, out GameObject obj))
             {
+                if (obj != null) DrawLodStats.OnDrawLodChanged(DrawLodStats.Category.Path, DrawLodInfo.GetDrawLod(obj, DrawLod.Normal), null);
                 Destroy(obj);
                 pathObjectsCache.Remove(pathId);
             }
+            closePathIds.Remove(pathId);
         }
     }
 
@@ -1465,6 +1663,16 @@ public class PathManager : BaseApiDataManager
 
         List<Vector3> points = new List<Vector3> { startPos, endPos };
         ApplyStationGrade(path, points);
+        // 曲線・経由点付きのパスは端点だけの直線だと形が崩れるので、描画点列を間引いて曲線を保つ。
+        bool hasWaypoints = (path.GetWaypointList()?.Count ?? 0) > 0;
+        if (path.curved || hasWaypoints)
+        {
+            List<Vector3> curvePoints = CalculatePathPoints(path);
+            if (curvePoints.Count >= 2)
+            {
+                points = DecimatePolyline(curvePoints, FAR_STRIP_SAMPLE_INTERVAL);
+            }
+        }
         float width = 6f;
         var masterData = MasterDataStore.Instance;
         if (masterData != null)
@@ -1487,6 +1695,10 @@ public class PathManager : BaseApiDataManager
         SavePathToCache(path);
         RegisterPathCells(path);
         UpdatePlannedIcon(pathGO, path, path.status == Constants.STATUS_PENDING);
+        DrawLodInfo.Ensure(pathGO).drawLod = DrawLod.Far;
+        closePathIds.Remove(path.path_id);
+        DrawLodStats.OnDrawLodChanged(DrawLodStats.Category.Path,
+            oldPath != null ? DrawLodInfo.GetDrawLod(oldPath, DrawLod.Normal) : (DrawLod?)null, DrawLod.Far);
 
         // 辞書は即座に新しいオブジェクトに更新する。
         // これにより、短時間に同じIDで再描画が呼ばれてもオブジェクトが増殖しない。
@@ -2049,12 +2261,20 @@ public class PathManager : BaseApiDataManager
 
         if (queued && terrainFollowRebuildWorker == null)
         {
-            terrainFollowRebuildWorker = StartCoroutine(TerrainFollowRebuildWorker());
+            EnsureTerrainFollowRebuildWorker();
         }
     }
 
-    public void CreateOrUpdatePath(PathSummary path, bool updateIntersections = true, bool forceRebuild = false)
+    /// <param name="drawLod">描画LOD(Normal / Close)。Far は CreateOrUpdateFarPath が担当する。</param>
+    /// <param name="detailFrom">詳細パーツを敷く区間の始点(全長に対する割合)。区間外は遠景の帯で埋める。</param>
+    /// <param name="detailTo">詳細パーツを敷く区間の終点。</param>
+    public void CreateOrUpdatePath(PathSummary path, bool updateIntersections = true, bool forceRebuild = false, DrawLod drawLod = DrawLod.Normal, double detailFrom = 0.0, double detailTo = 1.0)
     {
+        if (drawLod == DrawLod.Far || drawLod == DrawLod.Hidden) drawLod = DrawLod.Normal;
+        if (drawLod == DrawLod.Close && closePathIds.Count >= DrawLodConfig.MAX_CLOSE_PATHS && !closePathIds.Contains(path.path_id))
+        {
+            drawLod = DrawLod.Normal;
+        }
         GameObject oldPath = null;
         if (pathObjectsCache.TryGetValue(path.path_id, out GameObject existingPath))
         {
@@ -2063,8 +2283,9 @@ public class PathManager : BaseApiDataManager
                   var existingIdInfo = existingPath.GetComponent<ObjectIdInfo>();
                   int currentStatus = existingIdInfo != null ? existingIdInfo.status : 0;
                   bool existingIsFar = existingIdInfo != null && existingIdInfo.isFarObject;
-                  // Far簡易オブジェクトの誤再利用を防ぐため、遠景でないことを確認する
-                   if (currentStatus == path.status && !existingIsFar && pathDataCache.ContainsKey(path.path_id))
+                  // Far簡易オブジェクトの誤再利用を防ぐため、遠景でないことを確認する。描画LOD・詳細区間も一致が条件。
+                   if (currentStatus == path.status && !existingIsFar && pathDataCache.ContainsKey(path.path_id)
+                       && DrawLodMatches(existingPath, drawLod, detailFrom, detailTo))
                   {
                       // プールから再利用: 非表示だったオブジェクトを再表示
                       if (!existingPath.activeSelf)
@@ -2121,28 +2342,55 @@ public class PathManager : BaseApiDataManager
         // 工事中(STATUS_CONSTRUCTING)は完成品のメッシュを生成せず、専用の「工事現場」表示
         // （土ストリップ + 高架の柱のみ + トンネル坑口のみ）にする。
         // ただし model_type=none（公共交通の路線等、完成時も描画しないパス）は工事中も非表示のまま。
+        // 描画LODと詳細区間は PathDrawContext 経由で生成器へ渡す。詳細区間はパス全長の割合なので、
+        // 区間分割する生成(トンネル・工事中)には適用しない(全長を同じ詳細度で描く)。
         PathMeshResult meshResult;
-        if (status == Constants.STATUS_CONSTRUCTING && PathMeshFactory.GetModelType(path) != "none")
+        bool usePartialRange = false;
+        var genWatch = System.Diagnostics.Stopwatch.StartNew();
+        try
         {
-            meshResult = GenerateConstructingPathMesh(path, points);
+            if (status == Constants.STATUS_CONSTRUCTING && PathMeshFactory.GetModelType(path) != "none")
+            {
+                PathDrawContext.Begin(drawLod);
+                meshResult = GenerateConstructingPathMesh(path, points);
+            }
+            else if (UsesTunnelMesh(path, points))
+            {
+                // トンネル区間を含むパスは描画区間分割の都合上、歩道セットバックは適用しない
+                // （地下道路の交差点エンドキャップは現状スコープ外）。
+                PathDrawContext.Begin(drawLod);
+                meshResult = GenerateUndergroundPathMesh(path, points);
+            }
+            else
+            {
+                PathDrawContext.Begin(drawLod, detailFrom, detailTo);
+                pathStartSidewalkSetbacks.TryGetValue(path.path_id, out SidewalkSetback startSetback);
+                pathEndSidewalkSetbacks.TryGetValue(path.path_id, out SidewalkSetback endSetback);
+                meshResult = PathMeshFactory.GeneratePathMesh(path, points, startSetback, endSetback);
+                usePartialRange = PathDrawContext.HasDetailRange;
+            }
         }
-        else if (UsesTunnelMesh(path, points))
+        finally
         {
-            // トンネル区間を含むパスは描画区間分割の都合上、歩道セットバックは適用しない
-            // （地下道路の交差点エンドキャップは現状スコープ外）。
-            meshResult = GenerateUndergroundPathMesh(path, points);
+            PathDrawContext.End();
         }
-        else
-        {
-            pathStartSidewalkSetbacks.TryGetValue(path.path_id, out SidewalkSetback startSetback);
-            pathEndSidewalkSetbacks.TryGetValue(path.path_id, out SidewalkSetback endSetback);
-            meshResult = PathMeshFactory.GeneratePathMesh(path, points, startSetback, endSetback);
-        }
+        DrawLodStats.AddGenerationMs(DrawLodStats.Category.Path, genWatch.Elapsed.TotalMilliseconds);
 
         if (meshResult != null && meshResult.GeneratedObject != null)
         {
             meshResult.GeneratedObject.transform.SetParent(pathGO.transform, false);
         }
+
+        var drawInfo = DrawLodInfo.Ensure(pathGO);
+        drawInfo.drawLod = drawLod;
+        drawInfo.detailFrom = usePartialRange ? (float)detailFrom : 0f;
+        drawInfo.detailTo = usePartialRange ? (float)detailTo : 1f;
+        if (usePartialRange)
+        {
+            AddFarRemainderStrips(pathGO, points, GetRoadWidth(path.path_variant), detailFrom, detailTo);
+        }
+        if (drawLod == DrawLod.Close) closePathIds.Add(path.path_id);
+        else closePathIds.Remove(path.path_id);
 
         mf.mesh = meshResult?.Mesh;
         bool modulesCreated = meshResult?.ModulesCreated ?? false;
@@ -2186,6 +2434,8 @@ public class PathManager : BaseApiDataManager
         // 辞書は即座に新しいオブジェクトに更新する。
         // これにより、短時間に同じIDで再描画が呼ばれてもオブジェクトが増殖しない。
         pathObjectsCache[path.path_id] = pathGO;
+        DrawLodStats.OnDrawLodChanged(DrawLodStats.Category.Path,
+            oldPath != null ? DrawLodInfo.GetDrawLod(oldPath, DrawLod.Normal) : (DrawLod?)null, drawLod);
 
         // 古いオブジェクトの破棄だけを数フレーム遅延させる。
         // 新しいオブジェクトのレンダリングが確定してから破棄することで、一瞬の消滅を防ぐ。
@@ -2194,6 +2444,29 @@ public class PathManager : BaseApiDataManager
             StartCoroutine(DestroyObjectAfterFrames(oldPath));
         }
         ReevaluateAwaitingIntersectionsForPath(path);
+    }
+
+    /// <summary>遠景の帯の頂点間隔(m)。曲線の形を保ちつつ頂点を抑える。</summary>
+    private const float FAR_STRIP_SAMPLE_INTERVAL = 15f;
+
+    /// <summary>点列を距離間隔で間引く(始点・終点は必ず残す)。</summary>
+    private static List<Vector3> DecimatePolyline(List<Vector3> points, float interval)
+    {
+        var result = new List<Vector3>();
+        if (points == null || points.Count == 0) return result;
+        result.Add(points[0]);
+        float acc = 0f;
+        for (int i = 1; i < points.Count - 1; i++)
+        {
+            acc += Vector3.Distance(points[i - 1], points[i]);
+            if (acc >= interval)
+            {
+                result.Add(points[i]);
+                acc = 0f;
+            }
+        }
+        if (points.Count > 1) result.Add(points[points.Count - 1]);
+        return result;
     }
 
     /// <summary>
@@ -3144,8 +3417,13 @@ public class PathManager : BaseApiDataManager
         pathEndSidewalkSetbacks.Remove(pathId);
         pathVersionCache.Remove(pathId);
 
-        if (obj != null) Destroy(obj);
+        if (obj != null)
+        {
+            DrawLodStats.OnDrawLodChanged(DrawLodStats.Category.Path, DrawLodInfo.GetDrawLod(obj, DrawLod.Normal), null);
+            Destroy(obj);
+        }
         pathObjectsCache.Remove(pathId);
+        closePathIds.Remove(pathId);
     }
 
     private void UnregisterPathDataById(int pathId)
@@ -3250,7 +3528,7 @@ public class PathManager : BaseApiDataManager
         }
         if (pathsToRebuild.Count > 0 && terrainFollowRebuildWorker == null)
         {
-            terrainFollowRebuildWorker = StartCoroutine(TerrainFollowRebuildWorker());
+            EnsureTerrainFollowRebuildWorker();
         }
     }
 

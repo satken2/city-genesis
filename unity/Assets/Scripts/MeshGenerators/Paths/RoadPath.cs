@@ -23,6 +23,12 @@ public class RoadPath : IPathMeshGenerator
     public const float MAX_EXTRUDE_TILE_LENGTH = 1f;
 
     /// <summary>
+    /// SplineMesh 1個あたりの生成頂点数の上限。Unity標準メッシュの上限(65535頂点)を超えると
+    /// Dreamteck が毎フレームエラーを出し続けるため、余裕を持たせた値で count をクランプする。
+    /// </summary>
+    public const int SPLINE_MESH_VERTEX_BUDGET = 60000;
+
+    /// <summary>
     /// 道路パーツ用のマテリアルをキャッシュ経由で取得する。
     /// FBX由来のマテリアルを、同名の Resources マテリアルがあればそちらへ再割当し、
     /// Zファイティング回避の renderQueue+1 を一度だけ適用する。
@@ -130,6 +136,11 @@ public class RoadPath : IPathMeshGenerator
     {
         if (source == null) return null;
         string part = resourcePath.Substring(resourcePath.LastIndexOf('/') + 1);
+        // 接写パーツ(sidewalk_close 等)も無印と同じ路面原点で扱う。
+        if (part.EndsWith(PathDrawContext.CLOSE_SUFFIX, StringComparison.Ordinal))
+        {
+            part = part.Substring(0, part.Length - PathDrawContext.CLOSE_SUFFIX.Length);
+        }
         if (part != "sidewalk" && part != "line") return source;
         string bodyPath = resourcePath.Substring(0, resourcePath.LastIndexOf('/') + 1) + "body";
         var body = ModelManager.Instance?.GetModel(bodyPath)?.GetComponent<MeshFilter>()?.sharedMesh;
@@ -198,6 +209,7 @@ public class RoadPath : IPathMeshGenerator
 
         float splineLength = spline.CalculateLength();
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] スプライン長: {splineLength:F2}m");
+        PathDrawContext.SetAdaptiveTileLength(PathDrawContext.ComputeAdaptiveTileLength(spline, MAX_EXTRUDE_TILE_LENGTH));
 
         // 道路パーツ生成
         CreateRoadParts(container, spline, width, sidewalkWidth, sideWidth, lanes, treeSpacing, wallWidth, centerWidth, pillarSpacing, heightEditable, baseHeight, singleSpan, pathData, points, startSidewalkSetback, endSidewalkSetback);
@@ -270,7 +282,8 @@ public class RoadPath : IPathMeshGenerator
     /// </param>
     public static GameObject CreateSplineMesh(GameObject parent, SplineComputer spline, string prefabName, float width, float centerOffsetX, float offsetY, bool mirrorX = false, string fallbackPrefabName = null, bool isDashed = false, bool stretchToWidth = true, double clipFrom = 0.0, double clipTo = 1.0, bool singleSpan = false, bool compensatePivot = true, float maxTileLength = MAX_EXTRUDE_TILE_LENGTH)
     {
-        // プレハブのロード
+        // プレハブのロード。描画LODが接写なら `_close` を優先し、バリアント→タイプの順で解決する
+        // (PathDrawContext.ResolvePrefab)。接写パーツは無印と bbox・原点が一致する規約なので配置計算は共通。
         GameObject prefab = null;
         string resolvedPrefabName = prefabName;
         if (ModelManager.Instance == null)
@@ -279,16 +292,10 @@ public class RoadPath : IPathMeshGenerator
         }
         else
         {
-            prefab = ModelManager.Instance.GetModel(prefabName);
-            if (prefab == null && !string.IsNullOrEmpty(fallbackPrefabName))
+            prefab = PathDrawContext.ResolvePrefab(prefabName, fallbackPrefabName, out resolvedPrefabName);
+            if (prefab != null && resolvedPrefabName != prefabName)
             {
-                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] '{prefabName}' なし。タイプフォールバック試行: '{fallbackPrefabName}'");
-                prefab = ModelManager.Instance.GetModel(fallbackPrefabName);
-                if (prefab != null)
-                {
-                    resolvedPrefabName = fallbackPrefabName;
-                    UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] フォールバック成功: '{fallbackPrefabName}' を使用");
-                }
+                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] '{prefabName}' → '{resolvedPrefabName}' を使用");
             }
         }
 
@@ -412,11 +419,19 @@ public class RoadPath : IPathMeshGenerator
                 {
                     // ダッシュ（長さ dashLength）が道路の端から突き出さないよう、
                     // 配置区間を両端から dashLength/2 ずつ内側に制限する。
+                    // さらに描画LODの詳細描画区間(PathDrawContext)の外には敷かない。
                     double halfDashPercent = (dashLength * 0.5f) / splineLen;
-                    channel.clipFrom = halfDashPercent;
-                    channel.clipTo = 1.0 - halfDashPercent;
-                    float usableLen = splineLen - dashLength;
-                    channel.count = Mathf.Max(2, Mathf.FloorToInt(usableLen / dashSpacing) + 1);
+                    double dashFrom = halfDashPercent;
+                    double dashTo = 1.0 - halfDashPercent;
+                    if (!PathDrawContext.IntersectDetailRange(dashFrom, dashTo, out dashFrom, out dashTo))
+                    {
+                        UnityEngine.Object.Destroy(go);
+                        return null;
+                    }
+                    channel.clipFrom = dashFrom;
+                    channel.clipTo = dashTo;
+                    float usableLen = splineLen * (float)(dashTo - dashFrom);
+                    channel.count = Mathf.Max(1, Mathf.FloorToInt(usableLen / dashSpacing) + 1);
                 }
                 else
                 {
@@ -434,6 +449,20 @@ public class RoadPath : IPathMeshGenerator
             {
                 channel.minScale = new Vector3(scaleX, 1f, 1f);
                 channel.maxScale = new Vector3(scaleX, 1f, 1f);
+
+                // 描画LODの詳細描画区間(PathDrawContext)と呼び出し側のクリップ区間の共通部分だけに敷く。
+                // 区間外は PathManager が遠景の帯で埋める。single_span(桁橋のスパン)は1枚で
+                // 両端を結ぶ造形なので区間で切らない。
+                if (!singleSpan)
+                {
+                    if (!PathDrawContext.IntersectDetailRange(clipFrom, clipTo, out double detailClipFrom, out double detailClipTo))
+                    {
+                        UnityEngine.Object.Destroy(go);
+                        return null;
+                    }
+                    clipFrom = detailClipFrom;
+                    clipTo = detailClipTo;
+                }
 
                 // 歩道のエンドキャップ用に端を切り詰める場合は配置区間を制限する。
                 // clip 値は呼び出し側で 0〜1 かつ clipFrom < clipTo を保証すること。
@@ -455,7 +484,16 @@ public class RoadPath : IPathMeshGenerator
                 }
                 else
                 {
-                    float tileLen = maxTileLength > 0f ? Mathf.Min(meshLenZ, maxTileLength) : meshLenZ;
+                    // 既定の上限(1m)で呼ばれたパーツは、スプラインの曲率に応じたタイル長へ置き換える
+                    // (PathDrawContext.AdaptiveTileLength。直線・平坦なら長く、急カーブ・起伏では1mまで詰まる)。
+                    // 一律1mだと直線道路でも著作長の数倍の頂点を敷き、道床のような密なパーツで頂点上限に当たる。
+                    float tileLimit = maxTileLength;
+                    if (maxTileLength > 0f && Mathf.Approximately(maxTileLength, MAX_EXTRUDE_TILE_LENGTH)
+                        && PathDrawContext.AdaptiveTileLength > 0f)
+                    {
+                        tileLimit = PathDrawContext.AdaptiveTileLength;
+                    }
+                    float tileLen = tileLimit > 0f ? Mathf.Min(meshLenZ, tileLimit) : meshLenZ;
                     float clippedLen = splineLen * (float)System.Math.Max(0.0, clipTo - clipFrom);
                     channel.count = Mathf.Max(1, Mathf.RoundToInt(clippedLen / tileLen));
                 }
@@ -470,7 +508,6 @@ public class RoadPath : IPathMeshGenerator
             // 上限内に収まるよう count をクランプし、パーツ1個で超える場合は生成自体を中止する。
             if (mf != null && mf.sharedMesh != null)
             {
-                const int SPLINE_MESH_VERTEX_BUDGET = 60000;
                 int partVerts = mf.sharedMesh.vertexCount;
                 if (partVerts > SPLINE_MESH_VERTEX_BUDGET)
                 {
@@ -1011,6 +1048,9 @@ public class RoadPath : IPathMeshGenerator
     /// </summary>
     private PathMeshResult GenerateLinearPathWithCorners(PathSummary pathData, List<Vector3> points, SidewalkSetback startSidewalkSetback = default, SidewalkSetback endSidewalkSetback = default, bool singleSpan = false)
     {
+        // セグメントごとに別スプラインを持つため、パス全長の割合で表す詳細描画区間は適用できない
+        // (全長を同じ詳細度で描く)。
+        PathDrawContext.SuppressDetailRange = true;
         GameObject container = new GameObject($"Road_{pathData.path_id}");
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] 角あり直線道路生成開始: path_id={pathData.path_id}, segments={points.Count - 1}");
 
@@ -1174,6 +1214,7 @@ public class RoadPath : IPathMeshGenerator
             GameObject segObj = new GameObject($"Segment_{i}");
             segObj.transform.SetParent(container.transform, false);
             SplineComputer spline = BuildSpline(segObj, splinePoints, false);
+            PathDrawContext.SetAdaptiveTileLength(PathDrawContext.ComputeAdaptiveTileLength(spline, MAX_EXTRUDE_TILE_LENGTH));
 
             CreateRoadParts(segObj, spline, width, sidewalkWidth, sideWidth, lanes, treeSpacing, wallWidth, centerWidth, pillarSpacing, heightEditable, baseHeight, singleSpan, pathData, splinePoints, segStartSetbacks[i], segEndSetbacks[i]);
         }

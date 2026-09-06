@@ -26,11 +26,69 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// </summary>
     public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic = false)
     {
+        return Generate(buildingData, isDynamic, DrawLod.Normal);
+    }
+
+    /// <summary>
+    /// 描画LOD付きの生成。Far はパーツを一切読まずフットプリント押し出しの箱(<see cref="GenerateFarBuilding"/>)、
+    /// Close は同じ組み立てで `_close` パーツを優先解決する(BuildingMeshUtils.CurrentDrawLod)。
+    /// isDynamic(地形追従)はデータティア由来で、描画LODとは独立に渡す。
+    /// </summary>
+    public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic, DrawLod drawLod)
+    {
         if (buildingData == null)
         {
             Debug.LogError("BuildingMeshBuilder.Generate: BuildingSummary が null です。");
             return null;
         }
+        if (drawLod == DrawLod.Far || drawLod == DrawLod.Hidden)
+        {
+            return EnsureMaterials(GenerateFarBuilding(buildingData));
+        }
+
+        DrawLod previous = BuildingMeshUtils.CurrentDrawLod;
+        BuildingMeshUtils.CurrentDrawLod = drawLod;
+        try
+        {
+            return GenerateDetailed(buildingData, isDynamic);
+        }
+        finally
+        {
+            BuildingMeshUtils.CurrentDrawLod = previous;
+        }
+    }
+
+    /// <summary>
+    /// 遠景(Far)用の建物メッシュ。フットプリントを階数×階高で押し出した箱で、パーツ・マテリアルを一切読まない。
+    /// 遠景は数が最も多いので、フル詳細と同じ組み立てを走らせてマテリアルだけ差し替える方式は使わない。
+    /// 工事中・解体中は箱の高さを1階分にして「まだ建っていない」ことを遠目にも保ち、
+    /// 倒壊は瓦礫の高さ(0.5階分)にする。
+    /// </summary>
+    public static BuildingMeshResult GenerateFarBuilding(BuildingSummary buildingData)
+    {
+        Vector2[] footprint = BuildingMeshUtils.GetFootprint(buildingData);
+        float floorHeight = BuildingMeshUtils.GetFloorHeight(buildingData);
+        int floors = Mathf.Max(1, buildingData.floors ?? 1);
+        float height = floors * floorHeight;
+        if (buildingData.status == Constants.STATUS_CONSTRUCTING || buildingData.status == Constants.STATUS_DEMOLISHING)
+        {
+            height = floorHeight;
+        }
+        else if (buildingData.status == Constants.STATUS_COLLAPSED)
+        {
+            height = floorHeight * 0.5f;
+        }
+        int modelType = GetModelType(buildingData);
+        if (modelType == Constants.MODEL_MODULAR_GROUND)
+        {
+            // 地面アセット(畑・太陽光等)は高さを持たないので、薄い板にする。
+            height = 0.3f;
+        }
+        return GenerateSimpleBuildingWithHeight(footprint, height);
+    }
+
+    private BuildingMeshResult GenerateDetailed(BuildingSummary buildingData, bool isDynamic)
+    {
 
         // 工事中/解体中/廃墟は model_type に関わらず専用メッシュで描画する。model_type 分岐より
         // 先に status で判定することで Near/Far・DetailWorker・直接呼び出しの全生成経路をカバーする。
@@ -269,13 +327,18 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// </summary>
     public static BuildingMeshResult GenerateSimpleBuilding(Vector2[] footprint, int floors, float floorHeight)
     {
+        return GenerateSimpleBuildingWithHeight(footprint, floors * floorHeight);
+    }
+
+    /// <summary>高さを直接指定する簡易建物(遠景の箱)。</summary>
+    public static BuildingMeshResult GenerateSimpleBuildingWithHeight(Vector2[] footprint, float buildingHeight)
+    {
         if (footprint == null || footprint.Length < 3)
         {
             Debug.LogWarning($"BuildingMeshBuilder.GenerateSimpleBuilding: footprint が不正です（頂点数 < 3）。");
             return new BuildingMeshResult(new Mesh(), null);
         }
 
-        float buildingHeight = floors * floorHeight;
         Vector2[] normalizedFootprint = (Vector2[])footprint.Clone();
 
         if (SignedArea(normalizedFootprint) < 0f)

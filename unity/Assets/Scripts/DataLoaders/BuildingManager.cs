@@ -83,7 +83,22 @@ public class BuildingManager : BaseApiDataManager
     {
         public BuildingSummary data;
         public bool isDynamic;
+        /// <summary>生成する描画LOD(Normal / Close)。Far は軽量なので遅延せず即時生成する。</summary>
+        public DrawLod drawLod;
     }
+
+    // ================================================================
+    // 描画LOD(建物1棟ごとの詳細度。セルのデータティアとは独立)
+    // ================================================================
+
+    /// <summary>接写メッシュを持つ建物IDの集合。DrawLodConfig.MAX_CLOSE_BUILDINGS の母集団。</summary>
+    private readonly HashSet<int> closeBuildingIds = new HashSet<int>();
+
+    /// <summary>建物IDごとの境界球半径(フットプリント中心からの最遠点と高さから算出)。投影比の判定に使う。</summary>
+    private readonly Dictionary<int, float> buildingBoundsRadius = new Dictionary<int, float>();
+
+    /// <summary>描画LODを前回判定したときのカメラ位置。一定距離動いたときだけ再判定する。</summary>
+    private Vector3 lastDrawLodCameraPos = new Vector3(float.NaN, 0f, 0f);
 
     /// <summary>建物ID→遅延生成リクエスト。同一IDは最新のリクエストで上書きされる。</summary>
     private readonly Dictionary<int, DeferredDetailRequest> deferredDetailBuildings = new Dictionary<int, DeferredDetailRequest>();
@@ -140,6 +155,8 @@ public class BuildingManager : BaseApiDataManager
         PublicFacilityGlowOverlay.Ensure();
         // 視野外のため生成を遅延した詳細メッシュを消化する常駐ワーカー。
         StartCoroutine(DetailGenerationWorker());
+        // カメラ移動に応じて建物ごとの描画LODを再判定する常駐ワーカー。
+        StartCoroutine(DrawLodReevaluationWorker());
     }
 
     private void Update()
@@ -232,7 +249,9 @@ public class BuildingManager : BaseApiDataManager
             if (!buildingObjectsCache.TryGetValue(buildingId, out GameObject obj)) continue;
             if (obj == null) continue;
 
-            if (isDynamic)
+            // 遠景(Far)の箱は地形追従の造形を持たないので、Dynamicセルでも高さ調整だけで足りる。
+            DrawLod currentDrawLod = DrawLodInfo.GetDrawLod(obj, DrawLod.Normal);
+            if (isDynamic && currentDrawLod != DrawLod.Far)
             {
                 if (buildingDataCache.TryGetValue(buildingId, out BuildingSummary buildingData))
                 {
@@ -240,7 +259,7 @@ public class BuildingManager : BaseApiDataManager
                     // 積む(視野に入ったら DetailGenerationWorker が現在の地形高さで作り直す)。
                     if (IsPositionInGenerationView(obj.transform.position, camPos, camFwd))
                     {
-                        CreateOrUpdateBuildingObject(buildingData, isDynamic: true, forceRebuild: true);
+                        CreateOrUpdateBuildingObject(buildingData, isDynamic: true, forceRebuild: true, drawLod: currentDrawLod);
                     }
                     else
                     {
@@ -248,6 +267,7 @@ public class BuildingManager : BaseApiDataManager
                         {
                             data = buildingData,
                             isDynamic = true,
+                            drawLod = currentDrawLod,
                         };
                     }
                 }
@@ -279,6 +299,9 @@ public class BuildingManager : BaseApiDataManager
         deferredDetailBuildings.Clear();
         detailedBuildingIds.Clear();
         buildingLastVisibleFrame.Clear();
+        closeBuildingIds.Clear();
+        buildingBoundsRadius.Clear();
+        DrawLodStats.ResetCounts(DrawLodStats.Category.Building);
     }
 
     // ================================================================
@@ -409,6 +432,7 @@ public class BuildingManager : BaseApiDataManager
         Camera viewCam = Camera.main;
         Vector3 viewCamPos = viewCam != null ? viewCam.transform.position : Vector3.zero;
         Vector3 viewCamFwd = viewCam != null ? GetHorizontalForward(viewCam) : Vector3.forward;
+        float tanHalfFov = DrawLodEvaluator.GetTanHalfFov(viewCam);
 
         if (response?.buildings != null)
         {
@@ -476,9 +500,13 @@ public class BuildingManager : BaseApiDataManager
                     // （cellBuildingLod はロード完了後の ApplyLodCellChanges まで旧ティアのままなので参照しない）。
                     UnityLog.If(LocalConstants.UNITY_LOG_LOADER, () => $"BuildingManager: 建物 {b.agent_id} の再描画を開始 (version {cachedVersion} -> {b.version}, tier -> {desiredTier})");
 
-                    if (desiredTier == LodTier.Far)
+                    // 描画LODはセルのティアとは別に、建物ごとの画面上の大きさで決める。
+                    // Farセルは箱に固定し、Near/Dynamicセルでも遠くに小さく見える建物は箱にする。
+                    DrawLod desiredDrawLod = DetermineDesiredDrawLod(b, desiredTier, viewCamPos, tanHalfFov);
+
+                    if (desiredDrawLod == DrawLod.Far)
                     {
-                        // Far(白い箱)は軽量なので視野に関わらず即時生成する(スカイライン維持)。
+                        // Far(箱)は軽量なので視野に関わらず即時生成する(スカイライン維持)。
                         CreateFarBuildingObject(b);
                         buildingVersionCache[b.agent_id] = b.version;
                     }
@@ -502,11 +530,12 @@ public class BuildingManager : BaseApiDataManager
                         {
                             data = b,
                             isDynamic = desiredTier == LodTier.Dynamic,
+                            drawLod = desiredDrawLod,
                         };
                     }
                     else
                     {
-                        CreateOrUpdateBuildingObject(b, desiredTier == LodTier.Dynamic, forceRebuild: true);
+                        CreateOrUpdateBuildingObject(b, desiredTier == LodTier.Dynamic, forceRebuild: true, drawLod: desiredDrawLod);
                         buildingVersionCache[b.agent_id] = b.version;
                     }
                 }
@@ -524,6 +553,7 @@ public class BuildingManager : BaseApiDataManager
                     viewCam = Camera.main;
                     viewCamPos = viewCam != null ? viewCam.transform.position : Vector3.zero;
                     viewCamFwd = viewCam != null ? GetHorizontalForward(viewCam) : Vector3.forward;
+                    tanHalfFov = DrawLodEvaluator.GetTanHalfFov(viewCam);
                 }
             }
         }
@@ -582,6 +612,7 @@ public class BuildingManager : BaseApiDataManager
         {
             if (buildingObjectsCache.TryGetValue(id, out GameObject obj))
             {
+                if (obj != null) DrawLodStats.OnDrawLodChanged(DrawLodStats.Category.Building, DrawLodInfo.GetDrawLod(obj, DrawLod.Normal), null);
                 Destroy(obj);
                 buildingObjectsCache.Remove(id);
             }
@@ -606,6 +637,8 @@ public class BuildingManager : BaseApiDataManager
             buildingLastVisibleFrame.Remove(id);
             deferredDetailBuildings.Remove(id);
             buildingVersionCache.Remove(id);
+            closeBuildingIds.Remove(id);
+            buildingBoundsRadius.Remove(id);
         }
     }
 
@@ -642,16 +675,18 @@ public class BuildingManager : BaseApiDataManager
                 if (buildingObjectsCache.TryGetValue(id, out GameObject obj) && obj != null)
                 {
                     Vector2Int cell = PositionToCell(obj.transform.position);
-                    if (cellBuildingLod.TryGetValue(cell, out LodTier tier) && tier == LodTier.Dynamic)
+                    DrawLod currentDrawLod = DrawLodInfo.GetDrawLod(obj, DrawLod.Normal);
+                    if (cellBuildingLod.TryGetValue(cell, out LodTier tier) && tier == LodTier.Dynamic && currentDrawLod != DrawLod.Far)
                     {
                         // Dynamicセル: フェンス・地面パネルをロード完了後の地形に追従させるため、
                         // メッシュを強制的に再生成する。再生成は重いので視野内の建物のみ即時に行い、
                         // 視野外は遅延キューへ積む(視野に入ったらワーカーが現在の地形高さで作り直す)。
+                        // 遠景の箱は地形追従の造形を持たないため高さ調整だけにする。
                         if (buildingDataCache.TryGetValue(id, out BuildingSummary buildingData))
                         {
                             if (IsPositionInGenerationView(obj.transform.position, camPos, camFwd))
                             {
-                                CreateOrUpdateBuildingObject(buildingData, isDynamic: true, forceRebuild: true);
+                                CreateOrUpdateBuildingObject(buildingData, isDynamic: true, forceRebuild: true, drawLod: currentDrawLod);
                             }
                             else
                             {
@@ -659,6 +694,7 @@ public class BuildingManager : BaseApiDataManager
                                 {
                                     data = buildingData,
                                     isDynamic = true,
+                                    drawLod = currentDrawLod,
                                 };
                             }
                         }
@@ -756,7 +792,11 @@ public class BuildingManager : BaseApiDataManager
                     if (!loadedCells.Contains(cell)) continue;
                 }
 
-                CreateOrUpdateBuildingObject(req.data, req.isDynamic, forceRebuild: true);
+                // 接写の保持上限に達していれば通常で生成する(降格は次の再判定で投影比が決める)。
+                DrawLod lod = req.drawLod == DrawLod.Close && closeBuildingIds.Count >= DrawLodConfig.MAX_CLOSE_BUILDINGS && !closeBuildingIds.Contains(bestId)
+                    ? DrawLod.Normal
+                    : (req.drawLod == DrawLod.Far ? DrawLod.Normal : req.drawLod);
+                CreateOrUpdateBuildingObject(req.data, req.isDynamic, forceRebuild: true, drawLod: lod);
                 buildingVersionCache[bestId] = req.data.version;
                 EvictDetailedBuildingsOverCap(camPos, fwd, justCreatedId: bestId);
             }
@@ -828,12 +868,16 @@ public class BuildingManager : BaseApiDataManager
     /// </summary>
     private void EvictDetailedBuilding(int buildingId)
     {
+        DrawLod evictedLod = DrawLod.Normal;
         if (buildingObjectsCache.TryGetValue(buildingId, out GameObject obj) && obj != null)
         {
+            evictedLod = DrawLodInfo.GetDrawLod(obj, DrawLod.Normal);
+            DrawLodStats.OnDrawLodChanged(DrawLodStats.Category.Building, evictedLod, null);
             Destroy(obj);
         }
         buildingObjectsCache.Remove(buildingId);
         detailedBuildingIds.Remove(buildingId);
+        closeBuildingIds.Remove(buildingId);
         buildingLastVisibleFrame.Remove(buildingId);
         buildingVersionCache.Remove(buildingId);
 
@@ -844,7 +888,7 @@ public class BuildingManager : BaseApiDataManager
                 ? PositionToCell(new Vector3(cp[0], 0f, cp[1]))
                 : default;
             bool isDynamic = GetCellLodTier(cell) == LodTier.Dynamic;
-            deferredDetailBuildings[buildingId] = new DeferredDetailRequest { data = data, isDynamic = isDynamic };
+            deferredDetailBuildings[buildingId] = new DeferredDetailRequest { data = data, isDynamic = isDynamic, drawLod = evictedLod };
         }
     }
 
@@ -852,10 +896,121 @@ public class BuildingManager : BaseApiDataManager
     /// 建物IDを「フル詳細メッシュ保持中」として登録し、最終可視フレームを現在に更新する。
     /// CreateOrUpdateBuildingObject の生成・プール再利用の両経路から呼ぶ。
     /// </summary>
-    private void MarkBuildingDetailed(int buildingId)
+    private void MarkBuildingDetailed(int buildingId, DrawLod drawLod)
     {
         detailedBuildingIds.Add(buildingId);
         buildingLastVisibleFrame[buildingId] = Time.frameCount;
+        if (drawLod == DrawLod.Close) closeBuildingIds.Add(buildingId);
+        else closeBuildingIds.Remove(buildingId);
+    }
+
+    // ================================================================
+    // 描画LODの判定と再判定ワーカー
+    // ================================================================
+
+    /// <summary>
+    /// 建物の境界球半径(m)。フットプリントの中心からの最遠点と建物高さの合成で、投影比の判定に使う。
+    /// 建物ごとにキャッシュし、version が変わっても形状は変わらない前提で使い回す
+    /// (階数変更で多少ずれても、しきい値の粗さに比べれば無視できる)。
+    /// </summary>
+    private float GetBuildingBoundsRadius(BuildingSummary data)
+    {
+        if (buildingBoundsRadius.TryGetValue(data.agent_id, out float cached)) return cached;
+        float horizontal = 0f;
+        var poly = data.polygonArray;
+        if (poly != null)
+        {
+            for (int i = 0; i < poly.Length; i++)
+            {
+                if (poly[i] == null || poly[i].Length < 2) continue;
+                float d = Mathf.Sqrt(poly[i][0] * poly[i][0] + poly[i][1] * poly[i][1]);
+                if (d > horizontal) horizontal = d;
+            }
+        }
+        float height = Mathf.Max(1, data.floors ?? 1) * BuildingMeshUtils.GetFloorHeight(data);
+        float radius = Mathf.Max(3f, Mathf.Sqrt(horizontal * horizontal + 0.25f * height * height));
+        buildingBoundsRadius[data.agent_id] = radius;
+        return radius;
+    }
+
+    /// <summary>
+    /// 建物の望ましい描画LOD。Farセルは箱に固定し、Near/Dynamicセルでは投影比(画面上の大きさ)で決める。
+    /// 既存オブジェクトの描画LODをヒステリシスの基準にする。
+    /// </summary>
+    private DrawLod DetermineDesiredDrawLod(BuildingSummary data, LodTier tier, Vector3 camPos, float tanHalfFov)
+    {
+        if (tier == LodTier.Far) return DrawLod.Far;
+        float[] cp = data.centerPointArray;
+        if (cp == null || cp.Length < 2) return DrawLod.Normal;
+        DrawLod current = DrawLod.Normal;
+        if (buildingObjectsCache.TryGetValue(data.agent_id, out GameObject existing) && existing != null)
+        {
+            current = DrawLodInfo.GetDrawLod(existing, DrawLod.Normal);
+        }
+        float groundY = HeightmapTextureManager.GetTerrainHeight(new Vector3(cp[0], 1000f, cp[1]));
+        float radius = GetBuildingBoundsRadius(data);
+        float distance = Vector3.Distance(camPos, new Vector3(cp[0], groundY + radius * 0.5f, cp[1]));
+        bool allowClose = closeBuildingIds.Contains(data.agent_id) || closeBuildingIds.Count < DrawLodConfig.MAX_CLOSE_BUILDINGS;
+        return DrawLodEvaluator.EvaluateBySize(radius, distance, tanHalfFov, current, allowClose);
+    }
+
+    /// <summary>
+    /// カメラ移動に応じて、生成済みの建物の描画LODを再判定する常駐ワーカー。
+    /// 一定フレームごと、かつカメラが一定距離動いたときだけ全建物を走査する(数千件の距離計算で1ms未満)。
+    /// 変化があった建物は、箱化(Far)なら軽いので即時生成、詳細化(Normal/Close)は遅延キューへ積んで
+    /// DetailGenerationWorker が視野優先・フレーム予算で生成する。生成が終わるまで旧オブジェクトは残る。
+    /// </summary>
+    private IEnumerator DrawLodReevaluationWorker()
+    {
+        while (true)
+        {
+            for (int i = 0; i < DrawLodConfig.REEVALUATE_INTERVAL_FRAMES; i++) yield return null;
+            if (buildingObjectsCache.Count == 0) continue;
+
+            Camera cam = Camera.main;
+            if (cam == null) continue;
+            Vector3 camPos = cam.transform.position;
+            if (!float.IsNaN(lastDrawLodCameraPos.x)
+                && Vector3.Distance(camPos, lastDrawLodCameraPos) < DrawLodConfig.REEVALUATE_CAMERA_MOVE_DISTANCE)
+            {
+                continue;
+            }
+            lastDrawLodCameraPos = camPos;
+            float tanHalfFov = DrawLodEvaluator.GetTanHalfFov(cam);
+
+            // 走査中に辞書を書き換えないよう、変更対象を先に集める。
+            List<(int id, DrawLod lod)> changes = null;
+            foreach (var kvp in buildingObjectsCache)
+            {
+                GameObject obj = kvp.Value;
+                if (obj == null || !obj.activeSelf) continue;
+                if (!buildingDataCache.TryGetValue(kvp.Key, out BuildingSummary data)) continue;
+                if (!buildingCellById.TryGetValue(kvp.Key, out Vector2Int cell)) continue;
+                if (!loadedCells.Contains(cell)) continue;
+                LodTier tier = GetCellLodTier(cell);
+                DrawLod current = DrawLodInfo.GetDrawLod(obj, DrawLod.Normal);
+                DrawLod desired = DetermineDesiredDrawLod(data, tier, camPos, tanHalfFov);
+                if (desired == current) continue;
+                changes ??= new List<(int, DrawLod)>();
+                changes.Add((kvp.Key, desired));
+            }
+            if (changes == null) continue;
+
+            foreach (var (id, lod) in changes)
+            {
+                if (!buildingDataCache.TryGetValue(id, out BuildingSummary data)) continue;
+                if (lod == DrawLod.Far)
+                {
+                    CreateFarBuildingObject(data);
+                    buildingVersionCache[id] = data.version;
+                }
+                else
+                {
+                    bool isDynamic = buildingCellById.TryGetValue(id, out Vector2Int cell) && GetCellLodTier(cell) == LodTier.Dynamic;
+                    deferredDetailBuildings[id] = new DeferredDetailRequest { data = data, isDynamic = isDynamic, drawLod = lod };
+                }
+            }
+        }
     }
 
     private bool IsBuildingApplicableForAltitude(BuildingSummary buildingData)
@@ -998,7 +1153,10 @@ public class BuildingManager : BaseApiDataManager
         MeshFilter mf = buildingGO.AddComponent<MeshFilter>();
         MeshRenderer mr = buildingGO.AddComponent<MeshRenderer>();
 
-        BuildingMeshResult meshResult = new BuildingMeshBuilder().Generate(buildingData);
+        // 遠景はパーツを読まない箱(フットプリント押し出し)。フル詳細と同じ組み立てを走らせない。
+        var farWatch = System.Diagnostics.Stopwatch.StartNew();
+        BuildingMeshResult meshResult = new BuildingMeshBuilder().Generate(buildingData, false, DrawLod.Far);
+        DrawLodStats.AddGenerationMs(DrawLodStats.Category.Building, farWatch.Elapsed.TotalMilliseconds);
         if (meshResult?.Mesh != null)
         {
             mf.mesh = meshResult.Mesh;
@@ -1006,6 +1164,7 @@ public class BuildingManager : BaseApiDataManager
 
         mr.sharedMaterial = BuildingMeshBuilder.GetDefaultBuildingMaterial();
         ApplyDepthOffsetShader(mr);
+        DrawLodInfo.Ensure(buildingGO).drawLod = DrawLod.Far;
 
         float[] cp = buildingData.centerPointArray;
         if (cp != null && cp.Length >= 2)
@@ -1041,9 +1200,12 @@ public class BuildingManager : BaseApiDataManager
         // 辞書は即座に新しいオブジェクトに更新する。
         // これにより、短時間に同じIDで再描画が呼ばれてもオブジェクトが増殖しない。
         buildingObjectsCache[buildingData.agent_id] = buildingGO;
+        DrawLodStats.OnDrawLodChanged(DrawLodStats.Category.Building,
+            oldBuilding != null ? DrawLodInfo.GetDrawLod(oldBuilding, DrawLod.Normal) : (DrawLod?)null, DrawLod.Far);
 
-        // Far(白い箱)になったので、詳細メッシュのLRU台帳と遅延リクエストからは外す。
+        // Far(箱)になったので、詳細メッシュのLRU台帳と遅延リクエストからは外す。
         detailedBuildingIds.Remove(buildingData.agent_id);
+        closeBuildingIds.Remove(buildingData.agent_id);
         buildingLastVisibleFrame.Remove(buildingData.agent_id);
         deferredDetailBuildings.Remove(buildingData.agent_id);
 
@@ -1196,7 +1358,18 @@ public class BuildingManager : BaseApiDataManager
         {
             return;
         }
-        CreateOrUpdateBuildingObject(building, IsBuildingInDynamicCell(building), forceRebuild: true);
+        CreateOrUpdateBuildingObject(building, IsBuildingInDynamicCell(building), forceRebuild: true, drawLod: GetCurrentDrawLod(building.agent_id));
+    }
+
+    /// <summary>生成済みオブジェクトの描画LOD(未生成なら Normal)。個別更新で現在の詳細度を維持するために使う。</summary>
+    private DrawLod GetCurrentDrawLod(int buildingId)
+    {
+        if (buildingObjectsCache.TryGetValue(buildingId, out GameObject obj) && obj != null)
+        {
+            DrawLod lod = DrawLodInfo.GetDrawLod(obj, DrawLod.Normal);
+            return lod == DrawLod.Far ? DrawLod.Normal : lod;
+        }
+        return DrawLod.Normal;
     }
 
     protected override void UnloadCell(Vector2Int cellIndex)
@@ -1239,8 +1412,10 @@ public class BuildingManager : BaseApiDataManager
     /// true の場合、既存オブジェクトのプール再利用をスキップして必ずメッシュを再生成する。
     /// ティア変更時や dynamic 地形更新後の地形追従再生成に使用する。
     /// </param>
-    private void CreateOrUpdateBuildingObject(BuildingSummary buildingData, bool isDynamic, bool forceRebuild = false)
+    /// <param name="drawLod">描画LOD(Normal / Close)。Far は CreateFarBuildingObject が担当する。</param>
+    private void CreateOrUpdateBuildingObject(BuildingSummary buildingData, bool isDynamic, bool forceRebuild = false, DrawLod drawLod = DrawLod.Normal)
     {
+        if (drawLod == DrawLod.Far || drawLod == DrawLod.Hidden) drawLod = DrawLod.Normal;
         GameObject oldBuilding = null;
         if (buildingObjectsCache.TryGetValue(buildingData.agent_id, out GameObject existingBuilding))
         {
@@ -1249,10 +1424,11 @@ public class BuildingManager : BaseApiDataManager
                 var existingIdInfo = existingBuilding.GetComponent<ObjectIdInfo>();
                 int currentStatus = existingIdInfo != null ? existingIdInfo.status : 0;
                 bool existingIsFar = existingIdInfo != null && existingIdInfo.isFarObject;
-                // 遠景LODオブジェクト（白い箱）は近景では再利用しない。
-                // メッシュの詳細度が全く異なるため、破棄して近景用に再生成する。
+                bool sameDrawLod = DrawLodInfo.GetDrawLod(existingBuilding, DrawLod.Normal) == drawLod;
+                // 遠景LODオブジェクト（箱）は近景では再利用しない。
+                // メッシュの詳細度が全く異なるため、破棄して近景用に再生成する。描画LODが違う場合も同様。
                 // forceRebuild 時はメッシュの作り直しが目的なので再利用しない。
-                if (!forceRebuild && currentStatus == buildingData.status && !existingIsFar)
+                if (!forceRebuild && currentStatus == buildingData.status && !existingIsFar && sameDrawLod)
                 {
                     // プールから再利用: 非表示だったオブジェクトを再表示し、位置を更新
                     if (!existingBuilding.activeSelf)
@@ -1260,7 +1436,7 @@ public class BuildingManager : BaseApiDataManager
                     RegisterBuildingDataToCache(buildingData);
                     UpdateBuildingHeight(existingBuilding);
                     RegisterBuildingCell(buildingData.agent_id, existingBuilding.transform.position);
-                    MarkBuildingDetailed(buildingData.agent_id);
+                    MarkBuildingDetailed(buildingData.agent_id, drawLod);
                     VisualModeObject vmo = existingBuilding.GetComponent<VisualModeObject>();
                     if (vmo != null)
                     {
@@ -1296,7 +1472,10 @@ public class BuildingManager : BaseApiDataManager
         MeshFilter mf = buildingGO.AddComponent<MeshFilter>();
         MeshRenderer mr = buildingGO.AddComponent<MeshRenderer>();
 
-        BuildingMeshResult meshResult = new BuildingMeshBuilder().Generate(buildingData, isDynamic);
+        var genWatch = System.Diagnostics.Stopwatch.StartNew();
+        BuildingMeshResult meshResult = new BuildingMeshBuilder().Generate(buildingData, isDynamic, drawLod);
+        DrawLodStats.AddGenerationMs(DrawLodStats.Category.Building, genWatch.Elapsed.TotalMilliseconds);
+        DrawLodInfo.Ensure(buildingGO).drawLod = drawLod;
         if (meshResult is not null && meshResult.Mesh != null)
         {
             mf.mesh = meshResult.Mesh;
@@ -1379,7 +1558,9 @@ public class BuildingManager : BaseApiDataManager
         // 辞書は即座に新しいオブジェクトに更新する。
         // これにより、短時間に同じIDで再描画が呼ばれてもオブジェクトが増殖しない。
         buildingObjectsCache[buildingData.agent_id] = buildingGO;
-        MarkBuildingDetailed(buildingData.agent_id);
+        MarkBuildingDetailed(buildingData.agent_id, drawLod);
+        DrawLodStats.OnDrawLodChanged(DrawLodStats.Category.Building,
+            oldBuilding != null ? DrawLodInfo.GetDrawLod(oldBuilding, DrawLod.Normal) : (DrawLod?)null, drawLod);
         // 詳細メッシュを生成したので、残っていた遅延リクエストは不要になる。
         deferredDetailBuildings.Remove(buildingData.agent_id);
 
@@ -1461,7 +1642,7 @@ public class BuildingManager : BaseApiDataManager
             building =>
             {
                 if (building != null)
-                    CreateOrUpdateBuildingObject(building, IsBuildingInDynamicCell(building));
+                    CreateOrUpdateBuildingObject(building, IsBuildingInDynamicCell(building), drawLod: GetCurrentDrawLod(building.agent_id));
             },
             error => Debug.LogError($"FetchBuilding({agentId}) failed: {error}")
         );

@@ -17,6 +17,33 @@ public static class BuildingMeshUtils
         return ModelManager.Instance != null && ModelManager.Instance.HasModel(resourcePath);
     }
 
+    // ================================================================
+    // 描画LOD(接写パーツの解決)
+    // ================================================================
+
+    /// <summary>接写用パーツ名のサフィックス(例: Models/Buildings/a2000/0/mid-w1_close)。</summary>
+    public const string CLOSE_SUFFIX = "_close";
+
+    /// <summary>
+    /// 現在生成中の建物の描画LOD。BuildingMeshBuilder.Generate が生成の前後で設定・復元する。
+    /// 接写(Close)のとき、パーツ解決は同じ閾値フォルダの `{パーツ名}_close` を先に試し、無ければ無印を使う。
+    /// 生成は同期的にメインスレッドで行われ、十数箇所あるパーツ取得の呼び出しへ引数を通すより
+    /// この入口で一括して効かせる。セルのティア表を参照するわけではない。
+    /// </summary>
+    public static DrawLod CurrentDrawLod { get; set; } = DrawLod.Normal;
+
+    /// <summary>描画LODに応じてリソースパスを解決する(接写なら `_close` 優先)。</summary>
+    private static GameObject GetModelForDrawLod(string path, bool suppressWarning)
+    {
+        if (ModelManager.Instance == null) return null;
+        if (CurrentDrawLod == DrawLod.Close)
+        {
+            GameObject close = ModelManager.Instance.GetModel(path + CLOSE_SUFFIX, true);
+            if (close != null) return close;
+        }
+        return ModelManager.Instance.GetModel(path, suppressWarning);
+    }
+
 
     /// <summary>
     /// プレハブ配下の全メッシュを、プレハブルートのローカル空間へ変換した1つのメッシュに結合して返す。
@@ -269,11 +296,7 @@ public static class BuildingMeshUtils
         string partName = $"{level}-{type}{posStr}";
         string path = $"Models/Buildings/{prefix}/{suffix}/{partName}";
 
-        if (ModelManager.Instance != null)
-        {
-            return ModelManager.Instance.GetModel(path, suppressWarning);
-        }
-        return null;
+        return GetModelForDrawLod(path, suppressWarning);
     }
 
     /// <summary>
@@ -284,11 +307,7 @@ public static class BuildingMeshUtils
     {
         string path = $"Models/Buildings/{prefix}/{suffix}/{partName}";
 
-        if (ModelManager.Instance != null)
-        {
-            return ModelManager.Instance.GetModel(path, suppressWarning);
-        }
-        return null;
+        return GetModelForDrawLod(path, suppressWarning);
     }
 
     /// <summary>
@@ -778,7 +797,7 @@ public static class BuildingMeshUtils
     private static GameObject GetCommonPart(string partName)
     {
         string commonPath = $"Models/Buildings/{LocalConstants.CONSTRUCTION_COMMON_PREFIX}/{partName}";
-        return ModelManager.Instance != null ? ModelManager.Instance.GetModel(commonPath, true) : null;
+        return GetModelForDrawLod(commonPath, true);
     }
 
     /// <summary>

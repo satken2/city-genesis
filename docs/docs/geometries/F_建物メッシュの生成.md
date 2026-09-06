@@ -36,7 +36,9 @@ model_type とは別軸で、status が `STATUS_CONSTRUCTING` の建物はすべ
                           ├─ visual_variant2 外観バリアント2（0.0-1.0）
                                 │
                                 ▼
-                     BuildingMeshBuilder.Generate()
+                     BuildingMeshBuilder.Generate(data, isDynamic, drawLod)
+                          │
+                          ├─ drawLod が Far → GenerateFarBuilding（箱。パーツを一切読まない。§3.5）
                           │
                           ├─ status が STATUS_CONSTRUCTING → ConstructingBuildingMeshBuilder（F5）
                           │
@@ -137,6 +139,7 @@ Assets/Resources/Models/
 │   │       ├── base-c1.prefab       # 1階角 位置1
 │   │       ├── base-c2.prefab       # 1階角 位置2
 │   │       ├── mid-w1.prefab        # 中層壁 位置1
+│   │       ├── mid-w1_close.prefab  # 中層壁 位置1 の接写用（任意。§3.5）
 │   │       ├── mid-c1.prefab        # 中層角 位置1
 │   │       ├── top-w1.prefab        # 屋上壁 位置1
 │   │       ├── top-c1.prefab        # 屋上角 位置1
@@ -282,6 +285,16 @@ Models/Paths/p1/body                   道路ボディ
 | 地面パネル材 (floor) | 1 | 地面塗りつぶし用 |
 | タイルオブジェクト (tile) | 1 | 畑・庭など（`MODEL_MODULAR_GROUND` 専用） |
 
+### 3.5 接写用パーツ（`_close`）
+
+描画LOD（[E_LOD処理](E_LOD処理.md)「描画LOD（オブジェクト単位）」）が Close の建物は、パーツ名に `_close` を付けた接写用モデルで組み立てる。無印のパーツが Normal（制作の基準）であり、`_close` は任意の上乗せである。Far はコード生成の箱なのでモデルを持たない。
+
+- **命名**: `{パーツ名}_close`。無印と**同じ閾値フォルダ**に置く（例: `Models/Buildings/a2000/0/mid-w1_close`）。
+- **解決順**: Close のときは同じ閾値フォルダの `{パーツ名}_close` を先に試し、無ければ無印 `{パーツ名}` を使う（`BuildingMeshUtils.GetModelForDrawLod`）。閾値フォルダの選択（§4.2）とパーツの存在判定は無印の名前で行うため、`_close` だけを置いても無印が無ければ使われない。
+- **対象**: `BuildingMeshUtils.GetPart` / `GetPartNoPosition` / common パーツ経由で解決されるすべてのパーツ（壁・角・ceil・floor・entrance・roofprop・prebuilt・マッシュアップのサブ建物・common）。
+- **規約**: `_close` は無印と bbox・原点・マテリアル構成が一致していること。生成側は配置計算を一切変えずにプレハブだけ差し替える。
+- **仕組み**: `BuildingMeshBuilder.Generate(data, isDynamic, drawLod)` が生成の前後で静的コンテキスト `BuildingMeshUtils.CurrentDrawLod` を設定・復元し、十数箇所あるパーツ取得がこれを参照する（生成は同期的にメインスレッドで行われる）。`isDynamic`（データティア由来の地形追従）と `drawLod`（見え方由来）は独立した引数である。`drawLod` が Far の建物は組み立てを走らせず、`GenerateFarBuilding` がフットプリントを階数×階高で押し出した箱を返す（工事中・解体中は1階分、倒壊は0.5階分の高さ、`MODEL_MODULAR_GROUND` は0.3mの板）。
+
 ---
 
 ## 4. 外観バリアントの選択
@@ -331,6 +344,7 @@ variant_number = floor(visual_variant × 1000)     → 0 〜 1000
 すべて同一の閾値フォルダ内でフォールバックする。
 壁パーツ（w）と角パーツ（c）は同じ階層でレベルをまたいでフォールバックする。
 最終フォールバック先だけが異なる。
+描画LODが Close のときは、各段で `{パーツ名}_close` → 無印の順に試す（§3.5）。次の段へ進むのは無印も無いときだけである。
 
 **壁パーツ（w）**
 
@@ -685,7 +699,7 @@ Dynamicセルかどうかの判定はメッシュ生成器側では行わない�
 | ファイル                                        | 役割                                                                                                                                       |
 | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | **`MeshFactory.cs`**                        | 戻り値の型 `BuildingMeshResult`（Mesh + Material[] + ColliderMesh）と、各ビルダーが実装するインターフェース `IBuildingMeshGenerator` の定義。 |
-| **`BuildingMeshBuilder.cs`**                | **エントリポイント兼 static ユーティリティ**。`Generate` が status → `model_type` の順に分岐して各ビルダーへ振り分ける。`MergeSubMeshes`、`GenerateSimpleBuilding`、`GenerateColliderMesh`、`GenerateFoundationMesh`、塔屋・エントランス配置ロジック、`AddSegmentToCombineList` などの汎用メソッドを保持。 |
+| **`BuildingMeshBuilder.cs`**                | **エントリポイント兼 static ユーティリティ**。`Generate(data, isDynamic, drawLod)` が描画LOD=Far なら `GenerateFarBuilding`（箱）を返し、それ以外は status → `model_type` の順に分岐して各ビルダーへ振り分ける（§3.5）。`MergeSubMeshes`、`GenerateSimpleBuilding`、`GenerateColliderMesh`、`GenerateFoundationMesh`、塔屋・エントランス配置ロジック、`AddSegmentToCombineList` などの汎用メソッドを保持。 |
 | **`ModularBuildingMeshBuilder.cs`**         | `IBuildingMeshGenerator`。`ModularBodyBuilder` で壁・地面を生成 → `***RoofBuilder` で屋根を生成 → 塔屋を配置 → 結合・ベイク（[[F1_モジュラー建物のメッシュ生成]] / [[F2_地面アセットのメッシュ生成]]）。 |
 | **`ModularBodyBuilder.cs`**                 | **static クラス**。モジュラーパーツの壁・角・地面パネルを配置し、CombineInstance / Material / tempMesh リストを返す。敷地装飾（フェンス・タイル・地面パネル）の生成は既成建物・工事中とも共通。 |
 | **`FlatRoofBuilder.cs`**                    | **static クラス**。平らな屋上パネルを生成して返す。                                                                                                          |
@@ -698,4 +712,4 @@ Dynamicセルかどうかの判定はメッシュ生成器側では行わない�
 | **`RailYardBuildingMeshBuilder.cs`**        | `IBuildingMeshGenerator`。フットプリントと接続端子ノード位置から並行線路・集約曲線・架線・検修庫をプロシージャルに配置する（[[F9_車両基地のメッシュ生成]]）。 |
 | **`ConstructingBuildingMeshBuilder.cs`**    | `IBuildingMeshGenerator`。工事中専用の「工事現場」メッシュ（土マウンド + 足場リング + クレーン）を生成する（[[F5_工事中建物のメッシュ生成]]）。model_type 分岐より先に status で分岐する。 |
 | **`DefaultBodyBuilder.cs`**                 | **static クラス**。モジュラーパーツが一切存在しない場合のフォールバック躯体。底面ポリゴンを高さまで押し出した壁面と地面パネルを生成する（屋根は屋根ビルダーが担当）。 |
-| **`BuildingMeshUtils.cs`**                  | **static クラス**。パーツの存在確認・パス解決（`common` フォールバック含む）、プレハブ配下の全メッシュ結合、閾値 suffix の解決、積み上げモジュール配置などの共通処理。屋根ビルダーが共有するポリゴン幾何（`OffsetPolygonOutward` = 軒の出の輪郭、`TryResolveMinAreaRect` = 最小面積外接矩形）もここに置く。 |
+| **`BuildingMeshUtils.cs`**                  | **static クラス**。パーツの存在確認・パス解決（`common` フォールバック、描画LODの静的コンテキスト `CurrentDrawLod` による `_close` 優先解決を含む。§3.5）、プレハブ配下の全メッシュ結合、閾値 suffix の解決、積み上げモジュール配置などの共通処理。屋根ビルダーが共有するポリゴン幾何（`OffsetPolygonOutward` = 軒の出の輪郭、`TryResolveMinAreaRect` = 最小面積外接矩形）もここに置く。 |

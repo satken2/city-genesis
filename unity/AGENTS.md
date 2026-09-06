@@ -54,6 +54,7 @@
 - **このミラーは手動で維持しない。** `Assets/Models` にFBXを追加・移動すると、エディタ拡張(`Assets/Editor/ModelPrefabGenerator.cs`)が対応プレハブを自動生成する。一括同期はメニュー `Tools/Model Prefabs/Sync All`、FBXの削除・移動で孤児化したプレハブは `Tools/Model Prefabs/Delete Orphans` で削除する(自動削除はしない)。
 - 自動生成されるプレハブはFBXをオーバーライドなしで包む純粋なラッパー。プレハブ側にコンポーネント追加やマテリアル差し替え等の手動編集を行った場合、同期ツールはそのプレハブを上書きせずスキップして警告する。
 - **`Assets/Models` 配下のモデルは Read/Write Enabled(`ModelImporter.isReadable`)が必須。** ランタイムのメッシュ生成はパーツの頂点を読み出して配置行列を焼き込むため(`ModularBodyBuilder.BuildWallRun` / `BuildingMeshUtils.CombineModuleMeshes` / Dreamteck SplineMesh)、無効だと頂点が取れずエラーログだけ出して**そのパーツが無言で消える**(屋根・地面パネルはマテリアルしか使わないので残り、「壁だけ描画されない」という部分欠けになる)。Unityの既定値は無効なので、エディタ拡張(`Assets/Editor/ModelImportSettings.cs`)がインポート時に一律有効化する。既存アセットの一括修正はメニュー `Tools/Models/Enable Read-Write (Assets/Models)`、確認だけなら `Tools/Models/List Non-Readable Models`。
+- **接写用モデルの規約 `{パーツ}_close.fbx`**: 無印 `{パーツ}.fbx` が Normal(制作の基準)で、同じフォルダに任意で `{パーツ}_close.fbx` を置くと描画LODが Close のときだけ優先して使われる(建物: `BuildingMeshUtils.GetPart*` 経由の全パーツ、パス: `PathDrawContext.ResolvePrefab` を通る `CreateSplineMesh` 配置パーツのみ。Instantiate 配置の tree/pillar/pole/設備等は常に無印)。**bbox・原点・マテリアル構成は無印と一致させること**(生成側は配置計算を変えずに差し替える)。無印が無い `_close` は使われない(存在判定は無印名で行う)。Far はコード生成(建物=フットプリント押し出しの箱、パス=帯)なのでモデル不要。ミラープレハブは無印と同じ仕組みで自動生成される。
 
 # アーキテクチャの要点(まずこれを把握する)
 
@@ -77,6 +78,7 @@ CameraCellChecker(視線中心セルの変化検知)
 ```
 
 - **地形タイルは全ティア共通解像度(513)で、ティア変更はタイルの作り直しではなくデータのストリーミング適用で行う**。ティアダウンでは何もしない(高精細データを保持)。重い生成(SetHeights・コライダーベイク・建物/道路のメッシュ生成)は視野優先・フレーム予算制のワーカーで複数フレームに分散する。建物のフル詳細メッシュには個数上限(LRU破棄)がある。詳細は `DataLoaders/AGENTS.md` と `genesis-docs/docs/geometries/E_LOD処理.md`。
+- **セル単位のデータティアとは別に、建物1棟・パス1本ごとの描画LOD(`DrawLod`: Close / Normal / Far。`DataLoaders/DrawLod.cs`)がある。** ティアは「どの地形データを持ち地形追従するか」、描画LODは「どの細かさで描くか」を決め、両者は独立(Farセルだけは描画LODもFar固定)。建物は投影比(境界球半径÷(距離×tan(FOV/2)))、パスは中心線までの距離で判定し、昇格/降格を別しきい値にしたヒステリシス付き。Far=コード生成の箱/曲線を保った帯(モデル不要)、Normal=無印パーツ、Close=`{パーツ}_close` があれば優先。カメラが4m以上動いたとき12フレームごとに常駐ワーカーが再判定し、接写の同時保持数には上限がある。生成器はティア表を見ず、`BuildingMeshBuilder.Generate(data, isDynamic, drawLod)` / `PathDrawContext.Begin/End` で受け取る。**F8** で描画LOD統計オーバーレイ(`DrawLodStatsOverlay`。描画LOD別個数・生成ms・頂点数。シーン配置不要)を表示できる。詳細は `DataLoaders/AGENTS.md`「描画LOD」と `genesis-docs/docs/geometries/E_LOD処理.md`「描画LOD(オブジェクト単位)」。
 - **建物・道路・プロップは地形より先に生成され、地形のロード完了後に高さ・形状が追従更新される**(2段階)。追従対象は「実際に地形が更新されたセル ∩ Near以上のティア」であり、**Dynamicセルに限定してはいけない**(Nearセルの道路が地形に埋まったまま放置される)。
 - **地形が実際に変化していないセルは追従更新しない**: `OnAllTerrainLodLoaded` は「実際にハイトマップが適用されたセル」だけを渡すため、カメラのセル跨ぎで地形不変なら建物・道路の再生成は走らない。追従更新は `PerformanceConfig.FrameBudgetMs` でフレーム分散され、カメラ移動中のフレームヒッチを防ぐ。
 - Dynamicティアは「開放(acquire)済みセル」にしか割り当てられない(未開放セルにはdynamic地形データが存在しないため)。
