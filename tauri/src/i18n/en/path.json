@@ -64,7 +64,12 @@
         "description": "This platform does not belong to any station. Draw a station building line across it from the Station Building tab of the Track Construction panel."
       }
     },
-    "tabConstructionInfo": "Construction"
+    "tabConstructionInfo": "Construction",
+    "tabs": {
+      "basic": "Overview",
+      "traffic": "Traffic",
+      "construction": "Construction"
+    }
   },
   "path_construction": {
     "constructionSpeed": "Construction Speed",

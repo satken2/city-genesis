@@ -64,7 +64,12 @@
         "description": "이 승강장은 어느 역에도 속해 있지 않습니다. 궤도 건설 패널의 역사 탭에서 이 승강장을 가로지르는 역사 선을 부설하세요."
       }
     },
-    "tabConstructionInfo": "건설 공사"
+    "tabConstructionInfo": "건설 공사",
+    "tabs": {
+      "basic": "기본 정보",
+      "traffic": "교통",
+      "construction": "건설 공사"
+    }
   },
   "path_construction": {
     "constructionSpeed": "건설 속도",

@@ -4158,6 +4158,7 @@ public class PathMasterItem
     public float? max_span;
     public float? height;
     public bool? height_editable;
+    public bool frontage_allowed;
 
     /// <summary>
     /// 許容最小高さ(m)。負の値を持つバリアント（地下道路・地下鉄用線路など）だけが

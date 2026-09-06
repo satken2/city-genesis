@@ -512,6 +512,8 @@ export type PathMasterEntry = {
   default_speed_limit: number;
   /** 標高が編集可能かどうか。master.yaml の height_editable に対応する */
   height_editable: boolean;
+  /** 沿道区画の生成・接道指定を許可する。橋などの通過専用街路は false。 */
+  frontage_allowed: boolean;
   /**
    * 地形追従のバリアント既定。master.yaml の follow_terrain に対応する(未定義は true=追従)。
    * パス個別の follow_terrain が未設定のときのデフォルトとして使う。

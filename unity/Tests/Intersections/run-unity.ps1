@@ -1,4 +1,4 @@
-param([string]$UnityExe, [switch]$PavedModels)
+param([string]$UnityExe, [switch]$PavedModels, [switch]$Equipment)
 $ErrorActionPreference = 'Stop'
 $unityRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $project = Join-Path $unityRoot 'Assembly-CSharp.csproj'
@@ -15,6 +15,7 @@ $qaRoot = Join-Path $unityRoot 'Temp/IntersectionUnityQA'
 $editorAssets = Join-Path $qaRoot 'Assets/Editor'
 New-Item -ItemType Directory -Path $editorAssets -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Unity/IntersectionQA.cs') -Destination $editorAssets -Force
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Unity/RoadEquipmentQA.cs') -Destination $editorAssets -Force
 $pathAssets = Join-Path $qaRoot 'Assets/Paths'
 New-Item -ItemType Directory -Path $pathAssets -Force | Out-Null
 Get-ChildItem -LiteralPath (Join-Path $unityRoot 'Assets/Models/Paths') | Copy-Item -Destination $pathAssets -Recurse -Force
@@ -22,7 +23,7 @@ $resultPath = Join-Path $qaRoot 'result.txt'
 Set-Content -LiteralPath $resultPath -Value 'RUNNING'
 $process = Start-Process -FilePath $UnityExe -ArgumentList @(
     '-batchmode', '-projectPath', ('"' + $qaRoot + '"'),
-    '-executeMethod', 'IntersectionQA.Run', '-intersectionSourceRoot', ('"' + $unityRoot + '"'),
+    '-executeMethod', $(if ($Equipment) { 'RoadEquipmentQA.Run' } else { 'IntersectionQA.Run' }), '-intersectionSourceRoot', ('"' + $unityRoot + '"'),
     '-logFile', ('"' + (Join-Path $qaRoot 'qa.log') + '"'), $(if ($PavedModels) { '-pavedModels' } else { '-defaultModels' })
 ) -WindowStyle Hidden -PassThru
 $process.WaitForExit()

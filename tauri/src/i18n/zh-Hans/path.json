@@ -64,7 +64,12 @@
         "description": "该站台不属于任何车站。请在轨道建设面板的站房标签页中，铺设跨越该站台的站房线路。"
       }
     },
-    "tabConstructionInfo": "建设工程"
+    "tabConstructionInfo": "建设工程",
+    "tabs": {
+      "basic": "基本信息",
+      "traffic": "交通",
+      "construction": "建设工程"
+    }
   },
   "path_construction": {
     "constructionSpeed": "建设速度",

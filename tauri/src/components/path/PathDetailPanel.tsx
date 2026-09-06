@@ -6,9 +6,10 @@
  *
  * 表示項目:
  * - InfoHeader: アイコン・ステータス・名前
- * - 基本情報セクション: 所属地区(ZoneLink または地区変更ドロップダウン)
- * - PathConditionPanel: 耐久度・修繕状態・騒音・大気汚染
- * - PathTrafficPanel: 制限速度設定・利用率・交通量テーブル
+ * - 基本情報タブ: 所属地区・耐久度・修繕状態・騒音・大気汚染
+ * - 交通タブ: 制限速度設定・利用率・交通量テーブル
+ * - 道路設備タブ: 街灯・柵・街路樹・配電方式
+ * - 駅舎には駅情報、計画中・工事中には建設工事タブを表示する
  *
  * アイコンは path_type に応じて paths/path_N.png を使用する。
  * ステータス表示は経済主体・土地区画パネルと共通の InfoHeader を利用する。
@@ -42,7 +43,7 @@ import { InfoHeader } from "../common/InfoHeader";
 import { ZoneLink } from "../common/ZoneLink";
 import { StationInfoSection } from "./StationInfoSection";
 import { PathConditionPanel } from "./PathConditionPanel";
-import { PathEquipmentPanel } from "./PathEquipmentPanel";
+import { PathEquipmentPanel, pathEquipmentFields } from "./PathEquipmentPanel";
 import { PathTrafficPanel } from "./PathTrafficPanel";
 import { PathOperationPanel } from "./PathOperationPanel";
 import { PathTopologyEditPanel } from "./PathTopologyEditPanel";
@@ -74,6 +75,7 @@ export function PathDetailPanel({
   const [pathData, setPathData] = useState<PathData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTab, setSelectedTab] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   // 建設中の道路の「建設スピード」(utilization_target, ％整数) と建設コスト/期間。
   const [constructionSpeed, setConstructionSpeed] = useState<number>(100);
@@ -291,6 +293,21 @@ export function PathDetailPanel({
   const isStationHouse =
     masterData?.paths[pathData.path_variant]?.type === PATH_STATION_HOUSE;
 
+  const hasEquipment = pathEquipmentFields.some(field =>
+    masterData?.paths[pathData.path_variant]?.[`${field}_allowed`] || pathData[field] !== 0
+  );
+  const tabs: { id: string; label: string }[] = [];
+  if (!isPreConstruction) {
+    tabs.push({ id: "basic", label: t("path.tabs.basic") });
+    tabs.push({ id: "traffic", label: t("path.tabs.traffic") });
+    if (hasEquipment) tabs.push({ id: "equipment", label: t("pathEquipment.title") });
+  }
+  if (isStationHouse) tabs.push({ id: "station", label: t("station.sectionTitle") });
+  if (showConstructionInfo) tabs.push({ id: "construction", label: t("path.tabs.construction") });
+  const activeTab = tabs.some(tab => tab.id === selectedTab)
+    ? selectedTab
+    : (showConstructionInfo && (isPreConstruction || isConstructing) ? "construction" : tabs[0]?.id);
+
   /**
    * パスの表示名はIDベースで生成する。
    * name が設定されている場合はそちらを優先する。
@@ -333,15 +350,6 @@ export function PathDetailPanel({
           mode={topologyEditMode}
           onClose={() => setTopologyEditMode(null)}
           onCompleted={() => setRefreshKey((k) => k + 1)}
-        />
-      )}
-
-      {isStationHouse && (
-        <StationInfoSection
-          apiBaseUrl={apiBaseUrl}
-          pathId={pathData.path_id}
-          pathName={displayName}
-          onRenamed={() => setRefreshKey((k) => k + 1)}
         />
       )}
 
@@ -437,75 +445,98 @@ export function PathDetailPanel({
         </div>
       )}
 
-      {/* 計画中・建設中・解体中の時は建設工事情報を表示する */}
-      {showConstructionInfo && (
-        <PathConstructionInfoPanel
-          path={pathData}
-          apiBaseUrl={apiBaseUrl}
-          refreshKey={refreshKey}
-        />
+      {tabs.length > 0 && (
+        <div className="agent-detail-tabs path-detail-tabs">
+          {tabs.map(tab => (
+            <button key={tab.id} type="button"
+              className={`agent-detail-tab${activeTab === tab.id ? " agent-detail-tab--active" : ""}`}
+              aria-pressed={activeTab === tab.id}
+              aria-controls={`path-detail-${tab.id}`}
+              onClick={() => setSelectedTab(tab.id)}>
+              {tab.label}
+            </button>
+          ))}
+        </div>
       )}
 
-      {/* 計画中のパスは既存データを表示する意味がないため、
-          削除・形状編集ボタンだけを表示して各種属性セクションは省略する。 */}
+      {/* hiddenで表示だけを切り替え、設備・速度の未保存の入力を保持する。 */}
       {!isPreConstruction && (
         <>
-          {/* 基本情報セクション: 所属地区を表示・編集する */}
-          {(pathData.zone_name != null || canChangeZone) && (
-            <section className="agent-detail-section">
-              <h3 className="agent-detail-section-title">{t("path.basicInfo", "基本情報")}</h3>
-              <div className="agent-detail-grid">
-                <span className="agent-detail-label">{t("path.zoneName")}</span>
-                <span className="agent-detail-value">
-                  {canChangeZone ? (
-                    <select
-                      className="zone-change-select"
-                      value={pathData.zone_id ?? ""}
-                      disabled={zoneSaving}
-                      onChange={(e) => handleZoneChange(Number(e.target.value))}
-                    >
-                      {zoneOptions.map((z) => (
-                        <option key={z.zone_id} value={z.zone_id}>
-                          {z.zone_name}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <ZoneLink
-                      zoneId={pathData.zone_id}
-                      zoneName={pathData.zone_name ?? ""}
-                    />
-                  )}
-                </span>
-                {/* 地形追従の個別設定。バリアント既定を上書きしている(0/1)ときだけ表示する。 */}
-                {(pathData.follow_terrain === 0 || pathData.follow_terrain === 1) && (
-                  <>
-                    <span className="agent-detail-label">{t("path.followTerrain", "地形追従")}</span>
+          <div id="path-detail-basic" hidden={activeTab !== "basic"}>
+            <div className="agent-detail-tab-content">
+              {/* 基本情報セクション: 所属地区を表示・編集する */}
+              {(pathData.zone_name != null || canChangeZone) && (
+                <section className="agent-detail-section">
+                  <h3 className="agent-detail-section-title">{t("path.tabs.basic")}</h3>
+                  <div className="agent-detail-grid">
+                    <span className="agent-detail-label">{t("path.zoneName")}</span>
                     <span className="agent-detail-value">
-                      {pathData.follow_terrain === 1
-                        ? t("path.followTerrainFollow", "する(個別設定)")
-                        : t("path.followTerrainNone", "しない(個別設定)")}
+                      {canChangeZone ? (
+                        <select
+                          className="zone-change-select"
+                          value={pathData.zone_id ?? ""}
+                          disabled={zoneSaving}
+                          onChange={(e) => handleZoneChange(Number(e.target.value))}
+                        >
+                          {zoneOptions.map((z) => (
+                            <option key={z.zone_id} value={z.zone_id}>
+                              {z.zone_name}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <ZoneLink
+                          zoneId={pathData.zone_id}
+                          zoneName={pathData.zone_name ?? ""}
+                        />
+                      )}
                     </span>
-                  </>
-                )}
-              </div>
-              {zoneError && (
-                <div className="zone-change-error">{zoneError}</div>
+                    {/* 地形追従の個別設定。バリアント既定を上書きしている(0/1)ときだけ表示する。 */}
+                    {(pathData.follow_terrain === 0 || pathData.follow_terrain === 1) && (
+                      <>
+                        <span className="agent-detail-label">{t("path.followTerrain", "地形追従")}</span>
+                        <span className="agent-detail-value">
+                          {pathData.follow_terrain === 1
+                            ? t("path.followTerrainFollow", "する(個別設定)")
+                            : t("path.followTerrainNone", "しない(個別設定)")}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                  {zoneError && (
+                    <div className="zone-change-error">{zoneError}</div>
+                  )}
+                </section>
               )}
-            </section>
+
+              {/* 物理状態セクション */}
+              <PathConditionPanel path={pathData} />
+            </div>
+          </div>
+          <div id="path-detail-traffic" hidden={activeTab !== "traffic"}>
+            <PathTrafficPanel
+              path={pathData}
+              apiBaseUrl={apiBaseUrl}
+              onSaved={setPathData}
+            />
+          </div>
+          {hasEquipment && (
+            <div id="path-detail-equipment" hidden={activeTab !== "equipment"}>
+              <PathEquipmentPanel path={pathData} apiBaseUrl={apiBaseUrl} onSaved={setPathData} />
+            </div>
           )}
-
-          {/* 物理状態セクション */}
-          <PathConditionPanel path={pathData} />
-          <PathEquipmentPanel path={pathData} apiBaseUrl={apiBaseUrl} onSaved={setPathData} />
-
-          {/* 交通・速度設定セクション */}
-          <PathTrafficPanel
-            path={pathData}
-            apiBaseUrl={apiBaseUrl}
-            onSaved={setPathData}
-          />
         </>
+      )}
+      {isStationHouse && (
+        <div id="path-detail-station" hidden={activeTab !== "station"}>
+          <StationInfoSection apiBaseUrl={apiBaseUrl} pathId={pathData.path_id}
+            pathName={displayName} onRenamed={() => setRefreshKey(k => k + 1)} />
+        </div>
+      )}
+      {showConstructionInfo && (
+        <div id="path-detail-construction" hidden={activeTab !== "construction"}>
+          <PathConstructionInfoPanel path={pathData} apiBaseUrl={apiBaseUrl} refreshKey={refreshKey} />
+        </div>
       )}
       {templateMode && (
         <button

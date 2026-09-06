@@ -64,7 +64,12 @@
         "description": "Ce quai n'est rattaché à aucune gare. Depuis l'onglet Bâtiment de gare du panneau de construction ferroviaire, tracez une ligne de gare traversant ce quai."
       }
     },
-    "tabConstructionInfo": "Chantier"
+    "tabConstructionInfo": "Chantier",
+    "tabs": {
+      "basic": "Général",
+      "traffic": "Circulation",
+      "construction": "Travaux"
+    }
   },
   "path_construction": {
     "constructionSpeed": "Vitesse de construction",

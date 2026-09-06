@@ -70,7 +70,7 @@ public static class RoadEquipmentGenerator
                 {
                     Pose pose = Sample(spline, distance, offset * side, surface);
                     if (!Reserve(occupied, pose.position, 2f)) continue;
-                    if (PlacePrefab(parent, Prefab("streetlight"), pose)) continue;
+                    if (PlacePrefab(parent, Prefab("streetlight"), pose, faceRoad: true)) continue;
                     metal.Box(pose, new Vector3(0f, 3f, 0f), new Vector3(0.12f, 6f, 0.12f));
                     metal.Box(pose, new Vector3(-0.65f, 6f, 0f), new Vector3(1.4f, 0.12f, 0.12f));
                     lamp.Box(pose, new Vector3(-1.15f, 5.9f, 0f), new Vector3(0.65f, 0.12f, 0.35f));
@@ -92,15 +92,16 @@ public static class RoadEquipmentGenerator
         if (master.fence_type_allowed && path.fence_type == Constants.PATH_EQUIPMENT_STANDARD && sidewalkWidth > 0f)
         {
             float fenceOffset = edge - sidewalkWidth + 0.12f;
+            float fenceSurface = SurfaceHeight(path, "sidewalk", 0.5f - 0.12f / sidewalkWidth);
             for (int side = -1; side <= 1; side += 2)
             {
-                Pose previous = Sample(spline, EndClearance, side * fenceOffset, surface);
+                Pose previous = Sample(spline, EndClearance, side * fenceOffset, fenceSurface);
                 metal.Box(previous, new Vector3(0f, 0.5f, 0f), new Vector3(0.07f, 1f, 0.07f));
                 // 柵は歩道と独立して終端を閉じる。交差点内部に自動接続しないため通行口を塞がない。
                 for (float d = EndClearance; d < length - EndClearance;)
                 {
                     d = Mathf.Min(d + 2f, length - EndClearance);
-                    Pose next = Sample(spline, d, side * fenceOffset, surface);
+                    Pose next = Sample(spline, d, side * fenceOffset, fenceSurface);
                     metal.Box(next, new Vector3(0f, 0.5f, 0f), new Vector3(0.07f, 1f, 0.07f));
                     if (!PlaceFencePanel(parent, Prefab("fence"), previous.position, next.position))
                     {
@@ -125,25 +126,60 @@ public static class RoadEquipmentGenerator
         Vector3 forward = Vector3.ProjectOnPlane(sample.forward, Vector3.up).normalized;
         if (forward.sqrMagnitude < 0.001f) forward = Vector3.forward;
         Vector3 right = Vector3.Cross(Vector3.up, forward);
-        Vector3 position = sample.position + right * offset + sample.up * surface;
-        // プレハブは右側用（灯具が-Xへ張り出す）とし、左側はヨー反転する。
+        Vector3 normal = Vector3.Cross(sample.forward, right).normalized;
+        Vector3 position = sample.position + right * offset
+            + Vector3.up * RoadPartHeights.BODY_ABOVE_SPLINE
+            + normal * (surface - RoadPartHeights.BODY_ABOVE_SPLINE);
+        // 内向きはローカル-X。読み込み後の灯具の向きは配置時に合わせる。
         return new Pose(position, Quaternion.LookRotation(offset < 0f ? -forward : forward, Vector3.up));
     }
 
-    private static float SurfaceHeight(PathSummary path, string part)
+    private static float SurfaceHeight(PathSummary path, string part, float widthFraction = 0f)
     {
-        var prefab = Resolve(path, part);
+        // bodyは生成時に上面をY=0へ揃える。歩道も採用したモデル系列のbody高を除く。
+        if (part == "body") return RoadPartHeights.BODY_ABOVE_SPLINE;
+        string resourcePath = $"Models/Paths/p{path.path_variant}/{part}";
+        var prefab = ModelManager.Instance?.GetModel(resourcePath);
+        if (prefab == null)
+        {
+            resourcePath = $"Models/Paths/p{path.path_type}/{part}";
+            prefab = ModelManager.Instance?.GetModel(resourcePath);
+        }
         var mesh = prefab != null ? prefab.GetComponent<MeshFilter>()?.sharedMesh : null;
-        return RoadPartHeights.BODY_ABOVE_SPLINE + (mesh != null ? mesh.bounds.max.y : 0f);
+        if (mesh == null) return RoadPartHeights.BODY_ABOVE_SPLINE;
+        mesh = RoadPath.GetRoadPartMesh(mesh, resourcePath);
+        // 縁石と歩行面の高さは異なる。全体boundsの最大値ではなく設置する横位置の上面を使う。
+        Vector3 point = mesh.bounds.center;
+        point.x += widthFraction * mesh.bounds.size.x;
+        float top = float.NegativeInfinity;
+        var vertices = mesh.vertices;
+        var triangles = mesh.triangles;
+        for (int i = 0; i < triangles.Length; i += 3)
+        {
+            Vector3 a = vertices[triangles[i]], b = vertices[triangles[i + 1]], c = vertices[triangles[i + 2]];
+            float det = (b.z-c.z)*(a.x-c.x)+(c.x-b.x)*(a.z-c.z);
+            if (Mathf.Abs(det) < 1e-8f) continue;
+            float u = ((b.z-c.z)*(point.x-c.x)+(c.x-b.x)*(point.z-c.z))/det;
+            float v = ((c.z-a.z)*(point.x-c.x)+(a.x-c.x)*(point.z-c.z))/det;
+            if (u >= -0.0001f && v >= -0.0001f && u+v <= 1.0001f)
+                top = Mathf.Max(top, u*a.y+v*b.y+(1f-u-v)*c.y);
+        }
+        return RoadPartHeights.SIDEWALK_ABOVE_SPLINE + (float.IsNegativeInfinity(top) ? 0f : top);
     }
 
     private static GameObject Resolve(PathSummary path, string part) =>
         ModelManager.Instance?.GetModel($"Models/Paths/p{path.path_variant}/{part}")
         ?? ModelManager.Instance?.GetModel($"Models/Paths/p{path.path_type}/{part}");
 
-    private static bool PlacePrefab(GameObject parent, GameObject prefab, Pose pose)
+    private static bool PlacePrefab(GameObject parent, GameObject prefab, Pose pose, bool faceRoad = false)
     {
         if (prefab == null) return false;
+        // FBXの軸変換でXの符号が変わるため、Unityで読んだ灯具の張り出し側を基準にする。
+        var mesh = prefab.GetComponent<MeshFilter>()?.sharedMesh;
+        if (faceRoad && mesh != null && mesh.bounds.center.x > 0f)
+            pose.rotation *= Quaternion.Euler(0f, 180f, 0f);
+        // 接地原点を持たない旧共通モデルも、メッシュ下端を床へ合わせる。
+        if (mesh != null) pose.position -= Vector3.up * (mesh.bounds.min.y * prefab.transform.localScale.y);
         var go = Object.Instantiate(prefab, pose.position, pose.rotation, parent.transform);
         PreparePrefab(go);
         return true;

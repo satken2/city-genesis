@@ -282,7 +282,7 @@ public class PathInputHandler : MonoBehaviour, IInputHandler
 
     /// <summary>
     /// 道路沿い区画作成において、このパスが選択可能かどうかを判定する。
-    /// 稼働中（STATUS_ACTIVE）かつ一般道路（PATH_STREET）のみ選択可能とする。
+    /// 稼働中で接道可能な街路のみ選択できる。橋は地表にあっても対象外。
     /// </summary>
     private bool IsPathSelectableForParcelCreation()
     {
@@ -291,7 +291,9 @@ public class PathInputHandler : MonoBehaviour, IInputHandler
         {
             return false;
         }
-        return pathData.status == Constants.STATUS_ACTIVE && pathData.path_type == Constants.PATH_STREET;
+        var master = MasterDataStore.Instance?.GetPathMaster(pathData.path_variant);
+        return pathData.status == Constants.STATUS_ACTIVE && pathData.path_type == Constants.PATH_STREET
+            && master != null && master.frontage_allowed;
     }
 
     /// <summary>

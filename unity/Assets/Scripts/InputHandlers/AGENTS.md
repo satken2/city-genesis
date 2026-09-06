@@ -44,6 +44,8 @@
 
 ## 入力モード
 
+沿道区画生成の道路選択は `PathInputHandler.IsPathSelectableForParcelCreation` が稼働中・街路・マスターの `frontage_allowed` を確認する。道路橋223は通行可能な街路でも選択しない。地区編集の街路選択は別条件のため、橋も対象のままとする。
+
 モード定数・プリセット定数は `InputHandler.cs` 内の `InputMode` / `InputModePreset` / `InputObjectType` に定義されている。
 オブジェクトタイプごとにモードを設定できる(`InputSystemManager.SetInputMode(objectType, mode)`)。一括設定は `InputSystemManager.SetModePreset(preset)`。
 ※`InputSystemManager` は `InputHandler` への薄いラッパー(シングルトン)。実体は `InputHandler.SetMode / SetModePreset`。

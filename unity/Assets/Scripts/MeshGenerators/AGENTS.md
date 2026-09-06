@@ -126,3 +126,6 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 ## 道路の付帯設備 (Paths/RoadEquipmentGenerator.cs)
 
 RoadPathの街路樹配置はRoadEquipmentGeneratorへ集約している。PathSummaryの設備4項目を参照し、masterの*_allowedで制限する。0は明示なしでモデルのフォールバックによって復活させない。街灯・電柱・箱・樹木は共通の距離配置・直立処理・近傍グリッドで重複回避。柵は歩道とは独立し、交差点切断面から3m手前で閉じる。標準簡易形状は材質ごとに結合しIntersectionMeshOwnerが所有。詳細・プレハブ規約・配線の制限はGドキュメント§8.6。
+
+設備の接地は未補正FBXのbounds.max.yではなく、GetRoadPartMeshで路面原点へ補正した歩道の設置横位置の上面を参照する。縁石と歩行面の高さを区別する。body面はBODY_ABOVE_SPLINEに固定。スプライン上の定数オフセットはワールド上方向、歩道厚は断面法線方向へ加える。街灯の張り出し方向はBlenderのX符号を前提にせず、Unityに読み込んだメッシュのbounds中心Xで判断して内向きにする。実FBXの接地・方向検査はTests/Intersections/run-unity.ps1 -Equipment。
+点設備はプレハブ原点の一致だけに頼らず、メッシュ下端のYも補正して接地する（旧共通モデル対応）。

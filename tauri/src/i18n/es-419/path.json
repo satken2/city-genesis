@@ -64,7 +64,12 @@
         "description": "Este andén no pertenece a ninguna estación. Desde la pestaña de edificio de estación del panel de construcción ferroviaria, traza una línea de estación que cruce este andén."
       }
     },
-    "tabConstructionInfo": "Obra"
+    "tabConstructionInfo": "Obra",
+    "tabs": {
+      "basic": "Información",
+      "traffic": "Tráfico",
+      "construction": "Construcción"
+    }
   },
   "path_construction": {
     "constructionSpeed": "Velocidad de construcción",

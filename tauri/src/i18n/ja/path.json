@@ -64,7 +64,12 @@
         "description": "このプラットフォームはどの駅にも所属していません。軌道建設パネルの駅舎タブから、このプラットフォームを跨ぐ駅舎の線を敷設してください。"
       }
     },
-    "tabConstructionInfo": "建設工事"
+    "tabConstructionInfo": "建設工事",
+    "tabs": {
+      "basic": "基本情報",
+      "traffic": "交通",
+      "construction": "建設工事"
+    }
   },
   "path_construction": {
     "constructionSpeed": "建設スピード",
