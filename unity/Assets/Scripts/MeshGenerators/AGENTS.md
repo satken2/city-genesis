@@ -34,6 +34,8 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 
 ## 線路 (Paths/TrackPath.cs / Paths/TrackIntersectionMeshGenerator.cs)
 
+- ホームの `platform` / `platform_wall` は著作タイル長（451/452/461/462は8m）で配置し、道路用1m上限を適用しない。曲線用分割はモデル内に持つ。右側用はUnityの+X側で、標準FBX経由ではBlenderの-X側になる。実FBXの左右・支柱周期は `Tests/Intersections/run-unity.ps1 -Platforms` で検査する。
+
 - 線路(PATH_TRACK)・モノレール(PATH_MONORAIL)は `TrackPath` が生成する。RoadPath と同じ SplineMesh パーツ組み立て方式で、パーツ構成が異なる: `body`(道床。全幅に引き伸ばし。高架/橋梁はバリアント専用bodyで桁断面を表現) / `track`(1軌道分=レール2本+枕木。**Xスケールせず実寸**で lanes 本を等間隔配置。ゲージ維持のため) / `wire`・`pole`・`beam`(架線系。マスターの `wire_spacing` が null なら非電化でスキップ) / `wall`・`pillar`(道路と共通) / `platform`・`platform_wall`・`platform_panel`(駅パスのプラットフォーム3パーツ。下記)。仕様の正は `genesis-docs/docs/geometries/N_線路メッシュの生成.md`。
 - 軌道オフセットは `TrackPath.GetTrackCenterOffset`(width/lanes等分の帯の中央)に集約されており、ノード内レールコネクタの軌道位置もこれを共有する。
 - 道床(body)と軌道(track)が両方無いときだけ白ストリップにフォールバックする。**モノレールは body 無し(track=桁のみ)が正常構成**。

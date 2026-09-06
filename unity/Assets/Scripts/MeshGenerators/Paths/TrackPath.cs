@@ -462,8 +462,9 @@ public class TrackPath : IPathMeshGenerator
     {
         string sideLabel = leftSide ? "左" : "右";
 
+        // 支柱・柵の周期を保つため著作タイル長で並べる。曲線追従用の分割はモデル内に持つ。
         // 淵（platform）: 原点を線路中心線に合わせ、設置面（線路面）で配置する。
-        GameObject edge = RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/platform", 0f, 0f, RoadPartHeights.PLATFORM_BASE_ABOVE_SPLINE, leftSide, $"{typeBase}/platform", stretchToWidth: false, compensatePivot: false);
+        GameObject edge = RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/platform", 0f, 0f, RoadPartHeights.PLATFORM_BASE_ABOVE_SPLINE, leftSide, $"{typeBase}/platform", stretchToWidth: false, compensatePivot: false, maxTileLength: 0f);
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[TrackPath] platform 淵({sideLabel}): {(edge != null ? "生成成功" : "プレハブなし")}");
 
         // デッキ（ホーム上面）: 淵（中心線から PLATFORM_EDGE_OFFSET）から外縁
@@ -479,7 +480,7 @@ public class TrackPath : IPathMeshGenerator
             : new List<TrackCorridorInfo.PercentRange> { new TrackCorridorInfo.PercentRange { From = 0.0, To = 1.0 } };
         foreach (var range in ranges)
         {
-            RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/platform_wall", 0f, 0f, RoadPartHeights.PLATFORM_BASE_ABOVE_SPLINE, leftSide, $"{typeBase}/platform_wall", stretchToWidth: false, compensatePivot: false, clipFrom: range.From, clipTo: range.To);
+            RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/platform_wall", 0f, 0f, RoadPartHeights.PLATFORM_BASE_ABOVE_SPLINE, leftSide, $"{typeBase}/platform_wall", stretchToWidth: false, compensatePivot: false, clipFrom: range.From, clipTo: range.To, maxTileLength: 0f);
         }
     }
 
