@@ -338,6 +338,8 @@ export type PathSummary = {
   street_tree_type: number;
   /** 配線方式。0=なし、1=架空、2=地中。道路ごとの保存値。 */
   utility_mode: number;
+  /** 駅の共通基準線 [x,絶対標高,z]。空なら通常の地形追従 */
+  station_grade_profile: any[];
 };
 
 export type PathData = {
@@ -425,6 +427,8 @@ export type PathData = {
   street_tree_type: number;
   /** 配線方式。0=なし、1=架空、2=地中。道路ごとの保存値。 */
   utility_mode: number;
+  /** 駅の共通基準線 [x,絶対標高,z]。空なら通常の地形追従 */
+  station_grade_profile: any[];
 };
 
 export type ParcelSummary = {

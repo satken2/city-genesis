@@ -13,14 +13,10 @@ using GeneratedModels;
 ///      等間隔（TRACK_SPACING）で並べる。各線路の行き止まり端には車止め（yard_stop）、
 ///      上空には架線（yard_wire）と門型架線柱（yard_pole + yard_beam）を配置する。
 ///      余裕があれば先頭2線を検修庫（yard_shed）が覆う。
-///   2. 集約・接続ゾーン … 各線路の端から三次ベジエ曲線で端子ノードの手前
-///      （LEAD_LENGTH だけ内側）の1点へ収束させ、そこから端子まで1本の直線線路
-///      （リード線）を敷く。曲線・リード上にも架線を張る。
-///
-/// パーツはすべてスケールなしの実寸配置（yard_beam のみ柱間へXスケール）。
-/// タイル系パーツ（yard_track / yard_wire）はローカル+Zが線路方向で、メッシュ bounds で
-/// 再基準化して敷き詰めるため原点位置に依存しない。曲線区間は短い直線タイルを
-/// 弦近似で並べる（CURVE_STEP_RATIO で重ねて隙間を隠す）。
+///   2. 集約・接続ゾーン … 最外側の線路を斜めの集約線として延ばし、
+///      各留置線をその途中へ合流させる。集約線と端子の接続線は各1本だけ描く。
+/// タイルは長手方向だけ端数を調整し、曲線では頂点を中心線に沿って変形する。
+/// 軌間と高さは実寸を維持する。yard_beam は柱間へXスケールする。
 ///
 /// 端子ノードの位置は PathManager のノードキャッシュから引く。未ロード・テストシーン
 /// では、バックエンドの初期配置（接道辺から最も遠い辺の中点。crud_agents.py の
@@ -49,14 +45,12 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
     /// <summary>端子ノード手前の直線リード線の長さ(m)。曲線はこの始点へ収束する。</summary>
     private const float LEAD_LENGTH = 6f;
 
-    /// <summary>曲線区間の最小の走行方向長さ(m)。</summary>
-    private const float CURVE_MIN_RUN = 12f;
-
-    /// <summary>横ずれ量1mあたりの曲線走行長(m)。大きいほど曲線が緩くなる。</summary>
-    private const float CURVE_RUN_PER_LATERAL = 2.2f;
-
-    /// <summary>曲線区間のタイル送り（タイル実寸長に対する比率）。1未満で重ねて弦近似の隙間を隠す。</summary>
-    private const float CURVE_STEP_RATIO = 0.85f;
+    /// <summary>集約線の横移動1mに対する走行長。隣接線の合流点は10m間隔になる。</summary>
+    private const float LADDER_RUN_PER_LATERAL = 2f;
+    /// <summary>留置線の曲げ始めから集約線との交点までの走行長。</summary>
+    private const float ENTRY_APPROACH = 6f;
+    /// <summary>集約線との交点から接線を揃えた合流点までの走行長。</summary>
+    private const float ENTRY_OVERLAP = 4f;
 
     /// <summary>直線ゾーンとして成立する最小長(m)。これを切る行は線路を敷かない。</summary>
     private const float MIN_STRAIGHT_LENGTH = 6f;
@@ -83,7 +77,9 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
         public float V;             // 行の横方向オフセット
         public float StraightStart; // 直線区間の始端（行き止まり側）
         public float StraightEnd;   // 直線区間の終端（=曲線の始点）
-        public bool HasCurve;       // 集約曲線を持つか
+        public Vector2 Target;      // 共通の斜め集約線上の合流点
+        public Vector2 Direction;   // 合流先の集約線の接線
+        public bool IsSpine;        // 集約線の起点となる最外側の行
     }
 
     public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic = false)
@@ -146,32 +142,9 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
         int trackCount = Mathf.Clamp(Mathf.FloorToInt(usable / TRACK_SPACING) + 1, 1, MAX_TRACKS);
         float vCenter = (vMin + vMax) * 0.5f;
 
-        List<TrackRow> rows = new List<TrackRow>();
-        for (int i = 0; i < trackCount; i++)
-        {
-            float v = vCenter + (i - (trackCount - 1) * 0.5f) * TRACK_SPACING;
-            if (!TryGetChordRange(uv, v, out float uStart, out float uEnd))
-            {
-                continue;
-            }
-            uStart += END_MARGIN;
-            uEnd -= END_MARGIN;
-
-            // 集約曲線に必要な走行長（横ずれが大きい行ほど長い）
-            float run = Mathf.Max(CURVE_MIN_RUN, Mathf.Abs(v - nodeUV.y) * CURVE_RUN_PER_LATERAL);
-            float straightEnd = Mathf.Min(uEnd, leadStartU - run);
-            if (straightEnd - uStart < MIN_STRAIGHT_LENGTH)
-            {
-                continue;
-            }
-            rows.Add(new TrackRow
-            {
-                V = v,
-                StraightStart = uStart,
-                StraightEnd = straightEnd,
-                HasCurve = straightEnd < leadStartU - 0.5f,
-            });
-        }
+        List<TrackRow> rows = PlanRows(uv, nodeUV, vCenter, trackCount);
+        while (rows.Count == 0 && trackCount > 1)
+            rows = PlanRows(uv, nodeUV, vCenter, --trackCount);
 
         if (rows.Count == 0)
         {
@@ -214,68 +187,55 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
 
         Quaternion forwardRot = Quaternion.LookRotation(ToDir3(Vector2.right), Vector3.up);
 
-        // タイル1枚を「位置 p から方向 dir へ敷く」ための行列（bounds 始端を p に合わせる）
-        Matrix4x4 TileMatrix(Vector3 pos, Quaternion rot, float minZ) =>
-            Matrix4x4.TRS(pos - rot * new Vector3(0f, 0f, minZ), rot, Vector3.one);
-
-        // --- 1. 並行線路ゾーン（直線タイル+車止め） ---
+        // 直線・曲線を別々に敷き、共有区間は合流先の行だけが描画する。
         foreach (TrackRow row in rows)
         {
-            int n = Mathf.Max(1, Mathf.FloorToInt((row.StraightEnd - row.StraightStart) / tileLength));
+            int n = Mathf.Max(1, Mathf.RoundToInt((row.StraightEnd - row.StraightStart) / tileLength));
+            float step = (row.StraightEnd - row.StraightStart) / n;
             for (int t = 0; t < n; t++)
             {
-                Vector3 pos = ToLocal3(new Vector2(row.StraightStart + t * tileLength, row.V));
-                Matrix4x4 m = TileMatrix(pos, forwardRot, tileMinZ);
+                Vector3 pos = ToLocal3(new Vector2(row.StraightStart + t * step, row.V));
+                Matrix4x4 m = Matrix4x4.TRS(pos, forwardRot, new Vector3(1f, 1f, step / tileLength))
+                    * Matrix4x4.Translate(new Vector3(0f, 0f, -tileMinZ));
                 AddInstances(trackMesh, trackMats, m, combineInstances, materials);
                 if (wireMesh != null)
-                {
-                    AddInstances(wireMesh, wireMats, TileMatrix(pos, forwardRot, wireMinZ), combineInstances, materials);
-                }
+                    AddInstances(wireMesh, wireMats,
+                        Matrix4x4.TRS(pos, forwardRot, new Vector3(1f, 1f, step / wireMesh.bounds.size.z))
+                        * Matrix4x4.Translate(new Vector3(0f, 0f, -wireMinZ)), combineInstances, materials);
             }
             if (stopMesh != null)
-            {
-                // 車止めは行き止まり端に、+Z（著作の奥行き）が線路の内側を向くように置く
-                Vector3 pos = ToLocal3(new Vector2(row.StraightStart, row.V));
-                AddInstances(stopMesh, stopMats, Matrix4x4.TRS(pos, forwardRot, Vector3.one), combineInstances, materials);
-            }
+                AddInstances(stopMesh, stopMats,
+                    Matrix4x4.TRS(ToLocal3(new Vector2(row.StraightStart, row.V)), forwardRot, Vector3.one),
+                    combineInstances, materials);
+
+            Vector2 p0 = new Vector2(row.StraightEnd, row.V);
+            float run = row.Target.x - p0.x;
+            PlaceTilesAlongBezier(p0, p0 + Vector2.right * (run * .4f),
+                row.Target - row.Direction * ENTRY_OVERLAP, row.Target,
+                trackMesh, trackMats, wireMesh, wireMats, tileLength, tileMinZ, wireMinZ,
+                ToLocal3, ToDir3, combineInstances, materials, temporaryMeshes,
+                !row.IsSpine);
         }
 
-        // --- 2. 集約・接続ゾーン（ベジエ曲線+リード線） ---
-        Vector2 curveTarget = new Vector2(leadStartU, nodeUV.y);
+        // 最外側線から延びる集約線を1本だけ敷き、最後に共通の引き込み線で端子へ接続する。
+        TrackRow first = rows.Find(row => row.IsSpine);
+        Vector2 spineStart = first.Target;
+        Vector2 spineEnd = spineStart;
         foreach (TrackRow row in rows)
-        {
-            if (!row.HasCurve)
-            {
-                continue;
-            }
-            // 曲線の始点は直線タイルの実際の敷き終わり（タイル長で切り捨てた位置）に
-            // 合わせる。StraightEnd をそのまま使うと最大1タイル分の隙間が空く
-            int straightTiles = Mathf.Max(1, Mathf.FloorToInt((row.StraightEnd - row.StraightStart) / tileLength));
-            Vector2 p0 = new Vector2(row.StraightStart + straightTiles * tileLength, row.V);
-            float d = Mathf.Max(1f, curveTarget.x - p0.x);
-            Vector2 p1 = p0 + Vector2.right * (d * 0.4f);
-            Vector2 p2 = curveTarget - Vector2.right * (d * 0.4f);
-            PlaceTilesAlongBezier(p0, p1, p2, curveTarget,
-                trackMesh, trackMats, wireMesh, wireMats,
-                tileLength, tileMinZ, wireMinZ,
-                ToLocal3, ToDir3, combineInstances, materials);
-        }
-
-        // リード線（収束点→端子ノード）。端子の少し先まで敷いて、溶接された引き込み線路と馴染ませる
-        {
-            int n = Mathf.Max(1, Mathf.CeilToInt(LEAD_LENGTH / tileLength));
-            for (int t = 0; t < n; t++)
-            {
-                float u0 = leadStartU + t * tileLength;
-                Vector3 pos = ToLocal3(new Vector2(Mathf.Min(u0, nodeUV.x - 0.1f), nodeUV.y));
-                Matrix4x4 m = TileMatrix(pos, forwardRot, tileMinZ);
-                AddInstances(trackMesh, trackMats, m, combineInstances, materials);
-                if (wireMesh != null)
-                {
-                    AddInstances(wireMesh, wireMats, TileMatrix(pos, forwardRot, wireMinZ), combineInstances, materials);
-                }
-            }
-        }
+            if (row.Target.x > spineEnd.x) spineEnd = row.Target;
+        Vector2 delta = spineEnd - spineStart;
+        PlaceTilesAlongBezier(spineStart, spineStart + delta / 3f, spineStart + delta * (2f / 3f), spineEnd,
+            trackMesh, trackMats, wireMesh, wireMats, tileLength, tileMinZ, wireMinZ,
+            ToLocal3, ToDir3, combineInstances, materials, temporaryMeshes, false);
+        Vector2 lead = new Vector2(leadStartU, nodeUV.y);
+        float exitRun = lead.x - spineEnd.x;
+        PlaceTilesAlongBezier(spineEnd, spineEnd + first.Direction * (exitRun * .35f),
+            lead - Vector2.right * (exitRun * .35f), lead,
+            trackMesh, trackMats, wireMesh, wireMats, tileLength, tileMinZ, wireMinZ,
+            ToLocal3, ToDir3, combineInstances, materials, temporaryMeshes, false);
+        PlaceTilesAlongBezier(lead, lead + Vector2.right * 2f, nodeUV - Vector2.right * 2f, nodeUV,
+            trackMesh, trackMats, wireMesh, wireMats, tileLength, tileMinZ, wireMinZ,
+            ToLocal3, ToDir3, combineInstances, materials, temporaryMeshes, false);
 
         // --- 3. 検修庫: 先頭2線の行き止まり側を覆う（直線ゾーンに十分な長さがある場合のみ） ---
         // 架線柱より先に位置を確定し、庫の区間には門型柱を立てない（梁が庫を貫通するため）
@@ -338,15 +298,14 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
             }
         }
 
-        // --- 5. 敷地装飾（フェンス・地面パネル）。モジュラー/prebuilt/港湾と共通の処理 ---
-        Material floorMaterial = BuildingMeshUtils.ResolveFloorMaterialFromMaster(buildingData, prefix);
+        // 線路直下の道床はyard_trackが持つ。線路のない余白には敷地全面パネルを張らない。
         Vector2[] parcelPolygon = BuildingMeshUtils.ResolveParcelContext(
             buildingData, useParcelAltitude: false, out _, out _);
         Vector2[] sitePolygon = (parcelPolygon != null && parcelPolygon.Length >= 3) ? parcelPolygon : footprint;
         ModularBodyBuilder.GenerateSiteDecorations(
             prefix, 0,
             parcelPolygon, sitePolygon, sitePolygon,
-            floorMaterial,
+            null,
             centerPointWorld, deformToTerrain: isDynamic,
             combineInstances, materials, temporaryMeshes);
 
@@ -450,56 +409,162 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
         return hits >= 2 && uEnd - uStart > 1f;
     }
 
-    /// <summary>
-    /// 三次ベジエ曲線（UV座標）に沿って線路・架線タイルを弦近似で敷く。
-    /// 曲線を32分割した折れ線で弧長テーブルを作り、タイル実寸長×CURVE_STEP_RATIO の
-    /// 歩幅で位置・接線を求めて直線タイルを並べる（重なりで弦近似の隙間を隠す）。
-    /// </summary>
+    /// <summary>最外側から反対側へ横切る集約線を基準に、留置線の終端を求める。</summary>
+    private static List<TrackRow> PlanRows(Vector2[] uv, Vector2 node, float center, int count)
+    {
+        var rows = new List<TrackRow>();
+        float side = count == 1 ? 0f : node.y <= center ? 1f : -1f;
+        float outerV = center + side * (count - 1) * TRACK_SPACING * .5f;
+        float oppositeV = center - side * (count - 1) * TRACK_SPACING * .5f;
+        Vector2 direction = new Vector2(LADDER_RUN_PER_LATERAL, -side).normalized;
+        float lastV = oppositeV - side * ENTRY_OVERLAP / LADDER_RUN_PER_LATERAL;
+        float exitRun = Mathf.Max(18f, Mathf.Abs(lastV - node.y) * 2f);
+        float lastU = node.x - LEAD_LENGTH - exitRun;
+        float firstU = lastU - (count - 1) * TRACK_SPACING * LADDER_RUN_PER_LATERAL;
+        for (int i = 0; i < count; i++)
+        {
+            float v = outerV - side * i * TRACK_SPACING;
+            Vector2 target = new Vector2(firstU + i * TRACK_SPACING * LADDER_RUN_PER_LATERAL,
+                v - side * ENTRY_OVERLAP / LADDER_RUN_PER_LATERAL);
+            float end = target.x - ENTRY_OVERLAP - ENTRY_APPROACH;
+            if (!TryGetChordRange(uv, v, out float start, out float limit)) return new List<TrackRow>();
+            start += END_MARGIN;
+            if (end > limit - END_MARGIN || end - start < MIN_STRAIGHT_LENGTH) return new List<TrackRow>();
+            Vector2 p0 = new Vector2(end, v);
+            for (int k = 0; k <= 32; k++)
+            {
+                Vector2 point = BezierPoint(p0, p0 + Vector2.right * ((target.x-end)*.4f),
+                    target - direction * ENTRY_OVERLAP, target, k/32f);
+                if (!ContainsPoint(uv, point)) return new List<TrackRow>();
+            }
+            rows.Add(new TrackRow { V=v, StraightStart=start, StraightEnd=end, Target=target,
+                Direction=direction, IsSpine=i==0 });
+        }
+        // 接続点を敷地内で移動した場合も、共有線の中心が敷地から出る計画は採用しない。
+        Vector2 spineStart=rows[0].Target, spineEnd=rows[rows.Count-1].Target;
+        Vector2 lead=new Vector2(node.x-LEAD_LENGTH,node.y);
+        for (int k=0; k<=64; k++)
+        {
+            float t=k/64f;
+            if (!ContainsPoint(uv,Vector2.Lerp(spineStart,spineEnd,t))
+                || !ContainsPoint(uv,BezierPoint(spineEnd,spineEnd+direction*(exitRun*.35f),
+                    lead-Vector2.right*(exitRun*.35f),lead,t))
+                || !ContainsPoint(uv,Vector2.Lerp(lead,node,t))) return new List<TrackRow>();
+        }
+        rows.Sort((a,b)=>a.V.CompareTo(b.V));
+        return rows;
+    }
+
+    private static bool ContainsPoint(Vector2[] polygon, Vector2 point)
+    {
+        bool inside = false;
+        for (int i = 0, j = polygon.Length - 1; i < polygon.Length; j = i++)
+        {
+            Vector2 a = polygon[i], b = polygon[j];
+            if (DistancePointToSegment(point, a, b) < .01f) return true;
+            if ((a.y > point.y) != (b.y > point.y)
+                && point.x < (b.x - a.x) * (point.y - a.y) / (b.y - a.y) + a.x) inside = !inside;
+        }
+        return inside;
+    }
+
+    /// <summary>弧長に沿ってタイル頂点を曲げる。隣接タイルの境界は同じ位置・接線を使う。</summary>
     private static void PlaceTilesAlongBezier(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3,
         Mesh trackMesh, Material[] trackMats, Mesh wireMesh, Material[] wireMats,
         float tileLength, float tileMinZ, float wireMinZ,
         System.Func<Vector2, Vector3> toLocal3, System.Func<Vector2, Vector3> toDir3,
-        List<CombineInstance> combineInstances, List<Material> materials)
+        List<CombineInstance> combineInstances, List<Material> materials, List<Mesh> temporaryMeshes,
+        bool joinsTrack)
     {
-        const int SAMPLES = 32;
-        Vector2[] pts = new Vector2[SAMPLES + 1];
-        float[] len = new float[SAMPLES + 1];
-        for (int i = 0; i <= SAMPLES; i++)
+        const int samples = 96;
+        float[] lengths = new float[samples + 1];
+        Vector2 prev = p0;
+        for (int i = 1; i <= samples; i++)
         {
-            float t = (float)i / SAMPLES;
-            pts[i] = BezierPoint(p0, p1, p2, p3, t);
-            len[i] = i == 0 ? 0f : len[i - 1] + (pts[i] - pts[i - 1]).magnitude;
+            Vector2 point = BezierPoint(p0, p1, p2, p3, i / (float)samples);
+            lengths[i] = lengths[i - 1] + Vector2.Distance(prev, point);
+            prev = point;
         }
-        float total = len[SAMPLES];
-        if (total < 0.5f)
+        float total = lengths[samples];
+        if (total < .01f) return;
+        int tiles = Mathf.Max(1, Mathf.RoundToInt(total / tileLength));
+        float step = total / tiles;
+        float Parameter(float distance)
         {
-            return;
+            int i = System.Array.BinarySearch(lengths, Mathf.Clamp(distance, 0f, total));
+            if (i >= 0) return i / (float)samples;
+            i = Mathf.Clamp(~i, 1, samples);
+            return (i - 1 + (distance - lengths[i - 1]) / (lengths[i] - lengths[i - 1])) / samples;
         }
-
-        float step = tileLength * CURVE_STEP_RATIO;
-        int seg = 1;
-        for (float s = 0f; s < total - 0.25f; s += step)
+        void Bend(Mesh source, Material[] mats, float minZ, int tile, bool isTrack)
         {
-            while (seg < SAMPLES && len[seg] < s)
+            if (source == null) return;
+            Mesh mesh = Object.Instantiate(source);
+            Vector3[] vertices = source.vertices;
+            for (int v = 0; v < vertices.Length; v++)
             {
-                seg++;
+                Vector3 local = vertices[v];
+                float t = Parameter((tile + (local.z - minZ) / source.bounds.size.z) * step);
+                Vector2 at = BezierPoint(p0, p1, p2, p3, t);
+                Vector2 tangent = 3f * (1f - t) * (1f - t) * (p1 - p0)
+                    + 6f * (1f - t) * t * (p2 - p1) + 3f * t * t * (p3 - p2);
+                Vector3 right = Vector3.Cross(Vector3.up, toDir3(tangent));
+                vertices[v] = toLocal3(at) + right * local.x + Vector3.up * local.y;
             }
-            float segLen = Mathf.Max(1e-4f, len[seg] - len[seg - 1]);
-            float f = (s - len[seg - 1]) / segLen;
-            Vector2 at = Vector2.Lerp(pts[seg - 1], pts[seg], f);
-            Vector2 dir = (pts[seg] - pts[seg - 1]) / segLen;
-
-            Quaternion rot = Quaternion.LookRotation(toDir3(dir), Vector3.up);
-            Vector3 pos = toLocal3(at);
-            AddInstances(trackMesh, trackMats,
-                Matrix4x4.TRS(pos - rot * new Vector3(0f, 0f, tileMinZ), rot, Vector3.one),
-                combineInstances, materials);
-            if (wireMesh != null)
+            mesh.vertices = vertices;
+            // 合流先の支持材の外縁で切り、分岐側の道床・枕木を隙間なく接続する。
+            if (joinsTrack && isTrack)
             {
-                AddInstances(wireMesh, wireMats,
-                    Matrix4x4.TRS(pos - rot * new Vector3(0f, 0f, wireMinZ), rot, Vector3.one),
-                    combineInstances, materials);
+                var clippedVertices = new List<Vector3>(vertices);
+                var uvs = new List<Vector2>(source.uv);
+                while (uvs.Count < vertices.Length) uvs.Add(Vector2.zero);
+                Vector2 tangent = (p3 - p2).normalized;
+                Vector2 outward = new Vector2(-tangent.y, tangent.x);
+                outward *= Mathf.Sign(Vector2.Dot(p0 - p3, outward));
+                Vector3 normal = toDir3(outward);
+                Vector3 origin = toLocal3(p3);
+                for (int sub = 0; sub < mesh.subMeshCount; sub++)
+                {
+                    string name = mats[sub] != null ? mats[sub].name : "";
+                    float edge = name.StartsWith("PATH_ROADBED") ? 1.55f
+                        : (name.StartsWith("PATH_CONCRETE") || name.StartsWith("PATH_RAIL_METAL")) ? 1.3f : 0f;
+                    if (edge == 0f) continue;
+                    int[] indices = source.GetTriangles(sub);
+                    var triangles = new List<int>();
+                    for (int f = 0; f < indices.Length; f += 3)
+                    {
+                        var polygon = new List<int>(4);
+                        for (int k = 0; k < 3; k++)
+                        {
+                            int a = indices[f + k], b = indices[f + (k + 1) % 3];
+                            float da = Vector3.Dot(vertices[a] - origin, normal) - edge;
+                            float db = Vector3.Dot(vertices[b] - origin, normal) - edge;
+                            if (da >= 0f) polygon.Add(a);
+                            if ((da >= 0f) == (db >= 0f)) continue;
+                            float ratio = da / (da - db);
+                            polygon.Add(clippedVertices.Count);
+                            clippedVertices.Add(Vector3.Lerp(vertices[a], vertices[b], ratio));
+                            uvs.Add(Vector2.Lerp(uvs[a], uvs[b], ratio));
+                        }
+                        for (int k = 1; k + 1 < polygon.Count; k++)
+                        {
+                            triangles.Add(polygon[0]); triangles.Add(polygon[k]); triangles.Add(polygon[k + 1]);
+                        }
+                    }
+                    mesh.SetVertices(clippedVertices);
+                    mesh.SetUVs(0, uvs);
+                    mesh.SetTriangles(triangles, sub);
+                }
             }
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+            temporaryMeshes.Add(mesh);
+            AddInstances(mesh, mats, Matrix4x4.identity, combineInstances, materials);
+        }
+        for (int tile = 0; tile < tiles; tile++)
+        {
+            Bend(trackMesh, trackMats, tileMinZ, tile, true);
+            Bend(wireMesh, wireMats, wireMinZ, tile, false);
         }
     }
 

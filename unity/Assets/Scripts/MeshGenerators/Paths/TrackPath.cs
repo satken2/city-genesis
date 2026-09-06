@@ -95,6 +95,10 @@ using GeneratedModels;
 /// </summary>
 public class TrackPath : IPathMeshGenerator
 {
+    /// <summary>ノード逆引きによる接続パス。未設定時は車止めの配置を保留する。</summary>
+    public static System.Func<int, List<PathSummary>> ConnectedPathsProvider;
+    /// <summary>共用インフラ接続ノード。施設内へ軌道が続くため車止めを置かない。</summary>
+    public static System.Func<int, bool> InfrastructureConnectionProvider;
     /// <summary>架線柱を道床の端からどれだけ外側に立てるか（m）。</summary>
     private const float POLE_MARGIN = 0.5f;
 
@@ -166,7 +170,8 @@ public class TrackPath : IPathMeshGenerator
         // 一定間隔で中間点を補間し、地形高さを反映させる。
         // ウェイポイントの角は Broken 点として維持する（道路のような角の切断・充填は行わない。
         // 線路は通常 curved=true で滑らかに敷設される想定で、折れ線線路の角は簡易表現とする）。
-        if (!isCurved && (points.Count == 2 || (pathData.GetWaypointList()?.Count ?? 0) > 0))
+        if (!isCurved && (pathData.station_grade_profile == null || pathData.station_grade_profile.Count < 2)
+            && (points.Count == 2 || (pathData.GetWaypointList()?.Count ?? 0) > 0))
         {
             bool followTerrain = PathManager.GetPathFollowTerrain(pathData)
                 && AreAllAnchorsOnGround(pathData);
@@ -322,10 +327,11 @@ public class TrackPath : IPathMeshGenerator
         for (int i = 0; i < laneCount; i++)
         {
             float offset = GetTrackCenterOffset(width, laneCount, i);
-            GameObject track = RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/track", width / laneCount, offset, RoadPartHeights.TRACK_ABOVE_SPLINE, false, $"{typeBase}/track", isDashed: false, stretchToWidth: false);
+            GameObject track = RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/track", width / laneCount, offset, RoadPartHeights.TRACK_ABOVE_SPLINE, false, $"{typeBase}/track", isDashed: false, stretchToWidth: false, maxTileLength: 0f);
             if (track != null) placedTracks++;
         }
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[TrackPath] track(軌道): {placedTracks}/{laneCount}本配置");
+        CreateTerminations(container, points, corridor, pathData, width, laneCount, platformLeft, platformRight, variantBase, typeBase);
 
         // 道床も軌道も無いバリアントは白いストリップにフォールバックする（ゲームプレイ継続用）。
         // 軌道モデルだけがある構成（モノレール等、道床が不要なバリアント）では道床なしが正常。
@@ -389,6 +395,86 @@ public class TrackPath : IPathMeshGenerator
             && !TunnelSectionUtil.IsUndergroundPath(pathData))
         {
             RoadPath.GeneratePillars(container, spline, pillarSpacing.Value, baseHeight, pathData, variantBase, typeBase);
+        }
+    }
+
+    /// <summary>
+    /// 接続ノード単位で終端を解決する。近接するだけの並走線は車止めの有無に影響しない。
+    /// ホーム端は島式デッキの描画担当が実幅に合わせて生成する。
+    /// </summary>
+    private static void CreateTerminations(GameObject container, List<Vector3> points, TrackCorridorInfo corridor,
+        PathSummary path, float width, int lanes, float leftWidth, float rightWidth, string variantBase, string typeBase)
+    {
+        if (path.path_type != Constants.PATH_TRACK) return;
+        ComputeStripFrames(points, out var rights, out var lengths);
+        for (int end = 0; end < 2; end++)
+        {
+            int idx = end == 0 ? 0 : points.Count - 1;
+            int nodeId = end == 0 ? path.start_node_id : path.end_node_id;
+            var connections = ConnectedPathsProvider?.Invoke(nodeId);
+            bool trackContinues = InfrastructureConnectionProvider?.Invoke(nodeId) == true;
+            bool leftContinues = false, rightContinues = false;
+            if (connections != null)
+                foreach (var other in connections)
+                {
+                    if (other.path_id == path.path_id || other.path_type != path.path_type) continue;
+                    trackContinues = true;
+                    GetTrackMasterParams(other, out _, out _, out _, out _, out _, out _, out _, out float pfWidth);
+                    ResolvePlatformExtents(other, pfWidth, out float otherLeft, out float otherRight);
+                    // 同じ端点どうしの接続では幾何方向が逆なので左右を交換する。
+                    bool reverse = (end == 0) == (other.start_node_id == nodeId);
+                    leftContinues |= (reverse ? otherRight : otherLeft) > 0f;
+                    rightContinues |= (reverse ? otherLeft : otherRight) > 0f;
+                }
+            Vector3 forward = Vector3.Cross(rights[idx], Vector3.up);
+            Vector3 inward = end == 0 ? forward : -forward;
+            var anchor = end == 0 ? path.GetStartPointList() : path.GetEndPointList();
+            bool atAnchor = anchor == null || anchor.Count < 2 ||
+                Vector2.Distance(new Vector2(points[idx].x, points[idx].z),
+                    new Vector2(anchor[0], anchor.Count >= 3 ? anchor[2] : anchor[1])) < .5f;
+            // 未ロードや敷設中の仮ノードを終端と断定しない。
+            // トンネルで分割された描画区間の坑口も、線路自体の終端とは区別する。
+            if (atAnchor && connections != null && connections.Count > 0 && nodeId > 0 && !trackContinues && lengths[points.Count - 1] >= 3f)
+            {
+                for (int lane = 0; lane < lanes; lane++)
+                    PlaceEndPart(container, LoadPrefab($"{variantBase}/buffer_stop", $"{typeBase}/buffer_stop"),
+                        "TrackBufferStop", points[idx] + inward * 1.0f + rights[idx] * GetTrackCenterOffset(width, lanes, lane)
+                            + Vector3.up * RoadPartHeights.TRACK_ABOVE_SPLINE,
+                        Quaternion.LookRotation(inward), Vector3.one);
+            }
+            for (int side = 0; side < 2; side++)
+            {
+                bool left = side == 0;
+                float pf = left ? leftWidth : rightWidth;
+                if (pf <= 0f || (left ? leftContinues : rightContinues)) continue;
+                float[] farValues = corridor == null ? null : (left ? corridor.LeftDeckFar : corridor.RightDeckFar);
+                float far = farValues == null ? width * .5f + pf : farValues[idx];
+                if (float.IsNaN(far) || far <= PLATFORM_EDGE_OFFSET + PLATFORM_DECK_MIN_WIDTH) continue;
+                var prefab = LoadPrefab($"{variantBase}/platform_end", $"{typeBase}/platform_end");
+                float span = far - PLATFORM_EDGE_OFFSET;
+                int panels = Mathf.Max(1, Mathf.CeilToInt(span / 1.2f));
+                for (int panel = 0; panel < panels; panel++)
+                {
+                    float lateral = (left ? -1f : 1f) * (PLATFORM_EDGE_OFFSET + span * (panel + .5f) / panels);
+                    PlaceEndPart(container, prefab, "TrackPlatformEnd", points[idx] + rights[idx] * lateral
+                        + inward * .12f + Vector3.up * (RoadPartHeights.PLATFORM_SURFACE_ABOVE_SPLINE - PLATFORM_DECK_SINK),
+                        Quaternion.LookRotation(inward), new Vector3(span / panels, 1f, 1f));
+                }
+            }
+        }
+    }
+
+    private static void PlaceEndPart(GameObject parent, GameObject prefab, string name, Vector3 position, Quaternion rotation, Vector3 scale)
+    {
+        if (prefab == null) return;
+        var part = UnityEngine.Object.Instantiate(prefab, position, rotation, parent.transform);
+        part.name = name;
+        part.transform.localScale = scale;
+        foreach (var renderer in part.GetComponentsInChildren<MeshRenderer>())
+        {
+            var materials = renderer.sharedMaterials;
+            for (int i = 0; i < materials.Length; i++) materials[i] = RoadPath.GetOrCreateRoadMaterial(materials[i]);
+            renderer.sharedMaterials = materials;
         }
     }
 

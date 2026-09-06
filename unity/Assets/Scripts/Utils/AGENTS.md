@@ -28,3 +28,5 @@
 - `ApplyDepthOffsetShader(MeshRenderer, contextName)` ... DepthOffsetLitシェーダー(URP Litベース+Offset -1,-1のZ-fighting対策バリアント)を一括適用(キャッシュ付き)。PathManager / BuildingManager から使用。
 - `DestroyObjectAfterFrames(MonoBehaviour, GameObject)` ... 2フレーム遅延でオブジェクト破棄(ポッピング防止)。各マネージャーから使用。
 - `CalculateAverageWidth(List<float>)` ... 幅リストの平均値を計算。歩道コネクタ等で使用。
+
+PathSummaryExtensions.GetRelativeHeightAtPointはstation_grade_profileがあればXZ射影した設計絶対標高からUtils.GetGroundHeightを引く。基準線なしでは既存のアンカー相対Y補間を使い、描画Yのオフセットを混入させない。

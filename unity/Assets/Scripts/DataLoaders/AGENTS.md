@@ -215,3 +215,14 @@
 ## 道路設備のマスター
 
 PathMasterItemの設備*_allowed/default_*はAPIのpath_masterに対応する。設置状態の正はPathSummaryの4項目で、既定値をロード時に再適用しない。設備変更はPathのversion更新で通常の差分再描画に入る。
+
+## 駅の保存済み標高
+
+`PathSummary.station_grade_profile` があれば `ApplyStationGrade` でXZ射影した絶対標高を適用する。通常のスプライン補正（ROAD_SPLINE_OFFSET−base_height）を加え、交差点切断より前に適用する。折れ線も先に細分化し、TrackPath側で地形再サンプリングや切断断面の上書きをしない。Far表示・交差点ノードも同じ保存基準を参照する。
+
+GetNodeSnapPositionは接続パスに保存標高があればそれを優先し、なければノード相対YをUtilsの地形高さに加える。描画オフセットを含まない吸着用の絶対位置。
+
+- PathManagerはTrackPath.ConnectedPathsProviderにGetPathsConnectedToNodeを提供し、線路の車止め・ホーム端の接続判定もノード逆引きで行う。破棄時にプロバイダを解除する。
+
+
+TrackPath.InfrastructureConnectionProviderにはIsInfrastructureConnectionを登録し、ノードtypeのインフラビットを判定する。施設の共用接続点へ線路が1本だけ接続されていても車止めを置かない。BuildingManagerのロードを待たず判定し、OnDestroyでプロバイダを解除する。

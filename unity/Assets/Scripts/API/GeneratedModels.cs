@@ -355,6 +355,8 @@ namespace GeneratedModels
         public int street_tree_type;
         /// <summary>配線方式。0=なし、1=架空、2=地中。道路ごとの保存値。</summary>
         public int utility_mode;
+        /// <summary>駅の共通基準線 [x,絶対標高,z]。空なら通常の地形追従</summary>
+        public List<object> station_grade_profile;
     }
 
     [Serializable]
@@ -444,6 +446,8 @@ namespace GeneratedModels
         public int street_tree_type;
         /// <summary>配線方式。0=なし、1=架空、2=地中。道路ごとの保存値。</summary>
         public int utility_mode;
+        /// <summary>駅の共通基準線 [x,絶対標高,z]。空なら通常の地形追従</summary>
+        public List<object> station_grade_profile;
     }
 
     [Serializable]

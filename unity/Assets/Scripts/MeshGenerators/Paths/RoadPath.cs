@@ -481,6 +481,24 @@ public class RoadPath : IPathMeshGenerator
                 if (partVerts > 0 && (long)partVerts * channel.count > SPLINE_MESH_VERTEX_BUDGET)
                 {
                     int clampedCount = Mathf.Max(1, SPLINE_MESH_VERTEX_BUDGET / partVerts);
+                    if (maxTileLength <= 0f && !singleSpan && !isDashed)
+                    {
+                        // 造形周期を持つパーツはタイル数を減らさず、整数タイル単位で別メッシュへ分ける。
+                        int totalCount = channel.count;
+                        UnityEngine.Object.DestroyImmediate(go);
+                        var group = new GameObject(prefabName + "_Sections");
+                        group.transform.SetParent(parent.transform, false);
+                        for (int first = 0; first < totalCount; first += clampedCount)
+                        {
+                            int last = Mathf.Min(totalCount, first + clampedCount);
+                            double from = clipFrom + (clipTo - clipFrom) * first / totalCount;
+                            double to = clipFrom + (clipTo - clipFrom) * last / totalCount;
+                            CreateSplineMesh(group, spline, prefabName, width, centerOffsetX, offsetY,
+                                mirrorX, fallbackPrefabName, false, stretchToWidth, from, to,
+                                false, compensatePivot, maxTileLength);
+                        }
+                        return group;
+                    }
                     Debug.LogWarning($"[RoadPath] パーツ '{prefabName}' のタイル数 {channel.count} は頂点数上限を超えるため {clampedCount} にクランプします(1個あたり頂点{partVerts}、Z実寸={meshLenZ:F3}m)。Z実寸が異常に小さい場合はcm単位でエクスポートされたFBXの疑いがあります(1 Blenderユニット=1mで再エクスポートすること)。");
                     channel.count = clampedCount;
                 }

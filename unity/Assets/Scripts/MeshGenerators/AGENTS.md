@@ -97,7 +97,7 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 - **倒壊した建物 (`CollapsedBuildingMeshBuilder.cs`, STATUS_COLLAPSED)**: 「瓦礫マウンド + 任意の倒壊片」を生成する。瓦礫マウンドは工事中の `ConstructingBuildingMeshBuilder.GenerateDirtMoundMesh`(internal static 化・厚み/振幅を引数で上書き)を `CONSTRUCTION_RUBBLE_THICKNESS`/`CONSTRUCTION_RUBBLE_BUMP_AMPLITUDE` で流用し、区画ポリゴンに完全追従。マテリアルは `BuildingMeshBuilder.GetCollapsedRubbleMaterial()`(`Resources/CollapsedRubble`→土マテリアルにフォールバック)。倒壊片は `collapse` パーツを footprint の XZ AABB へ非一様スケールでフィット(充填率 `COLLAPSE_FRAGMENT_FILL`、高さ上限 `COLLAPSE_FRAGMENT_MAX_HEIGHT`)、無ければマウンドのみ(オプショナル)。GROUND/PORT は躯体片なし。仕様の正は `genesis-docs/docs/geometries/F8_倒壊建物のメッシュ生成.md`。
 - **港湾の岸壁 (`PortBuildingMeshBuilder.cs`, MODEL_PORT)**: 海岸土地区画(PARCEL_SHORE)の港湾(BUILDING_PORT)用。**バックエンドは区画ポリゴンを海岸線でクリップしない**(矩形等のまま)ため、`SHAPE_FULL` の底面外周と海岸線(陸地領域=`CoastlineStore.Rings` の偶奇合成(XOR)。NTS Geometry を `CoastlineStore.Version` 単位で静的キャッシュ)の交点から最遠2点=左端A・右端Bを求め、それぞれを海側へ `lerp(0.2, 1, visual_variant1/2)×奥行き上限` だけ突き出した A'・B' を結ぶ**直線**で底面をカット(陸側を残す)して岸壁フットプリントとし、厚みのある板(岸壁スラブ)を上下に押し出してプロシージャル生成する。**海側境界は海岸線をなぞらず常に直線**。カットは底面との交差なので区画外にはみ出さない。カット不能時(交点2未満/海側頂点なし/幾何演算失敗)は元形状のまま進む。モジュラーの壁・角は使わない。**上面高さは海面+2m固定**(`visual_variant3` は不使用)。マテリアルは**上面=floor・側面/下面=ceil**: 上面は敷地全体の地面パネル(draw_floor。`GenerateSiteDecorations` で土地区画全体に地形追従描画、モジュラー/prebuiltと共通)と同一マテリアルにして床続きに見せる。floor 解決は `ResolveFloorMaterialFromMaster`(a→b→common)、無効時は floor パーツ直参照→デフォルト白。下面は各頂点の地形(海底)高さに合わせる(`HeightmapTextureManager.GetTerrainHeight`)。塔屋は岸壁中央に直線エッジの向きで配置。**荷役クレーン(`port_crane`パーツ、閾値0固定)は水際=カット直線上に乗った辺に沿って等間隔配置**(`PlacePortCranes`。**スケールなし=実寸**、モデル原点が水際の境界線上・岸壁上面高さ、**ローカル+Zが海側**(壁系パーツの回転規約とは別物)、間隔=パーツ実寸幅×4.5(`CRANE_SPACING_RATIO`)・辺あたり最低1基/岸壁あたり最大8基・辺長がパーツ幅未満なら0基。カット不能な建物では水際が定まらないので配置しない)。**交点・海側判定には `CoastlineStore`(`DataLoaders/`)を参照する**(セッション開始時に `TerrainManager.FetchCoastline` がロード済み)。仕様の正は `genesis-docs/docs/geometries/F4_港湾岸壁のメッシュ生成.md`。
 
-- **鉄道車両基地 (`RailYardBuildingMeshBuilder.cs`, MODEL_RAIL_YARD)**: 敷地内の線路を接続端子ノード(`depot_node_id`。電化前提の共用接続ノード)の位置へ収束させて描画する。フットプリントの重心→端子ノードの方向を線路方向Uとし、①並行線路ゾーン(直線の `yard_track`/`yard_wire` タイルを線路間隔5mで敷き詰め+`yard_stop`+門型架線柱 `yard_pole`/`yard_beam`+先頭2線を覆う `yard_shed`)、②集約ゾーン(各線路端→端子手前6mの収束点への三次ベジエ。**曲線は短い直線タイルの弦近似**=タイル送り0.85倍で重ねて隙間を隠す。SplineMeshは使わない=建物は単一結合Meshを返す契約のため)、③リード線(収束点→端子)を `CombineInstance` のTRS行列方式(PlacePortCranes と同方式)で組む。パーツは全て実寸(`yard_beam` のXスケールのみ例外)、タイルは bounds でZ始端を再基準化。端子ノード位置は `PathManager.GetNodeData` から取得し、未ロード時は「前面辺から最も遠い辺の中点」(バックエンド `crud_agents._connection_node_position` の近似)へフォールバック。**端子移動のPATCH成功時は `NodeInputHandler` → `BuildingManager.OnTerminalNodeMoved` が MODEL_RAIL_YARD の建物だけを forceRebuild する**(versionが変わらないため通常の差分ロードでは追従しない)。接地は center_point の地形標高(基盤なし)、工事中/倒壊は GROUND/PORT と同じ土・瓦礫のみ。コライダーは底面×固定7m。仕様の正は `genesis-docs/docs/geometries/F9_車両基地のメッシュ生成.md`。
+- **鉄道車両基地 (`RailYardBuildingMeshBuilder.cs`, MODEL_RAIL_YARD)**: 最外側の留置線から斜めの集約線を1本延ばし、各留置線をその途中へ合流させる。集約線は横移動1m/U走行2m、各合流点のU間隔10m。端子へは最後の合流点から共通接続線1本で位置を合わせる。曲線はタイル頂点を弧長・接線で変形し、長手方向のみ端数を調整。合流部の支持材は集約線の外縁でクリップし、道床・枕木を共有する。floorパネルはdraw_floorに関係なく描かず、線路直下のyard_track道床のみ。端子位置はPathManagerのキャッシュ、未ロード時は最遠辺の中点。端子移動時はBuildingManager.OnTerminalNodeMovedが再生成する。詳細は `F9_車両基地のメッシュ生成.md`、実FBX検査は `Tests/Intersections/run-unity.ps1 -RailYard`。
 
 ## 超遠景の陸地メッシュ (UltraFarLandMeshBuilder.cs)
 
@@ -131,3 +131,11 @@ RoadPathの街路樹配置はRoadEquipmentGeneratorへ集約している。PathS
 
 設備の接地は未補正FBXのbounds.max.yではなく、GetRoadPartMeshで路面原点へ補正した歩道の設置横位置の上面を参照する。縁石と歩行面の高さを区別する。body面はBODY_ABOVE_SPLINEに固定。スプライン上の定数オフセットはワールド上方向、歩道厚は断面法線方向へ加える。街灯の張り出し方向はBlenderのX符号を前提にせず、Unityに読み込んだメッシュのbounds中心Xで判断して内向きにする。実FBXの接地・方向検査はTests/Intersections/run-unity.ps1 -Equipment。
 点設備はプレハブ原点の一致だけに頼らず、メッシュ下端のYも補正して接地する（旧共通モデル対応）。
+
+## 駅の標高と島式結合
+
+共通標高を持つTrackPathはPathManagerで補正・切断済みの点列を使う。モデルだけを地形へ戻してはいけない。TrackAdjacencyの島式デッキ結合は高さ差2cm以内に限り、一般の道床結合の1m許容値とは区別する。
+
+- TrackPathはbuffer_stop（車止め）とplatform_end（妻壁・柵）をバリアント→タイプで読む。終端はConnectedPathsProviderのノード接続情報で判定し、ホーム端は島式デッキの担当側だけが実幅で閉じる。軌道はmaxTileLength: 0で著作周期を保ち、RoadPathはこのモードの頂点数上限時にタイル数を減らさず整数タイル単位の複数メッシュへ分割する。
+
+TrackPathの車止めはInfrastructureConnectionProviderが共用インフラノードと判定した端点には配置しない。PathManagerがノードtypeのインフラビットを供給するため、建物のロード順に依存しない。

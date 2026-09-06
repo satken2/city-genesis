@@ -272,6 +272,7 @@ public static class PathSummaryExtensions
     /// <summary>
     /// パス中心線上の指定XZ位置における相対高さ(地形からの高さ)を返す。
     /// アンカー列(始点→ウェイポイント→終点)の相対Yを、XZ最近傍のアンカー区間上で線形補間する。
+    /// 保存設計標高がある場合はその基準線を優先し、Utilsの地形標高との差を返す。
     /// 吸着でパスの標高を引き継ぐ際は必ずこのメソッドを使うこと。
     /// 「描画ポリラインの絶対Y − 地形サンプル」の逆算は、折れ線チャード中間の地形起伏・
     /// 描画用オフセット・高さ源(CPU配列/Terrain.SampleHeight)の不一致がすべて標高ノイズとして
@@ -280,6 +281,12 @@ public static class PathSummaryExtensions
     /// </summary>
     public static float GetRelativeHeightAtPoint(this GeneratedModels.PathSummary p, float x, float z)
     {
+        if (p.station_grade_profile != null && p.station_grade_profile.Count >= 2)
+        {
+            var profile = Newtonsoft.Json.Linq.JArray.FromObject(p.station_grade_profile).ToObject<List<List<float>>>();
+            return PathManager.EvaluateStationGrade(profile, new Vector3(x, 0f, z)) - Utils.GetGroundHeight(new Vector3(x, 0f, z));
+        }
+
         var anchorX = new List<float>();
         var anchorZ = new List<float>();
         var anchorRel = new List<float>();

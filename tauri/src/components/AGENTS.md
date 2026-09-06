@@ -106,3 +106,9 @@ HUDは**3枚の専用Tauriウィンドウ**に分かれている。Unityの3Dビ
 path/PathEquipmentPanelは道路詳細から設備4項目を編集する。マスターの*_allowedで選択肢を制限し、適用時にPATCHしてsession:reloadを通知する。初期値の再適用はせず、取得したPathの保存値を表示する。文言は全7言語のpathEquipment.json。
 
 道路詳細はAgentDetailPanelのタブ用CSSを明示的に読み込み、「基本情報（所属地区・物理状態）」「交通」「道路設備」に分ける。設備タブは設置可能または既設の設備がある場合のみ表示する。駅舎には駅情報、計画中・建設中・解体中には建設工事タブを追加する。着工前は基本情報・交通・設備を省略し、初期選択は着工前・建設中なら建設工事、それ以外は基本情報。タブ内容はhiddenで切り替えて未保存の設備・速度入力を保持する。設備欄はagent-detail-section/title/grid/label/valueと既存の地区選択・交通保存ボタンのスタイルを使う。
+
+## 駅の同時敷設の標高
+
+`path/usePathConstruction.ts` はホームを持つ鉄道コンポーネントの一括POSTに `align_station_tracks: true` を付ける。共通標高の計算・保存はバックエンドに任せる。単線や既存駅を自動補正する指定ではない。
+
+PathConstructionPanel/TrackConstructionPanelの継続配置は間隔・進行方向・ホーム側・高さ・盛土・曲線・地形追従を保持する。continuePlacementはinitial_*と既存の設定パラメータをSTATE_EDIT_PATHへ渡し、座標・制御点・見積りだけをクリアする。PathBuildSectionsの高さ入力は小数対応、0.1mステップ。

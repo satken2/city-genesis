@@ -264,6 +264,8 @@ public class PathManager : BaseApiDataManager
         // 近接線路の結合描画（TrackPath）に隣接線路の点列を供給する。
         // キャッシュ済みパスデータとセル空間インデックスが必要なためPathManagerが担う。
         TrackAdjacency.NeighborProvider = GetAdjacentTrackNeighbors;
+        TrackPath.ConnectedPathsProvider = GetPathsConnectedToNode;
+        TrackPath.InfrastructureConnectionProvider = IsInfrastructureConnection;
     }
 
     private void Start()
@@ -280,7 +282,16 @@ public class PathManager : BaseApiDataManager
         if (TrackAdjacency.NeighborProvider == (System.Func<PathSummary, List<TrackNeighborInfo>>)GetAdjacentTrackNeighbors)
         {
             TrackAdjacency.NeighborProvider = null;
+            TrackPath.ConnectedPathsProvider = null;
+            TrackPath.InfrastructureConnectionProvider = null;
         }
+    }
+
+    private bool IsInfrastructureConnection(int nodeId)
+    {
+        // 共用ノードの資格は建物のロード順に依存せず判定できる。
+        NodeData node = GetNodeData(nodeId);
+        return node != null && InfraNetworkUtil.IsInfraMask(node.type);
     }
 
     // ================================================================
@@ -1453,6 +1464,7 @@ public class PathManager : BaseApiDataManager
             endPos.y = HeightmapTextureManager.GetTerrainHeight(new Vector3(endPos.x, 1000f, endPos.z)) + RoadPartHeights.ROAD_SPLINE_OFFSET;
 
         List<Vector3> points = new List<Vector3> { startPos, endPos };
+        ApplyStationGrade(path, points);
         float width = 6f;
         var masterData = MasterDataStore.Instance;
         if (masterData != null)
@@ -2519,10 +2531,53 @@ public class PathManager : BaseApiDataManager
         return true;
     }
 
+    /// <summary>接続パスの設計標高を優先した、描画オフセットを含まないノード吸着位置。</summary>
+    public Vector3 GetNodeSnapPosition(NodeData node)
+    {
+        Vector3 position = node.GetAbsolutePosition();
+        position.y = Utils.GetGroundHeight(position) + node.GetRelativeHeight();
+        foreach (var path in GetPathsConnectedToNode(node.node_id))
+        {
+            if (path.station_grade_profile == null || path.station_grade_profile.Count < 2) continue;
+            position.y = Utils.GetGroundHeight(position) + path.GetRelativeHeightAtPoint(position.x, position.z);
+            return position;
+        }
+        return position;
+    }
+
+    /// <summary>保存済み絶対標高を描画点列へ適用する。</summary>
+    public static void ApplyStationGrade(PathSummary path, List<Vector3> points)
+    {
+        if (path?.station_grade_profile == null || path.station_grade_profile.Count < 2) return;
+        var profile = Newtonsoft.Json.Linq.JArray.FromObject(path.station_grade_profile).ToObject<List<List<float>>>();
+        float offset = RoadPartHeights.ROAD_SPLINE_OFFSET - GetPathBaseHeight(path.path_variant);
+        for (int i = 0; i < points.Count; i++)
+        {
+            Vector3 point = points[i];
+            point.y = EvaluateStationGrade(profile, point) + offset;
+            points[i] = point;
+        }
+    }
+
+    /// <summary>基準線へのXZ射影を使い、曲線の内外・逆向きの線路でも同じ断面の高さを返す。</summary>
+    public static float EvaluateStationGrade(List<List<float>> profile, Vector3 point)
+    {
+        float best = float.PositiveInfinity, height = 0f;
+        for (int i = 1; i < profile.Count; i++)
+        {
+            var a = profile[i - 1]; var b = profile[i];
+            Vector2 start = new Vector2(a[0], a[2]);
+            Vector2 delta = new Vector2(b[0] - a[0], b[2] - a[2]);
+            float t = delta.sqrMagnitude > 1e-10f ? Mathf.Clamp01(Vector2.Dot(new Vector2(point.x, point.z) - start, delta) / delta.sqrMagnitude) : 0f;
+            float distance = (new Vector2(point.x, point.z) - start - delta * t).sqrMagnitude;
+            if (distance < best) { best = distance; height = Mathf.Lerp(a[1], b[1], t); }
+        }
+        return height;
+    }
+
     /// <summary>
-    /// パス個別の地形追従設定を解決する。パス個別の follow_terrain（0=非追従/1=追従）を
-    /// 最優先し、未設定（VALUE_NONE）のときのみバリアント既定に従う。
-    /// バックエンド geo_path_depth.path_follows_terrain と同一の解決順を維持すること。
+    /// パス個別の地形追従設定を優先し、未指定時はバリアント既定に従う。
+    /// バックエンド geo_path_depth.path_follows_terrain と同じ解決順。
     /// </summary>
     public static bool GetPathFollowTerrain(PathSummary path)
     {
@@ -2653,13 +2708,15 @@ public class PathManager : BaseApiDataManager
 
             anchorPoints.Add(endPos);
             bool singleSpan = MasterDataStore.Instance?.GetPathMaster(path.path_variant)?.single_span ?? false;
-            if (anchorPoints.Count == 2 && !singleSpan)
+            if ((anchorPoints.Count == 2 || path.station_grade_profile?.Count >= 2) && !singleSpan)
             {
                 bool followTerrain = GetPathFollowTerrain(path) && startPointList[1] == 0f && endPointList[1] == 0f;
                 var sampled = SubdividePointsWithTerrain(anchorPoints, TERRAIN_SAMPLE_INTERVAL, followTerrain);
+                ApplyStationGrade(path, sampled);
                 return trimIntersection ? TrimIntersectionPoints(path, sampled) : sampled;
             }
             // RoadPath.cs 等で角の処理を行ってから細分化するため、ここではそのまま返す
+            ApplyStationGrade(path, anchorPoints);
             return trimIntersection ? TrimIntersectionPoints(path, anchorPoints) : anchorPoints;
         }
 
@@ -2777,6 +2834,7 @@ public class PathManager : BaseApiDataManager
             }
         }
 
+        ApplyStationGrade(path, points);
         return trimIntersection ? TrimIntersectionPoints(path, points) : points;
     }
 
@@ -3400,6 +3458,13 @@ public class PathManager : BaseApiDataManager
         // 切断前の点列を共用し、本線の勾配と切断断面の高さを一致させる。
         var originalPoints = new Dictionary<int, List<Vector3>>();
         foreach (var p in connectedPaths) originalPoints[p.path_id] = CalculatePathPoints(p, false);
+        var gradedPath = connectedPaths.Find(p => p.station_grade_profile != null && p.station_grade_profile.Count >= 2);
+        if (gradedPath != null)
+        {
+            var nodePoints = new List<Vector3> { absolutePos };
+            ApplyStationGrade(gradedPath, nodePoints);
+            absolutePos.y = nodePoints[0].y;
+        }
         NodeMeshResult meshResult = NodeMeshFactory.GenerateNodeMesh(nodeId, absolutePos, connectedPaths, nodeData.GetRelativeHeight(), p => originalPoints[p.path_id], p => GetIntersectionCutLimit(p, nodeId, originalPoints[p.path_id]));
         if (meshResult == null || meshResult.Mesh == null)
         {

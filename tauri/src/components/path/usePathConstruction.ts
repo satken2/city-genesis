@@ -54,6 +54,7 @@ import { fetchApi } from "../../utils/api";
 import {
   DIR_BOTH,
   PATH_ROPEWAY,
+  PATH_TRACK,
   PLATFORM_SIDE_OUTSIDE,
   TRAFFIC_HAND_LEFT,
 } from "../../constants";
@@ -349,8 +350,7 @@ export function usePathConstruction(
    * 空配列(=中心線1本の単一プレビュー)。railComponents と同じ条件・同じ導出
    * (線路間隔=マスター幅+調整量)だが、STATE_EDIT_PATH 送信時点では
    * selectedVariant がまだ更新されていないため variantId 引数で直接計算する。
-   * spacingDelta は継続配置(continuePlacement)が間隔リセット後の値を state 更新を
-   * 待たずに同じ呼び出しで使うための上書き引数。省略時は現在の調整量を使う。
+   * 継続配置でも現在の線路間隔を使う。
    */
   const lateralOffsetsForVariant = useCallback((variantId: number, spacingDelta: number = trackSpacingDelta): number[] => {
     const data = masterData?.paths?.[variantId];
@@ -503,19 +503,11 @@ export function usePathConstruction(
   /**
    * 連続設置: 1本目のパス確定後に、選択中のバリアント・軌道設定を維持したまま
    * パス配置状態だけをクリアし、Unity を再び STATE_EDIT_PATH に戻す。
-   * resetTrackSpacing=true(確定後)のときは線路間隔の調整量も既定へ戻す。
-   * キャンセル(同じパスの引き直し)では維持するため false で呼ぶ。
+   * 高さ・盛土・曲線・追従・線路間隔などの敷設設定は次の配置にも引き継ぐ。
    */
-  const continuePlacement = useCallback((resetTrackSpacing: boolean = false) => {
+  const continuePlacement = useCallback(() => {
     if (selectedVariant === null) return;
     const variantData = masterData?.paths?.[selectedVariant];
-    // STATE_EDIT_PATH の初期オフセットにリセット後の間隔を使うため、
-    // state 更新(非同期)とは別に、明示的な調整量を lateralOffsetsForVariant へ渡す。
-    const nextSpacingDelta = resetTrackSpacing ? 0 : trackSpacingDelta;
-    if (resetTrackSpacing) setTrackSpacingDelta(0);
-    const defaultHeight = Math.max(0, variantData?.min_height ?? 0);
-    setHeight(defaultHeight);
-    setEmbankmentHeight(0);
     setSelectedNodeIndex(-1);
     setNodes([]);
     setRawPoints([]);
@@ -533,12 +525,16 @@ export function usePathConstruction(
       path_variant: selectedVariant,
       path_id: pathId ?? null,
       platform_side: platformSide,
-      lateral_offsets: lateralOffsetsForVariant(selectedVariant, nextSpacingDelta),
+      initial_height: height,
+      initial_embankment_height: embankmentHeight,
+      initial_curved: curveMode === "curved",
+      initial_follow_terrain: followTerrain,
+      lateral_offsets: lateralOffsetsForVariant(selectedVariant),
       travel_directions: travelDirectionsForVariant(selectedVariant),
     }).catch((err) => {
       console.error("[usePathConstruction] sendChangeState (continue) failed:", err);
     });
-  }, [selectedVariant, masterData, pathId, platformSide, trackSpacingDelta, lateralOffsetsForVariant, travelDirectionsForVariant]);
+  }, [selectedVariant, masterData, pathId, platformSide, height, embankmentHeight, curveMode, followTerrain, lateralOffsetsForVariant, travelDirectionsForVariant]);
 
   /**
    * 現在のパス形状をバックエンドに送信して確定する。
@@ -718,7 +714,7 @@ export function usePathConstruction(
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ paths: pathsPayload }),
+          body: JSON.stringify({ paths: pathsPayload, align_station_tracks: hasPlatform && selectedVariantData?.type === PATH_TRACK }),
         }
       );
       // 作成に成功したら敷設由来のハイライトを消す(以後の計画中パスの干渉表示は、
@@ -821,7 +817,7 @@ export function usePathConstruction(
     // 直後に開く詳細パネルが source="path_detail" で担う)。失敗時は例外でここに
     // 到達せず、赤表示が確定できない理由を示し続ける。
     void sendClearHighlights("path_build");
-  }, [apiBaseUrl, selectedVariant, rawPoints, rawEmbankmentHeights, curveMode, startControl, endControl, rawWaypointControls, pathId, railComponents, hasPlatform, platformSide, followTerrain, queryInterferenceAndHighlight]);
+  }, [apiBaseUrl, selectedVariant, selectedVariantData, rawPoints, rawEmbankmentHeights, curveMode, startControl, endControl, rawWaypointControls, pathId, railComponents, hasPlatform, platformSide, followTerrain, queryInterferenceAndHighlight]);
 
   /* ---- 都市の通行方向を取得(既定の進行方向割り当てに使う) ---- */
   useEffect(() => {

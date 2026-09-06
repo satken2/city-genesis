@@ -333,3 +333,7 @@ invoke("start_load_game", { saveId })
   3. loading.hide()
   4. Unity に game:end を送信
 ```
+
+## 敷設設定の継続
+
+新規敷設後の `STATE_EDIT_PATH` は `initial_height`（小数m）、`initial_embankment_height`、`initial_curved`、`initial_follow_terrain` を任意パラメータとして受け取る。UIの `continuePlacement` が敷設設定を明示送信し、Unityの `InitializeRoadPlacement` が最初の形状通知より前に適用する。線路間隔・進行方向・ホーム側は既存の各パラメータで引き継ぐ。座標・制御点と見積りだけをクリアする。未指定の新規開始は既定値、既存パス編集は保存値を使う。

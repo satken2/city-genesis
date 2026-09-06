@@ -239,6 +239,9 @@ public static class TrackAdjacency
     /// </summary>
     private const float PLATFORM_ENCROACH_CLEARANCE = 0.3f;
 
+    // 上面を片側の高さで共有できる誤差だけを許し、道床結合の高さ許容値と区別する。
+    private const float PLATFORM_JOIN_MAX_DY = 0.02f;
+
     /// <summary>コリドーの1メンバー（自分自身または隣接線路）。O は自中心線からの符号付き横位置。</summary>
     private struct Member
     {
@@ -424,6 +427,7 @@ public static class TrackAdjacency
                     // 島式結合: 互いに向き合うホームを持つほぼ平行な駅パスで、道床エッジ間
                     // ギャップが両ホームの張り出し幅の合計以下（＝デッキが届き合う距離）。
                     bool island = !endClampVirtual && cosAngle >= cosMaxAngle
+                        && Mathf.Abs(cp.y - ownPos.y) <= PLATFORM_JOIN_MAX_DY
                         && nbFacingPlatform > 0f
                         && edgeGap > 0f && edgeGap <= myPlatform + nbFacingPlatform;
                     if (island)

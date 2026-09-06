@@ -487,7 +487,7 @@ public class RoadPlanManager : MonoBehaviour
     /// existingPathId が指定されている場合は既存パス編集モードとなり、
     /// バックエンドから該当パスの形状データを取得して points にロードする。
     /// </summary>
-    public void InitializeRoadPlacement(int? existingPathId = null)
+    public void InitializeRoadPlacement(int? existingPathId = null, float? initialHeight = null, float? initialEmbankment = null, bool? initialCurved = null, int? initialFollowTerrain = null)
     {
         Debug.Log($"RoadPlanManager: 道路敷設モードを初期化 (existingPathId={existingPathId})");
         EnsureOverlayRenderer();
@@ -498,20 +498,14 @@ public class RoadPlanManager : MonoBehaviour
         hoveredEdgeIndex = -1;
         isDragging = false;
         dragTarget = DragTarget.None;
-        // 初期高度は地上(0)とする。min_height は地下対応バリアントの下限であって初期値ではない。
-        // 地下道路や送電線なども含め一律 0m から敷設を開始し、必要に応じてパネル/吸着で高さを変える。
-        // Max(0f, …) により万一 min_height が正のバリアントがあっても下限を割らないようにする。
-        currentHeight = Mathf.Max(0f, GetMinHeightFromMaster());
-        currentEmbankmentHeight = 0f;
-        // 地形追従の個別上書きは未設定（バリアント既定に従う）から始める。
-        // 既存パス編集の場合は LoadExistingPath でバックエンドの follow_terrain に上書きされる。
-        PathFollowTerrainOverride = Constants.VALUE_NONE;
-        // 曲線許可バリアントは曲線モードをデフォルトとする(曲線/直線の真実源はUnity側)。
-        // 既存パス編集の場合は LoadExistingPath でバックエンドの curved 値に上書きされる。
-        Curved = IsCurveAllowed();
-        // 曲線モードで開始する場合は「直線延長」吸着を自動でONにする(端点制御点の
-        // 延長方向整列がこのフラグでゲートされているため。SetCurved と同じ方針)。
-        if (Curved)
+        // 継続配置ではUIが敷設設定を渡す。指定のない新規開始だけ既定値を使う。
+        currentHeight = Mathf.Max(IsHeightEditable() ? initialHeight ?? 0f : 0f, GetMinHeightFromMaster());
+        currentEmbankmentHeight = Mathf.Clamp(initialEmbankment ?? 0f, -5f, 5f);
+        // 既存パス編集の設定は、後続のLoadExistingPathで保存値に置き換える。
+        PathFollowTerrainOverride = IsHeightEditable() ? initialFollowTerrain ?? Constants.VALUE_NONE : Constants.VALUE_NONE;
+        Curved = IsCurveAllowed() && (initialCurved ?? true);
+        // 新規開始だけ直線延長吸着を有効にし、継続配置では手動の吸着設定を保つ。
+        if (Curved && !initialCurved.HasValue)
         {
             TerrainInputHandler.EnableStraightLineSnapping = true;
         }
@@ -795,7 +789,7 @@ public class RoadPlanManager : MonoBehaviour
         {
             hoverWorldPosition = ApplySnapping(worldPos);
             // 高架エッジへ吸着中はホバープレビュー線もその標高で描くため保存する
-            hoverSnapWasElevated = lastSnapWasElevated && IsHeightEditable();
+            hoverSnapWasElevated = lastSnapWasElevated && (IsHeightEditable() || PathType == Constants.PATH_TRACK);
             hoverSnapRelHeight = lastSnapRelHeight;
             InvalidateShapeCache();
             Update3DPreview();
@@ -868,7 +862,8 @@ public class RoadPlanManager : MonoBehaviour
 
             var pt = points[dragPointIndex];
             // XZ移動時に相対高さを維持する
-            float relY = pt.position.y - Utils.GetGroundHeight(pt.position);
+            float relY = lastSnapWasElevated && (IsHeightEditable() || PathType == Constants.PATH_TRACK)
+                ? lastSnapRelHeight : pt.position.y - Utils.GetGroundHeight(pt.position);
             snappedPos.y = Utils.GetGroundHeight(snappedPos) + relY;
             pt.position = snappedPos;
             points[dragPointIndex] = pt;
@@ -1634,6 +1629,14 @@ public class RoadPlanManager : MonoBehaviour
             basePos = terrainInputHandler.ApplySnapping(basePos, PathSubtype, out lastSnapWasElevated, out lastSnapRelHeight, snapThreshold);
         }
 
+        // 接続先を確定した鉄道は、角度補助で位置や標高を再変更しない。
+        if (lastSnapWasElevated && PathType == Constants.PATH_TRACK)
+        {
+            isStraightLineSnapActive = false;
+            isRightAngleSnapActive = false;
+            return basePos;
+        }
+
         // 直線延長スナップ（直角スナップより優先）
         if (TerrainInputHandler.EnableStraightLineSnapping && points.Count >= 2)
         {
@@ -1845,7 +1848,7 @@ public class RoadPlanManager : MonoBehaviour
                 foreach (var node in nodes)
                 {
                     if (!InfraNetworkUtil.IsNodeSnappable(node, PathSubtype, pathManager)) continue;
-                    EvaluatePointTargetOffsetCandidates(basePos, node.GetAbsolutePosition(), node.GetRelativeHeight(), ref bestDist, ref snapped, ref snapRelHeight, ref found);
+                    EvaluatePointTargetOffsetCandidates(basePos, pathManager.GetNodeSnapPosition(node), node.GetRelativeHeight(), ref bestDist, ref snapped, ref snapRelHeight, ref found);
                 }
             }
 
@@ -1876,7 +1879,7 @@ public class RoadPlanManager : MonoBehaviour
                         for (int sign = -1; sign <= 1; sign += 2)
                         {
                             Vector3 shift = perp * (offset * sign);
-                            Vector3 candidate = TerrainInputHandler.GetClosestPointOnSegment(seg.a - shift, seg.b - shift, basePos);
+                            Vector3 candidate = TerrainInputHandler.GetClosestPointOnSegmentXZ(seg.a - shift, seg.b - shift, basePos);
                             float dist = Vector2.Distance(new Vector2(basePos.x, basePos.z), new Vector2(candidate.x, candidate.z));
                             if (dist < bestDist)
                             {
@@ -1886,6 +1889,7 @@ public class RoadPlanManager : MonoBehaviour
                                 // 引き継ぐ(描画Y−地形サンプルの逆算はノイズが乗るため使わない)
                                 snapRelHeight = seg.path != null
                                     ? seg.path.GetRelativeHeightAtPoint(candidate.x + shift.x, candidate.z + shift.z)
+                                        + Utils.GetGroundHeight(candidate + shift) - Utils.GetGroundHeight(candidate)
                                     : 0f;
                                 found = true;
                             }
@@ -1950,7 +1954,7 @@ public class RoadPlanManager : MonoBehaviour
 
     /// <summary>
     /// 点ターゲットと接線方向1本に対する候補 C = ターゲット ± perp·オフセット を列挙し最良値を更新する。
-    /// 候補のYは「候補位置の地形高さ + ターゲットの相対高さ」(高架端点からの延長で高さを引き継ぐ)。
+    /// 横移動してもターゲットの絶対標高を保ち、相対高さは移動先の地形から求める。
     /// </summary>
     private void EvaluateTangentOffsetCandidates(Vector3 basePos, Vector3 targetPos, Vector3 tangent, float relHeight, ref float bestDist, ref Vector3 bestPos, ref float bestRelHeight, ref bool found)
     {
@@ -1965,9 +1969,9 @@ public class RoadPlanManager : MonoBehaviour
                 if (dist < bestDist)
                 {
                     bestDist = dist;
-                    candidate.y = Utils.GetGroundHeight(candidate) + relHeight;
+                    candidate.y = targetPos.y;
                     bestPos = candidate;
-                    bestRelHeight = relHeight;
+                    bestRelHeight = candidate.y - Utils.GetGroundHeight(candidate);
                     found = true;
                 }
             }
@@ -1992,18 +1996,18 @@ public class RoadPlanManager : MonoBehaviour
             }
             if (!InfraNetworkUtil.IsPathSnappable(path.path_variant, PathSubtype)) continue;
 
-            EvaluateEndpointOffsetCandidates(basePos, GeneratedModelUtils.ToFloatList(path.start_point), searchRadius, ref bestDist, ref bestPos, ref bestRelHeight, ref found);
-            EvaluateEndpointOffsetCandidates(basePos, GeneratedModelUtils.ToFloatList(path.end_point), searchRadius, ref bestDist, ref bestPos, ref bestRelHeight, ref found);
+            EvaluateEndpointOffsetCandidates(basePos, path, GeneratedModelUtils.ToFloatList(path.start_point), searchRadius, ref bestDist, ref bestPos, ref bestRelHeight, ref found);
+            EvaluateEndpointOffsetCandidates(basePos, path, GeneratedModelUtils.ToFloatList(path.end_point), searchRadius, ref bestDist, ref bestPos, ref bestRelHeight, ref found);
         }
     }
 
     /// <summary>[x, 相対高さ, z] 形式の端点1つ分を絶対座標に組み立てて点ターゲット候補の評価へ渡す。</summary>
-    private void EvaluateEndpointOffsetCandidates(Vector3 basePos, List<float> pointList, float searchRadius, ref float bestDist, ref Vector3 bestPos, ref float bestRelHeight, ref bool found)
+    private void EvaluateEndpointOffsetCandidates(Vector3 basePos, PathSummary path, List<float> pointList, float searchRadius, ref float bestDist, ref Vector3 bestPos, ref float bestRelHeight, ref bool found)
     {
         if (pointList == null || pointList.Count < 2) return;
         float x = pointList[0];
         float z = pointList[pointList.Count - 1];
-        float rel = pointList.Count >= 3 ? pointList[1] : 0f;
+        float rel = path.GetRelativeHeightAtPoint(x, z);
         if (Vector2.Distance(new Vector2(basePos.x, basePos.z), new Vector2(x, z)) > searchRadius) return;
         Vector3 endpoint = new Vector3(x, Utils.GetGroundHeight(new Vector3(x, 0f, z)) + rel, z);
         EvaluatePointTargetOffsetCandidates(basePos, endpoint, rel, ref bestDist, ref bestPos, ref bestRelHeight, ref found);
@@ -2827,9 +2831,9 @@ public class RoadPlanManager : MonoBehaviour
     /// </summary>
     private float ResolvePlacementHeight()
     {
-        if (lastSnapWasElevated && IsHeightEditable())
+        if (lastSnapWasElevated && (IsHeightEditable() || PathType == Constants.PATH_TRACK))
         {
-            float relH = Mathf.Max(lastSnapRelHeight, GetMinHeightFromMaster());
+            float relH = PathType == Constants.PATH_TRACK ? lastSnapRelHeight : Mathf.Max(lastSnapRelHeight, GetMinHeightFromMaster());
             if (!Mathf.Approximately(relH, currentHeight))
             {
                 currentHeight = relH;

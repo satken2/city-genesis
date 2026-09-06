@@ -127,8 +127,8 @@ export function PathBuildSections({
                   onChange={handleHeightChange}
                   min={pc.selectedVariantData?.min_height ?? 0}
                   max={500}
-                  step={1}
-                  integerOnly={true}
+                  step={0.1}
+                  integerOnly={false}
                 />
                 <span className="pc-stepper-unit">m</span>
               </div>

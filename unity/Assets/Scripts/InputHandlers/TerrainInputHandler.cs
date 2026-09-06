@@ -753,10 +753,9 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
             NodeData snappedNode = FindNearestNode(basePosition, actualThreshold, pathManager, out snappedPos, drawingPathVariant);
             if (snappedNode != null)
             {
-                // 標高の引き継ぎはノードが保持する相対高さをそのまま使う
-                // (絶対Y−地形サンプルの逆算は高さ源の差がノイズとして乗る)
+                // 吸着位置は設計標高またはノード相対Yから組み立て、描画Yを含まない。
                 snappedToElevatable = true;
-                snapRelHeight = snappedNode.GetRelativeHeight();
+                snapRelHeight = snappedPos.y - Utils.GetGroundHeight(snappedPos);
                 return snappedPos;
             }
 
@@ -817,7 +816,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
             // インフラ網の互換性フィルタ（道路×インフラ、別網インフラ同士は吸着しない）
             if (!InfraNetworkUtil.IsNodeSnappable(node, drawingPathVariant, pathManager)) continue;
 
-            Vector3 nodePos = node.GetAbsolutePosition();
+            Vector3 nodePos = pathManager.GetNodeSnapPosition(node);
 
             float dist = Vector2.Distance(new Vector2(basePos.x, basePos.z), new Vector2(nodePos.x, nodePos.z));
             if (dist < minDist && dist <= threshold)
@@ -851,7 +850,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
             // インフラ網の互換性フィルタ（道路×インフラ、別網インフラ同士は吸着しない）
             if (seg.path != null && !InfraNetworkUtil.IsPathSnappable(seg.path.path_variant, drawingPathVariant)) continue;
 
-            Vector3 closest = GetClosestPointOnSegment(seg.a, seg.b, basePos);
+            Vector3 closest = GetClosestPointOnSegmentXZ(seg.a, seg.b, basePos);
             float dist = Vector2.Distance(new Vector2(basePos.x, basePos.z), new Vector2(closest.x, closest.z));
             if (dist < minDist && dist <= threshold)
             {
@@ -946,7 +945,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
             {
                 float sx = startList[0];
                 float sz = startList[startList.Count - 1];
-                float sRel = startList.Count >= 3 ? startList[1] : 0f;
+                float sRel = path.GetRelativeHeightAtPoint(sx, sz);
                 float sy = Utils.GetGroundHeight(new Vector3(sx, 0f, sz)) + sRel;
                 Vector3 startPos = new Vector3(sx, sy, sz);
                 float dist = Vector2.Distance(new Vector2(basePos.x, basePos.z), new Vector2(sx, sz));
@@ -964,7 +963,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
             {
                 float ex = endList[0];
                 float ez = endList[endList.Count - 1];
-                float eRel = endList.Count >= 3 ? endList[1] : 0f;
+                float eRel = path.GetRelativeHeightAtPoint(ex, ez);
                 float ey = Utils.GetGroundHeight(new Vector3(ex, 0f, ez)) + eRel;
                 Vector3 endPos = new Vector3(ex, ey, ez);
                 float dist = Vector2.Distance(new Vector2(basePos.x, basePos.z), new Vector2(ex, ez));
@@ -979,6 +978,15 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         }
 
         return found;
+    }
+
+    /// <summary>カーソルの地形Yで吸着位置が縦断方向へずれないよう、XZで射影する。</summary>
+    public static Vector3 GetClosestPointOnSegmentXZ(Vector3 start, Vector3 end, Vector3 point)
+    {
+        Vector2 delta = new Vector2(end.x - start.x, end.z - start.z);
+        float t = delta.sqrMagnitude > 1e-8f
+            ? Mathf.Clamp01(Vector2.Dot(new Vector2(point.x - start.x, point.z - start.z), delta) / delta.sqrMagnitude) : 0f;
+        return Vector3.Lerp(start, end, t);
     }
 
     public static Vector3 GetClosestPointOnSegment(Vector3 segStart, Vector3 segEnd, Vector3 point)

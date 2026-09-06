@@ -162,8 +162,7 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
         onClose();
       } else {
         // 新規敷設: 連続設置モード。バリアント選択を維持して次のパスを配置できるようにする。
-        // 線路間隔の調整は確定したパス限りの設定なので、ここで既定へ戻す。
-        pathConstruction.continuePlacement(true);
+        pathConstruction.continuePlacement();
         setIsConfirming(false);
         void showNotification({
           message: t("path_construction.placedContinue"),

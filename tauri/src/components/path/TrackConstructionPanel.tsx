@@ -198,7 +198,7 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
       await pc.confirmPath();
       await sendEditPathFinish();
       // 連続設置: 選択中バリアント・軌道設定を維持したまま次のパスを配置できる状態へ戻す。
-      pc.continuePlacement(true);
+      pc.continuePlacement();
       setIsConfirming(false);
       void showNotification({
         message: t("path_construction.placedContinue"),

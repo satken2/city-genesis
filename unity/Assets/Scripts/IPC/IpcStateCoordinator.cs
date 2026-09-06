@@ -562,7 +562,11 @@ public class IpcStateCoordinator : MonoBehaviour
             roadPlanManager.LateralOffsets = lateralOffsets;
             roadPlanManager.TravelDirections = travelDirections;
 
-            roadPlanManager.InitializeRoadPlacement(pathId);
+            roadPlanManager.InitializeRoadPlacement(pathId,
+                ipcParams != null && ipcParams.TryGetValue("initial_height", out var ih) ? System.Convert.ToSingle(ih) : (float?)null,
+                ipcParams != null && ipcParams.TryGetValue("initial_embankment_height", out var ie) ? System.Convert.ToSingle(ie) : (float?)null,
+                ipcParams != null && ipcParams.TryGetValue("initial_curved", out var ic) ? System.Convert.ToBoolean(ic) : (bool?)null,
+                ipcParams != null && ipcParams.TryGetValue("initial_follow_terrain", out var it) ? System.Convert.ToInt32(it) : (int?)null);
         }
     }
 
