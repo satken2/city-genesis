@@ -9,6 +9,7 @@ using UnityEditor;
 public static class VehicleQA
 {
     static Assembly game;
+    static readonly List<string> accessTimings = new List<string>();
     static string source;
     static readonly BindingFlags Flags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
     static object Get(object o, string name) => o.GetType().GetField(name, Flags).GetValue(o);
@@ -46,7 +47,7 @@ public static class VehicleQA
             report.Add(Network(5,12,120,true,4,false));
             report.Add(Network(200,12,120,true));
             report.Add(Network(5,12,120,false,60));
-            File.WriteAllText(result,"PASS\nGeometry, directions, lane boundaries, fractional budget\n"+string.Join("\n",report));
+            File.WriteAllText(result,"PASS\nGeometry, directions, lane boundaries, fractional budget\n"+string.Join("\n",report)+"\n"+string.Join("\n",accessTimings));
             EditorApplication.Exit(0);
         }
         catch(Exception ex) { File.WriteAllText(result,"FAIL\n"+ex); EditorApplication.Exit(1); }
@@ -156,6 +157,10 @@ public static class VehicleQA
             Check((bool)v.GetType().GetProperty("ExitComplete").GetValue(v), "Roadside exit never completes");
         }
     }
+    static IEnumerable<int> GetIds(object buildings,int count)
+    {
+        for(int i=0;i<count;i++)yield return 100+i;
+    }
     static void AccessFixture(object manager, int subdivisions, List<GameObject> cleanup)
     {
         var master = new GameObject("AccessMaster").AddComponent(game.GetType("MasterDataStore"));cleanup.Add(master.gameObject);
@@ -168,11 +173,29 @@ public static class VehicleQA
         int active=(int)game.GetType("Constants").GetField("STATUS_ACTIVE").GetRawConstantValue();
         float x=-100+100f/subdivisions;
         var parcel=New("GeneratedModels.ParcelSummary");Set(parcel,"parcel_id",100);Set(parcel,"front_path_id",1);Set(parcel,"status",active);
-        Set(parcel,"polygon",new List<object>{new float[]{x-3,-94},new float[]{x+3,-94},new float[]{x+3,-80},new float[]{x-3,-80}});
+        Set(parcel,"polygon",new List<object>{new List<object>{x-3,-94f},new List<object>{x+3,-94f},new List<object>{x+3,-80f},new List<object>{x-3,-80f}});
         Call(parcels,"RegisterParcelDataForLines",parcel);
         var building=New("GeneratedModels.BuildingSummary");Set(building,"agent_id",100);Set(building,"parcel_id",100);Set(building,"status",active);Set(building,"is_bd",true);
         Call(buildings,"RegisterBuildingDataToCache",building);
-        Action refresh=()=>{var work=(IEnumerator)Call(manager,"UpdateAccess",Vector3.zero);while(work.MoveNext()){};};
+        int parcelCount=subdivisions==1?1000:1;
+        for(int i=1;i<parcelCount;i++)
+        {
+            var extra=New("GeneratedModels.ParcelSummary");Set(extra,"parcel_id",100+i);Set(extra,"front_path_id",1);Set(extra,"status",active);Set(extra,"polygon",Get(parcel,"polygon"));
+            Call(parcels,"RegisterParcelDataForLines",extra);
+            var extraBuilding=New("GeneratedModels.BuildingSummary");Set(extraBuilding,"agent_id",100+i);Set(extraBuilding,"parcel_id",100+i);Set(extraBuilding,"status",active);Set(extraBuilding,"is_bd",true);
+            Call(buildings,"RegisterBuildingDataToCache",extraBuilding);
+        }
+        double maxSlice=0,totalMs=0;int slices=0;
+        Action refresh=()=>
+        {
+            var work=(IEnumerator)Call(manager,"UpdateAccess",Vector3.zero);
+            while(true)
+            {
+                var clock=System.Diagnostics.Stopwatch.StartNew();bool more=work.MoveNext();clock.Stop();
+                maxSlice=Math.Max(maxSlice,clock.Elapsed.TotalMilliseconds);totalMs+=clock.Elapsed.TotalMilliseconds;slices++;
+                if(!more)break;
+            }
+        };
         refresh();
         Check(((IList)((IDictionary)Get(manager,"entrances"))[1]).Count>0,"Building frontage entrance missing");
         int generation=(int)Get(manager,"accessGeneration");refresh();
@@ -180,14 +203,19 @@ public static class VehicleQA
         Set(item,"frontage_allowed",false);refresh();
         Check(((IList)((IDictionary)Get(manager,"entrances"))[1]).Count==0,"Bridge has an entrance");
         Set(item,"frontage_allowed",true);refresh();
-        Set(building,"status",-1);refresh();
+        foreach(int bid in new List<int>(GetIds(buildings,parcelCount)))
+            Set(Call(buildings,"GetBuildingSummary",bid),"status",-1);
+        refresh();
         Check(((IList)((IDictionary)Get(manager,"entrances"))[1]).Count==0,"Empty/inactive building retains entrance");
-        Set(building,"status",active);refresh();
+        foreach(int bid in new List<int>(GetIds(buildings,parcelCount)))
+            Set(Call(buildings,"GetBuildingSummary",bid),"status",active);
+        refresh();
         var road=((IDictionary)Get(manager,"roads"))[1];var data=Get(road,"data");int type=(int)Get(data,"path_type");
         Set(data,"path_type",(int)game.GetType("Constants").GetField("PATH_MOTORWAY").GetRawConstantValue());refresh();
         Check(((IList)((IDictionary)Get(manager,"entrances"))[1]).Count==0,"Motorway has an entrance");
         Set(data,"path_type",type);refresh();
         Check(((IDictionary)Get(manager,"exitRanks")).Count==4*subdivisions,"Reverse routes do not reach entrance");
+        accessTimings.Add($"access parcels={parcelCount} roads={4*subdivisions} refreshes=7 slices={slices} totalMs={totalMs:F2} maxSliceMs={maxSlice:F2}");
     }
     static string Network(int subdivisions, float target, int seconds, bool reduce, int hz = 4, bool withAccess = true)
     {

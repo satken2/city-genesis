@@ -214,8 +214,7 @@ public class VehicleManager : MonoBehaviour
             float range = renderRadius + despawnMargin;
             if (XZDistanceSquared(road.line.points[0], center) > range * range) overall ^= road.data.path_id * 17;
             if (XZDistanceSquared(road.line.points[road.line.points.Length - 1], center) > range * range) overall ^= road.data.path_id * 37;
-            bool allowed = road.data.path_type == Constants.PATH_STREET && MasterDataStore.Instance != null
-                && MasterDataStore.Instance.GetPathMaster(road.data.path_variant)?.frontage_allowed == true;
+            bool allowed = FrontageAllowed(road.data);
             if (allowed) overall ^= road.data.path_id * 79;
             if (allowed && parcelManager != null && buildingManager != null)
             {
@@ -241,7 +240,10 @@ public class VehicleManager : MonoBehaviour
                         if (building != 0) BuildEntrances(road, parcel, building, cached.entries);
                         accessCache[id] = cached;
                     }
-                    entries.AddRange(cached.entries);
+                    foreach (var entry in cached.entries)
+                        foreach (var interval in road.intervals)
+                            if (entry.s >= interval.x && entry.s <= interval.y)
+                            { entries.Add(entry); overall ^= entry.parcel * 101; break; }
                     if (timer.Elapsed.TotalMilliseconds >= 1) { yield return null; timer.Restart(); }
                 }
             }
@@ -326,6 +328,10 @@ public class VehicleManager : MonoBehaviour
         }
     }
 
+    private static bool FrontageAllowed(PathSummary road)
+        => road != null && road.path_type == Constants.PATH_STREET && MasterDataStore.Instance != null
+            && MasterDataStore.Instance.GetPathMasterDictionary().TryGetValue(road.path_variant, out var master) && master.frontage_allowed;
+
     private bool ValidEntrance(Entrance entry, int path)
     {
         if (parcelManager == null || buildingManager == null) return false;
@@ -333,7 +339,7 @@ public class VehicleManager : MonoBehaviour
         var building = buildingManager.GetBuildingSummary(entry.building);
         var road = pathManager.GetPathData(path);
         return Drivable(road) && road.path_type == Constants.PATH_STREET
-            && MasterDataStore.Instance?.GetPathMaster(road.path_variant)?.frontage_allowed == true
+            && FrontageAllowed(road)
             && parcel != null && parcel.front_path_id == path && parcel.status == Constants.STATUS_ACTIVE
             && building != null && building.is_bd && building.parcel_id == entry.parcel && building.status == Constants.STATUS_ACTIVE
             && parcelManager.IsPointInParcel(entry.parcel, entry.destination);
@@ -401,8 +407,7 @@ public class VehicleManager : MonoBehaviour
 
     private bool HasSpawnPoint(Road road)
     {
-        if (entrances.TryGetValue(road.data.path_id, out var list))
-            foreach (var e in list) if (ValidEntrance(e, road.data.path_id)) return true;
+        if (entrances.TryGetValue(road.data.path_id, out var list) && list.Count > 0) return true;
         foreach (var interval in road.intervals)
             if ((interval.x > .1f && DirectionAllowsEntry(road.data.travel_direction, true)) ||
                 (interval.y < road.line.Length - .1f && DirectionAllowsEntry(road.data.travel_direction, false))) return true;
@@ -453,8 +458,8 @@ public class VehicleManager : MonoBehaviour
                     if (ValidEntrance(entry, road.data.path_id)) options.Add((entry.s, entry.forward));
             foreach (var interval in road.intervals)
             {
-                if (interval.x > .1f && DirectionAllowsEntry(road.data.travel_direction, true)) options.Add((interval.x, true));
-                if (interval.y < road.line.Length - .1f && DirectionAllowsEntry(road.data.travel_direction, false)) options.Add((interval.y, false));
+                if (interval.x > .1f && DirectionAllowsEntry(road.data.travel_direction, true)) options.Add((interval.x + Mathf.Min(5, (interval.y - interval.x) * .25f), true));
+                if (interval.y < road.line.Length - .1f && DirectionAllowsEntry(road.data.travel_direction, false)) options.Add((interval.y - Mathf.Min(5, (interval.y - interval.x) * .25f), false));
             }
             if (options.Count == 0) return;
             var option = options[Random.Range(0, options.Count)]; s = option.s; forward = option.forward;
@@ -573,7 +578,7 @@ public class VehicleManager : MonoBehaviour
         if (candidates.Count == 0)
         {
             if (current.path_type != Constants.PATH_STREET || !DirectionAllowsEntry(current.travel_direction, !v.forward) || !roads.TryGetValue(v.pathId, out next)) return false;
-            // 中央1車線には折り返しの横幅がないため、終端で到着する。
+            // 退出先のない末端でも任意デスポーンはせず、街路で許可された折り返しを使う。
 
             nextForward = !v.forward;
         }
