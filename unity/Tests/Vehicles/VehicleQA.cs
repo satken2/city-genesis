@@ -43,6 +43,7 @@ public static class VehicleQA
             foreach(int split in new[]{1,5,20}) report.Add(Network(split,12,1200,false));
             report.Add(Network(5,.2f,1200,false));
             report.Add(Network(5,12,1200,true));
+            report.Add(Network(5,12,120,true,4,false));
             report.Add(Network(200,12,120,true));
             report.Add(Network(5,12,120,false,60));
             File.WriteAllText(result,"PASS\nGeometry, directions, lane boundaries, fractional budget\n"+string.Join("\n",report));
@@ -155,7 +156,40 @@ public static class VehicleQA
             Check((bool)v.GetType().GetProperty("ExitComplete").GetValue(v), "Roadside exit never completes");
         }
     }
-    static string Network(int subdivisions, float target, int seconds, bool reduce, int hz = 4)
+    static void AccessFixture(object manager, int subdivisions, List<GameObject> cleanup)
+    {
+        var master = new GameObject("AccessMaster").AddComponent(game.GetType("MasterDataStore"));cleanup.Add(master.gameObject);
+        game.GetType("MasterDataStore").GetField("<Instance>k__BackingField",Flags).SetValue(null,master);
+        var item=New("PathMasterItem");Set(item,"frontage_allowed",true);
+        ((IDictionary)Get(master,"pathMasterById"))[0]=item;
+        var parcels=new GameObject("AccessParcels").AddComponent(game.GetType("ParcelManager"));cleanup.Add(parcels.gameObject);
+        var buildings=new GameObject("AccessBuildings").AddComponent(game.GetType("BuildingManager"));cleanup.Add(buildings.gameObject);
+        Set(manager,"parcelManager",parcels);Set(manager,"buildingManager",buildings);
+        int active=(int)game.GetType("Constants").GetField("STATUS_ACTIVE").GetRawConstantValue();
+        float x=-100+100f/subdivisions;
+        var parcel=New("GeneratedModels.ParcelSummary");Set(parcel,"parcel_id",100);Set(parcel,"front_path_id",1);Set(parcel,"status",active);
+        Set(parcel,"polygon",new List<object>{new float[]{x-3,-94},new float[]{x+3,-94},new float[]{x+3,-80},new float[]{x-3,-80}});
+        Call(parcels,"RegisterParcelDataForLines",parcel);
+        var building=New("GeneratedModels.BuildingSummary");Set(building,"agent_id",100);Set(building,"parcel_id",100);Set(building,"status",active);Set(building,"is_bd",true);
+        Call(buildings,"RegisterBuildingDataToCache",building);
+        Action refresh=()=>{var work=(IEnumerator)Call(manager,"UpdateAccess",Vector3.zero);while(work.MoveNext()){};};
+        refresh();
+        Check(((IList)((IDictionary)Get(manager,"entrances"))[1]).Count>0,"Building frontage entrance missing");
+        int generation=(int)Get(manager,"accessGeneration");refresh();
+        Check((int)Get(manager,"accessGeneration")==generation,"Unchanged data rebuilds route table");
+        Set(item,"frontage_allowed",false);refresh();
+        Check(((IList)((IDictionary)Get(manager,"entrances"))[1]).Count==0,"Bridge has an entrance");
+        Set(item,"frontage_allowed",true);refresh();
+        Set(building,"status",-1);refresh();
+        Check(((IList)((IDictionary)Get(manager,"entrances"))[1]).Count==0,"Empty/inactive building retains entrance");
+        Set(building,"status",active);refresh();
+        var road=((IDictionary)Get(manager,"roads"))[1];var data=Get(road,"data");int type=(int)Get(data,"path_type");
+        Set(data,"path_type",(int)game.GetType("Constants").GetField("PATH_MOTORWAY").GetRawConstantValue());refresh();
+        Check(((IList)((IDictionary)Get(manager,"entrances"))[1]).Count==0,"Motorway has an entrance");
+        Set(data,"path_type",type);refresh();
+        Check(((IDictionary)Get(manager,"exitRanks")).Count==4*subdivisions,"Reverse routes do not reach entrance");
+    }
+    static string Network(int subdivisions, float target, int seconds, bool reduce, int hz = 4, bool withAccess = true)
     {
         UnityEngine.Random.InitState(321+subdivisions);
         var pathManager=new GameObject("Paths").AddComponent(game.GetType("PathManager"));
@@ -167,6 +201,7 @@ public static class VehicleQA
         var budget=Get(manager,"population");Call(budget,"SetTarget",target);
         Type roadType=manager.GetType().GetNestedType("Road",BindingFlags.NonPublic);
         Type bucketType=manager.GetType().GetNestedType("Bucket",BindingFlags.NonPublic);
+        if(subdivisions>20) withAccess=false;
         int count=4*subdivisions;
         var corners=new[]{new Vector3(-100,0,-100),new Vector3(100,0,-100),new Vector3(100,0,100),new Vector3(-100,0,100)};
         for(int i=0;i<count;i++)
@@ -181,10 +216,12 @@ public static class VehicleQA
             Call(pathManager,"SavePathToCache",data);
             var line=Line(a,b);float length=Vector3.Distance(a,b);
             var road=Activator.CreateInstance(roadType);Set(road,"data",data);Set(road,"line",line);Set(road,"lanes",New("RoadLaneLayout",12f,2f,.5f,0f,2,1));
-            Set(road,"insideLength",length);Set(road,"intervals",new List<Vector2>{new Vector2(0,length)});roads.Add(i+1,road);
+            Set(road,"halfWidth",6f);Set(road,"insideLength",length);Set(road,"intervals",new List<Vector2>{new Vector2(0,length)});roads.Add(i+1,road);
             var bucket=Activator.CreateInstance(bucketType);Set(bucket,"road",road);Set(bucket,"type",10);Set(bucket,"target",target/count);
             buckets.Add(bucket);lookup.Add(((long)(i+1)<<8)|10L,bucket);
         }
+        var fixtureObjects = new List<GameObject>();
+        if(withAccess) AccessFixture(manager,subdivisions,fixtureObjects);
         int observed=0,peak=0,transitions=0;double sum=0;
         var roadSamples = new double[count];
         var priorPaths=new Dictionary<object,int>();
@@ -224,10 +261,12 @@ public static class VehicleQA
                 // 道路間の再配置には0.5台または25%の許容幅があり、退出中は走行密度から除く。
                 foreach(double samples in roadSamples) Near((float)(samples/observed),target/count,Mathf.Max(.5f,target/count*.25f),"Road density bias");
         }
-        else Check(active.Count==0,"Zero traffic leaves circulating cars");
+        else if(withAccess) Check(active.Count==0,"Reachable entrance did not drain population");
+        else Check(active.Count==12,"Closed network without buildings lost vehicles");
         if(target>=1)Check(transitions>10,"Cars disappear before crossing nodes");
         Call(manager,"ClearVehicles");Check(active.Count==0,"Reset leaks active cars");
         UnityEngine.Object.DestroyImmediate(manager.gameObject);UnityEngine.Object.DestroyImmediate(pathManager.gameObject);
+        foreach(var obj in fixtureObjects) UnityEngine.Object.DestroyImmediate(obj);
         return $"hz={hz} split={subdivisions} target={target} reduce={reduce} average={average:F3} peak={peak} transitions={transitions}";
     }
 }

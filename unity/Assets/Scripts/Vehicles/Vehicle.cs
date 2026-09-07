@@ -38,6 +38,20 @@ public sealed class VehiclePolyline
         if (tangent.sqrMagnitude < .001f) tangent = forward ? Vector3.forward : Vector3.back;
     }
 
+    public float Project(Vector3 point)
+    {
+        float best = float.PositiveInfinity, result = 0;
+        for (int i = 1; i < points.Length; i++)
+        {
+            Vector3 delta = points[i] - points[i - 1]; delta.y = 0;
+            Vector3 offset = point - points[i - 1]; offset.y = 0;
+            float t = delta.sqrMagnitude > .00001f ? Mathf.Clamp01(Vector3.Dot(offset, delta) / delta.sqrMagnitude) : 0;
+            float error = (offset - delta * t).sqrMagnitude;
+            if (error < best) { best = error; result = distances[i - 1] + t * (distances[i] - distances[i - 1]); }
+        }
+        return result;
+    }
+
     /// <summary>線分と円の交点を解き、複数回出入りする場合も円外区間を含めない。</summary>
     public List<Vector2> InsideIntervals(Vector3 center, float radius)
     {
@@ -95,6 +109,9 @@ public class Vehicle
     public float s, speed, age, distanceSinceJunction;
     public float laneOffset, shoulderOffset;
     public float roadHalfWidth;
+    public int destinationParcel, destinationBuilding;
+    public int accessGeneration = -1, searchedPath = -1;
+    public Vector3 destinationPoint;
     public GameObject go;
     public VehiclePolyline road;
     public VehiclePolyline connector;
@@ -183,6 +200,15 @@ public class Vehicle
         exitRotationElapsed = 0; exitTravelled = 0;
         arrivalPending = true;
         ExitingRoad = true;
+    }
+
+    /// <summary>検証済みの敷地内入口へ退出する。入口のない場所で任意距離の退出を作らない。</summary>
+    public void BeginParcelExit(Vector3 destination)
+    {
+        BeginRoadsideExit(shoulderOffset < 0 ? Constants.TRAFFIC_HAND_LEFT : Constants.TRAFFIC_HAND_RIGHT);
+        Vector3 delta = destination - exitStart;
+        exitLength = delta.magnitude;
+        exitSide = exitLength > .001f ? delta / exitLength : exitSide;
     }
 
     public int AheadNodeId(int startNodeId, int endNodeId) => forward ? endNodeId : startNodeId;

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using GeneratedModels;
@@ -36,6 +37,28 @@ public class VehicleManager : MonoBehaviour
     private readonly Dictionary<long, Bucket> bucketByKey = new Dictionary<long, Bucket>();
     private readonly List<(Road road, bool forward, float weight)> candidates = new List<(Road, bool, float)>();
     private readonly VehiclePopulationBudget population = new VehiclePopulationBudget();
+    private ParcelManager parcelManager;
+    private BuildingManager buildingManager;
+    private Coroutine accessWorker;
+    private bool initialFill = true;
+    private int accessSignature, accessGeneration;
+    private bool accessReady;
+    private Dictionary<int, List<Entrance>> entrances = new Dictionary<int, List<Entrance>>();
+    private Dictionary<long, int> exitRanks = new Dictionary<long, int>();
+    private readonly Dictionary<int, AccessCache> accessCache = new Dictionary<int, AccessCache>();
+    private sealed class Entrance
+    {
+        public int parcel, building;
+        public float s;
+        public bool forward;
+        public Vector3 destination;
+    }
+    private sealed class AccessCache
+    {
+        public int signature;
+        public List<Entrance> entries;
+    }
+    private static long State(int path, bool forward) => ((long)path << 1) | (forward ? 1L : 0L);
     private Transform container;
     private float scanTimer, densityTimer;
     private Vector3 lastCenter;
@@ -67,6 +90,8 @@ public class VehicleManager : MonoBehaviour
         container = new GameObject("VehicleContainer").transform;
         container.SetParent(transform, false);
         lastTrafficHand = CityInfoStore.TrafficHand;
+        parcelManager = FindAnyObjectByType<ParcelManager>();
+        buildingManager = FindAnyObjectByType<BuildingManager>();
     }
 
     private void Start() => CityInfoStore.EnsureLoaded(this);
@@ -108,10 +133,14 @@ public class VehicleManager : MonoBehaviour
         for (int i = active.Count - 1; i >= 0; i--) Despawn(i);
         roads.Clear(); buckets.Clear(); bucketByKey.Clear();
         population.Reset(); scanTimer = 0; densityTimer = 0;
+        if (accessWorker != null) StopCoroutine(accessWorker);
+        accessWorker = null; entrances.Clear(); exitRanks.Clear(); accessCache.Clear(); initialFill = true; accessReady = false; accessGeneration++;
     }
 
     private void RefreshRoads(Vector3 center)
     {
+        if (parcelManager == null) parcelManager = FindAnyObjectByType<ParcelManager>();
+        if (buildingManager == null) buildingManager = FindAnyObjectByType<BuildingManager>();
         var nextRoads = new Dictionary<int, Road>();
         float radius = Mathf.Max(1, renderRadius + despawnMargin);
         foreach (var data in pathManager.GetPathsNearCircle(center, radius))
@@ -134,6 +163,7 @@ public class VehicleManager : MonoBehaviour
         }
         roads.Clear();
         foreach (var entry in nextRoads) roads.Add(entry.Key, entry.Value);
+        if (accessWorker == null) accessWorker = StartCoroutine(UpdateAccess(center));
         var previous = new Dictionary<long, Bucket>(bucketByKey);
         buckets.Clear(); bucketByKey.Clear();
         float total = 0;
@@ -159,6 +189,154 @@ public class VehicleManager : MonoBehaviour
             v.road = road.line; v.s = progress * road.line.Length;
             SetLane(v, road, false);
         }
+    }
+
+    // 周辺道路だけを走査し、区画・建物・中心線の版が変わった入口だけ再計算する。
+    // 重い幾何処理と逆探索は車のUpdateから分離し、約1msごとに次フレームへ譲る。
+    private IEnumerator UpdateAccess(Vector3 center)
+    {
+        yield return null;
+        var snapshot = new Dictionary<int, Road>(roads);
+        var usedParcels = new HashSet<int>();
+        var next = new Dictionary<int, List<Entrance>>();
+        var timer = System.Diagnostics.Stopwatch.StartNew();
+        int overall = CityInfoStore.TrafficHand;
+        foreach (var road in snapshot.Values)
+        {
+            var entries = new List<Entrance>();
+            int shapeHash = road.data.path_id;
+            foreach (var point in road.line.points) shapeHash = unchecked(shapeHash * 31 + point.GetHashCode());
+            shapeHash = unchecked(shapeHash * 31 + road.halfWidth.GetHashCode());
+            shapeHash = unchecked(shapeHash * 31 + road.data.travel_direction);
+            shapeHash = unchecked(shapeHash * 31 + road.data.start_node_id);
+            shapeHash = unchecked(shapeHash * 31 + road.data.end_node_id);
+            overall ^= shapeHash;
+            float range = renderRadius + despawnMargin;
+            if (XZDistanceSquared(road.line.points[0], center) > range * range) overall ^= road.data.path_id * 17;
+            if (XZDistanceSquared(road.line.points[road.line.points.Length - 1], center) > range * range) overall ^= road.data.path_id * 37;
+            bool allowed = road.data.path_type == Constants.PATH_STREET && MasterDataStore.Instance != null
+                && MasterDataStore.Instance.GetPathMaster(road.data.path_variant)?.frontage_allowed == true;
+            if (allowed) overall ^= road.data.path_id * 79;
+            if (allowed && parcelManager != null && buildingManager != null)
+            {
+                foreach (int id in new List<int>(parcelManager.GetParcelIdsByFrontPath(road.data.path_id)))
+                {
+                    usedParcels.Add(id);
+                    var parcel = parcelManager.GetParcelSummary(id);
+                    if (parcel == null) continue;
+                    int signature = parcel.version ^ shapeHash ^ CityInfoStore.TrafficHand;
+                    int building = 0;
+                    foreach (int bid in buildingManager.GetBuildingIdsByParcel(id))
+                    {
+                        var data = buildingManager.GetBuildingSummary(bid);
+                        if (data == null || !data.is_bd || data.status != Constants.STATUS_ACTIVE) continue;
+                        signature = unchecked(signature * 31 + bid);
+                        if (building == 0 || bid < building) building = bid;
+                    }
+                    // 地形追従や交差点切断はAPIのversionだけでは検出できない。
+                    overall ^= signature;
+                    if (!accessCache.TryGetValue(id, out var cached) || cached.signature != signature)
+                    {
+                        cached = new AccessCache { signature = signature, entries = new List<Entrance>() };
+                        if (building != 0) BuildEntrances(road, parcel, building, cached.entries);
+                        accessCache[id] = cached;
+                    }
+                    entries.AddRange(cached.entries);
+                    if (timer.Elapsed.TotalMilliseconds >= 1) { yield return null; timer.Restart(); }
+                }
+            }
+            next[road.data.path_id] = entries;
+            if (timer.Elapsed.TotalMilliseconds >= 1) { yield return null; timer.Restart(); }
+        }
+        if (accessReady && overall == accessSignature) { accessWorker = null; yield break; }
+        // 走行方向付き道路を状態とする逆グラフ。車ごとの探索は行わず、退出までの段数を共有する。
+        var outgoing = new Dictionary<int, List<long>>();
+        var reverse = new Dictionary<long, List<long>>();
+        var ranks = new Dictionary<long, int>();
+        var queue = new Queue<long>();
+        float radius = renderRadius + despawnMargin;
+        foreach (var road in snapshot.Values)
+        foreach (bool forward in new[] { false, true })
+        {
+            if (!DirectionAllowsEntry(road.data.travel_direction, forward)) continue;
+            long state = State(road.data.path_id, forward);
+            int start = forward ? road.data.start_node_id : road.data.end_node_id;
+            if (!outgoing.TryGetValue(start, out var list)) outgoing[start] = list = new List<long>();
+            list.Add(state);
+            reverse[state] = new List<long>();
+            Vector3 end = road.line.points[forward ? road.line.points.Length - 1 : 0];
+            bool sink = XZDistanceSquared(end, center) > radius * radius;
+            foreach (var entry in next[road.data.path_id]) if (entry.forward == forward) sink = true;
+            if (sink) { ranks[state] = 0; queue.Enqueue(state); }
+        }
+        foreach (var pair in reverse)
+        {
+            int id = (int)(pair.Key >> 1); bool forward = (pair.Key & 1) != 0;
+            var road = snapshot[id];
+            int end = forward ? road.data.end_node_id : road.data.start_node_id;
+            bool connected = false;
+            if (outgoing.TryGetValue(end, out var list))
+                foreach (long target in list)
+                    if ((target >> 1) != id) { reverse[target].Add(pair.Key); connected = true; }
+            // 高速道路上で折り返さない。街路の本当の行き止まりだけ逆方向へつなぐ。
+            long opposite = State(id, !forward);
+            if (!connected && road.data.path_type == Constants.PATH_STREET && reverse.ContainsKey(opposite))
+                reverse[opposite].Add(pair.Key);
+            if (timer.Elapsed.TotalMilliseconds >= 1) { yield return null; timer.Restart(); }
+        }
+        while (queue.Count > 0)
+        {
+            long state = queue.Dequeue();
+            foreach (long previous in reverse[state])
+                if (!ranks.ContainsKey(previous)) { ranks[previous] = ranks[state] + 1; queue.Enqueue(previous); }
+            if (timer.Elapsed.TotalMilliseconds >= 1) { yield return null; timer.Restart(); }
+        }
+        // 完成した表を一括交換する。途中の表を車に見せず、入口喪失は退出直前にも検査する。
+        entrances = next; exitRanks = ranks; accessSignature = overall; accessReady = true; accessGeneration++;
+        var stale = new List<int>();
+        foreach (int id in accessCache.Keys)
+            if (!usedParcels.Contains(id)) stale.Add(id);
+        foreach (int id in stale) accessCache.Remove(id);
+        accessWorker = null;
+    }
+
+    private void BuildEntrances(Road road, ParcelSummary parcel, int building, List<Entrance> result)
+    {
+        if (parcel.status != Constants.STATUS_ACTIVE) return;
+        var polygon = GeneratedModelUtils.ToFloatJaggedArray(parcel.polygon);
+        if (polygon == null || polygon.Length < 3) return;
+        for (int i = 0; i < polygon.Length; i++)
+        {
+            var a = polygon[i]; var b = polygon[(i + 1) % polygon.Length];
+            if (a.Length < 2 || b.Length < 2) continue;
+            Vector3 mid = new Vector3((a[0] + b[0]) * .5f, parcel.altitude, (a[1] + b[1]) * .5f);
+            float s = road.line.Project(mid);
+            road.line.Sample(s, true, out var point, out var tangent);
+            Vector3 offset = mid - point; offset.y = 0;
+            if (s < 3 || road.line.Length - s < 3 || Mathf.Abs(mid.y - point.y) > 2) continue;
+            if (offset.magnitude < road.halfWidth - 1 || offset.magnitude > road.halfWidth + 4) continue;
+            Vector3 edge = new Vector3(b[0] - a[0], 0, b[1] - a[1]).normalized;
+            if (Mathf.Abs(Vector3.Dot(edge, tangent)) < .8f) continue;
+            Vector3 destination = mid + offset.normalized * 3;
+            if (!parcelManager.IsPointInParcel(parcel.parcel_id, destination)) continue;
+            float side = Vector3.Dot(Vector3.Cross(Vector3.up, tangent), offset);
+            bool forward = CityInfoStore.TrafficHand == Constants.TRAFFIC_HAND_LEFT ? side < 0 : side > 0;
+            if (!DirectionAllowsEntry(road.data.travel_direction, forward)) continue;
+            result.Add(new Entrance { parcel = parcel.parcel_id, building = building, s = s, forward = forward, destination = destination });
+        }
+    }
+
+    private bool ValidEntrance(Entrance entry, int path)
+    {
+        if (parcelManager == null || buildingManager == null) return false;
+        var parcel = parcelManager.GetParcelSummary(entry.parcel);
+        var building = buildingManager.GetBuildingSummary(entry.building);
+        var road = pathManager.GetPathData(path);
+        return Drivable(road) && road.path_type == Constants.PATH_STREET
+            && MasterDataStore.Instance?.GetPathMaster(road.path_variant)?.frontage_allowed == true
+            && parcel != null && parcel.front_path_id == path && parcel.status == Constants.STATUS_ACTIVE
+            && building != null && building.is_bd && building.parcel_id == entry.parcel && building.status == Constants.STATUS_ACTIVE
+            && parcelManager.IsPointInParcel(entry.parcel, entry.destination);
     }
 
     private void RegulateDensity(float dt)
@@ -187,6 +365,7 @@ public class VehicleManager : MonoBehaviour
             ReserveArrival(true);
         }
 
+        if (population.Desired > 0 && active.Count >= population.Desired) initialFill = false;
         int missing = population.Desired - active.Count;
         int fill = Mathf.Min(missing, Mathf.Max(1, Mathf.CeilToInt(missing * (1 - Mathf.Exp(-Mathf.Max(0, spawnFillRate) * dt)))));
         for (int i = 0; i < fill; i++)
@@ -216,8 +395,19 @@ public class VehicleManager : MonoBehaviour
         return last;
     }
 
-    private static float SpawnWeight(Bucket b)
-        => b.target <= 0 ? 0 : Mathf.Max(0, b.target - b.count) + Mathf.Max(0, b.target - b.average);
+    private float SpawnWeight(Bucket b)
+        => b.target <= 0 || (!initialFill && !HasSpawnPoint(b.road)) ? 0
+            : Mathf.Max(0, b.target - b.count) + Mathf.Max(0, b.target - b.average);
+
+    private bool HasSpawnPoint(Road road)
+    {
+        if (entrances.TryGetValue(road.data.path_id, out var list))
+            foreach (var e in list) if (ValidEntrance(e, road.data.path_id)) return true;
+        foreach (var interval in road.intervals)
+            if ((interval.x > .1f && DirectionAllowsEntry(road.data.travel_direction, true)) ||
+                (interval.y < road.line.Length - .1f && DirectionAllowsEntry(road.data.travel_direction, false))) return true;
+        return false;
+    }
 
     private bool ReserveArrival(bool redistribute)
     {
@@ -226,6 +416,7 @@ public class VehicleManager : MonoBehaviour
         foreach (var v in active)
         {
             if (v.arrivalPending || v.fading || v.age < minimumJourneyTime) continue;
+            if (!exitRanks.ContainsKey(State(v.pathId, v.forward))) continue;
             float surplus = 0;
             if (bucketByKey.TryGetValue(Key(v.pathId, v.vehicleType), out var b))
             {
@@ -237,7 +428,7 @@ public class VehicleManager : MonoBehaviour
             if (score > best) { selected = v; best = score; }
         }
         if (selected == null) return false;
-        selected.arrivalPending = true;
+        selected.arrivalPending = true; selected.searchedPath = -1;
         if (bucketByKey.TryGetValue(Key(selected.pathId, selected.vehicleType), out var chosen)) chosen.pending++;
         return true;
     }
@@ -253,6 +444,20 @@ public class VehicleManager : MonoBehaviour
             s = interval.x + Mathf.Min(pick, interval.y - interval.x);
             pick -= interval.y - interval.x;
             if (pick <= 0) break;
+        }
+        if (!initialFill)
+        {
+            var options = new List<(float s, bool forward)>();
+            if (entrances.TryGetValue(road.data.path_id, out var list))
+                foreach (var entry in list)
+                    if (ValidEntrance(entry, road.data.path_id)) options.Add((entry.s, entry.forward));
+            foreach (var interval in road.intervals)
+            {
+                if (interval.x > .1f && DirectionAllowsEntry(road.data.travel_direction, true)) options.Add((interval.x, true));
+                if (interval.y < road.line.Length - .1f && DirectionAllowsEntry(road.data.travel_direction, false)) options.Add((interval.y, false));
+            }
+            if (options.Count == 0) return;
+            var option = options[Random.Range(0, options.Count)]; s = option.s; forward = option.forward;
         }
         int variant = VehicleModelResolver.PickVariantId(b.type, Random.Range(0, int.MaxValue));
         var v = new Vehicle { vehicleType = b.type, variantId = variant,
@@ -297,22 +502,33 @@ public class VehicleManager : MonoBehaviour
                     if (v.ExitComplete) { v.fading = true; continue; }
                     break;
                 }
-                if (!v.InIntersection && v.arrivalPending && v.arrivalDistance < 0 && v.age >= minimumJourneyTime)
+                if (!v.InIntersection && v.arrivalPending &&
+                    (v.accessGeneration != accessGeneration || v.searchedPath != v.pathId))
                 {
-                    // 路肩寄せを次の交差点までに完了できる場合だけ開始する。短い道路では予約を持ち越す。
-                    float clearance = Mathf.Min(4f, v.TotalLength * .15f);
-                    float available = v.Remaining - clearance;
-                    float entryGap = Mathf.Max(0, Mathf.Min(8f, v.TotalLength * .2f) - v.distanceSinceJunction);
-                    if (available > entryGap + .001f)
+                    v.accessGeneration = accessGeneration; v.searchedPath = v.pathId;
+                    Entrance selected = null;
+                    if (entrances.TryGetValue(v.pathId, out var entries))
+                        foreach (var entry in entries)
+                        {
+                            float distance = (entry.s - v.s) * (v.forward ? 1 : -1);
+                            if (entry.forward != v.forward || distance < -.001f || !ValidEntrance(entry, v.pathId)) continue;
+                            if (selected == null || distance < (selected.s - v.s) * (v.forward ? 1 : -1)) selected = entry;
+                        }
+                    if (selected != null)
                     {
-                        v.arrivalDistance = Mathf.Min(Random.Range(15f, 45f), available);
-                        v.arrivalBlendLength = Mathf.Min(15, v.arrivalDistance - entryGap);
+                        v.arrivalDistance = Mathf.Max(0, (selected.s - v.s) * (v.forward ? 1 : -1));
+                        v.arrivalBlendLength = Mathf.Min(15, Mathf.Max(.1f, v.arrivalDistance));
+                        v.destinationParcel = selected.parcel; v.destinationBuilding = selected.building; v.destinationPoint = selected.destination;
                     }
+                    else { v.arrivalDistance = -1; v.destinationParcel = 0; }
                 }
                 remaining = v.Advance(remaining);
                 if (!v.InIntersection && v.arrivalDistance >= 0 && v.arrivalDistance < .001f)
                 {
-                    v.BeginRoadsideExit(CityInfoStore.TrafficHand); continue;
+                    var entry = new Entrance { parcel = v.destinationParcel, building = v.destinationBuilding, destination = v.destinationPoint };
+                    if (ValidEntrance(entry, v.pathId)) v.BeginParcelExit(v.destinationPoint);
+                    else { v.arrivalDistance = -1; v.destinationParcel = 0; }
+                    continue;
                 }
                 if (v.InIntersection && v.connectorS >= v.connector.Length - .001f)
                 {
@@ -322,7 +538,11 @@ public class VehicleManager : MonoBehaviour
                 if (!v.InIntersection && v.Remaining < .001f)
                 {
                     if (++transitions > 128) { invalid = true; break; }
-                    if (!Transition(v)) v.BeginRoadsideExit(CityInfoStore.TrafficHand);
+                    if (!Transition(v))
+                    {
+                        // 退出先のない行き止まりでは実体を残す。見えている高速道路上で消して帳尻を合わせない。
+                        v.age += remaining; remaining = 0; break;
+                    }
                     continue;
                 }
                 break;
@@ -352,9 +572,9 @@ public class VehicleManager : MonoBehaviour
         Road next; bool nextForward;
         if (candidates.Count == 0)
         {
-            if (!DirectionAllowsEntry(current.travel_direction, !v.forward) || !roads.TryGetValue(v.pathId, out next)) return false;
+            if (current.path_type != Constants.PATH_STREET || !DirectionAllowsEntry(current.travel_direction, !v.forward) || !roads.TryGetValue(v.pathId, out next)) return false;
             // 中央1車線には折り返しの横幅がないため、終端で到着する。
-            if (next.lanes.Center(0, CityInfoStore.TrafficHand) == 0) return false;
+
             nextForward = !v.forward;
         }
         else
@@ -370,11 +590,18 @@ public class VehicleManager : MonoBehaviour
                     if (pick <= 0) { chosen = i; break; }
                 }
             }
+            if (v.arrivalPending)
+            {
+                int best = int.MaxValue;
+                for (int i = 0; i < candidates.Count; i++)
+                    if (exitRanks.TryGetValue(State(candidates[i].road.data.path_id, candidates[i].forward), out int rank) && rank < best)
+                    { best = rank; chosen = i; }
+            }
             next = candidates[chosen].road; nextForward = candidates[chosen].forward;
         }
         v.Sample(out Vector3 p0, out Vector3 t0);
         v.SetPath(next.data.path_id, next.line, nextForward);
-        v.spawnBlendRemaining = 0;
+        v.spawnBlendRemaining = 0; v.arrivalDistance = -1; v.destinationParcel = 0;
         SetLane(v, next, false);
         v.Sample(out Vector3 p1, out Vector3 t1);
         v.connector = VehiclePolyline.Connector(p0, t0, p1, t1, intersectionCurveTension);
@@ -456,7 +683,7 @@ public sealed class VehiclePopulationBudget
     {
         // 端数枠の到着・補充の遅れを台秒で繰り越す。0.2台を長時間描くときの上振れを防ぐ。
         if (Target - Mathf.Floor(Target) > .00001f)
-            remainder = Mathf.Clamp(remainder + (Desired - actual) * dt / 12f, -2, 2);
+            remainder += (Desired - actual) * dt / 12f;
     }
     private void Sample()
     {
