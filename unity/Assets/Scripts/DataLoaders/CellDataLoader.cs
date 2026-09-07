@@ -78,8 +78,8 @@ public class CellDataLoader : MonoBehaviour
         if (GameStateManager.Instance.IsGameStarted())
         {
             // 開放済みセルリストを取得してからセルロードを開始する。
-            // 未開放セルの Dynamic 抑制は、このリスト取得後に有効になる。
-            StartCoroutine(FetchAcquiredCellsThenLoad());
+            // 開放状態の表示は、このリスト取得後に有効になる。
+            RenderWorkScheduler.Start(this, FetchAcquiredCellsThenLoad(), "CellDataLoader");
         }
         else
         {
@@ -132,12 +132,7 @@ public class CellDataLoader : MonoBehaviour
         }
 
         // HeightmapTextureManager の初期化。
-        // TerrainManager への参照を設定し、地形の全量ロード完了後にCPU高さ配列を構築する。
-        // シーン未配置の場合はここで生成する(ResourceManager/PropManager と同じ自己生成パターン)。
-        // 未配置のままだと Instance が null となり、TerrainManager の高さ書き込みが
-        // 全てスキップされてCPU高さ配列・GPU高さテクスチャの両方が沈黙する
-        // (GetTerrainHeight は Utils.GetGroundHeight へフォールバックするため
-        // ゲームは一見正常に動き、シェーダーの地形追従だけが効かなくなる)。
+        // GPU高さ窓が地形タイルの完成通知を購読できるよう、参照を初期化する。
         if (heightmapTextureManager == null) heightmapTextureManager = FindAnyObjectByType<HeightmapTextureManager>();
         if (heightmapTextureManager == null)
         {
@@ -340,7 +335,7 @@ public class CellDataLoader : MonoBehaviour
 
     private void UpdateManagers(LodCellSets cellSets, HashSet<Vector2Int> tierChangedCells, bool isForce, bool forceManagerUpdate = false)
     {
-        if (cellSets.nearCells == null || cellSets.nearCells.Count == 0) return;
+        if (cellSets.farCells == null) return;
 
         if (!forceManagerUpdate && !isForce && (tierChangedCells == null || tierChangedCells.Count == 0))
         {
@@ -366,25 +361,63 @@ public class CellDataLoader : MonoBehaviour
         // 取りこぼしたセルは pendingFollowUpCells に残るため、次回完了時に再処理される。
         if (terrainFollowUpCoroutine != null)
         {
-            StopCoroutine(terrainFollowUpCoroutine);
+            RenderWorkScheduler.Stop(this, terrainFollowUpCoroutine);
             terrainFollowUpCoroutine = null;
         }
 
+        LoadBatch objectBatch = activeLoadBatch;
+        pendingObjectLoad = () => RenderWorkScheduler.Start(this, LoadObjectManagers(cellSets, tierChangedCells, isForce, objectBatch), "CellDataLoader");
+        if (terrainManager != null)
+        {
+            UnityLog.If(LocalConstants.UNITY_LOG_LOADER, "CellDataLoader: 地形のリロード開始");
+            if (pathManager != null)
+            {
+                pathManager.BeginDeferredTerrainTilePathRebuilds();
+            }
+            if (buildingManager != null)
+            {
+                buildingManager.BeginDeferredTerrainTileBuildingRebuilds();
+            }
+            terrainManager.LoadLodCells(cellSets, null, isForce, activeLoadBatch);
+        }
+        else { pendingObjectLoad?.Invoke(); pendingObjectLoad = null; }
+    }
+
+    /// <summary>
+    /// TerrainManager が全セルのロードを完了した時に呼ばれる。
+    /// 引数 <paramref name="updatedCells"/> は「このロードバッチで実際に地形タイルが
+    /// (再)生成・再縫合されたセル」の一覧。これらのセルだけを対象に、建物のY座標調整・
+    /// メッシュ再生成、道路の地形追従形状更新、プロップのY座標調整を行う。
+    /// 地形が変化していないセルには一切触れない。
+    ///
+    /// 追従更新は <see cref="TerrainFollowUpCoroutine"/> で複数フレームに分散し、
+    /// メッシュ再生成の集中によるフレームヒッチ(カメラのカクつき)を防ぐ。
+    /// </summary>
+    private System.Action pendingObjectLoad;
+
+    private IEnumerator LoadObjectManagers(LodCellSets cellSets, HashSet<Vector2Int> tierChangedCells, bool isForce, LoadBatch batch)
+    {
+        if (batch.IsCanceled) yield break;
+        if (parcelManager != null)
+        {
+            parcelManager.LoadLodCells(cellSets, isForce);
+            while (parcelManager.IsLoading)
+            {
+                if (batch.IsCanceled) yield break;
+                yield return null;
+            }
+        }
+        if (batch.IsCanceled) yield break;
         // 1. 建物, 道路, 区画, 地区のリロード
         if (buildingManager != null)
         {
             UnityLog.If(LocalConstants.UNITY_LOG_LOADER, "CellDataLoader: 建物のリロード開始");
-            buildingManager.LoadLodCells(cellSets, tierChangedCells, isForce, activeLoadBatch);
+            buildingManager.LoadLodCells(cellSets, tierChangedCells, isForce, batch);
         }
         if (pathManager != null)
         {
             UnityLog.If(LocalConstants.UNITY_LOG_LOADER, "CellDataLoader: 道路のリロード開始");
-            pathManager.LoadLodCells(cellSets, tierChangedCells, isForce, activeLoadBatch);
-        }
-        if (parcelManager != null)
-        {
-            UnityLog.If(LocalConstants.UNITY_LOG_LOADER, "CellDataLoader: 区画のリロード開始");
-            parcelManager.LoadLodCells(cellSets, isForce);
+            pathManager.LoadLodCells(cellSets, tierChangedCells, isForce, batch);
         }
         if (zoneManager != null)
         {
@@ -399,34 +432,11 @@ public class CellDataLoader : MonoBehaviour
         if (propManager != null)
         {
             UnityLog.If(LocalConstants.UNITY_LOG_LOADER, "CellDataLoader: プロップのリロード開始");
-            propManager.LoadLodCells(cellSets, tierChangedCells, isForce, activeLoadBatch);
+            propManager.LoadLodCells(cellSets, tierChangedCells, isForce, batch);
         }
         // 2/3. 地形(near/far/dynamic)のリロード
-        if (terrainManager != null)
-        {
-            UnityLog.If(LocalConstants.UNITY_LOG_LOADER, "CellDataLoader: 地形のリロード開始");
-            if (pathManager != null)
-            {
-                pathManager.BeginDeferredTerrainTilePathRebuilds();
-            }
-            if (buildingManager != null)
-            {
-                buildingManager.BeginDeferredTerrainTileBuildingRebuilds();
-            }
-            terrainManager.LoadLodCells(cellSets, null, isForce, activeLoadBatch);
-        }
     }
 
-    /// <summary>
-    /// TerrainManager が全セルのロードを完了した時に呼ばれる。
-    /// 引数 <paramref name="updatedCells"/> は「このロードバッチで実際に地形タイルが
-    /// (再)生成・再縫合されたセル」の一覧。これらのセルだけを対象に、建物のY座標調整・
-    /// メッシュ再生成、道路の地形追従形状更新、プロップのY座標調整を行う。
-    /// 地形が変化していないセルには一切触れない。
-    ///
-    /// 追従更新は <see cref="TerrainFollowUpCoroutine"/> で複数フレームに分散し、
-    /// メッシュ再生成の集中によるフレームヒッチ(カメラのカクつき)を防ぐ。
-    /// </summary>
     private void OnTerrainAllLoaded(IReadOnlyList<Vector2Int> updatedCells)
     {
         // 今回実際に更新されたセルを未処理集合へ統合する。
@@ -440,7 +450,7 @@ public class CellDataLoader : MonoBehaviour
         // 進行中の追従コルーチンがあれば停止して仕切り直す(最新地形に対して処理し直す)。
         if (terrainFollowUpCoroutine != null)
         {
-            StopCoroutine(terrainFollowUpCoroutine);
+            RenderWorkScheduler.Stop(this, terrainFollowUpCoroutine);
             terrainFollowUpCoroutine = null;
         }
 
@@ -456,14 +466,14 @@ public class CellDataLoader : MonoBehaviour
             return;
         }
 
-        terrainFollowUpCoroutine = StartCoroutine(TerrainFollowUpCoroutine());
+        terrainFollowUpCoroutine = RenderWorkScheduler.Start(this, TerrainFollowUpCoroutine(), "CellDataLoader");
     }
 
     /// <summary>
-    /// 地形追従更新(CPU高さ配列の更新 → 建物 → 道路 → プロップ)を複数フレームに分散して実行する。
-    /// 各ステップはフレーム予算(<see cref="PerformanceConfig.FrameBudgetMs"/>)を超えると次フレームに譲る。
+    /// 地形追従更新(建物 → 道路 → プロップ)を複数フレームに分散して実行する。
+    /// 各ステップはフレーム予算(<see cref="PerformanceConfig.SliceBudgetMs"/>)を超えると次フレームに譲る。
     /// 建物・道路は <see cref="HeightmapTextureManager.GetTerrainHeight"/> を参照するため、
-    /// 必ずCPU高さ配列の更新を先に行う。
+    /// 完成したTerrainタイルだけを参照する。
     /// </summary>
     private IEnumerator TerrainFollowUpCoroutine()
     {
@@ -499,16 +509,6 @@ public class CellDataLoader : MonoBehaviour
         }
         List<Vector2Int> meshRebuildCells = new List<Vector2Int>(rebuildSet);
 
-        // 1. CPU高さ配列。通常は地形タイルの生成・再縫合時に TerrainManager が
-        //    WriteCellHeights で直接書き込むため、ここでの更新は不要。
-        //    初回・強制時のみ全量を再構築する(GPU readbackなしのキャッシュ再書き込み)。
-        if (heightmapTextureManager != null && (!isInitialLoadComplete || pendingIsForce))
-        {
-            var swHtm = System.Diagnostics.Stopwatch.StartNew();
-            heightmapTextureManager.RebuildCpuHeightmap();
-            UnityLog.If(LocalConstants.UNITY_LOG_TIMING, () => $"[TIMING] CellDataLoader  Heightmap rebuild: {swHtm.ElapsedMilliseconds}ms");
-        }
-
         // 1.5. 道路のLOD一括ロードがまだ進行中なら、その完了を待ってから地形追従へ進む。
         //     地形と道路が同時にロードされる初回ロード(セーブ済みの都市を起動した瞬間など)では、
         //     道路の一括ロードが地形適用より先に走り、道路が「まだ標高0の地形」を参照して
@@ -516,7 +516,7 @@ public class CellDataLoader : MonoBehaviour
         //     並走すると、PathManager が「このバッチで生成済みの道路」を重複スキップし
         //     (TryRebuildPathOnce の lodBatchRebuiltPathIds ガード)、地形追従の再生成が
         //     握りつぶされて誤った高さ(地面の道路が浮く/高架が地面に落ちる)のまま固定される。
-        //     一括ロードが終わってから追従すれば、CPU高さ配列は上で再構築済みのため
+        //     一括ロードが終わってから追従すれば、地形タイルの適用は完了しているため
         //     すべての対象道路が正しい標高で再生成される。
         //     一括ロードはカメラ移動でキャンセルされてもフラグがリセットされるため、待機は有界。
         while (pathManager != null && pathManager.IsLodBatchActive)
@@ -589,6 +589,10 @@ public class CellDataLoader : MonoBehaviour
         }
 
 
+        var loadObjects = pendingObjectLoad;
+        pendingObjectLoad = null;
+        loadObjects?.Invoke();
+
         if (!isInitialLoadComplete)
         {
             isInitialLoadComplete = true;
@@ -600,7 +604,7 @@ public class CellDataLoader : MonoBehaviour
         //  2周目の FinishTerrainFollowUp では defer 集合が空のため、無限ループにはならない)
         if (pendingFollowUpCells.Count > 0 && terrainFollowUpCoroutine == null)
         {
-            terrainFollowUpCoroutine = StartCoroutine(TerrainFollowUpCoroutine());
+            terrainFollowUpCoroutine = RenderWorkScheduler.Start(this, TerrainFollowUpCoroutine(), "CellDataLoader");
         }
     }
 
@@ -649,7 +653,7 @@ public class CellDataLoader : MonoBehaviour
         if (currentCenterCell.x != int.MinValue && currentCenterCell.y != int.MinValue)
         {
 
-            StartCoroutine(ForceReloadAllDataCoroutine());
+            RenderWorkScheduler.Start(this, ForceReloadAllDataCoroutine(), "CellDataLoader");
         }
     }
 
@@ -680,6 +684,7 @@ public class CellDataLoader : MonoBehaviour
     /// </summary>
     public void ClearAllManagerData()
     {
+        pendingObjectLoad = null;
         // 実行中の地形追従やデータ取得バッチをキャンセル
         if (activeLoadBatch != null)
         {
@@ -689,7 +694,7 @@ public class CellDataLoader : MonoBehaviour
 
         if (terrainFollowUpCoroutine != null)
         {
-            StopCoroutine(terrainFollowUpCoroutine);
+            RenderWorkScheduler.Stop(this, terrainFollowUpCoroutine);
             terrainFollowUpCoroutine = null;
         }
 
@@ -702,7 +707,7 @@ public class CellDataLoader : MonoBehaviour
         resourceManager?.ClearAllCells();
         propManager?.ClearAllCells();
 
-        // CPU高さ配列と地形高さのフレームキャッシュを無効化する。
+        // GPU高さ窓と地形高さのフレームキャッシュを無効化する。
         // 無効化しないと、次のセーブのロード中に前のマップの標高が
         // HeightmapTextureManager.GetTerrainHeight から返り、地形タイル到着前に
         // 生成される建物・道路・パスのスプラインが誤った高さで作られる。
@@ -738,24 +743,24 @@ public class CellDataLoader : MonoBehaviour
     public void FetchBuilding(int agentId)
     {
         if (buildingManager != null)
-            StartCoroutine(buildingManager.FetchBuilding(agentId));
+            RenderWorkScheduler.Start(this, buildingManager.FetchBuilding(agentId), "CellDataLoader");
     }
 
     public void FetchPath(int pathId)
     {
         if (pathManager != null)
-            StartCoroutine(pathManager.FetchPath(pathId));
+            RenderWorkScheduler.Start(this, pathManager.FetchPath(pathId), "CellDataLoader");
     }
 
     public void FetchParcel(int parcelId)
     {
         if (parcelManager != null)
-            StartCoroutine(parcelManager.FetchParcel(parcelId));
+            RenderWorkScheduler.Start(this, parcelManager.FetchParcel(parcelId), "CellDataLoader");
     }
 
     public void FetchZone(int zoneId)
     {
         if (zoneManager != null)
-            StartCoroutine(zoneManager.FetchZone(zoneId));
+            RenderWorkScheduler.Start(this, zoneManager.FetchZone(zoneId), "CellDataLoader");
     }
 }

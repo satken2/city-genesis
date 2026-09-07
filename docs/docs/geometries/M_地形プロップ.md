@@ -41,16 +41,18 @@ PropGeometryが永続描画と散布プレビューの共通実装である。�
 
 ## M.4. 既存LODとの統合
 
-[E_LOD処理](E_LOD処理.md)のデータティア・描画LOD・生成保持予算の分離に従う。
+[E_LOD処理](E_LOD処理.md)の取得範囲・描画LOD・生成保持予算の分離に従う。
 
 | 層 | 管理内容 |
 |---|---|
-| LodConfig / CellDataLoader | 既存セルのティア、ロード対象、LoadBatch |
+| LodConfig / CellDataLoader | 常駐セル集合、ロード対象、LoadBatch |
 | セル内の小区画 | 散布・除外・GPUバッチ生成の単位。独立した地形セルではない |
 | DrawLod | 個体ごとのClose / Normal / Far / Hidden |
 | フレーム・保持予算 | 生成処理の分散、常駐候補点数の制限 |
 
-PropManagerはfarCells（Near/Dynamicを含む集合）をロードする。UltraFarには描画しない。Near/Dynamicでは画面上の大きさと既存DrawLodEvaluatorのヒステリシスでLODを選び、FarセルではFar以下に制限する。投影比0.001未満でHiddenへ、0.0015以上で再表示する。カメラ移動4m・投影設定変更・データ変更で再判定し、既存の12フレーム間隔を使う。視錐台によるバッチの表示判定は毎フレーム行う。
+PropManagerは最大81の常駐セルをロードする。旧farCells/nearCells/dynamicCellsは同じ集合で、地形ティアによるFar固定は行わない。投影サイズとヒステリシスで個体のLODを選ぶ。正投影にも対応し、距離の上限は実距離で判定する。常駐範囲外のUltraFarにはプロップを描画しない。
+
+候補予算は有効小区画へ配分し、各点のXZ・seedから得た固定順位で均等に選ぶ。列挙順で小区画全体を捨てない。個別配置を優先し、予算変更は安定した部分集合になる。Farの散布個体は固定順位で1/4に間引き、個別配置は間引かない。既存の簡略モデルをインスタンシングし、森専用の全域代理メッシュは使用しない。影を送信するインスタンスは1フレーム4096まで（サブメッシュ分を含む）。更新中は旧バッチを維持し、一時的に旧・新配列を併せて保持する。
 
 セルサイズの正はTerrainManager.CellSize。既定では一辺を8分割する（500mセルなら62.5m）。境界をまたがず、分割数はUnityのsubdivisionsで設定する。地形ハイトマップの513解像度、バックエンドのセルID、Dynamic地形の取得・保存単位には影響しない。
 
@@ -77,9 +79,9 @@ GraphicsSettingsのInstancing VariantsはKeep Allに設定する。実行時に�
 
 生成・高さ調整・描画バッチ構築はPerformanceConfig.FrameBudgetMsでフレーム分散する。LoadBatchと独自の世代番号で旧処理のコミットを防ぐ。同じ小区画のLOD再構築中は前の完成済みバッチを維持し、新しい完成結果へ置き換える。候補・除外データの更新で小区画を置き換える場合は、新バッチ完成まで一時的に非表示になる。
 
-一散布レコード5,000個という上限は設けない。代わりに常駐候補点の予算maxResidentCandidates（既定250,000）を使い、カメラに近い小区画から優先する。非表示候補も復元用に数える。予算を超える小区画は区画全体を省略し、次のロードで再評価する。更新作業中は旧配列と新配列を一時的に併存させるため、瞬間的なメモリ使用量は常駐分を上回る。
+一散布レコード5,000個という上限は設けない。常駐候補点の予算maxResidentCandidates（既定250,000）を有効小区画へ配分し、各点の固定順位で選ぶ。非表示候補も復元用に数える。予算超過で小区画全体を捨てない。更新作業中は旧配列と新配列が一時的に併存するため、瞬間的なメモリ使用量は常駐分を上回る。
 
-地形高さは既存HeightmapTextureManagerの取得処理を共用する。Near/DynamicはTerrainFollowUpCoroutineのupdatedCells∩nearCellsでYを更新する。初回Farタイルも地形より先にプロップを取得し得るため、OnTerrainTileReadyで対象小区画の高さ更新を予約する。ティアダウンで地形データを戻さない既存仕様に従い、保持中の地形へ接地する。
+高さは `HeightmapTextureManager.GetTerrainHeight`（Utilsへ委譲）で現在のTerrainを参照する。初回は地形適用後に生成し、編集時はTerrainFollowUpCoroutineの更新セルを再接地する。タイル完成通知も対象小区画の高さ更新へ合流する。
 
 ## M.7. APIと配置プレビュー
 

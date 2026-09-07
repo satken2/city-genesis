@@ -2,8 +2,7 @@ param([string]$UnityExe)
 $ErrorActionPreference = 'Stop'
 $unityRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $project = Join-Path $unityRoot 'Assembly-CSharp.csproj'
-& dotnet build $project -v quiet /clp:ErrorsOnly
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+& (Join-Path $PSScriptRoot "../BuildRuntime.ps1")
 if (!$UnityExe) {
     [xml]$projectXml = Get-Content -LiteralPath $project -Raw
     $coreReference = $projectXml.Project.ItemGroup.Reference | Where-Object { $_.Include -eq 'UnityEngine.CoreModule' }

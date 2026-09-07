@@ -50,15 +50,7 @@ public static class DrawLodConfig
     public const float PATH_NORMAL_ENTER_DISTANCE = 450f;
     public const float PATH_NORMAL_EXIT_DISTANCE = 550f;
 
-    /// <summary>
-    /// 長いパスの詳細描画区間。カメラからこの距離以内の部分だけ詳細パーツを敷き、
-    /// 残りは遠景の帯にする(描画区間の分割)。降格距離より少し外側まで詳細にして、
-    /// カメラの小さな移動で区間境界が動き続けないようにする。
-    /// </summary>
-    public const float PATH_DETAIL_RANGE_DISTANCE = 650f;
-    /// <summary>この長さ(m)未満のパスは区間分割せず全長を同じ詳細度で描く。</summary>
-    public const float PATH_DETAIL_RANGE_MIN_LENGTH = 300f;
-    /// <summary>詳細区間の端が、この割合以上ずれたときだけ再生成する(再生成の抑制)。</summary>
+    /// <summary>互換呼び出しのクリップ範囲を比較するときの許容差。</summary>
     public const float PATH_DETAIL_RANGE_REBUILD_TOLERANCE = 0.1f;
 
     /// <summary>描画LODの再判定間隔(フレーム)。毎フレーム全件を走査しない。</summary>
@@ -102,9 +94,9 @@ public static class DrawLodEvaluator
     /// current は現在の描画LOD(ヒステリシス用)。allowClose=false なら接写へ昇格しない
     /// (接写の保持上限に達しているとき)。Hidden は返さない(建物は遠景でもスカイラインを保つ)。
     /// </summary>
-    public static DrawLod EvaluateBySize(float radius, float distance, float tanHalfFov, DrawLod current, bool allowClose)
+    public static DrawLod EvaluateBySize(float radius, float distance, float tanHalfFov, DrawLod current, bool allowClose, bool orthographic = false)
     {
-        float ratio = ProjectedRatio(radius, distance, tanHalfFov);
+        float ratio = ProjectedRatio(radius, orthographic ? 1f : distance, tanHalfFov);
 
         bool closeNow;
         if (current == DrawLod.Close)

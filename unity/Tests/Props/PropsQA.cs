@@ -129,6 +129,18 @@ public static class PropsQA
                 results.Add($"{count}: actual={points.Count}, generationCPUms={generate:F2}, farBatchCPUms={watch.Elapsed.TotalMilliseconds:F2}, batches={batchCount}");
             }
             var original=Points();
+            int normalBudget = (int)Field(manager,"maxResidentCandidates");
+            Set(manager,"maxResidentCandidates",20000);
+            Apply(Snapshot(50000,false,50000));
+            var limited = Points();
+            Check(limited.Count <= 20000 && limited.Count > 19000, "resident candidate budget not enforced");
+            Check(limited.Keys.All(original.ContainsKey), "budget changed scatter positions");
+            Check(Chunks.Values.Cast<object>().All(c=>((Array)Field(c,"points")).Length>0), "budget dropped a whole forest chunk");
+            Set(manager,"maxResidentCandidates",10000);
+            Apply(Snapshot(50000,false,50000));
+            Check(Points().Keys.All(limited.ContainsKey), "reduced budget was not a nested subset");
+            Set(manager,"maxResidentCandidates",normalBudget);
+            Apply(Snapshot(50000,false,50000));
             Apply(Snapshot(50000,false,50000));
             Check((int)managerType.GetProperty("LastRegeneratedChunks").GetValue(manager)==0,"unchanged snapshot regenerated");
             Apply(Snapshot(50000,true,50000));var blocked=Points();

@@ -15,14 +15,6 @@ public class CameraCellChecker : MonoBehaviour
     // LodConfig がセル境界判定に使用する。
     public Vector3 CurrentWorldPosition { get; private set; }
 
-    // 確定済みのセルインデックス（ヒステリシス判定用）
-    private Vector2Int confirmedCellIndex = new Vector2Int(int.MinValue, int.MinValue);
-    // 未確定の新セル候補とその継続フレーム数
-    private Vector2Int candidateCellIndex;
-    private int candidateFrameCount;
-    // 新セルが連続して何フレーム検出されたら確定とみなすか
-    private const int CELL_CHANGE_CONFIRM_FRAMES = 3;
-
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -33,59 +25,19 @@ public class CameraCellChecker : MonoBehaviour
         Instance = this;
     }
 
+    private LodViewState viewState;
+    private float nextCheck;
+
     void Update()
     {
-        // ゲーム未開始時はカメラ移動によるセル変更イベントを発火しない。
-        // トップメニュー表示中に毎フレーム無駄なログが出力されるのを防ぐため。
-        if (GameStateManager.Instance != null && !GameStateManager.Instance.IsGameStarted())
-        {
-            return;
-        }
-
-
-
-        // 1. カメラ中心から数理地面平面（y=0）との交点を計算する。
-        //    地形コライダーに依存しないため、地形のロード/アンロードが
-        //    レイキャスト結果を変えることによるフィードバックループを防ぐ。
-        Vector3 centerPoint;
-        if (TryGetGroundHitPoint(out centerPoint))
-        {
-            CurrentWorldPosition = centerPoint;
-
-            // 2. ワールド座標 → セルインデックスへ変換
-            Vector2Int cellIndex = ConvertToCellIndex(centerPoint);
-
-            // 3. セルが変化したらヒステリシス判定を経て確定させる。
-            //    単発のノイズによる切り替わりを防ぐため、連続Nフレーム同じ新セルが
-            //    検出された場合に限り OnCellIndexChanged を発火する。
-            if (cellIndex != confirmedCellIndex)
-            {
-                if (cellIndex != candidateCellIndex)
-                {
-                    candidateCellIndex = cellIndex;
-                    candidateFrameCount = 1;
-                }
-                else
-                {
-                    candidateFrameCount++;
-                    if (candidateFrameCount >= CELL_CHANGE_CONFIRM_FRAMES)
-                    {
-                        CurrentCellIndex = cellIndex;
-                        confirmedCellIndex = cellIndex;
-                        OnCellIndexChanged(cellIndex);
-                        candidateFrameCount = 0;
-                    }
-                }
-            }
-            else
-            {
-                // 確定済みセルと同じ → 候補をリセット
-                if (candidateCellIndex != confirmedCellIndex)
-                {
-                    candidateFrameCount = 0;
-                }
-            }
-        }
+        if (GameStateManager.Instance != null && !GameStateManager.Instance.IsGameStarted()) return;
+        if (Time.unscaledTime < nextCheck) return;
+        nextCheck = Time.unscaledTime + 0.1f;
+        if (!viewState.Update(gameCamera)) return;
+        if (!TryGetGroundHitPoint(out Vector3 centerPoint)) centerPoint = gameCamera.transform.position;
+        CurrentWorldPosition = centerPoint;
+        CurrentCellIndex = ConvertToCellIndex(centerPoint);
+        OnCellIndexChanged(CurrentCellIndex);
     }
 
     /// <summary>
@@ -126,7 +78,7 @@ public class CameraCellChecker : MonoBehaviour
 
     private void OnCellIndexChanged(Vector2Int newCellIndex)
     {
-        Debug.Log("CameraCellChecker: OnCellIndexChanged newCellIndex: " + newCellIndex);
+        UnityLog.If(LocalConstants.UNITY_LOG_LOADER, () => "CameraCellChecker: view changed " + newCellIndex);
         // CellDataLoaderに通知
         if (cellDataLoader != null)
         {

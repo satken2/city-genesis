@@ -305,6 +305,28 @@ public class RoadPath : IPathMeshGenerator
             return null;
         }
 
+        if (!singleSpan && !isDashed && !PathDrawContext.SuppressDetailRange && spline.CalculateLength() >= 256f
+            && parent.GetComponentInParent<SplinePartLod>() == null)
+        {
+            var group = new GameObject(prefabName + "_LOD");
+            group.transform.SetParent(parent.transform, false);
+            float adaptive = PathDrawContext.AdaptiveTileLength;
+            group.AddComponent<SplinePartLod>().Configure(spline, width, centerOffsetX, offsetY,
+                prefabName.EndsWith("/body", StringComparison.Ordinal), GetOrCreateRoadMaterial(prefab.GetComponent<MeshRenderer>()?.sharedMaterial), clipFrom, clipTo,
+                (lod, from, to) =>
+                {
+                    PathDrawContext.Begin(lod, from, to);
+                    PathDrawContext.SetAdaptiveTileLength(adaptive);
+                    try
+                    {
+                        return CreateSplineMesh(group, spline, prefabName, width, centerOffsetX, offsetY,
+                            mirrorX, fallbackPrefabName, isDashed, stretchToWidth, from, to, singleSpan,
+                            compensatePivot, maxTileLength);
+                    }
+                    finally { PathDrawContext.End(); }
+                });
+            return group;
+        }
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] プレハブ取得成功: '{prefabName}', mirrorX={mirrorX}");
 
         GameObject go = new GameObject(prefabName);
@@ -546,7 +568,7 @@ public class RoadPath : IPathMeshGenerator
 
         try
         {
-            splineMesh.Rebuild();
+            splineMesh.RebuildImmediate();
         }
         catch (Exception ex)
         {

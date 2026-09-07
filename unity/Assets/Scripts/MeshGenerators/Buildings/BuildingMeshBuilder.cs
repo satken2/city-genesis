@@ -32,9 +32,9 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// <summary>
     /// 描画LOD付きの生成。Far はパーツを一切読まずフットプリント押し出しの箱(<see cref="GenerateFarBuilding"/>)、
     /// Close は同じ組み立てで `_close` パーツを優先解決する(BuildingMeshUtils.CurrentDrawLod)。
-    /// isDynamic(地形追従)はデータティア由来で、描画LODとは独立に渡す。
+    /// isDynamicは互換引数。地形追従の要否を表し、描画LODや土地の開放状態とは独立する。
     /// </summary>
-    public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic, DrawLod drawLod)
+    public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic, DrawLod drawLod, bool separateExterior = false)
     {
         if (buildingData == null)
         {
@@ -47,14 +47,22 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         }
 
         DrawLod previous = BuildingMeshUtils.CurrentDrawLod;
+        var previousCapture = BuildingExteriorRenderer.Capture;
+        int modelType = GetModelType(buildingData);
+        bool split = separateExterior && (IsApplicableModelType(modelType) || modelType == Constants.MODEL_PREBUILT);
+        var jobs = split ? new List<BuildingExteriorRenderer.Build>() : null;
         BuildingMeshUtils.CurrentDrawLod = drawLod;
+        BuildingExteriorRenderer.Capture = jobs;
         try
         {
-            return GenerateDetailed(buildingData, isDynamic);
+            var result = GenerateDetailed(buildingData, isDynamic);
+            if (result != null) result.ExteriorJobs = jobs;
+            return result;
         }
         finally
         {
             BuildingMeshUtils.CurrentDrawLod = previous;
+            BuildingExteriorRenderer.Capture = previousCapture;
         }
     }
 
@@ -249,7 +257,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
             mesh.SetTriangles(finalTriangles[i], i);
         }
 
-        return new BuildingMeshResult(mesh, finalMaterials.ToArray(), meshResult.ColliderMesh);
+        return new BuildingMeshResult(mesh, finalMaterials.ToArray(), meshResult.ColliderMesh) { ExteriorJobs = meshResult.ExteriorJobs };
     }
 
     private static Material cachedDefaultBuildingMaterial;

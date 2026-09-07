@@ -212,7 +212,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         // 頻繁なロードを避けるため、Force指定時または未ロード時のみ実行
         if (!isZoneLoadInProgress && (isForce || !areZonesLoaded))
         {
-            StartCoroutine(LoadAllZones());
+            RenderWorkScheduler.Start(this, LoadAllZones(), "ZoneManager");
         }
     }
 
@@ -272,7 +272,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
             zoneRefreshQueued = true;
             return;
         }
-        StartCoroutine(LoadAllZones());
+        RenderWorkScheduler.Start(this, LoadAllZones(), "ZoneManager");
     }
 
     /// <summary>
@@ -289,7 +289,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         // その完了時に全地区が再描画される。
         if (!isZoneLoadInProgress)
         {
-            StartCoroutine(LoadAllZones());
+            RenderWorkScheduler.Start(this, LoadAllZones(), "ZoneManager");
         }
     }
 
@@ -353,7 +353,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         if (zoneRefreshQueued)
         {
             zoneRefreshQueued = false;
-            StartCoroutine(LoadAllZones());
+            RenderWorkScheduler.Start(this, LoadAllZones(), "ZoneManager");
         }
     }
 
@@ -1081,7 +1081,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         // 通常はカメラセル更新でロードされるが、表示パネルだけを操作した場合でも空のCanvasにならないようにする。
         if (isVisible && !areZonesLoaded && !isZoneLoadInProgress)
         {
-            StartCoroutine(LoadAllZones());
+            RenderWorkScheduler.Start(this, LoadAllZones(), "ZoneManager");
         }
     }
 }

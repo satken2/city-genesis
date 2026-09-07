@@ -2,7 +2,7 @@ param([string]$UnityExe, [switch]$PavedModels, [switch]$Equipment, [switch]$Plat
 $ErrorActionPreference = 'Stop'
 $unityRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $project = Join-Path $unityRoot 'Assembly-CSharp.csproj'
-& dotnet build $project -v quiet /clp:ErrorsOnly
+& (Join-Path $PSScriptRoot '../BuildRuntime.ps1')
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 if (!$UnityExe) {
     [xml]$projectXml = Get-Content -LiteralPath $project -Raw
@@ -14,6 +14,8 @@ if (!(Test-Path -LiteralPath $UnityExe)) { throw "Unity.exe not found: $UnityExe
 $qaRoot = Join-Path $unityRoot 'Temp/IntersectionUnityQA'
 $editorAssets = Join-Path $qaRoot 'Assets/Editor'
 New-Item -ItemType Directory -Path $editorAssets -Force | Out-Null
+New-Item -ItemType Directory -Path "$qaRoot/ProjectSettings" -Force | Out-Null
+Copy-Item -LiteralPath "$unityRoot/ProjectSettings/ProjectVersion.txt" -Destination "$qaRoot/ProjectSettings/ProjectVersion.txt" -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Unity/IntersectionQA.cs') -Destination $editorAssets -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Unity/RoadEquipmentQA.cs') -Destination $editorAssets -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Unity/PlatformQA.cs') -Destination $editorAssets -Force
@@ -33,7 +35,7 @@ $process = Start-Process -FilePath $UnityExe -ArgumentList @(
     '-executeMethod', $(if ($RailYard) { 'RailYardQA.Run' } elseif ($Platforms) { 'PlatformQA.Run' } elseif ($Equipment) { 'RoadEquipmentQA.Run' } else { 'IntersectionQA.Run' }), '-intersectionSourceRoot', ('"' + $unityRoot + '"'),
     '-logFile', ('"' + (Join-Path $qaRoot 'qa.log') + '"'), $(if ($PavedModels) { '-pavedModels' } else { '-defaultModels' })
 ) -WindowStyle Hidden -PassThru
-$process.WaitForExit()
+if (!$process.WaitForExit(240000)) { Stop-Process -Id $process.Id; throw 'Intersection QA timed out; inspect Temp/IntersectionUnityQA/qa.log' }
 $result = Get-Content -LiteralPath $resultPath -Raw
 Write-Output $result
 if ($process.ExitCode -ne 0 -or !$result.StartsWith('PASS')) { exit 1 }

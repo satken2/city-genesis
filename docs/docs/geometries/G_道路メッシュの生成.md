@@ -112,27 +112,13 @@
 
 ## 3. LOD（Level of Detail）
 
-### 3.1 データティアの上限と描画LOD
+地形の開放状態とは独立し、道路中心線までの距離でClose / Normal / Farを選ぶ。Normalは無印、Closeは存在する `_close` パーツ、Farは簡易帯である。生成済みルートはデータ版・形状revision・LODをキーにLRUへ退避する。
 
-パスの描画品質は、セル単位のデータティア（`LodTier`）と、パス1本ごとの描画LOD（`DrawLod`: Close / Normal / Far）の2段で決まる（全体像は [E_LOD処理](E_LOD処理.md)）。
+長さ256m以上の通常道路は、連続するスプラインパーツを `SplinePartLod` で区間化する。区間数は全長÷128mの切り上げ、境界は全体の固定パラメータ比率とし、カメラで動かさない。曲線上の実長は各区間で多少異なる。各区間が距離でLODを選び、戻ったときは生成済みGOを再使用する。Farの路面は同じ曲線を17点でサンプルした帯、細部パーツは非表示になる。
 
-- **データティア**: パスが通過するセル（始点・終点・経由点と幅から求める）のうち最も高いティアを採用する。Farセルのパスは描画LODも Far に固定され、常に遠景の帯で描かれる。Dynamicセルのパスは地形追従で再生成される。
-- **描画LOD**: Near/Dynamicセルのパスは、アンカー点列（始点・経由点・終点）へのカメラの最近接距離で Close（120m以内で昇格、160m超で降格）/ Normal（450m以内で昇格、550m超で降格）/ Far を決める（`PathManager.DeterminePathDrawLod`、しきい値は `DrawLodConfig`）。昇格・降格を別しきい値にしたヒステリシスで境界のチラつきを防ぐ。接写（Close）の同時保持数には上限（`MAX_CLOSE_PATHS`=120）があり、上限到達時は Normal で生成する。
-- カメラ移動に応じた再判定は `PathDrawLodReevaluationWorker` が行い、変化したパスは地形追従と同じ再生成キュー（`TerrainFollowRebuildWorker`）で視野優先・フレーム予算制に作り直される。再生成が終わるまで旧オブジェクトは表示されたまま残る。
+保存された道路・経路探索・編集単位は分割しない。single-span、破線、折り返しなど独自の配置規則があるパーツはこの分割対象外。モデルがない場合の既存フォールバックを先に判定する。SplineMeshの生成は即時Rebuildとして共通生成予算へ計上する。
 
-### 3.2 Normal / Close（詳細表示）
-
-`CreateOrUpdatePath(path, updateIntersections, forceRebuild, drawLod, detailFrom, detailTo)` で通常のパスオブジェクトを生成する。ベジエサンプリング→スプライン構築→SplineMesh配置のフルパイプラインが実行される。描画LODと詳細描画区間は `PathDrawContext.Begin/End` で生成器へ渡され、Close のときは `CreateSplineMesh` が `{パーツ名}_close` を優先して解決する（§6・§7）。
-
-**詳細描画区間**: 全長300m（`PATH_DETAIL_RANGE_MIN_LENGTH`）以上のパスは、カメラから650m（`PATH_DETAIL_RANGE_DISTANCE`）以内の部分だけを詳細区間 `[detailFrom, detailTo]`（スプライン割合）として詳細パーツを敷き、区間外は `AddFarRemainderStrips` が描画点列を割合で切り出した遠景の帯（`FarRemainder_Start` / `FarRemainder_End`）で埋める。`CreateSplineMesh` は各パーツのクリップ区間と詳細区間の共通部分にだけパーツを敷く（`single_span` の body は1枚で両端を結ぶ造形なので切らない）。折れ角付き道路（`GenerateLinearPathWithCorners`。セグメントごとに別スプライン）、トンネル区間分割、工事中表示では区間分割を使わず全長を同じ詳細度で描く。区間の端が全長の10%（`PATH_DETAIL_RANGE_REBUILD_TOLERANCE`）以上ずれたときだけ再生成する。
-
-### 3.3 Far（遠景の帯）
-
-`CreateOrUpdateFarPath()` で遠景パスオブジェクトを生成する。直線パスは始点と終点の2点、曲線・経由点付きのパスは `CalculatePathPoints` の描画点列を15m間隔（`FAR_STRIP_SAMPLE_INTERVAL`）に間引いた点列から `BuildStripMesh` で帯を作り、曲線の形を保つ。パーツの解決や SplineMesh は使わない。マテリアルは道路用マテリアル（`GetRoadMaterial`）を流用する。地下パスと、丘を貫く非追従パスは帯を描かず非表示にする（§8.8）。
-
-セルのアンロード時はオブジェクトを破棄せず非アクティブにしてプーリングし、他のロード対象セルに跨っているパスは非表示にしない。これによりセル境界を跨ぐ道路がカメラ移動時に一瞬消えるチラつきを防止する。
-
----
+生成スケジューラー、区間ごとの8MiBキャッシュと全体512MiB上限は [E_LOD処理](E_LOD処理.md) を参照する。
 
 ## 4. スプラインによる道路形状の定義（RoadPath）
 

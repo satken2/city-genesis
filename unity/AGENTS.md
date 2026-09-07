@@ -60,29 +60,11 @@
 
 ## データロードとLODの全体像
 
-マップはセル(一辺 `TerrainManager.CellSize`、バックエンド設定から取得)に区切られ、カメラからの距離でセルごとに **Dynamic / Near / Far / UltraFar** の4ティアが決まる(`DataLoaders/LodConfig.cs`)。
+`LodConfig` が最大81の常駐セルを選ぶ。旧far/near/dynamic集合はすべて同じ常駐集合であり、地形の正や土地の開放状態とは独立している。地形→既存物の追従→区画→建物・道路などの順で取得する。地形APIは `/terrain/surface` のfloat32で、一時TerrainDataへ完成させてから差し替える。
 
-ロードの流れ(詳細は `DataLoaders/AGENTS.md`):
+描画LODは建物・プロップの投影サイズ、道路の距離で決まる。生成の共通フレーム予算は `RenderWorkScheduler`、生成済みGOの退避は `RenderObjectCache`。必ずschedulerのStart/Stopを対で使用し、取消し時のiteratorとメッシュを解放する。詳細は `Assets/Scripts/DataLoaders/AGENTS.md` と `../docs/docs/geometries/E_LOD処理.md`。
 
-```
-CameraCellChecker(視線中心セルの変化検知)
-  → CellDataLoader.OnCameraCellChanged
-    → LodConfig.CalculateCellSets(セルごとのティア計算)
-    → LoadBatch発行(旧バッチをCancel。StopCoroutineで止まらない子コルーチンの協調キャンセル用)
-    → Building/Path/Parcel/Zone 各Managerの LoadLodCells(マージBBOXの一括API取得 + version差分で再描画スキップ)
-    → TerrainManager.LoadLodCells(地形データ取得。適用はHeightStreamWorkerが視野優先・
-      フレーム予算制で部分SetHeightsストリーミング。適用と同期してCPU高さ配列へ行単位書き込み)
-  → TerrainManager.OnAllTerrainLodLoaded(updatedCells)  // 実際にデータが適用されたセルのみ通知
-    → CellDataLoader.TerrainFollowUpCoroutine (フレーム分散)
-       → 更新セル∩nearCells(Near以上の全ティア)の建物・道路メッシュ/高さ再計算とプロップのY再設定(地形追従、視野内優先)
-```
-
-- **地形タイルは全ティア共通解像度(513)で、ティア変更はタイルの作り直しではなくデータのストリーミング適用で行う**。ティアダウンでは何もしない(高精細データを保持)。重い生成(SetHeights・コライダーベイク・建物/道路のメッシュ生成)は視野優先・フレーム予算制のワーカーで複数フレームに分散する。建物のフル詳細メッシュには個数上限(LRU破棄)がある。詳細は `DataLoaders/AGENTS.md` と `genesis-docs/docs/geometries/E_LOD処理.md`。
-- **セル単位のデータティアとは別に、建物1棟・パス1本ごとの描画LOD(`DrawLod`: Close / Normal / Far。`DataLoaders/DrawLod.cs`)がある。** ティアは「どの地形データを持ち地形追従するか」、描画LODは「どの細かさで描くか」を決め、両者は独立(Farセルだけは描画LODもFar固定)。建物は投影比(境界球半径÷(距離×tan(FOV/2)))、パスは中心線までの距離で判定し、昇格/降格を別しきい値にしたヒステリシス付き。Far=コード生成の箱/曲線を保った帯(モデル不要)、Normal=無印パーツ、Close=`{パーツ}_close` があれば優先。カメラが4m以上動いたとき12フレームごとに常駐ワーカーが再判定し、接写の同時保持数には上限がある。生成器はティア表を見ず、`BuildingMeshBuilder.Generate(data, isDynamic, drawLod)` / `PathDrawContext.Begin/End` で受け取る。**F8** で描画LOD統計オーバーレイ(`DrawLodStatsOverlay`。描画LOD別個数・生成ms・頂点数。シーン配置不要)を表示できる。詳細は `DataLoaders/AGENTS.md`「描画LOD」と `genesis-docs/docs/geometries/E_LOD処理.md`「描画LOD(オブジェクト単位)」。
-- **建物・道路・プロップは地形より先に生成され、地形のロード完了後に高さ・形状が追従更新される**(2段階)。追従対象は「実際に地形が更新されたセル ∩ Near以上のティア」であり、**Dynamicセルに限定してはいけない**(Nearセルの道路が地形に埋まったまま放置される)。
-- **地形が実際に変化していないセルは追従更新しない**: `OnAllTerrainLodLoaded` は「実際にハイトマップが適用されたセル」だけを渡すため、カメラのセル跨ぎで地形不変なら建物・道路の再生成は走らない。追従更新は `PerformanceConfig.FrameBudgetMs` でフレーム分散され、カメラ移動中のフレームヒッチを防ぐ。
-- Dynamicティアは「開放(acquire)済みセル」にしか割り当てられない(未開放セルにはdynamic地形データが存在しないため)。
-- バックエンドのオブジェクトには `version` があり、各Managerはversionが変わったものだけ再描画する(HTTP取得自体は毎回全件)。
+F8は描画数、生成予算、フレームp95/p99、キャッシュ推定量を表示する。検証は `Tests/Lod/run.ps1`、追加ソースを含むビルドは `Tests/BuildRuntime.ps1`。Unity生成csprojが古いときも新しいソースを漏らさない。
 
 ## 座標系とセルインデックス
 
@@ -91,8 +73,7 @@ CameraCellChecker(視線中心セルの変化検知)
 
 ## 地形高さの取得
 
-- 原則 `HeightmapTextureManager.GetTerrainHeight(pos)` を使う(CPU高さ配列のO(1)ルックアップ。未構築時・サンプリング結果が0の場合は `Utils.GetGroundHeight` にフォールバック)。
-- `Utils.GetGroundHeight` は同一XZ座標だけを共有するフレーム単位キャッシュ付き（近傍座標への丸めは行わない）。**Terrainタイル差し替え後は `Utils.InvalidateHeightCache()` を呼ばないと古い高さを返す。**
+`Utils.GetGroundHeight`（`HeightmapTextureManager.GetTerrainHeight` も委譲）を使う。ロード済みTerrainを正とし、未ロードでは現在標高の全域overviewを参照する。同一XZだけのフレームキャッシュで、タイル差し替え時は `Utils.InvalidateHeightCache()` が必要。全域CPU高さ配列は保持しない。
 
 ## オブジェクトの命名規則とタグ(変更禁止級の規約)
 

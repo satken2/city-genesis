@@ -6,6 +6,8 @@ using UnityEngine;
 /// </summary>
 public static class PerformanceConfig
 {
+    /// <summary>一つの生成器が共通予算を独占しないための協調中断間隔。</summary>
+    public static float SliceBudgetMs => Mathf.Max(0.05f, Mathf.Min(0.5f, FrameBudgetMs - (float)RenderWorkScheduler.UsedMs));
     /// <summary>
     /// コルーチン内でのオブジェクト生成など、1フレームあたりの最大処理時間（ミリ秒）。
     /// 目標FPSに基づいて動的に計算される。

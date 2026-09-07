@@ -97,6 +97,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     /// LoadLodCells で起動したコルーチンを追跡し、新たなカメラ移動時にキャンセルする。
     /// </summary>
     private List<Coroutine> activeLodCoroutines = new List<Coroutine>();
+    public bool IsLoading { get; private set; }
 
     /// <summary>
     /// セル跨ぎの区画を誤って非表示にしないため、アンロード判定時に
@@ -222,7 +223,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         RegisterWithVisualModeHandler();
         if (VisualModeHandler.Instance == null)
         {
-            StartCoroutine(WaitAndRegisterVisualModeHandler());
+            RenderWorkScheduler.Start(this, WaitAndRegisterVisualModeHandler(), "ParcelManager");
         }
         TerrainManager.OnTerrainTileReady += OnTerrainTileReady;
     }
@@ -312,9 +313,10 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         // 実行中の古いコルーチンをすべてキャンセル（カメラ移動による再呼び出し対策）
         foreach (var c in activeLodCoroutines)
         {
-            if (c != null) StopCoroutine(c);
+            if (c != null) RenderWorkScheduler.Stop(this, c);
         }
         activeLodCoroutines.Clear();
+        IsLoading = false;
 
         var allParcelCells = new HashSet<Vector2Int>(cellSets.farCells);
 
@@ -360,7 +362,8 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
         if (cellsToLoad.Count > 0)
         {
-            activeLodCoroutines.Add(StartCoroutine(LoadMergedParcels(cellsToLoad)));
+            IsLoading = true;
+            activeLodCoroutines.Add(RenderWorkScheduler.Start(this, TrackParcelLoad(cellsToLoad), "ParcelManager"));
         }
     }
 
@@ -369,6 +372,12 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     /// 従来のセルごとのAPIコール(最大49回)を1回に削減する。
     /// 区画はLODティア分けがないため、全データを同一の処理で描画する。
     /// </summary>
+    private IEnumerator TrackParcelLoad(List<Vector2Int> cells)
+    {
+        try { yield return LoadMergedParcels(cells); }
+        finally { IsLoading = false; }
+    }
+
     private IEnumerator LoadMergedParcels(List<Vector2Int> cells)
     {
         CalculateMergedBBox(cells, out float minX, out float minZ, out float maxX, out float maxZ);
@@ -404,6 +413,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
                     CreateOrUpdateParcelObject(p);
                     parcelVersionCache[p.parcel_id] = p.version;
                 }
+                yield return null;
             }
         }
 
@@ -1028,8 +1038,8 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         requestedEnvironmentMode = endpoint != null ? mode : 0;
         if (endpoint == null) return;
 
-        if (environmentCoroutine != null) StopCoroutine(environmentCoroutine);
-        environmentCoroutine = StartCoroutine(FetchEnvironmentScoresCoroutine(mode, endpoint));
+        if (environmentCoroutine != null) RenderWorkScheduler.Stop(this, environmentCoroutine);
+        environmentCoroutine = RenderWorkScheduler.Start(this, FetchEnvironmentScoresCoroutine(mode, endpoint), "ParcelManager");
     }
 
     private IEnumerator FetchEnvironmentScoresCoroutine(int mode, string endpoint)
@@ -1566,10 +1576,10 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         frontPathParcelId = parcelId;
         if (frontPathCoroutine != null)
         {
-            StopCoroutine(frontPathCoroutine);
+            RenderWorkScheduler.Stop(this, frontPathCoroutine);
             frontPathCoroutine = null;
         }
-        frontPathCoroutine = StartCoroutine(FetchFrontPathCoroutine(parcelId));
+        frontPathCoroutine = RenderWorkScheduler.Start(this, FetchFrontPathCoroutine(parcelId), "ParcelManager");
     }
 
     /// <summary>
@@ -1580,7 +1590,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         frontPathParcelId = -1;
         if (frontPathCoroutine != null)
         {
-            StopCoroutine(frontPathCoroutine);
+            RenderWorkScheduler.Stop(this, frontPathCoroutine);
             frontPathCoroutine = null;
         }
         if (frontPathArrowActive)

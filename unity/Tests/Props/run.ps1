@@ -7,18 +7,14 @@ $editorRoot = $coreReference.HintPath -replace '[\\/]Data[\\/].*$', ''
 $unityExe = Join-Path $editorRoot 'Unity.exe'
 $qaRoot = Join-Path $unityRoot 'Temp/PropsUnityQA'
 New-Item -ItemType Directory -Path "$qaRoot/Assets/Editor", "$qaRoot/Assets/Models/Props", "$qaRoot/Packages" -Force | Out-Null
-# Unityがcsprojを再生成する前でも、新規ソースを本編アセンブリに含めて検証する。
-$targets = Join-Path $qaRoot 'PropsBuild.targets'
-$includes = @('PropGeometry', 'PropRenderModel') | Where-Object { !(Select-String -LiteralPath $project -SimpleMatch "DataLoaders\$_.cs" -Quiet) } | ForEach-Object { '<Compile Include="$(MSBuildProjectDirectory)/Assets/Scripts/DataLoaders/' + $_ + '.cs" />' }
-$targetXml = '<Project><ItemGroup Condition="' + "'" + '$(MSBuildProjectName)' + "' == 'Assembly-CSharp'" + '">' + ($includes -join '') + '</ItemGroup></Project>'
-Set-Content -LiteralPath $targets -Value $targetXml
-& dotnet build $project -v quiet /clp:ErrorsOnly "-p:CustomAfterMicrosoftCommonTargets=$targets"
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+New-Item -ItemType Directory -Path "$qaRoot/ProjectSettings" -Force | Out-Null
+Copy-Item -LiteralPath "$unityRoot/ProjectSettings/ProjectVersion.txt" -Destination "$qaRoot/ProjectSettings/ProjectVersion.txt" -Force
+& (Join-Path $PSScriptRoot "../BuildRuntime.ps1")
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'PropsQA.cs') -Destination "$qaRoot/Assets/Editor/PropsQA.cs" -Force
 Get-ChildItem -LiteralPath "$unityRoot/Assets/Models/Props" -File | Copy-Item -Destination "$qaRoot/Assets/Models/Props" -Force
 Set-Content -LiteralPath "$qaRoot/Packages/manifest.json" -Value '{"dependencies":{"com.unity.render-pipelines.universal":"17.4.0","com.unity.nuget.newtonsoft-json":"3.2.2"}}'
 Set-Content -LiteralPath "$qaRoot/result.txt" -Value 'RUNNING'
 $process = Start-Process -FilePath $unityExe -ArgumentList @('-batchmode', '-projectPath', ('"' + $qaRoot + '"'), '-executeMethod', 'PropsQA.Run', '-propsSourceRoot', ('"' + $unityRoot + '"'), '-logFile', ('"' + "$qaRoot/qa.log" + '"')) -WindowStyle Hidden -PassThru
-$process.WaitForExit()
+if (!$process.WaitForExit(240000)) { Stop-Process -Id $process.Id; throw 'Props QA timed out; inspect Temp/PropsUnityQA/qa.log' }
 Get-Content -LiteralPath "$qaRoot/result.txt"
 if ($process.ExitCode -ne 0 -or !(Select-String -LiteralPath "$qaRoot/result.txt" -Pattern '^PASS' -Quiet)) { exit 1 }

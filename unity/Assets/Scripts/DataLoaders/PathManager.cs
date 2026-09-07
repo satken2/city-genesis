@@ -14,6 +14,38 @@ using NetTopologySuite.Algorithm;
 /// </summary>
 public class PathManager : BaseApiDataManager
 {
+    private readonly RenderObjectCache lodCache = new RenderObjectCache(128L * 1024 * 1024);
+    private readonly Dictionary<int, int> geometryRevisions = new Dictionary<int, int>();
+
+    private string PathRenderKey(PathSummary path, DrawLod lod, bool invalidate)
+    {
+        geometryRevisions.TryGetValue(path.path_id, out int revision);
+        if (invalidate) geometryRevisions[path.path_id] = ++revision;
+        return path.path_id + ":" + path.version + ":" + revision + ":" + lod;
+    }
+
+    private bool RestorePathLod(PathSummary path, string key, DrawLod lod, bool updateIntersections)
+    {
+        pathObjectsCache.TryGetValue(path.path_id, out GameObject old);
+        GameObject next = old != null && old.GetComponent<RenderCacheIdentity>()?.key == key ? old : lodCache.Take(key);
+        if (next == null) return false;
+        if (next != old)
+        {
+            DrawLodStats.OnDrawLodChanged(DrawLodStats.Category.Path,
+                old != null ? DrawLodInfo.GetDrawLod(old, DrawLod.Normal) : (DrawLod?)null, lod);
+            lodCache.Park(old);
+        }
+        pathObjectsCache[path.path_id] = next;
+        next.SetActive(true);
+        if (lod == DrawLod.Close) closePathIds.Add(path.path_id); else closePathIds.Remove(path.path_id);
+        if (updateIntersections) RegisterPathData(path); else SavePathToCache(path);
+        RegisterPathCells(path);
+        next.GetComponent<VisualPathStats>()?.InitFrom(path);
+        UpdatePlannedIcon(next, path, path.status == Constants.STATUS_PENDING);
+        ReevaluateAwaitingIntersectionsForPath(path);
+        return true;
+    }
+
     // ノード/ウェイポイントの表示切り替え用フラグ（公開プロパティ）
     private bool _showNodes = false;
     /// <summary>
@@ -277,6 +309,7 @@ public class PathManager : BaseApiDataManager
 
     private void OnDestroy()
     {
+        lodCache.Clear();
         TerrainManager.OnTerrainTileReady -= OnTerrainTileReadyHandler;
 
         if (TrackAdjacency.NeighborProvider == (System.Func<PathSummary, List<TrackNeighborInfo>>)GetAdjacentTrackNeighbors)
@@ -336,14 +369,13 @@ public class PathManager : BaseApiDataManager
     /// パスの望ましい描画LODと詳細描画区間を決める。
     /// Farセルのパスは帯に固定し、Near/Dynamicセルではアンカー点列(始点・経由点・終点)への
     /// 最近接距離で Close/Normal/Far を決める(ヒステリシスは既存オブジェクトの描画LODを基準にする)。
-    /// 長いパスは、カメラから DrawLodConfig.PATH_DETAIL_RANGE_DISTANCE 以内の部分だけを
-    /// 詳細区間 [detailFrom, detailTo](全長に対する割合)にし、残りは遠景の帯で描く。
+    /// ルートのクリップ範囲は全長とし、長い道路の細分化は固定区間ワーカーに任せる。
     /// </summary>
     private DrawLod DeterminePathDrawLod(PathSummary path, LodTier tier, Vector3 camPos, out double detailFrom, out double detailTo)
     {
         detailFrom = 0.0;
         detailTo = 1.0;
-        if (tier == LodTier.Far) return DrawLod.Far;
+
 
         List<Vector3> anchors = BuildAnchorPolyline(path);
         if (anchors.Count < 2) return DrawLod.Normal;
@@ -358,47 +390,9 @@ public class PathManager : BaseApiDataManager
         DrawLod lod = DrawLodEvaluator.EvaluatePathByDistance(minDist, current, allowClose);
         if (lod == DrawLod.Far) return lod;
 
-        // 詳細描画区間: アンカー点列を等間隔にサンプルし、距離内のサンプルの最小・最大割合を取る。
-        float total = 0f;
-        for (int i = 1; i < anchors.Count; i++) total += Vector3.Distance(anchors[i - 1], anchors[i]);
-        if (total < DrawLodConfig.PATH_DETAIL_RANGE_MIN_LENGTH) return lod;
-
-        const float sampleStep = 25f;
-        int samples = Mathf.Max(2, Mathf.CeilToInt(total / sampleStep) + 1);
-        double from = 1.0, to = 0.0;
-        float walked = 0f;
-        int seg = 0;
-        for (int i = 0; i < samples; i++)
-        {
-            float target = total * i / (samples - 1);
-            while (seg < anchors.Count - 2 && walked + Vector3.Distance(anchors[seg], anchors[seg + 1]) < target)
-            {
-                walked += Vector3.Distance(anchors[seg], anchors[seg + 1]);
-                seg++;
-            }
-            float segLen = Vector3.Distance(anchors[seg], anchors[seg + 1]);
-            float t = segLen > 1e-4f ? Mathf.Clamp01((target - walked) / segLen) : 0f;
-            Vector3 pos = Vector3.Lerp(anchors[seg], anchors[seg + 1], t);
-            if (Vector3.Distance(pos, camPos) <= DrawLodConfig.PATH_DETAIL_RANGE_DISTANCE)
-            {
-                double frac = (double)i / (samples - 1);
-                if (frac < from) from = frac;
-                if (frac > to) to = frac;
-            }
-        }
-        if (to < from)
-        {
-            // しきい値の境目でサンプルが1つも入らない場合は全長を詳細にする(次の再判定で落ちる)。
-            return lod;
-        }
-        // 端のサンプル1個分の余裕を持たせ、端が0/1に近ければ全長扱いにする。
-        double margin = 1.0 / (samples - 1);
-        from = System.Math.Max(0.0, from - margin);
-        to = System.Math.Min(1.0, to + margin);
-        if (from <= 0.02) from = 0.0;
-        if (to >= 0.98) to = 1.0;
-        detailFrom = from;
-        detailTo = to;
+        float length = 0f;
+        for (int i = 1; i < anchors.Count; i++) length += Vector3.Distance(anchors[i-1], anchors[i]);
+        if (length >= 256f && PathMeshFactory.GetModelType(path) == "road") return DrawLod.Normal;
         return lod;
     }
 
@@ -434,7 +428,7 @@ public class PathManager : BaseApiDataManager
     {
         if (terrainFollowRebuildWorker == null)
         {
-            terrainFollowRebuildWorker = StartCoroutine(TerrainFollowRebuildWorker());
+            terrainFollowRebuildWorker = RenderWorkScheduler.Start(this, TerrainFollowRebuildWorker(), "PathManager");
         }
     }
 
@@ -444,6 +438,8 @@ public class PathManager : BaseApiDataManager
     /// 食い違うパスを地形追従と同じ再生成キューへ積む(視野優先・フレーム予算で TerrainFollowRebuildWorker が消化する)。
     /// 再生成が終わるまで旧オブジェクトは表示されたまま残る。
     /// </summary>
+    private LodViewState drawViewState;
+
     private IEnumerator PathDrawLodReevaluationWorker()
     {
         while (true)
@@ -454,14 +450,9 @@ public class PathManager : BaseApiDataManager
             Camera cam = Camera.main;
             if (cam == null) continue;
             Vector3 camPos = cam.transform.position;
-            if (!float.IsNaN(lastPathDrawLodCameraPos.x)
-                && Vector3.Distance(camPos, lastPathDrawLodCameraPos) < DrawLodConfig.REEVALUATE_CAMERA_MOVE_DISTANCE)
-            {
-                continue;
-            }
-            lastPathDrawLodCameraPos = camPos;
+            if (!drawViewState.Update(cam)) continue;
 
-            bool queued = false;
+            var drawChanges = new List<PathSummary>();
             foreach (var kvp in pathObjectsCache)
             {
                 GameObject obj = kvp.Value;
@@ -474,10 +465,14 @@ public class PathManager : BaseApiDataManager
                 }
                 DrawLod desired = DeterminePathDrawLod(path, tier, camPos, out double from, out double to);
                 if (DrawLodMatches(obj, desired, from, to)) continue;
-                queuedTerrainFollowPathIds.Add(kvp.Key);
-                queued = true;
+                drawChanges.Add(path);
             }
-            if (queued) EnsureTerrainFollowRebuildWorker();
+            foreach (var path in drawChanges)
+            {
+                if (!pathDataCache.ContainsKey(path.path_id)) continue;
+                TryRebuildPathOnce(path, LodTier.Near, false, false, "描画LOD");
+                yield return null;
+            }
         }
     }
 
@@ -584,7 +579,7 @@ public class PathManager : BaseApiDataManager
             Vector3 camFwd = cam != null ? Utils.GetCameraHorizontalForward(cam) : Vector3.forward;
 
             budgetWatch.Restart();
-            while (queuedTerrainFollowPathIds.Count > 0 && budgetWatch.Elapsed.TotalMilliseconds <= PerformanceConfig.FrameBudgetMs)
+            while (queuedTerrainFollowPathIds.Count > 0 && budgetWatch.Elapsed.TotalMilliseconds <= PerformanceConfig.SliceBudgetMs)
             {
                 // 最優先の1件を選ぶ。比較は「未選択なら無条件採用」のフラグ方式にする。
                 // (float.MaxValue - 1f のようなセンチネル値は float の精度では MaxValue と
@@ -660,6 +655,8 @@ public class PathManager : BaseApiDataManager
     {
         Debug.Log("PathManager: 全ノード・道路データをクリア");
         closePathIds.Clear();
+        lodCache.Clear();
+        geometryRevisions.Clear();
         DrawLodStats.ResetCounts(DrawLodStats.Category.Path);
 
         // 走行中のLODロードを止めてからクリアする。残しておくと、旧セッション宛の
@@ -737,7 +734,7 @@ public class PathManager : BaseApiDataManager
         CancelActiveLodCoroutines();
         if (pathDrawLodWorker == null)
         {
-            pathDrawLodWorker = StartCoroutine(PathDrawLodReevaluationWorker());
+            pathDrawLodWorker = RenderWorkScheduler.Start(this, PathDrawLodReevaluationWorker(), "PathManager");
         }
 
         var allPathCells = new HashSet<Vector2Int>(cellSets.farCells);
@@ -786,7 +783,7 @@ public class PathManager : BaseApiDataManager
                 }
             }
 
-            activeLodCoroutines.Add(StartCoroutine(LoadMergedPathsAndNodesAndApplyCells(cellsToLoad, nearSet, dynamicSet, toUnload, lodUpdates, changedCellsForLog, lodTierChangedCells)));
+            activeLodCoroutines.Add(RenderWorkScheduler.Start(this, LoadMergedPathsAndNodesAndApplyCells(cellsToLoad, nearSet, dynamicSet, toUnload, lodUpdates, changedCellsForLog, lodTierChangedCells), "PathManager"));
         }
         else
         {
@@ -868,7 +865,7 @@ public class PathManager : BaseApiDataManager
     {
         foreach (var c in activeLodCoroutines)
         {
-            if (c != null) StopCoroutine(c);
+            if (c != null) RenderWorkScheduler.Stop(this, c);
         }
         activeLodCoroutines.Clear();
 
@@ -951,7 +948,7 @@ public class PathManager : BaseApiDataManager
             {
                 CreateOrUpdateNode(n);
                 receivedNodeIds.Add(n.node_id);
-                if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.FrameBudgetMs)
+                if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
                 {
                     yield return null;
                     stopwatch.Restart();
@@ -971,11 +968,21 @@ public class PathManager : BaseApiDataManager
     {
         CalculateMergedBBox(cells, out float minX, out float minZ, out float maxX, out float maxZ);
         string bbox = $"{minX},{minZ},{maxX},{maxZ}";
-        PathListResponse response = null;
-        yield return ApiClient.GetBulk<PathListResponse>(
-            $"/paths/?bbox={bbox}&limit=5000",
-            r => response = r,
-            timingLabel: "PathManager paths");
+        PagedPathListResponse response = new PagedPathListResponse { paths = new List<PathSummary>() };
+        int cursor = 0;
+        while (true)
+        {
+            PagedPathListResponse page = null;
+            yield return ApiClient.GetBulk<PagedPathListResponse>(
+                $"/paths/?bbox={bbox}&limit=500&cursor={cursor}", value => page = value,
+                timingLabel: "PathManager page");
+            if (page?.paths == null) { response = null; break; }
+            response.paths.AddRange(page.paths);
+            if (!page.next_cursor.HasValue) break;
+            if (page.next_cursor.Value <= cursor) { response = null; break; }
+            cursor = page.next_cursor.Value;
+            yield return null;
+        }
         if (response == null)
         {
             onComplete?.Invoke(false);
@@ -1092,7 +1099,7 @@ public class PathManager : BaseApiDataManager
                 // ように形状だけが変わった稼働中パスが古いメッシュのまま残る。
                 TryRebuildPathOnce(p, tier, updateIntersections: true, forceRebuild: true, reason: "api");
 
-                if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.FrameBudgetMs)
+                if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
                 {
                     yield return null;
                     stopwatch.Restart();
@@ -1113,7 +1120,7 @@ public class PathManager : BaseApiDataManager
                 // version 差分で選ばれたパスのみが積まれているため、"api" と同じく必ず作り直す。
                 TryRebuildPathOnce(path, tier, updateIntersections: false, forceRebuild: true, reason: "api-high");
 
-                if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.FrameBudgetMs)
+                if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
                 {
                     yield return null;
                     stopwatch.Restart();
@@ -1134,7 +1141,7 @@ public class PathManager : BaseApiDataManager
             {
                 UpdateNodeIntersectionMesh(nodeId);
             }
-            if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.FrameBudgetMs)
+            if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
             {
                 yield return null;
                 stopwatch.Restart();
@@ -1149,7 +1156,7 @@ public class PathManager : BaseApiDataManager
         // これにより、コルーチン全体の完了を待つ必要がなくなり、地形と周辺道路の追従完了が一瞬で完了する。
         if (lowPriorityPaths.Count > 0)
         {
-            Coroutine lowPriorityCoroutine = StartCoroutine(BuildLowPriorityPathsCoroutine(lowPriorityPaths, batchPathTiers, nearSet, dynamicSet));
+            Coroutine lowPriorityCoroutine = RenderWorkScheduler.Start(this, BuildLowPriorityPathsCoroutine(lowPriorityPaths, batchPathTiers, nearSet, dynamicSet), "PathManager");
             activeLodCoroutines.Add(lowPriorityCoroutine);
         }
     }
@@ -1187,7 +1194,7 @@ public class PathManager : BaseApiDataManager
     }
 
     /// <summary>
-    /// 低優先度の遠景（Far ティア）道路を、フレーム予算（PerformanceConfig.FrameBudgetMs）の範囲内で
+    /// 低優先度の遠景（Far ティア）道路を、フレーム予算（PerformanceConfig.SliceBudgetMs）の範囲内で
     /// フレーム分割を挟みながら、バックグラウンドで非同期に生成する。
     /// </summary>
     private IEnumerator BuildLowPriorityPathsCoroutine(List<PathSummary> paths, Dictionary<int, LodTier> batchPathTiers, HashSet<Vector2Int> nearSet, HashSet<Vector2Int> dynamicSet)
@@ -1201,7 +1208,7 @@ public class PathManager : BaseApiDataManager
             // version 差分で選ばれたパスのみが積まれているため、"api" と同じく必ず作り直す。
             TryRebuildPathOnce(path, tier, updateIntersections: false, forceRebuild: true, reason: "api-low");
 
-            if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.FrameBudgetMs)
+            if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
             {
                 yield return null;
                 stopwatch.Restart();
@@ -1280,7 +1287,7 @@ public class PathManager : BaseApiDataManager
             LodTier tier = DeterminePathLodTier(path, nearSet, dynamicSet);
             TryRebuildPathOnce(path, tier, updateIntersections: true, forceRebuild: tier == LodTier.Dynamic, reason: "lookup");
 
-            if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.FrameBudgetMs)
+            if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
             {
                 yield return null;
                 stopwatch.Restart();
@@ -1304,7 +1311,7 @@ public class PathManager : BaseApiDataManager
                 alreadyRebuiltPathIds?.Add(pathId);
             }
 
-            if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.FrameBudgetMs)
+            if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
             {
                 yield return null;
                 stopwatch.Restart();
@@ -1340,7 +1347,7 @@ public class PathManager : BaseApiDataManager
         foreach (int nodeId in nodeIds)
         {
             yield return UpdateNodeIntersectionMeshAfterNodeReady(nodeId);
-            if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.FrameBudgetMs)
+            if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
             {
                 yield return null;
                 stopwatch.Restart();
@@ -1594,6 +1601,9 @@ public class PathManager : BaseApiDataManager
             return;
         }
 
+        string renderKey = PathRenderKey(path, DrawLod.Far, forceRebuild);
+        if (RestorePathLod(path, renderKey, DrawLod.Far, false)) return;
+        forceRebuild = true;
         GameObject oldPath = null;
         if (pathObjectsCache.TryGetValue(path.path_id, out GameObject existingPath))
         {
@@ -1692,6 +1702,10 @@ public class PathManager : BaseApiDataManager
             ApplyDepthOffsetShader(mr);
         }
 
+        var identity = pathGO.AddComponent<RenderCacheIdentity>();
+        identity.key = renderKey;
+        identity.mesh = mesh;
+
         SavePathToCache(path);
         RegisterPathCells(path);
         UpdatePlannedIcon(pathGO, path, path.status == Constants.STATUS_PENDING);
@@ -1708,7 +1722,7 @@ public class PathManager : BaseApiDataManager
         // 新しいオブジェクトのレンダリングが確定してから破棄することで、一瞬の消滅を防ぐ。
         if (oldPath != null)
         {
-            StartCoroutine(DestroyObjectAfterFrames(oldPath));
+            lodCache.Park(oldPath);
         }
         ReevaluateAwaitingIntersectionsForPath(path);
     }
@@ -2293,6 +2307,9 @@ public class PathManager : BaseApiDataManager
         {
             drawLod = DrawLod.Normal;
         }
+        string renderKey = PathRenderKey(path, drawLod, forceRebuild);
+        if (RestorePathLod(path, renderKey, drawLod, updateIntersections)) return;
+        forceRebuild = true;
         GameObject oldPath = null;
         if (pathObjectsCache.TryGetValue(path.path_id, out GameObject existingPath))
         {
@@ -2394,6 +2411,10 @@ public class PathManager : BaseApiDataManager
         }
         DrawLodStats.AddGenerationMs(DrawLodStats.Category.Path, genWatch.Elapsed.TotalMilliseconds);
 
+        var identity = pathGO.AddComponent<RenderCacheIdentity>();
+        identity.key = renderKey;
+        identity.mesh = meshResult?.Mesh;
+
         if (meshResult != null && meshResult.GeneratedObject != null)
         {
             meshResult.GeneratedObject.transform.SetParent(pathGO.transform, false);
@@ -2426,7 +2447,7 @@ public class PathManager : BaseApiDataManager
         if (meshResult != null && meshResult.Mesh != null)
         {
             // コライダーの物理データ生成（PhysXベイク）は処理負荷が高いため、別スレッドで非同期に実行する。
-            StartCoroutine(SetColliderAsync(pathGO, meshResult.Mesh));
+            RenderWorkScheduler.Start(this, SetColliderAsync(pathGO, meshResult.Mesh), "PathManager");
         }
         PathInputHandler inputHandler = pathGO.AddComponent<PathInputHandler>();
         inputHandler.pathId = path.path_id;
@@ -2459,7 +2480,7 @@ public class PathManager : BaseApiDataManager
         // 新しいオブジェクトのレンダリングが確定してから破棄することで、一瞬の消滅を防ぐ。
         if (oldPath != null)
         {
-            StartCoroutine(DestroyObjectAfterFrames(oldPath));
+            lodCache.Park(oldPath);
         }
         ReevaluateAwaitingIntersectionsForPath(path);
     }
@@ -3615,7 +3636,7 @@ public class PathManager : BaseApiDataManager
                 }
             }
 
-            if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.FrameBudgetMs)
+            if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
             {
                 yield return null;
                 stopwatch.Restart();
@@ -3652,7 +3673,7 @@ public class PathManager : BaseApiDataManager
                 Debug.LogError($"PathManager: 地形追従の交差点更新に失敗 node={nodeId}: {e}");
             }
 
-            if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.FrameBudgetMs)
+            if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
             {
                 yield return null;
                 stopwatch.Restart();
@@ -3713,7 +3734,7 @@ public class PathManager : BaseApiDataManager
             Debug.LogWarning($"[PathManager] nodeData not found for nodeId={nodeId}, fetching node...");
             if (fetchingIntersectionNodeIds.Add(nodeId))
             {
-                StartCoroutine(FetchNodeAndUpdateIntersection(nodeId));
+                RenderWorkScheduler.Start(this, FetchNodeAndUpdateIntersection(nodeId), "PathManager");
             }
             return;
         }
@@ -4316,8 +4337,7 @@ public class PathManager : BaseApiDataManager
     {
         if (mesh == null) yield break;
 
-        int meshId = mesh.GetInstanceID();
-        Task bakeTask = Task.Run(() => Physics.BakeMesh(meshId, false));
+        Task bakeTask = MeshBakeService.Bake(mesh);
         yield return Utils.WaitTask(bakeTask);
 
         if (targetGO != null)
@@ -4631,4 +4651,10 @@ public class PathMasterItem
 public class PathMasterResponse
 {
     public Dictionary<int, PathMasterItem> paths;
+}
+
+[Serializable]
+public sealed class PagedPathListResponse : PathListResponse
+{
+    public int? next_cursor;
 }

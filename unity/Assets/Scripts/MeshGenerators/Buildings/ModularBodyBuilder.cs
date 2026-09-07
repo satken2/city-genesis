@@ -279,6 +279,13 @@ public static class ModularBodyBuilder
         List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes,
         Vector2? fenceOpeningCenter = null, float fenceOpeningRadius = 0f)
     {
+        if (BuildingExteriorRenderer.Capture != null)
+        {
+            BuildingExteriorRenderer.Capture.Add((meshes, materials, temporary) => GenerateSiteDecorations(
+                prefix, suffix, fenceFootprint, tilePolygon, floorPolygon, floorMaterial, centerPointWorld,
+                deformToTerrain, meshes, materials, temporary, fenceOpeningCenter, fenceOpeningRadius));
+            return;
+        }
         // --- フェンス部分（fence）---
         // パーツが見つからない場合はスキップ。
         if (fenceFootprint != null && fenceFootprint.Length >= 3)

@@ -82,6 +82,9 @@ public class DrawLodStatsOverlay : MonoBehaviour
     private long sampledVertices, sampledTriangles;
     private int sampledRenderers;
     private float smoothedFrameMs;
+    private readonly float[] frameSamples = new float[600];
+    private int frameSampleCount, frameSampleIndex;
+    private float p95, p99;
     private readonly StringBuilder sb = new StringBuilder(1024);
     private GUIStyle style;
 
@@ -99,6 +102,8 @@ public class DrawLodStatsOverlay : MonoBehaviour
     {
         // フレーム時間は指数平滑で表示する(瞬間値は読めない)。
         float frameMs = Time.unscaledDeltaTime * 1000f;
+        frameSamples[frameSampleIndex++ % frameSamples.Length] = frameMs;
+        frameSampleCount = Mathf.Min(frameSampleCount+1, frameSamples.Length);
         smoothedFrameMs = smoothedFrameMs <= 0f ? frameMs : Mathf.Lerp(smoothedFrameMs, frameMs, 0.1f);
 
         if (InputUtil.KeyWasPressedThisFrame(TOGGLE_KEY))
@@ -109,6 +114,11 @@ public class DrawLodStatsOverlay : MonoBehaviour
         if (!visible) return;
         if (Time.realtimeSinceStartup >= nextSampleTime)
         {
+            var sorted = new float[frameSampleCount];
+            System.Array.Copy(frameSamples, sorted, frameSampleCount);
+            System.Array.Sort(sorted);
+            p95 = sorted[Mathf.Min(sorted.Length-1, Mathf.FloorToInt(sorted.Length*.95f))];
+            p99 = sorted[Mathf.Min(sorted.Length-1, Mathf.FloorToInt(sorted.Length*.99f))];
             SampleSceneMeshes();
             nextSampleTime = Time.realtimeSinceStartup + SAMPLE_INTERVAL_SEC;
         }
@@ -126,7 +136,7 @@ public class DrawLodStatsOverlay : MonoBehaviour
             Mesh m = mf.sharedMesh;
             if (m == null) continue;
             var r = mf.GetComponent<Renderer>();
-            if (r != null && !r.enabled) continue;
+            if (r != null && (!r.enabled || r.forceRenderingOff)) continue;
             sampledRenderers++;
             sampledVertices += m.vertexCount;
             for (int s = 0; s < m.subMeshCount; s++)
@@ -152,6 +162,9 @@ public class DrawLodStatsOverlay : MonoBehaviour
 
         sb.Clear();
         sb.AppendLine($"[DrawLOD stats] F8 で閉じる   frame {smoothedFrameMs:F1} ms ({(smoothedFrameMs > 0 ? 1000f / smoothedFrameMs : 0):F0} fps)");
+        sb.AppendLine($"frame p95 {p95:F1} / p99 {p99:F1} ms | 共通生成 {RenderWorkScheduler.LastFrameMs:F2} / {PerformanceConfig.FrameBudgetMs:F2} ms | 最大単工程 {RenderWorkScheduler.MaximumStepMs:F2} ms");
+        sb.AppendLine($"退避メッシュ推定 {RenderObjectCache.TotalBytes/(1024*1024)} / {RenderObjectCache.GlobalLimit/(1024*1024)} MiB | 待機 {RenderWorkScheduler.WaitingCount}");
+        if (PropManager.Instance != null) sb.AppendLine($"プロップ {PropManager.Instance.ResidentCandidateCount:N0}候補 / {PropManager.Instance.SubmittedInstanceCount:N0}描画 / {PropManager.Instance.SubmittedShadowInstances:N0}影");
         AppendCategory("建物", DrawLodStats.Category.Building);
         AppendCategory("パス", DrawLodStats.Category.Path);
         sb.AppendLine($"描画メッシュ: renderers {sampledRenderers:N0}  verts {sampledVertices:N0}  tris {sampledTriangles:N0}  (2秒ごと更新)");
@@ -161,7 +174,7 @@ public class DrawLodStatsOverlay : MonoBehaviour
             Vector3 p = cam.transform.position;
             sb.AppendLine($"camera: ({p.x:F0}, {p.y:F0}, {p.z:F0})  pitch {cam.transform.eulerAngles.x:F0}°  fov {cam.fieldOfView:F0}°");
         }
-        GUI.Box(new Rect(8, 8, 620, 130), sb.ToString(), style);
+        GUI.Box(new Rect(8, 8, 900, 205), sb.ToString(), style);
     }
 
     private void AppendCategory(string label, DrawLodStats.Category category)

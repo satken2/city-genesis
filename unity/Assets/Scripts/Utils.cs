@@ -82,6 +82,9 @@ public static class Utils
             return terrain.SampleHeight(position) + terrain.transform.position.y;
         }
 
+        if (cachedTerrainManager != null && cachedTerrainManager.TrySampleOverview(position, out float backgroundHeight))
+            return backgroundHeight;
+
         int groundLayerMask = LayerMask.GetMask("Ground");
         Ray ray = new Ray(new Vector3(position.x, 1000f, position.z), Vector3.down);
         if (Physics.Raycast(ray, out RaycastHit hit, 2000f, groundLayerMask))
@@ -173,7 +176,7 @@ public static class Utils
 
     private static Shader cachedDepthOffsetShader;
 
-    public static void ApplyDepthOffsetShader(MeshRenderer renderer, string contextName = "")
+    public static void ApplyDepthOffsetShader(MeshRenderer renderer, string contextName = "", System.Action<Material[]> onInstantiated = null)
     {
         if (renderer == null) return;
 
@@ -190,6 +193,7 @@ public static class Utils
         }
 
         Material[] mats = renderer.materials;
+        onInstantiated?.Invoke(mats);
         bool changed = false;
         for (int i = 0; i < mats.Length; i++)
         {

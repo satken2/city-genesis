@@ -154,9 +154,9 @@ public class BuildingManager : BaseApiDataManager
         // 公共施設ハイライトの光オーバーレイ(建物データを参照する常駐描画)を用意する。
         PublicFacilityGlowOverlay.Ensure();
         // 視野外のため生成を遅延した詳細メッシュを消化する常駐ワーカー。
-        StartCoroutine(DetailGenerationWorker());
+        RenderWorkScheduler.Start(this, DetailGenerationWorker(), "BuildingManager");
         // カメラ移動に応じて建物ごとの描画LODを再判定する常駐ワーカー。
-        StartCoroutine(DrawLodReevaluationWorker());
+        RenderWorkScheduler.Start(this, DrawLodReevaluationWorker(), "BuildingManager");
     }
 
     private void Update()
@@ -201,6 +201,7 @@ public class BuildingManager : BaseApiDataManager
 
     private void OnDestroy()
     {
+        lodCache.Clear();
         TerrainManager.OnTerrainTileReady -= OnTerrainTileReadyHandler;
     }
 
@@ -237,7 +238,7 @@ public class BuildingManager : BaseApiDataManager
         bool isDynamic = false;
         if (cellBuildingLod.TryGetValue(cellIndex, out LodTier tier))
         {
-            isDynamic = (tier == LodTier.Dynamic);
+            isDynamic = tier != LodTier.UltraFar;
         }
 
         Camera cam = Camera.main;
@@ -287,6 +288,7 @@ public class BuildingManager : BaseApiDataManager
             if (obj != null) Destroy(obj);
         }
 
+        lodCache.Clear();
         buildingObjectsCache.Clear();
         buildingDataCache.Clear();
         buildingIdByInfraNodeId.Clear();
@@ -318,7 +320,7 @@ public class BuildingManager : BaseApiDataManager
         // 実行中の古いコルーチンをすべてキャンセル（カメラ移動による再呼び出し対策）
         foreach (var c in activeLodCoroutines)
         {
-            if (c != null) StopCoroutine(c);
+            if (c != null) RenderWorkScheduler.Stop(this, c);
         }
         activeLodCoroutines.Clear();
 
@@ -358,7 +360,7 @@ public class BuildingManager : BaseApiDataManager
 
         if (cellsToLoad.Count > 0)
         {
-            activeLodCoroutines.Add(StartCoroutine(LoadMergedBuildingsAndApplyCells(cellsToLoad, nearSet, dynamicSet, toUnload, lodUpdates, tierChangedBuildingCells)));
+            activeLodCoroutines.Add(RenderWorkScheduler.Start(this, LoadMergedBuildingsAndApplyCells(cellsToLoad, nearSet, dynamicSet, toUnload, lodUpdates, tierChangedBuildingCells), "BuildingManager"));
         }
         else
         {
@@ -413,11 +415,21 @@ public class BuildingManager : BaseApiDataManager
     {
         CalculateMergedBBox(cells, out float minX, out float minZ, out float maxX, out float maxZ);
 
-        BuildingsListResponse response = null;
-        yield return ApiClient.GetBulk<BuildingsListResponse>(
-            $"/buildings/?bbox={minX},{minZ},{maxX},{maxZ}&limit=5000",
-            r => response = r,
-            timingLabel: "BuildingManager buildings");
+        BuildingsListResponse response = new BuildingsListResponse { buildings = new List<BuildingSummary>() };
+        int cursor = 0;
+        while (true)
+        {
+            BuildingsListResponse page = null;
+            yield return ApiClient.GetBulk<BuildingsListResponse>(
+                $"/buildings/?bbox={minX},{minZ},{maxX},{maxZ}&limit=500&cursor={cursor}", value => page = value,
+                timingLabel: "BuildingManager page");
+            if (page?.buildings == null) { response = null; break; }
+            response.buildings.AddRange(page.buildings);
+            if (!page.next_cursor.HasValue) break;
+            if (page.next_cursor.Value <= cursor) { response = null; break; }
+            cursor = page.next_cursor.Value;
+            yield return null;
+        }
         if (response == null)
         {
             onComplete?.Invoke(false);
@@ -462,8 +474,7 @@ public class BuildingManager : BaseApiDataManager
                         {
                             cellBuildingLod.TryGetValue(buildingCell, out LodTier oldTier);
                             bool isFarTransition = (oldTier == LodTier.Far) || (desiredTier == LodTier.Far);
-                            bool isDynamicTransition = (oldTier == LodTier.Dynamic) || (desiredTier == LodTier.Dynamic);
-                            needsRebuild = isFarTransition || isDynamicTransition;
+                            needsRebuild = isFarTransition;
                         }
                     }
 
@@ -542,7 +553,7 @@ public class BuildingManager : BaseApiDataManager
 
                 // フレーム予算: 目標FPSに基づく動的予算を超えたら次フレームに譲る。
                 // これによりオブジェクト生成の集中によるカクつきを抑制する。
-                if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.FrameBudgetMs)
+                if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
                 {
                     // 予算スライスの区切りで詳細メッシュの個数上限を適用する
                     // (建物1件ごとに全走査すると走査コストが支配的になるため)。
@@ -676,7 +687,7 @@ public class BuildingManager : BaseApiDataManager
                 {
                     Vector2Int cell = PositionToCell(obj.transform.position);
                     DrawLod currentDrawLod = DrawLodInfo.GetDrawLod(obj, DrawLod.Normal);
-                    if (cellBuildingLod.TryGetValue(cell, out LodTier tier) && tier == LodTier.Dynamic && currentDrawLod != DrawLod.Far)
+                    if (cellBuildingLod.TryGetValue(cell, out LodTier tier) && tier != LodTier.UltraFar && currentDrawLod != DrawLod.Far)
                     {
                         // Dynamicセル: フェンス・地面パネルをロード完了後の地形に追従させるため、
                         // メッシュを強制的に再生成する。再生成は重いので視野内の建物のみ即時に行い、
@@ -710,7 +721,7 @@ public class BuildingManager : BaseApiDataManager
                 Debug.LogError($"BuildingManager: 地形追従の高さ調整に失敗 agent_id={id}: {e}");
             }
 
-            if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.FrameBudgetMs)
+            if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
             {
                 yield return null;
                 stopwatch.Restart();
@@ -748,7 +759,7 @@ public class BuildingManager : BaseApiDataManager
             Vector3 fwd = cam != null ? GetHorizontalForward(cam) : Vector3.forward;
 
             budgetWatch.Restart();
-            while (deferredDetailBuildings.Count > 0 && budgetWatch.Elapsed.TotalMilliseconds <= PerformanceConfig.FrameBudgetMs)
+            while (deferredDetailBuildings.Count > 0 && budgetWatch.Elapsed.TotalMilliseconds <= PerformanceConfig.SliceBudgetMs)
             {
                 // 最優先の1件を線形走査で選ぶ。キューは高々数千件・単純なベクトル演算のみなので、
                 // 毎回の走査コストは生成コストに比べて無視できる。
@@ -868,28 +879,20 @@ public class BuildingManager : BaseApiDataManager
     /// </summary>
     private void EvictDetailedBuilding(int buildingId)
     {
-        DrawLod evictedLod = DrawLod.Normal;
+        if (buildingDataCache.TryGetValue(buildingId, out BuildingSummary data))
+        {
+            CreateFarBuildingObject(data);
+            return;
+        }
         if (buildingObjectsCache.TryGetValue(buildingId, out GameObject obj) && obj != null)
         {
-            evictedLod = DrawLodInfo.GetDrawLod(obj, DrawLod.Normal);
-            DrawLodStats.OnDrawLodChanged(DrawLodStats.Category.Building, evictedLod, null);
-            Destroy(obj);
+            DrawLodStats.OnDrawLodChanged(DrawLodStats.Category.Building, DrawLodInfo.GetDrawLod(obj, DrawLod.Normal), null);
+            lodCache.Park(obj);
         }
         buildingObjectsCache.Remove(buildingId);
         detailedBuildingIds.Remove(buildingId);
         closeBuildingIds.Remove(buildingId);
         buildingLastVisibleFrame.Remove(buildingId);
-        buildingVersionCache.Remove(buildingId);
-
-        if (buildingDataCache.TryGetValue(buildingId, out BuildingSummary data))
-        {
-            float[] cp = data.centerPointArray;
-            Vector2Int cell = (cp != null && cp.Length >= 2)
-                ? PositionToCell(new Vector3(cp[0], 0f, cp[1]))
-                : default;
-            bool isDynamic = GetCellLodTier(cell) == LodTier.Dynamic;
-            deferredDetailBuildings[buildingId] = new DeferredDetailRequest { data = data, isDynamic = isDynamic, drawLod = evictedLod };
-        }
     }
 
     /// <summary>
@@ -939,7 +942,7 @@ public class BuildingManager : BaseApiDataManager
     /// </summary>
     private DrawLod DetermineDesiredDrawLod(BuildingSummary data, LodTier tier, Vector3 camPos, float tanHalfFov)
     {
-        if (tier == LodTier.Far) return DrawLod.Far;
+
         float[] cp = data.centerPointArray;
         if (cp == null || cp.Length < 2) return DrawLod.Normal;
         DrawLod current = DrawLod.Normal;
@@ -951,7 +954,7 @@ public class BuildingManager : BaseApiDataManager
         float radius = GetBuildingBoundsRadius(data);
         float distance = Vector3.Distance(camPos, new Vector3(cp[0], groundY + radius * 0.5f, cp[1]));
         bool allowClose = closeBuildingIds.Contains(data.agent_id) || closeBuildingIds.Count < DrawLodConfig.MAX_CLOSE_BUILDINGS;
-        return DrawLodEvaluator.EvaluateBySize(radius, distance, tanHalfFov, current, allowClose);
+        return DrawLodEvaluator.EvaluateBySize(radius, distance, tanHalfFov, current, allowClose, Camera.main != null && Camera.main.orthographic);
     }
 
     /// <summary>
@@ -960,6 +963,8 @@ public class BuildingManager : BaseApiDataManager
     /// 変化があった建物は、箱化(Far)なら軽いので即時生成、詳細化(Normal/Close)は遅延キューへ積んで
     /// DetailGenerationWorker が視野優先・フレーム予算で生成する。生成が終わるまで旧オブジェクトは残る。
     /// </summary>
+    private LodViewState drawViewState;
+
     private IEnumerator DrawLodReevaluationWorker()
     {
         while (true)
@@ -970,12 +975,7 @@ public class BuildingManager : BaseApiDataManager
             Camera cam = Camera.main;
             if (cam == null) continue;
             Vector3 camPos = cam.transform.position;
-            if (!float.IsNaN(lastDrawLodCameraPos.x)
-                && Vector3.Distance(camPos, lastDrawLodCameraPos) < DrawLodConfig.REEVALUATE_CAMERA_MOVE_DISTANCE)
-            {
-                continue;
-            }
-            lastDrawLodCameraPos = camPos;
+            if (!drawViewState.Update(cam)) continue;
             float tanHalfFov = DrawLodEvaluator.GetTanHalfFov(cam);
 
             // 走査中に辞書を書き換えないよう、変更対象を先に集める。
@@ -1106,8 +1106,60 @@ public class BuildingManager : BaseApiDataManager
         if (ids.Count == 0) buildingIdsByCell.Remove(cell);
     }
 
+    private readonly RenderObjectCache lodCache = new RenderObjectCache(256L * 1024 * 1024);
+
+    private string BuildingRenderKey(BuildingSummary data, DrawLod lod)
+    {
+        ParcelSummary parcel = GetParcelManager()?.GetParcelSummary(data.parcel_id);
+        float[] cp = data.centerPointArray;
+        float radius = GetBuildingBoundsRadius(data);
+        var bounds = new Rect(cp != null ? cp[0]-radius : 0, cp != null ? cp[1]-radius : 0, 2*radius, 2*radius);
+        var parcelPolygon = parcel?.GetPolygonArray();
+        if (parcelPolygon != null)
+            foreach (float[] point in parcelPolygon)
+            {
+                bounds.xMin = Mathf.Min(bounds.xMin, point[0]); bounds.xMax = Mathf.Max(bounds.xMax, point[0]);
+                bounds.yMin = Mathf.Min(bounds.yMin, point[1]); bounds.yMax = Mathf.Max(bounds.yMax, point[1]);
+            }
+        var terrain = Utils.CachedTerrainManager;
+        string surface = terrain != null ? terrain.GetSurfaceStamp(bounds) : "none";
+        return Newtonsoft.Json.JsonConvert.SerializeObject(new {
+            data.agent_id, data.variant, data.bd_type, data.floors, data.status, data.status_reason,
+            data.construction_progress, data.polygon, data.center_point, data.visual_variant,
+            data.visual_variant2, data.visual_variant3, data.sub_buildings, data.infra_node_id, data.depot_node_id,
+            parcelPolygon = parcel?.GetPolygonArray(), altitude = parcel?.altitude, lod, surface
+        });
+    }
+
+    private bool RestoreBuildingLod(BuildingSummary data, DrawLod lod, string key)
+    {
+        buildingObjectsCache.TryGetValue(data.agent_id, out GameObject old);
+        var identity = old != null ? old.GetComponent<RenderCacheIdentity>() : null;
+        GameObject ready = identity != null && identity.key == key ? old : lodCache.Take(key);
+        if (ready == null) return false;
+        if (ready != old)
+        {
+            DrawLodStats.OnDrawLodChanged(DrawLodStats.Category.Building,
+                old != null ? DrawLodInfo.GetDrawLod(old, DrawLod.Normal) : (DrawLod?)null, lod);
+            lodCache.Park(old);
+        }
+        ready.SetActive(true);
+        buildingObjectsCache[data.agent_id] = ready;
+        RegisterBuildingDataToCache(data);
+        UpdateBuildingHeight(ready);
+        RegisterBuildingCell(data.agent_id, ready.transform.position);
+        UpdatePlannedIcon(ready, data);
+        if (lod == DrawLod.Far) { detailedBuildingIds.Remove(data.agent_id); closeBuildingIds.Remove(data.agent_id); }
+        else MarkBuildingDetailed(data.agent_id, lod);
+        deferredDetailBuildings.Remove(data.agent_id);
+        buildingVersionCache[data.agent_id] = data.version;
+        return true;
+    }
+
     private void CreateFarBuildingObject(BuildingSummary buildingData)
     {
+        string renderKey = BuildingRenderKey(buildingData, DrawLod.Far);
+        if (RestoreBuildingLod(buildingData, DrawLod.Far, renderKey)) return;
         GameObject oldBuilding = null;
         if (buildingObjectsCache.TryGetValue(buildingData.agent_id, out GameObject existing))
         {
@@ -1117,7 +1169,7 @@ public class BuildingManager : BaseApiDataManager
                 int currentStatus = existingIdInfo != null ? existingIdInfo.status : 0;
                 bool existingIsFar = existingIdInfo != null && existingIdInfo.isFarObject;
                 // 既存が遠景LODオブジェクトかつステータス一致ならプールから再利用
-                if (currentStatus == buildingData.status && existingIsFar)
+                if (currentStatus == buildingData.status && existingIsFar && existing.GetComponent<RenderCacheIdentity>()?.key == renderKey)
                 {
                     if (!existing.activeSelf)
                         existing.SetActive(true);
@@ -1156,14 +1208,17 @@ public class BuildingManager : BaseApiDataManager
         // 遠景はパーツを読まない箱(フットプリント押し出し)。フル詳細と同じ組み立てを走らせない。
         var farWatch = System.Diagnostics.Stopwatch.StartNew();
         BuildingMeshResult meshResult = new BuildingMeshBuilder().Generate(buildingData, false, DrawLod.Far);
+        var renderIdentity = buildingGO.AddComponent<RenderCacheIdentity>();
+        renderIdentity.key = renderKey;
+        renderIdentity.mesh = meshResult?.Mesh;
+        renderIdentity.colliderMesh = meshResult?.ColliderMesh;
         DrawLodStats.AddGenerationMs(DrawLodStats.Category.Building, farWatch.Elapsed.TotalMilliseconds);
         if (meshResult?.Mesh != null)
         {
             mf.mesh = meshResult.Mesh;
         }
 
-        mr.sharedMaterial = BuildingMeshBuilder.GetDefaultBuildingMaterial();
-        ApplyDepthOffsetShader(mr);
+        mr.sharedMaterial = GetFarBuildingMaterial();
         DrawLodInfo.Ensure(buildingGO).drawLod = DrawLod.Far;
 
         float[] cp = buildingData.centerPointArray;
@@ -1197,6 +1252,8 @@ public class BuildingManager : BaseApiDataManager
 
         UpdatePlannedIcon(buildingGO, buildingData);
 
+        if (meshResult?.Mesh != null) buildingGO.AddComponent<FarBuildingMember>().Configure(mr, meshResult.Mesh);
+
         // 辞書は即座に新しいオブジェクトに更新する。
         // これにより、短時間に同じIDで再描画が呼ばれてもオブジェクトが増殖しない。
         buildingObjectsCache[buildingData.agent_id] = buildingGO;
@@ -1212,7 +1269,7 @@ public class BuildingManager : BaseApiDataManager
         // 古いオブジェクトの破棄だけを数フレーム遅延させる。
         if (oldBuilding != null)
         {
-            StartCoroutine(DestroyObjectAfterFrames(oldBuilding));
+            lodCache.Park(oldBuilding);
         }
     }
 
@@ -1295,6 +1352,7 @@ public class BuildingManager : BaseApiDataManager
         }
 
         buildingDataCache[buildingData.agent_id] = buildingData;
+        buildingBoundsRadius.Remove(buildingData.agent_id);
 
         if (buildingData.infra_node_id > 0)
         {
@@ -1397,7 +1455,24 @@ public class BuildingManager : BaseApiDataManager
     /// <summary>
     private static void ApplyDepthOffsetShader(MeshRenderer renderer)
     {
-        Utils.ApplyDepthOffsetShader(renderer, "BuildingManager");
+        Utils.ApplyDepthOffsetShader(renderer, "BuildingManager", materials =>
+        {
+            var owner = renderer.GetComponent<RenderCacheIdentity>();
+            if (owner != null) owner.materials = materials;
+        });
+    }
+
+    private static Material farBuildingMaterial;
+    private static Material GetFarBuildingMaterial()
+    {
+        if (farBuildingMaterial != null) return farBuildingMaterial;
+        var source = BuildingMeshBuilder.GetDefaultBuildingMaterial();
+        var shader = Shader.Find("Custom/DepthOffsetLit") ?? Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+        if (source == null && shader == null) return null;
+        farBuildingMaterial = source != null ? new Material(source) : new Material(shader);
+        farBuildingMaterial.name = "FarBuildings";
+        if (shader != null) farBuildingMaterial.shader = shader;
+        return farBuildingMaterial;
     }
 
     /// <summary>
@@ -1416,6 +1491,9 @@ public class BuildingManager : BaseApiDataManager
     private void CreateOrUpdateBuildingObject(BuildingSummary buildingData, bool isDynamic, bool forceRebuild = false, DrawLod drawLod = DrawLod.Normal)
     {
         if (drawLod == DrawLod.Far || drawLod == DrawLod.Hidden) drawLod = DrawLod.Normal;
+        string renderKey = BuildingRenderKey(buildingData, drawLod);
+        if (RestoreBuildingLod(buildingData, drawLod, renderKey)) return;
+        forceRebuild = true;
         GameObject oldBuilding = null;
         if (buildingObjectsCache.TryGetValue(buildingData.agent_id, out GameObject existingBuilding))
         {
@@ -1473,7 +1551,11 @@ public class BuildingManager : BaseApiDataManager
         MeshRenderer mr = buildingGO.AddComponent<MeshRenderer>();
 
         var genWatch = System.Diagnostics.Stopwatch.StartNew();
-        BuildingMeshResult meshResult = new BuildingMeshBuilder().Generate(buildingData, isDynamic, drawLod);
+        BuildingMeshResult meshResult = new BuildingMeshBuilder().Generate(buildingData, true, drawLod, separateExterior: true);
+        var renderIdentity = buildingGO.AddComponent<RenderCacheIdentity>();
+        renderIdentity.key = renderKey;
+        renderIdentity.mesh = meshResult?.Mesh;
+        renderIdentity.colliderMesh = meshResult?.ColliderMesh;
         DrawLodStats.AddGenerationMs(DrawLodStats.Category.Building, genWatch.Elapsed.TotalMilliseconds);
         DrawLodInfo.Ensure(buildingGO).drawLod = drawLod;
         if (meshResult is not null && meshResult.Mesh != null)
@@ -1534,7 +1616,7 @@ public class BuildingManager : BaseApiDataManager
         if (meshResult != null && meshResult.ColliderMesh != null)
         {
             // コライダーの物理データ生成（PhysXベイク）は処理負荷が高いため、別スレッドで非同期に実行する。
-            StartCoroutine(SetColliderAsync(buildingGO, meshResult.ColliderMesh));
+            RenderWorkScheduler.Start(this, SetColliderAsync(buildingGO, meshResult.ColliderMesh), "BuildingManager");
         }
         BuildingInputHandler inputHandler = buildingGO.AddComponent<BuildingInputHandler>();
         inputHandler.buildingId = buildingData.agent_id;
@@ -1545,6 +1627,9 @@ public class BuildingManager : BaseApiDataManager
         visualModeObject.InitializeMaterials();
         visualModeObject.SetStatus(status);
         buildingGO.AddComponent<VisualBuildingObject>();
+
+        if (meshResult?.ExteriorJobs != null && meshResult.ExteriorJobs.Count > 0)
+            buildingGO.AddComponent<BuildingExteriorRenderer>().Configure(meshResult.ExteriorJobs);
 
         var stats = buildingGO.AddComponent<VisualBuildingStats>();
         stats.InitFrom(buildingData);
@@ -1567,7 +1652,7 @@ public class BuildingManager : BaseApiDataManager
         // 古いオブジェクトの破棄だけを数フレーム遅延させる。
         if (oldBuilding != null)
         {
-            StartCoroutine(DestroyObjectAfterFrames(oldBuilding));
+            lodCache.Park(oldBuilding);
         }
     }
 
@@ -1670,8 +1755,7 @@ public class BuildingManager : BaseApiDataManager
     {
         if (mesh == null) yield break;
 
-        int meshId = mesh.GetInstanceID();
-        Task bakeTask = Task.Run(() => Physics.BakeMesh(meshId, false));
+        Task bakeTask = MeshBakeService.Bake(mesh);
         yield return Utils.WaitTask(bakeTask);
 
         if (targetGO != null)
@@ -1706,5 +1790,6 @@ public class BuildingManager : BaseApiDataManager
 [Serializable]
 public class BuildingsListResponse
 {
+    public int? next_cursor;
     public List<BuildingSummary> buildings;
 }
