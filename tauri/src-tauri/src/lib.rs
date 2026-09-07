@@ -2226,9 +2226,12 @@ pub fn run() {
                     }
                     // どれかのTauriウィンドウがフォーカスを失った=多くはUnityの3Dビューを
                     // クリックした瞬間。Unityがフルスクリーン扱いでフォアグラウンドになると
-                    // topmostのHUDが裏に回ることがあるため、このタイミングで打ち直す。
+                    // topmostのUIが裏に回ることがあるため、このタイミングで打ち直す。
+                    // シェルによる持ち上げはUnityの活性化中に起きるため、これだけでは先に
+                    // 走って取りこぼすことがある。Unity側がフォーカスを得た後に送る
+                    // system:focus_gained(ipc.rs)での打ち直しが本命の復帰経路。
                     WindowEvent::Focused(false) => {
-                        window::reassert_hud_topmost(window.app_handle());
+                        window::reassert_topmost(window.app_handle());
                     }
                     _ => {}
                 }

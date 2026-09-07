@@ -1760,6 +1760,24 @@ public class PathManager : BaseApiDataManager
         return true;
     }
 
+    /// <summary>描画円の外接矩形にある道路候補をセル逆引きで返す。厳密な円交差は呼び出し側で判定する。</summary>
+    public List<PathSummary> GetPathsNearCircle(Vector3 center, float radius)
+    {
+        float size = TerrainManager.CellSize;
+        var ids = new HashSet<int>();
+        var result = new List<PathSummary>();
+        int minX = Mathf.FloorToInt((center.x - radius) / size), maxX = Mathf.FloorToInt((center.x + radius) / size);
+        int minZ = Mathf.FloorToInt((center.z - radius) / size), maxZ = Mathf.FloorToInt((center.z + radius) / size);
+        for (int x = minX; x <= maxX; x++)
+        for (int z = minZ; z <= maxZ; z++)
+        {
+            if (!pathIdsByCell.TryGetValue(new Vector2Int(x, z), out var cellIds)) continue;
+            foreach (int id in cellIds)
+                if (ids.Add(id) && pathDataCache.TryGetValue(id, out var path)) result.Add(path);
+        }
+        return result;
+    }
+
     public GameObject GetNodeObject(int nodeId)
     {
         if (nodeObjectsCache.TryGetValue(nodeId, out GameObject obj))

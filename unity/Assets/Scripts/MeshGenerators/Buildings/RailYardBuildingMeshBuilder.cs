@@ -13,8 +13,8 @@ using GeneratedModels;
 ///      等間隔（TRACK_SPACING）で並べる。各線路の行き止まり端には車止め（yard_stop）、
 ///      上空には架線（yard_wire）と門型架線柱（yard_pole + yard_beam）を配置する。
 ///      余裕があれば先頭2線を検修庫（yard_shed）が覆う。
-///   2. 集約・接続ゾーン … 最外側の線路を斜めの集約線として延ばし、
-///      各留置線をその途中へ合流させる。集約線と端子の接続線は各1本だけ描く。
+///   2. 集約・接続ゾーン … 接続点を通る中央線の左右に、最外側から延びる斜め集約線を置く。
+///      各留置線は同じ側の集約線へ途中合流し、左右の集約線は中央線へ接続する。
 /// タイルは長手方向だけ端数を調整し、曲線では頂点を中心線に沿って変形する。
 /// 軌間と高さは実寸を維持する。yard_beam は柱間へXスケールする。
 ///
@@ -80,6 +80,8 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
         public Vector2 Target;      // 共通の斜め集約線上の合流点
         public Vector2 Direction;   // 合流先の集約線の接線
         public bool IsSpine;        // 集約線の起点となる最外側の行
+        public int Side;            // 中央線=0、左右=-1/+1
+        public Vector2 MergePoint;  // 同じ側の集約線が中央線へ接続する位置
     }
 
     public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic = false)
@@ -106,7 +108,7 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
         // 端子ノードのローカルXZ位置（未ロード時はバックエンドの初期配置を模したフォールバック）。
         Vector2 nodeLocal = ResolveTerminalNodeLocal(buildingData, centerPointWorld, footprint);
 
-        // ローカル基底: U=線路方向（重心→端子）、V=その左手垂直。
+        // ローカル基底: U=敷地の初期接続辺へ向かう線路方向、V=その左手垂直。
         Vector2 centroid = Vector2.zero;
         for (int i = 0; i < footprint.Length; i++)
         {
@@ -114,7 +116,8 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
         }
         centroid /= footprint.Length;
 
-        Vector2 u2 = nodeLocal - centroid;
+        // 端子の横移動で全線の向きが回転しないよう、敷地の初期接続辺を方向の基準にする。
+        Vector2 u2 = ResolveTerminalNodeLocal(null, centerPointWorld, footprint) - centroid;
         if (u2.sqrMagnitude < 1e-4f)
         {
             // 端子が重心に一致する退化ケース。前面辺（頂点0→1）の法線方向を使う
@@ -122,6 +125,7 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
             u2 = new Vector2(-front.y, front.x);
         }
         u2.Normalize();
+        if (Vector2.Dot(nodeLocal - centroid, u2) < 0f) u2 = -u2;
         Vector2 v2 = new Vector2(-u2.y, u2.x);
 
         // フットプリントを UV 座標へ射影
@@ -143,8 +147,7 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
         float vCenter = (vMin + vMax) * 0.5f;
 
         List<TrackRow> rows = PlanRows(uv, nodeUV, vCenter, trackCount);
-        while (rows.Count == 0 && trackCount > 1)
-            rows = PlanRows(uv, nodeUV, vCenter, --trackCount);
+
 
         if (rows.Count == 0)
         {
@@ -210,29 +213,31 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
 
             Vector2 p0 = new Vector2(row.StraightEnd, row.V);
             float run = row.Target.x - p0.x;
+            if (row.Side == 0) continue;
             PlaceTilesAlongBezier(p0, p0 + Vector2.right * (run * .4f),
                 row.Target - row.Direction * ENTRY_OVERLAP, row.Target,
                 trackMesh, trackMats, wireMesh, wireMats, tileLength, tileMinZ, wireMinZ,
                 ToLocal3, ToDir3, combineInstances, materials, temporaryMeshes,
-                !row.IsSpine);
+                row.Side != 0 && !row.IsSpine);
         }
 
-        // 最外側線から延びる集約線を1本だけ敷き、最後に共通の引き込み線で端子へ接続する。
-        TrackRow first = rows.Find(row => row.IsSpine);
-        Vector2 spineStart = first.Target;
-        Vector2 spineEnd = spineStart;
-        foreach (TrackRow row in rows)
-            if (row.Target.x > spineEnd.x) spineEnd = row.Target;
-        Vector2 delta = spineEnd - spineStart;
-        PlaceTilesAlongBezier(spineStart, spineStart + delta / 3f, spineStart + delta * (2f / 3f), spineEnd,
-            trackMesh, trackMats, wireMesh, wireMats, tileLength, tileMinZ, wireMinZ,
-            ToLocal3, ToDir3, combineInstances, materials, temporaryMeshes, false);
+        // 左右それぞれの外側線から中央線へ集約する。横位置を戻す接続曲線は作らない。
+        foreach (int side in new[] { -1, 1 })
+        {
+            TrackRow first = rows.Find(row => row.Side == side && row.IsSpine);
+            if (first.Side == 0) continue;
+            Vector2 spineStart = first.Target;
+            Vector2 spineEnd = first.MergePoint + new Vector2(-8f, side * 2f);
+            Vector2 delta = spineEnd - spineStart;
+            PlaceTilesAlongBezier(spineStart, spineStart + delta / 3f, spineStart + delta * (2f / 3f), spineEnd,
+                trackMesh, trackMats, wireMesh, wireMats, tileLength, tileMinZ, wireMinZ,
+                ToLocal3, ToDir3, combineInstances, materials, temporaryMeshes, false);
+            PlaceTilesAlongBezier(spineEnd, spineEnd + first.Direction * 3f,
+                first.MergePoint - Vector2.right * 3f, first.MergePoint,
+                trackMesh, trackMats, wireMesh, wireMats, tileLength, tileMinZ, wireMinZ,
+                ToLocal3, ToDir3, combineInstances, materials, temporaryMeshes, true);
+        }
         Vector2 lead = new Vector2(leadStartU, nodeUV.y);
-        float exitRun = lead.x - spineEnd.x;
-        PlaceTilesAlongBezier(spineEnd, spineEnd + first.Direction * (exitRun * .35f),
-            lead - Vector2.right * (exitRun * .35f), lead,
-            trackMesh, trackMats, wireMesh, wireMats, tileLength, tileMinZ, wireMinZ,
-            ToLocal3, ToDir3, combineInstances, materials, temporaryMeshes, false);
         PlaceTilesAlongBezier(lead, lead + Vector2.right * 2f, nodeUV - Vector2.right * 2f, nodeUV,
             trackMesh, trackMats, wireMesh, wireMats, tileLength, tileMinZ, wireMinZ,
             ToLocal3, ToDir3, combineInstances, materials, temporaryMeshes, false);
@@ -247,7 +252,7 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
             float uStart = Mathf.Max(rowA.StraightStart, rowB.StraightStart) + 1.5f;
             float uEnd = uStart + SHED_LENGTH;
             if (uEnd + 2f < Mathf.Min(rowA.StraightEnd, rowB.StraightEnd)
-                && Mathf.Abs(rowA.V - rowB.V) < SHED_WIDTH)
+                && Mathf.Abs(rowA.V - rowB.V) <= TRACK_SPACING + .01f)
             {
                 Vector3 pos = ToLocal3(new Vector2((uStart + uEnd) * 0.5f, (rowA.V + rowB.V) * 0.5f));
                 AddInstances(shedMesh, shedMats, Matrix4x4.TRS(pos, forwardRot, Vector3.one), combineInstances, materials);
@@ -304,10 +309,11 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
         Vector2[] sitePolygon = (parcelPolygon != null && parcelPolygon.Length >= 3) ? parcelPolygon : footprint;
         ModularBodyBuilder.GenerateSiteDecorations(
             prefix, 0,
-            parcelPolygon, sitePolygon, sitePolygon,
+            sitePolygon, sitePolygon, sitePolygon,
             null,
             centerPointWorld, deformToTerrain: isDynamic,
-            combineInstances, materials, temporaryMeshes);
+            combineInstances, materials, temporaryMeshes,
+            fenceOpeningCenter: ResolveFenceOpening(sitePolygon,nodeLocal,u2), fenceOpeningRadius: 3f);
 
         UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
             $"[RailYardBMB] agent={buildingData.agent_id} prefix={prefix} tracks={rows.Count} " +
@@ -338,7 +344,7 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
     /// </summary>
     private static Vector2 ResolveTerminalNodeLocal(BuildingSummary buildingData, Vector3 centerPointWorld, Vector2[] footprint)
     {
-        int nodeId = buildingData.depot_node_id > 0 ? buildingData.depot_node_id : buildingData.infra_node_id;
+        int nodeId = buildingData == null ? 0 : buildingData.depot_node_id > 0 ? buildingData.depot_node_id : buildingData.infra_node_id;
         if (nodeId > 0)
         {
             PathManager pathManager = Object.FindAnyObjectByType<PathManager>();
@@ -382,77 +388,101 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     /// <summary>
-    /// UV座標のフットプリントを、V=<paramref name="v"/> の直線（U方向）で切ったときの
-    /// U範囲（弦）を返す。交点が2つ未満なら false。
-    /// 凹形状では最小〜最大の交点を採る（弦の途中で敷地外へ出る区画では線路が
-    /// はみ出しうるが、敷地装飾のフェンス内には収まるため許容する）。
+    /// 接続点を通る直線を先に確保し、左右の集約線へ留置線を追加する。
+    /// 境界に収まらない行だけを省くため、端子の移動で施設全体を棄却しない。
     /// </summary>
-    private static bool TryGetChordRange(Vector2[] uv, float v, out float uStart, out float uEnd)
-    {
-        uStart = float.MaxValue;
-        uEnd = float.MinValue;
-        int hits = 0;
-        int n = uv.Length;
-        for (int i = 0; i < n; i++)
-        {
-            Vector2 a = uv[i];
-            Vector2 b = uv[(i + 1) % n];
-            if ((a.y <= v && b.y > v) || (b.y <= v && a.y > v))
-            {
-                float t = (v - a.y) / (b.y - a.y);
-                float u = Mathf.Lerp(a.x, b.x, t);
-                uStart = Mathf.Min(uStart, u);
-                uEnd = Mathf.Max(uEnd, u);
-                hits++;
-            }
-        }
-        return hits >= 2 && uEnd - uStart > 1f;
-    }
-
-    /// <summary>最外側から反対側へ横切る集約線を基準に、留置線の終端を求める。</summary>
     private static List<TrackRow> PlanRows(Vector2[] uv, Vector2 node, float center, int count)
     {
         var rows = new List<TrackRow>();
-        float side = count == 1 ? 0f : node.y <= center ? 1f : -1f;
-        float outerV = center + side * (count - 1) * TRACK_SPACING * .5f;
-        float oppositeV = center - side * (count - 1) * TRACK_SPACING * .5f;
-        Vector2 direction = new Vector2(LADDER_RUN_PER_LATERAL, -side).normalized;
-        float lastV = oppositeV - side * ENTRY_OVERLAP / LADDER_RUN_PER_LATERAL;
-        float exitRun = Mathf.Max(18f, Mathf.Abs(lastV - node.y) * 2f);
-        float lastU = node.x - LEAD_LENGTH - exitRun;
-        float firstU = lastU - (count - 1) * TRACK_SPACING * LADDER_RUN_PER_LATERAL;
-        for (int i = 0; i < count; i++)
+        Vector2 lead = node - Vector2.right * LEAD_LENGTH;
+        if (!TryGetRowStart(uv, node.y, lead.x, out float mainStart)) return rows;
+        if (lead.x - mainStart < .5f) return rows;
+        rows.Add(new TrackRow { V=node.y, StraightStart=mainStart, StraightEnd=lead.x,
+            Target=lead, Direction=Vector2.right, Side=0 });
+        float minV=float.MaxValue, maxV=float.MinValue;
+        foreach (Vector2 point in uv) { minV=Mathf.Min(minV,point.y); maxV=Mathf.Max(maxV,point.y); }
+        for (int rank=1; rank<MAX_TRACKS && rows.Count<count; rank++)
         {
-            float v = outerV - side * i * TRACK_SPACING;
-            Vector2 target = new Vector2(firstU + i * TRACK_SPACING * LADDER_RUN_PER_LATERAL,
-                v - side * ENTRY_OVERLAP / LADDER_RUN_PER_LATERAL);
-            float end = target.x - ENTRY_OVERLAP - ENTRY_APPROACH;
-            if (!TryGetChordRange(uv, v, out float start, out float limit)) return new List<TrackRow>();
-            start += END_MARGIN;
-            if (end > limit - END_MARGIN || end - start < MIN_STRAIGHT_LENGTH) return new List<TrackRow>();
-            Vector2 p0 = new Vector2(end, v);
-            for (int k = 0; k <= 32; k++)
+            foreach (int side in new[] { -1, 1 })
             {
-                Vector2 point = BezierPoint(p0, p0 + Vector2.right * ((target.x-end)*.4f),
-                    target - direction * ENTRY_OVERLAP, target, k/32f);
-                if (!ContainsPoint(uv, point)) return new List<TrackRow>();
+                if (rows.Count>=count) break;
+                float v=node.y+side*rank*TRACK_SPACING;
+                if (v<minV+SIDE_MARGIN || v>maxV-SIDE_MARGIN) continue;
+                // 左右が同じ一点へ同時合流する三方分岐を避ける。
+                Vector2 merge=lead-Vector2.right*(side<0 ? 6f : 18f);
+                Vector2 spineEnd=merge+new Vector2(-8f,side*2f);
+                float distance=rank*TRACK_SPACING-ENTRY_OVERLAP/LADDER_RUN_PER_LATERAL;
+                Vector2 target=spineEnd+new Vector2(-(distance-2f)*LADDER_RUN_PER_LATERAL,side*(distance-2f));
+                Vector2 direction=new Vector2(LADDER_RUN_PER_LATERAL,-side).normalized;
+                float end=target.x-ENTRY_OVERLAP-ENTRY_APPROACH;
+                if (!TryGetRowStart(uv,v,end,out float start) || end-start<MIN_STRAIGHT_LENGTH) continue;
+                if (merge.x<mainStart || merge.x>lead.x) continue;
+                Vector2 p0=new Vector2(end,v);
+                bool fits=true;
+                for (int k=0; k<=64; k++)
+                {
+                    float t=k/64f;
+                    if (!ContainsPoint(uv,BezierPoint(p0,p0+Vector2.right*((target.x-end)*.4f),target-direction*ENTRY_OVERLAP,target,t))
+                        || !ContainsPoint(uv,Vector2.Lerp(target,spineEnd,t))
+                        || !ContainsPoint(uv,BezierPoint(spineEnd,spineEnd+direction*3f,merge-Vector2.right*3f,merge,t)))
+                    { fits=false; break; }
+                }
+                if (fits) rows.Add(new TrackRow { V=v,StraightStart=start,StraightEnd=end,Target=target,
+                    Direction=direction,Side=side,MergePoint=merge });
             }
-            rows.Add(new TrackRow { V=v, StraightStart=start, StraightEnd=end, Target=target,
-                Direction=direction, IsSpine=i==0 });
         }
-        // 接続点を敷地内で移動した場合も、共有線の中心が敷地から出る計画は採用しない。
-        Vector2 spineStart=rows[0].Target, spineEnd=rows[rows.Count-1].Target;
-        Vector2 lead=new Vector2(node.x-LEAD_LENGTH,node.y);
-        for (int k=0; k<=64; k++)
+        foreach (int side in new[] { -1, 1 })
         {
-            float t=k/64f;
-            if (!ContainsPoint(uv,Vector2.Lerp(spineStart,spineEnd,t))
-                || !ContainsPoint(uv,BezierPoint(spineEnd,spineEnd+direction*(exitRun*.35f),
-                    lead-Vector2.right*(exitRun*.35f),lead,t))
-                || !ContainsPoint(uv,Vector2.Lerp(lead,node,t))) return new List<TrackRow>();
+            int outer=-1;
+            for (int i=0; i<rows.Count; i++)
+                if (rows[i].Side==side && (outer<0 || rows[i].Target.x<rows[outer].Target.x)) outer=i;
+            if (outer>=0) { TrackRow row=rows[outer]; row.IsSpine=true; rows[outer]=row; }
         }
         rows.Sort((a,b)=>a.V.CompareTo(b.V));
         return rows;
+    }
+
+    /// <summary>行の終端を含む敷地内区間を選ぶ。凹区画の別の区間を横切らない。</summary>
+    private static bool TryGetRowStart(Vector2[] polygon,float v,float end,out float start)
+    {
+        start=0f;
+        // 境界上の水平辺は半開区間の交点計算から漏れるため、両側の微小オフセットも試す。
+        foreach (float offset in new[] { 0f,-.001f,.001f })
+        {
+            float sampleV=v+offset;
+            var hits=new List<float>();
+            for (int i=0; i<polygon.Length; i++)
+            {
+                Vector2 a=polygon[i],b=polygon[(i+1)%polygon.Length];
+                if ((a.y<=sampleV && b.y>sampleV)||(b.y<=sampleV && a.y>sampleV))
+                    hits.Add(Mathf.Lerp(a.x,b.x,(sampleV-a.y)/(b.y-a.y)));
+            }
+            hits.Sort();
+            for (int i=0; i+1<hits.Count; i+=2)
+                if (end>=hits[i] && end<=hits[i+1]+.01f)
+                {
+                    start=hits[i]+END_MARGIN;
+                    return true;
+                }
+        }
+        return false;
+    }
+
+    /// <summary>端子から線路方向へ延びる引き込み線が、最初に敷地境界を横切る位置。</summary>
+    private static Vector2 ResolveFenceOpening(Vector2[] polygon, Vector2 node, Vector2 direction)
+    {
+        float Cross(Vector2 a,Vector2 b) => a.x*b.y-a.y*b.x;
+        float nearest=float.MaxValue;
+        for (int i=0; i<polygon.Length; i++)
+        {
+            Vector2 a=polygon[i], edge=polygon[(i+1)%polygon.Length]-a;
+            float denominator=Cross(direction,edge);
+            if (Mathf.Abs(denominator)<.00001f) continue;
+            float t=Cross(a-node,edge)/denominator;
+            float u=Cross(a-node,direction)/denominator;
+            if (t>=-.01f && u>=0f && u<=1f) nearest=Mathf.Min(nearest,Mathf.Max(0f,t));
+        }
+        return nearest<float.MaxValue ? node+direction*nearest : node;
     }
 
     private static bool ContainsPoint(Vector2[] polygon, Vector2 point)

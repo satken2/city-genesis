@@ -596,6 +596,12 @@ pub async fn handle_incoming_message(
         "system:shutdown" => {
             app.exit(0);
         }
+        "system:focus_gained" => {
+            // Unity がフォアグラウンドになった直後の通知。フルスクリーン扱いの Unity が
+            // 活性化するとシェルが topmost の UI を裏へ回すため、その後で UI 全体の
+            // 最前面を打ち直す。「Unity をクリックすれば UI が必ず戻る」ための復帰経路。
+            window::reassert_topmost(&app);
+        }
         "system:graphic_ready" => {
             // Unity の起動完了通知。初回起動と、クラッシュ後にスーパーバイザ
             // (genesis.py)が Unity を自動再起動した場合の両方で送られてくる。
@@ -615,6 +621,8 @@ pub async fn handle_incoming_message(
             if is_reconnect {
                 window::close_all_popup_windows(&app, &state);
             }
+            // 起動直後の Unity は自分をフォアグラウンドにするため、UI が裏に回りうる。
+            window::reassert_topmost(&app);
             let _ = app.emit("graphic-reconnected", envelope.payload);
         }
         "notification:show" => {

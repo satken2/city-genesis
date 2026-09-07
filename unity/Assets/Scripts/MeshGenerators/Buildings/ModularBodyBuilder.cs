@@ -260,6 +260,7 @@ public static class ModularBodyBuilder
     ///
     /// - フェンス: fenceFootprint の外周に fence-w / fence-c パーツを配置する（無スケール・接地）。
     ///   パーツが解決できない辺・角はスキップされる。null でフェンスなし。
+    ///   開口中心と半径が指定された場合は、その円内の壁・角を省いて通路を確保する。
     /// - タイル: tilePolygon の内部に tile パーツを敷き詰める（GenerateTiles）。tile パーツが
     ///   無ければ何もしない。null でタイルなし。
     /// - 地面パネル: floorPolygon 形状の水平パネルを GROUND_OFFSET の高さに張る。
@@ -275,7 +276,8 @@ public static class ModularBodyBuilder
         string prefix, int suffix,
         Vector2[] fenceFootprint, Vector2[] tilePolygon, Vector2[] floorPolygon, Material floorMaterial,
         Vector3 centerPointWorld, bool deformToTerrain,
-        List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
+        List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes,
+        Vector2? fenceOpeningCenter = null, float fenceOpeningRadius = 0f)
     {
         // --- フェンス部分（fence）---
         // パーツが見つからない場合はスキップ。
@@ -303,7 +305,24 @@ public static class ModularBodyBuilder
                     float startOffset = MeasureCornerExtentAlongEdge(cornerModule, p0, p1, p2, 0f, true);
                     float endOffset = MeasureCornerExtentAlongEdge(nextCornerModule, p1, p2, p3, 0f, false);
 
-                    List<SegmentMeshData> wallSegments = GenerateFenceSegments(p1, p2, wallModule, wallMaterials, startOffset, endOffset);
+                    List<SegmentMeshData> wallSegments;
+                    Vector2 edge = p2-p1;
+                    float length = edge.magnitude;
+                    Vector2 direction = length > .001f ? edge/length : Vector2.zero;
+                    Vector2 toOpening = fenceOpeningCenter.HasValue ? fenceOpeningCenter.Value-p1 : Vector2.zero;
+                    float along = Vector2.Dot(toOpening,direction);
+                    float perpendicularSquared = (toOpening-direction*along).sqrMagnitude;
+                    if (fenceOpeningCenter.HasValue && fenceOpeningRadius > 0f && length > .001f
+                        && perpendicularSquared < fenceOpeningRadius*fenceOpeningRadius)
+                    {
+                        // 開口円と辺の交差区間を空ける。角付近では隣接する両辺へ同じ開口が及ぶ。
+                        float half = Mathf.Sqrt(fenceOpeningRadius*fenceOpeningRadius-perpendicularSquared);
+                        wallSegments = GenerateFenceSegments(p1,p2,wallModule,wallMaterials,startOffset,
+                            Mathf.Max(endOffset,length-(along-half)));
+                        wallSegments.AddRange(GenerateFenceSegments(p1,p2,wallModule,wallMaterials,
+                            Mathf.Max(startOffset,along+half),endOffset));
+                    }
+                    else wallSegments = GenerateFenceSegments(p1,p2,wallModule,wallMaterials,startOffset,endOffset);
                     foreach (var wallSegment in wallSegments)
                     {
                         if (wallSegment.IsValid)
@@ -317,7 +336,8 @@ public static class ModularBodyBuilder
                     }
                 }
 
-                if (cornerModule != null)
+                if (cornerModule != null && (!fenceOpeningCenter.HasValue
+                    || Vector2.Distance(p1,fenceOpeningCenter.Value) >= fenceOpeningRadius))
                 {
                     SegmentMeshData cornerSegment = GenerateFenceCorner(p0, p1, p2, cornerModule, cornerMaterials);
                     if (cornerSegment.IsValid)

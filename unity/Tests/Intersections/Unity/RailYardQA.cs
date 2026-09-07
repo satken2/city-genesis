@@ -34,7 +34,7 @@ public static class RailYardQA
             var model = new GameObject("Models").AddComponent(modelType);
             modelType.GetField("<Instance>k__BackingField", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, model);
             var cache = (IDictionary)modelType.GetField("_modelCache", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(model);
-            foreach (string part in new[] { "yard_track", "yard_wire", "yard_pole", "yard_beam", "yard_stop", "yard_shed", "floor" })
+            foreach (string part in new[] { "yard_track", "yard_wire", "yard_pole", "yard_beam", "yard_stop", "yard_shed", "floor", "fence-w1" })
             {
                 string asset = $"Assets/Buildings/a1060/0/{part}.fbx";
                 var importer = (ModelImporter)AssetImporter.GetAtPath(asset);
@@ -53,9 +53,12 @@ public static class RailYardQA
             var materials = (Material[])result.GetType().GetProperty("Materials").GetValue(result);
             Require(mesh.vertexCount > 5000, "Yard fell back to a box");
             Require(mesh.vertices.All(v => !float.IsNaN(v.x) && !float.IsInfinity(v.z)), "Non-finite mesh");
-            Require(mesh.bounds.max.z <= 80.01f, "Lead extends beyond terminal");
+            Require(mesh.vertices.Where(v=>Mathf.Abs(v.x)<1.6f && v.z>0f).Max(v=>v.z) <= 80.01f, "Lead extends beyond terminal");
+            Require(mesh.vertices.Any(v=>Mathf.Abs(v.x)>18.8f && v.y>2.1f && v.y<2.3f), "Boundary fence missing");
+            Require(!mesh.vertices.Any(v=>Mathf.Abs(v.x)<2.9f && v.z>79.7f && v.y>.5f && v.y<2.3f), "Fence blocks terminal opening");
             Require(!Covers(mesh, new Vector2(18f, 60f)), "Floor covers empty corner");
             Require(Covers(mesh, new Vector2(0f, 77f)), "Missing terminal lead");
+            CheckMovedMeshes(assembly,yard,summary,building);
             Render(root, mesh, materials);
             File.WriteAllText(report, $"PASS rail yard: {checks} checks; {mesh.vertexCount} vertices\n");
             EditorApplication.Exit(0);
@@ -65,29 +68,64 @@ public static class RailYardQA
 
     static void CheckPlan(Type yard)
     {
-        foreach (int count in new[] { 1, 2, 3, 6, 9, 10 })
+        var polygon = new[] { new Vector2(-80,-19),new Vector2(80,-19),new Vector2(80,19),new Vector2(-80,19) };
+        foreach (float u in new[] { 20f,60f,79f,80f })
+        foreach (float v in new[] { -19f,-17f,-8f,-.5f,0f,.5f,8f,17f,19f })
         {
-            var polygon = new[] { new Vector2(-180,-30), new Vector2(180,-30), new Vector2(180,30), new Vector2(-180,30) };
-            var node = new Vector2(180, 0);
-            var rows = ((IEnumerable)yard.GetMethod("PlanRows", PrivateStatic).Invoke(null, new object[] { polygon, node, 0f, count })).Cast<object>().ToArray();
-            Require(rows.Length == count, "Unexpected missing tracks in a large yard");
-            Func<object, string, float> scalar = (row, field) => (float)row.GetType().GetField(field).GetValue(row);
-            var targets = rows.Select(row => (Vector2)row.GetType().GetField("Target").GetValue(row)).ToArray();
-            Require(targets.Distinct().Count() == count, "Multiple tracks converge at one point");
-            Require(rows.Count(row => (bool)row.GetType().GetField("IsSpine").GetValue(row)) == 1, "Collector must have one owner");
-            var direction = (Vector2)rows[0].GetType().GetField("Direction").GetValue(rows[0]);
-            Require(rows.Min(row => scalar(row,"StraightEnd")-scalar(row,"StraightStart")) > 180f,
-                "Collector consumes more than half the length of a large yard");
-            Require(Mathf.Abs(rows.Max(row=>scalar(row,"StraightEnd"))-rows.Min(row=>scalar(row,"StraightEnd"))-(count-1)*10f)<.001f,
-                "Straight lengths should differ only by the diagonal collector spacing");
-            for (int i = 0; i < rows.Length; i++)
+            var node=new Vector2(u,v);
+            var rows=((IEnumerable)yard.GetMethod("PlanRows",PrivateStatic).Invoke(null,new object[] { polygon,node,0f,7 })).Cast<object>().ToArray();
+            Require(rows.Length>0,"Terminal movement removed the whole yard: "+node);
+            Func<object,string,float> scalar=(row,field)=>(float)row.GetType().GetField(field).GetValue(row);
+            Func<object,int> side=row=>(int)row.GetType().GetField("Side").GetValue(row);
+            var main=rows.Single(row=>side(row)==0);
+            Require(Mathf.Abs(scalar(main,"V")-node.y)<.001f,"Central track misses terminal");
+            Require(Mathf.Abs(scalar(main,"StraightEnd")-(node.x-6f))<.001f,"Central track is not straight up to lead");
+            if (v==0f) Require(rows.Any(row=>side(row)<0)&&rows.Any(row=>side(row)>0),"Centered terminal lacks two-sided collection");
+            foreach (int direction in new[] { -1,1 })
             {
-                var target = targets[i];
-                Vector2 delta = target-targets[0];
-                Require(Mathf.Abs(delta.x*direction.y-delta.y*direction.x)<.001f, "Merge is off the shared diagonal");
-                Require(target.x>scalar(rows[i],"StraightEnd"), "Merge behind track end");
+                var group=rows.Where(row=>side(row)==direction).ToArray();
+                if (group.Length==0) continue;
+                Require(group.Count(row=>(bool)row.GetType().GetField("IsSpine").GetValue(row))==1,"Collector has multiple owners");
+                var first=(Vector2)group[0].GetType().GetField("Target").GetValue(group[0]);
+                foreach (var row in group)
+                {
+                    var target=(Vector2)row.GetType().GetField("Target").GetValue(row);
+                    var merge=(Vector2)row.GetType().GetField("MergePoint").GetValue(row);
+                    var tangent=(Vector2)row.GetType().GetField("Direction").GetValue(row);
+                    var delta=target-first;
+                    Require(Mathf.Abs(delta.x*tangent.y-delta.y*tangent.x)<.001f,"Merge points are off collector");
+                    Require((scalar(row,"V")-node.y)*direction>=(target.y-node.y)*direction
+                        && (target.y-node.y)*direction>0 && Mathf.Abs(merge.y-node.y)<.001f,"Collector crosses terminal axis and curves back");
+                    Require(merge.x>target.x && target.x>scalar(row,"StraightEnd"),"Collector reverses longitudinal direction");
+                }
             }
         }
+    }
+
+    static void CheckMovedMeshes(Assembly assembly,Type yard,Type summary,object building)
+    {
+        var managerType=assembly.GetType("PathManager");
+        var go=new GameObject("TerminalMoveQA");
+        var manager=go.AddComponent(managerType);
+        var cache=(IDictionary)managerType.GetField("nodeDataCache",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(manager);
+        var nodeType=assembly.GetType("NodeData");
+        summary.GetField("depot_node_id").SetValue(building,1);
+        foreach (var pos in new[] { new Vector3(.5f,0,80),new Vector3(-.5f,0,79),new Vector3(8,0,75),new Vector3(-17,0,70),new Vector3(0,0,-75) })
+        {
+            var node=Activator.CreateInstance(nodeType);
+            nodeType.GetField("node_id").SetValue(node,1);
+            nodeType.GetField("position").SetValue(node,new[] {pos.x,pos.y,pos.z});
+            cache[1]=node;
+            var result=yard.GetMethod("Generate").Invoke(Activator.CreateInstance(yard),new[] { building,(object)false });
+            var mesh=(Mesh)result.GetType().GetProperty("Mesh").GetValue(result);
+            Require(mesh.vertexCount>5000,"Moved terminal produced a white box: "+pos);
+            float direction=pos.z<0 ? -1f:1f;
+            Require(Covers(mesh,new Vector2(pos.x,pos.z-direction*2f)),"Moved terminal has no straight lead: "+pos);
+            UnityEngine.Object.DestroyImmediate(mesh);
+            UnityEngine.Object.DestroyImmediate((Mesh)result.GetType().GetProperty("ColliderMesh").GetValue(result));
+        }
+        UnityEngine.Object.DestroyImmediate(go);
+        summary.GetField("depot_node_id").SetValue(building,0);
     }
 
     static bool Covers(Mesh mesh, Vector2 p)

@@ -106,6 +106,8 @@ Offset  8: Ring buffer data (8184 bytes)
 | `system:ready`                  | `ui -> graphic`  | UIプログラムの準備完了通知                        |
 | `system:ping`                   | `ui <-> graphic` | 疎通確認用                                 |
 | `system:pong`                   | `ui -> graphic`  | pingへの応答                              |
+| `system:graphic_ready`          | `graphic -> ui`  | グラフィックの起動とIPC初期化の完了通知。毎起動時に送られ、2回目以降(クラッシュ後の自動再起動)ではUIがポップアップを一掃する |
+| `system:focus_gained`           | `graphic -> ui`  | グラフィックのウィンドウがフォアグラウンドになった通知(`OnApplicationFocus(true)`)。フルスクリーン扱いのグラフィックが活性化するとシェルが最前面指定のUIを裏へ回すことがあるため、UIはこれを受けて表示中の全ウィンドウの最前面を打ち直す。UIが裏に回ったときの復帰経路 |
 | `session:reset`                 | `ui -> graphic`  | 現在の3Dオブジェクトや地形のデータを全てクリアする            |
 | `game:start`                    | `ui -> graphic`  | バックエンドのセッションが作成され、ゲームが開始されたことを通知   |
 | `game:end`                      | `ui -> graphic`  | セッションが破棄され、ゲームが終了したことを通知               |

@@ -775,7 +775,8 @@ public class RoadPath : IPathMeshGenerator
         // 街路樹は縁石（帯の内側端）から歩道幅の1/4程度外側に配置する。
 
         // 道路脇の線は、歩道の内側端（縁石）から sideWidth/2 だけ内側に入った位置を中心として配置する。
-        float sideLineCenterOffset = (width * 0.5f) - sidewalkWidth - (sideWidth * 0.5f);
+        var laneLayout = new RoadLaneLayout(width, sidewalkWidth, sideWidth, centerWidth, lanes, pathData.travel_direction);
+        float sideLineCenterOffset = laneLayout.Outer;
         // 線の描画太さは sideWidth の3割に統一する。
         float lineWidth = sideWidth * 0.3f;
         // ラインは道路本体の上面（BODY_ABOVE_SPLINE）より高く浮かせてZファイティングを回避する
@@ -800,7 +801,6 @@ public class RoadPath : IPathMeshGenerator
 
         // 中央分離帯（center）の配置。中央分離帯があればセンターラインは不要。
         // 中央分離帯のパーツがなければ line パーツにフォールバックする。
-        bool hasCenterObj = false;
         if (centerWidth > 0f)
         {
             GameObject centerObj = CreateSplineMesh(container, spline, $"{variantBase}/center", centerWidth, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/center");
@@ -809,83 +809,16 @@ public class RoadPath : IPathMeshGenerator
                 UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[RoadPath] center パーツなし。line にフォールバック。");
                 centerObj = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, 0f, lineOffsetY, false, $"{typeBase}/line");
             }
-            hasCenterObj = centerObj != null;
             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] center: {(centerObj != null ? "生成成功" : "生成失敗")}");
         }
 
-        // センターライン・通行帯線
-        if (!hasLine)
+        // 車線中心と同じ走行帯を使う。片側通行の全幅レーンも共通定義で分割する。
+        if (hasLine)
         {
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[RoadPath] sideWidth <= 0: 中央線・車線境界線なし");
-        }
-        else if (hasCenterObj)
-        {
-            // 中央分離帯あり: センターラインは不要。
-            // 中央分離帯と側線の間をレーン数で等分し、境界に点線を配置する。
-            // 例: 4車線 → 片側2レーンなので中央分離帯と側線の間に点線1本。
-            // 例: 6車線 → 片側3レーンなので中央分離帯と側線の間に点線2本。
-            float halfCenter = centerWidth * 0.5f;
-            float halfLaneCount = lanes / 2;
-            float laneSectionWidth = sideLineCenterOffset - halfCenter;
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] 中央分離帯あり: halfCenter={halfCenter:F3}, halfLaneCount={halfLaneCount}, laneSectionWidth={laneSectionWidth:F3}, sideLineCenterOffset={sideLineCenterOffset:F3}");
-            if (laneSectionWidth > 0f && halfLaneCount > 1)
+            foreach (var boundary in laneLayout.Boundaries())
             {
-                float laneWidth = laneSectionWidth / halfLaneCount;
-                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] 中央分離帯あり laneWidth={laneWidth:F3}");
-                for (int i = 1; i < halfLaneCount; i++)
-                {
-                    float offsetX = halfCenter + (laneWidth * i);
-                    GameObject leftDash = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, offsetX, lineOffsetY, false, $"{typeBase}/line", isDashed: true);
-                    GameObject rightDash = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, -offsetX, lineOffsetY, false, $"{typeBase}/line", isDashed: true);
-                    UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] lane line[{i}] offsetX={offsetX:F3} (左): {(leftDash != null ? "生成成功" : "生成失敗")}, (右): {(rightDash != null ? "生成成功" : "生成失敗")}");
-                }
-            }
-            else
-            {
-                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[RoadPath] 中央分離帯ありだが laneSectionWidth <= 0 または halfLaneCount <= 1 のため lane line を生成しません");
-            }
-        }
-        else
-        {
-            // 中央分離帯なし: 従来通りのセンターライン・車線境界線を描画する。
-            float laneWidth = width / Mathf.Max(1, lanes);
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] 中央分離帯なし: lanes={lanes}, laneWidth={laneWidth:F3}");
-            if (lanes == 2)
-            {
-                // 2車線: 中央に点線1本
-                GameObject centerLine = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, 0f, lineOffsetY + RoadPartHeights.CENTER_LINE_EXTRA, false, $"{typeBase}/line", isDashed: true);
-                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] center line(点線): {(centerLine != null ? "生成成功" : "生成失敗")}");
-            }
-            else if (lanes % 2 == 0)
-            {
-                // 4車線以上の偶数: 中央に実線、各車線境界に点線
-                GameObject centerSolid = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, 0f, lineOffsetY + RoadPartHeights.CENTER_LINE_EXTRA, false, $"{typeBase}/line");
-                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] center line(実線): {(centerSolid != null ? "生成成功" : "生成失敗")}");
-                for (int i = 1; i < lanes / 2; i++)
-                {
-                    float offsetX = laneWidth * i;
-                    GameObject leftDash = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, offsetX, lineOffsetY + RoadPartHeights.CENTER_LINE_EXTRA, false, $"{typeBase}/line", isDashed: true);
-                    GameObject rightDash = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, -offsetX, lineOffsetY + RoadPartHeights.CENTER_LINE_EXTRA, false, $"{typeBase}/line", isDashed: true);
-                    UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] lane line[{i}] offsetX={offsetX:F3} (左): {(leftDash != null ? "生成成功" : "生成失敗")}, (右): {(rightDash != null ? "生成成功" : "生成失敗")}");
-                }
-            }
-            else if (lanes <= 1)
-            {
-                // 1車線: 分ける対向車線が存在しないため、中央線も車線境界線も引かない。
-                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[RoadPath] lanes <= 1: 中央線・車線境界線なし");
-            }
-            else
-            {
-                // 奇数車線: 中央に点線、さらに車線境界にも点線
-                GameObject centerLine = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, 0f, lineOffsetY + RoadPartHeights.CENTER_LINE_EXTRA, false, $"{typeBase}/line", isDashed: true);
-                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] center line(点線): {(centerLine != null ? "生成成功" : "生成失敗")}");
-                for (int i = 1; i <= lanes / 2; i++)
-                {
-                    float offsetX = laneWidth * i;
-                    GameObject leftDash = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, offsetX, lineOffsetY + RoadPartHeights.CENTER_LINE_EXTRA, false, $"{typeBase}/line", isDashed: true);
-                    GameObject rightDash = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, -offsetX, lineOffsetY + RoadPartHeights.CENTER_LINE_EXTRA, false, $"{typeBase}/line", isDashed: true);
-                    UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] lane line[{i}] offsetX={offsetX:F3} (左): {(leftDash != null ? "生成成功" : "生成失敗")}, (右): {(rightDash != null ? "生成成功" : "生成失敗")}");
-                }
+                CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, boundary.offset,
+                    lineOffsetY + RoadPartHeights.CENTER_LINE_EXTRA, false, $"{typeBase}/line", isDashed: boundary.dashed);
             }
         }
 
@@ -1724,5 +1657,63 @@ public sealed class IntersectionMeshOwner : MonoBehaviour
     private void OnDestroy()
     {
         if (OwnedMesh != null) Destroy(OwnedMesh);
+    }
+}
+
+/// <summary>
+/// 道路の区画線と車両描画が共用する走行帯。車線番号は進行方向の路肩側から数える。
+/// 奇数の双方向道路は中央1車線を転回用として確保し、通常走行には使わない。
+/// </summary>
+public readonly struct RoadLaneLayout
+{
+    public float Outer { get; }
+    public float Inner { get; }
+    public int Count { get; }
+    public bool OneWay { get; }
+    private readonly bool centered;
+    private readonly int totalLanes;
+    private readonly float divider;
+
+    public RoadLaneLayout(float width, float sidewalk, float side, float center, int lanes, int direction)
+    {
+        Outer = Mathf.Max(0, width * .5f - Mathf.Max(0, sidewalk) - Mathf.Max(0, side) * .5f);
+        OneWay = direction != Constants.DIR_BOTH;
+        totalLanes = Mathf.Max(1, lanes);
+        divider = Mathf.Max(0, center) * .5f;
+        Inner = OneWay ? 0 : divider;
+        if (!OneWay && totalLanes > 1 && totalLanes % 2 != 0)
+            Inner = Mathf.Max(Inner, Outer / totalLanes);
+        centered = Outer <= Inner || (!OneWay && totalLanes <= 1);
+        Count = centered ? 1 : (OneWay ? totalLanes : Mathf.Max(1, totalLanes / 2));
+    }
+
+    public float Center(int lane, int trafficHand)
+    {
+        if (centered) return 0;
+        lane = Mathf.Clamp(lane, 0, Count - 1);
+        float offset = OneWay ? Outer - 2 * Outer / Count * (lane + .5f)
+            : Outer - (Outer - Inner) / Count * (lane + .5f);
+        return offset * (trafficHand == Constants.TRAFFIC_HAND_LEFT ? -1 : 1);
+    }
+
+    public IEnumerable<(float offset, bool dashed)> Boundaries()
+    {
+        if (centered) yield break;
+        if (OneWay)
+        {
+            for (int i = 1; i < Count; i++) yield return (-Outer + 2 * Outer * i / Count, true);
+            yield break;
+        }
+        if (divider <= 0)
+        {
+            if (Inner > 0) { yield return (-Inner, true); yield return (Inner, true); }
+            else yield return (0, totalLanes == 2);
+        }
+        for (int i = 1; i < Count; i++)
+        {
+            float offset = Inner + (Outer - Inner) * i / Count;
+            yield return (-offset, true);
+            yield return (offset, true);
+        }
     }
 }

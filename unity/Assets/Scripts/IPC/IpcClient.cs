@@ -181,6 +181,18 @@ public class IpcClient : MonoBehaviour
         _reader?.ProcessReceivedMessages();
     }
 
+    /// <summary>
+    /// Unity がフォアグラウンドになった瞬間を Tauri に知らせる。
+    /// フルスクリーン扱いの Unity が活性化するとシェルが topmost の UI を裏へ回すことがあり、
+    /// Tauri 側はこの通知を受けて UI 全体の最前面を打ち直す(「Unity をクリックすれば
+    /// UI が戻る」復帰経路)。フォーカス喪失側は通知しない。
+    /// </summary>
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        if (!hasFocus) return;
+        SendEnvelope("system:focus_gained", new Dictionary<string, object>());
+    }
+
     // ======================================================================
     // 受信メッセージのディスパッチ
     // ======================================================================

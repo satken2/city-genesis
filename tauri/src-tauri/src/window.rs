@@ -151,21 +151,76 @@ pub fn set_hud_visible(app: &AppHandle, visible: bool) {
     // WebView2では hide()→show() をまたぐと生成時の always_on_top 指定が
     // 効かなくなることがあるため、表示のたびに再適用する。
     if visible {
-        reassert_hud_topmost(app);
+        reassert_topmost(app);
     }
 }
 
-/// HUD常駐ウィンドウ群(HUD3枚+ヒントバー)のtopmost(最前面)指定を再適用する。
+/// 表示中の全Tauriウィンドウ(HUD3枚・ヒントバー・ポップアップ等)のtopmost(最前面)を打ち直す。
 ///
 /// topmostは生成時に一度指定しただけでは維持されない:
-/// - Unityがフルスクリーン扱いでフォアグラウンドになると、シェルがゲームを
-///   最前面バンドへ押し込み、topmostのHUDが裏に回ることがある
+/// - Unityがフルスクリーン扱い(モニタ全面を覆うボーダーレス)でフォアグラウンドになると、
+///   シェルがゲームをtopmostより手前へ持ち上げ、UIが裏に回る
 /// - WebView2では hide()→show() をまたぐとtopmostが外れることがある
-/// 冪等かつ安価な呼び出しなので、フォーカス移動などの機会に雑に呼び直してよい。
-/// 非表示ウィンドウに適用しても表示はされない(SWP_SHOWWINDOWは立たない)ため無害。
-pub fn reassert_hud_topmost(app: &AppHandle) {
-    for label in HUD_WINDOW_LABELS.iter().copied().chain(std::iter::once("hintbar")) {
-        if let Some(win) = app.get_webview_window(label) {
+///
+/// `set_always_on_top(true)` は使わない。tao は新旧フラグの差分が無いと `SetWindowPos` を
+/// 発行しないため、既にtopmost指定済みのウィンドウには何も起きず、裏に回った状態から
+/// 復帰できない。ここでは HWND に対して直接 `SetWindowPos(HWND_TOPMOST)` を発行する。
+///
+/// ウィンドウ同士の重なり順は変えない。`HWND_TOPMOST` はtopmost帯の先頭へ挿入するため、
+/// 現在のZオーダーで下にあるものから順に発行して相対順を保つ(ポップアップ同士の
+/// 前後関係や、ポップアップがHUDより手前にある状態を崩さないため)。
+/// 冪等かつ安価なので、フォーカス移動や Unity からの復帰通知のたびに呼び直してよい。
+pub fn reassert_topmost(app: &AppHandle) {
+    #[cfg(target_os = "windows")]
+    {
+        use std::collections::HashSet;
+        use windows_sys::Win32::UI::WindowsAndMessaging::{
+            GetTopWindow, GetWindow, IsWindowVisible, SetWindowPos, GW_HWNDNEXT, HWND_TOPMOST,
+            SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE,
+        };
+
+        // 表示中の自ウィンドウの HWND 集合(非表示のものは対象外)。
+        let mut targets: HashSet<isize> = HashSet::new();
+        for win in app.webview_windows().values() {
+            if let Ok(hwnd) = win.hwnd() {
+                let hwnd = hwnd.0 as *mut core::ffi::c_void;
+                if unsafe { IsWindowVisible(hwnd) } != 0 {
+                    targets.insert(hwnd as isize);
+                }
+            }
+        }
+        if targets.is_empty() {
+            return;
+        }
+
+        // デスクトップ直下のトップレベルウィンドウを手前から順に歩き、自ウィンドウだけ拾う。
+        let mut ordered: Vec<isize> = Vec::with_capacity(targets.len());
+        let mut cursor = unsafe { GetTopWindow(std::ptr::null_mut()) };
+        while !cursor.is_null() {
+            if targets.contains(&(cursor as isize)) {
+                ordered.push(cursor as isize);
+            }
+            cursor = unsafe { GetWindow(cursor, GW_HWNDNEXT) };
+        }
+
+        // 手前から順に集めたので、逆順(最背面から)に打つと相対順が保たれる。
+        for hwnd in ordered.into_iter().rev() {
+            unsafe {
+                SetWindowPos(
+                    hwnd as *mut core::ffi::c_void,
+                    HWND_TOPMOST,
+                    0,
+                    0,
+                    0,
+                    0,
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE,
+                );
+            }
+        }
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        for win in app.webview_windows().values() {
             let _ = win.set_always_on_top(true);
         }
     }

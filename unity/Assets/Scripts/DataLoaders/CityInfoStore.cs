@@ -7,8 +7,8 @@ using UnityEngine;
 ///
 /// traffic_hand はゲーム開始後に絶対に変化しない固定設定であり、
 /// 駅パスのプラットフォーム設置側（platform_side の内側/外側→左右の解決。
-/// TrackPath.ResolvePlatformExtents）が参照する。車両描画（VehicleManager）は
-/// 従来どおり自前で取得しており、本ストアとは独立している。
+/// TrackPath.ResolvePlatformExtents）が参照する。車両描画（VehicleManager）も
+/// 同じ値を参照し、独立した都市設定の取得は行わない。
 ///
 /// 取得は PathManager.Start が EnsureLoaded を呼ぶことで一度だけ行われる
 /// （パスのロードはゲームセッション開始後にしか走らないため、タイミングとして十分早い）。

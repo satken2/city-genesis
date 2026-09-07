@@ -238,3 +238,5 @@ GetNodeSnapPositionは接続パスに保存標高があればそれを優先し�
 
 
 TrackPath.InfrastructureConnectionProviderにはIsInfrastructureConnectionを登録し、ノードtypeのインフラビットを判定する。施設の共用接続点へ線路が1本だけ接続されていても車止めを置かない。BuildingManagerのロードを待たず判定し、OnDestroyでプロバイダを解除する。
+
+- 車両の範囲抽出は `GetPathsNearCircle` でセル逆引きから候補を得る。外接矩形の粗い抽出なので、呼び出し側で中心線と円の交差を判定する。`CityInfoStore` の通行方向は駅と車両が共有する。
