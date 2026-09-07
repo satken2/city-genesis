@@ -24,8 +24,6 @@ public class PropPlacementManager : MonoBehaviour
 {
     private enum Mode { Instance, Scatter }
 
-    // 散布プレビューで生成するゴースト prefab の上限。広い範囲×高密度でも描画負荷を抑えるため。
-    private const int MAX_SCATTER_PREVIEW = 2000;
 
     // 散布ポリゴン(範囲モード)のギズモ描画パラメータ(ピクセル単位)。
     private const float VERTEX_MARKER_HALF_SIZE = 6f;
@@ -60,8 +58,16 @@ public class PropPlacementManager : MonoBehaviour
 
     // ---- 範囲モード ----
     private readonly List<Vector3> scatterVertices = new List<Vector3>();
-    // 生成済みの散布プレビューゴースト。
-    private readonly List<GameObject> scatterGhosts = new List<GameObject>();
+    private sealed class PreviewBatch
+    {
+        public PropRenderModel.Part part;
+        public Matrix4x4[] matrices;
+    }
+    private readonly List<PreviewBatch> previewBatches = new List<PreviewBatch>();
+    private PropRenderModel previewModel;
+    private Coroutine previewWorker;
+    private int previewRevision;
+    private Vector3 previewOffset;
     private OverlayMeshRenderer overlayRenderer;
     private GameObject overlayMeshObj;
 
@@ -76,7 +82,8 @@ public class PropPlacementManager : MonoBehaviour
     {
         gameCamera = Camera.main;
         // 建物建設のプレビューと同じ半透明マテリアルを流用する(alpha≈0.39)。
-        previewMaterial = Resources.Load<Material>("PreviewBuildingMaterial");
+        var sourceMaterial = Resources.Load<Material>("PreviewBuildingMaterial");
+        if (sourceMaterial != null) previewMaterial = CreatePreviewMaterial(sourceMaterial);
         EnsureContainer();
         EnsureOverlayRenderer();
     }
@@ -85,6 +92,14 @@ public class PropPlacementManager : MonoBehaviour
     {
         if (!active || mode != Mode.Scatter) return;
         UpdateOverlay();
+        var manager = PropManager.Instance;
+        if (manager == null) return;
+        if (previewRevision != manager.PreviewRevision || previewOffset != manager.SceneOffset) RegenerateScatterPreview();
+        if (previewMaterial == null) return;
+        foreach (var batch in previewBatches)
+            Graphics.RenderMeshInstanced(new RenderParams(previewMaterial) { camera = gameCamera,
+                shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off, receiveShadows = false },
+                batch.part.mesh, batch.part.submesh, batch.matrices);
     }
 
     private void EnsureContainer()
@@ -119,7 +134,11 @@ public class PropPlacementManager : MonoBehaviour
         if (gameCamera == null) gameCamera = Camera.main;
         EnsureContainer();
         EnsureOverlayRenderer();
-        if (previewMaterial == null) previewMaterial = Resources.Load<Material>("PreviewBuildingMaterial");
+        if (previewMaterial == null)
+        {
+            var sourceMaterial = Resources.Load<Material>("PreviewBuildingMaterial");
+            if (sourceMaterial != null) previewMaterial = CreatePreviewMaterial(sourceMaterial);
+        }
 
         // モード切替・種別変更のたびに既存の配置状態をクリアしてやり直す。
         ClearAll();
@@ -269,6 +288,7 @@ public class PropPlacementManager : MonoBehaviour
             else
             {
                 ApplyTransform(hoverGhost, worldPos, rotation, scale);
+                hoverGhost.SetActive(PropManager.Instance != null && PropManager.Instance.CanPreview(worldPos, propType, scale));
             }
         }
         else
@@ -302,6 +322,7 @@ public class PropPlacementManager : MonoBehaviour
         GameObject go = Instantiate(prefab, container);
         go.SetActive(true);
         ApplyTransform(go, worldPos, rot, scl);
+        go.SetActive(PropManager.Instance != null && PropManager.Instance.CanPreview(worldPos, propType, scl));
 
         if (ghost && previewMaterial != null)
         {
@@ -341,76 +362,52 @@ public class PropPlacementManager : MonoBehaviour
     // 散布プレビュー生成(範囲モード)
     // =====================================================================
 
-    /// <summary>
-    /// 散布ポリゴン内に seed ベースの散布点を生成し、prefab を半透明ゴーストで簡易配置する。
-    /// 点数 ≈ ポリゴン面積 × density / 10000(density は本/ヘクタール)。MAX_SCATTER_PREVIEW で上限クランプ。
-    /// バックエンドの散布生成とは独立した簡易プレビューで、確定後の永続描画は別途行う。
-    /// </summary>
+    /// <summary>永続表示と同じ座標ハッシュ・小区画・障害物判定を使う。</summary>
     private void RegenerateScatterPreview()
     {
         ClearScatterGhosts();
-        if (scatterVertices.Count < 3 || density <= 0f) return;
-
-        // ポリゴンのバウンディングボックス。
-        float minX = float.MaxValue, maxX = float.MinValue, minZ = float.MaxValue, maxZ = float.MinValue;
-        foreach (var v in scatterVertices)
-        {
-            if (v.x < minX) minX = v.x;
-            if (v.x > maxX) maxX = v.x;
-            if (v.z < minZ) minZ = v.z;
-            if (v.z > maxZ) maxZ = v.z;
-        }
-
-        // density(本/ha=本/10000m²)からグリッド1セルの一辺(m)を求める。
-        float cell = Mathf.Sqrt(10000f / density);
-        if (cell < 0.5f) cell = 0.5f; // 過密で生成が爆発しないよう下限を設ける。
-
-        var rng = new System.Random(seed);
-        int placed = 0;
-        for (float gx = minX; gx <= maxX && placed < MAX_SCATTER_PREVIEW; gx += cell)
-        {
-            for (float gz = minZ; gz <= maxZ && placed < MAX_SCATTER_PREVIEW; gz += cell)
-            {
-                // グリッド中心にジッタを加える(seed 固定で決定的)。
-                float jx = gx + (float)(rng.NextDouble() - 0.5) * cell;
-                float jz = gz + (float)(rng.NextDouble() - 0.5) * cell;
-                if (!PointInPolygonXZ(jx, jz)) continue;
-
-                float y = Utils.GetGroundHeight(new Vector3(jx, 0f, jz));
-                // 散布個体の回転はランダム、スケールは基準値に±20%のばらつき。
-                float rot = (float)(rng.NextDouble() * 360.0);
-                float scl = scale * (0.8f + (float)rng.NextDouble() * 0.4f);
-
-                GameObject go = InstantiateProp(new Vector3(jx, y, jz), rot, scl, ghost: true);
-                if (go != null)
-                {
-                    scatterGhosts.Add(go);
-                    placed++;
-                }
-            }
-        }
-
-        Debug.Log($"PropPlacementManager: 散布プレビュー生成 {placed}本 (density={density}, seed={seed}, clamp={MAX_SCATTER_PREVIEW})");
-        if (placed >= MAX_SCATTER_PREVIEW)
-        {
-            Debug.LogWarning($"PropPlacementManager: 散布プレビューを {MAX_SCATTER_PREVIEW}本で打ち切りました(実際の散布本数はこれより多くなります)");
-        }
+        var manager = PropManager.Instance;
+        if (manager == null) return;
+        previewRevision = manager.PreviewRevision;
+        previewOffset = manager.SceneOffset;
+        if (scatterVertices.Count < 3 || density <= 0) return;
+        previewModel = new PropRenderModel(propType);
+        previewWorker = StartCoroutine(BuildScatterPreview(manager));
     }
 
-    /// <summary>XZ平面での点内包判定(even-odd rule)。scatterVertices を閉じたポリゴンとして扱う。</summary>
-    private bool PointInPolygonXZ(float x, float z)
+    private System.Collections.IEnumerator BuildScatterPreview(PropManager manager)
     {
-        bool inside = false;
-        int n = scatterVertices.Count;
-        for (int i = 0, j = n - 1; i < n; j = i++)
+        var ring = scatterVertices.ConvertAll(v => new Vector2(v.x - previewOffset.x, v.z - previewOffset.z)).ToArray();
+        var region = new PropGeometry.Region { bounds = PropGeometry.Bounds(ring) };
+        region.rings.Add(ring);
+        var regions = new List<PropGeometry.Region> { region };
+        int candidates = 0;
+        var timer = System.Diagnostics.Stopwatch.StartNew();
+        foreach (var rect in manager.PreviewRects(region.bounds))
         {
-            float xi = scatterVertices[i].x, zi = scatterVertices[i].z;
-            float xj = scatterVertices[j].x, zj = scatterVertices[j].z;
-            bool intersect = ((zi > z) != (zj > z)) &&
-                             (x < (xj - xi) * (z - zi) / (zj - zi) + xi);
-            if (intersect) inside = !inside;
+            var matrices = new List<Matrix4x4>();
+            foreach (var point in PropGeometry.Scatter(rect, regions, density, seed))
+            {
+                if (++candidates > manager.CandidateBudget) yield break;
+                var position = new Vector3(point.position.x, 0, point.position.y) + previewOffset;
+                position.y = HeightmapTextureManager.GetTerrainHeight(position);
+                if (manager.CanPreview(position, propType, point.scale))
+                    matrices.Add(Matrix4x4.TRS(position, Quaternion.Euler(0,point.rotation,0), Vector3.one * point.scale));
+                if ((candidates & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.FrameBudgetMs)
+                { yield return null; timer.Restart(); }
+            }
+            foreach (var part in previewModel.normal)
+                for (int start = 0; start < matrices.Count; start += 511)
+                {
+                    int count = Mathf.Min(511, matrices.Count - start);
+                    var values = new Matrix4x4[count];
+                    for (int i = 0; i < count; i++) values[i] = matrices[start+i] * part.local;
+                    previewBatches.Add(new PreviewBatch { part = part, matrices = values });
+                    if (timer.ElapsedMilliseconds > PerformanceConfig.FrameBudgetMs)
+                    { yield return null; timer.Restart(); }
+                }
         }
-        return inside;
+        previewWorker = null;
     }
 
     // =====================================================================
@@ -446,8 +443,10 @@ public class PropPlacementManager : MonoBehaviour
 
     private void ClearScatterGhosts()
     {
-        foreach (var go in scatterGhosts) if (go != null) Destroy(go);
-        scatterGhosts.Clear();
+        if (previewWorker != null) StopCoroutine(previewWorker);
+        previewWorker = null;
+        previewBatches.Clear();
+        previewModel?.Dispose(); previewModel = null;
     }
 
     // =====================================================================
@@ -524,8 +523,24 @@ public class PropPlacementManager : MonoBehaviour
         overlayRenderer.EndFrame(cam);
     }
 
+    private static Material CreatePreviewMaterial(Material source)
+    {
+        // アルファ値だけではURP Litは透過しないため、複製側で描画状態も揃える。
+        var material = new Material(source) { enableInstancing = true };
+        material.SetFloat("_Surface", 1f);
+        material.SetFloat("_ZWrite", 0f);
+        material.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        material.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        material.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+        material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+        material.SetOverrideTag("RenderType", "Transparent");
+        material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+        return material;
+    }
+
     private void OnDestroy()
     {
+        if (previewMaterial != null) Destroy(previewMaterial);
         ClearAll();
         if (overlayMeshObj != null) Destroy(overlayMeshObj);
     }

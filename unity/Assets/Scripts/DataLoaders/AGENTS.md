@@ -146,17 +146,19 @@
   - **再構築タイミング**: カメラ移動では再構築しない（world-spaceメッシュなので不要）。リソースロード完了時と、`TerrainManager.OnTerrainTileReady`（資源が存在するセルのみ）で再構築。同一フレームの複数イベントは `LateUpdate` で1回にまとめる。
   - **資源名ラベル**: ZoneManager と同じ ScreenSpaceOverlay Canvas 方式で `resource_type_label`(水源・森林等)を表示。`EnsureUICanvas` で専用Canvas(sortingOrder=55, ZoneManager=60より奥)を作り、`resource_type_label` を `Text`+`Outline` で描画。位置は `Update` でカメラが 1m/2° 以上動いたフレームだけ `center_point` を `WorldToScreenPoint` して更新(ZoneManagerと同じ間引き基準)。
 
-## 地形プロップ (PropManager.cs)
+## 地形プロップ (PropManager / PropGeometry / PropRenderModel)
 
-- 役割: 配置・散布済みの地形プロップ(森・岩などの装飾。仕様の正は `genesis-docs/docs/geometries/M_地形プロップ.md`)を `GET /props?bbox=` から取得し、GameObjectとして実体化する。ロード範囲は `BaseApiDataManager.LoadLodCells` のデフォルト = **nearCells**(Near以上のティア)。
-- **マージBBOXの一括取得+レコード単位レジストリ**: 散布プロップ(scatter)はバックエンドで「散布範囲全体を覆うBBOX」で空間登録されているため、セル単位に取得すると**同じレコードが複数セルの応答に重複して返る**。セルごとに独立生成すると同一座標に重複インスタンスができるため、必要セル全体のマージBBOXで1リクエスト取得し、`scatterStates` / `instanceStates`(レコードID→状態)で一元管理する。
-- **version差分更新**: HTTP取得は毎回全件、再生成は version が変わったレコードのみ(他マネージャーと同じ慣習)。応答に含まれないキャッシュ済みレコードは削除済みとして破棄する。これにより `ReloadAllData`(編集確定・エポック完了後)で「配置直後のプロップの出現」「重なり除去による region 変更の再散布」「削除の反映」が機能する。
-- **散布点の決定的生成とセル単位の差分実体化**: 散布点(ジッタ・回転・スケール)は `seed` 初期値の乱数を**散布範囲全体のグリッド走査順に、セルの実体化有無にかかわらず必ず消費**して生成する。これにより後から一部のセルだけ実体化しても同じ点列になる(`ScatterState.generatedCells` で生成済みセルを管理し、新たに必要になったセルだけ差分生成)。生成コルーチンが途中キャンセルされたセルは `generatedCells` にマークされず、次回ロードで作り直される。
-- **穴つき・複数塊regionの遵守**: `region`(GeoJSON MultiPolygon coordinates)は「各Polygonの先頭リング=外周、以降=穴」としてパースし、散布点は「外周の内側かつどの穴にも入らない」場所にのみ置く(公開ドキュメント M.3 の契約。重なり除去で刳り抜かれた道路・区画の上に散布しないため)。
-- **地形追従**: 生成時に `HeightmapTextureManager.GetTerrainHeight` でYをサンプルし、地形ロード完了後は `CellDataLoader.TerrainFollowUpCoroutine` から `AdjustPropHeightsForCellsCoroutine(updatedCells ∩ nearCells)` が呼ばれてY座標を再設定する(建物・道路と同じ2段階ロード。プロップはY再設定のみでメッシュ再生成なし)。
-- **セル逆引きインデックス (`scatterIdsByCell` / `instanceIdsByCell`)**: セル単位のアンロード・地形追従で全レコード走査を避けるためのインデックス。登録・削除は必ず `RegisterScatterCell` / `RegisterInstanceCell` / `UnloadCell` / `ClearAllCells` を通して同期すること。
-- 生成・破棄・高さ調整はすべて `PerformanceConfig.FrameBudgetMs` のフレーム予算でコルーチン分散する。1散布レコードあたりの生成上限は5000(超過は警告して打ち切り)。
-- 未実装(別タスク): GPUインスタンシング等による数万本規模の軽量描画(現状は1本=1GameObject)、既存プロップの削除UI。
+- `GET /props?bbox=…&include_obstacles=true`を`ApiClient.GetBulk`で取得する。完全スナップショットの配置情報と障害物を同時に更新し、建物のGameObject/Colliderへ依存しない。
+- `LoadLodCells`は既存`farCells`全体（Near/Dynamicを含む）を使用する。FarセルのDrawLodはFar以下、UltraFarは非表示。`CellDataLoader`から共通`LoadBatch`を渡し、旧処理の適用を防ぐ。
+- セルサイズは`TerrainManager.CellSize`が正。`subdivisions`（既定8）で各セルを整数分割し、候補点・除外判定・GPUバッチを管理する。地形セルや独立したロード距離は追加しない。
+- `PropGeometry`がregionの穴・複数パートと固定格子の座標ハッシュを扱う。候補点はregionのbboxや生成順、描画分割数に依存しない。プレビューもこの実装を使う。
+- `PropRenderModel`は共有FBXを変更せず、instancing対応Materialの複製と任意の`_close`/`_far`を用いる。Far未提供時は複雑なサブメッシュを頂点の空間集約で簡略化し、既に軽い部品はそのまま使う。所有するMesh/Materialを全消去時に破棄する。実行時生成MaterialのためGraphicsSettingsのInstancing VariantsはKeep Allを維持する。
+- `PropManager`は一本ごとのGameObjectを作らず、候補配列と小区画別バッチを保持する。描画は`Graphics.RenderMeshInstanced`（最大511個/呼び出し）。全マップを一括バッチにせずBoundsでカリングする。
+- プロップID/versionの署名と障害物key/signatureの署名を分ける。障害物だけの変更では候補を再生成せず対象区画の表示可否だけ更新する。非表示候補は復元用に残す。
+- `chunksByCell`でアンロード・地形追従の対象を引く。Near/Dynamicの高さは既存`TerrainFollowUpCoroutine`で更新し、初回Far地形ロードは`OnTerrainTileReady`でも高さ更新を予約する。地形高さの共通取得処理を使用する。
+- 生成・行列更新は`PerformanceConfig.FrameBudgetMs`で分散する。既定の常駐候補予算250,000を超える場合はカメラに近い小区画を優先し、区画の途中では切らない。更新中の旧/新配列の併存分は一時的に増える。
+- `ResidentCandidateCount`/`ResidentChunkCount`、`SubmittedBatchCount`/`SubmittedInstanceCount`（サブメッシュごとの延べ数）、`LastRegeneratedChunks`/`LastExclusionUpdatedChunks`で負荷と差分を観測できる。
+- 正式仕様は`city-genesis/docs/docs/geometries/M_地形プロップ.md`。独立Unity検証は`Tests/Props/run.ps1`。削除UI・橋下の高さ判定・UltraFar森林は対象外。
 
 ## 高さ取得APIの使い分け
 

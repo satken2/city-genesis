@@ -399,7 +399,7 @@ public class CellDataLoader : MonoBehaviour
         if (propManager != null)
         {
             UnityLog.If(LocalConstants.UNITY_LOG_LOADER, "CellDataLoader: プロップのリロード開始");
-            propManager.LoadLodCells(cellSets, isForce);
+            propManager.LoadLodCells(cellSets, tierChangedCells, isForce, activeLoadBatch);
         }
         // 2/3. 地形(near/far/dynamic)のリロード
         if (terrainManager != null)
