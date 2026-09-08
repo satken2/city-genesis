@@ -288,7 +288,7 @@ public class PropPlacementManager : MonoBehaviour
             else
             {
                 ApplyTransform(hoverGhost, worldPos, rotation, scale);
-                hoverGhost.SetActive(PropManager.Instance != null && PropManager.Instance.CanPreview(worldPos, propType, scale));
+                hoverGhost.SetActive(true);
             }
         }
         else
@@ -322,7 +322,6 @@ public class PropPlacementManager : MonoBehaviour
         GameObject go = Instantiate(prefab, container);
         go.SetActive(true);
         ApplyTransform(go, worldPos, rot, scl);
-        go.SetActive(PropManager.Instance != null && PropManager.Instance.CanPreview(worldPos, propType, scl));
 
         if (ghost && previewMaterial != null)
         {

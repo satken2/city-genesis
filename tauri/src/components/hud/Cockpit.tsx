@@ -7,6 +7,8 @@
  * - 常用ツール: 表示切替・都市マップ・地形セル開放・ブルドーザ。
  *   ブルドーザはウィンドウを開かずUnityの削除ステートに入る常駐モードで、
  *   アイコンパネルの地区編集と排他(`hudMode`でウィンドウをまたいで共有)。
+ *   解除し忘れによる誤削除を防ぐため、ON の間はパネル全体を工事現場風の
+ *   黄黒斜線(`cockpit--bulldozer`)にして常駐中であることを目立たせる。
  * - 公共サービス充足度: 電力・水道などの需要/供給キャパシティを縦棒で常時表示する。
  *   クリックで公共施設ウィンドウを開く。
  * - アラート: L1通知は重要度2階調で表現する。warning(都市崩壊の差し迫った危機)が
@@ -174,7 +176,9 @@ export function Cockpit() {
   const warningCount = l1Notifications.length - cautionCount;
 
   return (
-    <div className={`hud-panel cockpit ${epochExecuting ? "hud-disabled" : ""}`}>
+    <div
+      className={`hud-panel cockpit ${mode === "bulldozer" ? "cockpit--bulldozer" : ""} ${epochExecuting ? "hud-disabled" : ""}`}
+    >
       <div className="cockpit-tools">
         {TOOL_ICONS.map((icon) => {
           const active = icon.id === "bulldozer" && mode === "bulldozer";

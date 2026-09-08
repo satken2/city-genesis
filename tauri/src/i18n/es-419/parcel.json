@@ -56,10 +56,8 @@
     "sectionSplit": "División de parcelas existentes",
     "modeSingle": "Parcela única",
     "modeAlongPath": "A lo largo de la calle",
-    "modeTile": "En mosaico",
     "modeRandom": "Aleatorio",
     "modeBlock": "Manzana completa",
-    "modeManual": "Polígono libre",
     "modeSplitRect": "División rectangular",
     "modeSplitRandom": "División aleatoria",
     "modeWheelHint": "El método de creación puede elegirse en la vista 3D con Ctrl + rueda desde el menú radial (también desde estas fichas).",
@@ -94,13 +92,11 @@
     "pointSelected": "Punto seleccionado",
     "pathSelected": "Vía n.º {{id}} seleccionada",
     "parcelSelected": "Parcela n.º {{id}} seleccionada",
-    "drawPolygon": "Haz clic izquierdo en la vista 3D para colocar vértices y clic derecho para confirmar la forma",
-    "polygonPlacing": "Colocando vértices ({{count}} puntos) — clic derecho para confirmar la forma",
-    "polygonReady": "Polígono confirmado ({{count}} puntos) — puedes arrastrar los vértices para ajustarlo",
     "unitSqm": "㎡",
     "unitMeter": "m",
     "unitDegree": "°",
     "unitPercent": "%",
-    "unitCount": ""
+    "unitCount": "",
+    "noParcels": "No se pueden crear parcelas aquí. Selecciona terreno vacío junto a una calle o ajusta el área de búsqueda o las dimensiones."
   }
 }

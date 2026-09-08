@@ -56,10 +56,8 @@
     "sectionSplit": "Division de parcelles existantes",
     "modeSingle": "Parcelle unique",
     "modeAlongPath": "Le long de la route",
-    "modeTile": "En damier",
     "modeRandom": "Aléatoire",
     "modeBlock": "Îlot entier",
-    "modeManual": "Polygone libre",
     "modeSplitRect": "Division rectangulaire",
     "modeSplitRandom": "Division aléatoire",
     "modeWheelHint": "La méthode de création se choisit dans la vue 3D avec Ctrl + molette depuis le menu radial (ces tuiles fonctionnent aussi).",
@@ -94,13 +92,11 @@
     "pointSelected": "Point sélectionné",
     "pathSelected": "Voie n° {{id}} sélectionnée",
     "parcelSelected": "Parcelle n° {{id}} sélectionnée",
-    "drawPolygon": "Clic gauche dans la vue 3D pour poser des sommets, clic droit pour valider la forme",
-    "polygonPlacing": "Pose des sommets ({{count}} points) — clic droit pour valider la forme",
-    "polygonReady": "Polygone validé ({{count}} points) — faites glisser les sommets pour ajuster",
     "unitSqm": "m²",
     "unitMeter": "m",
     "unitDegree": "°",
     "unitPercent": "%",
-    "unitCount": ""
+    "unitCount": "",
+    "noParcels": "Aucune parcelle ne peut être créée ici. Sélectionnez un terrain libre près d’une route ou ajustez la zone de recherche ou les dimensions."
   }
 }

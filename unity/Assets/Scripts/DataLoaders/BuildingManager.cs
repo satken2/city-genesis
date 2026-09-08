@@ -325,6 +325,14 @@ public class BuildingManager : BaseApiDataManager
         activeLodCoroutines.Clear();
 
         var allBuildingCells = new HashSet<Vector2Int>(cellSets.farCells);
+        var obsoleteRequests = new List<int>();
+        foreach (var item in deferredDetailBuildings)
+        {
+            float[] point = item.Value.data.centerPointArray;
+            if (point != null && point.Length >= 2 && !allBuildingCells.Contains(PositionToCell(new Vector3(point[0], 0f, point[1]))))
+                obsoleteRequests.Add(item.Key);
+        }
+        foreach (int id in obsoleteRequests) deferredDetailBuildings.Remove(id);
         var nearSet = new HashSet<Vector2Int>(cellSets.nearCells);
         var dynamicSet = new HashSet<Vector2Int>(cellSets.dynamicCells);
 
@@ -743,6 +751,12 @@ public class BuildingManager : BaseApiDataManager
     /// アイドル的に生成する(振り向き時のポップイン軽減)。上限に達している場合、
     /// 視野外の建物は生成せずキューに残す(視野に入れば最優先で処理される)。
     /// </summary>
+    private bool IsDeferredCellReady(BuildingSummary data)
+    {
+        float[] point = data.centerPointArray;
+        return point == null || point.Length < 2 || loadedCells.Contains(PositionToCell(new Vector3(point[0], 0f, point[1])));
+    }
+
     private IEnumerator DetailGenerationWorker()
     {
         var budgetWatch = new System.Diagnostics.Stopwatch();
@@ -771,6 +785,8 @@ public class BuildingManager : BaseApiDataManager
                 bool found = false;
                 foreach (var kvp in deferredDetailBuildings)
                 {
+                    // 一括取得の適用完了までは未登録セルの要求を取り除かない。
+                    if (!IsDeferredCellReady(kvp.Value.data)) continue;
                     float score = ScoreDeferredBuilding(kvp.Value.data, camPos, fwd);
                     if (!found || score < bestScore)
                     {

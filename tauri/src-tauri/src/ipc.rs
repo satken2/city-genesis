@@ -542,11 +542,6 @@ pub async fn handle_incoming_message(
         "edit_parcel:update_shape" => {
             let _ = app.emit("edit_parcel:update_shape", envelope.payload);
         }
-        "edit_parcel:update_creation_shape" => {
-            // 土地区画作成モード(任意ポリゴン)で編集中のポリゴン頂点列を作成パネルへ中継する。
-            // 既存区画の形状編集で使う edit_parcel:update_shape とは用途が異なる別イベント。
-            let _ = app.emit("edit_parcel:update_creation_shape", envelope.payload);
-        }
         "edit_resource:update_shape" => {
             let _ = app.emit("edit_resource:update_shape", envelope.payload);
         }

@@ -30,7 +30,6 @@ import {
   IPC_EVENT_EDIT_PARCEL_SELECT_PARCEL,
   IPC_EVENT_EDIT_PARCEL_SET_MODE,
   IPC_EVENT_EDIT_PARCEL_UPDATE_ROTATION,
-  IPC_EVENT_EDIT_PARCEL_UPDATE_CREATION_SHAPE,
 } from "../../utils/ipc";
 import type { ParcelPreviewItem } from "./ParcelPreviewCanvas";
 import { ParcelPreviewCanvas } from "./ParcelPreviewCanvas";
@@ -42,15 +41,13 @@ import "./ParcelCreationPanel.css";
 type CreationMode =
   | "empty_area"
   | "along_path"
-  | "tile"
   | "random"
   | "block"
-  | "manual"
   | "split_rectangle"
   | "split_random";
 
 /** 地点選択で空き領域を探索するモード（Unity側は PARCEL_CREATION_POINT プリセット） */
-const POINT_MODES: CreationMode[] = ["empty_area", "tile", "random", "block"];
+const POINT_MODES: CreationMode[] = ["empty_area", "random", "block"];
 
 function isPointCreationMode(mode: CreationMode | null): boolean {
   return mode !== null && POINT_MODES.includes(mode);
@@ -60,15 +57,13 @@ function isPointCreationMode(mode: CreationMode | null): boolean {
  * width / height 入力のモード別の初期値と入力レンジ。
  *
  * 同じ2つの入力欄でも意味がモードによって違う。empty_area と along_path は
- * 区画そのものの寸法だが、tile / random / block は矩形内を複数区画で敷き詰める
- * 「まとめて造成する街区の広さ」なので桁が1つ違う（block はブロック全体が
- * 矩形に収まる必要がある）。モード切替時に必ず初期値へ戻し、前のモードの値が
+ * 区画そのものの寸法だが、random / block は周囲から複数区画を生成する
+ * 「探索範囲」なので桁が1つ違う。モード切替時に必ず初期値へ戻し、前のモードの値が
  * レンジ外のまま残らないようにする。
  */
 const SIZE_INPUT_PRESETS: Record<string, { width: number; height: number; min: number; max: number; step: number }> = {
   empty_area: { width: 10, height: 20, min: 1, max: 200, step: 1 },
   along_path: { width: 10, height: 20, min: 1, max: 100, step: 1 },
-  tile: { width: 200, height: 200, min: 1, max: 400, step: 10 },
   random: { width: 200, height: 200, min: 1, max: 400, step: 10 },
   block: { width: 200, height: 200, min: 20, max: 400, step: 10 },
 };
@@ -89,19 +84,14 @@ const CREATION_SECTIONS = [
     titleKey: "parcel_creation.sectionCreate",
     modes: [
       {
-        mode: "empty_area" as CreationMode,
-        icon: "creation_1.png",
-        tooltipKey: "parcel_creation.modeSingle",
-      },
-      {
         mode: "along_path" as CreationMode,
         icon: "creation_2.png",
         tooltipKey: "parcel_creation.modeAlongPath",
       },
       {
-        mode: "tile" as CreationMode,
-        icon: "creation_3.png",
-        tooltipKey: "parcel_creation.modeTile",
+        mode: "block" as CreationMode,
+        icon: "creation_2.png",
+        tooltipKey: "parcel_creation.modeBlock",
       },
       {
         mode: "random" as CreationMode,
@@ -109,17 +99,9 @@ const CREATION_SECTIONS = [
         tooltipKey: "parcel_creation.modeRandom",
       },
       {
-        // ブロック一括: 道路に囲まれたブロックを選択し、周縁の沿道区画+中央埋めを
-        // 一括生成する。アイコンは暫定で流用中。
-        mode: "block" as CreationMode,
-        icon: "creation_2.png",
-        tooltipKey: "parcel_creation.modeBlock",
-      },
-      {
-        // 任意ポリゴン作成。頂点を打ってポリゴンを描く。アイコンは暫定で流用中。
-        mode: "manual" as CreationMode,
+        mode: "empty_area" as CreationMode,
         icon: "creation_1.png",
-        tooltipKey: "parcel_creation.modeManual",
+        tooltipKey: "parcel_creation.modeSingle",
       },
     ],
   },
@@ -184,10 +166,6 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
   const [alongPathCount, setAlongPathCount] = useState(1);
   const [pathAnchor, setPathAnchor] = useState<number[] | null>(null);
 
-  // manual(任意ポリゴン)モード: Unityで編集中のポリゴン頂点列([x, z])と仮確定フラグ。
-  const [manualPolygon, setManualPolygon] = useState<number[][]>([]);
-  const [manualFinalized, setManualFinalized] = useState(false);
-
   const [previewData, setPreviewData] = useState<ParcelPreviewItem[] | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -200,7 +178,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
   /* ---- 選択・モードのリセット ---- */
 
   /**
-   * 3Dビューでの選択（地点/パス/区画/ポリゴン）とプレビューだけを捨てる。
+   * 3Dビューでの選択（地点/パス/区画）とプレビューだけを捨てる。
    * 幅・奥行きなどの入力値は保持する（連続作成では同じ寸法で作り続けるのが普通のため）。
    */
   const clearSelectionState = useCallback(() => {
@@ -210,8 +188,6 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
     setPathAnchor(null);
     setPreviewData(null);
     setAngle(0);
-    setManualPolygon([]);
-    setManualFinalized(false);
   }, []);
 
   /**
@@ -299,10 +275,6 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
 
   const fetchPreview = useCallback(
     async (signal?: AbortSignal) => {
-      // manual(任意ポリゴン)はバックエンドのプレビュー取得を使わず、Unity上のオーバーレイと
-      // パネル内キャンバスで直接プレビューするため、ここでは何もしない。
-      if (selectedMode === "manual") return;
-
       let payload: Record<string, unknown>;
       if (selectedMode === "empty_area") {
         if (!pickedPosition) return;
@@ -329,7 +301,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
           payload.anchor = pathAnchor;
           payload.count = alongPathCount;
         }
-      } else if (selectedMode === "tile" || selectedMode === "random") {
+      } else if (selectedMode === "random") {
         if (!pickedPosition) return;
         payload = {
           mode: selectedMode,
@@ -353,7 +325,6 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
           angle,
           lot_width: lotWidth,
           lot_depth: lotDepth,
-          average_area: area,
           jitter: jitterPct / 100,
           dry_run: true,
         };
@@ -448,7 +419,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
     return () => controller.abort();
   }, [selectedMode, selectedPathId, pathAnchor, alongPathScope, alongPathCount, side, width, height, fetchPreview]);
 
-  /* ---- 地点指定系のパラメータ変更監視 (empty_area / tile / random / block) ---- */
+  /* ---- 地点指定系のパラメータ変更監視 (empty_area / random / block) ---- */
   useEffect(() => {
     if (!isPointCreationMode(selectedMode) || pickedPosition == null) return;
 
@@ -464,7 +435,6 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
     let unlistenPath: (() => void) | undefined;
     let unlistenParcel: (() => void) | undefined;
     let unlistenRotation: (() => void) | undefined;
-    let unlistenShape: (() => void) | undefined;
     let unlistenMode: (() => void) | undefined;
 
     // 3DビューのCtrlラジアルメニューで作成モードが切り替わった（＝真実源が動いた）通知。
@@ -519,23 +489,11 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
       })
       .catch(console.error);
 
-    // manual(任意ポリゴン)モードで、Unity上で編集中のポリゴン頂点列を受信する。
-    appWindow
-      .listen<{ polygon: number[][]; finalized?: boolean }>(IPC_EVENT_EDIT_PARCEL_UPDATE_CREATION_SHAPE, (event) => {
-        setManualPolygon(event.payload?.polygon ?? []);
-        setManualFinalized(event.payload?.finalized ?? false);
-      })
-      .then((fn) => {
-        unlistenShape = fn;
-      })
-      .catch(console.error);
-
     return () => {
       unlistenPoint?.();
       unlistenPath?.();
       unlistenParcel?.();
       unlistenRotation?.();
-      unlistenShape?.();
       unlistenMode?.();
     };
   }, [appWindow, applyModeSelection]);
@@ -619,7 +577,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
         payload.anchor = pathAnchor;
         payload.count = alongPathCount;
       }
-    } else if (selectedMode === "tile" || selectedMode === "random") {
+    } else if (selectedMode === "random") {
       if (!pickedPosition) return;
       payload = {
         mode: selectedMode,
@@ -642,14 +600,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
         angle,
         lot_width: lotWidth,
         lot_depth: lotDepth,
-        average_area: area,
         jitter: jitterPct / 100,
-      };
-    } else if (selectedMode === "manual") {
-      if (manualPolygon.length < 3) return;
-      payload = {
-        mode: "manual",
-        polygon: manualPolygon,
       };
     } else {
       if (selectedParcelId == null) return;
@@ -706,19 +657,13 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
   const isPointMode = isPointCreationMode(selectedMode);
   const isPathMode = selectedMode === "along_path";
   const isParcelMode = selectedMode === "split_rectangle" || selectedMode === "split_random";
-  const isManualMode = selectedMode === "manual";
 
   const hasSelection =
     (isPointMode && !!pickedPosition) ||
     (isPathMode && selectedPathId != null) ||
-    (isParcelMode && selectedParcelId != null) ||
-    (isManualMode && manualPolygon.length > 0);
+    (isParcelMode && selectedParcelId != null);
 
-  // 確定可能条件: 通常モードはバックエンドのプレビュー取得済み、
-  // manual(任意ポリゴン)は頂点3個以上かつ右クリックで仮確定済みであること。
-  const canConfirm = isManualMode
-    ? manualPolygon.length >= 3 && manualFinalized
-    : !!previewData && previewData.length > 0;
+  const canConfirm = !previewLoading && !!previewData && previewData.length > 0;
 
   const originalPolygonForPreview = useMemo(() => {
     return null;
@@ -772,7 +717,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
         <div className="pc-body">
           {/* 上: 入力欄 */}
           <div className="pc-input-section">
-            {(selectedMode === "empty_area" || selectedMode === "tile" || selectedMode === "random") && (
+            {(selectedMode === "empty_area" || selectedMode === "random") && (
               <>
                 <div className="pc-input-row">
                   <span className="pc-input-label">{t("parcel_creation.width")}</span>
@@ -955,7 +900,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
               </>
             )}
 
-            {(selectedMode === "tile" || selectedMode === "random" || selectedMode === "block" || selectedMode === "split_rectangle" || selectedMode === "split_random") && (
+            {(selectedMode === "random" || selectedMode === "split_rectangle" || selectedMode === "split_random") && (
               <div className="pc-input-row">
                 <span className="pc-input-label">{t("parcel_creation.area")}</span>
                 <NumberStepper
@@ -1007,32 +952,11 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
                   : t("parcel_creation.selectParcel")}
               </div>
             )}
-            {isManualMode && (
-              <div className={`pc-selection-message ${canConfirm ? "active" : "waiting"}`}>
-                {manualPolygon.length === 0
-                  ? t("parcel_creation.drawPolygon")
-                  : !manualFinalized
-                    ? t("parcel_creation.polygonPlacing", { count: manualPolygon.length })
-                    : t("parcel_creation.polygonReady", { count: manualPolygon.length })}
-              </div>
-            )}
           </div>
 
           {/* 下: プレビュー */}
           <div className="pc-preview-section">
-            {isManualMode ? (
-              manualPolygon.length >= 3 ? (
-                <ParcelPreviewCanvas
-                  parcels={[{ polygon: manualPolygon, center_point: [0, 0], area: 0 }]}
-                  originalPolygon={null}
-                  size={280}
-                />
-              ) : (
-                <div className="pc-preview-message">
-                  {t("parcel_creation.drawPolygon")}
-                </div>
-              )
-            ) : previewLoading ? (
+            {previewLoading ? (
               <div className="pc-preview-message">
                 {t("parcel_creation.previewLoading")}
               </div>
@@ -1042,6 +966,8 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
                 originalPolygon={originalPolygonForPreview}
                 size={280}
               />
+            ) : previewData?.length === 0 ? (
+              <div className="pc-preview-message">{t("parcel_creation.noParcels")}</div>
             ) : (
               <div className="pc-preview-message">
                 {isPointMode && t("parcel_creation.selectPoint")}

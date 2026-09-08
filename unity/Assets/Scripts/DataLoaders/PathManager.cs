@@ -806,40 +806,48 @@ public class PathManager : BaseApiDataManager
         HashSet<Vector2Int> changedCellSet = new HashSet<Vector2Int>(changedCellsForLog);
 
         BeginLodPathBatch();
-        var swPhase = System.Diagnostics.Stopwatch.StartNew();
-        yield return LoadMergedPathsAndNodes(cellsToLoad, nearSet, dynamicSet, success => succeeded = success, rebuiltPathIds, targetPathIds, changedCellSet);
-        UnityLog.If(LocalConstants.UNITY_LOG_TIMING, () => $"[TIMING] PathManager  LoadMergedPathsAndNodes: {swPhase.ElapsedMilliseconds}ms");
-
-        if (!succeeded)
+        try
         {
-            // バッチ失敗時に deferred 情報が失われないよう退避して復元する。
-            var preservedNodeIds = new HashSet<int>(deferredLodIntersectionNodeIds);
-            var preservedPathIds = new HashSet<int>(deferredIntersectionPathRebuildIds);
+            var swPhase = System.Diagnostics.Stopwatch.StartNew();
+            yield return LoadMergedPathsAndNodes(cellsToLoad, nearSet, dynamicSet, success => succeeded = success, rebuiltPathIds, targetPathIds, changedCellSet);
+            UnityLog.If(LocalConstants.UNITY_LOG_TIMING, () => $"[TIMING] PathManager  LoadMergedPathsAndNodes: {swPhase.ElapsedMilliseconds}ms");
+
+            if (!succeeded)
+            {
+                // バッチ失敗時に deferred 情報が失われないよう退避して復元する。
+                var preservedNodeIds = new HashSet<int>(deferredLodIntersectionNodeIds);
+                var preservedPathIds = new HashSet<int>(deferredIntersectionPathRebuildIds);
+                EndLodPathBatch();
+                foreach (var id in preservedNodeIds) deferredLodIntersectionNodeIds.Add(id);
+                foreach (var id in preservedPathIds) deferredIntersectionPathRebuildIds.Add(id);
+                yield break;
+            }
+
+            // RebuildCachedPathsForCells にはティア変更セルのみを渡す。
+            // 全セルを渡すとversion比較なしの全再描画が発生するため、
+            // ティアが変わっていないセルの道路はスキップする。
+            swPhase.Restart();
+            yield return RebuildCachedPathsForCells(tierChangedCells, nearSet, dynamicSet, rebuiltPathIds);
+            UnityLog.If(LocalConstants.UNITY_LOG_TIMING, () => $"[TIMING] PathManager  RebuildCachedPathsForCells: {swPhase.ElapsedMilliseconds}ms (tierChangedCells={tierChangedCells.Count})");
+
+            swPhase.Restart();
+            yield return UpdateDeferredLodIntersections();
+            UnityLog.If(LocalConstants.UNITY_LOG_TIMING, () => $"[TIMING] PathManager  UpdateDeferredLodIntersections: {swPhase.ElapsedMilliseconds}ms");
+
+            swPhase.Restart();
+            yield return RebuildDeferredIntersectionPaths(nearSet, dynamicSet, rebuiltPathIds);
+            UnityLog.If(LocalConstants.UNITY_LOG_TIMING, () => $"[TIMING] PathManager  RebuildDeferredIntersectionPaths: {swPhase.ElapsedMilliseconds}ms");
+
+            ApplyLodCellChanges(cellsToLoad, cellsToUnload, lodUpdates);
             EndLodPathBatch();
-            foreach (var id in preservedNodeIds) deferredLodIntersectionNodeIds.Add(id);
-            foreach (var id in preservedPathIds) deferredIntersectionPathRebuildIds.Add(id);
-            yield break;
+
+            UnityLog.If(LocalConstants.UNITY_LOG_TIMING, () => $"[TIMING] PathManager LoadMergedPathsAndNodesAndApplyCells END: {swTotal.ElapsedMilliseconds}ms");
         }
-
-        // RebuildCachedPathsForCells にはティア変更セルのみを渡す。
-        // 全セルを渡すとversion比較なしの全再描画が発生するため、
-        // ティアが変わっていないセルの道路はスキップする。
-        swPhase.Restart();
-        yield return RebuildCachedPathsForCells(tierChangedCells, nearSet, dynamicSet, rebuiltPathIds);
-        UnityLog.If(LocalConstants.UNITY_LOG_TIMING, () => $"[TIMING] PathManager  RebuildCachedPathsForCells: {swPhase.ElapsedMilliseconds}ms (tierChangedCells={tierChangedCells.Count})");
-
-        swPhase.Restart();
-        yield return UpdateDeferredLodIntersections();
-        UnityLog.If(LocalConstants.UNITY_LOG_TIMING, () => $"[TIMING] PathManager  UpdateDeferredLodIntersections: {swPhase.ElapsedMilliseconds}ms");
-
-        swPhase.Restart();
-        yield return RebuildDeferredIntersectionPaths(nearSet, dynamicSet, rebuiltPathIds);
-        UnityLog.If(LocalConstants.UNITY_LOG_TIMING, () => $"[TIMING] PathManager  RebuildDeferredIntersectionPaths: {swPhase.ElapsedMilliseconds}ms");
-
-        ApplyLodCellChanges(cellsToLoad, cellsToUnload, lodUpdates);
-        EndLodPathBatch();
-
-        UnityLog.If(LocalConstants.UNITY_LOG_TIMING, () => $"[TIMING] PathManager LoadMergedPathsAndNodesAndApplyCells END: {swTotal.ElapsedMilliseconds}ms");
+        finally
+        {
+            // 中断・生成失敗でも次の地形追従を待ち状態に閉じ込めない。
+            if (isLodPathBatchActive) EndLodPathBatch();
+        }
     }
 
     private void BeginLodPathBatch()
@@ -1028,7 +1036,7 @@ public class PathManager : BaseApiDataManager
             foreach (var p in response.paths)
             {
                 bool versionChanged = true;
-                if (oldVersions.TryGetValue(p.path_id, out int cachedVersion) && cachedVersion == p.version)
+                if (oldVersions.TryGetValue(p.path_id, out int cachedVersion) && cachedVersion == p.version && HasPathRepresentation(p))
                 {
                     versionChanged = false;
                 }
@@ -1043,7 +1051,6 @@ public class PathManager : BaseApiDataManager
                     continue;
                 }
 
-                pathVersionCache[p.path_id] = p.version;
                 rebuiltPathIds?.Add(p.path_id);
 
                 // status変化検知 (oldStatusesはフェーズ1で上書き前に保存済み)
@@ -1423,6 +1430,12 @@ public class PathManager : BaseApiDataManager
         UpdateNodeIntersectionMesh(nodeId);
     }
 
+    private bool HasPathRepresentation(PathSummary path)
+    {
+        if (pathObjectsCache.TryGetValue(path.path_id, out var obj) && obj != null) return true;
+        return TunnelSectionUtil.IsUndergroundPath(path) || FarPathHasHiddenTunnel(path);
+    }
+
     private bool TryRebuildPathOnce(PathSummary path, LodTier tier, bool updateIntersections, bool forceRebuild, string reason)
     {
         if (path == null) return false;
@@ -1448,6 +1461,8 @@ public class PathManager : BaseApiDataManager
         else
             CreateOrUpdatePath(path, updateIntersections, forceRebuild, drawLod, detailFrom, detailTo);
 
+        // API受信やキュー投入を描画完了として扱わない。中断時は同じ版でも再生成する。
+        if (HasPathRepresentation(path)) pathVersionCache[path.path_id] = path.version;
         return true;
     }
 

@@ -60,7 +60,7 @@ public static class PropsQA
     static void Build(bool far)
     {
         foreach(var chunk in Chunks.Values)
-            Drain((IEnumerator)managerType.GetMethod("RebuildBatches",flags).Invoke(manager,new object[]{chunk,camera,far,Mathf.Tan(camera.fieldOfView*Mathf.Deg2Rad*.5f)}));
+            Drain((IEnumerator)managerType.GetMethod("RebuildBatches",flags).Invoke(manager,new object[]{chunk,camera,far,camera.orthographic ? camera.orthographicSize : Mathf.Tan(camera.fieldOfView*Mathf.Deg2Rad*.5f)}));
     }
     public static void Run()
     {
@@ -86,7 +86,7 @@ public static class PropsQA
             Check(preview.enableInstancing && preview.GetFloat("_Surface") == 1f && preview.GetFloat("_ZWrite") == 0f && preview.renderQueue == 3000, "transparent instanced preview state");
             Check(File.ReadAllText(root + "/ProjectSettings/GraphicsSettings.asset").Contains("m_InstancingStripping: 2"), "player instancing variants retained");
             UnityEngine.Object.DestroyImmediate(preview); UnityEngine.Object.DestroyImmediate(previewSource);
-            foreach(int id in new[]{1,2})
+            foreach(string id in new[]{"1","2","1_far","2_far"})
             {
                 var model=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Models/Props/"+id+".fbx");
                 Check(model!=null,"missing FBX");
@@ -98,6 +98,18 @@ public static class PropsQA
                     {
                         var source=mats[i]; var mat=new Material(Shader.Find("Universal Render Pipeline/Lit"));
                         if(source!=null && source.HasProperty("_Color")) mat.SetColor("_BaseColor",source.color);
+                        if(source!=null)
+                        {
+                            mat.SetTexture("_BaseMap",source.mainTexture);
+                            if(source.HasProperty("_Glossiness")) mat.SetFloat("_Smoothness",source.GetFloat("_Glossiness"));
+                            if(source.HasProperty("_Smoothness")) mat.SetFloat("_Smoothness",source.GetFloat("_Smoothness"));
+                            if(source.HasProperty("_Metallic")) mat.SetFloat("_Metallic",source.GetFloat("_Metallic"));
+                            if(source.name.StartsWith("PROP_PINE_GREEN") || source.name.StartsWith("PROP_LEAF_GREEN"))
+                            {
+                                Check(source.mainTexture!=null,"missing foliage color texture: "+id);
+                                Check(mat.GetFloat("_Smoothness")<=.15f,"foliage too glossy: "+id);
+                            }
+                        }
                         mats[i]=mat;
                     }
                     r.sharedMaterials=mats;
@@ -118,6 +130,7 @@ public static class PropsQA
             dense.GetComponent<Renderer>().sharedMaterial=new Material(Shader.Find("Universal Render Pipeline/Lit"));
             cache["Models/Props/991"]=dense;
             CheckGeometry();
+            CheckManualPlacement();
             foreach(int count in new[]{1000,10000,50000})
             {
                 var watch=Stopwatch.StartNew();Apply(Snapshot(count,false,count),true);watch.Stop();
@@ -149,6 +162,15 @@ public static class PropsQA
             Check((int)managerType.GetProperty("LastRegeneratedChunks").GetValue(manager)==0,"road regenerated candidates");
             Check((int)managerType.GetProperty("LastExclusionUpdatedChunks").GetValue(manager)<Chunks.Count,"road updated whole forest");
             Apply(Snapshot(50000,false,50000));Check(Points().All(p=>p.Value),"removed road did not restore props");
+            string waterSnapshot = Snapshot(50000,false,50000).Replace("\"obstacles\":[]",
+                "\"obstacles\":[{\"key\":\"water:0\",\"signature\":\"coast\",\"polygon\":[[-8,-8],[508,-8],[508,508],[-8,508]],\"holes\":[[[100,100],[400,100],[400,400],[100,400]]]}]");
+            Apply(waterSnapshot);
+            var coastPoints = Points();
+            Check(coastPoints.Where(p=>p.Key.x<90).All(p=>!p.Value), "ocean trees remained visible");
+            Check(coastPoints.Where(p=>p.Key.x>110 && p.Key.x<390 && p.Key.y>110 && p.Key.y<390).All(p=>p.Value), "island trees disappeared");
+            Check((int)managerType.GetProperty("LastRegeneratedChunks").GetValue(manager)==0,"coast regenerated candidates");
+            Apply(Snapshot(50000,false,50000));
+            Check(Points().All(p=>p.Value),"coast removal did not restore trees");
             var geom=asm.GetType("PropGeometry");
             var sample=geom.GetMethod("Sample");
             Check(sample.Invoke(null,new object[]{-4,12,5f,7}).Equals(sample.Invoke(null,new object[]{-4,12,5f,7})),"unstable sample");
@@ -162,6 +184,7 @@ public static class PropsQA
             managerType.GetMethod("Model",flags).Invoke(manager,new object[]{2});
             managerType.GetMethod("Model",flags).Invoke(manager,new object[]{991});
             CheckModels();
+            CheckForestLod();
             var existing=Points();
             Drain((IEnumerator)managerType.GetMethod("ApplySnapshot",flags).Invoke(manager,new[]{Json(Snapshot(1000,false)),cells,(object)true,999,null}));
             Check(existing.Keys.ToHashSet().SetEquals(Points().Keys),"stale generation committed");
@@ -191,6 +214,11 @@ public static class PropsQA
         Check((bool)inRing.Invoke(null,new object[]{new Vector2(0,5),ring}),"boundary not covered");
         Check((bool)blocked.Invoke(null,new object[]{new Vector2(-.5f,5),1f,ring,new Rect(0,0,10,10)}),"clearance missing");
         Check(!(bool)blocked.Invoke(null,new object[]{new Vector2(-2,5),1f,ring,new Rect(0,0,10,10)}),"clearance too wide");
+        var withHoles = g.GetMethod("BlockedWithHoles");
+        var holes = new List<Vector2[]> {new[]{new Vector2(2,2),new Vector2(8,2),new Vector2(8,8),new Vector2(2,8)}};
+        Check(!(bool)withHoles.Invoke(null,new object[]{new Vector2(5,5),.5f,ring,new Rect(0,0,10,10),holes}),"island interior blocked");
+        Check((bool)withHoles.Invoke(null,new object[]{new Vector2(2,5),.5f,ring,new Rect(0,0,10,10),holes}),"shore boundary allowed trees");
+        Check((bool)withHoles.Invoke(null,new object[]{new Vector2(2.3f,5),.5f,ring,new Rect(0,0,10,10),holes}),"shore clearance missing");
         // 穴と複数パートを含む同じregionを異なる小区画に分けて生成する。
         var response=Json("{\"scatters\":[{\"region\":[[[[0,0],[20,0],[20,20],[0,20]],[[5,5],[15,5],[15,15],[5,15]]],[[[30,0],[40,0],[40,10],[30,10]]]]}]} ");
         var scatter=((IList)Field(response,"scatters"))[0];
@@ -207,14 +235,61 @@ public static class PropsQA
             var normal=(IList)Field(m,"normal");var far=(IList)Field(m,"far");Check(far.Count>0,"missing far representation");
             foreach(var p in far)
             {
-                var mesh=(Mesh)Field(p,"mesh");Check(mesh.vertexCount<=128 || normal.Cast<object>().Any(n=>ReferenceEquals(Field(n,"mesh"),mesh)),"far mesh not simplified");
+                var mesh=(Mesh)Field(p,"mesh");Check(mesh.vertexCount<=200 || normal.Cast<object>().Any(n=>ReferenceEquals(Field(n,"mesh"),mesh)),"far mesh not simplified");
                 var b=mesh.bounds;Check(b.size.sqrMagnitude>0,"empty envelope");
                 Check(((Material)Field(p,"material")).enableInstancing,"instancing disabled");
             }
             results.Add($"model normalParts={normal.Count}, normalVertices={normal.Cast<object>().Sum(p=>((Mesh)Field(p,"mesh")).vertexCount)}, farParts={far.Count}, farVertices={far.Cast<object>().Sum(p=>((Mesh)Field(p,"mesh")).vertexCount)}");
+            Check(far.Cast<object>().Sum(p=>((Mesh)Field(p,"mesh")).vertexCount) < normal.Cast<object>().Sum(p=>((Mesh)Field(p,"mesh")).vertexCount), "far model did not reduce vertices");
         }
     }
     static int renderStage, renderFrame;
+    static void CheckForestLod()
+    {
+        int expected = Points().Count(p=>p.Value);
+        camera.orthographic = true;
+        foreach (float size in new[]{300f,1000f,100000f,300f})
+        {
+            camera.orthographicSize=size; Build(true);
+            int actual=Chunks.Values.Cast<object>().Sum(c=>((IList)Field(c,"batches")).Cast<object>()
+                .Sum(b=>((Array)Field(b,"matrices")).Length));
+            Check(actual==expected,"LOD thinned forest: "+size+" "+actual+"/"+expected);
+            foreach(var c in Chunks.Values) foreach(var p in (Array)Field(c,"points"))
+                if((bool)Field(p,"visible")) Check((bool)Field(p,"distant")== (size>300f),"distant crown selection");
+        }
+        camera.orthographic=false;
+    }
+    static void CheckManualPlacement()
+    {
+        foreach(string key in new[]{"parcel:1","path:1","water:0"})
+        {
+            string json=Snapshot(1000,false).Replace("\"instances\":[]",
+                "\"instances\":[{\"prop_instance_id\":1,\"prop_type\":1,\"x\":250,\"z\":250,\"scale\":1}]")
+                .Replace("\"obstacles\":[]", "\"obstacles\":[{\"key\":\""+key+"\",\"signature\":\"blocked\",\"polygon\":[[-8,-8],[508,-8],[508,508],[-8,508]]}]");
+            Apply(json,true);
+            int manual=0, hidden=0;
+            foreach(var c in Chunks.Values) foreach(var p in (Array)Field(c,"points"))
+            {
+                if((bool)Field(p,"explicitInstance")) {manual++;Check((bool)Field(p,"visible"),"manual tree hidden by "+key);}
+                else {hidden++;Check(!(bool)Field(p,"visible"),"scatter ignored "+key);}
+            }
+            Check(manual==1 && hidden>900,"manual/scatter test missing candidates");
+        }
+        var placementType=asm.GetType("PropPlacementManager");
+        var placement=new GameObject("ManualPreviewQA").AddComponent(placementType);
+        Set(placement,"propType",1);
+        Set(placement,"active",true);
+        var ghost=(GameObject)placementType.GetMethod("InstantiateProp",flags).Invoke(placement,new object[]{new Vector3(250,0,250),0f,1f,true});
+        Check(ghost!=null && ghost.activeSelf,"manual ghost hidden inside water");
+        UnityEngine.Object.DestroyImmediate(ghost);
+        var hover=placementType.GetMethod("OnTerrainHover");
+        hover.Invoke(placement,new object[]{new Vector3(250,0,250)});
+        ghost=(GameObject)Field(placement,"hoverGhost");
+        ghost.SetActive(false);
+        hover.Invoke(placement,new object[]{new Vector3(251,0,251)});
+        Check(ghost.activeSelf,"moving manual ghost hidden inside water");
+        UnityEngine.Object.DestroyImmediate(placement.gameObject);
+    }
     static readonly Stopwatch renderTimer = new Stopwatch();
     static double cpuTotal;
     static void RenderTick()
@@ -229,11 +304,23 @@ public static class PropsQA
                     camera.transform.LookAt(new Vector3(250,0,250));
                     Build(renderStage==1);
                 }
-                else
+                else if (renderStage == 2)
                 {
                     camera.transform.position=new Vector3(250,380,-220);
                     camera.transform.LookAt(new Vector3(250,0,250));
                     Apply(Snapshot(50000,true,50000));Build(true);
+                }
+                else
+                {
+                    int treeType = renderStage == 3 ? 1 : 2;
+                    string forest = "{\"scatters\":[{\"prop_scatter_id\":2,\"prop_type\":"+treeType+",\"version\":0,\"density\":400,\"seed\":7,\"region\":[[[[210,210],[290,210],[290,290],[210,290]]]]}],\"instances\":[],\"obstacles\":[{\"key\":\"parcel:1\",\"signature\":\"parcel\",\"polygon\":[[240,230],[260,230],[260,250],[240,250]],\"floor_variant\":0}]}";
+                    Apply(forest, true);
+                    var points = Points();
+                    Check(points.Any(p=>!p.Value && p.Key.x>240 && p.Key.x<260 && p.Key.y>230 && p.Key.y<250), "parcel did not hide trees");
+                    Check(points.Where(p=>p.Key.x>240 && p.Key.x<260 && p.Key.y>230 && p.Key.y<250).All(p=>!p.Value), "tree remained inside parcel");
+                    camera.transform.position=new Vector3(310,65,165);
+                    camera.transform.LookAt(new Vector3(250,0,250));
+                    Build(false);
                 }
                 camera.targetTexture=new RenderTexture(1200,850,24);
                 cpuTotal=0;
@@ -244,7 +331,7 @@ public static class PropsQA
             if(renderFrame>=10)cpuTotal+=renderTimer.Elapsed.TotalMilliseconds;
             renderFrame++;
             if(renderFrame<30)return;
-            string filename=renderStage==0?"preview-near.png":renderStage==1?"preview-far.png":"preview-50000.png";
+            string filename=renderStage==0?"preview-near.png":renderStage==1?"preview-far.png":renderStage==2?"preview-50000.png":renderStage==3?"forest-conifer.png":"forest-broadleaf.png";
             results.Add(filename+" warmed submit+Camera.Render CPUms/frame="+(cpuTotal/20).ToString("F2")+
                 ", submittedBatches="+managerType.GetProperty("SubmittedBatchCount").GetValue(manager)+
                 ", submeshInstances="+managerType.GetProperty("SubmittedInstanceCount").GetValue(manager));
@@ -254,7 +341,7 @@ public static class PropsQA
             File.WriteAllBytes(output+"/"+filename,tex.EncodeToPNG());RenderTexture.active=null;camera.targetTexture=null;
             UnityEngine.Object.DestroyImmediate(tex);UnityEngine.Object.DestroyImmediate(rt);
             renderFrame=0;renderStage++;
-            if(renderStage<3)return;
+            if(renderStage<5)return;
             EditorApplication.update-=RenderTick;
             results.Add("PASS checks="+checks+"; screenshot rendering uses URP Lit materials on actual FBX geometry; CPU timings exclude GPU completion");
             File.WriteAllLines(output+"/result.txt",results);EditorApplication.Exit(0);

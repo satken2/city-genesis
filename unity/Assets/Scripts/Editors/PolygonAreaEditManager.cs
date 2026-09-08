@@ -18,8 +18,7 @@ public enum PolygonEditPhase { Inactive, Placing, Editing }
 /// ParcelShapeEditManager の Editing フェーズ(頂点ドラッグ・辺挿入・右クリック削除)を
 /// 組み合わせた操作感で、閉じたポリゴンを組み立てる。頂点編集・オーバーレイ描画・
 /// ヒット判定・ドラッグ処理といった「ポリゴンの作り方」は完全にここへ集約し、
-/// 天然資源エリア(<see cref="ResourceAreaEditManager"/>)と土地区画の任意ポリゴン作成
-/// (<see cref="ParcelAreaEditManager"/>)の両方が本クラスを継承して再利用する。
+/// 天然資源エリア(<see cref="ResourceAreaEditManager"/>)が本クラスを継承して利用する。
 ///
 /// 派生クラスが差し替えるのは「完成したポリゴンをどのIPCイベントでUIへ通知するか
 /// (<see cref="EmitShape"/>)」と「オーバーレイの色・キャンバス名」だけである。

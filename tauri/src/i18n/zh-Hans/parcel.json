@@ -56,10 +56,8 @@
     "sectionSplit": "分割现有地块",
     "modeSingle": "单个地块",
     "modeAlongPath": "沿道路创建",
-    "modeTile": "瓦片状",
     "modeRandom": "随机",
     "modeBlock": "整个街区",
-    "modeManual": "任意多边形",
     "modeSplitRect": "矩形分割",
     "modeSplitRandom": "随机分割",
     "modeWheelHint": "创建方式可在3D视图中按住Ctrl并用滚轮从环形菜单选择（也可从这些方块切换）。",
@@ -94,13 +92,11 @@
     "pointSelected": "已选择地点",
     "pathSelected": "已选择路径 #{{id}}",
     "parcelSelected": "已选择地块 #{{id}}",
-    "drawPolygon": "在3D视图中左键点击放置顶点，右键点击确定形状",
-    "polygonPlacing": "正在放置顶点（{{count}} 点）— 右键点击确定形状",
-    "polygonReady": "多边形已确定（{{count}} 点）— 可拖动顶点进行调整",
     "unitSqm": "㎡",
     "unitMeter": "m",
     "unitDegree": "°",
     "unitPercent": "%",
-    "unitCount": "个"
+    "unitCount": "个",
+    "noParcels": "此范围内无法创建地块。请选择道路旁的空地，或调整搜索范围及地块尺寸。"
   }
 }

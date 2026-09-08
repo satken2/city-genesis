@@ -273,13 +273,6 @@ public class IpcStateCoordinator : MonoBehaviour
             resourceAreaEditManager.FinishEditMode();
         }
 
-        // 土地区画の任意ポリゴン作成を終了(オーバーレイをクリア)
-        var parcelAreaEditManager = FindAnyObjectByType<ParcelAreaEditManager>();
-        if (parcelAreaEditManager != null)
-        {
-            parcelAreaEditManager.FinishEditMode();
-        }
-
         // 公共交通の路線設置を終了
         var transitPlanManager = FindAnyObjectByType<TransitPlanManager>();
         if (transitPlanManager != null)

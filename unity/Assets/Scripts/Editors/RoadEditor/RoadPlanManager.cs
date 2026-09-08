@@ -30,7 +30,7 @@ public enum RoadEditorPhase { Inactive, Placing, Editing }
 /// Editingフェーズでドラッグにより手動調整可能。
 /// バックエンドの waypoints[].control_in / control_out と同じデータ構造。
 /// </summary>
-public class RoadPlanManager : MonoBehaviour
+public partial class RoadPlanManager : MonoBehaviour
 {
     [Header("References")]
     public PathManager pathManager;
@@ -467,6 +467,7 @@ public class RoadPlanManager : MonoBehaviour
 
     public void SetCurved(bool curved)
     {
+        ResetParallelSnap();
         // curve_allowed=false のバリアント(送電線など)では曲線化を拒否する
         Curved = curved && IsCurveAllowed();
         // 曲線モードでは接続先の既存パスへ滑らかにつなぐため「直線延長」吸着を自動でONにする
@@ -475,8 +476,9 @@ public class RoadPlanManager : MonoBehaviour
         {
             TerrainInputHandler.EnableStraightLineSnapping = true;
         }
-        // 曲線⇔直線の切り替えで端点整列の適用有無も変わるため制御点を再計算する
-        RecomputeAllControlPoints();
+        // 曲線⇔直線の切り替えで端点整列の適用有無も変わるため、手動調整も捨てて制御点を全て作り直す
+        RecomputeAllControlPoints(resetManual: true);
+        RefreshSnapPreview();
         InvalidateShapeCache();
         Update3DPreview();
         EmitShapeUpdate();
@@ -489,6 +491,8 @@ public class RoadPlanManager : MonoBehaviour
     /// </summary>
     public void InitializeRoadPlacement(int? existingPathId = null, float? initialHeight = null, float? initialEmbankment = null, bool? initialCurved = null, int? initialFollowTerrain = null)
     {
+        ResetParallelSnap();
+        hasRawSnapPosition = false;
         Debug.Log($"RoadPlanManager: 道路敷設モードを初期化 (existingPathId={existingPathId})");
         EnsureOverlayRenderer();
 
@@ -654,10 +658,12 @@ public class RoadPlanManager : MonoBehaviour
                     phase = RoadEditorPhase.Editing;
                     InvalidateShapeCache();
 
-                    // RecomputeAllControlPoints は全制御点を無条件に上書きするため、
                     // バックエンドに保存済みの制御点(ユーザーがドラッグで調整した曲線)を
                     // 退避してから自動計算を実行し、保存値がある箇所だけ上書き復元する。
                     // 保存値が無い箇所(スキーマ再生成前の端点など)は自動計算値のまま残る。
+                    // 保存値は自動計算結果も含む(確定時に整列済み制御点を明示送信するため)ので、
+                    // 自動計算値と一致する制御点は未調整扱いにし、以後の頂点移動で再計算されるようにする。
+                    // 乖離している制御点だけ手動調整済み扱いにして保持する。
                     var savedControlIn = new Vector3?[points.Count];
                     var savedControlOut = new Vector3?[points.Count];
                     for (int i = 0; i < points.Count; i++)
@@ -666,13 +672,24 @@ public class RoadPlanManager : MonoBehaviour
                         savedControlOut[i] = points[i].control_out;
                     }
 
-                    RecomputeAllControlPoints();
+                    RecomputeAllControlPoints(resetManual: true);
 
+                    const float manualEpsilon = 0.05f;
                     for (int i = 0; i < points.Count; i++)
                     {
                         var pt = points[i];
-                        if (savedControlIn[i].HasValue) pt.control_in = savedControlIn[i];
-                        if (savedControlOut[i].HasValue) pt.control_out = savedControlOut[i];
+                        if (savedControlIn[i].HasValue)
+                        {
+                            pt.control_in_manual = !pt.control_in.HasValue
+                                || Vector3.Distance(savedControlIn[i].Value, pt.control_in.Value) > manualEpsilon;
+                            pt.control_in = savedControlIn[i];
+                        }
+                        if (savedControlOut[i].HasValue)
+                        {
+                            pt.control_out_manual = !pt.control_out.HasValue
+                                || Vector3.Distance(savedControlOut[i].Value, pt.control_out.Value) > manualEpsilon;
+                            pt.control_out = savedControlOut[i];
+                        }
                         points[i] = pt;
                     }
 
@@ -691,6 +708,8 @@ public class RoadPlanManager : MonoBehaviour
 
     public void FinishRoadPlacement()
     {
+        ResetParallelSnap();
+        hasRawSnapPosition = false;
         phase = RoadEditorPhase.Inactive;
         points.Clear();
         selectedPointIndex = -1;
@@ -865,11 +884,9 @@ public class RoadPlanManager : MonoBehaviour
             float relY = lastSnapWasElevated && (IsHeightEditable() || PathType == Constants.PATH_TRACK)
                 ? lastSnapRelHeight : pt.position.y - Utils.GetGroundHeight(pt.position);
             snappedPos.y = Utils.GetGroundHeight(snappedPos) + relY;
-            pt.position = snappedPos;
-            points[dragPointIndex] = pt;
 
-            // ポイント移動に追従して全制御点を再計算
-            RecomputeAllControlPoints();
+            // 手動調整済みの制御点はアンカーに追従させ、未調整の制御点だけ再計算する
+            MoveAnchorPosition(dragPointIndex, snappedPos);
         }
         else if (dragTarget == DragTarget.ControlIn)
         {
@@ -882,6 +899,7 @@ public class RoadPlanManager : MonoBehaviour
             Vector3 nc = worldPos;
             nc.y = Utils.GetGroundHeight(nc) + anchorRelY;
             pt.control_in = nc;
+            pt.control_in_manual = true;
             points[dragPointIndex] = pt;
             // 反対側(control_out)を頂点を挟んで一直線に保ち、道路が折れないようにする
             EnforceCollinearControls(dragPointIndex, movedControlOut: false);
@@ -895,6 +913,7 @@ public class RoadPlanManager : MonoBehaviour
             Vector3 nc = worldPos;
             nc.y = Utils.GetGroundHeight(nc) + anchorRelY;
             pt.control_out = nc;
+            pt.control_out_manual = true;
             points[dragPointIndex] = pt;
             // 反対側(control_in)を頂点を挟んで一直線に保ち、道路が折れないようにする
             EnforceCollinearControls(dragPointIndex, movedControlOut: true);
@@ -990,8 +1009,13 @@ public class RoadPlanManager : MonoBehaviour
     /// 接線ベクトル V_i = P_{i+1} - P_{i-1}、テンション=1/6。
     /// 端点は片側の隣接アンカーとのベクトルを使用する。
     /// これによりX・Y・Zすべての軸で滑らかなベジェ曲線が得られる。
+    ///
+    /// 手動調整済み(control_*_manual)の制御点は上書きしない。頂点の移動・挿入・削除で
+    /// 呼ばれるたびに全制御点を作り直すと、ユーザーが整えた曲線が毎回消えてしまうため。
+    /// 手動調整済みの制御点は隣接アンカーの移動には追従しない(ユーザーの意図した方向を保つ)。
     /// </summary>
-    private void RecomputeAllControlPoints()
+    /// <param name="resetManual">true なら手動調整フラグを全て落とし、全制御点を自動計算し直す</param>
+    private void RecomputeAllControlPoints(bool resetManual = false)
     {
         if (points.Count < 2) return;
 
@@ -1000,9 +1024,14 @@ public class RoadPlanManager : MonoBehaviour
         for (int i = 0; i < n; i++)
         {
             var pt = points[i];
+            if (resetManual)
+            {
+                pt.control_out_manual = false;
+                pt.control_in_manual = false;
+            }
 
             // control_out: このポイントから次へ向かう出口制御点
-            if (pt.role != PathPointRole.End)
+            if (pt.role != PathPointRole.End && !pt.control_out_manual)
             {
                 Vector3 curr = pt.position;
                 Vector3 next = points[i + 1].position;
@@ -1022,7 +1051,7 @@ public class RoadPlanManager : MonoBehaviour
             }
 
             // control_in: 前のポイントからこのポイントへ入る入口制御点
-            if (pt.role != PathPointRole.Start)
+            if (pt.role != PathPointRole.Start && !pt.control_in_manual)
             {
                 Vector3 curr = pt.position;
                 Vector3 prev = points[i - 1].position;
@@ -1050,6 +1079,40 @@ public class RoadPlanManager : MonoBehaviour
     }
 
     /// <summary>
+    /// アンカー(頂点)を newPosition へ移動し、制御点を追従させる。
+    /// 手動調整済みの制御点はアンカーからの相対位置(XZ)を保ったまま平行移動し、
+    /// Yはアンカーの相対高さ(標高)を移動先の地形高さに乗せ直す。
+    /// 未調整の制御点は移動後の頂点列から RecomputeAllControlPoints で再計算する。
+    /// ドラッグ移動・標高変更(キー/IPC)の全経路がここを通る。
+    /// </summary>
+    private void MoveAnchorPosition(int index, Vector3 newPosition)
+    {
+        if (index < 0 || index >= points.Count) return;
+
+        var pt = points[index];
+        Vector3 oldPosition = pt.position;
+        Vector3 deltaXZ = new Vector3(newPosition.x - oldPosition.x, 0f, newPosition.z - oldPosition.z);
+        float anchorRelY = newPosition.y - Utils.GetGroundHeight(newPosition);
+        pt.position = newPosition;
+
+        if (pt.control_out_manual && pt.control_out.HasValue)
+        {
+            Vector3 c = pt.control_out.Value + deltaXZ;
+            c.y = Utils.GetGroundHeight(c) + anchorRelY;
+            pt.control_out = c;
+        }
+        if (pt.control_in_manual && pt.control_in.HasValue)
+        {
+            Vector3 c = pt.control_in.Value + deltaXZ;
+            c.y = Utils.GetGroundHeight(c) + anchorRelY;
+            pt.control_in = c;
+        }
+        points[index] = pt;
+
+        RecomputeAllControlPoints();
+    }
+
+    /// <summary>
     /// 指定ポイントの2本のベジエ制御点(control_in / control_out)を常に一直線（180度）に保つ。
     /// 制御点をドラッグしたとき反対側の制御点を頂点を挟んだ反対方向へ再配置し、
     /// 頂点で道路が折れないようにする（フロント側の親切設計。バックエンド検証は不要）。
@@ -1058,6 +1121,8 @@ public class RoadPlanManager : MonoBehaviour
     /// 始点/終点は片側しか持たないため何もしない。
     /// XZ平面上で一直線にし、Y座標はアンカーの相対高さ（標高）を維持する
     /// （地面高さへ潰すと高架パスで制御点だけ地面に落ちベジエが垂れ下がる）。
+    /// 追従させた反対側も手動調整済み扱いにする。片方だけ自動計算のままだと、
+    /// 次の頂点移動で再計算されて一直線が崩れ、頂点で道路が折れるため。
     /// </summary>
     /// <param name="index">対象ポイントのインデックス</param>
     /// <param name="movedControlOut">true なら control_out を動かした（control_in を追従させる）、false ならその逆</param>
@@ -1081,6 +1146,7 @@ public class RoadPlanManager : MonoBehaviour
             Vector3 newIn = anchor - outDir.normalized * inLen;
             newIn.y = Utils.GetGroundHeight(newIn) + anchorRelY;
             pt.control_in = newIn;
+            pt.control_in_manual = true;
         }
         else
         {
@@ -1093,6 +1159,7 @@ public class RoadPlanManager : MonoBehaviour
             Vector3 newOut = anchor - inDir.normalized * outLen;
             newOut.y = Utils.GetGroundHeight(newOut) + anchorRelY;
             pt.control_out = newOut;
+            pt.control_out_manual = true;
         }
 
         points[index] = pt;
@@ -1114,10 +1181,10 @@ public class RoadPlanManager : MonoBehaviour
         if (!TerrainInputHandler.EnableStraightLineSnapping) return;
         if (points.Count < 2) return;
 
-        // 始点: control_out を延長方向へ吸着
+        // 始点: control_out を延長方向へ吸着（手動調整済みならユーザーの向きを尊重）
         {
             var pt = points[0];
-            if (pt.control_out.HasValue)
+            if (pt.control_out.HasValue && !pt.control_out_manual)
             {
                 Vector3 cur = pt.control_out.Value - pt.position;
                 cur.y = 0f;
@@ -1136,11 +1203,11 @@ public class RoadPlanManager : MonoBehaviour
             }
         }
 
-        // 終点: control_in を延長方向へ吸着
+        // 終点: control_in を延長方向へ吸着（手動調整済みならユーザーの向きを尊重）
         {
             int last = points.Count - 1;
             var pt = points[last];
-            if (pt.control_in.HasValue)
+            if (pt.control_in.HasValue && !pt.control_in_manual)
             {
                 Vector3 cur = pt.control_in.Value - pt.position;
                 cur.y = 0f;
@@ -1585,12 +1652,16 @@ public class RoadPlanManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 指定位置に対してグリッド/ノード/パス/直角/直線延長スナップを適用する。
-    /// TerrainInputHandler の共通スナップ処理を利用し、直角スナップと直線延長スナップは
-    /// 道路敷設特有のロジックとして追加する。
+    /// 共通の接続・グリッド吸着と、道路編集固有の並行・終端揃え・角度補助を適用する。
+    /// 並行モードでは接続先を優先し、並行線への吸着後に別の角度補正を重ねない。
     /// </summary>
     private Vector3 ApplySnapping(Vector3 basePos)
     {
+        lastRawSnapPosition = basePos;
+        hasRawSnapPosition = true;
+        Vector3 rawPosition = basePos;
+        parallelSnapActive = false;
+        parallelGuideVisible = false;
         // まずTerrainInputHandlerの共通スナップ（グリッド/ノード/パス/ゾーン頂点）を適用。
         // 建設中バリアントを渡すことでインフラ網の互換性フィルタが働く
         // （道路はインフラノード/パスに吸着せず、インフラパスは同一網にのみ吸着する）。
@@ -1609,10 +1680,10 @@ public class RoadPlanManager : MonoBehaviour
         // 軌道複線(0以外の横オフセットあり)の敷設中は、ノード/パス吸着をオフセット考慮版に
         // 差し替える。素朴に中心線を既存線路へ吸着させると全線路が横にズレて接続できないため、
         // 「グループ内のいずれかの線路が吸着対象に乗る」中心線位置へ吸着させる。
-        // グリッド吸着が有効な間は共通スナップと同じ序列でグリッドを最優先する。
+        // 通常はグリッドを優先し、並行モードでは接続先の位置を優先する。
         bool offsetSnapApplied = false;
         if (HasNonZeroLateralOffsets()
-            && !(TerrainInputHandler.EnableGridSnapping && GridOverlay.Instance != null)
+            && (ParallelSnapEnabled || !(TerrainInputHandler.EnableGridSnapping && GridOverlay.Instance != null))
             && TryOffsetAwareRailSnap(basePos, out Vector3 offsetSnapped, out float offsetSnapRelHeight))
         {
             basePos = offsetSnapped;
@@ -1626,15 +1697,30 @@ public class RoadPlanManager : MonoBehaviour
         //  その既存線路の中心線へ引き戻されてしまうため)。
         if (!offsetSnapApplied && terrainInputHandler != null)
         {
-            basePos = terrainInputHandler.ApplySnapping(basePos, PathSubtype, out lastSnapWasElevated, out lastSnapRelHeight, snapThreshold);
+            basePos = terrainInputHandler.ApplySnapping(basePos, PathSubtype, out lastSnapWasElevated, out lastSnapRelHeight, snapThreshold, skipGrid: ParallelSnapEnabled);
         }
 
-        // 接続先を確定した鉄道は、角度補助で位置や標高を再変更しない。
-        if (lastSnapWasElevated && PathType == Constants.PATH_TRACK)
+        // 並行モードでも接続先の位置と標高を優先し、角度補助では再変更しない。
+        if (lastSnapWasElevated && (PathType == Constants.PATH_TRACK || ParallelSnapEnabled))
         {
             isStraightLineSnapActive = false;
             isRightAngleSnapActive = false;
             return basePos;
+        }
+
+        if (TryApplyParallelSnap(rawPosition, out Vector3 parallelPosition))
+        {
+            isStraightLineSnapActive = false;
+            isRightAngleSnapActive = false;
+            lastSnapWasElevated = false;
+            return parallelPosition;
+        }
+
+        if (ParallelSnapEnabled && TerrainInputHandler.EnableGridSnapping && GridOverlay.Instance != null)
+        {
+            isStraightLineSnapActive = false;
+            isRightAngleSnapActive = false;
+            return GridOverlay.Instance.SnapPosition(rawPosition);
         }
 
         // 直線延長スナップ（直角スナップより優先）
@@ -2069,6 +2155,7 @@ public class RoadPlanManager : MonoBehaviour
 
         DrawPoints(cam);
         DrawControlHandles(cam);
+        DrawParallelSnapGuide();
 
         if (hoveredEdgeIndex >= 0)
         {
@@ -2781,11 +2868,10 @@ public class RoadPlanManager : MonoBehaviour
         if (phase != RoadEditorPhase.Editing) return;
         if (nodeIndex < 0 || nodeIndex >= points.Count) return;
 
-        var pt = points[nodeIndex];
-        pt.position.y = Utils.GetGroundHeight(pt.position) + height;
-        points[nodeIndex] = pt;
+        Vector3 newPos = points[nodeIndex].position;
+        newPos.y = Utils.GetGroundHeight(newPos) + height;
+        MoveAnchorPosition(nodeIndex, newPos);
         InvalidateShapeCache();
-        RecomputeAllControlPoints();
         Update3DPreview();
         EmitShapeUpdate();
         EmitSelectNode();
@@ -2920,12 +3006,13 @@ public class RoadPlanManager : MonoBehaviour
             return;
         }
 
-        var pt = points[selectedPointIndex];
-        float groundY = Utils.GetGroundHeight(pt.position);
+        Vector3 newPos = points[selectedPointIndex].position;
+        float groundY = Utils.GetGroundHeight(newPos);
         // 下限はマスターの min_height（負の値を持つ地下対応バリアントのみ地下へ潜れる）
-        float newRelY = Mathf.Max((pt.position.y - groundY) + delta, GetMinHeightFromMaster());
-        pt.position.y = groundY + newRelY;
-        points[selectedPointIndex] = pt;
+        float newRelY = Mathf.Max((newPos.y - groundY) + delta, GetMinHeightFromMaster());
+        newPos.y = groundY + newRelY;
+        // 制御点のYもアンカーの相対高さに追従させる(IPC経由の標高変更と同じ経路)
+        MoveAnchorPosition(selectedPointIndex, newPos);
 
         InvalidateShapeCache();
         Update3DPreview();

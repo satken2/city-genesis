@@ -43,10 +43,6 @@ public static class InputMode
     // 停留所配置(MODE_EDIT_TRANSIT)と同じく地形ドラッグとして扱い、
     // 実体の掴み判定・移動は ConnectorEditManager がスクリーン座標のマーカー当たり判定で行う。
     public const int MODE_EDIT_CONNECTOR = 15;
-    // 土地区画の「任意ポリゴン」作成モード。地形クリックで頂点を打ち、右クリックで仮確定、
-    // 頂点ドラッグで調整する。資源エリア編集(MODE_EDIT_RESOURCE)と同じ地形ドラッグ方式で、
-    // 実際のポリゴン組み立ては ParcelAreaEditManager が担う。
-    public const int MODE_PARCEL_CREATION_POLYGON = 16;
     // ブルドーザ(オブジェクト削除)モード。空き地区画・計画中の建物/道路を
     // 左クリックまたは左ドラッグ(ペイント式)で削除する。実処理は RemovalManager が担う。
     public const int MODE_REMOVE = 17;
@@ -82,7 +78,6 @@ public static class InputModePreset
     public const int TRANSIT_CONSTRUCTION = 12;
     public const int PROP_PLACEMENT = 13;
     public const int CONNECTOR_EDIT = 14;
-    public const int PARCEL_CREATION_POLYGON = 15;
     // ブルドーザ(オブジェクト削除)モードのプリセット。建物・区画・道路・地形を
     // すべて MODE_REMOVE にして削除対象として拾えるようにする。
     public const int REMOVE_OBJECTS = 16;
@@ -814,23 +809,6 @@ public class InputHandler : MonoBehaviour
                 }
             }
         }
-        else if (currentMode == InputMode.MODE_PARCEL_CREATION_POLYGON)
-        {
-            var parcelAreaEditManager = FindAnyObjectByType<ParcelAreaEditManager>();
-            if (parcelAreaEditManager != null && parcelAreaEditManager.IsEditingPhase)
-            {
-                // 頂点上でドラッグ開始した場合は Editor ドラッグを開始する(Editingフェーズのみ)
-                if (parcelAreaEditManager.IsMouseOverVertex(InputUtil.MousePosition, Camera.main))
-                {
-                    isDragging = true;
-                    dragStartPosition = new Vector3(posX, 0, posZ);
-                    draggedObject = null;
-                    draggedObjectType = InputObjectType.TERRAIN;
-                    parcelAreaEditManager.StartDrag(InputUtil.MousePosition);
-                    return;
-                }
-            }
-        }
         else if (currentMode == InputMode.MODE_EDIT_TRANSIT)
         {
             var transitPlanManager = FindAnyObjectByType<TransitPlanManager>();
@@ -893,11 +871,6 @@ public class InputHandler : MonoBehaviour
                 var resourceEditManager = FindAnyObjectByType<ResourceAreaEditManager>();
                 resourceEditManager?.ProcessMouseDrag(currentPosition);
             }
-            else if (terrainMode == InputMode.MODE_PARCEL_CREATION_POLYGON)
-            {
-                var parcelAreaEditManager = FindAnyObjectByType<ParcelAreaEditManager>();
-                parcelAreaEditManager?.ProcessMouseDrag(currentPosition);
-            }
             else if (terrainMode == InputMode.MODE_EDIT_TRANSIT)
             {
                 var transitPlanManager = FindAnyObjectByType<TransitPlanManager>();
@@ -950,11 +923,6 @@ public class InputHandler : MonoBehaviour
                 {
                     var resourceEditManager = FindAnyObjectByType<ResourceAreaEditManager>();
                     resourceEditManager?.ProcessMouseDragEnd(endPosition);
-                }
-                else if (terrainMode == InputMode.MODE_PARCEL_CREATION_POLYGON)
-                {
-                    var parcelAreaEditManager = FindAnyObjectByType<ParcelAreaEditManager>();
-                    parcelAreaEditManager?.ProcessMouseDragEnd(endPosition);
                 }
                 else if (terrainMode == InputMode.MODE_EDIT_TRANSIT)
                 {
@@ -1152,17 +1120,6 @@ public class InputHandler : MonoBehaviour
                 Debug.Log("InputHandler: 資源エリア編集モードプリセットを設定しました");
                 break;
 
-            case InputModePreset.PARCEL_CREATION_POLYGON:
-                // 土地区画の任意ポリゴン作成。地形クリックで頂点を打つため、既存区画・パス・建物は
-                // 貫通(MODE_NONE)させて地形ヒットを採用し、ParcelAreaEditManager 側で処理する。
-                SetMode(InputObjectType.TERRAIN, InputMode.MODE_PARCEL_CREATION_POLYGON);
-                SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
-                SetMode(InputObjectType.PATH, InputMode.MODE_NONE);
-                SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
-                SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
-                SetMode(InputObjectType.ZONE, InputMode.MODE_NONE);
-                Debug.Log("InputHandler: 土地区画作成（任意ポリゴン）モードプリセットを設定しました");
-                break;
 
             case InputModePreset.TRANSIT_CONSTRUCTION:
                 // 停留所の設置は地形クリックで行う。下地パス(道路・駅パス)は貫通させて
@@ -1315,7 +1272,6 @@ public class InputHandler : MonoBehaviour
             case InputMode.MODE_EDIT_TRANSIT: return "公共交通設置";
             case InputMode.MODE_EDIT_PROP: return "プロップ配置";
             case InputMode.MODE_EDIT_CONNECTOR: return "接続点編集";
-            case InputMode.MODE_PARCEL_CREATION_POLYGON: return "土地区画作成（任意ポリゴン）";
             default: return "UNKNOWN";
         }
     }

@@ -20,7 +20,7 @@
   - **拡張の連続性チェックはフロントで行う**: バックエンドの`POST /paths/batch-zone`は選択が1本だけだと連続性を検証しない(`_validate_contiguity`が即return)ため、そのままだと離れた道路が地区に混ざる。`PathInputHandler.IsConnectedToZone`が`PathManager.GetZonePathIds`→`IsPathConnectedToSet`で選択中地区の道路と繋がっているかを見てから送る。
   - **適用直後の先行着色**: 応答を待たずにクリックした街路へ`VisualModeObject.SetTempZoneId`で適用先の色(新規作成は`ZoneEditContext.PREVIEW_SENTINEL`=`PreviewColor`)を乗せる。台帳は`ZoneEditContext.tempColoredPathIds`で、送信結果(成功/失敗の両方)・モード終了で`ClearTempVisuals`が明示的に戻す(**失敗時はversion不変でリロードが再描画しないため、リロード任せにせず明示クリアが必須**)。
   - **既存地区へのホバーハイライト**: 地区編集モード中にマウスが既存地区の領域内に入ると`ZoneManager.SetHoverFillZone`が半透明フィル(ポリゴンを`BuildingMeshBuilder.TriangulateOrFan`で三角形化・`_ZTest=Always`の専用`OverlayMeshRenderer`)を描く。ホバー地区が変わったフレームのみ再生成する。`InputHandler.HoveredZoneId`はこの判定結果の公開版で、地形クリックからカーソル下の地区を解決するのに使う。
-- **土地区画作成(MODE_PARCEL_CREATION_*)の作成方法もCtrlラジアルメニュー(`Editors/ParcelManager/ParcelEditControlMenu`)で切り替える**: 8種(単一区画/道路沿い/タイル状/ランダム/ブロック一括/任意ポリゴン/矩形分割/ランダム分割)。真実源は`ParcelEditorManager.CurrentMode`で、切り替えると`InputModePreset`(POINT/PATH/SPLIT/POLYGON)と選択状態がその場でリセットされる。**Escは選択のリセットのみでモードからは抜けず、確定してもモードを抜けない(連続作成)**。`TerrainInputHandler.Update`のEsc処理はマーカーを消すだけで、リセット自体は`ParcelEditorManager.Update`が行う(このコンポーネントは地形タイルごとに付くため条件は軽く保つこと)。
+- **土地区画作成(MODE_PARCEL_CREATION_*)の作成方法もCtrlラジアルメニュー(`Editors/ParcelManager/ParcelEditControlMenu`)で切り替える**: 6種(道路沿い/ブロック一括/ランダム/単一区画/矩形分割/ランダム分割)。真実源は`ParcelEditorManager.CurrentMode`で、切り替えると`InputModePreset`(POINT/PATH/SPLIT)と選択状態がその場でリセットされる。**Escは選択のリセットのみでモードからは抜けず、確定してもモードを抜けない(連続作成)**。`TerrainInputHandler.Update`のEsc処理はマーカーを消すだけで、リセット自体は`ParcelEditorManager.Update`が行う(このコンポーネントは地形タイルごとに付くため条件は軽く保つこと)。
 - **`StartTerrainDrag()` はレイキャストが何にもヒットしなかった場合しか呼ばれない(重要な罠)**: 地形コライダー(Terrain/SeaObject)にヒットした通常のケースでは、ドラッグは `hasPendingClick`(オブジェクトクリック候補、type=TERRAIN)→`StartDrag()`→`UpdateDrag()` と流れ、**各エディタマネージャの `StartDrag`(掴み開始処理)は一切呼ばれないまま `ProcessMouseDrag(worldPos)` だけが毎フレーム呼ばれる**。そのため地形ドラッグを受けるマネージャは、`RoadPlanManager.ProcessMouseDrag` / `ConnectorEditManager.ProcessMouseDrag` のように**初回呼び出しで現在のマウス位置から掴み対象を決定する(遅延グラブ)実装にする必要がある**。`StartTerrainDrag` 内の `IsMouseOverStop`/`IsMouseOverVertex` 分岐だけに掴み開始を書くと、実プレイでは地形が常にヒットするため一度も通らず「全くドラッグできない」バグになる(接続点編集で実際に起きた)。
 - UI(uGUI)上にポインタがある場合・カメラドラッグ中・**カメラのフライモード中(`CameraController.IsFlyMode`)**・**ラジアルメニュー表示中(`RadialMenuController.IsOpen`)**は入力処理全体がスキップされる(フライモード/メニュー表示中はクリック・ホバー・ツールチップを含む一切のマウス入力を無効化する。入力プリセットは変更せず `InputHandler.Update` 先頭のゲートで非破壊的に止めるため、抜ければ元の入力状態がそのまま復帰する。`CameraController.Update` にも同じ `IsOpen` ゲートがあり、メニュー操作のマウス移動でカメラが動かない。メニューのCanvasには意図的にGraphicRaycasterが無いため、EventSystemのUI判定では止まらないことに注意)。
 
@@ -41,6 +41,14 @@
 - **入力負荷の最適化 (毎フレーム処理の回避)**: 
   - マウスやカメラが動いておらず、かつクリック等の入力イベントも発生していないフレームでは、重い `RaycastAll` やホバー判定等の処理全体を即座にスキップする (`lastRay` キャッシュを利用)。
   - 地区のホバー判定 (`ZoneManager.GetZoneIdAtPoint`) は通常プレイ時の毎フレームオーバーヘッドを避けるため、「地区編集モード中」のみに制限して実行する。
+
+## 道路の並行補助との共通吸着の連携
+
+道路の並行・終端揃え設定は`RoadPlanManager`のstaticプロパティにあり、共通`Enable*Snapping`とは別。
+並行有効時だけ`ApplySnapping(..., skipGrid: true)`で接続吸着を先に解決し、並行候補が不成立なら
+道路編集側がグリッドへ戻す。共有フラグは書き換えない。他の入力モードでは`skipGrid`の既定falseを使う。
+接続吸着の戻り値`snappedToElevatable`は相対高さ0でもtrueなので、並行モードではこの結果を再射影しない。
+Ctrlメニューの2設定と候補・ガイド・XYZの役割分担は`Editors/AGENTS.md`を参照。
 
 ## 入力モード
 
@@ -66,13 +74,12 @@
 - MODE_EDIT_RESOURCE = 12
 - MODE_EDIT_TRANSIT = 13 (公共交通の停留所配置。`TerrainInputHandler` が `TransitPlanManager` へ委譲。ドラッグ移動は `InputHandler.StartTerrainDrag/UpdateDrag/EndDrag` が資源編集と同様に `IsMouseOverStop`/`ProcessMouseDrag` へ振り分ける)
 - MODE_EDIT_PROP = 14 (プロップ配置。`TerrainInputHandler` が `PropPlacementManager` へ委譲)
-- MODE_PARCEL_CREATION_POLYGON = 16 (土地区画の任意ポリゴン作成=`parcel_creation_mode="manual"`。地形クリックで頂点を打ち・右クリックで仮確定・頂点ドラッグで調整する。資源エリア編集(MODE_EDIT_RESOURCE)と同じ地形ドラッグ方式で、`TerrainInputHandler` が `ParcelAreaEditManager` へ委譲。ドラッグ移動は `StartTerrainDrag/UpdateDrag/EndDrag` が `IsMouseOverVertex`/`ProcessMouseDrag` へ振り分ける。※定数値15は先に定義済みの MODE_EDIT_CONNECTOR が使用しているため16)
 - MODE_REMOVE = 17 (ブルドーザ=オブジェクト削除。空き地区画・計画中の建物/道路をクリック/ドラッグで削除。実処理は `RemovalManager`)
 - MODE_PATH_MERGE = 18 (パス結合の相手選択。`PathInputHandler.onClick` が `PathTopologyEditManager.OnPathClickedForMerge` へ委譲し、候補パス以外のクリックは弾かれる。ホバーハイライトも候補のみ)
 - MODE_PATH_SPLIT = 19 (パス分割の分割点選択。PATH と TERRAIN の両方をこのモードにし、どちらのクリックも `PathTopologyEditManager.OnClickForSplit` へ委譲する〔パス脇の地形クリックでも中心線への垂線の足が分割点になる〕。**`TerrainInputHandler` の共通吸着 `ApplySnapping` はこのモードで適用しない**——ノード吸着で端点へ引き寄せられると常に「端点に近すぎる」分割になりバックエンドに拒否されるため)
 - MODE_EDIT_CONNECTOR = 15 (施設の接続端子ノード=インフラ/走行網接続点のドラッグ移動編集。マーカー=逆四角錐はノード実体の上空に浮くオーバーレイのためコライダーへのレイキャストではなく地形ドラッグとして受け、**掴み開始は `ConnectorEditManager.ProcessMouseDrag` の初回呼び出しの遅延グラブ**(上記の罠参照。`StartTerrainDrag` 経由は地形コライダーが無い場合のフォールバックのみ)。当たり判定 `IsMouseOverConnector` は「ノード地表点〜マーカー天面のスクリーン線分」との距離で行い、半径はズームに応じて拡大(最低45px)。NODEは`MODE_NONE`でレイキャスト貫通させる。`TerrainInputHandler.onHover` はこのモードで吸着(`ApplySnapping`)を適用しない(ドラッグ中の端子が自分自身の旧キャッシュ位置へ吸着し続けるため)。**`CameraController.IsMouseOverEditHandle` にもマーカー判定を足さないと、先に走る(`DefaultExecutionOrder(-100)`)カメラドラッグが掴みを奪う**)
 
-プリセット(`InputModePreset`): ALL_NONE / ALL_NORMAL / ROAD_CONSTRUCTION / BUILDING_CONSTRUCTION / PARCEL_CREATION_POINT / PARCEL_CREATION_PATH / PARCEL_CREATION_SPLIT / ZONE_EDIT / UNLOCK_CELL / PARCEL_SHAPE_EDIT / SET_GRID / EDIT_RESOURCE / TRANSIT_CONSTRUCTION / PROP_PLACEMENT / CONNECTOR_EDIT / PARCEL_CREATION_POLYGON(=任意ポリゴン作成。地形のみ`MODE_PARCEL_CREATION_POLYGON`) / REMOVE_OBJECTS / PATH_MERGE(=パスのみ`MODE_PATH_MERGE`) / PATH_SPLIT(=パスと地形が`MODE_PATH_SPLIT`)
+プリセット(`InputModePreset`): ALL_NONE / ALL_NORMAL / ROAD_CONSTRUCTION / BUILDING_CONSTRUCTION / PARCEL_CREATION_POINT / PARCEL_CREATION_PATH / PARCEL_CREATION_SPLIT / ZONE_EDIT / UNLOCK_CELL / PARCEL_SHAPE_EDIT / SET_GRID / EDIT_RESOURCE / TRANSIT_CONSTRUCTION / PROP_PLACEMENT / CONNECTOR_EDIT / REMOVE_OBJECTS / PATH_MERGE(=パスのみ`MODE_PATH_MERGE`) / PATH_SPLIT(=パスと地形が`MODE_PATH_SPLIT`)
 
 **クリックのみでドラッグを持たないモードは `StartDrag` / `StartTerrainDrag` の冒頭で明示的に return させること**(MODE_REMOVE / MODE_PATH_MERGE / MODE_PATH_SPLIT / MODE_ZONE_EDIT)。しないと既定経路でドラッグ状態に入り、`RoadPlanManager` 等のドラッグ処理へフォールバックする。
 

@@ -80,6 +80,21 @@ public static class PropGeometry
         return false;
     }
 
+    public static bool BlockedWithHoles(Vector2 p, float clearance, IList<Vector2> ring,
+        Rect bounds, IList<Vector2[]> holes)
+    {
+        if (!Blocked(p, clearance, ring, bounds)) return false;
+        foreach (var hole in holes)
+        {
+            if (!InRing(p, hole)) continue;
+            // 水域の穴は島の陸地。岸から離隔分だけ内側に入った点を表示する。
+            for (int i = 0, j = hole.Length - 1; i < hole.Length; j = i++)
+                if (DistanceSquared(p, hole[i], hole[j]) <= clearance * clearance) return true;
+            return false;
+        }
+        return true;
+    }
+
     private static uint Hash(uint value)
     {
         unchecked { value ^= value >> 16; value *= 0x7feb352d; value ^= value >> 15; value *= 0x846ca68b; return value ^ (value >> 16); }

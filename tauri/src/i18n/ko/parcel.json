@@ -56,10 +56,8 @@
     "sectionSplit": "기존 구획 분할",
     "modeSingle": "단일 구획",
     "modeAlongPath": "도로변에 생성",
-    "modeTile": "타일 형태",
     "modeRandom": "랜덤",
     "modeBlock": "블록 일괄",
-    "modeManual": "임의 폴리곤",
     "modeSplitRect": "직사각형 분할",
     "modeSplitRandom": "랜덤 분할",
     "modeWheelHint": "생성 방법은 3D 뷰에서 Ctrl을 누른 채 휠 메뉴로 고를 수 있습니다(이 타일에서도 전환할 수 있습니다).",
@@ -94,13 +92,11 @@
     "pointSelected": "지점을 선택함",
     "pathSelected": "경로 #{{id}}을(를) 선택함",
     "parcelSelected": "구획 #{{id}}을(를) 선택함",
-    "drawPolygon": "3D 뷰에서 좌클릭으로 정점을 배치하고, 우클릭으로 형상을 확정하세요",
-    "polygonPlacing": "정점 배치 중({{count}}점) — 우클릭으로 형상 확정",
-    "polygonReady": "폴리곤 확정됨({{count}}점) — 정점을 드래그해 조정할 수 있습니다",
     "unitSqm": "㎡",
     "unitMeter": "m",
     "unitDegree": "°",
     "unitPercent": "%",
-    "unitCount": "개"
+    "unitCount": "개",
+    "noParcels": "이 범위에는 구획을 만들 수 없습니다. 도로 옆 빈 땅을 선택하거나 탐색 범위 또는 구획 크기를 조정하세요."
   }
 }

@@ -339,3 +339,7 @@ invoke("start_load_game", { saveId })
 ## 敷設設定の継続
 
 新規敷設後の `STATE_EDIT_PATH` は `initial_height`（小数m）、`initial_embankment_height`、`initial_curved`、`initial_follow_terrain` を任意パラメータとして受け取る。UIの `continuePlacement` が敷設設定を明示送信し、Unityの `InitializeRoadPlacement` が最初の形状通知より前に適用する。線路間隔・進行方向・ホーム側は既存の各パラメータで引き継ぐ。座標・制御点と見積りだけをクリアする。未指定の新規開始は既定値、既存パス編集は保存値を使う。
+
+## 土地区画作成のモード契約
+
+`STATE_EDIT_PARCEL` の `parcel_creation_mode` は、新規作成では `along_path` / `block` / `random` / `empty_area` を使う。TauriのボタンとUnityのラジアルメニューはこの順で表示する。既存区画の分割モードは維持する。`block` は地点選択と従来のプレビューイベントを使い、UIからバックエンドへ探索範囲・間口・奥行き・ばらつきを送る。新規の任意ポリゴン作図は提供しない。既存区画の形状編集イベント（`edit_parcel:update_shape` と `edit_parcel:finish_shape_edit`）は引き続き使用する。

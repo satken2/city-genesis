@@ -11,7 +11,7 @@ New-Item -ItemType Directory -Path "$qaRoot/ProjectSettings" -Force | Out-Null
 Copy-Item -LiteralPath "$unityRoot/ProjectSettings/ProjectVersion.txt" -Destination "$qaRoot/ProjectSettings/ProjectVersion.txt" -Force
 & (Join-Path $PSScriptRoot "../BuildRuntime.ps1")
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'PropsQA.cs') -Destination "$qaRoot/Assets/Editor/PropsQA.cs" -Force
-Get-ChildItem -LiteralPath "$unityRoot/Assets/Models/Props" -File | Copy-Item -Destination "$qaRoot/Assets/Models/Props" -Force
+Get-ChildItem -LiteralPath "$unityRoot/Assets/Models/Props" | Copy-Item -Destination "$qaRoot/Assets/Models/Props" -Recurse -Force
 Set-Content -LiteralPath "$qaRoot/Packages/manifest.json" -Value '{"dependencies":{"com.unity.render-pipelines.universal":"17.4.0","com.unity.nuget.newtonsoft-json":"3.2.2"}}'
 Set-Content -LiteralPath "$qaRoot/result.txt" -Value 'RUNNING'
 $process = Start-Process -FilePath $unityExe -ArgumentList @('-batchmode', '-projectPath', ('"' + $qaRoot + '"'), '-executeMethod', 'PropsQA.Run', '-propsSourceRoot', ('"' + $unityRoot + '"'), '-logFile', ('"' + "$qaRoot/qa.log" + '"')) -WindowStyle Hidden -PassThru

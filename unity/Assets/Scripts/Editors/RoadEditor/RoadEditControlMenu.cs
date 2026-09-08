@@ -31,6 +31,8 @@ public class RoadEditControlMenu : MonoBehaviour
     private Sprite iconRoadSnap;
     private Sprite iconRightAngle;
     private Sprite iconGrid;
+    private Sprite iconParallel;
+    private Sprite iconAlignEnds;
 
     /// <summary>HUD providerが毎フレーム返すリスト。GC回避のため使い回す。</summary>
     private readonly List<CursorHudIcon> hudIcons = new List<CursorHudIcon>();
@@ -46,6 +48,8 @@ public class RoadEditControlMenu : MonoBehaviour
         iconRoadSnap = LoadIcon("road-snap");
         iconRightAngle = LoadIcon("90-snap");
         iconGrid = LoadIcon("grid");
+        iconParallel = CreateParallelIcon(false);
+        iconAlignEnds = CreateParallelIcon(true);
 
         // 項目リスト。状態の読み書きはすべてFunc/Action経由なので一度だけ構築すればよい。
         items = new List<RadialMenuItem>
@@ -90,6 +94,24 @@ public class RoadEditControlMenu : MonoBehaviour
                 GetIcon = () => iconRightAngle,
                 GetState = () => TerrainInputHandler.EnableRightAngleSnapping,
                 OnToggle = () => TerrainInputHandler.EnableRightAngleSnapping = !TerrainInputHandler.EnableRightAngleSnapping,
+            },
+            new RadialMenuItem
+            {
+                Id = "parallel",
+                Label = "Parallel",
+                GetIcon = () => iconParallel,
+                GetState = () => rpm.ParallelSnapEnabled,
+                IsEnabled = () => !rpm.Curved,
+                OnToggle = () => rpm.SetParallelSnapping(!RoadPlanManager.EnableParallelSnapping),
+            },
+            new RadialMenuItem
+            {
+                Id = "align_ends",
+                Label = "Align Ends",
+                GetIcon = () => iconAlignEnds,
+                GetState = () => rpm.EndAlignmentEnabled,
+                IsEnabled = () => rpm.ParallelSnapEnabled,
+                OnToggle = () => rpm.SetEndAlignment(!RoadPlanManager.EnableEndAlignment),
             },
             new RadialMenuItem
             {
@@ -145,6 +167,7 @@ public class RoadEditControlMenu : MonoBehaviour
         else if (menuOpenedByThis && RadialMenuController.IsOpen && !ctrlHeld)
         {
             RadialMenuController.Instance.CloseAndCommit();
+            rpm.RefreshSnapPreview();
             menuOpenedByThis = false;
         }
     }
@@ -164,7 +187,7 @@ public class RoadEditControlMenu : MonoBehaviour
     }
 
     /// <summary>
-    /// カーソルHUDの表示内容。曲線/直線+吸着5種のアイコン(OFFは半透明)と、
+    /// カーソルHUDの表示内容。曲線/直線+吸着7種のアイコン(OFFは半透明)と、
     /// 標高(H)・盛土(E)のテキストを返す。毎フレーム呼ばれるため軽量に保つこと。
     /// </summary>
     private (List<CursorHudIcon> icons, string text) BuildHudContent()
@@ -180,6 +203,8 @@ public class RoadEditControlMenu : MonoBehaviour
         hudIcons.Add(new CursorHudIcon(iconRoadSnap, TerrainInputHandler.EnablePathSnapping));
         hudIcons.Add(new CursorHudIcon(iconLine, TerrainInputHandler.EnableStraightLineSnapping));
         hudIcons.Add(new CursorHudIcon(iconRightAngle, TerrainInputHandler.EnableRightAngleSnapping));
+        hudIcons.Add(new CursorHudIcon(iconParallel, rpm.ParallelSnapEnabled));
+        hudIcons.Add(new CursorHudIcon(iconAlignEnds, rpm.EndAlignmentEnabled));
         hudIcons.Add(new CursorHudIcon(iconGrid, GridOverlay.Instance != null && GridOverlay.Instance.IsVisible));
 
         // テキストはASCIIのみ(組み込みフォントが日本語グリフ非対応のため)
@@ -202,10 +227,33 @@ public class RoadEditControlMenu : MonoBehaviour
         return rounded > 0 ? $"+{rounded}m" : $"{rounded}m";
     }
 
+    private void OnDestroy()
+    {
+        if (iconParallel != null) { Destroy(iconParallel.texture); Destroy(iconParallel); }
+        if (iconAlignEnds != null) { Destroy(iconAlignEnds.texture); Destroy(iconAlignEnds); }
+    }
+
+    /// <summary>並行する2本線と、両端を揃える横棒を小さな図形アイコンとして描く。</summary>
+    private static Sprite CreateParallelIcon(bool alignEnds)
+    {
+        const int size = 32;
+        var texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        texture.name = alignEnds ? "Align Ends Icon" : "Parallel Icon";
+        var pixels = new Color32[size * size];
+        for (int y = 4; y < 28; y++)
+        for (int x = 4; x < 28; x++)
+        {
+            bool vertical = (x >= 9 && x <= 11) || (x >= 20 && x <= 22);
+            bool bar = alignEnds && ((y >= 4 && y <= 6) || (y >= 25 && y <= 27));
+            if (vertical || bar) pixels[y * size + x] = new Color32(255, 255, 255, 255);
+        }
+        texture.SetPixels32(pixels);
+        texture.Apply(false, true);
+        return Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
+    }
+
     /// <summary>
-    /// Resources/UIIcons からアイコンSpriteをロードする。
-    /// テクスチャの Sprite Mode が Multiple でインポートされていると単体ロードが null になるため、
-    /// その場合はサブスプライトの先頭を採用する(正しい設定は Single)。
+    /// Resources/UIIconsからロードする。Multipleで取り込まれた場合は先頭のサブSpriteを使う。
     /// </summary>
     private static Sprite LoadIcon(string name)
     {

@@ -81,7 +81,7 @@ export const TOOL_ICONS: HudIconDef[] = [
   { id: "visibility", src: "visibility.png", tooltipKey: "taskbar.menuView", padding: "4px", windowType: "display_options" },
   { id: "map", src: "map.png", tooltipKey: "taskbar.menuMap", padding: "4px", windowType: "city_map" },
   { id: "unlock", src: "pixels.png", tooltipKey: "taskbar.menuUnlock", padding: "4px", windowType: "terrain_unlock" },
-  { id: "bulldozer", src: "menu_bulldoze.png", tooltipKey: "taskbar.bulldozerOff", padding: "3px" },
+  { id: "bulldozer", src: "bulldozer.png", tooltipKey: "taskbar.bulldozerOff", padding: "3px" },
 ];
 
 /**

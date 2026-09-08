@@ -75,6 +75,8 @@ public static class LodQA
         StableSelection();
         ProjectionAndResidency();
         yield return CacheLifetime();
+        yield return PendingRenderWork();
+        yield return InterruptedPathResponse();
         yield return MeshBakeLifetime();
         yield return Scheduler();
         yield return AtomicTerrain();
@@ -172,6 +174,90 @@ public static class LodQA
         Call(cache,"Clear"); yield return null;
         Check((long)Type("RenderObjectCache").GetProperty("TotalBytes").GetValue(null) == 0,"Global cache accounting leaked");
         results.Add("Cache: exact reuse, LRU eviction, destruction and global byte accounting passed");
+    }
+    static IEnumerator PendingRenderWork()
+    {
+        var go = new GameObject("PendingBuildingQA"); go.SetActive(false);
+        var manager = go.AddComponent(Type("BuildingManager"));
+        var data = Activator.CreateInstance(Type("GeneratedModels.BuildingSummary"));
+        Set(data,"agent_id",71001); Set(data,"center_point",new List<object> { 100f,100f });
+        var request = Activator.CreateInstance(Type("BuildingManager").GetNestedType("DeferredDetailRequest",BindingFlags.NonPublic),true);
+        Set(request,"data",data); Set(request,"drawLod",Lod(2));
+        var queue = (IDictionary)Field(manager,"deferredDetailBuildings"); queue[71001] = request;
+        ((IDictionary)Field(manager,"buildingDataCache"))[71001] = data;
+        var worker = (Coroutine)Static("RenderWorkScheduler","Start",host,Call(manager,"DetailGenerationWorker"),"QA.PendingBuilding");
+        for(int i=0;i<10;i++) yield return null;
+        Check(queue.Count == 1,"Building request lost before its cell finished loading");
+        Static("RenderWorkScheduler","Stop",host,worker);
+        ((HashSet<Vector2Int>)Field(manager,"loadedCells")).Add(Vector2Int.zero);
+        Check((bool)Call(manager,"IsDeferredCellReady",data),"Loaded cell did not release pending building");
+        Object.Destroy(go);
+
+        go = new GameObject("PendingPathQA"); go.SetActive(false);
+        manager = go.AddComponent(Type("PathManager"));
+        var path = Activator.CreateInstance(Type("GeneratedModels.PathSummary"));
+        Set(path,"path_id",72001); Set(path,"version",3); Set(path,"follow_terrain",true);
+        ((IDictionary)Field(manager,"pathVersionCache"))[72001] = 3;
+        Check(!(bool)Call(manager,"HasPathRepresentation",path),"Received version hid a road with no generated object");
+        var representation = new GameObject("Path_72001");
+        ((IDictionary)Field(manager,"pathObjectsCache"))[72001] = representation;
+        Check((bool)Call(manager,"HasPathRepresentation",path),"Completed road was not recognized");
+        var emptyCells = new List<Vector2Int>(); var emptySet = new HashSet<Vector2Int>();
+        var lodUpdates = Activator.CreateInstance(typeof(Dictionary<,>).MakeGenericType(typeof(Vector2Int),Type("LodTier")));
+        var batch = (IEnumerator)Call(manager,"LoadMergedPathsAndNodesAndApplyCells",emptyCells,emptySet,emptySet,emptyCells,lodUpdates,emptyCells,emptyCells);
+        Check(batch.MoveNext() && (bool)Field(manager,"isLodPathBatchActive"),"Road batch did not enter its loading state");
+        (batch as IDisposable)?.Dispose();
+        Check(!(bool)Field(manager,"isLodPathBatchActive"),"Canceled road batch left terrain follow-up blocked");
+        Object.Destroy(representation); Object.Destroy(go);
+        yield return null;
+        results.Add("Pending render work: unloaded-cell building request retained; received-only road version cannot skip rendering");
+    }
+    static IEnumerator InterruptedPathResponse()
+    {
+        var listener = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback,0);
+        listener.Start();
+        int port = ((System.Net.IPEndPoint)listener.LocalEndpoint).Port;
+        int status = (int)Type("Constants").GetField("STATUS_PENDING").GetRawConstantValue();
+        string json = "{\"paths\":[{\"path_id\":73001,\"version\":4,\"status\":"+status+",\"follow_terrain\":true,\"start_point\":[10,0,10],\"end_point\":[30,0,10]}],\"next_cursor\":null}";
+        var server = System.Threading.Tasks.Task.Run(async () => {
+            for(int i=0;i<2;i++) using(var client = await listener.AcceptTcpClientAsync())
+            {
+                var stream = client.GetStream(); var buffer = new byte[4096]; string headers = "";
+                while (!headers.Contains("\r\n\r\n")) {
+                    int count = await stream.ReadAsync(buffer,0,buffer.Length);
+                    if(count == 0) throw new Exception("QA client closed before request");
+                    headers += System.Text.Encoding.ASCII.GetString(buffer,0,count);
+                }
+                var body = System.Text.Encoding.UTF8.GetBytes(json);
+                var response = System.Text.Encoding.ASCII.GetBytes("HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: "+body.Length+"\r\nConnection: close\r\n\r\n");
+                await stream.WriteAsync(response,0,response.Length); await stream.WriteAsync(body,0,body.Length);
+            }
+        });
+        var baseUrl = Type("ApiClient").GetField("BASE_URL"); var previous = baseUrl.GetValue(null);
+        var go = new GameObject("InterruptedRoadQA"); go.SetActive(false);
+        var manager = go.AddComponent(Type("PathManager"));
+        baseUrl.SetValue(null,"http://127.0.0.1:"+port);
+        try
+        {
+            for(int attempt=0;attempt<2;attempt++)
+            {
+                Set(manager,"isLodPathBatchActive",true);
+                var cells = new List<Vector2Int> { Vector2Int.zero }; var set = new HashSet<Vector2Int>(cells);
+                var load = (IEnumerator)Call(manager,"LoadMergedPaths",cells,set,set,null,null,null,null);
+                try
+                {
+                    Check(load.MoveNext(),"Road did not request its API page");
+                    yield return load.Current;
+                    Check(load.MoveNext(),"Pending road was skipped on retry");
+                    Check(((IDictionary)Field(manager,"pathDataCache")).Contains(73001),"Road response was not received");
+                    Check(!((IDictionary)Field(manager,"pathVersionCache")).Contains(73001),"Road version committed before mesh generation");
+                }
+                finally { (load as IDisposable)?.Dispose(); }
+            }
+        }
+        finally { baseUrl.SetValue(null,previous); listener.Stop(); Object.Destroy(go); }
+        Check(server.IsCompleted && !server.IsFaulted,"Road fixture did not complete both requests");
+        results.Add("Road HTTP regression: pending road received twice; interruption before generation leaves version uncommitted");
     }
     static IEnumerator MeshBakeLifetime()
     {

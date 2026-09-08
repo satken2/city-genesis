@@ -934,17 +934,6 @@ export const IPC_EVENT_EDIT_PARCEL_SET_MODE = "edit_parcel:set_mode";
 /** 土地区画作成モード（empty_area）において、3Dビュー上で矩形の角度が変更された */
 export const IPC_EVENT_EDIT_PARCEL_UPDATE_ROTATION = "edit_parcel:update_rotation";
 
-/**
- * 土地区画作成モード（manual = 任意ポリゴン）において、編集中のポリゴン頂点列が変更された (Unity → UI)。
- * ペイロードは { polygon: number[][]; finalized: boolean }（各頂点は [x, z]）。
- * finalized は右クリックで形状を仮確定済み（頂点ドラッグ調整フェーズ）かどうか。
- * 作成パネルがこれを受けて頂点数の表示と POST 用のポリゴンを更新する。
- *
- * 既存区画の形状編集で使う `edit_parcel:update_shape`（IPC_EVENT_EDIT_PARCEL_UPDATE_SHAPE、
- * ParcelDetailPanel が使用）とは用途もペイロードも別物のため、イベント名を分けている。
- */
-export const IPC_EVENT_EDIT_PARCEL_UPDATE_CREATION_SHAPE = "edit_parcel:update_creation_shape";
-
 /** 表示オプションパネルの状態問い合わせに対するレスポンス */
 export const IPC_EVENT_VIEW_CURRENT_STATE = "view:current_state";
 

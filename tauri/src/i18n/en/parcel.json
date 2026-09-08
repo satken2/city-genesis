@@ -56,10 +56,8 @@
     "sectionSplit": "Split Existing Parcel",
     "modeSingle": "Single",
     "modeAlongPath": "Along Road",
-    "modeTile": "Tile-like",
     "modeRandom": "Random",
     "modeBlock": "Whole Block",
-    "modeManual": "Freeform Polygon",
     "modeSplitRect": "Rectangle Split",
     "modeSplitRandom": "Random Split",
     "modeWheelHint": "Hold Ctrl in the 3D view to pick the creation method from the radial menu (these tiles work too).",
@@ -94,13 +92,11 @@
     "pointSelected": "Point selected",
     "pathSelected": "Path #{{id}} selected",
     "parcelSelected": "Parcel #{{id}} selected",
-    "drawPolygon": "Left-click in the 3D view to place vertices, then right-click to finalize the shape",
-    "polygonPlacing": "Placing vertices ({{count}}) — right-click to finalize",
-    "polygonReady": "Polygon finalized ({{count}}) — drag vertices to adjust",
     "unitSqm": "m²",
     "unitMeter": "m",
     "unitDegree": "°",
     "unitPercent": "%",
-    "unitCount": ""
+    "unitCount": "",
+    "noParcels": "No parcels can be created here. Select vacant land by a road, or adjust the search area or lot dimensions."
   }
 }

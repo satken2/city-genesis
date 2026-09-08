@@ -1100,26 +1100,6 @@ public class IpcClient : MonoBehaviour
         SendEnvelope("edit_parcel:update_rotation", payload);
     }
 
-    /// <summary>
-    /// edit_parcel:update_creation_shape イベントを送信する。
-    /// 土地区画作成モード(任意ポリゴン = parcel_creation_mode="manual")において、
-    /// 編集中のポリゴン頂点列が変化したことをUIに通知する。各頂点は [x, z](ワールドXZ)。
-    /// finalized は右クリックで形状を仮確定済み(頂点ドラッグ調整フェーズ)かどうか。
-    /// 作成パネルがこれを受けて頂点数の表示とPOST用のポリゴンを更新する。
-    ///
-    /// 既存の edit_parcel:update_shape(既存区画の形状編集。ParcelShapeEditManager が使用)
-    /// とは用途もペイロード構造も異なるため、イベント名を分けている。
-    /// </summary>
-    public void EmitEditParcelUpdateCreationShape(List<List<float>> polygon, bool finalized)
-    {
-        var payload = new Dictionary<string, object>
-        {
-            ["polygon"] = polygon,
-            ["finalized"] = finalized
-        };
-
-        SendEnvelope("edit_parcel:update_creation_shape", payload);
-    }
 
     public void EmitGridAngleChanged(float angle, float originX, float originZ)
     {

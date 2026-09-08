@@ -44,6 +44,7 @@ public class PropObstacleItem
 {
     public string key, signature;
     public List<List<float>> polygon;
+    public List<List<List<float>>> holes;
     public int floor_variant;
     public float visual_variant;
 }
@@ -67,6 +68,7 @@ public class PropManager : BaseApiDataManager
     {
         public PropObstacleItem data;
         public Vector2[] ring;
+        public readonly List<Vector2[]> holes = new List<Vector2[]>();
         public Rect bounds;
     }
     private sealed class Spec
@@ -87,6 +89,7 @@ public class PropManager : BaseApiDataManager
         public bool explicitInstance;
         public ulong rank;
         public DrawLod lod;
+        public bool distant;
     }
     private sealed class DrawBatch
     {
@@ -213,6 +216,10 @@ public class PropManager : BaseApiDataManager
         {
             if (item.polygon == null || item.polygon.Count < 3 || !FloorExists(item)) continue;
             var obstacle = new Obstacle { data = item, ring = item.polygon.ConvertAll(p => new Vector2(p[0], p[1])).ToArray() };
+            if (item.holes != null)
+                foreach (var hole in item.holes)
+                    if (hole != null && hole.Count >= 3)
+                        obstacle.holes.Add(hole.ConvertAll(p => new Vector2(p[0], p[1])).ToArray());
             obstacle.bounds = PropGeometry.Bounds(obstacle.ring);
             var expanded = obstacle.bounds; expanded.xMin -= 8; expanded.yMin -= 8; expanded.xMax += 8; expanded.yMax += 8;
             foreach (var key in KeysIn(expanded, specs))
@@ -281,7 +288,8 @@ public class PropManager : BaseApiDataManager
                 for (int i = 0; i < points.Length; i++)
                 {
                     var p = points[i];
-                    p.visible = !Blocked(new Vector2(p.position.x, p.position.z), Model(p.type).Clearance(p.scale), spec.obstacles);
+                    // 個別配置はプレイヤーが意図した装飾なので、敷地内や水域でも残す。
+                    p.visible = p.explicitInstance || !Blocked(new Vector2(p.position.x, p.position.z), Model(p.type).Clearance(p.scale), spec.obstacles);
                     points[i] = p;
                     if ((i & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
                     { yield return null; timer.Restart(); if (Canceled(serial, batch)) yield break; }
@@ -340,7 +348,8 @@ public class PropManager : BaseApiDataManager
     }
     private static bool Blocked(Vector2 p, float clearance, List<Obstacle> obstacles)
     {
-        foreach (var obstacle in obstacles) if (PropGeometry.Blocked(p, clearance, obstacle.ring, obstacle.bounds)) return true;
+        foreach (var obstacle in obstacles)
+            if (PropGeometry.BlockedWithHoles(p, clearance, obstacle.ring, obstacle.bounds, obstacle.holes)) return true;
         return false;
     }
     public bool CanPreview(Vector3 world, int type, float scale)
@@ -396,7 +405,7 @@ public class PropManager : BaseApiDataManager
         Vector3 cameraPosition = cam.transform.position;
         var timer = System.Diagnostics.Stopwatch.StartNew();
         var next = new List<DrawBatch>();
-        var grouped = new Dictionary<(int, DrawLod), List<Matrix4x4>>();
+        var grouped = new Dictionary<(int, DrawLod, bool), List<Matrix4x4>>();
         for (int i = 0; i < chunk.points.Length; i++)
         {
             if ((i & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
@@ -405,20 +414,19 @@ public class PropManager : BaseApiDataManager
             var model = Model(p.type);
             float distance = Vector3.Distance(p.position + offset + model.bounds.center * p.scale, cameraPosition);
             float ratio = DrawLodEvaluator.ProjectedRatio(model.Radius * p.scale, cam.orthographic ? 1 : distance, projection);
-            var lod = ratio < (p.lod == DrawLod.Hidden ? 0.0015f : 0.001f) ? DrawLod.Hidden :
-                DrawLodEvaluator.EvaluateBySize(model.Radius * p.scale, distance, projection, p.lod, true, cam.orthographic);
+            var lod = DrawLodEvaluator.EvaluateBySize(model.Radius * p.scale, distance, projection, p.lod, true, cam.orthographic);
+            // 常駐範囲では本数を維持し、画面高の1%未満は四角錐へ置き換える。
+            // 戻りを1.2%にして、境界付近の往復でモデルがちらつくのを抑える。
+            p.distant = lod == DrawLod.Far && model.distant.Count > 0 && ratio < (p.distant ? .012f : .01f);
             p.lod = lod; chunk.points[i] = p;
-            if (lod == DrawLod.Hidden) continue;
-            // 遠景では固定順位の部分集合を描く。距離の往復で木の配置を引き直さない。
-            if (lod == DrawLod.Far && !p.explicitInstance && (p.rank & 3UL) != 0) continue;
-            var group = (p.type, lod);
+            var group = (p.type, lod, p.distant);
             if (!grouped.TryGetValue(group, out var matrices)) grouped[group] = matrices = new List<Matrix4x4>();
             matrices.Add(Matrix4x4.TRS(p.position + offset, Quaternion.Euler(0,p.rotation,0), Vector3.one * p.scale));
         }
         foreach (var group in grouped)
         {
             var model = Model(group.Key.Item1);
-            var parts = group.Key.Item2 == DrawLod.Far ? model.far : group.Key.Item2 == DrawLod.Close ? model.close : model.normal;
+            var parts = group.Key.Item3 ? model.distant : group.Key.Item2 == DrawLod.Far ? model.far : group.Key.Item2 == DrawLod.Close ? model.close : model.normal;
             foreach (var part in parts)
                 for (int start = 0; start < group.Value.Count; start += BatchSize)
                 {

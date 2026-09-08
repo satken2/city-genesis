@@ -36,6 +36,16 @@ public struct PathBuildPoint
     public Vector3? control_in;
 
     /// <summary>
+    /// control_out がユーザーの手動調整済みなら true。
+    /// 自動計算(RecomputeAllControlPoints)はこのフラグが立った制御点を上書きしない。
+    /// アンカーを動かしたときは自動計算し直さず、アンカーと同じ量だけ平行移動する。
+    /// </summary>
+    public bool control_out_manual;
+
+    /// <summary>control_in の手動調整フラグ。意味は control_out_manual と同じ。</summary>
+    public bool control_in_manual;
+
+    /// <summary>
     /// 盛土オフセット(m)。-5〜+5。
     /// 道路のY座標自体は0のままだが、着工時にこの高さだけDynamic地形を変形させる。
     /// プレビュー時はこの高さ分だけ道路メッシュを浮かせて表示する。
@@ -49,6 +59,8 @@ public struct PathBuildPoint
         role = r;
         control_out = null;
         control_in = null;
+        control_out_manual = false;
+        control_in_manual = false;
         embankmentHeight = 0f;
     }
 }

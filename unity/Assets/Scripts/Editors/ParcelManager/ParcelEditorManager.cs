@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 
 /// <summary>
 /// 土地区画作成モード(STATE_EDIT_PARCEL)の中核。
-/// 作成モード(単一区画 / 道路沿い / タイル / ランダム / ブロック一括 / 任意ポリゴン / 分割系)の
+/// 作成モード(道路沿い / ブロック一括 / ランダム / 単一区画 / 分割系)の
 /// **真実源はこのクラスの <see cref="CurrentMode"/>** で、3Dビューでの地点・パス・区画の選択と
 /// プレビュー描画、入力プリセットの切り替えまでを担う。
 ///
@@ -37,7 +37,6 @@ public class ParcelEditorManager : MonoBehaviour
         Point,    // 地形上の地点をクリック
         Path,     // 既存パスをクリック
         Parcel,   // 既存区画をクリック
-        Polygon,  // 頂点を打ってポリゴンを描く(ParcelAreaEditManager)
     }
 
     /// <summary>作成モード1件の定義(ラジアルメニュー・HUD・入力プリセットの共通ソース)。</summary>
@@ -54,22 +53,18 @@ public class ParcelEditorManager : MonoBehaviour
 
     /// <summary>
     /// 作成モードの一覧。ラジアルメニューの項目順もこの順序に従う。
-    /// UI(ParcelCreationPanel)の CREATION_SECTIONS と同じ並び(作成6種 → 分割2種)にしてある。
+    /// UI(ParcelCreationPanel)の CREATION_SECTIONS と同じ並び(作成4種 → 分割2種)にしてある。
     /// </summary>
     public static readonly List<ModeInfo> Modes = new List<ModeInfo>
     {
-        new ModeInfo { Id = "empty_area", Label = "単一区画", IconName = "parcel-single",
-            Hint = "地点をクリック / ドラッグで角度", Kind = SelectionKind.Point, Preset = InputModePreset.PARCEL_CREATION_POINT },
-        new ModeInfo { Id = "along_path", Label = "道路沿いに作成", IconName = "parcel-along-path",
+        new ModeInfo { Id = "along_path", Label = "道路沿い", IconName = "parcel-along-path",
             Hint = "区画を作る位置の道路をクリック", Kind = SelectionKind.Path, Preset = InputModePreset.PARCEL_CREATION_PATH },
-        new ModeInfo { Id = "tile", Label = "タイル状", IconName = "parcel-tile",
-            Hint = "地点をクリック / ドラッグで角度", Kind = SelectionKind.Point, Preset = InputModePreset.PARCEL_CREATION_POINT },
-        new ModeInfo { Id = "random", Label = "ランダム", IconName = "parcel-random",
-            Hint = "地点をクリック / ドラッグで角度", Kind = SelectionKind.Point, Preset = InputModePreset.PARCEL_CREATION_POINT },
         new ModeInfo { Id = "block", Label = "ブロック一括", IconName = "parcel-block",
             Hint = "ブロック内の地点をクリック", Kind = SelectionKind.Point, Preset = InputModePreset.PARCEL_CREATION_POINT },
-        new ModeInfo { Id = "manual", Label = "任意ポリゴン", IconName = "parcel-manual",
-            Hint = "左クリックで頂点 / 右クリックで確定", Kind = SelectionKind.Polygon, Preset = InputModePreset.PARCEL_CREATION_POLYGON },
+        new ModeInfo { Id = "random", Label = "ランダム", IconName = "parcel-random",
+            Hint = "地点をクリック / ドラッグで角度", Kind = SelectionKind.Point, Preset = InputModePreset.PARCEL_CREATION_POINT },
+        new ModeInfo { Id = "empty_area", Label = "単一区画", IconName = "parcel-single",
+            Hint = "地点をクリック / ドラッグで角度", Kind = SelectionKind.Point, Preset = InputModePreset.PARCEL_CREATION_POINT },
         new ModeInfo { Id = "split_rectangle", Label = "矩形分割", IconName = "parcel-split-rect",
             Hint = "分割する区画をクリック", Kind = SelectionKind.Parcel, Preset = InputModePreset.PARCEL_CREATION_SPLIT },
         new ModeInfo { Id = "split_random", Label = "ランダム分割", IconName = "parcel-split-random",
@@ -334,23 +329,6 @@ public class ParcelEditorManager : MonoBehaviour
                 break;
         }
 
-        // 任意ポリゴン作成では選択系ではなく ParcelAreaEditManager が頂点を組み立てる。
-        // 他モードへ移ったときに描きかけのポリゴンが残らないよう、ここで必ず初期化/終了する。
-        var areaEditManager = FindAnyObjectByType<ParcelAreaEditManager>();
-        if (info.Kind == SelectionKind.Polygon)
-        {
-            if (areaEditManager == null)
-            {
-                var go = new GameObject("ParcelAreaEditManager");
-                areaEditManager = go.AddComponent<ParcelAreaEditManager>();
-            }
-            areaEditManager.InitializeCreateMode();
-        }
-        else if (areaEditManager != null)
-        {
-            areaEditManager.FinishEditMode();
-        }
-
         if (notifyUi)
         {
             IpcClient.Instance?.EmitEditParcelSetMode(currentMode);
@@ -366,11 +344,6 @@ public class ParcelEditorManager : MonoBehaviour
         isActive = false;
         ClearWorldSelectionState();
 
-        var areaEditManager = FindAnyObjectByType<ParcelAreaEditManager>();
-        if (areaEditManager != null)
-        {
-            areaEditManager.FinishEditMode();
-        }
     }
 
     /// <summary>

@@ -16,6 +16,7 @@ public sealed class PropRenderModel : IDisposable
     public readonly List<Part> normal = new List<Part>();
     public readonly List<Part> close = new List<Part>();
     public readonly List<Part> far = new List<Part>();
+    public readonly List<Part> distant = new List<Part>();
     public Bounds bounds;
     public float Radius => bounds.extents.magnitude;
     public float Clearance(float scale) => Mathf.Min(8f, Mathf.Max(bounds.extents.x, bounds.extents.z) * 0.15f * scale);
@@ -52,6 +53,24 @@ public sealed class PropRenderModel : IDisposable
                 far.Add(new Part { mesh = mesh, material = part.material, local = part.local });
             }
         }
+        if (type == 1 || type == 2) CreateDistantTree();
+    }
+
+    private void CreateDistantTree()
+    {
+        if (far.Count == 0) return;
+        var canopy = TransformBounds(far[0].mesh.bounds, far[0].local);
+        foreach (var part in far) canopy.Encapsulate(TransformBounds(part.mesh.bounds, part.local));
+        var a = canopy.min; var b = canopy.max;
+        var mesh = new Mesh { name = "PropDistantCrown" };
+        mesh.vertices = new[] {new Vector3(a.x,a.y,a.z), new Vector3(b.x,a.y,a.z),
+            new Vector3(b.x,a.y,b.z), new Vector3(a.x,a.y,b.z),
+            new Vector3(canopy.center.x,b.y,canopy.center.z)};
+        mesh.triangles = new[] {0,1,2, 0,2,3, 0,4,1, 1,4,2, 2,4,3, 3,4,0};
+        mesh.uv = new[] {Vector2.zero,Vector2.right,Vector2.one,Vector2.up,new Vector2(.5f,.5f)};
+        mesh.RecalculateNormals(); mesh.RecalculateBounds();
+        owned.Add(mesh);
+        distant.Add(new Part {mesh=mesh, material=far[0].material, local=Matrix4x4.identity});
     }
 
     private void Extract(GameObject prefab, List<Part> parts)

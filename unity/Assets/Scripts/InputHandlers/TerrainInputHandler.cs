@@ -118,14 +118,6 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         return FindAnyObjectByType<ResourceAreaEditManager>();
     }
 
-    /// <summary>
-    /// ParcelAreaEditManager(土地区画の任意ポリゴン作成)を動的に検索して返す。
-    /// STATE_EDIT_PARCEL(manual)への遷移時に動的生成されるため、呼び出し時に毎回検索する。
-    /// </summary>
-    private ParcelAreaEditManager GetParcelAreaEditManager()
-    {
-        return FindAnyObjectByType<ParcelAreaEditManager>();
-    }
 
     /// <summary>
     /// TransitPlanManager を動的に検索して返す。
@@ -214,15 +206,6 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
                     }
                 }
                 break;
-            case InputMode.MODE_PARCEL_CREATION_POLYGON:
-                {
-                    var parcelAreaEditManager = GetParcelAreaEditManager();
-                    if (parcelAreaEditManager != null)
-                    {
-                        parcelAreaEditManager.OnTerrainLeftClick(clickPosition);
-                    }
-                }
-                break;
             case InputMode.MODE_EDIT_TRANSIT:
                 {
                     var transitPlanManager = GetTransitPlanManager();
@@ -300,15 +283,6 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
                     if (resourceEditManager != null)
                     {
                         resourceEditManager.OnTerrainRightClick(clickPosition);
-                    }
-                }
-                break;
-            case InputMode.MODE_PARCEL_CREATION_POLYGON:
-                {
-                    var parcelAreaEditManager = GetParcelAreaEditManager();
-                    if (parcelAreaEditManager != null)
-                    {
-                        parcelAreaEditManager.OnTerrainRightClick(clickPosition);
                     }
                 }
                 break;
@@ -420,15 +394,6 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
                     if (resourceEditManager != null)
                     {
                         resourceEditManager.OnTerrainHover(finalPosition);
-                    }
-                }
-                break;
-            case InputMode.MODE_PARCEL_CREATION_POLYGON:
-                {
-                    var parcelAreaEditManager = GetParcelAreaEditManager();
-                    if (parcelAreaEditManager != null)
-                    {
-                        parcelAreaEditManager.OnTerrainHover(finalPosition);
                     }
                 }
                 break;
@@ -717,8 +682,9 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
     /// thresholdOverride に正値を渡すとインスタンスの snapThreshold の代わりに使う。
     /// 道路/鉄道敷設のように編集側が独自の吸着半径を持つ場合に、共有ハンドラの既定半径から
     /// 切り離して吸着範囲を制御するために用いる（未指定=負値ならインスタンス値を使用）。
+    /// skipGrid は道路の並行補助で接続→並行→グリッドの順にするための省略指定。
     /// </summary>
-    public Vector3 ApplySnapping(Vector3 basePosition, int drawingPathVariant, out bool snappedToElevatable, out float snapRelHeight, float thresholdOverride = -1f)
+    public Vector3 ApplySnapping(Vector3 basePosition, int drawingPathVariant, out bool snappedToElevatable, out float snapRelHeight, float thresholdOverride = -1f, bool skipGrid = false)
     {
         snappedToElevatable = false;
         snapRelHeight = 0f;
@@ -731,7 +697,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         float actualThreshold = (thresholdOverride > 0.01f) ? thresholdOverride : ((snapThreshold > 0.01f) ? snapThreshold : 10.0f);
 
         // グリッドへの吸着を最優先（可視状態に依存しない）
-        if (EnableGridSnapping && GridOverlay.Instance != null)
+        if (!skipGrid && EnableGridSnapping && GridOverlay.Instance != null)
         {
             return GridOverlay.Instance.SnapPosition(basePosition);
         }

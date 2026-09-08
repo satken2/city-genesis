@@ -1,7 +1,7 @@
 # src/components フォルダ
 
 ドメイン別のUIコンポーネント置き場。コンポーネントごとに`.tsx`と対応する`.css`を並べる。
-表示文字列は必ずi18n(`t("key")`、`src/i18n/ja/`・`src/i18n/en/`配下のドメイン別JSONの両言語に追加)を使うこと。
+表示文字列は必ずi18n(`t("key")`、`src/i18n/`配下のドメイン別JSONの全7言語に追加)を使うこと。
 
 **他コンポーネントのCSSのクラスを借りるときは、そのCSSを明示的に`import`すること。** パネルは`App.tsx`で`lazy()`されておりCSSもチャンク単位で分割されるため、`import`しないと「そのチャンクを既に読み込んだウィンドウでだけスタイルが当たる」という再現性の低い崩れになる(ポップアップウィンドウは`window_type`をまたいで使い回されるので、直前に何を開いたかで結果が変わる)。全パネル共通のレイアウト(`.agent-detail`など)は`App.css`にあるのでこれに当たらない。
 
@@ -54,7 +54,7 @@ HUDは**3枚の専用Tauriウィンドウ**に分かれている。Unityの3Dビ
 - **地区編集の「地区の統合」の確定は `IconPanel` が中継して専用の小ウィンドウに出す**: 地区編集モードは自前のウィンドウを持たない常駐モードでUnityから直接ウィンドウを開けないため、Unityが3Dビューで統合元・統合先を決めた時点で送る `edit_zone:request_merge` を、常駐している `IconPanel` が受けて `zone_merge` ウィンドウ(`zone/ZoneMergeConfirmWindow`)を `params.extra.pendingMerge` 付きで開く。確定時は `POST /api/v1/zones/{id}/merge` を送って結果を `sendEditZoneFinishMerge(true)` でUnityへ返す。**イベントを投げてからウィンドウを開く順序ではパネルの購読が間に合わない**ため、統合内容はイベントではなくウィンドウコンテキストで渡している。**×で閉じられた場合の取消送信は Rust 側(`window.rs` のクローズ処理で `edit_zone:finish_merge {merged:0}`)が担う**(ウィンドウは非表示になるだけでReactのアンマウント処理が走らず、パネル任せだとUnityが統合待ちのまま取り残されるため)。
 - **建物建設パネルの施設情報カード(`building/BuildingFacilityInfoCard`)は稼働後のランニングコストを内訳つきで表示する**: TYPE_STANDARD(一般施設)のバリアント選択+敷地確定時、`POST /buildings/construction-cost`が返す`estimated_operating_cost`(総額)/`operating_wage_cost`(人件費)/`operating_material_cost`(原料費)/`operating_cost_category`(支出元予算カテゴリ=LEDGER_*)を、推定生産量・雇用人数と同じグリッドに表示する。総額=人件費+原料費(専用建物のため家賃なし。算出はバックエンドのcalc_rough_costに一元化されておりUI側で計算しない)。費目行は`utils/ledgerIcon.resolveLedgerIcon`+`budget.category.{id}`のi18nで予算ウィンドウと同じアイコン・名称を使う。注記(1エポック(n日)あたり・フル稼働時)の日数はレスポンスの`simulation_days`。修繕費は意図的に含めない(建設時に意識していなかったコストが後からのしかかるゲーム体験を残すため)。
 - **建物直接配置の民間区画オーバーラップは自動用地買収の確認ウィンドウを挟む**: `BuildingConstructionPanel`の直接配置モードで`preview-direct`が`requires_acquisition=True`(民間区画とのみ重なる)を返すと、確定ボタンは押せるが即送信せず`building_direct_acquisition`ウィンドウ(`building/BuildingDirectAcquisitionConfirmWindow`)を`params.extra.pendingAcquisition`(件数+買収費見積)付きで開く。OKでクロスウィンドウイベント`building_direct:acquisition_confirmed`が発火し、パネルが`acknowledge_acquisition=true`付きで`POST /buildings/direct`を送る(キャンセル/×は何も送らない=パネル側に確定待ち状態が無いためRustのクローズ特別処理は不要)。重なり区画・建物は`preview-direct`の`interference`を`sendHighlightObjects(_, "building_construction")`で道路敷設と同配色の3Dハイライトに流し、クリアはプレビュー消滅/キャンセル/確定成功時+ウィンドウクローズ時のRust側(`window.rs`)で行う。
-- **ブルドーザ(コックピット)と地区編集(アイコンパネル)は排他の常駐モード**だが、別ウィンドウにボタンがある。状態はTauriのグローバルイベント `hud:mode_changed` を真実源として `hudMode.ts` が全HUDウィンドウで同期する。**モードの副作用(Unityへの`STATE_*`送信・ヒントバー文言・セッションリロード)は操作した側のコンポーネントが実行し、他ウィンドウは表示を合わせるだけ**。
+- **ブルドーザ(コックピット)と地区編集(アイコンパネル)は排他の常駐モード**だが、別ウィンドウにボタンがある。状態はTauriのグローバルイベント `hud:mode_changed` を真実源として `hudMode.ts` が全HUDウィンドウで同期する。**モードの副作用(Unityへの`STATE_*`送信・ヒントバー文言・セッションリロード)は操作した側のコンポーネントが実行し、他ウィンドウは表示を合わせるだけ**。ブルドーザON中はコックピットのパネル背景を工事現場風の黄黒斜線(`Cockpit.css`の`.cockpit--bulldozer`)に切り替える(解除し忘れによる誤削除を防ぐため、アイコンのアクティブ表示だけに頼らない)。
 - **アイコンパネルの高さはReactの実測値でウィンドウに反映する**(`ResizeObserver` → Tauriコマンド `resize_icon_panel`)。アイコン数がテンプレートモードで変わるため。`IconPanel.css`で高さを固定してはならない(ウィンドウ丈との相互参照でリサイズが往復する)。
 - **BGM再生と3Dビューのオブジェクト選択受信は`Cockpit`が受け持つ**。HUD3枚で同じ処理を走らせると多重再生・多重オープンになるため、常に1枚だけ存在するウィンドウに寄せている。
 - チュートリアルのハイライト対象ID(`road` / `budget` / `land` / `construction` / `district` / `track` / `transport` / `visibility` / `execute`)はHUDのウィンドウをまたぐが、各ウィンドウは自分が持つIDにだけ反応する。**IDの持ち主はアイコンパネルとは限らない**(`budget`=コックピットの予算ミニメータ、`visibility`/`execute`=コックピット)。アイコンを削除・移動するときは`tutorial/tutorialSteps.ts`の`targetElementId`が指す先が消えていないか確認すること(消えるとハイライトがどこにも出ないまま進行する)。
@@ -112,3 +112,7 @@ path/PathEquipmentPanelは道路詳細から設備4項目を編集する。マ�
 `path/usePathConstruction.ts` はホームを持つ鉄道コンポーネントの一括POSTに `align_station_tracks: true` を付ける。共通標高の計算・保存はバックエンドに任せる。単線や既存駅を自動補正する指定ではない。
 
 PathConstructionPanel/TrackConstructionPanelの継続配置は間隔・進行方向・ホーム側・高さ・盛土・曲線・地形追従を保持する。continuePlacementはinitial_*と既存の設定パラメータをSTATE_EDIT_PATHへ渡し、座標・制御点・見積りだけをクリアする。PathBuildSectionsの高さ入力は小数対応、0.1mステップ。
+
+## 土地区画作成パネル
+
+`parcel/ParcelCreationPanel.tsx` の新規作成項目は道路沿い・ブロック一括・ランダム・単一区画の順でUnityの `ParcelEditorManager.Modes` と一致させる。ブロック一括は探索幅/高さ・間口・奥行き・ばらつきのみで、中央埋め用平均面積は持たない。プレビューが0件なら生成不能の案内を表示し、取得中・0件では確定できない。既存区画の分割と `ParcelDetailPanel` の頂点編集は独立した機能。

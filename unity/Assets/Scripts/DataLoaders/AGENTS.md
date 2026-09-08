@@ -99,7 +99,7 @@
 - `PropGeometry`がregionの穴・複数パートと固定格子の座標ハッシュを扱う。候補点はregionのbboxや生成順、描画分割数に依存しない。プレビューもこの実装を使う。
 - `PropRenderModel`は共有FBXを変更せず、instancing対応Materialの複製と任意の`_close`/`_far`を用いる。Far未提供時は複雑なサブメッシュを頂点の空間集約で簡略化し、既に軽い部品はそのまま使う。所有するMesh/Materialを全消去時に破棄する。実行時生成MaterialのためGraphicsSettingsのInstancing VariantsはKeep Allを維持する。
 - `PropManager`は一本ごとのGameObjectを作らず、候補配列と小区画別バッチを保持する。描画は`Graphics.RenderMeshInstanced`（最大511個/呼び出し）。全マップを一括バッチにせずBoundsでカリングする。
-- プロップID/versionの署名と障害物key/signatureの署名を分ける。障害物だけの変更では候補を再生成せず対象区画の表示可否だけ更新する。非表示候補は復元用に残す。
+- プロップID/versionの署名と障害物key/signatureの署名を分ける。障害物だけの変更では候補を再生成せず対象区画の表示可否だけ更新する。全土地区画が建物・床材の有無を問わず障害物になる（parcel:{id}、floor_variant=0）。非表示候補は復元用に残す。
 - `chunksByCell`でアンロード・地形追従の対象を引く。Near/Dynamicの高さは既存`TerrainFollowUpCoroutine`で更新し、初回Far地形ロードは`OnTerrainTileReady`でも高さ更新を予約する。地形高さの共通取得処理を使用する。
 - 生成・行列更新は`PerformanceConfig.FrameBudgetMs`で分散する。既定の常駐候補予算250,000を超える場合はカメラに近い小区画を優先し、区画の途中では切らない。更新中の旧/新配列の併存分は一時的に増える。
 - `ResidentCandidateCount`/`ResidentChunkCount`、`SubmittedBatchCount`/`SubmittedInstanceCount`（サブメッシュごとの延べ数）、`LastRegeneratedChunks`/`LastExclusionUpdatedChunks`で負荷と差分を観測できる。
@@ -186,3 +186,17 @@ TrackPath.InfrastructureConnectionProviderにはIsInfrastructureConnectionを登
 ## 非同期資源の解放
 
 `MeshBakeService.Bake` は同時2件の物理ベイクを行う。`RenderCacheIdentity` の破棄は同サービスのReleaseへ通し、ベイク中のMeshを先に破棄しない。タイル専用のMaterial・TerrainLayer・代替Textureは `TerrainTileResources` が所有する。建物の遠景Materialは全棟で共有し、Renderer.materialsで複製すると集約できなくなる。詳細建物で複製したMaterialはRenderCacheIdentityへ登録する。
+
+## 取得と描画完了の区別
+
+建物の遅延生成は、対象セルがロード完了集合へ登録されるまで要求を保持する。未登録セルの要求を選出してから削除してはいけない。一括取得中も生成ワーカーが動くため、背面の建物だけ永久に生成待ちから消える競合になる。次の取得範囲から外れた要求は新しいロード開始時に除く。
+
+道路の `pathVersionCache` は受信版ではなく、生成・復元が完了した版を記録する。API取得や高優先度キューへの投入時には更新しない。同じ版でも描画オブジェクトが存在しない道路は再生成対象とする（意図的な遠景トンネル非表示は除く）。これにより建設計画の更新中にロードが中断されても、次の差分取得で生成できる。道路バッチの終了処理はfinallyで実行し、中断・例外時に地形追従を永久待機させない。
+
+回帰検証は `Tests/Lod/run.ps1`。未ロードセルの建物キュー保持と、建設計画中の道路のHTTP取得→生成前中断→同版再取得を検証する。
+
+プロップ障害物のholesは水域内の島を表す。PropGeometry.BlockedWithHolesを永続描画・プレビューで共用し、島内部を表示しつつ岸の境界・離隔内は除外する。
+
+プロップは距離で本数を間引かず、極小投影サイズによるHiddenも使わない。木1/2は幹なしの専用Farを使用し、投影比1%未満でPropRenderModelの6三角形の四角錐へ替え、1.2%以上で戻す。DrawLod.Far内の切り替えで、常駐セル・候補予算は維持する。生成した最小メッシュはPropRenderModel.Disposeで解放する。
+
+プロップの障害物除外は範囲散布のみ。Candidate.explicitInstanceは常に表示可能とし、区画・道路・水域の追加や更新でも非表示にしない。個別配置の接地・常駐セル・候補予算・LODは通常どおり適用する。
