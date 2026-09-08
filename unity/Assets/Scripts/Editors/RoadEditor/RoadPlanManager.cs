@@ -267,6 +267,35 @@ public partial class RoadPlanManager : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// 敷設中バリアントが駅舎パス(type=PATH_STATION_HOUSE)かをマスターデータから判定する。
+    /// マスター未取得時は STATE_EDIT_PATH で受け取った PathType にフォールバックする。
+    /// </summary>
+    public bool IsStationHouse()
+    {
+        if (MasterDataStore.Instance != null)
+        {
+            try
+            {
+                var master = MasterDataStore.Instance.GetPathMaster(PathSubtype);
+                if (master != null) return master.type == Constants.PATH_STATION_HOUSE;
+            }
+            catch
+            {
+                // マスター未定義の場合は PathType で判定する
+            }
+        }
+        return PathType == Constants.PATH_STATION_HOUSE;
+    }
+
+    /// <summary>
+    /// 既存の地物へ引き寄せる吸着(ノード/パス/直線延長/直角/並行・終端揃え)を無効化するか。
+    /// 駅舎パスはプラットフォーム群を跨ぐ連絡橋で、線路・道路と交差してもノードを作らず接続もしない。
+    /// 線路へ吸着すると端点が線路上に乗って建屋が線路を避けきれないため、吸着自体を持たせない。
+    /// グリッド吸着はプレイヤーが明示的に出したグリッドへの整列なので対象外(有効なまま)。
+    /// </summary>
+    public bool SnappingSuppressed => IsStationHouse();
+
     // =====================================================================
     // ライフサイクル
     // =====================================================================
@@ -1178,7 +1207,7 @@ public partial class RoadPlanManager : MonoBehaviour
     /// </summary>
     private void AlignEndpointControlsToExistingPaths()
     {
-        if (!TerrainInputHandler.EnableStraightLineSnapping) return;
+        if (!TerrainInputHandler.EnableStraightLineSnapping || SnappingSuppressed) return;
         if (points.Count < 2) return;
 
         // 始点: control_out を延長方向へ吸着（手動調整済みならユーザーの向きを尊重）
@@ -1662,11 +1691,25 @@ public partial class RoadPlanManager : MonoBehaviour
         Vector3 rawPosition = basePos;
         parallelSnapActive = false;
         parallelGuideVisible = false;
+        lastSnapWasElevated = false;
+        lastSnapRelHeight = 0f;
+
+        // 駅舎パスは既存の地物へ一切吸着しない。プレイヤーが明示的に出したグリッドへの
+        // 整列だけは受け付ける。
+        if (SnappingSuppressed)
+        {
+            isStraightLineSnapActive = false;
+            isRightAngleSnapActive = false;
+            if (TerrainInputHandler.EnableGridSnapping && GridOverlay.Instance != null)
+            {
+                return GridOverlay.Instance.SnapPosition(basePos);
+            }
+            return basePos;
+        }
+
         // まずTerrainInputHandlerの共通スナップ（グリッド/ノード/パス/ゾーン頂点）を適用。
         // 建設中バリアントを渡すことでインフラ網の互換性フィルタが働く
         // （道路はインフラノード/パスに吸着せず、インフラパスは同一網にのみ吸着する）。
-        lastSnapWasElevated = false;
-        lastSnapRelHeight = 0f;
         // terrainInputHandler は地形タイル上のコンポーネントで、LODによるタイルの生成・破棄で
         // Start() 時にキャッシュした参照が破棄済み(Unityの疑似null)になりうる。null なら都度
         // 再解決する。これを怠るとグリッド/ノード/パス吸着が丸ごと無効化される。

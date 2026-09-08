@@ -117,7 +117,7 @@ public static class PlatformQA
             parent, new List<Vector3> { Vector3.zero, new Vector3(0,0,length) }, false });
         road.GetMethod("CreateSplineMesh").Invoke(null, new object[] {
             parent, spline, $"Models/Paths/p{variant}/track", 5f, 0f, .12f, false, null,
-            false, false, 0.0, 1.0, false, true, 0f });
+            false, false, 0.0, 1.0, false, true, 0f, true });
         var intervals = new List<Vector2>();
         foreach (var component in parent.GetComponentsInChildren<Component>())
         {
@@ -169,7 +169,7 @@ public static class PlatformQA
             cache[$"Models/Paths/p461/{part}"] = AssetDatabase.LoadAssetAtPath<GameObject>(asset);
             road.GetMethod("CreateSplineMesh").Invoke(null, new object[] {
                 parent, spline, $"Models/Paths/p461/{part}", 5f, 0f, part=="body" ? .1f : .12f, false, null,
-                false, part=="body", 0.0, 1.0, false, true, 0f });
+                false, part=="body", 0.0, 1.0, false, true, 0f, true });
         }
         var material = new Material(Shader.Find("Standard")) { color = new Color(.28f,.3f,.32f) };
         track.GetMethod("CreatePlatformSide", BindingFlags.Static|BindingFlags.NonPublic).Invoke(null, new object[] {

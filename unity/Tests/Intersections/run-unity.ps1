@@ -1,4 +1,4 @@
-param([string]$UnityExe, [switch]$PavedModels, [switch]$Equipment, [switch]$Platforms, [switch]$RailYard)
+param([string]$UnityExe, [switch]$PavedModels, [switch]$Equipment, [switch]$Platforms, [switch]$RailYard, [switch]$StationHouse)
 $ErrorActionPreference = 'Stop'
 $unityRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $project = Join-Path $unityRoot 'Assembly-CSharp.csproj'
@@ -20,6 +20,10 @@ Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Unity/IntersectionQA.cs') -Dest
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Unity/RoadEquipmentQA.cs') -Destination $editorAssets -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Unity/PlatformQA.cs') -Destination $editorAssets -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Unity/RailYardQA.cs') -Destination $editorAssets -Force
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Unity/StationHouseQA.cs') -Destination $editorAssets -Force
+if ($StationHouse) {
+    Copy-Item -LiteralPath "$unityRoot/ProjectSettings/TagManager.asset" -Destination "$qaRoot/ProjectSettings/TagManager.asset" -Force
+}
 if ($RailYard) {
     $yardAssets = Join-Path $qaRoot 'Assets/Buildings/a1060'
     New-Item -ItemType Directory -Path $yardAssets -Force | Out-Null
@@ -32,7 +36,7 @@ $resultPath = Join-Path $qaRoot 'result.txt'
 Set-Content -LiteralPath $resultPath -Value 'RUNNING'
 $process = Start-Process -FilePath $UnityExe -ArgumentList @(
     '-batchmode', '-projectPath', ('"' + $qaRoot + '"'),
-    '-executeMethod', $(if ($RailYard) { 'RailYardQA.Run' } elseif ($Platforms) { 'PlatformQA.Run' } elseif ($Equipment) { 'RoadEquipmentQA.Run' } else { 'IntersectionQA.Run' }), '-intersectionSourceRoot', ('"' + $unityRoot + '"'),
+    '-executeMethod', $(if ($StationHouse) { 'StationHouseQA.Run' } elseif ($RailYard) { 'RailYardQA.Run' } elseif ($Platforms) { 'PlatformQA.Run' } elseif ($Equipment) { 'RoadEquipmentQA.Run' } else { 'IntersectionQA.Run' }), '-intersectionSourceRoot', ('"' + $unityRoot + '"'),
     '-logFile', ('"' + (Join-Path $qaRoot 'qa.log') + '"'), $(if ($PavedModels) { '-pavedModels' } else { '-defaultModels' })
 ) -WindowStyle Hidden -PassThru
 if (!$process.WaitForExit(240000)) { Stop-Process -Id $process.Id; throw 'Intersection QA timed out; inspect Temp/IntersectionUnityQA/qa.log' }

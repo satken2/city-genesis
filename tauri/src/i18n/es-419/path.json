@@ -113,7 +113,7 @@
     "platformTab": "Andén",
     "houseTab": "Edificio de estación",
     "house": {
-      "hint": "Traza la línea del edificio de estación. Los andenes que cruce la línea pertenecerán a esta estación. En ambos extremos de la línea se colocan los edificios y a lo largo de ella se tiende un puente de conexión."
+      "hint": "Traza la línea del edificio de estación. Los andenes que cruce la línea pertenecerán a esta estación. En ambos extremos de la línea se colocan los edificios y a lo largo de ella se tiende un puente de conexión. El edificio de estación no se ajusta a las vías ni a las calles existentes (solo se aplica el ajuste a la cuadrícula)."
     }
   }
 }

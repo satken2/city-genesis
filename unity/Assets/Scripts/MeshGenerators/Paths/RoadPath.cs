@@ -280,7 +280,11 @@ public class RoadPath : IPathMeshGenerator
     /// 0以下を渡すと上限なし＝プレハブのZ実寸をそのままタイル長にする。縦カーブを持たない
     /// 折れ線スプライン（駅舎パスの連絡橋など）で、造形単位を著作サイズのまま並べたいときに使う。
     /// </param>
-    public static GameObject CreateSplineMesh(GameObject parent, SplineComputer spline, string prefabName, float width, float centerOffsetX, float offsetY, bool mirrorX = false, string fallbackPrefabName = null, bool isDashed = false, bool stretchToWidth = true, double clipFrom = 0.0, double clipTo = 1.0, bool singleSpan = false, bool compensatePivot = true, float maxTileLength = MAX_EXTRUDE_TILE_LENGTH)
+    /// <param name="normalizeBodySurface">
+    /// body の上面を路面原点Y=0へ揃える。地面原点の駅舎橋は false とし、モデルの高さを保つ。
+    /// false のパーツは、スプライン面へ置き換える道路用の区間LODも適用しない。
+    /// </param>
+    public static GameObject CreateSplineMesh(GameObject parent, SplineComputer spline, string prefabName, float width, float centerOffsetX, float offsetY, bool mirrorX = false, string fallbackPrefabName = null, bool isDashed = false, bool stretchToWidth = true, double clipFrom = 0.0, double clipTo = 1.0, bool singleSpan = false, bool compensatePivot = true, float maxTileLength = MAX_EXTRUDE_TILE_LENGTH, bool normalizeBodySurface = true)
     {
         // プレハブのロード。描画LODが接写なら `_close` を優先し、バリアント→タイプの順で解決する
         // (PathDrawContext.ResolvePrefab)。接写パーツは無印と bbox・原点が一致する規約なので配置計算は共通。
@@ -305,7 +309,7 @@ public class RoadPath : IPathMeshGenerator
             return null;
         }
 
-        if (!singleSpan && !isDashed && !PathDrawContext.SuppressDetailRange && spline.CalculateLength() >= 256f
+        if (normalizeBodySurface && !singleSpan && !isDashed && !PathDrawContext.SuppressDetailRange && spline.CalculateLength() >= 256f
             && parent.GetComponentInParent<SplinePartLod>() == null)
         {
             var group = new GameObject(prefabName + "_LOD");
@@ -321,7 +325,7 @@ public class RoadPath : IPathMeshGenerator
                     {
                         return CreateSplineMesh(group, spline, prefabName, width, centerOffsetX, offsetY,
                             mirrorX, fallbackPrefabName, isDashed, stretchToWidth, from, to, singleSpan,
-                            compensatePivot, maxTileLength);
+                            compensatePivot, maxTileLength, normalizeBodySurface);
                     }
                     finally { PathDrawContext.End(); }
                 });
@@ -348,7 +352,7 @@ public class RoadPath : IPathMeshGenerator
 
         if(mf != null && mf.sharedMesh != null)
         {
-             bool isBody = prefabName.EndsWith("/body", StringComparison.Ordinal);
+             bool isBody = normalizeBodySurface && prefabName.EndsWith("/body", StringComparison.Ordinal);
              Mesh meshToUse = isBody ? GetBodySurfaceMesh(mf.sharedMesh) : GetRoadPartMesh(mf.sharedMesh, resolvedPrefabName);
              Bounds fittingBounds = isBody ? GetBodySurfaceBounds(meshToUse) : meshToUse.bounds;
              UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath]   メッシュ: '{mf.sharedMesh.name}', bounds={mf.sharedMesh.bounds.size}, vertexCount={mf.sharedMesh.vertexCount}");
@@ -554,7 +558,7 @@ public class RoadPath : IPathMeshGenerator
                             double to = clipFrom + (clipTo - clipFrom) * last / totalCount;
                             CreateSplineMesh(group, spline, prefabName, width, centerOffsetX, offsetY,
                                 mirrorX, fallbackPrefabName, false, stretchToWidth, from, to,
-                                false, compensatePivot, maxTileLength);
+                                false, compensatePivot, maxTileLength, normalizeBodySurface);
                         }
                         return group;
                     }

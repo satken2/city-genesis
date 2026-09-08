@@ -37,6 +37,12 @@ public class RoadEditControlMenu : MonoBehaviour
     /// <summary>HUD providerが毎フレーム返すリスト。GC回避のため使い回す。</summary>
     private readonly List<CursorHudIcon> hudIcons = new List<CursorHudIcon>();
 
+    /// <summary>
+    /// 地物への吸着が働くバリアントか。駅舎パス敷設中は吸着を持たない(RoadPlanManager.SnappingSuppressed)ため、
+    /// メニュー項目をグレーにし、HUDのアイコンもOFFで描いて「押しても効かない」ことを見せる。
+    /// </summary>
+    private bool SnapUsable => rpm != null && !rpm.SnappingSuppressed;
+
     /// <summary>RoadPlanManager.Start から呼ばれる初期化。</summary>
     public void Initialize(RoadPlanManager manager)
     {
@@ -68,7 +74,8 @@ public class RoadEditControlMenu : MonoBehaviour
                 Id = "node_snap",
                 Label = "Node Snap",
                 GetIcon = () => iconNodeSnap,
-                GetState = () => TerrainInputHandler.EnableNodeSnapping,
+                GetState = () => SnapUsable && TerrainInputHandler.EnableNodeSnapping,
+                IsEnabled = () => SnapUsable,
                 OnToggle = () => TerrainInputHandler.EnableNodeSnapping = !TerrainInputHandler.EnableNodeSnapping,
             },
             new RadialMenuItem
@@ -76,7 +83,8 @@ public class RoadEditControlMenu : MonoBehaviour
                 Id = "path_snap",
                 Label = "Path Snap",
                 GetIcon = () => iconRoadSnap,
-                GetState = () => TerrainInputHandler.EnablePathSnapping,
+                GetState = () => SnapUsable && TerrainInputHandler.EnablePathSnapping,
+                IsEnabled = () => SnapUsable,
                 OnToggle = () => TerrainInputHandler.EnablePathSnapping = !TerrainInputHandler.EnablePathSnapping,
             },
             new RadialMenuItem
@@ -84,7 +92,8 @@ public class RoadEditControlMenu : MonoBehaviour
                 Id = "straight_ext",
                 Label = "Straight Ext",
                 GetIcon = () => iconLine,
-                GetState = () => TerrainInputHandler.EnableStraightLineSnapping,
+                GetState = () => SnapUsable && TerrainInputHandler.EnableStraightLineSnapping,
+                IsEnabled = () => SnapUsable,
                 OnToggle = () => TerrainInputHandler.EnableStraightLineSnapping = !TerrainInputHandler.EnableStraightLineSnapping,
             },
             new RadialMenuItem
@@ -92,7 +101,8 @@ public class RoadEditControlMenu : MonoBehaviour
                 Id = "right_angle",
                 Label = "Right Angle",
                 GetIcon = () => iconRightAngle,
-                GetState = () => TerrainInputHandler.EnableRightAngleSnapping,
+                GetState = () => SnapUsable && TerrainInputHandler.EnableRightAngleSnapping,
+                IsEnabled = () => SnapUsable,
                 OnToggle = () => TerrainInputHandler.EnableRightAngleSnapping = !TerrainInputHandler.EnableRightAngleSnapping,
             },
             new RadialMenuItem
@@ -101,7 +111,7 @@ public class RoadEditControlMenu : MonoBehaviour
                 Label = "Parallel",
                 GetIcon = () => iconParallel,
                 GetState = () => rpm.ParallelSnapEnabled,
-                IsEnabled = () => !rpm.Curved,
+                IsEnabled = () => SnapUsable && !rpm.Curved,
                 OnToggle = () => rpm.SetParallelSnapping(!RoadPlanManager.EnableParallelSnapping),
             },
             new RadialMenuItem
@@ -199,10 +209,10 @@ public class RoadEditControlMenu : MonoBehaviour
         {
             hudIcons.Add(new CursorHudIcon(rpm.Curved ? iconBezier : iconLine, true));
         }
-        hudIcons.Add(new CursorHudIcon(iconNodeSnap, TerrainInputHandler.EnableNodeSnapping));
-        hudIcons.Add(new CursorHudIcon(iconRoadSnap, TerrainInputHandler.EnablePathSnapping));
-        hudIcons.Add(new CursorHudIcon(iconLine, TerrainInputHandler.EnableStraightLineSnapping));
-        hudIcons.Add(new CursorHudIcon(iconRightAngle, TerrainInputHandler.EnableRightAngleSnapping));
+        hudIcons.Add(new CursorHudIcon(iconNodeSnap, SnapUsable && TerrainInputHandler.EnableNodeSnapping));
+        hudIcons.Add(new CursorHudIcon(iconRoadSnap, SnapUsable && TerrainInputHandler.EnablePathSnapping));
+        hudIcons.Add(new CursorHudIcon(iconLine, SnapUsable && TerrainInputHandler.EnableStraightLineSnapping));
+        hudIcons.Add(new CursorHudIcon(iconRightAngle, SnapUsable && TerrainInputHandler.EnableRightAngleSnapping));
         hudIcons.Add(new CursorHudIcon(iconParallel, rpm.ParallelSnapEnabled));
         hudIcons.Add(new CursorHudIcon(iconAlignEnds, rpm.EndAlignmentEnabled));
         hudIcons.Add(new CursorHudIcon(iconGrid, GridOverlay.Instance != null && GridOverlay.Instance.IsVisible));

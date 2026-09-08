@@ -113,7 +113,7 @@
     "platformTab": "Quai",
     "houseTab": "Bâtiment de gare",
     "house": {
-      "hint": "Tracez la ligne du bâtiment de gare. Les quais traversés par cette ligne sont rattachés à cette gare. Un bâtiment est placé à chaque extrémité de la ligne, reliés par une passerelle le long de celle-ci."
+      "hint": "Tracez la ligne du bâtiment de gare. Les quais traversés par cette ligne sont rattachés à cette gare. Un bâtiment est placé à chaque extrémité de la ligne, reliés par une passerelle le long de celle-ci. Le bâtiment de gare ne s'aligne jamais sur les routes ou les voies existantes (seul l'alignement sur la grille s'applique)."
     }
   }
 }

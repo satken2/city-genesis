@@ -86,7 +86,7 @@ public class StationHousePath : IPathMeshGenerator
         // タイル長の上限は設けない(折れ線スプラインは縦カーブを持たず弦誤差が出ないため)。
         GameObject bridgeBody = RoadPath.CreateSplineMesh(container, spline, bodyPath, width,
             0f, RoadPartHeights.STATION_BRIDGE_BASE_ABOVE_SPLINE, false, bodyFallbackPath,
-            stretchToWidth: false, singleSpan: singleSpan, maxTileLength: 0f);
+            stretchToWidth: false, singleSpan: singleSpan, maxTileLength: 0f, normalizeBodySurface: false);
         if (bridgeBody == null)
         {
             bridgeBody = RoadPath.CreateFallbackRoadBody(container, spline, width);

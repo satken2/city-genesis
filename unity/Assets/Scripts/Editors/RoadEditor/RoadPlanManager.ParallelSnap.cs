@@ -5,7 +5,7 @@ public partial class RoadPlanManager
     // 設定だけをセッション間で保持する。基準道路やガイドは敷設ごとの一時状態。
     public static bool EnableParallelSnapping { get; private set; }
     public static bool EnableEndAlignment { get; private set; }
-    public bool ParallelSnapEnabled => EnableParallelSnapping && !Curved;
+    public bool ParallelSnapEnabled => EnableParallelSnapping && !Curved && !SnappingSuppressed;
     public bool EndAlignmentEnabled => ParallelSnapEnabled && EnableEndAlignment;
 
     [SerializeField] private float parallelSearchRadius = 100f;

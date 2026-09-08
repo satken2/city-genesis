@@ -113,7 +113,7 @@
     "platformTab": "Platform",
     "houseTab": "Station Building",
     "house": {
-      "hint": "Draw the station building line. Platforms crossed by the line belong to this station. Buildings are placed at both ends of the line, connected by an overhead bridge."
+      "hint": "Draw the station building line. Platforms crossed by the line belong to this station. Buildings are placed at both ends of the line, connected by an overhead bridge. Station buildings never snap to existing roads or tracks (only grid snapping applies)."
     }
   }
 }
