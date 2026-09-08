@@ -51,12 +51,9 @@ pub struct AppState {
     pub last_save_id: Option<String>,
     /// ローディング中フラグ（ゲーム開始処理中）
     pub is_loading: bool,
-    /// ゲーム開始時にバックエンドから返された初期セル中心座標。
-    /// game:start イベントに乗せてグラフィックに伝える。
-    pub initial_cell_center: Option<(f64, f64)>,
-    /// フリーモード新規ゲーム開始時に game:start IPC を保留する際に
-    /// カメラ座標を一時保持する。finish_parameter_setup コマンドで消費される。
-    pub pending_game_start: Option<(f64, f64)>,
+    /// フリーモード新規ゲーム開始時に game:start IPC を保留しているかどうか。
+    /// パラメータ設定ウィンドウを閉じる finish_parameter_setup コマンドで消費される。
+    pub pending_game_start: bool,
     /// 開始したチュートリアルのID（None の場合はチュートリアル以外）
     pub tutorial_id: Option<String>,
     /// シナリオ（テンプレート）を「プレイ」として開始したかどうか。
@@ -134,8 +131,7 @@ impl SharedState {
             session_state: None,
             last_save_id: None,
             is_loading: false,
-            initial_cell_center: None,
-            pending_game_start: None,
+            pending_game_start: false,
             tutorial_id: None,
             is_scenario_play: false,
             parameter_setup_edit_mode: false,

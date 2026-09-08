@@ -425,20 +425,8 @@ async fn create_session(
         return Err(format!("セッション作成に失敗しました: {status}"));
     }
 
-    // レスポンスから initial_cell_center を取り出して state に保存する。
-    // ポーリングスレッドが game:start を送信する際に、
-    // この座標をパラメータとしてグラフィックに伝える。
-    let body = res.json::<serde_json::Value>().await.unwrap_or_default();
-    if let Some(obj) = body.get("initial_cell_center").and_then(|v| v.as_object()) {
-        let x = obj.get("x").and_then(|v| v.as_f64()).unwrap_or(0.0);
-        let z = obj.get("z").and_then(|v| v.as_f64()).unwrap_or(0.0);
-        {
-            let mut guard = state.lock();
-            guard.initial_cell_center = Some((x, z));
-        }
-        log::info!("[create_session] initial_cell_center=({}, {})", x, z);
-    }
-
+    // カメラの初期視点はUIを経由しない。グラフィックが game:start 受信時に
+    // GET /api/v1/city の camera(セーブ値、または地形マップ定義の初期値)を自分で読む。
     log::info!("[create_session] セッション作成リクエスト成功。ポーリング待機に委譲");
     Ok(())
 }
@@ -663,6 +651,9 @@ struct TerrainEditorData {
     /// 各要素は {id, resource_type, max_amount, recovery_rate, polygon(GeoJSONライク)}
     /// (ResourceAreaPayload)。未設定なら空配列。仕様の正は同 §D.12。
     resources: serde_json::Value,
+    /// カメラ初期状態 {x, y, z, yaw, pitch}(TerrainCameraPayload)。未設定なら null。
+    /// 仕様の正は同 §D.13。
+    camera: serde_json::Value,
 }
 
 #[tauri::command]
@@ -727,6 +718,7 @@ fn load_terrain_editor_data(
             .get("resources")
             .cloned()
             .unwrap_or_else(|| serde_json::Value::Array(Vec::new())),
+        camera: meta.get("camera").cloned().unwrap_or(serde_json::Value::Null),
     })
 }
 
@@ -894,6 +886,7 @@ fn save_terrain_editor_data(
     water_surfaces: Option<serde_json::Value>,
     rivers: Option<serde_json::Value>,
     resources: Option<serde_json::Value>,
+    camera: Option<serde_json::Value>,
 ) -> Result<(), String> {
     use base64::Engine;
     let bytes = base64::engine::general_purpose::STANDARD
@@ -911,11 +904,12 @@ fn save_terrain_editor_data(
     let map_dir = terrain_editor_dir(&app)?.join(&map_id);
     std::fs::create_dir_all(&map_dir).map_err(|e| e.to_string())?;
 
-    // 水面ポリゴン(海面以外の湖など)・川・天然資源エリアは作業コピーの meta.json に保持する。
-    // 未指定なら空配列を書く。
+    // 水面ポリゴン(海面以外の湖など)・川・天然資源エリア・カメラ初期状態は作業コピーの
+    // meta.json に保持する。未指定なら空配列(カメラは null)を書く。
     let water_surfaces = water_surfaces.unwrap_or_else(|| serde_json::Value::Array(Vec::new()));
     let rivers = rivers.unwrap_or_else(|| serde_json::Value::Array(Vec::new()));
     let resources = resources.unwrap_or_else(|| serde_json::Value::Array(Vec::new()));
+    let camera = camera.unwrap_or(serde_json::Value::Null);
     let meta = serde_json::json!({
         "map_id": map_id,
         "map_width": map_width,
@@ -928,6 +922,7 @@ fn save_terrain_editor_data(
         "water_surfaces": water_surfaces,
         "rivers": rivers,
         "resources": resources,
+        "camera": camera,
     });
     std::fs::write(map_dir.join("meta.json"), meta.to_string())
         .map_err(|e| format!("meta.json の書き込みに失敗しました: {e}"))?;
@@ -981,6 +976,7 @@ fn export_terrain_as_npy(
     water_surfaces: Option<serde_json::Value>,
     rivers: Option<serde_json::Value>,
     resources: Option<serde_json::Value>,
+    camera: Option<serde_json::Value>,
 ) -> Result<ExportTerrainResult, String> {
     use base64::Engine;
     let bytes = base64::engine::general_purpose::STANDARD
@@ -1064,6 +1060,12 @@ fn export_terrain_as_npy(
 
     log::info!("[export_terrain_as_npy] out_path={} へエクスポートしました", out_path);
 
+    // カメラ初期状態はサイドカーではなく terrain_maps.yaml のエントリ(camera:)に書く。
+    // 5つのスカラーだけなので専用ファイルを増やさず、バックエンドの terrain_registry が
+    // マップ定義の一部として読む。数値が揃っていない値は未設定として扱う。
+    let camera_spec: Option<TerrainCameraSpec> = camera
+        .and_then(|v| serde_json::from_value::<TerrainCameraSpec>(v).ok());
+
     // エクスポート先と同じディレクトリの terrain_maps.yaml にエントリを追記する。
     // 存在しなければ何もせず yaml_updated=false を返し、フロントエンドが通知を出す。
     let out_path_buf = std::path::Path::new(&out_path);
@@ -1086,6 +1088,7 @@ fn export_terrain_as_npy(
                     near_spacing,
                     far_spacing,
                     cell_size,
+                    camera_spec.as_ref(),
                 )?;
                 true
             } else {
@@ -1096,6 +1099,17 @@ fn export_terrain_as_npy(
     };
 
     Ok(ExportTerrainResult { yaml_updated })
+}
+
+/// terrain_maps.yaml のエントリに書くカメラ初期状態(TerrainCameraPayload と同じ契約)。
+/// 位置はワールド座標(m)、yaw は北(+Z)を0とする時計回りの度、pitch は見下ろし角の度。
+#[derive(serde::Deserialize)]
+struct TerrainCameraSpec {
+    x: f64,
+    y: f64,
+    z: f64,
+    yaw: f64,
+    pitch: f64,
 }
 
 /// terrain_maps.yaml に1マップ分のエントリをテキストベースで追記/上書きする。
@@ -1119,6 +1133,7 @@ fn upsert_terrain_yaml_entry(
     near_map_spacing: f64,
     far_map_spacing: f64,
     cell_size: f64,
+    camera: Option<&TerrainCameraSpec>,
 ) -> Result<(), String> {
     let original = std::fs::read_to_string(yaml_path)
         .map_err(|e| format!("terrain_maps.yaml の読み込みに失敗しました: {e}"))?;
@@ -1162,6 +1177,19 @@ fn upsert_terrain_yaml_entry(
     let (cx0, cx1) = (cells_x / 2 - 1, cells_x / 2);
     let (cy0, cy1) = (cells_y / 2 - 1, cells_y / 2);
 
+    // カメラ初期状態が未設定ならキー自体を書かない(バックエンドは未設定=原点の既定視点)。
+    let camera_text = match camera {
+        Some(c) => format!(
+            "\n  camera:\n    x: {x:.1}\n    y: {y:.1}\n    z: {z:.1}\n    yaw: {yaw:.1}\n    pitch: {pitch:.1}",
+            x = c.x,
+            y = c.y,
+            z = c.z,
+            yaw = c.yaw,
+            pitch = c.pitch,
+        ),
+        None => String::new(),
+    };
+
     let entry_text = format!(
         "# {map_id}\n\
          {map_id}:\n\
@@ -1176,7 +1204,7 @@ fn upsert_terrain_yaml_entry(
         \x20   far_map_spacing: {far_map_spacing}\n\
         \x20   dynamic_map_spacing: 1\n\
         \x20   cell_size: {cell_size}\n\
-        \x20 initial_cells: [[{cx0}, {cy0}], [{cx0}, {cy1}], [{cx1}, {cy0}], [{cx1}, {cy1}]]",
+        \x20 initial_cells: [[{cx0}, {cy0}], [{cx0}, {cy1}], [{cx1}, {cy0}], [{cx1}, {cy1}]]{camera_text}",
         map_width = map_width as i64,
         map_height = map_height as i64,
         near_map_spacing = near_map_spacing as i64,
@@ -1297,18 +1325,6 @@ async fn start_debug_init(
             guard.is_loading = false;
         }
         return Err(format!("セッション作成に失敗しました: {status}"));
-    }
-
-    // レスポンスから initial_cell_center を取り出して state に保存する。
-    let body = res.json::<serde_json::Value>().await.unwrap_or_default();
-    if let Some(obj) = body.get("initial_cell_center").and_then(|v| v.as_object()) {
-        let x = obj.get("x").and_then(|v| v.as_f64()).unwrap_or(0.0);
-        let z = obj.get("z").and_then(|v| v.as_f64()).unwrap_or(0.0);
-        {
-            let mut guard = state.lock();
-            guard.initial_cell_center = Some((x, z));
-        }
-        log::info!("[start_new_game] initial_cell_center=({}, {})", x, z);
     }
 
     log::info!("[start_new_game] セッション作成リクエスト成功。ポーリング待機に委譲");
@@ -1478,12 +1494,9 @@ fn resize_notification_window(
 }
 
 /// game:start IPC を Unity に送信するヘルパー。session:reload も先に送る。
-fn send_game_start_ipc(state: &SharedState, _app: &tauri::AppHandle, camera_pos: Option<(f64, f64)>) {
-    let game_start_payload = if let Some((x, z)) = camera_pos {
-        serde_json::json!({ "camera_x": x, "camera_z": z })
-    } else {
-        serde_json::json!({})
-    };
+/// カメラの視点はペイロードに乗せない(グラフィックがバックエンドの City.camera を読んで復元する)。
+fn send_game_start_ipc(state: &SharedState, _app: &tauri::AppHandle) {
+    let game_start_payload = serde_json::json!({});
     let _ = ipc::send_ui_action(
         state,
         "".to_string(),
@@ -1507,10 +1520,10 @@ fn finish_parameter_setup(
     app: tauri::AppHandle,
     state: tauri::State<'_, SharedState>,
 ) -> Result<(), String> {
-    let camera_pos = {
+    {
         let mut guard = state.lock();
-        guard.pending_game_start.take()
-    };
+        guard.pending_game_start = false;
+    }
     let monitor_index = {
         let guard = state.lock();
         guard.current_monitor_index
@@ -1518,7 +1531,7 @@ fn finish_parameter_setup(
     window::close_parameter_setup_window(&app);
     window::set_hud_visible(&app, true);
     show_hintbar_if_enabled(&app);
-    send_game_start_ipc(state.inner(), &app, camera_pos);
+    send_game_start_ipc(state.inner(), &app);
 
     // close_parameter_setup_window の直後に builder.build() を呼ぶと、
     // メインスレッドのイベントループが WebView2 破棄処理中のためデッドロックする。
@@ -1821,13 +1834,6 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                         }
                     }
 
-                    // 初期セル中心座標を state から取得し、
-                    // game:start にカメラ位置パラメータとして乗せる。
-                    let camera_pos = {
-                        let guard = state.lock();
-                        guard.initial_cell_center
-                    };
-
                     // テンプレートモードかどうかを session_data から取得する。
                     // フリーモード（地形から始める）の場合のみパラメータ設定ウィンドウを表示し、
                     // game:start IPC を finish_parameter_setup コマンドに委ねる。
@@ -1852,13 +1858,13 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                         // game:start は finish_parameter_setup に委ねる。
                         {
                             let mut guard = state.lock();
-                            guard.pending_game_start = camera_pos;
+                            guard.pending_game_start = true;
                         }
                         log::info!("[session-poll] フリーモード: パラメータ設定ウィンドウを表示");
                         if let Err(e) = window::open_parameter_setup_window(&app, &state, false) {
                             log::error!("[session-poll] パラメータ設定ウィンドウ表示失敗: {e}");
                             // フォールバック: 通常フローで game:start を送信
-                            send_game_start_ipc(&state, &app, camera_pos);
+                            send_game_start_ipc(&state, &app);
                             window::set_hud_visible(&app, true);
                             show_hintbar_if_enabled(&app);
                         }
@@ -1877,7 +1883,7 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                             }
                             let _ = app.emit("tutorial:show", tid);
                         }
-                        send_game_start_ipc(&state, &app, camera_pos);
+                        send_game_start_ipc(&state, &app);
                         if is_loading && !is_tutorial {
                             let _ = window::open_tips_window(&app, &state);
                         }
@@ -1913,10 +1919,9 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                     }
                     window::hide_loading_window(&app);
 
-                    // 次回ゲーム開始時に前回のカメラ位置が残らないようにクリアする
                     {
                         let mut guard = state.lock();
-                        guard.initial_cell_center = None;
+                        guard.pending_game_start = false;
                         guard.tutorial_id = None;
                     }
 

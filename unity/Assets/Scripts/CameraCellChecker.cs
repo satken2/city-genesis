@@ -28,6 +28,18 @@ public class CameraCellChecker : MonoBehaviour
     private LodViewState viewState;
     private float nextCheck;
 
+    /// <summary>
+    /// 視点変化の検出状態を未初期化へ戻す。次の Update ではカメラが静止していても必ず
+    /// 「変化あり」となり、セル通知(ロードの起点)が走る。
+    /// セッション切り替えで CellDataLoader の現在セルが未設定に戻った後、カメラを動かさなくても
+    /// 新しい都市のロードが始まるようにするために、状態クリアとロード再開の両方から呼ぶ。
+    /// </summary>
+    public void ResetViewState()
+    {
+        viewState = default;
+        nextCheck = 0f;
+    }
+
     void Update()
     {
         if (GameStateManager.Instance != null && !GameStateManager.Instance.IsGameStarted()) return;

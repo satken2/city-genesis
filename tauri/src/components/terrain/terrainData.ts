@@ -68,6 +68,23 @@ export type ResourceAreaPayload = {
   polygon: WaterPolygonGeoJson;
 };
 
+/**
+ * カメラ初期状態の保存契約。
+ * 地形エディタの meta.json / terrain_maps.yaml の `camera`、バックエンドの City.camera
+ * (GET/PATCH /api/v1/city)、Unity の CameraController.CameraStatePayload で共通の契約。
+ * 仕様の正は genesis-docs/docs/geometries/D_地形形状.md §D.13。
+ */
+export type TerrainCameraPayload = {
+  /** カメラ位置のワールド座標(m)。x/z はマップ中心が(0,0)、y は絶対標高フレームの高さ */
+  x: number;
+  y: number;
+  z: number;
+  /** 視線の方位(度)。北(ワールド+Z)を0とする時計回り */
+  yaw: number;
+  /** 見下ろし角(度)。正で下向き(90=真下)、0で水平 */
+  pitch: number;
+};
+
 /** バックエンドの地形エディタ用データ取得コマンドの戻り値型 */
 export type TerrainEditorData = {
   map_id: string;
@@ -86,6 +103,8 @@ export type TerrainEditorData = {
   rivers: RiverPayload[];
   /** 天然資源エリアの一覧。未設定なら空配列。 */
   resources: ResourceAreaPayload[];
+  /** カメラ初期状態。未設定なら null。 */
+  camera: TerrainCameraPayload | null;
 };
 
 /** float16(IEEE 754 half)のビット表現を float32 相当に変換する */

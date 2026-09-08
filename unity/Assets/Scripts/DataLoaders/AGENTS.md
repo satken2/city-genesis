@@ -7,7 +7,7 @@
 
 `LodConfig` は視点・注視点・視錐台から最大81セルを選ぶ。`farCells / nearCells / dynamicCells` は呼出し互換の名前で、現在はすべて同じ常駐セル集合。土地の開放状態で標高ソースや描画LODを変えてはいけない。
 
-`CameraCellChecker` は0.1秒間隔で位置、向き、FOV、正投影、画面条件を調べる。視線中心はy=0平面との交点。`CellDataLoader` は旧 `LoadBatch` を取消し、地形取得・適用→既存オブジェクトの地形追従→区画取得完了→建物・道路・地区・資源・プロップ取得の順で進める。更新セルだけを追従させ、取消しで残ったセルは次回へ引き継ぐ。版情報・タイルの取得失敗は2秒後に再試行し、必要タイルの適用前に後続生成へ進まない。
+`CameraCellChecker` は0.1秒間隔で位置、向き、FOV、正投影、画面条件を調べる。視線中心はy=0平面との交点。`ResetViewState` で検出状態を未初期化に戻すと静止中でも次の判定で必ずセル通知が出る(`CellDataLoader.ClearAllManagerData` と `ReloadAllData` の現在セル未設定分岐が呼ぶ)。`session:reset` 後は `session:reload` が届くまで `OnCameraCellChanged` を無視する(`ClearAllManagerDataForSessionReset` / `loadSuspendedUntilReload`。バックエンドが新しい都市を準備中のためで、準備中のタイルを取り込むと同じ版の差分リロードで更新されない)。`CellDataLoader` は旧 `LoadBatch` を取消し、地形取得・適用→既存オブジェクトの地形追従→区画取得完了→建物・道路・地区・資源・プロップ取得の順で進める。更新セルだけを追従させ、取消しで残ったセルは次回へ引き継ぐ。版情報・タイルの取得失敗は2秒後に再試行し、必要タイルの適用前に後続生成へ進まない。
 
 地形は `/terrain/surface` のfloat32を513格子の一時TerrainDataへ分割適用し、完了時にタイルを差し替える。途中の帯を表示中タイルへ書かない。取消しでは一時データを破棄する。`SetHeightsDelayLOD` と最後の `SyncHeightmap` を使い、隣接タイルを接続する。全域のCPU高さ配列、旧far/near/dynamic読み分け、ティア境界ブレンドは使用しない。超遠景は全域の陸地メッシュ。
 

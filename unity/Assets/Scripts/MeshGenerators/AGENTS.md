@@ -82,6 +82,8 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 
 ## 建物 (Buildings/)
 
+- 角の配置方向は `ComputeCornerRotation` でCCWの送り辺を内角の半分だけ回した**内角側の二等分線**から求める。単位辺ベクトルの和ではL字の凹角が180度反転するため使わない。壁の張り出し計測も同じ二等分線を共有する。凹角へ開閉できる2本のボーンがないパーツは `IsUnsupportedConcaveCorner` で配置・オフセット計測の両方から省き、壁を頂点まで敷く。実FBXの凸角・凹角と壁オフセットの回帰検証は `Tests/Buildings/run-unity.ps1`。
+
 - **角の接続はリグが正しいことが前提**。ボーンなしの静的な90度角は、張り出しを測っても非直角の辺に接続しない。敷地のfence-cは2本のボーンを必須とする。標準FBXではBlender +X/+YがUnityメッシュ −X/−Zになり、Bone(0番)をX側、Bone.001(1番)をY側へ割り当てる。両ボーンのheadは角原点、直線との接続端は単一ボーンへ完全追従させる。農地b32の制作例と回転符号はI文書§4・F文書§7を参照。
 - **仕様ドキュメントは生成方式ごとに分かれている**: 共通(パーツ命名・バリアント解決・壁/角の敷き詰め・基盤・フェンス・塔屋・エントランス・コライダー)は `genesis-docs/docs/geometries/F_建物メッシュの生成.md`、方式固有は `F1_モジュラー建物`(屋根4種+SHAPE_FULL) / `F2_地面アセット`(GROUND) / `F3_既成建物`(PREBUILT) / `F4_港湾岸壁`(PORT) / `F5_工事中建物`(STATUS_CONSTRUCTING) / `F6_マッシュアップ建物`(MASHUP) / `F9_車両基地`(RAIL_YARD)。共通ロジックを触るときは F を、方式固有を触るときは該当ファイルを見る。
 - `BuildingMeshBuilder` が入口。`BuildingMeshBuilder.Generate` は**まず status で分岐し(`STATUS_CONSTRUCTING`/`STATUS_DEMOLISHING` → `ConstructingBuildingMeshBuilder`(profile 差分で共用)、`STATUS_COLLAPSED` → `CollapsedBuildingMeshBuilder`。いずれも model_type 分岐より先)**、次にマスターデータの `model_type` で分岐する: `MODEL_MODULAR_*`→`ModularBuildingMeshBuilder`、`MODEL_PREBUILT`→`PreBuiltBuildingMeshBuilder`、`MODEL_PORT`→`PortBuildingMeshBuilder`、`MODEL_MASHUP`→`MashupBuildingMeshBuilder`、`MODEL_RAIL_YARD`→`RailYardBuildingMeshBuilder`、該当なし→白い箱。`ModularBuildingMeshBuilder` は Body(`ModularBodyBuilder` 等) と Roof(`FlatRoofBuilder` / `HouseRoofBuilder` / `GableRoofBuilder` / `ShedRoofBuilder`) を組み合わせる。**躯体は model_type で分岐しない**(MODULAR_* はどれも同じ壁・角の敷き詰め→`mid-w1` がどの閾値フォルダにも無ければ `DefaultBodyBuilder` の白い箱)。屋根だけが差分で、**どの屋根も立ち上がりは階高基準・屋根面のマテリアルは `ceil` パーツ**という共通規約に従う(建物高さ比例にすると階数の多い建物だけ屋根が巨大になる)。

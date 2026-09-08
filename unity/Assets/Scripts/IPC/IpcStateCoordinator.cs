@@ -1341,10 +1341,15 @@ public class IpcStateCoordinator : MonoBehaviour
         // （リセット後に再生成された線路の矢印が通常表示に出てしまうのを防ぐ）。
         TrackDirectionArrows.SetVisible(false);
 
-        // 各データマネージャーおよび内部状態キャッシュ、各種ストアを完全にクリア
+        // カメラ状態のバックエンド送信を止める。新しい都市の準備中に前の視点を PATCH すると、
+        // ロード後に適用するはずの保存視点を上書きしてしまうため(game:start で再開する)。
+        CameraController.Instance?.SuspendCameraSync();
+
+        // 各データマネージャーおよび内部状態キャッシュ、各種ストアを完全にクリアし、
+        // session:reload が届くまでカメラ由来のロードを止める
         if (CellDataLoader.Instance != null)
         {
-            CellDataLoader.Instance.ClearAllManagerData();
+            CellDataLoader.Instance.ClearAllManagerDataForSessionReset();
         }
     }
 

@@ -56,6 +56,15 @@ public class CellDataLoader : MonoBehaviour
     /// </summary>
     private bool isInitialLoadComplete = false;
     public bool IsInitialLoadComplete => isInitialLoadComplete;
+
+    /// <summary>
+    /// session:reset から session:reload までの間、カメラ由来のロードを止めるフラグ。
+    /// UI は新しいセッションの作成要求を出す直前に session:reset を送るため、この間の
+    /// バックエンドは前の都市の破棄〜新しい都市の初期化の途中にある。ここでロードすると
+    /// 中途半端な地形・オブジェクトを取り込み、後続の version 差分リロードでは同じ version の
+    /// タイルが更新対象にならず古い形状が残る。ロード完了通知(session:reload)で解除する。
+    /// </summary>
+    private bool loadSuspendedUntilReload = false;
     
     // BaseApiDataManagerがloadedCellsを管理するため、ここでの履歴管理は不要になるが、
     // カメラ移動時の「前回と同じか」判定のために保持してもよい。
@@ -191,6 +200,13 @@ public class CellDataLoader : MonoBehaviour
         if (!GameStateManager.Instance.IsGameStarted())
         {
             UnityLog.If(LocalConstants.UNITY_LOG_LOADER, "ゲームが開始されていないため、OnCameraCellChangedをスキップします。");
+            return;
+        }
+
+        // セッション切り替え中(バックエンドが新しい都市を準備している間)はロードしない
+        if (loadSuspendedUntilReload)
+        {
+            UnityLog.If(LocalConstants.UNITY_LOG_LOADER, "セッション切り替え中のため、OnCameraCellChangedをスキップします。");
             return;
         }
 
@@ -627,10 +643,18 @@ public class CellDataLoader : MonoBehaviour
     public void ReloadAllData()
     {
         Debug.Log("CellDataLoader: ReloadAllData invoked.");
+        loadSuspendedUntilReload = false;
         if (currentCenterCell.x != int.MinValue && currentCenterCell.y != int.MinValue)
         {
             LodCellSets cellSets = CalculateLodCellSets();
             UpdateManagers(cellSets, isForce: false, forceManagerUpdate: true);
+        }
+        else
+        {
+            // セッション切り替え直後(ClearAllManagerData で現在セルが未設定に戻った後)は
+            // 差分更新の対象が無い。視点検出を初期化し、カメラが静止していても次の
+            // CameraCellChecker の判定で OnCameraCellChanged が走って全ロードが始まるようにする。
+            CameraCellChecker.Instance?.ResetViewState();
         }
         // 地区は全件スナップショット方式(ZoneManager.LoadCells は未ロード時と強制時のみ
         // 再取得)のため、上の isForce=false 経路ではリロードされない。エポックごとの
@@ -674,6 +698,16 @@ public class CellDataLoader : MonoBehaviour
 
         // 全量再取得完了後にアラートアイコンも更新する。
         AlertManager.Instance?.Refresh(forceRefresh: true);
+    }
+
+    /// <summary>
+    /// session:reset 用。全データをクリアしたうえで、session:reload が届くまでカメラ由来の
+    /// ロードを止める(バックエンドが新しい都市を準備している間に中途半端なデータを取り込まない)。
+    /// </summary>
+    public void ClearAllManagerDataForSessionReset()
+    {
+        ClearAllManagerData();
+        loadSuspendedUntilReload = true;
     }
 
     /// <summary>
@@ -723,6 +757,11 @@ public class CellDataLoader : MonoBehaviour
         isInitialLoadComplete = false;
         pendingFollowUpCells.Clear();
         pendingIsForce = false;
+        loadSuspendedUntilReload = false;
+
+        // 視点検出も初期化する。現在セルを未設定に戻した後にカメラが静止したままだと、
+        // 視点変化が検出されず OnCameraCellChanged が二度と呼ばれない(海面しか見えない)ため。
+        CameraCellChecker.Instance?.ResetViewState();
 
         // 静的ストアや他の管理オブジェクトのクリア
         CoastlineStore.Clear();

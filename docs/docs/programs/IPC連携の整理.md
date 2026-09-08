@@ -108,8 +108,8 @@ Offset  8: Ring buffer data (8184 bytes)
 | `system:pong`                   | `ui -> graphic`  | pingへの応答                              |
 | `system:graphic_ready`          | `graphic -> ui`  | グラフィックの起動とIPC初期化の完了通知。毎起動時に送られ、2回目以降(クラッシュ後の自動再起動)ではUIがポップアップを一掃する |
 | `system:focus_gained`           | `graphic -> ui`  | グラフィックのウィンドウがフォアグラウンドになった通知(`OnApplicationFocus(true)`)。フルスクリーン扱いのグラフィックが活性化するとシェルが最前面指定のUIを裏へ回すことがあるため、UIはこれを受けて表示中の全ウィンドウの最前面を打ち直す。UIが裏に回ったときの復帰経路 |
-| `session:reset`                 | `ui -> graphic`  | 現在の3Dオブジェクトや地形のデータを全てクリアする            |
-| `game:start`                    | `ui -> graphic`  | バックエンドのセッションが作成され、ゲームが開始されたことを通知   |
+| `session:reset`                 | `ui -> graphic`  | 現在の3Dオブジェクトや地形のデータを全てクリアする。以後 `session:reload` が届くまでカメラ由来のロードとカメラ状態の `PATCH /api/v1/city` を止める（バックエンドが新しい都市を準備している間に中途半端なデータや前の視点を取り込まないため） |
+| `game:start`                    | `ui -> graphic`  | バックエンドのセッションが作成され、ゲームが開始されたことを通知。ペイロードは空。グラフィックはこれを受けて `GET /api/v1/city` の `camera`（セーブ済みの視点、新規都市ではマップ定義の初期視点）を読み、カメラを復元する（`null` なら原点の既定視点）。既にゲーム中でも送られ、その場合もカメラだけ復元する |
 | `game:end`                      | `ui -> graphic`  | セッションが破棄され、ゲームが終了したことを通知               |
 | `session:reload`                | `ui -> graphic`  | バックエンドからデータを取得して、3Dを再描画する             |
 

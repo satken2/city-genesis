@@ -99,14 +99,18 @@ public class GameStateManager : MonoBehaviour
     /// <summary>
     /// UI 側から game:start イベントを受信したときのハンドラ。
     /// バックエンドにセッションが作成され、current_save_id が非 null になった際に呼ばれる。
-    /// cameraPos が指定されていれば、カメラをその位置に移動する。
+    /// カメラの視点はバックエンドが保持するセッションのカメラ状態(GET /api/v1/city の camera)から
+    /// CameraController が復元する。Menu→Game の遷移時は OnStateChanged 経由で適用されるが、
+    /// 既にゲーム中(既存セッションからの切り替え)は状態が変わらずイベントが出ないため、
+    /// ここで明示的に適用する。
     /// </summary>
-    private void HandleGameStart(Vector3? cameraPos)
+    private void HandleGameStart()
     {
+        bool alreadyStarted = IsGameStarted();
         SetGameStarted(true, null);
-        if (cameraPos.HasValue && CameraController.Instance != null)
+        if (alreadyStarted && CameraController.Instance != null)
         {
-            CameraController.Instance.SetInitialPosition(cameraPos.Value);
+            CameraController.Instance.ApplySessionCamera();
         }
     }
 

@@ -134,6 +134,51 @@ public class CameraController : MonoBehaviour
     /// </summary>
     private Vector3 defaultPosition;
 
+    /// <summary>
+    /// セッションにカメラ状態が保存されていないときの向き。シーン配置時の回転をそのまま使う。
+    /// </summary>
+    private Quaternion defaultRotation;
+
+    // --- セッションのカメラ状態同期(バックエンドの City.camera) ---
+    // 視点はセーブデータに含めるため、カメラが静止した時点でバックエンドへ PATCH する。
+    // 毎フレーム送ると通信が無駄になるので、直近の姿勢からの移動・回転で「動いた」を検出し、
+    // 一定時間静止してから1回だけ送る。
+    private bool syncEnabled;            // 保存視点を適用してから true。session:reset / game:end で false
+    private bool syncDirty;              // 前回送信以降にカメラが動いた
+    private bool syncInFlight;           // PATCH 送信中
+    private float syncStillSince;        // 最後に動きを検出した時刻(unscaled)
+    private Vector3 syncLastPosition;
+    private Quaternion syncLastRotation;
+    private Coroutine applySessionCameraCoroutine;
+    private const float SYNC_MOVE_THRESHOLD_M = 1.0f;
+    private const float SYNC_ANGLE_THRESHOLD_DEG = 0.5f;
+    private const float SYNC_STILL_SECONDS = 1.0f;
+    private const float SYNC_RETRY_SECONDS = 5.0f;
+
+    /// <summary>GET /api/v1/city の応答のうちカメラ状態だけを読む型。</summary>
+    private class CityCameraResponse
+    {
+        public CityCameraProps city;
+    }
+
+    private class CityCameraProps
+    {
+        public CameraStatePayload camera;
+    }
+
+    /// <summary>
+    /// バックエンドと共有するカメラ状態(City.camera)。位置はワールド座標(m)、
+    /// yaw は北(+Z)を0とする時計回りの度、pitch は見下ろし角の度(正=下向き)。ロールは常に0。
+    /// </summary>
+    public class CameraStatePayload
+    {
+        public float x;
+        public float y;
+        public float z;
+        public float yaw;
+        public float pitch;
+    }
+
     private void Awake()
     {
         if (Instance == null)
@@ -155,6 +200,7 @@ public class CameraController : MonoBehaviour
         // デフォルト位置を保存（XZはシーン配置位置を尊重、Yは初期高度）
         defaultPosition = transform.position;
         defaultPosition.y = scaledInitialHeight;
+        defaultRotation = transform.rotation;
 
         // 初期位置をデフォルト位置に設定
         ResetToDefaultPosition();
@@ -204,13 +250,18 @@ public class CameraController : MonoBehaviour
 
     /// <summary>
     /// ゲーム状態が変化した際に呼ばれるハンドラ。
-    /// ゲーム開始（Game 状態）になったらカメラをデフォルト位置に戻す。
+    /// ゲーム開始（Game 状態）になったらセッションに保存された視点を適用し、
+    /// ゲーム終了（Menu 状態）になったら視点の同期を止める。
     /// </summary>
     private void HandleGameStateChanged(GameStateManager.GameState state)
     {
         if (state == GameStateManager.GameState.Game)
         {
-            ResetToDefaultPosition();
+            ApplySessionCamera();
+        }
+        else
+        {
+            SuspendCameraSync();
         }
     }
 
@@ -230,16 +281,128 @@ public class CameraController : MonoBehaviour
     }
 
     /// <summary>
-    /// ゲーム開始時に指定された初期位置をデフォルト位置として設定し、
-    /// カメラを即座にその位置に移動する。
-    /// 高度はスケール適用済みの初期高度を維持する。
-    /// Start より前に呼ばれる可能性があるため、スケール値を先に更新する。
+    /// セッションに保存されたカメラ状態(GET /api/v1/city の camera)を取得してカメラへ適用し、
+    /// 以後の視点変化のバックエンド同期を開始する。ゲーム開始(game:start)と、既にゲーム中での
+    /// セッション切り替えの両方から呼ばれる。取得中は同期を止め、前セッションの視点が
+    /// 新しい都市の保存値を上書きしないようにする。
     /// </summary>
-    public void SetInitialPosition(Vector3 position)
+    public void ApplySessionCamera()
     {
+        SuspendCameraSync();
+        applySessionCameraCoroutine = StartCoroutine(ApplySessionCameraCoroutine());
+    }
+
+    /// <summary>
+    /// 視点のバックエンド同期を止める。session:reset(新しい都市の準備中)と game:end で呼ぶ。
+    /// 保存視点の取得が進行中なら、それも打ち切る(古いセッションの値を適用しないため)。
+    /// </summary>
+    public void SuspendCameraSync()
+    {
+        syncEnabled = false;
+        syncDirty = false;
+        if (applySessionCameraCoroutine != null)
+        {
+            StopCoroutine(applySessionCameraCoroutine);
+            applySessionCameraCoroutine = null;
+        }
+    }
+
+    private IEnumerator ApplySessionCameraCoroutine()
+    {
+        // 取得失敗(ロード直後の一時的な通信不良など)は数回待って再試行し、それでも駄目なら
+        // 既定視点で開始する。視点が決まらないままロードだけ進む状態を長引かせない。
+        CameraStatePayload saved = null;
+        bool fetched = false;
+        for (int attempt = 0; attempt < 3 && !fetched; attempt++)
+        {
+            yield return ApiClient.Get<CityCameraResponse>(
+                "/city/",
+                response =>
+                {
+                    fetched = true;
+                    saved = response?.city?.camera;
+                },
+                error => Debug.LogWarning($"CameraController: カメラ状態の取得に失敗: {error}"));
+            if (!fetched) yield return new WaitForSecondsRealtime(2f);
+        }
+
         UpdateScaledValues();
-        defaultPosition = new Vector3(position.x, scaledInitialHeight, position.z);
-        ResetToDefaultPosition();
+        if (saved != null)
+        {
+            SetView(new Vector3(saved.x, saved.y, saved.z), Quaternion.Euler(saved.pitch, saved.yaw, 0f));
+        }
+        else
+        {
+            // 未設定の都市は原点の既定視点(シーン配置時の向き・初期高度)で始める。
+            SetView(new Vector3(0f, scaledInitialHeight, 0f), defaultRotation);
+        }
+        defaultPosition = new Vector3(transform.position.x, scaledInitialHeight, transform.position.z);
+
+        // 適用した姿勢を「送信済み」として同期を開始する(適用直後の姿勢は送らない)。
+        syncLastPosition = transform.position;
+        syncLastRotation = transform.rotation;
+        syncDirty = false;
+        syncStillSince = Time.unscaledTime;
+        syncEnabled = true;
+        applySessionCameraCoroutine = null;
+    }
+
+    /// <summary>
+    /// 視点変化の検出と、静止後のバックエンド送信。Update の早期 return(フライモード・
+    /// ラジアルメニュー表示中など)に左右されないよう LateUpdate で行う。
+    /// </summary>
+    private void LateUpdate()
+    {
+        if (!syncEnabled) return;
+        if (GameStateManager.Instance != null && !GameStateManager.Instance.IsGameStarted()) return;
+
+        bool moved = (transform.position - syncLastPosition).sqrMagnitude >= SYNC_MOVE_THRESHOLD_M * SYNC_MOVE_THRESHOLD_M
+            || Quaternion.Angle(transform.rotation, syncLastRotation) >= SYNC_ANGLE_THRESHOLD_DEG;
+        if (moved)
+        {
+            syncLastPosition = transform.position;
+            syncLastRotation = transform.rotation;
+            syncStillSince = Time.unscaledTime;
+            syncDirty = true;
+            return;
+        }
+        if (syncDirty && !syncInFlight && Time.unscaledTime - syncStillSince >= SYNC_STILL_SECONDS)
+        {
+            syncDirty = false;
+            StartCoroutine(PushCameraStateCoroutine());
+        }
+    }
+
+    /// <summary>現在のカメラ姿勢をバックエンドと共有する形(CameraStatePayload)にする。</summary>
+    public CameraStatePayload BuildCameraStatePayload()
+    {
+        Vector3 euler = transform.rotation.eulerAngles;
+        return new CameraStatePayload
+        {
+            x = transform.position.x,
+            y = transform.position.y,
+            z = transform.position.z,
+            yaw = euler.y,
+            pitch = NormalizePitchAngle(euler.x),
+        };
+    }
+
+    private IEnumerator PushCameraStateCoroutine()
+    {
+        syncInFlight = true;
+        var payload = new System.Collections.Generic.Dictionary<string, object>
+        {
+            ["camera"] = BuildCameraStatePayload()
+        };
+        bool failed = false;
+        yield return ApiClient.Patch("/city/", payload, null, (code, message) => failed = true);
+        syncInFlight = false;
+        if (failed && syncEnabled)
+        {
+            // 失敗時は間隔を空けて再送する(セッション切り替え中の一時的な失敗で連打しない)。
+            syncDirty = true;
+            syncStillSince = Time.unscaledTime + SYNC_RETRY_SECONDS - SYNC_STILL_SECONDS;
+        }
     }
 
     /// <summary>
@@ -261,6 +424,15 @@ public class CameraController : MonoBehaviour
         transform.position = position;
         transform.rotation = rotation;
         currentHeight = Mathf.Max(0f, position.y);
+
+        // フライモード中は視線角を内部変数で持っているため、置いた向きから再初期化する
+        // (更新しないと次のマウス入力で以前の向きへ飛ぶ)。
+        if (isFlyMode)
+        {
+            Vector3 euler = rotation.eulerAngles;
+            flyYaw = euler.y;
+            flyPitch = NormalizePitchAngle(euler.x);
+        }
 
         if (isTopDownMode && cam != null)
         {

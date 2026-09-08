@@ -85,7 +85,7 @@ public class IpcClient : MonoBehaviour
     public event Action<Dictionary<string, object>> OnEditPropChangeSettings;
     public event Action OnEditPropFinish;
     public event Action OnEditPropReset;
-    public event Action<Vector3?> OnGameStart;
+    public event Action OnGameStart;
     public event Action OnGameEnd;
     // 接道(front_path)の矢印表示。土地区画詳細パネルの開閉に対応する。
     public event Action<int> OnParcelShowFrontPath;
@@ -598,12 +598,7 @@ public class IpcClient : MonoBehaviour
 
                 case "game:start":
                     Debug.Log("IpcClient: game:start");
-                    Vector3? cameraPos = null;
-                    if (payload.TryGetValue("camera_x", out var camX) && payload.TryGetValue("camera_z", out var camZ))
-                    {
-                        cameraPos = new Vector3(Convert.ToSingle(camX), 0f, Convert.ToSingle(camZ));
-                    }
-                    OnGameStart?.Invoke(cameraPos);
+                    OnGameStart?.Invoke();
                     break;
 
                 case "game:end":

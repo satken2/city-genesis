@@ -877,7 +877,8 @@ public static class ModularBodyBuilder
         Mesh sourceMesh = GetPartSourceMesh(cornerModule);
         if (sourceMesh == null || sourceMesh.vertexCount == 0) return 0f;
 
-        Quaternion rotation = ComputeCornerRotation(p0, p1, p2, out Vector2 bisector, out _);
+        Quaternion rotation = ComputeCornerRotation(p0, p1, p2, out Vector2 bisector, out float interiorAngle);
+        if (IsUnsupportedConcaveCorner(cornerModule, interiorAngle)) return 0f;
         Vector3 scale = DetermineCornerScale(sourceMesh, targetHeight);
 
         // バインドポーズでの辺方向（二等分線から ±45°）。符号は「送り側の辺が二等分線の
@@ -926,7 +927,7 @@ public static class ModularBodyBuilder
     /// ボーン曲げはこの rotation とは独立に行われるため、この 135° は曲げに影響せず
     /// 曲げ後の角全体の向きだけを補正する。
     /// </summary>
-    /// <param name="bisector">2辺の二等分線（単位ベクトル）。退化時は辺 v2 の垂線</param>
+    /// <param name="bisector">内角側の二等分線（単位ベクトル）。凹角も建物内側へ向く</param>
     /// <param name="interiorAngle">内角(度)。0〜360</param>
     private static Quaternion ComputeCornerRotation(
         Vector2 p0, Vector2 p1, Vector2 p2, out Vector2 bisector, out float interiorAngle)
@@ -937,12 +938,10 @@ public static class ModularBodyBuilder
         interiorAngle = Vector2.SignedAngle(v2, v1);
         if (interiorAngle < 0f) interiorAngle += 360f;
 
-        // 内角が 180°付近（2辺がほぼ一直線）だと v1+v2 がほぼ 0 になり normalized が
-        // NaN 化して回転が暴れる。その場合は辺 v2 に垂直な向きでフォールバックする。
-        Vector2 bisectorRaw = v1 + v2;
-        bisector = bisectorRaw.sqrMagnitude < 1e-6f
-            ? new Vector2(-v2.y, v2.x)
-            : bisectorRaw.normalized;
+        // ベクトル和は常に小さい側の角を二等分するため、凹角では建物の外側を向く。
+        // CCWの送り辺から内角の半分だけ回し、180°付近でも連続した内側の向きを求める。
+        float interiorBisectorAngle = Mathf.Atan2(v2.y, v2.x) + interiorAngle * 0.5f * Mathf.Deg2Rad;
+        bisector = new Vector2(Mathf.Cos(interiorBisectorAngle), Mathf.Sin(interiorBisectorAngle));
 
         float bisectorAngle = Mathf.Atan2(bisector.y, bisector.x) * Mathf.Rad2Deg;
         return Quaternion.Euler(0, -bisectorAngle + 90 + 135, 0);
@@ -1237,13 +1236,7 @@ public static class ModularBodyBuilder
         // 向きは MeasureCornerExtentAlongEdge と共通の計算を使う（壁の敷き詰め開始位置は
         // この回転を前提に角パーツの張り出しを測るため、両者がずれると壁と角がずれる）。
         Quaternion rotation = ComputeCornerRotation(p0, p1, p2, out _, out float interiorAngle);
-
-        if (interiorAngle > 180f)
-        {
-            // 凹角（内角 > 180°）。角パーツは凸角前提で作られているため見た目が乱れる
-            // 可能性があるが、現状は補正せず警告のみに留める（意図的な挙動）。
-            Debug.LogWarning($"ModularBodyBuilder: 内角が180°を超えています ({interiorAngle:F1}°)。凹多角形の可能性があります。");
-        }
+        if (IsUnsupportedConcaveCorner(cornerModule, interiorAngle)) return default;
 
         SkinnedMeshRenderer prefabSmr = cornerModule.GetComponentInChildren<SkinnedMeshRenderer>();
         if (prefabSmr != null)
@@ -1289,6 +1282,14 @@ public static class ModularBodyBuilder
             Mesh = mesh,
             Materials = sharedMaterials,
         };
+    }
+
+    /// <summary>凹角へ開けないパーツは省き、壁を頂点まで敷いて接続する。</summary>
+    private static bool IsUnsupportedConcaveCorner(GameObject module, float interiorAngle)
+    {
+        if (interiorAngle <= 180f) return false;
+        SkinnedMeshRenderer smr = module.GetComponentInChildren<SkinnedMeshRenderer>();
+        return smr == null || smr.bones == null || smr.bones.Length < 2;
     }
 
     /// <summary>

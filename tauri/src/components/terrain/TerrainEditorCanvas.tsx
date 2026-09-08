@@ -58,6 +58,7 @@ import {
   type WaterSurfacePayload,
   type RiverPayload,
   type ResourceAreaPayload,
+  type TerrainCameraPayload,
   type GridRect,
   type Terrain3DRequestStatePayload,
   type Terrain3DFullStatePayload,
@@ -202,6 +203,14 @@ const CONTOUR_REFINE_ZOOM_THRESHOLD = 6;
  * 閾値(スクリーンピクセル)。押した位置からこの距離を超えて動かすとパンへ移行する。
  */
 const CLICK_VS_DRAG_THRESHOLD_PX = 4;
+
+/**
+ * カメラ初期状態を新しく置くときの既定値。高さはゲーム側 CameraController の初期高度
+ * (baseInitialHeight=150m)に、見下ろし角は通常プレイの俯瞰に合わせる。
+ */
+const CAMERA_DEFAULT_HEIGHT_M = 150;
+const CAMERA_DEFAULT_PITCH_DEG = 50;
+const CAMERA_DEFAULT_YAW_DEG = 0;
 
 /**
  * 現在のズーム倍率に応じて等高線間隔を細かくする。
@@ -973,6 +982,70 @@ function strokeResourceAreas(
 }
 
 /**
+ * カメラ初期状態のマーカーを2Dキャンバスへ描画する。draw() 内でビュー変換適用後に呼ぶ。
+ * 位置の丸と、yaw の向きへ伸びる視線(矢印)と視野を示す扇形を描く。yaw は北(+Z)を0とする
+ * 時計回りなので、向きベクトルは (sin(yaw), cos(yaw))(2D都市マップのカメラマーカーと同じ)。
+ * カメラ編集タブで注視点を指定する操作の目安として、mouse が渡されたら位置からマウスまで破線を引く。
+ */
+function strokeCameraMarker(
+  ctx: CanvasRenderingContext2D,
+  camera: TerrainCameraPayload | null,
+  mouse: WorldPoint | null,
+  lineWidth: number
+): void {
+  if (!camera) return;
+  const yawRad = (camera.yaw * Math.PI) / 180;
+  const dx = Math.sin(yawRad);
+  const dz = Math.cos(yawRad);
+  // 見下ろし角が浅いほど視線は遠くへ届くので、矢印の長さで俯角の目安も伝える
+  const reach = lineWidth * 40 + camera.y / Math.max(Math.tan((camera.pitch * Math.PI) / 180), 0.2);
+  const halfFov = Math.PI / 6;
+
+  ctx.save();
+  ctx.lineWidth = lineWidth;
+  ctx.strokeStyle = "rgba(255,230,90,0.9)";
+  ctx.fillStyle = "rgba(255,230,90,0.18)";
+
+  // 視野の扇形
+  ctx.beginPath();
+  ctx.moveTo(camera.x, camera.z);
+  ctx.lineTo(camera.x + Math.sin(yawRad - halfFov) * reach, camera.z + Math.cos(yawRad - halfFov) * reach);
+  ctx.lineTo(camera.x + dx * reach * 1.1, camera.z + dz * reach * 1.1);
+  ctx.lineTo(camera.x + Math.sin(yawRad + halfFov) * reach, camera.z + Math.cos(yawRad + halfFov) * reach);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // 視線の矢印
+  ctx.beginPath();
+  ctx.moveTo(camera.x, camera.z);
+  ctx.lineTo(camera.x + dx * reach, camera.z + dz * reach);
+  ctx.stroke();
+
+  // 位置
+  ctx.fillStyle = "rgba(255,230,90,0.95)";
+  ctx.beginPath();
+  ctx.arc(camera.x, camera.z, lineWidth * 4, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.font = `${lineWidth * 9}px sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "bottom";
+  ctx.fillText("Camera", camera.x, camera.z - lineWidth * 6);
+
+  if (mouse) {
+    ctx.setLineDash([lineWidth * 4, lineWidth * 4]);
+    ctx.strokeStyle = "rgba(255,230,90,0.6)";
+    ctx.beginPath();
+    ctx.moveTo(camera.x, camera.z);
+    ctx.lineTo(mouse.x, mouse.z);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  ctx.restore();
+}
+
+/**
  * 川を2Dキャンバスへ描画する。draw() 内でビュー変換適用後に呼ぶ。
  * 彫り込み済みの川は「川幅の半透明帯 + 濃青の中心線」、未彫り込み(計算直後)の川は
  * 明るい水色の破線で描き分ける。帯の幅は各川の平均幅を使う(セグメントごとに lineWidth を
@@ -1137,7 +1210,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
 
   // --- アクティブな編集タブのステート ---
   // 地形編集・水面編集・川編集・資源編集を排他的に切り替える。
-  const [activeTab, setActiveTab] = useState<"terrain" | "water" | "river" | "resource">("terrain");
+  const [activeTab, setActiveTab] = useState<"terrain" | "water" | "river" | "resource" | "camera">("terrain");
 
   // --- 水面(海面以外の湖など)のUI状態 ---
   // 水面モードON中は、左クリックが水面ポリゴンの頂点追加・右クリックが形状の確定(閉じる)になる
@@ -1170,6 +1243,14 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   const [resourceList, setResourceList] = useState<
     { id: string; resourceType: number; maxAmount: number; recoveryRate: number }[]
   >([]);
+
+  // --- カメラ初期状態のUI状態 ---
+  // カメラ編集タブがアクティブな間は、左クリック=カメラ位置の指定、右クリック=注視点の指定
+  // (位置から注視点への方位を yaw にする)になる。高さ・見下ろし角・方位はカードの数値入力でも
+  // 変えられる。実体は cameraRef、表示用ミラーが cameraState。マップに1つだけ持ち、
+  // 未設定(null)ならゲーム側が原点の既定視点を使う。
+  const [cameraMode, setCameraMode] = useState(false);
+  const [cameraState, setCameraState] = useState<TerrainCameraPayload | null>(null);
 
   // --- 川編集のUI状態 ---
   // 川は「流路を計算」→一覧に未彫り込みとして追加→一覧で個別に削除・深さ調整・
@@ -1250,6 +1331,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     rivers: EditorRiver[];
     waterSurfaces: EditorWaterSurface[];
     resourceAreas: EditorResourceArea[];
+    camera: TerrainCameraPayload | null;
   };
   const MAX_UNDO = 5;
   const undoStackRef = useRef<UndoState[]>([]);
@@ -1270,6 +1352,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       rivers: riversRef.current.slice(),
       waterSurfaces: waterSurfacesRef.current.slice(),
       resourceAreas: resourceAreasRef.current.slice(),
+      camera: cameraRef.current,
     });
     if (undoStackRef.current.length > MAX_UNDO) undoStackRef.current.shift();
     redoStackRef.current = [];
@@ -1293,6 +1376,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         rivers: riversRef.current.slice(),
         waterSurfaces: waterSurfacesRef.current.slice(),
         resourceAreas: resourceAreasRef.current.slice(),
+        camera: cameraRef.current,
       });
       if (redoStackRef.current.length > MAX_UNDO) redoStackRef.current.shift();
     }
@@ -1301,6 +1385,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     restoreRivers(target.rivers);
     restoreWaterSurfaces(target.waterSurfaces);
     restoreResourceAreas(target.resourceAreas);
+    restoreCamera(target.camera);
     rebuildTerrainVisuals(target.elev, target.mapWidth, target.mapHeight, target.spacing, target.rows, target.cols);
   }
 
@@ -1321,12 +1406,14 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         rivers: riversRef.current.slice(),
         waterSurfaces: waterSurfacesRef.current.slice(),
         resourceAreas: resourceAreasRef.current.slice(),
+        camera: cameraRef.current,
       });
       if (undoStackRef.current.length > MAX_UNDO) undoStackRef.current.shift();
     }
     restoreRivers(target.rivers);
     restoreWaterSurfaces(target.waterSurfaces);
     restoreResourceAreas(target.resourceAreas);
+    restoreCamera(target.camera);
     rebuildTerrainVisuals(target.elev, target.mapWidth, target.mapHeight, target.spacing, target.rows, target.cols);
   }
 
@@ -1347,6 +1434,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     waterPolygonClosed,
     resourceMode,
     resourcePolygonClosed,
+    cameraMode,
   });
   useEffect(() => {
     toolStateRef.current = {
@@ -1364,8 +1452,9 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       waterPolygonClosed,
       resourceMode,
       resourcePolygonClosed,
+      cameraMode,
     };
-  }, [shape, operation, brushParams, selectionFalloff, raiseLowerParams, flattenParams, noiseParams, featherWidth, polygonClosed, waterMode, waterLevelInput, waterPolygonClosed, resourceMode, resourcePolygonClosed]);
+  }, [shape, operation, brushParams, selectionFalloff, raiseLowerParams, flattenParams, noiseParams, featherWidth, polygonClosed, waterMode, waterLevelInput, waterPolygonClosed, resourceMode, resourcePolygonClosed, cameraMode]);
 
   // 現在のブラシ中心(ワールド座標)。マウス移動の度に更新されるため ref で保持する。
   const brushWorldPosRef = useRef<WorldPoint | null>(null);
@@ -1389,6 +1478,10 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   // 3Dプレビューへは送らない(資源は標高・水面と違い3D形状を持たないため)。
   const resourceAreasRef = useRef<EditorResourceArea[]>([]);
   const resourcePointsRef = useRef<WorldPoint[]>([]);
+
+  // === カメラ初期状態の実体 ===
+  // 保存・エクスポート(meta.json / terrain_maps.yaml の camera)の対象。3Dプレビューへは送らない。
+  const cameraRef = useRef<TerrainCameraPayload | null>(null);
 
   // 資源種別の表示名の対応表。draw()(イベントハンドラのクロージャから呼ばれ、React state を
   // 直接読めない)がラベル描画に使うため、マスターデータの変化を ref へミラーする。
@@ -1593,8 +1686,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     // 水面モード・資源モード中は標高編集のブラシ/ポリゴンプレビューは表示しない
     // (操作が水面/資源の作図に切り替わるため)。
     const previewLineW = 1.5 / v.zoom;
-    if (ts.waterMode || ts.resourceMode) {
-      // 水面/資源モードでは何も描かない(それぞれ下の strokeWaterSurfaces / strokeResourceAreas で描く)。
+    if (ts.waterMode || ts.resourceMode || ts.cameraMode) {
+      // 水面/資源/カメラモードでは何も描かない(それぞれ下の stroke* で描く)。
     } else if (ts.shape === "polygon") {
       strokePolygonPreview(ctx, polygonPointsRef.current, ts.polygonClosed ? null : brushWorldPosRef.current, previewLineW);
     } else if (brushWorldPosRef.current) {
@@ -1623,6 +1716,9 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       ts.resourceMode && !ts.resourcePolygonClosed ? brushWorldPosRef.current : null,
       previewLineW
     );
+
+    // カメラ初期状態のマーカー。常に表示し、カメラ編集タブのときだけ注視点指定の目安線を追従表示する。
+    strokeCameraMarker(ctx, cameraRef.current, ts.cameraMode ? brushWorldPosRef.current : null, previewLineW);
 
     ctx.restore();
 
@@ -1804,10 +1900,11 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
    * 川編集タブではポインタ操作を地形編集と同じ範囲選択(降雨範囲の指定に使う)のままにする。
    * 未彫り込みの川はタブを離れても破棄しない(一覧から個別に彫る途中の状態を保つため)。
    */
-  function handleTabChange(tab: "terrain" | "water" | "river" | "resource") {
+  function handleTabChange(tab: "terrain" | "water" | "river" | "resource" | "camera") {
     setActiveTab(tab);
     setWaterMode(tab === "water");
     setResourceMode(tab === "resource");
+    setCameraMode(tab === "camera");
     if (tab !== "water") {
       // 水面編集モードを解除する際は、作図中の未確定の頂点データを破棄する
       waterPointsRef.current = [];
@@ -2033,6 +2130,73 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   }
 
   /** meta.json / サイドカーから読み込んだ ResourceAreaPayload 配列を内部表現へ変換する。 */
+  /* ============================================================================
+   * カメラ初期状態(カメラ編集タブ)
+   *
+   * 左クリックでカメラ位置(x, z)を置き、右クリックで注視点を指定して方位(yaw)を決める。
+   * 高さ(y)・見下ろし角(pitch)・方位はカードの数値入力でも変えられる。マップに1つだけ持ち、
+   * 保存(meta.json)・エクスポート(terrain_maps.yaml の camera)の対象になる。
+   * ゲームは新規都市の開始時にこの視点で始まり、以後はセーブデータ側の視点が正になる。
+   * ========================================================================== */
+
+  /** cameraRef を差し替えて表示用 state へミラーする。カメラを変更したら必ずここを通す。 */
+  function restoreCamera(camera: TerrainCameraPayload | null) {
+    cameraRef.current = camera;
+    setCameraState(camera);
+  }
+
+  /** カメラ位置をワールド座標 (wx, wz) に置く。未設定なら高さ・向きは既定値で新規作成する。 */
+  function placeCamera(wx: number, wz: number) {
+    const current = cameraRef.current;
+    restoreCamera({
+      x: wx,
+      y: current?.y ?? CAMERA_DEFAULT_HEIGHT_M,
+      z: wz,
+      yaw: current?.yaw ?? CAMERA_DEFAULT_YAW_DEG,
+      pitch: current?.pitch ?? CAMERA_DEFAULT_PITCH_DEG,
+    });
+    draw();
+  }
+
+  /**
+   * 注視点 (wx, wz) の方向へカメラを向ける(位置から注視点への方位を yaw にする)。
+   * yaw は北(+Z)を0とする時計回りなので atan2(dx, dz)。位置と同じ点なら向きは変えない。
+   */
+  function aimCameraAt(wx: number, wz: number) {
+    const current = cameraRef.current;
+    if (!current) return;
+    const dx = wx - current.x;
+    const dz = wz - current.z;
+    if (Math.hypot(dx, dz) < 1e-6) return;
+    const yaw = ((Math.atan2(dx, dz) * 180) / Math.PI + 360) % 360;
+    restoreCamera({ ...current, yaw });
+    draw();
+  }
+
+  /** カメラの高さ・見下ろし角・方位のいずれかを数値入力から更新する。 */
+  function updateCameraField(field: "y" | "yaw" | "pitch", value: number) {
+    const current = cameraRef.current;
+    if (!current) return;
+    restoreCamera({ ...current, [field]: value });
+    draw();
+  }
+
+  /** カメラ初期状態を未設定に戻す(ゲームは原点の既定視点で始まる)。 */
+  function clearCamera() {
+    restoreCamera(null);
+    draw();
+  }
+
+  /** 作業コピー(meta.json)の camera を検証して復元する。数値が揃っていなければ未設定扱い。 */
+  function deserializeCamera(payload: TerrainCameraPayload | null | undefined): TerrainCameraPayload | null {
+    if (!payload || typeof payload !== "object") return null;
+    const fields = ["x", "y", "z", "yaw", "pitch"] as const;
+    for (const key of fields) {
+      if (typeof payload[key] !== "number" || !Number.isFinite(payload[key])) return null;
+    }
+    return { x: payload.x, y: payload.y, z: payload.z, yaw: payload.yaw, pitch: payload.pitch };
+  }
+
   function deserializeResourceAreas(payload: ResourceAreaPayload[] | undefined): EditorResourceArea[] {
     if (!Array.isArray(payload)) return [];
     const result: EditorResourceArea[] = [];
@@ -2585,6 +2749,9 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     waterPointsRef.current = waterPointsRef.current.map((p) => ({ x: p.x + dx, z: p.z + dz }));
     resourcePointsRef.current = resourcePointsRef.current.map((p) => ({ x: p.x + dx, z: p.z + dz }));
     polygonPointsRef.current = polygonPointsRef.current.map((p) => ({ x: p.x + dx, z: p.z + dz }));
+    if (cameraRef.current) {
+      restoreCamera({ ...cameraRef.current, x: cameraRef.current.x + dx, z: cameraRef.current.z + dz });
+    }
   }
 
   /**
@@ -2756,6 +2923,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         waterSurfaces: serializeWaterSurfaces(),
         rivers: serializeRivers(),
         resources: serializeResourceAreas(),
+        camera: cameraRef.current,
       });
       setSaveStatus("saved");
     } catch (error) {
@@ -2823,6 +2991,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         waterSurfaces: serializeWaterSurfaces(),
         rivers: serializeRivers(),
         resources: serializeResourceAreas(),
+        camera: cameraRef.current,
       });
       setExportStatus("exported");
       // エクスポート先にterrain_maps.yamlが見つからなかった場合は、通知ポップアップで知らせる。
@@ -2905,6 +3074,9 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         setResourcePointCount(0);
         setResourcePolygonClosed(false);
 
+        // 作業コピー(meta.json)に保存されているカメラ初期状態を復元する。
+        restoreCamera(deserializeCamera(data.camera));
+
         setStatus("ready");
       } catch (error) {
         if (cancelled) return;
@@ -2985,6 +3157,13 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
           if (resourcePointsRef.current.length >= 3 && !ts.resourcePolygonClosed) setResourcePolygonClosed(true);
           return;
         }
+        if (ts.cameraMode) {
+          // カメラモード: 右クリック位置を注視点として、カメラの向き(yaw)を決める。
+          const rect = canvasEl.getBoundingClientRect();
+          const [wx, wz] = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
+          aimCameraAt(wx, wz);
+          return;
+        }
         if (ts.shape === "polygon" && polygonPointsRef.current.length >= 3 && !ts.polygonClosed) {
           setPolygonClosed(true);
         }
@@ -3047,6 +3226,9 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         } else if (ts.resourceMode) {
           // 資源モード: 形状を閉じる前のみ、左クリックで資源ポリゴンの頂点を追加する。
           if (!ts.resourcePolygonClosed) addResourcePoint(wx, wz);
+        } else if (ts.cameraMode) {
+          // カメラモード: 左クリック位置にカメラを置く(向き・高さは維持)。
+          placeCamera(wx, wz);
         } else if (ts.shape === "polygon") {
           if (!ts.polygonClosed) {
             addPolygonPoint(wx, wz);
@@ -3165,6 +3347,14 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
             disabled={status !== "ready"}
           >
             {t("terrainEditor.tabResource", { defaultValue: "資源編集" })}
+          </button>
+          <button
+            type="button"
+            className={`terrain-editor-tab ${activeTab === "camera" ? "active" : ""}`}
+            onClick={() => handleTabChange("camera")}
+            disabled={status !== "ready"}
+          >
+            {t("terrainEditor.tabCamera", { defaultValue: "カメラ" })}
           </button>
         </div>
 
@@ -3721,6 +3911,76 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                   </div>
                 </div>
               </>
+            )}
+
+            {/* カメラ初期状態カード */}
+            {activeTab === "camera" && (
+              <div className="terrain-editor-card">
+                <div className="terrain-editor-card-title">{t("terrainEditor.cameraTitle", { defaultValue: "カメラ初期状態" })}</div>
+                <div className="terrain-editor-section">
+                  <div className="terrain-editor-hint">
+                    {t("terrainEditor.cameraHint", {
+                      defaultValue:
+                        "このマップで新規都市を始めたときのカメラの位置と向きです。左クリックでカメラ位置を置き、右クリックで注視点を指定して向きを決めます。左ドラッグで画面移動。未設定のままならゲームはマップ中心(原点)の既定視点で始まります",
+                    })}
+                  </div>
+                  {cameraState ? (
+                    <>
+                      <div className="terrain-editor-param-row">
+                        <span className="terrain-editor-param-label">{t("terrainEditor.cameraPosition", { defaultValue: "位置(x, z)" })}</span>
+                        <span className="terrain-editor-selection-status">
+                          {`${cameraState.x.toFixed(1)}, ${cameraState.z.toFixed(1)}`}
+                        </span>
+                      </div>
+                      <div className="terrain-editor-param-row">
+                        <span className="terrain-editor-param-label">{t("terrainEditor.cameraHeight", { defaultValue: "高さ(m)" })}</span>
+                        <NumberStepper
+                          value={cameraState.y}
+                          onChange={(v) => updateCameraField("y", v)}
+                          min={10}
+                          max={20000}
+                          step={10}
+                          integerOnly={false}
+                          disabled={status !== "ready"}
+                        />
+                      </div>
+                      <div className="terrain-editor-param-row">
+                        <span className="terrain-editor-param-label">{t("terrainEditor.cameraYaw", { defaultValue: "方位(度、北=0)" })}</span>
+                        <NumberStepper
+                          value={cameraState.yaw}
+                          onChange={(v) => updateCameraField("yaw", ((v % 360) + 360) % 360)}
+                          min={-1}
+                          max={360}
+                          step={5}
+                          integerOnly={false}
+                          disabled={status !== "ready"}
+                        />
+                      </div>
+                      <div className="terrain-editor-param-row">
+                        <span className="terrain-editor-param-label">{t("terrainEditor.cameraPitch", { defaultValue: "見下ろし角(度)" })}</span>
+                        <NumberStepper
+                          value={cameraState.pitch}
+                          onChange={(v) => updateCameraField("pitch", v)}
+                          min={5}
+                          max={89}
+                          step={5}
+                          integerOnly={false}
+                          disabled={status !== "ready"}
+                        />
+                      </div>
+                      <div className="terrain-editor-action-buttons">
+                        <button type="button" className="terrain-editor-btn" disabled={!cameraMode} onClick={clearCamera}>
+                          {t("terrainEditor.cameraClear", { defaultValue: "カメラをクリア(未設定に戻す)" })}
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="terrain-editor-hint">
+                      {t("terrainEditor.cameraUnset", { defaultValue: "未設定です。キャンバスを左クリックしてカメラ位置を置いてください" })}
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
 
             {/* 川編集カード群(降雨範囲 → 自動生成 → 作成済み一覧) */}

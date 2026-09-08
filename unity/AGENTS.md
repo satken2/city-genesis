@@ -27,8 +27,8 @@
   - MainMenu.cs         ... メインメニューのボタンイベントなどを管理するプログラム。
   - Utils.cs            ... ApplyDepthOffsetShader / DestroyObjectAfterFrames / CalculateAverageWidth / GetCameraHorizontalForward / IsInHorizontalView(視野優先処理の水平視野判定) など各マネージャー間で共有する汎用処理。新しい汎用処理を書く前に必ず確認。
   - Constants.cs / LocalConstants.cs ... 定数定義。
-  - CameraCellChecker.cs... カメラの視野中心がどのセルにいるのかを毎フレーム判定し、変化したらCellDataLoaderに通知する(ロードの起点)。
-  - CameraController.cs ... カメラの移動などを担うプログラム。
+  - CameraCellChecker.cs... カメラの視野中心がどのセルにいるのかを毎フレーム判定し、変化したらCellDataLoaderに通知する(ロードの起点)。`ResetViewState`で視点検出を未初期化へ戻すと、カメラが静止していても次の判定で必ず通知が走る(セッション切り替えで`CellDataLoader.ClearAllManagerData`が現在セルを未設定に戻した後、カメラを動かさなくてもロードが始まるための入口)。
+  - CameraController.cs ... カメラの移動などを担うプログラム。**セッションのカメラ状態(バックエンドの`City.camera`={x,y,z,yaw,pitch})の同期も担う**: ゲーム開始(`game:start`/Menu→Game遷移)で`ApplySessionCamera`が`GET /api/v1/city`を読んで`SetView`で視点を復元し(null=原点の既定視点)、以後は`LateUpdate`でカメラが1m/0.5°以上動いて1秒静止するたびに`PATCH /api/v1/city`へ送る。`session:reset`/`game:end`では`SuspendCameraSync`で送信と適用を止める(新しい都市の準備中に前の視点で保存値を上書きしないため)。
   - ZoneEditContext.cs  ... 地区編集の状態保持。
 ```
 
