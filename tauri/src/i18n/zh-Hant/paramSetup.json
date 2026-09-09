@@ -18,7 +18,15 @@
       "education": "教育",
       "construction": "建設・不動產",
       "environment": "環境",
-      "traffic": "交通"
+      "traffic": "交通",
+      "general": "通用",
+      "pathfind": "交通・路徑",
+      "building": "建築・建設",
+      "disaster": "災害・治安",
+      "sprawl": "城市蔓延",
+      "production": "生產・庫存",
+      "zone": "地區・地塊",
+      "financial": "金融"
     },
     "param": {
       "TFR_TARGET": {

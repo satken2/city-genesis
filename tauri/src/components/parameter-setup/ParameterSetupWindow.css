@@ -137,6 +137,19 @@
   transition: border-color 0.12s;
 }
 
+.param-setup-input--check {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  accent-color: #4ea1ff;
+  flex: none;
+}
+
+.param-setup-input--readonly {
+  font-size: 10px;
+  cursor: default;
+}
+
 .param-setup-input:focus {
   outline: none;
   border-color: rgba(78, 161, 255, 0.4);

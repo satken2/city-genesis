@@ -68,10 +68,10 @@ const SIZE_INPUT_PRESETS: Record<string, { width: number; height: number; min: n
   block: { width: 200, height: 200, min: 20, max: 400, step: 10 },
 };
 
-const DEFAULT_SIZE_INPUT = SIZE_INPUT_PRESETS.empty_area;
-
 /** ウィンドウを開いた直後の作成モード（Unity側 ParcelEditorManager.DefaultMode と一致させる） */
-const DEFAULT_CREATION_MODE: CreationMode = "empty_area";
+const DEFAULT_CREATION_MODE: CreationMode = "along_path";
+
+const DEFAULT_SIZE_INPUT = SIZE_INPUT_PRESETS[DEFAULT_CREATION_MODE];
 
 /**
  * 道路沿い作成で、クリック地点まわりに1回で作れる区画数の上限。

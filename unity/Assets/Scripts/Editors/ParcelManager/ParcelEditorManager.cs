@@ -77,7 +77,7 @@ public class ParcelEditorManager : MonoBehaviour
     };
 
     /// <summary>既定の作成モード(モード指定なしで STATE_EDIT_PARCEL に入ったとき)。</summary>
-    public const string DefaultMode = "empty_area";
+    public const string DefaultMode = "along_path";
 
     /// <summary>土地区画作成モードがアクティブかどうか(ラジアルメニュー・HUDの表示条件)。</summary>
     public bool IsActive => isActive;

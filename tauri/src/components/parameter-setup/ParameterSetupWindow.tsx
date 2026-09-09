@@ -14,8 +14,17 @@ type RawParams = {
   // ここに含まれるキーだけがこのウィンドウに表示される(含まれないキー=内部パラメータ)。
   // タブ順はマップの初出順、タブ内の並びはマップのキー順(=シートの行順)。
   GENERAL_PARAMS_CATEGORIES: Record<string, string>;
+  // GENERAL_PARAMS のキー → 表示名・説明文。スプレッドシートの display_name / description 列が
+  // general_params.yaml 経由で届く。i18n に個別訳(paramSetup.param.{キー})が無いパラメータは
+  // これを表示するので、シートに1行足すだけで新パラメータがUIに出せる。
+  GENERAL_PARAMS_DISPLAY: Record<string, ParamDisplay>;
   // パラメータを変更できる状態か（都市創設前 or テンプレート作成モード）。
   can_edit: boolean;
+};
+
+type ParamDisplay = {
+  label?: string;
+  desc?: string;
 };
 
 // バックエンドのパラメータ取得APIが返却するレスポンスの型定義。
@@ -25,11 +34,13 @@ type ApiResponse = {
   parameters: {
     GENERAL_PARAMS: Record<string, unknown>;
     GENERAL_PARAMS_CATEGORIES?: Record<string, string>;
+    GENERAL_PARAMS_DISPLAY?: Record<string, ParamDisplay>;
   };
   can_edit: boolean;
 };
 
-type EditedGroup = Record<string, number>;
+// 編集値。数値パラメータと真偽値パラメータ(SPRAWL_ENABLED 等)の両方を扱う。
+type EditedGroup = Record<string, number | boolean>;
 type EditedParams = {
   GENERAL_PARAMS?: EditedGroup;
 };
@@ -179,6 +190,7 @@ export function ParameterSetupWindow({ apiBaseUrl }: ParameterSetupWindowProps) 
         setRawParams({
           GENERAL_PARAMS: data.parameters.GENERAL_PARAMS,
           GENERAL_PARAMS_CATEGORIES: data.parameters.GENERAL_PARAMS_CATEGORIES ?? {},
+          GENERAL_PARAMS_DISPLAY: data.parameters.GENERAL_PARAMS_DISPLAY ?? {},
           can_edit: data.can_edit,
         });
         setFetching(false);
@@ -199,17 +211,17 @@ export function ParameterSetupWindow({ apiBaseUrl }: ParameterSetupWindowProps) 
     [rawParams]
   );
 
+  // 型は問わず現在値をそのまま返す(辞書値パラメータの表示にも使うため)。
   const getValue = useCallback(
-    (key: string): number => {
+    (key: string): unknown => {
       const editedVal = edited.GENERAL_PARAMS?.[key];
       if (editedVal !== undefined) return editedVal;
-      const raw = rawParams?.GENERAL_PARAMS?.[key];
-      return typeof raw === "number" ? raw : 0;
+      return rawParams?.GENERAL_PARAMS?.[key];
     },
     [edited, rawParams]
   );
 
-  const setValue = useCallback((key: string, val: number) => {
+  const setValue = useCallback((key: string, val: number | boolean) => {
     setEdited((prev) => ({
       ...prev,
       GENERAL_PARAMS: { ...prev.GENERAL_PARAMS, [key]: val },
@@ -304,29 +316,50 @@ export function ParameterSetupWindow({ apiBaseUrl }: ParameterSetupWindowProps) 
           <div className="param-setup-params">
             {(activeCat?.keys ?? []).map((key) => {
               const val = getValue(key);
-              const step = PARAM_STEPS[key] ?? defaultStep(val);
+              const step = PARAM_STEPS[key] ?? defaultStep(typeof val === "number" ? val : 0);
+              const display = rawParams.GENERAL_PARAMS_DISPLAY[key] ?? {};
               return (
                 <div key={key} className="param-setup-row">
                   <div className="param-setup-label-block">
                     <span className="param-setup-label">
-                      {/* i18n未登録のパラメータはキー名をそのまま表示する */}
-                      {t(`paramSetup.param.${key}.label`, { defaultValue: key })}
+                      {/* i18n未登録ならシート由来の表示名、それも無ければキー名を出す */}
+                      {t(`paramSetup.param.${key}.label`, { defaultValue: display.label || key })}
                     </span>
                     <span className="param-setup-desc-text">
-                      {t(`paramSetup.param.${key}.desc`, { defaultValue: "" })}
+                      {t(`paramSetup.param.${key}.desc`, { defaultValue: display.desc ?? "" })}
                     </span>
                   </div>
-                  <input
-                    className="param-setup-input"
-                    type="number"
-                    step={step}
-                    value={String(val)}
-                    onChange={(e) => {
-                      const n = parseFloat(e.target.value);
-                      if (!isNaN(n)) setValue(key, n);
-                    }}
-                    disabled={busy}
-                  />
+                  {typeof val === "boolean" ? (
+                    <input
+                      className="param-setup-input param-setup-input--check"
+                      type="checkbox"
+                      checked={val}
+                      onChange={(e) => setValue(key, e.target.checked)}
+                      disabled={busy}
+                    />
+                  ) : typeof val === "number" ? (
+                    <input
+                      className="param-setup-input"
+                      type="number"
+                      step={step}
+                      value={String(val)}
+                      onChange={(e) => {
+                        const n = parseFloat(e.target.value);
+                        if (!isNaN(n)) setValue(key, n);
+                      }}
+                      disabled={busy}
+                    />
+                  ) : (
+                    /* 辞書値パラメータ(HOUSEHOLD_DEMAND_SCALE 等)はこのウィンドウでは編集できない。
+                       数値入力に落とすと値を壊すので、現在値を読み取り専用で見せるだけにする。 */
+                    <input
+                      className="param-setup-input param-setup-input--readonly"
+                      type="text"
+                      value={JSON.stringify(val ?? null)}
+                      readOnly
+                      disabled
+                    />
+                  )}
                 </div>
               );
             })}

@@ -18,7 +18,15 @@
       "education": "Educación",
       "construction": "Construcción e inmuebles",
       "environment": "Medio ambiente",
-      "traffic": "Transporte"
+      "traffic": "Transporte",
+      "general": "General",
+      "pathfind": "Tráfico y rutas",
+      "building": "Edificios y construcción",
+      "disaster": "Desastres y seguridad",
+      "sprawl": "Expansión urbana",
+      "production": "Producción e inventario",
+      "zone": "Distritos y parcelas",
+      "financial": "Finanzas"
     },
     "param": {
       "TFR_TARGET": {
