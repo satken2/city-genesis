@@ -210,3 +210,7 @@ TrackPath.InfrastructureConnectionProviderにはIsInfrastructureConnectionを登
 区画一覧は1件ごとのContinueで予算内に複数件適用し、全件適用・削除差分の確定後にIsLoadingを解除する。区画が確定してから建物を生成する依存関係は維持する。地形の帯適用・SyncHeightmap・完成タイル公開も別ステップとし、未完成タイルを公開しない。
 
 `Tests/Lod/run.ps1` は小さい生成880件のフレーム数・共通予算・複数ワーカーの進行に加え、null/CustomYieldInstructionの待機、ネストしたiteratorの待機中キャンセルを検証する。MoveNext内で自己取消しが起きても、実行中iteratorのDisposeはそのステップが戻ってから行う。
+
+## 公共交通の時間付き描画
+
+路線一覧の取得主体は `Vehicles/TransitDataStore`。`TransitOverlayManager.RefreshLines/Clear` は共有ストアへ委譲し、色帯の表示設定で車両の取得・走行を止めない。車両は `TransitVehicleManager` が管理する。`TryGetPathPolyline` の第3引数 `trimIntersection=false` は未切断の地形追従点列を返し、パス途中の停留所の距離割合の解決に使う。レール接続は実際に生成済みのSplineComputerを参照する。

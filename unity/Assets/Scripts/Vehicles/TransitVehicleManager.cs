@@ -142,7 +142,8 @@ public sealed class TransitVehicleManager : MonoBehaviour
         int stride = Math.Max(1,(int)Math.Ceiling((double)trains / Math.Max(1,maxVisibleCars/cars*4)));
         for (int train = 0; train < trains; train += stride)
         {
-            int step = line.motion.AtTime(clock + line.motion.Duration*train/trains, out double distance, out _);
+            double trainTime = clock + line.motion.Duration*train/trains;
+            int step = line.motion.AtTime(trainTime, out double distance, out bool stopped);
             if (step < 0) continue;
             bool returning = line.motion.Returning[step];
             var positions = line.positions; var directions = line.directions;
@@ -151,6 +152,7 @@ public sealed class TransitVehicleManager : MonoBehaviour
             {
                 double offset = ((cars-1)*.5-car)*spacing;
                 if (!Sample(line, distance+offset, distance, line.motion.Steps[step].to_fraction > line.motion.Steps[step].from_fraction, out positions[car], out directions[car])) { ready = false; break; }
+                if (line.type == Constants.VEHICLE_BUS && stopped) BusTurnaround(line,step,trainTime,ref positions[car],ref directions[car]);
                 Vector3 delta = positions[car]-center; delta.y = 0;
                 near |= delta.sqrMagnitude <= renderRadius*renderRadius;
             }
@@ -171,11 +173,29 @@ public sealed class TransitVehicleManager : MonoBehaviour
                 }
                 if (!nominalLengths.TryGetValue(go,out float fitted) || fitted != spacing)
                 { VehicleModelResolver.FitTransitLength(go,spacing); nominalLengths[go]=spacing; }
-                Vector3 forward = directions[car] * (returning ? -1 : 1);
-                if (identity == cars-1 && cars > 1) forward = -forward;
+                Vector3 forward = directions[car] * (returning && line.type != Constants.VEHICLE_BUS ? -1 : 1);
+                if (identity == cars-1 && cars > 1 && line.type != Constants.VEHICLE_BUS) forward = -forward;
                 go.transform.SetPositionAndRotation(positions[car],Quaternion.LookRotation(forward,Vector3.up));
             }
         }
+    }
+
+    private void BusTurnaround(Line line,int index,double time,ref Vector3 position,ref Vector3 direction)
+    {
+        var step=line.motion.Steps[index];
+        var next=line.motion.Steps[(index+1)%line.motion.Steps.Count];
+        if (next.path_id!=step.path_id || (next.to_fraction-next.from_fraction)*(step.to_fraction-step.from_fraction)>=0 || !geometry.TryGetValue(step.path_id,out var g)) return;
+        double phase=((time%line.motion.Duration)+line.motion.Duration)%line.motion.Duration;
+        double elapsed=phase-line.motion.Times[index]-step.duration_seconds;
+        double duration=Math.Min(5,step.dwell_seconds);
+        if(duration<=0)return;
+        float t=Mathf.Clamp01((float)((elapsed-(step.dwell_seconds-duration))/duration));
+        Vector3 right=Vector3.Cross(Vector3.up,direction).normalized;
+        float offset=g.offset*(CityInfoStore.TrafficHand==Constants.TRAFFIC_HAND_LEFT?-1:1);
+        float angle=t*Mathf.PI;
+        if(Math.Abs(offset)<.001f) { direction=Quaternion.AngleAxis(t*180,Vector3.up)*direction; return; }
+        position+=right*offset*(Mathf.Cos(angle)-1)+direction*Math.Abs(offset)*Mathf.Sin(angle);
+        direction=(direction*Mathf.Cos(angle)-right*Mathf.Sign(offset)*Mathf.Sin(angle)).normalized;
     }
 
     private bool Sample(Line line, double distance, double reference, bool referenceForward, out Vector3 position, out Vector3 tangent)
