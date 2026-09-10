@@ -168,6 +168,7 @@ public static class Constants
     public const int LEDGER_MAINTENANCE = 9;
     public const int LEDGER_RESERVE = 10;
     public const int LEDGER_TRANSPORT = 11;
+    public const int LEDGER_WELFARE = 12;
     public const int LEDGER_LAND_ACQUISITION = 13;
     public const int LEDGER_LAND_PURCHASE = 14;
     public const int LEDGER_CONSUMPTION_TAX = 31;
@@ -243,6 +244,8 @@ public static class Constants
     public const int PAYMENT_REALESTATE = 4;
     public const int PAYMENT_TRANSIT = 5;
     public const int PAYMENT_ACQUISITION = 6;
+    public const int PAYMENT_TRANSFER = 7;
+    public const int PAYMENT_INTEREST = 8;
     public const int NODE_ROAD = 1;
     public const int NODE_RAIL = 2;
     public const int NODE_MONORAIL = 4;
