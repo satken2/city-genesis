@@ -2,7 +2,7 @@ param([string]$UnityExe)
 $ErrorActionPreference = 'Stop'
 $unityRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $project = Join-Path $unityRoot 'Assembly-CSharp.csproj'
-& dotnet build $project -v quiet /clp:ErrorsOnly
+& (Join-Path $unityRoot 'Tests/BuildRuntime.ps1')
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 if (!$UnityExe) {
     [xml]$projectXml = Get-Content -LiteralPath $project -Raw
@@ -13,7 +13,17 @@ $qaRoot = Join-Path $unityRoot 'Temp/VehicleUnityQA'
 $editorAssets = Join-Path $qaRoot 'Assets/Editor'
 New-Item -ItemType Directory -Path $editorAssets -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'VehicleQA.cs') -Destination $editorAssets -Force
-$resultPath = Join-Path $qaRoot 'result.txt'
+foreach ($vehicleType in @('12','20','21')) {
+    foreach ($relativeRoot in @('Assets/Models/Vehicles','Assets/Resources/Models/Vehicles')) {
+        $destination = Join-Path $qaRoot $relativeRoot
+        New-Item -ItemType Directory -Path $destination -Force | Out-Null
+        Copy-Item -LiteralPath (Join-Path $unityRoot "$relativeRoot/$vehicleType") -Destination $destination -Recurse -Force
+    }
+}
+$configDestination = Join-Path $qaRoot 'Assets/Resources/Config'
+New-Item -ItemType Directory -Path $configDestination -Force | Out-Null
+Copy-Item -LiteralPath (Join-Path $unityRoot 'Assets/Resources/Config/transit_vehicle_models.json') -Destination $configDestination -Force
+$resultPath = Join-Path $qaRoot 'result.txt' 
 Set-Content -LiteralPath $resultPath -Value 'RUNNING'
 $process = Start-Process -FilePath $UnityExe -ArgumentList @(
     '-batchmode', '-projectPath', ('"' + $qaRoot + '"'),

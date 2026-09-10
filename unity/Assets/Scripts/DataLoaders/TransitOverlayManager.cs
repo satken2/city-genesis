@@ -41,9 +41,8 @@ public class TransitOverlayManager : MonoBehaviour
 
     // 路線ごとの route_path_ids(=毎エポック再計算される実走行下地パスID列)。
     // GET /api/v1/transit/lines から取得し、下地パスの実ジオメトリを連結して描く。
-    private readonly List<TransitLineSummary> lines = new List<TransitLineSummary>();
-    private bool linesFetched;
-    private bool fetchInFlight;
+    private List<TransitLineSummary> lines => TransitDataStore.Ensure().Lines;
+    private int linesRevision = -1;
 
     private OverlayMeshRenderer overlayRenderer;
     private GameObject overlayMeshObj;
@@ -124,9 +123,8 @@ public class TransitOverlayManager : MonoBehaviour
     public void Clear()
     {
         visibleVariants.Clear();
-        lines.Clear();
-        linesFetched = false;
-        fetchInFlight = false;
+        TransitDataStore.Ensure().Clear();
+        linesRevision = -1;
         dirty = false;
         if (overlayRenderer != null)
         {
@@ -139,33 +137,18 @@ public class TransitOverlayManager : MonoBehaviour
     /// 路線作成直後(edit_transit.finish)と、毎エポックのセッションリロード後に呼ぶことで、
     /// 毎エポック再計算された実走行経路を描画へ反映する。
     /// </summary>
-    public void RefreshLines()
-    {
-        if (fetchInFlight) return;
-        fetchInFlight = true;
-        StartCoroutine(ApiClient.Get<TransitLinesResponse>(
-            "/transit/lines",
-            resp =>
-            {
-                lines.Clear();
-                if (resp != null && resp.lines != null) lines.AddRange(resp.lines);
-                linesFetched = true;
-                fetchInFlight = false;
-                dirty = true;
-            },
-            _ =>
-            {
-                // 失敗時は既存の lines を保持したまま、次回の再構築でフォールバック描画する。
-                fetchInFlight = false;
-            }));
-    }
+    public void RefreshLines() => TransitDataStore.Ensure().Refresh();
 
     private void Update()
     {
         if (visibleVariants.Count == 0) return;
 
         // 表示ONかつ未取得なら路線一覧を取得する(取得完了で dirty=true → 再構築)。
-        if (!linesFetched && !fetchInFlight) RefreshLines();
+        if (linesRevision != TransitDataStore.Ensure().Revision)
+        {
+            linesRevision = TransitDataStore.Instance.Revision;
+            dirty = true;
+        }
 
         Camera cam = Camera.main;
         if (cam == null) return;

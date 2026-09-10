@@ -37,6 +37,8 @@
     "parcelSelected": "敷地 #{{id}} を選択済み",
     "costRatioHelp": "傾斜地や複雑な地形の上に建物を建設すると、建設コストが上がります。",
     "coverageRatio": "建ぺい率",
+    "structure": "構造",
+    "structureNote": "上位の構造ほど建設費は高くなりますが、耐用年数と耐火性が上がります",
     "estimatedMaxProduction": "推定生産量(最大)",
     "estimatedEmployment": "推定雇用人数",
     "estimatedRunningCost": "推定ランニングコスト",

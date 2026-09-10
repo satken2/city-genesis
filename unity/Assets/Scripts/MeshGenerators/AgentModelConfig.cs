@@ -8,12 +8,25 @@ public static class AgentModelConfig
 {
     private const string ResourcePath = "Config/agent_model_config";
     private static readonly Dictionary<int, AgentModelDefinition> agentDefinitions = new();
+    // 構造種別つきプレハブフォルダ(a{variant}s{structure} / b{bd_type}s{structure})の一覧。
+    // 生成器(generate_agent_model_config.py)が実在フォルダから列挙した名前だけが入る。
+    private static readonly HashSet<string> structurePrefixes = new(StringComparer.Ordinal);
     private static bool isLoaded;
 
     public static bool TryGetAgentDefinition(int agentId, out AgentModelDefinition definition)
     {
         EnsureLoaded();
         return agentDefinitions.TryGetValue(agentId, out definition);
+    }
+
+    /// <summary>
+    /// 構造種別つきプレハブフォルダ(例 "a2000s1")が存在するか。
+    /// BuildingMeshUtils.DeterminePrefix が構造に応じたパーツ差し替えの可否判定に使う。
+    /// </summary>
+    public static bool HasStructurePrefix(string prefix)
+    {
+        EnsureLoaded();
+        return !string.IsNullOrEmpty(prefix) && structurePrefixes.Contains(prefix);
     }
 
     private static void EnsureLoaded()
@@ -34,6 +47,16 @@ public static class AgentModelConfig
         try
         {
             var root = ParseAgentModelConfig(asset.text);
+            if (root?.structure_prefixes != null)
+            {
+                foreach (var prefix in root.structure_prefixes)
+                {
+                    if (!string.IsNullOrWhiteSpace(prefix))
+                    {
+                        structurePrefixes.Add(prefix.Trim());
+                    }
+                }
+            }
             if (root?.agents == null)
             {
                 return;
@@ -78,11 +101,14 @@ public static class AgentModelConfig
     {
         var root = new AgentModelConfigRoot
         {
-            agents = new Dictionary<string, AgentModelDefinition>()
+            agents = new Dictionary<string, AgentModelDefinition>(),
+            structure_prefixes = new List<string>()
         };
 
         AgentModelDefinition currentDefinition = null;
         bool readingVariants = false;
+        // トップレベルの structure_prefixes: セクションを読んでいる間 true
+        bool readingStructurePrefixes = false;
 
         foreach (var rawLine in text.Split(new[] { '\n' }, StringSplitOptions.None))
         {
@@ -102,11 +128,22 @@ public static class AgentModelConfig
 
             if (indent == 0)
             {
-                if (trimmedLine.StartsWith("agents:", StringComparison.Ordinal))
-                {
-                    continue;
-                }
+                // トップレベルキーでセクションを切り替える(agents: / structure_prefixes:)
+                readingStructurePrefixes = trimmedLine.StartsWith("structure_prefixes:", StringComparison.Ordinal);
+                currentDefinition = null;
+                continue;
+            }
 
+            if (readingStructurePrefixes)
+            {
+                if (trimmedLine.StartsWith("-", StringComparison.Ordinal))
+                {
+                    var prefix = TrimQuotes(trimmedLine[1..].Trim());
+                    if (!string.IsNullOrEmpty(prefix))
+                    {
+                        root.structure_prefixes.Add(prefix);
+                    }
+                }
                 continue;
             }
 
@@ -214,6 +251,7 @@ public static class AgentModelConfig
     private class AgentModelConfigRoot
     {
         public Dictionary<string, AgentModelDefinition> agents;
+        public List<string> structure_prefixes;
     }
 
     [Serializable]

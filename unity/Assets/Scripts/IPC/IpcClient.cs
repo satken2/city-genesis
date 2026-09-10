@@ -35,6 +35,8 @@ public class IpcClient : MonoBehaviour
     public event Action<float[][], int, float[], float> OnEditBuildingUpdateShape;
     public event Action<int> OnEditBuildingUpdateFloors;
     public event Action<float, float, float> OnEditBuildingUpdateVisualVariant;
+    // 構造種別(structure_master のID)の変更。プレビューのパーツ prefix を切り替える。
+    public event Action<int> OnEditBuildingUpdateStructure;
     public event Action<EffectRangePayload> OnEditBuildingUpdateEffectRange;
     // 直接配置モードの矩形パラメータ(width, depth, angle, floors)。UI側の入力変更を受けて、
     // Unityがカーソル追従のリアルタイム矩形ゴーストを描画するために使用する。
@@ -411,6 +413,14 @@ public class IpcClient : MonoBehaviour
                     }
                     break;
 
+                case "edit_building:update_structure":
+                    {
+                        int structure = GetParamInt(payload, "structure");
+                        Debug.Log($"IpcClient: edit_building:update_structure -> {structure}");
+                        OnEditBuildingUpdateStructure?.Invoke(structure);
+                    }
+                    break;
+
                 case "edit_building:update_visual_variant":
                     {
                         float vv1 = GetParamFloat(payload, "visual_variant");
@@ -712,13 +722,14 @@ public class IpcClient : MonoBehaviour
     /// UI はこの variant / floors / visual_variant をパネルへシードし、STATE_EDIT_BUILDING の
     /// 区画選択フローへ遷移する。実寸フットプリントはバックエンドが source_agent_id から導出する。
     /// </summary>
-    public void EmitBuildingConstructionCopySource(int sourceAgentId, int variant, int floors, float vv1, float vv2, float vv3)
+    public void EmitBuildingConstructionCopySource(int sourceAgentId, int variant, int floors, int structure, float vv1, float vv2, float vv3)
     {
         var payload = new Dictionary<string, object>
         {
             ["source_agent_id"] = sourceAgentId,
             ["variant"] = variant,
             ["floors"] = floors,
+            ["structure"] = structure,
             ["visual_variant"] = vv1,
             ["visual_variant2"] = vv2,
             ["visual_variant3"] = vv3

@@ -37,6 +37,8 @@
     "parcelSelected": "Terrain n° {{id}} sélectionné",
     "costRatioHelp": "Construire sur un terrain en pente ou complexe augmente le coût de la construction.",
     "coverageRatio": "Emprise au sol",
+    "structure": "Structure",
+    "structureNote": "Une structure de grade supérieur coûte plus cher mais dure plus longtemps et résiste mieux au feu",
     "estimatedMaxProduction": "Production estimée (maximale)",
     "estimatedEmployment": "Emplois estimés",
     "estimatedRunningCost": "Coût de fonctionnement estimé",

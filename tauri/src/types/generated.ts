@@ -70,6 +70,8 @@ export type AgentSearchItem = {
   type: number;
   /** 経済主体の小分類（agent_master のバリアントID） */
   variant: number;
+  /** 建物の構造種別（structure_master のID。0=構造の区別なし） */
+  structure: number;
   /** 公共施設かどうか（0=民間/1=公共） */
   public_facility: boolean;
   /** 所属地区の名称（zone_idの参照解決） */
@@ -89,6 +91,8 @@ export type AgentSummary = {
   type: number;
   /** 経済主体の小分類（agent_master のバリアントID） */
   variant: number;
+  /** 建物の構造種別（structure_master のID。0=構造の区別なし） */
+  structure: number;
   /** 建物底面ポリゴンの座標列 [[x, z], ...] */
   polygon?: any[];
   /** 中心点座標 [x, z] */
@@ -136,6 +140,8 @@ export type AgentData = {
   type: number;
   /** 経済主体の小分類（agent_master のバリアントID） */
   variant: number;
+  /** 建物の構造種別（structure_master のID。0=構造の区別なし） */
+  structure: number;
   /** ステータス（計画中・建設中・稼働中など。STATUS_*） */
   status: number;
   /** ステータス遷移理由 */
@@ -460,6 +466,8 @@ export type ParcelSummary = {
   limit_volume_ratio: number;
   /** 高さの上限（m） */
   limit_height: number;
+  /** 建設を許可する最低構造種別（structure_master のID。0=制限なし） */
+  min_structure: number;
   /** この区画を使用している建物エージェントのID（0=空き地） */
   usage_id: number;
 };
@@ -514,6 +522,8 @@ export type ParcelData = {
   limit_volume_ratio: number;
   /** 高さの上限（m） */
   limit_height: number;
+  /** 建設を許可する最低構造種別（structure_master のID。0=制限なし） */
+  min_structure: number;
   /** 区画面積（m2） */
   area: number;
   /** 基準標高（m） */
@@ -547,6 +557,8 @@ export type ZoneData = {
   limit_volume_ratio: number;
   /** 高さの上限（m） */
   limit_height: number;
+  /** 建設を許可する最低構造種別（structure_master のID。0=制限なし） */
+  min_structure: number;
   /** 製品別の地区平均価格（税込み。製品ID→価格） */
   zone_average_prices: Record<string, number>;
   /** 標準ティア平均賃金の履歴 */

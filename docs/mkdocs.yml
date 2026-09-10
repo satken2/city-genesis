@@ -90,6 +90,7 @@ nav:
     - 地形プロップ: geometries/M_地形プロップ.md
     - 線路メッシュの生成: geometries/N_線路メッシュの生成.md
     - 車両の走行描画: geometries/O_車両の走行描画.md
+    - 交通シミュレーションと走行描画の整合: geometries/T_交通シミュレーションと走行描画の整合.md
     - マテリアル共有とエクスポート: geometries/P_マテリアル共有とエクスポート.md
     - 駅舎パスのメッシュ生成: geometries/Q_駅舎パスのメッシュ生成.md
     - マテリアルの解決: geometries/R_マテリアルの解決.md

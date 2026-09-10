@@ -52,6 +52,8 @@
     "limitHeight": "높이 규제",
     "limitVolumeRatio": "용적률",
     "limitCoverageRatio": "건폐율",
+    "minStructure": "최소 구조 등급",
+    "minStructureNone": "제한 없음",
     "immigrationTitle": "이민 규제",
     "immigrationDescription": "도시로의 이민 수용 조건을 설정합니다. 신청한 이민 가구가 이 조건을 충족하지 않으면 입주를 허가하지 않습니다.",
     "immigrationAgeRange": "가구주의 나이",

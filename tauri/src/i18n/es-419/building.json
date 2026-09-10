@@ -3,6 +3,7 @@
     "type": "Tipo de edificio",
     "durability": "Durabilidad",
     "floors": "Pisos",
+    "structure": "Estructura",
     "floorsValue": "{{floors}} pisos (superficie construida {{area, number}} ㎡)",
     "heightLabel": "Altura: {{value}} m",
     "baseAreaLabel": "Área de desplante: {{area, number}} ㎡",

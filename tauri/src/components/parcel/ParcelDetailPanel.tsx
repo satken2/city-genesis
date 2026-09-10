@@ -103,6 +103,7 @@ export function ParcelDetailPanel({
     limit_coverage_ratio: null,
     limit_volume_ratio: null,
     limit_height: null,
+    min_structure: 0,
   });
 
   // 土地区画詳細パネルの開閉状態をチュートリアル用の localStorage フラグに反映する。
@@ -221,6 +222,7 @@ export function ParcelDetailPanel({
             limit_coverage_ratio: data.limit_coverage_ratio ?? null,
             limit_volume_ratio: data.limit_volume_ratio ?? null,
             limit_height: data.limit_height ?? null,
+            min_structure: data.min_structure ?? 0,
           });
           setLoading(false);
         }
@@ -290,6 +292,7 @@ export function ParcelDetailPanel({
             limit_coverage_ratio: restrictionValues.limit_coverage_ratio,
             limit_volume_ratio: restrictionValues.limit_volume_ratio,
             limit_height: restrictionValues.limit_height,
+            min_structure: restrictionValues.min_structure,
           }
         : {}),
     };
@@ -309,6 +312,7 @@ export function ParcelDetailPanel({
         limit_coverage_ratio: updated.limit_coverage_ratio ?? null,
         limit_volume_ratio: updated.limit_volume_ratio ?? null,
         limit_height: updated.limit_height ?? null,
+        min_structure: updated.min_structure ?? 0,
       });
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : "Unknown error");

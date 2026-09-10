@@ -39,7 +39,7 @@ public static class VehicleQA
                 return null;
             };
             game=Assembly.LoadFrom(Path.Combine(source,"Temp/bin/Debug/Assembly-CSharp.dll"));
-            Geometry(); Budget(); Junction(); RoadsideExit();
+            Geometry(); Budget(); Junction(); RoadsideExit(); MotionContract(); TransitModels(); TransitPlacement();
             var report = new List<string>();
             foreach(int split in new[]{1,5,20}) report.Add(Network(split,12,1200,false));
             report.Add(Network(5,.2f,1200,false));
@@ -98,6 +98,107 @@ public static class VehicleQA
             Call(budget,"SetTarget",0f);Near(Property(budget,"Desired"),0,0,"Budget reduction");
         }
     }
+    static void TransitPlacement()
+    {
+        var models=new GameObject("PlacementModels").AddComponent(game.GetType("ModelManager"));
+        game.GetType("ModelManager").GetProperty("Instance").SetValue(null,models);
+        var manager=new GameObject("TransitPlacement").AddComponent(game.GetType("TransitVehicleManager"));
+        var stepType=game.GetType("GeneratedModels.TransitMotionStep");
+        var journeyType=game.GetType("GeneratedModels.TransitJourney");
+        var journeys=(IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(journeyType));
+        foreach(bool returning in new[]{false,true})
+        {
+            var steps=(IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(stepType));
+            var step=Activator.CreateInstance(stepType);
+            Set(step,"path_id",1);Set(step,"from_fraction",returning?.96f:.04f);Set(step,"to_fraction",returning?.04f:.96f);
+            Set(step,"length_m",460f);Set(step,"start_speed_mps",10f);Set(step,"end_speed_mps",10f);
+            Set(step,"duration_seconds",46.0);Set(step,"dwell_seconds",4.0);steps.Add(step);
+            var journey=Activator.CreateInstance(journeyType);Set(journey,"steps",steps);Set(journey,"returning",returning);journeys.Add(journey);
+        }
+        var data=New("GeneratedModels.TransitLineSummary");
+        Set(data,"line_agent_id",123);Set(data,"path_variant",1002);Set(data,"cars_per_train",2);Set(data,"vehicle_count",2);
+        Set(data,"length_per_vehicle",20f);Set(data,"status",(int)game.GetType("Constants").GetField("STATUS_ACTIVE").GetRawConstantValue());Set(data,"journeys",journeys);
+        var sourceList=(IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(data.GetType()));sourceList.Add(data);
+        Call(manager,"RebuildLines",sourceList);
+        var lines=(IList)Get(manager,"lines");Check(lines.Count==1,"Operating transit line missing");
+        var path=New("GeneratedModels.PathSummary");Set(path,"path_id",1);Set(path,"travel_direction",0);
+        var g=Activator.CreateInstance(manager.GetType().GetNestedType("Geometry",BindingFlags.NonPublic));
+        Set(g,"data",path);Set(g,"full",Line(Vector3.zero,Vector3.forward*500));Set(g,"trimStart",0f);Set(g,"trimEnd",500f);Set(g,"rail",true);
+        ((IDictionary)Get(manager,"geometry")).Add(1,g);
+        var previous=new Dictionary<string,Vector3>();
+        foreach(double time in new[]{0.0,25.0,46.0,49.9,50.0,75.0,99.9,100.0})
+        {
+            Get(manager,"used").GetType().GetMethod("Clear").Invoke(Get(manager,"used"),null);
+            Set(manager,"clock",time);Call(manager,"DrawLine",lines[0],Vector3.forward*250);Call(manager,"HideUnused",false);
+            var visible=(IDictionary)Get(manager,"visible");Check(visible.Count==2,"Consist disappears at terminal/time "+time);
+            var positions=new List<Vector3>();
+            foreach(DictionaryEntry entry in visible)
+            {
+                var position=((GameObject)entry.Value).transform.position;positions.Add(position);
+                Check(position.z>=0 && position.z<=500,"Car leaves platform/path");
+                if(time==50.0)Near(Vector3.Distance(previous[(string)entry.Key],position),0,.01f,"Turnback teleports physical car");
+                previous[(string)entry.Key]=position;
+            }
+            Near(Vector3.Distance(positions[0],positions[1]),20,.01f,"Consist spacing incorrect");
+        }
+        UnityEngine.Object.DestroyImmediate(manager.gameObject);UnityEngine.Object.DestroyImmediate(models.gameObject);
+    }
+
+    static void TransitModels()
+    {
+        var manager=new GameObject("ModelManagerQA").AddComponent(game.GetType("ModelManager"));
+        game.GetType("ModelManager").GetProperty("Instance").SetValue(null,manager);
+        var resolver=game.GetType("VehicleModelResolver");
+        foreach (int type in new[]{12,20,21})
+        {
+            foreach(bool middle in type==12?new[]{false}:new[]{false,true})
+            {
+                var car=(GameObject)resolver.GetMethod("CreateTransitCar").Invoke(null,new object[]{type,middle,null});
+                car.SetActive(true);
+                var renderers=car.GetComponentsInChildren<Renderer>();
+                Check(renderers.Length>0,"Transit FBX has no renderer");
+                var bounds=renderers[0].bounds;
+                foreach(var renderer in renderers)bounds.Encapsulate(renderer.bounds);
+                Check(bounds.size.z>5 && bounds.size.z<35,"Transit FBX length/axis is not metres: "+bounds.size);
+                Check(Mathf.Abs(bounds.center.z)<1,"Transit model pivot is not centred: "+bounds.center);
+                accessTimings.Add($"model type={type} middle={middle} bounds={bounds.size} center={bounds.center}");
+                UnityEngine.Object.DestroyImmediate(car);
+            }
+        }
+        UnityEngine.Object.DestroyImmediate(manager.gameObject);
+    }
+
+    static void MotionContract()
+    {
+        var stepType=game.GetType("GeneratedModels.TransitMotionStep");
+        var journeyType=game.GetType("GeneratedModels.TransitJourney");
+        var steps=(IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(stepType));
+        foreach (var speeds in new[]{new[]{0f,10f},new[]{10f,0f}})
+        {
+            var step=Activator.CreateInstance(stepType);
+            Set(step,"path_id",1);Set(step,"length_m",50f);
+            Set(step,"start_speed_mps",speeds[0]);Set(step,"end_speed_mps",speeds[1]);
+            Set(step,"duration_seconds",10.0);Set(step,"dwell_seconds",speeds[1]==0?30.0:0.0);
+            steps.Add(step);
+        }
+        var journeys=(IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(journeyType));
+        var journey=Activator.CreateInstance(journeyType);Set(journey,"steps",steps);journeys.Add(journey);
+        var clock=New("TransitMotionClock",journeys);
+        Near(Property(clock,"Duration"),50,0.0001f,"Stop duration counted twice");
+        foreach(var pair in new[]{new[]{5.0,12.5},new[]{10.0,50.0},new[]{15.0,87.5},new[]{20.0,100.0},new[]{49.0,100.0},new[]{55.0,12.5}})
+        {
+            object[] args={pair[0],null,null};Call(clock,"AtTime",args);
+            Near(Convert.ToSingle(args[1]),(float)pair[1],.001f,"Shared acceleration/time position");
+        }
+        var control=game.GetType("RoadMotionControl");
+        float requested=(float)control.GetMethod("DesiredSpeed").Invoke(null,new object[]{100f,5f,12f});
+        Near(requested,12,0.0001f,"Late vehicle exceeds free speed");
+        float stopped=(float)control.GetMethod("FollowingSpeed").Invoke(null,new object[]{12f,12f,2f,.1f});
+        Near(stopped,0,0.0001f,"Following vehicle overlaps stopped leader");
+        var v=New("Vehicle");Call(v,"SetPath",1,Line(Vector3.zero,Vector3.forward*100),true,50f);
+        Set(v,"speed",0f);Call(v,"Advance",1f);Near((float)Get(v,"s"),50,.001f,"Stopped car creeps forward");
+    }
+
     static void Junction()
     {
         var paths=new GameObject("JunctionPaths").AddComponent(game.GetType("PathManager"));

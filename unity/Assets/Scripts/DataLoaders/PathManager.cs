@@ -1778,12 +1778,12 @@ public class PathManager : BaseApiDataManager
     /// 連結して路線を描くために使う。道路/線路は curved=true でベジエ曲線サンプリングされる。
     /// pathDataCache 未読込(=まだロードされていないセルのパス)なら false。
     /// </summary>
-    public bool TryGetPathPolyline(int pathId, out List<Vector3> points)
+    public bool TryGetPathPolyline(int pathId, out List<Vector3> points, bool trimIntersection = true)
     {
         points = null;
         if (!pathDataCache.TryGetValue(pathId, out PathSummary path) || path == null)
             return false;
-        var pts = CalculatePathPoints(path);
+        var pts = CalculatePathPoints(path, trimIntersection);
         if (pts == null || pts.Count < 2)
             return false;
         points = pts;

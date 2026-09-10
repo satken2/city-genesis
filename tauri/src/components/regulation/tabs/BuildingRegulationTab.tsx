@@ -1,7 +1,7 @@
 /**
  * 建築規制タブ
  *
- * 都市全体の建築規制（高さ規制・容積率・建ぺい率）を設定する。
+ * 都市全体の建築規制（高さ規制・容積率・建ぺい率・最低構造種別）を設定する。
  * ここでの設定は「これ以降に作成される地区の既定値」であり、既存の地区・土地区画には
  * 遡及しない（既存地区の変更は地区詳細パネルから行う）。
  *
@@ -9,8 +9,9 @@
  * パーセント表記で表示・編集する。単位変換はこのファイルが持つ。
  */
 
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { useMasterData } from "../../../contexts/MasterDataContext";
 import type { BuildingRegKey, RegulationsData } from "../regulationTypes";
 
 /** 保存ペイロードの構築や差分判定で使う、建築規制キーの一覧 */
@@ -18,6 +19,7 @@ export const BUILDING_REG_KEYS: BuildingRegKey[] = [
   "limit_height",
   "limit_volume_ratio",
   "limit_coverage_ratio",
+  "min_structure",
 ];
 
 /**
@@ -73,6 +75,16 @@ export function BuildingRegulationTab({
   onChange: (key: BuildingRegKey, apiValue: number) => void;
 }) {
   const { t } = useTranslation();
+  const masterData = useMasterData();
+
+  /** 最低構造種別の選択肢(構造種別マスター、ID昇順) */
+  const structureOptions = useMemo(
+    () =>
+      Object.entries(masterData?.structures ?? {})
+        .map(([id, entry]) => ({ id: Number(id), name: entry.display_name }))
+        .sort((a, b) => a.id - b.id),
+    [masterData],
+  );
 
   /** API 単位での現在値（編集中値を優先） */
   const getValue = useCallback(
@@ -130,6 +142,44 @@ export function BuildingRegulationTab({
             </div>
           );
         })}
+
+        {/* 最低構造種別(防火地域指定に相当)。数値入力ではなく構造種別マスターからの選択。 */}
+        {(() => {
+          const modified = getValue("min_structure") !== cityRegulations.min_structure;
+          return (
+            <div className="regulation-building-row">
+              <span
+                className={[
+                  "regulation-building-row__name",
+                  modified && "regulation-building-row__name--modified",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                {t("regulation.minStructure")}
+              </span>
+              <div className="regulation-building-row__input-group">
+                <select
+                  className={[
+                    "regulation-building-input",
+                    modified && "regulation-building-input--modified",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  value={getValue("min_structure") ?? 0}
+                  onChange={(e) => onChange("min_structure", Number(e.target.value))}
+                >
+                  <option value={0}>{t("regulation.minStructureNone")}</option>
+                  {structureOptions.map((opt) => (
+                    <option key={opt.id} value={opt.id}>
+                      {t("parcel.minStructureAtLeast", { name: opt.name })}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </>
   );

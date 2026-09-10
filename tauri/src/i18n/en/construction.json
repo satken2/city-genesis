@@ -37,6 +37,8 @@
     "parcelSelected": "Parcel #{{id}} selected",
     "costRatioHelp": "Building on sloped or complex terrain increases the construction cost.",
     "coverageRatio": "Coverage Ratio",
+    "structure": "Structure",
+    "structureNote": "Higher-grade structures cost more to build but last longer and resist fire better",
     "estimatedMaxProduction": "Est. Max Production",
     "estimatedEmployment": "Est. Employment",
     "estimatedRunningCost": "Est. Running Cost",

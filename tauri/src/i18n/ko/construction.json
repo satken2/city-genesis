@@ -37,6 +37,8 @@
     "parcelSelected": "부지 #{{id}}을(를) 선택함",
     "costRatioHelp": "경사지나 복잡한 지형 위에 건물을 지으면 건설 비용이 올라갑니다.",
     "coverageRatio": "건폐율",
+    "structure": "구조",
+    "structureNote": "구조 등급이 높을수록 건설비는 오르지만 내용연수와 내화성이 높아집니다",
     "estimatedMaxProduction": "추정 생산량(최대)",
     "estimatedEmployment": "추정 고용 인원",
     "estimatedRunningCost": "추정 운영 비용",

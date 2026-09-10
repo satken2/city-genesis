@@ -539,15 +539,31 @@ public static class BuildingMeshUtils
 
     public static string GetGlbPrefix1(BuildingSummary buildingData) => ResolveModelNaming(buildingData).Prefix;
 
+    /// <summary>
+    /// パーツフォルダの prefix を決める。構造種別(structure > 0)を持つ建物は、構造つきフォルダ
+    /// (a{variant}s{structure} / b{bd_type}s{structure})があればそれを優先し、無ければ従来どおり
+    /// a{variant} → b{bd_type} へ落ちる。構造の差は木造の板壁 / RC の打放しのようにマテリアルや
+    /// 壁パーツの差し替えで表現し、ジオメトリの生成方式(model_type)は変えない。
+    /// 解決順: a{v}s{s} → a{v} → b{bd}s{s} → b{bd}
+    /// </summary>
     private static string DeterminePrefix(BuildingSummary buildingData)
     {
+        int structure = buildingData.structure;
         string variantPrefix = $"a{buildingData.variant}";
+        if (structure > 0 && AgentModelConfig.HasStructurePrefix($"{variantPrefix}s{structure}"))
+        {
+            return $"{variantPrefix}s{structure}";
+        }
         if (HasVariantDefinition(buildingData.variant))
         {
             return variantPrefix;
         }
 
         int bdType = ResolveBdTypeFallback(buildingData.variant, buildingData.bd_type ?? 0);
+        if (structure > 0 && AgentModelConfig.HasStructurePrefix($"b{bdType}s{structure}"))
+        {
+            return $"b{bdType}s{structure}";
+        }
         return $"b{bdType}";
     }
 

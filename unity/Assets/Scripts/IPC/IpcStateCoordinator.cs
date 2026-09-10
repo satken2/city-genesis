@@ -565,7 +565,7 @@ public class IpcStateCoordinator : MonoBehaviour
 
     /// <summary>
     /// STATE_EDIT_BUILDING: 建物建設モード
-    /// ipcParams には UI側で選択された building_variant / agent_id が含まれる。
+    /// ipcParams には UI側で選択された building_variant / agent_id / structure(構造種別) が含まれる。
     /// agent_id が指定されている場合は既存建物の編集モードとして動作する。
     ///
     /// パーセル表示は、選択された建物のbd_typeに対応する建設可能フィルタモード
@@ -628,6 +628,11 @@ public class IpcStateCoordinator : MonoBehaviour
                     int buildingVariant = Convert.ToInt32(bvObj);
                     buildingPlanManager.SetBuildingVariant(buildingVariant);
                     Debug.Log($"IpcStateCoordinator: building_variant = {buildingVariant}");
+                }
+                // 構造種別(0=構造の区別なし)。SetBuildingVariant の既定(許可構造の最上位)を UI の選択で上書きする。
+                if (ipcParams.TryGetValue("structure", out object stObj) && stObj != null)
+                {
+                    buildingPlanManager.SetStructure(Convert.ToInt32(stObj));
                 }
             }
 

@@ -23,6 +23,17 @@ public static class VehicleModelConfig
     private const string ResourcePath = "Config/vehicle_model_config";
     private static readonly Dictionary<int, List<int>> variantsByType = new();
     private static bool isLoaded;
+    private static Dictionary<string, int> transitTypes;
+
+    public static int GetTransitVehicleType(int pathVariant)
+    {
+        if (transitTypes == null)
+        {
+            var asset = Resources.Load<TextAsset>("Config/transit_vehicle_models");
+            transitTypes = asset != null ? JsonConvert.DeserializeObject<Dictionary<string,int>>(asset.text) : new();
+        }
+        return transitTypes.TryGetValue(pathVariant.ToString(), out int type) ? type : 0;
+    }
 
     /// <summary>指定車種のバリアントID一覧を返す(未定義なら空リスト)。</summary>
     public static IReadOnlyList<int> GetVariants(int vehicleType)

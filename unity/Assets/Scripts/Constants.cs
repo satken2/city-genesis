@@ -57,6 +57,10 @@ public static class Constants
     public const int MODEL_MASHUP = 7;
     public const int MODEL_MODULAR_SHED = 8;
     public const int MODEL_RAIL_YARD = 9;
+    public const int STRUCTURE_NONE = 0;
+    public const int STRUCTURE_WOOD = 1;
+    public const int STRUCTURE_SEMI_FIREPROOF = 2;
+    public const int STRUCTURE_FIREPROOF = 3;
     public const float MASHUP_CELL_SIZE = 8.0f;
     public const int FAMILY_SINGLE = 1;
     public const int FAMILY_COUPLE = 2;

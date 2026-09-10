@@ -171,6 +171,21 @@ export async function sendEditBuildingUpdateFloors(floors: number): Promise<void
 }
 
 /**
+ * `edit_building.update_structure`
+ * 建物建設モードにおいて、構造種別(structures マスターのID。0=構造の区別なし)を変更する。
+ * Unity側はキャッシュしている底面ポリゴンを用いて、構造に応じたパーツプレフィックス
+ * (a{variant}s{structure} → a{variant} などのフォールバック)でプレビューメッシュを再生成する。
+ */
+export async function sendEditBuildingUpdateStructure(structure: number): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "building_construction",
+    entity: null,
+    action: "edit_building:update_structure",
+    params: { structure },
+  });
+}
+
+/**
  * `edit_building.update_visual_variant`
  * 建物建設モードにおいて、外観バリアント(visual_variant1/2/3)を変更する。
  * Unity側はキャッシュしている底面ポリゴンを用いて、新しいvisual_variantで

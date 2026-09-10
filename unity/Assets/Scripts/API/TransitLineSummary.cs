@@ -21,6 +21,11 @@ namespace GeneratedModels
         public float fare_price;
         public float target_headway;
         public int vehicle_count;
+        public int cars_per_train = 1;
+        public int train_count;
+        public float length_per_vehicle;
+        public double round_trip_seconds;
+        public List<TransitJourney> journeys;
         public float required_vehicle_count;
         public float revenues;
         public float expenses;
@@ -43,5 +48,22 @@ namespace GeneratedModels
     public class TransitLinesResponse
     {
         public List<TransitLineSummary> lines;
+    }
+
+    [Serializable]
+    public class TransitJourney
+    {
+        public int from_stop_id, to_stop_id, transport_path_id;
+        public bool returning;
+        public List<TransitMotionStep> steps;
+    }
+
+    [Serializable]
+    public class TransitMotionStep
+    {
+        public int path_id;
+        public float from_fraction, to_fraction, length_m;
+        public float start_speed_mps, end_speed_mps;
+        public double duration_seconds, dwell_seconds, free_duration_seconds, congestion_delay_seconds;
     }
 }

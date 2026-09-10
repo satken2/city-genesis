@@ -107,6 +107,7 @@ public class Vehicle
     public int pathId, vehicleType, variantId, lane;
     public bool forward;
     public float s, speed, age, distanceSinceJunction;
+    public float motionRemaining, motionFreeSpeed;
     public float laneOffset, shoulderOffset;
     public float roadHalfWidth;
     public int destinationParcel, destinationBuilding;
@@ -167,7 +168,8 @@ public class Vehicle
         }
         float velocity = InIntersection ? connectorSpeed : speed;
         if (arrivalDistance >= 0) velocity *= Mathf.Lerp(.3f, 1, Mathf.Clamp01(arrivalDistance / Mathf.Max(.1f, arrivalBlendLength)));
-        velocity = Mathf.Max(.1f, velocity);
+        velocity = Mathf.Max(0, velocity);
+        if (velocity <= .00001f) { age += seconds; return 0; }
         float remaining = InIntersection ? connector.Length - connectorS : Remaining;
         if (!InIntersection && arrivalDistance >= 0) remaining = Mathf.Min(remaining, arrivalDistance);
         float used = Mathf.Min(seconds, Mathf.Max(0, remaining) / velocity);

@@ -52,6 +52,8 @@
     "limitHeight": "Height Limit",
     "limitVolumeRatio": "Volume Ratio",
     "limitCoverageRatio": "Coverage Ratio",
+    "minStructure": "Minimum structure",
+    "minStructureNone": "No restriction",
     "immigrationTitle": "Immigration Policy",
     "immigrationDescription": "Set conditions for accepting immigrant households. Applicants that do not meet these conditions will be rejected.",
     "immigrationAgeRange": "Household Head Age",

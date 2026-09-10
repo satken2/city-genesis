@@ -24,6 +24,58 @@ public static class VehicleModelResolver
 
     private static Material sharedBoxMaterial;
 
+    public static float GetVehicleLength(int type)
+    {
+        var prefab = ResolvePrefab(type,0);
+        if(prefab == null)return 10;
+        var bounds=ModelBounds(prefab.transform);
+        return Mathf.Max(1,Mathf.Max(bounds.size.x,bounds.size.z));
+    }
+
+    public static GameObject CreateTransitCar(int type, bool middle, Transform parent)
+    {
+        if (!middle) return CreateInstance(type,0,parent);
+        var prefab = ModelManager.Instance?.GetModel($"Models/Vehicles/{type}/middle",suppressWarning:true);
+        if (prefab == null) return CreateInstance(type,0,parent);
+        var root = new GameObject("TransitCar"); root.transform.SetParent(parent,false);
+        var model = Object.Instantiate(prefab,root.transform);
+        model.transform.localPosition = Vector3.zero; model.transform.localRotation = Quaternion.identity;
+        model.SetActive(true); NormalizeModel(root.transform,model.transform); root.SetActive(false); return root;
+    }
+
+    /// <summary>著作時の配置と長手軸をラッパー内で正規化し、走行側は+Z前方・接地中心原点に統一する。</summary>
+    private static void NormalizeModel(Transform root,Transform model)
+    {
+        Bounds bounds = ModelBounds(root);
+        if(bounds.size.x > bounds.size.z)model.localRotation=Quaternion.Euler(0,-90,0)*model.localRotation;
+        bounds=ModelBounds(root);
+        model.localPosition-=new Vector3(bounds.center.x,bounds.min.y,bounds.center.z);
+    }
+
+    private static Bounds ModelBounds(Transform root)
+    {
+        Bounds bounds=default;bool any=false;
+        foreach(var filter in root.GetComponentsInChildren<MeshFilter>(true))
+        {
+            if(filter.sharedMesh==null)continue;
+            var b=filter.sharedMesh.bounds;
+            Matrix4x4 matrix=root.worldToLocalMatrix*filter.transform.localToWorldMatrix;
+            for(int i=0;i<8;i++)
+            {
+                Vector3 point=matrix.MultiplyPoint3x4(b.center+Vector3.Scale(b.extents,new Vector3((i&1)==0?-1:1,(i&2)==0?-1:1,(i&4)==0?-1:1)));
+                if(!any){bounds=new Bounds(point,Vector3.zero);any=true;}else bounds.Encapsulate(point);
+            }
+        }
+        return bounds;
+    }
+
+    public static void FitTransitLength(GameObject car,float nominalLength)
+    {
+        car.transform.localScale=Vector3.one;
+        float length=ModelBounds(car.transform).size.z;
+        if(length>.01f && nominalLength>0)car.transform.localScale=new Vector3(1,1,nominalLength/length);
+    }
+
     /// <summary>seed で決定的にバリアントIDを選ぶ。設定が無ければ 0。</summary>
     public static int PickVariantId(int vehicleType, int seed)
     {
@@ -51,6 +103,7 @@ public static class VehicleModelResolver
             model.transform.localPosition = Vector3.zero;
             model.transform.localRotation = Quaternion.identity;
             model.SetActive(true); // glTF テンプレートは非アクティブで読まれるため明示的に有効化する。
+            NormalizeModel(root.transform,model.transform);
         }
         else
         {

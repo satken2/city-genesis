@@ -22,7 +22,7 @@ import { useTranslation } from "react-i18next";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import type { AgentMasterEntry, ParcelData } from "../../types";
+import type { AgentMasterEntry, ParcelData, StructureMasterEntry } from "../../types";
 import { resolveAgentIcon } from "../../utils/agentIcon";
 import { resolveParcelIcon } from "../../utils/parcelIcon";
 
@@ -31,6 +31,7 @@ import {
   sendChangeState,
   sendChangeDisplay,
   sendEditBuildingUpdateFloors,
+  sendEditBuildingUpdateStructure,
   sendEditBuildingUpdateShape,
   sendEditBuildingUpdateEffectRange,
   sendEditBuildingUpdateDirectParams,
@@ -97,6 +98,9 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
   const [selectedBdType, setSelectedBdType] = useState<number | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<number | null>(null);
   const [floors, setFloors] = useState(1);
+  // 構造種別(structures マスターのID)。構造を持つバリアントを選ぶと許可構造の最上位で初期化され、
+  // 構造を持たないバリアント(農地など)では null のまま(送信しない=バックエンドが 0 を確定する)。
+  const [structure, setStructure] = useState<number | null>(null);
   // 建ぺい率(0.0〜1.0)。敷地面積に対する建築面積の上限割合。プレビュー形状・建設コストの算出に用いる。
   const [coverageRatio, setCoverageRatio] = useState(0.6);
   // 外観バリアント(visual_variant1/2/3)。0.0〜1.0の値で建物の外観を決定する。
@@ -214,7 +218,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
     })
       .then(async (res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json() as Promise<{ economic_agent: { bd_type: number; variant: number; floors: number; parcel_id: number; visual_variant?: number; visual_variant2?: number; visual_variant3?: number } }>;
+        return res.json() as Promise<{ economic_agent: { bd_type: number; variant: number; floors: number; parcel_id: number; structure?: number; visual_variant?: number; visual_variant2?: number; visual_variant3?: number } }>;
       })
       .then((data) => {
         if (controller.signal.aborted) return;
@@ -222,6 +226,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         setSelectedBdType(agent.bd_type);
         setSelectedVariant(agent.variant);
         setFloors(agent.floors);
+        setStructure(agent.structure != null && agent.structure > 0 ? agent.structure : null);
         setParcelId(agent.parcel_id);
         // 既存建物の外観バリアントを初期値として読み込む。
         // single_agentスキーマがvisual_variantを含まない場合はundefinedとなり、
@@ -230,7 +235,11 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         if (agent.visual_variant2 != null) setVisualVariant2(agent.visual_variant2);
         if (agent.visual_variant3 != null) setVisualVariant3(agent.visual_variant3);
         // バリアント選択に伴い Unity 側に建物建設モードを通知する
-        sendChangeState("STATE_EDIT_BUILDING", { building_variant: agent.variant, agent_id: editAgentId }).catch((err) => {
+        sendChangeState("STATE_EDIT_BUILDING", {
+          building_variant: agent.variant,
+          agent_id: editAgentId,
+          structure: agent.structure ?? 0,
+        }).catch((err) => {
           console.error("[BuildingConstructionPanel] sendChangeState failed:", err);
         });
       })
@@ -256,6 +265,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         // 市庁舎バリアントの最小階数を初期値にする。1階固定にすると min_floors>1 の
         // 市庁舎で「1階のまま確定→バックエンドが階数エラーで拒否」になるため。
         setFloors(entry?.min_floors ?? 1);
+        setStructure(defaultStructureOf(entry));
         // 直接配置の底面サイズを default_width × default_height で初期化する
         // (default_height 未設定なら正方形)。
         const initialWidth = entry?.default_width ?? DEFAULT_BUILDING_WIDTH;
@@ -266,7 +276,11 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         setVisualVariant(Math.random());
         setVisualVariant2(Math.random());
         setVisualVariant3(Math.random());
-        sendChangeState("STATE_EDIT_BUILDING", { building_variant: VARIANT_CITY, agent_id: null }).catch((err) => {
+        sendChangeState("STATE_EDIT_BUILDING", {
+          building_variant: VARIANT_CITY,
+          agent_id: null,
+          structure: defaultStructureOf(entry) ?? 0,
+        }).catch((err) => {
           console.error("[BuildingConstructionPanel] sendChangeState for city hall failed:", err);
         });
       }
@@ -338,6 +352,32 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
     if (selectedVariant === null || !masterData) return null;
     return masterData.agents[selectedVariant] ?? null;
   }, [masterData, selectedVariant]);
+
+  /**
+   * 選択中バリアントが選べる構造種別の一覧(ID昇順)。構造を持たないバリアントは空。
+   * 表示名は構造種別マスターから引く。
+   */
+  const structureOptions = useMemo((): { id: number; entry: StructureMasterEntry | undefined }[] => {
+    if (!selectedVariantData || !masterData) return [];
+    const ids = [...(selectedVariantData.structures ?? [])].sort((a, b) => a - b);
+    return ids.map((id) => ({ id, entry: masterData.structures?.[id] }));
+  }, [selectedVariantData, masterData]);
+
+  /** 選択中の構造種別のマスター(構造なしは null) */
+  const selectedStructureData = useMemo((): StructureMasterEntry | null => {
+    if (structure == null || !masterData) return null;
+    return masterData.structures?.[structure] ?? null;
+  }, [structure, masterData]);
+
+  /**
+   * 階数の上限。バリアントの max_floors と、構造上の最大階数(木造は3階までなど。0=無制限)の
+   * 小さい方。バックエンドの検証と同じ規則。
+   */
+  const maxFloorsAllowed = useMemo(() => {
+    const variantMax = selectedVariantData?.max_floors ?? 50;
+    const structureMax = selectedStructureData?.max_floors ?? 0;
+    return structureMax > 0 ? Math.min(variantMax, structureMax) : variantMax;
+  }, [selectedVariantData, selectedStructureData]);
 
   /** 現在直接配置モード(土地区画外クリック)かどうか。pickedPosition が非nullなら直接配置。 */
   const isDirectMode = pickedPosition !== null;
@@ -446,6 +486,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         parcel_id: parcelId,
         floors,
         construction_ratio: coverageRatio,
+        ...(structure != null ? { structure } : {}),
         // コピーモードでは copy_source_agent_id を送り、忠実コピーなら割引後コストを受け取る。
         ...(copySourceAgentId != null ? { copy_source_agent_id: copySourceAgentId } : {}),
       }),
@@ -492,7 +533,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       });
 
     return () => controller.abort();
-  }, [selectedVariant, parcelId, floors, coverageRatio, copySourceAgentId, apiBaseUrl]);
+  }, [selectedVariant, parcelId, floors, coverageRatio, copySourceAgentId, structure, apiBaseUrl]);
 
   /* ---- インフラ施設の効果範囲の取得と3D可視化 ---- */
 
@@ -721,6 +762,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         width: rectWidth,
         depth: rectDepth,
         angle: rectAngle,
+        ...(structure != null ? { structure } : {}),
       }),
       signal: controller.signal,
     })
@@ -749,7 +791,20 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       });
 
     return () => controller.abort();
-  }, [selectedVariant, pickedPosition, floors, rectWidth, rectDepth, rectAngle, apiBaseUrl]);
+  }, [selectedVariant, pickedPosition, floors, rectWidth, rectDepth, rectAngle, structure, apiBaseUrl]);
+
+  /* ---- 構造種別をUnityへ同期(プレビューの外観用) ---- */
+
+  /**
+   * 構造種別が変わったら Unity へ送り、キャッシュ済みの底面ポリゴンから構造に応じた
+   * パーツでプレビューメッシュを再生成させる。構造を持たないバリアントは 0 を送る。
+   */
+  useEffect(() => {
+    if (selectedVariant === null) return;
+    void sendEditBuildingUpdateStructure(structure ?? 0).catch((err) => {
+      console.error("[BuildingConstruction] sendEditBuildingUpdateStructure failed:", err);
+    });
+  }, [selectedVariant, structure]);
 
   /* ---- 直接配置モード: インフラ施設の効果範囲の取得(3D送信は共通の送信用useEffectが行う) ---- */
   useEffect(() => {
@@ -920,6 +975,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         source_agent_id: number;
         variant: number;
         floors: number;
+        structure?: number;
         visual_variant?: number;
         visual_variant2?: number;
         visual_variant3?: number;
@@ -930,6 +986,12 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         setSelectedBdType(entry?.bd_type ?? null);
         setSelectedVariant(p.variant);
         setFloors(p.floors);
+        // 構造もコピーする(元建物の構造が許可集合に無ければ既定=最上位)。
+        const copiedStructure =
+          p.structure != null && (entry?.structures ?? []).includes(p.structure)
+            ? p.structure
+            : defaultStructureOf(entry);
+        setStructure(copiedStructure);
         setCopySourceAgentId(p.source_agent_id);
         setCopyValid(false);
         setCopyInvalidReason(null);
@@ -938,7 +1000,11 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         if (p.visual_variant2 != null) setVisualVariant2(p.visual_variant2);
         if (p.visual_variant3 != null) setVisualVariant3(p.visual_variant3);
         // 区画選択フローへ遷移する(新規建設。agent_id は付けない)。
-        sendChangeState("STATE_EDIT_BUILDING", { building_variant: p.variant, agent_id: null }).catch((err) => {
+        sendChangeState("STATE_EDIT_BUILDING", {
+          building_variant: p.variant,
+          agent_id: null,
+          structure: copiedStructure ?? 0,
+        }).catch((err) => {
           console.error("[BuildingConstruction] sendChangeState (copy) failed:", err);
         });
       })
@@ -1030,6 +1096,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
   function handleVariantClick(variantId: number) {
     if (selectedVariant === variantId) {
       setSelectedVariant(null);
+      setStructure(null);
       // 外観バリアントをリセット
       setVisualVariant(null);
       setVisualVariant2(null);
@@ -1042,8 +1109,10 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       // これにより、1階では建てられない建物（例: 高層ビル）を選択した際にも、適切な階数でプレビューが表示される。
       const entry = masterData?.agents[variantId];
       const initialFloors = entry?.min_floors ?? 1;
+      const initialStructure = defaultStructureOf(entry);
       setSelectedVariant(variantId);
       setFloors(initialFloors);
+      setStructure(initialStructure);
       // 直接配置モードの底面サイズを default_width × default_height で初期化する
       // (default_height 未設定なら正方形)。
       const initialWidth = entry?.default_width ?? DEFAULT_BUILDING_WIDTH;
@@ -1055,9 +1124,25 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       setVisualVariant(Math.random());
       setVisualVariant2(Math.random());
       setVisualVariant3(Math.random());
-      sendChangeState("STATE_EDIT_BUILDING", { building_variant: variantId, agent_id: editAgentId ?? null }).catch((err) => {
+      sendChangeState("STATE_EDIT_BUILDING", {
+        building_variant: variantId,
+        agent_id: editAgentId ?? null,
+        structure: initialStructure ?? 0,
+      }).catch((err) => {
         console.error("[BuildingConstruction] sendChangeState failed:", err);
       });
+    }
+  }
+
+  /**
+   * 構造種別の変更。構造上の最大階数(木造3階など)を超えている階数は上限へ丸める。
+   */
+  function handleStructureChange(value: number) {
+    setStructure(value);
+    const entry = masterData?.structures?.[value];
+    const structureMax = entry?.max_floors ?? 0;
+    if (structureMax > 0 && floors > structureMax) {
+      handleFloorChange(structureMax);
     }
   }
 
@@ -1139,6 +1224,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
           body: JSON.stringify({
             variant: selectedVariant,
             floors,
+            ...(structure != null ? { structure } : {}),
             ...buildVisualVariantFields(),
           }),
         });
@@ -1152,6 +1238,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
             variant: selectedVariant,
             construction_ratio: coverageRatio,
             floors,
+            ...(structure != null ? { structure } : {}),
             // コピーモードでは元建物の実寸フットプリントを固定コピーし、忠実コピーなら割引く。
             ...(copySourceAgentId != null ? { copy_source_agent_id: copySourceAgentId } : {}),
             ...buildVisualVariantFields(),
@@ -1193,6 +1280,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
           depth: rectDepth,
           // 回転角はマイナス・360超も入力可能なため、確定時に mod 360 で [0,360) に正規化する。
           angle: normalizeAngle(rectAngle),
+          ...(structure != null ? { structure } : {}),
           ...(acknowledgeAcquisition ? { acknowledge_acquisition: true } : {}),
           ...buildVisualVariantFields(),
         }),
@@ -1355,6 +1443,30 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
             </div>
           </div>
 
+          {/* 構造種別の選択(構造を持つバリアントのみ)。上位ほど建設費が高く、耐用年数・耐火性が上がる。 */}
+          {structureOptions.length > 0 && (
+            <div className="bc-description-frame" style={{ marginTop: 10 }}>
+              <div className="bc-description-body">
+                <div className="bc-description-name">{t("building_construction.structure")}</div>
+                <select
+                  className="bc-select"
+                  value={structure ?? ""}
+                  onChange={(e) => handleStructureChange(parseInt(e.target.value))}
+                  disabled={editAgentId != null && parcelId === null}
+                >
+                  {structureOptions.map(({ id, entry }) => (
+                    <option key={id} value={id}>
+                      {entry?.display_name ?? `#${id}`}
+                    </option>
+                  ))}
+                </select>
+                <div className="bc-description-text" style={{ marginTop: 6 }}>
+                  {selectedStructureData?.description || t("building_construction.structureNote")}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* インフラ施設の効果範囲の凡例（プレビューか既存範囲のいずれかを3D表示中のみ） */}
           {(effectRangeActive || existingEffectRanges.length > 0) && (
             <div className="bc-effect-range-legend">
@@ -1506,7 +1618,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
                   value={floors}
                   onChange={handleFloorChange}
                   min={selectedVariantData.min_floors ?? 1}
-                  max={selectedVariantData.max_floors ?? 50}
+                  max={maxFloorsAllowed}
                   step={1}
                   integerOnly={true}
                 />
@@ -1548,7 +1660,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
                   value={floors}
                   onChange={handleFloorChange}
                   min={selectedVariantData.min_floors ?? 1}
-                  max={selectedVariantData.max_floors ?? 50}
+                  max={maxFloorsAllowed}
                   step={1}
                   integerOnly={true}
                 />
@@ -1668,6 +1780,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
                 sendChangeState("STATE_EDIT_BUILDING", {
                   building_variant: selectedVariant,
                   agent_id: editAgentId ?? null,
+                  structure: structure ?? 0,
                 }).catch((err) => {
                   console.error("[BuildingConstruction] sendChangeState (cancel) failed:", err);
                 });
@@ -1724,6 +1837,16 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
 }
 
 /* ---- ユーティリティ ---- */
+
+/**
+ * バリアントの既定の構造種別(許可構造の最上位=最も耐火・長寿命)。構造を持たないバリアントは null。
+ * バックエンドの resolve_structure(未指定時の既定)と同じ規則。
+ */
+function defaultStructureOf(entry: AgentMasterEntry | undefined | null): number | null {
+  const ids = entry?.structures ?? [];
+  if (ids.length === 0) return null;
+  return Math.max(...ids);
+}
 
 /** Shoelace formula で多角形の面積を計算 */
 function polygonArea(polygon: number[][]): number {

@@ -37,6 +37,8 @@
     "parcelSelected": "已選擇用地 #{{id}}",
     "costRatioHelp": "在坡地或複雜地形上建造建築會提高建設成本。",
     "coverageRatio": "建蔽率",
+    "structure": "結構",
+    "structureNote": "結構等級越高，建設費越高，但耐用年限與耐火性也越高",
     "estimatedMaxProduction": "預估產量（最大）",
     "estimatedEmployment": "預估僱用人數",
     "estimatedRunningCost": "預估營運成本",

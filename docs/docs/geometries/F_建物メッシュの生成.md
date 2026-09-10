@@ -168,6 +168,8 @@ Assets/Resources/Models/
 │   │       ├── yard_beam.prefab     # 門型梁（同上。著作幅6mを柱間へXスケール）
 │   │       ├── yard_stop.prefab     # 車止め（同上。行き止まり端に実寸配置）
 │   │       └── yard_shed.prefab     # 検修庫（同上。原点=XZ中心・Y=0接地）
+│   ├── b{bd_type}s{structure}/       # 構造種別つき（任意。b{bd_type} と同じ構成。§3.2）
+│   ├── a{agent_variant}s{structure}/ # 構造種別つき（任意。a{agent_variant} と同じ構成。§3.2）
 │   ├── a{agent_variant}/
 │   │   └── {threshold}/
 │   │       ├── base-prebuilt.prefab
@@ -202,7 +204,7 @@ Models/Buildings/{prefix}/{threshold}/{partName}
 
 | 構成要素          | 値                             | 説明                                                        |
 | ------------- | ----------------------------- | --------------------------------------------------------- |
-| **prefix**    | `b{bd_type}` または `a{variant}` | `AgentModelConfig` に定義があれば `a{variant}`、なければ `b{bd_type}` |
+| **prefix**    | `a{variant}s{structure}` / `a{variant}` / `b{bd_type}s{structure}` / `b{bd_type}` | 建物の構造種別 `structure`（木造=1・準耐火=2・耐火=3。0=構造なし）ごとのフォルダがあればそれを優先する。解決順は `a{variant}s{structure}` → `a{variant}`（`AgentModelConfig` に定義がある場合） → `b{bd_type}s{structure}` → `b{bd_type}` |
 | **threshold** | `0`, `250`, `500`, `750` …    | 外観バリアントの閾値フォルダ                                            |
 | **partName**  | `base-w1`, `mid-c2` 等         | レベル・種類・位置番号をハイフン結合                                        |
 
@@ -236,6 +238,8 @@ crane-base       クレーン最下段（工事中表示専用。[[F5_工事中�
 crane-mid        クレーンの繰り返しセグメント（工事中表示専用）
 crane-top        クレーン頂部（工事中表示専用・実寸スケールなし）
 ```
+
+構造種別つきフォルダ（`a{variant}s{structure}` / `b{bd_type}s{structure}`）は、木造の板壁や RC の打放しのように**構造の差をパーツ・マテリアルの差し替えで表現する**ためのもので、ジオメトリの生成方式（`model_type`）は変えない。中身の構成・命名は無印のフォルダと同じで、構造ごとに用意しなければ無印のフォルダが使われる。どのフォルダが存在するかは `agent_model_config.yaml` の `structure_prefixes` に列挙され（`generate_agent_model_config.py` が実在フォルダから生成する）、`AgentModelConfig.HasStructurePrefix` が参照する。フォルダを追加したら必ず生成器を再実行すること。
 
 工事中表示専用パーツ（scaffold-\* / crane-\*）は、通常の prefix（`a{variant}` / `b{bd_type}`）に加えて、
 全建物共通の**標準パーツ置き場 `Models/Buildings/common/`** へのフォールバックを持つ（[[F5_工事中建物のメッシュ生成]] §2）。

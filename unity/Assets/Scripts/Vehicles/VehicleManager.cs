@@ -16,7 +16,7 @@ public class VehicleManager : MonoBehaviour
     [SerializeField] private float renderRadius = 400f;
     [SerializeField] private float despawnMargin = 80f;
     [Header("密度")]
-    [SerializeField] private float timeExaggeration = LocalConstants.VEHICLE_TIME_EXAGGERATION;
+    [SerializeField] private float renderFraction = 1f;
     [SerializeField] private float activeHoursPerDay = LocalConstants.VEHICLE_ACTIVE_HOURS_PER_DAY;
     [SerializeField] private int maxActiveVehicles = 300;
     [SerializeField] private float rangeScanInterval = .5f;
@@ -25,7 +25,6 @@ public class VehicleManager : MonoBehaviour
     [Header("走行")]
     [SerializeField] private float baseSpeed = 12f;
     [SerializeField] private float intersectionCurveTension = .4f;
-    [SerializeField] private float intersectionSpeedFactor = .5f;
     [SerializeField] private float heavyVehicleOuterLaneBias = .7f;
     [SerializeField] private float fadeDuration = .4f;
     [SerializeField] private bool showDebugOverlay;
@@ -61,6 +60,11 @@ public class VehicleManager : MonoBehaviour
     private static long State(int path, bool forward) => ((long)path << 1) | (forward ? 1L : 0L);
     private Transform container;
     private float scanTimer, densityTimer;
+    private float motionFetchTime;
+    private bool motionInFlight;
+    private int motionGeneration;
+    private readonly Dictionary<int,RoadMotionData> motion = new();
+    private readonly Dictionary<Vehicle,float> gaps = new();
     private Vector3 lastCenter;
     private bool hasCenter;
     private int densityTick;
@@ -130,6 +134,7 @@ public class VehicleManager : MonoBehaviour
 
     private void ClearVehicles()
     {
+        motionGeneration++; motionInFlight=false; motionFetchTime=0; motion.Clear();
         for (int i = active.Count - 1; i >= 0; i--) Despawn(i);
         roads.Clear(); buckets.Clear(); bucketByKey.Clear();
         population.Reset(); scanTimer = 0; densityTimer = 0;
@@ -163,6 +168,7 @@ public class VehicleManager : MonoBehaviour
         }
         roads.Clear();
         foreach (var entry in nextRoads) roads.Add(entry.Key, entry.Value);
+        FetchMotion();
         if (accessWorker == null) accessWorker = StartCoroutine(UpdateAccess(center));
         var previous = new Dictionary<long, Bucket>(bucketByKey);
         buckets.Clear(); bucketByKey.Clear();
@@ -170,9 +176,10 @@ public class VehicleManager : MonoBehaviour
         foreach (var road in roads.Values)
         foreach (int type in Constants.ROAD_VEHICLE_KEYS)
         {
+            if (type == Constants.VEHICLE_BUS) continue;
             long key = Key(road.data.path_id, type);
             float target = Traffic(road.data, type) / Mathf.Max(1, activeHoursPerDay * 3600) * road.insideLength
-                / Mathf.Max(.1f, baseSpeed * SpeedFactor(type)) * Mathf.Max(0, timeExaggeration);
+                / MeanSpeed(road.data.path_id,type) * Mathf.Clamp01(renderFraction);
             var bucket = new Bucket { road = road, type = type, target = target,
                 average = previous.TryGetValue(key, out var old) ? old.average : 0 };
             buckets.Add(bucket); bucketByKey.Add(key, bucket); total += target;
@@ -438,6 +445,48 @@ public class VehicleManager : MonoBehaviour
         return true;
     }
 
+    private void FetchMotion()
+    {
+        if (motionInFlight || Time.unscaledTime < motionFetchTime || roads.Count == 0) return;
+        motionInFlight=true; motionFetchTime=Time.unscaledTime+2;
+        int generation=motionGeneration;
+        var ids=new List<int>(roads.Keys);
+        if(ids.Count>4096)ids.RemoveRange(4096,ids.Count-4096);
+        StartCoroutine(ApiClient.Post<RoadMotionResponse>("/paths/motion",ids,response=>
+        {
+            if(generation!=motionGeneration)return;
+            motion.Clear();
+            if(response?.paths!=null)foreach(var item in response.paths)if(item.Valid)motion[item.path_id]=item;
+            if(response != null && response.active_hours > 0) activeHoursPerDay=response.active_hours;
+            motionInFlight=false;
+        },(_,__)=>{if(generation==motionGeneration)motionInFlight=false;}));
+    }
+    private float MeanSpeed(int path,int type) => motion.TryGetValue(path,out var data) ? data.MeanSpeed : Mathf.Max(.1f,baseSpeed*SpeedFactor(type));
+    private void SetMotion(Vehicle v,float connectorLength=0)
+    {
+        float mean=MeanSpeed(v.pathId,v.vehicleType);
+        v.motionRemaining=(v.Remaining+connectorLength)/mean;
+        v.motionFreeSpeed=motion.TryGetValue(v.pathId,out var data)?data.FreeSpeed:mean;
+    }
+    private void BuildFollowingGaps()
+    {
+        gaps.Clear();
+        var groups=new Dictionary<(int,bool,int),List<Vehicle>>();
+        foreach(var v in active)
+        {
+            if(v.ExitingRoad || v.fading)continue;
+            var key=(v.pathId,v.forward,v.lane);
+            if(!groups.TryGetValue(key,out var list)){list=new();groups[key]=list;}
+            list.Add(v);
+        }
+        foreach(var list in groups.Values)
+        {
+            list.Sort((a,b)=>Progress(a).CompareTo(Progress(b)));
+            for(int i=0;i+1<list.Count;i++)gaps[list[i]]=Mathf.Max(0,Progress(list[i+1])-Progress(list[i])-4.5f);
+        }
+    }
+    private static float Progress(Vehicle v)=>v.InIntersection ? -(v.connector.Length-v.connectorS) : v.forward?v.s:v.TotalLength-v.s;
+
     private void Spawn(Bucket b)
     {
         var road = b.road;
@@ -466,10 +515,11 @@ public class VehicleManager : MonoBehaviour
         }
         int variant = VehicleModelResolver.PickVariantId(b.type, Random.Range(0, int.MaxValue));
         var v = new Vehicle { vehicleType = b.type, variantId = variant,
-            speed = Mathf.Max(.1f, baseSpeed * SpeedFactor(b.type) * Random.Range(.85f, 1.15f)),
+            speed = Mathf.Max(.1f, MeanSpeed(b.road.data.path_id,b.type)),
             go = Acquire(b.type, variant), spawnBlendRemaining = 15 };
         v.SetPath(road.data.path_id, road.line, forward, s);
         SetLane(v, road, true);
+        SetMotion(v);
         active.Add(v);
         Place(v);
     }
@@ -490,12 +540,22 @@ public class VehicleManager : MonoBehaviour
     private void MoveVehicles(float dt, Vector3 center)
     {
         float radius = Mathf.Max(1, renderRadius + despawnMargin);
+        BuildFollowingGaps();
         for (int i = active.Count - 1; i >= 0; i--)
         {
             var v = active[i];
             var data = pathManager.GetPathData(v.pathId);
             if (!Drivable(data) || !DirectionAllowsEntry(data.travel_direction, v.forward)) { Despawn(i); continue; }
             float remaining = dt;
+            if (!v.ExitingRoad && !v.fading)
+            {
+                float distance = v.Remaining+(v.InIntersection?v.connector.Length-v.connectorS:0);
+                float free=motion.TryGetValue(v.pathId,out var timing)?timing.FreeSpeed:v.motionFreeSpeed;
+                float desired=RoadMotionControl.DesiredSpeed(distance,v.motionRemaining,free);
+                v.speed=RoadMotionControl.FollowingSpeed(desired,v.speed,gaps.TryGetValue(v,out float gap)?gap:float.PositiveInfinity,dt);
+                v.connectorSpeed=v.speed;
+                v.motionRemaining-=dt;
+            }
             bool invalid = false;
             int transitions = 0;
             while (remaining > .00001f)
@@ -611,7 +671,8 @@ public class VehicleManager : MonoBehaviour
         v.Sample(out Vector3 p1, out Vector3 t1);
         v.connector = VehiclePolyline.Connector(p0, t0, p1, t1, intersectionCurveTension);
         v.connectorS = 0;
-        v.connectorSpeed = v.speed * Mathf.Lerp(1, Mathf.Clamp(intersectionSpeedFactor, .1f, 1), Mathf.Clamp01(Vector3.Angle(t0, t1) / 90));
+        v.connectorSpeed = v.speed;
+        SetMotion(v,v.connector.Length);
         return true;
     }
 
