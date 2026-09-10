@@ -413,7 +413,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
                     CreateOrUpdateParcelObject(p);
                     parcelVersionCache[p.parcel_id] = p.version;
                 }
-                yield return null;
+                yield return RenderWorkScheduler.Continue;
             }
         }
 

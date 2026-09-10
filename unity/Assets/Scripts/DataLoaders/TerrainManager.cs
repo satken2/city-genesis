@@ -1426,13 +1426,13 @@ public class TerrainManager : BaseApiDataManager
                         if (canceled) break;
                         try { ApplyHeightBand(staged, active.heights, res, row, Mathf.Min(STREAM_BAND_ROWS, res-row)); }
                         catch (Exception ex) { Debug.LogException(ex); canceled = true; break; }
-                        yield return null;
+                        yield return RenderWorkScheduler.Continue;
                     }
                     if (!canceled)
                     {
                         try { staged.SyncHeightmap(); }
                         catch (Exception ex) { Debug.LogException(ex); canceled = true; }
-                        yield return null;
+                        yield return RenderWorkScheduler.Continue;
                     }
                     canceled |= clearEpoch != epoch || (active.batch != null && active.batch.IsCanceled);
                     if (!canceled)
@@ -1453,7 +1453,7 @@ public class TerrainManager : BaseApiDataManager
                 if (staged != null) { Destroy(staged); staged = null; }
                 active.done = true;
                 active = null;
-                yield return null;
+                yield return RenderWorkScheduler.Continue;
             }
         }
         finally

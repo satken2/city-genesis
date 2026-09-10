@@ -131,10 +131,10 @@ public static class LocalConstants
     public const float VEHICLE_TIME_EXAGGERATION = 60f; // 車描画の時間圧縮倍率。1=物理的に正確な同時存在台数(ほぼ常に0台)
     public const float VEHICLE_ACTIVE_HOURS_PER_DAY = 15f; // 1日の交通活動時間(h)。general_params.yamlのPATH_ACTIVE_HOURSと同値を保つ
 
-    public const bool UNITY_LOG_BUILDING = true; // BuildingMeshBuilder 等
+    public const bool UNITY_LOG_BUILDING = false; // BuildingMeshBuilder 等
     public const bool UNITY_LOG_ROAD = false;     // RoadPath 等
     public const bool UNITY_LOG_LOADER = false;   // CellDataLoader / 各Manager のロード進行ログ
-    public const bool UNITY_LOG_TIMING = false;   // [TIMING] 計測ログ
+    public const bool UNITY_LOG_TIMING = true;   // [TIMING] 計測ログ
 }
 
 /// <summary>

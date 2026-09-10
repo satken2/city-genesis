@@ -15,7 +15,7 @@
 
 生成・適用ワーカーは `RenderWorkScheduler.Start(owner, routine, category)` で起動し、停止も同クラスの `Stop` を使う。Unityの `StopCoroutine` だけではiteratorのfinallyが実行されないため、独自のStart/Stop対で待ち行列と一時メッシュを解放する。GOの無効化・破棄では `RenderWorkLifetime` が停止する。子処理は `LoadBatch.IsCanceled` も確認する。
 
-`PerformanceConfig.FrameBudgetMs` は全生成器の同期処理に共通（目標フレーム時間の25%、最低2ms）。各処理は `SliceBudgetMs` で協調中断する。1回のUnity API呼び出しは中断できないため、F8の最大step時間も確認する。
+`PerformanceConfig.FrameBudgetMs` は全生成器の同期処理に共通（目標フレーム時間の25%、最低2ms）。各処理は `SliceBudgetMs` または1件ごとの境界で `yield return RenderWorkScheduler.Continue` により協調中断する。共通ポンプが実行可能な処理を順番に進め、予算内なら同じフレームでも再開する。`yield return null` は次フレーム待ちなので、通信のポーリング・アイドル・周期待ちだけに使う。UnityのYieldInstruction/CustomYieldInstruction/AsyncOperation/Coroutineはネイティブ待機へ委譲し、その待機中の処理は実行順を塞がない。ポンプはRenderWorkLifetime.LateUpdateから1フレームに1回実行し、同期処理の合計に加えてポンプ全体の経過時間も共通予算で制限する。1回のUnity API呼び出しは中断できないため、F8の最大step時間も確認する。
 
 `RenderObjectCache` は非表示GOのLRU。建物256MiB、道路128MiB、道路パーツ8MiB、全キャッシュ合算512MiBの推定上限。生成Meshと固定管理費を数え、表示中GO・共有FBX・GPU複製は別。`RenderCacheIdentity` は生成Meshのみ所有し、共有アセットを破棄してはいけない。セッション終了時は各キャッシュをClearする。
 
@@ -200,3 +200,13 @@ TrackPath.InfrastructureConnectionProviderにはIsInfrastructureConnectionを登
 プロップは距離で本数を間引かず、極小投影サイズによるHiddenも使わない。木1/2は幹なしの専用Farを使用し、投影比1%未満でPropRenderModelの6三角形の四角錐へ替え、1.2%以上で戻す。DrawLod.Far内の切り替えで、常駐セル・候補予算は維持する。生成した最小メッシュはPropRenderModel.Disposeで解放する。
 
 プロップの障害物除外は範囲散布のみ。Candidate.explicitInstanceは常に表示可能とし、区画・道路・水域の追加や更新でも非表示にしない。個別配置の接地・常駐セル・候補予算・LODは通常どおり適用する。
+
+
+## ロード性能の計測
+
+`UNITY_LOG_TIMING` で `LoadBatch.Trace` の工程別経過時間と、RenderWorkSchedulerの5秒単位iterator別集約(cpu/maxStep/steps/queueFrames/underBudgetQueueFrames)を出す。RenderWorkLifetime.LateUpdateから報告するため待機中も残件数を観測できる。BuildingManager.PendingDetailCountとPathManager.PendingTerrainRebuildCountは遅延生成キューのみで、全表示の完了判定ではない。詳細とログの読み方は `K_Unity差分ロード整理.md` の「ロード遅延の計測」。
+
+
+区画一覧は1件ごとのContinueで予算内に複数件適用し、全件適用・削除差分の確定後にIsLoadingを解除する。区画が確定してから建物を生成する依存関係は維持する。地形の帯適用・SyncHeightmap・完成タイル公開も別ステップとし、未完成タイルを公開しない。
+
+`Tests/Lod/run.ps1` は小さい生成880件のフレーム数・共通予算・複数ワーカーの進行に加え、null/CustomYieldInstructionの待機、ネストしたiteratorの待機中キャンセルを検証する。MoveNext内で自己取消しが起きても、実行中iteratorのDisposeはそのステップが戻ってから行う。

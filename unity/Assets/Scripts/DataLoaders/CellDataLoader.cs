@@ -414,6 +414,7 @@ public class CellDataLoader : MonoBehaviour
     private IEnumerator LoadObjectManagers(LodCellSets cellSets, HashSet<Vector2Int> tierChangedCells, bool isForce, LoadBatch batch)
     {
         if (batch.IsCanceled) yield break;
+        batch.Trace("PARCEL_START");
         if (parcelManager != null)
         {
             parcelManager.LoadLodCells(cellSets, isForce);
@@ -424,6 +425,7 @@ public class CellDataLoader : MonoBehaviour
             }
         }
         if (batch.IsCanceled) yield break;
+        batch.Trace("PARCEL_DONE / OBJECTS_START");
         // 1. 建物, 道路, 区画, 地区のリロード
         if (buildingManager != null)
         {
@@ -455,6 +457,7 @@ public class CellDataLoader : MonoBehaviour
 
     private void OnTerrainAllLoaded(IReadOnlyList<Vector2Int> updatedCells)
     {
+        activeLoadBatch?.Trace($"TERRAIN_DONE updated={updatedCells?.Count ?? 0}");
         // 今回実際に更新されたセルを未処理集合へ統合する。
         // (前回コルーチンがキャンセルされて取りこぼしたセルがあれば、それと合流する)
         if (updatedCells != null)
@@ -586,6 +589,7 @@ public class CellDataLoader : MonoBehaviour
     /// </summary>
     private void FinishTerrainFollowUp()
     {
+        activeLoadBatch?.Trace("FOLLOWUP_DONE");
         // defer 中に受信して破棄された OnTerrainTileReady のセルを回収し、未処理集合へ合流させる。
         // 通常、これらのセルは updatedTerrainCellsThisLoad 経由で追従処理済みのため空集合になるが、
         // バッチのキャンセルタイミングによっては取りこぼしが起こりうるため、防御として拾う。

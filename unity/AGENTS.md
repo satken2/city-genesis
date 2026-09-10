@@ -123,3 +123,6 @@ F8は描画数、生成予算、フレームp95/p99、キャッシュ推定量�
 ## 地形プロップの描画
 
 プロップは既存farCells全体にロードし、セル内を整数分割してGPUインスタンシングで描画する。Near/Dynamicは個体別DrawLod、FarセルはFar以下、UltraFarは非表示。開発による除外は保存regionを変更せず、同梱された障害物情報で表示可否を更新する。共通LoadBatchと地形追従に組み込まれている。詳細はDataLoaders/AGENTS.mdと公開M_地形プロップ.md。
+
+
+単独起動時のAPI既定URLは `http://127.0.0.1:5000/api/v1`。IPv4だけで待受ける開発サーバーに対してlocalhostのIPv6接続からのフォールバック待ちを避ける。明示的な `--api-base-url` は指定値を優先する。

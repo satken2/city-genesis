@@ -13,15 +13,27 @@
 /// </summary>
 public class LoadBatch
 {
+    private static int nextId;
+    private readonly int id = ++nextId;
+    private readonly System.Diagnostics.Stopwatch elapsed = System.Diagnostics.Stopwatch.StartNew();
+
+    /// <summary>バッチ開始からの経過時間。各工程の待ち合わせと再開を同じIDで追跡する。</summary>
+    public void Trace(string stage)
+    {
+        UnityLog.If(LocalConstants.UNITY_LOG_TIMING,
+            () => $"[TIMING] LoadBatch#{id} {stage} elapsed={elapsed.ElapsedMilliseconds}ms frame={UnityEngine.Time.frameCount}");
+    }
     /// <summary>新しいバッチの開始によりキャンセルされたかどうか。</summary>
     public bool IsCanceled { get; private set; }
 
     public LoadBatch(LodCellSets cellSets, bool isForce)
     {
+        Trace($"START cells={cellSets.farCells?.Count ?? 0} force={isForce}");
     }
 
     public void Cancel()
     {
+        if (!IsCanceled) Trace("SUPERSEDED/RESET");
         IsCanceled = true;
     }
 }

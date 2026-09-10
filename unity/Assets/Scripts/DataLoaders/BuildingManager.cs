@@ -14,6 +14,7 @@ using GeneratedModels;
 public class BuildingManager : BaseApiDataManager
 {
     public static BuildingManager Instance { get; private set; }
+    public int PendingDetailCount => deferredDetailBuildings.Count;
 
     private const string BUILDING_PREFIX = "Building_";
     private const string BUILDING_TAG = "BuildingObject";
@@ -559,16 +560,16 @@ public class BuildingManager : BaseApiDataManager
                     }
                 }
 
-                // フレーム予算: 目標FPSに基づく動的予算を超えたら次フレームに譲る。
+                // 生成スライスを超えたら他ワーカーへ譲り、共通予算内なら同じフレームで再開する。
                 // これによりオブジェクト生成の集中によるカクつきを抑制する。
                 if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
                 {
                     // 予算スライスの区切りで詳細メッシュの個数上限を適用する
                     // (建物1件ごとに全走査すると走査コストが支配的になるため)。
                     EvictDetailedBuildingsOverCap(viewCamPos, viewCamFwd, justCreatedId: b.agent_id);
-                    yield return null;
+                    yield return RenderWorkScheduler.Continue;
                     stopwatch.Restart();
-                    // フレームを跨いだのでカメラ状態を取り直す。
+                    // 中断がフレームを跨ぐ場合もあるため、カメラ状態を取り直す。
                     viewCam = Camera.main;
                     viewCamPos = viewCam != null ? viewCam.transform.position : Vector3.zero;
                     viewCamFwd = viewCam != null ? GetHorizontalForward(viewCam) : Vector3.forward;
@@ -731,7 +732,7 @@ public class BuildingManager : BaseApiDataManager
 
             if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
             {
-                yield return null;
+                yield return RenderWorkScheduler.Continue;
                 stopwatch.Restart();
                 cam = Camera.main;
                 camPos = cam != null ? cam.transform.position : Vector3.zero;
@@ -772,6 +773,7 @@ public class BuildingManager : BaseApiDataManager
             Vector3 camPos = cam != null ? cam.transform.position : Vector3.zero;
             Vector3 fwd = cam != null ? GetHorizontalForward(cam) : Vector3.forward;
 
+            bool progressed = false;
             budgetWatch.Restart();
             while (deferredDetailBuildings.Count > 0 && budgetWatch.Elapsed.TotalMilliseconds <= PerformanceConfig.SliceBudgetMs)
             {
@@ -804,6 +806,7 @@ public class BuildingManager : BaseApiDataManager
 
                 DeferredDetailRequest req = deferredDetailBuildings[bestId];
                 deferredDetailBuildings.Remove(bestId);
+                progressed = true;
 
                 // データキャッシュから消えた建物(削除済み)は生成しない。
                 if (!buildingDataCache.ContainsKey(bestId)) continue;
@@ -828,7 +831,7 @@ public class BuildingManager : BaseApiDataManager
                 EvictDetailedBuildingsOverCap(camPos, fwd, justCreatedId: bestId);
             }
 
-            yield return null;
+            yield return progressed ? RenderWorkScheduler.Continue : null;
         }
     }
 

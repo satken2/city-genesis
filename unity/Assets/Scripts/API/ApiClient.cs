@@ -16,7 +16,7 @@ public static class ApiClient
     /// 起動時にコマンドライン引数 --api-base-url で上書き可能。
     /// Editor スクリプトなど外部からアクセスできるよう public にしている。
     /// </summary>
-    public static string BASE_URL = "http://localhost:5000/api/v1";
+    public static string BASE_URL = "http://127.0.0.1:5000/api/v1";
 
     /// <summary>
     /// GETリクエストを送信

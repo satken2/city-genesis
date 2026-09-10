@@ -79,6 +79,7 @@ public static class LodQA
         yield return InterruptedPathResponse();
         yield return MeshBakeLifetime();
         yield return Scheduler();
+        yield return SchedulerThroughput();
         yield return AtomicTerrain();
         yield return BuildingBatches();
         yield return BuildingExterior();
@@ -304,6 +305,91 @@ public static class LodQA
         Check((int)Type("RenderWorkScheduler").GetProperty("WaitingCount").GetValue(null) == 0,"Canceled scheduler ticket leaked");
         results.Add($"Scheduler: 8 workers / 32 steps across {frames.Count} frames; cancellation passed");
     }
+    static IEnumerator SchedulerThroughput()
+    {
+        Static("RenderWorkScheduler", "Reset");
+        object resume = Type("RenderWorkScheduler").GetField("Continue").GetValue(null);
+        int oldFps = Application.targetFrameRate;
+        Application.targetFrameRate = 60;
+        int completed = 0;
+        var progress = new int[4];
+        var frames = new HashSet<int>();
+        double maxWork = 0;
+        int previousFrame = -1;
+        double frameWork = 0;
+        IEnumerator Work(int worker)
+        {
+            for (int i = 0; i < 220; i++)
+            {
+                if (previousFrame != Time.frameCount) { previousFrame = Time.frameCount; frameWork = 0; }
+                var watch = Stopwatch.StartNew();
+                while (watch.Elapsed.TotalMilliseconds < .1) { }
+                frameWork += watch.Elapsed.TotalMilliseconds;
+                maxWork = Math.Max(maxWork, frameWork);
+                frames.Add(Time.frameCount);
+                progress[worker]++;
+                yield return resume;
+            }
+            Check(Array.TrueForAll(progress, count => count > 0), "Ready worker starved behind cooperative work");
+            completed++;
+        }
+        for (int i = 0; i < 4; i++) Static("RenderWorkScheduler", "Start", host, Work(i), "QA.Throughput");
+        float deadline = Time.realtimeSinceStartup + 15;
+        while (completed < 4 && Time.realtimeSinceStartup < deadline) yield return null;
+        Check(completed == 4, "Cooperative work failed to finish");
+        Check(frames.Count < 100, "Small items still pay one frame each");
+        Check(frames.Count >= 20, "Cooperative work ignored the shared frame budget");
+        Check(maxWork < 8, "Small cooperative steps exceeded frame budget excessively");
+
+        bool resumed = false, nestedDisposed = false;
+        int startFrame = 0, afterNull = 0;
+        IEnumerator NativeWait()
+        {
+            startFrame = Time.frameCount;
+            yield return null;
+            afterNull = Time.frameCount;
+            yield return new WaitUntil(() => resumed);
+            yield return new WaitForSecondsRealtime(.05f);
+            completed++;
+        }
+        Static("RenderWorkScheduler", "Start", host, NativeWait(), "QA.NativeWait");
+        for (int i = 0; i < 5; i++) yield return null;
+        Check(afterNull > startFrame, "Null yield failed to wait for next frame");
+        Check(completed == 4, "CustomYieldInstruction resumed before its condition");
+        resumed = true;
+        deadline = Time.realtimeSinceStartup + 2;
+        while (completed < 5 && Time.realtimeSinceStartup < deadline) yield return null;
+        Check(completed == 5, "Native wait failed to resume");
+
+        IEnumerator Child()
+        {
+            try { yield return new WaitForSecondsRealtime(30); }
+            finally { nestedDisposed = true; }
+        }
+        IEnumerator Parent() { yield return Child(); }
+        var handle = (Coroutine)Static("RenderWorkScheduler", "Start", host, Parent(), "QA.NestedCancel");
+        for (int i = 0; i < 3; i++) yield return null;
+        Static("RenderWorkScheduler", "Stop", host, handle);
+        Check(nestedDisposed, "Cancel during native wait leaked nested iterator");
+        Check((int)Type("RenderWorkScheduler").GetProperty("WaitingCount").GetValue(null) == 0, "Native wait cancellation left queue entries");
+        bool selfDisposed = false;
+        Coroutine selfHandle = null;
+        IEnumerator SelfCancel()
+        {
+            try
+            {
+                Static("RenderWorkScheduler", "Stop", host, selfHandle);
+                yield return resume;
+            }
+            finally { selfDisposed = true; }
+        }
+        selfHandle = (Coroutine)Static("RenderWorkScheduler", "Start", host, SelfCancel(), "QA.SelfCancel");
+        for (int i = 0; i < 3; i++) yield return null;
+        Check(selfDisposed, "Self cancellation did not release the executing iterator");
+        Check((int)Type("RenderWorkScheduler").GetProperty("WaitingCount").GetValue(null) == 0, "Self cancellation left queue entries");
+        Application.targetFrameRate = oldFps;
+        results.Add($"Scheduler throughput: 880 items in {frames.Count} frames, max synthetic CPU/frame={maxWork:F2}ms; fair progress, native waits and nested cancellation passed");
+    }
     static IEnumerator AtomicTerrain()
     {
         var go = new GameObject("TerrainManager"); go.SetActive(false);
@@ -327,8 +413,13 @@ public static class LodQA
         var oldLayer = oldData.terrainLayers[0];
         float oldHeight = oldData.GetHeight(0,0);
         object second = Request(.2f); pending[Vector2Int.zero] = second;
-        for(int i=0;i<4;i++) { yield return null; Check(ReferenceEquals(((Terrain)tiles[Vector2Int.zero]).terrainData,oldData),"Partial terrain exposed before commit"); }
-        steps=0; while (!(bool)Field(second,"done") && steps++<180) yield return null;
+        steps=0;
+        while (!(bool)Field(second,"done") && steps++<180)
+        {
+            Check(ReferenceEquals(((Terrain)tiles[Vector2Int.zero]).terrainData,oldData), "Partial terrain exposed before commit");
+            Check(oldData.GetHeight(0,0) == oldHeight, "Staged update modified visible terrain heights");
+            yield return null;
+        }
         Check((bool)Field(second,"succeeded"),"Updated terrain did not commit");
         Check(((Terrain)tiles[Vector2Int.zero]).terrainData.GetHeight(0,0)>oldHeight,"Updated surface not visible");
         yield return null;

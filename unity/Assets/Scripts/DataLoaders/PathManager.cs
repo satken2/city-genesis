@@ -14,6 +14,7 @@ using NetTopologySuite.Algorithm;
 /// </summary>
 public class PathManager : BaseApiDataManager
 {
+    public int PendingTerrainRebuildCount => queuedTerrainFollowPathIds.Count;
     private readonly RenderObjectCache lodCache = new RenderObjectCache(128L * 1024 * 1024);
     private readonly Dictionary<int, int> geometryRevisions = new Dictionary<int, int>();
 
@@ -471,7 +472,7 @@ public class PathManager : BaseApiDataManager
             {
                 if (!pathDataCache.ContainsKey(path.path_id)) continue;
                 TryRebuildPathOnce(path, LodTier.Near, false, false, "描画LOD");
-                yield return null;
+                yield return RenderWorkScheduler.Continue;
             }
         }
     }
@@ -630,7 +631,7 @@ public class PathManager : BaseApiDataManager
                 TryRebuildPathOnce(path, tier, updateIntersections: false, forceRebuild: true, reason: "地形追従(キュー)");
             }
 
-            yield return null;
+            yield return RenderWorkScheduler.Continue;
         }
     }
 
@@ -958,7 +959,7 @@ public class PathManager : BaseApiDataManager
                 receivedNodeIds.Add(n.node_id);
                 if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
                 {
-                    yield return null;
+                    yield return RenderWorkScheduler.Continue;
                     stopwatch.Restart();
                 }
             }
@@ -1108,7 +1109,7 @@ public class PathManager : BaseApiDataManager
 
                 if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
                 {
-                    yield return null;
+                    yield return RenderWorkScheduler.Continue;
                     stopwatch.Restart();
                 }
             }
@@ -1129,7 +1130,7 @@ public class PathManager : BaseApiDataManager
 
                 if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
                 {
-                    yield return null;
+                    yield return RenderWorkScheduler.Continue;
                     stopwatch.Restart();
                 }
             }
@@ -1150,7 +1151,7 @@ public class PathManager : BaseApiDataManager
             }
             if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
             {
-                yield return null;
+                yield return RenderWorkScheduler.Continue;
                 stopwatch.Restart();
             }
         }
@@ -1217,7 +1218,7 @@ public class PathManager : BaseApiDataManager
 
             if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
             {
-                yield return null;
+                yield return RenderWorkScheduler.Continue;
                 stopwatch.Restart();
             }
         }
@@ -1296,7 +1297,7 @@ public class PathManager : BaseApiDataManager
 
             if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
             {
-                yield return null;
+                yield return RenderWorkScheduler.Continue;
                 stopwatch.Restart();
             }
         }
@@ -1320,7 +1321,7 @@ public class PathManager : BaseApiDataManager
 
             if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
             {
-                yield return null;
+                yield return RenderWorkScheduler.Continue;
                 stopwatch.Restart();
             }
         }
@@ -1356,7 +1357,7 @@ public class PathManager : BaseApiDataManager
             yield return UpdateNodeIntersectionMeshAfterNodeReady(nodeId);
             if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
             {
-                yield return null;
+                yield return RenderWorkScheduler.Continue;
                 stopwatch.Restart();
             }
         }
@@ -3653,7 +3654,7 @@ public class PathManager : BaseApiDataManager
 
             if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
             {
-                yield return null;
+                yield return RenderWorkScheduler.Continue;
                 stopwatch.Restart();
             }
         }
@@ -3690,7 +3691,7 @@ public class PathManager : BaseApiDataManager
 
             if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
             {
-                yield return null;
+                yield return RenderWorkScheduler.Continue;
                 stopwatch.Restart();
             }
         }
