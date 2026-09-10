@@ -142,6 +142,8 @@ public sealed class TransitVehicleManager : MonoBehaviour
         int stride = Math.Max(1,(int)Math.Ceiling((double)trains / Math.Max(1,maxVisibleCars/cars*4)));
         for (int train = 0; train < trains; train += stride)
         {
+            // 編成の外観は路線IDと編成番号で固定し、往復・プール復帰でも全車を揃える。
+            int variant = VehicleModelResolver.PickVariantId(line.type, unchecked(line.data.line_agent_id * 397 + train));
             double trainTime = clock + line.motion.Duration*train/trains;
             int step = line.motion.AtTime(trainTime, out double distance, out bool stopped);
             if (step < 0) continue;
@@ -162,13 +164,13 @@ public sealed class TransitVehicleManager : MonoBehaviour
                 // 折り返しでは車体の前後を維持し、進行方向に対する編成順を逆転する。
                 int identity = returning ? cars-1-car : car;
                 bool middle = identity > 0 && identity < cars-1;
-                string modelKey = line.type + (middle ? ":middle" : ":0");
+                string modelKey = line.type + ":" + variant + (middle ? ":middle" : ":lead");
                 string key = line.data.line_agent_id+":"+train+":"+identity+":"+modelKey;
                 used.Add(key);
                 if (!visible.TryGetValue(key, out var go))
                 {
                     if (pool.TryGetValue(modelKey,out var stack) && stack.Count > 0) go = stack.Pop();
-                    else go = VehicleModelResolver.CreateTransitCar(line.type,middle,transform);
+                    else go = VehicleModelResolver.CreateTransitCar(line.type,middle,transform,variant);
                     go.name = modelKey; visible[key] = go; go.SetActive(true);
                 }
                 if (!nominalLengths.TryGetValue(go,out float fitted) || fitted != spacing)

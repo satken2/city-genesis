@@ -32,11 +32,13 @@ public static class VehicleModelResolver
         return Mathf.Max(1,Mathf.Max(bounds.size.x,bounds.size.z));
     }
 
-    public static GameObject CreateTransitCar(int type, bool middle, Transform parent)
+    public static GameObject CreateTransitCar(int type, bool middle, Transform parent, int variantId = 0)
     {
-        if (!middle) return CreateInstance(type,0,parent);
-        var prefab = ModelManager.Instance?.GetModel($"Models/Vehicles/{type}/middle",suppressWarning:true);
-        if (prefab == null) return CreateInstance(type,0,parent);
+        if (!middle) return CreateInstance(type,variantId,parent);
+        string part = variantId == 0 ? "middle" : $"middle_{variantId}";
+        var prefab = ModelManager.Instance?.GetModel($"Models/Vehicles/{type}/{part}",suppressWarning:true);
+        if (prefab == null) prefab = ModelManager.Instance?.GetModel($"Models/Vehicles/{type}/middle",suppressWarning:true);
+        if (prefab == null) return CreateInstance(type,variantId,parent);
         var root = new GameObject("TransitCar"); root.transform.SetParent(parent,false);
         var model = Object.Instantiate(prefab,root.transform);
         model.transform.localPosition = Vector3.zero; model.transform.localRotation = Quaternion.identity;
@@ -81,7 +83,7 @@ public static class VehicleModelResolver
     {
         var variants = VehicleModelConfig.GetVariants(vehicleType);
         if (variants.Count == 0) return 0;
-        int idx = Mathf.Abs(seed) % variants.Count;
+        int idx = (int)((uint)seed % (uint)variants.Count);
         return variants[idx];
     }
 

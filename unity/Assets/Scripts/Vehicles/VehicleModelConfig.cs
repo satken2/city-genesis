@@ -105,7 +105,8 @@ public static class VehicleModelConfig
 
         foreach (var raw in text.Split('\n'))
         {
-            var line = raw.Replace('\t', ' ').TrimEnd('\r');
+            // 数値キーと数値配列だけを扱う設定なので、行末の説明コメントを先に除く。
+            var line = raw.Split('#')[0].Replace('\t', ' ').TrimEnd();
             if (string.IsNullOrWhiteSpace(line)) continue;
 
             var trimmed = line.Trim();

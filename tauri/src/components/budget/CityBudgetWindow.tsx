@@ -32,10 +32,13 @@ import {
 import "./CityBudgetWindow.css";
 
 type BudgetAgent = {
-  kind?: "agent" | "path" | "parcel";
+  kind?: "agent" | "path" | "parcel" | "welfare";
   agent_id?: number;
   path_id?: number;
   parcel_id?: number;
+  /** 社会保障カテゴリの給付種別行(実体エンティティなし)。welfare_kind は i18n キー budget.welfare.* に対応 */
+  welfare_id?: number;
+  welfare_kind?: string;
   name: string;
   category_id: number;
   variant?: number;
@@ -47,10 +50,11 @@ type BudgetAgent = {
   remaining_epochs?: number | null;
 };
 
-/** エージェント/道路/土地区画を一意に識別するキー（稼働率の編集state・PATCH対象の識別に使う） */
+/** エージェント/道路/土地区画/給付種別を一意に識別するキー（稼働率の編集state・PATCH対象の識別に使う） */
 function rowKey(a: BudgetAgent): string {
   if (a.kind === "path") return `path:${a.path_id}`;
   if (a.kind === "parcel") return `parcel:${a.parcel_id}`;
+  if (a.kind === "welfare") return `welfare:${a.welfare_id}`;
   return `agent:${a.agent_id}`;
 }
 
@@ -774,11 +778,15 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       .map((agent) => ({
         ...agent,
         rowKeyStr: rowKey(agent),
+        // 社会保障の給付種別行は実体を持たないため、名称は i18n(budget.welfare.*)で解決する(バックエンドの name はフォールバック)
+        name: agent.kind === "welfare" && agent.welfare_kind
+          ? t(`budget.welfare.${agent.welfare_kind}`, { defaultValue: agent.name })
+          : agent.name,
         // 施設別の「必要金額」。この行の合計（agentsTotal.projected）はカテゴリの
         // 必要金額（baseAmounts[catId]）と常に一致する（同一の projected_expense を使うため）。
         projected_preview: agent.projected_expense,
       }));
-  }, [budgetAgents, activeCategory]);
+  }, [budgetAgents, activeCategory, t]);
 
   const agentsTotal = useMemo(() => {
     let actual = 0;

@@ -38,6 +38,8 @@ public static class VehicleQA
                 { string file=Path.Combine(source,dir,name); if(File.Exists(file))return Assembly.LoadFrom(file); }
                 return null;
             };
+            ModelImportSettings.EnableReadWriteAll();
+            ModelPrefabGenerator.SyncAll();
             game=Assembly.LoadFrom(Path.Combine(source,"Temp/bin/Debug/Assembly-CSharp.dll"));
             Geometry(); Budget(); Junction(); RoadsideExit(); MotionContract(); TransitModels(); TransitPlacement();
             var report = new List<string>();
@@ -132,6 +134,7 @@ public static class VehicleQA
             Set(manager,"clock",time);Call(manager,"DrawLine",lines[0],Vector3.forward*250);Call(manager,"HideUnused",false);
             var visible=(IDictionary)Get(manager,"visible");Check(visible.Count==2,"Consist disappears at terminal/time "+time);
             var positions=new List<Vector3>();
+            foreach(DictionaryEntry entry in visible) Check(((GameObject)entry.Value).name.StartsWith("20:1:"),"Consist variant changes or mixes at turnback");
             foreach(DictionaryEntry entry in visible)
             {
                 var position=((GameObject)entry.Value).transform.position;positions.Add(position);
@@ -149,19 +152,31 @@ public static class VehicleQA
         var manager=new GameObject("ModelManagerQA").AddComponent(game.GetType("ModelManager"));
         game.GetType("ModelManager").GetProperty("Instance").SetValue(null,manager);
         var resolver=game.GetType("VehicleModelResolver");
+        foreach(int vehicleType in new[]{10,11,12,13,20,21,22,23})
+        {
+            var variants=(IList)game.GetType("VehicleModelConfig").GetMethod("GetVariants").Invoke(null,new object[]{vehicleType});
+            Check(variants.Count==2,"Inline comments hide configured variants for "+vehicleType);
+            foreach(int seed in new[]{0,1,-1,int.MinValue})
+                Check((int)resolver.GetMethod("PickVariantId").Invoke(null,new object[]{vehicleType,seed})>=0,"Negative seed gives invalid variant");
+        }
         foreach (int type in new[]{12,20,21})
         {
+            foreach(int variant in new[]{0,1})
             foreach(bool middle in type==12?new[]{false}:new[]{false,true})
             {
-                var car=(GameObject)resolver.GetMethod("CreateTransitCar").Invoke(null,new object[]{type,middle,null});
+                var car=(GameObject)resolver.GetMethod("CreateTransitCar").Invoke(null,new object[]{type,middle,null,variant});
                 car.SetActive(true);
+                string expected = middle ? (variant==0 ? "middle" : "middle_1") : variant.ToString();
+                foreach(var filter in car.GetComponentsInChildren<MeshFilter>())
+                    Check(AssetDatabase.GetAssetPath(filter.sharedMesh).EndsWith($"/{type}/{expected}.fbx"), "Variant silently falls back: "+type+"/"+expected);
+                foreach(var filter in car.GetComponentsInChildren<MeshFilter>()) Check(filter.sharedMesh.isReadable,"Vehicle FBX is not readable");
                 var renderers=car.GetComponentsInChildren<Renderer>();
                 Check(renderers.Length>0,"Transit FBX has no renderer");
                 var bounds=renderers[0].bounds;
                 foreach(var renderer in renderers)bounds.Encapsulate(renderer.bounds);
                 Check(bounds.size.z>5 && bounds.size.z<35,"Transit FBX length/axis is not metres: "+bounds.size);
                 Check(Mathf.Abs(bounds.center.z)<1,"Transit model pivot is not centred: "+bounds.center);
-                accessTimings.Add($"model type={type} middle={middle} bounds={bounds.size} center={bounds.center}");
+                accessTimings.Add($"model type={type} variant={variant} middle={middle} bounds={bounds.size} center={bounds.center}");
                 UnityEngine.Object.DestroyImmediate(car);
             }
         }
