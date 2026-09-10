@@ -2,7 +2,7 @@
  * 規制ウィンドウコンポーネント
  *
  * 都市全体の規制・ポリシー設定を管理するウィンドウ。
- * 「制限速度」「建築規制」「補修設定」「移民規制」の4タブ構成で、
+ * 「制限速度」「建築規制」「補修設定」「移民規制」「社会保障」の5タブ構成で、
  * このコンポーネントはデータの取得・編集中値の保持・保存とタブ切替だけを担い、
  * 各タブの描画は `tabs/` 配下のコンポーネントに委ねる。
  *
@@ -11,7 +11,7 @@
  *
  * 保存先は2系統:
  * - PATCH /api/v1/city … 制限速度 (max_speed)・補修閾値 (repair_threshold*)
- * - PATCH /api/v1/city/regulations … 建築規制・移民規制
+ * - PATCH /api/v1/city/regulations … 建築規制・移民規制・社会保障政策
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -26,11 +26,13 @@ import type {
   PathVariantInfo,
   RegulationsData,
   SpeedMap,
+  WelfareRegulations,
 } from "./regulationTypes";
 import { FALLBACK_SPEED_LIMIT, SpeedLimitTab } from "./tabs/SpeedLimitTab";
 import { BUILDING_REG_KEYS, BuildingRegulationTab } from "./tabs/BuildingRegulationTab";
 import { RepairTab, type RepairTarget } from "./tabs/RepairTab";
 import { IMMIGRATION_SCALAR_KEYS, ImmigrationTab } from "./tabs/ImmigrationTab";
+import { WELFARE_KEYS, WelfareTab, type WelfareKey } from "./tabs/WelfareTab";
 import "./CityRegulationWindow.css";
 
 /** タブの並び。ラベルは各セクションの見出しをそのまま使う */
@@ -39,6 +41,7 @@ const TABS = [
   { id: "building", labelKey: "regulation.buildingRegulationTitle" },
   { id: "repair", labelKey: "regulation.repairTitle" },
   { id: "immigration", labelKey: "regulation.immigrationTitle" },
+  { id: "welfare", labelKey: "regulation.welfareTitle" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -83,6 +86,10 @@ export function CityRegulationWindow({
    */
   const [cityImmigration, setCityImmigration] = useState<ImmigrationRegulations | null>(null);
   const [pendingImmigration, setPendingImmigration] = useState<Partial<ImmigrationRegulations>>({});
+
+  /** 社会保障政策の確定値・編集中値（API 単位。給付率は 0〜1 の比率） */
+  const [cityWelfare, setCityWelfare] = useState<WelfareRegulations | null>(null);
+  const [pendingWelfare, setPendingWelfare] = useState<Partial<WelfareRegulations>>({});
 
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -149,6 +156,14 @@ export function CityRegulationWindow({
           immigration_quota: regulationsRes.immigration_quota,
         });
         setPendingImmigration({});
+
+        setCityWelfare({
+          retirement_age: regulationsRes.retirement_age,
+          unemployment_benefit_ratio: regulationsRes.unemployment_benefit_ratio,
+          pension_benefit_ratio: regulationsRes.pension_benefit_ratio,
+          livelihood_assistance_ratio: regulationsRes.livelihood_assistance_ratio,
+        });
+        setPendingWelfare({});
       } catch (err) {
         if (!controller.signal.aborted) {
           setError(err instanceof Error ? err.message : "Unknown error");
@@ -214,6 +229,10 @@ export function CityRegulationWindow({
     [cityImmigration],
   );
 
+  const handleWelfareChange = useCallback((key: WelfareKey, apiValue: number) => {
+    setPendingWelfare((prev) => ({ ...prev, [key]: apiValue }));
+  }, []);
+
   /* ==== 未保存の変更の判定 ==== */
 
   /**
@@ -250,7 +269,11 @@ export function CityRegulationWindow({
       }
     }
 
-    return { speed, building, repair, immigration };
+    const welfare =
+      cityWelfare != null &&
+      WELFARE_KEYS.some((key) => (pendingWelfare[key] ?? cityWelfare[key]) !== cityWelfare[key]);
+
+    return { speed, building, repair, immigration, welfare };
   }, [
     pendingSpeeds,
     cityMaxSpeed,
@@ -261,6 +284,8 @@ export function CityRegulationWindow({
     cityRepair,
     pendingImmigration,
     cityImmigration,
+    pendingWelfare,
+    cityWelfare,
   ]);
 
   const hasUnsavedChanges = TABS.some((tab) => dirtyTabs[tab.id]);
@@ -305,6 +330,11 @@ export function CityRegulationWindow({
         regulationPayload.immigration_skill_thresholds =
           pendingImmigration.immigration_skill_thresholds ?? cityImmigration.immigration_skill_thresholds;
       }
+      if (cityWelfare) {
+        for (const key of WELFARE_KEYS) {
+          regulationPayload[key] = pendingWelfare[key] ?? cityWelfare[key];
+        }
+      }
 
       const [speedRes, regulationRes] = await Promise.all([
         fetch(buildApiUrl(apiBaseUrl, "/api/v1/city"), {
@@ -341,6 +371,8 @@ export function CityRegulationWindow({
     pendingRegulations,
     cityImmigration,
     pendingImmigration,
+    cityWelfare,
+    pendingWelfare,
     onClose,
   ]);
 
@@ -350,7 +382,7 @@ export function CityRegulationWindow({
     return <div className="regulation-window__error">{error}</div>;
   }
 
-  if (pathVariants.length === 0 || !cityRegulations || !cityImmigration) {
+  if (pathVariants.length === 0 || !cityRegulations || !cityImmigration || !cityWelfare) {
     return <div className="regulation-window__loading">{t("common.loading")}</div>;
   }
 
@@ -407,6 +439,13 @@ export function CityRegulationWindow({
             onNumberChange={handleImmNumberChange}
             onBoolChange={handleImmBoolChange}
             onSkillThresholdChange={handleSkillThresholdChange}
+          />
+        )}
+        {activeTab === "welfare" && (
+          <WelfareTab
+            cityWelfare={cityWelfare}
+            pendingWelfare={pendingWelfare}
+            onChange={handleWelfareChange}
           />
         )}
       </div>

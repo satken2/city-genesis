@@ -35,6 +35,22 @@ export type RegulationsData = {
   immigration_gender_policy: number; // 0=制限なし, 1=男性のみ(世帯主), 2=女性のみ(世帯主)
   immigration_skill_thresholds: Record<string, number>; // skill_id(文字列) → 最低値
   immigration_quota: number; // 1エポックあたり上限人数。0=無制限
+  // 社会保障政策（給付率は 0〜1 の比率）
+  retirement_age: number;
+  unemployment_benefit_ratio: number;
+  pension_benefit_ratio: number;
+  livelihood_assistance_ratio: number;
+};
+
+/**
+ * 社会保障政策の編集中値を保持する型。
+ * 退職年齢（歳）と、失業給付・年金（地区標準賃金に対する比率）、生活扶助（不足額に対する比率）。
+ */
+export type WelfareRegulations = {
+  retirement_age: number;
+  unemployment_benefit_ratio: number;
+  pension_benefit_ratio: number;
+  livelihood_assistance_ratio: number;
 };
 
 /**
