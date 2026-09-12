@@ -100,7 +100,7 @@ HUDは**3枚の専用Tauriウィンドウ**に分かれている。Unityの3Dビ
 
 ### 軌道建設パネル(path/TrackConstructionPanel)の絞り込みは3段
 
-`track_build`ウィンドウは上から **鉄道種別プルダウン(鉄道/モノレール/ロープウェイ。タブより上位の選択で、タブを切り替えても保持する) → タブ(軌道=通常/橋梁 ・ プラットフォーム=駅 ・ 駅舎) → 規格プルダウン** の3段で敷設対象を絞り込む。**構造(通常/橋梁)・電化/非電化は独立した設定を持たず、すべて「規格」プルダウンの選択肢(=パスバリアント)として並べる**(表示はマスターの`display_name`そのまま)。したがって敷設対象の唯一の正は`usePathConstruction`の`selectedVariant`で、フック側にtrack_type・電化の状態は持たせない(復活させないこと)。候補一覧は`railBuild.railVariantsForTrackTypes`、鉄道種別の一覧は`railBuild.availableRailTypes`が返し、鉄道種別の変更・タブ切り替えで候補が入れ替わったらパネルのeffectが候補の先頭を`selectVariant`し直す。セクションの並びは **種別プルダウン → タブ → 規格プルダウン(`RailVariantSelector`) → 説明カード(`PathVariantDescription`) → 複線構成(`RailTrackLayoutSettings`=線路数・進行方向・線路間隔) → 形状以下(`PathBuildSections`)** で、区切り線は各`pc-section`の下罫線。**説明カードは道路建設パネルとは表示位置が違う(道路=バリアント選択の直下)ため`PathBuildSections`には入れず独立コンポーネントにしてある**。**駅舎タブも通常のパス敷設フロー**: 候補は`masterData.paths`のtype=PATH_STATION_HOUSEのバリアント(鉄道種別に依存しないため種別プルダウンは非表示)、カテゴリはnullのまま`selectVariant`→`confirmPath`で単一パスとして確定する(複線構成・ホーム設置側なし)。駅舎の専有エリア(建屋)の位置はバックエンドとUnityが線形・周辺線路から同一アルゴリズムで導出するため、パネル側の追加入力は無い。**駅舎バリアントの敷設中はUnity側(`RoadPlanManager.SnappingSuppressed`)が既存の地物への吸着を全て実効OFFにする**(グリッド吸着のみ有効)ので、駅舎の線が線路に引き寄せられることはない。
+`track_build`ウィンドウは上から **鉄道種別プルダウン(鉄道/モノレール/ロープウェイ。タブより上位の選択で、タブを切り替えても保持する) → タブ(軌道=通常/橋梁 ・ プラットフォーム=駅 ・ 駅舎) → 規格プルダウン** の3段で敷設対象を絞り込む。**構造(通常/橋梁)・電化/非電化は独立した設定を持たず、すべて「規格」プルダウンの選択肢(=パスバリアント)として並べる**(表示はマスターの`display_name`そのまま)。したがって敷設対象の唯一の正は`usePathConstruction`の`selectedVariant`で、フック側にtrack_type・電化の状態は持たせない(復活させないこと)。候補一覧は`railBuild.railVariantsForTrackTypes`、鉄道種別の一覧は`railBuild.availableRailTypes`が返し、鉄道種別の変更・タブ切り替えで候補が入れ替わったらパネルのeffectが候補の先頭を`selectVariant`し直す。セクションの並びは **種別プルダウン → タブ → 規格プルダウン(`RailVariantSelector`) → 説明カード(`PathVariantDescription`) → 複線構成(`RailTrackLayoutSettings`=線路数・進行方向・線路間隔) → 形状以下(`PathBuildSections`)** で、区切り線は各`pc-section`の下罫線。**説明カードは道路建設パネルとは表示位置が違う(道路=バリアント選択の直下)ため`PathBuildSections`には入れず独立コンポーネントにしてある**。**駅舎タブも通常のパス敷設フロー**: 候補は`masterData.paths`のtype=PATH_STATION_HOUSEのバリアント(鉄道種別に依存しないため種別プルダウンは非表示)、カテゴリはnullのまま`selectVariant`→`confirmPath`で単一パスとして確定する(複線構成・ホーム設置側なし)。駅舎の専有エリア(建屋)の位置はバックエンドとUnityが線形・周辺線路から同一アルゴリズムで導出するため、形状セクションの「建屋の配置」1行で両端・始点・終点を選ぶ。`StationHouseEndsSelect`は`pc-settings-row`・`pc-settings-label`・`pc-select`を共用し、端点や内外配置の説明文は表示しない。**駅舎バリアントの敷設中はUnity側(`RoadPlanManager.SnappingSuppressed`)が既存の地物への吸着を全て実効OFFにする**(グリッド吸着のみ有効)ので、駅舎の線が線路に引き寄せられることはない。
 
 ## 道路設備パネル
 
@@ -131,3 +131,7 @@ PathConstructionPanel/TrackConstructionPanelの継続配置は間隔・進行方
 `common/SatisfactionFace`は`value`（0〜1）と任意の`size`（px、既定32）で5段階の絵文字（😵→😢→😐→😊→🥰）を表示する。補正後の値が0のときだけ☠️を表示する。`getSatisfactionAppearance`が範囲補正・段階・色を共通で返す。境界は0.2/0.4/0.6/0.8で、上側の段階に含める。非有限値は0扱い。画像に置換するときはこのコンポーネント内の表示を差し替える。文言は全7言語のsatisfaction.json。達成目標の半円メーターは世帯スコア÷2を渡し、4項目の横棒は`common/Meter`のcolorに同じ配色を指定する。世帯未集計時は顔を表示しない。
 
 StationHouseEndsSelectは駅舎の両端/A端/B端の共通選択UI。建設はusePathConstruction→IPCでプレビュー反映、駅詳細は単独PATCH後に再取得とsession:reloadを行う。Aは始点、Bは終点。
+
+## プロップの高さ指定
+
+PropPlacementPanelの個別配置は全種別共通で地面相対高さ(m)を小数・負値で設定できる。heightを初期化・設定変更IPCへ渡し、Unityから受ける各インスタンスのyをそのままPOSTする。高さ変更は次のゴーストだけに適用し、すでに打点したインスタンスは個別の高さを保つ。

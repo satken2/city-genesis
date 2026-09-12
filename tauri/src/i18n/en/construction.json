@@ -123,6 +123,7 @@
     "cancel": "Cancel"
   },
   "prop_placement": {
+    "height": "Height above ground (m)",
     "hint": "Select a prop type and place it on the terrain",
     "modeLabel": "Placement Mode",
     "modeInstance": "Individual",

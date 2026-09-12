@@ -123,6 +123,7 @@
     "cancel": "취소"
   },
   "prop_placement": {
+    "height": "지면으로부터 높이(m)",
     "hint": "프롭 종류를 골라 지형에 배치하세요",
     "modeLabel": "배치 모드",
     "modeInstance": "개별",

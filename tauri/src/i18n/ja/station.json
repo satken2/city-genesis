@@ -11,10 +11,7 @@
     "lineSuspended": "運休",
     "houseEnds": "建屋の配置",
     "houseEnds_both": "両端",
-    "houseEnds_start": "A側のみ（始点）",
-    "houseEnds_end": "B側のみ（終点）",
-    "houseEndsHelp": "Aは最初に置いた端、Bは最後に置いた端です。省略した側は土地を占有しません。",
-    "placement_outside": "外側配置：建屋の内側の辺を線路外縁に合わせます。",
-    "placement_inside": "高架下配置：建屋の外側の辺を線路外縁に合わせます。"
+    "houseEnds_start": "始点",
+    "houseEnds_end": "終点"
   }
 }

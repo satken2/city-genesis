@@ -123,6 +123,7 @@
     "cancel": "取消"
   },
   "prop_placement": {
+    "height": "離地高度（公尺）",
     "hint": "請選擇裝飾物類型並放置到地形上",
     "modeLabel": "配置模式",
     "modeInstance": "個別",

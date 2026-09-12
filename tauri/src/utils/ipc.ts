@@ -570,9 +570,10 @@ export async function sendEditTransitFinish(): Promise<void> {
  * プロップ配置モードにおいて、プルダウン以外の数値設定(回転角・スケール・密度・seed)を変更する。
  * Unity 側は配置中のゴースト/散布プレビューにこの設定を即反映する
  * (道路建設の `edit_path:change_curved` と同じく、プレビューへの逐次反映のためのイベント)。
- * 個別モードでは rotation / scale、範囲モードでは density / seed を使う。
+ * 個別モードでは rotation / scale / height（地面相対高さm）、範囲モードでは density / seed を使う。
  */
 export async function sendEditPropChangeSettings(params: {
+  height?: number;
   rotation?: number;
   scale?: number;
   density?: number;

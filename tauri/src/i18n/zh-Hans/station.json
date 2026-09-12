@@ -11,10 +11,7 @@
     "lineSuspended": "停运",
     "houseEnds": "站房布置",
     "houseEnds_both": "两端",
-    "houseEnds_start": "仅A端（起点）",
-    "houseEnds_end": "仅B端（终点）",
-    "houseEndsHelp": "A为最先放置的端点，B为最后的端点。省略的一侧不占用土地。",
-    "placement_outside": "外侧布置：建筑内侧边缘对齐轨道外缘。",
-    "placement_inside": "高架下布置：建筑外侧边缘对齐轨道外缘。"
+    "houseEnds_start": "起点",
+    "houseEnds_end": "终点"
   }
 }

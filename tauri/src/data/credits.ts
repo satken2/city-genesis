@@ -84,6 +84,18 @@ export type CreditEntry = {
  */
 export const CREDIT_ENTRIES: CreditEntry[] = [
   {
+    title: "駅階段・下り階段入口プロップ",
+    category: "model",
+    source: "City Genesis（Blenderスクリプトによるプロシージャル制作）",
+    note: "Props/101〜104。Codex補助で制作。既存の道路材質を共有し、入口の黒色材質を作成。外部素材の追加なし。",
+  },
+  {
+    title: "高架下駅舎2003・2013の連絡通路",
+    category: "model",
+    source: "City Genesis（Blenderスクリプトによるプロシージャル制作）",
+    note: "Paths/p2003/body・p2013/body。Codex補助で制作し、既存の駅舎材質を共有。外部素材の追加なし。",
+  },
+  {
     title: "Piano loops 204 octave down long loop 120 bpm",
     category: "bgm",
     author: "josefpres",

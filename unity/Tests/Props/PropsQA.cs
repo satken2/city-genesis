@@ -78,6 +78,8 @@ public static class PropsQA
             var models=new GameObject("Models").AddComponent(modelType);
             modelType.GetField("<Instance>k__BackingField",BindingFlags.Static|BindingFlags.NonPublic).SetValue(null,models);
             var cache=(IDictionary)Field(models,"_modelCache");
+            ModelImportSettings.EnableReadWriteAll();
+            ModelPrefabGenerator.SyncAll();
             var rendererData=ScriptableObject.CreateInstance<UniversalRendererData>();
             var pipeline=UniversalRenderPipelineAsset.Create(rendererData);
             GraphicsSettings.defaultRenderPipeline=pipeline; QualitySettings.renderPipeline=pipeline;
@@ -86,10 +88,11 @@ public static class PropsQA
             Check(preview.enableInstancing && preview.GetFloat("_Surface") == 1f && preview.GetFloat("_ZWrite") == 0f && preview.renderQueue == 3000, "transparent instanced preview state");
             Check(File.ReadAllText(root + "/ProjectSettings/GraphicsSettings.asset").Contains("m_InstancingStripping: 2"), "player instancing variants retained");
             UnityEngine.Object.DestroyImmediate(preview); UnityEngine.Object.DestroyImmediate(previewSource);
-            foreach(string id in new[]{"1","2","1_far","2_far"})
+            foreach(string id in new[]{"1","2","1_far","2_far","101","102","103","104"})
             {
                 var model=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Models/Props/"+id+".fbx");
                 Check(model!=null,"missing FBX");
+                Check(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Resources/Models/Props/"+id+".prefab")!=null,"missing generated wrapper "+id);
                 var instance=UnityEngine.Object.Instantiate(model); instance.SetActive(false);
                 foreach(var r in instance.GetComponentsInChildren<MeshRenderer>(true))
                 {
@@ -288,7 +291,34 @@ public static class PropsQA
         ghost.SetActive(false);
         hover.Invoke(placement,new object[]{new Vector3(251,0,251)});
         Check(ghost.activeSelf,"moving manual ghost hidden inside water");
+        placementType.GetMethod("OnChangeSettingsFromIpc").Invoke(placement,new object[]{new Dictionary<string,object>{{"height",5.5f}}});
+        Check(Mathf.Abs(ghost.transform.position.y-5.5f)<.001f,"height setting did not move stationary ghost");
+        placementType.GetMethod("OnTerrainLeftClick").Invoke(placement,new object[]{new Vector3(251,0,251)});
+        var placed=(IList)Field(placement,"placedInstances");
+        Check(Mathf.Abs((float)placed[0].GetType().GetField("Item2").GetValue(placed[0])-5.5f)<.001f,"placed height missing from payload");
+        placementType.GetMethod("OnChangeSettingsFromIpc").Invoke(placement,new object[]{new Dictionary<string,object>{{"height",-2.25f}}});
+        Check(Mathf.Abs(ghost.transform.position.y+2.25f)<.001f,"negative height not applied");
+        Check(Mathf.Abs(((GameObject)((IList)Field(placement,"placedObjects"))[0]).transform.position.y-5.5f)<.001f,"setting moved previously placed instance");
+        foreach(GameObject go in (IList)Field(placement,"placedObjects")) UnityEngine.Object.DestroyImmediate(go);
+        UnityEngine.Object.DestroyImmediate(ghost);
         UnityEngine.Object.DestroyImmediate(placement.gameObject);
+        string elevated="{\"instances\":[{\"prop_instance_id\":9,\"prop_type\":1,\"x\":250,\"y\":5.5,\"z\":250,\"scale\":1,\"version\":0}],\"scatters\":[],\"obstacles\":[]}";
+        Apply(elevated,true);
+        foreach(var c in Chunks.Values) foreach(var p in (Array)Field(c,"points"))
+            Check(Mathf.Abs(((Vector3)Field(p,"position")).y-5.5f)<.001f,"saved height lost");
+        var terrainData=new TerrainData {heightmapResolution=33,size=new Vector3(500,100,500)};
+        var heights=new float[33,33];for(int z=0;z<33;z++)for(int x=0;x<33;x++)heights[z,x]=.2f;
+        terrainData.SetHeights(0,0,heights);
+        var terrain=Terrain.CreateTerrainGameObject(terrainData);
+        asm.GetType("Utils").GetMethod("InvalidateHeightCache").Invoke(null,null);
+        Drain((IEnumerator)managerType.GetMethod("AdjustPropHeightsForCellsCoroutine").Invoke(manager,new object[]{cells}));
+        foreach(var c in Chunks.Values) foreach(var p in (Array)Field(c,"points"))
+            Check(Mathf.Abs(((Vector3)Field(p,"position")).y-25.5f)<.001f,"terrain edit discarded relative height");
+        Apply(elevated.Replace("5.5","-2.25").Replace("\"version\":0","\"version\":1"));
+        foreach(var c in Chunks.Values) foreach(var p in (Array)Field(c,"points"))
+            Check(Mathf.Abs(((Vector3)Field(p,"position")).y-17.75f)<.001f,"height version update lost");
+        UnityEngine.Object.DestroyImmediate(terrain);UnityEngine.Object.DestroyImmediate(terrainData);
+        asm.GetType("Utils").GetMethod("InvalidateHeightCache").Invoke(null,null);
     }
     static readonly Stopwatch renderTimer = new Stopwatch();
     static double cpuTotal;
@@ -310,7 +340,7 @@ public static class PropsQA
                     camera.transform.LookAt(new Vector3(250,0,250));
                     Apply(Snapshot(50000,true,50000));Build(true);
                 }
-                else
+                else if (renderStage < 5)
                 {
                     int treeType = renderStage == 3 ? 1 : 2;
                     string forest = "{\"scatters\":[{\"prop_scatter_id\":2,\"prop_type\":"+treeType+",\"version\":0,\"density\":400,\"seed\":7,\"region\":[[[[210,210],[290,210],[290,290],[210,290]]]]}],\"instances\":[],\"obstacles\":[{\"key\":\"parcel:1\",\"signature\":\"parcel\",\"polygon\":[[240,230],[260,230],[260,250],[240,250]],\"floor_variant\":0}]}";
@@ -322,6 +352,22 @@ public static class PropsQA
                     camera.transform.LookAt(new Vector3(250,0,250));
                     Build(false);
                 }
+                else
+                {
+                    Apply("{\"instances\":[{\"prop_instance_id\":101,\"prop_type\":101,\"x\":241,\"y\":1.5,\"z\":250,\"scale\":1},{\"prop_instance_id\":102,\"prop_type\":102,\"x\":246,\"y\":1.5,\"z\":250,\"scale\":1},{\"prop_instance_id\":103,\"prop_type\":103,\"x\":252,\"y\":1.5,\"z\":250,\"scale\":1},{\"prop_instance_id\":104,\"prop_type\":104,\"x\":258,\"y\":1.5,\"z\":250,\"scale\":1}],\"scatters\":[],\"obstacles\":[]}",true);
+                    var slab=GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    foreach(int id in new[]{101,102,103,104})
+                    {
+                        var model=managerType.GetMethod("Model",flags).Invoke(manager,new object[]{id});
+                        var bounds=(Bounds)Field(model,"bounds");
+                        Check(Mathf.Abs(bounds.min.y)<.01f && Mathf.Abs(bounds.max.y-(id<103?6.52f:1.13f))<.01f,"stair prop height/origin mismatch "+id+": "+bounds);
+                        results.Add("station prop "+id+" bounds="+bounds);
+                    }
+                    slab.transform.position=new Vector3(250,1.25f,250);slab.transform.localScale=new Vector3(26,.5f,12);
+                    slab.GetComponent<Renderer>().sharedMaterial=new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                    camera.transform.position=new Vector3(267,17,268);camera.transform.LookAt(new Vector3(250,3,250));
+                    Build(false);
+                }
                 camera.targetTexture=new RenderTexture(1200,850,24);
                 cpuTotal=0;
             }
@@ -331,7 +377,7 @@ public static class PropsQA
             if(renderFrame>=10)cpuTotal+=renderTimer.Elapsed.TotalMilliseconds;
             renderFrame++;
             if(renderFrame<30)return;
-            string filename=renderStage==0?"preview-near.png":renderStage==1?"preview-far.png":renderStage==2?"preview-50000.png":renderStage==3?"forest-conifer.png":"forest-broadleaf.png";
+            string filename=renderStage==0?"preview-near.png":renderStage==1?"preview-far.png":renderStage==2?"preview-50000.png":renderStage==3?"forest-conifer.png":renderStage==4?"forest-broadleaf.png":"station-stair-props.png";
             results.Add(filename+" warmed submit+Camera.Render CPUms/frame="+(cpuTotal/20).ToString("F2")+
                 ", submittedBatches="+managerType.GetProperty("SubmittedBatchCount").GetValue(manager)+
                 ", submeshInstances="+managerType.GetProperty("SubmittedInstanceCount").GetValue(manager));
@@ -339,9 +385,10 @@ public static class PropsQA
             var rt=camera.targetTexture;RenderTexture.active=rt;
             var tex=new Texture2D(1200,850,TextureFormat.RGB24,false);tex.ReadPixels(new Rect(0,0,1200,850),0,0);tex.Apply();
             File.WriteAllBytes(output+"/"+filename,tex.EncodeToPNG());RenderTexture.active=null;camera.targetTexture=null;
+            Check(tex.GetPixels32().Count(c=>c.r>230 && c.g<30 && c.b>230)<1000,"shader error pixels in "+filename);
             UnityEngine.Object.DestroyImmediate(tex);UnityEngine.Object.DestroyImmediate(rt);
             renderFrame=0;renderStage++;
-            if(renderStage<5)return;
+            if(renderStage<6)return;
             EditorApplication.update-=RenderTick;
             results.Add("PASS checks="+checks+"; screenshot rendering uses URP Lit materials on actual FBX geometry; CPU timings exclude GPU completion");
             File.WriteAllLines(output+"/result.txt",results);EditorApplication.Exit(0);

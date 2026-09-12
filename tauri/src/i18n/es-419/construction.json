@@ -123,6 +123,7 @@
     "cancel": "Cancelar"
   },
   "prop_placement": {
+    "height": "Altura sobre el suelo (m)",
     "hint": "Elige el tipo de prop y colócalo en el terreno",
     "modeLabel": "Modo de colocación",
     "modeInstance": "Individual",

@@ -123,6 +123,7 @@
     "cancel": "キャンセル"
   },
   "prop_placement": {
+    "height": "地面からの高さ(m)",
     "hint": "プロップの種別を選んで地形に配置してください",
     "modeLabel": "配置モード",
     "modeInstance": "個別",

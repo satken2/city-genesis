@@ -105,12 +105,6 @@ export function PathBuildSections({
 
   return (
     <>
-      {pc.isStationHouse && editPathId === null && (
-        <div className="pc-section">
-          <StationHouseEndsSelect value={pc.houseEnds} onChange={pc.setHouseEnds} />
-          <p>{t(`station.placement_${pc.selectedVariantData?.house_placement ?? "outside"}`)}</p>
-        </div>
-      )}
       {/*
         形状セクション。曲線/直線・吸着の操作はUnity側(Ctrlラジアルメニュー)へ移管したが、
         標高・盛土は既存ノードを選んで数値で微調整する用途があるためステッパーを残す。
@@ -121,6 +115,10 @@ export function PathBuildSections({
         (pc.heightEditable || !pc.isInfrastructure || pc.hasPlatform) && (
         <div className="pc-section">
           <div className="pc-section-title">{t("path_construction.shape", "形状")}</div>
+
+          {pc.isStationHouse && editPathId === null && (
+            <StationHouseEndsSelect value={pc.houseEnds} onChange={pc.setHouseEnds} />
+          )}
 
           {/*
             標高（相対高さ）。height_editable=true のバリアント(高架道路・地下鉄用線路など)のみ表示。

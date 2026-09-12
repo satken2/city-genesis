@@ -11,10 +11,7 @@
     "lineSuspended": "운휴",
     "houseEnds": "역사 배치",
     "houseEnds_both": "양쪽 끝",
-    "houseEnds_start": "A쪽만 (시작점)",
-    "houseEnds_end": "B쪽만 (끝점)",
-    "houseEndsHelp": "A는 처음 놓은 끝점, B는 마지막 끝점입니다. 생략한 쪽은 토지를 점유하지 않습니다.",
-    "placement_outside": "외측 배치: 건물 안쪽 변을 선로 경계에 맞춥니다.",
-    "placement_inside": "고가 아래 배치: 건물 바깥쪽 변을 선로 경계에 맞춥니다."
+    "houseEnds_start": "시작점",
+    "houseEnds_end": "끝점"
   }
 }

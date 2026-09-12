@@ -933,6 +933,7 @@ public class IpcStateCoordinator : MonoBehaviour
 
         int propType = 0;
         string placementMode = "instance";
+        float height = 0f;
         float rotation = 0f;
         float scale = 1f;
         float density = 400f;
@@ -943,6 +944,8 @@ public class IpcStateCoordinator : MonoBehaviour
                 propType = Convert.ToInt32(ptObj);
             if (ipcParams.TryGetValue("placement_mode", out object pmObj) && pmObj != null)
                 placementMode = Convert.ToString(pmObj);
+            if (ipcParams.TryGetValue("height", out object hObj) && hObj != null)
+                height = Convert.ToSingle(hObj);
             if (ipcParams.TryGetValue("rotation", out object rObj) && rObj != null)
                 rotation = Convert.ToSingle(rObj);
             if (ipcParams.TryGetValue("scale", out object sObj) && sObj != null)
@@ -960,7 +963,7 @@ public class IpcStateCoordinator : MonoBehaviour
             var go = new GameObject("PropPlacementManager");
             propPlacementManager = go.AddComponent<PropPlacementManager>();
         }
-        propPlacementManager.InitializePlacement(placementMode, propType, rotation, scale, density, seed);
+        propPlacementManager.InitializePlacement(placementMode, propType, rotation, scale, density, seed, height);
 
         Debug.Log($"IpcStateCoordinator: プロップ配置モード -> prop_type={propType}, mode={placementMode}");
     }

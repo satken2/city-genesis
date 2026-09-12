@@ -209,7 +209,7 @@ TrackPath.InfrastructureConnectionProviderにはIsInfrastructureConnectionを登
 
 プロップは距離で本数を間引かず、極小投影サイズによるHiddenも使わない。木1/2は幹なしの専用Farを使用し、投影比1%未満でPropRenderModelの6三角形の四角錐へ替え、1.2%以上で戻す。DrawLod.Far内の切り替えで、常駐セル・候補予算は維持する。生成した最小メッシュはPropRenderModel.Disposeで解放する。
 
-プロップの障害物除外は範囲散布のみ。Candidate.explicitInstanceは常に表示可能とし、区画・道路・水域の追加や更新でも非表示にしない。個別配置の接地・常駐セル・候補予算・LODは通常どおり適用する。
+プロップの障害物除外は範囲散布のみ。Candidate.explicitInstanceは常に表示可能とし、区画・道路・水域の追加や更新でも非表示にしない。PropInstanceItem.yは地面からの相対高さ(m)でCandidate.heightOffsetへ保持する。初期生成・スナップショット再利用・タイル完成・地形編集の全経路で「地形標高+heightOffset」を使う。常駐セル・候補予算・LODは通常どおり適用する。
 
 
 ## ロード性能の計測

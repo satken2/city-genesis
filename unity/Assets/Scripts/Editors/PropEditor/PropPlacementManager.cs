@@ -38,6 +38,7 @@ public class PropPlacementManager : MonoBehaviour
     private int propType = 0;
     private float rotation = 0f;
     private float scale = 1f;
+    private float height = 0f;
     private float density = 400f;
     private int seed = 0;
 
@@ -49,8 +50,8 @@ public class PropPlacementManager : MonoBehaviour
     // ---- 個別モード ----
     // 確定済みインスタンス(不透明)。GameObject と配置データを対で保持する。
     private readonly List<GameObject> placedObjects = new List<GameObject>();
-    private readonly List<(float x, float z, float rotation, float scale)> placedInstances
-        = new List<(float, float, float, float)>();
+    private readonly List<(float x, float y, float z, float rotation, float scale)> placedInstances
+        = new List<(float, float, float, float, float)>();
     // カーソル追従の半透明ゴースト(個別モードのみ)。
     private GameObject hoverGhost;
     private bool hoverValid = false;
@@ -127,9 +128,9 @@ public class PropPlacementManager : MonoBehaviour
 
     /// <summary>
     /// プロップ配置モードを初期化する。placementMode は "instance" | "scatter"。
-    /// 個別モードでは rotation / scale、範囲モードでは density / seed を初期設定として使う。
+    /// 個別モードでは rotation / scale / height、範囲モードでは density / seed を初期設定として使う。
     /// </summary>
-    public void InitializePlacement(string placementMode, int propType, float rotation, float scale, float density, int seed)
+    public void InitializePlacement(string placementMode, int propType, float rotation, float scale, float density, int seed, float height = 0f)
     {
         if (gameCamera == null) gameCamera = Camera.main;
         EnsureContainer();
@@ -147,6 +148,7 @@ public class PropPlacementManager : MonoBehaviour
         this.propType = propType;
         this.rotation = rotation;
         this.scale = scale;
+        this.height = height;
         this.density = density;
         this.seed = seed;
         this.shapeFinalized = false;
@@ -174,7 +176,7 @@ public class PropPlacementManager : MonoBehaviour
 
     /// <summary>
     /// UI からの設定変更(edit_prop:change_settings)。送られてきたキーのみ反映する。
-    /// 個別モードは rotation / scale をゴーストに、範囲モードは density / seed を散布プレビューに反映する。
+    /// 個別モードは rotation / scale / height をゴーストに、範囲モードは density / seed を散布プレビューに反映する。
     /// </summary>
     public void OnChangeSettingsFromIpc(Dictionary<string, object> settings)
     {
@@ -185,6 +187,8 @@ public class PropPlacementManager : MonoBehaviour
             rotation = System.Convert.ToSingle(rObj);
         if (settings.TryGetValue("scale", out object sObj) && sObj != null)
             scale = System.Convert.ToSingle(sObj);
+        if (settings.TryGetValue("height", out object hObj) && hObj != null)
+            height = System.Convert.ToSingle(hObj);
         if (settings.TryGetValue("density", out object dObj) && dObj != null)
         {
             density = System.Convert.ToSingle(dObj);
@@ -225,7 +229,8 @@ public class PropPlacementManager : MonoBehaviour
             if (go != null)
             {
                 placedObjects.Add(go);
-                placedInstances.Add((worldPos.x, worldPos.z, rotation, scale));
+                Vector3 offset = PropManager.Instance != null ? PropManager.Instance.SceneOffset : Vector3.zero;
+                placedInstances.Add((worldPos.x - offset.x, height, worldPos.z - offset.z, rotation, scale));
                 EmitInstances();
             }
         }
@@ -337,9 +342,10 @@ public class PropPlacementManager : MonoBehaviour
         return ModelManager.Instance.GetModel($"Models/Props/{propType}");
     }
 
-    /// <summary>ワールド位置・Y軸回転・スケールを適用する。プロップは地面に接地する前提。</summary>
-    private static void ApplyTransform(GameObject go, Vector3 worldPos, float rot, float scl)
+    /// <summary>地形標高に指定高さを加える。重なりや種別で配置位置を補正しない。</summary>
+    private void ApplyTransform(GameObject go, Vector3 worldPos, float rot, float scl)
     {
+        worldPos.y = HeightmapTextureManager.GetTerrainHeight(worldPos) + height;
         go.transform.position = worldPos;
         go.transform.rotation = Quaternion.Euler(0f, rot, 0f);
         go.transform.localScale = Vector3.one * scl;
@@ -462,6 +468,7 @@ public class PropPlacementManager : MonoBehaviour
             list.Add(new Dictionary<string, object>
             {
                 ["x"] = inst.x,
+                ["y"] = inst.y,
                 ["z"] = inst.z,
                 ["rotation"] = inst.rotation,
                 ["scale"] = inst.scale,

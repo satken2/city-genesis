@@ -61,6 +61,8 @@ Ctrlメニューは8項目、HUDも最大8アイコン。並行の2アイコン�
 
 ## プロップの散布プレビュー
 
+個別配置は全種別で任意の地面相対高さを使う。PropPlacementManagerのheightは初期化・change_settingsから設定し、地形標高へ加えてゴーストを配置する。設定変更は次の配置だけに効き、打点済みの仮配置は各点の高さを保持する。update_instancesのyが相対高さ、XZはSceneOffsetを除いた保存座標。地形クリックの共通吸着は個別・散布とも無効。階段はProps/101・102（壁と屋根付き本体）、103・104（屋根なし入口）の手動配置だけで、駅への自動接続や床開口はしない。
+
 `PropEditor/PropPlacementManager`は`PropGeometry`の固定座標散布と`PropManager.CanPreview`の障害物判定を共用する。ロード済み・障害物取得済みの小区画だけを半透明GPUインスタンシングで描画し、`PreviewRevision`変更時に更新する。散布スケールは永続側と同じ0.8〜1.2で、個別配置用scaleを乗算しない。個別配置の編集用GameObjectは重なり判定を行わず表示する。CanPreviewの障害物・ロード範囲判定は散布プレビュー専用であり、個別配置へ適用しない。UIへの保存送信は従来どおりTauri側が行う。
 
 駅舎のHouseEndsはプレビュー仮PathSummaryとRoadRendererの再生成キーに含める。建設中はA/Bの端点ラベルを表示し、既存形状編集時はロード済みhouse_endsを使う。

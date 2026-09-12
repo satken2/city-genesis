@@ -54,6 +54,7 @@ type PlacementMode = "instance" | "scatter";
 /** Unity から受け取る個別配置インスタンス。 */
 type PropInstance = {
   x: number;
+  y: number;
   z: number;
   rotation: number;
   scale: number;
@@ -75,6 +76,7 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
   // 個別モードの配置設定。
   const [rotation, setRotation] = useState<number>(DEFAULT_ROTATION);
   const [scale, setScale] = useState<number>(DEFAULT_SCALE);
+  const [height, setHeight] = useState<number>(0);
 
   // 範囲モードの散布設定。
   const [density, setDensity] = useState<number>(DEFAULT_DENSITY);
@@ -104,6 +106,7 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
         {
           prop_type: typeId,
           placement_mode: nextMode,
+          height,
           rotation,
           scale,
           density,
@@ -112,7 +115,7 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
         "prop_placement",
       );
     },
-    [rotation, scale, density, seed],
+    [rotation, scale, height, density, seed],
   );
 
   /* ---- Unity 側で配置中のデータとセッション状態を受信する ---- */
@@ -217,6 +220,11 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
   const handleScaleChange = useCallback((v: number) => {
     setScale(v);
     void sendEditPropChangeSettings({ scale: v });
+  }, []);
+
+  const handleHeightChange = useCallback((v: number) => {
+    setHeight(v);
+    void sendEditPropChangeSettings({ height: v });
   }, []);
 
   const handleDensityChange = useCallback((v: number) => {
@@ -346,6 +354,18 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
 
           {mode === "instance" ? (
             <>
+              <div className="pc-settings-row">
+                <span className="pc-settings-label">{t("prop_placement.height")}</span>
+                <div className="pc-stepper-row">
+                  <NumberStepper
+                    value={height}
+                    onChange={handleHeightChange}
+                    step={0.1}
+                    integerOnly={false}
+                    label={t("prop_placement.height")}
+                  />
+                </div>
+              </div>
               <div className="pc-settings-row">
                 <span className="pc-settings-label">{t("prop_placement.rotation")}</span>
                 <div className="pc-stepper-row">

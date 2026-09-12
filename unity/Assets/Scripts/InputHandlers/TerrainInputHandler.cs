@@ -146,7 +146,8 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         // 掛けると二重吸着になり、RoadPlanManager 側の半径設定が一切効かなくなる。
         // パス分割の分割点選択も共通吸着を掛けない(端点ノードへ引き寄せられると常に
         // 端点近傍の分割になって拒否されるため。onHover 側と条件を揃える)。
-        if (mode != InputMode.MODE_ROAD_CONSTRUCTION && mode != InputMode.MODE_PATH_SPLIT && mode != InputMode.MODE_BUILDING_CONSTRUCTION)
+        if (mode != InputMode.MODE_ROAD_CONSTRUCTION && mode != InputMode.MODE_PATH_SPLIT
+            && mode != InputMode.MODE_BUILDING_CONSTRUCTION && mode != InputMode.MODE_EDIT_PROP)
         {
             clickPosition = ApplySnapping(clickPosition);
         }
@@ -341,6 +342,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         // 端点ノード付近でカーソルが端点へ引き寄せられ、常に「端点に近すぎる」分割になって
         // バックエンドに拒否されるため。分割点は中心線への射影(PathTopologyEditManager)で決める。
         bool skipSnap = mode == InputMode.MODE_EDIT_CONNECTOR
+                     || mode == InputMode.MODE_EDIT_PROP
                      || mode == InputMode.MODE_BUILDING_CONSTRUCTION
                      || mode == InputMode.MODE_ROAD_CONSTRUCTION
                      || mode == InputMode.MODE_PATH_SPLIT;

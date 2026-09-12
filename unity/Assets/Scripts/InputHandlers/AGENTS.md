@@ -73,7 +73,7 @@ Ctrlメニューの2設定と候補・ガイド・XYZの役割分担は`Editors/
 - MODE_SET_GRID = 11
 - MODE_EDIT_RESOURCE = 12
 - MODE_EDIT_TRANSIT = 13 (公共交通の停留所配置。`TerrainInputHandler` が `TransitPlanManager` へ委譲。ドラッグ移動は `InputHandler.StartTerrainDrag/UpdateDrag/EndDrag` が資源編集と同様に `IsMouseOverStop`/`ProcessMouseDrag` へ振り分ける)
-- MODE_EDIT_PROP = 14 (プロップ配置。`TerrainInputHandler` が `PropPlacementManager` へ委譲)
+- MODE_EDIT_PROP = 14 (プロップ配置。`TerrainInputHandler` が `PropPlacementManager` へ委譲。クリック・ホバーとも共通吸着を通さず、他オブジェクトを貫通して任意XZへ配置する。高さは配置マネージャが地形標高へ加算)
 - MODE_REMOVE = 17 (ブルドーザ=オブジェクト削除。空き地区画・計画中の建物/道路をクリック/ドラッグで削除。実処理は `RemovalManager`)
 - MODE_PATH_MERGE = 18 (パス結合の相手選択。`PathInputHandler.onClick` が `PathTopologyEditManager.OnPathClickedForMerge` へ委譲し、候補パス以外のクリックは弾かれる。ホバーハイライトも候補のみ)
 - MODE_PATH_SPLIT = 19 (パス分割の分割点選択。PATH と TERRAIN の両方をこのモードにし、どちらのクリックも `PathTopologyEditManager.OnClickForSplit` へ委譲する〔パス脇の地形クリックでも中心線への垂線の足が分割点になる〕。**`TerrainInputHandler` の共通吸着 `ApplySnapping` はこのモードで適用しない**——ノード吸着で端点へ引き寄せられると常に「端点に近すぎる」分割になりバックエンドに拒否されるため)

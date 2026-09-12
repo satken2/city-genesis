@@ -123,6 +123,7 @@
     "cancel": "Annuler"
   },
   "prop_placement": {
+    "height": "Hauteur au-dessus du sol (m)",
     "hint": "Choisissez un type de décor et placez-le sur le terrain",
     "modeLabel": "Mode de placement",
     "modeInstance": "Individuel",

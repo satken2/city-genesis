@@ -25,6 +25,7 @@ public class PropInstanceItem
     public int prop_instance_id;
     public int prop_type;
     public float x;
+    public float y;
     public float z;
     public float rotation;
     public float scale;
@@ -84,7 +85,7 @@ public class PropManager : BaseApiDataManager
     {
         public int type;
         public Vector3 position;
-        public float rotation, scale;
+        public float rotation, scale, heightOffset;
         public bool visible;
         public bool explicitInstance;
         public ulong rank;
@@ -270,7 +271,7 @@ public class PropManager : BaseApiDataManager
                 }
                 foreach (var point in spec.instances)
                 {
-                    var candidate = MakeCandidate(point.prop_type, new Vector2(point.x, point.z), point.rotation, point.scale);
+                    var candidate = MakeCandidate(point.prop_type, new Vector2(point.x, point.z), point.rotation, point.scale, point.y);
                     candidate.explicitInstance = true;
                     candidate.rank = (uint)point.prop_instance_id;
                     generated.Add(candidate.rank, candidate);
@@ -297,7 +298,7 @@ public class PropManager : BaseApiDataManager
                 // 通信待ちの間に地形追従が終わっていても、コミット時の高さを使う。
                 for (int i = 0; i < points.Length; i++)
                 {
-                    points[i].position.y = Height(points[i].position);
+                    points[i].position.y = Height(points[i].position) + points[i].heightOffset;
                     if ((i & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
                     { yield return null; timer.Restart(); if (Canceled(serial, batch)) yield break; }
                 }
@@ -320,10 +321,10 @@ public class PropManager : BaseApiDataManager
         if (item.floor_variant == 0) return true;
         return BuildingMeshUtils.ResolveFloorMaterialFromMaster(new BuildingSummary { variant = item.floor_variant, visual_variant = item.visual_variant }, $"a{item.floor_variant}") != null;
     }
-    private Candidate MakeCandidate(int type, Vector2 position, float rotation, float scale)
+    private Candidate MakeCandidate(int type, Vector2 position, float rotation, float scale, float heightOffset = 0f)
     {
-        var p = new Vector3(position.x, 0, position.y); p.y = Height(p);
-        return new Candidate { type = type, position = p, rotation = rotation, scale = scale, lod = DrawLod.Far };
+        var p = new Vector3(position.x, 0, position.y); p.y = Height(p) + heightOffset;
+        return new Candidate { type = type, position = p, rotation = rotation, scale = scale, heightOffset = heightOffset, lod = DrawLod.Far };
     }
     private float Height(Vector3 saved) => HeightmapTextureManager.GetTerrainHeight(saved + Offset);
     private Rect ChunkRect(Vector2Int key) => new Rect(key.x * ChunkSize, key.y * ChunkSize, ChunkSize, ChunkSize);
@@ -383,7 +384,7 @@ public class PropManager : BaseApiDataManager
                     {
                         for (int i = 0; i < chunk.points.Length; i++)
                         {
-                            chunk.points[i].position.y = Height(chunk.points[i].position);
+                            chunk.points[i].position.y = Height(chunk.points[i].position) + chunk.points[i].heightOffset;
                             if ((i & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
                             { yield return null; timer.Restart(); }
                         }
@@ -501,7 +502,7 @@ public class PropManager : BaseApiDataManager
                 if (!chunks.TryGetValue(key, out var chunk)) continue;
                 for (int i = 0; i < chunk.points.Length; i++)
                 {
-                    chunk.points[i].position.y = Height(chunk.points[i].position); chunk.dirty = true; chunk.revision++;
+                    chunk.points[i].position.y = Height(chunk.points[i].position) + chunk.points[i].heightOffset; chunk.dirty = true; chunk.revision++;
                     if ((i & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
                     { yield return null; timer.Restart(); }
                 }

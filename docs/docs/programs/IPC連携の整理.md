@@ -360,3 +360,7 @@ invoke("start_load_game", { saveId })
 ## 駅舎の建屋配置端
 
 `edit_path:change_house_ends`（UI→Unity）のparamsは`house_ends`（both/start/end）。建設パネルが真実源で、IpcClient→IpcEventHandler→RoadPlanManager.SetHouseEnds→RoadRendererの仮PathSummaryへ伝える。初期値はSTATE_EDIT_PATHの同名params。既存形状編集は保存値をロードして使い、配置端の変更は駅詳細のPATCHから行う。Rustの汎用send_window_action転送を使うため専用Rust分岐は不要。
+
+## プロップ個別配置の高さ
+
+world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地面からの相対高さm）を受け取る。edit_prop:update_instancesの要素はx/y/z/rotation/scaleで、yにその配置時の相対高さを載せる。Tauriは各点のyをPOST /api/v1/props/instancesへ送り、GETでも同じyを受け取る。高さ指定は全種別共通、0は地表、負値は地中。描画では地形標高へ加算し、モデルの拡大率を掛けない。

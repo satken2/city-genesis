@@ -1,5 +1,7 @@
 # IPC フォルダ
 
+プロップ個別配置の高さはworld:change_stateのparams.heightとedit_prop:change_settingsのheightで送る。地面からの相対高さ(m)で、全種別に適用する。edit_prop:update_instancesの各要素はx/y/z/rotation/scaleを持ち、yは相対高さ、XZはSceneOffsetを除いた保存座標。TauriはyをそのままPOST /props/instancesへ渡す。
+
 Tauri製UI(city-genesis/tauriレポジトリ)とのMemoryMappedFile(MMF)によるプロセス間通信を担当する。
 HTTP(バックエンド通信)とは別系統であることに注意。UnityとUIの間のやり取り(クリックした建物の詳細ウィンドウを開く、編集モードの切り替え等)はすべてここを通る。
 
