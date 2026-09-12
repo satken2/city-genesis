@@ -1,6 +1,6 @@
 {
   "credits": {
-    "lead": "Ce jeu utilise les ressources et logiciels listés ci-dessous. Les noms des auteurs, les sources, les licences et tout texte d'attribution exigé par une licence sont reproduits tels quels.",
+    "lead": "Ce jeu utilise les ressources listées ci-dessous. Les noms des auteurs, les sources, les licences et tout texte d'attribution exigé par une licence sont reproduits tels quels.",
     "empty": "Aucun élément.",
     "requiredText": "Mention exigée",
     "categories": {
@@ -9,9 +9,7 @@
       "image": "Images et icônes",
       "font": "Polices",
       "model": "Modèles 3D",
-      "texture": "Textures",
-      "engine": "Moteur de jeu",
-      "library": "Logiciels open source"
+      "texture": "Textures"
     }
   }
 }

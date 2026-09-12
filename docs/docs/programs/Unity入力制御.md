@@ -452,4 +452,6 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 
 配置状態の正は`BuildingPlanManager.Placement.cs`。パネルは変更差分を`placement_command`で送り、Unityは`placement_state`で位置・寸法・角度・世代を同時に返す。配置前のゴーストはローカル即時描画であり、設置可能の保証ではない。位置固定後にパネルがpreview-directを呼び、現在の要求と一致する検証結果が届くまで建設確定を無効化する。古い形状応答はplacement_revisionと階数の照合で破棄する。
 
-検証はUnityの`Tests/BuildingPlacement/run.ps1`(幾何計算)と`run-unity.ps1`(独立したUnityで本編コンポーネントの状態遷移)。
+輪郭・寸法線・道路吸着マーカーは地表高+0.05mのワールド座標で生成する。`BuildingPlacementGuide`は親を持たない原点・回転なし・等倍の描画オブジェクトとし、編集用オブジェクトの位置・回転・拡縮を頂点へ重ねて適用しない。コントロール無効化時は非表示にし、破棄時はガイドと所有するメッシュ・マテリアルも破棄する。
+
+検証はUnityの`Tests/BuildingPlacement/run.ps1`(幾何計算)と`run-unity.ps1`(独立したUnityで本編コンポーネントの状態遷移と、編集用オブジェクトの移動・回転・拡縮に対するガイド座標の不変性)。

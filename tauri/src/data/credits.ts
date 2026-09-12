@@ -1,8 +1,8 @@
 /**
  * クレジット表示の掲載データ
  *
- * フリー素材サイトやOSSライブラリの規約には「利用に際してクレジット表記が必要」と
- * 定めるものがあり、その表記義務を果たすための一覧。設定ウィンドウから開く
+ * フリー素材サイトの規約には「利用に際してクレジット表記が必要」と定めるものがあり、
+ * その表記義務を果たすための一覧。設定ウィンドウから開く
  * クレジットウィンドウ(`CreditsWindow`)がこの配列をそのまま描画する。
  *
  * ## 記載の原則
@@ -26,16 +26,12 @@
  * 掲載カテゴリ。
  * ウィンドウ内での並び順は `CREDIT_CATEGORY_ORDER` が決め、
  * 見出しの表示名は i18n キー `credits.categories.<カテゴリ>` から引く。
+ *
+ * 対象は素材(アセット)のみで、ゲームエンジンやOSSライブラリは扱わない。
+ * それらの著作権表示・ライセンス条文は配布物へ別途同梱する
+ * (`city-genesis/docs/docs/programs/素材クレジット管理.md` を参照)。
  */
-export type CreditCategory =
-  | "bgm"
-  | "sfx"
-  | "image"
-  | "font"
-  | "model"
-  | "texture"
-  | "engine"
-  | "library";
+export type CreditCategory = "bgm" | "sfx" | "image" | "font" | "model" | "texture";
 
 /** カテゴリの表示順序 */
 export const CREDIT_CATEGORY_ORDER: CreditCategory[] = [
@@ -45,12 +41,10 @@ export const CREDIT_CATEGORY_ORDER: CreditCategory[] = [
   "font",
   "model",
   "texture",
-  "engine",
-  "library",
 ];
 
 export type CreditEntry = {
-  /** 一覧の見出しになる名前。素材名・素材セット名・ライブラリ名のいずれか */
+  /** 一覧の見出しになる名前。素材名または素材セット名 */
   title: string;
   category: CreditCategory;
   /** 作者名・権利者名 */
@@ -90,6 +84,41 @@ export type CreditEntry = {
  */
 export const CREDIT_ENTRIES: CreditEntry[] = [
   {
+    title: "Piano loops 204 octave down long loop 120 bpm",
+    category: "bgm",
+    author: "josefpres",
+    source: "Freesound",
+    url: "https://freesound.org/s/849657/",
+    license: "CC0 1.0",
+  },
+  {
+    title: "Piano loops 207 octave down short loop 120 bpm",
+    category: "bgm",
+    author: "josefpres",
+    source: "Freesound",
+    url: "https://freesound.org/s/850757/",
+    license: "CC0 1.0",
+  },
+  {
+    title: "Tada!",
+    category: "sfx",
+    author: "Yoshicakes77",
+    source: "Freesound",
+    url: "https://freesound.org/s/850021/",
+    license: "CC0 1.0",
+    note: "Quest complete",
+  },
+  {
+    title: "VS Button Click 04",
+    category: "sfx",
+    author: "Vilkas_Sound",
+    source: "Freesound",
+    url: "https://freesound.org/s/707041/",
+    license: "CC BY 4.0",
+    requiredText:
+      '"VS Button Click 04" by Vilkas_Sound (https://freesound.org/s/707041/) — licensed under CC BY 4.0',
+  },
+  {
     title: "trash.wav",
     category: "sfx",
     author: "dullbananas",
@@ -106,6 +135,96 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     note: "UI click",
   },
   {
+    title: "Bribery",
+    category: "image",
+    author: "juicy_fish",
+    source: "Flaticon",
+    url: "https://www.flaticon.com/free-icon/bribery_5945366",
+    license: "Flaticon Free License",
+    requiredText: "Bribery icon designed by juicy_fish from Flaticon",
+  },
+  {
+    title: "Car accident",
+    category: "image",
+    author: "tulpahn",
+    source: "Flaticon",
+    url: "https://www.flaticon.com/free-icon/car-accident_7481581",
+    license: "Flaticon Free License",
+    requiredText: "Car accident icon designed by tulpahn from Flaticon",
+  },
+  {
+    title: "Road",
+    category: "image",
+    author: "IconBaandar",
+    source: "Flaticon",
+    url: "https://www.flaticon.com/free-icon/road_14755314",
+    license: "Flaticon Free License",
+    requiredText: "Road icon designed by IconBaandar from Flaticon",
+  },
+  {
+    title: "Crack",
+    category: "image",
+    author: "Three musketeers",
+    source: "Flaticon",
+    url: "https://www.flaticon.com/free-icon/crack_16455914",
+    license: "Flaticon Free License",
+    requiredText: "Crack icon designed by Three musketeers from Flaticon",
+  },
+  {
+    title: "Fire",
+    category: "image",
+    author: "Magnific",
+    source: "Flaticon",
+    url: "https://www.flaticon.com/free-icon/fire_785116",
+    license: "Flaticon Free License",
+    requiredText: "Fire icon designed by Magnific from Flaticon",
+  },
+  {
+    title: "Shooting",
+    category: "image",
+    author: "Magnific",
+    source: "Flaticon",
+    url: "https://www.flaticon.com/free-icon/shooting_5322199",
+    license: "Flaticon Free License",
+    requiredText: "Shooting icon designed by Magnific from Flaticon",
+  },
+  {
+    title: "Siren",
+    category: "image",
+    author: "Magnific",
+    source: "Flaticon",
+    url: "https://www.flaticon.com/free-icon/siren_2785693",
+    license: "Flaticon Free License",
+    requiredText: "Siren icon designed by Magnific from Flaticon",
+  },
+  {
+    title: "Smoke",
+    category: "image",
+    author: "Iconjam",
+    source: "Flaticon",
+    url: "https://www.flaticon.com/free-icon/smoke_12252967",
+    license: "Flaticon Free License",
+    requiredText: "Smoke icon designed by Iconjam from Flaticon",
+  },
+  {
+    title: "Water",
+    category: "image",
+    author: "meaicon",
+    source: "Flaticon",
+    url: "https://www.flaticon.com/free-icon/water_18383632",
+    license: "Flaticon Free License",
+    requiredText: "Water icon designed by meaicon from Flaticon",
+  },
+  {
+    title: "Flash",
+    category: "image",
+    author: "Smashicons",
+    source: "Flaticon",
+    url: "https://www.flaticon.com/free-icon/flash_222506",
+    license: "Flaticon Free License",
+    requiredText: "Flash icon designed by Smashicons from Flaticon",
+  },
+  {
     title: "Rock051 (崖の岩肌テクスチャ)",
     category: "texture",
     source: "ambientCG",
@@ -113,62 +232,76 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     license: "CC0 1.0",
     note: "Terrain cliff",
   },
-  {
-    title: "Unity",
-    category: "engine",
-    author: "Unity Technologies",
-    url: "https://unity.com",
-    note: "3D rendering",
-  },
-  {
-    title: "Tauri",
-    category: "library",
-    url: "https://tauri.app",
-    license: "MIT OR Apache-2.0",
-    note: "UI runtime",
-  },
-  {
-    title: "React",
-    category: "library",
-    url: "https://react.dev",
-    license: "MIT",
-  },
-  {
-    title: "three.js",
-    category: "library",
-    url: "https://threejs.org",
-    license: "MIT",
-  },
-  {
-    title: "Recharts",
-    category: "library",
-    url: "https://recharts.org",
-    license: "MIT",
-  },
-  {
-    title: "i18next / react-i18next",
-    category: "library",
-    url: "https://www.i18next.com",
-    license: "MIT",
-  },
-  {
-    title: "MessagePack for JavaScript",
-    category: "library",
-    url: "https://github.com/msgpack/msgpack-javascript",
-    license: "ISC",
-  },
-  {
-    title: "FastAPI",
-    category: "library",
-    url: "https://fastapi.tiangolo.com",
-    license: "MIT",
-    note: "Simulation backend",
-  },
-  {
-    title: "NumPy",
-    category: "library",
-    url: "https://numpy.org",
-    license: "BSD-3-Clause",
-    note: "Simulation backend",
-  },
+];
+
+/**
+ * 作者名が未確認の Flaticon アイコン(クレジット未完成の残作業)。
+ *
+ * Flaticon の無料ライセンスは **作者名を含む表記**(`designed by <作者名> from Flaticon`)を
+ * 要求するため、作者名が埋まるまで `CREDIT_ENTRIES` へは入れない(不完全な表記を出しても
+ * 義務を果たしたことにならず、誤った印象だけを与えるため)。
+ *
+ * 各要素は `https://www.flaticon.com/free-icon/<ここ>` のスラッグ。ページを開くと作者名と
+ * 表記用の文面が表示されるので、確認できたものから `CREDIT_ENTRIES` へ移すこと。
+ * 一覧はブラウザのダウンロード履歴に残っていた取得元URLから復元したもので、
+ * **ゲームに入っている全アイコンを網羅してはいない**(履歴が2026年2月以前を保持しておらず、
+ * それ以前に取得したアイコンの取得元は未特定)。
+ *
+ * なお Flaticon の有料プランに加入して取得し直せば表記義務そのものが外れる。
+ * アイコン点数を考えると、そちらのほうが運用は軽い。
+ */
+export const FLATICON_PENDING_SLUGS: string[] = [
+  "90-degrees_11207561",
+  "anchor-point_5340625",
+  "arrows_8145804",
+  "bridge_6088487",
+  "bulldozer_4819578",
+  "car_3774278",
+  "check_14090371",
+  "close_1828778",
+  "close_9068699",
+  "construction_2486950",
+  "crystal_12298496",
+  "deadline_1479689",
+  "diskette_2874091",
+  "door_9403330",
+  "down-arrow_608258",
+  "earthquake_6143198",
+  "eye_159604",
+  "flying-airplane_69987",
+  "frame_18384126",
+  "github_2111432",
+  "hand_16740809",
+  "heatmap_6868944",
+  "help-web-button_18436",
+  "hourglass_483610",
+  "land_10053849",
+  "layers_6982571",
+  "line_9613381",
+  "map_592245",
+  "natural-disaster_3436860",
+  "next_15114481",
+  "no-money_2762618",
+  "pen_10336582",
+  "pixels_923137",
+  "region_992219",
+  "reload_9311549",
+  "road-intersection_2062607",
+  "rocket_1195017",
+  "sand-clock_726210",
+  "search_3031293",
+  "setting_3019014",
+  "settings_2099058",
+  "sign_16001176",
+  "sketch_681560",
+  "sketchbook_1286028",
+  "table_9515212",
+  "tool_9109810",
+  "traffic-jam_4886426",
+  "train_2062152",
+  "transfer_4906853",
+  "unlocked-padlock_880",
+  "up-arrow_626075",
+  "visibility_3395544",
+  "wrench_9459152",
 ];

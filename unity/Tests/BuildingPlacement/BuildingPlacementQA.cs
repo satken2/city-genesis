@@ -35,6 +35,41 @@ public static class BuildingPlacementQA
         Call(manager, "OnPlacementCommand", token);
     }
 
+    static void CheckGuideCoordinates(Component manager)
+    {
+        var camera = new GameObject("GuideTestCamera").AddComponent<Camera>();
+        camera.tag = "MainCamera";
+        camera.transform.position = new Vector3(30, 80, -60);
+        camera.transform.LookAt(new Vector3(30, 0, 20));
+        var menu = manager.GetComponent(source.GetType("BuildingEditControlMenu"));
+        ((Behaviour)menu).enabled = false;
+        Set(manager, "directPreviewVisible", true);
+        Set(manager, "directCenter", new Vector3(30, 0, 20));
+        Set(manager, "directWidth", 24f);
+        Set(manager, "directDepth", 18f);
+        manager.transform.SetPositionAndRotation(new Vector3(120, 250, -90), Quaternion.Euler(20, 45, 10));
+        manager.transform.localScale = new Vector3(2, .7f, 1.3f);
+        Call(menu, "LateUpdate");
+        var overlay = (Component)Get(menu, "overlay");
+        var vertices = overlay.GetComponent<MeshFilter>().sharedMesh.vertices;
+        Check(vertices.Length > 0, "placement guide generates geometry");
+        bool worldCoordinatesMatch = true;
+        foreach (var vertex in vertices)
+            worldCoordinatesMatch &= Vector3.Distance(overlay.transform.TransformPoint(vertex), vertex) < .001f;
+        Check(worldCoordinatesMatch, "guide world vertices do not receive editor translation, rotation or scale");
+
+        manager.transform.SetPositionAndRotation(new Vector3(-300, 500, 100), Quaternion.Euler(40, 100, -15));
+        manager.transform.localScale = new Vector3(.5f, 3, 2);
+        Call(menu, "LateUpdate");
+        var movedVertices = overlay.GetComponent<MeshFilter>().sharedMesh.vertices;
+        bool stable = movedVertices.Length == vertices.Length;
+        for (int i = 0; stable && i < vertices.Length; i++)
+            stable &= Vector3.Distance(overlay.transform.TransformPoint(movedVertices[i]), vertices[i]) < .001f;
+        Check(stable, "moving editor leaves guide at the placement position");
+        Call(menu, "OnDisable");
+        Check(!overlay.gameObject.activeSelf, "disabled controls hide standalone guide");
+    }
+
     public static void Run()
     {
         if (!EditorApplication.isPlaying)
@@ -111,6 +146,7 @@ public static class BuildingPlacementQA
             Set(agent, "resizable", (bool?)false);
             Command(manager, "{\"variant\":99999,\"width\":20}");
             Check((float)Property(manager, "PlacementWidth") == 500, "fixed model ignores resize commands");
+            CheckGuideCoordinates(manager);
             Mode(manager, "Parcel");
             Check((int)Call(input, "GetMode", parcelType) == 3, "parcel mode restores parcel selection");
             manager.GetType().GetProperty("DirectAllowed").SetValue(manager, false);

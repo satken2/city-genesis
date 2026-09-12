@@ -11,6 +11,8 @@ $qaRoot = Join-Path $unityRoot 'Temp/BuildingPlacementQA'
 New-Item -ItemType Directory -Path "$qaRoot/Assets/Editor", "$qaRoot/ProjectSettings" -Force | Out-Null
 Copy-Item "$unityRoot/ProjectSettings/ProjectVersion.txt" "$qaRoot/ProjectSettings/ProjectVersion.txt" -Force
 Copy-Item "$PSScriptRoot/BuildingPlacementQA.cs" "$qaRoot/Assets/Editor/BuildingPlacementQA.cs" -Force
+# 描画パイプラインを含まない検証用プロジェクトでは、座標検証用の最小シェーダーを使う。
+Set-Content "$qaRoot/Assets/OverlayLine.shader" 'Shader "Custom/OverlayLine" { Properties { _ZTest ("ZTest", Float) = 8 } SubShader { Pass {} } }'
 Set-Content "$qaRoot/result.txt" 'RUNNING'
 $process = Start-Process -FilePath $UnityExe -ArgumentList @(
     '-batchmode', '-projectPath', ('"' + $qaRoot + '"'),

@@ -15,6 +15,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { QuestNotification, QuestTier } from "../../types";
+// 音声は必ず import 経由で参照する。パス文字列を直接 Audio に渡すとバンドル対象から
+// 外れ、本番ビルドではファイルが存在せず無音になる。
+import tadaSound from "../../assets/sounds/tada.wav";
 import "./QuestCompleteWindow.css";
 
 type QuestCompleteWindowProps = {
@@ -58,7 +61,7 @@ export function QuestCompleteWindow({ quests, onClose }: QuestCompleteWindowProp
   );
 
   useEffect(() => {
-    audioRef.current = new Audio("src/assets/sounds/tada.wav");
+    audioRef.current = new Audio(tadaSound);
     audioRef.current.play().catch(() => {});
     return () => {
       if (audioRef.current) {

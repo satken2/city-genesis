@@ -102,7 +102,7 @@ public class BuildingEditControlMenu : MonoBehaviour
         if (overlay == null)
         {
             var go = new GameObject("BuildingPlacementGuide");
-            go.transform.SetParent(transform, false);
+            // 頂点はワールド座標なので、編集用オブジェクトの変換を重ねない。
             overlay = go.AddComponent<OverlayMeshRenderer>();
             guideMaterial = new Material(Shader.Find("Custom/OverlayLine"));
             guideMaterial.SetInt("_ZTest", (int)UnityEngine.Rendering.CompareFunction.Always);
@@ -178,5 +178,14 @@ public class BuildingEditControlMenu : MonoBehaviour
     }
 
     private void OnDisable() { ReleaseUi(); if (overlay != null) overlay.gameObject.SetActive(false); }
-    private void OnDestroy() { ReleaseUi(); if (guideMaterial != null) Destroy(guideMaterial); }
+    private void OnDestroy()
+    {
+        ReleaseUi();
+        if (overlay != null)
+        {
+            Destroy(overlay.GetComponent<MeshFilter>().sharedMesh);
+            Destroy(overlay.gameObject);
+        }
+        if (guideMaterial != null) Destroy(guideMaterial);
+    }
 }

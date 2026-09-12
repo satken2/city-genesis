@@ -1,6 +1,6 @@
 {
   "credits": {
-    "lead": "Este juego utiliza los recursos y el software que se indican a continuación. Los nombres de autores, las fuentes, las licencias y todo texto de atribución exigido por una licencia se reproducen textualmente.",
+    "lead": "Este juego utiliza los recursos que se indican a continuación. Los nombres de autores, las fuentes, las licencias y todo texto de atribución exigido por una licencia se reproducen textualmente.",
     "empty": "No hay elementos.",
     "requiredText": "Atribución exigida",
     "categories": {
@@ -9,9 +9,7 @@
       "image": "Imágenes e iconos",
       "font": "Tipografías",
       "model": "Modelos 3D",
-      "texture": "Texturas",
-      "engine": "Motor de juego",
-      "library": "Software de código abierto"
+      "texture": "Texturas"
     }
   }
 }
