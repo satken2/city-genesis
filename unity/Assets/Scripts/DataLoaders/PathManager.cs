@@ -4679,6 +4679,7 @@ public class PathMasterItem
     /// 駅舎以外のバリアントは null。
     /// </summary>
     public float? house_depth;
+    public string house_placement;
 
     /// <summary>
     /// 駅舎パス(PATH_STATION_HOUSE)の専有エリア(建屋)の横方向オフセット(m)。

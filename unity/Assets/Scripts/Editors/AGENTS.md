@@ -62,3 +62,5 @@ Ctrlメニューは8項目、HUDも最大8アイコン。並行の2アイコン�
 ## プロップの散布プレビュー
 
 `PropEditor/PropPlacementManager`は`PropGeometry`の固定座標散布と`PropManager.CanPreview`の障害物判定を共用する。ロード済み・障害物取得済みの小区画だけを半透明GPUインスタンシングで描画し、`PreviewRevision`変更時に更新する。散布スケールは永続側と同じ0.8〜1.2で、個別配置用scaleを乗算しない。個別配置の編集用GameObjectは重なり判定を行わず表示する。CanPreviewの障害物・ロード範囲判定は散布プレビュー専用であり、個別配置へ適用しない。UIへの保存送信は従来どおりTauri側が行う。
+
+駅舎のHouseEndsはプレビュー仮PathSummaryとRoadRendererの再生成キーに含める。建設中はA/Bの端点ラベルを表示し、既存形状編集時はロード済みhouse_endsを使う。

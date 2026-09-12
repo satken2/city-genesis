@@ -129,3 +129,5 @@ PathConstructionPanel/TrackConstructionPanelの継続配置は間隔・進行方
 ### 満足度の顔と配色
 
 `common/SatisfactionFace`は`value`（0〜1）と任意の`size`（px、既定32）で5段階の絵文字（😵→😢→😐→😊→🥰）を表示する。補正後の値が0のときだけ☠️を表示する。`getSatisfactionAppearance`が範囲補正・段階・色を共通で返す。境界は0.2/0.4/0.6/0.8で、上側の段階に含める。非有限値は0扱い。画像に置換するときはこのコンポーネント内の表示を差し替える。文言は全7言語のsatisfaction.json。達成目標の半円メーターは世帯スコア÷2を渡し、4項目の横棒は`common/Meter`のcolorに同じ配色を指定する。世帯未集計時は顔を表示しない。
+
+StationHouseEndsSelectは駅舎の両端/A端/B端の共通選択UI。建設はusePathConstruction→IPCでプレビュー反映、駅詳細は単独PATCH後に再取得とsession:reloadを行う。Aは始点、Bは終点。

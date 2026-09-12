@@ -35,6 +35,18 @@ public static class StationHouseQA
             object setback = Activator.CreateInstance(assembly.GetType("SidewalkSetback"));
             int count = 0;
             var results = new List<string>();
+            var resolve = stationType.GetMethod("ResolveHousePosition");
+            float margin = Convert.ToSingle(assembly.GetType("Constants").GetField("STATION_HOUSE_TRACK_CLEARANCE_MARGIN").GetRawConstantValue());
+            foreach (var test in new[] {
+                (intervals: new List<Vector2> { new Vector2(-11, 11) }, inside: true, expected: 6f - margin),
+                (intervals: new List<Vector2> { new Vector2(-11, 11) }, inside: false, expected: 11f),
+                (intervals: new List<Vector2> { new Vector2(-31, -9) }, inside: true, expected: -14f - margin),
+                (intervals: new List<Vector2>(), inside: true, expected: -5f),
+                (intervals: new List<Vector2>(), inside: false, expected: 0f),
+            }) {
+                float actual = (float)resolve.Invoke(null, new object[] { test.intervals, 5f, test.inside });
+                Require(Mathf.Abs(actual - test.expected) < .001f, "Station footprint placement mismatch");
+            }
             foreach (int variant in new[] { 2001, 2011 })
             {
                 string asset = $"Assets/Paths/p{variant}/body.fbx";
@@ -47,16 +59,19 @@ public static class StationHouseQA
                 Require(original.min.y > 1f, "Bridge fixture must be above its ground origin");
                 foreach (float length in new[] { 32f, 320f, 2048f })
                 foreach (float direction in new[] { -1f, 1f })
+                foreach (string ends in new[] { "both", "start", "end" })
                 {
                     object path = Activator.CreateInstance(pathType);
                     pathType.GetField("path_id").SetValue(path, 1);
                     pathType.GetField("path_type").SetValue(path, 20);
                     pathType.GetField("path_variant").SetValue(path, variant);
+                    pathType.GetField("house_ends").SetValue(path, ends);
                     pathType.GetField("start_point").SetValue(path, new List<object> { 0f, 0f, 0f });
                     pathType.GetField("end_point").SetValue(path, new List<object> { 0f, 0f, length * direction });
                     var points = new List<Vector3> { Vector3.zero, new Vector3(0f, 0f, length * direction) };
                     object result = stationType.GetMethod("Generate").Invoke(Activator.CreateInstance(stationType), new[] { path, points, setback, setback });
                     var go = (GameObject)result.GetType().GetProperty("GeneratedObject").GetValue(result);
+                    Require(go.GetComponentsInChildren<Transform>().Count(t => t.name == "House") == (ends == "both" ? 2 : 1), "Wrong number of station buildings");
                     var bridge = go.GetComponentsInChildren<MeshFilter>().Where(f => f.name.StartsWith("Models/Paths/") && f.sharedMesh != null).ToArray();
                     Require(bridge.Length > 0, "Bridge mesh missing");
                     var ys = bridge.SelectMany(f => f.sharedMesh.vertices.Select(v => f.transform.TransformPoint(v).y)).ToArray();

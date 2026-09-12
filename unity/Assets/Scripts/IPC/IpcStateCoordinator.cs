@@ -552,6 +552,8 @@ public class IpcStateCoordinator : MonoBehaviour
                     travelDirections = ReadIntArray(tdObj);
                 }
             }
+            roadPlanManager.HouseEnds = ipcParams != null && ipcParams.TryGetValue("house_ends", out var he)
+                ? Convert.ToString(he) : "both";
             roadPlanManager.LateralOffsets = lateralOffsets;
             roadPlanManager.TravelDirections = travelDirections;
 

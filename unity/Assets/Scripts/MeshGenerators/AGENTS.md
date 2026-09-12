@@ -160,3 +160,7 @@ TrackPathの車止めはInfrastructureConnectionProviderが共用インフラノ
 ## 共通LOD基盤との関係
 
 長い通常道路の連続スプラインパーツは `SplinePartLod` が固定区間とLODキャッシュを持つ。モデル存在判定の後に分割し、single-span・破線は除外する。対応建物は `BuildingMeshBuilder.Generate(..., separateExterior: true)` で敷地装飾を別ジョブにできる。生成器内から独立の非計測Rebuildを起動せず、共通スケジューラーで同期生成を計測する。
+
+## 駅舎の配置方式
+
+house_ends（both/start/end）で選択した終端だけ建屋・接地占有を生成する。house_placement=outsideは区間回避、insideは最寄り線路占有区間の外縁に建屋外側辺を合わせる。insideの内側辺は区間上端−余白−奥行き、線路なしは−奥行き。Pythonのresolve_house_positionとUnityのResolveHousePositionを同一に保つ。片側でも終端識別を維持し、outsideは通路延長、insideは通路端移動。上記の「両終端」「線路を常に回避」という説明はoutside/bothの場合に限る。仕様はQ_駅舎パスのメッシュ生成.md §5。

@@ -8,6 +8,13 @@
     "lines": "Lignes desservantes",
     "noLines": "Aucune ligne ne dessert cette gare",
     "lineRunning": "En service",
-    "lineSuspended": "Interrompue"
+    "lineSuspended": "Interrompue",
+    "houseEnds": "Bâtiments de gare",
+    "houseEnds_both": "Aux deux extrémités",
+    "houseEnds_start": "A seulement (début)",
+    "houseEnds_end": "B seulement (fin)",
+    "houseEndsHelp": "A est la première extrémité, B la dernière. Le bâtiment omis ne réserve aucun terrain.",
+    "placement_outside": "À l’extérieur : le bord intérieur du bâtiment rejoint la limite des voies.",
+    "placement_inside": "Sous viaduc : le bord extérieur du bâtiment rejoint la limite des voies."
   }
 }

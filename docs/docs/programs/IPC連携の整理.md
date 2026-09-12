@@ -356,3 +356,7 @@ invoke("start_load_game", { saveId })
 `select_point`/`update_direct_angle`/`update_direct_params`は旧イベント定義として残るが、現行の建設パネルは直接配置にこれらを使用しない。配置方法を位置確定前から明示選択するため、以前の「区画外をクリックしたら直接配置へ入る」自動判定は行わない。
 
 パネルの寸法コマンドには`request_id`を付け、Unityは対応する`placement_state.request_id`にそのまま返す。パネルは最後に送った数値変更への応答が届くまで確定を待つ。これにより連続入力中に先の変更への応答だけで確定可能になることを防ぐ。
+
+## 駅舎の建屋配置端
+
+`edit_path:change_house_ends`（UI→Unity）のparamsは`house_ends`（both/start/end）。建設パネルが真実源で、IpcClient→IpcEventHandler→RoadPlanManager.SetHouseEnds→RoadRendererの仮PathSummaryへ伝える。初期値はSTATE_EDIT_PATHの同名params。既存形状編集は保存値をロードして使い、配置端の変更は駅詳細のPATCHから行う。Rustの汎用send_window_action転送を使うため専用Rust分岐は不要。

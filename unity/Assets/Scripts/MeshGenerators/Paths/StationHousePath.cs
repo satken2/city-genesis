@@ -10,9 +10,9 @@ using GeneratedModels;
 ///   1. 連絡橋: 線に沿った桁。各アンカー点を「そのXZ直下の地形標高」に置き、アンカー間を
 ///      直線で結ぶ(地形追従の細分化はしない)。**デッキの地上高・橋脚は body プレハブの
 ///      造形が持つ**(原点=地面。実寸配置で幅も引き伸ばさない)。
-///   2. 建屋: 両終端の専有エリア矩形に駅舎モデル(Models/Stations/{variant}/body)を置き、
+///   2. 建屋: 選択した終端の専有エリア矩形に駅舎モデル(Models/Stations/{variant}/body)を置き、
 ///      矩形の範囲に地面パネル(floor パーツのマテリアル)を張る。矩形は終端から外側へ
-///      広がり(内側の辺が終端の上)、マスターの house_offset ぶん横へずれる。**モデルの原点は
+///      広がる(outside)。insideは外側辺が線路外縁に合う位置へ移す。house_offsetは共通。**モデルの原点は
 ///      矩形の内側の辺の中点(modelOrigin。スライドが無ければパスの端点そのもの)に置く**
 ///      (奥行きの広がりも横ずれもプレハブの造形が持つため)。桁もこの位置まで伸ばす。
 ///
@@ -47,6 +47,8 @@ public class StationHousePath : IPathMeshGenerator
     /// </summary>
     public struct StationHouseFootprint
     {
+        public bool atEnd;
+        public bool inside;
         public Vector2 center;
         public Vector2 modelOrigin;
         public Vector2 direction;
@@ -103,7 +105,7 @@ public class StationHousePath : IPathMeshGenerator
             bridgeColliderMesh.name = $"StationHouseBridgeCollider_{pathData.path_id}";
         }
 
-        // ---- 両終端の建屋 ----
+        // ---- 選択した終端の建屋 ----
         foreach (var footprint in footprints)
         {
             CreateHouseObject(container.transform, pathData, footprint);
@@ -123,7 +125,7 @@ public class StationHousePath : IPathMeshGenerator
     /// アンカーが取得できない場合(縮退データ)は渡された点列を同じ規則で接地して使う。
     ///
     /// 専有エリアが線路を避けて外側へスライドした場合は、橋も建屋の取り付き位置
-    /// (footprint.modelOrigin)まで延長する。橋が終端で切れて建屋まで届かないのを防ぐ。
+    /// (footprint.modelOrigin)まで延長する。insideは同じ取り付きへ通路端を移す。
     /// </summary>
     private static List<Vector3> BuildBridgeAnchorPoints(PathSummary pathData, List<Vector3> points, List<StationHouseFootprint> footprints)
     {
@@ -160,18 +162,20 @@ public class StationHousePath : IPathMeshGenerator
             }
         }
 
-        // 建屋の取り付き位置までの延長(footprints は start側・end側の順)。
-        if (anchors.Count >= 2 && footprints != null && footprints.Count == 2)
+        // 片側だけでも端の識別を保つ。内側配置では通路を建屋の取り付きまで短縮する。
+        if (anchors.Count >= 2 && footprints != null)
         {
-            Vector2 startOrigin = footprints[0].modelOrigin;
-            Vector2 endOrigin = footprints[1].modelOrigin;
-            if (!IsSameXZ(anchors[0], startOrigin))
+            foreach (var footprint in footprints)
             {
-                anchors.Insert(0, MakeDeckPoint(startOrigin.x, startOrigin.y));
-            }
-            if (!IsSameXZ(anchors[anchors.Count - 1], endOrigin))
-            {
-                anchors.Add(MakeDeckPoint(endOrigin.x, endOrigin.y));
+                int index = footprint.atEnd ? anchors.Count - 1 : 0;
+                Vector2 origin = footprint.modelOrigin;
+                Vector3 point = MakeDeckPoint(origin.x, origin.y);
+                if (footprint.inside) anchors[index] = point;
+                else if (!IsSameXZ(anchors[index], origin))
+                {
+                    if (footprint.atEnd) anchors.Add(point);
+                    else anchors.Insert(0, point);
+                }
             }
         }
         return anchors;
@@ -380,7 +384,7 @@ public class StationHousePath : IPathMeshGenerator
     // =====================================================================
 
     /// <summary>
-    /// 駅舎パスの両終端の専有エリア(建屋フットプリント)を返す。start側・end側の順で最大2件。
+    /// 駅舎パスの選択した終端の専有エリア(建屋フットプリント)を返す。start側・end側の順で最大2件。
     ///
     /// バックエンド geo_station_house.station_house_end_rects と同一のアルゴリズム:
     /// 終端の外向き方向を s 軸とする1次元の区間回避問題として、周辺の軌道系パスの
@@ -403,15 +407,20 @@ public class StationHousePath : IPathMeshGenerator
         for (int endIndex = 0; endIndex < 2; endIndex++)
         {
             bool atEnd = endIndex == 1;
+            string ends = pathData.house_ends ?? "both";
+            if (ends != "both" && ends != (atEnd ? "end" : "start")) continue;
             if (!TryGetEndpointOutwardDir(anchors, atEnd, out Vector2 dir)) continue;
             Vector2 tip = atEnd ? anchors[anchors.Count - 1] : anchors[0];
 
             List<Vector2> intervals = CollectOccupiedIntervals(pathManager, tip, dir, houseWidth, houseOffset, pathData.path_id);
-            float sIn = ResolveSlideDistance(intervals, houseDepth);
+            bool inside = MasterDataStore.Instance?.GetPathMaster(pathData.path_variant)?.house_placement == "inside";
+            float sIn = ResolveHousePosition(intervals, houseDepth, inside);
             Vector2 innerCenter = tip + dir * sIn;
 
             result.Add(new StationHouseFootprint
             {
+                atEnd = atEnd,
+                inside = inside,
                 center = innerCenter + dir * (houseDepth / 2f) + RightAxis(dir) * houseOffset,
                 modelOrigin = innerCenter,
                 direction = dir,
@@ -617,6 +626,25 @@ public class StationHousePath : IPathMeshGenerator
     /// 乗る」初期位置)。候補は「終端そのもの(s_in=0)」と「各占有区間の終端」で、
     /// 区間と重ならない最小の候補を採用する(バックエンド _resolve_slide_distance と同一)。
     /// </summary>
+    public static float ResolveHousePosition(List<Vector2> intervals, float depth, bool inside)
+    {
+        if (!inside) return ResolveSlideDistance(intervals, depth);
+        var merged = MergeIntervals(intervals);
+        if (merged.Count == 0) return -depth;
+        Vector2 nearest = merged[0];
+        float distance = Mathf.Max(nearest.x, -nearest.y, 0f);
+        foreach (var interval in merged)
+        {
+            float candidate = Mathf.Max(interval.x, -interval.y, 0f);
+            if (candidate < distance || (candidate == distance && interval.y > nearest.y))
+            {
+                nearest = interval;
+                distance = candidate;
+            }
+        }
+        return nearest.y - Constants.STATION_HOUSE_TRACK_CLEARANCE_MARGIN - depth;
+    }
+
     private static float ResolveSlideDistance(List<Vector2> intervals, float houseDepth)
     {
         List<Vector2> merged = MergeIntervals(intervals);

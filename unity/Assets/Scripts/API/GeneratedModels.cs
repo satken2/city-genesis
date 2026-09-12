@@ -363,6 +363,8 @@ namespace GeneratedModels
         public int utility_mode;
         /// <summary>駅の共通基準線 [x,絶対標高,z]。空なら通常の地形追従</summary>
         public List<object> station_grade_profile;
+        /// <summary>駅舎の建屋配置端（both/start/end）</summary>
+        public string house_ends;
     }
 
     [Serializable]
@@ -454,6 +456,8 @@ namespace GeneratedModels
         public int utility_mode;
         /// <summary>駅の共通基準線 [x,絶対標高,z]。空なら通常の地形追従</summary>
         public List<object> station_grade_profile;
+        /// <summary>駅舎の建屋配置端（both/start/end）</summary>
+        public string house_ends;
     }
 
     [Serializable]

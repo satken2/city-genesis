@@ -690,6 +690,13 @@ export async function sendEditPathFinish(): Promise<void> {
  * (曲線モード等と同じく、プレビューへの逐次反映のためのイベント)。
  * 駅バリアント(platform_width>0)以外では無視される。
  */
+export async function sendSetHouseEnds(houseEnds: string): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "path_build", entity: null,
+    action: "edit_path:change_house_ends", params: { house_ends: houseEnds },
+  });
+}
+
 export async function sendSetPlatformSide(platformSide: number): Promise<void> {
   await invoke("send_window_action", {
     windowType: "path_build",

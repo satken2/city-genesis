@@ -8,6 +8,13 @@
     "lines": "停靠路線",
     "noLines": "沒有停靠的路線",
     "lineRunning": "行駛中",
-    "lineSuspended": "停駛"
+    "lineSuspended": "停駛",
+    "houseEnds": "站房配置",
+    "houseEnds_both": "兩端",
+    "houseEnds_start": "僅A端（起點）",
+    "houseEnds_end": "僅B端（終點）",
+    "houseEndsHelp": "A為最先放置的端點，B為最後的端點。省略的一側不占用土地。",
+    "placement_outside": "外側配置：建築內側邊緣對齊軌道外緣。",
+    "placement_inside": "高架下配置：建築外側邊緣對齊軌道外緣。"
   }
 }

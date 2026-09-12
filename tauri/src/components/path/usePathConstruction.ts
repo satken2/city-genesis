@@ -40,6 +40,7 @@ import type {
 import {
   sendChangeState,
   sendSetPlatformSide,
+  sendSetHouseEnds,
   sendEditPathChangeNode,
   sendEditPathChangeEmbankment,
   sendEditPathChangeLateralOffsets,
@@ -54,6 +55,7 @@ import { fetchApi } from "../../utils/api";
 import {
   DIR_BOTH,
   PATH_ROPEWAY,
+  PATH_STATION_HOUSE,
   PATH_TRACK,
   PLATFORM_SIDE_OUTSIDE,
   TRAFFIC_HAND_LEFT,
@@ -179,6 +181,19 @@ export function usePathConstruction(
   // platform_width を持つバリアント(駅)を選択しているときだけ意味を持つ。
   // 建設時にのみ指定でき、建設後の変更はできない(バックエンド側の制約)。
   const [platformSide, setPlatformSide] = useState<number>(PLATFORM_SIDE_OUTSIDE);
+  const [houseEnds, setHouseEnds] = useState("both");
+  useEffect(() => {
+    if (pathId == null || !apiBaseUrl) return;
+    const controller = new AbortController();
+    fetchApi<{ house_ends: string }>(`${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/${pathId}`, {
+      signal: controller.signal,
+    }).then((path) => {
+      if (!controller.signal.aborted) setHouseEnds(path.house_ends);
+    }).catch((err) => {
+      if (!controller.signal.aborted) console.error("station settings load failed", err);
+    });
+    return () => controller.abort();
+  }, [apiBaseUrl, pathId]);
   // 地形追従の個別設定(-1=未設定[バリアント既定]/0=非追従/1=追従)。真実源はUnity側で、
   // トグル操作は sendEditPathSetFollowTerrain で送り、値は edit_path:update_shape の
   // follow_terrain 受信で反映される。height_editable のバリアントでのみ意味を持つ。
@@ -391,6 +406,7 @@ export function usePathConstruction(
       // 駅パスのホーム設置側の初期値。敷設モード初期化時にUnityへ渡し、
       // 以後の切り替えは下の useEffect が edit_path:change_platform_side で逐次反映する。
       platform_side: platformSide,
+      house_ends: houseEnds,
       // 軌道複線の各線横オフセット・進行方向の初期値。3Dプレビューを平行N本で描かせる。
       // 以後の線路数・進行方向の変更は下の useEffect が edit_path:change_lateral_offsets で逐次反映する。
       lateral_offsets: lateralOffsetsForVariant(variantId),
@@ -398,7 +414,7 @@ export function usePathConstruction(
     }).catch((err) => {
       console.error("[usePathConstruction] sendChangeState failed:", err);
     });
-  }, [masterData, pathId, platformSide, lateralOffsetsForVariant, travelDirectionsForVariant]);
+  }, [masterData, pathId, houseEnds, platformSide, lateralOffsetsForVariant, travelDirectionsForVariant]);
 
   /* ---- カテゴリ/種別の選択ハンドラ ---- */
 
@@ -525,6 +541,7 @@ export function usePathConstruction(
       path_variant: selectedVariant,
       path_id: pathId ?? null,
       platform_side: platformSide,
+      house_ends: houseEnds,
       initial_height: height,
       initial_embankment_height: embankmentHeight,
       initial_curved: curveMode === "curved",
@@ -534,7 +551,7 @@ export function usePathConstruction(
     }).catch((err) => {
       console.error("[usePathConstruction] sendChangeState (continue) failed:", err);
     });
-  }, [selectedVariant, masterData, pathId, platformSide, height, embankmentHeight, curveMode, followTerrain, lateralOffsetsForVariant, travelDirectionsForVariant]);
+  }, [selectedVariant, masterData, pathId, houseEnds, platformSide, height, embankmentHeight, curveMode, followTerrain, lateralOffsetsForVariant, travelDirectionsForVariant]);
 
   /**
    * 現在のパス形状をバックエンドに送信して確定する。
@@ -589,6 +606,7 @@ export function usePathConstruction(
     // 座標は Unity が既にバックエンド系 [x, relY, z] で送っている(construction-cost と同形)。
     const body: Record<string, unknown> = {
       path_variant: selectedVariant,
+      house_ends: selectedVariantData?.type === PATH_STATION_HOUSE ? houseEnds : "both",
       start_point: pts[0],
       end_point: pts[pts.length - 1],
       curved: isCurved,
@@ -733,10 +751,13 @@ export function usePathConstruction(
 
     const pathData: Record<string, unknown> = {
       path_variant: selectedVariant,
+      house_ends: selectedVariantData?.type === PATH_STATION_HOUSE ? houseEnds : "both",
       start_point: [rawPoints[0][0], rawPoints[0][1], rawPoints[0][2]],
       end_point: [rawPoints[rawPoints.length - 1][0], rawPoints[rawPoints.length - 1][1], rawPoints[rawPoints.length - 1][2]],
       curved: isCurved,
     };
+
+    if (pathId != null) delete pathData.house_ends;
 
     // 新規作成時のみ一時IDを付与する
     if (pathId == null) {
@@ -817,7 +838,7 @@ export function usePathConstruction(
     // 直後に開く詳細パネルが source="path_detail" で担う)。失敗時は例外でここに
     // 到達せず、赤表示が確定できない理由を示し続ける。
     void sendClearHighlights("path_build");
-  }, [apiBaseUrl, selectedVariant, selectedVariantData, rawPoints, rawEmbankmentHeights, curveMode, startControl, endControl, rawWaypointControls, pathId, railComponents, hasPlatform, platformSide, followTerrain, queryInterferenceAndHighlight]);
+  }, [apiBaseUrl, selectedVariant, selectedVariantData, rawPoints, rawEmbankmentHeights, curveMode, startControl, endControl, rawWaypointControls, pathId, railComponents, hasPlatform, houseEnds, platformSide, followTerrain, queryInterferenceAndHighlight]);
 
   /* ---- 都市の通行方向を取得(既定の進行方向割り当てに使う) ---- */
   useEffect(() => {
@@ -860,6 +881,11 @@ export function usePathConstruction(
       console.error("[usePathConstruction] sendEditPathChangeLateralOffsets failed:", err);
     });
   }, [railComponents, selectedVariant]);
+
+  useEffect(() => {
+    if (pathId != null || selectedVariantData?.type !== PATH_STATION_HOUSE) return;
+    sendSetHouseEnds(houseEnds).catch((err) => console.error("station preview update failed", err));
+  }, [houseEnds, selectedVariantData, pathId]);
 
   /* ---- ホーム設置側の変更をUnityへ逐次通知 ---- */
   // 駅バリアント選択中にホーム設置側トグルを切り替えたら、敷設中プレビューメッシュの
@@ -1129,6 +1155,9 @@ export function usePathConstruction(
     heightEditable,
     isInfrastructure,
     curveAllowed,
+    isStationHouse: selectedVariantData?.type === PATH_STATION_HOUSE,
+    houseEnds,
+    setHouseEnds,
     hasPlatform,
     platformSide,
     setPlatformSide,

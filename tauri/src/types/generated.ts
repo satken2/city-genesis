@@ -346,6 +346,8 @@ export type PathSummary = {
   utility_mode: number;
   /** 駅の共通基準線 [x,絶対標高,z]。空なら通常の地形追従 */
   station_grade_profile: any[];
+  /** 駅舎の建屋配置端（both/start/end） */
+  house_ends: string;
 };
 
 export type PathData = {
@@ -435,6 +437,8 @@ export type PathData = {
   utility_mode: number;
   /** 駅の共通基準線 [x,絶対標高,z]。空なら通常の地形追従 */
   station_grade_profile: any[];
+  /** 駅舎の建屋配置端（both/start/end） */
+  house_ends: string;
 };
 
 export type ParcelSummary = {

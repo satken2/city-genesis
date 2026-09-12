@@ -596,6 +596,7 @@ export type PathMasterEntry = {
    */
   house_width?: number | null;
   house_depth?: number | null;
+  house_placement?: "outside" | "inside";
   house_offset?: number | null;
 };
 
@@ -668,6 +669,7 @@ export type NearbyZoneEntry = {
  * バックエンドの実装によって値が含まれない場合がある(null を許容)
  */
 export type PathData = {
+  house_ends: string;
   streetlight_type: number;
   fence_type: number;
   street_tree_type: number;

@@ -19,6 +19,7 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnEditPathChangeEmbankment += HandleEditPathChangeEmbankment;
             IpcClient.Instance.OnEditPathFinish += HandleEditPathFinish;
             IpcClient.Instance.OnEditPathChangePlatformSide += HandleEditPathChangePlatformSide;
+            IpcClient.Instance.OnEditPathChangeHouseEnds += HandleEditPathChangeHouseEnds;
             IpcClient.Instance.OnEditPathSetFollowTerrain += HandleEditPathSetFollowTerrain;
             IpcClient.Instance.OnEditPathChangeLateralOffsets += HandleEditPathChangeLateralOffsets;
             IpcClient.Instance.OnEditResourceFinish += HandleEditResourceFinish;
@@ -48,6 +49,7 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnEditPathChangeEmbankment -= HandleEditPathChangeEmbankment;
             IpcClient.Instance.OnEditPathFinish -= HandleEditPathFinish;
             IpcClient.Instance.OnEditPathChangePlatformSide -= HandleEditPathChangePlatformSide;
+            IpcClient.Instance.OnEditPathChangeHouseEnds -= HandleEditPathChangeHouseEnds;
             IpcClient.Instance.OnEditPathSetFollowTerrain -= HandleEditPathSetFollowTerrain;
             IpcClient.Instance.OnEditPathChangeLateralOffsets -= HandleEditPathChangeLateralOffsets;
             IpcClient.Instance.OnEditResourceFinish -= HandleEditResourceFinish;
@@ -118,6 +120,11 @@ public class IpcEventHandler : MonoBehaviour
     /// UIパネルのホーム設置側トグルを受けて、敷設中の駅パスプレビューの
     /// プラットフォーム張り出し側を即座に切り替える。
     /// </summary>
+    private void HandleEditPathChangeHouseEnds(string ends)
+    {
+        FindAnyObjectByType<RoadPlanManager>()?.SetHouseEnds(ends);
+    }
+
     private void HandleEditPathChangePlatformSide(int platformSide)
     {
         var rpm = GetRoadPlanManager();

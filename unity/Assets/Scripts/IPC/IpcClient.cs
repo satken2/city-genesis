@@ -75,6 +75,7 @@ public class IpcClient : MonoBehaviour
     // 駅パスのホーム設置側(Constants.PLATFORM_SIDE_*)の変更。UIパネルのトグルを受けて、
     // 敷設中プレビューのプラットフォーム張り出し側を切り替えるために使用する。
     public event Action<int> OnEditPathChangePlatformSide;
+    public event Action<string> OnEditPathChangeHouseEnds;
     // 地形追従の個別設定(-1=未設定/0=非追従/1=追従)の変更。UIパネルのトグルを受けて、
     // 敷設中プレビューの地形追従・トンネル可視化を切り替えるために使用する。
     public event Action<int> OnEditPathSetFollowTerrain;
@@ -334,6 +335,9 @@ public class IpcClient : MonoBehaviour
                     }
                     break;
 
+                case "edit_path:change_house_ends":
+                    OnEditPathChangeHouseEnds?.Invoke(GetParamString(payload, "house_ends"));
+                    break;
                 case "edit_path:change_platform_side":
                     {
                         int platformSide = GetParamInt(payload, "platform_side");

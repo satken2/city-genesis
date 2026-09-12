@@ -8,6 +8,13 @@
     "lines": "Serving Lines",
     "noLines": "No lines serve this station",
     "lineRunning": "Running",
-    "lineSuspended": "Suspended"
+    "lineSuspended": "Suspended",
+    "houseEnds": "Station buildings",
+    "houseEnds_both": "Both ends",
+    "houseEnds_start": "A only (start)",
+    "houseEnds_end": "B only (end)",
+    "houseEndsHelp": "A is the first endpoint; B is the last. The omitted building occupies no land.",
+    "placement_outside": "Outside: the inner building edge meets the track boundary.",
+    "placement_inside": "Under viaduct: the outer building edge meets the track boundary."
   }
 }

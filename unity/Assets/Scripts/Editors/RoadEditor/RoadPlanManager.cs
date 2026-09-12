@@ -56,6 +56,7 @@ public partial class RoadPlanManager : MonoBehaviour
     /// 建設時にのみ指定でき、駅バリアント以外では無視される。
     /// </summary>
     public int PlatformSide = Constants.PLATFORM_SIDE_OUTSIDE;
+    public string HouseEnds = "both";
 
     /// <summary>
     /// 地形追従の個別上書き（Constants.VALUE_NONE=未設定[バリアント既定]/0=非追従/1=追従）。
@@ -422,6 +423,14 @@ public partial class RoadPlanManager : MonoBehaviour
     /// 敷設セッション中(配置中・編集中)に切り替えても、その場でプラットフォームの
     /// 張り出し側が更新される。
     /// </summary>
+    public void SetHouseEnds(string ends)
+    {
+        if (ends != "both" && ends != "start" && ends != "end") return;
+        if (HouseEnds == ends) return;
+        HouseEnds = ends;
+        Update3DPreview();
+    }
+
     public void SetPlatformSide(int side)
     {
         if (PlatformSide == side) return;
@@ -585,6 +594,7 @@ public partial class RoadPlanManager : MonoBehaviour
 
                 points.Clear();
                 Curved = response.curved && IsCurveAllowed();
+                HouseEnds = response.house_ends ?? "both";
                 // 曲線パスの編集中も「直線延長」吸着を自動でONにする(新規敷設と同じ方針)。
                 if (Curved)
                 {
@@ -2863,7 +2873,7 @@ public partial class RoadPlanManager : MonoBehaviour
         if (renderPoints.Count >= 2)
         {
             bool isValid = CheckElevationIntersections().Count == 0;
-            roadRenderer.UpdateRoadPreview(renderPoints, PathType, PathSubtype, Curved, isValid, PlatformSide, LateralOffsets, TravelDirections);
+            roadRenderer.UpdateRoadPreview(renderPoints, PathType, PathSubtype, Curved, isValid, PlatformSide, LateralOffsets, TravelDirections, HouseEnds);
         }
         else
         {

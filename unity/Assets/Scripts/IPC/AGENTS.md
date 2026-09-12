@@ -52,3 +52,5 @@ STATE_EDIT_PATHの任意initial_height/initial_embankment_height/initial_curved/
 `edit_building:placement_command`(UI→Unity)はparams.command={variant, width?, depth?, angle?, reset?, labels?}。指定した寸法だけ変更し、状態を`edit_building:placement_state`(Unity→UI)で返す。空の変更差分は状態問い合わせ。labelsはパネルの選択言語で翻訳したCtrlメニュー/HUD文言。`placement_state`はvariant/revision/mode(parcel|free|roadside)/position(null=未固定)/width/depth/angle/parcel_idを一括通知し、UIは受信値を再送しない。Ctrl切替・位置固定・寸法キー・回転リリース・Escも同じ通知経路。直接配置の権威プレビュー`update_shape`には要求元のplacement_revisionを付け、Unityが現在世代・階数と照合する。既存建物編集は従来の世代なし区画プレビュー経路。`STATE_EDIT_BUILDING`のcopy_source_agent_idがある忠実コピーでは直接配置を無効化する。
 
 寸法コマンドの任意request_idはplacement_stateへ返す。パネルは最後の要求IDへの応答だけで数値変更待ちを解除する。
+
+edit_path:change_house_endsのhouse_ends（both/start/end）をRoadPlanManager.SetHouseEndsへ渡す。STATE_EDIT_PATHも同名paramsで初期化する。

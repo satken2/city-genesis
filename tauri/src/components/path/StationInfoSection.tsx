@@ -16,6 +16,8 @@ import { EditableLabel } from "../common/EditableLabel";
 import { PathLink } from "../common/PathLink";
 import { STATUS_ACTIVE } from "../../constants";
 import "./StationInfoSection.css";
+import { StationHouseEndsSelect } from "./StationHouseEndsSelect";
+import { sendSessionReload } from "../../utils/ipc";
 
 type StationPlatform = {
   path_id: number;
@@ -41,6 +43,7 @@ type StationInfo = {
 };
 
 type StationInfoSectionProps = {
+  houseEnds: string;
   apiBaseUrl: string;
   pathId: number;
   /** 駅名(=パスの name)。表示とインライン変更の初期値に使う。 */
@@ -72,12 +75,34 @@ export function StationInfoSection({
   apiBaseUrl,
   pathId,
   pathName,
+  houseEnds,
   onRenamed,
 }: StationInfoSectionProps) {
   const { t } = useTranslation();
   const masterData = useMasterData();
 
   const [info, setInfo] = useState<StationInfo | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [revision, setRevision] = useState(0);
+
+  async function saveHouseEnds(value: string) {
+    setSaving(true);
+    setError("");
+    try {
+      await fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/paths/{id}", String(pathId)), {
+        method: "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ house_ends: value }),
+      });
+      setRevision((r) => r + 1);
+      onRenamed();
+      await sendSessionReload();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setSaving(false);
+    }
+  }
 
   useEffect(() => {
     const controller = new AbortController();
@@ -94,7 +119,7 @@ export function StationInfoSection({
         }
       });
     return () => controller.abort();
-  }, [apiBaseUrl, pathId]);
+  }, [apiBaseUrl, pathId, revision]);
 
   /** 駅名(=パスの name)を PATCH で保存し、成功したら親にパス詳細を再取得させる。 */
   const handleRenameSave = useCallback(async (next: string) => {
@@ -109,6 +134,8 @@ export function StationInfoSection({
   return (
     <section className="agent-detail-section">
       <h3 className="agent-detail-section-title">{t("station.sectionTitle")}</h3>
+      <StationHouseEndsSelect value={houseEnds} onChange={saveHouseEnds} disabled={saving} />
+      {error && <p role="alert">{error}</p>}
       <div className="agent-detail-grid">
         <span className="agent-detail-label">{t("station.name")}</span>
         <span className="agent-detail-value">
