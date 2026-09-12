@@ -84,6 +84,7 @@ public static class LodQA
         yield return BuildingBatches();
         yield return BuildingExterior();
         yield return RoadSegments();
+        yield return RoadPresentation();
         TerrainBenchmark();
     }
     static Delegate SegmentFactory<T>(GameObject parent, Action built)
@@ -91,9 +92,59 @@ public static class LodQA
         return new Func<T, double, double, GameObject>((lod, from, to) => {
             built();
             var go = new GameObject("QA Segment");
+            go.AddComponent<MeshRenderer>();
             go.transform.SetParent(parent.transform, false);
             return go;
         });
+    }
+    static IEnumerator RoadPresentation()
+    {
+        var camera = new GameObject("SwapCamera").AddComponent<Camera>(); camera.tag = "MainCamera";
+        camera.transform.position = new Vector3(0,10,0);
+        var cache = Activator.CreateInstance(Type("RenderObjectCache"), new object[] { 8L * 1024 * 1024 });
+        GameObject Candidate(string name)
+        {
+            var rootObject = new GameObject(name);
+            rootObject.AddComponent<MeshRenderer>();
+            var identity = rootObject.AddComponent(Type("RenderCacheIdentity")); Set(identity,"key",name);
+            object spline = Static("RoadPath", "BuildSpline", rootObject,
+                new List<Vector3> { Vector3.zero, new Vector3(256,0,0), new Vector3(512,0,0) }, false);
+            var part = rootObject.AddComponent(Type("SplinePartLod"));
+            var factory = typeof(LodQA).GetMethod("SegmentFactory", BindingFlags.Static | BindingFlags.NonPublic)
+                .MakeGenericMethod(Type("DrawLod")).Invoke(null, new object[] { rootObject, (Action)(() => {}) });
+            Call(part,"Configure",spline,8f,0f,0f,false,null,0d,1d,factory);
+            return rootObject;
+        }
+        var old = new GameObject("VisibleRoad");
+        Set(old.AddComponent(Type("RenderCacheIdentity")),"key","old");
+        var next = Candidate("PendingRoad");
+        Static("PathPresentation","Replace",next,old,cache);
+        Check(old.activeSelf && next.GetComponent<MeshRenderer>().forceRenderingOff,"Pending road hid its predecessor or exposed overlapping renderers");
+        var latest = Candidate("LatestRoad");
+        Static("PathPresentation","Replace",latest,next,cache);
+        Check(old.activeSelf && !next.activeSelf,"Repeated replacement lost visible fallback");
+        var presentation = latest.GetComponent(Type("PathPresentation"));
+        int steps=0;
+        while ((bool)Field(presentation,"pending") && steps++<80)
+        {
+            Check(old.activeSelf && latest.GetComponent<MeshRenderer>().forceRenderingOff,"Road replacement exposed a blank or overlapping frame");
+            foreach (var renderer in latest.GetComponentsInChildren<Renderer>())
+                Check(renderer.forceRenderingOff,"Newly generated segment overlapped visible fallback");
+            yield return null;
+        }
+        Check(!(bool)Field(presentation,"pending"),"Road replacement never committed");
+        Check(!old.activeSelf && !latest.GetComponent<MeshRenderer>().forceRenderingOff,"Completed road failed atomic presentation swap");
+        foreach (var renderer in latest.GetComponentsInChildren<Renderer>())
+            Check(!renderer.forceRenderingOff,"Completed segment remained hidden");
+        var canceled = Candidate("CanceledRoad");
+        Static("PathPresentation","Replace",canceled,latest,cache);
+        canceled.SetActive(false);
+        Check(!latest.activeSelf,"Unloaded pending road left fallback visible");
+        yield return null;
+        Check(latest == null,"Unloaded pending road leaked fallback");
+        Object.Destroy(canceled); Call(cache,"Clear"); Object.Destroy(camera.gameObject);
+        yield return null;
+        results.Add("Road presentation: old road retained during segmented generation; no overlap, repeated replacement and unload cleanup passed");
     }
     static IEnumerator RoadSegments()
     {

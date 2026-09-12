@@ -34,7 +34,7 @@ public class PathManager : BaseApiDataManager
         {
             DrawLodStats.OnDrawLodChanged(DrawLodStats.Category.Path,
                 old != null ? DrawLodInfo.GetDrawLod(old, DrawLod.Normal) : (DrawLod?)null, lod);
-            lodCache.Park(old);
+            PathPresentation.Replace(next, old, lodCache);
         }
         pathObjectsCache[path.path_id] = next;
         next.SetActive(true);
@@ -1734,11 +1734,10 @@ public class PathManager : BaseApiDataManager
         // これにより、短時間に同じIDで再描画が呼ばれてもオブジェクトが増殖しない。
         pathObjectsCache[path.path_id] = pathGO;
 
-        // 古いオブジェクトの破棄だけを数フレーム遅延させる。
-        // 新しいオブジェクトのレンダリングが確定してから破棄することで、一瞬の消滅を防ぐ。
+        // 固定区間パーツは非同期に揃うため、初回生成が完了してから旧表示と差し替える。
         if (oldPath != null)
         {
-            lodCache.Park(oldPath);
+            PathPresentation.Replace(pathGO, oldPath, lodCache);
         }
         ReevaluateAwaitingIntersectionsForPath(path);
     }
@@ -2492,11 +2491,10 @@ public class PathManager : BaseApiDataManager
         DrawLodStats.OnDrawLodChanged(DrawLodStats.Category.Path,
             oldPath != null ? DrawLodInfo.GetDrawLod(oldPath, DrawLod.Normal) : (DrawLod?)null, drawLod);
 
-        // 古いオブジェクトの破棄だけを数フレーム遅延させる。
-        // 新しいオブジェクトのレンダリングが確定してから破棄することで、一瞬の消滅を防ぐ。
+        // 固定区間パーツは非同期に揃うため、初回生成が完了してから旧表示と差し替える。
         if (oldPath != null)
         {
-            lodCache.Park(oldPath);
+            PathPresentation.Replace(pathGO, oldPath, lodCache);
         }
         ReevaluateAwaitingIntersectionsForPath(path);
     }

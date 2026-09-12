@@ -214,3 +214,10 @@ TrackPath.InfrastructureConnectionProviderにはIsInfrastructureConnectionを登
 ## 公共交通の時間付き描画
 
 路線一覧の取得主体は `Vehicles/TransitDataStore`。`TransitOverlayManager.RefreshLines/Clear` は共有ストアへ委譲し、色帯の表示設定で車両の取得・走行を止めない。車両は `TransitVehicleManager` が管理する。`TryGetPathPolyline` の第3引数 `trimIntersection=false` は未切断の地形追従点列を返し、パス途中の停留所の距離割合の解決に使う。レール接続は実際に生成済みのSplineComputerを参照する。
+
+
+## 道路の非同期生成と表示の差し替え
+
+長い道路のSplinePartLodは本体GameObjectの作成後に固定区間を生成するため、本体の作成を表示完了とみなさない。PathPresentation.Replaceで旧道路を保持し、新しい道路の各パーツが初回LODを確定した時点で一括表示する。生成途中の新しいRendererはforceRenderingOffで伏せ、旧道路との重複描画を防ぐ。既存のforceRenderingOff値は復元する。
+
+再生成が連続した場合は未完成の候補から表示中の旧道路を引き継ぎ、未完成の候補だけを退避する。完成時に旧道路をキャッシュへ退避し、アンロード・全消去では保持中の旧道路を非表示にして破棄する。キャッシュからの復元と遠景への切替も同じ入口を通す。建物の主メッシュは同期生成なので、この道路パーツ専用の待ち合わせには含めない。回帰検証はTests/Lod/run.ps1のRoadPresentation。

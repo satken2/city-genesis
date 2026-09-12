@@ -11,6 +11,7 @@ using UnityEngine;
 public sealed class SplinePartLod : MonoBehaviour
 {
     public const float SegmentLength = 128f;
+    public bool IsInitialRenderReady => segments.TrueForAll(segment => segment.lod != DrawLod.Hidden);
     private sealed class Segment
     {
         public double from, to;
@@ -87,7 +88,13 @@ public sealed class SplinePartLod : MonoBehaviour
                 if (segment.shown != null) cache.Park(segment.shown);
                 segment.shown = next;
                 segment.lod = desired;
-                if (next != null) next.SetActive(true);
+                var presentation = GetComponentInParent<PathPresentation>();
+                if (next != null)
+                {
+                    presentation?.HidePending(next);
+                    next.SetActive(true);
+                }
+                presentation?.TryCommit();
                 var visual = GetComponentInParent<VisualModeObject>();
                 if (visual != null) visual.InitializeMaterials();
                 yield return null;
@@ -117,4 +124,69 @@ public sealed class SplinePartLod : MonoBehaviour
     }
 
     private void OnDestroy() { cache.Clear(); }
+}
+
+
+/// <summary>遅延生成される道路パーツが揃うまで旧道路を保持し、新旧を同じフレームで切り替える。</summary>
+public sealed class PathPresentation : MonoBehaviour
+{
+    private GameObject fallback;
+    private RenderObjectCache cache;
+    private SplinePartLod[] parts;
+    private bool pending;
+    private readonly Dictionary<Renderer, bool> hidden = new Dictionary<Renderer, bool>();
+
+    public static void Replace(GameObject next, GameObject previous, RenderObjectCache cache)
+    {
+        if (next == previous) return;
+        var prior = previous != null ? previous.GetComponent<PathPresentation>() : null;
+        GameObject visible = prior != null && prior.fallback != null ? prior.TakeFallback() : previous;
+        if (previous != null && previous != visible) cache.Park(previous);
+        var state = next.GetComponent<PathPresentation>() ?? next.AddComponent<PathPresentation>();
+        state.fallback = visible;
+        state.cache = cache;
+        state.parts = next.GetComponentsInChildren<SplinePartLod>(true);
+        state.pending = true;
+        state.HidePending(next);
+        state.TryCommit();
+    }
+
+    private GameObject TakeFallback()
+    {
+        var result = fallback;
+        fallback = null;
+        return result;
+    }
+
+    public void HidePending(GameObject target)
+    {
+        if (!pending) return;
+        foreach (var renderer in target.GetComponentsInChildren<Renderer>(true))
+        {
+            if (!hidden.ContainsKey(renderer)) hidden.Add(renderer, renderer.forceRenderingOff);
+            renderer.forceRenderingOff = true;
+        }
+    }
+
+    public void TryCommit()
+    {
+        if (!pending || parts == null) return;
+        foreach (var part in parts)
+            if (part != null && !part.IsInitialRenderReady) return;
+        pending = false;
+        foreach (var item in hidden)
+            if (item.Key != null) item.Key.forceRenderingOff = item.Value;
+        hidden.Clear();
+        var old = TakeFallback();
+        if (old != null) cache.Park(old);
+    }
+
+    private void OnDisable()
+    {
+        // アンロードや全消去時は退避キャッシュへ追加せず解放し、旧道路だけ残るのを防ぐ。
+        var old = TakeFallback();
+        if (old == null) return;
+        old.SetActive(false);
+        Destroy(old);
+    }
 }

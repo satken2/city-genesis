@@ -260,7 +260,7 @@ public class RoadRenderer : MonoBehaviour
     /// UI側の展開計算(city-genesis/tauri pathOffset.ts computeAnchorOffsetDirs)と同一ロジックで、
     /// プレビューと確定後の敷設位置を一致させる。Yは元の点の値を維持する。
     /// </summary>
-    private static List<Vector3> OffsetPolylineLateral(List<Vector3> points, float lateral)
+    public static List<Vector3> OffsetPolylineLateral(List<Vector3> points, float lateral)
     {
         int n = points.Count;
         var result = new List<Vector3>(n);

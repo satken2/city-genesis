@@ -737,6 +737,7 @@ public partial class RoadPlanManager : MonoBehaviour
 
     public void FinishRoadPlacement()
     {
+        earthworkPreview?.Clear();
         ResetParallelSnap();
         hasRawSnapPosition = false;
         phase = RoadEditorPhase.Inactive;
@@ -2854,6 +2855,7 @@ public partial class RoadPlanManager : MonoBehaviour
     /// </summary>
     private void Update3DPreview()
     {
+        UpdateEarthworkPreview();
         if (roadRenderer == null) return;
 
         List<Vector3> renderPoints = GetRenderPoints();
