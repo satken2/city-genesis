@@ -5,7 +5,8 @@
       "general": "一般",
       "display": "画面",
       "sound": "サウンド",
-      "system": "システム"
+      "system": "システム",
+      "about": "情報"
     },
     "fontSize": {
       "label": "文字サイズ",
@@ -58,6 +59,11 @@
     "windowReset": {
       "label": "ウィンドウ位置・サイズ",
       "action": "リセット"
+    },
+    "credits": {
+      "label": "クレジット",
+      "description": "本作が利用している素材・ソフトウェアの権利表記です",
+      "action": "表示"
     }
   },
   "saveLoad": {

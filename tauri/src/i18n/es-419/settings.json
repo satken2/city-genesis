@@ -5,7 +5,8 @@
       "general": "General",
       "display": "Pantalla",
       "sound": "Sonido",
-      "system": "Sistema"
+      "system": "Sistema",
+      "about": "Información"
     },
     "fontSize": {
       "label": "Tamaño de letra",
@@ -58,6 +59,11 @@
     "windowReset": {
       "label": "Posición y tamaño de las ventanas",
       "action": "Restablecer"
+    },
+    "credits": {
+      "label": "Créditos",
+      "description": "Atribuciones de los recursos y el software utilizados en este juego",
+      "action": "Ver"
     }
   },
   "saveLoad": {

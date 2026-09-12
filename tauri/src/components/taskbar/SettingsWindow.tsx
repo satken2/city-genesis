@@ -12,6 +12,7 @@
  *   ウィンドウ位置・サイズのリセット
  * - サウンド: マスターボリューム・BGM・サウンドエフェクトのスライダー（ダミー）
  * - システム: GPUアクセラレーションのCPU/GPU切り替え
+ * - 情報: クレジット表示（素材・OSSの表記義務を果たすクレジットウィンドウを開く）
  */
 
 import {
@@ -204,6 +205,18 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       await invoke<{ monitorIndex: number }>("switch_monitor", { direction });
     } catch (error) {
       console.error("failed to switch monitor", error);
+    }
+  }
+
+  /**
+   * クレジットウィンドウを開く。
+   * 設定ウィンドウとは別ウィンドウなので、設定を開いたまま並べて読める。
+   */
+  async function handleOpenCredits() {
+    try {
+      await invoke("open_registered_window", { windowType: "credits" });
+    } catch (error) {
+      console.error("failed to open credits", error);
     }
   }
 
@@ -500,6 +513,24 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                 );
               })}
             </div>
+          </SettingsRow>
+        </div>
+      </section>
+
+      <section className="settings-group">
+        <h3 className="settings-group-title">{t("settings.groups.about")}</h3>
+        <div className="settings-card">
+          <SettingsRow
+            label={t("settings.credits.label")}
+            description={t("settings.credits.description")}
+          >
+            <button
+              className="settings-btn"
+              onClick={() => void handleOpenCredits()}
+              type="button"
+            >
+              {t("settings.credits.action")}
+            </button>
           </SettingsRow>
         </div>
       </section>

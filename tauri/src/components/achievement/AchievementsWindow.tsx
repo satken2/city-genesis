@@ -1,24 +1,3 @@
-/**
- * 統合施政スコア＆達成目標ダッシュボード
- *
- * ウィンドウ全体を上下に分割し、都市の成長度合と課題を一目で把握できるようにリニューアル。
- *
- * - 上部エリア (3/5): 施政スコア分析
- *   - 上段・左: 当期スコア、1世帯あたりスコア、集計世帯数、ペナルティ等の数値表示。
- *   - 上段・右: 世帯満足度5軸（栄養、医療、娯楽、居住、住環境）のレーダーチャート。
- *   - 下段: 過去エポックごとのスコア推移（棒グラフ）＋1世帯あたりスコアの推移（面グラフ）。
- *
- * 累積スコアは扱わない。単調増加でしかなく施政の良し悪しを表さないためで、
- * 都市の規模は人口・GDP（統計ウィンドウ）で測る。代わりに人口と独立な指標である
- * 「1世帯あたりスコア」（0.0〜2.0）を主指標として据える。
- * - 下部エリア (2/5): 達成目標（クエスト）カード一覧
- *   - カードグリッド形式で、各目標の進捗率・ステータスを一目で確認可能。
- *   - 進捗はサーバ計算の progress（0..1）を使い、複数条件（clause_states）は行ごとに表示する。
- *   - status: locked（先行クエスト未達成）はグレー+錠前、failed（期限切れ）は赤系で表示。
- *   - hidden の隠しクエストは達成まで名前・内容を「???」で伏せる。
- *   - tier（gold/silver/bronze）バッジと category ラベル、期限（deadline）も表示する。
- */
-
 import { useEffect, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
@@ -26,23 +5,8 @@ import { buildApiUrl, fetchApi } from "../../utils/api";
 import { useTemplateMode } from "../../hooks/useTemplateMode";
 import { ScenarioInfoSection } from "./ScenarioInfoSection";
 import type { Quest, QuestClauseState } from "../../types";
-import {
-  Radar,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  ResponsiveContainer,
-  ComposedChart,
-  BarChart,
-  Bar,
-  Cell,
-  LabelList,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from "recharts";
+import { ResponsiveContainer, ComposedChart, Bar, Line, CartesianGrid, ReferenceLine, XAxis, YAxis, Tooltip } from "recharts";
+import { resolveIntlLocale } from "../../utils/locale";
 import "./AchievementsWindow.css";
 
 type QuestsResponse = {
@@ -52,7 +16,7 @@ type QuestsResponse = {
 /**
  * 1世帯が都市スコアに貢献しうる最大値。
  * qol_score(最大1.0) + 正規化 env_score(最大1.0) の合計であり、スコア式から定まる固定値。
- * 1世帯あたりスコアのグラフ軸の上限に使う（ScoreMiniMeter と同じ値）。
+ * 1世帯あたりスコアのグラフ軸の上限に使う（コックピットと同じ値）。
  */
 const MAX_SCORE_PER_HOUSEHOLD = 2.0;
 
@@ -85,6 +49,10 @@ type ScoreHistoryItem = {
   epoch: number;
   city_score: number;
   city_score_per_household: number;
+  city_score_qol: number;
+  city_score_env: number;
+  city_score_collapse_penalty: number;
+  city_score_household_count: number;
 };
 
 type ScoreResponse = {
@@ -115,15 +83,18 @@ function isCompleted(quest: Quest): boolean {
   return quest.status === "completed";
 }
 
-function formatMetricValue(v: number | null): string {
+function formatMetricValue(v: number | null, locale: string): string {
   if (v === null || v === undefined) return "—";
   return Number.isInteger(v)
-    ? v.toLocaleString()
-    : v.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    ? v.toLocaleString(locale)
+    : v.toLocaleString(locale, { maximumFractionDigits: 2 });
 }
 
 export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = resolveIntlLocale(i18n.language);
+  const fmt = (value: number, digits = 1) => value.toLocaleString(locale, { maximumFractionDigits: digits });
+  const [historyMode, setHistoryMode] = useState<"household" | "total">("household");
   const templateMode = useTemplateMode(apiBaseUrl);
   const [quests, setQuests] = useState<Quest[]>([]);
   const [scoreData, setScoreData] = useState<ScoreResponse | null>(null);
@@ -188,11 +159,7 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
 
     setDeletingQuestId(questId);
     try {
-      const res = await fetch(buildApiUrl(apiBaseUrl, `/api/v1/quests/${questId}`), { method: "DELETE" });
-      if (!res.ok) {
-        const bodyText = await res.text().catch(() => "");
-        throw new Error(`HTTP ${res.status}: ${bodyText}`);
-      }
+      await fetchApi(buildApiUrl(apiBaseUrl, `/api/v1/quests/${questId}`), { method: "DELETE" });
       setQuests((prev) => prev.filter((q) => q.id !== questId));
     } catch (err) {
       console.error("[AchievementsWindow] Failed to delete quest:", err);
@@ -209,294 +176,38 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     return <div className="achieve-window__error">{t("common.fetchError")}: {error}</div>;
   }
 
-  // レーダーチャート用データ構築 (0〜100%)。
-  // 施政スコアの構成要素は qol_score（栄養・医療・娯楽）と env_score（住環境）の4軸のみ。
-  // satis_residential はスコア計算に使われないため表示しない。
-  const radarData = scoreData
-    ? [
-        { subject: t("achievements.avgNutrition"), value: Math.round(scoreData.latest.city_score_avg_nutrition * 100) },
-        { subject: t("achievements.avgHealthcare"), value: Math.round(scoreData.latest.city_score_avg_healthcare * 100) },
-        { subject: t("achievements.avgEntertainment"), value: Math.round(scoreData.latest.city_score_avg_entertainment * 100) },
-        { subject: t("achievements.avgEnv"), value: Math.round(scoreData.latest.city_score_avg_env * 100) },
-      ]
-    : [];
-
-  // 棒グラフ用データ構築。棒=都市スコア合計（規模を含む絶対量）、面=1世帯あたり（規模と独立）。
-  const barData = scoreData
-    ? scoreData.history.map((h) => ({
-        name: t("achievements.epochLabel", { epoch: h.epoch }),
-        score: Math.round(h.city_score * 10) / 10,
-        perHousehold: Math.round(h.city_score_per_household * 100) / 100,
-      }))
-    : [];
-
   const latest = scoreData?.latest;
+  const hasHistory = (scoreData?.history.length ?? 0) > 0;
+  const hasHouseholds = hasHistory && (latest?.city_score_household_count ?? 0) > 0;
+  const satisfaction = latest ? [
+    { key: "avgNutrition", hint: "nutritionHint", value: latest.city_score_avg_nutrition },
+    { key: "avgHealthcare", hint: "healthcareHint", value: latest.city_score_avg_healthcare },
+    { key: "avgEntertainment", hint: "entertainmentHint", value: latest.city_score_avg_entertainment },
+    { key: "avgEnv", hint: "envHint", value: latest.city_score_avg_env },
+  ] : [];
+  const order: Record<string, number> = { active: 0, locked: 1, completed: 2, failed: 3 };
+  const orderedQuests = [...quests].sort((a, b) => order[a.status] - order[b.status]);
+  // 内訳は減点前の値。減点を負方向に描き、確定済みスコアを線で示す。
+  const history = (scoreData?.history ?? []).map((item) => {
+    const divisor = historyMode === "household" ? item.city_score_household_count : 1;
+    return {
+      name: t("achievements.epochLabel", { epoch: item.epoch }),
+      qol: divisor > 0 ? item.city_score_qol / divisor : 0,
+      env: divisor > 0 ? item.city_score_env / divisor : 0,
+      penalty: divisor > 0 ? -item.city_score_collapse_penalty / divisor : 0,
+      score: historyMode === "household" ? item.city_score_per_household : item.city_score,
+    };
+  });
+
+  const historyMinimum = Math.floor(Math.min(0, ...history.map((item) => item.penalty)) * 2) / 2;
 
   return (
     <div className="achieve-dashboard">
-      {/* シナリオ紹介文（テンプレート作成モードでは編集フォーム） */}
-      <ScenarioInfoSection apiBaseUrl={apiBaseUrl} templateMode={templateMode} />
-
-      {/* 上部エリア (3/5): 施政スコア分析 */}
-      <div className="achieve-dashboard__upper">
-        
-        {/* 上段: 数値サマリー & スコア推移 */}
-        <div className="achieve-dashboard__row-top">
-          {/* 左側: 数値サマリー */}
-          <div className="achieve-dashboard__summary">
-            <h3 className="achieve-dashboard__section-title">{t("achievements.scoreTitle")}</h3>
-            {latest && (
-              <div className="score-summary-grid">
-                <div className="score-summary-card score-summary-card--main">
-                  <span className="score-summary-card__label">{t("achievements.currentScore")}</span>
-                  <div className="score-summary-card__value-row">
-                    <span className="score-summary-card__value">{latest.city_score.toLocaleString(undefined, { maximumFractionDigits: 1 })}</span>
-                    <span className="score-summary-card__unit">{t("achievements.points")}</span>
-                  </div>
-                  <div className="score-summary-card__breakdown">
-                    <span>QoL: {latest.city_score_qol.toLocaleString(undefined, { maximumFractionDigits: 1 })}</span>
-                    <span>Env: {latest.city_score_env.toLocaleString(undefined, { maximumFractionDigits: 1 })}</span>
-                    {latest.city_score_collapse_penalty > 0 && (
-                      <span className="score-summary-card__penalty">
-                        -{latest.city_score_collapse_penalty.toLocaleString(undefined, { maximumFractionDigits: 1 })}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="score-summary-card score-summary-card--sub">
-                  <span className="score-summary-card__label">{t("achievements.perHouseholdScore")}</span>
-                  <div className="score-summary-card__value-row">
-                    <span className="score-summary-card__value">{latest.city_score_per_household.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                    <span className="score-summary-card__unit">/ {MAX_SCORE_PER_HOUSEHOLD.toFixed(1)}</span>
-                  </div>
-                </div>
-
-                <div className="score-summary-card score-summary-card--sub">
-                  <span className="score-summary-card__label">{t("achievements.householdCount")}</span>
-                  <div className="score-summary-card__value-row">
-                    <span className="score-summary-card__value">{latest.city_score_household_count.toLocaleString()}</span>
-                    <span className="score-summary-card__unit">{t("achievements.households")}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* 右側: スコア履歴 (棒グラフ) */}
-          <div className="achieve-dashboard__history">
-            <h3 className="achieve-dashboard__section-title">{t("achievements.scoreHistory")}</h3>
-            <div className="achieve-dashboard__chart-container-bar">
-              {barData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={barData} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
-                    <defs>
-                      <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#4ea1ff" stopOpacity={0.85} />
-                        <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.2} />
-                      </linearGradient>
-                      <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.3} />
-                        <stop offset="100%" stopColor="#f59e0b" stopOpacity={0.03} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis
-                      dataKey="name"
-                      tick={{ fill: "#7b8fa5", fontSize: 10 }}
-                      axisLine={{ stroke: "rgba(255, 255, 255, 0.08)" }}
-                      tickLine={false}
-                    />
-                    {/* 左軸は1世帯あたりスコア。満点(2.0)固定にして、
-                        「どの水準にいるか」がエポックをまたいでも同じ高さで読めるようにする */}
-                    <YAxis
-                      yAxisId="left"
-                      domain={[0, MAX_SCORE_PER_HOUSEHOLD]}
-                      tick={{ fill: "#c4873a", fontSize: 10 }}
-                      axisLine={{ stroke: "rgba(255, 255, 255, 0.08)" }}
-                      tickLine={false}
-                    />
-                    <YAxis
-                      yAxisId="right"
-                      orientation="right"
-                      tick={{ fill: "#7b8fa5", fontSize: 10 }}
-                      axisLine={{ stroke: "rgba(255, 255, 255, 0.08)" }}
-                      tickLine={false}
-                    />
-                    <Tooltip
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          const data = payload[0].payload as { name: string; score: number; perHousehold: number };
-                          return (
-                            <div className="bar-chart-tooltip">
-                              <p className="bar-chart-tooltip__epoch">{data.name}</p>
-                              <p className="bar-chart-tooltip__val">
-                                {t("achievements.currentScore")}: <span>{data.score} {t("achievements.points")}</span>
-                              </p>
-                              <p className="bar-chart-tooltip__val">
-                                {t("achievements.perHouseholdScore")}: <span>{data.perHousehold.toFixed(2)}</span>
-                              </p>
-                            </div>
-                          );
-                        }
-                        return null;
-                      }}
-                    />
-                    <Area
-                      yAxisId="left"
-                      dataKey="perHousehold"
-                      stroke="#f59e0b"
-                      strokeWidth={1.5}
-                      fill="url(#areaGrad)"
-                      dot={false}
-                      activeDot={{ r: 3, fill: "#f59e0b" }}
-                    />
-                    <Bar
-                      yAxisId="right"
-                      dataKey="score"
-                      fill="url(#barGrad)"
-                      radius={[4, 4, 0, 0]}
-                      maxBarSize={45}
-                    />
-                  </ComposedChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="achieve-dashboard__no-chart">{t("achievements.noHistory")}</div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* 中段: スコア構成 & 世帯満足度 & 災害一覧 */}
-        <div className="achieve-dashboard__row-bottom">
-          {/* 左: スコア構成ウォーターフォール */}
-          {latest && (() => {
-            const qol = latest.city_score_qol;
-            const env = latest.city_score_env;
-            const penalty = latest.city_score_collapse_penalty;
-            const hasPenalty = penalty > 0;
-            const fmt = (v: number) => v.toLocaleString(undefined, { maximumFractionDigits: 1 });
-
-            const wfData = [
-              { name: t("achievements.qolScore"),        base: 0,              value: qol,                color: "#3b82f6", label: `+${fmt(qol)}` },
-              { name: t("achievements.envScore"),        base: qol,            value: env,                color: "#10b981", label: `+${fmt(env)}` },
-              { name: t("achievements.collapsePenalty"), base: qol + env - penalty, value: Math.max(penalty, 0.1), color: hasPenalty ? "#ef4444" : "rgba(255,255,255,0.04)", label: hasPenalty ? `-${fmt(penalty)}` : "0" },
-              { name: t("achievements.finalScore"),      base: 0,              value: latest.city_score,  color: "#4ea1ff", label: fmt(latest.city_score) },
-            ];
-
-            return (
-              <div className="achieve-dashboard__waterfall">
-                <h3 className="achieve-dashboard__section-title">{t("achievements.scoreComposition")}</h3>
-                <div className="achieve-dashboard__chart-container">
-                  {radarData.length > 0 ? (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={wfData}
-                        margin={{ top: 12, right: 8, left: -20, bottom: 4 }}
-                        barCategoryGap="20%"
-                      >
-                        <XAxis
-                          dataKey="name"
-                          tick={{ fill: "#9db0c5", fontSize: 9, fontWeight: 600 }}
-                          axisLine={{ stroke: "rgba(255, 255, 255, 0.08)" }}
-                          tickLine={false}
-                          interval={0}
-                        />
-                        <YAxis hide />
-                        <Bar dataKey="base" stackId="wf" fill="transparent" />
-                        <Bar dataKey="value" stackId="wf" radius={[3, 3, 0, 0]}>
-                          <LabelList dataKey="label" position="top" fill="#e5eef9" fontSize={10} fontWeight={600} />
-                          {wfData.map((entry, i) => (
-                            <Cell key={i} fill={entry.color} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <div className="achieve-dashboard__no-chart">{t("achievements.noHistory")}</div>
-                  )}
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* 中央: 世帯満足度レーダーチャート */}
-          <div className="achieve-dashboard__radar">
-            <h3 className="achieve-dashboard__section-title">世帯満足度内訳</h3>
-            <div className="achieve-dashboard__chart-container">
-              {radarData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart cx="50%" cy="50%" outerRadius="68%" data={radarData}>
-                    <PolarGrid stroke="rgba(255, 255, 255, 0.08)" />
-                    <PolarAngleAxis
-                      dataKey="subject"
-                      tick={{ fill: "#9db0c5", fontSize: 10, fontWeight: 600 }}
-                    />
-                    <PolarRadiusAxis
-                      angle={30}
-                      domain={[0, 100]}
-                      tick={{ fill: "#5a6f86", fontSize: 9 }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <Radar
-                      name="Satisfaction"
-                      dataKey="value"
-                      stroke="#4ea1ff"
-                      fill="#4ea1ff"
-                      fillOpacity={0.25}
-                    />
-                  </RadarChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="achieve-dashboard__no-chart">{t("achievements.noHistory")}</div>
-              )}
-            </div>
-          </div>
-
-          {/* 右: 災害一覧 */}
-          <div className="achieve-dashboard__disasters">
-            <h3 className="achieve-dashboard__section-title">{t("achievements.disasterList")}</h3>
-            <div className="disaster-list">
-              {latest && latest.collapse_events.length > 0 ? (
-                latest.collapse_events.map((evt, idx) => (
-                  <div key={idx} className="disaster-card">
-                    <div className="disaster-card__header">
-                      <span className={`disaster-card__badge ${evt.is_path ? "disaster-card__badge--path" : "disaster-card__badge--building"}`}>
-                        {evt.is_path ? t("achievements.disasterTypePath") : t("achievements.disasterTypeBuilding")}
-                      </span>
-                      <span className="disaster-card__badge">
-                        {evt.cause === "fire"
-                          ? t("achievements.disasterCauseFire")
-                          : t("achievements.disasterCauseAging")}
-                      </span>
-                      <span className="disaster-card__id">#{evt.agent_id}</span>
-                    </div>
-                    <div className="disaster-card__details">
-                      <span className="disaster-card__zone">{t("achievements.disasterZone")}: {evt.zone_id}</span>
-                      {evt.death_count > 0 && (
-                        <span className="disaster-card__deaths">{evt.death_count}{t("achievements.disasterDeaths")}</span>
-                      )}
-                      {evt.death_count === 0 && (
-                        <span className="disaster-card__deaths disaster-card__deaths--zero">0{t("achievements.disasterDeaths")}</span>
-                      )}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="disaster-list__empty">{t("achievements.disasterNoData")}</div>
-              )}
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      {/* 下部エリア (2/5): 達成目標カード一覧 */}
-      <div className="achieve-dashboard__lower">
+      <div className="achieve-dashboard__goals">
         <h3 className="achieve-dashboard__section-title">
           {t("achievements.title")}
           <span className="achieve-dashboard__quest-count">
-            ({quests.filter(isCompleted).length} / {quests.length})
+            {t("achievements.completedCount", { completed: quests.filter(isCompleted).length, total: quests.length })}
           </span>
           {templateMode && (
             <button
@@ -509,18 +220,20 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
           )}
         </h3>
 
+        <p className="achieve-dashboard__hint">{t("achievements.goalsHint")}</p>
+        <ScenarioInfoSection apiBaseUrl={apiBaseUrl} templateMode={templateMode} />
         <div className="achieve-dashboard__quest-grid">
           {quests.length === 0 ? (
             <div className="achieve-dashboard__empty-quests">{t("achievements.noQuests")}</div>
           ) : (
-            quests.map((quest) => {
+            orderedQuests.map((quest) => {
               const completed = isCompleted(quest);
               const locked = quest.status === "locked";
               const failed = quest.status === "failed";
               // 隠しクエストは達成するまで名前・内容・条件を伏せる（テンプレートモードでは見せる）
               const masked = quest.hidden && !completed && !templateMode;
-              const progress = completed ? 1 : quest.progress ?? 0;
-              const barColor = completed ? "#10b981" : failed ? "#ef4444" : "#3b82f6";
+              const progress = completed ? 1 : Math.max(0, Math.min(1, quest.progress ?? 0));
+              const barColor = completed ? "var(--flat-good)" : failed ? "var(--flat-danger)" : "var(--flat-accent)";
               return (
                 <div
                   key={quest.id}
@@ -533,6 +246,13 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                   ].join(" ")}
                   onClick={templateMode ? () => void handleOpenEditQuest(quest.id) : undefined}
                   role={templateMode ? "button" : undefined}
+                  tabIndex={templateMode ? 0 : undefined}
+                  onKeyDown={templateMode ? (event) => {
+                    if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {
+                      event.preventDefault();
+                      void handleOpenEditQuest(quest.id);
+                    }
+                  } : undefined}
                 >
                   <div className="quest-grid-card__top">
                     <span className="quest-grid-card__badge">
@@ -568,6 +288,7 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                     )}
                   </div>
 
+                  <span className="quest-grid-card__status">{t(`achievements.status.${quest.status}`)}</span>
                   <p className="quest-grid-card__desc">
                     {masked ? t("achievements.hiddenQuestDesc") : quest.description}
                   </p>
@@ -585,7 +306,7 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                       )}
                       {quest.reward?.type === "grant_money" && (
                         <span className="quest-grid-card__meta-chip quest-grid-card__meta-chip--reward">
-                          {t("achievements.rewardMoney", { amount: quest.reward.amount.toLocaleString() })}
+                          {t("achievements.rewardMoney", { amount: fmt(quest.reward.amount) })}
                         </span>
                       )}
                     </div>
@@ -595,7 +316,7 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                     <p className="quest-grid-card__locked-note">{t("achievements.lockedNote")}</p>
                   ) : failed ? (
                     <p className="quest-grid-card__failed-note">{t("achievements.failedNote")}</p>
-                  ) : (
+                  ) : !masked ? (
                     <div className="quest-grid-card__progress-area">
                       <div className="quest-grid-card__bar-track">
                         <div
@@ -619,13 +340,110 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                         </span>
                       </div>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               );
             })
           )}
         </div>
       </div>
+      <section className="achieve-dashboard__score" aria-labelledby="resident-score-title">
+        <header className="achieve-dashboard__score-heading">
+          <h2 id="resident-score-title">{t("achievements.scoreTitle")}</h2>
+          {hasHistory && latest && <span>{t("achievements.epochLabel", { epoch: latest.epoch })}</span>}
+        </header>
+        <p className="achieve-dashboard__hint">{t("achievements.scoreHint")}</p>
+        {!hasHistory ? <p className="achieve-dashboard__empty">{t("achievements.noHistory")}</p> : latest && <>
+          <div className="resident-score-summary">
+            <div className="resident-score-main">
+              <span>{t("achievements.perHouseholdScore")}</span>
+              <div><strong>{hasHouseholds ? fmt(latest.city_score_per_household, 2) : "—"}</strong><span> / {fmt(MAX_SCORE_PER_HOUSEHOLD)} {t("achievements.points")}</span></div>
+              <p>{t(hasHouseholds ? "achievements.perHouseholdHint" : "achievements.noHouseholds")}</p>
+            </div>
+            <div className="resident-score-total">
+              <span>{t("achievements.currentScore")}</span>
+              <strong>{fmt(latest.city_score)} {t("achievements.points")}</strong>
+              <dl>
+                <div><dt>{t("achievements.qolScore")}</dt><dd>+{fmt(latest.city_score_qol)}</dd></div>
+                <div><dt>{t("achievements.envScore")}</dt><dd>+{fmt(latest.city_score_env)}</dd></div>
+                <div className="resident-score-penalty"><dt>{t("achievements.collapsePenalty")}</dt><dd>{latest.city_score_collapse_penalty > 0 ? "−" : ""}{fmt(latest.city_score_collapse_penalty)}</dd></div>
+              </dl>
+              <small>{t("achievements.householdCount")}: {fmt(latest.city_score_household_count)} {t("achievements.households")}</small>
+            </div>
+          </div>
+          <section className="resident-score-history">
+            <h3>{t("achievements.scoreHistory")}</h3>
+            <div className="resident-score-modes" role="group" aria-label={t("achievements.scoreHistory")}>
+              {(["household", "total"] as const).map((mode) => <button key={mode} type="button" aria-pressed={historyMode === mode} onClick={() => setHistoryMode(mode)}>{t(mode === "household" ? "achievements.perHouseholdScore" : "achievements.currentScore")}</button>)}
+            </div>
+            <p className="achieve-dashboard__hint">{t("achievements.historyHint")}</p>
+            <div className="resident-score-legend">
+              <span style={{ color: "var(--flat-accent)" }}>■ {t("achievements.qolScore")}</span>
+              <span style={{ color: "var(--flat-good)" }}>■ {t("achievements.envScore")}</span>
+              <span style={{ color: "var(--flat-danger)" }}>■ {t("achievements.collapsePenalty")}</span>
+              <span>━ {t("achievements.finalScore")}</span>
+            </div>
+            <div className="resident-score-chart">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={history} stackOffset="sign" margin={{ top: 8, right: 12, bottom: 4, left: 0 }} accessibilityLayer>
+                  <CartesianGrid vertical={false} stroke="#26374d" />
+                  <XAxis dataKey="name" tick={{ fill: "#a4bccc", fontSize: 11 }} minTickGap={32} tickLine={false} />
+                  <YAxis domain={historyMode === "household" ? [historyMinimum, MAX_SCORE_PER_HOUSEHOLD] : ["auto", "auto"]} ticks={historyMode === "household" ? [-1, -0.5, 0, 0.5, 1, 1.5, 2].filter((value) => value >= historyMinimum) : undefined} tick={{ fill: "#a4bccc", fontSize: 11 }} tickFormatter={(value: number) => fmt(value)} width={50} tickLine={false} />
+                  <ReferenceLine y={0} stroke="#a4bccc" />
+                  <Tooltip content={({ active, payload, label }) => active && payload?.length ? <div className="resident-score-tooltip"><strong>{label}</strong>{payload.map((entry) => <div key={String(entry.dataKey)}>{entry.name}: {fmt(Number(entry.value), 2)} {t("achievements.points")}</div>)}</div> : null} />
+                  <Bar dataKey="qol" name={t("achievements.qolScore")} stackId="score" fill="#4ea1ff" maxBarSize={30} isAnimationActive={false} />
+                  <Bar dataKey="env" name={t("achievements.envScore")} stackId="score" fill="#6cd47f" maxBarSize={30} isAnimationActive={false} />
+                  <Bar dataKey="penalty" name={t("achievements.collapsePenalty")} stackId="score" fill="#ff9a9a" maxBarSize={30} isAnimationActive={false} />
+                  <Line dataKey="score" name={t("achievements.finalScore")} stroke="#e0e0e0" strokeWidth={2} dot={{ r: 2 }} isAnimationActive={false} />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+          </section>
+          <section className="resident-satisfaction">
+            <h3>{t("achievements.satisfactionTitle")}</h3>
+            <p className="achieve-dashboard__hint">{t("achievements.satisfactionHint")}</p>
+            {hasHouseholds ? satisfaction.map((item) => <div className="resident-satisfaction-row" key={item.key}>
+              <div><span>{t(`achievements.${item.key}`)}</span><strong>{fmt(item.value * 100, 0)}%</strong></div>
+              <meter min={0} max={1} value={item.value} aria-label={t(`achievements.${item.key}`)} />
+              <small>{t(`achievements.${item.hint}`)}</small>
+            </div>) : <p className="achieve-dashboard__hint">{t("achievements.noHouseholds")}</p>}
+          </section>
+          <details className="resident-disasters">
+            <summary>{t("achievements.disasterList")} ({latest.collapse_events.length})</summary>
+            <div className="disaster-list">
+              {latest && latest.collapse_events.length > 0 ? (
+                latest.collapse_events.map((evt, idx) => (
+                  <div key={idx} className="disaster-card">
+                    <div className="disaster-card__header">
+                      <span className={`disaster-card__badge ${evt.is_path ? "disaster-card__badge--path" : "disaster-card__badge--building"}`}>
+                        {evt.is_path ? t("achievements.disasterTypePath") : t("achievements.disasterTypeBuilding")}
+                      </span>
+                      <span className="disaster-card__badge">
+                        {evt.cause === "fire"
+                          ? t("achievements.disasterCauseFire")
+                          : t("achievements.disasterCauseAging")}
+                      </span>
+                      <span className="disaster-card__id">#{evt.agent_id}</span>
+                    </div>
+                    <div className="disaster-card__details">
+                      <span className="disaster-card__zone">{t("achievements.disasterZone")}: {evt.zone_id}</span>
+                      {evt.death_count > 0 && (
+                        <span className="disaster-card__deaths">{evt.death_count}{t("achievements.disasterDeaths")}</span>
+                      )}
+                      {evt.death_count === 0 && (
+                        <span className="disaster-card__deaths disaster-card__deaths--zero">0{t("achievements.disasterDeaths")}</span>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="disaster-list__empty">{t("achievements.disasterNoData")}</div>
+              )}
+            </div>
+          </details>
+        </>}
+      </section>
+
     </div>
   );
 }
@@ -636,14 +454,15 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
  * 小さなラベルで補足する。streak は「n / window エポック連続」を表示する。
  */
 function ClauseRow({ clause }: { clause: QuestClauseState }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = resolveIntlLocale(i18n.language);
   const modeLabel =
     clause.mode !== "value" ? t(`achievements.mode.${clause.mode}`, { window: clause.window }) : null;
   return (
     <div className="quest-grid-card__clause">
-      <span className="quest-grid-card__current">{formatMetricValue(clause.current)}</span>
+      <span className="quest-grid-card__current">{formatMetricValue(clause.current, locale)}</span>
       <span className="quest-grid-card__operator">{compareToLabel(clause.compare)}</span>
-      <span className="quest-grid-card__target">{formatMetricValue(clause.target)}</span>
+      <span className="quest-grid-card__target">{formatMetricValue(clause.target, locale)}</span>
       {clause.mode === "streak" && (
         <span className="quest-grid-card__streak">
           {t("achievements.streakProgress", { current: clause.streak ?? 0, window: clause.window })}

@@ -17,6 +17,37 @@ public class PathManager : BaseApiDataManager
     public int PendingTerrainRebuildCount => queuedTerrainFollowPathIds.Count;
     private readonly RenderObjectCache lodCache = new RenderObjectCache(128L * 1024 * 1024);
     private readonly Dictionary<int, int> geometryRevisions = new Dictionary<int, int>();
+    private readonly Dictionary<int, (int version, int status)> terrainFollowCompletedPaths = new Dictionary<int, (int, int)>();
+    private readonly HashSet<int> terrainFollowCompletedNodes = new HashSet<int>();
+    private int terrainFollowNodeVersion;
+
+    /// <summary>追従全体の完了・強制更新・セッション終了時に、中断再開用の記録を解放する。</summary>
+    public void ClearTerrainFollowProgress()
+    {
+        terrainFollowCompletedPaths.Clear();
+        terrainFollowCompletedNodes.Clear();
+        terrainFollowNodeVersion = NodeDataVersion;
+    }
+
+    private void InvalidateTerrainFollowPath(PathSummary path)
+    {
+        if (path == null) return;
+        if (terrainFollowCompletedPaths.Remove(path.path_id))
+            RenderWorkScheduler.CountEvent("terrainFollow.pathInvalidated");
+        terrainFollowCompletedNodes.Remove(path.start_node_id);
+        terrainFollowCompletedNodes.Remove(path.end_node_id);
+    }
+
+    /// <summary>接地と交差点端部の依存範囲に余裕を持たせ、更新セルの周囲3×3だけ再処理可能にする。</summary>
+    private void InvalidateTerrainFollowCell(Vector2Int cell)
+    {
+        for (int z = -1; z <= 1; z++) for (int x = -1; x <= 1; x++)
+        {
+            if (!pathIdsByCell.TryGetValue(cell + new Vector2Int(x, z), out var ids)) continue;
+            foreach (int id in ids)
+                if (pathDataCache.TryGetValue(id, out var path)) InvalidateTerrainFollowPath(path);
+        }
+    }
 
     private string PathRenderKey(PathSummary path, DrawLod lod, bool invalidate)
     {
@@ -661,6 +692,7 @@ public class PathManager : BaseApiDataManager
 
     public override void ClearAllCells()
     {
+        ClearTerrainFollowProgress();
         Debug.Log("PathManager: 全ノード・道路データをクリア");
         closePathIds.Clear();
         lodCache.Clear();
@@ -1307,7 +1339,9 @@ public class PathManager : BaseApiDataManager
             if (!pathDataCache.TryGetValue(pathId, out PathSummary path)) continue;
 
             LodTier tier = DeterminePathLodTier(path, nearSet, dynamicSet);
-            TryRebuildPathOnce(path, tier, updateIntersections: true, forceRebuild: tier == LodTier.Dynamic, reason: "lookup");
+            // セルへの再入場だけでは形状の版を進めず、既存LODと退避キャッシュを使う。
+            // 地形・データ・交差点の変更は、それぞれの更新経路で強制再生成する。
+            TryRebuildPathOnce(path, tier, updateIntersections: true, forceRebuild: false, reason: "lookup");
 
             if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
             {
@@ -3428,14 +3462,22 @@ public class PathManager : BaseApiDataManager
         if (path == null) return;
         if (pathDataCache.TryGetValue(path.path_id, out var oldPath))
         {
+            if (oldPath.version != path.version || oldPath.status != path.status
+                || oldPath.start_node_id != path.start_node_id || oldPath.end_node_id != path.end_node_id)
+            {
+                InvalidateTerrainFollowPath(oldPath);
+                InvalidateTerrainFollowPath(path);
+            }
             RemovePathFromNodeIndex(path.path_id, oldPath.start_node_id, oldPath.end_node_id);
         }
+        else InvalidateTerrainFollowPath(path);
         pathDataCache[path.path_id] = path;
         AddPathToNodeIndex(path);
     }
 
     private void RemovePathFromCache(int pathId)
     {
+        if (pathDataCache.TryGetValue(pathId, out var removed)) InvalidateTerrainFollowPath(removed);
         if (pathDataCache.TryGetValue(pathId, out var path))
         {
             RemovePathFromNodeIndex(pathId, path.start_node_id, path.end_node_id);
@@ -3529,6 +3571,8 @@ public class PathManager : BaseApiDataManager
     private void OnTerrainTileReadyHandler(Vector2Int cellIndex, Terrain terrain)
     {
         Utils.InvalidateHeightCache();
+        // 通知抑制中も無効化する。取消されたロードで到着したタイルも取りこぼさない。
+        InvalidateTerrainFollowCell(cellIndex);
 
         if (deferTerrainTilePathRebuilds)
         {
@@ -3614,6 +3658,8 @@ public class PathManager : BaseApiDataManager
     /// </summary>
     public IEnumerator RebuildPathShapesForCellsCoroutine(List<Vector2Int> cells)
     {
+        // ノードの位置・接続種別が変わった場合は接続形状の再確認が必要。
+        if (terrainFollowNodeVersion != NodeDataVersion) ClearTerrainFollowProgress();
         HashSet<int> pathIds = new HashSet<int>();
         foreach (var cell in cells)
         {
@@ -3638,13 +3684,17 @@ public class PathManager : BaseApiDataManager
         }
         orderedPathIds.Sort((a, b) => pathScores[a].CompareTo(pathScores[b]));
 
-        // スプライン再構築・SplineMesh生成の集中によるカクつきを抑えるため、
-        // フレーム予算を超えたら次フレームに譲る。
-        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        // 1件ごとに完了を記録して共通予算へ戻す。取消し後も記録済みの本線は再生成しない。
         foreach (int pathId in orderedPathIds)
         {
             if (pathDataCache.TryGetValue(pathId, out PathSummary path))
             {
+                if (terrainFollowCompletedPaths.TryGetValue(pathId, out var completed)
+                    && completed == (path.version, path.status) && HasPathRepresentation(path))
+                {
+                    RenderWorkScheduler.CountEvent("terrainFollow.pathResumeSkipped");
+                    continue;
+                }
                 LodTier tier = LodTier.Far;
                 foreach (var cell in GetPathCoveredCellsCached(path))
                 {
@@ -3664,7 +3714,12 @@ public class PathManager : BaseApiDataManager
                 // 地形追従が恒久的に止まる。1本の失敗はそのパスだけに留めて続行する。
                 try
                 {
-                    TryRebuildPathOnce(path, tier, updateIntersections: false, forceRebuild: true, reason: "地形追従のため");
+                    if (TryRebuildPathOnce(path, tier, updateIntersections: false, forceRebuild: true, reason: "地形追従のため")
+                        && HasPathRepresentation(path))
+                    {
+                        terrainFollowCompletedPaths[pathId] = (path.version, path.status);
+                        RenderWorkScheduler.CountEvent("terrainFollow.pathCompleted");
+                    }
                 }
                 catch (System.Exception e)
                 {
@@ -3672,14 +3727,10 @@ public class PathManager : BaseApiDataManager
                 }
             }
 
-            if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
-            {
-                yield return RenderWorkScheduler.Continue;
-                stopwatch.Restart();
-            }
+            yield return RenderWorkScheduler.Continue;
         }
 
-        // 交差点メッシュも更新(こちらも視野内のノードから先に処理する)
+        // 本線を再開時に省略しても、未完了の交差点は全対象道路から回収する。
         HashSet<int> affectedNodeIds = new HashSet<int>();
         foreach (int pathId in pathIds)
         {
@@ -3700,20 +3751,27 @@ public class PathManager : BaseApiDataManager
         foreach (int nodeId in orderedNodeIds)
         {
             // パス再生成と同じ理由で、1ノードの失敗が追従全体を中断しないよう捕捉して続行する。
+            if (terrainFollowCompletedNodes.Contains(nodeId))
+            {
+                RenderWorkScheduler.CountEvent("terrainFollow.nodeResumeSkipped");
+                continue;
+            }
             try
             {
                 UpdateNodeIntersectionMesh(nodeId);
+                if (nodeDataCache.ContainsKey(nodeId) && !awaitingIntersectionNodes.Contains(nodeId)
+                    && !fetchingIntersectionNodeIds.Contains(nodeId))
+                {
+                    terrainFollowCompletedNodes.Add(nodeId);
+                    RenderWorkScheduler.CountEvent("terrainFollow.nodeCompleted");
+                }
             }
             catch (System.Exception e)
             {
                 Debug.LogError($"PathManager: 地形追従の交差点更新に失敗 node={nodeId}: {e}");
             }
 
-            if (stopwatch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
-            {
-                yield return RenderWorkScheduler.Continue;
-                stopwatch.Restart();
-            }
+            yield return RenderWorkScheduler.Continue;
         }
     }
 

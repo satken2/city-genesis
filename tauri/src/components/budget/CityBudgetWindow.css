@@ -24,46 +24,38 @@
   color: var(--flat-text);
 }
 
-/* ヘッダ: 資金カード(左) + 計画期間(右) */
+/* ヘッダ: 資金(左) + 計画期間(右)。ウィンドウ全体の前提を示すだけの行なので
+   カードにはせず、背景へじかに置く(カードは本文の4サブパネルだけに使う)。 */
 .budget-window__header {
   display: flex;
   justify-content: space-between;
-  align-items: stretch;
+  align-items: baseline;
   gap: 10px;
+  padding: 0 2px;
   flex-shrink: 0;
 }
 
 .budget-window__reserves-card {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 8px 14px;
-  background-color: var(--flat-surface);
-  box-shadow: inset 4px 0 0 var(--flat-accent), var(--flat-shadow);
+  align-items: baseline;
+  gap: 8px;
 }
 
 .budget-window__reserves-card-label {
-  font-size: 11px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-size: 12px;
   color: var(--flat-text-label);
 }
 
 .budget-window__reserves-card-value {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--flat-text);
 }
 
 .budget-window__period-info {
-  display: flex;
-  align-items: center;
-  padding: 8px 14px;
   font-size: 13px;
   color: var(--flat-text-body);
-  background-color: var(--flat-surface);
-  box-shadow: var(--flat-shadow);
 }
 
 /* 資金不足による自動調整バナー */
@@ -249,12 +241,13 @@
   box-shadow: inset 4px 0 0 var(--flat-accent), var(--flat-shadow-sm);
 }
 
-/* 左側のカテゴリアイコン枠(正方形)。画像が無いカテゴリは空枠のまま表示する。 */
+/* 左側のカテゴリアイコン(正方形の場所だけを確保する)。アイコン画像は背景が透過
+   されているため面を敷かず、カードの色をそのまま透かす。画像が無いカテゴリは
+   並びが崩れないよう空きスペースのまま残す。 */
 .budget-category-card__icon {
   flex-shrink: 0;
   width: 36px;
   height: 36px;
-  background-color: var(--flat-sunken);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -340,16 +333,23 @@
   flex: 1;
 }
 
-/* 収支バランスの見出し行: タイトル + 期間の但し書き */
+/* 収支バランスの見出し行: タイトル + 期間の但し書き。
+   幅が足りないときは但し書きだけを折り返す(見出しは折らない)。 */
 .budget-window__balance-header {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 4px 8px;
   flex-shrink: 0;
 }
 
+.budget-window__balance-header .budget-window__section-title {
+  white-space: nowrap;
+}
+
 .budget-window__balance-note {
+  flex: 1;
+  min-width: 0;
   font-size: 11px;
   color: var(--flat-text-muted);
 }

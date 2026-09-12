@@ -362,6 +362,7 @@ public class CellDataLoader : MonoBehaviour
 
         pendingCellSets = cellSets;
         pendingIsForce = isForce;
+        if (isForce) pathManager?.ClearTerrainFollowProgress();
 
         // 新しいロードバッチを発行し、進行中の旧バッチを協調キャンセルする。
         // 各マネージャーの親コルーチンは StopCoroutine で停止されるが、
@@ -460,9 +461,25 @@ public class CellDataLoader : MonoBehaviour
         // 2/3. 地形(near/far/dynamic)のリロード
     }
 
+    private void CollectDeferredTerrainNotifications()
+    {
+        // 抑制中のタイル通知は追従開始前に統合する。完了後に回収すると同じセルを二度処理する。
+        if (pathManager != null)
+        {
+            pendingFollowUpCells.UnionWith(pathManager.EndDeferredTerrainTilePathRebuilds());
+            pathManager.BeginDeferredTerrainTilePathRebuilds();
+        }
+        if (buildingManager != null)
+        {
+            pendingFollowUpCells.UnionWith(buildingManager.EndDeferredTerrainTileBuildingRebuilds());
+            buildingManager.BeginDeferredTerrainTileBuildingRebuilds();
+        }
+    }
+
     private void OnTerrainAllLoaded(IReadOnlyList<Vector2Int> updatedCells)
     {
         activeLoadBatch?.Trace($"TERRAIN_DONE updated={updatedCells?.Count ?? 0}");
+        CollectDeferredTerrainNotifications();
         // 今回実際に更新されたセルを未処理集合へ統合する。
         // (前回コルーチンがキャンセルされて取りこぼしたセルがあれば、それと合流する)
         if (updatedCells != null)
@@ -632,6 +649,7 @@ public class CellDataLoader : MonoBehaviour
         {
             terrainFollowUpCoroutine = RenderWorkScheduler.Start(this, TerrainFollowUpCoroutine(), "CellDataLoader");
         }
+        else if (pendingFollowUpCells.Count == 0) pathManager?.ClearTerrainFollowProgress();
     }
 
     /// <summary>

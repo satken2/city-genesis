@@ -5,7 +5,8 @@
       "general": "一般",
       "display": "畫面",
       "sound": "聲音",
-      "system": "系統"
+      "system": "系統",
+      "about": "資訊"
     },
     "fontSize": {
       "label": "文字大小",
@@ -58,6 +59,11 @@
     "windowReset": {
       "label": "視窗位置與大小",
       "action": "重設"
+    },
+    "credits": {
+      "label": "製作鳴謝",
+      "description": "本作所使用素材與軟體的版權標示",
+      "action": "檢視"
     }
   },
   "saveLoad": {

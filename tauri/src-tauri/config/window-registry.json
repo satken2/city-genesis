@@ -340,6 +340,15 @@
     "empty_shell": true,
     "actions": []
   },
+  "credits": {
+    "title": "Credits",
+    "width": 560,
+    "height": 560,
+    "resizable": true,
+    "policy": "single",
+    "empty_shell": true,
+    "actions": []
+  },
   "top_page": {
     "title": "Top Menu",
     "width": 800,

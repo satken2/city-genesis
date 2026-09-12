@@ -1,0 +1,17 @@
+{
+  "credits": {
+    "lead": "This game uses the assets and software listed below. Author names, sources, license names, and any attribution text required by a license are reproduced verbatim.",
+    "empty": "No entries.",
+    "requiredText": "Required attribution",
+    "categories": {
+      "bgm": "Music",
+      "sfx": "Sound Effects",
+      "image": "Images & Icons",
+      "font": "Fonts",
+      "model": "3D Models",
+      "texture": "Textures",
+      "engine": "Game Engine",
+      "library": "Open Source Software"
+    }
+  }
+}

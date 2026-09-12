@@ -1152,7 +1152,7 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                           totalLabel={t("budget.total", { defaultValue: "合計" })}
                         />
                       }
-                      cursor={{ fill: "rgba(255, 255, 255, 0.04)" }}
+                      cursor={{ fill: CHART_CURSOR_FILL }}
                     />
                     <Legend wrapperStyle={{ fontSize: 10 }} />
                     {balanceChart.series.map((s) => (

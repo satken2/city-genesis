@@ -1,0 +1,144 @@
+/**
+ * クレジットウィンドウのスタイル定義
+ *
+ * 意匠は設定ウィンドウと揃える(枠線・角丸・発光を使わず、ベタ塗りの四角と
+ * 落ち影だけで面の高さを表す)。配色は App.css の --flat-* トークンが唯一の正。
+ *
+ * 構成は「カテゴリ見出し + 掲載行を積んだカード」の縦並び。
+ * 行同士は2pxの隙間で分け、隙間から沈んだ面色が覗くことで区切り線の代わりにする。
+ *
+ * 寸法は設定ウィンドウと同じ理由で px 指定。文字サイズ設定を変えても
+ * このウィンドウのレイアウトが動かないようにする。
+ */
+
+.credits-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  height: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.credits-lead {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--flat-text-muted);
+}
+
+.credits-empty {
+  margin: 0;
+  font-size: 12px;
+  color: var(--flat-text-muted);
+}
+
+.credits-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 見出しは左端の実線ブロックで段を示す(設定ウィンドウと同じ規則) */
+.credits-group-title {
+  margin: 0;
+  padding: 2px 0 2px 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--flat-text);
+  box-shadow: inset 4px 0 0 var(--flat-accent);
+}
+
+.credits-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background-color: var(--flat-sunken);
+  box-shadow: var(--flat-shadow);
+}
+
+.credits-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 14px;
+  background-color: var(--flat-surface);
+}
+
+/* 素材名とライセンス名は同じ行に置き、ライセンス名を右端へ寄せる */
+.credits-row-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+}
+
+.credits-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--flat-text);
+}
+
+/* リンクは button 要素なので、素の見た目を打ち消してテキストとして見せる */
+.credits-title--link {
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  font-family: inherit;
+  text-align: left;
+  color: var(--flat-accent);
+  cursor: pointer;
+}
+
+.credits-title--link:hover {
+  text-decoration: underline;
+}
+
+.credits-license {
+  margin-left: auto;
+  padding: 2px 6px;
+  background-color: var(--flat-sunken);
+  color: var(--flat-text-body);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.credits-attribution {
+  font-size: 12px;
+  color: var(--flat-text-body);
+}
+
+.credits-note {
+  font-size: 11px;
+  color: var(--flat-text-muted);
+}
+
+/* 規約が指定する文面。改変していないことが読み取れるよう等幅で沈めた面に置く */
+.credits-required {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+  padding: 6px 8px;
+  background-color: var(--flat-sunken);
+}
+
+.credits-required-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--flat-text-muted);
+}
+
+.credits-required-body {
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--flat-text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}

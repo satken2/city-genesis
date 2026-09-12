@@ -23,6 +23,10 @@
 
 ## version差分更新の慣習
 
+地形追従の取消しでは `PathManager.terrainFollowCompletedPaths/Nodes` を保持する。本線は版・状態と表現の存在を確認して省略し、交差点は省略した本線の端点も含めて残作業を回収する。`OnTerrainTileReadyHandler` はdefer判定前に周囲3×3の道路と端点ノードの記録を無効化する。道路キャッシュの変更・削除は既存のSave/Removeヘルパーを通す。ノード版変更時は追従開始で全記録を破棄し、全体完了・強制更新・ClearAllCellsでも `ClearTerrainFollowProgress` する。区間の非同期表示完了は別で、PathPresentationの待ち合わせを維持する。
+
+`CellDataLoader.CollectDeferredTerrainNotifications` は全地形ロード完了時にdefer中の通知をpendingへ先に統合する。完了後の回収で同じセルを二度追従させない。`RebuildCachedPathsForCells` は常駐セルへの再入場だけでforce再生成しない。地形・データ・交差点の変更は各更新経路で無効化する。検証はTests/LodのTerrainFollowResume／TerrainNotificationConsumption、観測は `terrainFollow.pathCompleted/pathResumeSkipped/pathInvalidated` とノード側の対応カウンタ。
+
 建物・道路一覧は500件ずつcursorで最後まで取得してから削除差分を適用する。途中ページの失敗を空の完成一覧として扱わない。独自レスポンスの `next_cursor` を使い、自動生成 `GeneratedModels.cs` は編集しない。
 
 建物の再利用キーには形状・外観・状態・区画と地形版を含める。道路はデータ版、描画LOD、強制再生成の形状revisionを使う。地形が変わっていない単なるカメラ移動でforce再生成してはいけない。

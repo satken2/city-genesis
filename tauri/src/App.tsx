@@ -37,6 +37,7 @@ const TransitManagementWindow = lazy(() => import("./components/transit/TransitM
 const TransitCreationPanel = lazy(() => import("./components/transit/TransitCreationPanel").then(m => ({ default: m.TransitCreationPanel })));
 const TransitDetailPanel = lazy(() => import("./components/transit/TransitDetailPanel").then(m => ({ default: m.TransitDetailPanel })));
 const SettingsWindow = lazy(() => import("./components/taskbar/SettingsWindow").then(m => ({ default: m.SettingsWindow })));
+const CreditsWindow = lazy(() => import("./components/taskbar/CreditsWindow").then(m => ({ default: m.CreditsWindow })));
 const SaveLoadWindow = lazy(() => import("./components/taskbar/SaveLoadWindow").then(m => ({ default: m.SaveLoadWindow })));
 const SaveListWindow = lazy(() => import("./components/taskbar/SaveListWindow").then(m => ({ default: m.SaveListWindow })));
 const NewGameWindow = lazy(() => import("./components/taskbar/NewGameWindow").then(m => ({ default: m.NewGameWindow })));
@@ -82,7 +83,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * 専用パネルが実装されているウィンドウタイプのセット
  * これらのタイプはジェネリックな JSON 表示ではなく、専用コンポーネントでレンダリングする
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "zone_merge", "building_direct_acquisition", "path_build", "track_build", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "settings", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "new_game", "city_rename", "template_editor", "resource_detail", "resource_edit", "prop_placement", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "epoch_result", "quest_complete", "terrain_unlock", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "zone_merge", "building_direct_acquisition", "path_build", "track_build", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "settings", "credits", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "new_game", "city_rename", "template_editor", "resource_detail", "resource_edit", "prop_placement", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "epoch_result", "quest_complete", "terrain_unlock", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map"]);
 
 
 function App() {
@@ -455,6 +456,8 @@ function App() {
               />
             ) : context.window_type === "settings" ? (
               <SettingsWindow apiBaseUrl={context.api_base_url} />
+            ) : context.window_type === "credits" ? (
+              <CreditsWindow />
             ) : context.window_type === "top_page" ? (
               <TopMenu />
             ) : context.window_type === "save_load" ? (

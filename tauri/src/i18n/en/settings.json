@@ -5,7 +5,8 @@
       "general": "General",
       "display": "Display",
       "sound": "Sound",
-      "system": "System"
+      "system": "System",
+      "about": "About"
     },
     "fontSize": {
       "label": "Font Size",
@@ -58,6 +59,11 @@
     "windowReset": {
       "label": "Window Position & Size",
       "action": "Reset"
+    },
+    "credits": {
+      "label": "Credits",
+      "description": "Attributions for the assets and software used in this game",
+      "action": "View"
     }
   },
   "saveLoad": {

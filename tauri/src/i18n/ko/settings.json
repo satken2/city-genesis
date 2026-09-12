@@ -5,7 +5,8 @@
       "general": "일반",
       "display": "화면",
       "sound": "사운드",
-      "system": "시스템"
+      "system": "시스템",
+      "about": "정보"
     },
     "fontSize": {
       "label": "글자 크기",
@@ -58,6 +59,11 @@
     "windowReset": {
       "label": "창 위치・크기",
       "action": "초기화"
+    },
+    "credits": {
+      "label": "크레디트",
+      "description": "본 작품에 사용된 소재・소프트웨어의 저작권 표기입니다",
+      "action": "보기"
     }
   },
   "saveLoad": {

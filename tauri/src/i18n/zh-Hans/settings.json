@@ -5,7 +5,8 @@
       "general": "常规",
       "display": "画面",
       "sound": "声音",
-      "system": "系统"
+      "system": "系统",
+      "about": "信息"
     },
     "fontSize": {
       "label": "字体大小",
@@ -58,6 +59,11 @@
     "windowReset": {
       "label": "窗口位置与大小",
       "action": "重置"
+    },
+    "credits": {
+      "label": "鸣谢",
+      "description": "本作所使用素材与软件的版权标示",
+      "action": "查看"
     }
   },
   "saveLoad": {
