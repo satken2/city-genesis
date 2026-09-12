@@ -46,3 +46,9 @@ HTTP(バックエンド通信)とは別系統であることに注意。Unityと
 - **既存建物コピー建設のコピー元選択は専用の入力モードで行う**(ステートは切り替えない): `building_construction:pick_source`(UI→Unity, `IpcClient.OnBuildingConstructionPickSource`)を建物建設パネルの「既存建物をコピー」ボタンが送り、`IpcStateCoordinator.HandleBuildingConstructionPickSource` が入力プリセット `PICK_BUILDING`(建物だけクリック可能な `MODE_PICK_BUILDING`)へ切り替える。建物が選ばれると `BuildingInputHandler`(`MODE_PICK_BUILDING` 分岐)が `BuildingManager.GetBuildingSummary` から variant/floors/visual_variant を読み、`building_construction:copy_source`(Unity→UI, `IpcClient.EmitBuildingConstructionCopySource`。`{source_agent_id, variant, floors, visual_variant, visual_variant2, visual_variant3}`)で通知する。**実寸フットプリントは送らずバックエンドが `copy_source_agent_id` から導出する**(`crud_buildings.generate_copied_building`)。UIはこれをパネルへシードし、通常の `STATE_EDIT_BUILDING`(新規建設。区画選択フロー)へ遷移する。以降 preview/construction-cost/POST は `copy_source_agent_id` を付けて呼び、忠実コピー時のみ建設体積が割引かれる。Rust側 `ipc.rs` の受信match(`building_construction:copy_source`)・TS側 `ipc.ts` の送信関数 `sendPickCopySource` と定数 `IPC_EVENT_BUILDING_CONSTRUCTION_COPY_SOURCE` も揃えて追加済み。
 
 STATE_EDIT_PATHの任意initial_height/initial_embankment_height/initial_curved/initial_follow_terrainは継続配置設定。InitializeRoadPlacementへ渡し、形状通知前に反映する。確定終了と初期化の間のUnity状態には依存しない。
+
+## 建物の配置状態
+
+`edit_building:placement_command`(UI→Unity)はparams.command={variant, width?, depth?, angle?, reset?, labels?}。指定した寸法だけ変更し、状態を`edit_building:placement_state`(Unity→UI)で返す。空の変更差分は状態問い合わせ。labelsはパネルの選択言語で翻訳したCtrlメニュー/HUD文言。`placement_state`はvariant/revision/mode(parcel|free|roadside)/position(null=未固定)/width/depth/angle/parcel_idを一括通知し、UIは受信値を再送しない。Ctrl切替・位置固定・寸法キー・回転リリース・Escも同じ通知経路。直接配置の権威プレビュー`update_shape`には要求元のplacement_revisionを付け、Unityが現在世代・階数と照合する。既存建物編集は従来の世代なし区画プレビュー経路。`STATE_EDIT_BUILDING`のcopy_source_agent_idがある忠実コピーでは直接配置を無効化する。
+
+寸法コマンドの任意request_idはplacement_stateへ返す。パネルは最後の要求IDへの応答だけで数値変更待ちを解除する。

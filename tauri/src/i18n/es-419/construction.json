@@ -22,6 +22,23 @@
     "remainingEpochs": "aprox. {{n}} épocas"
   },
   "building_construction": {
+    "placement": {
+      "parcel": "Colocar en parcela",
+      "free": "Colocación libre",
+      "roadside": "Junto a la carretera",
+      "frontage": "Frente",
+      "depth": "Fondo",
+      "parcelHint": "Clic en parcela · Ctrl Modo de colocación",
+      "committed": "Posición fija · Confirmar en panel · Esc Reubicar",
+      "placeHint": "Clic izquierdo Fijar posición · Ctrl Modo",
+      "snapped": "Ajustado a la carretera",
+      "searching": "Buscando una carretera",
+      "sizeHint": "1/2 Frente · 3/4 Fondo · Shift 5m",
+      "fixed": "Dimensiones fijas",
+      "rotateHint": "Arrastrar botón central Girar",
+      "menuHint": "Mantén Ctrl en la vista 3D, apunta a un modo y suelta.",
+      "roadHint": "Se alinea con el borde exterior de la carretera. La rotación se ajusta automáticamente."
+    },
     "selectBdType": "-- Selecciona el tipo de edificio --",
     "selectVariant": "Selecciona un tipo de edificio",
     "noVariants": "No hay variantes disponibles",

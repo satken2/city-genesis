@@ -27,6 +27,7 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnEditPropFinish += HandleEditPropFinish;
             IpcClient.Instance.OnEditPropReset += HandleEditPropReset;
             IpcClient.Instance.OnEditBuildingUpdateShape += HandleEditBuildingUpdateShape;
+            IpcClient.Instance.OnEditBuildingPlacementCommand += HandleEditBuildingPlacementCommand;
             IpcClient.Instance.OnEditBuildingUpdateFloors += HandleEditBuildingUpdateFloors;
             IpcClient.Instance.OnEditBuildingUpdateVisualVariant += HandleEditBuildingUpdateVisualVariant;
             IpcClient.Instance.OnEditBuildingUpdateStructure += HandleEditBuildingUpdateStructure;
@@ -55,6 +56,7 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnEditPropFinish -= HandleEditPropFinish;
             IpcClient.Instance.OnEditPropReset -= HandleEditPropReset;
             IpcClient.Instance.OnEditBuildingUpdateShape -= HandleEditBuildingUpdateShape;
+            IpcClient.Instance.OnEditBuildingPlacementCommand -= HandleEditBuildingPlacementCommand;
             IpcClient.Instance.OnEditBuildingUpdateFloors -= HandleEditBuildingUpdateFloors;
             IpcClient.Instance.OnEditBuildingUpdateVisualVariant -= HandleEditBuildingUpdateVisualVariant;
             IpcClient.Instance.OnEditBuildingUpdateStructure -= HandleEditBuildingUpdateStructure;
@@ -244,12 +246,17 @@ public class IpcEventHandler : MonoBehaviour
     /// UI側がバックエンドのプレビューエンドポイントから取得した形状データ
     /// （polygon, floors, center_point, height）をそのままBuildingPlanManagerに渡す。
     /// </summary>
-    private void HandleEditBuildingUpdateShape(float[][] polygon, int floors, float[] centerPoint, float height)
+    private void HandleEditBuildingPlacementCommand(Newtonsoft.Json.Linq.JToken command)
+    {
+        GetBuildingPlanManager()?.OnPlacementCommand(command);
+    }
+
+    private void HandleEditBuildingUpdateShape(float[][] polygon, int floors, float[] centerPoint, float height, int revision)
     {
         var bpm = GetBuildingPlanManager();
         if (bpm != null)
         {
-            bpm.OnUpdateShapeFromIpc(polygon, floors, centerPoint, height);
+            bpm.OnUpdateShapeFromIpc(polygon, floors, centerPoint, height, revision);
         }
     }
 

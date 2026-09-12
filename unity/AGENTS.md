@@ -127,3 +127,5 @@ F8は描画数、生成予算、フレームp95/p99、キャッシュ推定量�
 
 
 単独起動時のAPI既定URLは `http://127.0.0.1:5000/api/v1`。IPv4だけで待受ける開発サーバーに対してlocalhostのIPv6接続からのフォールバック待ちを避ける。明示的な `--api-base-url` は指定値を優先する。
+
+建物直接配置の初期寸法・固定可否は`MasterDataStore.AgentMasterItem`の`default_width`/`default_height`/`resizable`で受け取り、Ctrl配置メニューとパネルで共有する。配置前から数値キーで変更可能。詳細はEditors/AGENTS.mdと公開Unity入力制御.md。

@@ -9,7 +9,7 @@
  *   2. バリアントタイルをクリックして選択 → 説明文が表示される
  *   3. IPC で graphic モジュールに STATE_EDIT_BUILDING を指示
  *   4. graphic 側で土地区画が選択されると edit_building.select_parcel が通知される
- *      (土地区画外の地点なら edit_building.select_point で直接配置モードに入る)
+ *      Ctrlで自由/道路沿い配置を選んだ場合はplacement_stateで矩形と位置を受け取る
  *   5. 形状プレビュー・情報欄が表示される
  *   6. 階数を変更すると edit_building.update_floors が送信される
  *   7. [建設を確定] で UI が直接バックエンドに送信する(道路建設と同じ責務分担。
@@ -34,19 +34,18 @@ import {
   sendEditBuildingUpdateStructure,
   sendEditBuildingUpdateShape,
   sendEditBuildingUpdateEffectRange,
-  sendEditBuildingUpdateDirectParams,
+  sendBuildingPlacementCommand,
+  IPC_EVENT_BUILDING_PLACEMENT_STATE,
   sendFocusGraphic,
   sendSessionReload,
   sendPickCopySource,
   sendHighlightObjects,
   sendClearHighlights,
   IPC_EVENT_EDIT_BUILDING_SELECT_PARCEL,
-  IPC_EVENT_EDIT_BUILDING_SELECT_POINT,
   IPC_EVENT_EDIT_BUILDING_INVALID_PARCEL,
-  IPC_EVENT_EDIT_BUILDING_UPDATE_DIRECT_ANGLE,
   IPC_EVENT_BUILDING_CONSTRUCTION_COPY_SOURCE,
 } from "../../utils/ipc";
-import type { EffectRangeRegion, PathInterferenceHighlight } from "../../utils/ipc";
+import type { BuildingPlacementState, EffectRangeRegion, PathInterferenceHighlight } from "../../utils/ipc";
 import { fetchApi, ApiError } from "../../utils/api";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { NumberStepper } from "../common/NumberStepper";
@@ -113,13 +112,19 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
   const [parcelId, setParcelId] = useState<number | null>(null);
   const [parcelData, setParcelData] = useState<ParcelData | null>(null);
   const [isParcelLoading, setIsParcelLoading] = useState(false);
-  // 直接配置モード(土地区画外クリック)の状態。pickedPosition が非nullのとき直接配置モードで、
-  // parcelId(区画モード)とは相互に排他となる。
+  // 直接配置の固定位置。配置方法はplacementMode、未固定の追従状態はnullで表す。
   const [pickedPosition, setPickedPosition] = useState<number[] | null>(null);
   // 直接配置の底面矩形サイズ(横幅・縦幅・回転角)。バリアント選択時に default_width で初期化する。
   const [rectWidth, setRectWidth] = useState(DEFAULT_BUILDING_WIDTH);
   const [rectDepth, setRectDepth] = useState(DEFAULT_BUILDING_WIDTH);
   const [rectAngle, setRectAngle] = useState(0);
+  const [placementMode, setPlacementMode] = useState<BuildingPlacementState["mode"]>("parcel");
+  const [placementRevision, setPlacementRevision] = useState(-1);
+  const [validatedDirectKey, setValidatedDirectKey] = useState<string | null>(null);
+  const [placementCommandPending, setPlacementCommandPending] = useState(false);
+  const latestPlacementRevision = useRef(-1);
+  const pendingPlacementRequest = useRef<string | null>(null);
+  const placementRequestSequence = useRef(0);
   // 直接配置の設置可否(バックエンドの preview-direct が返す valid / invalid_reason)。
   const [directValid, setDirectValid] = useState(false);
   const [directInvalidReason, setDirectInvalidReason] = useState<string | null>(null);
@@ -296,7 +301,9 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      await setHintbarText(t("hint.buildingConstruction"));
+      await setHintbarText(editAgentId != null ? t("hint.buildingConstruction") :
+        placementMode === "parcel" ? t("building_construction.placement.parcelHint") :
+          `${t("building_construction.placement.placeHint")} · ${t("building_construction.placement.sizeHint")}`);
     })().catch((err) => {
       if (!cancelled) {
         console.error("[BuildingConstruction] setHintbarText failed:", err);
@@ -306,7 +313,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       cancelled = true;
       void setHintbarText("");
     };
-  }, [t]);
+  }, [t, placementMode, editAgentId]);
 
   /* ---- マスターデータからの派生 ---- */
 
@@ -379,8 +386,10 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
     return structureMax > 0 ? Math.min(variantMax, structureMax) : variantMax;
   }, [selectedVariantData, selectedStructureData]);
 
-  /** 現在直接配置モード(土地区画外クリック)かどうか。pickedPosition が非nullなら直接配置。 */
-  const isDirectMode = pickedPosition !== null;
+  /** 直接配置は地点未固定でも有効。数値入力を位置選びと同時に操作できる。 */
+  const isDirectMode = editAgentId == null && placementMode !== "parcel";
+  const directRequestKey = JSON.stringify([selectedVariant, placementRevision, pickedPosition, rectWidth, rectDepth, rectAngle, floors]);
+  const directPreviewReady = pickedPosition !== null && validatedDirectKey === directRequestKey && !placementCommandPending;
   /** 現在コピー建設モード(既存建物の実寸フットプリントを固定コピー)かどうか。 */
   const isCopyMode = copySourceAgentId !== null;
   /** 選択中バリアントの底面が可変か。false のとき底面は default_width 四方の正方形で固定。 */
@@ -661,6 +670,9 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
     const controller = new AbortController();
 
     const url = `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/buildings/preview-direct`;
+    setValidatedDirectKey(null);
+    setDirectValid(false);
+    setDirectRequiresAcquisition(false);
     fetchApi<{
       polygon: number[][];
       height: number;
@@ -701,6 +713,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
           area: data.area,
         });
         setDirectValid(data.valid);
+        setValidatedDirectKey(directRequestKey);
         setDirectInvalidReason(data.invalid_reason ?? null);
         setDirectRequiresAcquisition(data.requires_acquisition === true);
         setDirectAcquisition(
@@ -732,6 +745,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
           floors,
           data.center_point,
           data.height,
+          placementRevision,
         ).catch((err) => {
           console.error("[BuildingConstruction] sendEditBuildingUpdateShape (direct) failed:", err);
         });
@@ -743,7 +757,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       });
 
     return () => controller.abort();
-  }, [selectedVariant, pickedPosition, floors, rectWidth, rectDepth, rectAngle, apiBaseUrl]);
+  }, [selectedVariant, pickedPosition, floors, rectWidth, rectDepth, rectAngle, apiBaseUrl, placementRevision, directRequestKey]);
 
   /* ---- 直接配置モード: 推定建設コストの取得 ---- */
   useEffect(() => {
@@ -841,21 +855,66 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
     return () => controller.abort();
   }, [selectedVariant, pickedPosition, floors, rectWidth, rectDepth, rectAngle, apiBaseUrl]);
 
-  /* ---- 直接配置モード: 矩形パラメータをUnityへ同期(カーソル追従ゴースト用) ---- */
-
-  /**
-   * バリアント選択中は、横幅・縦幅・回転角・階数の変更を Unity へ送り、
-   * カーソル追従のリアルタイム矩形ゴーストを更新させる。地点確定前(フェーズA)でも
-   * デフォルト値を送ることで、ホバー時点からゴーストを表示できる。
-   */
+  /* ---- 配置方法と矩形はUnityの状態を購読し、パネルからは変更差分だけを送る ---- */
   useEffect(() => {
+    if (selectedVariant === null || editAgentId != null) return;
+    let disposed = false;
+    let unlisten: (() => void) | undefined;
+    const labelKeys = ["parcel", "free", "roadside", "frontage", "depth", "parcelHint", "committed", "placeHint", "snapped", "searching", "sizeHint", "fixed", "rotateHint"];
+    void appWindow.listen<BuildingPlacementState>(IPC_EVENT_BUILDING_PLACEMENT_STATE, ({ payload }) => {
+      if (disposed || payload.variant !== selectedVariant || payload.revision < latestPlacementRevision.current) return;
+      latestPlacementRevision.current = payload.revision;
+      setPlacementRevision(payload.revision);
+      if (pendingPlacementRequest.current === null || payload.request_id === pendingPlacementRequest.current) {
+        pendingPlacementRequest.current = null;
+        setPlacementCommandPending(false);
+      }
+      setPlacementMode(payload.mode);
+      setRectWidth(payload.width);
+      setRectDepth(payload.depth);
+      setRectAngle(payload.angle);
+      // 同じ位置への応答ではプレビューAPIを呼び直さない。
+      setPickedPosition(previous => JSON.stringify(previous) === JSON.stringify(payload.position) ? previous : payload.position);
+      if (payload.mode !== "parcel" || payload.parcel_id < 0) {
+        setParcelId(null);
+        setParcelData(null);
+      }
+      if (payload.position === null && payload.parcel_id < 0) {
+        setBuildingPreview(null);
+        setValidatedDirectKey(null);
+        setDirectValid(false);
+        setDirectInvalidReason(null);
+        setDirectRequiresAcquisition(false);
+        setDirectAcquisition(null);
+        setEstimatedCost(null);
+        setPreviewEffectRegion(null);
+        setEffectRangeActive(false);
+        void sendClearHighlights(HIGHLIGHT_SOURCE).catch(() => {});
+      }
+    }).then(fn => {
+      if (disposed) { fn(); return; }
+      unlisten = fn;
+      // 購読完了後に状態を要求し、初期化通知の取りこぼしを防ぐ。
+      return sendBuildingPlacementCommand(selectedVariant, {
+        labels: Object.fromEntries(labelKeys.map(key => [key, t(`building_construction.placement.${key}`)])),
+      });
+    }).catch(console.error);
+    return () => { disposed = true; unlisten?.(); };
+  }, [appWindow, selectedVariant, editAgentId, t]);
+
+  function changeDirectParameter(field: "width" | "depth" | "angle", value: number) {
     if (selectedVariant === null) return;
-    void sendEditBuildingUpdateDirectParams(rectWidth, rectDepth, rectAngle, floors).catch(
-      (err) => {
-        console.error("[BuildingConstruction] sendEditBuildingUpdateDirectParams failed:", err);
-      },
-    );
-  }, [selectedVariant, rectWidth, rectDepth, rectAngle, floors]);
+    const requestId = `${Date.now()}-${++placementRequestSequence.current}`;
+    pendingPlacementRequest.current = requestId;
+    setPlacementCommandPending(true);
+    void sendBuildingPlacementCommand(selectedVariant, { [field]: value, request_id: requestId }).catch(err => {
+      if (pendingPlacementRequest.current === requestId) {
+        pendingPlacementRequest.current = null;
+        setPlacementCommandPending(false);
+      }
+      console.error("[BuildingConstruction] Failed to change placement:", err);
+    });
+  }
 
   /* ---- バリアント選択解除時に関連状態をリセット ---- */
 
@@ -895,35 +954,8 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         console.log("[BuildingConstruction] edit_building.select_parcel", event.payload);
         // 区画モードに入る。直接配置モードとは排他なので pickedPosition をクリアする。
         setPickedPosition(null);
+        setPlacementMode("parcel");
         setParcelId(event.payload.parcel_id);
-      })
-      .then((fn) => { unlisten = fn; })
-      .catch(console.error);
-
-    return () => { unlisten?.(); };
-  }, [appWindow, selectedVariant]);
-
-  /* ---- IPCイベントリスナー: 直接配置の地点選択 (Unity → UI) ---- */
-
-  /**
-   * 建物建設モード中に土地区画外の地点がクリックされたら、直接配置モードに入る。
-   * 区画モードとは排他なので parcelId をクリアし、クリック地点を底面矩形の中心とする。
-   */
-  useEffect(() => {
-    if (selectedVariant === null) return;
-
-    let unlisten: (() => void) | undefined;
-
-    appWindow
-      .listen<{ position: number[]; angle?: number }>(IPC_EVENT_EDIT_BUILDING_SELECT_POINT, (event) => {
-        console.log("[BuildingConstruction] edit_building.select_point", event.payload);
-        setParcelId(null);
-        setParcelData(null);
-        setPickedPosition(event.payload.position);
-        // 中ボタンドラッグでゴーストを回した角度を確定地点へ引き継ぐ。
-        if (typeof event.payload.angle === "number") {
-          setRectAngle(event.payload.angle);
-        }
       })
       .then((fn) => { unlisten = fn; })
       .catch(console.error);
@@ -1002,6 +1034,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         // 区画選択フローへ遷移する(新規建設。agent_id は付けない)。
         sendChangeState("STATE_EDIT_BUILDING", {
           building_variant: p.variant,
+          copy_source_agent_id: p.source_agent_id,
           agent_id: null,
           structure: copiedStructure ?? 0,
         }).catch((err) => {
@@ -1013,30 +1046,6 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
 
     return () => { unlisten?.(); };
   }, [appWindow, masterData]);
-
-  /* ---- IPCイベントリスナー: 直接配置の回転角更新 (Unity → UI) ---- */
-
-  /**
-   * 中ボタンドラッグによる回転が終了(リリース)したら、Unity側の確定角度で
-   * 回転ステッパー(rectAngle)を更新する。ドラッグ中は送られず、リリース時に1回だけ届く。
-   */
-  useEffect(() => {
-    if (selectedVariant === null) return;
-
-    let unlisten: (() => void) | undefined;
-
-    appWindow
-      .listen<{ angle: number }>(IPC_EVENT_EDIT_BUILDING_UPDATE_DIRECT_ANGLE, (event) => {
-        console.log("[BuildingConstruction] edit_building.update_direct_angle", event.payload);
-        if (typeof event.payload.angle === "number") {
-          setRectAngle(event.payload.angle);
-        }
-      })
-      .then((fn) => { unlisten = fn; })
-      .catch(console.error);
-
-    return () => { unlisten?.(); };
-  }, [appWindow, selectedVariant]);
 
   /* ---- 土地区画データ取得 ---- */
 
@@ -1110,6 +1119,9 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       const entry = masterData?.agents[variantId];
       const initialFloors = entry?.min_floors ?? 1;
       const initialStructure = defaultStructureOf(entry);
+      setPlacementMode("parcel");
+      pendingPlacementRequest.current = null;
+      setPlacementCommandPending(false);
       setSelectedVariant(variantId);
       setFloors(initialFloors);
       setStructure(initialStructure);
@@ -1265,7 +1277,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
    * 確認ウィンドウで承諾した場合のみ渡す(バックエンドは承諾なしの blocking を拒否する)。
    */
   async function handleDirectConfirm(acknowledgeAcquisition = false) {
-    if (selectedVariant === null || pickedPosition === null || selectedVariantData === null) return;
+    if (selectedVariant === null || pickedPosition === null || selectedVariantData === null || !directPreviewReady) return;
     const baseUrl = apiBaseUrl.replace(/\/+$/, "");
     try {
       const created = await fetchApi<{ agent_id: number }>(`${baseUrl}/api/v1/buildings/direct`, {
@@ -1491,14 +1503,16 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
 
 
           {/* 直接配置モードの情報パネル(設置可否の理由表示) */}
-          {isDirectMode && (
+          {isDirectMode && pickedPosition !== null && (
             <div className="bc-description-frame" style={{ marginTop: 10 }}>
               <div className="bc-description-body">
                 <div className="bc-description-name">
                   {t("building_construction.directPlacement")}
                 </div>
                 <div className="bc-description-text">
-                  {directValid ? (
+                  {!directPreviewReady ? (
+                    <span>{t("common.loading")}</span>
+                  ) : directValid ? (
                     t("building_construction.directPlaceable")
                   ) : directRequiresAcquisition ? (
                     // 民間区画と重なるが、自動用地買収を承諾すれば確定できる状態。
@@ -1647,7 +1661,19 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         </div>
       )}
 
-      {/* 直接配置モードの設定: 階数 + 横幅/縦幅/回転角 — 地点選択後に表示。
+      {selectedVariantData && editAgentId == null && (
+        <div className="bc-section">
+          <div className="bc-section-title">{t(`building_construction.placement.${placementMode}`)}</div>
+          <div className="bc-muted">
+            {t("building_construction.placement.menuHint")}
+            {isDirectMode && <><br />{t(isResizable ? "building_construction.placement.sizeHint" : "building_construction.placement.fixed")}</>}
+            {isDirectMode && pickedPosition === null && <><br />{t("building_construction.placement.placeHint")}</>}
+            {placementMode === "roadside" && <><br />{t("building_construction.placement.roadHint")}</>}
+          </div>
+        </div>
+      )}
+
+      {/* 直接配置モードの設定: 階数 + 間口/奥行き/回転角 — 地点選択前から表示。
           底面は矩形そのものなので建ぺい率は無い。resizable=false のバリアントは
           横幅・縦幅を固定(入力不可)とし、回転のみ編集できる。 */}
       {selectedVariantData && isDirectMode && (
@@ -1673,7 +1699,8 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
                 {/* 回転角はマイナス・360超も許容(クランプしない)。確定時に mod 360 で正規化する。 */}
                 <NumberStepper
                   value={rectAngle}
-                  onChange={setRectAngle}
+                  onChange={value => changeDirectParameter("angle", value)}
+                  disabled={placementMode === "roadside"}
                   step={5}
                   integerOnly={false}
                 />
@@ -1683,11 +1710,11 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
           </div>
           <div className="bc-split-row" style={{ marginTop: 10 }}>
             <div className="bc-split-col">
-              <div className="bc-section-title">{t("building_construction.width")}</div>
+              <div className="bc-section-title">{t("building_construction.placement.frontage")}</div>
               <div className="bc-stepper-row">
                 <NumberStepper
                   value={rectWidth}
-                  onChange={setRectWidth}
+                  onChange={value => changeDirectParameter("width", value)}
                   min={1}
                   max={500}
                   step={1}
@@ -1698,11 +1725,11 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
               </div>
             </div>
             <div className="bc-split-col">
-              <div className="bc-section-title">{t("building_construction.depth")}</div>
+              <div className="bc-section-title">{t("building_construction.placement.depth")}</div>
               <div className="bc-stepper-row">
                 <NumberStepper
                   value={rectDepth}
-                  onChange={setRectDepth}
+                  onChange={value => changeDirectParameter("depth", value)}
                   min={1}
                   max={500}
                   step={1}
@@ -1776,7 +1803,10 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
                 setDirectRequiresAcquisition(false);
                 setDirectAcquisition(null);
                 void sendClearHighlights(HIGHLIGHT_SOURCE).catch(() => {});
-                // Unity を建物建設モードのまま位置未確定の状態へ戻し、表示中のゴースト形状を消す。
+                if (editAgentId == null) {
+                  void sendBuildingPlacementCommand(selectedVariant, { reset: true }).catch(console.error);
+                  return;
+                }
                 sendChangeState("STATE_EDIT_BUILDING", {
                   building_variant: selectedVariant,
                   agent_id: editAgentId ?? null,
@@ -1795,7 +1825,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
               // コピーモードは区画選択済みかつフットプリントが収まる(copyValid)なら確定できる。
               disabled={
                 isDirectMode
-                  ? !(directValid || directRequiresAcquisition)
+                  ? !directPreviewReady || !(directValid || directRequiresAcquisition)
                   : isCopyMode
                     ? parcelId === null || !copyValid
                     : parcelId === null

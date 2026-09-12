@@ -28,6 +28,10 @@ public class MasterDataStore : MonoBehaviour
 		public int? max_floors;
 		public int? min_floors;
 		public float? height_per_floor;
+		// 直接配置の初期寸法とサイズ固定。パネルと3Dの配置前プレビューで同じマスター値を使う。
+		public float? default_width;
+		public float? default_height;
+		public bool? resizable;
 		public bool? shared_building;
 		// 地面パネル(地面全体を覆う水平スラブ)を描画するか。未設定(null)は描画しない(オプトイン)。
 		// 描画時のマテリアルは floor パーツを a{variant}→b{bd_type}→common で解決する。

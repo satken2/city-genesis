@@ -123,6 +123,7 @@ export async function sendEditBuildingUpdateShape(
   floors: number,
   centerPoint?: number[],
   height?: number,
+  placementRevision?: number,
 ): Promise<void> {
   await invoke("send_window_action", {
     windowType: "building_construction",
@@ -133,9 +134,36 @@ export async function sendEditBuildingUpdateShape(
       floors,
       center_point: centerPoint ?? null,
       height: height ?? null,
+      placement_revision: placementRevision ?? null,
     },
   });
 }
+
+export type BuildingPlacementState = {
+  variant: number;
+  revision: number;
+  mode: "parcel" | "free" | "roadside";
+  position: number[] | null;
+  width: number;
+  depth: number;
+  angle: number;
+  parcel_id: number;
+  request_id?: string | null;
+};
+
+/** 配置設定は差分だけを送り、補正後の位置・寸法はplacement_stateで受け取る。 */
+export async function sendBuildingPlacementCommand(variant: number, command: {
+  width?: number; depth?: number; angle?: number; reset?: boolean; labels?: Record<string, string>; request_id?: string;
+} = {}): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "building_construction",
+    entity: null,
+    action: "edit_building:placement_command",
+    params: { command: { variant, ...command } },
+  });
+}
+
+export const IPC_EVENT_BUILDING_PLACEMENT_STATE = "edit_building:placement_state";
 
 /**
  * `edit_building.update_direct_params`

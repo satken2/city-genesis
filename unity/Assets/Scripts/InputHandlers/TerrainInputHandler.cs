@@ -146,7 +146,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         // 掛けると二重吸着になり、RoadPlanManager 側の半径設定が一切効かなくなる。
         // パス分割の分割点選択も共通吸着を掛けない(端点ノードへ引き寄せられると常に
         // 端点近傍の分割になって拒否されるため。onHover 側と条件を揃える)。
-        if (mode != InputMode.MODE_ROAD_CONSTRUCTION && mode != InputMode.MODE_PATH_SPLIT)
+        if (mode != InputMode.MODE_ROAD_CONSTRUCTION && mode != InputMode.MODE_PATH_SPLIT && mode != InputMode.MODE_BUILDING_CONSTRUCTION)
         {
             clickPosition = ApplySnapping(clickPosition);
         }
@@ -161,10 +161,8 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
                 break;
             case InputMode.MODE_BUILDING_CONSTRUCTION:
                 {
-                    // 建物建設モードでの区画外(地形)クリック=直接配置モード。
-                    // 区画内クリックは InputHandler のフォールバック(GetParcelIdAtPoint)で
-                    // ParcelInputHandler へ差し替えられるため、ここへ来るのは
-                    // どの区画にも属さない地点だけ。BuildingPlanManager へ地点を渡す。
+                    // 直接配置中は区画を貫通して地形を選ぶ。区画配置中の地形クリックは
+                    // BuildingPlanManagerが無視する。吸着は同マネージャで一度だけ行う。
                     var bpm = GetBuildingPlanManager();
                     if (bpm != null)
                     {
@@ -343,6 +341,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         // 端点ノード付近でカーソルが端点へ引き寄せられ、常に「端点に近すぎる」分割になって
         // バックエンドに拒否されるため。分割点は中心線への射影(PathTopologyEditManager)で決める。
         bool skipSnap = mode == InputMode.MODE_EDIT_CONNECTOR
+                     || mode == InputMode.MODE_BUILDING_CONSTRUCTION
                      || mode == InputMode.MODE_ROAD_CONSTRUCTION
                      || mode == InputMode.MODE_PATH_SPLIT;
         Vector3 finalPosition = skipSnap
@@ -365,10 +364,8 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
                 // 地区編集モードでは terrain ホバーによるマーカー表示は無効
                 break;
             case InputMode.MODE_BUILDING_CONSTRUCTION:
-                // 直接配置モード: 空き地形上でカーソル追従の矩形ゴーストを表示する(地点確定前のみ)。
-                // 注意: InputHandler.UpdateTerrainPosition 経由の地形ホバーは区画上でも毎フレーム
-                // 呼ばれ続けるため、「区画上/区画選択済みならゴーストを出さない」判定は
-                // OnTerrainHoverDirect の内部で行う。
+                // 自由配置・道路沿い配置のゴースト。共通の道路中心線吸着は適用しない。
+                // 区画配置中も生の座標を保持し、Ctrlメニューを閉じた直後の再評価に使う。
                 GetBuildingPlanManager()?.OnTerrainHoverDirect(finalPosition);
                 break;
             case InputMode.MODE_PARCEL_CREATION_POINT:

@@ -117,3 +117,7 @@ PathConstructionPanel/TrackConstructionPanelの継続配置は間隔・進行方
 ## 土地区画作成パネル
 
 `parcel/ParcelCreationPanel.tsx` の新規作成項目は道路沿い・ブロック一括・ランダム・単一区画の順でUnityの `ParcelEditorManager.Modes` と一致させる。ブロック一括は探索幅/高さ・間口・奥行き・ばらつきのみで、中央埋め用平均面積は持たない。プレビューが0件なら生成不能の案内を表示し、取得中・0件では確定できない。既存区画の分割と `ParcelDetailPanel` の頂点編集は独立した機能。
+
+## 建物配置パネルの同期
+
+`BuildingConstructionPanel`の配置方法はUnityのCtrlメニューから`edit_building:placement_state`で受ける。自由/道路沿い配置では地点未固定でも間口・奥行き・階数を表示する。寸法ステッパーは`sendBuildingPlacementCommand`で変更フィールドだけを送り、スナップ補正済みのposition/width/depth/angle/revisionを一括受信する。受信値のエコー送信は禁止。直接配置の設置可否は現在の要求キー(variant/revision/位置/寸法/角度/階数)に対応する応答だけで確定を許可し、`update_shape`にもplacement_revisionを渡す。Escとパネル取消しは位置のみリセットし、寸法と配置方法を維持する。道路沿いでは角度入力を無効化。Ctrl/HUD文言は全言語のconstruction.jsonからlabelsとして送る。忠実コピー開始時のSTATE_EDIT_BUILDINGにはcopy_source_agent_idを渡し、区画配置専用にする。

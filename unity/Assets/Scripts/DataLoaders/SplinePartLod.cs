@@ -94,10 +94,10 @@ public sealed class SplinePartLod : MonoBehaviour
                     presentation?.HidePending(next);
                     next.SetActive(true);
                 }
-                presentation?.TryCommit();
                 var visual = GetComponentInParent<VisualModeObject>();
-                if (visual != null) visual.InitializeMaterials();
-                yield return null;
+                if (visual != null) visual.RefreshMaterials();
+                presentation?.TryCommit();
+                yield return RenderWorkScheduler.Continue;
             }
             yield return null;
         }

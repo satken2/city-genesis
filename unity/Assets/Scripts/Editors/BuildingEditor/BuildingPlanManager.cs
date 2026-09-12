@@ -13,7 +13,7 @@ using GeneratedModels;
 /// 新規建物の建設、既存建物の編集など建物計画全体を管理。
 /// InputHandlerシステムと連携して、マウス操作による建物建設機能を提供。
 /// </summary>
-public class BuildingPlanManager : MonoBehaviour
+public partial class BuildingPlanManager : MonoBehaviour
 {
     [Header("Construction Settings")]
     public int bdType = 0;        // 建物タイプ（bd_type）
@@ -73,7 +73,7 @@ public class BuildingPlanManager : MonoBehaviour
     private EffectRangeOverlay effectRangeOverlay;
 
     // ===== 直接配置のリアルタイム矩形ゴースト =====
-    // UI(パネル)から edit_building:update_direct_params で同期される直接配置パラメータ。
+    // マスターで初期化し、キーボードまたはパネルの差分コマンドで変更する直接配置パラメータ。
     // 直接配置の底面は「回転付き矩形」なのでUnity単独で生成でき、バックエンド往復なしに
     // カーソル追従のリアルタイムプレビュー(ゴースト)を描画できる。
     private float directWidth = 0f;
@@ -95,9 +95,6 @@ public class BuildingPlanManager : MonoBehaviour
     private Vector3 lastGhostCenter = new Vector3(float.MaxValue, 0f, float.MaxValue);
     private float lastGhostAngle = float.NaN;
     private const float GhostRebuildDistance = 0.5f; // この距離以上カーソルが動いたら再生成(m)
-
-    // カーソル下の土地区画判定(GetParcelIdAtPoint)用。ゴーストを区画外でのみ表示するために使う。
-    private ParcelManager parcelManager;
 
     private void Awake()
     {
@@ -129,6 +126,7 @@ public class BuildingPlanManager : MonoBehaviour
         {
             audioSource = gameObject.AddComponent<AudioSource>();
         }
+        gameObject.AddComponent<BuildingEditControlMenu>().Initialize(this);
     }
 
     /// <summary>
@@ -200,8 +198,9 @@ public class BuildingPlanManager : MonoBehaviour
         }
 
         // バリアント変更は新規の配置フロー開始とみなし、直接配置のゴースト状態を初期化する
-        // (地点未確定=フェーズAへ戻す)。寸法/回転はUIからの update_direct_params で再同期される。
+        // (地点未確定=フェーズAへ戻す)。寸法はマスターから初期化し、回転は0度に戻す。
         ResetDirectPlacementState();
+        InitializePlacement();
         
         // MasterDataStoreからagent_masterを取得して、エージェントタイプと建物タイプを設定
         if (MasterDataStore.Instance != null)
@@ -240,6 +239,8 @@ public class BuildingPlanManager : MonoBehaviour
         isBuildingModeActive = mode;
         if (mode)
         {
+            ApplyPlacementInputMode();
+            EmitPlacementState();
             Debug.Log("建物建設モード: ON");
         }
         else
@@ -310,6 +311,7 @@ public class BuildingPlanManager : MonoBehaviour
 
     public void OnParcelClick(int parcelId, Vector3 position, ParcelSummary parcelData = null)
     {
+        if (!isEditMode && PlacementMode != BuildingPlacementMode.Parcel) return;
         if (!isBuildingModeActive)
         {
             Debug.Log("建物建設モードが無効のため、クリックを無視します");
@@ -375,17 +377,14 @@ public class BuildingPlanManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 直接配置モード: 建物建設モード中に土地区画外の地点がクリックされたときに呼ばれる。
-    /// クリック地点のワールド座標をUIへ通知し、UIがその地点を中心とする矩形底面の
-    /// プレビュー(POST /buildings/preview-direct)を問い合わせて直接配置モードに入る。
-    /// 底面矩形の生成・設置可否判定・確定はすべてUI＋バックエンドが行うため、
-    /// このマネージャは地点の中継のみを担う(プレビュー3D表示は既存の edit_building:update_shape
-    /// 経由で受ける)。
-    ///
-    /// 直接配置は新規建設専用であり、既存建物の編集(移設)モードでは行わない。
+    /// 自由配置・道路沿い配置の地点を固定する。表示中の矩形と同じ吸着計算を使い、
+    /// 中心・寸法・角度をplacement_stateで一括通知する。建設の確定はパネルが行う。
     /// </summary>
     public void OnTerrainClickDirect(Vector3 position)
     {
+        if (!IsDirectPlacement || directCommitted || isMiddleDragging) return;
+        OnTerrainHoverDirect(position);
+        if (!directPreviewVisible) return;
         if (!isBuildingModeActive)
         {
             Debug.Log("建物建設モードが無効のため、区画外クリックを無視します");
@@ -409,7 +408,6 @@ public class BuildingPlanManager : MonoBehaviour
         selectedParcelId = -1;
 
         // 地点を確定(フェーズB)。以降ホバーで中心は動かさず、確定点周りで回転する。
-        directCenter = new Vector3(position.x, 0f, position.z);
         directCommitted = true;
         directPreviewVisible = true;
 
@@ -417,8 +415,8 @@ public class BuildingPlanManager : MonoBehaviour
 
         if (IpcClient.Instance != null)
         {
-            // 中ボタンドラッグでゴーストを回した角度を確定地点へ引き継ぐ。
-            IpcClient.Instance.EmitEditBuildingSelectPoint(position, Mathf.RoundToInt(directAngle));
+            // 表示中の中心・寸法・角度を同じ世代として通知する。
+            EmitPlacementState();
         }
     }
 
@@ -468,8 +466,13 @@ public class BuildingPlanManager : MonoBehaviour
     /// 受け取り、直接3Dプレビューメッシュを生成する。
     /// FetchBuildingShape()は使わず、提供されたデータから直接メッシュを構築する。
     /// </summary>
-    public void OnUpdateShapeFromIpc(float[][] polygon, int floors, float[] centerPoint, float height)
+    public void OnUpdateShapeFromIpc(float[][] polygon, int floors, float[] centerPoint, float height, int revision = -1)
     {
+        if (!isBuildingModeActive) return;
+        // 非同期応答で取消し済みの位置や古い寸法へ戻らないよう、直接配置は世代を照合する。
+        if (revision >= 0 && (!IsDirectPlacement || !directCommitted || revision != placementRevision || floors != currentFloors)) return;
+        if (revision < 0 && (IsDirectPlacement || (!isEditMode && selectedParcelId < 0))) return;
+        if (isMiddleDragging) return;
         Debug.Log($"BuildingPlanManager: IPC経由で形状変更を受信 floors={floors}, height={height}");
         currentFloors = floors;
 
@@ -603,6 +606,7 @@ public class BuildingPlanManager : MonoBehaviour
         bool changed = currentFloors != floors;
         currentFloors = floors;
         if (changed) PlaySound(changeFloorsSound);
+        if (IsDirectPlacement && directPreviewVisible) BuildDirectRectanglePreview();
         Debug.Log($"BuildingPlanManager: 階数を設定しました: {floors}");
         UpdateBuildingShape();
     }
@@ -660,6 +664,9 @@ public class BuildingPlanManager : MonoBehaviour
     /// </summary>
     private void ResetDirectPlacementState()
     {
+        ResetRoadAnchor();
+        hasRawPlacementPosition = false;
+        placementRevision++;
         directWidth = 0f;
         directDepth = 0f;
         directAngle = 0f;
@@ -705,26 +712,18 @@ public class BuildingPlanManager : MonoBehaviour
     /// </summary>
     public void OnTerrainHoverDirect(Vector3 pos)
     {
+        lastRawPlacementPosition = pos;
+        hasRawPlacementPosition = true;
+        if (!IsDirectPlacement) return;
         if (isEditMode || !hasDirectParams || directCommitted) return;
 
-        // 土地区画を選択済みの間はゴーストを出さない(区画ベースの配置フロー中)。
-        if (selectedParcelId > 0) return;
 
         // 中ボタン回転中はゴーストの中心を動かさない(回転操作でカーソルが動いても
         // ゴーストが滑らないようアンカーする)。回転の再描画は Update() が行う。
         if (isMiddleDragging) return;
 
-        // カーソルが土地区画の上にある間はゴーストを消す(そこをクリックすると区画配置になるため)。
-        // InputHandler.UpdateTerrainPosition の地形ホバーは区画上でも毎フレーム呼ばれ続けるので、
-        // onHoverEnd に頼らずここで毎回判定する(セル逆引き+BBOXで軽量)。
-        if (parcelManager == null) parcelManager = FindAnyObjectByType<ParcelManager>();
-        if (parcelManager != null && parcelManager.GetParcelIdAtPoint(pos) >= 0)
-        {
-            HideDirectGhost();
-            return;
-        }
-
         directCenter = new Vector3(pos.x, 0f, pos.z);
+        ResolveRoadPlacement(pos);
 
         // スロットル: 前回描画から一定距離動くか角度が変わった場合のみ再生成する
         // (毎フレームのメッシュ再生成によるGC/カクつきを避ける)。
@@ -791,6 +790,9 @@ public class BuildingPlanManager : MonoBehaviour
 
         // BuildingMeshBuilder は floors から高さを再算出するため、height は参考値の概算でよい。
         float heightEstimate = Mathf.Max(1, currentFloors) * 3.0f;
+        cachedPolygon = polygon;
+        cachedCenterPoint = new float[] { cx, cz };
+        cachedHeight = heightEstimate;
         BuildAndShowPreviewMesh(polygon, currentFloors, new float[] { cx, cz }, heightEstimate);
 
         directPreviewVisible = true;
@@ -801,10 +803,12 @@ public class BuildingPlanManager : MonoBehaviour
     /// <summary>
     /// 中ボタンドラッグによる直接配置の回転を毎フレーム処理する。
     /// フェーズA/B いずれでもローカル即時回転し、ボタンリリース時に確定角度を
-    /// edit_building:update_direct_angle でUIへ1回だけ通知する(ドラッグ中は送信しない)。
+    /// edit_building:placement_state でUIへ1回だけ通知する(ドラッグ中は送信しない)。
     /// </summary>
     private void Update()
     {
+        if (!UpdatePlacementInput()) return;
+        if (PlacementMode == BuildingPlacementMode.Roadside) return;
         if (!isBuildingModeActive || isEditMode || !hasDirectParams || !directPreviewVisible)
         {
             // ドラッグ中にモードが外れた等の場合は状態を落とす。
@@ -814,6 +818,7 @@ public class BuildingPlanManager : MonoBehaviour
 
         if (InputUtil.MiddleMouseWasPressedThisFrame)
         {
+            placementRevision++;
             isMiddleDragging = true;
             dragLastMouseX = InputUtil.MousePosition.x;
             return;
@@ -839,7 +844,7 @@ public class BuildingPlanManager : MonoBehaviour
             isMiddleDragging = false;
             if (IpcClient.Instance != null)
             {
-                IpcClient.Instance.EmitEditBuildingUpdateDirectAngle(Mathf.RoundToInt(directAngle));
+                EmitPlacementState();
             }
         }
     }
@@ -982,6 +987,7 @@ public class BuildingPlanManager : MonoBehaviour
             return;
         }
 
+        if (previewMesh != null && previewMesh != meshResult.Mesh) Destroy(previewMesh);
         previewMesh = meshResult.Mesh;
         previewMeshFilter.mesh = previewMesh;
 
@@ -1023,7 +1029,7 @@ public class BuildingPlanManager : MonoBehaviour
     {
         if (previewMesh != null)
         {
-            previewMesh.Clear();
+            Destroy(previewMesh);
             previewMesh = null;
         }
         if (previewMeshFilter != null)
@@ -1092,4 +1098,4 @@ public class BuildingPlanManager : MonoBehaviour
         if (bdType == Constants.BUILDING_PUBLIC) return "BUILDING_PUBLIC";
         return null;
     }
-} 
+}

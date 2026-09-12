@@ -32,7 +32,8 @@ public class IpcClient : MonoBehaviour
     // パネルのステッパー(UI→Unity)とUnityキー操作の双方向で編集できるようにしている。
     public event Action<int, float> OnEditPathChangeNode;
     public event Action<int, float> OnEditPathChangeEmbankment;
-    public event Action<float[][], int, float[], float> OnEditBuildingUpdateShape;
+    public event Action<float[][], int, float[], float, int> OnEditBuildingUpdateShape;
+    public event Action<Newtonsoft.Json.Linq.JToken> OnEditBuildingPlacementCommand;
     public event Action<int> OnEditBuildingUpdateFloors;
     public event Action<float, float, float> OnEditBuildingUpdateVisualVariant;
     // 構造種別(structure_master のID)の変更。プレビューのパーツ prefix を切り替える。
@@ -401,7 +402,8 @@ public class IpcClient : MonoBehaviour
                         float[] centerPoint = GetParamFloat1D(payload, "center_point");
                         float height = GetParamFloat(payload, "height");
                         Debug.Log($"IpcClient: edit_building:update_shape -> floors={floors}, has_center={centerPoint != null}, height={height}");
-                        OnEditBuildingUpdateShape?.Invoke(polygon, floors, centerPoint, height);
+                        int revision = (int?)GetParamToken(payload, "placement_revision") ?? -1;
+                        OnEditBuildingUpdateShape?.Invoke(polygon, floors, centerPoint, height, revision);
                     }
                     break;
 
@@ -442,6 +444,10 @@ public class IpcClient : MonoBehaviour
                         Debug.Log($"IpcClient: edit_building:update_effect_range -> clear={effectRange.IsClear}, existing={effectRange.existing.Count}");
                         OnEditBuildingUpdateEffectRange?.Invoke(effectRange);
                     }
+                    break;
+
+                case "edit_building:placement_command":
+                    OnEditBuildingPlacementCommand?.Invoke(GetParamToken(payload, "command"));
                     break;
 
                 case "edit_building:update_direct_params":
@@ -892,6 +898,12 @@ public class IpcClient : MonoBehaviour
         };
 
         SendEnvelope("edit_building:select_point", payload);
+    }
+
+    /// <summary>配置方法と、位置・寸法・角度を同一世代の状態としてパネルへ返す。</summary>
+    public void EmitEditBuildingPlacementState(Dictionary<string, object> state)
+    {
+        SendEnvelope("edit_building:placement_state", state);
     }
 
     /// <summary>

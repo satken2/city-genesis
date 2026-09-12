@@ -76,6 +76,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
 
     private void Awake()
     {
+        LoadDefaultMaterials();
         InitializeMaterials();
     }
 
@@ -105,6 +106,22 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     /// </summary>
     public void InitializeMaterials()
     {
+        CollectMaterials(false);
+    }
+
+    /// <summary>追加パーツを取り込み、既存Rendererの元マテリアルを保持して現在の表示を適用する。</summary>
+    public void RefreshMaterials()
+    {
+        CollectMaterials(true);
+        UpdateVisuals();
+    }
+
+    private void CollectMaterials(bool preserveOriginals)
+    {
+        var originals = new Dictionary<Renderer, RendererInfo>();
+        if (preserveOriginals)
+            foreach (var info in targetRenderers)
+                if (info.renderer != null) originals[info.renderer] = info;
         targetRenderers.Clear();
 
         // 自分自身
@@ -114,7 +131,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
             if (selfRenderer != null)
             {
                 bool prevent = ShouldPreventMaterialChange(selfRenderer);
-                targetRenderers.Add(new RendererInfo(selfRenderer, prevent));
+                targetRenderers.Add(originals.TryGetValue(selfRenderer, out var original) ? original : new RendererInfo(selfRenderer, prevent));
             }
         }
 
@@ -126,7 +143,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
             {
                 if (r.gameObject == this.gameObject) continue;
                 bool prevent = ShouldPreventMaterialChange(r);
-                targetRenderers.Add(new RendererInfo(r, prevent));
+                targetRenderers.Add(originals.TryGetValue(r, out var original) ? original : new RendererInfo(r, prevent));
             }
         }
     }

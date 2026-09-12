@@ -84,6 +84,7 @@ public static class LodQA
         yield return BuildingBatches();
         yield return BuildingExterior();
         yield return RoadSegments();
+        PathMaterials();
         yield return RoadPresentation();
         TerrainBenchmark();
     }
@@ -96,6 +97,43 @@ public static class LodQA
             go.transform.SetParent(parent.transform, false);
             return go;
         });
+    }
+    static void PathMaterials()
+    {
+        var rootObject = new GameObject("MaterialRoad");
+        var visual = rootObject.AddComponent(Type("VisualModeObject"));
+        Set(visual, "objectType", Type("InputObjectType").GetField("PATH").GetValue(null));
+        Set(visual, "useChildRenderers", true);
+        Set(visual, "ignoreSelfRenderer", true);
+        var shader = Shader.Find("Hidden/InternalErrorShader");
+        var planned = new Material(shader);
+        var original = new Material(shader);
+        Set(visual, "plannedMaterial", planned);
+        int plannedStatus = (int)Type("Constants").GetField("STATUS_SCHEDULED_CONSTRUCTION").GetValue(null);
+        int activeStatus = (int)Type("Constants").GetField("STATUS_ACTIVE").GetValue(null);
+        Call(visual, "SetStatus", plannedStatus);
+        MeshRenderer AddPart()
+        {
+            var part = new GameObject("LatePart");
+            part.transform.SetParent(rootObject.transform);
+            var renderer = part.AddComponent<MeshRenderer>();
+            renderer.sharedMaterials = new[] { original, original };
+            return renderer;
+        }
+        var first = AddPart();
+        Call(visual, "RefreshMaterials");
+        Check(Array.TrueForAll(first.sharedMaterials, mat => mat == planned), "First delayed part did not receive planned material immediately");
+        var second = AddPart();
+        Call(visual, "RefreshMaterials");
+        Check(Array.TrueForAll(second.sharedMaterials, mat => mat == planned), "Additional part kept its original material");
+        first.gameObject.SetActive(false);
+        Call(visual, "RefreshMaterials");
+        first.gameObject.SetActive(true);
+        Call(visual, "SetStatus", activeStatus);
+        Check(Array.TrueForAll(first.sharedMaterials, mat => mat == original)
+            && Array.TrueForAll(second.sharedMaterials, mat => mat == original), "Planned material contaminated originals across refresh or cache reuse");
+        Object.Destroy(rootObject); Object.Destroy(planned); Object.Destroy(original);
+        results.Add("Path materials: delayed parts, multiple slots and inactive cache restore passed");
     }
     static IEnumerator RoadPresentation()
     {

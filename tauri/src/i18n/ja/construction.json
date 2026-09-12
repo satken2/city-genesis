@@ -22,6 +22,23 @@
     "remainingEpochs": "約{{n}}エポック"
   },
   "building_construction": {
+    "placement": {
+      "parcel": "区画に配置",
+      "free": "自由配置",
+      "roadside": "道路沿い配置",
+      "frontage": "間口",
+      "depth": "奥行き",
+      "parcelHint": "区画をクリック · Ctrl 配置方法",
+      "committed": "位置固定 · パネルで確定 · Esc 選び直し",
+      "placeHint": "左クリック 位置固定 · Ctrl 配置方法",
+      "snapped": "道路に吸着中",
+      "searching": "道路を探しています",
+      "sizeHint": "1/2 間口 · 3/4 奥行き · Shift 5m",
+      "fixed": "寸法固定",
+      "rotateHint": "中ドラッグ 回転",
+      "menuHint": "3DビューでCtrlを押し、配置方法を選んで離します。",
+      "roadHint": "道路の外縁に合わせます。回転は道路に合わせて自動調整されます。"
+    },
     "selectBdType": "-- 建物種別を選択 --",
     "selectVariant": "建物種別を選択してください",
     "noVariants": "該当するバリアントがありません",

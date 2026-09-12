@@ -56,6 +56,9 @@ public sealed class RoadEarthworkPreview : MonoBehaviour
             {
                 // 操作変更や編集終了の前に出した結果は表示しない。
                 if (desired == key && isActiveAndEnabled) Draw(response);
+            }, (code, message) =>
+            {
+                if (desired == key) result = new Result { status = "unavailable" };
             });
         }
         finally { busy = false; }
@@ -87,7 +90,12 @@ public sealed class RoadEarthworkPreview : MonoBehaviour
             }
             // 元地形と造成面を結ぶ半透明の柱。切土の底は地形越しにも確認できる。
             int[] faces = {0,1,2,0,2,3,4,6,5,4,7,6,0,4,5,0,5,1,1,5,6,1,6,2,2,6,7,2,7,3,3,7,4,3,4,0};
-            foreach (int index in faces) triangles.Add(start+index);
+            for (int i = 0; i < faces.Length; i += 3)
+            {
+                triangles.Add(start + faces[i]);
+                triangles.Add(start + faces[i + (delta < 0 ? 1 : 2)]);
+                triangles.Add(start + faces[i + (delta < 0 ? 2 : 1)]);
+            }
         }
         mesh = new Mesh { name = "EarthworkPreview", indexFormat = IndexFormat.UInt32 };
         mesh.SetVertices(vertices); mesh.SetColors(colors); mesh.SetTriangles(triangles,0); mesh.RecalculateBounds();
@@ -106,7 +114,8 @@ public sealed class RoadEarthworkPreview : MonoBehaviour
     {
         if (result == null) return;
         if (legend == null) legend = new GUIStyle(GUI.skin.box) { font = UiFontProvider.GetFont(14), fontSize = 14, richText = true };
-        string text = result.status == "too_large" ? "造成プレビュー：範囲が広すぎます" :
+        string text = result.status == "unavailable" ? "造成プレビューを取得できませんでした" :
+            result.status == "too_large" ? "造成プレビュー：範囲が広すぎます" :
             $"造成概算  <color=#ff9a42>切土 {result.cut_volume:N0} m³</color>  <color=#40baff>盛土 {result.fill_volume:N0} m³</color>";
         GUI.Box(new Rect(16,Screen.height-72,430,32), text, legend);
     }

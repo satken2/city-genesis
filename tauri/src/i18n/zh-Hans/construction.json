@@ -22,6 +22,23 @@
     "remainingEpochs": "约{{n}}个纪元"
   },
   "building_construction": {
+    "placement": {
+      "parcel": "在地块上放置",
+      "free": "自由放置",
+      "roadside": "沿道路放置",
+      "frontage": "临街宽度",
+      "depth": "进深",
+      "parcelHint": "点击地块 · Ctrl 放置方式",
+      "committed": "位置已固定 · 面板确认 · Esc 重新选址",
+      "placeHint": "左键 固定位置 · Ctrl 放置方式",
+      "snapped": "已吸附道路",
+      "searching": "正在寻找道路",
+      "sizeHint": "1/2 临街宽度 · 3/4 进深 · Shift 5m",
+      "fixed": "尺寸固定",
+      "rotateHint": "中键拖动 旋转",
+      "menuHint": "在3D视图中按住Ctrl，指向放置方式后松开。",
+      "roadHint": "对齐道路外缘，自动沿道路调整旋转角度。"
+    },
     "selectBdType": "-- 请选择建筑类型 --",
     "selectVariant": "请选择建筑类型",
     "noVariants": "没有符合条件的变体",

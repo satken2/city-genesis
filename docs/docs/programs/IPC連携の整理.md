@@ -24,12 +24,12 @@ Unityのグラフィックプログラム(以下、`graphic`)と、TauriのUIプ
 
 ## MMFレイアウト
 
-各MMFは8KB（8192バイト）。
+各MMFは1MiB（1048576バイト）。
 
 ```
 Offset  0: WritePos  (int32) — 次の書き込み位置（バッファ内オフセット）
 Offset  4: ReadPos   (int32) — 次の読み取り位置（バッファ内オフセット）
-Offset  8: Ring buffer data (8184 bytes)
+Offset  8: Ring buffer data (1048568 bytes)
   各メッセージ: [MessageLength (int32)][UTF-8 JSON bytes]
 ```
 
@@ -68,10 +68,10 @@ Offset  8: Ring buffer data (8184 bytes)
 | `edit_path:finish_topology_edit` | `ui -> graphic` | パスの結合／分割の確定送信に成功したことを通知する（`removed_path_id`＝結合で吸収されて消えたパスID。分割時は0）。Unity は「選択モード終了 → 消えたパスの即時破棄 → 通常モードへ復帰 → データ再取得」を1つのハンドラでこの順に行う。**`session:reload` と `world:change_state` を別々に送ってはいけない**——差分リロードは複数フレームにまたがるコルーチンで、後続の状態遷移が割り込むと再生成・削除が中途半端に終わり、形状が更新されない／消えたはずのパスが残る（道路敷設の `edit_path:finish` が1イベントにまとまっているのと同じ理由） |
 | `edit_path:cancel_topology_edit` | `ui -> graphic` | パス詳細パネル（`path_detail`）のウィンドウが閉じられたときに Rust（`window.rs`）が送る打ち切り通知。Unity は結合／分割の対象選択モード中だった場合のみ、モードを終了して通常モードへ戻す（**ポップアップは閉じても破棄されず非表示になるだけで React のアンマウント処理が走らないため、パネル任せにすると選択モードのまま入力が固まる**）。選択モード中でなければ何もしない＝ブルドーザ等の他モードを巻き込まないための専用イベント |
 | `edit_building:select_parcel`   | `graphic -> ui`  | 建物建設モードにおいて、土地区画を選択した（parcel_id, polygon, position 等を含む） |
-| `edit_building:select_point`    | `graphic -> ui`  | 建物建設モード（直接配置）において、土地区画外の地点がクリックされた（`position`=[x,y,z]、および確定時点の回転角 `angle`=度 を含む）。`angle` は中ボタンドラッグでゴーストを回した角度を確定地点へ引き継ぐためのもの。UIはこの地点を中心とする矩形底面をバックエンドの `POST /api/v1/buildings/preview-direct` にプレビュー問い合わせして直接配置モードに入る。確定はUIが `POST /api/v1/buildings/direct` を直接呼ぶ |
+| `edit_building:select_point` | `graphic -> ui` | 旧定義。現行の建物直接配置は`placement_command`/`placement_state`を使用する |
 | `edit_building:invalid_parcel`  | `graphic -> ui`  | 建物建設モードにおいて、選択中の建物種類と互換性のない土地区画がクリックされた（parcel_id を含む） |
-| `edit_building:update_direct_params` | `ui -> graphic` | 建物建設モード（直接配置）において、矩形底面の `width`・`depth`・`angle`(度)・`floors` をUnityへ同期する。Unityはこれらでカーソル追従のリアルタイム矩形ゴーストを描画する（直接配置の底面は「回転付き矩形」でありバックエンド往復なしにUnity単独生成できる）。バリアント選択時および各値の変更時に送信する（地点確定前後どちらでも）。`angle` はマイナス・360超も生値で扱い、正規化(mod 360)はUIの確定送信時のみ行う |
-| `edit_building:update_direct_angle` | `graphic -> ui` | 建物建設モード（直接配置）において、中ボタンドラッグによる回転が終了(ボタンリリース)したとき、Unityが確定した回転角 `angle`(度)を通知する。UIは回転ステッパー(`rectAngle`)を更新する。ドラッグ中は送られず、リリース時に1回だけ届く |
+| `edit_building:update_direct_params` | `ui -> graphic` | 旧定義。現行の建物直接配置は`placement_command`/`placement_state`を使用する |
+| `edit_building:update_direct_angle` | `graphic -> ui` | 旧定義。現行の建物直接配置は`placement_command`/`placement_state`を使用する |
 | `edit_building:update_shape`    | `ui -> graphic`  | 建物建設モードにおいて、建物の底面形状を変更した              |
 | `edit_building:update_floors`   | `ui -> graphic`  | 建物建設モードにおいて、建物の階数を変更した                |
 | `edit_building:update_structure` | `ui -> graphic` | 建物建設モードにおいて、構造種別 `structure`（木造=1・準耐火=2・耐火=3。0=構造なし）を変更した。Unityはキャッシュ済みの底面から、構造つきパーツフォルダ（`a{variant}s{structure}` 等）でプレビューを再生成する。`STATE_EDIT_BUILDING` の遷移パラメータにも `structure` が含まれ、`building_construction:copy_source` はコピー元の `structure` を返す |
@@ -344,3 +344,15 @@ invoke("start_load_game", { saveId })
 ## 土地区画作成のモード契約
 
 `STATE_EDIT_PARCEL` の `parcel_creation_mode` は、新規作成では `along_path` / `block` / `random` / `empty_area` を使う。TauriのボタンとUnityのラジアルメニューはこの順で表示する。既存区画の分割モードは維持する。`block` は地点選択と従来のプレビューイベントを使い、UIからバックエンドへ探索範囲・間口・奥行き・ばらつきを送る。新規の任意ポリゴン作図は提供しない。既存区画の形状編集イベント（`edit_parcel:update_shape` と `edit_parcel:finish_shape_edit`）は引き続き使用する。
+
+## 建物直接配置の状態同期
+
+`edit_building:placement_command` (ui → graphic)のparams.commandには`variant`と変更したフィールドだけを渡す。任意フィールドは`width`/`depth`/`angle`、`reset=true`(位置選択のみ取消し)、`labels`(翻訳済みCtrlメニュー/HUD文言)。寸法を含まない呼び出しは状態問い合わせとなる。パネルは購読完了後に問い合わせ、初期化通知を取りこぼしても復元できる。
+
+`edit_building:placement_state` (graphic → ui)は`{variant, revision, mode, position, width, depth, angle, parcel_id}`を返す。modeはparcel/free/roadside、positionは`[x,0,z]`または未固定を示すnull、parcel_id=-1は区画未選択。キーボード寸法変更・Ctrl切替・位置固定・回転終了・Escも同じ状態通知を使う。ホバー移動では常時送信しない。UIはこの通知をパラメータ変更として再送しない。
+
+直接配置の`edit_building:update_shape`には要求元の`placement_revision`を付ける。Unityは現在の世代・階数・位置固定状態と一致する場合だけ描画する。パネルも要求キーで設置可否の鮮度を確認する。既存区画からの建設・編集は世代を付けない従来経路。
+
+`select_point`/`update_direct_angle`/`update_direct_params`は旧イベント定義として残るが、現行の建設パネルは直接配置にこれらを使用しない。配置方法を位置確定前から明示選択するため、以前の「区画外をクリックしたら直接配置へ入る」自動判定は行わない。
+
+パネルの寸法コマンドには`request_id`を付け、Unityは対応する`placement_state.request_id`にそのまま返す。パネルは最後に送った数値変更への応答が届くまで確定を待つ。これにより連続入力中に先の変更への応答だけで確定可能になることを防ぐ。

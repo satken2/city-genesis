@@ -22,6 +22,23 @@
     "remainingEpochs": "~{{n}} epochs"
   },
   "building_construction": {
+    "placement": {
+      "parcel": "Place on parcel",
+      "free": "Free placement",
+      "roadside": "Roadside placement",
+      "frontage": "Frontage",
+      "depth": "Depth",
+      "parcelHint": "Click a parcel · Ctrl Placement mode",
+      "committed": "Position fixed · Confirm in panel · Esc Reposition",
+      "placeHint": "Left click Fix position · Ctrl Placement mode",
+      "snapped": "Snapped to road",
+      "searching": "Searching for a road",
+      "sizeHint": "1/2 Frontage · 3/4 Depth · Shift 5m",
+      "fixed": "Fixed dimensions",
+      "rotateHint": "Middle drag Rotate",
+      "menuHint": "Hold Ctrl in the 3D view, point to a placement mode, then release.",
+      "roadHint": "Aligns to the outer road edge. Rotation follows the road automatically."
+    },
     "selectBdType": "-- Select Building Type --",
     "selectVariant": "Please select a building type",
     "noVariants": "No variants available",

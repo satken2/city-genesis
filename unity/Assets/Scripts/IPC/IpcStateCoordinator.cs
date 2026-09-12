@@ -647,6 +647,8 @@ public class IpcStateCoordinator : MonoBehaviour
             }
 
             buildingPlanManager.SetBuildingMode(true);
+            buildingPlanManager.DirectAllowed = !agentId.HasValue &&
+                !(ipcParams != null && ipcParams.TryGetValue("copy_source_agent_id", out var copyId) && copyId != null);
         }
     }
 

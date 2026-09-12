@@ -22,7 +22,7 @@ public class PathManager : BaseApiDataManager
     {
         geometryRevisions.TryGetValue(path.path_id, out int revision);
         if (invalidate) geometryRevisions[path.path_id] = ++revision;
-        return path.path_id + ":" + path.version + ":" + revision + ":" + lod;
+        return path.path_id + ":" + path.version + ":" + path.status + ":" + revision + ":" + lod;
     }
 
     private bool RestorePathLod(PathSummary path, string key, DrawLod lod, bool updateIntersections)
@@ -42,6 +42,7 @@ public class PathManager : BaseApiDataManager
         if (updateIntersections) RegisterPathData(path); else SavePathToCache(path);
         RegisterPathCells(path);
         next.GetComponent<VisualPathStats>()?.InitFrom(path);
+        next.GetComponent<VisualModeObject>()?.SetStatus(path.status);
         UpdatePlannedIcon(next, path, path.status == Constants.STATUS_PENDING);
         ReevaluateAwaitingIntersectionsForPath(path);
         return true;
@@ -1037,7 +1038,11 @@ public class PathManager : BaseApiDataManager
             foreach (var p in response.paths)
             {
                 bool versionChanged = true;
-                if (oldVersions.TryGetValue(p.path_id, out int cachedVersion) && cachedVersion == p.version && HasPathRepresentation(p))
+                int? renderedStatus = pathObjectsCache.TryGetValue(p.path_id, out var renderedPath) && renderedPath != null
+                    ? renderedPath.GetComponent<ObjectIdInfo>()?.status
+                    : oldStatuses.TryGetValue(p.path_id, out int cachedStatus) ? cachedStatus : (int?)null;
+                if (oldVersions.TryGetValue(p.path_id, out int cachedVersion) && cachedVersion == p.version && HasPathRepresentation(p)
+                    && renderedStatus == p.status)
                 {
                     versionChanged = false;
                 }
@@ -1721,6 +1726,12 @@ public class PathManager : BaseApiDataManager
         var identity = pathGO.AddComponent<RenderCacheIdentity>();
         identity.key = renderKey;
         identity.mesh = mesh;
+
+        var stats = pathGO.AddComponent<VisualPathStats>();
+        stats.InitFrom(path);
+        var visual = pathGO.AddComponent<VisualModeObject>();
+        visual.objectType = InputObjectType.PATH;
+        visual.SetStatus(status);
 
         SavePathToCache(path);
         RegisterPathCells(path);
@@ -3262,8 +3273,6 @@ public class PathManager : BaseApiDataManager
     {
         VisualModeObject visualModeObject = pathGO.AddComponent<VisualModeObject>();
         visualModeObject.objectType = InputObjectType.PATH;
-        visualModeObject.SetStatus(status);
-        
         visualModeObject.useChildRenderers = true;
         visualModeObject.ignoreSelfRenderer = true;
         visualModeObject.InitializeMaterials();
@@ -3275,6 +3284,7 @@ public class PathManager : BaseApiDataManager
 
         var stats = pathGO.AddComponent<VisualPathStats>();
         stats.InitFrom(path);
+        visualModeObject.SetStatus(status);
     }
 
     private void SetupWaypoints(GameObject pathGO, int pathId, List<Vector3> points)

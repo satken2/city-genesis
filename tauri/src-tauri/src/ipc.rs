@@ -504,6 +504,9 @@ pub async fn handle_incoming_message(
         "edit_building:select_parcel" => {
             let _ = app.emit("edit_building:select_parcel", envelope.payload);
         }
+        "edit_building:placement_state" => {
+            let _ = app.emit("edit_building:placement_state", envelope.payload);
+        }
         "edit_building:select_point" => {
             // 直接配置モード: 建物建設モード中に土地区画外(地形)がクリックされたとき、
             // そのワールド座標をUIへ中継する。UIはこの地点を中心とする矩形底面のプレビューを

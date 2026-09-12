@@ -1038,10 +1038,8 @@ public class InputHandler : MonoBehaviour
                 SetMode(InputObjectType.PATH, InputMode.MODE_NONE);
                 SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PARCEL, InputMode.MODE_BUILDING_CONSTRUCTION);
-                // 地形(区画外)クリックを直接配置モードとして受けるため TERRAIN にも
-                // 建設モードを設定する。区画内クリックは InputHandler のフォールバック
-                // (GetParcelIdAtPoint)が ParcelInputHandler へ差し替えるため、
-                // TerrainInputHandler へ来るのは「どの区画にも属さない地点」だけになる。
+                // 建設中の配置方法はBuildingPlanManagerが管理する。区画配置が初期値で、
+                // 自由配置・道路沿い配置に切り替えるとPARCELをMODE_NONEにして地形へ貫通させる。
                 SetMode(InputObjectType.TERRAIN, InputMode.MODE_BUILDING_CONSTRUCTION);
                 Debug.Log("InputHandler: 建物建設モードプリセットを設定しました");
                 break;
