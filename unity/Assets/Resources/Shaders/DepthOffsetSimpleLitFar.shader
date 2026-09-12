@@ -3,8 +3,8 @@
 //   カメラ近傍の per-cell 地形タイル(Custom/DepthOffsetTerrainLit, Offset 1,1)と重なるため、
 //   より大きい正の Offset(4,4)で最奥へ押しやり、per-cell タイルが常に手前で勝つようにする。
 //   海面(Custom/DepthOffsetLit, Offset -1,-1)よりも奥なので、海岸の縁でも海面が正しく手前に出る。
-// SimpleLit の標準パスをそのまま使い、per-cell タイルと同じ地面テクスチャをワールドXZ座標UVで貼る。
-//   未開放セルはサブメッシュ別マテリアルの _BaseColor に暗めのティントを乗算して表現する。
+// 地表の手続き色・岩肌・PBR照明をTerrainと共用する。SimpleLitの頂点入力と補助パスを利用する。
+// 未開放セルはTerrainと同じく、照明・霧の適用後に _TerrainTint を乗算する。
 // 沈み込み: per-cell タイルがロード済みのセルでは頂点を _FarSinkAmount(既定50m)地中に沈め、
 //   タイルへの突き抜け(特に near_map 由来タイルとの起伏差)を隠す。判定は TerrainManager が
 //   毎フレーム更新するロード済みセルマスク(_LoadedCellMask、1セル=1テクセル)を頂点シェーダーで参照する。
@@ -22,6 +22,33 @@ Shader "Custom/DepthOffsetSimpleLitFar"
         _LoadedCellMaskParams("Loaded Cell Mask Params", Vector) = (0, 0, 0, 0) // x:1/cellSize y:offsetX z:offsetY
         _LoadedCellMaskTexel("Loaded Cell Mask Texel", Vector) = (0, 0, 0, 0)   // x:1/cellsX y:1/cellsY
         _FarSinkAmount("Far Sink Amount", Float) = 100.0
+
+        _TerrainMacroVariationStrength("Macro Variation Strength", Range(0.0, 0.5)) = 0.12
+        _TerrainMacroVariationScale("Macro Variation Scale", Float) = 350.0
+        _TerrainMacroVariationTint("Macro Variation Tint", Color) = (0.85, 0.95, 0.75, 1.0)
+
+        // タイル全体への乗算ティント。未開放セルの暗色表示(TerrainManager.ApplyUnlockOverlayToTerrain)が
+        // タイルごとの materialTemplate に設定する。白=通常色。
+        _TerrainTint("Terrain Tint", Color) = (1.0, 1.0, 1.0, 1.0)
+
+        // 崖(急傾斜)への岩テクスチャブレンド設定。実行時は TerrainManager の
+        // ApplyTerrainMaterialSettings がタイルごとの materialTemplate に設定する。
+        // 既定値は TerrainManager.cs の SerializeField 既定値と一致させること。
+        _CliffAlbedoMap("Cliff Albedo", 2D) = "grey" {}
+        _CliffNormalMap("Cliff Normal", 2D) = "bump" {}
+        _CliffUvScale("Cliff UV Scale (1/m)", Float) = 0.0833
+        _CliffSlopeThreshold("Cliff Slope Threshold", Range(0.0, 1.0)) = 0.45
+        _CliffSlopeBlend("Cliff Slope Blend", Range(0.01, 1.0)) = 0.18
+        _CliffNoiseScale("Cliff Noise Scale (m)", Float) = 18.0
+        _CliffNoiseStrength("Cliff Noise Strength", Range(0.0, 0.3)) = 0.09
+        _CliffNormalStrength("Cliff Normal Strength", Range(0.0, 2.0)) = 1.0
+        _CliffSmoothness("Cliff Smoothness", Range(0.0, 1.0)) = 0.08
+        _CliffTexturesLoaded("Cliff Textures Loaded", Float) = 0.0
+        _CliffFallbackColor("Cliff Fallback Color", Color) = (0.42, 0.36, 0.30, 1.0)
+        _CliffLowlandStart("Cliff Lowland Start Height (m)", Float) = 2.0
+        _CliffLowlandFull("Cliff Lowland Full Height (m)", Float) = 0.0
+
+        _GroundMetallic("Ground Metallic", Range(0, 1)) = 0
 
         _Cutoff("Alpha Clipping", Range(0.0, 1.0)) = 0.5
 
@@ -74,7 +101,7 @@ Shader "Custom/DepthOffsetSimpleLitFar"
         {
             "RenderType" = "Opaque"
             "RenderPipeline" = "UniversalPipeline"
-            "UniversalMaterialType" = "SimpleLit"
+            "UniversalMaterialType" = "Lit"
             "IgnoreProjector" = "True"
         }
         LOD 300
@@ -162,7 +189,37 @@ Shader "Custom/DepthOffsetSimpleLitFar"
             // -------------------------------------
             // Includes
             #include "Packages/com.unity.render-pipelines.universal/Shaders/SimpleLitInput.hlsl"
+            // URPの入力・GI・霧を維持し、照明だけTerrainと共通のPBRへ接続する。
+            #include "Assets/Shaders/TerrainSurfaceAppearance.hlsl"
+            float _GroundMetallic;
+            float _Smoothness;
+            half4 FarTerrainFragmentPBR(InputData inputData, SurfaceData surfaceData)
+            {
+                return CliffTerrainFragmentPBR(inputData, surfaceData.albedo, _GroundMetallic,
+                    half3(0, 0, 0), _Smoothness, surfaceData.occlusion, surfaceData.emission, surfaceData.alpha);
+            }
+            #define UniversalFragmentBlinnPhong FarTerrainFragmentPBR
+            #define LitPassFragmentSimple OriginalFarFragment
             #include "Packages/com.unity.render-pipelines.universal/Shaders/SimpleLitForwardPass.hlsl"
+            #undef LitPassFragmentSimple
+            #undef UniversalFragmentBlinnPhong
+
+            void LitPassFragmentSimple(Varyings input, out half4 outColor : SV_Target0
+#ifdef _WRITE_RENDERING_LAYERS
+                , out uint outRenderingLayers : SV_Target1
+#endif
+            )
+            {
+                OriginalFarFragment(input, outColor
+#ifdef _WRITE_RENDERING_LAYERS
+                    , outRenderingLayers
+#endif
+                );
+                outColor.rgb = ApplyTerrainMacroVariation(outColor.rgb, input.positionWS);
+                outColor.rgb = ApplyTerrainColorGrade(outColor.rgb, input.positionWS);
+                outColor.rgb = ApplyContourLines(outColor.rgb, input.positionWS);
+                outColor.rgb *= (half3)_TerrainTint.rgb;
+            }
 
             TEXTURE2D(_LoadedCellMask);
             SAMPLER(sampler_LoadedCellMask);
@@ -422,7 +479,7 @@ Shader "Custom/DepthOffsetSimpleLitFar"
 
             Varyings VertDepthOnlyFar(Attributes input)
             {
-                ApplyFarSink(input.positionOS.xyz);
+                ApplyFarSink(input.position.xyz);
                 return DepthOnlyVertex(input);
             }
             ENDHLSL

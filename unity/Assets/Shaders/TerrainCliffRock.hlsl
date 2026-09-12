@@ -18,9 +18,9 @@
 //   陰影は保たれる。
 //
 // このファイルは TerrainMacroNoise を使用するため、
-// DepthOffsetTerrainLitMacroVariation.hlsl のノイズ関数定義より
+// TerrainSurfaceAppearance.hlsl のノイズ関数定義より
 // 後で include すること。プロパティ値は TerrainManager.cs の
-// ApplyTerrainMaterialSettings がタイルごとの materialTemplate に設定する。
+// ApplyTerrainMaterialSettings がTerrain・遠景の各マテリアルに設定する。
 // ================================================================
 
 TEXTURE2D(_CliffAlbedoMap);

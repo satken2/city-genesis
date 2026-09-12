@@ -29,6 +29,8 @@
 
 ## 地形の関連機能
 
+通常TerrainとUltraFarメッシュは `Assets/Shaders/TerrainSurfaceAppearance.hlsl` の手続き地表色・ディテール法線・岩肌・PBR照明を共用する。設定は両方とも `TerrainManager.ApplyTerrainMaterialSettings` から渡す。UltraFarのシェーダー名 `Custom/DepthOffsetSimpleLitFar` は既存参照のため維持しているが、Forwardの照明はPBRである。未開放色は両方とも照明・霧の後の `_TerrainTint` 乗算。遠景だけ `_BaseColor` で暗くすると霧・手続き色への作用が変わるため使わない。地形の色を調整するときは遠景にも反映し、`Tests/TerrainAppearance/run-unity.ps1` で比較描画を確認する。
+
 
 
 ## 道路 (PathManager.cs) — 知らないと事故るポイント

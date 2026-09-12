@@ -24,6 +24,14 @@ LODは「取得する範囲」「地形の細分化」「物体の描画品質�
 
 常駐範囲外には全景地形を描く。建物・道路・プロップの表示対象は取得範囲内であり、全都市を無制限に詳細表示する方式ではない。
 
+### 通常地形と全景地形の見た目
+
+通常のTerrainタイルとUltraFar陸地メッシュは、同じ地表の色・模様・岩肌・PBR照明を使う。`TerrainSurfaceAppearance.hlsl` が草と土の手続き色、微細な法線、傾斜・低標高での岩ブレンド、標高色、等高線を共通実装し、`TerrainManager.ApplyTerrainMaterialSettings` が両方に同じパラメータを渡す。地面テクスチャ、金属度、滑らかさも通常地形の設定を使う。遠景シェーダーの名前 `Custom/DepthOffsetSimpleLitFar` はシーン参照の互換用に維持するが、Forwardパスは共通のPBR照明を呼ぶ。
+
+未開放セルの暗色表示は、双方とも照明・霧を適用した後に `_TerrainTint` を乗算する。全景側は開放・未開放の2マテリアルで制御する。遠景の粗い形状、ロード済みセル内の沈み込みマスク、深度オフセットは維持するため、形状・法線の精度差は残るが、ロード境界で別の配色へ切り替わることを防ぐ。Forward+向けの共通化であり、未使用のGBufferパスに同じ地表表現を保証するものではない。
+
+`Tests/TerrainAppearance/run-unity.ps1` は独立したUnityプロジェクトで同じ地表をTerrainとメッシュで描画し、通常色・未開放色の画像差とシェーダーエラーを検査する。結果とPNGは `Temp/TerrainAppearanceQA` に出力する。
+
 ## 地形の取得と確定
 
 1. `/terrain/settings` と `/terrain/cell-versions` を取得する。

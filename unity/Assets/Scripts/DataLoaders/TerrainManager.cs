@@ -166,8 +166,6 @@ public class TerrainManager : BaseApiDataManager
     /// ビルドに確実に含めるため SerializeField で直接参照する(未設定時は Shader.Find フォールバック)。
     /// </summary>
     [SerializeField] private Shader ultraFarLandShader;
-    /// <summary>UltraFar 陸地の通常色。テクスチャ未設定時のフラット色フォールバック(テクスチャありなら白=素のテクスチャ色)。</summary>
-    [SerializeField] private Color ultraFarLandColor = new Color(0.45f, 0.62f, 0.40f, 1f);
     /// <summary>
     /// 未開放セルを暗くする乗算ティント。オーバーレイ表示(IsUnlockOverlayActive)が有効なとき、
     /// 通常のテクスチャ付き地面にこの色を乗算して「少し暗い地面」にする。
@@ -207,7 +205,7 @@ public class TerrainManager : BaseApiDataManager
     [SerializeField] private Color terrainMacroVariationTint = new Color(0.85f, 0.95f, 0.75f, 1f);
 
     // スタイライズ向けのカラーグレード・ディテール法線設定。シェーダー実装は
-    // Assets/Shaders/DepthOffsetTerrainLitMacroVariation.hlsl(ApplyTerrainColorGrade /
+    // Assets/Shaders/TerrainSurfaceAppearance.hlsl(ApplyTerrainColorGrade /
     // ApplyGroundDetailNormal)。写真テクスチャの精細さではなく色設計・法線で
     // 「破綻なく整った」非写実の地表を作るための層。新規フィールドのためシーンに
     // シリアライズ値が無く、ここのコード既定値がそのまま実行時に反映される。
@@ -232,7 +230,7 @@ public class TerrainManager : BaseApiDataManager
     [SerializeField] private float terrainDetailNormalTilingMeters = 3.5f;
 
     // 地面のベースアルベドの手続き生成設定。シェーダー実装は
-    // DepthOffsetTerrainLitMacroVariation.hlsl の ComputeProceduralGroundAlbedo。
+    // TerrainSurfaceAppearance.hlsl の ComputeProceduralGroundAlbedo。
     // 拾い物テクスチャの単純タイリング反復を消すため、ベース色自体を多スケールノイズで作る。
     // 新規SerializeFieldのためシーンに値が無く、ここのコード既定値が実行時に反映される。
     [Header("Terrain Procedural Ground Settings")]
@@ -420,7 +418,6 @@ public class TerrainManager : BaseApiDataManager
     private Mesh ultraFarLandMesh;
     private Material ultraFarLandMat;     // 開放済み(通常色)サブメッシュ用
     private Material ultraFarLandMatDark; // 未開放(暗め)サブメッシュ用
-    private static readonly int UltraFarBaseColorId = Shader.PropertyToID("_BaseColor");
 
     /// <summary>per-cellタイル用地形シェーダー(Custom/DepthOffsetTerrainLit)の乗算ティント。未開放セルの暗色化に使う。</summary>
     private static readonly int TerrainTintId = Shader.PropertyToID("_TerrainTint");
@@ -1171,8 +1168,7 @@ public class TerrainManager : BaseApiDataManager
     /// UltraFar 陸地メッシュ用の2マテリアル(開放済み=通常/未開放=暗め)を必要に応じて生成する。
     /// シェーダーは Custom/DepthOffsetSimpleLitFar(Offset 4,4)で per-cell 地形・海面より奥に描画する。
     /// per-cell タイルと同じ地面テクスチャを、頂点のワールドXZ座標をUVとして同じタイリングで貼る。
-    /// 法線マップは設定しない(SimpleLit の _BumpMap にカラーテクスチャが流用されると不正な法線で
-    /// 陰影が暗く濁るため。遠景専用なので法線ディテールは不要)。
+    /// 草・土の手続き色、岩肌、法線ディテールとPBR照明はTerrainと共通の設定・HLSLを使う。
     /// 色の設定は <see cref="RefreshUltraFarLandOverlay"/>、沈み込みマスクは
     /// <see cref="UpdateLoadedCellMask"/> が担う。
     /// </summary>
@@ -1204,6 +1200,20 @@ public class TerrainManager : BaseApiDataManager
             ultraFarLandMatDark.SetVector("_BaseMap_ST", tilingOffset);
         }
 
+        ApplyTerrainMaterialSettings(ultraFarLandMat);
+        ApplyTerrainMaterialSettings(ultraFarLandMatDark);
+        TerrainLayer groundLayer = customTerrainLayers != null && customTerrainLayers.Length > 0
+            ? customTerrainLayers[0] : null;
+        float metallic = groundLayer != null ? groundLayer.metallic : defaultMetallic;
+        float smoothness = groundLayer != null ? groundLayer.smoothness : defaultSmoothness;
+        Color baseColor = diffuseTex != null ? Color.white : defaultTerrainColor;
+        foreach (Material material in new[] { ultraFarLandMat, ultraFarLandMatDark })
+        {
+            material.SetFloat("_GroundMetallic", metallic);
+            material.SetFloat("_Smoothness", smoothness);
+            material.SetColor("_BaseColor", baseColor);
+        }
+
         // ロード済みセルでの沈み込み量。判定マスクは UpdateLoadedCellMask が毎フレーム供給する。
         ultraFarLandMat.SetFloat(FarSinkAmountId, ultraFarSinkAmount);
         ultraFarLandMatDark.SetFloat(FarSinkAmountId, ultraFarSinkAmount);
@@ -1218,12 +1228,9 @@ public class TerrainManager : BaseApiDataManager
     {
         if (ultraFarLandMat == null || ultraFarLandMatDark == null) return;
 
-        // テクスチャありなら白(素のテクスチャ色)、なければフラット色フォールバック。
-        Color baseColor = GetUltraFarDiffuseTexture(out _) != null ? Color.white : ultraFarLandColor;
-
-        ultraFarLandMat.SetColor(UltraFarBaseColorId, baseColor);
-        ultraFarLandMatDark.SetColor(UltraFarBaseColorId,
-            IsUnlockOverlayActive ? baseColor * unacquiredTint : baseColor);
+        ultraFarLandMat.SetColor(TerrainTintId, Color.white);
+        ultraFarLandMatDark.SetColor(TerrainTintId,
+            IsUnlockOverlayActive ? unacquiredTint : Color.white);
     }
 
     /// <summary>
