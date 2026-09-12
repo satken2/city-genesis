@@ -90,6 +90,22 @@ export type CreditEntry = {
  */
 export const CREDIT_ENTRIES: CreditEntry[] = [
   {
+    title: "trash.wav",
+    category: "sfx",
+    author: "dullbananas",
+    source: "Freesound",
+    url: "https://freesound.org/s/540877/",
+    license: "CC BY 3.0",
+    requiredText: '"trash.wav" by dullbananas (https://freesound.org/s/540877/) — licensed under CC BY 3.0',
+    note: "Removal click",
+  },
+  {
+    title: "SFX",
+    category: "sfx",
+    author: "Trinity Theatrical Studio",
+    note: "UI click",
+  },
+  {
     title: "Rock051 (崖の岩肌テクスチャ)",
     category: "texture",
     source: "ambientCG",
