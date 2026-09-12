@@ -62,6 +62,7 @@
     "CREATEPATH_ELEVATION_INTERSECTION": "Se detectó un cruce a desnivel. Ajusta la altura.",
     "PATH_TOO_FEW_POINTS": "Se requieren al menos 2 puntos.",
     "PATH_MAX_SPAN_EXCEEDED": "La distancia entre nodos es demasiado larga. Agrega puntos intermedios.",
-    "PATH_ELEVATION_CONFLICT": "Se detectó un cruce a desnivel. Ajusta la altura."
+    "PATH_ELEVATION_CONFLICT": "Se detectó un cruce a desnivel. Ajusta la altura.",
+    "INSUFFICIENT_FUNDS": "Fondos insuficientes para realizar este pedido."
   }
 }

@@ -15,6 +15,8 @@
     "supplyShortageMild": "도시의 건설 서비스 공급이 다소 부족합니다. 공사 기간이 추정보다 길어질 전망입니다.",
     "supplyShortageSevere": "이 도시는 건설업이 발달하지 않아 공사가 조금씩만 진행됩니다.",
     "budgetRatioNote": "다음 기 건설 예산의 {{percent}}%",
+    "availableFunds": "사용 가능한 자금",
+    "insufficientFunds": "자금이 부족하여 발주할 수 없습니다 (부족액 {{value}})",
     "constructionCostPerEpoch": "1에포크당 건설 비용",
     "demolitionCostPerEpoch": "1에포크당 철거 비용",
     "remainingConstruction": "남은 건설 기간",

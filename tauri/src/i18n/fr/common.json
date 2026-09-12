@@ -62,6 +62,7 @@
     "CREATEPATH_ELEVATION_INTERSECTION": "Un croisement à niveaux différents a été détecté. Ajustez la hauteur.",
     "PATH_TOO_FEW_POINTS": "Au moins 2 points sont requis.",
     "PATH_MAX_SPAN_EXCEEDED": "La distance entre les nœuds est trop grande. Ajoutez des points intermédiaires.",
-    "PATH_ELEVATION_CONFLICT": "Un croisement à niveaux différents a été détecté. Ajustez la hauteur."
+    "PATH_ELEVATION_CONFLICT": "Un croisement à niveaux différents a été détecté. Ajustez la hauteur.",
+    "INSUFFICIENT_FUNDS": "Fonds insuffisants pour passer cette commande."
   }
 }

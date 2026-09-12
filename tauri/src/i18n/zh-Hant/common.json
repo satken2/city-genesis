@@ -62,6 +62,7 @@
     "CREATEPATH_ELEVATION_INTERSECTION": "偵測到立體交叉。請調整高度。",
     "PATH_TOO_FEW_POINTS": "至少需要2個點。",
     "PATH_MAX_SPAN_EXCEEDED": "節點間距過長。請新增中間點。",
-    "PATH_ELEVATION_CONFLICT": "偵測到立體交叉。請調整高度。"
+    "PATH_ELEVATION_CONFLICT": "偵測到立體交叉。請調整高度。",
+    "INSUFFICIENT_FUNDS": "資金不足，無法下達建設指令。"
   }
 }

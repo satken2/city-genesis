@@ -62,6 +62,7 @@
     "CREATEPATH_ELEVATION_INTERSECTION": "An elevation intersection was detected. Please adjust the height.",
     "PATH_TOO_FEW_POINTS": "At least 2 points are required.",
     "PATH_MAX_SPAN_EXCEEDED": "The distance between nodes is too long. Please add intermediate points.",
-    "PATH_ELEVATION_CONFLICT": "An elevation intersection was detected. Please adjust the height."
+    "PATH_ELEVATION_CONFLICT": "An elevation intersection was detected. Please adjust the height.",
+    "INSUFFICIENT_FUNDS": "Insufficient funds to place this order."
   }
 }

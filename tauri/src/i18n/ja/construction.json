@@ -15,6 +15,8 @@
     "supplyShortageMild": "都市の建設サービスの供給がやや不足しています。工期が推定より延びる見込みです。",
     "supplyShortageSevere": "この都市では建設業が発展していないため、工事は少しずつしか進みません。",
     "budgetRatioNote": "来期の建設予算の {{percent}}%",
+    "availableFunds": "利用可能な資金",
+    "insufficientFunds": "資金が不足しているため発注できません（不足額 {{value}}）",
     "constructionCostPerEpoch": "1エポックの建設コスト",
     "demolitionCostPerEpoch": "1エポックの解体コスト",
     "remainingConstruction": "残り建設期間",

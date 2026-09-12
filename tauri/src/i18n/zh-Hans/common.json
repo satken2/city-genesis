@@ -62,6 +62,7 @@
     "CREATEPATH_ELEVATION_INTERSECTION": "检测到立体交叉。请调整高度。",
     "PATH_TOO_FEW_POINTS": "至少需要2个点。",
     "PATH_MAX_SPAN_EXCEEDED": "节点间距过长。请添加中间点。",
-    "PATH_ELEVATION_CONFLICT": "检测到立体交叉。请调整高度。"
+    "PATH_ELEVATION_CONFLICT": "检测到立体交叉。请调整高度。",
+    "INSUFFICIENT_FUNDS": "资金不足，无法下达建设指令。"
   }
 }

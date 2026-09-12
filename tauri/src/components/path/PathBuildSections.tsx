@@ -22,6 +22,7 @@ import { StationHouseEndsSelect } from "./StationHouseEndsSelect";
 import { useTranslation } from "react-i18next";
 import { NumberStepper } from "../common/NumberStepper";
 import { ConstructionInfoCard } from "../common/ConstructionInfoCard";
+import { isConstructionAffordable } from "../../utils/constructionFunding";
 import { GridSettingsPanel } from "./GridSettingsPanel";
 import type { GridDisplayMode } from "./GridSettingsPanel";
 import { FOLLOW_TERRAIN_UNSET, usePathConstruction } from "./usePathConstruction";
@@ -283,6 +284,8 @@ export function PathBuildSections({
               estimatedDurationDays={pc.estimatedDurationDays}
               isCostLoading={pc.isCostLoading}
               nextEpochConstructionBudget={pc.nextEpochConstructionBudget}
+              availableFunds={pc.availableFunds}
+              requiredTotal={pc.estimatedCost}
               supplyRatio={pc.supplyRatio}
               expectedDurationDays={pc.expectedDurationDays}
             />
@@ -303,7 +306,12 @@ export function PathBuildSections({
             </button>
             <button
               className="pc-btn pc-btn-confirm"
-              disabled={pc.nodes.length < 2 || isConfirming}
+              // 資金不足(推定総額 > 利用可能額)は確定させない。バックエンドも同じ基準で拒否する。
+              disabled={
+                pc.nodes.length < 2
+                || isConfirming
+                || !isConstructionAffordable(pc.estimatedCost, pc.availableFunds)
+              }
               type="button"
               onClick={onConfirm}
             >

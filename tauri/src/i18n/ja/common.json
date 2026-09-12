@@ -62,6 +62,7 @@
     "CREATEPATH_ELEVATION_INTERSECTION": "立体交差が検出されました。高さを変更してください。",
     "PATH_TOO_FEW_POINTS": "2点以上のポイントが必要です。",
     "PATH_MAX_SPAN_EXCEEDED": "ノード間の距離が長すぎます。中間点を追加してください。",
-    "PATH_ELEVATION_CONFLICT": "立体交差が検出されました。高さを変更してください。"
+    "PATH_ELEVATION_CONFLICT": "立体交差が検出されました。高さを変更してください。",
+    "INSUFFICIENT_FUNDS": "資金が不足しているため発注できません。"
   }
 }

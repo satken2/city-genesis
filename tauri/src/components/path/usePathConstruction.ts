@@ -224,6 +224,8 @@ export function usePathConstruction(
   const [costPerSimulationDays, setCostPerSimulationDays] = useState<number | null>(null);
   const [costSimulationDays, setCostSimulationDays] = useState<number | null>(null);
   const [nextEpochConstructionBudget, setNextEpochConstructionBudget] = useState<number | null>(null);
+  // 発注に使える市の資金(現預金 − 貯蓄目標 − 既存案件の拘束額)。資金審査の先回り表示に使う。
+  const [availableFunds, setAvailableFunds] = useState<number | null>(null);
   // 建設サービス財の調達充足率(0〜1)と、それを織り込んだ見込み建設期間(日)。
   // 複線は最も条件の悪い線に合わせる(充足率=最小、見込み期間=最長)。
   const [supplyRatio, setSupplyRatio] = useState<number | null>(null);
@@ -536,6 +538,7 @@ export function usePathConstruction(
     setCostPerSimulationDays(null);
     setCostSimulationDays(null);
     setNextEpochConstructionBudget(null);
+      setAvailableFunds(null);
     sendChangeState("STATE_EDIT_PATH", {
       path_type: variantData?.type ?? null,
       path_variant: selectedVariant,
@@ -1034,6 +1037,7 @@ export function usePathConstruction(
       setCostPerSimulationDays(null);
       setCostSimulationDays(null);
       setNextEpochConstructionBudget(null);
+      setAvailableFunds(null);
       setSupplyRatio(null);
       setExpectedDurationDays(null);
       setIsCostLoading(false);
@@ -1099,6 +1103,8 @@ export function usePathConstruction(
           : null);
         setCostSimulationDays(results[0]?.simulation_days ?? null);
         setNextEpochConstructionBudget(results[0]?.next_epoch_construction_budget ?? null);
+        // 利用可能額は都市全体の値なので全線で同じ。先頭の値を採用する。
+        setAvailableFunds(results[0]?.available_funds ?? null);
         // 充足率は最も低い線を採用する(全線が同じ地区の建設代理エージェントを共有するため、
         // 実際の按分は線ごとに大差ないが、悲観側に寄せて警告の取り逃しを防ぐ)。
         setSupplyRatio(results.some((r) => r.construction_supply_ratio != null)
@@ -1122,6 +1128,7 @@ export function usePathConstruction(
           setCostPerSimulationDays(null);
           setCostSimulationDays(null);
           setNextEpochConstructionBudget(null);
+      setAvailableFunds(null);
           setSupplyRatio(null);
           setExpectedDurationDays(null);
         }
@@ -1181,6 +1188,7 @@ export function usePathConstruction(
     costPerSimulationDays,
     costSimulationDays,
     nextEpochConstructionBudget,
+    availableFunds,
     supplyRatio,
     expectedDurationDays,
     isCostLoading,

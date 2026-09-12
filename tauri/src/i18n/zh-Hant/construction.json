@@ -15,6 +15,8 @@
     "supplyShortageMild": "城市的建設服務供給略顯不足。工期預計將比估算更長。",
     "supplyShortageSevere": "本市的營建業尚未發達，工程只能一點一點推進。",
     "budgetRatioNote": "下期建設預算的 {{percent}}%",
+    "availableFunds": "可用資金",
+    "insufficientFunds": "資金不足，無法下達建設指令（缺口 {{value}}）",
     "constructionCostPerEpoch": "每紀元建設成本",
     "demolitionCostPerEpoch": "每紀元拆除成本",
     "remainingConstruction": "剩餘工期",

@@ -51,6 +51,7 @@ import { useMasterData } from "../../contexts/MasterDataContext";
 import { NumberStepper } from "../common/NumberStepper";
 
 import { ConstructionInfoCard } from "../common/ConstructionInfoCard";
+import { isConstructionAffordable } from "../../utils/constructionFunding";
 import { BuildingFacilityInfoCard } from "./BuildingFacilityInfoCard";
 import { showNotification } from "../../utils/notification";
 import { BUILDING_PUBLIC, VARIANT_CITY } from "../../constants";
@@ -146,6 +147,12 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
   // 充足率が低い都市では建設が推定期間どおりに進まないため、警告表示に使う。
   const [supplyRatio, setSupplyRatio] = useState<number | null>(null);
   const [expectedDurationDays, setExpectedDurationDays] = useState<number | null>(null);
+  // 発注に使える市の資金(現預金 − 貯蓄目標 − 既存案件の拘束額)。資金審査の先回り表示に使う。
+  const [availableFunds, setAvailableFunds] = useState<number | null>(null);
+  // 資金審査の必要総額 = 建設費 + 直接配置の用地買収見積(民間区画の自動買収も市の支出)。
+  const requiredTotal =
+    estimatedCost == null ? null : estimatedCost + (directAcquisition?.estimatedCost ?? 0);
+  const isAffordable = isConstructionAffordable(requiredTotal, availableFunds);
   // TYPE_STANDARD(一般施設)のときのみ返る、最大稼働時の推定生産量・雇用人数・稼働コスト(いずれもsimulation_daysあたり)。
   const [estimatedMaxProduction, setEstimatedMaxProduction] = useState<number | null>(null);
   const [estimatedEmployment, setEstimatedEmployment] = useState<number | null>(null);
@@ -473,6 +480,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       setEstimatedStandardCost(null);
       setEstimatedDurationDays(null);
       setSupplyRatio(null);
+      setAvailableFunds(null);
       setExpectedDurationDays(null);
       setEstimatedMaxProduction(null);
       setEstimatedEmployment(null);
@@ -509,6 +517,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
           setEstimatedStandardCost(data.standard_construction_cost ?? null);
           setEstimatedDurationDays(data.estimated_duration_days ?? null);
           setSupplyRatio(data.construction_supply_ratio ?? null);
+          setAvailableFunds(data.available_funds ?? null);
           setExpectedDurationDays(data.expected_duration_days ?? null);
           // 生産系の項目はTYPE_STANDARDのときのみ返るため、未定義なら null にリセットする。
           setEstimatedMaxProduction(data.estimated_max_production ?? null);
@@ -527,6 +536,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
           setEstimatedStandardCost(null);
           setEstimatedDurationDays(null);
           setSupplyRatio(null);
+          setAvailableFunds(null);
           setExpectedDurationDays(null);
           setEstimatedMaxProduction(null);
           setEstimatedEmployment(null);
@@ -786,6 +796,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         setEstimatedStandardCost(data.standard_construction_cost ?? null);
         setEstimatedDurationDays(data.estimated_duration_days ?? null);
         setSupplyRatio(data.construction_supply_ratio ?? null);
+        setAvailableFunds(data.available_funds ?? null);
         setExpectedDurationDays(data.expected_duration_days ?? null);
         setEstimatedMaxProduction(data.estimated_max_production ?? null);
         setEstimatedEmployment(data.estimated_employment ?? null);
@@ -1763,6 +1774,8 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
             isCostLoading={isCostLoading}
             supplyRatio={supplyRatio}
             expectedDurationDays={expectedDurationDays}
+            availableFunds={availableFunds}
+            requiredTotal={requiredTotal}
           />
         </div>
       )}
@@ -1823,12 +1836,14 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
               // 区画モードは区画選択済み、直接配置モードは設置可能(directValid)、または
               // 民間区画の自動買収で解消できる(directRequiresAcquisition)なら確定できる。
               // コピーモードは区画選択済みかつフットプリントが収まる(copyValid)なら確定できる。
+              // 資金不足(建設費+用地買収見積 > 利用可能額)は確定させない。バックエンドも同じ基準で拒否する。
               disabled={
-                isDirectMode
+                !isAffordable
+                || (isDirectMode
                   ? !directPreviewReady || !(directValid || directRequiresAcquisition)
                   : isCopyMode
                     ? parcelId === null || !copyValid
-                    : parcelId === null
+                    : parcelId === null)
               }
               type="button"
               onClick={async () => {
