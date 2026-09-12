@@ -1,0 +1,10 @@
+{
+  "satisfaction": {
+    "exhausted": "げっそり",
+    "unhappy": "不満",
+    "neutral": "ふつう",
+    "happy": "満足",
+    "delighted": "大満足",
+    "zero": "満足度ゼロ"
+  }
+}

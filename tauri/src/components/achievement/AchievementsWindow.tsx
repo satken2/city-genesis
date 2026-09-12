@@ -7,6 +7,8 @@ import { ScenarioInfoSection } from "./ScenarioInfoSection";
 import type { Quest, QuestClauseState } from "../../types";
 import { ResponsiveContainer, ComposedChart, Bar, Line, CartesianGrid, ReferenceLine, XAxis, YAxis, Tooltip } from "recharts";
 import { resolveIntlLocale } from "../../utils/locale";
+import { SatisfactionFace, getSatisfactionAppearance } from "../common/SatisfactionFace";
+import { Meter } from "../common/Meter";
 import "./AchievementsWindow.css";
 
 type QuestsResponse = {
@@ -185,6 +187,7 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     { key: "avgEntertainment", hint: "entertainmentHint", value: latest.city_score_avg_entertainment },
     { key: "avgEnv", hint: "envHint", value: latest.city_score_avg_env },
   ] : [];
+  const overallSatisfaction = getSatisfactionAppearance((latest?.city_score_per_household ?? 0) / MAX_SCORE_PER_HOUSEHOLD);
   const order: Record<string, number> = { active: 0, locked: 1, completed: 2, failed: 3 };
   const orderedQuests = [...quests].sort((a, b) => order[a.status] - order[b.status]);
   // 内訳は減点前の値。減点を負方向に描き、確定済みスコアを線で示す。
@@ -357,8 +360,25 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
           <div className="resident-score-summary">
             <div className="resident-score-main">
               <span>{t("achievements.perHouseholdScore")}</span>
-              <div><strong>{hasHouseholds ? fmt(latest.city_score_per_household, 2) : "—"}</strong><span> / {fmt(MAX_SCORE_PER_HOUSEHOLD)} {t("achievements.points")}</span></div>
-              <p>{t(hasHouseholds ? "achievements.perHouseholdHint" : "achievements.noHouseholds")}</p>
+              {hasHouseholds ? <div className="resident-score-gauge-row">
+                <div className="resident-score-gauge" role="meter"
+                  aria-label={t("achievements.perHouseholdScore")} aria-valuemin={0} aria-valuemax={2}
+                  aria-valuenow={latest.city_score_per_household}
+                  aria-valuetext={`${fmt(latest.city_score_per_household, 2)} / 2 ${t("achievements.points")}`}>
+                  <svg viewBox="0 0 160 90" aria-hidden="true">
+                    <path d="M 12 80 A 68 68 0 0 1 148 80" pathLength={100} className="resident-score-gauge__track" />
+                    <path d="M 12 80 A 68 68 0 0 1 148 80" pathLength={100}
+                      fill="none" stroke={overallSatisfaction.color} strokeWidth={16}
+                      strokeDasharray={`${overallSatisfaction.fraction * 100} 100`} />
+                  </svg>
+                  <div className="resident-score-gauge__value">
+                    <strong style={{ color: overallSatisfaction.color }}>{fmt(overallSatisfaction.fraction * 100, 0)}<small>%</small></strong>
+                    <span>{fmt(latest.city_score_per_household, 2)} / {fmt(MAX_SCORE_PER_HOUSEHOLD)} {t("achievements.points")}</span>
+                  </div>
+                </div>
+                <SatisfactionFace value={overallSatisfaction.fraction} size={44} />
+              </div> : <div className="resident-score-unavailable">—</div>}
+              {!hasHouseholds && <p>{t("achievements.noHouseholds")}</p>}
             </div>
             <div className="resident-score-total">
               <span>{t("achievements.currentScore")}</span>
@@ -368,7 +388,6 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                 <div><dt>{t("achievements.envScore")}</dt><dd>+{fmt(latest.city_score_env)}</dd></div>
                 <div className="resident-score-penalty"><dt>{t("achievements.collapsePenalty")}</dt><dd>{latest.city_score_collapse_penalty > 0 ? "−" : ""}{fmt(latest.city_score_collapse_penalty)}</dd></div>
               </dl>
-              <small>{t("achievements.householdCount")}: {fmt(latest.city_score_household_count)} {t("achievements.households")}</small>
             </div>
           </div>
           <section className="resident-score-history">
@@ -376,7 +395,6 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
             <div className="resident-score-modes" role="group" aria-label={t("achievements.scoreHistory")}>
               {(["household", "total"] as const).map((mode) => <button key={mode} type="button" aria-pressed={historyMode === mode} onClick={() => setHistoryMode(mode)}>{t(mode === "household" ? "achievements.perHouseholdScore" : "achievements.currentScore")}</button>)}
             </div>
-            <p className="achieve-dashboard__hint">{t("achievements.historyHint")}</p>
             <div className="resident-score-legend">
               <span style={{ color: "var(--flat-accent)" }}>■ {t("achievements.qolScore")}</span>
               <span style={{ color: "var(--flat-good)" }}>■ {t("achievements.envScore")}</span>
@@ -401,12 +419,19 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
           </section>
           <section className="resident-satisfaction">
             <h3>{t("achievements.satisfactionTitle")}</h3>
-            <p className="achieve-dashboard__hint">{t("achievements.satisfactionHint")}</p>
-            {hasHouseholds ? satisfaction.map((item) => <div className="resident-satisfaction-row" key={item.key}>
-              <div><span>{t(`achievements.${item.key}`)}</span><strong>{fmt(item.value * 100, 0)}%</strong></div>
-              <meter min={0} max={1} value={item.value} aria-label={t(`achievements.${item.key}`)} />
-              <small>{t(`achievements.${item.hint}`)}</small>
-            </div>) : <p className="achieve-dashboard__hint">{t("achievements.noHouseholds")}</p>}
+            {hasHouseholds ? satisfaction.map((item) => {
+              const appearance = getSatisfactionAppearance(item.value);
+              return <div className="resident-satisfaction-row" key={item.key}>
+                <div className="resident-satisfaction-row__body">
+                  <div className="resident-satisfaction-row__label"><span>{t(`achievements.${item.key}`)}</span><strong>{fmt(appearance.fraction * 100, 0)}%</strong></div>
+                  <div role="meter" aria-label={t(`achievements.${item.key}`)} aria-valuemin={0} aria-valuemax={100} aria-valuenow={appearance.fraction * 100}>
+                    <Meter value={appearance.fraction} color={appearance.color} />
+                  </div>
+                  <small>{t(`achievements.${item.hint}`)}</small>
+                </div>
+                <SatisfactionFace value={appearance.fraction} size={34} />
+              </div>;
+            }) : <p className="achieve-dashboard__hint">{t("achievements.noHouseholds")}</p>}
           </section>
           <details className="resident-disasters">
             <summary>{t("achievements.disasterList")} ({latest.collapse_events.length})</summary>

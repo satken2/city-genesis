@@ -1,0 +1,10 @@
+{
+  "satisfaction": {
+    "exhausted": "疲憊不堪",
+    "unhappy": "不滿",
+    "neutral": "普通",
+    "happy": "滿意",
+    "delighted": "非常滿意",
+    "zero": "滿意度為零"
+  }
+}

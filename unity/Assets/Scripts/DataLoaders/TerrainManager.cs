@@ -75,7 +75,7 @@ public class TerrainManager : BaseApiDataManager
     /// 通常のテクスチャ付き地面に unacquiredTint を乗算した「少し暗い地面」で描画される。
     /// false の場合は全域が通常色になる。
     /// </summary>
-    public bool IsUnlockOverlayActive { get; private set; } = true;
+    public bool IsUnlockOverlayActive { get; private set; } = false;
 
     [Header("セル境界線・座標ラベル表示")]
     [SerializeField] private float cellLabelYOffset = 2.0f;
@@ -86,7 +86,7 @@ public class TerrainManager : BaseApiDataManager
     /// セル境界線と座標ラベルの表示が有効かどうか。
     /// ToggleUnlockOverlay と連動し、同じボタンで一括制御する。
     /// </summary>
-    public bool ShowCellBordersAndLabels { get; private set; } = true;
+    public bool ShowCellBordersAndLabels { get; private set; } = false;
 
     // セルオーバーレイ（境界線）を OverlayMeshRenderer で描画するための状態
     private GameObject cellOverlayMeshObj;
@@ -535,10 +535,7 @@ public class TerrainManager : BaseApiDataManager
     {
         Shader.SetGlobalFloat("_ShowContour", 0f);
 
-        // ゲーム開始時に自動的にセル境界表示（オーバーレイおよび枠線・ラベル）をONにする。
-        // これにより、起動直後から解放済みのセル境界と座標ラベルが正しく表示される。
-        IsUnlockOverlayActive = true;
-        ShowCellBordersAndLabels = true;
+        // 暗色表示と境界線・ラベルは初期状態では非表示とし、手動切替の状態を反映する。
         RefreshAllUnlockOverlays();
         RefreshAllCellOverlays();
 

@@ -33,6 +33,8 @@
 
 ## 地形の関連機能
 
+`IsUnlockOverlayActive` と `ShowCellBordersAndLabels` の初期値はfalse。`Start`ではオンへ上書きせず、`ToggleUnlockOverlay`による手動の一括切替を維持する。セル開放モードへの自動連動は行わない。
+
 遠景の沈み込みは `UltraFarTerrainSink.hlsl` をForward・Shadow・GBuffer・Depth・DepthNormalsで共用する。`_FarGridStep` はビルダーと同じ格子間隔（最低1m）を渡す。頂点の周囲1格子分が全てロード済みの場合だけ沈め、境界をまたぐ面は元の高さに残す。頂点自身のセルだけで沈めると三角形の補間が未ロード側も引き下げ、海が見える裂け目を作る。`Tests/TerrainAppearance/run-unity.ps1` が境界・アンロード・領域移動と内部沈み込みを描画検証する。
 
 通常TerrainとUltraFarメッシュは `Assets/Shaders/TerrainSurfaceAppearance.hlsl` の手続き地表色・ディテール法線・岩肌・PBR照明を共用する。設定は両方とも `TerrainManager.ApplyTerrainMaterialSettings` から渡す。UltraFarのシェーダー名 `Custom/DepthOffsetSimpleLitFar` は既存参照のため維持しているが、Forwardの照明はPBRである。未開放色は両方とも照明・霧の後の `_TerrainTint` 乗算。遠景だけ `_BaseColor` で暗くすると霧・手続き色への作用が変わるため使わない。地形の色を調整するときは遠景にも反映し、`Tests/TerrainAppearance/run-unity.ps1` で比較描画を確認する。

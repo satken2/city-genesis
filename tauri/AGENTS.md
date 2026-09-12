@@ -20,6 +20,7 @@ Unityのグラフィックの上に透明なWebViewウィンドウとして重�
   - App.tsx            ... 全ウィンドウのエントリポイント(ラベルで分岐)
   - components/        ... ドメイン別のUIコンポーネント(詳細はcomponents/AGENTS.md)
   - contexts/          ... MasterDataContext(マスターデータ), FontSizeContext
+  - data/              ... UI内に静的に持つ掲載データ(credits.ts=クレジット表示の掲載内容)
   - hooks/             ... 共通Reactフック(useTemplateMode=テンプレートモード判定, useConstructionBudgetRow=建設中/解体中の1エポックコスト・残りエポック数の取得)
   - utils/             ... 共通処理(下記の一覧参照)
   - i18n/              ... 多言語リソース(言語ディレクトリごとにドメイン別JSONを配置。index.tsがglobで集約)
