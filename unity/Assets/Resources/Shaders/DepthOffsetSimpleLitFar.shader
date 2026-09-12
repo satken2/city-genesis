@@ -5,9 +5,8 @@
 //   海面(Custom/DepthOffsetLit, Offset -1,-1)よりも奥なので、海岸の縁でも海面が正しく手前に出る。
 // 地表の手続き色・岩肌・PBR照明をTerrainと共用する。SimpleLitの頂点入力と補助パスを利用する。
 // 未開放セルはTerrainと同じく、照明・霧の適用後に _TerrainTint を乗算する。
-// 沈み込み: per-cell タイルがロード済みのセルでは頂点を _FarSinkAmount(既定50m)地中に沈め、
-//   タイルへの突き抜け(特に near_map 由来タイルとの起伏差)を隠す。判定は TerrainManager が
-//   毎フレーム更新するロード済みセルマスク(_LoadedCellMask、1セル=1テクセル)を頂点シェーダーで参照する。
+// 沈み込みは接続する三角形全体がロード済み範囲に収まる頂点だけに適用する。
+// 境界をまたぐ面を下げると未ロード側まで海面下へ引き込むため、外周に重なりを残す。
 Shader "Custom/DepthOffsetSimpleLitFar"
 {
     // Keep properties of StandardSpecular shader for upgrade reasons.
@@ -22,6 +21,7 @@ Shader "Custom/DepthOffsetSimpleLitFar"
         _LoadedCellMaskParams("Loaded Cell Mask Params", Vector) = (0, 0, 0, 0) // x:1/cellSize y:offsetX z:offsetY
         _LoadedCellMaskTexel("Loaded Cell Mask Texel", Vector) = (0, 0, 0, 0)   // x:1/cellsX y:1/cellsY
         _FarSinkAmount("Far Sink Amount", Float) = 100.0
+        _FarGridStep("Far Grid Step (m)", Float) = 80.0
 
         _TerrainMacroVariationStrength("Macro Variation Strength", Range(0.0, 0.5)) = 0.12
         _TerrainMacroVariationScale("Macro Variation Scale", Float) = 350.0
@@ -221,21 +221,7 @@ Shader "Custom/DepthOffsetSimpleLitFar"
                 outColor.rgb *= (half3)_TerrainTint.rgb;
             }
 
-            TEXTURE2D(_LoadedCellMask);
-            SAMPLER(sampler_LoadedCellMask);
-            float4 _LoadedCellMaskParams; // x: 1/cellSize, y: セルオフセットX, z: セルオフセットY
-            float4 _LoadedCellMaskTexel;  // x: 1/セル数X, y: 1/セル数Y
-            float _FarSinkAmount;
-
-            // per-cellタイルがロード済みのセルでは頂点を _FarSinkAmount 沈めてタイルへの突き抜けを隠す。
-            // メッシュは原点固定なのでオブジェクト座標=ワールド座標として扱える。
-            void ApplyFarSink(inout float3 positionOS)
-            {
-                float2 cellIdx = floor(positionOS.xz * _LoadedCellMaskParams.x) + _LoadedCellMaskParams.yz;
-                float2 uv = (cellIdx + 0.5) * _LoadedCellMaskTexel.xy;
-                float mask = SAMPLE_TEXTURE2D_LOD(_LoadedCellMask, sampler_LoadedCellMask, uv, 0).r;
-                positionOS.y -= step(0.5, mask) * _FarSinkAmount;
-            }
+            #include "Assets/Shaders/UltraFarTerrainSink.hlsl"
 
             Varyings VertForwardFar(Attributes input)
             {
@@ -291,21 +277,7 @@ Shader "Custom/DepthOffsetSimpleLitFar"
             #include "Packages/com.unity.render-pipelines.universal/Shaders/SimpleLitInput.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/Shaders/ShadowCasterPass.hlsl"
 
-            TEXTURE2D(_LoadedCellMask);
-            SAMPLER(sampler_LoadedCellMask);
-            float4 _LoadedCellMaskParams; // x: 1/cellSize, y: セルオフセットX, z: セルオフセットY
-            float4 _LoadedCellMaskTexel;  // x: 1/セル数X, y: 1/セル数Y
-            float _FarSinkAmount;
-
-            // per-cellタイルがロード済みのセルでは頂点を _FarSinkAmount 沈めてタイルへの突き抜けを隠す。
-            // メッシュは原点固定なのでオブジェクト座標=ワールド座標として扱える。
-            void ApplyFarSink(inout float3 positionOS)
-            {
-                float2 cellIdx = floor(positionOS.xz * _LoadedCellMaskParams.x) + _LoadedCellMaskParams.yz;
-                float2 uv = (cellIdx + 0.5) * _LoadedCellMaskTexel.xy;
-                float mask = SAMPLE_TEXTURE2D_LOD(_LoadedCellMask, sampler_LoadedCellMask, uv, 0).r;
-                positionOS.y -= step(0.5, mask) * _FarSinkAmount;
-            }
+            #include "Assets/Shaders/UltraFarTerrainSink.hlsl"
 
             Varyings VertShadowFar(Attributes input)
             {
@@ -395,21 +367,7 @@ Shader "Custom/DepthOffsetSimpleLitFar"
             #include "Packages/com.unity.render-pipelines.universal/Shaders/SimpleLitInput.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/Shaders/SimpleLitGBufferPass.hlsl"
 
-            TEXTURE2D(_LoadedCellMask);
-            SAMPLER(sampler_LoadedCellMask);
-            float4 _LoadedCellMaskParams; // x: 1/cellSize, y: セルオフセットX, z: セルオフセットY
-            float4 _LoadedCellMaskTexel;  // x: 1/セル数X, y: 1/セル数Y
-            float _FarSinkAmount;
-
-            // per-cellタイルがロード済みのセルでは頂点を _FarSinkAmount 沈めてタイルへの突き抜けを隠す。
-            // メッシュは原点固定なのでオブジェクト座標=ワールド座標として扱える。
-            void ApplyFarSink(inout float3 positionOS)
-            {
-                float2 cellIdx = floor(positionOS.xz * _LoadedCellMaskParams.x) + _LoadedCellMaskParams.yz;
-                float2 uv = (cellIdx + 0.5) * _LoadedCellMaskTexel.xy;
-                float mask = SAMPLE_TEXTURE2D_LOD(_LoadedCellMask, sampler_LoadedCellMask, uv, 0).r;
-                positionOS.y -= step(0.5, mask) * _FarSinkAmount;
-            }
+            #include "Assets/Shaders/UltraFarTerrainSink.hlsl"
 
             Varyings VertGBufferFar(Attributes input)
             {
@@ -461,21 +419,7 @@ Shader "Custom/DepthOffsetSimpleLitFar"
             #include "Packages/com.unity.render-pipelines.universal/Shaders/SimpleLitInput.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/Shaders/DepthOnlyPass.hlsl"
 
-            TEXTURE2D(_LoadedCellMask);
-            SAMPLER(sampler_LoadedCellMask);
-            float4 _LoadedCellMaskParams; // x: 1/cellSize, y: セルオフセットX, z: セルオフセットY
-            float4 _LoadedCellMaskTexel;  // x: 1/セル数X, y: 1/セル数Y
-            float _FarSinkAmount;
-
-            // per-cellタイルがロード済みのセルでは頂点を _FarSinkAmount 沈めてタイルへの突き抜けを隠す。
-            // メッシュは原点固定なのでオブジェクト座標=ワールド座標として扱える。
-            void ApplyFarSink(inout float3 positionOS)
-            {
-                float2 cellIdx = floor(positionOS.xz * _LoadedCellMaskParams.x) + _LoadedCellMaskParams.yz;
-                float2 uv = (cellIdx + 0.5) * _LoadedCellMaskTexel.xy;
-                float mask = SAMPLE_TEXTURE2D_LOD(_LoadedCellMask, sampler_LoadedCellMask, uv, 0).r;
-                positionOS.y -= step(0.5, mask) * _FarSinkAmount;
-            }
+            #include "Assets/Shaders/UltraFarTerrainSink.hlsl"
 
             Varyings VertDepthOnlyFar(Attributes input)
             {
@@ -531,21 +475,7 @@ Shader "Custom/DepthOffsetSimpleLitFar"
             #include "Packages/com.unity.render-pipelines.universal/Shaders/SimpleLitInput.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/Shaders/SimpleLitDepthNormalsPass.hlsl"
 
-            TEXTURE2D(_LoadedCellMask);
-            SAMPLER(sampler_LoadedCellMask);
-            float4 _LoadedCellMaskParams; // x: 1/cellSize, y: セルオフセットX, z: セルオフセットY
-            float4 _LoadedCellMaskTexel;  // x: 1/セル数X, y: 1/セル数Y
-            float _FarSinkAmount;
-
-            // per-cellタイルがロード済みのセルでは頂点を _FarSinkAmount 沈めてタイルへの突き抜けを隠す。
-            // メッシュは原点固定なのでオブジェクト座標=ワールド座標として扱える。
-            void ApplyFarSink(inout float3 positionOS)
-            {
-                float2 cellIdx = floor(positionOS.xz * _LoadedCellMaskParams.x) + _LoadedCellMaskParams.yz;
-                float2 uv = (cellIdx + 0.5) * _LoadedCellMaskTexel.xy;
-                float mask = SAMPLE_TEXTURE2D_LOD(_LoadedCellMask, sampler_LoadedCellMask, uv, 0).r;
-                positionOS.y -= step(0.5, mask) * _FarSinkAmount;
-            }
+            #include "Assets/Shaders/UltraFarTerrainSink.hlsl"
 
             Varyings VertDepthNormalsFar(Attributes input)
             {

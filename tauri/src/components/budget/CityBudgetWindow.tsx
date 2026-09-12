@@ -138,10 +138,20 @@ const FORECAST_LOOKBACK = 6;
 /** 将来予測を描く先のエポック数 */
 const FORECAST_HORIZON = 4;
 
-/** 現金推移グラフの色。実績=濃い水色、現在=明るい水色、予測=灰色の点線。 */
-const COLOR_RESERVES_ACTUAL = "#0284c7";
-const COLOR_RESERVES_CURRENT = "#38bdf8";
-const COLOR_RESERVES_FORECAST = "#94a3b8";
+/** 現金推移グラフの色。実績=濃い青、現在=アクセント色、予測=灰色の点線。 */
+const COLOR_RESERVES_ACTUAL = "#2c5687";
+const COLOR_RESERVES_CURRENT = "#4ea1ff";
+const COLOR_RESERVES_FORECAST = "#6b8299";
+
+/**
+ * グラフの軸・グリッドの色。フラット意匠の共通トークン(App.cssの --flat-*)と同値だが、
+ * rechartsはCSS変数を解決できない(SVG属性へ直接渡すため)ので直値で持つ。
+ */
+const CHART_AXIS_TEXT = "#a4bccc";
+const CHART_AXIS_LINE = "#2c3646";
+const CHART_GRID_LINE = "#22303f";
+const CHART_CURSOR_FILL = "rgba(78, 161, 255, 0.08)";
+const CHART_ZERO_LINE = "#ff9a9a";
 
 /** 収支バランスの棒(X軸カテゴリ)の識別子 */
 const BALANCE_ROW_REVENUE = "revenue";
@@ -958,19 +968,19 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                   data={reservesChartData}
                   margin={{ top: 4, right: 16, left: 0, bottom: 0 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_LINE} vertical={false} />
                   <XAxis
                     dataKey="label"
-                    tick={{ fontSize: 10, fill: "#94a3b8" }}
+                    tick={{ fontSize: 10, fill: CHART_AXIS_TEXT }}
                     tickLine={false}
-                    stroke="rgba(255,255,255,0.15)"
+                    stroke={CHART_AXIS_LINE}
                   />
                   <YAxis
-                    tick={{ fontSize: 10, fill: "#94a3b8" }}
+                    tick={{ fontSize: 10, fill: CHART_AXIS_TEXT }}
                     tickLine={false}
                     width={52}
                     tickFormatter={(v) => formatCompactAmount(Number(v), locale, false)}
-                    stroke="rgba(255,255,255,0.15)"
+                    stroke={CHART_AXIS_LINE}
                   />
                   <RechartsTooltip
                     content={
@@ -984,11 +994,11 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                         }
                       />
                     }
-                    cursor={{ fill: "rgba(255, 255, 255, 0.04)" }}
+                    cursor={{ fill: CHART_CURSOR_FILL }}
                   />
                   <Legend wrapperStyle={{ fontSize: 10 }} />
                   {/* 債務超過(現預金マイナス)が一目でわかるようにゼロ線を引く */}
-                  <ReferenceLine y={0} stroke="rgba(248, 113, 113, 0.5)" />
+                  <ReferenceLine y={0} stroke={CHART_ZERO_LINE} />
                   {/* 実績と現在は同じ stackId に載せることで、同じX位置で1本の棒として描かれる */}
                   <Bar
                     dataKey="actual"
@@ -1121,19 +1131,19 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                     margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
                     barCategoryGap="28%"
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_LINE} vertical={false} />
                     <XAxis
                       dataKey="name"
-                      tick={{ fontSize: 11, fill: "#cbd5e1" }}
+                      tick={{ fontSize: 11, fill: CHART_AXIS_TEXT }}
                       tickLine={false}
-                      stroke="rgba(255,255,255,0.15)"
+                      stroke={CHART_AXIS_LINE}
                     />
                     <YAxis
-                      tick={{ fontSize: 10, fill: "#94a3b8" }}
+                      tick={{ fontSize: 10, fill: CHART_AXIS_TEXT }}
                       tickLine={false}
                       width={52}
                       tickFormatter={(v) => formatCompactAmount(Number(v), locale, false)}
-                      stroke="rgba(255,255,255,0.15)"
+                      stroke={CHART_AXIS_LINE}
                     />
                     <RechartsTooltip
                       content={

@@ -179,10 +179,8 @@ public class TerrainManager : BaseApiDataManager
     [SerializeField] private float ultraFarHeightOffset = 1.0f;
     /// <summary>
     /// UltraFar 陸地メッシュを「per-cellタイルがロード済みのセル」で地中に沈める量(m)。
-    /// UltraFar メッシュは far_map 由来の粗い起伏を持つため、near_map 由来の Near/Dynamic タイルとは
-    /// 起伏の激しい場所で数十mの高低差が生じ、タイルの上に突き出て斑点状に見える。
-    /// タイルが存在するセルはロード済みセルマスク(_LoadedCellMask)で頂点ごとに判定し、
-    /// この量だけ大胆に沈めて突き抜けを防ぐ(タイルの無いセルは沈めないため海色の穴は出ない)。
+    /// 粗い遠景標高と通常タイルの高さ差による突き抜けを防ぐ。
+    /// 接続する三角形までロード済み領域に収まる頂点だけを沈め、境界には重なりを残す。
     /// </summary>
     [SerializeField] private float ultraFarSinkAmount = 100f;
 
@@ -1215,6 +1213,8 @@ public class TerrainManager : BaseApiDataManager
         }
 
         // ロード済みセルでの沈み込み量。判定マスクは UpdateLoadedCellMask が毎フレーム供給する。
+        ultraFarLandMat.SetFloat("_FarGridStep", Mathf.Max(1f, ultraFarGridStep));
+        ultraFarLandMatDark.SetFloat("_FarGridStep", Mathf.Max(1f, ultraFarGridStep));
         ultraFarLandMat.SetFloat(FarSinkAmountId, ultraFarSinkAmount);
         ultraFarLandMatDark.SetFloat(FarSinkAmountId, ultraFarSinkAmount);
     }
@@ -1236,12 +1236,9 @@ public class TerrainManager : BaseApiDataManager
     /// <summary>
     /// ロード済みセルマスク(UltraFar沈み込み用)を terrainTiles の現状から再構築する。毎フレーム呼ばれる。
     ///
-    /// UltraFar 陸地メッシュは 常駐セルのタイルと物理的に重なっており、特に近景
-    /// (near_map 由来)タイルとは起伏の激しい場所で数十mの高低差が生じてタイルの上に突き出る。
-    /// これを防ぐため「タイルが実際にロードされている(可視の)セル」を1セル=1テクセルのR8マスクにして
-    /// UltraFar シェーダーへ渡し、頂点シェーダーがマスクの立っているセルの頂点を ultraFarSinkAmount(50m)
-    /// 沈める。タイルの無いセルは沈めないので、カメラ移動やロード遅延で海色の穴が開くことはない
-    /// (タイル未ロードの間は UltraFar がそのまま見えるだけ)。
+    /// 遠景と通常地形の高さ差による突き抜けを防ぐため、可視タイルのセルをR8マスクにする。
+    /// シェーダーは頂点の周囲1グリッド分も調べ、接続面がロード済み範囲内に収まる場合だけ
+    /// 地中へ沈める。境界をまたぐ面は元の高さに保ち、未ロード側が海面下へ下がるのを防ぐ。
     ///
     /// テクセル座標はバックエンドセル座標(0-based)。シェーダー側は floor(worldXZ/cellSize)+offset で
     /// 同じ変換を行う(UnityCellToBackendCell と同一の整数オフセット)。

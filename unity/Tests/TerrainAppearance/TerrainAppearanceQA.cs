@@ -73,6 +73,7 @@ public static class TerrainAppearanceQA
                 if (error > 3) throw new Exception(report);
                 if (b.All(x => x.r > 240 && x.b > 240 && x.g < 10)) throw new Exception("Error shader rendered");
             }
+            report += CheckLoadedBoundary(camera, terrainGO, farGO, far, root);
             foreach (var shader in new[] { near.shader, far.shader })
                 foreach (var message in ShaderUtil.GetShaderMessages(shader))
                     if (message.severity.ToString() == "Error") throw new Exception(shader.name + ": " + message.message);
@@ -84,6 +85,65 @@ public static class TerrainAppearanceQA
             File.WriteAllText(root + "/result.txt", "FAIL " + e);
             EditorApplication.Exit(1);
         }
+    }
+
+    static string CheckLoadedBoundary(Camera camera, GameObject terrainGO, GameObject farGO, Material far, string root)
+    {
+        RenderSettings.fog = false;
+        far.SetColor("_TerrainTint", Color.white);
+        terrainGO.GetComponent<Terrain>().materialTemplate.SetColor("_TerrainTint", Color.white);
+        terrainGO.transform.position = new Vector3(0, 20, 0);
+        camera.transform.position = new Vector3(100, 400, 100);
+        camera.orthographicSize = 250;
+        var sea = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        sea.transform.position = new Vector3(100, 0, 100);
+        sea.transform.localScale = Vector3.one * 100;
+        var seaMaterial = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+        seaMaterial.SetColor("_BaseColor", Color.blue);
+        sea.GetComponent<Renderer>().sharedMaterial = seaMaterial;
+
+        // セル幅200mに対して遠景格子80mとし、三角形がロード境界をまたぐ条件を再現する。
+        const int side = 9;
+        var vertices = new Vector3[side * side];
+        var triangles = new int[(side - 1) * (side - 1) * 6];
+        int t = 0;
+        for (int z = 0; z < side; z++)
+            for (int x = 0; x < side; x++)
+            {
+                int i = z * side + x;
+                vertices[i] = new Vector3(-220 + 80 * x, 20, -220 + 80 * z);
+                if (x == side - 1 || z == side - 1) continue;
+                triangles[t++] = i; triangles[t++] = i + side; triangles[t++] = i + 1;
+                triangles[t++] = i + 1; triangles[t++] = i + side; triangles[t++] = i + side + 1;
+            }
+        var mesh = new Mesh { vertices = vertices, triangles = triangles };
+        mesh.RecalculateNormals();
+        farGO.GetComponent<MeshFilter>().sharedMesh = mesh;
+        farGO.transform.position = Vector3.zero;
+        farGO.transform.localScale = Vector3.one;
+        farGO.SetActive(true);
+        var mask = new Texture2D(3, 3, TextureFormat.R8, false) { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp };
+        far.SetTexture("_LoadedCellMask", mask);
+        far.SetVector("_LoadedCellMaskParams", new Vector4(1 / 200f, 1, 1, 0));
+        far.SetVector("_LoadedCellMaskTexel", new Vector4(1 / 3f, 1 / 3f, 0, 0));
+        far.SetFloat("_FarGridStep", 80);
+        far.SetFloat("_FarSinkAmount", 100);
+        var report = "";
+        foreach (int state in new[] { 0, 1, 2, 3, 4, 5 })
+        {
+            var bytes = new byte[9];
+            if (state != 1) bytes[state == 3 ? 5 : state == 5 ? 3 : 4] = 255;
+            mask.SetPixelData(bytes, 0); mask.Apply();
+            terrainGO.SetActive(state != 1 && state != 2);
+            terrainGO.transform.position = new Vector3(state == 3 ? 200 : state == 5 ? -200 : 0, 20, 0);
+            far.SetFloat("_FarGridStep", state == 4 ? 1 : 80);
+            var pixels = Capture(camera, root + $"/boundary-{state}.png");
+            int seaPixels = pixels.Count(c => c.b > 150 && c.r < 30 && c.g < 30);
+            report += $"boundary state={state}: exposed sea pixels={seaPixels}\n";
+            // 状態2は内部の沈み込み確認。状態4は余白を縮め、境界の裂け目を再現する対照。
+            if (state == 2 || state == 4 ? seaPixels == 0 : seaPixels != 0) throw new Exception(report);
+        }
+        return report;
     }
 
     static Color32[] Capture(Camera camera, string path)
