@@ -34,6 +34,7 @@ public static class DrawLodStats
         RollWindow();
         generationMsWindow[(int)category] += ms;
         generationCountWindow[(int)category]++;
+        RenderWorkScheduler.CountEvent(category == Category.Building ? "building.generated" : "path.generated");
     }
 
     public static int GetObjectCount(Category category, DrawLod lod) => objectCounts[(int)category, (int)lod];

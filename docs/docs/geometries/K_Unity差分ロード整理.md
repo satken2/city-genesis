@@ -52,6 +52,33 @@
 
 ## ロード遅延の計測
 
+### カメラ移動時の再取得・再生成件数
+
+`UNITY_LOG_TIMING` が有効なら、既存の5秒ごとの `[TIMING] Scheduler` に `count/名前=件数` を追記する。物体ごとのログは出さず、各窓の報告後に件数をゼロへ戻す。無効時は件数を蓄積しない。
+
+| 名前 | 意味 |
+| --- | --- |
+| `camera.sameCells` / `camera.loadBatches` / `camera.changedCells` | 同一常駐集合で省略した通知数／更新バッチ数／変更セルの延べ数。バッチには明示リロードも含む |
+| `building.fetchExistingCells` / `path.fetchExistingCells` | 再取得要求へ含めたロード済みセル数。`fetchNewCells` は未ロード分。マージBBOXの外接範囲やHTTP要求数ではない |
+| `building.received` / `path.received` | ページ受信件数。途中キャンセル・再試行の受信分も含む |
+| `building.dataUnchanged` / `path.dataUnchanged` | 一覧の適用時に再生成不要と判定した件数 |
+| `building.lodScanned` / `path.lodScanned` / `roadSegment.lodScanned` | LOD走査へ渡した候補の延べ数。建物・道路本体は非表示等の早期除外候補も含む |
+| `building.deferredLodChanged` | 建物の遅延要求と生成直前の判定が異なった件数 |
+| `building.buildRequested` / `path.buildRequested` / `roadSegment.buildRequested` | 生成要求がキャッシュで解決できなかった件数。成功数ではない |
+| `building.generated` / `path.generated` | 既存のメッシュ生成時間計測へ報告された件数。道路の遅延区間は別の `roadSegment` 件数で読む |
+| `building.reuseActive` / `path.reuseActive` | 現在の管理オブジェクトをそのまま利用した件数（非表示からの復帰を含む） |
+| `building.reuseCached` / `path.reuseCached` / `roadSegment.reuseCached` | 退避キャッシュから復元した件数 |
+| `path.forceRebuildRequested` / `path.lodRebuildRequested` | 道路の強制形状更新／通常LOD切り替えの要求数。重複除外前の値 |
+| `path.terrainRebuildRequested` | 強制更新要求のうち地形追従由来の件数 |
+| `terrainFollow.interrupted` / `terrainFollow.requestedCells` | 更新バッチへの置換で中断した追従処理数／追従対象セルの延べ数 |
+| `renderCache.localEvicted` / `renderCache.globalEvicted` | 個別／全体メモリ上限で破棄した退避オブジェクト数 |
+
+追従処理の中断時は、新しい `LoadBatch#` に `FOLLOWUP_RESTART pendingCells=...` も出す。処理済み対象の一部が再実行される可能性を調べる入口であり、この値だけでは重複再生成数は確定しない。
+
+静止・回転だけ・平行移動・セル境界の往復をそれぞれ5秒以上記録する。`fetchExistingCells` と `dataUnchanged` が多ければ取得範囲の差分化、`terrainFollow.interrupted` と地形由来の強制更新が多ければ中断後の継続単位、退避破棄とキャッシュミスが多ければ保持容量を検討する。CPU時間・最大step・F8のp95/p99も合わせて判断する。全範囲取得は編集・エポック実行後の差分更新にも使うため、カメラ由来の取得だけを分けるには要求理由と取消し時の未完了セルを扱う必要がある。
+
+### 工程時間
+
 `LocalConstants.UNITY_LOG_TIMING` を有効にすると、Unity ConsoleとEditor.log（Windowsでは `%LOCALAPPDATA%/Unity/Editor/Editor.log`）、製品実行時はPlayer.logに計測を出す。建物パーツの大量ログは計測へ影響するため `UNITY_LOG_BUILDING` を無効にする。
 
 - `LoadBatch#` は同じ更新要求の経過時間を追う。START→TERRAIN_DONEが地形取得・適用、TERRAIN_DONE→FOLLOWUP_DONEが既存物の地形追従、PARCEL_START→PARCEL_DONEが区画待ちである。OBJECTS_STARTは建物・道路の取得開始であり、表示完了ではない。SUPERSEDED/RESETは後続要求への置換またはセッション終了で、表示失敗を意味しない。

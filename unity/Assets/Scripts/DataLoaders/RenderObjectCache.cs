@@ -69,8 +69,16 @@ public sealed class RenderObjectCache
         entries.Add(entry.key, entry);
         Bytes += bytes;
         TotalBytes += bytes;
-        while (Bytes > limit && lru.Count > 0) Remove(lru.First.Value, true);
-        while (TotalBytes > GlobalLimit && globalLru.Count > 0) Remove(globalLru.First.Value, true);
+        while (Bytes > limit && lru.Count > 0)
+        {
+            RenderWorkScheduler.CountEvent("renderCache.localEvicted");
+            Remove(lru.First.Value, true);
+        }
+        while (TotalBytes > GlobalLimit && globalLru.Count > 0)
+        {
+            RenderWorkScheduler.CountEvent("renderCache.globalEvicted");
+            Remove(globalLru.First.Value, true);
+        }
     }
 
     public void Clear()

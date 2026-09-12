@@ -60,24 +60,33 @@ public sealed class SplinePartLod : MonoBehaviour
 
     private IEnumerator Worker()
     {
-        var order = new List<Segment>(segments);
+        var order = new List<Segment>();
         var view = new LodViewState();
         while (true)
         {
             Camera camera = Camera.main;
             if (camera == null || spline == null) { yield return null; continue; }
-            if (!view.Update(camera)) { yield return null; continue; }
+            if (!view.UpdatePosition(camera)) { yield return null; continue; }
             Vector3 position = transform.InverseTransformPoint(camera.transform.position);
+            RenderWorkScheduler.CountEvent("roadSegment.lodScanned", segments.Count);
+            order.Clear();
+            foreach (var segment in segments)
+                if (DrawLodEvaluator.EvaluatePathByDistance(Mathf.Sqrt(segment.bounds.SqrDistance(position)), segment.lod, true) != segment.lod)
+                    order.Add(segment);
             order.Sort((a,b) => a.bounds.SqrDistance(position).CompareTo(b.bounds.SqrDistance(position)));
             foreach (var segment in order)
             {
                 if (!gameObject.activeInHierarchy) break;
+                // 生成待ちの間に移動していても、不要になった詳細パーツを作らない。
+                position = transform.InverseTransformPoint(camera.transform.position);
                 DrawLod desired = DrawLodEvaluator.EvaluatePathByDistance(Mathf.Sqrt(segment.bounds.SqrDistance(position)), segment.lod, true);
                 if (desired == segment.lod) continue;
                 string key = segment.from.ToString("R", System.Globalization.CultureInfo.InvariantCulture) + ":" + desired;
                 GameObject next = cache.Take(key);
+                if (next != null) RenderWorkScheduler.CountEvent("roadSegment.reuseCached");
                 if (next == null && (desired != DrawLod.Far || body))
                 {
+                    RenderWorkScheduler.CountEvent("roadSegment.buildRequested");
                     next = desired == DrawLod.Far ? BuildStrip(segment) : build(desired, segment.from, segment.to);
                     if (next != null)
                     {

@@ -20,8 +20,17 @@ public static class RenderWorkScheduler
         public long steps, queueFrames, underBudgetQueueFrames;
     }
     private static readonly Dictionary<string, TimingSample> timingSamples = new Dictionary<string, TimingSample>();
+    private static readonly Dictionary<string, long> eventCounts = new Dictionary<string, long>();
     private static double lastReportTime;
     private static int lastReportFrame;
+
+    /// <summary>固定名の件数を5秒ログへ集約する。物体IDを名前に含めず、無効時は蓄積しない。</summary>
+    public static void CountEvent(string name, long count = 1)
+    {
+        if (!LocalConstants.UNITY_LOG_TIMING || count == 0) return;
+        eventCounts.TryGetValue(name, out long previous);
+        eventCounts[name] = previous + count;
+    }
 
     private static TimingSample GetTimingSample(IEnumerator routine)
     {
@@ -50,6 +59,8 @@ public static class RenderWorkScheduler
             s.cpuMs = s.maxMs = 0;
             s.steps = s.queueFrames = s.underBudgetQueueFrames = 0;
         }
+        foreach (var item in eventCounts) message.Append($"\n  count/{item.Key}={item.Value}");
+        eventCounts.Clear();
         // 集約ログ自身のスタック採取で計測対象へ負荷を加えない。
         UnityEngine.Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "{0}", message.ToString());
         lastReportTime = now;
@@ -87,6 +98,7 @@ public static class RenderWorkScheduler
         waiting.Clear();
         categoryMs.Clear();
         timingSamples.Clear();
+        eventCounts.Clear();
         lastReportTime = Time.realtimeSinceStartupAsDouble;
         lastReportFrame = Time.frameCount;
     }

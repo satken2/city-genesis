@@ -1,6 +1,6 @@
 using UnityEngine;
 
-/// <summary>取得範囲・描画LODが同じカメラ変更条件を使うための状態。</summary>
+/// <summary>カメラ変更の検出状態。取得範囲・投影LODはUpdate、距離LODはUpdatePositionを使う。</summary>
 public struct LodViewState
 {
     private bool initialized;
@@ -9,6 +9,16 @@ public struct LodViewState
     private float projection, aspect;
     private int pixels;
     private bool orthographic;
+
+    /// <summary>距離だけで決まる道路LOD用。回転・投影条件では距離が変わらない。</summary>
+    public bool UpdatePosition(Camera camera, float moveThreshold = 4f)
+    {
+        if (camera == null) return false;
+        if (initialized && (camera.transform.position-position).sqrMagnitude < moveThreshold*moveThreshold) return false;
+        initialized = true;
+        position = camera.transform.position;
+        return true;
+    }
 
     public bool Update(Camera camera, float moveThreshold = 4f)
     {

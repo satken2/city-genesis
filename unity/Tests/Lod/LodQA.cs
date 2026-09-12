@@ -84,6 +84,7 @@ public static class LodQA
         yield return BuildingBatches();
         yield return BuildingExterior();
         yield return RoadSegments();
+        yield return RoadSegmentsCameraMoves();
         PathMaterials();
         yield return RoadPresentation();
         TerrainBenchmark();
@@ -231,6 +232,29 @@ public static class LodQA
         for (int i = 0; i < a.Length; i++) Check(a[i] == b[i] && a[i] == c[i], "Stable thinning changed with traversal order or budget");
         results.Add("Stable thinning: 10,000 candidates; order-independent and nested subsets");
     }
+    static IEnumerator RoadSegmentsCameraMoves()
+    {
+        var camera = new GameObject("MovingRoadCamera").AddComponent<Camera>(); camera.tag = "MainCamera";
+        camera.transform.position = new Vector3(0,10,0);
+        var parent = new GameObject("MovingRoadSections");
+        object spline = Static("RoadPath", "BuildSpline", parent,
+            new List<Vector3> { Vector3.zero, new Vector3(256,0,0), new Vector3(512,0,0) }, false);
+        var component = parent.AddComponent(Type("SplinePartLod"));
+        int builds = 0;
+        var factory = typeof(LodQA).GetMethod("SegmentFactory", BindingFlags.Static | BindingFlags.NonPublic)
+            .MakeGenericMethod(Type("DrawLod")).Invoke(null, new object[] { parent, (Action)(() => {
+                builds++;
+                camera.transform.position = new Vector3(0,5000,0);
+            }) });
+        Call(component,"Configure",spline,8f,0f,0f,false,null,0d,1d,factory);
+        for (int i=0;i<30;i++) yield return null;
+        Check(builds == 1,"Camera moved away during generation but obsolete detailed road intervals were still built");
+        foreach (var segment in (IList)Field(component,"segments"))
+            Check((int)Field(segment,"lod") == 1,"Road interval failed to converge to current camera LOD");
+        Object.Destroy(parent); Object.Destroy(camera.gameObject);
+        yield return null;
+        results.Add("Moving road generation: pending intervals use current camera and avoid obsolete detail builds");
+    }
     static void ProjectionAndResidency()
     {
         var camera = new GameObject("Camera").AddComponent<Camera>(); camera.tag = "MainCamera";
@@ -240,6 +264,15 @@ public static class LodQA
         Check(!(bool)Call(state,"Update",camera,4f), "Stationary view evaluated repeatedly");
         camera.fieldOfView = 35;
         Check((bool)Call(state,"Update",camera,4f), "FOV-only change was ignored");
+        object distanceState = Activator.CreateInstance(Type("LodViewState"));
+        Check((bool)Call(distanceState,"UpdatePosition",camera,4f),"Initial distance LOD not evaluated");
+        camera.transform.rotation = Quaternion.Euler(30,90,0); camera.fieldOfView = 45;
+        Check(!(bool)Call(distanceState,"UpdatePosition",camera,4f),"Rotation/FOV triggered distance-only LOD scan");
+        camera.transform.position += Vector3.right * 3f;
+        Check(!(bool)Call(distanceState,"UpdatePosition",camera,4f),"Subthreshold movement triggered distance LOD scan");
+        camera.transform.position += Vector3.right;
+        Check((bool)Call(distanceState,"UpdatePosition",camera,4f),"Accumulated movement was ignored by distance LOD");
+        camera.transform.rotation = Quaternion.Euler(45,0,0);
         object normal = Static("DrawLodEvaluator","EvaluateBySize",10f,500f,50f,Lod(1),true,true);
         Check((int)normal == 2, "Orthographic distance incorrectly alters projected size");
         object sets = Static("LodConfig","CalculateCellSets",Vector2Int.zero,Vector3.zero,camera.transform.position,camera.transform.forward,null,500f,100000,100000,new HashSet<Vector2Int>());
@@ -281,6 +314,25 @@ public static class LodQA
         Static("RenderWorkScheduler","Stop",host,worker);
         ((HashSet<Vector2Int>)Field(manager,"loadedCells")).Add(Vector2Int.zero);
         Check((bool)Call(manager,"IsDeferredCellReady",data),"Loaded cell did not release pending building");
+        foreach (var existing in Object.FindObjectsByType<Camera>(FindObjectsSortMode.None)) Object.DestroyImmediate(existing.gameObject);
+        var camera = new GameObject("DeferredBuildingCamera").AddComponent<Camera>(); camera.tag = "MainCamera";
+        camera.transform.position = new Vector3(0,5000,0);
+        var latest = Activator.CreateInstance(Type("GeneratedModels.BuildingSummary"));
+        Set(latest,"agent_id",71001); Set(latest,"center_point",new List<object> {100f,100f}); Set(latest,"version",2);
+        ((IDictionary)Field(manager,"buildingDataCache"))[71001] = latest;
+        ((IDictionary)Field(manager,"buildingBoundsRadius"))[71001] = 3f;
+        var far = new GameObject("DeferredFarBuilding"); far.transform.position = new Vector3(100,0,100);
+        Set(Static("DrawLodInfo","Ensure",far),"drawLod",Lod(1));
+        Set(far.AddComponent(Type("RenderCacheIdentity")),"key",Call(manager,"BuildingRenderKey",latest,Lod(1)));
+        ((IDictionary)Field(manager,"buildingObjectsCache"))[71001] = far;
+        Set(manager,"maxDetailedBuildingObjects",0);
+        worker = (Coroutine)Static("RenderWorkScheduler","Start",host,Call(manager,"DetailGenerationWorker"),"QA.StaleBuilding");
+        for(int i=0;i<10;i++) yield return null;
+        Check(queue.Count == 0,"Obsolete detail request remained queued after moving away");
+        Check(ReferenceEquals(((IDictionary)Field(manager,"buildingObjectsCache"))[71001],far),"Obsolete detail request replaced an already-correct far object");
+        Check((int)((IDictionary)Field(manager,"buildingVersionCache"))[71001] == 2,"Deferred generation used stale building data");
+        Static("RenderWorkScheduler","Stop",host,worker);
+        Object.Destroy(far); Object.Destroy(camera.gameObject);
         Object.Destroy(go);
 
         go = new GameObject("PendingPathQA"); go.SetActive(false);

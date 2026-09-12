@@ -206,6 +206,10 @@ TrackPath.InfrastructureConnectionProviderにはIsInfrastructureConnectionを登
 
 ## ロード性能の計測
 
+カメラ移動の調査にはSchedulerの5秒窓の `count/` 集約も使う。再取得セル・受信件数・変更なし件数・LOD走査・生成要求／生成計測件数・現在GO／退避キャッシュ再利用・容量超過破棄・地形追従中断を区別する。追加カウンタは `RenderWorkScheduler.CountEvent` に固定名で渡し、物体IDをキーにしない。無効時は蓄積しない。名前と解釈は `K_Unity差分ロード整理.md` の「カメラ移動時の再取得・再生成件数」を参照する。
+
+建物の遅延生成は最新キャッシュと生成直前のカメラでLODを再評価する。Farで足りる要求は詳細保持上限の待機ゲートを通さず処理する。道路本体・区間の距離LODは `LodViewState.UpdatePosition` で移動だけを検出する。取得範囲・建物の投影LODには通常の `Update` を使う。道路区間はLOD変更対象だけソートし、生成前にも現在位置で判定する。区間のマテリアル更新と表示完了待ちは維持する。回帰検証は `Tests/Lod/run.ps1` の移動中生成と遅延建物テスト。
+
 `UNITY_LOG_TIMING` で `LoadBatch.Trace` の工程別経過時間と、RenderWorkSchedulerの5秒単位iterator別集約(cpu/maxStep/steps/queueFrames/underBudgetQueueFrames)を出す。RenderWorkLifetime.LateUpdateから報告するため待機中も残件数を観測できる。BuildingManager.PendingDetailCountとPathManager.PendingTerrainRebuildCountは遅延生成キューのみで、全表示の完了判定ではない。詳細とログの読み方は `K_Unity差分ロード整理.md` の「ロード遅延の計測」。
 
 

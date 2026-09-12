@@ -352,6 +352,7 @@ public class BuildingManager : BaseApiDataManager
         {
             LodTier desiredTier = dynamicSet.Contains(cell) ? LodTier.Dynamic : (nearSet.Contains(cell) ? LodTier.Near : LodTier.Far);
             cellsToLoad.Add(cell);
+            RenderWorkScheduler.CountEvent(loadedCells.Contains(cell) ? "building.fetchExistingCells" : "building.fetchNewCells");
             lodUpdates[cell] = desiredTier;
         }
 
@@ -433,6 +434,7 @@ public class BuildingManager : BaseApiDataManager
                 $"/buildings/?bbox={minX},{minZ},{maxX},{maxZ}&limit=500&cursor={cursor}", value => page = value,
                 timingLabel: "BuildingManager page");
             if (page?.buildings == null) { response = null; break; }
+            RenderWorkScheduler.CountEvent("building.received", page.buildings.Count);
             response.buildings.AddRange(page.buildings);
             if (!page.next_cursor.HasValue) break;
             if (page.next_cursor.Value <= cursor) { response = null; break; }
@@ -489,6 +491,7 @@ public class BuildingManager : BaseApiDataManager
 
                     if (!needsRebuild)
                     {
+                        RenderWorkScheduler.CountEvent("building.dataUnchanged");
                         // 非表示だった既存オブジェクトがあれば再表示する
                         if (buildingObjectsCache.TryGetValue(b.agent_id, out GameObject existing) && existing != null && !existing.activeSelf)
                         {
@@ -802,32 +805,43 @@ public class BuildingManager : BaseApiDataManager
                 // 視野外しか残っておらず上限到達済みなら、このフレームでは何もしない
                 // (視野に入るかLRU破棄で枠が空くのを待つ)。
                 bool bestInView = bestScore < DEFERRED_OUT_OF_VIEW_PENALTY;
-                if (!bestInView && detailedBuildingIds.Count >= maxDetailedBuildingObjects) break;
-
                 DeferredDetailRequest req = deferredDetailBuildings[bestId];
-                deferredDetailBuildings.Remove(bestId);
-                progressed = true;
-
-                // データキャッシュから消えた建物(削除済み)は生成しない。
-                if (!buildingDataCache.ContainsKey(bestId)) continue;
+                if (!buildingDataCache.TryGetValue(bestId, out BuildingSummary latest))
+                {
+                    deferredDetailBuildings.Remove(bestId);
+                    continue;
+                }
 
                 // ロード範囲外のセルに属する建物は生成しない。キュー投入からここまでの間に
                 // セルがアンロードされた場合に生成すると、非表示のはずの建物がアクティブな
                 // GameObjectとして復活してしまう。セルが再ロードされればマージロードが再度
                 // 遅延キューへ積み直す。
-                float[] reqCp = req.data.centerPointArray;
+                float[] reqCp = latest.centerPointArray;
                 if (reqCp != null && reqCp.Length >= 2)
                 {
                     Vector2Int cell = PositionToCell(new Vector3(reqCp[0], 0f, reqCp[1]));
-                    if (!loadedCells.Contains(cell)) continue;
+                    if (!loadedCells.Contains(cell))
+                    {
+                        deferredDetailBuildings.Remove(bestId);
+                        continue;
+                    }
                 }
 
-                // 接写の保持上限に達していれば通常で生成する(降格は次の再判定で投影比が決める)。
-                DrawLod lod = req.drawLod == DrawLod.Close && closeBuildingIds.Count >= DrawLodConfig.MAX_CLOSE_BUILDINGS && !closeBuildingIds.Contains(bestId)
-                    ? DrawLod.Normal
-                    : (req.drawLod == DrawLod.Far ? DrawLod.Normal : req.drawLod);
-                CreateOrUpdateBuildingObject(req.data, req.isDynamic, forceRebuild: true, drawLod: lod);
-                buildingVersionCache[bestId] = req.data.version;
+                // 待機中に視点やデータが変わり得るため、生成時点の条件を正とする。
+                cam = Camera.main;
+                if (cam == null) break;
+                camPos = cam.transform.position;
+                fwd = GetHorizontalForward(cam);
+                bool isDynamic = IsBuildingInDynamicCell(latest);
+                DrawLod lod = DetermineDesiredDrawLod(latest, isDynamic ? LodTier.Dynamic : LodTier.Near,
+                    camPos, DrawLodEvaluator.GetTanHalfFov(cam));
+                if (lod != DrawLod.Far && !bestInView && detailedBuildingIds.Count >= maxDetailedBuildingObjects) break;
+                deferredDetailBuildings.Remove(bestId);
+                progressed = true;
+                if (lod != req.drawLod) RenderWorkScheduler.CountEvent("building.deferredLodChanged");
+                if (lod == DrawLod.Far) CreateFarBuildingObject(latest);
+                else CreateOrUpdateBuildingObject(latest, isDynamic, forceRebuild: true, drawLod: lod);
+                buildingVersionCache[bestId] = latest.version;
                 EvictDetailedBuildingsOverCap(camPos, fwd, justCreatedId: bestId);
             }
 
@@ -995,6 +1009,7 @@ public class BuildingManager : BaseApiDataManager
             if (cam == null) continue;
             Vector3 camPos = cam.transform.position;
             if (!drawViewState.Update(cam)) continue;
+            RenderWorkScheduler.CountEvent("building.lodScanned", buildingObjectsCache.Count);
             float tanHalfFov = DrawLodEvaluator.GetTanHalfFov(cam);
 
             // 走査中に辞書を書き換えないよう、変更対象を先に集める。
@@ -1155,7 +1170,12 @@ public class BuildingManager : BaseApiDataManager
         buildingObjectsCache.TryGetValue(data.agent_id, out GameObject old);
         var identity = old != null ? old.GetComponent<RenderCacheIdentity>() : null;
         GameObject ready = identity != null && identity.key == key ? old : lodCache.Take(key);
-        if (ready == null) return false;
+        if (ready == null)
+        {
+            RenderWorkScheduler.CountEvent("building.buildRequested");
+            return false;
+        }
+        RenderWorkScheduler.CountEvent(ready == old ? "building.reuseActive" : "building.reuseCached");
         if (ready != old)
         {
             DrawLodStats.OnDrawLodChanged(DrawLodStats.Category.Building,

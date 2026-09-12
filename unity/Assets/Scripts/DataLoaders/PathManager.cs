@@ -29,7 +29,12 @@ public class PathManager : BaseApiDataManager
     {
         pathObjectsCache.TryGetValue(path.path_id, out GameObject old);
         GameObject next = old != null && old.GetComponent<RenderCacheIdentity>()?.key == key ? old : lodCache.Take(key);
-        if (next == null) return false;
+        if (next == null)
+        {
+            RenderWorkScheduler.CountEvent("path.buildRequested");
+            return false;
+        }
+        RenderWorkScheduler.CountEvent(next == old ? "path.reuseActive" : "path.reuseCached");
         if (next != old)
         {
             DrawLodStats.OnDrawLodChanged(DrawLodStats.Category.Path,
@@ -436,8 +441,8 @@ public class PathManager : BaseApiDataManager
 
     /// <summary>
     /// カメラ移動に応じて、生成済みパスの描画LODを再判定する常駐ワーカー。
-    /// 一定フレームごと・一定距離の移動があったときだけ全パスを走査し、望ましい描画LOD/詳細区間と
-    /// 食い違うパスを地形追従と同じ再生成キューへ積む(視野優先・フレーム予算で TerrainFollowRebuildWorker が消化する)。
+    /// 一定フレームごと・一定距離の移動があったときだけ全パスを走査し、望ましい描画LODと
+    /// 食い違うパスを共通フレーム予算で切り替える。回転・FOVは距離LODを変えない。
     /// 再生成が終わるまで旧オブジェクトは表示されたまま残る。
     /// </summary>
     private LodViewState drawViewState;
@@ -452,7 +457,8 @@ public class PathManager : BaseApiDataManager
             Camera cam = Camera.main;
             if (cam == null) continue;
             Vector3 camPos = cam.transform.position;
-            if (!drawViewState.Update(cam)) continue;
+            if (!drawViewState.UpdatePosition(cam)) continue;
+            RenderWorkScheduler.CountEvent("path.lodScanned", pathObjectsCache.Count);
 
             var drawChanges = new List<PathSummary>();
             foreach (var kvp in pathObjectsCache)
@@ -765,6 +771,7 @@ public class PathManager : BaseApiDataManager
             else if (nearSet.Contains(cell)) desiredTier = LodTier.Near;
 
             cellsToLoad.Add(cell);
+            RenderWorkScheduler.CountEvent(loadedCells.Contains(cell) ? "path.fetchExistingCells" : "path.fetchNewCells");
             lodUpdates[cell] = desiredTier;
         }
 
@@ -987,6 +994,7 @@ public class PathManager : BaseApiDataManager
                 $"/paths/?bbox={bbox}&limit=500&cursor={cursor}", value => page = value,
                 timingLabel: "PathManager page");
             if (page?.paths == null) { response = null; break; }
+            RenderWorkScheduler.CountEvent("path.received", page.paths.Count);
             response.paths.AddRange(page.paths);
             if (!page.next_cursor.HasValue) break;
             if (page.next_cursor.Value <= cursor) { response = null; break; }
@@ -1049,6 +1057,7 @@ public class PathManager : BaseApiDataManager
 
                 if (!versionChanged)
                 {
+                    RenderWorkScheduler.CountEvent("path.dataUnchanged");
                     // 再生成対象外だが、非表示になっている既存オブジェクトは再表示する。
                     if (pathObjectsCache.TryGetValue(p.path_id, out GameObject existingObj) && existingObj != null && !existingObj.activeSelf)
                     {
@@ -1445,6 +1454,9 @@ public class PathManager : BaseApiDataManager
     private bool TryRebuildPathOnce(PathSummary path, LodTier tier, bool updateIntersections, bool forceRebuild, string reason)
     {
         if (path == null) return false;
+        RenderWorkScheduler.CountEvent(forceRebuild ? "path.forceRebuildRequested" : "path.lodRebuildRequested");
+        if (forceRebuild && reason.StartsWith("地形追従", StringComparison.Ordinal))
+            RenderWorkScheduler.CountEvent("path.terrainRebuildRequested");
 
         if (isLodPathBatchActive && !lodBatchRebuiltPathIds.Add(path.path_id))
         {

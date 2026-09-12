@@ -225,6 +225,7 @@ public class CellDataLoader : MonoBehaviour
         HashSet<Vector2Int> tierChangedCells = CalculateTierChangedCells(cellSets, isForce: false);
         if (tierChangedCells.Count == 0)
         {
+            RenderWorkScheduler.CountEvent("camera.sameCells");
             UnityLog.If(LocalConstants.UNITY_LOG_LOADER, "CellDataLoader: セルティア変更がないため、3D更新をスキップします。");
             return;
         }
@@ -371,12 +372,16 @@ public class CellDataLoader : MonoBehaviour
             activeLoadBatch.Cancel();
         }
         activeLoadBatch = new LoadBatch(cellSets, isForce);
+        RenderWorkScheduler.CountEvent("camera.loadBatches");
+        RenderWorkScheduler.CountEvent("camera.changedCells", tierChangedCells?.Count ?? 0);
 
         // 進行中の地形追従コルーチンがあれば停止する。
         // これから新しい地形をロードするため、古い地形に対する追従処理は破棄して仕切り直す。
         // 取りこぼしたセルは pendingFollowUpCells に残るため、次回完了時に再処理される。
         if (terrainFollowUpCoroutine != null)
         {
+            RenderWorkScheduler.CountEvent("terrainFollow.interrupted");
+            activeLoadBatch.Trace($"FOLLOWUP_RESTART pendingCells={pendingFollowUpCells.Count}");
             RenderWorkScheduler.Stop(this, terrainFollowUpCoroutine);
             terrainFollowUpCoroutine = null;
         }
@@ -527,6 +532,7 @@ public class CellDataLoader : MonoBehaviour
                 rebuildSet.Add(c);
         }
         List<Vector2Int> meshRebuildCells = new List<Vector2Int>(rebuildSet);
+        RenderWorkScheduler.CountEvent("terrainFollow.requestedCells", meshRebuildCells.Count);
 
         // 1.5. 道路のLOD一括ロードがまだ進行中なら、その完了を待ってから地形追従へ進む。
         //     地形と道路が同時にロードされる初回ロード(セーブ済みの都市を起動した瞬間など)では、
