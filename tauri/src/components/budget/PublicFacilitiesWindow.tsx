@@ -43,6 +43,7 @@ type PublicServicePricesData = {
 const SPECIAL_TABS: { key: string; labelKey: string }[] = [
   { key: "real_estate", labelKey: "publicFacilities.tabRealEstate" },
   { key: "public_standard", labelKey: "publicFacilities.tabPublicStandard" },
+  { key: "open_space", labelKey: "publicFacilities.tabOpenSpace" },
   { key: "education", labelKey: "publicFacilities.tabEducation" },
   { key: "port", labelKey: "publicFacilities.tabPort" },
   { key: "city", labelKey: "publicFacilities.tabCity" },
@@ -53,11 +54,11 @@ const SPECIAL_TABS: { key: string; labelKey: string }[] = [
 //   - service:        公営施設タブ
 //   - real_estate:    不動産タブ
 //   - port:           港湾施設タブ
-//   - basic:          教育機関・市政府タブ（メトリクス無し、基本情報のみ）
+//   - basic:          教育機関・市政府・オープンスペースタブ（メトリクス無し、基本情報のみ）
 type CardVariant = "public_service" | "service" | "real_estate" | "port" | "basic";
 
 // メトリクスを持たない（基本情報のみの）タブキー。
-const BASIC_TAB_KEYS = new Set(["education", "city"]);
+const BASIC_TAB_KEYS = new Set(["education", "city", "open_space"]);
 
 function resolveCardVariant(tabKey: string): CardVariant {
   if (tabKey === "real_estate") return "real_estate";

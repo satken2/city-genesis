@@ -1341,7 +1341,7 @@ public class RoadPath : IPathMeshGenerator
     /// <summary>
     /// パスに沿って柱（pillar）を配置する。
     /// height_editable=true のバリアントに対してのみ配置される。
-    /// 各セグメントの終点には必ず1本配置し、セグメント長が pillar_spacing を超える場合は
+    /// 各セグメントの終点を配置候補とし、セグメント長が pillar_spacing を超える場合は
     /// その間隔で追加配置する。セグメントの始点には配置しない。
     ///
     /// base_height は3D描画用の高さオフセット(m)。CalculatePathPoints でスプライン点のYから
@@ -1350,6 +1350,19 @@ public class RoadPath : IPathMeshGenerator
     /// RoadPath（高架道路）と TrackPath（高架線路）の共通処理。
     /// </summary>
     public static void GeneratePillars(GameObject container, SplineComputer spline, float pillarSpacing, float baseHeight, PathSummary pathData, string variantBase, string typeBase)
+    {
+        GeneratePillarsCore(container, spline, pillarSpacing, baseHeight, pathData, variantBase, typeBase, null);
+    }
+
+    /// <summary>完成時と同じ干渉判定済みの橋脚を、接地原点を持つ施工単位として返す。</summary>
+    public static void GenerateConstructionPillars(GameObject container, SplineComputer spline, float spacing,
+        float baseHeight, PathSummary path, string variantBase, string typeBase, System.Action<GameObject, double> onSupport)
+    {
+        GeneratePillarsCore(container, spline, spacing, baseHeight, path, variantBase, typeBase, onSupport);
+    }
+
+    private static void GeneratePillarsCore(GameObject container, SplineComputer spline, float pillarSpacing,
+        float baseHeight, PathSummary pathData, string variantBase, string typeBase, System.Action<GameObject, double> onSupport)
     {
         // プレハブのロード（バリアント→タイプのフォールバック）
         string pillarPath = $"{variantBase}/pillar";
@@ -1447,14 +1460,36 @@ public class RoadPath : IPathMeshGenerator
             anchorPercents.Add(pct);
         }
 
+        var obstacles = PillarClearance.NeighborProvider?.Invoke(pathData);
+        var pillarBounds = PillarClearance.GetPrefabBounds(pillarPrefab);
+        var capBounds = PillarClearance.GetPrefabBounds(pillarCapPrefab);
         int placedCount = 0;
 
-        // パス全体の開始点（最初のアンカー点）に柱を配置する。
+        bool TryPlace(double percent)
+        {
+            if (onSupport == null)
+                return PlacePillar(container, pillarPrefab, pillarCapPrefab, pillarBounds, capBounds, obstacles, spline, percent);
+            Vector3 position = spline.EvaluatePosition(ClampSplinePercent(percent));
+            float ground = Utils.GetGroundHeight(position);
+            if (position.y - ground - capBounds.GetValueOrDefault().size.y <= 0.1f) return false;
+            var support = new GameObject("ConstructionSupport");
+            support.transform.SetParent(container.transform, false);
+            support.transform.position = new Vector3(position.x, ground, position.z);
+            if (!PlacePillar(support, pillarPrefab, pillarCapPrefab, pillarBounds, capBounds, obstacles, spline, percent))
+            {
+                UnityEngine.Object.Destroy(support);
+                return false;
+            }
+            onSupport(support, percent);
+            return true;
+        }
+
+        // パス全体の開始点（最初のアンカー点）も干渉判定付きの配置候補とする。
         // 各セグメントのループでは終端側のみに柱を配置するため、開始点にも個別に配置することで、
         // 重複を防ぎつつパス全体の開始端と終了端の両方に柱を過不足なく配置するための仕様。
         if (anchorPercents.Count > 0)
         {
-            if (PlacePillar(container, pillarPrefab, pillarCapPrefab, spline, baseHeight, anchorPercents[0]))
+            if (TryPlace(anchorPercents[0]))
             {
                 placedCount++;
             }
@@ -1479,7 +1514,7 @@ public class RoadPath : IPathMeshGenerator
                 {
                     double t = (double)j / divisions;
                     double placementPct = startPct + (endPct - startPct) * t;
-                    if (PlacePillar(container, pillarPrefab, pillarCapPrefab, spline, baseHeight, placementPct))
+                    if (TryPlace(placementPct))
                     {
                         placedCount++;
                     }
@@ -1488,7 +1523,7 @@ public class RoadPath : IPathMeshGenerator
             else
             {
                 // 短いセグメントは終点に1本のみ配置する
-                if (PlacePillar(container, pillarPrefab, pillarCapPrefab, spline, baseHeight, endPct))
+                if (TryPlace(endPct))
                 {
                     placedCount++;
                 }
@@ -1551,81 +1586,46 @@ public class RoadPath : IPathMeshGenerator
     /// すでに (groundY + (relY - base_height) + offset) になっており、柱は地面まで伸びる。
     /// 「3D描画上の都合」で、ゲームロジックには影響しない。
     /// </summary>
-    private static bool PlacePillar(GameObject container, GameObject pillarPrefab, GameObject pillarCapPrefab, SplineComputer spline, float baseHeight, double percent)
+    private static bool PlacePillar(GameObject container, GameObject pillarPrefab, GameObject pillarCapPrefab,
+        Bounds? pillarBounds, Bounds? capBounds, List<PillarClearance.Corridor> obstacles,
+        SplineComputer spline, double percent)
     {
         SplineSample sample = spline.Evaluate(ClampSplinePercent(percent));
-        float capThickness = 0f;
-        bool placed = false;
-
-        // 柱は地形の傾斜に追従せず、常にワールド上方向に対して垂直に立つ。
-        // 回転はYawのみ（Yaw=パス進行方向から導出し、ピッチ・ロールは0に固定）し、
-        // スケールも常にローカルY軸をワールド上方向へ伸ばす簡易計算にする。
         Vector3 forward = sample.forward;
         forward.y = 0f;
         if (forward.sqrMagnitude < 0.0001f) forward = Vector3.forward;
-        forward.Normalize();
-        Quaternion yawRotation = Quaternion.LookRotation(forward, Vector3.up);
+        Quaternion rotation = Quaternion.LookRotation(forward.normalized, Vector3.up);
+        Vector3 capScale = pillarCapPrefab != null ? pillarCapPrefab.transform.localScale : Vector3.one;
+        float capThickness = capBounds.HasValue ? Mathf.Max(0f, -capBounds.Value.min.y * capScale.y) : 0f;
+        Vector3 pillarPosition = sample.position + Vector3.down * capThickness;
+        float height = pillarPosition.y - Utils.GetGroundHeight(sample.position);
+        Vector3 pillarScale = pillarPrefab != null ? pillarPrefab.transform.localScale : Vector3.one;
+        // 橋脚モデルは実寸で著作され、種類ごとに高さが異なる。1mモデルとは限らない。
+        pillarScale.y = height / Mathf.Max(0.001f, pillarBounds.GetValueOrDefault().size.y);
 
-        // 1. pillar_cap の配置 (Y方向にはスケールしない)
+        // キャップの張り出しは柱本体とは高さが異なる。別々に判定し、干渉時は一組とも生成しない。
+        if (capBounds.HasValue && PillarClearance.Intersects(PillarClearance.TransformBounds(capBounds.Value,
+                Matrix4x4.TRS(sample.position, rotation, capScale)), obstacles)) return false;
+        if (height > 0.1f && pillarBounds.HasValue && PillarClearance.Intersects(PillarClearance.TransformBounds(pillarBounds.Value,
+                Matrix4x4.TRS(pillarPosition, rotation, pillarScale)), obstacles)) return false;
+
+        bool placed = false;
         if (pillarCapPrefab != null)
         {
-            GameObject pillarCap = UnityEngine.Object.Instantiate(pillarCapPrefab, container.transform);
-            pillarCap.transform.position = sample.position;
-            pillarCap.transform.rotation = yawRotation;
-            pillarCap.transform.localScale = pillarCapPrefab.transform.localScale;
+            var cap = UnityEngine.Object.Instantiate(pillarCapPrefab, container.transform);
+            cap.transform.position = sample.position;
+            cap.transform.rotation = rotation;
+            cap.transform.localScale = capScale;
             placed = true;
-
-            // pillar_cap の厚みを計算 (ピボットが上端にある規約に基づき、負のmin.yを厚みとする)
-            MeshFilter capMf = pillarCapPrefab.GetComponentInChildren<MeshFilter>();
-            if (capMf != null && capMf.sharedMesh != null)
-            {
-                float localMinY = capMf.sharedMesh.bounds.min.y;
-                capThickness = Mathf.Max(0f, -localMinY) * pillarCap.transform.localScale.y;
-            }
         }
-
-        // 2. pillar の配置
-        if (pillarPrefab != null)
+        if (pillarPrefab != null && height > 0.1f)
         {
-            // 柱は路面（サンプル点）から下方向に、棒の下端が localGroundY（地面）に達するまで伸びる。
-            // CalculatePathPoints で base_height 分のYシフトが適用済みのため、sample.position.y は
-            // すでに (groundY + (relY - base_height) + offset) になっており、柱の下端は localGroundY でよい。
-            Vector3 samplePos = sample.position;
-            // y=1000 は「十分に高い位置」を示すダミー値。HeightmapTextureManager は XZ をキーに
-            // CPU 高さ配列を O(1) ルックアップするため y は結果に影響しないが、RoadIntersectionMeshGenerator
-            // と同じ呼び出し方をしておく。
-            float localGroundY = HeightmapTextureManager.GetTerrainHeight(new Vector3(samplePos.x, 1000f, samplePos.z));
-            float roadRelY = samplePos.y - localGroundY;
-
-            // cap の厚み分だけ柱の上端を下にずらす（cap の下面 = 柱の上端）。
-            Vector3 pillarPos = samplePos;
-            if (capThickness > 0f)
-            {
-                // Yawのみの回転で柱は垂直に立つため、下方向は常にワールド下方向（Vector3.down）。
-                pillarPos = samplePos + Vector3.down * capThickness;
-            }
-
-            // 柱の長さ = (上端Y − 下端Y) = (pillarPos.y) − localGroundY。
-            // CalculatePathPoints で base_height 分だけYが下げられているため、
-            // すでに pillarPos.y は (groundY + effectiveRelY + offset − capTh) になっており、
-            // 柱の下端は localGroundY でよい（base_height は加算しない）。
-            float pillarBottomY = localGroundY;
-            float height = pillarPos.y - pillarBottomY;
-            if (height > 0.1f)
-            {
-                GameObject pillar = UnityEngine.Object.Instantiate(pillarPrefab, container.transform);
-                pillar.transform.position = pillarPos;
-                pillar.transform.rotation = yawRotation;
-                placed = true;
-
-                // ローカルY軸がワールド上方向に一致するYaw回転のため、
-                // Yスケールに height をそのまま適用すると柱の下端が pillarBottomY に接する。
-                Vector3 scale = pillar.transform.localScale;
-                scale.y = height;
-                pillar.transform.localScale = scale;
-            }
+            var pillar = UnityEngine.Object.Instantiate(pillarPrefab, container.transform);
+            pillar.transform.position = pillarPosition;
+            pillar.transform.rotation = rotation;
+            pillar.transform.localScale = pillarScale;
+            placed = true;
         }
-
         return placed;
     }
 

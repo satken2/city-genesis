@@ -52,6 +52,8 @@ import { NumberStepper } from "../common/NumberStepper";
 
 import { ConstructionInfoCard } from "../common/ConstructionInfoCard";
 import { isConstructionAffordable } from "../../utils/constructionFunding";
+import { useVariantAffordability } from "../../hooks/useVariantAffordability";
+import { VariantAffordabilityNote } from "../path/VariantAffordabilityNote";
 import { BuildingFacilityInfoCard } from "./BuildingFacilityInfoCard";
 import { showNotification } from "../../utils/notification";
 import { BUILDING_PUBLIC, VARIANT_CITY } from "../../constants";
@@ -93,6 +95,12 @@ type BuildingConstructionPanelProps = {
 export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: BuildingConstructionPanelProps) {
   const { t } = useTranslation();
   const masterData = useMasterData();
+  // バリアント単位の資金目安(最小規模すら建てられない施設をプルダウンで選ばせない)
+  const { affordability: variantAffordability } = useVariantAffordability("buildings", apiBaseUrl);
+  const isVariantUnaffordable = (variantId: number) =>
+    variantAffordability != null
+    && !variantAffordability.unlimited
+    && variantAffordability.variants[variantId]?.affordable === false;
   const appWindow = useMemo(() => getCurrentWindow(), []);
 
   const [selectedBdType, setSelectedBdType] = useState<number | null>(null);
@@ -1419,11 +1427,19 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
           >
             <option value="">{t("building_construction.selectVariant")}</option>
             {variantsForType.map(([idStr, entry]) => (
-              <option key={idStr} value={idStr}>
+              <option key={idStr} value={idStr} disabled={isVariantUnaffordable(parseInt(idStr))}>
                 {entry.display_name}
+                {isVariantUnaffordable(parseInt(idStr)) ? t("construction.variantUnaffordableSuffix") : ""}
               </option>
             ))}
           </select>
+        )}
+        {variantsForType.length > 0 && (
+          <VariantAffordabilityNote
+            affordability={variantAffordability}
+            anyUnaffordable={variantsForType.some(([idStr]) => isVariantUnaffordable(parseInt(idStr)))}
+            kind="building"
+          />
         )}
         {/* 既存建物をコピー: バリアント未選択のときだけ表示する。押すと Unity が
             コピー元建物の選択モードに入り、選ばれた建物の見た目・階数・フットプリントを取り込む。 */}

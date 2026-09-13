@@ -1,0 +1,23 @@
+{
+  "weather": {
+    "label": "날씨",
+    "choose": "날씨 선택",
+    "loading": "날씨 확인 중…",
+    "unknown": "알 수 없음",
+    "automatic": "{{weather}} (자동)",
+    "failed": "날씨를 변경하지 못했습니다",
+    "names": {
+      "clear": "쾌청",
+      "high_clouds": "옅은 구름",
+      "fair": "맑음",
+      "broken_clouds": "구름 사이 햇살",
+      "overcast": "흐림",
+      "rain_clouds": "비구름",
+      "fog": "안개",
+      "sunset": "노을",
+      "drizzle": "이슬비",
+      "rain": "비",
+      "heavy_rain": "폭우"
+    }
+  }
+}

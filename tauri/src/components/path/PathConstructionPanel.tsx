@@ -1,12 +1,16 @@
 /**
- * 道路建設パネル
+ * 道路建設パネル / インフラ建設パネル
  *
- * window_type="path_build" のポップアップウィンドウで表示する専用パネル。
+ * window_type="path_build"(道路)と "infra_build"(インフラ=電気・水道)の2つのポップアップ
+ * ウィンドウで共用する専用パネル。どちらのカテゴリを扱うかは `category` prop で固定し、
+ * パネル内でカテゴリを切り替える手段は持たない(プレイヤーには道路とインフラは別の道具に
+ * 見えるため入口=アイコンパネルのボタンを分けている。入力UIは同一なのでコードは共有する)。
+ * 軌道は TrackConstructionPanel(track_build)が担う。
  * BuildingConstructionPanel と同じ単列レイアウト。
  *
  * 操作フロー:
- *   1. 道路種別プルダウンでカテゴリを選択 → バリアントタイルが表示される
- *   2. バリアントタイルをクリックして選択 → IPCでグラフィックプログラムに道路敷設モードを通知
+ *   1. 種別ボタン(道路: 自動車専用道路/街路/歩道、インフラ: 電気/水道)を選ぶ → バリアントのプルダウンが出る
+ *   2. バリアントを選択 → IPCでグラフィックプログラムに敷設モードを通知
  *   3. グラフィックプログラム側でノードを配置 → IPCでノード情報がパネルに通知される
  *   4. プレビューキャンバスにパス形状が表示される
  *   5. [確定] でバックエンドに送信
@@ -27,6 +31,7 @@ import { setHintbarText } from "../../utils/hintbar";
 import { showNotification } from "../../utils/notification";
 import { ApiError } from "../../utils/api";
 import { usePathConstruction } from "./usePathConstruction";
+import { useVariantAffordability } from "../../hooks/useVariantAffordability";
 import { sendEditPathFinish, sendSetGrid, sendChangeDisplay, sendChangeState, sendFocusGraphic, IPC_EVENT_VIEW_GRID_TOGGLED } from "../../utils/ipc";
 import type { GridDisplayMode } from "./GridSettingsPanel";
 import { isInfraPathType } from "../../local-constants";
@@ -37,16 +42,24 @@ import { PathBuildSections } from "./PathBuildSections";
 import type { PathCategory } from "./usePathConstruction";
 import "./PathConstructionPanel.css";
 
+/** このパネルが扱うカテゴリ。軌道("rail")は TrackConstructionPanel の担当なので受け付けない。 */
+export type PathConstructionCategory = Exclude<PathCategory, "rail">;
+
 type PathConstructionPanelProps = {
   apiBaseUrl?: string;
   onClose: () => void;
   editPathId?: number | null;
+  /** 新規敷設時に固定するカテゴリ。既存パス編集時はパスの種別から決まるため参照しない。 */
+  category: PathConstructionCategory;
 };
 
-export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathConstructionPanelProps) {
+export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId, category }: PathConstructionPanelProps) {
   const { t } = useTranslation();
   const masterData = useMasterData();
   const pathConstruction = usePathConstruction(masterData, apiBaseUrl, editPathId ?? null);
+  // バリアント単位の資金目安(今の資金では平地の基準延長すら敷けない規格を選ばせない)
+  const { affordability: variantAffordability, refresh: refreshAffordability } =
+    useVariantAffordability("paths", apiBaseUrl);
 
   /* ---- 既存パス編集モード: データ取得 ---- */
   useEffect(() => {
@@ -109,15 +122,28 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
     }
   }, []);
 
-  /* ---- ハンドラ ---- */
+  /* ---- カテゴリの固定 ---- */
 
-  const handleCategoryChange = useCallback(
-    (next: PathCategory) => {
-      // 同じカテゴリを再クリックしたら解除(選択なし)に戻す
-      pathConstruction.onCategoryChange(pathConstruction.category === next ? null : next);
-    },
-    [pathConstruction]
-  );
+  /**
+   * 新規敷設ではウィンドウ種別で決まるカテゴリをフックに固定する(軌道建設パネルと同じ方式)。
+   * 既存パス編集はパス取得時の onTypeChange が種別からカテゴリを補完するため、ここでは触らない。
+   */
+  useEffect(() => {
+    if (editPathId == null) {
+      pathConstruction.onCategoryChange(category);
+    }
+    // マウント時に一度だけ実行する(pathConstruction.onCategoryChange は安定)。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [category, editPathId]);
+
+  /**
+   * 表示に使うカテゴリ。既存パス編集ではフック側(種別から補完した値)が正、
+   * 新規敷設では prop が正(フックの値は上の useEffect で追従するまで一瞬 null になりうる)。
+   */
+  const activeCategory: PathCategory | null =
+    editPathId != null ? pathConstruction.category : category;
+
+  /* ---- ハンドラ ---- */
 
   /**
    * パネル全体のクリックイベントを捕捉する共通のハンドラ。
@@ -150,6 +176,8 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
       await pathConstruction.confirmPath();
       // 成功時: Unityに編集終了を通知してデータをリロードさせる
       await sendEditPathFinish();
+      // 発注で拘束額が増えたので、規格ごとの資金目安を取り直す
+      refreshAffordability();
       if (editPathId != null) {
         // 既存パス編集: 確定したらパネルを閉じる
         // 先に STATE_NORMAL に戻してから表示モードを切り替える。
@@ -183,7 +211,7 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
       }
       void showNotification({ message: displayMessage, durationMs: 8000 });
     }
-  }, [editPathId, onClose, pathConstruction, t]);
+  }, [editPathId, onClose, pathConstruction, refreshAffordability, t]);
 
   /**
    * キャンセルボタンを押した際のハンドラ。
@@ -280,28 +308,8 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
 
   return (
     <div className="pc-layout" onClick={handlePanelClick}>
-      {/* カテゴリ選択(道路/インフラ)。軌道は専用の軌道建設パネル(track_build)へ分離した。 */}
-      <div className="pc-section">
-        <div className="pc-category-group">
-          {([
-            { key: "road", label: t("path_construction.category.road", "道路") },
-            { key: "infra", label: t("path_construction.category.infra", "インフラ") },
-          ] as { key: PathCategory; label: string }[]).map((c) => (
-            <button
-              key={c.key}
-              type="button"
-              className={`pc-category-btn ${pathConstruction.category === c.key ? "active" : ""}`}
-              disabled={editPathId != null}
-              onClick={() => handleCategoryChange(c.key)}
-            >
-              {c.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* カテゴリ別バリアント選択 */}
-      {pathConstruction.category === "road" && (
+      {/* カテゴリ別バリアント選択(カテゴリはウィンドウ種別で固定。軌道は track_build が担う) */}
+      {activeCategory === "road" && (
         <RoadVariantSelector
           masterData={masterData}
           selectedType={pathConstruction.selectedType}
@@ -310,9 +318,10 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
           onSelectType={pathConstruction.onTypeChange}
           onSelectVariant={pathConstruction.selectVariant}
           disabled={editPathId != null}
+          affordability={variantAffordability}
         />
       )}
-      {pathConstruction.category === "infra" && (
+      {activeCategory === "infra" && (
         <InfraVariantSelector
           masterData={masterData}
           selectedType={pathConstruction.selectedType}
@@ -321,6 +330,7 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
           onSelectType={pathConstruction.onTypeChange}
           onSelectVariant={pathConstruction.selectVariant}
           disabled={editPathId != null}
+          affordability={variantAffordability}
         />
       )}
 

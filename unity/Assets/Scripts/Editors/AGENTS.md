@@ -43,7 +43,7 @@ Ctrlメニューは8項目、HUDも最大8アイコン。並行の2アイコン�
 
 - `RoadPlanManager.Earthwork.cs` は同じアンカー・制御点・盛土・並行オフセットから造成プレビューを要求する。`RoadEarthworkPreview` は250ms静止後に `/paths/earthwork-preview` を1要求ずつ送り、形状変更時に旧メッシュを消し、古い応答を破棄する。切土橙・盛土青の半透明体積は専用`EarthworkPreview`シェーダーで地形越しに表示する（道路本体には適用しない）。確定・キャンセル時は`Clear`、破棄時はメッシュ・マテリアル・表示GOも解放する。`RoadRenderer.OffsetPolylineLateral`は道路表示と造成要求で共用する。
 
-- **`RoadRenderer` のプレビューは Dreamteck `SplineMesh` ベースで、生成時の変形が1フレーム遅延する。** そのため毎フレーム破棄→再生成すると「生成直後＝未変形＝不可視」のまま消え続ける。`UpdateRoadPreview` は前回と**同一形状・同一パラメータなら再生成をスキップ**して既存オブジェクトを維持し、変形完了後に安定表示させる(特にグリッド吸着中はセル内移動で点列が不変)。形状を変えずに毎フレーム作り直す実装にしないこと。
+- **道路プレビューは詳細な前区間・操作中の帯・詳細な後区間を別々に保持する**（`RoadRenderer.Sections.cs`）。`RoadPlanManager.UpdatePreviewSections` は配置中のホバー終点を詳細区間に含めない。曲線配置中は直前の1区間も帯へ含め、仮終点を追加したCatmull-Rom接線で末尾2区間をベジエ描画する（手動制御点は尊重）。打点時には自動制御点を再計算し、配置済み区間も曲線にする。帯の曲線は制御多角形長を基準に約2m・最低16・最大4096分割で再標本化する。ドラッグは直線の両隣、曲線アンカーの前後2区間（隣接アンカーの自動接線も変わるため）、制御点の両隣を帯にし、終了時に詳細へ戻す。詳細区間は同じ点列・設定ならGOを再利用し、変更時だけ本番の `PathMeshFactory` で生成する。帯はMeshと出力リストを再利用し、複線・ホームの左右幅を保持する。地形追従・盛土・高架は `GetMovingPreviewPoints` で反映する（保存形状と判定用点列は変更しない）。生成器が返すクリック用メッシュとフォールバック、帯のMeshはRoadRendererが解放する。駅舎の区間分割境界には端部建屋を生成しない。検証は `Tests/RoadPreview/run-unity.ps1`。
 
 - **プレビュー点群(`RoadPlanManager.GetRenderPoints`)の地形追従は曲線/直線で経路が違う。** 直線モードは点列をそのまま渡し、`RoadPath.Generate` 内の `SubdividePointsWithTerrain` が中間点を地形高さに追従させる。曲線モードは `GetRenderPoints` がベジエを直接サンプリングするため、**ここで地上道路(相対高さ≒0)のサンプル点Yを地形高さ＋盛土に追従させないと、ベジエがアンカー間の起伏を無視してYを補間し、丘や谷で道路が地形に埋まる**。実道路を生成する `PathManager.SampleBezierSegmentWithTerrain` と同じロジックを `GetRenderPoints` 内に持つ(高架=相対高さ>0の区間はベジエYのまま立体を維持)。
 
@@ -66,3 +66,7 @@ Ctrlメニューは8項目、HUDも最大8アイコン。並行の2アイコン�
 `PropEditor/PropPlacementManager`は`PropGeometry`の固定座標散布と`PropManager.CanPreview`の障害物判定を共用する。ロード済み・障害物取得済みの小区画だけを半透明GPUインスタンシングで描画し、`PreviewRevision`変更時に更新する。散布スケールは永続側と同じ0.8〜1.2で、個別配置用scaleを乗算しない。個別配置の編集用GameObjectは重なり判定を行わず表示する。CanPreviewの障害物・ロード範囲判定は散布プレビュー専用であり、個別配置へ適用しない。UIへの保存送信は従来どおりTauri側が行う。
 
 駅舎のHouseEndsはプレビュー仮PathSummaryとRoadRendererの再生成キーに含める。建設中はA/Bの端点ラベルを表示し、既存形状編集時はロード済みhouse_endsを使う。
+
+## 道路敷設の衝突と確定
+
+`EmitShapeUpdate` の `can_confirm` はEditingフェーズかつローカル交差なしの場合だけtrue。Tauriは全線の `/paths/validate` と併せて確定を許可する。ローカルは占有高さを削らず、バックエンド確定だけ50cmの緩衝を持つ。`SampleElevationSegments` は非追従区間をアンカーの絶対標高で補間し、既存パスは保存制御点と `station_grade_profile` も参照する。警告は `OccupancyVolumeUtil` の半透明箱で、道路本体を赤くしない。形状・複線設定変更時は箱キャッシュと権威警告を無効化する。

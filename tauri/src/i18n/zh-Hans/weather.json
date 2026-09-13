@@ -1,0 +1,23 @@
+{
+  "weather": {
+    "label": "天气",
+    "choose": "选择天气",
+    "loading": "正在获取天气…",
+    "unknown": "未知",
+    "automatic": "{{weather}}（自动）",
+    "failed": "无法更改天气",
+    "names": {
+      "clear": "晴空万里",
+      "high_clouds": "薄云",
+      "fair": "晴天",
+      "broken_clouds": "多云间晴",
+      "overcast": "阴天",
+      "rain_clouds": "雨云",
+      "fog": "雾",
+      "sunset": "晚霞",
+      "drizzle": "毛毛雨",
+      "rain": "雨",
+      "heavy_rain": "大雨"
+    }
+  }
+}

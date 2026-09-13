@@ -28,7 +28,7 @@ pub const ICON_PANEL_DEFAULT_HEIGHT: f64 = 660.0;
 
 /// コックピット(画面下部中央・常用ツール/公共サービス充足度/都市名日付/予算メータ/アラート/エポック実行)のサイズ。
 /// ウィンドウはパネルの実寸ぴったりで作るため、中身を増やしたらこの幅も広げる必要がある。
-pub const COCKPIT_WIDTH: f64 = 640.0;
+pub const COCKPIT_WIDTH: f64 = 800.0;
 pub const COCKPIT_HEIGHT: f64 = 76.0;
 
 /// システムトレイ(画面右下・設定/セーブ/リロード)のサイズ
@@ -674,6 +674,7 @@ pub async fn open_window(app: AppHandle, state: SharedState, payload: OpenWindow
 const EDIT_MODE_WINDOW_TYPES: &[&str] = &[
     "parcel_creation",
     "path_build",
+    "infra_build",
     "track_build",
     "building_construction",
     "terrain_unlock",
@@ -725,8 +726,9 @@ pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) 
                     json!({ "state": "STATE_NORMAL" }),
                 );
             }
-            if wt == "path_build" {
-                // 道路建設パネルが閉じられた場合、描画されているグリッドを確実に非表示にする。
+            if wt == "path_build" || wt == "infra_build" {
+                // 道路建設・インフラ建設パネル(同じ PathConstructionPanel)が閉じられた場合、
+                // 描画されているグリッドを確実に非表示にする。
                 // ウィンドウは非表示(再利用待ち)になるだけでReact側のアンマウント処理による
                 // クリーンアップ送信が走らないため、Rustのウィンドウクローズ処理側で明示的にオフを送る。
                 let _ = ipc::send_ui_action(

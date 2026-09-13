@@ -72,6 +72,8 @@
     }
   },
   "path_construction": {
+    "collisionChecking": "Checking for collisions…",
+    "collisionUnready": "Finalize the shape and resolve any collisions shown by red volumes.",
     "constructionSpeed": "Construction Speed",
     "selectType": "-- Select Type --",
     "selectTypeFirst": "Please select a type",

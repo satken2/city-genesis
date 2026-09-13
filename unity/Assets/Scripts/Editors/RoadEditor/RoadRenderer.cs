@@ -6,7 +6,7 @@ using GeneratedModels;
 /// RoadRenderer: 道路エディタの3Dプレビューメッシュ生成のみを担当する。
 /// 2Dオーバーレイ描画は RoadEditorOverlayRenderer に移動済み。
 /// </summary>
-public class RoadRenderer : MonoBehaviour
+public partial class RoadRenderer : MonoBehaviour
 {
     private MeshFilter previewMeshFilter;
     private MeshRenderer previewMeshRenderer;
@@ -16,9 +16,6 @@ public class RoadRenderer : MonoBehaviour
 
     // 直近に生成したプレビューの形状・パラメータ。
     // 同一形状で再度呼ばれた場合に破棄→再生成を行わないための重複判定に使う。
-    // 特にグリッド吸着中はカーソルがセル内で動いても吸着先（点列）が不変なため、
-    // ここで弾かないと毎フレーム破棄→再生成され、SplineMesh の遅延変形でプレビューが
-    // 「生成された瞬間は未変形＝不可視」のまま消え続ける。
     private List<Vector3> lastPreviewPoints;
     private int lastPathType;
     private int lastPathSubtype;
@@ -29,7 +26,7 @@ public class RoadRenderer : MonoBehaviour
 
     private void OnGUI()
     {
-        if (currentPreviewObject == null || lastPathType != Constants.PATH_STATION_HOUSE ||
+        if (isSection || lastPathType != Constants.PATH_STATION_HOUSE ||
             lastPreviewPoints == null || lastPreviewPoints.Count < 2 || Camera.main == null) return;
         for (int i = 0; i < 2; i++)
         {
@@ -101,9 +98,7 @@ public class RoadRenderer : MonoBehaviour
         }
 
         // 形状・パラメータが前回と同一なら再生成しない（破棄→再生成のスラッシングを防ぐ）。
-        // これにより生成済みオブジェクトが維持され、SplineMesh が次フレームで変形を完了して
-        // 安定的に表示される。グリッド吸着中はセル内移動で点列が変わらないため特に効く。
-        if (hasPreviewState && currentPreviewObject != null &&
+        if (hasPreviewState &&
             lastPathType == pathType && lastPathSubtype == pathSubtype &&
             lastCurved == curved && lastIsValid == isValid &&
             lastPlatformSide == platformSide && lastHouseEnds == houseEnds &&
@@ -117,9 +112,11 @@ public class RoadRenderer : MonoBehaviour
         // 前回のプレビューオブジェクトを削除
         if (currentPreviewObject != null)
         {
+            currentPreviewObject.SetActive(false);
             Destroy(currentPreviewObject);
             currentPreviewObject = null;
         }
+        ReleaseOwnedMeshes();
         previewMeshFilter.mesh = null;
 
         // バリデーション結果に応じたマテリアルを選択
@@ -209,6 +206,9 @@ public class RoadRenderer : MonoBehaviour
 
         PathMeshResult meshResult = PathMeshFactory.GeneratePathMesh(tempPathData, componentPoints);
         if (meshResult == null) return;
+        // 生成器が返す帯は、詳細GOがある場合には未使用のクリック用メッシュ。
+        // フォールバック表示を含め、このレンダラーが寿命を管理する。
+        if (meshResult.Mesh != null) ownedMeshes.Add(meshResult.Mesh);
 
         if (meshResult.GeneratedObject != null)
         {
@@ -382,17 +382,20 @@ public class RoadRenderer : MonoBehaviour
     /// </summary>
     public void ResetPreview()
     {
+        foreach (var section in sections)
+            if (section != null) section.ResetPreview();
         if (currentPreviewObject != null)
         {
+            currentPreviewObject.SetActive(false);
             Destroy(currentPreviewObject);
             currentPreviewObject = null;
         }
 
         if (previewMesh != null)
         {
-            previewMesh.Clear();
             previewMesh = null;
         }
+        ReleaseOwnedMeshes();
         if (previewMeshFilter != null)
         {
             previewMeshFilter.mesh = null;

@@ -59,6 +59,7 @@ export type HudIconDef = {
 export const MENU_ICONS: HudIconDef[] = [
   { id: "road", src: "menu_road.png", tooltipKey: "taskbar.menuRoad", windowType: "path_build" },
   { id: "track", src: "menu_track.png", tooltipKey: "taskbar.menuTrack", windowType: "track_build" },
+  { id: "infra", src: "menu_infra.png", tooltipKey: "taskbar.menuInfra", windowType: "infra_build" },
   { id: "land", src: "menu_land.png", tooltipKey: "taskbar.menuLand", windowType: "parcel_creation" },
   { id: "district", src: "menu_district.png", tooltipKey: "taskbar.menuDistrict" },
   { id: "construction", src: "menu_construction.png", tooltipKey: "taskbar.menuConstruction", windowType: "building_construction", enabledWhenLocked: true },
@@ -100,6 +101,7 @@ export const TRAY_ICONS: HudIconDef[] = [
  */
 export const EDIT_MODE_WINDOW_TYPES = new Set<string>([
   "path_build",
+  "infra_build",
   "track_build",
   "parcel_creation",
   "building_construction",

@@ -1,5 +1,7 @@
 # 建物メッシュの生成
 
+`MODEL_PARKING=10` / `MODEL_ROTARY=11` / `MODEL_PARK=12` は `OpenSpaceBuildingMeshBuilder` が区画内の配置計画から面と実寸装飾を組み立てる。底面はSHAPE_FULL、接地は中心位置の地形標高。`site_*` パーツは独立した閾値走査で解決し、`mid-w1` は不要。Farは0.3m板。3003舗装広場はGROUNDでfloorのみを描く。詳細は [[F10_オープンスペースのメッシュ生成]]。
+
 ## 概要
 
 バックエンドの Agent データから、建物の外装メッシュを組み立てて配置する仕様。

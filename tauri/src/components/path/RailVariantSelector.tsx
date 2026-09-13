@@ -12,6 +12,8 @@
 
 import { useTranslation } from "react-i18next";
 import type { PathMasterEntry } from "../../types";
+import type { VariantAffordability } from "../../hooks/useVariantAffordability";
+import { VariantAffordabilityNote } from "./VariantAffordabilityNote";
 
 type RailVariantSelectorProps = {
   /** 敷設できる規格(単線バリアント)の候補一覧。呼び出し側で絞り込み済み。 */
@@ -20,6 +22,8 @@ type RailVariantSelectorProps = {
   selectedVariant: number | null;
   onSelectVariant: (variantId: number) => void;
   disabled?: boolean;
+  /** バリアント単位の資金目安。渡すと基準費用を賄えないバリアントを選択不可にする */
+  affordability?: VariantAffordability | null;
 };
 
 export function RailVariantSelector({
@@ -27,8 +31,11 @@ export function RailVariantSelector({
   selectedVariant,
   onSelectVariant,
   disabled = false,
+  affordability = null,
 }: RailVariantSelectorProps) {
   const { t } = useTranslation();
+  const isUnaffordable = (variantId: number) =>
+    affordability != null && !affordability.unlimited && affordability.variants[variantId]?.affordable === false;
 
   return (
     <div className="pc-section">
@@ -50,12 +57,18 @@ export function RailVariantSelector({
           }}
         >
           {variantOptions.map((v) => (
-            <option key={v.id} value={v.id}>
+            <option key={v.id} value={v.id} disabled={isUnaffordable(v.id)}>
               {v.data.display_name}
+              {isUnaffordable(v.id) ? t("construction.variantUnaffordableSuffix") : ""}
             </option>
           ))}
         </select>
       )}
+      <VariantAffordabilityNote
+        affordability={affordability}
+        anyUnaffordable={variantOptions.some((v) => isUnaffordable(v.id))}
+        kind="path"
+      />
     </div>
   );
 }

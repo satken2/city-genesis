@@ -1,0 +1,199 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.Rendering;
+
+public static class ConstructionPathQA
+{
+    static Assembly assembly;
+    static Type builder, pathType;
+    static int checks;
+    static string output;
+    static Camera camera;
+    const BindingFlags Private = BindingFlags.Instance | BindingFlags.NonPublic;
+    static void Set(object target,string field,object value) => target.GetType().GetField(field).SetValue(target,value);
+    static object Field(object target,string field) => target.GetType().GetProperty(field)?.GetValue(target) ?? target.GetType().GetField(field).GetValue(target);
+    static void Check(bool condition,string label) { checks++; if(!condition) throw new Exception(label); }
+    [InitializeOnLoadMethod] static void Resume()
+    {
+        EditorApplication.delayCall += () => { if(SessionState.GetBool("ConstructionQA",false) && EditorApplication.isPlaying) { SessionState.SetBool("ConstructionQA",false); Run(); } };
+    }
+    public static void Run()
+    {
+        if(!EditorApplication.isPlaying)
+        {
+            GraphicsSettings.defaultRenderPipeline=AssetDatabase.LoadAssetAtPath<RenderPipelineAsset>("Assets/Settings/PC_RPAsset.asset");
+            QualitySettings.renderPipeline=GraphicsSettings.defaultRenderPipeline;
+            ModelPrefabGenerator.SyncAll(); SessionState.SetBool("ConstructionQA",true); EditorApplication.EnterPlaymode(); return;
+        }
+        output=Path.GetDirectoryName(Application.dataPath);
+        try
+        {
+            string[] args=Environment.GetCommandLineArgs();string source=args[Array.IndexOf(args,"-sourceRoot")+1];
+            AppDomain.CurrentDomain.AssemblyResolve += (o,e) => {
+                foreach(string dir in new[]{"/Temp/bin/Debug","/Library/ScriptAssemblies","/Assets/Plugins"}) {
+                    string file=source+dir+"/"+new AssemblyName(e.Name).Name+".dll";
+                    if(File.Exists(file)) return Assembly.LoadFrom(file);
+                } return null;
+            };
+            assembly=Assembly.LoadFrom(source+"/Temp/bin/Debug/Assembly-CSharp.dll");
+            builder=assembly.GetType("ConstructionPathBuilder");pathType=assembly.GetType("ConstructionPathSummary");
+            var masterType=assembly.GetType("MasterDataStore");var master=new GameObject("Master").AddComponent(masterType);
+            masterType.GetProperty("IsInitialized").SetValue(master,true);
+            var table=(IDictionary)masterType.GetField("pathMasterById",Private).GetValue(master);
+            foreach(int variant in new[]{1,2,402}) {
+                var item=Activator.CreateInstance(assembly.GetType("PathMasterItem"));
+                Set(item,"type",variant==402?4:variant);Set(item,"width",variant==402?5f:8f);Set(item,"height",5f);
+                Set(item,"sidewalk_width",1f);Set(item,"lanes",2);Set(item,"pillar_spacing",25f);Set(item,"height_editable",true);
+                Set(item,"model_type",variant==402?"track":"default");table.Add(variant,item);
+            }
+            new GameObject("Models").AddComponent(assembly.GetType("ModelManager"));
+            SetupView();
+            foreach(int variant in new[]{2,1,402}) foreach(float progress in new[]{0f,12.5f,25f,57.5f,90f,99f,100f}) Verify(variant,progress);
+            VerifyCurve(); VerifyTunnel(); VerifyProgressContract(); VerifySingleSpan(table); VerifyFar();
+            foreach(var message in ShaderUtil.GetShaderMessages(Shader.Find("Custom/PathDirt")))
+                Check(message.severity.ToString()!="Error",message.message);
+            File.WriteAllText(output+"/result.txt","PASS: "+checks+" checks; actual FBX, URP dirt, staged piers/decks, ground/rail, curves, tunnel, progress decode/cache key.");
+            EditorApplication.Exit(0);
+        }
+        catch(Exception e) { File.WriteAllText(output+"/result.txt","FAIL "+e);EditorApplication.Exit(1); }
+    }
+    static object PathData(int variant,float progress,float height)
+    {
+        object path=Activator.CreateInstance(pathType);
+        Set(path,"path_id",1);Set(path,"version",1);Set(path,"path_variant",variant);Set(path,"path_type",variant==402?4:variant);
+        Set(path,"status",(int)assembly.GetType("Constants").GetField("STATUS_CONSTRUCTING").GetRawConstantValue());
+        Set(path,"construction_progress",progress);Set(path,"width",variant==402?5f:8f);
+        Set(path,"start_point",new List<object>{-50f,height,0f});Set(path,"end_point",new List<object>{50f,height,0f});
+        return path;
+    }
+    static object Generate(object path,List<Vector3> points,bool tunnel=false)
+    {
+        var context=assembly.GetType("PathDrawContext");context.GetMethod("Begin").Invoke(null,new object[]{Enum.Parse(assembly.GetType("DrawLod"),"Normal"),0d,1d});
+        var args=new object[]{path,points,tunnel,true,null};
+        try{return builder.GetMethod("Generate").Invoke(null,args);}finally{context.GetMethod("End").Invoke(null,null);}
+    }
+    static List<Vector3> Line(float height) => Enumerable.Range(0,101).Select(i=>new Vector3(i-50,height+.1f,0)).ToList();
+    static void Verify(int variant,float progress)
+    {
+        float height=variant==2?0:10;var path=PathData(variant,progress,height);
+        object result=Generate(path,Line(height));var root=(GameObject)Field(result,"GeneratedObject");
+        Render(output+"/"+variant+"-"+(int)progress+".png");
+        File.WriteAllText(output+"/bounds.txt",string.Join("\n",root.GetComponentsInChildren<Renderer>().Select(r=>r.name+" "+r.bounds)));
+        var collider=(Mesh)Field(result,"Mesh");Check(collider!=null && collider.vertexCount>0,"Missing click collider");
+        var supports=root.GetComponentsInChildren<Transform>(true).Where(t=>t.name=="ConstructionSupport").ToArray();
+        int visible=supports.Count(t=>t.gameObject.activeSelf);
+        if(variant==2) Check(supports.Length==0,"Ground has piers");
+        else {
+            Check(supports.Length>=4,"Bridge piers missing");
+            if(progress==0)Check(visible==0,"Piers at zero progress");
+            if(progress>=25)Check(visible==supports.Length && supports.All(t=>t.localScale.y==1),"Piers incomplete at 25 percent");
+            if(progress==12.5f)Check(visible>0 && visible<supports.Length,"Sequential pier growth");
+            foreach(var support in supports.Where(t=>t.gameObject.activeSelf))
+                foreach(var renderer in support.GetComponentsInChildren<Renderer>())
+                    Check(renderer.bounds.min.y>=-.05f,"Pier extends below construction ground: "+renderer.bounds);
+        }
+        var surfaces=root.GetComponentsInChildren<Transform>().Where(t=>t.name=="CompletedSurface").ToArray();
+        if(variant!=2 && progress<=25 || progress==0)Check(surfaces.Length==0,"Surface built too early");
+        if(variant==2 && progress>0) {
+            Check(surfaces.Length>0,"Missing pavement");
+            var bounds=surfaces[0].GetComponentsInChildren<Renderer>().Select(r=>r.bounds).Aggregate((a,b)=>{a.Encapsulate(b);return a;});
+            Check(Math.Abs(bounds.max.x-(-50+progress))<.3f,"Pavement frontier "+progress+" actual="+bounds.max.x);
+        }
+        if(variant==2 && progress==100)Check(root.GetComponentsInChildren<Transform>().All(t=>t.name!="ConstructionDirt"),"Dirt remains on finished pavement");
+        if(variant==2 && progress==100)Check(root.GetComponentsInChildren<Transform>().All(t=>!t.name.StartsWith("construction_")),"Vehicles at 100 percent");
+        if(variant==1 && progress==57.5f)Check(root.GetComponentsInChildren<Transform>().Any(t=>t.name=="construction_crane"),"Missing erection crane");
+        if(variant!=2 && progress==57.5f) {
+            var body=root.GetComponentsInChildren<Renderer>().First(r=>r.name.EndsWith("/body"));
+            Check(Math.Abs(body.bounds.max.x)<.3f,"Deck must stop at middle pier at 57.5 percent");
+        }
+        if(variant!=2) {
+            Check(root.GetComponentsInChildren<Transform>().All(t=>t.name!="ConstructionDirt"),"Elevated dirt");
+            foreach(var vehicle in root.GetComponentsInChildren<Transform>().Where(t=>t.name.StartsWith("construction_"))) {
+                Check(Math.Abs(vehicle.position.z)<.01f,"Vehicle outside path centerline");
+                foreach(var renderer in vehicle.GetComponentsInChildren<Renderer>())
+                    Check(renderer.bounds.min.z>=-(variant==402?2.5f:4f) && renderer.bounds.max.z<=(variant==402?2.5f:4f),"Vehicle outside path width");
+            }
+            if(progress>=90) {
+                var body=root.GetComponentsInChildren<Renderer>().First(r=>r.name.EndsWith("/body"));
+                Check(Math.Abs(body.bounds.max.x-50)<.3f,"Deck incomplete during finishing");
+                Check(root.GetComponentsInChildren<Transform>().Any(t=>t.name=="construction_crane" && Math.Abs(t.position.x-46)<.01f),"Finishing crane moved");
+            }
+        }
+        foreach(var mesh in root.GetComponentsInChildren<MeshFilter>(true).Select(m=>m.sharedMesh).Where(m=>m!=null))
+            foreach(var v in mesh.vertices)Check(!float.IsNaN(v.y) && !float.IsInfinity(v.x),"Nonfinite mesh");
+        Render(output+"/"+variant+"-"+(int)progress+".png");
+        UnityEngine.Object.DestroyImmediate(root);UnityEngine.Object.DestroyImmediate(collider);
+    }
+    static void VerifyCurve()
+    {
+        var path=PathData(2,50,0);Set(path,"curved",true);
+        var points=Enumerable.Range(0,101).Select(i=>new Vector3(i-50,.1f,15*Mathf.Sin(i*Mathf.PI/100))).ToList();
+        var result=Generate(path,points);var root=(GameObject)Field(result,"GeneratedObject");
+        Check(root.GetComponentsInChildren<Renderer>().Any(r=>r.bounds.max.z>12),"Curve lost");Render(output+"/curve.png");
+        UnityEngine.Object.DestroyImmediate(root);UnityEngine.Object.DestroyImmediate((Mesh)Field(result,"Mesh"));
+    }
+    static void VerifyTunnel()
+    {
+        var path=PathData(2,50,-20);var result=Generate(path,Line(-20),true);var root=(GameObject)Field(result,"GeneratedObject");
+        Check(root.GetComponentsInChildren<Renderer>().Length==0,"Buried construction visible");UnityEngine.Object.DestroyImmediate(root);
+    }
+    static void VerifyProgressContract()
+    {
+        var json=assembly.GetReferencedAssemblies().First(a=>a.Name=="Newtonsoft.Json");var convert=Assembly.Load(json).GetType("Newtonsoft.Json.JsonConvert");
+        var decode=convert.GetMethod("DeserializeObject",new[]{typeof(string),typeof(Type)});
+        object response=decode.Invoke(null,new object[]{"{\"paths\":[{\"path_id\":1,\"construction_progress\":35}],\"next_cursor\":5}",assembly.GetType("PagedPathListResponse")});
+        var path=((IList)Field(response,"paths"))[0];Check(Math.Abs((float)builder.GetMethod("Progress").Invoke(null,new[]{path})-.35f)<.001f,"Progress decoding");
+        var manager=new GameObject("Paths").AddComponent(assembly.GetType("PathManager"));
+        var key=manager.GetType().GetMethod("PathRenderKey",Private);
+        var lod=Enum.Parse(assembly.GetType("DrawLod"),"Normal");
+        string a=(string)key.Invoke(manager,new object[]{path,lod,false});Set(path,"construction_progress",60f);
+        string b=(string)key.Invoke(manager,new object[]{path,lod,false});Check(a!=b,"Same-version progress reuses old mesh");
+        foreach(float value in new[]{float.NaN,float.PositiveInfinity,-20f}) {Set(path,"construction_progress",value);Check((float)builder.GetMethod("Progress").Invoke(null,new[]{path})==0,"Invalid progress");}
+    }
+    static void VerifySingleSpan(IDictionary table)
+    {
+        Set(table[1],"single_span",true);
+        var path=PathData(1,57.5f,10);var result=Generate(path,Line(10));var root=(GameObject)Field(result,"GeneratedObject");
+        Check(root.GetComponentsInChildren<Transform>().Count(t=>t.name=="CompletedSurface")==2,"Single-span decks must use one object per supported span");
+        UnityEngine.Object.DestroyImmediate(root);UnityEngine.Object.DestroyImmediate((Mesh)Field(result,"Mesh"));
+        Set(table[1],"single_span",false);
+    }
+    static void VerifyFar()
+    {
+        foreach(int variant in new[]{1,2})foreach(float progress in new[]{0f,35f,80f,100f}) {
+            var path=PathData(variant,progress,variant==1?10:0);var root=new GameObject("FarConstruction");
+            var material=new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            builder.GetMethod("GenerateFar").Invoke(null,new object[]{root,path,Line(variant==1?10:0),8f,material});
+            Check(root.GetComponentsInChildren<Transform>().All(t=>!t.name.StartsWith("construction_") && t.name!="ConstructionSupport"),"Far must not instantiate models");
+            bool hasSurface=root.GetComponentsInChildren<Transform>().Any(t=>t.name=="CompletedSurface");
+            if(variant==1)Check(root.GetComponentsInChildren<Transform>().All(t=>t.name!="ConstructionDirt"),"Far elevated dirt");
+            Check(hasSurface==(variant==1?progress>25:progress>0),"Far progress surface");
+            UnityEngine.Object.DestroyImmediate(root);UnityEngine.Object.DestroyImmediate(material);
+        }
+    }
+    static void SetupView()
+    {
+        GraphicsSettings.defaultRenderPipeline=AssetDatabase.LoadAssetAtPath<RenderPipelineAsset>("Assets/Settings/PC_RPAsset.asset");
+        QualitySettings.renderPipeline=GraphicsSettings.defaultRenderPipeline;
+        File.WriteAllText(output+"/pipeline.txt",GraphicsSettings.defaultRenderPipeline+" / "+QualitySettings.renderPipeline);
+
+        RenderSettings.ambientMode=AmbientMode.Flat;RenderSettings.ambientLight=new Color(.55f,.55f,.55f);
+        var sun=new GameObject("Sun").AddComponent<Light>();sun.type=LightType.Directional;sun.intensity=1.3f;sun.transform.rotation=Quaternion.Euler(48,-35,0);
+        var ground=GameObject.CreatePrimitive(PrimitiveType.Plane);ground.transform.localScale=new Vector3(16,1,10);
+        var material=new Material(Shader.Find("Universal Render Pipeline/Lit"));material.color=new Color(.26f,.32f,.20f);ground.GetComponent<Renderer>().sharedMaterial=material;
+        camera=new GameObject("Camera").AddComponent<Camera>();camera.orthographic=true;camera.orthographicSize=34;camera.aspect=1.8f;
+        camera.transform.position=new Vector3(48,58,-78);camera.transform.LookAt(new Vector3(0,3,0));camera.clearFlags=CameraClearFlags.SolidColor;camera.backgroundColor=new Color(.28f,.34f,.40f);
+    }
+    static void Render(string file)
+    {
+        var rt=new RenderTexture(1440,800,24);camera.targetTexture=rt;camera.Render();RenderTexture.active=rt;
+        var image=new Texture2D(1440,800,TextureFormat.RGB24,false);image.ReadPixels(new Rect(0,0,1440,800),0,0);image.Apply();File.WriteAllBytes(file,image.EncodeToPNG());
+        RenderTexture.active=null;camera.targetTexture=null;UnityEngine.Object.DestroyImmediate(image);UnityEngine.Object.DestroyImmediate(rt);
+    }
+}

@@ -10,6 +10,24 @@
 
 import { invoke } from "@tauri-apps/api/core";
 
+export const IPC_EVENT_WEATHER_STATE = "weather:state";
+
+export type WeatherState = {
+  id: string;
+  locked: boolean;
+  rain: number;
+  presets: { id: string; weight: number; rain: number }[];
+};
+
+export async function queryWeather(): Promise<void> {
+  await invoke("send_window_action", { windowType: "cockpit", entity: null, action: "weather:query", params: {} });
+}
+
+/** id=nullは固定を解除する。天気の正はUnityの応答とし、UIでは抽選しない。 */
+export async function setWeather(id: string | null): Promise<void> {
+  await invoke("send_window_action", { windowType: "cockpit", entity: null, action: "weather:set", params: { id } });
+}
+
 /**
  * グラフィックプログラムのステート種別
  * @see genesis-docs/programs/IPC連携の整理.md「グラフィックプログラムのステート」

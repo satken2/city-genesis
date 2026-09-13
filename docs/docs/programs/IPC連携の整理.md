@@ -364,3 +364,18 @@ invoke("start_load_game", { saveId })
 ## プロップ個別配置の高さ
 
 world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地面からの相対高さm）を受け取る。edit_prop:update_instancesの要素はx/y/z/rotation/scaleで、yにその配置時の相対高さを載せる。Tauriは各点のyをPOST /api/v1/props/instancesへ送り、GETでも同じyを受け取る。高さ指定は全種別共通、0は地表、負値は地中。描画では地形標高へ加算し、モデルの拡大率を掛けない。
+
+### パスの確定可否
+
+`edit_path:update_shape` は `can_confirm` を常送します。これはUnityの形状確定状態とローカル交差検証を合わせた真偽値で、形状が未確定または干渉中ならfalseです。Tauriはこの値だけで確定を許可せず、同じ全線ペイロードの `/paths/validate` 応答も照合します。既存の `world:highlight_objects` によるパス・建物の警告は、メッシュ着色ではなく半透明の占有箱として描画します。
+# 天候の表示と選択
+
+天候の正はUnityにあり、バックエンドへの書き込みや経済パラメータは追加しない。Cockpitは購読後に問い合わせ、応答した天候に合わせて表示と環境音を更新する。
+
+| イベント | 方向 | ペイロード・意味 |
+| --- | --- | --- |
+| `weather:query` | Tauri → Unity | 現在の天候を問い合わせる |
+| `weather:set` | Tauri → Unity | `{id: string または null}`。有効なIDは選択して固定、nullは固定を解除。未知のIDは無視 |
+| `weather:state` | Unity → Cockpit | `{id, locked, rain, presets:[{id, weight, rain}]}`。rainは0=なし、1=霧雨、2=雨、3=大雨 |
+
+送信は`utils/ipc.ts`の`queryWeather` / `setWeather`から`send_window_action`へ、受信はRust `ipc.rs`でCockpitだけに配信する。Unityは選択・抽選・固定変更後にも状態を送る。候補とウェイトはUnityが持ち、Tauriに抽選処理を複製しない。テンプレートモードOFF時はUIから固定解除を送る。詳細は[天気と環境光](../geometries/U_天気と環境光.md)を参照。

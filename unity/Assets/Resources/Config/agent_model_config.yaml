@@ -189,3 +189,23 @@ agents:
     variants:
       - 0
       - 500
+  3001:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  3002:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  3003:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  3004:
+    model: true
+    prebuilt: false
+    variants:
+      - 0

@@ -1,0 +1,10 @@
+/* バリアント選択下の資金目安(利用可能額と、灰色の選択肢がある理由) */
+.pc-affordability-note {
+  margin-top: 8px;
+  font-size: 0.85em;
+  opacity: 0.85;
+}
+.pc-affordability-warning {
+  margin-top: 4px;
+  color: #e08a3c;
+}

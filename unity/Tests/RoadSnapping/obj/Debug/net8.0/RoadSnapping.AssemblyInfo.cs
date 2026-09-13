@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RoadSnapping")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0e158fac5c9def9bd2d98fe0a2666284950b3a65")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+51665a037abc2e2e9ed5ef3c65b17eab7d9b72b3")]
 [assembly: System.Reflection.AssemblyProductAttribute("RoadSnapping")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RoadSnapping")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

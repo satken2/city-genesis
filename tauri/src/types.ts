@@ -394,6 +394,7 @@ export type AgentTypeEntry = {
  * - type=10 (民間施設): supply, materials, 集計パラメータ等を持つ
  *   - building=true の場合: height_per_floor, space_limits等も持つ
  * - type=20 (建物定義): max_floors, min_floors, 建物形状パラメータを持つ
+ * - type=30 (オープンスペース): building=true の建物フィールドのみ。supply / labor / space_limits を持たない
  */
 export type AgentMasterEntry = {
   display_name: string;

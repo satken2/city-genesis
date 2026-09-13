@@ -57,6 +57,9 @@ public static class Constants
     public const int MODEL_MASHUP = 7;
     public const int MODEL_MODULAR_SHED = 8;
     public const int MODEL_RAIL_YARD = 9;
+    public const int MODEL_PARKING = 10;
+    public const int MODEL_ROTARY = 11;
+    public const int MODEL_PARK = 12;
     public const int STRUCTURE_NONE = 0;
     public const int STRUCTURE_WOOD = 1;
     public const int STRUCTURE_SEMI_FIREPROOF = 2;
@@ -96,6 +99,7 @@ public static class Constants
     public const int TYPE_TRADE = 4;
     public const int TYPE_STANDARD = 10;
     public const int TYPE_BUILDING = 20;
+    public const int TYPE_OPEN_SPACE = 30;
     public const int VARIANT_ZONE_CONSTRUCTION = 0;
     public const int VARIANT_ZONE_CONSTRUCTION_MAINTENANCE = 1;
     public const int VARIANT_ZONE_RELOCATE = 3;

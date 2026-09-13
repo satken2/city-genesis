@@ -83,7 +83,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * 専用パネルが実装されているウィンドウタイプのセット
  * これらのタイプはジェネリックな JSON 表示ではなく、専用コンポーネントでレンダリングする
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "zone_merge", "building_direct_acquisition", "path_build", "track_build", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "settings", "credits", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "new_game", "city_rename", "template_editor", "resource_detail", "resource_edit", "prop_placement", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "epoch_result", "quest_complete", "terrain_unlock", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "zone_merge", "building_direct_acquisition", "path_build", "infra_build", "track_build", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "settings", "credits", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "new_game", "city_rename", "template_editor", "resource_detail", "resource_edit", "prop_placement", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "epoch_result", "quest_complete", "terrain_unlock", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map"]);
 
 
 function App() {
@@ -401,11 +401,20 @@ function App() {
               <PathConstructionPanel
                 apiBaseUrl={context.api_base_url}
                 onClose={closeWindow}
+                category="road"
                 editPathId={
                   (context.params as Record<string, unknown> | null)?.extra
                     ? ((context.params as Record<string, unknown>).extra as Record<string, unknown>).editPathId as number | undefined
                     : undefined
                 }
+              />
+            ) : context.window_type === "infra_build" ? (
+              // インフラ(電気・水道)の敷設。パネルは道路建設と共用でカテゴリだけ固定する。
+              // 既存パスの編集は種別を問わず path_build 側(パス詳細パネル起点)で行う。
+              <PathConstructionPanel
+                apiBaseUrl={context.api_base_url}
+                onClose={closeWindow}
+                category="infra"
               />
             ) : context.window_type === "track_build" ? (
               <TrackConstructionPanel

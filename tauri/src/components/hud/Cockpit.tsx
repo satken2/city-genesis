@@ -42,6 +42,8 @@ import { ScoreMiniMeter } from "./ScoreMiniMeter";
 import { TOOL_ICONS, iconUrl, openRegisteredWindow, type HudIconDef } from "./hudCommon";
 import { setHudMode, useHudMode } from "./hudMode";
 import { useHudSession, useTutorialHighlight } from "./useHudSession";
+import { useWeather } from "./useWeather";
+import { WeatherStatus } from "./WeatherStatus";
 import "./hud.css";
 import "./Cockpit.css";
 
@@ -50,7 +52,8 @@ const L1_NOTIFICATION_POLL_INTERVAL_MS = 30_000;
 
 export function Cockpit() {
   const { t, i18n } = useTranslation();
-  const { visible, apiBaseUrl, isLocked, cityName, currentDate, epochExecuting } = useHudSession();
+  const { visible, apiBaseUrl, isLocked, cityName, currentDate, epochExecuting, templateMode } = useHudSession();
+  const { weather, failed: weatherFailed, select: selectWeather } = useWeather(visible, templateMode);
   const mode = useHudMode();
   const getBtnClassName = useTutorialHighlight();
 
@@ -218,7 +221,10 @@ export function Cockpit() {
           {cityName || "—"}
         </button>
         <ScoreMiniMeter apiBaseUrl={apiBaseUrl} onOpen={() => void openRegisteredWindow("achievements")} />
-        <span className="cockpit-date">{formattedDate}</span>
+        <div className="cockpit-date-weather">
+          <span className="cockpit-date">{formattedDate}</span>
+          <WeatherStatus weather={weather} editable={templateMode} failed={weatherFailed} onSelect={selectWeather} />
+        </div>
         <BudgetMiniMeter
           apiBaseUrl={apiBaseUrl}
           onOpen={() => void openRegisteredWindow("city_budget")}

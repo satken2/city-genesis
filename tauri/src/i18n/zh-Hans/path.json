@@ -72,6 +72,8 @@
     }
   },
   "path_construction": {
+    "collisionChecking": "正在检查碰撞…",
+    "collisionUnready": "请确定路线形状，并消除红色立体区域所示的碰撞。",
     "constructionSpeed": "建设速度",
     "selectType": "-- 请选择种类 --",
     "selectTypeFirst": "请选择种类",

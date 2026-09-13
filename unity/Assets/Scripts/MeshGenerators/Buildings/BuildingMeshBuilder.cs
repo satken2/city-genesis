@@ -15,6 +15,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     private static readonly IBuildingMeshGenerator portGenerator = new PortBuildingMeshBuilder();
     private static readonly IBuildingMeshGenerator mashupGenerator = new MashupBuildingMeshBuilder();
     private static readonly IBuildingMeshGenerator railYardGenerator = new RailYardBuildingMeshBuilder();
+    private static readonly IBuildingMeshGenerator openSpaceGenerator = new OpenSpaceBuildingMeshBuilder();
     private static readonly IBuildingMeshGenerator constructingGenerator = new ConstructingBuildingMeshBuilder(ConstructionSiteProfile.Construction);
     private static readonly IBuildingMeshGenerator demolishingGenerator = new ConstructingBuildingMeshBuilder(ConstructionSiteProfile.Demolition);
     private static readonly IBuildingMeshGenerator collapsedGenerator = new CollapsedBuildingMeshBuilder();
@@ -87,13 +88,16 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
             height = floorHeight * 0.5f;
         }
         int modelType = GetModelType(buildingData);
-        if (modelType == Constants.MODEL_MODULAR_GROUND)
+        if (modelType == Constants.MODEL_MODULAR_GROUND || IsOpenSpaceModel(modelType))
         {
             // 地面アセット(畑・太陽光等)は高さを持たないので、薄い板にする。
             height = 0.3f;
         }
         return GenerateSimpleBuildingWithHeight(footprint, height);
     }
+
+    public static bool IsOpenSpaceModel(int modelType) => modelType == Constants.MODEL_PARKING
+        || modelType == Constants.MODEL_ROTARY || modelType == Constants.MODEL_PARK;
 
     private BuildingMeshResult GenerateDetailed(BuildingSummary buildingData, bool isDynamic)
     {
@@ -122,6 +126,11 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         BuildingMeshResult result;
         switch (modelType)
         {
+            case Constants.MODEL_PARKING:
+            case Constants.MODEL_ROTARY:
+            case Constants.MODEL_PARK:
+                result = openSpaceGenerator.Generate(buildingData, isDynamic);
+                break;
             case Constants.MODEL_MODULAR_FLAT:
             case Constants.MODEL_MODULAR_HOUSE:
             case Constants.MODEL_MODULAR_GABLE:

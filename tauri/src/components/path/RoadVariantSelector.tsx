@@ -7,6 +7,7 @@
 import type { MasterData, PathMasterEntry } from "../../types";
 import { PATH_MOTORWAY, PATH_STREET, PATH_WALKWAY } from "../../constants";
 import { TypeVariantSelector, type TypeOption } from "./TypeVariantSelector";
+import type { VariantAffordability } from "../../hooks/useVariantAffordability";
 
 const ROAD_TYPES: TypeOption[] = [
   { type: PATH_MOTORWAY },
@@ -22,6 +23,7 @@ type RoadVariantSelectorProps = {
   onSelectType: (type: number) => void;
   onSelectVariant: (variantId: number) => void;
   disabled?: boolean;
+  affordability?: VariantAffordability | null;
 };
 
 export function RoadVariantSelector(props: RoadVariantSelectorProps) {

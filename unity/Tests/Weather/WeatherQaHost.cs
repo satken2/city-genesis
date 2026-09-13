@@ -9,6 +9,17 @@ public class IpcClient : MonoBehaviour
 {
     public static IpcClient Instance { get; private set; }
     public event Action OnSessionReload, OnSessionForceReload, OnSessionReset, OnGameEnd, OnGameStart;
+    public event Action OnWeatherQuery;
+    public event Action<string> OnWeatherSet;
+    public int Publishes;
+    public string WeatherId;
+    public int Rain;
+    public bool Locked;
+    public object[] Presets;
+    public void EmitWeatherState(string id, bool locked, int rain, object[] presets)
+    { Publishes++; WeatherId = id; Locked = locked; Rain = rain; Presets = presets; }
+    public void QueryWeather() => OnWeatherQuery?.Invoke();
+    public void SetWeather(string id) => OnWeatherSet?.Invoke(id);
     private void Awake() => Instance = this;
     public void Reload() => OnSessionReload?.Invoke();
     public void ResetSession() => OnSessionReset?.Invoke();
@@ -56,7 +67,7 @@ public sealed class WeatherQaHost : MonoBehaviour
             }
             yield return value;
         }
-        File.WriteAllText(root + "/result.txt", $"PASS {checks} checks; 10 weather captures");
+        File.WriteAllText(root + "/result.txt", $"PASS {checks} checks; {WeatherPreset.All.Count} weather captures");
         UnityEditor.EditorApplication.Exit(0);
     }
     private IEnumerator Suite()
@@ -68,15 +79,15 @@ public sealed class WeatherQaHost : MonoBehaviour
         Check(tracker.Observe(2) == 0, "older save baseline");
         tracker.Reset(); Check(tracker.Observe(20) == 0, "session reset");
         var random = new System.Random(412);
-        int[] counts = new int[10];
-        int current = 0;
-        for (int i=0; i<9000; i++)
+        int[] counts = new int[WeatherPreset.All.Count];
+        for (int i=0; i<100000; i++)
         {
-            int next = WeatherEpochTracker.Next(random, current, 10);
-            Check(next != current && next >= 0 && next < 10, "nonrepeating valid choice");
-            counts[next]++; current = next;
+            int next = WeatherEpochTracker.Next(random);
+            Check(next >= 0 && next < counts.Length, "valid choice");
+            counts[next]++;
         }
-        foreach (int count in counts) Check(count > 600 && count < 1200, "all presets reachable");
+        for (int i=0; i<counts.Length; i++)
+            Check(Mathf.Abs(counts[i] / 1000f - WeatherPreset.All[i].Weight) < 0.7f, "observed frequency matches weight");
         var ipc = new GameObject("IPC").AddComponent<IpcClient>();
         new GameObject("State").AddComponent<GameStateManager>();
         var sun = new GameObject("Sun").AddComponent<Light>(); sun.type = LightType.Directional;
@@ -89,9 +100,10 @@ public sealed class WeatherQaHost : MonoBehaviour
         ipc.Reload();
         yield return null; yield return null; yield return null;
         Check(controller.CurrentIndex == initial, "editing reload preserves weather");
+        int before = ipc.Publishes;
         ApiClient.Epoch = 1; ipc.Reload();
         yield return null; yield return null; yield return null;
-        Check(controller.CurrentIndex != initial, "epoch advances weather");
+        Check(ipc.Publishes > before, "epoch draws and publishes weather, including consecutive same weather");
         controller.SelectWeather(8);
         ApiClient.Epoch = 2; ipc.Reload();
         yield return null; yield return null; yield return null;
@@ -99,6 +111,14 @@ public sealed class WeatherQaHost : MonoBehaviour
         ipc.ResetSession(); ApiClient.Epoch = 30; ipc.Begin();
         yield return null; yield return null; yield return null;
         Check(controller.CurrentIndex == 8, "new session only establishes baseline");
+        ipc.SetWeather("heavy_rain");
+        Check(ipc.WeatherId == "heavy_rain" && ipc.Rain == 3 && ipc.Locked, "manual weather acknowledged with rain level");
+        ipc.SetWeather("not_a_weather");
+        Check(ipc.WeatherId == "heavy_rain", "unknown weather rejected");
+        ipc.SetWeather(null);
+        Check(!controller.Locked && !ipc.Locked, "automatic selection releases lock");
+        ipc.QueryWeather();
+        Check(ipc.Presets.Length == WeatherPreset.All.Count, "complete authoritative options");
         controller.enabled = false;
         Check(RenderSettings.skybox == originalSky && Mathf.Approximately(sun.intensity,1.1f), "environment restored on disable");
         controller.enabled = true;
@@ -119,7 +139,7 @@ public sealed class WeatherQaHost : MonoBehaviour
             float h = 10 + (float)rng.NextDouble()*60;
             MakeBox(new Vector3(x*38,h/2,z*38), new Vector3(22,h,24), Color.Lerp(new Color(0.45f,0.48f,0.51f), new Color(0.88f,0.84f,0.75f),(float)rng.NextDouble()));
         }
-        for (int i=0; i<10; i++)
+        for (int i=0; i<WeatherPreset.All.Count; i++)
         {
             controller.SelectWeather(i, true, true);
             Vector3 expectedSun = new Vector3(Mathf.Sin(WeatherPreset.All[i].Azimuth * Mathf.Deg2Rad), 0,
@@ -127,7 +147,15 @@ public sealed class WeatherQaHost : MonoBehaviour
             Vector3 actualSun = Vector3.ProjectOnPlane(-sun.transform.forward, Vector3.up).normalized;
             Check(Vector3.Dot(expectedSun, actualSun) > 0.999f, "sun position matches preset compass bearing");
             for (int frame = 0; frame < 16; frame++) yield return null;
+            if (WeatherPreset.All[i].Rain > 0)
+            {
+                var particles = controller.GetComponentInChildren<ParticleSystem>();
+                particles.Simulate(3f, true, true);
+                Check(particles.particleCount > 0, "rain particles emitted");
+                yield return null;
+            }
             Check(!UnityEditor.ShaderUtil.ShaderHasError(RenderSettings.skybox.shader), "sky shader compilation");
+            Check(!UnityEditor.ShaderUtil.ShaderHasError(Resources.Load<Shader>("Weather/RainStreak")), "rain shader compilation");
             RenderTexture.active = camera.targetTexture;
             var pixels = new Texture2D(1280,720,TextureFormat.RGB24,false);
             pixels.ReadPixels(new Rect(0,0,1280,720),0,0); pixels.Apply();

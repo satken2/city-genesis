@@ -72,6 +72,8 @@
     }
   },
   "path_construction": {
+    "collisionChecking": "Vérification des collisions…",
+    "collisionUnready": "Finalisez le tracé et résolvez les collisions signalées par les volumes rouges.",
     "constructionSpeed": "Vitesse de construction",
     "selectType": "-- Choisir le type --",
     "selectTypeFirst": "Choisissez un type",

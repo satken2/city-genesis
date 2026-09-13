@@ -72,6 +72,8 @@
     }
   },
   "path_construction": {
+    "collisionChecking": "干渉を確認しています…",
+    "collisionUnready": "形状を確定し、赤い占有範囲の干渉を解消してください。",
     "constructionSpeed": "建設スピード",
     "selectType": "-- 種別を選択 --",
     "selectTypeFirst": "種別を選択してください",

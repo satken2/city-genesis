@@ -12,10 +12,16 @@ public sealed class WeatherEpochTracker
         return advanced;
     }
 
-    public static int Next(System.Random random, int current, int count)
+    public static int Next(System.Random random)
     {
-        if (count < 2) return 0;
-        int next = random.Next(count - 1);
-        return next >= current ? next + 1 : next;
+        int total = 0;
+        foreach (var preset in WeatherPreset.All) total += preset.Weight;
+        int roll = random.Next(total);
+        for (int i = 0; i < WeatherPreset.All.Count; i++)
+        {
+            roll -= WeatherPreset.All[i].Weight;
+            if (roll < 0) return i;
+        }
+        return WeatherPreset.All.Count - 1;
     }
 }

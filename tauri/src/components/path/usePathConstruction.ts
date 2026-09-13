@@ -29,6 +29,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
 import type { MasterData, PathMasterEntry, CombinedPathComponent } from "../../types";
@@ -165,6 +166,7 @@ export function usePathConstruction(
   apiBaseUrl?: string,
   pathId?: number | null,
 ) {
+  const { t } = useTranslation();
   const [category, setCategory] = useState<PathCategory | null>(null);
   const [selectedType, setSelectedType] = useState<number | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<number | null>(null);
@@ -564,98 +566,15 @@ export function usePathConstruction(
    * 平行パス群へ展開し、travel_direction を設定して1回のPOSTで一括作成する。
    * それ以外(道路・インフラ・単一パス・既存パス編集)は従来どおり単一パスとして送る。
    */
-  /* ---- パス干渉の権威問い合わせ & ハイライト ---- */
-
-  // 生ジオメトリ body で POST /paths/interference を叩き、結果を Unity へハイライト送信する。
-  // 敷設中のローカル推定表示とは別に、形状確定時・確定ボタン押下時の権威判定に使う。
-  const queryInterferenceAndHighlight = useCallback(
-    async (body: Record<string, unknown>): Promise<void> => {
-      if (!apiBaseUrl) return;
-      try {
-        const res = await fetchApi<PathInterferenceHighlight>(
-          `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/interference`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-          }
-        );
-        if (res) await sendHighlightObjects(res, "path_build");
-      } catch (err) {
-        console.error("[usePathConstruction] interference query failed:", err);
-      }
-    },
-    [apiBaseUrl]
-  );
-
-  // 形状確定(is_finalized)受信時に、そのペイロードから干渉問い合わせbodyを組み立てて発火する。
-  // リスナーは一度だけ登録され closure が stale になるため、最新stateを見る実体を ref に載せる。
-  const finalizeInterferenceRef = useRef<
-    (payload: {
-      is_curved?: boolean;
-      follow_terrain?: number;
-      selected_points?: number[][];
-      start_control?: number[];
-      end_control?: number[];
-      embankment_heights?: number[];
-      waypoint_controls?: Array<{ control_in?: number[] | null; control_out?: number[] | null }>;
-    }) => void
-  >(() => {});
-  finalizeInterferenceRef.current = (payload) => {
-    if (selectedVariant === null) return;
-    const pts = payload.selected_points;
-    if (!pts || pts.length < 2) return;
-    const isCurved = payload.is_curved === true;
-    // 座標は Unity が既にバックエンド系 [x, relY, z] で送っている(construction-cost と同形)。
-    const body: Record<string, unknown> = {
-      path_variant: selectedVariant,
-      house_ends: selectedVariantData?.type === PATH_STATION_HOUSE ? houseEnds : "both",
-      start_point: pts[0],
-      end_point: pts[pts.length - 1],
-      curved: isCurved,
-    };
-    if (isCurved && payload.start_control) body.start_control = payload.start_control;
-    if (isCurved && payload.end_control) body.end_control = payload.end_control;
-    const waypoints = pts.slice(1, -1);
-    if (waypoints.length > 0) {
-      const wcs = payload.waypoint_controls;
-      body.waypoints = waypoints.map((pt, i) => {
-        const wc = isCurved && Array.isArray(wcs) ? wcs[i] : undefined;
-        if (wc && (wc.control_in || wc.control_out)) {
-          return {
-            position: pt,
-            control_in: wc.control_in ?? null,
-            control_out: wc.control_out ?? null,
-          };
-        }
-        return pt;
-      });
-    }
-    if (Array.isArray(payload.embankment_heights) && payload.embankment_heights.length > 0) {
-      body.embankment_heights = payload.embankment_heights;
-    }
-    if (
-      typeof payload.follow_terrain === "number" &&
-      payload.follow_terrain !== FOLLOW_TERRAIN_UNSET
-    ) {
-      body.follow_terrain = payload.follow_terrain;
-    }
-    void queryInterferenceAndHighlight(body);
-  };
-
-  const confirmPath = useCallback(async (): Promise<void> => {
-    if (!apiBaseUrl || selectedVariant === null || rawPoints.length < 2) {
-      throw new Error("Invalid state for path confirmation");
-    }
-
+  // 事前検証と確定が同じ全線・制御点を送るため、送信形状を一度だけ組み立てる。
+  const constructionBody = useMemo(() => {
+    if (selectedVariant === null || rawPoints.length < 2) return null;
     const isCurved = curveMode !== "straight";
-
-    // 軌道複線: 中心線を各コンポーネントのオフセットで展開して一括作成する。
     if (railComponents) {
       const anchorDirs = computeAnchorOffsetDirs(
         rawPoints.map((p) => ({ x: p[0], z: p[2] }))
       );
-      const tempIdBase = `build_${Date.now()}`;
+      const tempIdBase = "build";
 
       const pathsPayload = railComponents.map((comp, idx) => {
         const pts = offsetPolyline3D(
@@ -726,32 +645,8 @@ export function usePathConstruction(
         return data;
       });
 
-      // 確定ボタン押下時の権威ある干渉ハイライト（複線は中心線代表=先頭コンポーネントで問い合わせる）。
-      // 送信完了を待ってから作成する(成功後のクリアより後にハイライトが届くと赤表示が残留するため)。
-      await queryInterferenceAndHighlight(pathsPayload[0]);
-
-      const res = await fetchApi<{ paths: Array<{ path_temp_id: string | null; path_id: number }> }>(
-        `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ paths: pathsPayload, align_station_tracks: hasPlatform && selectedVariantData?.type === PATH_TRACK }),
-        }
-      );
-      // 作成に成功したら敷設由来のハイライトを消す(以後の計画中パスの干渉表示は、
-      // 直後に開く詳細パネルが source="path_detail" で担う)。失敗時は例外でここに
-      // 到達せず、赤表示が確定できない理由を示し続ける。
-      void sendClearHighlights("path_build");
-      if (res && res.paths && res.paths.length > 0) {
-        const firstPath = res.paths[0];
-        void invoke("open_registered_window", {
-          windowType: "path_detail",
-          entityId: String(firstPath.path_id),
-        });
-      }
-      return;
+      return { paths: pathsPayload, align_station_tracks: hasPlatform && selectedVariantData?.type === PATH_TRACK };
     }
-
     const pathData: Record<string, unknown> = {
       path_variant: selectedVariant,
       house_ends: selectedVariantData?.type === PATH_STATION_HOUSE ? houseEnds : "both",
@@ -764,7 +659,7 @@ export function usePathConstruction(
 
     // 新規作成時のみ一時IDを付与する
     if (pathId == null) {
-      pathData.path_temp_id = `build_${Date.now()}`;
+      pathData.path_temp_id = "build";
     }
 
     // 駅パスのホーム設置側。建設時にのみ指定できる(既存パスの更新では送らない)。
@@ -808,40 +703,66 @@ export function usePathConstruction(
       pathData.follow_terrain = followTerrain;
     }
 
-    // 確定ボタン押下時の権威ある干渉ハイライト（pathData はそのまま干渉問い合わせbodyになる）。
-    // 送信完了を待ってから作成する(成功後のクリアより後にハイライトが届くと赤表示が残留するため)。
-    await queryInterferenceAndHighlight(pathData);
+    return { paths: [pathData], align_station_tracks: false };
+  }, [selectedVariant, selectedVariantData, rawPoints, rawEmbankmentHeights, curveMode, startControl, endControl, rawWaypointControls, pathId, railComponents, hasPlatform, houseEnds, platformSide, followTerrain]);
 
-    if (pathId != null) {
-      // 既存パス更新
-      await fetchApi(`${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/${pathId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(pathData),
-      });
-    } else {
-      // 新規作成
-      const res = await fetchApi<{ paths: Array<{ path_temp_id: string | null; path_id: number }> }>(
-        `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ paths: [pathData] }),
-        }
-      );
-      if (res && res.paths && res.paths.length > 0) {
-        const firstPath = res.paths[0];
-        void invoke("open_registered_window", {
-          windowType: "path_detail",
-          entityId: String(firstPath.path_id),
-        });
-      }
-    }
-    // 確定に成功したら敷設由来のハイライトを消す(以後の計画中パスの干渉表示は、
-    // 直後に開く詳細パネルが source="path_detail" で担う)。失敗時は例外でここに
-    // 到達せず、赤表示が確定できない理由を示し続ける。
+  const [localCanConfirm, setLocalCanConfirm] = useState(false);
+  const localCanConfirmRef = useRef(false);
+  const [validation, setValidation] = useState<{ key: string; valid: boolean } | null>(null);
+  const validationKey = JSON.stringify({ ...constructionBody, exclude_path_id: pathId ?? null });
+  const currentValidationKey = useRef(validationKey);
+  currentValidationKey.current = validationKey;
+  const canConfirm = localCanConfirm && constructionBody !== null
+    && validation?.key === validationKey && validation.valid;
+
+  useEffect(() => {
     void sendClearHighlights("path_build");
-  }, [apiBaseUrl, selectedVariant, selectedVariantData, rawPoints, rawEmbankmentHeights, curveMode, startControl, endControl, rawWaypointControls, pathId, railComponents, hasPlatform, houseEnds, platformSide, followTerrain, queryInterferenceAndHighlight]);
+    if (!apiBaseUrl || !constructionBody || !localCanConfirm) return;
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      try {
+        const result = await fetchApi<PathInterferenceHighlight & { is_valid: boolean }>(
+          `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/validate`,
+          { method: "POST", headers: { "Content-Type": "application/json" }, body: validationKey }
+        );
+        if (!cancelled && currentValidationKey.current === validationKey) {
+          setValidation({ key: validationKey, valid: result?.is_valid === true });
+          if (result) await sendHighlightObjects(result, "path_build");
+        }
+      } catch {
+        if (!cancelled) setValidation({ key: validationKey, valid: false });
+      }
+    }, 150);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [apiBaseUrl, constructionBody, localCanConfirm, validationKey]);
+
+  const confirmPath = useCallback(async (): Promise<void> => {
+    if (!apiBaseUrl || !constructionBody || !canConfirm || !localCanConfirmRef.current
+        || currentValidationKey.current !== validationKey) {
+      throw new Error(t("path_construction.collisionUnready"));
+    }
+    // 送信直前にも読み取り検証し、他の編集による都市側の変化を拾う。
+    const checked = await fetchApi<{ is_valid: boolean }>(
+      `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/validate`,
+      { method: "POST", headers: { "Content-Type": "application/json" }, body: validationKey }
+    );
+    if (!checked?.is_valid || !localCanConfirmRef.current || currentValidationKey.current !== validationKey) {
+      setValidation({ key: validationKey, valid: false });
+      throw new Error(t("path_construction.collisionUnready"));
+    }
+    const response = await fetchApi<{ paths: Array<{ path_id: number }> }>(
+      `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/${pathId ?? ""}`,
+      { method: pathId == null ? "POST" : "PATCH", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pathId == null ? constructionBody : constructionBody.paths[0]) }
+    );
+    setValidation(null);
+    localCanConfirmRef.current = false;
+    setLocalCanConfirm(false);
+    void sendClearHighlights("path_build");
+    if (pathId == null && response?.paths?.length) {
+      void invoke("open_registered_window", { windowType: "path_detail", entityId: String(response.paths[0].path_id) });
+    }
+  }, [apiBaseUrl, constructionBody, canConfirm, validationKey, pathId, t]);
 
   /* ---- 都市の通行方向を取得(既定の進行方向割り当てに使う) ---- */
   useEffect(() => {
@@ -939,6 +860,7 @@ export function usePathConstruction(
         is_curved: boolean;
         follow_terrain?: number;
         is_finalized?: boolean;
+        can_confirm?: boolean;
         selected_points?: number[][];
         start_control?: number[];
         end_control?: number[];
@@ -950,11 +872,10 @@ export function usePathConstruction(
       }>(IPC_EVENT_EDIT_PATH_UPDATE_SHAPE, (event) => {
         console.log("[usePathConstruction] edit_path.update_shape", event.payload);
 
-        // 形状確定(右クリック)なら、このペイロードから権威あるバックエンド干渉問い合わせを1回発火する。
-        // 同ペイロードに確定形状(selected_points)が載っているため、stateの更新を待たず即問い合わせる。
-        if (event.payload.is_finalized) {
-          finalizeInterferenceRef.current(event.payload);
-        }
+        currentValidationKey.current = "";
+        setValidation(null);
+        localCanConfirmRef.current = event.payload.can_confirm === true;
+        setLocalCanConfirm(localCanConfirmRef.current);
 
         // 曲線モードはUnity側が真実源。点列の有無にかかわらず必ず同期する
         // (敷設モード初期化直後は空点列+is_curvedだけが届く)。
@@ -1202,5 +1123,7 @@ export function usePathConstruction(
     resetPath,
     continuePlacement,
     confirmPath,
+    canConfirm,
+    collisionChecking: localCanConfirm && validation?.key !== validationKey,
   };
 }

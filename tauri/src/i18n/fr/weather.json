@@ -1,0 +1,23 @@
+{
+  "weather": {
+    "label": "Météo",
+    "choose": "Choisir la météo",
+    "loading": "Chargement météo…",
+    "unknown": "Inconnue",
+    "automatic": "{{weather}} (Auto)",
+    "failed": "Impossible de changer la météo",
+    "names": {
+      "clear": "Ciel dégagé",
+      "high_clouds": "Nuages élevés",
+      "fair": "Beau temps",
+      "broken_clouds": "Éclaircies",
+      "overcast": "Ciel couvert",
+      "rain_clouds": "Nuages de pluie",
+      "fog": "Brouillard",
+      "sunset": "Coucher de soleil",
+      "drizzle": "Bruine",
+      "rain": "Pluie",
+      "heavy_rain": "Forte pluie"
+    }
+  }
+}

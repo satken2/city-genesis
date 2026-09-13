@@ -572,6 +572,9 @@ pub async fn handle_incoming_message(
         "view:current_state" => {
             let _ = app.emit("view:current_state", envelope.payload);
         }
+        "weather:state" => {
+            let _ = app.emit_to(window::LABEL_COCKPIT, "weather:state", envelope.payload);
+        }
         "view:grid_angle_changed" => {
             let _ = app.emit("view:grid_angle_changed", envelope.payload);
         }

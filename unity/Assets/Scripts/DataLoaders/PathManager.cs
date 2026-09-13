@@ -16,6 +16,7 @@ public class PathManager : BaseApiDataManager
 {
     public int PendingTerrainRebuildCount => queuedTerrainFollowPathIds.Count;
     private readonly RenderObjectCache lodCache = new RenderObjectCache(128L * 1024 * 1024);
+    private readonly HashSet<int> pendingPillarRebuildIds = new HashSet<int>();
     private readonly Dictionary<int, int> geometryRevisions = new Dictionary<int, int>();
     private readonly Dictionary<int, (int version, int status)> terrainFollowCompletedPaths = new Dictionary<int, (int, int)>();
     private readonly HashSet<int> terrainFollowCompletedNodes = new HashSet<int>();
@@ -53,7 +54,7 @@ public class PathManager : BaseApiDataManager
     {
         geometryRevisions.TryGetValue(path.path_id, out int revision);
         if (invalidate) geometryRevisions[path.path_id] = ++revision;
-        return path.path_id + ":" + path.version + ":" + path.status + ":" + revision + ":" + lod;
+        return path.path_id + ":" + path.version + ":" + path.status + ":" + revision + ":" + lod + ":" + ConstructionPathBuilder.Progress(path);
     }
 
     private bool RestorePathLod(PathSummary path, string key, DrawLod lod, bool updateIntersections)
@@ -331,8 +332,9 @@ public class PathManager : BaseApiDataManager
 
         TerrainManager.OnTerrainTileReady += OnTerrainTileReadyHandler;
 
-        // 近接線路の結合描画（TrackPath）に隣接線路の点列を供給する。
+        // 橋脚の干渉判定と近接線路の結合描画に、周辺パスの点列を供給する。
         // キャッシュ済みパスデータとセル空間インデックスが必要なためPathManagerが担う。
+        PillarClearance.NeighborProvider = GetPillarObstacles;
         TrackAdjacency.NeighborProvider = GetAdjacentTrackNeighbors;
         TrackPath.ConnectedPathsProvider = GetPathsConnectedToNode;
         TrackPath.InfrastructureConnectionProvider = IsInfrastructureConnection;
@@ -348,6 +350,8 @@ public class PathManager : BaseApiDataManager
     private void OnDestroy()
     {
         lodCache.Clear();
+        if (PillarClearance.NeighborProvider == (Func<PathSummary, List<PillarClearance.Corridor>>)GetPillarObstacles)
+            PillarClearance.NeighborProvider = null;
         TerrainManager.OnTerrainTileReady -= OnTerrainTileReadyHandler;
 
         if (TrackAdjacency.NeighborProvider == (System.Func<PathSummary, List<TrackNeighborInfo>>)GetAdjacentTrackNeighbors)
@@ -727,6 +731,7 @@ public class PathManager : BaseApiDataManager
         loadedCells.Clear();
         nodeDataCache.Clear();
         pathDataCache.Clear();
+        pendingPillarRebuildIds.Clear();
         pathsByNodeIndex.Clear();
         pathVersionCache.Clear();
 
@@ -1017,7 +1022,7 @@ public class PathManager : BaseApiDataManager
     {
         CalculateMergedBBox(cells, out float minX, out float minZ, out float maxX, out float maxZ);
         string bbox = $"{minX},{minZ},{maxX},{maxZ}";
-        PagedPathListResponse response = new PagedPathListResponse { paths = new List<PathSummary>() };
+        PagedPathListResponse response = new PagedPathListResponse { paths = new List<ConstructionPathSummary>() };
         int cursor = 0;
         while (true)
         {
@@ -1055,6 +1060,7 @@ public class PathManager : BaseApiDataManager
         // 描画前に pathDataCache を一括更新する。
         Dictionary<int, int> oldVersions = new Dictionary<int, int>();
         Dictionary<int, int> oldStatuses = new Dictionary<int, int>();
+        var oldProgress = new Dictionary<int, float>();
         if (response?.paths != null)
         {
             foreach (var p in response.paths)
@@ -1067,6 +1073,7 @@ public class PathManager : BaseApiDataManager
                 if (pathDataCache.TryGetValue(p.path_id, out PathSummary oldPath))
                 {
                     oldStatuses[p.path_id] = oldPath.status;
+                    oldProgress[p.path_id] = ConstructionPathBuilder.Progress(oldPath);
                 }
                 SavePathToCache(p);
             }
@@ -1082,7 +1089,9 @@ public class PathManager : BaseApiDataManager
                     ? renderedPath.GetComponent<ObjectIdInfo>()?.status
                     : oldStatuses.TryGetValue(p.path_id, out int cachedStatus) ? cachedStatus : (int?)null;
                 if (oldVersions.TryGetValue(p.path_id, out int cachedVersion) && cachedVersion == p.version && HasPathRepresentation(p)
-                    && renderedStatus == p.status)
+                    && renderedStatus == p.status
+                    && (p.status != Constants.STATUS_CONSTRUCTING || (oldProgress.TryGetValue(p.path_id, out float previousProgress)
+                        && previousProgress == ConstructionPathBuilder.Progress(p))))
                 {
                     versionChanged = false;
                 }
@@ -1758,7 +1767,9 @@ public class PathManager : BaseApiDataManager
             if (pathMaster != null) width = pathMaster.width;
         }
 
-        Mesh mesh = PathMeshFactory.BuildStripMesh(points, width);
+        bool constructing = status == Constants.STATUS_CONSTRUCTING && PathMeshFactory.GetModelType(path) != "none";
+        Mesh mesh = constructing ? null : PathMeshFactory.BuildStripMesh(points, width);
+        if (constructing) ConstructionPathBuilder.GenerateFar(pathGO, path, points, width, GetRoadMaterial());
         if (mesh != null)
         {
             MeshFilter mf = pathGO.AddComponent<MeshFilter>();
@@ -2446,8 +2457,7 @@ public class PathManager : BaseApiDataManager
         // 地下パス（負の相対Yを持つ）や、実効非追従で丘に潜る区間を持つパスは、
         // トンネル区間（深さ > クリアランス高さ）のメッシュ生成をスキップし、
         // 描画区間ごとに分割して生成する。境界（坑口）には portal パーツを配置する。
-        // 工事中(STATUS_CONSTRUCTING)は完成品のメッシュを生成せず、専用の「工事現場」表示
-        // （土ストリップ + 高架の柱のみ + トンネル坑口のみ）にする。
+        // 工事中は進捗に応じた土工・橋脚・完成区間を組み立てる。
         // ただし model_type=none（公共交通の路線等、完成時も描画しないパス）は工事中も非表示のまま。
         // 描画LODと詳細区間は PathDrawContext 経由で生成器へ渡す。詳細区間はパス全長の割合なので、
         // 区間分割する生成(トンネル・工事中)には適用しない(全長を同じ詳細度で描く)。
@@ -2675,98 +2685,12 @@ public class PathManager : BaseApiDataManager
         return new PathMeshResult(colliderMesh, true, container);
     }
 
-    /// <summary>
-    /// 工事中(STATUS_CONSTRUCTING)パスの「工事現場」メッシュを生成する。
-    /// 完成品のパーツ（body/line/sidewalk等）は一切描画せず、以下で構成する:
-    ///
-    /// - 土ストリップ … 経路全体を覆う、厚みとPerlin凹凸を持つ土の帯
-    ///   (ConstructionMeshUtil.BuildDirtStripMesh)。高架パスでも土は地表に置かれる。
-    ///   幅はマスターの道路幅 + CONSTRUCTION_PATH_DIRT_EXTRA_WIDTH。
-    /// - 高架の柱 … height_editable かつ pillar_spacing を持つバリアントは、完成時と同じ
-    ///   RoadPath.GeneratePillars で pillar / pillar_cap のみを配置する（柱高0.1m以下の
-    ///   地上区間は PlacePillar が自動スキップするため、柱は高架区間にだけ立つ）。
-    /// - トンネル坑口 … 地下パスは完成時と同じ描画区間分割(TunnelSectionUtil)を行い、
-    ///   描画区間には土ストリップを、境界には portal パーツを配置する
-    ///   （トンネル区間は何も描画しない）。
-    ///
-    /// 進捗による見た目の変化はない（静的な表示）。status が変わると CreateOrUpdatePath の
-    /// プール再利用条件が外れて必ず再生成されるため、完成時は自動的に通常メッシュへ切り替わる。
-    /// マテリアルは Resources/ConstructionDirt（建物の土マウンドと共用。未配置時のフォールバック
-    /// 連鎖は BuildingMeshBuilder.GetConstructionDirtMaterial 参照）。
-    /// </summary>
+    /// <summary>進捗別の土工・橋脚・路面と、完成時と共通の坑口を組み立てる。</summary>
     private PathMeshResult GenerateConstructingPathMesh(PathSummary path, List<Vector3> points)
     {
-        GameObject container = new GameObject("ConstructingPath");
-
-        // 区間分割: トンネルパス（地下・非追従）は完成時と同じ「描画区間」だけに土を敷き、坑口を配置する
-        var portals = new List<TunnelSectionUtil.PortalInfo>();
-        bool isUnderground = UsesTunnelMesh(path, points);
-        List<List<Vector3>> runs;
-        if (isUnderground)
-        {
-            float clearance = TunnelSectionUtil.GetClearanceHeight(path.path_variant);
-            runs = TunnelSectionUtil.SplitDrawableRuns(points, clearance, portals, GetPathFollowTerrain(path));
-        }
-        else
-        {
-            runs = new List<List<Vector3>> { points };
-        }
-
-        RoadPath.GetPathMasterParams(path, out float width, out _, out _, out _, out _, out _, out _,
-            out float? pillarSpacing, out bool heightEditable, out float baseHeight, out _);
-        float dirtWidth = width + LocalConstants.CONSTRUCTION_PATH_DIRT_EXTRA_WIDTH;
-
-        // RoadPath のマテリアルキャッシュを経由し、renderQueue補正(Z-fight対策)に相乗りする
-        Material dirtMaterial = RoadPath.GetOrCreateRoadMaterial(BuildingMeshBuilder.GetConstructionDirtMaterial());
-
-        var colliderCombine = new List<CombineInstance>();
-        foreach (var run in runs)
-        {
-            Mesh dirtMesh = ConstructionMeshUtil.BuildDirtStripMesh(run, dirtWidth);
-            if (dirtMesh == null) continue;
-
-            GameObject dirtGO = new GameObject("ConstructionDirt");
-            dirtGO.transform.SetParent(container.transform, false);
-            MeshFilter dirtMf = dirtGO.AddComponent<MeshFilter>();
-            dirtMf.sharedMesh = dirtMesh;
-            MeshRenderer dirtMr = dirtGO.AddComponent<MeshRenderer>();
-            if (dirtMaterial != null) dirtMr.sharedMaterial = dirtMaterial;
-
-            colliderCombine.Add(new CombineInstance
-            {
-                mesh = dirtMesh,
-                transform = Matrix4x4.identity,
-            });
-        }
-
-        // 高架の柱（地下パスには配置しない: 完成時と同じ規則。PlacePillar が地下では破綻するため）
-        if (!isUnderground && heightEditable && pillarSpacing.HasValue && pillarSpacing.Value > 0f)
-        {
-            var spline = RoadPath.BuildSpline(container, points, path.curved);
-            RoadPath.GeneratePillars(container, spline, pillarSpacing.Value, baseHeight, path,
-                $"Models/Paths/p{path.path_variant}", $"Models/Paths/p{path.path_type}");
-        }
-
-        // トンネル坑口（完成時と同じ配置ロジックを共用）
-        PlaceTunnelPortals(container, path, portals);
-
-        Mesh colliderMesh = null;
-        if (colliderCombine.Count == 1)
-        {
-            colliderMesh = colliderCombine[0].mesh;
-        }
-        else if (colliderCombine.Count > 1)
-        {
-            colliderMesh = new Mesh();
-            colliderMesh.CombineMeshes(colliderCombine.ToArray(), true, false);
-            colliderMesh.RecalculateBounds();
-        }
-
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD,
-            () => $"[PathManager] 工事中パス {path.path_id}: 土区間={runs.Count} 坑口={portals.Count} 柱={(heightEditable && pillarSpacing.HasValue)}");
-
-        // 全区間トンネル等でメッシュが無い場合も ModulesCreated=true として黒帯フォールバックを抑制する
-        return new PathMeshResult(colliderMesh, true, container);
+        var result = ConstructionPathBuilder.Generate(path, points, UsesTunnelMesh(path, points), GetPathFollowTerrain(path), out var portals);
+        PlaceTunnelPortals(result.GeneratedObject, path, portals);
+        return result;
     }
 
     /// <summary>
@@ -3457,29 +3381,109 @@ public class PathManager : BaseApiDataManager
         }
     }
 
+    private static bool IsPillarObstacle(PathSummary path)
+    {
+        return path != null && (path.path_type == Constants.PATH_DEFAULT || path.path_type == Constants.PATH_MOTORWAY
+            || path.path_type == Constants.PATH_STREET || path.path_type == Constants.PATH_WALKWAY || IsTrackTypePath(path));
+    }
+
+    /// <summary>曲線・セル境界と橋脚の張り出しを含めるため、通過セルの隣接セルまで候補を集める。</summary>
+    private HashSet<int> CollectPillarNeighborIds(IEnumerable<Vector2Int> cells, int ownId)
+    {
+        var ids = new HashSet<int>();
+        foreach (var cell in cells)
+        for (int x = -1; x <= 1; x++)
+        for (int z = -1; z <= 1; z++)
+        {
+            if (!pathIdsByCell.TryGetValue(cell + new Vector2Int(x, z), out var neighbors)) continue;
+            foreach (int id in neighbors) if (id != ownId) ids.Add(id);
+        }
+        return ids;
+    }
+
+    /// <summary>メッシュの有無やLODを参照せず、最新データから通行空間を作る。橋脚候補ごとには再計算しない。</summary>
+    public List<PillarClearance.Corridor> GetPillarObstacles(PathSummary path)
+    {
+        var result = new List<PillarClearance.Corridor>();
+        foreach (int id in CollectPillarNeighborIds(GetPathCoveredCells(path), path.path_id))
+        {
+            if (!pathDataCache.TryGetValue(id, out var other) || !IsPillarObstacle(other)) continue;
+            var master = MasterDataStore.Instance?.GetPathMaster(other.path_variant);
+            if (master?.model_type == "none") continue;
+            // 切断前の中心線を使い、交差点内にも通行空間を残す。描画用点列キャッシュは旧版の可能性がある。
+            var points = CalculatePathPoints(other, false);
+            if (points == null || points.Count < 2) continue;
+            for (int i = 0; i < points.Count; i++) points[i] += Vector3.up * RoadPartHeights.BODY_ABOVE_SPLINE;
+            float platform = master?.platform_width ?? 0f;
+            float left = 0f, right = 0f;
+            if (IsTrackTypePath(other) && platform > 0f) TrackPath.ResolvePlatformExtents(other, platform, out left, out right);
+            result.Add(new PillarClearance.Corridor
+            {
+                Points = points,
+                HalfWidth = Mathf.Max(other.width, GetRoadWidth(other.path_variant)) * 0.5f + Mathf.Max(left, right),
+                Height = TunnelSectionUtil.GetClearanceHeight(other.path_variant)
+            });
+        }
+        return result;
+    }
+
+    private void EnqueuePillarNeighborRebuilds(PathSummary path, IEnumerable<Vector2Int> cells)
+    {
+        if (!IsPillarObstacle(path)) return;
+        foreach (int id in CollectPillarNeighborIds(cells, path.path_id))
+        {
+            if (!pathDataCache.TryGetValue(id, out var neighbor)) continue;
+            var master = MasterDataStore.Instance?.GetPathMaster(neighbor.path_variant);
+            if (!(master?.height_editable ?? false) || (master.pillar_spacing ?? 0f) <= 0f) continue;
+            if (!pendingPillarRebuildIds.Add(id)) continue;
+            InvalidateTerrainFollowPath(neighbor);
+            geometryRevisions.TryGetValue(id, out int revision);
+            geometryRevisions[id] = revision + 1;
+        }
+    }
+
+    private void LateUpdate()
+    {
+        if (isLodPathBatchActive || pendingPillarRebuildIds.Count == 0) return;
+        // 同一フレームの登録・削除完了を待つ。バッチ途中に描かれた橋脚も最新の周辺データで再評価する。
+        foreach (int id in pendingPillarRebuildIds) queuedTerrainFollowPathIds.Add(id);
+        pendingPillarRebuildIds.Clear();
+        EnsureTerrainFollowRebuildWorker();
+    }
+
     private void SavePathToCache(PathSummary path)
     {
         if (path == null) return;
-        if (pathDataCache.TryGetValue(path.path_id, out var oldPath))
+        bool changed = !pathDataCache.TryGetValue(path.path_id, out var oldPath)
+            || oldPath.version != path.version || oldPath.status != path.status
+            || oldPath.start_node_id != path.start_node_id || oldPath.end_node_id != path.end_node_id;
+        if (changed)
         {
-            if (oldPath.version != path.version || oldPath.status != path.status
-                || oldPath.start_node_id != path.start_node_id || oldPath.end_node_id != path.end_node_id)
+            if (oldPath != null)
             {
                 InvalidateTerrainFollowPath(oldPath);
-                InvalidateTerrainFollowPath(path);
+                EnqueuePillarNeighborRebuilds(oldPath, GetPathCoveredCellsCached(oldPath));
             }
-            RemovePathFromNodeIndex(path.path_id, oldPath.start_node_id, oldPath.end_node_id);
+            InvalidateTerrainFollowPath(path);
         }
-        else InvalidateTerrainFollowPath(path);
+        if (oldPath != null && ConstructionPathBuilder.Progress(oldPath) != ConstructionPathBuilder.Progress(path))
+            InvalidateTerrainFollowPath(path);
+        if (oldPath != null) RemovePathFromNodeIndex(path.path_id, oldPath.start_node_id, oldPath.end_node_id);
         pathDataCache[path.path_id] = path;
         AddPathToNodeIndex(path);
+        if (changed)
+        {
+            RegisterPathCells(path);
+            EnqueuePillarNeighborRebuilds(path, GetPathCoveredCellsCached(path));
+        }
     }
 
     private void RemovePathFromCache(int pathId)
     {
-        if (pathDataCache.TryGetValue(pathId, out var removed)) InvalidateTerrainFollowPath(removed);
         if (pathDataCache.TryGetValue(pathId, out var path))
         {
+            InvalidateTerrainFollowPath(path);
+            EnqueuePillarNeighborRebuilds(path, GetPathCoveredCellsCached(path));
             RemovePathFromNodeIndex(pathId, path.start_node_id, path.end_node_id);
             pathDataCache.Remove(pathId);
         }
@@ -4226,8 +4230,9 @@ public class PathManager : BaseApiDataManager
     private HashSet<Vector2Int> GetPathCoveredCells(PathSummary path)
     {
         HashSet<Vector2Int> cells = new HashSet<Vector2Int>();
-        List<Vector3> anchors = GetPathAnchorPositions(path);
-        if (anchors.Count == 0) return cells;
+        List<Vector3> anchors = path.curved && !(MasterDataStore.Instance?.GetPathMaster(path.path_variant)?.single_span ?? false)
+            ? IntersectionPolygonUtil.SamplePlan(path) ?? GetPathAnchorPositions(path) : GetPathAnchorPositions(path);
+        if (anchors == null || anchors.Count == 0) return cells;
 
         float halfWidth = Mathf.Max(GetRoadWidth(path.path_variant), path.width) * 0.5f;
         for (int i = 0; i < anchors.Count; i++)
@@ -4382,7 +4387,7 @@ public class PathManager : BaseApiDataManager
 
     public IEnumerator FetchPath(int pathId)
     {
-        yield return ApiClient.Get<PathSummary>(
+        yield return ApiClient.Get<ConstructionPathSummary>(
             $"/paths/{pathId}",
             path =>
             {
@@ -4749,7 +4754,8 @@ public class PathMasterResponse
 }
 
 [Serializable]
-public sealed class PagedPathListResponse : PathListResponse
+public sealed class PagedPathListResponse
 {
+    public List<ConstructionPathSummary> paths;
     public int? next_cursor;
 }

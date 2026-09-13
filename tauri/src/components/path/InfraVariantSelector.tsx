@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import type { MasterData, PathMasterEntry } from "../../types";
 import { PATH_ELECTRICITY, PATH_WATER } from "../../constants";
 import { TypeVariantSelector, type TypeOption } from "./TypeVariantSelector";
+import type { VariantAffordability } from "../../hooks/useVariantAffordability";
 
 type InfraVariantSelectorProps = {
   masterData: MasterData;
@@ -20,6 +21,7 @@ type InfraVariantSelectorProps = {
   onSelectType: (type: number) => void;
   onSelectVariant: (variantId: number) => void;
   disabled?: boolean;
+  affordability?: VariantAffordability | null;
 };
 
 export function InfraVariantSelector(props: InfraVariantSelectorProps) {

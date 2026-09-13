@@ -28,6 +28,7 @@ public sealed class WeatherController : MonoBehaviour
     private EnvironmentSnapshot original;
     private GUIStyle panelStyle;
     private ReflectionProbe reflection;
+    private WeatherRain precipitation;
 
     private sealed class CityResponse { public CityEpoch city; }
     private sealed class CityEpoch { public int? epoch; }
@@ -84,7 +85,8 @@ public sealed class WeatherController : MonoBehaviour
         reflection.resolution = 64;
         reflection.size = Vector3.one * 1000000f;
         reflection.importance = 0;
-        SelectWeather(random.Next(WeatherPreset.All.Count), false, true);
+        precipitation = gameObject.AddComponent<WeatherRain>();
+        SelectWeather(WeatherEpochTracker.Next(random), false, true);
     }
 
     private void Update()
@@ -107,7 +109,7 @@ public sealed class WeatherController : MonoBehaviour
             SelectWeather((CurrentIndex + WeatherPreset.All.Count - 1) % WeatherPreset.All.Count, true, true);
         if (keyboard.f7Key.wasPressedThisFrame)
             SelectWeather((CurrentIndex + 1) % WeatherPreset.All.Count, true, true);
-        if (keyboard.f10Key.wasPressedThisFrame) Locked = !Locked;
+        if (keyboard.f10Key.wasPressedThisFrame) { Locked = !Locked; PublishWeather(); }
         if (keyboard.f11Key.wasPressedThisFrame) { Locked = false; Randomize(1); }
     }
 
@@ -124,6 +126,9 @@ public sealed class WeatherController : MonoBehaviour
                 ipc.OnSessionReset += Suspend;
                 ipc.OnGameEnd += Suspend;
                 ipc.OnGameStart += BeginSession;
+                ipc.OnWeatherQuery += PublishWeather;
+                ipc.OnWeatherSet += SetWeatherFromUi;
+                PublishWeather();
             }
         }
         if (state != GameStateManager.Instance)
@@ -151,6 +156,7 @@ public sealed class WeatherController : MonoBehaviour
         suspended = false;
         pending = true;
         retryAt = 0;
+        if (precipitation != null && target != null) precipitation.SetRain(target.Rain);
     }
 
     private void Suspend()
@@ -159,6 +165,7 @@ public sealed class WeatherController : MonoBehaviour
         epochs.Reset();
         suspended = true;
         pending = false;
+        if (precipitation != null) precipitation.SetRain(0);
     }
 
     private void CancelQuery()
@@ -188,7 +195,7 @@ public sealed class WeatherController : MonoBehaviour
     private void Randomize(int count)
     {
         int next = CurrentIndex;
-        for (int i = 0; i < count; i++) next = WeatherEpochTracker.Next(random, next, WeatherPreset.All.Count);
+        for (int i = 0; i < count; i++) next = WeatherEpochTracker.Next(random);
         SelectWeather(next, false, false);
     }
 
@@ -206,6 +213,28 @@ public sealed class WeatherController : MonoBehaviour
         BuildCookie();
         ApplyEnvironment(blend);
         if (immediate) reflection.RenderProbe();
+        precipitation.SetRain(target.Rain);
+        PublishWeather();
+    }
+
+    public void SetWeatherFromUi(string id)
+    {
+        if (string.IsNullOrEmpty(id)) { Locked = false; PublishWeather(); return; }
+        for (int i = 0; i < WeatherPreset.All.Count; i++)
+            if (WeatherPreset.All[i].Id == id) { SelectWeather(i); return; }
+        PublishWeather();
+    }
+
+    public void PublishWeather()
+    {
+        if (sky == null || target == null || IpcClient.Instance == null) return;
+        var options = new object[WeatherPreset.All.Count];
+        for (int i = 0; i < options.Length; i++)
+        {
+            var preset = WeatherPreset.All[i];
+            options[i] = new { id = preset.Id, weight = preset.Weight, rain = preset.Rain };
+        }
+        IpcClient.Instance.EmitWeatherState(target.Id, Locked, target.Rain, options);
     }
 
     private void ApplyEnvironment(float t)
@@ -268,7 +297,7 @@ public sealed class WeatherController : MonoBehaviour
         if (panelStyle == null) panelStyle = new GUIStyle(GUI.skin.box)
             { font = UiFontProvider.GetFont(16), fontSize = 16, alignment = TextAnchor.UpperLeft, padding = new RectOffset(16,16,12,12) };
         GUI.Box(new Rect(20, 70, 430, 132),
-            $"天気 / Weather   {CurrentIndex + 1:00}/10\n{WeatherPreset.All[CurrentIndex].Name}   {(Locked ? "固定 / Locked" : "自動 / Auto")}\nF6/F7 選択   F10 固定   F11 再抽選\nF9 パネルを閉じる（撮影前に非表示）", panelStyle);
+            $"天気 / Weather   {CurrentIndex + 1:00}/{WeatherPreset.All.Count}\n{WeatherPreset.All[CurrentIndex].Name}   {(Locked ? "固定 / Locked" : "自動 / Auto")}\nF6/F7 選択   F10 固定   F11 再抽選\nF9 パネルを閉じる（撮影前に非表示）", panelStyle);
     }
 
     private void UnbindIpc()
@@ -279,6 +308,8 @@ public sealed class WeatherController : MonoBehaviour
         ipc.OnSessionReset -= Suspend;
         ipc.OnGameEnd -= Suspend;
         ipc.OnGameStart -= BeginSession;
+        ipc.OnWeatherQuery -= PublishWeather;
+        ipc.OnWeatherSet -= SetWeatherFromUi;
     }
 
     private void OnDisable()
@@ -289,6 +320,7 @@ public sealed class WeatherController : MonoBehaviour
         CancelQuery();
         if (original != null) original.Restore(sun, sunData);
         if (reflection != null) reflection.enabled = false;
+        if (precipitation != null) precipitation.enabled = false;
     }
 
     private void OnEnable()
@@ -306,6 +338,7 @@ public sealed class WeatherController : MonoBehaviour
         reflection.enabled = true;
         ApplyEnvironment(blend);
         reflection.RenderProbe();
+        if (precipitation != null) { precipitation.enabled = true; precipitation.SetRain(target.Rain); }
     }
 
     private void OnDestroy()
@@ -314,6 +347,7 @@ public sealed class WeatherController : MonoBehaviour
         if (sky != null) Destroy(sky);
         if (cookie != null) Destroy(cookie);
         if (reflection != null) Destroy(reflection.gameObject);
+        if (precipitation != null) Destroy(precipitation);
     }
 
     private sealed class EnvironmentSnapshot

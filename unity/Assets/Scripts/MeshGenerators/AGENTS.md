@@ -23,6 +23,8 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 
 ## 道路 (Paths/RoadPath.cs) — Dreamteck Splines ベース
 
+- **橋脚の干渉回避**: `GeneratePillars` が `PillarClearance.NeighborProvider` から未描画の相手も含む通行空間を取得し、`PlacePillar` が柱とキャップを別々の実寸boundsで検査する。一方が干渉すれば一組とも生成せず、移動・再配分はしない。`GetPrefabBounds` は子Transformを含むルート座標のboundsで、配置時のYaw・scaleを適用する。高さと水平距離を同時に評価し、同じ高さの接続や深いトンネルを誤って除外しない。道路・線路・工事中で共用。検証は `Tests/Pillars`。
+
 - 道路は1枚のメッシュではなく、**プレハブパーツを SplineMesh でスプラインに沿って曲げた子オブジェクトの集合**として生成される。
   - パーツ: `body` / `line`(実線・点線) / `sidewalk` / `wall` / `center` / `tree`(Instantiate配置) / `pillar`(高架用、Instantiate配置) / `pillar_cap`(柱の上部キャップ用、Y方向非伸縮、Instantiate配置)
   - プレハブは `PathDrawContext.ResolvePrefab` 経由で `Models/Paths/p{path_variant}/{パーツ名}` をロードし、無ければ `Models/Paths/p{path_type}/{パーツ名}` にフォールバックする(描画LODが Close なら各段で `{パーツ名}_close` を先に試す。上記「描画LOD」の節)。**新しいバリアントを追加するときはモデルを置くだけでよい**(コード変更不要)。道路本体（`body`）のモデルがない場合は、スプラインに沿った白い板（ストリップメッシュ）を動的に生成してフォールバックする。
@@ -36,10 +38,10 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 - `curved=false`+ウェイポイントありの道路は `GenerateLinearPathWithCorners`: セグメントごとに独立スプラインを作り、角はダミーの PathSummary 2本を `NodeMeshFactory` に渡して交差点と同じロジックで切断・充填する。
 - マスターデータ取得(`GetPathMaster`)は `GetPathMasterParams` 静的メソッドに集約されている。`Generate` / `GenerateLinearPathWithCorners` 両方から呼ばれる。
 - 高さ(Y)は呼び出し元(PathManager.CalculatePathPoints)で既に地形追従済みの点列を受け取る。相対Y制御の考え方はルートAGENTS.mdの「Y座標の考え方」参照。
-- **地下パス（負の相対Yを持つ）**: 点列の分割は呼び出し元(`PathManager.GenerateUndergroundPathMesh` + `Utils/TunnelSectionUtil`)が行い、RoadPath/TrackPath は描画区間ごとに呼ばれる。トンネル区間の境界に置く `portal` パーツ（`Models/Paths/p{variant}/portal`、ローカル+Zがトンネル内部向き）の配置も PathManager 側。RoadPath 側では地下パスに柱（pillar）を配置しない（`PlacePillar` は路面のワールドYをそのままスケールに使うため地下では破綻する）。
+- **地下パス（負の相対Yを持つ）**: 点列の分割は呼び出し元(`PathManager.GenerateUndergroundPathMesh` + `Utils/TunnelSectionUtil`)が行い、RoadPath/TrackPath は描画区間ごとに呼ばれる。トンネル区間の境界に置く `portal` パーツ（`Models/Paths/p{variant}/portal`、ローカル+Zがトンネル内部向き）の配置も PathManager 側。RoadPath 側では地下パスに柱（pillar）を配置しない（地下パスは橋脚の配置対象外）。
 - **路面の見た目の差し替え口は `Resources/{マテリアル名}.mat`**: `GetOrCreateRoadMaterial` が FBX 埋め込みマテリアルの名前で `Resources.Load<Material>` を試し、あればそちらへ再割当する。**コードを変更せずに特定バリアントだけ専用シェーダーにできる唯一の経路**。未舗装路(variant 201)がこれを使っており、body の `PATH_SAND` マテリアル(`Resources/PATH_SAND.mat`)に手続き土シェーダー `Custom/PathDirt`(`Resources/Shaders/PathDirt.shader` + `Assets/Shaders/PathDirt.hlsl`)を当てて、ワールドXZノイズの色ムラ・砂利斑・凹凸法線と、**頂点カラーのα(路面中核=1／なじませスカート外端=0)を縁マスクにしたアルファクリップ**で路肩を地面へ溶かしている。仕様の正は `genesis-docs/docs/geometries/G_道路メッシュの生成.md §16`。**このシェーダーは規約どおりの頂点カラーを持つメッシュ専用で、他の body へ流用しないこと。**
 - **RoadPath は線路と共用する共通ヘルパーの置き場でもある**: `CreateSplineMesh`（`stretchToWidth=false` でXスケール1の実寸配置になる。レール・架線用。生成頂点数は `SPLINE_MESH_VERTEX_BUDGET`=public const 60000 を上限にクランプ／整数タイル分割される）/ `BuildSpline`（点列→SplineComputer）/ `BuildColliderMeshFromSpline` / `CreateFallbackRoadBody` / `GeneratePillars` / `GetOrCreateRoadMaterial`(+マテリアル名だけを渡す `GetOrCreateRoadMaterialByName`。Resources に同名 .mat が無ければ null) / `GetPathMasterParams` は public static で、`TrackPath` や PathManager（工事中パス生成）からも呼ばれる。**同等の処理を再実装しないこと。**
-- **工事中(STATUS_CONSTRUCTING)のパスは完成パーツを描画しない**: 分岐は `PathManager.CreateOrUpdatePath`（DataLoaders/AGENTS.md参照）にあり、`Paths/ConstructionMeshUtil.BuildDirtStripMesh`（点列に沿った土の台形マウンド。高さは相対Yを無視して常に地表）+ `RoadPath.GeneratePillars`（高架の柱のみ）+ portal（トンネル坑口のみ）で「工事現場」を構成する。`model_type=none` のパスは工事中も非表示。仕様の正は `genesis-docs/docs/geometries/G_道路メッシュの生成.md §15`。
+- **工事中の道路・線路**: `ConstructionPathBuilder` が進捗別に組み立てる。地上は累積距離で始点から路面・軌道を伸ばし、残りに土を置く。高架は0〜25%橋脚、25〜90%桁単位の架設、90%以降は固定。高架に土は生成せず、工事車両はパス中心線上の地表に置く。橋脚は `RoadPath.GenerateConstructionPillars` が完成時と同じ内部候補・干渉判定を使い、接地原点の施工単位を返す。`ConstructionPathDirt` は頂点α規約を満たす専用の土ストリップへ `Custom/PathDirt` を適用する。車両4種はProps/construction_*の固定装飾。仕様は公開G文書§15、検証はTests/ConstructionPaths。
 
 ## 線路 (Paths/TrackPath.cs / Paths/TrackIntersectionMeshGenerator.cs)
 
@@ -81,6 +83,8 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 - 数値・描画検証は `Tests/TerrainSurface/run-unity.ps1`。Terrain自身の描画LODも影響するため、頂点の高さ検査だけで完了にしない。
 
 ## 建物 (Buildings/)
+
+- オープンスペースは `OpenSpaceLayout` が配置計画、`OpenSpaceBuildingMeshBuilder` が地形追従面・実寸FBXへの変換を担う。MODEL_PARKING/ROTARY/PARK=10/11/12。SHAPE_FULLの最初の辺が接道方向。ID・ロード順・LODに依存せずvisual_variant2とセルのハッシュで配置する。Far=0.3m板、工事・倒壊は地面用途。3003舗装広場はGROUND+floorのみ。検証・ギャラリー配置見本の再出力は `Tests/Buildings/run-open-space.ps1`。仕様はF10文書。
 
 - 角の配置方向は `ComputeCornerRotation` でCCWの送り辺を内角の半分だけ回した**内角側の二等分線**から求める。単位辺ベクトルの和ではL字の凹角が180度反転するため使わない。壁の張り出し計測も同じ二等分線を共有する。凹角へ開閉できる2本のボーンがないパーツは `IsUnsupportedConcaveCorner` で配置・オフセット計測の両方から省き、壁を頂点まで敷く。実FBXの凸角・凹角と壁オフセットの回帰検証は `Tests/Buildings/run-unity.ps1`。
 
@@ -164,3 +168,5 @@ TrackPathの車止めはInfrastructureConnectionProviderが共用インフラノ
 ## 駅舎の配置方式
 
 house_ends（both/start/end）で選択した終端だけ建屋・接地占有を生成する。house_placement=outsideは区間回避、insideは最寄り線路占有区間の外縁に建屋外側辺を合わせる。insideの内側辺は区間上端−余白−奥行き、線路なしは−奥行き。Pythonのresolve_house_positionとUnityのResolveHousePositionを同一に保つ。片側でも終端識別を維持し、outsideは通路延長、insideは通路端移動。上記の「両終端」「線路を常に回避」という説明はoutside/bothの場合に限る。仕様はQ_駅舎パスのメッシュ生成.md §5。
+
+橋脚のYスケールは必要高さ÷プレハブboundsの著作高さ。pillarの天端原点規約は維持するが、柱本体が1m高であると仮定してはいけない。SlicePolylineByFractionは施工端の重複・極小セグメントを統合し、SplineMeshの終端断面が回ることを防ぐ。実FBXの接地下端と施工端はTests/ConstructionPathsで検証する。

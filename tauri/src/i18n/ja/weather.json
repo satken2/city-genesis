@@ -1,0 +1,23 @@
+{
+  "weather": {
+    "label": "天候",
+    "choose": "天候を選択",
+    "loading": "天候を確認中…",
+    "unknown": "不明",
+    "automatic": "{{weather}}（自動）",
+    "failed": "天候を変更できませんでした",
+    "names": {
+      "clear": "快晴",
+      "high_clouds": "薄雲",
+      "fair": "晴れ",
+      "broken_clouds": "晴れ間",
+      "overcast": "曇り",
+      "rain_clouds": "雨雲",
+      "fog": "霧",
+      "sunset": "夕焼け",
+      "drizzle": "霧雨",
+      "rain": "雨",
+      "heavy_rain": "大雨"
+    }
+  }
+}

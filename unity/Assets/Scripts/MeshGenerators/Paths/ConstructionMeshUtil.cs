@@ -59,7 +59,7 @@ public static class ConstructionMeshUtil
 
         float baseHalfWidth = width * 0.5f;
         // 中央寄り頂点（盛り上げの頂部）の中心からの距離。全幅の1/4に置くと自然な台形になる
-        float crestRatio = 0.5f;
+        float crestRatio = 0.75f;
         float thickness = LocalConstants.CONSTRUCTION_DIRT_THICKNESS;
         float bumpAmp = LocalConstants.CONSTRUCTION_DIRT_BUMP_AMPLITUDE;
 
@@ -75,6 +75,7 @@ public static class ConstructionMeshUtil
 
         var vertices = new List<Vector3>(pointCount * 4);
         var uvs = new List<Vector2>(pointCount * 4);
+        var colors = new List<Color>(pointCount * 4);
         var triangles = new List<int>((pointCount - 1) * 18 + 12);
 
         // 断面: [0]=左端(接地) [1]=左クレスト(盛り上げ) [2]=右クレスト [3]=右端(接地)
@@ -106,6 +107,12 @@ public static class ConstructionMeshUtil
             Vector3 rightCrestPos = basePoint + binormal * (halfWidthRight * crestRatio);
             Vector3 rightEdge = basePoint + binormal * halfWidthRight;
 
+            // 横断勾配のある場所でも縁と路盤をそれぞれの地表へ追従させる。
+            leftEdge.y = Utils.GetGroundHeight(leftEdge) + .015f;
+            rightEdge.y = Utils.GetGroundHeight(rightEdge) + .015f;
+            leftCrestPos.y = Utils.GetGroundHeight(leftCrestPos) + RoadPartHeights.ROAD_SPLINE_OFFSET;
+            rightCrestPos.y = Utils.GetGroundHeight(rightCrestPos) + RoadPartHeights.ROAD_SPLINE_OFFSET;
+
             // 多オクターブの土ノイズ（建物の土マウンドと共通）
             float crestLeftY = thickness + DirtNoise(leftCrestPos.x, leftCrestPos.z) * bumpAmp;
             float crestRightY = thickness + DirtNoise(rightCrestPos.x, rightCrestPos.z) * bumpAmp;
@@ -114,6 +121,10 @@ public static class ConstructionMeshUtil
             vertices.Add(leftCrestPos + Vector3.up * crestLeftY);
             vertices.Add(rightCrestPos + Vector3.up * crestRightY);
             vertices.Add(rightEdge);
+            colors.Add(new Color(1, 1, 1, 0));
+            colors.Add(Color.white);
+            colors.Add(Color.white);
+            colors.Add(new Color(1, 1, 1, 0));
 
             // UVはワールドXZ座標ベース。マテリアル側の模様が経路の伸縮で歪まず、隣接区間とも連続する
             uvs.Add(new Vector2(leftEdge.x * 0.1f, leftEdge.z * 0.1f));
@@ -157,6 +168,7 @@ public static class ConstructionMeshUtil
         }
         mesh.SetVertices(vertices);
         mesh.SetUVs(0, uvs);
+        mesh.SetColors(colors);
         mesh.SetTriangles(triangles, 0);
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();

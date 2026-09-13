@@ -72,6 +72,8 @@
     }
   },
   "path_construction": {
+    "collisionChecking": "正在檢查碰撞…",
+    "collisionUnready": "請確定路線形狀，並消除紅色立體區域所示的碰撞。",
     "constructionSpeed": "建設速度",
     "selectType": "-- 請選擇種類 --",
     "selectTypeFirst": "請選擇種類",

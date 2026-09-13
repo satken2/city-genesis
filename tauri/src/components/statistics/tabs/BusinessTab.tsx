@@ -27,6 +27,7 @@ import {
   FAMILY_COUPLE,
   FAMILY_FAMILY,
   FAMILY_SENIOR,
+  TYPE_OPEN_SPACE,
 } from "../../../constants";
 import "./BusinessTab.css";
 
@@ -108,6 +109,7 @@ const SELECTABLE_TYPES: number[] = [
   TYPE_EDUCATION,
   TYPE_HOUSEHOLD,
   TYPE_TRADE,
+  TYPE_OPEN_SPACE,
 ];
 
 const SKILL_ORDER = [0, 1, 2, 3, 4, 5];

@@ -1,0 +1,23 @@
+{
+  "weather": {
+    "label": "Weather",
+    "choose": "Choose weather",
+    "loading": "Checking weather…",
+    "unknown": "Unknown",
+    "automatic": "{{weather}} (Auto)",
+    "failed": "Could not change weather",
+    "names": {
+      "clear": "Clear",
+      "high_clouds": "High clouds",
+      "fair": "Fair",
+      "broken_clouds": "Sunny intervals",
+      "overcast": "Overcast",
+      "rain_clouds": "Rain clouds",
+      "fog": "Fog",
+      "sunset": "Sunset",
+      "drizzle": "Drizzle",
+      "rain": "Rain",
+      "heavy_rain": "Heavy rain"
+    }
+  }
+}

@@ -19,6 +19,8 @@ HTTP(バックエンド通信)とは別系統であることに注意。Unityと
 
 ## 新しいIPCイベントを追加する手順
 
+天気は`weather:query`/`weather:set`（UI→Unity、setはidまたはnull=自動）と`weather:state`（Unity→Cockpit、id/locked/rain/presets）で同期する。WeatherControllerが正を保持し、RustはCockpitに中継する。表示名はTauriのweather.json。経済APIへの書き込みは行わない。
+
 1. `IpcClient.cs`に型付きイベント(`event Action<...> OnXxx`)または送信メソッドを追加
 2. city-genesis/tauri側にも対応する送受信を追加(`city-genesis/tauri/src/utils/ipc.ts`と`city-genesis/tauri/src-tauri/src/`)
 3. IPCプロトコルは両コンポーネントの開発契約なので、`genesis-docs`のprograms配下のIPC仕様ドキュメントも更新する
@@ -56,3 +58,5 @@ STATE_EDIT_PATHの任意initial_height/initial_embankment_height/initial_curved/
 寸法コマンドの任意request_idはplacement_stateへ返す。パネルは最後の要求IDへの応答だけで数値変更待ちを解除する。
 
 edit_path:change_house_endsのhouse_ends（both/start/end）をRoadPlanManager.SetHouseEndsへ渡す。STATE_EDIT_PATHも同名paramsで初期化する。
+
+`edit_path:update_shape` の `can_confirm` は形状確定かつローカル交差なしのときだけtrue。Rustは既存イベントのparamsを透過転送する。HighlightManagerは建物・パスを着色せず、OccupancyVolumeUtilの半透明箱を合成する。path_build由来の交差ではRoadPlanManagerにも通知して敷設中の全線を箱で示し、解除時に消す。

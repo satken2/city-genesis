@@ -195,6 +195,9 @@ public partial class RoadPlanManager : MonoBehaviour
     private List<Vector3> cachedRenderPoints;
     private List<(int segIndex, PathSegment otherSeg)> cachedElevationViolations;
     private List<int> cachedMaxSpanViolations;
+    private List<Vector3> cachedCollisionVolume;
+    private bool authoritativeCollision;
+    private List<Vector3> cachedBuildingVolume;
     // 敷設中パスと干渉する建物のフットプリント（ワールドXZポリゴン）のローカル推定キャッシュ。
     private List<List<Vector3>> cachedBuildingInterference;
 
@@ -204,10 +207,19 @@ public partial class RoadPlanManager : MonoBehaviour
 
     private void InvalidateShapeCache()
     {
+        authoritativeCollision = false;
         cachedRenderPoints = null;
         cachedElevationViolations = null;
+        cachedCollisionVolume = null;
+        cachedBuildingVolume = null;
         cachedMaxSpanViolations = null;
         cachedBuildingInterference = null;
+    }
+
+    public void SetAuthoritativeCollision(bool value)
+    {
+        authoritativeCollision = value;
+        cachedCollisionVolume = null;
     }
 
     public bool IsEditMode => phase == RoadEditorPhase.Editing;
@@ -469,7 +481,9 @@ public partial class RoadPlanManager : MonoBehaviour
         if (same) return;
         LateralOffsets = normalized;
         TravelDirections = normalizedDirs;
+        InvalidateShapeCache();
         Update3DPreview();
+        EmitShapeUpdate();
     }
 
     /// <summary>
@@ -811,6 +825,7 @@ public partial class RoadPlanManager : MonoBehaviour
                 Debug.Log($"RoadPlanManager: ウェイポイント追加 {snapped} (total: {points.Count})");
             }
 
+            if (Curved) RecomputeAllControlPoints();
             InvalidateShapeCache();
             Update3DPreview();
             EmitShapeUpdate();
@@ -973,6 +988,7 @@ public partial class RoadPlanManager : MonoBehaviour
             isDragging = false;
             dragPointIndex = -1;
             dragTarget = DragTarget.None;
+            Update3DPreview();
             EmitShapeUpdate();
         }
     }
@@ -1071,7 +1087,7 @@ public partial class RoadPlanManager : MonoBehaviour
             }
 
             // control_out: このポイントから次へ向かう出口制御点
-            if (pt.role != PathPointRole.End && !pt.control_out_manual)
+            if (i < n - 1 && pt.role != PathPointRole.End && !pt.control_out_manual)
             {
                 Vector3 curr = pt.position;
                 Vector3 next = points[i + 1].position;
@@ -2870,15 +2886,107 @@ public partial class RoadPlanManager : MonoBehaviour
 
         List<Vector3> renderPoints = GetRenderPoints();
 
+        UpdatePreviewSections(renderPoints);
+    }
+
+    private void UpdatePreviewSections(List<Vector3> renderPoints)
+    {
         if (renderPoints.Count >= 2)
         {
-            bool isValid = CheckElevationIntersections().Count == 0;
-            roadRenderer.UpdateRoadPreview(renderPoints, PathType, PathSubtype, Curved, isValid, PlatformSide, LateralOffsets, TravelDirections, HouseEnds);
+            int stride = Curved ? bezierSamplesPerSegment + 1 : 1;
+            int firstMoving = points.Count - 1;
+            int endMoving = points.Count - 1;
+            bool placing = phase == RoadEditorPhase.Placing;
+            // 仮終点を追加すると最後のアンカーの入口接線も変わるため、手前の1区間も帯で追従する。
+            if (placing && Curved) firstMoving = Mathf.Max(0, points.Count - 2);
+            if (isDragging && dragPointIndex >= 0)
+            {
+                // アンカー移動は隣接アンカーの自動接線にも影響する。
+                // 制御点移動は反対側ハンドルの共線補正を含めた両隣を扱う。
+                int reach = Curved && dragTarget == DragTarget.Point ? 2 : 1;
+                firstMoving = Mathf.Max(0, dragPointIndex - reach);
+                endMoving = Mathf.Min(points.Count - 1, dragPointIndex + reach);
+            }
+            int firstIndex = firstMoving * stride;
+            int endIndex = endMoving * stride;
+            List<Vector3> before = firstIndex > 0 ? renderPoints.GetRange(0, firstIndex + 1) : null;
+            List<Vector3> after = endIndex < (points.Count - 1) * stride
+                ? renderPoints.GetRange(endIndex, (points.Count - 1) * stride - endIndex + 1) : null;
+            List<Vector3> moving = placing || isDragging
+                ? GetMovingPreviewPoints(renderPoints, firstMoving, endMoving, placing) : null;
+            roadRenderer.UpdateSections(renderPoints, before, moving, after, PathType,
+                PathSubtype, Curved, PlatformSide, LateralOffsets, TravelDirections, HouseEnds);
         }
         else
         {
             roadRenderer.ResetPreview();
         }
+    }
+
+    /// <summary>
+    /// 帯にも地形追従・盛土・高架の高さを与える。保存形状と判定用点列は変更しない。
+    /// 曲線は制御点から再標本化し、ホバーを仮終点とした接線も表示専用に計算する。
+    /// </summary>
+    private List<Vector3> GetMovingPreviewPoints(List<Vector3> renderPoints, int first, int end, bool placing)
+    {
+        var result = new List<Vector3>();
+        int stride = Curved ? bezierSamplesPerSegment + 1 : 1;
+        for (int span = first; span < end + (placing ? 1 : 0); span++)
+        {
+            bool hover = span == points.Count - 1;
+            Vector3 a = renderPoints[span * stride];
+            Vector3 b = hover ? renderPoints[renderPoints.Count - 1] : renderPoints[(span + 1) * stride];
+            float embA = points[span].embankmentHeight;
+            float embB = hover ? currentEmbankmentHeight : points[span + 1].embankmentHeight;
+            float relA = points[span].position.y - Utils.GetGroundHeight(points[span].position);
+            float relB = hover ? (hoverSnapWasElevated ? hoverSnapRelHeight : currentHeight)
+                : points[span + 1].position.y - Utils.GetGroundHeight(points[span + 1].position);
+            bool follow = EffectiveFollowTerrain() && Mathf.Abs(relA) <= ELEVATION_EPSILON_REL
+                && Mathf.Abs(relB) <= ELEVATION_EPSILON_REL;
+            Vector3 c1 = Vector3.Lerp(a, b, 1f / 3f);
+            Vector3 c2 = Vector3.Lerp(a, b, 2f / 3f);
+            if (Curved)
+            {
+                var anchor = points[span];
+                if (hover)
+                {
+                    Vector3 hoverAnchor = b - Vector3.up * embB;
+                    Vector3 previous = span > 0 ? points[span - 1].position : anchor.position;
+                    c1 = anchor.control_out_manual && anchor.control_out.HasValue
+                        ? anchor.control_out.Value : anchor.position + (hoverAnchor - previous) / 6f;
+                    c1.y += embA;
+                    c2 = hoverAnchor - (hoverAnchor - anchor.position) / 6f;
+                    c2.y += embB;
+                }
+                else
+                {
+                    c1 = anchor.control_out ?? Vector3.Lerp(anchor.position, points[span + 1].position, 1f / 3f);
+                    c1.y += embA;
+                    var next = points[span + 1];
+                    c2 = next.control_in ?? Vector3.Lerp(anchor.position, next.position, 2f / 3f);
+                    if (placing && span + 1 == points.Count - 1 && !next.control_in_manual)
+                    {
+                        Vector3 hoverAnchor = renderPoints[renderPoints.Count - 1] - Vector3.up * currentEmbankmentHeight;
+                        c2 = next.position - (hoverAnchor - anchor.position) / 6f;
+                    }
+                    c2.y += embB;
+                }
+            }
+            // 制御多角形長は曲線長の上界。長いカーブでも固定16分割の折れが目立たない密度にする。
+            float length = Curved ? Vector3.Distance(a, c1) + Vector3.Distance(c1, c2) + Vector3.Distance(c2, b)
+                : Vector3.Distance(a, b);
+            int steps = Mathf.Clamp(Mathf.CeilToInt(length / 2f), Curved ? 16 : 1, 4096);
+            for (int i = 0; i < steps; i++)
+            {
+                float t = (float)i / steps;
+                Vector3 p = Curved ? SampleCubicBezier(a, c1, c2, b, t) : Vector3.Lerp(a, b, t);
+                if (follow)
+                    p.y = Utils.GetGroundHeight(p) + Mathf.Lerp(embA, embB, t) + RoadPartHeights.ROAD_SPLINE_OFFSET;
+                result.Add(p);
+            }
+        }
+        result.Add(placing ? renderPoints[renderPoints.Count - 1] : renderPoints[end * stride]);
+        return result;
     }
 
     /// <summary>
@@ -3194,7 +3302,8 @@ public partial class RoadPlanManager : MonoBehaviour
             embankmentHeights.Add(pt.embankmentHeight);
         }
 
-        IpcClient.Instance.EmitEditPathUpdateShape(pathId, PathType, pointsList, startControl, endControl, embankmentHeights, waypointControls, Curved, PathFollowTerrainOverride, finalized);
+        IpcClient.Instance.EmitEditPathUpdateShape(pathId, PathType, pointsList, startControl, endControl, embankmentHeights, waypointControls, Curved, PathFollowTerrainOverride, finalized,
+            phase == RoadEditorPhase.Editing && points.Count >= 2 && CheckElevationIntersections().Count == 0);
     }
 
     // =====================================================================
@@ -3405,14 +3514,16 @@ public partial class RoadPlanManager : MonoBehaviour
             
             if (pt.control_out.HasValue) {
                 float gY = Utils.GetGroundHeight(pt.control_out.Value);
-                relControlOut.Add(new Vector3(pt.control_out.Value.x, pt.control_out.Value.y - gY, pt.control_out.Value.z));
+                float controlY = i == 0 ? relY : pt.control_out.Value.y - gY;
+                relControlOut.Add(new Vector3(pt.control_out.Value.x, controlY, pt.control_out.Value.z));
             } else {
                 relControlOut.Add(null);
             }
             
             if (pt.control_in.HasValue) {
                 float gY = Utils.GetGroundHeight(pt.control_in.Value);
-                relControlIn.Add(new Vector3(pt.control_in.Value.x, pt.control_in.Value.y - gY, pt.control_in.Value.z));
+                float controlY = i == points.Count - 1 ? relY : pt.control_in.Value.y - gY;
+                relControlIn.Add(new Vector3(pt.control_in.Value.x, controlY, pt.control_in.Value.z));
             } else {
                 relControlIn.Add(null);
             }
@@ -3429,43 +3540,7 @@ public partial class RoadPlanManager : MonoBehaviour
 
         if (relPoints.Count < 2) return segments;
 
-        // 相対高さ空間でベジエサンプリング
-        List<Vector3> sampledPoints = new List<Vector3>();
-        if (!Curved)
-        {
-            sampledPoints.AddRange(relPoints);
-        }
-        else
-        {
-            for (int i = 0; i < relPoints.Count - 1; i++)
-            {
-                sampledPoints.Add(relPoints[i]);
-
-                Vector3 p0 = relPoints[i];
-                Vector3 p3 = relPoints[i + 1];
-
-                Vector3 p1 = relControlOut[i] ?? Vector3.Lerp(p0, p3, 1f / 3f);
-                Vector3 p2 = relControlIn[i + 1] ?? Vector3.Lerp(p0, p3, 2f / 3f);
-
-                for (int s = 1; s <= bezierSamplesPerSegment; s++)
-                {
-                    float t = (float)s / (bezierSamplesPerSegment + 1);
-                    Vector3 sampled = SampleCubicBezier(p0, p1, p2, p3, t);
-                    sampledPoints.Add(sampled);
-                }
-            }
-            sampledPoints.Add(relPoints[relPoints.Count - 1]);
-        }
-
-        bool variantFollows = EffectiveFollowTerrain();
-        for (int i = 0; i < sampledPoints.Count - 1; i++)
-        {
-            Vector3 a = sampledPoints[i];
-            Vector3 b = sampledPoints[i + 1];
-            segments.Add(new ElevationSegment(a, b, a.y, b.y, variantFollows));
-        }
-
-        return segments;
+        return SampleElevationSegments(relPoints, relControlOut, relControlIn, Curved, EffectiveFollowTerrain());
     }
 
     /// <summary>
@@ -3489,9 +3564,8 @@ public partial class RoadPlanManager : MonoBehaviour
         List<Vector3?> relControlIn = new List<Vector3?>();
 
         relPoints.Add(sp);
-        // PathSummary には start_control/end_control が含まれないため null とし、
-        // 後の処理で自動的に補間されるようにする
-        relControlOut.Add(null);
+        var sc = GeneratedModelUtils.ToFloatList(path.start_control);
+        relControlOut.Add(sc != null && sc.Count >= 3 ? new Vector3(sc[0], sc[1], sc[2]) : (Vector3?)null);
         relControlIn.Add(null);
 
         foreach (var wp in waypoints)
@@ -3512,42 +3586,58 @@ public partial class RoadPlanManager : MonoBehaviour
         }
 
         relPoints.Add(ep);
-        relControlIn.Add(null);
+        var ec = GeneratedModelUtils.ToFloatList(path.end_control);
+        relControlIn.Add(ec != null && ec.Count >= 3 ? new Vector3(ec[0], ec[1], ec[2]) : (Vector3?)null);
         relControlOut.Add(null);
 
-        List<Vector3> sampledPoints = new List<Vector3>();
-        if (!path.curved)
+        var result = SampleElevationSegments(relPoints, relControlOut, relControlIn, path.curved, PathManager.GetPathFollowTerrain(path));
+        if (path.station_grade_profile != null && path.station_grade_profile.Count >= 2)
         {
-            sampledPoints.AddRange(relPoints);
-        }
-        else
-        {
-            for (int i = 0; i < relPoints.Count - 1; i++)
+            for (int i = 0; i < result.Count; i++)
             {
-                sampledPoints.Add(relPoints[i]);
-                Vector3 p0 = relPoints[i];
-                Vector3 p3 = relPoints[i + 1];
-                Vector3 p1 = relControlOut[i] ?? Vector3.Lerp(p0, p3, 1f / 3f);
-                Vector3 p2 = relControlIn[i + 1] ?? Vector3.Lerp(p0, p3, 2f / 3f);
-
-                for (int s = 1; s <= bezierSamplesPerSegment; s++)
-                {
-                    float t = (float)s / (bezierSamplesPerSegment + 1);
-                    Vector3 sampled = SampleCubicBezier(p0, p1, p2, p3, t);
-                    sampledPoints.Add(sampled);
-                }
+                var seg = result[i];
+                seg.absYA = Utils.GetGroundHeight(seg.a) + path.GetRelativeHeightAtPoint(seg.a.x, seg.a.z);
+                seg.absYB = Utils.GetGroundHeight(seg.b) + path.GetRelativeHeightAtPoint(seg.b.x, seg.b.z);
+                seg.follows = false;
+                result[i] = seg;
             }
-            sampledPoints.Add(relPoints[relPoints.Count - 1]);
         }
+        return result;
+    }
 
-        bool variantFollows = PathManager.GetPathFollowTerrain(path);
-        for (int i = 0; i < sampledPoints.Count - 1; i++)
+    // 非追従区間の絶対標高はアンカー基準で補間する。途中の地形で橋・トンネルを曲げない。
+    private List<ElevationSegment> SampleElevationSegments(List<Vector3> anchors,
+        List<Vector3?> controlsOut, List<Vector3?> controlsIn, bool curved, bool followsTerrain)
+    {
+        var result = new List<ElevationSegment>();
+        for (int i = 0; i < anchors.Count - 1; i++)
         {
-            Vector3 a = sampledPoints[i];
-            Vector3 b = sampledPoints[i + 1];
-            segments.Add(new ElevationSegment(a, b, a.y, b.y, variantFollows));
+            var p0 = anchors[i];
+            var p3 = anchors[i + 1];
+            var p1 = controlsOut[i] ?? Vector3.Lerp(p0, p3, 1f / 3f);
+            var p2 = controlsIn[i + 1] ?? Vector3.Lerp(p0, p3, 2f / 3f);
+            float g0 = Utils.GetGroundHeight(p0), g3 = Utils.GetGroundHeight(p3);
+            bool follows = followsTerrain && Mathf.Abs(p0.y) <= ELEVATION_EPSILON_REL && Mathf.Abs(p3.y) <= ELEVATION_EPSILON_REL;
+            int count = curved ? bezierSamplesPerSegment + 1 : 1;
+            Vector3 previous = p0;
+            float previousAbs = g0 + p0.y;
+            for (int j = 1; j <= count; j++)
+            {
+                float t = (float)j / count;
+                var next = curved ? SampleCubicBezier(p0, p1, p2, p3, t) : Vector3.Lerp(p0, p3, t);
+                float absolute = follows ? Utils.GetGroundHeight(next)
+                    : (curved ? SampleCubicBezier(p0 + Vector3.up * g0, p1 + Vector3.up * g0,
+                        p2 + Vector3.up * g3, p3 + Vector3.up * g3, t).y : Mathf.Lerp(g0 + p0.y, g3 + p3.y, t));
+                var segment = new ElevationSegment(previous, next, previous.y, next.y, followsTerrain);
+                segment.follows = follows;
+                segment.absYA = previousAbs;
+                segment.absYB = absolute;
+                result.Add(segment);
+                previous = next;
+                previousAbs = absolute;
+            }
         }
-        return segments;
+        return result;
     }
 
     /// <summary>
@@ -3613,7 +3703,7 @@ public partial class RoadPlanManager : MonoBehaviour
             return cachedElevationViolations;
 
         var violations = new List<(int segIndex, PathSegment otherSeg)>();
-        if (pathManager == null || points.Count < 2)
+        if (pathManager == null || points.Count < 2 || PathType == Constants.PATH_STATION_HOUSE)
         {
             cachedElevationViolations = violations;
             return cachedElevationViolations;
@@ -3657,7 +3747,7 @@ public partial class RoadPlanManager : MonoBehaviour
             if (otherPathId == pathId) continue;
 
             PathSummary exPath = pathManager.GetPathData(otherPathId);
-            if (exPath == null) continue;
+            if (exPath == null || exPath.path_type == Constants.PATH_STATION_HOUSE) continue;
 
             // 既存パスのセグメントは編集中に変化しないためキャッシュする
             if (!existingElevSegCache.TryGetValue(otherPathId, out List<ElevationSegment> exSegments))
@@ -3707,7 +3797,7 @@ public partial class RoadPlanManager : MonoBehaviour
                     }
 
                     // 同じ高さ例外（相対比較1cm / 絶対比較0.5m）
-                    if (Mathf.Abs(myYAtIntersect - otherYAtIntersect) <= sameHeightEps)
+                    if (Mathf.Abs(myYAtIntersect - otherYAtIntersect) < sameHeightEps)
                         continue;
 
                     float myMin = myYAtIntersect;
@@ -3719,9 +3809,9 @@ public partial class RoadPlanManager : MonoBehaviour
                     if (overlap)
                     {
                         // 描画用に絶対座標に変換したダミーのPathSegmentを作成
-                        Vector3 aAbs = new Vector3(exSeg.a.x, Utils.GetGroundHeight(new Vector3(exSeg.a.x, 0, exSeg.a.z)) + exSeg.relYA, exSeg.a.z);
-                        Vector3 bAbs = new Vector3(exSeg.b.x, Utils.GetGroundHeight(new Vector3(exSeg.b.x, 0, exSeg.b.z)) + exSeg.relYB, exSeg.b.z);
-                        PathSegment dummyOther = new PathSegment { a = aAbs, b = bAbs };
+                        Vector3 aAbs = new Vector3(exSeg.a.x, exSeg.absYA, exSeg.a.z);
+                        Vector3 bAbs = new Vector3(exSeg.b.x, exSeg.absYB, exSeg.b.z);
+                        PathSegment dummyOther = new PathSegment { a = aAbs, b = bAbs, path = exPath };
                         violations.Add((i, dummyOther));
                     }
                 }
@@ -3761,7 +3851,7 @@ public partial class RoadPlanManager : MonoBehaviour
                     myRelY2 = Mathf.Lerp(mySeg2.relYA, mySeg2.relYB, tB);
                 }
 
-                if (Mathf.Abs(myRelY1 - myRelY2) <= selfSameHeightEps)
+                if (Mathf.Abs(myRelY1 - myRelY2) < selfSameHeightEps)
                     continue;
 
                 float min1 = myRelY1;
@@ -3772,8 +3862,8 @@ public partial class RoadPlanManager : MonoBehaviour
                 bool overlap = min1 < max2 && max1 > min2;
                 if (overlap)
                 {
-                    Vector3 aAbs = new Vector3(mySeg2.a.x, Utils.GetGroundHeight(new Vector3(mySeg2.a.x, 0, mySeg2.a.z)) + mySeg2.relYA, mySeg2.a.z);
-                    Vector3 bAbs = new Vector3(mySeg2.b.x, Utils.GetGroundHeight(new Vector3(mySeg2.b.x, 0, mySeg2.b.z)) + mySeg2.relYB, mySeg2.b.z);
+                    Vector3 aAbs = new Vector3(mySeg2.a.x, mySeg2.absYA, mySeg2.a.z);
+                    Vector3 bAbs = new Vector3(mySeg2.b.x, mySeg2.absYB, mySeg2.b.z);
                     PathSegment dummyOther = new PathSegment { a = aAbs, b = bAbs };
                     violations.Add((i, dummyOther));
                 }
@@ -3785,38 +3875,45 @@ public partial class RoadPlanManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 立体交差しているセグメントを赤色の太線でハイライトする。
+    /// 衝突する道路区間の幅と占有高さを半透明の箱で示す。
     /// </summary>
     private void DrawElevationIntersections(Camera cam)
     {
         if (overlayRenderer == null) return;
 
-        var intersections = CheckElevationIntersections();
-        if (intersections.Count == 0) return;
-
-        Vector3 camPos = cam.transform.position;
-        Vector3 camFwd = cam.transform.forward;
-        Color warningColor = new Color(1f, 0.2f, 0.2f, 0.9f);
-        List<Vector3> renderPoints = GetRenderPoints();
-
-        foreach (var (segIndex, otherSeg) in intersections)
+        if (cachedCollisionVolume == null)
         {
-            if (segIndex < 0 || segIndex >= renderPoints.Count - 1) continue;
-            Vector3 a = renderPoints[segIndex];
-            Vector3 b = renderPoints[segIndex + 1];
-            if (Vector3.Dot(a - camPos, camFwd) >= 0f || Vector3.Dot(b - camPos, camFwd) >= 0f)
+            cachedCollisionVolume = new List<Vector3>();
+            var segments = BuildEditingElevationSegments();
+            if (authoritativeCollision)
             {
-                overlayRenderer.AddSolidLine(a, b, warningColor, dashedLineThickness * 2.5f);
+                var renderPoints = GetRenderPoints();
+                var offsets = LateralOffsets != null && LateralOffsets.Length > 0 ? LateralOffsets : new float[] { 0f };
+                foreach (float offset in offsets)
+                {
+                    var line = RoadRenderer.OffsetPolylineLateral(renderPoints, offset);
+                    for (int i = 1; i < line.Count; i++)
+                        OccupancyVolumeUtil.AddSegment(cachedCollisionVolume, line[i - 1], line[i],
+                            pathManager.GetRoadWidth(PathSubtype), GetPathHeightFromMaster(PathSubtype));
+                }
             }
-
-            // 交差相手セグメントもハイライト
-            if (Vector3.Dot(otherSeg.a - camPos, camFwd) >= 0f || Vector3.Dot(otherSeg.b - camPos, camFwd) >= 0f)
+            var drawn = new HashSet<int>();
+            foreach (var (index, other) in CheckElevationIntersections())
             {
-                Color faded = warningColor;
-                faded.a *= 0.5f;
-                overlayRenderer.AddSolidLine(otherSeg.a, otherSeg.b, faded, dashedLineThickness * 2.5f);
+                if (index < 0 || index >= segments.Count) continue;
+                if (drawn.Add(index))
+                {
+                    var seg = segments[index];
+                    OccupancyVolumeUtil.AddSegment(cachedCollisionVolume,
+                        new Vector3(seg.a.x, seg.absYA, seg.a.z), new Vector3(seg.b.x, seg.absYB, seg.b.z),
+                        pathManager.GetRoadWidth(PathSubtype), GetPathHeightFromMaster(PathSubtype));
+                }
+                int variant = other.path != null ? other.path.path_variant : PathSubtype;
+                OccupancyVolumeUtil.AddSegment(cachedCollisionVolume, other.a, other.b,
+                    pathManager.GetRoadWidth(variant), GetPathHeightFromMaster(variant));
             }
         }
+        overlayRenderer.AddPreTriangulated(cachedCollisionVolume, OccupancyVolumeUtil.WarningColor);
     }
 
     /// <summary>
@@ -3836,6 +3933,7 @@ public partial class RoadPlanManager : MonoBehaviour
 
         var result = new List<List<Vector3>>();
         cachedBuildingInterference = result;
+        cachedBuildingVolume = new List<Vector3>();
 
         if (BuildingManager.Instance == null || pathManager == null) return result;
 
@@ -3910,7 +4008,17 @@ public partial class RoadPlanManager : MonoBehaviour
             }
             if (footprint.Count < 3) continue;
 
-            if (CorridorOverlapsPolygon(centerline, halfWidth, footprint))
+            float buildingBottom = Utils.GetGroundHeight(new Vector3(cp[0], 0f, cp[1]));
+            float buildingTop = buildingBottom + (summary.height ?? 0f);
+            bool overlaps = false;
+            for (int i = 1; i < centerline.Count && !overlaps; i++)
+            {
+                var a = centerline[i - 1];
+                var b = centerline[i];
+                if (Mathf.Min(a.y, b.y) >= buildingTop || Mathf.Max(a.y, b.y) + GetPathHeightFromMaster(PathSubtype) <= buildingBottom) continue;
+                overlaps = CorridorOverlapsPolygon(new List<Vector3> { a, b }, halfWidth, footprint);
+            }
+            if (overlaps)
             {
                 var worldPoly = new List<Vector3>(footprint.Count);
                 foreach (var f in footprint)
@@ -3918,6 +4026,7 @@ public partial class RoadPlanManager : MonoBehaviour
                     worldPoly.Add(new Vector3(f.x, 0f, f.y));
                 }
                 result.Add(worldPoly);
+                OccupancyVolumeUtil.AddBuilding(cachedBuildingVolume, summary);
             }
         }
 
@@ -4000,46 +4109,15 @@ public partial class RoadPlanManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ローカル推定した干渉建物のフットプリントを警告色でオーバーレイ表示する。
+    /// ローカル推定した干渉建物の占有箱を半透明で表示する。
     /// バックエンドの権威結果が来ると HighlightManager 側の色分けで上書きされる。
     /// </summary>
     private void DrawBuildingInterference(Camera cam)
     {
         if (overlayRenderer == null) return;
 
-        var footprints = CheckBuildingInterference();
-        if (footprints.Count == 0) return;
-
-        Color fillColor = new Color(1f, 0.2f, 0.2f, 0.35f);
-        Color outlineColor = new Color(1f, 0.2f, 0.2f, 0.9f);
-        Vector3 camPos = cam.transform.position;
-        Vector3 camFwd = cam.transform.forward;
-
-        foreach (var footprint in footprints)
-        {
-            if (footprint.Count < 3) continue;
-
-            // 各頂点を地形高さに載せる（少し浮かせてZファイト回避）
-            var worldPoints = new List<Vector3>(footprint.Count);
-            foreach (var pt in footprint)
-            {
-                float y = Utils.GetGroundHeight(new Vector3(pt.x, 1000f, pt.z)) + BuildingInterferenceHeightOffset;
-                worldPoints.Add(new Vector3(pt.x, y, pt.z));
-            }
-
-            overlayRenderer.AddPolygon(worldPoints, fillColor);
-
-            // 外周線
-            for (int i = 0; i < worldPoints.Count; i++)
-            {
-                Vector3 a = worldPoints[i];
-                Vector3 b = worldPoints[(i + 1) % worldPoints.Count];
-                if (Vector3.Dot(a - camPos, camFwd) >= 0f || Vector3.Dot(b - camPos, camFwd) >= 0f)
-                {
-                    overlayRenderer.AddSolidLine(a, b, outlineColor, dashedLineThickness * 2f);
-                }
-            }
-        }
+        CheckBuildingInterference();
+        if (cachedBuildingVolume != null)
+            overlayRenderer.AddPreTriangulated(cachedBuildingVolume, OccupancyVolumeUtil.WarningColor);
     }
 }
-

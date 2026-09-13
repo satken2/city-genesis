@@ -269,7 +269,7 @@ export function PathBuildSections({
           <div className="pc-section-title">
             {t("path_construction.costInfo", "建設費用")}
           </div>
-          {pc.nodes.length < 2 ? (
+          {!pc.canConfirm ? (
             <div className="pc-no-nodes-message">
               {t("path_construction.noNodesYet")}
             </div>
@@ -298,6 +298,9 @@ export function PathBuildSections({
       */}
       {pc.selectedVariant !== null && (
         <div className="pc-action-bar">
+          {pc.nodes.length >= 2 && !pc.canConfirm && (
+            <p role="status">{t(pc.collisionChecking ? "path_construction.collisionChecking" : "path_construction.collisionUnready")}</p>
+          )}
           <div className="pc-actions">
             <button className="pc-btn" type="button" onClick={onCancel}>
               {t("path_construction.cancel")}
@@ -306,7 +309,7 @@ export function PathBuildSections({
               className="pc-btn pc-btn-confirm"
               // 資金不足(推定総額 > 利用可能額)は確定させない。バックエンドも同じ基準で拒否する。
               disabled={
-                pc.nodes.length < 2
+                !pc.canConfirm
                 || isConfirming
                 || !isConstructionAffordable(pc.estimatedCost, pc.availableFunds)
               }

@@ -178,24 +178,33 @@ public static class PathDrawContext
         }
         if (total <= 1e-4f) return result;
         float a = (float)(from * total), b = (float)(to * total);
+        void AddPoint(Vector3 point)
+        {
+            if (result.Count > 0 && (result[result.Count - 1] - point).sqrMagnitude < 1e-8f)
+                result[result.Count - 1] = point;
+            else result.Add(point);
+        }
         for (int i = 0; i < points.Count - 1; i++)
         {
             float s0 = cum[i], s1 = cum[i + 1];
-            if (s1 < a || s0 > b) continue;
             float segLen = s1 - s0;
+            // 境界と一致した頂点を隣接セグメントから二重追加すると、末端の接線がゼロになる。
+            // SplineMeshの断面がそこで90度回り、施工先端から路面が突き出すため除外する。
+            if (s1 <= a || s0 >= b || segLen <= 1e-6f) continue;
             if (result.Count == 0)
             {
                 float t0 = segLen > 1e-6f ? Mathf.Clamp01((a - s0) / segLen) : 0f;
-                result.Add(Vector3.Lerp(points[i], points[i + 1], t0));
+                AddPoint(Vector3.Lerp(points[i], points[i + 1], t0));
             }
             if (s1 <= b)
             {
-                result.Add(points[i + 1]);
+                AddPoint(points[i + 1]);
+                if (s1 >= b) break;
             }
             else
             {
                 float t1 = segLen > 1e-6f ? Mathf.Clamp01((b - s0) / segLen) : 1f;
-                result.Add(Vector3.Lerp(points[i], points[i + 1], t1));
+                AddPoint(Vector3.Lerp(points[i], points[i + 1], t1));
                 break;
             }
         }

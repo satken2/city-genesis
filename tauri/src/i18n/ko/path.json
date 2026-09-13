@@ -72,6 +72,8 @@
     }
   },
   "path_construction": {
+    "collisionChecking": "충돌 확인 중…",
+    "collisionUnready": "경로를 확정하고 빨간 입체 영역으로 표시된 충돌을 해결하세요.",
     "constructionSpeed": "건설 속도",
     "selectType": "-- 종류 선택 --",
     "selectTypeFirst": "종류를 선택하세요",

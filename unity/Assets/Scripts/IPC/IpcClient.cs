@@ -91,6 +91,8 @@ public class IpcClient : MonoBehaviour
     public event Action OnEditPropReset;
     public event Action OnGameStart;
     public event Action OnGameEnd;
+    public event Action OnWeatherQuery;
+    public event Action<string> OnWeatherSet;
     // 接道(front_path)の矢印表示。土地区画詳細パネルの開閉に対応する。
     public event Action<int> OnParcelShowFrontPath;
     public event Action OnParcelHideFrontPath;
@@ -626,6 +628,14 @@ public class IpcClient : MonoBehaviour
                     OnGameEnd?.Invoke();
                     break;
 
+                case "weather:query":
+                    OnWeatherQuery?.Invoke();
+                    break;
+
+                case "weather:set":
+                    OnWeatherSet?.Invoke(GetParamString(payload, "id"));
+                    break;
+
                 case "view:set_grid":
                     {
                         string mode = GetParamString(payload, "mode") ?? "off";
@@ -817,7 +827,8 @@ public class IpcClient : MonoBehaviour
         List<Dictionary<string, object>> waypointControls = null,
         bool isCurved = false,
         int followTerrain = Constants.VALUE_NONE,
-        bool finalized = false)
+        bool finalized = false,
+        bool canConfirm = false)
     {
         var payload = new Dictionary<string, object>
         {
@@ -830,6 +841,7 @@ public class IpcClient : MonoBehaviour
             // 形状確定（Placing→Editing、右クリック）で true。UI はこのとき権威ある
             // バックエンド干渉問い合わせを1回発火する。ドラッグ中の更新では false。
             ["is_finalized"] = finalized,
+            ["can_confirm"] = canConfirm,
         };
 
         if (selectedPoints != null)
@@ -1196,6 +1208,14 @@ public class IpcClient : MonoBehaviour
         };
 
         SendEnvelope("view:current_state", payload);
+    }
+
+    public void EmitWeatherState(string id, bool locked, int rain, object[] presets)
+    {
+        SendEnvelope("weather:state", new Dictionary<string, object>
+        {
+            ["id"] = id, ["locked"] = locked, ["rain"] = rain, ["presets"] = presets
+        });
     }
 
     /// <summary>

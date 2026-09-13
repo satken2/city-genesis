@@ -98,6 +98,12 @@
   white-space: nowrap;
 }
 
+.cockpit-date-weather { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.cockpit-weather { font-size: 12px; color: #d8e5f2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cockpit-weather-select { min-width: 0; width: 150px; border: 1px solid #52677e; border-radius: 4px; padding: 3px 4px; background: #172638; color-scheme: dark; cursor: pointer; }
+.cockpit-weather-select:focus-visible { outline: 2px solid #9bcef9; outline-offset: 1px; }
+.cockpit-weather--error { border-color: #ff9b87; }
+
 /* ─── アラート(L1通知) ─── */
 
 .cockpit-alert {

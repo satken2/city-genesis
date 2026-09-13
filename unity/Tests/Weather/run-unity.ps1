@@ -7,7 +7,7 @@ foreach ($folder in @('Assets/Runtime', 'Assets/Editor', 'Assets/Resources/Weath
 }
 Copy-Item "$unityRoot/Assets/Scripts/Weather/*.cs" "$qaRoot/Assets/Runtime" -Force
 Copy-Item "$unityRoot/Assets/Scripts/UI/UiFontProvider.cs" "$qaRoot/Assets/Runtime" -Force
-Copy-Item "$unityRoot/Assets/Resources/Weather/Atmosphere.shader" "$qaRoot/Assets/Resources/Weather" -Force
+Copy-Item "$unityRoot/Assets/Resources/Weather/*.shader" "$qaRoot/Assets/Resources/Weather" -Force
 Copy-Item "$PSScriptRoot/WeatherQaHost.cs" "$qaRoot/Assets/Runtime" -Force
 Copy-Item "$PSScriptRoot/WeatherQA.cs" "$qaRoot/Assets/Editor" -Force
 foreach ($name in @('PC_RPAsset.asset', 'PC_Renderer.asset', 'DefaultVolumeProfile.asset', 'UniversalRenderPipelineGlobalSettings.asset')) {

@@ -79,6 +79,7 @@ public class CollapsedBuildingMeshBuilder : IBuildingMeshGenerator
         // 地面アセット（畑・庭）・岸壁・車両基地には躯体片を載せない（瓦礫のみ）
         bool wantsFragment = footprint != null
             && modelType != Constants.MODEL_MODULAR_GROUND
+            && !BuildingMeshBuilder.IsOpenSpaceModel(modelType)
             && modelType != Constants.MODEL_PORT
             && modelType != Constants.MODEL_RAIL_YARD;
 

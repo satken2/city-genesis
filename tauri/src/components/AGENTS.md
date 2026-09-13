@@ -1,5 +1,7 @@
 # src/components フォルダ
 
+Cockpitの日付横の天候は`hud/WeatherStatus.tsx`と`useWeather.ts`が担当する。Unityの`weather:state`を正として表示し、テンプレートモードでは標準selectから`weather:set`を送る。高さ76pxの独立WebViewをはみ出す候補にはCSSメニューを使わず、画面下端で上に開けるネイティブポップアップを使う。環境音の`WeatherAudio`もCockpitのみで所有し、他ウィンドウで二重再生しない。
+
 ドメイン別のUIコンポーネント置き場。コンポーネントごとに`.tsx`と対応する`.css`を並べる。
 表示文字列は必ずi18n(`t("key")`、`src/i18n/`配下のドメイン別JSONの全7言語に追加)を使うこと。
 
@@ -33,6 +35,7 @@
 | `Meter` | メーター表示(0〜1の割合を水平バーで可視化)。`polarity="negative"`を渡すと「値が大きいほど悪い指標」(騒音・大気汚染・犯罪など)として色の対応が反転する(バーの長さは常に値そのもの)。既定は`positive`=値が大きいほど良い |
 | `NumberStepper` | 数値の増減入力 |
 | `ConstructionInfoCard` | 建設情報カード。推定建設コスト(標準コストに対する倍率の色付きバッジ付き)・推定建設期間を枠付きグリッドで表示する。建物系は`buildingArea`/`totalHeight`/`totalFloorArea`を渡すと物理情報の行が付き、`perEpoch`を渡すと建設中・解体中の「1エポックのコスト・残り期間」ブロック、`nextEpochConstructionBudget`を渡すと「来期の建設予算の X%」注記が付く。`supplyRatio`(=APIの`construction_supply_ratio`)と`expectedDurationDays`(=`expected_duration_days`)を渡すと建設サービスの需給見通しを表示する: 充足率0.9未満で「見込み建設期間」の行と警告バナーが付き、0.5未満はオレンジの強警告(閾値はカード内のUI定数`SUPPLY_RATIO_OK`/`SUPPLY_RATIO_MILD`)。倍率バッジのホバー説明はドメインごとに文言が違うため`costRatioHelp`(翻訳済み文字列)で受け取る。i18nキーは`construction.*`。建物/パスの建設パネルと詳細パネル(建設工事タブ)の4箇所で共用しており、**建設コスト系の表示を新設・変更するときは個別実装せずこのカードを使う・拡張すること**。1エポックコスト・残りエポック数の取得は`src/hooks/useConstructionBudgetRow`(kind="agent"/"path")を使う `availableFunds`/`requiredTotal`を渡すと「利用可能な資金」行と資金不足バナー(必要総額>利用可能額)を出す。確定ボタンの無効化は呼び出し側(建物パネル・`PathBuildSections`)が`utils/constructionFunding.isConstructionAffordable`で同じ判定を行う(バックエンドの発注APIも同基準で`INSUFFICIENT_FUNDS`を返す。建物は建設費+直接配置の用地買収見積、道路は全線の建設費合計が必要総額) |
+| `path/VariantAffordabilityNote` + `hooks/useVariantAffordability` | バリアント単位の資金目安。フックが `GET /{paths,buildings}/variant-affordability` をマウント時・確定成功後(`refresh()`)・`epoch:executing` 終了時に取得し、`TypeVariantSelector`(道路・インフラ)/`RailVariantSelector`(軌道)/建物パネルの施設プルダウンが基準費用(道路=平地100m、建物=既定底面×min_floors×最安構造)を賄えない `<option>` を `disabled`+「（資金不足）」接尾にする。注記コンポーネントは利用可能額と灰色の理由を出し、`unlimited`(神モード)や未取得時は何も出さない。実際の受理可否はバックエンドの発注時審査 |
 | `TimeSeriesChart` | 時系列グラフ(recharts) |
 | `SpaceAmountChart` | フロア面積の内訳チャート |
 | `FiscalSankey` | 財政Sankey(歳入→資金プール→歳出の2段階フロー。recharts)。**現在の描画箇所は税率ウィンドウ(支出側=前エポック実績、`linkStyle="solid"`)だけ**(予算ウィンドウのSankeyは収支バランスの積み上げ棒へ置き換え済み。復活させないこと)。ただし歳入項目の組み立て(`TAX_REVENUE_META`/`buildBusinessRevenueItems`)と支出カテゴリ色(`spendCategoryColor`)は予算ウィンドウの収支バランスも共用するため、**財政系の項目定義・配色を足すときはこのモジュールに置く**。**歳入は税(`TAX_REVENUE_META`=total_revenueキー31〜35)だけでなく、公営事業収入(公共サービス売上・公営住宅家賃。total_revenueのコストカテゴリキー1〜7に計上される)も`buildBusinessRevenueItems`で支出側と同じ予算カテゴリ粒度・同色(`spendCategoryColor`)で描く**。さらに**税外の歳出**として、収用補償(市が民間から土地を収用した土地代。`LEDGER_LAND_ACQUISITION`=キー13)を`buildLandAcquisitionSpendItem`で土色(`FISCAL_COLOR_LAND`)のノードとして描く。**収用補償は予算枠ではなく実支出のため、前エポック実績を描く税率ウィンドウでのみ歳出側に加え、予算枠(次エポックの計画)を描く画面では加えない**(市有地の払い下げ代金は中央銀行が受け取るため、市の歳入には土地売却ノードは存在しない)。総歳入と総歳出の差はresidualノード(黒字=繰越/赤字=貯蓄取り崩し)でバランスさせる(`buildFiscalSankeyData`) |
@@ -44,7 +47,7 @@ HUDは**3枚の専用Tauriウィンドウ**に分かれている。Unityの3Dビ
 
 | ウィンドウラベル | コンポーネント | 位置 | 内容 |
 | --- | --- | --- | --- |
-| `icon-panel` | `IconPanel` | 画面左端・上下中央 | 各種メニュー(道路/軌道/土地区画/地区/建設/公共交通/規制/政策/金融/統計 + プロップ配置、テンプレートモード時のみ資源編集・パラメータ編集)。**予算・公共施設・達成目標のアイコンは持たない**(いずれもコックピットの対応するメータが常時状況を表示していてクリックで開けるため、入口を二重に持たせない)。**パネルの背景板は無し(透明)で、ボタン1個ずつをCSSで角丸+落ち影の面として描き、その中にアイコン画像を余白ゼロで敷く**(`IconPanel.css`の`.icon-panel-slot`。共通の`.hud-icon-btn`〔`hud.css`〕の背景・パディング・hoverを上書きするので、**必ず`.hud-icon-btn`と組んだ2クラス以上のセレクタで書く**。CSSはチャンク単位で分割され読み込み順が保証されず、同点の詳細度では勝てない) |
+| `icon-panel` | `IconPanel` | 画面左端・上下中央 | 各種メニュー(道路/軌道/インフラ/土地区画/地区/建設/公共交通/規制/政策/金融/統計 + プロップ配置、テンプレートモード時のみ資源編集・パラメータ編集)。**予算・公共施設・達成目標のアイコンは持たない**(いずれもコックピットの対応するメータが常時状況を表示していてクリックで開けるため、入口を二重に持たせない)。**パネルの背景板は無し(透明)で、ボタン1個ずつをCSSで角丸+落ち影の面として描き、その中にアイコン画像を余白ゼロで敷く**(`IconPanel.css`の`.icon-panel-slot`。共通の`.hud-icon-btn`〔`hud.css`〕の背景・パディング・hoverを上書きするので、**必ず`.hud-icon-btn`と組んだ2クラス以上のセレクタで書く**。CSSはチャンク単位で分割され読み込み順が保証されず、同点の詳細度では勝てない) |
 | `cockpit` | `Cockpit` | 画面下部中央 | 左から [常用ツール4種(表示切替・都市マップ・地形セル開放・ブルドーザ)を2行2列] [公共サービス充足度メータ(`PublicServiceGauges`)] [ステータス2行2列=左上:都市名(**クリックで`city_rename`ウィンドウを開く**)・右上:施政スコアミニメータ・左下:日付・右下:予算ミニメータ] [アラート(L1通知)] [エポック処理開始] |
 | `system-tray` | `SystemTray` | 画面右下 | 設定・セーブ/ロード・リロード(+デバッグ実行時のみテンプレートモード切替) |
 
@@ -88,9 +91,13 @@ HUDは**3枚の専用Tauriウィンドウ**に分かれている。Unityの3Dビ
 
 **ウィンドウを開いた時点で`STATE_EDIT_PARCEL`(既定=`empty_area`)へ入る**(3DビューのCtrlラジアルメニューは作成モード中しか開かないため、タイルを押すまでモードに入らないと「ホイールが出ない」)。作成方法の真実源はUnity(`ParcelEditorManager.CurrentMode`)で、**Unity起点の切り替えだけが`edit_parcel:set_mode`で届く**(パネルのタイルは`world:change_state`で依頼しつつ楽観的に自分の状態も更新する。両方向で通知すると往復ループになる)。同じモードで`set_mode`が届いたら「選択のリセット」(3DビューでEsc/同じ方法を選び直した)の意味で、選択状態だけ捨てて幅・奥行き等の入力値は保持する(モードが変わったときだけ`SIZE_INPUT_PRESETS`の初期値へ戻す——モードによって幅/奥行きの意味と桁が違うため)。**確定してもモードから抜けない**: 成功後は`STATE_NORMAL`を送らず、`edit_parcel:reset_selection`で3D側の選択も捨てて連続作成に戻る(パネルを閉じたときだけ`STATE_NORMAL`)。地点指定系では幅・奥行きを`edit_parcel:set_rect_params`でUnityへ送り、角度ドラッグ中のローカル矩形プレビューを入力値に合わせる。
 
+### 道路建設・インフラ建設パネル(path/PathConstructionPanel)は1コンポーネント2ウィンドウ
+
+`path_build`(道路=自動車専用道路/街路/歩道)と`infra_build`(インフラ=電気/水道)は**同じ`PathConstructionPanel`を`category` propだけ変えて使う**(`App.tsx`で固定)。入力UI・フローが同一なのでコードは共有するが、プレイヤーには道路と電線・水道管は別の道具に見えるため入口(アイコンパネルのボタン)とウィンドウは分けている。**パネル内にカテゴリ切替UIを復活させないこと。** 既存パスの編集(パス詳細パネル起点の`editPathId`付き起動)は種別を問わず`path_build`で行い、その場合のカテゴリはパス取得時に`usePathConstruction.onTypeChange`が種別から補完した値を使う。Rust側の`EDIT_MODE_WINDOW_TYPES`とクローズ時のグリッド/ハイライト消去は両ウィンドウ種別で同じ扱い。
+
 ### 道路建設パネル(path/)の設定系はUnity移管済み
 
-曲線/直線・吸着5種の設定UIは`PathConstructionPanel`に**無い**(Unity側のCtrlラジアルメニュー・カーソルHUDが担う)。復活させないこと。曲線モード(`usePathConstruction`の`curveMode`)は`edit_path:update_shape`の`is_curved`受信が唯一の書き込み元で、確定送信の`curved`・コスト見積り・形状プレビューがこれを参照する。**標高・盛土のステッパーはパネルに残す**(既存ノードを選んで数値で微調整する用途のため)。表示値は`edit_path:select_node`受信で選択ノード(node_id=-1は次回配置値)の値に同期し、ステッパー変更を`sendEditPathChangeNode`/`sendEditPathChangeEmbankment`でUnityへ送り返す双方向同期(Unityのキー操作でもHUD・パネル双方に反映される)。パネルが持つのはカテゴリ/バリアント選択・標高/盛土・ホーム設置側・グリッド設定(サイズ/角度。表示状態はUnityの`view:grid_toggled`受信で同期)・形状プレビュー・コスト・確定/キャンセル。軌道複線(線路数≥2)は確定時にUI側が中心線を平行な単線パス群へ展開して一括POSTするが、Unityの3Dプレビューにも複線が見えるよう、各線の横オフセット列を`STATE_EDIT_PATH`の`lateral_offsets` params(初期値)と`edit_path:change_lateral_offsets`(線路数変更時の逐次通知。配置中ノードは維持される)でUnityへ渡す(`usePathConstruction`の`lateralOffsetsForVariant`とrailComponents監視effect)。
+曲線/直線・吸着5種の設定UIは`PathConstructionPanel`に**無い**(Unity側のCtrlラジアルメニュー・カーソルHUDが担う)。復活させないこと。曲線モード(`usePathConstruction`の`curveMode`)は`edit_path:update_shape`の`is_curved`受信が唯一の書き込み元で、確定送信の`curved`・コスト見積り・形状プレビューがこれを参照する。**標高・盛土のステッパーはパネルに残す**(既存ノードを選んで数値で微調整する用途のため)。表示値は`edit_path:select_node`受信で選択ノード(node_id=-1は次回配置値)の値に同期し、ステッパー変更を`sendEditPathChangeNode`/`sendEditPathChangeEmbankment`でUnityへ送り返す双方向同期(Unityのキー操作でもHUD・パネル双方に反映される)。パネルが持つのは種別/バリアント選択・標高/盛土・ホーム設置側・グリッド設定(サイズ/角度。表示状態はUnityの`view:grid_toggled`受信で同期)・形状プレビュー・コスト・確定/キャンセル。軌道複線(線路数≥2)は確定時にUI側が中心線を平行な単線パス群へ展開して一括POSTするが、Unityの3Dプレビューにも複線が見えるよう、各線の横オフセット列を`STATE_EDIT_PATH`の`lateral_offsets` params(初期値)と`edit_path:change_lateral_offsets`(線路数変更時の逐次通知。配置中ノードは維持される)でUnityへ渡す(`usePathConstruction`の`lateralOffsetsForVariant`とrailComponents監視effect)。
 
 ### パス詳細パネルの結合・分割(path/PathTopologyEditPanel)
 
@@ -135,3 +142,5 @@ StationHouseEndsSelectは駅舎の両端/A端/B端の共通選択UI。建設はu
 ## プロップの高さ指定
 
 PropPlacementPanelの個別配置は全種別共通で地面相対高さ(m)を小数・負値で設定できる。heightを初期化・設定変更IPCへ渡し、Unityから受ける各インスタンスのyをそのままPOSTする。高さ変更は次のゴーストだけに適用し、すでに打点したインスタンスは個別の高さを保つ。
+
+道路・軌道の共通確定ボタンは `usePathConstruction.canConfirm` を使う。Unityからの `can_confirm` と、確定と同じ `constructionBody` 全線の `/paths/validate` 成功をANDする。事前検証は150msのデバウンスで行い、応答を送信形状キーで照合して古い結果を破棄する。取得失敗・検証待ち・交差中は確定不可。confirmPath自身もガードし、送信直前に再検証する。複線の先頭1本だけの検証は禁止。

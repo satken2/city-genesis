@@ -1,0 +1,23 @@
+{
+  "weather": {
+    "label": "Clima",
+    "choose": "Elegir clima",
+    "loading": "Consultando clima…",
+    "unknown": "Desconocido",
+    "automatic": "{{weather}} (Auto)",
+    "failed": "No se pudo cambiar el clima",
+    "names": {
+      "clear": "Despejado",
+      "high_clouds": "Nubes altas",
+      "fair": "Soleado",
+      "broken_clouds": "Claros",
+      "overcast": "Nublado",
+      "rain_clouds": "Nubes de lluvia",
+      "fog": "Niebla",
+      "sunset": "Atardecer",
+      "drizzle": "Llovizna",
+      "rain": "Lluvia",
+      "heavy_rain": "Lluvia intensa"
+    }
+  }
+}

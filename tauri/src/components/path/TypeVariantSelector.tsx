@@ -8,6 +8,8 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { MasterData, PathMasterEntry } from "../../types";
+import type { VariantAffordability } from "../../hooks/useVariantAffordability";
+import { VariantAffordabilityNote } from "./VariantAffordabilityNote";
 
 export type TypeOption = {
   /** path_type の値 */
@@ -26,6 +28,8 @@ type TypeVariantSelectorProps = {
   onSelectVariant: (variantId: number) => void;
   /** 既存パス編集など、種別・バリアントを変更させない場合 true */
   disabled?: boolean;
+  /** バリアント単位の資金目安。渡すと基準費用を賄えないバリアントを選択不可にする */
+  affordability?: VariantAffordability | null;
 };
 
 export function TypeVariantSelector({
@@ -37,8 +41,11 @@ export function TypeVariantSelector({
   onSelectType,
   onSelectVariant,
   disabled = false,
+  affordability = null,
 }: TypeVariantSelectorProps) {
   const { t } = useTranslation();
+  const isUnaffordable = (variantId: number) =>
+    affordability != null && !affordability.unlimited && affordability.variants[variantId]?.affordable === false;
 
   const variants = useMemo(
     () => (selectedType !== null ? variantsForType(selectedType) : []),
@@ -89,12 +96,18 @@ export function TypeVariantSelector({
         >
           <option value="">{t("path_construction.selectTypeFirst")}</option>
           {variants.map((v) => (
-            <option key={v.id} value={v.id}>
+            <option key={v.id} value={v.id} disabled={isUnaffordable(v.id)}>
               {v.data.display_name}
+              {isUnaffordable(v.id) ? t("construction.variantUnaffordableSuffix") : ""}
             </option>
           ))}
         </select>
       )}
+      <VariantAffordabilityNote
+        affordability={affordability}
+        anyUnaffordable={variants.some((v) => isUnaffordable(v.id))}
+        kind="path"
+      />
     </div>
   );
 }

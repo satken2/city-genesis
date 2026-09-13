@@ -50,6 +50,7 @@ import {
 import type { GridDisplayMode } from "./GridSettingsPanel";
 import type { PathMasterEntry } from "../../types";
 import { RailVariantSelector } from "./RailVariantSelector";
+import { useVariantAffordability } from "../../hooks/useVariantAffordability";
 import { RailTrackLayoutSettings } from "./RailTrackLayoutSettings";
 import { PathVariantDescription } from "./PathVariantDescription";
 import { PathBuildSections } from "./PathBuildSections";
@@ -78,6 +79,9 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
   const masterData = useMasterData();
   // 軌道は常に新規敷設のため editPathId は null 固定。
   const pc = usePathConstruction(masterData, apiBaseUrl, null);
+  // バリアント単位の資金目安(今の資金では平地の基準延長すら敷けない規格を選ばせない)
+  const { affordability: variantAffordability, refresh: refreshAffordability } =
+    useVariantAffordability("paths", apiBaseUrl);
 
   const [tab, setTab] = useState<TrackTab>("track");
   // 鉄道種別(鉄道/モノレール/ロープウェイ)はタブより上位の絞り込みなので、
@@ -203,6 +207,8 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
     try {
       await pc.confirmPath();
       await sendEditPathFinish();
+      // 発注で拘束額が増えたので、規格ごとの資金目安を取り直す
+      refreshAffordability();
       // 連続設置: 選択中バリアント・軌道設定を維持したまま次のパスを配置できる状態へ戻す。
       pc.continuePlacement();
       setIsConfirming(false);
@@ -224,7 +230,7 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
       }
       void showNotification({ message: displayMessage, durationMs: 8000 });
     }
-  }, [pc, t]);
+  }, [pc, refreshAffordability, t]);
 
   /** 軌道パスのキャンセル(配置中の仮形状だけをクリアして同じバリアントで引き直す)。 */
   const handleCancelPath = useCallback(() => {
@@ -343,6 +349,7 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
         variantOptions={tab === "house" ? houseVariantOptions : variantOptions}
         selectedVariant={pc.selectedVariant}
         onSelectVariant={pc.selectVariant}
+        affordability={variantAffordability}
       />
 
       <PathVariantDescription entry={pc.selectedVariantData} />

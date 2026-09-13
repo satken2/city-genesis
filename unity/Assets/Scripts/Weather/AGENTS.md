@@ -2,9 +2,11 @@
 
 Unityの環境表現だけを扱う。経済シミュレーションの天気データや共有定数は作らない。
 
-- `WeatherPreset`: 10種類の空・光の正。季節や都市日付とは独立。
+- `WeatherPreset`: 11種類の空・光・雨量・抽選ウェイトの正。季節や都市日付とは独立。
 - `WeatherEpochTracker`: 初回取得と実際のエポック増分を区別する。編集リロードでは天気を変更しない。
-- `WeatherController`: AppRootが生成。IPCは既存イベントを購読し、ApiClient経由でcity.epochだけ読む。専用System.Randomで選び、UnityEngine.Randomの状態に影響しない。
+- `WeatherController`: AppRootが生成。ApiClient経由でcity.epochだけ読む。専用System.Randomの重み付き独立抽選で、同一天気の連続を許す。UnityEngine.Randomの状態に影響しない。
+- `weather:query` / `weather:set {id}`を受け、`weather:state`で現在値と候補をCockpitへ送る。nullの選択は固定解除。天候ID・ウェイト・雨量の正はUnity、翻訳・絵文字・環境音はTauri。
+- `WeatherRain`: カメラ近傍だけで雨粒を描く。Resourcesの`RainStreak.shader`を使い、ゲーム外・無効化時に停止する。都市オブジェクトへの衝突判定や経済状態の変更はしない。
 - シェーダーは`Assets/Resources/Weather/Atmosphere.shader`。ビルド時にストリッピングされないようResourcesから直接ロードする。
 - シーンの主光源を再利用する。無効化時に元の環境を戻し、ランタイムの所有アセットは破棄時に解放する。
 - F9パネルはキーボード操作のみ。天気パネルのキーを追加するときはカメラ・Steam撮影キーと競合させない。
