@@ -8,6 +8,7 @@
 - 台帳は0.25秒ごとに実体一覧から構築する。交差点中は移動先へ1回だけ数え、到着予約・フェード中も消えるまでは枠を占める。
 - 車線と区画線は `RoadLaneLayout`（MeshGenerators/Paths/RoadPath.cs）を共有する。通行方向は `CityInfoStore`。交通量は型付き `PathSummary.path_traffic` を読み、utilizationで代用しない。
 - 範囲候補は `GetPathsNearCircle` のセル逆引き。円内区間・発生・デスポーンはすべてrenderRadius+despawnMarginを使う。
+- `AmbientVehicleManager` は空と海の環境演出(高高度の航空機3種・沖合の船舶4種)。経済と無関係で、GameObjectを持たず保存座標+`Graphics.RenderMesh`で描く。船は `CoastlineStore.SignedDistance` の先読み採点で陸地を避け、外洋(リング包含数0)にだけ発生する。距離関数は全辺走査なので毎フレーム呼ばない。飛行機雲・航跡は `AmbientTrail`。モデルは `Props/ambient_*`(固定名。prop_master登録なし)。仕様は公開 `geometries/V_環境演出の乗り物.md`。
 - 回帰検証は `unity/Tests/Vehicles/run.ps1`。独立Unityで本編アセンブリを実行し、本編シーンを変更しない。
 
 - 到着時は `BeginRoadsideExit` でその場の90度旋回→実寸の横移動を行い、検証済みの敷地内退出点へ抜けた後だけフェードする。退出中は道路スナップショット更新で位置を戻さず、管理円外でも退出を完了させる。

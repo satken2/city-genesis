@@ -22,11 +22,14 @@ public sealed class PropRenderModel : IDisposable
     public float Clearance(float scale) => Mathf.Min(8f, Mathf.Max(bounds.extents.x, bounds.extents.z) * 0.15f * scale);
     private readonly List<UnityEngine.Object> owned = new List<UnityEngine.Object>();
 
-    public PropRenderModel(int type)
+    public PropRenderModel(int type) : this(type.ToString(), type == 1 || type == 2) { }
+
+    /// <summary>固定名のモデル(Props/ambient_* など)も同じ抽出で読む。distantTree は森林の最遠景樹冠を作るか。</summary>
+    public PropRenderModel(string name, bool distantTree = false)
     {
         var manager = ModelManager.Instance;
         if (manager == null) return;
-        var prefab = manager.GetModel($"Models/Props/{type}");
+        var prefab = manager.GetModel($"Models/Props/{name}");
         if (prefab == null) return;
         Extract(prefab, normal);
         if (normal.Count == 0) return;
@@ -36,10 +39,10 @@ public sealed class PropRenderModel : IDisposable
             var b = TransformBounds(part.mesh.bounds, part.local);
             if (first) { bounds = b; first = false; } else bounds.Encapsulate(b);
         }
-        var closePrefab = manager.GetModel($"Models/Props/{type}_close", true);
+        var closePrefab = manager.GetModel($"Models/Props/{name}_close", true);
         if (closePrefab != null) Extract(closePrefab, close);
         if (close.Count == 0) close.AddRange(normal);
-        var farPrefab = manager.GetModel($"Models/Props/{type}_far", true);
+        var farPrefab = manager.GetModel($"Models/Props/{name}_far", true);
         if (farPrefab != null) Extract(farPrefab, far);
         if (far.Count == 0)
         {
@@ -53,7 +56,7 @@ public sealed class PropRenderModel : IDisposable
                 far.Add(new Part { mesh = mesh, material = part.material, local = part.local });
             }
         }
-        if (type == 1 || type == 2) CreateDistantTree();
+        if (distantTree) CreateDistantTree();
     }
 
     private void CreateDistantTree()

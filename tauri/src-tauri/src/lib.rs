@@ -1026,13 +1026,14 @@ fn export_terrain_as_npy(
 
     // 川は .npy と同じファイル名(拡張子だけ .rivers.json)で同じディレクトリに書き出す
     // (.water.json と同じ命名規則・方針)。川床の彫り込み自体は標高データ(.npy)に含まれて
-    // おり、このファイルは水面リボン描画用のスプライン(centerline/widths/surface_offsets)と
-    // 建設不可判定用の footprint を持つ。川が無くてもファイルを書き出し、以前のエクスポートで
-    // 残った古い川が読まれ続けるのを防ぐ。仕様の正は D_地形形状.md §D.11。
+    // おり、このファイルは川の範囲ポリゴン(polygon)と水面標高のプロファイル線(profile)を持つ。
+    // 川が無くてもファイルを書き出し、以前のエクスポートで残った古い川が読まれ続けるのを防ぐ。
+    // version 2 = 範囲ポリゴン方式(1 はスプライン帯方式で、バックエンドは読まない)。
+    // 仕様の正は D_地形形状.md §D.11。
     {
         let rivers = rivers.unwrap_or_else(|| serde_json::Value::Array(Vec::new()));
         let rivers_doc = serde_json::json!({
-            "version": 1,
+            "version": 2,
             "rivers": rivers,
         });
         // out_path が "map_foo.npy" なら "map_foo.rivers.json" にする。

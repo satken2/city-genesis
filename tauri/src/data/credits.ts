@@ -10,6 +10,9 @@
  * - **表記が不要な素材も、出所が分かっているものは載せる。** 後から規約が変わった
  *   場合や、出所を問われた場合に追跡できるようにするため。表記が本当に必須な行だけを
  *   選び出そうとすると、判断ミスが即ライセンス違反になる。
+ * - **自作の素材(自前のBlenderスクリプトやAI補助で作ったモデル等)は載せない。**
+ *   クレジットは他者の成果物を利用する際の出所表記であり、自作物には表記すべき
+ *   相手がいない。自作物の制作記録は `genesis-gallery` 側に置く。
  * - **`requiredText` は規約が指定する文面をそのまま入れる。** 翻訳・省略・改変を
  *   しないこと(「この表記のとおりに書くこと」が条件になっている素材があるため)。
  * - 素材を追加・差し替えしたら、**同じコミットでこの配列も更新する。** 出所を
@@ -93,12 +96,6 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     note: "Base ambience. Converted to Ogg Opus, loudness normalized and loop crossfaded. License verified 2026-09-13.",
   },
   {
-    title: "City Genesis construction vehicles",
-    category: "model",
-    source: "City Genesis / procedural Blender models",
-    note: "Paver, roller, excavator and mobile crane. Created with Codex-assisted Python geometry; no external model or texture downloads. Source: genesis-gallery/pipeline/jobs/build_construction_vehicles.py (2026-09-13).",
-  },
-  {
     title: "City from pasture NL summer 140713_0298.wav",
     category: "sfx",
     author: "klankbeeld",
@@ -133,24 +130,6 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     url: "https://freesound.org/people/lebaston100/sounds/346562/",
     license: "CC BY 4.0 — https://creativecommons.org/licenses/by/4.0/",
     note: "Heavy rain. Converted to Ogg Opus, loudness normalized and loop crossfaded. License verified 2026-09-13.",
-  },
-  {
-    title: "オープンスペースの敷地装飾",
-    category: "model",
-    source: "City Genesis（Blenderスクリプトによるプロシージャル制作）",
-    note: "Buildings/a3001〜a3004。車止め・乗降上屋・ベンチ・樹木をCodex補助で制作。既存マテリアルと森林広葉樹の葉色画像を共有し、外部素材の追加なし。",
-  },
-  {
-    title: "駅階段・下り階段入口プロップ",
-    category: "model",
-    source: "City Genesis（Blenderスクリプトによるプロシージャル制作）",
-    note: "Props/101〜104。Codex補助で制作。既存の道路材質を共有し、入口の黒色材質を作成。外部素材の追加なし。",
-  },
-  {
-    title: "高架下駅舎2003・2013の連絡通路",
-    category: "model",
-    source: "City Genesis（Blenderスクリプトによるプロシージャル制作）",
-    note: "Paths/p2003/body・p2013/body。Codex補助で制作し、既存の駅舎材質を共有。外部素材の追加なし。",
   },
   {
     title: "Piano loops 204 octave down long loop 120 bpm",

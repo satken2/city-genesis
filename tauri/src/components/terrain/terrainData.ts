@@ -29,25 +29,28 @@ export type WaterSurfacePayload = {
 
 /**
  * 川1本分の保存契約。
- * 地形エディタの meta.json / サイドカーJSON(map_xxx.rivers.json)と、将来のバックエンド・
- * Unity 描画で共通の契約。水面(WaterSurfacePayload)とは別系統で保存する。湖の契約は
- * 単一 water_level の水平面だが、川は流下方向に水面標高が変化するため互換性が無い。
+ * 地形エディタの meta.json / サイドカーJSON(map_xxx.rivers.json)と、バックエンド
+ * (GET /terrain/rivers)・Unity 描画で共通の契約。水面(WaterSurfacePayload)とは別系統で保存する。
+ * 湖の契約は単一 water_level の水平面だが、川は流下方向に水面標高が変化するため互換性が無い。
+ *
+ * 川は「範囲(polygon)」と「水面標高のプロファイル線(profile)」の2つで定義する。
+ * 川床を彫り込むときのスプライン(流路・幅・深さ)はエディタ内部の中間データであり、
+ * 標高データ(.npy)に焼き込まれた時点で役目を終える。ゲーム側が知る必要があるのは
+ * 「どの範囲が川で」「その範囲の各地点の水面が何mか」だけなので、それだけを保存する。
  * 仕様の正は genesis-docs/docs/geometries/D_地形形状.md §D.11。
  */
 export type RiverPayload = {
   id: string;
   /** 種別ラベル。常に "river" */
   kind: string;
-  /** 川床中心線(タルウェグ)の3D点列 [x, bedY, z](上流→下流)。ワールドXZ+絶対標高Y(m)。
-   *  Unity では Catmull-Rom スプライン(RoadPath.BuildSpline)の入力にそのまま使える。 */
-  centerline: number[][];
-  /** 各点の川幅(m)。centerline と同じ要素数。水面リボンメッシュ(BuildStripMesh)の幅入力 */
-  widths: number[];
-  /** 各点の水面オフセット(m)。水面Y = centerline[i][1] + surface_offsets[i] */
-  surface_offsets: number[];
-  /** 建設不可判定用の帯ポリゴン(中心線±幅/2 をオフセットした閉リング)。バックエンドが
-   *  compute_coastline_polygon の water_surfaces 穴あけと同列に difference するための平面形状 */
-  footprint: WaterPolygonGeoJson;
+  /** 川の範囲。彫り込み後の地形で「水面標高より低い」領域を地形格子から抽出したもので、
+   *  中州・島は穴(内周リング)になる。座標系は水面の polygon と同じ(ワールドXZ、マップ中心が(0,0))。
+   *  建設不可判定(海岸線の穴あけ)・パスの横断判定・水面メッシュの範囲はすべてこの形状を使う */
+  polygon: WaterPolygonGeoJson;
+  /** 水面標高のプロファイル線 [[x, waterY, z], ...](上流→下流)。
+   *  範囲内の任意地点の水面標高は「この折れ線上の最近点の waterY」で決まる
+   *  (riverGeometry.ts の RiverProfileSampler)。y は絶対標高(m、海面=0)で流下方向に単調非増加 */
+  profile: number[][];
 };
 
 /**

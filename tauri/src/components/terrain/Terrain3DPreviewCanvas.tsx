@@ -45,6 +45,7 @@ import {
   EVT_TERRAIN_3D_SELECTION_RESET,
   EVT_TERRAIN_3D_ELEVATION_DELTA,
 } from "./terrainData";
+import { RiverProfileSampler, buildRiverSurfaceMesh } from "./riverGeometry";
 import "./Terrain3DPreviewCanvas.css";
 
 type Terrain3DPreviewCanvasProps = {
@@ -233,13 +234,13 @@ export function Terrain3DPreviewCanvas({ mapId }: Terrain3DPreviewCanvasProps) {
   }
 
   /**
-   * 川の水面リボンのメッシュを最新の川定義(latestRiversRef)から作り直す。
+   * 川の水面メッシュを最新の川定義(latestRiversRef)から作り直す。
    *
-   * 中心線(川床のタルウェグ)の各点を左右の法線方向へ ±幅/2 オフセットした頂点列で
-   * トライアングルストリップを作る。頂点のY標高は「川床 + 水面オフセット」で、湖の水平面と
-   * 違い流下方向に沿って下っていく。ゲーム本体のUnity側で予定している
-   * MeshFactory.BuildStripMesh と同じ構成のリボンなので、保存データ(RiverPayload)の
-   * 妥当性検証も兼ねる。Z-fighting 回避のため水面をわずかに持ち上げる。
+   * 川の範囲ポリゴンを覆う格子面(buildRiverSurfaceMesh)で、各頂点のY標高はその地点の
+   * 水面プロファイル標高(プロファイル線上の最近点)。湖の水平面と違い流下方向に沿って
+   * 下っていく。ゲーム本体のUnity側(RiverSurfaceManager)と同じ構成なので、保存データ
+   * (RiverPayload)の妥当性検証も兼ねる。格子間隔は地形格子の半分にし、川床(地形格子)より
+   * 細かく水面を張って岸線の追従を良くする。Z-fighting 回避のため水面をわずかに持ち上げる。
    */
   function rebuildRiverMeshes() {
     const scene = sceneRef.current;
@@ -254,56 +255,18 @@ export function Terrain3DPreviewCanvas({ mapId }: Terrain3DPreviewCanvasProps) {
 
     // 川床とのZ-fighting回避用に水面へ加える微小な持ち上げ量(m)
     const WATER_LIFT = 0.05;
+    const spacing = gridRef.current?.spacing ?? 10;
+    const step = Math.max(1, spacing / 2);
 
     for (const river of latestRiversRef.current) {
-      const centerline = river?.centerline;
-      if (!Array.isArray(centerline) || centerline.length < 2) continue;
-      const n = centerline.length;
-
-      const positions = new Float32Array(n * 2 * 3);
-      for (let i = 0; i < n; i++) {
-        const cur = centerline[i];
-        const prev = centerline[Math.max(0, i - 1)];
-        const next = centerline[Math.min(n - 1, i + 1)];
-        // 接線(端点は片側差分、中間は中央差分)から左法線を求める(XZ平面)
-        let tx = next[0] - prev[0];
-        let tz = next[2] - prev[2];
-        const tl = Math.hypot(tx, tz);
-        if (tl < 1e-9) {
-          tx = 1;
-          tz = 0;
-        } else {
-          tx /= tl;
-          tz /= tl;
-        }
-        const nx = -tz;
-        const nz = tx;
-        const half = (river.widths?.[i] ?? 0) / 2;
-        const waterY = cur[1] + (river.surface_offsets?.[i] ?? 0) + WATER_LIFT;
-        // 左岸側の頂点 → 右岸側の頂点の順に並べる
-        positions[i * 6 + 0] = cur[0] + nx * half;
-        positions[i * 6 + 1] = waterY;
-        positions[i * 6 + 2] = cur[2] + nz * half;
-        positions[i * 6 + 3] = cur[0] - nx * half;
-        positions[i * 6 + 4] = waterY;
-        positions[i * 6 + 5] = cur[2] - nz * half;
-      }
-
-      const IndexArrayCtor = n * 2 > 65535 ? Uint32Array : Uint16Array;
-      const indices = new IndexArrayCtor((n - 1) * 6);
-      let ii = 0;
-      for (let i = 0; i < n - 1; i++) {
-        const l0 = i * 2;
-        const r0 = l0 + 1;
-        const l1 = l0 + 2;
-        const r1 = l0 + 3;
-        indices[ii++] = l0; indices[ii++] = r0; indices[ii++] = l1;
-        indices[ii++] = l1; indices[ii++] = r0; indices[ii++] = r1;
-      }
+      if (!river?.polygon || !Array.isArray(river.profile) || river.profile.length < 2) continue;
+      const sampler = new RiverProfileSampler(river.profile);
+      const surface = buildRiverSurfaceMesh(river.polygon, sampler, step, WATER_LIFT);
+      if (!surface) continue;
 
       const geom = new THREE.BufferGeometry();
-      geom.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-      geom.setIndex(new THREE.BufferAttribute(indices, 1));
+      geom.setAttribute("position", new THREE.BufferAttribute(surface.positions, 3));
+      geom.setIndex(new THREE.BufferAttribute(surface.indices, 1));
       geom.computeVertexNormals();
       const mat = new THREE.MeshStandardMaterial({
         color: 0x2a6fa8,
@@ -318,7 +281,6 @@ export function Terrain3DPreviewCanvas({ mapId }: Terrain3DPreviewCanvasProps) {
       riverMeshesRef.current.push(mesh);
     }
   }
-
   /** 標高マップ全体が収まるようにカメラを初期配置する(初回full_state受信時のみ呼ぶ) */
   function frameCameraToGrid(grid: GridState) {
     const camera = cameraRef.current;

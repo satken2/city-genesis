@@ -771,7 +771,7 @@ SplineMesh は子オブジェクトとして生成されるため、親オブジ
 
 ### 15.6 工事車両の制作と検証
 
-4種の原本は `genesis-gallery/library/props.blend`、再生成ジョブは `pipeline/jobs/build_construction_vehicles.py`。コレクションとFBXの名前は `construction_paver` / `construction_roller` / `construction_excavator` / `construction_crane`。配置原点は接地0・水平中心、Unityの+Zが前方。既存の車両用材質と黄色塗装を共有する。施工表示専用なので、自由配置用のprop_masterには登録しない。
+4種の原本は `genesis-gallery/library/props.blend`、再生成ジョブは `pipeline/jobs/build_construction_vehicles.py`。コレクションとFBXの名前は `construction_paver` / `construction_roller` / `construction_excavator` / `construction_crane`。配置原点は接地0・水平中心、Unityの+Zが前方。既存の車両用材質と黄色塗装を共有する。施工表示は固定名で読むが、飾りとして自由に置けるよう数値ID 201〜204 の別名FBX(メッシュ共有)も `prop_master` に登録している([地形プロップ](M_地形プロップ.md) §M.7.2)。
 
 `library.py export --category props --only construction_` で書き出し、Propsバリデータと `build_gallery.py --only construction_` を実行する。Unityへのミラーは `ModelPrefabGenerator` が生成する。`unity/Tests/ConstructionPaths/run-unity.ps1` は実FBXとURP材質で0・12.5・25・57.5・90・99・100%の描画、曲線、地下、クリック面、進捗の受信とキャッシュキーを検証する。橋脚の干渉回帰は `unity/Tests/Pillars/run-unity.ps1`。
 

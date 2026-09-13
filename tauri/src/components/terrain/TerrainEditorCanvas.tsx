@@ -56,6 +56,7 @@ import { useMasterData } from "../../contexts/MasterDataContext";
 import {
   type TerrainEditorData,
   type WaterSurfacePayload,
+  type WaterPolygonGeoJson,
   type RiverPayload,
   type ResourceAreaPayload,
   type TerrainCameraPayload,
@@ -93,8 +94,9 @@ import {
   evolveRivers,
   carveRivers,
   applyRiverDepth,
-  buildRiverFootprint,
+  buildRiverPolygon,
 } from "./terrainRiver";
+import { polygonArea, polygonParts, translatePolygon } from "./riverGeometry";
 import { captureTerrainThumbnail } from "./terrainThumbnail";
 import "./TerrainEditorCanvas.css";
 
@@ -150,8 +152,17 @@ type EditorWaterSurface = { id: string; waterLevel: number; points: WorldPoint[]
  *     一覧から1本ずつ「彫る」ことで true になる。保存・エクスポート・3Dプレビューの
  *     対象になるのは彫り込み済みの川のみ。
  *   - depthCoef: この川を彫るときの深さ係数。生成時の既定値から川ごとに調整できる。
+ *   - polygon: 川の範囲(彫り込み後の地形で水面より低い領域。穴=中州)。彫り込み時に抽出し、
+ *     保存契約(RiverPayload.polygon)・2D/3Dプレビューの水面表示に使う。未彫り込みは null。
+ *     保存データから復元した川は points の width/bedY を持たない(0 と waterY で埋める)ため、
+ *     範囲の再計算は既存 polygon を膨らませた帯で行う(buildRiverPolygon の polygon 帯)。
  */
-type EditorRiver = GeneratedRiver & { params: RiverGenParams; carved: boolean; depthCoef: number };
+type EditorRiver = GeneratedRiver & {
+  params: RiverGenParams;
+  carved: boolean;
+  depthCoef: number;
+  polygon: WaterPolygonGeoJson | null;
+};
 
 /**
  * 地形エディタ内での天然資源エリア1件分の内部表現。
@@ -197,6 +208,13 @@ function niceIntervalAtOrBelow(value: number): number {
  * 出る」ことがないよう、ある程度ズームインするまでは基準間隔のまま据え置く。
  */
 const CONTOUR_REFINE_ZOOM_THRESHOLD = 6;
+
+/**
+ * 保存データから復元した川(流路スプラインの幅情報を持たない)の範囲を再計算するとき、
+ * 既存の範囲ポリゴンを何セル膨らませた帯を探索するか。彫り込み後に岸を手作業で削って
+ * 川を広げた場合にも追従できる程度に取り、無関係な低地を拾わない程度に留める。
+ */
+const RIVER_POLYGON_DILATE_CELLS = 3;
 
 /**
  * 左ボタンの「その場クリック(単発の選択操作)」と「ドラッグ(パン)」を区別する移動量の
@@ -1047,9 +1065,10 @@ function strokeCameraMarker(
 
 /**
  * 川を2Dキャンバスへ描画する。draw() 内でビュー変換適用後に呼ぶ。
- * 彫り込み済みの川は「川幅の半透明帯 + 濃青の中心線」、未彫り込み(計算直後)の川は
- * 明るい水色の破線で描き分ける。帯の幅は各川の平均幅を使う(セグメントごとに lineWidth を
- * 変えると川1本あたりのストローク回数が点数分に増えるため、平均で近似する)。
+ * 彫り込み済みの川は「範囲ポリゴンの水面塗り(穴=中州は抜く) + 細い水面プロファイル線」で、
+ * ゲーム本体でどの範囲に水面が描かれるかをそのまま示す。範囲が未抽出の彫り込み済みの川
+ * (異常系)は中心線だけを描く。未彫り込み(計算直後)の川は明るい水色の破線で、川幅の帯を
+ * 平均幅で近似して描く(セグメントごとに lineWidth を変えるとストローク回数が点数分に増えるため)。
  */
 function strokeRivers(
   ctx: CanvasRenderingContext2D,
@@ -1075,13 +1094,28 @@ function strokeRivers(
     const built = buildPath(river);
     if (!built) continue;
     if (river.carved) {
-      // 彫り込み済み: 川幅の半透明帯 + 中心線
-      ctx.strokeStyle = "rgba(60,140,220,0.35)";
-      ctx.lineWidth = Math.max(built.avgWidth, lineWidth);
+      // 彫り込み済み: 範囲ポリゴン(穴込み)を水面色で塗る。even-odd で穴を抜く
+      if (river.polygon) {
+        const fill = new Path2D();
+        for (const part of polygonParts(river.polygon)) {
+          for (const ring of part) {
+            if (ring.length < 3) continue;
+            fill.moveTo(ring[0][0], ring[0][1]);
+            for (let i = 1; i < ring.length; i++) fill.lineTo(ring[i][0], ring[i][1]);
+            fill.closePath();
+          }
+        }
+        ctx.fillStyle = "rgba(60,140,220,0.45)";
+        ctx.fill(fill, "evenodd");
+        ctx.strokeStyle = "rgba(120,200,255,0.9)";
+        ctx.lineWidth = lineWidth * 0.75;
+        ctx.setLineDash([]);
+        ctx.stroke(fill);
+      }
+      // 水面プロファイル線(範囲の中心を通る流路)
+      ctx.strokeStyle = river.polygon ? "rgba(40,110,220,0.6)" : "rgba(255,140,40,0.9)";
+      ctx.lineWidth = lineWidth * 0.75;
       ctx.setLineDash([]);
-      ctx.stroke(built.path);
-      ctx.strokeStyle = "rgba(40,110,220,0.9)";
-      ctx.lineWidth = lineWidth;
       ctx.stroke(built.path);
     } else {
       // 未彫り込み: 明るい水色の破線(まだ地形を変更していないことを示す)
@@ -1279,9 +1313,19 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     discardedShortCount: number;
   } | null>(null);
   // 作成済みの川の一覧表示用(実体は riversRef)。削除・彫り込みボタンの再描画のために state にミラーする。
-  // 幅は最小〜最大を表示する(上流と下流で流量に応じて幅が変わることを確認できるように)。
+  // 未彫り込みは幅の最小〜最大(上流と下流で流量に応じて幅が変わることを確認できるように)、
+  // 彫り込み済みは範囲ポリゴンの面積(ha)を表示する。
   const [riverList, setRiverList] = useState<
-    { id: string; lengthKm: number; minWidth: number; maxWidth: number; carved: boolean; depthCoef: number }[]
+    {
+      id: string;
+      lengthKm: number;
+      minWidth: number;
+      maxWidth: number;
+      carved: boolean;
+      depthCoef: number;
+      /** 範囲ポリゴンの面積(ha)。未彫り込み・範囲未抽出は null */
+      areaHa: number | null;
+    }[]
   >([]);
 
   // --- 地図メタデータ(保存欄) ---
@@ -2256,9 +2300,60 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
           maxWidth,
           carved: river.carved,
           depthCoef: river.depthCoef,
+          areaHa: river.carved && river.polygon ? polygonArea(river.polygon) / 10000 : null,
         };
       }),
     );
+  }
+
+  /**
+   * 彫り込み済みの全ての川について、現在の地形から範囲ポリゴンを抽出し直す。
+   *
+   * 合流部で本流と支流の範囲が重ならないよう、流量(河口の q)の大きい川から順に処理し、
+   * 先に範囲を得た川の格子点を後続の川から除外する(claimed)。保存データから復元した川は
+   * q=0 なので、生成した川の後にリスト順で処理される。
+   *
+   * 探索帯は、流路スプラインを持つ川(このセッションで生成・彫り込んだ川。width>0)は
+   * 「中心線±(幅/2+なじみ帯)」、復元した川(幅情報なし)は「既存の範囲を数セル膨らませた帯」。
+   * 後者により、彫り込み後に手作業で岸を削った/盛った変更にも範囲が追従する。
+   * 彫り込み(carve)のたびに呼ぶほか、「川の範囲を再計算」ボタンからも呼ぶ。
+   */
+  function recomputeRiverPolygons(s: TerrainSettings, elev: Float32Array) {
+    const claimed = new Uint8Array(s.rows * s.cols);
+    const lakes = serializeWaterSurfaces();
+    const order = riversRef.current
+      .map((river, index) => ({ river, index }))
+      .filter((e) => e.river.carved)
+      .sort((a, b) => (b.river.points[b.river.points.length - 1]?.q ?? 0) - (a.river.points[a.river.points.length - 1]?.q ?? 0));
+    // Undo スタックのスナップショットが同じ EditorRiver オブジェクトを参照しているため、
+    // 範囲は in-place で書き換えず、新しいオブジェクトへ差し替える。
+    const next = riversRef.current.slice();
+    for (const { river, index } of order) {
+      const hasSpline = river.points.length > 0 && river.points[0].width > 0;
+      const band = hasSpline
+        ? ({ kind: "spline" } as const)
+        : river.polygon
+          ? ({ kind: "polygon", polygon: river.polygon, dilateCells: RIVER_POLYGON_DILATE_CELLS } as const)
+          : null;
+      if (!band) continue;
+      const polygon = buildRiverPolygon(
+        elev, s.rows, s.cols, s.spacing, s.mapWidth, s.mapHeight, river, band, claimed, lakes,
+      );
+      next[index] = { ...river, polygon };
+    }
+    riversRef.current = next;
+    syncRiverListState();
+  }
+
+  /** 「川の範囲を再計算」ボタン: 現在の地形で範囲ポリゴンを取り直し、2D/3Dプレビューを更新する */
+  function handleRecomputeRiverPolygons() {
+    const s = settingsRef.current;
+    const elev = elevRef.current;
+    if (!s || !elev) return;
+    pushUndoState();
+    recomputeRiverPolygons(s, elev);
+    draw();
+    emitTerrain3dFullState();
   }
 
   /** 川リストを丸ごと差し替える(Undo/Redo の復元用) */
@@ -2297,6 +2392,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         params: riverParams,
         carved: false,
         depthCoef: riverParams.depthCoef,
+        polygon: null,
       })),
     ];
     setRiverPreviewStats({
@@ -2310,17 +2406,37 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   }
 
   /**
-   * 彫り込み後の共通処理: 地形テクスチャの全域塗り直し・等高線再構築・3Dプレビューへの
-   * 全状態送信。複数の川がマップ全域に及ぶため、侵食の finishErosion と同じく全域rectで
-   * 塗り直す。3Dプレビューへは川リストも変わるため、標高差分ではなく full_state を送る。
+   * 彫り込み後の共通処理: 川の範囲ポリゴンの抽出(彫り込み済み全川)・地形テクスチャの
+   * 全域塗り直し・等高線再構築・3Dプレビューへの全状態送信。複数の川がマップ全域に及ぶため、
+   * 侵食の finishErosion と同じく全域rectで塗り直す。3Dプレビューへは川リストも変わるため、
+   * 標高差分ではなく full_state を送る。
    */
   function finishRiverCarve(s: TerrainSettings, elev: Float32Array) {
+    recomputeRiverPolygons(s, elev);
     const fullRect: DirtyRect = { rMin: 0, rMax: s.rows - 1, cMin: 0, cMax: s.cols - 1 };
     if (terrainImageDataRef.current && terrainCtxRef.current) {
       refreshTerrainTexture(fullRect, elev, s.cols, s.minLand, s.maxLand, terrainImageDataRef.current, terrainCtxRef.current);
     }
     rebuildContoursAtCurrentZoom();
     emitTerrain3dFullState();
+  }
+
+  /**
+   * 未彫り込みの川群を標高データへ彫り込み、彫り込み済み(carved=true)の新しいオブジェクトへ
+   * 差し替える。Undo スタックのスナップショットが同じオブジェクトを参照しているため、
+   * carved フラグは in-place で書き換えない(書き換えると Undo で地形だけ戻って
+   * 川が彫り込み済みのまま残る)。
+   */
+  function carveRiverObjects(s: TerrainSettings, elev: Float32Array, targets: EditorRiver[]) {
+    for (const river of targets) {
+      // 川ごとの深さ係数を川床標高(bedY)へ反映してから彫る
+      applyRiverDepth(river, river.depthCoef);
+    }
+    carveRivers(elev, s.rows, s.cols, s.spacing, s.mapWidth, s.mapHeight, targets);
+    const ids = new Set(targets.map((river) => river.id));
+    riversRef.current = riversRef.current.map((river) =>
+      ids.has(river.id) ? { ...river, carved: true } : river,
+    );
   }
 
   /**
@@ -2333,11 +2449,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     const river = riversRef.current.find((r) => r.id === id);
     if (!s || !elev || !river || river.carved) return;
     pushUndoState();
-    // 川ごとの深さ係数を川床標高(bedY)へ反映してから彫る
-    applyRiverDepth(river, river.depthCoef);
-    carveRivers(elev, s.rows, s.cols, s.spacing, s.mapWidth, s.mapHeight, [river]);
-    river.carved = true;
-    syncRiverListState();
+    carveRiverObjects(s, elev, [river]);
     finishRiverCarve(s, elev);
   }
 
@@ -2348,12 +2460,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     const targets = riversRef.current.filter((river) => !river.carved);
     if (!s || !elev || targets.length === 0) return;
     pushUndoState();
-    for (const river of targets) {
-      applyRiverDepth(river, river.depthCoef);
-    }
-    carveRivers(elev, s.rows, s.cols, s.spacing, s.mapWidth, s.mapHeight, targets);
-    for (const river of targets) river.carved = true;
-    syncRiverListState();
+    carveRiverObjects(s, elev, targets);
     finishRiverCarve(s, elev);
   }
 
@@ -2385,37 +2492,42 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     emitTerrain3dFullState();
   }
 
-  /** 内部表現の川一覧を、保存・送信用の RiverPayload に変換する(彫り込み済みのみ)。 */
+  /**
+   * 内部表現の川一覧を、保存・送信用の RiverPayload に変換する(彫り込み済みかつ範囲が
+   * 抽出できた川のみ)。範囲が空の川(彫り込んでも水面より低い格子点が無かった等)は
+   * ゲーム側に渡しても意味が無いため除く。
+   */
   function serializeRivers(): RiverPayload[] {
-    return riversRef.current.filter((river) => river.carved).map((river) => ({
-      id: river.id,
-      kind: "river",
-      centerline: river.points.map((p) => [p.x, p.bedY, p.z]),
-      widths: river.points.map((p) => p.width),
-      surface_offsets: river.points.map((p) => p.waterY - p.bedY),
-      footprint: {
-        type: "Polygon" as const,
-        coordinates: [buildRiverFootprint(river.points)],
-      },
-    }));
+    const result: RiverPayload[] = [];
+    for (const river of riversRef.current) {
+      if (!river.carved || !river.polygon) continue;
+      result.push({
+        id: river.id,
+        kind: "river",
+        polygon: river.polygon,
+        profile: river.points.map((p) => [p.x, p.waterY, p.z]),
+      });
+    }
+    return result;
   }
 
   /**
    * meta.json / サイドカーから読み込んだ RiverPayload 配列を内部表現へ変換する。
-   * 流量・曲率など生成時の中間量は保存していないため 0 で埋める(再彫り込みには使わず、
-   * 表示・削除・再保存のみに使うため問題ない)。
+   * 流量・曲率・幅・川床など生成時の中間量は保存していないため 0(川床は水面標高)で埋める。
+   * 復元した川は再彫り込みには使わず、表示・削除・範囲の再計算・再保存のみに使う
+   * (範囲の再計算は幅ではなく既存ポリゴンの膨張帯で行う)。
    */
   function deserializeRivers(payload: RiverPayload[] | undefined): EditorRiver[] {
     if (!Array.isArray(payload)) return [];
     const result: EditorRiver[] = [];
     for (const rv of payload) {
-      if (!Array.isArray(rv?.centerline) || rv.centerline.length < 2) continue;
-      const points = rv.centerline.map((c, i) => ({
+      if (!Array.isArray(rv?.profile) || rv.profile.length < 2 || !rv.polygon) continue;
+      const points = rv.profile.map((c) => ({
         x: c[0],
         z: c[2],
         q: 0,
-        width: rv.widths?.[i] ?? 0,
-        waterY: c[1] + (rv.surface_offsets?.[i] ?? 0),
+        width: 0,
+        waterY: c[1],
         bedY: c[1],
         curvature: 0,
         braided: false,
@@ -2428,6 +2540,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         // 保存されている川は彫り込み済みのもののみ(serializeRivers が彫り込み済みだけを書く)
         carved: true,
         depthCoef: riverParams.depthCoef,
+        polygon: rv.polygon,
       });
     }
     return result;
@@ -2741,6 +2854,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     riversRef.current = riversRef.current.map((river) => ({
       ...river,
       points: river.points.map((p) => ({ ...p, x: p.x + dx, z: p.z + dz })),
+      polygon: river.polygon ? translatePolygon(river.polygon, dx, dz) : null,
     }));
     resourceAreasRef.current = resourceAreasRef.current.map((area) => ({
       ...area,
@@ -4172,17 +4286,26 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                           <div key={river.id} className="terrain-editor-param-group">
                             <div className="terrain-editor-param-row">
                               <span className="terrain-editor-param-label">
-                                {t("terrainEditor.riverListItem", {
-                                  defaultValue: `川${idx + 1}: ${river.lengthKm.toFixed(1)}km / 幅${Math.round(river.minWidth)}〜${Math.round(river.maxWidth)}m`,
-                                  index: idx + 1,
-                                  lengthKm: river.lengthKm.toFixed(1),
-                                  minWidth: Math.round(river.minWidth),
-                                  maxWidth: Math.round(river.maxWidth),
-                                })}
+                                {river.carved
+                                  ? t("terrainEditor.riverListItemCarved", {
+                                      defaultValue: `川${idx + 1}: ${river.lengthKm.toFixed(1)}km / 範囲${(river.areaHa ?? 0).toFixed(1)}ha`,
+                                      index: idx + 1,
+                                      lengthKm: river.lengthKm.toFixed(1),
+                                      areaHa: (river.areaHa ?? 0).toFixed(1),
+                                    })
+                                  : t("terrainEditor.riverListItem", {
+                                      defaultValue: `川${idx + 1}: ${river.lengthKm.toFixed(1)}km / 幅${Math.round(river.minWidth)}〜${Math.round(river.maxWidth)}m`,
+                                      index: idx + 1,
+                                      lengthKm: river.lengthKm.toFixed(1),
+                                      minWidth: Math.round(river.minWidth),
+                                      maxWidth: Math.round(river.maxWidth),
+                                    })}
                               </span>
                               <span className="terrain-editor-selection-status">
                                 {river.carved
-                                  ? t("terrainEditor.riverStatusCarved", { defaultValue: "彫り込み済み" })
+                                  ? river.areaHa === null
+                                    ? t("terrainEditor.riverStatusNoPolygon", { defaultValue: "範囲なし" })
+                                    : t("terrainEditor.riverStatusCarved", { defaultValue: "彫り込み済み" })
                                   : t("terrainEditor.riverStatusUncarved", { defaultValue: "未彫り込み" })}
                               </span>
                             </div>
@@ -4232,6 +4355,20 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                               onClick={carveAllUncarvedRivers}
                             >
                               {t("terrainEditor.riverCarveAll", { defaultValue: "未彫り込みをすべて彫る" })}
+                            </button>
+                          )}
+                          {riverList.some((river) => river.carved) && (
+                            <button
+                              type="button"
+                              className="terrain-editor-btn"
+                              disabled={status !== "ready"}
+                              onClick={handleRecomputeRiverPolygons}
+                              title={t("terrainEditor.riverRecomputePolygonHint", {
+                                defaultValue:
+                                  "彫り込み済みの川の範囲(水面より低い領域)を現在の地形から取り直します。彫った後に岸を手作業で編集したときに使います",
+                              })}
+                            >
+                              {t("terrainEditor.riverRecomputePolygon", { defaultValue: "川の範囲を再計算" })}
                             </button>
                           )}
                           <button type="button" className="terrain-editor-btn" onClick={clearAllRivers}>
