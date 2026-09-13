@@ -194,6 +194,13 @@ public partial class RoadPlanManager : MonoBehaviour
     // 編集中アイドル状態ではキャッシュが維持され、毎フレームの重い再計算を回避する。
     private List<Vector3> cachedRenderPoints;
     private List<(int segIndex, PathSegment otherSeg)> cachedElevationViolations;
+    // 編集中パスが地表レベルで横切っている川と、その違反サンプル点(絶対座標)のローカル判定キャッシュ。
+    private List<(RiverRecord river, List<Vector3> points)> cachedRiverViolations;
+    // 川の横断判定でパス中心線を標本化する間隔(m)。バックエンドは1m間隔だが、ドラッグ中の
+    // リアルタイム判定なので粗くし、川幅(最小でも十数m)に対して取りこぼしが無い程度に留める。
+    private const float RiverCrossingSampleStep = 2f;
+    // 川の占有箱を出す範囲: 違反サンプル点からこの半径(m)以内のセルだけを赤く示す。
+    private const float RiverOccupancyBoxRadius = 40f;
     private List<int> cachedMaxSpanViolations;
     private List<Vector3> cachedCollisionVolume;
     private bool authoritativeCollision;
@@ -210,6 +217,7 @@ public partial class RoadPlanManager : MonoBehaviour
         authoritativeCollision = false;
         cachedRenderPoints = null;
         cachedElevationViolations = null;
+        cachedRiverViolations = null;
         cachedCollisionVolume = null;
         cachedBuildingVolume = null;
         cachedMaxSpanViolations = null;
@@ -3303,7 +3311,8 @@ public partial class RoadPlanManager : MonoBehaviour
         }
 
         IpcClient.Instance.EmitEditPathUpdateShape(pathId, PathType, pointsList, startControl, endControl, embankmentHeights, waypointControls, Curved, PathFollowTerrainOverride, finalized,
-            phase == RoadEditorPhase.Editing && points.Count >= 2 && CheckElevationIntersections().Count == 0);
+            phase == RoadEditorPhase.Editing && points.Count >= 2 && CheckElevationIntersections().Count == 0
+            && CheckRiverCrossings().Count == 0);
     }
 
     // =====================================================================
@@ -3875,7 +3884,8 @@ public partial class RoadPlanManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 衝突する道路区間の幅と占有高さを半透明の箱で示す。
+    /// 衝突する道路区間の幅と占有高さ、および地表レベルで横切っている川の範囲(横断付近)を
+    /// 半透明の箱で示す。
     /// </summary>
     private void DrawElevationIntersections(Camera cam)
     {
@@ -3912,8 +3922,74 @@ public partial class RoadPlanManager : MonoBehaviour
                 OccupancyVolumeUtil.AddSegment(cachedCollisionVolume, other.a, other.b,
                     pathManager.GetRoadWidth(variant), GetPathHeightFromMaster(variant));
             }
+            // 地表レベルで横切っている川は、横断付近の範囲を同じ警告色の占有箱で示す
+            foreach (var (river, violationPoints) in CheckRiverCrossings())
+            {
+                RiverStore.AddOccupancyBox(cachedCollisionVolume, river, violationPoints, RiverOccupancyBoxRadius);
+            }
         }
         overlayRenderer.AddPreTriangulated(cachedCollisionVolume, OccupancyVolumeUtil.WarningColor);
+    }
+
+    /// <summary>
+    /// 編集中パスが川の範囲(RiverStore)を地表レベルで横切っていないかをローカル判定する。
+    ///
+    /// バックエンド geo_rivers.validate_path_river_crossings と同じ規則:
+    /// 川の範囲内の各サンプル点で「路面絶対標高 ≥ 水面標高 + RIVER_BRIDGE_MIN_CLEARANCE(橋)」
+    /// または「地形標高 − 路面標高 > バリアントのクリアランス高さ(完全埋設トンネル)」の
+    /// いずれかを要求する。地形追従スパンは路面＝川床(水面より下)なので必ず違反になる。
+    /// インフラパス(電線・導水管)は地表を占有しないため対象外。
+    ///
+    /// 標本化は BuildEditingElevationSegments の各セグメント(直線スパンはスパン全体、曲線は
+    /// ベジエ分割片)を RiverCrossingSampleStep 間隔で分割し、追従セグメントは地形高さ、
+    /// 非追従セグメントは両端の絶対標高の線形補間を路面標高とする。
+    /// 戻り値は違反した川ごとの違反サンプル点(絶対座標。占有箱の範囲指定に使う)。
+    /// </summary>
+    private List<(RiverRecord river, List<Vector3> points)> CheckRiverCrossings()
+    {
+        if (cachedRiverViolations != null)
+            return cachedRiverViolations;
+
+        var violations = new List<(RiverRecord river, List<Vector3> points)>();
+        if (!RiverStore.HasRivers || points.Count < 2
+            || PathType == Constants.PATH_ELECTRICITY || PathType == Constants.PATH_WATER)
+        {
+            cachedRiverViolations = violations;
+            return cachedRiverViolations;
+        }
+
+        float clearance = GetPathHeightFromMaster(PathSubtype);
+        var byRiver = new Dictionary<RiverRecord, List<Vector3>>();
+        foreach (var seg in BuildEditingElevationSegments())
+        {
+            float dx = seg.b.x - seg.a.x;
+            float dz = seg.b.z - seg.a.z;
+            float length = Mathf.Sqrt(dx * dx + dz * dz);
+            int steps = Mathf.Max(1, Mathf.CeilToInt(length / RiverCrossingSampleStep));
+            for (int k = 0; k <= steps; k++)
+            {
+                float t = (float)k / steps;
+                float x = seg.a.x + dx * t;
+                float z = seg.a.z + dz * t;
+                var river = RiverStore.FindAt(x, z);
+                if (river == null) continue;
+                float terrainY = Utils.GetGroundHeight(new Vector3(x, 0f, z));
+                float roadY = seg.follows ? terrainY : Mathf.Lerp(seg.absYA, seg.absYB, t);
+                if (terrainY - roadY > clearance) continue; // 完全埋設トンネル
+                float waterY = river.WaterLevelAt(x, z);
+                if (roadY >= waterY + Constants.RIVER_BRIDGE_MIN_CLEARANCE) continue; // 橋
+                if (!byRiver.TryGetValue(river, out var list))
+                {
+                    list = new List<Vector3>();
+                    byRiver[river] = list;
+                }
+                list.Add(new Vector3(x, roadY, z));
+            }
+        }
+        foreach (var kv in byRiver) violations.Add((kv.Key, kv.Value));
+
+        cachedRiverViolations = violations;
+        return cachedRiverViolations;
     }
 
     /// <summary>

@@ -797,6 +797,14 @@ public class CellDataLoader : MonoBehaviour
         {
             WaterSurfaceManager.Instance.Clear();
         }
+        if (RiverSurfaceManager.Instance != null)
+        {
+            RiverSurfaceManager.Instance.Clear();
+        }
+        else
+        {
+            RiverStore.Clear();
+        }
         if (TransitOverlayManager.Instance != null)
         {
             TransitOverlayManager.Instance.Clear();

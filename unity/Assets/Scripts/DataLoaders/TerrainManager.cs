@@ -1888,6 +1888,12 @@ public class TerrainManager : BaseApiDataManager
         {
             yield return WaterSurfaceManager.Instance.LoadAndBuild();
         }
+        // 川(範囲ポリゴン+水面プロファイル線)も同じタイミングで取得し、RiverStore と水面メッシュを作る。
+        // 敷設中パスの川横断判定(RoadPlanManager)が RiverStore を参照するため、道路編集より先に必要。
+        if (RiverSurfaceManager.Instance != null)
+        {
+            yield return RiverSurfaceManager.Instance.LoadAndBuild();
+        }
     }
 
     /// <summary>

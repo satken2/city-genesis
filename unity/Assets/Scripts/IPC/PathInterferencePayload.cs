@@ -3,9 +3,10 @@ using Newtonsoft.Json.Linq;
 
 /// <summary>
 /// world:highlight_objects のペイロード。
-/// 計画中／未着工パスが干渉する区画・建物・既存パスを保持する。
+/// 計画中／未着工パスが干渉する区画・建物・既存パス・川を保持する。
 /// バックエンドの compute_path_interference と同形（区画は着工可否の4分類、
-/// 建物は当該区画に立地する agent_id、パスは立体交差する既存 path_id）。
+/// 建物は当該区画に立地する agent_id、パスは立体交差する既存 path_id、
+/// 川は地表レベルで横切っている川の id 文字列）。
 /// </summary>
 public class PathInterferencePayload
 {
@@ -15,19 +16,22 @@ public class PathInterferencePayload
     public List<int> ExemptParcels = new List<int>();
     public List<int> BuildingIds = new List<int>();
     public List<int> CollidingPathIds = new List<int>();
+    public List<string> CollidingRiverIds = new List<string>();
 
     public bool IsEmpty =>
         BlockingParcels.Count == 0 && RemovableParcels.Count == 0
         && ShavableParcels.Count == 0 && ExemptParcels.Count == 0
-        && BuildingIds.Count == 0 && CollidingPathIds.Count == 0;
+        && BuildingIds.Count == 0 && CollidingPathIds.Count == 0
+        && CollidingRiverIds.Count == 0;
 
     /// <summary>
     /// IPC の params から組み立てる。
     /// parcelsToken は {blocking,removable,shavable,exempt} を持つ JObject、
-    /// buildingIds / collidingPathIds は int 配列（null 可）。
+    /// buildingIds / collidingPathIds は int 配列（null 可）、
+    /// collidingRiverIdsToken は文字列配列の JArray（null 可）。
     /// </summary>
     public static PathInterferencePayload FromParams(
-        JToken parcelsToken, int[] buildingIds, int[] collidingPathIds)
+        JToken parcelsToken, int[] buildingIds, int[] collidingPathIds, JToken collidingRiverIdsToken = null)
     {
         var payload = new PathInterferencePayload();
 
@@ -41,6 +45,14 @@ public class PathInterferencePayload
 
         if (buildingIds != null) payload.BuildingIds.AddRange(buildingIds);
         if (collidingPathIds != null) payload.CollidingPathIds.AddRange(collidingPathIds);
+        if (collidingRiverIdsToken is JArray riverArr)
+        {
+            foreach (var item in riverArr)
+            {
+                string id = item?.ToString();
+                if (!string.IsNullOrEmpty(id)) payload.CollidingRiverIds.Add(id);
+            }
+        }
 
         return payload;
     }

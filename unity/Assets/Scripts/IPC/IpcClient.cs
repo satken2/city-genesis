@@ -554,13 +554,15 @@ public class IpcClient : MonoBehaviour
                         var parcelsToken = GetParamToken(payload, "parcels");
                         int[] buildingIds = GetParamInt1D(payload, "building_ids");
                         int[] collidingPathIds = GetParamInt1D(payload, "colliding_path_ids");
+                        var riverIdsToken = GetParamToken(payload, "colliding_river_ids");
                         var interference = PathInterferencePayload.FromParams(
-                            parcelsToken, buildingIds, collidingPathIds);
+                            parcelsToken, buildingIds, collidingPathIds, riverIdsToken);
                         Debug.Log(
                             $"IpcClient: world:highlight_objects [{source}] -> " +
                             $"parcels(b={interference.BlockingParcels.Count},r={interference.RemovableParcels.Count}," +
                             $"s={interference.ShavableParcels.Count},e={interference.ExemptParcels.Count}), " +
-                            $"buildings={interference.BuildingIds.Count}, paths={interference.CollidingPathIds.Count}");
+                            $"buildings={interference.BuildingIds.Count}, paths={interference.CollidingPathIds.Count}, " +
+                            $"rivers={interference.CollidingRiverIds.Count}");
                         OnWorldHighlightObjects?.Invoke(source, interference);
                     }
                     break;

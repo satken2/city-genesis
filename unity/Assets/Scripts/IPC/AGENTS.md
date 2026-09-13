@@ -61,4 +61,4 @@ STATE_EDIT_PATHの任意initial_height/initial_embankment_height/initial_curved/
 
 edit_path:change_house_endsのhouse_ends（both/start/end）をRoadPlanManager.SetHouseEndsへ渡す。STATE_EDIT_PATHも同名paramsで初期化する。
 
-`edit_path:update_shape` の `can_confirm` は形状確定かつローカル交差なしのときだけtrue。Rustは既存イベントのparamsを透過転送する。HighlightManagerは建物・パスを着色せず、OccupancyVolumeUtilの半透明箱を合成する。path_build由来の交差ではRoadPlanManagerにも通知して敷設中の全線を箱で示し、解除時に消す。
+`edit_path:update_shape` の `can_confirm` は形状確定かつローカル交差なしのときだけtrue。Rustは既存イベントのparamsを透過転送する。HighlightManagerは建物・パスを着色せず、OccupancyVolumeUtilの半透明箱を合成する。`colliding_river_ids`(川ID文字列の配列。`PathInterferencePayload.CollidingRiverIds`)の川は範囲全体を `RiverStore.AddOccupancyBox` の箱で示す。path_build由来の交差ではRoadPlanManagerにも通知して敷設中の全線を箱で示し、解除時に消す。

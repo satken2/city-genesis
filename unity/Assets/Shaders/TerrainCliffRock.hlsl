@@ -78,10 +78,11 @@ half ComputeCliffMask(float3 normalWS, float3 positionWS)
 /// 地面側の法線マップの偏りがそのまま傾斜判定に乗り、同じ傾斜でも特定の向きの
 /// 斜面だけ岩化する(山の片側だけ岩になる)方向依存バグの原因になるため。
 /// normalWS(シェーディング法線)は岩の法線をブレンドする出力先としてのみ使う。
+/// extraRockMask は傾斜・標高以外の理由で岩にしたい率(川床マスク。TerrainRiverBank.hlsl)。
 /// </summary>
-void ApplyCliffRock(float3 positionWS, float3 geoNormalWS, inout float3 normalWS, inout half3 albedo, inout half smoothness)
+void ApplyCliffRock(float3 positionWS, float3 geoNormalWS, inout float3 normalWS, inout half3 albedo, inout half smoothness, half extraRockMask)
 {
-    half mask = ComputeCliffMask(geoNormalWS, positionWS);
+    half mask = max(ComputeCliffMask(geoNormalWS, positionWS), extraRockMask);
 
     // 平地ピクセルはテクスチャタップ0で早期脱出する。
     // 動的分岐内の暗黙微分(ミップ選択)は理論上未定義だが、分岐境界では

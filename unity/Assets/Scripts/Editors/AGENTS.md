@@ -69,4 +69,4 @@ Ctrlメニューは8項目、HUDも最大8アイコン。並行の2アイコン�
 
 ## 道路敷設の衝突と確定
 
-`EmitShapeUpdate` の `can_confirm` はEditingフェーズかつローカル交差なしの場合だけtrue。Tauriは全線の `/paths/validate` と併せて確定を許可する。ローカルは占有高さを削らず、バックエンド確定だけ50cmの緩衝を持つ。`SampleElevationSegments` は非追従区間をアンカーの絶対標高で補間し、既存パスは保存制御点と `station_grade_profile` も参照する。警告は `OccupancyVolumeUtil` の半透明箱で、道路本体を赤くしない。形状・複線設定変更時は箱キャッシュと権威警告を無効化する。
+`EmitShapeUpdate` の `can_confirm` はEditingフェーズかつローカル交差なし・川の地表横断なし(`CheckRiverCrossings`=`RiverStore` の範囲内で「路面≥水面+`RIVER_BRIDGE_MIN_CLEARANCE`(橋)」でも「深さ>クリアランス高さ(完全埋設)」でもないサンプルが無い。インフラパスは対象外。バックエンド `geo_rivers.validate_path_river_crossings` と同一規則)の場合だけtrue。川の違反は横断付近の範囲を `RiverStore.AddOccupancyBox` の箱で示す。Tauriは全線の `/paths/validate` と併せて確定を許可する。ローカルは占有高さを削らず、バックエンド確定だけ50cmの緩衝を持つ。`SampleElevationSegments` は非追従区間をアンカーの絶対標高で補間し、既存パスは保存制御点と `station_grade_profile` も参照する。警告は `OccupancyVolumeUtil` の半透明箱で、道路本体を赤くしない。形状・複線設定変更時は箱キャッシュと権威警告を無効化する。

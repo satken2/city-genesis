@@ -49,6 +49,8 @@ CBUFFER_START(UnityPerMaterial)
     float  _RippleSpeed;        // さざ波のスクロール速度
     float  _RippleStrength;     // 法線の傾き強度(0で完全に平ら)
     float  _RippleDetail;       // 2枚目(細波)の相対スケール
+    float  _FlowEnabled;        // 1 で頂点UV2の流下方向へさざ波・泡を流す(川)。海面・湖面は0
+    float  _FlowSpeed;          // 流れの速度(m/s)
 CBUFFER_END
 
 // ---------------- プロシージャルノイズ ----------------
@@ -90,6 +92,7 @@ float WaterFbm(float2 p)
 }
 
 // 波の高さ場(ワールドXZ・時間 t)。2枚のスクロールする fbm を重ねる。
+// 川では呼び出し側が worldXZ を流下方向へ時間比例でずらして渡す(流れの表現)。
 float WaterHeight(float2 worldXZ, float t)
 {
     float2 p = worldXZ * _RippleScale;
@@ -117,6 +120,7 @@ float3 WaterNormalWS(float2 worldXZ, float t)
 struct Attributes
 {
     float4 positionOS : POSITION;
+    float2 uv1        : TEXCOORD1; // 流下方向(XZ単位ベクトル)。川の水面メッシュだけが持つ(他は0)
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
@@ -126,6 +130,7 @@ struct Varyings
     float3 positionWS : TEXCOORD0;
     float4 screenPos  : TEXCOORD1; // positionNDC(ComputeScreenPos 済み)
     float  fogFactor  : TEXCOORD2;
+    float2 flowDir    : TEXCOORD3; // 流下方向(_FlowEnabled=0 なら零ベクトル)
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
@@ -140,6 +145,7 @@ Varyings WaterVertex(Attributes IN)
     OUT.positionWS = vpi.positionWS;
     OUT.screenPos  = vpi.positionNDC;
     OUT.fogFactor  = ComputeFogFactor(vpi.positionCS.z);
+    OUT.flowDir    = IN.uv1 * _FlowEnabled;
     return OUT;
 }
 
@@ -149,7 +155,10 @@ half4 WaterFragment(Varyings IN) : SV_Target
 
     float3 positionWS = IN.positionWS;
     float3 viewDirWS  = normalize(GetCameraPositionWS() - positionWS);
-    float3 normalWS   = WaterNormalWS(positionWS.xz, _Time.y);
+    // 川の流れ: ノイズの参照座標を流下方向へ時間比例でずらすと、さざ波・泡が下流へ動いて見える
+    float2 flowOffset = IN.flowDir * (_Time.y * _FlowSpeed);
+    float2 noiseXZ    = positionWS.xz - flowOffset;
+    float3 normalWS   = WaterNormalWS(noiseXZ, _Time.y);
 
     // --- 水面ピクセルと、その背後にある不透明物(水底・地形)の深度差 ---
     float2 screenUV        = IN.screenPos.xy / IN.screenPos.w;
@@ -180,7 +189,7 @@ half4 WaterFragment(Varyings IN) : SV_Target
 
     // --- 岸のフォーム: 水柱が薄いピクセルにアニメする泡ノイズを乗せる ---
     float  foamBand  = 1.0 - saturate(depthColumn / max(_FoamDistance, 0.01));
-    float  foamNoise = WaterFbm(positionWS.xz * _FoamNoiseScale + _Time.y * 0.25);
+    float  foamNoise = WaterFbm(noiseXZ * _FoamNoiseScale + _Time.y * 0.25);
     float  foamMask  = smoothstep(_FoamCutoff, 1.0, foamBand * foamNoise);
     bodyColor        = lerp(bodyColor, _FoamColor.rgb, foamMask);
 

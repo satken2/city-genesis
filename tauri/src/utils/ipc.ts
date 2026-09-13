@@ -463,7 +463,7 @@ export async function sendHideParcelFrontPath(): Promise<void> {
  * パス干渉ハイライトのペイロード。バックエンドの
  * `compute_path_interference` / `GET|POST /api/v1/paths/interference` と同形。
  * 区画は着工可否の4分類、建物は当該区画に立地する agent_id、
- * パスは立体交差する既存 path_id。
+ * パスは立体交差する既存 path_id、川は地表レベルで横切っている川の id(文字列)。
  */
 export type PathInterferenceHighlight = {
   parcels: {
@@ -474,6 +474,7 @@ export type PathInterferenceHighlight = {
   };
   building_ids: number[];
   colliding_path_ids: number[];
+  colliding_river_ids?: string[];
 };
 
 /**
@@ -499,6 +500,7 @@ export async function sendHighlightObjects(
       parcels: interference.parcels,
       building_ids: interference.building_ids,
       colliding_path_ids: interference.colliding_path_ids,
+      colliding_river_ids: interference.colliding_river_ids ?? [],
     },
   });
 }

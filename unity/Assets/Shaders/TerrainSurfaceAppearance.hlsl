@@ -229,6 +229,7 @@ half3 ApplyContourLines(half3 color, float3 positionWS)
 // DepthNormalsと未使用のGBufferには反映されない。
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "Assets/Shaders/TerrainCliffRock.hlsl"
+#include "Assets/Shaders/TerrainRiverBank.hlsl"
 
 // TerrainLitPasses.hlsl:492 の呼び出しシグネチャ
 // (InputData, albedo, metallic, specular, smoothness, occlusion, emission, alpha)
@@ -252,7 +253,12 @@ half4 CliffTerrainFragmentPBR(InputData inputData, half3 albedo, half metallic, 
     // 平地の手続きディテール法線を先に乗せてから崖ブレンドする。
     // (崖マスクが高い箇所は ApplyCliffRock の lerp でこのディテール法線から岩法線へ移る)
     ApplyGroundDetailNormal(inputData.positionWS, cliffGeoNormalWS, inputData.normalWS);
-    ApplyCliffRock(inputData.positionWS, cliffGeoNormalWS, inputData.normalWS, albedo, smoothness);
+    // 川岸の砂地はベース色へ、川床は岩ブレンドへ合流させ、岩化後に濡れの暗色を乗せる
+    // (TerrainRiverBank.hlsl。川マスク未生成なら何も変えない)
+    half riverBed;
+    half riverRock = ApplyRiverSand(inputData.positionWS, albedo, smoothness, riverBed);
+    ApplyCliffRock(inputData.positionWS, cliffGeoNormalWS, inputData.normalWS, albedo, smoothness, riverRock);
+    ApplyRiverBedWet(riverBed, albedo, smoothness);
     return UniversalFragmentPBR(inputData, albedo, metallic, specular, smoothness, occlusion, emission, alpha);
 }
 

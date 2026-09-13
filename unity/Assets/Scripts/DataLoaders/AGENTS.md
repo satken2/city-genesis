@@ -41,6 +41,14 @@
 
 
 
+## 水面と川 (WaterSurfaceManager / RiverSurfaceManager / RiverStore)
+
+湖(`GET /terrain/water`)と川(`GET /terrain/rivers`)はマップ固有の静的データで、`TerrainManager.FetchCoastline` が海岸線に続けて一度だけ取得し、セッション終了(`CellDataLoader.ClearAllManagerData`)で破棄する。湖は `water_level` の水平メッシュ、川は範囲ポリゴンを覆う4m格子面(頂点Y=水面プロファイル線上の最近点標高+0.05m、UV2=流下方向)で、どちらも `SeaObject` タグ+`VisualSeaObject` を付けて海面の表示切替に追従させる。川のマテリアルは海面材質の複製に `_FlowEnabled=1` を設定したもの(海面・湖面の共有材質に流れを付けないため複製する)。
+
+`RiverStore` は川の静的ストア(海岸線の `CoastlineStore` と同じ位置付け)。`RiverRecord` が範囲ポリゴンの内外判定(全リングの even-odd)、プロファイル線の最近線分探索(格子バケット)、水面標高・流下方向、4m格子のラスタマスク(`CornerMask`。水面メッシュと占有箱で共有)を持つ。**「範囲内の水面標高＝プロファイル線上の最近点のy」は地形エディタ・バックエンドと共通の契約**なので変えないこと。`RiverStore.AddOccupancyBox` は川の範囲(または指定点群の近傍だけ)を半透明の占有箱にする。敷設中の川横断判定(`RoadPlanManager.CheckRiverCrossings`)と権威ハイライト(`HighlightManager`)が使う。仕様の正は `D_地形形状.md §D.11`。
+
+川床・川岸の地表は `RiverSurfaceManager.BuildRiverMask` が全域マスク `_RiverMask`(RG8、R=川床/G=内岸の砂地。各川の `CornerMask` を同じ格子線上へ整数オフセットで転記し、外側へ4近傍の幅優先で岸帯の距離を広げる)をグローバルテクスチャで渡し、`Assets/Shaders/TerrainRiverBank.hlsl` が `TerrainSurfaceAppearance.hlsl` の照明直前フックで参照する(川床は `ApplyCliffRock` の `extraRockMask` で岩化+濡れの暗色、砂地はベース色を砂色へ)。色・帯幅・曲率基準は Inspector の `River Bank Appearance`。マスク未生成は `_RiverMaskParams.w=0` で無効。
+
 ## 道路 (PathManager.cs) — 知らないと事故るポイント
 
 - **橋脚と周辺道路の依存**: `Awake` が `PillarClearance.NeighborProvider = GetPillarObstacles` を設定する。相手の最新データから切断前中心線・全幅（駅はホーム込み）・通行高さを供給し、コライダーや描画用点列キャッシュには依存しない。`SavePathToCache` は実変更時に通過セルも先行登録し、変更前後の周辺にある橋脚付きパスを `pendingPillarRebuildIds` へ積む。`RemovePathFromCache` も削除前に同じ通知を行う。描画revisionと地形追従の完了記録を無効化し、`LateUpdate` がLODバッチ外で既存の再生成キューに渡す。初期データの登録順やバッチ途中の生成を考慮し、バッチで生成済みでも除外しない。曲線の通過セルは `IntersectionPolygonUtil.SamplePlan` の平面点列を使用する（single_spanはアンカー直線）。検証は `Tests/Pillars`。

@@ -13,7 +13,8 @@
 //    標高0の地形が同深度でも水側が優先されるようにする。
 //
 // 用途: シーンの海面板(SeaObject)と、WaterSurfaceManager が生成する
-//       湖面メッシュ(海面 material を借用)。
+//       湖面メッシュ(海面 material を借用)、RiverSurfaceManager が生成する
+//       川の水面メッシュ(海面 material の複製に _FlowEnabled=1 を設定)。
 Shader "Custom/WaterLit"
 {
     Properties
@@ -45,6 +46,11 @@ Shader "Custom/WaterLit"
         _RippleSpeed("Ripple Speed", Float) = 0.05
         _RippleStrength("Ripple Strength", Range(0.0, 4.0)) = 1.2
         _RippleDetail("Ripple Detail Scale", Float) = 3.0
+
+        [Header(Flow (rivers))]
+        // 1 で頂点 UV2 の流下方向(XZ単位ベクトル)へさざ波・泡を流す。海面・湖面は 0 のまま。
+        _FlowEnabled("Flow Enabled", Float) = 0.0
+        _FlowSpeed("Flow Speed (m/s)", Float) = 1.5
     }
 
     SubShader
