@@ -568,6 +568,7 @@ public class IpcStateCoordinator : MonoBehaviour
     /// <summary>
     /// STATE_EDIT_BUILDING: 建物建設モード
     /// ipcParams には UI側で選択された building_variant / agent_id / structure(構造種別) が含まれる。
+    /// 任意で placement_mode(配置方法の初期値。parcel/free/roadside)を含む。
     /// agent_id が指定されている場合は既存建物の編集モードとして動作する。
     ///
     /// パーセル表示は、選択された建物のbd_typeに対応する建設可能フィルタモード
@@ -651,6 +652,15 @@ public class IpcStateCoordinator : MonoBehaviour
             buildingPlanManager.SetBuildingMode(true);
             buildingPlanManager.DirectAllowed = !agentId.HasValue &&
                 !(ipcParams != null && ipcParams.TryGetValue("copy_source_agent_id", out var copyId) && copyId != null);
+
+            // 配置方法の初期値(placement_mode: parcel/free/roadside)。省略時は区画配置。
+            // UIが状況に応じて指定する(都市創設時の市庁舎は道路も区画も無いのが通常なので自由配置から始める)。
+            // SetPlacementMode は PlacementActive かつ DirectAllowed を要求するため、必ず両者が揃ったこの位置で適用する。
+            if (ipcParams != null && ipcParams.TryGetValue("placement_mode", out object pmObj) && pmObj is string pmText &&
+                Enum.TryParse(pmText, true, out BuildingPlacementMode initialMode))
+            {
+                buildingPlanManager.SetPlacementMode(initialMode);
+            }
         }
     }
 

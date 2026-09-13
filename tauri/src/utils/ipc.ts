@@ -11,6 +11,8 @@
 import { invoke } from "@tauri-apps/api/core";
 
 export const IPC_EVENT_WEATHER_STATE = "weather:state";
+export const IPC_EVENT_AMBIENCE_CAMERA = "ambience:camera";
+export type AmbienceCameraState = { height_above_ground: number | null };
 
 export type WeatherState = {
   id: string;

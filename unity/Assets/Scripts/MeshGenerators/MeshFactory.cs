@@ -105,7 +105,6 @@ public interface IPathMeshGenerator
 /// メッシュ生成器は path_master の model_type で切り替える:
 ///   "default" → RoadPath, "track" → TrackPath, "station_house" → StationHousePath,
 ///   "none" → メッシュ生成なし。
-/// model_type が未設定（旧マスター）の場合は path_type から推論して後方互換を保つ。
 /// </summary>
 public static class PathMeshFactory
 {
@@ -156,8 +155,7 @@ public static class PathMeshFactory
 
     /// <summary>
     /// path_master の model_type を取得する。
-    /// 未設定（旧マスターで model_type 列がない、または空文字）の場合は
-    /// path_type から推論する（PATH_TRACK/PATH_MONORAIL → "track"、それ以外 → "default"）。
+    /// マスター未ロード・未知バリアントのときだけ "default"（道路メッシュ）を返す。
     /// PathManager が「工事中でも描画しないパス(model_type=none)」の判定にも使うため public。
     /// </summary>
     public static string GetModelType(GeneratedModels.PathSummary pathData)
@@ -169,12 +167,6 @@ public static class PathMeshFactory
         if (master != null && !string.IsNullOrEmpty(master.model_type))
         {
             return master.model_type;
-        }
-
-        // model_type 未設定時の path_type ベース推論（後方互換）
-        if (pathData.path_type == Constants.PATH_TRACK || pathData.path_type == Constants.PATH_MONORAIL)
-        {
-            return "track";
         }
         return "default";
     }

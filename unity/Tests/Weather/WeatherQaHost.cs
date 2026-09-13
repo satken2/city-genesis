@@ -16,6 +16,9 @@ public class IpcClient : MonoBehaviour
     public int Rain;
     public bool Locked;
     public object[] Presets;
+    public float? CameraHeight;
+    public int CameraPublishes;
+    public void EmitAmbienceCamera(float? height) { CameraHeight = height; CameraPublishes++; }
     public void EmitWeatherState(string id, bool locked, int rain, object[] presets)
     { Publishes++; WeatherId = id; Locked = locked; Rain = rain; Presets = presets; }
     public void QueryWeather() => OnWeatherQuery?.Invoke();
@@ -47,6 +50,11 @@ public static class ApiClient
         if (Fail) { error("test failure"); yield break; }
         success(Newtonsoft.Json.JsonConvert.DeserializeObject<T>("{\"city\":{\"epoch\":" + Epoch + "}}"));
     }
+}
+public static class Utils
+{
+    public static float GroundHeight;
+    public static float GetGroundHeight(Vector3 position) => GroundHeight;
 }
 public sealed class WeatherQaHost : MonoBehaviour
 {
@@ -127,6 +135,16 @@ public sealed class WeatherQaHost : MonoBehaviour
         var camera = new GameObject("Camera").AddComponent<Camera>(); camera.tag = "MainCamera";
         camera.transform.position = new Vector3(220,95,-230); camera.transform.LookAt(new Vector3(0,28,70));
         camera.clearFlags = CameraClearFlags.Skybox; camera.farClipPlane = 8000;
+        var ambience = new GameObject("Camera ambience").AddComponent<CameraAmbience>();
+        Utils.GroundHeight = 70;
+        yield return null;
+        yield return new WaitForSecondsRealtime(0.25f);
+        Check(ipc.CameraHeight == 25, "camera height is relative to terrain, not sea level");
+        Check(CameraAmbience.RelativeHeight(5, 10) == 0, "below ground clamps to zero");
+        Check(CameraAmbience.RelativeHeight(float.NaN, 10) == null, "invalid terrain height is unavailable");
+        ambience.enabled = false;
+        Check(ipc.CameraHeight == null, "disabled camera ambience clears near mix");
+        Utils.GroundHeight = 0;
         camera.GetUniversalAdditionalCameraData().renderPostProcessing = true;
         camera.targetTexture = new RenderTexture(1280,720,24,RenderTextureFormat.ARGB32);
         MakeBox(new Vector3(0,-3,0), new Vector3(2400,6,2400), new Color(0.32f,0.38f,0.28f));

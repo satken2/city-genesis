@@ -1218,6 +1218,14 @@ public class IpcClient : MonoBehaviour
         });
     }
 
+    public void EmitAmbienceCamera(float? heightAboveGround)
+    {
+        SendEnvelope("ambience:camera", new Dictionary<string, object>
+        {
+            ["height_above_ground"] = heightAboveGround
+        });
+    }
+
     /// <summary>
     /// input:current_modes イベントを送信する。
     /// デバッグパネルからの問い合わせに対して、現在の入力/表示モードを返す。

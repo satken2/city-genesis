@@ -19,6 +19,8 @@ HTTP(バックエンド通信)とは別系統であることに注意。Unityと
 
 ## 新しいIPCイベントを追加する手順
 
+`ambience:camera`はUnity→Cockpitの地表相対高度通知（height_above_ground:数値mまたはnull）。CameraAmbienceが5Hzで送り、Tauri WeatherAudioが近景環境音を混ぜる。null・2秒以上の通知途絶ではベース音だけへ戻す。
+
 天気は`weather:query`/`weather:set`（UI→Unity、setはidまたはnull=自動）と`weather:state`（Unity→Cockpit、id/locked/rain/presets）で同期する。WeatherControllerが正を保持し、RustはCockpitに中継する。表示名はTauriのweather.json。経済APIへの書き込みは行わない。
 
 1. `IpcClient.cs`に型付きイベント(`event Action<...> OnXxx`)または送信メソッドを追加
@@ -53,7 +55,7 @@ STATE_EDIT_PATHの任意initial_height/initial_embankment_height/initial_curved/
 
 ## 建物の配置状態
 
-`edit_building:placement_command`(UI→Unity)はparams.command={variant, width?, depth?, angle?, reset?, labels?}。指定した寸法だけ変更し、状態を`edit_building:placement_state`(Unity→UI)で返す。空の変更差分は状態問い合わせ。labelsはパネルの選択言語で翻訳したCtrlメニュー/HUD文言。`placement_state`はvariant/revision/mode(parcel|free|roadside)/position(null=未固定)/width/depth/angle/parcel_idを一括通知し、UIは受信値を再送しない。Ctrl切替・位置固定・寸法キー・回転リリース・Escも同じ通知経路。直接配置の権威プレビュー`update_shape`には要求元のplacement_revisionを付け、Unityが現在世代・階数と照合する。既存建物編集は従来の世代なし区画プレビュー経路。`STATE_EDIT_BUILDING`のcopy_source_agent_idがある忠実コピーでは直接配置を無効化する。
+`edit_building:placement_command`(UI→Unity)はparams.command={variant, width?, depth?, angle?, reset?, labels?}。指定した寸法だけ変更し、状態を`edit_building:placement_state`(Unity→UI)で返す。空の変更差分は状態問い合わせ。labelsはパネルの選択言語で翻訳したCtrlメニュー/HUD文言。`placement_state`はvariant/revision/mode(parcel|free|roadside)/position(null=未固定)/width/depth/angle/parcel_idを一括通知し、UIは受信値を再送しない。Ctrl切替・位置固定・寸法キー・回転リリース・Escも同じ通知経路。直接配置の権威プレビュー`update_shape`には要求元のplacement_revisionを付け、Unityが現在世代・階数と照合する。既存建物編集は従来の世代なし区画プレビュー経路。`STATE_EDIT_BUILDING`のcopy_source_agent_idがある忠実コピーでは直接配置を無効化する。`STATE_EDIT_BUILDING`の任意params`placement_mode`(parcel|free|roadside)は配置方法の初期値で、`ApplyStateEditBuilding`が`DirectAllowed`確定後に`SetPlacementMode`で適用する(それより前に呼ぶとガードで無視される)。省略時は区画配置。都市創設時の市庁舎はUIが`free`を渡す。
 
 寸法コマンドの任意request_idはplacement_stateへ返す。パネルは最後の要求IDへの応答だけで数値変更待ちを解除する。
 

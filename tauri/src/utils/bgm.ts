@@ -2,9 +2,9 @@ import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { loadAppSettings, type AppSettings } from "./settings";
 import { parseDaysSinceEpoch } from "./date";
 
-import bgmDefault from "../assets/sounds/bgm-default.mp3";
-import bgm04 from "../assets/sounds/bgm-04.mp3";
-import bgmResult from "../assets/sounds/bgm-result.mp3";
+import bgmDefault from "../assets/sounds/bgm-default.opus";
+import bgm04 from "../assets/sounds/bgm-04.opus";
+import bgmResult from "../assets/sounds/bgm-result.opus";
 
 const BGM_TRACKS: Record<string, string> = {
   default: bgmDefault,

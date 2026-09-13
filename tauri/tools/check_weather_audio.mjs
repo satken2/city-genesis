@@ -7,7 +7,7 @@ import ts from 'typescript';
 const source = fs.readFileSync(new URL('../src/utils/weatherAudio.ts', import.meta.url), 'utf8');
 const compiled = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
 const channels = [];
-let tick, settingsChanged, finishSettings, unlistened = false, cleared = false;
+let tick, settingsChanged, cameraChanged, finishSettings, unlistened = 0, cleared = false, now = 1000;
 class FakeAudio {
   paused = true;
   volume = 0;
@@ -21,11 +21,14 @@ class FakeAudio {
 }
 const exports = {};
 vm.runInNewContext(compiled, {
-  exports, Audio: FakeAudio, console, Date,
+  exports, Audio: FakeAudio, console, Date: { now: () => now },
   setInterval: fn => { tick = fn; return 1; },
   clearInterval: () => { cleared = true; },
   require: name => name === '@tauri-apps/api/event' ? {
-    listen: async (_, fn) => { settingsChanged = fn; return () => { unlistened = true; }; },
+    listen: async (event, fn) => {
+      if (event === 'settings-updated') settingsChanged = fn; else cameraChanged = fn;
+      return () => { unlistened++; };
+    },
   } : name === './settings' ? {
     loadAppSettings: () => new Promise(resolve => { finishSettings = resolve; }),
   } : { default: name },
@@ -44,6 +47,21 @@ assert.equal(channels[0].volume, 0.125, 'new settings win over late initial load
 assert.equal(channels[0].plays, 1, 'pending play is not started twice');
 assert.ok(channels.slice(1).every(x => x.paused), 'clear weather has no rain audio');
 channels[0].pending(); await settle();
+cameraChanged({ payload: { height_above_ground: 137.5 } }); advance();
+assert.ok(Math.abs(channels[4].volume - 0.0875) < 1e-8, 'halfway height blends near ambience');
+cameraChanged({ payload: { height_above_ground: 25 } }); advance();
+assert.ok(channels[4].volume > channels[0].volume * 3, 'near ground ambience dominates, base remains');
+assert.ok(channels[0].volume > 0, 'base is continuous at ground level');
+assert.equal(channels[0].plays, 1, 'camera movement does not restart base');
+channels[4].pending(); await settle();
+cameraChanged({ payload: { height_above_ground: 250 } }); advance();
+assert.ok(channels[4].paused && channels[0].volume === 0.125, 'high camera uses base only');
+cameraChanged({ payload: { height_above_ground: -10 } }); advance();
+assert.equal(channels[4].volume, 0.175, 'below ground clamps to near mix');
+now += 2100; advance();
+assert.ok(channels[4].paused, 'stale camera falls back to base');
+cameraChanged({ payload: { height_above_ground: NaN } }); advance();
+assert.ok(channels[4].paused, 'invalid height cannot produce invalid volume');
 sound.update(true, 1); advance();
 assert.equal(channels[1].volume, 0.1, 'drizzle overlays common ambience');
 channels[1].pending(); await settle();
@@ -57,6 +75,6 @@ channels[3].paused = false;
 channels[3].pending(); await settle();
 assert.ok(channels.every(x => x.paused), 'late play cannot survive session end');
 sound.destroy(); await settle();
-assert.ok(cleared && unlistened, 'timer and event subscription released');
+assert.ok(cleared && unlistened === 2, 'timer and both event subscriptions released');
 assert.ok(channels.every(x => x.src === '' && x.paused), 'media released');
 console.log('PASS weather audio: volume, settings race, rain switching, mute, session end, cleanup');

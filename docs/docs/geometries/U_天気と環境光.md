@@ -75,9 +75,11 @@ Cockpitは幅800px・高さ76pxの独立したWebViewウィンドウである。
 
 `WeatherRain`はメインカメラ近傍60m四方に限って雨粒を出す。霧雨160粒/秒、雨750粒/秒、大雨1800粒/秒で最大6000粒。`RainStreak.shader`で輪郭をぼかしたストリークを描き、都市の大きさに比例した生成や物理衝突は行わない。カメラの大移動時は残留粒子を消す。ゲーム終了時・コンポーネント無効化時は停止する。雲は静止しているが雨粒は描画上の時間で動く。
 
-音はTauriのCockpitが所有する`WeatherAudio`で1組だけ再生する。プレイ中は共通環境音を常時ループし、rain=1/2/3のときだけ対応する雨音を重ねる。切替は約1.5秒以内のゲイン変化で行う。音量はマスター×効果音の設定に従い、ミュートは即時反映する。セッションがなくCockpitを非表示にすると停止し、破棄後に非同期の再生が完了しても再開しない。長い音源をWeb AudioのPCMバッファに一括展開せず、HTMLAudioElementでストリーミングする。
+音はTauriのCockpitが所有する`WeatherAudio`で1組だけ再生する。プレイ中はベース環境音を常時ループし、地表へ近づくほど近景音を混ぜる。rain=1/2/3のときは対応する雨音を重ねる。切替は約1.5秒以内のゲイン変化で行う。音量はマスター×効果音の設定に従い、ミュートは即時反映する。セッションがなくCockpitを非表示にすると停止し、破棄後に非同期の再生が完了しても再開しない。長い音源をWeb AudioのPCMバッファに一括展開せず、HTMLAudioElementでストリーミングする。
 
-音源は`tauri/src/assets/sounds/weather/*.ogg`。FFmpegで44.1kHz・Vorbis品質3へ圧縮し、先頭末尾2秒の等電力クロスフェードと-24 LUFSへの音量調整を施す。合計263,519,176 bytesの原本から9,155,383 bytesへ縮小。原本はDownloadsに残し、リポジトリには入れない。再生成は`tauri/tools/prepare_weather_audio.py`、出所と加工記録は音源フォルダのREADMEと`credits.ts`を参照する。
+音源は`tauri/src/assets/sounds/weather/*.opus`。FFmpegでOpus 64kbps(モノラル原本の大雨のみ40kbps)へ圧縮し、先頭末尾2秒の等電力クロスフェードと-24 LUFSへの音量調整を施す。5音源の変換物は合計4,983,929 bytes。原本はDownloadsに残し、リポジトリには入れない。再生成は`tauri/tools/prepare_weather_audio.py`、出所と加工記録は音源フォルダのREADMEと`credits.ts`を参照する。
+
+全体の再生構成・高度ミックス・調整箇所は[サウンドシステム](../programs/サウンドシステム.md)を参照。
 
 ## 検証
 

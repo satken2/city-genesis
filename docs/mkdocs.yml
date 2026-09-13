@@ -107,6 +107,7 @@ nav:
     - 通知レベル管理: programs/通知レベル管理.md
     - ファイル配置: programs/ファイル配置.md
     - 素材クレジット管理: programs/素材クレジット管理.md
+    - サウンドシステム: programs/サウンドシステム.md
     - 達成目標ウィンドウ: programs/達成目標ウィンドウ.md
   - API Reference: api/index.html
 

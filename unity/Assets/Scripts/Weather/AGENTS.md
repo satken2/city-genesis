@@ -7,6 +7,7 @@ Unityの環境表現だけを扱う。経済シミュレーションの天気デ
 - `WeatherController`: AppRootが生成。ApiClient経由でcity.epochだけ読む。専用System.Randomの重み付き独立抽選で、同一天気の連続を許す。UnityEngine.Randomの状態に影響しない。
 - `weather:query` / `weather:set {id}`を受け、`weather:state`で現在値と候補をCockpitへ送る。nullの選択は固定解除。天候ID・ウェイト・雨量の正はUnity、翻訳・絵文字・環境音はTauri。
 - `WeatherRain`: カメラ近傍だけで雨粒を描く。Resourcesの`RainStreak.shader`を使い、ゲーム外・無効化時に停止する。都市オブジェクトへの衝突判定や経済状態の変更はしない。
+- `CameraAmbience`: AppRootが天候描画と独立に生成。Utils.GetGroundHeightでカメラ直下の相対高度を求め、`ambience:camera`を最大5Hzで送る。音は再生せず、Tauriが高度から近景ミックスを決める。公開`programs/サウンドシステム.md`を参照。
 - シェーダーは`Assets/Resources/Weather/Atmosphere.shader`。ビルド時にストリッピングされないようResourcesから直接ロードする。
 - シーンの主光源を再利用する。無効化時に元の環境を戻し、ランタイムの所有アセットは破棄時に解放する。
 - F9パネルはキーボード操作のみ。天気パネルのキーを追加するときはカメラ・Steam撮影キーと競合させない。

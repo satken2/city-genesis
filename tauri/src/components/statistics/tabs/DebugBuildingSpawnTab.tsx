@@ -50,18 +50,9 @@ const COLOR_BEST_SCORE = "#4ea1ff"; // 最高最終スコア
 const COLOR_NPV = "#10b981";        // 最良パターンのNPV（収益側）
 const COLOR_COST = "#ef4444";       // 最良パターンのコスト計
 
-/**
- * 最良パターンのコスト計（建設+土地+買収解体）を求める。
- * 内訳が未記録（記録拡張前の古いレコード）の場合は null を返し、
- * グラフ上は線を欠落させる。
- */
-function totalCost(entry: ConstructionVariantEntry): number | null {
-  if (entry.best_construction_cost === undefined) return null;
-  return (
-    entry.best_construction_cost +
-    (entry.best_land_cost ?? 0) +
-    (entry.best_extra_cost ?? 0)
-  );
+/** 最良パターンのコスト計（建設+土地+買収解体）を求める。 */
+function totalCost(entry: ConstructionVariantEntry): number {
+  return entry.best_construction_cost + entry.best_land_cost + entry.best_extra_cost;
 }
 
 export function DebugBuildingSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
@@ -103,7 +94,7 @@ export function DebugBuildingSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
       return {
         date: rec.date,
         best_score: entry ? entry.best_score : null,
-        best_npv: entry ? entry.best_npv ?? null : null,
+        best_npv: entry ? entry.best_npv : null,
         best_cost: entry ? totalCost(entry) : null,
         spawned: entry ? entry.spawned : 0,
       };
@@ -127,7 +118,7 @@ export function DebugBuildingSpawnTab({ apiBaseUrl }: { apiBaseUrl: string }) {
       .map(([id, entry]) => ({
         variantId: Number(id),
         bestScore: entry.best_score,
-        npv: entry.best_npv ?? null,
+        npv: entry.best_npv,
         cost: totalCost(entry),
         spawned: entry.spawned,
       }))

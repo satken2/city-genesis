@@ -25,6 +25,7 @@ Unityのグラフィックの上に透明なWebViewウィンドウとして重�
   - utils/             ... 共通処理(下記の一覧参照)
   - i18n/              ... 多言語リソース(言語ディレクトリごとにドメイン別JSONを配置。index.tsがglobで集約)
   - types.ts           ... 共通型定義(WindowContext, AgentData等)
+  - assets/sounds/     ... BGM・効果音・環境音(音声形式の規約は「音声アセット」の節)
   - constants.ts       ... 自動生成の定数(編集禁止)
   - local-constants.ts ... UI側で独自定義する定数
   - types/generated.ts ... 自動生成のAPIスキーマ(編集禁止)
@@ -45,10 +46,22 @@ Unityのグラフィックの上に透明なWebViewウィンドウとして重�
 | `date.ts` | ゲーム内仮想暦(1ヶ月=30日/1年=360日)の整形。`formatEpochDate` / `formatEpochDateRange` |
 | `money.ts` | 金額の整形。`formatCompactAmount`(有効3桁のコンパクト表記) / `formatExactAmount`(3桁区切り) |
 | `settings.ts` | アプリ設定のロード・保存 |
-| `weatherAudio.ts` | Cockpitだけが所有する共通環境音と雨音のループ・クロスフェード。音量はmaster×sfx。長いOggをHTMLAudioElementで再生し、ゲーム外では停止する |
-| `playSound.ts` | 効果音再生。**音声ファイルは必ず`import`して得たURLを渡すこと**(`"src/assets/sounds/x.wav"`のようなパス文字列を直接渡すとバンドル対象から外れ、開発実行では鳴るのに本番ビルドだけ無音になる) |
+| `weatherAudio.ts` | Cockpitだけが所有する共通環境音と雨音のループ・クロスフェード。音量はmaster×sfx。長いOpusをHTMLAudioElementで再生し、ゲーム外では停止する |
+| `playSound.ts` | 効果音再生。**音声ファイルは必ず`import`して得たURLを渡すこと**(`"src/assets/sounds/x.opus"`のようなパス文字列を直接渡すとバンドル対象から外れ、開発実行では鳴るのに本番ビルドだけ無音になる) |
 | `tutorial.ts` | チュートリアルの表示制御 |
 | `agentIcon.ts` / `parcelIcon.ts` / `pathIcon.ts` / `resourceIcon.ts` | 各種アイコン画像の解決 |
+
+# 音声アセット
+
+ベース環境音は`weather/city-base.opus`、地表近景は`weather/city-ambience.opus`。Unityの`ambience:camera`通知をWeatherAudioが直接受け、地表から250m〜25mで近景音を増やす。2秒間未受信ならベースへ戻す。再生系全体と調整箇所は`../docs/docs/programs/サウンドシステム.md`。
+
+`src/assets/sounds/`に置く音声は**Ogg Opus(`.opus`)を既定とする**。実行環境がWebView2(Chromium)に固定されているため互換性の問題がなく、同音質でMP3・Ogg Vorbisより配布サイズが小さい。PCM(`.wav`)をそのまま置いてはいけない(同じ音が10倍以上のサイズになる)。
+
+- 目安のビットレート: BGM 112kbps / 効果音 96kbps / 環境音 64kbps(モノラル素材は40kbps)。
+- 例外: 原本が既に低ビットレートで、再符号化するとサイズが増えるだけのもの(`notify.mp3`)はMP3のまま置く。
+- 変換例: `ffmpeg -i src.wav -c:a libopus -b:a 96k -vbr on -application audio out.opus`
+- 天候の環境音だけは原本からの加工手順をスクリプト化してある(`tools/prepare_weather_audio.py`、`src/assets/sounds/weather/README.md`)。
+- 外部素材を取り込む・差し替えるときは`src/data/credits.ts`の追記も必ずセットで行う。
 
 # スクロールバー(全ウィンドウ共通)
 

@@ -252,7 +252,7 @@ export function EpochResultWindow({
   const [quests, setQuests] = useState<Quest[]>([]);
   const [scoreLatest, setScoreLatest] = useState<ScoreLatest | null>(null);
 
-  // エポック結果画面の表示中は専用BGM (bgm-result.mp3) に切り替える
+  // エポック結果画面の表示中は専用BGM (bgm-result.opus) に切り替える
   useEffect(() => {
     void emit("bgm:request", { id: "epoch_result", track: "result", priority: 10 });
     return () => {

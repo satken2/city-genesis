@@ -77,6 +77,8 @@ public class AppRoot : MonoBehaviour
 
         if (WeatherController.Instance == null)
             gameObject.AddComponent<WeatherController>();
+        if (GetComponent<CameraAmbience>() == null)
+            gameObject.AddComponent<CameraAmbience>();
 
         // マスターデータの初期化。シーン内に手動配置されたインスタンスの Initialize を呼び出す。
         if (MasterDataStore.Instance != null)

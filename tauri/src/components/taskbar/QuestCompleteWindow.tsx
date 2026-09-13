@@ -2,7 +2,7 @@
  * クエスト達成通知ウィンドウ
  *
  * エポック実行完了後に、新規達成された notify="modal" のクエストがある場合に
- * 表示されるお祝いポップアップ。tada.wav の再生と紙吹雪アニメーションで演出する。
+ * 表示されるお祝いポップアップ。tada.opus の再生と紙吹雪アニメーションで演出する。
  *
  * 複数のクエストを同時に達成した場合は tier（gold > silver > bronze）の降順に
  * 1件ずつページ送りで表示する（「次へ」ボタン、最後のページで「閉じる」）。
@@ -17,7 +17,7 @@ import { useTranslation } from "react-i18next";
 import type { QuestNotification, QuestTier } from "../../types";
 // 音声は必ず import 経由で参照する。パス文字列を直接 Audio に渡すとバンドル対象から
 // 外れ、本番ビルドではファイルが存在せず無音になる。
-import tadaSound from "../../assets/sounds/tada.wav";
+import tadaSound from "../../assets/sounds/tada.opus";
 import "./QuestCompleteWindow.css";
 
 type QuestCompleteWindowProps = {

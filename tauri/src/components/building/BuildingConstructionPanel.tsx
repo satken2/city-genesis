@@ -296,10 +296,13 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         setVisualVariant(Math.random());
         setVisualVariant2(Math.random());
         setVisualVariant3(Math.random());
+        // 都市創設時は道路も土地区画も無いのが通常なので、配置方法は自由配置から始める
+        // (Ctrlラジアルで区画配置へ戻せる)。
         sendChangeState("STATE_EDIT_BUILDING", {
           building_variant: VARIANT_CITY,
           agent_id: null,
           structure: defaultStructureOf(entry) ?? 0,
+          placement_mode: "free",
         }).catch((err) => {
           console.error("[BuildingConstructionPanel] sendChangeState for city hall failed:", err);
         });

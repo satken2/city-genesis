@@ -9,19 +9,18 @@
  */
 
 /** GET /api/v1/stats/spawn_debug のバリアント別建設統計。
- *  best_* の内訳4項目は「最終スコアが最大の（パーセル×階数）パターン」における生値。
- *  記録拡張前の古いエポックのレコードには存在しないため optional とする。 */
+ *  best_* の内訳4項目は「最終スコアが最大の（パーセル×階数）パターン」における生値。 */
 export type ConstructionVariantEntry = {
   best_score: number;
   spawned: number;
   /** 最良パターンのNPV（賃料収入の現在価値） */
-  best_npv?: number;
+  best_npv: number;
   /** 最良パターンの建設コスト */
-  best_construction_cost?: number;
+  best_construction_cost: number;
   /** 最良パターンの土地取得コスト（デベロッパーマージン控除後） */
-  best_land_cost?: number;
+  best_land_cost: number;
   /** 最良パターンの既存建物買収+解体コスト */
-  best_extra_cost?: number;
+  best_extra_cost: number;
 };
 
 /** GET /api/v1/stats/spawn_debug の建物スポーン履歴1レコード */
@@ -62,18 +61,17 @@ export type AgentSpawnMetrics = {
 };
 
 /** GET /api/v1/stats/spawn_debug の経済主体スポーン履歴1レコード。
- *  variants は阻害要因カウンタ（件数）、metrics は評価の内部数値。
- *  metrics は記録拡張前の古いレコードには存在しないため optional とする。 */
+ *  variants は阻害要因カウンタ（件数）、metrics は評価の内部数値。 */
 export type AgentSpawnRecord = {
   date: number;
   variants: Record<string, Record<string, number>>;
-  metrics?: Record<string, AgentSpawnMetrics>;
+  metrics: Record<string, AgentSpawnMetrics>;
   /** 案件ごとの与信集中限度（円）。業種によらない都市共通のスカラーで、
    *  max(民間預金総額 × SPAWN_CREDIT_CONCENTRATION_LIMIT, SPAWN_CREDIT_FLOOR) */
-  credit_limit?: number;
+  credit_limit: number;
   /** 与信集中限度の分母である民間預金総額（円）。
    *  一般施設・共有建物・世帯の正の現金残高の合計 */
-  private_deposits?: number;
+  private_deposits: number;
 };
 
 /** GET /api/v1/stats/spawn_debug のレスポンス全体 */

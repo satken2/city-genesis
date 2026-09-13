@@ -22,7 +22,7 @@ import {
 } from "../../constants";
 import { resolveTransitIcon } from "../../utils/pathIcon";
 import { playSound } from "../../utils/playSound";
-import clickSrc from "../../assets/sounds/click.mp3";
+import clickSrc from "../../assets/sounds/click.opus";
 import "./DisplayOptionsPanel.css";
 
 type DisplayOptionsPanelProps = {

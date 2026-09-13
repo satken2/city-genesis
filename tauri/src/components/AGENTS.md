@@ -127,7 +127,7 @@ PathConstructionPanel/TrackConstructionPanelの継続配置は間隔・進行方
 
 ## 建物配置パネルの同期
 
-`BuildingConstructionPanel`の配置方法はUnityのCtrlメニューから`edit_building:placement_state`で受ける。自由/道路沿い配置では地点未固定でも間口・奥行き・階数を表示する。寸法ステッパーは`sendBuildingPlacementCommand`で変更フィールドだけを送り、スナップ補正済みのposition/width/depth/angle/revisionを一括受信する。受信値のエコー送信は禁止。直接配置の設置可否は現在の要求キー(variant/revision/位置/寸法/角度/階数)に対応する応答だけで確定を許可し、`update_shape`にもplacement_revisionを渡す。Escとパネル取消しは位置のみリセットし、寸法と配置方法を維持する。道路沿いでは角度入力を無効化。Ctrl/HUD文言は全言語のconstruction.jsonからlabelsとして送る。忠実コピー開始時のSTATE_EDIT_BUILDINGにはcopy_source_agent_idを渡し、区画配置専用にする。
+`BuildingConstructionPanel`の配置方法はUnityのCtrlメニューから`edit_building:placement_state`で受ける。自由/道路沿い配置では地点未固定でも間口・奥行き・階数を表示する。寸法ステッパーは`sendBuildingPlacementCommand`で変更フィールドだけを送り、スナップ補正済みのposition/width/depth/angle/revisionを一括受信する。受信値のエコー送信は禁止。直接配置の設置可否は現在の要求キー(variant/revision/位置/寸法/角度/階数)に対応する応答だけで確定を許可し、`update_shape`にもplacement_revisionを渡す。Escとパネル取消しは位置のみリセットし、寸法と配置方法を維持する。道路沿いでは角度入力を無効化。Ctrl/HUD文言は全言語のconstruction.jsonからlabelsとして送る。忠実コピー開始時のSTATE_EDIT_BUILDINGにはcopy_source_agent_idを渡し、区画配置専用にする。市庁舎未設置ゲートの自動選択(`VARIANT_CITY`)では`placement_mode: "free"`を渡し、道路も区画も無い創設時に自由配置から始める(以後の配置方法はUnityの`placement_state`に追従するだけで、パネルは初期値を保持しない)。
 
 ## 達成目標と住民満足度
 

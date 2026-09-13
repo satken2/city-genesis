@@ -347,6 +347,8 @@ invoke("start_load_game", { saveId })
 
 ## 建物直接配置の状態同期
 
+配置方法の初期値は `STATE_EDIT_BUILDING` の遷移パラメータ `placement_mode`（parcel/free/roadside。省略時はparcel）で指定する。既存建物編集・忠実コピーでは無視される。都市創設時の市庁舎はUIが `free` を指定する。以後の切り替えはUnityのCtrlラジアルメニューが担い、UIは `placement_state` の `mode` に追従する。
+
 `edit_building:placement_command` (ui → graphic)のparams.commandには`variant`と変更したフィールドだけを渡す。任意フィールドは`width`/`depth`/`angle`、`reset=true`(位置選択のみ取消し)、`labels`(翻訳済みCtrlメニュー/HUD文言)。寸法を含まない呼び出しは状態問い合わせとなる。パネルは購読完了後に問い合わせ、初期化通知を取りこぼしても復元できる。
 
 `edit_building:placement_state` (graphic → ui)は`{variant, revision, mode, position, width, depth, angle, parcel_id}`を返す。modeはparcel/free/roadside、positionは`[x,0,z]`または未固定を示すnull、parcel_id=-1は区画未選択。キーボード寸法変更・Ctrl切替・位置固定・回転終了・Escも同じ状態通知を使う。ホバー移動では常時送信しない。UIはこの通知をパラメータ変更として再送しない。
@@ -369,6 +371,8 @@ world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地�
 
 `edit_path:update_shape` は `can_confirm` を常送します。これはUnityの形状確定状態とローカル交差検証を合わせた真偽値で、形状が未確定または干渉中ならfalseです。Tauriはこの値だけで確定を許可せず、同じ全線ペイロードの `/paths/validate` 応答も照合します。既存の `world:highlight_objects` によるパス・建物の警告は、メッシュ着色ではなく半透明の占有箱として描画します。
 # 天候の表示と選択
+
+環境音のカメラ連携には別イベント`ambience:camera {height_above_ground: number | null}`（Unity→Cockpit）を使う。`CameraAmbience`が地表相対高度(m)を0.2秒ごとに送り、ゲーム外や取得不可はnull。RustはCockpitだけへ中継する。Tauriの`WeatherAudio`は2秒間未受信なら近景音を消してベースへ戻す。経済APIへの書き込みはない。ミックスの詳細は[サウンドシステム](サウンドシステム.md)を参照。
 
 天候の正はUnityにあり、バックエンドへの書き込みや経済パラメータは追加しない。Cockpitは購読後に問い合わせ、応答した天候に合わせて表示と環境音を更新する。
 

@@ -575,6 +575,9 @@ pub async fn handle_incoming_message(
         "weather:state" => {
             let _ = app.emit_to(window::LABEL_COCKPIT, "weather:state", envelope.payload);
         }
+        "ambience:camera" => {
+            let _ = app.emit_to(window::LABEL_COCKPIT, "ambience:camera", envelope.payload);
+        }
         "view:grid_angle_changed" => {
             let _ = app.emit("view:grid_angle_changed", envelope.payload);
         }

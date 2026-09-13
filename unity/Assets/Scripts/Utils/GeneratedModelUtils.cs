@@ -94,15 +94,10 @@ public static class GeneratedModelUtils
 
     /// <summary>
     /// ウェイポイントリストを PathWaypoint のリストに変換する。
-    /// バックエンドは2種類の形式でウェイポイントを返す可能性がある:
-    ///
-    /// 旧形式（フラット配列）:
-    ///   [[x1,y1,z1], [x2,y2,z2], ...]
-    ///
-    /// 新形式（制御点付き辞書）:
+    /// バックエンドは coordinate_utils.normalize_waypoints で正規化した制御点付き辞書
     ///   [{"position":[x,y,z], "control_in":[x,y,z], "control_out":[x,y,z]}, ...]
-    ///
-    /// 両方の形式に対応する。新形式の場合はベジエ曲線の制御点も抽出する。
+    /// だけを返す。要素の実体は JSON 経由なら JObject、msgpack 経由なら
+    /// Dictionary&lt;string, object&gt; になるため、その2形だけを受ける。
     /// </summary>
     public static List<PathWaypoint> ToWaypointList(List<object> list)
     {
@@ -149,14 +144,6 @@ public static class GeneratedModelUtils
                 }
 
                 result.Add(wp);
-            }
-            else if (list[i] is List<object> inner)
-            {
-                result.Add(new PathWaypoint { position = ToFloatArray(inner) });
-            }
-            else if (list[i] is JArray wj)
-            {
-                result.Add(new PathWaypoint { position = ToFloatArray(wj) });
             }
         }
         return result;
