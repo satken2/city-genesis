@@ -192,6 +192,10 @@ const RIVER = {
   /** 範囲抽出: 「水面より低い」と判定する余裕(m)。水面ちょうどの格子点(岸肩のなじみ帯)を
    *  範囲に入れず、岸線を水面のわずか下で切る */
   polygonWaterEps: 0.05,
+  /** 範囲抽出: 範囲に入れる格子点の、水面プロファイル線からの最大距離(m)。湛水区間の
+   *  岸越えの氾濫を表現しつつ、平坦な氾濫原で際限なく広がるのを防ぐ。大河川の川幅
+   *  (網状化区間の拡幅込み)より十分大きく取る */
+  polygonMaxDistFromProfileM: 120,
   /** 範囲抽出: リング間引きの許容誤差(spacing に対する倍率)。格子由来の細かなギザギザを消しつつ
    *  岸線の形状は保つ */
   polygonSimplifyFactor: 0.25,
@@ -1588,29 +1592,38 @@ function blendWidth(width: number, spacing: number): number {
  * ========================================================================== */
 
 /**
- * 川の範囲ポリゴンを抽出するときの探索帯の指定。
- *   - spline: 彫り込み直後用。中心線±(川幅/2 + なじみ帯)の帯(=彫り込みが及んだ範囲)を探索する。
+ * 川の範囲ポリゴンを抽出するときの「種セル」の指定。
+ *   - spline: 彫り込み直後用。中心線±(川幅/2 + なじみ帯)の帯(=彫り込みが及んだ範囲)を種にする。
  *     川幅は points の width を使う。
- *   - polygon: 保存済みの川(幅情報を持たない)の再計算用。既存の範囲ポリゴンを dilateCells セル
- *     膨らませた帯を探索する。彫り込み後に手作業で岸を削った/盛った場合の追従に使う。
+ *   - polygon: 保存済みの川(幅情報を持たない)の再計算用。既存の範囲ポリゴンの内側を種にする。
+ *     彫り込み後に手作業で岸を削った/盛った場合、種から連結する範囲だけが追従して伸縮する。
  */
 export type RiverPolygonBand =
   | { kind: "spline" }
-  | { kind: "polygon"; polygon: WaterPolygonGeoJson; dilateCells: number };
+  | { kind: "polygon"; polygon: WaterPolygonGeoJson };
 
 /**
  * 彫り込み後の地形から、川1本の範囲ポリゴン(穴=中州・島)を抽出する。
  *
- * 範囲の定義は「探索帯の内側で、地形標高が水面標高(プロファイル線上の最近点の waterY)を
- * 下回る格子点の集合」。湖の穴あけ(footprint 内で水位以下の領域)と同じ考え方を、
- * 流下方向に変化する水面に対して適用したもの。以下は範囲から除外する:
+ * 範囲の定義は「種セルから連結して到達できる、地形標高が水面標高(プロファイル線上の
+ * 最近点の waterY)を下回る格子点の集合」。湖の穴あけ(footprint 内で水位以下の領域)と同じ
+ * 考え方を流下方向に変化する水面に適用し、さらに河道から連結していること(=実際に水が
+ * 流れ込める)を条件にする。連結条件が無いと、河道の岸(なじみ帯)の外側にある無関係な
+ * 低地(水面より低いが土手で隔てられた窪地)まで範囲に入ってしまう。
+ * 河道の水面が周囲の地形より高い区間(1次元窪地充填で溢出点の高さまで湛水した区間)では、
+ * 水は岸を越えて周囲の低地へ広がる。この広がりは「プロファイル線からの距離が
+ * polygonMaxDistFromProfileM 以内」に制限する(平坦な氾濫原で際限なく広がるのを防ぐ)。
+ * 制限を種からの歩数ではなく線からの距離にしているのは、再計算(前回の範囲を種にする)を
+ * 何度繰り返しても範囲が同じになる(冪等)ようにするため。
+ *
+ * 以下は範囲から除外する:
  *   - 標高 0m 以下(海)。海面板が既に覆っており、河口で川の水面と重ねると Z-fighting になる
  *   - 既存の湖(water_surfaces)の水位以下の領域。湖の水面が担当する
  *   - claimed に立っている格子点。流量の大きい川から順に処理し、合流部で本流に取られた
  *     領域を支流が二重に持たないようにする(重なった水面同士の Z-fighting 回避)
  * 抽出した範囲の格子点は claimed へ書き戻す。
  *
- * 場は探索帯の外接矩形+1セルのパディング(負値)の上に作り、領域が必ず閉じるようにする。
+ * 場は到達範囲の外接矩形+1セルのパディング(負値)の上に作り、領域が必ず閉じるようにする。
  * 戻り値は範囲が空なら null。
  */
 export function buildRiverPolygon(
@@ -1629,8 +1642,7 @@ export function buildRiverPolygon(
   if (pts.length < 2) return null;
   const halfW = mapWidth / 2;
   const halfH = mapHeight / 2;
-
-  // --- 探索帯の外接グリッド範囲 ---
+  // --- 種セルの外接グリッド範囲(氾濫の到達分だけ広げる) ---
   let cMin = Infinity;
   let cMax = -Infinity;
   let rMin = Infinity;
@@ -1641,14 +1653,14 @@ export function buildRiverPolygon(
     rMin = Math.min(rMin, Math.floor((wz - reach + halfH) / spacing));
     rMax = Math.max(rMax, Math.ceil((wz + reach + halfH) / spacing));
   };
+  const floodReach = RIVER.polygonMaxDistFromProfileM;
   if (band.kind === "spline") {
-    for (const p of pts) extend(p.x, p.z, p.width / 2 + blendWidth(p.width, spacing));
+    for (const p of pts) extend(p.x, p.z, p.width / 2 + blendWidth(p.width, spacing) + floodReach);
   } else {
     const b = polygonBounds(band.polygon);
     if (!b) return null;
-    const reach = band.dilateCells * spacing;
-    extend(b.minX, b.minZ, reach);
-    extend(b.maxX, b.maxZ, reach);
+    extend(b.minX, b.minZ, floodReach);
+    extend(b.maxX, b.maxZ, floodReach);
   }
   cMin = Math.max(0, cMin);
   rMin = Math.max(0, rMin);
@@ -1659,15 +1671,13 @@ export function buildRiverPolygon(
   // 場はパディング1セルを含む (bw × bh)。場の格子点 (i, j) ↔ 地形格子 (c, r) = (cMin + i - 1, rMin + j - 1)
   const bw = cMax - cMin + 3;
   const bh = rMax - rMin + 3;
+  const originX = (cMin - 1) * spacing - halfW;
+  const originZ = (rMin - 1) * spacing - halfH;
   const field = new Float32Array(bw * bh).fill(-1);
-  // 各格子点の「探索帯内か」と、帯内の水面標高
-  const inBand = new Uint8Array(bw * bh);
-  const waterAt = new Float32Array(bw * bh);
+  const seed = new Uint8Array(bw * bh);
 
   if (band.kind === "spline") {
-    // 彫り込み(carveRivers)と同じく、各線分の到達範囲のセルへ最近線分の水面標高を書き込む。
-    // 複数の線分の到達範囲が重なるセルは、最も近い線分の値を採る(=折れ線への最近点)。
-    const bestDist = new Float32Array(bw * bh).fill(Infinity);
+    // 彫り込み(carveRivers)と同じく、各線分の到達範囲のセルを種にする
     for (let s = 0; s < pts.length - 1; s++) {
       const a = pts[s];
       const b = pts[s + 1];
@@ -1691,77 +1701,98 @@ export function buildRiverPolygon(
           const d = Math.hypot(wx - (a.x + segX * t), wz - (a.z + segZ * t));
           const w = a.width + (b.width - a.width) * t;
           if (d > w / 2 + blendWidth(w, spacing)) continue;
-          const fi = (r - rMin + 1) * bw + (c - cMin + 1);
-          if (d < bestDist[fi]) {
-            bestDist[fi] = d;
-            inBand[fi] = 1;
-            waterAt[fi] = a.waterY + (b.waterY - a.waterY) * t;
-          }
+          seed[(r - rMin + 1) * bw + (c - cMin + 1)] = 1;
         }
       }
     }
   } else {
-    // 既存ポリゴンをラスタライズし、dilateCells セル分だけ膨らませた帯を探索する
-    const originX = (cMin - 1) * spacing - halfW;
-    const originZ = (rMin - 1) * spacing - halfH;
+    // 既存ポリゴンの内側の格子点を種にする
     const base = rasterizePolygonMask(band.polygon, originX, originZ, spacing, bw, bh);
-    const k = Math.max(0, Math.round(band.dilateCells));
-    const sampler = new RiverProfileSampler(pts.map((p) => [p.x, p.waterY, p.z]));
-    for (let j = 0; j < bh; j++) {
-      for (let i = 0; i < bw; i++) {
-        let hit = false;
-        for (let dj = -k; dj <= k && !hit; dj++) {
-          const jj = j + dj;
-          if (jj < 0 || jj >= bh) continue;
-          for (let di = -k; di <= k; di++) {
-            const ii = i + di;
-            if (ii < 0 || ii >= bw) continue;
-            if (base[jj * bw + ii]) {
-              hit = true;
+    for (let j = 1; j < bh - 1; j++) {
+      for (let i = 1; i < bw - 1; i++) {
+        if (base[j * bw + i]) seed[j * bw + i] = 1;
+      }
+    }
+  }
+
+  // --- 各格子点が「水面より低く、川の範囲になり得るか」の判定(遅延評価) ---
+  const sampler = new RiverProfileSampler(pts.map((p) => [p.x, p.waterY, p.z]));
+  const lakes = waterSurfaces
+    .filter((ws) => typeof ws?.water_level === "number")
+    .map((ws) => ({ level: ws.water_level, polygon: ws.polygon, bounds: polygonBounds(ws.polygon) }));
+  // 0=未評価, 1=範囲候補, 2=範囲外
+  const state = new Uint8Array(bw * bh);
+  const evaluate = (i: number, j: number): boolean => {
+    const fi = j * bw + i;
+    if (state[fi] !== 0) return state[fi] === 1;
+    let ok = false;
+    if (i >= 1 && i < bw - 1 && j >= 1 && j < bh - 1) {
+      const c = cMin + i - 1;
+      const r = rMin + j - 1;
+      const h = elev[r * cols + c];
+      if (h > 0 && !claimed[r * cols + c]) {
+        const wx = c * spacing - halfW;
+        const wz = r * spacing - halfH;
+        const near = sampler.nearest(wx, wz);
+        const depth = near.dist <= RIVER.polygonMaxDistFromProfileM
+          ? sampler.heightOn(near.seg, near.t) - h - RIVER.polygonWaterEps
+          : -1;
+        if (depth > 0) {
+          let inLake = false;
+          for (const lake of lakes) {
+            const b = lake.bounds;
+            if (!b || h > lake.level) continue;
+            if (wx < b.minX || wx > b.maxX || wz < b.minZ || wz > b.maxZ) continue;
+            if (pointInPolygon(wx, wz, lake.polygon)) {
+              inLake = true;
               break;
             }
           }
+          if (!inLake) {
+            ok = true;
+            field[fi] = depth;
+          }
         }
-        if (!hit) continue;
-        const fi = j * bw + i;
-        inBand[fi] = 1;
-        waterAt[fi] = sampler.heightAt(originX + i * spacing, originZ + j * spacing);
       }
     }
-  }
+    state[fi] = ok ? 1 : 2;
+    return ok;
+  };
 
-  // --- 場の組み立て(パディング行/列は -1 のまま) ---
-  const lakeRings = waterSurfaces
-    .filter((ws) => typeof ws?.water_level === "number")
-    .map((ws) => ({ level: ws.water_level, polygon: ws.polygon, bounds: polygonBounds(ws.polygon) }));
+  // --- 種から4近傍へ幅優先で広げる(連結成分の抽出) ---
+  const queueI: number[] = [];
+  const queueJ: number[] = [];
+  const reached = new Uint8Array(bw * bh);
   for (let j = 1; j < bh - 1; j++) {
-    const r = rMin + j - 1;
     for (let i = 1; i < bw - 1; i++) {
-      const c = cMin + i - 1;
       const fi = j * bw + i;
-      if (!inBand[fi]) continue;
-      const h = elev[r * cols + c];
-      if (h <= 0) continue; // 海
-      if (claimed[r * cols + c]) continue; // 他の川が既に持つ領域
-      const wx = c * spacing - halfW;
-      const wz = r * spacing - halfH;
-      let inLake = false;
-      for (const lake of lakeRings) {
-        const b = lake.bounds;
-        if (!b || h > lake.level) continue;
-        if (wx < b.minX || wx > b.maxX || wz < b.minZ || wz > b.maxZ) continue;
-        if (pointInPolygon(wx, wz, lake.polygon)) {
-          inLake = true;
-          break;
-        }
+      if (seed[fi] && evaluate(i, j)) {
+        reached[fi] = 1;
+        queueI.push(i);
+        queueJ.push(j);
       }
-      if (inLake) continue;
-      field[fi] = waterAt[fi] - h - RIVER.polygonWaterEps;
     }
   }
+  let head = 0;
+  while (head < queueI.length) {
+    const i = queueI[head];
+    const j = queueJ[head];
+    head++;
+    const neighbors: [number, number][] = [[i - 1, j], [i + 1, j], [i, j - 1], [i, j + 1]];
+    for (const [ni, nj] of neighbors) {
+      const nfi = nj * bw + ni;
+      if (reached[nfi]) continue;
+      if (!evaluate(ni, nj)) continue;
+      reached[nfi] = 1;
+      queueI.push(ni);
+      queueJ.push(nj);
+    }
+  }
+  // 到達しなかった候補(種と連結していない低地)は範囲外に戻す
+  for (let fi = 0; fi < field.length; fi++) {
+    if (!reached[fi]) field[fi] = -1;
+  }
 
-  const originX = (cMin - 1) * spacing - halfW;
-  const originZ = (rMin - 1) * spacing - halfH;
   const polygon = extractRegionPolygon(field, bw, bh, originX, originZ, spacing, RIVER.polygonSimplifyFactor * spacing);
   if (!polygon) return null;
 

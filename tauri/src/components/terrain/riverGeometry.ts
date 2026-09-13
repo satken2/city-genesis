@@ -137,11 +137,17 @@ export class RiverProfileSampler {
     return { seg: bestSeg, t: bestT, dist: best };
   }
 
+  /** nearest() の結果(線分インデックスとパラメータ)から水面標高を線形補間する */
+  heightOn(seg: number, t: number): number {
+    if (this.segCount === 0) return this.ys.length > 0 ? this.ys[0] : 0;
+    return this.ys[seg] + (this.ys[seg + 1] - this.ys[seg]) * t;
+  }
+
   /** (x, z) の水面標高(最近線分上の最近点で y を線形補間) */
   heightAt(x: number, z: number): number {
     if (this.segCount === 0) return this.ys.length > 0 ? this.ys[0] : 0;
     const { seg, t } = this.nearest(x, z);
-    return this.ys[seg] + (this.ys[seg + 1] - this.ys[seg]) * t;
+    return this.heightOn(seg, t);
   }
 
   /** (x, z) の流下方向(最近線分の単位接線、XZ)。線分が無ければ +X */

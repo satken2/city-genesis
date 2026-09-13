@@ -241,6 +241,7 @@ public static class Constants
     public const float STATION_HOUSE_TRACK_SEARCH_RADIUS = 150.0f;
     public const float PATH_TANGENT_ALIGN_MAX_ANGLE_DEG = 20.0f;
     public const float INFRA_TAP_HEIGHT_TOLERANCE = 3.0f;
+    public const float RIVER_BRIDGE_MIN_CLEARANCE = 0.5f;
     public const int PAYMENT_MARKET = 0;
     public const int PAYMENT_RENT = 1;
     public const int PAYMENT_SALARY = 2;

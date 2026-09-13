@@ -210,13 +210,6 @@ function niceIntervalAtOrBelow(value: number): number {
 const CONTOUR_REFINE_ZOOM_THRESHOLD = 6;
 
 /**
- * 保存データから復元した川(流路スプラインの幅情報を持たない)の範囲を再計算するとき、
- * 既存の範囲ポリゴンを何セル膨らませた帯を探索するか。彫り込み後に岸を手作業で削って
- * 川を広げた場合にも追従できる程度に取り、無関係な低地を拾わない程度に留める。
- */
-const RIVER_POLYGON_DILATE_CELLS = 3;
-
-/**
  * 左ボタンの「その場クリック(単発の選択操作)」と「ドラッグ(パン)」を区別する移動量の
  * 閾値(スクリーンピクセル)。押した位置からこの距離を超えて動かすとパンへ移行する。
  */
@@ -2333,7 +2326,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       const band = hasSpline
         ? ({ kind: "spline" } as const)
         : river.polygon
-          ? ({ kind: "polygon", polygon: river.polygon, dilateCells: RIVER_POLYGON_DILATE_CELLS } as const)
+          ? ({ kind: "polygon", polygon: river.polygon } as const)
           : null;
       if (!band) continue;
       const polygon = buildRiverPolygon(
