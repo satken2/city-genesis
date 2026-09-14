@@ -17,7 +17,7 @@ Tauri(Rust)側のプログラム。ウィンドウ管理とUnityとのMMF(Memory
 
 ## 知らないとわからないこと
 
-- `ambience:camera`はCockpitだけに配信する地表相対高度通知。音のミックスはTSのWeatherAudioが担当し、Rustで高度・音量を計算しない。契約は公開`programs/サウンドシステム.md`。
+`ambience:volume {volume}`はTauri→Unityの音量通知（master×sfx、0〜1）。Cockpitが設定変更時と2秒ごとに送り、CameraAmbienceが所有するAudioSourceへ適用する。高度と天候の音響制御はUnity内で完結する。
 
 - **ゲーム中に常駐するHUDは3枚のウィンドウ(`icon-panel` / `cockpit` / `system-tray`)に分かれている。** Unityの3Dビューに重ねる透明ウィンドウは、見た目が透明な領域でもクリックをWebViewが吸ってしまうため、パネルの実面積ぴったりのウィンドウに分割する必要がある(1枚の全画面ウィンドウにはできない)。位置とサイズの定数は`window.rs`冒頭にまとまっている。**新しいウィンドウラベルを足したら`capabilities/default.json`の`windows`にも必ず追加すること**(漏れるとそのウィンドウからTauriコマンドを呼べない)。ウィンドウのtopmost(最前面)指定は生成時の一度きりでは維持されない(Unityがフルスクリーン扱い=モニタ全面を覆うボーダーレスでフォアグラウンドになるとシェルがUIを裏へ回す・WebView2はhide→showでtopmostが外れることがある)ため、`reassert_topmost`が**表示中の全ウィンドウ**へ`SetWindowPos(HWND_TOPMOST)`を直接発行して打ち直す(現在のZオーダーの相対順は保つ)。**`set_always_on_top(true)`で打ち直してはいけない**: taoは新旧フラグの差分が無いと`SetWindowPos`を発行しないため、既にtopmost指定済みのウィンドウには何も起きず、裏に回った状態から復帰できない。呼び出し箇所は`set_hud_visible(true)`の表示直後、`lib.rs`の`WindowEvent::Focused(false)`(=Unityクリックでフォーカスが移った瞬間)、`ipc.rs`の`system:focus_gained`(Unityの`OnApplicationFocus(true)`。シェルの持ち上げはUnity活性化中に起きるため、Unity側が焦点を得た後のこの通知が本命の復帰経路)と`system:graphic_ready`。
 - **ポップアップの配置計算はHUDの占有領域を避ける。** `HUD_LEFT_RESERVED`(左端のアイコンパネル幅)だけ左ドック(`left_panel` / `left_panel_narrow` / `left_top`)を右へずらし、丈と中央寄せは`HUD_BOTTOM_RESERVED`(下部中央のコックピット高)を引く。右サイドパネルと通知トーストだけは中央のコックピットと重ならないため、薄い`HUD_RIGHT_BOTTOM_RESERVED`(右下のシステムトレイ高)で足りる。HUDのサイズを変えたらこれらの定数だけ直せば全ポップアップに反映される。

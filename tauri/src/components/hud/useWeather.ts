@@ -1,18 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { IPC_EVENT_WEATHER_STATE, queryWeather, setWeather, type WeatherState } from "../../utils/ipc";
-import { WeatherAudio } from "../../utils/weatherAudio";
+import { AmbienceVolumeSync } from "../../utils/weatherAudio";
 
 export function useWeather(visible: boolean, templateMode: boolean) {
   const [weather, updateWeather] = useState<WeatherState | null>(null);
   const [failed, setFailed] = useState(false);
-  const audio = useRef<WeatherAudio>();
   const previousTemplate = useRef(templateMode);
 
   useEffect(() => {
-    const sound = new WeatherAudio();
-    audio.current = sound;
-    return () => { sound.destroy(); audio.current = undefined; };
+    const sound = new AmbienceVolumeSync();
+    return () => { sound.destroy(); };
   }, []);
 
   useEffect(() => {
@@ -33,10 +31,6 @@ export function useWeather(visible: boolean, templateMode: boolean) {
     }).catch(console.error);
     return () => { disposed = true; unlisten?.(); if (timer) clearInterval(timer); };
   }, [visible]);
-
-  useEffect(() => {
-    audio.current?.update(visible, weather?.rain ?? 0);
-  }, [visible, weather?.rain]);
 
   useEffect(() => {
     if (previousTemplate.current && !templateMode && visible)

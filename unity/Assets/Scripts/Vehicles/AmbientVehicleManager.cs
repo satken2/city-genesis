@@ -54,11 +54,17 @@ public sealed class AmbientVehicleManager : MonoBehaviour
         public Vector3 position;        // 保存座標
         public float heading;           // 進行方位 [deg]。0=+Z、時計回り
         public float targetHeading, speed, decisionTimer, travelled, routeLength;
+        public float expiresAt;         // 船の寿命(Time.time)。過ぎたら画面外に出た時点で消す
         public bool dead;               // 岸に乗り上げた船。次の更新で消す
         public Vector3 Direction => new Vector3(Mathf.Sin(heading * Mathf.Deg2Rad), 0, Mathf.Cos(heading * Mathf.Deg2Rad));
     }
 
-    private const int TargetShips = 6;
+    // 船は「外洋の面積×密度」の期待値を寿命付きの発生で維持する。海の広さに比例し、たまに見かける程度の希少さにする。
+    private const float ShipsPerKm2 = 1f / 40f;
+    private const int MaxShips = 6;
+    private const float ShipLifetimeMin = 420f, ShipLifetimeMax = 780f;   // [s]
+    private const float ShipSpawnTick = 2f;
+    private const int SeaSampleGrid = 40;             // 海面積の見積もり格子(片側の分割数)
     private const float AirRouteHalfLength = 7000f;   // 焦点の前後に伸ばす距離。遠景クリップ(4500m)の外で発生・消滅する
     private const float AirFocusRadius = 1200f;       // 航路の焦点をカメラ注視点からずらす範囲
     private const float DrawDistance = 6000f;
@@ -72,6 +78,7 @@ public sealed class AmbientVehicleManager : MonoBehaviour
     private readonly Dictionary<string, PropRenderModel> models = new Dictionary<string, PropRenderModel>();
     private readonly float[] airTimers = new float[AirSpecs.Length];
     private float shipTimer;
+    private float expectedShips;        // 外洋面積×密度。海岸線の世代ごとに見積もる
     private int coastVersion = -1;
     private bool visible = true;
     private Material trailMaterial;
@@ -131,16 +138,18 @@ public sealed class AmbientVehicleManager : MonoBehaviour
             if (vehicles.Count > 0) Clear();
             return;
         }
-        if (coastVersion != CoastlineStore.Version)
-        {
-            coastVersion = CoastlineStore.Version;
-            Clear();
-        }
         if (terrain == null) terrain = FindAnyObjectByType<TerrainManager>();
         if (ModelManager.Instance == null || terrain == null) return;
 
         float dt = Time.deltaTime;
         Vector3 camera = CameraSavedPosition();
+        if (coastVersion != CoastlineStore.Version)
+        {
+            coastVersion = CoastlineStore.Version;
+            Clear();
+            expectedShips = EstimateSeaAreaKm2() * ShipsPerKm2;
+            SeedShips(camera);
+        }
         SpawnAircraft(dt, camera);
         SpawnShips(dt, camera);
         for (int i = vehicles.Count - 1; i >= 0; i--)
@@ -251,17 +260,64 @@ public sealed class AmbientVehicleManager : MonoBehaviour
 
     // ---------------------------------------------------------------- 船舶
 
+    /// <summary>
+    /// 外洋の面積 [km²]。マップ矩形を格子でサンプリングし、外洋と判定された点の割合を掛ける。
+    /// 海岸線の世代ごとに一度だけ計算する(点ごとに全リングを走査するため毎フレームは呼ばない)。
+    /// </summary>
+    private float EstimateSeaAreaKm2()
+    {
+        if (!CoastlineStore.HasCoastline) return 0f;
+        float w = terrain.GetMapWidth(), h = terrain.GetMapHeight();
+        int sea = 0;
+        for (int i = 0; i < SeaSampleGrid; i++)
+            for (int j = 0; j < SeaSampleGrid; j++)
+            {
+                var p = new Vector3(-w * .5f + w * (i + .5f) / SeaSampleGrid, 0, -h * .5f + h * (j + .5f) / SeaSampleGrid);
+                if (IsOpenSea(p)) sea++;
+            }
+        return w * h * 1e-6f * sea / (SeaSampleGrid * SeaSampleGrid);
+    }
+
+    /// <summary>都市の読み込み直後から定常状態に近い数にする。ポアソン分布で数を決め、残り寿命は一様にばらす。</summary>
+    private void SeedShips(Vector3 camera)
+    {
+        int count = 0;
+        float threshold = Mathf.Exp(-expectedShips), product = Random.value;
+        while (product > threshold && count < MaxShips) { count++; product *= Random.value; }
+        for (int i = 0; i < count; i++)
+        {
+            var v = TrySpawnShip(camera);
+            if (v != null) v.expiresAt = Time.time + Random.Range(0f, ShipLifetimeMax);
+        }
+    }
+
+    /// <summary>
+    /// 発生率 = 期待値 ÷ 平均寿命 の定常過程。寿命の尽きた船は描画範囲の外に出た時点で消す(目の前で消えない)。
+    /// </summary>
     private void SpawnShips(float dt, Vector3 camera)
     {
         shipTimer -= dt;
         if (shipTimer > 0) return;
-        shipTimer = 2f;
+        shipTimer = ShipSpawnTick;
         int ships = 0;
-        foreach (var existing in vehicles) if (!existing.spec.air) ships++;
-        if (ships >= TargetShips || !CoastlineStore.HasCoastline) return;
+        foreach (var existing in vehicles)
+        {
+            if (existing.spec.air) continue;
+            ships++;
+            if (Time.time > existing.expiresAt && (existing.position - camera).sqrMagnitude > DrawDistance * DrawDistance)
+                existing.dead = true;
+        }
+        if (ships >= MaxShips || expectedShips <= 0f) return;
+        float rate = expectedShips / ((ShipLifetimeMin + ShipLifetimeMax) * .5f);
+        if (Random.value < rate * ShipSpawnTick) TrySpawnShip(camera);
+    }
+
+    private Vehicle TrySpawnShip(Vector3 camera)
+    {
+        if (!CoastlineStore.HasCoastline) return null;
         var spec = PickShipSpec();
         var model = GetModel(spec.model);
-        if (model == null) return;
+        if (model == null) return null;
         float halfW = terrain.GetMapWidth() * .5f + 500f, halfH = terrain.GetMapHeight() * .5f + 500f;
         float need = spec.length * .6f + 150f;
         for (int attempt = 0; attempt < 30; attempt++)
@@ -271,12 +327,13 @@ public sealed class AmbientVehicleManager : MonoBehaviour
             if (!IsOpenSea(p) || Clearance(p) < need) continue;
             var v = new Vehicle { spec = spec, model = model, trail = MakeTrail(spec), position = p,
                                   speed = Random.Range(spec.minSpeed, spec.maxSpeed), routeLength = float.PositiveInfinity,
-                                  heading = Random.Range(0f, 360f) };
+                                  heading = Random.Range(0f, 360f), expiresAt = Time.time + Random.Range(ShipLifetimeMin, ShipLifetimeMax) };
             v.heading = v.targetHeading = ChooseHeading(v);
             v.decisionTimer = DecisionInterval;
             vehicles.Add(v);
-            return;
+            return v;
         }
+        return null;
     }
 
     private static Spec PickShipSpec()

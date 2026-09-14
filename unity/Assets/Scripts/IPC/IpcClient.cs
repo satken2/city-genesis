@@ -91,6 +91,7 @@ public class IpcClient : MonoBehaviour
     public event Action OnEditPropReset;
     public event Action OnGameStart;
     public event Action OnGameEnd;
+    public event Action<float> OnAmbienceVolume;
     public event Action OnWeatherQuery;
     public event Action<string> OnWeatherSet;
     // 接道(front_path)の矢印表示。土地区画詳細パネルの開閉に対応する。
@@ -628,6 +629,10 @@ public class IpcClient : MonoBehaviour
                 case "game:end":
                     Debug.Log("IpcClient: game:end");
                     OnGameEnd?.Invoke();
+                    break;
+
+                case "ambience:volume":
+                    OnAmbienceVolume?.Invoke(GetParamFloat(payload, "volume"));
                     break;
 
                 case "weather:query":
@@ -1217,14 +1222,6 @@ public class IpcClient : MonoBehaviour
         SendEnvelope("weather:state", new Dictionary<string, object>
         {
             ["id"] = id, ["locked"] = locked, ["rain"] = rain, ["presets"] = presets
-        });
-    }
-
-    public void EmitAmbienceCamera(float? heightAboveGround)
-    {
-        SendEnvelope("ambience:camera", new Dictionary<string, object>
-        {
-            ["height_above_ground"] = heightAboveGround
         });
     }
 

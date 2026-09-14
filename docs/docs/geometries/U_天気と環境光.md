@@ -75,15 +75,11 @@ Cockpitは幅800px・高さ76pxの独立したWebViewウィンドウである。
 
 `WeatherRain`はメインカメラ近傍60m四方に限って雨粒を出す。霧雨160粒/秒、雨750粒/秒、大雨1800粒/秒で最大6000粒。`RainStreak.shader`で輪郭をぼかしたストリークを描き、都市の大きさに比例した生成や物理衝突は行わない。カメラの大移動時は残留粒子を消す。ゲーム終了時・コンポーネント無効化時は停止する。雲は静止しているが雨粒は描画上の時間で動く。
 
-音はTauriのCockpitが所有する`WeatherAudio`で1組だけ再生する。プレイ中はベース環境音を常時ループし、地表へ近づくほど近景音を混ぜる。rain=1/2/3のときは対応する雨音を重ねる。切替は約1.5秒以内のゲイン変化で行う。音量はマスター×効果音の設定に従い、ミュートは即時反映する。セッションがなくCockpitを非表示にすると停止し、破棄後に非同期の再生が完了しても再開しない。長い音源をWeb AudioのPCMバッファに一括展開せず、HTMLAudioElementでストリーミングする。
-
-音源は`tauri/src/assets/sounds/weather/*.opus`。FFmpegでOpus 64kbps(モノラル原本の大雨のみ40kbps)へ圧縮し、先頭末尾2秒の等電力クロスフェードと-24 LUFSへの音量調整を施す。5音源の変換物は合計4,983,929 bytes。原本はDownloadsに残し、リポジトリには入れない。再生成は`tauri/tools/prepare_weather_audio.py`、出所と加工記録は音源フォルダのREADMEと`credits.ts`を参照する。
-
-全体の再生構成・高度ミックス・調整箇所は[サウンドシステム](../programs/サウンドシステム.md)を参照。
+環境音と雨音はUnityのCameraAmbienceが再生する。カメラ高度は地表から100m〜10mで近景音を混ぜる。Tauriは音量設定だけを送り、天候の表示と音響は独立する。実装・素材・検証は[サウンドシステム](../programs/サウンドシステム.md)を参照。
 
 ## 検証
 
-Tauri側は`node tools/check_weather_audio.mjs`で音量・雨音切替・設定の非同期競合・セッション終了時の停止・解放を確認する。型検査は`npx tsc --noEmit -p tsconfig.json`、配布アセットの生成は`npx vite build`。実際のWebView2での音量バランスと画面下端のselect操作は本編で確認する。
+Tauri側は`node tools/check_weather_audio.mjs`で音量設定の同期を確認する。型検査は`npx tsc --noEmit -p tsconfig.json`、配布アセットの生成は`npx vite build`。実際のWebView2での音量バランスと画面下端のselect操作は本編で確認する。
 
 `unity/Tests/Weather/run-unity.ps1` は本編のC#をビルドし、`Temp/WeatherUnityQA` の独立したUnityプロジェクトで検証を開始する。本編シーンや実行中の都市は変更しない。完了時の `result.txt` と `qa.log` を確認する。
 

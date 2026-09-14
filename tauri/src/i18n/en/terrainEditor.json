@@ -163,8 +163,11 @@
     "riverListItemCarved": "River {{index}}: {{lengthKm}}km / extent {{areaHa}}ha",
     "riverRecomputePolygon": "Recompute river extents",
     "riverRecomputePolygonHint": "Re-extracts the extent of every carved river (the area below the water surface) from the current terrain. Use after editing the banks by hand",
+    "riverPreviewToggle": "Carve preview (show uncarved rivers at their current depth)",
+    "riverWaterToggle": "Show water surface (off: inspect the river bed)",
+    "riverSelectHint": "Click a row to highlight the river with the same number on the map. Changing the depth coefficient updates the preview; \"Confirm and carve\" writes it into the terrain",
     "riverDepthCoefOne": "Depth Coefficient",
-    "riverCarveOne": "Carve",
+    "riverCarveOne": "Confirm and carve",
     "riverCarveAll": "Carve All Uncarved",
     "riverDeleteOne": "Delete",
     "riverDeleteAll": "Delete All Rivers"

@@ -313,6 +313,7 @@ public class TrackPath : IPathMeshGenerator
         // 道床（body）: 全幅に引き伸ばして配置。高さは道路の body と同じ体系で、
         // 交差点の道床ハル（基準面 + BODY_ABOVE_SPLINE）とも同一平面になる。
         GameObject ballast = RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/body", width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/body");
+        BrickArcadeGenerator.Generate(container, spline, pathData, width);
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[TrackPath] body(道床): {(ballast != null ? "生成成功" : "プレハブなし")}");
 
         // 結合区間では隣の線路との道床の隙間をバラスト帯で埋め、一体の道床に見せる。

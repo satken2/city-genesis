@@ -163,8 +163,11 @@
     "riverListItemCarved": "河流{{index}}：{{lengthKm}}km / 范围{{areaHa}}ha",
     "riverRecomputePolygon": "重新计算河流范围",
     "riverRecomputePolygonHint": "根据当前地形重新提取所有已刻蚀河流的范围（低于水面的区域）。在刻蚀后手动编辑河岸时使用",
+    "riverPreviewToggle": "刻蚀预览（按当前深度显示未刻蚀的河流）",
+    "riverWaterToggle": "显示水面（关闭以查看河床地形）",
+    "riverSelectHint": "点击行可在地图上高亮同编号的河流。更改深度系数会更新预览，“确认并刻蚀”才会真正写入地形",
     "riverDepthCoefOne": "深度系数",
-    "riverCarveOne": "刻蚀",
+    "riverCarveOne": "确认并刻蚀",
     "riverCarveAll": "刻蚀所有未刻蚀的河流",
     "riverDeleteOne": "删除",
     "riverDeleteAll": "删除所有河流"

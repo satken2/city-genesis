@@ -378,3 +378,17 @@
   cursor: not-allowed;
 }
 
+
+/* 川一覧の行。見出し行のクリックで選択し、選択中は左端の実線ブロックで示す(フラット意匠の強調と同じ流儀) */
+.terrain-editor-river-row {
+  padding-left: 6px;
+}
+
+.terrain-editor-river-row-head {
+  cursor: pointer;
+}
+
+.terrain-editor-river-row.is-selected {
+  box-shadow: inset 3px 0 0 #7cc4ff;
+  background-color: rgba(124, 196, 255, 0.08);
+}

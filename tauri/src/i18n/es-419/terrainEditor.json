@@ -163,8 +163,11 @@
     "riverListItemCarved": "Río {{index}}: {{lengthKm}} km / extensión {{areaHa}} ha",
     "riverRecomputePolygon": "Recalcular extensión de ríos",
     "riverRecomputePolygonHint": "Vuelve a extraer la extensión de cada río excavado (área bajo la superficie del agua) a partir del terreno actual. Úsalo tras editar las orillas a mano",
+    "riverPreviewToggle": "Vista previa de excavación (ríos sin excavar a su profundidad actual)",
+    "riverWaterToggle": "Mostrar superficie del agua (apagado: ver el lecho)",
+    "riverSelectHint": "Haz clic en una fila para resaltar el río con el mismo número en el mapa. Cambiar el coeficiente de profundidad actualiza la vista previa; \"Confirmar y excavar\" lo aplica al terreno",
     "riverDepthCoefOne": "Coeficiente de profundidad",
-    "riverCarveOne": "Excavar",
+    "riverCarveOne": "Confirmar y excavar",
     "riverCarveAll": "Excavar todos los pendientes",
     "riverDeleteOne": "Eliminar",
     "riverDeleteAll": "Eliminar todos los ríos"

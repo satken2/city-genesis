@@ -163,8 +163,11 @@
     "riverListItemCarved": "川{{index}}: {{lengthKm}}km / 範囲{{areaHa}}ha",
     "riverRecomputePolygon": "川の範囲を再計算",
     "riverRecomputePolygonHint": "彫り込み済みの川の範囲(水面より低い領域)を現在の地形から取り直します。彫った後に岸を手作業で編集したときに使います",
+    "riverPreviewToggle": "彫り込みプレビュー(未彫り込みの川を今の深さで表示)",
+    "riverWaterToggle": "水面を表示(OFFで川底の地形を見る)",
+    "riverSelectHint": "行をクリックすると地図上の同じ番号の川が強調されます。深さ係数を変えるとプレビューが更新され、「確定して彫る」で実際に地形へ彫り込みます",
     "riverDepthCoefOne": "深さ係数",
-    "riverCarveOne": "彫る",
+    "riverCarveOne": "確定して彫る",
     "riverCarveAll": "未彫り込みをすべて彫る",
     "riverDeleteOne": "削除",
     "riverDeleteAll": "すべての川を削除"

@@ -93,7 +93,7 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     source: "Freesound",
     url: "https://freesound.org/people/klankbeeld/sounds/808956/",
     license: "CC BY 4.0 — https://creativecommons.org/licenses/by/4.0/",
-    note: "Base ambience. Converted to Ogg Opus, loudness normalized and loop crossfaded. License verified 2026-09-13.",
+    note: "Base ambience. Unity ambience. Converted from WAV to Ogg Vorbis, loudness normalized and loop crossfaded. License verified 2026-09-13.",
   },
   {
     title: "City from pasture NL summer 140713_0298.wav",
@@ -102,7 +102,7 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     source: "Freesound",
     url: "https://freesound.org/people/klankbeeld/sounds/242539/",
     license: "CC BY 4.0 — https://creativecommons.org/licenses/by/4.0/",
-    note: "Near-ground city ambience. Converted to Ogg Opus, loudness normalized and loop crossfaded. License verified 2026-09-13.",
+    note: "Near-ground city ambience. Unity ambience. Converted from WAV to Ogg Vorbis, loudness normalized and loop crossfaded. License verified 2026-09-13.",
   },
   {
     title: "Rain with distant traffic",
@@ -111,7 +111,7 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     source: "Freesound",
     url: "https://freesound.org/people/olsonbock623/sounds/442296/",
     license: "CC0 1.0 — https://creativecommons.org/publicdomain/zero/1.0/",
-    note: "Drizzle. Converted to Ogg Opus, loudness normalized and loop crossfaded. License verified 2026-09-13.",
+    note: "Drizzle. Unity ambience. Converted from WAV to Ogg Vorbis, loudness normalized and loop crossfaded. License verified 2026-09-13.",
   },
   {
     title: "Rain_03 (wav-24bit-96khz)",
@@ -120,7 +120,7 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     source: "Freesound",
     url: "https://freesound.org/people/vincefred/sounds/515839/",
     license: "CC0 1.0 — https://creativecommons.org/publicdomain/zero/1.0/",
-    note: "Rain. Original recording includes distant thunder. Converted to Ogg Opus, loudness normalized and loop crossfaded. License verified 2026-09-13.",
+    note: "Rain. Original recording includes distant thunder. Unity ambience. Converted from WAV to Ogg Vorbis, loudness normalized and loop crossfaded. License verified 2026-09-13.",
   },
   {
     title: "Rain without thunder",
@@ -129,7 +129,7 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     source: "Freesound",
     url: "https://freesound.org/people/lebaston100/sounds/346562/",
     license: "CC BY 4.0 — https://creativecommons.org/licenses/by/4.0/",
-    note: "Heavy rain. Converted to Ogg Opus, loudness normalized and loop crossfaded. License verified 2026-09-13.",
+    note: "Heavy rain. Unity ambience. Converted from WAV to Ogg Vorbis, loudness normalized and loop crossfaded. License verified 2026-09-13.",
   },
   {
     title: "Piano loops 204 octave down long loop 120 bpm",

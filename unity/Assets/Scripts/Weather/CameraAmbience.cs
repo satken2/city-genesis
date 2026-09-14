@@ -1,25 +1,77 @@
 using UnityEngine;
 
-/// <summary>環境音用の地表相対高度を通知する。天候描画の有効・無効には依存しない。</summary>
+/// <summary>ベース・近景・雨音をUnityでループ再生する。経済状態は変更しない。</summary>
 public sealed class CameraAmbience : MonoBehaviour
 {
-    private float nextSend;
+    public const float NearHeight = 10f, FarHeight = 100f;
+    private readonly AudioSource[] sources = new AudioSource[5];
+    private readonly float[] gains = new float[5];
+    private IpcClient ipc;
+    private float volume;
+    private bool running;
 
-    private void LateUpdate()
+    private void Awake()
     {
-        if (Time.unscaledTime < nextSend) return;
-        nextSend = Time.unscaledTime + 0.2f;
-        var ipc = IpcClient.Instance;
-        if (ipc == null) return;
-        var camera = Camera.main;
-        float? height = null;
-        if (camera != null && GameStateManager.Instance != null && GameStateManager.Instance.IsGameStarted())
+        string[] names = { "city-base", "drizzle", "rain", "heavy-rain", "city-ambience" };
+        for (int i = 0; i < names.Length; i++)
         {
-            var position = camera.transform.position;
-            height = RelativeHeight(position.y, Utils.GetGroundHeight(position));
+            var holder = new GameObject("Ambience " + names[i]);
+            holder.transform.SetParent(transform, false);
+            var source = holder.AddComponent<AudioSource>();
+            source.playOnAwake = false;
+            source.loop = true;
+            source.spatialBlend = 0f;
+            source.volume = 0f;
+            source.clip = Resources.Load<AudioClip>("Audio/Ambience/" + names[i]);
+            if (source.clip == null) Debug.LogError("Ambience: 音源がありません: " + names[i]);
+            sources[i] = source;
         }
-        // 定期通知により、Cockpitの後起動やIPC再接続でも問い合わせなしで復帰できる。
-        ipc.EmitAmbienceCamera(height);
+    }
+
+    private void Update()
+    {
+        if (ipc != IpcClient.Instance)
+        {
+            if (ipc != null) ipc.OnAmbienceVolume -= SetVolume;
+            ipc = IpcClient.Instance;
+            if (ipc != null) ipc.OnAmbienceVolume += SetVolume;
+        }
+        var camera = Camera.main;
+        bool active = camera != null && GameStateManager.Instance != null && GameStateManager.Instance.IsGameStarted();
+        if (!active) { StopAudio(); return; }
+        var position = camera.transform.position;
+        float proximity = Proximity(RelativeHeight(position.y, Utils.GetGroundHeight(position)));
+        int rain = WeatherController.Instance == null ? 0 : WeatherPreset.All[WeatherController.Instance.CurrentIndex].Rain;
+        for (int i = 0; i < sources.Length; i++)
+        {
+            gains[i] = Mathf.MoveTowards(gains[i], TargetGain(i, proximity, rain), Time.unscaledDeltaTime / 1.5f);
+            sources[i].volume = gains[i] * volume;
+            // ミュート中も再生位置を保ち、天候・高度の変更ではループを再スタートしない。
+            if (!running && sources[i].clip != null) sources[i].Play();
+        }
+        running = true;
+    }
+
+    public void SetVolume(float value)
+    {
+        volume = float.IsNaN(value) || float.IsInfinity(value) ? 0f : Mathf.Clamp01(value);
+        for (int i = 0; i < sources.Length; i++)
+            if (sources[i] != null) sources[i].volume = gains[i] * volume;
+    }
+
+    public static float Proximity(float? height)
+    {
+        if (!height.HasValue || float.IsNaN(height.Value) || float.IsInfinity(height.Value)) return 0f;
+        float t = Mathf.InverseLerp(FarHeight, NearHeight, height.Value);
+        return t * t * (3f - 2f * t);
+    }
+
+    public static float TargetGain(int channel, float proximity, int rain)
+    {
+        if (channel == 0) return 0.5f - 0.3f * proximity;
+        if (channel == 4) return 0.7f * proximity;
+        if (channel != rain) return 0f;
+        return channel == 1 ? 0.4f : channel == 2 ? 0.6f : channel == 3 ? 0.8f : 0f;
     }
 
     public static float? RelativeHeight(float cameraY, float groundY)
@@ -28,5 +80,22 @@ public sealed class CameraAmbience : MonoBehaviour
         return float.IsNaN(height) || float.IsInfinity(height) ? (float?)null : Mathf.Max(0f, height);
     }
 
-    private void OnDisable() => IpcClient.Instance?.EmitAmbienceCamera(null);
+    private void StopAudio()
+    {
+        if (!running) return;
+        for (int i = 0; i < sources.Length; i++) { sources[i].Stop(); sources[i].volume = 0f; gains[i] = 0f; }
+        running = false;
+    }
+
+    private void OnDisable()
+    {
+        StopAudio();
+        if (ipc != null) ipc.OnAmbienceVolume -= SetVolume;
+        ipc = null;
+    }
+
+    private void OnDestroy()
+    {
+        foreach (var source in sources) if (source != null) Destroy(source.gameObject);
+    }
 }

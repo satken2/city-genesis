@@ -110,6 +110,18 @@ public static class PillarQA
             Check(Generate(bridge) == 4, "Reversed registration order has same placement");
             Set(lower, "path_type", 4);
             Check(Generate(bridge) == 4, "Railway below bridge also removes support");
+            var arcadeMaster = Activator.CreateInstance(assembly.GetType("PathMasterItem"));
+            Set(arcadeMaster, "width", 5f); Set(arcadeMaster, "height_editable", true); Set(arcadeMaster, "pillar_spacing", 0f);
+            ((IDictionary)masterType.GetField("pathMasterById", Private).GetValue(master)).Add(404, arcadeMaster);
+            cache.Add("Models/Paths/p404/arcade", GameObject.CreatePrimitive(PrimitiveType.Cube));
+            var arcade = Path(4, new Vector3(-20, 10, 0), new Vector3(20, 10, 0), 404);
+            Set(arcade, "path_type", 4); Call("SavePathToCache", arcade);
+            pending.Clear(); Call("RemovePathFromCache", 2);
+            Check(pending.Contains(4), "Road removal invalidates arcade with zero pillar spacing");
+            pending.Clear(); Call("SavePathToCache", lower);
+            Check(pending.Contains(4), "Road addition invalidates arcade");
+            pending.Clear(); Call("SavePathToCache", moved);
+            Check(pending.Contains(4), "Road move invalidates old arcade neighborhood");
             File.WriteAllText(result, "PASS: Unity pillar placement, add/move/remove, data-only neighbor, LOD invalidation, curve cells, registration order, railway");
             EditorApplication.Exit(0);
         }

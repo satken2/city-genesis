@@ -1,16 +1,16 @@
-"""Freesound原本をループ用Ogg Opusへ変換する。原本は公開リポジトリへコピーしない。"""
+"""Freesound原本をループ用Unity用Ogg Vorbisへ変換する。原本は公開リポジトリへコピーしない。"""
 import argparse
 import json
 import pathlib
 import subprocess
 
-# 末尾はビットレート。環境音は常に低音量で背景に敷くため64kbpsで足り、モノラル原本は半分で足りる。
+# 既存の作者・ライセンスを保持してUnityへ取り込む。
 TRACKS = [
-    ("808956__klankbeeld__city-pasture-den-bosch-nethernlands-1013-am-170328_1113.wav", "city-base", "klankbeeld", "CC BY 4.0", "64k"),
-    ("242539__klankbeeld__city-from-pasture-nl-summer-140713_0298.wav", "city-ambience", "klankbeeld", "CC BY 4.0", "64k"),
-    ("442296__olsonbock623__rain-with-distant-traffic.wav", "drizzle", "olsonbock623", "CC0 1.0", "64k"),
-    ("515839__vincefred__rain_03-wav-24bit-96khz.wav", "rain", "vincefred", "CC0 1.0", "64k"),
-    ("346562__lebaston100__rain-without-thunder.wav", "heavy-rain", "lebaston100", "CC BY 4.0", "40k"),
+    ("808956__klankbeeld__city-pasture-den-bosch-nethernlands-1013-am-170328_1113.wav", "city-base", "klankbeeld", "CC BY 4.0"),
+    ("242539__klankbeeld__city-from-pasture-nl-summer-140713_0298.wav", "city-ambience", "klankbeeld", "CC BY 4.0"),
+    ("442296__olsonbock623__rain-with-distant-traffic.wav", "drizzle", "olsonbock623", "CC0 1.0"),
+    ("515839__vincefred__rain_03-wav-24bit-96khz.wav", "rain", "vincefred", "CC0 1.0"),
+    ("346562__lebaston100__rain-without-thunder.wav", "heavy-rain", "lebaston100", "CC BY 4.0"),
 ]
 
 def main():
@@ -19,9 +19,9 @@ def main():
     parser.add_argument("--ffmpeg", type=pathlib.Path, required=True)
     parser.add_argument("--track", help="指定した出力名だけ変換する（例: city-base）")
     args = parser.parse_args()
-    output = pathlib.Path(__file__).resolve().parents[1] / "src/assets/sounds/weather"
+    output = pathlib.Path(__file__).resolve().parents[1] / "../unity/Assets/Resources/Audio/Ambience"
     output.mkdir(parents=True, exist_ok=True)
-    for filename, key, author, license_name, bitrate in TRACKS:
+    for filename, key, author, license_name in TRACKS:
         if args.track and key != args.track:
             continue
         source = args.source / filename
@@ -35,11 +35,11 @@ def main():
                  "[h]atrim=end=2,asetpts=PTS-STARTPTS[head];"
                  "[tail][head]acrossfade=d=2:c1=qsin:c2=qsin[seam];"
                  "[body][seam]concat=n=2:v=0:a=1,loudnorm=I=-24:TP=-3:LRA=11[out]")
-        target = output / f"{key}.opus"
-        # Opusは常に48kHzで動作するため、サンプリングレートは指定しない。
+        target = output / f"{key}.ogg"
+        # Unityの標準AudioImporterで扱えるVorbisを原本から生成する。
         subprocess.run([str(args.ffmpeg), "-y", "-v", "error", "-i", str(source),
                         "-filter_complex", graph, "-map", "[out]", "-map_metadata", "-1",
-                        "-c:a", "libopus", "-b:a", bitrate, "-vbr", "on", "-application", "audio",
+                        "-ar", "44100", "-c:a", "libvorbis", "-q:a", "3",
                         "-metadata", f"artist={author}", "-metadata", f"copyright={license_name}",
                         "-metadata", f"comment=https://freesound.org/s/{filename.split('__')[0]}/; loop crossfade and loudness normalization",
                         str(target)], check=True)

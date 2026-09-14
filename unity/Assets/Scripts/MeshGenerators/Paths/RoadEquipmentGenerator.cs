@@ -38,7 +38,9 @@ public static class RoadEquipmentGenerator
         var leaves = new Batch(parent, "EquipmentLeaves", MaterialFor("PATH_EQUIPMENT_LEAVES", new Color(0.24f, 0.43f, 0.19f)));
 
         // 電柱を先に確定し、その接続点だけを電線で結ぶ。ボックスは電柱と別の間隔で置く。
-        if (master.utility_mode_allowed && path.utility_mode != Constants.PATH_UTILITY_NONE)
+        // 未舗装路も架空配線を持てるが、地中配線の地上ボックスは置かない。
+        if (master.utility_mode_allowed && path.utility_mode != Constants.PATH_UTILITY_NONE
+            && !(path.path_variant == 201 && path.utility_mode == Constants.PATH_UTILITY_UNDERGROUND))
         {
             bool overhead = path.utility_mode == Constants.PATH_UTILITY_OVERHEAD;
             Vector3? previous = null;
@@ -65,8 +67,10 @@ public static class RoadEquipmentGenerator
         }
         if (master.streetlight_type_allowed && path.streetlight_type == Constants.PATH_EQUIPMENT_STANDARD)
         {
+            // 狭い生活道路は始点から終点へ向かう右側だけで照明をまかなう。
+            int firstSide = path.path_variant == 211 || path.path_variant == 212 ? 1 : -1;
             foreach (float distance in Distances(length, LampSpacing, LampSpacing * 0.25f))
-                for (int side = -1; side <= 1; side += 2)
+                for (int side = firstSide; side <= 1; side += 2)
                 {
                     Pose pose = Sample(spline, distance, offset * side, surface);
                     if (!Reserve(occupied, pose.position, 2f)) continue;
@@ -79,6 +83,18 @@ public static class RoadEquipmentGenerator
         if (master.street_tree_type_allowed && path.street_tree_type == Constants.PATH_EQUIPMENT_STANDARD)
         {
             float spacing = treeSpacing.GetValueOrDefault() > 0f ? treeSpacing.Value : 20f;
+            var centerTree = Prefab("center_tree");
+            float centerWidth = master.center_width.GetValueOrDefault();
+            if (centerTree != null && centerWidth > 0f && length > centerWidth + EndClearance * 2f)
+            {
+                float centerSurface = SurfaceHeight(path, "center");
+                foreach (float distance in Distances(length, spacing, spacing * .5f))
+                {
+                    if (distance < centerWidth * .5f + EndClearance || distance > length - centerWidth * .5f - EndClearance) continue;
+                    Pose pose = Sample(spline, distance, 0f, centerSurface);
+                    if (Reserve(occupied, pose.position, 3f)) PlacePrefab(parent, centerTree, pose);
+                }
+            }
             foreach (float distance in Distances(length, spacing, spacing * 0.5f))
                 for (int side = -1; side <= 1; side += 2)
                 {

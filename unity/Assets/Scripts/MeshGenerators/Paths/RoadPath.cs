@@ -829,7 +829,23 @@ public class RoadPath : IPathMeshGenerator
         // 中央分離帯のパーツがなければ line パーツにフォールバックする。
         if (centerWidth > 0f)
         {
-            GameObject centerObj = CreateSplineMesh(container, spline, $"{variantBase}/center", centerWidth, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/center");
+            float length = spline.CalculateLength();
+            bool rounded = PathDrawContext.ResolvePrefab($"{variantBase}/center_start", $"{typeBase}/center_start", out _) != null
+                && PathDrawContext.ResolvePrefab($"{variantBase}/center_end", $"{typeBase}/center_end", out _) != null;
+            double from = rounded ? ClampSplinePercent(spline.Travel(0, centerWidth * .5f, Spline.Direction.Forward)) : 0;
+            double to = rounded ? ClampSplinePercent(spline.Travel(1, centerWidth * .5f, Spline.Direction.Backward)) : 1;
+            // 短い切断区間へ半円を重ねず、通行口を空ける。LODの境界には新しい端部を作らない。
+            bool fits = !rounded || length > centerWidth + .1f;
+            GameObject centerObj = fits ? CreateSplineMesh(container, spline, $"{variantBase}/center", centerWidth, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/center", clipFrom: from, clipTo: to) : null;
+            if (rounded && fits)
+            {
+                if (PathDrawContext.IntersectDetailRange(0, from, out _, out _))
+                    CreateSplineMesh(container, spline, $"{variantBase}/center_start", centerWidth, 0f, RoadPartHeights.BODY_ABOVE_SPLINE,
+                    fallbackPrefabName: $"{typeBase}/center_start", clipFrom: 0, clipTo: from, maxTileLength: 0, singleSpan: true);
+                if (PathDrawContext.IntersectDetailRange(to, 1, out _, out _))
+                    CreateSplineMesh(container, spline, $"{variantBase}/center_end", centerWidth, 0f, RoadPartHeights.BODY_ABOVE_SPLINE,
+                    fallbackPrefabName: $"{typeBase}/center_end", clipFrom: to, clipTo: 1, maxTileLength: 0, singleSpan: true);
+            }
             if (centerObj == null && hasLine)
             {
                 UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[RoadPath] center パーツなし。line にフォールバック。");
@@ -893,6 +909,7 @@ public class RoadPath : IPathMeshGenerator
         }
 
         RoadEquipmentGenerator.Generate(container, spline, pathData, width, sidewalkWidth, treeSpacing);
+        SuspensionBridgeGenerator.Generate(container, spline, pathData, width);
 
         // 柱
         // 地下パス（負の相対Yを持つ）は路面が地面より低く、路面支持の柱は不要なので配置しない

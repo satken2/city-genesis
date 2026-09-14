@@ -3434,7 +3434,8 @@ public class PathManager : BaseApiDataManager
         {
             if (!pathDataCache.TryGetValue(id, out var neighbor)) continue;
             var master = MasterDataStore.Instance?.GetPathMaster(neighbor.path_variant);
-            if (!(master?.height_editable ?? false) || (master.pillar_spacing ?? 0f) <= 0f) continue;
+            if (!(master?.height_editable ?? false)
+                || ((master.pillar_spacing ?? 0f) <= 0f && !BrickArcadeGenerator.HasArcade(neighbor))) continue;
             if (!pendingPillarRebuildIds.Add(id)) continue;
             InvalidateTerrainFollowPath(neighbor);
             geometryRevisions.TryGetValue(id, out int revision);

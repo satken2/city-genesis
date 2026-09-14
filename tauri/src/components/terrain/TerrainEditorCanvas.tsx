@@ -1055,18 +1055,30 @@ function strokeCameraMarker(
   }
   ctx.restore();
 }
+/** strokeRivers に渡す表示オプション(彫り込みプレビュー・水面表示・選択中の川)。 */
+type RiverDrawOptions = {
+  /** 未彫り込みの川の、プレビュー地形上で抽出した範囲ポリゴン(川ID→範囲)。プレビュー無効なら空 */
+  previewPolygons: ReadonlyMap<string, WaterPolygonGeoJson | null>;
+  /** false なら範囲ポリゴンの水面塗りを描かない(川底の地形を見るため) */
+  waterVisible: boolean;
+  /** 一覧で選択中の川ID(強調表示)。null なら無し */
+  selectedId: string | null;
+};
 
 /**
  * 川を2Dキャンバスへ描画する。draw() 内でビュー変換適用後に呼ぶ。
- * 彫り込み済みの川は「範囲ポリゴンの水面塗り(穴=中州は抜く) + 細い水面プロファイル線」で、
- * ゲーム本体でどの範囲に水面が描かれるかをそのまま示す。範囲が未抽出の彫り込み済みの川
- * (異常系)は中心線だけを描く。未彫り込み(計算直後)の川は明るい水色の破線で、川幅の帯を
- * 平均幅で近似して描く(セグメントごとに lineWidth を変えるとストローク回数が点数分に増えるため)。
+ * - 彫り込み済みの川: 範囲ポリゴンの水面塗り(穴=中州は抜く) + 細い水面プロファイル線。
+ *   ゲーム本体でどの範囲に水面が描かれるかをそのまま示す。範囲が未抽出(異常系)は中心線だけ。
+ * - 未彫り込みの川: 明るい水色の破線。彫り込みプレビュー中はプレビュー地形で抽出した範囲を
+ *   やや薄い水面色で塗る(彫り込み済みと区別する)。
+ * - 各川の源流点に一覧と同じ番号を描き、どの線がどの川かを対応づける。番号のフォントは
+ *   ズームに追従して画面上でほぼ一定の大きさになる。選択中の川は線を太く明るくする。
  */
 function strokeRivers(
   ctx: CanvasRenderingContext2D,
   rivers: EditorRiver[],
   lineWidth: number,
+  options: RiverDrawOptions,
 ): void {
   const buildPath = (river: EditorRiver): { path: Path2D; avgWidth: number } | null => {
     if (river.points.length < 2) return null;
@@ -1079,25 +1091,31 @@ function strokeRivers(
     }
     return { path, avgWidth: widthSum / (river.points.length - 1) };
   };
+  const buildFill = (polygon: WaterPolygonGeoJson): Path2D => {
+    const fill = new Path2D();
+    for (const part of polygonParts(polygon)) {
+      for (const ring of part) {
+        if (ring.length < 3) continue;
+        fill.moveTo(ring[0][0], ring[0][1]);
+        for (let i = 1; i < ring.length; i++) fill.lineTo(ring[i][0], ring[i][1]);
+        fill.closePath();
+      }
+    }
+    return fill;
+  };
 
   ctx.lineJoin = "round";
   ctx.lineCap = "round";
 
-  for (const river of rivers) {
+  rivers.forEach((river, index) => {
     const built = buildPath(river);
-    if (!built) continue;
+    if (!built) return;
+    const selected = river.id === options.selectedId;
+    const emphasis = selected ? 2 : 1;
     if (river.carved) {
       // 彫り込み済み: 範囲ポリゴン(穴込み)を水面色で塗る。even-odd で穴を抜く
-      if (river.polygon) {
-        const fill = new Path2D();
-        for (const part of polygonParts(river.polygon)) {
-          for (const ring of part) {
-            if (ring.length < 3) continue;
-            fill.moveTo(ring[0][0], ring[0][1]);
-            for (let i = 1; i < ring.length; i++) fill.lineTo(ring[i][0], ring[i][1]);
-            fill.closePath();
-          }
-        }
+      if (river.polygon && options.waterVisible) {
+        const fill = buildFill(river.polygon);
         ctx.fillStyle = "rgba(60,140,220,0.45)";
         ctx.fill(fill, "evenodd");
         ctx.strokeStyle = "rgba(120,200,255,0.9)";
@@ -1106,23 +1124,50 @@ function strokeRivers(
         ctx.stroke(fill);
       }
       // 水面プロファイル線(範囲の中心を通る流路)
-      ctx.strokeStyle = river.polygon ? "rgba(40,110,220,0.6)" : "rgba(255,140,40,0.9)";
-      ctx.lineWidth = lineWidth * 0.75;
+      ctx.strokeStyle = river.polygon ? `rgba(40,110,220,${selected ? 0.95 : 0.6})` : "rgba(255,140,40,0.9)";
+      ctx.lineWidth = lineWidth * 0.75 * emphasis;
       ctx.setLineDash([]);
       ctx.stroke(built.path);
     } else {
-      // 未彫り込み: 明るい水色の破線(まだ地形を変更していないことを示す)
-      ctx.strokeStyle = "rgba(120,200,255,0.25)";
-      ctx.lineWidth = Math.max(built.avgWidth, lineWidth);
-      ctx.setLineDash([]);
-      ctx.stroke(built.path);
-      ctx.strokeStyle = "rgba(120,220,255,0.95)";
-      ctx.lineWidth = lineWidth;
+      // 未彫り込み: プレビュー範囲(あれば)を薄い水面色で塗り、明るい水色の破線で流路を示す
+      const previewPolygon = options.previewPolygons.get(river.id);
+      if (previewPolygon && options.waterVisible) {
+        const fill = buildFill(previewPolygon);
+        ctx.fillStyle = "rgba(90,190,240,0.35)";
+        ctx.fill(fill, "evenodd");
+        ctx.strokeStyle = "rgba(150,225,255,0.8)";
+        ctx.lineWidth = lineWidth * 0.75;
+        ctx.setLineDash([]);
+        ctx.stroke(fill);
+      } else {
+        ctx.strokeStyle = "rgba(120,200,255,0.25)";
+        ctx.lineWidth = Math.max(built.avgWidth, lineWidth);
+        ctx.setLineDash([]);
+        ctx.stroke(built.path);
+      }
+      ctx.strokeStyle = selected ? "rgba(255,255,255,0.95)" : "rgba(120,220,255,0.95)";
+      ctx.lineWidth = lineWidth * emphasis;
       ctx.setLineDash([lineWidth * 4, lineWidth * 3]);
       ctx.stroke(built.path);
       ctx.setLineDash([]);
     }
-  }
+
+    // 番号ラベル(源流点)。一覧の「川N」と同じ番号。円で背景を敷いて地形の上でも読めるようにする
+    const head = river.points[0];
+    const radius = lineWidth * 6 * (selected ? 1.25 : 1);
+    ctx.beginPath();
+    ctx.arc(head.x, head.z, radius, 0, Math.PI * 2);
+    ctx.fillStyle = selected ? "rgba(255,255,255,0.95)" : river.carved ? "rgba(40,110,220,0.9)" : "rgba(20,120,200,0.9)";
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,0.9)";
+    ctx.lineWidth = lineWidth * 0.75;
+    ctx.stroke();
+    ctx.fillStyle = selected ? "#10305a" : "#ffffff";
+    ctx.font = `bold ${lineWidth * 8}px sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(String(index + 1), head.x, head.z);
+  });
 }
 
 export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
@@ -1320,6 +1365,22 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       areaHa: number | null;
     }[]
   >([]);
+  // --- 彫り込みプレビュー ---
+  // 未彫り込みの川を「今の深さ係数で彫ったらこうなる」を、実際の標高データ(elevRef)を変えずに
+  // 表示するための仕組み。previewElevRef は elevRef のコピーに未彫り込みの川を彫った表示用配列で、
+  // テクスチャ・等高線・3Dプレビューはこれがあればこちらを表示する(displayElev)。
+  // previewPolygonsRef はプレビュー地形上で抽出した未彫り込みの川の範囲(水面表示用)。
+  // 実際の彫り込み(確定)は従来どおり carveRiverObjects が elevRef へ行う。
+  const previewElevRef = useRef<Float32Array | null>(null);
+  const previewPolygonsRef = useRef<Map<string, WaterPolygonGeoJson | null>>(new Map());
+  const previewRebuildTimerRef = useRef<number | null>(null);
+  const [riverPreviewEnabled, setRiverPreviewEnabled] = useState(true);
+  const riverPreviewEnabledRef = useRef(true);
+  const [riverWaterVisible, setRiverWaterVisible] = useState(true);
+  const riverWaterVisibleRef = useRef(true);
+  const [selectedRiverId, setSelectedRiverId] = useState<string | null>(null);
+  const selectedRiverIdRef = useRef<string | null>(null);
+  const activeTabRef = useRef<"terrain" | "water" | "river" | "resource" | "camera">("terrain");
 
   // --- 地図メタデータ(保存欄) ---
   // map_width/map_height/near_spacing/grid_rows/grid_cols は標高データのグリッド構造そのものと
@@ -1424,6 +1485,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     restoreResourceAreas(target.resourceAreas);
     restoreCamera(target.camera);
     rebuildTerrainVisuals(target.elev, target.mapWidth, target.mapHeight, target.spacing, target.rows, target.cols);
+    // 復元後の川リスト・地形で彫り込みプレビューを作り直す(川編集タブ以外では解除される)
+    scheduleRiverPreviewRebuild();
   }
 
   /** Redo スタックから状態を復元する。現在の状態は Undo スタックに退避する。 */
@@ -1452,6 +1515,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     restoreResourceAreas(target.resourceAreas);
     restoreCamera(target.camera);
     rebuildTerrainVisuals(target.elev, target.mapWidth, target.mapHeight, target.spacing, target.rows, target.cols);
+    // 復元後の川リスト・地形で彫り込みプレビューを作り直す(川編集タブ以外では解除される)
+    scheduleRiverPreviewRebuild();
   }
 
   // ポインタイベントハンドラは status が変わった時にしか張り直さないため、常に最新の
@@ -1742,7 +1807,11 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     );
 
     // 川。彫り込み済みは濃青の帯+中心線、未彫り込み(計算直後)は水色の破線。
-    strokeRivers(ctx, riversRef.current, previewLineW);
+    strokeRivers(ctx, riversRef.current, previewLineW, {
+      previewPolygons: previewPolygonsRef.current,
+      waterVisible: riverWaterVisibleRef.current,
+      selectedId: selectedRiverIdRef.current,
+    });
 
     // 天然資源エリア。確定済みは常に表示し、作図中の頂点は資源編集タブのときだけ追従表示する。
     strokeResourceAreas(
@@ -1770,9 +1839,18 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
    * marching squares はセル数に比例するコストなので、ドラッグ中は行わず「適用」実行時
    * など標高が確定したタイミング、またはズーム操作が落ち着いたタイミングでのみ呼ぶ。
    */
+  /**
+   * 表示に使う標高配列。彫り込みプレビュー中はプレビュー配列、それ以外は実データ。
+   * テクスチャの全域塗り直し・等高線・3Dプレビュー送信はこれを読む(実データを書き換える
+   * 編集処理は必ず elevRef を直接使うこと)。
+   */
+  function displayElev(): Float32Array | null {
+    return previewElevRef.current ?? elevRef.current;
+  }
+
   function rebuildContoursAtCurrentZoom() {
     const s = settingsRef.current;
-    const elev = elevRef.current;
+    const elev = displayElev();
     if (!s || !elev) return;
     const interval = pickContourIntervalForZoom(baseIntervalRef.current, baseZoomRef.current, viewRef.current.zoom);
     contourIntervalRef.current = interval;
@@ -1803,7 +1881,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
    */
   function emitTerrain3dFullState() {
     const s = settingsRef.current;
-    const elev = elevRef.current;
+    const elev = displayElev();
     const mask = selectionMaskRef.current;
     if (!s || !elev || !mask) return;
     const fullRect: GridRect = { rMin: 0, rMax: s.rows - 1, cMin: 0, cMax: s.cols - 1 };
@@ -1819,7 +1897,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       elevBase64: uint8ToBase64(encodeFloat16Array(elev)),
       maskBase64: uint8ToBase64(quantizeMaskRect(mask, s.cols, fullRect)),
       waterSurfaces: serializeWaterSurfacesForPreview(),
-      rivers: serializeRivers(),
+      rivers: serializeRiversForDisplay(),
     };
     void emit(EVT_TERRAIN_3D_FULL_STATE, payload);
   }
@@ -1938,7 +2016,13 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
    * 未彫り込みの川はタブを離れても破棄しない(一覧から個別に彫る途中の状態を保つため)。
    */
   function handleTabChange(tab: "terrain" | "water" | "river" | "resource" | "camera") {
+    const leavingRiver = activeTabRef.current === "river" && tab !== "river";
+    activeTabRef.current = tab;
     setActiveTab(tab);
+    // 彫り込みプレビューは川編集タブでだけ表示する。他のタブでは実データ(elevRef)への編集が
+    // 走るため、プレビュー配列が表示に残ると編集結果が見えなくなる。
+    if (leavingRiver) clearRiverPreview();
+    if (tab === "river") scheduleRiverPreviewRebuild();
     setWaterMode(tab === "water");
     setResourceMode(tab === "resource");
     setCameraMode(tab === "camera");
@@ -2349,6 +2433,135 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     emitTerrain3dFullState();
   }
 
+  /* ============================================================================
+   * 彫り込みプレビュー
+   *
+   * 未彫り込みの川を、実データを変えずに「今の深さ係数で彫った地形」として表示する。
+   * 深さ係数のステッパーを動かすたびに作り直し、気に入ったら「確定して彫る」で実データへ
+   * 反映する。水面表示を切ると範囲の塗りと3Dの水面が消え、川底の地形だけが見える。
+   * ========================================================================== */
+
+  /** 表示中の標高(実データまたはプレビュー)でテクスチャ全域・等高線・3Dプレビューを更新する */
+  function refreshDisplayedTerrain() {
+    const s = settingsRef.current;
+    const elev = displayElev();
+    if (!s || !elev) return;
+    const fullRect: DirtyRect = { rMin: 0, rMax: s.rows - 1, cMin: 0, cMax: s.cols - 1 };
+    if (terrainImageDataRef.current && terrainCtxRef.current) {
+      refreshTerrainTexture(fullRect, elev, s.cols, s.minLand, s.maxLand, terrainImageDataRef.current, terrainCtxRef.current);
+    }
+    rebuildContoursAtCurrentZoom();
+    emitTerrain3dFullState();
+  }
+
+  /**
+   * 彫り込みプレビューを作り直す。未彫り込みの川が無い/プレビュー無効/川編集タブ以外なら解除する。
+   * 実データのコピーに未彫り込みの川を各自の深さ係数で彫り、その地形で範囲ポリゴンを抽出する
+   * (彫り込み済みの川は既存の範囲を種にして先に領域を取り、合流部の重なりを除く)。
+   */
+  function rebuildRiverPreview() {
+    const s = settingsRef.current;
+    const elev = elevRef.current;
+    if (!s || !elev) return;
+    const uncarved = riversRef.current.filter((river) => !river.carved);
+    if (!riverPreviewEnabledRef.current || activeTabRef.current !== "river" || uncarved.length === 0) {
+      previewElevRef.current = null;
+      previewPolygonsRef.current = new Map();
+      // 実データ表示へ戻す。彫り込み確定直後(実データが変わった)にもここを通るため、
+      // プレビューの有無にかかわらずテクスチャ全域を塗り直す
+      refreshDisplayedTerrain();
+      return;
+    }
+    const preview = new Float32Array(elev);
+    for (const river of uncarved) applyRiverDepth(river, river.depthCoef);
+    carveRivers(preview, s.rows, s.cols, s.spacing, s.mapWidth, s.mapHeight, uncarved);
+
+    const claimed = new Uint8Array(s.rows * s.cols);
+    const lakes = serializeWaterSurfaces();
+    const ordered = riversRef.current
+      .slice()
+      .sort((a, b) => (b.points[b.points.length - 1]?.q ?? 0) - (a.points[a.points.length - 1]?.q ?? 0));
+    const polygons = new Map<string, WaterPolygonGeoJson | null>();
+    for (const river of ordered) {
+      if (river.carved) {
+        if (river.polygon) {
+          buildRiverPolygon(preview, s.rows, s.cols, s.spacing, s.mapWidth, s.mapHeight, river,
+            { kind: "polygon", polygon: river.polygon }, claimed, lakes);
+        }
+        continue;
+      }
+      polygons.set(river.id, buildRiverPolygon(
+        preview, s.rows, s.cols, s.spacing, s.mapWidth, s.mapHeight, river, { kind: "spline" }, claimed, lakes,
+      ));
+    }
+    previewElevRef.current = preview;
+    previewPolygonsRef.current = polygons;
+    refreshDisplayedTerrain();
+  }
+
+  /** プレビューの再構築をデバウンスして予約する(ステッパー連打で毎回全域を彫り直さないため) */
+  function scheduleRiverPreviewRebuild() {
+    if (previewRebuildTimerRef.current != null) window.clearTimeout(previewRebuildTimerRef.current);
+    previewRebuildTimerRef.current = window.setTimeout(() => {
+      previewRebuildTimerRef.current = null;
+      rebuildRiverPreview();
+    }, 150);
+  }
+
+  /** 彫り込みプレビューを解除し、実データの表示へ戻す */
+  function clearRiverPreview() {
+    if (previewRebuildTimerRef.current != null) {
+      window.clearTimeout(previewRebuildTimerRef.current);
+      previewRebuildTimerRef.current = null;
+    }
+    if (previewElevRef.current === null) return;
+    previewElevRef.current = null;
+    previewPolygonsRef.current = new Map();
+    refreshDisplayedTerrain();
+  }
+
+  /**
+   * 2D/3Dプレビューの表示に使う川の一覧。保存用(serializeRivers)と違い、水面表示が OFF なら空、
+   * ON なら彫り込み済みの川に加えて未彫り込みの川のプレビュー範囲も含める。
+   */
+  function serializeRiversForDisplay(): RiverPayload[] {
+    if (!riverWaterVisibleRef.current) return [];
+    const result = serializeRivers();
+    for (const river of riversRef.current) {
+      if (river.carved) continue;
+      const polygon = previewPolygonsRef.current.get(river.id);
+      if (!polygon) continue;
+      result.push({
+        id: river.id,
+        kind: "river",
+        polygon,
+        profile: river.points.map((p) => [p.x, p.waterY, p.z]),
+      });
+    }
+    return result;
+  }
+
+  function handleRiverPreviewToggle(enabled: boolean) {
+    riverPreviewEnabledRef.current = enabled;
+    setRiverPreviewEnabled(enabled);
+    rebuildRiverPreview();
+  }
+
+  function handleRiverWaterVisibleToggle(visible: boolean) {
+    riverWaterVisibleRef.current = visible;
+    setRiverWaterVisible(visible);
+    draw();
+    emitTerrain3dFullState();
+  }
+
+  /** 一覧の行クリック: 川を選択して2Dキャンバス上で強調表示する(同じ行の再クリックで解除) */
+  function selectRiver(id: string) {
+    const next = selectedRiverIdRef.current === id ? null : id;
+    selectedRiverIdRef.current = next;
+    setSelectedRiverId(next);
+    draw();
+  }
+
   /** 川リストを丸ごと差し替える(Undo/Redo の復元用) */
   function restoreRivers(rivers: EditorRiver[]) {
     riversRef.current = rivers;
@@ -2396,6 +2609,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     });
     syncRiverListState();
     draw();
+    // 新しい未彫り込みの川を、今の深さ係数で彫ったプレビューとして表示する
+    rebuildRiverPreview();
   }
 
   /**
@@ -2406,12 +2621,9 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
    */
   function finishRiverCarve(s: TerrainSettings, elev: Float32Array) {
     recomputeRiverPolygons(s, elev);
-    const fullRect: DirtyRect = { rMin: 0, rMax: s.rows - 1, cMin: 0, cMax: s.cols - 1 };
-    if (terrainImageDataRef.current && terrainCtxRef.current) {
-      refreshTerrainTexture(fullRect, elev, s.cols, s.minLand, s.maxLand, terrainImageDataRef.current, terrainCtxRef.current);
-    }
-    rebuildContoursAtCurrentZoom();
-    emitTerrain3dFullState();
+    // 残った未彫り込みの川のプレビューを新しい実データの上で作り直す(無ければ実データ表示へ戻る)。
+    // どちらの経路でもテクスチャ全域・等高線・3Dプレビューが更新される。
+    rebuildRiverPreview();
   }
 
   /**
@@ -2463,6 +2675,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     if (!river || river.carved) return;
     river.depthCoef = depthCoef;
     syncRiverListState();
+    // 深さを変えたら彫り込みプレビューを作り直す(連打はデバウンス)
+    scheduleRiverPreviewRebuild();
   }
 
   /**
@@ -2473,16 +2687,16 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   function removeRiver(id: string) {
     riversRef.current = riversRef.current.filter((river) => river.id !== id);
     syncRiverListState();
-    draw();
-    emitTerrain3dFullState();
+    // 削除した川のプレビュー彫り込みも消す(残りの川で作り直す)
+    rebuildRiverPreview();
   }
 
   /** 川をすべて削除する(地形は戻さない) */
   function clearAllRivers() {
     riversRef.current = [];
     syncRiverListState();
-    draw();
-    emitTerrain3dFullState();
+    // 削除した川のプレビュー彫り込みも消す(残りの川で作り直す)
+    rebuildRiverPreview();
   }
 
   /**
@@ -4275,9 +4489,41 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                               "削除は川のデータ(水面・保存対象)のみで、彫り込み済みの地形は戻しません。地形も戻す場合は Ctrl+Z を使ってください",
                           })}
                         </div>
+                        {/* 彫り込みプレビューと水面表示の切り替え(表示だけで実データは変えない) */}
+                        <div className="terrain-editor-param-row">
+                          <span className="terrain-editor-param-label">
+                            {t("terrainEditor.riverPreviewToggle", { defaultValue: "彫り込みプレビュー(未彫り込みの川を今の深さで表示)" })}
+                          </span>
+                          <input
+                            type="checkbox"
+                            checked={riverPreviewEnabled}
+                            onChange={(e) => handleRiverPreviewToggle(e.target.checked)}
+                            disabled={status !== "ready"}
+                          />
+                        </div>
+                        <div className="terrain-editor-param-row">
+                          <span className="terrain-editor-param-label">
+                            {t("terrainEditor.riverWaterToggle", { defaultValue: "水面を表示(OFFで川底の地形を見る)" })}
+                          </span>
+                          <input
+                            type="checkbox"
+                            checked={riverWaterVisible}
+                            onChange={(e) => handleRiverWaterVisibleToggle(e.target.checked)}
+                            disabled={status !== "ready"}
+                          />
+                        </div>
+                        <div className="terrain-editor-hint">
+                          {t("terrainEditor.riverSelectHint", {
+                            defaultValue: "行をクリックすると地図上の同じ番号の川が強調されます。深さ係数を変えるとプレビューが更新され、「確定して彫る」で実際に地形へ彫り込みます",
+                          })}
+                        </div>
                         {riverList.map((river, idx) => (
-                          <div key={river.id} className="terrain-editor-param-group">
-                            <div className="terrain-editor-param-row">
+                          <div
+                            key={river.id}
+                            className={`terrain-editor-param-group terrain-editor-river-row${river.id === selectedRiverId ? " is-selected" : ""}`}
+                          >
+                            {/* 見出し行のクリックで選択(ステッパー・ボタンの操作で選択が切り替わらないよう見出し行だけに付ける) */}
+                            <div className="terrain-editor-param-row terrain-editor-river-row-head" onClick={() => selectRiver(river.id)}>
                               <span className="terrain-editor-param-label">
                                 {river.carved
                                   ? t("terrainEditor.riverListItemCarved", {
@@ -4326,7 +4572,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                                   disabled={status !== "ready"}
                                   onClick={() => carveOneRiver(river.id)}
                                 >
-                                  {t("terrainEditor.riverCarveOne", { defaultValue: "彫る" })}
+                                  {t("terrainEditor.riverCarveOne", { defaultValue: "確定して彫る" })}
                                 </button>
                               )}
                               <button

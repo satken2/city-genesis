@@ -372,7 +372,7 @@ world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地�
 `edit_path:update_shape` は `can_confirm` を常送します。これはUnityの形状確定状態とローカル交差検証（立体交差と川の横断）を合わせた真偽値で、形状が未確定または干渉中ならfalseです。Tauriはこの値だけで確定を許可せず、同じ全線ペイロードの `/paths/validate` 応答も照合します。既存の `world:highlight_objects` によるパス・建物の警告は、メッシュ着色ではなく半透明の占有箱として描画します。同イベントの params には `colliding_river_ids`（地表レベルで横切っている川のID文字列の配列。`/paths/validate` と `/paths/interference` の同名フィールドをそのまま渡す）も含み、Unity は該当する川の範囲を同じ占有箱で示します。
 # 天候の表示と選択
 
-環境音のカメラ連携には別イベント`ambience:camera {height_above_ground: number | null}`（Unity→Cockpit）を使う。`CameraAmbience`が地表相対高度(m)を0.2秒ごとに送り、ゲーム外や取得不可はnull。RustはCockpitだけへ中継する。Tauriの`WeatherAudio`は2秒間未受信なら近景音を消してベースへ戻す。経済APIへの書き込みはない。ミックスの詳細は[サウンドシステム](サウンドシステム.md)を参照。
+`ambience:volume {volume}`はTauri→Unityの音量通知（master×sfx、0〜1）。Cockpitが設定変更時と2秒ごとに送り、CameraAmbienceが所有するAudioSourceへ適用する。高度と天候の音響制御はUnity内で完結する。
 
 天候の正はUnityにあり、バックエンドへの書き込みや経済パラメータは追加しない。Cockpitは購読後に問い合わせ、応答した天候に合わせて表示と環境音を更新する。
 

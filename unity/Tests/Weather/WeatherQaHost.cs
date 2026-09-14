@@ -16,9 +16,8 @@ public class IpcClient : MonoBehaviour
     public int Rain;
     public bool Locked;
     public object[] Presets;
-    public float? CameraHeight;
-    public int CameraPublishes;
-    public void EmitAmbienceCamera(float? height) { CameraHeight = height; CameraPublishes++; }
+    public event Action<float> OnAmbienceVolume;
+    public void Volume(float value) => OnAmbienceVolume?.Invoke(value);
     public void EmitWeatherState(string id, bool locked, int rain, object[] presets)
     { Publishes++; WeatherId = id; Locked = locked; Rain = rain; Presets = presets; }
     public void QueryWeather() => OnWeatherQuery?.Invoke();
@@ -135,15 +134,30 @@ public sealed class WeatherQaHost : MonoBehaviour
         var camera = new GameObject("Camera").AddComponent<Camera>(); camera.tag = "MainCamera";
         camera.transform.position = new Vector3(220,95,-230); camera.transform.LookAt(new Vector3(0,28,70));
         camera.clearFlags = CameraClearFlags.Skybox; camera.farClipPlane = 8000;
+        camera.gameObject.AddComponent<AudioListener>();
         var ambience = new GameObject("Camera ambience").AddComponent<CameraAmbience>();
-        Utils.GroundHeight = 70;
+        Utils.GroundHeight = 85;
         yield return null;
-        yield return new WaitForSecondsRealtime(0.25f);
-        Check(ipc.CameraHeight == 25, "camera height is relative to terrain, not sea level");
-        Check(CameraAmbience.RelativeHeight(5, 10) == 0, "below ground clamps to zero");
-        Check(CameraAmbience.RelativeHeight(float.NaN, 10) == null, "invalid terrain height is unavailable");
+        ipc.Volume(0.5f);
+        yield return new WaitForSecondsRealtime(1.6f);
+        var sounds = ambience.GetComponentsInChildren<AudioSource>();
+        Check(sounds.Length == 5, "five Unity ambience channels");
+        foreach (var sound in sounds)
+        {
+            Check(sound.clip != null && sound.clip.loadType == AudioClipLoadType.Streaming, "streaming clip imports");
+            Check(sound.loop && sound.spatialBlend == 0f, "ambient bed is looping 2D audio");
+        }
+        Check(Mathf.Approximately(sounds[0].volume, 0.1f) && Mathf.Approximately(sounds[4].volume, 0.35f), "ten metres mixes near over base");
+        Utils.GroundHeight = -5;
+        yield return new WaitForSecondsRealtime(1.6f);
+        Check(sounds[4].volume == 0 && Mathf.Approximately(sounds[0].volume, 0.25f), "one hundred metres is base only");
+        Check(CameraAmbience.Proximity(55) == 0.5f, "fifty-five metres is halfway");
+        Check(CameraAmbience.TargetGain(1, 0, 1) == 0.4f && CameraAmbience.TargetGain(2, 0, 1) == 0, "rain channels exclusive");
+        Check(CameraAmbience.Proximity(float.NaN) == 0, "invalid height uses base");
+        ipc.Volume(0);
+        foreach (var sound in sounds) Check(sound.volume == 0, "mute immediate");
         ambience.enabled = false;
-        Check(ipc.CameraHeight == null, "disabled camera ambience clears near mix");
+        foreach (var sound in sounds) Check(!sound.isPlaying, "disable stops sound");
         Utils.GroundHeight = 0;
         camera.GetUniversalAdditionalCameraData().renderPostProcessing = true;
         camera.targetTexture = new RenderTexture(1280,720,24,RenderTextureFormat.ARGB32);

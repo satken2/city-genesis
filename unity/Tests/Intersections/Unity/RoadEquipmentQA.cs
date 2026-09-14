@@ -73,12 +73,12 @@ public static class RoadEquipmentQA
     static void CheckRoad(int variant, float grade, float sign, int utilityMode)
     {
         int type = variant / 100;
-        float width = variant == 231 ? 24 : variant == 221 || variant == 222 ? 12 : 7;
+        float width = variant == 231 ? 24 : variant == 221 || variant == 222 ? 12 : variant == 201 || variant == 211 ? 3 : variant == 212 ? 6 : 7;
         float sidewalk = variant == 231 ? 3 : variant == 221 || variant == 222 ? 2.5f : 0;
         var item = Activator.CreateInstance(itemType);
         Set(item, "width", width); Set(item, "sidewalk_width", sidewalk); Set(item, "lanes", 2);
         Set(item, "follow_terrain", false);
-        Set(item, "streetlight_type_allowed", true);
+        Set(item, "streetlight_type_allowed", variant != 201);
         Set(item, "street_tree_type_allowed", sidewalk > 0);
         Set(item, "fence_type_allowed", sidewalk > 0);
         Set(item, "utility_mode_allowed", type == 2);
@@ -101,6 +101,18 @@ public static class RoadEquipmentQA
             rebuild.Invoke(component, rebuild.GetParameters().Length == 0 ? null : new object[] { true });
         }
         var surfaces = road.GetComponentsInChildren<MeshFilter>().Where(f => f.name.EndsWith("/body") || f.name.EndsWith("/sidewalk")).ToArray();
+        var lamps = road.GetComponentsInChildren<MeshFilter>().Where(f => f.name.StartsWith("streetlight")).ToArray();
+        if (variant == 201)
+        {
+            Require(!road.GetComponentsInChildren<MeshFilter>().Any(f =>
+                new[] { "streetlight", "utility_box" }.Any(n => f.name.StartsWith(n))), "Unpaved road lamps and boxes must be absent");
+            Require(road.GetComponentsInChildren<MeshFilter>().Any(f => f.name.StartsWith("utility_pole")) == (utilityMode == 1), "Unpaved road must retain overhead poles only");
+            Require(road.GetComponentsInChildren<MeshFilter>().Any(f => f.name == "EquipmentMetal") == (utilityMode == 1), "Unpaved overhead wires must remain");
+        }
+        else if (variant == 211 || variant == 212)
+            Require(lamps.Length > 0 && lamps.All(f => f.transform.position.x * sign > 0), variant + " lamps must stay on the forward right side");
+        else
+            Require(lamps.Any(f => f.transform.position.x < 0) && lamps.Any(f => f.transform.position.x > 0), variant + " lamps must cover both sides");
         foreach (var filter in road.GetComponentsInChildren<MeshFilter>())
         {
             if (!new[] { "streetlight", "utility_pole", "utility_box", "tree" }.Any(n => filter.name.StartsWith(n))) continue;

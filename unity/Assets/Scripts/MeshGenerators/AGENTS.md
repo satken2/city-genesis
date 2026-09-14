@@ -1,5 +1,21 @@
 # MeshGenerators フォルダ
 
+## 植栽中央分離帯・吊り橋・レンガ高架
+
+吊り橋主塔の幅倍率はmax(1,道路幅/12)。塔高はclamp(径間長×0.12,8,80)×幅倍率、柱の幅と奥行きはモデル内で幅倍率を適用済み。柱中心と主ケーブルは道路端から0.8m×幅倍率、地盤までの脚半径は0.85m×幅倍率。2車線以下は基準寸法。モデルの塔頂原点12mを変更せず、縦方向の幅倍率をモデルとコードで二重に掛けない。
+
+254/256のcenterは下幅0.8m・上幅0.32m・高さ0.9mのコンクリート分離帯。マスターcenter_width=0.8によりRoadLaneLayoutが区画線・車両の走行帯から除く。
+
+吊り橋のtruss（254/256）は8m著作長の反復で、bodyのsingle_span伸縮を適用しない。SuspensionBridgeGeneratorがCreateSplineMeshへmaxTileLength: 0・stretchToWidth: falseで渡す。路面下端は254が3.2m、256が4.2m。251/252はトラスなしでbody厚1.1/1.3m。主ケーブルは半径0.25m・12角、吊材は半径0.035m。実FBX検証はこれらの厚み・太さも検査する。
+
+trussはnormalizeBodySurface: falseで道路用の区間LOD（路面への帯化）から除外し、橋全体のLODで扱う。頂点予算による整数タイル分割はそのまま使う。
+
+241のcenter_start/center_endは中心帯の両端を半円にする。RoadPathは切断済みスプラインを半径分だけ後退させ、キャップを1個ずつ配置する。LODで作られた詳細区間の端には置かない。center_treeはRoadEquipmentGeneratorがstreet_tree_typeと連動して植栽面へ置き、キャップから3m空ける。G文書の植栽中央分離帯節を参照。
+
+251/252/254/256は既存RoadPath（default/single_span）で桁を生成し、SuspensionBridgeGeneratorがtowerのある径間へ塔とケーブルを追加する。塔は20%/80%位置、縦寸法だけ径間に合わせ、ケーブルと吊材は動的生成する。404/414はTrackPathのarcadeをBrickArcadeGeneratorが8m基準で敷き、下端を地盤へ写像する。各アーチの変形後boundsをPillarClearanceで判定し、通行空間と重なるタイルを丸ごと省く。判定上端は道床面から1cm下げ、同標高の隣接線路を除外する。道床・軌道は維持する。
+
+PathStructureMeshは上記構造物専用の結合器で、60,000頂点ごとに分割し、パスの共有マテリアル・IntersectionMeshOwnerを使う。生成器の選択と保存パスの幾何は変更しない。実FBX検証はTests/Intersections/run-unity.ps1 -LandmarkPaths。
+
 建物・土地区画・パス(道路)・交差点の具体的なメッシュ生成アルゴリズム。
 DataLoaders のマネージャー群から呼ばれる(呼び出し側のフローは `DataLoaders/AGENTS.md` 参照)。
 
@@ -144,7 +160,7 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 
 ## 道路の付帯設備 (Paths/RoadEquipmentGenerator.cs)
 
-RoadPathの街路樹配置はRoadEquipmentGeneratorへ集約している。PathSummaryの設備4項目を参照し、masterの*_allowedで制限する。0は明示なしでモデルのフォールバックによって復活させない。街灯・電柱・箱・樹木は共通の距離配置・直立処理・近傍グリッドで重複回避。柵は歩道とは独立し、交差点切断面から3m手前で閉じる。標準簡易形状は材質ごとに結合しIntersectionMeshOwnerが所有。詳細・プレハブ規約・配線の制限はGドキュメント§8.6。
+RoadPathの街路樹配置はRoadEquipmentGeneratorへ集約している。PathSummaryの設備4項目を参照し、masterの*_allowedで制限する。0は明示なしでモデルのフォールバックによって復活させない。極小路地211・1車線生活道路212の街灯は始点→終点の右側だけに置き、その他は両側に置く。未舗装路201は街灯をマスターで設置不可とし、地中配線ボックスは描画時に省略する。架空配線の電柱・電線は通常どおり生成する。街灯・電柱・箱・樹木は共通の距離配置・直立処理・近傍グリッドで重複回避。柵は歩道とは独立し、交差点切断面から3m手前で閉じる。標準簡易形状は材質ごとに結合しIntersectionMeshOwnerが所有。詳細・プレハブ規約・配線の制限はGドキュメント§8.6。
 
 設備の接地は未補正FBXのbounds.max.yではなく、GetRoadPartMeshで路面原点へ補正した歩道の設置横位置の上面を参照する。縁石と歩行面の高さを区別する。body面はBODY_ABOVE_SPLINEに固定。スプライン上の定数オフセットはワールド上方向、歩道厚は断面法線方向へ加える。街灯の張り出し方向はBlenderのX符号を前提にせず、Unityに読み込んだメッシュのbounds中心Xで判断して内向きにする。実FBXの接地・方向検査はTests/Intersections/run-unity.ps1 -Equipment。
 点設備はプレハブ原点の一致だけに頼らず、メッシュ下端のYも補正して接地する（旧共通モデル対応）。

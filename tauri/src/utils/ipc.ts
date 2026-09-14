@@ -11,8 +11,9 @@
 import { invoke } from "@tauri-apps/api/core";
 
 export const IPC_EVENT_WEATHER_STATE = "weather:state";
-export const IPC_EVENT_AMBIENCE_CAMERA = "ambience:camera";
-export type AmbienceCameraState = { height_above_ground: number | null };
+export async function sendAmbienceVolume(volume: number): Promise<void> {
+  await invoke("send_window_action", { windowType: "cockpit", entity: null, action: "ambience:volume", params: { volume } });
+}
 
 export type WeatherState = {
   id: string;

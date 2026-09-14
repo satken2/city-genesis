@@ -2,9 +2,11 @@ $ErrorActionPreference = 'Stop'
 $unityRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 & (Join-Path $PSScriptRoot '../BuildRuntime.ps1')
 $qaRoot = Join-Path $unityRoot 'Temp/WeatherUnityQA'
-foreach ($folder in @('Assets/Runtime', 'Assets/Editor', 'Assets/Resources/Weather', 'Assets/Settings', 'Packages', 'ProjectSettings', 'Captures')) {
+foreach ($folder in @('Assets/Resources/Audio/Ambience', 'Assets/Resources/Audio/Ambience', 'Assets/Runtime', 'Assets/Editor', 'Assets/Resources/Weather', 'Assets/Settings', 'Packages', 'ProjectSettings', 'Captures')) {
     New-Item -ItemType Directory -Path (Join-Path $qaRoot $folder) -Force | Out-Null
 }
+Copy-Item "$unityRoot/Assets/Resources/Audio/Ambience/*.ogg*" "$qaRoot/Assets/Resources/Audio/Ambience" -Force
+Copy-Item "$unityRoot/Assets/Resources/Audio/Ambience/*.ogg*" "$qaRoot/Assets/Resources/Audio/Ambience" -Force
 Copy-Item "$unityRoot/Assets/Scripts/Weather/*.cs" "$qaRoot/Assets/Runtime" -Force
 Copy-Item "$unityRoot/Assets/Scripts/UI/UiFontProvider.cs" "$qaRoot/Assets/Runtime" -Force
 Copy-Item "$unityRoot/Assets/Resources/Weather/*.shader" "$qaRoot/Assets/Resources/Weather" -Force

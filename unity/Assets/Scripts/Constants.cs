@@ -15,6 +15,8 @@ public static class Constants
     public const string CITY_TEMPLATE_DIR = "UrbanGenesis/templates";
     public const string CITY_SAVE_DIR = "UrbanGenesis/saves";
     public const int HISTORY_COUNT = 120;
+    public const float DAYS_PER_YEAR = 365.0f;
+    public const float DAYS_PER_MONTH = 30.0f;
     public const int STATUS_TEMPORARY = 0;
     public const int STATUS_ACTIVE = 1;
     public const int STATUS_PAUSED = 2;

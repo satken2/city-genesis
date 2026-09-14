@@ -163,8 +163,11 @@
     "riverListItemCarved": "Rivière {{index}} : {{lengthKm}} km / emprise {{areaHa}} ha",
     "riverRecomputePolygon": "Recalculer les emprises",
     "riverRecomputePolygonHint": "Réextrait l’emprise de chaque rivière creusée (zone sous la surface de l’eau) à partir du terrain actuel. À utiliser après avoir retouché les berges à la main",
+    "riverPreviewToggle": "Aperçu du creusement (rivières non creusées à leur profondeur actuelle)",
+    "riverWaterToggle": "Afficher la surface de l’eau (désactivé : voir le lit)",
+    "riverSelectHint": "Cliquez sur une ligne pour mettre en évidence la rivière du même numéro sur la carte. Modifier le coefficient de profondeur met à jour l’aperçu ; « Confirmer et creuser » l’applique au terrain",
     "riverDepthCoefOne": "Coefficient de profondeur",
-    "riverCarveOne": "Creuser",
+    "riverCarveOne": "Confirmer et creuser",
     "riverCarveAll": "Creuser toutes les rivières non creusées",
     "riverDeleteOne": "Supprimer",
     "riverDeleteAll": "Supprimer toutes les rivières"

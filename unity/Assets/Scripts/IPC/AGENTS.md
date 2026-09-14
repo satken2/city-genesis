@@ -19,7 +19,7 @@ HTTP(バックエンド通信)とは別系統であることに注意。Unityと
 
 ## 新しいIPCイベントを追加する手順
 
-`ambience:camera`はUnity→Cockpitの地表相対高度通知（height_above_ground:数値mまたはnull）。CameraAmbienceが5Hzで送り、Tauri WeatherAudioが近景環境音を混ぜる。null・2秒以上の通知途絶ではベース音だけへ戻す。
+`ambience:volume {volume}`はTauri→Unityの音量通知（master×sfx、0〜1）。Cockpitが設定変更時と2秒ごとに送り、CameraAmbienceが所有するAudioSourceへ適用する。高度と天候の音響制御はUnity内で完結する。
 
 天気は`weather:query`/`weather:set`（UI→Unity、setはidまたはnull=自動）と`weather:state`（Unity→Cockpit、id/locked/rain/presets）で同期する。WeatherControllerが正を保持し、RustはCockpitに中継する。表示名はTauriのweather.json。経済APIへの書き込みは行わない。
 

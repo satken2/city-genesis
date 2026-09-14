@@ -163,8 +163,11 @@
     "riverListItemCarved": "강{{index}}: {{lengthKm}}km / 범위 {{areaHa}}ha",
     "riverRecomputePolygon": "강 범위 다시 계산",
     "riverRecomputePolygonHint": "굴착 완료된 강의 범위(수면보다 낮은 영역)를 현재 지형에서 다시 추출합니다. 굴착 후 강기슭을 수동으로 편집했을 때 사용합니다",
+    "riverPreviewToggle": "굴착 미리보기(미굴착 강을 현재 깊이로 표시)",
+    "riverWaterToggle": "수면 표시(끄면 강바닥 지형을 볼 수 있음)",
+    "riverSelectHint": "행을 클릭하면 지도에서 같은 번호의 강이 강조됩니다. 깊이 계수를 바꾸면 미리보기가 갱신되고, \"확정하고 굴착\"으로 실제 지형에 반영합니다",
     "riverDepthCoefOne": "깊이 계수",
-    "riverCarveOne": "굴착",
+    "riverCarveOne": "확정하고 굴착",
     "riverCarveAll": "미굴착 전부 굴착",
     "riverDeleteOne": "삭제",
     "riverDeleteAll": "모든 강 삭제"
