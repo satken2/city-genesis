@@ -20,6 +20,7 @@ public sealed class TransitVehicleManager : MonoBehaviour
     private readonly Dictionary<int, List<VehiclePolyline>> railConnectors = new();
     private readonly HashSet<string> used = new();
     private readonly Dictionary<GameObject,float> nominalLengths = new();
+    private readonly Dictionary<int,(double distance,double time)> soundTrack = new(); // 走行音の速度を路線時計の距離差分から出すための編成別の前回値
     private sealed class Line
     {
         public TransitLineSummary data;
@@ -57,6 +58,9 @@ public sealed class TransitVehicleManager : MonoBehaviour
         {
             session = store.Session; clock = 0; revision = -1; lines.Clear(); geometry.Clear();
             HideUnused(true);
+            soundTrack.Clear();
+            VehicleAmbience.Clear(VehicleAmbience.Kind.Bus);
+            VehicleAmbience.Clear(VehicleAmbience.Kind.Train);
         }
         if (GameStateManager.Instance == null || !GameStateManager.Instance.IsGameStarted())
         { HideUnused(true); return; }
@@ -159,6 +163,7 @@ public sealed class TransitVehicleManager : MonoBehaviour
                 near |= delta.sqrMagnitude <= renderRadius*renderRadius;
             }
             if (!ready || !near || used.Count+cars > maxVisibleCars) continue;
+            ReportSound(line, train, trainTime, distance, positions[cars/2]);
             for (int car = 0; car < cars; car++)
             {
                 // 折り返しでは車体の前後を維持し、進行方向に対する編成順を逆転する。
@@ -180,6 +185,17 @@ public sealed class TransitVehicleManager : MonoBehaviour
                 go.transform.SetPositionAndRotation(positions[car],Quaternion.LookRotation(forward,Vector3.up));
             }
         }
+    }
+
+    /// <summary>描画した編成を走行音の発音体として通知する。速度は路線時計の距離差分で、周回の折り返しで飛ぶ値は上限で丸める。</summary>
+    private void ReportSound(Line line, int train, double time, double distance, Vector3 position)
+    {
+        int id = unchecked(line.data.line_agent_id * 1000003 + train);
+        float speed = 0;
+        if (soundTrack.TryGetValue(id, out var last) && time > last.time)
+            speed = (float)Math.Min(60, Math.Abs(distance - last.distance) / (time - last.time));
+        soundTrack[id] = (distance, time);
+        VehicleAmbience.Report(line.type == Constants.VEHICLE_BUS ? VehicleAmbience.Kind.Bus : VehicleAmbience.Kind.Train, id, position, speed);
     }
 
     private void BusTurnaround(Line line,int index,double time,ref Vector3 position,ref Vector3 direction)

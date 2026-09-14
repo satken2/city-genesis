@@ -7,6 +7,8 @@ Unityの環境表現だけを扱う。経済シミュレーションの天気デ
 - `WeatherController`: AppRootが生成。ApiClient経由でcity.epochだけ読む。専用System.Randomの重み付き独立抽選で、同一天気の連続を許す。UnityEngine.Randomの状態に影響しない。
 - `weather:query` / `weather:set {id}`を受け、`weather:state`で現在値と候補をCockpitへ送る。nullの選択は固定解除。天候ID・ウェイト・雨量の正はUnity、翻訳・絵文字はTauri、環境音はUnity。
 - `WeatherRain`: カメラ近傍だけで雨粒を描く。Resourcesの`RainStreak.shader`を使い、ゲーム外・無効化時に停止する。都市オブジェクトへの衝突判定や経済状態の変更はしない。
+- `ConstructionAmbience`: AppRootが生成する工事音再生。BuildingManager/PathManagerがデータキャッシュ同期時に `Register/Unregister/Clear` で現場(バックエンド座標の点列)を登録し、0.25秒ごとにカメラから250m以内の近い順8件を3Dループ再生する(音源プール8本・Linear減衰15〜250m・ドップラー0・0.5秒フェード)。音源はResources/Audio/Construction。GameObjectに紐づけない。座標はFloatingOriginのずれを含まず、ルート直下の不動アンカーの位置をずれとして足す。
+- `VehicleAmbience`: AppRootが生成する走行音再生。VehicleManager(一般車=Kind.Car)とTransitVehicleManager(路線バス=Kind.Bus・鉄道編成=Kind.Train)が毎フレーム `Report(kind, id, ワールド座標, 速度)` で通知し、1秒通知が無い発音体は自動で外れる(`Remove`/`Clear`は即時)。車6本+鉄道3本の音源プールで近い順に割り当て(車120m・鉄道300m)、車はピッチ=`CarPitch(速度)`、鉄道はゲイン=`TrainGain(速度)`で停車中を表す。音源はResources/Audio/Vehicles。
 - `CameraAmbience`: AppRootが生成する環境音再生。Resources/Audio/AmbienceのStreamingクリップ5種類をループする。Utils.GetGroundHeightから地表相対高度を求め、100m〜10mで近景音を増やす。Tauriからは音量だけ受け取る。公開programs/サウンドシステム.mdを参照。
 - シェーダーは`Assets/Resources/Weather/Atmosphere.shader`。ビルド時にストリッピングされないようResourcesから直接ロードする。
 - シーンの主光源を再利用する。無効化時に元の環境を戻し、ランタイムの所有アセットは破棄時に解放する。

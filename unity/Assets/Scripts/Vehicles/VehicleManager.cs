@@ -680,6 +680,7 @@ public class VehicleManager : MonoBehaviour
     {
         v.Sample(out Vector3 p, out Vector3 t);
         v.go.transform.SetPositionAndRotation(p, Quaternion.LookRotation(t, Vector3.up));
+        VehicleAmbience.Report(VehicleAmbience.Kind.Car, v.go.GetInstanceID(), p, v.speed);
         float fade = v.fading ? 1 - v.fadeElapsed / Mathf.Max(.01f, fadeDuration) : v.ExitingRoad ? 1 : v.age / Mathf.Max(.01f, fadeDuration);
         v.go.transform.localScale = Vector3.one * Mathf.Clamp01(fade);
     }
@@ -698,6 +699,7 @@ public class VehicleManager : MonoBehaviour
         var v = active[index];
         if (v.go != null)
         {
+            VehicleAmbience.Remove(VehicleAmbience.Kind.Car, v.go.GetInstanceID());
             v.go.SetActive(false);
             string key = v.vehicleType + ":" + v.variantId;
             if (!pool.TryGetValue(key, out var queue)) { queue = new Queue<GameObject>(); pool.Add(key, queue); }

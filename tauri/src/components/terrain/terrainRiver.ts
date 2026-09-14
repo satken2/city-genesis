@@ -199,6 +199,14 @@ const RIVER = {
   /** 範囲抽出: リング間引きの許容誤差(spacing に対する倍率)。格子由来の細かなギザギザを消しつつ
    *  岸線の形状は保つ */
   polygonSimplifyFactor: 0.25,
+  /** 制御点: 自動生成した中心線を制御点へ間引くときの許容誤差(spacing に対する倍率)。
+   *  蛇行の形を保ちつつノード数を減らす */
+  controlPointToleranceFactor: 0.75,
+  /** 制御点: 間引きで必ず残す「流量の段差」の相対値。合流点(支流の流入)を制御点として固定する */
+  controlPointQJump: 0.1,
+  /** 制御点: 河口の判定で他の川へ「合流」とみなす距離の下限(リサンプル間隔に対する倍率)。
+   *  相手の川幅とこの値の大きい方を吸着半径にする */
+  confluenceSnapDsFactor: 2,
 } as const;
 
 /** 1年の秒数(流量[m³/s]への換算に使う) */
@@ -569,7 +577,12 @@ function buildHydroGrid(
 
 /** 流量から川幅(m)を求める(hydraulic geometry: w ∝ Q^0.5) */
 function widthFromDischarge(q: number, spacing: number, params: RiverGenParams): number {
-  return Math.max(params.widthCoef * Math.sqrt(Math.max(0, q)), RIVER.minWidthFactor * spacing);
+  return Math.max(params.widthCoef * Math.sqrt(Math.max(0, q)), minRiverWidth(spacing));
+}
+
+/** 川幅の下限(m)。1格子より細い川は彫り込みで表現できないため、指定した幅はこの値へ切り上げられる */
+export function minRiverWidth(spacing: number): number {
+  return RIVER.minWidthFactor * spacing;
 }
 
 /** 流量から水深(m)を求める(hydraulic geometry: d ∝ Q^0.4) */
@@ -926,7 +939,7 @@ function mergeParallelChannels(rivers: GeneratedRiver[]): GeneratedRiver[] {
 }
 
 /** polyline 上で pt に最も近い点のインデックスを返す */
-function nearestPointIndex(polyline: RiverPoint[], pt: { x: number; z: number }): number {
+export function nearestPointIndex(polyline: RiverPoint[], pt: { x: number; z: number }): number {
   let best = 0;
   let bestDist = Infinity;
   for (let i = 0; i < polyline.length; i++) {
@@ -1381,6 +1394,280 @@ function computeOneSurfaceProfile(
     pts[i].waterY = ws[i];
     pts[i].bedY = ws[i] - d * (1 + RIVER.poolDeepen * Math.abs(pts[i].curvature));
   }
+}
+
+/* ============================================================================
+ * [2b] 制御点による流路の手動作図・ノード編集
+ *
+ * 流路を「制御点(疎な頂点列)」でも表し、制御点を通る滑らかな曲線から等間隔の中心線
+ * (points)を作り直せるようにする。手動で描いた川はクリックした頂点がそのまま制御点、
+ * 自動生成した川は蛇行進化後の中心線を Douglas-Peucker で間引いたものを制御点とする。
+ * ノードの移動・追加・削除のたびに buildRiverFromControlPoints で中心線・河口・水面
+ * プロファイルを作り直す(標高は変更しない。彫り込みは従来どおり carveRivers)。
+ * ========================================================================== */
+
+/** 流路の制御点。q はこの地点の流量(m³/s)で、中心線へは制御点間の線形補間で引き継ぐ */
+export type RiverControlPoint = { x: number; z: number; q: number };
+
+/** buildRiverFromControlPoints の結果。河口を他の川へ吸着した場合は末尾の制御点も吸着後の位置になる */
+export type RiverRebuildResult = { river: GeneratedRiver; controlPoints: RiverControlPoint[] };
+
+/** 川幅(m)から流量(m³/s)を逆算する(widthFromDischarge の逆関数。幅の下限クランプは考慮しない) */
+export function dischargeFromWidth(width: number, params: RiverGenParams): number {
+  const coef = Math.max(1e-6, params.widthCoef);
+  return (Math.max(0, width) / coef) ** 2;
+}
+
+/**
+ * 中心線を Douglas-Peucker で間引いて制御点にする。許容誤差は spacing×controlPointToleranceFactor。
+ * 合流点で流量が段階的に増える点は形状に関係なく残す(間引くと支流の流入位置の流量変化が
+ * 制御点間の線形補間でなまり、合流点より上流の川幅まで太くなるため)。
+ */
+export function simplifyCenterlineToControlPoints(points: RiverPoint[], spacing: number): RiverControlPoint[] {
+  const n = points.length;
+  if (n === 0) return [];
+  const toCp = (p: RiverPoint): RiverControlPoint => ({ x: p.x, z: p.z, q: p.q });
+  if (n <= 2) return points.map(toCp);
+
+  const keep = new Uint8Array(n);
+  keep[0] = 1;
+  keep[n - 1] = 1;
+  for (let i = 1; i < n; i++) {
+    if (points[i].q > points[i - 1].q * (1 + RIVER.controlPointQJump) + 1e-9) {
+      keep[i - 1] = 1;
+      keep[i] = 1;
+    }
+  }
+
+  // 固定点で区切った区間ごとに反復版DP(再帰深さが点数に比例しないようにスタックで処理)
+  const stack: [number, number][] = [];
+  let segStart = 0;
+  for (let i = 1; i < n; i++) {
+    if (keep[i]) {
+      stack.push([segStart, i]);
+      segStart = i;
+    }
+  }
+  const tol2 = (RIVER.controlPointToleranceFactor * spacing) ** 2;
+  while (stack.length > 0) {
+    const [a, b] = stack.pop()!;
+    if (b - a < 2) continue;
+    const ax = points[a].x;
+    const az = points[a].z;
+    const dx = points[b].x - ax;
+    const dz = points[b].z - az;
+    const len2 = dx * dx + dz * dz;
+    let bestD = -1;
+    let bestI = -1;
+    for (let i = a + 1; i < b; i++) {
+      const px = points[i].x - ax;
+      const pz = points[i].z - az;
+      let d2: number;
+      if (len2 < 1e-12) {
+        d2 = px * px + pz * pz;
+      } else {
+        const t = Math.max(0, Math.min(1, (px * dx + pz * dz) / len2));
+        const ex = px - t * dx;
+        const ez = pz - t * dz;
+        d2 = ex * ex + ez * ez;
+      }
+      if (d2 > bestD) {
+        bestD = d2;
+        bestI = i;
+      }
+    }
+    if (bestD > tol2) {
+      keep[bestI] = 1;
+      stack.push([a, bestI], [bestI, b]);
+    }
+  }
+  const out: RiverControlPoint[] = [];
+  for (let i = 0; i < n; i++) if (keep[i]) out.push(toCp(points[i]));
+  return out;
+}
+
+/**
+ * 制御点を通る centripetal Catmull-Rom 曲線を、おおむね step 間隔の折れ線へ展開する。
+ * centripetal(α=0.5)は制御点の間隔が不均一でも尖点や自己交差の小ループができない性質があり、
+ * 手描きの頂点列に向く。両端は隣の制御点を鏡映した仮想点で接線を決める。
+ * q は制御点間で線形補間する。width 以降のフィールドは呼び出し側が計算し直す。
+ */
+function expandCatmullRom(cps: RiverControlPoint[], step: number): RiverPoint[] {
+  const n = cps.length;
+  const mk = (x: number, z: number, q: number): RiverPoint => ({ x, z, q, width: 0, waterY: 0, bedY: 0, curvature: 0, braided: false });
+  if (n === 0) return [];
+  if (n === 1) return [mk(cps[0].x, cps[0].z, cps[0].q)];
+  const out: RiverPoint[] = [];
+  const mirror = (a: RiverControlPoint, b: RiverControlPoint): RiverControlPoint => ({ x: 2 * a.x - b.x, z: 2 * a.z - b.z, q: a.q });
+  const knot = (a: RiverControlPoint, b: RiverControlPoint) => Math.max(1e-6, Math.sqrt(Math.hypot(b.x - a.x, b.z - a.z)));
+  for (let i = 0; i < n - 1; i++) {
+    const p0 = i === 0 ? mirror(cps[0], cps[1]) : cps[i - 1];
+    const p1 = cps[i];
+    const p2 = cps[i + 1];
+    const p3 = i + 2 < n ? cps[i + 2] : mirror(cps[n - 1], cps[n - 2]);
+    const pieces = Math.max(1, Math.ceil(Math.hypot(p2.x - p1.x, p2.z - p1.z) / step));
+    const t0 = 0;
+    const t1 = t0 + knot(p0, p1);
+    const t2 = t1 + knot(p1, p2);
+    const t3 = t2 + knot(p2, p3);
+    for (let k = 0; k < pieces; k++) {
+      const u = k / pieces;
+      const t = t1 + (t2 - t1) * u;
+      // Barry-Goldman のピラミッド評価
+      const w01a = (t1 - t) / (t1 - t0);
+      const w01b = (t - t0) / (t1 - t0);
+      const w12a = (t2 - t) / (t2 - t1);
+      const w12b = (t - t1) / (t2 - t1);
+      const w23a = (t3 - t) / (t3 - t2);
+      const w23b = (t - t2) / (t3 - t2);
+      const a1x = w01a * p0.x + w01b * p1.x;
+      const a1z = w01a * p0.z + w01b * p1.z;
+      const a2x = w12a * p1.x + w12b * p2.x;
+      const a2z = w12a * p1.z + w12b * p2.z;
+      const a3x = w23a * p2.x + w23b * p3.x;
+      const a3z = w23a * p2.z + w23b * p3.z;
+      const w02a = (t2 - t) / (t2 - t0);
+      const w02b = (t - t0) / (t2 - t0);
+      const w13a = (t3 - t) / (t3 - t1);
+      const w13b = (t - t1) / (t3 - t1);
+      const b1x = w02a * a1x + w02b * a2x;
+      const b1z = w02a * a1z + w02b * a2z;
+      const b2x = w13a * a2x + w13b * a3x;
+      const b2z = w13a * a2z + w13b * a3z;
+      out.push(mk(w12a * b1x + w12b * b2x, w12a * b1z + w12b * b2z, p1.q + (p2.q - p1.q) * u));
+    }
+  }
+  const last = cps[n - 1];
+  out.push(mk(last.x, last.z, last.q));
+  return out;
+}
+
+/** river が(合流の連鎖をたどって)targetId へ流れ込む川なら true。循環参照の防御つき */
+function flowsInto(river: GeneratedRiver, targetId: string, byId: Map<string, GeneratedRiver>): boolean {
+  let cur: GeneratedRiver | undefined = river;
+  for (let hop = 0; hop < 64 && cur; hop++) {
+    if (cur.mouth !== "confluence" || !cur.confluence) return false;
+    if (cur.confluence.riverId === targetId) return true;
+    cur = byId.get(cur.confluence.riverId);
+  }
+  return false;
+}
+
+/**
+ * 中心線の終点の位置から河口の種類を決め、river.mouth / mouthWaterLevel / confluence を更新する。
+ * 優先順位は 海(終点周辺の地形が0m以下) → 湖(既存の水面ポリゴンの内側) → 合流(他の川の
+ * 中心線に吸着半径以内で近い。相手の川幅と resampleFactor×spacing×confluenceSnapDsFactor の
+ * 大きい方) → 接続なし(edge。水面は地形の窪地充填プロファイルのまま)。
+ * 合流の場合は終点を相手の中心線上の最近点へ吸着させる(吸着後の座標を返す)。
+ * 自分へ流れ込む川(支流)へは合流させない(循環になるため)。
+ */
+function resolveRiverMouth(
+  river: GeneratedRiver,
+  sample: (wx: number, wz: number) => number,
+  ds: number,
+  lakes: WaterSurfacePayload[],
+  others: GeneratedRiver[],
+): { x: number; z: number } | null {
+  const pts = river.points;
+  if (pts.length === 0) return null;
+  const tail = pts[pts.length - 1];
+  river.mouthWaterLevel = undefined;
+  river.confluence = undefined;
+
+  let minAround = Infinity;
+  for (const [ox, oz] of [[0, 0], [ds, 0], [-ds, 0], [0, ds], [0, -ds]]) {
+    const h = sample(tail.x + ox, tail.z + oz);
+    if (h < minAround) minAround = h;
+  }
+  if (minAround <= 0) {
+    river.mouth = "sea";
+    return null;
+  }
+
+  for (const lake of lakes) {
+    if (!lake?.polygon || lake.polygon.type !== "Polygon") continue;
+    const ring = (lake.polygon.coordinates as number[][][])[0];
+    if (!Array.isArray(ring) || ring.length < 3) continue;
+    if (pointInRing(tail.x, tail.z, ring)) {
+      river.mouth = "lake";
+      river.mouthWaterLevel = lake.water_level;
+      return null;
+    }
+  }
+
+  const byId = new Map<string, GeneratedRiver>();
+  for (const r of others) byId.set(r.id, r);
+  byId.set(river.id, river);
+  let best: { river: GeneratedRiver; index: number; dist: number } | null = null;
+  for (const other of others) {
+    if (other.id === river.id || other.points.length < 2) continue;
+    if (flowsInto(other, river.id, byId)) continue;
+    const idx = nearestPointIndex(other.points, tail);
+    const op = other.points[idx];
+    const dist = Math.hypot(op.x - tail.x, op.z - tail.z);
+    const snap = Math.max(op.width, RIVER.confluenceSnapDsFactor * ds);
+    if (dist <= snap && (!best || dist < best.dist)) best = { river: other, index: idx, dist };
+  }
+  if (best) {
+    river.mouth = "confluence";
+    river.confluence = { riverId: best.river.id, pointIndex: best.index };
+    const op = best.river.points[best.index];
+    tail.x = op.x;
+    tail.z = op.z;
+    return { x: op.x, z: op.z };
+  }
+  river.mouth = "edge";
+  return null;
+}
+
+/**
+ * 制御点列から川1本の中心線・河口・水面プロファイルを作り直す(標高は変更しない)。
+ *
+ * 制御点を通る曲線を resampleFactor×spacing 間隔の中心線に展開し、各点の川幅を流量から
+ * (hydraulic geometry で)求め、河口を終点の位置から判定してから水面プロファイルを確定する。
+ * keepMouth が true なら河口の種類は base のものを保つ(終点を動かしていない編集や、
+ * 本流の変更に追従して終点を吸着し直した支流の再構築で、河口判定のやり直しを避ける)。
+ * 支流の合流先の水面を参照するため others には(彫り込み済みも含む)他の全ての川を渡す。
+ * base 自身は変更せず、新しい GeneratedRiver を返す(エディタの Undo スナップショットが
+ * 同じオブジェクトを参照しているため)。
+ */
+export function buildRiverFromControlPoints(
+  base: GeneratedRiver,
+  controlPoints: RiverControlPoint[],
+  elev: Float32Array,
+  rows: number,
+  cols: number,
+  spacing: number,
+  mapWidth: number,
+  mapHeight: number,
+  params: RiverGenParams,
+  others: GeneratedRiver[],
+  lakes: WaterSurfacePayload[],
+  keepMouth: boolean,
+): RiverRebuildResult {
+  const ds = RIVER.resampleFactor * spacing;
+  const sample = (wx: number, wz: number) => sampleElevAtWorld(elev, rows, cols, spacing, mapWidth, mapHeight, wx, wz);
+  let points = expandCatmullRom(controlPoints, ds / 2);
+  points = resampleCenterline(points, ds);
+  for (const p of points) p.width = widthFromDischarge(p.q, spacing, params);
+  const river: GeneratedRiver = {
+    ...base,
+    points,
+    confluence: base.confluence ? { ...base.confluence } : undefined,
+  };
+  let cps = controlPoints;
+  if (!keepMouth || (river.mouth === "confluence" && !river.confluence)) {
+    const snapped = resolveRiverMouth(river, sample, ds, lakes, others);
+    if (snapped && cps.length > 0) {
+      cps = cps.slice();
+      cps[cps.length - 1] = { ...cps[cps.length - 1], x: snapped.x, z: snapped.z };
+    }
+  }
+  const byId = new Map<string, GeneratedRiver>();
+  for (const r of others) byId.set(r.id, r);
+  byId.set(river.id, river);
+  computeOneSurfaceProfile(river, byId, sample, params, ds);
+  return { river, controlPoints: cps };
 }
 
 /* ============================================================================

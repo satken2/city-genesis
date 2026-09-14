@@ -51,6 +51,8 @@
 
 ## 道路 (PathManager.cs) — 知らないと事故るポイント
 
+- **工事音の現場登録は `SavePathToCache` の変更検知内 (`SyncConstructionSound`)**: 工事中(STATUS_CONSTRUCTING)のパスだけ `CalculatePathPoints` を25m間隔で間引いた中心線を `ConstructionAmbience.Register` し、それ以外・`RemovePathFromCache`・`ClearAllCells` で解除する。version/status/端点ノードが変わらない再登録では走らない(Weather/AGENTS.md参照)。
+
 - **橋脚と周辺道路の依存**: `Awake` が `PillarClearance.NeighborProvider = GetPillarObstacles` を設定する。相手の最新データから切断前中心線・全幅（駅はホーム込み）・通行高さを供給し、コライダーや描画用点列キャッシュには依存しない。`SavePathToCache` は実変更時に通過セルも先行登録し、変更前後の周辺にある橋脚付きパス（pillar_spacingが0でもBrickArcadeGenerator.HasArcadeが真のレンガ高架を含む）を `pendingPillarRebuildIds` へ積む。`RemovePathFromCache` も削除前に同じ通知を行う。描画revisionと地形追従の完了記録を無効化し、`LateUpdate` がLODバッチ外で既存の再生成キューに渡す。初期データの登録順やバッチ途中の生成を考慮し、バッチで生成済みでも除外しない。曲線の通過セルは `IntersectionPolygonUtil.SamplePlan` の平面点列を使用する（single_spanはアンカー直線）。検証は `Tests/Pillars`。
 
 - **ノードキャッシュの実変更カウンタ `NodeDataVersion`**: ノードの新規追加・位置/タイプの実変更・削除があった場合にのみインクリメントされる公開カウンタ(カメラのセル跨ぎ再取得は大半が無変更のためインクリメントしない)。ノードは編集モード進入後にも非同期ロードで到着するため、`RoadPlanManager` が背景オーバーレイ(既存ノード表示)の再構築判定にポーリング比較で使う。ノード削除時(`SyncNodesInCells` / `SyncNodesInCell`)は `nodeGrid`(空間ハッシュ)からも必ず除去すること(残すと削除済みノードへ吸着してしまう)。全消去時(`ClearAllCells`)も同様に `nodeGrid` / `segmentGrid` を `SpatialHash.Clear()` で空にし、`NodeDataVersion` をインクリメントして背景オーバーレイの再構築を促すこと(カメラ静止中はこのカウンタの変化でしか作り直されないため、通知しないと消えたはずのパス線が残る)。
@@ -86,6 +88,7 @@
 - **工事中(STATUS_CONSTRUCTING)の建物は毎エポック version が上がり再生成される**: 工事中の建物は進捗に応じた「工事現場」メッシュ(土マウンド+足場+クレーン。`ConstructingBuildingMeshBuilder`、MeshGenerators/AGENTS.md参照)で描画され、バックエンドの建設進捗フェーズ(`progress.py`)が進捗の増えたエポックで version を bump するため、既存の version 差分ロードだけで足場が毎エポック伸びる(BuildingManager側に専用処理は無い)。
 - **接続端子ノードの移動に追従するのは車両基地だけ (`OnTerminalNodeMoved`)**: 端子ノードの移動確定(PATCH成功。`NodeInputHandler.SaveNodePosition`)時に呼ばれ、`TryGetInfraTerminalOwner` で所属施設を逆引きして model_type が MODEL_RAIL_YARD の建物だけを `forceRebuild: true` で再生成する(車両基地は端子位置へ線路を収束させて描画するため。versionは変わらないので差分ロードでは追従しない)。他の model_type は端子位置が見た目に影響しないため対象外。
 - **インフラ接続端子ノードの逆引きインデックス (`buildingIdByInfraNodeId`)**: 端子ノードID(`agents.infra_node_id`)→建物agent_id のインデックス。ノードAPIは所属施設(owner)を公開しない片方向参照の設計のため、フロントの端子ノード識別(スナップ判定・端子マーカー・網互換判定)はこのインデックス経由の `TryGetInfraTerminalOwner` で行う。`buildingDataCache` への登録は必ず `RegisterBuildingDataToCache` を通し、削除は `SyncBuildingsInCells` / `ClearAllCells` で同期すること(`RegisterBuildingCell` 等と同じ管理規約)。
+- **工事音の現場登録も同じ管理規約**: `RegisterBuildingDataToCache` 内の `SyncConstructionSound` が建設中・解体中の建物だけ `ConstructionAmbience.Register`(中心点の地表座標)し、それ以外・削除・`ClearAllCells` で解除する。GameObjectやLODとは無関係にデータキャッシュの生存期間で決まる(Weather/AGENTS.md参照)。
 - **公共施設ハイライトの光オーバーレイは BuildingManager が起動する**: `Awake` の `PublicFacilityGlowOverlay.Ensure()`。描画本体は `VisualHandlers/PublicFacilityGlowOverlay.cs`(建物データをポーリングし、敷地の土地区画形状に黄色い光を描く。詳細は VisualHandlers/AGENTS.md)。
 - **土地区画の逆引きインデックス (`buildingIdsByParcel`)**: 区画ID(`agents.parcel_id`)→その区画上の建物agent_id集合。「この区画の上に建っている建物」を全建物走査なしで解決するための汎用の逆引き(`GetBuildingIdsByParcel`)。`buildingIdByInfraNodeId` と同じ管理規約で、登録は `RegisterBuildingDataToCache`(parcel_id 変更時は旧マッピング除去)、削除は `SyncBuildingsInCells` / `ClearAllCells` で同期する。**ただし `GET /buildings/` の `multi_agent` スキーマに `parcel_id` が無いため、一括ロードされた建物の `parcel_id` は常に0でこのインデックスは実質空**(単体取得の建物だけが入る)。区画から建物を引く必要がある処理は、endpoint_schemas シートへの `parcel_id` 行追加まではこのインデックスに依存できない(`PublicFacilityGlowOverlay` は `ParcelManager.GetParcelIdAtPoint` による空間判定で回避している)。
 

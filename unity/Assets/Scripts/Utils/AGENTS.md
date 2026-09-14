@@ -20,6 +20,7 @@
 | StackedBreakdownMeter.cs | 積み上げメーター表示 |
 | `UILineRenderer.cs` | UI上の線描画 |
 | `UISoundEffectPlayer.cs` | 効果音再生 |
+| `VisualEffectManager.cs` | 建物・道路の完成/解体遷移でパーティクルと単発3D音を鳴らすシングルトン。**シーン配置ではなくAppRootが生成する**。音量は`ambience:volume`(master×sfx)購読×基準ゲイン0.8で、受信前は無音。クリップはインスペクタ未設定なら`Resources/Audio/Effects/construction-complete`・`demolition`を探す(現状どちらも未配置=無音)。呼び出しはBuildingManager/PathManager/ParcelManagerの`TriggerBuildingStatusEffect`等 |
 | `WindowUtil.cs` | ウィンドウ操作 |
 
 `Utils.cs`(Scripts直下)にも以下の汎用処理がある:

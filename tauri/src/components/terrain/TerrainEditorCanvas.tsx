@@ -90,11 +90,18 @@ import { type SeaFloorParams, applySeaFloor } from "./terrainSeaFloor";
 import {
   type RiverGenParams,
   type GeneratedRiver,
+  type RiverMouthKind,
+  type RiverControlPoint,
   extractRiverNetwork,
   evolveRivers,
   carveRivers,
   applyRiverDepth,
   buildRiverPolygon,
+  buildRiverFromControlPoints,
+  simplifyCenterlineToControlPoints,
+  dischargeFromWidth,
+  nearestPointIndex,
+  minRiverWidth,
 } from "./terrainRiver";
 import { polygonArea, polygonParts, translatePolygon } from "./riverGeometry";
 import { captureTerrainThumbnail } from "./terrainThumbnail";
@@ -156,13 +163,32 @@ type EditorWaterSurface = { id: string; waterLevel: number; points: WorldPoint[]
  *     保存契約(RiverPayload.polygon)・2D/3Dプレビューの水面表示に使う。未彫り込みは null。
  *     保存データから復元した川は points の width/bedY を持たない(0 と waterY で埋める)ため、
  *     範囲の再計算は既存 polygon を膨らませた帯で行う(buildRiverPolygon の polygon 帯)。
+ *   - controlPoints: ノード編集の単位となる制御点列(上流→下流)。手動で描いた川はクリックした
+ *     頂点、自動生成した川は蛇行進化後の中心線を間引いたもの。ノードを動かすたびに
+ *     buildRiverFromControlPoints で points を作り直す。保存データから復元した川(スプライン
+ *     無し)は null で、ノード編集の対象外。
+ *   - manualWidths: 手動で描いた川の上流端/下流端の川幅(m)。制御点の流量はこの幅から逆算し、
+ *     区間は弧長で線形補間する。自動生成した川は null(流量は流路特定の結果をそのまま持つ)。
  */
 type EditorRiver = GeneratedRiver & {
   params: RiverGenParams;
   carved: boolean;
   depthCoef: number;
   polygon: WaterPolygonGeoJson | null;
+  controlPoints: RiverControlPoint[] | null;
+  manualWidths: { head: number; tail: number } | null;
 };
+
+/**
+ * 川編集タブでのポインタ操作の種類。
+ *   - rain: 地形編集と同じ範囲選択(自動生成の降雨範囲の指定)
+ *   - draw: 流路の手動作図(左クリック=頂点追加、右クリック=川を確定)
+ *   - node: 選択中の未彫り込みの川のノード編集(ドラッグ=移動、流路上のクリック=追加、ノードの右クリック=削除)
+ */
+type RiverPointerMode = "rain" | "draw" | "node";
+
+/** ノード編集でノード・流路を拾う画面上の許容距離(px)。ワールド座標へはズームで割って換算する */
+const RIVER_NODE_HIT_PX = 9;
 
 /**
  * 地形エディタ内での天然資源エリア1件分の内部表現。
@@ -1170,6 +1196,127 @@ function strokeRivers(
   });
 }
 
+/** 折れ線上で (wx, wz) に最も近い点までの距離と、その点が属する線分の始点インデックス・線分内位置 t */
+function nearestOnPolyline(
+  points: ReadonlyArray<{ x: number; z: number }>,
+  wx: number,
+  wz: number,
+): { dist: number; index: number; t: number } | null {
+  if (points.length === 0) return null;
+  if (points.length === 1) return { dist: Math.hypot(points[0].x - wx, points[0].z - wz), index: 0, t: 0 };
+  let best = { dist: Infinity, index: 0, t: 0 };
+  for (let i = 0; i < points.length - 1; i++) {
+    const a = points[i];
+    const b = points[i + 1];
+    const dx = b.x - a.x;
+    const dz = b.z - a.z;
+    const len2 = dx * dx + dz * dz;
+    const t = len2 < 1e-12 ? 0 : Math.max(0, Math.min(1, ((wx - a.x) * dx + (wz - a.z) * dz) / len2));
+    const dist = Math.hypot(a.x + dx * t - wx, a.z + dz * t - wz);
+    if (dist < best.dist) best = { dist, index: i, t };
+  }
+  return best;
+}
+
+/** 制御点列の中で (wx, wz) から tol 以内にある最も近いノードのインデックス。無ければ -1 */
+function findRiverNodeAt(cps: ReadonlyArray<RiverControlPoint>, wx: number, wz: number, tol: number): number {
+  let best = -1;
+  let bestDist = tol;
+  for (let i = 0; i < cps.length; i++) {
+    const d = Math.hypot(cps[i].x - wx, cps[i].z - wz);
+    if (d <= bestDist) {
+      bestDist = d;
+      best = i;
+    }
+  }
+  return best;
+}
+
+/**
+ * 手動作図中の流路を描く: 置いた頂点を結ぶ線と、マウスへの追従線。頂点には順番を振り、
+ * 最後の線分の先端に矢印を付けて「上流→下流」の向きを示す。
+ */
+function strokeRiverDraft(ctx: CanvasRenderingContext2D, points: WorldPoint[], mouse: WorldPoint | null, lineWidth: number): void {
+  if (points.length === 0) return;
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
+  ctx.strokeStyle = "rgba(120,220,255,0.95)";
+  ctx.lineWidth = lineWidth * 1.5;
+  ctx.setLineDash([lineWidth * 4, lineWidth * 3]);
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].z);
+  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].z);
+  if (mouse) ctx.lineTo(mouse.x, mouse.z);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // 進行方向の矢印(最後の確定線分、追従中は追従線の先端)
+  const tip = mouse ?? points[points.length - 1];
+  const from = mouse ? points[points.length - 1] : points[points.length - 2];
+  if (from && (tip.x !== from.x || tip.z !== from.z)) {
+    const ang = Math.atan2(tip.z - from.z, tip.x - from.x);
+    const size = lineWidth * 8;
+    ctx.fillStyle = "rgba(120,220,255,0.95)";
+    ctx.beginPath();
+    ctx.moveTo(tip.x, tip.z);
+    ctx.lineTo(tip.x - size * Math.cos(ang - 0.5), tip.z - size * Math.sin(ang - 0.5));
+    ctx.lineTo(tip.x - size * Math.cos(ang + 0.5), tip.z - size * Math.sin(ang + 0.5));
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  const r = lineWidth * 4;
+  ctx.font = `bold ${lineWidth * 7}px sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  points.forEach((p, i) => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.z, r, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(255,255,255,0.95)";
+    ctx.fill();
+    ctx.strokeStyle = "rgba(20,120,200,0.95)";
+    ctx.lineWidth = lineWidth;
+    ctx.stroke();
+    ctx.fillStyle = "#10305a";
+    ctx.fillText(String(i + 1), p.x, p.z);
+  });
+}
+
+/**
+ * ノード編集中の川の制御点ハンドルを描く。制御点を結ぶ細い破線(曲線との違いが分かるように)と、
+ * 各ノードの円。ホバー中のノードは大きく黄色にする。終点(河口)はひし形で区別する。
+ */
+function strokeRiverControlPoints(ctx: CanvasRenderingContext2D, cps: ReadonlyArray<RiverControlPoint>, hoveredIndex: number, lineWidth: number): void {
+  if (cps.length === 0) return;
+  ctx.strokeStyle = "rgba(255,255,255,0.45)";
+  ctx.lineWidth = lineWidth * 0.75;
+  ctx.setLineDash([lineWidth * 2, lineWidth * 2]);
+  ctx.beginPath();
+  ctx.moveTo(cps[0].x, cps[0].z);
+  for (let i = 1; i < cps.length; i++) ctx.lineTo(cps[i].x, cps[i].z);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  cps.forEach((p, i) => {
+    const hovered = i === hoveredIndex;
+    const r = lineWidth * (hovered ? 5 : 3.5);
+    ctx.beginPath();
+    if (i === cps.length - 1) {
+      ctx.moveTo(p.x, p.z - r * 1.3);
+      ctx.lineTo(p.x + r * 1.3, p.z);
+      ctx.lineTo(p.x, p.z + r * 1.3);
+      ctx.lineTo(p.x - r * 1.3, p.z);
+      ctx.closePath();
+    } else {
+      ctx.arc(p.x, p.z, r, 0, Math.PI * 2);
+    }
+    ctx.fillStyle = hovered ? "rgba(255,230,90,0.95)" : "rgba(255,255,255,0.95)";
+    ctx.fill();
+    ctx.strokeStyle = "rgba(20,90,170,0.95)";
+    ctx.lineWidth = lineWidth;
+    ctx.stroke();
+  });
+}
+
 export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   const { t } = useTranslation();
   // 資源編集タブの種別プルダウン・種別ラベル表示に使う(resource_master 由来)。
@@ -1363,6 +1510,14 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       depthCoef: number;
       /** 範囲ポリゴンの面積(ha)。未彫り込み・範囲未抽出は null */
       areaHa: number | null;
+      /** ノード編集できる川か(未彫り込みかつ制御点あり) */
+      editable: boolean;
+      /** 制御点(ノード)の数。制御点を持たない川は 0 */
+      nodeCount: number;
+      /** 手動作図の川の上流端/下流端の川幅(m)。自動生成した川は null */
+      manualWidths: { head: number; tail: number } | null;
+      /** 河口の種類(未彫り込みの川で「海・湖・合流・接続なし」の表示に使う) */
+      mouth: RiverMouthKind;
     }[]
   >([]);
   // --- 彫り込みプレビュー ---
@@ -1381,6 +1536,27 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   const [selectedRiverId, setSelectedRiverId] = useState<string | null>(null);
   const selectedRiverIdRef = useRef<string | null>(null);
   const activeTabRef = useRef<"terrain" | "water" | "river" | "resource" | "camera">("terrain");
+  // --- 流路の手動作図・ノード編集 ---
+  // 川編集タブのポインタ操作(降雨範囲の選択/川を描く/ノード編集)。タブを離れると rain に戻す。
+  // 作図中の頂点列は riverDraftPointsRef、ノードのドラッグ中の状態は riverNodeDragRef、
+  // マウス直下のノード(ハンドルの強調表示用)は hoveredRiverNodeRef が持つ。
+  const [riverPointerMode, setRiverPointerMode] = useState<RiverPointerMode>("rain");
+  const [riverDraftPointCount, setRiverDraftPointCount] = useState(0);
+  // 手動作図の川の上流端/下流端の川幅(m)。作図を確定するときの初期値で、作成後は一覧の行で川ごとに変えられる。
+  const [riverManualWidthHead, setRiverManualWidthHead] = useState(6);
+  const [riverManualWidthTail, setRiverManualWidthTail] = useState(20);
+  const riverDraftPointsRef = useRef<WorldPoint[]>([]);
+  const riverNodeDragRef = useRef<{ riverId: string; index: number; moved: boolean } | null>(null);
+  const hoveredRiverNodeRef = useRef<number>(-1);
+  // 川幅の下限(m)。彫り込みは格子間隔の1.5倍より細い川を表現できないため、ステッパーの下限にして
+  // 「指定した幅より太く彫られる」不一致を見せない。地形の読み込み後に既定値もここへ切り上げる。
+  const manualWidthMin = settingsRef.current ? Math.ceil(minRiverWidth(settingsRef.current.spacing)) : 1;
+  useEffect(() => {
+    if (status !== "ready" || !settingsRef.current) return;
+    const floor = Math.ceil(minRiverWidth(settingsRef.current.spacing));
+    setRiverManualWidthHead((v) => Math.max(v, floor));
+    setRiverManualWidthTail((v) => Math.max(v, floor));
+  }, [status]);
 
   // --- 地図メタデータ(保存欄) ---
   // map_width/map_height/near_spacing/grid_rows/grid_cols は標高データのグリッド構造そのものと
@@ -1537,6 +1713,10 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     resourceMode,
     resourcePolygonClosed,
     cameraMode,
+    riverPointerMode,
+    riverParams,
+    riverManualWidthHead,
+    riverManualWidthTail,
   });
   useEffect(() => {
     toolStateRef.current = {
@@ -1555,8 +1735,12 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       resourceMode,
       resourcePolygonClosed,
       cameraMode,
+      riverPointerMode,
+      riverParams,
+      riverManualWidthHead,
+      riverManualWidthTail,
     };
-  }, [shape, operation, brushParams, selectionFalloff, raiseLowerParams, flattenParams, noiseParams, featherWidth, polygonClosed, waterMode, waterLevelInput, waterPolygonClosed, resourceMode, resourcePolygonClosed, cameraMode]);
+  }, [shape, operation, brushParams, selectionFalloff, raiseLowerParams, flattenParams, noiseParams, featherWidth, polygonClosed, waterMode, waterLevelInput, waterPolygonClosed, resourceMode, resourcePolygonClosed, cameraMode, riverPointerMode, riverParams, riverManualWidthHead, riverManualWidthTail]);
 
   // 現在のブラシ中心(ワールド座標)。マウス移動の度に更新されるため ref で保持する。
   const brushWorldPosRef = useRef<WorldPoint | null>(null);
@@ -1785,11 +1969,11 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     }
 
     // ブラシ/ポリゴンのプレビュー(常時表示。モード切替を廃止したため編集ツールは常に有効)。
-    // 水面モード・資源モード中は標高編集のブラシ/ポリゴンプレビューは表示しない
-    // (操作が水面/資源の作図に切り替わるため)。
+    // 水面モード・資源モード・川の作図/ノード編集中は標高編集のブラシ/ポリゴンプレビューは
+    // 表示しない(操作が水面/資源/流路の作図に切り替わるため)。
     const previewLineW = 1.5 / v.zoom;
-    if (ts.waterMode || ts.resourceMode || ts.cameraMode) {
-      // 水面/資源/カメラモードでは何も描かない(それぞれ下の stroke* で描く)。
+    if (ts.waterMode || ts.resourceMode || ts.cameraMode || ts.riverPointerMode !== "rain") {
+      // 水面/資源/カメラ/流路編集モードでは何も描かない(それぞれ下の stroke* で描く)。
     } else if (ts.shape === "polygon") {
       strokePolygonPreview(ctx, polygonPointsRef.current, ts.polygonClosed ? null : brushWorldPosRef.current, previewLineW);
     } else if (brushWorldPosRef.current) {
@@ -1812,6 +1996,14 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       waterVisible: riverWaterVisibleRef.current,
       selectedId: selectedRiverIdRef.current,
     });
+
+    // 流路の手動作図(作図中の頂点列)と、ノード編集中の川の制御点ハンドル
+    if (ts.riverPointerMode === "draw") {
+      strokeRiverDraft(ctx, riverDraftPointsRef.current, brushWorldPosRef.current, previewLineW);
+    } else if (ts.riverPointerMode === "node") {
+      const target = nodeEditTargetRiver();
+      if (target?.controlPoints) strokeRiverControlPoints(ctx, target.controlPoints, hoveredRiverNodeRef.current, previewLineW);
+    }
 
     // 天然資源エリア。確定済みは常に表示し、作図中の頂点は資源編集タブのときだけ追従表示する。
     strokeResourceAreas(
@@ -2012,7 +2204,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
    * 編集タブを切り替える。
    * 水面編集/資源編集タブに切り替えた場合は対応する作図モード(waterMode/resourceMode)を
    * ONにし、他のタブに切り替えた場合はOFFにして作図中(未確定)の頂点を破棄する。
-   * 川編集タブではポインタ操作を地形編集と同じ範囲選択(降雨範囲の指定に使う)のままにする。
+   * 川編集タブのポインタ操作は riverPointerMode で決まり(既定は地形編集と同じ範囲選択=降雨範囲の
+   * 指定)、タブを離れるときに rain へ戻して作図中の頂点を破棄する。
    * 未彫り込みの川はタブを離れても破棄しない(一覧から個別に彫る途中の状態を保つため)。
    */
   function handleTabChange(tab: "terrain" | "water" | "river" | "resource" | "camera") {
@@ -2021,7 +2214,10 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     setActiveTab(tab);
     // 彫り込みプレビューは川編集タブでだけ表示する。他のタブでは実データ(elevRef)への編集が
     // 走るため、プレビュー配列が表示に残ると編集結果が見えなくなる。
-    if (leavingRiver) clearRiverPreview();
+    if (leavingRiver) {
+      clearRiverPreview();
+      setRiverPointerModeSafe("rain");
+    }
     if (tab === "river") scheduleRiverPreviewRebuild();
     setWaterMode(tab === "water");
     setResourceMode(tab === "resource");
@@ -2378,6 +2574,10 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
           carved: river.carved,
           depthCoef: river.depthCoef,
           areaHa: river.carved && river.polygon ? polygonArea(river.polygon) / 10000 : null,
+          editable: !river.carved && river.controlPoints !== null,
+          nodeCount: river.controlPoints?.length ?? 0,
+          manualWidths: river.manualWidths,
+          mouth: river.mouth,
         };
       }),
     );
@@ -2599,6 +2799,9 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         carved: false,
         depthCoef: riverParams.depthCoef,
         polygon: null,
+        // ノード編集用に中心線を間引いた制御点を持たせる(初めてノードを動かすまで points は蛇行進化の結果のまま)
+        controlPoints: simplifyCenterlineToControlPoints(river.points, s.spacing),
+        manualWidths: null,
       })),
     ];
     setRiverPreviewStats({
@@ -2748,9 +2951,259 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         carved: true,
         depthCoef: riverParams.depthCoef,
         polygon: rv.polygon,
+        controlPoints: null,
+        manualWidths: null,
       });
     }
     return result;
+  }
+
+  /* ============================================================================
+   * 流路の手動作図・ノード編集
+   *
+   * 川編集タブのポインタ操作は riverPointerMode で切り替える(RiverPointerMode 参照)。
+   * 流路の実体は制御点列(EditorRiver.controlPoints)で、ノードを動かすたびに
+   * terrainRiver.ts の buildRiverFromControlPoints で中心線・河口・水面プロファイルを
+   * 作り直す(標高は変えない)。彫り込みは従来どおり一覧の「確定して彫る」で行う。
+   * 本流を動かしたときは、そこへ合流している支流の終点を本流の新しい中心線へ吸着し直して
+   * 連鎖的に作り直す(合流が切れないように)。
+   * ========================================================================== */
+
+  /**
+   * ポインタ操作を切り替える。draw 以外へ移るときは作図中の頂点を破棄し、ドラッグ・ホバー状態も
+   * 消す。ポインタハンドラは toolStateRef を読むため、state の反映(次の描画)を待たずに
+   * ref も直接更新してから再描画する。
+   */
+  function setRiverPointerModeSafe(mode: RiverPointerMode) {
+    if (mode !== "draw") {
+      riverDraftPointsRef.current = [];
+      setRiverDraftPointCount(0);
+    }
+    hoveredRiverNodeRef.current = -1;
+    riverNodeDragRef.current = null;
+    if (canvasRef.current) canvasRef.current.style.cursor = "";
+    toolStateRef.current = { ...toolStateRef.current, riverPointerMode: mode };
+    setRiverPointerMode(mode);
+    draw();
+  }
+
+  /** ノード編集の対象(一覧で選択中の、制御点を持つ未彫り込みの川)。無ければ null */
+  function nodeEditTargetRiver(): EditorRiver | null {
+    const id = selectedRiverIdRef.current;
+    if (!id) return null;
+    const river = riversRef.current.find((r) => r.id === id);
+    if (!river || river.carved || !river.controlPoints) return null;
+    return river;
+  }
+
+  /** ノード・流路を拾う許容距離(ワールド座標m)。画面上で一定のpx数になるようズームで換算する */
+  function riverHitToleranceWorld(): number {
+    return RIVER_NODE_HIT_PX / viewRef.current.zoom;
+  }
+
+  /** 流路(中心線)を拾う許容距離。細い川でも画面上の最小px数、太い川は川幅の半分まで許す */
+  function riverLineToleranceWorld(river: EditorRiver, wx: number, wz: number): number {
+    const near = nearestOnPolyline(river.points, wx, wz);
+    const width = near ? river.points[near.index].width : 0;
+    return Math.max(riverHitToleranceWorld(), width / 2);
+  }
+
+  /**
+   * 手動作図の川の各制御点に流量を割り当てる。川幅を上流端→下流端で弧長に対して線形補間し、
+   * hydraulic geometry の逆算(dischargeFromWidth)で流量へ変換する。
+   */
+  function assignManualDischarge(
+    cps: RiverControlPoint[],
+    widths: { head: number; tail: number },
+    params: RiverGenParams,
+  ): RiverControlPoint[] {
+    const n = cps.length;
+    if (n === 0) return cps;
+    const arc = new Float64Array(n);
+    for (let i = 1; i < n; i++) arc[i] = arc[i - 1] + Math.hypot(cps[i].x - cps[i - 1].x, cps[i].z - cps[i - 1].z);
+    const total = arc[n - 1];
+    return cps.map((p, i) => {
+      const f = total > 1e-9 ? arc[i] / total : i / Math.max(1, n - 1);
+      return { ...p, q: dischargeFromWidth(widths.head + (widths.tail - widths.head) * f, params) };
+    });
+  }
+
+  /**
+   * 制御点列から川を作り直して riversRef を差し替える。作り直した川へ合流している未彫り込みの
+   * 支流は、終点を新しい中心線上の最近点へ吸着させて連鎖的に作り直す(河口の種類は保つ)。
+   * 川リストの一覧表示も更新する。描画・プレビューの更新は呼び出し側で行う。
+   */
+  function applyRiverControlPoints(id: string, cps: RiverControlPoint[], keepMouth: boolean) {
+    const s = settingsRef.current;
+    const elev = elevRef.current;
+    if (!s || !elev) return;
+    const lakes = serializeWaterSurfaces();
+    const rebuiltIds = new Set<string>();
+    const queue: { id: string; cps: RiverControlPoint[]; keepMouth: boolean }[] = [{ id, cps, keepMouth }];
+    while (queue.length > 0) {
+      const job = queue.shift()!;
+      if (rebuiltIds.has(job.id)) continue;
+      const idx = riversRef.current.findIndex((r) => r.id === job.id);
+      if (idx < 0) continue;
+      const river = riversRef.current[idx];
+      const cpsIn = river.manualWidths ? assignManualDischarge(job.cps, river.manualWidths, river.params) : job.cps;
+      const others = riversRef.current.filter((r) => r.id !== job.id);
+      const result = buildRiverFromControlPoints(
+        river, cpsIn, elev, s.rows, s.cols, s.spacing, s.mapWidth, s.mapHeight, river.params, others, lakes, job.keepMouth,
+      );
+      const next = riversRef.current.slice();
+      next[idx] = { ...river, ...result.river, controlPoints: result.controlPoints };
+      riversRef.current = next;
+      rebuiltIds.add(job.id);
+      const rebuilt = next[idx];
+      for (const trib of riversRef.current) {
+        if (trib.carved || !trib.controlPoints || trib.id === job.id || rebuiltIds.has(trib.id)) continue;
+        if (trib.mouth !== "confluence" || trib.confluence?.riverId !== job.id) continue;
+        const tribCps = trib.controlPoints.slice();
+        const tail = tribCps[tribCps.length - 1];
+        const np = rebuilt.points[nearestPointIndex(rebuilt.points, tail)];
+        tribCps[tribCps.length - 1] = { ...tail, x: np.x, z: np.z };
+        queue.push({ id: trib.id, cps: tribCps, keepMouth: true });
+      }
+    }
+    syncRiverListState();
+  }
+
+  /** 作図モードで、作図中の流路に頂点を追加する(上流→下流の順) */
+  function addRiverDraftPoint(wx: number, wz: number) {
+    riverDraftPointsRef.current = [...riverDraftPointsRef.current, { x: wx, z: wz }];
+    setRiverDraftPointCount(riverDraftPointsRef.current.length);
+    draw();
+  }
+
+  /** 作図中の流路の頂点をすべて破棄する */
+  function clearRiverDraft() {
+    riverDraftPointsRef.current = [];
+    setRiverDraftPointCount(0);
+    draw();
+  }
+
+  /**
+   * 作図中の頂点列(2点以上)を1本の未彫り込みの川として登録する。頂点はそのまま制御点になり、
+   * 流量は上流端/下流端の川幅から逆算する。終点の位置から河口(海・湖・合流・接続なし)を判定し、
+   * 登録後はその川を選択して(ノード編集へすぐ移れるように)作図をクリアする。
+   */
+  function finishRiverDraft() {
+    const pts = riverDraftPointsRef.current;
+    const s = settingsRef.current;
+    const elev = elevRef.current;
+    if (pts.length < 2 || !s || !elev) return;
+    const ts = toolStateRef.current;
+    pushUndoState();
+    const id = `river_manual_${Date.now()}`;
+    const river: EditorRiver = {
+      id,
+      points: [],
+      mouth: "edge",
+      params: ts.riverParams,
+      carved: false,
+      depthCoef: ts.riverParams.depthCoef,
+      polygon: null,
+      controlPoints: pts.map((p) => ({ x: p.x, z: p.z, q: 0 })),
+      manualWidths: { head: ts.riverManualWidthHead, tail: ts.riverManualWidthTail },
+    };
+    riversRef.current = [...riversRef.current, river];
+    applyRiverControlPoints(id, river.controlPoints!, false);
+    riverDraftPointsRef.current = [];
+    setRiverDraftPointCount(0);
+    selectedRiverIdRef.current = id;
+    setSelectedRiverId(id);
+    draw();
+    rebuildRiverPreview();
+  }
+
+  /** ノードをドラッグで移動する(ドラッグ中に毎回呼ぶ。終点を動かした場合は河口を判定し直す) */
+  function moveRiverNode(river: EditorRiver, index: number, wx: number, wz: number) {
+    if (!river.controlPoints) return;
+    const cps = river.controlPoints.slice();
+    cps[index] = { ...cps[index], x: wx, z: wz };
+    applyRiverControlPoints(river.id, cps, index !== cps.length - 1);
+  }
+
+  /** 流路上をクリックした位置に制御点を挿入する(流量は前後の制御点から線分内位置で補間) */
+  function insertRiverNode(river: EditorRiver, segIndex: number, t: number, wx: number, wz: number) {
+    const cps = river.controlPoints;
+    if (!cps || segIndex < 0 || segIndex >= cps.length - 1) return;
+    const a = cps[segIndex];
+    const b = cps[segIndex + 1];
+    const inserted: RiverControlPoint = { x: wx, z: wz, q: a.q + (b.q - a.q) * t };
+    pushUndoState();
+    applyRiverControlPoints(river.id, [...cps.slice(0, segIndex + 1), inserted, ...cps.slice(segIndex + 1)], true);
+    draw();
+    rebuildRiverPreview();
+  }
+
+  /** 制御点を1つ削除する(2点は残す。終点を消した場合は新しい終点で河口を判定し直す) */
+  function deleteRiverNode(river: EditorRiver, index: number) {
+    const cps = river.controlPoints;
+    if (!cps || cps.length <= 2 || index < 0 || index >= cps.length) return;
+    pushUndoState();
+    hoveredRiverNodeRef.current = -1;
+    applyRiverControlPoints(river.id, cps.filter((_, i) => i !== index), index !== cps.length - 1);
+    draw();
+    rebuildRiverPreview();
+  }
+
+  /** 一覧の川幅ステッパー: 手動作図の川の上流端/下流端の川幅を変え、流路を作り直す */
+  function setManualRiverWidth(id: string, which: "head" | "tail", value: number) {
+    const river = riversRef.current.find((r) => r.id === id);
+    if (!river || river.carved || !river.controlPoints || !river.manualWidths) return;
+    riversRef.current = riversRef.current.map((r) =>
+      r.id === id && r.manualWidths ? { ...r, manualWidths: { ...r.manualWidths, [which]: value } } : r,
+    );
+    applyRiverControlPoints(id, river.controlPoints, true);
+    draw();
+    scheduleRiverPreviewRebuild();
+  }
+
+  /** ノード編集モードで、選択中の川のノードがカーソル直下にあればそのインデックスを返す */
+  function hitSelectedRiverNode(wx: number, wz: number): { river: EditorRiver; index: number } | null {
+    const target = nodeEditTargetRiver();
+    if (!target?.controlPoints) return null;
+    const index = findRiverNodeAt(target.controlPoints, wx, wz, riverHitToleranceWorld());
+    return index >= 0 ? { river: target, index } : null;
+  }
+
+  /**
+   * ノード編集モードでの左クリック(ノード以外): 選択中の川の流路上ならその位置に制御点を挿入し、
+   * 他の未彫り込みの川の流路上ならその川を選択する。
+   */
+  function handleRiverNodeClick(wx: number, wz: number) {
+    const target = nodeEditTargetRiver();
+    if (target?.controlPoints) {
+      const near = nearestOnPolyline(target.points, wx, wz);
+      if (near && near.dist <= riverLineToleranceWorld(target, wx, wz)) {
+        const seg = nearestOnPolyline(target.controlPoints, wx, wz);
+        if (seg) insertRiverNode(target, seg.index, seg.t, wx, wz);
+        return;
+      }
+    }
+    let best: { river: EditorRiver; dist: number } | null = null;
+    for (const river of riversRef.current) {
+      if (river.carved || !river.controlPoints || river.id === target?.id) continue;
+      const near = nearestOnPolyline(river.points, wx, wz);
+      if (!near || near.dist > riverLineToleranceWorld(river, wx, wz)) continue;
+      if (!best || near.dist < best.dist) best = { river, dist: near.dist };
+    }
+    if (best) {
+      selectedRiverIdRef.current = best.river.id;
+      setSelectedRiverId(best.river.id);
+      hoveredRiverNodeRef.current = -1;
+      draw();
+    }
+  }
+
+  /** ノード編集モードのマウス移動: ハンドルの強調とカーソル形状を更新する */
+  function updateRiverNodeHover(wx: number, wz: number) {
+    const hit = hitSelectedRiverNode(wx, wz);
+    const index = hit ? hit.index : -1;
+    if (canvasRef.current) canvasRef.current.style.cursor = index >= 0 ? "grab" : "";
+    hoveredRiverNodeRef.current = index;
   }
 
   /** ポリゴンが閉じた状態のとき、ぼかし幅を含む仮の選択範囲をプレビューCanvasへ書き込む */
@@ -3062,7 +3515,9 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       ...river,
       points: river.points.map((p) => ({ ...p, x: p.x + dx, z: p.z + dz })),
       polygon: river.polygon ? translatePolygon(river.polygon, dx, dz) : null,
+      controlPoints: river.controlPoints ? river.controlPoints.map((p) => ({ ...p, x: p.x + dx, z: p.z + dz })) : null,
     }));
+    riverDraftPointsRef.current = riverDraftPointsRef.current.map((p) => ({ x: p.x + dx, z: p.z + dz }));
     resourceAreasRef.current = resourceAreasRef.current.map((area) => ({
       ...area,
       points: area.points.map((p) => ({ x: p.x + dx, z: p.z + dz })),
@@ -3470,6 +3925,19 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       // ここでは登録まで行わず、パラメータ(水位/資源種別等)を設定してから確定ボタンで登録する2段階。
       // 通常時はポリゴン描画中(頂点3つ以上)ならポリゴン作成を完了(閉じる)する。それ以外は何もしない。
       if (e.button === 2) {
+        if (ts.riverPointerMode === "draw") {
+          // 流路の作図: 右クリックで川を確定する(2点未満なら何もしない)
+          finishRiverDraft();
+          return;
+        }
+        if (ts.riverPointerMode === "node") {
+          // ノード編集: ノードの右クリックで削除する
+          const rect = canvasEl.getBoundingClientRect();
+          const [wx, wz] = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
+          const hit = hitSelectedRiverNode(wx, wz);
+          if (hit) deleteRiverNode(hit.river, hit.index);
+          return;
+        }
         if (ts.waterMode) {
           if (waterPointsRef.current.length >= 3 && !ts.waterPolygonClosed) setWaterPolygonClosed(true);
           return;
@@ -3496,6 +3964,13 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       const v = viewRef.current;
       leftDownRef.current = { x: e.clientX, y: e.clientY };
       dragRef.current = { active: false, startX: e.clientX, startY: e.clientY, offX: v.offsetX, offY: v.offsetY };
+      // ノード編集: ノードの上で押した場合はパンではなくノードのドラッグにする(移動の確定は onMove の閾値判定)
+      if (ts.riverPointerMode === "node") {
+        const rect = canvasEl.getBoundingClientRect();
+        const [wx, wz] = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
+        const hit = hitSelectedRiverNode(wx, wz);
+        riverNodeDragRef.current = hit ? { riverId: hit.river.id, index: hit.index, moved: false } : null;
+      }
     }
 
     function onMove(e: MouseEvent) {
@@ -3511,6 +3986,29 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         }
         // ブラシ/ポリゴンのプレビュー追従のため、常に最新のワールド座標を保持する
         brushWorldPosRef.current = { x: wx, z: wz };
+      }
+
+      // ノードのドラッグ中: 閾値を超えたら(最初の1回だけ Undo を積んで)ノードを追従させ、パンはしない。
+      // 流路の作り直しは軽いので毎回行い、重い彫り込みプレビューはデバウンスして予約する。
+      const nodeDrag = riverNodeDragRef.current;
+      if (nodeDrag && leftDownRef.current) {
+        if (!nodeDrag.moved) {
+          const dx = e.clientX - leftDownRef.current.x;
+          const dy = e.clientY - leftDownRef.current.y;
+          if (Math.hypot(dx, dy) <= CLICK_VS_DRAG_THRESHOLD_PX) return;
+          nodeDrag.moved = true;
+          pushUndoState();
+          if (canvasEl.style) canvasEl.style.cursor = "grabbing";
+        }
+        const river = riversRef.current.find((r) => r.id === nodeDrag.riverId);
+        if (river && !river.carved && river.controlPoints) {
+          const [wx, wz] = screenToWorld(mx, my);
+          moveRiverNode(river, nodeDrag.index, wx, wz);
+          hoveredRiverNodeRef.current = nodeDrag.index;
+          draw();
+          scheduleRiverPreviewRebuild();
+        }
+        return;
       }
 
       // 左ボタン押下中、移動量が閾値を超えたらパンへ移行する(クリック単発とドラッグパンの判定)。
@@ -3532,16 +4030,39 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         return;
       }
 
-      if (inside) draw();
+      if (inside) {
+        if (toolStateRef.current.riverPointerMode === "node") {
+          const [wx, wz] = screenToWorld(mx, my);
+          updateRiverNodeHover(wx, wz);
+        }
+        draw();
+      }
     }
 
     function onUp(e: MouseEvent) {
+      // ノードのドラッグ終了: 動かしていれば最終状態で彫り込みプレビューを作り直す。
+      // 動かさずに離した(ノードをクリックしただけ)場合は何もしない。
+      const nodeDrag = riverNodeDragRef.current;
+      if (e.button === 0 && nodeDrag) {
+        riverNodeDragRef.current = null;
+        leftDownRef.current = null;
+        dragRef.current.active = false;
+        if (canvasEl.style) canvasEl.style.cursor = "grab";
+        if (nodeDrag.moved) rebuildRiverPreview();
+        return;
+      }
       // 左ボタンがドラッグへ移行せずに離された場合のみ、その位置でクリック単発の選択操作を行う。
       if (e.button === 0 && leftDownRef.current && !dragRef.current.active) {
         const ts = toolStateRef.current;
         const rect = canvasEl.getBoundingClientRect();
         const [wx, wz] = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
-        if (ts.waterMode) {
+        if (ts.riverPointerMode === "draw") {
+          // 流路の作図: 左クリックで頂点を追加する(上流→下流の順)
+          addRiverDraftPoint(wx, wz);
+        } else if (ts.riverPointerMode === "node") {
+          // ノード編集: 流路上のクリックでノード追加、他の川のクリックで選択の切り替え
+          handleRiverNodeClick(wx, wz);
+        } else if (ts.waterMode) {
           // 水面モード: 形状を閉じる前のみ、左クリックで水面ポリゴンの頂点を追加する。
           if (!ts.waterPolygonClosed) addWaterPoint(wx, wz);
         } else if (ts.resourceMode) {
@@ -3601,9 +4122,16 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
 
-  /** Undo / Redo のキーボードショートカット。Ctrl+Z で戻る、Ctrl+Y (Ctrl+Shift+Z) で進む。 */
+  /**
+   * Undo / Redo のキーボードショートカット。Ctrl+Z で戻る、Ctrl+Y (Ctrl+Shift+Z) で進む。
+   * Escape は流路の作図中の頂点を破棄する。
+   */
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape" && toolStateRef.current.riverPointerMode === "draw" && riverDraftPointsRef.current.length > 0) {
+        clearRiverDraft();
+        return;
+      }
       if (!e.ctrlKey || e.metaKey) return;
       // テキスト入力中はインターセプトしない
       const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
@@ -4307,6 +4835,92 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
             {/* 川編集カード群(降雨範囲 → 自動生成 → 作成済み一覧) */}
             {activeTab === "river" && (
               <>
+                {/* 操作モードカード: 川編集タブでのポインタ操作(降雨範囲の選択/川を描く/ノード編集)を切り替える */}
+                <div className="terrain-editor-card">
+                  <div className="terrain-editor-card-title">{t("terrainEditor.riverModeTitle", { defaultValue: "流路の操作" })}</div>
+                  <div className="terrain-editor-section">
+                    <div className="terrain-editor-toggle-group">
+                      <button
+                        type="button"
+                        className={`terrain-editor-toggle-btn ${riverPointerMode === "rain" ? "selected" : ""}`}
+                        onClick={() => setRiverPointerModeSafe("rain")}
+                      >
+                        {t("terrainEditor.riverModeRain", { defaultValue: "降雨範囲の選択" })}
+                      </button>
+                      <button
+                        type="button"
+                        className={`terrain-editor-toggle-btn ${riverPointerMode === "draw" ? "selected" : ""}`}
+                        disabled={status !== "ready"}
+                        onClick={() => setRiverPointerModeSafe("draw")}
+                      >
+                        {t("terrainEditor.riverModeDraw", { defaultValue: "川を描く" })}
+                      </button>
+                      <button
+                        type="button"
+                        className={`terrain-editor-toggle-btn ${riverPointerMode === "node" ? "selected" : ""}`}
+                        disabled={status !== "ready"}
+                        onClick={() => setRiverPointerModeSafe("node")}
+                      >
+                        {t("terrainEditor.riverModeNode", { defaultValue: "ノード編集" })}
+                      </button>
+                    </div>
+                    {riverPointerMode === "rain" && (
+                      <div className="terrain-editor-hint">
+                        {t("terrainEditor.riverModeRainHint", {
+                          defaultValue: "地形編集と同じ操作で範囲を選択します(自動生成の降雨範囲)。川を任意の場所に作るには「川を描く」、作成済みの流路を動かすには「ノード編集」を選んでください",
+                        })}
+                      </div>
+                    )}
+                    {riverPointerMode === "draw" && (
+                      <>
+                        <div className="terrain-editor-hint">
+                          {t("terrainEditor.riverDrawHint", {
+                            defaultValue:
+                              "左クリックで上流から下流の順に頂点を置き、右クリックで川を確定します(2点以上。Escで作図をやり直し)。頂点を通る滑らかな曲線が流路になり、終点が海・湖・他の川の上にあればそこへ接続されます。確定後は「ノード編集」で形を整えられます",
+                          })}
+                        </div>
+                        <div className="terrain-editor-param-row">
+                          <span className="terrain-editor-param-label">{t("terrainEditor.riverManualWidthHead", { defaultValue: "上流端の川幅(m)" })}</span>
+                          <NumberStepper value={riverManualWidthHead} onChange={setRiverManualWidthHead} min={manualWidthMin} max={500} step={1} integerOnly={false} />
+                        </div>
+                        <div className="terrain-editor-param-row">
+                          <span className="terrain-editor-param-label">{t("terrainEditor.riverManualWidthTail", { defaultValue: "下流端の川幅(m)" })}</span>
+                          <NumberStepper value={riverManualWidthTail} onChange={setRiverManualWidthTail} min={manualWidthMin} max={500} step={1} integerOnly={false} />
+                        </div>
+                        <div className="terrain-editor-polygon-count">
+                          {t("terrainEditor.riverDraftVertexCount", { defaultValue: `作図中の頂点数: ${riverDraftPointCount}`, count: riverDraftPointCount })}
+                        </div>
+                        <div className="terrain-editor-action-buttons">
+                          <button
+                            type="button"
+                            className="terrain-editor-btn terrain-editor-btn-confirm"
+                            disabled={riverDraftPointCount < 2}
+                            onClick={finishRiverDraft}
+                          >
+                            {t("terrainEditor.riverDraftConfirm", { defaultValue: "川を確定" })}
+                          </button>
+                          <button type="button" className="terrain-editor-btn" disabled={riverDraftPointCount === 0} onClick={clearRiverDraft}>
+                            {t("terrainEditor.riverDraftClear", { defaultValue: "作図クリア" })}
+                          </button>
+                        </div>
+                      </>
+                    )}
+                    {riverPointerMode === "node" && (
+                      <div className="terrain-editor-hint">
+                        {riverList.some((river) => river.id === selectedRiverId && river.editable)
+                          ? t("terrainEditor.riverNodeHint", {
+                              defaultValue:
+                                "選択中の川のノードをドラッグで移動、流路上の左クリックでノードを追加、ノードの右クリックで削除します(2点は残ります)。終点を海・湖・他の川の上へ動かすとそこへ接続されます。別の未彫り込みの川をクリックすると選択が切り替わります",
+                            })
+                          : t("terrainEditor.riverNodeNoTarget", {
+                              defaultValue:
+                                "編集する川を一覧で選択するか、地図上の未彫り込みの川をクリックしてください(彫り込み済みの川や読み込んだ川はノード編集できません。彫り直すには Ctrl+Z で彫り込み前に戻してください)",
+                            })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 {/* 降雨範囲カード: 地形編集と同じ選択マスクを降雨範囲として流用する */}
                 <div className="terrain-editor-card">
                   <div className="terrain-editor-card-title">{t("terrainEditor.rainAreaTitle", { defaultValue: "降雨範囲" })}</div>
@@ -4562,6 +5176,57 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                                   step={0.1}
                                   integerOnly={false}
                                 />
+                              </div>
+                            )}
+                            {/* 手動で描いた川は上流端/下流端の川幅を川ごとに変えられる(流路を作り直す) */}
+                            {!river.carved && river.manualWidths && (
+                              <>
+                                <div className="terrain-editor-param-row">
+                                  <span className="terrain-editor-param-label">
+                                    {t("terrainEditor.riverManualWidthHead", { defaultValue: "上流端の川幅(m)" })}
+                                  </span>
+                                  <NumberStepper
+                                    value={river.manualWidths.head}
+                                    onChange={(v) => setManualRiverWidth(river.id, "head", v)}
+                                    min={manualWidthMin}
+                                    max={500}
+                                    step={1}
+                                    integerOnly={false}
+                                  />
+                                </div>
+                                <div className="terrain-editor-param-row">
+                                  <span className="terrain-editor-param-label">
+                                    {t("terrainEditor.riverManualWidthTail", { defaultValue: "下流端の川幅(m)" })}
+                                  </span>
+                                  <NumberStepper
+                                    value={river.manualWidths.tail}
+                                    onChange={(v) => setManualRiverWidth(river.id, "tail", v)}
+                                    min={manualWidthMin}
+                                    max={500}
+                                    step={1}
+                                    integerOnly={false}
+                                  />
+                                </div>
+                              </>
+                            )}
+                            {/* 未彫り込みの川の河口の種類とノード数(ノード編集の対象かどうかの目安) */}
+                            {!river.carved && (
+                              <div className="terrain-editor-param-row">
+                                <span className="terrain-editor-param-label">
+                                  {t("terrainEditor.riverMouthLabel", { defaultValue: "河口" })}
+                                </span>
+                                <span className="terrain-editor-selection-status">
+                                  {river.mouth === "sea"
+                                    ? t("terrainEditor.riverMouthSea", { defaultValue: "海" })
+                                    : river.mouth === "lake"
+                                      ? t("terrainEditor.riverMouthLake", { defaultValue: "湖" })
+                                      : river.mouth === "confluence"
+                                        ? t("terrainEditor.riverMouthConfluence", { defaultValue: "他の川へ合流" })
+                                        : t("terrainEditor.riverMouthEdge", { defaultValue: "接続なし" })}
+                                  {river.editable
+                                    ? ` / ${t("terrainEditor.riverNodeCount", { defaultValue: `ノード${river.nodeCount}`, count: river.nodeCount })}`
+                                    : ""}
+                                </span>
                               </div>
                             )}
                             <div className="terrain-editor-action-buttons">

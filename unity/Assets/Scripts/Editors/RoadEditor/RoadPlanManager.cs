@@ -151,6 +151,25 @@ public partial class RoadPlanManager : MonoBehaviour
     private enum DragTarget { None, Point, ControlIn, ControlOut }
     private DragTarget dragTarget = DragTarget.None;
 
+    /// <summary>
+    /// 選択中ノードをドラッグしたときに動かす軸。XZ=地面に沿った移動、Y=地面からの高さ変更。
+    /// 未選択ノードのクリックでXZになり、選択済みノードを再クリックするたびにトグルする
+    /// (標高編集不可のバリアントではXZ固定)。ノードの選択解除でXZへ戻る。
+    /// </summary>
+    private enum AnchorDragAxis { XZ, Y }
+    private AnchorDragAxis anchorDragAxis = AnchorDragAxis.XZ;
+
+    // 高さドラッグの基準値。ドラッグ開始時のカーソル位置が指す平面上のYと、そのときのノード相対高さを
+    // 記録し、以後は差分で動かす。ノードの円は地面に描かれているため、絶対値で追従させると
+    // 掴んだ瞬間に高架ノードが地面へ落ちる。
+    private Vector3 verticalDragAnchor;
+    private float verticalDragStartPlaneY;
+    private float verticalDragStartRelY;
+
+    // 高さドラッグでカメラ正面向きの鉛直平面を使えるかの下限(カメラ前方ベクトルの水平成分の2乗長)。
+    // これ未満(ほぼ真上からの見下ろし)は平面とレイが平行に近づくため、画面縦ピクセル差の換算に切り替える。
+    private const float VERTICAL_DRAG_MIN_PLANE_NORMAL_SQR = 0.04f;
+
     // サブコンポーネント
     private OverlayMeshRenderer overlayRenderer;
     private GameObject overlayMeshObj;
@@ -267,6 +286,12 @@ public partial class RoadPlanManager : MonoBehaviour
             return currentEmbankmentHeight;
         }
     }
+
+    /// <summary>Editingフェーズでノードを選択中か(カーソルHUDの移動軸矢印の表示条件)。</summary>
+    public bool HasSelectedNode => phase == RoadEditorPhase.Editing && selectedPointIndex >= 0 && selectedPointIndex < points.Count;
+
+    /// <summary>選択中ノードのドラッグが高さ(Y)方向モードか。未選択時はfalse。</summary>
+    public bool IsVerticalDragMode => HasSelectedNode && anchorDragAxis == AnchorDragAxis.Y;
 
     /// <summary>
     /// 現在の PathSubtype で曲線モードが許可されているかをマスターデータから判定する。
@@ -559,6 +584,7 @@ public partial class RoadPlanManager : MonoBehaviour
         phase = RoadEditorPhase.Placing;
         points.Clear();
         selectedPointIndex = -1;
+        anchorDragAxis = AnchorDragAxis.XZ;
         hoveredEdgeIndex = -1;
         isDragging = false;
         dragTarget = DragTarget.None;
@@ -775,6 +801,7 @@ public partial class RoadPlanManager : MonoBehaviour
         phase = RoadEditorPhase.Inactive;
         points.Clear();
         selectedPointIndex = -1;
+        anchorDragAxis = AnchorDragAxis.XZ;
         hoveredEdgeIndex = -1;
         isDragging = false;
         dragTarget = DragTarget.None;
@@ -918,10 +945,14 @@ public partial class RoadPlanManager : MonoBehaviour
             }
             else if (hit.type == HitTargetType.Point)
             {
-                selectedPointIndex = hit.index;
+                SelectPoint(hit.index);
                 isDragging = true;
                 dragTarget = DragTarget.Point;
                 dragPointIndex = hit.index;
+                if (anchorDragAxis == AnchorDragAxis.Y)
+                {
+                    BeginVerticalDrag(cam);
+                }
                 EmitSelectNode();
             }
             else
@@ -935,7 +966,12 @@ public partial class RoadPlanManager : MonoBehaviour
         Vector3 newWorldPos = worldPos;
         newWorldPos.y = Utils.GetGroundHeight(newWorldPos);
 
-        if (dragTarget == DragTarget.Point)
+        if (dragTarget == DragTarget.Point && anchorDragAxis == AnchorDragAxis.Y)
+        {
+            if (dragPointIndex < 0 || dragPointIndex >= points.Count) return;
+            UpdateVerticalDrag();
+        }
+        else if (dragTarget == DragTarget.Point)
         {
             if (dragPointIndex < 0 || dragPointIndex >= points.Count) return;
 
@@ -987,17 +1023,77 @@ public partial class RoadPlanManager : MonoBehaviour
     }
 
     /// <summary>
+    /// 高さ(Y)ドラッグの基準を記録する。ノードの現在位置と、開始時のカーソルが指す高さを保存し、
+    /// 以後の UpdateVerticalDrag はここからの差分でノード標高を動かす。
+    /// </summary>
+    private void BeginVerticalDrag(Camera cam)
+    {
+        var pt = points[dragPointIndex];
+        verticalDragAnchor = pt.position;
+        verticalDragStartRelY = pt.position.y - Utils.GetGroundHeight(pt.position);
+        verticalDragStartPlaneY = ResolveVerticalDragY(cam, verticalDragAnchor);
+    }
+
+    /// <summary>
+    /// 高さ(Y)ドラッグの1フレーム分。カーソルが指す高さの変化量をノードの相対高さに加え、
+    /// キー入力と同じく min_height で下限を切って MoveAnchorPosition へ渡す(XZは動かさない)。
+    /// XZ吸着は高さに無関係なので適用しない。
+    /// </summary>
+    private void UpdateVerticalDrag()
+    {
+        Camera cam = gameCamera != null ? gameCamera : Camera.main;
+        if (cam == null) return;
+
+        float planeY = ResolveVerticalDragY(cam, verticalDragAnchor);
+        float relY = Mathf.Max(verticalDragStartRelY + (planeY - verticalDragStartPlaneY), GetMinHeightFromMaster());
+
+        Vector3 newPos = points[dragPointIndex].position;
+        newPos.y = Utils.GetGroundHeight(newPos) + relY;
+        MoveAnchorPosition(dragPointIndex, newPos);
+    }
+
+    /// <summary>
+    /// カーソルが指す「高さ」をワールドYで返す。基準ノードを通りカメラ正面を向いた鉛直平面と
+    /// マウスレイの交点を使うので、斜め視点ではカーソルの上下とノードの上下が一致する。
+    /// ほぼ真上からの視点では平面とレイが平行に近づき交点が飛ぶため、ノード奥行きでの
+    /// 1ピクセルあたりの長さに画面縦座標を掛けた値で代用する(差分でしか使わないので原点は任意)。
+    /// </summary>
+    private float ResolveVerticalDragY(Camera cam, Vector3 anchor)
+    {
+        Vector2 mouse = InputUtil.MousePosition;
+        Ray ray = cam.ScreenPointToRay(mouse);
+
+        Vector3 normal = cam.transform.forward;
+        normal.y = 0f;
+        if (normal.sqrMagnitude >= VERTICAL_DRAG_MIN_PLANE_NORMAL_SQR)
+        {
+            var plane = new Plane(normal.normalized, anchor);
+            if (plane.Raycast(ray, out float enter))
+            {
+                return ray.GetPoint(enter).y;
+            }
+        }
+
+        float depth = Mathf.Max(Vector3.Dot(anchor - cam.transform.position, cam.transform.forward), 1f);
+        float metersPerPixel = 2f * depth * Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad) / Screen.height;
+        return mouse.y * metersPerPixel;
+    }
+
+    /// <summary>
     /// InputHandlerからのドラッグ終了通知。
     /// </summary>
     public void ProcessMouseDragEnd(Vector3 worldPos)
     {
         if (isDragging && phase == RoadEditorPhase.Editing)
         {
+            bool movedAnchor = dragTarget == DragTarget.Point;
             isDragging = false;
             dragPointIndex = -1;
             dragTarget = DragTarget.None;
             Update3DPreview();
             EmitShapeUpdate();
+            // 頂点移動はUIパネルの選択ノード情報(位置・標高)も更新する
+            if (movedAnchor) EmitSelectNode();
         }
     }
 
@@ -1056,6 +1152,7 @@ public partial class RoadPlanManager : MonoBehaviour
 
         phase = RoadEditorPhase.Editing;
         selectedPointIndex = -1;
+        anchorDragAxis = AnchorDragAxis.XZ;
         hoveredEdgeIndex = -1;
 
         InvalidateShapeCache();
@@ -1369,7 +1466,16 @@ public partial class RoadPlanManager : MonoBehaviour
         // 状態管理が InputHandler 側のドラッグ閾値判定と整合する。
         if (hit.type == HitTargetType.Point)
         {
-            selectedPointIndex = hit.index;
+            if (hit.index == selectedPointIndex)
+            {
+                // 選択済みノードの再クリックは移動軸のトグル。標高編集不可のバリアントはXZ固定。
+                anchorDragAxis = (anchorDragAxis == AnchorDragAxis.XZ && IsHeightEditable())
+                    ? AnchorDragAxis.Y : AnchorDragAxis.XZ;
+            }
+            else
+            {
+                SelectPoint(hit.index);
+            }
             EmitSelectNode();
         }
         else if (hit.type == HitTargetType.Edge)
@@ -1378,8 +1484,21 @@ public partial class RoadPlanManager : MonoBehaviour
         }
         else
         {
-            selectedPointIndex = -1;
+            SelectPoint(-1);
         }
+    }
+
+    /// <summary>
+    /// ノードの選択を切り替える。別ノード(または未選択)への切り替えで移動軸はXZに戻す。
+    /// 同じノードの再指定では軸を保つ(ドラッグ開始時の再検出で軸が勝手に戻らないようにするため)。
+    /// </summary>
+    private void SelectPoint(int index)
+    {
+        if (index != selectedPointIndex)
+        {
+            anchorDragAxis = AnchorDragAxis.XZ;
+        }
+        selectedPointIndex = index;
     }
 
     private void HandleEditingRightClick(Vector3 worldPos)
@@ -1455,7 +1574,11 @@ public partial class RoadPlanManager : MonoBehaviour
             points.RemoveAt(index);
         }
 
-        if (selectedPointIndex == index) selectedPointIndex = -1;
+        if (selectedPointIndex == index)
+        {
+            selectedPointIndex = -1;
+            anchorDragAxis = AnchorDragAxis.XZ;
+        }
         else if (selectedPointIndex > index) selectedPointIndex--;
 
         InvalidateShapeCache();

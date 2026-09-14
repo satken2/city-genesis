@@ -56,7 +56,7 @@ public class CursorStatusHud : MonoBehaviour
     private const float ICON_SIZE = 22f;
     private const float ICON_SPACING = 3f;
     private const float PADDING = 5f;
-    private const int MAX_ICONS = 8;
+    private const int MAX_ICONS = 9;  // 道路編集=移動軸矢印1+曲線1+吸着7
     private const float OFFSET_X = 18f;   // カーソルからのオフセット(ツールチップと重ねない)
     private const float OFFSET_Y = -40f;
     // OFF状態は暗い背景パネルに馴染んで目立たなくなるよう、色を暗いグレーまで落とし

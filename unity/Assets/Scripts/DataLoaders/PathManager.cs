@@ -245,6 +245,7 @@ public class PathManager : BaseApiDataManager
     private Dictionary<Vector2Int, HashSet<int>> pathIdsByCell = new Dictionary<Vector2Int, HashSet<int>>();
     private Dictionary<int, HashSet<Vector2Int>> pathCellsById = new Dictionary<int, HashSet<Vector2Int>>();
     private Dictionary<int, List<Vector3>> pathPointsCache = new Dictionary<int, List<Vector3>>();
+    private const float CONSTRUCTION_SOUND_SAMPLE_INTERVAL = 25f; // 工事音の発音位置を決める中心線の間引き間隔(m)
 
     /// <summary>
     /// カメラ移動によるLOD更新中は TerrainManager.OnTerrainTileReady がセルごとに発火する。
@@ -731,6 +732,7 @@ public class PathManager : BaseApiDataManager
         loadedCells.Clear();
         nodeDataCache.Clear();
         pathDataCache.Clear();
+        ConstructionAmbience.Clear(ConstructionAmbience.Kind.Path);
         pendingPillarRebuildIds.Clear();
         pathsByNodeIndex.Clear();
         pathVersionCache.Clear();
@@ -3474,6 +3476,7 @@ public class PathManager : BaseApiDataManager
         AddPathToNodeIndex(path);
         if (changed)
         {
+            SyncConstructionSound(path);
             RegisterPathCells(path);
             EnqueuePillarNeighborRebuilds(path, GetPathCoveredCellsCached(path));
         }
@@ -3487,7 +3490,23 @@ public class PathManager : BaseApiDataManager
             EnqueuePillarNeighborRebuilds(path, GetPathCoveredCellsCached(path));
             RemovePathFromNodeIndex(pathId, path.start_node_id, path.end_node_id);
             pathDataCache.Remove(pathId);
+            ConstructionAmbience.Unregister(ConstructionAmbience.Kind.Path, pathId);
         }
+    }
+
+    /// <summary>
+    /// 工事音の現場登録をパスデータに同期する。工事中だけ中心線の点列(間引き済み)を登録し、それ以外は解除する。
+    /// 座標は描画点列と同じバックエンド座標(FloatingOriginのずれを含まない)で渡す。
+    /// </summary>
+    private void SyncConstructionSound(PathSummary path)
+    {
+        List<Vector3> points = path.status == Constants.STATUS_CONSTRUCTING ? CalculatePathPoints(path) : null;
+        if (points == null || points.Count < 2)
+        {
+            ConstructionAmbience.Unregister(ConstructionAmbience.Kind.Path, path.path_id);
+            return;
+        }
+        ConstructionAmbience.Register(ConstructionAmbience.Kind.Path, path.path_id, DecimatePolyline(points, CONSTRUCTION_SOUND_SAMPLE_INTERVAL));
     }
 
     private void RegisterPathData(PathSummary path)

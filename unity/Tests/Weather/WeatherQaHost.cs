@@ -158,6 +158,104 @@ public sealed class WeatherQaHost : MonoBehaviour
         foreach (var sound in sounds) Check(sound.volume == 0, "mute immediate");
         ambience.enabled = false;
         foreach (var sound in sounds) Check(!sound.isPlaying, "disable stops sound");
+
+        var construction = new GameObject("Construction ambience").AddComponent<ConstructionAmbience>();
+        camera.transform.position = new Vector3(0, 60, 0);
+        var road = new[] { new Vector3(-400, 0, 30), new Vector3(400, 0, 30) };
+        Check(ConstructionAmbience.NearestPoint(road, new Vector3(0, 60, 0)) == new Vector3(0, 0, 30), "nearest point on polyline");
+        Check(ConstructionAmbience.NearestPoint(road, new Vector3(900, 0, 0)) == new Vector3(400, 0, 30), "nearest point clamps to segment end");
+        ConstructionAmbience.Register(ConstructionAmbience.Kind.Path, 1, road);
+        for (int i = 0; i < 10; i++) ConstructionAmbience.Register(ConstructionAmbience.Kind.Building, 100 + i, new[] { new Vector3(20 * i, 0, -20) });
+        ConstructionAmbience.Register(ConstructionAmbience.Kind.Building, 999, new[] { new Vector3(3000, 0, 0) });
+        Check(ConstructionAmbience.SiteCount == 12, "construction sites registered");
+        yield return null; // 初回Updateで音量IPCを購読してから音量を送る(本編は2秒ごとの再送で追いつく)
+        ipc.Volume(0.5f);
+        yield return new WaitForSecondsRealtime(1f);
+        var voices = new System.Collections.Generic.List<AudioSource>();
+        foreach (var source in FindObjectsByType<AudioSource>(FindObjectsSortMode.None))
+            if (source.gameObject.name.StartsWith("Construction voice")) voices.Add(source);
+        Check(voices.Count == ConstructionAmbience.MaxVoices, "eight construction voices");
+        Check(construction.PlayingCount == ConstructionAmbience.MaxVoices, "eight nearest sites play");
+        bool roadHeard = false;
+        foreach (var voice in voices)
+        {
+            Check(voice.clip != null && voice.clip.loadType == AudioClipLoadType.CompressedInMemory, "construction clip imports in memory");
+            Check(voice.loop && voice.spatialBlend == 1f && voice.dopplerLevel == 0f, "construction voice is looping 3D audio without doppler");
+            Check(voice.transform.position.x < 1000f, "far site not selected");
+            Check(Mathf.Approximately(voice.volume, 0.5f), "construction voice faded in to settings volume");
+            if (voice.clip.name == "construction-path") { roadHeard = true; Check(voice.transform.position == new Vector3(0, 0, 30), "road voice sits at nearest point"); }
+        }
+        Check(roadHeard, "road site plays with path clip");
+        ConstructionAmbience.Register(ConstructionAmbience.Kind.Path, 1, road);
+        yield return null;
+        foreach (var voice in voices) Check(voice.isPlaying && Mathf.Approximately(voice.volume, 0.5f), "re-registering a site keeps its voice playing");
+        Check(ConstructionAmbience.SiteCount == 12, "re-registration does not duplicate sites");
+        ipc.Volume(0);
+        foreach (var voice in voices) Check(voice.volume == 0, "construction mute immediate");
+        ipc.Volume(0.5f);
+        ConstructionAmbience.Unregister(ConstructionAmbience.Kind.Path, 1);
+        yield return new WaitForSecondsRealtime(1f);
+        foreach (var voice in voices) Check(!(voice.isPlaying && voice.clip.name == "construction-path"), "unregistered site stops after fade");
+        Check(construction.PlayingCount == ConstructionAmbience.MaxVoices, "next nearest site fills the freed voice");
+        ConstructionAmbience.Clear(ConstructionAmbience.Kind.Building);
+        yield return new WaitForSecondsRealtime(1f);
+        Check(ConstructionAmbience.SiteCount == 0 && construction.PlayingCount == 0, "cleared sites stop");
+        construction.enabled = false;
+
+        var vehicles = new GameObject("Vehicle ambience").AddComponent<VehicleAmbience>();
+        Check(Mathf.Approximately(VehicleAmbience.CarPitch(0), 0.9f) && Mathf.Approximately(VehicleAmbience.CarPitch(30), 1.4f), "car pitch follows speed");
+        Check(Mathf.Approximately(VehicleAmbience.TrainGain(0), 0.35f) && Mathf.Approximately(VehicleAmbience.TrainGain(10), 1f), "train gain follows speed");
+        yield return null;
+        ipc.Volume(0.5f);
+        float reportUntil = Time.unscaledTime + 1f;
+        while (Time.unscaledTime < reportUntil)
+        {
+            for (int i = 0; i < 9; i++) VehicleAmbience.Report(VehicleAmbience.Kind.Car, i, new Vector3(10 * i, 0, 0), 20f);
+            VehicleAmbience.Report(VehicleAmbience.Kind.Bus, 1, new Vector3(0, 0, 10), 0f);
+            VehicleAmbience.Report(VehicleAmbience.Kind.Train, 1, new Vector3(0, 0, 100), 0f);
+            VehicleAmbience.Report(VehicleAmbience.Kind.Train, 2, new Vector3(0, 0, 900), 10f);
+            yield return null;
+        }
+        Check(VehicleAmbience.EmitterCount == 12, "vehicle emitters registered");
+        var carVoices = new System.Collections.Generic.List<AudioSource>();
+        var trainVoices = new System.Collections.Generic.List<AudioSource>();
+        foreach (var source in FindObjectsByType<AudioSource>(FindObjectsSortMode.None))
+        {
+            if (source.gameObject.name.StartsWith("Vehicle voice car")) carVoices.Add(source);
+            if (source.gameObject.name.StartsWith("Vehicle voice train")) trainVoices.Add(source);
+        }
+        Check(carVoices.Count == VehicleAmbience.CarVoices && trainVoices.Count == VehicleAmbience.TrainVoices, "vehicle voice pools");
+        Check(vehicles.PlayingCount == VehicleAmbience.CarVoices + 1, "six nearest cars and the near train play");
+        bool busHeard = false;
+        foreach (var voice in carVoices)
+        {
+            Check(voice.isPlaying && voice.clip.name == "vehicle-car" && voice.clip.loadType == AudioClipLoadType.CompressedInMemory, "car clip imports in memory");
+            Check(voice.loop && voice.spatialBlend == 1f && voice.dopplerLevel == 0f, "car voice is looping 3D audio without doppler");
+            Check(voice.transform.position.x <= 50f, "farthest cars not selected");
+            Check(Mathf.Approximately(voice.volume, 0.5f), "car voice faded in to settings volume");
+            if (voice.transform.position == new Vector3(0, 0, 10)) { busHeard = true; Check(Mathf.Approximately(voice.pitch, 0.9f), "stopped bus idles at low pitch"); }
+            else Check(Mathf.Approximately(voice.pitch, 1.4f), "moving car pitch");
+        }
+        Check(busHeard, "bus reports share the car clip");
+        int trainsPlaying = 0;
+        foreach (var voice in trainVoices)
+        {
+            if (!voice.isPlaying) continue;
+            trainsPlaying++;
+            Check(voice.clip.name == "vehicle-train" && voice.transform.position == new Vector3(0, 0, 100), "near train plays with train clip");
+            Check(Mathf.Approximately(voice.volume, 0.5f * 0.35f), "stopped train keeps a faint idle");
+        }
+        Check(trainsPlaying == 1, "far train not selected");
+        ipc.Volume(0);
+        foreach (var voice in carVoices) Check(voice.volume == 0, "vehicle mute immediate");
+        ipc.Volume(0.5f);
+        yield return new WaitForSecondsRealtime(1.6f);
+        Check(VehicleAmbience.EmitterCount == 0 && vehicles.PlayingCount == 0, "unreported vehicles drop after a second");
+        VehicleAmbience.Report(VehicleAmbience.Kind.Train, 3, new Vector3(0, 0, 50), 10f);
+        VehicleAmbience.Clear(VehicleAmbience.Kind.Train);
+        Check(VehicleAmbience.EmitterCount == 0, "clear removes kind");
+        vehicles.enabled = false;
+        camera.transform.position = new Vector3(220,95,-230); camera.transform.LookAt(new Vector3(0,28,70));
         Utils.GroundHeight = 0;
         camera.GetUniversalAdditionalCameraData().renderPostProcessing = true;
         camera.targetTexture = new RenderTexture(1280,720,24,RenderTextureFormat.ARGB32);

@@ -292,6 +292,7 @@ public class BuildingManager : BaseApiDataManager
         lodCache.Clear();
         buildingObjectsCache.Clear();
         buildingDataCache.Clear();
+        ConstructionAmbience.Clear(ConstructionAmbience.Kind.Building);
         buildingIdByInfraNodeId.Clear();
         buildingIdsByParcel.Clear();
         buildingIdsByCell.Clear();
@@ -655,6 +656,7 @@ public class BuildingManager : BaseApiDataManager
                 }
             }
             buildingDataCache.Remove(id);
+            ConstructionAmbience.Unregister(ConstructionAmbience.Kind.Building, id);
             // 視野ゲート・LRU関連の台帳も同期して外す
             detailedBuildingIds.Remove(id);
             buildingLastVisibleFrame.Remove(id);
@@ -1368,6 +1370,23 @@ public class BuildingManager : BaseApiDataManager
     }
 
     /// <summary>
+    /// 工事音の現場登録を建物データに同期する。建設中・解体中だけ中心点を登録し、それ以外は解除する。
+    /// 座標はバックエンド座標(FloatingOriginのずれを含まない)で渡す。
+    /// </summary>
+    private static void SyncConstructionSound(BuildingSummary data)
+    {
+        bool site = data.status == Constants.STATUS_CONSTRUCTING || data.status == Constants.STATUS_DEMOLISHING;
+        float[] cp = data.centerPointArray;
+        if (!site || cp == null || cp.Length < 2)
+        {
+            ConstructionAmbience.Unregister(ConstructionAmbience.Kind.Building, data.agent_id);
+            return;
+        }
+        float y = HeightmapTextureManager.GetTerrainHeight(new Vector3(cp[0], 1000f, cp[1]));
+        ConstructionAmbience.Register(ConstructionAmbience.Kind.Building, data.agent_id, new[] { new Vector3(cp[0], y, cp[1]) });
+    }
+
+    /// <summary>
     /// 建物データをキャッシュに登録し、インフラ接続端子ノードの逆引きインデックス
     /// （buildingIdByInfraNodeId）を同期する。buildingDataCache への直接代入は禁止で、
     /// 必ずこのメソッドを通すこと（逆引きインデックスの整合性を保つため）。
@@ -1392,6 +1411,7 @@ public class BuildingManager : BaseApiDataManager
 
         buildingDataCache[buildingData.agent_id] = buildingData;
         buildingBoundsRadius.Remove(buildingData.agent_id);
+        SyncConstructionSound(buildingData);
 
         if (buildingData.infra_node_id > 0)
         {

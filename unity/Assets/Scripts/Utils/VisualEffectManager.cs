@@ -1,9 +1,9 @@
-using System.Collections;
 using UnityEngine;
 
 /// <summary>
 /// 建物や道路のステータス変化時にビジュアルエフェクト（パーティクル）や
-/// 3D効果音を再生するシングルトンマネージャー。
+/// 3D効果音を再生するシングルトンマネージャー。AppRootが生成する。
+/// 音量は設定画面のmaster×sfx(ambience:volume)を購読し、受信するまでは無音。
 /// </summary>
 public class VisualEffectManager : MonoBehaviour
 {
@@ -12,30 +12,56 @@ public class VisualEffectManager : MonoBehaviour
     [Header("建設完了エフェクト設定")]
     [Tooltip("完成時に再生するパーティクルプレハブ")]
     public GameObject constructionCompleteParticlePrefab;
-    [Tooltip("完成時に再生する効果音")]
+    [Tooltip("完成時に再生する効果音。未設定なら Resources/Audio/Effects/construction-complete を探す")]
     public AudioClip constructionCompleteSound;
 
     [Header("解体・倒壊エフェクト設定")]
     [Tooltip("解体・倒壊時に再生するパーティクルプレハブ")]
     public GameObject demolitionParticlePrefab;
-    [Tooltip("解体・倒壊時に再生する効果音")]
+    [Tooltip("解体・倒壊時に再生する効果音。未設定なら Resources/Audio/Effects/demolition を探す")]
     public AudioClip demolitionSound;
 
     [Header("3Dオーディオ設定")]
+    [Tooltip("設定音量(master×sfx)に掛ける基準ゲイン")]
     [Range(0f, 1f)] public float soundVolume = 0.8f;
     [Tooltip("3Dサウンドが減衰を開始する距離")]
     public float audioMinDistance = 10f;
     [Tooltip("3Dサウンドが全く聞こえなくなる距離")]
     public float audioMaxDistance = 100f;
 
+    private IpcClient ipc;
+    private float settingsVolume;
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
         {
-            Destroy(gameObject);
+            Destroy(this);
             return;
         }
         Instance = this;
+        if (constructionCompleteSound == null) constructionCompleteSound = Resources.Load<AudioClip>("Audio/Effects/construction-complete");
+        if (demolitionSound == null) demolitionSound = Resources.Load<AudioClip>("Audio/Effects/demolition");
+    }
+
+    private void Update()
+    {
+        // IpcClientはUnity再起動や後起動で差し替わるため、CameraAmbienceと同じく参照を毎フレーム照合する。
+        if (ipc == IpcClient.Instance) return;
+        if (ipc != null) ipc.OnAmbienceVolume -= SetVolume;
+        ipc = IpcClient.Instance;
+        if (ipc != null) ipc.OnAmbienceVolume += SetVolume;
+    }
+
+    public void SetVolume(float value)
+    {
+        settingsVolume = float.IsNaN(value) || float.IsInfinity(value) ? 0f : Mathf.Clamp01(value);
+    }
+
+    private void OnDestroy()
+    {
+        if (ipc != null) ipc.OnAmbienceVolume -= SetVolume;
+        if (Instance == this) Instance = null;
     }
 
     /// <summary>
@@ -87,20 +113,21 @@ public class VisualEffectManager : MonoBehaviour
     /// </summary>
     private void Play3DSound(AudioClip clip, Vector3 position)
     {
-        if (clip == null) return;
+        if (clip == null || settingsVolume <= 0f) return;
 
         GameObject audioObj = new GameObject("3D_Sound_Effect");
         audioObj.transform.position = position;
 
         AudioSource source = audioObj.AddComponent<AudioSource>();
         source.clip = clip;
-        source.volume = soundVolume;
-        
+        source.volume = soundVolume * settingsVolume;
+
         // 3D音響設定
         source.spatialBlend = 1.0f; // 完全な3Dサウンド
         source.rolloffMode = AudioRolloffMode.Logarithmic;
         source.minDistance = audioMinDistance;
         source.maxDistance = audioMaxDistance;
+        source.dopplerLevel = 0f; // カメラの高速移動で音程が揺れないようにする
 
         source.Play();
 
