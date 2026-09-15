@@ -286,6 +286,7 @@ export function PathBuildSections({
               requiredTotal={pc.estimatedCost}
               supplyRatio={pc.supplyRatio}
               expectedDurationDays={pc.expectedDurationDays}
+              alignment={pc.alignment}
             />
           )}
         </div>
@@ -299,7 +300,15 @@ export function PathBuildSections({
       {pc.selectedVariant !== null && (
         <div className="pc-action-bar">
           {pc.nodes.length >= 2 && !pc.canConfirm && (
-            <p role="status">{t(pc.collisionChecking ? "path_construction.collisionChecking" : "path_construction.collisionUnready")}</p>
+            <p role="status">
+              {t(
+                pc.collisionChecking
+                  ? "path_construction.collisionChecking"
+                  : !pc.alignmentOk
+                    ? "path_construction.alignmentUnready"
+                    : "path_construction.collisionUnready",
+              )}
+            </p>
           )}
           <div className="pc-actions">
             <button className="pc-btn" type="button" onClick={onCancel}>
@@ -307,10 +316,12 @@ export function PathBuildSections({
             </button>
             <button
               className="pc-btn pc-btn-confirm"
-              // 資金不足(推定総額 > 利用可能額)は確定させない。バックエンドも同じ基準で拒否する。
+              // 資金不足(推定総額 > 利用可能額)と線形制約違反(急カーブ・急勾配)は確定させない。
+              // バックエンドも同じ基準で拒否する(INSUFFICIENT_FUNDS / CREATEPATH_CURVE_TOO_TIGHT / CREATEPATH_GRADE_TOO_STEEP)。
               disabled={
                 !pc.canConfirm
                 || isConfirming
+                || !pc.alignmentOk
                 || !isConstructionAffordable(pc.estimatedCost, pc.availableFunds)
               }
               type="button"

@@ -10,6 +10,10 @@
     "airPollution": "大気汚染",
     "overrideMaxSpeed": "制限速度を個別に設定",
     "maxSpeed": "制限速度",
+    "baseSpeed": "通過速度",
+    "minCurveRadius": "最小曲線半径",
+    "maxGrade": "最大勾配",
+    "straightLine": "直線",
     "utilization": "利用率",
     "trafficByVehicle": "交通量(1日あたり)",
     "trafficUnitPerDay": "/日",
@@ -74,6 +78,7 @@
   "path_construction": {
     "collisionChecking": "干渉を確認しています…",
     "collisionUnready": "形状を確定し、赤い占有範囲の干渉を解消してください。",
+    "alignmentUnready": "急なカーブや勾配が規格の制限を超えています。形状を緩めてください。",
     "constructionSpeed": "建設スピード",
     "selectType": "-- 種別を選択 --",
     "selectTypeFirst": "種別を選択してください",

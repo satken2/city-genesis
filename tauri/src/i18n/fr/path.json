@@ -10,6 +10,10 @@
     "airPollution": "Pollution de l'air",
     "overrideMaxSpeed": "Définir la limitation de vitesse individuellement",
     "maxSpeed": "Limitation de vitesse",
+    "baseSpeed": "Vitesse de passage",
+    "minCurveRadius": "Rayon de courbe min.",
+    "maxGrade": "Pente max.",
+    "straightLine": "Rectiligne",
     "utilization": "Utilisation",
     "trafficByVehicle": "Trafic (par jour)",
     "trafficUnitPerDay": "/jour",
@@ -74,6 +78,7 @@
   "path_construction": {
     "collisionChecking": "Vérification des collisions…",
     "collisionUnready": "Finalisez le tracé et résolvez les collisions signalées par les volumes rouges.",
+    "alignmentUnready": "Une courbe ou une pente dépasse les limites de cette norme. Adoucissez le tracé.",
     "constructionSpeed": "Vitesse de construction",
     "selectType": "-- Choisir le type --",
     "selectTypeFirst": "Choisissez un type",

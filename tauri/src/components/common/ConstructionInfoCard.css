@@ -95,3 +95,9 @@
   background: rgba(249, 115, 22, 0.08);
   border: 1px solid rgba(249, 115, 22, 0.35);
 }
+
+/* 線形制約(最小曲線半径・最大勾配)を超えた値。警告バナーと同じ系統の色で目立たせる */
+.construction-alignment-violated {
+  color: #e05a5a;
+  font-weight: 600;
+}

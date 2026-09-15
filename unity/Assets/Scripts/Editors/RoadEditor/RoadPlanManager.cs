@@ -218,9 +218,16 @@ public partial class RoadPlanManager : MonoBehaviour
     // 川の横断判定でパス中心線を標本化する間隔(m)。バックエンドは1m間隔だが、ドラッグ中の
     // リアルタイム判定なので粗くし、川幅(最小でも十数m)に対して取りこぼしが無い程度に留める。
     private const float RiverCrossingSampleStep = 2f;
+    // 線形(曲線半径・勾配)のローカル推定に使う中心線の標本間隔(m)。バックエンドの1m間隔と同じ
+    private const float AlignmentSampleStep = 1f;
     // 川の占有箱を出す範囲: 違反サンプル点からこの半径(m)以内のセルだけを赤く示す。
     private const float RiverOccupancyBoxRadius = 40f;
     private List<int> cachedMaxSpanViolations;
+    // 線形制約(最小曲線半径・最大勾配)を超える区間の点列(絶対座標)のローカル推定キャッシュと、
+    // HUD表示用の最小曲線半径(m)・最大勾配(%)。
+    private List<List<Vector3>> cachedAlignmentViolations;
+    private float cachedAlignmentMinRadius = float.PositiveInfinity;
+    private float cachedAlignmentMaxGradePct;
     private List<Vector3> cachedCollisionVolume;
     private bool authoritativeCollision;
     private List<Vector3> cachedBuildingVolume;
@@ -241,6 +248,7 @@ public partial class RoadPlanManager : MonoBehaviour
         cachedBuildingVolume = null;
         cachedMaxSpanViolations = null;
         cachedBuildingInterference = null;
+        cachedAlignmentViolations = null;
     }
 
     public void SetAuthoritativeCollision(bool value)
@@ -2375,6 +2383,7 @@ public partial class RoadPlanManager : MonoBehaviour
 
         DrawTunnelSections(cam);
         DrawMaxSpanWarnings(cam);
+        DrawAlignmentWarnings(cam);
         DrawElevationIntersections(cam);
         DrawBuildingInterference(cam);
 
@@ -3435,7 +3444,7 @@ public partial class RoadPlanManager : MonoBehaviour
 
         IpcClient.Instance.EmitEditPathUpdateShape(pathId, PathType, pointsList, startControl, endControl, embankmentHeights, waypointControls, Curved, PathFollowTerrainOverride, finalized,
             phase == RoadEditorPhase.Editing && points.Count >= 2 && CheckElevationIntersections().Count == 0
-            && CheckRiverCrossings().Count == 0);
+            && CheckRiverCrossings().Count == 0 && CheckAlignmentViolations().Count == 0);
     }
 
     // =====================================================================
@@ -3506,6 +3515,196 @@ public partial class RoadPlanManager : MonoBehaviour
             Vector3 b = points[i + 1].position;
             if (Vector3.Dot(a - camPos, camFwd) < 0f && Vector3.Dot(b - camPos, camFwd) < 0f) continue;
             overlayRenderer.AddSolidLine(a, b, warningColor, dashedLineThickness * 2.5f);
+        }
+    }
+
+    // =====================================================================
+    // 線形制約(最小曲線半径・最大勾配)のローカル推定
+    // =====================================================================
+
+    /// <summary>HUD用: 敷設中パスの最小曲線半径(m)。直線・点不足は +∞。</summary>
+    public float AlignmentMinRadius { get { CheckAlignmentViolations(); return cachedAlignmentMinRadius; } }
+
+    /// <summary>HUD用: 敷設中パスの最大縦断勾配(%)。</summary>
+    public float AlignmentMaxGradePct { get { CheckAlignmentViolations(); return cachedAlignmentMaxGradePct; } }
+
+    /// <summary>規格(min_curve_radius / max_grade)を超える区間があるか。</summary>
+    public bool HasAlignmentViolation => CheckAlignmentViolations().Count > 0;
+
+    /// <summary>線形指標を表示できる状態か(配置中は1点+ホバー、編集中は2点以上)。</summary>
+    public bool HasAlignmentMetrics =>
+        IsAlignmentTarget() && points.Count >= (phase == RoadEditorPhase.Placing ? 1 : 2);
+
+    /// <summary>線形の評価対象の種別か(バックエンド geo_path_alignment.ALIGNMENT_PATH_TYPES と同じ)。</summary>
+    private bool IsAlignmentTarget()
+    {
+        return PathType == Constants.PATH_MOTORWAY || PathType == Constants.PATH_STREET
+            || PathType == Constants.PATH_WALKWAY || PathType == Constants.PATH_TRACK
+            || PathType == Constants.PATH_MONORAIL;
+    }
+
+    /// <summary>
+    /// 敷設中パスの線形(曲線半径・縦断勾配)を1m間隔の点列からローカル推定し、規格
+    /// (path_master の min_curve_radius / max_grade。0=制限なし)を超える区間の点列を返す。
+    ///
+    /// バックエンド geo_path_alignment と同じ規則: 前後 PATH_CURVATURE_WINDOW_M の3点を通る
+    /// 円の半径を局所曲線半径(折れ線の角は小さな半径として現れる)、PATH_GRADE_SMOOTH_MIN_M の
+    /// 移動平均で均した絶対標高の前後差を勾配とする。権威判定はバックエンド
+    /// (construction-cost / validate / 登録時)で、ここはドラッグ追従の赤表示・HUD・
+    /// 確定ボタンの先回りに使う。編集中はキャッシュし、形状変更で無効化される。
+    /// </summary>
+    private List<List<Vector3>> CheckAlignmentViolations()
+    {
+        if (cachedAlignmentViolations != null)
+            return cachedAlignmentViolations;
+
+        var violations = new List<List<Vector3>>();
+        cachedAlignmentViolations = violations;
+        cachedAlignmentMinRadius = float.PositiveInfinity;
+        cachedAlignmentMaxGradePct = 0f;
+        if (!IsAlignmentTarget()) return violations;
+
+        float radiusLimit = 0f, gradeLimit = 0f;
+        if (MasterDataStore.Instance != null)
+        {
+            var master = MasterDataStore.Instance.GetPathMaster(PathSubtype);
+            if (master != null)
+            {
+                radiusLimit = master.min_curve_radius ?? 0f;
+                gradeLimit = master.max_grade ?? 0f;
+            }
+        }
+
+        var samples = BuildAlignmentSamples();
+        int n = samples.Count;
+        if (n < 3) return violations;
+
+        int w = Mathf.Max(1, Mathf.RoundToInt(LocalConstants.PATH_CURVATURE_WINDOW_M / AlignmentSampleStep));
+        var radius = new float[n];
+        for (int i = 0; i < n; i++)
+        {
+            int span = Mathf.Min(w, Mathf.Min(i, n - 1 - i));
+            radius[i] = span >= 1 ? Circumradius(samples[i - span], samples[i], samples[i + span]) : float.PositiveInfinity;
+            if (radius[i] < cachedAlignmentMinRadius) cachedAlignmentMinRadius = radius[i];
+        }
+
+        // 勾配: 標高を移動平均で均してから(float16地形の量子化段差を消す)、前後 w 点の標高差を距離で割る
+        int half = Mathf.Max(1, Mathf.RoundToInt(LocalConstants.PATH_GRADE_SMOOTH_MIN_M / AlignmentSampleStep)) / 2;
+        var smoothed = new float[n];
+        for (int i = 0; i < n; i++)
+        {
+            float sum = 0f;
+            for (int j = -half; j <= half; j++) sum += samples[Mathf.Clamp(i + j, 0, n - 1)].y;
+            smoothed[i] = sum / (2 * half + 1);
+        }
+        var gradePct = new float[n];
+        for (int i = 0; i < n; i++)
+        {
+            float ya = smoothed[Mathf.Clamp(i - w, 0, n - 1)];
+            float yb = smoothed[Mathf.Clamp(i + w, 0, n - 1)];
+            gradePct[i] = Mathf.Abs(yb - ya) / (2f * w * AlignmentSampleStep) * 100f;
+            if (gradePct[i] > cachedAlignmentMaxGradePct) cachedAlignmentMaxGradePct = gradePct[i];
+        }
+
+        // 違反サンプルの連続区間を点列にまとめる
+        List<Vector3> run = null;
+        for (int i = 0; i < n; i++)
+        {
+            bool bad = (radiusLimit > 0f && radius[i] < radiusLimit) || (gradeLimit > 0f && gradePct[i] > gradeLimit);
+            if (bad)
+            {
+                if (run == null) { run = new List<Vector3>(); violations.Add(run); }
+                run.Add(samples[i]);
+            }
+            else
+            {
+                run = null;
+            }
+        }
+        return violations;
+    }
+
+    /// <summary>
+    /// 敷設中の中心線を1m間隔・絶対標高付きの点列にする(CheckAlignmentViolations 用)。
+    /// 元は GetRenderPoints(曲線=約2m間隔で地上区間は地形高さ済み、直線=アンカーのみ)に
+    /// 配置中のホバー位置を加えたもの。直線モードの長いスパンで両端が地面高さなら地形追従
+    /// スパンなので各点で地形高さを引き、それ以外は両端のYを線形補間する(高架・トンネル・橋)。
+    /// </summary>
+    private List<Vector3> BuildAlignmentSamples()
+    {
+        var source = new List<Vector3>(GetRenderPoints());
+        if (phase == RoadEditorPhase.Placing && points.Count >= 1)
+        {
+            if (source.Count == 0 || (source[source.Count - 1] - hoverWorldPosition).sqrMagnitude > 0.01f)
+            {
+                source.Add(hoverWorldPosition);
+            }
+        }
+        var samples = new List<Vector3>();
+        if (source.Count < 2) return samples;
+
+        bool follow = EffectiveFollowTerrain();
+        for (int i = 0; i < source.Count - 1; i++)
+        {
+            Vector3 a = source[i];
+            Vector3 b = source[i + 1];
+            float dx = b.x - a.x;
+            float dz = b.z - a.z;
+            float len = Mathf.Sqrt(dx * dx + dz * dz);
+            if (len < 1e-3f) continue;
+            int steps = Mathf.Max(1, Mathf.CeilToInt(len / AlignmentSampleStep));
+            bool sampleTerrain = follow && len > 3f
+                && Mathf.Abs(a.y - Utils.GetGroundHeight(a)) < 0.05f
+                && Mathf.Abs(b.y - Utils.GetGroundHeight(b)) < 0.05f;
+            for (int k = (samples.Count == 0 ? 0 : 1); k <= steps; k++)
+            {
+                float t = (float)k / steps;
+                var p = new Vector3(a.x + dx * t, a.y + (b.y - a.y) * t, a.z + dz * t);
+                if (sampleTerrain) p.y = Utils.GetGroundHeight(p);
+                samples.Add(p);
+            }
+        }
+        return samples;
+    }
+
+    /// <summary>XZ平面で3点を通る円の半径。ほぼ一直線なら +∞。</summary>
+    private static float Circumradius(Vector3 a, Vector3 b, Vector3 c)
+    {
+        float abx = b.x - a.x, abz = b.z - a.z;
+        float acx = c.x - a.x, acz = c.z - a.z;
+        float bcx = c.x - b.x, bcz = c.z - b.z;
+        float cross = Mathf.Abs(abx * acz - abz * acx);
+        if (cross < 1e-6f) return float.PositiveInfinity;
+        float ab = Mathf.Sqrt(abx * abx + abz * abz);
+        float ac = Mathf.Sqrt(acx * acx + acz * acz);
+        float bc = Mathf.Sqrt(bcx * bcx + bcz * bcz);
+        return ab * bc * ac / (2f * cross);
+    }
+
+    /// <summary>
+    /// 線形制約を超える区間を赤の太線でハイライトする(max_span 警告と同じ表現)。
+    /// 1m間隔の点列を2点おきに結び、路面より少し浮かせて描く。
+    /// </summary>
+    private void DrawAlignmentWarnings(Camera cam)
+    {
+        if (overlayRenderer == null) return;
+
+        var violations = CheckAlignmentViolations();
+        if (violations.Count == 0) return;
+
+        Vector3 camPos = cam.transform.position;
+        Vector3 camFwd = cam.transform.forward;
+        Color warningColor = new Color(1f, 0.2f, 0.2f, 0.9f);
+        Vector3 lift = Vector3.up * 0.3f;
+        foreach (var run in violations)
+        {
+            for (int i = 2; i < run.Count + 1; i += 2)
+            {
+                Vector3 a = run[i - 2] + lift;
+                Vector3 b = run[Mathf.Min(i, run.Count - 1)] + lift;
+                if (Vector3.Dot(a - camPos, camFwd) < 0f && Vector3.Dot(b - camPos, camFwd) < 0f) continue;
+                overlayRenderer.AddSolidLine(a, b, warningColor, dashedLineThickness * 2.5f);
+            }
         }
     }
 

@@ -412,6 +412,12 @@ namespace GeneratedModels
         public object max_speed;
         /// <summary>制限速度をプレイヤー指定で上書きしているか（0/1）</summary>
         public bool override_max_speed;
+        /// <summary>形状から決まる通過速度(km/h)。制限速度・曲線半径・縦断勾配・端点の加減速から算出(geo_path_alignment)</summary>
+        public float base_speed;
+        /// <summary>パス内の最小曲線半径(m)。直線は上限値(1e6)</summary>
+        public float min_curve_radius;
+        /// <summary>パス内の最大縦断勾配(%)</summary>
+        public float max_grade;
         /// <summary>移動種別ごとの実通過時間（混雑込み）</summary>
         public Dictionary<string, float> travel_time;
         /// <summary>交通種別ごとの交通量（道路交通・鉄道交通など）</summary>

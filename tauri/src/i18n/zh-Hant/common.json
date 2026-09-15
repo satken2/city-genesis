@@ -60,6 +60,8 @@
     "CREATEPATH_OUTSIDE_COASTLINE": "無法在海岸線之外鋪設路徑。",
     "CREATEPATH_MULTIPLE_INTERSECTIONS": "與同一條道路多次相交。請選擇其他路線。",
     "CREATEPATH_ELEVATION_INTERSECTION": "偵測到立體交叉。請調整高度。",
+    "CREATEPATH_CURVE_TOO_TIGHT": "彎道對此規格而言過急。請放緩彎道。",
+    "CREATEPATH_GRADE_TOO_STEEP": "坡度對此規格而言過陡。請減小坡度。",
     "PATH_TOO_FEW_POINTS": "至少需要2個點。",
     "PATH_MAX_SPAN_EXCEEDED": "節點間距過長。請新增中間點。",
     "PATH_ELEVATION_CONFLICT": "偵測到立體交叉。請調整高度。",

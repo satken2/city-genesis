@@ -10,6 +10,10 @@
     "airPollution": "大气污染",
     "overrideMaxSpeed": "单独设置限速",
     "maxSpeed": "限速",
+    "baseSpeed": "通行速度",
+    "minCurveRadius": "最小曲线半径",
+    "maxGrade": "最大坡度",
+    "straightLine": "直线",
     "utilization": "使用率",
     "trafficByVehicle": "交通量（每日）",
     "trafficUnitPerDay": "/日",
@@ -74,6 +78,7 @@
   "path_construction": {
     "collisionChecking": "正在检查碰撞…",
     "collisionUnready": "请确定路线形状，并消除红色立体区域所示的碰撞。",
+    "alignmentUnready": "弯道或坡度超出此规格的限制。请放缓线形。",
     "constructionSpeed": "建设速度",
     "selectType": "-- 请选择种类 --",
     "selectTypeFirst": "请选择种类",

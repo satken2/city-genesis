@@ -4750,6 +4750,16 @@ public class PathMasterItem
     public bool? curve_allowed;
 
     /// <summary>
+    /// 線形制約: 許容する最小曲線半径(m)。0 または null は制限なし。敷設中のローカル推定
+    /// (RoadPlanManager.CheckAlignmentViolations)が赤表示・HUD・確定ボタンの先回りに使う
+    /// (権威判定はバックエンド geo_path_alignment)。
+    /// </summary>
+    public float? min_curve_radius;
+
+    /// <summary>線形制約: 許容する最大縦断勾配(%)。0 または null は制限なし。</summary>
+    public float? max_grade;
+
+    /// <summary>
     /// 路面の見た目を代表するマテリアル名（`Assets/Resources/` 直下の .mat 名）。
     /// 交差点アスファルトが「舗装路どうしならアスファルト、未舗装路が絡めば土」のように
     /// 接続道路の路面に合わせて塗り分けるために参照する。

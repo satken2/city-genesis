@@ -10,6 +10,10 @@
     "airPollution": "Air Pollution",
     "overrideMaxSpeed": "Override speed limit",
     "maxSpeed": "Speed Limit",
+    "baseSpeed": "Travel Speed",
+    "minCurveRadius": "Min. Curve Radius",
+    "maxGrade": "Max. Grade",
+    "straightLine": "Straight",
     "utilization": "Utilization",
     "trafficByVehicle": "Traffic (per day)",
     "trafficUnitPerDay": "/day",
@@ -74,6 +78,7 @@
   "path_construction": {
     "collisionChecking": "Checking for collisions…",
     "collisionUnready": "Finalize the shape and resolve any collisions shown by red volumes.",
+    "alignmentUnready": "A curve or grade exceeds the limits of this standard. Ease the alignment.",
     "constructionSpeed": "Construction Speed",
     "selectType": "-- Select Type --",
     "selectTypeFirst": "Please select a type",

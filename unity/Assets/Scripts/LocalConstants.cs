@@ -130,6 +130,8 @@ public static class LocalConstants
 
     public const float VEHICLE_TIME_EXAGGERATION = 60f; // 車描画の時間圧縮倍率。1=物理的に正確な同時存在台数(ほぼ常に0台)
     public const float VEHICLE_ACTIVE_HOURS_PER_DAY = 15f; // 1日の交通活動時間(h)。general_params.yamlのPATH_ACTIVE_HOURSと同値を保つ
+    public const float PATH_CURVATURE_WINDOW_M = 10f; // 曲線半径・勾配の評価窓(前後m)。general_params.yamlのPATH_CURVATURE_WINDOW_Mと同値を保つ
+    public const float PATH_GRADE_SMOOTH_MIN_M = 10f; // 勾配評価前の標高移動平均の距離(m)。バックエンドgeo_path_alignmentの_MIN_GRADE_SMOOTH_Mと同値を保つ
 
     public const bool UNITY_LOG_BUILDING = false; // BuildingMeshBuilder 等
     public const bool UNITY_LOG_ROAD = false;     // RoadPath 等

@@ -567,6 +567,10 @@ export type PathMasterEntry = {
    * 未定義は true（カーブ可）扱い。
    */
   curve_allowed?: boolean;
+  /** 線形制約: 許容する最小曲線半径(m)。0/未定義は制限なし */
+  min_curve_radius?: number;
+  /** 線形制約: 許容する最大縦断勾配(%)。0/未定義は制限なし */
+  max_grade?: number;
   /**
    * 駅パスのプラットフォーム幅(m)。master.yaml の platform_width に対応する。
    * 正の値を持つバリアント(駅)だけが建設時にホーム設置側(platform_side)を指定できる。
@@ -657,6 +661,29 @@ export type BudgetCategoryEntry = MasterNameEntry;
 /**
  * nearby_zones の各要素。隣接パスが所属している地区の zone_id と zone_name を持つ。
  */
+/**
+ * 敷設中パスの線形指標(usePathConstruction が construction-cost の alignment を集約した値)。
+ * ConstructionInfoCard の通過速度・線形制約の表示と、PathBuildSections の確定ブロックに使う。
+ */
+export type PathAlignmentSummary = {
+  /** 形状から決まる通過速度(km/h) */
+  baseSpeed: number;
+  /** 制限速度(km/h) */
+  maxSpeed: number;
+  /** 最小曲線半径(m)。null は直線 */
+  minCurveRadius: number | null;
+  /** 最大縦断勾配(%) */
+  maxGrade: number;
+  /** 規格の最小曲線半径(m)。0 は制限なし */
+  curveRadiusLimit: number;
+  /** 規格の最大勾配(%)。0 は制限なし */
+  gradeLimit: number;
+  /** 曲線半径が規格の下限を割る区間がある */
+  curveViolated: boolean;
+  /** 勾配が規格の上限を超える区間がある */
+  gradeViolated: boolean;
+};
+
 export type NearbyZoneEntry = {
   zone_id: number;
   zone_name: string;
@@ -690,6 +717,12 @@ export type PathData = {
   air_pollution: number | null;
   max_speed: number | null;
   override_max_speed: boolean;
+  /** 形状から決まる通過速度(km/h)。制限速度・曲線半径・勾配・端点の加減速から算出 */
+  base_speed?: number | null;
+  /** パス内の最小曲線半径(m)。直線は 1e6 */
+  min_curve_radius?: number | null;
+  /** パス内の最大縦断勾配(%) */
+  max_grade?: number | null;
   /** 地形追従の個別設定(-1=未設定[バリアント既定]/0=非追従/1=追従)。 */
   follow_terrain?: number;
   path_traffic: Record<string, number> | null;

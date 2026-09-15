@@ -6,6 +6,8 @@
  * 表示・編集項目:
  * - override_max_speed: 都市のデフォルト制限速度をこのパスで上書きするかどうか
  * - max_speed: override_max_speed が true の場合のみ編集可能な制限速度(km/h)
+ * - base_speed / min_curve_radius / max_grade: 形状から決まる通過速度と線形指標(読み取り専用)。
+ *   制限速度が通過速度を大きく上回るほど事故が起きやすいため、制限速度設定の隣に並べる
  * - utilization: 現在の利用率をメーターで表示する
  * - path_traffic: 車両種別ごとの交通量(1日あたりの通過トリップ数)を表形式で表示する
  *
@@ -25,6 +27,9 @@ import {
   PATH_TRANSPORT,
 } from "../../constants";
 import "./PathTrafficPanel.css";
+
+// バックエンド geo_path_alignment.NO_CURVATURE_RADIUS(直線扱いの半径上限)。これ以上は「直線」と表示する。
+const STRAIGHT_RADIUS_THRESHOLD = 1.0e6;
 
 type PathTrafficPanelProps = {
   path: PathData;
@@ -161,6 +166,30 @@ export function PathTrafficPanel({ path, apiBaseUrl, onSaved }: PathTrafficPanel
           </span>
         </div>
       </div>
+
+      {/* 形状から決まる通過速度と線形指標(読み取り専用) */}
+      {path.base_speed != null && (
+        <div className="agent-detail-grid path-alignment-grid">
+          <span className="agent-detail-label">{t("path.baseSpeed")}</span>
+          <span className="agent-detail-value">{Math.round(path.base_speed)} km/h</span>
+          {path.min_curve_radius != null && (
+            <>
+              <span className="agent-detail-label">{t("path.minCurveRadius")}</span>
+              <span className="agent-detail-value">
+                {path.min_curve_radius >= STRAIGHT_RADIUS_THRESHOLD
+                  ? t("path.straightLine")
+                  : `${Math.round(path.min_curve_radius)} m`}
+              </span>
+            </>
+          )}
+          {path.max_grade != null && (
+            <>
+              <span className="agent-detail-label">{t("path.maxGrade")}</span>
+              <span className="agent-detail-value">{path.max_grade.toFixed(1)} %</span>
+            </>
+          )}
+        </div>
+      )}
 
       {/* 保存ボタン */}
       <div className="path-save-row">

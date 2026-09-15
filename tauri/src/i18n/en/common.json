@@ -60,6 +60,8 @@
     "CREATEPATH_OUTSIDE_COASTLINE": "Paths cannot be placed outside the coastline.",
     "CREATEPATH_MULTIPLE_INTERSECTIONS": "The path intersects the same road multiple times. Please choose a different route.",
     "CREATEPATH_ELEVATION_INTERSECTION": "An elevation intersection was detected. Please adjust the height.",
+    "CREATEPATH_CURVE_TOO_TIGHT": "The curve is too tight for this path standard. Ease the curve.",
+    "CREATEPATH_GRADE_TOO_STEEP": "The grade is too steep for this path standard. Reduce the slope.",
     "PATH_TOO_FEW_POINTS": "At least 2 points are required.",
     "PATH_MAX_SPAN_EXCEEDED": "The distance between nodes is too long. Please add intermediate points.",
     "PATH_ELEVATION_CONFLICT": "An elevation intersection was detected. Please adjust the height.",

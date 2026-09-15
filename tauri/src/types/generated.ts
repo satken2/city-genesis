@@ -393,6 +393,12 @@ export type PathData = {
   max_speed?: any;
   /** 制限速度をプレイヤー指定で上書きしているか（0/1） */
   override_max_speed: boolean;
+  /** 形状から決まる通過速度(km/h)。制限速度・曲線半径・縦断勾配・端点の加減速から算出(geo_path_alignment) */
+  base_speed: number;
+  /** パス内の最小曲線半径(m)。直線は上限値(1e6) */
+  min_curve_radius: number;
+  /** パス内の最大縦断勾配(%) */
+  max_grade: number;
   /** 移動種別ごとの実通過時間（混雑込み） */
   travel_time: Record<string, number>;
   /** 交通種別ごとの交通量（道路交通・鉄道交通など） */

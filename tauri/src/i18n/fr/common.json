@@ -60,6 +60,8 @@
     "CREATEPATH_OUTSIDE_COASTLINE": "Impossible de tracer une voie au-delà du littoral.",
     "CREATEPATH_MULTIPLE_INTERSECTIONS": "La voie croise plusieurs fois la même route. Choisissez un autre tracé.",
     "CREATEPATH_ELEVATION_INTERSECTION": "Un croisement à niveaux différents a été détecté. Ajustez la hauteur.",
+    "CREATEPATH_CURVE_TOO_TIGHT": "La courbe est trop serrée pour cette norme. Adoucissez la courbe.",
+    "CREATEPATH_GRADE_TOO_STEEP": "La pente est trop forte pour cette norme. Réduisez la pente.",
     "PATH_TOO_FEW_POINTS": "Au moins 2 points sont requis.",
     "PATH_MAX_SPAN_EXCEEDED": "La distance entre les nœuds est trop grande. Ajoutez des points intermédiaires.",
     "PATH_ELEVATION_CONFLICT": "Un croisement à niveaux différents a été détecté. Ajustez la hauteur.",

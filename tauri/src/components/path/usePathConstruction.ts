@@ -53,6 +53,7 @@ import {
 } from "../../utils/ipc";
 import type { PathInterferenceHighlight } from "../../utils/ipc";
 import { fetchApi } from "../../utils/api";
+import type { PathAlignmentSummary } from "../../types";
 import {
   DIR_BOTH,
   PATH_ROPEWAY,
@@ -161,6 +162,40 @@ export type WaypointControls = {
   control_out: number[] | null;
 };
 
+/** POST /paths/construction-cost の alignment(バックエンド geo_path_alignment.alignment_for_api の形)。 */
+type PathAlignmentResponse = {
+  base_speed: number;
+  max_speed: number;
+  min_curve_radius: number | null;
+  max_grade: number;
+  curve_radius_limit: number;
+  grade_limit: number;
+  curve_violations: number[][];
+  grade_violations: number[][];
+  alignment_ok: boolean;
+};
+
+/**
+ * 複線の各線の線形指標を「最悪値」で1つにまとめる。
+ * 通過速度は最も遅い線、最小曲線半径は最も小さい線(直線=null は無視)、最大勾配は最も急な線。
+ * 閾値は先頭の線の規格(複線は同じ規格の線路群)。違反はいずれかの線にあれば真。
+ */
+function summarizeAlignment(items: Array<PathAlignmentResponse | undefined>): PathAlignmentSummary | null {
+  const valid = items.filter((a): a is PathAlignmentResponse => a != null);
+  if (valid.length === 0) return null;
+  const radii = valid.map((a) => a.min_curve_radius).filter((r): r is number => r != null);
+  return {
+    baseSpeed: Math.min(...valid.map((a) => a.base_speed)),
+    maxSpeed: valid[0].max_speed,
+    minCurveRadius: radii.length > 0 ? Math.min(...radii) : null,
+    maxGrade: Math.max(...valid.map((a) => a.max_grade)),
+    curveRadiusLimit: valid[0].curve_radius_limit,
+    gradeLimit: valid[0].grade_limit,
+    curveViolated: valid.some((a) => a.curve_violations.length > 0),
+    gradeViolated: valid.some((a) => a.grade_violations.length > 0),
+  };
+}
+
 export function usePathConstruction(
   masterData: MasterData | null,
   apiBaseUrl?: string,
@@ -233,6 +268,9 @@ export function usePathConstruction(
   const [supplyRatio, setSupplyRatio] = useState<number | null>(null);
   const [expectedDurationDays, setExpectedDurationDays] = useState<number | null>(null);
   const [isCostLoading, setIsCostLoading] = useState(false);
+  // 線形指標(通過速度・最小曲線半径・最大勾配・規格の閾値と違反)。construction-cost の
+  // alignment を複線は最悪値で集約する。null は未取得。
+  const [alignment, setAlignment] = useState<PathAlignmentSummary | null>(null);
   const costAbortControllerRef = useRef<AbortController | null>(null);
 
   /* ---- 派生データ ---- */
@@ -952,7 +990,7 @@ export function usePathConstruction(
 
   /* ---- 推定建設コストの取得 ---- */
   useEffect(() => {
-    if (!apiBaseUrl || selectedVariant === null || rawPoints.length < 2) {
+    if (!apiBaseUrl || selectedVariant === null || !constructionBody) {
       setEstimatedCost(null);
       setEstimatedDurationDays(null);
       setCostPerSimulationDays(null);
@@ -961,6 +999,7 @@ export function usePathConstruction(
       setAvailableFunds(null);
       setSupplyRatio(null);
       setExpectedDurationDays(null);
+      setAlignment(null);
       setIsCostLoading(false);
       return;
     }
@@ -972,13 +1011,11 @@ export function usePathConstruction(
 
     const url = `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/construction-cost`;
 
-    // 軌道複線は各線をオフセット済み中心線で見積もり、合算する(工期は最長を採用)。
-    const requests: { path_variant: number; points: number[][] }[] = railComponents
-      ? railComponents.map((comp) => ({
-          path_variant: comp.path_variant,
-          points: offsetPolyline3D(rawPoints, comp.lateral_offset ?? 0, comp.height_offset ?? 0),
-        }))
-      : [{ path_variant: selectedVariant, points: rawPoints }];
+    // 確定送信と同じ形状(複線は各線のオフセット済み中心線。制御点・盛土・地形追従も含む)で
+    // 見積もり、合算する(工期は最長を採用)。制御点と地形追従は線形(曲線半径・勾配)の
+    // 評価精度に効くため、アンカーだけを送って自動補完させない。余分なキー
+    // (travel_direction 等)はバックエンドが無視する。
+    const requests = constructionBody.paths;
 
     if (requests.length === 0) {
       setIsCostLoading(false);
@@ -990,13 +1027,7 @@ export function usePathConstruction(
         fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            path_variant: req.path_variant,
-            start_point: req.points[0],
-            end_point: req.points[req.points.length - 1],
-            waypoints: req.points.slice(1, -1),
-            curved: curveMode !== "straight",
-          }),
+          body: JSON.stringify(req),
           signal: controller.signal,
         }).then(async (res) => {
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -1037,6 +1068,7 @@ export function usePathConstruction(
         setExpectedDurationDays(results.some((r) => r.expected_duration_days != null)
           ? maxOf("expected_duration_days")
           : null);
+        setAlignment(summarizeAlignment(results.map((r) => r.alignment as PathAlignmentResponse | undefined)));
       })
       .catch((err) => {
         if ((err as Error).name !== "AbortError") {
@@ -1052,6 +1084,7 @@ export function usePathConstruction(
       setAvailableFunds(null);
           setSupplyRatio(null);
           setExpectedDurationDays(null);
+          setAlignment(null);
         }
       })
       .finally(() => {
@@ -1061,7 +1094,7 @@ export function usePathConstruction(
       });
 
     return () => controller.abort();
-  }, [apiBaseUrl, selectedVariant, rawPoints, curveMode, railComponents]);
+  }, [apiBaseUrl, selectedVariant, constructionBody]);
 
   return {
     category,
@@ -1114,6 +1147,9 @@ export function usePathConstruction(
     expectedDurationDays,
     isCostLoading,
     pathLength,
+    // 線形
+    alignment,
+    alignmentOk: alignment == null || (!alignment.curveViolated && !alignment.gradeViolated),
     // 選択・敷設
     onCategoryChange,
     onTypeChange,

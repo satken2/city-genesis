@@ -239,6 +239,14 @@ public class RoadEditControlMenu : MonoBehaviour
         {
             text += (text.Length > 0 ? "  " : "") + $"E {FormatMeters(embankment)}";
         }
+        // 線形: 最小曲線半径(R。直線は"-")と最大勾配(G)。規格を超えていれば "!" を前置する
+        if (rpm.HasAlignmentMetrics)
+        {
+            float radius = rpm.AlignmentMinRadius;
+            string radiusText = float.IsInfinity(radius) || radius >= 1e5f ? "R -" : $"R {Mathf.RoundToInt(radius)}m";
+            string mark = rpm.HasAlignmentViolation ? "!" : "";
+            text += (text.Length > 0 ? "  " : "") + $"{mark}{radiusText}  G {rpm.AlignmentMaxGradePct:0.0}%";
+        }
         return (hudIcons, text);
     }
 

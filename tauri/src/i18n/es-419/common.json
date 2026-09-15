@@ -60,6 +60,8 @@
     "CREATEPATH_OUTSIDE_COASTLINE": "No se pueden trazar vías fuera de la línea costera.",
     "CREATEPATH_MULTIPLE_INTERSECTIONS": "La vía cruza la misma calle varias veces. Elige otro trazado.",
     "CREATEPATH_ELEVATION_INTERSECTION": "Se detectó un cruce a desnivel. Ajusta la altura.",
+    "CREATEPATH_CURVE_TOO_TIGHT": "La curva es demasiado cerrada para este estándar. Suaviza la curva.",
+    "CREATEPATH_GRADE_TOO_STEEP": "La pendiente es demasiado pronunciada para este estándar. Reduce la pendiente.",
     "PATH_TOO_FEW_POINTS": "Se requieren al menos 2 puntos.",
     "PATH_MAX_SPAN_EXCEEDED": "La distancia entre nodos es demasiado larga. Agrega puntos intermedios.",
     "PATH_ELEVATION_CONFLICT": "Se detectó un cruce a desnivel. Ajusta la altura.",

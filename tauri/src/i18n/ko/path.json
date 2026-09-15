@@ -10,6 +10,10 @@
     "airPollution": "대기 오염",
     "overrideMaxSpeed": "제한 속도를 개별 설정",
     "maxSpeed": "제한 속도",
+    "baseSpeed": "통과 속도",
+    "minCurveRadius": "최소 곡선 반경",
+    "maxGrade": "최대 경사",
+    "straightLine": "직선",
     "utilization": "이용률",
     "trafficByVehicle": "교통량(1일당)",
     "trafficUnitPerDay": "/일",
@@ -74,6 +78,7 @@
   "path_construction": {
     "collisionChecking": "충돌 확인 중…",
     "collisionUnready": "경로를 확정하고 빨간 입체 영역으로 표시된 충돌을 해결하세요.",
+    "alignmentUnready": "급한 곡선 또는 경사가 규격 제한을 초과합니다. 형상을 완만하게 하세요.",
     "constructionSpeed": "건설 속도",
     "selectType": "-- 종류 선택 --",
     "selectTypeFirst": "종류를 선택하세요",

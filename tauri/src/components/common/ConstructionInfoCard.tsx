@@ -24,9 +24,13 @@
  * - availableFunds / requiredTotal を渡すと「利用可能な資金」の行を出し、必要総額が
  *   利用可能額を超えるときは資金不足の警告バナーを付ける(建設パネル用。確定ボタンの
  *   無効化は呼び出し側が utils/constructionFunding の同じ判定で行う)。
+ * - alignment を渡すと通過速度・最小曲線半径・最大勾配の行が付く(パス建設パネル用)。
+ *   規格の閾値(min_curve_radius / max_grade)を超える値は赤字にし、警告バナーを付ける
+ *   (確定ボタンの無効化は呼び出し側=PathBuildSections が alignmentOk で行う)。
  */
 
 import { useTranslation } from "react-i18next";
+import type { PathAlignmentSummary } from "../../types";
 import { Money } from "./Money";
 import { costRatioColor } from "../../utils/costRatio";
 import { constructionFundsShortfall } from "../../utils/constructionFunding";
@@ -80,6 +84,8 @@ type ConstructionInfoCardProps = {
   requiredTotal?: number | null;
   /** 建設中・解体中の実績情報。渡すと1エポックコスト・残り期間ブロックを表示する */
   perEpoch?: ConstructionPerEpochInfo;
+  /** 線形指標(パス系)。undefined なら行ごと非表示、null なら "—"(取得中・未確定) */
+  alignment?: PathAlignmentSummary | null;
 };
 
 export function ConstructionInfoCard({
@@ -99,6 +105,7 @@ export function ConstructionInfoCard({
   availableFunds,
   requiredTotal,
   perEpoch,
+  alignment,
 }: ConstructionInfoCardProps) {
   const { t } = useTranslation();
 
@@ -193,6 +200,47 @@ export function ConstructionInfoCard({
             : "—"}
         </span>
 
+        {/* 線形指標(パス系のみ)。規格の閾値を超える値は赤字 */}
+        {alignment !== undefined && (
+          <>
+            <span className="construction-info-label">{t("construction.passSpeed")}</span>
+            <span className="construction-info-value">
+              {isCostLoading
+                ? t("common.loading")
+                : alignment != null
+                ? t("construction.passSpeedValue", {
+                    speed: Math.round(alignment.baseSpeed),
+                    max: Math.round(alignment.maxSpeed),
+                  })
+                : "—"}
+            </span>
+
+            <span className="construction-info-label">{t("construction.minCurveRadius")}</span>
+            <span
+              className={`construction-info-value${alignment?.curveViolated ? " construction-alignment-violated" : ""}`}
+            >
+              {isCostLoading
+                ? t("common.loading")
+                : alignment != null
+                ? alignment.minCurveRadius != null
+                  ? `${Math.round(alignment.minCurveRadius)} ${t("construction.unitMeter")}`
+                  : t("construction.straightLine")
+                : "—"}
+            </span>
+
+            <span className="construction-info-label">{t("construction.maxGrade")}</span>
+            <span
+              className={`construction-info-value${alignment?.gradeViolated ? " construction-alignment-violated" : ""}`}
+            >
+              {isCostLoading
+                ? t("common.loading")
+                : alignment != null
+                ? `${alignment.maxGrade.toFixed(1)} %`
+                : "—"}
+            </span>
+          </>
+        )}
+
         {/* 都市の建設能力から見た見込み建設期間。充足率が十分なときは行ごと出さない */}
         {supplyShortageLevel && expectedDurationDays != null && (
           <>
@@ -209,6 +257,18 @@ export function ConstructionInfoCard({
           </>
         )}
       </div>
+
+      {/* 線形制約の違反警告(規格の最小曲線半径・最大勾配を超えている) */}
+      {!isCostLoading && alignment?.curveViolated && (
+        <div className="construction-supply-note construction-supply-note-severe">
+          {t("construction.curveTooTight", { limit: Math.round(alignment.curveRadiusLimit) })}
+        </div>
+      )}
+      {!isCostLoading && alignment?.gradeViolated && (
+        <div className="construction-supply-note construction-supply-note-severe">
+          {t("construction.gradeTooSteep", { limit: alignment.gradeLimit })}
+        </div>
+      )}
 
       {/* 建設サービスの供給不足警告 */}
       {supplyShortageLevel && (
