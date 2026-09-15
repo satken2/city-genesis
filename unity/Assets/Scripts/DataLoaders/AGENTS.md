@@ -255,3 +255,5 @@ TrackPath.InfrastructureConnectionProviderにはIsInfrastructureConnectionを登
 PathMasterItem.house_placementはoutside/insideを受信する。駅舎の個別house_endsはPathSummaryに載り、通常のversion差分で再描画する。
 
 工事中パスの進捗は `ConstructionPathSummary` が一覧・単体取得の `construction_progress` を保持する。`PagedPathListResponse` は独自の型付き一覧。エポック取得時はversion/statusに加えて進捗を比較し、再利用キーにも含める。進捗だけの変化でも地形追従の完了記録を無効化する。生成はConstructionPathBuilder、公開G文書§15とTests/ConstructionPaths参照。
+
+`PathMasterItem.smooth_factor` はマスターAPIの標高平滑化距離を受信する。RoadPlanManagerの勾配推定ではバックエンド同様に最小10mへ制限して用い、型から省略して固定10mで代用しない。

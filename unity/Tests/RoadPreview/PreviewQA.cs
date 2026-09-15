@@ -76,7 +76,9 @@ public static class PreviewQA
             Require(filter.sharedMesh == null, "Reset left moving mesh attached");
             Require(before.Count == 2, "Reset mutated source points");
             CheckManager(asm, renderer);
-            File.WriteAllText(result, "PASS: 100 updates preserve detailed prefix and dynamic Mesh; suffix reuse, double track, slope, winding, release, resume, reset; manager placing, dragging and release partitions.");
+            CheckAlignment(asm, item);
+            CheckControlHeights(asm);
+            File.WriteAllText(result, "PASS: 100 updates preserve detailed prefix and dynamic Mesh; suffix reuse, double track, slope, winding, release, resume, reset; manager placing, dragging and release partitions; alignment curves, grades, hover and uniform samples.");
             EditorApplication.Exit(0);
         }
         catch (Exception ex)
@@ -161,4 +163,159 @@ public static class PreviewQA
         type.GetMethod("RecomputeAllControlPoints", flags).Invoke(manager, new object[] { false });
         Require(pointType.GetField("control_in").GetValue(anchors[6]) != null, "Placed waypoint has no incoming control");
     }
+    private static void CheckAlignment(Assembly asm, object master)
+    {
+        var type = asm.GetType("RoadPlanManager");
+        var manager = new GameObject("AlignmentManager").AddComponent(type);
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
+        void Set(string name, object value) => type.GetField(name, flags).SetValue(manager, value);
+        object Call(string name, params object[] args) => type.GetMethod(name, flags).Invoke(manager, args);
+        float Metric(string name) => (float)type.GetProperty(name).GetValue(manager);
+        bool State(string name) => (bool)type.GetProperty(name).GetValue(manager);
+        void Master(string name, object value) => master.GetType().GetField(name).SetValue(master, value);
+        Set("PathSubtype", 100);
+        Set("PathType", 4);
+        Set("phase", Enum.Parse(asm.GetType("RoadEditorPhase"), "Editing"));
+        Master("min_curve_radius", 160f);
+        Master("max_grade", 3.5f);
+        Master("smooth_factor", 80f);
+        var anchors = (IList)type.GetField("points", flags).GetValue(manager);
+        var pt = asm.GetType("PathBuildPoint");
+        var role = asm.GetType("PathPointRole");
+        object Add(Vector3 p, string kind)
+        {
+            var anchor = Activator.CreateInstance(pt, p, Enum.Parse(role, kind));
+            anchors.Add(anchor);
+            return anchor;
+        }
+        void Clear(bool curved)
+        {
+            anchors.Clear();
+            Set("Curved", curved);
+            Call("InvalidateShapeCache");
+        }
+        void Curve(float scale)
+        {
+            Clear(true);
+            var a = Add(new Vector3(0, 6, 0), "Start");
+            var b = Add(new Vector3(1000 * scale, 6, 100 * scale), "End");
+            pt.GetField("control_out").SetValue(a, new Vector3(1000f / 3 * scale, 6, 0));
+            pt.GetField("control_in").SetValue(b, new Vector3(2000f / 3 * scale, 6, 100 * scale));
+            anchors[0] = a;
+            anchors[1] = b;
+        }
+        // 1kmの緩いベジエを固定17分割で測ると半径が約321mに縮む回帰を検出する。
+        Curve(1);
+        float radius = Metric("AlignmentMinRadius");
+        Require(radius > 1550 && radius < 1800, "Gentle Bezier radius: " + radius);
+        Require(Metric("AlignmentMaxGradePct") < 0.001f, "Level viaduct acquired a grade");
+        Require(!State("HasAlignmentViolation"), "Gentle level viaduct rejected");
+        // 地図上の位置だけで半径が変化しないこと。判定用再標本化まで相対座標を維持する。
+        foreach (float offset in new[] { 10000f, 50000f, 100000f })
+        {
+            Curve(1);
+            Vector3 shift = new Vector3(offset, 0, offset);
+            for (int i = 0; i < anchors.Count; i++)
+            {
+                var a = anchors[i];
+                pt.GetField("position").SetValue(a, (Vector3)pt.GetField("position").GetValue(a) + shift);
+                foreach (string key in new[] { "control_in", "control_out" })
+                {
+                    var c = pt.GetField(key).GetValue(a);
+                    if (c != null) pt.GetField(key).SetValue(a, (Vector3)c + shift);
+                }
+                anchors[i] = a;
+            }
+            Call("InvalidateShapeCache");
+            float translated = Metric("AlignmentMinRadius");
+            Require(Mathf.Abs(translated - radius) < radius * 0.04f, "World position changed curve radius: " + translated);
+        }
+        Curve(0.05f);
+        Require(State("HasCurveViolation") && !State("HasGradeViolation"), "Tight curve must warn independently");
+        Clear(false);
+        for (int x = 0; x <= 300; x++)
+            Add(new Vector3(x, 6 + 1.5f * Mathf.Exp(-Mathf.Pow((x - 150) / 15f, 2)), 0),
+                x == 0 ? "Start" : x == 300 ? "End" : "Waypoint");
+        float smoothed = Metric("AlignmentMaxGradePct");
+        Require(smoothed > 1.55f && smoothed < 1.7f && !State("HasGradeViolation"), "80m master smoothing: " + smoothed);
+        Master("smooth_factor", 10f);
+        Call("InvalidateShapeCache");
+        Require(Metric("AlignmentMaxGradePct") > 6 && State("HasGradeViolation"), "10m smoothing must retain bump grade");
+        Master("smooth_factor", 80f);
+        Clear(false);
+        Add(new Vector3(0, 6, 0), "Start");
+        Add(new Vector3(500, 41, 0), "End");
+        float steep = Metric("AlignmentMaxGradePct");
+        Require(steep > 6.9f && steep < 7.1f && State("HasGradeViolation"), "Sustained steep grade must warn: " + steep);
+        Require(!State("HasCurveViolation"), "Straight grade warned as curve");
+        Clear(false);
+        Add(new Vector3(0, 6, 0), "Start");
+        Add(new Vector3(0.3f, 6, 0), "Waypoint");
+        Add(new Vector3(100.2f, 6, 0), "End");
+        var samples = (List<Vector3>)Call("BuildAlignmentSamples");
+        for (int i = 1; i < samples.Count; i++)
+            Require(Mathf.Abs(Vector3.Distance(samples[i - 1], samples[i]) - 100.2f / 101) < 0.0001f, "Segment boundaries broke equal spacing");
+        Clear(true);
+        Set("phase", Enum.Parse(asm.GetType("RoadEditorPhase"), "Placing"));
+        Set("currentHeight", 6f);
+        Add(new Vector3(0, 6, 0), "Start");
+        Add(new Vector3(100, 6, 0), "Waypoint");
+        Set("hoverWorldPosition", new Vector3(200, 0, 100));
+        Call("RecomputeAllControlPoints", false);
+        samples = (List<Vector3>)Call("BuildAlignmentSamples");
+        Require(samples.Exists(p => p.z < -0.1f), "Alignment omitted incoming hover tangent");
+        Require(samples.Exists(p => p.x > 110 && p.x < 180 && Mathf.Abs(p.z - (p.x - 100)) > 1), "Alignment used straight hover chord");
+        Require(Vector3.Distance(samples[samples.Count - 1], new Vector3(200, 6, 100)) < 0.001f, "Alignment appended raw ground hover");
+        Require(Metric("AlignmentMaxGradePct") < 0.001f, "Hover height created fictitious slope");
+        Clear(true);
+        Add(new Vector3(0, 6, 0), "Start");
+        Set("hoverWorldPosition", new Vector3(200, 0, 0));
+        Require(!State("HasAlignmentViolation"), "Single point plus hover rejected");
+        Set("hoverWorldPosition", new Vector3(0, 0, 0));
+        Call("InvalidateShapeCache");
+        Require(!State("HasAlignmentViolation"), "Coincident hover rejected");
+        anchors.Clear();
+        Call("InvalidateShapeCache");
+        Require(!State("HasAlignmentViolation"), "Empty path rejected");
+    }
+
+    private static void CheckControlHeights(Assembly asm)
+    {
+        var terrainData = new TerrainData { heightmapResolution = 33, size = new Vector3(200, 100, 200) };
+        var heights = new float[33, 33];
+        for (int z = 0; z < 33; z++)
+        for (int x = 0; x < 33; x++) heights[z, x] = 0.2f + x * 0.01f;
+        terrainData.SetHeights(0, 0, heights);
+        var terrain = Terrain.CreateTerrainGameObject(terrainData);
+        asm.GetType("Utils").GetMethod("InvalidateHeightCache").Invoke(null, null);
+        var type = asm.GetType("RoadPlanManager");
+        const BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
+        var manager = new GameObject("HeightManager").AddComponent(type);
+        var anchor = new Vector3(0, 60, 20);
+        var control = new Vector3(100, 63, 20);
+        var encoded = (List<float>)type.GetMethod("ControlToRelativeList", flags).Invoke(null, new object[] { control, anchor });
+        Require(Mathf.Abs(encoded[1] - 43) < 0.02f, "Control encoded relative to control terrain instead of anchor");
+        var restored = (Vector3)type.GetMethod("RestoreControl", flags).Invoke(null, new object[] { encoded[0], encoded[1], encoded[2], anchor });
+        Require(Vector3.Distance(restored, control) < 0.001f, "Control height round trip over sloped terrain");
+        var pt = asm.GetType("PathBuildPoint");
+        var role = asm.GetType("PathPointRole");
+        var anchors = (IList)type.GetField("points", flags).GetValue(manager);
+        var point = Activator.CreateInstance(pt, anchor, Enum.Parse(role, "Start"));
+        pt.GetField("control_out").SetValue(point, control);
+        pt.GetField("control_out_manual").SetValue(point, true);
+        anchors.Add(point);
+        type.GetMethod("MoveAnchorPosition", flags).Invoke(manager, new object[] { 0, anchor + new Vector3(20, 5, 0) });
+        var moved = (Vector3)pt.GetField("control_out").GetValue(anchors[0]);
+        Require(Vector3.Distance(moved, control + new Vector3(20, 5, 0)) < 0.001f, "Anchor movement changed vertical tangent with underlying terrain");
+        point = anchors[0];
+        pt.GetField("control_in").SetValue(point, new Vector3(10, 62, 10));
+        anchors[0] = point;
+        type.GetMethod("EnforceCollinearControls", flags).Invoke(manager, new object[] { 0, true });
+        var opposite = (Vector3)pt.GetField("control_in").GetValue(anchors[0]);
+        Require(Mathf.Abs(opposite.y - 62) < 0.001f, "Planar collinearity changed control height");
+        UnityEngine.Object.DestroyImmediate(terrain);
+        UnityEngine.Object.DestroyImmediate(terrainData);
+        asm.GetType("Utils").GetMethod("InvalidateHeightCache").Invoke(null, null);
+    }
+
 }

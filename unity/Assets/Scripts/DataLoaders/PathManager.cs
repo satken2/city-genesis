@@ -4758,6 +4758,8 @@ public class PathMasterItem
 
     /// <summary>線形制約: 許容する最大縦断勾配(%)。0 または null は制限なし。</summary>
     public float? max_grade;
+    /// <summary>縦断勾配を評価する標高平滑化距離(m)。最小10mでバックエンドと共用する。</summary>
+    public float? smooth_factor;
 
     /// <summary>
     /// 路面の見た目を代表するマテリアル名（`Assets/Resources/` 直下の .mat 名）。

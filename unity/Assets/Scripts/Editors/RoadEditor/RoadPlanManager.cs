@@ -228,6 +228,9 @@ public partial class RoadPlanManager : MonoBehaviour
     private List<List<Vector3>> cachedAlignmentViolations;
     private float cachedAlignmentMinRadius = float.PositiveInfinity;
     private float cachedAlignmentMaxGradePct;
+    private float cachedAlignmentGradeLimit;
+    private bool cachedCurveViolation;
+    private bool cachedGradeViolation;
     private List<Vector3> cachedCollisionVolume;
     private bool authoritativeCollision;
     private List<Vector3> cachedBuildingVolume;
@@ -687,14 +690,12 @@ public partial class RoadPlanManager : MonoBehaviour
                             if (wp.control_in != null && wp.control_in.Length >= 2)
                             {
                                 float ciRelY = wp.control_in.Length > 2 ? wp.control_in[1] : 0f;
-                                float ciGroundY = Utils.GetGroundHeight(new Vector3(wp.control_in[0], 0f, wp.control_in[wp.control_in.Length - 1]));
-                                pt.control_in = new Vector3(wp.control_in[0], ciGroundY + ciRelY, wp.control_in[wp.control_in.Length - 1]);
+                                pt.control_in = RestoreControl(wp.control_in[0], ciRelY, wp.control_in[wp.control_in.Length - 1], wpPos);
                             }
                             if (wp.control_out != null && wp.control_out.Length >= 2)
                             {
                                 float coRelY = wp.control_out.Length > 2 ? wp.control_out[1] : 0f;
-                                float coGroundY = Utils.GetGroundHeight(new Vector3(wp.control_out[0], 0f, wp.control_out[wp.control_out.Length - 1]));
-                                pt.control_out = new Vector3(wp.control_out[0], coGroundY + coRelY, wp.control_out[wp.control_out.Length - 1]);
+                                pt.control_out = RestoreControl(wp.control_out[0], coRelY, wp.control_out[wp.control_out.Length - 1], wpPos);
                             }
                             points.Add(pt);
                         }
@@ -720,18 +721,16 @@ public partial class RoadPlanManager : MonoBehaviour
                 if (startControlList != null && startControlList.Count >= 2 && points.Count >= 1)
                 {
                     float scRelY = startControlList.Count > 2 ? startControlList[1] : 0f;
-                    float scGroundY = Utils.GetGroundHeight(new Vector3(startControlList[0], 0f, startControlList[startControlList.Count - 1]));
                     var startPt = points[0];
-                    startPt.control_out = new Vector3(startControlList[0], scGroundY + scRelY, startControlList[startControlList.Count - 1]);
+                    startPt.control_out = RestoreControl(startControlList[0], scRelY, startControlList[startControlList.Count - 1], startPt.position);
                     points[0] = startPt;
                 }
                 var endControlList = response.GetEndControlList();
                 if (endControlList != null && endControlList.Count >= 2 && points.Count >= 1)
                 {
                     float ecRelY = endControlList.Count > 2 ? endControlList[1] : 0f;
-                    float ecGroundY = Utils.GetGroundHeight(new Vector3(endControlList[0], 0f, endControlList[endControlList.Count - 1]));
                     var endPtRef = points[points.Count - 1];
-                    endPtRef.control_in = new Vector3(endControlList[0], ecGroundY + ecRelY, endControlList[endControlList.Count - 1]);
+                    endPtRef.control_in = RestoreControl(endControlList[0], ecRelY, endControlList[endControlList.Count - 1], endPtRef.position);
                     points[points.Count - 1] = endPtRef;
                 }
 
@@ -999,12 +998,9 @@ public partial class RoadPlanManager : MonoBehaviour
         {
             if (dragPointIndex < 0 || dragPointIndex >= points.Count) return;
             var pt = points[dragPointIndex];
-            // 制御点のYはアンカーの相対高さ（標高）を維持する。地面高さへ潰すと
-            // 高架パスでアンカーだけ高く制御点が地面に落ち、ベジエが垂れ下がる（吊り橋状）。
-            // 地上道路では anchorRelY≈0 のため従来と同一挙動。
-            float anchorRelY = pt.position.y - Utils.GetGroundHeight(pt.position);
+            // XZドラッグでは絶対標高を維持し、制御点直下の地形の起伏を混入させない。
             Vector3 nc = worldPos;
-            nc.y = Utils.GetGroundHeight(nc) + anchorRelY;
+            nc.y = (pt.control_in ?? pt.position).y;
             pt.control_in = nc;
             pt.control_in_manual = true;
             points[dragPointIndex] = pt;
@@ -1015,10 +1011,9 @@ public partial class RoadPlanManager : MonoBehaviour
         {
             if (dragPointIndex < 0 || dragPointIndex >= points.Count) return;
             var pt = points[dragPointIndex];
-            // 制御点のYはアンカーの相対高さ（標高）を維持する（ControlIn と同様）。
-            float anchorRelY = pt.position.y - Utils.GetGroundHeight(pt.position);
+            // XZドラッグでは既存の制御点の絶対標高を維持する。
             Vector3 nc = worldPos;
-            nc.y = Utils.GetGroundHeight(nc) + anchorRelY;
+            nc.y = (pt.control_out ?? pt.position).y;
             pt.control_out = nc;
             pt.control_out_manual = true;
             points[dragPointIndex] = pt;
@@ -1261,19 +1256,19 @@ public partial class RoadPlanManager : MonoBehaviour
         var pt = points[index];
         Vector3 oldPosition = pt.position;
         Vector3 deltaXZ = new Vector3(newPosition.x - oldPosition.x, 0f, newPosition.z - oldPosition.z);
-        float anchorRelY = newPosition.y - Utils.GetGroundHeight(newPosition);
+        float deltaY = newPosition.y - oldPosition.y;
         pt.position = newPosition;
 
         if (pt.control_out_manual && pt.control_out.HasValue)
         {
             Vector3 c = pt.control_out.Value + deltaXZ;
-            c.y = Utils.GetGroundHeight(c) + anchorRelY;
+            c.y += deltaY;
             pt.control_out = c;
         }
         if (pt.control_in_manual && pt.control_in.HasValue)
         {
             Vector3 c = pt.control_in.Value + deltaXZ;
-            c.y = Utils.GetGroundHeight(c) + anchorRelY;
+            c.y += deltaY;
             pt.control_in = c;
         }
         points[index] = pt;
@@ -1288,8 +1283,7 @@ public partial class RoadPlanManager : MonoBehaviour
     /// 反対側ハンドルの長さ（アンカーからの距離）は維持し、向きだけを反転させる。
     /// 両方の制御点を持つポイント（ウェイポイント）でのみ機能する。
     /// 始点/終点は片側しか持たないため何もしない。
-    /// XZ平面上で一直線にし、Y座標はアンカーの相対高さ（標高）を維持する
-    /// （地面高さへ潰すと高架パスで制御点だけ地面に落ちベジエが垂れ下がる）。
+    /// XZ平面上で一直線にし、各制御点の絶対標高は維持する。
     /// 追従させた反対側も手動調整済み扱いにする。片方だけ自動計算のままだと、
     /// 次の頂点移動で再計算されて一直線が崩れ、頂点で道路が折れるため。
     /// </summary>
@@ -1302,7 +1296,7 @@ public partial class RoadPlanManager : MonoBehaviour
         if (!pt.control_in.HasValue || !pt.control_out.HasValue) return;
 
         Vector3 anchor = pt.position;
-        float anchorRelY = anchor.y - Utils.GetGroundHeight(anchor);
+
 
         if (movedControlOut)
         {
@@ -1313,7 +1307,7 @@ public partial class RoadPlanManager : MonoBehaviour
             inVec.y = 0f;
             float inLen = inVec.magnitude;
             Vector3 newIn = anchor - outDir.normalized * inLen;
-            newIn.y = Utils.GetGroundHeight(newIn) + anchorRelY;
+            newIn.y = pt.control_in.Value.y;
             pt.control_in = newIn;
             pt.control_in_manual = true;
         }
@@ -1326,7 +1320,7 @@ public partial class RoadPlanManager : MonoBehaviour
             outVec.y = 0f;
             float outLen = outVec.magnitude;
             Vector3 newOut = anchor - inDir.normalized * outLen;
-            newOut.y = Utils.GetGroundHeight(newOut) + anchorRelY;
+            newOut.y = pt.control_out.Value.y;
             pt.control_out = newOut;
             pt.control_out_manual = true;
         }
@@ -1361,11 +1355,9 @@ public partial class RoadPlanManager : MonoBehaviour
                 if (len > 1e-4f
                     && TryGetExistingPathExtensionDir(pt.position, cur, out Vector3 aligned))
                 {
-                    // 制御点のYはアンカーの相対高さ（標高）を維持する。地面へ潰すと
-                    // 高架接続部で端点ハンドルが地面に落ちベジエが垂れ下がる。
-                    float anchorRelY = pt.position.y - Utils.GetGroundHeight(pt.position);
+                    // 平面方向の整列では縦断形状を変えない。
                     Vector3 newOut = pt.position + aligned * len;
-                    newOut.y = Utils.GetGroundHeight(newOut) + anchorRelY;
+                    newOut.y = pt.control_out.Value.y;
                     pt.control_out = newOut;
                     points[0] = pt;
                 }
@@ -1384,10 +1376,9 @@ public partial class RoadPlanManager : MonoBehaviour
                 if (len > 1e-4f
                     && TryGetExistingPathExtensionDir(pt.position, cur, out Vector3 aligned))
                 {
-                    // 制御点のYはアンカーの相対高さ（標高）を維持する（始点側と同様）。
-                    float anchorRelY = pt.position.y - Utils.GetGroundHeight(pt.position);
+                    // 平面方向の整列では縦断形状を変えない。
                     Vector3 newIn = pt.position + aligned * len;
-                    newIn.y = Utils.GetGroundHeight(newIn) + anchorRelY;
+                    newIn.y = pt.control_in.Value.y;
                     pt.control_in = newIn;
                     points[last] = pt;
                 }
@@ -3064,10 +3055,16 @@ public partial class RoadPlanManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 帯にも地形追従・盛土・高架の高さを与える。保存形状と判定用点列は変更しない。
-    /// 曲線は制御点から再標本化し、ホバーを仮終点とした接線も表示専用に計算する。
+    /// 帯にも地形追従・盛土・高架の高さを与える。保存形状は変更しない。
+    /// 曲線と仮終点の接線は線形評価と同じサンプラーで生成する。
     /// </summary>
     private List<Vector3> GetMovingPreviewPoints(List<Vector3> renderPoints, int first, int end, bool placing)
+    {
+        return SamplePreviewSpans(renderPoints, first, end, placing, true);
+    }
+
+    /// <summary>描画と線形評価で仮終点の接線を共有し、評価には描画用の浮かせ量を含めない。</summary>
+    private List<Vector3> SamplePreviewSpans(List<Vector3> renderPoints, int first, int end, bool placing, bool surfaceOffset, Vector3 origin = default)
     {
         var result = new List<Vector3>();
         int stride = Curved ? bezierSamplesPerSegment + 1 : 1;
@@ -3116,16 +3113,19 @@ public partial class RoadPlanManager : MonoBehaviour
             float length = Curved ? Vector3.Distance(a, c1) + Vector3.Distance(c1, c2) + Vector3.Distance(c2, b)
                 : Vector3.Distance(a, b);
             int steps = Mathf.Clamp(Mathf.CeilToInt(length / 2f), Curved ? 16 : 1, 4096);
+            // 小さな相対座標で補間し、大きなワールド座標の丸めが曲率へ増幅されるのを防ぐ。
+            Vector3 localA = a - origin, localB = b - origin;
+            Vector3 localC1 = c1 - origin, localC2 = c2 - origin;
             for (int i = 0; i < steps; i++)
             {
                 float t = (float)i / steps;
-                Vector3 p = Curved ? SampleCubicBezier(a, c1, c2, b, t) : Vector3.Lerp(a, b, t);
+                Vector3 p = Curved ? SampleCubicBezier(localA, localC1, localC2, localB, t) : Vector3.Lerp(localA, localB, t);
                 if (follow)
-                    p.y = Utils.GetGroundHeight(p) + Mathf.Lerp(embA, embB, t) + RoadPartHeights.ROAD_SPLINE_OFFSET;
+                    p.y = Utils.GetGroundHeight(p + origin) - origin.y + Mathf.Lerp(embA, embB, t) + (surfaceOffset ? RoadPartHeights.ROAD_SPLINE_OFFSET : 0f);
                 result.Add(p);
             }
         }
-        result.Add(placing ? renderPoints[renderPoints.Count - 1] : renderPoints[end * stride]);
+        result.Add((placing ? renderPoints[renderPoints.Count - 1] : renderPoints[end * stride]) - origin);
         return result;
     }
 
@@ -3387,6 +3387,19 @@ public partial class RoadPlanManager : MonoBehaviour
         return 1f - (distance - DISTANCE_START_FADE) / fadeRange;
     }
 
+    /// <summary>制御点のYは所属アンカー直下の地盤基準。バックエンドの非追従スパンと共通。</summary>
+    private static List<float> ControlToRelativeList(Vector3? control, Vector3 anchor)
+    {
+        if (!control.HasValue) return null;
+        var c = control.Value;
+        return new List<float> { c.x, c.y - Utils.GetGroundHeight(anchor), c.z };
+    }
+
+    private static Vector3 RestoreControl(float x, float relativeY, float z, Vector3 anchor)
+    {
+        return new Vector3(x, Utils.GetGroundHeight(anchor) + relativeY, z);
+    }
+
     /// <summary>
     /// 現在のポイント位置をIPC経由でUIパネルに通知する。
     ///
@@ -3406,17 +3419,8 @@ public partial class RoadPlanManager : MonoBehaviour
             pointsList.Add(new List<float> { pt.position.x, relY, pt.position.z });
         }
 
-        // 制御点をバックエンド座標系 [x, 相対高さ, z] へ変換する(未設定は null)
-        List<float> ControlToRelativeList(Vector3? control)
-        {
-            if (!control.HasValue) return null;
-            var c = control.Value;
-            float groundY = Utils.GetGroundHeight(c);
-            return new List<float> { c.x, c.y - groundY, c.z };
-        }
-
-        List<float> startControl = points.Count > 0 ? ControlToRelativeList(points[0].control_out) : null;
-        List<float> endControl = points.Count > 0 ? ControlToRelativeList(points[points.Count - 1].control_in) : null;
+        List<float> startControl = points.Count > 0 ? ControlToRelativeList(points[0].control_out, points[0].position) : null;
+        List<float> endControl = points.Count > 0 ? ControlToRelativeList(points[points.Count - 1].control_in, points[points.Count - 1].position) : null;
 
         // 中間アンカー(ウェイポイント)の制御点。UIが確定送信の waypoints に
         // {position, control_in, control_out} 形式で含めることで、ドラッグで調整した
@@ -3429,8 +3433,8 @@ public partial class RoadPlanManager : MonoBehaviour
             {
                 waypointControls.Add(new Dictionary<string, object>
                 {
-                    ["control_in"] = ControlToRelativeList(points[i].control_in),
-                    ["control_out"] = ControlToRelativeList(points[i].control_out),
+                    ["control_in"] = ControlToRelativeList(points[i].control_in, points[i].position),
+                    ["control_out"] = ControlToRelativeList(points[i].control_out, points[i].position),
                 });
             }
         }
@@ -3442,9 +3446,11 @@ public partial class RoadPlanManager : MonoBehaviour
             embankmentHeights.Add(pt.embankmentHeight);
         }
 
+        // 線形は地形・保存設計標高・複線展開を解決する /paths/validate の全線検証で確定する。
+        // 描画用のローカル推定をゲートにすると、権威検証自体が呼ばれず誤判定から復帰できない。
         IpcClient.Instance.EmitEditPathUpdateShape(pathId, PathType, pointsList, startControl, endControl, embankmentHeights, waypointControls, Curved, PathFollowTerrainOverride, finalized,
             phase == RoadEditorPhase.Editing && points.Count >= 2 && CheckElevationIntersections().Count == 0
-            && CheckRiverCrossings().Count == 0 && CheckAlignmentViolations().Count == 0);
+            && CheckRiverCrossings().Count == 0);
     }
 
     // =====================================================================
@@ -3530,6 +3536,9 @@ public partial class RoadPlanManager : MonoBehaviour
 
     /// <summary>規格(min_curve_radius / max_grade)を超える区間があるか。</summary>
     public bool HasAlignmentViolation => CheckAlignmentViolations().Count > 0;
+    public bool HasCurveViolation { get { CheckAlignmentViolations(); return cachedCurveViolation; } }
+    public float AlignmentGradeLimit { get { CheckAlignmentViolations(); return cachedAlignmentGradeLimit; } }
+    public bool HasGradeViolation { get { CheckAlignmentViolations(); return cachedGradeViolation; } }
 
     /// <summary>線形指標を表示できる状態か(配置中は1点+ホバー、編集中は2点以上)。</summary>
     public bool HasAlignmentMetrics =>
@@ -3548,10 +3557,11 @@ public partial class RoadPlanManager : MonoBehaviour
     /// (path_master の min_curve_radius / max_grade。0=制限なし)を超える区間の点列を返す。
     ///
     /// バックエンド geo_path_alignment と同じ規則: 前後 PATH_CURVATURE_WINDOW_M の3点を通る
-    /// 円の半径を局所曲線半径(折れ線の角は小さな半径として現れる)、PATH_GRADE_SMOOTH_MIN_M の
+    /// 円の半径を局所曲線半径(折れ線の角は小さな半径として現れる)、smooth_factor(最小10m)の
     /// 移動平均で均した絶対標高の前後差を勾配とする。権威判定はバックエンド
-    /// (construction-cost / validate / 登録時)で、ここはドラッグ追従の赤表示・HUD・
-    /// 確定ボタンの先回りに使う。編集中はキャッシュし、形状変更で無効化される。
+    /// (construction-cost / validate / 登録時)で、ここはドラッグ追従の赤表示・HUDに使う。
+    /// 保存設計標高や複線展開後の最終判定はバックエンドに委ね、
+    /// ローカル推定だけでは確定を禁止しない。形状変更でキャッシュを無効化する。
     /// </summary>
     private List<List<Vector3>> CheckAlignmentViolations()
     {
@@ -3562,9 +3572,12 @@ public partial class RoadPlanManager : MonoBehaviour
         cachedAlignmentViolations = violations;
         cachedAlignmentMinRadius = float.PositiveInfinity;
         cachedAlignmentMaxGradePct = 0f;
+        cachedAlignmentGradeLimit = 0f;
+        cachedCurveViolation = cachedGradeViolation = false;
         if (!IsAlignmentTarget()) return violations;
 
         float radiusLimit = 0f, gradeLimit = 0f;
+        float smoothDistance = LocalConstants.PATH_GRADE_SMOOTH_MIN_M;
         if (MasterDataStore.Instance != null)
         {
             var master = MasterDataStore.Instance.GetPathMaster(PathSubtype);
@@ -3572,10 +3585,12 @@ public partial class RoadPlanManager : MonoBehaviour
             {
                 radiusLimit = master.min_curve_radius ?? 0f;
                 gradeLimit = master.max_grade ?? 0f;
+                smoothDistance = Mathf.Max(smoothDistance, master.smooth_factor ?? 0f);
             }
         }
 
-        var samples = BuildAlignmentSamples();
+        cachedAlignmentGradeLimit = gradeLimit;
+        var samples = BuildLocalAlignmentSamples(out Vector3 sampleOrigin);
         int n = samples.Count;
         if (n < 3) return violations;
 
@@ -3589,20 +3604,25 @@ public partial class RoadPlanManager : MonoBehaviour
         }
 
         // 勾配: 標高を移動平均で均してから(float16地形の量子化段差を消す)、前後 w 点の標高差を距離で割る
-        int half = Mathf.Max(1, Mathf.RoundToInt(LocalConstants.PATH_GRADE_SMOOTH_MIN_M / AlignmentSampleStep)) / 2;
-        var smoothed = new float[n];
+        int half = Mathf.Max(1, Mathf.RoundToInt(smoothDistance / AlignmentSampleStep)) / 2;
+        var smoothed = new double[n];
+        // 累積和で長い平滑化窓も線形時間で処理し、絶対標高が高い都市での桁落ちを抑える。
+        var sums = new double[n + 1];
+        for (int i = 0; i < n; i++) sums[i + 1] = sums[i] + samples[i].y;
         for (int i = 0; i < n; i++)
         {
-            float sum = 0f;
-            for (int j = -half; j <= half; j++) sum += samples[Mathf.Clamp(i + j, 0, n - 1)].y;
+            int left = Mathf.Max(0, i - half), right = Mathf.Min(n - 1, i + half);
+            double sum = sums[right + 1] - sums[left];
+            sum += (double)Mathf.Max(0, half - i) * samples[0].y;
+            sum += (double)Mathf.Max(0, i + half - n + 1) * samples[n - 1].y;
             smoothed[i] = sum / (2 * half + 1);
         }
         var gradePct = new float[n];
         for (int i = 0; i < n; i++)
         {
-            float ya = smoothed[Mathf.Clamp(i - w, 0, n - 1)];
-            float yb = smoothed[Mathf.Clamp(i + w, 0, n - 1)];
-            gradePct[i] = Mathf.Abs(yb - ya) / (2f * w * AlignmentSampleStep) * 100f;
+            double ya = smoothed[Mathf.Clamp(i - w, 0, n - 1)];
+            double yb = smoothed[Mathf.Clamp(i + w, 0, n - 1)];
+            gradePct[i] = (float)(System.Math.Abs(yb - ya) / (2.0 * w * AlignmentSampleStep) * 100.0);
             if (gradePct[i] > cachedAlignmentMaxGradePct) cachedAlignmentMaxGradePct = gradePct[i];
         }
 
@@ -3610,11 +3630,15 @@ public partial class RoadPlanManager : MonoBehaviour
         List<Vector3> run = null;
         for (int i = 0; i < n; i++)
         {
-            bool bad = (radiusLimit > 0f && radius[i] < radiusLimit) || (gradeLimit > 0f && gradePct[i] > gradeLimit);
+            bool badCurve = radiusLimit > 0f && radius[i] < radiusLimit;
+            bool badGrade = gradeLimit > 0f && gradePct[i] > gradeLimit + 1e-6f;
+            cachedCurveViolation |= badCurve;
+            cachedGradeViolation |= badGrade;
+            bool bad = badCurve || badGrade;
             if (bad)
             {
                 if (run == null) { run = new List<Vector3>(); violations.Add(run); }
-                run.Add(samples[i]);
+                run.Add(samples[i] + sampleOrigin);
             }
             else
             {
@@ -3625,44 +3649,44 @@ public partial class RoadPlanManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 敷設中の中心線を1m間隔・絶対標高付きの点列にする(CheckAlignmentViolations 用)。
-    /// 元は GetRenderPoints(曲線=約2m間隔で地上区間は地形高さ済み、直線=アンカーのみ)に
-    /// 配置中のホバー位置を加えたもの。直線モードの長いスパンで両端が地面高さなら地形追従
-    /// スパンなので各点で地形高さを引き、それ以外は両端のYを線形補間する(高架・トンネル・橋)。
+    /// 描画と同じ制御点・仮終点から密な曲線を作り、全長にわたる約1m等間隔へ再標本化する。
+    /// 固定分割の描画用折れ線を測ると、その折れ角を急カーブとして検出するため使用しない。
+    /// 区間ごとに端数を切り上げず、バックエンドと同じ全長基準で標本間隔を揃える。
     /// </summary>
     private List<Vector3> BuildAlignmentSamples()
     {
-        var source = new List<Vector3>(GetRenderPoints());
-        if (phase == RoadEditorPhase.Placing && points.Count >= 1)
-        {
-            if (source.Count == 0 || (source[source.Count - 1] - hoverWorldPosition).sqrMagnitude > 0.01f)
-            {
-                source.Add(hoverWorldPosition);
-            }
-        }
+        var samples = BuildLocalAlignmentSamples(out Vector3 origin);
+        for (int i = 0; i < samples.Count; i++) samples[i] += origin;
+        return samples;
+    }
+
+    private List<Vector3> BuildLocalAlignmentSamples(out Vector3 origin)
+    {
+        origin = points.Count > 0 ? points[0].position : Vector3.zero;
         var samples = new List<Vector3>();
+        if (!HasAlignmentMetrics) return samples;
+        bool placing = phase == RoadEditorPhase.Placing;
+        var source = SamplePreviewSpans(GetRenderPoints(), 0, points.Count - 1, placing, false, origin);
         if (source.Count < 2) return samples;
 
-        bool follow = EffectiveFollowTerrain();
-        for (int i = 0; i < source.Count - 1; i++)
+        var distances = new double[source.Count];
+        for (int i = 1; i < source.Count; i++)
         {
-            Vector3 a = source[i];
-            Vector3 b = source[i + 1];
-            float dx = b.x - a.x;
-            float dz = b.z - a.z;
-            float len = Mathf.Sqrt(dx * dx + dz * dz);
-            if (len < 1e-3f) continue;
-            int steps = Mathf.Max(1, Mathf.CeilToInt(len / AlignmentSampleStep));
-            bool sampleTerrain = follow && len > 3f
-                && Mathf.Abs(a.y - Utils.GetGroundHeight(a)) < 0.05f
-                && Mathf.Abs(b.y - Utils.GetGroundHeight(b)) < 0.05f;
-            for (int k = (samples.Count == 0 ? 0 : 1); k <= steps; k++)
-            {
-                float t = (float)k / steps;
-                var p = new Vector3(a.x + dx * t, a.y + (b.y - a.y) * t, a.z + dz * t);
-                if (sampleTerrain) p.y = Utils.GetGroundHeight(p);
-                samples.Add(p);
-            }
+            double dx = (double)source[i].x - source[i - 1].x;
+            double dz = (double)source[i].z - source[i - 1].z;
+            distances[i] = distances[i - 1] + System.Math.Sqrt(dx * dx + dz * dz);
+        }
+        double total = distances[distances.Length - 1];
+        if (total < 1e-3) return samples;
+        int steps = (int)System.Math.Ceiling(total / AlignmentSampleStep);
+        int segment = 0;
+        for (int i = 0; i <= steps; i++)
+        {
+            double distance = total * i / steps;
+            while (segment < source.Count - 2 && distances[segment + 1] <= distance) segment++;
+            double length = distances[segment + 1] - distances[segment];
+            float t = length > 0 ? (float)((distance - distances[segment]) / length) : 0f;
+            samples.Add(Vector3.Lerp(source[segment], source[segment + 1], t));
         }
         return samples;
     }
@@ -3670,15 +3694,15 @@ public partial class RoadPlanManager : MonoBehaviour
     /// <summary>XZ平面で3点を通る円の半径。ほぼ一直線なら +∞。</summary>
     private static float Circumradius(Vector3 a, Vector3 b, Vector3 c)
     {
-        float abx = b.x - a.x, abz = b.z - a.z;
-        float acx = c.x - a.x, acz = c.z - a.z;
-        float bcx = c.x - b.x, bcz = c.z - b.z;
-        float cross = Mathf.Abs(abx * acz - abz * acx);
-        if (cross < 1e-6f) return float.PositiveInfinity;
-        float ab = Mathf.Sqrt(abx * abx + abz * abz);
-        float ac = Mathf.Sqrt(acx * acx + acz * acz);
-        float bc = Mathf.Sqrt(bcx * bcx + bcz * bcz);
-        return ab * bc * ac / (2f * cross);
+        double abx = (double)b.x - a.x, abz = (double)b.z - a.z;
+        double acx = (double)c.x - a.x, acz = (double)c.z - a.z;
+        double bcx = (double)c.x - b.x, bcz = (double)c.z - b.z;
+        double cross = System.Math.Abs(abx * acz - abz * acx);
+        if (cross < 1e-9) return float.PositiveInfinity;
+        double ab = System.Math.Sqrt(abx * abx + abz * abz);
+        double ac = System.Math.Sqrt(acx * acx + acz * acz);
+        double bc = System.Math.Sqrt(bcx * bcx + bcz * bcz);
+        return (float)(ab * bc * ac / (2.0 * cross));
     }
 
     /// <summary>
@@ -3842,7 +3866,7 @@ public partial class RoadPlanManager : MonoBehaviour
             float groundY = Utils.GetGroundHeight(pt.position);
             float relY = pt.position.y - groundY;
             relPoints.Add(new Vector3(pt.position.x, relY, pt.position.z));
-            
+
             if (pt.control_out.HasValue) {
                 float gY = Utils.GetGroundHeight(pt.control_out.Value);
                 float controlY = i == 0 ? relY : pt.control_out.Value.y - gY;
@@ -3850,7 +3874,7 @@ public partial class RoadPlanManager : MonoBehaviour
             } else {
                 relControlOut.Add(null);
             }
-            
+
             if (pt.control_in.HasValue) {
                 float gY = Utils.GetGroundHeight(pt.control_in.Value);
                 float controlY = i == points.Count - 1 ? relY : pt.control_in.Value.y - gY;
