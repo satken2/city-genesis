@@ -252,6 +252,7 @@ public partial class RoadPlanManager : MonoBehaviour
         cachedMaxSpanViolations = null;
         cachedBuildingInterference = null;
         cachedAlignmentViolations = null;
+        alignmentLabels.Clear();
     }
 
     public void SetAuthoritativeCollision(bool value)
@@ -3064,7 +3065,7 @@ public partial class RoadPlanManager : MonoBehaviour
     }
 
     /// <summary>描画と線形評価で仮終点の接線を共有し、評価には描画用の浮かせ量を含めない。</summary>
-    private List<Vector3> SamplePreviewSpans(List<Vector3> renderPoints, int first, int end, bool placing, bool surfaceOffset, Vector3 origin = default)
+    private List<Vector3> SamplePreviewSpans(List<Vector3> renderPoints, int first, int end, bool placing, bool surfaceOffset, Vector3 origin = default, List<bool> followSamples = null)
     {
         var result = new List<Vector3>();
         int stride = Curved ? bezierSamplesPerSegment + 1 : 1;
@@ -3123,9 +3124,11 @@ public partial class RoadPlanManager : MonoBehaviour
                 if (follow)
                     p.y = Utils.GetGroundHeight(p + origin) - origin.y + Mathf.Lerp(embA, embB, t) + (surfaceOffset ? RoadPartHeights.ROAD_SPLINE_OFFSET : 0f);
                 result.Add(p);
+                followSamples?.Add(follow);
             }
         }
         result.Add((placing ? renderPoints[renderPoints.Count - 1] : renderPoints[end * stride]) - origin);
+        if (followSamples != null) followSamples.Add(followSamples.Count > 0 && followSamples[followSamples.Count - 1]);
         return result;
     }
 
@@ -3528,10 +3531,10 @@ public partial class RoadPlanManager : MonoBehaviour
     // 線形制約(最小曲線半径・最大勾配)のローカル推定
     // =====================================================================
 
-    /// <summary>HUD用: 敷設中パスの最小曲線半径(m)。直線・点不足は +∞。</summary>
+    /// <summary>検証用: 敷設中パスの最小曲線半径(m)。直線・点不足は +∞。</summary>
     public float AlignmentMinRadius { get { CheckAlignmentViolations(); return cachedAlignmentMinRadius; } }
 
-    /// <summary>HUD用: 敷設中パスの最大縦断勾配(%)。</summary>
+    /// <summary>検証用: 敷設中パスの最大縦断勾配(%)。</summary>
     public float AlignmentMaxGradePct { get { CheckAlignmentViolations(); return cachedAlignmentMaxGradePct; } }
 
     /// <summary>規格(min_curve_radius / max_grade)を超える区間があるか。</summary>
@@ -3539,6 +3542,9 @@ public partial class RoadPlanManager : MonoBehaviour
     public bool HasCurveViolation { get { CheckAlignmentViolations(); return cachedCurveViolation; } }
     public float AlignmentGradeLimit { get { CheckAlignmentViolations(); return cachedAlignmentGradeLimit; } }
     public bool HasGradeViolation { get { CheckAlignmentViolations(); return cachedGradeViolation; } }
+
+    // 約1mの標高差分に含まれるfloatの丸め誤差を許容する（単位はパーセントポイント）。
+    private const float AlignmentGradeTolerancePct = 0.001f;
 
     /// <summary>線形指標を表示できる状態か(配置中は1点+ホバー、編集中は2点以上)。</summary>
     public bool HasAlignmentMetrics =>
@@ -3558,8 +3564,8 @@ public partial class RoadPlanManager : MonoBehaviour
     ///
     /// バックエンド geo_path_alignment と同じ規則: 前後 PATH_CURVATURE_WINDOW_M の3点を通る
     /// 円の半径を局所曲線半径(折れ線の角は小さな半径として現れる)、smooth_factor(最小10m)の
-    /// 移動平均で均した絶対標高の前後差を勾配とする。権威判定はバックエンド
-    /// (construction-cost / validate / 登録時)で、ここはドラッグ追従の赤表示・HUDに使う。
+    /// 移動平均は地形追従区間だけに適用し、非追従区間は線分の標高差を勾配とする。権威判定はバックエンド
+    /// (construction-cost / validate / 登録時)で、ここはドラッグ追従の赤表示・区間ラベルに使う。
     /// 保存設計標高や複線展開後の最終判定はバックエンドに委ね、
     /// ローカル推定だけでは確定を禁止しない。形状変更でキャッシュを無効化する。
     /// </summary>
@@ -3570,6 +3576,7 @@ public partial class RoadPlanManager : MonoBehaviour
 
         var violations = new List<List<Vector3>>();
         cachedAlignmentViolations = violations;
+        alignmentLabels.Clear();
         cachedAlignmentMinRadius = float.PositiveInfinity;
         cachedAlignmentMaxGradePct = 0f;
         cachedAlignmentGradeLimit = 0f;
@@ -3590,7 +3597,8 @@ public partial class RoadPlanManager : MonoBehaviour
         }
 
         cachedAlignmentGradeLimit = gradeLimit;
-        var samples = BuildLocalAlignmentSamples(out Vector3 sampleOrigin);
+        var follows = new List<bool>();
+        var samples = BuildLocalAlignmentSamples(out Vector3 sampleOrigin, follows);
         int n = samples.Count;
         if (n < 3) return violations;
 
@@ -3622,16 +3630,28 @@ public partial class RoadPlanManager : MonoBehaviour
         {
             double ya = smoothed[Mathf.Clamp(i - w, 0, n - 1)];
             double yb = smoothed[Mathf.Clamp(i + w, 0, n - 1)];
-            gradePct[i] = (float)(System.Math.Abs(yb - ya) / (2.0 * w * AlignmentSampleStep) * 100.0);
+            if (follows[i])
+                gradePct[i] = (float)(System.Math.Abs(yb - ya) / (2.0 * w * AlignmentSampleStep) * 100.0);
+            else
+            {
+                // 非追従区間は造成されないため、隣の坂を平滑化で持ち込まず実際の線分の勾配を測る。
+                int a = Mathf.Min(i, n - 2), b = a + 1;
+                double dx = (double)samples[b].x - samples[a].x, dz = (double)samples[b].z - samples[a].z;
+                double distance = System.Math.Sqrt(dx * dx + dz * dz);
+                gradePct[i] = distance > 1e-9 ? (float)(System.Math.Abs((double)samples[b].y - samples[a].y) / distance * 100) : 0f;
+            }
             if (gradePct[i] > cachedAlignmentMaxGradePct) cachedAlignmentMaxGradePct = gradePct[i];
         }
+
+        CollectAlignmentLabels(samples, sampleOrigin, radius, radiusLimit, true, alignmentLabels);
+        CollectAlignmentLabels(samples, sampleOrigin, gradePct, gradeLimit, false, alignmentLabels);
 
         // 違反サンプルの連続区間を点列にまとめる
         List<Vector3> run = null;
         for (int i = 0; i < n; i++)
         {
             bool badCurve = radiusLimit > 0f && radius[i] < radiusLimit;
-            bool badGrade = gradeLimit > 0f && gradePct[i] > gradeLimit + 1e-6f;
+            bool badGrade = gradeLimit > 0f && gradePct[i] > gradeLimit + AlignmentGradeTolerancePct;
             cachedCurveViolation |= badCurve;
             cachedGradeViolation |= badGrade;
             bool bad = badCurve || badGrade;
@@ -3660,13 +3680,14 @@ public partial class RoadPlanManager : MonoBehaviour
         return samples;
     }
 
-    private List<Vector3> BuildLocalAlignmentSamples(out Vector3 origin)
+    private List<Vector3> BuildLocalAlignmentSamples(out Vector3 origin, List<bool> follows = null)
     {
         origin = points.Count > 0 ? points[0].position : Vector3.zero;
         var samples = new List<Vector3>();
         if (!HasAlignmentMetrics) return samples;
         bool placing = phase == RoadEditorPhase.Placing;
-        var source = SamplePreviewSpans(GetRenderPoints(), 0, points.Count - 1, placing, false, origin);
+        var sourceFollows = new List<bool>();
+        var source = SamplePreviewSpans(GetRenderPoints(), 0, points.Count - 1, placing, false, origin, sourceFollows);
         if (source.Count < 2) return samples;
 
         var distances = new double[source.Count];
@@ -3687,6 +3708,7 @@ public partial class RoadPlanManager : MonoBehaviour
             double length = distances[segment + 1] - distances[segment];
             float t = length > 0 ? (float)((distance - distances[segment]) / length) : 0f;
             samples.Add(Vector3.Lerp(source[segment], source[segment + 1], t));
+            follows?.Add(sourceFollows[segment]);
         }
         return samples;
     }

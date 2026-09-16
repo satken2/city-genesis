@@ -239,18 +239,6 @@ public class RoadEditControlMenu : MonoBehaviour
         {
             text += (text.Length > 0 ? "  " : "") + $"E {FormatMeters(embankment)}";
         }
-        // 線形: 最小曲線半径(R。直線は"-")と最大勾配(G)。規格を超えた指標だけに "!" を前置する
-        if (rpm.HasAlignmentMetrics)
-        {
-            float radius = rpm.AlignmentMinRadius;
-            string radiusText = float.IsInfinity(radius) || radius >= 1e5f ? "R -" : $"R {Mathf.RoundToInt(radius)}m";
-            string radiusMark = rpm.HasCurveViolation ? "!" : "";
-            // 境界付近の超過が丸めで上限と同じ表示になっても、比較記号で違反理由を明示する。
-            string gradeText = rpm.HasGradeViolation
-                ? $"!G {rpm.AlignmentMaxGradePct:0.00}% (>{rpm.AlignmentGradeLimit:0.##}%)"
-                : $"G {rpm.AlignmentMaxGradePct:0.00}%";
-            text += (text.Length > 0 ? "  " : "") + $"{radiusMark}{radiusText}  {gradeText}";
-        }
         return (hudIcons, text);
     }
 

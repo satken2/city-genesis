@@ -78,6 +78,8 @@ public static class PreviewQA
             CheckManager(asm, renderer);
             CheckAlignment(asm, item);
             CheckControlHeights(asm);
+            CheckElevatedTerrainIndependence(asm, item);
+            CheckAlignmentLabels(asm);
             File.WriteAllText(result, "PASS: 100 updates preserve detailed prefix and dynamic Mesh; suffix reuse, double track, slope, winding, release, resume, reset; manager placing, dragging and release partitions; alignment curves, grades, hover and uniform samples.");
             EditorApplication.Exit(0);
         }
@@ -176,8 +178,8 @@ public static class PreviewQA
         Set("PathSubtype", 100);
         Set("PathType", 4);
         Set("phase", Enum.Parse(asm.GetType("RoadEditorPhase"), "Editing"));
-        Master("min_curve_radius", 160f);
-        Master("max_grade", 3.5f);
+        Master("min_curve_radius", 100f);
+        Master("max_grade", 4.5f);
         Master("smooth_factor", 80f);
         var anchors = (IList)type.GetField("points", flags).GetValue(manager);
         var pt = asm.GetType("PathBuildPoint");
@@ -237,10 +239,10 @@ public static class PreviewQA
             Add(new Vector3(x, 6 + 1.5f * Mathf.Exp(-Mathf.Pow((x - 150) / 15f, 2)), 0),
                 x == 0 ? "Start" : x == 300 ? "End" : "Waypoint");
         float smoothed = Metric("AlignmentMaxGradePct");
-        Require(smoothed > 1.55f && smoothed < 1.7f && !State("HasGradeViolation"), "80m master smoothing: " + smoothed);
+        Require(smoothed > 8 && State("HasGradeViolation"), "Non-follow bump must use actual deck grade: " + smoothed);
         Master("smooth_factor", 10f);
         Call("InvalidateShapeCache");
-        Require(Metric("AlignmentMaxGradePct") > 6 && State("HasGradeViolation"), "10m smoothing must retain bump grade");
+        Require(Mathf.Abs(Metric("AlignmentMaxGradePct") - smoothed) < 0.001f, "Earthwork smoothing changed elevated grade");
         Master("smooth_factor", 80f);
         Clear(false);
         Add(new Vector3(0, 6, 0), "Start");
@@ -248,6 +250,15 @@ public static class PreviewQA
         float steep = Metric("AlignmentMaxGradePct");
         Require(steep > 6.9f && steep < 7.1f && State("HasGradeViolation"), "Sustained steep grade must warn: " + steep);
         Require(!State("HasCurveViolation"), "Straight grade warned as curve");
+        Clear(false);
+        Add(new Vector3(0, 60, 0), "Start");
+        Add(new Vector3(200, 60, 0), "Waypoint");
+        Add(new Vector3(400, 80, 0), "End");
+        var warnings = (List<List<Vector3>>)Call("CheckAlignmentViolations");
+        Require(State("HasGradeViolation"), "Real ramp must still warn");
+        foreach (var run in warnings)
+        foreach (var p in run)
+            Require(p.x >= 199.99f, "Ramp grade leaked onto level deck at " + p.x);
         Clear(false);
         Add(new Vector3(0, 6, 0), "Start");
         Add(new Vector3(0.3f, 6, 0), "Waypoint");
@@ -316,6 +327,104 @@ public static class PreviewQA
         UnityEngine.Object.DestroyImmediate(terrain);
         UnityEngine.Object.DestroyImmediate(terrainData);
         asm.GetType("Utils").GetMethod("InvalidateHeightCache").Invoke(null, null);
+    }
+
+    private static void CheckElevatedTerrainIndependence(Assembly asm, object master)
+    {
+        var data = new TerrainData { heightmapResolution = 65, size = new Vector3(400, 100, 400) };
+        var terrain = Terrain.CreateTerrainGameObject(data);
+        var type = asm.GetType("RoadPlanManager");
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
+        var manager = new GameObject("TerrainInvariantManager").AddComponent(type);
+        void Set(string name, object value) => type.GetField(name, flags).SetValue(manager, value);
+        void Invalidate()
+        {
+            asm.GetType("Utils").GetMethod("InvalidateHeightCache").Invoke(null, null);
+            type.GetMethod("InvalidateShapeCache", flags).Invoke(manager, null);
+        }
+        var anchors = (IList)type.GetField("points", flags).GetValue(manager);
+        var pt = asm.GetType("PathBuildPoint");
+        var role = asm.GetType("PathPointRole");
+        Set("PathSubtype", 100);
+        Set("PathType", 4);
+        Set("phase", Enum.Parse(asm.GetType("RoadEditorPhase"), "Editing"));
+        try
+        {
+            foreach (bool curved in new[] { false, true })
+            foreach (bool follows in new[] { false, true })
+            foreach (float slope in new[] { 0f, 0.02f, 0.04f, 0.045f, 0.05f, 0.07f })
+            {
+                Set("Curved", curved);
+                master.GetType().GetField("follow_terrain").SetValue(master, follows);
+                anchors.Clear();
+                var a = new Vector3(0, 60, 100);
+                var b = new Vector3(400, 60 + 400 * slope, 100);
+                var start = Activator.CreateInstance(pt, a, Enum.Parse(role, "Start"));
+                var end = Activator.CreateInstance(pt, b, Enum.Parse(role, "End"));
+                pt.GetField("control_out").SetValue(start, Vector3.Lerp(a, b, 1f / 3));
+                pt.GetField("control_in").SetValue(end, Vector3.Lerp(a, b, 2f / 3));
+                anchors.Add(start);
+                anchors.Add(end);
+                List<Vector3> baseline = null;
+                float baselineGrade = 0;
+                for (int terrainCase = 0; terrainCase < 2; terrainCase++)
+                {
+                    var heights = new float[65, 65];
+                    for (int z = 0; z < 65; z++)
+                    for (int x = 0; x < 65; x++)
+                        heights[z, x] = 0.2f + (terrainCase == 0 ? 0 : 0.25f * Mathf.Sin(x * Mathf.PI / 64));
+                    data.SetHeights(0, 0, heights);
+                    Invalidate();
+                    var samples = (List<Vector3>)type.GetMethod("BuildAlignmentSamples", flags).Invoke(manager, null);
+                    float grade = (float)type.GetProperty("AlignmentMaxGradePct").GetValue(manager);
+                    Require(Mathf.Abs(grade - slope * 100) < 0.05f, "Elevated grade differs from deck: " + grade);
+                    Require((bool)type.GetProperty("HasGradeViolation").GetValue(manager) == (slope > 0.045f), "Grade limit boundary misclassified: " + grade);
+                    var rendered = (List<Vector3>)type.GetMethod("GetRenderPoints", flags).Invoke(manager, null);
+                    foreach (var p in rendered)
+                        Require(Mathf.Abs(p.y - (60 + p.x * slope)) < 0.001f, "Terrain changed rendered viaduct");
+                    if (baseline != null)
+                    {
+                        Require(samples.Count == baseline.Count, "Terrain changed sample count");
+                        for (int i = 0; i < samples.Count; i++)
+                            Require(Vector3.Distance(samples[i], baseline[i]) < 0.001f, "Terrain changed elevated alignment samples");
+                        Require(Mathf.Abs(grade - baselineGrade) < 0.001f, "Terrain changed elevated grade");
+                    }
+                    baseline = samples;
+                    baselineGrade = grade;
+                }
+            }
+        }
+        finally
+        {
+            master.GetType().GetField("follow_terrain").SetValue(master, false);
+            UnityEngine.Object.DestroyImmediate(manager.gameObject);
+            UnityEngine.Object.DestroyImmediate(terrain);
+            UnityEngine.Object.DestroyImmediate(data);
+            asm.GetType("Utils").GetMethod("InvalidateHeightCache").Invoke(null, null);
+        }
+    }
+
+    private static void CheckAlignmentLabels(Assembly asm)
+    {
+        var type = asm.GetType("RoadPlanManager");
+        var labelType = type.GetNestedType("AlignmentLabel", BindingFlags.NonPublic);
+        var list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(labelType));
+        var collect = type.GetMethod("CollectAlignmentLabels", BindingFlags.NonPublic | BindingFlags.Static);
+        var samples = new List<Vector3>();
+        for (int i = 0; i < 7; i++) samples.Add(new Vector3(i, 0, 0));
+        var origin = new Vector3(1000, 20, 3000);
+        collect.Invoke(null, new object[] { samples, origin, new float[] { 100, 60, 50, 100, 65, 100, 100 }, 70f, true, list });
+        collect.Invoke(null, new object[] { samples, origin, new float[] { 0, 0, 4, 5, 0, 0, 0 }, 4.5f, false, list });
+        Require(list.Count == 3, "Independent curve runs and overlapping grade run must have separate labels");
+        Require((float)labelType.GetField("value").GetValue(list[0]) == 50, "First curve label must use its own minimum");
+        Require((float)labelType.GetField("value").GetValue(list[1]) == 65, "Second curve label inherited global minimum");
+        Require((float)labelType.GetField("value").GetValue(list[2]) == 5, "Grade label must use its own maximum");
+        Require((Vector3)labelType.GetField("position").GetValue(list[0]) == origin + Vector3.right * 2, "Label must point to worst world position");
+        Require((string)labelType.GetField("text").GetValue(list[2]) == "勾配  G 5.00%\n上限 4.5% 超過", "Grade label units and limit");
+        Require((bool)labelType.GetField("curve").GetValue(list[0]) && !(bool)labelType.GetField("curve").GetValue(list[2]), "Reason icons must differ");
+        list.Clear();
+        collect.Invoke(null, new object[] { samples, origin, new float[] { 70, 80, 90, 100, 80, 70, 70 }, 70f, true, list });
+        Require(list.Count == 0, "Valid geometry must have no labels");
     }
 
 }
