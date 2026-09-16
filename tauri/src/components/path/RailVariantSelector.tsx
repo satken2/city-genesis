@@ -13,7 +13,6 @@
 import { useTranslation } from "react-i18next";
 import type { PathMasterEntry } from "../../types";
 import type { VariantAffordability } from "../../hooks/useVariantAffordability";
-import { VariantAffordabilityNote } from "./VariantAffordabilityNote";
 
 type RailVariantSelectorProps = {
   /** 敷設できる規格(単線バリアント)の候補一覧。呼び出し側で絞り込み済み。 */
@@ -64,11 +63,6 @@ export function RailVariantSelector({
           ))}
         </select>
       )}
-      <VariantAffordabilityNote
-        affordability={affordability}
-        anyUnaffordable={variantOptions.some((v) => isUnaffordable(v.id))}
-        kind="path"
-      />
     </div>
   );
 }

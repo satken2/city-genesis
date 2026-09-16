@@ -53,7 +53,6 @@ import { NumberStepper } from "../common/NumberStepper";
 import { ConstructionInfoCard } from "../common/ConstructionInfoCard";
 import { isConstructionAffordable } from "../../utils/constructionFunding";
 import { useVariantAffordability } from "../../hooks/useVariantAffordability";
-import { VariantAffordabilityNote } from "../path/VariantAffordabilityNote";
 import { BuildingFacilityInfoCard } from "./BuildingFacilityInfoCard";
 import { showNotification } from "../../utils/notification";
 import { BUILDING_PUBLIC, VARIANT_CITY } from "../../constants";
@@ -1436,13 +1435,6 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
               </option>
             ))}
           </select>
-        )}
-        {variantsForType.length > 0 && (
-          <VariantAffordabilityNote
-            affordability={variantAffordability}
-            anyUnaffordable={variantsForType.some(([idStr]) => isVariantUnaffordable(parseInt(idStr)))}
-            kind="building"
-          />
         )}
         {/* 既存建物をコピー: バリアント未選択のときだけ表示する。押すと Unity が
             コピー元建物の選択モードに入り、選ばれた建物の見た目・階数・フットプリントを取り込む。 */}

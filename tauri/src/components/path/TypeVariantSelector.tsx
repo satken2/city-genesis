@@ -9,7 +9,6 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { MasterData, PathMasterEntry } from "../../types";
 import type { VariantAffordability } from "../../hooks/useVariantAffordability";
-import { VariantAffordabilityNote } from "./VariantAffordabilityNote";
 
 export type TypeOption = {
   /** path_type の値 */
@@ -103,11 +102,6 @@ export function TypeVariantSelector({
           ))}
         </select>
       )}
-      <VariantAffordabilityNote
-        affordability={affordability}
-        anyUnaffordable={variants.some((v) => isUnaffordable(v.id))}
-        kind="path"
-      />
     </div>
   );
 }

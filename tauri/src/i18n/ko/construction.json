@@ -25,8 +25,6 @@
     "availableFunds": "사용 가능한 자금",
     "insufficientFunds": "자금이 부족하여 발주할 수 없습니다 (부족액 {{value}})",
     "variantUnaffordableSuffix": " (자금 부족)",
-    "pathVariantUnaffordableNote": "회색 항목은 평지에 {{length}}m를 건설하는 비용에도 자금이 부족합니다.",
-    "buildingVariantUnaffordableNote": "회색 항목은 최소 규모로 짓는 비용에도 자금이 부족합니다.",
     "constructionCostPerEpoch": "1에포크당 건설 비용",
     "demolitionCostPerEpoch": "1에포크당 철거 비용",
     "remainingConstruction": "남은 건설 기간",

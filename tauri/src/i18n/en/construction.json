@@ -25,8 +25,6 @@
     "availableFunds": "Available funds",
     "insufficientFunds": "Cannot place this order: insufficient funds (short by {{value}})",
     "variantUnaffordableSuffix": " (insufficient funds)",
-    "pathVariantUnaffordableNote": "Greyed-out options cost more than your available funds even for {{length}} m on flat ground.",
-    "buildingVariantUnaffordableNote": "Greyed-out options cost more than your available funds even at their minimum size.",
     "constructionCostPerEpoch": "Construction Cost / Epoch",
     "demolitionCostPerEpoch": "Demolition Cost / Epoch",
     "remainingConstruction": "Remaining Duration",

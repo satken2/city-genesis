@@ -25,8 +25,6 @@
     "availableFunds": "Fonds disponibles",
     "insufficientFunds": "Commande impossible : fonds insuffisants (il manque {{value}})",
     "variantUnaffordableSuffix": " (fonds insuffisants)",
-    "pathVariantUnaffordableNote": "Les options grisées coûtent plus que les fonds disponibles, même pour {{length}} m en terrain plat.",
-    "buildingVariantUnaffordableNote": "Les options grisées coûtent plus que les fonds disponibles, même à leur taille minimale.",
     "constructionCostPerEpoch": "Coût de chantier par époque",
     "demolitionCostPerEpoch": "Coût de démolition par époque",
     "remainingConstruction": "Durée de chantier restante",

@@ -101,7 +101,6 @@ import {
   simplifyCenterlineToControlPoints,
   dischargeFromWidth,
   nearestPointIndex,
-  minRiverWidth,
 } from "./terrainRiver";
 import { polygonArea, polygonParts, translatePolygon } from "./riverGeometry";
 import { captureTerrainThumbnail } from "./terrainThumbnail";
@@ -1548,15 +1547,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   const riverDraftPointsRef = useRef<WorldPoint[]>([]);
   const riverNodeDragRef = useRef<{ riverId: string; index: number; moved: boolean } | null>(null);
   const hoveredRiverNodeRef = useRef<number>(-1);
-  // 川幅の下限(m)。彫り込みは格子間隔の1.5倍より細い川を表現できないため、ステッパーの下限にして
-  // 「指定した幅より太く彫られる」不一致を見せない。地形の読み込み後に既定値もここへ切り上げる。
-  const manualWidthMin = settingsRef.current ? Math.ceil(minRiverWidth(settingsRef.current.spacing)) : 1;
-  useEffect(() => {
-    if (status !== "ready" || !settingsRef.current) return;
-    const floor = Math.ceil(minRiverWidth(settingsRef.current.spacing));
-    setRiverManualWidthHead((v) => Math.max(v, floor));
-    setRiverManualWidthTail((v) => Math.max(v, floor));
-  }, [status]);
+  // 川幅の下限は設けない(小川・用水路も作れるようにする)。格子間隔より細い河道は
+  // 彫り込み側(carveRivers のタルウェグ線の直接刻み)が1格子幅の連続した溝として表現する。
 
   // --- 地図メタデータ(保存欄) ---
   // map_width/map_height/near_spacing/grid_rows/grid_cols は標高データのグリッド構造そのものと
@@ -2591,8 +2583,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
    * q=0 なので、生成した川の後にリスト順で処理される。
    *
    * 探索帯は、流路スプラインを持つ川(このセッションで生成・彫り込んだ川。width>0)は
-   * 「中心線±(幅/2+なじみ帯)」、復元した川(幅情報なし)は「既存の範囲を数セル膨らませた帯」。
-   * 後者により、彫り込み後に手作業で岸を削った/盛った変更にも範囲が追従する。
+   * 「中心線±(幅/2+格子の半対角幅)」、復元した川(幅情報なし)は既存の範囲を上限とする。
+   * 周辺斜面の低地へは広げず、範囲内で水没する部分を取り直す。
    * 彫り込み(carve)のたびに呼ぶほか、「川の範囲を再計算」ボタンからも呼ぶ。
    */
   function recomputeRiverPolygons(s: TerrainSettings, elev: Float32Array) {
@@ -2606,7 +2598,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     // 範囲は in-place で書き換えず、新しいオブジェクトへ差し替える。
     const next = riversRef.current.slice();
     for (const { river, index } of order) {
-      const hasSpline = river.points.length > 0 && river.points[0].width > 0;
+      const hasSpline = river.points.length > 1 && river.controlPoints !== null;
       const band = hasSpline
         ? ({ kind: "spline" } as const)
         : river.polygon
@@ -4881,11 +4873,11 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                         </div>
                         <div className="terrain-editor-param-row">
                           <span className="terrain-editor-param-label">{t("terrainEditor.riverManualWidthHead", { defaultValue: "上流端の川幅(m)" })}</span>
-                          <NumberStepper value={riverManualWidthHead} onChange={setRiverManualWidthHead} min={manualWidthMin} max={500} step={1} integerOnly={false} />
+                          <NumberStepper value={riverManualWidthHead} onChange={setRiverManualWidthHead} min={0} max={500} step={1} integerOnly={false} />
                         </div>
                         <div className="terrain-editor-param-row">
                           <span className="terrain-editor-param-label">{t("terrainEditor.riverManualWidthTail", { defaultValue: "下流端の川幅(m)" })}</span>
-                          <NumberStepper value={riverManualWidthTail} onChange={setRiverManualWidthTail} min={manualWidthMin} max={500} step={1} integerOnly={false} />
+                          <NumberStepper value={riverManualWidthTail} onChange={setRiverManualWidthTail} min={0} max={500} step={1} integerOnly={false} />
                         </div>
                         <div className="terrain-editor-polygon-count">
                           {t("terrainEditor.riverDraftVertexCount", { defaultValue: `作図中の頂点数: ${riverDraftPointCount}`, count: riverDraftPointCount })}
@@ -5188,7 +5180,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                                   <NumberStepper
                                     value={river.manualWidths.head}
                                     onChange={(v) => setManualRiverWidth(river.id, "head", v)}
-                                    min={manualWidthMin}
+                                    min={0}
                                     max={500}
                                     step={1}
                                     integerOnly={false}
@@ -5201,7 +5193,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                                   <NumberStepper
                                     value={river.manualWidths.tail}
                                     onChange={(v) => setManualRiverWidth(river.id, "tail", v)}
-                                    min={manualWidthMin}
+                                    min={0}
                                     max={500}
                                     step={1}
                                     integerOnly={false}

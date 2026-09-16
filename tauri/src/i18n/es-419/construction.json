@@ -25,8 +25,6 @@
     "availableFunds": "Fondos disponibles",
     "insufficientFunds": "No se puede realizar el pedido: fondos insuficientes (faltan {{value}})",
     "variantUnaffordableSuffix": " (fondos insuficientes)",
-    "pathVariantUnaffordableNote": "Las opciones en gris cuestan más que los fondos disponibles incluso para {{length}} m en terreno plano.",
-    "buildingVariantUnaffordableNote": "Las opciones en gris cuestan más que los fondos disponibles incluso en su tamaño mínimo.",
     "constructionCostPerEpoch": "Costo de obra por época",
     "demolitionCostPerEpoch": "Costo de demolición por época",
     "remainingConstruction": "Plazo de obra restante",

@@ -120,10 +120,6 @@ const RIVER = {
   /** これより点数が少ない川は破棄する(短すぎる沢は描画・彫り込みに値しないため)。
    *  数km規模の島マップの短い川も残せるよう、極端に大きくしない */
   minRiverPoints: 10,
-  /** 川幅の下限(spacing に対する倍率)。1格子より細い川は彫り込みが表現できない。
-   *  小さなマップでは物理幅が数mになり全区間がこの下限に張り付く(=上流と下流で
-   *  太さが変わらなく見える)ため、必要最小限に留める */
-  minWidthFactor: 1.5,
   /** 深さの下限(m) */
   minDepth: 0.5,
   /** 蛇行: 横移動速度の基準係数(meanderStrength=1 のときの値) */
@@ -192,10 +188,6 @@ const RIVER = {
   /** 範囲抽出: 「水面より低い」と判定する余裕(m)。水面ちょうどの格子点(岸肩のなじみ帯)を
    *  範囲に入れず、岸線を水面のわずか下で切る */
   polygonWaterEps: 0.05,
-  /** 範囲抽出: 範囲に入れる格子点の、水面プロファイル線からの最大距離(m)。湛水区間の
-   *  岸越えの氾濫を表現しつつ、平坦な氾濫原で際限なく広がるのを防ぐ。大河川の川幅
-   *  (網状化区間の拡幅込み)より十分大きく取る */
-  polygonMaxDistFromProfileM: 120,
   /** 範囲抽出: リング間引きの許容誤差(spacing に対する倍率)。格子由来の細かなギザギザを消しつつ
    *  岸線の形状は保つ */
   polygonSimplifyFactor: 0.25,
@@ -575,14 +567,14 @@ function buildHydroGrid(
   return { dsRows, dsCols, stride, dsElev, lakeIdx, filled, flowDir, discharge, cellToWorldX, cellToWorldZ };
 }
 
-/** 流量から川幅(m)を求める(hydraulic geometry: w ∝ Q^0.5) */
-function widthFromDischarge(q: number, spacing: number, params: RiverGenParams): number {
-  return Math.max(params.widthCoef * Math.sqrt(Math.max(0, q)), minRiverWidth(spacing));
-}
-
-/** 川幅の下限(m)。1格子より細い川は彫り込みで表現できないため、指定した幅はこの値へ切り上げられる */
-export function minRiverWidth(spacing: number): number {
-  return RIVER.minWidthFactor * spacing;
+/**
+ * 流量から川幅(m)を求める(hydraulic geometry: w ∝ Q^0.5)。
+ * 下限は設けない。格子間隔より細い河道も彫り込める(carveRivers の格子フットプリント補正)。
+ * ただし地形は格子点の標高でしか表現できないため、実際に刻まれる溝の幅は
+ * 最小でも1格子(spacing)程度になる。
+ */
+function widthFromDischarge(q: number, params: RiverGenParams): number {
+  return params.widthCoef * Math.sqrt(Math.max(0, q));
 }
 
 /** 流量から水深(m)を求める(hydraulic geometry: d ∝ Q^0.4) */
@@ -795,7 +787,7 @@ export function extractRiverNetwork(
         x: g.cellToWorldX(c),
         z: g.cellToWorldZ(r),
         q,
-        width: widthFromDischarge(q, spacing, params),
+        width: widthFromDischarge(q, params),
         waterY: 0,
         bedY: 0,
         curvature: 0,
@@ -1412,7 +1404,7 @@ export type RiverControlPoint = { x: number; z: number; q: number };
 /** buildRiverFromControlPoints の結果。河口を他の川へ吸着した場合は末尾の制御点も吸着後の位置になる */
 export type RiverRebuildResult = { river: GeneratedRiver; controlPoints: RiverControlPoint[] };
 
-/** 川幅(m)から流量(m³/s)を逆算する(widthFromDischarge の逆関数。幅の下限クランプは考慮しない) */
+/** 川幅(m)から流量(m³/s)を逆算する(widthFromDischarge の逆関数) */
 export function dischargeFromWidth(width: number, params: RiverGenParams): number {
   const coef = Math.max(1e-6, params.widthCoef);
   return (Math.max(0, width) / coef) ** 2;
@@ -1649,7 +1641,7 @@ export function buildRiverFromControlPoints(
   const sample = (wx: number, wz: number) => sampleElevAtWorld(elev, rows, cols, spacing, mapWidth, mapHeight, wx, wz);
   let points = expandCatmullRom(controlPoints, ds / 2);
   points = resampleCenterline(points, ds);
-  for (const p of points) p.width = widthFromDischarge(p.q, spacing, params);
+  for (const p of points) p.width = widthFromDischarge(p.q, params);
   const river: GeneratedRiver = {
     ...base,
     points,
@@ -1709,6 +1701,8 @@ export function carveRivers(
   const halfW = mapWidth / 2;
   const halfH = mapHeight / 2;
 
+  const footprint = spacing / Math.SQRT2;
+
   // --- 川ネットワーク全体の外接グリッド範囲(なじみ帯込み)を求め、スタンプバッファを確保する ---
   let minX = Infinity;
   let maxX = -Infinity;
@@ -1721,7 +1715,7 @@ export function carveRivers(
       if (p.x > maxX) maxX = p.x;
       if (p.z < minZ) minZ = p.z;
       if (p.z > maxZ) maxZ = p.z;
-      const reach = p.width / 2 + blendWidth(p.width, spacing);
+      const reach = p.width / 2 + blendWidth(p.width, spacing) + footprint;
       if (reach > maxReach) maxReach = reach;
     }
   }
@@ -1755,7 +1749,7 @@ export function carveRivers(
       const nx = -tz;
       const nz = tx;
 
-      const reach = Math.max(a.width, b.width) / 2 + blendWidth(Math.max(a.width, b.width), spacing);
+      const reach = Math.max(a.width, b.width) / 2 + blendWidth(Math.max(a.width, b.width), spacing) + footprint;
       const cMin = Math.max(bboxCMin, Math.floor((Math.min(a.x, b.x) - reach + halfW) / spacing));
       const cMax = Math.min(bboxCMax, Math.ceil((Math.max(a.x, b.x) + reach + halfW) / spacing));
       const rMin = Math.max(bboxRMin, Math.floor((Math.min(a.z, b.z) - reach + halfH) / spacing));
@@ -1779,7 +1773,8 @@ export function carveRivers(
           const projZ = a.z + segZ * s;
           const offX = wx - projX;
           const offZ = wz - projZ;
-          const absT = Math.hypot(offX, offZ);
+          // 格子点が代表する半対角幅を含め、格子との位置関係による川底の深さの脈動を防ぐ。
+          const absT = Math.max(0, Math.hypot(offX, offZ) - footprint);
           // 断面の左右(非対称性)の判定にだけ法線成分の符号を使う
           const t = offX * nx + offZ * nz >= 0 ? absT : -absT;
 
@@ -1795,7 +1790,9 @@ export function carveRivers(
           const depth = waterY - bedY; // タルウェグ深(淵の深化込み)
 
           let target: number;
-          if (absT <= halfWidth) {
+          if (halfWidth <= 1e-6 && absT === 0) {
+            target = bedY;
+          } else if (absT <= halfWidth && halfWidth > 1e-6) {
             // --- 川内部: 鋭角ノッチの非対称断面(岸勾配クリップ付き) ---
             // tn ∈ [-1,1]。タルウェグは外岸側(K>0=左カーブなら右岸=負のt側)へ寄る。
             // 深さプロファイルは 1 - |x|^p(p<1)。タルウェグ直上で勾配が急峻になり、
@@ -1840,6 +1837,7 @@ export function carveRivers(
           if (target < stamp[si]) stamp[si] = target;
         }
       }
+
       arc += segLen;
     }
   }
@@ -1883,7 +1881,7 @@ function blendWidth(width: number, spacing: number): number {
  *   - spline: 彫り込み直後用。中心線±(川幅/2 + なじみ帯)の帯(=彫り込みが及んだ範囲)を種にする。
  *     川幅は points の width を使う。
  *   - polygon: 保存済みの川(幅情報を持たない)の再計算用。既存の範囲ポリゴンの内側を種にする。
- *     彫り込み後に手作業で岸を削った/盛った場合、種から連結する範囲だけが追従して伸縮する。
+ *     彫り込み後に手作業で岸を盛った場合、既存範囲内で水没する部分だけを残す。
  */
 export type RiverPolygonBand =
   | { kind: "spline" }
@@ -1897,11 +1895,8 @@ export type RiverPolygonBand =
  * 考え方を流下方向に変化する水面に適用し、さらに河道から連結していること(=実際に水が
  * 流れ込める)を条件にする。連結条件が無いと、河道の岸(なじみ帯)の外側にある無関係な
  * 低地(水面より低いが土手で隔てられた窪地)まで範囲に入ってしまう。
- * 河道の水面が周囲の地形より高い区間(1次元窪地充填で溢出点の高さまで湛水した区間)では、
- * 水は岸を越えて周囲の低地へ広がる。この広がりは「プロファイル線からの距離が
- * polygonMaxDistFromProfileM 以内」に制限する(平坦な氾濫原で際限なく広がるのを防ぐ)。
- * 制限を種からの歩数ではなく線からの距離にしているのは、再計算(前回の範囲を種にする)を
- * 何度繰り返しても範囲が同じになる(冪等)ようにするため。
+ * 掘削時の川幅に格子の半対角幅を加えた河道帯を上限とし、斜面上の低地へ水面を延長しない。
+ * 幅情報を持たない保存済みの川は、既存ポリゴンを上限として再計算する。
  *
  * 以下は範囲から除外する:
  *   - 標高 0m 以下(海)。海面板が既に覆っており、河口で川の水面と重ねると Z-fighting になる
@@ -1940,7 +1935,7 @@ export function buildRiverPolygon(
     rMin = Math.min(rMin, Math.floor((wz - reach + halfH) / spacing));
     rMax = Math.max(rMax, Math.ceil((wz + reach + halfH) / spacing));
   };
-  const floodReach = RIVER.polygonMaxDistFromProfileM;
+  const floodReach = spacing;
   if (band.kind === "spline") {
     for (const p of pts) extend(p.x, p.z, p.width / 2 + blendWidth(p.width, spacing) + floodReach);
   } else {
@@ -2021,9 +2016,12 @@ export function buildRiverPolygon(
         const wx = c * spacing - halfW;
         const wz = r * spacing - halfH;
         const near = sampler.nearest(wx, wz);
-        const depth = near.dist <= RIVER.polygonMaxDistFromProfileM
-          ? sampler.heightOn(near.seg, near.t) - h - RIVER.polygonWaterEps
-          : -1;
+        // 河道帯を上限とし、周辺斜面の低地へ水面を延長しない。
+        const width = pts[near.seg].width + (pts[near.seg + 1].width - pts[near.seg].width) * near.t;
+        const inBand = band.kind === "spline"
+          ? near.dist <= width / 2 + spacing / Math.SQRT2
+          : seed[fi] !== 0;
+        const depth = inBand ? sampler.heightOn(near.seg, near.t) - h - RIVER.polygonWaterEps : -1;
         if (depth > 0) {
           let inLake = false;
           for (const lake of lakes) {

@@ -29,8 +29,6 @@ export type VariantAffordability = {
   availableFunds: number | null;
   /** 神モードなど資金審査なしのとき true */
   unlimited: boolean;
-  /** 道路の基準延長(m)。注記の表示に使う */
-  referenceLength: number;
   /** バリアントID → 可否 */
   variants: Record<number, VariantAffordabilityEntry>;
 };
@@ -73,7 +71,6 @@ export function useVariantAffordability(
         setAffordability({
           availableFunds: data.available_funds ?? null,
           unlimited: data.unlimited === true,
-          referenceLength: data.reference_length,
           variants,
         });
       })
