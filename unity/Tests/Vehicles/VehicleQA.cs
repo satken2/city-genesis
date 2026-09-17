@@ -447,6 +447,56 @@ public static class VehicleQA
         Check((bool)p.GetType().GetProperty("Entering").GetValue(p) && (bool)p.GetType().GetProperty("InConnector").GetValue(p),"Entering connector absent");
         Call(p,"Advance",100f);Check((bool)p.GetType().GetProperty("ConnectorComplete").GetValue(p),"Entering never completes");
     }
+    static void CheckPedestrianSurface(Mesh mesh)
+    {
+        var vertices = mesh.vertices;
+        var normals = mesh.normals;
+        var triangles = mesh.triangles;
+        var ids = new int[vertices.Length];
+        var positions = new Dictionary<Vector3Int, int>();
+        var parents = new List<int>();
+        // FBXのUV・法線分割を位置で戻し、材質境界を穴として誤検出しない。
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            var v = vertices[i] * 100000f;
+            var key = new Vector3Int(Mathf.RoundToInt(v.x), Mathf.RoundToInt(v.y), Mathf.RoundToInt(v.z));
+            if (!positions.TryGetValue(key, out int id))
+            {
+                id = parents.Count; positions.Add(key, id); parents.Add(id);
+            }
+            ids[i] = id;
+        }
+        int Root(int id) { while (parents[id] != id) id = parents[id]; return id; }
+        var edges = new Dictionary<(int, int), (int count, int balance)>();
+        for (int t = 0; t < triangles.Length; t += 3)
+        {
+            int a = triangles[t], b = triangles[t + 1], c = triangles[t + 2];
+            var cross = Vector3.Cross(vertices[b] - vertices[a], vertices[c] - vertices[a]);
+            Check(cross.sqrMagnitude > 1e-12f, "Pedestrian has a degenerate triangle");
+            foreach (int index in new[] { a, b, c })
+                Check(Vector3.Dot(cross.normalized, normals[index]) > .1f, "Pedestrian normal opposes winding");
+            for (int e = 0; e < 3; e++)
+            {
+                int from = ids[triangles[t + e]], to = ids[triangles[t + (e + 1) % 3]];
+                var key = (Math.Min(from, to), Math.Max(from, to));
+                edges.TryGetValue(key, out var value);
+                edges[key] = (value.count + 1, value.balance + (from < to ? 1 : -1));
+                parents[Root(from)] = Root(to);
+            }
+        }
+        foreach (var edge in edges.Values)
+            Check(edge.count == 2 && edge.balance == 0, "Pedestrian has an open or reversed face");
+        var volumes = new Dictionary<int, double>();
+        for (int t = 0; t < triangles.Length; t += 3)
+        {
+            int root = Root(ids[triangles[t]]);
+            volumes.TryGetValue(root, out double volume);
+            volumes[root] = volume + Vector3.Dot(vertices[triangles[t]],
+                Vector3.Cross(vertices[triangles[t + 1]], vertices[triangles[t + 2]])) / 6.0;
+        }
+        foreach (double volume in volumes.Values)
+            Check(volume > 1e-8, "Pedestrian body part faces inward");
+    }
     static void PedestrianModels()
     {
         var manager=new GameObject("PedestrianModelsQA").AddComponent(game.GetType("ModelManager"));
@@ -464,6 +514,7 @@ public static class VehicleQA
             {
                 Check(filter.sharedMesh.isReadable,"Pedestrian FBX is not readable");
                 triangles+=filter.sharedMesh.triangles.Length/3;
+                CheckPedestrianSurface(filter.sharedMesh);
                 var b=filter.sharedMesh.bounds;var m=prefab.transform.worldToLocalMatrix*filter.transform.localToWorldMatrix;
                 for(int c=0;c<8;c++){var point=m.MultiplyPoint3x4(b.center+Vector3.Scale(b.extents,new Vector3((c&1)==0?-1:1,(c&2)==0?-1:1,(c&4)==0?-1:1)));if(!any){bounds=new Bounds(point,Vector3.zero);any=true;}else bounds.Encapsulate(point);}
             }
