@@ -41,6 +41,6 @@
 - `Pedestrian.side` / `lateral` は**パス幾何(始点→終点)に対する左右**。反転しても符号を変えない(同じ歩道に留まる)。交差点では進行方向に対する左右を保って次のパスへ写し、ベジエで結ぶ(車道を斜めに横切ってよい)。`travel_direction` は見ない。行き止まりはどこでも折り返す。
 - 到着は逆探索表を持たず、到着予約中に進行方向の先へ現れた最初の入口へ入る(同じ側を優先、無ければ反対側へ横断)。閉じた網に入口も円外への出口も無ければ到着を予約しない。
 - 実体はGameObjectを持たない。`PropRenderModel("pedestrian_{n}")` の `normal` パーツを `LateUpdate` で `Graphics.RenderMeshInstanced`(1023件ずつ)で描く。FBXが無ければ人型の箱。走行音の通知はしない。
-- モデルは `Assets/Models/Props/pedestrian_{0..5}.fbx`(固定名。prop_master未登録。1体44三角形)。著作は genesis-gallery の `pipeline/jobs/build_pedestrians.py`。
+- モデルは `Assets/Models/Props/pedestrian_{0..5}.fbx`(固定名。prop_master未登録。1体332三角形・400未満)。著作は genesis-gallery の `pipeline/jobs/build_pedestrians.py`。
 - 駅の入口・ホーム上の待機・連絡橋の歩行は未実装(W doc §W.10)。
-- 検証は `Tests/Vehicles/run.ps1` に同居(`PedestrianBands` / `PedestrianModels` / `PedestrianNetwork`)。
+- 検証は `Tests/Vehicles/run.ps1` に同居(`PedestrianBands` / `PedestrianModels` / `PedestrianNetwork`)。`-PedestrianModelsOnly`でモデルだけ検査でき、取り込み後の面の閉鎖・巻き順・法線・各部位の外向きも確認する。

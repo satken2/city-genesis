@@ -1,4 +1,4 @@
-param([string]$UnityExe)
+param([string]$UnityExe, [switch]$PedestrianModelsOnly)
 $ErrorActionPreference = 'Stop'
 $unityRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $project = Join-Path $unityRoot 'Assembly-CSharp.csproj'
@@ -35,11 +35,13 @@ Copy-Item -LiteralPath (Join-Path $unityRoot 'Assets/Resources/Config/transit_ve
 Copy-Item -LiteralPath (Join-Path $unityRoot 'Assets/Resources/Config/vehicle_model_config.yaml') -Destination $configDestination -Force
 $resultPath = Join-Path $qaRoot 'result.txt' 
 Set-Content -LiteralPath $resultPath -Value 'RUNNING'
-$process = Start-Process -FilePath $UnityExe -ArgumentList @(
+$qaArguments = @(
     '-batchmode', '-projectPath', ('"' + $qaRoot + '"'),
     '-executeMethod', 'VehicleQA.Run', '-vehicleSourceRoot', ('"' + $unityRoot + '"'),
     '-logFile', ('"' + (Join-Path $qaRoot 'qa.log') + '"')
-) -WindowStyle Hidden -PassThru
+)
+if ($PedestrianModelsOnly) { $qaArguments += '-pedestrianModelsOnly' }
+$process = Start-Process -FilePath $UnityExe -ArgumentList $qaArguments -WindowStyle Hidden -PassThru
 $process.WaitForExit()
 $result = Get-Content -LiteralPath $resultPath -Raw
 Write-Output $result

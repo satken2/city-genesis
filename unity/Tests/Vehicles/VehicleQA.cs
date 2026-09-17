@@ -41,6 +41,13 @@ public static class VehicleQA
             ModelImportSettings.EnableReadWriteAll();
             ModelPrefabGenerator.SyncAll();
             game=Assembly.LoadFrom(Path.Combine(source,"Temp/bin/Debug/Assembly-CSharp.dll"));
+            if (Array.IndexOf(args, "-pedestrianModelsOnly") >= 0)
+            {
+                PedestrianModels();
+                File.WriteAllText(result, "PASS\nPedestrian FBX topology, normals, budgets, scale and ground\n" + string.Join("\n", accessTimings));
+                EditorApplication.Exit(0);
+                return;
+            }
             Geometry(); Budget(); Junction(); RoadsideExit(); MotionContract(); TransitModels(); TransitPlacement();
             PedestrianBands(); PedestrianModels();
             var report = new List<string>();
