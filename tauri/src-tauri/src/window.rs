@@ -435,8 +435,22 @@ fn compute_window_geometry(
             let m_size = monitor.size().to_logical::<f64>(scale);
 
             let margin = HUD_MARGIN;
-            let w = saved_geometry.map(|g| g.width).unwrap_or(definition.width as f64);
-            let h = saved_geometry.map(|g| g.height).unwrap_or(definition.height as f64);
+            // 既定サイズ: width_ratio があればモニター幅に対する比率で幅を決め、height_ratio が
+            // 無ければ正方形にする(コックピットを避けた作業領域の高さでクランプ)。比率が無ければレジストリの実寸。
+            let work_h = (m_size.height - HUD_BOTTOM_RESERVED - margin * 2.0).max(200.0);
+            let (default_w, default_h) = match definition.width_ratio {
+                Some(rw) if rw > 0.0 => {
+                    let w = (m_size.width * rw).round();
+                    let h = match definition.height_ratio {
+                        Some(rh) if rh > 0.0 => (work_h * rh).round(),
+                        _ => w.min(work_h),
+                    };
+                    (w, h)
+                }
+                _ => (definition.width as f64, definition.height as f64),
+            };
+            let w = saved_geometry.map(|g| g.width).unwrap_or(default_w);
+            let h = saved_geometry.map(|g| g.height).unwrap_or(default_h);
 
             return (
                 LogicalSize::new(w, h),

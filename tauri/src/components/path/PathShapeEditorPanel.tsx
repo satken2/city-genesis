@@ -28,6 +28,7 @@ import { listen } from "@tauri-apps/api/event";
 import {
   CityMapCanvas,
   DEFAULT_CITY_MAP_LAYERS,
+  type CityMapBounds,
   type CityMapCanvasHandle,
   type CityMapPointerEvent,
   type CityMapViewState,
@@ -69,6 +70,9 @@ const CAMERA_FALLBACK_HALF_EXTENT = 300;
 const FIT_PADDING_RATIO = 0.25;
 const FIT_PADDING_MIN_M = 40;
 
+/** 地図レイヤー。標高色分けは地物の読み取りを妨げるのでOFF(都市マップウィンドウと同じ)。再レンダーで再取得が走らないよう定数にする */
+const MAP_LAYERS = { ...DEFAULT_CITY_MAP_LAYERS, elevation: false };
+
 /** ヒット対象ごとのカーソル形状 */
 function cursorForHit(hit: ShapeHit | null): string {
   if (!hit) return "";
@@ -84,6 +88,10 @@ export function PathShapeEditorPanel({ apiBaseUrl }: { apiBaseUrl: string }) {
   const [shape, setShape] = useState<PathShapeUpdatePayload | null>(null);
   const [overlayVersion, setOverlayVersion] = useState(0);
   const [cursor, setCursor] = useState("");
+  // 地図の初期表示範囲。CityMapCanvas は地形ロード後に initialBounds(無ければ都市全体)へ
+  // ビューを合わせるため、先に fitBounds を呼んでも上書きされる。最初の形状(または点列が
+  // 無いときのカメラ位置)から範囲を決めてから地図をマウントし、敷設中パス全体が収まるようにする。
+  const [initialBounds, setInitialBounds] = useState<CityMapBounds | null>(null);
 
   // ポインタハンドラは CityMapCanvas 側で ref ミラーされるが、ハンドラ自身も最新の形状・
   // ホバー・ドラッグを再生成なしで参照したいので ref に持つ。
@@ -126,7 +134,10 @@ export function PathShapeEditorPanel({ apiBaseUrl }: { apiBaseUrl: string }) {
       const g = buildShapeGeometry(payload);
       if (!fittedRef.current && g.anchors.length > 0) {
         fittedRef.current = true;
-        fitToShape(g);
+        // 地図が未マウントなら初期範囲として渡す。カメラ位置で先にマウント済みなら
+        // initialBounds の差し替えで地図が作り直され、地形ロード後にこの範囲へ合う。
+        const bounds = shapeBounds(g, FIT_PADDING_RATIO, FIT_PADDING_MIN_M);
+        if (bounds) setInitialBounds(bounds);
       }
     })
       .then((fn) => { unlistenShape = fn; })
@@ -136,7 +147,7 @@ export function PathShapeEditorPanel({ apiBaseUrl }: { apiBaseUrl: string }) {
     listen<{ position?: number[] }>(IPC_EVENT_CAMERA_STATE, (event) => {
       const pos = event.payload?.position;
       if (fittedRef.current || !pos || pos.length < 3) return;
-      mapRef.current?.fitBounds({
+      setInitialBounds((prev) => prev ?? {
         x1: pos[0] - CAMERA_FALLBACK_HALF_EXTENT,
         z1: pos[2] - CAMERA_FALLBACK_HALF_EXTENT,
         x2: pos[0] + CAMERA_FALLBACK_HALF_EXTENT,
@@ -153,7 +164,7 @@ export function PathShapeEditorPanel({ apiBaseUrl }: { apiBaseUrl: string }) {
       unlistenShape?.();
       unlistenCamera?.();
     };
-  }, [fitToShape]);
+  }, []);
 
   /* ---- 形状が変わったら重ね描きを更新する ---- */
   useEffect(() => {
@@ -330,10 +341,12 @@ export function PathShapeEditorPanel({ apiBaseUrl }: { apiBaseUrl: string }) {
         </div>
       </div>
       <div className="pse-map">
+        {initialBounds && (
         <CityMapCanvas
           ref={mapRef}
           apiBaseUrl={apiBaseUrl}
-          layers={{ ...DEFAULT_CITY_MAP_LAYERS, elevation: false }}
+          layers={MAP_LAYERS}
+          initialBounds={initialBounds}
           interactive
           showCompass
           overlayDraw={overlayDraw}
@@ -344,6 +357,7 @@ export function PathShapeEditorPanel({ apiBaseUrl }: { apiBaseUrl: string }) {
           onContextMenu={handleContextMenu}
           cursor={cursor}
         />
+        )}
         {/* 線形の要約(左下)。Unityのローカル推定で、権威値は敷設パネルの費用カードが表示する */}
         {alignment && (
           <div className="pse-summary">
