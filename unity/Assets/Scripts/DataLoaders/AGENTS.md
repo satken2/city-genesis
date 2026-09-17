@@ -5,6 +5,8 @@
 
 ## 地形・取得範囲・描画LOD
 
+`station_grade_profile`は駅だけでなく、既存パスへの接続勾配を設計した道路・線路にも付く。`ApplyStationGrade`と吸着用の保存標高参照をパス種別で限定しない。独立設計の`station_grade_id="connection"`は共通駅グループではない。
+
 `LodConfig` は視点・注視点・視錐台から最大81セルを選ぶ。`farCells / nearCells / dynamicCells` は呼出し互換の名前で、現在はすべて同じ常駐セル集合。土地の開放状態で標高ソースや描画LODを変えてはいけない。
 
 `CameraCellChecker` は0.1秒間隔で位置、向き、FOV、正投影、画面条件を調べる。視線中心はy=0平面との交点。`ResetViewState` で検出状態を未初期化に戻すと静止中でも次の判定で必ずセル通知が出る(`CellDataLoader.ClearAllManagerData` と `ReloadAllData` の現在セル未設定分岐が呼ぶ)。`session:reset` 後は `session:reload` が届くまで `OnCameraCellChanged` を無視する(`ClearAllManagerDataForSessionReset` / `loadSuspendedUntilReload`。バックエンドが新しい都市を準備中のためで、準備中のタイルを取り込むと同じ版の差分リロードで更新されない)。`CellDataLoader` は旧 `LoadBatch` を取消し、地形取得・適用→既存オブジェクトの地形追従→区画取得完了→建物・道路・地区・資源・プロップ取得の順で進める。更新セルだけを追従させ、取消しで残ったセルは次回へ引き継ぐ。版情報・タイルの取得失敗は2秒後に再試行し、必要タイルの適用前に後続生成へ進まない。
@@ -51,7 +53,7 @@
 
 ## 道路 (PathManager.cs) — 知らないと事故るポイント
 
-- **工事音の現場登録は `SavePathToCache` の変更検知内 (`SyncConstructionSound`)**: 工事中(STATUS_CONSTRUCTING)のパスだけ `CalculatePathPoints` を25m間隔で間引いた中心線を `ConstructionAmbience.Register` し、それ以外・`RemovePathFromCache`・`ClearAllCells` で解除する。version/status/端点ノードが変わらない再登録では走らない(Weather/AGENTS.md参照)。
+- **工事音の現場登録は `SavePathToCache` の変更検知内 (`SyncConstructionSound`)**: 工事中(STATUS_CONSTRUCTING)のパスだけ、`CalculatePathPoints` の中心線上で施工の先端にあたる1点(`ConstructionPathBuilder.FrontPoint`=工事車両が並ぶ位置と同じ割合)を `ConstructionAmbience.Register` し、それ以外・`RemovePathFromCache`・`ClearAllCells` で解除する。version/status/端点ノードが変わらない再登録では走らないが、進捗(`construction_progress`)だけが変わった場合は先端が動くので再登録する(Weather/AGENTS.md参照)。
 
 - **橋脚と周辺道路の依存**: `Awake` が `PillarClearance.NeighborProvider = GetPillarObstacles` を設定する。相手の最新データから切断前中心線・全幅（駅はホーム込み）・通行高さを供給し、コライダーや描画用点列キャッシュには依存しない。`SavePathToCache` は実変更時に通過セルも先行登録し、変更前後の周辺にある橋脚付きパス（pillar_spacingが0でもBrickArcadeGenerator.HasArcadeが真のレンガ高架を含む）を `pendingPillarRebuildIds` へ積む。`RemovePathFromCache` も削除前に同じ通知を行う。描画revisionと地形追従の完了記録を無効化し、`LateUpdate` がLODバッチ外で既存の再生成キューに渡す。初期データの登録順やバッチ途中の生成を考慮し、バッチで生成済みでも除外しない。曲線の通過セルは `IntersectionPolygonUtil.SamplePlan` の平面点列を使用する（single_spanはアンカー直線）。検証は `Tests/Pillars`。
 

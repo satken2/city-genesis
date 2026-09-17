@@ -76,7 +76,16 @@
     }
   },
   "path_construction": {
-    "collisionChecking": "충돌 확인 중…",
+    "validationCurve": "선로 {{track}}: 시작점에서 {{start}}~{{end}}m 구간의 곡선 반경이 최소값보다 작습니다.",
+    "validationGrade": "선로 {{track}}: 시작점에서 {{start}}~{{end}}m 구간의 경사가 최대값을 초과합니다.",
+    "validationPathCollision": "도로 또는 선로의 점유 범위가 겹칩니다. 빨간 점유 범위를 확인하세요.",
+    "validationRiverCollision": "지표에서 강을 가로지릅니다. 높이나 경로를 조정하세요.",
+    "validationRejected": "건설 조건을 충족하지 않습니다. 형태와 설정을 확인하세요.",
+    "validationFailed": "건설 조건 검증 실패: {{reason}}",
+    "validationUnavailable": "서버 연결 설정이 없어 건설 조건을 검증할 수 없습니다.",
+    "validationRetry": "다시 시도",
+    "shapeUnready": "3D 화면에서 오른쪽 클릭하여 형태를 확정하세요.",
+    "collisionChecking": "건설 조건 확인 중…",
     "collisionUnready": "경로를 확정하고 빨간 입체 영역으로 표시된 충돌을 해결하세요.",
     "alignmentUnready": "급한 곡선 또는 경사가 규격 제한을 초과합니다. 형상을 완만하게 하세요.",
     "constructionSpeed": "건설 속도",

@@ -76,7 +76,7 @@ source（プレハブの sharedMaterial 等）
 | 部位 | 解決順 |
 | --- | --- |
 | 道路本体・区画線・歩道・防音壁・中央分離帯・街路樹・柱・坑口 | パーツプレハブのマテリアル → `GetOrCreateRoadMaterial` |
-| 道路本体のプレハブが無いとき（白い板フォールバック） | `Shader.Find("Standard")` から作った静的キャッシュ済みマテリアル |
+| パス本体のプレハブが無いとき（明灰色の板フォールバック）・パーツの材質配列が空のとき | URP対応の `Resources/BuildingMaterial` → `GetOrCreateRoadMaterialByName` の共有プール |
 | 交差点アスファルト | 代表バリアントのマスターの `body_material`（§2.3）→ 代表バリアントの `body` プレハブ → `Resources/PATH_ASPHALT` → `Resources/NodeMaterial` |
 | 交差点の歩道コネクタ・エンドキャップ | 通常道路と同じ `sidewalk` プレハブ → `GetOrCreateRoadMaterial` |
 | 駅ホームのデッキ | `platform_panel` プレハブ → `GetOrCreateRoadMaterial` → `Resources/COMMON_CONCRETE` |

@@ -197,8 +197,8 @@ export function PathBuildSections({
                   onChange={handleEmbankmentHeightChange}
                   min={-5}
                   max={5}
-                  step={1}
-                  integerOnly={true}
+                  step={0.1}
+                  integerOnly={false}
                 />
                 <span className="pc-stepper-unit">m</span>
               </div>
@@ -279,7 +279,7 @@ export function PathBuildSections({
           <div className="pc-section-title">
             {t("path_construction.costInfo", "建設費用")}
           </div>
-          {!pc.canConfirm ? (
+          {pc.nodes.length < 2 ? (
             <div className="pc-no-nodes-message">
               {t("path_construction.noNodesYet")}
             </div>
@@ -309,16 +309,16 @@ export function PathBuildSections({
       */}
       {pc.selectedVariant !== null && (
         <div className="pc-action-bar">
-          {pc.nodes.length >= 2 && !pc.canConfirm && (
-            <p role="status">
-              {t(
-                pc.collisionChecking
-                  ? "path_construction.collisionChecking"
-                  : !pc.alignmentOk
-                    ? "path_construction.alignmentUnready"
-                    : "path_construction.collisionUnready",
+          {pc.nodes.length >= 2 && (!pc.canConfirm || !pc.alignmentOk) && (
+            <div role="status">
+              {(pc.canConfirm ? [t("path_construction.alignmentUnready")] : pc.validationMessages)
+                .map((message, index) => <p key={index}>{message}</p>)}
+              {pc.canRetryValidation && (
+                <button className="pc-btn" type="button" onClick={pc.retryValidation}>
+                  {t("path_construction.validationRetry")}
+                </button>
               )}
-            </p>
+            </div>
           )}
           <div className="pc-actions">
             <button className="pc-btn" type="button" onClick={handleOpenShapeEditor}>

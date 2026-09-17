@@ -17,7 +17,7 @@ public partial class RoadRenderer
     /// </summary>
     public void UpdateSections(List<Vector3> allPoints, List<Vector3> before,
         List<Vector3> moving, List<Vector3> after, int pathType, int variant, bool curved,
-        int platformSide, float[] offsets, int[] directions, string houseEnds)
+        int platformSide, float[] offsets, int[] directions, string houseEnds, List<List<Vector3>> profiles = null)
     {
         if (previewMeshFilter == null) return;
         lastPathType = pathType;
@@ -57,7 +57,7 @@ public partial class RoadRenderer
                 string sectionEnds = startHouse ? (endHouse ? "both" : "start") : (endHouse ? "end" : "none");
                 section.UpdateRoadPreview(points, pathType, variant, curved, true,
                     platformSide, offsets, directions,
-                    pathType == Constants.PATH_STATION_HOUSE ? sectionEnds : houseEnds);
+                    pathType == Constants.PATH_STATION_HOUSE ? sectionEnds : houseEnds, profiles);
             }
         }
     }

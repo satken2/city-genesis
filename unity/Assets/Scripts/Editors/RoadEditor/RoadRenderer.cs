@@ -39,6 +39,7 @@ public partial class RoadRenderer : MonoBehaviour
     private float[] lastLateralOffsets;
     private int[] lastTravelDirections;
     private bool hasPreviewState = false;
+    private List<List<Vector3>> lastProfiles;
 
     /// <summary>
     /// バリデーションエラー時（立体交差など）に使用する赤色のプレビューマテリアル。
@@ -87,7 +88,7 @@ public partial class RoadRenderer : MonoBehaviour
     /// 確定時にUI側が平行な単線パス群へ展開して敷設するのと同じ見た目にするための機構で、
     /// 敷設済み線路同士の結合描画(TrackAdjacency)はプレビューには適用されない。
     /// </summary>
-    public void UpdateRoadPreview(List<Vector3> subdividePoints, int pathType, int pathSubtype, bool curved = true, bool isValid = true, int platformSide = Constants.PLATFORM_SIDE_OUTSIDE, float[] lateralOffsets = null, int[] travelDirections = null, string houseEnds = "both")
+    public void UpdateRoadPreview(List<Vector3> subdividePoints, int pathType, int pathSubtype, bool curved = true, bool isValid = true, int platformSide = Constants.PLATFORM_SIDE_OUTSIDE, float[] lateralOffsets = null, int[] travelDirections = null, string houseEnds = "both", List<List<Vector3>> profiles = null)
     {
         if (previewMeshFilter == null || previewMeshRenderer == null) return;
 
@@ -98,7 +99,7 @@ public partial class RoadRenderer : MonoBehaviour
         }
 
         // 形状・パラメータが前回と同一なら再生成しない（破棄→再生成のスラッシングを防ぐ）。
-        if (hasPreviewState &&
+        if (hasPreviewState && lastProfiles == profiles &&
             lastPathType == pathType && lastPathSubtype == pathSubtype &&
             lastCurved == curved && lastIsValid == isValid &&
             lastPlatformSide == platformSide && lastHouseEnds == houseEnds &&
@@ -129,7 +130,7 @@ public partial class RoadRenderer : MonoBehaviour
         if (lateralOffsets == null || lateralOffsets.Length == 0)
         {
             // 単一パス: 受け取った点列をそのまま中心線として1本生成する
-            GenerateComponentPreview(subdividePoints, pathType, pathSubtype, curved, platformSide, Constants.DIR_BOTH, activeMaterial, null, houseEnds);
+            GenerateComponentPreview(profiles != null ? profiles[0] : subdividePoints, pathType, pathSubtype, curved, platformSide, Constants.DIR_BOTH, activeMaterial, null, houseEnds, profiles != null);
         }
         else
         {
@@ -140,10 +141,11 @@ public partial class RoadRenderer : MonoBehaviour
             currentPreviewObject = container;
             for (int i = 0; i < lateralOffsets.Length; i++)
             {
-                List<Vector3> offsetPoints = OffsetPolylineLateral(subdividePoints, lateralOffsets[i]);
+                List<Vector3> offsetPoints = profiles != null && i < profiles.Count
+                    ? profiles[i] : OffsetPolylineLateral(subdividePoints, lateralOffsets[i]);
                 int travelDirection = (travelDirections != null && i < travelDirections.Length)
                     ? travelDirections[i] : Constants.DIR_BOTH;
-                GenerateComponentPreview(offsetPoints, pathType, pathSubtype, curved, platformSide, travelDirection, activeMaterial, container, houseEnds);
+                GenerateComponentPreview(offsetPoints, pathType, pathSubtype, curved, platformSide, travelDirection, activeMaterial, container, houseEnds, profiles != null);
             }
         }
 
@@ -159,6 +161,7 @@ public partial class RoadRenderer : MonoBehaviour
         lastHouseEnds = houseEnds;
         lastLateralOffsets = lateralOffsets != null ? (float[])lateralOffsets.Clone() : null;
         lastTravelDirections = travelDirections != null ? (int[])travelDirections.Clone() : null;
+        lastProfiles = profiles;
         hasPreviewState = true;
     }
 
@@ -170,7 +173,7 @@ public partial class RoadRenderer : MonoBehaviour
     /// travelDirection(Constants.DIR_*)も仮 PathSummary に載せるため、駅バリアントの
     /// ホーム設置側の解決と一方通行線路の進行方向矢印が確定後と同じ見た目になる。
     /// </summary>
-    private void GenerateComponentPreview(List<Vector3> componentPoints, int pathType, int pathSubtype, bool curved, int platformSide, int travelDirection, Material activeMaterial, GameObject parent, string houseEnds)
+    private void GenerateComponentPreview(List<Vector3> componentPoints, int pathType, int pathSubtype, bool curved, int platformSide, int travelDirection, Material activeMaterial, GameObject parent, string houseEnds, bool designed = false)
     {
         Vector3 startPos = componentPoints[0];
         Vector3 endPos = componentPoints[componentPoints.Count - 1];
@@ -204,6 +207,14 @@ public partial class RoadRenderer : MonoBehaviour
             end_point = new List<object> { (object)endPos.x, (object)endRelY, (object)endPos.z }
         };
 
+        if (designed)
+        {
+            // 造成済みの設計点列を生成器が生地形へ再投影しないようにする。
+            tempPathData.follow_terrain = false;
+            tempPathData.station_grade_profile = new List<object>();
+            foreach (var p in componentPoints)
+                tempPathData.station_grade_profile.Add(new List<object> { p.x, p.y, p.z });
+        }
         PathMeshResult meshResult = PathMeshFactory.GeneratePathMesh(tempPathData, componentPoints);
         if (meshResult == null) return;
         // 生成器が返す帯は、詳細GOがある場合には未使用のクリック用メッシュ。

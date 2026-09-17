@@ -76,7 +76,16 @@
     }
   },
   "path_construction": {
-    "collisionChecking": "Vérification des collisions…",
+    "validationCurve": "Voie {{track}} : rayon inférieur au minimum entre {{start}} et {{end}} m depuis le départ.",
+    "validationGrade": "Voie {{track}} : pente supérieure au maximum entre {{start}} et {{end}} m depuis le départ.",
+    "validationPathCollision": "Les volumes occupés des routes ou voies se chevauchent. Vérifiez les volumes rouges.",
+    "validationRiverCollision": "Le tracé traverse une rivière au niveau du sol. Ajustez la hauteur ou le tracé.",
+    "validationRejected": "Les conditions de construction ne sont pas remplies. Vérifiez le tracé et les paramètres.",
+    "validationFailed": "Échec de la validation : {{reason}}",
+    "validationUnavailable": "Impossible de valider sans configuration de connexion au serveur.",
+    "validationRetry": "Réessayer",
+    "shapeUnready": "Faites un clic droit dans la vue 3D pour finaliser le tracé.",
+    "collisionChecking": "Vérification des conditions de construction…",
     "collisionUnready": "Finalisez le tracé et résolvez les collisions signalées par les volumes rouges.",
     "alignmentUnready": "Une courbe ou une pente dépasse les limites de cette norme. Adoucissez le tracé.",
     "constructionSpeed": "Vitesse de construction",

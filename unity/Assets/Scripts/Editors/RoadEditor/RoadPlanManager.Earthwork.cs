@@ -17,7 +17,11 @@ public partial class RoadPlanManager
             anchors.Add(hover); embankments.Add(currentEmbankmentHeight);
         }
         if (anchors.Count < 2) { earthworkPreview?.Clear(); return; }
-        if (earthworkPreview == null) earthworkPreview = gameObject.AddComponent<RoadEarthworkPreview>();
+        if (earthworkPreview == null)
+        {
+            earthworkPreview = gameObject.AddComponent<RoadEarthworkPreview>();
+            earthworkPreview.Changed += Update3DPreview;
+        }
         var paths = new List<object>();
         float[] offsets = LateralOffsets != null && LateralOffsets.Length > 0 ? LateralOffsets : new float[] { 0 };
         for (int line = 0; line < offsets.Length; line++)
@@ -30,7 +34,7 @@ public partial class RoadPlanManager
             {
                 if (!Curved || !control.HasValue) return null;
                 var p = control.Value + shifted[i]-anchors[i];
-                float y = offsets.Length > 1 ? relative[i][1] : control.Value.y-Utils.GetGroundHeight(control.Value);
+                float y = relative[i][1];
                 return new[] {p.x,y,p.z};
             }
             var waypoints = new List<object>();

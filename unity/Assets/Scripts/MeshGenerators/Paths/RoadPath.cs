@@ -13,7 +13,6 @@ public class RoadPath : IPathMeshGenerator
     private static readonly Dictionary<Mesh, Mesh> MirroredMeshCache = new Dictionary<Mesh, Mesh>();
     private static readonly Dictionary<(Mesh, float), Mesh> PartMeshCache = new Dictionary<(Mesh, float), Mesh>();
     private static readonly Dictionary<Mesh, Mesh> BodyMeshCache = new Dictionary<Mesh, Mesh>();
-    private static Material cachedFallbackMaterial;
 
     // Extrude配置の1タイルの最大長（m）。
     // SplineMesh はタイル内の頂点Z位置でしかスプラインを評価しないため、
@@ -77,12 +76,10 @@ public class RoadPath : IPathMeshGenerator
         MaterialCache[key] = material;
     }
 
-    private static Material GetFallbackStandardMaterial()
+    private static Material GetFallbackRoadMaterial()
     {
-        if (cachedFallbackMaterial != null)
-            return cachedFallbackMaterial;
-        cachedFallbackMaterial = new Material(Shader.Find("Standard"));
-        return cachedFallbackMaterial;
+        // URP対応のアセットを共有プール経由で使い、ビルド時のシェーダー参照も保持する。
+        return GetOrCreateRoadMaterialByName("BuildingMaterial");
     }
 
     /// <summary>路面幅は桁の張り出しを含む全体 bounds ではなく、最上面の幅から求める。</summary>
@@ -397,7 +394,7 @@ public class RoadPath : IPathMeshGenerator
             }
             else
             {
-                targetMr.material = GetFallbackStandardMaterial();
+                targetMr.sharedMaterial = GetFallbackRoadMaterial();
                 Debug.LogWarning($"[RoadPath]   プレハブにMeshRendererなし。Standardシェーダーのマテリアルを使用。");
             }
 
@@ -705,7 +702,7 @@ public class RoadPath : IPathMeshGenerator
         mf.sharedMesh = mesh;
 
         MeshRenderer mr = go.AddComponent<MeshRenderer>();
-        mr.sharedMaterial = GetFallbackStandardMaterial();
+        mr.sharedMaterial = GetFallbackRoadMaterial();
 
         return go;
     }

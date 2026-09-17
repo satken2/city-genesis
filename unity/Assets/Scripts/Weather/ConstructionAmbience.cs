@@ -13,6 +13,7 @@ public sealed class ConstructionAmbience : MonoBehaviour
 
     public const int MaxVoices = 8;
     public const float MinDistance = 15f, MaxDistance = 250f, RefreshSeconds = 0.25f, FadeSeconds = 0.5f;
+    public const float Gain = 0.6f; // 工事音は他の環境音より目立ちすぎるので、Tauriから受けた音量にさらに掛ける基準ゲイン
 
     private sealed class Site
     {
@@ -142,7 +143,7 @@ public sealed class ConstructionAmbience : MonoBehaviour
             bool wanted = !voice.site.removed && voice.site.distance < MaxDistance;
             voice.gain = Mathf.MoveTowards(voice.gain, wanted ? 1f : 0f, step);
             voice.source.transform.position = voice.site.nearest + offset;
-            voice.source.volume = voice.gain * volume;
+            voice.source.volume = voice.gain * volume * Gain;
             if (!wanted && voice.gain <= 0f) { voice.source.Stop(); voice.site = null; }
         }
     }
@@ -196,7 +197,7 @@ public sealed class ConstructionAmbience : MonoBehaviour
     public void SetVolume(float value)
     {
         volume = float.IsNaN(value) || float.IsInfinity(value) ? 0f : Mathf.Clamp01(value);
-        foreach (var voice in voices) if (voice.source != null) voice.source.volume = voice.gain * volume;
+        foreach (var voice in voices) if (voice.source != null) voice.source.volume = voice.gain * volume * Gain;
     }
 
     /// <summary>検証用。現在鳴っている音源の数。</summary>

@@ -76,7 +76,16 @@
     }
   },
   "path_construction": {
-    "collisionChecking": "正在检查碰撞…",
+    "validationCurve": "线路{{track}}：距起点{{start}}～{{end}}m处的曲线半径小于规定下限。",
+    "validationGrade": "线路{{track}}：距起点{{start}}～{{end}}m处的坡度超过规定上限。",
+    "validationPathCollision": "道路或轨道的占用范围重叠。请检查红色占用范围。",
+    "validationRiverCollision": "线路在地表横穿河流。请调整高度或路线。",
+    "validationRejected": "不符合建设条件。请检查形状和设置。",
+    "validationFailed": "建设条件验证失败：{{reason}}",
+    "validationUnavailable": "未设置服务器连接，无法验证建设条件。",
+    "validationRetry": "重试",
+    "shapeUnready": "请在3D画面中右键单击以确定形状。",
+    "collisionChecking": "正在检查建设条件…",
     "collisionUnready": "请确定路线形状，并消除红色立体区域所示的碰撞。",
     "alignmentUnready": "弯道或坡度超出此规格的限制。请放缓线形。",
     "constructionSpeed": "建设速度",

@@ -383,6 +383,8 @@ world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地�
 ### パスの確定可否
 
 `edit_path:update_shape` は `can_confirm` を常送します。これはUnityの形状確定状態とローカル交差検証（立体交差と川の横断）を合わせた真偽値で、形状が未確定または干渉中ならfalseです。Tauriはこの値だけで確定を許可せず、同じ全線ペイロードの `/paths/validate` 応答も照合します。既存の `world:highlight_objects` によるパス・建物の警告は、メッシュ着色ではなく半透明の占有箱として描画します。同イベントの params には `colliding_river_ids`（地表レベルで横切っている川のID文字列の配列。`/paths/validate` と `/paths/interference` の同名フィールドをそのまま渡す）も含み、Unity は該当する川の範囲を同じ占有箱で示します。
+敷設パネルは `/paths/validate` の `alignment_violations` を保持し、線番号（1始まり）と各線の始点からの距離区間を添えて曲率・勾配違反を表示します。パス干渉・川横断・形状未確定・検証待ち・検証エラーを区別し、APIエラーの理由は省略せず再試行ボタンを出します。原因不明の拒否を赤い干渉と断定しません。送信直前の再検証でも同じ説明を使い、古い形状の結果は表示しません。2D表示はUnityの推定値なので、全線検証で拒否された区間を敷設パネルの案内で確認できます。費用欄は確定不可でも2点以上あれば表示します。
+
 # 天候の表示と選択
 
 `ambience:volume {volume}`はTauri→Unityの音量通知（master×sfx、0〜1）。Cockpitが設定変更時と2秒ごとに送り、CameraAmbience（環境音）・ConstructionAmbience（工事音）・VehicleAmbience（走行音）・VisualEffectManager（完成・解体音）が所有するAudioSourceへ適用する。高度と天候の音響制御はUnity内で完結する。
@@ -396,3 +398,9 @@ world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地�
 | `weather:state` | Unity → Cockpit | `{id, locked, rain, presets:[{id, weight, rain}]}`。rainは0=なし、1=霧雨、2=雨、3=大雨 |
 
 送信は`utils/ipc.ts`の`queryWeather` / `setWeather`から`send_window_action`へ、受信はRust `ipc.rs`でCockpitだけに配信する。Unityは選択・抽選・固定変更後にも状態を送る。候補とウェイトはUnityが持ち、Tauriに抽選処理を複製しない。テンプレートモードOFF時はUIから固定解除を送る。詳細は[天気と環境光](../geometries/U_天気と環境光.md)を参照。
+
+
+`/paths/validate` の `alignments` は敷設する全線の設計後の線形指標で、費用カードと確定可否の表示に優先する。`/paths/earthwork-preview` の `path_profiles` は各線の `[x,絶対標高,z]` 配列で、Unityは形状確定後の3Dモデルに使用する。道路・地上線路は造成後、高架は設計縦断を表示する。操作中のHUD・2D線形はローカルの近似値である。
+
+
+造成の切土・盛土を示すオレンジ／青の半透明ボリュームと体積凡例は表示しない。RoadEarthworkPreviewは造成後のpath_profiles取得だけを担い、道路・線路モデル自体の標高へ反映する。

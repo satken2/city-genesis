@@ -46,6 +46,8 @@ export function NumberStepper({
     (delta: number) => {
       let next = value + delta;
       if (integerOnly) next = Math.round(next);
+      // 小数の加減算で生じる末尾の誤差を除き、手入力した細かい桁は維持する。
+      else next = Number(next.toPrecision(15));
       const clamped = clamp(next, min, max);
       onChange(clamped);
       if (!isFocused) {

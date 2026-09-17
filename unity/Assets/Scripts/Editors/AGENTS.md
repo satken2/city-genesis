@@ -4,6 +4,8 @@
 
 ## 編集フローの全体像(知らないとわからない)
 
+道路・線路の接続縦断はearthwork-previewの`path_profiles`を使う。編集停止後はメッシュとローカル勾配警告を同じ絶対標高から作り、受信時に警告キャッシュを破棄する。設計済み点列へ地形追従の平滑化を重ねない。取得待ち・ドラッグ中はローカル近似、確定可否は全線validateが正。
+
 編集操作は3つのコンポーネントの連携で成立する。
 
 1. **UI(Tauri/city-genesis/tauri)**: 建設ウィンドウでバリアント選択・確定ボタン → IPCでUnityに通知
@@ -95,3 +97,9 @@ Ctrlメニューは8項目、HUDは最大9アイコン(移動軸矢印1+曲線1+
 ## 2Dパス形状編集パネルとの同期(`RoadPlanManager.ShapeSync.cs`)
 
 Tauriの2Dパス形状編集パネル(`path_shape_editor`)は形状を持たず、`edit_path:shape_command` でノード・制御点の操作を送ってくる。`ApplyShapeCommand` は既存の `MoveAnchorPosition`(地面相対の高さを維持・手動制御点を平行移動)/ 制御点の絶対標高維持+`EnforceCollinearControls` / `InsertPointOnEdge` / `RemovePoint` / `SelectPoint` へ委譲し、吸着(`ApplySnapping`)は通さない。Editingフェーズ以外と3Dドラッグ中(`isDragging`)は無視する。適用後は3Dドラッグ終了と同じく `EmitShapeUpdate` + `EmitSelectNode`。`BuildShapeSyncExtras` が `update_shape` に `phase`/`selected_index`/`lateral_offsets`/`alignment` を足す。`alignment` は `CheckAlignmentViolations` が保持した1mサンプル(`cachedAlignmentSamplesWorld`/`cachedAlignmentRadius`/`cachedAlignmentGradePct`)を約5m間隔に間引いたもの(各要素に累積距離・路面の絶対標高・地盤標高も載せ、2Dの縦断面ストリップが使う)と区間ラベル(`alignmentLabels`)、各アンカーの縦断面位置 `nodes`(XZで最も近い1mサンプルの累積距離とアンカー直下の地盤高)で、無限大の半径は null にする(JSONに載せられないため)。`height_editable`/`min_height` も載せる。2Dの縦断面ストリップからの高さ変更は既存の `edit_path:change_node`(`OnChangeNodeFromIpc`)で届く。ノード番号(1始まり)のIMGUIラベルは `RoadPlanManager.NodeLabels.cs`(`DrawNodeNumberLabels`。AlignmentLabels の OnGUI から呼ぶ。選択中は青背景)で、2Dの地図・ストリップと同じ番号を3Dに出して対応付ける。`edit_path:query_shape` には `EmitShapeUpdateOnRequest` で現在形状を返す(セッション外は `phase=inactive`。2Dパネルはこれで自分を閉じる)。
+
+
+形状確定後・ドラッグ停止中の3DモデルはRoadEarthworkPreviewのpath_profiles（各線の造成後の絶対標高）を使う。取得中と操作中はローカル推定に戻す。応答の要求キー一致後にだけモデルを再生成し、生成器へfollow_terrain=0と一時のstation_grade_profileを渡して生地形への再投影を防ぐ。操作中のHUD・2D線形は近似、確定可否と費用欄は全線validateの設計縦断を正とする。
+
+
+造成の切土・盛土を示すオレンジ／青の半透明ボリュームと体積凡例は表示しない。RoadEarthworkPreviewは造成後のpath_profiles取得だけを担い、道路・線路モデル自体の標高へ反映する。

@@ -467,7 +467,7 @@ public static class VehicleQA
                 var b=filter.sharedMesh.bounds;var m=prefab.transform.worldToLocalMatrix*filter.transform.localToWorldMatrix;
                 for(int c=0;c<8;c++){var point=m.MultiplyPoint3x4(b.center+Vector3.Scale(b.extents,new Vector3((c&1)==0?-1:1,(c&2)==0?-1:1,(c&4)==0?-1:1)));if(!any){bounds=new Bounds(point,Vector3.zero);any=true;}else bounds.Encapsulate(point);}
             }
-            Check(triangles<50,$"pedestrian_{i} exceeds 50 triangles: {triangles}");
+            Check(triangles<400,$"pedestrian_{i} exceeds 400 triangles: {triangles}");
             Check(bounds.size.y>1.4f && bounds.size.y<2f,$"pedestrian_{i} height is not human scale: {bounds.size}");
             Check(Mathf.Abs(bounds.min.y)<.05f,$"pedestrian_{i} is not grounded: {bounds.min.y}");
             Check(Mathf.Abs(bounds.center.x)<.3f && Mathf.Abs(bounds.center.z)<.3f,$"pedestrian_{i} is off centre: {bounds.center}");

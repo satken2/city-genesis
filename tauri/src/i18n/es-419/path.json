@@ -76,7 +76,16 @@
     }
   },
   "path_construction": {
-    "collisionChecking": "Comprobando colisiones…",
+    "validationCurve": "Vía {{track}}: el radio es inferior al mínimo entre {{start}} y {{end}} m desde el inicio.",
+    "validationGrade": "Vía {{track}}: la pendiente supera el máximo entre {{start}} y {{end}} m desde el inicio.",
+    "validationPathCollision": "Los volúmenes de carreteras o vías se superponen. Revisa los volúmenes rojos.",
+    "validationRiverCollision": "El trazado cruza un río al nivel del suelo. Ajusta la altura o la ruta.",
+    "validationRejected": "No se cumplen las condiciones de construcción. Revisa el trazado y la configuración.",
+    "validationFailed": "Falló la validación: {{reason}}",
+    "validationUnavailable": "No se puede validar sin configurar la conexión al servidor.",
+    "validationRetry": "Reintentar",
+    "shapeUnready": "Haz clic derecho en la vista 3D para finalizar el trazado.",
+    "collisionChecking": "Comprobando las condiciones de construcción…",
     "collisionUnready": "Confirma el trazado y resuelve las colisiones indicadas por los volúmenes rojos.",
     "alignmentUnready": "Una curva o pendiente supera los límites de este estándar. Suaviza el trazado.",
     "constructionSpeed": "Velocidad de construcción",

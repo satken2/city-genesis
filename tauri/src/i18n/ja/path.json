@@ -76,7 +76,16 @@
     }
   },
   "path_construction": {
-    "collisionChecking": "干渉を確認しています…",
+    "validationCurve": "線路{{track}}：始点から{{start}}〜{{end}}mの曲線半径が規格の下限を下回っています。",
+    "validationGrade": "線路{{track}}：始点から{{start}}〜{{end}}mの勾配が規格の上限を超えています。",
+    "validationPathCollision": "道路・線路の占有範囲が干渉しています。赤い占有範囲を確認してください。",
+    "validationRiverCollision": "川を地表で横断しています。高さや経路を調整してください。",
+    "validationRejected": "敷設条件を満たしていません。形状や設定を確認してください。",
+    "validationFailed": "敷設条件の検証に失敗しました：{{reason}}",
+    "validationUnavailable": "接続先が未設定のため敷設条件を検証できません。",
+    "validationRetry": "再試行",
+    "shapeUnready": "3D画面で右クリックして形状を確定してください。",
+    "collisionChecking": "敷設条件を確認しています…",
     "collisionUnready": "形状を確定し、赤い占有範囲の干渉を解消してください。",
     "alignmentUnready": "急なカーブや勾配が規格の制限を超えています。形状を緩めてください。",
     "constructionSpeed": "建設スピード",

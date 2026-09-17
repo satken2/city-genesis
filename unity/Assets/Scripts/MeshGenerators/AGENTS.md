@@ -183,6 +183,8 @@ TrackPathの車止めはInfrastructureConnectionProviderが共用インフラノ
 
 ## 駅舎の配置方式
 
+通路bodyの未配置時（地下駅舎2002・2012を含む）は `CreateFallbackRoadBody` の板を使う。代替材質とパーツの空マテリアル配列は、URP対応の明灰色の `BuildingMaterial` を `GetOrCreateRoadMaterialByName` で共有する。Built-in用の `Standard` シェーダーを生成してはならない。
+
 house_ends（both/start/end）で選択した終端だけ建屋・接地占有を生成する。house_placement=outsideは区間回避、insideは最寄り線路占有区間の外縁に建屋外側辺を合わせる。insideの内側辺は区間上端−余白−奥行き、線路なしは−奥行き。Pythonのresolve_house_positionとUnityのResolveHousePositionを同一に保つ。片側でも終端識別を維持し、outsideは通路延長、insideは通路端移動。上記の「両終端」「線路を常に回避」という説明はoutside/bothの場合に限る。仕様はQ_駅舎パスのメッシュ生成.md §5。
 
 橋脚のYスケールは必要高さ÷プレハブboundsの著作高さ。pillarの天端原点規約は維持するが、柱本体が1m高であると仮定してはいけない。SlicePolylineByFractionは施工端の重複・極小セグメントを統合し、SplineMeshの終端断面が回ることを防ぐ。実FBXの接地下端と施工端はTests/ConstructionPathsで検証する。

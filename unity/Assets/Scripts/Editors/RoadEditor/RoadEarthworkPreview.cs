@@ -2,26 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using UnityEngine;
-using UnityEngine.Rendering;
 
-/// <summary>造成予定の体積だけを表示する。Terrainや確定済みパスは変更しない。</summary>
+/// <summary>造成後の線路標高を取得する。Terrainや確定済みパスは変更しない。</summary>
 public sealed class RoadEarthworkPreview : MonoBehaviour
 {
     public sealed class Result
     {
-        public List<List<List<float>>> cells;
-        public float cut_volume, fill_volume;
-        public string status;
+        public List<List<List<float>>> path_profiles;
     }
     string desired, sent;
     object payload;
     float changedAt;
     bool busy;
-    Mesh mesh;
-    Material material;
-    GameObject display;
-    Result result;
-    GUIStyle legend;
+    public List<List<Vector3>> PathProfiles { get; private set; }
+    public event System.Action Changed;
 
     public void Request(object value)
     {
@@ -30,14 +24,14 @@ public sealed class RoadEarthworkPreview : MonoBehaviour
         desired = key;
         payload = value;
         changedAt = Time.unscaledTime;
-        ClearMesh();
+        ClearProfiles();
     }
 
     public void Clear()
     {
         desired = sent = null;
         payload = null;
-        ClearMesh();
+        ClearProfiles();
     }
 
     void Update()
@@ -55,83 +49,35 @@ public sealed class RoadEarthworkPreview : MonoBehaviour
             yield return ApiClient.Post<Result>("/paths/earthwork-preview", value, response =>
             {
                 // 操作変更や編集終了の前に出した結果は表示しない。
-                if (desired == key && isActiveAndEnabled) Draw(response);
+                if (desired == key && isActiveAndEnabled) ApplyProfiles(response);
             }, (code, message) =>
             {
-                if (desired == key) result = new Result { status = "unavailable" };
+                if (desired == key) Debug.LogWarning($"造成後の線路標高を取得できませんでした: {code} {message}");
             });
         }
         finally { busy = false; }
     }
 
-    void Draw(Result response)
+    void ApplyProfiles(Result response)
     {
-        ClearMesh();
-        result = response;
-        if (response.cells == null || response.cells.Count == 0) return;
-        var vertices = new List<Vector3>();
-        var colors = new List<Color>();
-        var triangles = new List<int>();
-        foreach (var cell in response.cells)
+        ClearProfiles();
+        if (response.path_profiles != null)
         {
-            float delta = 0;
-            foreach (var p in cell) delta += p[3]-p[2];
-            Color color = delta < 0 ? new Color(1f,.48f,.12f,.24f) : new Color(.12f,.7f,1f,.24f);
-            int start = vertices.Count;
-            foreach (var p in cell)
+            PathProfiles = new List<List<Vector3>>();
+            foreach (var line in response.path_profiles)
             {
-                vertices.Add(new Vector3(p[0], p[2]+.04f, p[1]));
-                colors.Add(color);
-            }
-            foreach (var p in cell)
-            {
-                vertices.Add(new Vector3(p[0], p[3]+.04f, p[1]));
-                colors.Add(color);
-            }
-            // 元地形と造成面を結ぶ半透明の柱。切土の底は地形越しにも確認できる。
-            int[] faces = {0,1,2,0,2,3,4,6,5,4,7,6,0,4,5,0,5,1,1,5,6,1,6,2,2,6,7,2,7,3,3,7,4,3,4,0};
-            for (int i = 0; i < faces.Length; i += 3)
-            {
-                triangles.Add(start + faces[i]);
-                triangles.Add(start + faces[i + (delta < 0 ? 1 : 2)]);
-                triangles.Add(start + faces[i + (delta < 0 ? 2 : 1)]);
+                var points = new List<Vector3>();
+                foreach (var p in line) points.Add(new Vector3(p[0], p[1], p[2]));
+                PathProfiles.Add(points);
             }
         }
-        mesh = new Mesh { name = "EarthworkPreview", indexFormat = IndexFormat.UInt32 };
-        mesh.SetVertices(vertices); mesh.SetColors(colors); mesh.SetTriangles(triangles,0); mesh.RecalculateBounds();
-        if (material == null) material = new Material(Resources.Load<Shader>("EarthworkPreview"));
-        if (display == null)
-        {
-            display = new GameObject("EarthworkPreview");
-            display.AddComponent<MeshFilter>();
-            display.AddComponent<MeshRenderer>().sharedMaterial = material;
-        }
-        display.GetComponent<MeshFilter>().sharedMesh = mesh;
-        display.GetComponent<MeshRenderer>().shadowCastingMode = ShadowCastingMode.Off;
+        Changed?.Invoke();
     }
 
-    void OnGUI()
+    void ClearProfiles()
     {
-        if (result == null) return;
-        if (legend == null) legend = new GUIStyle(GUI.skin.box) { font = UiFontProvider.GetFont(14), fontSize = 14, richText = true };
-        string text = result.status == "unavailable" ? "造成プレビューを取得できませんでした" :
-            result.status == "too_large" ? "造成プレビュー：範囲が広すぎます" :
-            $"造成概算  <color=#ff9a42>切土 {result.cut_volume:N0} m³</color>  <color=#40baff>盛土 {result.fill_volume:N0} m³</color>";
-        GUI.Box(new Rect(16,Screen.height-72,430,32), text, legend);
-    }
-
-    void ClearMesh()
-    {
-        result = null;
-        if (display != null) display.GetComponent<MeshFilter>().sharedMesh = null;
-        if (mesh != null) Destroy(mesh);
-        mesh = null;
+        PathProfiles = null;
     }
     void OnDisable() { Clear(); }
-    void OnDestroy()
-    {
-        Clear();
-        if (display != null) Destroy(display);
-        if (material != null) Destroy(material);
-    }
+    void OnDestroy() { Clear(); }
 }

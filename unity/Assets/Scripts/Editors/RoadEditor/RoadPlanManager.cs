@@ -3014,10 +3014,20 @@ public partial class RoadPlanManager : MonoBehaviour
     private void Update3DPreview()
     {
         UpdateEarthworkPreview();
+        // 非同期に届いた完成予定の縦断でも、警告を同じ形状から再計算する。
+        cachedAlignmentViolations = null;
         if (roadRenderer == null) return;
 
+        // 操作停止後は全線の造成後標高を使う。取得中・ドラッグ中は軽量なローカル表示を続ける。
+        var profiles = earthworkPreview?.PathProfiles;
+        if (phase == RoadEditorPhase.Editing && !isDragging && profiles != null
+            && profiles.Count > 0 && profiles.TrueForAll(line => line.Count >= 2))
+        {
+            roadRenderer.UpdateSections(profiles[0], profiles[0], null, null, PathType,
+                PathSubtype, Curved, PlatformSide, LateralOffsets, TravelDirections, HouseEnds, profiles);
+            return;
+        }
         List<Vector3> renderPoints = GetRenderPoints();
-
         UpdatePreviewSections(renderPoints);
     }
 
@@ -3700,6 +3710,17 @@ public partial class RoadPlanManager : MonoBehaviour
         bool placing = phase == RoadEditorPhase.Placing;
         var sourceFollows = new List<bool>();
         var source = SamplePreviewSpans(GetRenderPoints(), 0, points.Count - 1, placing, false, origin, sourceFollows);
+        var profiles = earthworkPreview?.PathProfiles;
+        if (!placing && !isDragging && profiles != null && profiles.Count > 0 && profiles[0].Count >= 2)
+        {
+            source = new List<Vector3>(profiles[0].Count);
+            sourceFollows.Clear();
+            foreach (var point in profiles[0])
+            {
+                source.Add(point - origin);
+                sourceFollows.Add(false);
+            }
+        }
         if (source.Count < 2) return samples;
 
         var distances = new double[source.Count];

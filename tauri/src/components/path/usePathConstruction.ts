@@ -51,7 +51,7 @@ import {
   IPC_EVENT_EDIT_PATH_SELECT_NODE,
   IPC_EVENT_EDIT_PATH_UPDATE_SHAPE,
 } from "../../utils/ipc";
-import type { PathInterferenceHighlight } from "../../utils/ipc";
+import { describePathValidation, type PathValidationResult } from "./pathValidation";
 import { fetchApi } from "../../utils/api";
 import type { PathAlignmentSummary } from "../../types";
 import {
@@ -163,7 +163,7 @@ export type WaypointControls = {
 };
 
 /** POST /paths/construction-cost の alignment(バックエンド geo_path_alignment.alignment_for_api の形)。 */
-type PathAlignmentResponse = {
+export type PathAlignmentResponse = {
   base_speed: number;
   max_speed: number;
   min_curve_radius: number | null;
@@ -746,12 +746,34 @@ export function usePathConstruction(
 
   const [localCanConfirm, setLocalCanConfirm] = useState(false);
   const localCanConfirmRef = useRef(false);
-  const [validation, setValidation] = useState<{ key: string; valid: boolean } | null>(null);
+  const [validation, setValidation] = useState<{
+    key: string; result?: PathValidationResult; error?: string;
+  } | null>(null);
+  const [validationAttempt, setValidationAttempt] = useState(0);
+  const [shapePhase, setShapePhase] = useState<string>();
+  const retryValidation = useCallback(() => {
+    setValidation(null);
+    setValidationAttempt((value) => value + 1);
+  }, []);
   const validationKey = JSON.stringify({ ...constructionBody, exclude_path_id: pathId ?? null });
   const currentValidationKey = useRef(validationKey);
   currentValidationKey.current = validationKey;
   const canConfirm = localCanConfirm && constructionBody !== null
-    && validation?.key === validationKey && validation.valid;
+    && validation?.key === validationKey && validation.result?.is_valid === true;
+  const validationMessages = !localCanConfirm
+    ? [t(shapePhase === "placing" ? "path_construction.shapeUnready" : "path_construction.collisionUnready")]
+    : !apiBaseUrl
+      ? [t("path_construction.validationUnavailable")]
+      : validation?.key !== validationKey
+        ? [t("path_construction.collisionChecking")]
+        : validation.error !== undefined
+          ? [t("path_construction.validationFailed", { reason: validation.error })]
+          : validation.result ? describePathValidation(validation.result, t) : [];
+  const validatedAlignment = validation?.key === validationKey && validation.result?.alignments
+    ? summarizeAlignment(validation.result.alignments) : null;
+  const displayAlignment = validatedAlignment ?? alignment;
+  const canRetryValidation = localCanConfirm && !!apiBaseUrl
+    && validation?.key === validationKey && validation.error !== undefined;
 
   useEffect(() => {
     void sendClearHighlights("path_build");
@@ -759,34 +781,47 @@ export function usePathConstruction(
     let cancelled = false;
     const timer = setTimeout(async () => {
       try {
-        const result = await fetchApi<PathInterferenceHighlight & { is_valid: boolean }>(
+        const result = await fetchApi<PathValidationResult>(
           `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/validate`,
           { method: "POST", headers: { "Content-Type": "application/json" }, body: validationKey }
         );
         if (!cancelled && currentValidationKey.current === validationKey) {
-          setValidation({ key: validationKey, valid: result?.is_valid === true });
-          if (result) await sendHighlightObjects(result, "path_build");
+          setValidation({ key: validationKey, result });
+          void sendHighlightObjects(result, "path_build").catch(console.error);
         }
-      } catch {
-        if (!cancelled) setValidation({ key: validationKey, valid: false });
+      } catch (error) {
+        if (!cancelled && currentValidationKey.current === validationKey) {
+          setValidation({ key: validationKey, error: error instanceof Error ? error.message : String(error) });
+        }
       }
     }, 150);
     return () => { cancelled = true; clearTimeout(timer); };
-  }, [apiBaseUrl, constructionBody, localCanConfirm, validationKey]);
+  }, [apiBaseUrl, constructionBody, localCanConfirm, validationKey, validationAttempt]);
 
   const confirmPath = useCallback(async (): Promise<void> => {
     if (!apiBaseUrl || !constructionBody || !canConfirm || !localCanConfirmRef.current
         || currentValidationKey.current !== validationKey) {
-      throw new Error(t("path_construction.collisionUnready"));
+      throw new Error(validationMessages.join("\n") || t("path_construction.collisionChecking"));
     }
     // 送信直前にも読み取り検証し、他の編集による都市側の変化を拾う。
-    const checked = await fetchApi<{ is_valid: boolean }>(
-      `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/validate`,
-      { method: "POST", headers: { "Content-Type": "application/json" }, body: validationKey }
-    );
-    if (!checked?.is_valid || !localCanConfirmRef.current || currentValidationKey.current !== validationKey) {
-      setValidation({ key: validationKey, valid: false });
-      throw new Error(t("path_construction.collisionUnready"));
+    let checked: PathValidationResult;
+    try {
+      checked = await fetchApi<PathValidationResult>(
+        `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/validate`,
+        { method: "POST", headers: { "Content-Type": "application/json" }, body: validationKey }
+      );
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      if (currentValidationKey.current === validationKey) setValidation({ key: validationKey, error: reason });
+      throw new Error(t("path_construction.validationFailed", { reason }));
+    }
+    if (!localCanConfirmRef.current || currentValidationKey.current !== validationKey) {
+      throw new Error(t("path_construction.collisionChecking"));
+    }
+    setValidation({ key: validationKey, result: checked });
+    void sendHighlightObjects(checked, "path_build").catch(console.error);
+    if (!checked.is_valid) {
+      throw new Error(describePathValidation(checked, t).join("\n"));
     }
     const response = await fetchApi<{ paths: Array<{ path_id: number }> }>(
       `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/${pathId ?? ""}`,
@@ -800,7 +835,7 @@ export function usePathConstruction(
     if (pathId == null && response?.paths?.length) {
       void invoke("open_registered_window", { windowType: "path_detail", entityId: String(response.paths[0].path_id) });
     }
-  }, [apiBaseUrl, constructionBody, canConfirm, validationKey, pathId, t]);
+  }, [apiBaseUrl, constructionBody, canConfirm, validationKey, pathId, t, validationMessages]);
 
   /* ---- 都市の通行方向を取得(既定の進行方向割り当てに使う) ---- */
   useEffect(() => {
@@ -899,6 +934,7 @@ export function usePathConstruction(
         follow_terrain?: number;
         is_finalized?: boolean;
         can_confirm?: boolean;
+        phase?: string;
         selected_points?: number[][];
         start_control?: number[];
         end_control?: number[];
@@ -914,6 +950,7 @@ export function usePathConstruction(
         setValidation(null);
         localCanConfirmRef.current = event.payload.can_confirm === true;
         setLocalCanConfirm(localCanConfirmRef.current);
+        setShapePhase(event.payload.phase);
 
         // 曲線モードはUnity側が真実源。点列の有無にかかわらず必ず同期する
         // (敷設モード初期化直後は空点列+is_curvedだけが届く)。
@@ -1154,8 +1191,8 @@ export function usePathConstruction(
     isCostLoading,
     pathLength,
     // 線形
-    alignment,
-    alignmentOk: alignment == null || (!alignment.curveViolated && !alignment.gradeViolated),
+    alignment: displayAlignment,
+    alignmentOk: displayAlignment == null || (!displayAlignment.curveViolated && !displayAlignment.gradeViolated),
     // 選択・敷設
     onCategoryChange,
     onTypeChange,
@@ -1166,6 +1203,8 @@ export function usePathConstruction(
     continuePlacement,
     confirmPath,
     canConfirm,
-    collisionChecking: localCanConfirm && validation?.key !== validationKey,
+    validationMessages,
+    canRetryValidation,
+    retryValidation,
   };
 }

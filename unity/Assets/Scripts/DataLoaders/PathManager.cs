@@ -245,7 +245,6 @@ public class PathManager : BaseApiDataManager
     private Dictionary<Vector2Int, HashSet<int>> pathIdsByCell = new Dictionary<Vector2Int, HashSet<int>>();
     private Dictionary<int, HashSet<Vector2Int>> pathCellsById = new Dictionary<int, HashSet<Vector2Int>>();
     private Dictionary<int, List<Vector3>> pathPointsCache = new Dictionary<int, List<Vector3>>();
-    private const float CONSTRUCTION_SOUND_SAMPLE_INTERVAL = 25f; // 工事音の発音位置を決める中心線の間引き間隔(m)
 
     /// <summary>
     /// カメラ移動によるLOD更新中は TerrainManager.OnTerrainTileReady がセルごとに発火する。
@@ -3469,14 +3468,15 @@ public class PathManager : BaseApiDataManager
             }
             InvalidateTerrainFollowPath(path);
         }
-        if (oldPath != null && ConstructionPathBuilder.Progress(oldPath) != ConstructionPathBuilder.Progress(path))
-            InvalidateTerrainFollowPath(path);
+        // 進捗はversionを上げずに毎エポック進むので、施工先端に追従する表示と工事音は進捗差分でも更新する。
+        bool progressChanged = oldPath != null && ConstructionPathBuilder.Progress(oldPath) != ConstructionPathBuilder.Progress(path);
+        if (progressChanged) InvalidateTerrainFollowPath(path);
         if (oldPath != null) RemovePathFromNodeIndex(path.path_id, oldPath.start_node_id, oldPath.end_node_id);
         pathDataCache[path.path_id] = path;
         AddPathToNodeIndex(path);
+        if (changed || progressChanged) SyncConstructionSound(path);
         if (changed)
         {
-            SyncConstructionSound(path);
             RegisterPathCells(path);
             EnqueuePillarNeighborRebuilds(path, GetPathCoveredCellsCached(path));
         }
@@ -3495,7 +3495,8 @@ public class PathManager : BaseApiDataManager
     }
 
     /// <summary>
-    /// 工事音の現場登録をパスデータに同期する。工事中だけ中心線の点列(間引き済み)を登録し、それ以外は解除する。
+    /// 工事音の現場登録をパスデータに同期する。工事中だけ施工の先端(工事車両が並ぶ位置)の1点を登録し、それ以外は解除する。
+    /// 道路全体から鳴らすと作業していない区間まで工事音が聞こえるため、車両の配置と同じ先端座標だけを発音位置にする。
     /// 座標は描画点列と同じバックエンド座標(FloatingOriginのずれを含まない)で渡す。
     /// </summary>
     private void SyncConstructionSound(PathSummary path)
@@ -3506,7 +3507,8 @@ public class PathManager : BaseApiDataManager
             ConstructionAmbience.Unregister(ConstructionAmbience.Kind.Path, path.path_id);
             return;
         }
-        ConstructionAmbience.Register(ConstructionAmbience.Kind.Path, path.path_id, DecimatePolyline(points, CONSTRUCTION_SOUND_SAMPLE_INTERVAL));
+        var front = ConstructionPathBuilder.FrontPoint(path, points, UsesTunnelMesh(path, points));
+        ConstructionAmbience.Register(ConstructionAmbience.Kind.Path, path.path_id, new[] { front });
     }
 
     private void RegisterPathData(PathSummary path)

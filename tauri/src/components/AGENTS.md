@@ -143,8 +143,15 @@ PathConstructionPanel/TrackConstructionPanelの継続配置は間隔・進行方
 
 StationHouseEndsSelectは駅舎の両端/A端/B端の共通選択UI。建設はusePathConstruction→IPCでプレビュー反映、駅詳細は単独PATCH後に再取得とsession:reloadを行う。Aは始点、Bは終点。
 
+道路・軌道共通の `PathBuildSections` の盛土・切土入力は -5〜+5m、ボタン0.1m刻み、手入力はそれより細かい小数も許可する。`NumberStepper` の `integerOnly={false}` は増減時の末尾誤差を有効15桁で除くが、手入力をステップ幅へ丸めない。
+
 ## プロップの高さ指定
 
 PropPlacementPanelの個別配置は全種別共通で地面相対高さ(m)を小数・負値で設定できる。heightを初期化・設定変更IPCへ渡し、Unityから受ける各インスタンスのyをそのままPOSTする。高さ変更は次のゴーストだけに適用し、すでに打点したインスタンスは個別の高さを保つ。
 
 道路・軌道の共通確定ボタンは `usePathConstruction.canConfirm` を使う。Unityからの `can_confirm` と、確定と同じ `constructionBody` 全線の `/paths/validate` 成功をANDする。事前検証は150msのデバウンスで行い、応答を送信形状キーで照合して古い結果を破棄する。取得失敗・検証待ち・交差中は確定不可。confirmPath自身もガードし、送信直前に再検証する。複線の先頭1本だけの検証は禁止。
+
+パス確定不可の理由は `path/pathValidation.ts` で全線検証の `alignment_violations`（線番号と始点からの距離区間）・パス干渉・川横断を区別して表示する。API例外はメッセージを保持して再試行を提供し、干渉と表示しない。形状キーが一致する結果だけを表示・採用し、送信直前の再検証にも同じ説明を使う。ハイライトIPC失敗を検証失敗へ置き換えない。建設費用欄はノードが2点以上なら確定可否にかかわらず表示する。
+
+
+全線validateのalignmentsが現在の形状キーで取得できたら、費用カードの線形値とalignmentOkにはその最悪値を優先する。個別のconstruction-costは駅共通標高を含まないため、取得済み全線結果を上書きしない。

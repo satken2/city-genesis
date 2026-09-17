@@ -76,7 +76,16 @@
     }
   },
   "path_construction": {
-    "collisionChecking": "正在檢查碰撞…",
+    "validationCurve": "路線{{track}}：距起點{{start}}～{{end}}m處的曲線半徑小於規定下限。",
+    "validationGrade": "路線{{track}}：距起點{{start}}～{{end}}m處的坡度超過規定上限。",
+    "validationPathCollision": "道路或軌道的占用範圍重疊。請檢查紅色占用範圍。",
+    "validationRiverCollision": "路線在地表橫穿河流。請調整高度或路線。",
+    "validationRejected": "不符合建設條件。請檢查形狀和設定。",
+    "validationFailed": "建設條件驗證失敗：{{reason}}",
+    "validationUnavailable": "未設定伺服器連線，無法驗證建設條件。",
+    "validationRetry": "重試",
+    "shapeUnready": "請在3D畫面中按右鍵以確定形狀。",
+    "collisionChecking": "正在檢查建設條件…",
     "collisionUnready": "請確定路線形狀，並消除紅色立體區域所示的碰撞。",
     "alignmentUnready": "彎道或坡度超出此規格的限制。請放緩線形。",
     "constructionSpeed": "建設速度",

@@ -16,13 +16,45 @@ public static class ConstructionPathBuilder
     public static float PierProgress(float progress) => Mathf.Clamp01(progress / .25f);
     public static float DeckProgress(float progress) => Mathf.Clamp01((progress - .25f) / .65f);
 
-    /// <summary>遠景はパーツを読み込まず、土と施工済み面の帯だけで進捗を示す。</summary>
-    public static void GenerateFar(GameObject root, PathSummary path, List<Vector3> points, float width, Material surface)
+    /// <summary>施工の先端の位置(始点からの割合)。高架は橋脚期間は橋脚の、桁架設以降は桁の進み具合で決まる。</summary>
+    public static float FrontFraction(float progress, bool elevated)
+        => elevated ? (progress < .25f ? PierProgress(progress) : DeckProgress(progress)) : progress;
+
+    /// <summary>
+    /// 高架として施工するか。相対高さゼロの道路を描画用の浮かせ量だけで高架扱いしないよう、基準高さより明確に高い点があるときだけ真。
+    /// </summary>
+    public static bool IsElevated(PathSummary path, List<Vector3> points, bool underground)
     {
         RoadPath.GetPathMasterParams(path, out _, out _, out _, out _, out _, out _, out _,
             out float? spacing, out bool heightEditable, out float baseHeight, out _);
-        bool elevated = heightEditable && spacing.GetValueOrDefault() > 0f
+        return !underground && heightEditable && spacing.GetValueOrDefault() > 0f
             && points.Exists(p => path.GetRelativeHeightAtPoint(p.x, p.z) - baseHeight > .1f);
+    }
+
+    /// <summary>
+    /// 施工の先端(工事車両が集まる位置)の中心線上の座標。工事音の発音位置に使う。
+    /// 車両の配置(PlaceVehicles)と同じ割合で中心線を辿るので、進捗が変われば車両と一緒に移動する。
+    /// </summary>
+    public static Vector3 FrontPoint(PathSummary path, List<Vector3> points, bool underground)
+    {
+        float front = FrontFraction(Progress(path), IsElevated(path, points, underground));
+        float total = 0f;
+        for (int i = 1; i < points.Count; i++) total += Vector3.Distance(points[i - 1], points[i]);
+        float target = front * total, walked = 0f;
+        for (int i = 1; i < points.Count; i++)
+        {
+            float segment = Vector3.Distance(points[i - 1], points[i]);
+            if (walked + segment >= target)
+                return Vector3.Lerp(points[i - 1], points[i], segment > 1e-6f ? Mathf.Clamp01((target - walked) / segment) : 0f);
+            walked += segment;
+        }
+        return points[points.Count - 1];
+    }
+
+    /// <summary>遠景はパーツを読み込まず、土と施工済み面の帯だけで進捗を示す。</summary>
+    public static void GenerateFar(GameObject root, PathSummary path, List<Vector3> points, float width, Material surface)
+    {
+        bool elevated = IsElevated(path, points, false);
         float built = elevated ? DeckProgress(Progress(path)) : Progress(path);
         var dirtLine = elevated ? new List<Vector3>() : PathDrawContext.SlicePolylineByFraction(points, built, 1);
         AddMesh(root, "ConstructionDirt", ConstructionMeshUtil.BuildDirtStripMesh(dirtLine,
@@ -39,9 +71,7 @@ public static class ConstructionPathBuilder
         RoadPath.GetPathMasterParams(path, out float width, out float sidewalk, out _, out _, out int lanes,
             out _, out _, out float? spacing, out bool heightEditable, out float baseHeight, out bool singleSpan);
         float progress = Progress(path);
-        // 相対高さゼロの道路を、描画用の浮かせ量だけで高架扱いしない。
-        bool elevated = !underground && heightEditable && spacing.GetValueOrDefault() > 0f
-            && points.Exists(p => path.GetRelativeHeightAtPoint(p.x, p.z) - baseHeight > .1f);
+        bool elevated = IsElevated(path, points, underground);
         var spline = RoadPath.BuildSpline(root, points, path.curved);
         PathDrawContext.SetAdaptiveTileLength(PathDrawContext.ComputeAdaptiveTileLength(spline, RoadPath.MAX_EXTRUDE_TILE_LENGTH));
         string variant = $"Models/Paths/p{path.path_variant}", type = $"Models/Paths/p{path.path_type}";
@@ -133,8 +163,7 @@ public static class ConstructionPathBuilder
             if (collision != null) colliderParts.Add(collision);
         }
         if ((elevated ? progress > 0f : progress < 1f) && PathDrawContext.CurrentDrawLod != DrawLod.Far)
-            PlaceVehicles(root, points, width, elevated ? (progress < .25f ? PierProgress(progress) : built) : built,
-                elevated, PathMeshFactory.GetModelType(path) == "track", underground ? clearance : float.PositiveInfinity, progress >= .25f);
+            PlaceVehicles(root, points, width, FrontFraction(progress, elevated), elevated, PathMeshFactory.GetModelType(path) == "track", underground ? clearance : float.PositiveInfinity, progress >= .25f);
 
         Mesh collider = null;
         if (colliderParts.Count > 0)

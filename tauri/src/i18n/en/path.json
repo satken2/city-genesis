@@ -76,7 +76,16 @@
     }
   },
   "path_construction": {
-    "collisionChecking": "Checking for collisions…",
+    "validationCurve": "Path {{track}}: curve radius is below the minimum from {{start}} to {{end}} m from the start.",
+    "validationGrade": "Path {{track}}: grade exceeds the maximum from {{start}} to {{end}} m from the start.",
+    "validationPathCollision": "Road or track occupancy overlaps. Check the red occupancy volumes.",
+    "validationRiverCollision": "The path crosses a river at ground level. Adjust the elevation or route.",
+    "validationRejected": "Construction requirements are not met. Check the shape and settings.",
+    "validationFailed": "Construction validation failed: {{reason}}",
+    "validationUnavailable": "Cannot validate construction without a server connection setting.",
+    "validationRetry": "Retry",
+    "shapeUnready": "Right-click in the 3D view to finalize the shape.",
+    "collisionChecking": "Checking construction requirements…",
     "collisionUnready": "Finalize the shape and resolve any collisions shown by red volumes.",
     "alignmentUnready": "A curve or grade exceeds the limits of this standard. Ease the alignment.",
     "constructionSpeed": "Construction Speed",
