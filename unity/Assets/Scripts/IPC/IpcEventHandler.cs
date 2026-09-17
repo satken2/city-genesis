@@ -22,6 +22,8 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnEditPathChangeHouseEnds += HandleEditPathChangeHouseEnds;
             IpcClient.Instance.OnEditPathSetFollowTerrain += HandleEditPathSetFollowTerrain;
             IpcClient.Instance.OnEditPathChangeLateralOffsets += HandleEditPathChangeLateralOffsets;
+            IpcClient.Instance.OnEditPathShapeCommand += HandleEditPathShapeCommand;
+            IpcClient.Instance.OnEditPathQueryShape += HandleEditPathQueryShape;
             IpcClient.Instance.OnEditResourceFinish += HandleEditResourceFinish;
             IpcClient.Instance.OnEditTransitFinish += HandleEditTransitFinish;
             IpcClient.Instance.OnEditPropChangeSettings += HandleEditPropChangeSettings;
@@ -52,6 +54,8 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnEditPathChangeHouseEnds -= HandleEditPathChangeHouseEnds;
             IpcClient.Instance.OnEditPathSetFollowTerrain -= HandleEditPathSetFollowTerrain;
             IpcClient.Instance.OnEditPathChangeLateralOffsets -= HandleEditPathChangeLateralOffsets;
+            IpcClient.Instance.OnEditPathShapeCommand -= HandleEditPathShapeCommand;
+            IpcClient.Instance.OnEditPathQueryShape -= HandleEditPathQueryShape;
             IpcClient.Instance.OnEditResourceFinish -= HandleEditResourceFinish;
             IpcClient.Instance.OnEditTransitFinish -= HandleEditTransitFinish;
             IpcClient.Instance.OnEditPropChangeSettings -= HandleEditPropChangeSettings;
@@ -160,6 +164,32 @@ public class IpcEventHandler : MonoBehaviour
         if (rpm != null)
         {
             rpm.SetLateralOffsets(lateralOffsets, travelDirections);
+        }
+    }
+
+    /// <summary>
+    /// edit_path.shape_command → RoadPlanManager.ApplyShapeCommand()
+    /// 2Dパス形状編集パネルからのノード・制御点操作。結果は update_shape で返る。
+    /// </summary>
+    private void HandleEditPathShapeCommand(RoadPlanManager.ShapeCommand cmd)
+    {
+        var rpm = GetRoadPlanManager();
+        if (rpm != null)
+        {
+            rpm.ApplyShapeCommand(cmd);
+        }
+    }
+
+    /// <summary>
+    /// edit_path.query_shape → RoadPlanManager.EmitShapeUpdateOnRequest()
+    /// 2Dパス形状編集パネルが開いた直後に現在形状を問い合わせる。
+    /// </summary>
+    private void HandleEditPathQueryShape()
+    {
+        var rpm = GetRoadPlanManager();
+        if (rpm != null)
+        {
+            rpm.EmitShapeUpdateOnRequest();
         }
     }
 

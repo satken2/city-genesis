@@ -42,7 +42,13 @@ public static class VehicleQA
             ModelPrefabGenerator.SyncAll();
             game=Assembly.LoadFrom(Path.Combine(source,"Temp/bin/Debug/Assembly-CSharp.dll"));
             Geometry(); Budget(); Junction(); RoadsideExit(); MotionContract(); TransitModels(); TransitPlacement();
+            PedestrianBands(); PedestrianModels();
             var report = new List<string>();
+            foreach(int split in new[]{1,5}) report.Add(PedestrianNetwork(split,12,1200,false,true));
+            report.Add(PedestrianNetwork(5,.2f,1200,false,false));
+            // 歩行者は1.1m/sなので、入口のある1辺へ戻るまで800mの環状路で最大約730秒かかる。
+            report.Add(PedestrianNetwork(5,12,2400,true,true));
+            report.Add(PedestrianNetwork(5,12,600,true,false));
             foreach(int split in new[]{1,5,20}) report.Add(Network(split,12,1200,false));
             report.Add(Network(5,.2f,1200,false));
             report.Add(Network(5,12,1200,true));
@@ -412,5 +418,156 @@ public static class VehicleQA
         UnityEngine.Object.DestroyImmediate(manager.gameObject);UnityEngine.Object.DestroyImmediate(pathManager.gameObject);
         foreach(var obj in fixtureObjects) UnityEngine.Object.DestroyImmediate(obj);
         return $"hz={hz} split={subdivisions} target={target} reduce={reduce} average={average:F3} peak={peak} transitions={transitions}";
+    }
+
+    static void PedestrianBands()
+    {
+        var resolve=game.GetType("PedestrianManager").GetMethod("ResolveBand");
+        int street=(int)game.GetType("Constants").GetField("PATH_STREET").GetRawConstantValue();
+        int walkway=(int)game.GetType("Constants").GetField("PATH_WALKWAY").GetRawConstantValue();
+        object[] a={street,12f,2.5f,.3f,1f,null,null,null,null};resolve.Invoke(null,a);
+        Near((float)a[5],3.8f,.001f,"Sidewalk band inner");Near((float)a[6],5.7f,.001f,"Sidewalk band outer");
+        Near((float)a[7],.3f,.001f,"Sidewalk surface height");Check(!(bool)a[8],"Sidewalk band is centred");
+        a=new object[]{street,6f,0f,.3f,1f,null,null,null,null};resolve.Invoke(null,a);
+        Near((float)a[5],2f,.001f,"Shoulder band inner");Near((float)a[6],2.7f,.001f,"Shoulder band outer");Near((float)a[7],.1f,.001f,"Shoulder on road surface");
+        a=new object[]{walkway,4f,0f,.3f,1f,null,null,null,null};resolve.Invoke(null,a);
+        Check((bool)a[8] && (float)a[5]==0,"Walkway band not centred");Near((float)a[6],1.7f,.001f,"Walkway band outer");
+        a=new object[]{street,1f,0f,.3f,1f,null,null,null,null};resolve.Invoke(null,a);
+        Check((float)a[5]<=(float)a[6],"Narrow road band inverted");
+        var p=New("Pedestrian");Call(p,"SetPath",1,Line(Vector3.zero,Vector3.forward*100),true,50f);
+        Set(p,"side",1);Set(p,"lateral",4f);Set(p,"surface",.3f);
+        object[] sample={null,null};Call(p,"Sample",sample);
+        Near(((Vector3)sample[0]).x,4,.001f,"Right side lateral offset");Near(((Vector3)sample[0]).y,.3f,.001f,"Surface height");
+        Check(Vector3.Angle((Vector3)sample[1],Vector3.forward)<.01f,"Forward tangent");
+        Set(p,"forward",false);Call(p,"Sample",sample);
+        Near(((Vector3)sample[0]).x,4,.001f,"Reversal moves pedestrian to the other side");
+        Check(Vector3.Angle((Vector3)sample[1],Vector3.back)<.01f,"Backward tangent");
+        Set(p,"speed",1f);Near((float)Call(p,"Advance",100f),50,.001f,"Residual time lost at path end");
+        Call(p,"BeginEntering",new Vector3(10,0,0));
+        Check((bool)p.GetType().GetProperty("Entering").GetValue(p) && (bool)p.GetType().GetProperty("InConnector").GetValue(p),"Entering connector absent");
+        Call(p,"Advance",100f);Check((bool)p.GetType().GetProperty("ConnectorComplete").GetValue(p),"Entering never completes");
+    }
+    static void PedestrianModels()
+    {
+        var manager=new GameObject("PedestrianModelsQA").AddComponent(game.GetType("ModelManager"));
+        game.GetType("ModelManager").GetProperty("Instance").SetValue(null,manager);
+        var getModel=game.GetType("ModelManager").GetMethod("GetModel");
+        int count=0;
+        for(int i=0;i<16;i++)
+        {
+            var prefab=(GameObject)getModel.Invoke(manager,new object[]{$"Models/Props/pedestrian_{i}",true});
+            if(prefab==null)break;
+            count++;
+            var filters=prefab.GetComponentsInChildren<MeshFilter>(true);Check(filters.Length>0,"Pedestrian FBX has no mesh");
+            int triangles=0;Bounds bounds=default;bool any=false;
+            foreach(var filter in filters)
+            {
+                Check(filter.sharedMesh.isReadable,"Pedestrian FBX is not readable");
+                triangles+=filter.sharedMesh.triangles.Length/3;
+                var b=filter.sharedMesh.bounds;var m=prefab.transform.worldToLocalMatrix*filter.transform.localToWorldMatrix;
+                for(int c=0;c<8;c++){var point=m.MultiplyPoint3x4(b.center+Vector3.Scale(b.extents,new Vector3((c&1)==0?-1:1,(c&2)==0?-1:1,(c&4)==0?-1:1)));if(!any){bounds=new Bounds(point,Vector3.zero);any=true;}else bounds.Encapsulate(point);}
+            }
+            Check(triangles<50,$"pedestrian_{i} exceeds 50 triangles: {triangles}");
+            Check(bounds.size.y>1.4f && bounds.size.y<2f,$"pedestrian_{i} height is not human scale: {bounds.size}");
+            Check(Mathf.Abs(bounds.min.y)<.05f,$"pedestrian_{i} is not grounded: {bounds.min.y}");
+            Check(Mathf.Abs(bounds.center.x)<.3f && Mathf.Abs(bounds.center.z)<.3f,$"pedestrian_{i} is off centre: {bounds.center}");
+            accessTimings.Add($"pedestrian_{i} triangles={triangles} size={bounds.size}");
+        }
+        Check(count>=1,"No pedestrian model found");
+        UnityEngine.Object.DestroyImmediate(manager.gameObject);
+    }
+    static void PedestrianAccessFixture(object manager, List<GameObject> cleanup)
+    {
+        var master=new GameObject("PedestrianMaster").AddComponent(game.GetType("MasterDataStore"));cleanup.Add(master.gameObject);
+        game.GetType("MasterDataStore").GetField("<Instance>k__BackingField",Flags).SetValue(null,master);
+        var item=New("PathMasterItem");Set(item,"frontage_allowed",true);
+        ((IDictionary)Get(master,"pathMasterById"))[0]=item;
+        var parcels=new GameObject("PedestrianParcels").AddComponent(game.GetType("ParcelManager"));cleanup.Add(parcels.gameObject);
+        var buildings=new GameObject("PedestrianBuildings").AddComponent(game.GetType("BuildingManager"));cleanup.Add(buildings.gameObject);
+        Set(manager,"parcelManager",parcels);Set(manager,"buildingManager",buildings);
+        int active=(int)game.GetType("Constants").GetField("STATUS_ACTIVE").GetRawConstantValue();
+        var parcel=New("GeneratedModels.ParcelSummary");Set(parcel,"parcel_id",100);Set(parcel,"front_path_id",1);Set(parcel,"status",active);
+        Set(parcel,"polygon",new List<object>{new List<object>{-3f,-94f},new List<object>{3f,-94f},new List<object>{3f,-80f},new List<object>{-3f,-80f}});
+        Call(parcels,"RegisterParcelDataForLines",parcel);
+        var building=New("GeneratedModels.BuildingSummary");Set(building,"agent_id",100);Set(building,"parcel_id",100);Set(building,"status",active);Set(building,"is_bd",true);
+        Call(buildings,"RegisterBuildingDataToCache",building);
+        Action refresh=()=>{var work=(IEnumerator)Call(manager,"UpdateAccess",Vector3.zero);while(work.MoveNext()){}};
+        refresh();
+        var entrances=(IDictionary)Get(manager,"entrances");
+        Check(((IList)entrances[1]).Count>0,"Pedestrian frontage entrance missing");
+        foreach(var entry in (IList)entrances[1]) Check((int)Get(entry,"side")==1,"Entrance side is not the parcel side");
+        int generation=(int)Get(manager,"accessGeneration");refresh();
+        Check((int)Get(manager,"accessGeneration")==generation,"Unchanged data rebuilds pedestrian entrances");
+    }
+    static string PedestrianNetwork(int subdivisions, float target, int seconds, bool reduce, bool withAccess, int hz=4)
+    {
+        UnityEngine.Random.InitState(4321+subdivisions);
+        var pathManager=new GameObject("PedestrianPaths").AddComponent(game.GetType("PathManager"));
+        var manager=new GameObject("Pedestrians").AddComponent(game.GetType("PedestrianManager"));
+        Set(manager,"pathManager",pathManager);Set(manager,"renderRadius",1000f);
+        var walks=(IDictionary)Get(manager,"walks");var buckets=(IList)Get(manager,"buckets");
+        var lookup=(IDictionary)Get(manager,"bucketByPath");var active=(IList)Get(manager,"active");
+        var budget=Get(manager,"population");Call(budget,"SetTarget",target);
+        Type walkType=manager.GetType().GetNestedType("Walk",BindingFlags.NonPublic);
+        Type bucketType=manager.GetType().GetNestedType("Bucket",BindingFlags.NonPublic);
+        int count=4*subdivisions;
+        var corners=new[]{new Vector3(-100,0,-100),new Vector3(100,0,-100),new Vector3(100,0,100),new Vector3(-100,0,100)};
+        for(int i=0;i<count;i++)
+        {
+            int side=i/subdivisions,part=i%subdivisions;
+            Vector3 a=Vector3.Lerp(corners[side],corners[(side+1)%4],(float)part/subdivisions);
+            Vector3 b=Vector3.Lerp(corners[side],corners[(side+1)%4],(float)(part+1)/subdivisions);
+            var data=New("GeneratedModels.PathSummary");Set(data,"path_id",i+1);Set(data,"start_node_id",i+1);Set(data,"end_node_id",(i+1)%count+1);
+            Set(data,"status",(int)game.GetType("Constants").GetField("STATUS_ACTIVE").GetRawConstantValue());
+            Set(data,"path_type",(int)game.GetType("Constants").GetField("PATH_STREET").GetRawConstantValue());
+            // 一方通行にしても歩行者は両方向に歩く。
+            Set(data,"travel_direction",1);Set(data,"path_traffic",new Dictionary<string,float>{{"0",100}});
+            Call(pathManager,"SavePathToCache",data);
+            var line=Line(a,b);float length=Vector3.Distance(a,b);
+            var walk=Activator.CreateInstance(walkType);Set(walk,"data",data);Set(walk,"line",line);
+            Set(walk,"halfWidth",6f);Set(walk,"insideLength",length);Set(walk,"intervals",new List<Vector2>{new Vector2(0,length)});
+            Set(walk,"inner",3.8f);Set(walk,"outer",5.7f);Set(walk,"surface",.3f);Set(walk,"centered",false);walks.Add(i+1,walk);
+            var bucket=Activator.CreateInstance(bucketType);Set(bucket,"walk",walk);Set(bucket,"target",target/count);
+            buckets.Add(bucket);lookup.Add(i+1,bucket);
+        }
+        var fixtureObjects=new List<GameObject>();
+        if(withAccess) PedestrianAccessFixture(manager,fixtureObjects);
+        int observed=0,peak=0,transitions=0,forwardSeen=0,backwardSeen=0;double sum=0;
+        var priorPaths=new Dictionary<object,int>();
+        for(int tick=0;tick<seconds*hz;tick++)
+        {
+            if(reduce && tick==seconds*hz/2)
+            {
+                Call(budget,"SetTarget",0f);foreach(var b in buckets)Set(b,"target",0f);
+            }
+            Call(manager,"MovePedestrians",1f/hz,Vector3.zero);
+            if((tick+1)%(hz/4)==0) Call(manager,"RegulateDensity",.25f);
+            peak=Math.Max(peak,active.Count);
+            foreach(var p in active)
+            {
+                int path=(int)Get(p,"pathId");if(priorPaths.TryGetValue(p,out int old) && old!=path)transitions++;
+                priorPaths[p]=path;
+                if((bool)Get(p,"forward"))forwardSeen++;else backwardSeen++;
+                object[] sample={null,null};Call(p,"Sample",sample);var position=(Vector3)sample[0];
+                Check(!float.IsNaN(position.x) && !float.IsNaN(position.z),"Non-finite pedestrian position");
+                Check(active.Count<=1000,"Global hard cap");
+                if((bool)p.GetType().GetProperty("InConnector").GetValue(p)) continue;
+                var road=Get(p,"road");float s=(float)Call(road,"Project",position);
+                Sample(road,s,true,out var centre,out _);
+                float lateral=Vector2.Distance(new Vector2(position.x,position.z),new Vector2(centre.x,centre.z));
+                Check(lateral>=3.8f-.02f && lateral<=5.7f+.02f,$"Pedestrian left the sidewalk band: {lateral}");
+                Near(position.y,.3f,.001f,"Pedestrian is not on the sidewalk surface");
+            }
+            if(tick>=60*hz){observed++;sum+=active.Count;}
+        }
+        double average=sum/observed;
+        if(!reduce) Near((float)average,target,Mathf.Max(.05f,target*.12f),"Pedestrian population drift");
+        else if(withAccess) Check(active.Count==0,"Reachable entrance did not drain pedestrians");
+        else Check(active.Count==12,"Closed network without buildings lost pedestrians");
+        if(target>=1){Check(transitions>10,"Pedestrians disappear before crossing nodes");Check(forwardSeen>0 && backwardSeen>0,"One-way road blocks a walking direction");}
+        Call(manager,"ClearPedestrians");Check(active.Count==0,"Reset leaks pedestrians");
+        UnityEngine.Object.DestroyImmediate(manager.gameObject);UnityEngine.Object.DestroyImmediate(pathManager.gameObject);
+        foreach(var obj in fixtureObjects) UnityEngine.Object.DestroyImmediate(obj);
+        return $"pedestrians hz={hz} split={subdivisions} target={target} reduce={reduce} access={withAccess} average={average:F3} peak={peak} transitions={transitions}";
     }
 }

@@ -140,6 +140,18 @@ export type CityMapBounds = { x1: number; z1: number; x2: number; z2: number };
 /** ビュー状態。overlayDrawコールバックに渡される */
 export type CityMapViewState = { offsetX: number; offsetY: number; zoom: number };
 
+/**
+ * ポインタ操作コールバックに渡す情報。screen はキャンバス左上原点のピクセル座標、
+ * world はその地点のワールド座標(x, z)。view は変換の逆算(ワールド→画面)に使う。
+ */
+export type CityMapPointerEvent = {
+  world: { x: number; z: number };
+  screen: { x: number; y: number };
+  view: CityMapViewState;
+  button: number;
+  event: MouseEvent;
+};
+
 /** 上位コンポーネントがref経由で呼べる操作 */
 export type CityMapCanvasHandle = {
   /** 全体表示(initialBounds指定時はその範囲)へビューをリセットする */
@@ -203,6 +215,20 @@ export type CityMapCanvasProps = {
   ) => void;
   /** マウスカーソル位置のワールド座標通知(キャンバス外に出たらnull) */
   onCursorWorldPos?: (pos: { x: number; z: number } | null) => void;
+  /**
+   * 左ボタン押下のフック(interactive時のみ)。true を返すとそのドラッグをパンとして扱わず、
+   * 以後の onPointerMove / onPointerUp を上位のドラッグ操作(ノード移動など)に委ねる。
+   * false/未指定なら従来どおりパン開始する。
+   */
+  onPointerDown?: (e: CityMapPointerEvent) => boolean;
+  /** マウス移動のフック(ウィンドウ全体で受ける。ドラッグ中のカーソル追従に使う) */
+  onPointerMove?: (e: CityMapPointerEvent) => void;
+  /** onPointerDown が true を返したドラッグの終了通知 */
+  onPointerUp?: (e: CityMapPointerEvent) => void;
+  /** 右クリック(contextmenu)のフック。既定のコンテキストメニューは常に抑止する */
+  onContextMenu?: (e: CityMapPointerEvent) => void;
+  /** キャンバスのカーソル形状(CSS cursor)。ホバー対象に応じて上位が切り替える */
+  cursor?: string;
   /** ズーム倍率の変更通知 */
   onZoomChange?: (zoom: number) => void;
   className?: string;
@@ -980,6 +1006,11 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       overlayVersion,
       animatedOverlayDraw,
       onCursorWorldPos,
+      onPointerDown,
+      onPointerMove,
+      onPointerUp,
+      onContextMenu,
+      cursor,
       onZoomChange,
       onHeatmapStats,
       className,
@@ -1001,12 +1032,14 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
     const overlayDrawRef = useRef<CityMapCanvasProps["overlayDraw"]>(overlayDraw);
     const animatedOverlayDrawRef = useRef<CityMapCanvasProps["animatedOverlayDraw"]>(animatedOverlayDraw);
     const cursorCbRef = useRef<CityMapCanvasProps["onCursorWorldPos"]>(onCursorWorldPos);
+    const pointerCbRef = useRef({ onPointerDown, onPointerMove, onPointerUp, onContextMenu });
     const zoomCbRef = useRef<CityMapCanvasProps["onZoomChange"]>(onZoomChange);
     const heatmapStatsCbRef = useRef<CityMapCanvasProps["onHeatmapStats"]>(onHeatmapStats);
     const masterDataRef = useRef<MasterData | null>(masterData);
     overlayDrawRef.current = overlayDraw;
     animatedOverlayDrawRef.current = animatedOverlayDraw;
     cursorCbRef.current = onCursorWorldPos;
+    pointerCbRef.current = { onPointerDown, onPointerMove, onPointerUp, onContextMenu };
     zoomCbRef.current = onZoomChange;
     heatmapStatsCbRef.current = onHeatmapStats;
 
@@ -1056,6 +1089,11 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
     useEffect(() => {
       engineRef.current?.draw();
     }, [overlayVersion]);
+
+    /* ---- カーソル形状: 上位のホバー判定に応じて切り替える ---- */
+    useEffect(() => {
+      if (canvasRef.current) canvasRef.current.style.cursor = cursor ?? "";
+    }, [cursor]);
 
     /* ---- 初期化(データロード・イベント登録)。apiBaseUrl等が変わったら作り直す ---- */
     useEffect(() => {
@@ -1781,9 +1819,31 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       let dragStartY = 0;
       let dragOffsetX = 0;
       let dragOffsetY = 0;
+      // 上位の onPointerDown が true を返したドラッグ(ノード移動など)。パンはしない。
+      let customDrag = false;
+
+      /** マウスイベントを上位コールバック用のポインタ情報へ変換する */
+      const toPointerEvent = (e: MouseEvent): CityMapPointerEvent => {
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        const [wx, wz] = screenToWorld(mx, my);
+        return {
+          world: { x: wx, z: wz },
+          screen: { x: mx, y: my },
+          view: { ...view },
+          button: e.button,
+          event: e,
+        };
+      };
 
       const onMouseDown = (e: MouseEvent) => {
         if (e.button !== 0) return;
+        const down = pointerCbRef.current.onPointerDown;
+        if (down && down(toPointerEvent(e))) {
+          customDrag = true;
+          return;
+        }
         dragging = true;
         dragStartX = e.clientX;
         dragStartY = e.clientY;
@@ -1801,6 +1861,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         } else {
           cursorCbRef.current?.(null);
         }
+        pointerCbRef.current.onPointerMove?.(toPointerEvent(e));
 
         if (!dragging) return;
         // カーソル下のワールド座標が固定されるようにパンする。
@@ -1810,8 +1871,18 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         draw();
       };
 
-      const onMouseUp = () => {
+      const onMouseUp = (e: MouseEvent) => {
         dragging = false;
+        if (customDrag) {
+          customDrag = false;
+          pointerCbRef.current.onPointerUp?.(toPointerEvent(e));
+        }
+      };
+
+      const onContextMenu = (e: MouseEvent) => {
+        // 右クリックは上位の操作(ノード削除など)に使うため、ブラウザ既定のメニューは常に出さない
+        e.preventDefault();
+        pointerCbRef.current.onContextMenu?.(toPointerEvent(e));
       };
 
       const onMouseLeave = () => {
@@ -1841,6 +1912,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         window.addEventListener("mouseup", onMouseUp);
         canvas.addEventListener("mouseleave", onMouseLeave);
         canvas.addEventListener("wheel", onWheel, { passive: false });
+        canvas.addEventListener("contextmenu", onContextMenu);
       }
 
       /* ---- 起動シーケンス ---- */
@@ -1902,6 +1974,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           window.removeEventListener("mouseup", onMouseUp);
           canvas.removeEventListener("mouseleave", onMouseLeave);
           canvas.removeEventListener("wheel", onWheel);
+          canvas.removeEventListener("contextmenu", onContextMenu);
         }
       };
       // initialBoundsは値ベースのキー(boundsKey)で比較する

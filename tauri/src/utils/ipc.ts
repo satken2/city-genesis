@@ -753,6 +753,52 @@ export async function sendEditPathChangeLateralOffsets(
 }
 
 /**
+ * 2Dパス形状編集パネル(path_shape_editor)からの形状操作。op ごとに使うフィールドが違う。
+ * - select_node: index
+ * - move_node: index, x, z (XZのみ。地面相対の高さはUnity側が維持する)
+ * - move_control: index, which("in"|"out"), x, z (制御点の絶対標高はUnity側が維持する)
+ * - insert_node: edge_index(points[i]〜points[i+1]の辺), x, z
+ * - remove_node: index
+ */
+export type PathShapeCommand =
+  | { op: "select_node"; index: number }
+  | { op: "move_node"; index: number; x: number; z: number }
+  | { op: "move_control"; index: number; which: "in" | "out"; x: number; z: number }
+  | { op: "insert_node"; edge_index: number; x: number; z: number }
+  | { op: "remove_node"; index: number };
+
+/**
+ * `edit_path.shape_command`
+ * 2Dパス形状編集パネルのノード・制御点操作をUnityへ送る。形状の真実源はUnity側
+ * (RoadPlanManager)のままで、Unityは吸着を適用せず既存の移動・挿入・削除ロジックで
+ * 適用し、結果を `edit_path:update_shape`(全状態)で返す。ドラッグ中は送らず、
+ * ドラッグ終了時に1回だけ送る。Editingフェーズ以外や3Dでドラッグ中はUnity側が無視する。
+ */
+export async function sendEditPathShapeCommand(command: PathShapeCommand): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "path_shape_editor",
+    entity: null,
+    action: "edit_path:shape_command",
+    params: command,
+  });
+}
+
+/**
+ * `edit_path.query_shape`
+ * 敷設中パスの現在形状を問い合わせる。Unityは `edit_path:update_shape` を1回返す。
+ * `update_shape` は形状が変化したときにしか送られないため、開くたびに再マウントされる
+ * 2Dパス形状編集パネルが初期状態を得るのに使う(`camera:query_state` と同じ問い合わせ応答型)。
+ */
+export async function sendEditPathQueryShape(): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "path_shape_editor",
+    entity: null,
+    action: "edit_path:query_shape",
+    params: {},
+  });
+}
+
+/**
  * `edit_path.set_follow_terrain`
  * パス敷設モードにおいて、地形追従の個別設定(-1=未設定[バリアント既定]/0=非追従/1=追従)を変更する。
  * Unity側は敷設中プレビューの地形追従・トンネル可視化を即座に切り替える(真実源はUnity側で、
@@ -938,7 +984,11 @@ export async function sendViewQueryState(): Promise<void> {
  */
 export const IPC_EVENT_EDIT_PATH_SELECT_NODE = "edit_path:select_node";
 
-/** パス敷設モードにおいて、敷設中パスの形状が変更された */
+/**
+ * パス敷設モードにおいて、敷設中パスの形状が変更された(Unity → UI)。
+ * 全WebViewへブロードキャストされるため、敷設パネルと2Dパス形状編集パネルの両方が同じイベントを受ける。
+ * ペイロードの型は `components/path/pathBuildConstants.ts` の `PathShapeUpdatePayload`。
+ */
 export const IPC_EVENT_EDIT_PATH_UPDATE_SHAPE = "edit_path:update_shape";
 
 /**

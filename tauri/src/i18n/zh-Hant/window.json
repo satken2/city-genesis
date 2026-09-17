@@ -36,7 +36,8 @@
     "transit_creation": "新建大眾運輸路線",
     "transit_detail": "路線詳情",
     "prop_placement": "裝飾物配置",
-    "mashup_edit": "附屬建築配置"
+    "mashup_edit": "附屬建築配置",
+    "path_shape_editor": "路徑形狀編輯"
   },
   "cityMap": {
     "layers": {

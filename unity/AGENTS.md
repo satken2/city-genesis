@@ -24,6 +24,7 @@
   - GameStateManager.cs ... グローバルなゲーム状態の管理(シングルトン)。状態変化イベントの購読。
   - MasterDataStore.cs  ... バックエンドから取得したマスターデータの保持。道路幅・車線数などの描画パラメータはここを正とする。
   - AppRoot.cs          ... アプリ起動処理。
+  - Vehicles            ... 描画専用の交通演出。一般車(`VehicleManager`)・公共交通の編成(`TransitVehicleManager`)・歩行者(`PedestrianManager`。GameObjectなしのinstanced描画)・空と海の環境演出(`AmbientVehicleManager`)。経済へ書き戻さない。(詳細はVehicles/AGENTS.md)
   - Weather             ... Unity専用の天気・環境光。AppRootがWeatherControllerを生成する。既存session:reload/force_reloadでcity.epochを読み、増分がある場合だけ抽選する(編集リロードでは不変)。WeatherPresetの重み付き11種類、Resources/Weather/Atmosphere.shader、太陽・雲影Cookie・霧・空だけの反射プローブを管理する。F9で撮影用キーボードパネル、F6/F7で選択固定、F10で固定切替、F11で自動再抽選。経済・マスター・セーブには書き込まない。詳細は公開U_天気と環境光.md、検証はTests/Weather/run-unity.ps1。
   - MainMenu.cs         ... メインメニューのボタンイベントなどを管理するプログラム。
   - Utils.cs            ... ApplyDepthOffsetShader / DestroyObjectAfterFrames / CalculateAverageWidth / GetCameraHorizontalForward / IsInHorizontalView(視野優先処理の水平視野判定) など各マネージャー間で共有する汎用処理。新しい汎用処理を書く前に必ず確認。

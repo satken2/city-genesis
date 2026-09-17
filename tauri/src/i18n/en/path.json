@@ -113,7 +113,8 @@
       "dirForward": "Forward",
       "dirBackward": "Backward",
       "dirBoth": "Both ways"
-    }
+    },
+    "openShapeEditor": "Edit in 2D"
   },
   "track_construction": {
     "trackTab": "Track",
@@ -122,5 +123,23 @@
     "house": {
       "hint": "Draw the station building line. Platforms crossed by the line belong to this station. Buildings are placed at both ends of the line, connected by an overhead bridge. Station buildings never snap to existing roads or tracks (only grid snapping applies)."
     }
+  },
+  "path_shape_editor": {
+    "hintInactive": "No path is being laid",
+    "hintPlacing": "Right-click in the 3D view to finalize the shape, then edit it here",
+    "hintEditing": "Drag: move node/handle  Click edge: add node  Right-click: delete node",
+    "hintStraight": "(straight mode: no handles)",
+    "fitView": "Fit view",
+    "minRadius": "Min radius",
+    "maxGrade": "Max grade",
+    "limit": "limit",
+    "noLimit": "none",
+    "straight": "straight",
+    "curveLabel": "Curve R {{value}}m\nbelow min {{limit}}m",
+    "gradeLabel": "Grade G {{value}}%\nabove max {{limit}}%",
+    "profileTitle": "Profile",
+    "profileHint": "Drag a node up/down to change its height (no horizontal movement)",
+    "profileReadOnly": "Finalize the shape in the 3D view to edit heights",
+    "ground": "ground"
   }
 }

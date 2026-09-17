@@ -99,6 +99,7 @@ nav:
     - 火災エフェクトの描画: geometries/S_火災エフェクトの描画.md
     - 天気と環境光: geometries/U_天気と環境光.md
     - 環境演出の乗り物: geometries/V_環境演出の乗り物.md
+    - 歩行者の描画: geometries/W_歩行者の描画.md
   - プログラム連携:
     - IPC連携: programs/IPC連携の整理.md
     - コンポーネント連携: programs/コンポーネント連携.md

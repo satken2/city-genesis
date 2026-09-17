@@ -3453,7 +3453,8 @@ public partial class RoadPlanManager : MonoBehaviour
         // 描画用のローカル推定をゲートにすると、権威検証自体が呼ばれず誤判定から復帰できない。
         IpcClient.Instance.EmitEditPathUpdateShape(pathId, PathType, pointsList, startControl, endControl, embankmentHeights, waypointControls, Curved, PathFollowTerrainOverride, finalized,
             phase == RoadEditorPhase.Editing && points.Count >= 2 && CheckElevationIntersections().Count == 0
-            && CheckRiverCrossings().Count == 0);
+            && CheckRiverCrossings().Count == 0,
+            BuildShapeSyncExtras());
     }
 
     // =====================================================================
@@ -3577,6 +3578,10 @@ public partial class RoadPlanManager : MonoBehaviour
         var violations = new List<List<Vector3>>();
         cachedAlignmentViolations = violations;
         alignmentLabels.Clear();
+        cachedAlignmentSamplesWorld = null;
+        cachedAlignmentRadius = null;
+        cachedAlignmentGradePct = null;
+        cachedAlignmentRadiusLimit = 0f;
         cachedAlignmentMinRadius = float.PositiveInfinity;
         cachedAlignmentMaxGradePct = 0f;
         cachedAlignmentGradeLimit = 0f;
@@ -3645,6 +3650,13 @@ public partial class RoadPlanManager : MonoBehaviour
 
         CollectAlignmentLabels(samples, sampleOrigin, radius, radiusLimit, true, alignmentLabels);
         CollectAlignmentLabels(samples, sampleOrigin, gradePct, gradeLimit, false, alignmentLabels);
+
+        // 2Dパネルへ送る線形サンプル(RoadPlanManager.ShapeSync)のために評価結果を保持する
+        cachedAlignmentSamplesWorld = new List<Vector3>(n);
+        for (int i = 0; i < n; i++) cachedAlignmentSamplesWorld.Add(samples[i] + sampleOrigin);
+        cachedAlignmentRadius = radius;
+        cachedAlignmentGradePct = gradePct;
+        cachedAlignmentRadiusLimit = radiusLimit;
 
         // 違反サンプルの連続区間を点列にまとめる
         List<Vector3> run = null;

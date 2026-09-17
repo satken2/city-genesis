@@ -33,6 +33,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useMasterData } from "../../contexts/MasterDataContext";
 
@@ -207,6 +208,8 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
     try {
       await pc.confirmPath();
       await sendEditPathFinish();
+      // 確定した形状の2D編集パネルは役目を終えるので閉じる(開いていなければ何もしない)
+      void invoke("close_registered_window", { windowType: "path_shape_editor" }).catch(console.error);
       // 発注で拘束額が増えたので、規格ごとの資金目安を取り直す
       refreshAffordability();
       // 連続設置: 選択中バリアント・軌道設定を維持したまま次のパスを配置できる状態へ戻す。

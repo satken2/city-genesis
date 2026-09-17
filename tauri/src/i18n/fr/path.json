@@ -113,7 +113,8 @@
       "dirForward": "Sens aller",
       "dirBackward": "Sens retour",
       "dirBoth": "Deux sens"
-    }
+    },
+    "openShapeEditor": "Éditer en 2D"
   },
   "track_construction": {
     "trackTab": "Voie ferrée",
@@ -122,5 +123,23 @@
     "house": {
       "hint": "Tracez la ligne du bâtiment de gare. Les quais traversés par cette ligne sont rattachés à cette gare. Un bâtiment est placé à chaque extrémité de la ligne, reliés par une passerelle le long de celle-ci. Le bâtiment de gare ne s'aligne jamais sur les routes ou les voies existantes (seul l'alignement sur la grille s'applique)."
     }
+  },
+  "path_shape_editor": {
+    "hintInactive": "Aucune voie en cours de tracé",
+    "hintPlacing": "Faites un clic droit dans la vue 3D pour fixer la forme, puis modifiez-la ici",
+    "hintEditing": "Glisser : déplacer un nœud/une poignée  Clic sur un tronçon : ajouter un nœud  Clic droit : supprimer un nœud",
+    "hintStraight": "(mode rectiligne : pas de poignées)",
+    "fitView": "Vue globale",
+    "minRadius": "Rayon min.",
+    "maxGrade": "Pente max.",
+    "limit": "limite",
+    "noLimit": "aucune",
+    "straight": "droite",
+    "curveLabel": "Courbe R {{value}}m\nsous le min. {{limit}}m",
+    "gradeLabel": "Pente G {{value}}%\nau-dessus du max. {{limit}}%",
+    "profileTitle": "Profil en long",
+    "profileHint": "Glissez un nœud vers le haut/bas pour changer sa hauteur (pas de déplacement horizontal)",
+    "profileReadOnly": "Fixez la forme dans la vue 3D pour modifier les hauteurs",
+    "ground": "sol"
   }
 }

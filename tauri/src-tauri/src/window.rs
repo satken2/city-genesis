@@ -425,6 +425,24 @@ fn compute_window_geometry(
                 LogicalPosition::new(m_pos.x + HUD_LEFT_RESERVED + margin, m_pos.y + margin),
             );
         }
+    } else if definition.layout == WindowLayout::RightTop {
+        // 右上配置: 画面右端・上端にマージンを空けて配置し、サイズはレジストリ値を使用する。
+        // 敷設パネル(左端)と同時に使う2Dパス形状編集パネルのように、3Dビューの中央を
+        // 塞がずに左のパネルと共存させたいウィンドウ向け。
+        if let Some(monitor) = monitor {
+            let scale = monitor.scale_factor();
+            let m_pos = monitor.position().to_logical::<f64>(scale);
+            let m_size = monitor.size().to_logical::<f64>(scale);
+
+            let margin = HUD_MARGIN;
+            let w = saved_geometry.map(|g| g.width).unwrap_or(definition.width as f64);
+            let h = saved_geometry.map(|g| g.height).unwrap_or(definition.height as f64);
+
+            return (
+                LogicalSize::new(w, h),
+                LogicalPosition::new(m_pos.x + m_size.width - w - margin, m_pos.y + margin),
+            );
+        }
     } else {
         // 自由配置: 記憶済みの位置・サイズがあればそれをそのまま復元する。
         if let Some(geo) = saved_geometry {
@@ -747,6 +765,11 @@ pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) 
                     json!({ "source": "path_build" }),
                 );
             }
+            if wt == "path_build" || wt == "infra_build" || wt == "track_build" {
+                // 敷設セッションの持ち主である敷設パネルが閉じられたら、付随する2Dパス形状編集
+                // パネルも閉じる。逆(2Dパネルを閉じる)は敷設セッションを終わらせない。
+                close_windows_by_type(app, state, "path_shape_editor");
+            }
             if wt == "building_construction" {
                 // 建物建設パネルが閉じられたとき、直接配置の干渉ハイライト
                 // (source="building_construction")を消す。ウィンドウは非表示(再利用待ち)に
@@ -859,6 +882,23 @@ pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) 
     }
 
     Ok(())
+}
+
+/// 指定ウィンドウタイプの表示中ウィンドウをすべて閉じる(非表示・再利用待ちにする)。
+/// 開いていなければ何もしない。他ウィンドウの操作(確定ボタン等)から付随ウィンドウを閉じる用途。
+pub fn close_windows_by_type(app: &AppHandle, state: &SharedState, window_type: &str) {
+    let labels: Vec<String> = {
+        let guard = state.lock();
+        guard
+            .open_windows
+            .values()
+            .filter(|w| !w.hidden && w.window_type == window_type)
+            .map(|w| w.label.clone())
+            .collect()
+    };
+    for label in labels {
+        let _ = close_window_by_label(app, state, &label);
+    }
 }
 
 fn apply_mutex_rules(app: &AppHandle, state: &SharedState, window_type: &str) -> Result<(), String> {

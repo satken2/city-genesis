@@ -113,7 +113,8 @@
       "dirForward": "順方向",
       "dirBackward": "逆方向",
       "dirBoth": "雙方向"
-    }
+    },
+    "openShapeEditor": "2D編輯"
   },
   "track_construction": {
     "trackTab": "軌道",
@@ -122,5 +123,23 @@
     "house": {
       "hint": "鋪設站房路線。與此路線相交的月台將歸屬於此站房所在的車站。路線兩端會放置站房建築，並沿線架設連接橋。站房不會吸附至既有的道路或軌道（僅網格吸附有效）。"
     }
+  },
+  "path_shape_editor": {
+    "hintInactive": "沒有正在鋪設的路徑",
+    "hintPlacing": "在3D視圖中按右鍵確定形狀後，即可在此編輯",
+    "hintEditing": "拖曳: 移動節點/控制點  點擊邊: 新增節點  右鍵: 刪除節點",
+    "hintStraight": "(直線模式，無控制點)",
+    "fitView": "全覽",
+    "minRadius": "最小半徑",
+    "maxGrade": "最大坡度",
+    "limit": "限制",
+    "noLimit": "無",
+    "straight": "直線",
+    "curveLabel": "彎道 R {{value}}m\n低於下限 {{limit}}m",
+    "gradeLabel": "坡度 G {{value}}%\n超過上限 {{limit}}%",
+    "profileTitle": "縱斷面",
+    "profileHint": "上下拖曳節點以更改高度(不能水平移動)",
+    "profileReadOnly": "在3D視圖中確定形狀後即可編輯高度",
+    "ground": "地面"
   }
 }

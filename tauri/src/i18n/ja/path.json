@@ -113,7 +113,8 @@
       "dirForward": "順方向",
       "dirBackward": "逆方向",
       "dirBoth": "両方向"
-    }
+    },
+    "openShapeEditor": "2Dで編集"
   },
   "track_construction": {
     "trackTab": "軌道",
@@ -122,5 +123,23 @@
     "house": {
       "hint": "駅舎の線を敷設します。線と交差したプラットフォームがこの駅舎の駅に所属します。線の両端に駅舎の建屋が置かれ、線に沿って連絡橋が架かります。駅舎は既存の道路・線路には吸着しません(グリッド吸着のみ有効)。"
     }
+  },
+  "path_shape_editor": {
+    "hintInactive": "敷設中のパスがありません",
+    "hintPlacing": "3Dビューで右クリックして形状を確定すると、ここで編集できます",
+    "hintEditing": "ドラッグ: ノード/制御点を移動  辺クリック: ノード追加  右クリック: ノード削除",
+    "hintStraight": "(直線モードのため制御点はありません)",
+    "fitView": "全体表示",
+    "minRadius": "最小半径",
+    "maxGrade": "最大勾配",
+    "limit": "制限",
+    "noLimit": "なし",
+    "straight": "直線",
+    "curveLabel": "カーブ R {{value}}m\n下限 {{limit}}m 未満",
+    "gradeLabel": "勾配 G {{value}}%\n上限 {{limit}}% 超過",
+    "profileTitle": "縦断面",
+    "profileHint": "ノードを上下にドラッグで高さを変更(横方向は動かせません)",
+    "profileReadOnly": "3Dビューで形状を確定すると高さを編集できます",
+    "ground": "地盤"
   }
 }

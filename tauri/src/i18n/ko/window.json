@@ -36,7 +36,8 @@
     "transit_creation": "대중교통 신설",
     "transit_detail": "노선 상세",
     "prop_placement": "프롭 배치",
-    "mashup_edit": "부속 건물 배치"
+    "mashup_edit": "부속 건물 배치",
+    "path_shape_editor": "경로 형상 편집"
   },
   "cityMap": {
     "layers": {

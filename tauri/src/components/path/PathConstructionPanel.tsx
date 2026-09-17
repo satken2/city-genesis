@@ -25,6 +25,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { invoke } from "@tauri-apps/api/core";
 import { useMasterData } from "../../contexts/MasterDataContext";
 
 import { setHintbarText } from "../../utils/hintbar";
@@ -176,6 +177,8 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId, categor
       await pathConstruction.confirmPath();
       // 成功時: Unityに編集終了を通知してデータをリロードさせる
       await sendEditPathFinish();
+      // 確定した形状の2D編集パネルは役目を終えるので閉じる(開いていなければ何もしない)
+      void invoke("close_registered_window", { windowType: "path_shape_editor" }).catch(console.error);
       // 発注で拘束額が増えたので、規格ごとの資金目安を取り直す
       refreshAffordability();
       if (editPathId != null) {

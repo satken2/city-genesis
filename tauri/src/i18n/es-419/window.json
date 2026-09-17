@@ -36,7 +36,8 @@
     "transit_creation": "Nueva línea de transporte",
     "transit_detail": "Detalle de la línea",
     "prop_placement": "Colocación de props",
-    "mashup_edit": "Distribución de anexos"
+    "mashup_edit": "Distribución de anexos",
+    "path_shape_editor": "Editor de forma de vía"
   },
   "cityMap": {
     "layers": {

@@ -27,6 +27,7 @@ const ZoneMergeConfirmWindow = lazy(() => import("./components/zone/ZoneMergeCon
 const BuildingDirectAcquisitionConfirmWindow = lazy(() => import("./components/building/BuildingDirectAcquisitionConfirmWindow").then(m => ({ default: m.BuildingDirectAcquisitionConfirmWindow })));
 const PathConstructionPanel = lazy(() => import("./components/path/PathConstructionPanel").then(m => ({ default: m.PathConstructionPanel })));
 const TrackConstructionPanel = lazy(() => import("./components/path/TrackConstructionPanel").then(m => ({ default: m.TrackConstructionPanel })));
+const PathShapeEditorPanel = lazy(() => import("./components/path/PathShapeEditorPanel").then(m => ({ default: m.PathShapeEditorPanel })));
 const PathDetailPanel = lazy(() => import("./components/path/PathDetailPanel").then(m => ({ default: m.PathDetailPanel })));
 const BuildingConstructionPanel = lazy(() => import("./components/building/BuildingConstructionPanel").then(m => ({ default: m.BuildingConstructionPanel })));
 const MashupEditPanel = lazy(() => import("./components/building/MashupEditPanel").then(m => ({ default: m.MashupEditPanel })));
@@ -83,7 +84,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * 専用パネルが実装されているウィンドウタイプのセット
  * これらのタイプはジェネリックな JSON 表示ではなく、専用コンポーネントでレンダリングする
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "zone_merge", "building_direct_acquisition", "path_build", "infra_build", "track_build", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "settings", "credits", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "new_game", "city_rename", "template_editor", "resource_detail", "resource_edit", "prop_placement", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "epoch_result", "quest_complete", "terrain_unlock", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "zone_merge", "building_direct_acquisition", "path_build", "infra_build", "track_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "settings", "credits", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "new_game", "city_rename", "template_editor", "resource_detail", "resource_edit", "prop_placement", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "epoch_result", "quest_complete", "terrain_unlock", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map"]);
 
 
 function App() {
@@ -421,6 +422,9 @@ function App() {
                 apiBaseUrl={context.api_base_url}
                 onClose={closeWindow}
               />
+            ) : context.window_type === "path_shape_editor" ? (
+              // 敷設中パスの2D形状編集。敷設パネル(path_build/track_build/infra_build)と並行して開く
+              <PathShapeEditorPanel apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "resource_edit" ? (
               <ResourceConstructionPanel
                 apiBaseUrl={context.api_base_url}

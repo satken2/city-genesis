@@ -36,7 +36,8 @@
     "transit_creation": "新建公共交通线路",
     "transit_detail": "线路详情",
     "prop_placement": "装饰物放置",
-    "mashup_edit": "附属建筑布局"
+    "mashup_edit": "附属建筑布局",
+    "path_shape_editor": "路径形状编辑"
   },
   "cityMap": {
     "layers": {

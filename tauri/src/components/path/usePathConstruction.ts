@@ -920,6 +920,12 @@ export function usePathConstruction(
         const isCurved = event.payload.is_curved === true;
         setCurveMode(isCurved ? "curved" : "straight");
 
+        // 曲線モードで形状を確定(3Dビューの右クリック)したら、制御点を調整しやすい
+        // 2Dパス形状編集パネルを自動で開く(直線モードはボタンから手動で開く)。
+        if (event.payload.is_finalized === true && isCurved) {
+          void invoke("open_registered_window", { windowType: "path_shape_editor" }).catch(console.error);
+        }
+
         // 地形追従の個別設定もUnity側が真実源。常送されるので毎回同期する。
         if (typeof event.payload.follow_terrain === "number") {
           setFollowTerrainState(event.payload.follow_terrain);

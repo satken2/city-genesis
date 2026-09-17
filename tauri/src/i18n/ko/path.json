@@ -113,7 +113,8 @@
       "dirForward": "순방향",
       "dirBackward": "역방향",
       "dirBoth": "양방향"
-    }
+    },
+    "openShapeEditor": "2D로 편집"
   },
   "track_construction": {
     "trackTab": "궤도",
@@ -122,5 +123,23 @@
     "house": {
       "hint": "역사 선을 부설합니다. 선과 교차한 승강장이 이 역사의 역에 소속됩니다. 선의 양 끝에 역사 건물이 놓이고, 선을 따라 연결 다리가 놓입니다. 역사는 기존 도로·선로에 흡착되지 않습니다(그리드 흡착만 적용)."
     }
+  },
+  "path_shape_editor": {
+    "hintInactive": "부설 중인 경로가 없습니다",
+    "hintPlacing": "3D 뷰에서 우클릭으로 형상을 확정하면 여기서 편집할 수 있습니다",
+    "hintEditing": "드래그: 노드/제어점 이동  변 클릭: 노드 추가  우클릭: 노드 삭제",
+    "hintStraight": "(직선 모드이므로 제어점이 없습니다)",
+    "fitView": "전체 보기",
+    "minRadius": "최소 반경",
+    "maxGrade": "최대 경사",
+    "limit": "제한",
+    "noLimit": "없음",
+    "straight": "직선",
+    "curveLabel": "커브 R {{value}}m\n하한 {{limit}}m 미만",
+    "gradeLabel": "경사 G {{value}}%\n상한 {{limit}}% 초과",
+    "profileTitle": "종단면",
+    "profileHint": "노드를 위아래로 드래그해 높이를 변경(가로 방향은 이동 불가)",
+    "profileReadOnly": "3D 뷰에서 형상을 확정하면 높이를 편집할 수 있습니다",
+    "ground": "지반"
   }
 }

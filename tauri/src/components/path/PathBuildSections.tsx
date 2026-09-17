@@ -18,6 +18,7 @@
  */
 
 import { useCallback } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { StationHouseEndsSelect } from "./StationHouseEndsSelect";
 import { useTranslation } from "react-i18next";
 import { NumberStepper } from "../common/NumberStepper";
@@ -102,6 +103,15 @@ export function PathBuildSections({
     },
     [pc],
   );
+
+  /**
+   * 2Dパス形状編集パネル(path_shape_editor)を開く。曲線モードで形状を確定したときは
+   * usePathConstruction が自動で開くが、直線モードや配置中でも手動で開けるようにする。
+   * 既に開いていれば前面化されるだけ(single ポリシー)。
+   */
+  const handleOpenShapeEditor = useCallback(() => {
+    void invoke("open_registered_window", { windowType: "path_shape_editor" }).catch(console.error);
+  }, []);
 
   return (
     <>
@@ -311,6 +321,9 @@ export function PathBuildSections({
             </p>
           )}
           <div className="pc-actions">
+            <button className="pc-btn" type="button" onClick={handleOpenShapeEditor}>
+              {t("path_construction.openShapeEditor")}
+            </button>
             <button className="pc-btn" type="button" onClick={onCancel}>
               {t("path_construction.cancel")}
             </button>

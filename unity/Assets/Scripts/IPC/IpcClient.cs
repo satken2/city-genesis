@@ -83,6 +83,11 @@ public class IpcClient : MonoBehaviour
     // 線路数・進行方向の変更を受けて、敷設中プレビューの平行本数・ホーム設置側・
     // 進行方向矢印を切り替えるために使用する。両配列はindex対応。空配列=単一パス。
     public event Action<float[], int[]> OnEditPathChangeLateralOffsets;
+    // 2Dパス形状編集パネルからのノード・制御点操作(XZのみ。吸着なし)。
+    // 形状の真実源は RoadPlanManager のままで、結果は edit_path:update_shape で全状態を返す。
+    public event Action<RoadPlanManager.ShapeCommand> OnEditPathShapeCommand;
+    // 2Dパス形状編集パネルが開いた直後の現在形状の問い合わせ。update_shape を1回返す。
+    public event Action OnEditPathQueryShape;
     public event Action OnEditResourceFinish;
     public event Action OnEditTransitFinish;
     // プロップ配置。change_settings は (rotation?, scale?, density?, seed?) を辞書で渡す。
@@ -364,6 +369,27 @@ public class IpcClient : MonoBehaviour
                         Debug.Log($"IpcClient: edit_path:change_lateral_offsets -> count={lateralOffsets.Length}");
                         OnEditPathChangeLateralOffsets?.Invoke(lateralOffsets, travelDirections);
                     }
+                    break;
+
+                case "edit_path:shape_command":
+                    {
+                        var cmd = new RoadPlanManager.ShapeCommand
+                        {
+                            op = GetParamString(payload, "op"),
+                            index = GetParamInt(payload, "index"),
+                            edgeIndex = GetParamInt(payload, "edge_index"),
+                            which = GetParamString(payload, "which"),
+                            x = GetParamFloat(payload, "x"),
+                            z = GetParamFloat(payload, "z"),
+                        };
+                        Debug.Log($"IpcClient: edit_path:shape_command -> op={cmd.op}, index={cmd.index}, edge={cmd.edgeIndex}");
+                        OnEditPathShapeCommand?.Invoke(cmd);
+                    }
+                    break;
+
+                case "edit_path:query_shape":
+                    Debug.Log("IpcClient: edit_path:query_shape");
+                    OnEditPathQueryShape?.Invoke();
                     break;
 
                 case "edit_resource:finish":
@@ -823,6 +849,8 @@ public class IpcClient : MonoBehaviour
     /// isCurved は曲線モードの現在値。真実源はUnity側(RoadPlanManager.Curved)にあり、
     /// UIは受信値を確定送信(curved)・形状プレビュー・コスト見積りに使うため、
     /// 点列が空でも常に送信する。
+    /// extras は2Dパス形状編集パネルが使う追加フィールド(phase / selected_index /
+    /// lateral_offsets / alignment)で、そのままトップレベルにマージする。
     /// </summary>
     public void EmitEditPathUpdateShape(
         int unsentPathsCount,
@@ -835,7 +863,8 @@ public class IpcClient : MonoBehaviour
         bool isCurved = false,
         int followTerrain = Constants.VALUE_NONE,
         bool finalized = false,
-        bool canConfirm = false)
+        bool canConfirm = false,
+        Dictionary<string, object> extras = null)
     {
         var payload = new Dictionary<string, object>
         {
@@ -874,6 +903,13 @@ public class IpcClient : MonoBehaviour
         if (waypointControls != null)
         {
             payload["waypoint_controls"] = waypointControls;
+        }
+
+        // 2Dパス形状編集パネル向けの追加フィールド(phase / selected_index / lateral_offsets / alignment)。
+        // RoadPlanManager.BuildShapeSyncExtras が組み立てる。
+        if (extras != null)
+        {
+            foreach (var kv in extras) payload[kv.Key] = kv.Value;
         }
 
         SendEnvelope("edit_path:update_shape", payload);

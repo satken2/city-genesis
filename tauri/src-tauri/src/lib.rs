@@ -250,6 +250,18 @@ async fn open_registered_window(
     window::open_window(app, state.inner().clone(), payload).await
 }
 
+/// `window-registry.json` のキーに対応するポップアップを(開いていれば)閉じる。
+/// 別ウィンドウの操作に付随して閉じたいとき(敷設パネルの確定で2Dパス形状編集パネルを閉じる等)に使う。
+#[tauri::command]
+fn close_registered_window(
+    app: tauri::AppHandle,
+    state: tauri::State<'_, SharedState>,
+    window_type: String,
+) -> Result<(), String> {
+    window::close_windows_by_type(&app, state.inner(), &window_type);
+    Ok(())
+}
+
 /// Graphic(Unity) を起動する、または起動済みの場合はパイプ経由でリセット指示を送る
 #[tauri::command]
 fn launch_graphic(state: tauri::State<'_, SharedState>) -> Result<String, String> {
@@ -2252,6 +2264,7 @@ pub fn run() {
             get_topmenu_state,
             switch_monitor,
             open_registered_window,
+            close_registered_window,
             launch_graphic,
             start_new_game,
             start_load_game,

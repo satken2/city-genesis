@@ -120,7 +120,7 @@
 - `LoadLodCells`は共通の常駐セル集合を使用する。個体の投影サイズでDrawLodを決め、セル由来のFar固定はしない。常駐範囲外は非表示。`CellDataLoader`から共通`LoadBatch`を渡し、旧処理の適用を防ぐ。
 - セルサイズは`TerrainManager.CellSize`が正。`subdivisions`（既定8）で各セルを整数分割し、候補点・除外判定・GPUバッチを管理する。地形セルや独立したロード距離は追加しない。
 - `PropGeometry`がregionの穴・複数パートと固定格子の座標ハッシュを扱う。候補点はregionのbboxや生成順、描画分割数に依存しない。プレビューもこの実装を使う。
-- `PropRenderModel`は種別ID(int)のほか固定名(string。`ambient_*`など)でも `Models/Props/{名前}` を読める。最遠景樹冠の生成は森林2種だけ。
+- `PropRenderModel`は種別ID(int)のほか固定名(string。`ambient_*`・`pedestrian_*`など)でも `Models/Props/{名前}` を読める。最遠景樹冠の生成は森林2種だけ。歩行者(`Vehicles/PedestrianManager`)は `normal` パーツを `RenderMeshInstanced` で描く。
 - `PropRenderModel`は共有FBXを変更せず、instancing対応Materialの複製と任意の`_close`/`_far`を用いる。Far未提供時は複雑なサブメッシュを頂点の空間集約で簡略化し、既に軽い部品はそのまま使う。所有するMesh/Materialを全消去時に破棄する。実行時生成MaterialのためGraphicsSettingsのInstancing VariantsはKeep Allを維持する。
 - `PropManager`は一本ごとのGameObjectを作らず、候補配列と小区画別バッチを保持する。描画は`Graphics.RenderMeshInstanced`（最大511個/呼び出し）。全マップを一括バッチにせずBoundsでカリングする。
 - プロップID/versionの署名と障害物key/signatureの署名を分ける。障害物だけの変更では候補を再生成せず対象区画の表示可否だけ更新する。全土地区画が建物・床材の有無を問わず障害物になる（parcel:{id}、floor_variant=0）。非表示候補は復元用に残す。

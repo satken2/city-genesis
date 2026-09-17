@@ -231,14 +231,7 @@ public class VehicleManager : MonoBehaviour
                     var parcel = parcelManager.GetParcelSummary(id);
                     if (parcel == null) continue;
                     int signature = parcel.version ^ shapeHash ^ CityInfoStore.TrafficHand;
-                    int building = 0;
-                    foreach (int bid in buildingManager.GetBuildingIdsByParcel(id))
-                    {
-                        var data = buildingManager.GetBuildingSummary(bid);
-                        if (data == null || !data.is_bd || data.status != Constants.STATUS_ACTIVE) continue;
-                        signature = unchecked(signature * 31 + bid);
-                        if (building == 0 || bid < building) building = bid;
-                    }
+                    int building = RoadsideAccess.ActiveBuilding(buildingManager, id, ref signature);
                     // 地形追従や交差点切断はAPIのversionだけでは検出できない。
                     overall ^= signature;
                     if (!accessCache.TryGetValue(id, out var cached) || cached.signature != signature)
@@ -309,47 +302,26 @@ public class VehicleManager : MonoBehaviour
         accessWorker = null;
     }
 
+    // 入口の幾何は歩行者と共有し、車はパス幾何の左右を通行側と走行方向へ読み替える。
     private void BuildEntrances(Road road, ParcelSummary parcel, int building, List<Entrance> result)
     {
-        if (parcel.status != Constants.STATUS_ACTIVE) return;
-        var polygon = GeneratedModelUtils.ToFloatJaggedArray(parcel.polygon);
-        if (polygon == null || polygon.Length < 3) return;
-        for (int i = 0; i < polygon.Length; i++)
+        var candidates = new List<RoadsideAccess.Candidate>();
+        RoadsideAccess.BuildCandidates(road.line, road.halfWidth, parcel, building, parcelManager, candidates);
+        foreach (var c in candidates)
         {
-            var a = polygon[i]; var b = polygon[(i + 1) % polygon.Length];
-            if (a.Length < 2 || b.Length < 2) continue;
-            Vector3 mid = new Vector3((a[0] + b[0]) * .5f, parcel.altitude, (a[1] + b[1]) * .5f);
-            float s = road.line.Project(mid);
-            road.line.Sample(s, true, out var point, out var tangent);
-            Vector3 offset = mid - point; offset.y = 0;
-            if (s < 3 || road.line.Length - s < 3 || Mathf.Abs(mid.y - point.y) > 2) continue;
-            if (offset.magnitude < road.halfWidth - 1 || offset.magnitude > road.halfWidth + 4) continue;
-            Vector3 edge = new Vector3(b[0] - a[0], 0, b[1] - a[1]).normalized;
-            if (Mathf.Abs(Vector3.Dot(edge, tangent)) < .8f) continue;
-            Vector3 destination = mid + offset.normalized * 3;
-            if (!parcelManager.IsPointInParcel(parcel.parcel_id, destination)) continue;
-            float side = Vector3.Dot(Vector3.Cross(Vector3.up, tangent), offset);
-            bool forward = CityInfoStore.TrafficHand == Constants.TRAFFIC_HAND_LEFT ? side < 0 : side > 0;
+            bool forward = CityInfoStore.TrafficHand == Constants.TRAFFIC_HAND_LEFT ? c.side < 0 : c.side > 0;
             if (!DirectionAllowsEntry(road.data.travel_direction, forward)) continue;
-            result.Add(new Entrance { parcel = parcel.parcel_id, building = building, s = s, forward = forward, destination = destination });
+            result.Add(new Entrance { parcel = c.parcel, building = c.building, s = c.s, forward = forward, destination = c.destination });
         }
     }
 
-    private static bool FrontageAllowed(PathSummary road)
-        => road != null && road.path_type == Constants.PATH_STREET && MasterDataStore.Instance != null
-            && MasterDataStore.Instance.GetPathMasterDictionary().TryGetValue(road.path_variant, out var master) && master.frontage_allowed;
+    private static bool FrontageAllowed(PathSummary road) => RoadsideAccess.FrontageAllowed(road);
 
     private bool ValidEntrance(Entrance entry, int path)
     {
-        if (parcelManager == null || buildingManager == null) return false;
-        var parcel = parcelManager.GetParcelSummary(entry.parcel);
-        var building = buildingManager.GetBuildingSummary(entry.building);
         var road = pathManager.GetPathData(path);
-        return Drivable(road) && road.path_type == Constants.PATH_STREET
-            && FrontageAllowed(road)
-            && parcel != null && parcel.front_path_id == path && parcel.status == Constants.STATUS_ACTIVE
-            && building != null && building.is_bd && building.parcel_id == entry.parcel && building.status == Constants.STATUS_ACTIVE
-            && parcelManager.IsPointInParcel(entry.parcel, entry.destination);
+        return Drivable(road) && road.path_type == Constants.PATH_STREET && FrontageAllowed(road)
+            && RoadsideAccess.EntranceValid(parcelManager, buildingManager, entry.parcel, entry.building, path, entry.destination);
     }
 
     private void RegulateDensity(float dt)

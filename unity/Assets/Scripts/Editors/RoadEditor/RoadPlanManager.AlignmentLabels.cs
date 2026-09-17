@@ -51,6 +51,8 @@ public partial class RoadPlanManager
         if (!isActiveAndEnabled || !IsSessionActive || RadialMenuController.IsOpen) return;
         Camera cam = gameCamera != null ? gameCamera : Camera.main;
         if (cam == null || Event.current.type != EventType.Repaint) return;
+        // ノード番号(RoadPlanManager.NodeLabels)は違反の有無にかかわらず常に描く
+        DrawNodeNumberLabels(cam);
         CheckAlignmentViolations();
         if (alignmentLabels.Count == 0) return;
         if (alignmentLabelStyle == null)

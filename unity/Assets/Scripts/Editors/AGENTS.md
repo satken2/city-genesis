@@ -91,3 +91,7 @@ Ctrlメニューは8項目、HUDは最大9アイコン(移動軸矢印1+曲線1+
 地形追従サンプルだけに造成用の勾配平滑化を適用する。高架・地下など非追従サンプルは約1m線分の実水平距離と標高差で勾配を求める。平坦区間に隣の坂の勾配を広げない。
 
 勾配の上限比較には0.001パーセントポイントの数値誤差を許容し、上限ちょうどの線路を標高差分の丸め誤差で拒否しません。
+
+## 2Dパス形状編集パネルとの同期(`RoadPlanManager.ShapeSync.cs`)
+
+Tauriの2Dパス形状編集パネル(`path_shape_editor`)は形状を持たず、`edit_path:shape_command` でノード・制御点の操作を送ってくる。`ApplyShapeCommand` は既存の `MoveAnchorPosition`(地面相対の高さを維持・手動制御点を平行移動)/ 制御点の絶対標高維持+`EnforceCollinearControls` / `InsertPointOnEdge` / `RemovePoint` / `SelectPoint` へ委譲し、吸着(`ApplySnapping`)は通さない。Editingフェーズ以外と3Dドラッグ中(`isDragging`)は無視する。適用後は3Dドラッグ終了と同じく `EmitShapeUpdate` + `EmitSelectNode`。`BuildShapeSyncExtras` が `update_shape` に `phase`/`selected_index`/`lateral_offsets`/`alignment` を足す。`alignment` は `CheckAlignmentViolations` が保持した1mサンプル(`cachedAlignmentSamplesWorld`/`cachedAlignmentRadius`/`cachedAlignmentGradePct`)を約5m間隔に間引いたもの(各要素に累積距離・路面の絶対標高・地盤標高も載せ、2Dの縦断面ストリップが使う)と区間ラベル(`alignmentLabels`)、各アンカーの縦断面位置 `nodes`(XZで最も近い1mサンプルの累積距離とアンカー直下の地盤高)で、無限大の半径は null にする(JSONに載せられないため)。`height_editable`/`min_height` も載せる。2Dの縦断面ストリップからの高さ変更は既存の `edit_path:change_node`(`OnChangeNodeFromIpc`)で届く。ノード番号(1始まり)のIMGUIラベルは `RoadPlanManager.NodeLabels.cs`(`DrawNodeNumberLabels`。AlignmentLabels の OnGUI から呼ぶ。選択中は青背景)で、2Dの地図・ストリップと同じ番号を3Dに出して対応付ける。`edit_path:query_shape` には `EmitShapeUpdateOnRequest` で現在形状を返す(セッション外は `phase=inactive`。2Dパネルはこれで自分を閉じる)。

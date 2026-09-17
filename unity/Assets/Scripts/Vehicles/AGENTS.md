@@ -6,6 +6,7 @@
 - `VehicleManager` は道路スナップショット・分岐・密度調整・プール。ノード遷移で台数超過を理由にデスポーンしてはいけない。到着予約は交差点を跨ぎ、路肩寄せは道路内だけで行う。
 - 全体枠は `VehiclePopulationBudget`。道路別の端数を切り上げず、合算後に整数化する。実在台数をObserveで返し、到着・補充の遅れを端数へ繰り越す。
 - 台帳は0.25秒ごとに実体一覧から構築する。交差点中は移動先へ1回だけ数え、到着予約・フェード中も消えるまでは枠を占める。
+- 建物入口の幾何(接道辺の中点→敷地内3mの点、有効性検査)は `RoadsideAccess` に置き、車と歩行者で共有する。`VehicleManager.BuildEntrances` はそのパス幾何の左右を通行側・走行方向へ読み替えるだけ。入口の条件を変えるときは `RoadsideAccess` を直し、片方に別実装を書かない。
 - 車線と区画線は `RoadLaneLayout`（MeshGenerators/Paths/RoadPath.cs）を共有する。通行方向は `CityInfoStore`。交通量は型付き `PathSummary.path_traffic` を読み、utilizationで代用しない。
 - 範囲候補は `GetPathsNearCircle` のセル逆引き。円内区間・発生・デスポーンはすべてrenderRadius+despawnMarginを使う。
 - `AmbientVehicleManager` は空と海の環境演出(高高度の航空機3種・沖合の船舶4種)。経済と無関係で、GameObjectを持たず保存座標+`Graphics.RenderMesh`で描く。船は `CoastlineStore.SignedDistance` の先読み採点で陸地を避け、外洋(リング包含数0)にだけ発生する。距離関数は全辺走査なので毎フレーム呼ばない。飛行機雲・航跡は `AmbientTrail`。モデルは `Props/ambient_*`(固定名。prop_master登録なし)。仕様は公開 `geometries/V_環境演出の乗り物.md`。
@@ -30,3 +31,16 @@
 - `Tests/Vehicles` は独立Unityへ実FBXとラッパーをコピーし、時間積分・停車・前車停止・編成位置・折り返しの連続性も検証する。本編シーンとモデルは変更しない。
 
 - vehicle_model_config.yamlの簡易パーサは数値キー・数値配列と行末の#コメントを扱う。コメントをキーに含めると全候補が無視されるため、行末コメントを除いてから解析する。
+
+## 歩行者
+
+仕様は公開 `geometries/W_歩行者の描画.md`。台数調整の考え方は車と同じで、パスの端で消さない。
+
+- `PedestrianManager` は `AfterSceneLoad` で自己生成する(シーンに置かない)。対象は `PATH_STREET` / `PATH_WALKWAY` のみで、交通量は `path_traffic["0"]`(VEHICLE_PEDESTRIAN)。時間API(`/paths/motion`)は呼ばず、速度は `LocalConstants.PEDESTRIAN_WALK_SPEED` の個体定数。`renderFraction` は交通量に対する表示倍率(1=等倍。2・4で増やす)で、最低密度は設けない。
+- 歩行帯は `PedestrianManager.ResolveBand`(歩道あり=歩道の上、歩道なし=路肩、歩行者専用道路=全幅)。高さは `RoadPartHeights` + `LocalConstants.PEDESTRIAN_SIDEWALK_SURFACE`。
+- `Pedestrian.side` / `lateral` は**パス幾何(始点→終点)に対する左右**。反転しても符号を変えない(同じ歩道に留まる)。交差点では進行方向に対する左右を保って次のパスへ写し、ベジエで結ぶ(車道を斜めに横切ってよい)。`travel_direction` は見ない。行き止まりはどこでも折り返す。
+- 到着は逆探索表を持たず、到着予約中に進行方向の先へ現れた最初の入口へ入る(同じ側を優先、無ければ反対側へ横断)。閉じた網に入口も円外への出口も無ければ到着を予約しない。
+- 実体はGameObjectを持たない。`PropRenderModel("pedestrian_{n}")` の `normal` パーツを `LateUpdate` で `Graphics.RenderMeshInstanced`(1023件ずつ)で描く。FBXが無ければ人型の箱。走行音の通知はしない。
+- モデルは `Assets/Models/Props/pedestrian_{0..5}.fbx`(固定名。prop_master未登録。1体44三角形)。著作は genesis-gallery の `pipeline/jobs/build_pedestrians.py`。
+- 駅の入口・ホーム上の待機・連絡橋の歩行は未実装(W doc §W.10)。
+- 検証は `Tests/Vehicles/run.ps1` に同居(`PedestrianBands` / `PedestrianModels` / `PedestrianNetwork`)。

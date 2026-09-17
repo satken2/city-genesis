@@ -113,7 +113,8 @@
       "dirForward": "顺方向",
       "dirBackward": "逆方向",
       "dirBoth": "双方向"
-    }
+    },
+    "openShapeEditor": "2D编辑"
   },
   "track_construction": {
     "trackTab": "轨道",
@@ -122,5 +123,23 @@
     "house": {
       "hint": "铺设站房线路。与该线路相交的站台将归属于此站房所在的车站。线路两端会放置站房建筑，并沿线架设连接桥。站房不会吸附到已有的道路或轨道上（仅网格吸附有效）。"
     }
+  },
+  "path_shape_editor": {
+    "hintInactive": "没有正在铺设的路径",
+    "hintPlacing": "在3D视图中右键确定形状后，即可在此编辑",
+    "hintEditing": "拖动: 移动节点/控制点  点击边: 添加节点  右键: 删除节点",
+    "hintStraight": "(直线模式，无控制点)",
+    "fitView": "全览",
+    "minRadius": "最小半径",
+    "maxGrade": "最大坡度",
+    "limit": "限制",
+    "noLimit": "无",
+    "straight": "直线",
+    "curveLabel": "弯道 R {{value}}m\n低于下限 {{limit}}m",
+    "gradeLabel": "坡度 G {{value}}%\n超过上限 {{limit}}%",
+    "profileTitle": "纵断面",
+    "profileHint": "上下拖动节点以更改高度(不能水平移动)",
+    "profileReadOnly": "在3D视图中确定形状后即可编辑高度",
+    "ground": "地面"
   }
 }

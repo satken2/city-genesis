@@ -1,0 +1,155 @@
+/* 2Dパス形状編集パネル。都市マップウィンドウ(CityMapWindow.css)と同じ配色・寸法感で揃える */
+
+.pse {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background: #0f1420;
+  color: #cdd6f4;
+  overflow: hidden;
+}
+
+.pse-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 12px;
+  background: #171c2c;
+  border-bottom: 1px solid #2a3149;
+}
+
+.pse-hint {
+  font-size: 0.72rem;
+  color: #cdd6f4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pse-hint--muted {
+  color: #6c7a94;
+}
+
+.pse-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.pse-btn {
+  padding: 4px 12px;
+  border: 1px solid #2a3149;
+  border-radius: 4px;
+  background: #1b2135;
+  color: #cdd6f4;
+  font-size: 0.75rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pse-btn:hover {
+  background: #26324f;
+  border-color: #4f6ba8;
+}
+
+.pse-map {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+/* 線形の要約(左下) */
+.pse-summary {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  display: flex;
+  gap: 14px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(15, 20, 32, 0.8);
+  font-size: 0.72rem;
+  color: #93a9c0;
+  pointer-events: none;
+}
+
+.pse-summary-item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.pse-summary-label {
+  color: #6c7a94;
+}
+
+.pse-summary-value {
+  font-family: Consolas, Menlo, monospace;
+  color: #cdd6f4;
+}
+
+.pse-summary-value--bad {
+  color: #f38ba8;
+}
+
+.pse-summary-limit {
+  font-family: Consolas, Menlo, monospace;
+  color: #6c7a94;
+}
+
+/* カーソル座標と線形サンプル値(右下) */
+.pse-status {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  background: rgba(15, 20, 32, 0.75);
+  font-family: Consolas, Menlo, monospace;
+  font-size: 0.72rem;
+  color: #93a9c0;
+  white-space: pre;
+  pointer-events: none;
+}
+
+/* 縦断面ストリップ(地図の下。高架・地下バリアントのときだけ表示) */
+.pse-profile {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 32%;
+  min-height: 120px;
+  border-top: 1px solid #2a3149;
+  background: #0f1420;
+}
+
+.pse-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 12px;
+  background: #171c2c;
+  font-size: 0.7rem;
+}
+
+.pse-profile-title {
+  color: #cdd6f4;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pse-profile-hint {
+  color: #6c7a94;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pse-profile-canvas-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}

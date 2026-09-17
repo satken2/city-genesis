@@ -36,7 +36,8 @@
     "transit_creation": "New Transit Line",
     "transit_detail": "Line Detail",
     "prop_placement": "Prop Placement",
-    "mashup_edit": "Sub-Building Layout"
+    "mashup_edit": "Sub-Building Layout",
+    "path_shape_editor": "Path Shape Editor"
   },
   "cityMap": {
     "layers": {

@@ -22,6 +22,13 @@ foreach ($vehicleType in @('10','11','12','13','20','21','22','23')) {
         Copy-Item -LiteralPath (Join-Path $unityRoot "$relativeRoot/$vehicleType") -Destination $destination -Recurse -Force
     }
 }
+foreach ($relativeRoot in @('Assets/Models/Props','Assets/Resources/Models/Props')) {
+    $destination = Join-Path $qaRoot $relativeRoot
+    New-Item -ItemType Directory -Path $destination -Force | Out-Null
+    Get-ChildItem -LiteralPath (Join-Path $unityRoot $relativeRoot) -Filter 'pedestrian_*' -File | ForEach-Object {
+        Copy-Item -LiteralPath $_.FullName -Destination $destination -Force
+    }
+}
 $configDestination = Join-Path $qaRoot 'Assets/Resources/Config'
 New-Item -ItemType Directory -Path $configDestination -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $unityRoot 'Assets/Resources/Config/transit_vehicle_models.json') -Destination $configDestination -Force
