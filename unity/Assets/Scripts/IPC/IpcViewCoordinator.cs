@@ -53,6 +53,8 @@ public class IpcViewCoordinator : MonoBehaviour
         if (IpcClient.Instance != null)
         {
             IpcClient.Instance.OnViewChangeView += HandleViewChange;
+            IpcClient.Instance.OnViewSetObjectFilter += HandleSetObjectFilter;
+            IpcClient.Instance.OnViewQueryObjectFilter += NotifyObjectFilterState;
         }
     }
 
@@ -61,7 +63,28 @@ public class IpcViewCoordinator : MonoBehaviour
         if (IpcClient.Instance != null)
         {
             IpcClient.Instance.OnViewChangeView -= HandleViewChange;
+            IpcClient.Instance.OnViewSetObjectFilter -= HandleSetObjectFilter;
+            IpcClient.Instance.OnViewQueryObjectFilter -= NotifyObjectFilterState;
         }
+    }
+
+    /// <summary>
+    /// オブジェクト単位の表示フィルタ(建設プロジェクトのタグ単位／個別の表示切替)を適用する。
+    /// UIから届くのは非表示IDの全集合で、レイヤー単位の色モード・表示フラグとは独立に効く。
+    /// 適用後は現在値をUIへ返し、複数のパネル(建設プロジェクト・各詳細)の表示を揃える。
+    /// </summary>
+    private void HandleSetObjectFilter(int[] hiddenBuildingIds, int[] hiddenPathIds)
+    {
+        ObjectVisibilityFilter.SetHidden(hiddenBuildingIds, hiddenPathIds);
+        NotifyObjectFilterState();
+    }
+
+    /// <summary>現在の非表示集合をUIへ通知する。</summary>
+    public void NotifyObjectFilterState()
+    {
+        IpcClient.Instance?.EmitViewObjectFilterState(
+            ObjectVisibilityFilter.GetHiddenBuildings(),
+            ObjectVisibilityFilter.GetHiddenPaths());
     }
 
     private void HandleViewChange(string layer, string mode, string subMode, string flags)
