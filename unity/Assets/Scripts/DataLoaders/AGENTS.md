@@ -13,6 +13,8 @@
 
 地形は `/terrain/surface` のfloat32を513格子の一時TerrainDataへ分割適用し、完了時にタイルを差し替える。途中の帯を表示中タイルへ書かない。取消しでは一時データを破棄する。`SetHeightsDelayLOD` と最後の `SyncHeightmap` を使い、隣接タイルを接続する。全域のCPU高さ配列、旧far/near/dynamic読み分け、ティア境界ブレンドは使用しない。超遠景は全域の陸地メッシュ。
 
+ワールド座標はバックエンドと一致する固定座標で、原点シフトは行わない。`TerrainManager.UpdateCameraClipDistance` はマップ寸法と現在のカメラ位置・高度から全景を含むfarClipPlaneを確保する。シーンの固定距離を描画上限にせず、常駐セル数や詳細オブジェクトのLODは既存の予算内に保つ。
+
 ## 共通生成予算・キャッシュ
 
 生成・適用ワーカーは `RenderWorkScheduler.Start(owner, routine, category)` で起動し、停止も同クラスの `Stop` を使う。Unityの `StopCoroutine` だけではiteratorのfinallyが実行されないため、独自のStart/Stop対で待ち行列と一時メッシュを解放する。GOの無効化・破棄では `RenderWorkLifetime` が停止する。子処理は `LoadBatch.IsCanceled` も確認する。

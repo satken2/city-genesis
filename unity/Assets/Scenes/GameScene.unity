@@ -1033,7 +1033,6 @@ GameObject:
   - component: {fileID: 357067997}
   - component: {fileID: 357067998}
   - component: {fileID: 357067999}
-  - component: {fileID: 357068000}
   m_Layer: 0
   m_Name: GameCamera
   m_TagString: MainCamera
@@ -1220,19 +1219,6 @@ MonoBehaviour:
   cellDataLoader: {fileID: 1841469864}
   terrainManager: {fileID: 0}
   gameCamera: {fileID: 357067995}
---- !u!114 &357068000
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 357067993}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 350f452c666648a438a4323f94d385c8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  threshold: 5000
 --- !u!1 &361604308
 GameObject:
   m_ObjectHideFlags: 0
@@ -4311,7 +4297,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   terrainSize: {x: 1000, y: 1200, z: 1000}
-  maxRenderDistance: 1000
   cellLabelYOffset: 2
   cellLabelFontSize: 3
   cellLabelColor: {r: 1, g: 1, b: 1, a: 1}

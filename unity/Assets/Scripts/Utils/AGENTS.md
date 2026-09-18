@@ -4,7 +4,6 @@
 
 | ファイル | 内容 |
 | --- | --- |
-| `FloatingOrigin.cs` | カメラが原点から閾値(5000)を超えて離れたら、全Transformを一括シフトして浮動小数点精度を保つ。**Unityのワールド座標はバックエンド座標と常に一致するとは限らない**ことの原因なので、座標を扱う処理は注意 |
 | `SpatialHash.cs` | 汎用の空間ハッシュ`SpatialHash<T>`。「半径r以内のオブジェクト候補抽出」はこれを使う(自前で全件走査しない) |
 | `ModelManager.cs` | モデルのロードとキャッシュ(シングルトン)。persistentDataPathのglTF/glbを優先し、なければ`Resources/Models`配下のプレハブにフォールバック。同じモデルを二度ロードしない。Resources側のプレハブは`Assets/Models`のFBXから自動生成される(unity直下AGENTS.mdの「モデルアセットの構成」参照) |
 | `GeneratedModelUtils.cs` | 自動生成スキーマ(GeneratedModels)関連の補助 |

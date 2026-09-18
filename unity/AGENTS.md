@@ -71,7 +71,7 @@ F8は描画数、生成予算、フレームp95/p99、キャッシュ推定量�
 ## 座標系とセルインデックス
 
 - Unityワールドはマップ中心が原点で、**Unityセルインデックスは負値を取る**。バックエンドのセルは0-based(左下原点)。変換は必ず `TerrainManager.UnityCellToBackendCell` / `BackendCellToUnityCells` / `WorldPositionToBackendCell` を使うこと。
-- `FloatingOrigin`(Utils/)によりUnityワールド座標がバックエンド座標とずれている可能性がある点にも注意。
+- Unityワールド座標はバックエンドと同じ固定座標を使う。カメラ距離に応じた原点シフトは行わない。Transformだけを移動するとセル判定・高さ参照・保存座標が不整合になる。
 
 ## 地形高さの取得
 

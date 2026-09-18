@@ -66,9 +66,6 @@ public class TerrainManager : BaseApiDataManager
     /// </summary>
     private const float SeaFloorDepthSpan = 200f;
 
-    // LoD: 3D距離ベースの最大描画距離（メートル）
-    [SerializeField] private float maxRenderDistance = 1000f;
-
     /// <summary>
     /// 未開放セルの暗色表示が有効かどうか。
     /// true の場合、未開放セルの地形(per-cellタイル・UltraFar陸地メッシュとも)は
@@ -497,6 +494,7 @@ public class TerrainManager : BaseApiDataManager
 
     private void Update()
     {
+        UpdateCameraClipDistance();
         UpdateCellOverlayIfActive();
         UpdateLoadedCellMask();
 
@@ -539,18 +537,22 @@ public class TerrainManager : BaseApiDataManager
         RefreshAllUnlockOverlays();
         RefreshAllCellOverlays();
 
-        if (Camera.main != null)
-        {
-            Camera cam = Camera.main;
-            float recommendedFarPlane = maxRenderDistance * 2f;
-            if (cam.farClipPlane < recommendedFarPlane)
-            {
-                if (Application.isEditor && !Application.isPlaying)
-                {
-                    cam.farClipPlane = recommendedFarPlane;
-                }
-            }
-        }
+    }
+
+    private void UpdateCameraClipDistance()
+    {
+        Camera camera = Camera.main;
+        if (terrainSettings == null || camera == null) return;
+
+        // 常駐セルの範囲外も全景メッシュで描くため、最遠のマップ隅までクリップしない。
+        // 視点移動・高度変更後も地形の上下端を含め、シーンで指定された距離は縮めない。
+        Vector3 position = camera.transform.position;
+        float dx = Mathf.Abs(position.x) + terrainSettings.map_width * 0.5f;
+        float dz = Mathf.Abs(position.z) + terrainSettings.map_height * 0.5f;
+        float dy = Mathf.Max(Mathf.Abs(position.y + SeaFloorDepthSpan),
+            Mathf.Abs(position.y - (terrainSize.y - SeaFloorDepthSpan + ultraFarHeightOffset)));
+        float requiredDistance = new Vector3(dx, dy, dz).magnitude + CellSize;
+        if (camera.farClipPlane < requiredDistance) camera.farClipPlane = requiredDistance;
     }
 
     private void OnValidate()

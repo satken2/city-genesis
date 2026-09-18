@@ -74,6 +74,7 @@ public static class LodQA
     {
         StableSelection();
         ProjectionAndResidency();
+        LargeMapCameraRange();
         yield return CacheLifetime();
         yield return PendingRenderWork();
         yield return InterruptedPathResponse();
@@ -91,6 +92,52 @@ public static class LodQA
         yield return RoadPresentation();
         TerrainBenchmark();
     }
+    static void LargeMapCameraRange()
+    {
+        string scene = File.ReadAllText(root + "/Assets/Scenes/GameScene.unity");
+        Check(!scene.Contains("350f452c666648a438a4323f94d385c8") && !scene.Contains("357068000"),
+            "Game scene still references the origin-shifting component");
+        Check(source.GetType("FloatingOrigin") == null, "Origin shifting is still available in the runtime");
+        var go = new GameObject("LargeMapTerrain"); go.SetActive(false);
+        var manager = go.AddComponent(Type("TerrainManager"));
+        var previousMainCamera = Camera.main;
+        if (previousMainCamera != null) previousMainCamera.enabled = false;
+        var cameraObject = new GameObject("LargeMapCamera") { tag = "MainCamera" };
+        var camera = cameraObject.AddComponent<Camera>();
+        camera.farClipPlane = 4500f;
+        try
+        {
+            Check(Camera.main == camera, "Large map test camera is not the main camera");
+            Call(manager, "UpdateCameraClipDistance");
+            Check(camera.farClipPlane == 4500f, "Unloaded map changed the camera range");
+            foreach (var size in new[] { new Vector2Int(2000, 2000), new Vector2Int(30000, 24000), new Vector2Int(8000, 60000) })
+            {
+                var settings = Activator.CreateInstance(Type("TerrainSettingsData"));
+                Set(settings, "map_width", size.x); Set(settings, "map_height", size.y);
+                Set(manager, "terrainSettings", settings);
+                foreach (var position in new[] { new Vector3(0, 150, 0), new Vector3(size.x / 2f, 500, -size.y / 2f), new Vector3(-6000, 20000, 8000) })
+                {
+                    camera.transform.position = position;
+                    float previous = camera.farClipPlane;
+                    Call(manager, "UpdateCameraClipDistance");
+                    Check(camera.transform.position == position, "Map range adjustment moved the camera");
+                    Check(camera.farClipPlane >= previous, "Map range adjustment shrank the configured range");
+                    foreach (float x in new[] { -size.x / 2f, size.x / 2f })
+                    foreach (float z in new[] { -size.y / 2f, size.y / 2f })
+                    foreach (float y in new[] { -200f, 1000f })
+                        Check(Vector3.Distance(position, new Vector3(x, y, z)) < camera.farClipPlane,
+                            $"Large map corner is outside the far clipping range: map={size}, camera={position}, far={camera.farClipPlane}");
+                }
+            }
+        }
+        finally
+        {
+            Object.DestroyImmediate(cameraObject); Object.DestroyImmediate(go);
+            if (previousMainCamera != null) previousMainCamera.enabled = true;
+        }
+        results.Add("Large maps: fixed world coordinates and full terrain clipping range across map sizes, corners and altitude");
+    }
+
     static Delegate SegmentFactory<T>(GameObject parent, Action built)
     {
         return new Func<T, double, double, GameObject>((lod, from, to) => {
