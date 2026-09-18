@@ -97,10 +97,10 @@ export function availableRailTypes(masterData: MasterData | null): number[] {
 
 /**
  * (軌道カテゴリ, 許可する track_type 群) に一致する単線バリアントを全て返す。
- * 構造(通常/橋梁)・電化/非電化・線路規格(地上/高架/地下、軌間・設計速度など)の違いは
+ * 構造(通常/橋梁)・電化/非電化・線路規格(軌間・設計速度など)の違いは
  * すべてバリアントの違いとして1本のプルダウンに並べ、プレイヤーに直接選ばせる。
- * 並び順は 構造(通常→橋梁→駅) → 非電化→電化 → 高さで地上/高架/地下を表現できる
- * height_editable=true を優先 → ID昇順。
+ * 地上/高架/地下はバリアントではなくノードの高さで決まるので、選択肢には現れない。
+ * 並び順は 構造(通常→橋梁→駅) → 非電化→電化 → ID昇順。
  */
 export function railVariantsForTrackTypes(
   masterData: MasterData | null,
@@ -122,9 +122,6 @@ export function railVariantsForTrackTypes(
     const ea = isElectrifiedVariant(a.data) ? 1 : 0;
     const eb = isElectrifiedVariant(b.data) ? 1 : 0;
     if (ea !== eb) return ea - eb;
-    const ha = a.data.height_editable ? 0 : 1;
-    const hb = b.data.height_editable ? 0 : 1;
-    if (ha !== hb) return ha - hb;
     return a.id - b.id;
   });
   return matches;

@@ -1613,6 +1613,8 @@ public class RoadPath : IPathMeshGenerator
         float capThickness = capBounds.HasValue ? Mathf.Max(0f, -capBounds.Value.min.y * capScale.y) : 0f;
         Vector3 pillarPosition = sample.position + Vector3.down * capThickness;
         float height = pillarPosition.y - Utils.GetGroundHeight(sample.position);
+        // 地表に張り付いた区間（地上線路・切り通し）には柱もキャップも置かない。
+        if (height <= 0.1f) return false;
         Vector3 pillarScale = pillarPrefab != null ? pillarPrefab.transform.localScale : Vector3.one;
         // 橋脚モデルは実寸で著作され、種類ごとに高さが異なる。1mモデルとは限らない。
         pillarScale.y = height / Mathf.Max(0.001f, pillarBounds.GetValueOrDefault().size.y);
@@ -1620,7 +1622,7 @@ public class RoadPath : IPathMeshGenerator
         // キャップの張り出しは柱本体とは高さが異なる。別々に判定し、干渉時は一組とも生成しない。
         if (capBounds.HasValue && PillarClearance.Intersects(PillarClearance.TransformBounds(capBounds.Value,
                 Matrix4x4.TRS(sample.position, rotation, capScale)), obstacles)) return false;
-        if (height > 0.1f && pillarBounds.HasValue && PillarClearance.Intersects(PillarClearance.TransformBounds(pillarBounds.Value,
+        if (pillarBounds.HasValue && PillarClearance.Intersects(PillarClearance.TransformBounds(pillarBounds.Value,
                 Matrix4x4.TRS(pillarPosition, rotation, pillarScale)), obstacles)) return false;
 
         bool placed = false;
@@ -1632,7 +1634,7 @@ public class RoadPath : IPathMeshGenerator
             cap.transform.localScale = capScale;
             placed = true;
         }
-        if (pillarPrefab != null && height > 0.1f)
+        if (pillarPrefab != null)
         {
             var pillar = UnityEngine.Object.Instantiate(pillarPrefab, container.transform);
             pillar.transform.position = pillarPosition;

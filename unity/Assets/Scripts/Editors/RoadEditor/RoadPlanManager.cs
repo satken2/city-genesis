@@ -906,7 +906,7 @@ public partial class RoadPlanManager : MonoBehaviour
         {
             hoverWorldPosition = ApplySnapping(worldPos);
             // 高架エッジへ吸着中はホバープレビュー線もその標高で描くため保存する
-            hoverSnapWasElevated = lastSnapWasElevated && (IsHeightEditable() || PathType == Constants.PATH_TRACK);
+            hoverSnapWasElevated = lastSnapWasElevated && IsHeightEditable();
             hoverSnapRelHeight = lastSnapRelHeight;
             InvalidateShapeCache();
             Update3DPreview();
@@ -988,7 +988,7 @@ public partial class RoadPlanManager : MonoBehaviour
 
             var pt = points[dragPointIndex];
             // XZ移動時に相対高さを維持する
-            float relY = lastSnapWasElevated && (IsHeightEditable() || PathType == Constants.PATH_TRACK)
+            float relY = lastSnapWasElevated && IsHeightEditable()
                 ? lastSnapRelHeight : pt.position.y - Utils.GetGroundHeight(pt.position);
             snappedPos.y = Utils.GetGroundHeight(snappedPos) + relY;
 
@@ -3233,9 +3233,9 @@ public partial class RoadPlanManager : MonoBehaviour
     /// </summary>
     private float ResolvePlacementHeight()
     {
-        if (lastSnapWasElevated && (IsHeightEditable() || PathType == Constants.PATH_TRACK))
+        if (lastSnapWasElevated && IsHeightEditable())
         {
-            float relH = PathType == Constants.PATH_TRACK ? lastSnapRelHeight : Mathf.Max(lastSnapRelHeight, GetMinHeightFromMaster());
+            float relH = Mathf.Max(lastSnapRelHeight, GetMinHeightFromMaster());
             if (!Mathf.Approximately(relH, currentHeight))
             {
                 currentHeight = relH;

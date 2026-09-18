@@ -310,11 +310,27 @@ public class TrackPath : IPathMeshGenerator
         int laneCount = Mathf.Max(1, lanes);
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[TrackPath] CreateTrackParts開始: variant={variantBase}, type={typeBase}, width={width}, lanes={laneCount}, wallWidth={wallWidth}, wireSpacing={wireSpacing}");
 
+        // 地上・高架・地下はバリアントではなくアンカーの高さで決まるため、桁・スラブ軌道・高欄の
+        // 描き分けは「地表より高い区間」の percent 区間で行う。地表区間（開削区間を含む）は無印パーツ、
+        // 高架区間は `{part}_elevated`（無ければ無印）を使う。
+        List<TrackCorridorInfo.PercentRange> elevatedRanges = GetElevatedPercentRanges(points, baseHeight);
+        List<TrackCorridorInfo.PercentRange> groundRanges = ComplementRanges(elevatedRanges);
+
         // 道床（body）: 全幅に引き伸ばして配置。高さは道路の body と同じ体系で、
         // 交差点の道床ハル（基準面 + BODY_ABOVE_SPLINE）とも同一平面になる。
-        GameObject ballast = RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/body", width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/body");
+        GameObject ballast = null;
+        foreach (var range in groundRanges)
+        {
+            GameObject part = RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/body", width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/body", clipFrom: range.From, clipTo: range.To);
+            if (ballast == null) ballast = part;
+        }
+        foreach (var range in elevatedRanges)
+        {
+            GameObject part = RoadPath.CreateSplineMesh(container, spline, ElevatedPartName(variantBase, "body"), width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/body", clipFrom: range.From, clipTo: range.To);
+            if (ballast == null) ballast = part;
+        }
         BrickArcadeGenerator.Generate(container, spline, pathData, width);
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[TrackPath] body(道床): {(ballast != null ? "生成成功" : "プレハブなし")}");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[TrackPath] body(道床): {(ballast != null ? "生成成功" : "プレハブなし")} 高架区間={elevatedRanges.Count}");
 
         // 結合区間では隣の線路との道床の隙間をバラスト帯で埋め、一体の道床に見せる。
         // 道床プレハブが無いバリアント（モノレール等）は道床自体が無いため充填もしない。
@@ -330,8 +346,16 @@ public class TrackPath : IPathMeshGenerator
         for (int i = 0; i < laneCount; i++)
         {
             float offset = GetTrackCenterOffset(width, laneCount, i);
-            GameObject track = RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/track", width / laneCount, offset, RoadPartHeights.TRACK_ABOVE_SPLINE, false, $"{typeBase}/track", isDashed: false, stretchToWidth: false, maxTileLength: 0f);
-            if (track != null) placedTracks++;
+            foreach (var range in groundRanges)
+            {
+                GameObject track = RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/track", width / laneCount, offset, RoadPartHeights.TRACK_ABOVE_SPLINE, false, $"{typeBase}/track", isDashed: false, stretchToWidth: false, clipFrom: range.From, clipTo: range.To, maxTileLength: 0f);
+                if (track != null) placedTracks++;
+            }
+            foreach (var range in elevatedRanges)
+            {
+                GameObject track = RoadPath.CreateSplineMesh(container, spline, ElevatedPartName(variantBase, "track"), width / laneCount, offset, RoadPartHeights.TRACK_ABOVE_SPLINE, false, $"{typeBase}/track", isDashed: false, stretchToWidth: false, clipFrom: range.From, clipTo: range.To, maxTileLength: 0f);
+                if (track != null) placedTracks++;
+            }
         }
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[TrackPath] track(軌道): {placedTracks}/{laneCount}本配置");
         CreateTerminations(container, points, corridor, pathData, width, laneCount, platformLeft, platformRight, variantBase, typeBase);
@@ -369,24 +393,24 @@ public class TrackPath : IPathMeshGenerator
             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[TrackPath] wire_spacing未設定: 非電化（架線・架線柱なし）");
         }
 
-        // 防音壁: 道路と同じ「右側用パーツ」規約（左側はXミラー）で道床の外側に立てる。
+        // 高欄（wall）: 高架区間だけに、道路と同じ「右側用パーツ」規約（左側はXミラー）で道床の外側に立てる。
         // 近接線路と結合している側は、線路間に壁を立てないよう結合区間を区間クリップで省略する
         // （分岐などで間隔が開き結合が解けた区間では壁が復活する）。
         // プラットフォームがある側には壁を立てない（乗降空間を防音壁で塞がないため。
         // ホーム外縁の壁・柵は platform_wall が担う）。ホームの無い側は通常どおり立てる。
-        if (wallWidth > 0f)
+        if (wallWidth > 0f && elevatedRanges.Count > 0)
         {
             float wallCenterOffset = (width * 0.5f) + (wallWidth * 0.5f);
             if (platformLeft <= 0f)
             {
-                foreach (var range in GetWallPercentRanges(corridor, leftSide: true))
+                foreach (var range in IntersectRanges(GetWallPercentRanges(corridor, leftSide: true), elevatedRanges))
                 {
                     RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, -wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, true, $"{typeBase}/wall", clipFrom: range.From, clipTo: range.To);
                 }
             }
             if (platformRight <= 0f)
             {
-                foreach (var range in GetWallPercentRanges(corridor, leftSide: false))
+                foreach (var range in IntersectRanges(GetWallPercentRanges(corridor, leftSide: false), elevatedRanges))
                 {
                     RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, false, $"{typeBase}/wall", clipFrom: range.From, clipTo: range.To);
                 }
@@ -961,6 +985,80 @@ public class TrackPath : IPathMeshGenerator
     /// 結合コリドーが無ければ全長1区間、あれば「指定側に隣接線路がおらず、かつ
     /// 他線路の道床が壁の位置に掛かっていない区間」のみ。
     /// </summary>
+    /// <summary>
+    /// 高架区間用のパーツ名を返す。`{part}_elevated` プレハブがあればそれ、無ければ無印。
+    /// バリアント→タイプのフォールバックは呼び出し側が無印のタイプ名で行う。
+    /// </summary>
+    private static string ElevatedPartName(string variantBase, string part)
+    {
+        string elevated = $"{variantBase}/{part}_elevated";
+        bool exists = ModelManager.Instance != null && ModelManager.Instance.GetModel(elevated, true) != null;
+        return exists ? elevated : $"{variantBase}/{part}";
+    }
+
+    /// <summary>
+    /// 点列のうち地表より GROUND_SNAP_EPSILON を超えて高い（高架の）連続区間を、
+    /// 弧長比のスプライン percent 区間として返す。区間境界はサンプル点の中間位置。
+    /// 地表・開削区間は含まない（地下パスのトンネル区間は点列に来ない）。
+    /// </summary>
+    private static List<TrackCorridorInfo.PercentRange> GetElevatedPercentRanges(List<Vector3> points, float baseHeight)
+    {
+        var result = new List<TrackCorridorInfo.PercentRange>();
+        int n = points.Count;
+        var cumulative = new float[n];
+        for (int i = 1; i < n; i++)
+        {
+            cumulative[i] = cumulative[i - 1] + Vector2.Distance(new Vector2(points[i - 1].x, points[i - 1].z), new Vector2(points[i].x, points[i].z));
+        }
+        float total = cumulative[n - 1];
+        if (total <= 0f) return result;
+
+        bool Elevated(int i) => points[i].y - baseHeight - Utils.GetGroundHeight(points[i]) > TunnelSectionUtil.GROUND_SNAP_EPSILON;
+
+        int idx = 0;
+        while (idx < n)
+        {
+            if (!Elevated(idx)) { idx++; continue; }
+            int s = idx;
+            while (idx < n && Elevated(idx)) idx++;
+            int e = idx - 1;
+            float fromLen = (s == 0) ? 0f : (cumulative[s - 1] + cumulative[s]) * 0.5f;
+            float toLen = (e == n - 1) ? total : (cumulative[e] + cumulative[e + 1]) * 0.5f;
+            result.Add(new TrackCorridorInfo.PercentRange { From = fromLen / total, To = toLen / total });
+        }
+        return result;
+    }
+
+    /// <summary>昇順・非重複の percent 区間列の補集合（[0,1] 内）を返す。</summary>
+    private static List<TrackCorridorInfo.PercentRange> ComplementRanges(List<TrackCorridorInfo.PercentRange> ranges)
+    {
+        var result = new List<TrackCorridorInfo.PercentRange>();
+        double cursor = 0.0;
+        foreach (var range in ranges)
+        {
+            if (range.From > cursor) result.Add(new TrackCorridorInfo.PercentRange { From = cursor, To = range.From });
+            cursor = range.To;
+        }
+        if (cursor < 1.0) result.Add(new TrackCorridorInfo.PercentRange { From = cursor, To = 1.0 });
+        return result;
+    }
+
+    /// <summary>2つの percent 区間列の共通部分を返す（空区間は含めない）。</summary>
+    private static List<TrackCorridorInfo.PercentRange> IntersectRanges(List<TrackCorridorInfo.PercentRange> a, List<TrackCorridorInfo.PercentRange> b)
+    {
+        var result = new List<TrackCorridorInfo.PercentRange>();
+        foreach (var x in a)
+        {
+            foreach (var y in b)
+            {
+                double from = System.Math.Max(x.From, y.From);
+                double to = System.Math.Min(x.To, y.To);
+                if (to > from) result.Add(new TrackCorridorInfo.PercentRange { From = from, To = to });
+            }
+        }
+        return result;
+    }
+
     private static List<TrackCorridorInfo.PercentRange> GetWallPercentRanges(TrackCorridorInfo corridor, bool leftSide)
     {
         if (corridor == null)
