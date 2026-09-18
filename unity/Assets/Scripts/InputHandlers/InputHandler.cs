@@ -56,6 +56,9 @@ public static class InputMode
     // クリックされた建物の variant / floors / visual_variant を UI へ通知する(建設はしない)。
     // 通知は BuildingInputHandler が building_construction:copy_source として送る。
     public const int MODE_PICK_BUILDING = 20;
+    // 駅パッケージ配置モード(軌道建設パネルの簡易モード → 駅タブ)。地形クリックで
+    // プラットフォーム複線+駅舎のゴーストの設置地点を固定する。実処理は StationPlanManager。
+    public const int MODE_EDIT_STATION = 21;
 }
 
 /// <summary>
@@ -88,6 +91,8 @@ public static class InputModePreset
     public const int PATH_SPLIT = 18;
     // 既存建物コピー建設のコピー元選択プリセット。建物だけをクリック可能にする。
     public const int PICK_BUILDING = 19;
+    // 駅パッケージ配置プリセット。地形だけをクリック可能にする(プロップ配置と同型)。
+    public const int STATION_PLACEMENT = 20;
 }
 
 /// <summary>
@@ -1170,6 +1175,18 @@ public class InputHandler : MonoBehaviour
                 SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
                 SetMode(InputObjectType.ZONE, InputMode.MODE_NONE);
                 Debug.Log("InputHandler: プロップ配置モードプリセットを設定しました");
+                break;
+
+            case InputModePreset.STATION_PLACEMENT:
+                // 駅パッケージ配置は地形クリックで地点を固定する。既存の線路・区画の上でも
+                // 地形を拾えるよう、他のオブジェクトはレイキャストを貫通させる(プロップ配置と同じ)。
+                SetMode(InputObjectType.TERRAIN, InputMode.MODE_EDIT_STATION);
+                SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
+                SetMode(InputObjectType.PATH, InputMode.MODE_NONE);
+                SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
+                SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
+                SetMode(InputObjectType.ZONE, InputMode.MODE_NONE);
+                Debug.Log("InputHandler: 駅パッケージ配置モードプリセットを設定しました");
                 break;
 
             case InputModePreset.CONNECTOR_EDIT:

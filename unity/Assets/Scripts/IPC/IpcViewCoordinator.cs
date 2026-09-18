@@ -290,6 +290,20 @@ public class IpcViewCoordinator : MonoBehaviour
                 SetPlanOnlyFlags();
                 break;
 
+            case "STATE_EDIT_STATION":
+                // 駅パッケージ配置中も道路敷設と同じ計画中表示にし、地区は非表示にする
+                // (地区が表示されていると誤クリックで地区パネルが開き、配置が中断されるため)。
+                _layerModes["parcel"] = "border";
+                _layerModes["road"] = "default";
+                _layerModes["building"] = "default";
+                _layerModes["district"] = "hidden";
+                _layerSubModes.Remove("parcel");
+                _layerSubModes.Remove("road");
+                _layerSubModes.Remove("building");
+                _layerSubModes.Remove("district");
+                SetPlanOnlyFlags();
+                break;
+
             case "STATE_MERGE_PATH":
             case "STATE_SPLIT_PATH":
                 // パスの結合相手・分割点の選択中は道路敷設と同じ計画中表示にし、地区は非表示にする

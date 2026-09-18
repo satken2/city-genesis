@@ -563,6 +563,11 @@ pub async fn handle_incoming_message(
             // (アイコンパネルがこれを受けて統合先の地区詳細ウィンドウを開く)。
             let _ = app.emit("edit_zone:request_merge", envelope.payload);
         }
+        "edit_station:placement_state" => {
+            // 駅パッケージ配置(軌道建設パネルの簡易モード)の現在の配置状態。
+            // 地点・角度・高さに加え、確定送信に使うプラットフォーム2本と駅舎1本の中心線を含む。
+            let _ = app.emit("edit_station:placement_state", envelope.payload);
+        }
         "edit_prop:update_instances" => {
             let _ = app.emit("edit_prop:update_instances", envelope.payload);
         }

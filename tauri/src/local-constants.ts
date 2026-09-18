@@ -50,6 +50,22 @@ export const TRANSIT_VARIANT_COLOR: Record<number, string> = {
 export const TRANSIT_DEFAULT_COLOR = "#f9e2af";
 
 /**
+ * 軌道建設パネルの簡易モード(駅タブ)で、ホーム長を「両数」で指定するための換算値。
+ * マスターに車両長の項目が無いため UI 側で持つ。1両20m + 停止位置の余裕を両端に取る。
+ * バックエンドはホーム長を m でしか扱わないので、この換算は表示と入力のためだけのもの。
+ */
+export const STATION_CAR_LENGTH_M = 20;
+export const STATION_PLATFORM_MARGIN_M = 10;
+export const STATION_MIN_CAR_COUNT = 1;
+export const STATION_MAX_CAR_COUNT = 20;
+export const STATION_DEFAULT_CAR_COUNT = 4;
+
+/** 両数からホーム長(m)を求める。 */
+export function stationPlatformLength(carCount: number): number {
+  return carCount * STATION_CAR_LENGTH_M + STATION_PLATFORM_MARGIN_M;
+}
+
+/**
  * 複合パス(combined_paths)用のUI専用の擬似パスタイプ。
  * バックエンドの path_type としては存在せず、PathConstructionPanel の
  * タイププルダウンで複合パスカテゴリを表すためだけに使われる。

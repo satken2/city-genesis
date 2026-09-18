@@ -137,6 +137,15 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         return FindAnyObjectByType<PropPlacementManager>();
     }
 
+    /// <summary>
+    /// StationPlanManager を動的に検索して返す。
+    /// STATE_EDIT_STATION への遷移時に動的生成されるため、Start() ではなく呼び出し時に毎回検索する。
+    /// </summary>
+    private StationPlanManager GetStationPlanManager()
+    {
+        return FindAnyObjectByType<StationPlanManager>();
+    }
+
     public void onClick(int mode)
     {
         Vector3 clickPosition = new Vector3(InputHandler.Instance.posX, 0, InputHandler.Instance.posZ);
@@ -146,8 +155,11 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         // 掛けると二重吸着になり、RoadPlanManager 側の半径設定が一切効かなくなる。
         // パス分割の分割点選択も共通吸着を掛けない(端点ノードへ引き寄せられると常に
         // 端点近傍の分割になって拒否されるため。onHover 側と条件を揃える)。
+        // 駅パッケージ配置も共通吸着を掛けない。中心線は複線の「間」を通るため、既存の線路や
+        // ノードへ引き寄せられると意図した位置から半間隔ぶんずれる(位置と角度は数値入力で決める)。
         if (mode != InputMode.MODE_ROAD_CONSTRUCTION && mode != InputMode.MODE_PATH_SPLIT
-            && mode != InputMode.MODE_BUILDING_CONSTRUCTION && mode != InputMode.MODE_EDIT_PROP)
+            && mode != InputMode.MODE_BUILDING_CONSTRUCTION && mode != InputMode.MODE_EDIT_PROP
+            && mode != InputMode.MODE_EDIT_STATION)
         {
             clickPosition = ApplySnapping(clickPosition);
         }
@@ -220,6 +232,15 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
                     if (propPlacementManager != null)
                     {
                         propPlacementManager.OnTerrainLeftClick(clickPosition);
+                    }
+                }
+                break;
+            case InputMode.MODE_EDIT_STATION:
+                {
+                    var stationPlanManager = GetStationPlanManager();
+                    if (stationPlanManager != null)
+                    {
+                        stationPlanManager.OnTerrainLeftClick(clickPosition);
                     }
                 }
                 break;
@@ -303,6 +324,15 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
                     }
                 }
                 break;
+            case InputMode.MODE_EDIT_STATION:
+                {
+                    var stationPlanManager = GetStationPlanManager();
+                    if (stationPlanManager != null)
+                    {
+                        stationPlanManager.OnTerrainRightClick(clickPosition);
+                    }
+                }
+                break;
             default:
                 break;
         }
@@ -343,6 +373,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         // バックエンドに拒否されるため。分割点は中心線への射影(PathTopologyEditManager)で決める。
         bool skipSnap = mode == InputMode.MODE_EDIT_CONNECTOR
                      || mode == InputMode.MODE_EDIT_PROP
+                     || mode == InputMode.MODE_EDIT_STATION
                      || mode == InputMode.MODE_BUILDING_CONSTRUCTION
                      || mode == InputMode.MODE_ROAD_CONSTRUCTION
                      || mode == InputMode.MODE_PATH_SPLIT;
@@ -411,6 +442,15 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
                     if (propPlacementManager != null)
                     {
                         propPlacementManager.OnTerrainHover(finalPosition);
+                    }
+                }
+                break;
+            case InputMode.MODE_EDIT_STATION:
+                {
+                    var stationPlanManager = GetStationPlanManager();
+                    if (stationPlanManager != null)
+                    {
+                        stationPlanManager.OnTerrainHover(finalPosition);
                     }
                 }
                 break;

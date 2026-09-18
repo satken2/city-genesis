@@ -14,6 +14,7 @@ public class ModeTextDisplay : MonoBehaviour
         ("STATE_EDIT_ZONE", "Zone Edit"),
         ("STATE_UNLOCK_CELL", "Unlock Cell"),
         ("STATE_EDIT_PROP", "Prop Placement"),
+        ("STATE_EDIT_STATION", "Station Placement"),
         // フライモードはUI(Tauri)を経由しないUnityローカルのステート。
         // 抜け方（Shift + F）をキャプションに含めて案内する。
         ("STATE_FLY_MODE", "STATE_FLY_MODE (Shift + F to exit)"),
