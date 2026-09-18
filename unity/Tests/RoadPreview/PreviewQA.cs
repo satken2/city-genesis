@@ -44,7 +44,7 @@ public static class PreviewQA
             {
                 type.GetMethod("UpdateSections").Invoke(renderer, new object[] {
                     before, fixedPoints, active, after, 1, 100, true, 0,
-                    new float[] { -5, 5 }, new int[] { 0, 0 }, "both" });
+                    new float[] { -5, 5 }, new int[] { 0, 0 }, "both", null });
             }
             Update(before, moving);
             var sections = (Array)type.GetField("sections", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(renderer);
@@ -80,7 +80,8 @@ public static class PreviewQA
             CheckControlHeights(asm);
             CheckElevatedTerrainIndependence(asm, item);
             CheckAlignmentLabels(asm);
-            File.WriteAllText(result, "PASS: 100 updates preserve detailed prefix and dynamic Mesh; suffix reuse, double track, slope, winding, release, resume, reset; manager placing, dragging and release partitions; alignment curves, grades, hover and uniform samples.");
+            CheckRouteProposals(asm, item);
+            File.WriteAllText(result, "PASS: 100 preview updates; alignment curves, grades and controls; route proposal apply, undo, fixed endpoints, stale revisions, generated-point promotion and editing phase.");
             EditorApplication.Exit(0);
         }
         catch (Exception ex)
@@ -425,6 +426,61 @@ public static class PreviewQA
         list.Clear();
         collect.Invoke(null, new object[] { samples, origin, new float[] { 70, 80, 90, 100, 80, 70, 70 }, 70f, true, list });
         Require(list.Count == 0, "Valid geometry must have no labels");
+    }
+
+    private static void CheckRouteProposals(Assembly asm, object master)
+    {
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
+        var type = asm.GetType("RoadPlanManager");
+        var manager = new GameObject("ProposalManager").AddComponent(type);
+        master.GetType().GetField("curve_allowed").SetValue(master, true);
+        master.GetType().GetField("height_editable").SetValue(master, true);
+        type.GetField("PathSubtype").SetValue(manager, 100);
+        var phase = type.GetField("phase", flags);
+        phase.SetValue(manager, Enum.Parse(phase.FieldType, "Editing"));
+        var pointType = asm.GetType("PathBuildPoint");
+        var roleType = asm.GetType("PathPointRole");
+        var points = (IList)type.GetField("points", flags).GetValue(manager);
+        points.Add(Activator.CreateInstance(pointType, new object[] { new Vector3(0, 10, 0), Enum.Parse(roleType, "Start") }));
+        points.Add(Activator.CreateInstance(pointType, new object[] { new Vector3(200, 15, 0), Enum.Parse(roleType, "End") }));
+        string Revision() => (string)type.GetField("routeRevision", flags).GetValue(manager);
+        string json = "{\"points\":[[0,10,0],[100,12,30],[200,15,0]],\"controls_in\":[[0,10,0],[70,11,30],[170,14,0]],\"controls_out\":[[30,11,0],[130,13,30],[200,15,0]],\"embankments\":[0,0,0],\"generated\":[0,1,0],\"height_mode\":\"fixed\"}";
+        void Command(string op, string revision, string route = null)
+        {
+            var commandType = type.GetNestedType("ShapeCommand");
+            var command = Activator.CreateInstance(commandType);
+            commandType.GetField("op").SetValue(command, op);
+            commandType.GetField("revision").SetValue(command, revision);
+            commandType.GetField("routeJson").SetValue(command, route);
+            type.GetMethod("ApplyShapeCommand").Invoke(manager, new[] { command });
+        }
+        try
+        {
+            string before = Revision();
+            Command("apply_route", "stale", json);
+            Require(points.Count == 2, "Stale proposal changed points");
+            Command("apply_route", before, json.Replace("[0,10,0]", "[1,10,0]"));
+            Require(points.Count == 2, "Proposal moved a fixed endpoint");
+            Command("apply_route", before, json);
+            Require(points.Count == 3, "Proposal was not applied");
+            Require((bool)pointType.GetField("proposalGenerated").GetValue(points[1]), "Generated point lost provenance");
+            Require((bool)pointType.GetField("control_out_manual").GetValue(points[0]), "Optimizer controls will be overwritten");
+            Require(((Vector3)pointType.GetField("control_out").GetValue(points[0])).y == 11, "Proposal control height changed");
+            Command("undo_route", before);
+            Require(points.Count == 3, "Stale undo changed shape");
+            Command("undo_route", Revision());
+            Require(points.Count == 2 && !(bool)type.GetField("Curved").GetValue(manager), "Undo did not restore geometry and mode");
+            Command("apply_route", Revision(), json);
+            type.GetMethod("MoveAnchorPosition", flags).Invoke(manager, new object[] { 1, new Vector3(100, 13, 30) });
+            type.GetMethod("InvalidateShapeCache", flags).Invoke(manager, null);
+            Require(!(bool)pointType.GetField("proposalGenerated").GetValue(points[1]), "Manual edit did not promote generated point");
+            Command("undo_route", Revision());
+            Require(points.Count == 3, "Undo erased a later manual edit");
+            phase.SetValue(manager, Enum.Parse(phase.FieldType, "Placing"));
+            Command("apply_route", Revision(), json);
+            Require(((Vector3)pointType.GetField("position").GetValue(points[1])).y == 13, "Proposal applied in placing phase");
+        }
+        finally { UnityEngine.Object.DestroyImmediate(manager.gameObject); }
     }
 
 }

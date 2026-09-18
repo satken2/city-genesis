@@ -409,3 +409,7 @@ world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地�
 
 
 造成の切土・盛土を示すオレンジ／青の半透明ボリュームと体積凡例は表示しない。RoadEarthworkPreviewは造成後のpath_profiles取得だけを担い、道路・線路モデル自体の標高へ反映する。
+
+## 経路提案
+
+経路提案はUnityの編集世代付き絶対座標をTauriから読み取り専用HTTP APIへ送り、成功した候補を既存shape_commandで一括反映する。イベント、固定条件、取消しの詳細は[経路提案](経路提案.md)を参照。

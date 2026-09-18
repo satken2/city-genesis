@@ -1,0 +1,15 @@
+{
+  "route_proposal": {
+    "title": "Proposer un tracé",
+    "mode": "Mode d’altitude",
+    "fixed": "Conserver l’altitude des points",
+    "adjust": "Ajuster l’altitude des points intermédiaires",
+    "help": "Disponible après validation de la forme. Les extrémités et les positions XZ restent fixes.",
+    "searching": "Recherche…",
+    "cancel": "Annuler",
+    "undo": "Annuler la proposition",
+    "notFound": "Aucun tracé valide trouvé dans les limites de recherche. Ajustez les points de passage.",
+    "heightFailure": "Les altitudes imposées ne peuvent pas être conservées. Vérifiez le mode d’altitude ou le suivi du terrain.",
+    "failed": "Échec de la proposition : {{reason}}"
+  }
+}

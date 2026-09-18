@@ -29,6 +29,9 @@ public struct PathBuildPoint
     public Vector3 position;
     public PathPointRole role;
 
+    /// <summary>経路提案が補った点。プレイヤーが移動した点は指定点へ昇格する。</summary>
+    public bool proposalGenerated;
+
     /// <summary>出口制御点。始点とウェイポイントのみ。セグメントのベジエP1に対応。</summary>
     public Vector3? control_out;
 
@@ -57,6 +60,7 @@ public struct PathBuildPoint
     {
         position = pos;
         role = r;
+        proposalGenerated = false;
         control_out = null;
         control_in = null;
         control_out_manual = false;

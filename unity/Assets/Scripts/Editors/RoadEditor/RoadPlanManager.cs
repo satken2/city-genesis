@@ -243,6 +243,7 @@ public partial class RoadPlanManager : MonoBehaviour
 
     private void InvalidateShapeCache()
     {
+        routeRevision = System.Guid.NewGuid().ToString("N");
         authoritativeCollision = false;
         cachedRenderPoints = null;
         cachedElevationViolations = null;
@@ -588,6 +589,7 @@ public partial class RoadPlanManager : MonoBehaviour
     /// </summary>
     public void InitializeRoadPlacement(int? existingPathId = null, float? initialHeight = null, float? initialEmbankment = null, bool? initialCurved = null, int? initialFollowTerrain = null)
     {
+        routeUndoPoints = null;
         ResetParallelSnap();
         hasRawSnapPosition = false;
         Debug.Log($"RoadPlanManager: 道路敷設モードを初期化 (existingPathId={existingPathId})");
@@ -1259,6 +1261,7 @@ public partial class RoadPlanManager : MonoBehaviour
         Vector3 deltaXZ = new Vector3(newPosition.x - oldPosition.x, 0f, newPosition.z - oldPosition.z);
         float deltaY = newPosition.y - oldPosition.y;
         pt.position = newPosition;
+        pt.proposalGenerated = false;
 
         if (pt.control_out_manual && pt.control_out.HasValue)
         {
@@ -3214,6 +3217,7 @@ public partial class RoadPlanManager : MonoBehaviour
 
         var pt = points[nodeIndex];
         pt.embankmentHeight = embankmentHeight;
+        pt.proposalGenerated = false;
         points[nodeIndex] = pt;
         InvalidateShapeCache();
         Update3DPreview();
@@ -3370,6 +3374,7 @@ public partial class RoadPlanManager : MonoBehaviour
         float newEmbankment = Mathf.Clamp(pt.embankmentHeight + delta, -5f, 5f);
         if (Mathf.Approximately(newEmbankment, pt.embankmentHeight)) return;
         pt.embankmentHeight = newEmbankment;
+        pt.proposalGenerated = false;
         points[selectedPointIndex] = pt;
 
         InvalidateShapeCache();

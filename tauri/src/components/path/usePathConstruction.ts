@@ -53,6 +53,7 @@ import {
 } from "../../utils/ipc";
 import { describePathValidation, type PathValidationResult } from "./pathValidation";
 import { fetchApi } from "../../utils/api";
+import { useRouteProposal } from "./useRouteProposal";
 import type { PathAlignmentSummary } from "../../types";
 import {
   DIR_BOTH,
@@ -634,7 +635,7 @@ export function usePathConstruction(
         }
         if (isCurved && startControl) {
           const oc = offsetControlPoint(startControl, anchorDirs[0], comp.lateral_offset ?? 0);
-          if (oc) data.start_control = [oc.x, pts[0][1], oc.z];
+          if (oc) data.start_control = [oc.x, (startControl.y ?? rawPoints[0][1]) + (comp.height_offset ?? 0), oc.z];
         }
         if (isCurved && endControl) {
           const oc = offsetControlPoint(
@@ -642,7 +643,7 @@ export function usePathConstruction(
             anchorDirs[anchorDirs.length - 1],
             comp.lateral_offset ?? 0
           );
-          if (oc) data.end_control = [oc.x, pts[pts.length - 1][1], oc.z];
+          if (oc) data.end_control = [oc.x, (endControl.y ?? rawPoints[rawPoints.length - 1][1]) + (comp.height_offset ?? 0), oc.z];
         }
         // ウェイポイント。中心線の制御点を受信している場合は、アンカーと同じ
         // オフセット方向で制御点も平行移動し、各線の曲線形状を中心線と相似に保つ。
@@ -668,8 +669,8 @@ export function usePathConstruction(
               : null;
             return {
               position: pt,
-              control_in: ci ? [ci.x, pt[1], ci.z] : null,
-              control_out: co ? [co.x, pt[1], co.z] : null,
+              control_in: ci ? [ci.x, (wc.control_in?.[1] ?? rawPoints[i + 1][1]) + (comp.height_offset ?? 0), ci.z] : null,
+              control_out: co ? [co.x, (wc.control_out?.[1] ?? rawPoints[i + 1][1]) + (comp.height_offset ?? 0), co.z] : null,
             };
           });
         }
@@ -705,12 +706,12 @@ export function usePathConstruction(
       pathData.platform_side = platformSide;
     }
 
-    // 制御点は対応するアンカーポイントと同じ相対高さを持つ
+    // 制御点の高さもUnityの設計値を保持し、縦断の接線を保存後に変えない。
     if (isCurved && startControl) {
-      pathData.start_control = [startControl.x, rawPoints[0][1], startControl.z];
+      pathData.start_control = [startControl.x, startControl.y ?? rawPoints[0][1], startControl.z];
     }
     if (isCurved && endControl) {
-      pathData.end_control = [endControl.x, rawPoints[rawPoints.length - 1][1], endControl.z];
+      pathData.end_control = [endControl.x, endControl.y ?? rawPoints[rawPoints.length - 1][1], endControl.z];
     }
 
     // ウェイポイント（中間点）。Unityから制御点を受信している場合は
@@ -744,6 +745,11 @@ export function usePathConstruction(
     return { paths: [pathData], align_station_tracks: false };
   }, [selectedVariant, selectedVariantData, rawPoints, rawEmbankmentHeights, curveMode, startControl, endControl, rawWaypointControls, pathId, railComponents, hasPlatform, houseEnds, platformSide, followTerrain]);
 
+  const routeProposal = useRouteProposal({ apiBaseUrl, path_variant: selectedVariant,
+    follow_terrain: followTerrain, components: railComponents, platform_side: platformSide,
+    align_station_tracks: hasPlatform && selectedVariantData?.type === PATH_TRACK,
+    exclude_path_id: pathId ?? null, enabled: curveAllowed && !isInfrastructure && selectedVariantData?.type !== PATH_STATION_HOUSE,
+    heightEditable });
   const [localCanConfirm, setLocalCanConfirm] = useState(false);
   const localCanConfirmRef = useRef(false);
   const [validation, setValidation] = useState<{
@@ -758,7 +764,7 @@ export function usePathConstruction(
   const validationKey = JSON.stringify({ ...constructionBody, exclude_path_id: pathId ?? null });
   const currentValidationKey = useRef(validationKey);
   currentValidationKey.current = validationKey;
-  const canConfirm = localCanConfirm && constructionBody !== null
+  const canConfirm = !routeProposal.busy && localCanConfirm && constructionBody !== null
     && validation?.key === validationKey && validation.result?.is_valid === true;
   const validationMessages = !localCanConfirm
     ? [t(shapePhase === "placing" ? "path_construction.shapeUnready" : "path_construction.collisionUnready")]
@@ -998,13 +1004,13 @@ export function usePathConstruction(
             const sc = event.payload.start_control;
             const ec = event.payload.end_control;
             if (sc && sc.length >= 2) {
-              setStartControl({ x: sc[0], z: sc[2] ?? sc[1] });
+              setStartControl({ x: sc[0], y: sc.length > 2 ? sc[1] : undefined, z: sc[2] ?? sc[1] });
             } else {
               const controls = computeSplineOrBezierControls(newNodes, "curved");
               setStartControl(controls.start);
             }
             if (ec && ec.length >= 2) {
-              setEndControl({ x: ec[0], z: ec[2] ?? ec[1] });
+              setEndControl({ x: ec[0], y: ec.length > 2 ? ec[1] : undefined, z: ec[2] ?? ec[1] });
             } else {
               const controls = computeSplineOrBezierControls(newNodes, "curved");
               setEndControl(controls.end);
@@ -1140,6 +1146,7 @@ export function usePathConstruction(
   }, [apiBaseUrl, selectedVariant, constructionBody]);
 
   return {
+    routeProposal,
     category,
     selectedType,
     selectedVariant,

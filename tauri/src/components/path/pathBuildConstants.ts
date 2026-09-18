@@ -49,6 +49,8 @@ export type DragTarget =
 /** 制御点情報 */
 export type ControlPoint = {
   x: number;
+  /** 所属アンカー直下の地盤に対する相対高さ。未受信時だけアンカー高さで補完する。 */
+  y?: number;
   z: number;
 } | null;
 
@@ -115,4 +117,15 @@ export type PathShapeUpdatePayload = {
   /** 相対高さの下限(m。マスター min_height。負なら地下可) */
   min_height?: number;
   alignment?: PathAlignmentSyncPayload;
+  route_proposal?: RouteProposalShape;
+};
+
+export type RouteProposalShape = {
+  revision: string;
+  points: number[][];
+  controls_in: number[][];
+  controls_out: number[][];
+  embankments: number[];
+  generated: number[];
+  can_undo: boolean;
 };

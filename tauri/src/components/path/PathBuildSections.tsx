@@ -25,6 +25,7 @@ import { NumberStepper } from "../common/NumberStepper";
 import { ConstructionInfoCard } from "../common/ConstructionInfoCard";
 import { isConstructionAffordable } from "../../utils/constructionFunding";
 import { GridSettingsPanel } from "./GridSettingsPanel";
+import { RouteProposalControls } from "./RouteProposalControls";
 import type { GridDisplayMode } from "./GridSettingsPanel";
 import { FOLLOW_TERRAIN_UNSET, usePathConstruction } from "./usePathConstruction";
 import {
@@ -115,6 +116,7 @@ export function PathBuildSections({
 
   return (
     <>
+      <RouteProposalControls state={pc.routeProposal} />
       {/*
         形状セクション。曲線/直線・吸着の操作はUnity側(Ctrlラジアルメニュー)へ移管したが、
         標高・盛土は既存ノードを選んで数値で微調整する用途があるためステッパーを残す。

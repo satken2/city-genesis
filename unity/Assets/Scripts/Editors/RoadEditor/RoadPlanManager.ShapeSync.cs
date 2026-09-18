@@ -24,6 +24,8 @@ public partial class RoadPlanManager
         public float x;
         /// <summary>ワールドZ(move_node / move_control / insert_node)</summary>
         public float z;
+        public string revision;
+        public string routeJson;
     }
 
     /// <summary>2Dへ送る線形サンプルの間隔(m)。1m推定を間引いて edit_path:update_shape の肥大化を防ぐ。</summary>
@@ -49,6 +51,12 @@ public partial class RoadPlanManager
 
         switch (cmd.op)
         {
+            case "apply_route":
+                ApplyRouteProposal(cmd.revision, cmd.routeJson);
+                break;
+            case "undo_route":
+                UndoRouteProposal(cmd.revision);
+                break;
             case "select_node":
                 SelectPoint(cmd.index >= 0 && cmd.index < points.Count ? cmd.index : -1);
                 EmitSelectNode();
@@ -144,6 +152,7 @@ public partial class RoadPlanManager
             // 2Dパネルの縦断面(高さ編集)ストリップの表示可否と高さの下限(マスター min_height)
             ["height_editable"] = IsHeightEditable(),
             ["min_height"] = GetMinHeightFromMaster(),
+            ["route_proposal"] = BuildRouteProposalPayload(),
         };
         var alignment = BuildAlignmentPayload();
         if (alignment != null) extras["alignment"] = alignment;

@@ -382,6 +382,8 @@ public class IpcClient : MonoBehaviour
                         var cmd = new RoadPlanManager.ShapeCommand
                         {
                             op = GetParamString(payload, "op"),
+                            revision = GetParamString(payload, "revision"),
+                            routeJson = GetParamString(payload, "route_json"),
                             index = GetParamInt(payload, "index"),
                             edgeIndex = GetParamInt(payload, "edge_index"),
                             which = GetParamString(payload, "which"),

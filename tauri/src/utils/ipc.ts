@@ -809,6 +809,8 @@ export async function sendEditPathChangeLateralOffsets(
  * - remove_node: index
  */
 export type PathShapeCommand =
+  | { op: "apply_route"; revision: string; route_json: string }
+  | { op: "undo_route"; revision: string }
   | { op: "select_node"; index: number }
   | { op: "move_node"; index: number; x: number; z: number }
   | { op: "move_control"; index: number; which: "in" | "out"; x: number; z: number }

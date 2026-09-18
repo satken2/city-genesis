@@ -164,3 +164,7 @@ PropPlacementPanelの個別配置は全種別共通で地面相対高さ(m)を�
 `fitRiverRouteToValley`は左右の探索帯（UI既定100m）で標高・逆勾配・迂回のコストが小さい連続経路を選び、両端を固定した制御点を返す。UIの`fitRiverRoute`はUndoを保存してから`applyRiverControlPoints`へ渡し、合流先を保って支流も更新する。彫り込み済み・読み込んだ川は対象外。川幅入力は地形補正前の目安である。
 
 `buildRiverPolygon`は乾いた点の水位差も補間し、簡略化誤差はspacing×0.02。保存済みポリゴンを上限とする場合は境界までの符号付き距離で再計算による膨張を防ぐ。`buildRiverSurfaceMesh`は描画専用に隣接1セルを加えて岸へ埋めるが、保存範囲は広げない。Unityの`RiverRecord.SurfaceCellIncluded`と同じ規則。回帰検証は`tools/river-valley-regression-test.ts`と`tools/river-raster-regression-test.ts`（tsx）。
+
+## 経路提案UI
+
+`path/useRouteProposal.ts`はUnityの編集世代を保持して読み取り専用propose-route APIを呼び、同じ形状・設定への応答だけをshape_commandで反映する。`RouteProposalControls`は共通PathBuildSectionsへ高さ固定/調整・提案・取消し・復元を表示する。制御点Yは`ControlPoint.y`とwaypoint_controlsから保持し、複線展開時にもアンカー高さへ置き換えない。翻訳は各言語のroute-proposal.json。詳細は公開`programs/経路提案.md`。

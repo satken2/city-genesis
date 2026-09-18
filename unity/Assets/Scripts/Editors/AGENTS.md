@@ -104,3 +104,7 @@ Tauriの2Dパス形状編集パネル(`path_shape_editor`)は形状を持たず�
 
 
 造成の切土・盛土を示すオレンジ／青の半透明ボリュームと体積凡例は表示しない。RoadEarthworkPreviewは造成後のpath_profiles取得だけを担い、道路・線路モデル自体の標高へ反映する。
+
+## 経路提案の編集状態
+
+`RoadEditor/RoadPlanManager.RouteProposal.cs`は経路提案の絶対座標ペイロード、世代、提案前の復元を管理する。`PathBuildPoint.proposalGenerated`で補助点を区別し、手動移動で指定点へ昇格する。`InvalidateShapeCache`で世代を更新し、古いapply_route/undo_routeを拒否する。提案の制御点は手動フラグで自動補完から保護する。造成プレビューも制御点固有のYを保持する。詳細は公開`programs/経路提案.md`、検証は`Tests/RoadPreview/run-unity.ps1`。

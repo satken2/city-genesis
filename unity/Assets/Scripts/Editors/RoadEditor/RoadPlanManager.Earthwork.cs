@@ -34,7 +34,7 @@ public partial class RoadPlanManager
             {
                 if (!Curved || !control.HasValue) return null;
                 var p = control.Value + shifted[i]-anchors[i];
-                float y = relative[i][1];
+                float y = control.Value.y-Utils.GetGroundHeight(anchors[i]);
                 return new[] {p.x,y,p.z};
             }
             var waypoints = new List<object>();
