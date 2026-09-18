@@ -122,6 +122,13 @@ fn resize_icon_panel(app: tauri::AppHandle, state: tauri::State<'_, SharedState>
     window::resize_icon_panel(&app, state.inner(), height);
 }
 
+/// システムトレイの幅をReact側から通知させる(アイコンパネルの高さと同じ理由。
+/// テンプレートモードのボタンで横幅が変わるため、透明な余白がクリックを吸わないようにする)。
+#[tauri::command]
+fn resize_system_tray(app: tauri::AppHandle, state: tauri::State<'_, SharedState>, width: f64) {
+    window::resize_system_tray(&app, state.inner(), width);
+}
+
 /// トップメニューの初期状態を返す
 /// フロントエンドのTopMenuコンポーネントが初期化時に呼び出す
 #[tauri::command]
@@ -163,7 +170,7 @@ fn switch_monitor(app: tauri::AppHandle, state: tauri::State<'_, SharedState>, d
     let monitor_pos = monitor.position().to_logical::<f64>(scale);
 
     // HUD3枚(左端のアイコンパネル・下部中央のコックピット・右下のシステムトレイ)を対象モニターへ移動する
-    window::layout_hud_windows(&app, &monitors, new_index, None);
+    window::layout_hud_windows(&app, &monitors, new_index, None, None);
 
     // ヒントバーも同じモニターの上部中央に移動する。
     if let Some(hintbar) = app.get_webview_window("hintbar") {
@@ -2261,6 +2268,7 @@ pub fn run() {
             send_window_action,
             get_connection_status,
             resize_icon_panel,
+            resize_system_tray,
             get_topmenu_state,
             switch_monitor,
             open_registered_window,

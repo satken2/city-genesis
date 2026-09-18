@@ -1,0 +1,36 @@
+{
+  "templateTools": {
+    "trayComplete": "Completar toda la construcción (termina al instante calles y edificios planificados o en obra)",
+    "trayStreetGrid": "Crear calles secundarias (planificar una cuadrícula dentro de un área dibujada)",
+    "completing": "Completando toda la construcción...",
+    "completed": "Completado: {{paths}} calles y {{buildings}} edificios",
+    "completedWithRemaining": "Completado: {{paths}} calles y {{buildings}} edificios ({{remaining}} no pudieron iniciar obra)",
+    "completeFailed": "No se pudo completar la construcción",
+    "hintAddVertices": "Haz clic izquierdo en el mapa para colocar al menos 3 vértices del área (clic derecho deshace uno)",
+    "hintReady": "Área definida. Pulsa \"Crear\" para planificar la cuadrícula",
+    "vertexCount": "Vértices: {{count}}",
+    "spacing": "Separación",
+    "variant": "Tipo de calle",
+    "angle": "Orientación",
+    "angleAuto": "Alinear con la calle más cercana",
+    "angleManual": "Indicar ángulo",
+    "undoVertex": "Deshacer",
+    "clearVertices": "Limpiar",
+    "create": "Crear",
+    "creating": "Creando...",
+    "gridCreated": "Se planificaron {{created}} tramos ({{rejected}} rechazados)",
+    "gridFailed": "No se pudieron crear las calles",
+    "reject": {
+      "too_short": "demasiado corto",
+      "outside_coastline": "fuera de la costa",
+      "overlaps_existing_path": "se superpone a una calle",
+      "parcel_in_use": "parcela con edificio",
+      "too_steep": "pendiente excesiva",
+      "river_crossing": "cruza un río",
+      "multiple_intersections": "cruces múltiples",
+      "elevation_conflict": "conflicto de desnivel",
+      "terrain_not_acquired": "terreno no desbloqueado",
+      "other": "otros"
+    }
+  }
+}

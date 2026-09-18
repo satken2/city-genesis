@@ -1,0 +1,36 @@
+{
+  "templateTools": {
+    "trayComplete": "一括完成（計画中・建設中の道路と建物を即時竣工）",
+    "trayStreetGrid": "路地作成（範囲を指定して格子状の路地を計画）",
+    "completing": "一括完成を実行中...",
+    "completed": "一括完成: 道路 {{paths}} 本・建物 {{buildings}} 棟を竣工しました",
+    "completedWithRemaining": "一括完成: 道路 {{paths}} 本・建物 {{buildings}} 棟を竣工しました（着工できないものが {{remaining}} 件残っています）",
+    "completeFailed": "一括完成に失敗しました",
+    "hintAddVertices": "地図を左クリックして範囲の頂点を3点以上指定してください（右クリックで1つ戻す）",
+    "hintReady": "範囲が確定しました。「作成」で格子状の路地を計画します",
+    "vertexCount": "頂点: {{count}}",
+    "spacing": "格子間隔",
+    "variant": "路地の種類",
+    "angle": "向き",
+    "angleAuto": "最寄りの道路に揃える",
+    "angleManual": "角度を指定",
+    "undoVertex": "1つ戻す",
+    "clearVertices": "クリア",
+    "create": "作成",
+    "creating": "作成中...",
+    "gridCreated": "路地を {{created}} 本計画しました（棄却 {{rejected}} 本）",
+    "gridFailed": "路地の作成に失敗しました",
+    "reject": {
+      "too_short": "短すぎる",
+      "outside_coastline": "海岸線の外",
+      "overlaps_existing_path": "既存道路と重複",
+      "parcel_in_use": "建物のある区画",
+      "too_steep": "勾配が急",
+      "river_crossing": "川を横断",
+      "multiple_intersections": "複数回交差",
+      "elevation_conflict": "立体交差の衝突",
+      "terrain_not_acquired": "未開放の地形",
+      "other": "その他"
+    }
+  }
+}

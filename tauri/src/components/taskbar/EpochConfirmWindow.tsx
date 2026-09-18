@@ -6,6 +6,8 @@
  *
  * エポック数セレクターにより1〜10エポックの連続実行が可能。
  * 複数エポックを選択した場合は「実行後の日付」がその分だけ先の日付になる。
+ * テンプレートモード(シナリオ制作)では上限を外し、数値を直接入力できる
+ * (都市を育てるために数百エポックを一気に回す用途。1回のHTTPリクエストで完了まで待つ)。
  *
  * 都市が大きくなるとエポック実行(POST /api/v1/epochs)に時間がかかりうるため、
  * 実行を確定したらこの確認ウィンドウは一旦 hide() で非表示にし、右下に「エポック実行中」
@@ -38,6 +40,7 @@ import { logInfoToFile } from "../../utils/log";
 import { showNotification, dismissNotification } from "../../utils/notification";
 import { formatEpochDate } from "../../utils/date";
 import { resolveIntlLocale } from "../../utils/locale";
+import { useTemplateMode } from "../../hooks/useTemplateMode";
 import type { QuestNotification } from "../../types";
 import nextIcon from "../../assets/images/next.png";
 import "./EpochConfirmWindow.css";
@@ -57,14 +60,29 @@ type EpochConfirmWindowProps = {
   onClose: () => void;
 };
 
-/** 選択可能なエポック数の上限 */
+/** 選択可能なエポック数の上限(通常プレイ)。テンプレートモードでは適用しない */
 const MAX_EPOCH_COUNT = 10;
+
+/** テンプレートモードで直接入力できるエポック数の上限(誤入力で数万エポック回すのを防ぐ安全弁) */
+const TEMPLATE_MAX_EPOCH_COUNT = 10000;
 
 export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowProps) {
   const { i18n, t } = useTranslation();
   const [city, setCity] = useState<CityData | null>(null);
   const [executing, setExecuting] = useState(false);
   const [epochCount, setEpochCount] = useState(1);
+  const templateMode = useTemplateMode(apiBaseUrl);
+  const maxEpochCount = templateMode ? TEMPLATE_MAX_EPOCH_COUNT : MAX_EPOCH_COUNT;
+
+  /** 直接入力(テンプレートモード)。空欄や範囲外は1〜上限に丸める */
+  function handleCountInput(raw: string) {
+    const parsed = Number.parseInt(raw, 10);
+    if (Number.isNaN(parsed)) {
+      setEpochCount(1);
+      return;
+    }
+    setEpochCount(Math.max(1, Math.min(maxEpochCount, parsed)));
+  }
 
   useEffect(() => {
     const baseUrl = apiBaseUrl.replace(/\/+$/, "");
@@ -213,7 +231,7 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
         </div>
       </div>
 
-      {/* エポック数セレクター: 1〜MAX_EPOCH_COUNT の範囲で連続実行数を指定できる */}
+      {/* エポック数セレクター: 1〜MAX_EPOCH_COUNT の範囲で連続実行数を指定できる(テンプレートモードは上限なし・直接入力可) */}
       <div className="epoch-confirm-count-row">
         <span className="epoch-confirm-count-label">{t("epochConfirm.epochCount")}</span>
         <div className="epoch-confirm-count-controls">
@@ -225,11 +243,23 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
           >
             −
           </button>
-          <span className="epoch-confirm-count-value">{epochCount}</span>
+          {templateMode ? (
+            <input
+              className="epoch-confirm-count-input"
+              type="number"
+              min={1}
+              max={TEMPLATE_MAX_EPOCH_COUNT}
+              value={epochCount}
+              disabled={executing}
+              onChange={(e) => handleCountInput(e.target.value)}
+            />
+          ) : (
+            <span className="epoch-confirm-count-value">{epochCount}</span>
+          )}
           <button
             className="epoch-confirm-count-btn"
-            onClick={() => setEpochCount((c) => Math.min(MAX_EPOCH_COUNT, c + 1))}
-            disabled={executing || epochCount >= MAX_EPOCH_COUNT}
+            onClick={() => setEpochCount((c) => Math.min(maxEpochCount, c + 1))}
+            disabled={executing || epochCount >= maxEpochCount}
             type="button"
           >
             ＋

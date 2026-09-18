@@ -1,0 +1,36 @@
+{
+  "templateTools": {
+    "trayComplete": "Tout achever (termine immédiatement les routes et bâtiments planifiés ou en chantier)",
+    "trayStreetGrid": "Créer des ruelles (planifier un quadrillage dans une zone tracée)",
+    "completing": "Achèvement en cours...",
+    "completed": "Achevé : {{paths}} routes et {{buildings}} bâtiments",
+    "completedWithRemaining": "Achevé : {{paths}} routes et {{buildings}} bâtiments ({{remaining}} n'ont pas pu démarrer)",
+    "completeFailed": "Échec de l'achèvement",
+    "hintAddVertices": "Clic gauche sur la carte pour placer au moins 3 sommets de la zone (clic droit pour annuler le dernier)",
+    "hintReady": "Zone définie. « Créer » planifie le quadrillage",
+    "vertexCount": "Sommets : {{count}}",
+    "spacing": "Espacement",
+    "variant": "Type de rue",
+    "angle": "Orientation",
+    "angleAuto": "Aligner sur la route la plus proche",
+    "angleManual": "Angle manuel",
+    "undoVertex": "Annuler",
+    "clearVertices": "Effacer",
+    "create": "Créer",
+    "creating": "Création...",
+    "gridCreated": "{{created}} tronçons planifiés ({{rejected}} rejetés)",
+    "gridFailed": "Échec de la création des ruelles",
+    "reject": {
+      "too_short": "trop court",
+      "outside_coastline": "hors du littoral",
+      "overlaps_existing_path": "chevauche une route",
+      "parcel_in_use": "parcelle bâtie",
+      "too_steep": "trop pentu",
+      "river_crossing": "traverse une rivière",
+      "multiple_intersections": "intersections multiples",
+      "elevation_conflict": "conflit de dénivelé",
+      "terrain_not_acquired": "terrain non débloqué",
+      "other": "autre"
+    }
+  }
+}

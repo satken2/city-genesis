@@ -1,0 +1,36 @@
+{
+  "templateTools": {
+    "trayComplete": "一键竣工（立即完成计划中和建设中的道路与建筑）",
+    "trayStreetGrid": "创建小巷（指定范围规划网格状小巷）",
+    "completing": "正在执行一键竣工...",
+    "completed": "一键竣工：道路 {{paths}} 条、建筑 {{buildings}} 栋已竣工",
+    "completedWithRemaining": "一键竣工：道路 {{paths}} 条、建筑 {{buildings}} 栋已竣工（{{remaining}} 项无法开工）",
+    "completeFailed": "一键竣工失败",
+    "hintAddVertices": "在地图上左键点击，指定至少3个范围顶点（右键撤销一个）",
+    "hintReady": "范围已确定。点击“创建”规划网格状小巷",
+    "vertexCount": "顶点：{{count}}",
+    "spacing": "网格间距",
+    "variant": "小巷类型",
+    "angle": "方向",
+    "angleAuto": "对齐最近道路",
+    "angleManual": "指定角度",
+    "undoVertex": "撤销",
+    "clearVertices": "清除",
+    "create": "创建",
+    "creating": "创建中...",
+    "gridCreated": "已规划 {{created}} 段小巷（拒绝 {{rejected}} 段）",
+    "gridFailed": "创建小巷失败",
+    "reject": {
+      "too_short": "过短",
+      "outside_coastline": "海岸线外",
+      "overlaps_existing_path": "与现有道路重叠",
+      "parcel_in_use": "有建筑的地块",
+      "too_steep": "坡度过陡",
+      "river_crossing": "横穿河流",
+      "multiple_intersections": "多次交叉",
+      "elevation_conflict": "立交冲突",
+      "terrain_not_acquired": "未开放地形",
+      "other": "其他"
+    }
+  }
+}

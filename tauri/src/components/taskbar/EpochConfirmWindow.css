@@ -147,3 +147,16 @@
 .epoch-confirm-no:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.14);
 }
+
+/* テンプレートモードのエポック数直接入力(表示値と同じ書体で、ステッパーの間に収める) */
+.epoch-confirm-count-input {
+  width: 72px;
+  padding: 2px 4px;
+  border: 1px solid #3a4a66;
+  border-radius: 4px;
+  background: #101826;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e5eef9;
+  text-align: center;
+}

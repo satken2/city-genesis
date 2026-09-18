@@ -1,0 +1,36 @@
+{
+  "templateTools": {
+    "trayComplete": "Complete all construction (finish planned/under-construction roads and buildings instantly)",
+    "trayStreetGrid": "Create side streets (plan a street grid inside a drawn area)",
+    "completing": "Completing all construction...",
+    "completed": "Completed: {{paths}} roads and {{buildings}} buildings",
+    "completedWithRemaining": "Completed: {{paths}} roads and {{buildings}} buildings ({{remaining}} could not start construction)",
+    "completeFailed": "Failed to complete construction",
+    "hintAddVertices": "Left-click the map to place at least 3 vertices of the area (right-click to undo one)",
+    "hintReady": "Area is set. Press \"Create\" to plan the street grid",
+    "vertexCount": "Vertices: {{count}}",
+    "spacing": "Grid spacing",
+    "variant": "Street type",
+    "angle": "Orientation",
+    "angleAuto": "Align to nearest road",
+    "angleManual": "Set angle",
+    "undoVertex": "Undo",
+    "clearVertices": "Clear",
+    "create": "Create",
+    "creating": "Creating...",
+    "gridCreated": "Planned {{created}} street segments ({{rejected}} rejected)",
+    "gridFailed": "Failed to create side streets",
+    "reject": {
+      "too_short": "too short",
+      "outside_coastline": "outside coastline",
+      "overlaps_existing_path": "overlaps existing road",
+      "parcel_in_use": "parcel with building",
+      "too_steep": "too steep",
+      "river_crossing": "crosses river",
+      "multiple_intersections": "multiple intersections",
+      "elevation_conflict": "grade-separation conflict",
+      "terrain_not_acquired": "terrain not unlocked",
+      "other": "other"
+    }
+  }
+}

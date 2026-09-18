@@ -4,13 +4,19 @@
  * Windowsのタスクトレイ風に、メニューアイコンより小さいアイコンを横並びにする。
  */
 
+/*
+ * 幅はボタン数に合わせた内容幅にする(ウィンドウ幅はこの実測値をRust側へ通知して合わせる)。
+ * ウィンドウの方が一時的に広いときは右端に寄せ、Unity側のクリックを吸う透明領域を左側に逃がす。
+ */
 .system-tray {
-  width: 100%;
+  width: max-content;
   height: 100%;
+  margin-left: auto;
   align-items: center;
   justify-content: center;
   gap: 6px;
   padding: 4px 8px;
+  box-sizing: border-box;
 }
 
 .system-tray-icon {

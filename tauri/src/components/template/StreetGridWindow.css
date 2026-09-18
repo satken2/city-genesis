@@ -1,0 +1,126 @@
+/* 路地作成ウィンドウ。都市マップウィンドウ(CityMapWindow.css)と同じ配色・寸法感で揃える */
+
+.street-grid {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background: #0f1420;
+  color: #cdd6f4;
+  overflow: hidden;
+}
+
+.street-grid__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 6px 12px;
+  background: #171c2c;
+  border-bottom: 1px solid #2a3149;
+}
+
+.street-grid__hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  color: #cdd6f4;
+  white-space: nowrap;
+}
+
+.street-grid__count {
+  color: #6c7a94;
+}
+
+.street-grid__controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.street-grid__field {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  color: #93a9c0;
+  white-space: nowrap;
+}
+
+.street-grid__field input,
+.street-grid__field select {
+  padding: 2px 6px;
+  border: 1px solid #2a3149;
+  border-radius: 4px;
+  background: #1b2135;
+  color: #cdd6f4;
+  font-size: 0.75rem;
+}
+
+.street-grid__field input[type="number"] {
+  width: 64px;
+  text-align: right;
+}
+
+.street-grid__unit {
+  color: #6c7a94;
+}
+
+.street-grid__actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.street-grid__btn {
+  padding: 4px 12px;
+  border: 1px solid #2a3149;
+  border-radius: 4px;
+  background: #1b2135;
+  color: #cdd6f4;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.street-grid__btn:hover:not(:disabled) {
+  background: #26324f;
+  border-color: #4f6ba8;
+}
+
+.street-grid__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.street-grid__btn--primary {
+  background: #3a5a9a;
+  border-color: #4f6ba8;
+}
+
+.street-grid__btn--primary:hover:not(:disabled) {
+  background: #4668b5;
+}
+
+.street-grid__map {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+/* 作成結果・エラーの表示(地図の下端に重ねる) */
+.street-grid__message {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(15, 20, 32, 0.85);
+  font-size: 0.75rem;
+  color: #cdd6f4;
+  pointer-events: none;
+}

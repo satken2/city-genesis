@@ -31,7 +31,9 @@ pub const ICON_PANEL_DEFAULT_HEIGHT: f64 = 660.0;
 pub const COCKPIT_WIDTH: f64 = 800.0;
 pub const COCKPIT_HEIGHT: f64 = 76.0;
 
-/// システムトレイ(画面右下・設定/セーブ/リロード)のサイズ
+/// システムトレイ(画面右下・設定/セーブ/リロード)のサイズ。
+/// 幅はテンプレートモードのボタン(一括完成・路地作成)の有無で変わるため既定値であり、
+/// React側が `resize_system_tray` コマンドで実測値を通知して上書きする。
 pub const SYSTEM_TRAY_WIDTH: f64 = 176.0;
 pub const SYSTEM_TRAY_HEIGHT: f64 = 40.0;
 
@@ -82,19 +84,21 @@ pub fn create_hud_windows(
             .build()
             .map_err(|e| format!("failed to create {label} window: {e}"))?;
     }
-    layout_hud_windows(app, monitors, monitor_index, None);
+    layout_hud_windows(app, monitors, monitor_index, None, None);
     Ok(())
 }
 
 /// HUD各ウィンドウを対象モニターの定位置(左端中央・下部中央・右下)へ配置する。
 ///
-/// `icon_panel_height` はアイコンパネルの高さの明示指定。None のときは現在の
-/// ウィンドウ高さ(=React側が実測して通知済みの値)を維持したまま位置だけ取り直す。
+/// `icon_panel_height` はアイコンパネルの高さ、`system_tray_width` はシステムトレイの幅の
+/// 明示指定。None のときは現在のウィンドウ寸法(=React側が実測して通知済みの値)を
+/// 維持したまま位置だけ取り直す。
 pub fn layout_hud_windows(
     app: &AppHandle,
     monitors: &[Monitor],
     monitor_index: usize,
     icon_panel_height: Option<f64>,
+    system_tray_width: Option<f64>,
 ) {
     let Some(monitor) = monitors.get(monitor_index) else {
         return;
@@ -130,11 +134,20 @@ pub fn layout_hud_windows(
         ));
     }
 
-    // システムトレイ: 画面右下
+    // システムトレイ: 画面右下。幅は中身のボタン数に合わせて右端基準で伸縮する
     if let Some(win) = app.get_webview_window(LABEL_SYSTEM_TRAY) {
-        let _ = win.set_size(LogicalSize::new(SYSTEM_TRAY_WIDTH, SYSTEM_TRAY_HEIGHT));
+        let current = win
+            .inner_size()
+            .ok()
+            .map(|s| s.to_logical::<f64>(scale).width)
+            .filter(|w| *w > 1.0)
+            .unwrap_or(SYSTEM_TRAY_WIDTH);
+        let width = system_tray_width
+            .unwrap_or(current)
+            .clamp(1.0, m_size.width - HUD_MARGIN * 2.0);
+        let _ = win.set_size(LogicalSize::new(width, SYSTEM_TRAY_HEIGHT));
         let _ = win.set_position(LogicalPosition::new(
-            m_pos.x + m_size.width - SYSTEM_TRAY_WIDTH - HUD_MARGIN,
+            m_pos.x + m_size.width - width - HUD_MARGIN,
             m_pos.y + m_size.height - SYSTEM_TRAY_HEIGHT - HUD_MARGIN,
         ));
     }
@@ -239,7 +252,21 @@ pub fn resize_icon_panel(app: &AppHandle, state: &SharedState, height: f64) {
         .unwrap_or_default()
         .into_iter()
         .collect();
-    layout_hud_windows(app, &monitors, monitor_index, Some(height));
+    layout_hud_windows(app, &monitors, monitor_index, Some(height), None);
+}
+
+/// システムトレイの幅をReact側の実測値に合わせて更新し、右下へ寄せ直す。
+pub fn resize_system_tray(app: &AppHandle, state: &SharedState, width: f64) {
+    let monitor_index = {
+        let guard = state.lock();
+        guard.current_monitor_index
+    };
+    let monitors: Vec<_> = app
+        .available_monitors()
+        .unwrap_or_default()
+        .into_iter()
+        .collect();
+    layout_hud_windows(app, &monitors, monitor_index, None, Some(width));
 }
 
 /// 指定レイアウトが画面端に固定されるドック配置かどうか。

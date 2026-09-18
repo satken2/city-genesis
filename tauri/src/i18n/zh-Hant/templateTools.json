@@ -1,0 +1,36 @@
+{
+  "templateTools": {
+    "trayComplete": "一鍵竣工（立即完成計畫中與建設中的道路與建築）",
+    "trayStreetGrid": "建立巷道（指定範圍規劃格狀巷道）",
+    "completing": "正在執行一鍵竣工...",
+    "completed": "一鍵竣工：道路 {{paths}} 條、建築 {{buildings}} 棟已竣工",
+    "completedWithRemaining": "一鍵竣工：道路 {{paths}} 條、建築 {{buildings}} 棟已竣工（{{remaining}} 項無法開工）",
+    "completeFailed": "一鍵竣工失敗",
+    "hintAddVertices": "在地圖上左鍵點擊，指定至少3個範圍頂點（右鍵撤銷一個）",
+    "hintReady": "範圍已確定。按「建立」規劃格狀巷道",
+    "vertexCount": "頂點：{{count}}",
+    "spacing": "格線間距",
+    "variant": "巷道類型",
+    "angle": "方向",
+    "angleAuto": "對齊最近道路",
+    "angleManual": "指定角度",
+    "undoVertex": "撤銷",
+    "clearVertices": "清除",
+    "create": "建立",
+    "creating": "建立中...",
+    "gridCreated": "已規劃 {{created}} 段巷道（拒絕 {{rejected}} 段）",
+    "gridFailed": "建立巷道失敗",
+    "reject": {
+      "too_short": "過短",
+      "outside_coastline": "海岸線外",
+      "overlaps_existing_path": "與既有道路重疊",
+      "parcel_in_use": "有建築的地塊",
+      "too_steep": "坡度過陡",
+      "river_crossing": "橫越河流",
+      "multiple_intersections": "多次交叉",
+      "elevation_conflict": "立體交叉衝突",
+      "terrain_not_acquired": "未開放地形",
+      "other": "其他"
+    }
+  }
+}

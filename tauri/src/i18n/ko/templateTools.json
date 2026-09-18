@@ -1,0 +1,36 @@
+{
+  "templateTools": {
+    "trayComplete": "일괄 완성(계획 중·건설 중인 도로와 건물을 즉시 준공)",
+    "trayStreetGrid": "골목길 생성(범위를 지정해 격자형 골목길 계획)",
+    "completing": "일괄 완성 실행 중...",
+    "completed": "일괄 완성: 도로 {{paths}}개, 건물 {{buildings}}동 준공",
+    "completedWithRemaining": "일괄 완성: 도로 {{paths}}개, 건물 {{buildings}}동 준공(착공 불가 {{remaining}}건 남음)",
+    "completeFailed": "일괄 완성에 실패했습니다",
+    "hintAddVertices": "지도를 왼쪽 클릭해 범위의 꼭짓점을 3개 이상 지정하세요(오른쪽 클릭으로 하나 되돌리기)",
+    "hintReady": "범위가 확정되었습니다. \"생성\"으로 격자형 골목길을 계획합니다",
+    "vertexCount": "꼭짓점: {{count}}",
+    "spacing": "격자 간격",
+    "variant": "골목길 종류",
+    "angle": "방향",
+    "angleAuto": "가장 가까운 도로에 맞춤",
+    "angleManual": "각도 지정",
+    "undoVertex": "되돌리기",
+    "clearVertices": "지우기",
+    "create": "생성",
+    "creating": "생성 중...",
+    "gridCreated": "골목길 {{created}}개를 계획했습니다(거부 {{rejected}}개)",
+    "gridFailed": "골목길 생성에 실패했습니다",
+    "reject": {
+      "too_short": "너무 짧음",
+      "outside_coastline": "해안선 밖",
+      "overlaps_existing_path": "기존 도로와 중복",
+      "parcel_in_use": "건물이 있는 구획",
+      "too_steep": "경사가 급함",
+      "river_crossing": "강 횡단",
+      "multiple_intersections": "여러 번 교차",
+      "elevation_conflict": "입체교차 충돌",
+      "terrain_not_acquired": "미개방 지형",
+      "other": "기타"
+    }
+  }
+}
