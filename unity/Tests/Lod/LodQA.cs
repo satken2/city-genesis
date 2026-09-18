@@ -75,6 +75,7 @@ public static class LodQA
         StableSelection();
         ProjectionAndResidency();
         LargeMapCameraRange();
+        yield return OverviewSessionSwitch();
         yield return CacheLifetime();
         yield return PendingRenderWork();
         yield return InterruptedPathResponse();
@@ -136,6 +137,85 @@ public static class LodQA
             if (previousMainCamera != null) previousMainCamera.enabled = true;
         }
         results.Add("Large maps: fixed world coordinates and full terrain clipping range across map sizes, corners and altitude");
+    }
+
+    static IEnumerator OverviewSessionSwitch()
+    {
+        var go = new GameObject("OverviewSessionQA"); go.SetActive(false);
+        var manager = go.AddComponent(Type("TerrainManager"));
+        Set(manager, "ultraFarLandShader", Shader.Find("Universal Render Pipeline/Lit"));
+        Set(manager, "ultraFarGridStep", 100f);
+        object Batch() => Activator.CreateInstance(Type("LoadBatch"), Activator.CreateInstance(Type("LodCellSets")), false);
+        void Receive(int width, int height, float value, long revision)
+        {
+            var settings = Activator.CreateInstance(Type("TerrainSettingsData"));
+            Set(settings, "map_width", width); Set(settings, "map_height", height);
+            Set(manager, "terrainSettings", settings);
+            var heights = new float[5,5];
+            for (int z=0;z<5;z++) for (int x=0;x<5;x++) heights[z,x] = value;
+            Set(manager, "farTerrainHeights", heights); Set(manager, "overviewDataRevision", revision);
+        }
+        try
+        {
+            Receive(1000, 1000, .25f, 0);
+            yield return Call(manager, "EnsureOverview", 0L, Batch());
+            var first = (GameObject)Field(manager, "ultraFarLandObject");
+            Check(first != null && (long)Field(manager, "overviewRevision") == 0, "Initial overview did not finish");
+            Call(manager, "ClearAllCells");
+            Check((long)Field(manager, "overviewRevision") == -1 && (long)Field(manager, "overviewDataRevision") == -1,
+                "Session clear retained the previous map's overview revision");
+
+            // 別マップも版0から始まり、受信完了後・メッシュ公開前にカメラ移動で中断される。
+            Receive(2400, 1600, .3f, 0);
+            var batch = Batch();
+            var interrupted = (IEnumerator)Call(manager, "EnsureOverview", 0L, batch);
+            Check(interrupted.MoveNext(), "New map incorrectly reused the previous map's completed revision");
+            var building = (IEnumerator)interrupted.Current;
+            Check(building.MoveNext(), "Overview did not enter background generation");
+            Call(batch, "Cancel");
+            yield return building;
+            (building as IDisposable)?.Dispose(); (interrupted as IDisposable)?.Dispose();
+            Check(Field(manager, "ultraFarLandObject") == null && (long)Field(manager, "overviewRevision") == -1,
+                "Canceled overview was published or marked complete");
+            yield return Call(manager, "EnsureOverview", 0L, Batch());
+            var second = (GameObject)Field(manager, "ultraFarLandObject");
+            var mesh = (Mesh)Field(manager, "ultraFarLandMesh");
+            Check(second != null && second.activeSelf && mesh.vertexCount > 0, "Interrupted new map overview did not recover");
+            Check(Mathf.Abs(mesh.bounds.size.x - 2400f) < 1f && Mathf.Abs(mesh.bounds.size.z - 1600f) < 1f,
+                "Overview recovered with the previous map's dimensions");
+            yield return Call(manager, "EnsureOverview", 0L, Batch());
+            Check(ReferenceEquals(second, Field(manager, "ultraFarLandObject")), "Completed overview regenerated without a revision change");
+
+            // グリッドの標本点を含まない微小な陸地は空メッシュとして完成する。
+            Static("CoastlineStore", "SetFromGeoJson", Newtonsoft.Json.Linq.JToken.Parse("[[[1,1],[2,1],[2,2],[1,2],[1,1]]]"));
+            Receive(2400, 1600, .3f, 1);
+            yield return Call(manager, "EnsureOverview", 1L, Batch());
+            Check(Field(manager, "ultraFarLandObject") == null && (long)Field(manager, "overviewRevision") == 1,
+                "Empty overview retained old land or failed to complete");
+            yield return null;
+            Check(second == null && mesh == null && first == null, "Replaced overview objects or meshes leaked");
+            Static("CoastlineStore", "Clear");
+
+            Receive(1000, 1000, .25f, 2);
+            var pending = (IEnumerator)Call(manager, "EnsureOverview", 2L, Batch());
+            Check(pending.MoveNext(), "Updated overview did not start");
+            building = (IEnumerator)pending.Current;
+            Check(building.MoveNext(), "Updated overview did not start background work");
+            Call(manager, "ClearAllCells");
+            Static("CoastlineStore", "Clear");
+            yield return building;
+            (building as IDisposable)?.Dispose(); (pending as IDisposable)?.Dispose();
+            Check(Field(manager, "ultraFarLandObject") == null && (long)Field(manager, "overviewRevision") == -1,
+                "Previous session's background result reappeared after clear");
+        }
+        finally
+        {
+            Call(manager, "ClearAllCells");
+            foreach (string name in new[] { "ultraFarLandMat", "ultraFarLandMatDark" })
+                if (Field(manager, name) is Material material) Object.Destroy(material);
+            Object.Destroy(go);
+        }
+        results.Add("Overview: same-revision session switch, interrupted generation/resume, map dimensions, empty land and stale-result rejection");
     }
 
     static Delegate SegmentFactory<T>(GameObject parent, Action built)

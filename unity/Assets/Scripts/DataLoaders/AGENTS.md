@@ -15,6 +15,8 @@
 
 ワールド座標はバックエンドと一致する固定座標で、原点シフトは行わない。`TerrainManager.UpdateCameraClipDistance` はマップ寸法と現在のカメラ位置・高度から全景を含むfarClipPlaneを確保する。シーンの固定距離を描画上限にせず、常駐セル数や詳細オブジェクトのLODは既存の予算内に保つ。
 
+超遠景は `overviewDataRevision`（標高受信済み）と `overviewRevision`（メッシュ完成済み）を分ける。`EnsureOverview` は生成中断後も同じ受信データから再開し、生成成功または陸地なしの確定時だけ完成版を進める。取得・生成失敗は2秒後に再試行する。`ClearAllCells` は進行中バッチとロードを止め、両方の版を未設定へ戻す。バックグラウンド結果はclearEpochとバッチ取消しを検査し、旧セッションの全景を公開しない。回帰検証は `Tests/Lod/run.ps1` のOverview。
+
 ## 共通生成予算・キャッシュ
 
 生成・適用ワーカーは `RenderWorkScheduler.Start(owner, routine, category)` で起動し、停止も同クラスの `Stop` を使う。Unityの `StopCoroutine` だけではiteratorのfinallyが実行されないため、独自のStart/Stop対で待ち行列と一時メッシュを解放する。GOの無効化・破棄では `RenderWorkLifetime` が停止する。子処理は `LoadBatch.IsCanceled` も確認する。

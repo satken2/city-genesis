@@ -712,6 +712,7 @@ public class TerrainManager : BaseApiDataManager
     {
         if (terrainSettings == null) yield break;
         if (farTerrainHeights != null) yield break;
+        int epoch = clearEpoch;
 
         int farRows = terrainSettings.map_height / terrainSettings.far_map_spacing + 1;
         int farCols = terrainSettings.map_width / terrainSettings.far_map_spacing + 1;
@@ -733,6 +734,7 @@ public class TerrainManager : BaseApiDataManager
 
             rawBytes = req.downloadHandler.data;
         }
+        if (epoch != clearEpoch) yield break;
         UnityLog.If(LocalConstants.UNITY_LOG_TIMING, () => $"[TIMING] TerrainManager  network/far: {swFar.ElapsedMilliseconds}ms ({rawBytes?.Length ?? 0} bytes)");
 
         int targetResolution = GetValidTerrainResolution(Mathf.Max(farRows, farCols));
@@ -740,7 +742,7 @@ public class TerrainManager : BaseApiDataManager
         Task<float[,]> task = ProcessHeightmapAsync(rawBytes, farRows, farCols, targetResolution);
         yield return WaitTask(task);
         UnityLog.If(LocalConstants.UNITY_LOG_TIMING, () => $"[TIMING] TerrainManager  ProcessHeightmapAsync/far: {swProc.ElapsedMilliseconds}ms");
-        if (task.IsFaulted || task.Result == null) yield break;
+        if (epoch != clearEpoch || task.IsFaulted || task.IsCanceled || task.Result == null) yield break;
 
         farTerrainHeights = task.Result;
 
@@ -835,6 +837,13 @@ public class TerrainManager : BaseApiDataManager
 
     public override void ClearAllCells()
     {
+        currentLoadBatch?.Cancel();
+        if (loadLodCellsCoroutine != null)
+        {
+            RenderWorkScheduler.Stop(this, loadLodCellsCoroutine);
+            loadLodCellsCoroutine = null;
+        }
+        settingsLoading = false;
         // 進行中・待機中のストリーミングをすべて無効化する。
         // clearEpoch のインクリメントにより、適用途中のワーカーは次のバンド適用前に中断し、
         // 破棄済みTerrainDataへの書き込みやクリア後の孤児タイル登録を行わない。
@@ -878,6 +887,8 @@ public class TerrainManager : BaseApiDataManager
 
         // 遠景データキャッシュをクリア
         farTerrainHeights = null;
+        overviewDataRevision = -1;
+        overviewRevision = -1;
 
         // 設定キャッシュをクリア（session.reset対応）
         terrainSettings = null;
@@ -941,21 +952,8 @@ public class TerrainManager : BaseApiDataManager
                     versions[cell] = item.version;
         long revision = 0;
         foreach (int version in versions.Values) revision += version;
-        if (farTerrainHeights == null || revision != overviewRevision)
-        {
-            farTerrainHeights = null;
-            yield return LoadFarTerrainData();
-            if (batch.IsCanceled) yield break;
-            if (farTerrainHeights != null)
-            {
-                GameObject previous = ultraFarLandObject;
-                Mesh previousMesh = ultraFarLandMesh;
-                yield return BuildUltraFarTerrain();
-                if (previous != null && previous != ultraFarLandObject) Destroy(previous);
-                if (previousMesh != null && previousMesh != ultraFarLandMesh) Destroy(previousMesh);
-                overviewRevision = revision;
-            }
-        }
+        yield return EnsureOverview(revision, batch);
+        if (batch.IsCanceled) yield break;
         var desired = new HashSet<Vector2Int>(cellSets.farCells);
         var remove = new List<Vector2Int>();
         foreach (var cell in loadedCells) if (!desired.Contains(cell)) remove.Add(cell);
@@ -1021,7 +1019,40 @@ public class TerrainManager : BaseApiDataManager
         return key.ToString();
     }
 
+    // データ受信と描画完成を分け、中断後は受信済みデータから未完成メッシュを再生成する。
+    private long overviewDataRevision = -1;
     private long overviewRevision = -1;
+
+    private IEnumerator EnsureOverview(long revision, LoadBatch batch)
+    {
+        int epoch = clearEpoch;
+        while (overviewRevision != revision && !batch.IsCanceled && epoch == clearEpoch)
+        {
+            if (farTerrainHeights == null || overviewDataRevision != revision)
+            {
+                farTerrainHeights = null;
+                yield return LoadFarTerrainData();
+                if (batch.IsCanceled || epoch != clearEpoch) yield break;
+                if (farTerrainHeights != null) overviewDataRevision = revision;
+            }
+            if (farTerrainHeights != null)
+            {
+                GameObject previous = ultraFarLandObject;
+                Mesh previousMesh = ultraFarLandMesh;
+                bool completed = false;
+                yield return BuildUltraFarTerrain(batch, () => completed = true);
+                if (batch.IsCanceled || epoch != clearEpoch) yield break;
+                if (completed)
+                {
+                    if (previous != null && previous != ultraFarLandObject) Destroy(previous);
+                    if (previousMesh != null && previousMesh != ultraFarLandMesh) Destroy(previousMesh);
+                    overviewRevision = revision;
+                    yield break;
+                }
+            }
+            yield return new WaitForSecondsRealtime(2f);
+        }
+    }
 
     private IEnumerator RunParallelCoroutines(IEnumerator[] coroutines)
     {
@@ -1039,9 +1070,10 @@ public class TerrainManager : BaseApiDataManager
         onComplete?.Invoke();
     }
 
-    private IEnumerator BuildUltraFarTerrain()
+    private IEnumerator BuildUltraFarTerrain(LoadBatch batch, Action onCompleted)
     {
-        if (farTerrainHeights == null || terrainSettings == null) yield break;
+        if (farTerrainHeights == null || terrainSettings == null || batch.IsCanceled) yield break;
+        int epoch = clearEpoch;
 
         float mapWidth = terrainSettings.map_width;
         float mapHeight = terrainSettings.map_height;
@@ -1086,10 +1118,17 @@ public class TerrainManager : BaseApiDataManager
         Task<UltraFarLandMeshBuilder.MeshData> task = Task.Run(() =>
             UltraFarLandMeshBuilder.Build(mapWidth, mapHeight, gridStep, heightOffset, sampleHeight, isAcquired));
         yield return WaitTask(task);
-        if (task.IsFaulted || task.Result.vertices == null) yield break;
+        if (batch.IsCanceled || epoch != clearEpoch || task.IsFaulted || task.IsCanceled || task.Result.vertices == null) yield break;
 
         UltraFarLandMeshBuilder.MeshData md = task.Result;
-        if (md.vertices.Count < 3) yield break; // 陸地が無い(全域海)など。
+        if (md.vertices.Count < 3)
+        {
+            // 三角形が生成されない場合も、以前の陸地を残さず空の結果を版として確定する。
+            ultraFarLandObject = null;
+            ultraFarLandMesh = null;
+            onCompleted();
+            yield break;
+        }
 
         // メインスレッドで Mesh を組み立てる。
         Mesh mesh = new Mesh { name = "UltraFarLandMesh" };
@@ -1134,6 +1173,7 @@ public class TerrainManager : BaseApiDataManager
 
         ultraFarLandObject = go;
         RefreshUltraFarLandOverlay();
+        onCompleted();
 
         Debug.Log($"TerrainManager: Ultra-far land mesh built. verts={md.vertices.Count}, " +
                   $"acquiredTris={md.trianglesAcquired.Count / 3}, unacquiredTris={md.trianglesUnacquired.Count / 3}");
