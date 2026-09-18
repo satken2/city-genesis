@@ -63,6 +63,8 @@ export const MENU_ICONS: HudIconDef[] = [
   { id: "land", src: "menu_land.png", tooltipKey: "taskbar.menuLand", windowType: "parcel_creation" },
   { id: "district", src: "menu_district.png", tooltipKey: "taskbar.menuDistrict" },
   { id: "construction", src: "menu_construction.png", tooltipKey: "taskbar.menuConstruction", windowType: "building_construction", enabledWhenLocked: true },
+  // 建設プロジェクト(タグ単位の工事一覧)。専用アイコンが未用意のため建設と同じ画像を仮当てしている。
+  { id: "construction_projects", src: "menu_construction.png", tooltipKey: "taskbar.menuConstructionProjects", windowType: "construction_projects" },
   { id: "transport", src: "menu_transport.png", tooltipKey: "taskbar.menuTransport", windowType: "transit_management" },
   { id: "regulation", src: "menu_regulation.png", tooltipKey: "taskbar.menuRegulation", windowType: "city_regulation" },
   { id: "city", src: "menu_city.png", tooltipKey: "taskbar.menuCity", windowType: "city_hall" },

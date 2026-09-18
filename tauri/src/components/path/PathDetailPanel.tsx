@@ -40,6 +40,7 @@ import {
   ALERT_PATH_NO_STATION_HOUSE
 } from "../../constants";
 import { InfoHeader } from "../common/InfoHeader";
+import { TagRow } from "../common/TagRow";
 import { ZoneLink } from "../common/ZoneLink";
 import { StationInfoSection } from "./StationInfoSection";
 import { PathConditionPanel } from "./PathConditionPanel";
@@ -328,6 +329,9 @@ export function PathDetailPanel({
         onNameSave={handleNameSave}
         nameValue={pathData.name}
       />
+
+      {/* 建設プロジェクトのタグと、この道路だけを3Dビューで隠す切り替え。 */}
+      <TagRow apiBaseUrl={apiBaseUrl} kind="path" entityId={pathData.path_id} />
 
       <PathOperationPanel
         path={pathData}

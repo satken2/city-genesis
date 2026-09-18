@@ -78,6 +78,7 @@
   "taskbar": {
     "menuMap": "地圖",
     "menuConstruction": "建設",
+    "menuConstructionProjects": "建設專案",
     "menuRoad": "道路",
     "menuTrack": "軌道建設",
     "menuInfra": "基礎設施",

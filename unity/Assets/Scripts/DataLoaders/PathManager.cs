@@ -1790,6 +1790,7 @@ public class PathManager : BaseApiDataManager
         var visual = pathGO.AddComponent<VisualModeObject>();
         visual.objectType = InputObjectType.PATH;
         visual.SetStatus(status);
+        visual.SetFilterHidden(ObjectVisibilityFilter.IsHidden(InputObjectType.PATH, path.path_id));
 
         SavePathToCache(path);
         RegisterPathCells(path);
@@ -1846,6 +1847,18 @@ public class PathManager : BaseApiDataManager
     /// 連結して路線を描くために使う。道路/線路は curved=true でベジエ曲線サンプリングされる。
     /// pathDataCache 未読込(=まだロードされていないセルのパス)なら false。
     /// </summary>
+    /// <summary>
+    /// 生成済みのパスへ、オブジェクト単位の表示フィルタ(ObjectVisibilityFilter)を反映し直す。
+    /// 非表示集合が変わったときに呼ばれる。未ロードのパスは生成時に自分で引くため対象外。
+    /// </summary>
+    public void RefreshVisibilityFilter()
+    {
+        foreach (var pair in pathObjectsCache)
+        {
+            ObjectVisibilityFilter.ApplyToObject(pair.Value, InputObjectType.PATH, pair.Key);
+        }
+    }
+
     public bool TryGetPathPolyline(int pathId, out List<Vector3> points, bool trimIntersection = true)
     {
         points = null;
@@ -3256,6 +3269,9 @@ public class PathManager : BaseApiDataManager
         var stats = pathGO.AddComponent<VisualPathStats>();
         stats.InitFrom(path);
         visualModeObject.SetStatus(status);
+        // オブジェクト単位の表示フィルタは差分ロードで後から生成されたパスにも効かせる必要が
+        // あるため、生成直後にここで初期状態を引く。
+        visualModeObject.SetFilterHidden(ObjectVisibilityFilter.IsHidden(InputObjectType.PATH, path.path_id));
     }
 
     private void SetupWaypoints(GameObject pathGO, int pathId, List<Vector3> points)

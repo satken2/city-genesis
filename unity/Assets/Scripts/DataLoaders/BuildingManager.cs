@@ -1262,6 +1262,11 @@ public class BuildingManager : BaseApiDataManager
         mr.sharedMaterial = GetFarBuildingMaterial();
         DrawLodInfo.Ensure(buildingGO).drawLod = DrawLod.Far;
 
+        // 遠景LODの建物は VisualModeObject を持たない(FarBuildingBatcher が輪郭メッシュを
+        // 結合するため)ので、MeshRenderer を直接落として非表示にする。結合バッチからは
+        // FarBuildingMember が enabled の変化を検知して自動的に外れる。
+        ObjectVisibilityFilter.ApplyToObject(buildingGO, InputObjectType.BUILDING, buildingData.agent_id);
+
         float[] cp = buildingData.centerPointArray;
         if (cp != null && cp.Length >= 2)
         {
@@ -1367,6 +1372,18 @@ public class BuildingManager : BaseApiDataManager
             return data;
         }
         return null;
+    }
+
+    /// <summary>
+    /// 生成済みの建物へ、オブジェクト単位の表示フィルタ(ObjectVisibilityFilter)を反映し直す。
+    /// 非表示集合が変わったときに呼ばれる。未ロードの建物は生成時に自分で引くため対象外。
+    /// </summary>
+    public void RefreshVisibilityFilter()
+    {
+        foreach (var pair in buildingObjectsCache)
+        {
+            ObjectVisibilityFilter.ApplyToObject(pair.Value, InputObjectType.BUILDING, pair.Key);
+        }
     }
 
     /// <summary>
@@ -1685,6 +1702,10 @@ public class BuildingManager : BaseApiDataManager
         visualModeObject.useChildRenderers = true;
         visualModeObject.InitializeMaterials();
         visualModeObject.SetStatus(status);
+        // オブジェクト単位の表示フィルタは差分ロードで後から生成された建物にも効かせる必要が
+        // あるため、生成直後にここで初期状態を引く。
+        visualModeObject.SetFilterHidden(
+            ObjectVisibilityFilter.IsHidden(InputObjectType.BUILDING, buildingData.agent_id));
         buildingGO.AddComponent<VisualBuildingObject>();
 
         if (meshResult?.ExteriorJobs != null && meshResult.ExteriorJobs.Count > 0)

@@ -128,6 +128,16 @@
       }
     ]
   },
+  "construction_projects": {
+    "title": "建設プロジェクト",
+    "width": 900,
+    "height": 620,
+    "width_ratio": 0.6,
+    "height_ratio": 0.7,
+    "resizable": true,
+    "policy": "single",
+    "actions": []
+  },
   "city_map": {
     "title": "都市マップ",
     "width": 1200,

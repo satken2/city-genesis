@@ -586,6 +586,11 @@ pub async fn handle_incoming_message(
         "view:current_state" => {
             let _ = app.emit("view:current_state", envelope.payload);
         }
+        "view:object_filter_state" => {
+            // オブジェクト単位の表示フィルタ(建設プロジェクトのタグ単位/個別の表示切替)の
+            // 現在値。表示状態の正はUnity側にあり、複数のパネルが同じ状態を見るため全ウィンドウへ流す。
+            let _ = app.emit("view:object_filter_state", envelope.payload);
+        }
         "weather:state" => {
             let _ = app.emit_to(window::LABEL_COCKPIT, "weather:state", envelope.payload);
         }

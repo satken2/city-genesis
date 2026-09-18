@@ -55,6 +55,12 @@ public class IpcClient : MonoBehaviour
     // 地区統合の確定/取消の通知(UI→Unity)。UI側が POST /zones/{id}/merge を送り終えた後、
     // または確定パネルでキャンセルされたときに送られる。引数は統合が実行されたかどうか。
     public event Action<bool> OnEditZoneFinishMerge;
+    // オブジェクト単位の表示フィルタ(建設プロジェクトのタグ単位／個別の表示切替)。
+    // 引数は「非表示にする建物ID配列」「非表示にするパスID配列」で、差分ではなく全置換。
+    // 状態はUnityのセッション内にしか存在せず、バックエンドにもセーブにも残さない。
+    public event Action<int[], int[]> OnViewSetObjectFilter;
+    // 現在の非表示集合の問い合わせ(UIのパネルが開いたときに送られる)。
+    public event Action OnViewQueryObjectFilter;
     public event Action<string, float, float, float?, float?> OnViewSetGrid;
     public event Action OnSystemShutdown;
     public event Action OnSessionReset;
@@ -307,6 +313,20 @@ public class IpcClient : MonoBehaviour
                             OnViewChangeView?.Invoke(layer, mode, subMode ?? "", flags);
                         }
                     }
+                    break;
+
+                case "view:set_object_filter":
+                    {
+                        int[] hiddenBuildings = GetParamInt1D(payload, "hidden_building_ids");
+                        int[] hiddenPaths = GetParamInt1D(payload, "hidden_path_ids");
+                        Debug.Log($"IpcClient: view:set_object_filter -> buildings={hiddenBuildings.Length}, paths={hiddenPaths.Length}");
+                        OnViewSetObjectFilter?.Invoke(hiddenBuildings, hiddenPaths);
+                    }
+                    break;
+
+                case "view:query_object_filter":
+                    Debug.Log("IpcClient: view:query_object_filter");
+                    OnViewQueryObjectFilter?.Invoke();
                     break;
 
                 case "edit_path:change_node":
@@ -1326,6 +1346,21 @@ public class IpcClient : MonoBehaviour
         };
 
         SendEnvelope("view:current_state", payload);
+    }
+
+    /// <summary>
+    /// view:object_filter_state イベントを送信する。
+    /// オブジェクト単位の表示フィルタの現在値(非表示にしているIDの全集合)をUIへ返す。
+    /// 表示状態の正はUnity側にあり、UIはパネルを開いたときにこれを問い合わせて同期する
+    /// (view:query_state / view:current_state と同じ形)。
+    /// </summary>
+    public void EmitViewObjectFilterState(List<int> hiddenBuildingIds, List<int> hiddenPathIds)
+    {
+        SendEnvelope("view:object_filter_state", new Dictionary<string, object>
+        {
+            ["hidden_building_ids"] = hiddenBuildingIds ?? new List<int>(),
+            ["hidden_path_ids"] = hiddenPathIds ?? new List<int>()
+        });
     }
 
     public void EmitWeatherState(string id, bool locked, int rain, object[] presets)

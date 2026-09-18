@@ -78,6 +78,7 @@
   "taskbar": {
     "menuMap": "Carte",
     "menuConstruction": "Construction",
+    "menuConstructionProjects": "Projets de construction",
     "menuRoad": "Routes",
     "menuTrack": "Voies ferrées",
     "menuInfra": "Infrastructures",

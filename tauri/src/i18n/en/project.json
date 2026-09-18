@@ -1,0 +1,40 @@
+{
+  "tag": {
+    "label": "Project",
+    "none": "(No tag)",
+    "createNew": "+ New tag…",
+    "newPlaceholder": "Enter a tag name",
+    "add": "Add",
+    "cancel": "Cancel",
+    "saveFailed": "Failed to save the tag",
+    "showObject": "Show in the 3D view",
+    "hideObject": "Hide in the 3D view"
+  },
+  "constructionProjects": {
+    "description": "Groups works by the tag given to buildings and roads, and totals their cost and duration. Show/hide settings last only for this session and are not saved.",
+    "empty": "No tagged buildings or roads yet. Add a tag from a detail panel.",
+    "loadFailed": "Failed to load construction projects",
+    "totalCost": "Estimated cost",
+    "duration": "Time left",
+    "progress": "Progress",
+    "progressValue": "{{done}} / {{total}} done",
+    "epochsValue": "{{value}} epochs",
+    "stalled": "Stalled",
+    "stalledWarning": "{{count}} work(s) will not progress because the construction speed is 0 (excluded from the duration total).",
+    "done": "Done",
+    "unnamed": "#{{id}}",
+    "showAll": "Show everything again ({{count}})",
+    "showTag": "Show this project in the 3D view",
+    "hideTag": "Hide this project in the 3D view",
+    "showObject": "Show in the 3D view",
+    "hideObject": "Hide in the 3D view",
+    "deleteTag": "Delete this tag",
+    "confirmDeleteTag": "Delete the tag \"{{tag}}\"? It will be removed from its buildings and roads (the works themselves remain).",
+    "columns": {
+      "name": "Target",
+      "status": "Status",
+      "cost": "Cost left",
+      "remaining": "Time left"
+    }
+  }
+}

@@ -41,6 +41,7 @@ import { useConstructionBudgetRow } from "../../hooks/useConstructionBudgetRow";
 import { resolveAgentIcon } from "../../utils/agentIcon";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { InfoHeader } from "../common/InfoHeader";
+import { TagRow } from "../common/TagRow";
 import { AgentAlertsPanel } from "./AgentAlertsPanel";
 import { AgentBasicInfoPanel } from "./AgentBasicInfoPanel";
 import { BuildingInfo } from "./BuildingInfo";
@@ -453,6 +454,12 @@ export function AgentDetailPanel({
         iconFrameColor={underAcquisition ? ACQUISITION_FRAME_COLOR : undefined}
         onNameSave={agentData.public_facility ? handleNameSave : undefined}
       />
+
+      {/* 建設プロジェクトのタグと、この建物だけを3Dビューで隠す切り替え。
+          タグは建物(is_bd)にだけ付く(世帯やテナントは工事の対象にならないため)。 */}
+      {agentData.is_bd && (
+        <TagRow apiBaseUrl={apiBaseUrl} kind="agent" entityId={agentData.agent_id} />
+      )}
 
       {/* 未着工（保留）状態の警告バナー */}
       {agentData.is_bd && agentData.status === STATUS_PENDING && (

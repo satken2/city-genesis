@@ -11,6 +11,16 @@
 - `SetMode` / `SetFlags` は前回と同じ値ならスキップする(差分チェック)。
 - Destroy済み参照は10秒ごとの `PeriodicCleanup` で除去される。
 
+## オブジェクト単位の表示フィルタ(ObjectVisibilityFilter)
+
+- レイヤー単位の色モード・表示フラグとは**直交する第3の系統**。非表示にする `agent_id` / `path_id` の集合を静的クラス `ObjectVisibilityFilter` が持ち、`VisualModeObject.SetFilterHidden` で反映する。
+- **`UpdateVisuals` の最優先分岐**で、建設中・計画中の常時表示やハイライトを含む何よりも先に Renderer とコライダーを落とす(プレイヤーが明示的に消した状態なので、クリックも拾わせない)。
+- 入力は UI(Tauri)からの `view:set_object_filter`(建設プロジェクトのタグ単位／詳細パネルの個別切替)だけで、**差分ではなくIDの全集合**が毎回届く。状態の正はUnity側にあり、`view:object_filter_state` でUIへ返す。**バックエンドにもセーブにも残らない**(タグ自体は保存されるが、隠しているかどうかは保存しない)。
+- 差分ロードで後から生成されるオブジェクトにも効かせるため、**生成側(`BuildingManager` / `PathManager`)が生成直後に `IsHidden` を引く**。集合が変わったときは各マネージャーの `RefreshVisibilityFilter()` がキャッシュ済みオブジェクトへ反映する(シーン全体は走査しない)。
+- **遠景LODの建物は `VisualModeObject` を持たない**(`FarBuildingBatcher` が輪郭メッシュを結合するため)ので `MeshRenderer.enabled` を直接落とす(`ObjectVisibilityFilter.ApplyToObject`)。`FarBuildingMember` が `enabled` の変化を検知して結合バッチから自動的に外れる。
+- セッションのリセット(新規都市・ロード)では `IpcStateCoordinator.HandleSessionReset` が必ずクリアする。IDは都市ごとに別物のため。
+- アラートアイコン(`AlertManager`)はこのフィルタと連動しない(レイヤー単位の非表示でも同じ)。
+
 ## IVisualModeHandler の実装者は2種類ある(重要)
 
 1. **`VisualModeObject`** — 建物・道路・交差点・地形タイル等、個々のGameObjectに付くコンポーネント。生成元(BuildingManager/PathManager/TerrainManager)が AddComponent し、`Start()` で自動的に VisualModeHandler に登録される。

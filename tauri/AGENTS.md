@@ -21,7 +21,7 @@ Unityのグラフィックの上に透明なWebViewウィンドウとして重�
   - components/        ... ドメイン別のUIコンポーネント(詳細はcomponents/AGENTS.md)
   - contexts/          ... MasterDataContext(マスターデータ), FontSizeContext
   - data/              ... UI内に静的に持つ掲載データ(credits.ts=クレジット表示の掲載内容)
-  - hooks/             ... 共通Reactフック(useTemplateMode=テンプレートモード判定, useConstructionBudgetRow=建設中/解体中の1エポックコスト・残りエポック数の取得, useVariantAffordability=建設パネルのバリアント単位の資金目安〔GET /{paths,buildings}/variant-affordability〕)
+  - hooks/             ... 共通Reactフック(useTemplateMode=テンプレートモード判定, useConstructionBudgetRow=建設中/解体中の1エポックコスト・残りエポック数の取得, useVariantAffordability=建設パネルのバリアント単位の資金目安〔GET /{paths,buildings}/variant-affordability〕, useObjectVisibility=建物・道路のオブジェクト単位の表示/非表示〔状態の正はUnity側。バックエンド・セーブには残らない〕)
   - utils/             ... 共通処理(下記の一覧参照)
   - i18n/              ... 多言語リソース(言語ディレクトリごとにドメイン別JSONを配置。index.tsがglobで集約)
   - types.ts           ... 共通型定義(WindowContext, AgentData等)
@@ -40,6 +40,7 @@ Unityのグラフィックの上に透明なWebViewウィンドウとして重�
 | `ipc.ts` | Unityへのイベント送信(`sendChangeState`, `sendEditBuildingConfirm`等)。**Unityに何か伝えたいときはここに関数を追加する** |
 | `notification.ts` | 通知ウィンドウの表示(`showNotification`) |
 | `log.ts` | Rust側ファイルログ(実行ファイル横の`city-genesis/tauri.log`)へのINFO転送(`logInfoToFile`)。本番でconsoleが見えないため、無言で止まりうる重要フロー(エポック実行など)の進行記録に使う。なお未キャッチ例外・unhandledrejection・`console.error`は`main.tsx`が自動で同ログへERROR転送する |
+| `constructionTags.ts` | 建設プロジェクトのタグ(建物・道路に付ける単一の分類ラベル)の共通処理。`fetchTags`(候補一覧) / `fetchTagProjects`(タグ別の工事一覧+集計) / `fetchEntityTag`(**1件の現在値。`tag`は単体取得のレスポンスに載らないので専用の口 GET /tags/object から引く**) / `saveEntityTag`(PATCH agents/paths の`tag`) / `deleteTag` / `TAGS_CHANGED_EVENT`(タグ変更をウィンドウ間に知らせるグローバルイベント名)。**表示・非表示はここでは扱わない**(`hooks/useObjectVisibility`) |
 | `cityNotifications.ts` | L1通知(重大通知)の共通処理。`fetchL1Notifications`(GET /api/v1/notifications)・`formatL1NotificationMessage`(i18nキー`notifications.types.<type>`への差し込み。未知typeはフォールバック)・`NOTIFICATION_ENTITY_WINDOW_TYPES`(通知対象→詳細ウィンドウの対応表)。コックピット(hud/Cockpit.tsx)とCityNotificationsWindowが共用 |
 | `hintbar.ts` | 画面下部ヒントバーのテキスト設定 |
 | `locale.ts` | 対応言語(`SUPPORTED_LANGUAGES`)と、言語コード→`Intl`用ロケールの変換(`resolveIntlLocale`)・検証(`isSupportedLanguage`)・対応言語コードへの丸め(`resolveSupportedLanguage`。`ja-JP`のような地域付きコードを`ja`へ寄せる。プルダウンの現在値解決に使う)。詳細は「多言語対応」の節 |

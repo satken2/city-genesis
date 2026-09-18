@@ -1,0 +1,193 @@
+/* 建設プロジェクトウィンドウ。タグ1つ＝カード1枚で、見出しに集計、中身に工事の表を置く。
+   表示・非表示の目アイコンは見出し(タグ単位)と各行(オブジェクト単位)の2箇所にある。 */
+.cp-root {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 14px;
+  overflow-y: auto;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.cp-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cp-description {
+  margin: 0;
+  font-size: 0.74rem;
+  color: #9fb3c8;
+}
+
+.cp-showall-btn {
+  font-size: 0.72rem;
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #c5d4e3;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.cp-showall-btn:hover {
+  background: rgba(78, 161, 255, 0.16);
+  border-color: #4ea1ff;
+}
+
+.cp-empty {
+  margin: 24px 0;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #8195a9;
+}
+
+.cp-project {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.cp-project-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cp-project-title {
+  margin: 0;
+  font-size: 0.92rem;
+  color: #f6fbff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 集計(見込み額合計・工期・進捗)。見出しの右側に等幅で並べる。 */
+.cp-project-summary {
+  display: flex;
+  gap: 18px;
+  margin: 0 0 0 auto;
+}
+
+.cp-summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.cp-summary-item dt {
+  font-size: 0.64rem;
+  color: #8195a9;
+}
+
+.cp-summary-item dd {
+  margin: 0;
+  font-size: 0.86rem;
+  color: #f6fbff;
+  font-variant-numeric: tabular-nums;
+}
+
+.cp-delete-btn {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #8195a9;
+  font-size: 0.9rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.cp-delete-btn:hover {
+  background: rgba(255, 120, 120, 0.18);
+  color: #ff9a9a;
+}
+
+.cp-warning {
+  margin: 8px 0 0;
+  font-size: 0.7rem;
+  color: #ffc46b;
+}
+
+.cp-table {
+  width: 100%;
+  margin-top: 8px;
+  border-collapse: collapse;
+  font-size: 0.76rem;
+}
+
+.cp-table th {
+  text-align: left;
+  font-weight: normal;
+  font-size: 0.66rem;
+  color: #8195a9;
+  padding: 2px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cp-table td {
+  padding: 3px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+}
+
+.cp-col-eye {
+  width: 26px;
+}
+
+.cp-col-cost,
+.cp-col-epochs {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.cp-col-status {
+  width: 96px;
+}
+
+/* 竣工済みの工事は集計から外れているので、行も控えめに落とす。 */
+.cp-row--done {
+  opacity: 0.55;
+}
+
+/* 3Dビュー上で非表示にしている行は、表の側でも一目で分かるようにする。 */
+.cp-row--hidden .cp-col-name,
+.cp-row--hidden .cp-col-cost,
+.cp-row--hidden .cp-col-epochs {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+
+.cp-variant {
+  margin-left: 6px;
+  font-size: 0.66rem;
+  color: #8195a9;
+}
+
+.cp-eye {
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #c5d4e3;
+  font-size: 0.82rem;
+  line-height: 1;
+  padding: 2px 4px;
+  cursor: pointer;
+}
+
+.cp-eye:hover {
+  background: rgba(78, 161, 255, 0.16);
+}
+
+.cp-eye--hidden {
+  color: #ff9a9a;
+}

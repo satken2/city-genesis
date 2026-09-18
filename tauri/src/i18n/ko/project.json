@@ -1,0 +1,40 @@
+{
+  "tag": {
+    "label": "건설 프로젝트",
+    "none": "(태그 없음)",
+    "createNew": "＋ 새 태그…",
+    "newPlaceholder": "태그 이름 입력",
+    "add": "추가",
+    "cancel": "취소",
+    "saveFailed": "태그 저장에 실패했습니다",
+    "showObject": "3D 뷰에 표시",
+    "hideObject": "3D 뷰에서 숨기기"
+  },
+  "constructionProjects": {
+    "description": "건물과 도로에 붙인 태그별로 공사를 모아 건설비와 공기를 집계합니다. 표시·숨김은 이번 세션에만 유효하며 저장되지 않습니다.",
+    "empty": "태그가 붙은 건물이나 도로가 없습니다. 상세 패널에서 태그를 붙여 주세요.",
+    "loadFailed": "건설 프로젝트를 불러오지 못했습니다",
+    "totalCost": "건설비(예상)",
+    "duration": "남은 공기",
+    "progress": "진행",
+    "progressValue": "{{done}} / {{total}}건 완료",
+    "epochsValue": "{{value}} 에포크",
+    "stalled": "진행 없음",
+    "stalledWarning": "{{count}}건의 공사는 건설 속도가 0이라 진행되지 않습니다(공기 집계에서 제외).",
+    "done": "완료",
+    "unnamed": "#{{id}}",
+    "showAll": "모두 다시 표시 ({{count}})",
+    "showTag": "이 프로젝트를 3D 뷰에 표시",
+    "hideTag": "이 프로젝트를 3D 뷰에서 숨기기",
+    "showObject": "3D 뷰에 표시",
+    "hideObject": "3D 뷰에서 숨기기",
+    "deleteTag": "태그 삭제",
+    "confirmDeleteTag": "태그 \"{{tag}}\"을(를) 삭제할까요? 해당 건물과 도로에서 태그가 제거됩니다(공사 자체는 사라지지 않습니다).",
+    "columns": {
+      "name": "대상",
+      "status": "상태",
+      "cost": "남은 건설비",
+      "remaining": "남은 공기"
+    }
+  }
+}

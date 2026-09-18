@@ -1,0 +1,40 @@
+{
+  "tag": {
+    "label": "建設專案",
+    "none": "（無標籤）",
+    "createNew": "＋ 新增標籤…",
+    "newPlaceholder": "輸入標籤名稱",
+    "add": "新增",
+    "cancel": "取消",
+    "saveFailed": "標籤儲存失敗",
+    "showObject": "在3D檢視中顯示",
+    "hideObject": "在3D檢視中隱藏"
+  },
+  "constructionProjects": {
+    "description": "依建築與道路上的標籤彙整工程，並統計建設費用與工期。顯示與隱藏僅在本次遊戲期間有效，不會儲存。",
+    "empty": "尚未有帶標籤的建築或道路。請在詳細面板中加上標籤。",
+    "loadFailed": "建設專案載入失敗",
+    "totalCost": "預估建設費",
+    "duration": "剩餘工期",
+    "progress": "進度",
+    "progressValue": "已完成 {{done}} / {{total}}",
+    "epochsValue": "{{value}} 個紀元",
+    "stalled": "停滯",
+    "stalledWarning": "有 {{count}} 項工程因建設速度為0而無法推進（已從工期統計中排除）。",
+    "done": "已完成",
+    "unnamed": "#{{id}}",
+    "showAll": "全部恢復顯示（{{count}}）",
+    "showTag": "在3D檢視中顯示此專案",
+    "hideTag": "在3D檢視中隱藏此專案",
+    "showObject": "在3D檢視中顯示",
+    "hideObject": "在3D檢視中隱藏",
+    "deleteTag": "刪除標籤",
+    "confirmDeleteTag": "要刪除標籤「{{tag}}」嗎？相關建築與道路的標籤會被移除（工程本身不會消失）。",
+    "columns": {
+      "name": "對象",
+      "status": "狀態",
+      "cost": "剩餘費用",
+      "remaining": "剩餘工期"
+    }
+  }
+}

@@ -1433,6 +1433,10 @@ public class IpcStateCoordinator : MonoBehaviour
         // （リセット後に再生成された線路の矢印が通常表示に出てしまうのを防ぐ）。
         TrackDirectionArrows.SetVisible(false);
 
+        // オブジェクト単位の表示フィルタは建物ID・パスIDの集合なので、別の都市を
+        // 読み込むと全く別のオブジェクトを指してしまう。セッションの切り替えでは必ず捨てる。
+        ObjectVisibilityFilter.Clear();
+
         // カメラ状態のバックエンド送信を止める。新しい都市の準備中に前の視点を PATCH すると、
         // ロード後に適用するはずの保存視点を上書きしてしまうため(game:start で再開する)。
         CameraController.Instance?.SuspendCameraSync();

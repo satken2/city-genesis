@@ -111,6 +111,7 @@ nav:
     - 素材クレジット管理: programs/素材クレジット管理.md
     - サウンドシステム: programs/サウンドシステム.md
     - 達成目標ウィンドウ: programs/達成目標ウィンドウ.md
+    - 建設プロジェクト管理: programs/建設プロジェクト管理.md
     - テンプレート作成支援: programs/テンプレート作成支援.md
   - API Reference: api/index.html
 

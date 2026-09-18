@@ -1024,6 +1024,47 @@ export async function sendViewQueryState(): Promise<void> {
   });
 }
 
+/**
+ * `view.set_object_filter`
+ * 建物・道路をオブジェクト単位で非表示にする集合をグラフィックプログラムへ送る。
+ * レイヤー単位の表示制御(`view:change_view`)とは独立の別系統で、建設プロジェクトの
+ * タグ単位の表示切り替えと、詳細パネルの個別の表示切り替えが共用する。
+ *
+ * **差分ではなく「今隠しているものの全集合」を毎回送る**(追加・削除の取りこぼしで
+ * 表示が食い違う余地をなくすため)。状態の正はUnity側にあり、バックエンドには送らない。
+ */
+export async function sendSetObjectFilter(
+  hiddenBuildingIds: number[],
+  hiddenPathIds: number[],
+  windowType: string = "construction_projects",
+): Promise<void> {
+  await invoke("send_window_action", {
+    windowType,
+    entity: null,
+    action: "view:set_object_filter",
+    params: {
+      hidden_building_ids: hiddenBuildingIds,
+      hidden_path_ids: hiddenPathIds,
+    },
+  });
+}
+
+/**
+ * `view.query_object_filter`
+ * オブジェクト単位の表示フィルタの現在値をグラフィックプログラムに問い合わせる。
+ * 応答は `view:object_filter_state`(`IPC_EVENT_VIEW_OBJECT_FILTER_STATE`)。
+ */
+export async function sendQueryObjectFilter(
+  windowType: string = "construction_projects",
+): Promise<void> {
+  await invoke("send_window_action", {
+    windowType,
+    entity: null,
+    action: "view:query_object_filter",
+    params: {},
+  });
+}
+
 /* ---- graphic -> ui 方向の受信イベント名（定数） ---- */
 /* これらのイベント名は、Rust層から Tauri の emit 経由でフロントエンドに配信される際に使われる。 */
 
@@ -1110,6 +1151,14 @@ export const IPC_EVENT_EDIT_PARCEL_UPDATE_ROTATION = "edit_parcel:update_rotatio
 
 /** 表示オプションパネルの状態問い合わせに対するレスポンス */
 export const IPC_EVENT_VIEW_CURRENT_STATE = "view:current_state";
+
+/**
+ * オブジェクト単位の表示フィルタの現在値(Unity → UI)。
+ * ペイロードは `{ hidden_building_ids: number[], hidden_path_ids: number[] }`。
+ * `sendSetObjectFilter()` の適用後と `sendQueryObjectFilter()` への応答で流れる。
+ * 表示状態の正はUnity側にあるため、複数のパネルはこれを受けて表示を揃える。
+ */
+export const IPC_EVENT_VIEW_OBJECT_FILTER_STATE = "view:object_filter_state";
 
 /**
  * 3Dビューのカメラ状態(Unity → UI)。`sendCameraQueryState()` への応答。

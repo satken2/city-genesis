@@ -78,6 +78,7 @@
   "taskbar": {
     "menuMap": "지도",
     "menuConstruction": "건설",
+    "menuConstructionProjects": "건설 프로젝트",
     "menuRoad": "도로",
     "menuTrack": "궤도 건설",
     "menuInfra": "인프라",

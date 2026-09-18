@@ -1,0 +1,110 @@
+/* 建設プロジェクトのタグ選択。詳細パネルの情報行に収まる高さで、
+   プルダウンと「新しいタグ」の入力欄を同じ1行に置き換えて表示する。 */
+.tag-select {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.tag-select__select {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.78rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+  padding: 3px 6px;
+  outline: none;
+}
+
+.tag-select__select:focus {
+  border-color: #4ea1ff;
+}
+
+.tag-select__input {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.78rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+  padding: 3px 6px;
+  outline: none;
+}
+
+.tag-select__input:focus {
+  border-color: #4ea1ff;
+}
+
+.tag-select__btn {
+  font-size: 0.68rem;
+  padding: 3px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #c5d4e3;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.tag-select__btn:hover:not(:disabled) {
+  background: rgba(78, 161, 255, 0.16);
+  border-color: #4ea1ff;
+}
+
+.tag-select__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tag-select__error {
+  flex-basis: 100%;
+  font-size: 0.7rem;
+  color: #ff9a9a;
+}
+
+/* 詳細パネルに置くタグ行。「ラベル + プルダウン + 表示/非表示トグル」の1行。 */
+.tag-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.tag-row__label {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  color: #8195a9;
+}
+
+.tag-row .tag-select {
+  flex: 1;
+  min-width: 0;
+}
+
+.tag-row__eye {
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #c5d4e3;
+  font-size: 0.8rem;
+  line-height: 1;
+  padding: 3px 6px;
+  cursor: pointer;
+}
+
+.tag-row__eye:hover {
+  background: rgba(78, 161, 255, 0.16);
+  border-color: #4ea1ff;
+}
+
+.tag-row__eye--hidden {
+  color: #ff9a9a;
+  border-color: rgba(255, 154, 154, 0.5);
+}

@@ -52,6 +52,9 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `view:change_view`              | `ui -> graphic`  | 地形、建物、区画、道路、環境、アラートなどの表示モードを切り替え（`{layer, mode, sub_mode, flags}`）。`flags` は色モードと独立した表示トグルのCSV文字列（`plan`=計画中の表示、`public`=公共施設ハイライト。road/building レイヤーのみ使用）。**`flags` が `null`（またはキー欠落）の場合は現在のフラグを維持**し、空文字は全トグルOFFを意味する |
 | `view:query_state`              | `ui -> graphic`  | グラフィックプログラムに現在の表示状態を問い合わせる            |
 | `view:current_state`            | `graphic -> ui`  | `view:query_state`への応答、およびステート変更時の表示状態通知。各レイヤーは `{mode, sub_mode, flags}`（`flags` はONのトグルのCSV。無ければ空文字） |
+| `view:set_object_filter`        | `ui -> graphic`  | 建物・道路を**オブジェクト単位**で非表示にする集合を送る（`{hidden_building_ids, hidden_path_ids}`）。差分ではなく毎回「今隠しているものの全集合」を送る。レイヤー単位の`view:change_view`とは直交し、こちらが立っているオブジェクトは色モード・計画中表示に関わらず消える（クリックも拾わない）。状態はUnityのセッション内だけに存在し、バックエンドにもセーブにも残らない。詳細は[建設プロジェクト管理](建設プロジェクト管理.md) |
+| `view:query_object_filter`      | `ui -> graphic`  | オブジェクト単位の表示フィルタの現在値を問い合わせる（パネルを開いたときに送る） |
+| `view:object_filter_state`      | `graphic -> ui`  | `view:query_object_filter`への応答、およびフィルタ適用後の通知（`{hidden_building_ids, hidden_path_ids}`）。表示状態の正はUnity側にあり、複数のパネルがこれを受けて表示を揃える |
 | `view:set_grid`                 | `ui -> graphic`  | グリッドの表示有無や設定を切り替え。Unity側はグリッド表示とグリッド吸着を連動させる（表示ON=吸着ON） |
 | `view:grid_toggled`             | `graphic -> ui`  | 3Dビューのラジアルメニューでグリッド表示がトグルされた（`{ visible }`）。UI側は道路建設パネルのグリッド設定UIの表示状態を追従させる |
 | `camera:query_state`            | `ui -> graphic`  | 3Dカメラの現在位置と視線方位を問い合わせる。2D都市マップがカメラマーカーを描くために、開いたときと再読み込みのときに送る |

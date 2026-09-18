@@ -69,6 +69,9 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
 
     private bool isHovered = false;
     private bool isPreview = false; // プレビューモードかどうか
+    // オブジェクト単位の表示フィルタ(ObjectVisibilityFilter)で隠されているか。
+    // 色モード・表示フラグとは独立で、立っている間は何よりも優先して消す。
+    private bool isFilterHidden = false;
     private int tempZoneId = 0; // ドラッグ中の一時的な地区ID（ゾーン色分けプレビュー用）
     // パス干渉ハイライトの色。値があるとプレビュー以外の全表示に優先して塗る。
     // HighlightManager が計画中パスの干渉オブジェクト（建物・既存パス）へ設定する。
@@ -213,6 +216,18 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     }
 
     /// <summary>
+    /// オブジェクト単位の表示フィルタによる非表示を設定する。
+    /// 建設プロジェクトのタグ単位／オブジェクト単位の表示切り替え(ObjectVisibilityFilter)専用で、
+    /// 色モードや計画中表示フラグとは独立に効く。
+    /// </summary>
+    public void SetFilterHidden(bool hidden)
+    {
+        if (isFilterHidden == hidden) return;
+        isFilterHidden = hidden;
+        UpdateVisuals();
+    }
+
+    /// <summary>
     /// ホバー状態を設定する
     /// </summary>
     public void SetHover(bool hover)
@@ -269,7 +284,17 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
         int currentMode = modeOverride ?? (VisualModeHandler.Instance != null ? VisualModeHandler.Instance.GetMode(objectType) : VisualMode.MODE_NORMAL);
         int flags = VisualModeHandler.Instance != null ? VisualModeHandler.Instance.GetFlags(objectType) : VisualFlag.SHOW_PLAN;
 
-        // 1. プレビューモードの処理（最優先）
+        // 0. オブジェクト単位の表示フィルタ（最優先）。
+        // プレイヤーが「この建物・この道路だけ消す」と明示した状態なので、建設中・計画中の
+        // 常時表示やハイライトを含むあらゆる表示に優先する。クリックも拾わせない。
+        if (isFilterHidden)
+        {
+            SetRenderersEnabled(false);
+            EnableCollider(false);
+            return;
+        }
+
+        // 1. プレビューモードの処理
         if (isPreview)
         {
             SetRenderersEnabled(true);

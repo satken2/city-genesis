@@ -214,6 +214,10 @@ TrackPath.InfrastructureConnectionProviderにはIsInfrastructureConnectionを登
 
 - 車両の範囲抽出は `GetPathsNearCircle` でセル逆引きから候補を得る。外接矩形の粗い抽出なので、呼び出し側で中心線と円の交差を判定する。`CityInfoStore` の通行方向は駅と車両が共有する。
 
+## オブジェクト単位の表示フィルタ
+
+建物・道路は `ObjectVisibilityFilter`（`VisualHandlers/`）でID単位に非表示にできる。差分ロードで後から生成されるオブジェクトにも効かせるため、**生成直後に `IsHidden` を引くのは生成側（`BuildingManager.CreateBuilding` / `CreateFarBuildingObject` / `PathManager` の各生成点）の責務**で、集合が変わったときの反映は各マネージャーの `RefreshVisibilityFilter()`（キャッシュ済みオブジェクトだけを走査する）。**遠景LODの建物は `VisualModeObject` を持たない**ため `MeshRenderer.enabled` を直接落とす（`FarBuildingMember` が変化を検知して結合バッチから外れる）。
+
 ## 非同期資源の解放
 
 `MeshBakeService.Bake` は同時2件の物理ベイクを行う。`RenderCacheIdentity` の破棄は同サービスのReleaseへ通し、ベイク中のMeshを先に破棄しない。タイル専用のMaterial・TerrainLayer・代替Textureは `TerrainTileResources` が所有する。建物の遠景Materialは全棟で共有し、Renderer.materialsで複製すると集約できなくなる。詳細建物で複製したMaterialはRenderCacheIdentityへ登録する。
