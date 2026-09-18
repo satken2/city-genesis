@@ -46,15 +46,16 @@ public static class ConstructionPathQA
             var masterType=assembly.GetType("MasterDataStore");var master=new GameObject("Master").AddComponent(masterType);
             masterType.GetProperty("IsInitialized").SetValue(master,true);
             var table=(IDictionary)masterType.GetField("pathMasterById",Private).GetValue(master);
-            foreach(int variant in new[]{1,2,402}) {
+            foreach(int variant in new[]{1,2,401}) {
                 var item=Activator.CreateInstance(assembly.GetType("PathMasterItem"));
-                Set(item,"type",variant==402?4:variant);Set(item,"width",variant==402?5f:8f);Set(item,"height",5f);
+                Set(item,"type",variant==401?4:variant);Set(item,"width",variant==401?5f:8f);Set(item,"height",5f);
                 Set(item,"sidewalk_width",1f);Set(item,"lanes",2);Set(item,"pillar_spacing",25f);Set(item,"height_editable",true);
-                Set(item,"model_type",variant==402?"track":"default");table.Add(variant,item);
+                Set(item,"model_type",variant==401?"track":"default");table.Add(variant,item);
             }
             new GameObject("Models").AddComponent(assembly.GetType("ModelManager"));
             SetupView();
-            foreach(int variant in new[]{2,1,402}) foreach(float progress in new[]{0f,12.5f,25f,57.5f,90f,99f,100f}) Verify(variant,progress);
+            foreach(int variant in new[]{2,1,401}) foreach(float progress in new[]{0f,12.5f,25f,57.5f,90f,99f,100f}) Verify(variant,progress);
+            VerifyStructuralParts(table);
             VerifyCurve(); VerifyTunnel(); VerifyProgressContract(); VerifySingleSpan(table); VerifyFar();
             foreach(var message in ShaderUtil.GetShaderMessages(Shader.Find("Custom/PathDirt")))
                 Check(message.severity.ToString()!="Error",message.message);
@@ -66,9 +67,9 @@ public static class ConstructionPathQA
     static object PathData(int variant,float progress,float height)
     {
         object path=Activator.CreateInstance(pathType);
-        Set(path,"path_id",1);Set(path,"version",1);Set(path,"path_variant",variant);Set(path,"path_type",variant==402?4:variant);
+        Set(path,"path_id",1);Set(path,"version",1);Set(path,"path_variant",variant);Set(path,"path_type",variant==401?4:variant);
         Set(path,"status",(int)assembly.GetType("Constants").GetField("STATUS_CONSTRUCTING").GetRawConstantValue());
-        Set(path,"construction_progress",progress);Set(path,"width",variant==402?5f:8f);
+        Set(path,"construction_progress",progress);Set(path,"width",variant==401?5f:8f);
         Set(path,"start_point",new List<object>{-50f,height,0f});Set(path,"end_point",new List<object>{50f,height,0f});
         return path;
     }
@@ -109,7 +110,7 @@ public static class ConstructionPathQA
         if(variant==2 && progress==100)Check(root.GetComponentsInChildren<Transform>().All(t=>!t.name.StartsWith("construction_")),"Vehicles at 100 percent");
         if(variant==1 && progress==57.5f)Check(root.GetComponentsInChildren<Transform>().Any(t=>t.name=="construction_crane"),"Missing erection crane");
         if(variant!=2 && progress==57.5f) {
-            var body=root.GetComponentsInChildren<Renderer>().First(r=>r.name.EndsWith("/body"));
+            var body=root.GetComponentsInChildren<Renderer>().First(r=>(r.name.EndsWith("/body") || r.name.EndsWith("/body_elevated")));
             Check(Math.Abs(body.bounds.max.x)<.3f,"Deck must stop at middle pier at 57.5 percent");
         }
         if(variant!=2) {
@@ -117,10 +118,10 @@ public static class ConstructionPathQA
             foreach(var vehicle in root.GetComponentsInChildren<Transform>().Where(t=>t.name.StartsWith("construction_"))) {
                 Check(Math.Abs(vehicle.position.z)<.01f,"Vehicle outside path centerline");
                 foreach(var renderer in vehicle.GetComponentsInChildren<Renderer>())
-                    Check(renderer.bounds.min.z>=-(variant==402?2.5f:4f) && renderer.bounds.max.z<=(variant==402?2.5f:4f),"Vehicle outside path width");
+                    Check(renderer.bounds.min.z>=-(variant==401?2.5f:4f) && renderer.bounds.max.z<=(variant==401?2.5f:4f),"Vehicle outside path width");
             }
             if(progress>=90) {
-                var body=root.GetComponentsInChildren<Renderer>().First(r=>r.name.EndsWith("/body"));
+                var body=root.GetComponentsInChildren<Renderer>().First(r=>(r.name.EndsWith("/body") || r.name.EndsWith("/body_elevated")));
                 Check(Math.Abs(body.bounds.max.x-50)<.3f,"Deck incomplete during finishing");
                 Check(root.GetComponentsInChildren<Transform>().Any(t=>t.name=="construction_crane" && Math.Abs(t.position.x-46)<.01f),"Finishing crane moved");
             }
@@ -130,6 +131,30 @@ public static class ConstructionPathQA
         Render(output+"/"+variant+"-"+(int)progress+".png");
         UnityEngine.Object.DestroyImmediate(root);UnityEngine.Object.DestroyImmediate(collider);
     }
+    static void VerifyStructuralParts(IDictionary table)
+    {
+
+        Set(table[401], "wall_width", .3f);
+        Set(table[1], "wall_width", .3f);
+        foreach (int variant in new[] { 1, 401 }) foreach (float height in new[] { 0f, 10f })
+        {
+            var path = PathData(variant, 57.5f, height);
+            if (variant == 401) Set(path, "path_type", 4);
+            var result = Generate(path, Line(height));
+            var root = (GameObject)Field(result, "GeneratedObject");
+            var names = root.GetComponentsInChildren<Renderer>().Select(r => r.name).ToArray();
+            bool rail = variant == 401;
+            Check(names.Any(n => n.EndsWith(rail && height > 0 ? "/body_elevated" : "/body")), "Construction roadbed selection");
+            if (rail)
+                Check(names.Any(n => n.EndsWith(height > 0 ? "/track_elevated" : "/track")), "Construction track selection");
+            Check(names.Count(n => n.EndsWith("/wall")) == (rail && height == 0 ? 0 : 2), "Construction wall sides");
+            Check(!names.Any(n => n.EndsWith("/wire") || n.EndsWith("/pole") || n.EndsWith("/beam") || n.EndsWith("/center")), "Construction finishing equipment");
+            Render(output + "/structural-" + variant + "-" + height + ".png");
+            UnityEngine.Object.DestroyImmediate(root);
+            UnityEngine.Object.DestroyImmediate((Mesh)Field(result, "Mesh"));
+        }
+    }
+
     static void VerifyCurve()
     {
         var path=PathData(2,50,0);Set(path,"curved",true);

@@ -179,8 +179,8 @@
     "riverDrawHint": "左键从上游到下游依次放置顶点,右键确定河流(至少2点,Esc重新绘制)。河道是经过各顶点的平滑曲线;若终点位于海、湖或其他河流上,则会连接到那里。确定后可用「编辑节点」调整形状",
     "riverNodeHint": "拖动所选河流的节点可移动,在河道上左键可添加节点,右键节点可删除(至少保留2点)。将终点移到海、湖或其他河流上即可连接。点击其他未雕刻的河流可切换选择",
     "riverNodeNoTarget": "请在列表中选择要编辑的河流,或点击地图上未雕刻的河流(已雕刻或已读取的河流无法编辑节点;如需重雕请用 Ctrl+Z 回到雕刻前)",
-    "riverManualWidthHead": "上游端河宽(m)",
-    "riverManualWidthTail": "下游端河宽(m)",
+    "riverManualWidthHead": "上游参考河宽(m)",
+    "riverManualWidthTail": "下游参考河宽(m)",
     "riverDraftVertexCount": "绘制中的顶点数: {{count}}",
     "riverDraftConfirm": "确定河流",
     "riverDraftClear": "清除绘制",
@@ -189,7 +189,10 @@
     "riverMouthLake": "湖",
     "riverMouthConfluence": "汇入其他河流",
     "riverMouthEdge": "未连接",
-    "riverNodeCount": "节点{{count}}"
+    "riverNodeCount": "节点{{count}}",
+    "riverFitRoute": "沿山谷修正河道",
+    "riverRouteRadius": "路径搜索距离(m)",
+    "riverRouteHint": "保持起点和终点，在当前路径两侧寻找较低的地形。仅可在开挖前修正。河宽为参考值，实际河道会随地形变宽或变窄。"
   },
   "god_edit": {
     "openEditor": "属性编辑",

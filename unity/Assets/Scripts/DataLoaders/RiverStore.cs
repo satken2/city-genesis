@@ -37,12 +37,21 @@ public class RiverRecord
     /// <summary>格子点がポリゴン内側なら1(行優先 GridW×GridH)。</summary>
     public byte[] CornerMask;
 
-    /// <summary>セル (i, j)(左上格子点)が水面メッシュに含まれるか(4隅のいずれかが内側)。</summary>
+    /// <summary>セル (i, j)(左上格子点)が川の占有範囲に含まれるか(4隅のいずれかが内側)。</summary>
     public bool CellIncluded(int i, int j)
     {
         if (i < 0 || j < 0 || i >= GridW - 1 || j >= GridH - 1) return false;
         return (CornerMask[j * GridW + i] | CornerMask[j * GridW + i + 1]
             | CornerMask[(j + 1) * GridW + i] | CornerMask[(j + 1) * GridW + i + 1]) != 0;
+    }
+
+    /// <summary>描画専用の岸への埋め込み余白。占有判定や川床マスクは広げない。</summary>
+    public bool SurfaceCellIncluded(int i, int j)
+    {
+        for (int y = j - 1; y <= j + 1; y++)
+            for (int x = i - 1; x <= i + 1; x++)
+                if (CellIncluded(x, y)) return true;
+        return false;
     }
 
     /// <summary>プロファイル線を設定し、最近線分探索用のバケットを構築する。</summary>
@@ -209,10 +218,10 @@ public class RiverRecord
     public void BuildGrid(float step)
     {
         GridStep = step;
-        GridOriginX = Mathf.Floor(MinX / step) * step - step;
-        GridOriginZ = Mathf.Floor(MinZ / step) * step - step;
-        GridW = Mathf.CeilToInt((MaxX - GridOriginX) / step) + 2;
-        GridH = Mathf.CeilToInt((MaxZ - GridOriginZ) / step) + 2;
+        GridOriginX = Mathf.Floor(MinX / step) * step - 2 * step;
+        GridOriginZ = Mathf.Floor(MinZ / step) * step - 2 * step;
+        GridW = Mathf.CeilToInt((MaxX - GridOriginX) / step) + 3;
+        GridH = Mathf.CeilToInt((MaxZ - GridOriginZ) / step) + 3;
         CornerMask = new byte[GridW * GridH];
 
         var edges = new List<float>();

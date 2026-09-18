@@ -179,8 +179,8 @@
     "riverDrawHint": "왼쪽 클릭으로 상류에서 하류 순으로 꼭짓점을 놓고, 오른쪽 클릭으로 강을 확정합니다(2점 이상. Esc로 다시 그리기). 꼭짓점을 지나는 매끄러운 곡선이 유로가 되며, 끝점이 바다·호수·다른 강 위에 있으면 그곳에 연결됩니다. 확정 후에는 「노드 편집」으로 모양을 다듬을 수 있습니다",
     "riverNodeHint": "선택한 강의 노드를 드래그하여 이동, 유로 위 왼쪽 클릭으로 노드 추가, 노드 오른쪽 클릭으로 삭제합니다(2점은 남습니다). 끝점을 바다·호수·다른 강 위로 옮기면 그곳에 연결됩니다. 다른 미조각 강을 클릭하면 선택이 바뀝니다",
     "riverNodeNoTarget": "편집할 강을 목록에서 선택하거나 지도의 미조각 강을 클릭하세요(조각된 강이나 불러온 강은 노드 편집할 수 없습니다. 다시 조각하려면 Ctrl+Z로 조각 전으로 되돌리세요)",
-    "riverManualWidthHead": "상류 끝 강폭(m)",
-    "riverManualWidthTail": "하류 끝 강폭(m)",
+    "riverManualWidthHead": "상류 기준 강폭(m)",
+    "riverManualWidthTail": "하류 기준 강폭(m)",
     "riverDraftVertexCount": "그리는 중인 꼭짓점 수: {{count}}",
     "riverDraftConfirm": "강 확정",
     "riverDraftClear": "그리기 지우기",
@@ -189,7 +189,10 @@
     "riverMouthLake": "호수",
     "riverMouthConfluence": "다른 강에 합류",
     "riverMouthEdge": "연결 없음",
-    "riverNodeCount": "노드 {{count}}"
+    "riverNodeCount": "노드 {{count}}",
+    "riverFitRoute": "계곡을 따라 경로 보정",
+    "riverRouteRadius": "경로 탐색 거리(m)",
+    "riverRouteHint": "시작점과 끝점을 유지하고 현재 경로 양쪽에서 낮은 지형을 찾습니다. 굴착 전에만 보정할 수 있습니다. 강폭은 기준값이며 지형에 따라 넓어지거나 좁아집니다."
   },
   "god_edit": {
     "openEditor": "프로퍼티 편집",

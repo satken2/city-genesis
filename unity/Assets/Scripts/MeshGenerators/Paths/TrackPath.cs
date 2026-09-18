@@ -183,15 +183,7 @@ public class TrackPath : IPathMeshGenerator
         // 従来どおり単独描画になる（ホームは自幅の単独デッキ）。
         // ホームがある側の道床結合（バラスト充填等）の抑止と島式ホームの結合判定は
         // Compute 側が platformLeft / platformRight を見て行う。
-        TrackCorridorInfo corridor = null;
-        if (TrackAdjacency.NeighborProvider != null)
-        {
-            List<TrackNeighborInfo> trackNeighbors = TrackAdjacency.NeighborProvider(pathData);
-            if (trackNeighbors != null && trackNeighbors.Count > 0)
-            {
-                corridor = TrackAdjacency.Compute(pathData.path_id, points, width, wallWidth, platformLeft, platformRight, trackNeighbors);
-            }
-        }
+        var corridor = ResolveCorridor(pathData, points, width, wallWidth, platformLeft, platformRight);
 
         GameObject container = new GameObject($"Track_{pathData.path_id}");
         SplineComputer spline = RoadPath.BuildSpline(container, points, isCurved);
@@ -294,6 +286,35 @@ public class TrackPath : IPathMeshGenerator
         return -width * 0.5f + laneWidth * (trackIndex + 0.5f);
     }
 
+    private static TrackCorridorInfo ResolveCorridor(PathSummary pathData, List<Vector3> points,
+        float width, float wallWidth, float platformLeft, float platformRight)
+    {
+        TrackCorridorInfo corridor = null;
+        if (TrackAdjacency.NeighborProvider != null)
+        {
+            List<TrackNeighborInfo> trackNeighbors = TrackAdjacency.NeighborProvider(pathData);
+            if (trackNeighbors != null && trackNeighbors.Count > 0)
+            {
+                corridor = TrackAdjacency.Compute(pathData.path_id, points, width, wallWidth, platformLeft, platformRight, trackNeighbors);
+            }
+        }
+        return corridor;
+    }
+
+    /// <summary>施工済み区間の道床・軌道・高欄。高架判定と隣接線路側の壁の省略は完成時と共通。</summary>
+    public static void CreateConstructionParts(GameObject container, SplineComputer spline,
+        List<Vector3> points, PathSummary pathData)
+    {
+        GetTrackMasterParams(pathData, out float width, out int lanes, out float wallWidth,
+            out float? pillarSpacing, out bool heightEditable, out float? wireSpacing,
+            out float baseHeight, out float platformWidth);
+        ResolvePlatformExtents(pathData, platformWidth, out float platformLeft, out float platformRight);
+        var corridor = ResolveCorridor(pathData, points, width, wallWidth, platformLeft, platformRight);
+        CreateTrackParts(container, spline, points, width, lanes, wallWidth, pillarSpacing,
+            heightEditable, baseHeight, wireSpacing, pathData, corridor, platformLeft, platformRight,
+            constructionOnly: true);
+    }
+
     /// <summary>
     /// 線路パーツ（道床、軌道、架線、架線柱、防音壁、橋脚、プラットフォーム）をスプラインに沿って配置する。
     /// corridor（近接線路の結合コリドー。null可）が渡された場合、結合区間では
@@ -303,7 +324,7 @@ public class TrackPath : IPathMeshGenerator
     /// platformLeft / platformRight は駅パスのプラットフォームの左右の張り出し幅
     /// （ResolvePlatformExtents で解決済み。0なら無し）。
     /// </summary>
-    private static void CreateTrackParts(GameObject container, SplineComputer spline, List<Vector3> points, float width, int lanes, float wallWidth, float? pillarSpacing, bool heightEditable, float baseHeight, float? wireSpacing, PathSummary pathData, TrackCorridorInfo corridor = null, float platformLeft = 0f, float platformRight = 0f)
+    private static void CreateTrackParts(GameObject container, SplineComputer spline, List<Vector3> points, float width, int lanes, float wallWidth, float? pillarSpacing, bool heightEditable, float baseHeight, float? wireSpacing, PathSummary pathData, TrackCorridorInfo corridor = null, float platformLeft = 0f, float platformRight = 0f, bool constructionOnly = false)
     {
         string variantBase = $"Models/Paths/p{pathData.path_variant}";
         string typeBase = $"Models/Paths/p{pathData.path_type}";
@@ -329,7 +350,7 @@ public class TrackPath : IPathMeshGenerator
             GameObject part = RoadPath.CreateSplineMesh(container, spline, ElevatedPartName(variantBase, "body"), width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/body", clipFrom: range.From, clipTo: range.To);
             if (ballast == null) ballast = part;
         }
-        BrickArcadeGenerator.Generate(container, spline, pathData, width);
+        if (!constructionOnly) BrickArcadeGenerator.Generate(container, spline, pathData, width);
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[TrackPath] body(道床): {(ballast != null ? "生成成功" : "プレハブなし")} 高架区間={elevatedRanges.Count}");
 
         // 結合区間では隣の線路との道床の隙間をバラスト帯で埋め、一体の道床に見せる。
@@ -358,7 +379,7 @@ public class TrackPath : IPathMeshGenerator
             }
         }
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[TrackPath] track(軌道): {placedTracks}/{laneCount}本配置");
-        CreateTerminations(container, points, corridor, pathData, width, laneCount, platformLeft, platformRight, variantBase, typeBase);
+        if (!constructionOnly) CreateTerminations(container, points, corridor, pathData, width, laneCount, platformLeft, platformRight, variantBase, typeBase);
 
         // 道床も軌道も無いバリアントは白いストリップにフォールバックする（ゲームプレイ継続用）。
         // 軌道モデルだけがある構成（モノレール等、道床が不要なバリアント）では道床なしが正常。
@@ -373,13 +394,13 @@ public class TrackPath : IPathMeshGenerator
         // （クラスコメント参照）。張り出し幅は platform_width、デッキの高さは
         // RoadPartHeights.PLATFORM_SURFACE_ABOVE_SPLINE が正。淵・外縁プレハブは
         // 原点＝線路面で、ホーム面までの立ち上がりをプレハブ形状が持つ。
-        if (platformLeft > 0f || platformRight > 0f)
+        if (!constructionOnly && (platformLeft > 0f || platformRight > 0f))
         {
             CreatePlatformParts(container, spline, points, corridor, width, platformLeft, platformRight, variantBase, typeBase);
         }
 
         // 架線系（電化バリアントのみ: wire_spacing が設定されている場合）
-        if (wireSpacing.HasValue && wireSpacing.Value > 0f)
+        if (!constructionOnly && wireSpacing.HasValue && wireSpacing.Value > 0f)
         {
             for (int i = 0; i < laneCount; i++)
             {
@@ -418,7 +439,7 @@ public class TrackPath : IPathMeshGenerator
         }
 
         // 高架橋脚（道路と共通処理）。地下パスには配置しない（RoadPath側の理由コメント参照）。
-        if (heightEditable && pillarSpacing.HasValue && pillarSpacing.Value > 0f
+        if (!constructionOnly && heightEditable && pillarSpacing.HasValue && pillarSpacing.Value > 0f
             && !TunnelSectionUtil.IsUndergroundPath(pathData))
         {
             RoadPath.GeneratePillars(container, spline, pillarSpacing.Value, baseHeight, pathData, variantBase, typeBase);

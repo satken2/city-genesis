@@ -98,6 +98,7 @@ import {
   applyRiverDepth,
   buildRiverPolygon,
   buildRiverFromControlPoints,
+  fitRiverRouteToValley,
   simplifyCenterlineToControlPoints,
   dischargeFromWidth,
   nearestPointIndex,
@@ -1544,6 +1545,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   // 手動作図の川の上流端/下流端の川幅(m)。作図を確定するときの初期値で、作成後は一覧の行で川ごとに変えられる。
   const [riverManualWidthHead, setRiverManualWidthHead] = useState(6);
   const [riverManualWidthTail, setRiverManualWidthTail] = useState(20);
+  const [riverRouteRadius, setRiverRouteRadius] = useState(100);
   const riverDraftPointsRef = useRef<WorldPoint[]>([]);
   const riverNodeDragRef = useRef<{ riverId: string; index: number; moved: boolean } | null>(null);
   const hoveredRiverNodeRef = useRef<number>(-1);
@@ -2583,7 +2585,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
    * q=0 なので、生成した川の後にリスト順で処理される。
    *
    * 探索帯は、流路スプラインを持つ川(このセッションで生成・彫り込んだ川。width>0)は
-   * 「中心線±(幅/2+格子の半対角幅)」、復元した川(幅情報なし)は既存の範囲を上限とする。
+   * 「中心線±(幅/2+格子の半対角幅+なじみ帯+1格子)」、復元した川は既存範囲を上限とする。
    * 周辺斜面の低地へは広げず、範囲内で水没する部分を取り直す。
    * 彫り込み(carve)のたびに呼ぶほか、「川の範囲を再計算」ボタンからも呼ぶ。
    */
@@ -3059,6 +3061,18 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       }
     }
     syncRiverListState();
+  }
+
+  /** 両端と接続先を保ち、指定した横断帯の低い地形へ未彫り込みの流路を寄せる。 */
+  function fitRiverRoute(id: string) {
+    const s = settingsRef.current, elev = elevRef.current;
+    const river = riversRef.current.find((r) => r.id === id);
+    if (!s || !elev || !river || river.carved || !river.controlPoints) return;
+    const cps = fitRiverRouteToValley(river, elev, s.rows, s.cols, s.spacing, s.mapWidth, s.mapHeight, riverRouteRadius);
+    pushUndoState();
+    applyRiverControlPoints(id, cps, true);
+    draw();
+    rebuildRiverPreview();
   }
 
   /** 作図モードで、作図中の流路に頂点を追加する(上流→下流の順) */
@@ -5095,6 +5109,11 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                               "削除は川のデータ(水面・保存対象)のみで、彫り込み済みの地形は戻しません。地形も戻す場合は Ctrl+Z を使ってください",
                           })}
                         </div>
+                        <div className="terrain-editor-param-row">
+                          <span className="terrain-editor-param-label">{t("terrainEditor.riverRouteRadius")}</span>
+                          <NumberStepper value={riverRouteRadius} onChange={setRiverRouteRadius} min={10} max={500} step={10} />
+                        </div>
+                        <div className="terrain-editor-hint">{t("terrainEditor.riverRouteHint")}</div>
                         {/* 彫り込みプレビューと水面表示の切り替え(表示だけで実データは変えない) */}
                         <div className="terrain-editor-param-row">
                           <span className="terrain-editor-param-label">
@@ -5222,6 +5241,12 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                               </div>
                             )}
                             <div className="terrain-editor-action-buttons">
+                              {river.editable && (
+                                <button type="button" className="terrain-editor-btn" disabled={status !== "ready"}
+                                  onClick={() => fitRiverRoute(river.id)}>
+                                  {t("terrainEditor.riverFitRoute")}
+                                </button>
+                              )}
                               {!river.carved && (
                                 <button
                                   type="button"

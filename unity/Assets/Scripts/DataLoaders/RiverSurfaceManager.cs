@@ -341,7 +341,7 @@ public class RiverSurfaceManager : MonoBehaviour
         {
             for (int i = 0; i < w - 1; i++)
             {
-                if (!river.CellIncluded(i, j)) continue;
+                if (!river.SurfaceCellIncluded(i, j)) continue;
                 int a = GetVertex(i, j), b = GetVertex(i + 1, j), c = GetVertex(i, j + 1), d = GetVertex(i + 1, j + 1);
                 // +Y 法線になる巻き順(Unity は左手系・時計回りが表)
                 triangles.Add(a); triangles.Add(c); triangles.Add(b);

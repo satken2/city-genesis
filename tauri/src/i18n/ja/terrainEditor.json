@@ -179,8 +179,8 @@
     "riverDrawHint": "左クリックで上流から下流の順に頂点を置き、右クリックで川を確定します(2点以上。Escで作図をやり直し)。頂点を通る滑らかな曲線が流路になり、終点が海・湖・他の川の上にあればそこへ接続されます。確定後は「ノード編集」で形を整えられます",
     "riverNodeHint": "選択中の川のノードをドラッグで移動、流路上の左クリックでノードを追加、ノードの右クリックで削除します(2点は残ります)。終点を海・湖・他の川の上へ動かすとそこへ接続されます。別の未彫り込みの川をクリックすると選択が切り替わります",
     "riverNodeNoTarget": "編集する川を一覧で選択するか、地図上の未彫り込みの川をクリックしてください(彫り込み済みの川や読み込んだ川はノード編集できません。彫り直すには Ctrl+Z で彫り込み前に戻してください)",
-    "riverManualWidthHead": "上流端の川幅(m)",
-    "riverManualWidthTail": "下流端の川幅(m)",
+    "riverManualWidthHead": "上流端の目安の川幅(m)",
+    "riverManualWidthTail": "下流端の目安の川幅(m)",
     "riverDraftVertexCount": "作図中の頂点数: {{count}}",
     "riverDraftConfirm": "川を確定",
     "riverDraftClear": "作図クリア",
@@ -189,7 +189,10 @@
     "riverMouthLake": "湖",
     "riverMouthConfluence": "他の川へ合流",
     "riverMouthEdge": "接続なし",
-    "riverNodeCount": "ノード{{count}}"
+    "riverNodeCount": "ノード{{count}}",
+    "riverFitRoute": "谷に沿って経路を補正",
+    "riverRouteRadius": "経路補正の探索距離(m)",
+    "riverRouteHint": "始点・終点を保ち、現在の経路の左右から低い地形を探します。補正は彫り込み前のみ可能です。川幅は目安で、地形に応じて広がったり狭まったりします。"
   },
   "god_edit": {
     "openEditor": "プロパティ編集",

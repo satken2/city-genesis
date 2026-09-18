@@ -311,9 +311,8 @@ export type RiverSurfaceMesh = {
  * 実際の(流下方向に下がる)水面から乖離する。格子面なら各頂点がその地点のプロファイル
  * 標高を持ち、勾配が正しく再現される。
  *
- * セルは「4隅のいずれかがポリゴン内側」なら採用するため、水面は岸線から最大1セル分だけ
- * 外側へはみ出す。はみ出した部分は岸(水面より高い地形)に埋まって見えないので問題ない。
- * 逆にポリゴン内側のセルは必ず覆われる(水面に穴が開かない)。
+ * ポリゴンを覆うセルとその隣接1セルを描く。地形と水面の格子・対角線が異なるため、
+ * 岸線ぴったりで切ると曲線区間で端が露出する。余白は岸へ埋め、保存範囲は広げない。
  *
  * 頂点の y は「その地点のプロファイル標高 + lift」。lift は川床との Z-fighting 回避用。
  */
@@ -325,11 +324,10 @@ export function buildRiverSurfaceMesh(
 ): RiverSurfaceMesh | null {
   const bounds = polygonBounds(polygon);
   if (!bounds || step <= 0) return null;
-  // 外側に1セルの余白を持たせ、境界セルも4隅を持てるようにする
-  const originX = Math.floor(bounds.minX / step) * step - step;
-  const originZ = Math.floor(bounds.minZ / step) * step - step;
-  const w = Math.ceil((bounds.maxX - originX) / step) + 2;
-  const h = Math.ceil((bounds.maxZ - originZ) / step) + 2;
+  const originX = Math.floor(bounds.minX / step) * step - 2 * step;
+  const originZ = Math.floor(bounds.minZ / step) * step - 2 * step;
+  const w = Math.ceil((bounds.maxX - originX) / step) + 3;
+  const h = Math.ceil((bounds.maxZ - originZ) / step) + 3;
   const cornerMask = rasterizePolygonMask(polygon, originX, originZ, step, w, h);
 
   const vertexIndex = new Int32Array(w * h).fill(-1);
@@ -352,11 +350,13 @@ export function buildRiverSurfaceMesh(
 
   for (let j = 0; j < h - 1; j++) {
     for (let i = 0; i < w - 1; i++) {
-      const tl = cornerMask[j * w + i];
-      const tr = cornerMask[j * w + i + 1];
-      const bl = cornerMask[(j + 1) * w + i];
-      const br = cornerMask[(j + 1) * w + i + 1];
-      if (!(tl | tr | bl | br)) continue;
+      let included = false;
+      for (let y = Math.max(0, j - 1); y <= Math.min(h - 1, j + 2) && !included; y++) {
+        for (let x = Math.max(0, i - 1); x <= Math.min(w - 1, i + 2); x++) {
+          if (cornerMask[y * w + x]) { included = true; break; }
+        }
+      }
+      if (!included) continue;
       const a = getVertex(i, j);
       const b = getVertex(i + 1, j);
       const c = getVertex(i, j + 1);

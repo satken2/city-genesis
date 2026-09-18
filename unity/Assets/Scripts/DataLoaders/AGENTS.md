@@ -264,3 +264,8 @@ PathMasterItem.house_placementはoutside/insideを受信する。駅舎の個別
 工事中パスの進捗は `ConstructionPathSummary` が一覧・単体取得の `construction_progress` を保持する。`PagedPathListResponse` は独自の型付き一覧。エポック取得時はversion/statusに加えて進捗を比較し、再利用キーにも含める。進捗だけの変化でも地形追従の完了記録を無効化する。生成はConstructionPathBuilder、公開G文書§15とTests/ConstructionPaths参照。
 
 `PathMasterItem.smooth_factor` はマスターAPIの標高平滑化距離を受信する。RoadPlanManagerの勾配推定ではバックエンド同様に最小10mへ制限して用い、型から省略して固定10mで代用しない。
+
+
+## 川の水面の岸への埋め込み
+
+`RiverRecord.CellIncluded`は川の占有範囲（ポリゴンを覆う格子セル）、`SurfaceCellIncluded`は描画専用（占有セルと隣接1セル）。`RiverSurfaceManager.BuildOneRiver`は後者を使い、地形と水面の格子・三角形の違いで曲線の岸から水の板の端が露出しないよう、余白を岸へ埋める。`BuildGrid`は外側2セルの余白を確保する。川床マスク・干渉の占有箱・保存範囲をこの余白で広げない。Tauriの`riverGeometry.ts/buildRiverSurfaceMesh`も同じ規則。生成側の水位と地形補正の詳細は公開D_地形形状.md §D.11。

@@ -68,8 +68,8 @@ public static class ConstructionPathBuilder
     {
         var root = new GameObject("ConstructingPath");
         portals = new List<TunnelSectionUtil.PortalInfo>();
-        RoadPath.GetPathMasterParams(path, out float width, out float sidewalk, out _, out _, out int lanes,
-            out _, out _, out float? spacing, out bool heightEditable, out float baseHeight, out bool singleSpan);
+        RoadPath.GetPathMasterParams(path, out float width, out float sidewalk, out _, out _, out _,
+            out float wallWidth, out _, out float? spacing, out bool heightEditable, out float baseHeight, out bool singleSpan);
         float progress = Progress(path);
         bool elevated = IsElevated(path, points, underground);
         var spline = RoadPath.BuildSpline(root, points, path.curved);
@@ -142,23 +142,30 @@ public static class ConstructionPathBuilder
             complete.transform.SetParent(root.transform, false);
             var roadSpline = RoadPath.BuildSpline(complete, run, false);
             bool track = PathMeshFactory.GetModelType(path) == "track";
-            GameObject body = RoadPath.CreateSplineMesh(complete, roadSpline, variant + "/body", width, 0,
-                RoadPartHeights.BODY_ABOVE_SPLINE, fallbackPrefabName: type + "/body", singleSpan: singleSpan);
             if (track)
             {
-                for (int lane = 0; lane < lanes; lane++)
-                    RoadPath.CreateSplineMesh(complete, roadSpline, variant + "/track", width,
-                        TrackPath.GetTrackCenterOffset(width, lanes, lane), RoadPartHeights.TRACK_ABOVE_SPLINE,
-                        fallbackPrefabName: type + "/track", stretchToWidth: false);
+                TrackPath.CreateConstructionParts(complete, roadSpline, run, path);
             }
-            else if (sidewalk > 0f)
+            else
             {
-                for (int side = -1; side <= 1; side += 2)
-                    RoadPath.CreateSplineMesh(complete, roadSpline, variant + "/sidewalk", sidewalk,
-                        side * (width - sidewalk) * .5f, RoadPartHeights.SIDEWALK_ABOVE_SPLINE,
-                        mirrorX: side > 0, fallbackPrefabName: type + "/sidewalk");
+                GameObject body = RoadPath.CreateSplineMesh(complete, roadSpline, variant + "/body", width, 0,
+                    RoadPartHeights.BODY_ABOVE_SPLINE, fallbackPrefabName: type + "/body", singleSpan: singleSpan);
+                if (sidewalk > 0f)
+                {
+                    for (int side = -1; side <= 1; side += 2)
+                        RoadPath.CreateSplineMesh(complete, roadSpline, variant + "/sidewalk", sidewalk,
+                            side * (width - sidewalk) * .5f, RoadPartHeights.SIDEWALK_ABOVE_SPLINE,
+                            mirrorX: side > 0, fallbackPrefabName: type + "/sidewalk");
+                }
+                if (wallWidth > 0f)
+                {
+                    for (int side = -1; side <= 1; side += 2)
+                        RoadPath.CreateSplineMesh(complete, roadSpline, variant + "/wall", wallWidth,
+                            side * (width + wallWidth) * .5f, RoadPartHeights.WALL_ABOVE_SPLINE,
+                            mirrorX: side < 0, fallbackPrefabName: type + "/wall");
+                }
+                if (body == null) RoadPath.CreateFallbackRoadBody(complete, roadSpline, width);
             }
-            if (body == null && !track) RoadPath.CreateFallbackRoadBody(complete, roadSpline, width);
             var collision = RoadPath.BuildColliderMeshFromSpline(roadSpline, width);
             if (collision != null) colliderParts.Add(collision);
         }

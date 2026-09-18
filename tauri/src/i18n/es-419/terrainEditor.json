@@ -179,8 +179,8 @@
     "riverDrawHint": "Clic izquierdo para colocar vértices de aguas arriba a aguas abajo y clic derecho para confirmar el río (2 puntos o más; Esc para empezar de nuevo). El cauce es una curva suave que pasa por los vértices. Si el final queda sobre el mar, un lago u otro río, se conecta allí. Después puedes ajustar la forma con \"Editar nodos\"",
     "riverNodeHint": "Arrastra un nodo del río seleccionado para moverlo, clic izquierdo sobre el cauce para añadir un nodo y clic derecho sobre un nodo para eliminarlo (quedan al menos 2). Si mueves el final sobre el mar, un lago u otro río, se conecta allí. Haz clic en otro río sin excavar para cambiar la selección",
     "riverNodeNoTarget": "Selecciona un río en la lista o haz clic en un río sin excavar en el mapa (los ríos excavados o cargados no admiten edición de nodos; usa Ctrl+Z para volver antes de excavar)",
-    "riverManualWidthHead": "Ancho en el nacimiento (m)",
-    "riverManualWidthTail": "Ancho en la desembocadura (m)",
+    "riverManualWidthHead": "Ancho aproximado aguas arriba (m)",
+    "riverManualWidthTail": "Ancho aproximado aguas abajo (m)",
     "riverDraftVertexCount": "Vértices en curso: {{count}}",
     "riverDraftConfirm": "Confirmar río",
     "riverDraftClear": "Borrar dibujo",
@@ -189,7 +189,10 @@
     "riverMouthLake": "Lago",
     "riverMouthConfluence": "Confluye en otro río",
     "riverMouthEdge": "Sin conexión",
-    "riverNodeCount": "{{count}} nodos"
+    "riverNodeCount": "{{count}} nodos",
+    "riverFitRoute": "Ajustar ruta al valle",
+    "riverRouteRadius": "Distancia de búsqueda (m)",
+    "riverRouteHint": "Conserva ambos extremos y busca terreno bajo a los lados de la ruta. Disponible solo antes de excavar. Los anchos son orientativos; el cauce se adapta al terreno."
   },
   "god_edit": {
     "openEditor": "Editar propiedades",

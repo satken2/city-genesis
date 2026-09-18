@@ -25,7 +25,7 @@ for (const width of [0, 3, 15, 16, 30, 60]) {
   console.log(`幅${width}m: 川底${checked}点の深さが一定`);
 }
 
-// 川に沿って下り、横断方向にも下る斜面。谷で水面を閉じ込めない条件を検証する。
+// 川に沿って下り、横断方向にも下る斜面。低い岸より下へ水位を置いてから彫る。
 const rv = river(3, 20);
 const sampler = new RiverProfileSampler(rv.points.map(p => [p.x, p.waterY, p.z]));
 const elev = new Float32Array(rows * cols);
@@ -34,6 +34,7 @@ for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
   const across = ((x + 380) * -640 + (z + 327) * 750) / Math.hypot(750, 640);
   elev[r * cols + c] = sampler.heightAt(x, z) - across * 0.2;
 }
+for (const p of rv.points) { p.waterY -= 15; p.bedY -= 15; }
 carveRivers(elev, rows, cols, spacing, size, size, [rv]);
 const poly = buildRiverPolygon(elev, rows, cols, spacing, size, size, rv, { kind: "spline" }, new Uint8Array(rows * cols), []);
 if (!poly) throw new Error("水面がない");

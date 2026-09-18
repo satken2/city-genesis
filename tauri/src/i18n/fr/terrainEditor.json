@@ -179,8 +179,8 @@
     "riverDrawHint": "Clic gauche pour placer les sommets de l'amont vers l'aval, clic droit pour valider la rivière (2 points minimum ; Échap pour recommencer). Le tracé est une courbe lisse passant par les sommets. Si l'extrémité se trouve sur la mer, un lac ou une autre rivière, elle s'y raccorde. Après validation, affinez la forme avec « Modifier les nœuds »",
     "riverNodeHint": "Faites glisser un nœud de la rivière sélectionnée pour le déplacer, clic gauche sur le tracé pour ajouter un nœud, clic droit sur un nœud pour le supprimer (2 restent au minimum). Déplacer l'extrémité sur la mer, un lac ou une autre rivière la raccorde. Cliquez sur une autre rivière non creusée pour changer la sélection",
     "riverNodeNoTarget": "Sélectionnez une rivière dans la liste ou cliquez sur une rivière non creusée sur la carte (les rivières creusées ou chargées ne peuvent pas être modifiées par nœuds ; utilisez Ctrl+Z pour revenir avant le creusement)",
-    "riverManualWidthHead": "Largeur à la source (m)",
-    "riverManualWidthTail": "Largeur à l'embouchure (m)",
+    "riverManualWidthHead": "Largeur indicative en amont (m)",
+    "riverManualWidthTail": "Largeur indicative en aval (m)",
     "riverDraftVertexCount": "Sommets en cours : {{count}}",
     "riverDraftConfirm": "Valider la rivière",
     "riverDraftClear": "Effacer le tracé",
@@ -189,7 +189,10 @@
     "riverMouthLake": "Lac",
     "riverMouthConfluence": "Rejoint une autre rivière",
     "riverMouthEdge": "Non raccordée",
-    "riverNodeCount": "{{count}} nœuds"
+    "riverNodeCount": "{{count}} nœuds",
+    "riverFitRoute": "Adapter le tracé à la vallée",
+    "riverRouteRadius": "Distance de recherche (m)",
+    "riverRouteHint": "Conserve les deux extrémités et recherche les terrains bas de chaque côté du tracé. Disponible uniquement avant le creusement. Les largeurs sont indicatives et varient selon le relief."
   },
   "god_edit": {
     "openEditor": "Édition des propriétés",

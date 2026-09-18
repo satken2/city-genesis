@@ -14,7 +14,7 @@ foreach ($folder in 'Assets/Editor','Assets/Models/Props','Assets/Models/Paths',
 Copy-Item "$PSScriptRoot/ConstructionPathQA.cs" "$qaRoot/Assets/Editor" -Force
 foreach ($file in 'ModelPrefabGenerator.cs','ModelImportSettings.cs') { Copy-Item "$unityRoot/Assets/Editor/$file" "$qaRoot/Assets/Editor" -Force }
 Copy-Item "$unityRoot/Assets/Models/Props/construction_*.fbx*" "$qaRoot/Assets/Models/Props" -Force
-foreach ($variant in 'p1','p2','p4','p402') {
+foreach ($variant in 'p1','p2','p4','p401') {
     New-Item -ItemType Directory -Path "$qaRoot/Assets/Models/Paths/$variant" -Force | Out-Null
     Copy-Item "$unityRoot/Assets/Models/Paths/$variant/*" "$qaRoot/Assets/Models/Paths/$variant" -Force
 }

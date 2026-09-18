@@ -29,6 +29,7 @@ import {
   extractRegionPolygon,
   pointInPolygon,
   polygonBounds,
+  polygonRings,
   rasterizePolygonMask,
 } from "./riverGeometry";
 
@@ -56,7 +57,7 @@ export type RiverPoint = {
   z: number;
   /** この地点の流量(m³/s)。合流のたびに増える */
   q: number;
-  /** 川幅(m)。網状化区間では拡幅済みの値 */
+  /** 地形の閉じ込めを反映した河道幅(m)。水際は彫り込み後の地形との交点で決まる */
   width: number;
   /** 水面のY標高(m)。流下方向に単調非増加 */
   waterY: number;
@@ -176,8 +177,6 @@ const RIVER = {
   braidMaxSlope: 0.002,
   braidMinWidth: 30,
   braidMinRun: 4,
-  /** 網状化: 拡幅倍率 */
-  braidWidenFactor: 1.6,
   /** 網状化: バー(中州)の高さ(深さに対する倍率)と、バー頂の水面からの深さ(m、冠水中州) */
   braidBarHeightFactor: 0.9,
   braidBarClipBelowWater: 0.3,
@@ -190,7 +189,7 @@ const RIVER = {
   polygonWaterEps: 0.05,
   /** 範囲抽出: リング間引きの許容誤差(spacing に対する倍率)。格子由来の細かなギザギザを消しつつ
    *  岸線の形状は保つ */
-  polygonSimplifyFactor: 0.25,
+  polygonSimplifyFactor: 0.02,
   /** 制御点: 自動生成した中心線を制御点へ間引くときの許容誤差(spacing に対する倍率)。
    *  蛇行の形を保ちつつノード数を減らす */
   controlPointToleranceFactor: 0.75,
@@ -1188,7 +1187,7 @@ export function evolveRivers(
 /**
  * 全ての川の水面標高プロファイル(waterY)・川床標高(bedY)・断面用曲率・網状化フラグを確定する。
  *
- * 水面は「地形の平滑化サンプル」を上限とし、下流方向の min スキャンで単調非増加を保証する。
+ * 水面は河道と岸の最低標高より低く置き、下流方向の min スキャンで単調非増加を保証する。
  * さらに最小勾配 ε_s を課して完全な平坦を避ける(Unity の水面リボンが確実に「流れ下る」見た目に
  * なるように)。河口は種類に応じてクランプする:
  *   - sea: 0m(海面)
@@ -1253,70 +1252,55 @@ function computeOneSurfaceProfile(
   const n = pts.length;
   if (n === 0) return;
 
-  // --- 地形サンプル: 河道横断方向(±川幅/2)の最低点を各点の「谷底標高」とする ---
-  // 中心線上の1点だけをサンプルすると、蛇行や平滑化で流路が谷底から少し外れた区間で
-  // 水面が谷壁の高さに「載って」しまい、running-max がそれを上流全体へ伝播して
-  // 水面が地形から浮く=彫り込みが一切発生しない区間ができる。横断方向の最低点に
-  // 固定することで、流路のわずかなブレに関わらず水面が谷底に沿う。
-  const terrain = new Float64Array(n);
-  for (let i = 0; i < n; i++) {
-    const p = pts[i];
-    // 接線(端点は片側差分)から左法線を求める
+  const spacing = ds / RIVER.resampleFactor;
+  const normals = pts.map((_, i) => {
     const prev = pts[Math.max(0, i - 1)];
     const next = pts[Math.min(n - 1, i + 1)];
-    let tx = next.x - prev.x;
-    let tz = next.z - prev.z;
-    const tl = Math.hypot(tx, tz);
-    if (tl < 1e-9) {
-      tx = 1;
-      tz = 0;
-    } else {
-      tx /= tl;
-      tz /= tl;
-    }
-    const nx = -tz;
-    const nz = tx;
-    const halfW = p.width / 2;
-    let mn = Infinity;
-    for (let k = -2; k <= 2; k++) {
-      const off = (k / 2) * halfW;
-      const h = sample(p.x + nx * off, p.z + nz * off);
-      if (h < mn) mn = h;
-    }
-    terrain[i] = mn;
-  }
-  const smoothed = new Float64Array(n);
-  const HALF_WINDOW = 1;
+    const dx = next.x - prev.x, dz = next.z - prev.z;
+    const len = Math.hypot(dx, dz);
+    return len > 1e-9 ? { x: -dz / len, z: dx / len } : { x: 0, z: 1 };
+  });
+
+  // 指定幅は流量から得る目安。横断方向の起伏が深さに比べて大きい谷では河道を絞る。
+  // 毎回流量から再計算し、ノード編集や再構築で拡幅率が累積しないようにする。
+  const widths = pts.map((p, i) => {
+    const base = widthFromDischarge(p.q, params);
+    const normal = normals[i];
+    const reach = Math.max(base, spacing);
+    const h = sample(p.x, p.z);
+    const left = sample(p.x + normal.x * reach, p.z + normal.z * reach);
+    const right = sample(p.x - normal.x * reach, p.z - normal.z * reach);
+    const relief = Math.max(Math.abs(left - h), Math.abs(right - h));
+    const depth = depthFromDischarge(p.q, params.depthCoef);
+    return base * (0.6 + 0.8 / (1 + relief / depth));
+  });
   for (let i = 0; i < n; i++) {
-    let sum = 0;
-    let count = 0;
-    for (let k = -HALF_WINDOW; k <= HALF_WINDOW; k++) {
-      const j = i + k;
-      if (j < 0 || j >= n) continue;
-      sum += terrain[j];
-      count++;
-    }
-    smoothed[i] = sum / count;
+    pts[i].width = (widths[Math.max(0, i - 1)] + 2 * widths[i] + widths[Math.min(n - 1, i + 1)]) / 4;
+    pts[i].braided = false;
   }
 
-  // --- 上流方向 running-max スキャン(1次元の窪地充填)+ 最小勾配 ---
-  // 流路の途中に地形の盛り上がり(尾根・ノイズの瘤)がある場合、水は「上流側の低い水位の
-  // まま瘤を貫通する」のではなく「瘤(溢出点)の高さまで溜まってから乗り越える」。
-  // そのため水面は、各点から見た下流側の最大標高(=そこを流れ切るのに必要な水位)を
-  // 上流方向の running-max で求める。こうすると窪地区間は溢出点の高さの平坦な水面
-  // (湖のような区間。地形より水面が上に来るため彫り込みは発生しない)になり、
-  // 瘤を横切る箇所の彫り込みは川の深さ分だけで済む。
-  // ※以前は下流方向の min スキャンだったが、それだと瘤の高さぶんの巨大な峡谷を
-  //   彫ってしまう(深さ係数と無関係に発生する)ため、この方式に修正した。
-  const ws = new Float64Array(n);
-  ws[n - 1] = smoothed[n - 1];
-  for (let i = n - 2; i >= 0; i--) {
-    ws[i] = Math.max(smoothed[i], ws[i + 1]);
+  // 岸を確保するため、格子補正・なじみ帯の外縁まで調べ、水面を低い岸より下に置く。
+  // 前後半区間も調べ、中心線の標本間にある窪地を平均で持ち上げない。
+  const caps = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    const p = pts[i], normal = normals[i];
+    const reach = p.width / 2 + spacing / Math.SQRT2 + blendWidth(p.width, spacing) + spacing;
+    const steps = Math.max(4, Math.ceil(2 * reach / (spacing / 2)));
+    let low = Infinity;
+    for (let k = 0; k <= steps; k++) {
+      const off = -reach + 2 * reach * k / steps;
+      for (const along of [-ds / 2, 0, ds / 2]) {
+        low = Math.min(low, sample(p.x + normal.x * off + normal.z * along, p.z + normal.z * off - normal.x * along));
+      }
+    }
+    caps[i] = low - RIVER.freeboard;
   }
-  // 単調非増加は running-max で保証済み。最小勾配だけを下流方向のパスで課す
-  // (完全に平坦な水面を避け、Unityの水面リボンが確実に「流れ下る」見た目になるように)。
-  for (let i = 1; i < n; i++) {
-    ws[i] = Math.min(ws[i], ws[i - 1] - RIVER.minSurfaceSlope * ds);
+  const ws = new Float64Array(n);
+  for (let i = 0; i < n; i++) {
+    const average = (caps[Math.max(0, i - 1)] + caps[i] + caps[Math.min(n - 1, i + 1)]) / 3;
+    const ceiling = Math.min(caps[i], average);
+    const distance = i > 0 ? Math.hypot(pts[i].x - pts[i - 1].x, pts[i].z - pts[i - 1].z) : 0;
+    ws[i] = i === 0 ? ceiling : Math.min(ceiling, ws[i - 1] - RIVER.minSurfaceSlope * distance);
   }
 
   // --- 河口クランプ + 逆向きのなじませスキャン ---
@@ -1331,20 +1315,18 @@ function computeOneSurfaceProfile(
       mouthLevel = target.points[idx].waterY;
     }
   }
-  if (mouthLevel !== null && ws[n - 1] > mouthLevel) {
-    // 河口の水位を mouthLevel まで下げ、その落差(drop)を河口付近の限定区間だけに
-    // smoothstep で配分してなじませる。区間長は「追加される勾配が maxMouthSlope を
-    // 超えない長さ」(川全体を上限)。川全体に勾配上限を課す方式だと、源流の水面が
-    // 地形から大きく乖離して(例: 標高100mの源流の水面が河口+わずかになる)、
-    // 彫り込みが不自然な大峡谷になってしまうため、なじませは河口側に限定する。
-    const drop = ws[n - 1] - mouthLevel;
-    const rampLen = Math.min(n - 1, Math.max(1, Math.ceil(drop / (RIVER.maxMouthSlope * ds))));
-    for (let k = 0; k <= rampLen; k++) {
-      const i = n - 1 - k;
-      const t = 1 - k / rampLen; // 河口で1 → 上流側の区間端で0
-      const sm = t * t * (3 - 2 * t);
-      ws[i] -= drop * sm;
+  if (mouthLevel !== null) {
+    if (ws[n - 1] > mouthLevel) {
+      const drop = ws[n - 1] - mouthLevel;
+      const rampLen = Math.min(n - 1, Math.max(1, Math.ceil(drop / (RIVER.maxMouthSlope * ds))));
+      for (let k = 0; k <= rampLen; k++) {
+        const t = 1 - k / Math.max(1, rampLen);
+        ws[n - 1 - k] -= drop * t * t * (3 - 2 * t);
+      }
     }
+    // 河口は海・湖・本流の水位に接続する。背水区間の海・湖との重複は範囲抽出で除く。
+    for (let i = 0; i < n; i++) ws[i] = Math.max(mouthLevel, ws[i]);
+    ws[n - 1] = mouthLevel;
   }
 
   // --- 断面用の無次元曲率(±maxNormCurvature にクランプ) ---
@@ -1354,7 +1336,7 @@ function computeOneSurfaceProfile(
     pts[i].curvature = Math.max(-RIVER.maxNormCurvature, Math.min(RIVER.maxNormCurvature, kn));
   }
 
-  // --- 網状化(braiding)区間の判定と拡幅 ---
+  // --- 網状化区間の判定(岸の調査後に河道を広げない) ---
   // 条件: 水面勾配が緩く(braidMaxSlope 未満)かつ川幅が大きい(braidMinWidth 以上)。
   // 短い飛び地はノイズなので、braidMinRun 点以上連続した区間だけを網状化する。
   if (params.enableBraiding) {
@@ -1371,7 +1353,6 @@ function computeOneSurfaceProfile(
         if (i - runStart >= RIVER.braidMinRun) {
           for (let j = runStart; j < i; j++) {
             pts[j].braided = true;
-            pts[j].width *= RIVER.braidWidenFactor;
           }
         }
         runStart = -1;
@@ -1403,6 +1384,82 @@ export type RiverControlPoint = { x: number; z: number; q: number };
 
 /** buildRiverFromControlPoints の結果。河口を他の川へ吸着した場合は末尾の制御点も吸着後の位置になる */
 export type RiverRebuildResult = { river: GeneratedRiver; controlPoints: RiverControlPoint[] };
+
+/**
+ * 元の流路の横断帯から、標高・逆勾配・迂回量の小さい連続経路を動的計画法で選ぶ。
+ * 始点と終点を固定し、各断面を順番に通すことで別の谷への大迂回や逆戻りを防ぐ。
+ * 地形は変更せず、戻り値を通常の制御点再構築へ渡してプレビューとUndoを共用する。
+ */
+export function fitRiverRouteToValley(
+  river: GeneratedRiver,
+  elev: Float32Array,
+  rows: number,
+  cols: number,
+  spacing: number,
+  mapWidth: number,
+  mapHeight: number,
+  radius: number,
+): RiverControlPoint[] {
+  if (!Number.isFinite(radius) || radius <= 0 || river.points.length < 2) {
+    return river.points.map(({ x, z, q }) => ({ x, z, q }));
+  }
+  const points = resampleCenterline(river.points, Math.max(spacing, radius / 8));
+  if (points.length < 3) return points.map(({ x, z, q }) => ({ x, z, q }));
+  const sample = (x: number, z: number) => sampleElevAtWorld(elev, rows, cols, spacing, mapWidth, mapHeight, x, z);
+  const half = Math.min(20, Math.max(1, Math.ceil(radius / spacing)));
+  const count = half * 2 + 1;
+  const candidates = points.map((p, i) => {
+    const prev = points[Math.max(0, i - 1)], next = points[Math.min(points.length - 1, i + 1)];
+    const dx = next.x - prev.x, dz = next.z - prev.z;
+    const len = Math.max(1e-9, Math.hypot(dx, dz));
+    return Array.from({ length: count }, (_, j) => {
+      const offset = (j - half) * radius / half;
+      const x = p.x - dz / len * offset, z = p.z + dx / len * offset;
+      const valid = x >= -mapWidth / 2 && x <= mapWidth / 2 && z >= -mapHeight / 2 && z <= mapHeight / 2;
+      return { x, z, q: p.q, h: valid ? sample(x, z) : Infinity, offset };
+    });
+  });
+  let cost = new Float64Array(count).fill(Infinity);
+  cost[half] = 0;
+  const parents = new Int16Array(points.length * count).fill(-1);
+  for (let i = 1; i < points.length; i++) {
+    const nextCost = new Float64Array(count).fill(Infinity);
+    const baseDistance = Math.hypot(points[i].x - points[i - 1].x, points[i].z - points[i - 1].z);
+    const low = Math.min(...candidates[i].map((p) => p.h));
+    for (let j = 0; j < count; j++) {
+      if (i === points.length - 1 && j !== half) continue;
+      const p = candidates[i][j];
+      if (!Number.isFinite(p.h)) continue;
+      for (let k = 0; k < count; k++) {
+        if (!Number.isFinite(cost[k])) continue;
+        const prev = candidates[i - 1][k];
+        const distance = Math.hypot(p.x - prev.x, p.z - prev.z);
+        if (distance > baseDistance + radius / half * 2) continue;
+        // 線分途中も調べ、候補点だけが低いときに尾根を飛び越さないようにする。
+        let ridge = 0;
+        for (const t of [0.25, 0.5, 0.75]) {
+          ridge += Math.max(0, sample(prev.x + (p.x - prev.x) * t, prev.z + (p.z - prev.z) * t) - (prev.h + (p.h - prev.h) * t));
+        }
+        const value = cost[k] + (p.h - low) + 4 * Math.max(0, p.h - prev.h)
+          + 2 * ridge + 0.05 * distance + 0.02 * Math.abs(p.offset) + 0.05 * Math.abs(p.offset - prev.offset);
+        if (value < nextCost[j]) {
+          nextCost[j] = value;
+          parents[i * count + j] = k;
+        }
+      }
+    }
+    cost = nextCost;
+  }
+  if (!Number.isFinite(cost[half])) return river.points.map(({ x, z, q }) => ({ x, z, q }));
+  const result: RiverControlPoint[] = new Array(points.length);
+  let j = half;
+  for (let i = points.length - 1; i >= 0; i--) {
+    const p = candidates[i][j];
+    result[i] = { x: p.x, z: p.z, q: p.q };
+    if (i > 0) j = parents[i * count + j];
+  }
+  return result;
+}
 
 /** 川幅(m)から流量(m³/s)を逆算する(widthFromDischarge の逆関数) */
 export function dischargeFromWidth(width: number, params: RiverGenParams): number {
@@ -1895,7 +1952,7 @@ export type RiverPolygonBand =
  * 考え方を流下方向に変化する水面に適用し、さらに河道から連結していること(=実際に水が
  * 流れ込める)を条件にする。連結条件が無いと、河道の岸(なじみ帯)の外側にある無関係な
  * 低地(水面より低いが土手で隔てられた窪地)まで範囲に入ってしまう。
- * 掘削時の川幅に格子の半対角幅を加えた河道帯を上限とし、斜面上の低地へ水面を延長しない。
+ * 川幅に格子の半対角幅・なじみ帯・1格子の余裕を加えた調査帯で、地形との水際を探す。
  * 幅情報を持たない保存済みの川は、既存ポリゴンを上限として再計算する。
  *
  * 以下は範囲から除外する:
@@ -1937,7 +1994,7 @@ export function buildRiverPolygon(
   };
   const floodReach = spacing;
   if (band.kind === "spline") {
-    for (const p of pts) extend(p.x, p.z, p.width / 2 + blendWidth(p.width, spacing) + floodReach);
+    for (const p of pts) extend(p.x, p.z, p.width / 2 + spacing / Math.SQRT2 + blendWidth(p.width, spacing) + floodReach);
   } else {
     const b = polygonBounds(band.polygon);
     if (!b) return null;
@@ -1957,6 +2014,7 @@ export function buildRiverPolygon(
   const originZ = (rMin - 1) * spacing - halfH;
   const field = new Float32Array(bw * bh).fill(-1);
   const seed = new Uint8Array(bw * bh);
+  let boundaryDistance: Float32Array | null = null;
 
   if (band.kind === "spline") {
     // 彫り込み(carveRivers)と同じく、各線分の到達範囲のセルを種にする
@@ -1995,6 +2053,25 @@ export function buildRiverPolygon(
         if (base[j * bw + i]) seed[j * bw + i] = 1;
       }
     }
+    // 保存済みの岸線を上限にする。内外を単純な±1にすると、深い川ほど
+    // 等値線の補間が外へ寄り、範囲の再計算を繰り返すたびに水面が広がる。
+    boundaryDistance = new Float32Array(bw * bh).fill(spacing * 2);
+    for (const ring of polygonRings(band.polygon)) {
+      for (let k = 1; k < ring.length; k++) {
+        const a = ring[k - 1], b = ring[k];
+        const dx = b[0] - a[0], dz = b[1] - a[1], len2 = dx * dx + dz * dz;
+        const i0 = Math.max(0, Math.floor((Math.min(a[0], b[0]) - originX) / spacing) - 2);
+        const i1 = Math.min(bw - 1, Math.ceil((Math.max(a[0], b[0]) - originX) / spacing) + 2);
+        const j0 = Math.max(0, Math.floor((Math.min(a[1], b[1]) - originZ) / spacing) - 2);
+        const j1 = Math.min(bh - 1, Math.ceil((Math.max(a[1], b[1]) - originZ) / spacing) + 2);
+        for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) {
+          const x = originX + i * spacing, z = originZ + j * spacing;
+          const t = len2 > 0 ? Math.max(0, Math.min(1, ((x - a[0]) * dx + (z - a[1]) * dz) / len2)) : 0;
+          const index = j * bw + i;
+          boundaryDistance[index] = Math.min(boundaryDistance[index], Math.hypot(x - a[0] - dx * t, z - a[1] - dz * t));
+        }
+      }
+    }
   }
 
   // --- 各格子点が「水面より低く、川の範囲になり得るか」の判定(遅延評価) ---
@@ -2016,12 +2093,16 @@ export function buildRiverPolygon(
         const wx = c * spacing - halfW;
         const wz = r * spacing - halfH;
         const near = sampler.nearest(wx, wz);
-        // 河道帯を上限とし、周辺斜面の低地へ水面を延長しない。
+        // 調査した岸の外縁まで水際を探す。指定幅そのもので水面を切り落とさない。
         const width = pts[near.seg].width + (pts[near.seg + 1].width - pts[near.seg].width) * near.t;
         const inBand = band.kind === "spline"
-          ? near.dist <= width / 2 + spacing / Math.SQRT2
+          ? near.dist <= width / 2 + spacing / Math.SQRT2 + blendWidth(width, spacing) + spacing
           : seed[fi] !== 0;
-        const depth = inBand ? sampler.heightOn(near.seg, near.t) - h - RIVER.polygonWaterEps : -1;
+        const waterDepth = sampler.heightOn(near.seg, near.t) - h - RIVER.polygonWaterEps;
+        const depth = boundaryDistance
+          ? Math.min(waterDepth, (seed[fi] ? 1 : -1) * boundaryDistance[fi])
+          : inBand ? waterDepth : -1;
+        if (depth <= 0) field[fi] = depth;
         if (depth > 0) {
           let inLake = false;
           for (const lake of lakes) {
@@ -2075,7 +2156,7 @@ export function buildRiverPolygon(
   }
   // 到達しなかった候補(種と連結していない低地)は範囲外に戻す
   for (let fi = 0; fi < field.length; fi++) {
-    if (!reached[fi]) field[fi] = -1;
+    if (!reached[fi] && field[fi] > 0) field[fi] = -1;
   }
 
   const polygon = extractRegionPolygon(field, bw, bh, originX, originZ, spacing, RIVER.polygonSimplifyFactor * spacing);
