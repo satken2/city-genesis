@@ -9,7 +9,8 @@
       "image": "圖像與圖示",
       "font": "字型",
       "model": "3D 模型",
-      "texture": "貼圖"
+      "texture": "貼圖",
+      "data": "地形與地理資料"
     }
   }
 }

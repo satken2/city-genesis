@@ -9,7 +9,8 @@
       "image": "Images et icônes",
       "font": "Polices",
       "model": "Modèles 3D",
-      "texture": "Textures"
+      "texture": "Textures",
+      "data": "Données géographiques"
     }
   }
 }

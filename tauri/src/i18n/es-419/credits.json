@@ -9,7 +9,8 @@
       "image": "Imágenes e iconos",
       "font": "Tipografías",
       "model": "Modelos 3D",
-      "texture": "Texturas"
+      "texture": "Texturas",
+      "data": "Datos geográficos"
     }
   }
 }

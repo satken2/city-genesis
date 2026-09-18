@@ -34,7 +34,7 @@
  * それらの著作権表示・ライセンス条文は配布物へ別途同梱する
  * (`city-genesis/docs/docs/programs/素材クレジット管理.md` を参照)。
  */
-export type CreditCategory = "bgm" | "sfx" | "image" | "font" | "model" | "texture";
+export type CreditCategory = "bgm" | "sfx" | "image" | "font" | "model" | "texture" | "data";
 
 /** カテゴリの表示順序 */
 export const CREDIT_CATEGORY_ORDER: CreditCategory[] = [
@@ -44,6 +44,7 @@ export const CREDIT_CATEGORY_ORDER: CreditCategory[] = [
   "font",
   "model",
   "texture",
+  "data",
 ];
 
 export type CreditEntry = {
@@ -315,6 +316,15 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     url: "https://ambientcg.com/a/Rock051",
     license: "CC0 1.0",
     note: "Terrain cliff",
+  },
+  {
+    title: "標高タイル(基盤地図情報数値標高モデル)",
+    category: "data",
+    source: "国土地理院 地理院タイル",
+    url: "https://maps.gsi.go.jp/development/ichiran.html",
+    license: "国土地理院コンテンツ利用規約 — https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html",
+    requiredText: "地理院タイル（標高タイル（基盤地図情報数値標高モデル））を加工して作成",
+    note: "Terrain maps: kumejima, iejima, ikishima, naoshima, chichijima. Resampled to a 10 m metric grid, small islets removed and sea floor synthesized. License verified 2026-09-18.",
   },
 ];
 
