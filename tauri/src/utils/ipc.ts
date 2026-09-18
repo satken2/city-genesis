@@ -611,6 +611,26 @@ export async function sendEditPropChangeSettings(params: {
 }
 
 /**
+ * `remove_object:confirm_result`
+ * ブルドーザモードで Unity が確認を求めた対象(`remove_object:request_confirm`。範囲配置プロップ)について、
+ * 確認ダイアログの回答を返す。accepted=true で Unity が DELETE を発行して差分リロードする。
+ * 回答が届かない限り Unity はその対象を削除しない(取消はダイアログを閉じるだけでよいが、
+ * Unity 側の確認待ちを解くため false も必ず返す)。
+ */
+export async function sendRemoveObjectConfirmResult(
+  objectType: string,
+  id: number,
+  accepted: boolean,
+): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "bulldozer",
+    entity: null,
+    action: "remove_object:confirm_result",
+    params: { object_type: objectType, id, accepted: accepted ? 1 : 0 },
+  });
+}
+
+/**
  * `edit_prop:finish`
  * プロップ配置モードを終了し、Unity 側で配置状態(ゴースト/散布プレビュー)をリセットして
  * データをリロードする。バックエンドへの POST /api/v1/props/... 送信は Tauri(UI)側が直接行うため、
@@ -1122,3 +1142,19 @@ export const IPC_EVENT_EDIT_PROP_UPDATE_INSTANCES = "edit_prop:update_instances"
  * PropPlacementPanel がこれを受けて頂点数の表示と POST 用のポリゴンを更新する。
  */
 export const IPC_EVENT_EDIT_PROP_UPDATE_SHAPE = "edit_prop:update_shape";
+
+/**
+ * プロップ配置(個別モード)において、3D側の操作(中ボタンドラッグ回転・PageUp/PageDown の高さ変更)で
+ * 次に置くゴーストの設定が変わった(Unity → UI)。ペイロードは { rotation, height }。
+ * PropPlacementPanel はステッパー表示を追従させるだけで、`edit_prop:change_settings` へエコーしない
+ * (建物直接配置の `edit_building:update_direct_angle` と同じ扱い)。
+ */
+export const IPC_EVENT_EDIT_PROP_PLACEMENT_SETTINGS = "edit_prop:placement_settings";
+
+/**
+ * ブルドーザモードで、Unity が即削除せず確認を求める対象をクリックした(Unity → UI。コックピット宛)。
+ * ペイロードは { object_type, id, prop_type }。object_type は現状 "prop_scatter"(範囲配置プロップ=
+ * 森などを散布範囲ごと撤去する不可逆操作)のみ。コックピットが確認ダイアログを出し、
+ * 結果を `sendRemoveObjectConfirmResult` で返す。
+ */
+export const IPC_EVENT_REMOVE_OBJECT_REQUEST_CONFIRM = "remove_object:request_confirm";

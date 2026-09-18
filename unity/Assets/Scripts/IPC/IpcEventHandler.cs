@@ -29,6 +29,7 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnEditPropChangeSettings += HandleEditPropChangeSettings;
             IpcClient.Instance.OnEditPropFinish += HandleEditPropFinish;
             IpcClient.Instance.OnEditPropReset += HandleEditPropReset;
+            IpcClient.Instance.OnRemoveObjectConfirmResult += HandleRemoveObjectConfirmResult;
             IpcClient.Instance.OnEditBuildingUpdateShape += HandleEditBuildingUpdateShape;
             IpcClient.Instance.OnEditBuildingPlacementCommand += HandleEditBuildingPlacementCommand;
             IpcClient.Instance.OnEditBuildingUpdateFloors += HandleEditBuildingUpdateFloors;
@@ -61,6 +62,7 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnEditPropChangeSettings -= HandleEditPropChangeSettings;
             IpcClient.Instance.OnEditPropFinish -= HandleEditPropFinish;
             IpcClient.Instance.OnEditPropReset -= HandleEditPropReset;
+            IpcClient.Instance.OnRemoveObjectConfirmResult -= HandleRemoveObjectConfirmResult;
             IpcClient.Instance.OnEditBuildingUpdateShape -= HandleEditBuildingUpdateShape;
             IpcClient.Instance.OnEditBuildingPlacementCommand -= HandleEditBuildingPlacementCommand;
             IpcClient.Instance.OnEditBuildingUpdateFloors -= HandleEditBuildingUpdateFloors;
@@ -276,6 +278,16 @@ public class IpcEventHandler : MonoBehaviour
         {
             ppm.ResetPlacement();
         }
+    }
+
+    /// <summary>
+    /// remove_object.confirm_result → RemovalManager.OnConfirmResult()
+    /// ブルドーザモードで確認を求めた対象(範囲配置プロップ)について、UIの確認ダイアログの回答を受け取る。
+    /// accepted なら RemovalManager が DELETE を発行して差分リロードする。
+    /// </summary>
+    private void HandleRemoveObjectConfirmResult(string objectType, int id, bool accepted)
+    {
+        RemovalManager.Instance?.OnConfirmResult(objectType, id, accepted);
     }
 
     /// <summary>

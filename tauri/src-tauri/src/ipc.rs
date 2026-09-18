@@ -569,6 +569,15 @@ pub async fn handle_incoming_message(
         "edit_prop:update_shape" => {
             let _ = app.emit("edit_prop:update_shape", envelope.payload);
         }
+        "edit_prop:placement_settings" => {
+            // 3D側の操作(中ボタン回転・PageUp/PageDown)で変わった回転角・高さをプロップ配置パネルへ中継する。
+            let _ = app.emit("edit_prop:placement_settings", envelope.payload);
+        }
+        "remove_object:request_confirm" => {
+            // ブルドーザで範囲配置プロップ(森など)をクリックしたときの削除確認要求。
+            // 常駐するコックピットだけが確認ダイアログを出し、結果を remove_object:confirm_result で返す。
+            let _ = app.emit_to(window::LABEL_COCKPIT, "remove_object:request_confirm", envelope.payload);
+        }
         "view:current_state" => {
             let _ = app.emit("view:current_state", envelope.payload);
         }

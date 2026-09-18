@@ -133,7 +133,8 @@
 - `chunksByCell`でアンロード・地形追従の対象を引く。Near/Dynamicの高さは既存`TerrainFollowUpCoroutine`で更新し、初回Far地形ロードは`OnTerrainTileReady`でも高さ更新を予約する。地形高さの共通取得処理を使用する。
 - 生成・行列更新は`PerformanceConfig.FrameBudgetMs`で分散する。既定の常駐候補予算250,000を超える場合はカメラに近い小区画を優先し、区画の途中では切らない。更新中の旧/新配列の併存分は一時的に増える。
 - `ResidentCandidateCount`/`ResidentChunkCount`、`SubmittedBatchCount`/`SubmittedInstanceCount`（サブメッシュごとの延べ数）、`LastRegeneratedChunks`/`LastExclusionUpdatedChunks`で負荷と差分を観測できる。
-- 正式仕様は`city-genesis/docs/docs/geometries/M_地形プロップ.md`。独立Unity検証は`Tests/Props/run.ps1`。削除UI・橋下の高さ判定・UltraFar森林は対象外。
+- 候補は`sourceId`(explicitInstance ? prop_instance_id : prop_scatter_id)を持ち、`TryPick(ray, maxDistance)`が表示中候補のワールドAABB(モデルbounds×TRS)とレイの交差で最近傍1本を返す(ブルドーザ用。小区画は描画バッチのBoundsで粗く絞る)。`TryGetScatterRegions`は常駐セルが参照する散布範囲、`HideSource(scatter,id)`はDELETE成功直後の暫定非表示(正はリロード後のスナップショット)。
+- 正式仕様は`city-genesis/docs/docs/geometries/M_地形プロップ.md`。独立Unity検証は`Tests/Props/run.ps1`。橋下の高さ判定・UltraFar森林は対象外。削除UIは`InputHandlers/RemovalManager`(ブルドーザ)。
 
 ## 高さ取得APIの使い分け
 

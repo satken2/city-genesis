@@ -84,6 +84,7 @@ public class PropManager : BaseApiDataManager
     private struct Candidate
     {
         public int type;
+        public int sourceId; // 元レコードのID(explicitInstance ? prop_instance_id : prop_scatter_id)。削除対象の特定に使う
         public Vector3 position;
         public float rotation, scale, heightOffset;
         public bool visible;
@@ -91,6 +92,15 @@ public class PropManager : BaseApiDataManager
         public ulong rank;
         public DrawLod lod;
         public bool distant;
+    }
+    /// <summary>レイ判定で拾った1本のプロップ。scatter=true なら範囲配置(id=prop_scatter_id)、false なら個別配置(id=prop_instance_id)。</summary>
+    public struct PickResult
+    {
+        public bool scatter;
+        public int id;
+        public int type;
+        public Bounds bounds;   // ワールド座標のAABB(ハイライト描画用)
+        public float distance;  // レイ原点からの距離
     }
     private sealed class DrawBatch
     {
@@ -263,6 +273,7 @@ public class PropManager : BaseApiDataManager
                     foreach (var point in PropGeometry.Scatter(spec.rect, scatter.regions, scatter.data.density, scatter.data.seed))
                     {
                         var candidate = MakeCandidate(scatter.data.prop_type, point.position, point.rotation, point.scale);
+                        candidate.sourceId = scatter.data.prop_scatter_id;
                         candidate.rank = StableSample<Candidate>.Rank(point.position.x, point.position.y, scatter.data.seed);
                         generated.Add(candidate.rank | (1UL << 63), candidate);
                         if ((++visited & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
@@ -273,6 +284,7 @@ public class PropManager : BaseApiDataManager
                 {
                     var candidate = MakeCandidate(point.prop_type, new Vector2(point.x, point.z), point.rotation, point.scale, point.y);
                     candidate.explicitInstance = true;
+                    candidate.sourceId = point.prop_instance_id;
                     candidate.rank = (uint)point.prop_instance_id;
                     generated.Add(candidate.rank, candidate);
                 }
@@ -360,6 +372,71 @@ public class PropManager : BaseApiDataManager
         var cell = PositionToCell(saved);
         if (!obstacleReadyCells.Contains(cell)) return false;
         return !obstacleGrid.TryGetValue(key, out var obstacles) || !Blocked(new Vector2(saved.x,saved.z), Model(type).Clearance(scale), obstacles);
+    }
+
+    /// <summary>
+    /// 画面レイに最も近い表示中プロップを返す(ブルドーザのクリック/ホバー用)。プロップは個体ごとの
+    /// GameObject/Colliderを持たないため、物理レイキャストの代わりに候補点ごとのワールドAABB
+    /// (モデルbounds×回転×スケール)とレイの交差で判定する。maxDistance より遠い(手前の建物・地形に
+    /// 隠れている)ものは拾わない。小区画は描画バッチのBoundsで粗く絞る。
+    /// </summary>
+    public bool TryPick(Ray ray, float maxDistance, out PickResult result)
+    {
+        result = default;
+        bool found = false;
+        float best = maxDistance;
+        Vector3 offset = Offset;
+        foreach (var chunk in chunks.Values)
+        {
+            if (chunk.offset != offset || chunk.batches.Count == 0) continue;
+            bool near = false;
+            foreach (var batch in chunk.batches)
+                if (batch.bounds.IntersectRay(ray, out float d) && d <= best) { near = true; break; }
+            if (!near) continue;
+            for (int i = 0; i < chunk.points.Length; i++)
+            {
+                var p = chunk.points[i];
+                if (!p.visible) continue;
+                var model = Model(p.type);
+                if (model.normal.Count == 0) continue;
+                var bounds = PropRenderModel.TransformBounds(model.bounds,
+                    Matrix4x4.TRS(p.position + offset, Quaternion.Euler(0, p.rotation, 0), Vector3.one * p.scale));
+                if (!bounds.IntersectRay(ray, out float distance) || distance >= best) continue;
+                best = distance;
+                found = true;
+                result = new PickResult { scatter = !p.explicitInstance, id = p.sourceId, type = p.type, bounds = bounds, distance = distance };
+            }
+        }
+        return found;
+    }
+
+    /// <summary>範囲配置レコードの散布範囲(常駐セル内で参照しているもの)を返す。ハイライト描画用で、保存座標系。</summary>
+    public bool TryGetScatterRegions(int scatterId, out List<PropGeometry.Region> regions)
+    {
+        regions = null;
+        foreach (var chunk in chunks.Values)
+            foreach (var scatter in chunk.spec.scatters)
+                if (scatter.data.prop_scatter_id == scatterId) { regions = scatter.regions; return true; }
+        return false;
+    }
+
+    /// <summary>
+    /// 削除が確定したレコードの候補を即座に非表示にする。差分リロード(候補の再生成)が完了するまでの
+    /// 間も撤去済みに見せるための暫定処理で、常駐データの正はリロード後のスナップショットである。
+    /// </summary>
+    public void HideSource(bool scatter, int id)
+    {
+        foreach (var chunk in chunks.Values)
+        {
+            bool changed = false;
+            for (int i = 0; i < chunk.points.Length; i++)
+            {
+                if (chunk.points[i].explicitInstance == scatter || chunk.points[i].sourceId != id || !chunk.points[i].visible) continue;
+                chunk.points[i].visible = false;
+                changed = true;
+            }
+            if (changed) { chunk.dirty = true; chunk.revision++; }
+        }
     }
 
     private IEnumerator DrawWorker()

@@ -15,12 +15,14 @@
  *   2. プロップ種別プルダウンで種類を選択 → IPC で Unity を配置モード(STATE_EDIT_PROP)にする
  *   3. 個別: 3Dビューをクリックして配置(配置済みは不透明、カーソル追従は半透明ゴースト)
  *      範囲: 3Dビューをクリックして頂点を置きポリゴンを描く(散布は半透明でプレビュー)
- *   4. 設定(回転/スケール、または密度/seed)を調整する(Unity のプレビューに即反映)
+ *   4. 設定(回転/スケール/高さ、または密度/seed)を調整する(Unity のプレビューに即反映)。
+ *      個別配置は3D側でも中ボタンドラッグで回転・PageUp/PageDown で高さを変えられ、その結果は
+ *      edit_prop:placement_settings でステッパーへ書き戻される(パネルからはエコーしない)
  *   5. [確定] で UI が直接バックエンドに POST する(道路建設・資源編集と同じ責務分担)
  *      個別: POST /api/v1/props/instances、範囲: POST /api/v1/props/scatters
  *
  * バックエンドへの送信は Tauri(UI)側が直接行い、成功後に edit_prop:finish で Unity の
- * 配置状態をリセットする。既存プロップの削除は別機能(本パネルは配置のみ)。
+ * 配置状態をリセットする。既存プロップの削除はコックピットのブルドーザで行う(本パネルは配置のみ)。
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -38,6 +40,7 @@ import {
   sendEditPropReset,
   IPC_EVENT_EDIT_PROP_UPDATE_INSTANCES,
   IPC_EVENT_EDIT_PROP_UPDATE_SHAPE,
+  IPC_EVENT_EDIT_PROP_PLACEMENT_SETTINGS,
 } from "../../utils/ipc";
 // 基本レイアウト(pc-*)は資源編集パネルと共有する。
 import "../resource/ResourceConstructionPanel.css";
@@ -123,7 +126,21 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
     const appWindow = getCurrentWindow();
     let unlistenInstances: (() => void) | undefined;
     let unlistenShape: (() => void) | undefined;
+    let unlistenSettings: (() => void) | undefined;
     let unlistenSession: (() => void) | undefined;
+
+    // 3D側の操作(中ボタン回転・PageUp/PageDown)で変わった設定をステッパーへ反映する。
+    // Unity が権威なので change_settings でエコーしない(setter だけを呼ぶ)。
+    appWindow
+      .listen<{ rotation?: number; height?: number }>(IPC_EVENT_EDIT_PROP_PLACEMENT_SETTINGS, (event) => {
+        const payload = event.payload ?? {};
+        if (typeof payload.rotation === "number") setRotation(Math.round(payload.rotation));
+        if (typeof payload.height === "number") setHeight(Math.round(payload.height * 100) / 100);
+      })
+      .then((fn) => {
+        unlistenSettings = fn;
+      })
+      .catch(console.error);
 
     appWindow
       .listen<{ instances: PropInstance[] }>(IPC_EVENT_EDIT_PROP_UPDATE_INSTANCES, (event) => {
@@ -156,6 +173,7 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
     return () => {
       unlistenInstances?.();
       unlistenShape?.();
+      unlistenSettings?.();
       unlistenSession?.();
     };
   }, []);

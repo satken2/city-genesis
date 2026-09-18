@@ -26,7 +26,13 @@ import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useTranslation } from "react-i18next";
 
-import { sendChangeState, IPC_EVENT_WORLD_SELECT_OBJECT } from "../../utils/ipc";
+import {
+  sendChangeState,
+  sendRemoveObjectConfirmResult,
+  IPC_EVENT_REMOVE_OBJECT_REQUEST_CONFIRM,
+  IPC_EVENT_WORLD_SELECT_OBJECT,
+} from "../../utils/ipc";
+import { useMasterData } from "../../contexts/MasterDataContext";
 import { setHintbarText } from "../../utils/hintbar";
 import { formatEpochDate } from "../../utils/date";
 import { resolveIntlLocale } from "../../utils/locale";
@@ -56,6 +62,8 @@ export function Cockpit() {
   const { weather, failed: weatherFailed, select: selectWeather } = useWeather(visible, templateMode);
   const mode = useHudMode();
   const getBtnClassName = useTutorialHighlight();
+  // ブルドーザの削除確認ダイアログでプロップ種別名を出すために参照する。
+  const masterData = useMasterData();
 
   // L1通知(今すぐ対処が必要な重大事象)の現在有効な一覧。件数バッジと点滅の判定に使う。
   const [l1Notifications, setL1Notifications] = useState<L1Notification[]>([]);
@@ -95,6 +103,39 @@ export function Cockpit() {
       unlistenSelect?.();
     };
   }, []);
+
+  /**
+   * ブルドーザの確認付き削除。Unity は範囲配置プロップ(森など)を即削除せず、常駐する本ウィンドウへ
+   * 確認を求めてくる。散布範囲ごと消える不可逆操作なので確認ダイアログを挟み、回答は取消でも必ず返す
+   * (返さないと Unity 側が確認待ちのまま次の範囲配置クリックを受け付けない)。
+   */
+  useEffect(() => {
+    const appWindow = getCurrentWindow();
+    let unlisten: (() => void) | undefined;
+
+    appWindow
+      .listen<{ object_type: string; id: number; prop_type?: number }>(
+        IPC_EVENT_REMOVE_OBJECT_REQUEST_CONFIRM,
+        (event) => {
+          const payload = event.payload;
+          if (!payload?.object_type || payload.id == null) return;
+          const name =
+            payload.prop_type != null
+              ? masterData?.prop_types?.[payload.prop_type]?.display_name ?? String(payload.prop_type)
+              : "";
+          const accepted = window.confirm(t("taskbar.bulldozerConfirmScatter", { name }));
+          void sendRemoveObjectConfirmResult(payload.object_type, payload.id, accepted).catch(console.error);
+        },
+      )
+      .then((fn) => {
+        unlisten = fn;
+      })
+      .catch(console.error);
+
+    return () => {
+      unlisten?.();
+    };
+  }, [masterData, t]);
 
   // セッションが切れたら通知一覧を空にし、別の都市をロードし直したときに
   // 前の都市の件数バッジが残らないようにする。

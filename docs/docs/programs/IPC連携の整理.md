@@ -102,6 +102,9 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `edit_prop:update_instances`    | `graphic -> ui`  | プロップ配置(個別モード)において、配置済みインスタンス列が変更された（`{ instances: [{x, z, rotation, scale}, ...] }`）。配置パネルが配置数の表示とPOST用のインスタンス列を更新する |
 | `edit_prop:update_shape`        | `graphic -> ui`  | プロップ配置(範囲モード)において、散布範囲ポリゴンが変更された（`{ polygon: [[x,z], ...] }`。`edit_resource:update_shape` と同形） |
 | `edit_prop:finish`              | `ui -> graphic`  | プロップ配置モードを終了する。UI側が `POST /api/v1/props/instances`(個別) または `POST /api/v1/props/scatters`(範囲) の送信に成功した後に送信され、Unity側の配置状態をリセットしてデータをリロードする（`edit_transit:finish` と同じ役割） |
+| `edit_prop:placement_settings`  | `graphic -> ui`  | プロップ配置(個別モード)において、3D側の操作（中ボタンドラッグ回転・PageUp/PageDown の高さ変更）で次に置くゴーストの設定が変わった（`{ rotation, height }`。回転は0〜360度）。配置パネルはステッパー表示を追従させるだけで `edit_prop:change_settings` へエコーしない（`edit_building:update_direct_angle` と同じ扱い） |
+| `remove_object:request_confirm` | `graphic -> ui`  | ブルドーザモードで、即削除せず確認を要する対象がクリックされた（`{ object_type, id, prop_type }`。`object_type` は現状 `"prop_scatter"`＝範囲配置プロップを散布範囲ごと撤去する不可逆操作のみ）。Rust は常駐する `cockpit` ウィンドウだけへ中継し、コックピットが確認ダイアログを出す。Unity は回答が届くまでその対象を削除せず、別の範囲配置クリックも受け付けない |
+| `remove_object:confirm_result`  | `ui -> graphic`  | 上記の確認ダイアログの回答（`{ object_type, id, accepted }`。accepted は 1/0）。承諾なら Unity が `DELETE /api/v1/props/scatters/{id}` を発行して差分リロードする。取消でも必ず返し、Unity 側の確認待ちを解除する |
 | `edit_connector:show`           | `ui -> graphic`  | 経済主体詳細パネル(AgentDetailPanel)の表示中、施設の接続端子ノード（インフラ接続点 `infra_node_id` / 走行網接続点 `depot_node_id`）を Unity 上に色付きマーカーで読み取り専用ハイライトする。`{ agent_id, infra_node_id, depot_node_id }` を含む。`infra_node_id == depot_node_id`（共用接続ノード）ならマーカーは1つ。0 のノードIDは表示しない |
 | `edit_connector:hide`           | `ui -> graphic`  | 接続端子ノードのハイライト表示をクリアする。パネルを閉じた／別エージェントへ遷移したときに送信する（`parcel:hide_front_path` と同じ役割） |
 | `game:time_update`              | `graphic -> ui`  | ゲーム内時間（エポック・日付）の更新通知                  |
@@ -154,7 +157,7 @@ Unityのグラフィックプログラムは、いくつかのステートを持
 
 設置済みの公共交通パス（`PATH_TRANSPORT`）は、`view:change_view` の `transit` レイヤーで路線種別ごとに表示ON/OFFできる（`sub_mode` に表示する `transit_path_id` のCSV文字列を渡す）。Unity は種別色の帯（オーバーレイ）として下地道路の上に描画する。
 
-`STATE_EDIT_PROP` は地形プロップ（森・岩・茂みなどの装飾）の配置モードで、プロップ配置パネル（`prop_placement`）で種別を選ぶと遷移する。`world:change_state` の params に `prop_type`・`placement_mode`（`"instance"` | `"scatter"`）・初期設定 `rotation`/`scale`（個別）・`density`/`seed`（範囲）を含める。配置には2モードある。**個別モード**は左クリックで1個ずつ配置（カーソル追従は半透明ゴースト、確定すると不透明の実モデル、右クリックで直近を取り消し）し、配置列を `edit_prop:update_instances` でUIへ送出する。**範囲モード**は左クリックで散布範囲のポリゴン頂点を置き（3頂点以上でseedベースの散布ゴーストを簡易プレビュー、右クリックで直近頂点を取り消し）、ポリゴンを `edit_prop:update_shape` でUIへ送出する。回転/スケール/密度/seed の変更は `edit_prop:change_settings` でプレビューに即反映する。確定送信（個別=`POST /api/v1/props/instances`、範囲=`POST /api/v1/props/scatters`）はUI側が直接行い、成功後に `edit_prop:finish` を送信してUnity側の配置状態をリセットする（散布の永続レンダラおよび既存プロップの削除UIは別途）。プロップはゼロコストの装飾のため未開放セルにも配置でき、`template_mode` ゲートはない。詳細な仕様は `genesis-docs/docs/geometries/M_地形プロップ.md` を参照。
+`STATE_EDIT_PROP` は地形プロップ（森・岩・茂みなどの装飾）の配置モードで、プロップ配置パネル（`prop_placement`）で種別を選ぶと遷移する。`world:change_state` の params に `prop_type`・`placement_mode`（`"instance"` | `"scatter"`）・初期設定 `rotation`/`scale`（個別）・`density`/`seed`（範囲）を含める。配置には2モードある。**個別モード**は左クリックで1個ずつ配置（カーソル追従は半透明ゴースト、確定すると不透明の実モデル、右クリックで直近を取り消し）し、配置列を `edit_prop:update_instances` でUIへ送出する。**範囲モード**は左クリックで散布範囲のポリゴン頂点を置き（3頂点以上でseedベースの散布ゴーストを簡易プレビュー、右クリックで直近頂点を取り消し）、ポリゴンを `edit_prop:update_shape` でUIへ送出する。回転/スケール/密度/seed の変更は `edit_prop:change_settings` でプレビューに即反映する。個別モードでは3D側でも中ボタンドラッグで回転、PageUp/PageDown で高さを変えられ、結果は `edit_prop:placement_settings` でパネルへ書き戻す。確定送信（個別=`POST /api/v1/props/instances`、範囲=`POST /api/v1/props/scatters`）はUI側が直接行い、成功後に `edit_prop:finish` を送信してUnity側の配置状態をリセットする。既存プロップの削除は配置パネルではなく `STATE_REMOVE_OBJECTS`（ブルドーザ）で行い、範囲配置は `remove_object:request_confirm` / `remove_object:confirm_result` の確認を挟む。プロップはゼロコストの装飾のため未開放セルにも配置でき、`template_mode` ゲートはない。詳細な仕様は `genesis-docs/docs/geometries/M_地形プロップ.md` を参照。
 
 `STATE_MERGE_PATH` / `STATE_SPLIT_PATH` は既存パスの結合・分割の「対象選択モード」で、パス詳細パネル（`path_detail`）の操作パネルにある結合／分割ボタンで遷移する。`world:change_state` の params に操作対象の `path_id`（結合では結合後に残る側＝survivor、分割では分割元）を含める。どちらも稼働中（`STATUS_ACTIVE`）のパスにのみ表示される。
 
@@ -368,6 +371,8 @@ invoke("start_load_game", { saveId })
 ## プロップ個別配置の高さ
 
 world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地面からの相対高さm）を受け取る。edit_prop:update_instancesの要素はx/y/z/rotation/scaleで、yにその配置時の相対高さを載せる。Tauriは各点のyをPOST /api/v1/props/instancesへ送り、GETでも同じyを受け取る。高さ指定は全種別共通、0は地表、負値は地中。描画では地形標高へ加算し、モデルの拡大率を掛けない。
+
+3D側のPageUp/PageDown（0.1m刻み、Shiftで1m）と中ボタンドラッグ回転で変わった値は、Unityがedit_prop:placement_settings（rotation/height）でパネルへ返す。UIはこれをchange_settingsへエコーせず、以後パネルのステッパーを操作したときだけchange_settingsを送る（UnityとUIの往復ループを作らない）。
 
 ## 2Dパス形状編集パネルの同期
 

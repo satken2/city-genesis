@@ -132,7 +132,7 @@
   },
   "prop_placement": {
     "height": "Hauteur au-dessus du sol (m)",
-    "hint": "Choisissez un type de décor et placez-le sur le terrain",
+    "hint": "Choisissez un type de décor et placez-le sur le terrain. Faites glisser avec le bouton du milieu pour pivoter, PageUp/PageDown pour changer la hauteur (Maj pour des pas de 1 m).",
     "modeLabel": "Mode de placement",
     "modeInstance": "Individuel",
     "modeScatter": "Par zone",

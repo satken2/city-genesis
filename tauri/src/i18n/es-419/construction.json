@@ -132,7 +132,7 @@
   },
   "prop_placement": {
     "height": "Altura sobre el suelo (m)",
-    "hint": "Elige el tipo de prop y colócalo en el terreno",
+    "hint": "Elige el tipo de prop y colócalo en el terreno. Arrastra con el botón central para rotar y usa PageUp/PageDown para cambiar la altura (Shift para pasos de 1 m).",
     "modeLabel": "Modo de colocación",
     "modeInstance": "Individual",
     "modeScatter": "Por área",

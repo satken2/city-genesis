@@ -86,10 +86,9 @@ public partial class BuildingPlanManager : MonoBehaviour
     private bool directPreviewVisible = false; // 直接配置のプレビューメッシュが現在表示されているか
     private Vector3 directCenter = Vector3.zero; // 現在の矩形中心(フェーズA:カーソル / フェーズB:確定点)
 
-    // 中ボタンドラッグ回転の状態
-    private bool isMiddleDragging = false;
-    private float dragLastMouseX = 0f;
-    private const float MiddleDragDegreesPerPixel = 0.5f; // ドラッグ感度(度/px)。調整可能。
+    // 中ボタンドラッグ回転(プロップ配置と共通の PlacementInput.cs)。ドラッグ中はUnityが角度の権威となる。
+    private readonly MiddleDragRotation middleDrag = new MiddleDragRotation();
+    private bool isMiddleDragging => middleDrag.IsDragging;
 
     // ホバーゴースト再生成のスロットル(前回描画した中心と角度)
     private Vector3 lastGhostCenter = new Vector3(float.MaxValue, 0f, float.MaxValue);
@@ -674,7 +673,7 @@ public partial class BuildingPlanManager : MonoBehaviour
         directCommitted = false;
         directPreviewVisible = false;
         directCenter = Vector3.zero;
-        isMiddleDragging = false;
+        middleDrag.Cancel();
         lastGhostCenter = new Vector3(float.MaxValue, 0f, float.MaxValue);
         lastGhostAngle = float.NaN;
     }
@@ -812,40 +811,25 @@ public partial class BuildingPlanManager : MonoBehaviour
         if (!isBuildingModeActive || isEditMode || !hasDirectParams || !directPreviewVisible)
         {
             // ドラッグ中にモードが外れた等の場合は状態を落とす。
-            isMiddleDragging = false;
+            middleDrag.Cancel();
             return;
         }
 
-        if (InputUtil.MiddleMouseWasPressedThisFrame)
+        switch (middleDrag.Update(out int deltaDegrees))
         {
-            placementRevision++;
-            isMiddleDragging = true;
-            dragLastMouseX = InputUtil.MousePosition.x;
-            return;
-        }
-
-        if (isMiddleDragging && InputUtil.MiddleMouseIsPressed)
-        {
-            float curX = InputUtil.MousePosition.x;
-            float deltaDeg = (curX - dragLastMouseX) * MiddleDragDegreesPerPixel;
-            // 1度単位に量子化して適用。端数は次フレームへ持ち越す。
-            int step = (int)deltaDeg;
-            if (step != 0)
-            {
-                directAngle += step;
-                dragLastMouseX += step / MiddleDragDegreesPerPixel;
+            case MiddleDragRotation.Result.Started:
+                placementRevision++;
+                break;
+            case MiddleDragRotation.Result.Rotated:
+                directAngle += deltaDegrees;
                 BuildDirectRectanglePreview();
-            }
-            return;
-        }
-
-        if (isMiddleDragging && InputUtil.MiddleMouseWasReleasedThisFrame)
-        {
-            isMiddleDragging = false;
-            if (IpcClient.Instance != null)
-            {
-                EmitPlacementState();
-            }
+                break;
+            case MiddleDragRotation.Result.Released:
+                if (IpcClient.Instance != null)
+                {
+                    EmitPlacementState();
+                }
+                break;
         }
     }
 

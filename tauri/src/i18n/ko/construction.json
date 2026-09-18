@@ -132,7 +132,7 @@
   },
   "prop_placement": {
     "height": "지면으로부터 높이(m)",
-    "hint": "프롭 종류를 골라 지형에 배치하세요",
+    "hint": "프롭 종류를 골라 지형에 배치하세요. 가운데 버튼 드래그로 회전, PageUp/PageDown으로 높이를 변경할 수 있습니다(Shift로 1m 단위).",
     "modeLabel": "배치 모드",
     "modeInstance": "개별",
     "modeScatter": "범위",

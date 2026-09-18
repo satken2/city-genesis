@@ -40,3 +40,4 @@ Tauri(Rust)側のプログラム。ウィンドウ管理とUnityとのMMF(Memory
 - 天然資源エリアも水面と同じ方式で、`save_terrain_editor_data` / `export_terrain_as_npy` の任意引数 `resources`(ResourceAreaPayloadの配列。id/resource_type/max_amount/recovery_rate/polygon)で受け取る。`save_terrain_editor_data` は作業コピーの `meta.json` に `resources` として保持し(`load_terrain_editor_data` が返す)、`export_terrain_as_npy` は `.npyと同名で拡張子だけ.resources.json`(`{"version":1,"resources":[...]}`)として同じ場所に書き出す(空でも書き出して古い資源が残らないようにする)。genesis-core側は `terrain_registry.load_map_resources` がこの命名規則で読み込み、新規都市の初期化時(init_game)に資源エンティティとして配置する。仕様の正は `genesis-docs/docs/geometries/D_地形形状.md §D.12`。
 
 - `ipc.rs`は建物の`edit_building:placement_state`をパネルへ中継する。配置方法・中心・寸法・角度・世代を同じpayloadで返すため、個別イベントに分解しない。
+- `ipc.rs`はプロップの`edit_prop:placement_settings`を全ウィンドウへ、ブルドーザの`remove_object:request_confirm`は`emit_to(LABEL_COCKPIT)`でコックピットだけへ中継する(確認ダイアログを出すのは常駐1枚のコックピットに限るため。`weather:state`と同じ宛先指定)。回答の`remove_object:confirm_result`はUI→Unityの汎用転送で足りる。

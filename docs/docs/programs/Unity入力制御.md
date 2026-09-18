@@ -20,7 +20,7 @@ Rayが命中したオブジェクトはTagまたはコンポーネントの有�
 | `NODE` | 4 | Tag `PathNode` |
 | `TERRAIN` | 5 | `Terrain` コンポーネントの有無 |
 | `ZONE` | 6 | Tag `ZoneObject` |
-| `PROP` | 7 | 地形プロップ（配置は地形クリックで行うため専用タグ判定はまだ持たない） |
+| `PROP` | 7 | 地形プロップ（個体ごとのColliderを持たないためレイキャストでは判定しない。配置は地形クリック、ブルドーザの削除は `RemovalManager` が画面レイで `PropManager.TryPick` のAABB判定を行い、この値は削除済み集合のキーにだけ使う） |
 
 `MODE_NONE` に設定されたオブジェクトタイプはRayを貫通し、背後にあるオブジェクトが選択対象となる。
 
@@ -94,6 +94,7 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 ### 3.3. ドラッグを持たないモード
 
 ブルドーザ（`MODE_REMOVE`）、パス結合・分割の対象選択（`MODE_PATH_MERGE` / `MODE_PATH_SPLIT`）、地区編集（`MODE_ZONE_EDIT`）はクリックのみで操作する。
+ブルドーザ中のクリックは、レイキャストのヒット物へ配送する前に地形プロップを判定する（`InputHandler.TryRemovePropAtScreenPoint` → `RemovalManager.TryRemovePropAt`。プロップはColliderを持たないため `PropManager.TryPick` のAABB判定で、ヒット物より手前にある最も近い1本を選ぶ）。プロップを拾えた場合は背後の建物・区画へは配送しない。ホバーも同様に `RemovalManager.UpdatePropHover` で赤い枠を出す。
 これらのモードでは `StartDrag` / `StartTerrainDrag` の冒頭で即座に return し、ドラッグ状態に入らない
 （入らないと既定の経路で道路エディタのドラッグ処理へフォールバックしてしまう）。
 地区編集の左ドラッグは通常どおりカメラの移動になる。
@@ -137,7 +138,8 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 | `MODE_PARCEL_SHAPE_EDIT` | `ParcelShapeEditManager.OnTerrainLeftClick` に委譲 | 同右 | 頂点ホバー判定 |
 | `MODE_EDIT_RESOURCE` | `ResourceAreaEditManager.OnTerrainLeftClick` に委譲 | 同右 | 同 `OnTerrainHover` に委譲 |
 | `MODE_EDIT_TRANSIT` | `TransitPlanManager.OnTerrainLeftClick` に委譲 | 同右 | 同 `OnTerrainHover` に委譲 |
-| `MODE_EDIT_PROP` | `PropPlacementManager.OnTerrainLeftClick` に委譲（個別=1個配置／範囲=頂点追加） | 同右（個別=直近取消／範囲=直近頂点取消） | 同 `OnTerrainHover` に委譲（個別=ゴースト追従） |
+| `MODE_EDIT_PROP` | `PropPlacementManager.OnTerrainLeftClick` に委譲（個別=1個配置／範囲=頂点追加） | 同右（個別=直近取消／範囲=直近頂点取消） | 同 `OnTerrainHover` に委譲（個別=ゴースト追従。中ボタン回転中は位置を固定） |
+| `MODE_REMOVE` | 何もしない（地形に埋もれた空き区画は `InputHandler` の地形→区画置換で区画へ配送される。地形プロップは配送前に `InputHandler` が判定する） | — | — |
 
 ### 4.2. PathInputHandler（道路）
 
@@ -463,6 +465,12 @@ Y軸ドラッグは、ポイントを通りカメラ正面を向いた鉛直平�
 ## プロップの自由配置
 
 MODE_EDIT_PROPはクリック・ホバーともTerrainInputHandlerの共通吸着を通さず、地形の任意XZをPropPlacementManagerへ渡す。他オブジェクトの入力を貫通し、個別配置ではパネルで指定した地面相対高さを加算する。既存の建物・道路・プロップとの干渉判定や高さによる種別制限は行わない。
+
+個別配置の3D側操作は`PropPlacementManager.Update`が受ける。中ボタンドラッグで回転(ドラッグ中はゴースト位置を固定し、左クリックの打点を無視)、PageUp/PageDownで高さ(0.1m刻み、Shiftで1m、長押しリピート)。中ボタン回転・キー長押しリピート・入力ブロック判定(ウィンドウ非フォーカス・ラジアルメニュー・カメラのフライモード/ドラッグ・UI上のポインタ)は`Editors/PlacementInput.cs`の`MiddleDragRotation`/`KeyRepeat`/`PlacementInput.IsBlocked`で、建物の直接配置(`BuildingPlanManager`)と共有する。変更後の値は`edit_prop:placement_settings`でパネルへ返す。
+
+## プロップの削除(ブルドーザ)
+
+`MODE_REMOVE`中、`InputHandler`はクリック候補の発火前に`RemovalManager.TryRemovePropAt`(画面レイ+ヒット物までの距離)を呼ぶ。個別配置は即DELETE、範囲配置はUIへ確認を求めて回答待ちにする(`remove_object:request_confirm`/`confirm_result`)。ホバーはレイが変わったフレームで`UpdatePropHover`を呼び、`RemovalManager`が`OverlayMeshRenderer`で対象のAABBと(範囲配置なら)散布範囲の外周を赤く描く。
 
 ## 道路・線路の曲率と勾配の警告
 

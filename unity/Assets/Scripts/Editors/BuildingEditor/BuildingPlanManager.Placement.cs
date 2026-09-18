@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.EventSystems;
 
 public enum BuildingPlacementMode { Parcel, Free, Roadside }
 
@@ -35,8 +34,8 @@ public partial class BuildingPlanManager
     private int roadAnchorId = -1;
     private int roadAnchorSegment = -1;
     private Vector3 roadFront, roadOutward, roadGuideA, roadGuideB;
-    private readonly float[] sizeRepeatTimes = new float[4];
-    private static readonly Key[] SizeKeys = { Key.Digit1, Key.Digit2, Key.Digit3, Key.Digit4 };
+    // 1/2=間口の増減、3/4=奥行きの増減。長押しリピートは PlacementInput.cs の共通実装。
+    private readonly KeyRepeat[] sizeKeys = { new KeyRepeat(Key.Digit1), new KeyRepeat(Key.Digit2), new KeyRepeat(Key.Digit3), new KeyRepeat(Key.Digit4) };
     private float maxRoadHalfWidth = 100f;
     private readonly HashSet<long> visitedPlacementSegments = new HashSet<long>();
     private readonly List<RoadCandidate> roadCandidates = new List<RoadCandidate>();
@@ -81,7 +80,7 @@ public partial class BuildingPlanManager
         bool keepPosition = directCommitted && mode != BuildingPlacementMode.Parcel;
         PlacementMode = mode;
         ResetRoadAnchor();
-        isMiddleDragging = false;
+        middleDrag.Cancel();
         if (!keepPosition) ResetPlacementSelection(false);
         ApplyPlacementInputMode();
         RefreshPlacementPreview();
@@ -92,7 +91,7 @@ public partial class BuildingPlanManager
     {
         directCommitted = false;
         selectedParcelId = -1;
-        isMiddleDragging = false;
+        middleDrag.Cancel();
         ResetRoadAnchor();
         HideDirectGhost();
         ClearPreview();
@@ -167,12 +166,9 @@ public partial class BuildingPlanManager
     private bool UpdatePlacementInput()
     {
         ActiveSizeAxis = 0;
-        bool blocked = !Application.isFocused || !PlacementActive || RadialMenuController.IsOpen ||
-            (CameraController.Instance != null && (CameraController.Instance.IsFlyMode || CameraController.Instance.IsMouseDragging)) ||
-            (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject());
-        if (blocked)
+        if (!PlacementActive || PlacementInput.IsBlocked())
         {
-            if (isMiddleDragging) { isMiddleDragging = false; EmitPlacementState(); }
+            if (isMiddleDragging) { middleDrag.Cancel(); EmitPlacementState(); }
             return false;
         }
         if (InputUtil.KeyWasPressedThisFrame(Key.Escape)) ResetPlacementSelection();
@@ -180,14 +176,12 @@ public partial class BuildingPlanManager
         if (SizeEditable && !isMiddleDragging)
         {
             bool changed = false;
-            float step = InputUtil.KeyPressed(Key.LeftShift) || InputUtil.KeyPressed(Key.RightShift) ? 5 : 1;
-            for (int i = 0; i < SizeKeys.Length; i++)
+            float step = PlacementInput.ShiftHeld ? 5 : 1;
+            for (int i = 0; i < sizeKeys.Length; i++)
             {
-                if (!InputUtil.KeyPressed(SizeKeys[i])) continue;
+                if (!sizeKeys[i].Held) continue;
                 ActiveSizeAxis = i < 2 ? 1 : 2;
-                bool pressed = InputUtil.KeyWasPressedThisFrame(SizeKeys[i]);
-                if (!pressed && Time.unscaledTime < sizeRepeatTimes[i]) continue;
-                sizeRepeatTimes[i] = Time.unscaledTime + (pressed ? 0.35f : 0.075f);
+                if (!sizeKeys[i].Fired()) continue;
                 float delta = (i % 2 == 0 ? 1 : -1) * step;
                 if (i < 2) directWidth = Mathf.Clamp(directWidth + delta, 1f, 500f);
                 else directDepth = Mathf.Clamp(directDepth + delta, 1f, 500f);

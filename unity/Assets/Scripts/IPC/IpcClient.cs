@@ -94,6 +94,8 @@ public class IpcClient : MonoBehaviour
     public event Action<Dictionary<string, object>> OnEditPropChangeSettings;
     public event Action OnEditPropFinish;
     public event Action OnEditPropReset;
+    // ブルドーザの確認付き削除(範囲配置プロップ)に対するUIの回答: (object_type, id, accepted)
+    public event Action<string, int, bool> OnRemoveObjectConfirmResult;
     public event Action OnGameStart;
     public event Action OnGameEnd;
     public event Action<float> OnAmbienceVolume;
@@ -425,6 +427,17 @@ public class IpcClient : MonoBehaviour
                     {
                         Debug.Log("IpcClient: edit_prop:reset received");
                         OnEditPropReset?.Invoke();
+                    }
+                    break;
+
+                case "remove_object:confirm_result":
+                    {
+                        // ブルドーザの確認ダイアログの回答。accepted=1 で削除を実行する。
+                        string objectType = GetParamString(payload, "object_type");
+                        int id = GetParamInt(payload, "id");
+                        bool accepted = GetParamInt(payload, "accepted") != 0;
+                        Debug.Log($"IpcClient: remove_object:confirm_result -> {objectType}/{id} accepted={accepted}");
+                        OnRemoveObjectConfirmResult?.Invoke(objectType, id, accepted);
                     }
                     break;
 
@@ -1166,6 +1179,41 @@ public class IpcClient : MonoBehaviour
         };
 
         SendEnvelope("edit_prop:update_shape", payload);
+    }
+
+    /// <summary>
+    /// edit_prop:placement_settings イベントを送信する。
+    /// プロップ配置(個別モード)で3D側の操作(中ボタン回転・PageUp/PageDown の高さ変更)により
+    /// 次に置くゴーストの回転角・高さが変わったことをUIへ通知し、パネルのステッパー表示を追従させる
+    /// (建物直接配置の edit_building:update_direct_angle と同じ役割。UIはこれをエコーしない)。
+    /// </summary>
+    public void EmitEditPropPlacementSettings(float rotation, float height)
+    {
+        var payload = new Dictionary<string, object>
+        {
+            ["rotation"] = rotation,
+            ["height"] = height
+        };
+
+        SendEnvelope("edit_prop:placement_settings", payload);
+    }
+
+    /// <summary>
+    /// remove_object:request_confirm イベントを送信する。
+    /// ブルドーザモードで「取り消せない・影響範囲が広い」対象(範囲配置プロップ=森などを範囲ごと撤去)を
+    /// クリックしたとき、Unityは即削除せずUIへ確認を求める。常駐のコックピットが確認ダイアログを出し、
+    /// 結果を remove_object:confirm_result で返す。object_type は "prop_scatter"。
+    /// </summary>
+    public void EmitRemoveObjectRequestConfirm(string objectType, int id, int propType)
+    {
+        var payload = new Dictionary<string, object>
+        {
+            ["object_type"] = objectType,
+            ["id"] = id,
+            ["prop_type"] = propType
+        };
+
+        SendEnvelope("remove_object:request_confirm", payload);
     }
 
     /// <summary>

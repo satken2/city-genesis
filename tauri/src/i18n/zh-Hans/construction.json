@@ -132,7 +132,7 @@
   },
   "prop_placement": {
     "height": "距地面高度（米）",
-    "hint": "请选择装饰物类型并放置到地形上",
+    "hint": "请选择装饰物类型并放置到地形上。按住鼠标中键拖动可旋转，PageUp/PageDown 可调整高度（按住 Shift 以 1 m 为步长）。",
     "modeLabel": "放置模式",
     "modeInstance": "单个",
     "modeScatter": "范围",

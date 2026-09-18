@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// PropPlacementManager:
@@ -8,7 +9,10 @@ using UnityEngine;
 ///
 ///   個別モード(instance): 左クリックで1個ずつ配置する(PropInstance)。カーソル追従のゴーストは
 ///     半透明、左クリックで確定すると不透明の実モデルになる。右クリックで直近の配置を取り消す。
-///     回転角・スケールは UI から設定され、edit_prop:change_settings で逐次反映される。
+///     回転角・スケール・高さは UI から設定され、edit_prop:change_settings で逐次反映される。
+///     3D側でも建物の直接配置と同じく中ボタンドラッグで回転、PageUp/PageDown で高さを変えられ、
+///     その結果は edit_prop:placement_settings でパネルのステッパーへ書き戻す(次に置くゴーストの設定を
+///     変えるだけで、打点済みの仮配置は動かさない)。
 ///
 ///   範囲モード(scatter): 左クリックで散布範囲のポリゴン頂点を置く(PropScatter)。頂点が3つ以上に
 ///     なると seed ベースの散布点を生成し、prefab を半透明ゴーストで簡易プレビューする。密度・seed の
@@ -33,6 +37,10 @@ public class PropPlacementManager : MonoBehaviour
     private static readonly Color VertexColor = new Color(1f, 1f, 1f, 1f);
     private static readonly Color PreviewColor = new Color(0.4f, 0.9f, 0.5f, 0.5f);
 
+    // PageUp/PageDown 1回あたりの高さ変化(m)。パネルのステッパー刻みと同じ。Shift併用で1m。
+    private const float HeightKeyStep = 0.1f;
+    private const float HeightKeyShiftStep = 1.0f;
+
     private Mode mode = Mode.Instance;
     private bool shapeFinalized = false;
     private int propType = 0;
@@ -43,6 +51,11 @@ public class PropPlacementManager : MonoBehaviour
     private int seed = 0;
 
     private bool active = false;
+
+    // 個別モードの3D側操作(建物の直接配置と共通の PlacementInput.cs)。
+    private readonly MiddleDragRotation middleDrag = new MiddleDragRotation();
+    private readonly KeyRepeat heightUpKey = new KeyRepeat(Key.PageUp);
+    private readonly KeyRepeat heightDownKey = new KeyRepeat(Key.PageDown);
 
     // 配置した prop の親。まとめて破棄できるよう1つの GameObject 配下に置く。
     private Transform container;
@@ -87,6 +100,43 @@ public class PropPlacementManager : MonoBehaviour
         if (sourceMaterial != null) previewMaterial = CreatePreviewMaterial(sourceMaterial);
         EnsureContainer();
         EnsureOverlayRenderer();
+    }
+
+    /// <summary>
+    /// 個別モードの3D側操作。中ボタンドラッグで回転(ドラッグ中はゴーストを即時回転し、リリース時に
+    /// 確定角度をUIへ通知)、PageUp/PageDown で地面からの高さを増減する(変更のたびにUIへ通知)。
+    /// どちらも「次に置くゴースト」の設定を変えるだけで、打点済みの仮配置は動かさない。
+    /// </summary>
+    private void Update()
+    {
+        if (!active || mode != Mode.Instance || PlacementInput.IsBlocked())
+        {
+            // ドラッグ中にモードが外れた・カメラ操作が始まった等の場合は状態を落とし、途中までの角度をUIへ返す。
+            if (middleDrag.IsDragging) { middleDrag.Cancel(); EmitPlacementSettings(); }
+            return;
+        }
+
+        switch (middleDrag.Update(out int deltaDegrees))
+        {
+            case MiddleDragRotation.Result.Rotated:
+                rotation = Mathf.Repeat(rotation + deltaDegrees, 360f);
+                RefreshHoverGhost();
+                break;
+            case MiddleDragRotation.Result.Released:
+                EmitPlacementSettings();
+                break;
+        }
+        if (middleDrag.IsDragging) return;
+
+        float step = PlacementInput.ShiftHeld ? HeightKeyShiftStep : HeightKeyStep;
+        float heightDelta = 0f;
+        if (heightUpKey.Fired()) heightDelta += step;
+        if (heightDownKey.Fired()) heightDelta -= step;
+        if (heightDelta == 0f) return;
+        // 0.1m刻みの累積で浮動小数の端数が溜まらないよう cm 単位へ丸める。
+        height = Mathf.Round((height + heightDelta) * 100f) / 100f;
+        RefreshHoverGhost();
+        EmitPlacementSettings();
     }
 
     private void LateUpdate()
@@ -202,16 +252,27 @@ public class PropPlacementManager : MonoBehaviour
 
         if (mode == Mode.Instance)
         {
-            // ホバーゴーストに新しい回転/スケールを即反映する。
-            if (hoverGhost != null && hoverValid)
-            {
-                ApplyTransform(hoverGhost, hoverPos, rotation, scale);
-            }
+            RefreshHoverGhost();
         }
         else if (scatterDirty)
         {
             RegenerateScatterPreview();
         }
+    }
+
+    /// <summary>ホバーゴーストに現在の回転/スケール/高さを即反映する(ゴースト未生成なら何もしない)。</summary>
+    private void RefreshHoverGhost()
+    {
+        if (hoverGhost != null && hoverValid)
+        {
+            ApplyTransform(hoverGhost, hoverPos, rotation, scale);
+        }
+    }
+
+    /// <summary>3D側の操作で変わった回転角・高さをパネルへ書き戻す(パネルはこれをUnityへエコーしない)。</summary>
+    private void EmitPlacementSettings()
+    {
+        IpcClient.Instance?.EmitEditPropPlacementSettings(rotation, height);
     }
 
     // =====================================================================
@@ -224,6 +285,9 @@ public class PropPlacementManager : MonoBehaviour
 
         if (mode == Mode.Instance)
         {
+            // 中ボタン回転中の左クリックは配置しない(回転操作の途中で誤って打点しないため)。
+            if (middleDrag.IsDragging) return;
+
             // その場に不透明の実モデルを確定配置する。
             GameObject go = InstantiateProp(worldPos, rotation, scale, ghost: false);
             if (go != null)
@@ -284,6 +348,9 @@ public class PropPlacementManager : MonoBehaviour
 
         if (mode == Mode.Instance)
         {
+            // 中ボタン回転中はゴーストの位置を固定する(回転操作でカーソルが横に動いても滑らないようアンカーする)。
+            if (middleDrag.IsDragging && hoverGhost != null) return;
+
             hoverValid = true;
             hoverPos = worldPos;
             if (hoverGhost == null)
@@ -421,6 +488,8 @@ public class PropPlacementManager : MonoBehaviour
 
     private void ClearAll()
     {
+        middleDrag.Cancel();
+
         // 個別モードの確定済み・ホバーゴースト。
         foreach (var go in placedObjects) if (go != null) Destroy(go);
         placedObjects.Clear();

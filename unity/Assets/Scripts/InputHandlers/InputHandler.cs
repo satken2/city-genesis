@@ -405,6 +405,14 @@ public class InputHandler : MonoBehaviour
             }
         }
 
+        // ブルドーザ中は、コライダーを持たない地形プロップのホバー枠を RemovalManager に更新させる
+        // (ヒット物より手前のプロップだけが対象。何もヒットしなければレイの最大距離まで探す)。
+        if (GetModeForObjectType(InputObjectType.TERRAIN) == InputMode.MODE_REMOVE && RemovalManager.Instance != null)
+        {
+            RemovalManager.Instance.UpdatePropHover(ray,
+                validHitObject != null ? Vector3.Distance(ray.origin, validHitPoint) : rayDistance);
+        }
+
         if (validHitObject != null)
         {
             HandleObjectHit(validHitObject, validHitPoint, validHitObjectType);
@@ -487,15 +495,24 @@ public class InputHandler : MonoBehaviour
         // マウスアップ処理
         if (InputUtil.LeftMouseWasReleasedThisFrame)
         {
-            // クリック候補が残っていたらマウスアップ時にクリックとして発火する
+            // クリック候補が残っていたらマウスアップ時にクリックとして発火する。
+            // ブルドーザ中はコライダーを持たない地形プロップを先に判定し、ヒット物より手前にあれば
+            // プロップの削除だけを行う(背後の建物・区画へは配送しない)。
             if (hasPendingClick)
             {
-                HandleObjectClick(pendingClickObject, pendingClickPoint, pendingClickObjectType);
+                float hitDistance = Vector3.Distance(ray.origin, pendingClickPoint);
+                if (!TryRemovePropAtScreenPoint(pendingClickScreenPos, hitDistance))
+                {
+                    HandleObjectClick(pendingClickObject, pendingClickPoint, pendingClickObjectType);
+                }
                 hasPendingClick = false;
             }
             if (hasPendingTerrainClick)
             {
-                HandleTerrainClick();
+                if (!TryRemovePropAtScreenPoint(pendingTerrainClickScreenPos, rayDistance))
+                {
+                    HandleTerrainClick();
+                }
                 hasPendingTerrainClick = false;
             }
 
@@ -614,6 +631,18 @@ public class InputHandler : MonoBehaviour
 
         // クリックイベントコールバック
         clickEventCallback?.Invoke(objectType, hitPoint);
+    }
+
+    /// <summary>
+    /// ブルドーザ中に限り、押下時の画面位置のレイで地形プロップの削除を試みる。
+    /// maxDistance はそのレイでヒットした建物・区画・地形までの距離(手前判定)。
+    /// プロップを処理した(削除発行・確認要求・処理済み)場合は true を返し、通常のクリック配送を抑止する。
+    /// </summary>
+    private bool TryRemovePropAtScreenPoint(Vector2 screenPos, float maxDistance)
+    {
+        if (GetModeForObjectType(InputObjectType.TERRAIN) != InputMode.MODE_REMOVE) return false;
+        if (RemovalManager.Instance == null || Camera.main == null) return false;
+        return RemovalManager.Instance.TryRemovePropAt(Camera.main.ScreenPointToRay(screenPos), maxDistance);
     }
 
     private void HandleTerrainClick()

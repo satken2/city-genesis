@@ -132,7 +132,7 @@
   },
   "prop_placement": {
     "height": "Height above ground (m)",
-    "hint": "Select a prop type and place it on the terrain",
+    "hint": "Select a prop type and place it on the terrain. Drag with the middle mouse button to rotate, PageUp/PageDown to change the height (Shift for 1 m steps).",
     "modeLabel": "Placement Mode",
     "modeInstance": "Individual",
     "modeScatter": "Scatter",

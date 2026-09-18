@@ -132,7 +132,7 @@
   },
   "prop_placement": {
     "height": "地面からの高さ(m)",
-    "hint": "プロップの種別を選んで地形に配置してください",
+    "hint": "プロップの種別を選んで地形に配置してください。中ボタンドラッグで回転、PageUp/PageDownで高さを変更（Shiftで1m刻み）できます。",
     "modeLabel": "配置モード",
     "modeInstance": "個別",
     "modeScatter": "範囲",
