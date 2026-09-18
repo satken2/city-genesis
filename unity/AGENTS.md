@@ -39,6 +39,10 @@
 各主要ディレクトリに、役割・既存ユーティリティ・注意点を書いた`AGENTS.md`がある(`CLAUDE.md`は`AGENTS.md`へのシンボリックリンク)。**作業対象ディレクトリのAGENTS.mdを必ず先に読むこと。**
 開発によってAGENTS.mdの記載内容に影響が出た場合や、記載と実装の矛盾を発見した場合は、必ず該当するAGENTS.mdを更新すること。
 
+# 水面の検証
+
+水面(`Assets/Shaders/Water.hlsl`)のフォグはピクセルのワールド位置から計算する。巨大な海面の頂点フォグを補間すると、カメラ回転で近景全体が白くなる。検証は `Tests/WaterFog/run-unity.ps1`（独立環境 `Library/WaterFogQA`）。光沢・反射の明るさを制限してフォグの不具合を隠さないこと。
+
 # 交差点の検証
 
 交差点の回帰検証は `Tests/Intersections` にある。`run.ps1` は実アセンブリの幾何計算、`run-unity.ps1` は独立した検証用Unityで実FBXの接合端を検査する。生成物は `Temp/IntersectionUnityQA` に置き、本編シーン・マスター・モデルを書き換えない。詳細は同ディレクトリのREADMEを参照する。

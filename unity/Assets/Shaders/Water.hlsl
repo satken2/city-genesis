@@ -129,7 +129,6 @@ struct Varyings
     float4 positionCS : SV_POSITION;
     float3 positionWS : TEXCOORD0;
     float4 screenPos  : TEXCOORD1; // positionNDC(ComputeScreenPos 済み)
-    float  fogFactor  : TEXCOORD2;
     float2 flowDir    : TEXCOORD3; // 流下方向(_FlowEnabled=0 なら零ベクトル)
     UNITY_VERTEX_INPUT_INSTANCE_ID
 };
@@ -144,7 +143,6 @@ Varyings WaterVertex(Attributes IN)
     OUT.positionCS = vpi.positionCS;
     OUT.positionWS = vpi.positionWS;
     OUT.screenPos  = vpi.positionNDC;
-    OUT.fogFactor  = ComputeFogFactor(vpi.positionCS.z);
     OUT.flowDir    = IN.uv1 * _FlowEnabled;
     return OUT;
 }
@@ -207,13 +205,16 @@ half4 WaterFragment(Varyings IN) : SV_Target
     inputData.normalWS                = normalWS;
     inputData.viewDirectionWS         = viewDirWS;
     inputData.shadowCoord             = TransformWorldToShadowCoord(positionWS);
-    inputData.fogCoord                = IN.fogFactor;
+    // 大きな海面では頂点ごとの霧を補間すると、遠い頂点の霧が近景にも広がる。
+    // ピクセルのワールド位置から求め、カメラの向きやメッシュ分割に依存させない。
+    inputData.fogCoord                = InitializeInputDataFog(float4(positionWS, 1.0), 0.0);
     inputData.bakedGI                 = SampleSH(normalWS);
     inputData.normalizedScreenSpaceUV = screenUV;
     inputData.shadowMask              = half4(1, 1, 1, 1);
 
     half4 color = UniversalFragmentPBR(inputData, surfaceData);
-    color.rgb = MixFog(color.rgb, IN.fogFactor);
+
+    color.rgb = MixFog(color.rgb, inputData.fogCoord);
 
     // --- 不透明度: 水際だけソフトにフェードさせて地形との境界をなじませる。
     //     体色には既に屈折(背景)を合成済みなので、それ以外は不透明にする。
