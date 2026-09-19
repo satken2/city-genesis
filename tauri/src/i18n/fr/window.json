@@ -130,6 +130,8 @@
     "layerTransit": "Transports publics",
     "layerProp": "Décors",
     "modeTransitDefault": "Afficher les transports",
+    "transitHighlightDescription": "Affiche les lignes et les noms des arrêts devant les bâtiments et le terrain, y compris les lignes souterraines. Cliquez sur une ligne ou un véhicule pour ouvrir ses détails.",
+    "transitHighlight": "Surbrillance des transports publics",
     "transitNoTypes": "Aucun type de ligne de transport disponible.",
     "modeTerrainDefault": "Affichage normal",
     "modeTerrainTransparent": "Affichage transparent",

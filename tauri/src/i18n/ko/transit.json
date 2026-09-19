@@ -74,6 +74,12 @@
     "loopLine": "순환 운행 ({{name}}(으)로 돌아감)",
     "openStation": "역 상세 열기",
     "vehicleShortage": "차량이 부족합니다. 목표 배차 간격을 유지할 수 없습니다.",
-    "carsPerTrainShort": "1편성 {{n}}량"
+    "carsPerTrainShort": "1편성 {{n}}량",
+    "fleet": "차량",
+    "fleetTotalCars": "총 {{count}}량",
+    "fleetFormation": "{{cars}}량 편성 × {{trains}}편성",
+    "fleetNone": "운행 중인 차량이 없습니다.",
+    "fleetMoreTrains": "그 외 {{count}}편성",
+    "fleetShortage": "차량 부족으로 {{count}}편성을 구성하지 못했습니다."
   }
 }

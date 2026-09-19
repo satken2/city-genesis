@@ -66,3 +66,5 @@
 `InputHandlers/` の入力モード(クリック時の挙動)と、ここのビジュアルモード(見た目)は**別物**。編集モードに入るときは通常、両方をセットで切り替える(入力は `InputSystemManager.SetModePreset`、見た目は `IpcStateCoordinator` が `VisualModeHandler.SetMode`/`SetFlags` をオブジェクトタイプごとに呼ぶ)。
 
 非同期で子Rendererを追加・キャッシュ復元する場合は `RefreshMaterials()` を使う。既存Rendererの元材質を保持し、新しいRendererだけ材質を取得したうえで現在の表示を即時適用する。上塗り後の `InitializeMaterials()` は計画色などを元材質として記録してしまうため使わない。既存Rendererそのものの基底材質を置換する場合のみ、元材質へ置換した後にInitializeMaterialsを使う。既定表示用マテリアルはAwakeでロードするためStart前のSetStatusにも適用できる。
+
+公共交通ハイライトはTransitOverlayManagerが独立レイヤーとして管理する。VisualModeの排他色モードやInputModeの編集プリセットは追加しない。詳細はDataLoaders/AGENTS.mdと公開programs/公共交通ハイライト.md。

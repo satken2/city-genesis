@@ -74,6 +74,12 @@
     "loopLine": "环线运行（返回 {{name}}）",
     "openStation": "打开车站详情",
     "vehicleShortage": "车辆不足，无法维持目标发车间隔。",
-    "carsPerTrainShort": "每列 {{n}} 节"
+    "carsPerTrainShort": "每列 {{n}} 节",
+    "fleet": "车辆",
+    "fleetTotalCars": "共 {{count}} 节",
+    "fleetFormation": "{{cars}} 节编组 × {{trains}} 列",
+    "fleetNone": "没有运行中的车辆。",
+    "fleetMoreTrains": "另有 {{count}} 列",
+    "fleetShortage": "因车辆不足，有 {{count}} 列无法编组。"
   }
 }

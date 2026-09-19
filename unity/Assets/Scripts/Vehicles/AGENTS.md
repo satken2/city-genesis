@@ -45,3 +45,7 @@
 - モデルは `Assets/Models/Props/pedestrian_{0..5}.fbx`(固定名。prop_master未登録。1体332三角形・400未満)。著作は genesis-gallery の `pipeline/jobs/build_pedestrians.py`。
 - 駅の入口・ホーム上の待機・連絡橋の歩行は未実装(W doc §W.10)。
 - 検証は `Tests/Vehicles/run.ps1` に同居(`PedestrianBands` / `PedestrianModels` / `PedestrianNetwork`)。`-PedestrianModelsOnly`でモデルだけ検査でき、取り込み後の面の閉鎖・巻き順・法線・各部位の外向きも確認する。
+
+## 公共交通の経路共有と選択
+
+`TransitRouteGeometry` は方向付きRunの構築・地形追従点列・生成済みレール接続・車線オフセット・距離補間を車両とハイライトで共有する。形状キャッシュは呼出側ごとに持ち、未ロードのパス・未生成接続を直線補完しない。`TransitVehicleManager.TryPick` は描画中の車体Rendererの境界とレイを交差させ、手前の地形・建物に遮られた車両を除外する。プールから取り出すたびに路線IDを更新し、非表示の車体は選択対象外。ハイライトのON/OFFに依存しない。

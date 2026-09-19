@@ -74,6 +74,12 @@
     "loopLine": "Service circulaire (retour à {{name}})",
     "openStation": "Ouvrir les détails de la gare",
     "vehicleShortage": "Véhicules insuffisants. L’intervalle cible ne peut pas être maintenu.",
-    "carsPerTrainShort": "{{n}} voitures par rame"
+    "carsPerTrainShort": "{{n}} voitures par rame",
+    "fleet": "Matériel roulant",
+    "fleetTotalCars": "{{count}} voitures au total",
+    "fleetFormation": "Rames de {{cars}} voitures × {{trains}}",
+    "fleetNone": "Aucun véhicule en service.",
+    "fleetMoreTrains": "et {{count}} rame(s) de plus",
+    "fleetShortage": "{{count}} rame(s) n’ont pas pu être formées faute de véhicules."
   }
 }

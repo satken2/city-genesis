@@ -224,7 +224,7 @@ export const DISPLAY_LAYERS: DisplayLayer[] = [
     // DisplayOptionsPanel の TransitSection が subMode(有効な transit_path_id の CSV)として管理する。
     id: "transit",
     titleKey: "display.layerTransit",
-    defaultMode: "default",
+    defaultMode: "hidden",
     modes: [
       { id: "default", tooltipKey: "display.modeTransitDefault", icon: "transport/t_bus.png" },
     ],

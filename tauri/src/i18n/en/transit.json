@@ -74,6 +74,12 @@
     "loopLine": "Loop service (returns to {{name}})",
     "openStation": "Open station details",
     "vehicleShortage": "Not enough vehicles. The target headway cannot be maintained.",
-    "carsPerTrainShort": "{{n}} cars per train"
+    "carsPerTrainShort": "{{n}} cars per train",
+    "fleet": "Fleet",
+    "fleetTotalCars": "{{count}} cars in total",
+    "fleetFormation": "{{cars}}-car trains × {{trains}}",
+    "fleetNone": "No vehicles are in service.",
+    "fleetMoreTrains": "and {{count}} more train(s)",
+    "fleetShortage": "{{count}} train(s) could not be formed due to a vehicle shortage."
   }
 }

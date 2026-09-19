@@ -19,7 +19,7 @@ public class IpcViewCoordinator : MonoBehaviour
         { "district", "hidden" },
         { "resource", "hidden" },
         { "alert", "visible" },
-        { "transit", "default" },
+        { "transit", "hidden" },
         { "prop", "visible" }
     };
 
@@ -731,7 +731,7 @@ public class IpcViewCoordinator : MonoBehaviour
         if (TransitOverlayManager.Instance == null) return;
 
         var variants = new HashSet<int>();
-        if (!string.IsNullOrEmpty(subMode))
+        if (mode != "hidden" && !string.IsNullOrEmpty(subMode))
         {
             foreach (var part in subMode.Split(','))
             {

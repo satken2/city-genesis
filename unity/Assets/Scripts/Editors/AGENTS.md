@@ -115,3 +115,5 @@ Tauriの2Dパス形状編集パネル(`path_shape_editor`)は形状を持たず�
 ## 線形警告の共有
 
 建設パネルが取得した全線 `/paths/validate` の `alignments` を `shape_command` の `apply_alignment` で受け、`revision` が一致する場合だけ採用する。警告線・区間ラベル・要約値は検証応答の `preview` と指標を使い、Unityでは再計算しない。複線の全線を表示し、要約は最悪値。形状・設定変更で破棄し、待機中・操作中はローカル推定へ戻す。`earthwork-preview` 受信は3D更新後に `EmitShapeUpdate` も呼ぶが、採用済みの検証結果を上書きしない。
+
+道路線形ラベルの引出線はUI/WorldCallout.DrawLineを共用する。ラベルの内容・違反判定はRoadPlanManager.AlignmentLabelsが保持する。

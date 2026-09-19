@@ -364,7 +364,7 @@ function TransitSection({
     } else {
       next.add(transitPathId);
     }
-    onSelect("transit", "default", Array.from(next).join(","));
+    onSelect("transit", selection.mode, Array.from(next).join(","));
   };
 
   if (entries.length === 0) {
@@ -373,6 +373,19 @@ function TransitSection({
 
   return (
     <div className="do-alert-list">
+      <button
+        type="button"
+        className={`do-alert-card ${selection.mode !== "hidden" ? "enabled" : ""}`}
+        onClick={() => {
+          playSound(clickSrc);
+          onSelect("transit", selection.mode === "hidden" ? "default" : "hidden",
+            selection.subMode ?? entries.map((entry) => entry.transit_path_id).join(","));
+        }}
+        aria-pressed={selection.mode !== "hidden"}
+      >
+        <span className="do-alert-card-text">{t("display.transitHighlight")}</span>
+        <div className="do-alert-card-toggle" />
+      </button>
       {entries.map((entry) => {
         const isEnabled = enabled.has(entry.transit_path_id);
         return (
@@ -633,11 +646,12 @@ function LegendArea({
   layerId: string;
   modeId: string;
 }) {
+  const { t } = useTranslation();
   const info = getLegendInfo(layerId, modeId);
 
   return (
     <div className="do-legend-root">
-      <div className="do-description">{info.description}</div>
+      <div className="do-description">{layerId === "transit" ? t("display.transitHighlightDescription") : info.description}</div>
       <div className="do-legend-divider" />
       <div className="do-legend-area">
         {info.type === "none" && (

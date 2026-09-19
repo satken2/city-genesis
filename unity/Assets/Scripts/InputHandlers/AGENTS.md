@@ -127,3 +127,7 @@ public class MyObjectInputHandler : MonoBehaviour, IInputHandler
 - `InputHandler.terrainLayerMask`(Layer 10 Groundのみ)には Water レイヤーが含まれないため、`UpdateTerrainPosition` での `posX/posZ` 更新には影響しない。海域では y=0 平面との交点フォールバックが効くため、`TerrainInputHandler.onClick` に渡る `clickPosition` は正しく算出される。
 
 パス吸着の位置射影はGetClosestPointOnSegmentXZを使う。カーソルの地形Yで勾配上のXZ位置をずらさず、標高は別途保存基準から解決する。
+
+## 公共交通の選択
+
+通常のPATH/TERRAIN入力中は`TransitSelection.ProcessPointer`を物理レイキャストより先に呼ぶ。車体は3D境界（遮蔽物を考慮）、帯・停留所・名前ラベルは前面表示と同じスクリーン座標で判定する。マウスダウン時の路線IDを保持し、移動5px未満のリリースでtransit_detailを開く。重なる帯は路線候補を表示する。編集・UI・カメラドラッグ・フライ・ラジアルメニュー・セッション切替では候補を破棄する。車両クリックはハイライトOFFでも有効。

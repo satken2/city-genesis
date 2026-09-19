@@ -221,6 +221,7 @@ public class InputHandler : MonoBehaviour
         {
             ClearHover();
             TooltipManager.Instance?.Hide();
+            TransitSelection.Cancel();
             hasPendingClick = false;
             hasPendingTerrainClick = false;
             hasPendingRightClick = false;
@@ -235,6 +236,7 @@ public class InputHandler : MonoBehaviour
         {
             ClearHover();
             TooltipManager.Instance?.Hide();
+            TransitSelection.Cancel();
             hasPendingClick = false;
             hasPendingTerrainClick = false;
             hasPendingRightClick = false;
@@ -243,11 +245,12 @@ public class InputHandler : MonoBehaviour
         }
 
         // UI上をクリックした場合は処理を中断
-        if (EventSystem.current.IsPointerOverGameObject())
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
         {
             ClearHover();
             TooltipManager.Instance?.Hide();
             // UIクリック時はペンディング中のクリックを破棄する
+            TransitSelection.Cancel();
             hasPendingClick = false;
             hasPendingTerrainClick = false;
             hasPendingRightClick = false;
@@ -265,6 +268,7 @@ public class InputHandler : MonoBehaviour
             ClearHover();
             TooltipManager.Instance?.Hide();
             // カメラドラッグ確定時はペンディング中のクリックを破棄する
+            TransitSelection.Cancel();
             hasPendingClick = false;
             hasPendingTerrainClick = false;
             hasPendingRightClick = false;
@@ -279,6 +283,18 @@ public class InputHandler : MonoBehaviour
         {
             return;
         }
+
+        if (GetModeForObjectType(InputObjectType.PATH) == InputMode.MODE_NORMAL
+            && GetModeForObjectType(InputObjectType.TERRAIN) == InputMode.MODE_NORMAL)
+        {
+            if (TransitSelection.ProcessPointer(Camera.main))
+            {
+                ClearHover(); TooltipManager.Instance?.Hide();
+                hasPendingClick = false; hasPendingTerrainClick = false;
+                return;
+            }
+        }
+        else TransitSelection.Cancel();
 
         // 地区編集モード中の Esc は選択中地区(拡張先・統合先)の選択だけを解除する
         // (モード自体の終了は従来どおりUI起点の STATE_NORMAL に委ねる)。

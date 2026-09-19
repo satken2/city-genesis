@@ -74,6 +74,12 @@
     "loopLine": "Servicio circular (vuelve a {{name}})",
     "openStation": "Abrir detalles de la estación",
     "vehicleShortage": "No hay suficientes vehículos. No se puede mantener la frecuencia objetivo.",
-    "carsPerTrainShort": "{{n}} vagones por tren"
+    "carsPerTrainShort": "{{n}} vagones por tren",
+    "fleet": "Material rodante",
+    "fleetTotalCars": "{{count}} vagones en total",
+    "fleetFormation": "Trenes de {{cars}} vagones × {{trains}}",
+    "fleetNone": "No hay vehículos en servicio.",
+    "fleetMoreTrains": "y {{count}} tren(es) más",
+    "fleetShortage": "No se pudieron formar {{count}} tren(es) por falta de vehículos."
   }
 }

@@ -130,6 +130,8 @@
     "layerTransit": "公共交通",
     "layerProp": "装饰物",
     "modeTransitDefault": "显示公共交通",
+    "transitHighlightDescription": "在建筑和地形前方显示线路和站点名称，包括地下线路。点击线路或车辆可打开线路详情。",
+    "transitHighlight": "公共交通高亮",
     "transitNoTypes": "没有可用的公共交通线路类型。",
     "modeTerrainDefault": "普通显示",
     "modeTerrainTransparent": "透明显示",

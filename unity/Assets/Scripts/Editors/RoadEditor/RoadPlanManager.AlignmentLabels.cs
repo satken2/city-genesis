@@ -119,10 +119,6 @@ public partial class RoadPlanManager
 
     private static void DrawAlignmentGuiLine(Vector2 a, Vector2 b, float width)
     {
-        Matrix4x4 matrix = GUI.matrix;
-        Vector2 delta = b - a;
-        GUIUtility.RotateAroundPivot(Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg, a);
-        GUI.DrawTexture(new Rect(a.x, a.y - width * 0.5f, delta.magnitude, width), Texture2D.whiteTexture);
-        GUI.matrix = matrix;
+        WorldCallout.DrawLine(a, b, width);
     }
 }

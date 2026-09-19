@@ -130,6 +130,8 @@
     "layerTransit": "대중교통",
     "layerProp": "프롭",
     "modeTransitDefault": "대중교통 표시",
+    "transitHighlightDescription": "건물과 지형 앞에 노선과 정류장 이름을 표시합니다. 지하 노선도 표시됩니다. 노선이나 차량을 클릭하면 노선 상세 정보를 엽니다.",
+    "transitHighlight": "대중교통 강조",
     "transitNoTypes": "대중교통 종류가 없습니다.",
     "modeTerrainDefault": "일반 표시",
     "modeTerrainTransparent": "투과 표시",

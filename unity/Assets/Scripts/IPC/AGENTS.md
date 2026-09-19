@@ -74,3 +74,5 @@ edit_path:change_house_endsのhouse_ends（both/start/end）をRoadPlanManager.S
 ## パス線形検証の同期
 
 `edit_path:update_shape.revision` はUnityの編集世代。UIは全線validateの `alignments` を `edit_path:shape_command` の `{op: "apply_alignment", revision, alignment_json}` で返す。nullは待機・再試行時の破棄。Unityは同じ世代のEditingだけ適用し、`alignment` に `authoritative`・`curve_violated`・`grade_violated`・全線の `warnings`（各点 `[x, 絶対標高, z]` の折れ線群）を追加して再配信する。UIは選択・警告だけの再通知で検証を再起動しない。Rustは既存の汎用転送を使う。
+
+公共交通ハイライトは既存view:change_viewのtransitレイヤーでmode=hidden/defaultを全体OFF/ONとして扱う（既定hidden）。sub_modeの種別CSVはOFF中も保持する。Unityの路線・車両選択は既存EmitSelectObject("transit_detail", "agent", 路線ID)を使い、新しいIPCイベントは持たない。

@@ -74,6 +74,12 @@
     "loopLine": "環状運転（{{name}} へ戻る）",
     "openStation": "駅の詳細を開く",
     "vehicleShortage": "車両が不足しています。目標の運行間隔を維持できていません。",
-    "carsPerTrainShort": "1編成 {{n}} 両"
+    "carsPerTrainShort": "1編成 {{n}} 両",
+    "fleet": "車両",
+    "fleetTotalCars": "合計 {{count}} 両",
+    "fleetFormation": "{{cars}}両編成 × {{trains}}編成",
+    "fleetNone": "運行中の車両はありません。",
+    "fleetMoreTrains": "ほか {{count}} 編成",
+    "fleetShortage": "{{count}} 編成ぶんの車両が調達できていません。"
   }
 }

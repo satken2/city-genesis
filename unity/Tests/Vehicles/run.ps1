@@ -1,4 +1,4 @@
-param([string]$UnityExe, [switch]$PedestrianModelsOnly)
+param([string]$UnityExe, [switch]$PedestrianModelsOnly, [switch]$TransitOnly)
 $ErrorActionPreference = 'Stop'
 $unityRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $project = Join-Path $unityRoot 'Assembly-CSharp.csproj'
@@ -41,6 +41,7 @@ $qaArguments = @(
     '-logFile', ('"' + (Join-Path $qaRoot 'qa.log') + '"')
 )
 if ($PedestrianModelsOnly) { $qaArguments += '-pedestrianModelsOnly' }
+if ($TransitOnly) { $qaArguments += '-transitOnly' }
 $process = Start-Process -FilePath $UnityExe -ArgumentList $qaArguments -WindowStyle Hidden -PassThru
 $process.WaitForExit()
 $result = Get-Content -LiteralPath $resultPath -Raw

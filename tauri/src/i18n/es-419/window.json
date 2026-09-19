@@ -130,6 +130,8 @@
     "layerTransit": "Transporte público",
     "layerProp": "Props",
     "modeTransitDefault": "Mostrar transporte",
+    "transitHighlightDescription": "Muestra las rutas y los nombres de las paradas delante de los edificios y el terreno, incluidas las rutas subterráneas. Haz clic en una ruta o vehículo para ver sus detalles.",
+    "transitHighlight": "Resaltar transporte público",
     "transitNoTypes": "No hay tipos de línea de transporte disponibles.",
     "modeTerrainDefault": "Vista normal",
     "modeTerrainTransparent": "Vista transparente",

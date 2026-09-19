@@ -60,6 +60,25 @@
   color: #6b8299;
 }
 
+/* ---- メーター行(共通メーター + 百分率) ---- */
+.transit-detail__meter {
+  gap: 8px;
+}
+
+.transit-detail__meter .meter {
+  flex: 1;
+  min-width: 0;
+}
+
+.transit-detail__meter-value {
+  flex-shrink: 0;
+  min-width: 32px;
+  font-size: 0.74rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--flat-text-body);
+}
+
 /* ---- 運行実績タイル(2列) ---- */
 .transit-detail__tiles {
   display: grid;

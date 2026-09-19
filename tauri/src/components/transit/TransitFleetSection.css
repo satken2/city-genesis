@@ -1,0 +1,53 @@
+/* 車両セクション(TransitFleetSection)。合計両数の見出しと、編成の側面図を縦に並べる。 */
+
+.transit-fleet__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.transit-fleet__total {
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--flat-text);
+}
+
+.transit-fleet__formation {
+  font-size: 0.74rem;
+  color: var(--flat-text-label);
+}
+
+.transit-fleet__trains {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  background: var(--flat-sunken);
+  border-radius: 6px;
+}
+
+/* 編成図。パネル幅を超える長編成は縦横比を保ったまま縮める */
+.transit-fleet__train {
+  max-width: 100%;
+  height: auto;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+/* 車両不足で組めていない編成。路線カラーのまま薄くして「実在しない編成」に見せる */
+.transit-fleet__train--missing {
+  opacity: 0.45;
+}
+
+.transit-fleet__note {
+  margin: 0;
+  font-size: 0.7rem;
+  color: #6b8299;
+}
+
+.transit-fleet__note--warn {
+  color: #f0c040;
+}

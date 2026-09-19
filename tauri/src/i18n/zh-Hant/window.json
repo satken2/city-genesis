@@ -130,6 +130,8 @@
     "layerTransit": "大眾運輸",
     "layerProp": "裝飾物",
     "modeTransitDefault": "顯示大眾運輸",
+    "transitHighlightDescription": "在建築與地形前方顯示路線及站點名稱，包括地下路線。點擊路線或車輛可開啟路線詳情。",
+    "transitHighlight": "公共交通醒目顯示",
     "transitNoTypes": "沒有可用的大眾運輸路線類型。",
     "modeTerrainDefault": "一般顯示",
     "modeTerrainTransparent": "透明顯示",

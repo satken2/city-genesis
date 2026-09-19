@@ -13,7 +13,7 @@
  * 運休理由と診断ウィンドウへの導線はタブに依らず常に見える位置(ヘッダ直下)に置く。
  * データは GET /api/v1/transit/lines/{id} から取得し、設定の保存は PATCH、廃止は DELETE。
  * 保存・削除後は "transit:lines_changed" で公共交通ウィンドウに再取得を促し、
- * 表示レイヤーの再送で Unity の路線色帯にも路線カラーの変更を反映させる。
+ * Unityの共有路線データは定期取得で更新し、ユーザーの表示設定は維持する。
  */
 
 import { useCallback, useEffect, useState } from "react";
@@ -24,15 +24,14 @@ import { buildApiUrl } from "../../utils/api";
 import { InfoHeader } from "../common/InfoHeader";
 import { NumberStepper } from "../common/NumberStepper";
 import { ColorSwatchPicker } from "../common/ColorSwatchPicker";
-import { UsageMeter } from "../statistics/tabs/AccidentsTab";
+import { Meter } from "../common/Meter";
 import { resolveTransitIcon } from "../../utils/pathIcon";
 import { STATUS_ACTIVE } from "../../constants";
 import { useMasterData } from "../../contexts/MasterDataContext";
-import { sendChangeDisplay } from "../../utils/ipc";
 import { TRANSIT_LINE_COLOR_PRESETS, resolveTransitColor } from "../../local-constants";
-import type { TransitMasterEntry } from "../../types";
 import { TransitLineMap } from "./TransitLineMap";
 import { TransitLineDiagram } from "./TransitLineDiagram";
+import { TransitFleetSection } from "./TransitFleetSection";
 // 右パネルの体裁(セクション・ラベル/値グリッド・タブ)は経済主体詳細パネルと共有する。
 import "../agent/AgentDetailPanel.css";
 // 運行状態バッジ(.transit-badge)は公共交通ウィンドウの一覧と共通。
@@ -153,22 +152,6 @@ export function TransitDetailPanel({
 
   const url = buildApiUrl(apiBaseUrl, pathTemplate, initialEntityId);
 
-  /** 公共交通レイヤーを全種別表示にする。Unity 側は受信のたびに路線一覧を取り直すため、
-   *  保存後に再送すると路線カラーの変更が路線色帯へ反映される。 */
-  const showTransitLayer = useCallback(() => {
-    if (!masterData) return;
-    const allIds = Object.values(masterData.transit)
-      .map((e) => (e as TransitMasterEntry).transit_path_id)
-      .join(",");
-    void sendChangeDisplay("transit", "default", allIds);
-  }, [masterData]);
-
-  // 詳細パネルを開いている間は公共交通の表示をONにする(全種別を表示)。
-  // 表示中の路線の区間パスがグラフィック上で見えるようにするため。
-  useEffect(() => {
-    showTransitLayer();
-  }, [showTransitLayer]);
-
   useEffect(() => {
     const controller = new AbortController();
     setLoading(true);
@@ -232,14 +215,13 @@ export function TransitDetailPanel({
       );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       await emit("transit:lines_changed", {});
-      showTransitLayer();
       setRefreshKey((k) => k + 1);
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : "Failed to save");
     } finally {
       setSaving(false);
     }
-  }, [apiBaseUrl, line, fare, headway, carsPerTrain, lineColor, showTransitLayer]);
+  }, [apiBaseUrl, line, fare, headway, carsPerTrain, lineColor]);
 
   const handleDelete = useCallback(async () => {
     if (!line) return;
@@ -251,14 +233,13 @@ export function TransitDetailPanel({
       );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       await emit("transit:lines_changed", {});
-      showTransitLayer();
       await invoke("close_current_window");
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : "Failed to delete");
       setDeleting(false);
       setConfirmDelete(false);
     }
-  }, [apiBaseUrl, line, showTransitLayer]);
+  }, [apiBaseUrl, line]);
 
   if (loading) {
     return <p className="agent-detail-muted">{t("common.loading")}</p>;
@@ -418,20 +399,33 @@ export function TransitDetailPanel({
                 />
               </div>
               <div className="agent-detail-grid" style={{ alignItems: "center" }}>
+                {/* 混雑率は高いほど悪い指標、車両調達率は高いほど良い指標。
+                    共通メーターの polarity で色の対応を切り替える。 */}
                 <span className="agent-detail-label">{t("transit.colUtilization")}</span>
-                <span className="agent-detail-value">
-                  <UsageMeter usage_ratio={line.avg_utilization} />
+                <span className="agent-detail-value transit-detail__meter">
+                  <Meter value={line.avg_utilization} polarity="negative" />
+                  <span className="transit-detail__meter-value">{formatPercent(line.avg_utilization)}</span>
                 </span>
                 <span className="agent-detail-label">{t("transit.vehicleProcurement")}</span>
-                <span className="agent-detail-value">
+                <span className="agent-detail-value transit-detail__meter">
                   {procurementRatio === null ? (
                     "—"
                   ) : (
-                    <UsageMeter usage_ratio={procurementRatio} goodHigh />
+                    <>
+                      <Meter value={procurementRatio} />
+                      <span className="transit-detail__meter-value">{formatPercent(procurementRatio)}</span>
+                    </>
                   )}
                 </span>
               </div>
             </section>
+
+            <TransitFleetSection
+              carsPerTrain={line.cars_per_train}
+              vehicleCount={line.vehicle_count}
+              requiredTrains={line.train_count}
+              color={savedColor}
+            />
           </>
         )}
 
@@ -557,6 +551,11 @@ export function TransitDetailPanel({
       </div>
     </div>
   );
+}
+
+/** メーターに添える百分率表記。共通メーター(Meter)自体は数値を持たない */
+function formatPercent(ratio: number): string {
+  return `${Math.round(Math.max(0, Math.min(1, ratio)) * 100)}%`;
 }
 
 type StatTileProps = {

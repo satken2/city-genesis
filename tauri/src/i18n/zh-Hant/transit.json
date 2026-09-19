@@ -74,6 +74,12 @@
     "loopLine": "環狀運行（返回 {{name}}）",
     "openStation": "開啟車站詳情",
     "vehicleShortage": "車輛不足，無法維持目標發車間隔。",
-    "carsPerTrainShort": "每列 {{n}} 節"
+    "carsPerTrainShort": "每列 {{n}} 節",
+    "fleet": "車輛",
+    "fleetTotalCars": "共 {{count}} 節",
+    "fleetFormation": "{{cars}} 節編組 × {{trains}} 列",
+    "fleetNone": "沒有運行中的車輛。",
+    "fleetMoreTrains": "另有 {{count}} 列",
+    "fleetShortage": "因車輛不足，有 {{count}} 列無法編組。"
   }
 }

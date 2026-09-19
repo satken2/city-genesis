@@ -130,6 +130,8 @@
     "layerTransit": "Transit",
     "layerProp": "Props",
     "modeTransitDefault": "Show Transit",
+    "transitHighlightDescription": "Show routes and stop names in front of buildings and terrain, including underground routes. Click a route or vehicle to open its details.",
+    "transitHighlight": "Public transport highlight",
     "transitNoTypes": "No transit line types available.",
     "modeTerrainDefault": "Default View",
     "modeTerrainTransparent": "Transparent",

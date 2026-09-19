@@ -167,12 +167,14 @@
 - `TransitOverlayManager` 等と同じく `[RuntimeInitializeOnLoadMethod(AfterSceneLoad)]` で自己生成するため、シーンへの事前配置は不要。
 - 詳細は `genesis-docs/docs/geometries/S_火災エフェクトの描画.md` 参照。
 
-## 公共交通オーバーレイ (TransitOverlayManager.cs)
+## 公共交通ハイライト (TransitOverlayManager.cs)
 
-- 役割: 設置済みの公共交通パス(`PATH_TRANSPORT`)を「路線種別ごとの色帯」として下地道路の上にオーバーレイ描画する。`PATH_TRANSPORT` は `PathMeshFactory` にメッシュ生成器が無く通常描画では非表示だが、`PathManager` のキャッシュには点列込みで存在するため、**`PathManager.GetTransitPathsForOverlay()`**(path_type==`Constants.PATH_TRANSPORT` のキャッシュ済みパスを `CalculatePathPoints` で点列化して返す)で取得して `Utils/OverlayMeshRenderer`(`Custom/OverlayLine`)で細い色帯として描く。色は各パスの `path_variant`(=`transit_master` の `transit_path_id`)から黄金角ベースで安定生成する。
-- 表示制御は路線種別(`transit_path_id`)単位。表示オプションの公共交通タブ → `view:change_view`(layer=`transit`, sub_mode=表示する `transit_path_id` のCSV) → `IpcViewCoordinator.ApplyTransitMode` → `SetVisibleVariants(HashSet<int>)`。空集合なら全非表示(メッシュを即クリア)。
-- 再構築はカメラ移動(1m/1°)・0.5秒周期・`MarkDirty()`(路線設置確定後に `IpcEventHandler.HandleEditTransitFinish` から呼ぶ)のいずれかで行う。`AlertManager` 等と同じくシーン事前配置不要で、`[RuntimeInitializeOnLoadMethod(AfterSceneLoad)]` で自己生成する。
-- 停留所の配置(路線設置エディタ)は `Editors/TransitEditor/TransitPlanManager` 側。
+- `TransitDataStore.Lines` の `journeys.steps` を `TransitRouteGeometry` で補間し、車両と同じ方向・停止中心・レール接続に沿う帯を描く。`route_path_ids` の端点推測や停留所間の直線フォールバックは使わない。未ロード・未生成接続部分は切る。
+- `OverlayMeshRenderer` を輪郭12px・路線色8pxの2枚で描き、`_ZTest=Always`・描画順3200/3201で建物・地形より前面に表示する。地下区間も見える。
+- 公共交通タブの `mode=hidden` は全体OFF、`default` はON。`sub_mode` は種別IDのCSVで、OFF中もフィルターを保持する。OFF時は帯・停留所マーカー・吹き出し・選択候補を即座に消す。車両は止めない。
+- 名前は表示対象路線の詳細APIを10秒間隔・逐次取得する。停留所の下地パスへXZ射影して高さを合わせ、同じ駅舎のラベルを集約する。`WorldCallout` が引出線と配置を担当し、近景を優先して最大80ラベルを表示する。無名はノードIDで表示する。
+- 経路形状は0.5秒周期、カメラの変化では帯の画面幅だけを更新する。セッション変更では取得中のコルーチンと名前キャッシュを破棄する。選択は `InputHandlers/TransitSelection` が処理する。
+
 
 ## その他の注意
 

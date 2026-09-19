@@ -130,6 +130,8 @@
     "layerTransit": "公共交通",
     "layerProp": "プロップ",
     "modeTransitDefault": "公共交通表示",
+    "transitHighlightDescription": "路線と停留所名を建物・地形の手前に表示します。地下の路線も表示されます。路線や車両をクリックすると路線詳細を開きます。",
+    "transitHighlight": "公共交通ハイライト",
     "transitNoTypes": "公共交通の種別がありません。",
     "modeTerrainDefault": "通常表示",
     "modeTerrainTransparent": "透過表示",

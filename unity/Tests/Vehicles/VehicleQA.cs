@@ -48,7 +48,13 @@ public static class VehicleQA
                 EditorApplication.Exit(0);
                 return;
             }
-            Geometry(); Budget(); Junction(); RoadsideExit(); MotionContract(); TransitModels(); TransitPlacement();
+            if (Array.IndexOf(args,"-transitOnly")>=0)
+            {
+                Geometry(); MotionContract(); TransitModels(); TransitPlacement(); TransitHighlightSelection();
+                File.WriteAllText(result,"PASS\nPublic transport: motion, models, turnback, shared curved geometry, missing paths, vehicle selection and occlusion");
+                EditorApplication.Exit(0); return;
+            }
+            Geometry(); Budget(); Junction(); RoadsideExit(); MotionContract(); TransitModels(); TransitPlacement(); TransitHighlightSelection();
             PedestrianBands(); PedestrianModels();
             var report = new List<string>();
             foreach(int split in new[]{1,5}) report.Add(PedestrianNetwork(split,12,1200,false,true));
@@ -137,9 +143,11 @@ public static class VehicleQA
         Call(manager,"RebuildLines",sourceList);
         var lines=(IList)Get(manager,"lines");Check(lines.Count==1,"Operating transit line missing");
         var path=New("GeneratedModels.PathSummary");Set(path,"path_id",1);Set(path,"travel_direction",0);
-        var g=Activator.CreateInstance(manager.GetType().GetNestedType("Geometry",BindingFlags.NonPublic));
+        var routeGeometry=New("TransitRouteGeometry",new object[]{null});
+        Set(manager,"routeGeometry",routeGeometry);
+        var g=Activator.CreateInstance(routeGeometry.GetType().GetNestedType("Geometry",BindingFlags.NonPublic));
         Set(g,"data",path);Set(g,"full",Line(Vector3.zero,Vector3.forward*500));Set(g,"trimStart",0f);Set(g,"trimEnd",500f);Set(g,"rail",true);
-        ((IDictionary)Get(manager,"geometry")).Add(1,g);
+        ((IDictionary)Get(routeGeometry,"geometry")).Add(1,g);
         var previous=new Dictionary<string,Vector3>();
         foreach(double time in new[]{0.0,25.0,46.0,49.9,50.0,75.0,99.9,100.0})
         {
@@ -157,11 +165,37 @@ public static class VehicleQA
             }
             Near(Vector3.Distance(positions[0],positions[1]),20,.01f,"Consist spacing incorrect");
         }
+        // ハイライトも同じ補間を使い、パス途中の停止中心と曲線の高さを維持する。
+        var curved=Line(Vector3.zero,new Vector3(100,25,100),new Vector3(0,50,300),Vector3.forward*500);
+        Set(g,"full",curved); Set(g,"trimEnd",Property(curved,"Length"));
+        object[] sampleArgs={lines[0],230.0,230.0,true,null,null};
+        Check((bool)Call(routeGeometry,"Sample",sampleArgs),"Shared route rejects loaded curve");
+        Sample(curved,Property(curved,"Length")*.5f,true,out var expected,out _);
+        expected.y+=(float)game.GetType("RoadPartHeights").GetField("TRACK_ABOVE_SPLINE").GetRawConstantValue()+.2f;
+        Near(Vector3.Distance((Vector3)sampleArgs[4],expected),0,.01f,"Highlight cuts across curved/elevated track");
+        ((IDictionary)Get(routeGeometry,"geometry")).Clear();
+        Check(!(bool)Call(routeGeometry,"Sample",sampleArgs),"Missing path was connected by a straight line");
+        ((IDictionary)Get(routeGeometry,"geometry")).Add(1,g);
+        var visibleCars=(IDictionary)Get(manager,"visible");
+        GameObject pickedCar=null;
+        foreach(DictionaryEntry entry in visibleCars) { pickedCar=(GameObject)entry.Value; break; }
+        var bounds=pickedCar.GetComponentInChildren<Renderer>().bounds;
+        var ray=new Ray(bounds.center+Vector3.up*100,Vector3.down);
+        Physics.SyncTransforms();
+        object[] pickArgs={ray,0};
+        Check((bool)Call(manager,"TryPick",pickArgs) && (int)pickArgs[1]==123,"Vehicle selection loses line identity when overlay is absent");
+        var blocker=GameObject.CreatePrimitive(PrimitiveType.Cube);
+        blocker.transform.position=bounds.center+Vector3.up*20; blocker.transform.localScale=Vector3.one*10;
+        Physics.SyncTransforms();
+        Check(!(bool)Call(manager,"TryPick",pickArgs),"Vehicle behind a building is selected");
+        UnityEngine.Object.DestroyImmediate(blocker);
+        Call(manager,"HideUnused",true);
+        Check(!(bool)Call(manager,"TryPick",pickArgs),"Pooled vehicle is selectable");
         // パス管理が無くても、描画する編成が無い更新では道路形状にアクセスしない。
         Set(data,"vehicle_count",0);
         Call(manager,"RebuildLines",sourceList);
         Call(manager,"RefreshGeometry",Vector3.zero);
-        Check(((IDictionary)Get(manager,"geometry")).Count==0,"Unavailable fleet retains geometry");
+        Check(((IDictionary)Get(routeGeometry,"geometry")).Count==0,"Unavailable fleet retains geometry");
         Set(data,"vehicle_count",2);
         Call(manager,"RebuildLines",sourceList);
         Check(lines.Count==1,"Restored fleet does not resume");
@@ -170,6 +204,32 @@ public static class VehicleQA
         Call(manager,"RefreshGeometry",Vector3.zero);
         Check(lines.Count==0,"Removed route retained");
         UnityEngine.Object.DestroyImmediate(manager.gameObject);UnityEngine.Object.DestroyImmediate(models.gameObject);
+    }
+
+    static void TransitHighlightSelection()
+    {
+        // 無効なGOでAwakeを遅らせ、描画リソースと独立して画面上の選択契約を検査する。
+        var root=new GameObject("HighlightPickQA"); root.SetActive(false);
+        var overlay=root.AddComponent(game.GetType("TransitOverlayManager"));
+        var cameraObject=new GameObject("HighlightCameraQA"); var cam=cameraObject.AddComponent<Camera>();
+        cameraObject.transform.position=new Vector3(0,20,-40); cameraObject.transform.LookAt(Vector3.zero);
+        var segmentType=overlay.GetType().GetNestedType("Segment",BindingFlags.NonPublic);
+        var segments=(IList)Get(overlay,"segments");
+        foreach(int id in new[]{123,456})
+        {
+            var segment=Activator.CreateInstance(segmentType);
+            Set(segment,"a",Vector3.left*10); Set(segment,"b",Vector3.right*10); Set(segment,"id",id); segments.Add(segment);
+        }
+        Vector2 cursor=cam.WorldToScreenPoint(Vector3.zero);
+        var picked=(IList)Call(overlay,"Pick",cam,cursor);
+        Check(picked.Count==2 && (int)picked[0]==123 && (int)picked[1]==456,"Overlapping routes do not offer both candidates");
+        Check(((IList)Call(overlay,"Pick",cam,cursor+Vector2.up*20)).Count==0,"Route selection captures unrelated ground");
+        cameraObject.transform.rotation=Quaternion.LookRotation(Vector3.back);
+        Check(((IList)Call(overlay,"Pick",cam,cursor)).Count==0,"Route behind camera is selectable");
+        segments.Clear();
+        cameraObject.transform.LookAt(Vector3.zero);
+        Check(((IList)Call(overlay,"Pick",cam,cursor)).Count==0,"Cleared overlay remains selectable");
+        UnityEngine.Object.DestroyImmediate(root); UnityEngine.Object.DestroyImmediate(cameraObject);
     }
 
     static void TransitModels()
