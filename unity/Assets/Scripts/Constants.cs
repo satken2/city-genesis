@@ -224,7 +224,7 @@ public static class Constants
     public const int PATH_WALKWAY = 3;
     public const int PATH_TRACK = 4;
     public const int PATH_MONORAIL = 5;
-    public const int PATH_ROPEWAY = 6;
+    public const int PATH_CONVEYOR = 6;
     public const int PATH_TRANSPORT = 10;
     public const int PATH_ELECTRICITY = 11;
     public const int PATH_WATER = 12;
@@ -241,6 +241,7 @@ public static class Constants
     public const float STATION_HOUSE_DEFAULT_DEPTH = 16.0f;
     public const float STATION_HOUSE_TRACK_CLEARANCE_MARGIN = 0.1f;
     public const float STATION_HOUSE_TRACK_SEARCH_RADIUS = 150.0f;
+    public const int CONVEYOR_MAX_NODE_DEGREE = 2;
     public const float PATH_TANGENT_ALIGN_MAX_ANGLE_DEG = 20.0f;
     public const float INFRA_TAP_HEIGHT_TOLERANCE = 3.0f;
     public const float RIVER_BRIDGE_MIN_CLEARANCE = 0.5f;
@@ -256,7 +257,7 @@ public static class Constants
     public const int NODE_ROAD = 1;
     public const int NODE_RAIL = 2;
     public const int NODE_MONORAIL = 4;
-    public const int NODE_ROPEWAY = 8;
+    public const int NODE_CONVEYOR = 8;
     public const int NODE_TRANSIT = 16;
     public const int INFRA_BIT_BASE = 5;
     public const int SPACE_OTHER = 1;

@@ -62,6 +62,7 @@
     "CREATEPATH_ELEVATION_INTERSECTION": "偵測到立體交叉。請調整高度。",
     "CREATEPATH_CURVE_TOO_TIGHT": "彎道對此規格而言過急。請放緩彎道。",
     "CREATEPATH_GRADE_TOO_STEEP": "坡度對此規格而言過陡。請減小坡度。",
+    "CREATEPATH_CONVEYOR_BRANCH": "人員輸送設施（索道等）不能分叉。端點只能連接另一條輸送路徑。",
     "PATH_TOO_FEW_POINTS": "至少需要2個點。",
     "PATH_MAX_SPAN_EXCEEDED": "節點間距過長。請新增中間點。",
     "PATH_ELEVATION_CONFLICT": "偵測到立體交叉。請調整高度。",

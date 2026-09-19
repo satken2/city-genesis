@@ -578,12 +578,19 @@ export type PathMasterEntry = {
    */
   platform_width?: number | null;
   /**
-   * 軌道(線路・モノレール・ロープウェイ)の構造種別。master.yaml の track_type に対応する。
+   * 軌道(線路・モノレール・人員搬送)の構造種別。master.yaml の track_type に対応する。
    * consts.py の TRACK_* と一致する数値(TRACK_NORMAL=通常 / TRACK_BRIDGE=橋梁 / TRACK_STATION=駅)。
    * 建設パネルの軌道カテゴリが「通常/橋梁/駅」ボタンでこの値を絞り込む。
    * 未定義は TRACK_NORMAL 扱い(軌道以外のバリアントでは参照しない)。
    */
   track_type?: number;
+  /**
+   * 人員搬送パス(PATH_CONVEYOR)で、この区間の端点から歩行者が乗降できるか。master.yaml の boardable。
+   * ロープウェイの駅区間などが true。搬送パス以外では未定義。
+   */
+  boardable?: boolean;
+  /** 人員搬送パスの乗降ノードでの固定乗車待ち(分)。master.yaml の board_wait_min。 */
+  board_wait_min?: number;
   /**
    * このバリアントが流せるインフラ財の製品IDリスト。master.yaml の infra_products に対応する。
    * 電化軌道は電力財(PRODUCT_HIGH_ELECTRICITY=401)を含む。建設パネルの軌道カテゴリの

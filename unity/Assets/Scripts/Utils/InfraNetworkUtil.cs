@@ -5,7 +5,7 @@ using UnityEngine;
 /// ノードの溶接互換（吸着可否）判定ユーティリティ。バックエンドの溶接ルールをフロントで再現する。
 ///
 /// ノードの type はビットフラグで、「そのノードが受け入れる接続種別の集合」を表す:
-///   - 交通ビット: NODE_ROAD / NODE_RAIL（道路・線路は共有＝踏切）/ NODE_MONORAIL / NODE_ROPEWAY / NODE_TRANSIT
+///   - 交通ビット: NODE_ROAD / NODE_RAIL（道路・線路は共有＝踏切）/ NODE_MONORAIL / NODE_CONVEYOR（人員搬送。ロープウェイ等） / NODE_TRANSIT
 ///   - インフラビット: インフラ財（GOODS_INFRASTRUCTURE）ごとの固有ビット。ビット位置は
 ///     全インフラ財の製品IDを昇順に並べた順位で決まる（1 << (INFRA_BIT_BASE + 順位)）。
 ///     バックエンドの MasterData.get_infra_node_bit と一致させること。
@@ -137,8 +137,8 @@ public static class InfraNetworkUtil
             case Constants.PATH_MONORAIL:
                 mask |= Constants.NODE_MONORAIL;
                 break;
-            case Constants.PATH_ROPEWAY:
-                mask |= Constants.NODE_ROPEWAY;
+            case Constants.PATH_CONVEYOR:
+                mask |= Constants.NODE_CONVEYOR;
                 break;
             case Constants.PATH_TRANSPORT:
                 mask |= Constants.NODE_TRANSIT;

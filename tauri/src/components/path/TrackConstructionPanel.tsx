@@ -11,7 +11,7 @@
  *     高さ・角度・駅舎の種類だけ。プラットフォームを曲げたり本数を変えたりはできない。
  *   - 詳細モード: 軌道 / プラットフォーム / 駅舎 の3枚。従来どおり1本ずつ自由に敷設する。
  *
- * 鉄道種別プルダウン(鉄道/モノレール/ロープウェイ)はタブより上位の選択で、タブを切り替えても保持する。
+ * 鉄道種別プルダウン(鉄道/モノレール/人員搬送)はタブより上位の選択で、タブを切り替えても保持する。
  * タブの役割:
  *   - 軌道タブ:        通常(TRACK_NORMAL)・橋梁(TRACK_BRIDGE)の線路を敷設する。
  *   - プラットフォームタブ: 駅(TRACK_STATION)の線路を敷設する(ホーム設置側の指定あり)。
@@ -100,7 +100,7 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
   const [mode, setMode] = useState<PanelMode>("simple");
   const [tab, setTab] = useState<TrackTab>("track");
   const isStationTab = tab === "station";
-  // 鉄道種別(鉄道/モノレール/ロープウェイ)はタブより上位の絞り込みなので、
+  // 鉄道種別(鉄道/モノレール/人員搬送)はタブより上位の絞り込みなので、
   // タブ切り替えで選択が失われないようパネル側で保持する。
   const [railType, setRailType] = useState<number | null>(null);
 
@@ -429,7 +429,7 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
         ))}
       </div>
 
-      {/* 鉄道種別(鉄道 / モノレール / ロープウェイ)。タブより上位の絞り込み。
+      {/* 鉄道種別(鉄道 / モノレール / 人員搬送)。タブより上位の絞り込み。
           駅舎は鉄道種別に依存しないため、駅舎タブでは表示しない。 */}
       {tab !== "house" && (
         <div className="tc-railtype-bar">

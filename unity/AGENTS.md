@@ -55,6 +55,8 @@
 
 # モデルアセットの構成(FBXとミラープレハブ)
 
+モノレール501/502・手動配置車両308/309の実FBX検証は`Tests/Monorail/run.ps1`。独立プロジェクトでUnityのsharedMesh座標・ホームの右側・桁とキャップの接合・車両の接地と連結ピッチ・自動プレハブ生成を確認する。制作仕様は公開N/M文書、著作ジョブはgenesis-galleryのbuild_monorail.py。
+
 - `Assets/Models` ... FBXソース(Buildings / Paths / Props)。
 - `Assets/Resources/Models` ... 上記と同一相対パスのラッパープレハブ。ランタイム(`Utils/ModelManager`)が `"Models/Buildings/{型}/{variant}/{パーツ}"` の文字列パスで `Resources.Load` するために必要。
 - **このミラーは手動で維持しない。** `Assets/Models` にFBXを追加・移動すると、エディタ拡張(`Assets/Editor/ModelPrefabGenerator.cs`)が対応プレハブを自動生成する。一括同期はメニュー `Tools/Model Prefabs/Sync All`、FBXの削除・移動で孤児化したプレハブは `Tools/Model Prefabs/Delete Orphans` で削除する(自動削除はしない)。

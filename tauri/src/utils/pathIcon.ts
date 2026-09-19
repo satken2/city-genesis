@@ -49,7 +49,6 @@ const TRANSIT_VARIANT_ICON_NAME: Record<number, string> = {
   1003: "t_tram", // LRT路線
   1004: "t_monorail", // モノレール路線
   1005: "t_train", // 中距離鉄道路線
-  1006: "t_ropeway", // ロープウェイ路線
 };
 
 /**

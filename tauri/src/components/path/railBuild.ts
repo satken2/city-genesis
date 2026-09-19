@@ -1,5 +1,5 @@
 /**
- * 軌道(線路・モノレール・ロープウェイ)の複線敷設ロジック
+ * 軌道(線路・モノレール・人員搬送)の複線敷設ロジック
  *
  * 建設パネルの軌道カテゴリでは、プリセットの複合パス(combined_paths)を選ぶ代わりに、
  * プレイヤーが「線路数・各線の進行方向・線路間隔」を直接指定して複線を構成する。
@@ -8,8 +8,9 @@
  * 本モジュールはその設定から、1本の中心線を平行な単線パス群へ展開するための
  * コンポーネント定義(CombinedPathComponent 相当)を生成する純粋関数群を提供する。
  *
- * ロープウェイ(PATH_ROPEWAY)は軌道カテゴリに属するが、描画・敷設とも道路と同じ扱い
- * (両方向のロープが張られたメッシュを単一パス1本で配置)のため、複線展開の対象外。
+ * 人員搬送(PATH_CONVEYOR。ロープウェイ等)は軌道カテゴリの敷設UIに属するが、描画・敷設とも
+ * 道路と同じ扱い(両方向のロープが張られたメッシュを単一パス1本で配置)のため、複線展開の対象外。
+ * 経済上は路線ではなく「乗降区間からしか乗れない速い歩道」であり、路線・停留所は作らない。
  *
  * 展開後の敷設・プレビュー・コスト見積りは既存の複合パス機構(pathOffset / confirmPath)を
  * そのまま再利用する。ここで生成する components は combined_paths のコンポーネントと同型。
@@ -19,7 +20,7 @@ import type { MasterData, PathMasterEntry, CombinedPathComponent } from "../../t
 import {
   PATH_TRACK,
   PATH_MONORAIL,
-  PATH_ROPEWAY,
+  PATH_CONVEYOR,
   TRACK_NORMAL,
   TRACK_BRIDGE,
   TRACK_STATION,
@@ -30,8 +31,8 @@ import {
   PRODUCT_HIGH_ELECTRICITY,
 } from "../../constants";
 
-/** 軌道カテゴリに属する path_type(鉄道・モノレール・ロープウェイ) */
-export const RAIL_TYPES: readonly number[] = [PATH_TRACK, PATH_MONORAIL, PATH_ROPEWAY];
+/** 軌道カテゴリ(軌道建設パネル)で敷設する path_type(鉄道・モノレール・人員搬送) */
+export const RAIL_TYPES: readonly number[] = [PATH_TRACK, PATH_MONORAIL, PATH_CONVEYOR];
 
 /** 規格プルダウンにおける構造(track_type)の並び順(通常→橋梁→駅) */
 export const TRACK_TYPE_ORDER: readonly number[] = [TRACK_NORMAL, TRACK_BRIDGE, TRACK_STATION];
@@ -69,7 +70,7 @@ export function clampTrackSpacing(base: number, delta: number): number {
   );
 }
 
-/** path_type が軌道カテゴリ(鉄道・モノレール・ロープウェイ)かを返す。 */
+/** path_type が軌道カテゴリ(鉄道・モノレール・人員搬送)かを返す。 */
 export function isRailType(type: number | null | undefined): boolean {
   return type != null && RAIL_TYPES.includes(type);
 }
@@ -84,7 +85,7 @@ export function isElectrifiedVariant(entry: PathMasterEntry | null | undefined):
   return !!entry?.infra_products?.includes(PRODUCT_HIGH_ELECTRICITY);
 }
 
-/** 実際にバリアントが存在する軌道カテゴリ(鉄道/モノレール/ロープウェイ)を規定順で返す。 */
+/** 実際にバリアントが存在する軌道カテゴリ(鉄道/モノレール/人員搬送)を規定順で返す。 */
 export function availableRailTypes(masterData: MasterData | null): number[] {
   if (!masterData?.paths) return [];
   const present = new Set<number>();

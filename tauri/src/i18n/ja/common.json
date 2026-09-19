@@ -62,6 +62,7 @@
     "CREATEPATH_ELEVATION_INTERSECTION": "立体交差が検出されました。高さを変更してください。",
     "CREATEPATH_CURVE_TOO_TIGHT": "カーブが急すぎます。曲線半径を規格の最小値以上にしてください。",
     "CREATEPATH_GRADE_TOO_STEEP": "勾配が急すぎます。規格の最大勾配以下にしてください。",
+    "CREATEPATH_CONVEYOR_BRANCH": "人員搬送路(ロープウェイ等)は分岐できません。端点は他の搬送路1本にだけ接続できます。",
     "PATH_TOO_FEW_POINTS": "2点以上のポイントが必要です。",
     "PATH_MAX_SPAN_EXCEEDED": "ノード間の距離が長すぎます。中間点を追加してください。",
     "PATH_ELEVATION_CONFLICT": "立体交差が検出されました。高さを変更してください。",

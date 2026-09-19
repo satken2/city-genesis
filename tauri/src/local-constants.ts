@@ -43,7 +43,6 @@ export const TRANSIT_VARIANT_COLOR: Record<number, string> = {
   1003: "#a6e3a1", // LRT路線 (緑)
   1004: "#cba6f7", // モノレール路線 (紫)
   1005: "#f38ba8", // 中距離鉄道路線 (赤)
-  1006: "#94e2d5", // ロープウェイ路線 (水色)
 };
 
 /** 種別未定義時のフォールバック色 */

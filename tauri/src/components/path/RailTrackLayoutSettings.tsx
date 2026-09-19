@@ -10,12 +10,12 @@
  * (左右の割り当ては都市の通行方向による)、奇数本は中央1本が両方向になる
  * (算出は railBuild.defaultTravelDirections)。
  *
- * ロープウェイは描画・敷設とも道路と同じ「両方向の単一パス1本」扱いのため、
+ * 人員搬送(ロープウェイ等)は描画・敷設とも道路と同じ「両方向の単一パス1本」扱いのため、
  * セクションごと描画しない(区切り線も出ない)。
  */
 
 import { useTranslation } from "react-i18next";
-import { PATH_ROPEWAY, DIR_FORWARD, DIR_BACKWARD } from "../../constants";
+import { PATH_CONVEYOR, DIR_FORWARD, DIR_BACKWARD } from "../../constants";
 import { NumberStepper } from "../common/NumberStepper";
 import { MIN_TRACK_COUNT, MAX_TRACK_COUNT } from "./railBuild";
 import upArrowIcon from "../../assets/images/ui/up-arrow.png";
@@ -23,7 +23,7 @@ import downArrowIcon from "../../assets/images/ui/down-arrow.png";
 import bothArrowIcon from "../../assets/images/ui/both-arrow.png";
 
 type RailTrackLayoutSettingsProps = {
-  /** 選択中の鉄道種別(ロープウェイは複線構成を持たない) */
+  /** 選択中の鉄道種別(人員搬送は複線構成を持たない) */
   railType: number | null;
   trackCount: number;
   /** 実効の線路間隔(m)。表示専用で、変更は onAdjustSpacing 経由で行う。 */
@@ -69,7 +69,7 @@ export function RailTrackLayoutSettings({
     return t("path_construction.rail.dirBoth", "両方向");
   };
 
-  if (railType === null || railType === PATH_ROPEWAY) return null;
+  if (railType === null || railType === PATH_CONVEYOR) return null;
 
   return (
     <div className="pc-section">

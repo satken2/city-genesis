@@ -12,11 +12,11 @@
  *     線路間隔の既定はバリアントのマスター幅で、広げる/縮めるボタンで一定範囲内を
  *     調整できる(パス1本確定ごとに既定へ戻る)。
  *     複線は中心線を平行な単線パス群へ展開して一括敷設する(railComponents)。
- *     ロープウェイは道路と同じ「両方向の単一パス1本」扱いで、複線展開しない。
+ *     人員搬送(ロープウェイ等)は道路と同じ「両方向の単一パス1本」扱いで、複線展開しない。
  *
  * 状態:
  *   category: 選択中のカテゴリ("road" | "rail" | "infra")
- *   selectedType: 選択中の path_type(軌道では鉄道/モノレール/ロープウェイの type)
+ *   selectedType: 選択中の path_type(軌道では鉄道/モノレール/人員搬送の type)
  *   selectedVariant: 敷設する単一(=軌道では中心線の代表)バリアントID
  *   curveMode: 描画モード (straight/curved)。真実源はUnity側(ラジアルメニューで切替)であり、
  *              edit_path.update_shape の is_curved 受信によってのみ更新される。
@@ -59,7 +59,7 @@ import { fetchApi } from "../../utils/api";
 import type { PathAlignmentSummary } from "../../types";
 import {
   DIR_BOTH,
-  PATH_ROPEWAY,
+  PATH_CONVEYOR,
   PATH_STATION_HOUSE,
   PATH_TRACK,
   PLATFORM_SIDE_OUTSIDE,
@@ -387,13 +387,13 @@ export function usePathConstruction(
    * 新規敷設の軌道カテゴリでのみ生成し、道路・インフラ・既存パス編集では null。
    * null のときは単一パスとして扱う(confirmPath / コスト見積り / プレビュー共通)。
    * 単線(trackCount=1)でも travel_direction を送るためコンポーネント経路を使う。
-   * ロープウェイは描画・敷設とも道路と同じ「両方向の単一パス1本」なので複線展開しない。
+   * 人員搬送(ロープウェイ等)は描画・敷設とも道路と同じ「両方向の単一パス1本」なので複線展開しない。
    */
   const railComponents = useMemo((): CombinedPathComponent[] | null => {
     if (!isRail || selectedVariant === null || pathId != null) return null;
-    // 複線展開するのは線路・モノレールだけ。ロープウェイ・駅舎パスなど
+    // 複線展開するのは線路・モノレールだけ。人員搬送・駅舎パスなど
     // それ以外の type は単一パス扱い。
-    if (selectedVariantData?.type === PATH_ROPEWAY || !isRailType(selectedVariantData?.type)) return null;
+    if (selectedVariantData?.type === PATH_CONVEYOR || !isRailType(selectedVariantData?.type)) return null;
     return buildRailComponents(selectedVariant, trackCount, trackSpacing, trackDirections);
   }, [isRail, selectedVariant, selectedVariantData, pathId, trackCount, trackSpacing, trackDirections]);
 
@@ -410,7 +410,7 @@ export function usePathConstruction(
 
   /**
    * Unityの3Dプレビューへ渡す複合パス(軌道複線)の各線横オフセット(m)を求める。
-   * 軌道の新規敷設のみ非空で、道路・インフラ・ロープウェイ・既存パス編集は
+   * 軌道の新規敷設のみ非空で、道路・インフラ・人員搬送・既存パス編集は
    * 空配列(=中心線1本の単一プレビュー)。railComponents と同じ条件・同じ導出
    * (線路間隔=マスター幅+調整量)だが、STATE_EDIT_PATH 送信時点では
    * selectedVariant がまだ更新されていないため variantId 引数で直接計算する。
@@ -418,7 +418,7 @@ export function usePathConstruction(
    */
   const lateralOffsetsForVariant = useCallback((variantId: number, spacingDelta: number = trackSpacingDelta): number[] => {
     const data = masterData?.paths?.[variantId];
-    if (pathId != null || !data || !isRailType(data.type) || data.type === PATH_ROPEWAY) {
+    if (pathId != null || !data || !isRailType(data.type) || data.type === PATH_CONVEYOR) {
       return [];
     }
     const base = typeof data.width === "number" && data.width > 0 ? data.width : FALLBACK_TRACK_SPACING;
@@ -433,7 +433,7 @@ export function usePathConstruction(
    */
   const travelDirectionsForVariant = useCallback((variantId: number): number[] => {
     const data = masterData?.paths?.[variantId];
-    if (pathId != null || !data || !isRailType(data.type) || data.type === PATH_ROPEWAY) {
+    if (pathId != null || !data || !isRailType(data.type) || data.type === PATH_CONVEYOR) {
       return [];
     }
     return trackDirections;
