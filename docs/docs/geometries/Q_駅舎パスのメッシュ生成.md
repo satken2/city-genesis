@@ -80,6 +80,13 @@
 
 ### 建屋
 
+2000「簡易駅舎」は棒式ホーム脇のプレハブ風平屋。白いパネル壁・薄い片流れ屋根・
+小庇・前後の引き戸と窓を持ち、建屋本体5.3×3m、基礎込み5.9×3.95m、地上高2.99m。
+専有領域は6×4m、横ずれ0、outside配置。`stations.blend`の`2000/body`を
+`pipeline/jobs/build_station_2000.py`が生成し、既存材質を共有した1メッシュ・688三角形で構成する。
+跨線橋・階段・連絡通路パーツは持たない。model_typeは通常のstation_houseで、
+通路モデル欠落時の代替表示は共通仕様に従う。建屋だけの特別な描画方式は設けない。
+
 駅舎の著作元は `genesis-gallery/library/stations.blend` の `2001/body`・
 `2002/body`・`2011/body`。`pipeline/jobs/build_stations.py` が既存マテリアルを共有し、
 各モデルを1メッシュで生成する。通常建物の `Buildings/a2001` 等とは別のアセットである。
