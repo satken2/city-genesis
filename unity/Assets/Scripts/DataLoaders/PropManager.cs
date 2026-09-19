@@ -59,6 +59,11 @@ public class PropManager : BaseApiDataManager
     public static PropManager Instance { get; private set; }
     [SerializeField, Min(1)] private int subdivisions = 8;
     [SerializeField, Min(1000)] private int maxResidentCandidates = 250000;
+    [SerializeField] private bool useGpuForests = true;
+    private ForestRenderer forestRenderer;
+    private TerrainManager terrainManager;
+    private bool GpuForests => useGpuForests && (forestRenderer ?? (forestRenderer = new ForestRenderer())).Supported;
+    private bool IsGpuTree(int type) => (type == 1 || type == 2) && GpuForests;
     private const int BatchSize = 511;
     private sealed class Scatter
     {
@@ -114,6 +119,7 @@ public class PropManager : BaseApiDataManager
         public Spec spec;
         public Candidate[] points;
         public readonly List<DrawBatch> batches = new List<DrawBatch>();
+        public readonly List<ForestRenderer.Patch> forests = new List<ForestRenderer.Patch>();
         public bool dirty = true;
         public bool heightDirty;
         public int revision;
@@ -143,6 +149,8 @@ public class PropManager : BaseApiDataManager
     public int SubmittedBatchCount { get; private set; }
     public int SubmittedInstanceCount { get; private set; }
     public int SubmittedShadowInstances { get; private set; }
+    public int ForestCandidateCount { get { int n = 0; foreach (var c in chunks.Values) foreach (var p in c.forests) n += p.count; return n; } }
+    public int SubmittedForestBatches { get; private set; }
     /// <summary>常駐候補のうち、カメラからの距離でHiddenにしている点数(統計表示用)。</summary>
     public int DistanceHiddenCount { get { int n = 0; foreach (var chunk in chunks.Values) n += chunk.hiddenCount; return n; } }
     public const int ShadowInstanceBudget = 4096;
@@ -221,7 +229,7 @@ public class PropManager : BaseApiDataManager
             foreach (var region in scatter.regions)
                 foreach (var key in KeysIn(region.bounds, specs))
                     if (assigned.Add(key)) specs[key].scatters.Add(scatter);
-            if (timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs) { yield return null; timer.Restart(); }
+            if (timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs) { yield return RenderWorkScheduler.Continue; timer.Restart(); }
             if (Canceled(serial, batch)) yield break;
         }
         foreach (var item in response.instances ?? new List<PropInstanceItem>())
@@ -243,7 +251,7 @@ public class PropManager : BaseApiDataManager
                 if (!nextObstacles.TryGetValue(key, out var list)) nextObstacles[key] = list = new List<Obstacle>();
                 list.Add(obstacle);
             }
-            if (timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs) { yield return null; timer.Restart(); }
+            if (timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs) { yield return RenderWorkScheduler.Continue; timer.Restart(); }
             if (Canceled(serial, batch)) yield break;
         }
         obstacleGrid.Clear(); foreach (var pair in nextObstacles) obstacleGrid.Add(pair.Key, pair.Value);
@@ -254,6 +262,9 @@ public class PropManager : BaseApiDataManager
         var keep = new HashSet<Vector2Int>();
         int activeSpecs = ordered.FindAll(spec => spec.scatters.Count > 0 || spec.instances.Count > 0).Count;
         int quota = maxResidentCandidates / Mathf.Max(1, activeSpecs);
+        int forestSpecs = 0;
+        foreach (var spec in ordered) foreach (var scatter in spec.scatters) if (IsGpuTree(scatter.data.prop_type)) forestSpecs++;
+        int forestQuota = ForestRenderer.CandidateBudget / Mathf.Max(1, forestSpecs);
         foreach (var spec in ordered)
         {
             if (Canceled(serial, batch)) yield break;
@@ -261,7 +272,7 @@ public class PropManager : BaseApiDataManager
             spec.scatters.Sort((a,b) => a.data.prop_scatter_id.CompareTo(b.data.prop_scatter_id));
             spec.instances.Sort((a,b) => a.prop_instance_id.CompareTo(b.prop_instance_id));
             spec.obstacles.Sort((a,b) => string.CompareOrdinal(a.data.key,b.data.key));
-            spec.sourceSignature = quota + ":" + string.Join(";", spec.scatters.ConvertAll(s => $"s{s.data.prop_scatter_id}:{s.data.version}")) + "|" +
+            spec.sourceSignature = quota + ":" + forestQuota + ":" + GpuForests + ":" + string.Join(";", spec.scatters.ConvertAll(s => $"s{s.data.prop_scatter_id}:{s.data.version}")) + "|" +
                 string.Join(";", spec.instances.ConvertAll(i => $"i{i.prop_instance_id}:{i.version}"));
             spec.obstacleSignature = string.Join(";", spec.obstacles.ConvertAll(o => o.data.key + ":" + o.data.signature));
             chunks.TryGetValue(spec.key, out var previous);
@@ -272,6 +283,7 @@ public class PropManager : BaseApiDataManager
                 int visited = 0;
                 foreach (var scatter in spec.scatters)
                 {
+                    if (IsGpuTree(scatter.data.prop_type)) continue;
                     var model = Model(scatter.data.prop_type);
                     if (model.normal.Count == 0) continue;
                     foreach (var point in PropGeometry.Scatter(spec.rect, scatter.regions, scatter.data.density, scatter.data.seed))
@@ -281,7 +293,7 @@ public class PropManager : BaseApiDataManager
                         candidate.rank = StableSample<Candidate>.Rank(point.position.x, point.position.y, scatter.data.seed);
                         generated.Add(candidate.rank | (1UL << 63), candidate);
                         if ((++visited & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
-                        { yield return null; timer.Restart(); if (Canceled(serial, batch)) yield break; }
+                        { yield return RenderWorkScheduler.Continue; timer.Restart(); if (Canceled(serial, batch)) yield break; }
                     }
                 }
                 foreach (var point in spec.instances)
@@ -309,24 +321,42 @@ public class PropManager : BaseApiDataManager
                     p.visible = p.explicitInstance || !Blocked(new Vector2(p.position.x, p.position.z), Model(p.type).Clearance(p.scale), spec.obstacles);
                     points[i] = p;
                     if ((i & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
-                    { yield return null; timer.Restart(); if (Canceled(serial, batch)) yield break; }
+                    { yield return RenderWorkScheduler.Continue; timer.Restart(); if (Canceled(serial, batch)) yield break; }
                 }
                 // 通信待ちの間に地形追従が終わっていても、コミット時の高さを使う。
                 for (int i = 0; i < points.Length; i++)
                 {
                     points[i].position.y = Height(points[i].position) + points[i].heightOffset;
                     if ((i & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
-                    { yield return null; timer.Restart(); if (Canceled(serial, batch)) yield break; }
+                    { yield return RenderWorkScheduler.Continue; timer.Restart(); if (Canceled(serial, batch)) yield break; }
                 }
                 var previousBatches = previous != null ? new List<DrawBatch>(previous.batches) : null;
                 RemoveChunk(spec.key);
                 var chunk = new Chunk { spec = spec, points = points };
+                var obstacles = new List<PropGeometry.Region>();
+                foreach (var obstacle in spec.obstacles)
+                {
+                    var region = new PropGeometry.Region { bounds = obstacle.bounds };
+                    region.rings.Add(obstacle.ring); region.rings.AddRange(obstacle.holes); obstacles.Add(region);
+                }
+                try
+                {
+                    foreach (var scatter in spec.scatters)
+                    {
+                        if (!IsGpuTree(scatter.data.prop_type)) continue;
+                        var model = Model(scatter.data.prop_type);
+                        if (model.normal.Count == 0) continue;
+                        var patch = forestRenderer.Create(scatter.data, scatter.regions, obstacles, spec.rect, model, forestQuota);
+                        if (patch != null) chunk.forests.Add(patch);
+                    }
+                }
+                catch { foreach (var patch in chunk.forests) patch.Dispose(); throw; }
                 if (previousBatches != null) { chunk.batches.AddRange(previousBatches); chunk.offset = previous.offset; }
                 chunks.Add(spec.key, chunk); candidateCount += points.Length;
                 if (!chunksByCell.TryGetValue(spec.cell, out var keys)) chunksByCell[spec.cell] = keys = new HashSet<Vector2Int>();
                 keys.Add(spec.key);
             }
-            if (timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs) { yield return null; timer.Restart(); }
+            if (timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs) { yield return RenderWorkScheduler.Continue; timer.Restart(); }
         }
         foreach (var key in new List<Vector2Int>(chunks.Keys)) if (!keep.Contains(key)) RemoveChunk(key);
         loading = null;
@@ -392,6 +422,28 @@ public class PropManager : BaseApiDataManager
         Vector3 offset = Offset;
         foreach (var chunk in chunks.Values)
         {
+            // GPU個体を読み戻さず、レイが横切る小区画だけ同じseedで再現する。
+            foreach (var patch in chunk.forests)
+            {
+                if (!patch.ready || patch.hidden || !patch.bounds.IntersectRay(ray, out float patchDistance) || patchDistance > best) continue;
+                var scatter = chunk.spec.scatters.Find(s => s.data.prop_scatter_id == patch.sourceId);
+                if (scatter == null) continue;
+                for (int index = 0; index < patch.count; index++)
+                {
+                    int cell = patch.count == patch.gridCount ? index : Mathf.FloorToInt((float)index * patch.gridCount / patch.count);
+                    var sample = PropGeometry.Sample(patch.startX + cell % patch.gridWidth, patch.startZ + cell / patch.gridWidth, patch.spacing, patch.seed);
+                    if (!patch.rect.Contains(sample.position) || !scatter.regions.Exists(r => r.Contains(sample.position))) continue;
+                    if (Blocked(sample.position, patch.model.Clearance(sample.scale), chunk.spec.obstacles)) continue;
+                    var position = new Vector3(sample.position.x, 0, sample.position.y); position.y = Height(position);
+                    var cam = Camera.main;
+                    if (cam != null && Vector3.Distance(position + offset, cam.transform.position) >= DrawLodConfig.PROP_HIDDEN_ENTER_DISTANCE) continue;
+                    var bounds = PropRenderModel.TransformBounds(patch.model.bounds,
+                        Matrix4x4.TRS(position + offset, Quaternion.Euler(0,sample.rotation,0),Vector3.one*sample.scale));
+                    if (!bounds.IntersectRay(ray, out float distance) || distance >= best) continue;
+                    best = distance; found = true;
+                    result = new PickResult { scatter = true, id = patch.sourceId, type = patch.type, bounds = bounds, distance = distance };
+                }
+            }
             if (chunk.offset != offset || chunk.batches.Count == 0) continue;
             bool near = false;
             foreach (var batch in chunk.batches)
@@ -432,6 +484,7 @@ public class PropManager : BaseApiDataManager
     {
         foreach (var chunk in chunks.Values)
         {
+            if (scatter) foreach (var patch in chunk.forests) if (patch.sourceId == id) patch.hidden = true;
             bool changed = false;
             for (int i = 0; i < chunk.points.Length; i++)
             {
@@ -455,6 +508,20 @@ public class PropManager : BaseApiDataManager
             foreach (var key in keys)
             {
                 if (!chunks.TryGetValue(key, out var chunk)) continue;
+                foreach (var patch in chunk.forests)
+                {
+                    if (!patch.dirty && !chunk.heightDirty && chunk.offset == Offset) continue;
+                    if (terrainManager == null) terrainManager = FindAnyObjectByType<TerrainManager>();
+                    if (terrainManager != null && terrainManager.LoadedTerrainTiles.TryGetValue(chunk.spec.cell, out var terrain))
+                        forestRenderer.Generate(patch, terrain, Offset);
+                }
+                if (chunk.points.Length == 0)
+                {
+                    chunk.batches.Clear(); chunk.heightDirty = false; chunk.dirty = false; chunk.offset = Offset;
+                    if (timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
+                    { yield return RenderWorkScheduler.Continue; timer.Restart(); }
+                    continue;
+                }
                 var pos = cam.transform.position;
                 float projection = DrawLodEvaluator.GetTanHalfFov(cam);
                 bool far = !nearCells.Contains(chunk.spec.cell);
@@ -470,14 +537,14 @@ public class PropManager : BaseApiDataManager
                         {
                             chunk.points[i].position.y = Height(chunk.points[i].position) + chunk.points[i].heightOffset;
                             if ((i & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
-                            { yield return null; timer.Restart(); }
+                            { yield return RenderWorkScheduler.Continue; timer.Restart(); }
                         }
                         chunk.heightDirty = false; chunk.revision++;
                     }
                     if (!chunks.TryGetValue(key, out var current) || current != chunk) continue;
                     yield return RebuildBatches(chunk, cam, far, projection);
                 }
-                if (timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs) { yield return null; timer.Restart(); }
+                if (timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs) { yield return RenderWorkScheduler.Continue; timer.Restart(); }
             }
             for (int i = 1; i < DrawLodConfig.REEVALUATE_INTERVAL_FRAMES; i++) yield return null;
         }
@@ -497,7 +564,7 @@ public class PropManager : BaseApiDataManager
         for (int i = 0; i < chunk.points.Length; i++)
         {
             if ((i & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
-            { yield return null; timer.Restart(); if (serial != generation) yield break; }
+            { yield return RenderWorkScheduler.Continue; timer.Restart(); if (serial != generation) yield break; }
             var p = chunk.points[i]; if (!p.visible) continue;
             if (beyond) { p.lod = DrawLod.Hidden; p.distant = false; chunk.points[i] = p; hiddenCount++; continue; }
             var model = Model(p.type);
@@ -532,7 +599,7 @@ public class PropManager : BaseApiDataManager
                     }
                     next.Add(new DrawBatch { part = part, matrices = matrices, bounds = bounds, shadows = group.Key.Item2 != DrawLod.Far && Vector3.Distance(bounds.center, cameraPosition) < 150f });
                     if (timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
-                    { yield return null; timer.Restart(); if (serial != generation) yield break; }
+                    { yield return RenderWorkScheduler.Continue; timer.Restart(); if (serial != generation) yield break; }
                 }
         }
         if (serial == generation && revision == chunk.revision && offset == Offset && chunks.TryGetValue(chunk.spec.key, out var live) && live == chunk)
@@ -575,6 +642,7 @@ public class PropManager : BaseApiDataManager
     private void LateUpdate()
     {
         SubmittedBatchCount = 0; SubmittedInstanceCount = 0; SubmittedShadowInstances = 0;
+        SubmittedForestBatches = 0;
         if (!visible) return;
         var cam = Camera.main; if (cam == null) return;
         GeometryUtility.CalculateFrustumPlanes(cam, planes);
@@ -589,6 +657,10 @@ public class PropManager : BaseApiDataManager
             Graphics.RenderMeshInstanced(parameters, batch.part.mesh, batch.part.submesh, batch.matrices);
             SubmittedBatchCount++; SubmittedInstanceCount += batch.matrices.Length;
         }
+        int shadowBudget = ShadowInstanceBudget - SubmittedShadowInstances;
+        foreach (var chunk in chunks.Values) foreach (var patch in chunk.forests)
+            SubmittedForestBatches += forestRenderer.Draw(patch, cam, planes, ref shadowBudget);
+        SubmittedShadowInstances = ShadowInstanceBudget - shadowBudget;
     }
     public IEnumerator AdjustPropHeightsForCellsCoroutine(List<Vector2Int> cells)
     {
@@ -600,11 +672,12 @@ public class PropManager : BaseApiDataManager
             foreach (var key in new List<Vector2Int>(keys))
             {
                 if (!chunks.TryGetValue(key, out var chunk)) continue;
+                foreach (var patch in chunk.forests) patch.dirty = true;
                 for (int i = 0; i < chunk.points.Length; i++)
                 {
                     chunk.points[i].position.y = Height(chunk.points[i].position) + chunk.points[i].heightOffset; chunk.dirty = true; chunk.revision++;
                     if ((i & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
-                    { yield return null; timer.Restart(); }
+                    { yield return RenderWorkScheduler.Continue; timer.Restart(); }
                 }
             }
         }
@@ -612,6 +685,7 @@ public class PropManager : BaseApiDataManager
     private void RemoveChunk(Vector2Int key)
     {
         if (!chunks.TryGetValue(key, out var chunk)) return;
+        foreach (var patch in chunk.forests) patch.Dispose();
         candidateCount -= chunk.points.Length; chunks.Remove(key);
         if (chunksByCell.TryGetValue(chunk.spec.cell, out var keys))
         { keys.Remove(key); if (keys.Count == 0) chunksByCell.Remove(chunk.spec.cell); }
@@ -625,8 +699,10 @@ public class PropManager : BaseApiDataManager
     {
         generation++;
         if (loading != null) RenderWorkScheduler.Stop(this, loading); loading = null;
+        foreach (var chunk in chunks.Values) foreach (var patch in chunk.forests) patch.Dispose();
         chunks.Clear(); chunksByCell.Clear(); loadedCells.Clear(); nearCells.Clear();
         obstacleGrid.Clear(); obstacleReadyCells.Clear(); candidateCount = 0; PreviewRevision++;
         foreach (var model in models.Values) model.Dispose(); models.Clear();
+        forestRenderer?.Dispose(); forestRenderer = null;
     }
 }

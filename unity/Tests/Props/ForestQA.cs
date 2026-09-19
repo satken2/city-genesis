@@ -1,0 +1,194 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using UnityEditor;
+using UnityEngine;
+
+public static partial class PropsQA
+{
+    struct GpuPoint { public Vector4 positionScale, rotationVisible; }
+    static Terrain forestTerrain;
+    static void GenerateForests()
+    {
+        var renderer = Field(manager,"forestRenderer");
+        foreach (var chunk in Chunks.Values) foreach (var patch in (IList)Field(chunk,"forests"))
+            Check((bool)renderer.GetType().GetMethod("Generate").Invoke(renderer,new object[]{patch,forestTerrain,Vector3.zero}),"GPU generation unavailable");
+    }
+
+    static void CheckGpuForest()
+    {
+        var shader = Resources.Load<Shader>("Shaders/Forest");
+        Check(shader != null && shader.isSupported && !ShaderUtil.ShaderHasError(shader),"forest shader compilation failed");
+        var data = new TerrainData { heightmapResolution=33, size=new Vector3(500,100,500) };
+        var heights = new float[33,33];
+        for (int z=0;z<33;z++) for(int x=0;x<33;x++) heights[z,x] = .1f + x/32f*.3f + z/32f*.2f;
+        data.SetHeights(0,0,heights);
+        forestTerrain=Terrain.CreateTerrainGameObject(data).GetComponent<Terrain>();
+        forestTerrain.drawHeightmap=false;
+        var timer = new Stopwatch();
+        foreach (int count in new[]{10000,50000})
+        {
+            Set(manager,"useGpuForests",false);
+            timer.Restart(); Apply(Snapshot(count,true,count),true); timer.Stop();
+            double cpu = timer.Elapsed.TotalMilliseconds;
+            var expected = Points();
+            Set(manager,"useGpuForests",true);
+            timer.Restart(); Apply(Snapshot(count,true,count),true); timer.Stop();
+            Check((int)managerType.GetProperty("ResidentCandidateCount").GetValue(manager)==0,"GPU forest retained CPU candidates");
+            Check((int)managerType.GetProperty("ForestCandidateCount").GetValue(manager)>0,"GPU forest is empty");
+            results.Add($"GPU forest {count}: CPU snapshot {timer.Elapsed.TotalMilliseconds:F2}ms vs fallback {cpu:F2}ms; GPU dispatch/readback excluded");
+            timer.Restart(); GenerateForests(); timer.Stop();
+            results.Add($"GPU forest {count}: dispatch submission CPU {timer.Elapsed.TotalMilliseconds:F2}ms (GPU completion excluded)");
+            int valid=0;
+            var sampleMethod=asm.GetType("PropGeometry").GetMethod("Sample");
+            foreach(var chunk in Chunks.Values) foreach(var patch in (IList)Field(chunk,"forests"))
+            {
+                int n=(int)Field(patch,"count"), width=(int)Field(patch,"gridWidth");
+                var buffer=(GraphicsBuffer)Field(patch,"points");
+                var points=new GpuPoint[n]; buffer.GetData(points);
+                for(int i=0;i<n;i++)
+                {
+                    var sample=sampleMethod.Invoke(null,new object[]{(int)Field(patch,"startX")+i%width,(int)Field(patch,"startZ")+i/width,(float)Field(patch,"spacing"),(int)Field(patch,"seed")});
+                    Vector2 xy=(Vector2)Field(sample,"position");
+                    Check(Vector2.Distance(xy,new Vector2(points[i].positionScale.x,points[i].positionScale.z))<.0002f,"GPU/CPU seed position mismatch");
+                    Check(Mathf.Abs(points[i].positionScale.w-(float)Field(sample,"scale"))<.00001f,"GPU scale mismatch");
+                    bool inside=((Rect)Field(patch,"rect")).Contains(xy);
+                    bool visible=inside && expected.TryGetValue(xy,out bool allowed) && allowed;
+                    Check((points[i].rotationVisible.y>.5f)==visible,"GPU polygon/obstacle mismatch");
+                    float height=10+Mathf.Clamp(xy.x,0,500)*.06f+Mathf.Clamp(xy.y,0,500)*.04f;
+                    Check(Mathf.Abs(points[i].positionScale.y-height)<.015f,$"GPU terrain height mismatch at {xy}: {points[i].positionScale.y} expected {height}");
+                    if(visible)valid++;
+                }
+            }
+            Check(valid==expected.Count(p=>p.Value),"GPU duplicated/lost candidates at chunk boundaries");
+            object first=Chunks.Values.Cast<object>().First(c=>((IList)Field(c,"forests")).Count>0);
+            var old=((IList)Field(first,"forests"))[0];
+            Apply(Snapshot(count,true,count));
+            Check(Chunks.Values.Cast<object>().Any(c=>((IList)Field(c,"forests")).Contains(old)),"unchanged forest recreated buffers");
+            managerType.GetMethod("HideSource").Invoke(manager,new object[]{true,1});
+            Check(Chunks.Values.Cast<object>().All(c=>((IList)Field(c,"forests")).Cast<object>().All(p=>(bool)Field(p,"hidden"))),"scatter deletion did not hide GPU forest");
+        }
+        CheckGpuHolesAndEdits();
+        var zero=new float[33,33]; data.SetHeights(0,0,zero);
+        Set(manager,"useGpuForests",false); Apply(Snapshot(10000,true),true); Build(false);
+    }
+
+    static void CheckGpuHolesAndEdits()
+    {
+        var previousCells=cells;
+        cells=new List<Vector2Int>{new Vector2Int(-1,-1)};
+        var loaded=(HashSet<Vector2Int>)managerType.BaseType.GetField("loadedCells",flags).GetValue(manager);
+        loaded.Clear(); loaded.UnionWith(cells);
+        forestTerrain.transform.position=new Vector3(-500,0,-500);
+        var heights=new float[33,33];
+        for(int z=0;z<33;z++)for(int x=0;x<33;x++)heights[z,x]=.25f;
+        forestTerrain.terrainData.SetHeights(0,0,heights);
+        string snapshot="{\"scatters\":[{\"prop_scatter_id\":8,\"prop_type\":2,\"version\":1,\"density\":400,\"seed\":-17,\"region\":[[[[-500,-500],[-60,-500],[-60,-60],[-500,-60]],[[-420,-420],[-350,-420],[-350,-350],[-420,-350]]],[[[-40,-40],[0,-40],[0,0],[-40,0]]]]}],\"instances\":[],\"obstacles\":[{\"key\":\"water:0\",\"signature\":\"water\",\"polygon\":[[-480,-480],[-100,-480],[-100,-100],[-480,-100]],\"holes\":[[[-300,-300],[-200,-300],[-200,-200],[-300,-200]]]}]}";
+        Set(manager,"useGpuForests",false);Apply(snapshot,true);var expected=Points();
+        Set(manager,"useGpuForests",true);Apply(snapshot,true);GenerateForests();
+        var sampleMethod=asm.GetType("PropGeometry").GetMethod("Sample");
+        var found=new HashSet<Vector2>();
+        Vector3 pickPosition=Vector3.zero;
+        foreach(var chunk in Chunks.Values)foreach(var patch in (IList)Field(chunk,"forests"))
+        {
+            int n=(int)Field(patch,"count"), width=(int)Field(patch,"gridWidth");
+            var gpu=new GpuPoint[n];((GraphicsBuffer)Field(patch,"points")).GetData(gpu);
+            for(int i=0;i<n;i++)
+            {
+                var sample=sampleMethod.Invoke(null,new object[]{(int)Field(patch,"startX")+i%width,(int)Field(patch,"startZ")+i/width,(float)Field(patch,"spacing"),(int)Field(patch,"seed")});
+                var xy=(Vector2)Field(sample,"position");
+                bool visible=((Rect)Field(patch,"rect")).Contains(xy) && expected.TryGetValue(xy,out bool allowed) && allowed;
+                Check((gpu[i].rotationVisible.y>.5f)==visible,"negative coords / holes / island mismatch");
+                if(!visible)continue;
+                Check(found.Add(xy),"GPU duplicate across chunks");
+                Check(Mathf.Abs(gpu[i].positionScale.y-25)<.015f,"negative tile height mismatch");
+                pickPosition=new Vector3(xy.x,25,xy.y);
+            }
+        }
+        Check(found.SetEquals(expected.Where(x=>x.Value).Select(x=>x.Key)),"GPU hole/multipolygon missing visible tree");
+        camera.transform.position=pickPosition+Vector3.up*30;
+        var pickArgs=new object[]{new Ray(camera.transform.position,Vector3.down),100f,null};
+        Check((bool)managerType.GetMethod("TryPick").Invoke(manager,pickArgs),"GPU forest cannot be picked");
+        Check((bool)Field(pickArgs[2],"scatter") && (int)Field(pickArgs[2],"id")==8,"GPU pick wrong source");
+        var first=Chunks.Values.Cast<object>().Where(c=>((IList)Field(Field(c,"spec"),"obstacles")).Count>0)
+            .SelectMany(c=>((IList)Field(c,"forests")).Cast<object>()).First();
+        var oldBuffer=(GraphicsBuffer)Field(first,"points");
+        for(int z=0;z<33;z++)for(int x=0;x<33;x++)heights[z,x]=.4f;
+        forestTerrain.terrainData.SetHeights(0,0,heights);
+        Drain((IEnumerator)managerType.GetMethod("AdjustPropHeightsForCellsCoroutine").Invoke(manager,new object[]{cells}));
+        Check((bool)Field(first,"dirty"),"terrain edit did not invalidate GPU patch");GenerateForests();
+        var updated=new GpuPoint[(int)Field(first,"count")];oldBuffer.GetData(updated);
+        Check(updated.All(p=>Mathf.Abs(p.positionScale.y-40)<.015f),"GPU forest did not follow terrain edit");
+        Apply(snapshot.Replace("\"signature\":\"water\"","\"signature\":\"changed\""));
+        Check(!oldBuffer.IsValid(),"replaced GPU buffer leaked");
+        GenerateForests();
+        var preserved=Chunks.Values.Cast<object>().SelectMany(c=>((IList)Field(c,"forests")).Cast<object>()).First();
+        Drain((IEnumerator)managerType.GetMethod("ApplySnapshot",flags).Invoke(manager,new[]{Json(snapshot),cells,(object)true,999,null}));
+        Check(Chunks.Values.Cast<object>().Any(c=>((IList)Field(c,"forests")).Contains(preserved)),"stale load replaced GPU forest");
+        cells=previousCells;loaded.Clear();loaded.UnionWith(cells);forestTerrain.transform.position=Vector3.zero;
+        results.Add("GPU forest: negative coordinates, multipolygon holes, water islands, terrain edits, picking, unchanged reuse, buffer release and stale-load rejection passed");
+    }
+
+    static void SetupGpuRender()
+    {
+        if (renderStage==8)
+        {
+            var heights=new float[33,33];
+            for(int z=0;z<33;z++)for(int x=0;x<33;x++)
+                heights[z,x]=.15f + .22f*Mathf.Pow(Mathf.Sin(x*.14f),2) + .3f*Mathf.Pow(Mathf.Sin(z*.11f),2);
+            forestTerrain.terrainData.SetHeights(0,0,heights);
+            var tex=new Texture2D(1,1);tex.SetPixel(0,0,new Color(.29f,.35f,.18f));tex.Apply();
+            forestTerrain.terrainData.terrainLayers=new[]{new TerrainLayer{diffuseTexture=tex,tileSize=Vector2.one*20}};
+            forestTerrain.materialTemplate=new Material(Shader.Find("Universal Render Pipeline/Terrain/Lit"));
+            forestTerrain.drawHeightmap=true;
+        }
+        Set(manager,"useGpuForests",true);
+        Apply(Snapshot(10000,true,10000).Replace("\"prop_type\":1","\"prop_type\":2"),true);
+        // 本編ワーカーが所属タイルを解決してGPU生成する経路も確認する。
+        var tm=new GameObject("Forest QA TerrainManager").AddComponent(asm.GetType("TerrainManager"));
+        ((IDictionary)Field(tm,"terrainTiles"))[Vector2Int.zero]=forestTerrain;
+        Set(manager,"terrainManager",tm);
+        var worker=(IEnumerator)managerType.GetMethod("DrawWorker",flags).Invoke(manager,null);
+        for(int i=0;i<128;i++)
+        {
+            Check(worker.MoveNext(),"forest worker stopped");
+            if(worker.Current is IEnumerator child)Drain(child);
+            if(Chunks.Values.Cast<object>().All(c=>((IList)Field(c,"forests")).Cast<object>().All(p=>(bool)Field(p,"ready"))))break;
+        }
+        Check(Chunks.Values.Cast<object>().All(c=>((IList)Field(c,"forests")).Cast<object>().All(p=>(bool)Field(p,"ready"))),"worker did not generate forest");
+        (worker as IDisposable)?.Dispose();
+        ((IDictionary)Field(tm,"terrainTiles")).Clear();
+        UnityEngine.Object.DestroyImmediate(tm.gameObject);
+        Build(false);
+        camera.transform.position = renderStage==6 ? new Vector3(250,28,150) : renderStage==7 ? new Vector3(250,200,-280) : new Vector3(250,110,-100);
+        camera.transform.LookAt(new Vector3(250,renderStage>=8?40:0,320));
+        if(renderStage==9)
+        {
+            var broken=Resources.Load<Shader>("Shaders/ForestWithoutCluster");
+            Check(broken!=null && !ShaderUtil.ShaderHasError(broken),"missing-cluster regression shader failed");
+            foreach(Material material in ((IDictionary)Field(Field(manager,"forestRenderer"),"materials")).Values)
+                material.shader=broken;
+        }
+    }
+
+    static void CheckForestSunlight(Texture2D missingCluster)
+    {
+        var correct=new Texture2D(2,2);
+        correct.LoadImage(System.IO.File.ReadAllBytes(output+"/gpu-forest-mountain.png"));
+        var a=correct.GetPixels32();var b=missingCluster.GetPixels32();
+        double lit=0,unlit=0;int samples=0;
+        for(int i=0;i<a.Length*0.6;i++)
+        {
+            if(a[i].g<=a[i].r*1.1 || a[i].g<=a[i].b*1.05)continue;
+            lit+=a[i].r*.2126+a[i].g*.7152+a[i].b*.0722;
+            unlit+=b[i].r*.2126+b[i].g*.7152+b[i].b*.0722;
+            samples++;
+        }
+        Check(samples>10000,"sunlight comparison has too few forest pixels");
+        results.Add($"Forward+ sunlight: forest luminance {lit/samples:F2}, missing cluster variant {unlit/samples:F2}");
+        Check(lit>unlit*1.15,"Forward+ forest lost directional lighting");
+        UnityEngine.Object.DestroyImmediate(correct);
+    }
+}

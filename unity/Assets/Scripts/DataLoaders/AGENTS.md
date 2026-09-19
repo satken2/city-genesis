@@ -120,7 +120,14 @@
   - **再構築タイミング**: カメラ移動では再構築しない（world-spaceメッシュなので不要）。リソースロード完了時と、`TerrainManager.OnTerrainTileReady`（資源が存在するセルのみ）で再構築。同一フレームの複数イベントは `LateUpdate` で1回にまとめる。
   - **資源名ラベル**: ZoneManager と同じ ScreenSpaceOverlay Canvas 方式で `resource_type_label`(水源・森林等)を表示。`EnsureUICanvas` で専用Canvas(sortingOrder=55, ZoneManager=60より奥)を作り、`resource_type_label` を `Text`+`Outline` で描画。位置は `Update` でカメラが 1m/2° 以上動いたフレームだけ `center_point` を `WorldToScreenPoint` して更新(ZoneManagerと同じ間引き基準)。
 
-## 地形プロップ (PropManager / PropGeometry / PropRenderModel)
+## 地形プロップ (PropManager / PropGeometry / PropRenderModel / ForestRenderer)
+
+- 種類1/2の範囲配置は既定でForestRendererを使う。GPUが固定格子・seedによる散布、穴付き領域・障害物の判定、Terrain.heightmapTextureからの接地を行う。CPU個体配列・行列は保持しない。通常モデルは約100m以内、90〜110mで木ごとに切替距離を分散し、以遠はFar樹冠、1500mで非表示。カメラ移動では再散布しない。
+- Forest.shaderはURP LitのUniversalFragmentPBRを使う。本編PC_RendererはForward+なので_CLUSTER_LIGHT_LOOPのバリアントが必須。これを省くと主光源の減衰係数を通常Forward用のunity_LightData.zから読み、太陽光による陰影が消え得る。材質の基色・画像・Smoothness・Metallicを引き継ぐ。Tests/PropsはForward+で、同じシーンからクラスタ対応だけを抜いた検証用シェーダーとの輝度差も検査する。
+- ForestPlacement.computeのハッシュとポリゴン判定はPropGeometryと同じ規則。GPU候補は2,000,000個まで（32バイト/個）で、小区画×散布へ配分する。超過時のみ格子を均等抽出する。個別配置・他の種別・GPU非対応時はCPU候補経路を使う。近景もGPU配置なのでモデル切替で座標がずれない。
+- 森林の地形参照は所属Terrainタイルそのもの。1536m移動窓を使わない。タイル完成・地形編集でdirtyを立て、未完成タイルでは待つ。バッファは小区画に所有させ、置換・アンロード・ClearAllCellsで解放する。TryPickはレイが通る小区画だけCPUで再現し、GPU読み戻しは行わない。ForestCandidateCountとSubmittedForestBatchesをF8で観測する。
+
+以下は主に個別配置・森林以外・GPU非対応時のCPU候補経路の説明。
 
 - `GET /props?bbox=…&include_obstacles=true`を`ApiClient.GetBulk`で取得する。完全スナップショットの配置情報と障害物を同時に更新し、建物のGameObject/Colliderへ依存しない。
 - `LoadLodCells`は共通の常駐セル集合を使用する。個体の投影サイズでDrawLodを決め、セル由来のFar固定はしない。常駐範囲内でもカメラから一定距離以上はHidden(後述)。常駐範囲外は非表示。`CellDataLoader`から共通`LoadBatch`を渡し、旧処理の適用を防ぐ。
@@ -131,7 +138,7 @@
 - `PropManager`は一本ごとのGameObjectを作らず、候補配列と小区画別バッチを保持する。描画は`Graphics.RenderMeshInstanced`（最大511個/呼び出し）。全マップを一括バッチにせずBoundsでカリングする。
 - プロップID/versionの署名と障害物key/signatureの署名を分ける。障害物だけの変更では候補を再生成せず対象区画の表示可否だけ更新する。全土地区画が建物・床材の有無を問わず障害物になる（parcel:{id}、floor_variant=0）。非表示候補は復元用に残す。
 - `chunksByCell`でアンロード・地形追従の対象を引く。Near/Dynamicの高さは既存`TerrainFollowUpCoroutine`で更新し、初回Far地形ロードは`OnTerrainTileReady`でも高さ更新を予約する。地形高さの共通取得処理を使用する。
-- 生成・行列更新は`PerformanceConfig.FrameBudgetMs`で分散する。既定の常駐候補予算250,000を超える場合はカメラに近い小区画を優先し、区画の途中では切らない。更新中の旧/新配列の併存分は一時的に増える。
+- 生成・行列更新は`PerformanceConfig.FrameBudgetMs`で分散する。既定の常駐候補予算250,000を有効小区画へ均等配分し、固定順位で候補を抽出する（個別配置優先）。更新中の旧/新配列の併存分は一時的に増える。
 - `ResidentCandidateCount`/`ResidentChunkCount`、`SubmittedBatchCount`/`SubmittedInstanceCount`（サブメッシュごとの延べ数）、`LastRegeneratedChunks`/`LastExclusionUpdatedChunks`で負荷と差分を観測できる。
 - 候補は`sourceId`(explicitInstance ? prop_instance_id : prop_scatter_id)を持ち、`TryPick(ray, maxDistance)`が表示中候補のワールドAABB(モデルbounds×TRS)とレイの交差で最近傍1本を返す(ブルドーザ用。小区画は描画バッチのBoundsで粗く絞る)。`TryGetScatterRegions`は常駐セルが参照する散布範囲、`HideSource(scatter,id)`はDELETE成功直後の暫定非表示(正はリロード後のスナップショット)。
 - 正式仕様は`city-genesis/docs/docs/geometries/M_地形プロップ.md`。独立Unity検証は`Tests/Props/run.ps1`。橋下の高さ判定・UltraFar森林は対象外。削除UIは`InputHandlers/RemovalManager`(ブルドーザ)。
@@ -234,9 +241,9 @@ TrackPath.InfrastructureConnectionProviderにはIsInfrastructureConnectionを登
 
 プロップ障害物のholesは水域内の島を表す。PropGeometry.BlockedWithHolesを永続描画・プレビューで共用し、島内部を表示しつつ岸の境界・離隔内は除外する。
 
-プロップは距離で本数を間引かず、極小投影サイズによるHiddenも使わない。木1/2は幹なしの専用Farを使用し、投影比1%未満でPropRenderModelの6三角形の四角錐へ替え、1.2%以上で戻す。DrawLod.Far内の切り替えで、常駐セル・候補予算は維持する。生成した最小メッシュはPropRenderModel.Disposeで解放する。
+CPU候補経路のプロップは距離で本数を間引かず、極小投影サイズによるHiddenも使わない。木1/2は幹なしの専用Farを使用し、投影比1%未満でPropRenderModelの6三角形の四角錐へ替え、1.2%以上で戻す。DrawLod.Far内の切り替えで、常駐セル・候補予算は維持する。生成した最小メッシュはPropRenderModel.Disposeで解放する。
 
-プロップのHiddenは**カメラからの実距離だけ**で決める(`DrawLodConfig.PROP_HIDDEN_ENTER_DISTANCE`=1,500m以上で隠す/`PROP_HIDDEN_EXIT_DISTANCE`=1,350m未満で戻す。`DrawLodEvaluator.PropHiddenByDistance`)。投影LOD(`EvaluateBySize`)より先に判定し、Hiddenの点はバッチに載せない(=`TryPick`でも拾わない)。個別配置も対象。`RebuildBatches`は小区画矩形までのXZ距離(`ChunkDistance`。各点の実距離の下限)が進入距離以上なら個体判定を省いて全点Hidden+`Chunk.hidden=true`にし、`DrawWorker`はその小区画が進入距離の内側へ戻るまでカメラ移動による再構築をスキップする(dirty/heightDirty/原点変更は通常どおり処理)。正射影でも実距離のまま(トップダウンで高く引くほど消える)。F8の「距離非表示」は`DistanceHiddenCount`。
+CPU候補経路のプロップのHiddenは**カメラからの実距離だけ**で決める(`DrawLodConfig.PROP_HIDDEN_ENTER_DISTANCE`=1,500m以上で隠す/`PROP_HIDDEN_EXIT_DISTANCE`=1,350m未満で戻す。`DrawLodEvaluator.PropHiddenByDistance`)。投影LOD(`EvaluateBySize`)より先に判定し、Hiddenの点はバッチに載せない(=`TryPick`でも拾わない)。個別配置も対象。`RebuildBatches`は小区画矩形までのXZ距離(`ChunkDistance`。各点の実距離の下限)が進入距離以上なら個体判定を省いて全点Hidden+`Chunk.hidden=true`にし、`DrawWorker`はその小区画が進入距離の内側へ戻るまでカメラ移動による再構築をスキップする(dirty/heightDirty/原点変更は通常どおり処理)。正射影でも実距離のまま(トップダウンで高く引くほど消える)。F8の「距離非表示」は`DistanceHiddenCount`。
 
 プロップの障害物除外は範囲散布のみ。Candidate.explicitInstanceは常に表示可能とし、区画・道路・水域の追加や更新でも非表示にしない。PropInstanceItem.yは地面からの相対高さ(m)でCandidate.heightOffsetへ保持する。初期生成・スナップショット再利用・タイル完成・地形編集の全経路で「地形標高+heightOffset」を使う。常駐セル・候補予算・LODは通常どおり適用する。
 

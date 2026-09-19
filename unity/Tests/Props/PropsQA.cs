@@ -12,7 +12,7 @@ using UnityEngine.Rendering.Universal;
 using Debug = UnityEngine.Debug;
 
 // 独立したUnityプロジェクトで、本編のアセンブリと実FBXを検証する。
-public static class PropsQA
+public static partial class PropsQA
 {
     static Assembly asm;
     static Type managerType;
@@ -80,8 +80,9 @@ public static class PropsQA
             var cache=(IDictionary)Field(models,"_modelCache");
             ModelImportSettings.EnableReadWriteAll();
             ModelPrefabGenerator.SyncAll();
-            var rendererData=ScriptableObject.CreateInstance<UniversalRendererData>();
-            var pipeline=UniversalRenderPipelineAsset.Create(rendererData);
+            var rendererData=AssetDatabase.LoadAssetAtPath<UniversalRendererData>("Assets/Settings/PC_Renderer.asset");
+            Check(rendererData.renderingMode==RenderingMode.ForwardPlus,"QA must use the production Forward+ renderer");
+            var pipeline=AssetDatabase.LoadAssetAtPath<UniversalRenderPipelineAsset>("Assets/Settings/PC_RPAsset.asset");
             GraphicsSettings.defaultRenderPipeline=pipeline; QualitySettings.renderPipeline=pipeline;
             var previewSource = new Material(Shader.Find("Universal Render Pipeline/Lit"));
             var preview = (Material)asm.GetType("PropPlacementManager").GetMethod("CreatePreviewMaterial", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, new object[]{previewSource});
@@ -127,6 +128,7 @@ public static class PropsQA
             var ground=GameObject.CreatePrimitive(PrimitiveType.Plane);ground.transform.position=new Vector3(250,-.05f,250);ground.transform.localScale=Vector3.one*50;
             var groundMat=new Material(Shader.Find("Universal Render Pipeline/Lit"));groundMat.SetColor("_BaseColor",new Color(.29f,.35f,.18f));ground.GetComponent<Renderer>().sharedMaterial=groundMat;
             managerType=asm.GetType("PropManager");manager=new GameObject("Props").AddComponent(managerType);
+            Set(manager,"useGpuForests",false);
             // 編集モードではAwakeに依存せず、ロード対象を明示する。
             var loaded=(HashSet<Vector2Int>)managerType.BaseType.GetField("loadedCells",flags).GetValue(manager);loaded.UnionWith(cells);
             var dense=GameObject.CreatePrimitive(PrimitiveType.Sphere);dense.SetActive(false);
@@ -207,6 +209,7 @@ public static class PropsQA
             UnityEngine.Object.DestroyImmediate(terrain);UnityEngine.Object.DestroyImmediate(terrainData);
             Drain((IEnumerator)managerType.GetMethod("AdjustPropHeightsForCellsCoroutine").Invoke(manager,new object[]{cells}));
             // 描画はEditorのフレームを分け、同一フレームの描画登録を累積させない。
+            CheckGpuForest();
             EditorApplication.update += RenderTick;
         }
         catch(Exception ex){File.WriteAllText(output+"/result.txt",ex.ToString());Debug.LogException(ex);EditorApplication.Exit(1);}
@@ -374,7 +377,7 @@ public static class PropsQA
                     camera.transform.LookAt(new Vector3(250,0,250));
                     Build(false);
                 }
-                else
+                else if (renderStage == 5)
                 {
                     Apply("{\"instances\":[{\"prop_instance_id\":101,\"prop_type\":101,\"x\":241,\"y\":1.5,\"z\":250,\"scale\":1},{\"prop_instance_id\":102,\"prop_type\":102,\"x\":246,\"y\":1.5,\"z\":250,\"scale\":1},{\"prop_instance_id\":103,\"prop_type\":103,\"x\":252,\"y\":1.5,\"z\":250,\"scale\":1},{\"prop_instance_id\":104,\"prop_type\":104,\"x\":258,\"y\":1.5,\"z\":250,\"scale\":1}],\"scatters\":[],\"obstacles\":[]}",true);
                     var slab=GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -390,6 +393,7 @@ public static class PropsQA
                     camera.transform.position=new Vector3(267,17,268);camera.transform.LookAt(new Vector3(250,3,250));
                     Build(false);
                 }
+                else SetupGpuRender();
                 camera.targetTexture=new RenderTexture(1200,850,24);
                 cpuTotal=0;
             }
@@ -399,20 +403,25 @@ public static class PropsQA
             if(renderFrame>=10)cpuTotal+=renderTimer.Elapsed.TotalMilliseconds;
             renderFrame++;
             if(renderFrame<30)return;
-            string filename=renderStage==0?"preview-near.png":renderStage==1?"preview-far.png":renderStage==2?"preview-50000.png":renderStage==3?"forest-conifer.png":renderStage==4?"forest-broadleaf.png":"station-stair-props.png";
+            string filename=renderStage==0?"preview-near.png":renderStage==1?"preview-far.png":renderStage==2?"preview-50000.png":renderStage==3?"forest-conifer.png":renderStage==4?"forest-broadleaf.png":renderStage==5?"station-stair-props.png":renderStage==6?"gpu-forest-near.png":renderStage==7?"gpu-forest-far.png":renderStage==8?"gpu-forest-mountain.png":"gpu-forest-mountain-no-cluster.png";
             results.Add(filename+" warmed submit+Camera.Render CPUms/frame="+(cpuTotal/20).ToString("F2")+
                 ", submittedBatches="+managerType.GetProperty("SubmittedBatchCount").GetValue(manager)+
-                ", submeshInstances="+managerType.GetProperty("SubmittedInstanceCount").GetValue(manager));
-            Check((int)managerType.GetProperty("SubmittedBatchCount").GetValue(manager)>0,"no GPU submission");
+                ", submeshInstances="+managerType.GetProperty("SubmittedInstanceCount").GetValue(manager)+
+                ", forestBatches="+managerType.GetProperty("SubmittedForestBatches").GetValue(manager));
+            Check((int)managerType.GetProperty(renderStage<6?"SubmittedBatchCount":"SubmittedForestBatches").GetValue(manager)>0,"no GPU submission");
             var rt=camera.targetTexture;RenderTexture.active=rt;
             var tex=new Texture2D(1200,850,TextureFormat.RGB24,false);tex.ReadPixels(new Rect(0,0,1200,850),0,0);tex.Apply();
             File.WriteAllBytes(output+"/"+filename,tex.EncodeToPNG());RenderTexture.active=null;camera.targetTexture=null;
             Check(tex.GetPixels32().Count(c=>c.r>230 && c.g<30 && c.b>230)<1000,"shader error pixels in "+filename);
+            if(renderStage==9)CheckForestSunlight(tex);
             UnityEngine.Object.DestroyImmediate(tex);UnityEngine.Object.DestroyImmediate(rt);
             renderFrame=0;renderStage++;
-            if(renderStage<6)return;
+            if(renderStage<10)return;
             EditorApplication.update-=RenderTick;
-            results.Add("PASS checks="+checks+"; screenshot rendering uses URP Lit materials on actual FBX geometry; CPU timings exclude GPU completion");
+            var buffers=Chunks.Values.Cast<object>().SelectMany(c=>((IList)Field(c,"forests")).Cast<object>()).Select(p=>(GraphicsBuffer)Field(p,"points")).ToArray();
+            managerType.GetMethod("ClearAllCells").Invoke(manager,null);
+            Check(buffers.All(b=>!b.IsValid()),"session clear leaked GPU forest buffers");
+            results.Add("PASS checks="+checks+"; actual FBX with URP Lit (fallback) / Forest.shader (GPU); CPU timings exclude GPU completion");
             File.WriteAllLines(output+"/result.txt",results);EditorApplication.Exit(0);
         }
         catch(Exception ex)
