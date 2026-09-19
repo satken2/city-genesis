@@ -2106,11 +2106,12 @@ public class PathManager : BaseApiDataManager
 
                 nodeGrid?.Add(cachedNode, cachedNode.GetAbsolutePosition());
             }
-            if (positionChanged || cachedNode.type != node.type)
+            if (positionChanged || cachedNode.type != node.type || cachedNode.station_path_id != node.station_path_id)
             {
                 NodeDataVersion++;
             }
             cachedNode.type = node.type;
+            cachedNode.station_path_id = node.station_path_id;
             node = cachedNode;
         }
         else
@@ -4500,6 +4501,7 @@ public class NodeGeometryResponse
 public class NodeData
 {
     public int node_id;
+    public int? station_path_id;
     public int node_temp_id;
     public float[] position;
 

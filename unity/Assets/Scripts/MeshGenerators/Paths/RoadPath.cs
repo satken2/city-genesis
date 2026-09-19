@@ -283,6 +283,12 @@ public class RoadPath : IPathMeshGenerator
     /// </param>
     public static GameObject CreateSplineMesh(GameObject parent, SplineComputer spline, string prefabName, float width, float centerOffsetX, float offsetY, bool mirrorX = false, string fallbackPrefabName = null, bool isDashed = false, bool stretchToWidth = true, double clipFrom = 0.0, double clipTo = 1.0, bool singleSpan = false, bool compensatePivot = true, float maxTileLength = MAX_EXTRUDE_TILE_LENGTH, bool normalizeBodySurface = true)
     {
+        // 施工中の共通入口でも、索道のケーブルを道路幅へ拡大しない。
+        if (prefabName == "Models/Paths/p601/body" || prefabName == "Models/Paths/p602/body")
+        {
+            stretchToWidth = false;
+            normalizeBodySurface = false;
+        }
         // プレハブのロード。描画LODが接写なら `_close` を優先し、バリアント→タイプの順で解決する
         // (PathDrawContext.ResolvePrefab)。接写パーツは無印と bbox・原点が一致する規約なので配置計算は共通。
         GameObject prefab = null;
@@ -780,7 +786,12 @@ public class RoadPath : IPathMeshGenerator
         // Road Body
         // 地形解像度限界・Zファイティングによる埋没を回避するため、道路本体はスプラインから浮かせる。
         // single_span=true の場合は body をタイル化せず1枚で引き伸ばす（アンカー点間の直線スパン）。
+        // 索道はケーブルの実寸間隔と原点を保ち、駅の屋根を路面として高さ補正しない。
+        bool ropeway = pathData.path_variant == 601 || pathData.path_variant == 602;
         GameObject roadBody = CreateSplineMesh(container, spline, $"{variantBase}/body", width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/body", singleSpan: singleSpan);
+        if (ropeway)
+            CreateSplineMesh(container, spline, $"{variantBase}/station_shell", width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE,
+                stretchToWidth: false, maxTileLength: 0, normalizeBodySurface: false);
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] body: {(roadBody != null ? "生成成功" : "生成失敗（プレハブなし？）")}");
 
         if (roadBody == null)

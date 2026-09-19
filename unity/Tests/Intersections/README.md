@@ -47,3 +47,5 @@ Platformsは32m/256mの実軌道FBXで枕木の伸長・頂点数上限・分割
 初回だけ`-SyncLandmarkPrefabs`を追加すると、検証済みのFBXから本編のModelPrefabGeneratorでラッパープレハブを生成し、新規7種のResourcesへ取り込む。既存プレハブは上書きせず、GUID競合時は停止する。通常の検証はこのオプションを付けず、ゲーム資産へ書き込まない。
 
 レンガ高架は交差するアーチの全体省略・幅広道路・上側道路・同標高・深いトンネル・移動/削除後の復帰と道床維持も検査する。近傍再生成の通知はTests/Pillars/run-unity.ps1で検査する。
+
+RailYardは1064モノレール車庫も検査する。実FBXの架線不在・端子へのリード・細い単桁の曲線合流部の連続性を確認し、monorail-yard-preview.pngとmonorail-yard-throat.pngを出力する。

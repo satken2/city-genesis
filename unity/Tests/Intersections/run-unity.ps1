@@ -27,9 +27,11 @@ if ($StationHouse) {
     Copy-Item -LiteralPath "$unityRoot/ProjectSettings/TagManager.asset" -Destination "$qaRoot/ProjectSettings/TagManager.asset" -Force
 }
 if ($RailYard) {
-    $yardAssets = Join-Path $qaRoot 'Assets/Buildings/a1060'
-    New-Item -ItemType Directory -Path $yardAssets -Force | Out-Null
-    Copy-Item -LiteralPath (Join-Path $unityRoot 'Assets/Models/Buildings/a1060/0') -Destination $yardAssets -Recurse -Force
+    foreach ($variant in @(1060,1064)) {
+        $yardAssets = Join-Path $qaRoot "Assets/Buildings/a$variant"
+        New-Item -ItemType Directory -Path $yardAssets -Force | Out-Null
+        Copy-Item -LiteralPath (Join-Path $unityRoot "Assets/Models/Buildings/a$variant/0") -Destination $yardAssets -Recurse -Force
+    }
 }
 $pathAssets = Join-Path $qaRoot 'Assets/Paths'
 New-Item -ItemType Directory -Path $pathAssets -Force | Out-Null

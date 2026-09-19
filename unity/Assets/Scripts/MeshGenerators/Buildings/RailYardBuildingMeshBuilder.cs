@@ -558,6 +558,14 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
                     string name = mats[sub] != null ? mats[sub].name : "";
                     float edge = name.StartsWith("PATH_ROADBED") ? 1.55f
                         : (name.StartsWith("PATH_CONCRETE") || name.StartsWith("PATH_RAIL_METAL")) ? 1.3f : 0f;
+                    // 細い単桁は通常線路の枕木幅を持たない。サブメッシュの実断面へ接続する。
+                    if (edge > 0f && source.bounds.size.x < 2f)
+                    {
+                        edge = 0f;
+                        Vector3[] authoredVertices = source.vertices;
+                        foreach (int index in source.GetTriangles(sub))
+                            edge = Mathf.Max(edge, Mathf.Abs(authoredVertices[index].x));
+                    }
                     if (edge == 0f) continue;
                     int[] indices = source.GetTriangles(sub);
                     var triangles = new List<int>();

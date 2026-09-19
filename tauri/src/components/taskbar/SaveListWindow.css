@@ -10,13 +10,30 @@
  * 塗り色と左端の実線ブロックで示す。
  */
 
+/**
+ * ウィンドウ全体の枠
+ * 確認ダイアログのオーバーレイ(absolute)の基準になるため、ここ自体はスクロールさせない。
+ * スクロールを持たせると、オーバーレイがスクロール前の原点=一覧の先頭に貼り付いてしまう。
+ */
 .save-list-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+/**
+ * スクロールする内容領域
+ */
+.save-list-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  height: 100%;
-  overflow-y: auto;
 }
 
 /**

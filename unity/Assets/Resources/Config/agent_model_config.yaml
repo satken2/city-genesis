@@ -134,6 +134,11 @@ agents:
     prebuilt: true
     variants:
       - 0
+  1064:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
   2000:
     model: true
     prebuilt: false

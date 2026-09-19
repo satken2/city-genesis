@@ -60,10 +60,53 @@ public static class RailYardQA
             Require(Covers(mesh, new Vector2(0f, 77f)), "Missing terminal lead");
             CheckMovedMeshes(assembly,yard,summary,building);
             Render(root, mesh, materials);
+            CheckMonorail(root, yard, summary, building, cache);
             File.WriteAllText(report, $"PASS rail yard: {checks} checks; {mesh.vertexCount} vertices\n");
             EditorApplication.Exit(0);
         }
         catch (Exception e) { File.WriteAllText(report, "FAIL " + e); Debug.LogException(e); EditorApplication.Exit(1); }
+    }
+
+    static void CheckMonorail(string root, Type yard, Type summary, object building, IDictionary cache)
+    {
+        foreach (string part in new[] {"yard_wire","yard_pole","yard_beam","floor"})
+            cache.Remove($"Models/Buildings/b0/0/{part}");
+        foreach (string part in new[] {"yard_track","yard_stop","yard_shed","fence-w1"})
+        {
+            string asset = $"Assets/Buildings/a1064/0/{part}.fbx";
+            var importer = (ModelImporter)AssetImporter.GetAtPath(asset);
+            importer.isReadable = true; importer.SaveAndReimport();
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(asset);
+            cache[$"Models/Buildings/b0/0/{part}"] = prefab;
+            cache[$"Models/Buildings/a1064/0/{part}"] = prefab;
+        }
+        summary.GetField("variant").SetValue(building,1064);
+        object result=yard.GetMethod("Generate").Invoke(Activator.CreateInstance(yard),new[] {building,(object)false});
+        var mesh=(Mesh)result.GetType().GetProperty("Mesh").GetValue(result);
+        var materials=(Material[])result.GetType().GetProperty("Materials").GetValue(result);
+        Require(mesh.vertexCount>5000,"Monorail yard fell back to box");
+        Require(mesh.bounds.max.y<6.1f,"Unwanted overhead wire equipment");
+        Require(Covers(mesh,new Vector2(0,79)),"Missing monorail lead");
+        var polygon=new[] {new Vector2(-80,-19),new Vector2(80,-19),new Vector2(80,19),new Vector2(-80,19)};
+        var rows=((IEnumerable)yard.GetMethod("PlanRows",PrivateStatic).Invoke(null,new object[] {polygon,new Vector2(80,0),0f,7})).Cast<object>();
+        foreach(var row in rows)
+        {
+            var type=row.GetType();
+            if((int)type.GetField("Side").GetValue(row)==0) continue;
+            var p0=new Vector2((float)type.GetField("StraightEnd").GetValue(row),(float)type.GetField("V").GetValue(row));
+            var p3=(Vector2)type.GetField("Target").GetValue(row);
+            var direction=(Vector2)type.GetField("Direction").GetValue(row);
+            var p1=p0+Vector2.right*((p3.x-p0.x)*.4f);
+            var p2=p3-direction*4;
+            for(int i=48;i<=96;i++)
+            {
+                float t=i/96f, a=1-t;
+                var p=a*a*a*p0+3*a*a*t*p1+3*a*t*t*p2+t*t*t*p3;
+                Require(Covers(mesh,new Vector2(-p.y,p.x)),"Gap in monorail merging guideway at "+p);
+            }
+        }
+        var old=GameObject.Find("RailYard"); if(old!=null) UnityEngine.Object.DestroyImmediate(old);
+        Render(root,mesh,materials,"monorail-yard");
     }
 
     static void CheckPlan(Type yard)
@@ -143,7 +186,7 @@ public static class RailYardQA
         return false;
     }
 
-    static void Render(string root, Mesh mesh, Material[] source)
+    static void Render(string root, Mesh mesh, Material[] source, string prefix = "rail-yard")
     {
         var go = new GameObject("RailYard"); go.AddComponent<MeshFilter>().sharedMesh=mesh;
         go.AddComponent<MeshRenderer>().sharedMaterials = source.Select(m => new Material(Shader.Find("Standard")) {
@@ -155,10 +198,10 @@ public static class RailYardQA
         camera.orthographic=true; camera.orthographicSize=90;
         camera.transform.position=new Vector3(90,145,155); camera.transform.LookAt(Vector3.zero);
         camera.clearFlags=CameraClearFlags.SolidColor; camera.backgroundColor=new Color(.23f,.30f,.25f);
-        Save(camera,root+"/Temp/IntersectionUnityQA/rail-yard-preview.png");
+        Save(camera,root+"/Temp/IntersectionUnityQA/"+prefix+"-preview.png");
         camera.orthographicSize=40;
         camera.transform.position=new Vector3(45,80,110); camera.transform.LookAt(new Vector3(0,0,35));
-        Save(camera,root+"/Temp/IntersectionUnityQA/rail-yard-throat.png");
+        Save(camera,root+"/Temp/IntersectionUnityQA/"+prefix+"-throat.png");
     }
 
     static void Save(Camera camera, string path)

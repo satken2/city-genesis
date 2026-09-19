@@ -70,6 +70,14 @@ public static class MonorailQA
                 Check(car.Max(v => Mathf.Abs(v.x)) < 1.5f, "Vehicle must clear boarding edge");
                 Check(car.All(v => v.y >= -.001f), "Vehicle penetrates guideway top");
             }
+            // 検証用ラッパーは本編の生成器で再作成し、以前のGUIDに依存させない。
+            foreach (string guid in AssetDatabase.FindAssets("t:Model", new[] {"Assets/Models"}))
+            {
+                string source = AssetDatabase.GUIDToAssetPath(guid);
+                if (!source.EndsWith(".fbx", StringComparison.OrdinalIgnoreCase)) continue;
+                string wrapper = Path.ChangeExtension(source.Replace("Assets/Models/", "Assets/Resources/Models/"), ".prefab");
+                ModelPrefabGenerator.CreateWrapperPrefab(source, wrapper);
+            }
             ModelPrefabGenerator.SyncAll();
             foreach (string relative in new[] {"Paths/p501/track", "Paths/p502/platform", "Props/308", "Props/309"})
                 Check(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Resources/Models/" + relative + ".prefab") != null, "Missing generated prefab " + relative);

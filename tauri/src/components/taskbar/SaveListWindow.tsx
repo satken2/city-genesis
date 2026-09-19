@@ -190,81 +190,83 @@ export function SaveListWindow({ apiBaseUrl, onClose }: SaveListWindowProps) {
   }
 
   return (
-    <div className="save-list-body" style={{ position: "relative" }}>
-      <div className="save-list-header-actions">
-        <button
-          className="save-list-open-folder-btn"
-          onClick={handleOpenFolder}
-          type="button"
-        >
-          {t("saveList.openFolderButton")}
-        </button>
-      </div>
+    <div className="save-list-body">
+      <div className="save-list-scroll">
+        <div className="save-list-header-actions">
+          <button
+            className="save-list-open-folder-btn"
+            onClick={handleOpenFolder}
+            type="button"
+          >
+            {t("saveList.openFolderButton")}
+          </button>
+        </div>
 
-      {loading ? (
-        <div className="save-list-loading">{t("saveList.loading")}</div>
-      ) : saveEntries.length === 0 ? (
-        <div className="save-list-empty">{t("saveList.noSaves")}</div>
-      ) : (
-        <div className="save-list-items">
-          {saveEntries.map((entry) => {
-            const isCurrent = entry.id === currentSaveId;
-            return (
-              <div
-                key={entry.id}
-                className={`save-list-card ${isCurrent ? "save-list-card--current" : ""}`}
-              >
-                <div className="save-list-card-header">
-                  <span className="save-list-card-name">
-                    {entry.city_name || `Save ${entry.id.slice(0, 8)}`}
-                    {isCurrent && (
-                      <span className="save-list-card-current-badge">
-                        {t("saveList.currentSave")}
-                      </span>
-                    )}
-                  </span>
-                  <div className="save-list-card-actions">
-                    <button
-                      className="save-list-card-load-btn"
-                      onClick={() => setConfirmSaveId(entry.id)}
-                      disabled={busy}
-                      type="button"
-                    >
-                      {t("saveList.loadButton")}
-                    </button>
-                    <button
-                      className="save-list-card-delete-btn"
-                      onClick={() => setConfirmDeleteId(entry.id)}
-                      disabled={busy}
-                      type="button"
-                    >
-                      {t("saveList.deleteButton")}
-                    </button>
+        {loading ? (
+          <div className="save-list-loading">{t("saveList.loading")}</div>
+        ) : saveEntries.length === 0 ? (
+          <div className="save-list-empty">{t("saveList.noSaves")}</div>
+        ) : (
+          <div className="save-list-items">
+            {saveEntries.map((entry) => {
+              const isCurrent = entry.id === currentSaveId;
+              return (
+                <div
+                  key={entry.id}
+                  className={`save-list-card ${isCurrent ? "save-list-card--current" : ""}`}
+                >
+                  <div className="save-list-card-header">
+                    <span className="save-list-card-name">
+                      {entry.city_name || `Save ${entry.id.slice(0, 8)}`}
+                      {isCurrent && (
+                        <span className="save-list-card-current-badge">
+                          {t("saveList.currentSave")}
+                        </span>
+                      )}
+                    </span>
+                    <div className="save-list-card-actions">
+                      <button
+                        className="save-list-card-load-btn"
+                        onClick={() => setConfirmSaveId(entry.id)}
+                        disabled={busy}
+                        type="button"
+                      >
+                        {t("saveList.loadButton")}
+                      </button>
+                      <button
+                        className="save-list-card-delete-btn"
+                        onClick={() => setConfirmDeleteId(entry.id)}
+                        disabled={busy}
+                        type="button"
+                      >
+                        {t("saveList.deleteButton")}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="save-list-card-meta">
+                    <span>
+                      {t("saveList.population")}: {entry.population.toLocaleString()}
+                    </span>
+                    <span>
+                      {t("saveList.inGameDate")}:{" "}
+                      <EpochDate daysSinceEpoch={entry.current_date} />
+                    </span>
+                  </div>
+                  <div className="save-list-card-savedat">
+                    {t("saveList.savedAt")}: {formatSavedAt(entry.saved_at)}
                   </div>
                 </div>
-                <div className="save-list-card-meta">
-                  <span>
-                    {t("saveList.population")}: {entry.population.toLocaleString()}
-                  </span>
-                  <span>
-                    {t("saveList.inGameDate")}:{" "}
-                    <EpochDate daysSinceEpoch={entry.current_date} />
-                  </span>
-                </div>
-                <div className="save-list-card-savedat">
-                  {t("saveList.savedAt")}: {formatSavedAt(entry.saved_at)}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        )}
 
-      {status && (
-        <div className={`save-list-status save-list-status--${status.type}`}>
-          {status.text}
-        </div>
-      )}
+        {status && (
+          <div className={`save-list-status save-list-status--${status.type}`}>
+            {status.text}
+          </div>
+        )}
+      </div>
 
       {confirmSaveId && (
         <div

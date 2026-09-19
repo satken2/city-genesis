@@ -32,6 +32,16 @@
 
 制作元は`genesis-gallery/pipeline/jobs/build_landmark_paths.py`と`library/paths.blend`。実FBXによる端部・接地・塔位置の検証は`Tests/Intersections/run-unity.ps1 -LandmarkPaths`。ギャラリーの吊り橋見本は160m、街路見本は30mであり、ゲームの敷設長を固定するものではない。
 
+## ロープウェイ601・ロープウェイ駅602のモデル
+
+601/602はRoadPathで描く。マスター幅8mは判定帯として維持し、bodyの往復ケーブルは中心間隔4.2m（左右±2.1m）の実寸で配置する。CreateSplineMeshはこの2バリアントのbodyについて幅伸縮と路面上面への高さ補正を無効にし、施工時も同じ位置を保つ。bodyはsingle_spanでアンカー間へ伸ばす。
+
+pillarは天端0・下端-8m。601は鋼管柱、602は左右の白い角柱で中央通路を空ける。pillar_capは実寸の横梁・左右各4輪の滑車・保守足場、601は梯子上部も持つ。ケーブル下面は配置補正後にスプライン+0.02mで滑車上端と一致する。cap下端は601が-1.65m、602が-4.05m。支柱間隔は100m／40m、アンカーにも柱を置く。滑車列は水平保持し勾配に応じた回転は行わない。
+
+602はstation_shellで白い床版・柱・腰壁、両側のガラス壁、濃い青灰色の曲面屋根と天窓を描く。前後は開放する。床版は幅8m、屋根は約8.5m、長手8m。実配置の床上面はスプライン-3.3m、床版下面-3.6mで受け梁へ接続する。ケーブル原点を保つため屋根を路面として扱わない。shellは実寸幅・maxTileLength=0・normalizeBodySurface=falseで反復し、区間の長さに合う整数タイル数へ合わせる。道路用の区間LODは適用しない。鉄道用platform_widthは使用しない。
+
+制作元はgenesis-gallery/library/paths.blendとpipeline/jobs/build_ropeway.py。既存のPATH系およびBD_WHITE_WALL・BD_WINDOW・BD_DARK_METALを共有する。ガラスは不透明な窓材で表現する。かご・動的なたるみ・終端折り返し機構・階段は含まない。床が地形へ埋まらない高さで敷設する。Unity取り込み後の実寸・接点・床版の接合・自動プレハブ生成はunity/Tests/Ropeway/run.ps1で検証する。
+
 ## 概要
 
 バックエンドの Path データから、道路の外観メッシュを組み立てて配置する仕様。

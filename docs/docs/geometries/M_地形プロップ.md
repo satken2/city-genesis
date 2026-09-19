@@ -176,7 +176,7 @@ Unityからの`edit_prop:update_instances`とPOST/GETの各個別配置は`x, y,
 
 ### M.7.2. 乗り物モデルの手動配置
 
-モノレール先頭車308・中間車309は`build_monorail.py`がprops.blendへ著作する手動配置車両。白い面取り車体・青帯・乗降扉・屋上機器・連結部を持ち、幅2.7m、連結端間14m、高さ3.85m。原点は走行タイヤの接地面、前方はUnity +Z。501/502の桁上面（スプライン+0.12m）へ原点を合わせると床高1.38mがホーム面と一致する。14mピッチで連結し、後尾は先頭車を180度回して使う。運行描画への自動割り当てはない。既存のPROP材質だけを使い、先頭車272・中間車276三角形。
+モノレール先頭車308・中間車309は`build_monorail.py`がprops.blendへ著作する手動配置車両。通勤電車風の平らな角型前面・白い面取り車体・青帯・乗降扉・屋上機器・連結部を持ち、幅2.7m、連結端間14m、高さ3.85m。原点は走行タイヤの接地面、前方はUnity +Z。501/502の桁上面（スプライン+0.12m）へ原点を合わせると床高1.38mがホーム面と一致する。14mピッチで連結し、後尾は先頭車を180度回して使う。運行描画への自動割り当てはない。既存のPROP材質だけを使い、先頭車274・中間車276三角形。
 
 工事車両と環境演出の航空機・船舶は固定名のFBX(`construction_*` / `ambient_*`)で描画されるが、飾りとして自由に置けるよう数値IDの別名でも `prop_master` に登録している。`genesis-gallery/pipeline/jobs/build_prop_aliases.py` が `props.blend` 内でメッシュデータを共有した数値IDコレクションを作り、`Props/{ID}.fbx` として書き出す。元モデルを再著作したら別名も再生成する。
 
@@ -207,3 +207,14 @@ Unityからの`edit_prop:update_instances`とPOST/GETの各個別配置は`x, y,
 ## M.8. 検証
 
 バックエンドはtests/test_props.py、UnityはTests/Props/run.ps1で検証する。Unity検証はTemp/PropsUnityQAの独立プロジェクトで実アセンブリと実FBXを使い、境界重複、穴、分割数変更時の再現性、非破壊除外と復元、局所更新、Farモデル、距離によるHiddenと復元、1,000/10,000/50,000本の生成を確認する。画像とCPU計測値は同ディレクトリに出力する。CPU計測はGPU完了時間や本編のフレームレートを意味しない。実行条件と計測記録はUnityリポジトリ内の`Tests/Props/README.md`に記載する。
+
+
+### M.7.5. バス停の自動配置モデル
+
+`Props/bus_stop.fbx`は路線の停留所ノードから自動配置する固定名モデルで、手動散布用prop_masterには登録しない。`BusStopManager`が`PropRenderModel`を使い、1バッチ最大511個のGPUインスタンシングで描く。個体のGameObjectやColliderは作らず、停留所の経済状態やセーブデータへ装飾を書き戻さない。
+
+横幅5.4m、奥行2.2m、屋根天端2.64m、座面高0.51m。4人分の座席と背面・左右のガラス壁を持つ。広告は枠内の両面とも無地の白とし、図柄や文字のポリゴンは作らない。屋根4本・ベンチ3本の支柱は高さ-2mまで延ばす。全体272三角形。Unity +Zがベンチ正面、Xが道路の長手方向。既存のPROP_Trim・PROP_FreightDeck・BD_WOOD・PROP_Body_Whiteを共有し、透明ガラスだけPROP_SHELTER_GLASSを持つ自前のスクリプト生成物で、外部素材の追加はない。
+
+著作元はprops.blendのbus_stopコレクション、ジョブは`genesis-gallery/pipeline/jobs/build_prop_bus_stop.py`。書き出しはlibrary.pyの`export --category props --only bus_stop`、ギャラリーは`--only bus_stop`。独立Unity検証`unity/Tests/BusStops/run.ps1`は実FBXの寸法・地中脚・ポリゴン数・自動prefabと道路への配置方向を確認する。
+
+ガラスのFBX透明度に加え、BusStopManager.ConfigureGlassはPropRenderModelが所有する複製材質へURPの透過描画・深度書き込みOFF・不透明度23%を設定する。ガラスだけ影を落とさず、共有材質は変更しない。

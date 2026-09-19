@@ -8,7 +8,8 @@ New-Item -ItemType Directory -Path "$qaRoot/Assets/Editor", "$qaRoot/Assets/Mode
 Copy-Item -LiteralPath "$unityRoot/ProjectSettings/ProjectVersion.txt" -Destination "$qaRoot/ProjectSettings/ProjectVersion.txt" -Force
 Copy-Item -LiteralPath "$PSScriptRoot/MonorailQA.cs", "$unityRoot/Assets/Editor/ModelPrefabGenerator.cs", "$unityRoot/Assets/Editor/ModelImportSettings.cs" -Destination "$qaRoot/Assets/Editor" -Force
 foreach ($id in @(501,502)) {
-    Copy-Item -LiteralPath "$unityRoot/Assets/Models/Paths/p$id" -Destination "$qaRoot/Assets/Models/Paths" -Recurse -Force
+    New-Item -ItemType Directory -Path "$qaRoot/Assets/Models/Paths/p$id" -Force | Out-Null
+    Get-ChildItem -LiteralPath "$unityRoot/Assets/Models/Paths/p$id" -Filter '*.fbx' | Copy-Item -Destination "$qaRoot/Assets/Models/Paths/p$id" -Force
 }
 foreach ($id in @(308,309)) {
     Copy-Item -LiteralPath "$unityRoot/Assets/Models/Props/$id.fbx" -Destination "$qaRoot/Assets/Models/Props" -Force
