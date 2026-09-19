@@ -12,7 +12,8 @@ using GeneratedModels;
 /// 「ホーム長(両数)・高さ・角度・規格(プラットフォーム/駅舎)」だけで、形状は次のように固定される。
 ///   - プラットフォームは中心線の左右に線路間隔の半分ずつ振り分けた平行2線(相対式=ホームは外側)。
 ///   - 駅舎は中心線と直交する1本の直線で、両プラットフォームを跨ぐ長さを自動で取る。
-///   - 3本とも直線・水平(中心点の地盤標高 + 指定の高さで揃える)。
+///   - 3本とも直線。プラットフォームは中心点の地盤標高+指定の高さで水平に揃え(駅は共通標高)、
+///     駅舎の線は地面に沿わせる(連絡橋のデッキ高さはプレハブの造形が持つため)。
 ///
 /// 操作は建物の自由配置・プロップの個別配置と同じ(共通部品 Editors/PlacementInput.cs)。
 ///   - カーソル追従のゴースト → 左クリックで地点を固定 → パネルの確定ボタンで発注。
@@ -67,6 +68,15 @@ public class StationPlanManager : MonoBehaviour
     private readonly List<Mesh> ownedMeshes = new List<Mesh>();
     private string lastPreviewKey;
 
+    /// <summary>
+    /// カーソル追従中のプレビュー再生成の最短間隔(秒)。ゴーストは線路2本+駅舎の実メッシュを
+    /// 作り直すので、マウス移動のたびに再生成するとフレームが落ちる。位置は常に最新の
+    /// ホバー座標を使い、作り直す頻度だけを間引く。
+    /// </summary>
+    private const float HOVER_REBUILD_INTERVAL = 0.1f;
+    private float nextHoverRebuildTime;
+    private bool hoverPreviewDirty;
+
     // =====================================================================
     // パブリックAPI: モード遷移
     // =====================================================================
@@ -88,6 +98,7 @@ public class StationPlanManager : MonoBehaviour
         this.houseEnds = NormalizeHouseEnds(houseEnds);
         fixedCenter = null;
         hasHover = false;
+        hoverPreviewDirty = false;
         middleDrag.Cancel();
         active = true;
         ClearPreview();
@@ -102,6 +113,7 @@ public class StationPlanManager : MonoBehaviour
         active = false;
         fixedCenter = null;
         hasHover = false;
+        hoverPreviewDirty = false;
         middleDrag.Cancel();
         ClearPreview();
     }
@@ -171,6 +183,14 @@ public class StationPlanManager : MonoBehaviour
         }
         if (middleDrag.IsDragging) return;
 
+        // ホバーの間引きで見送った位置を、間隔が空いたフレームで反映する。
+        if (hoverPreviewDirty && Time.unscaledTime >= nextHoverRebuildTime)
+        {
+            nextHoverRebuildTime = Time.unscaledTime + HOVER_REBUILD_INTERVAL;
+            hoverPreviewDirty = false;
+            RefreshPreview();
+        }
+
         if (InputUtil.KeyWasPressedThisFrame(Key.Escape) && fixedCenter.HasValue)
         {
             fixedCenter = null;
@@ -219,6 +239,14 @@ public class StationPlanManager : MonoBehaviour
         if (middleDrag.IsDragging) return;
         hoverCenter = worldPos;
         hasHover = true;
+        // 位置は毎回取り込みつつ、実メッシュの作り直しは一定間隔に間引く。
+        if (Time.unscaledTime < nextHoverRebuildTime)
+        {
+            hoverPreviewDirty = true;
+            return;
+        }
+        nextHoverRebuildTime = Time.unscaledTime + HOVER_REBUILD_INTERVAL;
+        hoverPreviewDirty = false;
         RefreshPreview();
     }
 
@@ -232,15 +260,16 @@ public class StationPlanManager : MonoBehaviour
     /// <summary>
     /// 中心点・角度・ホーム長・線路間隔から、プラットフォーム2本と駅舎1本の中心線(絶対座標)を作る。
     /// 角度は北(ワールド+Z)を0とする時計回りの度で、プラットフォームはこの方向に伸び、
-    /// 駅舎はこれと直交する方向に伸びる。3本とも中心点の地盤標高+指定高さで水平に揃える
-    /// (確定送信の align_station_tracks と同じ「駅は共通標高」の考え方)。
+    /// 駅舎はこれと直交する方向に伸びる。
+    ///
+    /// プラットフォームは中心点の地盤標高+指定高さで**水平に**揃える(駅は共通標高。確定送信の
+    /// align_station_tracks でバックエンドも同じ扱いにする)。駅舎の線は逆に**地形へ追従**させる
+    /// (連絡橋のデッキ高さ・橋脚は駅舎プレハブの造形が持ち、線そのものは地面に置く規約のため)。
     /// </summary>
-    private bool TryBuildGeometry(out List<List<Vector3>> platforms, out List<Vector3> house, out float trackAbsY, out float houseAbsY)
+    private bool TryBuildGeometry(out List<List<Vector3>> platforms, out List<Vector3> house)
     {
         platforms = null;
         house = null;
-        trackAbsY = 0f;
-        houseAbsY = 0f;
         Vector3? centerOpt = CurrentCenter;
         if (centerOpt == null || platformVariant <= 0) return false;
 
@@ -249,12 +278,7 @@ public class StationPlanManager : MonoBehaviour
         Vector3 dir = new Vector3(Mathf.Sin(rad), 0f, Mathf.Cos(rad));
         Vector3 right = new Vector3(dir.z, 0f, -dir.x);
 
-        float groundY = Utils.GetGroundHeight(center);
-        trackAbsY = groundY + height;
-        // 駅舎は高さを編集できない規格(橋上・地下とも連絡橋の高さはプレハブ側が持つ)なので、
-        // 相対高さは0のまま置く。編集可能な規格が現れたらプラットフォームと同じ高さへ揃える。
-        houseAbsY = groundY + (IsHeightEditable(houseVariant) ? height : 0f);
-
+        float trackAbsY = Utils.GetGroundHeight(center) + height;
         float half = platformLength * 0.5f;
         float[] offsets = { -trackSpacing * 0.5f, trackSpacing * 0.5f };
         platforms = new List<List<Vector3>>(offsets.Length);
@@ -268,12 +292,17 @@ public class StationPlanManager : MonoBehaviour
             });
         }
 
+        // 駅舎は高さを編集できない規格(橋上・地下とも連絡橋の高さはプレハブ側が持つ)なので、
+        // 相対高さは0のまま地面へ置く。編集可能な規格が現れたらプラットフォームと同じ高さにする。
+        float houseRelY = IsHeightEditable(houseVariant) ? height : 0f;
         float houseHalf = HouseHalfLength();
-        house = new List<Vector3>
+        house = new List<Vector3>();
+        foreach (float sign in new[] { -1f, 1f })
         {
-            new Vector3(center.x - right.x * houseHalf, houseAbsY, center.z - right.z * houseHalf),
-            new Vector3(center.x + right.x * houseHalf, houseAbsY, center.z + right.z * houseHalf),
-        };
+            var point = new Vector3(center.x + right.x * houseHalf * sign, 0f, center.z + right.z * houseHalf * sign);
+            point.y = Utils.GetGroundHeight(point) + houseRelY;
+            house.Add(point);
+        }
         return true;
     }
 
@@ -301,7 +330,7 @@ public class StationPlanManager : MonoBehaviour
     private void RefreshPreview()
     {
         if (!active) return;
-        if (!TryBuildGeometry(out var platforms, out var house, out _, out _))
+        if (!TryBuildGeometry(out var platforms, out var house))
         {
             ClearPreview();
             return;
@@ -320,31 +349,31 @@ public class StationPlanManager : MonoBehaviour
             int direction = (travelDirections != null && i < travelDirections.Length)
                 ? travelDirections[i] : Constants.DIR_BOTH;
             AddComponentPreview(platforms[i], platformType, platformVariant, direction,
-                Constants.PLATFORM_SIDE_OUTSIDE, "both", material);
+                Constants.PLATFORM_SIDE_OUTSIDE, "both", material, designed: true);
         }
         if (houseVariant > 0)
         {
+            // 駅舎は設計標高を渡さず地形追従のまま描く(連絡橋は各アンカーを地面に置く規約)。
             AddComponentPreview(house, GetMaster(houseVariant)?.type ?? Constants.PATH_STATION_HOUSE,
-                houseVariant, Constants.DIR_BOTH, Constants.PLATFORM_SIDE_OUTSIDE, houseEnds, material);
+                houseVariant, Constants.DIR_BOTH, Constants.PLATFORM_SIDE_OUTSIDE, houseEnds, material,
+                designed: false);
         }
         lastPreviewKey = key;
     }
 
     /// <summary>
     /// 1本ぶんのプレビューメッシュを生成して previewRoot 配下へぶら下げる。
-    /// 生成器が地形へ再投影しないよう follow_terrain=false + station_grade_profile を渡す
-    /// (RoadRenderer の造成済みプレビューと同じ扱い。駅は水平に置くため)。
+    /// designed=true では生成器が地形へ再投影しないよう follow_terrain=false +
+    /// station_grade_profile を渡す(RoadRenderer の造成済みプレビューと同じ扱い。
+    /// プラットフォームを水平に保つため)。
     /// </summary>
     private void AddComponentPreview(List<Vector3> points, int pathType, int pathVariant,
-        int travelDirection, int platformSide, string ends, Material material)
+        int travelDirection, int platformSide, string ends, Material material, bool designed)
     {
         Vector3 start = points[0];
         Vector3 end = points[points.Count - 1];
         float startRelY = start.y - Utils.GetGroundHeight(start);
         float endRelY = end.y - Utils.GetGroundHeight(end);
-
-        var gradeProfile = new List<object>();
-        foreach (var p in points) gradeProfile.Add(new List<object> { p.x, p.y, p.z });
 
         var tempPathData = new PathSummary
         {
@@ -355,11 +384,16 @@ public class StationPlanManager : MonoBehaviour
             platform_side = platformSide,
             house_ends = ends,
             travel_direction = travelDirection,
-            follow_terrain = false,
-            station_grade_profile = gradeProfile,
             start_point = new List<object> { (object)start.x, (object)startRelY, (object)start.z },
             end_point = new List<object> { (object)end.x, (object)endRelY, (object)end.z },
         };
+        if (designed)
+        {
+            tempPathData.follow_terrain = false;
+            var gradeProfile = new List<object>();
+            foreach (var p in points) gradeProfile.Add(new List<object> { p.x, p.y, p.z });
+            tempPathData.station_grade_profile = gradeProfile;
+        }
 
         PathMeshResult result = PathMeshFactory.GeneratePathMesh(tempPathData, points);
         if (result == null) return;
@@ -441,7 +475,7 @@ public class StationPlanManager : MonoBehaviour
             ["house"] = null,
         };
 
-        if (fixedCenter.HasValue && TryBuildGeometry(out var platforms, out var house, out _, out _))
+        if (fixedCenter.HasValue && TryBuildGeometry(out var platforms, out var house))
         {
             Vector3 center = fixedCenter.Value;
             payload["position"] = new List<float> { center.x, center.z };

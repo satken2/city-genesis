@@ -164,11 +164,12 @@ export function useStationConstruction(
     };
   }, []);
 
-  /* ---- 駅タブの表示中だけ Unity を駅配置モードにする ---- */
-  // バリアント・ホーム長・高さ・角度の変更は placement_command で逐次送るため、
-  // ここで再初期化するのは「タブに入った」「規格が決まった」ときだけにする。
-  useEffect(() => {
-    if (!enabled || platformVariant == null || houseVariant == null) return;
+  /**
+   * Unity を駅配置モード(STATE_EDIT_STATION)にする。現在の設定をまとめて初期値として渡す。
+   * 敷設セッションの開始と、確定後に連続設置へ戻すときの両方で使う。
+   */
+  const enterPlacementMode = useCallback(() => {
+    if (platformVariant == null || houseVariant == null) return;
     sendChangeState(
       "STATE_EDIT_STATION",
       {
@@ -183,7 +184,14 @@ export function useStationConstruction(
       },
       "track_build",
     ).catch((err) => console.error("[useStationConstruction] sendChangeState failed:", err));
-    // 規格が変わったときだけ入り直す(寸法・角度は下の逐次送信で反映する)。
+  }, [platformVariant, houseVariant, platformLength, trackSpacing, height, angle, travelDirections]);
+
+  /* ---- 駅タブの表示中だけ Unity を駅配置モードにする ---- */
+  // 寸法・角度・高さの変更は placement_command で逐次送るため、モードに入り直すのは
+  // 「タブに入った」「規格が変わった」ときだけにする(配置中の地点を保つため)。
+  useEffect(() => {
+    if (!enabled) return;
+    enterPlacementMode();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, platformVariant, houseVariant]);
 
@@ -372,7 +380,7 @@ export function useStationConstruction(
   const selectPlatformVariant = useCallback((variantId: number) => setPlatformVariantState(variantId), []);
   const selectHouseVariant = useCallback((variantId: number) => setHouseVariantState(variantId), []);
 
-  /** 配置地点の固定だけを解除して置き直す(キャンセル・連続設置の共通処理)。 */
+  /** 配置地点の固定だけを解除して置き直す(パネルのキャンセルボタン)。 */
   const resetPlacement = useCallback(() => {
     setPlacement(null);
     setValidation(null);
@@ -380,6 +388,17 @@ export function useStationConstruction(
     sendStationPlacementCommand({ reset: true }).catch((err) =>
       console.error("[useStationConstruction] reset failed:", err));
   }, [clearCost]);
+
+  /**
+   * 連続設置: 発注後の後始末(edit_path:finish)で Unity 側の配置モードが閉じるため、
+   * 設定を保ったまま駅配置モードへ入り直す(詳細モードの continuePlacement と同じ役割)。
+   */
+  const continuePlacement = useCallback(() => {
+    setPlacement(null);
+    setValidation(null);
+    clearCost();
+    enterPlacementMode();
+  }, [clearCost, enterPlacementMode]);
 
   /** プラットフォーム2本と駅舎1本を1回のPOSTで発注する。 */
   const confirmStation = useCallback(async (): Promise<void> => {
@@ -457,6 +476,7 @@ export function useStationConstruction(
     canRetryValidation,
     retryValidation,
     resetPlacement,
+    continuePlacement,
     confirmStation,
   };
 }

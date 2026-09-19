@@ -3,13 +3,21 @@
  *
  * window_type="track_build" のポップアップウィンドウで表示する専用パネル。
  * 道路建設(PathConstructionPanel)から軌道関連を分離し、上から
- * 「鉄道種別プルダウン → タブ → 規格プルダウン」の3段で対象を絞り込む。
+ * 「モード切替 → 鉄道種別プルダウン → タブ → 規格プルダウン」の順で対象を絞り込む。
+ *
+ * パネル全体に簡易モードと詳細モードがあり、タブの構成が変わる。
+ *   - 簡易モード(既定): 軌道タブ + 駅タブの2枚。駅タブは「相対式(対面ホーム)の複線 +
+ *     駅舎」を1クリックでまとめて置く固定パッケージで、指定できるのはホーム長(両数)・
+ *     高さ・角度・駅舎の種類だけ。プラットフォームを曲げたり本数を変えたりはできない。
+ *   - 詳細モード: 軌道 / プラットフォーム / 駅舎 の3枚。従来どおり1本ずつ自由に敷設する。
  *
  * 鉄道種別プルダウン(鉄道/モノレール/ロープウェイ)はタブより上位の選択で、タブを切り替えても保持する。
- * タブは3つ:
+ * タブの役割:
  *   - 軌道タブ:        通常(TRACK_NORMAL)・橋梁(TRACK_BRIDGE)の線路を敷設する。
  *   - プラットフォームタブ: 駅(TRACK_STATION)の線路を敷設する(ホーム設置側の指定あり)。
  *   - 駅舎タブ:        駅舎パス(type=PATH_STATION_HOUSE のバリアント)を敷設する。
+ *   - 駅タブ(簡易):    上記2つをまとめたパッケージ。形状の組み立てとゴーストはUnityの
+ *     StationPlanManager(STATE_EDIT_STATION)が持ち、確定送信は useStationConstruction が行う。
  *
  * 軌道・プラットフォームタブは usePathConstruction をカテゴリ="rail"に固定して駆動し、
  * 許可する track_type だけが異なる。構造(通常/橋梁)・電化/非電化は独立した設定ではなく
@@ -55,6 +63,8 @@ import { useVariantAffordability } from "../../hooks/useVariantAffordability";
 import { RailTrackLayoutSettings } from "./RailTrackLayoutSettings";
 import { PathVariantDescription } from "./PathVariantDescription";
 import { PathBuildSections } from "./PathBuildSections";
+import { StationBuildSections } from "./StationBuildSections";
+import { useStationConstruction } from "./useStationConstruction";
 import { availableRailTypes, railVariantsForTrackTypes } from "./railBuild";
 import {
   TRACK_NORMAL,
@@ -72,8 +82,11 @@ type TrackConstructionPanelProps = {
   onClose: () => void;
 };
 
-/** タブ種別。軌道 / プラットフォーム / 駅舎。 */
-type TrackTab = "track" | "platform" | "house";
+/** タブ種別。軌道 / プラットフォーム / 駅舎(詳細モード) / 駅(簡易モードのパッケージ)。 */
+type TrackTab = "track" | "platform" | "house" | "station";
+
+/** パネル全体のモード。簡易=軌道+駅の2タブ、詳細=軌道+プラットフォーム+駅舎の3タブ。 */
+type PanelMode = "simple" | "detail";
 
 export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelProps) {
   const { t } = useTranslation();
@@ -84,7 +97,9 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
   const { affordability: variantAffordability, refresh: refreshAffordability } =
     useVariantAffordability("paths", apiBaseUrl);
 
+  const [mode, setMode] = useState<PanelMode>("simple");
   const [tab, setTab] = useState<TrackTab>("track");
+  const isStationTab = tab === "station";
   // 鉄道種別(鉄道/モノレール/ロープウェイ)はタブより上位の絞り込みなので、
   // タブ切り替えで選択が失われないようパネル側で保持する。
   const [railType, setRailType] = useState<number | null>(null);
@@ -133,9 +148,10 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
   }, []);
 
   /* ---- 鉄道種別・タブから規格プルダウンの候補を絞り込む ---- */
-  // 軌道タブ=通常/橋梁、プラットフォームタブ=駅。構造・電化の違いも候補の一部として並べる。
+  // 軌道タブ=通常/橋梁、プラットフォームタブと簡易モードの駅タブ=駅。
+  // 構造・電化の違いも候補の一部として並べる。
   const allowedTrackTypes = useMemo(
-    () => (tab === "platform" ? [TRACK_STATION] : [TRACK_NORMAL, TRACK_BRIDGE]),
+    () => (tab === "platform" || tab === "station" ? [TRACK_STATION] : [TRACK_NORMAL, TRACK_BRIDGE]),
     [tab],
   );
   const railTypeOptions = useMemo(() => availableRailTypes(masterData), [masterData]);
@@ -159,12 +175,30 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
     return matches;
   }, [masterData]);
 
+  /* ---- 駅タブ(簡易モード)の状態管理。タブを離れている間は Unity へ何も送らない ---- */
+  const sc = useStationConstruction(masterData, apiBaseUrl, isStationTab);
+
   /* ---- 初回マウント時にカテゴリを軌道へ固定する ---- */
   useEffect(() => {
     pc.onCategoryChange("rail");
     // マウント時に一度だけ実行する(pc.onCategoryChange は安定)。
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /* ---- 駅タブの規格の既定値(プラットフォーム・駅舎とも候補の先頭) ---- */
+  useEffect(() => {
+    // 他のタブでは variantOptions が通常/橋梁の候補になるため、駅タブ表示中だけ選び直す。
+    if (!isStationTab) return;
+    if (variantOptions.length > 0
+        && (sc.platformVariant == null || !variantOptions.some((v) => v.id === sc.platformVariant))) {
+      sc.selectPlatformVariant(variantOptions[0].id);
+    }
+    if (houseVariantOptions.length > 0
+        && (sc.houseVariant == null || !houseVariantOptions.some((v) => v.id === sc.houseVariant))) {
+      sc.selectHouseVariant(houseVariantOptions[0].id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isStationTab, variantOptions, houseVariantOptions, sc.platformVariant, sc.houseVariant]);
 
   /* ---- 鉄道種別の既定値(マスターに存在する先頭の種別=鉄道) ---- */
   useEffect(() => {
@@ -177,17 +211,25 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
   // 鉄道種別の変更・タブ切り替え(=許可する構造の変更)で候補が入れ替わったときに、
   // 敷設対象を必ず候補内のバリアントへ揃える。駅舎タブは駅舎バリアントの候補で同様に行う。
   useEffect(() => {
+    // 駅タブは usePathConstruction を使わない(敷設セッションの持ち主が StationPlanManager のため)。
+    if (isStationTab) return;
     const options = tab === "house" ? houseVariantOptions : variantOptions;
     if (options.length === 0) return;
     if (pc.selectedVariant != null && options.some((v) => v.id === pc.selectedVariant)) return;
     pc.selectVariant(options[0].id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab, variantOptions, houseVariantOptions, pc.selectedVariant]);
+  }, [isStationTab, tab, variantOptions, houseVariantOptions, pc.selectedVariant]);
 
   /* ---- タブ切り替え ---- */
   const handleTabChange = useCallback(
     (next: TrackTab) => {
       if (next === tab) return;
+      if (next === "station") {
+        // 駅タブへは pc 側の状態を触らずに移る。useStationConstruction の effect が送る
+        // STATE_EDIT_STATION が、Unity 側で進行中のパス敷設セッションごと引き取る。
+        setTab(next);
+        return;
+      }
       if (next === "house") {
         // 駅舎は鉄道種別に依存せず複線展開もしないため、カテゴリを外して
         // 単一パス敷設として扱う(選択リセット後、上の useEffect が候補の先頭を選ぶ)。
@@ -200,6 +242,21 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
       setTab(next);
     },
     [tab, pc],
+  );
+
+  /* ---- モード切り替え(簡易 ⇔ 詳細) ---- */
+  // タブ構成が変わるため、切り替え先に存在しないタブを開いていたら軌道タブへ退避する。
+  const handleModeChange = useCallback(
+    (next: PanelMode) => {
+      if (next === mode) return;
+      setMode(next);
+      if (next === "simple" && (tab === "platform" || tab === "house")) {
+        handleTabChange("track");
+      } else if (next === "detail" && tab === "station") {
+        handleTabChange("track");
+      }
+    },
+    [mode, tab, handleTabChange],
   );
 
   /* ---- 軌道パスの確定(常に新規敷設=連続設置モード) ---- */
@@ -239,6 +296,39 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
   const handleCancelPath = useCallback(() => {
     pc.continuePlacement();
   }, [pc]);
+
+  /* ---- 駅パッケージの確定(プラットフォーム2本+駅舎1本を一括発注し、連続設置へ戻す) ---- */
+  const handleConfirmStation = useCallback(async () => {
+    setIsConfirming(true);
+    try {
+      await sc.confirmStation();
+      // Unity 側の配置状態をリセットしてデータを再取得させる(道路敷設と同じ後始末)。
+      await sendEditPathFinish();
+      refreshAffordability();
+      // 設定を保ったまま駅配置モードへ入り直し、続けて次の駅を置けるようにする。
+      sc.continuePlacement();
+      setIsConfirming(false);
+      void showNotification({ message: t("path_construction.placedContinue"), durationMs: 3000 });
+    } catch (err) {
+      setIsConfirming(false);
+      let displayMessage: string;
+      if (err instanceof ApiError) {
+        const i18nKey = `errors.${err.code}`;
+        displayMessage =
+          i18nKey !== "errors.UNKNOWN_ERROR"
+            ? t(i18nKey, { defaultValue: err.message })
+            : err.message;
+      } else {
+        displayMessage = err instanceof Error ? err.message : t("path_construction.confirmFailedUnknown");
+      }
+      void showNotification({ message: displayMessage, durationMs: 8000 });
+    }
+  }, [sc, refreshAffordability, t]);
+
+  /** 駅パッケージのキャンセル(固定した地点だけを捨てて置き直す。寸法・角度は維持)。 */
+  const handleCancelStation = useCallback(() => {
+    sc.resetPlacement();
+  }, [sc]);
 
   /* ---- インフラと違い軌道はグリッド自動オフ不要。破棄時にグリッドと編集モードを片付ける ---- */
   useEffect(() => {
@@ -285,11 +375,13 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
     let cancelled = false;
     (async () => {
       const hintKey =
-        tab === "house"
-          ? "track_construction.house.hint"
-          : pc.heightEditable
-            ? "hint.pathConstructionElevated"
-            : "hint.pathConstruction";
+        tab === "station"
+          ? "track_construction.station.hint"
+          : tab === "house"
+            ? "track_construction.house.hint"
+            : pc.heightEditable
+              ? "hint.pathConstructionElevated"
+              : "hint.pathConstruction";
       await setHintbarText(t(hintKey));
     })().catch((err) => {
       if (!cancelled) {
@@ -306,8 +398,37 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
     return <p className="pc-muted">{t("common.loading")}</p>;
   }
 
+  // タブ構成はモードで変わる。簡易=軌道+駅、詳細=軌道+プラットフォーム+駅舎。
+  const tabDefs: { key: TrackTab; label: string }[] = mode === "simple"
+    ? [
+        { key: "track", label: t("track_construction.trackTab") },
+        { key: "station", label: t("track_construction.stationTab") },
+      ]
+    : [
+        { key: "track", label: t("track_construction.trackTab") },
+        { key: "platform", label: t("track_construction.platformTab") },
+        { key: "house", label: t("track_construction.houseTab") },
+      ];
+
   return (
     <div className="pc-layout" onClick={handlePanelClick}>
+      {/* パネル全体のモード切替。タブより上位の選択なので最上段に置く。 */}
+      <div className="tc-modebar">
+        {([
+          { key: "simple", label: t("track_construction.simpleMode") },
+          { key: "detail", label: t("track_construction.detailMode") },
+        ] as { key: PanelMode; label: string }[]).map((modeDef) => (
+          <button
+            key={modeDef.key}
+            type="button"
+            className={`tc-mode-btn ${mode === modeDef.key ? "active" : ""}`}
+            onClick={() => handleModeChange(modeDef.key)}
+          >
+            {modeDef.label}
+          </button>
+        ))}
+      </div>
+
       {/* 鉄道種別(鉄道 / モノレール / ロープウェイ)。タブより上位の絞り込み。
           駅舎は鉄道種別に依存しないため、駅舎タブでは表示しない。 */}
       {tab !== "house" && (
@@ -329,13 +450,9 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
         </div>
       )}
 
-      {/* タブバー(軌道 / プラットフォーム / 駅舎) */}
+      {/* タブバー(モードごとのタブ構成) */}
       <div className="tc-tabbar">
-        {([
-          { key: "track", label: t("track_construction.trackTab", "軌道") },
-          { key: "platform", label: t("track_construction.platformTab", "プラットフォーム") },
-          { key: "house", label: t("track_construction.houseTab", "駅舎") },
-        ] as { key: TrackTab; label: string }[]).map((tabDef) => (
+        {tabDefs.map((tabDef) => (
           <button
             key={tabDef.key}
             type="button"
@@ -347,48 +464,64 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
         ))}
       </div>
 
-      {/* 規格プルダウン(駅舎タブは駅舎バリアント、それ以外は鉄道種別×構造で絞った軌道バリアント) */}
-      <RailVariantSelector
-        variantOptions={tab === "house" ? houseVariantOptions : variantOptions}
-        selectedVariant={pc.selectedVariant}
-        onSelectVariant={pc.selectVariant}
-        affordability={variantAffordability}
-      />
-
-      <PathVariantDescription entry={pc.selectedVariantData} />
-
-      {/* 線路数・進行方向・線路間隔は軌道の複線構成専用(駅舎は常に単一の折れ線) */}
-      {tab !== "house" && (
-        <RailTrackLayoutSettings
-          railType={railType}
-          trackCount={pc.trackCount}
-          trackSpacing={pc.trackSpacing}
-          canWidenSpacing={pc.canWidenTrackSpacing}
-          canShrinkSpacing={pc.canShrinkTrackSpacing}
-          trackDirections={pc.trackDirections}
-          onChangeTrackCount={pc.changeTrackCount}
-          onAdjustSpacing={pc.adjustTrackSpacing}
-          onCycleDirection={pc.cycleTrackDirection}
+      {/* 駅タブは「規格 → 駅舎 → 寸法・向き → 費用 → 確定」を専用ボディに持つ。
+          形状は固定なので、グリッド設定・複線構成・2D形状編集は出さない。 */}
+      {isStationTab ? (
+        <StationBuildSections
+          sc={sc}
+          platformVariantOptions={variantOptions}
+          houseVariantOptions={houseVariantOptions}
+          affordability={variantAffordability}
+          isConfirming={isConfirming}
+          onConfirm={() => void handleConfirmStation()}
+          onCancel={handleCancelStation}
         />
-      )}
+      ) : (
+        <>
+          {/* 規格プルダウン(駅舎タブは駅舎バリアント、それ以外は鉄道種別×構造で絞った軌道バリアント) */}
+          <RailVariantSelector
+            variantOptions={tab === "house" ? houseVariantOptions : variantOptions}
+            selectedVariant={pc.selectedVariant}
+            onSelectVariant={pc.selectVariant}
+            affordability={variantAffordability}
+          />
 
-      <PathBuildSections
-        pc={pc}
-        editPathId={null}
-        gridMode={gridMode}
-        gridSize={gridSize}
-        gridAngle={gridAngle}
-        onGridModeChange={setGridMode}
-        onGridSizeChange={setGridSize}
-        onGridAngleChange={setGridAngle}
-        onGridOriginChange={setGridOrigin}
-        onStartSetAngleMode={handleStartSetAngleMode}
-        onEndSetAngleMode={handleEndSetAngleMode}
-        isConfirming={isConfirming}
-        onConfirm={() => void handleConfirmPath()}
-        onCancel={handleCancelPath}
-        showPlatformSide={tab === "platform"}
-      />
+          <PathVariantDescription entry={pc.selectedVariantData} />
+
+          {/* 線路数・進行方向・線路間隔は軌道の複線構成専用(駅舎は常に単一の折れ線) */}
+          {tab !== "house" && (
+            <RailTrackLayoutSettings
+              railType={railType}
+              trackCount={pc.trackCount}
+              trackSpacing={pc.trackSpacing}
+              canWidenSpacing={pc.canWidenTrackSpacing}
+              canShrinkSpacing={pc.canShrinkTrackSpacing}
+              trackDirections={pc.trackDirections}
+              onChangeTrackCount={pc.changeTrackCount}
+              onAdjustSpacing={pc.adjustTrackSpacing}
+              onCycleDirection={pc.cycleTrackDirection}
+            />
+          )}
+
+          <PathBuildSections
+            pc={pc}
+            editPathId={null}
+            gridMode={gridMode}
+            gridSize={gridSize}
+            gridAngle={gridAngle}
+            onGridModeChange={setGridMode}
+            onGridSizeChange={setGridSize}
+            onGridAngleChange={setGridAngle}
+            onGridOriginChange={setGridOrigin}
+            onStartSetAngleMode={handleStartSetAngleMode}
+            onEndSetAngleMode={handleEndSetAngleMode}
+            isConfirming={isConfirming}
+            onConfirm={() => void handleConfirmPath()}
+            onCancel={handleCancelPath}
+            showPlatformSide={tab === "platform"}
+          />
+        </>
+      )}
     </div>
   );
 }

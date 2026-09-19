@@ -126,9 +126,22 @@
     "openShapeEditor": "2D編輯"
   },
   "track_construction": {
+    "simpleMode": "簡易",
+    "detailMode": "詳細",
     "trackTab": "軌道",
     "platformTab": "月台",
     "houseTab": "站房",
+    "stationTab": "車站",
+    "station": {
+      "hint": "在3D視圖中點擊放置車站的位置。按住滑鼠中鍵拖曳可旋轉，使用 PageUp/PageDown 可調整高度。右鍵或 Esc 可重新選點。",
+      "houseVariant": "站房類型",
+      "settings": "車站設定",
+      "carCount": "月台長度",
+      "carCountUnit": "節 ({{length}}m)",
+      "angle": "角度",
+      "fixedNote": "固定為複線相對式月台（左右各一條）。若要變更路線數量或月台形式，請使用詳細模式。",
+      "pickPointFirst": "請在3D視圖中點擊放置車站的位置"
+    },
     "house": {
       "hint": "鋪設站房路線。與此路線相交的月台將歸屬於此站房所在的車站。路線兩端會放置站房建築，並沿線架設連接橋。站房不會吸附至既有的道路或軌道（僅網格吸附有效）。"
     }

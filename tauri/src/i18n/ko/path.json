@@ -126,9 +126,22 @@
     "openShapeEditor": "2D로 편집"
   },
   "track_construction": {
+    "simpleMode": "간편",
+    "detailMode": "상세",
     "trackTab": "궤도",
     "platformTab": "승강장",
     "houseTab": "역사",
+    "stationTab": "역",
+    "station": {
+      "hint": "3D 뷰에서 역을 놓을 지점을 클릭하세요. 마우스 가운데 버튼 드래그로 회전, PageUp/PageDown으로 높이를 조정합니다. 오른쪽 클릭 또는 Esc로 지점을 다시 고릅니다.",
+      "houseVariant": "역사 종류",
+      "settings": "역 설정",
+      "carCount": "승강장 길이",
+      "carCountUnit": "량 ({{length}}m)",
+      "angle": "각도",
+      "fixedNote": "복선 상대식 승강장(좌우 1개씩)으로 고정입니다. 선로 수나 승강장 형태를 바꾸려면 상세 모드를 사용하세요.",
+      "pickPointFirst": "3D 뷰에서 역을 놓을 지점을 클릭하세요"
+    },
     "house": {
       "hint": "역사 선을 부설합니다. 선과 교차한 승강장이 이 역사의 역에 소속됩니다. 선의 양 끝에 역사 건물이 놓이고, 선을 따라 연결 다리가 놓입니다. 역사는 기존 도로·선로에 흡착되지 않습니다(그리드 흡착만 적용)."
     }

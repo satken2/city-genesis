@@ -128,6 +128,13 @@ public class IpcStateCoordinator : MonoBehaviour
             PathTopologyEditManager.Instance.EndMode();
         }
 
+        // 駅パッケージ配置から別モードへ直接遷移した場合にも、駅のゴーストを確実に片付ける
+        // (STATE_NORMAL 経由なら ApplyStateNormal 内でも終了するが冪等なので問題ない)。
+        if (state != "STATE_EDIT_STATION")
+        {
+            FindAnyObjectByType<StationPlanManager>()?.FinishPlacement();
+        }
+
         // 一方通行線路の進行方向矢印は道路敷設モードでのみ表示する
         // （既存線路に向きの対を作って接続する際の編集支援表示のため）。
         TrackDirectionArrows.SetVisible(state == "STATE_EDIT_PATH" || state == "STATE_EDIT_STATION");
@@ -998,6 +1005,10 @@ public class IpcStateCoordinator : MonoBehaviour
     /// </summary>
     private void ApplyStateEditStation(Dictionary<string, object> ipcParams)
     {
+        // 軌道タブから駅タブへ直接移ったときに、進行中のパス敷設セッション(プレビューメッシュ・
+        // 配置済みノード)を引き取って片付ける。STATE_NORMAL を挟まない遷移があるため。
+        FindAnyObjectByType<RoadPlanManager>()?.FinishRoadPlacement();
+
         // InputMode: 駅配置プリセット(地形クリックで地点を固定する)。
         if (InputSystemManager.Instance != null)
         {

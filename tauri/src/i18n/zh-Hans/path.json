@@ -126,9 +126,22 @@
     "openShapeEditor": "2D编辑"
   },
   "track_construction": {
+    "simpleMode": "简易",
+    "detailMode": "详细",
     "trackTab": "轨道",
     "platformTab": "站台",
     "houseTab": "站房",
+    "stationTab": "车站",
+    "station": {
+      "hint": "在3D视图中点击放置车站的位置。按住鼠标中键拖动可旋转，使用 PageUp/PageDown 可调整高度。右键或 Esc 可重新选点。",
+      "houseVariant": "站房类型",
+      "settings": "车站设置",
+      "carCount": "站台长度",
+      "carCountUnit": "节 ({{length}}m)",
+      "angle": "角度",
+      "fixedNote": "固定为复线相对式站台（左右各一条）。若要更改线路数量或站台形式，请使用详细模式。",
+      "pickPointFirst": "请在3D视图中点击放置车站的位置"
+    },
     "house": {
       "hint": "铺设站房线路。与该线路相交的站台将归属于此站房所在的车站。线路两端会放置站房建筑，并沿线架设连接桥。站房不会吸附到已有的道路或轨道上（仅网格吸附有效）。"
     }

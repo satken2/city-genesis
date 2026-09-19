@@ -126,9 +126,22 @@
     "openShapeEditor": "Edit in 2D"
   },
   "track_construction": {
+    "simpleMode": "Simple",
+    "detailMode": "Detailed",
     "trackTab": "Track",
     "platformTab": "Platform",
     "houseTab": "Station Building",
+    "stationTab": "Station",
+    "station": {
+      "hint": "Click in the 3D view to place the station. Drag with the middle mouse button to rotate, and use PageUp/PageDown to change the height. Right-click or press Esc to pick a different spot.",
+      "houseVariant": "Station building",
+      "settings": "Station settings",
+      "carCount": "Platform length",
+      "carCountUnit": "cars ({{length}}m)",
+      "angle": "Angle",
+      "fixedNote": "Fixed as a double track with side platforms (one on each side). Use detailed mode to change the number of tracks or the platform layout.",
+      "pickPointFirst": "Click in the 3D view to place the station"
+    },
     "house": {
       "hint": "Draw the station building line. Platforms crossed by the line belong to this station. Buildings are placed at both ends of the line, connected by an overhead bridge. Station buildings never snap to existing roads or tracks (only grid snapping applies)."
     }
