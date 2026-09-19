@@ -1,5 +1,6 @@
 {
   "transit": {
+    "diagnose": "Diagnostiquer la cause",
     "hint": "Liste des lignes de transport public. Ajustez les tarifs et les fréquences, ou créez et supprimez des lignes.",
     "lineCount": "Lignes",
     "totalRidership": "Voyages totaux",

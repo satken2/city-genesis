@@ -45,6 +45,7 @@
     },
     "pendingWarning": "이 건물은 계획 중입니다. 착공을 지시하세요.",
     "alerts": {
+      "diagnoseHint": "클릭하여 원인 진단",
       "title": "경보",
       "constructionShortage": {
         "title": "건설 서비스 부족",

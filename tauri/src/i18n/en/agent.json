@@ -45,6 +45,7 @@
     },
     "pendingWarning": "This building is planned. Please command to start construction.",
     "alerts": {
+      "diagnoseHint": "Click to diagnose the cause",
       "title": "Alerts",
       "constructionShortage": {
         "title": "Construction Service Shortage",

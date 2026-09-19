@@ -94,6 +94,25 @@
   padding-left: 20px;
 }
 
+/* 診断ウィンドウへ誘導するクリック可能なカード(button要素)。見た目は通常カードと揃える */
+.agent-detail-alert-card--clickable {
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.agent-detail-alert-card--clickable:hover {
+  background: rgba(220, 120, 30, 0.22);
+  border-color: rgba(255, 160, 50, 0.6);
+}
+
+.agent-detail-alert-hint {
+  font-size: 0.7rem;
+  opacity: 0.6;
+  padding-left: 20px;
+}
+
 /* ========== 稼働率目標 ========== */
 .agent-detail-utilization-target {
   background: rgba(255, 255, 255, 0.03);

@@ -156,7 +156,7 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 - RoadPath のマテリアルとミラーメッシュは**静的キャッシュ**(`MaterialCache` / `MirroredMeshCache`)でマテリアル名・元Mesh参照単位に管理される。同じバリアントの道路パーツはキャッシュ済みインスタンスを共有するため、再生成時のメモリリークやドローコール増加は起きない。Zファイティング回避の `renderQueue + 1` もキャッシュ生成時に一度だけ適用される。
 - 道路系の冗長ログは `UnityLog.If(LocalConstants.UNITY_LOG_ROAD, ...)` を使うこと(常時 `Debug.Log` を呼ばない)。
 
-- 道路body の幅・横中心は GetBodySurfaceBounds の最上面（2mm許容）で測る。桁・スカートを含む全体boundsを使うと路面が公称幅より狭くなる。生成用共有メッシュで上面Yを0に補正する。地面原点の駅舎橋は `CreateSplineMesh(normalizeBodySurface: false)` でモデルの高さを保ち、道路用の区間LOD（スプライン面への帯化）も適用しない。SplineMeshの高さオフセットはワールド上方向、モデルの厚みは断面法線方向。
+- 道路body の幅・横中心は GetBodySurfaceBounds の最上面（2mm許容）で測る。桁・スカートを含む全体boundsを使うと路面が公称幅より狭くなる。生成用共有メッシュで上面Yを0に補正する。地面原点の駅舎橋と `base_height` を持つバリアント（送電線。スプライン＝地表でモデル自体が電線の地上高を持つ）は `CreateSplineMesh(normalizeBodySurface: false)` でモデルの高さを保ち、道路用の区間LOD（スプライン面への帯化）も適用しない。`base_height` バリアントの `pillar_cap` は鉄塔本体（接地原点）なので、`PlacePillar` は「路面と地表の差 + base_height」で置く／置かないを判定し、柱本体だけを路面と地表の差で伸ばす。SplineMeshの高さオフセットはワールド上方向、モデルの厚みは断面法線方向。
 
 歩道・ラインは採用したモデル系列のbody上面Yを引いた共有メッシュを使う（GetRoadPartMesh）。bodyだけをY=0へ補正すると、路面高を含むp2の付属パーツが0.5m浮く。歩道終端は道路外縁を扇の中心とし、縁石を外側へ90度回す。幅ゼロの尖端にしない。
 

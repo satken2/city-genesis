@@ -45,6 +45,7 @@
     },
     "pendingWarning": "Este edificio está en proyecto. Ordena el inicio de la obra.",
     "alerts": {
+      "diagnoseHint": "Haz clic para diagnosticar la causa",
       "title": "Alertas",
       "constructionShortage": {
         "title": "Falta de servicios de construcción",

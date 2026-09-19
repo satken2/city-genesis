@@ -787,8 +787,10 @@ public class RoadPath : IPathMeshGenerator
         // 地形解像度限界・Zファイティングによる埋没を回避するため、道路本体はスプラインから浮かせる。
         // single_span=true の場合は body をタイル化せず1枚で引き伸ばす（アンカー点間の直線スパン）。
         // 索道はケーブルの実寸間隔と原点を保ち、駅の屋根を路面として高さ補正しない。
+        // base_height を持つバリアント（送電線）はスプラインが地表に置かれ、モデル自体が電線の地上高を
+        // 持つ規約なので、上面をY=0へ揃える補正を掛けると電線が地面に落ちる。
         bool ropeway = pathData.path_variant == 601 || pathData.path_variant == 602;
-        GameObject roadBody = CreateSplineMesh(container, spline, $"{variantBase}/body", width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/body", singleSpan: singleSpan);
+        GameObject roadBody = CreateSplineMesh(container, spline, $"{variantBase}/body", width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/body", singleSpan: singleSpan, normalizeBodySurface: baseHeight <= 0f);
         if (ropeway)
             CreateSplineMesh(container, spline, $"{variantBase}/station_shell", width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE,
                 stretchToWidth: false, maxTileLength: 0, normalizeBodySurface: false);
@@ -1493,14 +1495,16 @@ public class RoadPath : IPathMeshGenerator
         bool TryPlace(double percent)
         {
             if (onSupport == null)
-                return PlacePillar(container, pillarPrefab, pillarCapPrefab, pillarBounds, capBounds, obstacles, spline, percent);
+                return PlacePillar(container, pillarPrefab, pillarCapPrefab, pillarBounds, capBounds, obstacles, spline, percent, baseHeight);
             Vector3 position = spline.EvaluatePosition(ClampSplinePercent(percent));
             float ground = Utils.GetGroundHeight(position);
-            if (position.y - ground - capBounds.GetValueOrDefault().size.y <= 0.1f) return false;
+            // キャップ下端が地面に届く高さが無い地点は施工単位にしない（PlacePillar と同じキャップ厚の定義）。
+            float capThickness = capBounds.HasValue ? Mathf.Max(0f, -capBounds.Value.min.y * (pillarCapPrefab != null ? pillarCapPrefab.transform.localScale.y : 1f)) : 0f;
+            if (position.y - ground + baseHeight - capThickness <= 0.1f) return false;
             var support = new GameObject("ConstructionSupport");
             support.transform.SetParent(container.transform, false);
             support.transform.position = new Vector3(position.x, ground, position.z);
-            if (!PlacePillar(support, pillarPrefab, pillarCapPrefab, pillarBounds, capBounds, obstacles, spline, percent))
+            if (!PlacePillar(support, pillarPrefab, pillarCapPrefab, pillarBounds, capBounds, obstacles, spline, percent, baseHeight))
             {
                 UnityEngine.Object.Destroy(support);
                 return false;
@@ -1610,10 +1614,13 @@ public class RoadPath : IPathMeshGenerator
     /// CalculatePathPoints で base_height 分のYシフトが適用済みのため、sample.position.y は
     /// すでに (groundY + (relY - base_height) + offset) になっており、柱は地面まで伸びる。
     /// 「3D描画上の都合」で、ゲームロジックには影響しない。
+    /// base_height を持つバリアント（送電線）はスプラインが地表にあり、キャップ＝鉄塔がモデル自体で
+    /// 地上高を持つため、路面と地表の差に base_height を足した値を「構造物の高さ」として
+    /// 置く／置かないを判定する。柱本体は路面と地表の差の分だけ伸ばす。
     /// </summary>
     private static bool PlacePillar(GameObject container, GameObject pillarPrefab, GameObject pillarCapPrefab,
         Bounds? pillarBounds, Bounds? capBounds, List<PillarClearance.Corridor> obstacles,
-        SplineComputer spline, double percent)
+        SplineComputer spline, double percent, float baseHeight)
     {
         SplineSample sample = spline.Evaluate(ClampSplinePercent(percent));
         Vector3 forward = sample.forward;
@@ -1625,7 +1632,9 @@ public class RoadPath : IPathMeshGenerator
         Vector3 pillarPosition = sample.position + Vector3.down * capThickness;
         float height = pillarPosition.y - Utils.GetGroundHeight(sample.position);
         // 地表に張り付いた区間（地上線路・切り通し）には柱もキャップも置かない。
-        if (height <= 0.1f) return false;
+        if (height + baseHeight <= 0.1f) return false;
+        // 柱本体は路面と地表の隙間を埋める部材なので、隙間が無ければキャップだけを置く。
+        bool needsPillar = pillarPrefab != null && height > 0.1f;
         Vector3 pillarScale = pillarPrefab != null ? pillarPrefab.transform.localScale : Vector3.one;
         // 橋脚モデルは実寸で著作され、種類ごとに高さが異なる。1mモデルとは限らない。
         pillarScale.y = height / Mathf.Max(0.001f, pillarBounds.GetValueOrDefault().size.y);
@@ -1633,7 +1642,7 @@ public class RoadPath : IPathMeshGenerator
         // キャップの張り出しは柱本体とは高さが異なる。別々に判定し、干渉時は一組とも生成しない。
         if (capBounds.HasValue && PillarClearance.Intersects(PillarClearance.TransformBounds(capBounds.Value,
                 Matrix4x4.TRS(sample.position, rotation, capScale)), obstacles)) return false;
-        if (pillarBounds.HasValue && PillarClearance.Intersects(PillarClearance.TransformBounds(pillarBounds.Value,
+        if (needsPillar && pillarBounds.HasValue && PillarClearance.Intersects(PillarClearance.TransformBounds(pillarBounds.Value,
                 Matrix4x4.TRS(pillarPosition, rotation, pillarScale)), obstacles)) return false;
 
         bool placed = false;
@@ -1645,7 +1654,7 @@ public class RoadPath : IPathMeshGenerator
             cap.transform.localScale = capScale;
             placed = true;
         }
-        if (pillarPrefab != null)
+        if (needsPillar)
         {
             var pillar = UnityEngine.Object.Instantiate(pillarPrefab, container.transform);
             pillar.transform.position = pillarPosition;

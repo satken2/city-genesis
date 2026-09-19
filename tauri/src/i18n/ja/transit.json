@@ -1,5 +1,6 @@
 {
   "transit": {
+    "diagnose": "原因を診断",
     "hint": "公共交通機関の路線一覧です。運賃や運行間隔を調整したり、路線を新設・削除できます。",
     "lineCount": "路線数",
     "totalRidership": "総乗車回数",

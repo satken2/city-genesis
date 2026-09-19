@@ -1,5 +1,6 @@
 {
   "windowType": {
+    "diagnosis": "진단",
     "city_notifications": "중요 알림",
     "city_map": "도시 지도",
     "agent_detail": "경제 주체 상세",

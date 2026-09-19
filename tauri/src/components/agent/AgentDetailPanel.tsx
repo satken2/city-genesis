@@ -541,7 +541,16 @@ export function AgentDetailPanel({
       </>
       )}
 
-      <AgentAlertsPanel alert={agentData.alert} />
+      {/* アラートカードのクリックで、原因を因果順に掘り下げる診断ウィンドウを開く */}
+      <AgentAlertsPanel
+        alert={agentData.alert}
+        onDiagnose={() => {
+          void invoke("open_registered_window", {
+            windowType: "diagnosis",
+            entityId: currentEntityId,
+          });
+        }}
+      />
 
       {/* マッシュアップ建物のサブ建物配置エディタを開くボタン。
           操作系は他のパネルと同じアイコンボタンに揃え、名称はツールチップに持たせる。 */}

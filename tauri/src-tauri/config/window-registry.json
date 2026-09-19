@@ -37,6 +37,25 @@
       }
     ]
   },
+  "diagnosis": {
+    "title": "Diagnosis",
+    "width": 480,
+    "height": 560,
+    "resizable": true,
+    "policy": "single_per_entity",
+    "entity_type": "agent",
+    "layout": "right_panel",
+    "fetch": {
+      "method": "GET",
+      "path_template": "/api/v1/agents/{id}/diagnosis"
+    },
+    "actions": [
+      {
+        "id": "camera.move_to_entity",
+        "label": "Move Camera"
+      }
+    ]
+  },
   "citizen_detail": {
     "title": "Citizen Details",
     "width": 460,

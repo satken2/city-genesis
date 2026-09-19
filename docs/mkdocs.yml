@@ -108,6 +108,7 @@ nav:
     - Unity入力制御: programs/Unity入力制御.md
     - アラートフラグ管理: programs/アラートフラグ管理.md
     - 通知レベル管理: programs/通知レベル管理.md
+    - 診断ウィンドウ: programs/診断ウィンドウ.md
     - ファイル配置: programs/ファイル配置.md
     - 素材クレジット管理: programs/素材クレジット管理.md
     - サウンドシステム: programs/サウンドシステム.md

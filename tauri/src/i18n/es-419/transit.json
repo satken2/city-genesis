@@ -1,5 +1,6 @@
 {
   "transit": {
+    "diagnose": "Diagnosticar la causa",
     "hint": "Listado de líneas de transporte público. Ajusta tarifas e intervalos, o crea y elimina líneas.",
     "lineCount": "Líneas",
     "totalRidership": "Viajes totales",

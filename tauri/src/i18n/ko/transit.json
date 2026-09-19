@@ -1,5 +1,6 @@
 {
   "transit": {
+    "diagnose": "원인 진단",
     "hint": "대중교통 노선 목록입니다. 운임과 배차 간격을 조정하거나 노선을 신설・삭제할 수 있습니다.",
     "lineCount": "노선 수",
     "totalRidership": "총 승차 횟수",

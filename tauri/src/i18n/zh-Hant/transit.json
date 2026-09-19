@@ -1,5 +1,6 @@
 {
   "transit": {
+    "diagnose": "診斷原因",
     "hint": "大眾運輸路線一覽。可調整票價與發車間隔，也可新建或刪除路線。",
     "lineCount": "路線數",
     "totalRidership": "總乘車次數",

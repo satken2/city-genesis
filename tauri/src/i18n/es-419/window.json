@@ -1,5 +1,6 @@
 {
   "windowType": {
+    "diagnosis": "Diagnóstico",
     "city_notifications": "Alertas críticas",
     "city_map": "Mapa de la ciudad",
     "agent_detail": "Detalle del agente",

@@ -45,6 +45,7 @@
     },
     "pendingWarning": "この建物は計画中です。着工を指示してください。",
     "alerts": {
+      "diagnoseHint": "クリックして原因を診断",
       "title": "アラート",
       "constructionShortage": {
         "title": "建設サービス不足",

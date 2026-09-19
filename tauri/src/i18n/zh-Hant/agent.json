@@ -45,6 +45,7 @@
     },
     "pendingWarning": "此建築尚在規劃中。請下達開工指令。",
     "alerts": {
+      "diagnoseHint": "點擊診斷原因",
       "title": "警報",
       "constructionShortage": {
         "title": "建設服務不足",

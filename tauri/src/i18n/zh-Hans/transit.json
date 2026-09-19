@@ -1,5 +1,6 @@
 {
   "transit": {
+    "diagnose": "诊断原因",
     "hint": "公共交通线路一览。可调整票价与发车间隔，也可新建或删除线路。",
     "lineCount": "线路数",
     "totalRidership": "总乘车次数",

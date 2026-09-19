@@ -1,5 +1,6 @@
 {
   "transit": {
+    "diagnose": "Diagnose cause",
     "hint": "List of public transit lines. Adjust fares and headways, or create and delete lines.",
     "lineCount": "Lines",
     "totalRidership": "Total ridership",

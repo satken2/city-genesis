@@ -45,6 +45,7 @@
     },
     "pendingWarning": "Ce bâtiment est à l'état de projet. Ordonnez le démarrage du chantier.",
     "alerts": {
+      "diagnoseHint": "Cliquer pour diagnostiquer la cause",
       "title": "Alertes",
       "constructionShortage": {
         "title": "Manque de services de construction",

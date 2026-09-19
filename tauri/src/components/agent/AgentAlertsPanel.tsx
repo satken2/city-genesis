@@ -54,9 +54,14 @@ const ALERT_CARDS: AlertCardDef[] = [
 type AgentAlertsPanelProps = {
   /** agent の alert ビット和。未設定(undefined/null)は 0 として扱う */
   alert: number | undefined | null;
+  /**
+   * カードをクリックしたときに診断ウィンドウを開くハンドラ。
+   * 指定するとカードがボタンになり、原因を掘り下げる診断(window_type="diagnosis")へ誘導する。
+   */
+  onDiagnose?: () => void;
 };
 
-export function AgentAlertsPanel({ alert }: AgentAlertsPanelProps) {
+export function AgentAlertsPanel({ alert, onDiagnose }: AgentAlertsPanelProps) {
   const { t } = useTranslation();
   const bits = alert ?? 0;
   const activeCards = ALERT_CARDS.filter((card) => (bits & card.bit) !== 0);
@@ -64,17 +69,38 @@ export function AgentAlertsPanel({ alert }: AgentAlertsPanelProps) {
 
   return (
     <div className="agent-detail-alerts">
-      {activeCards.map((card) => (
-        <div className="agent-detail-alert-card" key={card.key}>
-          <div className="agent-detail-alert-title">
-            <img src={card.icon} alt="" className="agent-detail-alert-icon" />
-            {t(`agent.alerts.${card.key}.title`)}
-          </div>
-          <div className="agent-detail-alert-desc">
-            {t(`agent.alerts.${card.key}.description`)}
-          </div>
-        </div>
-      ))}
+      {activeCards.map((card) => {
+        const body = (
+          <>
+            <div className="agent-detail-alert-title">
+              <img src={card.icon} alt="" className="agent-detail-alert-icon" />
+              {t(`agent.alerts.${card.key}.title`)}
+            </div>
+            <div className="agent-detail-alert-desc">
+              {t(`agent.alerts.${card.key}.description`)}
+            </div>
+          </>
+        );
+        if (!onDiagnose) {
+          return (
+            <div className="agent-detail-alert-card" key={card.key}>
+              {body}
+            </div>
+          );
+        }
+        return (
+          <button
+            className="agent-detail-alert-card agent-detail-alert-card--clickable"
+            key={card.key}
+            type="button"
+            title={t("agent.alerts.diagnoseHint")}
+            onClick={onDiagnose}
+          >
+            {body}
+            <div className="agent-detail-alert-hint">{t("agent.alerts.diagnoseHint")}</div>
+          </button>
+        );
+      })}
     </div>
   );
 }

@@ -148,8 +148,10 @@ public static class ConstructionPathBuilder
             }
             else
             {
+                // base_height を持つバリアントは完成時と同じくモデルの地上高を保つ（RoadPath.CreateRoadParts 参照）。
                 GameObject body = RoadPath.CreateSplineMesh(complete, roadSpline, variant + "/body", width, 0,
-                    RoadPartHeights.BODY_ABOVE_SPLINE, fallbackPrefabName: type + "/body", singleSpan: singleSpan);
+                    RoadPartHeights.BODY_ABOVE_SPLINE, fallbackPrefabName: type + "/body", singleSpan: singleSpan,
+                    normalizeBodySurface: baseHeight <= 0f);
                 if (sidewalk > 0f)
                 {
                     for (int side = -1; side <= 1; side += 2)

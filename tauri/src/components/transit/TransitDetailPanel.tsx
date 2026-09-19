@@ -267,6 +267,22 @@ export function TransitDetailPanel({
             {pauseReasonText}
           </p>
         )}
+        {/* 運休中または車両不足のときだけ、原因を掘り下げる診断ウィンドウへの導線を出す。
+            路線詳細のIDは路線エージェントの agent_id と同じなので、そのまま診断対象にできる。 */}
+        {(!running || (procurementRatio !== null && procurementRatio < 1)) && (
+          <button
+            type="button"
+            className="transit-detail__diagnose-btn"
+            onClick={() => {
+              void invoke("open_registered_window", {
+                windowType: "diagnosis",
+                entityId: initialEntityId,
+              });
+            }}
+          >
+            {t("transit.diagnose")}
+          </button>
+        )}
       </section>
 
       {/* 運賃・運行間隔の設定 */}

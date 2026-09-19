@@ -841,6 +841,18 @@ pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) 
                 "world:change_state".to_string(),
                 json!({ "state": "STATE_NORMAL" }),
             );
+        } else if wt == "diagnosis" {
+            // 診断ウィンドウが閉じられたとき、診断木が指すパス・建物のハイライト
+            // (source="diagnosis")を消す。ウィンドウは非表示(再利用待ち)になるだけで
+            // React側のアンマウント処理によるクリーンアップ送信が走らないため、
+            // クローズ処理側で明示的に送る(path_detail と同じ理由)。
+            let _ = ipc::send_ui_action(
+                state,
+                wt.clone(),
+                None,
+                "world:clear_highlights".to_string(),
+                json!({ "source": "diagnosis" }),
+            );
         } else if wt == "zone_merge" {
             // 地区統合の確定ウィンドウが(確定も取消もされずに)閉じられたとき、
             // Unity 側の確定待ちを取消として解除する。ウィンドウは非表示(再利用待ち)に
