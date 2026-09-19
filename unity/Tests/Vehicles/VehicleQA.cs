@@ -157,6 +157,18 @@ public static class VehicleQA
             }
             Near(Vector3.Distance(positions[0],positions[1]),20,.01f,"Consist spacing incorrect");
         }
+        // パス管理が無くても、描画する編成が無い更新では道路形状にアクセスしない。
+        Set(data,"vehicle_count",0);
+        Call(manager,"RebuildLines",sourceList);
+        Call(manager,"RefreshGeometry",Vector3.zero);
+        Check(((IDictionary)Get(manager,"geometry")).Count==0,"Unavailable fleet retains geometry");
+        Set(data,"vehicle_count",2);
+        Call(manager,"RebuildLines",sourceList);
+        Check(lines.Count==1,"Restored fleet does not resume");
+        sourceList.Clear();
+        Call(manager,"RebuildLines",sourceList);
+        Call(manager,"RefreshGeometry",Vector3.zero);
+        Check(lines.Count==0,"Removed route retained");
         UnityEngine.Object.DestroyImmediate(manager.gameObject);UnityEngine.Object.DestroyImmediate(models.gameObject);
     }
 

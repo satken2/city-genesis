@@ -14,6 +14,7 @@ public sealed class TransitVehicleManager : MonoBehaviour
     private float scanTimer;
     private int revision = -1, session = -1;
     private readonly List<Line> lines = new();
+    private readonly HashSet<int> routePaths = new();
     private readonly Dictionary<int, Geometry> geometry = new();
     private readonly Dictionary<string, GameObject> visible = new();
     private readonly Dictionary<string, Stack<GameObject>> pool = new();
@@ -56,7 +57,7 @@ public sealed class TransitVehicleManager : MonoBehaviour
         var store = TransitDataStore.Ensure();
         if (session != store.Session)
         {
-            session = store.Session; clock = 0; revision = -1; lines.Clear(); geometry.Clear();
+            session = store.Session; clock = 0; revision = -1; lines.Clear(); routePaths.Clear(); geometry.Clear(); railConnectors.Clear();
             HideUnused(true);
             soundTrack.Clear();
             VehicleAmbience.Clear(VehicleAmbience.Kind.Bus);
@@ -79,6 +80,7 @@ public sealed class TransitVehicleManager : MonoBehaviour
     private void RebuildLines(List<TransitLineSummary> source)
     {
         lines.Clear();
+        routePaths.Clear();
         foreach (var data in source)
         {
             if (data.status != Constants.STATUS_ACTIVE || data.vehicle_count < Math.Max(1, data.cars_per_train)) continue;
@@ -95,6 +97,7 @@ public sealed class TransitVehicleManager : MonoBehaviour
                 else line.runs.Add(new Run { path = s.path_id, start = line.motion.Distances[i], end = line.motion.Distances[i]+s.length_m, from = s.from_fraction, to = s.to_fraction });
             }
             lines.Add(line);
+            foreach (var run in line.runs) routePaths.Add(run.path);
         }
         scanTimer = 0;
     }
@@ -102,11 +105,13 @@ public sealed class TransitVehicleManager : MonoBehaviour
     private void RefreshGeometry(Vector3 center)
     {
         geometry.Clear(); railConnectors.Clear();
+        // 点列の生成には地形・交差点の計算を伴うため、描画する路線の経路だけを対象にする。
+        if (routePaths.Count == 0) return;
         float margin = 0;
         foreach (var l in lines) margin = Mathf.Max(margin, l.data.cars_per_train*Mathf.Max(1,l.data.length_per_vehicle));
         foreach (var data in paths.GetPathsNearCircle(center, renderRadius + margin))
         {
-            if (data.status != Constants.STATUS_ACTIVE || !paths.TryGetPathPolyline(data.path_id, out var full, false) || full.Count < 2) continue;
+            if (!routePaths.Contains(data.path_id) || data.status != Constants.STATUS_ACTIVE || !paths.TryGetPathPolyline(data.path_id, out var full, false) || full.Count < 2) continue;
             if (!paths.TryGetPathPolyline(data.path_id, out var trimmed) || trimmed.Count < 2) continue;
             var g = new Geometry { data = data, full = new VehiclePolyline(full), trimmed = new VehiclePolyline(trimmed), rail = TrackIntersectionMeshGenerator.IsTrackType(data.path_type) };
             g.trimStart = g.full.Project(trimmed[0]); g.trimEnd = g.full.Project(trimmed[trimmed.Count-1]);
