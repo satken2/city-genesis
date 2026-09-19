@@ -621,6 +621,32 @@ async fn copy_terrain_for_editor(
         .await
         .map_err(|e| format!("地形データの読み込みに失敗しました: {e}"))?;
 
+    // 登録マップの配置定義を取得し、編集中の都市とは独立した作業コピーへ持ち込む。
+    let props: serde_json::Value = client
+        .get(format!("{}/api/v1/terrain/maps/{}/props", base, map_id))
+        .timeout(Duration::from_secs(60))
+        .send()
+        .await
+        .map_err(|e| format!("プロップ定義の取得に失敗しました: {e}"))?
+        .error_for_status()
+        .map_err(|e| format!("プロップ定義の取得に失敗しました: {e}"))?
+        .json()
+        .await
+        .map_err(|e| format!("プロップ定義の読み込みに失敗しました: {e}"))?;
+
+    let resource_document: serde_json::Value = client
+        .get(format!("{}/api/v1/terrain/maps/{}/resources", base, map_id))
+        .timeout(Duration::from_secs(60))
+        .send()
+        .await
+        .map_err(|e| format!("資源定義の取得に失敗しました: {e}"))?
+        .error_for_status()
+        .map_err(|e| format!("資源定義の取得に失敗しました: {e}"))?
+        .json()
+        .await
+        .map_err(|e| format!("資源定義の読み込みに失敗しました: {e}"))?;
+    let resources = terrain_editor_resources(&resource_document)?;
+
     let map_dir = terrain_editor_dir(&app)?.join(&map_id);
     std::fs::create_dir_all(&map_dir).map_err(|e| e.to_string())?;
 
@@ -633,6 +659,8 @@ async fn copy_terrain_for_editor(
         "cell_size": cell_size,
         "grid_rows": grid_rows,
         "grid_cols": grid_cols,
+        "props": props,
+        "resources": resources,
     });
     std::fs::write(map_dir.join("meta.json"), meta.to_string())
         .map_err(|e| format!("meta.json の書き込みに失敗しました: {e}"))?;
@@ -641,6 +669,45 @@ async fn copy_terrain_for_editor(
 
     log::info!("[copy_terrain_for_editor] map_id={} を保存しました", map_id);
     Ok(())
+}
+
+/// 都市生成ローダーと同じ2種類の外形を受け入れ、資源の各フィールドは加工しない。
+fn terrain_editor_resources(document: &serde_json::Value) -> Result<&serde_json::Value, String> {
+    let resources = if document.is_array() {
+        document
+    } else {
+        document.get("resources").unwrap_or(&serde_json::Value::Null)
+    };
+    if !resources.is_array() {
+        return Err("資源定義の形式が不正です(resources配列が必要です)".to_string());
+    }
+    Ok(resources)
+}
+
+#[cfg(test)]
+mod terrain_resource_import_tests {
+    use super::terrain_editor_resources;
+    use serde_json::json;
+
+    #[test]
+    fn preserves_resource_fields_in_both_supported_formats() {
+        let entries = json!([{
+            "id": "ore", "resource_type": 3, "max_amount": 123456.5,
+            "recovery_rate": 0.025,
+            "polygon": {"type": "Polygon", "coordinates": [[[0, 0], [10, 0], [10, 10], [0, 0]]]}
+        }]);
+        let document = json!({"version": 1, "resources": entries});
+        assert_eq!(terrain_editor_resources(&document).unwrap(), &entries);
+        assert_eq!(terrain_editor_resources(&entries).unwrap(), &entries);
+        assert_eq!(terrain_editor_resources(&json!({"resources": []})).unwrap(), &json!([]));
+    }
+
+    #[test]
+    fn rejects_missing_or_invalid_resource_array() {
+        for document in [json!(null), json!({}), json!({"resources": null}), json!({"resources": {}})] {
+            assert!(terrain_editor_resources(&document).is_err());
+        }
+    }
 }
 
 /// 地形エディタが表示・編集するためのローカル作業コピーを読み込む。
@@ -670,6 +737,7 @@ struct TerrainEditorData {
     /// 各要素は {id, resource_type, max_amount, recovery_rate, polygon(GeoJSONライク)}
     /// (ResourceAreaPayload)。未設定なら空配列。仕様の正は同 §D.12。
     resources: serde_json::Value,
+    props: serde_json::Value,
     /// カメラ初期状態 {x, y, z, yaw, pitch}(TerrainCameraPayload)。未設定なら null。
     /// 仕様の正は同 §D.13。
     camera: serde_json::Value,
@@ -737,6 +805,10 @@ fn load_terrain_editor_data(
             .get("resources")
             .cloned()
             .unwrap_or_else(|| serde_json::Value::Array(Vec::new())),
+        props: meta
+            .get("props")
+            .cloned()
+            .unwrap_or_else(|| serde_json::json!({"instances": [], "scatters": []})),
         camera: meta.get("camera").cloned().unwrap_or(serde_json::Value::Null),
     })
 }
@@ -905,6 +977,7 @@ fn save_terrain_editor_data(
     water_surfaces: Option<serde_json::Value>,
     rivers: Option<serde_json::Value>,
     resources: Option<serde_json::Value>,
+    props: Option<serde_json::Value>,
     camera: Option<serde_json::Value>,
 ) -> Result<(), String> {
     use base64::Engine;
@@ -941,6 +1014,7 @@ fn save_terrain_editor_data(
         "water_surfaces": water_surfaces,
         "rivers": rivers,
         "resources": resources,
+        "props": props.unwrap_or_else(|| serde_json::json!({"instances": [], "scatters": []})),
         "camera": camera,
     });
     std::fs::write(map_dir.join("meta.json"), meta.to_string())
@@ -995,6 +1069,7 @@ fn export_terrain_as_npy(
     water_surfaces: Option<serde_json::Value>,
     rivers: Option<serde_json::Value>,
     resources: Option<serde_json::Value>,
+    props: Option<serde_json::Value>,
     camera: Option<serde_json::Value>,
 ) -> Result<ExportTerrainResult, String> {
     use base64::Engine;
@@ -1009,6 +1084,11 @@ fn export_terrain_as_npy(
             bytes.len()
         ));
     }
+
+    let props = props.unwrap_or_else(|| serde_json::json!({"instances": [], "scatters": []}));
+    let props_doc = serde_json::json!({"version": 1, "props": props});
+    std::fs::write(std::path::Path::new(&out_path).with_extension("props.json"), props_doc.to_string())
+        .map_err(|e| format!("プロップ定義の書き込みに失敗しました: {e}"))?;
 
     let npy = build_npy_float16(&bytes, grid_rows as usize, grid_cols as usize);
     std::fs::write(&out_path, &npy)

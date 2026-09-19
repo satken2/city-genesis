@@ -193,7 +193,12 @@
     "riverNodeCount": "節點{{count}}",
     "riverFitRoute": "沿山谷修正河道",
     "riverRouteRadius": "路徑搜尋距離(m)",
-    "riverRouteHint": "保持起點和終點，在目前路徑兩側尋找較低的地形。僅可在開挖前修正。河寬為參考值，實際河道會隨地形變寬或變窄。"
+    "riverRouteHint": "保持起點和終點，在目前路徑兩側尋找較低的地形。僅可在開挖前修正。河寬為參考值，實際河道會隨地形變寬或變窄。",
+    "editMetadata": "編輯中繼資料",
+    "tabProp": "裝飾物編輯",
+    "propHint": "左鍵單獨放置。區域散布時，左鍵新增頂點，右鍵閉合後確認（面積至少1平方公尺）。左鍵拖曳平移視圖。高度相對於地面。",
+    "propDraftCount": "待確認的物件／頂點數：{{count}}",
+    "propList": "已放置的裝飾物"
   },
   "god_edit": {
     "openEditor": "屬性編輯",

@@ -106,6 +106,7 @@ import {
 import { polygonArea, polygonParts, translatePolygon } from "./riverGeometry";
 import { captureTerrainThumbnail } from "./terrainThumbnail";
 import "./TerrainEditorCanvas.css";
+import { TerrainPropEditor, useTerrainPropEditor, emptyTerrainProps, type TerrainProps } from "./TerrainPropEditor";
 
 type TerrainEditorCanvasProps = {
   /** 編集対象の地形マップID。window-registry の entity_id 経由で渡される。 */
@@ -188,7 +189,7 @@ type EditorRiver = GeneratedRiver & {
 type RiverPointerMode = "rain" | "draw" | "node";
 
 /** 左ツールパネル上部のプルダウンで排他的に切り替える編集対象 */
-type EditorTab = "terrain" | "water" | "river" | "resource" | "camera";
+type EditorTab = "terrain" | "water" | "river" | "resource" | "camera" | "prop";
 
 /** ノード編集でノード・流路を拾う画面上の許容距離(px)。ワールド座標へはズームで割って換算する */
 const RIVER_NODE_HIT_PX = 9;
@@ -1432,7 +1433,10 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
 
   // --- アクティブな編集タブのステート ---
   // 地形編集・水面編集・川編集・資源編集を排他的に切り替える。
+  const metadataDialogRef = useRef<HTMLDialogElement>(null);
+  const propEditor = useTerrainPropEditor(pushUndoState, draw);
   const [activeTab, setActiveTab] = useState<EditorTab>("terrain");
+  const [terrainEditTab, setTerrainEditTab] = useState<"auto" | "manual">("manual");
 
   // --- 水面(海面以外の湖など)のUI状態 ---
   // 水面モードON中は、左クリックが水面ポリゴンの頂点追加・右クリックが形状の確定(閉じる)になる
@@ -1602,6 +1606,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     rivers: EditorRiver[];
     waterSurfaces: EditorWaterSurface[];
     resourceAreas: EditorResourceArea[];
+    props: TerrainProps;
     camera: TerrainCameraPayload | null;
   };
   const MAX_UNDO = 5;
@@ -1623,6 +1628,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       rivers: riversRef.current.slice(),
       waterSurfaces: waterSurfacesRef.current.slice(),
       resourceAreas: resourceAreasRef.current.slice(),
+      props: propEditor.current.data.current,
       camera: cameraRef.current,
     });
     if (undoStackRef.current.length > MAX_UNDO) undoStackRef.current.shift();
@@ -1647,6 +1653,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         rivers: riversRef.current.slice(),
         waterSurfaces: waterSurfacesRef.current.slice(),
         resourceAreas: resourceAreasRef.current.slice(),
+        props: propEditor.current.data.current,
         camera: cameraRef.current,
       });
       if (redoStackRef.current.length > MAX_UNDO) redoStackRef.current.shift();
@@ -1656,6 +1663,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     restoreRivers(target.rivers);
     restoreWaterSurfaces(target.waterSurfaces);
     restoreResourceAreas(target.resourceAreas);
+    propEditor.current.restore(target.props);
     restoreCamera(target.camera);
     rebuildTerrainVisuals(target.elev, target.mapWidth, target.mapHeight, target.spacing, target.rows, target.cols);
     // 復元後の川リスト・地形で彫り込みプレビューを作り直す(川編集タブ以外では解除される)
@@ -1679,6 +1687,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         rivers: riversRef.current.slice(),
         waterSurfaces: waterSurfacesRef.current.slice(),
         resourceAreas: resourceAreasRef.current.slice(),
+        props: propEditor.current.data.current,
         camera: cameraRef.current,
       });
       if (undoStackRef.current.length > MAX_UNDO) undoStackRef.current.shift();
@@ -1686,6 +1695,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     restoreRivers(target.rivers);
     restoreWaterSurfaces(target.waterSurfaces);
     restoreResourceAreas(target.resourceAreas);
+    propEditor.current.restore(target.props);
     restoreCamera(target.camera);
     rebuildTerrainVisuals(target.elev, target.mapWidth, target.mapHeight, target.spacing, target.rows, target.cols);
     // 復元後の川リスト・地形で彫り込みプレビューを作り直す(川編集タブ以外では解除される)
@@ -1969,7 +1979,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     // 水面モード・資源モード・川の作図/ノード編集中は標高編集のブラシ/ポリゴンプレビューは
     // 表示しない(操作が水面/資源/流路の作図に切り替わるため)。
     const previewLineW = 1.5 / v.zoom;
-    if (ts.waterMode || ts.resourceMode || ts.cameraMode || ts.riverPointerMode !== "rain") {
+    if (activeTabRef.current === "prop" || ts.waterMode || ts.resourceMode || ts.cameraMode || ts.riverPointerMode !== "rain") {
       // 水面/資源/カメラ/流路編集モードでは何も描かない(それぞれ下の stroke* で描く)。
     } else if (ts.shape === "polygon") {
       strokePolygonPreview(ctx, polygonPointsRef.current, ts.polygonClosed ? null : brushWorldPosRef.current, previewLineW);
@@ -2013,6 +2023,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     );
 
     // カメラ初期状態のマーカー。常に表示し、カメラ編集タブのときだけ注視点指定の目安線を追従表示する。
+    propEditor.current.draw(ctx, v.zoom, activeTabRef.current === "prop", brushWorldPosRef.current);
     strokeCameraMarker(ctx, cameraRef.current, ts.cameraMode ? brushWorldPosRef.current : null, previewLineW);
 
     ctx.restore();
@@ -2209,6 +2220,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     const leavingRiver = activeTabRef.current === "river" && tab !== "river";
     activeTabRef.current = tab;
     setActiveTab(tab);
+    if (tab !== "prop") propEditor.current.reset();
     // 彫り込みプレビューは川編集タブでだけ表示する。他のタブでは実データ(elevRef)への編集が
     // 走るため、プレビュー配列が表示に残ると編集結果が見えなくなる。
     if (leavingRiver) {
@@ -3533,6 +3545,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     }));
     waterPointsRef.current = waterPointsRef.current.map((p) => ({ x: p.x + dx, z: p.z + dz }));
     resourcePointsRef.current = resourcePointsRef.current.map((p) => ({ x: p.x + dx, z: p.z + dz }));
+    propEditor.current.shift(dx, dz);
     polygonPointsRef.current = polygonPointsRef.current.map((p) => ({ x: p.x + dx, z: p.z + dz }));
     if (cameraRef.current) {
       restoreCamera({ ...cameraRef.current, x: cameraRef.current.x + dx, z: cameraRef.current.z + dz });
@@ -3708,6 +3721,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         waterSurfaces: serializeWaterSurfaces(),
         rivers: serializeRivers(),
         resources: serializeResourceAreas(),
+        props: propEditor.current.data.current,
         camera: cameraRef.current,
       });
       setSaveStatus("saved");
@@ -3776,6 +3790,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         waterSurfaces: serializeWaterSurfaces(),
         rivers: serializeRivers(),
         resources: serializeResourceAreas(),
+        props: propEditor.current.data.current,
         camera: cameraRef.current,
       });
       setExportStatus("exported");
@@ -3855,6 +3870,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
 
         // 作業コピー(meta.json)に保存されている天然資源エリアを復元する。
         restoreResourceAreas(deserializeResourceAreas(data.resources));
+        propEditor.current.restore(data.props ?? emptyTerrainProps());
         resourcePointsRef.current = [];
         setResourcePointCount(0);
         setResourcePolygonClosed(false);
@@ -3934,6 +3950,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       // ここでは登録まで行わず、パラメータ(水位/資源種別等)を設定してから確定ボタンで登録する2段階。
       // 通常時はポリゴン描画中(頂点3つ以上)ならポリゴン作成を完了(閉じる)する。それ以外は何もしない。
       if (e.button === 2) {
+        if (activeTabRef.current === "prop") { propEditor.current.closePolygon(); return; }
         if (ts.riverPointerMode === "draw") {
           // 流路の作図: 右クリックで川を確定する(2点未満なら何もしない)
           finishRiverDraft();
@@ -4065,7 +4082,9 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         const ts = toolStateRef.current;
         const rect = canvasEl.getBoundingClientRect();
         const [wx, wz] = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
-        if (ts.riverPointerMode === "draw") {
+        if (activeTabRef.current === "prop") {
+          propEditor.current.click(wx, wz);
+        } else if (ts.riverPointerMode === "draw") {
           // 流路の作図: 左クリックで頂点を追加する(上流→下流の順)
           addRiverDraftPoint(wx, wz);
         } else if (ts.riverPointerMode === "node") {
@@ -4137,10 +4156,12 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
    */
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
+      if (metadataDialogRef.current?.open) return;
       if (e.key === "Escape" && toolStateRef.current.riverPointerMode === "draw" && riverDraftPointsRef.current.length > 0) {
         clearRiverDraft();
         return;
       }
+      if (e.key === "Escape" && activeTabRef.current === "prop") { propEditor.current.reset(); return; }
       if (!e.ctrlKey || e.metaKey) return;
       // テキスト入力中はインターセプトしない
       const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
@@ -4161,45 +4182,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
 
   return (
     <div className="terrain-editor-root">
-      {/* 左ツールパネル。カード形式の編集UIを配置する。 */}
-      <aside className="terrain-editor-tools">
-        <div className="terrain-editor-tools-title-row">
-          <div className="terrain-editor-tools-title">
-            {t("terrainEditor.toolsTitle", { defaultValue: "編集ツール" })}
-          </div>
-          <button type="button" className="terrain-editor-btn" onClick={() => void handleOpen3dPreview()}>
-            {t("terrainEditor.open3dPreview", { defaultValue: "3Dプレビューを開く" })}
-          </button>
-        </div>
-
-        {/* 編集機能の切り替え。タブは5つあり横並びボタンでは1つあたりの幅が足りないため、プルダウンで選ぶ */}
-        <div className="terrain-editor-tabs">
-          <label className="terrain-editor-tabs-label" htmlFor="terrain-editor-tab-select">
-            {t("terrainEditor.tabSelectLabel", { defaultValue: "編集対象" })}
-          </label>
-          <select
-            id="terrain-editor-tab-select"
-            className="terrain-editor-select terrain-editor-tab-select"
-            value={activeTab}
-            onChange={(e) => handleTabChange(e.target.value as EditorTab)}
-            disabled={status !== "ready"}
-          >
-            <option value="terrain">{t("terrainEditor.tabTerrain", { defaultValue: "地形編集" })}</option>
-            <option value="water">{t("terrainEditor.tabWater", { defaultValue: "水面編集" })}</option>
-            <option value="river">{t("terrainEditor.tabRiver", { defaultValue: "川編集" })}</option>
-            <option value="resource">{t("terrainEditor.tabResource", { defaultValue: "資源編集" })}</option>
-            <option value="camera">{t("terrainEditor.tabCamera", { defaultValue: "カメラ" })}</option>
-          </select>
-        </div>
-
-        {/* カード配置領域(上半分)。左カラム(メタデータ)と右カラム(各タブの編集カード)の2列。 */}
-        <div className="terrain-editor-cards-area">
-
-          {/* ============================================================ */}
-          {/* 左カラム: 地図メタデータ */}
-          {/* ============================================================ */}
-          <div className="terrain-editor-cards-left">
-
+      <dialog ref={metadataDialogRef} className="terrain-editor-metadata-dialog" aria-label={t("terrainEditor.metadataTitle")}>
+        <button type="button" className="terrain-editor-btn terrain-editor-dialog-close" onClick={() => metadataDialogRef.current?.close()}>{t("common.close")}</button>
             {/* 地図メタデータカード */}
             <div className="terrain-editor-card">
               <div className="terrain-editor-card-title">
@@ -4292,50 +4276,77 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                 </div>
               )}
 
-              {/* 保存・エクスポート */}
-              <div className="terrain-editor-action-buttons" style={{ marginTop: 10 }}>
-                <button
-                  type="button"
-                  className="terrain-editor-btn terrain-editor-btn-confirm"
-                  disabled={status !== "ready" || saveStatus === "saving"}
-                  onClick={() => void handleSaveTerrainEditorData()}
-                >
-                  {saveStatus === "saving"
-                    ? t("terrainEditor.saving", { defaultValue: "保存中..." })
-                    : t("terrainEditor.save", { defaultValue: "保存" })}
-                </button>
-                <button
-                  type="button"
-                  className="terrain-editor-btn"
-                  disabled={status !== "ready" || exportStatus === "exporting"}
-                  onClick={() => void handleExportTerrainAsNpy()}
-                >
-                  {exportStatus === "exporting"
-                    ? t("terrainEditor.exporting", { defaultValue: "エクスポート中..." })
-                    : t("terrainEditor.export", { defaultValue: ".npyへエクスポート" })}
-                </button>
-              </div>
-              {saveStatus === "saved" && (
-                <div className="terrain-editor-hint terrain-editor-hint--success">
-                  {t("terrainEditor.saveSuccess", { defaultValue: "作業コピーに保存しました" })}
-                </div>
-              )}
-              {saveStatus === "error" && (
-                <div className="terrain-editor-hint terrain-editor-hint--error">
-                  {saveErrorMsg || t("terrainEditor.saveFailed", { defaultValue: "保存に失敗しました" })}
-                </div>
-              )}
-              {exportStatus === "exported" && (
-                <div className="terrain-editor-hint terrain-editor-hint--success">
-                  {t("terrainEditor.exportSuccess", { defaultValue: ".npyへエクスポートしました" })}
-                </div>
-              )}
-              {exportStatus === "error" && (
-                <div className="terrain-editor-hint terrain-editor-hint--error">
-                  {exportErrorMsg || t("terrainEditor.exportFailed", { defaultValue: "エクスポートに失敗しました" })}
-                </div>
-              )}
             </div>
+      </dialog>
+      {/* 左ツールパネル。カード形式の編集UIを配置する。 */}
+      <aside className="terrain-editor-tools">
+        <div className="terrain-editor-tools-title-row">
+          <div className="terrain-editor-tools-title">
+            {t("terrainEditor.toolsTitle", { defaultValue: "編集ツール" })}
+          </div>
+          <div className="terrain-editor-header-actions">
+          <button type="button" className="terrain-editor-btn" onClick={() => void handleOpen3dPreview()}>
+            {t("terrainEditor.open3dPreview", { defaultValue: "3Dプレビューを開く" })}
+          </button>
+          <button type="button" className="terrain-editor-btn" onClick={() => metadataDialogRef.current?.showModal()}>{t("terrainEditor.editMetadata")}</button>
+          </div>
+        </div>
+
+        {/* 編集対象はプルダウンで選ぶ。 */}
+        <div className="terrain-editor-tabs">
+          <label className="terrain-editor-tabs-label" htmlFor="terrain-editor-tab-select">
+            {t("terrainEditor.tabSelectLabel", { defaultValue: "編集対象" })}
+          </label>
+          <select
+            id="terrain-editor-tab-select"
+            className="terrain-editor-select terrain-editor-tab-select"
+            value={activeTab}
+            onChange={(e) => handleTabChange(e.target.value as EditorTab)}
+            disabled={status !== "ready"}
+          >
+            <option value="terrain">{t("terrainEditor.tabTerrain", { defaultValue: "地形編集" })}</option>
+            <option value="water">{t("terrainEditor.tabWater", { defaultValue: "水面編集" })}</option>
+            <option value="river">{t("terrainEditor.tabRiver", { defaultValue: "川編集" })}</option>
+            <option value="resource">{t("terrainEditor.tabResource", { defaultValue: "資源編集" })}</option>
+            <option value="prop">{t("terrainEditor.tabProp")}</option>
+            <option value="camera">{t("terrainEditor.tabCamera", { defaultValue: "カメラ" })}</option>
+          </select>
+        </div>
+
+        {activeTab === "terrain" && (
+          <div className="terrain-editor-subtabs" role="tablist" aria-label={t("terrainEditor.tabTerrain")}>
+            {(["auto", "manual"] as const).map((tab) => (
+              <button
+                key={tab}
+                id={`terrain-edit-tab-${tab}`}
+                type="button"
+                role="tab"
+                aria-selected={terrainEditTab === tab}
+                aria-controls={`terrain-edit-panel-${tab}`}
+                tabIndex={terrainEditTab === tab ? 0 : -1}
+                className={`terrain-editor-toggle-btn ${terrainEditTab === tab ? "selected" : ""}`}
+                onClick={() => setTerrainEditTab(tab)}
+                onKeyDown={(event) => {
+                  if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+                  event.preventDefault();
+                  const next = event.key === "Home" ? "auto" : event.key === "End" ? "manual" : tab === "auto" ? "manual" : "auto";
+                  setTerrainEditTab(next);
+                  document.getElementById(`terrain-edit-tab-${next}`)?.focus();
+                }}
+              >
+                {t(tab === "auto" ? "terrainEditor.autoTitle" : "terrainEditor.editTitle")}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* 選択中の編集カードを1列で表示する。設定値と範囲選択はタブをまたいで保持する。 */}
+        <div className="terrain-editor-cards-area">
+
+          {/* ============================================================ */}
+          {/* 左カラム: 地形の自動編集 */}
+          {/* ============================================================ */}
+          <div className="terrain-editor-cards-left" id="terrain-edit-panel-auto" role="tabpanel" aria-labelledby="terrain-edit-tab-auto" hidden={activeTab !== "terrain" || terrainEditTab !== "auto"}>
 
             {/* 自動編集カード(侵食シミュレーションをマップ全体へ一括適用する) */}
             {activeTab === "terrain" && (
@@ -4487,7 +4498,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
           {/* ============================================================ */}
           {/* 右カラム: 各タブの編集カード */}
           {/* ============================================================ */}
-          <div className="terrain-editor-cards-right">
+          <div className="terrain-editor-cards-right" id="terrain-edit-panel-manual" role={activeTab === "terrain" ? "tabpanel" : undefined} aria-labelledby={activeTab === "terrain" ? "terrain-edit-tab-manual" : undefined} hidden={activeTab === "terrain" && terrainEditTab !== "manual"}>
+            {activeTab === "prop" && <TerrainPropEditor editor={propEditor.current} />}
 
             {/* 水面カード(海面以外の湖などを任意ポリゴンで追加する) */}
             {activeTab === "water" && (
@@ -5609,6 +5621,51 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
             </div>
           )}
           </div>
+        </div>
+        <div className="terrain-editor-save-actions">
+              {/* 保存・エクスポート */}
+              <div className="terrain-editor-action-buttons" style={{ marginTop: 10 }}>
+                <button
+                  type="button"
+                  className="terrain-editor-btn terrain-editor-btn-confirm"
+                  disabled={status !== "ready" || saveStatus === "saving"}
+                  onClick={() => void handleSaveTerrainEditorData()}
+                >
+                  {saveStatus === "saving"
+                    ? t("terrainEditor.saving", { defaultValue: "保存中..." })
+                    : t("terrainEditor.save", { defaultValue: "保存" })}
+                </button>
+                <button
+                  type="button"
+                  className="terrain-editor-btn"
+                  disabled={status !== "ready" || exportStatus === "exporting"}
+                  onClick={() => void handleExportTerrainAsNpy()}
+                >
+                  {exportStatus === "exporting"
+                    ? t("terrainEditor.exporting", { defaultValue: "エクスポート中..." })
+                    : t("terrainEditor.export", { defaultValue: ".npyへエクスポート" })}
+                </button>
+              </div>
+              {saveStatus === "saved" && (
+                <div className="terrain-editor-hint terrain-editor-hint--success">
+                  {t("terrainEditor.saveSuccess", { defaultValue: "作業コピーに保存しました" })}
+                </div>
+              )}
+              {saveStatus === "error" && (
+                <div className="terrain-editor-hint terrain-editor-hint--error">
+                  {saveErrorMsg || t("terrainEditor.saveFailed", { defaultValue: "保存に失敗しました" })}
+                </div>
+              )}
+              {exportStatus === "exported" && (
+                <div className="terrain-editor-hint terrain-editor-hint--success">
+                  {t("terrainEditor.exportSuccess", { defaultValue: ".npyへエクスポートしました" })}
+                </div>
+              )}
+              {exportStatus === "error" && (
+                <div className="terrain-editor-hint terrain-editor-hint--error">
+                  {exportErrorMsg || t("terrainEditor.exportFailed", { defaultValue: "エクスポートに失敗しました" })}
+                </div>
+              )}
         </div>
       </aside>
 

@@ -204,7 +204,7 @@ public sealed class WeatherQaHost : MonoBehaviour
 
         var vehicles = new GameObject("Vehicle ambience").AddComponent<VehicleAmbience>();
         Check(Mathf.Approximately(VehicleAmbience.CarPitch(0), 0.9f) && Mathf.Approximately(VehicleAmbience.CarPitch(30), 1.4f), "car pitch follows speed");
-        Check(Mathf.Approximately(VehicleAmbience.TrainGain(0), 0.35f) && Mathf.Approximately(VehicleAmbience.TrainGain(10), 1f), "train gain follows speed");
+        Check(VehicleAmbience.TrainGain(0) == 0 && Mathf.Approximately(VehicleAmbience.TrainGain(10), 0.75f), "rolling sound is silent when stopped");
         yield return null;
         ipc.Volume(0.5f);
         float reportUntil = Time.unscaledTime + 1f;
@@ -243,7 +243,7 @@ public sealed class WeatherQaHost : MonoBehaviour
             if (!voice.isPlaying) continue;
             trainsPlaying++;
             Check(voice.clip.name == "vehicle-train" && voice.transform.position == new Vector3(0, 0, 100), "near train plays with train clip");
-            Check(Mathf.Approximately(voice.volume, 0.5f * 0.35f), "stopped train keeps a faint idle");
+            Check(voice.volume == 0, "stopped train has no rolling sound");
         }
         Check(trainsPlaying == 1, "far train not selected");
         ipc.Volume(0);

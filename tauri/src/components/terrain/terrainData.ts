@@ -1,3 +1,5 @@
+import type { TerrainProps } from "./TerrainPropEditor";
+
 /**
  * 地形データの符号化・色マッピングの共通ロジック。
  *
@@ -106,6 +108,7 @@ export type TerrainEditorData = {
   rivers: RiverPayload[];
   /** 天然資源エリアの一覧。未設定なら空配列。 */
   resources: ResourceAreaPayload[];
+  props: TerrainProps;
   /** カメラ初期状態。未設定なら null。 */
   camera: TerrainCameraPayload | null;
 };

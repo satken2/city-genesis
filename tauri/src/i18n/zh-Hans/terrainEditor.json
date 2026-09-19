@@ -193,7 +193,12 @@
     "riverNodeCount": "节点{{count}}",
     "riverFitRoute": "沿山谷修正河道",
     "riverRouteRadius": "路径搜索距离(m)",
-    "riverRouteHint": "保持起点和终点，在当前路径两侧寻找较低的地形。仅可在开挖前修正。河宽为参考值，实际河道会随地形变宽或变窄。"
+    "riverRouteHint": "保持起点和终点，在当前路径两侧寻找较低的地形。仅可在开挖前修正。河宽为参考值，实际河道会随地形变宽或变窄。",
+    "editMetadata": "编辑元数据",
+    "tabProp": "装饰物编辑",
+    "propHint": "左键单独放置。区域散布时，左键添加顶点，右键闭合后确认（面积至少1平方米）。左键拖动平移视图。高度相对于地面。",
+    "propDraftCount": "待确认的物体／顶点数：{{count}}",
+    "propList": "已放置的装饰物"
   },
   "god_edit": {
     "openEditor": "属性编辑",

@@ -193,7 +193,12 @@
     "riverNodeCount": "{{count}} nodos",
     "riverFitRoute": "Ajustar ruta al valle",
     "riverRouteRadius": "Distancia de búsqueda (m)",
-    "riverRouteHint": "Conserva ambos extremos y busca terreno bajo a los lados de la ruta. Disponible solo antes de excavar. Los anchos son orientativos; el cauce se adapta al terreno."
+    "riverRouteHint": "Conserva ambos extremos y busca terreno bajo a los lados de la ruta. Disponible solo antes de excavar. Los anchos son orientativos; el cauce se adapta al terreno.",
+    "editMetadata": "Editar metadatos",
+    "tabProp": "Objetos decorativos",
+    "propHint": "Haz clic para colocar objetos individuales. Para dispersar, agrega vértices con clics, cierra con clic derecho y confirma (área mínima: 1 m²). Arrastra para desplazar la vista. La altura es relativa al suelo.",
+    "propDraftCount": "Objetos / vértices pendientes: {{count}}",
+    "propList": "Objetos colocados"
   },
   "god_edit": {
     "openEditor": "Editar propiedades",

@@ -9,8 +9,8 @@
 
 /* 左ツールパネル。カード形式の編集UIを配置する(3Dプレビューは別ウィンドウのため含まない)。 */
 .terrain-editor-tools {
-  flex: 0 0 600px;
-  width: 600px;
+  flex: 0 0 300px;
+  width: 300px;
   height: 100%;
   background-color: #16161c;
   border-right: 1px solid #2a2a35;
@@ -21,10 +21,11 @@
   flex-direction: column;
 }
 
-/* タイトルと「3Dプレビューを開く」ボタンを横並びにする行 */
+/* 見出しの下にプレビュー・メタデータのボタンを横並びで配置する。 */
 .terrain-editor-tools-title-row {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   justify-content: space-between;
   gap: 10px;
   margin-bottom: 12px;
@@ -39,9 +40,10 @@
   color: #a0c8ff;
 }
 
-/* カード配置領域。左カラム(メタデータ＋自動編集)と右カラム(手動編集)の2列。残り高さいっぱいに広げてスクロールする。 */
+/* カード配置領域。選択中の1列だけ表示し、残りの高さをスクロールに使う。 */
 .terrain-editor-cards-area {
   flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   display: flex;
   gap: 10px;
@@ -154,6 +156,8 @@
 
 .terrain-editor-select {
   flex: 0 0 auto;
+  max-width: 100%;
+  box-sizing: border-box;
   background-color: #1c1c24;
   color: #e0e0e0;
   border: 1px solid #30303c;
@@ -212,6 +216,7 @@
 /* アクションボタン */
 .terrain-editor-action-buttons {
   display: flex;
+  flex-wrap: wrap;
   gap: 4px;
   margin-top: 4px;
 }
@@ -389,3 +394,26 @@
   box-shadow: inset 3px 0 0 #7cc4ff;
   background-color: rgba(124, 196, 255, 0.08);
 }
+
+.terrain-editor-cards-left[hidden],
+.terrain-editor-cards-right[hidden] { display: none; }
+.terrain-editor-subtabs {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+.terrain-editor-header-actions { display: flex; gap: 6px; }
+.terrain-editor-save-actions { flex: 0 0 auto; }
+.terrain-editor-metadata-dialog {
+  width: min(560px, calc(100vw - 48px));
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  border: none;
+  padding: 16px;
+  color: var(--flat-text);
+  background: var(--flat-surface);
+  box-shadow: var(--flat-shadow);
+}
+.terrain-editor-metadata-dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
+.terrain-editor-dialog-close { display: block; margin-left: auto; margin-bottom: 12px; }

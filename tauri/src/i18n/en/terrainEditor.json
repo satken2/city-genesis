@@ -193,7 +193,12 @@
     "riverNodeCount": "{{count}} nodes",
     "riverFitRoute": "Fit route to valley",
     "riverRouteRadius": "Route search distance (m)",
-    "riverRouteHint": "Keep both endpoints and find low terrain on either side of the current route. Available before carving only. Widths are guides; the channel widens and narrows with the terrain."
+    "riverRouteHint": "Keep both endpoints and find low terrain on either side of the current route. Available before carving only. Widths are guides; the channel widens and narrows with the terrain.",
+    "editMetadata": "Edit metadata",
+    "tabProp": "Props",
+    "propHint": "Click to place individual props. For scatter, click to add vertices, right-click to close, then confirm (minimum area: 1 m²). Drag to pan. Height is relative to the ground.",
+    "propDraftCount": "Pending instances / vertices: {{count}}",
+    "propList": "Placed props"
   },
   "god_edit": {
     "openEditor": "Edit properties",

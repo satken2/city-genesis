@@ -193,7 +193,12 @@
     "riverNodeCount": "{{count}} nœuds",
     "riverFitRoute": "Adapter le tracé à la vallée",
     "riverRouteRadius": "Distance de recherche (m)",
-    "riverRouteHint": "Conserve les deux extrémités et recherche les terrains bas de chaque côté du tracé. Disponible uniquement avant le creusement. Les largeurs sont indicatives et varient selon le relief."
+    "riverRouteHint": "Conserve les deux extrémités et recherche les terrains bas de chaque côté du tracé. Disponible uniquement avant le creusement. Les largeurs sont indicatives et varient selon le relief.",
+    "editMetadata": "Modifier les métadonnées",
+    "tabProp": "Objets décoratifs",
+    "propHint": "Cliquez pour placer un objet. Pour disperser, ajoutez des sommets, fermez avec un clic droit puis confirmez (surface minimale : 1 m²). Faites glisser pour déplacer la vue. La hauteur est relative au sol.",
+    "propDraftCount": "Objets / sommets en attente : {{count}}",
+    "propList": "Objets placés"
   },
   "god_edit": {
     "openEditor": "Édition des propriétés",

@@ -168,13 +168,13 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     note: "Car and bus engine loop, pitch follows speed. Unity 3D ambience. Converted to Ogg Vorbis, loudness normalized and loop crossfaded. License verified 2026-09-15.",
   },
   {
-    title: "Train Rumble and Rattle",
+    title: "Electric Train Motor Idle - Loop (Queensland Rail InterCity Express)",
     category: "sfx",
-    author: "ProductionNow",
+    author: "JotrainG",
     source: "Freesound",
-    url: "https://freesound.org/people/ProductionNow/sounds/455045/",
+    url: "https://freesound.org/people/JotrainG/sounds/700034/",
     license: "CC0 1.0 — https://creativecommons.org/publicdomain/zero/1.0/",
-    note: "Train running loop, gain follows speed. Unity 3D ambience. Freesound HQ MP3 preview converted to Ogg Vorbis, loudness normalized and loop crossfaded. License verified 2026-09-20.",
+    note: "Train motor loop, playback speed and pitch follow train speed. Converted from WAV to Ogg Vorbis and loudness normalized. License verified 2026-09-20.",
   },
   {
     title: "Piano loops 204 octave down long loop 120 bpm",

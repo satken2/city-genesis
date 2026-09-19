@@ -218,3 +218,14 @@ Unityからの`edit_prop:update_instances`とPOST/GETの各個別配置は`x, y,
 著作元はprops.blendのbus_stopコレクション、ジョブは`genesis-gallery/pipeline/jobs/build_prop_bus_stop.py`。書き出しはlibrary.pyの`export --category props --only bus_stop`、ギャラリーは`--only bus_stop`。独立Unity検証`unity/Tests/BusStops/run.ps1`は実FBXの寸法・地中脚・ポリゴン数・自動prefabと道路への配置方向を確認する。
 
 ガラスのFBX透明度に加え、BusStopManager.ConfigureGlassはPropRenderModelが所有する複製材質へURPの透過描画・深度書き込みOFF・不透明度23%を設定する。ガラスだけ影を落とさず、共有材質は変更しない。
+
+
+## 地形エディタでの配置
+
+`TerrainEditorCanvas` の「編集対象」でプロップ編集を選ぶと、2Dキャンバスで個別配置と範囲散布を定義できる。種別は `prop_types` マスターから取得する。個別配置は左クリックごとに位置を追加し、高さ（地面からの相対値）・回転・倍率をその時点の設定で記録する。範囲散布は左クリックで頂点を追加し、右クリックまたは形状確定ボタンで閉じ、密度（本/ha）とシードを指定する。面積は1㎡以上とする。左ドラッグはどちらも画面移動である。
+
+確定するまで作業コピーの配置一覧には入らず、リセット・キャンセル・Escape・編集対象の切り替えで仮配置を破棄する。確定済みの配置は一覧から削除でき、確定・削除はUndo/Redoの対象となる。マップのリサイズでは、地形の原点移動に合わせて個別位置と散布ポリゴンを平行移動する。2D表示は位置・向きのマーカーと散布範囲であり、モデルそのものはゲームのUnity側で描画する。地形専用の3Dプレビューにはプロップを送らない。
+
+作業コピーの `meta.json` には `props` として `instances`・`scatters` の配列を保存する。個別配置の各要素は `id/prop_type/x/y/z/rotation/scale`、範囲散布は `id/prop_type/polygon/density/seed` を持つ。polygonはXZ座標の頂点列である。エクスポートは `.npy` と同名の `.props.json` に `version: 1` と `props` を書き出す。配置が空でも書き出し、古い配置を残さない。登録マップをエディタへ取り込む際は `GET /api/v1/terrain/maps/{map_id}/props` から配置定義を取得する。
+
+新規都市ではこの配置定義からプロップを初期配置し、その後は都市のセーブデータが正となる。作業コピーの保存やエクスポートはプレイ中の都市に直接影響しない。
