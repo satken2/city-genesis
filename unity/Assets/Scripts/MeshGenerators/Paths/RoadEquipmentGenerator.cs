@@ -105,10 +105,13 @@ public static class RoadEquipmentGenerator
                     leaves.Box(pose, new Vector3(0f, 3f, 0f), new Vector3(1.8f, 2.5f, 1.8f));
                 }
         }
-        if (master.fence_type_allowed && path.fence_type == Constants.PATH_EQUIPMENT_STANDARD && sidewalkWidth > 0f)
+        if (master.fence_type_allowed && path.fence_type == Constants.PATH_EQUIPMENT_STANDARD)
         {
-            float fenceOffset = edge - sidewalkWidth + 0.12f;
-            float fenceSurface = SurfaceHeight(path, "sidewalk", 0.5f - 0.12f / sidewalkWidth);
+            // 独立した歩道を持たない歩行者道では、舗装端の内側に柵を置く。
+            float fenceOffset = sidewalkWidth > 0f ? edge - sidewalkWidth + 0.12f : Mathf.Max(0f, edge - 0.12f);
+            float fenceSurface = sidewalkWidth > 0f
+                ? SurfaceHeight(path, "sidewalk", 0.5f - 0.12f / sidewalkWidth)
+                : SurfaceHeight(path, "body");
             for (int side = -1; side <= 1; side += 2)
             {
                 Pose previous = Sample(spline, EndClearance, side * fenceOffset, fenceSurface);

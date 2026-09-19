@@ -338,42 +338,39 @@
   z-index: 5;
 }
 
-/* タブ切り替えバーのスタイル */
+/* 編集対象の切り替え行(ラベル+プルダウン) */
 .terrain-editor-tabs {
   display: flex;
-  gap: 4px;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 12px;
   padding-bottom: 8px;
   border-bottom: 1px solid #2a2a35;
   flex: 0 0 auto;
 }
 
-.terrain-editor-tab {
-  flex: 1;
-  padding: 8px 12px;
+.terrain-editor-tabs-label {
   font-size: 11px;
   font-weight: 600;
-  color: #8a8a98;
-  background-color: #1a1a24;
-  border: 1px solid #30303c;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  color: #9aa0b0;
+  flex: 0 0 auto;
 }
 
-.terrain-editor-tab:hover:not(:disabled) {
-  color: #c8c8d0;
-  border-color: #4a4a5a;
-  background-color: #20202a;
-}
-
-.terrain-editor-tab.active {
+/* 現在の編集対象は常に見えている必要があるため、他のプルダウンより強調して幅も広く取る */
+.terrain-editor-tab-select {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 6px 8px;
+  font-size: 12px;
+  font-weight: 600;
   background-color: #2a3a52;
   border-color: #5a8fd6;
   color: #a0c8ff;
 }
 
-.terrain-editor-tab:disabled {
+.terrain-editor-tab-select:disabled {
+  background-color: #1c1c24;
+  border-color: #30303c;
   color: #555;
   cursor: not-allowed;
 }

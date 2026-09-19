@@ -73,14 +73,14 @@ public static class RoadEquipmentQA
     static void CheckRoad(int variant, float grade, float sign, int utilityMode)
     {
         int type = variant / 100;
-        float width = variant == 231 ? 24 : variant == 221 || variant == 222 ? 12 : variant == 201 || variant == 211 ? 3 : variant == 212 ? 6 : 7;
+        float width = variant == 301 ? 4 : variant == 231 ? 24 : variant == 221 || variant == 222 ? 12 : variant == 201 || variant == 211 ? 3 : variant == 212 ? 6 : 7;
         float sidewalk = variant == 231 ? 3 : variant == 221 || variant == 222 ? 2.5f : 0;
         var item = Activator.CreateInstance(itemType);
         Set(item, "width", width); Set(item, "sidewalk_width", sidewalk); Set(item, "lanes", 2);
         Set(item, "follow_terrain", false);
         Set(item, "streetlight_type_allowed", variant != 201);
         Set(item, "street_tree_type_allowed", sidewalk > 0);
-        Set(item, "fence_type_allowed", sidewalk > 0);
+        Set(item, "fence_type_allowed", sidewalk > 0 || variant == 301);
         Set(item, "utility_mode_allowed", type == 2);
         masters[variant] = item;
         var path = Activator.CreateInstance(pathType);
@@ -102,6 +102,14 @@ public static class RoadEquipmentQA
         }
         var surfaces = road.GetComponentsInChildren<MeshFilter>().Where(f => f.name.EndsWith("/body") || f.name.EndsWith("/sidewalk")).ToArray();
         var lamps = road.GetComponentsInChildren<MeshFilter>().Where(f => f.name.StartsWith("streetlight")).ToArray();
+        if (variant == 301)
+        {
+            var panels = road.GetComponentsInChildren<MeshFilter>().Where(f => f.name.StartsWith("fence")).ToArray();
+            Require(panels.Length > 0, "Pedestrian road must have fence panels without a sidewalk");
+            Require(panels.Any(f => f.transform.position.x < 0) && panels.Any(f => f.transform.position.x > 0), "Pedestrian fences must cover both edges");
+            foreach (var panel in panels)
+                Require(Mathf.Abs(Mathf.Abs(panel.transform.position.x) - 1.88f) < .005f, "Pedestrian fence must stay inside paving edge");
+        }
         if (variant == 201)
         {
             Require(!road.GetComponentsInChildren<MeshFilter>().Any(f =>

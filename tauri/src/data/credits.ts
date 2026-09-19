@@ -88,6 +88,14 @@ export type CreditEntry = {
  */
 export const CREDIT_ENTRIES: CreditEntry[] = [
   {
+    title: "Paving Stones 033",
+    category: "texture",
+    source: "ambientCG",
+    url: "https://ambientcg.com/view?id=PavingStones033",
+    license: "CC0 1.0 Universal",
+    note: "歩行者専用道路301。1K-PNGのColor・NormalGLを使用。2026-09-19取得。",
+  },
+  {
     title: "city pasture Den Bosch Nethernlands 1013 am 170328_1113",
     category: "sfx",
     author: "klankbeeld",

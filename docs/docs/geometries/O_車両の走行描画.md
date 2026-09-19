@@ -19,7 +19,7 @@
 | `path_traffic` | 車種別の日次通過トリップ数。目標台数と分岐の重み |
 | `travel_direction` | `DIR_BOTH` / `DIR_FORWARD` / `DIR_BACKWARD` による進入方向制限 |
 | 始終点ノードID | 同一ノードに接続する次の道路の取得 |
-| `path_type`・`status` | `PATH_MOTORWAY` / `PATH_STREET` かつ `STATUS_ACTIVE` の選別 |
+| `path_type`・`status` | `PATH_STREET` / `PATH_MOTORWAY` かつ `STATUS_ACTIVE` の選別 |
 | パスマスターの道路幅・歩道幅・側線幅・中央分離帯幅・車線数 | 道路の区画線と共通の車線配置 |
 | `CityInfoStore.TrafficHand` | 都市の左側通行・右側通行 |
 

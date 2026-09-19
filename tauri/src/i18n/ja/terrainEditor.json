@@ -100,6 +100,7 @@
     "waterSurfaceCount": "作成済みの水面: {{count}}枚",
     "waterRemoveLast": "最後の水面を削除",
     "waterClearAll": "すべての水面を削除",
+    "tabSelectLabel": "編集対象",
     "tabTerrain": "地形編集",
     "tabWater": "水面編集",
     "tabRiver": "川編集",

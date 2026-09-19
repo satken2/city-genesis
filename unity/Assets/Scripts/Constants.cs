@@ -219,8 +219,8 @@ public static class Constants
     public const int SHAPE_COMMERCIAL = 3;
     public const int SHAPE_FULL = 4;
     public const int PATH_DEFAULT = 0;
-    public const int PATH_MOTORWAY = 1;
-    public const int PATH_STREET = 2;
+    public const int PATH_STREET = 1;
+    public const int PATH_MOTORWAY = 2;
     public const int PATH_WALKWAY = 3;
     public const int PATH_TRACK = 4;
     public const int PATH_MONORAIL = 5;

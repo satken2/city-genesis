@@ -464,7 +464,7 @@ public partial class RoadPlanManager : MonoBehaviour
     {
         PathSubtype = pathSubtype;
         // 標高編集不可のバリアント（街路など）に切り替えた場合は標高をリセットする。
-        // 前のバリアント（自動車専用道路など）で設定した標高が残らないようにする。
+        // 前のバリアント（高速道路など）で設定した標高が残らないようにする。
         // 地形追従の個別上書きも標高編集不可バリアントでは意味を失うため未設定へ戻す。
         if (!IsHeightEditable())
         {

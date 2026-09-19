@@ -6,8 +6,8 @@
  *
  * path_type → ファイル名の対応:
  * - PATH_DEFAULT   (0)  → paths/path_0.png
- * - PATH_MOTORWAY  (1)  → paths/path_1.png
- * - PATH_STREET    (2)  → paths/path_2.png
+ * - PATH_STREET    (1)  → paths/path_1.png
+ * - PATH_MOTORWAY  (2)  → paths/path_2.png
  * - PATH_WALKWAY   (3)  → paths/path_3.png
  * - PATH_TRACK     (4)  → paths/path_4.png
  * - PATH_TRANSPORT (10) → paths/path_10.png

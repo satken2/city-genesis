@@ -27,7 +27,7 @@
  *   - buildings : 建物の底面形状
  *   - allRoads / trunkRoads / railways : パス(道路・幹線道路・線路)。
  *     道路はマスターデータの全幅(width)をstroke幅に使い、実際の道路幅を持つ
- *     面として描く(街路=灰、自動車専用道路=黄、線路=茶の線)。
+ *     面として描く(街路=灰、高速道路=黄、線路=茶の線)。
  *
  * ヒートマップ(heatmap propで1種別だけ選ぶ排他表示):
  *   騒音・大気汚染・治安・日照の環境スコアを土地区画の塗り分けで表現する。APIが返すのは
@@ -40,7 +40,7 @@
  *     ビューポートが取得済み範囲の外へ出たらデバウンス付きで再取得する。
  *   - 地区は件数が少ない(上限100件)ため全件取得する。
  *   - 幹線道路の判定はマスターデータ(paths[variant].trunk)で行う
- *     (自動車専用道路はtrunkフラグにかかわらず常に幹線扱い)。
+ *     (高速道路はtrunkフラグにかかわらず常に幹線扱い)。
  *
  * 方位コンパス(showCompass):
  *   地図は常に北(ワールド+Z)が画面上の固定ビューなので、コンパスも回転しない
@@ -441,8 +441,8 @@ const FETCH_LIMIT = 10000;
 
 /** マスターデータ未取得時の道路幅フォールバック(m)。path_type別 */
 const FALLBACK_ROAD_WIDTH: Record<number, number> = {
-  [PATH_MOTORWAY]: 16,
   [PATH_STREET]: 8,
+  [PATH_MOTORWAY]: 16,
   [PATH_WALKWAY]: 2,
 };
 
@@ -1636,7 +1636,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       };
 
       /**
-       * パスを描画区分(街路系/自動車専用道路/線路)ごとに分類してPath2Dを構築する。
+       * パスを描画区分(街路系/高速道路/線路)ごとに分類してPath2Dを構築する。
        * 道路はマスターデータのwidth(全幅m)をstroke幅に使って実幅の面として描くため、
        * 幅の異なるバリアントは別のRoadBandに分ける。
        */
@@ -1660,13 +1660,13 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
             append(rail, pts);
             hasRail = true;
           } else if (
-            p.path_type === PATH_MOTORWAY ||
             p.path_type === PATH_STREET ||
+            p.path_type === PATH_MOTORWAY ||
             p.path_type === PATH_WALKWAY
           ) {
             const master = md?.paths?.[p.path_variant];
-            // 幹線道路レイヤーの対象判定はマスターのtrunkフラグ。ただし自動車専用
-            // 道路は都市の骨格として常に見せたいため、フラグにかかわらず幹線扱い
+            // 幹線道路レイヤーの対象判定はマスターのtrunkフラグ。ただし高速道路は
+            // 都市の骨格として常に見せたいため、フラグにかかわらず幹線扱い
             const trunk = p.path_type === PATH_MOTORWAY || Boolean(master?.trunk);
             const kind: RoadBandKind = p.path_type === PATH_MOTORWAY ? "motorway" : "street";
             const width = master?.width ?? FALLBACK_ROAD_WIDTH[p.path_type] ?? 8;
@@ -1679,7 +1679,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
             append(band.path, pts);
           }
         }
-        // 描画順: 非幹線街路 → 幹線街路 → 自動車専用道路(後に描くほど上に重なる)
+        // 描画順: 非幹線街路 → 幹線街路 → 高速道路(後に描くほど上に重なる)
         const rank = (b: RoadBand) => (b.kind === "motorway" ? 2 : b.trunk ? 1 : 0);
         vec.roadBands = [...bands.values()].sort((a, b) => rank(a) - rank(b));
         vec.railPath = hasRail ? rail : null;

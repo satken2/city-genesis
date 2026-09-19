@@ -85,7 +85,7 @@ export async function sendChangeDisplay(
  * `world.change_state`
  * グラフィックプログラムのステート（通常モード、建物建設モード等）を切り替える。
  * extraに追加パラメータを渡すと、paramsにマージされて送信される。
- * 例: 道路敷設モード時に { path_type: 1, path_variant: 3 } を渡すと
+ * 例: 道路敷設モード時に { path_type: 1, path_variant: 212 } を渡すと
  * Unity側でRoadPlanManagerに反映される。
  *
  * windowType は送信元ウィンドウの種別。省略時は "path_build" を使用する。

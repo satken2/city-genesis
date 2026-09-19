@@ -100,6 +100,7 @@
     "waterSurfaceCount": "생성된 수면: {{count}}장",
     "waterRemoveLast": "마지막 수면 삭제",
     "waterClearAll": "모든 수면 삭제",
+    "tabSelectLabel": "편집 대상",
     "tabTerrain": "지형 편집",
     "tabWater": "수면 편집",
     "tabRiver": "강 편집",

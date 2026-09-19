@@ -187,6 +187,9 @@ type EditorRiver = GeneratedRiver & {
  */
 type RiverPointerMode = "rain" | "draw" | "node";
 
+/** 左ツールパネル上部のプルダウンで排他的に切り替える編集対象 */
+type EditorTab = "terrain" | "water" | "river" | "resource" | "camera";
+
 /** ノード編集でノード・流路を拾う画面上の許容距離(px)。ワールド座標へはズームで割って換算する */
 const RIVER_NODE_HIT_PX = 9;
 
@@ -1429,7 +1432,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
 
   // --- アクティブな編集タブのステート ---
   // 地形編集・水面編集・川編集・資源編集を排他的に切り替える。
-  const [activeTab, setActiveTab] = useState<"terrain" | "water" | "river" | "resource" | "camera">("terrain");
+  const [activeTab, setActiveTab] = useState<EditorTab>("terrain");
 
   // --- 水面(海面以外の湖など)のUI状態 ---
   // 水面モードON中は、左クリックが水面ポリゴンの頂点追加・右クリックが形状の確定(閉じる)になる
@@ -1535,7 +1538,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   const riverWaterVisibleRef = useRef(true);
   const [selectedRiverId, setSelectedRiverId] = useState<string | null>(null);
   const selectedRiverIdRef = useRef<string | null>(null);
-  const activeTabRef = useRef<"terrain" | "water" | "river" | "resource" | "camera">("terrain");
+  const activeTabRef = useRef<EditorTab>("terrain");
   // --- 流路の手動作図・ノード編集 ---
   // 川編集タブのポインタ操作(降雨範囲の選択/川を描く/ノード編集)。タブを離れると rain に戻す。
   // 作図中の頂点列は riverDraftPointsRef、ノードのドラッグ中の状態は riverNodeDragRef、
@@ -2202,7 +2205,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
    * 指定)、タブを離れるときに rain へ戻して作図中の頂点を破棄する。
    * 未彫り込みの川はタブを離れても破棄しない(一覧から個別に彫る途中の状態を保つため)。
    */
-  function handleTabChange(tab: "terrain" | "water" | "river" | "resource" | "camera") {
+  function handleTabChange(tab: EditorTab) {
     const leavingRiver = activeTabRef.current === "river" && tab !== "river";
     activeTabRef.current = tab;
     setActiveTab(tab);
@@ -4169,48 +4172,24 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
           </button>
         </div>
 
-        {/* 編集機能のタブ切り替えバー */}
+        {/* 編集機能の切り替え。タブは5つあり横並びボタンでは1つあたりの幅が足りないため、プルダウンで選ぶ */}
         <div className="terrain-editor-tabs">
-          <button
-            type="button"
-            className={`terrain-editor-tab ${activeTab === "terrain" ? "active" : ""}`}
-            onClick={() => handleTabChange("terrain")}
+          <label className="terrain-editor-tabs-label" htmlFor="terrain-editor-tab-select">
+            {t("terrainEditor.tabSelectLabel", { defaultValue: "編集対象" })}
+          </label>
+          <select
+            id="terrain-editor-tab-select"
+            className="terrain-editor-select terrain-editor-tab-select"
+            value={activeTab}
+            onChange={(e) => handleTabChange(e.target.value as EditorTab)}
             disabled={status !== "ready"}
           >
-            {t("terrainEditor.tabTerrain", { defaultValue: "地形編集" })}
-          </button>
-          <button
-            type="button"
-            className={`terrain-editor-tab ${activeTab === "water" ? "active" : ""}`}
-            onClick={() => handleTabChange("water")}
-            disabled={status !== "ready"}
-          >
-            {t("terrainEditor.tabWater", { defaultValue: "水面編集" })}
-          </button>
-          <button
-            type="button"
-            className={`terrain-editor-tab ${activeTab === "river" ? "active" : ""}`}
-            onClick={() => handleTabChange("river")}
-            disabled={status !== "ready"}
-          >
-            {t("terrainEditor.tabRiver", { defaultValue: "川編集" })}
-          </button>
-          <button
-            type="button"
-            className={`terrain-editor-tab ${activeTab === "resource" ? "active" : ""}`}
-            onClick={() => handleTabChange("resource")}
-            disabled={status !== "ready"}
-          >
-            {t("terrainEditor.tabResource", { defaultValue: "資源編集" })}
-          </button>
-          <button
-            type="button"
-            className={`terrain-editor-tab ${activeTab === "camera" ? "active" : ""}`}
-            onClick={() => handleTabChange("camera")}
-            disabled={status !== "ready"}
-          >
-            {t("terrainEditor.tabCamera", { defaultValue: "カメラ" })}
-          </button>
+            <option value="terrain">{t("terrainEditor.tabTerrain", { defaultValue: "地形編集" })}</option>
+            <option value="water">{t("terrainEditor.tabWater", { defaultValue: "水面編集" })}</option>
+            <option value="river">{t("terrainEditor.tabRiver", { defaultValue: "川編集" })}</option>
+            <option value="resource">{t("terrainEditor.tabResource", { defaultValue: "資源編集" })}</option>
+            <option value="camera">{t("terrainEditor.tabCamera", { defaultValue: "カメラ" })}</option>
+          </select>
         </div>
 
         {/* カード配置領域(上半分)。左カラム(メタデータ)と右カラム(各タブの編集カード)の2列。 */}

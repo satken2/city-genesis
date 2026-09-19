@@ -100,6 +100,7 @@
     "waterSurfaceCount": "已创建的水面：{{count}}片",
     "waterRemoveLast": "删除最后一片水面",
     "waterClearAll": "删除所有水面",
+    "tabSelectLabel": "编辑对象",
     "tabTerrain": "地形编辑",
     "tabWater": "水面编辑",
     "tabRiver": "河流编辑",
