@@ -742,6 +742,9 @@ public class IpcViewCoordinator : MonoBehaviour
             }
         }
         TransitOverlayManager.Instance.SetVisibleVariants(variants);
+        // 表示切替のたびに路線一覧を取り直す。UI は路線カラーの保存・路線の削除後にこのイベントを
+        // 再送するので、TransitDataStore の定期取得を待たずに路線色帯が最新の色・構成へ追随する。
+        TransitOverlayManager.Instance.RefreshLines();
     }
 
     private void ApplyPropMode(string mode)

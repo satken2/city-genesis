@@ -19,6 +19,7 @@
       "education_low_enrollment": "La institución educativa «{{name}}» está subutilizada: hay pocos estudiantes inscritos ({{enrolled}} de {{max_students}} cupos)",
       "infra_facility_down": "La instalación de infraestructura «{{name}}» está fuera de servicio",
       "infra_disconnected": "{{count}} instalaciones no están conectadas a la red de infraestructura",
+      "rail_capacity_exceeded": "La frecuencia de trenes supera la capacidad de la vía en {{count}} tramo(s)",
       "collapse": "{{count}} edificios o calles se derrumbaron",
       "collapse_with_deaths": "{{count}} edificios o calles se derrumbaron y murieron {{deaths}} personas",
       "deaths_traffic": "{{count}} personas murieron en accidentes de tránsito",

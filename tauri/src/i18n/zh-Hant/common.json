@@ -14,7 +14,9 @@
     "renameFailed": "重新命名失敗",
     "minutes": "分鐘",
     "processing": "處理中...",
-    "cancel": "取消"
+    "cancel": "取消",
+    "colorPresets": "預設顏色",
+    "colorHex": "顏色代碼"
   },
   "status": {
     "0": "規劃中",

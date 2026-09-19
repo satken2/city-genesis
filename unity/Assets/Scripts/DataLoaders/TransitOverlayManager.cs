@@ -187,7 +187,7 @@ public class TransitOverlayManager : MonoBehaviour
             if (poly == null || poly.Count < 2) continue;
 
             poly = PolylineUtils.RoundCorners(poly, CORNER_RADIUS, CORNER_SEGMENTS);
-            Color routeColor = GetVariantColor(variant);
+            Color routeColor = GetLineColor(line);
             for (int i = 0; i < poly.Count - 1; i++)
             {
                 overlayRenderer.AddSolidLine(poly[i], poly[i + 1], routeColor, RIBBON_THICKNESS);
@@ -263,8 +263,24 @@ public class TransitOverlayManager : MonoBehaviour
     }
 
     /// <summary>
+    /// 路線の描画色。プレイヤーが設定した路線カラー(line_color="#rrggbb")を優先し、
+    /// 未設定・解析不能なときは種別ごとの自動色へフォールバックする。
+    /// </summary>
+    private static Color GetLineColor(TransitLineSummary line)
+    {
+        if (!string.IsNullOrEmpty(line.line_color)
+            && ColorUtility.TryParseHtmlString(line.line_color, out Color c))
+        {
+            c.a = 0.9f;
+            return c;
+        }
+        return GetVariantColor(line.path_variant);
+    }
+
+    /// <summary>
     /// 路線種別(バリアント)ごとに安定した識別色を返す。
-    /// マスターに色指定が無いため、バリアントIDから黄金角ベースの色相を割り当てる。
+    /// 路線カラー未設定時と、路線を特定できない区間パス直線フォールバックで使う。
+    /// バリアントIDから黄金角ベースの色相を割り当てる。
     /// </summary>
     private static Color GetVariantColor(int variant)
     {

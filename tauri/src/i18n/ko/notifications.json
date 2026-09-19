@@ -19,6 +19,7 @@
       "education_low_enrollment": "교육 기관 「{{name}}」에 학생이 모이지 않아 가동률이 낮습니다(재적 {{enrolled}}명/정원 {{max_students}}명)",
       "infra_facility_down": "인프라 시설 「{{name}}」이(가) 정지되어 있습니다",
       "infra_disconnected": "{{count}}개 시설이 인프라망에 연결되어 있지 않습니다",
+      "rail_capacity_exceeded": "{{count}}개 선로에서 열차 운행 횟수가 선로 용량을 초과했습니다",
       "collapse": "{{count}}개의 건물・도로가 붕괴했습니다",
       "collapse_with_deaths": "{{count}}개의 건물・도로가 붕괴하여 {{deaths}}명이 사망했습니다",
       "deaths_traffic": "교통사고로 {{count}}명이 사망했습니다",

@@ -14,7 +14,9 @@
     "renameFailed": "Failed to rename",
     "minutes": "mins",
     "processing": "Processing...",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "colorPresets": "Color presets",
+    "colorHex": "Color code"
   },
   "status": {
     "0": "Pending",

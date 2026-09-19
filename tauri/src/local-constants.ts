@@ -32,8 +32,9 @@ export const TRANSIT_DEFAULT_HEADWAY_MIN = 10;
 export const TRANSIT_DEFAULT_CARS_PER_TRAIN = 1;
 
 /**
- * 公共交通路線の種別(path_variant)ごとの路線図描画色。
- * バックエンドのマスター(transit_master / path_master)に色情報の項目が無いため、UI 側で定義する。
+ * 公共交通路線の種別(path_variant)ごとの既定描画色。
+ * 路線の色は路線ごとの `line_color`(バックエンドが作成時にパレットから割り当て、プレイヤーが
+ * 変更できる)が正で、ここは line_color が空の路線に対するフォールバックにだけ使う。
  * resolveTransitIcon(utils/pathIcon.ts)と同様にバリアントIDをキーとする。
  * 未定義の種別は TRANSIT_DEFAULT_COLOR にフォールバックする。
  */
@@ -47,6 +48,26 @@ export const TRANSIT_VARIANT_COLOR: Record<number, string> = {
 
 /** 種別未定義時のフォールバック色 */
 export const TRANSIT_DEFAULT_COLOR = "#f9e2af";
+
+/**
+ * 路線カラーの色見本(路線詳細の設定タブ)。バックエンドが新設路線に巡回的に割り当てる
+ * パレット(crud_transit.TRANSIT_LINE_COLOR_PALETTE)と同じ12色で、暗い UI と 3D 地表の
+ * 両方で見分けやすい実在の地下鉄路線図風の高彩度色。任意色はカラーコード入力で指定できる。
+ */
+export const TRANSIT_LINE_COLOR_PRESETS: readonly string[] = [
+  "#e5171f", // 赤
+  "#0079c2", // 青
+  "#00a650", // 緑
+  "#f39700", // 橙
+  "#8f76d6", // 紫
+  "#e85298", // 桃
+  "#00b2b2", // 青緑
+  "#ffd400", // 黄
+  "#9c5e31", // 茶
+  "#1f2f8c", // 紺
+  "#b5b5ac", // 銀
+  "#6cbb5a", // 黄緑
+];
 
 /**
  * 軌道建設パネルの簡易モード(駅タブ)で、ホーム長を「両数」で指定するための換算値。

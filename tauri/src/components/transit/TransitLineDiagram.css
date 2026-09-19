@@ -1,0 +1,172 @@
+/* 路線図(縦型ストリップ, TransitLineDiagram)。路線カラーは --tld-color で受け取る。 */
+
+.tld {
+  --tld-line-width: 10px;
+  --tld-row-height: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* 停留所数と起点⇄終点の要約行 */
+.tld__summary {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding: 0 2px 4px;
+  font-size: 0.74rem;
+  color: #9db0c5;
+}
+
+.tld__summary-count {
+  font-weight: 700;
+  color: #c5d4e3;
+}
+
+.tld__summary-ends {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.tld__summary-arrow {
+  color: var(--tld-color);
+  font-weight: 700;
+}
+
+.tld__list {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+}
+
+.tld__row {
+  display: flex;
+  align-items: center;
+  height: var(--tld-row-height);
+  min-width: 0;
+}
+
+/* 左端の停留所番号。実際の駅ナンバリングを模した等幅の2桁 */
+.tld__index {
+  width: 26px;
+  flex-shrink: 0;
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.5px;
+  color: #6b8299;
+  text-align: right;
+  padding-right: 10px;
+}
+
+/* 線と丸を重ねる列。行の高さいっぱいを使い、上下半分の線と中央の丸を絶対配置する */
+.tld__track {
+  position: relative;
+  width: 28px;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.tld__seg {
+  position: absolute;
+  left: 50%;
+  width: var(--tld-line-width);
+  transform: translateX(-50%);
+  background: var(--tld-color);
+}
+
+.tld__seg--up {
+  top: 0;
+  height: 50%;
+}
+
+.tld__seg--down {
+  top: 50%;
+  height: 50%;
+}
+
+/* 運休区間: 灰色の破線。上下半分は隣接行と合わせて1区間なので、破線の位相を行高で揃える */
+.tld__seg--suspended {
+  background: repeating-linear-gradient(
+    to bottom,
+    #6c7086 0 6px,
+    transparent 6px 11px
+  );
+}
+
+/* 停留所の丸。白地に路線カラーのリングで、線の上に乗る */
+.tld__dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: #ffffff;
+  border: 3px solid var(--tld-color);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.35);
+  box-sizing: border-box;
+}
+
+/* 起点・終点は一回り大きい二重丸 */
+.tld__dot--terminal {
+  width: 18px;
+  height: 18px;
+  border-width: 4px;
+  box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px rgba(0, 0, 0, 0.35);
+}
+
+.tld__name {
+  margin-left: 8px;
+  padding: 2px 6px;
+  min-width: 0;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #e8f0f8;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+/* 駅舎に所属する停留所は駅詳細を開けるリンク。App.css の button 既定を打ち消して素のテキスト風にする */
+.tld__name--link {
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  cursor: pointer;
+  color: #e8f0f8;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tld__name--link:hover {
+  background: rgba(78, 161, 255, 0.14);
+  color: #4ea1ff;
+}
+
+/* 環状路線の「先頭へ戻る」行 */
+.tld__row--loop {
+  height: 30px;
+}
+
+.tld__loop-mark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.9rem;
+  color: var(--tld-color);
+  background: #16202e;
+  border-radius: 50%;
+  line-height: 1;
+}
+
+.tld__name--loop {
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: #9db0c5;
+}

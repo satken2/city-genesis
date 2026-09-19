@@ -14,7 +14,9 @@
     "renameFailed": "名称の変更に失敗しました",
     "cancel": "キャンセル",
     "processing": "処理中...",
-    "minutes": "分"
+    "minutes": "分",
+    "colorPresets": "色見本",
+    "colorHex": "カラーコード"
   },
   "status": {
     "0": "計画中",

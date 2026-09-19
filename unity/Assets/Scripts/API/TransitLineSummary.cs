@@ -41,6 +41,12 @@ namespace GeneratedModels
 
         /// <summary>運休理由コード(None / "route_disconnected" / "return_leg_blocked" / "no_underlay")。</summary>
         public string pause_reason;
+
+        /// <summary>
+        /// 路線カラー("#rrggbb"。プレイヤー設定)。TransitOverlayManager の路線色帯はこれを使い、
+        /// 空・解析不能なときだけ種別ごとの自動色へフォールバックする。
+        /// </summary>
+        public string line_color;
     }
 
     /// <summary>GET /api/v1/transit/lines のレスポンス。バックエンドは {"lines": [...]} を返す。</summary>

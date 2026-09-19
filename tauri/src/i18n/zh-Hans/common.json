@@ -14,7 +14,9 @@
     "renameFailed": "重命名失败",
     "minutes": "分钟",
     "processing": "处理中...",
-    "cancel": "取消"
+    "cancel": "取消",
+    "colorPresets": "预设颜色",
+    "colorHex": "颜色代码"
   },
   "status": {
     "0": "规划中",

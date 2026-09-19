@@ -25,6 +25,7 @@ import { resolveTransitIcon } from "../../utils/pathIcon";
 // コンポーネントを再利用する。import により AccidentsTab.css(.usage-meter)も読み込まれる。
 import { UsageMeter } from "../statistics/tabs/AccidentsTab";
 import { STATUS_ACTIVE } from "../../constants";
+import { resolveTransitColor } from "../../local-constants";
 import "./TransitManagementWindow.css";
 
 /** GET /api/v1/transit/lines の1路線分のレスポンス型 */
@@ -35,6 +36,8 @@ type TransitLine = {
   status: number;
   fare_price: number;
   target_headway: number;
+  // 路線カラー("#rrggbb")。空文字は未設定で種別ごとの既定色にフォールバックする。
+  line_color: string;
   vehicle_count: number;
   required_vehicle_count: number;
   revenues: number;
@@ -166,7 +169,11 @@ export function TransitManagementWindow({
             body: JSON.stringify({ fare_price: edit.fare, target_headway: edit.headway }),
           },
         );
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (!res.ok) {
+          // 線路容量の事前検証で拒否された場合、バックエンドは理由を message に入れて返す。
+          const body = await res.json().catch(() => null);
+          throw new Error(body?.message ?? `HTTP ${res.status}`);
+        }
         await load();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to save");
@@ -302,6 +309,12 @@ export function TransitManagementWindow({
                   <tr key={line.line_agent_id}>
                     <td className="transit-table__name">
                       <img src={resolveTransitIcon(line.path_variant)} alt="" className="transit-table__mode-icon" draggable={false} />
+                      {/* 路線カラーの縦帯。3D の路線色帯・詳細パネルの帯と同じ色で路線を見分ける */}
+                      <span
+                        className="transit-table__color"
+                        style={{ background: line.line_color || resolveTransitColor(line.path_variant) }}
+                        aria-hidden="true"
+                      />
                       <div className="transit-table__name-body">
                         <button
                           type="button"

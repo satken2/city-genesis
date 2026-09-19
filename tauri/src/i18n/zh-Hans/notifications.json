@@ -19,6 +19,7 @@
       "education_low_enrollment": "教育机构「{{name}}」招不到学生，处于低负荷运转（在读{{enrolled}}人/名额{{max_students}}人）",
       "infra_facility_down": "基础设施「{{name}}」已停止运转",
       "infra_disconnected": "有{{count}}处设施未接入基础设施网络",
+      "rail_capacity_exceeded": "有{{count}}段轨道的列车班次超过了轨道容量",
       "collapse": "有{{count}}处建筑・道路倒塌",
       "collapse_with_deaths": "有{{count}}处建筑・道路倒塌，{{deaths}}人死亡",
       "deaths_traffic": "交通事故导致{{count}}人死亡",

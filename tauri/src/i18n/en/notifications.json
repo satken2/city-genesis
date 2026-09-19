@@ -19,6 +19,7 @@
       "education_low_enrollment": "Educational institution \"{{name}}\" is underused — few students are enrolled ({{enrolled}} of {{max_students}} seats)",
       "infra_facility_down": "Infrastructure facility \"{{name}}\" is out of service",
       "infra_disconnected": "{{count}} facilities are disconnected from the infrastructure network",
+      "rail_capacity_exceeded": "Train frequency exceeds track capacity on {{count}} track segment(s)",
       "collapse": "{{count}} buildings/roads have collapsed",
       "collapse_with_deaths": "{{count}} buildings/roads have collapsed, killing {{deaths}} people",
       "deaths_traffic": "{{count}} people died in traffic accidents",

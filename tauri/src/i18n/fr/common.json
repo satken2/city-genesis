@@ -14,7 +14,9 @@
     "renameFailed": "Échec du renommage",
     "minutes": "min",
     "processing": "Traitement...",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "colorPresets": "Couleurs prédéfinies",
+    "colorHex": "Code couleur"
   },
   "status": {
     "0": "En projet",

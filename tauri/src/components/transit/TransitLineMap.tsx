@@ -31,7 +31,6 @@ import {
   type CityMapLayerVisibility,
   type CityMapViewState,
 } from "../map/CityMapCanvas";
-import { resolveTransitColor } from "../../local-constants";
 import { STATUS_ACTIVE } from "../../constants";
 import type { TransitStop, TransitEdge } from "./TransitDetailPanel";
 import "./TransitLineMap.css";
@@ -51,8 +50,8 @@ type TransitLineMapProps = {
   apiBaseUrl: string;
   stops: TransitStop[];
   edges: TransitEdge[];
-  /** 路線の種別(transit_master の transit_path_id)。色とアイコンの解決に使う */
-  pathVariant: number;
+  /** 路線カラー("#rrggbb")。区間エッジと中間停留所のリングに使う */
+  color: string;
   /** true のとき稼働中として描く。false は運休で点線・暗色になる */
   running: boolean;
 };
@@ -143,7 +142,7 @@ export function TransitLineMap({
   apiBaseUrl,
   stops,
   edges,
-  pathVariant,
+  color,
   running,
 }: TransitLineMapProps) {
   const mapRef = useRef<CityMapCanvasHandle>(null);
@@ -160,8 +159,6 @@ export function TransitLineMap({
     for (const s of stops) m.set(s.node_id, s);
     return m;
   }, [stops]);
-
-  const color = resolveTransitColor(pathVariant);
 
   /* ---- 路線(エッジ)と停留所(マーカー)をワールド座標で重ね描きする ---- */
   const overlayDraw = useCallback(
@@ -242,14 +239,14 @@ export function TransitLineMap({
       }
       ctx.setLineDash([]);
 
-      // --- 停留所マーカー(始点=緑・終点=赤・中間=種別色リング+黒芯) ---
+      // --- 停留所マーカー(始点=緑・終点=赤・中間=路線カラーのリング+黒芯) ---
       const ringR = px(7);
       const innerR = px(4);
       const lastOrder = stops.length - 1;
       for (const s of stops) {
         const x = s.position[0];
         const z = s.position[2];
-        // 外側のリング(種別色)。始点・終点は塗りを変えて路線の端を強調する。
+        // 外側のリング(路線カラー)。始点・終点は塗りを変えて路線の端を強調する。
         const isStart = s.order === 0 && stops.length > 1;
         const isEnd = s.order === lastOrder && stops.length > 1;
         ctx.fillStyle = activeRingColor(color, isStart, isEnd);
@@ -290,7 +287,7 @@ export function TransitLineMap({
         overlayVersion={overlayVersion}
         className="transit-line-map__canvas"
       />
-      {/* 凡例: 種別色・始終点・運休の見分け方 */}
+      {/* 凡例: 路線カラー・始終点・運休の見分け方 */}
       <div className="transit-line-map__legend">
         <span className="transit-line-map__legend-item">
           <span
@@ -304,7 +301,7 @@ export function TransitLineMap({
   );
 }
 
-/** 始点・終点・中間で停留所リングの色を変える。中間は種別色、始点=緑、終点=赤 */
+/** 始点・終点・中間で停留所リングの色を変える。中間は路線カラー、始点=緑、終点=赤 */
 function activeRingColor(base: string, isStart: boolean, isEnd: boolean): string {
   if (isStart) return "#a6e3a1";
   if (isEnd) return "#f38ba8";

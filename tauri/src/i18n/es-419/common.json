@@ -14,7 +14,9 @@
     "renameFailed": "No se pudo cambiar el nombre",
     "minutes": "min",
     "processing": "Procesando...",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "colorPresets": "Colores predefinidos",
+    "colorHex": "Código de color"
   },
   "status": {
     "0": "En planeación",

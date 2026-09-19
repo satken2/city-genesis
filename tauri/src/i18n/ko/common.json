@@ -14,7 +14,9 @@
     "renameFailed": "이름 변경에 실패했습니다",
     "minutes": "분",
     "processing": "처리 중...",
-    "cancel": "취소"
+    "cancel": "취소",
+    "colorPresets": "색상 견본",
+    "colorHex": "색상 코드"
   },
   "status": {
     "0": "계획 중",

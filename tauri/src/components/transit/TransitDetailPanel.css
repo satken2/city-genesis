@@ -1,80 +1,273 @@
 /* ==========================================================================
    TransitDetailPanel.css - 路線詳細パネル(右パネル)
-   体裁の大部分は AgentDetailPanel.css(agent-detail-*)を共有し、
-   ここでは公共交通固有のボタン・区間一覧のみを定義する。
+   体裁の大部分は AgentDetailPanel.css(agent-detail-*: セクション・グリッド・タブ)を共有し、
+   ここでは公共交通固有の要素(路線カラー帯・注意バナー・実績タイル・設定ツールバー・
+   廃止ブロック・小型ボタン)だけを定義する。
    ========================================================================== */
 
-.transit-detail__save-btn {
-  margin-top: 10px;
-  width: 100%;
-  padding: 7px 12px;
-  border: none;
-  border-radius: 6px;
-  background: #2563eb;
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
+/* ---- 路線カラー帯(ヘッダ直下) ---- */
+.transit-detail__stripe {
+  height: 5px;
+  border-radius: 3px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
 }
-.transit-detail__save-btn:disabled {
+
+.transit-detail__stripe--suspended {
   opacity: 0.4;
-  cursor: not-allowed;
-}
-.transit-detail__save-btn:not(:disabled):hover {
-  filter: brightness(1.12);
 }
 
-.transit-detail__delete-btn {
-  width: 100%;
-  padding: 7px 12px;
-  border: 1px solid rgba(239, 68, 68, 0.6);
+/* ---- 運休理由・車両不足の注意バナー(文言 + 診断ボタン) ---- */
+.transit-detail__notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid rgba(245, 158, 11, 0.45);
   border-radius: 6px;
-  background: rgba(239, 68, 68, 0.15);
-  color: #fca5a5;
-  font-weight: 600;
-  cursor: pointer;
-}
-.transit-detail__delete-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.transit-detail__delete-btn:not(:disabled):hover {
-  background: rgba(239, 68, 68, 0.28);
+  background: rgba(245, 158, 11, 0.1);
 }
 
-.transit-detail__diagnose-btn {
-  width: 100%;
-  margin-top: 8px;
-  padding: 6px 12px;
-  border: 1px solid rgba(255, 160, 50, 0.5);
-  border-radius: 6px;
-  background: rgba(220, 120, 30, 0.15);
-  color: #ffb875;
-  font-weight: 600;
-  cursor: pointer;
-}
-.transit-detail__diagnose-btn:hover {
-  background: rgba(220, 120, 30, 0.28);
-}
-
-.transit-detail__pause-reason {
-  margin: 8px 0 0;
-  padding: 7px 10px;
-  border: 1px solid rgba(245, 158, 11, 0.5);
-  border-radius: 6px;
-  background: rgba(245, 158, 11, 0.12);
+.transit-detail__notice-text {
+  flex: 1;
+  min-width: 0;
   color: #fcd34d;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   line-height: 1.4;
 }
 
-.transit-detail__segments {
+/* タブ見出しに付ける「未保存あり」の点 */
+.transit-detail__tab-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 5px;
+  vertical-align: middle;
+  border-radius: 50%;
+  background: #f0c040;
+  box-shadow: 0 0 4px rgba(240, 192, 64, 0.8);
+}
+
+/* 値に添える単位・補足 */
+.transit-detail__unit {
+  margin-left: 4px;
+  font-size: 0.7rem;
+  color: #93a9c0;
+}
+
+.transit-detail__hint {
+  margin-left: 8px;
+  font-size: 0.7rem;
+  color: #6b8299;
+}
+
+/* ---- 運行実績タイル(2列) ---- */
+.transit-detail__tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.transit-detail__tile {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-}
-.transit-detail__segment {
-  padding: 4px 6px;
+  gap: 2px;
+  padding: 7px 10px;
+  background: var(--flat-raised);
+  box-shadow: var(--flat-shadow-sm);
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.04);
-  font-size: 0.8rem;
+  min-width: 0;
+}
+
+.transit-detail__tile-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--flat-text-label);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.transit-detail__tile-value {
+  font-size: 0.98rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--flat-text);
+  white-space: nowrap;
+}
+
+/* 収支の符号。左端の実線ブロックで良し悪しを示す(トップメニュー系の意匠) */
+.transit-detail__tile--positive {
+  box-shadow: inset 4px 0 0 var(--flat-good), var(--flat-shadow-sm);
+}
+.transit-detail__tile--positive .transit-detail__tile-value {
+  color: var(--flat-good);
+}
+
+.transit-detail__tile--negative {
+  box-shadow: inset 4px 0 0 var(--flat-danger), var(--flat-shadow-sm);
+}
+.transit-detail__tile--negative .transit-detail__tile-value {
+  color: var(--flat-danger);
+}
+
+/* ---- 設定タブ ---- */
+.transit-detail__settings-grid {
+  align-items: center;
+  row-gap: 6px;
+}
+
+/* 色見本は複数行になるので上寄せにする */
+.transit-detail__color-value {
+  align-items: flex-start;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.transit-detail__note {
+  margin: 0;
+  font-size: 0.7rem;
+  line-height: 1.45;
+  color: #6b8299;
+}
+
+/* 保存ツールバー: 左=未保存注記、右=ボタン群 */
+.transit-detail__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.transit-detail__dirty {
+  font-size: 0.7rem;
+  color: #6b8299;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.transit-detail__dirty--on {
+  color: #f0c040;
+}
+
+.transit-detail__dirty--on::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: #f0c040;
+  vertical-align: middle;
+}
+
+.transit-detail__actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.transit-detail__error {
+  margin: 0;
+  font-size: 0.72rem;
+  color: #ff9a9a;
+}
+
+/* ---- 小型ボタン(App.css の button 既定より一回り小さく、面の高さは落ち影で表す) ---- */
+.transit-detail__btn {
+  padding: 5px 12px;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+}
+
+.transit-detail__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.transit-detail__btn--primary {
+  background: var(--flat-selected);
+  color: #ffffff;
+  box-shadow: var(--flat-shadow-sm);
+}
+.transit-detail__btn--primary:not(:disabled):hover {
+  background: var(--flat-selected-hover);
+}
+
+.transit-detail__btn--ghost {
+  background: transparent;
+  color: #a4bccc;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+.transit-detail__btn--ghost:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6fbff;
+}
+
+.transit-detail__btn--warn {
+  background: rgba(220, 120, 30, 0.22);
+  color: #ffb875;
+  border: 1px solid rgba(255, 160, 50, 0.5);
+}
+.transit-detail__btn--warn:not(:disabled):hover {
+  background: rgba(220, 120, 30, 0.36);
+}
+
+.transit-detail__btn--danger {
+  background: transparent;
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.5);
+}
+.transit-detail__btn--danger:not(:disabled):hover {
+  background: rgba(239, 68, 68, 0.16);
+}
+
+.transit-detail__btn--danger-solid {
+  background: #b91c1c;
+  color: #ffffff;
+  box-shadow: var(--flat-shadow-sm);
+}
+.transit-detail__btn--danger-solid:not(:disabled):hover {
+  background: #dc2626;
+}
+
+/* ---- 路線の廃止ブロック(設定タブ末尾) ---- */
+.transit-detail__danger {
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(239, 68, 68, 0.35);
+}
+
+.transit-detail__danger-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.transit-detail__danger-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.transit-detail__danger-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fca5a5;
+}
+
+.transit-detail__danger-desc {
+  font-size: 0.68rem;
+  line-height: 1.4;
+  color: #6b8299;
 }

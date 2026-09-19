@@ -1,0 +1,79 @@
+/* 色見本ピッカー(ColorSwatchPicker)。プリセットの丸見本の列 + カラーコード入力欄。 */
+
+.color-swatch-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.color-swatch-picker--disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.color-swatch-picker__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* 丸い色見本。選択中は白いリングで囲い、背景の路線色を隠さない。 */
+.color-swatch-picker__swatch {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 2px solid rgba(0, 0, 0, 0.35);
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.color-swatch-picker__swatch:hover {
+  transform: scale(1.15);
+  /* App.css の button:hover が背景を上書きしないよう明示的に無効化する(背景=色そのもの) */
+  background-image: none;
+}
+
+.color-swatch-picker__swatch--selected {
+  border-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35), 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.color-swatch-picker__hex {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+}
+
+.color-swatch-picker__preview {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+.color-swatch-picker__input {
+  width: 78px;
+  padding: 4px 8px;
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.5px;
+  color: #cdd6f4;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 5px;
+  outline: none;
+}
+
+.color-swatch-picker__input:focus {
+  border-color: #4ea1ff;
+}
+
+.color-swatch-picker__input--invalid {
+  border-color: rgba(255, 113, 113, 0.7);
+  color: #ff9a9a;
+}

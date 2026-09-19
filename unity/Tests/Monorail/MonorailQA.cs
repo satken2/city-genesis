@@ -54,10 +54,14 @@ public static class MonorailQA
             }
             var platform = Vertices("Paths/p502/platform");
             Check(platform.All(v => v.x >= .299f && v.x <= 4.501f), "Platform must face Unity +X");
-            Near(platform.Where(v => Mathf.Abs(v.x - 1.5f) < .001f).Max(v => v.y), 1.5f, "Boarding edge");
+            Near(platform.Where(v => Mathf.Abs(v.x - 1.5f) < .001f && v.y < 2f).Max(v => v.y), 1.5f, "Boarding edge");
+            Near(platform.Max(v => v.y), 5.22f, "Canopy ridge");
+            Check(platform.Any(v => Mathf.Abs(v.x - 1.5f) < .001f && v.y > 4.8f), "Canopy must cover boarding edge");
+            Check(platform.Where(v => v.y > 1.51f && v.y < 4.7f).All(v => v.x > 3.4f), "Canopy columns must clear boarding area");
             Near(platform.Max(v => v.z) - platform.Min(v => v.z), 8, "Platform tile length");
             var wall = Vertices("Paths/p502/platform_wall");
             Check(wall.All(v => v.x >= 4.299f && v.x <= 4.501f), "Outer wall location");
+            Near(wall.Max(v => v.y), 4.82f, "Full height side wall meets canopy");
             Vertices("Paths/p502/platform_panel");
             foreach (int id in new[] {308, 309})
             {
