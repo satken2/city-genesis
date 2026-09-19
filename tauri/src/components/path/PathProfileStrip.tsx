@@ -210,9 +210,9 @@ export function PathProfileStrip({ shape, geom, editing, onLocalHeightChange }: 
 
   return (
     <div className="pse-profile">
-      <div className="pse-profile-header">
-        <span className="pse-profile-title">{t("path_shape_editor.profileTitle")}</span>
-        <span className="pse-profile-hint">
+      <div className="pse-section-header">
+        <span className="pse-section-title">{t("path_shape_editor.profileTitle")}</span>
+        <span className={`pse-hint ${editing ? "" : "pse-hint--muted"}`}>
           {editing ? t("path_shape_editor.profileHint") : t("path_shape_editor.profileReadOnly")}
         </span>
       </div>

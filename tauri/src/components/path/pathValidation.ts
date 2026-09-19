@@ -1,6 +1,7 @@
 import type { PathInterferenceHighlight } from "../../utils/ipc";
 
 import type { PathAlignmentResponse } from "./usePathConstruction";
+import type { PathMaxSpanViolation } from "./pathBuildConstants";
 
 export type PathValidationResult = PathInterferenceHighlight & {
   is_valid: boolean;
@@ -13,6 +14,17 @@ export type PathValidationResult = PathInterferenceHighlight & {
 };
 
 type Translate = (key: string, values?: Record<string, string | number>) => string;
+
+/** 形状編集と建設パネルでUnityの赤線の理由を共通表示する。 */
+export function describeMaxSpanViolations(violations: PathMaxSpanViolation[] | undefined, t: Translate): string[] {
+  return (violations ?? []).map(({ segment_index, distance, limit }) =>
+    t("path_construction.validationMaxSpan", {
+      start: segment_index + 1,
+      end: segment_index + 2,
+      distance: distance.toFixed(2),
+      limit: Number(limit.toFixed(2)),
+    }));
+}
 
 /** 全線検証の拒否理由を使う。中心線の推定値から原因を推測しない。 */
 export function describePathValidation(result: PathValidationResult, t: Translate): string[] {

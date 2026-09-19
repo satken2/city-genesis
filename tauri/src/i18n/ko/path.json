@@ -76,6 +76,8 @@
     }
   },
   "path_construction": {
+    "shapeError": "형상에 오류가 있습니다.",
+    "validationMaxSpan": "노드 {{start}}–{{end}} 사이 거리 {{distance}}m가 제한 {{limit}}m를 초과합니다. 중간 노드를 추가하거나 거리를 줄이세요.",
     "validationCurve": "선로 {{track}}: 시작점에서 {{start}}~{{end}}m 구간의 곡선 반경이 최소값보다 작습니다.",
     "validationGrade": "선로 {{track}}: 시작점에서 {{start}}~{{end}}m 구간의 경사가 최대값을 초과합니다.",
     "validationPathCollision": "도로 또는 선로의 점유 범위가 겹칩니다. 빨간 점유 범위를 확인하세요.",
@@ -147,6 +149,8 @@
     }
   },
   "path_shape_editor": {
+    "spanLabel": "노드 간 거리 {{value}}m\n제한 {{limit}}m 초과",
+    "planTitle": "평면 형상",
     "hintInactive": "부설 중인 경로가 없습니다",
     "hintPlacing": "3D 뷰에서 우클릭으로 형상을 확정하면 여기서 편집할 수 있습니다",
     "hintEditing": "드래그: 노드/제어점 이동  변 클릭: 노드 추가  우클릭: 노드 삭제",

@@ -3468,7 +3468,7 @@ public partial class RoadPlanManager : MonoBehaviour
         // 描画用のローカル推定をゲートにすると、権威検証自体が呼ばれず誤判定から復帰できない。
         IpcClient.Instance.EmitEditPathUpdateShape(pathId, PathType, pointsList, startControl, endControl, embankmentHeights, waypointControls, Curved, PathFollowTerrainOverride, finalized,
             phase == RoadEditorPhase.Editing && points.Count >= 2 && CheckElevationIntersections().Count == 0
-            && CheckRiverCrossings().Count == 0,
+            && CheckRiverCrossings().Count == 0 && CheckMaxSpanViolations().Count == 0,
             BuildShapeSyncExtras());
     }
 

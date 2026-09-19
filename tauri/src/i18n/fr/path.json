@@ -76,6 +76,8 @@
     }
   },
   "path_construction": {
+    "shapeError": "La forme contient des erreurs.",
+    "validationMaxSpan": "La distance entre les nœuds {{start}}–{{end}} est de {{distance}}m et dépasse la limite de {{limit}}m. Ajoutez un nœud intermédiaire ou réduisez la distance.",
     "validationCurve": "Voie {{track}} : rayon inférieur au minimum entre {{start}} et {{end}} m depuis le départ.",
     "validationGrade": "Voie {{track}} : pente supérieure au maximum entre {{start}} et {{end}} m depuis le départ.",
     "validationPathCollision": "Les volumes occupés des routes ou voies se chevauchent. Vérifiez les volumes rouges.",
@@ -147,6 +149,8 @@
     }
   },
   "path_shape_editor": {
+    "spanLabel": "Distance entre nœuds {{value}}m\nLimite de {{limit}}m dépassée",
+    "planTitle": "Tracé en plan",
     "hintInactive": "Aucune voie en cours de tracé",
     "hintPlacing": "Faites un clic droit dans la vue 3D pour fixer la forme, puis modifiez-la ici",
     "hintEditing": "Glisser : déplacer un nœud/une poignée  Clic sur un tronçon : ajouter un nœud  Clic droit : supprimer un nœud",

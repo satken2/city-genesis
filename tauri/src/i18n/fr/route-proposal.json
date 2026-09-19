@@ -8,8 +8,7 @@
     "searching": "Recherche…",
     "cancel": "Annuler",
     "undo": "Annuler la proposition",
-    "notFound": "Aucun tracé valide trouvé dans les limites de recherche. Ajustez les points de passage.",
-    "heightFailure": "Les altitudes imposées ne peuvent pas être conservées. Vérifiez le mode d’altitude ou le suivi du terrain.",
-    "failed": "Échec de la proposition : {{reason}}"
+    "notFound": "Aucun tracé trouvé.",
+    "failed": "Échec de la proposition de tracé."
   }
 }

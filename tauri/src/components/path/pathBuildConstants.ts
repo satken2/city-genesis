@@ -89,6 +89,13 @@ export type PathAlignmentSyncPayload = {
   nodes?: Array<[number, number]>;
 };
 
+export type PathMaxSpanViolation = {
+  /** 始点ノードの0始まり添字。距離は曲線長でなくXZ平面の直線距離(m)。 */
+  segment_index: number;
+  distance: number;
+  limit: number;
+};
+
 /**
  * `edit_path:update_shape` のペイロード。座標は [x, 地面相対の高さ, z]。
  * 制御点の相対高さは所属アンカー直下の地盤基準(Unity `ControlToRelativeList`)。
@@ -102,6 +109,7 @@ export type PathShapeUpdatePayload = {
   /** 右クリックで形状確定(Placing→Editing)した通知のときだけ true */
   is_finalized?: boolean;
   can_confirm?: boolean;
+  max_span_violations?: PathMaxSpanViolation[];
   selected_points?: number[][];
   start_control?: number[];
   end_control?: number[];

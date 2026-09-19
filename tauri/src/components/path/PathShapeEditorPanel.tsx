@@ -40,7 +40,7 @@ import {
   sendEditPathQueryShape,
   sendEditPathShapeCommand,
 } from "../../utils/ipc";
-import type { PathShapeUpdatePayload } from "./pathBuildConstants";
+import type { PathMaxSpanViolation, PathShapeUpdatePayload } from "./pathBuildConstants";
 import {
   SHAPE_HIT_OPTIONS,
   applyLocalMove,
@@ -289,6 +289,11 @@ export function PathShapeEditorPanel({ apiBaseUrl }: { apiBaseUrl: string }) {
     return text.split("\n");
   }, [t]);
 
+  const spanLabelLines = useCallback((violation: PathMaxSpanViolation) =>
+    t("path_shape_editor.spanLabel", {
+      value: violation.distance.toFixed(2), limit: Number(violation.limit.toFixed(2)),
+    }).split("\n"), [t]);
+
   const heightText = useCallback((relHeight: number, embankment: number) => {
     const parts: string[] = [];
     if (Math.abs(relHeight) >= 0.05) parts.push(`H ${relHeight > 0 ? "+" : ""}${relHeight.toFixed(1)}`);
@@ -304,10 +309,12 @@ export function PathShapeEditorPanel({ apiBaseUrl }: { apiBaseUrl: string }) {
       selectedIndex: s?.selected_index ?? -1,
       lateralOffsets: s?.lateral_offsets ?? [],
       alignment: s?.alignment,
+      maxSpanViolations: s?.max_span_violations,
+      spanLabelLines,
       labelLines,
       heightText,
     });
-  }, [labelLines, heightText]);
+  }, [labelLines, spanLabelLines, heightText]);
 
   /** 縦断面ストリップでの高さ変更をローカルへ先行反映する(Unityの update_shape が届くまでの表示維持) */
   const handleLocalHeightChange = useCallback((index: number, relHeight: number) => {
@@ -335,16 +342,17 @@ export function PathShapeEditorPanel({ apiBaseUrl }: { apiBaseUrl: string }) {
 
   return (
     <div className="pse">
-      <div className="pse-toolbar">
-        <span className={`pse-hint ${editing ? "" : "pse-hint--muted"}`}>{hint}</span>
-        <div className="pse-actions">
-          <button type="button" className="pse-btn" onClick={() => fitToShape(geomRef.current)}>
-            {t("path_shape_editor.fitView")}
-          </button>
+      <section className="pse-plan">
+        <div className="pse-section-header">
+          <span className="pse-section-title">{t("path_shape_editor.planTitle")}</span>
+          <span className={`pse-hint ${editing ? "" : "pse-hint--muted"}`}>{hint}</span>
+          <div className="pse-actions">
+            <button type="button" className="pse-btn" onClick={() => fitToShape(geomRef.current)}>
+              {t("path_shape_editor.fitView")}
+            </button>
+          </div>
         </div>
-      </div>
-      <RouteProposalControls state={routeProposal} />
-      <div className="pse-map">
+        <div className="pse-map">
         {initialBounds && (
         <CityMapCanvas
           ref={mapRef}
@@ -389,7 +397,8 @@ export function PathShapeEditorPanel({ apiBaseUrl }: { apiBaseUrl: string }) {
         <div className="pse-status">
           <span ref={statusRef}>---, ---</span>
         </div>
-      </div>
+        </div>
+      </section>
       {/* 高架・地下のバリアントだけ、地図の下に縦断面(高さ編集)ストリップを出す */}
       {shape?.height_editable === true && (
         <PathProfileStrip
@@ -399,6 +408,7 @@ export function PathShapeEditorPanel({ apiBaseUrl }: { apiBaseUrl: string }) {
           onLocalHeightChange={handleLocalHeightChange}
         />
       )}
+      <RouteProposalControls state={routeProposal} />
     </div>
   );
 }

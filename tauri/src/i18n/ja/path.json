@@ -76,6 +76,8 @@
     }
   },
   "path_construction": {
+    "shapeError": "形状にエラーがあります",
+    "validationMaxSpan": "ノード{{start}}–{{end}}間の距離 {{distance}}m が上限 {{limit}}m を超えています。途中にノードを追加するか、距離を短くしてください。",
     "validationCurve": "線路{{track}}：始点から{{start}}〜{{end}}mの曲線半径が規格の下限を下回っています。",
     "validationGrade": "線路{{track}}：始点から{{start}}〜{{end}}mの勾配が規格の上限を超えています。",
     "validationPathCollision": "道路・線路の占有範囲が干渉しています。赤い占有範囲を確認してください。",
@@ -147,6 +149,8 @@
     }
   },
   "path_shape_editor": {
+    "spanLabel": "ノード間距離 {{value}}m\n上限 {{limit}}m 超過",
+    "planTitle": "平面形状",
     "hintInactive": "敷設中のパスがありません",
     "hintPlacing": "3Dビューで右クリックして形状を確定すると、ここで編集できます",
     "hintEditing": "ドラッグ: ノード/制御点を移動  辺クリック: ノード追加  右クリック: ノード削除",

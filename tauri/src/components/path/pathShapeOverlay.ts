@@ -11,7 +11,7 @@
  */
 
 import type { CityMapViewState } from "../map/CityMapCanvas";
-import type { PathAlignmentSyncPayload, PathShapeUpdatePayload } from "./pathBuildConstants";
+import type { PathAlignmentSyncPayload, PathMaxSpanViolation, PathShapeUpdatePayload } from "./pathBuildConstants";
 
 export type XZ = { x: number; z: number };
 
@@ -375,6 +375,8 @@ export type ShapeDrawOptions = {
   selectedIndex: number;
   lateralOffsets: number[];
   alignment?: PathAlignmentSyncPayload;
+  maxSpanViolations?: PathMaxSpanViolation[];
+  spanLabelLines?: (violation: PathMaxSpanViolation) => string[];
   /** 区間ラベルの文言(行ごと)。i18n済みの文字列を上位が渡す */
   labelLines: (label: PathAlignmentSyncPayload["labels"][number]) => string[];
   /** ノード脇の高さ表示。表示不要なら null */
@@ -548,11 +550,23 @@ export function drawPathShape(
     ctx.stroke();
   }
 
-  // 線形の区間ラベル(3Dの引出線ラベルと同じ内容)
-  if (alignment && !opts.drag) {
-    alignment.labels.forEach((label, idx) => {
-      const lines = opts.labelLines(label);
-      const accent = label.curve ? COLOR_LABEL_CURVE : COLOR_LABEL_GRADE;
+  // 距離超過も線形違反と同じ引出線ラベルで、対象区間に結び付けて表示する。
+  if (!opts.drag) {
+    const labels = (alignment?.labels ?? []).map((label) => ({
+      x: label.x, z: label.z, lines: opts.labelLines(label), accent: label.curve ? COLOR_LABEL_CURVE : COLOR_LABEL_GRADE,
+    }));
+    for (const violation of opts.maxSpanViolations ?? []) {
+      const segment = segmentPoints(geom, violation.segment_index);
+      if (segment.length < 2 || !opts.spanLabelLines) continue;
+      const middle = (segment.length - 1) / 2;
+      const a = segment[Math.floor(middle)], b = segment[Math.ceil(middle)];
+      labels.push({
+        x: (a.x + b.x) / 2, z: (a.z + b.z) / 2,
+        lines: opts.spanLabelLines(violation), accent: COLOR_ALIGN_BAD,
+      });
+    }
+    labels.forEach((label, idx) => {
+      const { lines, accent } = label;
       ctx.beginPath();
       ctx.arc(label.x, label.z, px(3.5), 0, Math.PI * 2);
       ctx.fillStyle = accent;

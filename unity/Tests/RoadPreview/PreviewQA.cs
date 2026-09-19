@@ -81,6 +81,7 @@ public static class PreviewQA
             CheckElevatedTerrainIndependence(asm, item);
             CheckAlignmentLabels(asm);
             CheckRouteProposals(asm, item);
+            CheckMaxSpan(asm, item);
             File.WriteAllText(result, "PASS: 100 preview updates; alignment curves, grades and controls; route proposal apply, undo, fixed endpoints, stale revisions, generated-point promotion and editing phase.");
             EditorApplication.Exit(0);
         }
@@ -426,6 +427,53 @@ public static class PreviewQA
         list.Clear();
         collect.Invoke(null, new object[] { samples, origin, new float[] { 70, 80, 90, 100, 80, 70, 70 }, 70f, true, list });
         Require(list.Count == 0, "Valid geometry must have no labels");
+    }
+
+    private static void CheckMaxSpan(Assembly asm, object item)
+    {
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
+        var type = asm.GetType("RoadPlanManager");
+        var manager = new GameObject("SpanValidation").AddComponent(type);
+        type.GetField("PathSubtype").SetValue(manager, 100);
+        var anchors = (IList)type.GetField("points", flags).GetValue(manager);
+        var pointType = asm.GetType("PathBuildPoint");
+        var roleType = asm.GetType("PathPointRole");
+        var limitField = item.GetType().GetField("max_span");
+        object originalLimit = limitField.GetValue(item);
+        IList Evaluate(float? limit, params Vector3[] positions)
+        {
+            limitField.SetValue(item, limit);
+            anchors.Clear();
+            foreach (var p in positions)
+                anchors.Add(Activator.CreateInstance(pointType, p, Enum.Parse(roleType, "Waypoint")));
+            type.GetMethod("InvalidateShapeCache", flags).Invoke(manager, null);
+            return (IList)type.GetMethod("BuildMaxSpanViolationsPayload", flags).Invoke(manager, null);
+        }
+        try
+        {
+            var a = Vector3.zero;
+            var b = new Vector3(300, 200, 400);
+            Require(Evaluate(500f, a, b).Count == 0, "Exactly 500m XZ span must pass regardless of height");
+            var violations = Evaluate(500f, a, new Vector3(501, 0, 0));
+            Require(violations.Count == 1, "Over-limit span must be reported");
+            var detail = (IDictionary)violations[0];
+            Require((int)detail["segment_index"] == 0 && (float)detail["distance"] == 501f
+                && (float)detail["limit"] == 500f, "UI must receive the offending nodes, distance and limit");
+            Require(Evaluate(500f, a, new Vector3(250, 0, 0), new Vector3(501, 0, 0)).Count == 0,
+                "Adding an intermediate node must clear the warning");
+            Require(Evaluate(0f, a, b * 10).Count == 0 && Evaluate(null, a, b * 10).Count == 0,
+                "Unlimited variants must clear the warning");
+            Require(Evaluate(500f, a).Count == 0 && Evaluate(500f).Count == 0,
+                "Reset and insufficient points must clear the warning");
+            violations = Evaluate(100f, a, b, b * 2);
+            Require(violations.Count == 2 && (int)((IDictionary)violations[1])["segment_index"] == 1,
+                "All offending spans must retain their node indices");
+        }
+        finally
+        {
+            limitField.SetValue(item, originalLimit);
+            UnityEngine.Object.DestroyImmediate(manager.gameObject);
+        }
     }
 
     private static void CheckRouteProposals(Assembly asm, object master)

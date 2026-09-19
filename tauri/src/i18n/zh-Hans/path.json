@@ -76,6 +76,8 @@
     }
   },
   "path_construction": {
+    "shapeError": "形状存在错误",
+    "validationMaxSpan": "节点{{start}}–{{end}}之间的距离为{{distance}}m，超过{{limit}}m的上限。请添加中间节点或缩短距离。",
     "validationCurve": "线路{{track}}：距起点{{start}}～{{end}}m处的曲线半径小于规定下限。",
     "validationGrade": "线路{{track}}：距起点{{start}}～{{end}}m处的坡度超过规定上限。",
     "validationPathCollision": "道路或轨道的占用范围重叠。请检查红色占用范围。",
@@ -147,6 +149,8 @@
     }
   },
   "path_shape_editor": {
+    "spanLabel": "节点间距 {{value}}m\n超过上限 {{limit}}m",
+    "planTitle": "平面形状",
     "hintInactive": "没有正在铺设的路径",
     "hintPlacing": "在3D视图中右键确定形状后，即可在此编辑",
     "hintEditing": "拖动: 移动节点/控制点  点击边: 添加节点  右键: 删除节点",

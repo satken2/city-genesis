@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { fetchApi } from "../../utils/api";
 import { sendEditPathShapeCommand } from "../../utils/ipc";
 import type { PathShapeUpdatePayload, RouteProposalShape } from "./pathBuildConstants";
-import { describePathValidation, type PathValidationResult } from "./pathValidation";
 
 type Settings = {
   apiBaseUrl: string;
@@ -55,7 +54,6 @@ export function useRouteProposal(settings: Settings) {
     try {
       const response = await fetchApi<{
         status: string; revision: string; route?: RouteProposalResult;
-        diagnostics?: PathValidationResult & { fixed_height_error?: number };
       }>(`${settings.apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/propose-route`, {
         method: "POST", headers: { "Content-Type": "application/json" }, signal: controller.signal,
         body: JSON.stringify({
@@ -71,15 +69,16 @@ export function useRouteProposal(settings: Settings) {
       });
       if (controller.signal.aborted || currentKey.current !== key || currentShape.current?.revision !== start.revision) return;
       if (response.status !== "ok" || !response.route) {
-        const details = response.diagnostics?.alignments
-          ? describePathValidation(response.diagnostics, t).join(" ") : "";
-        setMessage(t(response.diagnostics?.fixed_height_error ? "route_proposal.heightFailure" : "route_proposal.notFound") + (details ? ` ${details}` : ""));
+        setMessage(t("route_proposal.notFound"));
         return;
       }
       await sendEditPathShapeCommand({ op: "apply_route", revision: start.revision,
         route_json: JSON.stringify({ ...response.route, height_mode: mode }) });
     } catch (error) {
-      if (!controller.signal.aborted) setMessage(t("route_proposal.failed", { reason: error instanceof Error ? error.message : String(error) }));
+      if (!controller.signal.aborted) {
+        console.error("[useRouteProposal] proposal failed", error);
+        setMessage(t("route_proposal.failed"));
+      }
     } finally {
       if (request.current === controller) { request.current = null; setBusy(false); }
     }

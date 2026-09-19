@@ -8,8 +8,7 @@
     "searching": "Searching…",
     "cancel": "Cancel",
     "undo": "Undo suggestion",
-    "notFound": "No valid route was found within the search limits. Try adjusting the waypoints.",
-    "heightFailure": "The required heights could not be preserved. Check the height mode or terrain following setting.",
-    "failed": "Route suggestion failed: {{reason}}"
+    "notFound": "No route was found.",
+    "failed": "Route suggestion failed."
   }
 }

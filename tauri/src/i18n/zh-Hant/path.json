@@ -76,6 +76,8 @@
     }
   },
   "path_construction": {
+    "shapeError": "形狀存在錯誤",
+    "validationMaxSpan": "節點{{start}}–{{end}}之間的距離為{{distance}}m，超過{{limit}}m的上限。請新增中間節點或縮短距離。",
     "validationCurve": "路線{{track}}：距起點{{start}}～{{end}}m處的曲線半徑小於規定下限。",
     "validationGrade": "路線{{track}}：距起點{{start}}～{{end}}m處的坡度超過規定上限。",
     "validationPathCollision": "道路或軌道的占用範圍重疊。請檢查紅色占用範圍。",
@@ -147,6 +149,8 @@
     }
   },
   "path_shape_editor": {
+    "spanLabel": "節點間距 {{value}}m\n超過上限 {{limit}}m",
+    "planTitle": "平面形狀",
     "hintInactive": "沒有正在鋪設的路徑",
     "hintPlacing": "在3D視圖中按右鍵確定形狀後，即可在此編輯",
     "hintEditing": "拖曳: 移動節點/控制點  點擊邊: 新增節點  右鍵: 刪除節點",

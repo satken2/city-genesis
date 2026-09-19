@@ -310,9 +310,8 @@ export function PathBuildSections({
       {pc.selectedVariant !== null && (
         <div className="pc-action-bar">
           {pc.nodes.length >= 2 && (!pc.canConfirm || !pc.alignmentOk) && (
-            <div role="status">
-              {(pc.canConfirm ? [t("path_construction.alignmentUnready")] : pc.validationMessages)
-                .map((message, index) => <p key={index}>{message}</p>)}
+            <div className="pc-validation-message" role="status">
+              <p>{t("path_construction.shapeError")}</p>
               {pc.canRetryValidation && (
                 <button className="pc-btn" type="button" onClick={pc.retryValidation}>
                   {t("path_construction.validationRetry")}

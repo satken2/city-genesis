@@ -76,6 +76,8 @@
     }
   },
   "path_construction": {
+    "shapeError": "The shape contains errors.",
+    "validationMaxSpan": "The distance between nodes {{start}}–{{end}} is {{distance}}m, exceeding the {{limit}}m limit. Add an intermediate node or shorten the span.",
     "validationCurve": "Path {{track}}: curve radius is below the minimum from {{start}} to {{end}} m from the start.",
     "validationGrade": "Path {{track}}: grade exceeds the maximum from {{start}} to {{end}} m from the start.",
     "validationPathCollision": "Road or track occupancy overlaps. Check the red occupancy volumes.",
@@ -147,6 +149,8 @@
     }
   },
   "path_shape_editor": {
+    "spanLabel": "Node spacing {{value}}m\nExceeds limit {{limit}}m",
+    "planTitle": "Plan shape",
     "hintInactive": "No path is being laid",
     "hintPlacing": "Right-click in the 3D view to finalize the shape, then edit it here",
     "hintEditing": "Drag: move node/handle  Click edge: add node  Right-click: delete node",

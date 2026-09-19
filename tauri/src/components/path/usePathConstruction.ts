@@ -37,6 +37,8 @@ import type {
   BuildPoint,
   ControlPoint,
   CurveMode,
+  PathShapeUpdatePayload,
+  PathMaxSpanViolation,
 } from "./pathBuildConstants";
 import {
   sendChangeState,
@@ -51,7 +53,7 @@ import {
   IPC_EVENT_EDIT_PATH_SELECT_NODE,
   IPC_EVENT_EDIT_PATH_UPDATE_SHAPE,
 } from "../../utils/ipc";
-import { describePathValidation, type PathValidationResult } from "./pathValidation";
+import { describeMaxSpanViolations, describePathValidation, type PathValidationResult } from "./pathValidation";
 import { fetchApi } from "../../utils/api";
 import type { PathAlignmentSummary } from "../../types";
 import {
@@ -745,6 +747,7 @@ export function usePathConstruction(
   }, [selectedVariant, selectedVariantData, rawPoints, rawEmbankmentHeights, curveMode, startControl, endControl, rawWaypointControls, pathId, railComponents, hasPlatform, houseEnds, platformSide, followTerrain]);
 
   const [localCanConfirm, setLocalCanConfirm] = useState(false);
+  const [maxSpanViolations, setMaxSpanViolations] = useState<PathMaxSpanViolation[]>([]);
   const localCanConfirmRef = useRef(false);
   const [validation, setValidation] = useState<{
     key: string; result?: PathValidationResult; error?: string;
@@ -760,7 +763,9 @@ export function usePathConstruction(
   currentValidationKey.current = validationKey;
   const canConfirm = localCanConfirm && constructionBody !== null
     && validation?.key === validationKey && validation.result?.is_valid === true;
-  const validationMessages = !localCanConfirm
+  const validationMessages = maxSpanViolations.length > 0
+    ? describeMaxSpanViolations(maxSpanViolations, t)
+    : !localCanConfirm
     ? [t(shapePhase === "placing" ? "path_construction.shapeUnready" : "path_construction.collisionUnready")]
     : !apiBaseUrl
       ? [t("path_construction.validationUnavailable")]
@@ -927,28 +932,14 @@ export function usePathConstruction(
       .catch(console.error);
 
     appWindow
-      .listen<{
-        unsent_paths_count: number;
-        path_type: number;
-        is_curved: boolean;
-        follow_terrain?: number;
-        is_finalized?: boolean;
-        can_confirm?: boolean;
-        phase?: string;
-        selected_points?: number[][];
-        start_control?: number[];
-        end_control?: number[];
-        embankment_heights?: number[];
-        waypoint_controls?: Array<{
-          control_in?: number[] | null;
-          control_out?: number[] | null;
-        }>;
-      }>(IPC_EVENT_EDIT_PATH_UPDATE_SHAPE, (event) => {
+      .listen<PathShapeUpdatePayload>(IPC_EVENT_EDIT_PATH_UPDATE_SHAPE, (event) => {
         console.log("[usePathConstruction] edit_path.update_shape", event.payload);
 
         currentValidationKey.current = "";
         setValidation(null);
-        localCanConfirmRef.current = event.payload.can_confirm === true;
+        const spanViolations = event.payload.max_span_violations ?? [];
+        setMaxSpanViolations(spanViolations);
+        localCanConfirmRef.current = event.payload.can_confirm === true && spanViolations.length === 0;
         setLocalCanConfirm(localCanConfirmRef.current);
         setShapePhase(event.payload.phase);
 

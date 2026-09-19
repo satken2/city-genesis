@@ -8,8 +8,7 @@
     "searching": "搜索中…",
     "cancel": "取消",
     "undo": "撤销建议",
-    "notFound": "在搜索范围内未找到符合条件的路线。请调整指定点。",
-    "heightFailure": "无法保持指定高度。请检查高度模式或地形跟随设置。",
-    "failed": "路线建议失败：{{reason}}"
+    "notFound": "未找到路线。",
+    "failed": "路线建议失败。"
   }
 }

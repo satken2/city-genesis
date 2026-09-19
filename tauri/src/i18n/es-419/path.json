@@ -76,6 +76,8 @@
     }
   },
   "path_construction": {
+    "shapeError": "La forma contiene errores.",
+    "validationMaxSpan": "La distancia entre los nodos {{start}}–{{end}} es de {{distance}}m y supera el límite de {{limit}}m. Agrega un nodo intermedio o reduce la distancia.",
     "validationCurve": "Vía {{track}}: el radio es inferior al mínimo entre {{start}} y {{end}} m desde el inicio.",
     "validationGrade": "Vía {{track}}: la pendiente supera el máximo entre {{start}} y {{end}} m desde el inicio.",
     "validationPathCollision": "Los volúmenes de carreteras o vías se superponen. Revisa los volúmenes rojos.",
@@ -147,6 +149,8 @@
     }
   },
   "path_shape_editor": {
+    "spanLabel": "Distancia entre nodos {{value}}m\nSupera el límite de {{limit}}m",
+    "planTitle": "Forma en planta",
     "hintInactive": "No hay ninguna vía en construcción",
     "hintPlacing": "Haz clic derecho en la vista 3D para fijar la forma y luego edítala aquí",
     "hintEditing": "Arrastrar: mover nodo/control  Clic en borde: agregar nodo  Clic derecho: eliminar nodo",

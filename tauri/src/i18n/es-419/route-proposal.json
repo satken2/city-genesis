@@ -8,8 +8,7 @@
     "searching": "Buscando…",
     "cancel": "Cancelar",
     "undo": "Deshacer propuesta",
-    "notFound": "No se encontró una ruta válida dentro de los límites de búsqueda. Ajusta los puntos.",
-    "heightFailure": "No se pudieron mantener las alturas requeridas. Revisa el modo de altura o el seguimiento del terreno.",
-    "failed": "Error al proponer la ruta: {{reason}}"
+    "notFound": "No se encontró una ruta.",
+    "failed": "No se pudo proponer la ruta."
   }
 }

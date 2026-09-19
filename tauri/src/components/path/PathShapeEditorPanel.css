@@ -1,32 +1,51 @@
 /* 2Dパス形状編集パネル。都市マップウィンドウ(CityMapWindow.css)と同じ配色・寸法感で揃える */
 
+/* 地色は敷かない。ポップアップの土台(App.cssの`.popup-shell`のグラデーション)をそのまま見せることで、
+   地図・縦断面・カード以外の余白がウィンドウの他の部分と同じ色になる */
 .pse {
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100%;
   min-height: 0;
-  background: #0f1420;
   color: #cdd6f4;
   overflow: hidden;
 }
 
-.pse-toolbar {
+.pse-plan {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* 3セクション(平面形状・縦断面・経路提案)共通の見出し行。見出しの右に説明、右端に操作ボタン。
+   地色は敷かず区切り線だけで分けるので、パネル直下でもカードの中でも親の背景に馴染む */
+.pse-section-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   padding: 6px 12px;
-  background: #171c2c;
   border-bottom: 1px solid #2a3149;
 }
 
+.pse-section-title {
+  flex-shrink: 0;
+  color: #cdd6f4;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* 見出し右の説明。幅が足りなければ折り返して全文を出す(切り詰めない) */
 .pse-hint {
+  flex: 1;
+  min-width: 0;
   font-size: 0.72rem;
   color: #cdd6f4;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 .pse-hint--muted {
@@ -40,14 +59,26 @@
   flex-shrink: 0;
 }
 
+/* 経路提案カードの外周。上下の余白だけ取り、左右は取らずカードをパネル幅いっぱいにする */
+.pse-route-area {
+  flex: 0 0 auto;
+  padding: 12px 0;
+  border-top: 1px solid #2a3149;
+}
+
+.pse-route-card {
+  border: 1px solid #2a3149;
+  border-radius: 6px;
+  background: #131827;
+  overflow: hidden;
+}
+
 .pse-route-controls {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 6px;
-  padding: 5px 12px;
-  border-bottom: 1px solid #2a3149;
-  background: #171c2c;
+  gap: 8px;
+  padding: 8px 12px;
   font-size: 0.72rem;
   color: #93a9c0;
 }
@@ -70,12 +101,11 @@
 }
 
 .pse-route-message {
-  min-width: 180px;
-  flex: 1;
-  overflow: hidden;
+  min-width: 0;
+  flex-basis: 100%;
   color: #f38ba8;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .pse-btn {
@@ -172,29 +202,6 @@
   flex: 0 0 32%;
   min-height: 120px;
   border-top: 1px solid #2a3149;
-  background: #0f1420;
-}
-
-.pse-profile-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 3px 12px;
-  background: #171c2c;
-  font-size: 0.7rem;
-}
-
-.pse-profile-title {
-  color: #cdd6f4;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.pse-profile-hint {
-  color: #6c7a94;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .pse-profile-canvas-wrap {
@@ -202,4 +209,5 @@
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  background: #0b0e16;
 }

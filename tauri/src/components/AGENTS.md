@@ -176,4 +176,6 @@ PropPlacementPanelの個別配置は全種別共通で地面相対高さ(m)を�
 
 ## 経路提案UI
 
-`path/useRouteProposal.ts`はUnityの編集世代を保持して読み取り専用propose-route APIを呼び、同じ形状・設定への応答だけをshape_commandで反映する。`RouteProposalControls`は`PathShapeEditorPanel`のツールバーへ高さ固定/調整・提案・取消し・復元を表示し、形状同期の`route_proposal`から探索条件を受け取る。制御点Yは`ControlPoint.y`とwaypoint_controlsから保持し、複線展開時にもアンカー高さへ置き換えない。翻訳は各言語のroute-proposal.json。詳細は公開`programs/経路提案.md`。
+`path/useRouteProposal.ts`はUnityの編集世代を保持して読み取り専用propose-route APIを呼び、同じ形状・設定への応答だけをshape_commandで反映する。`RouteProposalControls`は`PathShapeEditorPanel`最下部のカードへ高さ固定/調整・提案・取消し・復元を表示し、形状同期の`route_proposal`から探索条件を受け取る。制御点Yは`ControlPoint.y`とwaypoint_controlsから保持し、複線展開時にもアンカー高さへ置き換えない。翻訳は各言語のroute-proposal.json。詳細は公開`programs/経路提案.md`。
+
+ノード間距離超過は `update_shape.max_span_violations`（`{segment_index, distance, limit}` 配列）から受け、形状編集では `pathShapeOverlay.drawPathShape` が対象区間の中央へカーブ・勾配と共通の引出線付き吹き出し（距離・上限）を描く。ドラッグ中は表示しない。道路・軌道の共通確定欄は `pc-validation-message`（0.72rem）で「形状にエラーがあります」と表示し、詳細は並べない。Unityの `can_confirm` と合わせて `usePathConstruction` の確定・送信直前ガードに反映する。違反のない更新では警告を消す。

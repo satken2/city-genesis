@@ -162,6 +162,17 @@
   gap: 6px;
 }
 
+.pc-validation-message {
+  margin-bottom: 8px;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: #f38ba8;
+}
+
+.pc-validation-message p {
+  margin: 0;
+}
+
 .pc-btn {
   flex: 1;
   min-width: 60px;

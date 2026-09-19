@@ -8,8 +8,7 @@
     "searching": "搜尋中…",
     "cancel": "取消",
     "undo": "復原建議",
-    "notFound": "在搜尋範圍內未找到符合條件的路線。請調整指定點。",
-    "heightFailure": "無法保持指定高度。請檢查高度模式或地形跟隨設定。",
-    "failed": "路線建議失敗：{{reason}}"
+    "notFound": "未找到路線。",
+    "failed": "路線建議失敗。"
   }
 }

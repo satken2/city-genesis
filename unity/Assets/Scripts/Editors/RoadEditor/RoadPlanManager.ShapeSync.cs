@@ -153,10 +153,32 @@ public partial class RoadPlanManager
             ["height_editable"] = IsHeightEditable(),
             ["min_height"] = GetMinHeightFromMaster(),
             ["route_proposal"] = BuildRouteProposalPayload(),
+            ["max_span_violations"] = BuildMaxSpanViolationsPayload(),
         };
         var alignment = BuildAlignmentPayload();
         if (alignment != null) extras["alignment"] = alignment;
         return extras;
+    }
+
+    /// <summary>赤線と同じノード間距離違反を送る。解消時も空配列でUIの警告を消す。</summary>
+    private List<Dictionary<string, object>> BuildMaxSpanViolationsPayload()
+    {
+        var result = new List<Dictionary<string, object>>();
+        var violations = CheckMaxSpanViolations();
+        if (violations.Count == 0) return result;
+        float limit = MasterDataStore.Instance.GetPathMaster(PathSubtype).max_span.Value;
+        foreach (int index in violations)
+        {
+            Vector3 a = points[index].position, b = points[index + 1].position;
+            float dx = b.x - a.x, dz = b.z - a.z;
+            result.Add(new Dictionary<string, object>
+            {
+                ["segment_index"] = index,
+                ["distance"] = Mathf.Sqrt(dx * dx + dz * dz),
+                ["limit"] = limit,
+            });
+        }
+        return result;
     }
 
     /// <summary>
