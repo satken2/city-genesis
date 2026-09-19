@@ -121,6 +121,8 @@ public class PropManager : BaseApiDataManager
         public float lastProjection;
         public Vector3 offset;
         public bool far;
+        public bool hidden;      // 小区画全体が距離の進入閾値より遠く、全点をHiddenにした状態
+        public int hiddenCount;  // 直近のバッチ構築で距離によりHiddenにした点数(統計表示用)
     }
     private readonly Dictionary<Vector2Int, Chunk> chunks = new Dictionary<Vector2Int, Chunk>();
     private readonly Dictionary<Vector2Int, HashSet<Vector2Int>> chunksByCell = new Dictionary<Vector2Int, HashSet<Vector2Int>>();
@@ -141,6 +143,8 @@ public class PropManager : BaseApiDataManager
     public int SubmittedBatchCount { get; private set; }
     public int SubmittedInstanceCount { get; private set; }
     public int SubmittedShadowInstances { get; private set; }
+    /// <summary>常駐候補のうち、カメラからの距離でHiddenにしている点数(統計表示用)。</summary>
+    public int DistanceHiddenCount { get { int n = 0; foreach (var chunk in chunks.Values) n += chunk.hiddenCount; return n; } }
     public const int ShadowInstanceBudget = 4096;
     public int LastRegeneratedChunks { get; private set; }
     public int LastExclusionUpdatedChunks { get; private set; }
@@ -455,6 +459,9 @@ public class PropManager : BaseApiDataManager
                 float projection = DrawLodEvaluator.GetTanHalfFov(cam);
                 bool far = !nearCells.Contains(chunk.spec.cell);
                 bool moved = (pos - chunk.lastCamera).sqrMagnitude >= DrawLodConfig.REEVALUATE_CAMERA_MOVE_DISTANCE * DrawLodConfig.REEVALUATE_CAMERA_MOVE_DISTANCE;
+                // 全点が距離で非表示の小区画は、進入閾値の内側へ戻るまでカメラ移動での再構築を省く。
+                bool beyond = ChunkDistance(chunk, pos) >= DrawLodConfig.PROP_HIDDEN_ENTER_DISTANCE;
+                if (chunk.hidden && beyond && !chunk.dirty && !chunk.heightDirty && chunk.offset == Offset) continue;
                 if (chunk.dirty || chunk.heightDirty || chunk.offset != Offset || chunk.far != far || projection != chunk.lastProjection || moved)
                 {
                     if (chunk.heightDirty)
@@ -484,13 +491,19 @@ public class PropManager : BaseApiDataManager
         var timer = System.Diagnostics.Stopwatch.StartNew();
         var next = new List<DrawBatch>();
         var grouped = new Dictionary<(int, DrawLod, bool), List<Matrix4x4>>();
+        // 小区画の矩形までのXZ距離は各点の実距離の下限なので、進入閾値以上なら個体判定を省いて全点を隠せる。
+        bool beyond = ChunkDistance(chunk, cameraPosition) >= DrawLodConfig.PROP_HIDDEN_ENTER_DISTANCE;
+        int hiddenCount = 0;
         for (int i = 0; i < chunk.points.Length; i++)
         {
             if ((i & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
             { yield return null; timer.Restart(); if (serial != generation) yield break; }
             var p = chunk.points[i]; if (!p.visible) continue;
+            if (beyond) { p.lod = DrawLod.Hidden; p.distant = false; chunk.points[i] = p; hiddenCount++; continue; }
             var model = Model(p.type);
             float distance = Vector3.Distance(p.position + offset + model.bounds.center * p.scale, cameraPosition);
+            if (DrawLodEvaluator.PropHiddenByDistance(distance, p.lod))
+            { p.lod = DrawLod.Hidden; p.distant = false; chunk.points[i] = p; hiddenCount++; continue; }
             float ratio = DrawLodEvaluator.ProjectedRatio(model.Radius * p.scale, cam.orthographic ? 1 : distance, projection);
             var lod = DrawLodEvaluator.EvaluateBySize(model.Radius * p.scale, distance, projection, p.lod, true, cam.orthographic);
             // 常駐範囲では本数を維持し、画面高の1%未満は四角錐へ置き換える。
@@ -526,8 +539,18 @@ public class PropManager : BaseApiDataManager
         {
             chunk.batches.Clear(); chunk.batches.AddRange(next);
             chunk.dirty = false; chunk.offset = offset; chunk.far = far;
+            chunk.hidden = beyond; chunk.hiddenCount = hiddenCount;
             chunk.lastCamera = cameraPosition; chunk.lastProjection = projection;
         }
+    }
+    /// <summary>ワールド座標のカメラ位置から小区画の矩形(保存座標)までのXZ距離。矩形内なら0。</summary>
+    private float ChunkDistance(Chunk chunk, Vector3 worldCamera)
+    {
+        Vector3 c = worldCamera - Offset;
+        var rect = chunk.spec.rect;
+        float dx = Mathf.Max(rect.xMin - c.x, 0f, c.x - rect.xMax);
+        float dz = Mathf.Max(rect.yMin - c.z, 0f, c.z - rect.yMax);
+        return Mathf.Sqrt(dx * dx + dz * dz);
     }
     private void TerrainReady(Vector2Int cell, Terrain terrain)
     {

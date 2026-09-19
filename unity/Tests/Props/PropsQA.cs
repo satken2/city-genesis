@@ -188,6 +188,7 @@ public static class PropsQA
             managerType.GetMethod("Model",flags).Invoke(manager,new object[]{991});
             CheckModels();
             CheckForestLod();
+            CheckDistanceHidden();
             var existing=Points();
             Drain((IEnumerator)managerType.GetMethod("ApplySnapshot",flags).Invoke(manager,new[]{Json(Snapshot(1000,false)),cells,(object)true,999,null}));
             Check(existing.Keys.ToHashSet().SetEquals(Points().Keys),"stale generation committed");
@@ -261,6 +262,27 @@ public static class PropsQA
                 if((bool)Field(p,"visible")) Check((bool)Field(p,"distant")== (size>300f),"distant crown selection");
         }
         camera.orthographic=false;
+    }
+    // カメラからの実距離でHiddenになり、戻ると同じ本数が復元されること。区画(0〜500m)の手前1,800mは進入閾値1,500mより遠い。
+    static void CheckDistanceHidden()
+    {
+        int Drawn()=>Chunks.Values.Cast<object>().Sum(c=>((IList)Field(c,"batches")).Cast<object>().Sum(b=>((Array)Field(b,"matrices")).Length));
+        int expected=Drawn();
+        Check(expected>0,"distance test needs drawn props");
+        var savedPosition=camera.transform.position; var savedRotation=camera.transform.rotation;
+        camera.transform.position=new Vector3(250,380,-1800);camera.transform.LookAt(new Vector3(250,0,250));
+        Build(true);
+        Check(Drawn()==0,"props beyond hide distance still drawn");
+        foreach(var c in Chunks.Values)
+        {
+            Check((bool)Field(c,"hidden"),"chunk beyond hide distance not flagged");
+            foreach(var p in (Array)Field(c,"points"))
+                if((bool)Field(p,"visible")) Check(Convert.ToInt32(Field(p,"lod"))==0,"prop beyond hide distance not Hidden");
+        }
+        camera.transform.position=savedPosition;camera.transform.rotation=savedRotation;
+        Build(true);
+        Check(Drawn()==expected,"props not restored within hide distance");
+        foreach(var c in Chunks.Values) Check(!(bool)Field(c,"hidden"),"chunk within hide distance still flagged");
     }
     static void CheckManualPlacement()
     {

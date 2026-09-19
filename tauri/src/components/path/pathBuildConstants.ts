@@ -69,10 +69,15 @@ export type LayerConfig = {
 export type PathEditorPhase = "placing" | "editing" | "inactive";
 
 /**
- * `edit_path:update_shape` の `alignment`。Unity がローカル推定した線形指標
- * (3Dの赤線・区間ラベルと同じ計算)を約5m間隔に間引いたもの。線形評価の対象外の種別では省略される。
+ * `edit_path:update_shape` の `alignment`。全線検証の線形指標、未取得時はUnityのローカル推定
+ * (3Dの赤線・区間ラベルと共通)の表示用サンプルを間引いたもの。線形評価の対象外の種別では省略される。
  */
 export type PathAlignmentSyncPayload = {
+  authoritative?: boolean;
+  curve_violated?: boolean;
+  grade_violated?: boolean;
+  /** 全線検証で拒否された区間の折れ線。各点は [x, 絶対標高, z]。 */
+  warnings?: number[][][] | null;
   /** 規格の最小曲線半径(m)。0=制限なし */
   radius_limit: number;
   /** 規格の最大勾配(%)。0=制限なし */
@@ -101,6 +106,7 @@ export type PathMaxSpanViolation = {
  * 制御点の相対高さは所属アンカー直下の地盤基準(Unity `ControlToRelativeList`)。
  */
 export type PathShapeUpdatePayload = {
+  revision?: string;
   /** 編集対象の既存パスID(0=新規)。名前は歴史的経緯 */
   unsent_paths_count: number;
   path_type: number;

@@ -8,7 +8,7 @@ using UnityEngine;
 /// </summary>
 public enum DrawLod
 {
-    /// <summary>描画しない(画面上で判別できない大きさ。現状はパス・建物では使わず将来のプロップ用)。</summary>
+    /// <summary>描画しない。プロップがカメラから一定距離以上で使う。パス・建物では使わない(遠景でもスカイライン・帯を保つ)。</summary>
     Hidden = 0,
     /// <summary>遠景: フットプリント押し出しの箱 / 曲線を保った帯。コード生成でモデル不要。</summary>
     Far = 1,
@@ -49,6 +49,14 @@ public static class DrawLodConfig
     public const float PATH_CLOSE_EXIT_DISTANCE = 160f;
     public const float PATH_NORMAL_ENTER_DISTANCE = 450f;
     public const float PATH_NORMAL_EXIT_DISTANCE = 550f;
+
+    /// <summary>
+    /// プロップをHiddenにするカメラからの実距離(m)。投影比ではなく実距離で切るのは、
+    /// 低ポリモデルを増やさずに常駐範囲(最大±2km超)の遠い森を丸ごと描画対象から外すため。
+    /// 正射影でも実距離を使う(トップダウンで高く引くほど消える)。進入/退出で差を持たせてちらつきを防ぐ。
+    /// </summary>
+    public const float PROP_HIDDEN_ENTER_DISTANCE = 1500f;
+    public const float PROP_HIDDEN_EXIT_DISTANCE = 1350f;
 
     /// <summary>互換呼び出しのクリップ範囲を比較するときの許容差。</summary>
     public const float PATH_DETAIL_RANGE_REBUILD_TOLERANCE = 0.1f;
@@ -129,6 +137,17 @@ public static class DrawLodEvaluator
             ? distance <= DrawLodConfig.PATH_NORMAL_EXIT_DISTANCE
             : distance <= DrawLodConfig.PATH_NORMAL_ENTER_DISTANCE;
         return normalNow ? DrawLod.Normal : DrawLod.Far;
+    }
+
+    /// <summary>
+    /// プロップ1本を距離でHiddenにするか。current がHiddenなら退出距離(近い側)を下回るまで隠したままにする。
+    /// 個体ごとの投影LOD(<see cref="EvaluateBySize"/>)より先に評価し、真なら投影LODは求めない。
+    /// </summary>
+    public static bool PropHiddenByDistance(float distance, DrawLod current)
+    {
+        return current == DrawLod.Hidden
+            ? distance >= DrawLodConfig.PROP_HIDDEN_EXIT_DISTANCE
+            : distance >= DrawLodConfig.PROP_HIDDEN_ENTER_DISTANCE;
     }
 
     /// <summary>点列(XZ)へのカメラの最近接距離(3D)。線分ごとに最近接点を取る。</summary>

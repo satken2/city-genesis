@@ -20,7 +20,7 @@ public partial class RoadPlanManager
         if (earthworkPreview == null)
         {
             earthworkPreview = gameObject.AddComponent<RoadEarthworkPreview>();
-            earthworkPreview.Changed += Update3DPreview;
+            earthworkPreview.Changed += OnEarthworkPreviewChanged;
         }
         var paths = new List<object>();
         float[] offsets = LateralOffsets != null && LateralOffsets.Length > 0 ? LateralOffsets : new float[] { 0 };
@@ -51,5 +51,11 @@ public partial class RoadPlanManager
             });
         }
         earthworkPreview.Request(new {paths});
+    }
+
+    private void OnEarthworkPreviewChanged()
+    {
+        Update3DPreview();
+        EmitShapeUpdate();
     }
 }

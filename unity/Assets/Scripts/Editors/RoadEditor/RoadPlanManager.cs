@@ -244,6 +244,7 @@ public partial class RoadPlanManager : MonoBehaviour
     private void InvalidateShapeCache()
     {
         routeRevision = System.Guid.NewGuid().ToString("N");
+        authoritativeAlignments = null;
         authoritativeCollision = false;
         cachedRenderPoints = null;
         cachedElevationViolations = null;
@@ -462,6 +463,7 @@ public partial class RoadPlanManager : MonoBehaviour
     }
     public void SetPathSubtype(int pathSubtype)
     {
+        InvalidateShapeCache();
         PathSubtype = pathSubtype;
         // 標高編集不可のバリアント（街路など）に切り替えた場合は標高をリセットする。
         // 前のバリアント（高速道路など）で設定した標高が残らないようにする。
@@ -486,16 +488,20 @@ public partial class RoadPlanManager : MonoBehaviour
         if (ends != "both" && ends != "start" && ends != "end") return;
         if (HouseEnds == ends) return;
         HouseEnds = ends;
+        InvalidateShapeCache();
         Update3DPreview();
+        EmitShapeUpdate();
     }
 
     public void SetPlatformSide(int side)
     {
         if (PlatformSide == side) return;
         PlatformSide = side;
+        InvalidateShapeCache();
         // 点列やパラメータは変わらないが platform_side が変わったので、
         // RoadRenderer 側の重複判定を通過させて再生成させる。
         Update3DPreview();
+        EmitShapeUpdate();
     }
 
     /// <summary>
@@ -3601,6 +3607,8 @@ public partial class RoadPlanManager : MonoBehaviour
         cachedAlignmentMaxGradePct = 0f;
         cachedAlignmentGradeLimit = 0f;
         cachedCurveViolation = cachedGradeViolation = false;
+        if (authoritativeAlignments != null)
+            return ApplyAuthoritativeAlignmentCache(violations);
         if (!IsAlignmentTarget()) return violations;
 
         float radiusLimit = 0f, gradeLimit = 0f;

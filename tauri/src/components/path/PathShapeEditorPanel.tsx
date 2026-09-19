@@ -323,7 +323,7 @@ export function PathShapeEditorPanel({ apiBaseUrl }: { apiBaseUrl: string }) {
       const pts = prev.selected_points.map((pt) => pt.slice());
       const pt = pts[index];
       if (pt.length >= 3) pt[1] = relHeight; else pts[index] = [pt[0], relHeight, pt[1]];
-      return { ...prev, selected_points: pts, selected_index: index };
+      return { ...prev, selected_points: pts, selected_index: index, alignment: undefined };
     });
   }, []);
 
@@ -370,12 +370,12 @@ export function PathShapeEditorPanel({ apiBaseUrl }: { apiBaseUrl: string }) {
           cursor={cursor}
         />
         )}
-        {/* 線形の要約(左下)。Unityのローカル推定で、権威値は敷設パネルの費用カードが表示する */}
+        {/* 線形の要約。全線検証後は建設パネル・3Dと同じ値を表示する。 */}
         {alignment && (
           <div className="pse-summary">
             <span className="pse-summary-item">
               <span className="pse-summary-label">{t("path_shape_editor.minRadius")}</span>
-              <span className={`pse-summary-value ${alignment.radius_limit > 0 && alignment.min_curve_radius != null && alignment.min_curve_radius < alignment.radius_limit ? "pse-summary-value--bad" : ""}`}>
+              <span className={`pse-summary-value ${alignment.curve_violated ? "pse-summary-value--bad" : ""}`}>
                 {alignment.min_curve_radius == null ? t("path_shape_editor.straight") : `${alignment.min_curve_radius.toFixed(1)}m`}
               </span>
               <span className="pse-summary-limit">
@@ -384,7 +384,7 @@ export function PathShapeEditorPanel({ apiBaseUrl }: { apiBaseUrl: string }) {
             </span>
             <span className="pse-summary-item">
               <span className="pse-summary-label">{t("path_shape_editor.maxGrade")}</span>
-              <span className={`pse-summary-value ${alignment.grade_limit > 0 && alignment.max_grade > alignment.grade_limit ? "pse-summary-value--bad" : ""}`}>
+              <span className={`pse-summary-value ${alignment.grade_violated ? "pse-summary-value--bad" : ""}`}>
                 {alignment.max_grade.toFixed(2)}%
               </span>
               <span className="pse-summary-limit">

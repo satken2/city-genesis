@@ -111,3 +111,7 @@ Tauriの2Dパス形状編集パネル(`path_shape_editor`)は形状を持たず�
 `RoadEditor/RoadPlanManager.RouteProposal.cs`は経路提案の絶対座標ペイロード、世代、提案前の復元を管理する。`PathBuildPoint.proposalGenerated`で補助点を区別し、手動移動で指定点へ昇格する。`InvalidateShapeCache`で世代を更新し、古いapply_route/undo_routeを拒否する。提案の制御点は手動フラグで自動補完から保護する。造成プレビューも制御点固有のYを保持する。詳細は公開`programs/経路提案.md`、検証は`Tests/RoadPreview/run-unity.ps1`。
 
 ノード間距離の上限 `max_span` は `CheckMaxSpanViolations` がXZ直線距離で判定する。赤線・`can_confirm`・`ShapeSync` の `max_span_violations` は同じ結果を使う。ペイロードは `{segment_index, distance, limit}` の配列で、解消時も空配列を送る。
+
+## 線形警告の共有
+
+建設パネルが取得した全線 `/paths/validate` の `alignments` を `shape_command` の `apply_alignment` で受け、`revision` が一致する場合だけ採用する。警告線・区間ラベル・要約値は検証応答の `preview` と指標を使い、Unityでは再計算しない。複線の全線を表示し、要約は最悪値。形状・設定変更で破棄し、待機中・操作中はローカル推定へ戻す。`earthwork-preview` 受信は3D更新後に `EmitShapeUpdate` も呼ぶが、採用済みの検証結果を上書きしない。

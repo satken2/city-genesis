@@ -123,7 +123,7 @@
 ## 地形プロップ (PropManager / PropGeometry / PropRenderModel)
 
 - `GET /props?bbox=…&include_obstacles=true`を`ApiClient.GetBulk`で取得する。完全スナップショットの配置情報と障害物を同時に更新し、建物のGameObject/Colliderへ依存しない。
-- `LoadLodCells`は共通の常駐セル集合を使用する。個体の投影サイズでDrawLodを決め、セル由来のFar固定はしない。常駐範囲外は非表示。`CellDataLoader`から共通`LoadBatch`を渡し、旧処理の適用を防ぐ。
+- `LoadLodCells`は共通の常駐セル集合を使用する。個体の投影サイズでDrawLodを決め、セル由来のFar固定はしない。常駐範囲内でもカメラから一定距離以上はHidden(後述)。常駐範囲外は非表示。`CellDataLoader`から共通`LoadBatch`を渡し、旧処理の適用を防ぐ。
 - セルサイズは`TerrainManager.CellSize`が正。`subdivisions`（既定8）で各セルを整数分割し、候補点・除外判定・GPUバッチを管理する。地形セルや独立したロード距離は追加しない。
 - `PropGeometry`がregionの穴・複数パートと固定格子の座標ハッシュを扱う。候補点はregionのbboxや生成順、描画分割数に依存しない。プレビューもこの実装を使う。
 - `PropRenderModel`は種別ID(int)のほか固定名(string。`ambient_*`・`pedestrian_*`など)でも `Models/Props/{名前}` を読める。最遠景樹冠の生成は森林2種だけ。歩行者(`Vehicles/PedestrianManager`)は `normal` パーツを `RenderMeshInstanced` で描く。
@@ -233,6 +233,8 @@ TrackPath.InfrastructureConnectionProviderにはIsInfrastructureConnectionを登
 プロップ障害物のholesは水域内の島を表す。PropGeometry.BlockedWithHolesを永続描画・プレビューで共用し、島内部を表示しつつ岸の境界・離隔内は除外する。
 
 プロップは距離で本数を間引かず、極小投影サイズによるHiddenも使わない。木1/2は幹なしの専用Farを使用し、投影比1%未満でPropRenderModelの6三角形の四角錐へ替え、1.2%以上で戻す。DrawLod.Far内の切り替えで、常駐セル・候補予算は維持する。生成した最小メッシュはPropRenderModel.Disposeで解放する。
+
+プロップのHiddenは**カメラからの実距離だけ**で決める(`DrawLodConfig.PROP_HIDDEN_ENTER_DISTANCE`=1,500m以上で隠す/`PROP_HIDDEN_EXIT_DISTANCE`=1,350m未満で戻す。`DrawLodEvaluator.PropHiddenByDistance`)。投影LOD(`EvaluateBySize`)より先に判定し、Hiddenの点はバッチに載せない(=`TryPick`でも拾わない)。個別配置も対象。`RebuildBatches`は小区画矩形までのXZ距離(`ChunkDistance`。各点の実距離の下限)が進入距離以上なら個体判定を省いて全点Hidden+`Chunk.hidden=true`にし、`DrawWorker`はその小区画が進入距離の内側へ戻るまでカメラ移動による再構築をスキップする(dirty/heightDirty/原点変更は通常どおり処理)。正射影でも実距離のまま(トップダウンで高く引くほど消える)。F8の「距離非表示」は`DistanceHiddenCount`。
 
 プロップの障害物除外は範囲散布のみ。Candidate.explicitInstanceは常に表示可能とし、区画・道路・水域の追加や更新でも非表示にしない。PropInstanceItem.yは地面からの相対高さ(m)でCandidate.heightOffsetへ保持する。初期生成・スナップショット再利用・タイル完成・地形編集の全経路で「地形標高+heightOffset」を使う。常駐セル・候補予算・LODは通常どおり適用する。
 

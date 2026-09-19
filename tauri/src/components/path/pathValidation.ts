@@ -1,7 +1,16 @@
 import type { PathInterferenceHighlight } from "../../utils/ipc";
 
 import type { PathAlignmentResponse } from "./usePathConstruction";
-import type { PathMaxSpanViolation } from "./pathBuildConstants";
+import type { PathMaxSpanViolation, PathShapeUpdatePayload } from "./pathBuildConstants";
+
+/** 選択・警告の再通知では検証をやり直さず、形状・編集世代・確定可否の変更だけを拾う。 */
+export function pathValidationShapeKey(shape: PathShapeUpdatePayload): string {
+  return JSON.stringify([
+    shape.revision, shape.phase, shape.can_confirm, shape.unsent_paths_count, shape.path_type,
+    shape.is_curved, shape.follow_terrain, shape.selected_points, shape.start_control, shape.end_control,
+    shape.waypoint_controls, shape.embankment_heights, shape.lateral_offsets, shape.max_span_violations,
+  ]);
+}
 
 export type PathValidationResult = PathInterferenceHighlight & {
   is_valid: boolean;

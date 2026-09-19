@@ -156,6 +156,7 @@ export function applyLocalMove(p: PathShapeUpdatePayload, hit: ShapeHit, world: 
     v && v.length >= 2 ? [v[0] + dx, ...(v.length >= 3 ? [v[1]] : []), v[v.length - 1] + dz] : v;
   const next: PathShapeUpdatePayload = {
     ...p,
+    alignment: undefined,
     selected_points: p.selected_points.map((pt) => pt.slice()),
     waypoint_controls: p.waypoint_controls?.map((w) => ({ ...w })),
   };
@@ -442,7 +443,13 @@ export function drawPathShape(
 
   // 線形の色分け(ドラッグ中はUnityの再評価前なので描かない。ドラッグ終了後の受信で更新される)
   const alignment = opts.alignment;
-  if (alignment && !opts.drag && alignment.samples.length >= 2) {
+  if (alignment?.authoritative && !opts.drag) {
+    ctx.lineWidth = px(4);
+    ctx.strokeStyle = "#ff3333";
+    for (const run of alignment.warnings ?? []) {
+      strokePolyline(ctx, run.map((p) => ({ x: p[0], z: p[2] })));
+    }
+  } else if (alignment && !opts.drag && alignment.samples.length >= 2) {
     ctx.lineWidth = px(4);
     const samples = alignment.samples;
     for (let i = 0; i < samples.length - 1; i++) {

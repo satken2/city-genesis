@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using UnityEngine;
 
 /// <summary>
@@ -26,6 +27,7 @@ public partial class RoadPlanManager
         public float z;
         public string revision;
         public string routeJson;
+        public string alignmentJson;
     }
 
     /// <summary>2Dへ送る線形サンプルの間隔(m)。1m推定を間引いて edit_path:update_shape の肥大化を防ぐ。</summary>
@@ -41,13 +43,99 @@ public partial class RoadPlanManager
     private float[] cachedAlignmentGradePct;
     private float cachedAlignmentRadiusLimit;
 
+    private sealed class ValidatedAlignment
+    {
+        public float? min_curve_radius;
+        public float max_grade;
+        public float curve_radius_limit;
+        public float grade_limit;
+        public float[][] curve_violations;
+        public float[][] grade_violations;
+        public AlignmentPreview preview;
+    }
+
+    private sealed class AlignmentPreview
+    {
+        public double?[][] samples;
+        public AlignmentWarning[] warnings;
+    }
+
+    private sealed class AlignmentWarning
+    {
+        public bool curve;
+        public float value;
+        public float limit;
+        public float[] position;
+        public float[][] points;
+    }
+
+    private ValidatedAlignment[] authoritativeAlignments;
+
+    /// <summary>全線検証と同じ世代だけ採用する。再通知は形状を変更せず、再検証も要求しない。</summary>
+    private void ApplyAuthoritativeAlignments(string revision, string json)
+    {
+        if (revision != routeRevision) return;
+        try { authoritativeAlignments = JsonConvert.DeserializeObject<ValidatedAlignment[]>(json ?? "null"); }
+        catch (JsonException) { return; }
+        cachedAlignmentViolations = null;
+        EmitShapeUpdate();
+    }
+
+    private List<List<Vector3>> ApplyAuthoritativeAlignmentCache(List<List<Vector3>> violations)
+    {
+        foreach (var line in authoritativeAlignments)
+        {
+            cachedAlignmentMinRadius = Mathf.Min(cachedAlignmentMinRadius, line.min_curve_radius ?? float.PositiveInfinity);
+            cachedAlignmentMaxGradePct = Mathf.Max(cachedAlignmentMaxGradePct, line.max_grade);
+            cachedCurveViolation |= line.curve_violations?.Length > 0;
+            cachedGradeViolation |= line.grade_violations?.Length > 0;
+            foreach (var warning in line.preview?.warnings ?? System.Array.Empty<AlignmentWarning>())
+            {
+                var run = new List<Vector3>();
+                foreach (var p in warning.points) run.Add(new Vector3(p[0], p[1], p[2]));
+                violations.Add(run);
+                alignmentLabels.Add(new AlignmentLabel {
+                    curve = warning.curve, value = warning.value, limit = warning.limit,
+                    position = new Vector3(warning.position[0], warning.position[1], warning.position[2]),
+                    text = warning.curve
+                        ? $"カーブ  R {warning.value:0.00}m\n下限 {warning.limit:0.##}m 未満"
+                        : $"勾配  G {warning.value:0.00}%\n上限 {warning.limit:0.##}% 超過",
+                });
+            }
+        }
+        if (authoritativeAlignments.Length == 0) return violations;
+        var first = authoritativeAlignments[0];
+        cachedAlignmentRadiusLimit = first.curve_radius_limit;
+        cachedAlignmentGradeLimit = first.grade_limit;
+        var samples = first.preview?.samples;
+        if (samples == null) return violations;
+        cachedAlignmentSamplesWorld = new List<Vector3>();
+        cachedAlignmentRadius = new float[samples.Length];
+        cachedAlignmentGradePct = new float[samples.Length];
+        for (int i = 0; i < samples.Length; i++)
+        {
+            var s = samples[i];
+            cachedAlignmentSamplesWorld.Add(new Vector3((float)s[0].Value, (float)s[5].Value, (float)s[1].Value));
+            cachedAlignmentRadius[i] = s[2].HasValue ? (float)s[2].Value : float.PositiveInfinity;
+            cachedAlignmentGradePct[i] = (float)s[3].Value;
+        }
+        return violations;
+    }
+
     /// <summary>
     /// 2Dパネルからの形状操作を適用する。Editingフェーズ以外、および3Dでドラッグ中は無視する
     /// (3Dと2Dから同時に同じ点を動かす競合を避ける)。適用後は3Dドラッグ終了と同じ通知を行う。
     /// </summary>
     public void ApplyShapeCommand(ShapeCommand cmd)
     {
-        if (phase != RoadEditorPhase.Editing || isDragging) return;
+        if (phase != RoadEditorPhase.Editing) return;
+        // 掴んだだけで形状が変わっていない場合も検証応答を受け取る。移動した時点で世代が変わる。
+        if (cmd.op == "apply_alignment")
+        {
+            ApplyAuthoritativeAlignments(cmd.revision, cmd.alignmentJson);
+            return;
+        }
+        if (isDragging) return;
 
         switch (cmd.op)
         {
@@ -147,6 +235,7 @@ public partial class RoadPlanManager
         var extras = new Dictionary<string, object>
         {
             ["phase"] = phaseName,
+            ["revision"] = routeRevision,
             ["selected_index"] = selectedPointIndex,
             ["lateral_offsets"] = new List<float>(LateralOffsets ?? System.Array.Empty<float>()),
             // 2Dパネルの縦断面(高さ編集)ストリップの表示可否と高さの下限(マスター min_height)
@@ -203,8 +292,11 @@ public partial class RoadPlanManager
             float dx = world[i].x - world[i - 1].x, dz = world[i].z - world[i - 1].z;
             dists[i] = dists[i - 1] + Mathf.Sqrt(dx * dx + dz * dz);
         }
+        if (authoritativeAlignments != null)
+            for (int i = 0; i < n; i++) dists[i] = (float)authoritativeAlignments[0].preview.samples[i][4].Value;
 
-        int stride = Mathf.Max(1, Mathf.RoundToInt(AlignmentSyncStrideM / AlignmentSampleStep));
+        int stride = authoritativeAlignments != null ? 1
+            : Mathf.Max(1, Mathf.RoundToInt(AlignmentSyncStrideM / AlignmentSampleStep));
         var samples = new List<List<object>>();
         for (int i = 0; i < n; i += stride)
         {
@@ -243,12 +335,35 @@ public partial class RoadPlanManager
             });
         }
 
+        var warnings = new List<List<float[]>>();
+        if (authoritativeAlignments != null)
+        {
+            foreach (var run in cachedAlignmentViolations)
+            {
+                var line = new List<float[]>();
+                foreach (var p in run) line.Add(new[] { p.x, p.y, p.z });
+                warnings.Add(line);
+            }
+            // 地盤・距離・指標も検証時の値を保ち、Unityでの再サンプリングを挟まない。
+            samples.Clear();
+            foreach (var s in authoritativeAlignments[0].preview.samples)
+            {
+                var row = new List<object>();
+                foreach (var value in s) row.Add(value.HasValue ? (object)value.Value : null);
+                samples.Add(row);
+            }
+        }
+
         return new Dictionary<string, object>
         {
             ["radius_limit"] = cachedAlignmentRadiusLimit,
             ["grade_limit"] = cachedAlignmentGradeLimit,
             ["min_curve_radius"] = float.IsInfinity(cachedAlignmentMinRadius) ? null : (object)cachedAlignmentMinRadius,
             ["max_grade"] = cachedAlignmentMaxGradePct,
+            ["curve_violated"] = cachedCurveViolation,
+            ["grade_violated"] = cachedGradeViolation,
+            ["authoritative"] = authoritativeAlignments != null,
+            ["warnings"] = authoritativeAlignments == null ? null : warnings,
             ["samples"] = samples,
             ["labels"] = labels,
             ["nodes"] = nodes,

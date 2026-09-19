@@ -809,6 +809,7 @@ export async function sendEditPathChangeLateralOffsets(
  * - remove_node: index
  */
 export type PathShapeCommand =
+  | { op: "apply_alignment"; revision: string; alignment_json: string }
   | { op: "apply_route"; revision: string; route_json: string }
   | { op: "undo_route"; revision: string }
   | { op: "select_node"; index: number }
@@ -831,6 +832,11 @@ export async function sendEditPathShapeCommand(command: PathShapeCommand): Promi
     action: "edit_path:shape_command",
     params: command,
   });
+}
+
+/** 建設パネルの全線検証結果を、検証時のUnity編集世代とともに共有する。 */
+export async function sendEditPathAlignment(revision: string, alignments: unknown): Promise<void> {
+  await sendEditPathShapeCommand({ op: "apply_alignment", revision, alignment_json: JSON.stringify(alignments ?? null) });
 }
 
 /**

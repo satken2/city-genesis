@@ -4,7 +4,7 @@
 
 `pwsh -NoProfile -File Tests/Props/run.ps1` をUnityディレクトリから実行する。PowerShell 7、ローカルのUnity生成済み`Assembly-CSharp.csproj`、対応Unity Editor、dotnetが必要。生成されたcsprojは変更せず、本編アセンブリをビルドし、`Temp/PropsUnityQA`に独立した検証プロジェクトを作る。本編の開いているシーンには触れない。
 
-確認対象は固定座標散布、境界の重複防止、穴と複数パート、分割数変更時の位置不変、障害物追加時の局所更新、撤去時の同位置復元、LoadBatchのキャンセル、地形高さ追従、実FBXの専用Farと高頂点モデルの自動Far生成、プレビュー透過設定、ビルド時のinstancing保持である。バックエンド側は`genesis-core`で`.venv/Scripts/python.exe -m pytest tests/test_props.py -q`を実行する。
+確認対象は固定座標散布、境界の重複防止、穴と複数パート、分割数変更時の位置不変、障害物追加時の局所更新、撤去時の同位置復元、LoadBatchのキャンセル、地形高さ追従、実FBXの専用Farと高頂点モデルの自動Far生成、カメラからの実距離によるHidden(区画の手前1,800mで描画0・全小区画hidden、戻すと同じ本数へ復元)、プレビュー透過設定、ビルド時のinstancing保持である。バックエンド側は`genesis-core`で`.venv/Scripts/python.exe -m pytest tests/test_props.py -q`を実行する。
 
 ## 2026-09-08の計測記録
 

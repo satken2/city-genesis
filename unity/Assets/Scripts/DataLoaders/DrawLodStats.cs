@@ -165,7 +165,7 @@ public class DrawLodStatsOverlay : MonoBehaviour
         sb.AppendLine($"[DrawLOD stats] F8 で閉じる   frame {smoothedFrameMs:F1} ms ({(smoothedFrameMs > 0 ? 1000f / smoothedFrameMs : 0):F0} fps)");
         sb.AppendLine($"frame p95 {p95:F1} / p99 {p99:F1} ms | 共通生成 {RenderWorkScheduler.LastFrameMs:F2} / {PerformanceConfig.FrameBudgetMs:F2} ms | 最大単工程 {RenderWorkScheduler.MaximumStepMs:F2} ms");
         sb.AppendLine($"退避メッシュ推定 {RenderObjectCache.TotalBytes/(1024*1024)} / {RenderObjectCache.GlobalLimit/(1024*1024)} MiB | 待機 {RenderWorkScheduler.WaitingCount}");
-        if (PropManager.Instance != null) sb.AppendLine($"プロップ {PropManager.Instance.ResidentCandidateCount:N0}候補 / {PropManager.Instance.SubmittedInstanceCount:N0}描画 / {PropManager.Instance.SubmittedShadowInstances:N0}影");
+        if (PropManager.Instance != null) sb.AppendLine($"プロップ {PropManager.Instance.ResidentCandidateCount:N0}候補 / {PropManager.Instance.DistanceHiddenCount:N0}距離非表示 / {PropManager.Instance.SubmittedInstanceCount:N0}描画 / {PropManager.Instance.SubmittedShadowInstances:N0}影");
         AppendCategory("建物", DrawLodStats.Category.Building);
         AppendCategory("パス", DrawLodStats.Category.Path);
         sb.AppendLine($"描画メッシュ: renderers {sampledRenderers:N0}  verts {sampledVertices:N0}  tris {sampledTriangles:N0}  (2秒ごと更新)");

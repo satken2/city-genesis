@@ -404,6 +404,7 @@ public class IpcClient : MonoBehaviour
                             op = GetParamString(payload, "op"),
                             revision = GetParamString(payload, "revision"),
                             routeJson = GetParamString(payload, "route_json"),
+                            alignmentJson = GetParamString(payload, "alignment_json"),
                             index = GetParamInt(payload, "index"),
                             edgeIndex = GetParamInt(payload, "edge_index"),
                             which = GetParamString(payload, "which"),

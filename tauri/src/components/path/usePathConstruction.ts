@@ -50,10 +50,11 @@ import {
   sendEditPathSetFollowTerrain,
   sendHighlightObjects,
   sendClearHighlights,
+  sendEditPathAlignment,
   IPC_EVENT_EDIT_PATH_SELECT_NODE,
   IPC_EVENT_EDIT_PATH_UPDATE_SHAPE,
 } from "../../utils/ipc";
-import { describeMaxSpanViolations, describePathValidation, type PathValidationResult } from "./pathValidation";
+import { describeMaxSpanViolations, describePathValidation, pathValidationShapeKey, type PathValidationResult } from "./pathValidation";
 import { fetchApi } from "../../utils/api";
 import type { PathAlignmentSummary } from "../../types";
 import {
@@ -175,6 +176,10 @@ export type PathAlignmentResponse = {
   curve_violations: number[][];
   grade_violations: number[][];
   alignment_ok: boolean;
+  preview?: {
+    samples: Array<[number, number, number | null, number, number, number, number]>;
+    warnings: Array<{ curve: boolean; value: number; limit: number; position: number[]; points: number[][] }>;
+  };
 };
 
 /**
@@ -754,6 +759,9 @@ export function usePathConstruction(
   } | null>(null);
   const [validationAttempt, setValidationAttempt] = useState(0);
   const [shapePhase, setShapePhase] = useState<string>();
+  const [shapeRevision, setShapeRevision] = useState("");
+  const currentShapeRevision = useRef("");
+  const receivedShapeKey = useRef("");
   const retryValidation = useCallback(() => {
     setValidation(null);
     setValidationAttempt((value) => value + 1);
@@ -782,7 +790,8 @@ export function usePathConstruction(
 
   useEffect(() => {
     void sendClearHighlights("path_build");
-    if (!apiBaseUrl || !constructionBody || !localCanConfirm) return;
+    if (shapeRevision) void sendEditPathAlignment(shapeRevision, null).catch(console.error);
+    if (!apiBaseUrl || !constructionBody || shapePhase !== "editing") return;
     let cancelled = false;
     const timer = setTimeout(async () => {
       try {
@@ -790,22 +799,23 @@ export function usePathConstruction(
           `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/validate`,
           { method: "POST", headers: { "Content-Type": "application/json" }, body: validationKey }
         );
-        if (!cancelled && currentValidationKey.current === validationKey) {
+        if (!cancelled && currentValidationKey.current === validationKey && currentShapeRevision.current === shapeRevision) {
           setValidation({ key: validationKey, result });
+          if (shapeRevision) void sendEditPathAlignment(shapeRevision, result.alignments).catch(console.error);
           void sendHighlightObjects(result, "path_build").catch(console.error);
         }
       } catch (error) {
-        if (!cancelled && currentValidationKey.current === validationKey) {
+        if (!cancelled && currentValidationKey.current === validationKey && currentShapeRevision.current === shapeRevision) {
           setValidation({ key: validationKey, error: error instanceof Error ? error.message : String(error) });
         }
       }
     }, 150);
     return () => { cancelled = true; clearTimeout(timer); };
-  }, [apiBaseUrl, constructionBody, localCanConfirm, validationKey, validationAttempt]);
+  }, [apiBaseUrl, shapePhase, shapeRevision, localCanConfirm, validationKey, validationAttempt]);
 
   const confirmPath = useCallback(async (): Promise<void> => {
     if (!apiBaseUrl || !constructionBody || !canConfirm || !localCanConfirmRef.current
-        || currentValidationKey.current !== validationKey) {
+        || currentValidationKey.current !== validationKey || currentShapeRevision.current !== shapeRevision) {
       throw new Error(validationMessages.join("\n") || t("path_construction.collisionChecking"));
     }
     // 送信直前にも読み取り検証し、他の編集による都市側の変化を拾う。
@@ -817,13 +827,15 @@ export function usePathConstruction(
       );
     } catch (error) {
       const reason = error instanceof Error ? error.message : String(error);
-      if (currentValidationKey.current === validationKey) setValidation({ key: validationKey, error: reason });
+      if (currentValidationKey.current === validationKey && currentShapeRevision.current === shapeRevision)
+        setValidation({ key: validationKey, error: reason });
       throw new Error(t("path_construction.validationFailed", { reason }));
     }
-    if (!localCanConfirmRef.current || currentValidationKey.current !== validationKey) {
+    if (!localCanConfirmRef.current || currentValidationKey.current !== validationKey || currentShapeRevision.current !== shapeRevision) {
       throw new Error(t("path_construction.collisionChecking"));
     }
     setValidation({ key: validationKey, result: checked });
+    if (shapeRevision) void sendEditPathAlignment(shapeRevision, checked.alignments).catch(console.error);
     void sendHighlightObjects(checked, "path_build").catch(console.error);
     if (!checked.is_valid) {
       throw new Error(describePathValidation(checked, t).join("\n"));
@@ -840,7 +852,7 @@ export function usePathConstruction(
     if (pathId == null && response?.paths?.length) {
       void invoke("open_registered_window", { windowType: "path_detail", entityId: String(response.paths[0].path_id) });
     }
-  }, [apiBaseUrl, constructionBody, canConfirm, validationKey, pathId, t, validationMessages]);
+  }, [apiBaseUrl, constructionBody, canConfirm, validationKey, shapeRevision, pathId, t, validationMessages]);
 
   /* ---- 都市の通行方向を取得(既定の進行方向割り当てに使う) ---- */
   useEffect(() => {
@@ -935,6 +947,12 @@ export function usePathConstruction(
       .listen<PathShapeUpdatePayload>(IPC_EVENT_EDIT_PATH_UPDATE_SHAPE, (event) => {
         console.log("[usePathConstruction] edit_path.update_shape", event.payload);
 
+        const sourceKey = pathValidationShapeKey(event.payload);
+        if (receivedShapeKey.current === sourceKey) return;
+        receivedShapeKey.current = sourceKey;
+        currentShapeRevision.current = event.payload.revision ?? "";
+        setShapeRevision(event.payload.revision ?? "");
+
         currentValidationKey.current = "";
         setValidation(null);
         const spanViolations = event.payload.max_span_violations ?? [];
@@ -1006,6 +1024,10 @@ export function usePathConstruction(
           }
         } else {
           // 空点列(敷設モード初期化・配置リセット直後)は制御点も空へ戻す
+          setRawPoints([]);
+          setRawEmbankmentHeights([]);
+          setRawWaypointControls([]);
+          setNodes([]);
           setStartControl(null);
           setEndControl(null);
         }
@@ -1042,6 +1064,7 @@ export function usePathConstruction(
     const controller = new AbortController();
     costAbortControllerRef.current = controller;
     setIsCostLoading(true);
+    setAlignment(null);
 
     const url = `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/construction-cost`;
 

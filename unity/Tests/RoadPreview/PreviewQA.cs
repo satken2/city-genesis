@@ -80,6 +80,7 @@ public static class PreviewQA
             CheckControlHeights(asm);
             CheckElevatedTerrainIndependence(asm, item);
             CheckAlignmentLabels(asm);
+            CheckAuthoritativeAlignment(asm);
             CheckRouteProposals(asm, item);
             CheckMaxSpan(asm, item);
             File.WriteAllText(result, "PASS: 100 preview updates; alignment curves, grades and controls; route proposal apply, undo, fixed endpoints, stale revisions, generated-point promotion and editing phase.");
@@ -427,6 +428,49 @@ public static class PreviewQA
         list.Clear();
         collect.Invoke(null, new object[] { samples, origin, new float[] { 70, 80, 90, 100, 80, 70, 70 }, 70f, true, list });
         Require(list.Count == 0, "Valid geometry must have no labels");
+    }
+
+    private static void CheckAuthoritativeAlignment(Assembly asm)
+    {
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
+        var type = asm.GetType("RoadPlanManager");
+        var manager = new GameObject("AuthoritativeAlignment").AddComponent(type);
+        var phase = type.GetField("phase", flags);
+        phase.SetValue(manager, Enum.Parse(phase.FieldType, "Editing"));
+        string revision = (string)type.GetField("routeRevision", flags).GetValue(manager);
+        string level = "{\"min_curve_radius\":null,\"max_grade\":0,\"curve_radius_limit\":0,\"grade_limit\":15,\"curve_violations\":[],\"grade_violations\":[],\"preview\":{\"samples\":[[0,0,null,0,0,10,0],[100,0,null,0,100,10,0]],\"warnings\":[]}}";
+        string steep = "{\"min_curve_radius\":null,\"max_grade\":21.97,\"curve_radius_limit\":0,\"grade_limit\":15,\"curve_violations\":[],\"grade_violations\":[[10,11]],\"preview\":{\"samples\":[],\"warnings\":[{\"curve\":false,\"value\":21.97,\"limit\":15,\"position\":[10,12,20],\"points\":[[10,12,20],[11,12.2197,20]]}]}}";
+        void Apply(string rev, string json)
+        {
+            var commandType = type.GetNestedType("ShapeCommand");
+            var command = Activator.CreateInstance(commandType);
+            commandType.GetField("op").SetValue(command, "apply_alignment");
+            commandType.GetField("revision").SetValue(command, rev);
+            commandType.GetField("alignmentJson").SetValue(command, json);
+            type.GetMethod("ApplyShapeCommand").Invoke(manager, new[] { command });
+        }
+        try
+        {
+            Apply("stale", "[" + steep + "]");
+            Require(type.GetField("authoritativeAlignments", flags).GetValue(manager) == null, "Stale validation was accepted");
+            type.GetField("isDragging", flags).SetValue(manager, true);
+            Apply(revision, "[" + level + "," + steep + "]");
+            type.GetField("isDragging", flags).SetValue(manager, false);
+            Require(Mathf.Abs((float)type.GetProperty("AlignmentMaxGradePct").GetValue(manager) - 21.97f) < .0001f,
+                "Summary ignored a non-first track");
+            var payload = (IDictionary)type.GetMethod("BuildAlignmentPayload", flags).Invoke(manager, null);
+            Require((bool)payload["authoritative"] && (bool)payload["grade_violated"], "2D lost authoritative state");
+            Require(((IList)payload["warnings"]).Count == 1 && ((IList)payload["labels"]).Count == 1, "2D lost backend warning");
+            Require(((IList)payload["samples"]).Count == 2, "Authoritative samples were thinned a second time");
+            type.GetMethod("OnEarthworkPreviewChanged", flags).Invoke(manager, null);
+            Require((bool)type.GetProperty("HasGradeViolation").GetValue(manager), "Earthwork reply replaced validated warning");
+            Apply(revision, "[" + level + "]");
+            Require(!(bool)type.GetProperty("HasAlignmentViolation").GetValue(manager), "Successful validation left an old warning");
+            type.GetMethod("InvalidateShapeCache", flags).Invoke(manager, null);
+            Apply(revision, "[" + steep + "]");
+            Require(type.GetField("authoritativeAlignments", flags).GetValue(manager) == null, "Editing revived an old validation");
+        }
+        finally { UnityEngine.Object.DestroyImmediate(manager.gameObject); }
     }
 
     private static void CheckMaxSpan(Assembly asm, object item)
