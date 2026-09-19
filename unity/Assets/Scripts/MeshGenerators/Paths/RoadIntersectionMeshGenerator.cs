@@ -17,6 +17,9 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
 
     public NodeMeshResult GenerateWithSections(int nodeId, Vector3 nodePosition, List<PathSummary> paths, float nodeRelativeY = 0f, Func<PathSummary, List<Vector3>> pointResolver = null, Func<PathSummary, float> cutLimitResolver = null)
     {
+        // ケーブルには接続点を埋める路面がない。切断断面も作らず、各スパンをアンカーまで描く。
+        paths = paths?.FindAll(p => p.path_type != Constants.PATH_CONVEYOR
+            && p.path_type != Constants.PATH_ELECTRICITY);
         if (paths == null || paths.Count < 2)
         {
             return null;

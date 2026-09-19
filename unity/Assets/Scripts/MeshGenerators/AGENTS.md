@@ -86,6 +86,8 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 
 ## 交差点 (Paths/RoadIntersectionMeshGenerator.cs)
 
+`GenerateWithSections` は `PATH_CONVEYOR` と `PATH_ELECTRICITY` を接続パスから除外する。ケーブルには路面がないため、実ノード（駅との接続を含む）・ウェイポイントのダミーノードの両方で、充填板と切断断面を生成しない。スパンは元のアンカー位置まで描く。混在ノードでもケーブルを道路の交差点形状へ含めない。
+
 - `IntersectionPolygonUtil`の`PathEndSection`（切断位置・接線・法線・幅）と`IntersectionCorner`（隣接入口間の外周）を本線・路面・歩道・壁・レールが共有する。凸包や独立した矩形で入口を推測しない。
 - `PathManager`から未切断の描画点列と切断距離上限を渡す。`ConnectionPoints`はその点列上の断面中心であり、元のアンカー・制御点を書き換えず`Trim`する。`BuildSpline`は端部ハンドルを区間方向へ固定したBezier補間（内部はCatmull-Rom相当）。
 - `SidewalkConnectorSpec.Part`は`sidewalk/wall/center/line`。`RoadPath.CreateSidewalkConnectorObject`がプレハブをタイル変形する。幅補間はX方向のみで、`SplinePoint.size`による高さの変形を避ける。歩道なしの相手へは道路外縁を中心とした四分円の扇形終端、壁なしの相手へは先細り終端を作る。2本の移行部では中央分離帯・側線・車線境界も接続する。

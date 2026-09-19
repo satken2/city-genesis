@@ -911,3 +911,7 @@ maxTileLengthを0以下にして著作周期を保つ連続パーツは、頂点
 ### 301の石畳テクスチャ
 
 ambientCGのPaving Stones 033（CC0）の色・NormalGL画像を使用する。PATH_PAVING_STONEとCustom/PathPavingが上面を描画し、石の形状やディスプレイスメントは生成しない。ワールドXZへ2m周期で投影するため、道路タイルの伸縮・回転・分割で石の大きさが変わらない。石の配列方向はワールド方向に固定され、道路に沿って回転しない。通常・接写は同じ単純なメッシュである。ForwardLitとDepthNormalsのUV・接線を揃え、標準のShadowCaster・DepthOnlyを併用する。色画像はsRGB、法線画像はNormalMap、Repeatとミップマップを有効にし最大1024px・異方性4で取り込む。Tests/Paving/run-unity.ps1が回転前後の画素一致、法線マップの効果、FBXの12三角形、各描画パスを検証する。素材の出所はゲーム内クレジットとAssets/Models/Paths/Textures/PAVING_STONE_SOURCE.mdに記録する。
+
+## ケーブル接続部の描画
+
+ロープウェイ（PATH_CONVEYOR）と送電線（PATH_ELECTRICITY）は路面を持たないため、道路交差点の充填メッシュと切断断面の生成対象から除外する。ウェイポイントの折れ点と駅を含む実ノードの接続点の両方で適用し、ケーブルのスパンは元のアンカー位置まで描画する。支柱・ケーブル・駅設備のモデルは通常のパス生成で配置する。

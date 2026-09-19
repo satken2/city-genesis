@@ -14,6 +14,26 @@ internal static class Program
 
     private static void Main()
     {
+        foreach (int type in new[] { Constants.PATH_CONVEYOR, Constants.PATH_ELECTRICITY })
+        {
+            var cables = new List<PathSummary> {
+                new PathSummary { path_type = type, path_variant = 601 },
+                new PathSummary { path_type = type, path_variant = 602 },
+            };
+            Check(NodeMeshFactory.GenerateNodeMesh(-1, Vector3.zero, cables) == null,
+                "ケーブルの折れ点・駅接続に路面が生成されました。");
+            cables.Add(new PathSummary { path_type = Constants.PATH_STREET });
+            Check(NodeMeshFactory.GenerateNodeMesh(1, Vector3.zero, cables) == null,
+                "ケーブルが道路の交差点形状に含まれました。");
+        }
+        foreach (double angle in new[] { 0, 4.99, 5, 5.01, -5.01, 90, 180 })
+        {
+            var next = new Vector3((float)(100 * Math.Cos(angle * Math.PI / 180)), 400,
+                (float)(100 * Math.Sin(angle * Math.PI / 180)));
+            double actual = RoadPlanManager.RopewayBendAngle(new Vector3(-100, 200, 0), Vector3.zero, next);
+            Check(Math.Abs(actual - Math.Abs(angle)) < .0001, "ロープウェイの水平折れ角が不正です。");
+            Check((actual <= 5.001) == (Math.Abs(angle) <= 5), "5度境界の許否が不正です。");
+        }
         int layouts = 0, constrained = 0;
         var factory = new GeometryFactory();
         foreach (float length in new[] { 4f, 20f, 100f })

@@ -174,7 +174,7 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     source: "Freesound",
     url: "https://freesound.org/people/ProductionNow/sounds/455045/",
     license: "CC0 1.0 — https://creativecommons.org/publicdomain/zero/1.0/",
-    note: "Train running loop, gain follows speed. Unity 3D ambience. Converted to Ogg Vorbis, loudness normalized and loop crossfaded. License verified 2026-09-15.",
+    note: "Train running loop, gain follows speed. Unity 3D ambience. Freesound HQ MP3 preview converted to Ogg Vorbis, loudness normalized and loop crossfaded. License verified 2026-09-20.",
   },
   {
     title: "Piano loops 204 octave down long loop 120 bpm",

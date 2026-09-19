@@ -3474,7 +3474,8 @@ public partial class RoadPlanManager : MonoBehaviour
         // 描画用のローカル推定をゲートにすると、権威検証自体が呼ばれず誤判定から復帰できない。
         IpcClient.Instance.EmitEditPathUpdateShape(pathId, PathType, pointsList, startControl, endControl, embankmentHeights, waypointControls, Curved, PathFollowTerrainOverride, finalized,
             phase == RoadEditorPhase.Editing && points.Count >= 2 && CheckElevationIntersections().Count == 0
-            && CheckRiverCrossings().Count == 0 && CheckMaxSpanViolations().Count == 0,
+            && CheckRiverCrossings().Count == 0 && CheckMaxSpanViolations().Count == 0
+            && (!(PathSubtype == 601 || PathSubtype == 602) || !HasAlignmentViolation),
             BuildShapeSyncExtras());
     }
 
@@ -3568,6 +3569,36 @@ public partial class RoadPlanManager : MonoBehaviour
     // 約1mの標高差分に含まれるfloatの丸め誤差を許容する（単位はパーセントポイント）。
     private const float AlignmentGradeTolerancePct = 0.001f;
 
+    /// <summary>水平折れ角。バックエンド ropeway_bend_violations と同じく重複点は無効とする。</summary>
+    public static double RopewayBendAngle(Vector3 previous, Vector3 anchor, Vector3 next)
+    {
+        double ax = (double)anchor.x - previous.x, az = (double)anchor.z - previous.z;
+        double bx = (double)next.x - anchor.x, bz = (double)next.z - anchor.z;
+        if (ax * ax + az * az <= 1e-12 || bx * bx + bz * bz <= 1e-12) return 180.0;
+        return System.Math.Atan2(System.Math.Abs(ax * bz - az * bx), ax * bx + az * bz)
+            * 180.0 / System.Math.PI;
+    }
+
+    private void CollectRopewayBendWarnings(List<List<Vector3>> violations)
+    {
+        var anchors = new List<Vector3>();
+        foreach (var point in points) anchors.Add(point.position);
+        if (phase == RoadEditorPhase.Placing) anchors.Add(hoverWorldPosition);
+        for (int i = 1; i < anchors.Count - 1; i++)
+        {
+            double angle = RopewayBendAngle(anchors[i - 1], anchors[i], anchors[i + 1]);
+            // 度単位の許容誤差はバックエンドと共通。高さによる傾斜は含めない。
+            if (angle <= 5.0 + 0.001) continue;
+            cachedCurveViolation = true;
+            violations.Add(new List<Vector3> { anchors[i - 1], anchors[i] });
+            violations.Add(new List<Vector3> { anchors[i], anchors[i + 1] });
+            alignmentLabels.Add(new AlignmentLabel {
+                curve = true, value = (float)angle, limit = 5f, position = anchors[i],
+                text = $"ロープウェイ 折れ角 {angle:0.00}°\n上限 5° 超過",
+            });
+        }
+    }
+
     /// <summary>線形指標を表示できる状態か(配置中は1点+ホバー、編集中は2点以上)。</summary>
     public bool HasAlignmentMetrics =>
         IsAlignmentTarget() && points.Count >= (phase == RoadEditorPhase.Placing ? 1 : 2);
@@ -3607,6 +3638,11 @@ public partial class RoadPlanManager : MonoBehaviour
         cachedAlignmentMaxGradePct = 0f;
         cachedAlignmentGradeLimit = 0f;
         cachedCurveViolation = cachedGradeViolation = false;
+        if (PathSubtype == 601 || PathSubtype == 602)
+        {
+            CollectRopewayBendWarnings(violations);
+            return violations;
+        }
         if (authoritativeAlignments != null)
             return ApplyAuthoritativeAlignmentCache(violations);
         if (!IsAlignmentTarget()) return violations;
