@@ -1,7 +1,7 @@
 /**
  * 道路カテゴリのバリアント選択UI。
  * 「自動車専用道路(PATH_MOTORWAY)」「街路(PATH_STREET)」「歩道(PATH_WALKWAY)」を
- * ボタンで選び、その下のプルダウンでバリアントを選ぶ。
+ * タブで選び、その中身のプルダウンでバリアントを選ぶ。
  */
 
 import type { MasterData, PathMasterEntry } from "../../types";

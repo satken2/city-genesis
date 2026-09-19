@@ -1,8 +1,8 @@
 /**
  * 軌道建設パネル専用スタイル
  *
- * モード切替(簡易 / 詳細)・鉄道種別プルダウン・タブバーのみを定義する。
- * それ以外のセクション・ボタン等は道路建設パネル(PathConstructionPanel.css)の
+ * モード切替(簡易 / 詳細)と鉄道種別プルダウンのみを定義する。
+ * タブバーを含むそれ以外のセクション・ボタン等は道路建設パネル(PathConstructionPanel.css)の
  * pc-* クラスをそのまま共有する。
  */
 
@@ -50,32 +50,4 @@
   padding: 8px 10px;
 }
 
-/* ---- タブバー ---- */
-/* 直下のセクション(規格プルダウン等)がタブの内容そのものなので、下罫線で区切らない。 */
-.tc-tabbar {
-  display: flex;
-  gap: 4px;
-  padding: 8px 12px;
-}
-
-.tc-tab {
-  flex: 1;
-  padding: 8px 6px;
-  border: 2px solid rgba(255, 255, 255, 0.14);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #f6fbff;
-  font-size: 0.74rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease;
-}
-
-.tc-tab:hover:not(.active) {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.tc-tab.active {
-  border-color: #4ea1ff;
-  background: rgba(78, 161, 255, 0.18);
-}
+/* タブバーは道路建設パネルと共通(PathConstructionPanel.css の pc-tabbar / pc-tab)。 */

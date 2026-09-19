@@ -1,8 +1,12 @@
 /**
- * 「path_type をボタンで選び、その下のプルダウンでバリアントを選ぶ」共通の選択UI。
+ * 「path_type をタブで選び、その中身のプルダウンでバリアントを選ぶ」共通の選択UI。
  *
  * 道路(自動車専用道路/街路/歩道)とインフラ(電気/水道)はどちらもこの形なので、
  * RoadVariantSelector / InfraVariantSelector が本コンポーネントを種別リストだけ変えて包む。
+ *
+ * 種別を切り替えると下に続く内容(バリアント・説明・形状設定・費用)がすべて入れ替わるため、
+ * 見た目・支援技術の双方でタブとして扱う(tablist/tab/tabpanel)。タブバーの意匠は
+ * 軌道建設パネルのタブと共通の pc-tabbar / pc-tab(PathConstructionPanel.css)。
  */
 
 import { useMemo } from "react";
@@ -52,9 +56,9 @@ export function TypeVariantSelector({
   );
 
   return (
-    <div className="pc-section">
-      {/* 種別ボタン */}
-      <div className="pc-type-group">
+    <>
+      {/* 種別タブ */}
+      <div className="pc-tabbar" role="tablist">
         {options.map((opt) => {
           const label =
             opt.label ?? masterData.path_types[opt.type]?.display_name ?? `Type ${opt.type}`;
@@ -62,7 +66,9 @@ export function TypeVariantSelector({
             <button
               key={opt.type}
               type="button"
-              className={`pc-type-btn ${selectedType === opt.type ? "active" : ""}`}
+              role="tab"
+              aria-selected={selectedType === opt.type}
+              className={`pc-tab ${selectedType === opt.type ? "active" : ""}`}
               disabled={disabled}
               onClick={() => {
                 if (selectedType !== opt.type) onSelectType(opt.type);
@@ -74,34 +80,35 @@ export function TypeVariantSelector({
         })}
       </div>
 
-      {/* バリアントプルダウン */}
-      {selectedType === null ? (
-        <div className="pc-empty-variants">{t("path_construction.selectTypeFirst")}</div>
-      ) : variants.length === 0 ? (
-        <div className="pc-empty-variants">{t("path_construction.noVariants")}</div>
-      ) : (
-        <select
-          className="pc-select"
-          value={selectedVariant ?? ""}
-          disabled={disabled}
-          onChange={(e) => {
-            const val = e.target.value;
-            if (val) {
-              const variantId = parseInt(val);
-              if (selectedVariant !== variantId) onSelectVariant(variantId);
-            }
-          }}
-          style={{ marginTop: 10 }}
-        >
-          <option value="">{t("path_construction.selectTypeFirst")}</option>
-          {variants.map((v) => (
-            <option key={v.id} value={v.id} disabled={isUnaffordable(v.id)}>
-              {v.data.display_name}
-              {isUnaffordable(v.id) ? t("construction.variantUnaffordableSuffix") : ""}
-            </option>
-          ))}
-        </select>
-      )}
-    </div>
+      {/* 選択中タブの中身(バリアントプルダウン) */}
+      <div className="pc-section" role="tabpanel">
+        {selectedType === null ? (
+          <div className="pc-empty-variants">{t("path_construction.selectTypeFirst")}</div>
+        ) : variants.length === 0 ? (
+          <div className="pc-empty-variants">{t("path_construction.noVariants")}</div>
+        ) : (
+          <select
+            className="pc-select"
+            value={selectedVariant ?? ""}
+            disabled={disabled}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val) {
+                const variantId = parseInt(val);
+                if (selectedVariant !== variantId) onSelectVariant(variantId);
+              }
+            }}
+          >
+            <option value="">{t("path_construction.selectTypeFirst")}</option>
+            {variants.map((v) => (
+              <option key={v.id} value={v.id} disabled={isUnaffordable(v.id)}>
+                {v.data.display_name}
+                {isUnaffordable(v.id) ? t("construction.variantUnaffordableSuffix") : ""}
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+    </>
   );
 }

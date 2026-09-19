@@ -450,13 +450,15 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
         </div>
       )}
 
-      {/* タブバー(モードごとのタブ構成) */}
-      <div className="tc-tabbar">
+      {/* タブバー(モードごとのタブ構成)。意匠は道路建設パネルと共通の pc-tabbar / pc-tab。 */}
+      <div className="pc-tabbar" role="tablist">
         {tabDefs.map((tabDef) => (
           <button
             key={tabDef.key}
             type="button"
-            className={`tc-tab ${tab === tabDef.key ? "active" : ""}`}
+            role="tab"
+            aria-selected={tab === tabDef.key}
+            className={`pc-tab ${tab === tabDef.key ? "active" : ""}`}
             onClick={() => handleTabChange(tabDef.key)}
           >
             {tabDef.label}

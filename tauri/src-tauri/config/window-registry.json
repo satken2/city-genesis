@@ -323,6 +323,7 @@
     "resizable": true,
     "policy": "single",
     "layout": "left_panel_narrow",
+    "empty_shell": true,
     "actions": []
   },
   "track_build": {
@@ -332,6 +333,7 @@
     "resizable": true,
     "policy": "single",
     "layout": "left_panel_narrow",
+    "empty_shell": true,
     "actions": []
   },
   "infra_build": {
@@ -341,6 +343,7 @@
     "resizable": true,
     "policy": "single",
     "layout": "left_panel_narrow",
+    "empty_shell": true,
     "actions": []
   },
   "path_shape_editor": {

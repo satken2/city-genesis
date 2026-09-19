@@ -146,13 +146,14 @@
 /* ---- アクションボタン ---- */
 /* パネル下部固定のアクションバー。内容がスクロールしても常に見えるよう
    sticky で最下部に貼り付ける。margin-top: auto により内容が短くても
-   パネルの底に押し出され、パネル背景と同色の下地で背後の内容を隠す。 */
+   パネルの底に押し出される。背後の内容を隠すため不透明にする必要があるので、
+   ここだけは土台のグラデーション下端と同じ色を直値で敷く(半透明だと透ける)。 */
 .pc-action-bar {
   position: sticky;
   bottom: 0;
   margin-top: auto;
   padding: 10px 12px;
-  background: #182231;
+  background: #101723;
   border-top: 1px solid rgba(255, 255, 255, 0.15);
   z-index: 2;
 }
@@ -319,36 +320,49 @@
   background: rgba(78, 161, 255, 0.18);
 }
 
-/* ---- 種別ボタン(道路種別/インフラ種別) ---- */
-.pc-type-group {
+/* ---- タブバー(道路/インフラの種別、軌道パネルのタブ) ---- */
+/* 下辺のアクセント罫線がタブの台座で、直下のセクションがそのタブの中身であることを示す。
+   選択中のタブだけ罫線と同色の面で塗り、台座と地続きに見せる(下罫線を持たない)。
+   面はすべて半透明で、ポップアップ土台のグラデーションを透かす(不透明な地色は浮く)。
+   stretch はラベルが2行に折り返すタブがあっても高さを揃えるため。 */
+.pc-tabbar {
   display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 2px;
+  padding: 8px 12px 0;
+  border-bottom: 2px solid rgba(78, 161, 255, 0.55);
 }
 
-.pc-type-btn {
+.pc-tab {
   flex: 1;
   min-width: 56px;
-  padding: 6px 10px;
-  border: 2px solid rgba(255, 255, 255, 0.14);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #f6fbff;
-  font-size: 0.72rem;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(246, 251, 255, 0.6);
+  font-family: inherit;
+  font-size: 0.74rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
-.pc-type-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.12);
+.pc-tab:hover:not(.active):not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f6fbff;
 }
 
-.pc-type-btn.active {
-  border-color: #4ea1ff;
-  background: rgba(78, 161, 255, 0.18);
+/* 上へ2px伸ばして手前に立っているように見せる。 */
+.pc-tab.active {
+  margin-top: -2px;
+  border-color: rgba(78, 161, 255, 0.55);
+  background: rgba(78, 161, 255, 0.2);
+  color: #f6fbff;
 }
 
-.pc-type-btn:disabled {
+.pc-tab:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }

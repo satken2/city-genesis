@@ -71,7 +71,7 @@ HUDは**3枚の専用Tauriウィンドウ**に分かれている。Unityの3Dビ
 
 1. 適切なドメインフォルダにコンポーネントを作成
 2. `App.tsx`にimportを追加し、`SPECIALIZED_PANEL_TYPES`にウィンドウタイプ名を追加して分岐を書く
-3. `src-tauri/config/window-registry.json`にウィンドウ定義(タイトル、サイズ、インスタンスポリシー)を追加
+3. `src-tauri/config/window-registry.json`にウィンドウ定義(タイトル、サイズ、インスタンスポリシー)を追加(`empty_shell: true`にすると、タイトルバー下の共通余白`.content`の`padding: 10px`が外れ、パネルが窓の端まで広がる=余白とスクロールをパネル側が全部持つ指定)
 4. 排他にしたいウィンドウがあれば`window-mutex-groups.json`にも追加
 
 ## 建設・編集パネルの確定送信の責務分担
@@ -97,6 +97,12 @@ HUDは**3枚の専用Tauriウィンドウ**に分かれている。Unityの3Dビ
 ### 道路建設・インフラ建設パネル(path/PathConstructionPanel)は1コンポーネント2ウィンドウ
 
 `path_build`(道路=自動車専用道路/街路/歩道)と`infra_build`(インフラ=電気/水道)は**同じ`PathConstructionPanel`を`category` propだけ変えて使う**(`App.tsx`で固定)。入力UI・フローが同一なのでコードは共有するが、プレイヤーには道路と電線・水道管は別の道具に見えるため入口(アイコンパネルのボタン)とウィンドウは分けている。**パネル内にカテゴリ切替UIを復活させないこと。** 既存パスの編集(パス詳細パネル起点の`editPathId`付き起動)は種別を問わず`path_build`で行い、その場合のカテゴリはパス取得時に`usePathConstruction.onTypeChange`が種別から補完した値を使う。Rust側の`EDIT_MODE_WINDOW_TYPES`とクローズ時のグリッド/ハイライト消去は両ウィンドウ種別で同じ扱い。
+
+### パス系建設パネル(道路/インフラ/軌道)の共通意匠: タブバーと余白
+
+3つの建設ウィンドウ(`path_build` / `infra_build` / `track_build`)は**ポップアップ共通の外余白を使わない**(`window-registry.json`で`empty_shell: true`を指定し、`App.css`の`.content`が持つ`padding: 10px`を外す)。余白は各セクション(`.pc-section` = 10px 12px)と下部の`.pc-action-bar`が自前で持ち、タブバーは窓の左右端まで、アクションバーは窓の下端まで届く。`.pc-action-bar`はstickyで背後のスクロール内容を隠す必要があるため、例外的に不透明色(土台グラデーションの下端と同じ`#101723`)を直値で敷いている。
+
+上部の種別選択(道路=自動車専用道路/街路/歩道、インフラ=電気/水道)と軌道建設パネルのタブは、**同じタブ意匠`pc-tabbar` / `pc-tab`(`PathConstructionPanel.css`)を共有する**。アクセント色の下罫線がタブの台座で、選択中のタブだけ同色の半透明面で塗って2px上へ出す(面はすべて半透明。不透明な地色を敷くと土台のグラデーションから浮く)。`TypeVariantSelector`は種別タブとその中身のバリアントセクションを`role="tablist"` / `role="tab"` / `role="tabpanel"`で組んでいる。**軌道パネルのように`pc-*`を借りる側は`PathConstructionPanel.css`を明示的にimportすること**(CSSがチャンク単位で分かれるため)。
 
 ### 道路建設パネル(path/)の設定系はUnity移管済み
 

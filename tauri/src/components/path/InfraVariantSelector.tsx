@@ -1,10 +1,10 @@
 /**
  * インフラカテゴリのバリアント選択UI。
- * 「電気(PATH_ELECTRICITY)」「水道(PATH_WATER)」をボタンで選び、
- * その下のプルダウンでバリアントを選ぶ。
+ * 「電気(PATH_ELECTRICITY)」「水道(PATH_WATER)」をタブで選び、
+ * その中身のプルダウンでバリアントを選ぶ。
  *
  * 注: path_type 定数(電気=11/水道=12)は最近分割されたが master.yaml の path_types が
- * 未更新のため、ボタンのラベルはここで明示的に与えてフォールバックする。
+ * 未更新のため、タブのラベルはここで明示的に与えてフォールバックする。
  */
 
 import { useTranslation } from "react-i18next";
