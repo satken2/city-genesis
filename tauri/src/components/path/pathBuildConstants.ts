@@ -128,4 +128,17 @@ export type RouteProposalShape = {
   embankments: number[];
   generated: number[];
   can_undo: boolean;
+  enabled: boolean;
+  height_editable: boolean;
+  path_variant: number;
+  follow_terrain: number;
+  components: Array<{
+    path_variant: number;
+    lateral_offset: number;
+    height_offset: number;
+    travel_direction: number;
+  }>;
+  platform_side: number;
+  align_station_tracks: boolean;
+  exclude_path_id: number | null;
 };

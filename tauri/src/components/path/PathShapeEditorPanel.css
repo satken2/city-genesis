@@ -35,8 +35,47 @@
 
 .pse-actions {
   display: flex;
+  align-items: center;
   gap: 6px;
   flex-shrink: 0;
+}
+
+.pse-route-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 5px 12px;
+  border-bottom: 1px solid #2a3149;
+  background: #171c2c;
+  font-size: 0.72rem;
+  color: #93a9c0;
+}
+
+.pse-route-mode {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pse-select {
+  height: 25px;
+  max-width: 190px;
+  padding: 2px 7px;
+  border: 1px solid #2a3149;
+  border-radius: 4px;
+  background: #1b2135;
+  color: #cdd6f4;
+  font-size: 0.72rem;
+}
+
+.pse-route-message {
+  min-width: 180px;
+  flex: 1;
+  overflow: hidden;
+  color: #f38ba8;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .pse-btn {
@@ -53,6 +92,17 @@
 .pse-btn:hover {
   background: #26324f;
   border-color: #4f6ba8;
+}
+
+.pse-btn:disabled,
+.pse-select:disabled {
+  cursor: default;
+  opacity: 0.48;
+}
+
+.pse-btn--primary {
+  border-color: #4f6ba8;
+  background: #26324f;
 }
 
 .pse-map {

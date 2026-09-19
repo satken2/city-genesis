@@ -55,6 +55,8 @@ import {
   type ShapeHit,
 } from "./pathShapeOverlay";
 import { PathProfileStrip } from "./PathProfileStrip";
+import { RouteProposalControls } from "./RouteProposalControls";
+import { useRouteProposal } from "./useRouteProposal";
 import "./PathShapeEditorPanel.css";
 
 /** クリックとドラッグを分ける移動量(画面px)。Unity InputHandler の閾値に合わせる */
@@ -92,6 +94,7 @@ export function PathShapeEditorPanel({ apiBaseUrl }: { apiBaseUrl: string }) {
   // ビューを合わせるため、先に fitBounds を呼んでも上書きされる。最初の形状(または点列が
   // 無いときのカメラ位置)から範囲を決めてから地図をマウントし、敷設中パス全体が収まるようにする。
   const [initialBounds, setInitialBounds] = useState<CityMapBounds | null>(null);
+  const routeProposal = useRouteProposal({ apiBaseUrl, payload: shape });
 
   // ポインタハンドラは CityMapCanvas 側で ref ミラーされるが、ハンドラ自身も最新の形状・
   // ホバー・ドラッグを再生成なしで参照したいので ref に持つ。
@@ -340,6 +343,7 @@ export function PathShapeEditorPanel({ apiBaseUrl }: { apiBaseUrl: string }) {
           </button>
         </div>
       </div>
+      <RouteProposalControls state={routeProposal} />
       <div className="pse-map">
         {initialBounds && (
         <CityMapCanvas

@@ -176,4 +176,4 @@ PropPlacementPanelの個別配置は全種別共通で地面相対高さ(m)を�
 
 ## 経路提案UI
 
-`path/useRouteProposal.ts`はUnityの編集世代を保持して読み取り専用propose-route APIを呼び、同じ形状・設定への応答だけをshape_commandで反映する。`RouteProposalControls`は共通PathBuildSectionsへ高さ固定/調整・提案・取消し・復元を表示する。制御点Yは`ControlPoint.y`とwaypoint_controlsから保持し、複線展開時にもアンカー高さへ置き換えない。翻訳は各言語のroute-proposal.json。詳細は公開`programs/経路提案.md`。
+`path/useRouteProposal.ts`はUnityの編集世代を保持して読み取り専用propose-route APIを呼び、同じ形状・設定への応答だけをshape_commandで反映する。`RouteProposalControls`は`PathShapeEditorPanel`のツールバーへ高さ固定/調整・提案・取消し・復元を表示し、形状同期の`route_proposal`から探索条件を受け取る。制御点Yは`ControlPoint.y`とwaypoint_controlsから保持し、複線展開時にもアンカー高さへ置き換えない。翻訳は各言語のroute-proposal.json。詳細は公開`programs/経路提案.md`。

@@ -36,6 +36,22 @@ public partial class RoadPlanManager
             embankments.Add(point.embankmentHeight);
             generated.Add(point.proposalGenerated ? 1 : 0);
         }
+
+        var components = new List<Dictionary<string, object>>();
+        var offsets = LateralOffsets != null && LateralOffsets.Length > 0
+            ? LateralOffsets : new[] { 0f };
+        for (int i = 0; i < offsets.Length; i++)
+        {
+            components.Add(new Dictionary<string, object>
+            {
+                ["path_variant"] = PathSubtype,
+                ["lateral_offset"] = offsets[i],
+                ["height_offset"] = 0f,
+                ["travel_direction"] = TravelDirections != null && i < TravelDirections.Length
+                    ? TravelDirections[i] : Constants.DIR_BOTH,
+            });
+        }
+        var master = MasterDataStore.Instance?.GetPathMaster(PathSubtype);
         return new Dictionary<string, object>
         {
             ["revision"] = routeRevision,
@@ -45,6 +61,16 @@ public partial class RoadPlanManager
             ["embankments"] = embankments,
             ["generated"] = generated,
             ["can_undo"] = routeUndoPoints != null && routeUndoRevision == routeRevision,
+            // 提案UIは独立した2D編集ウィンドウにあるため、探索条件も形状と同じ通知へ載せる。
+            ["enabled"] = IsCurveAllowed() && IsAlignmentTarget() && !IsStationHouse(),
+            ["height_editable"] = IsHeightEditable(),
+            ["path_variant"] = PathSubtype,
+            ["follow_terrain"] = PathFollowTerrainOverride,
+            ["components"] = components,
+            ["platform_side"] = PlatformSide,
+            ["align_station_tracks"] = PathType == Constants.PATH_TRACK
+                && master != null && (master.platform_width ?? 0f) > 0f,
+            ["exclude_path_id"] = pathId != 0 ? (object)pathId : null,
         };
     }
 

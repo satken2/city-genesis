@@ -53,7 +53,6 @@ import {
 } from "../../utils/ipc";
 import { describePathValidation, type PathValidationResult } from "./pathValidation";
 import { fetchApi } from "../../utils/api";
-import { useRouteProposal } from "./useRouteProposal";
 import type { PathAlignmentSummary } from "../../types";
 import {
   DIR_BOTH,
@@ -745,11 +744,6 @@ export function usePathConstruction(
     return { paths: [pathData], align_station_tracks: false };
   }, [selectedVariant, selectedVariantData, rawPoints, rawEmbankmentHeights, curveMode, startControl, endControl, rawWaypointControls, pathId, railComponents, hasPlatform, houseEnds, platformSide, followTerrain]);
 
-  const routeProposal = useRouteProposal({ apiBaseUrl, path_variant: selectedVariant,
-    follow_terrain: followTerrain, components: railComponents, platform_side: platformSide,
-    align_station_tracks: hasPlatform && selectedVariantData?.type === PATH_TRACK,
-    exclude_path_id: pathId ?? null, enabled: curveAllowed && !isInfrastructure && selectedVariantData?.type !== PATH_STATION_HOUSE,
-    heightEditable });
   const [localCanConfirm, setLocalCanConfirm] = useState(false);
   const localCanConfirmRef = useRef(false);
   const [validation, setValidation] = useState<{
@@ -764,7 +758,7 @@ export function usePathConstruction(
   const validationKey = JSON.stringify({ ...constructionBody, exclude_path_id: pathId ?? null });
   const currentValidationKey = useRef(validationKey);
   currentValidationKey.current = validationKey;
-  const canConfirm = !routeProposal.busy && localCanConfirm && constructionBody !== null
+  const canConfirm = localCanConfirm && constructionBody !== null
     && validation?.key === validationKey && validation.result?.is_valid === true;
   const validationMessages = !localCanConfirm
     ? [t(shapePhase === "placing" ? "path_construction.shapeUnready" : "path_construction.collisionUnready")]
@@ -1146,7 +1140,6 @@ export function usePathConstruction(
   }, [apiBaseUrl, selectedVariant, constructionBody]);
 
   return {
-    routeProposal,
     category,
     selectedType,
     selectedVariant,
