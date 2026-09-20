@@ -140,3 +140,5 @@ stdout が返らない等の罠がある)。本Skillはプロップ固有の差�
 - 外観候補は `Resources/Config/vehicle_model_config.yaml`、路線種別との対応は `transit_vehicle_models.json`。既存IDを確認して登録する。
 - exportのカテゴリは `vehicles`、検証対象は `Assets/Models/Vehicles/{車種}`、ギャラリーは `Vehicles`。Unity回帰は `Tests/Vehicles/run.ps1 -TransitOnly`。自動生成されたResourcesラッパーとFBXのGUIDが対応することを確認する。
 - 再生成ジョブは非公開制作ツール `genesis-gallery/pipeline/jobs/vehicles.md`、LRTは同ディレクトリの `lrt_vehicles.md` を参照する。
+
+手動配置用モノレール308/309は `props.blend` の例外的な車両プロップ。原点は走行タイヤと桁上面の接点で、スカートは高さ-0.70mまで桁の両脇へ下がる。bbox底面を原点に揃え直さない。負の高さでは左右0.51mの桁用離隔を維持し、`Tests/Monorail/run.ps1`で確認する。
