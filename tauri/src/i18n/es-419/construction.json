@@ -100,7 +100,6 @@
       "overlap_parcel": "Se traslapa con una parcela existente",
       "overlap_city_building": "Se traslapa con una instalación municipal o un sitio de construcción planificado",
       "overlap_path": "Se traslapa con una calle",
-      "terrain_not_acquired": "No se puede construir en terreno no liberado",
       "incompatible_parcel_type": "Este edificio no se puede construir en este tipo de terreno",
       "generic": "No se puede construir en este lugar"
     },

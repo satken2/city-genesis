@@ -99,7 +99,6 @@
     "bulldozerOn": "불도저: ON(클릭하여 철거)",
     "bulldozerConfirmScatter": "범위 배치된 프롭 “{{name}}”을(를) 범위째 모두 삭제합니다. 정말 삭제하시겠습니까?",
     "bulldozerOff": "불도저(빈 땅・계획 중인 건물/도로・지형 프롭 철거)",
-    "menuUnlock": "지형 셀 개방",
     "menuResourceEdit": "자원 편집",
     "menuParameterEdit": "파라미터 편집",
     "menuPropPlacement": "프롭 배치",
@@ -121,7 +120,6 @@
   "display": {
     "layerTerrain": "지형",
     "layerAlert": "경보",
-    "layerCell": "셀",
     "layerRoad": "도로",
     "layerBuilding": "건물",
     "layerParcel": "구획",
@@ -139,7 +137,6 @@
     "modeHidden": "숨김",
     "modeResourceVisible": "표시",
     "modePropVisible": "표시",
-    "modeCellBoundaries": "셀 경계 표시",
     "modeRoadDefault": "일반 표시",
     "modeRoadTraffic": "교통량 색상 구분",
     "modeRoadSpeed": "속도 규제 색상 구분",

@@ -1,15 +1,4 @@
 {
-  "terrainUnlock": {
-    "title": "解锁地形单元",
-    "selectCell": "请选择地形单元",
-    "cellSelected": "已选择单元 ({{x}}, {{z}})",
-    "alreadyAcquired": "单元 ({{x}}, {{z}}) 已解锁",
-    "confirm": "确定",
-    "cancel": "取消",
-    "acquiring": "解锁中...",
-    "acquireSuccess": "已解锁该单元",
-    "acquireError": "解锁失败"
-  },
   "terrain3dPreview": {
     "waitingForEditor": "正在等待地形编辑器的数据…"
   },

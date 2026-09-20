@@ -99,7 +99,6 @@
     "bulldozerOn": "推土機：開（點擊拆除）",
     "bulldozerConfirmScatter": "將刪除散布範圍內的全部「{{name}}」裝飾物。確定要整片刪除嗎？",
     "bulldozerOff": "推土機（拆除空地、規劃中的建築／道路及地形裝飾物）",
-    "menuUnlock": "解鎖地形單元",
     "menuResourceEdit": "資源編輯",
     "menuParameterEdit": "參數編輯",
     "menuPropPlacement": "裝飾物配置",
@@ -121,7 +120,6 @@
   "display": {
     "layerTerrain": "地形",
     "layerAlert": "警報",
-    "layerCell": "單元",
     "layerRoad": "道路",
     "layerBuilding": "建築",
     "layerParcel": "地塊",
@@ -139,7 +137,6 @@
     "modeHidden": "隱藏",
     "modeResourceVisible": "顯示",
     "modePropVisible": "顯示",
-    "modeCellBoundaries": "顯示單元邊界",
     "modeRoadDefault": "一般顯示",
     "modeRoadTraffic": "交通量配色",
     "modeRoadSpeed": "速限配色",

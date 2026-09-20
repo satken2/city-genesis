@@ -106,15 +106,6 @@ export const DISPLAY_LAYERS: DisplayLayer[] = [
     ],
   },
   {
-    id: "cell",
-    titleKey: "display.layerCell",
-    defaultMode: "hidden",
-    modes: [
-      { id: "hidden", tooltipKey: "display.modeHidden", icon: "visual/invisible.png" },
-      { id: "boundaries", tooltipKey: "display.modeCellBoundaries", icon: "visual/frame.png" },
-    ],
-  },
-  {
     id: "road",
     titleKey: "display.layerRoad",
     defaultMode: "default",

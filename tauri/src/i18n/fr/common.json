@@ -56,7 +56,6 @@
     "unknownResource": "Ressource inconnue"
   },
   "errors": {
-    "TERRAIN_NOT_ACQUIRED": "Cette zone n'a pas encore été explorée. Débloquez d'abord la cellule de terrain.",
     "UNKNOWN_ERROR": "Une erreur est survenue.",
     "CREATEPATH_INVALID_GEOMETRY": "La forme de la voie est invalide. Vérifiez le point de départ et d'arrivée.",
     "CREATEPATH_OUTSIDE_COASTLINE": "Impossible de tracer une voie au-delà du littoral.",

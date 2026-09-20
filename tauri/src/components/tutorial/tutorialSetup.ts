@@ -78,7 +78,7 @@ export const TUTORIAL4_DEPOT_PARCEL_KEY = "tutorial4_depot_parcel_id";
 
 /**
  * H 型道路網の座標定義。
- * flat マップの初期解放セル(おおよそ x,z ∈ [-500, 500])の内側に収まるよう配置する。
+ * どのマップでも道路網がマップ内に収まるよう、マップ中央付近(おおよそ x,z ∈ [-500, 500])に配置する。
  * 座標は [x, y, z](y は地面からの高さで、街路は常に 0)。
  */
 const LEFT_X = -150;

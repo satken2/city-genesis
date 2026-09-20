@@ -95,14 +95,6 @@ const TRAY_ITEMS: DisplayTrayItem[] = [
     onStateKey: "display.trayStateVisible",
     offStateKey: "display.trayStateHidden",
   },
-  {
-    layerId: "cell",
-    icon: iconUrl("pixels.png"),
-    labelKey: "display.layerCell",
-    visibleMode: "boundaries",
-    onStateKey: "display.trayStateVisible",
-    offStateKey: "display.trayStateHidden",
-  },
 ];
 
 export function DisplayTray() {

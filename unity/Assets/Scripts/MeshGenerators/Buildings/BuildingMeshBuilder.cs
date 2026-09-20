@@ -33,7 +33,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// <summary>
     /// 描画LOD付きの生成。Far はパーツを一切読まずフットプリント押し出しの箱(<see cref="GenerateFarBuilding"/>)、
     /// Close は同じ組み立てで `_close` パーツを優先解決する(BuildingMeshUtils.CurrentDrawLod)。
-    /// isDynamicは互換引数。地形追従の要否を表し、描画LODや土地の開放状態とは独立する。
+    /// isDynamicは互換引数。地形追従の要否を表し、描画LODとは独立する。
     /// </summary>
     public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic, DrawLod drawLod, bool separateExterior = false)
     {

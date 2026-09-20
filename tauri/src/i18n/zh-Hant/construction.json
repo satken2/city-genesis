@@ -100,7 +100,6 @@
       "overlap_parcel": "與既有地塊重疊",
       "overlap_city_building": "與市政設施或計畫建設用地重疊",
       "overlap_path": "與道路重疊",
-      "terrain_not_acquired": "無法在未解鎖的土地上建設",
       "incompatible_parcel_type": "此處的地形無法建造此建築",
       "generic": "無法在此處建設"
     },

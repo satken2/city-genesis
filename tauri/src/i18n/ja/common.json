@@ -56,7 +56,6 @@
     "unknownResource": "不明な資源"
   },
   "errors": {
-    "TERRAIN_NOT_ACQUIRED": "まだ調査していないエリアです。先に地形セルを開放してください。",
     "UNKNOWN_ERROR": "エラーが発生しました。",
     "CREATEPATH_INVALID_GEOMETRY": "パスの形状が無効です。始点と終点を確認してください。",
     "CREATEPATH_OUTSIDE_COASTLINE": "海岸線の外側にパスを敷設することはできません。",

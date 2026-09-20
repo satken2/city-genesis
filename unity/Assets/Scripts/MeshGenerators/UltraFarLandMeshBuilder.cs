@@ -20,9 +20,6 @@ using UnityEngine;
 /// 順に拾う」マーチングスクエア的クリップで陸地ポリゴンに切り出すため、海岸線はグリッド解像度より
 /// 細かく(交差点を線形補間して)滑らかに出る。高さで頂点を持ち上げることで粗い起伏も表現する。
 ///
-/// 未開放セルの暗色表現のため、各三角形を「開放/未開放」の2サブメッシュに振り分ける。
-/// 呼び出し側はサブメッシュ別に通常/暗め(ティント乗算)のマテリアルを割り当てる。
-///
 /// Mesh 自体の生成はメインスレッド専用なので、本ビルダーは純粋なデータ(頂点・三角形配列)のみを
 /// 構築する。重い符号付き距離計算を含むため、バックグラウンドスレッドから呼んでよい
 /// (<see cref="CoastlineStore"/> と渡されるデリゲートがビルド中に変更されないこと)。
@@ -35,8 +32,7 @@ public static class UltraFarLandMeshBuilder
         public List<Vector3> vertices;
         public List<Vector2> uvs;             // UV 座標 (ワールド X, Z)
         public List<Vector3> normals;         // 位置溶接済みのスムース法線
-        public List<int> trianglesAcquired;   // 開放済みセルの三角形(サブメッシュ0)
-        public List<int> trianglesUnacquired; // 未開放セルの三角形(サブメッシュ1)
+        public List<int> triangles;
     }
 
     /// <summary>
@@ -47,19 +43,16 @@ public static class UltraFarLandMeshBuilder
     /// <param name="gridStep">グリッド間隔(メートル)。小さいほど海岸線・起伏が細かいが頂点が増える。</param>
     /// <param name="heightOffset">陸地を海面板の上に保つため全頂点Yに足す微小オフセット(メートル)。</param>
     /// <param name="sampleHeight">ワールド(x,z)→地表ワールドY(メートル)。far_map 由来の粗い高さ。</param>
-    /// <param name="isAcquired">ワールド(x,z)がそのセルが開放済みか。スレッド安全なスナップショットを参照すること。</param>
     public static MeshData Build(
         float mapWidth, float mapHeight, float gridStep, float heightOffset,
-        Func<float, float, float> sampleHeight,
-        Func<float, float, bool> isAcquired)
+        Func<float, float, float> sampleHeight)
     {
         var data = new MeshData
         {
             vertices = new List<Vector3>(4096),
             uvs = new List<Vector2>(4096),
             normals = null, // 末尾でまとめて構築する
-            trianglesAcquired = new List<int>(8192),
-            trianglesUnacquired = new List<int>(1024),
+            triangles = new List<int>(8192),
         };
 
         if (gridStep < 1f) gridStep = 1f;
@@ -152,11 +145,6 @@ public static class UltraFarLandMeshBuilder
                     continue; // 陸が無い(全コーナー海)、または退化セル。
                 }
 
-                // セルの開放状態は中心(おおよそ陸地ポリゴンの重心)で判定する。
-                float cx = (gx[i] + gx[i + 1]) * 0.5f;
-                float cz = (gz[j] + gz[j + 1]) * 0.5f;
-                List<int> tris = isAcquired(cx, cz) ? data.trianglesAcquired : data.trianglesUnacquired;
-
                 // ポリゴン頂点を追加し、扇状(0, k, k+1)に分割する。
                 int baseIdx = data.vertices.Count;
                 for (int k = 0; k < polyCount; k++)
@@ -166,9 +154,9 @@ public static class UltraFarLandMeshBuilder
                 }
                 for (int k = 1; k < polyCount - 1; k++)
                 {
-                    tris.Add(baseIdx);
-                    tris.Add(baseIdx + k);
-                    tris.Add(baseIdx + k + 1);
+                    data.triangles.Add(baseIdx);
+                    data.triangles.Add(baseIdx + k);
+                    data.triangles.Add(baseIdx + k + 1);
                 }
             }
         }
@@ -192,9 +180,8 @@ public static class UltraFarLandMeshBuilder
         var normals = new List<Vector3>(vcount);
         for (int i = 0; i < vcount; i++) normals.Add(Vector3.zero);
 
-        // 面積重み付きの面法線(=正規化しない外積)を各頂点へ加算する。両サブメッシュ分。
-        AccumulateFaceNormals(data.vertices, data.trianglesAcquired, normals);
-        AccumulateFaceNormals(data.vertices, data.trianglesUnacquired, normals);
+        // 面積重み付きの面法線(=正規化しない外積)を各頂点へ加算する。
+        AccumulateFaceNormals(data.vertices, data.triangles, normals);
 
         // 同一XZ位置(量子化キー)へ法線を集約する。交差点・コーナー頂点は隣接セルで
         // 同一座標が決定論的に再現されるため、量子化で確実に一致する。

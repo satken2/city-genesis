@@ -170,11 +170,6 @@ public class IpcStateCoordinator : MonoBehaviour
                 WindowUtil.BringToForeground();
                 break;
 
-            case "STATE_UNLOCK_CELL":
-                ApplyStateUnlockCell();
-                WindowUtil.BringToForeground();
-                break;
-
             case "STATE_SET_GRID":
                 ApplyStateSetGrid(ipcParams);
                 WindowUtil.BringToForeground();
@@ -1169,30 +1164,6 @@ public class IpcStateCoordinator : MonoBehaviour
     }
 
     /// <summary>
-    /// STATE_UNLOCK_CELL: 地形セル開放モード
-    /// 地形クリックでセルを選択し、UI側で開放確定を行う。
-    /// </summary>
-    private void ApplyStateUnlockCell()
-    {
-        // InputMode: 地形セル開放プリセット
-        if (InputSystemManager.Instance != null)
-        {
-            InputSystemManager.Instance.SetModePreset(InputModePreset.UNLOCK_CELL);
-        }
-
-        // VisualMode の適用は IpcViewCoordinator.SyncFromState(ステート別の表示プリセット)が行う。
-
-        // 道路エディタを終了状態に戻す
-        var roadPlanManager = FindAnyObjectByType<RoadPlanManager>();
-        if (roadPlanManager != null)
-        {
-            roadPlanManager.FinishRoadPlacement();
-        }
-
-        Debug.Log("IpcStateCoordinator: 地形セル開放モードを適用しました");
-    }
-
-    /// <summary>
     /// STATE_SET_GRID: グリッド角度設定ノード選択モード
     /// </summary>
     private void ApplyStateSetGrid(Dictionary<string, object> ipcParams)
@@ -1377,11 +1348,11 @@ public class IpcStateCoordinator : MonoBehaviour
         viewCoordinator?.ClearNormalStateMemory();
 
         // セッションリロード時は別のセーブデータが読み込まれた可能性があるため、
-        // 開放済みセルリストをバックエンドから再取得してから3D更新を行う。
+        // 海岸線・水面・川を取り直してから3D更新を行う。
         var terrainManager = FindAnyObjectByType<TerrainManager>();
         if (terrainManager != null)
         {
-            StartCoroutine(FetchAcquiredCellsThenReload(terrainManager));
+            StartCoroutine(FetchCoastlineThenReload(terrainManager));
         }
         else if (CellDataLoader.Instance != null)
         {
@@ -1393,9 +1364,9 @@ public class IpcStateCoordinator : MonoBehaviour
         TransitOverlayManager.Instance?.RefreshLines();
     }
 
-    private System.Collections.IEnumerator FetchAcquiredCellsThenReload(TerrainManager terrainManager)
+    private System.Collections.IEnumerator FetchCoastlineThenReload(TerrainManager terrainManager)
     {
-        yield return terrainManager.FetchAcquiredCells();
+        yield return terrainManager.FetchCoastline();
         if (CellDataLoader.Instance != null)
         {
             CellDataLoader.Instance.ReloadAllData();

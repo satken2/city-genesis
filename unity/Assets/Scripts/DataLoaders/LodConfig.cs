@@ -26,7 +26,7 @@ public static class LodConfig
     public static LodCellSets CalculateCellSets(
         Vector2Int centerCell, Vector3 viewCenterPosition, Vector3 cameraPosition,
         Vector3 cameraForward, TerrainManager terrainManager, float cellSize,
-        int mapWidth, int mapHeight, HashSet<Vector2Int> acquiredCells = null)
+        int mapWidth, int mapHeight)
     {
         var resident = new List<Vector2Int>();
         if (cellSize <= 0 || mapWidth <= 0 || mapHeight <= 0)

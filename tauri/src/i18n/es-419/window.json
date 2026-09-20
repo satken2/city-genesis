@@ -99,7 +99,6 @@
     "bulldozerOn": "Bulldozer: ACTIVADO (clic para eliminar)",
     "bulldozerConfirmScatter": "Se eliminarán todos los props “{{name}}” del área dispersa. ¿Eliminar toda el área?",
     "bulldozerOff": "Bulldozer (elimina parcelas vacías, obras planeadas y props del terreno)",
-    "menuUnlock": "Liberar terreno",
     "menuResourceEdit": "Editar recursos",
     "menuParameterEdit": "Editar parámetros",
     "menuPropPlacement": "Colocación de props",
@@ -121,7 +120,6 @@
   "display": {
     "layerTerrain": "Terreno",
     "layerAlert": "Alertas",
-    "layerCell": "Celdas",
     "layerRoad": "Calles",
     "layerBuilding": "Edificios",
     "layerParcel": "Parcelas",
@@ -139,7 +137,6 @@
     "modeHidden": "Oculto",
     "modeResourceVisible": "Visible",
     "modePropVisible": "Visible",
-    "modeCellBoundaries": "Límites de celda",
     "modeRoadDefault": "Vista normal",
     "modeRoadTraffic": "Color por tránsito",
     "modeRoadSpeed": "Color por límite de velocidad",

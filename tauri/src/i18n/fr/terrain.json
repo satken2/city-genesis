@@ -1,15 +1,4 @@
 {
-  "terrainUnlock": {
-    "title": "Débloquer une cellule de terrain",
-    "selectCell": "Sélectionnez une cellule de terrain",
-    "cellSelected": "Cellule ({{x}}, {{z}}) sélectionnée",
-    "alreadyAcquired": "La cellule ({{x}}, {{z}}) est déjà débloquée",
-    "confirm": "Valider",
-    "cancel": "Annuler",
-    "acquiring": "Déblocage...",
-    "acquireSuccess": "Cellule débloquée",
-    "acquireError": "Échec du déblocage"
-  },
   "terrain3dPreview": {
     "waitingForEditor": "En attente des données de l'éditeur de terrain…"
   },

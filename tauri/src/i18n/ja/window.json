@@ -99,7 +99,6 @@
     "bulldozerOn": "ブルドーザ: ON（クリックで削除）",
     "bulldozerConfirmScatter": "範囲配置されたプロップ「{{name}}」を、散布範囲ごとすべて削除します。本当に削除しますか？",
     "bulldozerOff": "ブルドーザ（空き地・計画中の建物/道路・地形プロップを削除）",
-    "menuUnlock": "地形セル開放",
     "menuResourceEdit": "資源編集",
     "menuParameterEdit": "パラメータ編集",
     "menuPropPlacement": "プロップ配置",
@@ -121,7 +120,6 @@
   "display": {
     "layerTerrain": "地形",
     "layerAlert": "アラート",
-    "layerCell": "セル",
     "layerRoad": "道路",
     "layerBuilding": "建物",
     "layerParcel": "区画",
@@ -139,7 +137,6 @@
     "modeHidden": "非表示",
     "modeResourceVisible": "表示",
     "modePropVisible": "表示",
-    "modeCellBoundaries": "セル境界表示",
     "modeRoadDefault": "通常表示",
     "modeRoadTraffic": "交通量色分け",
     "modeRoadSpeed": "速度規制色分け",

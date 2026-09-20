@@ -142,9 +142,9 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 
 - 超遠景(UltraFar)の「陸地シルエット」を、海岸線ポリゴン(`CoastlineStore`)から直接メッシュ化する。`TerrainManager.BuildUltraFarTerrain` から呼ばれる(従来の Unity Terrain ハイトマップ方式を置き換えたもの)。
 - 陸地AABBを `gridStep` 間隔のグリッドに切り、各セルを「辺をたどり陸側コーナー+海岸線交差点を拾う」マーチングスクエア的クリップで陸地ポリゴンに切り出す。交差点は `CoastlineStore.SignedDistance` の符号反転位置の線形補間で求めるため、海岸線はグリッド解像度より細かく滑らかに出る。海(陸地外)はメッシュを作らない(海面板が担う)。
-- 頂点Yは渡された `sampleHeight`(far_map 由来)で粗い起伏を付け、`heightOffset` 持ち上げる。各三角形は `isAcquired`(セル開放判定)で開放/未開放の2サブメッシュに振り分ける(未開放セルの暗色表示用。呼び出し側がサブメッシュ別マテリアルで通常/暗めティントに塗り分ける)。
+- 頂点Yは渡された `sampleHeight`(far_map 由来)で粗い起伏を付け、`heightOffset` 持ち上げる。三角形は単一のサブメッシュにまとめ、呼び出し側はマテリアル1枚を割り当てる。
 - **スムース法線**: `MeshData.normals` に位置溶接済みのスムース法線を返す(`BuildSmoothNormals`)。頂点はグリッドセルごとに個別追加され境界に重複頂点ができるため、`Mesh.RecalculateNormals` だと境界でファセット状の陰影になる。面積重み付き面法線を同一ワールドXZ位置(量子化キー)へ集約して正規化することで、頂点を溶接せず法線値だけをセルをまたいで共有する。呼び出し側(`TerrainManager.BuildUltraFarTerrain`)は `md.normals` を `Mesh.SetNormals` する。
-- **Mesh の組み立てはメインスレッド専用**。本ビルダーは純粋なデータ(`MeshData`: 頂点 + スムース法線 + サブメッシュ別三角形)のみ返すので、重い符号付き距離計算・法線集約を含む呼び出しは Task.Run でバックグラウンド実行してよい(`CoastlineStore` と渡すデリゲートがビルド中に不変であること)。
+- **Mesh の組み立てはメインスレッド専用**。本ビルダーは純粋なデータ(`MeshData`: 頂点 + スムース法線 + 三角形)のみ返すので、重い符号付き距離計算・法線集約を含む呼び出しは Task.Run でバックグラウンド実行してよい(`CoastlineStore` と渡すデリゲートがビルド中に不変であること)。
 
 ## 土地区画 (Percels/DefaultParcel.cs)
 

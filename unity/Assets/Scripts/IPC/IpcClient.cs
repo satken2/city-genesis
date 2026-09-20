@@ -1408,22 +1408,6 @@ public class IpcClient : MonoBehaviour
     }
 
     /// <summary>
-    /// unlock_cell:select_cell イベントを送信する。
-    /// 地形セル開放モードでセルがクリックされたことをUIに通知する。
-    /// </summary>
-    public void EmitUnlockCellSelect(int cellX, int cellZ, bool alreadyAcquired)
-    {
-        var payload = new Dictionary<string, object>
-        {
-            ["cell_x"] = cellX,
-            ["cell_z"] = cellZ,
-            ["already_acquired"] = alreadyAcquired
-        };
-
-        SendEnvelope("unlock_cell:select_cell", payload);
-    }
-
-    /// <summary>
     /// system:graphic_ready イベントを送信する。
     /// Unity の起動完了(初回起動・クラッシュ後の自動再起動とも)を Tauri に通知する。
     /// Tauri 側は2回目以降の受信(=クラッシュ後の再起動)でのみポップアップを一掃する

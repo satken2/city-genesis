@@ -1,15 +1,4 @@
 {
-  "terrainUnlock": {
-    "title": "Unlock Terrain Cell",
-    "selectCell": "Please select a terrain cell",
-    "cellSelected": "Cell ({{x}}, {{z}}) selected",
-    "alreadyAcquired": "Cell ({{x}}, {{z}}) is already unlocked",
-    "confirm": "Confirm",
-    "cancel": "Cancel",
-    "acquiring": "Unlocking...",
-    "acquireSuccess": "Cell unlocked",
-    "acquireError": "Failed to unlock"
-  },
   "terrain3dPreview": {
     "waitingForEditor": "Waiting for data from the terrain editor…"
   },

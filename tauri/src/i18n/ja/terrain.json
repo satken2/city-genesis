@@ -1,15 +1,4 @@
 {
-  "terrainUnlock": {
-    "title": "地形セル開放",
-    "selectCell": "地形セルを選択してください",
-    "cellSelected": "セル ({{x}}, {{z}}) が選択されました",
-    "alreadyAcquired": "セル ({{x}}, {{z}}) は解放済みです",
-    "confirm": "確定",
-    "cancel": "キャンセル",
-    "acquiring": "開放中...",
-    "acquireSuccess": "セルを開放しました",
-    "acquireError": "開放に失敗しました"
-  },
   "terrain3dPreview": {
     "waitingForEditor": "地形エディタからの読み込みを待っています…"
   },

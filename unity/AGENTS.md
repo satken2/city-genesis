@@ -72,7 +72,7 @@
 
 ## データロードとLODの全体像
 
-`LodConfig` が最大81の常駐セルを選ぶ。旧far/near/dynamic集合はすべて同じ常駐集合であり、地形の正や土地の開放状態とは独立している。地形→既存物の追従→区画→建物・道路などの順で取得する。地形APIは `/terrain/surface` のfloat32で、一時TerrainDataへ完成させてから差し替える。
+`LodConfig` が最大81の常駐セルを選ぶ。旧far/near/dynamic集合はすべて同じ常駐集合であり、地形の正とは独立している。地形→既存物の追従→区画→建物・道路などの順で取得する。地形APIは `/terrain/surface` のfloat32で、一時TerrainDataへ完成させてから差し替える。
 
 描画LODは建物・プロップの投影サイズ、道路の距離で決まる。生成の共通フレーム予算は `RenderWorkScheduler`、生成済みGOの退避は `RenderObjectCache`。必ずschedulerのStart/Stopを対で使用し、取消し時のiteratorとメッシュを解放する。詳細は `Assets/Scripts/DataLoaders/AGENTS.md` と `../docs/docs/geometries/E_LOD処理.md`。
 
@@ -121,8 +121,8 @@ F8は描画数、生成予算、フレームp95/p99、キャッシュ推定量�
   マウス位置から区画を解決する `ParcelManager.GetParcelIdAtPoint`(起伏地形で区画コライダーが地形に埋まった場合の InputHandler のフォールバック)が、マウス移動フレームごとに全区画のポリゴン内外判定を線形走査しないための逆引きインデックス。区画の登録は `RegisterParcelDataForLines`(内部で `RegisterParcelSpatialIndex`)、削除は `RemoveParcel` / `ClearAllCells` を通して同期すること。
 - **接道街路の逆引きインデックス (`ParcelManager.parcelIdsByFrontPath`)** と **区画の逆引きインデックス (`BuildingManager.buildingIdsByParcel`)**:
   「この道路に面している区画」「この区画の上に建っている建物」を全件走査なしで解決するための逆引きインデックス。前者は `RegisterParcelSpatialIndex` / `UnregisterParcelSpatialIndex` / `ClearAllCells`、後者は `RegisterBuildingDataToCache`(parcel_id変更時は旧マッピング除去) / `SyncBuildingsInCells` / `ClearAllCells` を通して同期すること。
-- **カメラ非依存のオーバーレイメッシュは毎フレーム再構築しない (`TerrainManager.UpdateCellOverlayIfActive`)**:
-  開放済みセルの境界点線(`OverlayMeshRenderer` によるワールド固定幅の点線)はカメラに依存しない静的ジオメトリなので、毎フレーム `BeginFrame`〜`EndFrame` でメッシュを作り直すと、カメラ静止・入力なしのアイドル時でも無駄なCPU/GPU(頂点構築＋メッシュ再アップロード)を消費する。境界の変化(`borderSegmentsDirty`)や表示切り替え(`ShowCellBordersAndLabels` の変化)があったフレームだけ再構築し、それ以外は既存メッシュをそのまま描画すること。カメラに追従してビルボードやスクリーン幅換算が必要なオーバーレイ(パーセル枠線等)はこの限りではなく、カメラ移動閾値でガードする。
+- **カメラ非依存のオーバーレイメッシュは毎フレーム再構築しない (`ZoneManager.hoverFillRenderer`)**:
+  ワールド固定のオーバーレイジオメトリはカメラに依存しない静的メッシュなので、毎フレーム `BeginFrame`〜`EndFrame` で作り直すと、カメラ静止・入力なしのアイドル時でも無駄なCPU/GPU(頂点構築＋メッシュ再アップロード)を消費する。`OverlayMeshRenderer` は次の `BeginFrame` まで前フレームのメッシュを保持するので、内容が変わったフレーム(地区ホバーフィルなら対象地区が変わったフレーム)だけ再構築し、それ以外は既存メッシュをそのまま描画すること。カメラに追従してビルボードやスクリーン幅換算が必要なオーバーレイ(パーセル枠線等)はこの限りではなく、カメラ移動閾値でガードする。
 
 # 重要な考え方
 

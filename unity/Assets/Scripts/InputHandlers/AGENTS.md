@@ -68,7 +68,6 @@ Ctrlメニューの2設定と候補・ガイド・XYZの役割分担は`Editors/
 - MODE_PARCEL_CREATION_SPLIT = 6
 - MODE_EDIT = 7
 - MODE_ZONE_EDIT = 8
-- MODE_UNLOCK_CELL = 9
 - MODE_PARCEL_SHAPE_EDIT = 10
 - MODE_SET_GRID = 11
 - MODE_EDIT_RESOURCE = 12
@@ -80,7 +79,7 @@ Ctrlメニューの2設定と候補・ガイド・XYZの役割分担は`Editors/
 - MODE_PATH_SPLIT = 19 (パス分割の分割点選択。PATH と TERRAIN の両方をこのモードにし、どちらのクリックも `PathTopologyEditManager.OnClickForSplit` へ委譲する〔パス脇の地形クリックでも中心線への垂線の足が分割点になる〕。**`TerrainInputHandler` の共通吸着 `ApplySnapping` はこのモードで適用しない**——ノード吸着で端点へ引き寄せられると常に「端点に近すぎる」分割になりバックエンドに拒否されるため)
 - MODE_EDIT_CONNECTOR = 15 (施設の接続端子ノード=インフラ/走行網接続点のドラッグ移動編集。マーカー=逆四角錐はノード実体の上空に浮くオーバーレイのためコライダーへのレイキャストではなく地形ドラッグとして受け、**掴み開始は `ConnectorEditManager.ProcessMouseDrag` の初回呼び出しの遅延グラブ**(上記の罠参照。`StartTerrainDrag` 経由は地形コライダーが無い場合のフォールバックのみ)。当たり判定 `IsMouseOverConnector` は「ノード地表点〜マーカー天面のスクリーン線分」との距離で行い、半径はズームに応じて拡大(最低45px)。NODEは`MODE_NONE`でレイキャスト貫通させる。`TerrainInputHandler.onHover` はこのモードで吸着(`ApplySnapping`)を適用しない(ドラッグ中の端子が自分自身の旧キャッシュ位置へ吸着し続けるため)。**`CameraController.IsMouseOverEditHandle` にもマーカー判定を足さないと、先に走る(`DefaultExecutionOrder(-100)`)カメラドラッグが掴みを奪う**)
 
-プリセット(`InputModePreset`): ALL_NONE / ALL_NORMAL / ROAD_CONSTRUCTION / BUILDING_CONSTRUCTION / PARCEL_CREATION_POINT / PARCEL_CREATION_PATH / PARCEL_CREATION_SPLIT / ZONE_EDIT / UNLOCK_CELL / PARCEL_SHAPE_EDIT / SET_GRID / EDIT_RESOURCE / TRANSIT_CONSTRUCTION / PROP_PLACEMENT / CONNECTOR_EDIT / REMOVE_OBJECTS / PATH_MERGE(=パスのみ`MODE_PATH_MERGE`) / PATH_SPLIT(=パスと地形が`MODE_PATH_SPLIT`) / STATION_PLACEMENT(=地形のみ`MODE_EDIT_STATION`)
+プリセット(`InputModePreset`): ALL_NONE / ALL_NORMAL / ROAD_CONSTRUCTION / BUILDING_CONSTRUCTION / PARCEL_CREATION_POINT / PARCEL_CREATION_PATH / PARCEL_CREATION_SPLIT / ZONE_EDIT / PARCEL_SHAPE_EDIT / SET_GRID / EDIT_RESOURCE / TRANSIT_CONSTRUCTION / PROP_PLACEMENT / CONNECTOR_EDIT / REMOVE_OBJECTS / PATH_MERGE(=パスのみ`MODE_PATH_MERGE`) / PATH_SPLIT(=パスと地形が`MODE_PATH_SPLIT`) / STATION_PLACEMENT(=地形のみ`MODE_EDIT_STATION`)
 
 **クリックのみでドラッグを持たないモードは `StartDrag` / `StartTerrainDrag` の冒頭で明示的に return させること**(MODE_REMOVE / MODE_PATH_MERGE / MODE_PATH_SPLIT / MODE_ZONE_EDIT)。しないと既定経路でドラッグ状態に入り、`RoadPlanManager` 等のドラッグ処理へフォールバックする。
 
@@ -122,7 +121,7 @@ public class MyObjectInputHandler : MonoBehaviour, IInputHandler
 
 - 海面は `TerrainManager` が管理するTerrainタイルとは別物で、シーンに静的配置された板ポリゴン(`Sea` GameObject, Layer=Water, `Custom/DepthOffsetLit` シェーダー)。`Terrain` コンポーネントを持たないため、素の状態では `GetObjectType` が `-1` を返し、クリックが無反応になる。
 - これを解決するため、Sea には **`SeaObject` タグ**を付与し、`InputHandler.Start` で **`TerrainInputHandler` を AddComponent** する。`GetObjectType` は `SeaObject` タグを `InputObjectType.TERRAIN` に振り分けるため、海面クリックは地形クリックと同じ経路(`TerrainInputHandler.onClick`)に流れる。
-- これにより土地区画作成の点選択(`MODE_PARCEL_CREATION_POINT`)等が海面上でも有効になる。バックエンド側で当該セルが解放済みであれば、海上区画(`PARCEL_WATER`)として作成できる。
+- これにより土地区画作成の点選択(`MODE_PARCEL_CREATION_POINT`)等が海面上でも有効になる。海上区画(`PARCEL_WATER`)として作成できる。
 - Sea には既に `VisualSeaObject`(`VisualHandlers/`)が付与されており、`InputObjectType.TERRAIN` として VisualModeHandler に登録済み。入力系もこれと同じタイプに揃える形。
 - `InputHandler.terrainLayerMask`(Layer 10 Groundのみ)には Water レイヤーが含まれないため、`UpdateTerrainPosition` での `posX/posZ` 更新には影響しない。海域では y=0 平面との交点フォールバックが効くため、`TerrainInputHandler.onClick` に渡る `clickPosition` は正しく算出される。
 

@@ -60,7 +60,6 @@ const CityNotificationsWindow = lazy(() => import("./components/notification/Cit
 const ConstructionProjectsWindow = lazy(() => import("./components/construction/ConstructionProjectsWindow").then(m => ({ default: m.ConstructionProjectsWindow })));
 const EpochResultWindow = lazy(() => import("./components/taskbar/EpochResultWindow").then(m => ({ default: m.EpochResultWindow })));
 const QuestCompleteWindow = lazy(() => import("./components/taskbar/QuestCompleteWindow").then(m => ({ default: m.QuestCompleteWindow })));
-const TerrainUnlockPanel = lazy(() => import("./components/terrain/TerrainUnlockPanel").then(m => ({ default: m.TerrainUnlockPanel })));
 const TerrainEditorCanvas = lazy(() => import("./components/terrain/TerrainEditorCanvas").then(m => ({ default: m.TerrainEditorCanvas })));
 const Terrain3DPreviewCanvas = lazy(() => import("./components/terrain/Terrain3DPreviewCanvas").then(m => ({ default: m.Terrain3DPreviewCanvas })));
 const CityMapWindow = lazy(() => import("./components/map/CityMapWindow").then(m => ({ default: m.CityMapWindow })));
@@ -88,7 +87,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * 専用パネルが実装されているウィンドウタイプのセット
  * これらのタイプはジェネリックな JSON 表示ではなく、専用コンポーネントでレンダリングする
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "diagnosis", "parcel_detail", "zone_detail", "zone_merge", "building_direct_acquisition", "path_build", "infra_build", "track_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "settings", "credits", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "new_game", "city_rename", "template_editor", "resource_detail", "resource_edit", "prop_placement", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "terrain_unlock", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "street_grid"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "diagnosis", "parcel_detail", "zone_detail", "zone_merge", "building_direct_acquisition", "path_build", "infra_build", "track_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "settings", "credits", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "new_game", "city_rename", "template_editor", "resource_detail", "resource_edit", "prop_placement", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "street_grid"]);
 
 
 function App() {
@@ -570,8 +569,6 @@ function App() {
                 }
                 onClose={closeWindow}
               />
-            ) : context.window_type === "terrain_unlock" ? (
-              <TerrainUnlockPanel apiBaseUrl={context.api_base_url} onClose={closeWindow} />
             ) : context.window_type === "city_map" ? (
               <CityMapWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "street_grid" ? (

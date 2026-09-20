@@ -42,7 +42,6 @@ export type GraphicState =
   | "STATE_EDIT_ZONE"
   | "STATE_EDIT_PARCEL"
   | "STATE_EDIT_PARCEL_SHAPE"
-  | "STATE_UNLOCK_CELL"
   | "STATE_SET_GRID"
   | "STATE_EDIT_RESOURCE"
   | "STATE_EDIT_TRANSIT"
@@ -1208,9 +1207,6 @@ export const IPC_EVENT_VIEW_OBJECT_FILTER_STATE = "view:object_filter_state";
  * 時計回りの度。2D都市マップがこれを受けてカメラ位置マーカーを重ね描きする。
  */
 export const IPC_EVENT_CAMERA_STATE = "camera:state";
-
-/** 地形セル開放モードでセルが選択された */
-export const IPC_EVENT_UNLOCK_CELL_SELECT = "unlock_cell:select_cell";
 
 /** 土地区画形状編集モードにおいて、編集中のポリゴンが変更された */
 export const IPC_EVENT_EDIT_PARCEL_UPDATE_SHAPE = "edit_parcel:update_shape";

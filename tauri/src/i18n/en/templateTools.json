@@ -29,7 +29,6 @@
       "river_crossing": "crosses river",
       "multiple_intersections": "multiple intersections",
       "elevation_conflict": "grade-separation conflict",
-      "terrain_not_acquired": "terrain not unlocked",
       "other": "other"
     }
   }

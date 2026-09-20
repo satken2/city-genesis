@@ -29,7 +29,6 @@
       "river_crossing": "cruza un río",
       "multiple_intersections": "cruces múltiples",
       "elevation_conflict": "conflicto de desnivel",
-      "terrain_not_acquired": "terreno no desbloqueado",
       "other": "otros"
     }
   }

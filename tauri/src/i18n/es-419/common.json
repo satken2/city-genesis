@@ -56,7 +56,6 @@
     "unknownResource": "Recurso desconocido"
   },
   "errors": {
-    "TERRAIN_NOT_ACQUIRED": "Esta área aún no ha sido explorada. Primero libera la celda de terreno.",
     "UNKNOWN_ERROR": "Ocurrió un error.",
     "CREATEPATH_INVALID_GEOMETRY": "La forma de la vía no es válida. Revisa el punto inicial y el final.",
     "CREATEPATH_OUTSIDE_COASTLINE": "No se pueden trazar vías fuera de la línea costera.",

@@ -8,9 +8,9 @@
  * | ウィンドウラベル | コンポーネント | 位置 | 内容 |
  * | --- | --- | --- | --- |
  * | `icon-panel` | `IconPanel` | 画面左端・上下中央 | 各種メニュー(道路/建設/予算/統計…)。背景は透明 |
- * | `cockpit` | `Cockpit` | 画面下部中央 | 常用ツール4種・都市名と日付・施政スコア/予算メータ・アラート・エポック実行 |
+ * | `cockpit` | `Cockpit` | 画面下部中央 | 常用ツール3種・都市名と日付・施政スコア/予算メータ・アラート・エポック実行 |
  * | `system-tray` | `SystemTray` | 画面右下 | 設定・セーブ・リロード |
- * | `display-tray` | `DisplayTray` | 画面左下 | 表示レイヤーの簡易ON/OFF(建物・パス・プロップ・区画・地形・地区・セル) |
+ * | `display-tray` | `DisplayTray` | 画面左下 | 表示レイヤーの簡易ON/OFF(建物・パス・プロップ・区画・地形・地区) |
  *
  * コックピット・システムトレイのアイコンは背景板の上に画像を直接置くため、
  * 画像サイズの差を padding フィールドで個別に吸収する
@@ -77,14 +77,13 @@ export const MENU_ICONS: HudIconDef[] = [
 ];
 
 /**
- * コックピット左側に2行×2列で置く常用ツール。
- * 表示切替・マップ・地形セル開放・ブルドーザという、
+ * コックピット左側に2列のグリッドで置く常用ツール。
+ * 表示切替・マップ・ブルドーザという、
  * 他のメニューを開いている最中でも押したくなる操作をまとめている。
  */
 export const TOOL_ICONS: HudIconDef[] = [
   { id: "visibility", src: "visibility.png", tooltipKey: "taskbar.menuView", padding: "4px", windowType: "display_options" },
   { id: "map", src: "map.png", tooltipKey: "taskbar.menuMap", padding: "4px", windowType: "city_map" },
-  { id: "unlock", src: "pixels.png", tooltipKey: "taskbar.menuUnlock", padding: "4px", windowType: "terrain_unlock" },
   { id: "bulldozer", src: "bulldozer.png", tooltipKey: "taskbar.bulldozerOff", padding: "3px" },
 ];
 

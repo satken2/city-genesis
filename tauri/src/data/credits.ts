@@ -385,7 +385,6 @@ export const FLATICON_PENDING_SLUGS: string[] = [
   "next_15114481",
   "no-money_2762618",
   "pen_10336582",
-  "pixels_923137",
   "region_992219",
   "reload_9311549",
   "road-intersection_2062607",

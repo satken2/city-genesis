@@ -99,7 +99,6 @@
     "bulldozerOn": "Bulldozer: ON (click to remove)",
     "bulldozerConfirmScatter": "This will delete every “{{name}}” prop in the scattered area. Delete the whole area?",
     "bulldozerOff": "Bulldozer (remove empty parcels, planned buildings/roads & terrain props)",
-    "menuUnlock": "Unlock Terrain",
     "menuResourceEdit": "Edit Resources",
     "menuParameterEdit": "Edit Parameters",
     "menuPropPlacement": "Prop Placement",
@@ -121,7 +120,6 @@
   "display": {
     "layerTerrain": "Terrain",
     "layerAlert": "Alert",
-    "layerCell": "Cell",
     "layerRoad": "Road",
     "layerBuilding": "Building",
     "layerParcel": "Parcel",
@@ -139,7 +137,6 @@
     "modeHidden": "Hidden",
     "modeResourceVisible": "Visible",
     "modePropVisible": "Show Props",
-    "modeCellBoundaries": "Cell Boundaries",
     "modeRoadDefault": "Default View",
     "modeRoadTraffic": "Traffic Coloring",
     "modeRoadSpeed": "Speed Limit Coloring",

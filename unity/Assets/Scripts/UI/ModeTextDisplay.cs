@@ -12,7 +12,6 @@ public class ModeTextDisplay : MonoBehaviour
         ("STATE_EDIT_PATH", "Road Construction"),
         ("STATE_EDIT_BUILDING", "Building Construction"),
         ("STATE_EDIT_ZONE", "Zone Edit"),
-        ("STATE_UNLOCK_CELL", "Unlock Cell"),
         ("STATE_EDIT_PROP", "Prop Placement"),
         ("STATE_EDIT_STATION", "Station Placement"),
         // フライモードはUI(Tauri)を経由しないUnityローカルのステート。

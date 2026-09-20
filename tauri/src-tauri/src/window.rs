@@ -44,11 +44,11 @@ pub const SYSTEM_TRAY_WIDTH: f64 = 176.0;
 pub const SYSTEM_TRAY_HEIGHT: f64 = 40.0;
 
 /// 表示トレイ(画面左下・レイヤーの表示ON/OFFを切り替えるアイコン列)のサイズ。
-/// ボタン数が固定(7個)なので実測値の通知は行わず、ここの値をそのまま使う。
+/// ボタン数が固定(6個)なので実測値の通知は行わず、ここの値をそのまま使う。
 /// `DisplayTray.css` のボタン寸法(30px)・間隔(6px)・左右パディング(8px)・枠線(1px)と
-/// 一致させること(30×7 + 6×6 + 8×2 + 1×2 = 264)。
+/// 一致させること(30×6 + 6×5 + 8×2 + 1×2 = 228)。
 /// 足りないとボタンが切れ、余ると透明領域がクリックを吸ってUnityを操作できなくなる。
-pub const DISPLAY_TRAY_WIDTH: f64 = 264.0;
+pub const DISPLAY_TRAY_WIDTH: f64 = 228.0;
 pub const DISPLAY_TRAY_HEIGHT: f64 = 40.0;
 
 /// 画面下部中央でコックピットが占有する高さ(画面下端からコックピット上端まで)。
@@ -768,7 +768,6 @@ const EDIT_MODE_WINDOW_TYPES: &[&str] = &[
     "infra_build",
     "track_build",
     "building_construction",
-    "terrain_unlock",
     "transit_management",
     "transit_creation",
 ];

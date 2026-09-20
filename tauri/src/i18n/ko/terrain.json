@@ -1,15 +1,4 @@
 {
-  "terrainUnlock": {
-    "title": "지형 셀 개방",
-    "selectCell": "지형 셀을 선택하세요",
-    "cellSelected": "셀 ({{x}}, {{z}})이 선택되었습니다",
-    "alreadyAcquired": "셀 ({{x}}, {{z}})은 이미 개방되었습니다",
-    "confirm": "확정",
-    "cancel": "취소",
-    "acquiring": "개방 중...",
-    "acquireSuccess": "셀을 개방했습니다",
-    "acquireError": "개방에 실패했습니다"
-  },
   "terrain3dPreview": {
     "waitingForEditor": "지형 에디터에서 불러오기를 기다리는 중…"
   },

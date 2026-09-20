@@ -30,7 +30,7 @@ export function buildApiUrl(
 
 /**
  * バックエンドから返される標準エラーレスポンスの型。
- * { code: "TERRAIN_NOT_ACQUIRED", message: "..." } のような形式を期待する。
+ * { code: "CREATEPATH_OUTSIDE_COASTLINE", message: "..." } のような形式を期待する。
  */
 export interface ApiErrorResponse {
   code: string;

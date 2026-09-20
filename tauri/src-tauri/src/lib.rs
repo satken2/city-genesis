@@ -659,7 +659,7 @@ async fn copy_terrain_for_editor(
     let resources = terrain_editor_resources(&resource_document)?;
 
     let features: serde_json::Value = if original {
-        serde_json::json!({"water_surfaces": [], "rivers": [], "camera": null, "initial_cells": []})
+        serde_json::json!({"water_surfaces": [], "rivers": [], "camera": null})
     } else {
         client
             .get(format!("{}/api/v1/terrain/maps/{}/features", base, map_id))
@@ -698,7 +698,6 @@ async fn copy_terrain_for_editor(
         "water_surfaces": features["water_surfaces"],
         "rivers": features["rivers"],
         "camera": features["camera"],
-        "initial_cells": features["initial_cells"],
     });
     std::fs::write(map_dir.join("meta.json"), meta.to_string())
         .map_err(|e| format!("meta.json の書き込みに失敗しました: {e}"))?;
@@ -779,9 +778,6 @@ struct TerrainEditorData {
     /// カメラ初期状態 {x, y, z, yaw, pitch}(TerrainCameraPayload)。未設定なら null。
     /// 仕様の正は同 §D.13。
     camera: serde_json::Value,
-    /// 初期開放セルの一覧 [[cx, cy], ...]。未設定なら空配列(ゲームはマップ中央の2×2セルで始まる)。
-    /// 仕様の正は同 §D.15。
-    initial_cells: serde_json::Value,
 }
 
 #[tauri::command]
@@ -851,10 +847,6 @@ fn load_terrain_editor_data(
             .cloned()
             .unwrap_or_else(|| serde_json::json!({"instances": [], "scatters": []})),
         camera: meta.get("camera").cloned().unwrap_or(serde_json::Value::Null),
-        initial_cells: meta
-            .get("initial_cells")
-            .cloned()
-            .unwrap_or_else(|| serde_json::Value::Array(Vec::new())),
     })
 }
 
@@ -900,8 +892,6 @@ fn create_new_terrain_for_editor(app: tauri::AppHandle) -> Result<String, String
         "cell_size": cell_size,
         "grid_rows": grid_rows,
         "grid_cols": grid_cols,
-        // 新規マップは全域(2×2セル)を初期開放セルにしておき、エディタで地形を広げながら調整する。
-        "initial_cells": [[0, 0], [0, 1], [1, 0], [1, 1]],
     });
     std::fs::write(map_dir.join("meta.json"), meta.to_string())
         .map_err(|e| format!("meta.json の書き込みに失敗しました: {e}"))?;
@@ -950,7 +940,6 @@ fn export_terrain_as_npy(
     resources: Option<serde_json::Value>,
     props: Option<serde_json::Value>,
     camera: Option<serde_json::Value>,
-    initial_cells: Option<Vec<[i64; 2]>>,
 ) -> Result<ExportTerrainResult, String> {
     use base64::Engine;
     // 付随JSONを含め、最初のファイルを書く前に原本への出力を拒否する。
@@ -1049,10 +1038,6 @@ fn export_terrain_as_npy(
     let camera_spec: Option<TerrainCameraSpec> = camera
         .and_then(|v| serde_json::from_value::<TerrainCameraSpec>(v).ok());
 
-    // 初期開放セルもカメラと同じくyamlのエントリ(initial_cells:)に書く。
-    // 空ならキー自体を書かず、バックエンドの既定(マップ中央の2×2セル)に委ねる。
-    let initial_cells = initial_cells.unwrap_or_default();
-
     // エクスポート先と同じディレクトリの terrain_maps.yaml にエントリを追記する。
     // 存在しなければ何もせず yaml_updated=false を返し、フロントエンドが通知を出す。
     let out_path_buf = std::path::Path::new(&out_path);
@@ -1072,7 +1057,6 @@ fn export_terrain_as_npy(
                     far_spacing,
                     cell_size,
                     camera_spec.as_ref(),
-                    &initial_cells,
                 )?;
                 true
             } else {
@@ -1118,7 +1102,6 @@ fn upsert_terrain_yaml_entry(
     far_map_spacing: f64,
     cell_size: f64,
     camera: Option<&TerrainCameraSpec>,
-    initial_cells: &[[i64; 2]],
 ) -> Result<(), String> {
     let original = std::fs::read_to_string(yaml_path)
         .map_err(|e| format!("terrain_maps.yaml の読み込みに失敗しました: {e}"))?;
@@ -1154,18 +1137,6 @@ fn upsert_terrain_yaml_entry(
         start
     };
 
-    // 初期開放セルが空ならキー自体を書かない(バックエンドは未設定=マップ中央の2×2セル)。
-    let initial_cells_text = if initial_cells.is_empty() {
-        String::new()
-    } else {
-        let cells = initial_cells
-            .iter()
-            .map(|c| format!("[{}, {}]", c[0], c[1]))
-            .collect::<Vec<_>>()
-            .join(", ");
-        format!("\n  initial_cells: [{cells}]")
-    };
-
     // カメラ初期状態が未設定ならキー自体を書かない(バックエンドは未設定=原点の既定視点)。
     let camera_text = match camera {
         Some(c) => format!(
@@ -1192,7 +1163,7 @@ fn upsert_terrain_yaml_entry(
         \x20   near_map_spacing: {near_map_spacing}\n\
         \x20   far_map_spacing: {far_map_spacing}\n\
         \x20   dynamic_map_spacing: 1\n\
-        \x20   cell_size: {cell_size}{initial_cells_text}{camera_text}",
+        \x20   cell_size: {cell_size}{camera_text}",
         map_width = map_width as i64,
         map_height = map_height as i64,
         near_map_spacing = near_map_spacing as i64,
@@ -1238,36 +1209,29 @@ fn upsert_terrain_yaml_entry(
 mod terrain_yaml_entry_tests {
     use super::upsert_terrain_yaml_entry;
 
-    const EXISTING: &str = "# island\nisland:\n  id: island\n  name: island\n  file_name: terrains/map_island.npy\n  src_spacing: 10.0\n  settings:\n    map_width: 1000\n    map_height: 1000\n    near_map_spacing: 10\n    far_map_spacing: 200\n    dynamic_map_spacing: 1\n    cell_size: 500\n  initial_cells: [[0, 0]]\n";
+    const EXISTING: &str = "# island\nisland:\n  id: island\n  name: island\n  file_name: terrains/map_island.npy\n  src_spacing: 10.0\n  settings:\n    map_width: 1000\n    map_height: 1000\n    near_map_spacing: 10\n    far_map_spacing: 200\n    dynamic_map_spacing: 1\n    cell_size: 500\n";
 
     /// 同じIDのブロックを置換する形で書き出し、書かれた内容を返す。
-    fn upsert(cells: &[[i64; 2]]) -> String {
+    fn upsert() -> String {
         let dir = std::env::temp_dir().join(format!("cg_yaml_test_{}", uuid::Uuid::new_v4()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("terrain_maps.yaml");
         std::fs::write(&path, EXISTING).unwrap();
         upsert_terrain_yaml_entry(
             &path, "island", "terrains/map_island.npy".to_string(),
-            10.0, 1000.0, 1000.0, 10.0, 200.0, 500.0, None, cells,
+            10.0, 1000.0, 1000.0, 10.0, 200.0, 500.0, None,
         ).unwrap();
         let text = std::fs::read_to_string(&path).unwrap();
         std::fs::remove_dir_all(&dir).ok();
         text
     }
 
+    /// 既存の同一IDブロックは重複追記されず、見出しコメントと settings を保ったまま置き換わる。
     #[test]
-    fn writes_initial_cells_from_editor_selection() {
-        let text = upsert(&[[1, 2], [3, 4]]);
-        assert!(text.contains("\n  initial_cells: [[1, 2], [3, 4]]\n"), "{text}");
-        // 見出しコメントと settings は保持する
+    fn replaces_existing_block_in_place() {
+        let text = upsert();
+        assert_eq!(text.matches("\nisland:\n").count(), 1, "{text}");
         assert!(text.starts_with("# island\n"), "{text}");
-        assert!(text.contains("    cell_size: 500\n"), "{text}");
-    }
-
-    #[test]
-    fn omits_initial_cells_key_when_empty() {
-        let text = upsert(&[]);
-        assert!(!text.contains("initial_cells"), "{text}");
         assert!(text.contains("    cell_size: 500\n"), "{text}");
     }
 }

@@ -211,8 +211,7 @@ public static class LodQA
         finally
         {
             Call(manager, "ClearAllCells");
-            foreach (string name in new[] { "ultraFarLandMat", "ultraFarLandMatDark" })
-                if (Field(manager, name) is Material material) Object.Destroy(material);
+            if (Field(manager, "ultraFarLandMat") is Material material) Object.Destroy(material);
             Object.Destroy(go);
         }
         results.Add("Overview: same-revision session switch, interrupted generation/resume, map dimensions, empty land and stale-result rejection");
@@ -404,10 +403,10 @@ public static class LodQA
         camera.transform.rotation = Quaternion.Euler(45,0,0);
         object normal = Static("DrawLodEvaluator","EvaluateBySize",10f,500f,50f,Lod(1),true,true);
         Check((int)normal == 2, "Orthographic distance incorrectly alters projected size");
-        object sets = Static("LodConfig","CalculateCellSets",Vector2Int.zero,Vector3.zero,camera.transform.position,camera.transform.forward,null,500f,100000,100000,new HashSet<Vector2Int>());
+        object sets = Static("LodConfig","CalculateCellSets",Vector2Int.zero,Vector3.zero,camera.transform.position,camera.transform.forward,null,500f,100000,100000);
         var cells = (List<Vector2Int>)Field(sets,"farCells");
         Check(cells.Count > 0 && cells.Count <= 81,"Residency budget exceeded");
-        Check(cells.Count == ((List<Vector2Int>)Field(sets,"dynamicCells")).Count,"Ownership still changes terrain detail");
+        Check(cells.Count == ((List<Vector2Int>)Field(sets,"dynamicCells")).Count,"Tier sets diverged from the single resident set");
         results.Add($"View: zoom-only and orthographic decisions passed; {cells.Count}/81 resident cells");
     }
     static IEnumerator CacheLifetime()

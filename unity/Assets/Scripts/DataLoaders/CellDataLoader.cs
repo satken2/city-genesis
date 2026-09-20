@@ -86,9 +86,9 @@ public class CellDataLoader : MonoBehaviour
     {
         if (GameStateManager.Instance.IsGameStarted())
         {
-            // 開放済みセルリストを取得してからセルロードを開始する。
-            // 開放状態の表示は、このリスト取得後に有効になる。
-            RenderWorkScheduler.Start(this, FetchAcquiredCellsThenLoad(), "CellDataLoader");
+            // 海岸線・水面・川を先に取得してからセルロードを開始する。
+            // 港湾の岸壁メッシュ判定や敷設中パスの川横断判定が、建物・道路より先に必要とする。
+            RenderWorkScheduler.Start(this, FetchCoastlineThenLoad(), "CellDataLoader");
         }
         else
         {
@@ -96,11 +96,11 @@ public class CellDataLoader : MonoBehaviour
         }
     }
 
-    private IEnumerator FetchAcquiredCellsThenLoad()
+    private IEnumerator FetchCoastlineThenLoad()
     {
         if (terrainManager != null)
         {
-            yield return terrainManager.FetchAcquiredCells();
+            yield return terrainManager.FetchCoastline();
         }
         OnCameraCellChanged(new Vector2Int(0, -1));
     }
@@ -264,11 +264,7 @@ public class CellDataLoader : MonoBehaviour
             ? Camera.main.transform.forward
             : Vector3.forward;
 
-        HashSet<Vector2Int> acquiredCells = terrainManager != null
-            ? terrainManager.GetAcquiredCells()
-            : null;
-
-        return LodConfig.CalculateCellSets(currentCenterCell, viewCenterPosition, cameraPosition, cameraForward, terrainManager, cellSize, mapWidth, mapHeight, acquiredCells);
+        return LodConfig.CalculateCellSets(currentCenterCell, viewCenterPosition, cameraPosition, cameraForward, terrainManager, cellSize, mapWidth, mapHeight);
     }
 
     private HashSet<Vector2Int> CalculateTierChangedCells(LodCellSets cellSets, bool isForce)
@@ -655,7 +651,6 @@ public class CellDataLoader : MonoBehaviour
     /// <summary>
     /// 強制的に現在のセルのデータを更新する (Button OnClickなど)。
     /// 全オブジェクトを破棄してから再ロードを実行する。
-    /// 開放済みセルリストを再取得してからLOD計算を行う。
     /// </summary>
     public void ForceUpdateCurrentCells()
     {
@@ -697,8 +692,7 @@ public class CellDataLoader : MonoBehaviour
 
     /// <summary>
     /// すべてのデータを完全にクリアして再取得する。
-    /// 開放済みセルリストを再取得してからLOD計算を行うため、
-    /// Dynamicティアの判定が正しく行われる。
+    /// 海岸線・水面・川もセッション開始時と同じ手順で取り直してからLOD計算を行う。
     /// </summary>
     public void ForceReloadAllData()
     {
@@ -714,12 +708,11 @@ public class CellDataLoader : MonoBehaviour
     {
         ClearAllManagerData();
 
-        // ClearAllManagerData で acquiredCells もクリアされるため、
-        // 再取得しないと CalculateLodCellSets で全セルが未開放扱いになり
-        // Dynamic ティアに昇格しない。
+        // ClearAllManagerData が海岸線・水面・川のストアも空にするため、
+        // 建物・道路の生成より先に取り直す(港湾の岸壁判定と川横断判定が参照する)。
         if (terrainManager != null)
         {
-            yield return terrainManager.FetchAcquiredCells();
+            yield return terrainManager.FetchCoastline();
         }
 
         LodCellSets cellSets = CalculateLodCellSets();

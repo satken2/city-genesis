@@ -29,7 +29,6 @@
       "river_crossing": "横穿河流",
       "multiple_intersections": "多次交叉",
       "elevation_conflict": "立交冲突",
-      "terrain_not_acquired": "未开放地形",
       "other": "其他"
     }
   }

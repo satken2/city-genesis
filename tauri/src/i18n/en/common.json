@@ -56,7 +56,6 @@
     "unknownResource": "Unknown Resource"
   },
   "errors": {
-    "TERRAIN_NOT_ACQUIRED": "This area has not been surveyed yet. Please unlock the terrain cell first.",
     "UNKNOWN_ERROR": "An error occurred.",
     "CREATEPATH_INVALID_GEOMETRY": "The path geometry is invalid. Please check the start and end points.",
     "CREATEPATH_OUTSIDE_COASTLINE": "Paths cannot be placed outside the coastline.",

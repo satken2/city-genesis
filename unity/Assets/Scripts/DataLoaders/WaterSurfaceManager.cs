@@ -72,8 +72,8 @@ public class WaterSurfaceManager : MonoBehaviour
 
     /// <summary>
     /// バックエンドから水面ポリゴンを取得し、水面メッシュを再生成する。
-    /// セッション開始時・全量リロード時(ForceReloadAllData → FetchAcquiredCells → FetchCoastline)
-    /// から呼ばれる。呼び出しのたびに既存の水面を破棄してから作り直す(冪等)。
+    /// セッション開始時・全量リロード時(TerrainManager.FetchCoastline)から呼ばれる。
+    /// 呼び出しのたびに既存の水面を破棄してから作り直す(冪等)。
     /// </summary>
     public IEnumerator LoadAndBuild()
     {

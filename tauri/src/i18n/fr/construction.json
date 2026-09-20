@@ -100,7 +100,6 @@
       "overlap_parcel": "Chevauche une parcelle existante",
       "overlap_city_building": "Chevauche une installation municipale ou un site de construction planifié",
       "overlap_path": "Chevauche une route",
-      "terrain_not_acquired": "Impossible de construire sur un terrain non débloqué",
       "incompatible_parcel_type": "Ce bâtiment ne peut pas être construit sur ce type de terrain",
       "generic": "Construction impossible à cet endroit"
     },

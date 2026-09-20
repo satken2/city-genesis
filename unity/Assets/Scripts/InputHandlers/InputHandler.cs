@@ -33,7 +33,6 @@ public static class InputMode
     public const int MODE_PARCEL_CREATION_SPLIT = 6;
     public const int MODE_EDIT = 7;
     public const int MODE_ZONE_EDIT = 8;
-    public const int MODE_UNLOCK_CELL = 9;
     public const int MODE_PARCEL_SHAPE_EDIT = 10;
     public const int MODE_SET_GRID = 11;
     public const int MODE_EDIT_RESOURCE = 12;
@@ -74,7 +73,6 @@ public static class InputModePreset
     public const int PARCEL_CREATION_PATH = 5;
     public const int PARCEL_CREATION_SPLIT = 6;
     public const int ZONE_EDIT = 7;
-    public const int UNLOCK_CELL = 8;
     public const int PARCEL_SHAPE_EDIT = 9;
     public const int SET_GRID = 10;
     public const int EDIT_RESOURCE = 11;
@@ -1126,16 +1124,6 @@ public class InputHandler : MonoBehaviour
                 SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
                 SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
                 Debug.Log("InputHandler: 地区編集モードプリセットを設定しました");
-                break;
-
-            case InputModePreset.UNLOCK_CELL:
-                SetMode(InputObjectType.TERRAIN, InputMode.MODE_UNLOCK_CELL);
-                SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
-                SetMode(InputObjectType.PATH, InputMode.MODE_NONE);
-                SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
-                SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
-                SetMode(InputObjectType.ZONE, InputMode.MODE_NONE);
-                Debug.Log("InputHandler: 地形セル開放モードプリセットを設定しました");
                 break;
 
             case InputModePreset.PARCEL_SHAPE_EDIT:

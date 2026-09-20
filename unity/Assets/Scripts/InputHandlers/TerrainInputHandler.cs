@@ -41,9 +41,6 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
     // RoadPlanManagerへの参照
     private RoadPlanManager roadPlanManager;
 
-    // TerrainManagerへの参照
-    private TerrainManager terrainManager;
-
     // BuildingPlanManagerへの参照(直接配置のホバーゴースト用。毎フレーム検索を避けキャッシュする)
     private BuildingPlanManager buildingPlanManager;
 
@@ -77,13 +74,6 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         if (roadPlanManager == null)
         {
             Debug.LogError("RoadPlanManagerが見つかりません");
-        }
-
-        // TerrainManagerの自動検索
-        terrainManager = FindAnyObjectByType<TerrainManager>();
-        if (terrainManager == null)
-        {
-            Debug.LogError("TerrainManagerが見つかりません");
         }
     }
 
@@ -185,9 +175,6 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
                 break;
             case InputMode.MODE_ZONE_EDIT:
                 HandleZoneEditTerrainClick();
-                break;
-            case InputMode.MODE_UNLOCK_CELL:
-                HandleUnlockCellClick(clickPosition);
                 break;
             case InputMode.MODE_PARCEL_SHAPE_EDIT:
                 {
@@ -541,37 +528,6 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
     {
         int hoveredZoneId = InputHandler.Instance != null ? InputHandler.Instance.HoveredZoneId : -1;
         ZoneEditContext.Instance?.SelectZone(hoveredZoneId > 0 ? hoveredZoneId : 0);
-    }
-
-    /// <summary>
-    /// 地形セル開放モード時のクリック処理。
-    /// クリック位置からセル座標を計算し、開放済みかどうかを判定してIPCでUIに通知する。
-    /// </summary>
-    private void HandleUnlockCellClick(Vector3 position)
-    {
-        if (terrainManager == null)
-        {
-            Debug.LogError("TerrainManagerが見つかりません");
-            return;
-        }
-
-        float cellSize = TerrainManager.CellSize;
-        int cellX = Mathf.FloorToInt(position.x / cellSize);
-        int cellZ = Mathf.FloorToInt(position.z / cellSize);
-
-        // クリックしたTerrainタイルのUnityセル座標で直接開放済みかどうかを判定する。
-        // バックエンドセルへの変換を介さないことで、座標系のずれや
-        // 1バックエンドセルが複数Unityセルを覆う場合の曖昧さを排除する。
-        Vector2Int unityCell = new Vector2Int(cellX, cellZ);
-        bool alreadyAcquired = terrainManager.IsCellAcquired(unityCell);
-
-        // UI側はバックエンド座標系（非負）でセルを扱うため、
-        // クリック位置から直接バックエンドセルを計算して送信する。
-        Vector2Int backendCell = terrainManager.WorldPositionToBackendCell(position);
-
-        Debug.Log($"TerrainInputHandler: セル選択 Unity=({cellX},{cellZ}) Backend=({backendCell.x},{backendCell.y}) - 開放済み={alreadyAcquired} (loaded={terrainManager.IsAcquiredCellsLoaded}, count={terrainManager.AcquiredCellsCount})");
-
-        IpcClient.Instance?.EmitUnlockCellSelect(backendCell.x, backendCell.y, alreadyAcquired);
     }
 
     private void ShowMarker(Vector3 position)

@@ -24,7 +24,6 @@ public class IpcViewCoordinator : MonoBehaviour
     {
         { "terrain", "default" },
         { "grid", "hidden" },
-        { "cell", "hidden" },
         { "road", "default" },
         { "building", "default" },
         { "parcel", "border" },
@@ -72,7 +71,6 @@ public class IpcViewCoordinator : MonoBehaviour
         { "road", ("default", null, "plan") },
         { "parcel", ("hidden", null, null) },
         { "district", ("hidden", null, null) },
-        { "cell", ("hidden", null, null) },
         { "prop", ("visible", null, null) },
         { "transit", ("hidden", null, null) },
         { "resource", ("hidden", null, null) },
@@ -164,10 +162,6 @@ public class IpcViewCoordinator : MonoBehaviour
 
             case "grid":
                 ApplyGridMode(mode);
-                break;
-
-            case "cell":
-                ApplyCellMode(mode);
                 break;
 
             case "road":
@@ -283,10 +277,6 @@ public class IpcViewCoordinator : MonoBehaviour
                 ApplyLandEditPreset("zone_color", "default", "");
                 break;
 
-            case "STATE_UNLOCK_CELL":
-                ApplyUnlockCellPreset();
-                break;
-
             case "STATE_EDIT_TRANSIT":
                 ApplyTransitPreset();
                 break;
@@ -373,7 +363,7 @@ public class IpcViewCoordinator : MonoBehaviour
 
     /// <summary>
     /// 道路・線路・インフラ・建物の敷設/建設中の表示。
-    /// 計画中の構造物と、位置決めの手がかりになるもの(区画・地区・セル・等高線)をすべて出し、
+    /// 計画中の構造物と、位置決めの手がかりになるもの(区画・地区・等高線)をすべて出し、
     /// 視界を遮るプロップだけを消す。区画の色モードだけは呼び出し側が決める
     /// (建物建設=建設可能な区画の色分け、それ以外=境界線)。
     /// </summary>
@@ -383,14 +373,13 @@ public class IpcViewCoordinator : MonoBehaviour
         ForceLayer("road", "default", null, "plan");
         ForceLayer("building", "default", null, "plan");
         ForceLayer("district", "border_icon");
-        ForceLayer("cell", "boundaries");
         ForceLayer("prop", "hidden");
         // 等高線だけONにする。地形の色モード(標高色分け等)はユーザーの選択を尊重して触らない。
         ForceLayer("terrain", _layerModes["terrain"], "contour_on");
     }
 
     /// <summary>
-    /// 地区編集・土地区画編集中の表示。区画・地区・セルを出して、
+    /// 地区編集・土地区画編集中の表示。区画・地区を出して、
     /// どの区画がどの地区に属するかを地表で確認できるようにする。
     /// 道路・建物の色モードとフラグは呼び出し側が決める
     /// (地区編集=道路だけ地区色分け+計画中OFF、区画編集=通常表示+計画中ON)。
@@ -401,20 +390,6 @@ public class IpcViewCoordinator : MonoBehaviour
         ForceLayer("road", roadMode, null, flags);
         ForceLayer("building", buildingMode, null, flags);
         ForceLayer("district", "border_icon");
-        ForceLayer("cell", "boundaries");
-    }
-
-    /// <summary>
-    /// 地形セル開放中の表示。開放単位であるセルと、その範囲の目安になる地区を出す。
-    /// 現況の街並みだけを見せたいので計画中の表示はOFF、区画も畳む。
-    /// </summary>
-    private void ApplyUnlockCellPreset()
-    {
-        ForceLayer("parcel", "hidden");
-        ForceLayer("road", "default", null, "");
-        ForceLayer("building", "default", null, "");
-        ForceLayer("district", "border_icon");
-        ForceLayer("cell", "boundaries");
     }
 
     /// <summary>
@@ -530,7 +505,6 @@ public class IpcViewCoordinator : MonoBehaviour
         {
             case "terrain": ApplyTerrainMode(mode, subMode); break;
             case "grid": ApplyGridMode(mode); break;
-            case "cell": ApplyCellMode(mode); break;
             case "road": ApplyRoadMode(mode, subMode, flags); break;
             case "building": ApplyBuildingMode(mode, subMode, flags); break;
             case "parcel": ApplyParcelMode(mode, subMode); break;
@@ -600,21 +574,6 @@ public class IpcViewCoordinator : MonoBehaviour
         // グリッドは独自のシステムで管理される。
         // 現状はログのみ。GridOverlayコンポーネント等への通知は別途実装。
         Debug.Log($"IpcViewCoordinator: Grid mode -> {mode}");
-    }
-
-    /// <summary>
-    /// セルレイヤー。boundaries で未開放セルの暗色表示と開放済みセル境界の点線をまとめて出す
-    /// (どちらも TerrainManager の未開放オーバーレイ機構で、個別には切り替えない)。
-    /// </summary>
-    private void ApplyCellMode(string mode)
-    {
-        var tm = FindAnyObjectByType<TerrainManager>();
-        if (tm == null)
-        {
-            Debug.LogWarning("IpcViewCoordinator: TerrainManager not found");
-            return;
-        }
-        tm.SetUnlockOverlayVisible(mode == "boundaries");
     }
 
     private void ApplyRoadMode(string mode, string subMode, string flags)

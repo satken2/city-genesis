@@ -56,7 +56,6 @@
     "unknownResource": "未知資源"
   },
   "errors": {
-    "TERRAIN_NOT_ACQUIRED": "此區域尚未勘查。請先解鎖對應的地形單元。",
     "UNKNOWN_ERROR": "發生錯誤。",
     "CREATEPATH_INVALID_GEOMETRY": "路徑形狀無效。請確認起點與終點。",
     "CREATEPATH_OUTSIDE_COASTLINE": "無法在海岸線之外鋪設路徑。",

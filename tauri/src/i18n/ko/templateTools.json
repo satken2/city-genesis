@@ -29,7 +29,6 @@
       "river_crossing": "강 횡단",
       "multiple_intersections": "여러 번 교차",
       "elevation_conflict": "입체교차 충돌",
-      "terrain_not_acquired": "미개방 지형",
       "other": "기타"
     }
   }

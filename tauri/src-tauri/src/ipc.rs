@@ -551,9 +551,6 @@ pub async fn handle_incoming_message(
         "edit_transit:update_stops" => {
             let _ = app.emit("edit_transit:update_stops", envelope.payload);
         }
-        "unlock_cell:select_cell" => {
-            let _ = app.emit("unlock_cell:select_cell", envelope.payload);
-        }
         "edit_zone:selected" => {
             let _ = app.emit("edit_zone:selected", envelope.payload);
         }

@@ -29,7 +29,6 @@
       "river_crossing": "川を横断",
       "multiple_intersections": "複数回交差",
       "elevation_conflict": "立体交差の衝突",
-      "terrain_not_acquired": "未開放の地形",
       "other": "その他"
     }
   }

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 using Newtonsoft.Json;
-using TMPro;
 
 /// <summary>
 /// バックエンドAPIから3段階LOD（遠景/近景/超近景）の標高マップを取得し、Terrainを配置するマネージャー。
@@ -67,43 +66,6 @@ public class TerrainManager : BaseApiDataManager
     private const float SeaFloorDepthSpan = 200f;
 
     /// <summary>
-    /// 未開放セルの暗色表示が有効かどうか。
-    /// true の場合、未開放セルの地形(per-cellタイル・UltraFar陸地メッシュとも)は
-    /// 通常のテクスチャ付き地面に unacquiredTint を乗算した「少し暗い地面」で描画される。
-    /// false の場合は全域が通常色になる。
-    /// </summary>
-    public bool IsUnlockOverlayActive { get; private set; } = false;
-
-    [Header("セル境界線・座標ラベル表示")]
-    [SerializeField] private float cellLabelYOffset = 2.0f;
-    [SerializeField] private float cellLabelFontSize = 3.0f;
-    [SerializeField] private Color cellLabelColor = Color.white;
-
-    /// <summary>
-    /// セル境界線と座標ラベルの表示が有効かどうか。
-    /// SetUnlockOverlayVisible が IsUnlockOverlayActive と一括で切り替える。
-    /// </summary>
-    public bool ShowCellBordersAndLabels { get; private set; } = false;
-
-    // セルオーバーレイ（境界線）を OverlayMeshRenderer で描画するための状態
-    private GameObject cellOverlayMeshObj;
-    private OverlayMeshRenderer cellOverlayRenderer;
-    /// <summary>境界線セグメントのワールド座標キャッシュ。acquiredCells 更新時に再構築する。</summary>
-    private List<(Vector3, Vector3)> borderSegments3D = new List<(Vector3, Vector3)>();
-    private bool borderSegmentsDirty = true;
-
-    // セルオーバーレイメッシュの再構築を最小化するための状態。
-    // 境界線の点線ジオメトリはワールド固定幅でカメラに依存しないため、
-    // 入力・カメラが動かないアイドル時に毎フレーム作り直す必要がない。
-    // メッシュを一度構築したらフラグを立て、境界の変化（borderSegmentsDirty）や
-    // 表示切り替え（ShowCellBordersAndLabels の変化）があったフレームだけ再構築する。
-    private bool cellOverlayMeshBuilt = false;
-    private bool cellOverlayLastShowBorders = false;
-
-    private Dictionary<Vector2Int, TextMeshPro> cellLabelObjects = new Dictionary<Vector2Int, TextMeshPro>();
-    private TMP_FontAsset cachedFontAsset;
-
-    /// <summary>
     /// dynamicティアの各セルのversionキャッシュ。
     /// 差分更新時にバックエンドのX-Cell-Versionと比較し、変更があった場合のみ再描画する。
     /// </summary>
@@ -113,38 +75,6 @@ public class TerrainManager : BaseApiDataManager
     /// デバッグモードの有効状態。MinimapOverlay などから参照される。
     /// </summary>
     public bool IsDebugMode { get; set; } = false;
-
-    /// <summary>
-    /// 未開放セルの暗色表示と、開放済みセル境界の点線・座標ラベルをまとめて表示/非表示にする。
-    /// Tauriの表示オプション「セル」レイヤー(view:change_view の layer=cell)から
-    /// IpcViewCoordinator.ApplyCellMode 経由で呼ばれる唯一の切替口。
-    /// 全 Terrain タイルのティントと境界線メッシュを再構築して即座に反映する。
-    /// </summary>
-    public void SetUnlockOverlayVisible(bool visible)
-    {
-        if (IsUnlockOverlayActive == visible) return;
-        IsUnlockOverlayActive = visible;
-        ShowCellBordersAndLabels = visible;
-        RefreshAllUnlockOverlays();
-        RefreshAllCellOverlays();
-    }
-
-    /// <summary>
-    /// 全 Terrain タイルに対して、現在の IsUnlockOverlayActive 状態に基づき
-    /// 未開放セルの濃色表示を適用または解除する。
-    /// </summary>
-    private void RefreshAllUnlockOverlays()
-    {
-        foreach (var kvp in terrainTiles)
-        {
-            if (kvp.Value != null)
-            {
-                ApplyUnlockOverlayToTerrain(kvp.Key, kvp.Value);
-            }
-        }
-        // 超遠景の陸地メッシュにも濃色表示状態を反映する(未開放サブメッシュの色を切り替える)。
-        RefreshUltraFarLandOverlay();
-    }
 
     [Header("Material Settings")]
     [SerializeField] private TerrainLayer[] customTerrainLayers;
@@ -165,13 +95,6 @@ public class TerrainManager : BaseApiDataManager
     /// ビルドに確実に含めるため SerializeField で直接参照する(未設定時は Shader.Find フォールバック)。
     /// </summary>
     [SerializeField] private Shader ultraFarLandShader;
-    /// <summary>
-    /// 未開放セルを暗くする乗算ティント。オーバーレイ表示(IsUnlockOverlayActive)が有効なとき、
-    /// 通常のテクスチャ付き地面にこの色を乗算して「少し暗い地面」にする。
-    /// per-cellタイル(地形シェーダーの _TerrainTint)と UltraFar 陸地メッシュの未開放サブメッシュ
-    /// (_BaseColor)の両方で共通に使い、ティア境界でも未開放の暗さが揃うようにする。
-    /// </summary>
-    [SerializeField] private Color unacquiredTint = new Color(0.55f, 0.60f, 0.55f, 1f);
     /// <summary>UltraFar 陸地メッシュのグリッド間隔(m)。小さいほど海岸線・起伏が細かいが頂点が増える。</summary>
     [SerializeField] private float ultraFarGridStep = 80f;
     /// <summary>UltraFar 陸地を海面板の上に保つための頂点Yオフセット(m)。</summary>
@@ -316,33 +239,6 @@ public class TerrainManager : BaseApiDataManager
     // === 設定（APIから遅延読み込み） ===
     private TerrainSettingsData terrainSettings;
 
-    // === 開放済みセル管理 ===
-    /// <summary>
-    /// バックエンドで「開放（acquire）済み」と判定されたセルのインデックスセット。
-    /// 土地の開放状態の表示に使う。取得解像度や接地の可否には使わない。
-    /// </summary>
-    private HashSet<Vector2Int> acquiredCells = new HashSet<Vector2Int>();
-    /// <summary>
-    /// 開放済みセルリストがバックエンドから取得済みかどうか。
-    /// 未取得の場合は安全のため全セルを未開放とみなす。
-    /// </summary>
-    private bool acquiredCellsLoaded = false;
-
-    // === 開放済みセル取得用のAPIレスポンス型 ===
-    [Serializable]
-    private class AcquiredCellsResponse
-    {
-        public List<AcquiredCellItem> cells;
-    }
-
-    [Serializable]
-    private class AcquiredCellItem
-    {
-        public int cell_x;
-        public int cell_z;
-    }
-
-
     private bool settingsLoaded = false;
     private bool settingsLoading = false;
 
@@ -413,10 +309,9 @@ public class TerrainManager : BaseApiDataManager
     // 海(陸地外)はメッシュを作らず、既存の海面板がそのまま海を担う。
     private GameObject ultraFarLandObject;
     private Mesh ultraFarLandMesh;
-    private Material ultraFarLandMat;     // 開放済み(通常色)サブメッシュ用
-    private Material ultraFarLandMatDark; // 未開放(暗め)サブメッシュ用
+    private Material ultraFarLandMat;
 
-    /// <summary>per-cellタイル用地形シェーダー(Custom/DepthOffsetTerrainLit)の乗算ティント。未開放セルの暗色化に使う。</summary>
+    /// <summary>地形シェーダー(Custom/DepthOffsetTerrainLit / DepthOffsetSimpleLitFar)の乗算ティント。通常表示では白。</summary>
     private static readonly int TerrainTintId = Shader.PropertyToID("_TerrainTint");
 
     // === ロード済みセルマスク(UltraFar沈み込み用) ===
@@ -475,7 +370,6 @@ public class TerrainManager : BaseApiDataManager
         // インスタンスを静的キャッシュに登録する。
         // これにより数千回/フレームの GetGroundHeight 呼び出しが O(1) になる。
         Utils.RegisterTerrainManager(this);
-        EnsureCellOverlayRenderer();
     }
 
     private void OnDestroy()
@@ -486,18 +380,11 @@ public class TerrainManager : BaseApiDataManager
         {
             Utils.RegisterTerrainManager(null);
         }
-        if (cellOverlayMeshObj != null)
-        {
-            Destroy(cellOverlayMeshObj);
-            cellOverlayMeshObj = null;
-            cellOverlayRenderer = null;
-        }
     }
 
     private void Update()
     {
         UpdateCameraClipDistance();
-        UpdateCellOverlayIfActive();
         UpdateLoadedCellMask();
 
         // 遅延破棄プールの処理：TERRAIN_DESTROY_DELAY 経過後に実際のDestroyを行う。
@@ -534,11 +421,6 @@ public class TerrainManager : BaseApiDataManager
     private void Start()
     {
         Shader.SetGlobalFloat("_ShowContour", 0f);
-
-        // 暗色表示と境界線・ラベルは初期状態では非表示(UI側「セル」レイヤーの既定値 hidden と一致させる)。
-        RefreshAllUnlockOverlays();
-        RefreshAllCellOverlays();
-
     }
 
     private void UpdateCameraClipDistance()
@@ -832,9 +714,6 @@ public class TerrainManager : BaseApiDataManager
             HeightmapTextureManager.Instance?.MarkSurfaceChanged();
             UpdateNeighborsForAdjacents(cellIndex);
         }
-        // タイルの有無に関わらず記録を消す(全ティア失敗で None が記録されたままの
-        // セルの辞書エントリが、アンロード後も無際限に残るのを防ぐ)。
-        DestroyCellOverlay(cellIndex);
     }
 
     public override void ClearAllCells()
@@ -895,12 +774,6 @@ public class TerrainManager : BaseApiDataManager
         // 設定キャッシュをクリア（session.reset対応）
         terrainSettings = null;
         settingsLoaded = false;
-
-        // 開放済みセルキャッシュをクリア
-        ClearAcquiredCells();
-
-        // セル境界線・ラベルのクリア
-        ClearAllCellOverlays();
     }
 
     // ================================================================
@@ -999,7 +872,6 @@ public class TerrainManager : BaseApiDataManager
             if (batch.IsCanceled) yield break;
         } while (incomplete);
         foreach (var cell in updatedTerrainCellsThisLoad) UpdateNeighbors(cell);
-        borderSegmentsDirty = true;
         var updated = new List<Vector2Int>(updatedTerrainCellsThisLoad);
         updatedTerrainCellsThisLoad.Clear();
         OnAllTerrainLodLoaded?.Invoke(updated);
@@ -1102,23 +974,11 @@ public class TerrainManager : BaseApiDataManager
             return CatmullRomInterpolateArray(far, fx, fy, farCols, farRows) * verticalSpan - belowSeaSpan;
         };
 
-        // 開放済み判定。スレッド安全なスナップショットを参照する。未ロード時は全て開放扱い(濃色表示なし)。
-        HashSet<Vector2Int> acquiredSnapshot = GetAcquiredCells();
-        bool acquiredKnown = acquiredCellsLoaded;
-        float cs = CellSize;
-        Func<float, float, bool> isAcquired = (x, z) =>
-        {
-            if (!acquiredKnown) return true;
-            int ux = Mathf.FloorToInt(x / cs);
-            int uz = Mathf.FloorToInt(z / cs);
-            return acquiredSnapshot.Contains(new Vector2Int(ux, uz));
-        };
-
         float gridStep = ultraFarGridStep;
         float heightOffset = ultraFarHeightOffset;
 
         Task<UltraFarLandMeshBuilder.MeshData> task = Task.Run(() =>
-            UltraFarLandMeshBuilder.Build(mapWidth, mapHeight, gridStep, heightOffset, sampleHeight, isAcquired));
+            UltraFarLandMeshBuilder.Build(mapWidth, mapHeight, gridStep, heightOffset, sampleHeight));
         yield return WaitTask(task);
         if (batch.IsCanceled || epoch != clearEpoch || task.IsFaulted || task.IsCanceled || task.Result.vertices == null) yield break;
 
@@ -1143,9 +1003,7 @@ public class TerrainManager : BaseApiDataManager
         {
             mesh.SetUVs(0, md.uvs);
         }
-        mesh.subMeshCount = 2;
-        mesh.SetTriangles(md.trianglesAcquired, 0);   // サブメッシュ0 = 開放済み(通常色)
-        mesh.SetTriangles(md.trianglesUnacquired, 1); // サブメッシュ1 = 未開放(濃色表示対象)
+        mesh.SetTriangles(md.triangles, 0);
         // ビルダーが位置溶接済みのスムース法線を返す。RecalculateNormals は重複頂点を
         // 溶接しないためセル境界でファセット状の陰影になるので使わない。
         if (md.normals != null && md.normals.Count == md.vertices.Count)
@@ -1169,16 +1027,15 @@ public class TerrainManager : BaseApiDataManager
         MeshRenderer mr = go.AddComponent<MeshRenderer>();
 
         EnsureUltraFarLandMaterials();
-        mr.sharedMaterials = new Material[] { ultraFarLandMat, ultraFarLandMatDark };
+        mr.sharedMaterial = ultraFarLandMat;
 
         go.AddComponent<VisualTerrainObject>();
 
         ultraFarLandObject = go;
-        RefreshUltraFarLandOverlay();
         onCompleted();
 
         Debug.Log($"TerrainManager: Ultra-far land mesh built. verts={md.vertices.Count}, " +
-                  $"acquiredTris={md.trianglesAcquired.Count / 3}, unacquiredTris={md.trianglesUnacquired.Count / 3}");
+                  $"tris={md.triangles.Count / 3}");
     }
 
     /// <summary>
@@ -1204,12 +1061,11 @@ public class TerrainManager : BaseApiDataManager
     }
 
     /// <summary>
-    /// UltraFar 陸地メッシュ用の2マテリアル(開放済み=通常/未開放=暗め)を必要に応じて生成する。
+    /// UltraFar 陸地メッシュ用のマテリアルを必要に応じて生成する。
     /// シェーダーは Custom/DepthOffsetSimpleLitFar(Offset 4,4)で per-cell 地形・海面より奥に描画する。
     /// per-cell タイルと同じ地面テクスチャを、頂点のワールドXZ座標をUVとして同じタイリングで貼る。
     /// 草・土の手続き色、岩肌、法線ディテールとPBR照明はTerrainと共通の設定・HLSLを使う。
-    /// 色の設定は <see cref="RefreshUltraFarLandOverlay"/>、沈み込みマスクは
-    /// <see cref="UpdateLoadedCellMask"/> が担う。
+    /// 沈み込みマスクは <see cref="UpdateLoadedCellMask"/> が担う。
     /// </summary>
     private void EnsureUltraFarLandMaterials()
     {
@@ -1224,54 +1080,26 @@ public class TerrainManager : BaseApiDataManager
         if (ultraFarLandMat == null) ultraFarLandMat = new Material(sh) { name = "UltraFarLand" };
         else ultraFarLandMat.shader = sh;
 
-        if (ultraFarLandMatDark == null) ultraFarLandMatDark = new Material(sh) { name = "UltraFarLandDark" };
-        else ultraFarLandMatDark.shader = sh;
-
         // per-cell タイルと同じ地面テクスチャ・タイリングを適用する(UVはワールドXZ座標)。
         Texture2D diffuseTex = GetUltraFarDiffuseTexture(out Vector2 tileSize);
         if (diffuseTex != null)
         {
             ultraFarLandMat.SetTexture("_BaseMap", diffuseTex);
-            ultraFarLandMatDark.SetTexture("_BaseMap", diffuseTex);
 
             Vector4 tilingOffset = new Vector4(1f / tileSize.x, 1f / tileSize.y, 0f, 0f);
             ultraFarLandMat.SetVector("_BaseMap_ST", tilingOffset);
-            ultraFarLandMatDark.SetVector("_BaseMap_ST", tilingOffset);
         }
 
         ApplyTerrainMaterialSettings(ultraFarLandMat);
-        ApplyTerrainMaterialSettings(ultraFarLandMatDark);
         TerrainLayer groundLayer = customTerrainLayers != null && customTerrainLayers.Length > 0
             ? customTerrainLayers[0] : null;
-        float metallic = groundLayer != null ? groundLayer.metallic : defaultMetallic;
-        float smoothness = groundLayer != null ? groundLayer.smoothness : defaultSmoothness;
-        Color baseColor = diffuseTex != null ? Color.white : defaultTerrainColor;
-        foreach (Material material in new[] { ultraFarLandMat, ultraFarLandMatDark })
-        {
-            material.SetFloat("_GroundMetallic", metallic);
-            material.SetFloat("_Smoothness", smoothness);
-            material.SetColor("_BaseColor", baseColor);
-        }
+        ultraFarLandMat.SetFloat("_GroundMetallic", groundLayer != null ? groundLayer.metallic : defaultMetallic);
+        ultraFarLandMat.SetFloat("_Smoothness", groundLayer != null ? groundLayer.smoothness : defaultSmoothness);
+        ultraFarLandMat.SetColor("_BaseColor", diffuseTex != null ? Color.white : defaultTerrainColor);
 
         // ロード済みセルでの沈み込み量。判定マスクは UpdateLoadedCellMask が毎フレーム供給する。
         ultraFarLandMat.SetFloat("_FarGridStep", Mathf.Max(1f, ultraFarGridStep));
-        ultraFarLandMatDark.SetFloat("_FarGridStep", Mathf.Max(1f, ultraFarGridStep));
         ultraFarLandMat.SetFloat(FarSinkAmountId, ultraFarSinkAmount);
-        ultraFarLandMatDark.SetFloat(FarSinkAmountId, ultraFarSinkAmount);
-    }
-
-    /// <summary>
-    /// 未開放セルの暗色表示状態を UltraFar 陸地メッシュに反映する。
-    /// 開放済みサブメッシュは常に通常色(テクスチャ素の色)。未開放サブメッシュは IsUnlockOverlayActive
-    /// のとき unacquiredTint を乗算して「同じ地面テクスチャを少し暗くした」見た目、無効時は通常色にする。
-    /// </summary>
-    private void RefreshUltraFarLandOverlay()
-    {
-        if (ultraFarLandMat == null || ultraFarLandMatDark == null) return;
-
-        ultraFarLandMat.SetColor(TerrainTintId, Color.white);
-        ultraFarLandMatDark.SetColor(TerrainTintId,
-            IsUnlockOverlayActive ? unacquiredTint : Color.white);
     }
 
     /// <summary>
@@ -1288,7 +1116,7 @@ public class TerrainManager : BaseApiDataManager
     private void UpdateLoadedCellMask()
     {
         // マスクの利用者はUltraFarマテリアルのみ。設定未取得・マテリアル未生成なら何もしない。
-        if (terrainSettings == null || ultraFarLandMat == null || ultraFarLandMatDark == null) return;
+        if (terrainSettings == null || ultraFarLandMat == null) return;
 
         int w = GetCellsX();
         int h = GetCellsY();
@@ -1319,9 +1147,6 @@ public class TerrainManager : BaseApiDataManager
             ultraFarLandMat.SetTexture(LoadedCellMaskId, loadedCellMaskTex);
             ultraFarLandMat.SetVector(LoadedCellMaskParamsId, maskParams);
             ultraFarLandMat.SetVector(LoadedCellMaskTexelId, maskTexel);
-            ultraFarLandMatDark.SetTexture(LoadedCellMaskId, loadedCellMaskTex);
-            ultraFarLandMatDark.SetVector(LoadedCellMaskParamsId, maskParams);
-            ultraFarLandMatDark.SetVector(LoadedCellMaskTexelId, maskTexel);
         }
 
         // 現在ロード済み(可視)のタイルをマスクに書き込む。
@@ -1490,7 +1315,6 @@ public class TerrainManager : BaseApiDataManager
                             updatedTerrainCellsThisLoad.Add(cell);
                             active.succeeded = true;
                             OnTerrainTileReady?.Invoke(cell, terrainTiles[cell]);
-                            RefreshCellOverlay(cell);
                         }
                         catch (Exception ex) { Debug.LogException(ex); }
                     }
@@ -1565,8 +1389,8 @@ public class TerrainManager : BaseApiDataManager
         terrainComp.treeDistance = 1000f;
         terrainComp.treeCrossFadeLength = 200f;
         // ベースマップ切り替えを実質無効化する。デフォルト(1000m)のままだと、遠方のタイルが
-        // カスタムシェーダーではなくベースマップ用シェーダーで描画され、_TerrainTint(未開放の暗色化)や
-        // マクロバリエーション・深度Offsetが遠方タイルに適用されなくなるため。
+        // カスタムシェーダーではなくベースマップ用シェーダーで描画され、マクロバリエーションや
+        // 深度Offsetが遠方タイルに適用されなくなるため。
         terrainComp.basemapDistance = 100000f;
 
         // 旧→新タイルの差し替え(チラつき防止の要)。
@@ -1578,7 +1402,6 @@ public class TerrainManager : BaseApiDataManager
         Utils.InvalidateHeightCache();
 
         ApplyTerrainMaterial(terrainComp, tData);
-        ApplyUnlockOverlayToTerrain(cellIndex, terrainComp);
 
         TerrainCollider col = terrainGO.GetComponent<TerrainCollider>();
         if (col != null) col.terrainData = tData;
@@ -1799,102 +1622,11 @@ public class TerrainManager : BaseApiDataManager
     public IEnumerable<Vector2Int> BackendCellToUnityCells(Vector2Int backendCell)
     {
         // マップの最大幅・高さがセルサイズの偶数倍であることを利用し、
-        // 浮動小数点の境界値判定で生じる不要な隣接セルの誤解放（3x3化）を完全に排除する。
+        // 浮動小数点の境界値判定で1つのバックエンドセルが複数のUnityセル（3x3化）へ割れるのを完全に排除する。
         // バックエンドの非負セル座標から整数オフセットを差し引いた、唯一の対応するUnityセルインデックスを返す。
         int offsetX = Mathf.RoundToInt((GetMapWidth() / 2.0f) / GetCellSize());
         int offsetY = Mathf.RoundToInt((GetMapHeight() / 2.0f) / GetCellSize());
         yield return new Vector2Int(backendCell.x - offsetX, backendCell.y - offsetY);
-    }
-
-    // ================================================================
-    // 開放済みセル管理
-    // ================================================================
-
-    /// <summary>
-    /// 指定セルがバックエンドで開放済み（acquire済み）かどうかを判定する。
-    /// 開放済みリストが未ロードの場合は安全のため false を返す（未開放とみなす）。
-    /// </summary>
-    public bool IsCellAcquired(Vector2Int cellIndex)
-    {
-        return acquiredCellsLoaded && acquiredCells.Contains(cellIndex);
-    }
-
-    /// <summary>
-    /// 開放済みセルリストがバックエンドから取得済みかどうか。
-    /// </summary>
-    public bool IsAcquiredCellsLoaded => acquiredCellsLoaded;
-
-    /// <summary>
-    /// 現在保持している開放済みUnityセルの件数。
-    /// </summary>
-    public int AcquiredCellsCount => acquiredCells.Count;
-
-    /// <summary>
-    /// 開放済みセルのセットを返す。LodConfig などで LOD ティア計算に使用する。
-    /// リスト未ロード時は空のセットを返す。
-    /// </summary>
-    public HashSet<Vector2Int> GetAcquiredCells()
-    {
-        return new HashSet<Vector2Int>(acquiredCells);
-    }
-
-    /// <summary>
-    /// バックエンドから開放済みセル一覧を取得し、ローカルにキャッシュする。
-    /// セッション開始時やセーブデータロード後に呼ぶ必要がある。
-    /// </summary>
-    public IEnumerator FetchAcquiredCells()
-    {
-        yield return EnsureSettingsLoaded();
-        if (!settingsLoaded)
-        {
-            Debug.LogError("TerrainManager: Settings not loaded, cannot fetch acquired cells.");
-            yield break;
-        }
-
-        string error = null;
-
-        yield return ApiClient.Get<AcquiredCellsResponse>(
-            "/terrain/acquired-cells",
-            response =>
-            {
-                acquiredCells.Clear();
-                if (response.cells != null)
-                {
-                    foreach (var item in response.cells)
-                    {
-                        Vector2Int backendCell = new Vector2Int(item.cell_x, item.cell_z);
-                        foreach (var unityCell in BackendCellToUnityCells(backendCell))
-                        {
-                            acquiredCells.Add(unityCell);
-                        }
-                    }
-                }
-                acquiredCellsLoaded = true;
-            },
-            err => { error = err; }
-        );
-
-        if (!string.IsNullOrEmpty(error))
-        {
-            Debug.LogError($"TerrainManager: Failed to fetch acquired cells: {error}");
-        }
-        else
-        {
-            Debug.Log($"TerrainManager: Fetched {acquiredCells.Count} acquired cells.");
-            // 開放済みリストが更新されたら、既存のTerrainタイルの濃色表示状態を再描画する。
-            // セッションリロード後など、リストの内容が変わってもSplatmapが古いままになるのを防ぐ。
-            if (IsUnlockOverlayActive)
-            {
-                RefreshAllUnlockOverlays();
-                // セルデータのロード完了時に境界線の初期構築とラベル生成を即座に実行する。
-                RefreshAllCellOverlays();
-            }
-        }
-
-        // 海岸線（陸地境界ポリゴン）も同じセッション初期化のタイミングで取得しておく。
-        // 港湾（MODEL_PORT）の岸壁メッシュ生成で、底面のどの辺が海岸線に接しているかの
-        // 判定に使う（CoastlineStore に格納）。建物のロードより先に取得しておく必要がある。
-        yield return FetchCoastline();
     }
 
     /// <summary>
@@ -1950,16 +1682,6 @@ public class TerrainManager : BaseApiDataManager
     {
         public string type;
         public Newtonsoft.Json.Linq.JToken coordinates;
-    }
-
-    /// <summary>
-    /// 開放済みセルキャッシュをクリアする。
-    /// セッション終了時やリセット時に呼ぶ。
-    /// </summary>
-    public void ClearAcquiredCells()
-    {
-        acquiredCells.Clear();
-        acquiredCellsLoaded = false;
     }
 
     /// <summary>
@@ -2204,15 +1926,15 @@ public class TerrainManager : BaseApiDataManager
 
     /// <summary>
     /// タイルごとにクローンした materialTemplate を識別するための名前サフィックス。
-    /// _TerrainTint(未開放セルの暗色化)をタイル単位で独立に設定するため、
-    /// 共有マテリアル(アセット等)をそのまま materialTemplate に使ってはいけない。
+    /// マテリアルパラメータをタイル単位で設定するため、共有マテリアル(アセット等)を
+    /// そのまま materialTemplate に使うとアセット本体を書き換えてしまう。
     /// </summary>
     private const string TILE_MATERIAL_SUFFIX = " (TileInstance)";
 
     /// <summary>
     /// TerrainのmaterialTemplateを、Z-fighting防止用の Custom/DepthOffsetTerrainLit(Offset 1,1)に
     /// 差し替える。共有マテリアルは必ずクローンして「タイルごとの個別インスタンス」にする
-    /// (_TerrainTint をタイル単位で変えるため)。クローン済みかは名前サフィックスで識別し、
+    /// (アセット本体の書き換えを防ぐため)。クローン済みかは名前サフィックスで識別し、
     /// 再適用時の二重クローンを避ける。
     /// </summary>
     private void ApplyTerrainOffsetMaterial(Terrain terrain)
@@ -2257,6 +1979,9 @@ public class TerrainManager : BaseApiDataManager
     private void ApplyTerrainMaterialSettings(Material material)
     {
         if (material == null) return;
+
+        // 乗算ティントは常に白(=素の地形色)。クローン元マテリアルが白以外を持っていても打ち消す。
+        material.SetColor(TerrainTintId, Color.white);
 
         material.SetFloat(TerrainMacroVariationStrengthId, terrainMacroVariationStrength);
         material.SetFloat(TerrainMacroVariationScaleId, Mathf.Max(1f, terrainMacroVariationScale));
@@ -2379,22 +2104,6 @@ public class TerrainManager : BaseApiDataManager
         terrainData.terrainLayers = new TerrainLayer[] { normalLayer };
     }
 
-    /// <summary>
-    /// 指定セルの Terrain に対して、未開放セルの暗色表示状態を適用する。
-    /// IsUnlockOverlayActive が true かつセルが未開放の場合、タイルの materialTemplate の
-    /// 乗算ティント(_TerrainTint)を unacquiredTint にして、通常のテクスチャ付き地面を少し暗くする。
-    /// それ以外は白(ティントなし=通常色)に戻す。
-    /// materialTemplate は ApplyTerrainOffsetMaterial がタイルごとにクローンした個別インスタンスなので、
-    /// タイル単位で独立に色を変えられる。
-    /// </summary>
-    private void ApplyUnlockOverlayToTerrain(Vector2Int cellIndex, Terrain terrain)
-    {
-        if (terrain == null || terrain.materialTemplate == null) return;
-
-        bool useDark = IsUnlockOverlayActive && !IsCellAcquired(cellIndex);
-        terrain.materialTemplate.SetColor(TerrainTintId, useDark ? unacquiredTint : Color.white);
-    }
-
     [ContextMenu("Refresh Terrain Materials")]
     public void RefreshAllTerrainMaterials()
     {
@@ -2403,254 +2112,8 @@ public class TerrainManager : BaseApiDataManager
             if (kvp.Value != null)
             {
                 ApplyTerrainMaterial(kvp.Value, kvp.Value.terrainData);
-                ApplyUnlockOverlayToTerrain(kvp.Key, kvp.Value);
             }
         }
-
-        // UltraFar は Terrain ではなく陸地メッシュなので、マテリアル色の濃色表示のみ反映する。
-        RefreshUltraFarLandOverlay();
-    }
-
-    // ================================================================
-    // セル境界線・座標ラベル描画
-    // ================================================================
-
-    /// <summary>
-    /// 全ロード済みセルの境界線・座標ラベルを、現在の表示設定に応じて更新する。
-    /// </summary>
-    private void RefreshAllCellOverlays()
-    {
-        foreach (var cell in loadedCells)
-        {
-            RefreshCellOverlay(cell);
-        }
-        borderSegmentsDirty = true;
-    }
-
-    /// <summary>
-    /// 指定セルの座標ラベルを、現在の表示設定に応じて生成または破棄する。
-    /// 境界線は UpdateCellOverlayIfActive → RebuildBorderSegments で一括管理するため、ここでは扱わない。
-    /// </summary>
-    private void RefreshCellOverlay(Vector2Int cellIndex)
-    {
-        if (ShowCellBordersAndLabels)
-        {
-            EnsureCellLabel(cellIndex);
-        }
-        else
-        {
-            DestroyCellOverlay(cellIndex);
-        }
-        // 新しい地形タイルがロード・準備完了した際、高精度の地形に境界線の高さを追従させるため、再構築フラグを立てる。
-        borderSegmentsDirty = true;
-    }
-
-    /// <summary>
-    /// 指定セルの座標ラベルを破棄する。
-    /// </summary>
-    private void DestroyCellOverlay(Vector2Int cellIndex)
-    {
-        if (cellLabelObjects.TryGetValue(cellIndex, out TextMeshPro labelTMP) && labelTMP != null)
-        {
-            Destroy(labelTMP.gameObject);
-            cellLabelObjects.Remove(cellIndex);
-        }
-    }
-
-    /// <summary>
-    /// 全セルの境界線と座標ラベルを破棄する。
-    /// </summary>
-    private void ClearAllCellOverlays()
-    {
-        borderSegments3D.Clear();
-        borderSegmentsDirty = true;
-
-        foreach (var kvp in cellLabelObjects)
-        {
-            if (kvp.Value != null) Destroy(kvp.Value.gameObject);
-        }
-        cellLabelObjects.Clear();
-
-        if (cellOverlayRenderer != null) cellOverlayRenderer.ClearMesh();
-    }
-
-    // ================================================================
-    // セルオーバーレイ（OverlayMeshRenderer 版）
-    // ================================================================
-
-    private void EnsureCellOverlayRenderer()
-    {
-        if (cellOverlayMeshObj != null) return;
-        cellOverlayMeshObj = new GameObject("TerrainCellOverlayMesh");
-        DontDestroyOnLoad(cellOverlayMeshObj);
-        cellOverlayRenderer = cellOverlayMeshObj.AddComponent<OverlayMeshRenderer>();
-        Material mat = new Material(Shader.Find("Custom/OverlayLine"));
-        cellOverlayRenderer.Initialize(mat);
-    }
-
-    /// <summary>
-    /// 毎フレーム呼び出し。IsUnlockOverlayActive のとき、開放済みセルの外枠線を OverlayMeshRenderer で描画する。
-    /// 未開放セルの暗色表現は、各 Terrain タイルの乗算ティント(_TerrainTint)と、
-    /// 超遠景陸地メッシュの未開放サブメッシュのティント乗算によって表現するため、ここでの半透明ポリゴンの描画は不要となる。
-    ///
-    /// 境界線の点線ジオメトリはワールド固定幅でカメラに依存しないため、一度構築したメッシュは
-    /// そのまま描画され続ける。毎フレーム同じメッシュを作り直して GPU に再アップロードするのを避けるため、
-    /// 境界の変化(borderSegmentsDirty)や表示切り替え(ShowCellBordersAndLabels の変化)があった
-    /// フレームだけ再構築する。カメラ静止時に無駄な再構築が走らないようにする最適化。
-    /// </summary>
-    private void UpdateCellOverlayIfActive()
-    {
-        if (!IsUnlockOverlayActive || !acquiredCellsLoaded)
-        {
-            // 非表示化はメッシュを保持したまま GameObject を無効化するだけにする。
-            // 再表示時は cellOverlayLastShowBorders / borderSegmentsDirty の状態次第で再構築を判断する。
-            if (cellOverlayMeshObj != null) cellOverlayMeshObj.SetActive(false);
-            return;
-        }
-
-        EnsureCellOverlayRenderer();
-        cellOverlayMeshObj.SetActive(true);
-
-        // 既にメッシュを構築済みで、境界にも表示状態にも変化がなければ再構築しない。
-        if (cellOverlayMeshBuilt && !borderSegmentsDirty && ShowCellBordersAndLabels == cellOverlayLastShowBorders)
-        {
-            return;
-        }
-
-        Camera cam = Camera.main;
-        if (cam == null) return;
-
-        cellOverlayRenderer.BeginFrame();
-
-        // 開放済みセルの外枠線を点線で追加
-        if (ShowCellBordersAndLabels)
-        {
-            if (borderSegmentsDirty) RebuildBorderSegments();
-            // 境界線を目立たせつつ他の情報と重なっても視認性を損なわないよう、半透明（アルファ50%）の白色で描画する。
-            Color borderColor = new Color(1f, 1f, 1f, 0.5f);
-            foreach (var (a, b) in borderSegments3D)
-            {
-                // ピクセル空間ではなくワールド空間の固定幅（4.0メートル）で描画することにより、遠近感が正しく適用される。
-                // 太線化に伴い、視認性を維持するため点線の実線長を16.0メートル、隙間を8.0メートルに調整する。
-                cellOverlayRenderer.AddDashedLineWorld(a, b, borderColor, 4.0f, 16.0f, 8.0f);
-            }
-        }
-
-        cellOverlayRenderer.EndFrame(cam);
-
-        cellOverlayMeshBuilt = true;
-        cellOverlayLastShowBorders = ShowCellBordersAndLabels;
-    }
-
-    /// <summary>
-    /// 開放済みセルの外周エッジ（未開放・境界側のみ）を 3D セグメントとして構築しキャッシュする。
-    /// 各エッジを細かく分割し地形追従させる。
-    /// </summary>
-    private void RebuildBorderSegments()
-    {
-        borderSegments3D.Clear();
-        borderSegmentsDirty = false;
-        if (!acquiredCellsLoaded || acquiredCells.Count == 0) return;
-
-        // エッジをこの分割数でサブセグメントに切る（地形追従の細かさ）
-        const int borderSubdivs = 8;
-        // 地形面からの浮き上がり量。ZTest LEqual による地形へのめり込みを防ぎ、高低差のある場所でも安定して浮いて見えるように1.8mを設定する。
-        const float yOffset = 1.8f;
-        // セル境界線上で隣の非アクティブな（未ロードの）セルの地形を誤ってサンプリングし、
-        // 遠景や超遠景の低解像度な地形データにフォールバックするのを避けるため、
-        // サンプリング対象の座標をわずかに解放済みセルの内側にオフセットさせる距離（メートル）。
-        const float samplingInnerOffset = 1.0f;
-
-        float s = CellSize;
-        // 始点グリッド, 終点グリッド, および解放済みセルの内側を指すオフセット方向ベクトル
-        var raw = new List<((int, int), (int, int), Vector3)>();
-        foreach (var cell in acquiredCells)
-        {
-            int cx = cell.x; int cy = cell.y;
-            // 上側境界（+Z方向が未開放）：内側は -Z 方向。
-            if (!acquiredCells.Contains(new Vector2Int(cx, cy + 1)))
-                raw.Add(((cx, cy + 1), (cx + 1, cy + 1), new Vector3(0f, 0f, -samplingInnerOffset)));
-            // 下側境界（-Z方向が未開放）：内側は +Z 方向。隣接判定座標は (cx, cy - 1) を正しく参照する。
-            if (!acquiredCells.Contains(new Vector2Int(cx, cy - 1)))
-                raw.Add(((cx + 1, cy), (cx, cy), new Vector3(0f, 0f, samplingInnerOffset)));
-            // 左側境界（-X方向が未開放）：内側は +X 方向。隣接判定座標は (cx - 1, cy) を正しく参照する。
-            if (!acquiredCells.Contains(new Vector2Int(cx - 1, cy)))
-                raw.Add(((cx, cy), (cx, cy + 1), new Vector3(samplingInnerOffset, 0f, 0f)));
-            // 右側境界（+X方向が未開放）：内側は -X 方向。隣接判定座標は (cx + 1, cy) を正しく参照する。
-            if (!acquiredCells.Contains(new Vector2Int(cx + 1, cy)))
-                raw.Add(((cx + 1, cy + 1), (cx + 1, cy), new Vector3(-samplingInnerOffset, 0f, 0f)));
-        }
-
-        foreach (var (a, b, innerOffsetDir) in raw)
-        {
-            float ax = a.Item1 * s, az = a.Item2 * s;
-            float bx = b.Item1 * s, bz = b.Item2 * s;
-
-            // 始点の高さを、解放済みセル内側にオフセットした座標から高精度に取得する
-            Vector3 prevSamplePos = new Vector3(ax, 0f, az) + innerOffsetDir;
-            float prevY = Utils.GetGroundHeight(prevSamplePos) + yOffset;
-            Vector3 prev = new Vector3(ax, prevY, az);
-
-            for (int k = 1; k <= borderSubdivs; k++)
-            {
-                float t = k / (float)borderSubdivs;
-                float wx = Mathf.Lerp(ax, bx, t);
-                float wz = Mathf.Lerp(az, bz, t);
-
-                // 各中継点の高さを、解放済みセル内側にオフセットした座標から高精度に取得する
-                Vector3 nextSamplePos = new Vector3(wx, 0f, wz) + innerOffsetDir;
-                float nextY = Utils.GetGroundHeight(nextSamplePos) + yOffset;
-                Vector3 next = new Vector3(wx, nextY, wz);
-
-                borderSegments3D.Add((prev, next));
-                prev = next;
-            }
-        }
-    }
-
-    /// <summary>
-    /// 指定セルの座標ラベルを生成または更新する。
-    /// セル中心の地形上に、Unityセル座標とバックエンドセル座標を表示する。
-    /// </summary>
-    private void EnsureCellLabel(Vector2Int cellIndex)
-    {
-        if (cellLabelObjects.ContainsKey(cellIndex)) return;
-
-        GameObject labelGO = new GameObject($"CellLabel_{cellIndex.x}_{cellIndex.y}");
-        Transform container = GetContainer("CellOverlays");
-        if (container != null) labelGO.transform.SetParent(container);
-
-        TextMeshPro tmp = labelGO.AddComponent<TextMeshPro>();
-        tmp.fontSize = cellLabelFontSize;
-        tmp.color = cellLabelColor;
-        tmp.alignment = TextAlignmentOptions.Center;
-        tmp.font = GetCachedFontAsset();
-
-        Vector2Int backendCell = UnityCellToBackendCell(cellIndex);
-        tmp.text = $"U:{cellIndex.x},{cellIndex.y}\nB:{backendCell.x},{backendCell.y}";
-
-        float cellSize = CellSize;
-        float centerX = (cellIndex.x + 0.5f) * cellSize;
-        float centerZ = (cellIndex.y + 0.5f) * cellSize;
-        float groundY = Utils.GetGroundHeight(new Vector3(centerX, 0f, centerZ));
-
-        labelGO.transform.position = new Vector3(centerX, groundY + cellLabelYOffset, centerZ);
-        labelGO.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
-
-        cellLabelObjects[cellIndex] = tmp;
-    }
-
-    /// <summary>
-    /// TextMeshPro で使うフォントアセットをキャッシュして返す。
-    /// Resources/Fonts & Materials/LiberationSans SDF を使用する。
-    /// </summary>
-    private TMP_FontAsset GetCachedFontAsset()
-    {
-        if (cachedFontAsset == null)
-        {
-            cachedFontAsset = Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF");
-        }
-        return cachedFontAsset;
     }
 
     // ================================================================

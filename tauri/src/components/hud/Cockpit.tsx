@@ -2,9 +2,9 @@
  * コックピット(画面下部中央の常駐パネル)
  *
  * プレイ中に最も頻繁に見る情報と操作を1枚に集約する。
- *   [常用ツール4種(2行2列)] [公共サービス充足度] [都市名・施政スコア / 日付・予算メータ(2行2列)] [アラート] [エポック処理開始]
+ *   [常用ツール3種(2列のグリッド)] [公共サービス充足度] [都市名・施政スコア / 日付・予算メータ(2行2列)] [アラート] [エポック処理開始]
  *
- * - 常用ツール: 表示切替・都市マップ・地形セル開放・ブルドーザ。
+ * - 常用ツール: 表示切替・都市マップ・ブルドーザ。
  *   ブルドーザはウィンドウを開かずUnityの削除ステートに入る常駐モードで、
  *   アイコンパネルの地区編集と排他(`hudMode`でウィンドウをまたいで共有)。
  *   解除し忘れによる誤削除を防ぐため、ON の間はパネル全体を工事現場風の
@@ -197,17 +197,9 @@ export function Cockpit() {
         await toggleBulldozer();
         return;
       }
-      if (icon.id === "unlock") {
-        // 地形セル開放はウィンドウを開いた上でUnityをセル選択ステートにする
-        await setHudMode(null);
-        await setHintbarText(t("hint.terrainUnlock"));
-        await openRegisteredWindow("terrain_unlock");
-        await sendChangeState("STATE_UNLOCK_CELL", undefined, "terrain_unlock");
-        return;
-      }
       if (icon.windowType) await openRegisteredWindow(icon.windowType);
     },
-    [toggleBulldozer, t],
+    [toggleBulldozer],
   );
 
   if (!visible) return null;
