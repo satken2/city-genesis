@@ -115,7 +115,7 @@ public static class TerrainAppearanceQA
         camera.farClipPlane=3000;
         var averages=new double[4];
         int index=0;
-        foreach(float height in new[]{1200f,1300f,1400f,1520f})
+        foreach(float height in new[]{800f,950f,1120f,1520f})
         {
             camera.transform.position=new Vector3(0,height,0);
             var pixels=Capture(camera,root+$"/forest-transition-{index}.png");
@@ -123,6 +123,8 @@ public static class TerrainAppearanceQA
         }
         if(Math.Abs(averages[0]-averages[3])<10 || averages[1]>averages[0]+2 || averages[2]>averages[1]+2)
             throw new Exception("Forest transition discontinuity: "+string.Join(",",averages));
+        if(Math.Abs(averages[2]-averages[3])>2)
+            throw new Exception("Forest backdrop changed while models fade: "+string.Join(",",averages));
         Shader.SetGlobalFloat("_ForestOverviewEnabled",0);
         camera.transform.position=new Vector3(0,220,0);
         return $"forest: Terrain/UltraFar mean error={error:F3}/255; replacement contrast={change:F1}; transition green={string.Join(",",averages.Select(x=>x.ToString("F1")))}\n";

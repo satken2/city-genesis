@@ -17,7 +17,7 @@ float ForestDetailAt(float2 position)
 float ForestModelWeight(float3 position, float3 camera)
 {
     if (_ForestOverviewEnabled < .5) return 1;
-    float support = ForestDetailAt(position.xz);
+    float support = smoothstep(0,.65,ForestDetailAt(position.xz));
     return support * (1 - smoothstep(1200,1500,distance(position,camera)));
 }
 
@@ -32,6 +32,10 @@ float2 ForestCoverageAt(float3 position)
 float ForestSurfaceWeight(float3 position)
 {
     float2 coverage = ForestCoverageAt(position);
-    return (1 - (1-coverage.r)*(1-coverage.g)) * (1 - ForestModelWeight(position, _WorldSpaceCameraPos));
+    // 下地が薄いまま木を間引くと、両方の被覆が不足して明るい帯になる。
+    // 距離・常駐境界ともに、樹冠の下地を完成させてからモデルを減らす。
+    float distanceWeight = smoothstep(800,1100,distance(position,_WorldSpaceCameraPos));
+    float boundaryWeight = 1 - smoothstep(.7,1,ForestDetailAt(position.xz));
+    return (1 - (1-coverage.r)*(1-coverage.g)) * max(distanceWeight,boundaryWeight);
 }
 #endif
