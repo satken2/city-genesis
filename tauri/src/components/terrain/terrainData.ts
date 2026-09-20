@@ -95,7 +95,7 @@ export type TerrainCameraPayload = {
  * 地形エディタの meta.json / terrain_maps.yaml の `initial_cells` と、バックエンドの
  * 新規都市初期化(terrain_registry → initialize_data での acquire_cell)で共通の契約。
  * セル番号はマップ隅(-map_width/2, -map_height/2)を (0, 0) とする cell_size 間隔の格子。
- * 仕様の正は genesis-docs/docs/geometries/D_地形形状.md §D.14。
+ * 仕様の正は genesis-docs/docs/geometries/D_地形形状.md §D.15。
  */
 export type InitialCellPayload = [number, number];
 
@@ -120,8 +120,8 @@ export type TerrainEditorData = {
   props: TerrainProps;
   /** カメラ初期状態。未設定なら null。 */
   camera: TerrainCameraPayload | null;
-  /** 初期開放セルの一覧。未設定なら空配列(ゲームはマップ中央の2×2セルで始まる)。 */
-  initial_cells: InitialCellPayload[];
+  /** 初期開放セルの一覧。未設定なら空配列または null(ゲームはマップ中央の2×2セルで始まる)。 */
+  initial_cells: InitialCellPayload[] | null;
 };
 
 /** float16(IEEE 754 half)のビット表現を float32 相当に変換する */

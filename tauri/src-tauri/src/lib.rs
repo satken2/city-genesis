@@ -780,7 +780,7 @@ struct TerrainEditorData {
     /// 仕様の正は同 §D.13。
     camera: serde_json::Value,
     /// 初期開放セルの一覧 [[cx, cy], ...]。未設定なら空配列(ゲームはマップ中央の2×2セルで始まる)。
-    /// 仕様の正は同 §D.14。
+    /// 仕様の正は同 §D.15。
     initial_cells: serde_json::Value,
 }
 
@@ -1232,6 +1232,44 @@ fn upsert_terrain_yaml_entry(
     let mut output = new_lines.join("\n");
     output.push('\n');
     std::fs::write(yaml_path, output).map_err(|e| format!("terrain_maps.yaml の書き込みに失敗しました: {e}"))
+}
+
+#[cfg(test)]
+mod terrain_yaml_entry_tests {
+    use super::upsert_terrain_yaml_entry;
+
+    const EXISTING: &str = "# island\nisland:\n  id: island\n  name: island\n  file_name: terrains/map_island.npy\n  src_spacing: 10.0\n  settings:\n    map_width: 1000\n    map_height: 1000\n    near_map_spacing: 10\n    far_map_spacing: 200\n    dynamic_map_spacing: 1\n    cell_size: 500\n  initial_cells: [[0, 0]]\n";
+
+    /// 同じIDのブロックを置換する形で書き出し、書かれた内容を返す。
+    fn upsert(cells: &[[i64; 2]]) -> String {
+        let dir = std::env::temp_dir().join(format!("cg_yaml_test_{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("terrain_maps.yaml");
+        std::fs::write(&path, EXISTING).unwrap();
+        upsert_terrain_yaml_entry(
+            &path, "island", "terrains/map_island.npy".to_string(),
+            10.0, 1000.0, 1000.0, 10.0, 200.0, 500.0, None, cells,
+        ).unwrap();
+        let text = std::fs::read_to_string(&path).unwrap();
+        std::fs::remove_dir_all(&dir).ok();
+        text
+    }
+
+    #[test]
+    fn writes_initial_cells_from_editor_selection() {
+        let text = upsert(&[[1, 2], [3, 4]]);
+        assert!(text.contains("\n  initial_cells: [[1, 2], [3, 4]]\n"), "{text}");
+        // 見出しコメントと settings は保持する
+        assert!(text.starts_with("# island\n"), "{text}");
+        assert!(text.contains("    cell_size: 500\n"), "{text}");
+    }
+
+    #[test]
+    fn omits_initial_cells_key_when_empty() {
+        let text = upsert(&[]);
+        assert!(!text.contains("initial_cells"), "{text}");
+        assert!(text.contains("    cell_size: 500\n"), "{text}");
+    }
 }
 
 /// float16(リトルエンディアン)の生バイト列に NumPy の .npy(バージョン1.0)ヘッダを被せる。

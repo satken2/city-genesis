@@ -1,7 +1,7 @@
 /**
  * 地形のサムネイル画像を生成する処理。
  *
- * 地形エディタの「保存」「.npyへエクスポート」実行時に呼ばれ、Terrain3DPreviewCanvas と同様の
+ * 地形エディタの「.npyへエクスポート」実行時に呼ばれ、Terrain3DPreviewCanvas と同様の
  * ハイトフィールドメッシュを画面に表示せず(WebGLRendererのcanvasをDOMに追加しない)オフスクリーンで
  * 一度だけ描画し、160x120のPNG画像をbase64文字列として返す。
  * 3Dプレビューウィンドウ(terrain_3d_preview)が開いていなくても、地形エディタ側が保持する

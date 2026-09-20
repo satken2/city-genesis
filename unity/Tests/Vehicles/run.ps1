@@ -15,11 +15,12 @@ New-Item -ItemType Directory -Path $editorAssets -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'VehicleQA.cs') -Destination $editorAssets -Force
 Copy-Item -LiteralPath (Join-Path $unityRoot 'Assets/Editor/ModelPrefabGenerator.cs') -Destination $editorAssets -Force
 Copy-Item -LiteralPath (Join-Path $unityRoot 'Assets/Editor/ModelImportSettings.cs') -Destination $editorAssets -Force
-foreach ($vehicleType in @('10','11','12','13','20','21','22','23')) {
+foreach ($vehicleType in @('10','11','12','13','14','20','21','22','23')) {
     foreach ($relativeRoot in @('Assets/Models/Vehicles','Assets/Resources/Models/Vehicles')) {
         $destination = Join-Path $qaRoot $relativeRoot
         New-Item -ItemType Directory -Path $destination -Force | Out-Null
-        Copy-Item -LiteralPath (Join-Path $unityRoot "$relativeRoot/$vehicleType") -Destination $destination -Recurse -Force
+        $modelSource = Join-Path $unityRoot "$relativeRoot/$vehicleType"
+        if (Test-Path -LiteralPath $modelSource) { Copy-Item -LiteralPath $modelSource -Destination $destination -Recurse -Force }
     }
 }
 foreach ($relativeRoot in @('Assets/Models/Props','Assets/Resources/Models/Props')) {

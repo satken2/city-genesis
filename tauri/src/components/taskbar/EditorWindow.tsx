@@ -89,7 +89,7 @@ export function EditorWindow({ apiBaseUrl, onClose }: EditorWindowProps) {
    *
    * 標高-10m(`local-constants.ts` の `NEW_TERRAIN_INITIAL_ELEVATION_M` と同じ値。
    * Rust側 `create_new_terrain_for_editor` にハードコードされている)で初期化した
-   * 1x1セルの標高マップの作業コピーをローカルに生成し、
+   * 2×2セル(1000m×1000m)の最小サイズの標高マップの作業コピーをローカルに生成し、
    * 地形エディタウィンドウを開く。既存の地形マップ一覧には影響しない。
    */
   async function handleCreateNewTerrain() {

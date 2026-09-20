@@ -37,6 +37,7 @@ Tauri(Rust)側のプログラム。ウィンドウ管理とUnityとのMMF(Memory
 - サムネイル画像(160x120 PNG)は `export_terrain_as_npy` の `thumbnail_base64` で受け取り、`.npy` と同名の `.png` へ書く。生成は `terrainThumbnail.ts` の `captureTerrainThumbnail` が行う。
 - 水面は `export_terrain_as_npy` の `water_surfaces` を `.water.json`（version 1）へ書く。空でも書き出して古い水面を残さない。取り込み時は既存マップの `/features` から meta.json へ持ち込む。仕様は `city-genesis/docs/docs/geometries/D_地形形状.md §D.10`。
 - カメラ初期状態は `export_terrain_as_npy` の `camera` を `terrain_maps.yaml` のエントリへ書く。既存マップの再編集では `/features` から取り込む。未設定は null。仕様は `city-genesis/docs/docs/geometries/D_地形形状.md §D.13`。
+- 初期開放セルも同じく `export_terrain_as_npy` の `initial_cells`（`[[cx, cy], ...]`）を `terrain_maps.yaml` のエントリへ書く。**空ならキー自体を書かず、バックエンドの既定(マップ中央の2×2セル)に委ねる**（Rust側でセル番号を機械的に計算しない）。既存マップの再編集では `/features` から取り込み、新規地形は全域(2×2セル)を meta.json の初期値にする。仕様は同 `§D.15`。
 - 川は `export_terrain_as_npy` の `rivers`（id/kind/polygon/profile）を `.rivers.json`（version 2）へ書く。川床は標高へ焼き込む。既存マップの再編集では `/features` から取り込む。仕様は `city-genesis/docs/docs/geometries/D_地形形状.md §D.11`。
 - 天然資源は `export_terrain_as_npy` の `resources` を `.resources.json`（version 1）へ書く。取り込みは `/resources` からID・GeoJSONをそのまま保持する。ゲームでは `init_game` が資源エンティティを生成する。仕様は `city-genesis/docs/docs/geometries/D_地形形状.md §D.12`。
 

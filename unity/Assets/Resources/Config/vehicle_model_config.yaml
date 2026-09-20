@@ -15,6 +15,8 @@ vehicles:
     variants: [0, 1]
   13: # VEHICLE_COMMERCIAL
     variants: [0, 1]
+  14: # VEHICLE_TRAM
+    variants: [0]
   20: # VEHICLE_METRO_TRAIN
     variants: [0, 1]
   21: # VEHICLE_PASSANGER_TRAIN

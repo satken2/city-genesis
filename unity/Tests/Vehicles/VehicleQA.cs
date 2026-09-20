@@ -237,16 +237,17 @@ public static class VehicleQA
         var manager=new GameObject("ModelManagerQA").AddComponent(game.GetType("ModelManager"));
         game.GetType("ModelManager").GetProperty("Instance").SetValue(null,manager);
         var resolver=game.GetType("VehicleModelResolver");
-        foreach(int vehicleType in new[]{10,11,12,13,20,21,22,23})
+        foreach(int vehicleType in new[]{10,11,12,13,14,20,21,22,23})
         {
             var variants=(IList)game.GetType("VehicleModelConfig").GetMethod("GetVariants").Invoke(null,new object[]{vehicleType});
-            Check(variants.Count==2,"Inline comments hide configured variants for "+vehicleType);
+            Check(variants.Count==(vehicleType==14?1:2),"Inline comments hide configured variants for "+vehicleType);
             foreach(int seed in new[]{0,1,-1,int.MinValue})
                 Check((int)resolver.GetMethod("PickVariantId").Invoke(null,new object[]{vehicleType,seed})>=0,"Negative seed gives invalid variant");
         }
-        foreach (int type in new[]{12,20,21})
+        Check((int)game.GetType("VehicleModelConfig").GetMethod("GetTransitVehicleType").Invoke(null,new object[]{1003})==14,"LRT model mapping missing");
+        foreach (int type in new[]{12,14,20,21})
         {
-            foreach(int variant in new[]{0,1})
+            foreach(int variant in type==14?new[]{0}:new[]{0,1})
             foreach(bool middle in type==12?new[]{false}:new[]{false,true})
             {
                 var car=(GameObject)resolver.GetMethod("CreateTransitCar").Invoke(null,new object[]{type,middle,null,variant});
@@ -261,6 +262,13 @@ public static class VehicleQA
                 foreach(var renderer in renderers)bounds.Encapsulate(renderer.bounds);
                 Check(bounds.size.z>5 && bounds.size.z<35,"Transit FBX length/axis is not metres: "+bounds.size);
                 Check(Mathf.Abs(bounds.center.z)<1,"Transit model pivot is not centred: "+bounds.center);
+                if(type==14)
+                {
+                    Near(bounds.size.z,10,.08f,"LRT nominal length");
+                    Near(bounds.size.x,2.54f,.05f,"LRT width");
+                    Near(bounds.min.y,0,.001f,"LRT ground");
+                    Near(bounds.size.y,middle?5.21f:3.369f,.05f,"LRT roof height");
+                }
                 accessTimings.Add($"model type={type} variant={variant} middle={middle} bounds={bounds.size} center={bounds.center}");
                 UnityEngine.Object.DestroyImmediate(car);
             }

@@ -54,6 +54,7 @@ import { ConstructionInfoCard } from "../common/ConstructionInfoCard";
 import { isConstructionAffordable } from "../../utils/constructionFunding";
 import { useVariantAffordability } from "../../hooks/useVariantAffordability";
 import { BuildingFacilityInfoCard } from "./BuildingFacilityInfoCard";
+import { BuildingFloorSpecs } from "./BuildingFloorSpecs";
 import { showNotification } from "../../utils/notification";
 import { BUILDING_PUBLIC, VARIANT_CITY } from "../../constants";
 import "./BuildingConstructionPanel.css";
@@ -1474,6 +1475,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
               <div className="bc-description-text">
                 {selectedVariantData.description || "—"}
               </div>
+              <BuildingFloorSpecs entry={selectedVariantData} />
             </div>
           </div>
 

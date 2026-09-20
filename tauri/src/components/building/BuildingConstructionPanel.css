@@ -95,6 +95,33 @@
   line-height: 1.5;
 }
 
+/* 説明文の下に並べるフロア仕様(種別アイコン+階数。種別名・階数の意味はtitleのツールチップ) */
+.bc-description-floors {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.bc-floor {
+  display: inline-flex;
+  cursor: default;
+}
+
+.bc-floor-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.bc-floor-range {
+  margin-left: 2px;
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 0.7rem;
+  color: #c5d4e3;
+  cursor: default;
+}
+
 /* 敷地未選択時のプロンプトはアイコンなしで中央寄せ */
 .bc-parcel-prompt {
   text-align: center;
