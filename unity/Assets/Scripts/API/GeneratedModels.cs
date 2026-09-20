@@ -367,6 +367,14 @@ namespace GeneratedModels
         public string house_ends;
         /// <summary>駅舎の通路方式（elevated/ground/underground）</summary>
         public string passage_mode;
+        /// <summary>ベンチの種類。0=なし、1=標準。道路ごとの保存値。</summary>
+        public int bench_type;
+        /// <summary>ゴミ箱の種類。0=なし、1=標準。道路ごとの保存値。</summary>
+        public int bin_type;
+        /// <summary>植え込みの種類。0=なし、1=標準。道路ごとの保存値。</summary>
+        public int planter_type;
+        /// <summary>広告の種類。0=なし、1=標準。道路ごとの保存値。</summary>
+        public int advert_type;
     }
 
     [Serializable]
@@ -468,6 +476,14 @@ namespace GeneratedModels
         public string house_ends;
         /// <summary>駅舎の通路方式（elevated/ground/underground）</summary>
         public string passage_mode;
+        /// <summary>ベンチの種類。0=なし、1=標準。道路ごとの保存値。</summary>
+        public int bench_type;
+        /// <summary>ゴミ箱の種類。0=なし、1=標準。道路ごとの保存値。</summary>
+        public int bin_type;
+        /// <summary>植え込みの種類。0=なし、1=標準。道路ごとの保存値。</summary>
+        public int planter_type;
+        /// <summary>広告の種類。0=なし、1=標準。道路ごとの保存値。</summary>
+        public int advert_type;
     }
 
     [Serializable]

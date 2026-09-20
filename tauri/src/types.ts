@@ -525,6 +525,14 @@ export type PathMasterEntry = {
   default_fence_type: number;
   street_tree_type_allowed: boolean;
   default_street_tree_type: number;
+  bench_type_allowed: boolean;
+  default_bench_type: number;
+  bin_type_allowed: boolean;
+  default_bin_type: number;
+  planter_type_allowed: boolean;
+  default_planter_type: number;
+  advert_type_allowed: boolean;
+  default_advert_type: number;
   utility_mode_allowed: boolean;
   default_utility_mode: number;
 
@@ -714,6 +722,10 @@ export type PathData = {
   streetlight_type: number;
   fence_type: number;
   street_tree_type: number;
+  bench_type: number;
+  bin_type: number;
+  planter_type: number;
+  advert_type: number;
   utility_mode: number;
 
   path_id: number;

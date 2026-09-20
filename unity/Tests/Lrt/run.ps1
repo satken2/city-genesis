@@ -9,7 +9,7 @@ $qaRoot = Join-Path $unityRoot 'Temp/LrtUnityQA'
 New-Item -ItemType Directory -Path "$qaRoot/Assets/Editor", "$qaRoot/Assets/Paths", "$qaRoot/ProjectSettings", "$qaRoot/Packages" -Force | Out-Null
 Copy-Item -LiteralPath "$unityRoot/ProjectSettings/ProjectVersion.txt" -Destination "$qaRoot/ProjectSettings/ProjectVersion.txt" -Force
 Copy-Item -LiteralPath "$PSScriptRoot/LrtQA.cs", "$unityRoot/Assets/Editor/ModelPrefabGenerator.cs" -Destination "$qaRoot/Assets/Editor" -Force
-foreach ($id in @(222,242,303,431)) {
+foreach ($id in @(222,242,303,304,305,431)) {
     Copy-Item -LiteralPath "$unityRoot/Assets/Models/Paths/p$id" -Destination "$qaRoot/Assets/Paths" -Recurse -Force
 }
 Set-Content -LiteralPath "$qaRoot/Packages/manifest.json" -Value '{"dependencies":{}}'

@@ -19,7 +19,8 @@ public static class RoadEquipmentGenerator
         float width, float sidewalkWidth, float? treeSpacing)
     {
         var master = MasterDataStore.Instance?.GetPathMaster(path.path_variant);
-        if (master == null || (path.streetlight_type == 0 && path.fence_type == 0 && path.street_tree_type == 0 && path.utility_mode == 0)) return;
+        if (master == null || (path.streetlight_type == 0 && path.fence_type == 0 && path.street_tree_type == 0 && path.utility_mode == 0
+            && path.bench_type == 0 && path.bin_type == 0 && path.planter_type == 0 && path.advert_type == 0)) return;
         var prefabs = new Dictionary<string, GameObject>();
         GameObject Prefab(string part)
         {
@@ -31,7 +32,21 @@ public static class RoadEquipmentGenerator
         var occupied = new Dictionary<Vector2Int, List<Vector3>>();
         float edge = width * 0.5f;
         float offset = sidewalkWidth > 0f ? edge - sidewalkWidth * 0.5f : Mathf.Max(0f, edge - 0.3f);
+        bool centralMall = path.path_variant == 304;
+        bool twinMall = path.path_variant == 305;
+        bool lrtMall = path.path_variant == 303;
+        if (centralMall) offset = 0f;
+        else if (twinMall) offset = width * .2f;
+        else if (lrtMall) offset = edge - .9f;
         float surface = SurfaceHeight(path, sidewalkWidth > 0f ? "sidewalk" : "body");
+        if (lrtMall && master.wire_spacing.GetValueOrDefault() > 0f)
+        {
+            // 中央単線の片持ち柱は道路中心から右3.4m。架線柱の足元にも設備を重ねない。
+            float spacing = master.wire_spacing.Value;
+            float margin = Mathf.Min(spacing * .5f, 5f);
+            for (float d = margin; d <= length - margin; d += spacing)
+                Reserve(occupied, Sample(spline, d, 3.4f, surface).position, 2f);
+        }
         var metal = new Batch(parent, "EquipmentMetal", MaterialFor("PATH_EQUIPMENT_METAL", new Color(0.32f, 0.35f, 0.37f)));
         var concrete = new Batch(parent, "EquipmentConcrete", MaterialFor("PATH_EQUIPMENT_CONCRETE", new Color(0.62f, 0.61f, 0.57f)));
         var lamp = new Batch(parent, "EquipmentLamp", MaterialFor("PATH_EQUIPMENT_LAMP", new Color(1f, 0.91f, 0.67f)));
@@ -68,7 +83,7 @@ public static class RoadEquipmentGenerator
         if (master.streetlight_type_allowed && path.streetlight_type == Constants.PATH_EQUIPMENT_STANDARD)
         {
             // 狭い生活道路は始点から終点へ向かう右側だけで照明をまかなう。
-            int firstSide = path.path_variant == 211 || path.path_variant == 212 ? 1 : -1;
+            int firstSide = centralMall || path.path_variant == 211 || path.path_variant == 212 ? 1 : -1;
             foreach (float distance in Distances(length, LampSpacing, LampSpacing * 0.25f))
                 for (int side = firstSide; side <= 1; side += 2)
                 {
@@ -96,13 +111,35 @@ public static class RoadEquipmentGenerator
                 }
             }
             foreach (float distance in Distances(length, spacing, spacing * 0.5f))
-                for (int side = -1; side <= 1; side += 2)
+                for (int side = centralMall ? 1 : -1; side <= 1; side += 2)
                 {
                     Pose pose = Sample(spline, distance, offset * side, surface);
                     if (!Reserve(occupied, pose.position, 3f)) continue;
                     if (PlacePrefab(parent, Prefab("tree"), pose)) continue;
                     concrete.Box(pose, new Vector3(0f, 1f, 0f), new Vector3(0.2f, 2f, 0.2f));
                     leaves.Box(pose, new Vector3(0f, 3f, 0f), new Vector3(1.8f, 2.5f, 1.8f));
+                }
+        }
+        Furniture("bench", master.bench_type_allowed, path.bench_type, 24f, 0f, 2f);
+        Furniture("bin", master.bin_type_allowed, path.bin_type, 24f, 3f, 1.2f);
+        Furniture("planter", master.planter_type_allowed, path.planter_type, 24f, 17f, 2.5f);
+        Furniture("advert", master.advert_type_allowed, path.advert_type, 48f, 21f, 2f);
+
+        void Furniture(string part, bool allowed, int selected, float spacing, float phase, float clearance)
+        {
+            if (!allowed || selected != Constants.PATH_EQUIPMENT_STANDARD) return;
+            var prefab = Prefab(part);
+            if (prefab == null) return;
+            bool pair = !centralMall || part == "bench";
+            float lateral = centralMall ? (pair ? .95f : 0f) : offset;
+            foreach (float distance in Distances(length, spacing, phase))
+                for (int side = pair ? -1 : 1; side <= 1; side += 2)
+                {
+                    Pose pose = Sample(spline, distance, lateral * side, surface);
+                    // 中央島のベンチは外向き。2列型は中央通路へ向け、店舗前を空ける。
+                    if (centralMall && part == "bench") pose.rotation *= Quaternion.Euler(0f, 180f, 0f);
+                    if (Reserve(occupied, pose.position, part == "bench" && centralMall ? 1.8f : clearance))
+                        PlacePrefab(parent, prefab, pose);
                 }
         }
         if (master.fence_type_allowed && path.fence_type == Constants.PATH_EQUIPMENT_STANDARD)

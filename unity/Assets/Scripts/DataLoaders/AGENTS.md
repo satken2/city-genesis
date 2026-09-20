@@ -216,7 +216,7 @@
 
 ## 道路設備のマスター
 
-PathMasterItemの設備*_allowed/default_*はAPIのpath_masterに対応する。設置状態の正はPathSummaryの4項目で、既定値をロード時に再適用しない。設備変更はPathのversion更新で通常の差分再描画に入る。
+PathMasterItemの設備*_allowed/default_*はAPIのpath_masterに対応する。設置状態の正はPathSummaryの8項目で、既定値をロード時に再適用しない。設備変更はPathのversion更新で通常の差分再描画に入る。
 
 ## 駅の保存済み標高
 
@@ -299,3 +299,5 @@ PathMasterItem.house_placementはoutside/insideを受信する。駅舎の個別
 `BusStopManager`は固定名Props/bus_stopをPropRenderModelでインスタンシング描画する。0.5秒間隔で注視点600m以内のQueryNearbyNodesを使い、接続PATH_TRANSPORTの車種がバスの停留所だけを抽出する。NodeData.station_path_idから下地道路を直接解決し、実中心線の接線・標高で路肩へ配置する。路線の運休・車両数・色帯設定では隠さない。都市切替はTransitDataStore.Sessionでクリアする。NodeDataの下地ID変更もCreateOrUpdateNodeでキャッシュへ反映する。制作規約はM文書§M.7.5、検証はTests/BusStops/run.ps1。
 
 TransitOverlayManagerはRoute.VehicleTypeを設定し、LRTのハイライトをLrtRoadPartsの軌道位置へ合わせる。バスとLRTが同じ道路を使っても走行車線を混同しない。
+
+PathMasterItemの設備項目は街灯・柵・街路樹・配線方式に加えbench_type/bin_type/planter_type/advert_typeの各*_allowed/default_*を持つ。個別Pathの値はAPI生成型で受け、描画設定はRoadEquipmentGeneratorが解釈する。

@@ -9,13 +9,17 @@ import { PATH_EQUIPMENT_NONE, PATH_EQUIPMENT_STANDARD, PATH_UTILITY_UNDERGROUND 
 import "./PathDetailPanel.css";
 import "./PathTrafficPanel.css";
 
-export const pathEquipmentFields = ["streetlight_type", "fence_type", "street_tree_type", "utility_mode"] as const;
+export const pathEquipmentFields = ["streetlight_type", "fence_type", "street_tree_type", "utility_mode", "bench_type", "bin_type", "planter_type", "advert_type"] as const;
 type Equipment = Pick<PathData, typeof pathEquipmentFields[number]>;
 const selection = (path: PathData): Equipment => ({
   streetlight_type: path.streetlight_type,
   fence_type: path.fence_type,
   street_tree_type: path.street_tree_type,
   utility_mode: path.utility_mode,
+  bench_type: path.bench_type,
+  bin_type: path.bin_type,
+  planter_type: path.planter_type,
+  advert_type: path.advert_type,
 });
 
 export function PathEquipmentPanel({ path, apiBaseUrl, onSaved }: {

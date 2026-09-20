@@ -364,4 +364,4 @@ export const ALERT_AGENT_ICON_BITS: number[] = [1, 2, 4, 8, 16, 32];
 
 export const ALERT_PATH_ICON_BITS: number[] = [1, 2, 4];
 
-export const PATH_EQUIPMENT_FIELDS: string[] = ["streetlight_type", "fence_type", "street_tree_type", "utility_mode"];
+export const PATH_EQUIPMENT_FIELDS: string[] = ["streetlight_type", "fence_type", "street_tree_type", "utility_mode", "bench_type", "bin_type", "planter_type", "advert_type"];

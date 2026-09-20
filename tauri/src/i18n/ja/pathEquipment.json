@@ -9,6 +9,10 @@
     "standard": "標準",
     "overhead": "架空配線",
     "underground": "地中配線",
-    "apply": "適用"
+    "apply": "適用",
+    "bench_type": "ベンチ",
+    "bin_type": "ゴミ箱",
+    "planter_type": "植え込み",
+    "advert_type": "広告"
   }
 }

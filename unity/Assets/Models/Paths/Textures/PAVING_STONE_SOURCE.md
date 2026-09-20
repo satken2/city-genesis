@@ -1,4 +1,4 @@
-# 歩行者専用道路301の石畳
+# 歩行者専用道路301・303・304・305の石畳
 
 - 素材: [Paving Stones 033 / ambientCG](https://ambientcg.com/view?id=PavingStones033)
 - ライセンス: CC0 1.0 Universal。商用利用・元ファイルの再配布を含む。[公式の説明](https://docs.ambientcg.com/license/)

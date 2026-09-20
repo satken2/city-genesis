@@ -9,6 +9,10 @@
     "standard": "표준",
     "overhead": "가공 배선",
     "underground": "지중 배선",
-    "apply": "적용"
+    "apply": "적용",
+    "bench_type": "벤치",
+    "bin_type": "쓰레기통",
+    "planter_type": "화단",
+    "advert_type": "광고"
   }
 }

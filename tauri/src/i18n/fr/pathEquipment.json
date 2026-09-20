@@ -9,6 +9,10 @@
     "standard": "Standard",
     "overhead": "Aériens",
     "underground": "Souterrains",
-    "apply": "Appliquer"
+    "apply": "Appliquer",
+    "bench_type": "Bancs",
+    "bin_type": "Poubelles",
+    "planter_type": "Jardinières",
+    "advert_type": "Publicités"
   }
 }

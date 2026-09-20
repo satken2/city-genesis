@@ -203,3 +203,7 @@ p461 8個  body track platform platform_wall platform_panel wire pole beam (電�
 - 431は411と同じ通常の電化軌道パーツをメッシュ共有する。新規バリアントはpath_masterだけでなく、transit_masterのLRT走行・停留所リストにも追加する。
 - 非公開の制作ツールにある`genesis-gallery/pipeline/jobs/build_lrt_paths.py`が著作元。exportは`--only p222/lrt_,p222/body,p222/sidewalk,p222/line,p222/center,p242/,p303/,p431/`で既存設備の不要な再出力を避ける。
 - 検証はバリデータと`city-genesis/unity/Tests/Lrt/run.ps1`。レール位置、直立柱、カーブ、相互接続、FBXとラッパープレハブのGUIDを確認する。
+
+## 歩行者モールの点設備
+
+303/304/305の舗装・bench/bin/planter/advert/treeは非公開の制作ツール`genesis-gallery/pipeline/jobs/build_mall_paths.py`が著作する。304は幅12mの中央島、305は幅20mで中心から左右4mの2列、303は中央LRTを空ける小型設備。新設備は`bench_type`/`bin_type`/`planter_type`/`advert_type`の各`*_allowed`・`default_*`と個別Pathの0/1選択に従う。規約・位相・向きはG文書§5.5、検証はTests/Lrt/run.ps1。

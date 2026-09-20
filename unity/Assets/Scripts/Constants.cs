@@ -371,5 +371,5 @@ public static class Constants
 
     public static readonly int[] ALERT_PATH_ICON_BITS = new int[] { ALERT_PATH_CONSTRUCTION_SHORTAGE, ALERT_PATH_ACCIDENT, ALERT_PATH_NO_STATION_HOUSE };
 
-    public static readonly string[] PATH_EQUIPMENT_FIELDS = new string[] { "streetlight_type", "fence_type", "street_tree_type", "utility_mode" };
+    public static readonly string[] PATH_EQUIPMENT_FIELDS = new string[] { "streetlight_type", "fence_type", "street_tree_type", "utility_mode", "bench_type", "bin_type", "planter_type", "advert_type" };
 }

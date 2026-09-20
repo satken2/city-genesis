@@ -56,6 +56,7 @@ public static class LrtQA
             }
             foreach (int a in new[] { 222, 242, 303, 431 })
                 foreach (int b in new[] { 222, 242, 303, 431 }) { Connections(a, b); Connections(a, b, true); }
+            foreach (int id in new[] { 303, 304, 305 }) Mall(id);
             ExportPrefabs();
             File.WriteAllText(root + "/Temp/LrtUnityQA/result.txt", "PASS LRT: " + checks + " checks; FBX, straight/curve/slope, all LRT connections, wrapper prefabs");
             EditorApplication.Exit(0);
@@ -156,9 +157,56 @@ public static class LrtQA
             UnityEngine.Object.DestroyImmediate(go);
         }
     }
+    static void Mall(int id)
+    {
+        Master(id);
+        float width = id == 303 ? 8f : id == 304 ? 12f : 20f;
+        var m = masters[id];
+        Set(m, "width", width); Set(m, "tree_spacing", 24f);
+        if (id != 303) Set(m, "wire_spacing", 0f);
+        string[] fields = { "streetlight_type", "street_tree_type", "bench_type", "bin_type", "planter_type", "advert_type" };
+        foreach (string f in fields) Set(m, f + "_allowed", true);
+        var path = PathData(id);
+        Set(path, "path_type", 3);
+        foreach (string f in fields) Set(path, f, 1);
+        foreach (bool curved in new[] { false, true })
+        {
+            var points = new List<Vector3>();
+            for (int i = 0; i <= 20; i++) points.Add(new Vector3(curved ? 4 * Mathf.Sin(i * Mathf.PI / 20) : 0, .02f*i*4, i*4));
+            var type = asm.GetType("RoadPath");
+            var setback = Activator.CreateInstance(asm.GetType("SidewalkSetback"));
+            var result = type.GetMethod("Generate").Invoke(Activator.CreateInstance(type), new[] { path, points, setback, setback });
+            var go = (GameObject)result.GetType().GetProperty("GeneratedObject").GetValue(result);
+            foreach (string part in new[] { "bench", "bin", "planter", "advert", "tree" })
+            {
+                var placed = go.GetComponentsInChildren<MeshFilter>().Where(f => f.name.StartsWith(part + "(")).ToArray();
+                Check(placed.Length > 0, "mall part present " + id + " " + part);
+                foreach (var f in placed)
+                {
+                    Check(Vector3.Dot(f.transform.up, Vector3.up) > .9999f, "mall upright " + part);
+                    Check(f.sharedMesh.vertices.All(v => !float.IsNaN(v.x+v.y+v.z)), "mall finite " + part);
+                    if (!curved)
+                    {
+                        var b = f.GetComponent<Renderer>().bounds;
+                        Check(b.min.x > -width/2 && b.max.x < width/2, "mall footprint " + id + " " + part);
+                        Check(b.min.z > 1.5f && b.max.z < 78.5f, "mall end clearance " + part);
+                        if (id == 304) Check(b.min.x >= -1.7f && b.max.x <= 1.7f, "central furniture island");
+                        if (id == 305) Check(Mathf.Abs(f.transform.position.x) > 3.9f && Mathf.Abs(f.transform.position.x) < 4.1f, "two furniture rows");
+                        if (id == 303) Check(b.max.x < -2.2f || b.min.x > 2.2f, "LRT clearance");
+                    }
+                }
+            }
+            UnityEngine.Object.DestroyImmediate(go);
+        }
+        foreach (string f in fields) Set(path, f, 0);
+        var empty = new GameObject("NoEquipment");
+        asm.GetType("RoadEquipmentGenerator").GetMethod("Generate").Invoke(null, new object[] { empty, null, path, width, 0f, 24f });
+        Check(empty.transform.childCount == 0, "all equipment disabled " + id);
+        UnityEngine.Object.DestroyImmediate(empty);
+    }
     static void ExportPrefabs()
     {
-        foreach (int id in new[] { 222, 242, 303, 431 })
+        foreach (int id in new[] { 222, 242, 303, 304, 305, 431 })
             foreach (string file in Directory.GetFiles("Assets/Paths/p" + id, "*.fbx"))
             {
                 string asset = file.Replace('\\', '/');

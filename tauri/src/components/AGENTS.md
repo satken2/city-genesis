@@ -212,3 +212,5 @@ PropPlacementPanelの個別配置は全種別共通で地面相対高さ(m)を�
 `taskbar/EditorWindow` は「既存マップを編集」（説明: 川、資源、プロップなどを含みます）→「オリジナル地形」（説明: 純粋な地形データです）の順に表示する。編集途中のデータの一覧・再開・削除UI、および `TerrainEditorCanvas` の作業保存は持たない。編集結果を残す操作は `.npyへエクスポート`。
 
 毎回 `copy_terrain_for_editor` を呼び、返却された editor_id で新しい編集ウィンドウを開く。`TerrainEditorCanvas` の登録ID欄は読み込んだ data.map_id を使う。既存マップは標高・資源・プロップに加えて `/terrain/maps/{id}/features` の川・水面・カメラを読み込む。原本は `original=true` で標高だけを取り込む。原本にはサムネイル等の付随データを置かない。
+
+PathEquipmentPanelの道路設備は街灯・柵・街路樹・配線方式・ベンチ・ゴミ箱・植え込み・広告。マスターの*_allowedで選択肢を制限し、PATCH後にsession:reloadでUnityを更新する。新4設備は0=なし/1=バリアント標準。

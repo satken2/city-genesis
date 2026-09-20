@@ -9,6 +9,10 @@
     "standard": "Standard",
     "overhead": "Overhead",
     "underground": "Underground",
-    "apply": "Apply"
+    "apply": "Apply",
+    "bench_type": "Benches",
+    "bin_type": "Bins",
+    "planter_type": "Planters",
+    "advert_type": "Advertising"
   }
 }

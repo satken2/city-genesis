@@ -9,6 +9,10 @@
     "standard": "标准",
     "overhead": "架空线路",
     "underground": "地下线路",
-    "apply": "应用"
+    "apply": "应用",
+    "bench_type": "长椅",
+    "bin_type": "垃圾桶",
+    "planter_type": "花坛",
+    "advert_type": "广告"
   }
 }

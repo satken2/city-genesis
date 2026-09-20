@@ -93,7 +93,7 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     source: "ambientCG",
     url: "https://ambientcg.com/view?id=PavingStones033",
     license: "CC0 1.0 Universal",
-    note: "歩行者専用道路301。1K-PNGのColor・NormalGLを使用。2026-09-19取得。",
+    note: "歩行者専用道路301・303・304・305。1K-PNGのColor・NormalGLを使用。2026-09-19取得。",
   },
   {
     title: "city pasture Den Bosch Nethernlands 1013 am 170328_1113",

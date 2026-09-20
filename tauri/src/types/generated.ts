@@ -350,6 +350,14 @@ export type PathSummary = {
   house_ends: string;
   /** 駅舎の通路方式（elevated/ground/underground） */
   passage_mode: string;
+  /** ベンチの種類。0=なし、1=標準。道路ごとの保存値。 */
+  bench_type: number;
+  /** ゴミ箱の種類。0=なし、1=標準。道路ごとの保存値。 */
+  bin_type: number;
+  /** 植え込みの種類。0=なし、1=標準。道路ごとの保存値。 */
+  planter_type: number;
+  /** 広告の種類。0=なし、1=標準。道路ごとの保存値。 */
+  advert_type: number;
 };
 
 export type PathData = {
@@ -449,6 +457,14 @@ export type PathData = {
   house_ends: string;
   /** 駅舎の通路方式（elevated/ground/underground） */
   passage_mode: string;
+  /** ベンチの種類。0=なし、1=標準。道路ごとの保存値。 */
+  bench_type: number;
+  /** ゴミ箱の種類。0=なし、1=標準。道路ごとの保存値。 */
+  bin_type: number;
+  /** 植え込みの種類。0=なし、1=標準。道路ごとの保存値。 */
+  planter_type: number;
+  /** 広告の種類。0=なし、1=標準。道路ごとの保存値。 */
+  advert_type: number;
 };
 
 export type ParcelSummary = {

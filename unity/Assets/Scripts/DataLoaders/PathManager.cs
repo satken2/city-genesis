@@ -4663,6 +4663,14 @@ public class PathMasterItem
     public int default_fence_type;
     public bool street_tree_type_allowed;
     public int default_street_tree_type;
+    public bool bench_type_allowed;
+    public int default_bench_type;
+    public bool bin_type_allowed;
+    public int default_bin_type;
+    public bool planter_type_allowed;
+    public int default_planter_type;
+    public bool advert_type_allowed;
+    public int default_advert_type;
     public bool utility_mode_allowed;
     public int default_utility_mode;
 

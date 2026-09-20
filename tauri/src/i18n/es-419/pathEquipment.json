@@ -9,6 +9,10 @@
     "standard": "Estándar",
     "overhead": "Aéreo",
     "underground": "Subterráneo",
-    "apply": "Aplicar"
+    "apply": "Aplicar",
+    "bench_type": "Bancas",
+    "bin_type": "Basureros",
+    "planter_type": "Jardineras",
+    "advert_type": "Publicidad"
   }
 }

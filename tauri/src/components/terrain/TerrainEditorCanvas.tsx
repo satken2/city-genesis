@@ -42,6 +42,10 @@
  * 新規都市の初期化時(init_game)に読み込んで資源エンティティとして配置する。
  * 資源種別の一覧はマスターデータ(resource_master)に依存するため、バックエンドが
  * 起動していない場合は資源種別を選択できない(既存の資源の表示・削除は可能)。
+ *
+ * 「初期開放セル」タブは、このマップで新規都市を始めたときに開放済みで始まるセルを
+ * セル境界グリッド上のクリックで指定する。標高と違いセル番号そのものを持つデータなので、
+ * カメラ初期状態と同じく meta.json と terrain_maps.yaml のエントリ(initial_cells)へ書く。
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -60,6 +64,7 @@ import {
   type RiverPayload,
   type ResourceAreaPayload,
   type TerrainCameraPayload,
+  type InitialCellPayload,
   type GridRect,
   type Terrain3DRequestStatePayload,
   type Terrain3DFullStatePayload,
@@ -189,7 +194,7 @@ type EditorRiver = GeneratedRiver & {
 type RiverPointerMode = "rain" | "draw" | "node";
 
 /** 左ツールパネル上部のプルダウンで排他的に切り替える編集対象 */
-type EditorTab = "terrain" | "water" | "river" | "resource" | "camera" | "prop";
+type EditorTab = "terrain" | "water" | "river" | "resource" | "camera" | "cell" | "prop";
 
 /** ノード編集でノード・流路を拾う画面上の許容距離(px)。ワールド座標へはズームで割って換算する */
 const RIVER_NODE_HIT_PX = 9;
@@ -1085,6 +1090,45 @@ function strokeCameraMarker(
   }
   ctx.restore();
 }
+/**
+ * 初期開放セルを2Dキャンバスへ描画する。draw() 内でビュー変換適用後に呼ぶ。
+ * セル番号(cx, cy)はマップ左上(ワールド座標 -mapWidth/2, -mapHeight/2)を原点とする格子で、
+ * バックエンドの Terrain のセル番号と同じ並びである。hover は初期開放セル編集タブで
+ * カーソル下のセルに枠を出すためのもの(他タブでは null)。
+ */
+function fillInitialCells(
+  ctx: CanvasRenderingContext2D,
+  cells: readonly (readonly [number, number])[],
+  hover: readonly [number, number] | null,
+  mapWidth: number,
+  mapHeight: number,
+  cellSize: number,
+  lineWidth: number
+): void {
+  if (cellSize <= 0) return;
+  const originX = -mapWidth / 2;
+  const originZ = -mapHeight / 2;
+
+  ctx.save();
+  ctx.fillStyle = "rgba(120,220,255,0.22)";
+  ctx.strokeStyle = "rgba(120,220,255,0.9)";
+  ctx.lineWidth = lineWidth;
+  for (const [cx, cy] of cells) {
+    const x = originX + cx * cellSize;
+    const z = originZ + cy * cellSize;
+    ctx.fillRect(x, z, cellSize, cellSize);
+    ctx.strokeRect(x, z, cellSize, cellSize);
+  }
+
+  if (hover) {
+    ctx.setLineDash([lineWidth * 4, lineWidth * 4]);
+    ctx.strokeStyle = "rgba(255,255,255,0.9)";
+    ctx.strokeRect(originX + hover[0] * cellSize, originZ + hover[1] * cellSize, cellSize, cellSize);
+    ctx.setLineDash([]);
+  }
+  ctx.restore();
+}
+
 /** strokeRivers に渡す表示オプション(彫り込みプレビュー・水面表示・選択中の川)。 */
 type RiverDrawOptions = {
   /** 未彫り込みの川の、プレビュー地形上で抽出した範囲ポリゴン(川ID→範囲)。プレビュー無効なら空 */
@@ -1478,6 +1522,13 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   const [cameraMode, setCameraMode] = useState(false);
   const [cameraState, setCameraState] = useState<TerrainCameraPayload | null>(null);
 
+  // --- 初期開放セルのUI状態 ---
+  // 初期開放セル編集タブがアクティブな間は、左クリック=そのセルの開放/非開放をトグル、
+  // 右クリック=そのセルを外す、になる。実体は initialCellsRef、表示用ミラーが initialCellList。
+  // 空(未設定)ならゲーム側がマップ中央の2×2セルを開放して始める。
+  const [cellMode, setCellMode] = useState(false);
+  const [initialCellList, setInitialCellList] = useState<InitialCellPayload[]>([]);
+
   // --- 川編集のUI状態 ---
   // 川は「流路を計算」→一覧に未彫り込みとして追加→一覧で個別に削除・深さ調整・
   // 「彫る」で1本ずつ地形へ彫り込む、というフロー。計算は標高を一切変更せず、
@@ -1606,6 +1657,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     resourceAreas: EditorResourceArea[];
     props: TerrainProps;
     camera: TerrainCameraPayload | null;
+    initialCells: InitialCellPayload[];
   };
   const MAX_UNDO = 5;
   const undoStackRef = useRef<UndoState[]>([]);
@@ -1628,6 +1680,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       resourceAreas: resourceAreasRef.current.slice(),
       props: propEditor.current.data.current,
       camera: cameraRef.current,
+      initialCells: initialCellsRef.current.slice(),
     });
     if (undoStackRef.current.length > MAX_UNDO) undoStackRef.current.shift();
     redoStackRef.current = [];
@@ -1653,6 +1706,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         resourceAreas: resourceAreasRef.current.slice(),
         props: propEditor.current.data.current,
         camera: cameraRef.current,
+        initialCells: initialCellsRef.current.slice(),
       });
       if (redoStackRef.current.length > MAX_UNDO) redoStackRef.current.shift();
     }
@@ -1663,6 +1717,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     restoreResourceAreas(target.resourceAreas);
     propEditor.current.restore(target.props);
     restoreCamera(target.camera);
+    restoreInitialCells(target.initialCells);
     rebuildTerrainVisuals(target.elev, target.mapWidth, target.mapHeight, target.spacing, target.rows, target.cols);
     // 復元後の川リスト・地形で彫り込みプレビューを作り直す(川編集タブ以外では解除される)
     scheduleRiverPreviewRebuild();
@@ -1687,6 +1742,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         resourceAreas: resourceAreasRef.current.slice(),
         props: propEditor.current.data.current,
         camera: cameraRef.current,
+        initialCells: initialCellsRef.current.slice(),
       });
       if (undoStackRef.current.length > MAX_UNDO) undoStackRef.current.shift();
     }
@@ -1695,6 +1751,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     restoreResourceAreas(target.resourceAreas);
     propEditor.current.restore(target.props);
     restoreCamera(target.camera);
+    restoreInitialCells(target.initialCells);
     rebuildTerrainVisuals(target.elev, target.mapWidth, target.mapHeight, target.spacing, target.rows, target.cols);
     // 復元後の川リスト・地形で彫り込みプレビューを作り直す(川編集タブ以外では解除される)
     scheduleRiverPreviewRebuild();
@@ -1718,6 +1775,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     resourceMode,
     resourcePolygonClosed,
     cameraMode,
+    cellMode,
     riverPointerMode,
     riverParams,
     riverManualWidthHead,
@@ -1740,12 +1798,13 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       resourceMode,
       resourcePolygonClosed,
       cameraMode,
+      cellMode,
       riverPointerMode,
       riverParams,
       riverManualWidthHead,
       riverManualWidthTail,
     };
-  }, [shape, operation, brushParams, selectionFalloff, raiseLowerParams, flattenParams, noiseParams, featherWidth, polygonClosed, waterMode, waterLevelInput, waterPolygonClosed, resourceMode, resourcePolygonClosed, cameraMode, riverPointerMode, riverParams, riverManualWidthHead, riverManualWidthTail]);
+  }, [shape, operation, brushParams, selectionFalloff, raiseLowerParams, flattenParams, noiseParams, featherWidth, polygonClosed, waterMode, waterLevelInput, waterPolygonClosed, resourceMode, resourcePolygonClosed, cameraMode, cellMode, riverPointerMode, riverParams, riverManualWidthHead, riverManualWidthTail]);
 
   // 現在のブラシ中心(ワールド座標)。マウス移動の度に更新されるため ref で保持する。
   const brushWorldPosRef = useRef<WorldPoint | null>(null);
@@ -1773,6 +1832,11 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   // === カメラ初期状態の実体 ===
   // エクスポート(meta.json / terrain_maps.yaml の camera)の対象。3Dプレビューへは送らない。
   const cameraRef = useRef<TerrainCameraPayload | null>(null);
+
+  // === 初期開放セルの実体 ===
+  // エクスポート(meta.json / terrain_maps.yaml の initial_cells)の対象。3Dプレビューへは送らない。
+  // 空配列は「未設定」で、ゲームはマップ中央の2×2セルで始まる。
+  const initialCellsRef = useRef<InitialCellPayload[]>([]);
 
   // 資源種別の表示名の対応表。draw()(イベントハンドラのクロージャから呼ばれ、React state を
   // 直接読めない)がラベル描画に使うため、マスターデータの変化を ref へミラーする。
@@ -1977,8 +2041,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     // 水面モード・資源モード・川の作図/ノード編集中は標高編集のブラシ/ポリゴンプレビューは
     // 表示しない(操作が水面/資源/流路の作図に切り替わるため)。
     const previewLineW = 1.5 / v.zoom;
-    if (activeTabRef.current === "prop" || ts.waterMode || ts.resourceMode || ts.cameraMode || ts.riverPointerMode !== "rain") {
-      // 水面/資源/カメラ/流路編集モードでは何も描かない(それぞれ下の stroke* で描く)。
+    if (activeTabRef.current === "prop" || ts.waterMode || ts.resourceMode || ts.cameraMode || ts.cellMode || ts.riverPointerMode !== "rain") {
+      // 水面/資源/カメラ/初期開放セル/流路編集モードでは何も描かない(それぞれ下の stroke* で描く)。
     } else if (ts.shape === "polygon") {
       strokePolygonPreview(ctx, polygonPointsRef.current, ts.polygonClosed ? null : brushWorldPosRef.current, previewLineW);
     } else if (brushWorldPosRef.current) {
@@ -2017,6 +2081,19 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       resourceTypeLabel,
       ts.resourceMode ? resourcePointsRef.current : [],
       ts.resourceMode && !ts.resourcePolygonClosed ? brushWorldPosRef.current : null,
+      previewLineW
+    );
+
+    // 初期開放セル。常に表示し、初期開放セル編集タブのときだけカーソル下のセルに枠を出す。
+    fillInitialCells(
+      ctx,
+      initialCellsRef.current,
+      ts.cellMode && brushWorldPosRef.current
+        ? worldToCell(brushWorldPosRef.current.x, brushWorldPosRef.current.z)
+        : null,
+      s.mapWidth,
+      s.mapHeight,
+      cellGridIntervalRef.current,
       previewLineW
     );
 
@@ -2229,6 +2306,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     setWaterMode(tab === "water");
     setResourceMode(tab === "resource");
     setCameraMode(tab === "camera");
+    setCellMode(tab === "cell");
     if (tab !== "water") {
       // 水面編集モードを解除する際は、作図中の未確定の頂点データを破棄する
       waterPointsRef.current = [];
@@ -2519,6 +2597,80 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       if (typeof payload[key] !== "number" || !Number.isFinite(payload[key])) return null;
     }
     return { x: payload.x, y: payload.y, z: payload.z, yaw: payload.yaw, pitch: payload.pitch };
+  }
+
+  /* ============================================================================
+   * 初期開放セル(初期開放セル編集タブ)
+   *
+   * 左クリックでカーソル下のセルの開放/非開放をトグルし、右クリックで外す。
+   * ゲームは新規都市の開始時にこのセルだけを開放した状態で始まる(セルの並びは
+   * バックエンドの Terrain と同じで、マップ左上が (0, 0))。空なら未設定として扱われ、
+   * ゲーム側がマップ中央の2×2セルを開放する。
+   * ========================================================================== */
+
+  /** initialCellsRef を差し替えて表示用 state へミラーする。初期開放セルの変更は必ずここを通す。 */
+  function restoreInitialCells(cells: InitialCellPayload[]) {
+    initialCellsRef.current = cells;
+    setInitialCellList(cells);
+  }
+
+  /**
+   * ワールド座標 (wx, wz) を含むセル番号を返す。マップ外なら null。
+   * セル番号の原点(0, 0)はマップ左上(-mapWidth/2, -mapHeight/2)で、バックエンドの
+   * Terrain._validate_cell_coords と同じ範囲(0 <= cx < cells_x)に収まるものだけを返す。
+   */
+  function worldToCell(wx: number, wz: number): InitialCellPayload | null {
+    const s = settingsRef.current;
+    const size = cellGridIntervalRef.current;
+    if (!s || size <= 0) return null;
+    const cx = Math.floor((wx + s.mapWidth / 2) / size);
+    const cy = Math.floor((wz + s.mapHeight / 2) / size);
+    const cellsX = Math.round(s.mapWidth / size);
+    const cellsY = Math.round(s.mapHeight / size);
+    if (cx < 0 || cy < 0 || cx >= cellsX || cy >= cellsY) return null;
+    return [cx, cy];
+  }
+
+  /** カーソル下のセルの開放/非開放をトグルする(マップ外のクリックは無視する)。 */
+  function toggleInitialCellAt(wx: number, wz: number) {
+    const cell = worldToCell(wx, wz);
+    if (!cell) return;
+    const current = initialCellsRef.current;
+    const hit = current.findIndex(([cx, cy]) => cx === cell[0] && cy === cell[1]);
+    restoreInitialCells(hit >= 0 ? current.filter((_, i) => i !== hit) : [...current, cell]);
+    draw();
+  }
+
+  /** カーソル下のセルを初期開放セルから外す(選択されていなければ何もしない)。 */
+  function removeInitialCellAt(wx: number, wz: number) {
+    const cell = worldToCell(wx, wz);
+    if (!cell) return;
+    const next = initialCellsRef.current.filter(([cx, cy]) => cx !== cell[0] || cy !== cell[1]);
+    if (next.length === initialCellsRef.current.length) return;
+    restoreInitialCells(next);
+    draw();
+  }
+
+  /** 初期開放セルを空(未設定)に戻す。ゲームはマップ中央の2×2セルで始まる。 */
+  function clearInitialCells() {
+    restoreInitialCells([]);
+    draw();
+  }
+
+  /** 作業コピー(meta.json)・バックエンドの initial_cells を検証して復元する。 */
+  function deserializeInitialCells(payload: unknown): InitialCellPayload[] {
+    if (!Array.isArray(payload)) return [];
+    const result: InitialCellPayload[] = [];
+    for (const entry of payload) {
+      if (!Array.isArray(entry) || entry.length < 2) continue;
+      const cx = Number(entry[0]);
+      const cy = Number(entry[1]);
+      if (!Number.isFinite(cx) || !Number.isFinite(cy)) continue;
+      const cell: InitialCellPayload = [Math.trunc(cx), Math.trunc(cy)];
+      if (result.some(([x, y]) => x === cell[0] && y === cell[1])) continue;
+      result.push(cell);
+    }
+    return result;
   }
 
   function deserializeResourceAreas(payload: ResourceAreaPayload[] | undefined): EditorResourceArea[] {
@@ -3551,6 +3703,55 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   }
 
   /**
+   * 初期開放セルのセル番号を (dcx, dcz) だけ付け替える。マップリサイズ専用の補正処理。
+   *
+   * 初期開放セルはワールド座標ではなくセル番号なので、shiftVectorFeatures の平行移動では
+   * 追従できない。セル番号の原点が動くのは端にセルを足し引きした側(left/bottom)だけで、
+   * 反対側(right/top)は原点が動かないため番号も変わらない。新しいマップの外に出たセルは落とす。
+   */
+  function shiftInitialCells(dcx: number, dcz: number, cellsX: number, cellsY: number) {
+    const cells = initialCellsRef.current;
+    if (cells.length === 0) return;
+    restoreInitialCells(
+      cells
+        .map(([cx, cy]): InitialCellPayload => [cx + dcx, cy + dcz])
+        .filter(([cx, cy]) => cx >= 0 && cy >= 0 && cx < cellsX && cy < cellsY)
+    );
+  }
+
+  /**
+   * セルサイズ変更に合わせて初期開放セルのセル番号を付け替える。
+   * 旧セルが覆っていたワールド範囲に重なる新セルをすべて拾うため、セルを細かくすると分割され、
+   * 粗くすると統合される(セル格子はサイズに関係なくマップ隅を原点とするので、
+   * 番号の換算はマップ隅からの距離で行える)。
+   */
+  function remapInitialCellsToCellSize(prevSize: number, nextSize: number) {
+    const s = settingsRef.current;
+    const cells = initialCellsRef.current;
+    if (!s || cells.length === 0 || prevSize <= 0 || nextSize <= 0 || prevSize === nextSize) return;
+
+    const cellsX = Math.round(s.mapWidth / nextSize);
+    const cellsY = Math.round(s.mapHeight / nextSize);
+    const next: InitialCellPayload[] = [];
+    const seen = new Set<string>();
+    for (const [cx, cy] of cells) {
+      const x0 = Math.floor((cx * prevSize) / nextSize);
+      const x1 = Math.ceil(((cx + 1) * prevSize) / nextSize) - 1;
+      const z0 = Math.floor((cy * prevSize) / nextSize);
+      const z1 = Math.ceil(((cy + 1) * prevSize) / nextSize) - 1;
+      for (let nz = Math.max(0, z0); nz <= Math.min(cellsY - 1, z1); nz++) {
+        for (let nx = Math.max(0, x0); nx <= Math.min(cellsX - 1, x1); nx++) {
+          const key = `${nx},${nz}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          next.push([nx, nz]);
+        }
+      }
+    }
+    restoreInitialCells(next);
+  }
+
+  /**
    * マップサイズをセル単位で変更する(追加/削除)。
    * map_width/map_height は 2*cell_size 刻みで増減する。
    * 追加時は新規エリアを新規地形作成時と同じ初期標高(`NEW_TERRAIN_INITIAL_ELEVATION_M`、海面より低い)で埋め、
@@ -3652,6 +3853,16 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     else shiftZ = resizeAction === "add" ? -half : half;
     shiftVectorFeatures(shiftX, shiftZ);
 
+    // 標高の詰め替えでセル番号の原点が動くのは left / bottom 側だけ(上のループ参照)。
+    // 増減は常に2セル単位(2*cell_size)なので、その側に足し引きした分だけ番号をずらす。
+    const cellDelta = resizeAction === "add" ? 2 : -2;
+    shiftInitialCells(
+      resizeEdge === "left" ? cellDelta : 0,
+      resizeEdge === "bottom" ? cellDelta : 0,
+      Math.round(newMapWidth / cellSize),
+      Math.round(newMapHeight / cellSize),
+    );
+
     rebuildTerrainVisuals(newElev, newMapWidth, newMapHeight, s.spacing, newRows, newCols);
 
     setResizeStatus("ok");
@@ -3730,6 +3941,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         resources: serializeResourceAreas(),
         props: propEditor.current.data.current,
         camera: cameraRef.current,
+        initialCells: initialCellsRef.current,
       });
       setExportStatus("exported");
       // エクスポート先にterrain_maps.yamlが見つからなかった場合は、通知ポップアップで知らせる。
@@ -3811,8 +4023,9 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         setResourcePointCount(0);
         setResourcePolygonClosed(false);
 
-        // 作業コピー(meta.json)に保存されているカメラ初期状態を復元する。
+        // 作業コピー(meta.json)に保存されているカメラ初期状態・初期開放セルを復元する。
         restoreCamera(deserializeCamera(data.camera));
+        restoreInitialCells(deserializeInitialCells(data.initial_cells));
 
         setStatus("ready");
       } catch (error) {
@@ -3853,10 +4066,12 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, waterLevelInput, waterPolygonClosed]);
 
-  /** セルサイズ(メタデータ欄で編集可能)を変えたら、セル境界グリッドを再構築する */
+  /** セルサイズ(メタデータ欄で編集可能)を変えたら、セル境界グリッドと初期開放セルを作り直す */
   useEffect(() => {
     const s = settingsRef.current;
     if (status === "ready" && s && cellSize > 0) {
+      // 付け替えの基準になる変更前のセルサイズは cellGridIntervalRef が保持している。
+      remapInitialCellsToCellSize(cellGridIntervalRef.current, cellSize);
       cellGridPathRef.current = buildGridPath(s.mapWidth, s.mapHeight, cellSize);
       cellGridIntervalRef.current = cellSize;
       draw();
@@ -3913,6 +4128,13 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
           const rect = canvasEl.getBoundingClientRect();
           const [wx, wz] = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
           aimCameraAt(wx, wz);
+          return;
+        }
+        if (ts.cellMode) {
+          // 初期開放セルモード: 右クリックしたセルを初期開放セルから外す。
+          const rect = canvasEl.getBoundingClientRect();
+          const [wx, wz] = screenToWorld(e.clientX - rect.left, e.clientY - rect.top);
+          removeInitialCellAt(wx, wz);
           return;
         }
         if (ts.shape === "polygon" && polygonPointsRef.current.length >= 3 && !ts.polygonClosed) {
@@ -4035,6 +4257,9 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         } else if (ts.cameraMode) {
           // カメラモード: 左クリック位置にカメラを置く(向き・高さは維持)。
           placeCamera(wx, wz);
+        } else if (ts.cellMode) {
+          // 初期開放セルモード: 左クリックしたセルの開放/非開放をトグルする。
+          toggleInitialCellAt(wx, wz);
         } else if (ts.shape === "polygon") {
           if (!ts.polygonClosed) {
             addPolygonPoint(wx, wz);
@@ -4246,6 +4471,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
             <option value="resource">{t("terrainEditor.tabResource", { defaultValue: "資源編集" })}</option>
             <option value="prop">{t("terrainEditor.tabProp")}</option>
             <option value="camera">{t("terrainEditor.tabCamera", { defaultValue: "カメラ" })}</option>
+            <option value="cell">{t("terrainEditor.tabCell", { defaultValue: "初期開放セル" })}</option>
           </select>
         </div>
 
@@ -4760,6 +4986,40 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                     <div className="terrain-editor-hint">
                       {t("terrainEditor.cameraUnset", { defaultValue: "未設定です。キャンバスを左クリックしてカメラ位置を置いてください" })}
                     </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* 初期開放セルカード */}
+            {activeTab === "cell" && (
+              <div className="terrain-editor-card">
+                <div className="terrain-editor-card-title">{t("terrainEditor.cellTitle", { defaultValue: "初期開放セル" })}</div>
+                <div className="terrain-editor-section">
+                  <div className="terrain-editor-hint">
+                    {t("terrainEditor.cellHint", {
+                      defaultValue:
+                        "このマップで新規都市を始めたときに開放されているセルです。左クリックでセルを追加/解除、右クリックで解除。左ドラッグで画面移動。未設定のままならマップ中央の2×2セルで始まります",
+                    })}
+                  </div>
+                  <div className="terrain-editor-param-row">
+                    <span className="terrain-editor-param-label">{t("terrainEditor.cellCount", { defaultValue: "選択セル数" })}</span>
+                    <span className="terrain-editor-selection-status">{initialCellList.length}</span>
+                  </div>
+                  {initialCellList.length > 0 && (
+                    <>
+                      <div className="terrain-editor-param-row">
+                        <span className="terrain-editor-param-label">{t("terrainEditor.cellList", { defaultValue: "セル番号(cx, cy)" })}</span>
+                        <span className="terrain-editor-selection-status">
+                          {initialCellList.map(([cx, cy]) => `(${cx}, ${cy})`).join(" ")}
+                        </span>
+                      </div>
+                      <div className="terrain-editor-action-buttons">
+                        <button type="button" className="terrain-editor-btn" onClick={clearInitialCells}>
+                          {t("terrainEditor.cellClear", { defaultValue: "すべて解除(中央2×2に戻す)" })}
+                        </button>
+                      </div>
+                    </>
                   )}
                 </div>
               </div>

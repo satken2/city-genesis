@@ -202,3 +202,5 @@ RailYardBuildingMeshBuilderは1060とモノレール車庫1064で共通。幅2m�
 StationHousePathはpassage_mode=undergroundで通路の描画・コライダーを省き建屋だけ残す。全駅舎で3方式を許可し、2001/2011の上空・2003/2013の地上は専用body、それ以外は方式名パーツをバリアント→p20へ解決する。建屋の接続部との見た目の不一致は許容する。
 
 LrtRoadPartsは222/242の最内車線へ複線、303へ中央単線を追加する。lrt_track/lrt_wireは路面原点で実寸、lrt_poleは道路中心原点・Yawのみ。交差点は222/242/303/431同士だけを接続し、埋め込み側を含む場合はRailConnectorSpecの始終端高さで専用軌道との差を補間する。仕様はG文書、実FBX検証はTests/Lrt/run.ps1。
+
+RoadEquipmentGeneratorはbench/bin/planter/advertを個別の保存値とマスターの許可で配置する。304は中央島（ベンチだけ左右0.95mで外向き）、305は中央から左右4mの2列、303はLRT軌道の外側。架線柱の足元を予約し、各設備の位相と空間ハッシュで重なりを避ける。公開G文書§5.5、Tests/Lrt/run.ps1参照。
