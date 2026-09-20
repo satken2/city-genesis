@@ -3,6 +3,7 @@
 `powershell -NoProfile -File Tests/RoadSnapping/run.ps1` をUnityディレクトリで実行する。
 本編のランタイムアセンブリをビルドし、実際の `RoadParallelSnapGeometry` を呼ぶ。
 回転・方向反転・左右の配置、標高の保持、両端揃え、始点配置、閾値外、縮退区間を検証する。
+`PolylineUtils`も実アセンブリで検証する。2D距離、端点へのクランプ、XZと3Dの射影の違い、カーソルYへの非依存、ゼロ長・垂直・微小線分の縮退判定を確認する。
 
 Unity上では以下の操作も確認する。
 

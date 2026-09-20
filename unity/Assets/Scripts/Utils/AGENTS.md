@@ -4,6 +4,7 @@
 
 | ファイル | 内容 |
 | --- | --- |
+| `PolylineUtils.cs` | 線分の最近接点・距離計算の共通実装。引数は点・始点・終点の順。`ClosestPointOnSegment`はVector2/Vector3の各座標系、`ClosestPointOnSegmentXZ`は水平射影後にYを補間する。`DistanceToSegmentSq`はVector2の二乗距離。射影する座標系で長さの二乗が1e-8以下なら始点を返す。画面座標とワールド座標を混ぜない。`RoundCorners`は点列の角丸め |
 | `SpatialHash.cs` | 汎用の空間ハッシュ`SpatialHash<T>`。「半径r以内のオブジェクト候補抽出」はこれを使う(自前で全件走査しない) |
 | `ModelManager.cs` | モデルのロードとキャッシュ(シングルトン)。persistentDataPathのglTF/glbを優先し、なければ`Resources/Models`配下のプレハブにフォールバック。同じモデルを二度ロードしない。Resources側のプレハブは`Assets/Models`のFBXから自動生成される(unity直下AGENTS.mdの「モデルアセットの構成」参照) |
 | `GeneratedModelUtils.cs` | 自動生成スキーマ(GeneratedModels)関連の補助 |

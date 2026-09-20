@@ -111,9 +111,13 @@ public static class Constants
     public const int VARIANT_ELEMENRATY_SCHOOL = 200;
     public const int VARIANT_HOUSEHOLD = 300;
     public const int VARIANT_IMPORT = 400;
+    public const int VARIANT_FIRE_STATION = 1052;
+    public const int VARIANT_POLICE_STATION = 1053;
     public const int VARIANT_SOLAR_PLANT = 1054;
     public const int VARIANT_SUBSTATION = 1062;
     public const int VARIANT_APARTMENT = 2001;
+    public const int PATH_VARIANT_ROPEWAY = 601;
+    public const int PATH_VARIANT_ROPEWAY_STATION = 602;
     public const int PATH_VARIANT_GRID = 1101;
     public const int PRODUCT_CONSTRUCTION_SERVICE = 124;
     public const int PRODUCT_FIRE_SERVICE = 125;
@@ -346,6 +350,8 @@ public static class Constants
         { STATUS_COLLAPSED, "倒壊" },
         { STATUS_PENDING, "着工保留中" }
     };
+
+    public static readonly int[] OFF_MARKET_GOODS_TYPES = new int[] { GOODS_INFRASTRUCTURE, GOODS_TRANSIT };
 
     public static readonly int[] ALL_ROUTES = new int[] { ROUTE_PEDESTRIAN, ROUTE_AUTOMOBILE };
 

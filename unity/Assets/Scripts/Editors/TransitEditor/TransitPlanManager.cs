@@ -308,7 +308,7 @@ public class TransitPlanManager : MonoBehaviour
             if (!stopPathVariants.Contains(seg.path.path_variant)) continue;
             if (seg.path.status != Constants.STATUS_ACTIVE) continue;
 
-            Vector3 proj = ProjectPointOnSegmentXZ(worldPos, seg.a, seg.b);
+            Vector3 proj = PolylineUtils.ClosestPointOnSegmentXZ(worldPos, seg.a, seg.b);
             float dist = HorizontalDistance(worldPos, proj);
 
             float width = pathManager.GetRoadWidth(seg.path.path_variant);
@@ -328,17 +328,6 @@ public class TransitPlanManager : MonoBehaviour
             snapped = bestPoint;
         }
         return found;
-    }
-
-    /// <summary>点 p を線分 [a,b] へXZ平面で射影した点を返す(Yは a,b の補間)。</summary>
-    private static Vector3 ProjectPointOnSegmentXZ(Vector3 p, Vector3 a, Vector3 b)
-    {
-        Vector3 ab = new Vector3(b.x - a.x, 0f, b.z - a.z);
-        float abLenSq = ab.x * ab.x + ab.z * ab.z;
-        if (abLenSq < 1e-6f) return a;
-        Vector3 ap = new Vector3(p.x - a.x, 0f, p.z - a.z);
-        float t = Mathf.Clamp01((ap.x * ab.x + ap.z * ab.z) / abLenSq);
-        return new Vector3(a.x + ab.x * t, Mathf.Lerp(a.y, b.y, t), a.z + ab.z * t);
     }
 
     private static float HorizontalDistance(Vector3 a, Vector3 b)
@@ -391,7 +380,7 @@ public class TransitPlanManager : MonoBehaviour
             Vector3 s1 = cam.WorldToScreenPoint(stops[i]);
             Vector3 s2 = cam.WorldToScreenPoint(stops[i + 1]);
             if (s1.z < 0f || s2.z < 0f) continue;
-            float d = DistancePointToSegment2D(screenPos, new Vector2(s1.x, s1.y), new Vector2(s2.x, s2.y));
+            float d = Mathf.Sqrt(PolylineUtils.DistanceToSegmentSq(screenPos, new Vector2(s1.x, s1.y), new Vector2(s2.x, s2.y)));
             if (d < bestDist)
             {
                 bestDist = d;
@@ -399,16 +388,6 @@ public class TransitPlanManager : MonoBehaviour
             }
         }
         return best;
-    }
-
-    private static float DistancePointToSegment2D(Vector2 p, Vector2 a, Vector2 b)
-    {
-        Vector2 ab = b - a;
-        float abLenSq = ab.sqrMagnitude;
-        if (abLenSq < 1e-6f) return Vector2.Distance(p, a);
-        float t = Mathf.Clamp01(Vector2.Dot(p - a, ab) / abLenSq);
-        Vector2 proj = a + ab * t;
-        return Vector2.Distance(p, proj);
     }
 
     // =====================================================================

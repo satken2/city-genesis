@@ -126,7 +126,7 @@ public class MyObjectInputHandler : MonoBehaviour, IInputHandler
 - Sea には既に `VisualSeaObject`(`VisualHandlers/`)が付与されており、`InputObjectType.TERRAIN` として VisualModeHandler に登録済み。入力系もこれと同じタイプに揃える形。
 - `InputHandler.terrainLayerMask`(Layer 10 Groundのみ)には Water レイヤーが含まれないため、`UpdateTerrainPosition` での `posX/posZ` 更新には影響しない。海域では y=0 平面との交点フォールバックが効くため、`TerrainInputHandler.onClick` に渡る `clickPosition` は正しく算出される。
 
-パス吸着の位置射影はGetClosestPointOnSegmentXZを使う。カーソルの地形Yで勾配上のXZ位置をずらさず、標高は別途保存基準から解決する。
+パス吸着の位置射影は`PolylineUtils.ClosestPointOnSegmentXZ(point, start, end)`を使う。カーソルの地形Yで勾配上のXZ位置をずらさず、標高は別途保存基準から解決する。線分の幾何計算は入力ハンドラに持たせない。
 
 ## 公共交通の選択
 

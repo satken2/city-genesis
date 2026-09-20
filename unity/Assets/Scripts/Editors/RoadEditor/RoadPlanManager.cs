@@ -2178,7 +2178,7 @@ public partial class RoadPlanManager : MonoBehaviour
                         for (int sign = -1; sign <= 1; sign += 2)
                         {
                             Vector3 shift = perp * (offset * sign);
-                            Vector3 candidate = TerrainInputHandler.GetClosestPointOnSegmentXZ(seg.a - shift, seg.b - shift, basePos);
+                            Vector3 candidate = PolylineUtils.ClosestPointOnSegmentXZ(basePos, seg.a - shift, seg.b - shift);
                             float dist = Vector2.Distance(new Vector2(basePos.x, basePos.z), new Vector2(candidate.x, candidate.z));
                             if (dist < bestDist)
                             {
@@ -2236,7 +2236,7 @@ public partial class RoadPlanManager : MonoBehaviour
             }
             else if (!anyTouching)
             {
-                Vector3 closest = TerrainInputHandler.GetClosestPointOnSegment(seg.a, seg.b, targetPos);
+                Vector3 closest = PolylineUtils.ClosestPointOnSegment(targetPos, seg.a, seg.b);
                 float d = Vector2.Distance(targetXZ, new Vector2(closest.x, closest.z));
                 if (d < fallbackDist)
                 {
@@ -4579,7 +4579,7 @@ public partial class RoadPlanManager : MonoBehaviour
             {
                 Vector2 a = new Vector2(centerline[ci].x, centerline[ci].z);
                 Vector2 b = new Vector2(centerline[ci + 1].x, centerline[ci + 1].z);
-                if (SqDistancePointToSegmentXZ(fp, a, b) <= halfWidthSq) return true;
+                if (PolylineUtils.DistanceToSegmentSq(fp, a, b) <= halfWidthSq) return true;
             }
         }
 
@@ -4606,17 +4606,6 @@ public partial class RoadPlanManager : MonoBehaviour
         }
 
         return false;
-    }
-
-    /// <summary>点Pから線分ABまでのXZ平面上の距離の2乗。</summary>
-    private static float SqDistancePointToSegmentXZ(Vector2 p, Vector2 a, Vector2 b)
-    {
-        Vector2 ab = b - a;
-        float lenSq = ab.sqrMagnitude;
-        if (lenSq < 1e-9f) return (p - a).sqrMagnitude;
-        float t = Mathf.Clamp01(Vector2.Dot(p - a, ab) / lenSq);
-        Vector2 proj = a + t * ab;
-        return (p - proj).sqrMagnitude;
     }
 
     /// <summary>点PがXZポリゴン内部にあるか（レイキャスティング法）。</summary>

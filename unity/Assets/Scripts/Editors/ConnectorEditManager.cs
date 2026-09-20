@@ -425,7 +425,7 @@ public class ConnectorEditManager : MonoBehaviour
 
             Vector2 a = new Vector2(spNode.x, spNode.y);
             Vector2 b = new Vector2(spTop.x, spTop.y);
-            float d = DistancePointToSegment(screenPos, a, b);
+            float d = Mathf.Sqrt(PolylineUtils.DistanceToSegmentSq(screenPos, a, b));
 
             // 見かけの大きさに応じたヒット半径: 柱の画面投影長からピクセル/メートルを概算し、
             // 四角錐の底面半径ぶんの横幅(+余裕1.5倍)を確保する。遠距離では最低半径にフォールバック。
@@ -442,16 +442,6 @@ public class ConnectorEditManager : MonoBehaviour
             }
         }
         return best;
-    }
-
-    /// <summary>点 p からスクリーン上の線分 [a,b] までの距離(ピクセル)。</summary>
-    private static float DistancePointToSegment(Vector2 p, Vector2 a, Vector2 b)
-    {
-        Vector2 ab = b - a;
-        float lenSq = ab.sqrMagnitude;
-        if (lenSq < 1e-6f) return Vector2.Distance(p, a);
-        float t = Mathf.Clamp01(Vector2.Dot(p - a, ab) / lenSq);
-        return Vector2.Distance(p, a + ab * t);
     }
 
     /// <summary>

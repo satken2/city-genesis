@@ -18,6 +18,7 @@ internal static class Program
 
     private static void Main()
     {
+        CheckSegmentProjection();
         // 平行移動・回転・方向反転でも、横間隔と高さが不変で両端が揃うことを検証する。
         foreach (float degrees in new[] { 0f, 17f, 45f, 90f, 179f, 270f })
         foreach (int sign in new[] { -1, 1 })
@@ -68,5 +69,46 @@ internal static class Program
         Check(!RoadParallelSnapGeometry.TrySnap(new Vector3(50, 0, 20), null, origin, far, origin, far, true, 5,
             out _, out _, out _), "first point away from both ends is free");
         Console.WriteLine($"Road snapping: {checks} checks passed.");
+    }
+
+    private static void CheckSegmentProjection()
+    {
+        var a = new Vector3(0, 10, 0);
+        var b = new Vector3(10, 20, 0);
+        foreach (float y in new[] { -1000f, 0f, 1000f })
+        {
+            Near(PolylineUtils.ClosestPointOnSegmentXZ(new Vector3(4, y, 3), a, b),
+                new Vector3(4, 14, 0), "XZ projection ignores cursor height and interpolates endpoint height");
+        }
+        Near(PolylineUtils.ClosestPointOnSegment(new Vector3(4, 10, 3), a, b),
+            new Vector3(2, 12, 0), "3D projection includes height");
+        Near(PolylineUtils.ClosestPointOnSegmentXZ(new Vector3(-2, 0, 3), a, b), a, "clamp before start");
+        Near(PolylineUtils.ClosestPointOnSegmentXZ(new Vector3(12, 0, 3), a, b), b, "clamp after end");
+        Near(PolylineUtils.ClosestPointOnSegmentXZ(new Vector3(4, 0, 3), b, a),
+            new Vector3(4, 14, 0), "reversed segment");
+
+        var vertical = new Vector3(0, 20, 0);
+        Near(PolylineUtils.ClosestPointOnSegmentXZ(vertical, a, vertical), a, "vertical segment degenerates in XZ");
+        Near(PolylineUtils.ClosestPointOnSegment(vertical, a, vertical), vertical, "vertical segment valid in 3D");
+        Near(PolylineUtils.ClosestPointOnSegment(b, a, a), a, "zero length 3D remains finite");
+        Near(PolylineUtils.ClosestPointOnSegmentXZ(b, a, a), a, "zero length XZ remains finite");
+
+        Check(MathF.Abs(PolylineUtils.DistanceToSegmentSq(new Vector2(5, 3), Vector2.zero, new Vector2(10, 0)) - 9) < 1e-6f,
+            "2D perpendicular squared distance");
+        Check(MathF.Abs(PolylineUtils.DistanceToSegmentSq(new Vector2(13, 4), Vector2.zero, new Vector2(10, 0)) - 25) < 1e-6f,
+            "2D distance clamps to endpoint");
+        Check(MathF.Abs(PolylineUtils.DistanceToSegmentSq(new Vector2(3, 4), Vector2.zero, Vector2.zero) - 25) < 1e-6f,
+            "zero length 2D remains finite");
+        foreach (float length in new[] { 0.00005f, 0.0002f, 0.0005f })
+        {
+            var end = new Vector3(length, 0, 0);
+            float expected = length < 0.0001f ? 0 : length;
+            Check(MathF.Abs(PolylineUtils.ClosestPointOnSegmentXZ(end, Vector3.zero, end).x - expected) < 1e-8f,
+                "XZ tiny segment threshold");
+            Check(MathF.Abs(PolylineUtils.ClosestPointOnSegment(end, Vector3.zero, end).x - expected) < 1e-8f,
+                "3D tiny segment threshold");
+            Check(MathF.Abs(PolylineUtils.ClosestPointOnSegment(new Vector2(length, 0), Vector2.zero, new Vector2(length, 0)).x - expected) < 1e-8f,
+                "2D tiny segment threshold");
+        }
     }
 }

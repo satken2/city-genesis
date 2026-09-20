@@ -23,12 +23,7 @@ public static class RoadParallelSnapGeometry
 
     public static float SegmentDistance(Vector3 position, Vector3 a, Vector3 b)
     {
-        Vector3 d = b - a;
-        d.y = 0;
-        Vector3 delta = position - a;
-        delta.y = 0;
-        float t = d.sqrMagnitude < 1e-6f ? 0 : Mathf.Clamp01(Vector3.Dot(delta, d) / d.sqrMagnitude);
-        return DistanceXZ(position, a + d * t);
+        return DistanceXZ(position, PolylineUtils.ClosestPointOnSegmentXZ(position, a, b));
     }
 
     /// <summary>

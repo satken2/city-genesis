@@ -2,11 +2,48 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// ポリライン(点列)に対する幾何ユーティリティ。
-/// 公共交通オーバーレイが下地パスを連結した経路の角を丸めるために使う。
+/// 線分の最近接点・距離と、ポリライン(点列)の角丸めを扱う幾何ユーティリティ。
 /// </summary>
 public static class PolylineUtils
 {
+    // 長さ0.0001座標単位以下は始点として扱う。ワールドでは0.1mm、画面では0.0001px。
+    private const float DEGENERATE_LENGTH_SQ = 1e-8f;
+
+    private static float ProjectionParameter(float dot, float lengthSq)
+    {
+        return lengthSq <= DEGENERATE_LENGTH_SQ ? 0f : Mathf.Clamp01(dot / lengthSq);
+    }
+
+    /// <summary>同じ2D座標系の点と線分を渡す。スクリーン座標の場合は単位がピクセルになる。</summary>
+    public static Vector2 ClosestPointOnSegment(Vector2 point, Vector2 start, Vector2 end)
+    {
+        Vector2 delta = end - start;
+        float t = ProjectionParameter(Vector2.Dot(point - start, delta), delta.sqrMagnitude);
+        return start + delta * t;
+    }
+
+    /// <summary>高さも含む3D距離で射影する。地形上のカーソルの水平吸着にはXZ版を使う。</summary>
+    public static Vector3 ClosestPointOnSegment(Vector3 point, Vector3 start, Vector3 end)
+    {
+        Vector3 delta = end - start;
+        float t = ProjectionParameter(Vector3.Dot(point - start, delta), delta.sqrMagnitude);
+        return start + delta * t;
+    }
+
+    /// <summary>XZだけで射影位置を決め、Yは両端から補間する。XZが縮退した場合は始点を返す。</summary>
+    public static Vector3 ClosestPointOnSegmentXZ(Vector3 point, Vector3 start, Vector3 end)
+    {
+        Vector2 delta = new Vector2(end.x - start.x, end.z - start.z);
+        Vector2 offset = new Vector2(point.x - start.x, point.z - start.z);
+        float t = ProjectionParameter(Vector2.Dot(offset, delta), delta.sqrMagnitude);
+        return Vector3.Lerp(start, end, t);
+    }
+
+    public static float DistanceToSegmentSq(Vector2 point, Vector2 start, Vector2 end)
+    {
+        return (point - ClosestPointOnSegment(point, start, end)).sqrMagnitude;
+    }
+
     // これ以下の曲がり角は「ほぼ直線」とみなして丸めず素通しする(度)。
     private const float STRAIGHT_ANGLE_DEG = 4f;
 

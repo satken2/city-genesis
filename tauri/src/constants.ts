@@ -106,9 +106,13 @@ export const VARIANT_CENTRAL_BANK: number = 101;
 export const VARIANT_ELEMENRATY_SCHOOL: number = 200;
 export const VARIANT_HOUSEHOLD: number = 300;
 export const VARIANT_IMPORT: number = 400;
+export const VARIANT_FIRE_STATION: number = 1052;
+export const VARIANT_POLICE_STATION: number = 1053;
 export const VARIANT_SOLAR_PLANT: number = 1054;
 export const VARIANT_SUBSTATION: number = 1062;
 export const VARIANT_APARTMENT: number = 2001;
+export const PATH_VARIANT_ROPEWAY: number = 601;
+export const PATH_VARIANT_ROPEWAY_STATION: number = 602;
 export const PATH_VARIANT_GRID: number = 1101;
 export const PRODUCT_CONSTRUCTION_SERVICE: number = 124;
 export const PRODUCT_FIRE_SERVICE: number = 125;
@@ -339,6 +343,8 @@ export const STATUS_NAME_MAP: Record<number, string> = {
   10: "倒壊",
   11: "着工保留中",
 };
+
+export const OFF_MARKET_GOODS_TYPES: number[] = [4, 5];
 
 export const ALL_ROUTES: number[] = [0, 1];
 

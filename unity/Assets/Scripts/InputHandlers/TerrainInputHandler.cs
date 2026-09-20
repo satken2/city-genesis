@@ -855,7 +855,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
             // インフラ網の互換性フィルタ（道路×インフラ、別網インフラ同士は吸着しない）
             if (seg.path != null && !InfraNetworkUtil.IsPathSnappable(seg.path.path_variant, drawingPathVariant)) continue;
 
-            Vector3 closest = GetClosestPointOnSegmentXZ(seg.a, seg.b, basePos);
+            Vector3 closest = PolylineUtils.ClosestPointOnSegmentXZ(basePos, seg.a, seg.b);
             float dist = Vector2.Distance(new Vector2(basePos.x, basePos.z), new Vector2(closest.x, closest.z));
             if (dist < minDist && dist <= threshold)
             {
@@ -985,27 +985,6 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         return found;
     }
 
-    /// <summary>カーソルの地形Yで吸着位置が縦断方向へずれないよう、XZで射影する。</summary>
-    public static Vector3 GetClosestPointOnSegmentXZ(Vector3 start, Vector3 end, Vector3 point)
-    {
-        Vector2 delta = new Vector2(end.x - start.x, end.z - start.z);
-        float t = delta.sqrMagnitude > 1e-8f
-            ? Mathf.Clamp01(Vector2.Dot(new Vector2(point.x - start.x, point.z - start.z), delta) / delta.sqrMagnitude) : 0f;
-        return Vector3.Lerp(start, end, t);
-    }
-
-    public static Vector3 GetClosestPointOnSegment(Vector3 segStart, Vector3 segEnd, Vector3 point)
-    {
-        Vector3 seg = segEnd - segStart;
-        float segLenSqr = seg.sqrMagnitude;
-        if (segLenSqr < 1e-6f)
-        {
-            return segStart;
-        }
-        float t = Vector3.Dot(point - segStart, seg) / segLenSqr;
-        t = Mathf.Clamp01(t);
-        return segStart + seg * t;
-    }
     
     #endregion
 }
