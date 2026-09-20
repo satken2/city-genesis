@@ -334,6 +334,51 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     requiredText: "地理院タイル（標高タイル（基盤地図情報数値標高モデル））を加工して作成",
     note: "Terrain maps: kumejima, iejima, ikishima, naoshima, chichijima. Resampled to a 10 m metric grid, small islets removed and sea floor synthesized. License verified 2026-09-18.",
   },
+  {
+    title: "3DEP Bare Earth DEM (Manhattan)",
+    category: "data",
+    source: "U.S. Geological Survey, National Geospatial Program",
+    url: "https://www.usgs.gov/3d-elevation-program",
+    license: "U.S. Public Domain",
+    requiredText: "Map services and data available from U.S. Geological Survey, National Geospatial Program.",
+    note: "Terrain map: manhattan. Data has been modified: reprojected to a 10 m metric grid, cropped to Manhattan Island, small islets removed and sea floor synthesized. Not approved or endorsed by the USGS. License verified 2026-09-20.",
+  },
+  {
+    title: "Digital Terrain Model (DTM), 5m grid (Hong Kong Island)",
+    category: "data",
+    source: "Survey and Mapping Office, Lands Department, HKSAR Government / DATA.GOV.HK",
+    url: "https://data.gov.hk/en-data/dataset/hk-landsd-openmap-5m-grid-dtm",
+    license: "DATA.GOV.HK Terms and Conditions of Use — https://data.gov.hk/en/terms-and-conditions",
+    requiredText: "Contains Digital Terrain Model (DTM) data provided by the Survey and Mapping Office, Lands Department of the Government of the Hong Kong Special Administrative Region, obtained from DATA.GOV.HK. The intellectual property rights in the Data are owned by the Government of the Hong Kong Special Administrative Region and the Relevant Organisations.",
+    note: "Terrain map: hongkong. Data has been modified: converted from HK1980 Grid to a 10 m metric grid, cropped to Hong Kong Island, small islets removed and sea floor synthesized. License verified 2026-09-20.",
+  },
+  {
+    title: "Copernicus DEM GLO-30 (Santorini)",
+    category: "data",
+    source: "Copernicus / ESA / Airbus Defence and Space GmbH / DLR",
+    url: "https://registry.opendata.aws/copernicus-dem/",
+    license: "Licence for Copernicus DEM instance COP-DEM-GLO-30-F (Global 30m Full, Free & Open)",
+    requiredText:
+      "produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved\n" +
+      "The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30",
+    note: "Terrain map: santorini. Data has been modified: resampled to a 10 m metric grid, cropped to the Santorini caldera group and sea floor synthesized. Not endorsed by Copernicus, ESA or Airbus. License verified 2026-09-20.",
+  },
+  {
+    title: "ASTER Global Digital Elevation Map",
+    category: "data",
+    source: "NASA / METI / AIST / Japan Space Systems / U.S.-Japan ASTER Science Team",
+    url: "https://asterweb.jpl.nasa.gov/gdem.asp",
+    requiredText: "ASTER Global Digital Elevation Map, NASA/METI/AIST/Japan Space Systems, and U.S./Japan ASTER Science Team",
+    note: "Void-fill pixels inside Copernicus DEM GLO-30, present on land in terrain map santorini.",
+  },
+  {
+    title: "SRTM Digital Elevation Data",
+    category: "data",
+    source: "NASA / U.S. Geological Survey",
+    url: "https://doi.org/10.5067/MEaSUREs/SRTM/SRTMGL1.003",
+    requiredText: "SRTM Digital Elevation Data produced by NASA and the U.S. Geological Survey",
+    note: "Void-fill pixels inside Copernicus DEM GLO-30, present on land in terrain map santorini.",
+  },
 ];
 
 /**

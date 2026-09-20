@@ -180,30 +180,35 @@ export function useMapNavigation(apiBaseUrl: string, mapRef: RefObject<CityMapCa
   }, [url, picking, directions, select, status?.busy]);
   const draw = useCallback((ctx: CanvasRenderingContext2D, view: CityMapViewState) => {
     const px = (n: number) => n / view.zoom;
+    // Canvasもサイドバーと同じゲーム共通の配色を使う。公共交通の路線色は個別設定を優先する。
+    const style = getComputedStyle(document.documentElement);
+    const color = (token: string) => style.getPropertyValue(`--flat-${token}`).trim();
+    const palette = { outline: color("sunken"), route: color("accent"), walk: color("text-label"), origin: color("good"), destination: color("warn") };
     ctx.save(); ctx.lineJoin = "round"; ctx.lineCap = "round";
     route?.legs?.forEach((leg, index) => {
       if (!leg.points.length) return;
       const walk = leg.kind === "walk" || leg.kind === "access";
       ctx.beginPath(); leg.points.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
       ctx.globalAlpha = activeLeg !== null && activeLeg !== index ? 0.35 : 1;
-      ctx.setLineDash([]); ctx.strokeStyle = "#ffffff"; ctx.lineWidth = px(activeLeg === index ? 10 : 8); ctx.stroke();
+      ctx.setLineDash([]); ctx.strokeStyle = palette.outline; ctx.lineWidth = px(activeLeg === index ? 10 : 8); ctx.stroke();
       ctx.setLineDash(walk ? [px(2), px(8)] : []);
-      ctx.strokeStyle = leg.color && /^#[0-9a-f]{6}$/i.test(leg.color) ? leg.color : walk ? "#5a7695" : "#4285f4";
+      ctx.strokeStyle = leg.color && /^#[0-9a-f]{6}$/i.test(leg.color) ? leg.color : walk ? palette.walk : palette.route;
       ctx.lineWidth = px(activeLeg === index ? 7 : 5); ctx.stroke();
     });
     ctx.globalAlpha = 1; ctx.setLineDash([]);
     const marker = (place: Place, color: string, label: string) => {
       if (place.polygon.length) {
         ctx.beginPath(); place.polygon.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
-        ctx.closePath(); ctx.fillStyle = `${color}30`; ctx.fill(); ctx.strokeStyle = color; ctx.lineWidth = px(2); ctx.stroke();
+        ctx.closePath(); ctx.fillStyle = color; ctx.globalAlpha = 0.18; ctx.fill(); ctx.globalAlpha = 1;
+        ctx.strokeStyle = color; ctx.lineWidth = px(2); ctx.stroke();
       }
       ctx.beginPath(); ctx.arc(place.x, place.z, px(11), 0, Math.PI * 2);
-      ctx.fillStyle = color; ctx.fill(); ctx.strokeStyle = "white"; ctx.lineWidth = px(3); ctx.stroke();
-      ctx.save(); ctx.translate(place.x, place.z); ctx.scale(1, -1); ctx.fillStyle = "white";
+      ctx.fillStyle = color; ctx.fill(); ctx.strokeStyle = palette.outline; ctx.lineWidth = px(3); ctx.stroke();
+      ctx.save(); ctx.translate(place.x, place.z); ctx.scale(1, -1); ctx.fillStyle = palette.outline;
       ctx.font = `bold ${px(12)}px sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(label, 0, 0); ctx.restore();
     };
-    if (directions && origin) marker(origin, "#188038", "A");
-    if (destination) marker(destination, "#ea4335", directions ? "B" : "•");
+    if (directions && origin) marker(origin, palette.origin, "A");
+    if (destination) marker(destination, palette.destination, directions ? "B" : "•");
     ctx.restore();
   }, [route, activeLeg, origin, destination, directions]);
   const displayName = (p: Place) => p.name || (p.kind === "point" ? t("mapNavigation.mapPoint") :
