@@ -299,3 +299,7 @@ PathMasterItem.house_placementはoutside/insideを受信する。駅舎の個別
 TransitOverlayManagerはRoute.VehicleTypeを設定し、LRTのハイライトをLrtRoadPartsの軌道位置へ合わせる。バスとLRTが同じ道路を使っても走行車線を混同しない。
 
 PathMasterItemの設備項目は街灯・柵・街路樹・配線方式に加えbench_type/bin_type/planter_type/advert_typeの各*_allowed/default_*を持つ。個別Pathの値はAPI生成型で受け、描画設定はRoadEquipmentGeneratorが解釈する。
+
+## 都市外背景
+
+`TerrainManager.Background.cs` は任意の50m格子をチャンクメッシュで描画し、都市外設備の接地標高も提供する。詳細地形の常駐セルは都市内に限るが、LodConfigの設備取得範囲とカメラの可動範囲・遠方クリップ距離には背景を含める。背景は編集しない。仕様は `docs/docs/geometries/D_地形形状.md`。

@@ -266,10 +266,15 @@ export async function sendEditBuildingUpdateVisualVariant(
  * 既存建物コピー建設で、コピー元建物の選択モードを Unity 側で開始させる。
  * Unity は建物だけをクリック可能(MODE_PICK_BUILDING)にし、建物が選ばれると
  * `building_construction:copy_source` を UI へ返す。
+ *
+ * Unity側のこのモードは「既存の建物を1つ選ぶ」だけの汎用動作なので、テンプレートモードの
+ * 経済主体作成パネル(入居先建物の選択)も同じ経路を使う。`windowType` は送信元の識別用で、
+ * Unityの動作は変わらない。同じ通知を複数のパネルが受けないよう、この経路を使うウィンドウは
+ * `window-mutex-groups.json` で同時に開けないようにしてある。
  */
-export async function sendPickCopySource(): Promise<void> {
+export async function sendPickCopySource(windowType: string = "building_construction"): Promise<void> {
   await invoke("send_window_action", {
-    windowType: "building_construction",
+    windowType,
     entity: null,
     action: "building_construction:pick_source",
     params: {},
@@ -1158,6 +1163,8 @@ export const IPC_EVENT_EDIT_BUILDING_INVALID_PARCEL = "edit_building:invalid_par
  * 既存建物コピー建設のコピー元選択モードで、コピー元の建物が選択された。
  * ペイロードは { source_agent_id, variant, floors, visual_variant, visual_variant2, visual_variant3 }。
  * パネルはこれをシードして STATE_EDIT_BUILDING の区画選択フローへ遷移する。
+ * 経済主体作成パネル(`agent_creation`)も `sendPickCopySource` 経由でこの通知を受け、
+ * source_agent_id を入居先建物として扱う(他のフィールドは使わない)。
  */
 export const IPC_EVENT_BUILDING_CONSTRUCTION_COPY_SOURCE = "building_construction:copy_source";
 

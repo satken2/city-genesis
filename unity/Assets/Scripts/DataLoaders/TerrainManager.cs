@@ -13,7 +13,7 @@ using Newtonsoft.Json;
 /// ・超近景: /api/v1/terrain/dynamic?bbox=... （セル単位、最高解像度、404時は近景にフォールバック）
 /// ・セルサイズは /api/v1/terrain/settings から遅延取得
 /// </summary>
-public class TerrainManager : BaseApiDataManager
+public partial class TerrainManager : BaseApiDataManager
 {
     // タイル生成完了を通知するイベント
     public static System.Action<Vector2Int, Terrain> OnTerrainTileReady;
@@ -432,6 +432,13 @@ public class TerrainManager : BaseApiDataManager
         float dz = Mathf.Abs(position.z) + terrainSettings.map_height * 0.5f;
         float dy = Mathf.Max(Mathf.Abs(position.y + SeaFloorDepthSpan),
             Mathf.Abs(position.y - (terrainSize.y - SeaFloorDepthSpan + ultraFarHeightOffset)));
+        if (backgroundHeights != null)
+        {
+            dy = Mathf.Max(dy, Mathf.Max(Mathf.Abs(position.y-backgroundMinHeight), Mathf.Abs(position.y-backgroundMaxHeight)));
+            Rect bounds = BackgroundBounds;
+            dx = Mathf.Max(dx, Mathf.Max(Mathf.Abs(position.x-bounds.xMin), Mathf.Abs(position.x-bounds.xMax)));
+            dz = Mathf.Max(dz, Mathf.Max(Mathf.Abs(position.z-bounds.yMin), Mathf.Abs(position.z-bounds.yMax)));
+        }
         float requiredDistance = new Vector3(dx, dy, dz).magnitude + CellSize;
         if (camera.farClipPlane < requiredDistance) camera.farClipPlane = requiredDistance;
     }
@@ -715,6 +722,7 @@ public class TerrainManager : BaseApiDataManager
 
     public override void ClearAllCells()
     {
+        ClearBackground();
         currentLoadBatch?.Cancel();
         if (loadLodCellsCoroutine != null)
         {
@@ -825,8 +833,10 @@ public class TerrainManager : BaseApiDataManager
         long revision = 0;
         foreach (int version in versions.Values) revision += version;
         yield return EnsureOverview(revision, batch);
+        yield return EnsureBackground(batch);
         if (batch.IsCanceled) yield break;
         var desired = new HashSet<Vector2Int>(cellSets.farCells);
+        desired.RemoveWhere(cell => !IsCityCell(cell));
         var remove = new List<Vector2Int>();
         foreach (var cell in loadedCells) if (!desired.Contains(cell)) remove.Add(cell);
         foreach (var cell in remove)
@@ -1679,6 +1689,7 @@ public class TerrainManager : BaseApiDataManager
     /// </summary>
     public bool TryGetCellHeightRange(Vector2Int cellIndex, out float minY, out float maxY)
     {
+        if (!IsCityCell(cellIndex) && TryGetBackgroundHeightRange(cellIndex, out minY, out maxY)) return true;
         minY = -SeaFloorDepthSpan;
         maxY = terrainSize.y - SeaFloorDepthSpan;
 
@@ -1737,7 +1748,7 @@ public class TerrainManager : BaseApiDataManager
         if (farTerrainHeights == null || terrainSettings == null) return false;
         float u = (position.x + GetMapWidth()*.5f)/GetMapWidth();
         float v = (position.z + GetMapHeight()*.5f)/GetMapHeight();
-        if (u < 0 || u > 1 || v < 0 || v > 1) return false;
+        if (u < 0 || u > 1 || v < 0 || v > 1) return TrySampleBackground(position, out height);
         int cols = farTerrainHeights.GetLength(1), rows = farTerrainHeights.GetLength(0);
         height = CatmullRomInterpolateArray(farTerrainHeights, u*(cols-1), v*(rows-1), cols, rows) * terrainSize.y - SeaFloorDepthSpan;
         return true;

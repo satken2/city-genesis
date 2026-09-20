@@ -909,7 +909,7 @@ public class CameraController : MonoBehaviour
     }
 
     /// <summary>
-    /// カメラをマップ範囲（標高マップの範囲 = /terrain/settings の map_width × map_height）の外へ出さないようクランプする。
+    /// カメラを詳細地形と背景地形を合わせた範囲にクランプする。
     /// マップは中心が原点のワールド座標で扱われる（CameraCellChecker / UnityCellToBackendCell と同じ慣習）ため、
     /// 有効範囲は X が [-mapWidth/2, +mapWidth/2]、Z が [-mapHeight/2, +mapHeight/2] となる。
     /// TerrainManager が存在しないシーン（メッシュテスト等）ではクランプを行わない。
@@ -930,8 +930,9 @@ public class CameraController : MonoBehaviour
         float halfHeight = terrainManagerRef.GetMapHeight() / 2f;
 
         Vector3 pos = transform.position;
-        pos.x = Mathf.Clamp(pos.x, -halfWidth, halfWidth);
-        pos.z = Mathf.Clamp(pos.z, -halfHeight, halfHeight);
+        Rect background = terrainManagerRef.BackgroundBounds;
+        pos.x = Mathf.Clamp(pos.x, Mathf.Min(-halfWidth, background.xMin), Mathf.Max(halfWidth, background.xMax));
+        pos.z = Mathf.Clamp(pos.z, Mathf.Min(-halfHeight, background.yMin), Mathf.Max(halfHeight, background.yMax));
         transform.position = pos;
     }
 

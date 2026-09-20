@@ -30,6 +30,35 @@
       "multiple_intersections": "多次交叉",
       "elevation_conflict": "立體交叉衝突",
       "other": "其他"
+    },
+    "agentCreation": {
+      "hint": "選擇種類與變體，按下「選擇建築」，然後在3D檢視中點擊要進駐的建築。",
+      "agentType": "種類",
+      "typeStandard": "民間設施",
+      "typeTrade": "進出口據點",
+      "variant": "變體",
+      "noVariants": "沒有可選擇的變體",
+      "building": "進駐建築",
+      "pickBuilding": "選擇建築",
+      "picking": "請在3D檢視中點擊建築…",
+      "cancelPick": "取消選擇",
+      "noBuilding": "未選擇",
+      "buildingInfo": "{{name}}（{{floors}}層 · 每層 {{area}} m²）",
+      "loadingBuilding": "正在取得建築資訊…",
+      "notSharedBuilding": "此建築不是共用建築，無法進駐。",
+      "statusUnavailable": "只能進駐營運中或暫停中的建築。",
+      "noSpaceType": "此建築沒有所選種類的空餘樓層空間。",
+      "alreadyOccupied": "非共享建築已有進駐者，無法進駐。",
+      "vacancy": "空餘：{{floors}}層（{{area}} m²）",
+      "fullOccupancy": "非共享建築將佔用全部樓層（{{floors}}層 · {{area}} m²）。",
+      "floors": "佔用層數",
+      "occupiedArea": "佔用面積：{{area}} m²",
+      "belowSpaceMin": "低於此種類的最小面積 {{min}} m²。",
+      "aboveSpaceMax": "超過此種類的最大面積 {{max}} m²。",
+      "create": "建立",
+      "creating": "建立中…",
+      "created": "已建立 {{name}}（{{area}} m² · {{floors}}層）",
+      "createFailed": "建立經濟主體失敗"
     }
   }
 }

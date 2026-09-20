@@ -30,6 +30,35 @@
       "multiple_intersections": "複数回交差",
       "elevation_conflict": "立体交差の衝突",
       "other": "その他"
+    },
+    "agentCreation": {
+      "hint": "種別とバリアントを選び、「建物を選択」を押してから3Dビューで入居先の建物をクリックしてください。",
+      "agentType": "種別",
+      "typeStandard": "民間施設",
+      "typeTrade": "輸出入拠点",
+      "variant": "バリアント",
+      "noVariants": "選択できるバリアントがありません",
+      "building": "入居先の建物",
+      "pickBuilding": "建物を選択",
+      "picking": "3Dビューで建物をクリックしてください…",
+      "cancelPick": "選択をやめる",
+      "noBuilding": "未選択",
+      "buildingInfo": "{{name}}（{{floors}}階・1フロア {{area}} m²）",
+      "loadingBuilding": "建物情報を取得中…",
+      "notSharedBuilding": "この建物は共用建物ではないため入居させられません。",
+      "statusUnavailable": "稼働中か休止中の建物にのみ入居させられます。",
+      "noSpaceType": "この建物には選択した種別の空き床がありません。",
+      "alreadyOccupied": "非共有建物のため、既に入居者がいると入居できません。",
+      "vacancy": "空き: {{floors}}階分（{{area}} m²）",
+      "fullOccupancy": "非共有建物のため全床（{{floors}}階・{{area}} m²）を占有します。",
+      "floors": "占有階数",
+      "occupiedArea": "占有面積: {{area}} m²",
+      "belowSpaceMin": "この種別の最小面積 {{min}} m² を下回っています。",
+      "aboveSpaceMax": "この種別の最大面積 {{max}} m² を超えています。",
+      "create": "作成",
+      "creating": "作成中…",
+      "created": "{{name}} を作成しました（{{area}} m²・{{floors}}階分）",
+      "createFailed": "経済主体の作成に失敗しました"
     }
   }
 }

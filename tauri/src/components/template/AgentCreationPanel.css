@@ -1,0 +1,168 @@
+/* 経済主体作成パネル。路地作成ウィンドウ(StreetGridWindow.css)と同じ配色・寸法感で揃える */
+
+.agent-creation {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 12px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  background: #0f1420;
+  color: #cdd6f4;
+  font-size: 0.78rem;
+}
+
+.agent-creation__hint {
+  margin: 0;
+  color: #93a9c0;
+  line-height: 1.5;
+}
+
+.agent-creation__section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  background: #171c2c;
+  border: 1px solid #2a3149;
+  border-radius: 4px;
+}
+
+.agent-creation__label {
+  font-size: 0.72rem;
+  color: #93a9c0;
+}
+
+.agent-creation__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.agent-creation__row input[type="range"] {
+  flex: 1;
+  min-width: 120px;
+}
+
+.agent-creation__select,
+.agent-creation__number {
+  padding: 3px 6px;
+  border: 1px solid #2a3149;
+  border-radius: 4px;
+  background: #1b2135;
+  color: #cdd6f4;
+  font-size: 0.78rem;
+}
+
+.agent-creation__select {
+  width: 100%;
+}
+
+.agent-creation__number {
+  width: 64px;
+  text-align: right;
+}
+
+.agent-creation__description {
+  margin: 0;
+  color: #6c7a94;
+  line-height: 1.4;
+}
+
+/* 種別の二択はセグメント式のトグルで、選択中だけ面を明るくする */
+.agent-creation__seg {
+  display: inline-flex;
+  border: 1px solid #2a3149;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.agent-creation__seg-btn {
+  padding: 4px 12px;
+  border: none;
+  background: #1b2135;
+  color: #93a9c0;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.agent-creation__seg-btn + .agent-creation__seg-btn {
+  border-left: 1px solid #2a3149;
+}
+
+.agent-creation__seg-btn--active {
+  background: #3a5a9a;
+  color: #cdd6f4;
+}
+
+.agent-creation__seg-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.agent-creation__building {
+  flex: 1;
+  min-width: 0;
+  color: #cdd6f4;
+}
+
+.agent-creation__note {
+  margin: 0;
+  color: #93a9c0;
+}
+
+.agent-creation__warn {
+  margin: 0;
+  color: #f9e2af;
+}
+
+.agent-creation__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.agent-creation__btn {
+  padding: 4px 12px;
+  border: 1px solid #2a3149;
+  border-radius: 4px;
+  background: #1b2135;
+  color: #cdd6f4;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.agent-creation__btn:hover:not(:disabled) {
+  background: #26324f;
+  border-color: #4f6ba8;
+}
+
+.agent-creation__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.agent-creation__btn--primary {
+  background: #3a5a9a;
+  border-color: #4f6ba8;
+}
+
+.agent-creation__btn--primary:hover:not(:disabled) {
+  background: #4668b5;
+}
+
+.agent-creation__message {
+  padding: 6px 10px;
+  border-radius: 4px;
+  background: rgba(58, 90, 154, 0.25);
+  color: #cdd6f4;
+  line-height: 1.4;
+}
+
+.agent-creation__message--error {
+  background: rgba(243, 139, 168, 0.18);
+  color: #f38ba8;
+}

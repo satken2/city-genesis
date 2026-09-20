@@ -658,11 +658,9 @@ async fn copy_terrain_for_editor(
     };
     let resources = terrain_editor_resources(&resource_document)?;
 
-    let features: serde_json::Value = if original {
-        serde_json::json!({"water_surfaces": [], "rivers": [], "camera": null})
-    } else {
+    let features: serde_json::Value = {
         client
-            .get(format!("{}/api/v1/terrain/maps/{}/features", base, map_id))
+            .get(format!("{}/api/v1/terrain/maps/{}/features?original={}", base, map_id, original))
             .timeout(Duration::from_secs(60))
             .send()
             .await
@@ -698,6 +696,7 @@ async fn copy_terrain_for_editor(
         "water_surfaces": features["water_surfaces"],
         "rivers": features["rivers"],
         "camera": features["camera"],
+        "background": features["background"],
     });
     std::fs::write(map_dir.join("meta.json"), meta.to_string())
         .map_err(|e| format!("meta.json の書き込みに失敗しました: {e}"))?;
@@ -778,6 +777,7 @@ struct TerrainEditorData {
     /// カメラ初期状態 {x, y, z, yaw, pitch}(TerrainCameraPayload)。未設定なら null。
     /// 仕様の正は同 §D.13。
     camera: serde_json::Value,
+    background: serde_json::Value,
 }
 
 #[tauri::command]
@@ -847,6 +847,7 @@ fn load_terrain_editor_data(
             .cloned()
             .unwrap_or_else(|| serde_json::json!({"instances": [], "scatters": []})),
         camera: meta.get("camera").cloned().unwrap_or(serde_json::Value::Null),
+        background: meta.get("background").cloned().unwrap_or(serde_json::Value::Null),
     })
 }
 
@@ -940,6 +941,7 @@ fn export_terrain_as_npy(
     resources: Option<serde_json::Value>,
     props: Option<serde_json::Value>,
     camera: Option<serde_json::Value>,
+    background: Option<serde_json::Value>,
 ) -> Result<ExportTerrainResult, String> {
     use base64::Engine;
     // 付随JSONを含め、最初のファイルを書く前に原本への出力を拒否する。
@@ -1057,6 +1059,7 @@ fn export_terrain_as_npy(
                     far_spacing,
                     cell_size,
                     camera_spec.as_ref(),
+                    background.as_ref(),
                 )?;
                 true
             } else {
@@ -1102,6 +1105,7 @@ fn upsert_terrain_yaml_entry(
     far_map_spacing: f64,
     cell_size: f64,
     camera: Option<&TerrainCameraSpec>,
+    background: Option<&serde_json::Value>,
 ) -> Result<(), String> {
     let original = std::fs::read_to_string(yaml_path)
         .map_err(|e| format!("terrain_maps.yaml の読み込みに失敗しました: {e}"))?;
@@ -1150,6 +1154,9 @@ fn upsert_terrain_yaml_entry(
         None => String::new(),
     };
 
+    // 背景は不変の原本を参照する。JSONのオブジェクト表記はYAMLでも有効。
+    let background_text = background.filter(|v| !v.is_null())
+        .map(|v| format!("\n  background: {v}")).unwrap_or_default();
     let entry_text = format!(
         "# {map_id}\n\
          {map_id}:\n\
@@ -1163,7 +1170,7 @@ fn upsert_terrain_yaml_entry(
         \x20   near_map_spacing: {near_map_spacing}\n\
         \x20   far_map_spacing: {far_map_spacing}\n\
         \x20   dynamic_map_spacing: 1\n\
-        \x20   cell_size: {cell_size}{camera_text}",
+        \x20   cell_size: {cell_size}{camera_text}{background_text}",
         map_width = map_width as i64,
         map_height = map_height as i64,
         near_map_spacing = near_map_spacing as i64,
@@ -1219,7 +1226,7 @@ mod terrain_yaml_entry_tests {
         std::fs::write(&path, EXISTING).unwrap();
         upsert_terrain_yaml_entry(
             &path, "island", "terrains/map_island.npy".to_string(),
-            10.0, 1000.0, 1000.0, 10.0, 200.0, 500.0, None,
+            10.0, 1000.0, 1000.0, 10.0, 200.0, 500.0, None, Some(&serde_json::json!({"file_name":"terrains/original/bg.npy"})),
         ).unwrap();
         let text = std::fs::read_to_string(&path).unwrap();
         std::fs::remove_dir_all(&dir).ok();
@@ -1233,6 +1240,7 @@ mod terrain_yaml_entry_tests {
         assert_eq!(text.matches("\nisland:\n").count(), 1, "{text}");
         assert!(text.starts_with("# island\n"), "{text}");
         assert!(text.contains("    cell_size: 500\n"), "{text}");
+        assert!(text.contains("terrains/original/bg.npy"), "{text}");
     }
 }
 

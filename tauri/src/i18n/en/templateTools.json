@@ -30,6 +30,35 @@
       "multiple_intersections": "multiple intersections",
       "elevation_conflict": "grade-separation conflict",
       "other": "other"
+    },
+    "agentCreation": {
+      "hint": "Choose a type and variant, press \"Pick building\", then click the destination building in the 3D view.",
+      "agentType": "Type",
+      "typeStandard": "Private business",
+      "typeTrade": "Trade hub",
+      "variant": "Variant",
+      "noVariants": "No variants available",
+      "building": "Destination building",
+      "pickBuilding": "Pick building",
+      "picking": "Click a building in the 3D view…",
+      "cancelPick": "Cancel picking",
+      "noBuilding": "Not selected",
+      "buildingInfo": "{{name}} ({{floors}} floors, {{area}} m² per floor)",
+      "loadingBuilding": "Loading building…",
+      "notSharedBuilding": "This is not a shared building, so no tenant can move in.",
+      "statusUnavailable": "Tenants can only move into active or paused buildings.",
+      "noSpaceType": "This building has no vacant floor space of the selected type.",
+      "alreadyOccupied": "This non-shared building already has a tenant.",
+      "vacancy": "Vacant: {{floors}} floors ({{area}} m²)",
+      "fullOccupancy": "Non-shared building: the tenant occupies all floors ({{floors}} floors, {{area}} m²).",
+      "floors": "Floors to occupy",
+      "occupiedArea": "Occupied area: {{area}} m²",
+      "belowSpaceMin": "Below the minimum area for this type ({{min}} m²).",
+      "aboveSpaceMax": "Above the maximum area for this type ({{max}} m²).",
+      "create": "Create",
+      "creating": "Creating…",
+      "created": "Created {{name}} ({{area}} m², {{floors}} floors)",
+      "createFailed": "Failed to create the economic agent"
     }
   }
 }

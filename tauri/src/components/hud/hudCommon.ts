@@ -74,6 +74,8 @@ export const MENU_ICONS: HudIconDef[] = [
   { id: "prop_placement", src: "menu_prop.png", tooltipKey: "taskbar.menuPropPlacement", windowType: "prop_placement", hintKey: "prop_placement.hint" },
   { id: "resource_edit", src: "menu_resource.png", tooltipKey: "taskbar.menuResourceEdit", windowType: "resource_edit", hintKey: "hint.resourceEdit", templateOnly: true },
   { id: "parameter_edit", src: "tray_settings.png", tooltipKey: "taskbar.menuParameterEdit", command: "open_parameter_edit_window", templateOnly: true },
+  // 経済主体の作成(建物ではない施設を既存建物へ入居済みで置く)。専用アイコンが未用意のため建設と同じ画像を仮当てしている。
+  { id: "agent_creation", src: "menu_construction.png", tooltipKey: "taskbar.menuAgentCreation", windowType: "agent_creation", templateOnly: true },
 ];
 
 /**
@@ -98,6 +100,8 @@ export const TRAY_ICONS: HudIconDef[] = [
 
 /**
  * クリックすると Unity の描画ステートを変更する編集モード系ウィンドウの種別。
+ * 経済主体の作成(`agent_creation`)はステートは変えないが、建物の選択で入力プリセットを
+ * 上書きする(MODE_PICK_BUILDING)ため同じ扱いにする。
  * これらを開くと Unity は STATE_REMOVE_OBJECTS を上書きするため、
  * ブルドーザ・地区編集トグルを連動して OFF にする必要がある。
  */
@@ -110,6 +114,7 @@ export const EDIT_MODE_WINDOW_TYPES = new Set<string>([
   "transit_management",
   "prop_placement",
   "resource_edit",
+  "agent_creation",
 ]);
 
 /** レジストリ定義のウィンドウを開く。失敗してもHUDは壊さず、コンソールに残すだけにする。 */

@@ -111,6 +111,7 @@ export type TerrainEditorData = {
   props: TerrainProps;
   /** カメラ初期状態。未設定なら null。 */
   camera: TerrainCameraPayload | null;
+  background: { file_name: string; origin?: [number, number] } | null;
 };
 
 /** float16(IEEE 754 half)のビット表現を float32 相当に変換する */

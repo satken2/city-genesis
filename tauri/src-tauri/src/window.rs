@@ -770,6 +770,8 @@ const EDIT_MODE_WINDOW_TYPES: &[&str] = &[
     "building_construction",
     "transit_management",
     "transit_creation",
+    // 建物の選択で入力プリセットを上書きする(MODE_PICK_BUILDING)。選択待ちのまま閉じても戻すため。
+    "agent_creation",
 ];
 
 pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) -> Result<(), String> {

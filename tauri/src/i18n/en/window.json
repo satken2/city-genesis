@@ -101,6 +101,7 @@
     "bulldozerOff": "Bulldozer (remove empty parcels, planned buildings/roads & terrain props)",
     "menuResourceEdit": "Edit Resources",
     "menuParameterEdit": "Edit Parameters",
+    "menuAgentCreation": "Create economic agent (place a non-building business in an existing building)",
     "menuPropPlacement": "Prop Placement",
     "menuExecute": "Execute",
     "budgetMeterLabel": "Budget",

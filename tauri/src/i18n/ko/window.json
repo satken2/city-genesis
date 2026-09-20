@@ -101,6 +101,7 @@
     "bulldozerOff": "불도저(빈 땅・계획 중인 건물/도로・지형 프롭 철거)",
     "menuResourceEdit": "자원 편집",
     "menuParameterEdit": "파라미터 편집",
+    "menuAgentCreation": "경제 주체 생성(건물이 아닌 시설을 기존 건물에 입주시킴)",
     "menuPropPlacement": "프롭 배치",
     "menuExecute": "시작",
     "budgetMeterLabel": "예산",

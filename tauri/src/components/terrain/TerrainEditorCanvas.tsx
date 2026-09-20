@@ -1774,6 +1774,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   // === カメラ初期状態の実体 ===
   // エクスポート(meta.json / terrain_maps.yaml の camera)の対象。3Dプレビューへは送らない。
   const cameraRef = useRef<TerrainCameraPayload | null>(null);
+  const backgroundRef = useRef<TerrainEditorData["background"]>(null);
 
   // 資源種別の表示名の対応表。draw()(イベントハンドラのクロージャから呼ばれ、React state を
   // 直接読めない)がラベル描画に使うため、マスターデータの変化を ref へミラーする。
@@ -3731,6 +3732,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         resources: serializeResourceAreas(),
         props: propEditor.current.data.current,
         camera: cameraRef.current,
+        background: backgroundRef.current,
       });
       setExportStatus("exported");
       // エクスポート先にterrain_maps.yamlが見つからなかった場合は、通知ポップアップで知らせる。
@@ -3764,6 +3766,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     async function load() {
       try {
         const data = await invoke<TerrainEditorData>("load_terrain_editor_data", { mapId });
+        backgroundRef.current = data.background;
         if (cancelled) return;
 
         const bytes = base64ToUint8(data.data_base64);

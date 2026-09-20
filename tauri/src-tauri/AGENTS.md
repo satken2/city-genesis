@@ -52,3 +52,5 @@ Tauri(Rust)側のプログラム。ウィンドウ管理とUnityとのMMF(Memory
 `copy_terrain_for_editor` の `original=true` はバックエンドの標高原本を取得し、川・水面・資源・プロップ・カメラの配置を含まない新規IDの作業コピーを作る。戻り値は取り込みごとに作る editor_id で、UIはこのIDを開く。meta.json の map_id はエクスポート用IDで、既存マップは元のIDを保持する。原本からは新しいマップIDを作る。既存マップは /features から川・水面・カメラも取り込み、原本は配置情報を一切取得しない。
 
 ゲーム用地形と `terrain_maps.yaml` は `genesis-core/assets/terrains/` にある。`export_terrain_as_npy` は `terrain_export_paths.rs` で出力先を検証し、`terrains/original/` 配下を拒否する。親ディレクトリ・既存ファイルのリンク先も検証し、付随JSONを含め最初の書き込みより前に止める。登録表の `file_name` は assets 基準なので、terrains への出力は `terrains/ファイル名.npy` として登録する。原本の寸法・解像度は別ファイル `original_terrains.yaml` にあり、エクスポートで変更しない。
+
+- 任意の50m背景地形参照 `background` は原本・既存マップの `/features` からmeta.jsonへ取り込み、TerrainEditorDataとexport_terrain_as_npyを通じて登録表へ保持する。背景ファイル自体を編集・複製しない。原本のfeaturesは `original=true` を指定し、背景以外の配置情報は空となる。

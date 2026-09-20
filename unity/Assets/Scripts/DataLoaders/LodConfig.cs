@@ -37,13 +37,18 @@ public static class LodConfig
         float radius = Mathf.Clamp(halfView * (camera != null ? Mathf.Max(1f, camera.aspect) : 1f) + PRELOAD_MARGIN, 1100f, MAX_FOCUS_RADIUS);
         Plane[] planes = camera != null ? GeometryUtility.CalculateFrustumPlanes(camera) : null;
         int halfX = Mathf.RoundToInt(mapWidth/(2f*cellSize)), halfZ = Mathf.RoundToInt(mapHeight/(2f*cellSize));
+        Rect extent = terrainManager != null ? terrainManager.BackgroundBounds : new Rect(-mapWidth*.5f, -mapHeight*.5f, mapWidth, mapHeight);
+        int minX = Mathf.Min(-halfX, Mathf.FloorToInt(extent.xMin/cellSize));
+        int minZ = Mathf.Min(-halfZ, Mathf.FloorToInt(extent.yMin/cellSize));
+        int maxX = Mathf.Max(halfX, Mathf.CeilToInt(extent.xMax/cellSize));
+        int maxZ = Mathf.Max(halfZ, Mathf.CeilToInt(extent.yMax/cellSize));
         var candidates = new HashSet<Vector2Int>();
         void Include(Vector3 center, float range)
         {
             int cx = Mathf.FloorToInt(center.x/cellSize), cz = Mathf.FloorToInt(center.z/cellSize);
             int count = Mathf.CeilToInt(range/cellSize)+1;
-            for (int z = Mathf.Max(-halfZ, cz-count); z < Mathf.Min(halfZ, cz+count+1); z++)
-                for (int x = Mathf.Max(-halfX, cx-count); x < Mathf.Min(halfX, cx+count+1); x++)
+            for (int z = Mathf.Max(minZ, cz-count); z < Mathf.Min(maxZ, cz+count+1); z++)
+                for (int x = Mathf.Max(minX, cx-count); x < Mathf.Min(maxX, cx+count+1); x++)
                     candidates.Add(new Vector2Int(x,z));
         }
         Include(viewCenterPosition, radius);

@@ -30,6 +30,35 @@
       "multiple_intersections": "cruces múltiples",
       "elevation_conflict": "conflicto de desnivel",
       "other": "otros"
+    },
+    "agentCreation": {
+      "hint": "Elige un tipo y una variante, pulsa \"Seleccionar edificio\" y luego haz clic en el edificio de destino en la vista 3D.",
+      "agentType": "Tipo",
+      "typeStandard": "Negocio privado",
+      "typeTrade": "Centro de comercio exterior",
+      "variant": "Variante",
+      "noVariants": "No hay variantes disponibles",
+      "building": "Edificio de destino",
+      "pickBuilding": "Seleccionar edificio",
+      "picking": "Haz clic en un edificio en la vista 3D…",
+      "cancelPick": "Cancelar selección",
+      "noBuilding": "Sin seleccionar",
+      "buildingInfo": "{{name}} ({{floors}} pisos, {{area}} m² por piso)",
+      "loadingBuilding": "Cargando edificio…",
+      "notSharedBuilding": "Este no es un edificio compartido, por lo que no puede recibir inquilinos.",
+      "statusUnavailable": "Solo se puede ocupar edificios activos o en pausa.",
+      "noSpaceType": "Este edificio no tiene espacio libre del tipo seleccionado.",
+      "alreadyOccupied": "Este edificio no compartido ya tiene un inquilino.",
+      "vacancy": "Disponible: {{floors}} pisos ({{area}} m²)",
+      "fullOccupancy": "Edificio no compartido: el inquilino ocupa todos los pisos ({{floors}} pisos, {{area}} m²).",
+      "floors": "Pisos a ocupar",
+      "occupiedArea": "Área ocupada: {{area}} m²",
+      "belowSpaceMin": "Por debajo del área mínima de este tipo ({{min}} m²).",
+      "aboveSpaceMax": "Por encima del área máxima de este tipo ({{max}} m²).",
+      "create": "Crear",
+      "creating": "Creando…",
+      "created": "Se creó {{name}} ({{area}} m², {{floors}} pisos)",
+      "createFailed": "No se pudo crear el agente económico"
     }
   }
 }

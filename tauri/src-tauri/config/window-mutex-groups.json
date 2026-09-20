@@ -23,7 +23,12 @@
     "city_map"
   ],
   "building_construction": [
-    "building_construction"
+    "building_construction",
+    "agent_creation"
+  ],
+  "agent_creation": [
+    "building_construction",
+    "agent_creation"
   ],
   "city_budget": [
     "city_budget"

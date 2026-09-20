@@ -101,6 +101,7 @@
     "bulldozerOff": "推土机（拆除空地、规划中的建筑/道路及地形装饰物）",
     "menuResourceEdit": "资源编辑",
     "menuParameterEdit": "参数编辑",
+    "menuAgentCreation": "创建经济主体（将非建筑类设施安置到现有建筑中）",
     "menuPropPlacement": "装饰物放置",
     "menuExecute": "开始",
     "budgetMeterLabel": "预算",

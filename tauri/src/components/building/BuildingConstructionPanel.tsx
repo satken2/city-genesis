@@ -56,7 +56,7 @@ import { useVariantAffordability } from "../../hooks/useVariantAffordability";
 import { BuildingFacilityInfoCard } from "./BuildingFacilityInfoCard";
 import { BuildingFloorSpecs } from "./BuildingFloorSpecs";
 import { showNotification } from "../../utils/notification";
-import { BUILDING_PUBLIC, VARIANT_CITY } from "../../constants";
+import { BUILDING_PUBLIC, VARIANT_CITY, VARIANT_GENERIC_BUILDING } from "../../constants";
 import "./BuildingConstructionPanel.css";
 
 // 直接配置モードで default_width が未設定のバリアント用のフォールバック(m)。
@@ -344,9 +344,9 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
   const buildingVariants = useMemo(() => {
     if (!masterData) return [];
     return Object.entries(masterData.agents).filter(
-      ([, entry]) => entry.building
+      ([id, entry]) => entry.building && (templateMode || Number(id) !== VARIANT_GENERIC_BUILDING)
     ) as [string, AgentMasterEntry][];
-  }, [masterData]);
+  }, [masterData, templateMode]);
 
   /** ユニークな建物タイプ一覧 */
   const availableBdTypes = useMemo(() => {

@@ -78,6 +78,8 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `edit_building:select_parcel`   | `graphic -> ui`  | 建物建設モードにおいて、土地区画を選択した（parcel_id, polygon, position 等を含む） |
 | `edit_building:select_point` | `graphic -> ui` | 旧定義。現行の建物直接配置は`placement_command`/`placement_state`を使用する |
 | `edit_building:invalid_parcel`  | `graphic -> ui`  | 建物建設モードにおいて、選択中の建物種類と互換性のない土地区画がクリックされた（parcel_id を含む） |
+| `building_construction:pick_source` | `ui -> graphic` | 既存の建物を1つ選ぶ選択モード（`MODE_PICK_BUILDING`。ステートは変えず入力プリセットだけ上書き）を開始する。建物建設パネルの「既存建物をコピー」と、テンプレートモードの経済主体作成パネル（入居先建物の選択）が使う。送信元ウィンドウ種別はUnityの動作に影響しないため、両パネルは `window-mutex-groups.json` で同時に開けない |
+| `building_construction:copy_source` | `graphic -> ui` | 選択モードで建物が選ばれた（`{source_agent_id, variant, floors, structure, visual_variant, visual_variant2, visual_variant3}`）。建設パネルはこれをシードして `STATE_EDIT_BUILDING` へ遷移し、経済主体作成パネルは `source_agent_id` だけを使って `STATE_NORMAL` へ戻す |
 | `edit_building:update_direct_params` | `ui -> graphic` | 旧定義。現行の建物直接配置は`placement_command`/`placement_state`を使用する |
 | `edit_building:update_direct_angle` | `graphic -> ui` | 旧定義。現行の建物直接配置は`placement_command`/`placement_state`を使用する |
 | `edit_building:update_shape`    | `ui -> graphic`  | 建物建設モードにおいて、建物の底面形状を変更した              |

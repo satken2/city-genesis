@@ -30,6 +30,35 @@
       "multiple_intersections": "여러 번 교차",
       "elevation_conflict": "입체교차 충돌",
       "other": "기타"
+    },
+    "agentCreation": {
+      "hint": "종별과 바리안트를 고르고 「건물 선택」을 누른 뒤 3D 뷰에서 입주할 건물을 클릭하세요.",
+      "agentType": "종별",
+      "typeStandard": "민간 시설",
+      "typeTrade": "수출입 거점",
+      "variant": "바리안트",
+      "noVariants": "선택할 수 있는 바리안트가 없습니다",
+      "building": "입주할 건물",
+      "pickBuilding": "건물 선택",
+      "picking": "3D 뷰에서 건물을 클릭하세요…",
+      "cancelPick": "선택 취소",
+      "noBuilding": "미선택",
+      "buildingInfo": "{{name}}({{floors}}층 · 층당 {{area}} m²)",
+      "loadingBuilding": "건물 정보를 불러오는 중…",
+      "notSharedBuilding": "공용 건물이 아니므로 입주시킬 수 없습니다.",
+      "statusUnavailable": "가동 중이거나 휴지 중인 건물에만 입주시킬 수 있습니다.",
+      "noSpaceType": "이 건물에는 선택한 종별의 빈 바닥이 없습니다.",
+      "alreadyOccupied": "비공유 건물이므로 이미 입주자가 있으면 입주할 수 없습니다.",
+      "vacancy": "빈 공간: {{floors}}층분({{area}} m²)",
+      "fullOccupancy": "비공유 건물이므로 전체 층({{floors}}층 · {{area}} m²)을 점유합니다.",
+      "floors": "점유 층수",
+      "occupiedArea": "점유 면적: {{area}} m²",
+      "belowSpaceMin": "이 종별의 최소 면적 {{min}} m²보다 작습니다.",
+      "aboveSpaceMax": "이 종별의 최대 면적 {{max}} m²를 초과합니다.",
+      "create": "생성",
+      "creating": "생성 중…",
+      "created": "{{name}}을(를) 생성했습니다({{area}} m² · {{floors}}층분)",
+      "createFailed": "경제 주체 생성에 실패했습니다"
     }
   }
 }

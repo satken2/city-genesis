@@ -101,6 +101,7 @@
     "bulldozerOff": "Bulldozer (elimina parcelas vacías, obras planeadas y props del terreno)",
     "menuResourceEdit": "Editar recursos",
     "menuParameterEdit": "Editar parámetros",
+    "menuAgentCreation": "Crear agente económico (instalar un negocio sin edificio propio en un edificio existente)",
     "menuPropPlacement": "Colocación de props",
     "menuExecute": "Iniciar",
     "budgetMeterLabel": "Presupuesto",

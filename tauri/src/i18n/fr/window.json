@@ -101,6 +101,7 @@
     "bulldozerOff": "Bulldozer (supprime terrains vides, projets en attente et décors du terrain)",
     "menuResourceEdit": "Modifier les ressources",
     "menuParameterEdit": "Modifier les paramètres",
+    "menuAgentCreation": "Créer un agent économique (installer une activité sans bâtiment propre dans un bâtiment existant)",
     "menuPropPlacement": "Placement de décors",
     "menuExecute": "Démarrer",
     "budgetMeterLabel": "Budget",

@@ -179,6 +179,15 @@
     "empty_shell": false,
     "actions": []
   },
+  "agent_creation": {
+    "title": "経済主体の作成",
+    "width": 440,
+    "height": 640,
+    "resizable": true,
+    "policy": "single",
+    "layout": "left_panel_narrow",
+    "actions": []
+  },
   "building_construction": {
     "title": "建物建設",
     "width": 800,
