@@ -734,6 +734,10 @@ public class IpcClient : MonoBehaviour
                     OnWeatherQuery?.Invoke();
                     break;
 
+                case "drive:open":
+                    DriveMode.Ensure().Open(GetParamsDictionary(payload));
+                    break;
+
                 case "weather:set":
                     OnWeatherSet?.Invoke(GetParamString(payload, "id"));
                     break;

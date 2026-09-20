@@ -225,6 +225,8 @@ export type CityMapCanvasProps = {
   onPointerMove?: (e: CityMapPointerEvent) => void;
   /** onPointerDown が true を返したドラッグの終了通知 */
   onPointerUp?: (e: CityMapPointerEvent) => void;
+  /** パンの移動量が5px未満の左クリック。既存のドラッグ操作とは独立して通知する。 */
+  onMapClick?: (e: CityMapPointerEvent) => void;
   /** 右クリック(contextmenu)のフック。既定のコンテキストメニューは常に抑止する */
   onContextMenu?: (e: CityMapPointerEvent) => void;
   /** キャンバスのカーソル形状(CSS cursor)。ホバー対象に応じて上位が切り替える */
@@ -1009,6 +1011,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       onPointerDown,
       onPointerMove,
       onPointerUp,
+      onMapClick,
       onContextMenu,
       cursor,
       onZoomChange,
@@ -1032,14 +1035,14 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
     const overlayDrawRef = useRef<CityMapCanvasProps["overlayDraw"]>(overlayDraw);
     const animatedOverlayDrawRef = useRef<CityMapCanvasProps["animatedOverlayDraw"]>(animatedOverlayDraw);
     const cursorCbRef = useRef<CityMapCanvasProps["onCursorWorldPos"]>(onCursorWorldPos);
-    const pointerCbRef = useRef({ onPointerDown, onPointerMove, onPointerUp, onContextMenu });
+    const pointerCbRef = useRef({ onPointerDown, onPointerMove, onPointerUp, onContextMenu, onMapClick });
     const zoomCbRef = useRef<CityMapCanvasProps["onZoomChange"]>(onZoomChange);
     const heatmapStatsCbRef = useRef<CityMapCanvasProps["onHeatmapStats"]>(onHeatmapStats);
     const masterDataRef = useRef<MasterData | null>(masterData);
     overlayDrawRef.current = overlayDraw;
     animatedOverlayDrawRef.current = animatedOverlayDraw;
     cursorCbRef.current = onCursorWorldPos;
-    pointerCbRef.current = { onPointerDown, onPointerMove, onPointerUp, onContextMenu };
+    pointerCbRef.current = { onPointerDown, onPointerMove, onPointerUp, onContextMenu, onMapClick };
     zoomCbRef.current = onZoomChange;
     heatmapStatsCbRef.current = onHeatmapStats;
 
@@ -1821,6 +1824,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       let dragOffsetY = 0;
       // 上位の onPointerDown が true を返したドラッグ(ノード移動など)。パンはしない。
       let customDrag = false;
+      let moved = false;
 
       /** マウスイベントを上位コールバック用のポインタ情報へ変換する */
       const toPointerEvent = (e: MouseEvent): CityMapPointerEvent => {
@@ -1845,6 +1849,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           return;
         }
         dragging = true;
+        moved = false;
         dragStartX = e.clientX;
         dragStartY = e.clientY;
         dragOffsetX = view.offsetX;
@@ -1864,6 +1869,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         pointerCbRef.current.onPointerMove?.(toPointerEvent(e));
 
         if (!dragging) return;
+        if (Math.hypot(e.clientX - dragStartX, e.clientY - dragStartY) >= 5) moved = true;
         // カーソル下のワールド座標が固定されるようにパンする。
         // Yは反転描画のため、offsetYはドラッグ量を加算する向きになる。
         view.offsetX = dragOffsetX - (e.clientX - dragStartX) / view.zoom;
@@ -1872,6 +1878,12 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       };
 
       const onMouseUp = (e: MouseEvent) => {
+        if (e.button !== 0) return;
+        const rect = canvas.getBoundingClientRect();
+        if (dragging && !moved && Math.hypot(e.clientX - dragStartX, e.clientY - dragStartY) < 5
+          && e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom) {
+          pointerCbRef.current.onMapClick?.(toPointerEvent(e));
+        }
         dragging = false;
         if (customDrag) {
           customDrag = false;

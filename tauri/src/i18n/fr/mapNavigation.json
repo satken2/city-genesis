@@ -1,0 +1,55 @@
+{
+  "mapNavigation": {
+    "title": "Explorer la ville",
+    "back": "Retour",
+    "search": "Rechercher un lieu",
+    "origin": "Choisir le départ",
+    "destination": "Choisir la destination",
+    "clear": "Effacer",
+    "searching": "Recherche…",
+    "error": "Connexion impossible. Rechargez et réessayez.",
+    "noResults": "Aucun lieu trouvé",
+    "mode": "Mode de déplacement",
+    "pedestrian": "Marche et transports",
+    "automobile": "Voiture",
+    "pickOrigin": "Choisir le départ sur la carte",
+    "pickDestination": "Choisir l’arrivée sur la carte",
+    "swap": "Inverser",
+    "cancel": "Annuler",
+    "directions": "Itinéraire",
+    "explore": "Découvrez votre ville",
+    "intro": "Recherchez un établissement, une gare ou un quartier, ou choisissez un lieu sur la carte.",
+    "chooseOrigin": "Recherchez un départ ou choisissez-le sur la carte.",
+    "routing": "Recherche d’itinéraire…",
+    "showRoute": "Voir tout l’itinéraire",
+    "mapPoint": "Point sur la carte",
+    "minutes": "Environ {{count}} min",
+    "unnamed": "{{kind}} {{id}}",
+    "snapshot": "Estimation selon le réseau du calcul n°{{epoch}}. Les pointillés indiquent la marche et les liaisons d’accès.",
+    "busy": "Simulation en cours. Les résultats seront actualisés à la fin.",
+    "not_ready": "Aucun itinéraire calculé. Lancez une simulation dans cette ville pour les afficher.",
+    "unreachable": "Aucun itinéraire ne relie ces deux lieux.",
+    "no_access": "Aucune voie accessible à proximité du lieu choisi.",
+    "geometry_unavailable": "La géométrie des transports de cet itinéraire est indisponible.",
+    "place_missing": "Le lieu sélectionné a été supprimé. Sélectionnez-le à nouveau.",
+    "kind": {
+      "agent": "Établissement",
+      "zone": "Quartier",
+      "stop": "Arrêt",
+      "station": "Gare",
+      "point": "Point"
+    },
+    "leg": {
+      "walk": "Marche",
+      "drive": "Voiture",
+      "transit": "Transports",
+      "conveyor": "Transport de personnes",
+      "access": "Liaison d’accès",
+      "turn": "Virage au carrefour"
+    },
+    "picking": {
+      "origin": "Cliquez sur le départ sur la carte.",
+      "destination": "Cliquez sur la destination sur la carte."
+    }
+  }
+}

@@ -46,7 +46,8 @@ public class CameraCellChecker : MonoBehaviour
         if (Time.unscaledTime < nextCheck) return;
         nextCheck = Time.unscaledTime + 0.1f;
         if (!viewState.Update(gameCamera)) return;
-        if (!TryGetGroundHitPoint(out Vector3 centerPoint)) centerPoint = gameCamera.transform.position;
+        Vector3 centerPoint;
+        if (!DriveMode.TryGetLoadCenter(out centerPoint) && !TryGetGroundHitPoint(out centerPoint)) centerPoint = gameCamera.transform.position;
         CurrentWorldPosition = centerPoint;
         CurrentCellIndex = ConvertToCellIndex(centerPoint);
         OnCellIndexChanged(CurrentCellIndex);

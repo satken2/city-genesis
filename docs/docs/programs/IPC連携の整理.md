@@ -49,7 +49,7 @@ Offset  8: Ring buffer data (1048568 bytes)
 | ------------------------------- | ---------------- | ------------------------------------- |
 | `world:select_object`           | `graphic -> ui`  | オブジェクトを選択する                           |
 | `world:change_state`            | `ui -> graphic`  | グラフィックのモード(通常モード、土地区画作成モード、etc.)を切り替え |
-| `view:change_view`              | `ui -> graphic`  | 地形、建物、区画、道路、環境、アラートなどの表示モードを切り替え（`{layer, mode, sub_mode, flags}`）。`flags` は色モードと独立した表示トグルのCSV文字列（`plan`=計画中の表示、`public`=公共施設ハイライト。road/building レイヤーのみ使用）。**`flags` が `null`（またはキー欠落）の場合は現在のフラグを維持**し、空文字は全トグルOFFを意味する。`layer=cell` は `mode=boundaries` で未開放セルの暗色表示と開放済みセル境界の点線をまとめて出す（詳細は[LOD処理](../geometries/E_LOD処理.md)の「セル開放状態の可視化」） |
+| `view:change_view`              | `ui -> graphic`  | 地形、建物、区画、道路、環境、アラートなどの表示モードを切り替え（`{layer, mode, sub_mode, flags}`）。`flags` は色モードと独立した表示トグルのCSV文字列（`plan`=計画中の表示、`public`=公共施設ハイライト。road/building レイヤーのみ使用）。**`flags` が `null`（またはキー欠落）の場合は現在のフラグを維持**し、空文字は全トグルOFFを意味する |
 | `view:query_state`              | `ui -> graphic`  | グラフィックプログラムに現在の表示状態を問い合わせる            |
 | `view:apply_preset`             | `ui -> graphic`  | ウィンドウを開いている間だけ表示を差し替える（`{preset}`）。プリセットの中身はUnity側が持ち、UIは名前だけを指定する。**専用の編集ステート（`STATE_*`）を持たないウィンドウ専用**で、ステートを持つ操作ではUnityがステート別の表示プリセットを自動適用する。元の表示への復帰は `STATE_NORMAL` への復帰が担う（[Unity入力制御 §9.1](Unity入力制御.md#91)）。現在のプリセットは `transit`（公共交通の一覧・新設） |
 | `view:current_state`            | `graphic -> ui`  | `view:query_state`への応答、およびステート変更時の表示状態通知。各レイヤーは `{mode, sub_mode, flags}`（`flags` はONのトグルのCSV。無ければ空文字） |
@@ -163,7 +163,7 @@ Unityのグラフィックプログラムは、いくつかのステートを持
 
 設置済みの公共交通パス（`PATH_TRANSPORT`）は、`view:change_view` の `transit` レイヤーで路線種別ごとに表示ON/OFFできる（`sub_mode` に表示する `transit_path_id` のCSV文字列を渡す）。Unity は種別色の帯（オーバーレイ）として下地道路の上に描画する。
 
-`STATE_EDIT_PROP` は地形プロップ（森・岩・茂みなどの装飾）の配置モードで、プロップ配置パネル（`prop_placement`）で種別を選ぶと遷移する。`world:change_state` の params に `prop_type`・`placement_mode`（`"instance"` | `"scatter"`）・初期設定 `rotation`/`scale`（個別）・`density`/`seed`（範囲）を含める。配置には2モードある。**個別モード**は左クリックで1個ずつ配置（カーソル追従は半透明ゴースト、確定すると不透明の実モデル、右クリックで直近を取り消し）し、配置列を `edit_prop:update_instances` でUIへ送出する。**範囲モード**は左クリックで散布範囲のポリゴン頂点を置き（3頂点以上でseedベースの散布ゴーストを簡易プレビュー、右クリックで直近頂点を取り消し）、ポリゴンを `edit_prop:update_shape` でUIへ送出する。回転/スケール/密度/seed の変更は `edit_prop:change_settings` でプレビューに即反映する。個別モードでは3D側でも中ボタンドラッグで回転、PageUp/PageDown で高さを変えられ、結果は `edit_prop:placement_settings` でパネルへ書き戻す。確定送信（個別=`POST /api/v1/props/instances`、範囲=`POST /api/v1/props/scatters`）はUI側が直接行い、成功後に `edit_prop:finish` を送信してUnity側の配置状態をリセットする。既存プロップの削除は配置パネルではなく `STATE_REMOVE_OBJECTS`（ブルドーザ）で行い、範囲配置は `remove_object:request_confirm` / `remove_object:confirm_result` の確認を挟む。プロップはゼロコストの装飾のため未開放セルにも配置でき、`template_mode` ゲートはない。詳細な仕様は `genesis-docs/docs/geometries/M_地形プロップ.md` を参照。
+`STATE_EDIT_PROP` は地形プロップ（森・岩・茂みなどの装飾）の配置モードで、プロップ配置パネル（`prop_placement`）で種別を選ぶと遷移する。`world:change_state` の params に `prop_type`・`placement_mode`（`"instance"` | `"scatter"`）・初期設定 `rotation`/`scale`（個別）・`density`/`seed`（範囲）を含める。配置には2モードある。**個別モード**は左クリックで1個ずつ配置（カーソル追従は半透明ゴースト、確定すると不透明の実モデル、右クリックで直近を取り消し）し、配置列を `edit_prop:update_instances` でUIへ送出する。**範囲モード**は左クリックで散布範囲のポリゴン頂点を置き（3頂点以上でseedベースの散布ゴーストを簡易プレビュー、右クリックで直近頂点を取り消し）、ポリゴンを `edit_prop:update_shape` でUIへ送出する。回転/スケール/密度/seed の変更は `edit_prop:change_settings` でプレビューに即反映する。個別モードでは3D側でも中ボタンドラッグで回転、PageUp/PageDown で高さを変えられ、結果は `edit_prop:placement_settings` でパネルへ書き戻す。確定送信（個別=`POST /api/v1/props/instances`、範囲=`POST /api/v1/props/scatters`）はUI側が直接行い、成功後に `edit_prop:finish` を送信してUnity側の配置状態をリセットする。既存プロップの削除は配置パネルではなく `STATE_REMOVE_OBJECTS`（ブルドーザ）で行い、範囲配置は `remove_object:request_confirm` / `remove_object:confirm_result` の確認を挟む。プロップはゼロコストの装飾のため `template_mode` ゲートはない。詳細な仕様は `genesis-docs/docs/geometries/M_地形プロップ.md` を参照。
 
 `STATE_EDIT_STATION` は駅パッケージ配置モードで、軌道建設パネル（`track_build`）の**簡易モードの「駅」タブ**が使う。プラットフォーム（複線の相対式＝対面ホーム）と駅舎をひとまとめにして1クリックで置くためのモードで、`world:change_state` の params に `platform_variant` / `house_variant` / `platform_length`（m） / `track_spacing`（m） / `height`（相対m） / `angle`（度。北＝ワールド+Zが0の時計回り） / `travel_directions`（各線の `DIR_*`） / `house_ends` を含める。
 
@@ -443,3 +443,7 @@ world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地�
 操作中・結果待ちはUnityの暫定推定を使う。造成後縦断の非同期受信でも3Dと2Dを再通知するが、同じ世代の全線検証がすでにあればその結果を維持する。選択や警告だけの通知では建設パネルの検証を再起動せず、往復ループを防ぐ。
 
 駅舎通路のpassage_mode（elevated/ground/underground）はSTATE_EDIT_PATH/STATE_EDIT_STATIONと、edit_path:change_passage_mode、edit_station:placement_command/stateで共有する。プレビューと保存で同じ方式を使う。
+
+## ドライブの開始
+
+`drive:open`はCockpitのブルドーザー右隣からUnityへ送る。paramsは`src/i18n/<言語>/drive.json`の`drive`辞書（キー→表示文言）。`IpcClient`は`DriveMode.Ensure().Open`へ渡す。Unity側が車種/路線・開始位置・乗車HUDを保持し、表示中の再送は終了として扱う。転送には既存Rustの`send_window_action`を使い、新しいEnvelopeやバックエンドAPIは持たない。仕様は[車両の走行描画](../geometries/O_車両の走行描画.md#o12-ドライブモード)を参照。

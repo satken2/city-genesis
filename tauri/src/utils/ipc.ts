@@ -11,6 +11,10 @@
 import { invoke } from "@tauri-apps/api/core";
 
 export const IPC_EVENT_WEATHER_STATE = "weather:state";
+/** 乗車選択と走行HUDはUnityが表示する。文言はUIの現在言語で一括して渡す。 */
+export async function openDriveMode(labels: Record<string, string>): Promise<void> {
+  await invoke("send_window_action", { windowType: "cockpit", entity: null, action: "drive:open", params: labels });
+}
 export async function sendAmbienceVolume(volume: number): Promise<void> {
   await invoke("send_window_action", { windowType: "cockpit", entity: null, action: "ambience:volume", params: { volume } });
 }

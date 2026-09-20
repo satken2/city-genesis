@@ -1,0 +1,27 @@
+{
+  "drive": {
+    "title": "Balade",
+    "car": "Voiture",
+    "rail": "Lignes ferroviaires",
+    "standard": "Voiture particulière",
+    "commercial": "Véhicule utilitaire",
+    "truck": "Camion",
+    "finishEditing": "Terminez les modifications avant de démarrer une balade.",
+    "noLines": "Aucune ligne ferroviaire en service n'est disponible.",
+    "pickRail": "Cliquez sur une voie de la ligne choisie.",
+    "pickRoad": "Cliquez sur une route en service.",
+    "clickStart": "Choisissez le départ (faites glisser pour déplacer la carte).",
+    "startSelected": "Départ sélectionné. Suivez la direction de la flèche.",
+    "reverse": "Inverser le sens",
+    "start": "Partir",
+    "back": "Retour",
+    "close": "Quitter (Échap)",
+    "invalidStart": "Départ impossible ici. Choisissez une route praticable ou une voie de votre ligne.",
+    "notReady": "Ce sens est indisponible ou les voies sont en cours de chargement. Changez de sens ou de position, ou réessayez plus tard.",
+    "controls": "Maintenir Espace : vitesse ×5 / Échap : quitter",
+    "turnControls": "← → : choisir une sortie / ↑ : la plus droite",
+    "loading": "Chargement des voies…",
+    "onRoute": "Suit la ligne avec arrêts et demi-tours automatiques.",
+    "waiting": "Impasse ou attente de connexion (demi-tour si autorisé)."
+  }
+}

@@ -41,10 +41,6 @@ Shader "Custom/DepthOffsetTerrainLit"
         _TerrainMacroVariationScale("Macro Variation Scale", Float) = 350.0
         _TerrainMacroVariationTint("Macro Variation Tint", Color) = (0.85, 0.95, 0.75, 1.0)
 
-        // タイル全体への乗算ティント。TerrainManager がタイルごとの materialTemplate に設定する。
-        // 白=素の地形色。
-        _TerrainTint("Terrain Tint", Color) = (1.0, 1.0, 1.0, 1.0)
-
         // 崖(急傾斜)への岩テクスチャブレンド設定。実行時は TerrainManager の
         // ApplyTerrainMaterialSettings がタイルごとの materialTemplate に設定する。
         // 既定値は TerrainManager.cs の SerializeField 既定値と一致させること。

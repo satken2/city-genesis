@@ -54,7 +54,13 @@ public static class VehicleQA
                 File.WriteAllText(result,"PASS\nPublic transport: motion, models, turnback, shared curved geometry, missing paths, vehicle selection and occlusion");
                 EditorApplication.Exit(0); return;
             }
-            Geometry(); Budget(); Junction(); RoadsideExit(); MotionContract(); TransitModels(); TransitPlacement(); TransitHighlightSelection();
+            if (Array.IndexOf(args,"-driveOnly")>=0)
+            {
+                Geometry(); Junction(); MotionContract(); TransitPlacement(); DriveCamera();
+                File.WriteAllText(result,"PASS\nDrive: branch selection, one-way restrictions, protected lifetime, transit start/turnback/loading, camera restore and input cleanup");
+                EditorApplication.Exit(0); return;
+            }
+            Geometry(); Budget(); Junction(); RoadsideExit(); MotionContract(); TransitModels(); TransitPlacement(); TransitHighlightSelection(); DriveCamera();
             PedestrianBands(); PedestrianModels();
             var report = new List<string>();
             foreach(int split in new[]{1,5}) report.Add(PedestrianNetwork(split,12,1200,false,true));
@@ -165,6 +171,27 @@ public static class VehicleQA
             }
             Near(Vector3.Distance(positions[0],positions[1]),20,.01f,"Consist spacing incorrect");
         }
+        var motion=Get(lines[0],"motion");
+        foreach (bool forward in new[] { true, false })
+        {
+            object[] timeArgs={motion,1,.5f,forward,0.0};
+            Check((bool)Call(manager,"TryFindDriveTime",timeArgs),"Selected position cannot be mapped onto route clock");
+            Near(Convert.ToSingle(timeArgs[4]),forward?23:73,.001f,"Route start confuses outward and return journey");
+        }
+        object[] invalidStart={motion,999,.5f,true,0.0};
+        Check(!(bool)Call(manager,"TryFindDriveTime",invalidStart),"Ride accepts a track outside its route");
+        manager.GetType().GetProperty("DrivenLineId").SetValue(manager,123);
+        Set(manager,"clock",49.999); Call(manager,"DrawLine",lines[0],Vector3.zero);
+        Vector3 cab=(Vector3)manager.GetType().GetProperty("DrivePosition").GetValue(manager);
+        Set(manager,"clock",50.0); Call(manager,"DrawLine",lines[0],Vector3.zero);
+        Near(Vector3.Distance(cab,(Vector3)manager.GetType().GetProperty("DrivePosition").GetValue(manager)),0,.02f,"Ride teleports to opposite cab at turnback");
+        ((IDictionary)Get(routeGeometry,"geometry")).Clear();
+        Set(manager,"driveDelta",.5f); Set(manager,"clock",50.5); Call(manager,"DrawLine",lines[0],Vector3.zero);
+        Check((bool)manager.GetType().GetProperty("DriveWaiting").GetValue(manager),"Ride does not wait for missing track geometry");
+        Near(Convert.ToSingle(Get(manager,"driveOffset")),-.5f,.001f,"Ride clock runs through unloaded track");
+        Near(Vector3.Distance(cab,(Vector3)manager.GetType().GetProperty("DrivePosition").GetValue(manager)),0,.02f,"Missing geometry moves the ride camera");
+        ((IDictionary)Get(routeGeometry,"geometry")).Add(1,g);
+        Call(manager,"StopDrive");
         // ハイライトも同じ補間を使い、パス途中の停止中心と曲線の高さを維持する。
         var curved=Line(Vector3.zero,new Vector3(100,25,100),new Vector3(0,50,300),Vector3.forward*500);
         Set(g,"full",curved); Set(g,"trimEnd",Property(curved,"Length"));
@@ -342,7 +369,50 @@ public static class VehicleQA
             Check(Get(v,"connector")!=null && Property(Get(v,"connector"),"Length")>0,"Intersection curve absent");
         }
         Check(straight>50 && turned>50,"Traffic weighted junction choices biased");
+        foreach (int requested in new[] { -1, 3, 4 })
+        {
+            var driver=New("Vehicle"); Set(driver,"vehicleType",10); Set(driver,"speed",12f); Set(driver,"age",100f);
+            var line=Get(inbound,"line"); Call(driver,"SetPath",1,line,true,Property(line,"Length")); Call(manager,"SetLane",driver,inbound,false);
+            manager.GetType().GetProperty("DrivenVehicle").SetValue(manager,driver);
+            manager.GetType().GetProperty("RequestedDrivePath").SetValue(manager,requested);
+            ((IList)Get(manager,"active")).Add(driver);
+            ((IDictionary)Get(manager,"exitRanks")).Add(3L,0);
+            Check(!(bool)Call(manager,"ReserveArrival",false),"Driven car was scheduled to disappear");
+            Check((bool)Call(manager,"Transition",driver),"Driven car could not cross junction");
+            Check((int)Get(driver,"pathId")== (requested==3?3:2),"Drive branch ignores choice, straight default or one-way restriction");
+            Check((int)manager.GetType().GetProperty("RequestedDrivePath").GetValue(manager)==-1,"Choice leaked to next junction");
+            Call(manager,"StopDrive");
+            Check(((IList)Get(manager,"active")).Count==0,"Driven car remains after exit");
+            ((IDictionary)Get(manager,"exitRanks")).Clear();
+        }
         UnityEngine.Object.DestroyImmediate(manager.gameObject);UnityEngine.Object.DestroyImmediate(paths.gameObject);
+    }
+
+    static void DriveCamera()
+    {
+        var go=new GameObject("DriveCameraQA"); var camera=go.AddComponent<Camera>();
+        var controller=go.AddComponent(game.GetType("CameraController"));
+        game.GetType("CameraController").GetProperty("Instance").SetValue(null,controller);
+        var drive=new GameObject("DriveModeQA").AddComponent(game.GetType("DriveMode"));
+        game.GetType("DriveMode").GetProperty("Instance").SetValue(null,drive);
+        Set(drive,"open",true); Set(drive,"riding",true); Set(drive,"saved",true); Set(drive,"cameraRef",camera);
+        Set(drive,"position",new Vector3(500,20,800));
+        var original=new Vector3(10,250,30); var rotation=Quaternion.Euler(70,35,0);
+        Set(drive,"savedPosition",original); Set(drive,"savedRotation",rotation);
+        Set(drive,"savedOrthographic",true); Set(drive,"savedSize",230f); Set(drive,"savedFov",55f); Set(drive,"savedNear",.8f);
+        Set(controller,"isMouseDragging",true); Set(controller,"dragVelocity",Vector3.one*100);
+        object[] args={null};
+        Check((bool)Call(drive,"TryGetLoadCenter",args),"Ride did not override the ground-ray load center");
+        Near(Vector3.Distance((Vector3)args[0],new Vector3(500,20,800)),0,.001f,"Load center is not the ridden vehicle");
+        Call(drive,"Close",true);
+        Near(Vector3.Distance(camera.transform.position,original),0,.001f,"Drive exit did not restore camera position");
+        Near(Quaternion.Angle(camera.transform.rotation,rotation),0,.001f,"Drive exit did not restore camera angle");
+        Check(camera.orthographic,"Drive exit lost orthographic projection");
+        Near(camera.orthographicSize,230,.001f,"Drive exit lost zoom"); Near(camera.nearClipPlane,.8f,.001f,"Drive exit lost clipping plane");
+        Check(!(bool)Get(controller,"isMouseDragging") && ((Vector3)Get(controller,"dragVelocity")).sqrMagnitude==0,"Camera resumes stale dragging after drive");
+        Check(!(bool)Call(drive,"TryGetLoadCenter",args),"Drive load center leaked after exit");
+        Near(Property(drive,"SpeedMultiplier"),1,.001f,"Fast-forward leaked after exit");
+        UnityEngine.Object.DestroyImmediate(drive.gameObject); UnityEngine.Object.DestroyImmediate(go);
     }
     static void RoadsideExit()
     {

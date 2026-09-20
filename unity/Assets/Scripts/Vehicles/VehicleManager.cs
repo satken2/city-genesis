@@ -8,7 +8,7 @@ using GeneratedModels;
 /// 交通量から決まる全体枠と道路別の時間平均密度で発生・沿道到着を調整する。
 /// 台数調整はノード遷移から独立しており、交差点の上では到着させない。
 /// </summary>
-public class VehicleManager : MonoBehaviour
+public partial class VehicleManager : MonoBehaviour
 {
     [SerializeField] private PathManager pathManager;
     [SerializeField] private CameraCellChecker cameraCellChecker;
@@ -111,6 +111,7 @@ public class VehicleManager : MonoBehaviour
         float dt = Time.deltaTime;
         if (dt <= 0) return;
         Vector3 center = cameraCellChecker != null ? cameraCellChecker.CurrentWorldPosition : (Camera.main != null ? Camera.main.transform.position : Vector3.zero);
+        if (DriveMode.TryGetLoadCenter(out var rideCenter)) center = rideCenter;
         bool jumped = hasCenter && XZDistanceSquared(center, lastCenter) > renderRadius * renderRadius;
         if (jumped || lastTrafficHand != CityInfoStore.TrafficHand) ClearVehicles();
         lastTrafficHand = CityInfoStore.TrafficHand;
@@ -122,8 +123,11 @@ public class VehicleManager : MonoBehaviour
             RefreshRoads(center);
             scanTimer = Mathf.Max(.1f, rangeScanInterval);
         }
-        MoveVehicles(dt, center);
-        densityTimer += dt;
+        float trafficDt = dt * DriveMode.SpeedMultiplier;
+        // 早送りでも追従間隔を小刻みに再評価し、前車を一度に飛び越えない。
+        for (float left = trafficDt; left > .00001f; left -= Mathf.Min(left, 1f / 30f))
+            MoveVehicles(Mathf.Min(left, 1f / 30f), center);
+        densityTimer += trafficDt;
         // 制御周期を固定し、フレームごとの確率の切り捨て・上限依存を避ける。
         while (densityTimer >= .25f)
         {
@@ -400,7 +404,7 @@ public class VehicleManager : MonoBehaviour
         float best = float.NegativeInfinity;
         foreach (var v in active)
         {
-            if (v.arrivalPending || v.fading || v.age < minimumJourneyTime) continue;
+            if (v == DrivenVehicle || v.arrivalPending || v.fading || v.age < minimumJourneyTime) continue;
             if (!exitRanks.ContainsKey(State(v.pathId, v.forward))) continue;
             float surplus = 0;
             if (bucketByKey.TryGetValue(Key(v.pathId, v.vehicleType), out var b))
@@ -586,7 +590,7 @@ public class VehicleManager : MonoBehaviour
                 break;
             }
             Place(v);
-            if (invalid || v.fadeElapsed >= Mathf.Max(.01f, fadeDuration) || (!v.ExitingRoad && XZDistanceSquared(v.go.transform.position, center) > radius * radius))
+            if (invalid || v.fadeElapsed >= Mathf.Max(.01f, fadeDuration) || (v != DrivenVehicle && !v.ExitingRoad && XZDistanceSquared(v.go.transform.position, center) > radius * radius))
                 Despawn(i);
         }
     }
@@ -596,17 +600,7 @@ public class VehicleManager : MonoBehaviour
         PathSummary current = pathManager.GetPathData(v.pathId);
         if (current == null) return false;
         int node = v.AheadNodeId(current.start_node_id, current.end_node_id);
-        candidates.Clear();
-        float total = 0;
-        foreach (var data in pathManager.GetPathsConnectedToNode(node))
-        {
-            if (data.path_id == v.pathId || !Drivable(data) || !roads.TryGetValue(data.path_id, out var road)) continue;
-            bool forward = data.start_node_id == node;
-            if (!forward && data.end_node_id != node) continue;
-            if (!DirectionAllowsEntry(data.travel_direction, forward)) continue;
-            float weight = Traffic(data, v.vehicleType);
-            candidates.Add((road, forward, weight)); total += weight;
-        }
+        float total = CollectCandidates(v, node);
         Road next; bool nextForward;
         if (candidates.Count == 0)
         {
@@ -635,8 +629,10 @@ public class VehicleManager : MonoBehaviour
                     if (exitRanks.TryGetValue(State(candidates[i].road.data.path_id, candidates[i].forward), out int rank) && rank < best)
                     { best = rank; chosen = i; }
             }
+            if (v == DrivenVehicle) chosen = ChooseDriveCandidate(v);
             next = candidates[chosen].road; nextForward = candidates[chosen].forward;
         }
+        if (v == DrivenVehicle) RequestedDrivePath = -1;
         v.Sample(out Vector3 p0, out Vector3 t0);
         v.SetPath(next.data.path_id, next.line, nextForward);
         v.spawnBlendRemaining = 0; v.arrivalDistance = -1; v.destinationParcel = 0;
@@ -670,6 +666,7 @@ public class VehicleManager : MonoBehaviour
     private void Despawn(int index)
     {
         var v = active[index];
+        if (v == DrivenVehicle) DrivenVehicle = null;
         if (v.go != null)
         {
             VehicleAmbience.Remove(VehicleAmbience.Kind.Car, v.go.GetInstanceID());

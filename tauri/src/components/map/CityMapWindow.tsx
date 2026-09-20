@@ -8,8 +8,7 @@
  *
  * 3Dビューのカメラ位置・向きもマーカーとして重ねて描く(下記「カメラマーカー」)。
  *
- * 将来的にはウィンドウ左側に検索・2点間経路探索のパネルを追加する予定
- * (現時点では未実装)。
+ * 左側の検索・経路案内は、一括経路計算の結果を読み取り専用で表示する。
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -27,6 +26,7 @@ import {
 } from "./CityMapCanvas";
 import { IPC_EVENT_CAMERA_STATE, sendCameraQueryState } from "../../utils/ipc";
 import "./CityMapWindow.css";
+import { useMapNavigation } from "./CityMapNavigation";
 
 /** ツールバーに並べるレイヤーの表示順 */
 const LAYER_ORDER: (keyof CityMapLayerVisibility)[] = [
@@ -79,6 +79,7 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const mapRef = useRef<CityMapCanvasHandle>(null);
   const coordRef = useRef<HTMLSpanElement | null>(null);
   const zoomRef = useRef<HTMLSpanElement | null>(null);
+  const navigation = useMapNavigation(apiBaseUrl, mapRef);
 
   // 標高色分けは地図の地物(道路・区画・建物)より情報量が多く、都市の読み取りを
   // 妨げるため既定ではOFFにする(必要なときにツールバーから点ける)。
@@ -139,8 +140,9 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   /** 再読み込みでは地図データと合わせてカメラ位置も取り直す */
   const handleReload = useCallback(() => {
     mapRef.current?.reload();
+    navigation.reload();
     void sendCameraQueryState().catch(console.error);
-  }, []);
+  }, [navigation.reload]);
 
   /**
    * カメラ位置マーカーの重ね描き。ctxにはワールド座標系のビュー変換が適用済みなので、
@@ -148,6 +150,7 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
    */
   const drawCameraMarker = useCallback(
     (ctx: CanvasRenderingContext2D, view: CityMapViewState) => {
+      navigation.draw(ctx, view);
       if (!camera) return;
       const px = (v: number) => v / view.zoom;
 
@@ -178,11 +181,13 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       ctx.fill();
       ctx.stroke();
     },
-    [camera]
+    [camera, navigation.draw]
   );
 
   return (
     <div className="city-map-window">
+      {navigation.sidebar}
+      <div className="city-map-window__main">
       {/* ツールバー: レイヤー表示切り替えと操作ボタン */}
       <div className="city-map-window__toolbar">
         <div className="city-map-window__layer-toggles">
@@ -248,7 +253,9 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
           onZoomChange={handleZoom}
           onHeatmapStats={setHeatmapStats}
           overlayDraw={drawCameraMarker}
-          overlayVersion={camera?.seq ?? 0}
+          overlayVersion={(camera?.seq ?? 0) + navigation.overlayVersion}
+          onMapClick={navigation.onMapClick}
+          cursor={navigation.picking ? "crosshair" : undefined}
         />
         {/* ヒートマップの凡例。塗り色はエポックごとのmin〜maxを両端まで
             引き伸ばした相対値なので、実値レンジを併記して絶対水準を伝える */}
@@ -288,6 +295,7 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
             100%
           </span>
         </div>
+      </div>
       </div>
     </div>
   );

@@ -311,9 +311,6 @@ public class TerrainManager : BaseApiDataManager
     private Mesh ultraFarLandMesh;
     private Material ultraFarLandMat;
 
-    /// <summary>地形シェーダー(Custom/DepthOffsetTerrainLit / DepthOffsetSimpleLitFar)の乗算ティント。通常表示では白。</summary>
-    private static readonly int TerrainTintId = Shader.PropertyToID("_TerrainTint");
-
     // === ロード済みセルマスク(UltraFar沈み込み用) ===
     private static readonly int LoadedCellMaskId = Shader.PropertyToID("_LoadedCellMask");
     private static readonly int LoadedCellMaskParamsId = Shader.PropertyToID("_LoadedCellMaskParams");
@@ -1596,25 +1593,6 @@ public class TerrainManager : BaseApiDataManager
     }
 
     /// <summary>
-    /// ワールド座標からバックエンドの 0-based セルインデックスを直接計算する。
-    /// Python 側の計算式と完全に一致させるため、
-    /// マップ中央を原点とするワールド座標を左上原点のセルインデックスに変換する。
-    /// </summary>
-    public Vector2Int WorldPositionToBackendCell(Vector3 worldPosition)
-    {
-        float cellSize = GetCellSize();
-        // マップ中央原点のワールド座標から、マップ左下隅を原点とするバックエンドの非負セルインデックスを計算する。
-        // ここでも浮動小数点の計算誤差を回避するため、まずUnityのセルインデックス（正負）を求め、それに整数オフセットを加算する。
-        int offsetX = Mathf.RoundToInt((GetMapWidth() / 2.0f) / cellSize);
-        int offsetY = Mathf.RoundToInt((GetMapHeight() / 2.0f) / cellSize);
-
-        int ux = Mathf.FloorToInt(worldPosition.x / cellSize);
-        int uy = Mathf.FloorToInt(worldPosition.z / cellSize);
-
-        return new Vector2Int(ux + offsetX, uy + offsetY);
-    }
-
-    /// <summary>
     /// バックエンドの 0-based セルインデックスを Unity のセルインデックスに変換する。
     /// マップ幅・高さがセルサイズの偶数倍であるため、バックエンドセルとUnityセルは
     /// 1対1で対応し、常に1つのセルのみを返す。
@@ -1636,6 +1614,16 @@ public class TerrainManager : BaseApiDataManager
     /// </summary>
     public IEnumerator FetchCoastline()
     {
+        // 呼び出し元(セッション開始・全量リロード)はこの直後にLODの常駐セル集合を算出する。
+        // 算出はマップ寸法とセルサイズに依存し、未取得だと既定値でマップ外のセルを要求してしまうため、
+        // 地形設定をここで確定させる。
+        yield return EnsureSettingsLoaded();
+        if (!settingsLoaded)
+        {
+            Debug.LogError("TerrainManager: 地形設定を取得できないため海岸線の取得を中断します。");
+            yield break;
+        }
+
         string error = null;
 
         yield return ApiClient.Get<CoastlineResponse>(
@@ -1979,9 +1967,6 @@ public class TerrainManager : BaseApiDataManager
     private void ApplyTerrainMaterialSettings(Material material)
     {
         if (material == null) return;
-
-        // 乗算ティントは常に白(=素の地形色)。クローン元マテリアルが白以外を持っていても打ち消す。
-        material.SetColor(TerrainTintId, Color.white);
 
         material.SetFloat(TerrainMacroVariationStrengthId, terrainMacroVariationStrength);
         material.SetFloat(TerrainMacroVariationScaleId, Mathf.Max(1f, terrainMacroVariationScale));

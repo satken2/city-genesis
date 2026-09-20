@@ -4242,16 +4242,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   terrainSize: {x: 1000, y: 1200, z: 1000}
-  cellLabelYOffset: 2
-  cellLabelFontSize: 3
-  cellLabelColor: {r: 1, g: 1, b: 1, a: 1}
   customTerrainLayers: []
   customTerrainMaterial: {fileID: 2100000, guid: c5a4b380786a3694c82561ecdc118eff, type: 2}
   useCustomMaterial: 0
   depthOffsetTerrainShader: {fileID: 0}
   ultraFarLandShader: {fileID: 0}
   ultraFarLandColor: {r: 0.45, g: 0.62, b: 0.4, a: 1}
-  unacquiredTint: {r: 0.5660378, g: 0.5660378, b: 0.5660378, a: 0.33333334}
   ultraFarGridStep: 80
   ultraFarHeightOffset: 1
   ultraFarSinkAmount: 100

@@ -1,0 +1,27 @@
+{
+  "drive": {
+    "title": "驾驶游览",
+    "car": "汽车",
+    "rail": "铁路线路",
+    "standard": "乘用车",
+    "commercial": "商用车",
+    "truck": "卡车",
+    "finishEditing": "请先结束编辑，再开始游览。",
+    "noLines": "没有可乘坐的运营中铁路线路。",
+    "pickRail": "点击所选线路上的轨道。",
+    "pickRoad": "点击使用中的道路。",
+    "clickStart": "选择起点（拖动可移动地图）。",
+    "startSelected": "已选择起点，将沿箭头方向出发。",
+    "reverse": "反转方向",
+    "start": "出发",
+    "back": "返回",
+    "close": "退出（Esc）",
+    "invalidStart": "无法从此处出发。请选择可行驶道路或所选线路上的轨道。",
+    "notReady": "此方向不可用，或附近轨道正在加载。请更换方向、位置，或稍后重试。",
+    "controls": "按住空格：5倍速 ／ Esc：退出",
+    "turnControls": "← →：选择出口 ／ ↑：最接近直行",
+    "loading": "正在加载轨道…",
+    "onRoute": "沿线路自动行驶，自动停站和折返。",
+    "waiting": "道路尽头或等待连接（允许时自动折返）。"
+  }
+}

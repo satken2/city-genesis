@@ -19,11 +19,9 @@ GBufferFragOutput SplatmapFragment(Varyings IN)
     output.gBuffer0.rgb = ApplyTerrainMacroVariation(output.gBuffer0.rgb, IN.positionWS);
     output.gBuffer0.rgb = ApplyTerrainColorGrade(output.gBuffer0.rgb, IN.positionWS);
     output.gBuffer0.rgb = ApplyContourLines(output.gBuffer0.rgb, IN.positionWS);
-    output.gBuffer0.rgb *= (half3)_TerrainTint.rgb;
     output.color.rgb = ApplyTerrainMacroVariation(output.color.rgb, IN.positionWS);
     output.color.rgb = ApplyTerrainColorGrade(output.color.rgb, IN.positionWS);
     output.color.rgb = ApplyContourLines(output.color.rgb, IN.positionWS);
-    output.color.rgb *= (half3)_TerrainTint.rgb;
     return output;
 }
 #else
@@ -46,7 +44,6 @@ void SplatmapFragment(
     outColor.rgb = ApplyTerrainMacroVariation(outColor.rgb, IN.positionWS);
     outColor.rgb = ApplyTerrainColorGrade(outColor.rgb, IN.positionWS);
     outColor.rgb = ApplyContourLines(outColor.rgb, IN.positionWS);
-    outColor.rgb *= (half3)_TerrainTint.rgb;
 }
 #endif
 

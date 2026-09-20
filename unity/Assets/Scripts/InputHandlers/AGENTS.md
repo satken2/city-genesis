@@ -52,6 +52,8 @@ Ctrlメニューの2設定と候補・ガイド・XYZの役割分担は`Editors/
 
 ## 入力モード
 
+ドライブUI表示中は`InputHandler.Update`の先頭ゲートで通常クリック・ホバー・公共交通選択を止める。開始位置のクリックは`DriveMode`が5pxのドラッグ閾値で判定する。専用のInputMode定数は持たず、編集中は開始を拒否する。カメラは位置選択中の地図移動を許し、乗車中と選択パネル上では通常入力を止める。
+
 沿道区画生成の道路選択は `PathInputHandler.IsPathSelectableForParcelCreation` が稼働中・街路・マスターの `frontage_allowed` を確認する。道路橋223は通行可能な街路でも選択しない。地区編集の街路選択は別条件のため、橋も対象のままとする。
 
 モード定数・プリセット定数は `InputHandler.cs` 内の `InputMode` / `InputModePreset` / `InputObjectType` に定義されている。

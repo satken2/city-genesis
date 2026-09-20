@@ -1,0 +1,55 @@
+{
+  "mapNavigation": {
+    "title": "Explorar la ciudad",
+    "back": "Volver",
+    "search": "Buscar un lugar",
+    "origin": "Elegir origen",
+    "destination": "Elegir destino",
+    "clear": "Borrar",
+    "searching": "Buscando…",
+    "error": "No se pudo conectar. Vuelve a cargar e inténtalo de nuevo.",
+    "noResults": "No se encontraron lugares",
+    "mode": "Modo de viaje",
+    "pedestrian": "A pie y transporte",
+    "automobile": "Auto",
+    "pickOrigin": "Elegir origen en el mapa",
+    "pickDestination": "Elegir destino en el mapa",
+    "swap": "Intercambiar",
+    "cancel": "Cancelar",
+    "directions": "Cómo llegar",
+    "explore": "Descubre tu ciudad",
+    "intro": "Busca instalaciones, estaciones o distritos, o selecciona un lugar en el mapa.",
+    "chooseOrigin": "Busca un origen o elige uno en el mapa.",
+    "routing": "Buscando ruta…",
+    "showRoute": "Ver ruta completa",
+    "mapPoint": "Punto en el mapa",
+    "minutes": "Aprox. {{count}} min",
+    "unnamed": "{{kind}} {{id}}",
+    "snapshot": "Estimación basada en la red del cálculo #{{epoch}}. Las líneas punteadas indican tramos a pie y conexiones de acceso.",
+    "busy": "La simulación está en curso. Los resultados se actualizarán al terminar.",
+    "not_ready": "Aún no hay datos de rutas. Ejecuta una simulación en esta ciudad para verlas.",
+    "unreachable": "No hay una ruta entre estos lugares.",
+    "no_access": "No se encontró una vía accesible cerca del lugar seleccionado.",
+    "geometry_unavailable": "La geometría del transporte de esta ruta no está disponible.",
+    "place_missing": "El lugar seleccionado fue eliminado. Vuelve a seleccionarlo.",
+    "kind": {
+      "agent": "Instalación",
+      "zone": "Distrito",
+      "stop": "Parada",
+      "station": "Estación",
+      "point": "Punto"
+    },
+    "leg": {
+      "walk": "Caminar",
+      "drive": "Conducir",
+      "transit": "Transporte público",
+      "conveyor": "Transporte de pasajeros",
+      "access": "Conexión de acceso",
+      "turn": "Giro en cruce"
+    },
+    "picking": {
+      "origin": "Haz clic en el origen en el mapa.",
+      "destination": "Haz clic en el destino en el mapa."
+    }
+  }
+}

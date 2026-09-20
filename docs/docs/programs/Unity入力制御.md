@@ -42,7 +42,6 @@ Rayが命中したオブジェクトはTagまたはコンポーネントの有�
 | `MODE_PARCEL_CREATION_SPLIT` | 6 | 土地区画分割モード |
 | `MODE_EDIT` | 7 | 既存オブジェクトの編集モード |
 | `MODE_ZONE_EDIT` | 8 | 地区編集モード |
-| `MODE_UNLOCK_CELL` | 9 | 地形セル開放モード |
 | `MODE_PARCEL_SHAPE_EDIT` | 10 | 土地区画形状編集モード |
 | `MODE_SET_GRID` | 11 | グリッド角度設定モード |
 | `MODE_EDIT_RESOURCE` | 12 | 資源エリア編集モード |
@@ -65,7 +64,6 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 | `PARCEL_CREATION_PATH` | — | PARCEL_CREATION_PATH | — | NONE | NONE | — |
 | `PARCEL_CREATION_SPLIT` | — | NONE | — | PARCEL_CREATION_SPLIT | NONE | — |
 | `ZONE_EDIT` | ZONE_EDIT | ZONE_EDIT | NONE | NONE | NONE | ZONE_EDIT |
-| `UNLOCK_CELL` | UNLOCK_CELL | NONE | NONE | NONE | NONE | NONE |
 | `PARCEL_SHAPE_EDIT` | PARCEL_SHAPE_EDIT | NONE | NONE | NONE | NONE | NONE |
 | `PROP_PLACEMENT` | EDIT_PROP | NONE | NONE | NONE | NONE | NONE |
 | `CONNECTOR_EDIT` | NONE | NONE | EDIT | NONE | NONE | NONE |
@@ -135,7 +133,6 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 | `MODE_ROAD_CONSTRUCTION` | `RoadPlanManager.OnTerrainLeftClick` に委譲 | 同右 | `RoadPlanManager.OnTerrainHover` に委譲 |
 | `MODE_ZONE_EDIT` | 何もしない | — | 地区ポリゴン内判定・ツールチップ表示 |
 | `MODE_BUILDING_CONSTRUCTION` | `BuildingPlanManager.OnTerrainClickDirect` に委譲（直接配置=区画外地点の確定） | — | `BuildingPlanManager.OnTerrainHoverDirect` に委譲（直接配置=カーソル追従の矩形ゴースト表示）。ホバー離脱時 `HideDirectGhost` |
-| `MODE_UNLOCK_CELL` | セル座標を計算してUIに通知 | — | — |
 | `MODE_PARCEL_CREATION_POINT` | 土地区画エディタに点を通知 | — | 配置マーカー表示 |
 | `MODE_PARCEL_SHAPE_EDIT` | `ParcelShapeEditManager.OnTerrainLeftClick` に委譲 | 同右 | 頂点ホバー判定 |
 | `MODE_EDIT_RESOURCE` | `ResourceAreaEditManager.OnTerrainLeftClick` に委譲 | 同右 | 同 `OnTerrainHover` に委譲 |
@@ -311,7 +308,6 @@ Y軸ドラッグは、ポイントを通りカメラ正面を向いた鉛直平�
 | `STATE_EDIT_ZONE` | `ZONE_EDIT` | `ZoneEditContext.EnterCreateMode` または `EnterEditMode`（道路のみ地区色分け表示にし、地区枠線を強調） |
 | `STATE_EDIT_PARCEL` | 作成方法に応じて切替 | `ParcelEditorManager.EnterCreationMode`（作成方法の切り替えはUnity側のCtrlラジアルメニュー`ParcelEditControlMenu`が担い、プリセットも同メソッドが切り替える） |
 | `STATE_EDIT_PARCEL_SHAPE` | `PARCEL_SHAPE_EDIT` | `ParcelShapeEditManager.InitializeEditMode` |
-| `STATE_UNLOCK_CELL` | `UNLOCK_CELL` | — |
 | `STATE_EDIT_PROP` | `PROP_PLACEMENT` | `PropPlacementManager` の初期化（個別配置／範囲散布） |
 | `STATE_EDIT_CONNECTOR` | `CONNECTOR_EDIT` | `ConnectorEditManager.EnterEditMode`（接続端子ノードの強調＋ドラッグ有効化） |
 
@@ -323,10 +319,9 @@ Y軸ドラッグは、ポイントを通りカメラ正面を向いた鉛直平�
 
 | ステート（操作） | 強制する表示 |
 |---|---|
-| `STATE_EDIT_PATH` / `STATE_EDIT_STATION` / `STATE_MERGE_PATH` / `STATE_SPLIT_PATH` / `STATE_EDIT_BUILDING`（道路・線路・インフラ・建物の設置） | 区画（建物建設は建設可能な区画の色分け、他は境界線）・地区・セル・等高線を表示、計画中の道路と建物を表示、プロップを非表示 |
-| `STATE_EDIT_PARCEL`（土地区画編集） | 区画・地区・セルを表示、計画中の道路と建物を表示 |
-| `STATE_EDIT_ZONE`（地区編集） | 区画・地区・セルを表示、道路のみ地区色分け、計画中表示と公共施設ハイライトはOFF |
-| `STATE_UNLOCK_CELL`（セル開放） | セルと地区を表示、区画は非表示、計画中表示はOFF（現況の街並みだけを見せる） |
+| `STATE_EDIT_PATH` / `STATE_EDIT_STATION` / `STATE_MERGE_PATH` / `STATE_SPLIT_PATH` / `STATE_EDIT_BUILDING`（道路・線路・インフラ・建物の設置） | 区画（建物建設は建設可能な区画の色分け、他は境界線）・地区・等高線を表示、計画中の道路と建物を表示、プロップを非表示 |
+| `STATE_EDIT_PARCEL`（土地区画編集） | 区画・地区を表示、計画中の道路と建物を表示 |
+| `STATE_EDIT_ZONE`（地区編集） | 区画・地区を表示、道路のみ地区色分け、計画中表示と公共施設ハイライトはOFF |
 | `STATE_EDIT_TRANSIT` ＋ プリセット `transit`（公共交通の一覧・新設） | 公共交通路線を全種別表示、計画中の道路と建物を表示 |
 | `STATE_REMOVE_OBJECTS`（ブルドーザ） | 区画の境界線・計画中の道路と建物を表示、地区は非表示（プロップは削除対象なので消さない） |
 
@@ -535,3 +530,7 @@ MODE_EDIT_PROPはクリック・ホバーともTerrainInputHandlerの共通吸�
 造成後の地上路面は、地形を距離幅の移動平均で平滑化した標高を使う。端部は端点を中心に地形を点対称に延長して平均するため、曲線の外挿で終端だけが沈んだり跳ね上がったりしない。短い坂も一定勾配を保つ。この標高はバックエンドの造成プレビュー・勾配検証・施工で共通であり、操作停止後の3Dモデルと勾配ラベルにも反映される。
 
 駅舎の通路方式は建設パネルの上空/地上/地下から選び、配置中にもプレビューへ反映する。建屋配置端はTrackConstructionPanel内だけで選択する。既存形状編集は保存済みhouse_endsとpassage_modeを保持する。
+
+## ドライブの入力
+
+Cockpitから`drive:open`を受けると`DriveMode`が開始位置の選択と乗車を扱う。既存InputMode定数は増やさず、`InputHandler`の通常クリック/ホバーを専用ゲートで停止する。開始位置はドラッグ移動5px未満のクリックだけを受け、選択中のカメラ移動は許可する。走行中は矢印キーを分岐選択、Space長押しを5倍速、Escを終了に使う。鉄道は路線に追従するため分岐操作を持たない。カメラの保存は選択UI表示中から止め、終了時に元の視点へ戻す。`SetView`はドラッグ状態と慣性を破棄する。詳細は[車両の走行描画](../geometries/O_車両の走行描画.md)を参照。

@@ -215,7 +215,7 @@ public class InputHandler : MonoBehaviour
         // フライモード中はマウス入力（クリック・ホバー・ドラッグ）を一切受け付けない。
         // カメラを自由飛行させている間は3Dオブジェクトの選択やホバー（ツールチップ含む）を
         // 完全に無効化するため、他のどの判定よりも先に即抜けする。
-        if (CameraController.Instance != null && CameraController.Instance.IsFlyMode)
+        if (DriveMode.IsOpen || (CameraController.Instance != null && CameraController.Instance.IsFlyMode))
         {
             ClearHover();
             TooltipManager.Instance?.Hide();

@@ -5,7 +5,7 @@ using GeneratedModels;
 
 
 /// <summary>確定した路線時計から編成を配置する。画面外の進行と停車も同じ時計で再現する。</summary>
-public sealed class TransitVehicleManager : MonoBehaviour
+public sealed partial class TransitVehicleManager : MonoBehaviour
 {
     public static TransitVehicleManager Instance { get; private set; }
     private readonly Dictionary<GameObject, int> lineByVehicle = new();
@@ -70,6 +70,7 @@ public sealed class TransitVehicleManager : MonoBehaviour
         var store = TransitDataStore.Ensure();
         if (session != store.Session)
         {
+            StopDrive();
             session = store.Session; clock = 0; revision = -1; lines.Clear(); routePaths.Clear(); routeGeometry?.Clear();
             HideUnused(true);
             soundTrack.Clear();
@@ -80,13 +81,16 @@ public sealed class TransitVehicleManager : MonoBehaviour
         { HideUnused(true); return; }
         if (paths == null) paths = FindAnyObjectByType<PathManager>();
         if (paths == null || CameraCellChecker.Instance == null) return;
-        clock += Time.deltaTime;
+        driveDelta = Time.deltaTime * DriveMode.SpeedMultiplier;
+        clock += driveDelta;
         if (revision != store.Revision) { revision = store.Revision; RebuildLines(store.Lines); }
         Vector3 center = CameraCellChecker.Instance.CurrentWorldPosition;
+        if (DriveMode.TryGetLoadCenter(out var rideCenter)) center = rideCenter;
         scanTimer -= Time.deltaTime;
         if (scanTimer <= 0) { scanTimer = .5f; RefreshGeometry(center); }
         used.Clear();
-        foreach (var line in lines) DrawLine(line, center);
+        foreach (var line in lines) if (line.data.line_agent_id == DrivenLineId) DrawLine(line, center);
+        foreach (var line in lines) if (line.data.line_agent_id != DrivenLineId) DrawLine(line, center);
         HideUnused(false);
     }
 
@@ -106,6 +110,7 @@ public sealed class TransitVehicleManager : MonoBehaviour
             foreach (var run in line.runs) routePaths.Add(run.path);
         }
         scanTimer = 0;
+        if (DrivenLineId >= 0 && !lines.Exists(line => line.data.line_agent_id == DrivenLineId)) StopDrive();
     }
 
     private void RefreshGeometry(Vector3 center)
@@ -126,7 +131,8 @@ public sealed class TransitVehicleManager : MonoBehaviour
         {
             // 編成の外観は路線IDと編成番号で固定し、往復・プール復帰でも全車を揃える。
             int variant = VehicleModelResolver.PickVariantId(line.type, unchecked(line.data.line_agent_id * 397 + train));
-            double trainTime = clock + line.motion.Duration*train/trains;
+            bool driven = line.data.line_agent_id == DrivenLineId && train == 0;
+            double trainTime = clock + line.motion.Duration*train/trains + (driven ? driveOffset : 0);
             int step = line.motion.AtTime(trainTime, out double distance, out bool stopped);
             if (step < 0) continue;
             bool returning = line.motion.Returning[step];
@@ -140,7 +146,21 @@ public sealed class TransitVehicleManager : MonoBehaviour
                 Vector3 delta = positions[car]-center; delta.y = 0;
                 near |= delta.sqrMagnitude <= renderRadius*renderRadius;
             }
-            if (!ready || !near || used.Count+cars > maxVisibleCars) continue;
+            if (driven)
+            {
+                DriveWaiting = !ready;
+                if (!ready)
+                {
+                    // 未ロードの接続を越えて時計だけ進めない。最後の編成と視点を保ってロードを待つ。
+                    driveOffset -= driveDelta;
+                    string prefix = line.data.line_agent_id + ":0:";
+                    foreach (var entry in visible) if (entry.Key.StartsWith(prefix, StringComparison.Ordinal)) used.Add(entry.Key);
+                    continue;
+                }
+                int cab = returning ? cars - 1 : 0;
+                DrivePosition = positions[cab]; DriveDirection = directions[cab];
+            }
+            if (!ready || (!driven && !near) || used.Count+cars > maxVisibleCars) continue;
             ReportSound(line, train, trainTime, distance, positions[cars/2]);
             for (int car = 0; car < cars; car++)
             {

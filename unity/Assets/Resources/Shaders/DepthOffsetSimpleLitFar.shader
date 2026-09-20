@@ -4,7 +4,6 @@
 //   より大きい正の Offset(4,4)で最奥へ押しやり、per-cell タイルが常に手前で勝つようにする。
 //   海面(Custom/DepthOffsetLit, Offset -1,-1)よりも奥なので、海岸の縁でも海面が正しく手前に出る。
 // 地表の手続き色・岩肌・PBR照明をTerrainと共用する。SimpleLitの頂点入力と補助パスを利用する。
-// 乗算ティント _TerrainTint はTerrainと同じく、照明・霧の適用後に掛ける。
 // 沈み込みは接続する三角形全体がロード済み範囲に収まる頂点だけに適用する。
 // 境界をまたぐ面を下げると未ロード側まで海面下へ引き込むため、外周に重なりを残す。
 Shader "Custom/DepthOffsetSimpleLitFar"
@@ -26,10 +25,6 @@ Shader "Custom/DepthOffsetSimpleLitFar"
         _TerrainMacroVariationStrength("Macro Variation Strength", Range(0.0, 0.5)) = 0.12
         _TerrainMacroVariationScale("Macro Variation Scale", Float) = 350.0
         _TerrainMacroVariationTint("Macro Variation Tint", Color) = (0.85, 0.95, 0.75, 1.0)
-
-        // メッシュ全体への乗算ティント。TerrainManager がマテリアルに設定する。
-        // 白=素の地形色。
-        _TerrainTint("Terrain Tint", Color) = (1.0, 1.0, 1.0, 1.0)
 
         // 崖(急傾斜)への岩テクスチャブレンド設定。実行時は TerrainManager の
         // ApplyTerrainMaterialSettings がタイルごとの materialTemplate に設定する。
@@ -218,7 +213,6 @@ Shader "Custom/DepthOffsetSimpleLitFar"
                 outColor.rgb = ApplyTerrainMacroVariation(outColor.rgb, input.positionWS);
                 outColor.rgb = ApplyTerrainColorGrade(outColor.rgb, input.positionWS);
                 outColor.rgb = ApplyContourLines(outColor.rgb, input.positionWS);
-                outColor.rgb *= (half3)_TerrainTint.rgb;
             }
 
             #include "Assets/Shaders/UltraFarTerrainSink.hlsl"

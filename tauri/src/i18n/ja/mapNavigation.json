@@ -1,0 +1,55 @@
+{
+  "mapNavigation": {
+    "title": "街を探索",
+    "back": "戻る",
+    "search": "場所を検索",
+    "origin": "出発地を検索",
+    "destination": "目的地を検索",
+    "clear": "クリア",
+    "searching": "検索中…",
+    "error": "接続できません。再読み込みしてお試しください。",
+    "noResults": "場所が見つかりません",
+    "mode": "移動手段",
+    "pedestrian": "徒歩・公共交通",
+    "automobile": "自動車",
+    "pickOrigin": "出発地を地図で選ぶ",
+    "pickDestination": "目的地を地図で選ぶ",
+    "swap": "入れ替え",
+    "cancel": "キャンセル",
+    "directions": "ここへの行き方",
+    "explore": "街の新しい発見へ",
+    "intro": "施設・駅・地区を検索するか、地図上の場所を選んでください。",
+    "chooseOrigin": "出発地を検索するか、地図から選んでください。",
+    "routing": "経路を検索中…",
+    "showRoute": "経路全体を表示",
+    "mapPoint": "地図上の地点",
+    "minutes": "約{{count}}分",
+    "unnamed": "{{kind}} {{id}}",
+    "snapshot": "経路計算 #{{epoch}} の道路網に基づく目安です。点線は徒歩・道路への接続を示します。",
+    "busy": "シミュレーション中です。完了後に更新します。",
+    "not_ready": "経路データがありません。この都市でシミュレーションを実行すると表示できます。",
+    "unreachable": "この2地点を結ぶ経路が見つかりません。",
+    "no_access": "選んだ地点から利用できる道路が見つかりません。",
+    "geometry_unavailable": "この経路の公共交通の走行形状が取得できません。",
+    "place_missing": "選択した場所が削除されました。選び直してください。",
+    "kind": {
+      "agent": "施設",
+      "zone": "地区",
+      "stop": "停留所",
+      "station": "駅",
+      "point": "地点"
+    },
+    "leg": {
+      "walk": "徒歩",
+      "drive": "自動車",
+      "transit": "公共交通",
+      "conveyor": "人員搬送",
+      "access": "道路への接続",
+      "turn": "交差点での転回"
+    },
+    "picking": {
+      "origin": "出発地を地図上でクリックしてください。",
+      "destination": "目的地を地図上でクリックしてください。"
+    }
+  }
+}

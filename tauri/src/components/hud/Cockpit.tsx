@@ -28,6 +28,7 @@ import { useTranslation } from "react-i18next";
 
 import {
   sendChangeState,
+  openDriveMode,
   sendRemoveObjectConfirmResult,
   IPC_EVENT_REMOVE_OBJECT_REQUEST_CONFIRM,
   IPC_EVENT_WORLD_SELECT_OBJECT,
@@ -236,6 +237,27 @@ export function Cockpit() {
             </button>
           );
         })}
+        <button
+          id="drive"
+          className="hud-icon-btn cockpit-tool cockpit-drive"
+          type="button"
+          title={t("drive.title")}
+          aria-label={t("drive.title")}
+          disabled={isLocked}
+          onClick={() => void (async () => {
+            if (mode !== null) {
+              await sendChangeState("STATE_NORMAL", undefined, "cockpit");
+              await setHudMode(null);
+              await setHintbarText("");
+            }
+            await openDriveMode(t("drive", { returnObjects: true }) as Record<string, string>);
+          })().catch(console.error)}
+        >
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="2" />
+            <path d="M3 10h7m4 0h7M10 14l-2 6m6-6 2 6" />
+          </svg>
+        </button>
       </div>
 
       <PublicServiceGauges

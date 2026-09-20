@@ -329,7 +329,7 @@
           "terrain"
         ],
         "summary": "Get Dynamic Map",
-        "description": "超近景用標高マップをセル単位でrawバイナリ(float16 LE)で返す。\n\nセル指定: ?cell_x=0&cell_z=0\n\n指定したセルがまだacquireされていない（地形データが存在しない）場合は404を返す。\nレスポンスヘッダー X-Cell-Version に、現在のセルの地形バージョンを含める。\nフロントエンドはこのバージョンを保持し、次回取得時に比較することで\n「描画済み地形と同じ形状か」を即座に判断できる。\n\nマップ範囲外のセル（＝標高ソースが存在しない領域）を要求された場合も404を返す。\n標高ソースはマップそのものであり、範囲外に地形データは存在しない。\n範囲外を get_dynamic_map に渡すと ValueError（→500）になるため、ここで先に弾く。",
+        "description": "超近景用標高マップをセル単位でrawバイナリ(float16 LE)で返す。\n\nセル指定: ?cell_x=0&cell_z=0\n\n指定したセルがまだ編集されていない（編集用の地形データが存在しない）場合は404を返す。\nレスポンスヘッダー X-Cell-Version に、現在のセルの地形バージョンを含める。\nフロントエンドはこのバージョンを保持し、次回取得時に比較することで\n「描画済み地形と同じ形状か」を即座に判断できる。\n\nマップ範囲外のセル（＝標高ソースが存在しない領域）を要求された場合も404を返す。\n標高ソースはマップそのものであり、範囲外に地形データは存在しない。\n範囲外を get_dynamic_map に渡すと ValueError（→500）になるため、ここで先に弾く。",
         "operationId": "get_dynamic_map_api_v1_terrain_dynamic_get",
         "parameters": [
           {
@@ -441,48 +441,6 @@
         }
       }
     },
-    "/api/v1/terrain/acquire-cell": {
-      "post": {
-        "tags": [
-          "terrain"
-        ],
-        "summary": "Acquire Cell",
-        "description": "セルを確保する。ゲーム内でプレイヤーがセルを使用開始するときに呼ぶ。",
-        "operationId": "acquire_cell_api_v1_terrain_acquire_cell_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": true,
-                "type": "object",
-                "title": "Data"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/terrain/release-cell": {
       "post": {
         "tags": [
@@ -525,33 +483,13 @@
         }
       }
     },
-    "/api/v1/terrain/acquired-cells": {
-      "get": {
-        "tags": [
-          "terrain"
-        ],
-        "summary": "Get Acquired Cells",
-        "description": "開放済みセルの一覧を返す。",
-        "operationId": "get_acquired_cells_api_v1_terrain_acquired_cells_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/terrain/cell-versions": {
       "get": {
         "tags": [
           "terrain"
         ],
         "summary": "Get Cell Versions",
-        "description": "全ての開放済みセルとその地形バージョンの一覧を返す。\n\nフロントエンドはこの一覧を取得し、クライアント側で保持しているバージョンと比較することで、\n更新が必要なセルのみを個別に /api/v1/terrain/dynamic へ問い合わせることができる。",
+        "description": "地形バージョンを持つセルとその3x3近傍の一覧を返す。\n\nフロントエンドはこの一覧を取得し、クライアント側で保持しているバージョンと比較することで、\n更新が必要なセルのみを個別に /api/v1/terrain/dynamic へ問い合わせることができる。\n一覧に無いセルはバージョン0（未編集）として扱う。",
         "operationId": "get_cell_versions_api_v1_terrain_cell_versions_get",
         "responses": {
           "200": {

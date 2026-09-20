@@ -56,24 +56,22 @@ public static class TerrainAppearanceQA
                 material.SetFloat("_TerrainDetailNormalScale", 1 / 3.5f);
             }
             var report = "";
-            foreach (bool dark in new[] { false, true })
+            foreach (bool fog in new[] { false, true })
             {
-                RenderSettings.fog = dark;
+                RenderSettings.fog = fog;
                 RenderSettings.fogMode = FogMode.Exponential;
                 RenderSettings.fogDensity = .002f;
                 RenderSettings.fogColor = new Color(.6f, .5f, .4f);
-                foreach (var material in new[] { near, far })
-                    material.SetColor("_TerrainTint", dark ? new Color(.5f, .5f, .5f) : Color.white);
                 farGO.SetActive(false); terrainGO.SetActive(true);
-                var a = Capture(camera, root + (dark ? "/near-dark.png" : "/near.png"));
+                var a = Capture(camera, root + (fog ? "/near-fog.png" : "/near.png"));
                 farGO.SetActive(true); terrainGO.SetActive(false);
-                var b = Capture(camera, root + (dark ? "/far-dark.png" : "/far.png"));
+                var b = Capture(camera, root + (fog ? "/far-fog.png" : "/far.png"));
                 double error = a.Zip(b, (x, y) => (Math.Abs(x.r - y.r) + Math.Abs(x.g - y.g) + Math.Abs(x.b - y.b)) / 3.0).Average();
-                report += $"dark={dark}: mean RGB error={error:F3}/255\n";
+                report += $"fog={fog}: mean RGB error={error:F3}/255\n";
                 if (error > 3) throw new Exception(report);
                 if (b.All(x => x.r > 240 && x.b > 240 && x.g < 10)) throw new Exception("Error shader rendered");
             }
-            report += CheckForest(camera, terrainGO, farGO, near, far, root);
+            report += CheckForest(camera, terrainGO, farGO, root);
             report += CheckContours(camera, terrainGO, farGO, root);
             report += CheckLoadedBoundary(camera, terrainGO, farGO, far, root);
             foreach (var shader in new[] { near.shader, far.shader })
@@ -89,10 +87,9 @@ public static class TerrainAppearanceQA
         }
     }
 
-    static string CheckForest(Camera camera, GameObject terrainGO, GameObject farGO, Material near, Material far, string root)
+    static string CheckForest(Camera camera, GameObject terrainGO, GameObject farGO, string root)
     {
         RenderSettings.fog = false;
-        near.SetColor("_TerrainTint",Color.white); far.SetColor("_TerrainTint",Color.white);
         Shader.SetGlobalTexture("_ForestCoverage",Texture2D.whiteTexture);
         Shader.SetGlobalVector("_ForestCoverageRect",new Vector4(-10000,-10000,1/20000f,1/20000f));
         Shader.SetGlobalVector("_ForestDetailRect",new Vector4(-10000,-10000,1/20000f,1/20000f));
@@ -136,7 +133,6 @@ public static class TerrainAppearanceQA
         farGO.SetActive(false);
         terrainGO.SetActive(true);
         var terrain = terrainGO.GetComponent<Terrain>();
-        terrain.materialTemplate.SetColor("_TerrainTint", Color.white);
         var heights = new float[33, 33];
         for (int z = 0; z < 33; z++)
             for (int x = 0; x < 33; x++) heights[z, x] = x / 32f * .4f;
@@ -177,8 +173,6 @@ public static class TerrainAppearanceQA
     static string CheckLoadedBoundary(Camera camera, GameObject terrainGO, GameObject farGO, Material far, string root)
     {
         RenderSettings.fog = false;
-        far.SetColor("_TerrainTint", Color.white);
-        terrainGO.GetComponent<Terrain>().materialTemplate.SetColor("_TerrainTint", Color.white);
         terrainGO.transform.position = new Vector3(0, 20, 0);
         camera.transform.position = new Vector3(100, 400, 100);
         camera.orthographicSize = 250;

@@ -16,7 +16,7 @@ public struct LodCellSets
     public List<Vector2Int> dynamicCells;
 }
 
-/// <summary>取得する空間範囲だけを決める。地形の標高源・所有権・物体の描画LODを変更しない。</summary>
+/// <summary>取得する空間範囲だけを決める。地形の標高源・物体の描画LODを変更しない。</summary>
 public static class LodConfig
 {
     public const int MAX_RESIDENT_CELLS = 81;

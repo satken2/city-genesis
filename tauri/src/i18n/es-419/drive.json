@@ -1,0 +1,27 @@
+{
+  "drive": {
+    "title": "Paseo",
+    "car": "Automóvil",
+    "rail": "Rutas ferroviarias",
+    "standard": "Automóvil de pasajeros",
+    "commercial": "Vehículo comercial",
+    "truck": "Camión",
+    "finishEditing": "Termina de editar antes de iniciar el paseo.",
+    "noLines": "No hay rutas ferroviarias en servicio disponibles.",
+    "pickRail": "Haz clic en una vía de la ruta seleccionada.",
+    "pickRoad": "Haz clic en una calle activa.",
+    "clickStart": "Elige el punto de inicio (arrastra para mover el mapa).",
+    "startSelected": "Punto elegido. Se partirá en la dirección de la flecha.",
+    "reverse": "Invertir dirección",
+    "start": "Partir",
+    "back": "Volver",
+    "close": "Salir (Esc)",
+    "invalidStart": "No se puede empezar aquí. Elige una calle transitable o una vía de la ruta.",
+    "notReady": "Esta dirección no está disponible o las vías cercanas se están cargando. Cambia de dirección o posición, o espera y vuelve a intentar.",
+    "controls": "Mantén Espacio: velocidad ×5 / Esc: salir",
+    "turnControls": "← →: elegir salida / ↑: la más recta",
+    "loading": "Cargando vías…",
+    "onRoute": "Sigue la ruta; las paradas y los retornos son automáticos.",
+    "waiting": "Fin de vía o esperando conexión (retorno si se permite)."
+  }
+}

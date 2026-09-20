@@ -102,6 +102,7 @@ nav:
     - 環境演出の乗り物: geometries/V_環境演出の乗り物.md
     - 歩行者の描画: geometries/W_歩行者の描画.md
   - プログラム連携:
+    - 都市マップの検索と経路案内: programs/都市マップの検索と経路案内.md
     - IPC連携: programs/IPC連携の整理.md
     - コンポーネント連携: programs/コンポーネント連携.md
     - モックバックエンド: programs/モックバックエンド.md

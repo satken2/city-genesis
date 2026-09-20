@@ -1,4 +1,4 @@
-param([string]$UnityExe, [switch]$PedestrianModelsOnly, [switch]$TransitOnly)
+param([string]$UnityExe, [switch]$PedestrianModelsOnly, [switch]$TransitOnly, [switch]$DriveOnly)
 $ErrorActionPreference = 'Stop'
 $unityRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $project = Join-Path $unityRoot 'Assembly-CSharp.csproj'
@@ -43,6 +43,7 @@ $qaArguments = @(
 )
 if ($PedestrianModelsOnly) { $qaArguments += '-pedestrianModelsOnly' }
 if ($TransitOnly) { $qaArguments += '-transitOnly' }
+if ($DriveOnly) { $qaArguments += '-driveOnly' }
 $process = Start-Process -FilePath $UnityExe -ArgumentList $qaArguments -WindowStyle Hidden -PassThru
 $process.WaitForExit()
 $result = Get-Content -LiteralPath $resultPath -Raw

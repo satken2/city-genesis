@@ -80,7 +80,7 @@ F8は描画数、生成予算、フレームp95/p99、キャッシュ推定量�
 
 ## 座標系とセルインデックス
 
-- Unityワールドはマップ中心が原点で、**Unityセルインデックスは負値を取る**。バックエンドのセルは0-based(左下原点)。変換は必ず `TerrainManager.UnityCellToBackendCell` / `BackendCellToUnityCells` / `WorldPositionToBackendCell` を使うこと。
+- Unityワールドはマップ中心が原点で、**Unityセルインデックスは負値を取る**。バックエンドのセルは0-based(左下原点)。変換は必ず `TerrainManager.UnityCellToBackendCell` / `BackendCellToUnityCells` を使うこと。
 - Unityワールド座標はバックエンドと同じ固定座標を使う。カメラ距離に応じた原点シフトは行わない。Transformだけを移動するとセル判定・高さ参照・保存座標が不整合になる。
 
 ## 地形高さの取得
@@ -94,6 +94,8 @@ F8は描画数、生成予算、フレームp95/p99、キャッシュ推定量�
 - マウス入力のタイプ判定は**タグ**で行う: `BuildingObject` / `ParcelObject` / `PathObject` / `PathNode` / `ZoneObject` / `SeaObject`(地形はTerrainコンポーネントで判定するが、海面は `Terrain` コンポーネントを持たないため `SeaObject` タグで代用し `InputObjectType.TERRAIN` に振り分ける)。コライダーとタグがないとクリックできない。
 
 ## モード系は2系統ある
+
+ドライブは`Vehicles/DriveMode`による描画専用の乗車操作で、InputMode/VisualModeの新規定数を持たない。選択UI表示中は通常のオブジェクト入力とカメラ保存を止め、乗車中はカメラを車両へ追従する。`CameraCellChecker`のロード中心も車両位置へ切り替える。`CameraController.SetView`はドラッグと慣性を破棄してから視点を置く。仕様は公開`O_車両の走行描画.md`のドライブモード節。
 
 - **入力モード**(`InputSystemManager` / `InputHandlers/`): クリック時に何が起きるか。
 - **ビジュアルモード**(`VisualModeHandler` / `VisualHandlers/`): どう見えるか(非表示/ハイライト/データ可視化)。

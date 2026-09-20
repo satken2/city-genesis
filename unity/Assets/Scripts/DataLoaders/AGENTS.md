@@ -13,7 +13,7 @@
 
 `station_grade_profile`は駅だけでなく、既存パスへの接続勾配を設計した道路・線路にも付く。`ApplyStationGrade`と吸着用の保存標高参照をパス種別で限定しない。独立設計の`station_grade_id="connection"`は共通駅グループではない。
 
-`LodConfig` は視点・注視点・視錐台から最大81セルを選ぶ。`farCells / nearCells / dynamicCells` は呼出し互換の名前で、現在はすべて同じ常駐セル集合。
+`LodConfig` は視点・注視点・視錐台から最大81セルを選ぶ。`farCells / nearCells / dynamicCells` は呼出し互換の名前で、現在はすべて同じ常駐セル集合。候補セルはマップ寸法でクランプするため、常駐セルの算出前に `/terrain/settings` を取得しておく必要がある(セッション開始・全量リロード・`session:reload` の入口である `TerrainManager.FetchCoastline` が先頭で `EnsureSettingsLoaded` を呼ぶ)。既定値のまま算出するとマップ外セルを要求し、`/terrain/surface` の400応答で地形ロードが2秒間隔の再試行から抜けられなくなる。
 
 `CameraCellChecker` は0.1秒間隔で位置、向き、FOV、正投影、画面条件を調べる。視線中心はy=0平面との交点。`ResetViewState` で検出状態を未初期化に戻すと静止中でも次の判定で必ずセル通知が出る(`CellDataLoader.ClearAllManagerData` と `ReloadAllData` の現在セル未設定分岐が呼ぶ)。`session:reset` 後は `session:reload` が届くまで `OnCameraCellChanged` を無視する(`ClearAllManagerDataForSessionReset` / `loadSuspendedUntilReload`。バックエンドが新しい都市を準備中のためで、準備中のタイルを取り込むと同じ版の差分リロードで更新されない)。`CellDataLoader` は旧 `LoadBatch` を取消し、地形取得・適用→既存オブジェクトの地形追従→区画取得完了→建物・道路・地区・資源・プロップ取得の順で進める。更新セルだけを追従させ、取消しで残ったセルは次回へ引き継ぐ。版情報・タイルの取得失敗は2秒後に再試行し、必要タイルの適用前に後続生成へ進まない。
 
@@ -47,7 +47,7 @@
 
 遠景の沈み込みは `UltraFarTerrainSink.hlsl` をForward・Shadow・GBuffer・Depth・DepthNormalsで共用する。`_FarGridStep` はビルダーと同じ格子間隔（最低1m）を渡す。頂点の周囲1格子分が全てロード済みの場合だけ沈め、境界をまたぐ面は元の高さに残す。頂点自身のセルだけで沈めると三角形の補間が未ロード側も引き下げ、海が見える裂け目を作る。`Tests/TerrainAppearance/run-unity.ps1` が境界・アンロード・領域移動と内部沈み込みを描画検証する。
 
-通常TerrainとUltraFarメッシュは `Assets/Shaders/TerrainSurfaceAppearance.hlsl` の手続き地表色・ディテール法線・岩肌・PBR照明を共用する。設定は両方とも `TerrainManager.ApplyTerrainMaterialSettings` から渡す。UltraFarのシェーダー名 `Custom/DepthOffsetSimpleLitFar` は既存参照のため維持しているが、Forwardの照明はPBRである。乗算ティント `_TerrainTint` は両方とも照明・霧の後に掛ける(常に白=素の地形色。`ApplyTerrainMaterialSettings` が明示設定する)。遠景だけ `_BaseColor` で色を変えると霧・手続き色への作用が変わるため使わない。地形の色を調整するときは遠景にも反映し、`Tests/TerrainAppearance/run-unity.ps1` で比較描画を確認する。
+通常TerrainとUltraFarメッシュは `Assets/Shaders/TerrainSurfaceAppearance.hlsl` の手続き地表色・ディテール法線・岩肌・PBR照明を共用する。設定は両方とも `TerrainManager.ApplyTerrainMaterialSettings` から渡す。UltraFarのシェーダー名 `Custom/DepthOffsetSimpleLitFar` は既存参照のため維持しているが、Forwardの照明はPBRである。マクロバリエーション・カラーグレード・等高線は両方とも照明・霧の後に掛ける。遠景だけ `_BaseColor` で色を変えると霧・手続き色への作用が変わるため使わない。地形の色を調整するときは遠景にも反映し、`Tests/TerrainAppearance/run-unity.ps1` で比較描画を確認する。
 
 
 

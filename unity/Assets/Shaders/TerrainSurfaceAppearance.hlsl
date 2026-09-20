@@ -36,10 +36,6 @@ float4 _TerrainGroundColorA;    // ベース(草)
 float4 _TerrainGroundColorB;    // 乾いた土のパッチ
 float4 _TerrainGroundColorC;    // 明色(細かい斑で薄く混ぜる)
 
-// 地形全体への乗算ティント(通常は白=素の地形色)。
-// TerrainManager がタイルごとの materialTemplate に設定する。
-float4 _TerrainTint;
-
 // Global variables for contour lines
 float _ShowContour;
 

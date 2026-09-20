@@ -286,7 +286,6 @@ public static partial class PropsQA
         for(int z=0;z<8;z++)for(int x=0;x<4;x++)rects.Add(new Rect(x*62.5f,z*62.5f,62.5f,62.5f));
         type.GetMethod("UpdateDetail").Invoke(overview,new object[]{rects,62.5f});
         var ground=new Material(Shader.Find("Custom/DepthOffsetTerrainLit"));
-        ground.SetColor("_TerrainTint",Color.white);
         ground.SetFloat("_ProceduralGroundBlend",1);
         ground.SetFloat("_ProceduralGroundScale",40);
         ground.SetColor("_TerrainGroundColorA",new Color(.38f,.47f,.26f));

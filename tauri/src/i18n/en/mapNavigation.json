@@ -1,0 +1,55 @@
+{
+  "mapNavigation": {
+    "title": "Explore the city",
+    "back": "Back",
+    "search": "Search for a place",
+    "origin": "Choose starting point",
+    "destination": "Choose destination",
+    "clear": "Clear",
+    "searching": "Searching…",
+    "error": "Unable to connect. Reload and try again.",
+    "noResults": "No places found",
+    "mode": "Travel mode",
+    "pedestrian": "Walk & transit",
+    "automobile": "Drive",
+    "pickOrigin": "Choose start on map",
+    "pickDestination": "Choose destination on map",
+    "swap": "Swap",
+    "cancel": "Cancel",
+    "directions": "Directions",
+    "explore": "Discover your city",
+    "intro": "Search for facilities, stations or districts, or select a place on the map.",
+    "chooseOrigin": "Search for a starting point or choose one on the map.",
+    "routing": "Finding a route…",
+    "showRoute": "Show full route",
+    "mapPoint": "Point on map",
+    "minutes": "About {{count}} min",
+    "unnamed": "{{kind}} {{id}}",
+    "snapshot": "Estimate using the network from route calculation #{{epoch}}. Dotted lines indicate walking and access connections.",
+    "busy": "Simulation is running. Results will refresh when it finishes.",
+    "not_ready": "No route data yet. Run a simulation in this city to view routes.",
+    "unreachable": "No route connects these two places.",
+    "no_access": "No accessible road was found near the selected place.",
+    "geometry_unavailable": "Transit geometry for this route is unavailable.",
+    "place_missing": "The selected place was removed. Please select it again.",
+    "kind": {
+      "agent": "Facility",
+      "zone": "District",
+      "stop": "Stop",
+      "station": "Station",
+      "point": "Point"
+    },
+    "leg": {
+      "walk": "Walk",
+      "drive": "Drive",
+      "transit": "Transit",
+      "conveyor": "Passenger conveyor",
+      "access": "Access connection",
+      "turn": "Junction turn"
+    },
+    "picking": {
+      "origin": "Click your starting point on the map.",
+      "destination": "Click your destination on the map."
+    }
+  }
+}

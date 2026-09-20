@@ -353,6 +353,7 @@ public class CameraController : MonoBehaviour
     /// </summary>
     private void LateUpdate()
     {
+        if (DriveMode.IsOpen) return;
         if (!syncEnabled) return;
         if (GameStateManager.Instance != null && !GameStateManager.Instance.IsGameStarted()) return;
 
@@ -420,6 +421,9 @@ public class CameraController : MonoBehaviour
         }
         EndMouseRotation();
         StopFocus();
+        isMouseDragging = false;
+        isPendingDrag = false;
+        dragVelocity = Vector3.zero;
 
         transform.position = position;
         transform.rotation = rotation;
@@ -442,6 +446,7 @@ public class CameraController : MonoBehaviour
 
     void Update()
     {
+        if (DriveMode.BlocksCamera) return;
         // GameStateManager を持つシーン（ゲーム本編）では、ゲーム開始前やロードによる
         // カメラロック中はカメラ操作を一切受け付けない。
         // GameStateManager が存在しないシーン（メッシュテスト等の単体シーン）では、
@@ -752,6 +757,7 @@ public class CameraController : MonoBehaviour
 
     public void ToggleTopDownMode()
     {
+        if (DriveMode.IsOpen) return;
         SetTopDownMode(!isTopDownMode);
     }
 
@@ -842,6 +848,7 @@ public class CameraController : MonoBehaviour
 
     public void ToggleFlyMode()
     {
+        if (DriveMode.IsOpen) return;
         SetFlyMode(!isFlyMode);
     }
 
@@ -903,7 +910,7 @@ public class CameraController : MonoBehaviour
 
     /// <summary>
     /// カメラをマップ範囲（標高マップの範囲 = /terrain/settings の map_width × map_height）の外へ出さないようクランプする。
-    /// マップは中心が原点のワールド座標で扱われる（CameraCellChecker / WorldPositionToBackendCell と同じ慣習）ため、
+    /// マップは中心が原点のワールド座標で扱われる（CameraCellChecker / UnityCellToBackendCell と同じ慣習）ため、
     /// 有効範囲は X が [-mapWidth/2, +mapWidth/2]、Z が [-mapHeight/2, +mapHeight/2] となる。
     /// TerrainManager が存在しないシーン（メッシュテスト等）ではクランプを行わない。
     /// </summary>
