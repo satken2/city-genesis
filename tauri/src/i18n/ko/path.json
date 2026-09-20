@@ -125,7 +125,13 @@
       "dirBackward": "역방향",
       "dirBoth": "양방향"
     },
-    "openShapeEditor": "2D로 편집"
+    "openShapeEditor": "2D로 편집",
+    "spec": {
+      "minCurveRadius": "최소 곡선 반경",
+      "maxGrade": "최대 경사",
+      "maxSpan": "최대 경간 길이",
+      "minHeight": "최소 높이"
+    }
   },
   "track_construction": {
     "simpleMode": "간편",

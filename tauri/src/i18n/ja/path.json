@@ -125,7 +125,13 @@
       "dirBackward": "逆方向",
       "dirBoth": "両方向"
     },
-    "openShapeEditor": "2Dで編集"
+    "openShapeEditor": "2Dで編集",
+    "spec": {
+      "minCurveRadius": "最小曲線半径",
+      "maxGrade": "最大勾配",
+      "maxSpan": "最大スパン長",
+      "minHeight": "最小高さ"
+    }
   },
   "track_construction": {
     "simpleMode": "簡易",

@@ -125,7 +125,13 @@
       "dirBackward": "Backward",
       "dirBoth": "Both ways"
     },
-    "openShapeEditor": "Edit in 2D"
+    "openShapeEditor": "Edit in 2D",
+    "spec": {
+      "minCurveRadius": "Min. curve radius",
+      "maxGrade": "Max. grade",
+      "maxSpan": "Max. span length",
+      "minHeight": "Min. height"
+    }
   },
   "track_construction": {
     "simpleMode": "Simple",

@@ -96,6 +96,34 @@
   line-height: 1.5;
 }
 
+/* 説明文の下に並べる規格値(アイコン+数値のみ。項目名はtitleのツールチップ) */
+.pc-description-specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 6px;
+}
+
+.pc-spec {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: default;
+}
+
+.pc-spec-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: #7f97b0;
+}
+
+.pc-spec-value {
+  font-family: "Consolas", "Menlo", monospace;
+  font-size: 0.7rem;
+  color: #c5d4e3;
+}
+
 /* ---- プレビューセクション ---- */
 /* 横幅いっぱい・高さ固定の横長プレビュー。道路は水平方向に長い形状が多いため、
    正方形より横長の方が空間効率が良い。 */

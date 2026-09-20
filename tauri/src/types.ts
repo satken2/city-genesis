@@ -572,6 +572,11 @@ export type PathMasterEntry = {
   /** 線形制約: 許容する最大縦断勾配(%)。0/未定義は制限なし */
   max_grade?: number;
   /**
+   * 構造制約: 柱・桁で支える非追従スパン1区画の最大長(m)。master.yaml の max_span に対応する。
+   * 地形に張り付く地表スパンには掛からない。0/未定義は制限なし
+   */
+  max_span?: number | null;
+  /**
    * 駅パスのプラットフォーム幅(m)。master.yaml の platform_width に対応する。
    * 正の値を持つバリアント(駅)だけが建設時にホーム設置側(platform_side)を指定できる。
    * 未定義・null はホームなし(通常の道路・線路)。

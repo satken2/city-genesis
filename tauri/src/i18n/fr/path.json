@@ -125,7 +125,13 @@
       "dirBackward": "Sens retour",
       "dirBoth": "Deux sens"
     },
-    "openShapeEditor": "Éditer en 2D"
+    "openShapeEditor": "Éditer en 2D",
+    "spec": {
+      "minCurveRadius": "Rayon de courbe minimal",
+      "maxGrade": "Pente maximale",
+      "maxSpan": "Portée maximale",
+      "minHeight": "Hauteur minimale"
+    }
   },
   "track_construction": {
     "simpleMode": "Simple",

@@ -72,7 +72,8 @@ Shader "CityGenesis/Forest"
             surface.occlusion = 1;
             surface.alpha = 1;
             half3 color = UniversalFragmentPBR(lighting,surface).rgb;
-            float fog = ComputeFogFactor(TransformWorldToHClip(input.positionWS).z);
+            // Terrain/Litと同じビュー空間距離を使い、正投影でも霧の濃さを揃える。
+            float fog = InitializeInputDataFog(float4(input.positionWS,1),0);
             return half4(MixFog(color,fog),1);
         }
         half4 DepthFragment(Varyings input) : SV_Target { return 0; }
@@ -96,7 +97,7 @@ Shader "CityGenesis/Forest"
             HLSLPROGRAM
             #pragma vertex ForestVertex
             #pragma fragment ForestFragment
-            #pragma multi_compile_fog
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Fog.hlsl"
             #pragma multi_compile _ _CLUSTER_LIGHT_LOOP
             #pragma multi_compile _ _ADDITIONAL_LIGHTS
             #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS

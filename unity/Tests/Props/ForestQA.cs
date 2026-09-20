@@ -19,6 +19,7 @@ public static partial class PropsQA
 
     static void CheckGpuForest()
     {
+        CheckForestFog();
         CheckForestOverview();
         var shader = Resources.Load<Shader>("Shaders/Forest");
         Check(shader != null && shader.isSupported && !ShaderUtil.ShaderHasError(shader),"forest shader compilation failed");
@@ -74,6 +75,49 @@ public static partial class PropsQA
         CheckGpuHolesAndEdits();
         var zero=new float[33,33]; data.SetHeights(0,0,zero);
         Set(manager,"useGpuForests",false); Apply(Snapshot(10000,true),true); Build(false);
+    }
+
+    static void CheckForestFog()
+    {
+        var savedPosition=camera.transform.position; var savedRotation=camera.transform.rotation;
+        bool savedOrtho=camera.orthographic; float savedFar=camera.farClipPlane, savedSize=camera.orthographicSize;
+        var plane=GameObject.CreatePrimitive(PrimitiveType.Plane);
+        plane.transform.position=new Vector3(250,2000,250); plane.transform.localScale=Vector3.one*100;
+        var lit=new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        var forest=new Material(Resources.Load<Shader>("Shaders/Forest"));
+        foreach(var material in new[]{lit,forest}) { material.SetColor("_BaseColor",new Color(.3f,.4f,.2f)); material.SetFloat("_Smoothness",.1f); }
+        plane.GetComponent<Renderer>().sharedMaterial=lit;
+        var mesh=plane.GetComponent<MeshFilter>().sharedMesh;
+        using(var buffer=new GraphicsBuffer(GraphicsBuffer.Target.Structured,1,32))
+        {
+            buffer.SetData(new[]{new GpuPoint{positionScale=new Vector4(250,2000,250,1),rotationVisible=new Vector4(0,1,.5f,.5f)}});
+            var props=new MaterialPropertyBlock(); props.SetBuffer("_ForestPoints",buffer);
+            props.SetMatrix("_PartLocal",Matrix4x4.Scale(Vector3.one*100)); props.SetMatrix("_PartNormal",Matrix4x4.identity);
+            props.SetInt("_ForestLod",1); props.SetFloat("_DetailDistance",100); props.SetFloat("_MaxDistance",1500);
+            camera.transform.position=new Vector3(250,2500,250); camera.transform.rotation=Quaternion.Euler(90,0,0);
+            camera.farClipPlane=30000; camera.orthographicSize=100;
+            props.SetVector("_ForestCamera",camera.transform.position);
+            camera.targetTexture=new RenderTexture(128,128,24);
+            var sample=new Texture2D(128,128,TextureFormat.RGB24,false);
+            Color Read() { camera.Render(); RenderTexture.active=camera.targetTexture; sample.ReadPixels(new Rect(0,0,128,128),0,0); sample.Apply(); return sample.GetPixel(64,64); }
+            RenderSettings.fog=true; RenderSettings.fogMode=FogMode.Linear;
+            RenderSettings.fogStartDistance=0; RenderSettings.fogEndDistance=600; RenderSettings.fogColor=new Color(.7f,.75f,.8f);
+            foreach(bool ortho in new[]{false,true})
+            {
+                camera.orthographic=ortho;
+                plane.SetActive(true); Color reference=Read(); plane.SetActive(false);
+                Graphics.RenderMeshPrimitives(new RenderParams(forest){camera=camera,matProps=props,worldBounds=new Bounds(plane.transform.position,Vector3.one*1000)},mesh,0,1);
+                Color actual=Read();
+                float error=Mathf.Max(Mathf.Abs(actual.r-reference.r),Mathf.Max(Mathf.Abs(actual.g-reference.g),Mathf.Abs(actual.b-reference.b)))*255;
+                results.Add($"Fog parity ortho={ortho}: max RGB error={error:F2}/255; lit={reference}; forest={actual}");
+                Check(error<4,"Forest fog differs from URP Lit: "+error+" ortho="+ortho);
+            }
+            RenderTexture.active=null; UnityEngine.Object.DestroyImmediate(camera.targetTexture); camera.targetTexture=null;
+            UnityEngine.Object.DestroyImmediate(sample);
+        }
+        UnityEngine.Object.DestroyImmediate(plane); UnityEngine.Object.DestroyImmediate(lit); UnityEngine.Object.DestroyImmediate(forest);
+        RenderSettings.fog=false; camera.orthographic=savedOrtho; camera.farClipPlane=savedFar; camera.orthographicSize=savedSize;
+        camera.transform.SetPositionAndRotation(savedPosition,savedRotation);
     }
 
     static void CheckForestOverview()

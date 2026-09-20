@@ -5,6 +5,8 @@
 
 ## 地形・取得範囲・描画LOD
 
+森林シェーダーの霧はTerrain/Litと同じ`InitializeInputDataFog`を使う。クリップZを`ComputeFogFactor`へ渡す実装では、正投影の木だけ霧が掛からず遠景森林と色が分離する。`Tests/Props`の同一平面・材質による透視/正投影の標準Lit比較を維持する。
+
 `ForestOverview`は範囲配置の木（1・2）の全域被覆マスクを所有する。`PropManager`が`/props/forest-overview`を初回・編集時に取得し、バックグラウンドで最大2048²にラスタ化する。個別の木やセルごとの水域ポリゴンは全域取得しない。`CellDataLoader.ReloadAllData`で無効化し、カメラ移動では再取得しない。生成済み森林小区画から境界距離マスクも作り、`ForestCoverage.hlsl`を実モデルと通常/UltraFar地形で共有する。1,200〜1,500mと生成済み範囲の縁約100mでモデルから地形の樹冠表現へ移す。clear時は通信・Taskを取消し、旧結果を公開せずグローバル描画も無効化する。近傍の木のFBX・Forward+照明は変更しない。
 
 `station_grade_profile`は駅だけでなく、既存パスへの接続勾配を設計した道路・線路にも付く。`ApplyStationGrade`と吸着用の保存標高参照をパス種別で限定しない。独立設計の`station_grade_id="connection"`は共通駅グループではない。

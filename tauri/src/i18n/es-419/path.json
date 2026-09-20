@@ -125,7 +125,13 @@
       "dirBackward": "Sentido contrario",
       "dirBoth": "Ambos sentidos"
     },
-    "openShapeEditor": "Editar en 2D"
+    "openShapeEditor": "Editar en 2D",
+    "spec": {
+      "minCurveRadius": "Radio de curva mínimo",
+      "maxGrade": "Pendiente máxima",
+      "maxSpan": "Longitud máxima de tramo",
+      "minHeight": "Altura mínima"
+    }
   },
   "track_construction": {
     "simpleMode": "Simple",

@@ -125,7 +125,13 @@
       "dirBackward": "逆方向",
       "dirBoth": "双方向"
     },
-    "openShapeEditor": "2D编辑"
+    "openShapeEditor": "2D编辑",
+    "spec": {
+      "minCurveRadius": "最小曲线半径",
+      "maxGrade": "最大坡度",
+      "maxSpan": "最大跨度",
+      "minHeight": "最小高度"
+    }
   },
   "track_construction": {
     "simpleMode": "简易",
