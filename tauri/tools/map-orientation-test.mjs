@@ -1,0 +1,117 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import vm from "node:vm";
+import ts from "typescript";
+
+// 実コンポーネントの描画変換とイベントを動かす。DOMと通信だけを置き換え、
+// 地形の北側をクリックしたときの座標、パン、ズーム、重ね描きの整合を検査する。
+const effects = [];
+const canvases = [];
+let frame;
+let drawn;
+let animated;
+let clicked;
+const handle = {};
+const near = (a, b) => assert.ok(Math.abs(a - b) < 1e-8, `${a} != ${b}`);
+function eventTarget() {
+  const events = new Map();
+  return {
+    addEventListener: (name, fn) => events.set(name, fn),
+    removeEventListener: (name) => events.delete(name),
+    dispatch: (name, e) => events.get(name)?.({ button: 0, preventDefault() {}, ...e }),
+  };
+}
+function context() {
+  let matrix = [1, 0, 0, 1, 0, 0];
+  const stack = [];
+  return new Proxy({
+    setTransform: (...m) => { matrix = m; },
+    save: () => stack.push([...matrix]),
+    restore: () => { matrix = stack.pop(); },
+    translate: (x, y) => { matrix[4] += matrix[0] * x; matrix[5] += matrix[3] * y; },
+    scale: (x, y) => { matrix[0] *= x; matrix[3] *= y; },
+    point: (x, z) => ({ x: matrix[0] * x + matrix[4], y: matrix[3] * z + matrix[5] }),
+    createImageData: (w, h) => ({ data: new Uint8ClampedArray(w * h * 4) }),
+  }, { get: (obj, key) => obj[key] ?? (() => {}) });
+}
+function canvas() {
+  const ctx = context();
+  return { ...eventTarget(), style: {}, getContext: () => ctx,
+    getBoundingClientRect: () => ({ left: 0, top: 0, right: 800, bottom: 600 }) };
+}
+function jsx(type, props) {
+  if (props.ref) {
+    const node = type === "canvas" ? canvas() : { clientWidth: 800, clientHeight: 600 };
+    props.ref.current = node;
+    if (type === "canvas") canvases.push(node);
+  }
+  return { type, props };
+}
+const windowMock = { ...eventTarget(), devicePixelRatio: 2, setTimeout, clearTimeout,
+  requestAnimationFrame: (cb) => { frame = cb; return 1; }, cancelAnimationFrame() {} };
+const imports = {
+  "react": { forwardRef: (fn) => fn, useRef: (current) => ({ current }),
+    useEffect: (fn) => effects.push(fn), useImperativeHandle: (ref, fn) => Object.assign(ref, fn()) },
+  "react/jsx-runtime": { jsx, jsxs: jsx },
+  "react-i18next": { useTranslation: () => ({ t: (key) => key }) },
+  "../../contexts/MasterDataContext": { useMasterData: () => null },
+  "../../utils/api": {
+    buildApiUrl: (_, path) => path,
+    fetchApi: async (url) => url.endsWith("settings")
+      ? { map_width: 100, map_height: 200, near_map_spacing: 100, cell_size: 100 }
+      : { type: "Polygon", coordinates: [] },
+  },
+  "../terrain/terrainData": { computePixelRGB: () => [0, 0, 0], decodeFloat16Array: () => new Float32Array(6) },
+  "../../constants": { PATH_MOTORWAY: 1, PATH_STREET: 2, PATH_WALKWAY: 3, PATH_TRACK: 4 },
+};
+function load(path) {
+  const { outputText } = ts.transpileModule(readFileSync(new URL(path, import.meta.url), "utf8"), {
+    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX },
+  });
+  const exports = {};
+  vm.runInNewContext(outputText, {
+    exports, require: (name) => { assert.ok(name in imports, name); return imports[name]; },
+    window: windowMock, document: { createElement: canvas }, console, AbortController,
+    ResizeObserver: class { observe() {} disconnect() {} },
+    Path2D: class { moveTo() {} lineTo() {} closePath() {} },
+    fetch: async () => ({ ok: true, arrayBuffer: async () => new ArrayBuffer(12) }),
+  });
+  return exports;
+}
+const { CityMapCanvas, DEFAULT_CITY_MAP_LAYERS } = load("../src/components/map/CityMapCanvas.tsx");
+const { worldToScreen, screenToWorld } = load("../src/components/path/pathShapeOverlay.ts");
+CityMapCanvas({ apiBaseUrl: "test", showCompass: false,
+  layers: Object.fromEntries(Object.keys(DEFAULT_CITY_MAP_LAYERS).map((key) => [key, false])),
+  overlayDraw: (ctx, view) => { drawn = { view, north: ctx.point(0, -50), south: ctx.point(0, 50) }; },
+  animatedOverlayDraw: (ctx) => { animated = ctx.point(0, -50); },
+  onMapClick: (e) => { clicked = e.world; },
+}, handle);
+const cleanups = effects.map((fn) => fn());
+await new Promise((resolve) => setImmediate(resolve));
+const base = canvases[0];
+const screenNorth = () => ({ x: drawn.north.x / 2, y: drawn.north.y / 2 });
+const click = (p) => {
+  base.dispatch("mousedown", { clientX: p.x, clientY: p.y });
+  windowMock.dispatch("mouseup", { clientX: p.x, clientY: p.y });
+};
+assert.ok(drawn.north.y < drawn.south.y, "North (-Z) must be above south (+Z)");
+click(screenNorth()); near(clicked.x, 0); near(clicked.z, -50);
+const point = worldToScreen(drawn.view, { x: 0, z: -50 });
+near(point.x, screenNorth().x); near(point.y, screenNorth().y);
+near(screenToWorld(drawn.view, point).z, -50);
+
+const before = screenNorth();
+base.dispatch("mousedown", { clientX: before.x, clientY: before.y });
+windowMock.dispatch("mousemove", { clientX: before.x + 30, clientY: before.y + 40 });
+windowMock.dispatch("mouseup", { clientX: before.x + 30, clientY: before.y + 40 });
+near(screenNorth().x, before.x + 30); near(screenNorth().y, before.y + 40);
+const anchor = screenNorth();
+base.dispatch("wheel", { clientX: anchor.x, clientY: anchor.y, deltaY: -1 });
+near(screenNorth().x, anchor.x); near(screenNorth().y, anchor.y);
+click(anchor); near(clicked.z, -50);
+handle.fitBounds({ x1: -20, z1: -80, x2: 20, z2: -20 });
+near(screenNorth().x, 400); near(screenNorth().y, 300);
+frame(100);
+near(animated.x, drawn.north.x); near(animated.y, drawn.north.y);
+for (const cleanup of cleanups.reverse()) cleanup?.();
+console.log("PASS: north-up, click coordinates, path editor coordinates, pan, cursor zoom, fitBounds, animated overlay (DPR=2)");

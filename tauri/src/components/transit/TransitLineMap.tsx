@@ -16,11 +16,10 @@
  * 運休中の路線(status≠STATUS_ACTIVE)は区間エッジを点線・暗色で描く。
  *
  * 座標系:
- *   CityMapCanvas の overlayDraw に渡る ctx はワールド座標(X-Z平面)かつ +Z が
- *   画面上向きになる変換(Y反転)が適用済みなので、停留所座標 (x, z) をそのまま
+ *   CityMapCanvas の overlayDraw に渡る ctx はワールド座標(X-Z平面)かつ -Z が
+ *   画面上向きになる変換が適用済みなので、停留所座標 (x, z) をそのまま
  *   moveTo/lineTo/arc に渡せる。線幅・半径・矢印サイズは view.zoom で割って
  *   ワールド単位へ換算し、画面上で一定の見た目にする。
- *   ※文字は描かないため、Y反転の打ち消しは不要。
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -187,9 +186,9 @@ export function TransitLineMap({
         if (len < 1e-6) continue;
         const ux = dx / len;
         const uz = dz / len;
-        // 進行方向に垂直な左側単位ベクトル(進行方向を (ux,uz) として、左=+Z画面上)
-        const lx = -uz;
-        const lz = ux;
+        // 地図は+Zが下向きなので、画面上の進行方向左側は(uz,-ux)。
+        const lx = uz;
+        const lz = -ux;
 
         const active = e.status === STATUS_ACTIVE;
         const strokeColor = active ? color : "#6c7086";

@@ -9,13 +9,11 @@
  * 描画はCanvas 2Dのビュー変換(translate+scale)で行い、各レイヤーは
  * ワールド座標のままPath2D/オフスクリーンCanvasとしてキャッシュする。
  *
- * 画面上の向き: Canvas 2DはY軸が下向きだが、ここではビュー変換でY倍率を負にして
- * ワールド+Zを画面の「上」に描く。これによりUnityの俯瞰カメラ・ミニマップ
- * (いずれも+Zが画面上)と2Dマップの上下が一致する。個々の座標を反転させるのでは
- * なく変換行列(CTM)で吸収するため、Path2D・標高画像・等高線・グリッド・overlayDraw
- * はすべてワールド座標のまま無変更で流用できる。
- * overlayDrawで文字や画像(アイコン等)を描く場合のみ、Y反転のかかったCTM上で
- * 上下反転して見えるため、その描画に限りY方向を打ち消す必要がある。
+ * 画面上の向き: 地形データは先頭行が北、列は西から東、行は北から南へ並ぶ。
+ * ワールド座標も列が+X、行が+Zなので、地理的な北は-Z。CanvasのY下向きと
+ * 同じ向きで描き、東(+X)を右、北(-Z)を上に固定する。
+ * Path2D・標高画像・等高線・グリッド・overlayDrawはワールド座標のまま描ける。
+ * 文字や画像もY反転せず描く。Unityカメラのyaw=0(+Z)は地理的な北ではない。
  *
  * レイヤー(propsのlayersでON/OFF):
  *   - elevation : 標高に応じた色分け(近景標高マップを最大解像度で色付け。地形エディタと同方式)
@@ -43,7 +41,7 @@
  *     (高速道路はtrunkフラグにかかわらず常に幹線扱い)。
  *
  * 方位コンパス(showCompass):
- *   地図は常に北(ワールド+Z)が画面上の固定ビューなので、コンパスも回転しない
+ *   地図は常に北(ワールド-Z)が画面上の固定ビューなので、コンパスも回転しない
  *   固定のSVGとしてキャンバスの右上に重ねる。Canvasには描かずDOM要素として置くため、
  *   地図の再描画やビュー変換の影響を受けない。
  *
@@ -951,7 +949,7 @@ const COMPASS_LABELS: { key: string; angle: number; north?: boolean }[] = [
 
 /**
  * 地図の右上に重ねる方位コンパス。
- * 地図は常に北(ワールド+Z)が画面上の固定ビューなので、向きを変える必要がなく
+ * 地図は常に北(ワールド-Z)が画面上の固定ビューなので、向きを変える必要がなく
  * 完全に静的なSVGでよい。マウス操作は下のキャンバスへ透過させる。
  */
 function MapCompass() {
@@ -1166,14 +1164,14 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
 
       /* ---- 座標変換 ----
        * offsetX = 画面左端(sx=0)のworld x。offsetY = 画面上端(sy=0)のworld z。
-       * Y反転描画のため画面上端がzの最大側になる(screen_y = (offsetY - wz) * zoom)。 */
+       * 北(-Z)を上にするため、screen_y = (wz - offsetY) * zoom。 */
       const screenToWorld = (sx: number, sy: number): [number, number] => [
         sx / view.zoom + view.offsetX,
-        view.offsetY - sy / view.zoom,
+        view.offsetY + sy / view.zoom,
       ];
 
       const getViewBounds = (): CityMapBounds => {
-        // 上端(sy=0)がz最大・下端(sy=canvasH)がz最小になるので、z1<z2となるよう並べ替える
+        // 上端が北側(z最小)、下端が南側(z最大)。
         const [x1, zTop] = screenToWorld(0, 0);
         const [x2, zBottom] = screenToWorld(canvasW, canvasH);
         return { x1, z1: Math.min(zTop, zBottom), x2, z2: Math.max(zTop, zBottom) };
@@ -1190,8 +1188,8 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         );
         view.zoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, zoom));
         view.offsetX = b.x1 - (canvasW / view.zoom - dataW) / 2;
-        // offsetYは画面上端のworld z(=表示範囲の最大側)。データを中央に収める余白を足す
-        view.offsetY = b.z2 + (canvasH / view.zoom - dataH) / 2;
+        // offsetYは画面上端のworld z。北側へ余白を広げて中央に収める。
+        view.offsetY = b.z1 - (canvasH / view.zoom - dataH) / 2;
         zoomCbRef.current?.(view.zoom);
       };
 
@@ -1208,9 +1206,9 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           });
         } else {
           // 地形設定未取得時のフォールバック。原点(0,0)を画面中央に置く
-          // (offsetYは上端のworld zなので +canvasH/2)
+          // offsetYも画面上端から原点までの距離を引く。
           view.offsetX = -canvasW / 2;
-          view.offsetY = canvasH / 2;
+          view.offsetY = -canvasH / 2;
           view.zoom = 1;
           zoomCbRef.current?.(view.zoom);
         }
@@ -1228,10 +1226,10 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
 
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         ctx.save();
-        // Y倍率を負にしてworld+Zを画面上向きに描く(Unity俯瞰/ミニマップと一致)。
-        // world(wx,wz) → 画面: sx=(wx-offsetX)*zoom, sy=(offsetY-wz)*zoom
-        ctx.translate(-view.offsetX * view.zoom, view.offsetY * view.zoom);
-        ctx.scale(view.zoom, -view.zoom);
+        // 地形配列の北→南の行順とCanvasの下向きを揃える。
+        // world(wx,wz) → 画面: sx=(wx-offsetX)*zoom, sy=(wz-offsetY)*zoom
+        ctx.translate(-view.offsetX * view.zoom, -view.offsetY * view.zoom);
+        ctx.scale(view.zoom, view.zoom);
 
         const z = view.zoom;
         const px = (w: number) => w / z; // 画面ピクセル単位の線幅をワールド単位へ
@@ -1401,8 +1399,8 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         const dpr = window.devicePixelRatio || 1;
         animCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
         animCtx.save();
-        animCtx.translate(-view.offsetX * view.zoom, view.offsetY * view.zoom);
-        animCtx.scale(view.zoom, -view.zoom);
+        animCtx.translate(-view.offsetX * view.zoom, -view.offsetY * view.zoom);
+        animCtx.scale(view.zoom, view.zoom);
         cb(animCtx, { ...view }, timeMs);
         animCtx.restore();
       };
@@ -1871,9 +1869,8 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         if (!dragging) return;
         if (Math.hypot(e.clientX - dragStartX, e.clientY - dragStartY) >= 5) moved = true;
         // カーソル下のワールド座標が固定されるようにパンする。
-        // Yは反転描画のため、offsetYはドラッグ量を加算する向きになる。
         view.offsetX = dragOffsetX - (e.clientX - dragStartX) / view.zoom;
-        view.offsetY = dragOffsetY + (e.clientY - dragStartY) / view.zoom;
+        view.offsetY = dragOffsetY - (e.clientY - dragStartY) / view.zoom;
         draw();
       };
 

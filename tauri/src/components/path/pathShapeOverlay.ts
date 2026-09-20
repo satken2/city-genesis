@@ -2,9 +2,9 @@
  * 2Dパス形状編集パネル(PathShapeEditorPanel)の描画・ヒット判定(React非依存の純関数)。
  *
  * `edit_path:update_shape` のペイロードを「アンカー列 + 各アンカーの入口/出口制御点」に展開し、
- * CityMapCanvas の overlayDraw(ワールド座標系のCTM適用済み。+Zが画面上向き)へ描く。
+ * CityMapCanvas の overlayDraw(ワールド座標系のCTM適用済み。-Zが画面上向き)へ描く。
  * 画面上で一定の大きさにしたい寸法は `px / view.zoom` でワールド単位へ換算する。
- * 文字だけはCTMのY反転を打ち消してから描く(withScreenText)。
+ * 文字などを画面px単位で描くときは拡縮だけを打ち消す(withScreenSpace)。
  *
  * ベジエの制御点補完はここでは行わない。曲線モードではUnityが全制御点を送ってくるため、
  * 受信値をそのまま描く(バックエンド・Unityと同じ形状になる)。直線モードは直線で結ぶ。
@@ -235,7 +235,7 @@ function offsetPolyline(points: XZ[], offset: number): XZ[] {
     const p1 = points[Math.min(n - 1, i + 1)];
     const dx = p1.x - p0.x, dz = p1.z - p0.z;
     const len = Math.hypot(dx, dz) || 1;
-    // 進行方向 (dx,dz) の右手法線は (dz, -dx)(x東・z北の右手系)
+    // 進行方向 (dx,dz) の右手法線は (dz, -dx)(Unityのパス配置規約)
     out.push({ x: points[i].x + (dz / len) * offset, z: points[i].z - (dx / len) * offset });
   }
   return out;
@@ -246,11 +246,11 @@ function offsetPolyline(points: XZ[], offset: number): XZ[] {
  * ========================================================================== */
 
 export function worldToScreen(view: CityMapViewState, p: XZ): { x: number; y: number } {
-  return { x: (p.x - view.offsetX) * view.zoom, y: (view.offsetY - p.z) * view.zoom };
+  return { x: (p.x - view.offsetX) * view.zoom, y: (p.z - view.offsetY) * view.zoom };
 }
 
 export function screenToWorld(view: CityMapViewState, s: { x: number; y: number }): XZ {
-  return { x: s.x / view.zoom + view.offsetX, z: view.offsetY - s.y / view.zoom };
+  return { x: s.x / view.zoom + view.offsetX, z: view.offsetY + s.y / view.zoom };
 }
 
 /**
@@ -394,7 +394,7 @@ function withScreenSpace(
 ) {
   ctx.save();
   ctx.translate(wx, wz);
-  ctx.scale(1 / view.zoom, -1 / view.zoom);
+  ctx.scale(1 / view.zoom, 1 / view.zoom);
   fn(ctx);
   ctx.restore();
 }

@@ -55,7 +55,7 @@ const HEATMAP_ORDER: CityMapHeatmapKind[] = ["none", "noise", "pollution", "crim
 type CameraStatePayload = {
   /** カメラのワールド座標 [x, y, z] */
   position?: number[];
-  /** 視線の方位角(北=ワールド+Zを0とする時計回り・度) */
+  /** 視線の方位角(Unityの+Zを0とする回転角・度) */
   yaw?: number;
 };
 
@@ -154,7 +154,7 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       if (!camera) return;
       const px = (v: number) => v / view.zoom;
 
-      // 方位角(北=+Z、時計回り)を水平面の単位ベクトルへ。
+      // Unityのyaw(+Z=0度)をワールド方向へ戻す。地理的な北は-Z。
       const yawRad = (camera.yaw * Math.PI) / 180;
       const dx = Math.sin(yawRad);
       const dz = Math.cos(yawRad);
