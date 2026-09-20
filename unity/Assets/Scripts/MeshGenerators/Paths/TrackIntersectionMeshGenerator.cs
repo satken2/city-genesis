@@ -56,6 +56,7 @@ public static class TrackIntersectionMeshGenerator
         public float Width;
         public int PathVariant;
         public int PathType;
+        public PathSummary Path;
     }
 
     /// <summary>
@@ -75,7 +76,7 @@ public static class TrackIntersectionMeshGenerator
         List<TrackEntry> entries = new List<TrackEntry>();
         foreach (var path in paths)
         {
-            if (!IsTrackType(path.path_type)) continue;
+            if (!IsTrackType(path.path_type) && !LrtRoadParts.IsEmbedded(path.path_variant)) continue;
             if (!connectionPoints.TryGetValue(path.path_id, out Vector2 cut)) continue;
             if (!RoadIntersectionMeshGenerator.TryGetPathDirectionFromNode(nodeId, path, out Vector2 nodePoint, out Vector2 directionPoint)) continue;
 
@@ -98,6 +99,7 @@ public static class TrackIntersectionMeshGenerator
                 Width = width,
                 PathVariant = path.path_variant,
                 PathType = path.path_type,
+                Path = path,
             });
         }
 
@@ -116,12 +118,14 @@ public static class TrackIntersectionMeshGenerator
             {
                 TrackEntry a = entries[i];
                 TrackEntry b = entries[j];
-                if (a.PathType != b.PathType) continue;
+                bool lrtPair = LrtRoadParts.IsLrt(a.PathVariant) && LrtRoadParts.IsLrt(b.PathVariant);
+                if (!lrtPair && (a.PathType != b.PathType || LrtRoadParts.IsLrt(a.PathVariant) || LrtRoadParts.IsLrt(b.PathVariant))) continue;
 
                 // A→Bの偏向角: 到着方向(-a.Direction)と発進方向(b.Direction)のなす角。
                 // B→Aも同じ角度になる（対称）ため、順序なしペアごとに1回だけ判定すればよい。
                 float cosDeflection = Vector2.Dot(-a.LogicalDirection, b.LogicalDirection);
-                if (cosDeflection < cosLimit) continue;
+                // 転回角の制限は案内軌条系どうしだけ。道路上のLRTはバックエンドと同じく右左折できる。
+                if ((!lrtPair || (IsTrackType(a.PathType) && IsTrackType(b.PathType))) && cosDeflection < cosLimit) continue;
 
                 AddConnectorsForPair(specs, a, b, nodePosition, horizontalPlane);
             }
@@ -170,6 +174,8 @@ public static class TrackIntersectionMeshGenerator
 
         // 見た目の基準となるレールプレハブは、歩道コネクタと同じく variant 番号が大きい方に合わせる。
         TrackEntry prefabSource = a.PathVariant >= b.PathVariant ? a : b;
+        bool embedded = LrtRoadParts.IsEmbedded(a.PathVariant) || LrtRoadParts.IsEmbedded(b.PathVariant);
+        if (embedded) prefabSource = LrtRoadParts.IsEmbedded(a.PathVariant) ? a : b;
 
         for (int k = 0; k < connectorCount; k++)
         {
@@ -192,7 +198,14 @@ public static class TrackIntersectionMeshGenerator
                 points.Add(ToLocalTrackPoint(pt, nodePosition, horizontalPlane));
             }
 
-            specs.Add(new RailConnectorSpec(points, prefabSource.PathVariant, prefabSource.PathType) { StartDirection = travelA, EndDirection = travelB, StartSlope = -a.Slope, EndSlope = b.Slope });
+            specs.Add(new RailConnectorSpec(points, prefabSource.PathVariant, prefabSource.PathType) {
+                StartDirection = travelA, EndDirection = travelB, StartSlope = -a.Slope, EndSlope = b.Slope,
+                EmbeddedLrt = embedded,
+                StartRailBase = embedded && !LrtRoadParts.IsEmbedded(a.PathVariant) ? RoadPartHeights.TRACK_ABOVE_SPLINE + .355f - LrtRoadParts.RailTop : RoadPartHeights.BODY_ABOVE_SPLINE,
+                EndRailBase = embedded && !LrtRoadParts.IsEmbedded(b.PathVariant) ? RoadPartHeights.TRACK_ABOVE_SPLINE + .355f - LrtRoadParts.RailTop : RoadPartHeights.BODY_ABOVE_SPLINE,
+                StartWireOffset = LrtRoadParts.IsEmbedded(a.PathVariant) ? 0 : -.28f,
+                EndWireOffset = LrtRoadParts.IsEmbedded(b.PathVariant) ? 0 : -.28f
+            });
         }
     }
 
@@ -202,6 +215,11 @@ public static class TrackIntersectionMeshGenerator
     /// </summary>
     private static List<float> BuildSortedLaterals(TrackEntry entry, float sign)
     {
+        if (LrtRoadParts.IsEmbedded(entry.PathVariant))
+        {
+            float offset = LrtRoadParts.Offset(entry.Path);
+            return entry.PathVariant == 303 ? new List<float> { 0 } : new List<float> { -offset, offset };
+        }
         List<float> laterals = new List<float>(entry.Lanes);
         for (int i = 0; i < entry.Lanes; i++)
         {

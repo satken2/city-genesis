@@ -95,8 +95,9 @@ p461 8個  body track platform platform_wall platform_panel wire pole beam (電�
 
 - **Z方向(進行方向)が1タイル**の長さ。道路の連続面は10m程度でよい(生成側が1m以下へ圧縮して反復する)。
   支柱・ベンチを含むホームは8mの造形周期を保ち、曲線用の分割をモデル内に持つ。
-- **左右非対称パーツ(`sidewalk` / `wall` / `pole` / `platform` / `platform_wall`)は
-  「道路の右側用」として作る**(道路中心側が -X、外側が +X)。左側はXミラーで配置される。
+- **歩道は左側用（Unityの道路中心側が+X）**で右側をXミラーにする。
+  **壁・ホームは右側用（道路中心側が-X）**で左側をXミラーにする。
+  **架線柱poleは右側用**で左側をY軸180°回転する。
   **標準FBX経由では Blender(x,y,z)→Unity(-x,z,-y)** になる。
   ホームの右側用はBlenderで **-X側**、UnityのsharedMeshで+X側に置く。
   Blenderの再インポートだけではUnityの符号を検証できないため、実Unityでも確認する。
@@ -191,3 +192,14 @@ p461 8個  body track platform platform_wall platform_panel wire pole beam (電�
 - 道路設備は切断済み区間の端から3mを空け、設備ごとの開始位相と間隔で配置する(G §8.6)。
   点設備の接地原点はZ=0、街灯は右側配置を基準に-Xへ向ける。柵モデルに支柱を含めない。
   電柱の電線取付位置は接地面+7.6m。柱・鉄道架線柱の配置規則とは区別する。
+
+## LRTの併用軌道と専用軌道
+
+222（幅24m・4車線）／242（幅32m・6車線）は中央寄りの左右1車線を自動車と共用し、303（幅8m）は中央単線。`lanes`を道路上の軌道数として扱わない。詳細は公開G文書「LRT付き道路222・242・歩行者道303」、専用軌道431はN文書を参照。
+
+- 道路用は`lrt_track`／`lrt_wire`／`lrt_pole`。RoadPathがLrtRoadPartsで追加配置する。通常鉄道のtrack/pole/beamと混ぜない。
+- lrt_trackは幅3m、レール中心±0.7175m、踏面Z=0.025m。lrt_wireの中心はZ=5.30m。原点はどちらも路面で、UnityはBODY_ABOVE_SPLINEを加える。
+- lrt_poleは道路中心・路面原点の実寸配置。222/242は中央T字柱、303は端の片持ち柱を原点からずらして著作する。bounds中心へ再配置しない。架線系はwire_spacingが正の場合だけ描く。
+- 431は411と同じ通常の電化軌道パーツをメッシュ共有する。新規バリアントはpath_masterだけでなく、transit_masterのLRT走行・停留所リストにも追加する。
+- 非公開の制作ツールにある`genesis-gallery/pipeline/jobs/build_lrt_paths.py`が著作元。exportは`--only p222/lrt_,p222/body,p222/sidewalk,p222/line,p222/center,p242/,p303/,p431/`で既存設備の不要な再出力を避ける。
+- 検証はバリデータと`city-genesis/unity/Tests/Lrt/run.ps1`。レール位置、直立柱、カーブ、相互接続、FBXとラッパープレハブのGUIDを確認する。

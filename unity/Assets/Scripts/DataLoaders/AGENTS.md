@@ -45,7 +45,7 @@
 
 ## 地形の関連機能
 
-`IsUnlockOverlayActive` と `ShowCellBordersAndLabels` の初期値はfalse。`Start`ではオンへ上書きせず、`ToggleUnlockOverlay`による一括切替を維持する。セル開放モードへの自動連動は行わない。表示切替の操作経路はTauri(`view:set_display`)に一本化されているが、この未開放セルのグレーアウトにはIPCの入口がなく、現状`ToggleUnlockOverlay`を呼ぶ箇所は無い(機構だけが残っている)。Tauriの「セル」レイヤーが切り替えるのは`DebugCellVisualizer`のセル格子であって、ここのセル境界線・座標ラベルとは別物。
+`IsUnlockOverlayActive` と `ShowCellBordersAndLabels` の初期値はfalse(UI側「セル」レイヤーの既定値 hidden と一致)。`Start`ではオンへ上書きしない。唯一の切替口は `SetUnlockOverlayVisible(bool)` で、Tauriの表示オプション「セル」レイヤー(`view:change_view` の `layer=cell`、`mode=boundaries/hidden`)を `IpcViewCoordinator.ApplyCellMode` が中継する。未開放セルの暗色ティント・開放済みセル境界の点線・座標ラベルは一括で切り替わり、個別のON/OFFは無い。セル開放モードへの自動連動はここでは行わず、`IpcViewCoordinator` のプリセット(`ApplyUnlockCellPreset` 等)が `ForceLayer("cell","boundaries")` で出す。
 
 遠景の沈み込みは `UltraFarTerrainSink.hlsl` をForward・Shadow・GBuffer・Depth・DepthNormalsで共用する。`_FarGridStep` はビルダーと同じ格子間隔（最低1m）を渡す。頂点の周囲1格子分が全てロード済みの場合だけ沈め、境界をまたぐ面は元の高さに残す。頂点自身のセルだけで沈めると三角形の補間が未ロード側も引き下げ、海が見える裂け目を作る。`Tests/TerrainAppearance/run-unity.ps1` が境界・アンロード・領域移動と内部沈み込みを描画検証する。
 
@@ -297,3 +297,5 @@ PathMasterItem.house_placementはoutside/insideを受信する。駅舎の個別
 ## バス停の上屋
 
 `BusStopManager`は固定名Props/bus_stopをPropRenderModelでインスタンシング描画する。0.5秒間隔で注視点600m以内のQueryNearbyNodesを使い、接続PATH_TRANSPORTの車種がバスの停留所だけを抽出する。NodeData.station_path_idから下地道路を直接解決し、実中心線の接線・標高で路肩へ配置する。路線の運休・車両数・色帯設定では隠さない。都市切替はTransitDataStore.Sessionでクリアする。NodeDataの下地ID変更もCreateOrUpdateNodeでキャッシュへ反映する。制作規約はM文書§M.7.5、検証はTests/BusStops/run.ps1。
+
+TransitOverlayManagerはRoute.VehicleTypeを設定し、LRTのハイライトをLrtRoadPartsの軌道位置へ合わせる。バスとLRTが同じ道路を使っても走行車線を混同しない。

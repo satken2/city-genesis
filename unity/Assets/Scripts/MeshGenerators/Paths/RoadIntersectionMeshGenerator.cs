@@ -102,7 +102,15 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
                 AdjustConnectorHeight(connector.Points, nodePosition, roadResult.Sections, connector.Part == "line" ? RoadPartHeights.LINE_ABOVE_SPLINE : RoadPartHeights.SIDEWALK_ABOVE_SPLINE);
             }
             if (railConnectors != null) foreach (var connector in railConnectors)
+            {
                 AdjustConnectorHeight(connector.Points, nodePosition, roadResult.Sections, RoadPartHeights.TRACK_ABOVE_SPLINE);
+                if (connector.EmbeddedLrt)
+                    for (int i = 0; i < connector.Points.Count; i++)
+                    {
+                        float t = (float)i / (connector.Points.Count - 1);
+                        connector.Points[i] += Vector3.up * (Mathf.Lerp(connector.StartRailBase, connector.EndRailBase, t * t * (3 - 2 * t)) - RoadPartHeights.TRACK_ABOVE_SPLINE);
+                    }
+            }
             return new NodeMeshResult(roadMesh, roadMaterial, connectionPoints, sidewalkConnectors, railConnectors, sidewalkSetbacks);
         }
         catch (Exception ex)

@@ -200,3 +200,5 @@ RailYardBuildingMeshBuilderは1060とモノレール車庫1064で共通。幅2m�
 ロープウェイ601/602のbodyはCreateSplineMeshの共通入口で幅伸縮・路面上面補正を無効にし、ケーブル中心間隔4.2mを施工中も維持する。602のstation_shellは実寸幅・原点維持・maxTileLength=0で8m周期の駅屋根と壁を反復する。道路用の区間LODは適用しない。仕様は公開G文書、制作元はgenesis-galleryのbuild_ropeway.py。
 
 StationHousePathはpassage_mode=undergroundで通路の描画・コライダーを省き建屋だけ残す。全駅舎で3方式を許可し、2001/2011の上空・2003/2013の地上は専用body、それ以外は方式名パーツをバリアント→p20へ解決する。建屋の接続部との見た目の不一致は許容する。
+
+LrtRoadPartsは222/242の最内車線へ複線、303へ中央単線を追加する。lrt_track/lrt_wireは路面原点で実寸、lrt_poleは道路中心原点・Yawのみ。交差点は222/242/303/431同士だけを接続し、埋め込み側を含む場合はRailConnectorSpecの始終端高さで専用軌道との差を補間する。仕様はG文書、実FBX検証はTests/Lrt/run.ps1。

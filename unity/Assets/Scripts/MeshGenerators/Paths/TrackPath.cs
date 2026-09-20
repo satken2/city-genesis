@@ -1210,7 +1210,9 @@ public class TrackPath : IPathMeshGenerator
 
         // レール専用パーツ（枕木なし）を優先し、無ければ通常の軌道パーツ（track）で代用する。
         // どちらも無ければスキップ（オプショナルパーツ。道床ハルだけが描かれる）。
-        GameObject prefab = LoadPrefab($"Models/Paths/p{connector.PrefabVariant}/rail", $"Models/Paths/p{connector.FallbackType}/rail");
+        GameObject prefab = connector.EmbeddedLrt
+            ? LoadPrefab($"Models/Paths/p{connector.PrefabVariant}/lrt_track", null)
+            : LoadPrefab($"Models/Paths/p{connector.PrefabVariant}/rail", $"Models/Paths/p{connector.FallbackType}/rail");
         if (prefab == null)
         {
             prefab = LoadPrefab($"Models/Paths/p{connector.PrefabVariant}/track", $"Models/Paths/p{connector.FallbackType}/track");
@@ -1237,6 +1239,24 @@ public class TrackPath : IPathMeshGenerator
         // BuildSpline はワールド点を受け取る。コネクタはノードローカル点なのでここで変換する。
         for (int i = 0; i < points.Count; i++) points[i] = parent.TransformPoint(points[i]);
         SplineComputer spline = RoadPath.BuildSpline(go, points, true);
+        if (connector.EmbeddedLrt)
+        {
+            RoadPath.CreateSplineMesh(go, spline, $"Models/Paths/p{connector.PrefabVariant}/lrt_track", 3, 0, 0,
+                stretchToWidth: false);
+            // 専用軌道では踏面とトロリ線の相対高さが異なるため、架線の端点を別に合わせる。
+            var wireRoot = new GameObject("LrtWireConnector");
+            wireRoot.transform.SetParent(go.transform, false);
+            var wirePoints = new List<Vector3>(points);
+            for (int i = 0; i < wirePoints.Count; i++)
+            {
+                float t = (float)i / (wirePoints.Count - 1);
+                wirePoints[i] += Vector3.up * Mathf.Lerp(connector.StartWireOffset, connector.EndWireOffset, t * t * (3 - 2 * t));
+            }
+            var wireSpline = RoadPath.BuildSpline(wireRoot, wirePoints, true);
+            RoadPath.CreateSplineMesh(wireRoot, wireSpline, $"Models/Paths/p{connector.PrefabVariant}/lrt_wire", 1, 0, 0,
+                stretchToWidth: false);
+            return;
+        }
         SplineMesh splineMesh = go.AddComponent<SplineMesh>();
         splineMesh.spline = spline;
         SplineMesh.Channel channel = splineMesh.AddChannel(prefabMf.sharedMesh, $"RailConnector_{index}");

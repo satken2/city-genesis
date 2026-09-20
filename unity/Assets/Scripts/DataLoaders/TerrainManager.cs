@@ -81,7 +81,7 @@ public class TerrainManager : BaseApiDataManager
 
     /// <summary>
     /// セル境界線と座標ラベルの表示が有効かどうか。
-    /// ToggleUnlockOverlay と連動し、同じボタンで一括制御する。
+    /// SetUnlockOverlayVisible が IsUnlockOverlayActive と一括で切り替える。
     /// </summary>
     public bool ShowCellBordersAndLabels { get; private set; } = false;
 
@@ -115,16 +115,18 @@ public class TerrainManager : BaseApiDataManager
     public bool IsDebugMode { get; set; } = false;
 
     /// <summary>
-    /// 未開放セルの濃色表示をトグルする。
-    /// 全 Terrain タイルの Splatmap を再構築して即座に反映する。
+    /// 未開放セルの暗色表示と、開放済みセル境界の点線・座標ラベルをまとめて表示/非表示にする。
+    /// Tauriの表示オプション「セル」レイヤー(view:change_view の layer=cell)から
+    /// IpcViewCoordinator.ApplyCellMode 経由で呼ばれる唯一の切替口。
+    /// 全 Terrain タイルのティントと境界線メッシュを再構築して即座に反映する。
     /// </summary>
-    public void ToggleUnlockOverlay()
+    public void SetUnlockOverlayVisible(bool visible)
     {
-        IsUnlockOverlayActive = !IsUnlockOverlayActive;
-        ShowCellBordersAndLabels = IsUnlockOverlayActive;
+        if (IsUnlockOverlayActive == visible) return;
+        IsUnlockOverlayActive = visible;
+        ShowCellBordersAndLabels = visible;
         RefreshAllUnlockOverlays();
         RefreshAllCellOverlays();
-        Debug.Log($"TerrainManager: Unlock overlay toggled to {IsUnlockOverlayActive}");
     }
 
     /// <summary>
@@ -533,7 +535,7 @@ public class TerrainManager : BaseApiDataManager
     {
         Shader.SetGlobalFloat("_ShowContour", 0f);
 
-        // 暗色表示と境界線・ラベルは初期状態では非表示とし、手動切替の状態を反映する。
+        // 暗色表示と境界線・ラベルは初期状態では非表示(UI側「セル」レイヤーの既定値 hidden と一致させる)。
         RefreshAllUnlockOverlays();
         RefreshAllCellOverlays();
 

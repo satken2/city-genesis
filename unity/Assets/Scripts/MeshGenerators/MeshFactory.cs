@@ -398,6 +398,11 @@ public class SidewalkConnectorSpec
 /// </summary>
 public class RailConnectorSpec
 {
+    public bool EmbeddedLrt;
+    public float StartRailBase;
+    public float EndRailBase;
+    public float StartWireOffset;
+    public float EndWireOffset;
     public float StartSlope;
     public float EndSlope;
     public Vector2 StartDirection;

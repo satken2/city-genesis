@@ -602,24 +602,19 @@ public class IpcViewCoordinator : MonoBehaviour
         Debug.Log($"IpcViewCoordinator: Grid mode -> {mode}");
     }
 
+    /// <summary>
+    /// セルレイヤー。boundaries で未開放セルの暗色表示と開放済みセル境界の点線をまとめて出す
+    /// (どちらも TerrainManager の未開放オーバーレイ機構で、個別には切り替えない)。
+    /// </summary>
     private void ApplyCellMode(string mode)
     {
-        var visualizer = FindAnyObjectByType<DebugCellVisualizer>();
-        if (visualizer == null)
+        var tm = FindAnyObjectByType<TerrainManager>();
+        if (tm == null)
         {
-            Debug.LogWarning("IpcViewCoordinator: DebugCellVisualizer not found");
+            Debug.LogWarning("IpcViewCoordinator: TerrainManager not found");
             return;
         }
-
-        switch (mode)
-        {
-            case "hidden":
-                visualizer.SetShowCellGrid(false);
-                break;
-            case "boundaries":
-                visualizer.SetShowCellGrid(true);
-                break;
-        }
+        tm.SetUnlockOverlayVisible(mode == "boundaries");
     }
 
     private void ApplyRoadMode(string mode, string subMode, string flags)

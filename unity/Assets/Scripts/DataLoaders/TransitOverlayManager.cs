@@ -118,7 +118,7 @@ public class TransitOverlayManager : MonoBehaviour
         foreach (var line in TransitDataStore.Ensure().Lines)
         {
             if (!visibleVariants.Contains(line.path_variant)) continue;
-            var route = new TransitRouteGeometry.Route { motion = new TransitMotionClock(line.journeys) };
+            var route = new TransitRouteGeometry.Route { motion = new TransitMotionClock(line.journeys), VehicleType = VehicleModelConfig.GetTransitVehicleType(line.path_variant) };
             TransitRouteGeometry.BuildRuns(route);
             routes.Add((line, route));
             foreach (var run in route.runs) ids.Add(run.path);

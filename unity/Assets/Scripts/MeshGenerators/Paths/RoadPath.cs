@@ -803,6 +803,8 @@ public class RoadPath : IPathMeshGenerator
             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] body: モデルなしのため白い板にフォールバック");
         }
 
+        LrtRoadParts.Generate(container, spline, pathData);
+
         // オフセット計算（CreateSplineMesh に渡すのはすべて「パーツ中心の位置」。
         // プレハブのピボット位置の差は CreateSplineMesh 側で bounds 中心基準に補正される）
         bool hasSidewalk = sidewalkWidth > 0f;

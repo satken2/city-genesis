@@ -13,6 +13,7 @@ public sealed class TransitRouteGeometry
     public class Route
     {
         public TransitMotionClock motion;
+        public int VehicleType;
         public readonly List<Run> runs = new();
     }
     public sealed class Run
@@ -26,7 +27,7 @@ public sealed class TransitRouteGeometry
     {
         public PathSummary data;
         public VehiclePolyline full, trimmed;
-        public float trimStart, trimEnd, offset;
+        public float trimStart, trimEnd, offset, tramOffset;
         public bool rail;
     }
 
@@ -67,6 +68,9 @@ public sealed class TransitRouteGeometry
                 RoadPath.GetPathMasterParams(data, out float width, out float sidewalk, out float side, out _, out int lanes, out _, out float divider, out _, out _, out _, out _);
                 g.offset = Math.Abs(new RoadLaneLayout(width,sidewalk,side,divider,lanes,data.travel_direction).Center(0,CityInfoStore.TrafficHand));
             }
+            g.tramOffset = LrtRoadParts.IsEmbedded(data.path_variant) ? LrtRoadParts.Offset(data) : g.offset;
+            if (LrtRoadParts.IsEmbedded(data.path_variant))
+            { ReadRailConnectors(data.start_node_id); ReadRailConnectors(data.end_node_id); }
             geometry[data.path_id] = g;
         }
     }
@@ -79,6 +83,7 @@ public sealed class TransitRouteGeometry
         if (parent == null) return;
         foreach (var spline in parent.GetComponentsInChildren<SplineComputer>())
         {
+            if (!spline.gameObject.name.StartsWith("RailConnector_", StringComparison.Ordinal)) continue;
             var points = new List<Vector3>();
             for (int i = 0; i <= 48; i++) points.Add(spline.EvaluatePosition(i/48.0));
             list.Add(new VehiclePolyline(points));
@@ -89,6 +94,7 @@ public sealed class TransitRouteGeometry
     {
         position = default; tangent = Vector3.forward;
         if (line.runs.Count == 0) return false;
+        bool tram = line.VehicleType == Constants.VEHICLE_TRAM;
         int refRun = FindRun(line.runs, reference), index = FindRun(line.runs,distance);
         if (line.runs[refRun].Forward != referenceForward && refRun > 0 && Math.Abs(line.runs[refRun].start-reference)<.001) refRun--;
         // 終点で逆方向の脚へ車体を曲げず、同じ線路上に編成を保つ。
@@ -99,27 +105,27 @@ public sealed class TransitRouteGeometry
         float s = fraction*g.full.Length;
         if (s < -.01 || s > g.full.Length+.01) return false;
         if (s >= g.trimStart && s <= g.trimEnd)
-        { SampleTrack(g,run.Forward,s,out position,out tangent); return true; }
+        { SampleTrack(g,run.Forward,s,tram,out position,out tangent); return true; }
         bool ahead = run.Forward ? s > g.trimEnd : s < g.trimStart;
         int otherIndex = index+(ahead ? 1 : -1);
         if (otherIndex < 0 || otherIndex >= line.runs.Count)
-        { SampleTrack(g,run.Forward,s,out position,out tangent); return true; }
+        { SampleTrack(g,run.Forward,s,tram,out position,out tangent); return true; }
         var other = line.runs[otherIndex];
         if (other.path == run.path)
-        { SampleTrack(g,run.Forward,s,out position,out tangent); return true; }
+        { SampleTrack(g,run.Forward,s,tram,out position,out tangent); return true; }
         if (!geometry.TryGetValue(other.path,out var next)) return false;
         var a = ahead ? g : next; var b = ahead ? next : g;
         var ra = ahead ? run : other; var rb = ahead ? other : run;
         int node = ra.Forward ? a.data.end_node_id : a.data.start_node_id;
         if (node != (rb.Forward ? b.data.start_node_id : b.data.end_node_id)) return false;
-        SampleTrack(a,ra.Forward,ra.Forward?a.trimEnd:a.trimStart,out var p0,out var t0);
-        SampleTrack(b,rb.Forward,rb.Forward?b.trimStart:b.trimEnd,out var p1,out var t1);
+        SampleTrack(a,ra.Forward,ra.Forward?a.trimEnd:a.trimStart,tram,out var p0,out var t0);
+        SampleTrack(b,rb.Forward,rb.Forward?b.trimStart:b.trimEnd,tram,out var p1,out var t1);
         float tail = ra.Forward?a.full.Length-a.trimEnd:a.trimStart;
         float head = rb.Forward?b.trimStart:b.full.Length-b.trimEnd;
         float along = ahead ? (run.Forward?s-g.trimEnd:g.trimStart-s) : tail+(run.Forward?s:g.full.Length-s);
         VehiclePolyline connector = null;
         bool reverse = false;
-        if (g.rail)
+        if (g.rail || tram)
         {
             float best = float.PositiveInfinity;
             if (railConnectors.TryGetValue(node,out var options)) foreach (var option in options)
@@ -133,16 +139,19 @@ public sealed class TransitRouteGeometry
         else connector = VehiclePolyline.Connector(p0,t0,p1,t1,1f/3f);
         float progress = Mathf.Clamp01(along/Math.Max(.001f,tail+head));
         connector.Sample((reverse?1-progress:progress)*connector.Length,!reverse,out position,out tangent);
-        if (g.rail) position.y += .2f;
+        if (tram) position.y += LrtRoadParts.IsEmbedded(g.data.path_variant) || LrtRoadParts.IsEmbedded(next.data.path_variant) ? LrtRoadParts.RailTop : .355f;
+        else if (g.rail) position.y += .2f;
         return true;
     }
 
-    private static void SampleTrack(Geometry g,bool forward,float s,out Vector3 p,out Vector3 t)
+    private static void SampleTrack(Geometry g,bool forward,float s,bool tram,out Vector3 p,out Vector3 t)
     {
         g.full.Sample(s,forward,out p,out t);
         float sign = CityInfoStore.TrafficHand == Constants.TRAFFIC_HAND_LEFT ? -1 : 1;
-        p += Vector3.Cross(Vector3.up,t).normalized*(g.offset*sign);
-        p.y += g.rail ? RoadPartHeights.TRACK_ABOVE_SPLINE+.2f : RoadPartHeights.BODY_ABOVE_SPLINE;
+        float offset = tram ? g.tramOffset : g.offset;
+        p += Vector3.Cross(Vector3.up,t).normalized*(offset*sign);
+        p.y += g.rail ? RoadPartHeights.TRACK_ABOVE_SPLINE + (tram ? .355f : .2f)
+            : RoadPartHeights.BODY_ABOVE_SPLINE + (tram ? LrtRoadParts.RailTop : 0);
     }
     private static int FindRun(List<Run> runs,double distance)
     {

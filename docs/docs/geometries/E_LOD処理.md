@@ -221,11 +221,11 @@ per-cellタイル（Far / Near / Dynamic）の仕様:
 - 実装方式: 地形シェーダー `Custom/DepthOffsetTerrainLit` が持つタイル全体への乗算ティント `_TerrainTint`（白=通常色）を使う。未開放セルのタイルは `unacquiredTint` を、開放済みセルは白を、タイルごとの `materialTemplate` に設定する（`ApplyUnlockOverlayToTerrain`）。テクスチャ模様・マクロバリエーション・崖の岩ブレンドは保ったまま全体が一様に暗くなる
 - `materialTemplate` は `ApplyTerrainOffsetMaterial` がタイル生成時に必ずクローンする「タイルごとの個別インスタンス」（名前サフィックス ` (TileInstance)` で識別）なので、タイル単位で独立にティントを変えられる
 - `Terrain.basemapDistance` は実質無効（100000m）に設定する。デフォルト（1000m）のままだと遠方タイルがベースマップ用シェーダーで描画され、`_TerrainTint` やマクロバリエーション・深度Offsetが適用されなくなるため
-- 更新タイミング: `ToggleUnlockOverlay` 呼び出し時や、Terrainタイル生成時に `ApplyUnlockOverlayToTerrain` を実行する
+- 更新タイミング: `SetUnlockOverlayVisible` 呼び出し時や、Terrainタイル生成時に `ApplyUnlockOverlayToTerrain` を実行する
 
 超遠景（UltraFar）の陸地メッシュは Terrain ではないため、サブメッシュ別マテリアルの `_BaseColor` で同じ `unacquiredTint` を乗算する（「未開放セルの暗色表示」参照）。per-cellタイルとUltraFarで同じティント色と同じ地面テクスチャを使うため、ティア境界でも未開放の見た目が揃う。
 
-`ToggleUnlockOverlay` はセル境界線・座標ラベル・開放済み領域の外枠線の表示と連動しており、OFFにすると枠線類が消えると同時に未開放セルも通常色に戻る（全域が通常の色になる）。
+表示の切替口は `TerrainManager.SetUnlockOverlayVisible(bool)` のみで、UI(Tauri)の表示オプション「セル」レイヤー（`view:change_view` の `layer=cell`、`mode=boundaries` でON・`hidden` でOFF）から `IpcViewCoordinator.ApplyCellMode` が呼ぶ。道路敷設・地区編集・セル開放などの編集ステート中はプリセットが自動でONにする。セル境界線・座標ラベル・開放済み領域の外枠線の表示と連動しており、OFFにすると枠線類が消えると同時に未開放セルも通常色に戻る（全域が通常の色になる）。
 
 これにより、プレイヤーはどのエリアがまだ開放されていないかをカメラ位置に関係なく一目で確認できる。
 
