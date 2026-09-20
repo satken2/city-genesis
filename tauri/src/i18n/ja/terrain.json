@@ -14,6 +14,9 @@
     "waitingForEditor": "地形エディタからの読み込みを待っています…"
   },
   "editor": {
+    "originalTerrains": "オリジナル地形",
+    "originalTerrainsHelp": "純粋な地形データです",
+    "gameTerrains": "既存マップを編集",
     "terrainTab": "地形エディタ",
     "scenarioTab": "シナリオエディタ",
     "addNewTerrain": "新しい地形を追加",
@@ -21,14 +24,6 @@
     "createFailed": "新しい地形の作成に失敗しました",
     "copying": "コピー中...",
     "copyFailed": "地形データの取得に失敗しました",
-    "localMapsTitle": "編集途中のデータを開く",
-    "opening": "開いています...",
-    "openLocalFailed": "作業コピーを開けませんでした",
-    "deleteLocalMap": "この作業コピーを削除",
-    "confirmDeleteLocalMap": "この作業コピーを削除しますか？この操作は取り消せません。",
-    "confirmDelete": "削除",
-    "cancelDelete": "キャンセル",
-    "deleting": "削除中...",
-    "deleteLocalFailed": "作業コピーの削除に失敗しました"
+    "gameTerrainsHelp": "川、資源、プロップなどを含みます"
   }
 }

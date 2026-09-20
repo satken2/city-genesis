@@ -2,6 +2,7 @@ mod ipc;
 mod messages;
 mod settings;
 mod state;
+mod terrain_export_paths;
 mod window;
 
 use messages::{BackendLaunchConfig, EntityRef, GraphicLaunchConfig, MutexGroups, WindowRegistry};
@@ -579,20 +580,22 @@ fn header_f64(res: &reqwest::Response, name: &str) -> f64 {
 /// 地形エディタの編集対象として、指定マップの近景標高マップをバックエンドから取得し、
 /// ローカル(AppData)に作業コピーを保存する。
 ///
-/// 地形編集はこのローカルコピーに対して行われ、バックエンドには書き戻さない
-/// (編集内容をゲームに反映する手順は別途実装される)。
+/// 地形編集はこのローカルコピーに対して行われ、バックエンドには書き戻さない。
+/// 原本は標高だけを新しいIDへ複製し、ゲームへの反映はエクスポートで行う。
 #[tauri::command]
 async fn copy_terrain_for_editor(
     app: tauri::AppHandle,
     state: tauri::State<'_, SharedState>,
     map_id: String,
-) -> Result<(), String> {
+    original: Option<bool>,
+) -> Result<String, String> {
     let api_base_url = {
         let guard = state.lock();
         guard.api_base_url.clone()
     };
     let base = api_base_url.trim_end_matches('/');
-    let url = format!("{}/api/v1/terrain/maps/{}/near", base, map_id);
+    let original = original.unwrap_or(false);
+    let url = format!("{}/api/v1/terrain/maps/{}/near?original={}", base, map_id, original);
 
     let client = reqwest::Client::new();
     let res = client
@@ -622,32 +625,63 @@ async fn copy_terrain_for_editor(
         .map_err(|e| format!("地形データの読み込みに失敗しました: {e}"))?;
 
     // 登録マップの配置定義を取得し、編集中の都市とは独立した作業コピーへ持ち込む。
-    let props: serde_json::Value = client
-        .get(format!("{}/api/v1/terrain/maps/{}/props", base, map_id))
-        .timeout(Duration::from_secs(60))
-        .send()
-        .await
-        .map_err(|e| format!("プロップ定義の取得に失敗しました: {e}"))?
-        .error_for_status()
-        .map_err(|e| format!("プロップ定義の取得に失敗しました: {e}"))?
-        .json()
-        .await
-        .map_err(|e| format!("プロップ定義の読み込みに失敗しました: {e}"))?;
+    let props: serde_json::Value = if original {
+        serde_json::json!({"instances": [], "scatters": []})
+    } else {
+        client
+            .get(format!("{}/api/v1/terrain/maps/{}/props", base, map_id))
+            .timeout(Duration::from_secs(60))
+            .send()
+            .await
+            .map_err(|e| format!("プロップ定義の取得に失敗しました: {e}"))?
+            .error_for_status()
+            .map_err(|e| format!("プロップ定義の取得に失敗しました: {e}"))?
+            .json()
+            .await
+            .map_err(|e| format!("プロップ定義の読み込みに失敗しました: {e}"))?
+    };
 
-    let resource_document: serde_json::Value = client
-        .get(format!("{}/api/v1/terrain/maps/{}/resources", base, map_id))
-        .timeout(Duration::from_secs(60))
-        .send()
-        .await
-        .map_err(|e| format!("資源定義の取得に失敗しました: {e}"))?
-        .error_for_status()
-        .map_err(|e| format!("資源定義の取得に失敗しました: {e}"))?
-        .json()
-        .await
-        .map_err(|e| format!("資源定義の読み込みに失敗しました: {e}"))?;
+    let resource_document: serde_json::Value = if original {
+        serde_json::json!({"resources": []})
+    } else {
+        client
+            .get(format!("{}/api/v1/terrain/maps/{}/resources", base, map_id))
+            .timeout(Duration::from_secs(60))
+            .send()
+            .await
+            .map_err(|e| format!("資源定義の取得に失敗しました: {e}"))?
+            .error_for_status()
+            .map_err(|e| format!("資源定義の取得に失敗しました: {e}"))?
+            .json()
+            .await
+            .map_err(|e| format!("資源定義の読み込みに失敗しました: {e}"))?
+    };
     let resources = terrain_editor_resources(&resource_document)?;
 
-    let map_dir = terrain_editor_dir(&app)?.join(&map_id);
+    let features: serde_json::Value = if original {
+        serde_json::json!({"water_surfaces": [], "rivers": [], "camera": null})
+    } else {
+        client
+            .get(format!("{}/api/v1/terrain/maps/{}/features", base, map_id))
+            .timeout(Duration::from_secs(60))
+            .send()
+            .await
+            .map_err(|e| format!("川・水面定義の取得に失敗しました: {e}"))?
+            .error_for_status()
+            .map_err(|e| format!("川・水面定義の取得に失敗しました: {e}"))?
+            .json()
+            .await
+            .map_err(|e| format!("川・水面定義の読み込みに失敗しました: {e}"))?
+    };
+
+    let map_id = if original {
+        format!("{}_{}", map_id, uuid::Uuid::new_v4())
+    } else {
+        map_id
+    };
+    // ウィンドウ再利用で前回の編集状態が残らないよう、取り込みごとに別のIDで開く。
+    let editor_id = uuid::Uuid::new_v4().to_string();
+    let map_dir = terrain_editor_dir(&app)?.join(&editor_id);
     std::fs::create_dir_all(&map_dir).map_err(|e| e.to_string())?;
 
     let meta = serde_json::json!({
@@ -661,6 +695,9 @@ async fn copy_terrain_for_editor(
         "grid_cols": grid_cols,
         "props": props,
         "resources": resources,
+        "water_surfaces": features["water_surfaces"],
+        "rivers": features["rivers"],
+        "camera": features["camera"],
     });
     std::fs::write(map_dir.join("meta.json"), meta.to_string())
         .map_err(|e| format!("meta.json の書き込みに失敗しました: {e}"))?;
@@ -668,7 +705,7 @@ async fn copy_terrain_for_editor(
         .map_err(|e| format!("near.bin の書き込みに失敗しました: {e}"))?;
 
     log::info!("[copy_terrain_for_editor] map_id={} を保存しました", map_id);
-    Ok(())
+    Ok(editor_id)
 }
 
 /// 都市生成ローダーと同じ2種類の外形を受け入れ、資源の各フィールドは加工しない。
@@ -813,92 +850,6 @@ fn load_terrain_editor_data(
     })
 }
 
-/// terrain_editor/ 配下にある作業コピー一覧の1件分の要約情報。
-#[derive(serde::Serialize)]
-struct TerrainEditorMapSummary {
-    map_id: String,
-    map_width: f64,
-    map_height: f64,
-    grid_rows: u32,
-    grid_cols: u32,
-    /// thumbnail.png が存在すればbase64エンコードして含める(存在しなければnull)。
-    /// EditorWindow.tsx が Tauri のアセットプロトコル設定なしで<img>にそのまま表示できるようにするため。
-    thumbnail_base64: Option<String>,
-}
-
-/// AppData の terrain_editor/ 配下にある作業コピー(map_idごとのディレクトリ)を列挙する。
-///
-/// 「編集途中のデータを開く」機能のために、copy_terrain_for_editor によるバックエンドからの
-/// 再取得(＝編集内容の上書き)を伴わずに、既存の作業コピーを一覧表示するためのコマンド。
-/// meta.json が存在しない/パースできないディレクトリはスキップする(一覧に出ないだけで削除はしない)。
-#[tauri::command]
-fn list_terrain_editor_maps(app: tauri::AppHandle) -> Result<Vec<TerrainEditorMapSummary>, String> {
-    let base_dir = terrain_editor_dir(&app)?;
-    let mut summaries = Vec::new();
-
-    let entries = match std::fs::read_dir(&base_dir) {
-        Ok(entries) => entries,
-        Err(_) => return Ok(summaries),
-    };
-
-    for entry in entries.flatten() {
-        let path = entry.path();
-        if !path.is_dir() {
-            continue;
-        }
-        let meta_path = path.join("meta.json");
-        let meta_str = match std::fs::read_to_string(&meta_path) {
-            Ok(s) => s,
-            Err(_) => continue,
-        };
-        let meta: serde_json::Value = match serde_json::from_str(&meta_str) {
-            Ok(v) => v,
-            Err(_) => continue,
-        };
-        let dir_name = path
-            .file_name()
-            .and_then(|n| n.to_str())
-            .unwrap_or_default()
-            .to_string();
-        let thumbnail_base64 = std::fs::read(path.join("thumbnail.png"))
-            .ok()
-            .map(|bytes| {
-                use base64::Engine;
-                base64::engine::general_purpose::STANDARD.encode(&bytes)
-            });
-        summaries.push(TerrainEditorMapSummary {
-            map_id: meta
-                .get("map_id")
-                .and_then(|v| v.as_str())
-                .unwrap_or(&dir_name)
-                .to_string(),
-            map_width: meta.get("map_width").and_then(|v| v.as_f64()).unwrap_or(0.0),
-            map_height: meta.get("map_height").and_then(|v| v.as_f64()).unwrap_or(0.0),
-            grid_rows: meta.get("grid_rows").and_then(|v| v.as_f64()).unwrap_or(0.0) as u32,
-            grid_cols: meta.get("grid_cols").and_then(|v| v.as_f64()).unwrap_or(0.0) as u32,
-            thumbnail_base64,
-        });
-    }
-
-    summaries.sort_by(|a, b| a.map_id.cmp(&b.map_id));
-    Ok(summaries)
-}
-
-/// AppData の terrain_editor/ 配下にある作業コピー(map_idごとのディレクトリ)を削除する。
-///
-/// 「編集途中のデータを開く」一覧の×ボタンから呼ばれる。バックエンドの地形マップ本体には
-/// 影響しない(このコマンドが削除するのはローカルの作業コピーのみ)。
-#[tauri::command]
-fn delete_terrain_editor_map(app: tauri::AppHandle, map_id: String) -> Result<(), String> {
-    let map_dir = terrain_editor_dir(&app)?.join(&map_id);
-    if map_dir.is_dir() {
-        std::fs::remove_dir_all(&map_dir)
-            .map_err(|e| format!("作業コピーの削除に失敗しました: {e}"))?;
-    }
-    log::info!("[delete_terrain_editor_map] map_id={} を削除しました", map_id);
-    Ok(())
-}
-
 /// 新しい地形を作成し、地形エディタ用の作業コピーを初期化する。
 ///
 /// 最小サイズ(2×2セル、1000m×1000m)の標高マップを標高-10mで生成し、
@@ -954,88 +905,6 @@ fn create_new_terrain_for_editor(app: tauri::AppHandle) -> Result<String, String
     Ok(map_id)
 }
 
-/// 地形エディタで編集した標高データをローカル作業コピー(meta.json / near.bin)へ書き戻す。
-///
-/// map_id は保存先ディレクトリ名になる。ロード時と同じ map_id を渡せば上書き保存、
-/// 別の map_id を渡せば新しいディレクトリに保存される(「別名で保存」に相当)。
-/// 地形データ作成マニュアルにあるとおり、ここでの保存はあくまでローカル作業コピーの更新で
-/// あり、バックエンドの元データやゲームのセーブデータには一切影響しない。ゲームで使うには
-/// 別途 .npy へ変換して assets/ に配置する手動手順が必要。
-#[tauri::command]
-fn save_terrain_editor_data(
-    app: tauri::AppHandle,
-    map_id: String,
-    map_width: f64,
-    map_height: f64,
-    near_spacing: f64,
-    far_spacing: f64,
-    cell_size: f64,
-    grid_rows: u32,
-    grid_cols: u32,
-    data_base64: String,
-    thumbnail_base64: Option<String>,
-    water_surfaces: Option<serde_json::Value>,
-    rivers: Option<serde_json::Value>,
-    resources: Option<serde_json::Value>,
-    props: Option<serde_json::Value>,
-    camera: Option<serde_json::Value>,
-) -> Result<(), String> {
-    use base64::Engine;
-    let bytes = base64::engine::general_purpose::STANDARD
-        .decode(&data_base64)
-        .map_err(|e| format!("標高データのデコードに失敗しました: {e}"))?;
-
-    let expected_len = (grid_rows as usize) * (grid_cols as usize) * 2;
-    if bytes.len() != expected_len {
-        return Err(format!(
-            "標高データのサイズが不正です(期待値: {expected_len} バイト、実際: {} バイト)",
-            bytes.len()
-        ));
-    }
-
-    let map_dir = terrain_editor_dir(&app)?.join(&map_id);
-    std::fs::create_dir_all(&map_dir).map_err(|e| e.to_string())?;
-
-    // 水面ポリゴン(海面以外の湖など)・川・天然資源エリア・カメラ初期状態は作業コピーの
-    // meta.json に保持する。未指定なら空配列(カメラは null)を書く。
-    let water_surfaces = water_surfaces.unwrap_or_else(|| serde_json::Value::Array(Vec::new()));
-    let rivers = rivers.unwrap_or_else(|| serde_json::Value::Array(Vec::new()));
-    let resources = resources.unwrap_or_else(|| serde_json::Value::Array(Vec::new()));
-    let camera = camera.unwrap_or(serde_json::Value::Null);
-    let meta = serde_json::json!({
-        "map_id": map_id,
-        "map_width": map_width,
-        "map_height": map_height,
-        "near_spacing": near_spacing,
-        "far_spacing": far_spacing,
-        "cell_size": cell_size,
-        "grid_rows": grid_rows,
-        "grid_cols": grid_cols,
-        "water_surfaces": water_surfaces,
-        "rivers": rivers,
-        "resources": resources,
-        "props": props.unwrap_or_else(|| serde_json::json!({"instances": [], "scatters": []})),
-        "camera": camera,
-    });
-    std::fs::write(map_dir.join("meta.json"), meta.to_string())
-        .map_err(|e| format!("meta.json の書き込みに失敗しました: {e}"))?;
-    std::fs::write(map_dir.join("near.bin"), &bytes)
-        .map_err(|e| format!("near.bin の書き込みに失敗しました: {e}"))?;
-
-    // サムネイル(160x120のPNG)は任意。エディタ側が斜め上からのレンダリング結果をbase64で渡してきた
-    // 場合のみ thumbnail.png として書き戻す。渡されなければ既存のサムネイルはそのまま残す。
-    if let Some(thumb_b64) = thumbnail_base64 {
-        let thumb_bytes = base64::engine::general_purpose::STANDARD
-            .decode(&thumb_b64)
-            .map_err(|e| format!("サムネイル画像のデコードに失敗しました: {e}"))?;
-        std::fs::write(map_dir.join("thumbnail.png"), &thumb_bytes)
-            .map_err(|e| format!("thumbnail.png の書き込みに失敗しました: {e}"))?;
-    }
-
-    log::info!("[save_terrain_editor_data] map_id={} に保存しました", map_id);
-    Ok(())
-}
-
 /// export_terrain_as_npy の戻り値。terrain_maps.yaml への追記可否をフロントに伝えるために使う。
 #[derive(serde::Serialize)]
 struct ExportTerrainResult {
@@ -1073,6 +942,9 @@ fn export_terrain_as_npy(
     camera: Option<serde_json::Value>,
 ) -> Result<ExportTerrainResult, String> {
     use base64::Engine;
+    // 付随JSONを含め、最初のファイルを書く前に原本への出力を拒否する。
+    let checked_path = terrain_export_paths::checked_export_path(std::path::Path::new(&out_path))?;
+    let out_path = checked_path.to_string_lossy().into_owned();
     let bytes = base64::engine::general_purpose::STANDARD
         .decode(&data_base64)
         .map_err(|e| format!("標高データのデコードに失敗しました: {e}"))?;
@@ -1173,11 +1045,7 @@ fn export_terrain_as_npy(
         Some(dir) => {
             let yaml_path = dir.join("terrain_maps.yaml");
             if yaml_path.exists() {
-                let file_name = out_path_buf
-                    .file_name()
-                    .and_then(|n| n.to_str())
-                    .unwrap_or_default()
-                    .to_string();
+                let file_name = terrain_export_paths::registry_file_name(out_path_buf);
                 upsert_terrain_yaml_entry(
                     &yaml_path,
                     &map_id,
@@ -2378,10 +2246,7 @@ pub fn run() {
             reset_window_geometries,
             copy_terrain_for_editor,
             create_new_terrain_for_editor,
-            list_terrain_editor_maps,
-            delete_terrain_editor_map,
             load_terrain_editor_data,
-            save_terrain_editor_data,
             export_terrain_as_npy,
             open_save_directory,
         ])

@@ -148,7 +148,7 @@ type WorldPoint = { x: number; z: number };
 /**
  * 地形エディタ内での水面(海面以外の湖など)1枚分の内部表現。
  * points は外周ポリゴンの頂点(ワールド座標XZ)。waterLevel は水面のY標高(m、海面=0)。
- * 保存・エクスポート・3Dプレビュー送信時に GeoJSON ライクな WaterSurfacePayload へ変換する。
+ * エクスポート・3Dプレビュー送信時に GeoJSON ライクな WaterSurfacePayload へ変換する。
  */
 type EditorWaterSurface = { id: string; waterLevel: number; points: WorldPoint[] };
 
@@ -157,7 +157,7 @@ type EditorWaterSurface = { id: string; waterLevel: number; points: WorldPoint[]
  * GeneratedRiver(terrainRiver.ts)に以下を加えたもの。
  *   - params: 生成時のパラメータ(再生成の参考用)
  *   - carved: 川床を地形へ彫り込み済みか。「流路を計算」直後は false(プレビュー状態)で、
- *     一覧から1本ずつ「彫る」ことで true になる。保存・エクスポート・3Dプレビューの
+ *     一覧から1本ずつ「彫る」ことで true になる。エクスポート・3Dプレビューの
  *     対象になるのは彫り込み済みの川のみ。
  *   - depthCoef: この川を彫るときの深さ係数。生成時の既定値から川ごとに調整できる。
  *   - polygon: 川の範囲(彫り込み後の地形で水面より低い領域。穴=中州)。彫り込み時に抽出し、
@@ -196,7 +196,7 @@ const RIVER_NODE_HIT_PX = 9;
 
 /**
  * 地形エディタ内での天然資源エリア1件分の内部表現。
- * points は外周ポリゴンの頂点(ワールド座標XZ)。保存・エクスポート時に GeoJSON ライクな
+ * points は外周ポリゴンの頂点(ワールド座標XZ)。エクスポート時に GeoJSON ライクな
  * ResourceAreaPayload へ変換する。種別の表示名はマスターデータから都度解決するため持たない。
  */
 type EditorResourceArea = {
@@ -1562,13 +1562,11 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   // --- 地図メタデータ(保存欄) ---
   // map_width/map_height/near_spacing/grid_rows/grid_cols は標高データのグリッド構造そのものと
   // 結び付いており、リサンプリングなしに変更すると near.bin との整合性が壊れるため編集不可にし、
-  // settingsRef の値をそのまま読み取り専用表示する。map_id(保存先ディレクトリ名。別名保存に使う)/
+  // settingsRef の値をそのまま読み取り専用表示する。map_id(エクスポート先の登録ID)/
   // far_spacing/cell_size は近景標高データに影響しない独立したメタデータなので編集可能にする。
   const [mapIdInput, setMapIdInput] = useState<string>(mapId);
   const [farSpacing, setFarSpacing] = useState<number>(0);
   const [cellSize, setCellSize] = useState<number>(0);
-  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
-  const [saveErrorMsg, setSaveErrorMsg] = useState<string>("");
   const [exportStatus, setExportStatus] = useState<"idle" | "exporting" | "exported" | "error">("idle");
   const [exportErrorMsg, setExportErrorMsg] = useState<string>("");
 
@@ -1756,14 +1754,14 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
 
   // === 水面(海面以外の湖など)の実体 ===
   // 作成済み水面の一覧。内部表現は {id, waterLevel, points(頂点のワールド座標列)}。
-  // 保存・エクスポート・3Dプレビュー送信時に GeoJSON ライク(WaterSurfacePayload)へ変換する。
+  // エクスポート・3Dプレビュー送信時に GeoJSON ライク(WaterSurfacePayload)へ変換する。
   const waterSurfacesRef = useRef<EditorWaterSurface[]>([]);
   // 水面モードで作図中(未確定)の頂点列。
   const waterPointsRef = useRef<WorldPoint[]>([]);
 
   // === 川の実体 ===
   // 未彫り込み(計算直後)と彫り込み済みの両方を carved フラグつきで持つ。
-  // 保存・エクスポート・3Dプレビュー送信の対象になるのは彫り込み済みの川のみ。
+  // エクスポート・3Dプレビュー送信の対象になるのは彫り込み済みの川のみ。
   const riversRef = useRef<EditorRiver[]>([]);
 
   // === 天然資源エリアの実体 ===
@@ -1773,7 +1771,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   const resourcePointsRef = useRef<WorldPoint[]>([]);
 
   // === カメラ初期状態の実体 ===
-  // 保存・エクスポート(meta.json / terrain_maps.yaml の camera)の対象。3Dプレビューへは送らない。
+  // エクスポート(meta.json / terrain_maps.yaml の camera)の対象。3Dプレビューへは送らない。
   const cameraRef = useRef<TerrainCameraPayload | null>(null);
 
   // 資源種別の表示名の対応表。draw()(イベントハンドラのクロージャから呼ばれ、React state を
@@ -2319,7 +2317,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   /**
    * 3Dプレビュー送信用の水面一覧。確定済みの水面に加えて、「形状を閉じたが未確定の水面」を
    * 現在の水位(waterLevelInput)で仮の1枚として含める。これにより、確定前でも水位を変えると
-   * 3Dプレビューの水面が上下する。保存・エクスポートには使わない(未確定分を含めないため)。
+   * 3Dプレビューの水面が上下する。エクスポートには使わない(未確定分を含めないため)。
    */
   function serializeWaterSurfacesForPreview(): WaterSurfacePayload[] {
     const list = serializeWaterSurfaces();
@@ -2361,7 +2359,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
    *
    * 作図フローは水面と同じ2段階(左クリックで頂点追加→右クリックで形状を閉じる→
    * 種別・埋蔵量上限・回復率を設定して「資源を確定」で1件として登録)。
-   * 登録した資源は保存(meta.json)・エクスポート(サイドカー map_xxx.resources.json)の
+   * 登録した資源はエクスポート(サイドカー map_xxx.resources.json)の
    * 対象になり、バックエンドが新規都市の初期化時に資源エンティティとして配置する。
    * ========================================================================== */
 
@@ -2461,7 +2459,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
    *
    * 左クリックでカメラ位置(x, z)を置き、右クリックで注視点を指定して方位(yaw)を決める。
    * 高さ(y)・見下ろし角(pitch)・方位はカードの数値入力でも変えられる。マップに1つだけ持ち、
-   * 保存(meta.json)・エクスポート(terrain_maps.yaml の camera)の対象になる。
+   * エクスポート(terrain_maps.yaml の camera)の対象になる。
    * ゲームは新規都市の開始時にこの視点で始まり、以後はセーブデータ側の視点が正になる。
    * ========================================================================== */
 
@@ -3657,7 +3655,6 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     rebuildTerrainVisuals(newElev, newMapWidth, newMapHeight, s.spacing, newRows, newCols);
 
     setResizeStatus("ok");
-    setSaveStatus("idle");
   }
 
   /**
@@ -3674,70 +3671,11 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   }
 
   /**
-   * 編集中の標高データとメタデータを、Tauriコマンド save_terrain_editor_data で
-   * ローカル作業コピー(meta.json / near.bin)へ書き戻す。
-   *
-   * マップIDをロード時から変更していれば別ディレクトリへの新規保存(別名保存)になる。
-   * ここでの保存はあくまで作業コピーの更新であり、バックエンドの元データやゲームの
-   * セーブデータには影響しない。ゲームで使うには、地形データ作成マニュアルの手順で
-   * 別途 .npy への変換と assets/ への配置が必要。
-   */
-  async function handleSaveTerrainEditorData() {
-    const s = settingsRef.current;
-    const elev = elevRef.current;
-    const targetMapId = mapIdInput.trim();
-    if (!s || !elev) return;
-    if (!targetMapId) {
-      setSaveStatus("error");
-      setSaveErrorMsg(t("terrainEditor.saveMapIdRequired", { defaultValue: "マップIDを入力してください" }));
-      return;
-    }
-    setSaveStatus("saving");
-    setSaveErrorMsg("");
-    try {
-      const bytes = encodeFloat16Array(elev);
-      const dataBase64 = uint8ToBase64(bytes);
-      const thumbnailBase64 = captureTerrainThumbnail(
-        elev,
-        s.rows,
-        s.cols,
-        s.mapWidth,
-        s.mapHeight,
-        s.spacing,
-        s.minLand,
-        s.maxLand
-      );
-      await invoke("save_terrain_editor_data", {
-        mapId: targetMapId,
-        mapWidth: s.mapWidth,
-        mapHeight: s.mapHeight,
-        nearSpacing: s.spacing,
-        farSpacing,
-        cellSize,
-        gridRows: s.rows,
-        gridCols: s.cols,
-        dataBase64,
-        thumbnailBase64,
-        waterSurfaces: serializeWaterSurfaces(),
-        rivers: serializeRivers(),
-        resources: serializeResourceAreas(),
-        props: propEditor.current.data.current,
-        camera: cameraRef.current,
-      });
-      setSaveStatus("saved");
-    } catch (error) {
-      setSaveStatus("error");
-      setSaveErrorMsg(error instanceof Error ? error.message : String(error));
-    }
-  }
-
-  /**
    * 編集中の標高データを、バックエンドが読み込める .npy ファイルへエクスポートする。
    *
    * 保存先パスは @tauri-apps/plugin-dialog の保存ダイアログでユーザーに選ばせ、
    * その後 Tauriコマンド export_terrain_as_npy に現在の標高データ(メモリ上の elev 配列)を
-   * そのまま渡す。「保存」ボタン(作業コピーへの書き戻し)とは独立しており、事前の保存操作は
-   * 不要。.npy への変換はRust側が自前で行う(外部プロセスに依存しない)。
+   * そのまま渡す。.npy への変換はRust側が自前で行う(外部プロセスに依存しない)。
    * サムネイル画像(160x120のPNG)もこの時点の標高データから生成し、.npyと同じファイル名
    * (拡張子だけ.png)で同じ場所に書き出す。
    */
@@ -3837,14 +3775,12 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         const mapWidth = data.map_width;
         const mapHeight = data.map_height;
 
-        // 地図メタデータ欄の初期値。map_id はロード元のIDから開始し、変更すれば別名保存になる。
+        // 地図メタデータ欄の初期値。map_id はロード元のIDから開始し、変更すれば別のIDでエクスポートする。
         // cellSize state は rebuildTerrainVisuals より先にセットする（すでに引数で渡しているので
         // 実害はないが、後続のセル境界グリッドuseEffectが古い値で走るのを避けるため）。
-        setMapIdInput(mapId);
+        setMapIdInput(data.map_id);
         setFarSpacing(data.far_spacing > 0 ? data.far_spacing : 200);
         setCellSize(data.cell_size > 0 ? data.cell_size : 500);
-        setSaveStatus("idle");
-        setSaveErrorMsg("");
 
         // 標高レンジ計算・テクスチャ構築・等高線・グリッド・settingsRef 設定・リセットビュー・描画
         // は rebuildTerrainVisuals で一括実行する。
@@ -5623,18 +5559,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
           </div>
         </div>
         <div className="terrain-editor-save-actions">
-              {/* 保存・エクスポート */}
+              {/* エクスポート */}
               <div className="terrain-editor-action-buttons" style={{ marginTop: 10 }}>
-                <button
-                  type="button"
-                  className="terrain-editor-btn terrain-editor-btn-confirm"
-                  disabled={status !== "ready" || saveStatus === "saving"}
-                  onClick={() => void handleSaveTerrainEditorData()}
-                >
-                  {saveStatus === "saving"
-                    ? t("terrainEditor.saving", { defaultValue: "保存中..." })
-                    : t("terrainEditor.save", { defaultValue: "保存" })}
-                </button>
                 <button
                   type="button"
                   className="terrain-editor-btn"
@@ -5646,16 +5572,6 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                     : t("terrainEditor.export", { defaultValue: ".npyへエクスポート" })}
                 </button>
               </div>
-              {saveStatus === "saved" && (
-                <div className="terrain-editor-hint terrain-editor-hint--success">
-                  {t("terrainEditor.saveSuccess", { defaultValue: "作業コピーに保存しました" })}
-                </div>
-              )}
-              {saveStatus === "error" && (
-                <div className="terrain-editor-hint terrain-editor-hint--error">
-                  {saveErrorMsg || t("terrainEditor.saveFailed", { defaultValue: "保存に失敗しました" })}
-                </div>
-              )}
               {exportStatus === "exported" && (
                 <div className="terrain-editor-hint terrain-editor-hint--success">
                   {t("terrainEditor.exportSuccess", { defaultValue: ".npyへエクスポートしました" })}

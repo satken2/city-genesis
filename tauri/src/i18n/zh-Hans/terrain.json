@@ -14,6 +14,9 @@
     "waitingForEditor": "正在等待地形编辑器的数据…"
   },
   "editor": {
+    "originalTerrains": "原始地形",
+    "originalTerrainsHelp": "仅包含地形数据",
+    "gameTerrains": "编辑现有地图",
     "terrainTab": "地形编辑器",
     "scenarioTab": "剧本编辑器",
     "addNewTerrain": "添加新地形",
@@ -21,14 +24,6 @@
     "createFailed": "新地形创建失败",
     "copying": "复制中...",
     "copyFailed": "地形数据获取失败",
-    "localMapsTitle": "打开编辑中的数据",
-    "opening": "正在打开...",
-    "openLocalFailed": "无法打开工作副本",
-    "deleteLocalMap": "删除该工作副本",
-    "confirmDeleteLocalMap": "确定删除该工作副本吗？此操作无法撤销。",
-    "confirmDelete": "删除",
-    "cancelDelete": "取消",
-    "deleting": "删除中...",
-    "deleteLocalFailed": "工作副本删除失败"
+    "gameTerrainsHelp": "包含河流、资源、装饰物等"
   }
 }

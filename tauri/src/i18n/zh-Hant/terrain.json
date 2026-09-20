@@ -14,6 +14,9 @@
     "waitingForEditor": "正在等待地形編輯器的資料…"
   },
   "editor": {
+    "originalTerrains": "原始地形",
+    "originalTerrainsHelp": "僅包含地形資料",
+    "gameTerrains": "編輯現有地圖",
     "terrainTab": "地形編輯器",
     "scenarioTab": "劇本編輯器",
     "addNewTerrain": "新增地形",
@@ -21,14 +24,6 @@
     "createFailed": "新地形建立失敗",
     "copying": "複製中...",
     "copyFailed": "地形資料取得失敗",
-    "localMapsTitle": "開啟編輯中的資料",
-    "opening": "正在開啟...",
-    "openLocalFailed": "無法開啟工作副本",
-    "deleteLocalMap": "刪除此工作副本",
-    "confirmDeleteLocalMap": "確定刪除此工作副本嗎？此操作無法復原。",
-    "confirmDelete": "刪除",
-    "cancelDelete": "取消",
-    "deleting": "刪除中...",
-    "deleteLocalFailed": "工作副本刪除失敗"
+    "gameTerrainsHelp": "包含河流、資源、裝飾物等"
   }
 }

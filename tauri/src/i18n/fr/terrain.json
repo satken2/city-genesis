@@ -14,6 +14,9 @@
     "waitingForEditor": "En attente des données de l'éditeur de terrain…"
   },
   "editor": {
+    "originalTerrains": "Terrain original",
+    "originalTerrainsHelp": "Données de terrain uniquement.",
+    "gameTerrains": "Modifier une carte existante",
     "terrainTab": "Éditeur de terrain",
     "scenarioTab": "Éditeur de scénarios",
     "addNewTerrain": "Ajouter un nouveau terrain",
@@ -21,14 +24,6 @@
     "createFailed": "Échec de la création du nouveau terrain",
     "copying": "Copie...",
     "copyFailed": "Échec de la récupération des données de terrain",
-    "localMapsTitle": "Ouvrir un travail en cours",
-    "opening": "Ouverture...",
-    "openLocalFailed": "Impossible d'ouvrir la copie de travail",
-    "deleteLocalMap": "Supprimer cette copie de travail",
-    "confirmDeleteLocalMap": "Supprimer cette copie de travail ? Cette action est irréversible.",
-    "confirmDelete": "Supprimer",
-    "cancelDelete": "Annuler",
-    "deleting": "Suppression...",
-    "deleteLocalFailed": "Échec de la suppression de la copie de travail"
+    "gameTerrainsHelp": "Contient les rivières, les ressources, les éléments décoratifs et plus encore."
   }
 }
