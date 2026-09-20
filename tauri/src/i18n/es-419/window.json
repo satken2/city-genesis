@@ -190,7 +190,12 @@
     "toggleShowPlanRoad": "Mostrar calles planeadas",
     "toggleShowPlanBuilding": "Mostrar edificios planeados",
     "toggleHighlightPublic": "Resaltar servicios públicos",
-    "showContours": "Mostrar curvas de nivel"
+    "showContours": "Mostrar curvas de nivel",
+    "trayTooltip": "{{name}}: {{state}}",
+    "trayStateVisible": "Visible",
+    "trayStateHidden": "Oculto",
+    "trayStateContour": "Curvas de nivel",
+    "trayStateTerrainNormal": "Vista normal"
   },
   "grid_settings": {
     "title": "Cuadrícula",

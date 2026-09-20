@@ -39,8 +39,9 @@ import {
 import { STATUS_ACTIVE } from "../../constants";
 import {
   sendChangeState,
-  sendChangeDisplay,
+  sendViewApplyPreset,
   sendEditTransitFinish,
+  VIEW_PRESET_TRANSIT,
   IPC_EVENT_EDIT_TRANSIT_UPDATE_STOPS,
 } from "../../utils/ipc";
 // 建物建設パネルと同一のデザイン(文字サイズ・カード・セレクト)を用いるため、
@@ -93,15 +94,13 @@ export function TransitCreationPanel({
     };
   }, [t]);
 
-  // 本パネルを開いている間は公共交通の表示をONにする(全種別を表示)。
-  // 設置済みの路線や、これから配置する停留所の下地パスが見えるようにするため。
+  // 本パネルを開いている間は3Dビューを公共交通向けの表示(全路線+計画中の道路・建物)にする。
+  // 種別を選ぶと STATE_EDIT_TRANSIT が同じプリセットを適用するが、種別選択前から
+  // 既設の路線が見えている必要があるのでマウント時にも送る。
+  // 元の表示へ戻すのはウィンドウを閉じたときの STATE_NORMAL が担う。
   useEffect(() => {
-    if (!masterData) return;
-    const allIds = Object.values(masterData.transit)
-      .map((e) => (e as TransitMasterEntry).transit_path_id)
-      .join(",");
-    void sendChangeDisplay("transit", "default", allIds);
-  }, [masterData]);
+    void sendViewApplyPreset(VIEW_PRESET_TRANSIT, "transit_creation").catch(console.error);
+  }, []);
 
   // 種別を選ぶと、Unity を停留所配置モード(STATE_EDIT_TRANSIT)にする。
   // 停留所の設置制約(stop_path_variants)と走行網(route_path_variants)を渡し、

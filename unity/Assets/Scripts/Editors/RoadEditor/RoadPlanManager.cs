@@ -57,6 +57,7 @@ public partial class RoadPlanManager : MonoBehaviour
     /// </summary>
     public int PlatformSide = Constants.PLATFORM_SIDE_OUTSIDE;
     public string HouseEnds = "both";
+    public string PassageMode = "elevated";
 
     /// <summary>
     /// 地形追従の個別上書き（Constants.VALUE_NONE=未設定[バリアント既定]/0=非追従/1=追従）。
@@ -483,6 +484,16 @@ public partial class RoadPlanManager : MonoBehaviour
     /// 敷設セッション中(配置中・編集中)に切り替えても、その場でプラットフォームの
     /// 張り出し側が更新される。
     /// </summary>
+    public void SetPassageMode(string mode)
+    {
+        if (mode != "elevated" && mode != "ground" && mode != "underground") return;
+        if (PassageMode == mode) return;
+        PassageMode = mode;
+        InvalidateShapeCache();
+        Update3DPreview();
+        EmitShapeUpdate();
+    }
+
     public void SetHouseEnds(string ends)
     {
         if (ends != "both" && ends != "start" && ends != "end") return;
@@ -574,12 +585,6 @@ public partial class RoadPlanManager : MonoBehaviour
         ResetParallelSnap();
         // curve_allowed=false のバリアント(送電線など)では曲線化を拒否する
         Curved = curved && IsCurveAllowed();
-        // 曲線モードでは接続先の既存パスへ滑らかにつなぐため「直線延長」吸着を自動でONにする
-        // (端点制御点の延長方向整列がこのフラグでゲートされている)。不要ならラジアルメニューでOFFにできる。
-        if (Curved)
-        {
-            TerrainInputHandler.EnableStraightLineSnapping = true;
-        }
         // 曲線⇔直線の切り替えで端点整列の適用有無も変わるため、手動調整も捨てて制御点を全て作り直す
         RecomputeAllControlPoints(resetManual: true);
         RefreshSnapPreview();
@@ -614,10 +619,12 @@ public partial class RoadPlanManager : MonoBehaviour
         // 既存パス編集の設定は、後続のLoadExistingPathで保存値に置き換える。
         PathFollowTerrainOverride = IsHeightEditable() ? initialFollowTerrain ?? Constants.VALUE_NONE : Constants.VALUE_NONE;
         Curved = IsCurveAllowed() && (initialCurved ?? true);
-        // 新規開始だけ直線延長吸着を有効にし、継続配置では手動の吸着設定を保つ。
-        if (Curved && !initialCurved.HasValue)
+        // 「直線延長」吸着は曲線/直線・道路/軌道/インフラを問わず常にOFFから始める
+        // (敷設中に既存パスの延長線へ引き寄せられるのを既定の挙動にしない)。
+        // 継続配置(UIが敷設設定を渡す)ではセッション中の手動の吸着設定をそのまま保つ。
+        if (!initialCurved.HasValue)
         {
-            TerrainInputHandler.EnableStraightLineSnapping = true;
+            TerrainInputHandler.EnableStraightLineSnapping = false;
         }
         InvalidateShapeCache();
         existingElevSegCache.Clear();
@@ -663,11 +670,7 @@ public partial class RoadPlanManager : MonoBehaviour
                 points.Clear();
                 Curved = response.curved && IsCurveAllowed();
                 HouseEnds = response.house_ends ?? "both";
-                // 曲線パスの編集中も「直線延長」吸着を自動でONにする(新規敷設と同じ方針)。
-                if (Curved)
-                {
-                    TerrainInputHandler.EnableStraightLineSnapping = true;
-                }
+                PassageMode = response.passage_mode;
                 // 地形追従の個別上書きを復元する（スキーマ再生成前は VALUE_NONE=未設定になり、
                 // バリアント既定に従う。height_editable=false のバリアントでは意味を持たない）。
                 PathFollowTerrainOverride = response.GetFollowTerrain();
@@ -1342,7 +1345,7 @@ public partial class RoadPlanManager : MonoBehaviour
     /// 始点・終点が既存パスの終端に接続している場合、その端点のベジエ制御点を
     /// 既存パスの延長線方向へ吸着させ、接続部で道路が折れないようにする（フロント側の親切設計）。
     /// 「直線延長」吸着フラグ(TerrainInputHandler.EnableStraightLineSnapping)がONのときのみ
-    /// 適用する（曲線モードON時に自動でONになる。OFFにすれば描いた方向がそのまま使われる）。
+    /// 適用する（敷設開始時は常にOFF。ラジアルメニューでONにしない限り描いた方向がそのまま使われる）。
     /// 自動計算された接線と延長線の角度差が PATH_TANGENT_ALIGN_MAX_ANGLE_DEG を超える場合は、
     /// 明らかに別方向へ引いたものとみなして整列せずユーザーの方向を尊重する。
     /// RecomputeAllControlPoints の自動計算結果を上書きする形で適用し、
@@ -3033,7 +3036,7 @@ public partial class RoadPlanManager : MonoBehaviour
             && profiles.Count > 0 && profiles.TrueForAll(line => line.Count >= 2))
         {
             roadRenderer.UpdateSections(profiles[0], profiles[0], null, null, PathType,
-                PathSubtype, Curved, PlatformSide, LateralOffsets, TravelDirections, HouseEnds, profiles);
+                PathSubtype, Curved, PlatformSide, LateralOffsets, TravelDirections, HouseEnds, profiles, PassageMode);
             return;
         }
         List<Vector3> renderPoints = GetRenderPoints();
@@ -3066,7 +3069,7 @@ public partial class RoadPlanManager : MonoBehaviour
             List<Vector3> moving = placing || isDragging
                 ? GetMovingPreviewPoints(renderPoints, firstMoving, endMoving, placing) : null;
             roadRenderer.UpdateSections(renderPoints, before, moving, after, PathType,
-                PathSubtype, Curved, PlatformSide, LateralOffsets, TravelDirections, HouseEnds);
+                PathSubtype, Curved, PlatformSide, LateralOffsets, TravelDirections, HouseEnds, passageMode: PassageMode);
         }
         else
         {

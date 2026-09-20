@@ -17,16 +17,17 @@ public partial class RoadRenderer
     /// </summary>
     public void UpdateSections(List<Vector3> allPoints, List<Vector3> before,
         List<Vector3> moving, List<Vector3> after, int pathType, int variant, bool curved,
-        int platformSide, float[] offsets, int[] directions, string houseEnds, List<List<Vector3>> profiles = null)
+        int platformSide, float[] offsets, int[] directions, string houseEnds, List<List<Vector3>> profiles = null, string passageMode = "elevated")
     {
         if (previewMeshFilter == null) return;
         lastPathType = pathType;
         if (lastPreviewPoints == null) lastPreviewPoints = new List<Vector3>();
         lastPreviewPoints.Clear();
         lastPreviewPoints.AddRange(allPoints);
-        UpdateSection(0, before, false);
-        UpdateSection(1, moving, true);
-        UpdateSection(2, after, false);
+        bool station = pathType == Constants.PATH_STATION_HOUSE;
+        UpdateSection(0, station ? allPoints : before, false);
+        UpdateSection(1, station ? null : moving, true);
+        UpdateSection(2, station ? null : after, false);
 
         void UpdateSection(int index, List<Vector3> points, bool simple)
         {
@@ -52,12 +53,12 @@ public partial class RoadRenderer
             else
             {
                 bool startHouse = index == 0 && (houseEnds == "both" || houseEnds == "start");
-                bool endHouse = (index == 2 || (moving == null && after == null))
+                bool endHouse = (station || index == 2 || (moving == null && after == null))
                     && (houseEnds == "both" || houseEnds == "end");
                 string sectionEnds = startHouse ? (endHouse ? "both" : "start") : (endHouse ? "end" : "none");
                 section.UpdateRoadPreview(points, pathType, variant, curved, true,
                     platformSide, offsets, directions,
-                    pathType == Constants.PATH_STATION_HOUSE ? sectionEnds : houseEnds, profiles);
+                    pathType == Constants.PATH_STATION_HOUSE ? sectionEnds : houseEnds, profiles, passageMode);
             }
         }
     }

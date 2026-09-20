@@ -705,6 +705,7 @@ export type NearbyZoneEntry = {
  */
 export type PathData = {
   house_ends: string;
+  passage_mode: string;
   streetlight_type: number;
   fence_type: number;
   street_tree_type: number;

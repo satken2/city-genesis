@@ -5,20 +5,28 @@
  * - 表示値は city.max_speed にオーバーライドがあればそれ、なければマスターの default_speed_limit
  * - path_type ごとにグループ化した開閉可能なアコーディオンで並べる（既定は全て開いた状態）
  * - 入力欄と名称の強調表示は「マスターの既定速度から変えているか」を表す
+ *
+ * 保存すると敷設済みのパスにも即座に反映される（個別に制限速度を指定したパスは除く）。
  */
 
 import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useMasterData } from "../../../contexts/MasterDataContext";
+import { PATH_MONORAIL, PATH_MOTORWAY, PATH_STREET, PATH_TRACK } from "../../../constants";
 import type { PathVariantInfo, SpeedMap } from "../regulationTypes";
 
 /**
- * 制限速度の設定対象から除外する path_type の ID
- * - 0: 通常 (PATH_DEFAULT) … 基本的なパス
- * - 3: 歩道 (PATH_WALKWAY) … 歩行者専用
- * - 5: 公共交通 (PATH_TRANSPORT)
+ * 制限速度を設定できる path_type の ID（許可リスト）
+ *
+ * 制限速度が実際に通過時間へ効くのは、自動車が走る道路（街路・高速道路）と、
+ * 公共交通の車両が実際に走る下地パス（線路・モノレール）だけ。
+ * 歩道は歩行者速度パラメータ、人員搬送はバリアント固有の巡航速度で動き、
+ * 公共交通の区間パス・インフラ・駅舎はそもそも通過時間を持たないため対象外。
+ *
+ * 除外リストではなく許可リストにしているのは、マスターへパス種別が増えたときに
+ * 「効かない設定」が黙って画面に出るのを防ぐため。
  */
-const EXCLUDED_PATH_TYPE_IDS = new Set([0, 3, 5]);
+const EDITABLE_PATH_TYPE_IDS = new Set([PATH_STREET, PATH_MOTORWAY, PATH_TRACK, PATH_MONORAIL]);
 
 /** マスターに default_speed_limit が無いバリアントの既定速度 (km/h) */
 export const FALLBACK_SPEED_LIMIT = 40;
@@ -46,7 +54,7 @@ export function SpeedLimitTab({
   const groupedVariants = useMemo(() => {
     const groups = new Map<number, PathVariantInfo[]>();
     for (const variant of pathVariants) {
-      if (EXCLUDED_PATH_TYPE_IDS.has(variant.type)) continue;
+      if (!EDITABLE_PATH_TYPE_IDS.has(variant.type)) continue;
       const existing = groups.get(variant.type);
       if (existing) {
         existing.push(variant);

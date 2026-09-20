@@ -8,7 +8,7 @@
  * パネル全体に簡易モードと詳細モードがあり、タブの構成が変わる。
  *   - 簡易モード(既定): 軌道タブ + 駅タブの2枚。駅タブは「相対式(対面ホーム)の複線 +
  *     駅舎」を1クリックでまとめて置く固定パッケージで、指定できるのはホーム長(両数)・
- *     高さ・角度・駅舎の種類だけ。プラットフォームを曲げたり本数を変えたりはできない。
+ *     高さ・角度・駅舎の種類・建屋の配置端・通路方式。プラットフォームを曲げたり本数を変えたりはできない。
  *   - 詳細モード: 軌道 / プラットフォーム / 駅舎 の3枚。従来どおり1本ずつ自由に敷設する。
  *
  * 鉄道種別プルダウン(鉄道/モノレール/人員搬送)はタブより上位の選択で、タブを切り替えても保持する。
@@ -40,6 +40,8 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { StationHouseEndsSelect } from "./StationHouseEndsSelect";
+import { StationPassageModeSelect } from "./StationPassageModeSelect";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -469,6 +471,11 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
       {/* 駅タブは「規格 → 駅舎 → 寸法・向き → 費用 → 確定」を専用ボディに持つ。
           形状は固定なので、グリッド設定・複線構成・2D形状編集は出さない。 */}
       {isStationTab ? (
+        <>
+        <div className="pc-section">
+          <StationHouseEndsSelect value={sc.houseEnds} onChange={sc.setHouseEnds} />
+          <StationPassageModeSelect value={sc.passageMode} onChange={sc.setPassageMode} />
+        </div>
         <StationBuildSections
           sc={sc}
           platformVariantOptions={variantOptions}
@@ -478,6 +485,7 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
           onConfirm={() => void handleConfirmStation()}
           onCancel={handleCancelStation}
         />
+        </>
       ) : (
         <>
           {/* 規格プルダウン(駅舎タブは駅舎バリアント、それ以外は鉄道種別×構造で絞った軌道バリアント) */}
@@ -489,6 +497,12 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
           />
 
           <PathVariantDescription entry={pc.selectedVariantData} />
+          {tab === "house" && pc.selectedVariant !== null && (
+            <div className="pc-section">
+              <StationHouseEndsSelect value={pc.houseEnds} onChange={pc.setHouseEnds} />
+              <StationPassageModeSelect value={pc.passageMode} onChange={pc.setPassageMode} />
+            </div>
+          )}
 
           {/* 線路数・進行方向・線路間隔は軌道の複線構成専用(駅舎は常に単一の折れ線) */}
           {tab !== "house" && (

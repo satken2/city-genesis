@@ -82,6 +82,7 @@ public class IpcClient : MonoBehaviour
     // 敷設中プレビューのプラットフォーム張り出し側を切り替えるために使用する。
     public event Action<int> OnEditPathChangePlatformSide;
     public event Action<string> OnEditPathChangeHouseEnds;
+    public event Action<string> OnEditPathChangePassageMode;
     // 地形追従の個別設定(-1=未設定/0=非追従/1=追従)の変更。UIパネルのトグルを受けて、
     // 敷設中プレビューの地形追従・トンネル可視化を切り替えるために使用する。
     public event Action<int> OnEditPathSetFollowTerrain;
@@ -315,6 +316,23 @@ public class IpcClient : MonoBehaviour
                     }
                     break;
 
+                case "view:apply_preset":
+                    {
+                        // 専用の編集ステートを持たないウィンドウが、開いている間だけ表示を
+                        // 差し替えるためのプリセット指定。元の表示への復帰は STATE_NORMAL が担う。
+                        string preset = GetParamString(payload, "preset");
+                        Debug.Log($"IpcClient: view:apply_preset -> {preset}");
+                        if (preset != null)
+                        {
+                            var viewCoordinator = UnityEngine.Object.FindAnyObjectByType<IpcViewCoordinator>();
+                            if (viewCoordinator != null)
+                            {
+                                viewCoordinator.ApplyPreset(preset);
+                            }
+                        }
+                    }
+                    break;
+
                 case "view:set_object_filter":
                     {
                         int[] hiddenBuildings = GetParamInt1D(payload, "hidden_building_ids");
@@ -369,6 +387,9 @@ public class IpcClient : MonoBehaviour
                     }
                     break;
 
+                case "edit_path:change_passage_mode":
+                    OnEditPathChangePassageMode?.Invoke(GetParamString(payload, "passage_mode"));
+                    break;
                 case "edit_path:change_house_ends":
                     OnEditPathChangeHouseEnds?.Invoke(GetParamString(payload, "house_ends"));
                     break;

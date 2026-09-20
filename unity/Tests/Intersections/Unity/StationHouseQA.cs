@@ -47,16 +47,19 @@ public static class StationHouseQA
                 float actual = (float)resolve.Invoke(null, new object[] { test.intervals, 5f, test.inside });
                 Require(Mathf.Abs(actual - test.expected) < .001f, "Station footprint placement mismatch");
             }
-            foreach (int variant in new[] { 2001, 2011 })
+            foreach (int variant in new[] { 2001, 2002, 2003, 2011, 2012, 2013 })
+            foreach (string mode in new[] { "elevated", "ground", "underground" })
             {
-                string asset = $"Assets/Paths/p{variant}/body.fbx";
+                bool existing = mode == "ground" ? variant == 2003 || variant == 2013 : variant == 2001 || variant == 2011;
+                string modelPath = existing ? $"p{variant}/body" : $"p20/passage_{(mode == "ground" ? "ground" : "elevated")}";
+                string asset = $"Assets/Paths/{modelPath}.fbx";
                 var importer = (ModelImporter)AssetImporter.GetAtPath(asset);
                 importer.isReadable = true;
                 importer.SaveAndReimport();
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(asset);
-                cache[$"Models/Paths/p{variant}/body"] = prefab;
+                cache[$"Models/Paths/{modelPath}"] = prefab;
                 Bounds original = prefab.GetComponent<MeshFilter>().sharedMesh.bounds;
-                Require(original.min.y > 1f, "Bridge fixture must be above its ground origin");
+                if (mode == "elevated") Require(original.min.y > 1f, "Bridge fixture must be above its ground origin");
                 foreach (float length in new[] { 32f, 320f, 2048f })
                 foreach (float direction in new[] { -1f, 1f })
                 foreach (string ends in new[] { "both", "start", "end" })
@@ -66,6 +69,7 @@ public static class StationHouseQA
                     pathType.GetField("path_type").SetValue(path, 20);
                     pathType.GetField("path_variant").SetValue(path, variant);
                     pathType.GetField("house_ends").SetValue(path, ends);
+                    pathType.GetField("passage_mode").SetValue(path, mode);
                     pathType.GetField("start_point").SetValue(path, new List<object> { 0f, 0f, 0f });
                     pathType.GetField("end_point").SetValue(path, new List<object> { 0f, 0f, length * direction });
                     var points = new List<Vector3> { Vector3.zero, new Vector3(0f, 0f, length * direction) };
@@ -73,6 +77,14 @@ public static class StationHouseQA
                     var go = (GameObject)result.GetType().GetProperty("GeneratedObject").GetValue(result);
                     Require(go.GetComponentsInChildren<Transform>().Count(t => t.name == "House") == (ends == "both" ? 2 : 1), "Wrong number of station buildings");
                     var bridge = go.GetComponentsInChildren<MeshFilter>().Where(f => f.name.StartsWith("Models/Paths/") && f.sharedMesh != null).ToArray();
+                    if (mode == "underground")
+                    {
+                        Require(bridge.Length == 0, "Underground passage must be invisible");
+                        Require(result.GetType().GetProperty("Mesh").GetValue(result) == null, "Underground passage collider remains");
+                        UnityEngine.Object.DestroyImmediate(go);
+                        count++;
+                        continue;
+                    }
                     Require(bridge.Length > 0, "Bridge mesh missing");
                     var ys = bridge.SelectMany(f => f.sharedMesh.vertices.Select(v => f.transform.TransformPoint(v).y)).ToArray();
                     float splineY = .1f;
@@ -91,6 +103,38 @@ public static class StationHouseQA
             EditorApplication.Exit(0);
         }
         catch (Exception e) { File.WriteAllText(report, e.ToString()); Debug.LogException(e); EditorApplication.Exit(1); }
+    }
+
+    // 明示実行時だけ、既存の生成器で共通通路のラッパーとインポート設定を本編へ同期する。
+    public static void SyncPassagePrefabs()
+    {
+        string[] args = Environment.GetCommandLineArgs();
+        string root = args[Array.IndexOf(args, "-intersectionSourceRoot") + 1];
+        try
+        {
+            foreach (string part in new[] { "passage_ground", "passage_elevated" })
+            {
+                string source = $"Assets/Paths/p20/{part}.fbx";
+                var importer = (ModelImporter)AssetImporter.GetAtPath(source);
+                importer.isReadable = true;
+                importer.SaveAndReimport();
+                string guid = AssetDatabase.AssetPathToGUID(source);
+                string destination = $"{root}/Assets/Models/Paths/p20/{part}.fbx.meta";
+                if (File.Exists(destination)) Require(File.ReadAllText(destination).Contains("guid: " + guid), "FBX GUID conflict");
+                else File.Copy(source + ".meta", destination);
+                string prefab = $"Assets/Resources/Models/Paths/p20/{part}.prefab";
+                Require(ModelPrefabGenerator.CreateWrapperPrefab(source, prefab), "Prefab generation failed");
+                string output = root + "/" + prefab;
+                Directory.CreateDirectory(Path.GetDirectoryName(output));
+                if (File.Exists(output)) Require(File.ReadAllText(output).Contains("guid: " + guid), "Prefab GUID conflict");
+                else { File.Copy(prefab, output); File.Copy(prefab + ".meta", output + ".meta"); }
+                Require(Resources.Load<GameObject>($"Models/Paths/p20/{part}") != null, "Resource missing");
+            }
+            AssetDatabase.SaveAssets();
+            File.WriteAllText(root + "/Temp/IntersectionUnityQA/passage-prefabs.txt", "PASS passage prefab sync");
+            EditorApplication.Exit(0);
+        }
+        catch (Exception e) { Debug.LogException(e); EditorApplication.Exit(1); }
     }
 
     static void Require(bool valid, string message) { if (!valid) throw new Exception(message); }

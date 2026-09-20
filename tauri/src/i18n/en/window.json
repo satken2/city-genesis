@@ -190,7 +190,12 @@
     "toggleShowPlanRoad": "Show Planned Roads",
     "toggleShowPlanBuilding": "Show Planned Buildings",
     "toggleHighlightPublic": "Highlight Public Facilities",
-    "showContours": "Show Contour Lines"
+    "showContours": "Show Contour Lines",
+    "trayTooltip": "{{name}}: {{state}}",
+    "trayStateVisible": "Shown",
+    "trayStateHidden": "Hidden",
+    "trayStateContour": "Contour Lines",
+    "trayStateTerrainNormal": "Default View"
   },
   "grid_settings": {
     "title": "Grid",

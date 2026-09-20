@@ -1,0 +1,29 @@
+/**
+ * 表示トレイ(画面左下)のスタイル
+ *
+ * システムトレイと同じ寸法のアイコンを横並びにする。
+ * ボタン数が固定なので幅も固定で、`window.rs` の `DISPLAY_TRAY_WIDTH` と一致させる
+ * (ボタン30px×7 + 間隔6px×6 + 左右パディング8px×2 + 枠線1px×2 = 264px)。
+ */
+
+.display-tray {
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 4px 8px;
+  box-sizing: border-box;
+}
+
+.display-tray-icon {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+}
+
+/* 非表示状態。色を抜いて沈めることで、ONのボタンとの区別を文字なしで示す */
+.display-tray-icon--off .hud-icon-img {
+  filter: grayscale(100%) brightness(0.7);
+  opacity: 0.5;
+}

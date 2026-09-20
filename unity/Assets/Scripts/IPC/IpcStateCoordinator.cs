@@ -362,16 +362,7 @@ public class IpcStateCoordinator : MonoBehaviour
             InputSystemManager.Instance.SetModePreset(InputModePreset.REMOVE_OBJECTS);
         }
 
-        // VisualMode: 削除対象が見えるように、区画は境界線表示、Path/Building は計画表示
-        if (VisualModeHandler.Instance != null)
-        {
-            VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_BOUNDARY);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.SHOW_PLAN);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.SHOW_PLAN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
-        }
+        // VisualMode の適用は IpcViewCoordinator.SyncFromState(ステート別の表示プリセット)が行う。
 
         // RemovalManager を get-or-create し、削除済みセットを初期化する
         var removalManager = RemovalManager.Instance;
@@ -414,16 +405,7 @@ public class IpcStateCoordinator : MonoBehaviour
                 isMerge ? InputModePreset.PATH_MERGE : InputModePreset.PATH_SPLIT);
         }
 
-        // VisualMode: 対象・候補のパスが見えるように計画表示にし、地区は誤クリック防止で非表示
-        if (VisualModeHandler.Instance != null)
-        {
-            VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_BOUNDARY);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.SHOW_PLAN);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.SHOW_PLAN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
-        }
+        // VisualMode の適用は IpcViewCoordinator.SyncFromState(ステート別の表示プリセット)が行う。
 
         var manager = PathTopologyEditManager.Instance;
         if (manager == null)
@@ -511,16 +493,7 @@ public class IpcStateCoordinator : MonoBehaviour
             InputSystemManager.Instance.SetModePreset(InputModePreset.ROAD_CONSTRUCTION);
         }
 
-        // VisualMode: 計画表示（地区は非表示）
-        if (VisualModeHandler.Instance != null)
-        {
-            VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_BOUNDARY);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.SHOW_PLAN);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.SHOW_PLAN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
-        }
+        // VisualMode の適用は IpcViewCoordinator.SyncFromState(ステート別の表示プリセット)が行う。
 
         // RoadPlanManagerを道路敷設モードで初期化
         var roadPlanManager = FindAnyObjectByType<RoadPlanManager>();
@@ -573,6 +546,8 @@ public class IpcStateCoordinator : MonoBehaviour
             }
             roadPlanManager.HouseEnds = ipcParams != null && ipcParams.TryGetValue("house_ends", out var he)
                 ? Convert.ToString(he) : "both";
+            roadPlanManager.PassageMode = ipcParams != null && ipcParams.TryGetValue("passage_mode", out var pm)
+                ? Convert.ToString(pm) : "elevated";
             roadPlanManager.LateralOffsets = lateralOffsets;
             roadPlanManager.TravelDirections = travelDirections;
 
@@ -595,29 +570,10 @@ public class IpcStateCoordinator : MonoBehaviour
     /// </summary>
     private void ApplyStateEditBuilding(Dictionary<string, object> ipcParams)
     {
-        // まずbuilding_variantを読み取り、bd_typeを確定する
-        int currentBdType = 0;
         int? agentId = null;
-
-        if (ipcParams != null)
+        if (ipcParams != null && ipcParams.TryGetValue("agent_id", out object aidObj) && aidObj != null)
         {
-            if (ipcParams.TryGetValue("agent_id", out object aidObj) && aidObj != null)
-            {
-                agentId = Convert.ToInt32(aidObj);
-            }
-            if (ipcParams.TryGetValue("building_variant", out object bvObj) && bvObj != null)
-            {
-                int buildingVariant = Convert.ToInt32(bvObj);
-                // MasterDataStoreからbd_typeを取得
-                if (MasterDataStore.Instance != null)
-                {
-                    var agentMaster = MasterDataStore.Instance.GetAgentMaster(buildingVariant);
-                    if (agentMaster != null && agentMaster.bd_type.HasValue)
-                    {
-                        currentBdType = agentMaster.bd_type.Value;
-                    }
-                }
-            }
+            agentId = Convert.ToInt32(aidObj);
         }
 
         // InputMode: 建物建設プリセット
@@ -626,18 +582,9 @@ public class IpcStateCoordinator : MonoBehaviour
             InputSystemManager.Instance.SetModePreset(InputModePreset.BUILDING_CONSTRUCTION);
         }
 
-        // VisualMode: 計画表示
-        // パーセルは選択された建物種類に対応するフィルタモード（建設可能な区画をハイライト）
-        if (VisualModeHandler.Instance != null)
-        {
-            int parcelMode = BuildingPlanManager.BdTypeToParcelFilterMode(currentBdType);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, parcelMode);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.SHOW_PLAN);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.SHOW_PLAN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_NORMAL);
-        }
+        // VisualMode の適用は IpcViewCoordinator.SyncFromState(ステート別の表示プリセット)が行う。
+        // 建設可能な区画のハイライトも、選択中の建物種類から解決したフィルタを
+        // そちらが区画レイヤーのサブモードとして設定する。
 
         // BuildingPlanManagerを建物建設モードで初期化
         var buildingPlanManager = FindAnyObjectByType<BuildingPlanManager>();
@@ -728,19 +675,7 @@ public class IpcStateCoordinator : MonoBehaviour
             InputSystemManager.Instance.SetModePreset(InputModePreset.ZONE_EDIT);
         }
 
-        // VisualMode: 地区編集の主役は「道路の地区色」と「地区の枠線」の2つだけにする。
-        // 区画・建物まで地区色で塗ると画面が地区色で埋まって道路の所属変化が読み取れなくなるため、
-        // どちらも通常表示のままにする(地区の広がりは枠線が示す)。
-        // 計画中表示・公共施設ハイライトは編集の邪魔になるためOFF。
-        if (VisualModeHandler.Instance != null)
-        {
-            VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualModePath.ZONE_COLOR);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.NONE);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.NONE);
-        }
+        // VisualMode の適用は IpcViewCoordinator.SyncFromState(ステート別の表示プリセット)が行う。
     }
 
     /// <summary>
@@ -757,16 +692,7 @@ public class IpcStateCoordinator : MonoBehaviour
             creationMode = modeObj.ToString();
         }
 
-        // VisualMode: 計画表示（Parcelは境界線表示、Path/Buildingは計画表示）
-        if (VisualModeHandler.Instance != null)
-        {
-            VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_BOUNDARY);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.SHOW_PLAN);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.SHOW_PLAN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
-        }
+        // VisualMode の適用は IpcViewCoordinator.SyncFromState(ステート別の表示プリセット)が行う。
 
         // 作成モードの適用(入力プリセットの切り替え・選択状態のリセット・任意ポリゴンの初期化)は
         // 真実源である ParcelEditorManager に集約されている。Unity側のラジアルメニューからの
@@ -897,16 +823,7 @@ public class IpcStateCoordinator : MonoBehaviour
             InputSystemManager.Instance.SetModePreset(InputModePreset.TRANSIT_CONSTRUCTION);
         }
 
-        // VisualMode: 計画表示（地区は非表示）。道路建設と同じ設定。
-        if (VisualModeHandler.Instance != null)
-        {
-            VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_BOUNDARY);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.SHOW_PLAN);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.SHOW_PLAN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
-        }
+        // VisualMode の適用は IpcViewCoordinator.SyncFromState(ステート別の表示プリセット)が行う。
 
         int pathVariant = 0;
         int[] stopPathVariants = System.Array.Empty<int>();
@@ -1015,16 +932,7 @@ public class IpcStateCoordinator : MonoBehaviour
             InputSystemManager.Instance.SetModePreset(InputModePreset.STATION_PLACEMENT);
         }
 
-        // VisualMode: 計画表示（地区は非表示）。道路建設と同じ設定。
-        if (VisualModeHandler.Instance != null)
-        {
-            VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_BOUNDARY);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.SHOW_PLAN);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.SHOW_PLAN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
-        }
+        // VisualMode の適用は IpcViewCoordinator.SyncFromState(ステート別の表示プリセット)が行う。
 
         int platformVariant = 0;
         int houseVariant = 0;
@@ -1033,6 +941,7 @@ public class IpcStateCoordinator : MonoBehaviour
         float height = 0f;
         float angle = 0f;
         string houseEnds = "both";
+        string passageMode = "elevated";
         int[] travelDirections = Array.Empty<int>();
         if (ipcParams != null)
         {
@@ -1050,6 +959,8 @@ public class IpcStateCoordinator : MonoBehaviour
                 angle = Convert.ToSingle(aObj);
             if (ipcParams.TryGetValue("house_ends", out object heObj) && heObj != null)
                 houseEnds = Convert.ToString(heObj);
+            if (ipcParams.TryGetValue("passage_mode", out object pmObj) && pmObj != null)
+                passageMode = Convert.ToString(pmObj);
             if (ipcParams.TryGetValue("travel_directions", out object tdObj) && tdObj != null)
                 travelDirections = ReadIntArray(tdObj);
         }
@@ -1061,7 +972,7 @@ public class IpcStateCoordinator : MonoBehaviour
             stationPlanManager = go.AddComponent<StationPlanManager>();
         }
         stationPlanManager.InitializeStationPlacement(platformVariant, houseVariant, platformLength,
-            trackSpacing, height, angle, travelDirections, houseEnds);
+            trackSpacing, height, angle, travelDirections, houseEnds, passageMode);
 
         Debug.Log($"IpcStateCoordinator: 駅配置モード -> platform={platformVariant}, house={houseVariant}, length={platformLength}");
     }
@@ -1269,16 +1180,7 @@ public class IpcStateCoordinator : MonoBehaviour
             InputSystemManager.Instance.SetModePreset(InputModePreset.UNLOCK_CELL);
         }
 
-        // VisualMode: 通常表示（地形オーバーレイはそのまま）。計画中表示も含めて現況の街並みだけを見せる
-        if (VisualModeHandler.Instance != null)
-        {
-            VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_HIDDEN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.NONE);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.NONE);
-        }
+        // VisualMode の適用は IpcViewCoordinator.SyncFromState(ステート別の表示プリセット)が行う。
 
         // 道路エディタを終了状態に戻す
         var roadPlanManager = FindAnyObjectByType<RoadPlanManager>();

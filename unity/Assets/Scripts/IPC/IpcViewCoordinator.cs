@@ -5,9 +5,21 @@ using UnityEngine;
 /// <summary>
 /// IPC経由で view.change_view イベントを受信し、
 /// VisualModeHandler のモードを各レイヤーごとに切り替える。
+///
+/// 表示状態の正はこのクラスの記憶(_layerModes / _layerSubModes / _layerFlags)で、
+/// 編集ステート(道路敷設・地区編集など)や表示プリセットが強制した表示も必ずここを通す。
+/// ステートを抜けて STATE_NORMAL に戻ると、_normalStateMemory に記憶した
+/// 「ユーザーが通常モードで選んでいた表示」へ戻す。
 /// </summary>
 public class IpcViewCoordinator : MonoBehaviour
 {
+    /// <summary>
+    /// ウィンドウを開いている間だけ表示を差し替えるプリセット名(view.apply_preset の preset)。
+    /// 専用の編集ステートを持たないウィンドウ(公共交通の管理・新設パネル)が使う。
+    /// 元の表示へ戻すのは STATE_NORMAL への復帰(=ウィンドウを閉じたときにRust側が送る)。
+    /// </summary>
+    public const string PRESET_TRANSIT = "transit";
+
     private Dictionary<string, string> _layerModes = new Dictionary<string, string>
     {
         { "terrain", "default" },
@@ -47,6 +59,25 @@ public class IpcViewCoordinator : MonoBehaviour
     /// STATE_NORMAL 以外での変更は記憶しない。
     /// </summary>
     private Dictionary<string, (string mode, string subMode, string flags)> _normalStateMemory = new Dictionary<string, (string, string, string)>();
+
+    /// <summary>
+    /// 通常モードの既定表示。ユーザーが一度も触っていないレイヤーを STATE_NORMAL へ戻すときの値で、
+    /// UI側(displayConstants.ts の DISPLAY_LAYERS)の初期値と一致させること。
+    /// 地形(terrain)だけは色モードを強制しないため、この表からは外して個別に扱う。
+    /// </summary>
+    private static readonly Dictionary<string, (string mode, string subMode, string flags)> NORMAL_DEFAULTS =
+        new Dictionary<string, (string, string, string)>
+    {
+        { "building", ("default", null, "plan") },
+        { "road", ("default", null, "plan") },
+        { "parcel", ("hidden", null, null) },
+        { "district", ("hidden", null, null) },
+        { "cell", ("hidden", null, null) },
+        { "prop", ("visible", null, null) },
+        { "transit", ("hidden", null, null) },
+        { "resource", ("hidden", null, null) },
+        { "alert", ("visible", null, null) },
+    };
 
     private void OnEnable()
     {
@@ -204,18 +235,10 @@ public class IpcViewCoordinator : MonoBehaviour
                 break;
 
             case "STATE_EDIT_PATH":
-                // 道路敷設中は地区を非表示にする。
-                // 地区が表示されていると誤クリックで地区パネルが開き、
-                // パネルを閉じた際に道路敷設がキャンセルされる恐れがあるため。
-                _layerModes["parcel"] = "border";
-                _layerModes["road"] = "default";
-                _layerModes["building"] = "default";
-                _layerModes["district"] = "hidden";
-                _layerSubModes.Remove("parcel");
-                _layerSubModes.Remove("road");
-                _layerSubModes.Remove("building");
-                _layerSubModes.Remove("district");
-                SetPlanOnlyFlags();
+            case "STATE_EDIT_STATION":
+            case "STATE_MERGE_PATH":
+            case "STATE_SPLIT_PATH":
+                ApplyConstructionPreset("border", null);
                 break;
 
             case "STATE_EDIT_BUILDING":
@@ -239,121 +262,43 @@ public class IpcViewCoordinator : MonoBehaviour
                 string filterSubMode = BuildingPlanManager.BdTypeToParcelFilterSubMode(currentBdType);
                 if (filterSubMode != null)
                 {
-                    _layerModes["parcel"] = "buildable_color";
-                    _layerSubModes["parcel"] = filterSubMode;
+                    ApplyConstructionPreset("buildable_color", filterSubMode);
                 }
                 else
                 {
-                    _layerModes["parcel"] = "border";
-                    _layerSubModes.Remove("parcel");
+                    ApplyConstructionPreset("border", null);
                 }
-                _layerModes["road"] = "default";
-                _layerModes["building"] = "default";
-                _layerModes["district"] = "border_icon";
-                _layerSubModes.Remove("road");
-                _layerSubModes.Remove("building");
-                _layerSubModes.Remove("district");
-                SetPlanOnlyFlags();
                 break;
             }
 
             case "STATE_EDIT_PARCEL":
-                _layerModes["parcel"] = "border";
-                _layerModes["road"] = "default";
-                _layerModes["building"] = "default";
-                _layerModes["district"] = "border_icon";
-                _layerSubModes.Remove("parcel");
-                _layerSubModes.Remove("road");
-                _layerSubModes.Remove("building");
-                _layerSubModes.Remove("district");
-                SetPlanOnlyFlags();
+                ApplyLandEditPreset("default", "default", "plan");
                 break;
 
             case "STATE_EDIT_ZONE":
-                // 地区編集中は道路・建物とも地区色分けにして所属地区を可視化する。
-                // 計画中の表示は編集の邪魔になるためOFF。
-                _layerModes["parcel"] = "border";
-                _layerModes["road"] = "zone_color";
-                _layerModes["building"] = "zone_color";
-                _layerModes["district"] = "border_icon";
-                _layerSubModes.Remove("parcel");
-                _layerSubModes.Remove("road");
-                _layerSubModes.Remove("building");
-                _layerSubModes.Remove("district");
-                _layerFlags.Remove("road");
-                _layerFlags.Remove("building");
+                // 地区編集の主役は「道路の地区色」と「地区の枠線」の2つだけにする。
+                // 建物まで地区色で塗ると画面が地区色で埋まって道路の所属変化が読み取れないため、
+                // 建物は通常表示のままにする(地区の広がりは枠線が示す)。
+                // 計画中表示・公共施設ハイライトは編集の邪魔になるためOFF。
+                ApplyLandEditPreset("zone_color", "default", "");
                 break;
 
             case "STATE_UNLOCK_CELL":
-                // セル開放中は現況の街並みだけを見せたいので、計画中の表示もOFFにする。
-                _layerModes["parcel"] = "hidden";
-                _layerModes["road"] = "default";
-                _layerModes["building"] = "default";
-                _layerModes["district"] = "hidden";
-                _layerSubModes.Remove("parcel");
-                _layerSubModes.Remove("road");
-                _layerSubModes.Remove("building");
-                _layerSubModes.Remove("district");
-                _layerFlags.Remove("road");
-                _layerFlags.Remove("building");
+                ApplyUnlockCellPreset();
                 break;
 
             case "STATE_EDIT_TRANSIT":
-                // 公共交通の路線設置中は道路建設と同じ計画中表示にし、地区は非表示にする。
-                // 公共交通レイヤー(transit)は、設置対象の路線種別が見えるよう表示は維持する
-                // (実際の表示種別集合は UI 側パネルが view.change_view で明示指定する)。
-                _layerModes["parcel"] = "border";
-                _layerModes["road"] = "default";
-                _layerModes["building"] = "default";
-                _layerModes["district"] = "hidden";
-                _layerSubModes.Remove("parcel");
-                _layerSubModes.Remove("road");
-                _layerSubModes.Remove("building");
-                _layerSubModes.Remove("district");
-                SetPlanOnlyFlags();
-                break;
-
-            case "STATE_EDIT_STATION":
-                // 駅パッケージ配置中も道路敷設と同じ計画中表示にし、地区は非表示にする
-                // (地区が表示されていると誤クリックで地区パネルが開き、配置が中断されるため)。
-                _layerModes["parcel"] = "border";
-                _layerModes["road"] = "default";
-                _layerModes["building"] = "default";
-                _layerModes["district"] = "hidden";
-                _layerSubModes.Remove("parcel");
-                _layerSubModes.Remove("road");
-                _layerSubModes.Remove("building");
-                _layerSubModes.Remove("district");
-                SetPlanOnlyFlags();
-                break;
-
-            case "STATE_MERGE_PATH":
-            case "STATE_SPLIT_PATH":
-                // パスの結合相手・分割点の選択中は道路敷設と同じ計画中表示にし、地区は非表示にする
-                // (地区が表示されていると誤クリックで地区パネルが開き、選択操作が中断されるため)。
-                _layerModes["parcel"] = "border";
-                _layerModes["road"] = "default";
-                _layerModes["building"] = "default";
-                _layerModes["district"] = "hidden";
-                _layerSubModes.Remove("parcel");
-                _layerSubModes.Remove("road");
-                _layerSubModes.Remove("building");
-                _layerSubModes.Remove("district");
-                SetPlanOnlyFlags();
+                ApplyTransitPreset();
                 break;
 
             case "STATE_REMOVE_OBJECTS":
-                // ブルドーザ(削除)モードは道路敷設と同じ計画中表示にし、地区は非表示にする。
+                // ブルドーザ(削除)モードは計画中表示で地区は非表示にする。
                 // 区画は境界線表示にして、空き地(削除対象)が見えるようにする。
-                _layerModes["parcel"] = "border";
-                _layerModes["road"] = "default";
-                _layerModes["building"] = "default";
-                _layerModes["district"] = "hidden";
-                _layerSubModes.Remove("parcel");
-                _layerSubModes.Remove("road");
-                _layerSubModes.Remove("building");
-                _layerSubModes.Remove("district");
-                SetPlanOnlyFlags();
+                // プロップは削除対象そのものなので消さない(建設系プリセットと違う点)。
+                ForceLayer("parcel", "border");
+                ForceLayer("road", "default", null, "plan");
+                ForceLayer("building", "default", null, "plan");
+                ForceLayer("district", "hidden");
                 break;
 
             default:
@@ -366,81 +311,200 @@ public class IpcViewCoordinator : MonoBehaviour
     }
 
     /// <summary>
-    /// 編集系ステートの標準フラグ「計画中の表示のみON」を道路・建物に設定する。
-    /// 公共施設ハイライト等の他フラグは編集の邪魔になるため一時的にOFFにする
-    /// (STATE_NORMAL 復帰時に _normalStateMemory から復元される)。
+    /// ウィンドウ単位の表示プリセットを適用する(view.apply_preset)。
+    /// 専用の編集ステートを持たないウィンドウが、開いている間だけ表示を差し替えるために使う。
+    /// プリセットの内容は編集ステートと同じ ForceLayer 経由なので記憶(_normalStateMemory)を
+    /// 汚さず、STATE_NORMAL へ戻った時点で元の表示に復帰する。
     /// </summary>
-    private void SetPlanOnlyFlags()
+    public void ApplyPreset(string preset)
     {
-        _layerFlags["road"] = "plan";
-        _layerFlags["building"] = "plan";
+        switch (preset)
+        {
+            case PRESET_TRANSIT:
+                ApplyTransitPreset();
+                break;
+            default:
+                Debug.LogWarning($"IpcViewCoordinator: 未知の表示プリセット: {preset}");
+                return;
+        }
+
+        Debug.Log($"IpcViewCoordinator: ApplyPreset -> {preset}");
+        NotifyStateChanged();
+    }
+
+    /// <summary>
+    /// 編集ステート・表示プリセットがレイヤー1枚の表示を強制する。
+    /// 記憶(_layerModes 等)の更新と実際の描画反映をここでまとめて行うため、
+    /// ステート側(IpcStateCoordinator)では VisualModeHandler を直接触らないこと
+    /// (二重管理になり、UIへ通知する表示状態と実際の見え方がずれる)。
+    ///
+    /// flags は view.change_view と同じ規約で、null=現在値を維持 / ""=全OFF / CSV=指定集合。
+    /// ここでの変更は記憶(_normalStateMemory)には載せない。通常モードへ戻したときに
+    /// ユーザーが自分で選んだ表示へ復帰させるため。
+    /// </summary>
+    private void ForceLayer(string layer, string mode, string subMode = null, string flags = null)
+    {
+        _layerModes[layer] = mode;
+        if (string.IsNullOrEmpty(subMode))
+        {
+            _layerSubModes.Remove(layer);
+        }
+        else
+        {
+            _layerSubModes[layer] = subMode;
+        }
+
+        if (flags != null)
+        {
+            if (flags.Length > 0)
+            {
+                _layerFlags[layer] = flags;
+            }
+            else
+            {
+                _layerFlags.Remove(layer);
+            }
+        }
+
+        if (VisualModeHandler.Instance == null) return;
+        string effectiveFlags = _layerFlags.TryGetValue(layer, out var f) ? f : "";
+        ApplyLayerMode(layer, mode, _layerSubModes.TryGetValue(layer, out var s) ? s : null, effectiveFlags);
+    }
+
+    /// <summary>
+    /// 道路・線路・インフラ・建物の敷設/建設中の表示。
+    /// 計画中の構造物と、位置決めの手がかりになるもの(区画・地区・セル・等高線)をすべて出し、
+    /// 視界を遮るプロップだけを消す。区画の色モードだけは呼び出し側が決める
+    /// (建物建設=建設可能な区画の色分け、それ以外=境界線)。
+    /// </summary>
+    private void ApplyConstructionPreset(string parcelMode, string parcelSubMode)
+    {
+        ForceLayer("parcel", parcelMode, parcelSubMode);
+        ForceLayer("road", "default", null, "plan");
+        ForceLayer("building", "default", null, "plan");
+        ForceLayer("district", "border_icon");
+        ForceLayer("cell", "boundaries");
+        ForceLayer("prop", "hidden");
+        // 等高線だけONにする。地形の色モード(標高色分け等)はユーザーの選択を尊重して触らない。
+        ForceLayer("terrain", _layerModes["terrain"], "contour_on");
+    }
+
+    /// <summary>
+    /// 地区編集・土地区画編集中の表示。区画・地区・セルを出して、
+    /// どの区画がどの地区に属するかを地表で確認できるようにする。
+    /// 道路・建物の色モードとフラグは呼び出し側が決める
+    /// (地区編集=道路だけ地区色分け+計画中OFF、区画編集=通常表示+計画中ON)。
+    /// </summary>
+    private void ApplyLandEditPreset(string roadMode, string buildingMode, string flags)
+    {
+        ForceLayer("parcel", "border");
+        ForceLayer("road", roadMode, null, flags);
+        ForceLayer("building", buildingMode, null, flags);
+        ForceLayer("district", "border_icon");
+        ForceLayer("cell", "boundaries");
+    }
+
+    /// <summary>
+    /// 地形セル開放中の表示。開放単位であるセルと、その範囲の目安になる地区を出す。
+    /// 現況の街並みだけを見せたいので計画中の表示はOFF、区画も畳む。
+    /// </summary>
+    private void ApplyUnlockCellPreset()
+    {
+        ForceLayer("parcel", "hidden");
+        ForceLayer("road", "default", null, "");
+        ForceLayer("building", "default", null, "");
+        ForceLayer("district", "border_icon");
+        ForceLayer("cell", "boundaries");
+    }
+
+    /// <summary>
+    /// 公共交通の一覧・路線設置中の表示。既設の路線を全種別出し、
+    /// 計画中の道路・建物も見えるようにする(停留所は建設中のパス上にも置けるため)。
+    /// 停留所は既存パス上にしか置けないので、区画・地区の表示には手を出さない。
+    /// </summary>
+    private void ApplyTransitPreset()
+    {
+        ForceLayer("road", "default", null, "plan");
+        ForceLayer("building", "default", null, "plan");
+
+        string allVariants = AllTransitVariantsCsv();
+        if (string.IsNullOrEmpty(allVariants))
+        {
+            // マスター未取得のときは種別を絞れないので、表示状態には触れない。
+            return;
+        }
+        ForceLayer("transit", "default", allVariants);
+    }
+
+    /// <summary>
+    /// 公共交通マスターの全路線種別(transit_path_id)をCSVで返す。
+    /// 表示レイヤー transit のサブモードは「表示する種別の集合」なので、
+    /// 「すべて表示」は全IDを並べた文字列で表す(UIの種別トグルと同じ表現)。
+    /// </summary>
+    private string AllTransitVariantsCsv()
+    {
+        var master = MasterDataStore.Instance?.GetTransitMasterDictionary();
+        if (master == null || master.Count == 0) return null;
+
+        var ids = new List<string>(master.Count);
+        foreach (var item in master.Values)
+        {
+            ids.Add(item.transit_path_id.ToString());
+        }
+        return string.Join(",", ids);
     }
 
     /// <summary>
     /// STATE_NORMAL に戻ったとき、_normalStateMemory に記憶した表示状態を復元する。
-    /// 記憶がないレイヤーはデフォルト値に戻す。
+    /// 記憶がないレイヤーは NORMAL_DEFAULTS(=UI側の初期値と一致)へ戻す。
+    ///
+    /// **編集ステート・表示プリセットが強制するレイヤーは必ずここに含めること。**
+    /// 含め忘れると「記憶が無ければ現在値を維持」になり、編集中の表示が通常モードへ残る。
+    /// 実際の描画反映は呼び出し元(IpcStateCoordinator)の ApplyAllLayerModes が行う。
     /// </summary>
     private void RestoreNormalLayerModes()
     {
-        string[] targetLayers = { "building", "road", "parcel", "district", "terrain", "grid", "cell", "resource", "alert" };
-
-        foreach (var layer in targetLayers)
+        foreach (var entry in NORMAL_DEFAULTS)
         {
-            if (_normalStateMemory.TryGetValue(layer, out var mem))
+            string layer = entry.Key;
+            var value = _normalStateMemory.TryGetValue(layer, out var mem) ? mem : entry.Value;
+
+            _layerModes[layer] = value.mode;
+            if (!string.IsNullOrEmpty(value.subMode))
             {
-                Debug.Log($"RestoreNormalLayerModes: {layer} は記憶あり -> mode={mem.mode}, sub={mem.subMode ?? "(none)"}, flags={mem.flags ?? "(none)"}");
-                _layerModes[layer] = mem.mode;
-                if (!string.IsNullOrEmpty(mem.subMode))
-                {
-                    _layerSubModes[layer] = mem.subMode;
-                }
-                else
-                {
-                    _layerSubModes.Remove(layer);
-                }
-                if (!string.IsNullOrEmpty(mem.flags))
-                {
-                    _layerFlags[layer] = mem.flags;
-                }
-                else
-                {
-                    _layerFlags.Remove(layer);
-                }
+                _layerSubModes[layer] = value.subMode;
             }
             else
             {
-                string oldMode = _layerModes.ContainsKey(layer) ? _layerModes[layer] : "(missing)";
-                switch (layer)
-                {
-                    case "building":
-                        _layerModes[layer] = "default";
-                        _layerSubModes.Remove(layer);
-                        _layerFlags[layer] = "plan";
-                        break;
-                    case "road":
-                        _layerModes[layer] = "default";
-                        _layerSubModes.Remove(layer);
-                        _layerFlags[layer] = "plan";
-                        break;
-                    case "parcel":
-                        _layerModes[layer] = "hidden";
-                        _layerSubModes.Remove(layer);
-                        break;
-                    case "district":
-                        _layerModes[layer] = "hidden";
-                        _layerSubModes.Remove(layer);
-                        break;
-                    case "resource":
-                        _layerModes[layer] = "hidden";
-                        _layerSubModes.Remove(layer);
-                        break;
-                    case "alert":
-                        _layerModes[layer] = "visible";
-                        _layerSubModes.Remove(layer);
-                        break;
-                    // terrain, grid, cell, resource は記憶がなければ現在の値を維持（初期値が設定済み）
-                }
+                _layerSubModes.Remove(layer);
             }
+            if (!string.IsNullOrEmpty(value.flags))
+            {
+                _layerFlags[layer] = value.flags;
+            }
+            else
+            {
+                _layerFlags.Remove(layer);
+            }
+        }
+
+        // 地形は色モードを強制しない(編集中に触るのは等高線のサブモードだけ)ので、
+        // 記憶が無ければ色モードは現在値のままにして等高線だけOFFへ戻す。
+        if (_normalStateMemory.TryGetValue("terrain", out var terrainMem))
+        {
+            _layerModes["terrain"] = terrainMem.mode;
+            if (!string.IsNullOrEmpty(terrainMem.subMode))
+            {
+                _layerSubModes["terrain"] = terrainMem.subMode;
+            }
+            else
+            {
+                _layerSubModes.Remove("terrain");
+            }
+        }
+        else
+        {
+            _layerSubModes.Remove("terrain");
         }
     }
 

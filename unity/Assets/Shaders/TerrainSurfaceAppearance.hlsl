@@ -182,14 +182,23 @@ half3 ComputeProceduralGroundAlbedo(float3 positionWS, float3 geoNormalWS, half3
     return lerp(texAlbedo, ground, (half)blend);
 }
 
-/// <summary>
-/// 地形の標高に基づいて等高線を描画する。
-/// </summary>
+// ピクセル幅の芯とアンチエイリアスを持つ線。水平面の全面着色と密集時の塗り潰しを防ぐ。
+float ContourCoverage(float height, float dy, float interval, float halfWidth)
+{
+    float phase = frac(height / interval + 0.5) - 0.5;
+    float pixels = abs(phase) * interval / max(dy, 0.00001);
+    float coverage = 1.0 - smoothstep(halfWidth - 0.5, halfWidth + 0.5, pixels);
+    return coverage * smoothstep(0.00001, 0.0001, dy)
+        * (1.0 - smoothstep(0.12, 0.25, dy / interval));
+}
+
+// 標高は固定したまま近距離の補助線をフェードさせ、ズームで線が地面を滑らないようにする。
 half3 ApplyContourLines(half3 color, float3 positionWS)
 {
     if (_ShowContour <= 0.0)
         return color;
 
+    half3 groundColor = color;
     float height = positionWS.y;
     float minorInterval = 10.0;
     float majorInterval = 50.0;
@@ -221,7 +230,18 @@ half3 ApplyContourLines(half3 color, float3 positionWS)
         color = lerp(color, contourColor, minorIntensity * 0.25);
     }
 
-    return color;
+    float closeWeight = 1.0 - smoothstep(150.0, 600.0, distance(_WorldSpaceCameraPos, positionWS));
+    float detail = ContourCoverage(height, dy, 2.0, 0.8);
+    float index = ContourCoverage(height, dy, 10.0, 1.25);
+    float major = ContourCoverage(height, dy, 50.0, 1.6);
+    float ink = max(detail * 0.78, max(index * 0.92, major * 0.96));
+    float halo = max(ContourCoverage(height, dy, 2.0, 1.8),
+        max(ContourCoverage(height, dy, 10.0, 2.25), ContourCoverage(height, dy, 50.0, 2.6)));
+
+    // 明るい縁と濃い青灰色の芯で、草地・岩肌・日陰でも線を見分けられるようにする。
+    half3 closeColor = lerp(groundColor, half3(0.8, 0.86, 0.9), halo * 0.32);
+    closeColor = lerp(closeColor, half3(0.018, 0.028, 0.045), ink);
+    return lerp(color, closeColor, closeWeight);
 }
 
 // Terrainと遠景メッシュが照明直前に共用する地表処理。

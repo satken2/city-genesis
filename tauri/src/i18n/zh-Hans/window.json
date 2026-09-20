@@ -190,7 +190,12 @@
     "toggleShowPlanRoad": "显示规划中的道路",
     "toggleShowPlanBuilding": "显示规划中的建筑",
     "toggleHighlightPublic": "高亮公共设施",
-    "showContours": "显示等高线"
+    "showContours": "显示等高线",
+    "trayTooltip": "{{name}}：{{state}}",
+    "trayStateVisible": "显示",
+    "trayStateHidden": "隐藏",
+    "trayStateContour": "等高线显示",
+    "trayStateTerrainNormal": "普通显示"
   },
   "grid_settings": {
     "title": "网格",

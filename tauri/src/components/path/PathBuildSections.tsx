@@ -19,7 +19,6 @@
 
 import { useCallback } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { StationHouseEndsSelect } from "./StationHouseEndsSelect";
 import { useTranslation } from "react-i18next";
 import { NumberStepper } from "../common/NumberStepper";
 import { ConstructionInfoCard } from "../common/ConstructionInfoCard";
@@ -126,9 +125,6 @@ export function PathBuildSections({
         <div className="pc-section">
           <div className="pc-section-title">{t("path_construction.shape", "形状")}</div>
 
-          {pc.isStationHouse && editPathId === null && (
-            <StationHouseEndsSelect value={pc.houseEnds} onChange={pc.setHouseEnds} />
-          )}
 
           {/*
             標高（相対高さ）。height_editable=true のバリアント(高架道路・地下鉄用線路など)のみ表示。

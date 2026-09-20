@@ -365,6 +365,8 @@ namespace GeneratedModels
         public List<object> station_grade_profile;
         /// <summary>駅舎の建屋配置端（both/start/end）</summary>
         public string house_ends;
+        /// <summary>駅舎の通路方式（elevated/ground/underground）</summary>
+        public string passage_mode;
     }
 
     [Serializable]
@@ -464,6 +466,8 @@ namespace GeneratedModels
         public List<object> station_grade_profile;
         /// <summary>駅舎の建屋配置端（both/start/end）</summary>
         public string house_ends;
+        /// <summary>駅舎の通路方式（elevated/ground/underground）</summary>
+        public string passage_mode;
     }
 
     [Serializable]

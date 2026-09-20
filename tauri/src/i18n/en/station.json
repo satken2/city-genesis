@@ -12,6 +12,10 @@
     "houseEnds": "Station buildings",
     "houseEnds_both": "Both ends",
     "houseEnds_start": "Start",
-    "houseEnds_end": "End"
+    "houseEnds_end": "End",
+    "passageMode": "Passage placement",
+    "passageMode_elevated": "Elevated",
+    "passageMode_ground": "Ground level",
+    "passageMode_underground": "Underground"
   }
 }

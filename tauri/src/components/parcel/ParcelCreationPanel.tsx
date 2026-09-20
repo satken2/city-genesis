@@ -20,7 +20,6 @@ import { useTranslation } from "react-i18next";
 import { setHintbarText } from "../../utils/hintbar";
 import {
   sendChangeState,
-  sendChangeDisplay,
   sendEditParcelUpdatePreview,
   sendEditParcelResetSelection,
   sendEditParcelSetRectParams,
@@ -227,9 +226,6 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
       "parcel_creation"
     ).catch((err) => {
       console.error("[ParcelCreation] sendChangeState failed:", err);
-    });
-    sendChangeDisplay("parcel", "border").catch((err) => {
-      console.error("[ParcelCreation] sendChangeDisplay failed:", err);
     });
   }, []);
 
@@ -516,7 +512,6 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
     return () => {
       void sendEditParcelUpdatePreview(selectedModeRef.current, [], null);
       void sendChangeState("STATE_NORMAL", undefined, "parcel_creation");
-      void sendChangeDisplay("parcel", "hidden");
     };
   }, []);
 

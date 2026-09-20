@@ -348,6 +348,8 @@ export type PathSummary = {
   station_grade_profile: any[];
   /** 駅舎の建屋配置端（both/start/end） */
   house_ends: string;
+  /** 駅舎の通路方式（elevated/ground/underground） */
+  passage_mode: string;
 };
 
 export type PathData = {
@@ -445,6 +447,8 @@ export type PathData = {
   station_grade_profile: any[];
   /** 駅舎の建屋配置端（both/start/end） */
   house_ends: string;
+  /** 駅舎の通路方式（elevated/ground/underground） */
+  passage_mode: string;
 };
 
 export type ParcelSummary = {

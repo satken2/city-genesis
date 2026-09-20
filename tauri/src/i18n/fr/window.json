@@ -190,7 +190,12 @@
     "toggleShowPlanRoad": "Afficher les routes planifiées",
     "toggleShowPlanBuilding": "Afficher les bâtiments planifiés",
     "toggleHighlightPublic": "Mettre en évidence les services publics",
-    "showContours": "Afficher les courbes de niveau"
+    "showContours": "Afficher les courbes de niveau",
+    "trayTooltip": "{{name}} : {{state}}",
+    "trayStateVisible": "Affiché",
+    "trayStateHidden": "Masqué",
+    "trayStateContour": "Courbes de niveau",
+    "trayStateTerrainNormal": "Affichage normal"
   },
   "grid_settings": {
     "title": "Grille",

@@ -45,7 +45,7 @@
   },
   "regulation": {
     "speedLimitTitle": "Speed Limits",
-    "speedLimitDescription": "Set speed limits for each path variant. Newly built paths will use these limits.",
+    "speedLimitDescription": "Set speed limits for each path variant. These limits also apply to paths already built, except those with an individually assigned limit.",
     "speedUnit": "km/h",
     "unknownType": "Unknown",
     "buildingRegulationTitle": "Building Regulations",

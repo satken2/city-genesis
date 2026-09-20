@@ -45,7 +45,7 @@
   },
   "regulation": {
     "speedLimitTitle": "Límites de velocidad",
-    "speedLimitDescription": "Define el límite de velocidad de cada variante de calle. Las vías nuevas usarán la velocidad definida aquí.",
+    "speedLimitDescription": "Define el límite de velocidad de cada variante de calle. También se aplica a las vías ya construidas, salvo las que tengan un límite asignado individualmente.",
     "speedUnit": "km/h",
     "unknownType": "Desconocido",
     "buildingRegulationTitle": "Normativa de construcción",

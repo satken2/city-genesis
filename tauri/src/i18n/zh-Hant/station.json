@@ -12,6 +12,10 @@
     "houseEnds": "站房配置",
     "houseEnds_both": "兩端",
     "houseEnds_start": "起點",
-    "houseEnds_end": "終點"
+    "houseEnds_end": "終點",
+    "passageMode": "通道位置",
+    "passageMode_elevated": "高架",
+    "passageMode_ground": "地面",
+    "passageMode_underground": "地下"
   }
 }

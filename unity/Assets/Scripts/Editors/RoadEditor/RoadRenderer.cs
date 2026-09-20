@@ -23,6 +23,7 @@ public partial class RoadRenderer : MonoBehaviour
     private bool lastIsValid;
     private int lastPlatformSide;
     private string lastHouseEnds;
+    private string lastPassageMode;
 
     private void OnGUI()
     {
@@ -88,7 +89,7 @@ public partial class RoadRenderer : MonoBehaviour
     /// 確定時にUI側が平行な単線パス群へ展開して敷設するのと同じ見た目にするための機構で、
     /// 敷設済み線路同士の結合描画(TrackAdjacency)はプレビューには適用されない。
     /// </summary>
-    public void UpdateRoadPreview(List<Vector3> subdividePoints, int pathType, int pathSubtype, bool curved = true, bool isValid = true, int platformSide = Constants.PLATFORM_SIDE_OUTSIDE, float[] lateralOffsets = null, int[] travelDirections = null, string houseEnds = "both", List<List<Vector3>> profiles = null)
+    public void UpdateRoadPreview(List<Vector3> subdividePoints, int pathType, int pathSubtype, bool curved = true, bool isValid = true, int platformSide = Constants.PLATFORM_SIDE_OUTSIDE, float[] lateralOffsets = null, int[] travelDirections = null, string houseEnds = "both", List<List<Vector3>> profiles = null, string passageMode = "elevated")
     {
         if (previewMeshFilter == null || previewMeshRenderer == null) return;
 
@@ -102,7 +103,7 @@ public partial class RoadRenderer : MonoBehaviour
         if (hasPreviewState && lastProfiles == profiles &&
             lastPathType == pathType && lastPathSubtype == pathSubtype &&
             lastCurved == curved && lastIsValid == isValid &&
-            lastPlatformSide == platformSide && lastHouseEnds == houseEnds &&
+            lastPlatformSide == platformSide && lastHouseEnds == houseEnds && lastPassageMode == passageMode &&
             OffsetsApproximatelyEqual(lastLateralOffsets, lateralOffsets) &&
             IntArraysEqual(lastTravelDirections, travelDirections) &&
             PointsApproximatelyEqual(lastPreviewPoints, subdividePoints))
@@ -130,7 +131,7 @@ public partial class RoadRenderer : MonoBehaviour
         if (lateralOffsets == null || lateralOffsets.Length == 0)
         {
             // 単一パス: 受け取った点列をそのまま中心線として1本生成する
-            GenerateComponentPreview(profiles != null ? profiles[0] : subdividePoints, pathType, pathSubtype, curved, platformSide, Constants.DIR_BOTH, activeMaterial, null, houseEnds, profiles != null);
+            GenerateComponentPreview(profiles != null ? profiles[0] : subdividePoints, pathType, pathSubtype, curved, platformSide, Constants.DIR_BOTH, activeMaterial, null, houseEnds, profiles != null, passageMode);
         }
         else
         {
@@ -145,7 +146,7 @@ public partial class RoadRenderer : MonoBehaviour
                     ? profiles[i] : OffsetPolylineLateral(subdividePoints, lateralOffsets[i]);
                 int travelDirection = (travelDirections != null && i < travelDirections.Length)
                     ? travelDirections[i] : Constants.DIR_BOTH;
-                GenerateComponentPreview(offsetPoints, pathType, pathSubtype, curved, platformSide, travelDirection, activeMaterial, container, houseEnds, profiles != null);
+                GenerateComponentPreview(offsetPoints, pathType, pathSubtype, curved, platformSide, travelDirection, activeMaterial, container, houseEnds, profiles != null, passageMode);
             }
         }
 
@@ -159,6 +160,7 @@ public partial class RoadRenderer : MonoBehaviour
         lastIsValid = isValid;
         lastPlatformSide = platformSide;
         lastHouseEnds = houseEnds;
+        lastPassageMode = passageMode;
         lastLateralOffsets = lateralOffsets != null ? (float[])lateralOffsets.Clone() : null;
         lastTravelDirections = travelDirections != null ? (int[])travelDirections.Clone() : null;
         lastProfiles = profiles;
@@ -173,7 +175,7 @@ public partial class RoadRenderer : MonoBehaviour
     /// travelDirection(Constants.DIR_*)も仮 PathSummary に載せるため、駅バリアントの
     /// ホーム設置側の解決と一方通行線路の進行方向矢印が確定後と同じ見た目になる。
     /// </summary>
-    private void GenerateComponentPreview(List<Vector3> componentPoints, int pathType, int pathSubtype, bool curved, int platformSide, int travelDirection, Material activeMaterial, GameObject parent, string houseEnds, bool designed = false)
+    private void GenerateComponentPreview(List<Vector3> componentPoints, int pathType, int pathSubtype, bool curved, int platformSide, int travelDirection, Material activeMaterial, GameObject parent, string houseEnds, bool designed = false, string passageMode = "elevated")
     {
         Vector3 startPos = componentPoints[0];
         Vector3 endPos = componentPoints[componentPoints.Count - 1];
@@ -202,6 +204,7 @@ public partial class RoadRenderer : MonoBehaviour
             curved = curved,
             platform_side = platformSide,
             house_ends = houseEnds,
+            passage_mode = passageMode,
             travel_direction = travelDirection,
             start_point = new List<object> { (object)startPos.x, (object)startRelY, (object)startPos.z },
             end_point = new List<object> { (object)endPos.x, (object)endRelY, (object)endPos.z }

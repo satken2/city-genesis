@@ -45,7 +45,7 @@
   },
   "regulation": {
     "speedLimitTitle": "Limitations de vitesse",
-    "speedLimitDescription": "Définit la limitation de vitesse de chaque variante de voie. Les voies nouvellement créées adoptent la vitesse définie ici.",
+    "speedLimitDescription": "Définit la limitation de vitesse de chaque variante de voie. Elle s'applique aussi aux voies déjà construites, sauf celles dotées d'une limitation définie individuellement.",
     "speedUnit": "km/h",
     "unknownType": "Inconnu",
     "buildingRegulationTitle": "Réglementation de construction",

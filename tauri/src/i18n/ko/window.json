@@ -190,7 +190,12 @@
     "toggleShowPlanRoad": "계획 중인 도로 표시",
     "toggleShowPlanBuilding": "계획 중인 건물 표시",
     "toggleHighlightPublic": "공공시설 강조",
-    "showContours": "등고선 표시"
+    "showContours": "등고선 표시",
+    "trayTooltip": "{{name}}: {{state}}",
+    "trayStateVisible": "표시",
+    "trayStateHidden": "숨김",
+    "trayStateContour": "등고선 표시",
+    "trayStateTerrainNormal": "일반 표시"
   },
   "grid_settings": {
     "title": "그리드",

@@ -534,7 +534,7 @@ export function PathDetailPanel({
       {isStationHouse && (
         <div id="path-detail-station" hidden={activeTab !== "station"}>
           <StationInfoSection apiBaseUrl={apiBaseUrl} pathId={pathData.path_id}
-            houseEnds={pathData.house_ends}
+            passageMode={pathData.passage_mode}
             pathName={displayName} onRenamed={() => setRefreshKey(k => k + 1)} />
         </div>
       )}

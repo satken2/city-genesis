@@ -44,9 +44,6 @@ import {
 } from "../../local-constants";
 import { FALLBACK_TRACK_SPACING, defaultTravelDirections } from "./railBuild";
 
-/** 駅舎は簡易モードでは両端固定(建屋の配置端は詳細モード・駅詳細で変更する)。 */
-const STATION_HOUSE_ENDS = "both";
-
 /** POST /paths/construction-cost のうち、費用カードが使うフィールド。 */
 type PathCostResponse = {
   estimated_construction_cost?: number | null;
@@ -85,6 +82,8 @@ export function useStationConstruction(
   const { t } = useTranslation();
 
   const [platformVariant, setPlatformVariantState] = useState<number | null>(null);
+  const [houseEnds, setHouseEnds] = useState("both");
+  const [passageMode, setPassageMode] = useState("elevated");
   const [houseVariant, setHouseVariantState] = useState<number | null>(null);
   const [carCount, setCarCountState] = useState(STATION_DEFAULT_CAR_COUNT);
   const [height, setHeightState] = useState(0);
@@ -180,11 +179,12 @@ export function useStationConstruction(
         height,
         angle,
         travel_directions: travelDirections,
-        house_ends: STATION_HOUSE_ENDS,
+        house_ends: houseEnds,
+        passage_mode: passageMode,
       },
       "track_build",
     ).catch((err) => console.error("[useStationConstruction] sendChangeState failed:", err));
-  }, [platformVariant, houseVariant, platformLength, trackSpacing, height, angle, travelDirections]);
+  }, [platformVariant, houseVariant, platformLength, trackSpacing, height, angle, travelDirections, houseEnds, passageMode]);
 
   /* ---- 駅タブの表示中だけ Unity を駅配置モードにする ---- */
   // 寸法・角度・高さの変更は placement_command で逐次送るため、モードに入り直すのは
@@ -196,7 +196,7 @@ export function useStationConstruction(
   }, [enabled, platformVariant, houseVariant]);
 
   /* ---- 設定変更の逐次送信(ゴーストへの即時反映) ---- */
-  const commandKey = JSON.stringify({ platformLength, trackSpacing, height, angle, travelDirections });
+  const commandKey = JSON.stringify({ platformLength, trackSpacing, height, angle, travelDirections, houseEnds, passageMode });
   useEffect(() => {
     if (!enabled || platformVariant == null) return;
     sendStationPlacementCommand({
@@ -205,6 +205,8 @@ export function useStationConstruction(
       height,
       angle,
       travel_directions: travelDirections,
+      house_ends: houseEnds,
+      passage_mode: passageMode,
     }).catch((err) => console.error("[useStationConstruction] sendStationPlacementCommand failed:", err));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, platformVariant, commandKey]);
@@ -225,7 +227,8 @@ export function useStationConstruction(
     }));
     paths.push({
       path_variant: houseVariant,
-      house_ends: STATION_HOUSE_ENDS,
+      house_ends: houseEnds,
+        passage_mode: passageMode,
       start_point: placement.house[0],
       end_point: placement.house[1],
       curved: false,
@@ -233,7 +236,7 @@ export function useStationConstruction(
     });
     // プラットフォームの共通標高の解決はバックエンドに任せる(詳細モードの複線と同じ)。
     return { paths, align_station_tracks: true };
-  }, [platformVariant, houseVariant, placement, travelDirections]);
+  }, [platformVariant, houseVariant, placement, travelDirections, houseEnds, passageMode]);
 
   /* ---- 事前検証(干渉・川横断・線形) ---- */
   const [validation, setValidation] = useState<{
@@ -440,6 +443,7 @@ export function useStationConstruction(
   }, [apiBaseUrl, constructionBody, canConfirm, validationKey, validationMessages, t]);
 
   return {
+    houseEnds, setHouseEnds, passageMode, setPassageMode,
     platformVariant,
     platformData,
     houseVariant,

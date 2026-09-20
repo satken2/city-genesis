@@ -16,7 +16,7 @@ import { EditableLabel } from "../common/EditableLabel";
 import { PathLink } from "../common/PathLink";
 import { STATUS_ACTIVE } from "../../constants";
 import "./StationInfoSection.css";
-import { StationHouseEndsSelect } from "./StationHouseEndsSelect";
+import { StationPassageModeSelect } from "./StationPassageModeSelect";
 import { sendSessionReload } from "../../utils/ipc";
 
 type StationPlatform = {
@@ -43,7 +43,7 @@ type StationInfo = {
 };
 
 type StationInfoSectionProps = {
-  houseEnds: string;
+  passageMode: string;
   apiBaseUrl: string;
   pathId: number;
   /** 駅名(=パスの name)。表示とインライン変更の初期値に使う。 */
@@ -75,7 +75,7 @@ export function StationInfoSection({
   apiBaseUrl,
   pathId,
   pathName,
-  houseEnds,
+  passageMode,
   onRenamed,
 }: StationInfoSectionProps) {
   const { t } = useTranslation();
@@ -86,13 +86,13 @@ export function StationInfoSection({
   const [error, setError] = useState("");
   const [revision, setRevision] = useState(0);
 
-  async function saveHouseEnds(value: string) {
+  async function savePassageMode(value: string) {
     setSaving(true);
     setError("");
     try {
       await fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/paths/{id}", String(pathId)), {
         method: "PATCH", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ house_ends: value }),
+        body: JSON.stringify({ passage_mode: value }),
       });
       setRevision((r) => r + 1);
       onRenamed();
@@ -134,7 +134,7 @@ export function StationInfoSection({
   return (
     <section className="agent-detail-section">
       <h3 className="agent-detail-section-title">{t("station.sectionTitle")}</h3>
-      <StationHouseEndsSelect value={houseEnds} onChange={saveHouseEnds} disabled={saving} />
+      <StationPassageModeSelect value={passageMode} onChange={savePassageMode} disabled={saving} />
       {error && <p role="alert">{error}</p>}
       <div className="agent-detail-grid">
         <span className="agent-detail-label">{t("station.name")}</span>

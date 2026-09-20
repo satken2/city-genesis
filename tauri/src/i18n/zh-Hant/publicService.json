@@ -45,7 +45,7 @@
   },
   "regulation": {
     "speedLimitTitle": "速限",
-    "speedLimitDescription": "設定各道路變體的速限。新建路徑將採用此處設定的速度。",
+    "speedLimitDescription": "設定各道路變體的速限。已建成的路徑同樣適用（單獨指定速限的路徑除外）。",
     "speedUnit": "km/h",
     "unknownType": "未知",
     "buildingRegulationTitle": "建築法規",

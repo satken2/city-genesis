@@ -12,6 +12,10 @@
     "houseEnds": "建屋の配置",
     "houseEnds_both": "両端",
     "houseEnds_start": "始点",
-    "houseEnds_end": "終点"
+    "houseEnds_end": "終点",
+    "passageMode": "通路の配置",
+    "passageMode_elevated": "上空",
+    "passageMode_ground": "地上",
+    "passageMode_underground": "地下"
   }
 }

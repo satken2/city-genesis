@@ -12,6 +12,10 @@
     "houseEnds": "Bâtiments de gare",
     "houseEnds_both": "Aux deux extrémités",
     "houseEnds_start": "Début",
-    "houseEnds_end": "Fin"
+    "houseEnds_end": "Fin",
+    "passageMode": "Emplacement du passage",
+    "passageMode_elevated": "En hauteur",
+    "passageMode_ground": "Au sol",
+    "passageMode_underground": "Souterrain"
   }
 }

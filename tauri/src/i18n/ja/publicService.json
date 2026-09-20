@@ -45,7 +45,7 @@
   },
   "regulation": {
     "speedLimitTitle": "制限速度",
-    "speedLimitDescription": "道路バリアントごとの制限速度を設定します。新設パスにはここで設定した速度が適用されます。",
+    "speedLimitDescription": "道路バリアントごとの制限速度を設定します。敷設済みのパスにも適用されます（個別に制限速度を指定したパスを除く）。",
     "speedUnit": "km/h",
     "unknownType": "不明",
     "buildingRegulationTitle": "建築規制",

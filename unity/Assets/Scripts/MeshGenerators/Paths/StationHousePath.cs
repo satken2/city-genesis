@@ -7,7 +7,7 @@ using GeneratedModels;
 /// 駅舎パス(PATH_STATION_HOUSE, model_type="station_house")のメッシュ生成器。
 ///
 /// 駅舎はウェイポイント付き折れ線のパスで、描画は次の2要素で構成される:
-///   1. 連絡橋: 線に沿った桁。各アンカー点を「そのXZ直下の地形標高」に置き、アンカー間を
+///   1. 通路: passage_modeで上空・地上・地下を選ぶ。地下は描画・帯コライダーなし。各アンカー点を「そのXZ直下の地形標高」に置き、アンカー間を
 ///      直線で結ぶ(地形追従の細分化はしない)。**デッキの地上高・橋脚は body プレハブの
 ///      造形が持つ**(原点=地面。実寸配置で幅も引き伸ばさない)。
 ///   2. 建屋: 選択した終端の専有エリア矩形に駅舎モデル(Models/Stations/{variant}/body)を置き、
@@ -72,37 +72,32 @@ public class StationHousePath : IPathMeshGenerator
 
         List<StationHouseFootprint> footprints = ComputeEndFootprints(pathData);
 
-        // ---- 連絡橋(桁) ----
-        List<Vector3> anchors = BuildBridgeAnchorPoints(pathData, points, footprints);
-        SplineComputer spline = RoadPath.BuildSpline(container, anchors, false);
-
-        string bodyPath = $"Models/Paths/p{pathData.path_variant}/body";
-        string bodyFallbackPath = $"Models/Paths/p{pathData.path_type}/body";
-
-        // 桁は実寸配置(stretchToWidth:false)。マスターの width は敷地ポリゴンとコライダーの幅で、
-        // 桁の断面はプレハブ形状が持つため、幅に合わせて引き伸ばしてはいけない。
-        // 敷き方はマスターの single_span に従う。false(既定)なら body プレハブをZ実寸のまま
-        // 折れ線に沿って敷き詰め、true なら1枚を全長へ引き伸ばす。引き伸ばしはZ分割を持たない
-        // プレハブだとアンカー間の弦になり、ウェイポイントを素通りして始点と終点が直結された
-        // 形になるため、造形のある桁では single_span=false にする。
-        // タイル長の上限は設けない(折れ線スプラインは縦カーブを持たず弦誤差が出ないため)。
-        GameObject bridgeBody = RoadPath.CreateSplineMesh(container, spline, bodyPath, width,
-            0f, RoadPartHeights.STATION_BRIDGE_BASE_ABOVE_SPLINE, false, bodyFallbackPath,
-            stretchToWidth: false, singleSpan: singleSpan, maxTileLength: 0f, normalizeBodySurface: false);
-        if (bridgeBody == null)
+        // 地下通路には地上の描画・クリック面を作らず、建屋から駅を選択する。
+        Mesh bridgeColliderMesh = null;
+        if (pathData.passage_mode != "underground")
         {
-            bridgeBody = RoadPath.CreateFallbackRoadBody(container, spline, width);
-        }
+            List<Vector3> anchors = BuildBridgeAnchorPoints(pathData, points, footprints);
+            SplineComputer spline = RoadPath.BuildSpline(container, anchors, false);
+            bool ground = pathData.passage_mode == "ground";
+            string part = ground ? "passage_ground" : "passage_elevated";
+            string bodyPath = $"Models/Paths/p{pathData.path_variant}/{part}";
+            string bodyFallbackPath = $"Models/Paths/p{Constants.PATH_STATION_HOUSE}/{part}";
 
-        // 橋の帯のクリック用コライダーメッシュ。他のパスと同様に PathMeshResult.Mesh として
-        // 返し、PathManager が pathGO 側にコライダー・タグ・ハンドラを装着する。
-        // スプラインは地面にあり桁は上空に描かれるため、プレハブの天端の高さぶん持ち上げて
-        // 実際に見えているデッキの位置でクリックを受ける。
-        Mesh bridgeColliderMesh = RoadPath.BuildColliderMeshFromSpline(spline, width);
-        if (bridgeColliderMesh != null)
-        {
-            OffsetMeshY(bridgeColliderMesh, GetBodyTopHeight(bodyPath, bodyFallbackPath));
-            bridgeColliderMesh.name = $"StationHouseBridgeCollider_{pathData.path_id}";
+            // 既存の専用通路は対応する方式で使い、他の組み合わせは共通パーツへ解決する。
+            bool existingBody = ground
+                ? pathData.path_variant == 2003 || pathData.path_variant == 2013
+                : pathData.path_variant == 2001 || pathData.path_variant == 2011;
+            if (existingBody) bodyPath = $"Models/Paths/p{pathData.path_variant}/body";
+            RoadPath.CreateSplineMesh(container, spline, bodyPath, width,
+                0f, RoadPartHeights.STATION_BRIDGE_BASE_ABOVE_SPLINE, false, bodyFallbackPath,
+                stretchToWidth: false, singleSpan: singleSpan, maxTileLength: 0f, normalizeBodySurface: false);
+
+            bridgeColliderMesh = RoadPath.BuildColliderMeshFromSpline(spline, width);
+            if (bridgeColliderMesh != null)
+            {
+                OffsetMeshY(bridgeColliderMesh, GetBodyTopHeight(bodyPath, bodyFallbackPath));
+                bridgeColliderMesh.name = $"StationHouseBridgeCollider_{pathData.path_id}";
+            }
         }
 
         // ---- 選択した終端の建屋 ----

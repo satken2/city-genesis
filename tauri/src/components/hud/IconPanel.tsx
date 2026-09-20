@@ -21,7 +21,6 @@ import { useTranslation } from "react-i18next";
 import {
   IPC_EVENT_EDIT_ZONE_REQUEST_MERGE,
   sendChangeState,
-  sendChangeDisplay,
   sendSessionReload,
 } from "../../utils/ipc";
 import { setHintbarText } from "../../utils/hintbar";
@@ -105,9 +104,11 @@ export function IconPanel() {
   /**
    * 地区編集モードのトグル。ウィンドウを開かない常駐モード
    * (windowType "district" は送信元ラベルで実ウィンドウは無い)。
-   * ON で Unity を STATE_EDIT_ZONE にして道路を地区色分け表示にし、ヒントバーに操作説明を出す。
-   * OFF で STATE_NORMAL に戻し道路表示を既定へ戻してからセッションをリロードする
+   * ON で Unity を STATE_EDIT_ZONE にし、ヒントバーに操作説明を出す。
+   * OFF で STATE_NORMAL に戻してからセッションをリロードする
    * (地区の割当・拡張は3Dジェスチャで即時反映されるため、抜ける際に最新状態を確実に反映する)。
+   * 地区編集中の表示(道路の地区色分け・地区枠線・セル・区画)はUnity側のステート別
+   * プリセットが適用し、OFFで元の表示へ戻すのもUnity側なので、ここからは表示を触らない。
    * 3Dビュー内のツール切替(作成/拡張)・操作は Unity 側の Ctrl ラジアルメニューが担う。
    */
   const toggleDistrict = useCallback(async () => {
@@ -116,10 +117,8 @@ export function IconPanel() {
       if (next) {
         await setHintbarText(t("hint.districtEdit"));
         await sendChangeState("STATE_EDIT_ZONE", undefined, "district");
-        await sendChangeDisplay("road", "zone_color");
       } else {
         await sendChangeState("STATE_NORMAL", undefined, "district");
-        await sendChangeDisplay("road", "default");
         await setHintbarText("");
         await sendSessionReload();
       }

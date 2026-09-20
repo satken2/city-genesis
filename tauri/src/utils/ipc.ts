@@ -627,6 +627,7 @@ export async function sendStationPlacementCommand(command: {
   height?: number;
   angle?: number;
   house_ends?: string;
+  passage_mode?: string;
   travel_directions?: number[];
   reset?: boolean;
 }): Promise<void> {
@@ -762,6 +763,13 @@ export async function sendEditPathFinish(): Promise<void> {
  * (曲線モード等と同じく、プレビューへの逐次反映のためのイベント)。
  * 駅バリアント(platform_width>0)以外では無視される。
  */
+export async function sendSetPassageMode(passageMode: string): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "path_build", entity: null,
+    action: "edit_path:change_passage_mode", params: { passage_mode: passageMode },
+  });
+}
+
 export async function sendSetHouseEnds(houseEnds: string): Promise<void> {
   await invoke("send_window_action", {
     windowType: "path_build", entity: null,
@@ -1031,6 +1039,34 @@ export async function sendViewQueryState(): Promise<void> {
 }
 
 /**
+ * 表示プリセットの名前。Unity側(`IpcViewCoordinator`の`PRESET_*`)と一致させること。
+ * 公共交通の一覧・新設パネルが開いている間の表示(全路線+計画中の道路・建物)。
+ */
+export const VIEW_PRESET_TRANSIT = "transit";
+
+/**
+ * `view.apply_preset`
+ * ウィンドウを開いている間だけ3Dビューの表示を差し替える。
+ *
+ * 道路敷設や地区編集のように専用の編集ステート(`STATE_*`)を持つ操作では、Unityが
+ * ステートごとの表示プリセットを自動で適用するのでこれを呼ぶ必要はない。
+ * **ステートを持たないウィンドウ専用の入口**で、元の表示への復帰は
+ * `STATE_NORMAL`(ウィンドウを閉じたときにRust側が送る)が担う。
+ * プリセットの中身はUnity側が持ち、UIは名前だけを指定する。
+ *
+ * ここで変えた表示はUnityの「通常モードの記憶」には載らないので、
+ * `sendChangeDisplay`で同じことをしてはいけない(ユーザーが選んでいた表示を上書きしてしまう)。
+ */
+export async function sendViewApplyPreset(preset: string, windowType: string): Promise<void> {
+  await invoke("send_window_action", {
+    windowType,
+    entity: null,
+    action: "view:apply_preset",
+    params: { preset },
+  });
+}
+
+/**
  * `view.set_object_filter`
  * 建物・道路をオブジェクト単位で非表示にする集合をグラフィックプログラムへ送る。
  * レイヤー単位の表示制御(`view:change_view`)とは独立の別系統で、建設プロジェクトの
@@ -1259,6 +1295,7 @@ export type StationPlacementState = {
   platform_variant: number;
   house_variant: number;
   house_ends: string;
+  passage_mode: string;
   platforms: number[][][] | null;
   house: number[][] | null;
 };

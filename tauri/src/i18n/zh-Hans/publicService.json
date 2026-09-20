@@ -45,7 +45,7 @@
   },
   "regulation": {
     "speedLimitTitle": "限速",
-    "speedLimitDescription": "设置各道路变体的限速。新建路径将采用此处设置的速度。",
+    "speedLimitDescription": "设置各道路变体的限速。已建成的路径同样适用（单独指定了限速的路径除外）。",
     "speedUnit": "km/h",
     "unknownType": "未知",
     "buildingRegulationTitle": "建筑法规",

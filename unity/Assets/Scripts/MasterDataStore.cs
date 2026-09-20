@@ -504,6 +504,11 @@ public class MasterDataStore : MonoBehaviour
 		return pathMasterById;
 	}
 
+	public IReadOnlyDictionary<int, TransitMasterItem> GetTransitMasterDictionary()
+	{
+		return transitMasterById;
+	}
+
 	public PathTypeItem GetPathType(int typeId)
 	{
 		pathTypesById.TryGetValue(typeId, out var item);

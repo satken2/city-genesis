@@ -74,6 +74,7 @@ import type { PendingDirectAcquisition } from "./components/building/BuildingDir
 import { IconPanel } from "./components/hud/IconPanel";
 import { Cockpit } from "./components/hud/Cockpit";
 import { SystemTray } from "./components/hud/SystemTray";
+import { DisplayTray } from "./components/hud/DisplayTray";
 import { TopMenu } from "./components/topmenu/TopMenu";
 import { LoadingWindow } from "./components/loading/LoadingWindow";
 import { ParameterSetupWindow } from "./components/parameter-setup/ParameterSetupWindow";
@@ -98,7 +99,7 @@ function App() {
   const [openWindowCount, setOpenWindowCount] = useState<number>(0);
   const [queryState, setQueryState] = useState<QueryState>({ status: "idle" });
   const [actionState, setActionState] = useState<string>("");
-  const [windowKind, setWindowKind] = useState<"host" | "icon-panel" | "cockpit" | "system-tray" | "topmenu" | "loading" | "popup" | "notification" | "hintbar" | "parameter-setup" | "tutorial" | "tips">("host");
+  const [windowKind, setWindowKind] = useState<"host" | "icon-panel" | "cockpit" | "system-tray" | "display-tray" | "topmenu" | "loading" | "popup" | "notification" | "hintbar" | "parameter-setup" | "tutorial" | "tips">("host");
 
   useEffect(() => {
     let disposed = false;
@@ -110,6 +111,8 @@ function App() {
         setWindowKind("cockpit");
       } else if (label === "system-tray") {
         setWindowKind("system-tray");
+      } else if (label === "display-tray") {
+        setWindowKind("display-tray");
       } else if (label === "topmenu") {
         setWindowKind("topmenu");
       } else if (label === "loading") {
@@ -134,8 +137,8 @@ function App() {
         setOpenWindowCount(status.open_window_count);
       }
 
-      // HUD3枚・トップメニュー・通知・Tipsは window-registry のポップアップではないため context を持たない
-      const contextlessLabels = ["main", "icon-panel", "cockpit", "system-tray", "topmenu", "notification", "tips"];
+      // HUD各枚・トップメニュー・通知・Tipsは window-registry のポップアップではないため context を持たない
+      const contextlessLabels = ["main", "icon-panel", "cockpit", "system-tray", "display-tray", "topmenu", "notification", "tips"];
       if (!contextlessLabels.includes(label)) {
         const initialContext = await invoke<WindowContext>("get_window_context");
         if (!disposed) {
@@ -299,6 +302,8 @@ function App() {
         <Cockpit />
       ) : windowKind === "system-tray" ? (
         <SystemTray />
+      ) : windowKind === "display-tray" ? (
+        <DisplayTray />
       ) : windowKind === "hintbar" ? (
         <Hintbar />
       ) : windowKind === "tutorial" ? (

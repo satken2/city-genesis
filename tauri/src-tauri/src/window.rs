@@ -7,13 +7,19 @@ use std::time::Duration;
 use tauri::{AppHandle, Emitter, LogicalPosition, LogicalSize, Manager, Monitor, WebviewUrl, WebviewWindowBuilder};
 
 /// HUD(ゲーム中に画面へ常駐する操作パネル群)のウィンドウラベル。
-/// 3枚に分かれているのは、Unityの3Dビューの上に重ねる透明ウィンドウでは
+/// 複数枚に分かれているのは、Unityの3Dビューの上に重ねる透明ウィンドウでは
 /// 「見た目が透明な領域でもクリックがWebViewに吸われる」ため、
 /// パネルの実面積だけを覆うウィンドウに分割する必要があるから。
 pub const LABEL_ICON_PANEL: &str = "icon-panel";
 pub const LABEL_COCKPIT: &str = "cockpit";
 pub const LABEL_SYSTEM_TRAY: &str = "system-tray";
-pub const HUD_WINDOW_LABELS: [&str; 3] = [LABEL_ICON_PANEL, LABEL_COCKPIT, LABEL_SYSTEM_TRAY];
+pub const LABEL_DISPLAY_TRAY: &str = "display-tray";
+pub const HUD_WINDOW_LABELS: [&str; 4] = [
+    LABEL_ICON_PANEL,
+    LABEL_COCKPIT,
+    LABEL_SYSTEM_TRAY,
+    LABEL_DISPLAY_TRAY,
+];
 
 /// HUD各パネルと画面端・他ウィンドウとの間隔
 pub const HUD_MARGIN: f64 = 8.0;
@@ -37,6 +43,14 @@ pub const COCKPIT_HEIGHT: f64 = 76.0;
 pub const SYSTEM_TRAY_WIDTH: f64 = 176.0;
 pub const SYSTEM_TRAY_HEIGHT: f64 = 40.0;
 
+/// 表示トレイ(画面左下・レイヤーの表示ON/OFFを切り替えるアイコン列)のサイズ。
+/// ボタン数が固定(7個)なので実測値の通知は行わず、ここの値をそのまま使う。
+/// `DisplayTray.css` のボタン寸法(30px)・間隔(6px)・左右パディング(8px)・枠線(1px)と
+/// 一致させること(30×7 + 6×6 + 8×2 + 1×2 = 264)。
+/// 足りないとボタンが切れ、余ると透明領域がクリックを吸ってUnityを操作できなくなる。
+pub const DISPLAY_TRAY_WIDTH: f64 = 264.0;
+pub const DISPLAY_TRAY_HEIGHT: f64 = 40.0;
+
 /// 画面下部中央でコックピットが占有する高さ(画面下端からコックピット上端まで)。
 /// ポップアップの中央寄せや下部中央パネルの配置はこの分だけ上に詰める。
 pub const HUD_BOTTOM_RESERVED: f64 = COCKPIT_HEIGHT + HUD_MARGIN;
@@ -58,11 +72,12 @@ fn hud_window_spec(label: &str) -> (&'static str, f64, f64) {
     match label {
         LABEL_ICON_PANEL => ("Genesis Icon Panel", ICON_PANEL_WIDTH, ICON_PANEL_DEFAULT_HEIGHT),
         LABEL_COCKPIT => ("Genesis Cockpit", COCKPIT_WIDTH, COCKPIT_HEIGHT),
+        LABEL_DISPLAY_TRAY => ("Genesis Display Tray", DISPLAY_TRAY_WIDTH, DISPLAY_TRAY_HEIGHT),
         _ => ("Genesis System Tray", SYSTEM_TRAY_WIDTH, SYSTEM_TRAY_HEIGHT),
     }
 }
 
-/// HUDウィンドウ3枚を生成する。初期状態は非表示で、
+/// HUDウィンドウを生成する。初期状態は非表示で、
 /// セッション開始時に `set_hud_visible` で表示される。
 pub fn create_hud_windows(
     app: &AppHandle,
@@ -88,7 +103,7 @@ pub fn create_hud_windows(
     Ok(())
 }
 
-/// HUD各ウィンドウを対象モニターの定位置(左端中央・下部中央・右下)へ配置する。
+/// HUD各ウィンドウを対象モニターの定位置(左端中央・下部中央・右下・左下)へ配置する。
 ///
 /// `icon_panel_height` はアイコンパネルの高さ、`system_tray_width` はシステムトレイの幅の
 /// 明示指定。None のときは現在のウィンドウ寸法(=React側が実測して通知済みの値)を
@@ -151,9 +166,20 @@ pub fn layout_hud_windows(
             m_pos.y + m_size.height - SYSTEM_TRAY_HEIGHT - HUD_MARGIN,
         ));
     }
+
+    // 表示トレイ: 画面左下。アイコンパネルと同じく画面左端からマージンだけ空けて置く。
+    // 左ドックのポップアップは下端から `HUD_BOTTOM_RESERVED` + マージン分を空けるので、
+    // この高さのトレイとは縦に重ならない。
+    if let Some(win) = app.get_webview_window(LABEL_DISPLAY_TRAY) {
+        let _ = win.set_size(LogicalSize::new(DISPLAY_TRAY_WIDTH, DISPLAY_TRAY_HEIGHT));
+        let _ = win.set_position(LogicalPosition::new(
+            m_pos.x + HUD_MARGIN,
+            m_pos.y + m_size.height - DISPLAY_TRAY_HEIGHT - HUD_MARGIN,
+        ));
+    }
 }
 
-/// HUDウィンドウ3枚をまとめて表示/非表示する。
+/// HUDウィンドウをまとめて表示/非表示する。
 /// セッション(=プレイ中の都市)の有無に連動させる。
 pub fn set_hud_visible(app: &AppHandle, visible: bool) {
     for label in HUD_WINDOW_LABELS {
@@ -730,6 +756,12 @@ pub async fn open_window(app: AppHandle, state: SharedState, payload: OpenWindow
 /// zone_detail は表示専用パネルでステートを変更しないため含めない。
 /// 地区編集(STATE_EDIT_ZONE)はウィンドウを開かないタスクバーのトグルモードのため、ここには含めない
 /// (トグルOFFで Taskbar が直接 STATE_NORMAL を送る。ブルドーザ=STATE_REMOVE_OBJECTS と同じ扱い)。
+/// 閉じたときにUnityを通常モードへ戻すウィンドウ。
+/// 「Unityの編集ステート(`STATE_*`)に入るもの」に加えて、
+/// 「開いている間だけ3Dビューの表示を差し替えるもの(公共交通の一覧・新設)」も含める。
+/// 表示を元へ戻すのはUnityの `STATE_NORMAL` 復帰なので、ここに載せないと
+/// ×で閉じたときに差し替えた表示が残り続ける(ウィンドウは非表示になるだけで
+/// React側のアンマウント処理が走らないため、パネル任せにはできない)。
 const EDIT_MODE_WINDOW_TYPES: &[&str] = &[
     "parcel_creation",
     "path_build",
@@ -737,6 +769,8 @@ const EDIT_MODE_WINDOW_TYPES: &[&str] = &[
     "track_build",
     "building_construction",
     "terrain_unlock",
+    "transit_management",
+    "transit_creation",
 ];
 
 pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) -> Result<(), String> {
@@ -991,7 +1025,7 @@ fn make_instance_key(window_type: &str, entity: Option<&EntityRef>) -> String {
 }
 
 pub fn on_window_destroyed(app: &AppHandle, state: &SharedState, label: &str) {
-    // main・HUD3枚・topmenu・notification・hintbar・tutorial・parameter-setup・tips は管理対象外なのでスキップする。
+    // main・HUD各枚・topmenu・notification・hintbar・tutorial・parameter-setup・tips は管理対象外なのでスキップする。
     // notification・hintbar・tutorial は open_windows に登録されない専用ウィンドウのため、
     // 削除処理を行うと誤った popup-count-changed イベントが発行されてしまう。
     if label == "main"

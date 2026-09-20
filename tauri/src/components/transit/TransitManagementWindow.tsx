@@ -20,6 +20,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { setHintbarText } from "../../utils/hintbar";
+import { sendViewApplyPreset, VIEW_PRESET_TRANSIT } from "../../utils/ipc";
 import { resolveTransitIcon } from "../../utils/pathIcon";
 // 混雑率(稼働率)メーターは、統計ウィンドウの消防署/警察署の逼迫度メーターと同じ
 // コンポーネントを再利用する。import により AccidentsTab.css(.usage-meter)も読み込まれる。
@@ -78,6 +79,13 @@ export function TransitManagementWindow({
       setHintbarText("");
     };
   }, [t]);
+
+  // 一覧を見ている間は3Dビューを公共交通向けの表示(全路線+計画中の道路・建物)にする。
+  // 元の表示へ戻すのはウィンドウを閉じたときにRust側が送る STATE_NORMAL なので、
+  // ここでは戻す処理を持たない(×で閉じるとReactのアンマウントは走らないため)。
+  useEffect(() => {
+    void sendViewApplyPreset(VIEW_PRESET_TRANSIT, "transit_management").catch(console.error);
+  }, []);
 
   const load = useCallback(
     async (signal?: AbortSignal) => {

@@ -44,6 +44,7 @@ import {
   sendChangeState,
   sendSetPlatformSide,
   sendSetHouseEnds,
+  sendSetPassageMode,
   sendEditPathChangeNode,
   sendEditPathChangeEmbankment,
   sendEditPathChangeLateralOffsets,
@@ -226,13 +227,17 @@ export function usePathConstruction(
   // 建設時にのみ指定でき、建設後の変更はできない(バックエンド側の制約)。
   const [platformSide, setPlatformSide] = useState<number>(PLATFORM_SIDE_OUTSIDE);
   const [houseEnds, setHouseEnds] = useState("both");
+  const [passageMode, setPassageMode] = useState("elevated");
   useEffect(() => {
     if (pathId == null || !apiBaseUrl) return;
     const controller = new AbortController();
-    fetchApi<{ house_ends: string }>(`${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/${pathId}`, {
+    fetchApi<{ house_ends: string; passage_mode: string }>(`${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/${pathId}`, {
       signal: controller.signal,
     }).then((path) => {
-      if (!controller.signal.aborted) setHouseEnds(path.house_ends);
+      if (!controller.signal.aborted) {
+        setHouseEnds(path.house_ends);
+        setPassageMode(path.passage_mode);
+      }
     }).catch((err) => {
       if (!controller.signal.aborted) console.error("station settings load failed", err);
     });
@@ -456,6 +461,7 @@ export function usePathConstruction(
       // 以後の切り替えは下の useEffect が edit_path:change_platform_side で逐次反映する。
       platform_side: platformSide,
       house_ends: houseEnds,
+      passage_mode: passageMode,
       // 軌道複線の各線横オフセット・進行方向の初期値。3Dプレビューを平行N本で描かせる。
       // 以後の線路数・進行方向の変更は下の useEffect が edit_path:change_lateral_offsets で逐次反映する。
       lateral_offsets: lateralOffsetsForVariant(variantId),
@@ -463,7 +469,7 @@ export function usePathConstruction(
     }).catch((err) => {
       console.error("[usePathConstruction] sendChangeState failed:", err);
     });
-  }, [masterData, pathId, houseEnds, platformSide, lateralOffsetsForVariant, travelDirectionsForVariant]);
+  }, [masterData, pathId, houseEnds, passageMode, platformSide, lateralOffsetsForVariant, travelDirectionsForVariant]);
 
   /* ---- カテゴリ/種別の選択ハンドラ ---- */
 
@@ -592,6 +598,7 @@ export function usePathConstruction(
       path_id: pathId ?? null,
       platform_side: platformSide,
       house_ends: houseEnds,
+      passage_mode: passageMode,
       initial_height: height,
       initial_embankment_height: embankmentHeight,
       initial_curved: curveMode === "curved",
@@ -601,7 +608,7 @@ export function usePathConstruction(
     }).catch((err) => {
       console.error("[usePathConstruction] sendChangeState (continue) failed:", err);
     });
-  }, [selectedVariant, masterData, pathId, houseEnds, platformSide, height, embankmentHeight, curveMode, followTerrain, lateralOffsetsForVariant, travelDirectionsForVariant]);
+  }, [selectedVariant, masterData, pathId, houseEnds, passageMode, platformSide, height, embankmentHeight, curveMode, followTerrain, lateralOffsetsForVariant, travelDirectionsForVariant]);
 
   /**
    * 現在のパス形状をバックエンドに送信して確定する。
@@ -695,6 +702,7 @@ export function usePathConstruction(
     const pathData: Record<string, unknown> = {
       path_variant: selectedVariant,
       house_ends: selectedVariantData?.type === PATH_STATION_HOUSE ? houseEnds : "both",
+      passage_mode: selectedVariantData?.type === PATH_STATION_HOUSE ? passageMode : "elevated",
       start_point: [rawPoints[0][0], rawPoints[0][1], rawPoints[0][2]],
       end_point: [rawPoints[rawPoints.length - 1][0], rawPoints[rawPoints.length - 1][1], rawPoints[rawPoints.length - 1][2]],
       curved: isCurved,
@@ -749,7 +757,7 @@ export function usePathConstruction(
     }
 
     return { paths: [pathData], align_station_tracks: false };
-  }, [selectedVariant, selectedVariantData, rawPoints, rawEmbankmentHeights, curveMode, startControl, endControl, rawWaypointControls, pathId, railComponents, hasPlatform, houseEnds, platformSide, followTerrain]);
+  }, [selectedVariant, selectedVariantData, rawPoints, rawEmbankmentHeights, curveMode, startControl, endControl, rawWaypointControls, pathId, railComponents, hasPlatform, houseEnds, passageMode, platformSide, followTerrain]);
 
   const [localCanConfirm, setLocalCanConfirm] = useState(false);
   const [maxSpanViolations, setMaxSpanViolations] = useState<PathMaxSpanViolation[]>([]);
@@ -898,8 +906,9 @@ export function usePathConstruction(
 
   useEffect(() => {
     if (pathId != null || selectedVariantData?.type !== PATH_STATION_HOUSE) return;
+    sendSetPassageMode(passageMode).catch(console.error);
     sendSetHouseEnds(houseEnds).catch((err) => console.error("station preview update failed", err));
-  }, [houseEnds, selectedVariantData, pathId]);
+  }, [houseEnds, passageMode, selectedVariantData, pathId]);
 
   /* ---- ホーム設置側の変更をUnityへ逐次通知 ---- */
   // 駅バリアント選択中にホーム設置側トグルを切り替えたら、敷設中プレビューメッシュの
@@ -1176,6 +1185,8 @@ export function usePathConstruction(
     isStationHouse: selectedVariantData?.type === PATH_STATION_HOUSE,
     houseEnds,
     setHouseEnds,
+    passageMode,
+    setPassageMode,
     hasPlatform,
     platformSide,
     setPlatformSide,

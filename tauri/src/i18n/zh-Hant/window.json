@@ -190,7 +190,12 @@
     "toggleShowPlanRoad": "顯示規劃中的道路",
     "toggleShowPlanBuilding": "顯示規劃中的建築",
     "toggleHighlightPublic": "醒目標示公共設施",
-    "showContours": "顯示等高線"
+    "showContours": "顯示等高線",
+    "trayTooltip": "{{name}}：{{state}}",
+    "trayStateVisible": "顯示",
+    "trayStateHidden": "隱藏",
+    "trayStateContour": "等高線顯示",
+    "trayStateTerrainNormal": "一般顯示"
   },
   "grid_settings": {
     "title": "格線",

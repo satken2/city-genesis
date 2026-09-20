@@ -49,6 +49,7 @@ public class StationPlanManager : MonoBehaviour
     private float height;
     private float angle;
     private string houseEnds = "both";
+    private string passageMode = "elevated";
     private int[] travelDirections = System.Array.Empty<int>();
 
     // 配置状態。fixedCenter が null の間はカーソル追従のゴースト、固定後は確定待ち。
@@ -86,7 +87,7 @@ public class StationPlanManager : MonoBehaviour
     /// 敷設設定は引き継がず、UI から渡された値でやり直す(連続設置は地点の固定解除で行う)。
     /// </summary>
     public void InitializeStationPlacement(int platformVariant, int houseVariant, float platformLength,
-        float trackSpacing, float height, float angle, int[] travelDirections, string houseEnds)
+        float trackSpacing, float height, float angle, int[] travelDirections, string houseEnds, string passageMode = "elevated")
     {
         this.platformVariant = platformVariant;
         this.houseVariant = houseVariant;
@@ -96,6 +97,7 @@ public class StationPlanManager : MonoBehaviour
         this.angle = Mathf.Repeat(angle, 360f);
         this.travelDirections = travelDirections ?? System.Array.Empty<int>();
         this.houseEnds = NormalizeHouseEnds(houseEnds);
+        this.passageMode = passageMode;
         fixedCenter = null;
         hasHover = false;
         hoverPreviewDirty = false;
@@ -145,6 +147,8 @@ public class StationPlanManager : MonoBehaviour
             angle = Mathf.Repeat(System.Convert.ToSingle(aObj), 360f);
         if (command.TryGetValue("house_ends", out object heObj) && heObj != null)
             houseEnds = NormalizeHouseEnds(System.Convert.ToString(heObj));
+        if (command.TryGetValue("passage_mode", out object pmObj) && pmObj != null)
+            passageMode = System.Convert.ToString(pmObj);
         if (command.TryGetValue("travel_directions", out object tdObj) && tdObj != null)
             travelDirections = ReadIntArray(tdObj);
         if (command.TryGetValue("reset", out object rObj) && rObj != null && System.Convert.ToBoolean(rObj))
@@ -383,6 +387,7 @@ public class StationPlanManager : MonoBehaviour
             curved = false,
             platform_side = platformSide,
             house_ends = ends,
+            passage_mode = passageMode,
             travel_direction = travelDirection,
             start_point = new List<object> { (object)start.x, (object)startRelY, (object)start.z },
             end_point = new List<object> { (object)end.x, (object)endRelY, (object)end.z },
@@ -437,7 +442,7 @@ public class StationPlanManager : MonoBehaviour
     private string BuildPreviewKey(List<List<Vector3>> platforms, List<Vector3> house)
     {
         var sb = new System.Text.StringBuilder();
-        sb.Append(platformVariant).Append('/').Append(houseVariant).Append('/').Append(houseEnds).Append('/');
+        sb.Append(platformVariant).Append('/').Append(houseVariant).Append('/').Append(houseEnds).Append('/').Append(passageMode).Append('/');
         foreach (var line in platforms)
             foreach (var p in line) sb.Append(p.x.ToString("F2")).Append(',').Append(p.y.ToString("F2")).Append(',').Append(p.z.ToString("F2")).Append(';');
         foreach (var p in house) sb.Append(p.x.ToString("F2")).Append(',').Append(p.y.ToString("F2")).Append(',').Append(p.z.ToString("F2")).Append(';');
@@ -470,6 +475,7 @@ public class StationPlanManager : MonoBehaviour
             ["platform_variant"] = platformVariant,
             ["house_variant"] = houseVariant,
             ["house_ends"] = houseEnds,
+            ["passage_mode"] = passageMode,
             ["position"] = null,
             ["platforms"] = null,
             ["house"] = null,

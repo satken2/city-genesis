@@ -45,7 +45,7 @@
   },
   "regulation": {
     "speedLimitTitle": "제한 속도",
-    "speedLimitDescription": "도로 배리언트별 제한 속도를 설정합니다. 신설 경로에는 여기서 설정한 속도가 적용됩니다.",
+    "speedLimitDescription": "도로 배리언트별 제한 속도를 설정합니다. 이미 건설된 경로에도 적용됩니다(개별로 제한 속도를 지정한 경로 제외).",
     "speedUnit": "km/h",
     "unknownType": "알 수 없음",
     "buildingRegulationTitle": "건축 규제",

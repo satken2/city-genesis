@@ -73,6 +73,7 @@ public static class TerrainAppearanceQA
                 if (error > 3) throw new Exception(report);
                 if (b.All(x => x.r > 240 && x.b > 240 && x.g < 10)) throw new Exception("Error shader rendered");
             }
+            report += CheckContours(camera, terrainGO, farGO, root);
             report += CheckLoadedBoundary(camera, terrainGO, farGO, far, root);
             foreach (var shader in new[] { near.shader, far.shader })
                 foreach (var message in ShaderUtil.GetShaderMessages(shader))
@@ -85,6 +86,50 @@ public static class TerrainAppearanceQA
             File.WriteAllText(root + "/result.txt", "FAIL " + e);
             EditorApplication.Exit(1);
         }
+    }
+
+    static string CheckContours(Camera camera, GameObject terrainGO, GameObject farGO, string root)
+    {
+        RenderSettings.fog = false;
+        farGO.SetActive(false);
+        terrainGO.SetActive(true);
+        var terrain = terrainGO.GetComponent<Terrain>();
+        terrain.materialTemplate.SetColor("_TerrainTint", Color.white);
+        var heights = new float[33, 33];
+        for (int z = 0; z < 33; z++)
+            for (int x = 0; x < 33; x++) heights[z, x] = x / 32f * .4f;
+        terrain.terrainData.SetHeights(0, 0, heights);
+        camera.farClipPlane = 2000;
+        var counts = new int[2];
+        var contrasts = new double[2];
+        for (int i = 0; i < 2; i++)
+        {
+            camera.transform.position = new Vector3(0, i == 0 ? 140 : 1000, 0);
+            Shader.SetGlobalFloat("_ShowContour", 0);
+            var off = Capture(camera, root + $"/contour-{i}-off.png");
+            Shader.SetGlobalFloat("_ShowContour", 1);
+            var on = Capture(camera, root + $"/contour-{i}-on.png");
+            bool previous = false;
+            // 同じ斜面・画面範囲で線の本数と暗さを比較し、距離による密度とコントラストを検証する。
+            for (int x = 10; x < 246; x++)
+            {
+                int p = 128 * 256 + x;
+                double darkening = (off[p].r + off[p].g + off[p].b - on[p].r - on[p].g - on[p].b) / 3.0;
+                bool line = darkening > 12;
+                if (line && !previous) counts[i]++;
+                contrasts[i] = Math.Max(contrasts[i], darkening);
+                previous = line;
+            }
+        }
+        string report = $"contours: near/far lines={counts[0]}/{counts[1]}, peak contrast={contrasts[0]:F1}/{contrasts[1]:F1}\n";
+        if (counts[1] < 1 || counts[0] < counts[1] * 3 || contrasts[0] <= contrasts[1]) throw new Exception(report);
+        terrain.terrainData.SetHeights(0, 0, new float[33, 33]);
+        camera.transform.position = new Vector3(0, 80, 0);
+        var flatOn = Capture(camera, root + "/contour-flat-on.png");
+        Shader.SetGlobalFloat("_ShowContour", 0);
+        var flatOff = Capture(camera, root + "/contour-flat-off.png");
+        if (!flatOn.SequenceEqual(flatOff)) throw new Exception("Contour lines tinted a flat plateau");
+        return report;
     }
 
     static string CheckLoadedBoundary(Camera camera, GameObject terrainGO, GameObject farGO, Material far, string root)

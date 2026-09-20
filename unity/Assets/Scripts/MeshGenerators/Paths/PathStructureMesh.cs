@@ -23,7 +23,7 @@ public sealed class PathStructureMesh
         }
     }
 
-    public void Append(Mesh source, Vector3[] worldVertices)
+    public void Append(Mesh source, Vector3[] worldVertices, bool reverseWinding = false)
     {
         if (vertices.Count + worldVertices.Length > RoadPath.SPLINE_MESH_VERTEX_BUDGET) Finish();
         int start = vertices.Count;
@@ -34,7 +34,15 @@ public sealed class PathStructureMesh
             uv.Add(sourceUv.Length == worldVertices.Length ? sourceUv[i] : Vector2.zero);
         }
         for (int sub = 0; sub < source.subMeshCount; sub++)
-            foreach (int index in source.GetTriangles(sub)) triangles[sub].Add(start + index);
+        {
+            var indices = source.GetTriangles(sub);
+            for (int i = 0; i < indices.Length; i += 3)
+            {
+                triangles[sub].Add(start + indices[i]);
+                triangles[sub].Add(start + indices[i + (reverseWinding ? 2 : 1)]);
+                triangles[sub].Add(start + indices[i + (reverseWinding ? 1 : 2)]);
+            }
+        }
     }
 
     public void Bar(Vector3 a, Vector3 b, float radius, int material = 0, int sides = 6)

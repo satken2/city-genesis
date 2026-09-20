@@ -615,6 +615,7 @@ public class TrackPath : IPathMeshGenerator
         foreach (var range in ranges)
         {
             RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/platform_wall", 0f, 0f, RoadPartHeights.PLATFORM_BASE_ABOVE_SPLINE, leftSide, $"{typeBase}/platform_wall", stretchToWidth: false, compensatePivot: false, clipFrom: range.From, clipTo: range.To, maxTileLength: 0f);
+            PlatformFoundationGenerator.Generate(container, spline, variantBase, typeBase, leftSide, range.From, range.To);
         }
     }
 

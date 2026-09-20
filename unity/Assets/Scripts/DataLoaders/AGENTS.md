@@ -39,13 +39,15 @@
 
 ## 地形の関連機能
 
-`IsUnlockOverlayActive` と `ShowCellBordersAndLabels` の初期値はfalse。`Start`ではオンへ上書きせず、`ToggleUnlockOverlay`による手動の一括切替を維持する。セル開放モードへの自動連動は行わない。
+`IsUnlockOverlayActive` と `ShowCellBordersAndLabels` の初期値はfalse。`Start`ではオンへ上書きせず、`ToggleUnlockOverlay`による一括切替を維持する。セル開放モードへの自動連動は行わない。表示切替の操作経路はTauri(`view:set_display`)に一本化されているが、この未開放セルのグレーアウトにはIPCの入口がなく、現状`ToggleUnlockOverlay`を呼ぶ箇所は無い(機構だけが残っている)。Tauriの「セル」レイヤーが切り替えるのは`DebugCellVisualizer`のセル格子であって、ここのセル境界線・座標ラベルとは別物。
 
 遠景の沈み込みは `UltraFarTerrainSink.hlsl` をForward・Shadow・GBuffer・Depth・DepthNormalsで共用する。`_FarGridStep` はビルダーと同じ格子間隔（最低1m）を渡す。頂点の周囲1格子分が全てロード済みの場合だけ沈め、境界をまたぐ面は元の高さに残す。頂点自身のセルだけで沈めると三角形の補間が未ロード側も引き下げ、海が見える裂け目を作る。`Tests/TerrainAppearance/run-unity.ps1` が境界・アンロード・領域移動と内部沈み込みを描画検証する。
 
 通常TerrainとUltraFarメッシュは `Assets/Shaders/TerrainSurfaceAppearance.hlsl` の手続き地表色・ディテール法線・岩肌・PBR照明を共用する。設定は両方とも `TerrainManager.ApplyTerrainMaterialSettings` から渡す。UltraFarのシェーダー名 `Custom/DepthOffsetSimpleLitFar` は既存参照のため維持しているが、Forwardの照明はPBRである。未開放色は両方とも照明・霧の後の `_TerrainTint` 乗算。遠景だけ `_BaseColor` で暗くすると霧・手続き色への作用が変わるため使わない。地形の色を調整するときは遠景にも反映し、`Tests/TerrainAppearance/run-unity.ps1` で比較描画を確認する。
 
 
+
+等高線も `TerrainSurfaceAppearance.hlsl` で共用する。各地表点からカメラまで150m以内は2m補助線と濃い青灰色の縁取り付き線、600m以上は10m/50mの茶色の線で、間は固定標高の線をフェードする。表示トグルは `SetContourLinesVisible` の `_ShowContour`。描画検証は `Tests/TerrainAppearance/run-unity.ps1`、詳細は公開E文書「等高線」。
 
 ## 水面と川 (WaterSurfaceManager / RiverSurfaceManager / RiverStore)
 
@@ -155,7 +157,7 @@
 - **表示方式は ZoneManager / ResourceManager と同じ ScreenSpaceOverlay Canvas + Image**: 距離に依存せず常に一定のスクリーンサイズで表示する。ワールド座標は毎フレーム `Camera.WorldToScreenPoint` でスクリーン座標に変換して `RectTransform.anchoredPosition` を更新する(カメラ移動が1m/2°未満のフレームはスキップして間引き)。建物/道路の子にはしないため VisualModeObject のステータス連動や LOD アンロードの影響を受けない。
 - **1オブジェクトに複数ビットが立っている場合はアイコンを水平に並べる**: 並べ方 `ZoneManager.cs:763` と同じ `(i - (count-1)/2f) * alertIconHorizontalSpacing` 式で中央揃えファンアウト。
 - **アイコンSpriteの選択は AlertIconFactory が担当**: `AlertIconFactory.Instance.GetIconForAgent(bit)` / `GetIconForPath(bit)` を呼び出す。AgentとPathで同じビット値(例: CONSTRUCTION_SHORTAGE=1)でも別のアイコンを割り当てられるよう、ファクトリ内部は `Dictionary<(string entityType, int bit), Sprite>` で保持する。未設定ビットのSpriteはnullになりそのビットのアイコンはスキップされる。AlertIconFactory は BuildingIconFactory / AgentIconFactory / PathIconFactory と同じく `Utils/AlertIconFactory.cs` に配置し、Inspector から名前付き `[SerializeField] Sprite` を割り当てるパターンに従う。
-- **表示フィルタのマスクは agent/path で名前空間を分ける**: UI(表示パネルのアラートタブ)から `view:change_view` の `sub_mode` にビットマスクが届き、`ApplyAlertMode` → `SetFilterMask` に渡る。`ALERT_AGENT_*` と `ALERT_PATH_*` は同じビット値(1/2/4…)を使うため、マスクでは **下位バイト=agent、上位バイト=path(`Constants.ALERT_PATH_MASK_SHIFT`=8シフト)** に分離する。`EnumerateActiveBits` は path のとき比較前にマスクを右シフトして下ろす。既定値は `AlertManager.DefaultFilterMask`(全種別ON)で、`ApplyAlertMode` の未指定時もこれを使う(定数の直書き禁止)。**アラート定数を追加したら `AGENT_ALERT_BITS` / `PATH_ALERT_BITS` の配列とUI側の `ALERT_CARDS` に足すこと**(配列に無いビットは無言で表示されない)。
+- **表示フィルタのマスクは agent/path で名前空間を分ける**: UI(表示パネルのアラートタブ)から `view:change_view` の `sub_mode` にビットマスクが届き、`ApplyAlertMode` → `SetFilterMask` に渡る。`ALERT_AGENT_*` と `ALERT_PATH_*` は同じビット値(1/2/4…)を使うため、マスクでは **下位バイト=agent、上位バイト=path(`Constants.ALERT_PATH_MASK_SHIFT`=8シフト)** に分離する。`EnumerateActiveBits` は path のとき比較前にマスクを右シフトして下ろす。既定値は `AlertManager.DefaultFilterMask`(全種別ON)で、`ApplyAlertMode` の未指定時もこれを使う(定数の直書き禁止)。**アラート定数を追加したら `AGENT_ALERT_BITS` / `PATH_ALERT_BITS` の配列とUI側の `ALERT_CARDS` に足すこと**(配列に無いビットは無言で表示されない)。アラート全体の表示ON/OFF(`IsVisible` / `ToggleVisibility`)にはIPCの入口がなく、UIからの全消しは全種別OFF(マスク0)で行う。
 - **火災系2ビットはアイコンを作らず `FireEffectManager` に委譲する**: `ALERT_AGENT_ON_FIRE` / `ALERT_AGENT_ACCIDENTAL_FIRE` は `AGENT_ALERT_BITS` ではなく `AGENT_VFX_BITS` に置く。この配列は `DefaultFilterMask` には含めるがアイコン生成には使わないため、表示パネルのトグルはそのまま炎・煙のON/OFFとして効く。`ApplyAlerts` は**アイコン用Canvas/AlertIconFactory の準備前に**火災側へ応答を渡すこと(火災エフェクトはどちらにも依存しないため、シーンにIconFactoryが無くても動く)。`ClearAll` は火災エフェクトも破棄する全消去、`ClearIcons` はアイコンのみ。
 - **廃墟(倒壊)アイコンだけは alert ビットではなく status 由来**: `STATUS_COLLAPSED` の対象は `alert==0` でもバックエンドの `/alerts` が返す(`services/utility/alert.py`)。廃墟は撤去するまで消えず出っぱなしになるため、表示フィルタ専用ビット `Constants.ALERT_DISPLAY_RUIN`(65536。エンティティの `alert` には決して立たない)でON/OFFする。agent/path 共通の1ビット。
 - **フィルタで表示対象が0になった対象はアイコンを破棄する**: `UpdateIcons` は「廃墟表示OFF かつ有効ビット0」なら `DestroyIcons(key)` して抜ける。`/alerts` の応答に含まれる=`newKeys` に入るため、ApplyAlerts 末尾の削除スイープでは消えない。`DestroyIcons` は `_worldPositions` / `_baseScreenPositions` / `_isBehindCache` も揃えて消すこと(`_baseScreenPositions` を残すと `_icons` との件数不一致でスクリーン座標更新が毎フレーム走る)。

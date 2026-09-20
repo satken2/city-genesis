@@ -2271,7 +2271,7 @@ pub fn run() {
             move |window, event| {
                 match event {
                     // ウィンドウの×ボタン(Alt+F4含む)。
-                    // - main/topmenu/HUD3枚 はアプリの主要サーフェスなので、
+                    // - main/topmenu/HUD各枚 はアプリの主要サーフェスなので、
                     //   閉じる操作を「アプリ全体の終了要求」として扱い、
                     //   終了シーケンス(Unity通知→バックエンド統括shutdown→自終了)に合流させる。
                     // - open_windows 管理下のポップアップは既存の hide+LRU 再利用
@@ -2283,7 +2283,8 @@ pub fn run() {
                             "main" | "topmenu"
                             | window::LABEL_ICON_PANEL
                             | window::LABEL_COCKPIT
-                            | window::LABEL_SYSTEM_TRAY => {
+                            | window::LABEL_SYSTEM_TRAY
+                            | window::LABEL_DISPLAY_TRAY => {
                                 api.prevent_close();
                                 let app = window.app_handle().clone();
                                 let state = event_state.clone();

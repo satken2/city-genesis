@@ -12,6 +12,10 @@
     "houseEnds": "역사 배치",
     "houseEnds_both": "양쪽 끝",
     "houseEnds_start": "시작점",
-    "houseEnds_end": "끝점"
+    "houseEnds_end": "끝점",
+    "passageMode": "통로 배치",
+    "passageMode_elevated": "고가",
+    "passageMode_ground": "지상",
+    "passageMode_underground": "지하"
   }
 }
