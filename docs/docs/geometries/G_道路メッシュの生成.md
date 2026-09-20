@@ -30,7 +30,7 @@
 
 主径間のケーブルは塔頂間の放物線で、中央の高さは塔高の25%。側径間は桁端の定着点と塔頂を結び、吊材は約3m間隔で垂直に配置する。塔頂を必ずサンプリング点に含めるため、橋の長さを変えても接続が外れない。ケーブル径や主塔の奥行きを道路長とともに引き伸ばさない。構造メッシュは`PathStructureMesh`が60,000頂点ごとに分割し、共有パスマテリアルと`IntersectionMeshOwner`による解放を使う。
 
-制作元は`genesis-gallery/pipeline/jobs/build_landmark_paths.py`と`library/paths.blend`。実FBXによる端部・接地・塔位置の検証は`Tests/Intersections/run-unity.ps1 -LandmarkPaths`。ギャラリーの吊り橋見本は160m、街路見本は30mであり、ゲームの敷設長を固定するものではない。
+制作元は`genesis-gallery/pipeline/jobs/build_landmark_paths.py`と`blender/paths.blend`。実FBXによる端部・接地・塔位置の検証は`Tests/Intersections/run-unity.ps1 -LandmarkPaths`。ギャラリーの吊り橋見本は160m、街路見本は30mであり、ゲームの敷設長を固定するものではない。
 
 ## ロープウェイ601・ロープウェイ駅602のモデル
 
@@ -40,7 +40,7 @@ pillarは天端0・下端-8m。601は鋼管柱、602は左右の白い角柱で�
 
 602はstation_shellで白い床版・柱・腰壁、両側のガラス壁、濃い青灰色の曲面屋根と天窓を描く。前後は開放する。床版は幅8m、屋根は約8.5m、長手8m。実配置の床上面はスプライン-3.3m、床版下面-3.6mで受け梁へ接続する。ケーブル原点を保つため屋根を路面として扱わない。shellは実寸幅・maxTileLength=0・normalizeBodySurface=falseで反復し、区間の長さに合う整数タイル数へ合わせる。道路用の区間LODは適用しない。鉄道用platform_widthは使用しない。
 
-制作元はgenesis-gallery/library/paths.blendとpipeline/jobs/build_ropeway.py。既存のPATH系およびBD_WHITE_WALL・BD_WINDOW・BD_DARK_METALを共有する。ガラスは不透明な窓材で表現する。かご・動的なたるみ・終端折り返し機構・階段は含まない。床が地形へ埋まらない高さで敷設する。Unity取り込み後の実寸・接点・床版の接合・自動プレハブ生成はunity/Tests/Ropeway/run.ps1で検証する。
+制作元はblender/paths.blendとgenesis-gallery/pipeline/jobs/build_ropeway.py。既存のPATH系およびBD_WHITE_WALL・BD_WINDOW・BD_DARK_METALを共有する。ガラスは不透明な窓材で表現する。かご・動的なたるみ・終端折り返し機構・階段は含まない。床が地形へ埋まらない高さで敷設する。Unity取り込み後の実寸・接点・床版の接合・自動プレハブ生成はunity/Tests/Ropeway/run.ps1で検証する。
 
 ## 概要
 
@@ -275,7 +275,7 @@ SplineMesh に渡すパーツは、元のメッシュの寸法と道路の設計
 
 連続パーツは進行方向2.5mのタイルとし、既存の `PATH_ASPHALT`・`PATH_CONCRETE`・`PATH_METAL` を共有する。道路設備（街路樹・街灯・柵・電柱）の個別設定は許可しない。高欄は道路設備の柵ではなく、常設の `wall` パーツである。
 
-制作元は `genesis-gallery/library/paths.blend` の `p223/*` コレクション。著作ジョブは `pipeline/jobs/build_p223.py`、書き出し先は `Assets/Models/Paths/p223/`。Unityのミラープレハブは通常の自動生成に従う。
+制作元は `blender/paths.blend` の `p223/*` コレクション。著作ジョブは `genesis-gallery/pipeline/jobs/build_p223.py`、書き出し先は `Assets/Models/Paths/p223/`。Unityのミラープレハブは通常の自動生成に従う。
 
 ### 5.4 歩行者専用道路301・歩行者吊り橋302
 
@@ -287,7 +287,7 @@ SplineMesh に渡すパーツは、元のメッシュの寸法と道路の設計
 
 主塔は専用towerパーツで、柱中心は±2.8m、著作時の塔頂は12m。既存のSuspensionBridgeGeneratorが各径間の20%・80%に配置し、高さを径間長へ合わせる。ケーブル・吊材・地盤までの脚は同生成器の共通寸法で生成する。8m未満の短い区間には主塔とケーブルを置かない。
 
-舗装は通常・接写とも12三角形、302の高欄はNormalで40頂点/m以内に収める。近景では同じboundsのbody_close・wall_closeへ切り替える。302のbodyは長手方向の横目地を持たず、single_spanによる伸長でも大きな目地模様にならない。制作原本はgenesis-gallery/library/paths.blend、著作ジョブはpipeline/jobs/build_pedestrian_paths.py。Unityのプレハブは通常の自動生成に従う。
+舗装は通常・接写とも12三角形、302の高欄はNormalで40頂点/m以内に収める。近景では同じboundsのbody_close・wall_closeへ切り替える。302のbodyは長手方向の横目地を持たず、single_spanによる伸長でも大きな目地模様にならない。制作原本はblender/paths.blend、著作ジョブはgenesis-gallery/pipeline/jobs/build_pedestrian_paths.py。Unityのプレハブは通常の自動生成に従う。
 
 ## 6. アセットの命名規則とフォルダ構成
 
@@ -828,7 +828,7 @@ SplineMesh は子オブジェクトとして生成されるため、親オブジ
 
 ### 15.6 工事車両の制作と検証
 
-4種の原本は `genesis-gallery/library/props.blend`、再生成ジョブは `pipeline/jobs/build_construction_vehicles.py`。コレクションとFBXの名前は `construction_paver` / `construction_roller` / `construction_excavator` / `construction_crane`。配置原点は接地0・水平中心、Unityの+Zが前方。既存の車両用材質と黄色塗装を共有する。施工表示は固定名で読むが、飾りとして自由に置けるよう数値ID 201〜204 の別名FBX(メッシュ共有)も `prop_master` に登録している([地形プロップ](M_地形プロップ.md) §M.7.2)。
+4種の原本は `blender/props.blend`、再生成ジョブは `genesis-gallery/pipeline/jobs/build_construction_vehicles.py`。コレクションとFBXの名前は `construction_paver` / `construction_roller` / `construction_excavator` / `construction_crane`。配置原点は接地0・水平中心、Unityの+Zが前方。既存の車両用材質と黄色塗装を共有する。施工表示は固定名で読むが、飾りとして自由に置けるよう数値ID 201〜204 の別名FBX(メッシュ共有)も `prop_master` に登録している([地形プロップ](M_地形プロップ.md) §M.7.2)。
 
 `library.py export --category props --only construction_` で書き出し、Propsバリデータと `build_gallery.py --only construction_` を実行する。Unityへのミラーは `ModelPrefabGenerator` が生成する。`unity/Tests/ConstructionPaths/run-unity.ps1` は実FBXとURP材質で0・12.5・25・57.5・90・99・100%の描画、曲線、地下、クリック面、進捗の受信とキャッシュキーを検証する。橋脚の干渉回帰は `unity/Tests/Pillars/run-unity.ps1`。
 

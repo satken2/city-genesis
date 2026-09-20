@@ -67,7 +67,7 @@
 | 材質 | 既存の `PROP_*` と `BD_YELLOW` を名前で共有する。新規材質は作らない |
 | LOD | `_close` / `_far` は使わない(常に無印を描く) |
 
-正本は `genesis-gallery/library/props.blend`、生成ジョブは `pipeline/jobs/build_ambient_vehicles.py`(寸法・面数・再生成手順は `pipeline/jobs/ambient_vehicles.md`)。バリデータは `ambient_` 接頭辞のファイルを環境演出として扱い、水平中心と専用の頂点予算(Normal 3,500)だけを検査する。船は喫水線原点なので地形プロップの接地検査は適用しない。
+正本は `blender/props.blend`、生成ジョブは `genesis-gallery/pipeline/jobs/build_ambient_vehicles.py`(寸法・面数・再生成手順は `genesis-gallery/pipeline/jobs/ambient_vehicles.md`)。バリデータは `ambient_` 接頭辞のファイルを環境演出として扱い、水平中心と専用の頂点予算(Normal 3,500)だけを検査する。船は喫水線原点なので地形プロップの接地検査は適用しない。
 
 ## V.6. 検証と制限
 

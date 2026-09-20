@@ -95,7 +95,7 @@ GraphicsSettingsのInstancing VariantsはKeep Allに設定する。実行時に�
 
 ### M.5.1. モデル制作規約
 
-1種別=1FBXで、`Assets/Models/Props/{prop_type}.fbx` に置く（閾値フォルダ・パーツ分割はない）。`{prop_type}_close.fbx` と `{prop_type}_far.fbx` は任意で、無印と同じ原点・水平bbox・天端で著作する。Farは幹を省いて底面を上げてよい。Closeは底面も無印と一致させる。ソースはBlenderライブラリ `genesis-gallery/library/props.blend`（コレクション名=種別ID）で、FBXは書き出し先である。
+1種別=1FBXで、`Assets/Models/Props/{prop_type}.fbx` に置く（閾値フォルダ・パーツ分割はない）。`{prop_type}_close.fbx` と `{prop_type}_far.fbx` は任意で、無印と同じ原点・水平bbox・天端で著作する。Farは幹を省いて底面を上げてよい。Closeは底面も無印と一致させる。ソースはBlenderライブラリ `blender/props.blend`（コレクション名=種別ID）で、FBXは書き出し先である。
 
 | 項目 | 規約 |
 |---|---|
@@ -114,7 +114,7 @@ GraphicsSettingsのInstancing VariantsはKeep Allに設定する。実行時に�
 
 ### M.5.2. 森林用の木モデル
 
-`pipeline/jobs/build_prop_trees.py` が針葉樹・広葉樹と専用Farを `library/props.blend` に著作する。針葉樹は裾の広い4段の枝葉、広葉樹は重なる4個の葉塊で樹冠を作る。葉ごとの面や透過カードを使わず、低ポリゴンの輪郭と陰影に面を割り当てる。幹と葉は既存の2マテリアルを共有する。幹は5角柱のまま、著作座標の根元半径0.46m・上端半径0.24mとし、樹種ごとの寸法倍率を掛ける。幹の太さを調整しても樹冠寸法・高さ・面数は変えない。
+`genesis-gallery/pipeline/jobs/build_prop_trees.py` が針葉樹・広葉樹と専用Farを `blender/props.blend` に著作する。針葉樹は裾の広い4段の枝葉、広葉樹は重なる4個の葉塊で樹冠を作る。葉ごとの面や透過カードを使わず、低ポリゴンの輪郭と陰影に面を割り当てる。幹と葉は既存の2マテリアルを共有する。幹は5角柱のまま、著作座標の根元半径0.46m・上端半径0.24mとし、樹種ごとの寸法倍率を掛ける。幹の太さを調整しても樹冠寸法・高さ・面数は変えない。
 
 葉面はスムーズ法線を使い、幹と針葉樹の枝段の底は平面法線を保つ。大きな三角面の境界で陰影が急変するのを抑えるが、輪郭の頂点数は増やさない。葉材質は非金属・粗さ0.9（UnityのSmoothnessは0.1）とし、針葉樹は深緑、広葉樹は黄緑を抑えた緑にする。`Props/Textures/PROP_*_color.png`の256×256画像に固定乱数の大小の色むらを焼き、無印とFarで共有する。2m基準のキューブ投影UVを使い、透明描画・追加サブメッシュ・専用シェーダーは増やさない。画像はsRGB、材質の乗算色は白にして二重着色を避ける。Blenderのノードだけで成立する質感にはせず、FBXから画像を外部参照する。
 
@@ -186,7 +186,7 @@ Unityからの`edit_prop:update_instances`とPOST/GETの各個別配置は`x, y,
 
 入口には屋根も階段室の側壁も付けず、三方の柵・低い縁と黒い内部を持たせる。黒い底面は原点から4cm上でホームの連続床を覆い、手前の浅い3段が奥へ下りる印象を作る。原点は入口を置くホーム面に合わせる。
 
-著作元は`genesis-gallery/library/props.blend`、再生成ジョブは`pipeline/jobs/build_prop_station_stairs.py`。道路のPATH_CONCRETE・PATH_METALと駅舎のBD_WHITE_WALLを共有し、黒い内部のみPROP_STAIR_VOIDを使う。新しい外部素材は使わない。
+著作元は`blender/props.blend`、再生成ジョブは`genesis-gallery/pipeline/jobs/build_prop_station_stairs.py`。道路のPATH_CONCRETE・PATH_METALと駅舎のBD_WHITE_WALLを共有し、黒い内部のみPROP_STAIR_VOIDを使う。新しい外部素材は使わない。
 
 ### M.7.2. 乗り物モデルの手動配置
 
@@ -215,7 +215,7 @@ Unityからの`edit_prop:update_instances`とPOST/GETの各個別配置は`x, y,
 道路との自動接続、通行経路、歩行者の昇降、街路樹や街灯の除去は行わない純装飾である。
 専用Farは階段を傾斜床へ替えて屋根・開放側面・橋脚の輪郭を維持する。
 個別配置する構造物として、森林向け600頂点目安の警告を許容する。
-著作元は`props.blend`、ジョブは`pipeline/jobs/build_prop_footbridges.py`。
+著作元は`props.blend`、ジョブは`genesis-gallery/pipeline/jobs/build_prop_footbridges.py`。
 既存材質を共有する自作モデルで、外部素材は使用しない。
 
 ## M.8. 検証

@@ -21,7 +21,7 @@ platform_wallと同じ島式結合・近接線路による省略範囲、左右�
 メッシュは60,000頂点以内に分割し、同一長手断面のスプラインと地盤の照会を共有する。
 パーツを持たない既存ホームには下部外壁を生成しない。
 
-制作元は`genesis-gallery/pipeline/jobs/build_p462.py`と`library/paths.blend`。
+制作元は`genesis-gallery/pipeline/jobs/build_p462.py`と`blender/paths.blend`。
 各専用パーツは8m周期・長手1m以下の分割を持つ。ギャラリーは平坦地の高架見本で下部外壁も接地させる。
 実FBX検証は`Tests/HighStandardPlatform/run.ps1`。高さ6/15/30m・左右・逆方向・区間クリップを検査する。
 
@@ -31,7 +31,7 @@ platform_wallと同じ島式結合・近接線路による省略範囲、左右�
 
 502のホームは中心線から1.5〜4.5m、上面はスプライン+1.5m。platformが乗降縁・黄色帯・桁から張り出す床版と受け梁を持ち、platform_wallが外縁のガラス壁、platform_panelが動的デッキの材質を供給する。右側用の形状はBlender -X側へ著作し、Unityでは+X側となる。長手8mタイルを1m以下に分割して曲線へ追従する。上屋はホーム幅全体を覆う白い折板屋根（最高5.22m）と4m周期の金属柱で、platformに含める。外壁は天端4.82mのガラス面・2m周期の白い縦枠・金属横桟を持つ。島式結合では壁だけが省略され、上屋は残る。階段は含まない。
 
-制作元は`genesis-gallery/pipeline/jobs/build_monorail.py`と`library/paths.blend`。車両の先頭車308・中間車309は[M文書](M_地形プロップ.md)の手動配置プロップで、原点を桁の上面へ置くと床高がホームに揃う。UnityのFBX取り込み検証は`Tests/Monorail/run.ps1`。
+制作元は`genesis-gallery/pipeline/jobs/build_monorail.py`と`blender/paths.blend`。車両の先頭車308・中間車309は[M文書](M_地形プロップ.md)の手動配置プロップで、原点を桁の上面へ置くと床高がホームに揃う。UnityのFBX取り込み検証は`Tests/Monorail/run.ps1`。
 
 ## レンガアーチ高架（404・414）
 
@@ -45,7 +45,7 @@ platform_wallと同じ島式結合・近接線路による省略範囲、左右�
 
 道路・線路の通行空間と重なるアーチは、8m基準のタイルごと丸ごと省く。変形後のアーチ全体（開口内も含む）の外接円と高さ範囲を既存のPillarClearanceで判定する保守的な近似なので、交差部周辺のアーチも省く場合がある。道床・軌道・側壁・架線は維持する。同じ道床標高の隣接線路を支持構造に含めないよう、判定上端は道床面より1cm下げる。上を通る道路や深いトンネルは高さが重ならなければ省略を起こさない。周辺道路の追加・移動・削除で描画revisionを更新し、開口を再計算する。相手の描画有無には依存しない。
 
-制作元は`genesis-gallery/pipeline/jobs/build_landmark_paths.py`と`library/paths.blend`。材質は既存の道床・軌道・金属を共有し、レンガの色材のみ`PATH_HERITAGE_BRICK`と`PATH_HERITAGE_BRICK_LIGHT`を使用する。外部モデル・画像テクスチャは取り込まない。高さ6m・15mの実FBX検証は`Tests/Intersections/run-unity.ps1 -LandmarkPaths`。
+制作元は`genesis-gallery/pipeline/jobs/build_landmark_paths.py`と`blender/paths.blend`。材質は既存の道床・軌道・金属を共有し、レンガの色材のみ`PATH_HERITAGE_BRICK`と`PATH_HERITAGE_BRICK_LIGHT`を使用する。外部モデル・画像テクスチャは取り込まない。高さ6m・15mの実FBX検証は`Tests/Intersections/run-unity.ps1 -LandmarkPaths`。
 
 ## 概要
 
@@ -100,9 +100,9 @@ platform_wallと同じ島式結合・近接線路による省略範囲、左右�
 `_close` は `body_elevated_close` / `track_elevated_close` の名前で同様に優先される。
 
 401/411/451/461 は `track`（バラスト用の成形PC枕木）と `track_elevated`（面取りしたスラブと独立支承）を持ち、
-それぞれ `genesis-gallery/library/paths.blend` 内で同一の Mesh データを参照する。オブジェクトを
+それぞれ `blender/paths.blend` 内で同一の Mesh データを参照する。オブジェクトを
 別々に置いても、枕木や締結部の編集はグループ全体に反映される。
-両形式のレール断面と締結部は `pipeline/jobs/build_electric_rail.py` の共通関数で生成する。
+両形式のレール断面と締結部は `genesis-gallery/pipeline/jobs/build_electric_rail.py` の共通関数で生成する。
 レール中心位置は既存接続端に合わせて ±0.7175m、踏面はパーツ原点から0.355m、
 タイル長は2m、枕木・支承の周期は0.5m。中心間隔とレール内面間の軌間は区別する。
 
@@ -347,7 +347,7 @@ Blender `(x,y,z)` は Unity `(-x,z,-y)` になるため、ライブラリでは�
 
 `buffer_stop` と `platform_end` をバリアント→タイプの順で読み込む。標準パーツは
 `p4` に置き、地上・高架・電化・非電化で共有する。マスターへの追加項目は不要。
-制作元は `genesis-gallery/pipeline/jobs/build_track_ends.py` と `library/paths.blend`。
+制作元は `genesis-gallery/pipeline/jobs/build_track_ends.py` と `blender/paths.blend`。
 
 - `buffer_stop`: 軌道中央・枕木下面を原点とし、Unityの+Zを列車が来る方向にする
   （Blenderでは-Y）。接続ノードに他の鉄道パスがない場合、各軌道の端から1m内側へ実寸配置。

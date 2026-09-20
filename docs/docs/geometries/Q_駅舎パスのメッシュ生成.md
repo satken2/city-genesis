@@ -75,7 +75,7 @@
 共通モデルは幅5.2m・長さ4m、床・腰壁・支柱・屋根を持ち、両端は開放する。
 地上型の床上面は0.08m、上空型は5.5m。屋根天端は床から3.2m上で、各92三角形。
 上空型はホーム上へ橋脚を落とさない連続桁。地面原点・実寸の規約は専用通路と共通。
-`build_shared_station_passages.py` が `library/paths.blend` に著作し、既存の駅舎材質を共用する。
+`build_shared_station_passages.py` が `blender/paths.blend` に著作し、既存の駅舎材質を共用する。
 地下は代替の板も描画しない。
 
 2003・2013の線部分には `Paths/p2003/body`・`Paths/p2013/body` の専用通路を使う。
@@ -83,8 +83,8 @@
 2003は幅5.2m・屋根天端3.65m・床上面0.08m、2013は幅6.4m・屋根天端4.02m・
 床上面0.14m。両者とも長さ4mのタイル、床下端-0.4m、48三角形。
 マスターのwidthは判定帯用であり、通路はこの実寸を保つ（§1）。
-著作元は `genesis-gallery/library/paths.blend`、生成ジョブは
-`pipeline/jobs/build_station_passages.py`。駅舎本体と既存材質を共有し、
+著作元は `blender/paths.blend`、生成ジョブは
+`genesis-gallery/pipeline/jobs/build_station_passages.py`。駅舎本体と既存材質を共有し、
 高架の桁や昇降設備は通路パーツに含めない。
 ギャラリーの直線30mプレビューも駅舎種別は実寸幅・地面原点で配置し、
 道路用の幅補正と地上高0.2mのオフセットを適用しない。
@@ -94,15 +94,15 @@
 2000「簡易駅舎」は棒式ホーム脇のプレハブ風平屋。白いパネル壁・薄い片流れ屋根・
 小庇・前後の引き戸と窓を持ち、建屋本体5.3×3m、基礎込み5.9×3.95m、地上高2.99m。
 専有領域は6×4m、横ずれ0、outside配置。`stations.blend`の`2000/body`を
-`pipeline/jobs/build_station_2000.py`が生成し、既存材質を共有した1メッシュ・688三角形で構成する。
+`genesis-gallery/pipeline/jobs/build_station_2000.py`が生成し、既存材質を共有した1メッシュ・688三角形で構成する。
 跨線橋・階段・連絡通路パーツは持たない。model_typeは通常のstation_houseで、
 通路モデル欠落時の代替表示は共通仕様に従う。建屋だけの特別な描画方式は設けない。
 
-駅舎の著作元は `genesis-gallery/library/stations.blend` の `2001/body`・
-`2002/body`・`2011/body`。`pipeline/jobs/build_stations.py` が既存マテリアルを共有し、
+駅舎の著作元は `blender/stations.blend` の `2001/body`・
+`2002/body`・`2011/body`。`genesis-gallery/pipeline/jobs/build_stations.py` が既存マテリアルを共有し、
 各モデルを1メッシュで生成する。通常建物の `Buildings/a2001` 等とは別のアセットである。
-`2012/body`・`2013/body` は同じライブラリへ `pipeline/jobs/build_station_halls.py`
-が生成する。2003（高架下簡易駅舎）は `pipeline/jobs/build_station_2003.py` が
+`2012/body`・`2013/body` は同じライブラリへ `genesis-gallery/pipeline/jobs/build_station_halls.py`
+が生成する。2003（高架下簡易駅舎）は `genesis-gallery/pipeline/jobs/build_station_2003.py` が
 同じライブラリの `2003/body` へ生成する。駅舎建屋は各1メッシュ。
 
 | バリアント | 造形 | 三角形数 |
