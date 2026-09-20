@@ -394,6 +394,7 @@ public static partial class PropsQA
                     Build(false);
                 }
                 else SetupGpuRender();
+                if (renderStage == 10) SetupForestBoundaryRender();
                 camera.targetTexture=new RenderTexture(1200,850,24);
                 cpuTotal=0;
             }
@@ -404,6 +405,7 @@ public static partial class PropsQA
             renderFrame++;
             if(renderFrame<30)return;
             string filename=renderStage==0?"preview-near.png":renderStage==1?"preview-far.png":renderStage==2?"preview-50000.png":renderStage==3?"forest-conifer.png":renderStage==4?"forest-broadleaf.png":renderStage==5?"station-stair-props.png":renderStage==6?"gpu-forest-near.png":renderStage==7?"gpu-forest-far.png":renderStage==8?"gpu-forest-mountain.png":"gpu-forest-mountain-no-cluster.png";
+            if (renderStage == 10) filename="gpu-forest-overview-boundary.png";
             results.Add(filename+" warmed submit+Camera.Render CPUms/frame="+(cpuTotal/20).ToString("F2")+
                 ", submittedBatches="+managerType.GetProperty("SubmittedBatchCount").GetValue(manager)+
                 ", submeshInstances="+managerType.GetProperty("SubmittedInstanceCount").GetValue(manager)+
@@ -416,7 +418,7 @@ public static partial class PropsQA
             if(renderStage==9)CheckForestSunlight(tex);
             UnityEngine.Object.DestroyImmediate(tex);UnityEngine.Object.DestroyImmediate(rt);
             renderFrame=0;renderStage++;
-            if(renderStage<10)return;
+            if(renderStage<11)return;
             EditorApplication.update-=RenderTick;
             var buffers=Chunks.Values.Cast<object>().SelectMany(c=>((IList)Field(c,"forests")).Cast<object>()).Select(p=>(GraphicsBuffer)Field(p,"points")).ToArray();
             managerType.GetMethod("ClearAllCells").Invoke(manager,null);

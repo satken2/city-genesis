@@ -68,3 +68,5 @@ Unity 6000.4.2f1、500m四方・8×8小区画での単発計測。初回のcompu
 Forest.shaderはUniversalFragmentPBRと_CLUSTER_LIGHT_LOOPバリアントを使う。材質のSmoothness・Metallicも引き継ぐ。検証専用のForestWithoutCluster.shaderは同じソースからクラスタのpragmaだけを取り除いて独立環境内に作る。本編へは含めない。同一の山・カメラ・光源で比較し、対応を外すと太陽光が消えて暗い平坦な森になることを再現した。森林画素の平均輝度は対応あり101.67、対応なし57.34（8bit RGBの加重輝度）。修正版が15%以上明るいことを回帰条件とする。833,394チェック通過。
 
 比較画像はgpu-forest-mountain.png（修正版）とgpu-forest-mountain-no-cluster.png（不具合の再現）。本編と同じ描画設定を使うが、実際の都市・天気・カメラの撮影ではない。モデルFBXは変更していない。
+
+遠景森林の検証では、全域マスクの道路・湖・海の除外、最大テクスチャ寸法、取消し、セッション終了時の無効化を確認する。`gpu-forest-overview-boundary.png`は山の左半分をモデル生成済み、右半分を未生成として、実FBXと地形の樹冠表現をつないだ画像。実モデルの材質から得た広葉樹アルベドはlinear RGB約(0.25,0.36,0.17)。`Tests/TerrainAppearance/run-unity.ps1`では通常/UltraFarの森林画像、生成待ち時の置換、1,200〜1,500mの段階的変化を確認する。両地形の画素平均絶対差は約3.09/255で、微小な投影差による細かな樹冠のずれを含む。街全体でのGPU時間・実プレイの見え方はこの独立テストからは保証しない。

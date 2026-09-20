@@ -8,7 +8,7 @@ Copy-Item "$PSScriptRoot/TerrainAppearanceQA.cs" "$qaRoot/Assets/Editor" -Force
 foreach ($name in @('DepthOffsetTerrainLit.shader', 'DepthOffsetSimpleLitFar.shader')) {
     Copy-Item "$unityRoot/Assets/Resources/Shaders/$name" "$qaRoot/Assets/Resources/Shaders" -Force
 }
-foreach ($name in @('TerrainSurfaceAppearance.hlsl', 'DepthOffsetTerrainLitMacroVariation.hlsl', 'TerrainCliffRock.hlsl', 'TerrainRiverBank.hlsl', 'UltraFarTerrainSink.hlsl')) {
+foreach ($name in @('ForestCoverage.hlsl', 'TerrainSurfaceAppearance.hlsl', 'DepthOffsetTerrainLitMacroVariation.hlsl', 'TerrainCliffRock.hlsl', 'TerrainRiverBank.hlsl', 'UltraFarTerrainSink.hlsl')) {
     Copy-Item "$unityRoot/Assets/Shaders/$name" "$qaRoot/Assets/Shaders" -Force
 }
 foreach ($name in @('PC_RPAsset.asset', 'PC_Renderer.asset', 'DefaultVolumeProfile.asset', 'UniversalRenderPipelineGlobalSettings.asset')) {

@@ -73,6 +73,7 @@ public static class TerrainAppearanceQA
                 if (error > 3) throw new Exception(report);
                 if (b.All(x => x.r > 240 && x.b > 240 && x.g < 10)) throw new Exception("Error shader rendered");
             }
+            report += CheckForest(camera, terrainGO, farGO, near, far, root);
             report += CheckContours(camera, terrainGO, farGO, root);
             report += CheckLoadedBoundary(camera, terrainGO, farGO, far, root);
             foreach (var shader in new[] { near.shader, far.shader })
@@ -86,6 +87,45 @@ public static class TerrainAppearanceQA
             File.WriteAllText(root + "/result.txt", "FAIL " + e);
             EditorApplication.Exit(1);
         }
+    }
+
+    static string CheckForest(Camera camera, GameObject terrainGO, GameObject farGO, Material near, Material far, string root)
+    {
+        RenderSettings.fog = false;
+        near.SetColor("_TerrainTint",Color.white); far.SetColor("_TerrainTint",Color.white);
+        Shader.SetGlobalTexture("_ForestCoverage",Texture2D.whiteTexture);
+        Shader.SetGlobalVector("_ForestCoverageRect",new Vector4(-10000,-10000,1/20000f,1/20000f));
+        Shader.SetGlobalVector("_ForestDetailRect",new Vector4(-10000,-10000,1/20000f,1/20000f));
+        Shader.SetGlobalVector("_ForestPineColor",new Vector4(.10f,.17f,.045f,1));
+        Shader.SetGlobalVector("_ForestLeafColor",new Vector4(.12f,.20f,.055f,1));
+        Shader.SetGlobalFloat("_ForestOverviewEnabled",1);
+        Shader.SetGlobalTexture("_ForestDetail",Texture2D.blackTexture);
+        farGO.SetActive(false); terrainGO.SetActive(true);
+        var a=Capture(camera,root+"/forest-near.png");
+        farGO.SetActive(true); terrainGO.SetActive(false);
+        var b=Capture(camera,root+"/forest-far.png");
+        double error=a.Zip(b,(x,y)=>(Math.Abs(x.r-y.r)+Math.Abs(x.g-y.g)+Math.Abs(x.b-y.b))/3.0).Average();
+        // 地形とメッシュの微小な投影差で樹冠の縁はずれるため、色の平均も独立に比較する。
+        double meanDifference=Math.Abs(a.Average(p=>(double)p.g)-b.Average(p=>(double)p.g));
+        if(error>6 || meanDifference>2) throw new Exception("Forest Terrain/UltraFar mismatch: "+error+"; mean green="+meanDifference);
+        Shader.SetGlobalTexture("_ForestDetail",Texture2D.whiteTexture);
+        var ground=Capture(camera,root+"/forest-detail-ready.png");
+        double change=b.Zip(ground,(x,y)=>Math.Abs(x.g-y.g)).Average();
+        if(change<10) throw new Exception("Forest replacement had no visible effect: "+change);
+        camera.farClipPlane=3000;
+        var averages=new double[4];
+        int index=0;
+        foreach(float height in new[]{1200f,1300f,1400f,1520f})
+        {
+            camera.transform.position=new Vector3(0,height,0);
+            var pixels=Capture(camera,root+$"/forest-transition-{index}.png");
+            averages[index++]=pixels.Average(p=>(double)p.g);
+        }
+        if(Math.Abs(averages[0]-averages[3])<10 || averages[1]>averages[0]+2 || averages[2]>averages[1]+2)
+            throw new Exception("Forest transition discontinuity: "+string.Join(",",averages));
+        Shader.SetGlobalFloat("_ForestOverviewEnabled",0);
+        camera.transform.position=new Vector3(0,220,0);
+        return $"forest: Terrain/UltraFar mean error={error:F3}/255; replacement contrast={change:F1}; transition green={string.Join(",",averages.Select(x=>x.ToString("F1")))}\n";
     }
 
     static string CheckContours(Camera camera, GameObject terrainGO, GameObject farGO, string root)

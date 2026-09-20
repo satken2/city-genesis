@@ -77,6 +77,6 @@ void Generate(uint3 id : SV_DispatchThreadID)
     float height = _Heightmap.SampleLevel(linearClampSampler,uv,0).r * 2 * _TileSize.y + _TileOrigin.y;
     ForestPoint result;
     result.positionScale = float4(world.x,height,world.y,scale);
-    result.rotationVisible = float4(Unit(h+2)*6.28318530718,visible ? 1 : 0,Unit(h+4),0);
+    result.rotationVisible = float4(Unit(h+2)*6.28318530718,visible ? 1 : 0,Unit(h+4),Unit(h+5));
     _Points[id.x] = result;
 }

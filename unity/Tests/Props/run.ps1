@@ -17,6 +17,12 @@ Copy-Item -LiteralPath "$unityRoot/ProjectSettings/ProjectVersion.txt" -Destinat
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'PropsQA.cs') -Destination "$qaRoot/Assets/Editor/PropsQA.cs" -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'ForestQA.cs') -Destination "$qaRoot/Assets/Editor/ForestQA.cs" -Force
 New-Item -ItemType Directory -Path "$qaRoot/Assets/Resources/Shaders" -Force | Out-Null
+New-Item -ItemType Directory -Path "$qaRoot/Assets/Shaders" -Force | Out-Null
+Copy-Item -LiteralPath "$unityRoot/Assets/Shaders/ForestCoverage.hlsl" -Destination "$qaRoot/Assets/Shaders" -Force
+foreach ($name in @('TerrainSurfaceAppearance.hlsl', 'DepthOffsetTerrainLitMacroVariation.hlsl', 'TerrainCliffRock.hlsl', 'TerrainRiverBank.hlsl', 'UltraFarTerrainSink.hlsl')) {
+    Copy-Item -LiteralPath "$unityRoot/Assets/Shaders/$name" -Destination "$qaRoot/Assets/Shaders" -Force
+}
+Copy-Item -LiteralPath "$unityRoot/Assets/Resources/Shaders/DepthOffsetTerrainLit.shader" -Destination "$qaRoot/Assets/Resources/Shaders" -Force
 Copy-Item -LiteralPath "$unityRoot/Assets/Resources/Shaders/Forest.shader", "$unityRoot/Assets/Resources/Shaders/ForestPlacement.compute" -Destination "$qaRoot/Assets/Resources/Shaders" -Force
 $missingCluster = (Get-Content -LiteralPath "$unityRoot/Assets/Resources/Shaders/Forest.shader" -Raw).Replace('CityGenesis/Forest', 'CityGenesis/ForestWithoutCluster').Replace('#pragma multi_compile _ _CLUSTER_LIGHT_LOOP', '')
 Set-Content -LiteralPath "$qaRoot/Assets/Resources/Shaders/ForestWithoutCluster.shader" -Value $missingCluster

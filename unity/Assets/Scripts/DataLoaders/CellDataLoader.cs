@@ -670,6 +670,7 @@ public class CellDataLoader : MonoBehaviour
     /// </summary>
     public void ReloadAllData()
     {
+        PropManager.Instance?.InvalidateForestOverview();
         Debug.Log("CellDataLoader: ReloadAllData invoked.");
         loadSuspendedUntilReload = false;
         if (currentCenterCell.x != int.MinValue && currentCenterCell.y != int.MinValue)

@@ -14,6 +14,7 @@ Shader "CityGenesis/Forest"
         #pragma target 4.5
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+        #include "Assets/Shaders/ForestCoverage.hlsl"
         struct ForestPoint { float4 positionScale; float4 rotationVisible; };
         StructuredBuffer<ForestPoint> _ForestPoints;
         TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap);
@@ -38,7 +39,9 @@ Shader "CityGenesis/Forest"
             float distance = length(p.positionScale.xyz-_ForestCamera);
             float threshold = _DetailDistance + (p.rotationVisible.z-.5)*_TransitionWidth;
             bool near = distance < threshold;
-            if (p.rotationVisible.y < .5 || distance >= _MaxDistance || near != (_ForestLod == 0))
+            float modelWeight = ForestModelWeight(p.positionScale.xyz, _ForestCamera);
+            if (p.rotationVisible.y < .5 || distance >= _MaxDistance || near != (_ForestLod == 0)
+                || modelWeight <= p.rotationVisible.w)
             {
                 o.positionCS = float4(2,2,2,1);
                 return o;

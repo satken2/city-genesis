@@ -61,6 +61,12 @@ public class PropManager : BaseApiDataManager
     [SerializeField, Min(1000)] private int maxResidentCandidates = 250000;
     [SerializeField] private bool useGpuForests = true;
     private ForestRenderer forestRenderer;
+    private ForestOverview forestOverview;
+    private Coroutine overviewLoading;
+    private System.Threading.CancellationTokenSource overviewCancel;
+    private int overviewRevision;
+    private bool overviewDirty = true;
+    private readonly List<Rect> forestReadyRects = new List<Rect>();
     private TerrainManager terrainManager;
     private bool GpuForests => useGpuForests && (forestRenderer ?? (forestRenderer = new ForestRenderer())).Supported;
     private bool IsGpuTree(int type) => (type == 1 || type == 2) && GpuForests;
@@ -188,6 +194,9 @@ public class PropManager : BaseApiDataManager
     public override void LoadCells(List<Vector2Int> cells, bool isForce)
     {
         if (!visible) return;
+        if (isForce) InvalidateForestOverview();
+        if (GpuForests && overviewDirty && overviewLoading == null)
+            overviewLoading = RenderWorkScheduler.Start(this, LoadForestOverview(), "ForestOverview");
         generation++;
         if (loading != null) RenderWorkScheduler.Stop(this, loading);
         var needed = new HashSet<Vector2Int>(cells);
@@ -198,6 +207,45 @@ public class PropManager : BaseApiDataManager
         loading = RenderWorkScheduler.Start(this, Load(new List<Vector2Int>(cells), isForce, generation, currentLoadBatch), "PropManager");
     }
     private bool Canceled(int serial, LoadBatch batch) => serial != generation || !visible || (batch != null && batch.IsCanceled);
+
+    public void InvalidateForestOverview()
+    {
+        overviewRevision++; overviewDirty = true;
+        overviewCancel?.Cancel();
+        if (overviewLoading != null) RenderWorkScheduler.Stop(this, overviewLoading);
+        overviewLoading = null;
+    }
+
+    private IEnumerator LoadForestOverview()
+    {
+        int revision = overviewRevision;
+        ForestOverviewResponse response = null;
+        while (response == null)
+        {
+            yield return ApiClient.GetBulk<ForestOverviewResponse>("/props/forest-overview", data => response = data,
+                error => Debug.LogWarning($"ForestOverview: {error}"));
+            if (revision != overviewRevision) yield break;
+            if (response == null) yield return new WaitForSecondsRealtime(2);
+        }
+        overviewCancel?.Dispose();
+        overviewCancel = new System.Threading.CancellationTokenSource();
+        var token = overviewCancel.Token;
+        var task = System.Threading.Tasks.Task.Run(() => ForestOverview.Build(response, token), token);
+        while (!task.IsCompleted) yield return null;
+        if (task.IsFaulted) Debug.LogException(task.Exception);
+        else if (!task.IsCanceled && revision == overviewRevision && visible)
+        {
+            forestOverview ??= new ForestOverview();
+            if (!forestOverview.Ready)
+            {
+                forestOverview.SetLeafColor(1, Model(1));
+                forestOverview.SetLeafColor(2, Model(2));
+            }
+            forestOverview.Publish(task.Result);
+            overviewDirty = false;
+        }
+        overviewLoading = null;
+    }
 
     private IEnumerator Load(List<Vector2Int> cells, bool force, int serial, LoadBatch batch)
     {
@@ -645,6 +693,17 @@ public class PropManager : BaseApiDataManager
         SubmittedForestBatches = 0;
         if (!visible) return;
         var cam = Camera.main; if (cam == null) return;
+        if (forestOverview != null && forestOverview.Ready)
+        {
+            forestReadyRects.Clear();
+            foreach (var chunk in chunks.Values)
+            {
+                bool ready = chunk.forests.Count > 0;
+                foreach (var patch in chunk.forests) ready &= patch.ready && !patch.hidden;
+                if (ready) forestReadyRects.Add(chunk.spec.rect);
+            }
+            forestOverview.UpdateDetail(forestReadyRects, ChunkSize);
+        }
         GeometryUtility.CalculateFrustumPlanes(cam, planes);
         foreach (var chunk in chunks.Values) foreach (var batch in chunk.batches)
         {
@@ -697,6 +756,9 @@ public class PropManager : BaseApiDataManager
     }
     public override void ClearAllCells()
     {
+        InvalidateForestOverview();
+        overviewCancel?.Dispose(); overviewCancel = null;
+        forestOverview?.Dispose(); forestOverview = null;
         generation++;
         if (loading != null) RenderWorkScheduler.Stop(this, loading); loading = null;
         foreach (var chunk in chunks.Values) foreach (var patch in chunk.forests) patch.Dispose();

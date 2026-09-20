@@ -19,6 +19,7 @@ public static partial class PropsQA
 
     static void CheckGpuForest()
     {
+        CheckForestOverview();
         var shader = Resources.Load<Shader>("Shaders/Forest");
         Check(shader != null && shader.isSupported && !ShaderUtil.ShaderHasError(shader),"forest shader compilation failed");
         var data = new TerrainData { heightmapResolution=33, size=new Vector3(500,100,500) };
@@ -73,6 +74,38 @@ public static partial class PropsQA
         CheckGpuHolesAndEdits();
         var zero=new float[33,33]; data.SetHeights(0,0,zero);
         Set(manager,"useGpuForests",false); Apply(Snapshot(10000,true),true); Build(false);
+    }
+
+    static void CheckForestOverview()
+    {
+        var responseType = asm.GetType("ForestOverviewResponse");
+        var type = asm.GetType("ForestOverview");
+        var converter = AppDomain.CurrentDomain.GetAssemblies().First(a=>a.GetName().Name=="Newtonsoft.Json").GetType("Newtonsoft.Json.JsonConvert");
+        object Parse(string json) => converter.GetMethod("DeserializeObject",new[]{typeof(string),typeof(Type)}).Invoke(null,new object[]{json,responseType});
+        var response = Parse(Snapshot(50000,true).TrimEnd('}') + ",\"coastline\":{\"type\":\"Polygon\",\"coordinates\":[[[0,0],[400,0],[400,500],[0,500],[0,0]],[[50,50],[100,50],[100,100],[50,100],[50,50]]]}}");
+        var raster = type.GetMethod("Build").Invoke(null,new object[]{response,System.Threading.CancellationToken.None});
+        var bounds = (Rect)Field(raster,"bounds");
+        int width=(int)Field(raster,"width"), height=(int)Field(raster,"height");
+        var pixels=(Color32[])Field(raster,"pixels");
+        byte At(float x,float z) => pixels[Mathf.FloorToInt((z-bounds.yMin)/bounds.height*height)*width+Mathf.FloorToInt((x-bounds.xMin)/bounds.width*width)].r;
+        Check(At(150,150)>200,"global forest missing away from camera");
+        Check(At(230,150)==0,"forest overview covered road");
+        Check(At(75,75)==0,"forest overview covered lake hole");
+        Check(At(450,150)==0,"forest overview covered sea");
+        Check(width<=2048 && height<=2048,"forest mask exceeded texture budget");
+        using(var cancel=new System.Threading.CancellationTokenSource())
+        {
+            cancel.Cancel(); bool canceled=false;
+            try { type.GetMethod("Build").Invoke(null,new object[]{response,cancel.Token}); }
+            catch(System.Reflection.TargetInvocationException e) { canceled=e.InnerException is OperationCanceledException; }
+            Check(canceled,"overview ignored session cancellation");
+        }
+        var overview=Activator.CreateInstance(type);
+        type.GetMethod("Publish").Invoke(overview,new[]{raster});
+        Check(Shader.GetGlobalFloat("_ForestOverviewEnabled")==1,"overview not published");
+        ((IDisposable)overview).Dispose();
+        Check(Shader.GetGlobalFloat("_ForestOverviewEnabled")==0,"overview leaked across sessions");
+        results.Add("Forest overview: global coverage, road/lake/sea exclusions, texture budget and cancellation passed");
     }
 
     static void CheckGpuHolesAndEdits()
@@ -190,5 +223,34 @@ public static partial class PropsQA
         results.Add($"Forward+ sunlight: forest luminance {lit/samples:F2}, missing cluster variant {unlit/samples:F2}");
         Check(lit>unlit*1.15,"Forward+ forest lost directional lighting");
         UnityEngine.Object.DestroyImmediate(correct);
+    }
+
+    static void SetupForestBoundaryRender()
+    {
+        foreach(Material material in ((IDictionary)Field(Field(manager,"forestRenderer"),"materials")).Values)
+            material.shader=Resources.Load<Shader>("Shaders/Forest");
+        var type=asm.GetType("ForestOverview");
+        var overview=Activator.CreateInstance(type);
+        var converter=AppDomain.CurrentDomain.GetAssemblies().First(a=>a.GetName().Name=="Newtonsoft.Json").GetType("Newtonsoft.Json.JsonConvert");
+        var response=converter.GetMethod("DeserializeObject",new[]{typeof(string),typeof(Type)}).Invoke(null,new object[]{Snapshot(10000,true).Replace("\"prop_type\":1","\"prop_type\":2"),asm.GetType("ForestOverviewResponse")});
+        var raster=type.GetMethod("Build").Invoke(null,new object[]{response,System.Threading.CancellationToken.None});
+        type.GetMethod("Publish").Invoke(overview,new[]{raster});
+        var model=managerType.GetMethod("Model",flags).Invoke(manager,new object[]{2});
+        type.GetMethod("SetLeafColor").Invoke(overview,new[]{(object)2,model});
+        results.Add("Overview broadleaf linear albedo="+Shader.GetGlobalVector("_ForestLeafColor"));
+        var rects=new List<Rect>();
+        for(int z=0;z<8;z++)for(int x=0;x<4;x++)rects.Add(new Rect(x*62.5f,z*62.5f,62.5f,62.5f));
+        type.GetMethod("UpdateDetail").Invoke(overview,new object[]{rects,62.5f});
+        var ground=new Material(Shader.Find("Custom/DepthOffsetTerrainLit"));
+        ground.SetColor("_TerrainTint",Color.white);
+        ground.SetFloat("_ProceduralGroundBlend",1);
+        ground.SetFloat("_ProceduralGroundScale",40);
+        ground.SetColor("_TerrainGroundColorA",new Color(.38f,.47f,.26f));
+        ground.SetColor("_TerrainGroundColorB",new Color(.38f,.47f,.26f));
+        ground.SetColor("_TerrainGroundColorC",new Color(.38f,.47f,.26f));
+        forestTerrain.materialTemplate=ground;
+        Check(!ShaderUtil.ShaderHasError(ground.shader),"overview ground shader failed");
+        camera.transform.position=new Vector3(250,380,-220);
+        camera.transform.LookAt(new Vector3(250,40,250));
     }
 }

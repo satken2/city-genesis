@@ -1,5 +1,6 @@
 #ifndef TERRAIN_SURFACE_APPEARANCE_INCLUDED
 #define TERRAIN_SURFACE_APPEARANCE_INCLUDED
+#include "Assets/Shaders/ForestCoverage.hlsl"
 
 float _TerrainMacroVariationStrength;
 float _TerrainMacroVariationScale;
@@ -81,7 +82,7 @@ float TerrainMacroFbm(float2 p)
 
 half3 ApplyTerrainMacroVariation(half3 color, float3 positionWS)
 {
-    float strength = saturate(_TerrainMacroVariationStrength);
+    float strength = saturate(_TerrainMacroVariationStrength) * (1 - ForestSurfaceWeight(positionWS));
     if (strength <= 0.0001)
         return color;
 
@@ -106,7 +107,7 @@ half3 ApplyTerrainMacroVariation(half3 color, float3 positionWS)
 /// </summary>
 half3 ApplyTerrainColorGrade(half3 color, float3 positionWS)
 {
-    float strength = saturate(_TerrainColorGradeStrength);
+    float strength = saturate(_TerrainColorGradeStrength) * (1 - ForestSurfaceWeight(positionWS));
     if (strength <= 0.0001)
         return color;
 
@@ -279,6 +280,33 @@ half4 CliffTerrainFragmentPBR(InputData inputData, half3 albedo, half metallic, 
     half riverRock = ApplyRiverSand(inputData.positionWS, albedo, smoothness, riverBed);
     ApplyCliffRock(inputData.positionWS, cliffGeoNormalWS, inputData.normalWS, albedo, smoothness, riverRock);
     ApplyRiverBedWet(riverBed, albedo, smoothness);
+    float forest = ForestSurfaceWeight(inputData.positionWS) * (1 - riverBed);
+    if (forest > .001)
+    {
+        float2 coverage = ForestCoverageAt(inputData.positionWS);
+        half3 leaf = lerp(_ForestPineColor.rgb, _ForestLeafColor.rgb, coverage.g / max(.001, coverage.r + coverage.g));
+        float2 uv = inputData.positionWS.xz / 5;
+        float2 cell = floor(uv), offset = 0;
+        float closest = 10;
+        // 樹冠の丸みを法線に与え、画面上で小さくなった凹凸だけを平均化する。
+        [unroll] for (int y = -1; y <= 1; y++)
+        [unroll] for (int x = -1; x <= 1; x++)
+        {
+            float2 key = cell + float2(x,y);
+            float2 delta = uv - key - float2(TerrainMacroHash(key), TerrainMacroHash(key + 37));
+            float d = dot(delta,delta);
+            if (d < closest) { closest = d; offset = delta; }
+        }
+        float detail = 1 - smoothstep(.35,1.5,max(length(ddx(uv)),length(ddy(uv))));
+        float crown = saturate(1 - closest);
+        float macro = TerrainMacroNoise(inputData.positionWS.xz / 55);
+        leaf *= lerp(.78, lerp(.62,1,crown), detail) * lerp(.93,1.07,macro);
+        float3 crownNormal = normalize(float3(offset.x * 1.5 * detail,1,offset.y * 1.5 * detail));
+        inputData.normalWS = normalize(lerp(inputData.normalWS,crownNormal,forest));
+        inputData.bakedGI = lerp(inputData.bakedGI,SampleSH(inputData.normalWS),forest);
+        albedo = lerp(albedo,leaf,forest);
+        smoothness = lerp(smoothness,.1,forest);
+    }
     return UniversalFragmentPBR(inputData, albedo, metallic, specular, smoothness, occlusion, emission, alpha);
 }
 
