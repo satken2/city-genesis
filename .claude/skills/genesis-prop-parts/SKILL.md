@@ -1,0 +1,132 @@
+---
+name: genesis-prop-parts
+description: City Genesisの地形プロップ3Dモデル(森の木・岩・茂みなど装飾オブジェクトのFBX)をヘッドレスBlenderで制作・編集・検証するときに使う。「木のモデルを作って/直して」「岩のプロップを追加したい」「プロップの遠景(_far)モデルを用意したい」「prop_masterに種別を足したい」など、Assets/Models/Props配下のFBXを新規作成・修正する作業では必ずこのSkillに従うこと。Unity側の散布・描画コード(PropManager等)の話はM_地形プロップ.mdとDataLoaders/AGENTS.mdを読むこと。建物パーツは genesis-building-parts、道路・線路パーツは genesis-path-parts を使うこと。
+---
+
+> **パス表記の基準**: 本文中のパスはワークディレクトリ `S:/city/genesis`(`city-genesis` と `genesis-core` を並べた作業ツリー)を起点とする。`city-genesis` 単体で作業している場合は先頭の `city-genesis/` を読み替えること。`genesis-core/` 配下は非公開のコアシミュレータなので、手元に無ければその項目は読み飛ばしてよい。
+
+# 地形プロップの制作・編集・検証
+
+制作基盤(ヘッドレスBlender・ライブラリ.blend・バリデータ・ギャラリー)は建物パーツと共通なので、
+**まず [[genesis-building-parts]] の「実行環境」と「鉄則」を読むこと**
+(Blender の実体と起動方法は Linux サーバーと Windows で異なる。Windows は Microsoft Store 版で
+stdout が返らない等の罠がある)。本Skillはプロップ固有の差分を記述する。
+
+## 鉄則(プロップ固有)
+
+1. **規約の正本**は `city-genesis/docs/docs/geometries/M_地形プロップ.md`。
+   制作前に §M.5(GPU描画とモデル)と **§M.5.1(モデル制作規約)** を必ず読む。
+   Unity側の実装メモは `city-genesis/unity/Assets/Scripts/DataLoaders/AGENTS.md` の「地形プロップ」節。
+2. **1種別=1FBX。パーツ分割も閾値フォルダも無い。** `Assets/Models/Props/{prop_type}.fbx` だけで
+   描画が成立する。`_close` / `_far` は任意のオプトイン。
+3. **原点=接地点、XZ中心=原点。** Unityは原点を地表に置き、原点まわりにY軸回転と0.8〜1.2倍の
+   一様スケールを掛ける。通常モデルの底面を浮かせない(地中へ延ばすのは可)。幹を省くFarは原点を地表に保ったまま底面を樹冠の高さへ上げてよい。
+4. **軽く作る。** 常駐候補は最大25万本をGPUインスタンシングする。無印は数百頂点以内が目安
+   (木は46〜58共有頂点、Unity向け推定126〜150頂点)。細部は `_close` に寄せる。
+5. **マテリアルは `PROP_*` を既存から流用する**(`pipeline/materials.py --category Props`)。
+   既存: `PROP_BARK` `PROP_PINE_GREEN` `PROP_LEAF_GREEN`。
+6. モデルの編集は `city-genesis/blender/props.blend`。**コレクション名=種別ID**(`1`, `2`, …)。
+   書き戻しは `pipeline/library.py export --category props --only <ID>`。
+
+---
+
+## 既存アセットと種別の対応
+
+| prop_type | display_name | ライブラリのコレクション/オブジェクト | FBX |
+|---|---|---|---|
+| 1 | 針葉樹 | `1` / `Tree_1`(46頂点・高さ12m・半幅2m) | `Props/1.fbx` |
+| 2 | 広葉樹 | `2` / `Tree_2`(58頂点・高さ9m・半幅3m) | `Props/2.fbx` |
+| 3 | 岩 | **無し** | **無し**(選べるが何も描画されない) |
+| 101〜104 | 駅階段 | `101`〜`104` | `Props/101.fbx`〜 |
+| 111・112 | 屋根付き歩道橋（24m・32m道路用、コの字階段） | `111`・`112`と専用Far | `Props/111.fbx`・`112.fbx`と`_far` |
+| 201〜204 | 工事車両 | `construction_*` のメッシュを共有する別名 `201`〜`204` | `Props/201.fbx`〜 |
+| 301〜307 | 航空機・船舶 | `ambient_*` のメッシュを共有する別名 `301`〜`307` | `Props/301.fbx`〜 |
+| 101〜104 | 駅階段 | `101`〜`104` | `Props/101.fbx`〜 |
+| 201〜204 | 工事車両 | `construction_*` のメッシュを共有する別名 `201`〜`204` | `Props/201.fbx`〜 |
+| 301〜307 | 航空機・船舶 | `ambient_*` のメッシュを共有する別名 `301`〜`307` | `Props/301.fbx`〜 |
+
+- 種別の一覧は `genesis-core/assets/master.yaml` の `prop_master`(`display_name` のみ)。
+  **`prop_master` はスプレッドシート由来ではなく master.yaml に直書き**されており、生成スクリプトは無い
+  (他の `create_*_master.py` は自分のセクションだけ差し替えて書き戻すので消えない)。
+  種別を足すときは `prop_master` に `ID: {display_name: …}` を追記する
+  ([[master-data]] Skillの「yamlを直接編集しない」はこのセクションには当たらない。2026-09-08時点)。
+- 木2種は `pipeline/jobs/build_prop_trees.py` で原点に著作する。通常72/96三角形、専用Far14/20三角形（幹なしの八角錐/丸い葉塊）。
+  広葉樹は4個の葉塊、針葉樹は細身の4段樹冠。両種の再生成は同ジョブを一度実行する。
+  葉はスムーズ法線と粗さ0.9、共有256×256色画像（Props/Textures）を使う。画像は外部参照でFarも共有し、FBX拡散色は白にする。
+- **固定名モデル**: `construction_*`(工事車両。G文書§15)と `ambient_*`(空と海の環境演出の航空機・船舶。V文書)は
+  同じ `props.blend` / `Props/` に置く。固定名のFBXは描画コードが直接読み、手動配置用には数値ID別名を `prop_master` に登録する。
+  `ambient_*` は船が喫水線原点(船体は原点より下)なので、バリデータは接地検査をせず水平中心と専用予算だけを見る。
+  再生成は `pipeline/jobs/ambient_vehicles.md`。手動配置用の数値ID別名(201〜204・301〜307)は
+  `pipeline/jobs/build_prop_aliases.py` がメッシュ共有で作る。**元モデルを再著作したら別名も再実行して書き出す**。手動配置用の数値ID別名(201〜204・301〜307)は
+  `pipeline/jobs/build_prop_aliases.py` がメッシュ共有で作る。**元モデルを再著作したら別名も再実行して書き出す**。
+- **固定名モデル**: `construction_*`(工事車両。G文書§15)と `ambient_*`(空と海の環境演出の航空機・船舶。V文書)は
+  同じ `props.blend` / `Props/` に置く。固定名のFBXは描画コードが直接読み、手動配置用には数値ID別名を `prop_master` に登録する。
+  `ambient_*` は船が喫水線原点(船体は原点より下)なので、バリデータは接地検査をせず水平中心と専用予算だけを見る。
+  再生成は `pipeline/jobs/ambient_vehicles.md`。
+- 旧手著作ファイル `S:\city\BlenderModels\props.blend` の Trees はこのライブラリへ移植済み
+  (Trains/Vehicles は `vehicles.blend` へ移植済み)。**BlenderModels は参照しない**。
+
+---
+
+## 描画LODとファイル名
+
+| ファイル | 役割 | 規約 |
+|---|---|---|
+| `{id}.fbx` | Normal(必須) | 制作の基準。これだけで成立する |
+| `{id}_close.fbx` | Close(任意) | 無印と同じ原点・bbox(許容0.05m)。接写時に差し替え |
+| `{id}_far.fbx` | Far(任意) | 無印と同じ原点・水平bbox・天端(許容0.3m)。幹の省略で底面を上げるのは可。無いと**Unityが自動生成**: 128三角形を超えるサブメッシュだけ4×8×4格子で頂点集約。軽いモデルは元形状のまま |
+
+`_far` を著作するのは「自動集約で輪郭が崩れる目立つ種類」だけでよい。
+建物・パスの Far はコード生成なので `_far` ファイルを持てるのはプロップだけ。
+
+---
+
+## 制作の標準手順
+
+1. `master.yaml` の `prop_master` で種別IDを確認する(新種別なら未使用IDを決める。1〜99=自然物、101〜=駅設備、201〜=工事車両、301〜=航空機・船舶)
+2. 使うマテリアルを決める(既存 `PROP_*` 優先。新規は `PROP_` 接頭辞)
+3. Blender用スクリプトで `city-genesis/blender/props.blend` を開き、コレクション `{id}` にメッシュを著作する。
+   `pipeline/jobs/_common.py`(`open_library` / `link_into(["{id}"], obj)` / `get_material` / `save_library`)を使い、
+   手著作でないモデルは `pipeline/jobs/build_prop_{id}.py` として残す(寸法調整を何度でも回せる)。
+   回転・スケールは適用済みにし、オブジェクトは原点に置く。
+   Windowsでは `blender-launcher.exe -b --factory-startup --python <script>` + ログ/DONEマーカーのポーリング
+4. `pipeline/library.py export --category props --only {id}` でFBX化
+   (Windowsは `py -3 pipeline/windows_run.py pipeline/library.py export --category props --only {id}`)。
+   `--only` は部分一致なので、`1` は `10`〜`19` にも当たる。種別が増えたら書き出し結果の `EXPORTED` 行を確認する
+5. `validator/validate.py city-genesis/unity/Assets/Models/Props` → error 0 まで修正ループ
+   (Windowsは `py -3 pipeline/windows_run.py validator/validate.py <パス>`)
+6. `pipeline/build_gallery.py --only Props` でサムネイル更新 → ユーザーが目視。
+   **プロップに組み立てプレビューは無い**(単体サムネイルのみ。散布の見え方は実機でしか確認できない)
+7. 新種別なら `prop_master` に追記する(上記)。Tauriの配置パネルは `/api/v1/master/prop_types` から一覧を作るので
+   バックエンド再起動で選択肢に出る
+8. Windows側でUnityを開き、`ModelPrefabImportWatcher` が `Resources/Models/Props/{id}.prefab` を自動生成したことを
+   確認して実機で散布・個別配置を目視する。Unity単体の回帰は `unity/Tests/Props/run.ps1`
+   (`Assets/Models/Props` 直下の全FBXを独立プロジェクトへコピーして検証する)
+
+---
+
+## バリデータが検査すること(`validator/rules.py` の Props 分岐)
+
+- マテリアル命名(`PROP_*` 推奨・`.001` サフィックス検出)
+- **接地**: ルートノード基準で bbox 底面が原点より0.05m以上浮いていれば error(`prop-floating`)
+- **水平中心**: bbox のXZ中心が原点から0.25m以上ずれていれば warn(`prop-off-center`)
+- **`_close` / `_far` の対**: 基準モデルの存在と bbox 一致(`far-without-base` / `far-bbox-mismatch`)
+- **頂点予算**: Unity推定頂点数が Normal 600 / Close 4000 を超えると warn(`vertex-budget`)
+
+規約を新たに知った・増やしたら rules.py に追加すること。
+
+## 知らないと事故る仕様
+
+- **障害物との離隔は bbox から決まる**: 水平半径(X/Z半幅の大きい方)×0.15×スケール(上限8m)。
+  bbox が実体より大きい(離れた小片・不可視ジオメトリ)と、建物や道路から不自然に離れて生える。
+- **投影サイズによるLOD判定も bbox の半径**(`extents.magnitude`)で行う。細長い飾りが1本あるだけで
+  遠くまで Normal で描かれ続ける。
+- **ルートノードの変換だけ無視され、子ノードのローカル変換は残る**。複数オブジェクトで組む場合は
+  親子関係とローカル位置に意味がある(単一メッシュに結合するのが安全)。
+- **非対称形状は Blender(x,y,z)→Unity(-x,z,-y)**。散布の向きは乱数なので通常は気にしなくてよいが、
+  個別配置で rotation を指定する用途(看板・ベンチ等)では前面の向きを決めておく。
+- マテリアルはUnityが実行時に複製して instancing を有効化する。**GPUインスタンシング非対応のシェーダーだと描画されない**。
+  GraphicsSettings の Instancing Variants は Keep All を維持する(プロジェクト設定側。モデル側の作業ではない)。
+- **一本ごとの GameObject / Collider は生成されない**。クリック判定やコライダー前提の設計はできない。
+- 経済・コスト・資源とは一切接続しない純装飾なので、`agent_master` / `path_master` のような寸法マスターは無い。
+  必要なのは `prop_master` の表示名だけ。

@@ -1,0 +1,235 @@
+---
+name: genesis-building-parts
+description: City Genesisの建物パーツ3Dモデル(壁・角・prebuilt等のFBX)をヘッドレスBlenderで制作・量産・検証するときに使う。「建物モデルを作って」「パーツをBlenderで作成」「モデルのバリデーション」「ギャラリーを更新」など、Assets/Models配下のFBXを新規作成・修正する作業では必ずこのSkillに従うこと。Unity側のメッシュ生成コードの話は genesis-building-geometry を使うこと。道路・線路のパーツ制作は genesis-path-parts を使うこと。
+---
+
+> **パス表記の基準**: 本文中のパスはワークディレクトリ `S:/city/genesis`(`city-genesis` と `genesis-core` を並べた作業ツリー)を起点とする。`city-genesis` 単体で作業している場合は先頭の `city-genesis/` を読み替えること。`genesis-core/` 配下は非公開のコアシミュレータなので、手元に無ければその項目は読み飛ばしてよい。
+
+# 建物パーツの制作・量産・検証
+
+制作パイプラインは `genesis-gallery/` に整備されている。パーツ制作は必ずこのワークフローに乗せること。
+
+`genesis-gallery` は作者が個人運用する**非公開**の制作・検証ツール群で、作業ツリーに `city-genesis` と
+並置される(ゲーム本体には含まれず、原本 .blend も持たない)。手元に無い場合、FBX の量産・バリデータ・
+マテリアル検索は実行できないので、本Skillのうち `city-genesis/` 側だけで完結する項目
+(規格ドキュメント・命名規約・FBXの置き場・Unity側の扱い)を読むこと。
+
+## 実行環境: Blenderがどこにあるかを最初に確認する
+
+作業ツリーは Linux と Windows の両方に置かれることがあり、**Blender の実体と起動方法が違う**。
+どちらで作業しているかを最初に確かめ、以下のいずれかに従うこと。
+
+| | Linux | Windows |
+|---|---|---|
+| Blender | `~/opt/blender-5.2` | **Microsoft Store 版 5.2.1** |
+| 起動 | `pipeline/blender_run.sh [args...]`(必要な環境変数を設定するラッパー) | 実行エイリアス `%LOCALAPPDATA%\Microsoft\WindowsApps\blender-launcher.exe` |
+| stdout | 普通に返る | **返らない**(下記) |
+
+**Windows 側の罠**(Store版アプリなので avoidable ではない):
+
+- `C:\Program Files\WindowsApps\...\blender.exe` は ACL で**直接起動できない**(Permission denied)。
+  必ず `blender-launcher.exe` を使う。`C:\Program Files\Blender Foundation\Blender 4.5` は
+  python/scripts だけの残骸で実行ファイルは無い。
+- ランチャーは GUI 用で **stdout/stderr を返さず即座に戻る**。`-b --python x.py` は動くが出力は捨てられる。
+  → スクリプト側にログファイルと DONE マーカーを書かせ、呼び出し側でポーリングする。
+- パイプラインは `blender_run.sh`(bashスクリプト)前提なので、Windows から回すときは
+  `blender_run.sh` を呼ぶ箇所(`validator/validate.py` の `run_inspect` など)を
+  `subprocess.run` の差し替えで迂回する。
+- ライブラリ .blend は Blender 5.02 形式。4.x では開けない。
+- Git Bash から `--only "/middle"` のように**先頭スラッシュの引数を渡すと MSYS がパス変換して壊す**
+  (`C:/Program Files/Git/middle` になる)。先頭スラッシュを避けるか `MSYS_NO_PATHCONV=1` を付ける。
+
+以下、本Skillでコマンドを `blender_run.sh ...` と書いている箇所は、Windows では上記の
+`blender-launcher.exe` + ログポーリングに読み替えること。
+
+## 鉄則
+
+1. **規約の正本はドキュメント、検証の正本はバリデータ。** 制作前に必ず読む:
+   - `city-genesis/docs/docs/geometries/I_建物パーツ作成マニュアル.md` (制作規格の正典)
+   - `city-genesis/docs/docs/geometries/F_建物メッシュの生成.md` §3(命名)・§4(バリアント)・§5(フォールバック)
+   - model_type別の詳細: F1(モジュラー/切妻/片流れ)・F2(地面)・F3(既成)・F4(港湾)・F6(マッシュアップ)
+2. **最小構成から始める。** パーツは28種類定義されているが、**1つの建物で全種類を使うことは想定していない**。
+   ユーザーが指定した特徴を表現できる最小限の種類だけで作り、追加指示があって初めて足す(下記「最小構成の原則」)。
+3. **マテリアルは新規作成の前に必ず既存を探す。** 窓・アスファルト・コンクリートのような
+   汎用材質は既存のものを流用する(下記「マテリアル共有」)。
+4. **バリデータが全項目パスするまで「完了」と言わない。** エクスポートしたら必ず:
+   ```bash
+   genesis-gallery/validator/validate.py <閾値フォルダ or FBX>
+   ```
+   error が1つでもあれば修正して再実行。warn は内容を確認し、意図的な逸脱
+   (ピロティ等の意図した隙間など)でない限り解消する。
+5. **量産は使い捨てプロセス。** 常駐Blenderは使わず、1ジョブごとに
+   `blender_run.sh -b --factory-startup --python <script>` を新規起動する
+   (前モデルのデータ汚染・名前衝突を防ぐ)。対話的な微調整だけMCP接続を使う。
+6. **モデルのソース・オブ・トゥルースはカテゴリ別ライブラリ .blend**
+   (`city-genesis/blender/{buildings,paths,props,vehicles,stations}.blend`)。
+   原本は公開レポジトリ `city-genesis` 側にあり、`genesis-gallery` は制作・検証の道具として
+   並置される(`library.py` の `LIBRARY` 定数が参照先)。`*.blend1` はコミットしない。
+   1カテゴリ1ファイル+フルパス名のコレクション(例 `a200/0/base-w1`)で構成され、
+   マテリアルはファイル内で実体1つに共有される。**新規制作・編集はこのファイルに対して行い**、
+   `pipeline/library.py export --category buildings --only <パス>` でFBXへ書き戻す
+   (エクスポート設定はI doc §5.1の設定Aを自動再現。ラウンドトリップ等価は検証済み)。
+   FBXの置き場は `city-genesis/unity/Assets/Models/...`。Unity側のprefabミラーは
+   `ModelPrefabGenerator` が生成するので触らない。
+
+---
+
+## 最小構成の原則
+
+**必須は `mid-w1` ただ1つ。** これが無いと建物全体が白い箱になる(F doc §4.3)。
+逆に言えば、`mid-w1` だけ作れば全レベル(1階・中層・屋上)・全辺がそれで埋まり、
+建物として成立する。他のパーツはすべて**特徴を足すためのオプトイン**である。
+
+まず「ユーザーが言った特徴」を表現するのに必要なパーツだけを選び、それで組んで
+プレビューを見せる。**言われていない差異のためにパーツを増やさない。**
+
+| ユーザーの要求に含まれる特徴 | 足すパーツ |
+|---|---|
+| (何もなくても必須) | `mid-w1` |
+| 屋根・屋上面の材質を指定したい | `ceil` |
+| 角に柱・隅石・面取りなど独自の造作がある | `mid-c1` |
+| 1階だけ違う(店舗ファサード、ピロティ、腰壁、高い天井) | `base-w1`(角も違うなら `base-c1`) |
+| 屋上階だけ違う(パラペット、コーニス、後退した最上階) | `top-w1`(角も違うなら `top-c1`) |
+| 正面と側面で意匠が違う | `mid-w2` 等(位置番号 = 頂点index+1。位置1がフォールバック先) |
+| 玄関・車寄せ・アプローチ階段 | `entrance` |
+| 屋上に塔屋・設備・看板 | `roofprop` |
+| 敷地の地面を描きたい | `floor`(マスターが `draw_floor=yes` の建物のみ描画される) |
+| 敷地を塀・柵で囲みたい | `fence-w1`(角も要るなら `fence-c1`) |
+| 切妻/片流れ屋根の妻壁の材質 | `generic-wall` |
+| 畑・庭など地面アセット(MODEL_MODULAR_GROUND) | `tile`(建物本体は一切描かない) |
+
+### 既存アセットの実例(これが現実的な規模感)
+
+```
+a1054 太陽光発電所  1個  tile
+b32   農場          3個  fence-w1 fence-c1 floor
+a2007/a2012         4個  mid-w1 mid-c1 top-w1 top-c1
+b8                  6個  mid-w1 mid-c1 ceil floor entrance roofprop
+a200  初等学校     11個  base-w1 base-c1 mid-w1 mid-w2 mid-c1 top-w1 top-c1
+                          ceil floor entrance roofprop
+```
+
+最大の a200 でも11個。**4〜6個が標準的な落としどころ**と考えてよい。
+
+### 増やすときの順序
+
+1. まず最小構成で作り、`build_gallery.py` で組み立てプレビューを出してユーザーに見せる
+2. ユーザーの追加指示(「1階を店舗にして」「角に柱がほしい」)を受けて、その特徴に
+   対応するパーツだけを足す
+3. 足したパーツは既存パーツとマテリアル・寸法の整合を取る
+   (特に同一レベルの壁と角は**著作高さを揃える**。プログラムは補正しない)
+
+---
+
+## マテリアル共有
+
+マテリアルは**名前の一致**だけを起点に共有される(P_マテリアル共有とエクスポート.md §5.1)。
+同じ材質に別名を付けると、Unity側で別マテリアル・別テクスチャとして増殖する。
+
+### 手順
+
+1. **作る前に既存を検索する**:
+   ```bash
+   genesis-gallery/pipeline/materials.py 窓 WINDOW    # キーワード検索
+   genesis-gallery/pipeline/materials.py --used-by a200   # 似た建物が何を使っているか
+   genesis-gallery/pipeline/materials.py             # 全一覧(使用箇所の多い順)
+   ```
+2. **使えそうなものがあれば必ずそれを使う。** 窓・アスファルト・コンクリート・金属・
+   白壁のような汎用材質は、たいてい既存で足りる。よく使われている代表例:
+   `BD_WHITE_WALL` `BD_CONCRETE` `BD_METAL` `BD_WINDOW` `BD_WINDOW_LIGHT`
+   `BD_BRICK_WALL` `BD_BLUE_ROOF` / 道路系は `PATH_ASPHALT` `PATH_CONCRETE`
+3. **ライブラリ .blend 内では既存マテリアルデータブロックをそのまま参照する**
+   (`obj.data.materials.append(bpy.data.materials["BD_WINDOW"])`)。
+   新規に同名で作り直すと `.001` が付いて共有が壊れる。
+4. **本当に新しい材質のときだけ新規作成する。** 命名は接頭辞の名前空間
+   (建物=`BD_*` / 道路・パス=`PATH_*` / プロップ・車両=`PROP_*`)+用途が分かる名前。
+   カテゴリを跨いだ**再利用**は共有として正当(駅舎が `BD_*` を使う等)。
+5. `.001` 系サフィックスは残さない(バリデータが `material-suffix` で検出)。
+
+---
+
+## ツール一覧 (genesis-gallery/)
+
+| ツール | 用途 |
+|---|---|
+| `pipeline/blender_run.sh [args...]` | ヘッドレスBlender起動ラッパー(必須の環境変数を設定)。GPUなし環境なのでレンダはCycles CPU |
+| `pipeline/library.py build/export` | ライブラリ.blendの構築(FBX取り込み)とFBX書き戻し |
+| `pipeline/materials.py [検索語]` | 既存マテリアルの一覧・検索(共有先を探す) |
+| `validator/validate.py <対象>` | 規約バリデータ。exit 0=合格。`--json` でレポート出力 |
+| `pipeline/build_gallery.py` | ギャラリー差分ビルド(GLB+サムネ+組み立てプレビュー+検証+manifest) |
+| `pipeline/blender_scripts/batch_process.py` | FBX→inspect JSON/GLB/サムネのバッチ処理(Blender内実行) |
+
+**ギャラリーは自動更新されない。** モデルを変えたら `build_gallery.py` を明示的に実行する
+(差分ビルドなので変更分だけ再生成される)。
+
+## 制作の標準手順
+
+1. 対象建物の master.yaml (`agent_master` の `model_type`・`bd_type`・`draw_floor`) と、
+   似た既存建物のパーツ構成を確認する
+2. **最小構成のパーツ種類を決める**(上記「最小構成の原則」)。迷ったら少ない方に倒す
+3. **使うマテリアルを決める**(上記「マテリアル共有」。既存優先)
+4. Blender用のPythonスクリプトを書き、**ライブラリ .blend を開いて**パーツのコレクションを
+   追加・編集する(`blender_run.sh -b --factory-startup --python <script>` で実行。
+   スクリプト内で `bpy.ops.wm.open_mainfile(filepath=ライブラリ)` → 編集 → 保存)。
+   オブジェクトの回転・スケールは適用済みにする
+5. `pipeline/library.py export --category buildings --only <コレクションパス>` でFBX化
+6. `validator/validate.py <閾値フォルダ>` → 全パスまで修正ループ
+7. `pipeline/build_gallery.py` でギャラリー更新 → ユーザーがポート4567で目視確認
+8. ユーザーの追加指示があればパーツを足して2〜7を繰り返す
+9. **マスターデータの更新が必要か判定し、必要なら反映する**(下記)
+10. 承認後、必要ならWindows側でUnityを開いてprefab生成・実機確認を依頼する
+
+---
+
+## モデルを作った後: マスターデータの更新
+
+パーツを作っただけでは反映されない設定がある。**モデル作業の最後に必ず下表を確認し、
+更新が必要なら [[master-data]] Skill に従ってGoogleスプレッドシートを更新する。**
+`master.yaml` は編集禁止の自動生成物なので、**yamlを直接書き換えてはいけない**
+(次の再生成で消える)。シート更新 → `create_agent_master.py` 等で再生成 → `git diff` 検証、
+の順で進める。書き込み権限が無ければ、変更するセルと値を表にしてユーザーに依頼する。
+
+| 何をしたか | 更新するマスター項目(タブ: agent_master) |
+|---|---|
+| 新しい建物のパーツ一式を作った | `model_type`(1=FLAT/2=HOUSE/3=GABLE/4=GROUND/5=PREBUILT/6=PORT/7=MASHUP/8=SHED/9=RAIL_YARD)。未設定だと意図した組み立て方にならない |
+| `floor` パーツを作って地面を描きたい | **`draw_floor=yes`**。パーツを置くだけでは地面パネルは描画されない(オプトイン。F doc §8.1) |
+| 屋根の形を変えた(切妻/片流れ/寄棟にした) | `model_type` を 3 / 8 / 2 へ |
+| 階高に合わせてパーツを作った/階高を変えたい | `height_per_floor`(既定4.0)。パーツの著作高さとずれると隙間・めり込みが出る |
+| `b{bd_type}` フォルダにパーツを置いた | その建物の `bd_type` が該当ビットか確認(フォールバック先が変わる) |
+| マッシュアップのサブ建物を作った | タブ `subbuilding_master` の `model_prefix`(パーツ名 `mashup-{model_prefix}-*-prebuilt` と一致必須)・width/height/floors/count。再生成は `create_subbuilding_master.py` |
+
+### スプレッドシート以外に必要な再生成
+
+- **新しく `a{id}` フォルダを作った場合**は `city-genesis/unity/Assets/Resources/Config/agent_model_config.yaml`
+  の再生成が要る(`genesis-core/tools/generate_agent_model_config.py`)。ここに定義が無いと
+  Unityは `a{variant}` ではなく `b{bd_type}` のパーツを見に行く(F doc §3.2)。
+  このスクリプトは `Resources/Models/Buildings/` のprefabを走査するため、
+  **Unityでprefabを生成した後**に実行する必要がある(Windows側の作業)。
+
+## バリデータが検査すること(=機械化済みの規約)
+
+命名規則 / mid-w1の存在(白い箱防止) / 同一レベルの壁・角の高さ揃え /
+XZ実寸0.3m未満の単位間違い疑い / スケール未適用 / スキン角パーツのボーン名
+(`Bone`=Z側, `Bone.001`=X側)と頂点グループ / prebuiltの原点(XZ中心。Y=0が接地基準で、
+底面は地中へ延ばしてよいが0より上に浮くのは禁止) /
+閾値フォルダ名 / マテリアル命名(接頭辞BD_/PATH_/PROP_と.001サフィックス検出。
+建物以外のカテゴリはマテリアル検査のみ実施)。
+検査ルールの実体は `genesis-gallery/validator/rules.py`。
+**規約を新たに知った・増やしたら rules.py に追加すること**(それが規約の実質的な正本になる)。
+
+## 知らないと事故る仕様
+
+- **UnityはモジュラーパーツのFBXノード変換を無視する**(壁・角・fence・roofprop・
+  entrance・tile)。sharedMeshのジオメトリローカル座標を直接TRSで配置するため、
+  in-place著作のノード位置は実行時に消える。壁はメッシュX範囲のスロット合わせで
+  再基準化されるので原点ずれも実害なし(F doc §6.2-6.3)。roofpropは
+  **モデル原点が屋上面に置かれる**(ジオメトリを原点付近・接地0で著作すること)。
+  ただし **prebuilt/mashup/port_crane はノード変換込み**で結合され原点基準で積まれるので
+  原点規約(XZ中心、Y=0が接地基準)が実害を持つ。
+  地形の凹凸対策として底面をY=0より下(地中)へ延ばすのは正当な作法。
+- mid レベルだけY方向スケールされる。base/top は著作高さのまま描画され、
+  階高とずれると隙間/めり込みが出る(プログラムは補正しない)。
+- 壁パーツの**ローカルX軸が辺の長さ方向**。ここを間違えると敷き詰めで細片に潰れる。
+- `ceil`/`floor`/`generic-wall` はマテリアル参照専用で形状は描画されない。
+- `mid-prebuilt` には必ず1フロア分だけ入れる(Array適用済み複数階は全体が1階分に潰される)。
+- 角パーツは建物単位のオプトイン。無ければ角を描かず壁が辺の端まで敷かれる(破綻しない)。
