@@ -322,6 +322,7 @@ public static class Constants
     public const int PATH_UTILITY_NONE = 0;
     public const int PATH_UTILITY_OVERHEAD = 1;
     public const int PATH_UTILITY_UNDERGROUND = 2;
+    public const int VARIANT_GENERIC_BUILDING = 4;
 
     public static readonly Dictionary<int, int> VEHICLE_TO_TRAFFIC = new Dictionary<int, int>
     {
