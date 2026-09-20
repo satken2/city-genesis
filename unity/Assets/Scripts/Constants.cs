@@ -214,6 +214,7 @@ public static class Constants
     public const int VEHICLE_TRUCK = 11;
     public const int VEHICLE_BUS = 12;
     public const int VEHICLE_COMMERCIAL = 13;
+    public const int VEHICLE_TRAM = 14;
     public const int VEHICLE_METRO_TRAIN = 20;
     public const int VEHICLE_PASSANGER_TRAIN = 21;
     public const int VEHICLE_FREIGHT_TRAIN = 22;
@@ -329,6 +330,7 @@ public static class Constants
         { VEHICLE_TRUCK, TRAFFIC_ROAD },
         { VEHICLE_BUS, TRAFFIC_ROAD },
         { VEHICLE_COMMERCIAL, TRAFFIC_ROAD },
+        { VEHICLE_TRAM, TRAFFIC_ROAD },
         { VEHICLE_METRO_TRAIN, TRAFFIC_RAIL },
         { VEHICLE_PASSANGER_TRAIN, TRAFFIC_RAIL },
         { VEHICLE_FREIGHT_TRAIN, TRAFFIC_RAIL },
@@ -359,7 +361,7 @@ public static class Constants
 
     public static readonly int[] PEDESTRIAN_VEHICLE_KEYS = new int[] { VEHICLE_PEDESTRIAN };
 
-    public static readonly int[] ROAD_VEHICLE_KEYS = new int[] { VEHICLE_STANDARD, VEHICLE_TRUCK, VEHICLE_BUS, VEHICLE_COMMERCIAL };
+    public static readonly int[] ROAD_VEHICLE_KEYS = new int[] { VEHICLE_STANDARD, VEHICLE_TRUCK, VEHICLE_BUS, VEHICLE_COMMERCIAL, VEHICLE_TRAM };
 
     public static readonly int[] RAIL_VEHICLE_KEYS = new int[] { VEHICLE_METRO_TRAIN, VEHICLE_PASSANGER_TRAIN, VEHICLE_FREIGHT_TRAIN, VEHICLE_HIGH_SPEED_TRAIN };
 

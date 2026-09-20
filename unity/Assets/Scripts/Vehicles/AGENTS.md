@@ -23,7 +23,7 @@
 ## 共通時間と公共交通
 
 - 時間・流量の契約の正は公開 `geometries/T_交通シミュレーションと走行描画の整合.md`。平均速度に独立した交差点減速・駅停車を重ねてはならない。
-- `RoadMotionData` / `RoadMotionControl`: `/paths/motion` の自由秒数・混雑込み秒数を参照。`VehicleManager` は同一道路・方向・車線の前車へ追従し、締切超過時も自由走行平均速度を超えない。表示標本率は0〜1。バスのランダム生成は行わない。
+- `RoadMotionData` / `RoadMotionControl`: `/paths/motion` の自由秒数・混雑込み秒数を参照。`VehicleManager` は同一道路・方向・車線の前車へ追従し、締切超過時も自由走行平均速度を超えない。表示標本率は0〜1。バス・LRT(`VEHICLE_BUS`/`VEHICLE_TRAM`。路線車両として`TransitVehicleManager`が描く)のランダム生成は行わない。
 - `TransitDataStore`: 色帯と車両で共有する路線一覧。5秒ポーリング＋明示Refresh。Clearで世代を進め、古い都市の応答を破棄する。色帯の表示ON/OFFで取得を止めない。
 - `TransitMotionClock`: コアの `journeys.steps` の等加速度区間・停車を時刻から参照する純粋なクラス。車両需要や待ち時間と同じ時間を使う。
 - `TransitVehicleManager`: 実調達編成数を位相配置し、周辺の車体だけプールから出す。鉄道は停止中心を基準に各車を距離配置し、折り返し中も個体と前後を保つ。欠けたパス・未生成レールコネクタを直線で補完しない。

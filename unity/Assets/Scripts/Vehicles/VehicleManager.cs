@@ -176,7 +176,8 @@ public class VehicleManager : MonoBehaviour
         foreach (var road in roads.Values)
         foreach (int type in Constants.ROAD_VEHICLE_KEYS)
         {
-            if (type == Constants.VEHICLE_BUS) continue;
+            // 路線車両(バス・LRT)は TransitVehicleManager が路線に沿って描くため、環境交通としては出さない。
+            if (type == Constants.VEHICLE_BUS || type == Constants.VEHICLE_TRAM) continue;
             long key = Key(road.data.path_id, type);
             float target = Traffic(road.data, type) / Mathf.Max(1, activeHoursPerDay * 3600) * road.insideLength
                 / MeanSpeed(road.data.path_id,type) * Mathf.Clamp01(renderFraction);

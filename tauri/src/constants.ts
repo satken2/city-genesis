@@ -209,6 +209,7 @@ export const VEHICLE_STANDARD: number = 10;
 export const VEHICLE_TRUCK: number = 11;
 export const VEHICLE_BUS: number = 12;
 export const VEHICLE_COMMERCIAL: number = 13;
+export const VEHICLE_TRAM: number = 14;
 export const VEHICLE_METRO_TRAIN: number = 20;
 export const VEHICLE_PASSANGER_TRAIN: number = 21;
 export const VEHICLE_FREIGHT_TRAIN: number = 22;
@@ -323,6 +324,7 @@ export const VEHICLE_TO_TRAFFIC: Record<number, number> = {
   11: 1,
   12: 1,
   13: 1,
+  14: 1,
   20: 2,
   21: 2,
   22: 2,
@@ -352,7 +354,7 @@ export const ALL_TRAFFICS: number[] = [0, 1, 2];
 
 export const PEDESTRIAN_VEHICLE_KEYS: number[] = [0];
 
-export const ROAD_VEHICLE_KEYS: number[] = [10, 11, 12, 13];
+export const ROAD_VEHICLE_KEYS: number[] = [10, 11, 12, 13, 14];
 
 export const RAIL_VEHICLE_KEYS: number[] = [20, 21, 22, 23];
 
