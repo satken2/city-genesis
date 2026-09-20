@@ -61,3 +61,6 @@ Space長押し中は`DriveMode.SpeedMultiplier`が5になり、一般車と公�
 LRTはRoute.VehicleType=VEHICLE_TRAMで最内車線の軌道を使う（LrtRoadParts.Offsetが唯一の正）。303は中央単線、431は通常軌道。路線ハイライトも同じ経路設定を使う。交差点は描画済みRailコネクタへ接続し、踏面高さを加える。バスの外側車線配置と混同しない。
 
 LRTのモデル対応は1003→車種14。`Vehicles/14/0`が先頭・後尾共用、`middle`が集電装置付き中間車で、外観候補は0のみ。公称車長10mの低床車体を既存の編成配置で使う。原本は`blender/vehicles.blend`。
+
+
+道路モデルは10=10外観、11=4外観、12/13=各2外観。vehicle_model_config.yamlの候補数と実FBXを揃える。鉄道を含む全36モデルはProps/350〜367・370〜387の自由配置別名を持つ。形状の正はvehicles.blendで、別名は非公開制作ツールのbuild_vehicle_props.pyがprops.blendへ同期する。Tests/VehiclesのTransitModels/VehiclePropsが候補数・FBX参照・接地・別名の形状一致を確認する。

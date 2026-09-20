@@ -8,9 +8,9 @@
 # 例(fbx を Assets/Resources/Models/Vehicles/10/0.prefab, /1.prefab として配置した場合):
 vehicles:
   10: # VEHICLE_STANDARD
-    variants: [0, 1]
+    variants: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
   11: # VEHICLE_TRUCK
-    variants: [0, 1]
+    variants: [0, 1, 2, 3]
   12: # VEHICLE_BUS
     variants: [0, 1]
   13: # VEHICLE_COMMERCIAL

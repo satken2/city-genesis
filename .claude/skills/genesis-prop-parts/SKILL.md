@@ -133,7 +133,7 @@ stdout が返らない等の罠がある)。本Skillはプロップ固有の差�
 
 ## 道路・鉄道を走る車両モデル
 
-道路車両・編成車両の制作にも共通のBlender基盤を使うが、保存先は `blender/vehicles.blend` と `Assets/Models/Vehicles/{車種}/{モデル名}.fbx`。地形プロップ用の `prop_master` には登録しない。制作前に公開 `geometries/O_車両の走行描画.md` の O.10.1 と `unity/Assets/Scripts/Vehicles/AGENTS.md` を読む。
+道路車両・編成車両の制作にも共通のBlender基盤を使うが、保存先は `blender/vehicles.blend` と `Assets/Models/Vehicles/{車種}/{モデル名}.fbx`。走行用の全36モデルは自由配置用の数値ID 350〜367・370〜387でも `prop_master` に登録する。制作前に公開 `geometries/O_車両の走行描画.md` の O.10.1 と `unity/Assets/Scripts/Vehicles/AGENTS.md` を読む。
 
 - 原点は接地面・水平中心、Blender -Yが前方。1FBX=1メッシュで既存の車両用 `PROP_*` 材質を共有する。
 - 先頭・後尾は数値バリアント、中間は `middle` / `middle_1`。LRT車種14は `0` と `middle` の1外観。最後尾の反転はUnityが行う。
@@ -142,3 +142,6 @@ stdout が返らない等の罠がある)。本Skillはプロップ固有の差�
 - 再生成ジョブは非公開制作ツール `genesis-gallery/pipeline/jobs/vehicles.md`、LRTは同ディレクトリの `lrt_vehicles.md` を参照する。
 
 手動配置用モノレール308/309は `props.blend` の例外的な車両プロップ。原点は走行タイヤと桁上面の接点で、スカートは高さ-0.70mまで桁の両脇へ下がる。bbox底面を原点に揃え直さない。負の高さでは左右0.51mの桁用離隔を維持し、`Tests/Monorail/run.ps1`で確認する。
+
+
+走行車両の自由配置別名は、非公開制作ツール `genesis-gallery/pipeline/jobs/vehicle_prop_catalog.py` が対応表を持つ。`build_vehicle_props.py -- --blend <props.blend>` は隣のvehicles.blendから全モデルの形状・UV・材質を同期する。道路車両は `build_vehicles.py --road-only` で18外観（10種/4種/2種/2種）を再生成し、その後に別名も同期する。鉄道/LRTを再著作した場合も同期が必要。書き出しはvehiclesとpropsの両カテゴリへ行い、Unityの `Tests/Vehicles/run.ps1 -TransitOnly` で別名も確認する。詳細は公開M文書§M.7.6とO文書§O.10.1。

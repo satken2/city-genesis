@@ -259,6 +259,34 @@ public static class VehicleQA
         UnityEngine.Object.DestroyImmediate(root); UnityEngine.Object.DestroyImmediate(cameraObject);
     }
 
+    static void VehicleProps()
+    {
+        var paths=new List<string>();
+        foreach(int type in new[]{10,11,12,13})
+            for(int variant=0;variant<(type==10?10:type==11?4:2);variant++)paths.Add($"{type}/{variant}");
+        paths.Add("14/0");paths.Add("14/middle");
+        foreach(int type in new[]{20,21,22,23})
+        {
+            paths.Add($"{type}/0");paths.Add($"{type}/1");
+            string middle=type==22?"wagon":"middle";
+            paths.Add($"{type}/{middle}");paths.Add($"{type}/{middle}_1");
+        }
+        for(int index=0;index<paths.Count;index++)
+        {
+            int id=index<18?350+index:370+index-18;
+            var sourceModel=Resources.Load<GameObject>("Models/Vehicles/"+paths[index]);
+            var prop=Resources.Load<GameObject>($"Models/Props/{id}");
+            Check(sourceModel!=null && prop!=null,"Missing vehicle prop: "+id);
+            var original=sourceModel.GetComponentInChildren<MeshFilter>(true).sharedMesh;
+            var copy=prop.GetComponentInChildren<MeshFilter>(true).sharedMesh;
+            Check(copy.isReadable && original.vertexCount==copy.vertexCount && original.triangles.Length==copy.triangles.Length,"Vehicle prop topology differs: "+id);
+            Near(Vector3.Distance(original.bounds.size,copy.bounds.size),0,.002f,"Vehicle prop dimensions differ");
+            var model=New("PropRenderModel",id);
+            Check(((IList)Get(model,"normal")).Count>0 && ((IList)Get(model,"far")).Count>0,"Vehicle prop has no drawable parts: "+id);
+            Call(model,"Dispose");
+        }
+    }
+
     static void TransitModels()
     {
         var manager=new GameObject("ModelManagerQA").AddComponent(game.GetType("ModelManager"));
@@ -267,10 +295,28 @@ public static class VehicleQA
         foreach(int vehicleType in new[]{10,11,12,13,14,20,21,22,23})
         {
             var variants=(IList)game.GetType("VehicleModelConfig").GetMethod("GetVariants").Invoke(null,new object[]{vehicleType});
-            Check(variants.Count==(vehicleType==14?1:2),"Inline comments hide configured variants for "+vehicleType);
+            Check(variants.Count==(vehicleType==10?10:vehicleType==11?4:vehicleType==14?1:2),"Configured variant count differs for "+vehicleType);
+            foreach(int variant in variants)
+            {
+                string path=$"Assets/Models/Vehicles/{vehicleType}/{variant}.fbx";
+                var prefab=Resources.Load<GameObject>($"Models/Vehicles/{vehicleType}/{variant}");
+                Check(prefab!=null,"Missing vehicle wrapper: "+path);
+                Check(AssetDatabase.GetAssetPath(prefab.GetComponentInChildren<MeshFilter>(true).sharedMesh)==path,"Wrong FBX reference: "+path);
+                if(vehicleType>13)continue;
+                var car=(GameObject)resolver.GetMethod("CreateInstance").Invoke(null,new object[]{vehicleType,variant,null});
+                car.SetActive(true);
+                var renderers=car.GetComponentsInChildren<Renderer>();
+                Check(renderers.Length>0,"Road vehicle falls back to an empty model");
+                var bounds=renderers[0].bounds;
+                foreach(var renderer in renderers)bounds.Encapsulate(renderer.bounds);
+                Near(bounds.min.y,0,.02f,"Road vehicle floats");
+                Check(bounds.size.z>3 && bounds.size.z<13 && bounds.size.x>1.4f && bounds.size.x<3,"Road vehicle dimensions");
+                UnityEngine.Object.DestroyImmediate(car);
+            }
             foreach(int seed in new[]{0,1,-1,int.MinValue})
                 Check((int)resolver.GetMethod("PickVariantId").Invoke(null,new object[]{vehicleType,seed})>=0,"Negative seed gives invalid variant");
         }
+        VehicleProps();
         Check((int)game.GetType("VehicleModelConfig").GetMethod("GetTransitVehicleType").Invoke(null,new object[]{1003})==14,"LRT model mapping missing");
         foreach (int type in new[]{12,14,20,21})
         {
