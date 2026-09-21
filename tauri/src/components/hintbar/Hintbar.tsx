@@ -28,11 +28,12 @@ export type HintbarPayload = {
 
 type SessionStatePayload = {
   current_save_id: string | null;
+  isLoading?: boolean;
 };
 
 export function Hintbar() {
   const appWindow = useMemo(() => getCurrentWindow(), []);
-  const [sessionActive, setSessionActive] = useState(true);
+  const [sessionActive, setSessionActive] = useState(false);
   const [enabled, setEnabled] = useState(true);
   const [text, setText] = useState("");
 
@@ -53,7 +54,7 @@ export function Hintbar() {
 
     appWindow
       .listen<SessionStatePayload>("session-state", (event) => {
-        setSessionActive(event.payload.current_save_id != null);
+        setSessionActive(event.payload.current_save_id != null && !event.payload.isLoading);
       })
       .then((fn) => {
         unlistenSession = fn;

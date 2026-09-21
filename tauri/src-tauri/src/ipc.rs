@@ -619,6 +619,13 @@ pub async fn handle_incoming_message(
             // 最前面を打ち直す。「Unity をクリックすれば UI が必ず戻る」ための復帰経路。
             window::reassert_topmost(&app);
         }
+        "game:loaded" => {
+            let loading_id = envelope.payload.get("loading_id").and_then(|v| v.as_u64());
+            let mut guard = state.lock();
+            if guard.is_loading && loading_id == Some(guard.loading_id) {
+                guard.graphic_load_ready = true;
+            }
+        }
         "system:graphic_ready" => {
             // Unity の起動完了通知。初回起動と、クラッシュ後にスーパーバイザ
             // (genesis.py)が Unity を自動再起動した場合の両方で送られてくる。
@@ -637,6 +644,21 @@ pub async fn handle_incoming_message(
             };
             if is_reconnect {
                 window::close_all_popup_windows(&app, &state);
+            }
+            let (loading, started, has_session) = {
+                let guard = state.lock();
+                (guard.is_loading, guard.loading_started, guard.last_save_id.is_some())
+            };
+            if loading && started {
+                crate::send_game_start_ipc(&state, &app);
+            } else if !loading && has_session {
+                let app = app.clone();
+                let state = state.clone();
+                std::thread::spawn(move || {
+                    if crate::begin_initial_loading(&app, &state, false).is_ok() {
+                        crate::send_game_start_ipc(&state, &app);
+                    }
+                });
             }
             // 起動直後の Unity は自分をフォアグラウンドにするため、UI が裏に回りうる。
             window::reassert_topmost(&app);

@@ -153,6 +153,9 @@
     "stepProgress": "ステップ {{current}} / {{total}}"
   },
   "tips": {
+    "startGame": "ゲームを開始する",
+    "nowLoading": "Now Loading...",
+    "startError": "開始できませんでした。もう一度お試しください。",
     "todaysTips": "Today's Tips",
     "gotIt": "閉じる",
     "items": {

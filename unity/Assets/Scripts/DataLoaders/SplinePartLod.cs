@@ -49,7 +49,7 @@ public sealed class SplinePartLod : MonoBehaviour
     private void OnEnable()
     {
         if (build != null && worker == null && isActiveAndEnabled)
-            worker = RenderWorkScheduler.Start(this, Worker(), "RoadSegments");
+            worker = RenderWorkScheduler.Start(this, Worker(), "RoadSegments", () => !IsInitialRenderReady);
     }
 
     private void OnDisable()

@@ -153,6 +153,9 @@
     "stepProgress": "Step {{current}} / {{total}}"
   },
   "tips": {
+    "startGame": "Start Game",
+    "nowLoading": "Now Loading...",
+    "startError": "Unable to start. Please try again.",
     "todaysTips": "Today's Tips",
     "gotIt": "Got It",
     "items": {

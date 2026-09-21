@@ -76,7 +76,6 @@ import { Cockpit } from "./components/hud/Cockpit";
 import { SystemTray } from "./components/hud/SystemTray";
 import { DisplayTray } from "./components/hud/DisplayTray";
 import { TopMenu } from "./components/topmenu/TopMenu";
-import { LoadingWindow } from "./components/loading/LoadingWindow";
 import { ParameterSetupWindow } from "./components/parameter-setup/ParameterSetupWindow";
 import { NotificationWindow } from "./components/notification/NotificationWindow";
 import { TipsWindow } from "./components/tips/TipsWindow";
@@ -99,7 +98,7 @@ function App() {
   const [openWindowCount, setOpenWindowCount] = useState<number>(0);
   const [queryState, setQueryState] = useState<QueryState>({ status: "idle" });
   const [actionState, setActionState] = useState<string>("");
-  const [windowKind, setWindowKind] = useState<"host" | "icon-panel" | "cockpit" | "system-tray" | "display-tray" | "topmenu" | "loading" | "popup" | "notification" | "hintbar" | "parameter-setup" | "tutorial" | "tips">("host");
+  const [windowKind, setWindowKind] = useState<"host" | "icon-panel" | "cockpit" | "system-tray" | "display-tray" | "topmenu" | "popup" | "notification" | "hintbar" | "parameter-setup" | "tutorial" | "tips">("host");
 
   useEffect(() => {
     let disposed = false;
@@ -115,8 +114,7 @@ function App() {
         setWindowKind("display-tray");
       } else if (label === "topmenu") {
         setWindowKind("topmenu");
-      } else if (label === "loading") {
-        setWindowKind("loading");
+
       } else if (label === "notification") {
         setWindowKind("notification");
       } else if (label === "hintbar") {
@@ -308,8 +306,7 @@ function App() {
         <Hintbar />
       ) : windowKind === "tutorial" ? (
         <Tutorial />
-      ) : windowKind === "loading" ? (
-        <LoadingWindow />
+
       ) : windowKind === "parameter-setup" ? (
         <ParameterSetupWindow apiBaseUrl={apiBaseUrl} />
       ) : windowKind === "tips" ? (

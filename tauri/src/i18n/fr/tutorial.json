@@ -153,6 +153,9 @@
     "stepProgress": "Étape {{current}} / {{total}}"
   },
   "tips": {
+    "startGame": "Commencer la partie",
+    "nowLoading": "Now Loading...",
+    "startError": "Impossible de démarrer. Veuillez réessayer.",
     "todaysTips": "Astuce du jour",
     "gotIt": "Fermer",
     "items": {

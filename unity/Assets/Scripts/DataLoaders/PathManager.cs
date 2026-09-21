@@ -470,7 +470,7 @@ public class PathManager : BaseApiDataManager
     {
         if (terrainFollowRebuildWorker == null)
         {
-            terrainFollowRebuildWorker = RenderWorkScheduler.Start(this, TerrainFollowRebuildWorker(), "PathManager");
+            terrainFollowRebuildWorker = RenderWorkScheduler.Start(this, TerrainFollowRebuildWorker(), "PathManager", () => PendingTerrainRebuildCount > 0);
         }
     }
 
@@ -780,7 +780,7 @@ public class PathManager : BaseApiDataManager
         CancelActiveLodCoroutines();
         if (pathDrawLodWorker == null)
         {
-            pathDrawLodWorker = RenderWorkScheduler.Start(this, PathDrawLodReevaluationWorker(), "PathManager");
+            pathDrawLodWorker = RenderWorkScheduler.Start(this, PathDrawLodReevaluationWorker(), "PathManager", () => false);
         }
 
         var allPathCells = new HashSet<Vector2Int>(cellSets.farCells);

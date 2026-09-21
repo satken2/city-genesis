@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { invoke } from "@tauri-apps/api/core";
+import { getInitialLoadingReady, startGameFromTips } from "../../utils/ipc";
 import "./TipsWindow.css";
 
 import tip1 from "../../assets/images/tips/tip_1.jpg";
@@ -39,29 +39,44 @@ const TIPS_LIST: TipItem[] = [
 ];
 
 export function TipsWindow() {
-  console.log("[TipsWindow] 1: render start");
   const { t } = useTranslation();
-  console.log("[TipsWindow] 2: useTranslation ok");
-  const [currentIndex] = useState(() => {
-    const idx = Math.floor(Math.random() * TIPS_LIST.length);
-    console.log("[TipsWindow] 3: useState init, idx=", idx);
-    return idx;
-  });
-  console.log("[TipsWindow] 4: after useState, currentIndex=", currentIndex);
+  const [currentIndex] = useState(() => Math.floor(Math.random() * TIPS_LIST.length));
+  const [ready, setReady] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const [error, setError] = useState(false);
 
-  const handleClose = async () => {
-    console.log("[TipsWindow] handleClose called");
+  useEffect(() => {
+    let disposed = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const refresh = async () => {
+      try {
+        const value = await getInitialLoadingReady();
+        if (!disposed) setReady(value);
+      } catch (e) {
+        console.error("Failed to read loading state:", e);
+      } finally {
+        if (!disposed) timer = setTimeout(refresh, 300);
+      }
+    };
+    void refresh();
+    return () => { disposed = true; clearTimeout(timer); };
+  }, []);
+
+  const handleStart = async () => {
+    if (!ready || starting) return;
+    setStarting(true);
+    setError(false);
     try {
-      await invoke("close_tips_window");
+      await startGameFromTips();
     } catch (e) {
-      console.error("Failed to close tips window:", e);
+      console.error("Failed to start game:", e);
+      setError(true);
+      setStarting(false);
     }
   };
 
   const currentTip = TIPS_LIST[currentIndex];
-  console.log("[TipsWindow] 5: currentTip=", currentTip);
 
-  console.log("[TipsWindow] 6: entering JSX return");
   return (
     <div className="tips-window" data-tauri-drag-region>
       <div className="tips-header" data-tauri-drag-region>
@@ -90,9 +105,17 @@ export function TipsWindow() {
       </div>
 
       <div className="tips-footer">
-        <button className="tips-btn tips-btn--primary" onClick={handleClose} type="button">
-          {t("tips.gotIt")}
-        </button>
+        {error && <span role="alert">{t("tips.startError")}</span>}
+        {ready ? (
+          <button className="tips-btn tips-btn--primary" onClick={handleStart} disabled={starting} type="button">
+            {t("tips.startGame")}
+          </button>
+        ) : (
+          <span className="tips-loading" role="status" aria-live="polite">
+            <span className="tips-loading-spinner" aria-hidden="true" />
+            <span className="tips-loading-text">{t("tips.nowLoading")}</span>
+          </span>
+        )}
       </div>
     </div>
   );

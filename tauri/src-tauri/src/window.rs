@@ -1084,57 +1084,6 @@ pub fn get_connection_status(state: &SharedState) -> Value {
     })
 }
 
-/// Loading ウィンドウを表示する。既に表示されている場合は何もしない。
-/// 画面中央に 400x200 の小ウィンドウを表示し、ゲーム開始/ロード中の待機を示す。
-pub fn show_loading_window(app: &AppHandle, state: &SharedState) -> Result<(), String> {
-    if app.get_webview_window("loading").is_some() {
-        return Ok(());
-    }
-
-    let monitor_index = {
-        let guard = state.lock();
-        guard.current_monitor_index
-    };
-
-    let monitors: Vec<_> = app
-        .available_monitors()
-        .unwrap_or_default()
-        .into_iter()
-        .collect();
-
-    let mut builder = WebviewWindowBuilder::new(
-        app,
-        "loading",
-        WebviewUrl::App("index.html".into()),
-    )
-    .title("Loading")
-    .decorations(false)
-    .transparent(true)
-    .always_on_top(true)
-    .skip_taskbar(true)
-    .resizable(false)
-    .inner_size(400.0, 200.0);
-
-    if let Some(monitor) = monitors.get(monitor_index) {
-        let scale = monitor.scale_factor();
-        let m_size = monitor.size().to_logical::<f64>(scale);
-        let m_pos = monitor.position().to_logical::<f64>(scale);
-        let x = m_pos.x + (m_size.width - 400.0) / 2.0;
-        let y = m_pos.y + (m_size.height - 200.0) / 2.0;
-        builder = builder.position(x, y);
-    }
-
-    builder.build().map_err(|e| e.to_string())?;
-    Ok(())
-}
-
-/// Loading ウィンドウを閉じる。存在しない場合は何もしない。
-pub fn hide_loading_window(app: &AppHandle) {
-    if let Some(window) = app.get_webview_window("loading") {
-        let _ = window.close();
-    }
-}
-
 /// パラメータ設定ウィンドウを開く。
 /// edit_mode=false … フリーモード新規ゲーム開始時の初期セットアップ。
 /// edit_mode=true … テンプレート作成モード中の再編集（完了しても game:start を送らない）。
@@ -1216,8 +1165,7 @@ pub fn open_tips_window(app: &AppHandle, state: &SharedState) -> Result<(), Stri
 }
 
 /// Tips of the Day ウィンドウをモニターインデックス指定で表示する。
-/// close_parameter_setup_window の直後に呼ぶと WebView2 破棄処理とデッドロックするため、
-/// finish_parameter_setup からは必ず遅延スレッド経由で呼ぶこと。
+/// ウィンドウ生成は非同期コマンドまたはワーカースレッドから行う。
 pub fn open_tips_window_on_monitor(app: &AppHandle, monitor_index: usize) -> Result<(), String> {
     if app.get_webview_window("tips").is_some() {
         return Ok(());
@@ -1262,7 +1210,7 @@ pub fn open_tips_window_on_monitor(app: &AppHandle, monitor_index: usize) -> Res
 /// Tips of the Day ウィンドウを閉じる。存在しない場合は何もしない。
 pub fn close_tips_window(app: &AppHandle) {
     if let Some(window) = app.get_webview_window("tips") {
-        let _ = window.close();
+        let _ = window.destroy();
     }
 }
 

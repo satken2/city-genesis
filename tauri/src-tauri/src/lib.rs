@@ -277,7 +277,7 @@ fn launch_graphic(state: tauri::State<'_, SharedState>) -> Result<String, String
 }
 
 /// 新規ゲームセッションを開始する。
-/// Unity を起動し、topmenu を隠して loading を表示した後、
+/// Unity を起動し、topmenu を隠して Tipsを表示した後、
 /// バックエンドに POST /api/v1/sessions を送信する。
 /// バックエンドの準備完了はポーリングスレッドが検知し、自動的にHUDを表示する。
 #[tauri::command]
@@ -298,13 +298,9 @@ async fn start_new_game(
     // ゲーム開始の確定に伴い、開いているポップアップを全て閉じる
     window::close_all_popup_windows(&app, state.inner());
 
-    // loading を表示
-    window::show_loading_window(&app, state.inner())?;
+    // Tipsをロード画面として表示
+    begin_initial_loading(&app, state.inner(), true)?;
 
-    {
-        let mut guard = state.lock();
-        guard.is_loading = true;
-    }
 
     // バックエンドにセッション作成リクエストを送信
     let api_base_url = {
@@ -319,14 +315,14 @@ async fn start_new_game(
         .timeout(Duration::from_secs(60))
         .send()
         .await
-        .map_err(|e| format!("セッション作成リクエストに失敗しました: {e}"))?;
+        .map_err(|e| { abort_initial_loading(&app, state.inner()); format!("セッション作成リクエストに失敗しました: {e}") })?;
 
     if !res.status().is_success() {
         let status = res.status();
         let body = res.text().await.unwrap_or_default();
         log::error!("[start_new_game] セッション作成失敗: {} {}", status, body);
         // 失敗時は loading を閉じて topmenu を戻す
-        window::hide_loading_window(&app);
+        abort_initial_loading(&app, state.inner());
         if let Some(topmenu) = app.get_webview_window("topmenu") {
             let _ = topmenu.show();
         }
@@ -338,11 +334,12 @@ async fn start_new_game(
     }
 
     log::info!("[start_new_game] セッション作成リクエスト成功。ポーリング待機に委譲");
+    state.lock().backend_load_complete = true;
     Ok(())
 }
 
 /// 新規ゲームセッションを作成する（地形またはテンプレート選択後に呼び出される）。
-/// Unity を起動し、topmenu と現在のポップアップを隠して loading を表示した後、
+/// Unity を起動し、topmenu と現在のポップアップを隠して Tipsを表示した後、
 /// バックエンドに POST /api/v1/sessions を送信する。
 ///
 /// 追加パラメータ（都市名・言語・シミュレーション日数）はクエリパラメータとして
@@ -375,7 +372,7 @@ async fn create_session(
     // 開いているポップアップを全て閉じる（NewGameWindow など）
     window::close_all_popup_windows(&app, state.inner());
 
-    window::show_loading_window(&app, state.inner())?;
+    begin_initial_loading(&app, state.inner(), template_id.is_none() && !template_mode.unwrap_or(false) && !is_tutorial.unwrap_or(false))?;
 
     {
         let mut guard = state.lock();
@@ -385,10 +382,7 @@ async fn create_session(
         } else {
             None
         };
-        // シナリオ「プレイ」= テンプレート指定かつ神モードでない場合。
-        // このセッションではパラメータ設定ウィンドウを表示しない（作者が決めたパラメータで開始）。
-        guard.is_scenario_play =
-            template_id.is_some() && !template_mode.unwrap_or(false);
+
     }
 
     let api_base_url = {
@@ -428,13 +422,13 @@ async fn create_session(
         .timeout(Duration::from_secs(60))
         .send()
         .await
-        .map_err(|e| format!("セッション作成リクエストに失敗しました: {e}"))?;
+        .map_err(|e| { abort_initial_loading(&app, state.inner()); format!("セッション作成リクエストに失敗しました: {e}") })?;
 
     if !res.status().is_success() {
         let status = res.status();
         let body = res.text().await.unwrap_or_default();
         log::error!("[create_session] セッション作成失敗: {} {}", status, body);
-        window::hide_loading_window(&app);
+        abort_initial_loading(&app, state.inner());
         if let Some(topmenu) = app.get_webview_window("topmenu") {
             let _ = topmenu.show();
         }
@@ -448,11 +442,12 @@ async fn create_session(
     // カメラの初期視点はUIを経由しない。グラフィックが game:start 受信時に
     // GET /api/v1/city の camera(セーブ値、または地形マップ定義の初期値)を自分で読む。
     log::info!("[create_session] セッション作成リクエスト成功。ポーリング待機に委譲");
+    state.lock().backend_load_complete = true;
     Ok(())
 }
 
 /// セーブデータをロードしてゲームセッションを開始する。
-/// Unity を起動し、topmenu を隠して loading を表示した後、
+/// Unity を起動し、topmenu を隠して Tipsを表示した後、
 /// バックエンドにロードリクエストを送信する。
 #[tauri::command]
 async fn start_load_game(
@@ -473,12 +468,8 @@ async fn start_load_game(
     // 前セッションの詳細パネル等がロード後のデータと無関係になるため一掃する。
     window::close_all_popup_windows(&app, state.inner());
 
-    window::show_loading_window(&app, state.inner())?;
+    begin_initial_loading(&app, state.inner(), false)?;
 
-    {
-        let mut guard = state.lock();
-        guard.is_loading = true;
-    }
 
     let api_base_url = {
         let guard = state.lock();
@@ -493,13 +484,13 @@ async fn start_load_game(
         .timeout(Duration::from_secs(60))
         .send()
         .await
-        .map_err(|e| format!("ロードリクエストに失敗しました: {e}"))?;
+        .map_err(|e| { abort_initial_loading(&app, state.inner()); format!("ロードリクエストに失敗しました: {e}") })?;
 
     if !res.status().is_success() {
         let status = res.status();
         let body = res.text().await.unwrap_or_default();
         log::error!("[start_load_game] ロード失敗: {} {}", status, body);
-        window::hide_loading_window(&app);
+        abort_initial_loading(&app, state.inner());
         if let Some(topmenu) = app.get_webview_window("topmenu") {
             let _ = topmenu.show();
         }
@@ -511,6 +502,7 @@ async fn start_load_game(
     }
 
     log::info!("[start_load_game] ロードリクエスト成功。ポーリング待機に委譲");
+    state.lock().backend_load_complete = true;
     Ok(())
 }
 
@@ -1271,7 +1263,7 @@ fn build_npy_float16(data: &[u8], rows: usize, cols: usize) -> Vec<u8> {
 }
 
 /// デバッグ初期化を実行してゲームセッションを開始する。
-/// Unity を起動し、topmenu を隠して loading を表示した後、
+/// Unity を起動し、topmenu を隠して Tipsを表示した後、
 /// バックエンドに POST /api/v1/system/debug-init を送信する。
 #[tauri::command]
 async fn start_debug_init(
@@ -1289,12 +1281,8 @@ async fn start_debug_init(
     // ゲーム開始の確定に伴い、開いているポップアップを全て閉じる
     window::close_all_popup_windows(&app, state.inner());
 
-    window::show_loading_window(&app, state.inner())?;
+    begin_initial_loading(&app, state.inner(), false)?;
 
-    {
-        let mut guard = state.lock();
-        guard.is_loading = true;
-    }
 
     let api_base_url = {
         let guard = state.lock();
@@ -1308,13 +1296,13 @@ async fn start_debug_init(
         .timeout(Duration::from_secs(60))
         .send()
         .await
-        .map_err(|e| format!("セッション作成リクエストに失敗しました: {e}"))?;
+        .map_err(|e| { abort_initial_loading(&app, state.inner()); format!("セッション作成リクエストに失敗しました: {e}") })?;
 
     if !res.status().is_success() {
         let status = res.status();
         let body = res.text().await.unwrap_or_default();
         log::error!("[start_new_game] セッション作成失敗: {} {}", status, body);
-        window::hide_loading_window(&app);
+        abort_initial_loading(&app, state.inner());
         if let Some(topmenu) = app.get_webview_window("topmenu") {
             let _ = topmenu.show();
         }
@@ -1326,6 +1314,7 @@ async fn start_debug_init(
     }
 
     log::info!("[start_new_game] セッション作成リクエスト成功。ポーリング待機に委譲");
+    state.lock().backend_load_complete = true;
     Ok(())
 }
 
@@ -1491,28 +1480,62 @@ fn resize_notification_window(
     window::resize_notification_window(&app, state.inner(), height)
 }
 
-/// game:start IPC を Unity に送信するヘルパー。session:reload も先に送る。
-/// カメラの視点はペイロードに乗せない(グラフィックがバックエンドの City.camera を読んで復元する)。
+/// ロード要求の世代を進め、前セッションの完了通知を無視する。
+fn begin_initial_loading(app: &tauri::AppHandle, state: &SharedState, needs_setup: bool) -> Result<(), String> {
+    {
+        let mut guard = state.lock();
+        guard.loading_id += 1;
+        guard.is_loading = true;
+        guard.backend_load_complete = false;
+        guard.loading_started = false;
+        guard.graphic_load_ready = false;
+        guard.needs_parameter_setup = needs_setup;
+        guard.awaiting_parameter_setup = false;
+        guard.tutorial_id = None;
+    }
+    window::set_hud_visible(app, false);
+    if let Some(hintbar) = app.get_webview_window("hintbar") { let _ = hintbar.hide(); }
+    ipc::send_ui_action(state, "".into(), None, "game:loading".into(), serde_json::json!({}))?;
+    window::open_tips_window(app, state)
+}
+
+fn abort_initial_loading(app: &tauri::AppHandle, state: &SharedState) {
+    {
+        let mut guard = state.lock();
+        guard.is_loading = false;
+        guard.backend_load_complete = false;
+        guard.loading_started = false;
+        guard.graphic_load_ready = false;
+        guard.needs_parameter_setup = false;
+    }
+    window::close_tips_window(app);
+    if let Some(topmenu) = app.get_webview_window("topmenu") { let _ = topmenu.show(); }
+}
+
+/// game:startは描画準備のみ開始する。表示解禁はgame:revealで行う。
 fn send_game_start_ipc(state: &SharedState, _app: &tauri::AppHandle) {
-    let game_start_payload = serde_json::json!({});
-    let _ = ipc::send_ui_action(
-        state,
-        "".to_string(),
-        None,
-        "session:reload".to_string(),
-        serde_json::json!({}),
-    );
-    let _ = ipc::send_ui_action(
-        state,
-        "".to_string(),
-        None,
-        "game:start".to_string(),
-        game_start_payload,
-    );
+    let loading_id = {
+        let mut guard = state.lock();
+        guard.loading_started = true;
+        guard.graphic_load_ready = false;
+        guard.loading_id
+    };
+    let _ = ipc::send_ui_action(state, "".into(), None, "session:reload".into(), serde_json::json!({}));
+    let _ = ipc::send_ui_action(state, "".into(), None, "game:start".into(), serde_json::json!({"loading_id": loading_id}));
+}
+
+fn show_game_controls(app: &tauri::AppHandle, state: &SharedState) {
+    window::set_hud_visible(app, true);
+    show_hintbar_if_enabled(app);
+    let tutorial_id = state.lock().tutorial_id.clone();
+    if let Some(tid) = tutorial_id {
+        if let Some(tutorial) = app.get_webview_window("tutorial") { let _ = tutorial.show(); }
+        let _ = app.emit("tutorial:show", tid);
+    }
 }
 
 /// フリーモード新規ゲームのパラメータ設定完了後に呼ばれるコマンド。
-/// パラメータ設定ウィンドウを閉じ、Taskbar/Hintbar を表示して Unity に game:start を送信する。
+/// パラメータ設定ウィンドウを閉じ、HUD/Hintbarを表示する。都市の初期ロードは完了済み。
 #[tauri::command]
 fn finish_parameter_setup(
     app: tauri::AppHandle,
@@ -1520,27 +1543,12 @@ fn finish_parameter_setup(
 ) -> Result<(), String> {
     {
         let mut guard = state.lock();
-        guard.pending_game_start = false;
+        if !guard.awaiting_parameter_setup { return Err("初期設定中ではありません".into()); }
+        guard.awaiting_parameter_setup = false;
+        guard.is_loading = false;
     }
-    let monitor_index = {
-        let guard = state.lock();
-        guard.current_monitor_index
-    };
     window::close_parameter_setup_window(&app);
-    window::set_hud_visible(&app, true);
-    show_hintbar_if_enabled(&app);
-    send_game_start_ipc(state.inner(), &app);
-
-    // close_parameter_setup_window の直後に builder.build() を呼ぶと、
-    // メインスレッドのイベントループが WebView2 破棄処理中のためデッドロックする。
-    // 別スレッドで少し待ってから作成することで回避する。
-    let app_clone = app.clone();
-    std::thread::spawn(move || {
-        std::thread::sleep(std::time::Duration::from_millis(300));
-        if let Err(e) = window::open_tips_window_on_monitor(&app_clone, monitor_index) {
-            log::error!("[tips] ウィンドウ作成失敗: {e}");
-        }
-    });
+    show_game_controls(&app, state.inner());
     Ok(())
 }
 
@@ -1573,8 +1581,29 @@ fn close_parameter_setup_window(app: tauri::AppHandle) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn close_tips_window(app: tauri::AppHandle) -> Result<(), String> {
+fn get_initial_loading_ready(state: tauri::State<'_, SharedState>) -> bool {
+    state.lock().graphic_load_ready
+}
+
+#[tauri::command]
+async fn close_tips_window(app: tauri::AppHandle, state: tauri::State<'_, SharedState>) -> Result<(), String> {
+    let (needs_setup, loading_id) = {
+        let guard = state.lock();
+        if !guard.is_loading || !guard.graphic_load_ready { return Err("初期ロードは完了していません".into()); }
+        (guard.needs_parameter_setup, guard.loading_id)
+    };
+    // 生成に失敗してもTipsから再試行できるよう、先に次のウィンドウを用意する。
+    if needs_setup { window::open_parameter_setup_window(&app, state.inner(), false)?; }
+    ipc::send_ui_action(state.inner(), "".into(), None, "game:reveal".into(), serde_json::json!({"loading_id": loading_id}))?;
+    {
+        let mut guard = state.lock();
+        guard.graphic_load_ready = false;
+        guard.needs_parameter_setup = false;
+        guard.awaiting_parameter_setup = needs_setup;
+        guard.is_loading = needs_setup;
+    }
     window::close_tips_window(&app);
+    if !needs_setup { show_game_controls(&app, state.inner()); }
     Ok(())
 }
 
@@ -1587,11 +1616,10 @@ fn reset_window_geometries(app: tauri::AppHandle, state: tauri::State<'_, Shared
 ///
 /// 5秒ごとにバックエンドの `/api/v1/sessions` と `/api/v1/city` を取得し、
 /// `session-state` イベントとして全 WebView ウィンドウにブロードキャストする。
-/// これにより TopMenu・Taskbar・LoadingWindow などが個別にポーリングする必要がなくなる。
+/// これにより TopMenu・HUD・Tips などが個別にポーリングする必要がなくなる。
 ///
-/// さらに、`is_loading == true` の状態で `current_save_id` が non-null に変化した場合、
-/// ゲーム開始/ロード完了とみなして LoadingWindow を閉じ、Taskbar を表示し、
-/// Unity に `session:reload` と `game:start` を送信する。
+/// バックエンドの準備完了後にUnityの初期描画を開始する。
+/// Tipsを閉じる条件はUnityのgame:loadedとユーザーの開始操作である。
 fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
     std::thread::spawn(move || {
         // クライアントをループ外で生成してコネクションプールを維持する。
@@ -1802,7 +1830,13 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
             // current_save_id の変化はゲーム開始・終了の検知ログで通知するため、
             // 変化がない場合は何も出力しない。
 
-            if save_id_changed {
+            let load_completed = {
+                let mut guard = state.lock();
+                let ready = guard.backend_load_complete && current_save_id.is_some();
+                if ready { guard.backend_load_complete = false; }
+                ready
+            };
+            if (save_id_changed && !is_loading) || load_completed {
                 let new_save_id = current_save_id.map(|s| s.to_string());
                 {
                     let mut guard = state.lock();
@@ -1815,77 +1849,14 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                         "[session-poll] current_save_id が設定されました。ゲーム開始を検知"
                     );
 
-                    // LoadingWindow が残っていれば必ず閉じる。
-                    // 前回の last_save_id が Some のまま残っていた場合など、
-                    // save_id_changed だが prev_save_id.is_none() でないケースでも
-                    // 確実にローディング表示を解除するため、条件を緩めている。
-                    window::hide_loading_window(&app);
-
-                    if is_loading {
-                        let mut guard = state.lock();
-                        guard.is_loading = false;
-                    } else {
-                        // ローディング中でない場合（例: 外部からセッションが作成された）
-                        // topmenu を隠す
-                        if let Some(topmenu) = app.get_webview_window("topmenu") {
-                            let _ = topmenu.hide();
+                    if !is_loading {
+                        if let Err(error) = begin_initial_loading(&app, &state, false) {
+                            log::error!("初期ロード画面を開けません: {error}");
                         }
                     }
+                    // POSTの応答前にセッションを検知しても、準備完了まではロードしない。
+                    if load_completed || !is_loading { send_game_start_ipc(&state, &app); }
 
-                    // テンプレートモードかどうかを session_data から取得する。
-                    // フリーモード（地形から始める）の場合のみパラメータ設定ウィンドウを表示し、
-                    // game:start IPC を finish_parameter_setup コマンドに委ねる。
-                    let template_mode = session_data
-                        .as_ref()
-                        .and_then(|d| d.get("template_mode"))
-                        .and_then(|v| v.as_bool())
-                        .unwrap_or(true); // 判断できない場合はテンプレートモード扱いで通常フロー
-
-                    // チュートリアルモード・シナリオプレイかどうかは State に保存されたフラグで判定する。
-                    let (tutorial_id, is_scenario_play) = {
-                        let guard = state.lock();
-                        (guard.tutorial_id.clone(), guard.is_scenario_play)
-                    };
-                    let is_tutorial = tutorial_id.is_some();
-
-                    // フリーモード（地形から始める）新規ゲームのときだけパラメータ設定ウィンドウを表示する。
-                    // チュートリアルはデフォルトパラメータで即開始するためスキップし、シナリオプレイは
-                    // 作者が決めたパラメータで開始するためスキップする（いずれも通常フロー=else節へ）。
-                    if !template_mode && is_loading && !is_tutorial && !is_scenario_play {
-                        // フリーモード新規ゲーム：パラメータ設定ウィンドウを表示し、
-                        // game:start は finish_parameter_setup に委ねる。
-                        {
-                            let mut guard = state.lock();
-                            guard.pending_game_start = true;
-                        }
-                        log::info!("[session-poll] フリーモード: パラメータ設定ウィンドウを表示");
-                        if let Err(e) = window::open_parameter_setup_window(&app, &state, false) {
-                            log::error!("[session-poll] パラメータ設定ウィンドウ表示失敗: {e}");
-                            // フォールバック: 通常フローで game:start を送信
-                            send_game_start_ipc(&state, &app);
-                            window::set_hud_visible(&app, true);
-                            show_hintbar_if_enabled(&app);
-                        }
-                    } else {
-                        // テンプレートモード、チュートリアルモード、またはローディング中でない（外部セッション）: 通常フロー
-                        window::set_hud_visible(&app, true);
-                        show_hintbar_if_enabled(&app);
-                        // チュートリアルミッションから開始した場合はチュートリアルウィンドウを表示する。
-                        // ヒントバーの直下に配置され、ステップ形式で操作ガイドを提供する。
-                        // show() でネイティブウィンドウを表示した後、tutorial:show イベントを
-                        // 発行して React 側の表示状態(visible)を true にする。
-                        // これを忘れるとウィンドウだけ表示されてコンテンツが空(透明)になる。
-                        if let Some(ref tid) = tutorial_id {
-                            if let Some(tutorial) = app.get_webview_window("tutorial") {
-                                let _ = tutorial.show();
-                            }
-                            let _ = app.emit("tutorial:show", tid);
-                        }
-                        send_game_start_ipc(&state, &app);
-                        if is_loading && !is_tutorial {
-                            let _ = window::open_tips_window(&app, &state);
-                        }
-                    }
                 }
 
                 // non-null -> null: ゲーム終了
@@ -1915,11 +1886,13 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                     if let Some(topmenu) = app.get_webview_window("topmenu") {
                         let _ = topmenu.show();
                     }
-                    window::hide_loading_window(&app);
+                    window::close_tips_window(&app);
 
                     {
                         let mut guard = state.lock();
-                        guard.pending_game_start = false;
+                        guard.is_loading = false;
+                        guard.graphic_load_ready = false;
+                        guard.awaiting_parameter_setup = false;
                         guard.tutorial_id = None;
                     }
 
@@ -2191,7 +2164,9 @@ pub fn run() {
                                 });
                             }
                             "notification" | "hintbar" | "tutorial" | "parameter-setup"
-                            | "tips" | "loading" => {}
+                            => {}
+                            "tips" if event_state.lock().is_loading => { api.prevent_close(); }
+                            "tips" => {}
                             _ => {
                                 let is_managed_popup = {
                                     let guard = event_state.lock();
@@ -2273,6 +2248,7 @@ pub fn run() {
             get_parameter_setup_mode,
             close_parameter_setup_window,
             close_tips_window,
+            get_initial_loading_ready,
             reset_window_geometries,
             copy_terrain_for_editor,
             create_new_terrain_for_editor,

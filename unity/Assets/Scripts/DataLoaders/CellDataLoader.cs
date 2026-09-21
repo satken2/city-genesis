@@ -56,6 +56,11 @@ public class CellDataLoader : MonoBehaviour
     /// </summary>
     private bool isInitialLoadComplete = false;
     public bool IsInitialLoadComplete => isInitialLoadComplete;
+    public bool IsInitialSceneReady => isInitialLoadComplete
+        && !loadSuspendedUntilReload && pendingObjectLoad == null
+        && terrainFollowUpCoroutine == null && pendingFollowUpCells.Count == 0
+        && (resourceManager == null || resourceManager.IsInitialLoadReady)
+        && !RenderWorkScheduler.HasPendingInitialWork;
 
     /// <summary>
     /// session:reset から session:reload までの間、カメラ由来のロードを止めるフラグ。

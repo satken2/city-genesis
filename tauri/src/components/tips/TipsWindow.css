@@ -135,3 +135,45 @@
   transform: translateY(0);
   background: rgba(255, 255, 255, 0.06);
 }
+
+.tips-loading {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 0;
+  gap: 12px;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.tips-loading-text {
+  color: var(--flat-text-muted);
+  background: linear-gradient(100deg, var(--flat-text-muted) 35%, var(--flat-text) 46%, #fff 50%, var(--flat-text) 54%, var(--flat-text-muted) 65%);
+  background-size: 300% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: tips-light-sweep 2.2s linear infinite;
+}
+.tips-btn:disabled { cursor: wait; opacity: 0.65; }
+@keyframes tips-light-sweep {
+  from { background-position: 150% 0; }
+  to { background-position: -50% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tips-loading-text { animation: none; background: none; -webkit-text-fill-color: currentColor; }
+}
+
+.tips-loading-spinner {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  border: 2px solid var(--flat-text-muted);
+  border-top-color: var(--flat-accent);
+  border-radius: 50%;
+  animation: tips-spin 1s linear infinite;
+}
+@keyframes tips-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .tips-loading-spinner { animation: none; }
+}

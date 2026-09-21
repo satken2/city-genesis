@@ -1323,6 +1323,7 @@ public class IpcStateCoordinator : MonoBehaviour
 
         // カメラ状態のバックエンド送信を止める。新しい都市の準備中に前の視点を PATCH すると、
         // ロード後に適用するはずの保存視点を上書きしてしまうため(game:start で再開する)。
+        GameStateManager.Instance?.BeginLoading();
         CameraController.Instance?.SuspendCameraSync();
 
         // 各データマネージャーおよび内部状態キャッシュ、各種ストアを完全にクリアし、

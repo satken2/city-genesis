@@ -51,18 +51,17 @@ pub struct AppState {
     pub last_save_id: Option<String>,
     /// ローディング中フラグ（ゲーム開始処理中）
     pub is_loading: bool,
-    /// フリーモード新規ゲーム開始時に game:start IPC を保留しているかどうか。
-    /// パラメータ設定ウィンドウを閉じる finish_parameter_setup コマンドで消費される。
-    pub pending_game_start: bool,
-    /// 開始したチュートリアルのID（None の場合はチュートリアル以外）
+    pub loading_id: u64,
+    pub backend_load_complete: bool,
+    pub graphic_load_ready: bool,
+    pub needs_parameter_setup: bool,
+    /// 初期設定中はHUDを抑制し、設定完了で通常操作へ進む。
+    pub awaiting_parameter_setup: bool,
+    pub loading_started: bool,
+    /// 開始したチュートリアルのID（Noneは通常プレイ）。
     pub tutorial_id: Option<String>,
-    /// シナリオ（テンプレート）を「プレイ」として開始したかどうか。
-    /// template_id 指定かつ template_mode=false のセッションで true になる。
-    /// シナリオのゲームバランスパラメータは作者が決めるものであり、プレイ開始時に
-    /// パラメータ設定ウィンドウを表示しないための判定に使う（フリーモード新規ゲームとの区別）。
-    pub is_scenario_play: bool,
     /// パラメータ設定ウィンドウが「ゲーム内編集モード」で開かれているかどうか。
-    /// false（既定）… フリーモード新規ゲームの初期セットアップ。完了で game:start を送る。
+    /// false（既定）… フリーモード新規ゲームの初期セットアップ。完了でHUDを表示する。
     /// true … テンプレート作成モード中に Taskbar から開いた再編集。完了しても game:start は
     ///   送らず、ウィンドウを閉じるだけ（既にゲームは進行中のため）。
     pub parameter_setup_edit_mode: bool,
@@ -131,9 +130,13 @@ impl SharedState {
             session_state: None,
             last_save_id: None,
             is_loading: false,
-            pending_game_start: false,
+            loading_id: 0,
+            backend_load_complete: false,
+            graphic_load_ready: false,
+            needs_parameter_setup: false,
+            awaiting_parameter_setup: false,
+            loading_started: false,
             tutorial_id: None,
-            is_scenario_play: false,
             parameter_setup_edit_mode: false,
             notification_queue: VecDeque::new(),
             notification_showing: false,

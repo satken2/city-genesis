@@ -286,6 +286,8 @@ public class CameraController : MonoBehaviour
     /// セッション切り替えの両方から呼ばれる。取得中は同期を止め、前セッションの視点が
     /// 新しい都市の保存値を上書きしないようにする。
     /// </summary>
+    public bool IsSessionCameraReady => syncEnabled && applySessionCameraCoroutine == null;
+
     public void ApplySessionCamera()
     {
         SuspendCameraSync();
@@ -446,6 +448,7 @@ public class CameraController : MonoBehaviour
 
     void Update()
     {
+        if (GameStateManager.Instance != null && !GameStateManager.Instance.IsWorldVisible) return;
         if (DriveMode.BlocksCamera) return;
         // GameStateManager を持つシーン（ゲーム本編）では、ゲーム開始前やロードによる
         // カメラロック中はカメラ操作を一切受け付けない。

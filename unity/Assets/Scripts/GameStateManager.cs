@@ -21,6 +21,49 @@ public class GameStateManager : MonoBehaviour
 
     private GameState currentState = GameState.Init;
     private string savedataId = null;
+    public bool IsWorldVisible { get; private set; }
+    private int loadingId;
+    private bool waitingForInitialLoad;
+    private int readyFrames;
+    private float nextReadyNotification;
+
+    public void BeginLoading()
+    {
+        IsWorldVisible = false;
+        waitingForInitialLoad = false;
+        readyFrames = 0;
+    }
+
+    public void PrepareInitialLoad(int id)
+    {
+        BeginLoading();
+        loadingId = id;
+        waitingForInitialLoad = true;
+        nextReadyNotification = 0f;
+    }
+
+    public void RevealWorld(int id)
+    {
+        if (id != loadingId || readyFrames < 3) return;
+        IsWorldVisible = true;
+        waitingForInitialLoad = false;
+    }
+
+    private void LateUpdate()
+    {
+        if (!waitingForInitialLoad) return;
+        var loader = CellDataLoader.Instance;
+        bool ready = loader != null && loader.IsInitialSceneReady
+            && CameraController.Instance != null && CameraController.Instance.IsSessionCameraReady;
+        readyFrames = ready ? readyFrames + 1 : 0;
+        // 生成器が次フレームに積む子処理も待つ。再送によりMMFの取りこぼしから復帰する。
+        if (readyFrames >= 3 && Time.unscaledTime >= nextReadyNotification)
+        {
+            IpcClient.Instance?.EmitGameLoaded(loadingId);
+            nextReadyNotification = Time.unscaledTime + 1f;
+        }
+    }
+
 
     private void Awake()
     {
@@ -121,6 +164,7 @@ public class GameStateManager : MonoBehaviour
     /// </summary>
     private void HandleGameEnd()
     {
+        BeginLoading();
         SetGameStarted(false, null);
         if (CellDataLoader.Instance != null)
         {

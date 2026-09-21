@@ -155,9 +155,9 @@ public class BuildingManager : BaseApiDataManager
         // 公共施設ハイライトの光オーバーレイ(建物データを参照する常駐描画)を用意する。
         PublicFacilityGlowOverlay.Ensure();
         // 視野外のため生成を遅延した詳細メッシュを消化する常駐ワーカー。
-        RenderWorkScheduler.Start(this, DetailGenerationWorker(), "BuildingManager");
+        RenderWorkScheduler.Start(this, DetailGenerationWorker(), "BuildingManager", () => HasPendingInitialDetails);
         // カメラ移動に応じて建物ごとの描画LODを再判定する常駐ワーカー。
-        RenderWorkScheduler.Start(this, DrawLodReevaluationWorker(), "BuildingManager");
+        RenderWorkScheduler.Start(this, DrawLodReevaluationWorker(), "BuildingManager", () => false);
     }
 
     private void Update()
@@ -761,6 +761,23 @@ public class BuildingManager : BaseApiDataManager
     {
         float[] point = data.centerPointArray;
         return point == null || point.Length < 2 || loadedCells.Contains(PositionToCell(new Vector3(point[0], 0f, point[1])));
+    }
+
+    private bool HasPendingInitialDetails
+    {
+        get
+        {
+            if (detailedBuildingIds.Count < maxDetailedBuildingObjects) return deferredDetailBuildings.Count > 0;
+            var cam = Camera.main;
+            if (cam == null) return deferredDetailBuildings.Count > 0;
+            foreach (var request in deferredDetailBuildings)
+            {
+                if (!buildingDataCache.TryGetValue(request.Key, out var data)) continue;
+                if (ScoreDeferredBuilding(data, cam.transform.position, GetHorizontalForward(cam)) < DEFERRED_OUT_OF_VIEW_PENALTY) return true;
+            }
+            // 上限超過で保留された視野外の建物は、カメラ移動後に通常のLOD処理で生成する。
+            return false;
+        }
     }
 
     private IEnumerator DetailGenerationWorker()

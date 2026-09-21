@@ -1314,3 +1314,12 @@ export type StationPlacementState = {
  * 結果を `sendRemoveObjectConfirmResult` で返す。
  */
 export const IPC_EVENT_REMOVE_OBJECT_REQUEST_CONFIRM = "remove_object:request_confirm";
+
+/** Unityの初期描画完了はRustに保持されるため、Tipsの購読開始順に依存しない。 */
+export function getInitialLoadingReady(): Promise<boolean> {
+  return invoke<boolean>("get_initial_loading_ready");
+}
+
+export function startGameFromTips(): Promise<void> {
+  return invoke("close_tips_window");
+}

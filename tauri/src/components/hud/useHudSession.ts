@@ -56,7 +56,7 @@ export function useHudSession(): HudSession {
 
     listen<SessionStatePayload>("session-state", (event) => {
       const payload = event.payload;
-      const shouldShow = payload.current_save_id != null;
+      const shouldShow = payload.current_save_id != null && !payload.isLoading;
       // Rust側(`set_hud_visible`)もセッションの開始・終了で表示を切り替えるが、
       // ポーリングのたびに現在の状態へ寄せ直すことで、取りこぼしで
       // ウィンドウが消えたまま/出たままになるのを防ぐ。

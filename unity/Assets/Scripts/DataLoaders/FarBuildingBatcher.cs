@@ -21,7 +21,7 @@ public sealed class FarBuildingBatcher : MonoBehaviour
         if (instance == null)
         {
             instance = new GameObject("FarBuildingBatches").AddComponent<FarBuildingBatcher>();
-            RenderWorkScheduler.Start(instance, instance.Worker(), "BuildingSummaries");
+            RenderWorkScheduler.Start(instance, instance.Worker(), "BuildingSummaries", () => false);
         }
         var position = member.transform.position;
         member.groupKey = (Mathf.FloorToInt(position.x/256f), Mathf.FloorToInt(position.z/256f),

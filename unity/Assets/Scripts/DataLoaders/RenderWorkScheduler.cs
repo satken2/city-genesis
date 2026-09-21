@@ -78,6 +78,7 @@ public static class RenderWorkScheduler
         public string category;
         public int readyFrame;
         public bool blocked, done, stepping;
+        public Func<bool> hasPendingWork;
     }
     private static readonly Dictionary<Coroutine, Operation> operations = new Dictionary<Coroutine, Operation>();
     private static int pumpedFrame = -1;
@@ -85,6 +86,15 @@ public static class RenderWorkScheduler
     public static double MaximumStepMs { get; private set; }
     public static long Steps { get; private set; }
     public static int WaitingCount => waiting.Count;
+    public static bool HasPendingInitialWork
+    {
+        get
+        {
+            foreach (var operation in operations.Values)
+                if (!operation.done && (operation.hasPendingWork == null || operation.hasPendingWork())) return true;
+            return false;
+        }
+    }
     public static double UsedMs { get { BeginFrame(); return usedMs; } }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -113,10 +123,10 @@ public static class RenderWorkScheduler
 
     public static double GetCategoryMilliseconds(string category) => categoryMs.TryGetValue(category, out double ms) ? ms : 0;
 
-    public static Coroutine Start(MonoBehaviour owner, IEnumerator routine, string category)
+    public static Coroutine Start(MonoBehaviour owner, IEnumerator routine, string category, Func<bool> hasPendingWork = null)
     {
         if (owner.GetComponent<RenderWorkLifetime>() == null) owner.gameObject.AddComponent<RenderWorkLifetime>();
-        var operation = new Operation { owner = owner, category = category, readyFrame = Time.frameCount + 1 };
+        var operation = new Operation { owner = owner, category = category, hasPendingWork = hasPendingWork, readyFrame = Time.frameCount + 1 };
         operation.stack.Push(routine);
         operation.handle = owner.StartCoroutine(Lifetime(operation));
         if (operation.handle == null) { Finish(operation); return null; }

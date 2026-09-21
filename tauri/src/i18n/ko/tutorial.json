@@ -153,6 +153,9 @@
     "stepProgress": "스텝 {{current}} / {{total}}"
   },
   "tips": {
+    "startGame": "게임 시작",
+    "nowLoading": "Now Loading...",
+    "startError": "시작할 수 없습니다. 다시 시도해 주세요.",
     "todaysTips": "오늘의 팁",
     "gotIt": "닫기",
     "items": {

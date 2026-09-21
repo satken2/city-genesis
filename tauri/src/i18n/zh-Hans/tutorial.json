@@ -153,6 +153,9 @@
     "stepProgress": "步骤 {{current}} / {{total}}"
   },
   "tips": {
+    "startGame": "开始游戏",
+    "nowLoading": "Now Loading...",
+    "startError": "无法开始，请重试。",
     "todaysTips": "今日提示",
     "gotIt": "关闭",
     "items": {

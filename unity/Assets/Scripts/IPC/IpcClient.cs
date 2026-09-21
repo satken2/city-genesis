@@ -716,7 +716,14 @@ public class IpcClient : MonoBehaviour
                     }
                     break;
 
+                case "game:loading":
+                    GameStateManager.Instance?.BeginLoading();
+                    break;
+                case "game:reveal":
+                    GameStateManager.Instance?.RevealWorld(GetParamInt(payload, "loading_id"));
+                    break;
                 case "game:start":
+                    GameStateManager.Instance?.PrepareInitialLoad(GetParamInt(payload, "loading_id"));
                     Debug.Log("IpcClient: game:start");
                     OnGameStart?.Invoke();
                     break;
@@ -1417,6 +1424,11 @@ public class IpcClient : MonoBehaviour
     /// Tauri 側は2回目以降の受信(=クラッシュ後の再起動)でのみポップアップを一掃する
     /// (初回はユーザーが操作中のロード画面などを閉じないため表示に触れない)。
     /// </summary>
+    public void EmitGameLoaded(int loadingId)
+    {
+        SendEnvelope("game:loaded", new Dictionary<string, object> { { "loading_id", loadingId } });
+    }
+
     public void EmitGraphicReady()
     {
         SendEnvelope("system:graphic_ready", new Dictionary<string, object>());

@@ -1216,7 +1216,7 @@ public partial class TerrainManager : BaseApiDataManager
     {
         if (streamWorkerCoroutine == null)
         {
-            streamWorkerCoroutine = RenderWorkScheduler.Start(this, HeightStreamWorker(), "TerrainManager");
+            streamWorkerCoroutine = RenderWorkScheduler.Start(this, HeightStreamWorker(), "TerrainManager", () => pendingStreamRequests.Count > 0);
         }
     }
 

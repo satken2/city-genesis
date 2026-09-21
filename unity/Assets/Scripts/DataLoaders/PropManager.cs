@@ -173,7 +173,7 @@ public class PropManager : BaseApiDataManager
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
         anchor = GetContainer("PropContainer");
-        worker = RenderWorkScheduler.Start(this, DrawWorker(), "PropManager");
+        worker = RenderWorkScheduler.Start(this, DrawWorker(), "PropManager", () => HasPendingDrawWork);
         TerrainManager.OnTerrainTileReady += TerrainReady;
     }
     private void OnDestroy()
@@ -549,6 +549,20 @@ public class PropManager : BaseApiDataManager
                 changed = true;
             }
             if (changed) { chunk.dirty = true; chunk.revision++; }
+        }
+    }
+
+    private bool HasPendingDrawWork
+    {
+        get
+        {
+            if (!visible) return false;
+            foreach (var chunk in chunks.Values)
+            {
+                if (chunk.dirty || chunk.heightDirty || chunk.offset != Offset) return true;
+                foreach (var patch in chunk.forests) if (patch.dirty) return true;
+            }
+            return false;
         }
     }
 

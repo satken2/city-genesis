@@ -202,6 +202,8 @@ public class ResourceManager : BaseApiDataManager
         heatmapMeshRenderer.enabled = isVisible;
     }
 
+    public bool IsInitialLoadReady => areResourcesLoaded && !isLoadInProgress;
+
     public override void LoadCells(List<Vector2Int> neededCells, bool isForce)
     {
         if (!isLoadInProgress && (isForce || !areResourcesLoaded))
@@ -225,6 +227,13 @@ public class ResourceManager : BaseApiDataManager
             heatmapMesh.Clear();
         }
         ClearAllResourceLabels();
+    }
+
+    private IEnumerator RetryInitialLoad()
+    {
+        yield return new WaitForSecondsRealtime(2f);
+        if (GameStateManager.Instance != null && GameStateManager.Instance.IsGameStarted() && !areResourcesLoaded)
+            LoadCells(new List<Vector2Int>(), false);
     }
 
     private IEnumerator LoadAllResources()
@@ -255,6 +264,7 @@ public class ResourceManager : BaseApiDataManager
                 Debug.LogError($"ResourceManager: Failed to load resources: {error}");
                 areResourcesLoaded = false;
                 isLoadInProgress = false;
+                StartCoroutine(RetryInitialLoad());
             }
         );
     }
