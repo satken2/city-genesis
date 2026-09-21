@@ -146,3 +146,9 @@ UI側で独自に定義する定数は`local-constants.ts`に定義する。
 
 各主要ディレクトリに、役割・既存ユーティリティ・注意点を書いた`AGENTS.md`がある(`CLAUDE.md`は`AGENTS.md`へのシンボリックリンク)。作業対象ディレクトリのAGENTS.mdを必ず先に読むこと。
 開発によってAGENTS.mdの記載内容に影響が出た場合や、記載と実装の矛盾を発見した場合は、必ず該当するAGENTS.mdを更新すること。
+
+# プロップのカテゴリとサムネイル
+
+配置パネルの分類は `src/data/propCategories.json`（カテゴリIDと種別IDの対応）を正とする。表示名と選択可能な種別はバックエンドの `prop_types` を使い、未分類の種別は「その他」に出す。カテゴリ名は全7言語の `construction.json` の `prop_placement.categories` に置く。
+
+`tools/render_prop_thumbnails.py` は数値ID付き通常版FBXから `src/assets/images/props/{id}.png` を生成する独立ツール。PythonとBlenderを使い、非公開制作ツールやマスターは不要。PNGはGit管理し、差分キャッシュは管理しない。UIは `import.meta.glob` で画像をバンドルする。詳細は公開M文書§M.7.8を参照。

@@ -150,6 +150,21 @@
     "confirming": "Confirming...",
     "confirmFailedUnknown": "Failed to place props. Please adjust the settings and try again.",
     "reset": "Reset",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "category": "Category",
+    "noThumbnail": "No preview",
+    "selectedType": "Selected: {{name}}",
+    "categories": {
+      "all": "All",
+      "nature": "Nature",
+      "facilities": "Station facilities & footbridges",
+      "signs": "Road signs",
+      "construction": "Construction vehicles",
+      "road": "Road vehicles",
+      "rail": "Rail vehicles",
+      "aircraft": "Aircraft",
+      "ships": "Ships",
+      "other": "Other"
+    }
   }
 }

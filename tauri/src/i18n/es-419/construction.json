@@ -150,6 +150,21 @@
     "confirming": "Confirmando...",
     "confirmFailedUnknown": "No se pudieron colocar los props. Cambia los ajustes e inténtalo de nuevo.",
     "reset": "Restablecer",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "category": "Categoría",
+    "noThumbnail": "Sin vista previa",
+    "selectedType": "Seleccionado: {{name}}",
+    "categories": {
+      "all": "Todos",
+      "nature": "Naturaleza",
+      "facilities": "Instalaciones de estación y puentes peatonales",
+      "signs": "Señales viales",
+      "construction": "Vehículos de construcción",
+      "road": "Vehículos de carretera",
+      "rail": "Vehículos ferroviarios",
+      "aircraft": "Aeronaves",
+      "ships": "Barcos",
+      "other": "Otros"
+    }
   }
 }

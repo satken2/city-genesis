@@ -150,6 +150,21 @@
     "confirming": "Validation...",
     "confirmFailedUnknown": "Échec du placement des décors. Modifiez les réglages et réessayez.",
     "reset": "Réinitialiser",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "category": "Catégorie",
+    "noThumbnail": "Aucun aperçu",
+    "selectedType": "Sélection : {{name}}",
+    "categories": {
+      "all": "Tout",
+      "nature": "Nature",
+      "facilities": "Équipements de gare et passerelles",
+      "signs": "Panneaux routiers",
+      "construction": "Engins de chantier",
+      "road": "Véhicules routiers",
+      "rail": "Véhicules ferroviaires",
+      "aircraft": "Aéronefs",
+      "ships": "Navires",
+      "other": "Autres"
+    }
   }
 }

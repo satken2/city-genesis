@@ -150,6 +150,21 @@
     "confirming": "確定中...",
     "confirmFailedUnknown": "裝飾物配置失敗。請修改設定後重試。",
     "reset": "重設",
-    "cancel": "取消"
+    "cancel": "取消",
+    "category": "類別",
+    "noThumbnail": "暫無預覽",
+    "selectedType": "已選擇：{{name}}",
+    "categories": {
+      "all": "全部",
+      "nature": "自然",
+      "facilities": "車站設施與行人天橋",
+      "signs": "道路標誌",
+      "construction": "工程車輛",
+      "road": "道路車輛",
+      "rail": "鐵路車輛",
+      "aircraft": "航空器",
+      "ships": "船舶",
+      "other": "其他"
+    }
   }
 }

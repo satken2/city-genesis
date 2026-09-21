@@ -150,6 +150,21 @@
     "confirming": "确定中...",
     "confirmFailedUnknown": "装饰物放置失败。请修改设置后重试。",
     "reset": "重置",
-    "cancel": "取消"
+    "cancel": "取消",
+    "category": "类别",
+    "noThumbnail": "暂无预览",
+    "selectedType": "已选择：{{name}}",
+    "categories": {
+      "all": "全部",
+      "nature": "自然",
+      "facilities": "车站设施与人行天桥",
+      "signs": "道路标志",
+      "construction": "工程车辆",
+      "road": "道路车辆",
+      "rail": "铁路车辆",
+      "aircraft": "航空器",
+      "ships": "船舶",
+      "other": "其他"
+    }
   }
 }

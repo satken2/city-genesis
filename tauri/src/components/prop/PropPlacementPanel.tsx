@@ -12,7 +12,7 @@
  *
  * 操作フロー:
  *   1. モード(個別/範囲)を選ぶ
- *   2. プロップ種別プルダウンで種類を選択 → IPC で Unity を配置モード(STATE_EDIT_PROP)にする
+ *   2. カテゴリで絞り込み、プロップのタイルを選択 → IPC で Unity を配置モード(STATE_EDIT_PROP)にする
  *   3. 個別: 3Dビューをクリックして配置(配置済みは不透明、カーソル追従は半透明ゴースト)
  *      範囲: 3Dビューをクリックして頂点を置きポリゴンを描く(散布は半透明でプレビュー)
  *   4. 設定(回転/スケール/高さ、または密度/seed)を調整する(Unity のプレビューに即反映)。
@@ -30,6 +30,7 @@ import { useTranslation } from "react-i18next";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { NumberStepper } from "../common/NumberStepper";
+import { PropTypeSelector } from "./PropTypeSelector";
 import { setHintbarText } from "../../utils/hintbar";
 import { showNotification } from "../../utils/notification";
 import { ApiError, buildApiUrl, fetchApi } from "../../utils/api";
@@ -217,16 +218,15 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
   );
 
   const handleTypeChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const val = e.target.value;
-      const typeId = val ? parseInt(val) : null;
+    (typeId: number) => {
+      if (typeId === selectedType || isConfirming) return;
       setSelectedType(typeId);
       setInstances([]);
       setPolygon([]);
       setIsShapeFinalized(false);
       enterEditMode(mode, typeId);
     },
-    [mode, enterEditMode],
+    [mode, enterEditMode, selectedType, isConfirming],
   );
 
   /* ---- 数値設定変更を Unity のプレビューに即反映する ---- */
@@ -331,14 +331,8 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
         {propTypeEntries.length === 0 ? (
           <div className="pc-no-nodes-message">{t("prop_placement.noVariants")}</div>
         ) : (
-          <select className="pc-select" value={selectedType ?? ""} onChange={handleTypeChange}>
-            <option value="">{t("prop_placement.selectType")}</option>
-            {propTypeEntries.map(([id, entry]) => (
-              <option key={id} value={id}>
-                {entry.display_name}
-              </option>
-            ))}
-          </select>
+          <PropTypeSelector entries={propTypeEntries} selectedType={selectedType}
+            onSelect={handleTypeChange} disabled={isConfirming} />
         )}
       </div>
 

@@ -221,3 +221,7 @@ PropPlacementPanelの個別配置は全種別共通で地面相対高さ(m)を�
 毎回 `copy_terrain_for_editor` を呼び、返却された editor_id で新しい編集ウィンドウを開く。`TerrainEditorCanvas` の登録ID欄は読み込んだ data.map_id を使う。既存マップは標高・資源・プロップに加えて `/terrain/maps/{id}/features` の川・水面・カメラを読み込む。原本は `original=true` で標高だけを取り込む。原本にはサムネイル等の付随データを置かない。
 
 PathEquipmentPanelの道路設備は街灯・柵・街路樹・配線方式・ベンチ・ゴミ箱・植え込み・広告。マスターの*_allowedで選択肢を制限し、PATCH後にsession:reloadでUnityを更新する。新4設備は0=なし/1=バリアント標準。
+
+## ゲーム中のプロップ配置
+
+`prop/PropPlacementPanel` は `PropTypeSelector` でカテゴリとサムネイル付きタイルを表示する。分類の正は `src/data/propCategories.json`、画像は `src/assets/images/props/{id}.png`。マスターにある種別だけを表示し、未分類は「その他」、画像欠損は名前付きの代替表示にする。カテゴリ切り替えと同一タイルの再選択は仮配置を保ち、別種別の選択で配置をリセットする。選択中の名前は絞り込み結果に関係なく表示し、確定処理中は種別を変更できない。

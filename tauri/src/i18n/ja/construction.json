@@ -150,6 +150,21 @@
     "confirming": "確定中...",
     "confirmFailedUnknown": "プロップの配置に失敗しました。設定を変更して再度お試しください。",
     "reset": "リセット",
-    "cancel": "キャンセル"
+    "cancel": "キャンセル",
+    "category": "カテゴリ",
+    "noThumbnail": "画像未生成",
+    "selectedType": "選択中: {{name}}",
+    "categories": {
+      "all": "すべて",
+      "nature": "自然",
+      "facilities": "駅設備・歩道橋",
+      "signs": "道路看板",
+      "construction": "工事車両",
+      "road": "道路車両",
+      "rail": "鉄道車両",
+      "aircraft": "航空機",
+      "ships": "船舶",
+      "other": "その他"
+    }
   }
 }

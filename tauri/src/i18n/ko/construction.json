@@ -150,6 +150,21 @@
     "confirming": "확정 중...",
     "confirmFailedUnknown": "프롭 배치에 실패했습니다. 설정을 변경해 다시 시도하세요.",
     "reset": "초기화",
-    "cancel": "취소"
+    "cancel": "취소",
+    "category": "카테고리",
+    "noThumbnail": "미리보기 없음",
+    "selectedType": "선택: {{name}}",
+    "categories": {
+      "all": "전체",
+      "nature": "자연",
+      "facilities": "역 시설·육교",
+      "signs": "도로 표지판",
+      "construction": "건설 차량",
+      "road": "도로 차량",
+      "rail": "철도 차량",
+      "aircraft": "항공기",
+      "ships": "선박",
+      "other": "기타"
+    }
   }
 }
