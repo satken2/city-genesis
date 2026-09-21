@@ -6,7 +6,7 @@ Unityのグラフィックの上に透明なWebViewウィンドウとして重�
 
 # アーキテクチャ(知らないと絶対わからない)
 
-- **1つのReactアプリ(`src/App.tsx`)が全ウィンドウを描画する。** Tauriのウィンドウラベル(`main` / `icon-panel` / `cockpit` / `system-tray` / `display-tray` / `topmenu` / `loading` / `notification` / `hintbar` / `tutorial` / `parameter-setup` / `tips` / それ以外=popup)によって`windowKind`が決まり、描画内容が分岐する。
+- **1つのReactアプリ(`src/App.tsx`)が全ウィンドウを描画する。** Tauriのウィンドウラベル(`main` / `icon-panel` / `cockpit` / `system-tray` / `display-tray` / `topmenu` / `notification` / `hintbar` / `tutorial` / `parameter-setup` / `tips` / それ以外=popup)によって`windowKind`が決まり、描画内容が分岐する。
 - **ゲーム中に常駐するHUDは4枚のウィンドウに分かれている**(`icon-panel`=画面左端の縦並びメニュー、`cockpit`=画面下部中央、`system-tray`=画面右下、`display-tray`=画面左下の簡易表示切替)。Unityの3Dビューに重ねる透明ウィンドウは、見た目が透明な領域でもクリックをWebViewが吸ってしまうため、**パネルの実面積ぴったりのウィンドウに分割する必要がある**(1枚の全画面ウィンドウにはできない)。生成・配置・表示切替はRust側(`window.rs`の`create_hud_windows` / `layout_hud_windows` / `set_hud_visible`)、中身は`src/components/hud/`。
 - **ポップアップパネルはすべて `React.lazy` で遅延インポートされる。** メインバンドルから重い依存(`three.js` / `recharts`)を切り離し、新規ウィンドウ起動時のJSパース量を減らすため。ポップアップの `<section>` 内は `<Suspense key={`${window_type}:${entity_id}:${label}`}>` で囲まれ、context切り替え時に内部コンポーネントが確実に再マウントされる(各Panelが `initialEntityId` を `useState` 初期値に取る実装のため、prop変更を追跡できないことを補う)。新しいパネルを追加するときも `lazy(() => import(...))` の形式で追加すること。
 - ポップアップウィンドウの種類(サイズ、単一/複数インスタンスのポリシー等)は`src-tauri/config/window-registry.json`で定義される。同時に開けないウィンドウの組は`window-mutex-groups.json`で定義される。
@@ -134,7 +134,7 @@ UI側で独自に定義する定数は`local-constants.ts`に定義する。
 
 バックエンドの `GET /api/v1/sessions` が返す `current_save_id` は、**サーバ起動直後・セッション作成 API をまだ呼んでいない間**は JSON の `null` になる。`POST /api/v1/sessions` で新規セッションを作ると、ファイル保存の前から UUID 文字列が入る（`null` のままではない）。
 
-トップメニュー／HUD の WebView ウィンドウの表示は `TopMenu.tsx`・`hud/useHudSession.ts` のポーリング受信が決める。どちらの実行形態（`tauri build` でパッケージした本番 UI も `tauri dev` の開発実行も）とも、`current_save_id` のみで表示を切り替える。`current_save_id` が `null` の間はトップメニューを表示し、非 `null` の間はHUD3枚を表示する。Rust側も同じ条件で `set_hud_visible` を呼ぶ(二重だが、片方の取りこぼしで出たまま/消えたままになるのを防ぐため両方残している)。
+トップメニュー／HUD の WebView ウィンドウの表示は `TopMenu.tsx`・`hud/useHudSession.ts` のポーリング受信が決める。どちらの実行形態（`tauri build` でパッケージした本番 UI も `tauri dev` の開発実行も）とも、`current_save_id` と初期ロード状態で表示を切り替える。`current_save_id` が `null` の間はトップメニューを表示し、非 `null` かつ `isLoading=false` の間はHUDを表示する。Rust側も同じ条件で `set_hud_visible` を呼ぶ(二重だが、片方の取りこぼしで出たまま/消えたままになるのを防ぐため両方残している)。
 
 ヒントバーの表示は「セッションがロード済み(`current_save_id` が非 `null`)」かつ「設定 `hintbar_visible` が真」のANDで決まる。ゲーム開始時にネイティブウィンドウを出すのは Rust 側の `show_hintbar_if_enabled`(設定を見て show/hide を判断する唯一の入口。`hintbar.show()` を直接呼ばないこと)で、設定変更の即時反映は `Hintbar.tsx` が `settings-updated` イベントを受けて `show()`/`hide()` する。
 
@@ -152,3 +152,13 @@ UI側で独自に定義する定数は`local-constants.ts`に定義する。
 配置パネルの分類は `src/data/propCategories.json`（カテゴリIDと種別IDの対応）を正とする。表示名と選択可能な種別はバックエンドの `prop_types` を使い、未分類の種別は「その他」に出す。カテゴリ名は全7言語の `construction.json` の `prop_placement.categories` に置く。
 
 `tools/render_prop_thumbnails.py` は数値ID付き通常版FBXから `src/assets/images/props/{id}.png` を生成する独立ツール。PythonとBlenderを使い、非公開制作ツールやマスターは不要。PNGはGit管理し、差分キャッシュは管理しない。UIは `import.meta.glob` で画像をバンドルする。詳細は公開M文書§M.7.8を参照。
+
+### 初期ロードとTips
+
+初期ロードは `tips` ウィンドウに統合する。バックエンドへの開始要求中からTipsと回転アイコン付きの `Now Loading...` を表示し、文字は20px・太字で左から右へ光が移動する。動きを減らす設定ではアニメーションを停止する。
+
+`begin_initial_loading` は要求ごとの `loading_id` と、空の都市を新規作成したかを保持する。POST成功後に `session:reload` と `game:start {loading_id}` を送り、同じセーブIDを再ロードした場合も初期描画を開始する。Unityの `game:loaded {loading_id}` が現在の世代と一致したら、Tipsを「ゲームを開始する」ボタンへ切り替える。TipsはRustの保持状態を問い合わせるので、WebView起動前の完了通知も取りこぼさない。
+
+開始ボタンは `game:reveal {loading_id}` で黒画面を解除する。通常ロード・シナリオ・チュートリアル・テンプレート編集では初期設定を自動表示しない。空の都市を新規作成した場合だけTipsの次に `ParameterSetupWindow` を表示し、設定完了までHUDを抑制する。設定完了時に都市を再ロードしない。テンプレート編集から手動で開くパラメータ編集は従来どおり使用できる。
+
+HUDとヒントバーは `current_save_id != null && !isLoading` を表示条件とする。`isLoading` は描画準備・開始ボタン待ち・初期設定中を含む。TipsのAlt+F4では待機を解除しない。開始APIの失敗時はTipsを破棄し、ロード状態を解除する。

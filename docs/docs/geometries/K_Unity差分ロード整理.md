@@ -125,3 +125,11 @@
 ## 森林GPUの差分更新
 
 範囲配置の木（種類1/2）はPropManagerのスナップショット適用で小区画ごとのForestRenderer.Patchを作る。配置・障害物の署名が同じ場合はGPUバッファを再利用する。DrawWorkerが所属する完成Terrainを解決し、ForestPlacement.computeで散布・除外・高さを計算する。CPU候補がない区画ではカメラ移動によるRebuildBatchesを省く。地形完成通知と編集追従は該当区画をdirtyにし、再生成を予約する。ClearAllCells・区画置換・アンロードはGPUバッファを解放する。F8の森林GPU候補数は割当格子数であり、道路除外後の可視本数や描画三角形数ではない。
+
+## 初期画面の準備完了
+
+`GameStateManager.IsGameStarted()` はデータ取得の許可、`IsWorldVisible` はユーザーへの表示許可として分離する。`LoadingOverlay` は後者まで黒を維持し、`CameraController` と `InputUtil` は表示前の操作を抑制する。ロード中もLOD判定に必要な `Camera.main` を利用できるよう、カメラを有効に保つ。
+
+`CellDataLoader.IsInitialSceneReady` は初回地形処理だけでなく、後続の区画・建物・道路・地区・資源・プロップ、敷地装飾・道路区間・コライダーの描画準備を待つ。`RenderWorkScheduler.Start` の任意 `hasPendingWork` は常駐ワーカーの未処理判定で、省略した有限コルーチンは通信待ちを含めて全期間待機対象になる。常駐ワーカーを追加するときは、無限ループ自身を完了条件にしないようこの判定を指定する。建物の上限により意図的に保留している視野外の詳細と、元の表示を維持する遠景結合処理は待ち続けない。
+
+保存カメラの復元と生成完了を連続3フレーム確認して `game:loaded` を送る。初期ロードとは初期視点の常駐セルと全景の描画準備であり、都市全域の詳細モデルを常駐させる意味ではない。開始後のカメラ移動には通常のLODストリーミングを使う。

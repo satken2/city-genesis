@@ -83,3 +83,9 @@ edit_path:change_house_endsのhouse_ends（both/start/end）をRoadPlanManager.S
 公共交通ハイライトは既存view:change_viewのtransitレイヤーでmode=hidden/defaultを全体OFF/ONとして扱う（既定hidden）。sub_modeの種別CSVはOFF中も保持する。Unityの路線・車両選択は既存EmitSelectObject("transit_detail", "agent", 路線ID)を使い、新しいIPCイベントは持たない。
 
 edit_path:change_passage_modeのpassage_mode（elevated/ground/underground）はRoadPlanManager.SetPassageModeへ渡す。STATE_EDIT_PATHとSTATE_EDIT_STATIONの初期値、edit_station:placement_command/stateにも同名属性を含む。
+
+## 初期ロードの表示契約
+
+UI→Unityは既存の `ui:action` Envelopeの `payload.action` / `payload.params` を使う。`game:loading` は黒画面と入力抑制を開始する。`game:start` のparamsは `{loading_id: 整数}` で、描画準備を開始するが黒画面は維持する。Unity→UIの `game:loaded` はpayload直下の `{loading_id: 整数}` を返す。初期描画完了後、表示解禁まで1秒間隔で再送し、Rustは現在の要求世代だけを受理する。UI→Unityの `game:reveal` は同じloading_idをparamsに載せ、準備済みの世代だけを表示する。
+
+`system:graphic_ready` はプロセスの起動完了であり、都市の描画完了ではない。遅延起動・再接続ではRustが開始要求を再送する。ゲーム中の再接続でもTipsを使い、初期設定は再表示しない。

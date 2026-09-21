@@ -144,3 +144,11 @@ F8は描画数、生成予算、フレームp95/p99、キャッシュ推定量�
 建物直接配置の初期寸法・固定可否は`MasterDataStore.AgentMasterItem`の`default_width`/`default_height`/`resizable`で受け取り、Ctrl配置メニューとパネルで共有する。配置前から数値キーで変更可能。詳細はEditors/AGENTS.mdと公開Unity入力制御.md。
 
 - カメラの可動範囲は詳細地形と任意の背景地形の外接範囲。背景はTerrainManager.BackgroundBoundsで取得する。背景追加によって都市の建設可能範囲は変えない。
+
+## 初期画面の準備完了
+
+`GameStateManager.IsGameStarted()` はデータ取得の許可、`IsWorldVisible` はユーザーへの表示許可として分離する。`LoadingOverlay` は後者まで黒を維持し、`CameraController` と `InputUtil` は表示前の操作を抑制する。ロード中もLOD判定に必要な `Camera.main` を利用できるよう、カメラを有効に保つ。
+
+`CellDataLoader.IsInitialSceneReady` は初回地形処理だけでなく、後続の区画・建物・道路・地区・資源・プロップ、敷地装飾・道路区間・コライダーの描画準備を待つ。`RenderWorkScheduler.Start` の任意 `hasPendingWork` は常駐ワーカーの未処理判定で、省略した有限コルーチンは通信待ちを含めて全期間待機対象になる。常駐ワーカーを追加するときは、無限ループ自身を完了条件にしないようこの判定を指定する。建物の上限により意図的に保留している視野外の詳細と、元の表示を維持する遠景結合処理は待ち続けない。
+
+保存カメラの復元と生成完了を連続3フレーム確認して `game:loaded` を送る。初期ロードとは初期視点の常駐セルと全景の描画準備であり、都市全域の詳細モデルを常駐させる意味ではない。開始後のカメラ移動には通常のLODストリーミングを使う。

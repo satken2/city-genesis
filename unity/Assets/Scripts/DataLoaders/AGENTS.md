@@ -305,3 +305,11 @@ PathMasterItemの設備項目は街灯・柵・街路樹・配線方式に加え
 `TerrainManager.Background.cs` は任意の50m格子をチャンクメッシュで描画し、都市外設備の接地標高も提供する。詳細地形の常駐セルは都市内に限るが、LodConfigの設備取得範囲とカメラの可動範囲・遠方クリップ距離には背景を含める。背景は編集しない。仕様は `docs/docs/geometries/D_地形形状.md`。
 
 PropScatterItemのedge_fade_widthは外周・穴から内側への密度フェード幅(m)。PropGeometry.Accept/EdgeWeightとForestPlacement.computeは固定格子のUnit(h+6)で同じ間引きを行う。allow_water=trueはwater:障害物だけを除外対象から外し、道路・区画は除外する。CPU候補、GPU森林、TryPick、ForestOverviewの被覆率すべてに適用する。
+
+## 初期画面の準備完了
+
+`GameStateManager.IsGameStarted()` はデータ取得の許可、`IsWorldVisible` はユーザーへの表示許可として分離する。`LoadingOverlay` は後者まで黒を維持し、`CameraController` と `InputUtil` は表示前の操作を抑制する。ロード中もLOD判定に必要な `Camera.main` を利用できるよう、カメラを有効に保つ。
+
+`CellDataLoader.IsInitialSceneReady` は初回地形処理だけでなく、後続の区画・建物・道路・地区・資源・プロップ、敷地装飾・道路区間・コライダーの描画準備を待つ。`RenderWorkScheduler.Start` の任意 `hasPendingWork` は常駐ワーカーの未処理判定で、省略した有限コルーチンは通信待ちを含めて全期間待機対象になる。常駐ワーカーを追加するときは、無限ループ自身を完了条件にしないようこの判定を指定する。建物の上限により意図的に保留している視野外の詳細と、元の表示を維持する遠景結合処理は待ち続けない。
+
+保存カメラの復元と生成完了を連続3フレーム確認して `game:loaded` を送る。初期ロードとは初期視点の常駐セルと全景の描画準備であり、都市全域の詳細モデルを常駐させる意味ではない。開始後のカメラ移動には通常のLODストリーミングを使う。

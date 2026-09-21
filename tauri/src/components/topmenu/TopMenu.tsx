@@ -28,7 +28,7 @@ export function TopMenu() {
    * トップメニューウィンドウの表示/非表示を制御する。
    *
    * current_save_id が未設定の間はトップメニューを表示する。
-   * ただし、ゲーム開始/ロード処理中（isLoading == true）の間は LoadingWindow が表示されているため、
+   * ただし、ゲーム開始/ロード処理中（isLoading == true）の間は Tips が表示されているため、
    * トップメニューは明示的に隠す。
    */
   useEffect(() => {
@@ -39,7 +39,7 @@ export function TopMenu() {
         setDebugExecution((payload.session?.debug_execution as boolean) ?? false);
 
         // ローディング中はトップメニューを隠す。
-        // LoadingWindow が前面に表示されており、トップメニューがその上に出てくるのを防ぐ。
+        // Tips が前面に表示されており、トップメニューがその上に出てくるのを防ぐ。
         if (payload.isLoading) {
           appWindow.hide().catch(() => {});
           return;
@@ -67,7 +67,7 @@ export function TopMenu() {
    *
    * Unity を起動し、シナリオ選択ウィンドウ（new_game）を開く。
    * ユーザーは地形またはテンプレートを選択後、NewGameWindow 内で create_session を呼び出す。
-   * そのため、ここでは LoadingWindow は表示しない。
+   * そのため、ここでは Tips は表示しない。
    */
   async function handleNewGame() {
     try {
@@ -106,7 +106,7 @@ export function TopMenu() {
   /**
    * デバッグ初期化ボタン押下時の処理。
    *
-   * Rust 側の start_debug_init を呼び出し、Unity 起動 → LoadingWindow 表示 →
+   * Rust 側の start_debug_init を呼び出し、Unity 起動 → Tips 表示 →
    * バックエンド POST → ポーリング待機 → HUD 表示 の一連のフローを実行する。
    */
   async function handleDebugInit() {

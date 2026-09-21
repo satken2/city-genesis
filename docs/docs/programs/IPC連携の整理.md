@@ -449,3 +449,9 @@ world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地�
 ## ドライブの開始
 
 `drive:open`はCockpitのブルドーザー右隣からUnityへ送る。paramsは`src/i18n/<言語>/drive.json`の`drive`辞書（キー→表示文言）。`IpcClient`は`DriveMode.Ensure().Open`へ渡す。Unity側が車種/路線・開始位置・乗車HUDを保持し、表示中の再送は終了として扱う。転送には既存Rustの`send_window_action`を使い、新しいEnvelopeやバックエンドAPIは持たない。仕様は[車両の走行描画](../geometries/O_車両の走行描画.md#o12-ドライブモード)を参照。
+
+## 初期ロードの表示契約
+
+UI→Unityは既存の `ui:action` Envelopeの `payload.action` / `payload.params` を使う。`game:loading` は黒画面と入力抑制を開始する。`game:start` のparamsは `{loading_id: 整数}` で、描画準備を開始するが黒画面は維持する。Unity→UIの `game:loaded` はpayload直下の `{loading_id: 整数}` を返す。初期描画完了後、表示解禁まで1秒間隔で再送し、Rustは現在の要求世代だけを受理する。UI→Unityの `game:reveal` は同じloading_idをparamsに載せ、準備済みの世代だけを表示する。
+
+`system:graphic_ready` はプロセスの起動完了であり、都市の描画完了ではない。遅延起動・再接続ではRustが開始要求を再送する。ゲーム中の再接続でもTipsを使い、初期設定は再表示しない。
