@@ -8,6 +8,7 @@ export type TerrainPropInstance = {
 };
 export type TerrainPropScatter = {
   id: string; prop_type: number; polygon: number[][]; density: number; seed: number;
+  edge_fade_width: number; allow_water: boolean;
 };
 /** 地形の作業コピーと .props.json に保存する配置定義。y は地面からの相対高さ。 */
 export type TerrainProps = { instances: TerrainPropInstance[]; scatters: TerrainPropScatter[] };
@@ -30,6 +31,8 @@ export function useTerrainPropEditor(beforeChange: () => void, redraw: () => voi
   const [scale, setScale] = useState(1);
   const [density, setDensity] = useState(400);
   const [seed, setSeed] = useState(12345);
+  const [edgeFadeWidth, setEdgeFadeWidth] = useState(0);
+  const [allowWater, setAllowWater] = useState(false);
   const draft = useRef<{ instances: TerrainPropInstance[]; polygon: number[][]; closed: boolean }>({ instances: [], polygon: [], closed: false });
   function refresh() { setRevision(v => v + 1); redraw(); }
   function reset() { draft.current = { instances: [], polygon: [], closed: false }; refresh(); }
@@ -57,7 +60,7 @@ export function useTerrainPropEditor(beforeChange: () => void, redraw: () => voi
     beforeChange();
     data.current = mode === "instance"
       ? { ...data.current, instances: [...data.current.instances, ...draft.current.instances] }
-      : { ...data.current, scatters: [...data.current.scatters, { id: crypto.randomUUID(), prop_type: type, polygon: polygon.map(p => [...p]), density, seed }] };
+      : { ...data.current, scatters: [...data.current.scatters, { id: crypto.randomUUID(), prop_type: type, polygon: polygon.map(p => [...p]), density, seed, edge_fade_width: edgeFadeWidth, allow_water: allowWater }] };
     reset();
   }
   function remove(id: string) {
@@ -105,6 +108,7 @@ export function useTerrainPropEditor(beforeChange: () => void, redraw: () => voi
   }
   // キャンバスのイベントは再登録されないので、呼び出し口だけを最新レンダーへ差し替える。
   const actions = { data, draft, revision, mode, type, height, rotation, scale, density, seed, canConfirm, setHeight, setRotation, setScale, setDensity, setSeed,
+    edgeFadeWidth, setEdgeFadeWidth, allowWater, setAllowWater,
     setMode: (v: "instance" | "scatter") => { setMode(v); reset(); },
     setType: (v: number | null) => { setType(v); reset(); },
     reset, restore, click, closePolygon, confirm, remove, shift, draw };
@@ -145,6 +149,18 @@ export function TerrainPropEditor({ editor }: { editor: ReturnType<typeof useTer
         <span className="terrain-editor-param-label">{t(`prop_placement.${field.key}`)}</span>
         <NumberStepper value={field.value} onChange={field.onChange} min={field.min} max={field.max} step={field.step} integerOnly={field.step >= 1} />
       </div>)}
+      {editor.mode === "scatter" && <>
+        <div className="terrain-editor-param-row">
+          <span className="terrain-editor-param-label">{t("terrainEditor.propEdgeFadeWidth")}</span>
+          <NumberStepper value={editor.edgeFadeWidth} onChange={editor.setEdgeFadeWidth} min={0} max={100000} step={5} />
+        </div>
+        <p className="terrain-editor-hint">{t("terrainEditor.propEdgeFadeHint")}</p>
+        <label className="terrain-editor-param-row">
+          <span className="terrain-editor-param-label">{t("terrainEditor.propAllowWater")}</span>
+          <input type="checkbox" checked={editor.allowWater} onChange={e => editor.setAllowWater(e.target.checked)} />
+        </label>
+        <p className="terrain-editor-hint">{t("terrainEditor.propAllowWaterHint")}</p>
+      </>}
     </div>
     <p className="terrain-editor-hint">{t("terrainEditor.propDraftCount", { count: editor.mode === "instance" ? editor.draft.current.instances.length : editor.draft.current.polygon.length })}</p>
     <div className="terrain-editor-action-buttons">

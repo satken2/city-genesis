@@ -27,6 +27,7 @@ public sealed class ForestRenderer : IDisposable
     {
         public int sourceId, type, seed, count, gridWidth, gridCount, startX, startZ;
         public float spacing, clearance;
+        public float edgeFadeWidth;
         public Rect rect;
         public Bounds bounds;
         public PropRenderModel model;
@@ -43,6 +44,7 @@ public sealed class ForestRenderer : IDisposable
     {
         if (!Supported || budget <= 0 || data.density <= 0 || float.IsNaN(data.density) || float.IsInfinity(data.density)) return null;
         var p = new Patch { sourceId = data.prop_scatter_id, type = data.prop_type, seed = data.seed,
+            edgeFadeWidth = data.edge_fade_width,
             rect = rect, model = model, spacing = Mathf.Max(.5f, Mathf.Sqrt(10000f / data.density)),
             clearance = Mathf.Max(model.bounds.extents.x, model.bounds.extents.z) * .15f };
         p.startX = Mathf.FloorToInt(rect.xMin / p.spacing); p.startZ = Mathf.FloorToInt(rect.yMin / p.spacing);
@@ -95,6 +97,7 @@ public sealed class ForestRenderer : IDisposable
         compute.SetInt("_Count", p.count); compute.SetInt("_Seed", p.seed);
         compute.SetInt("_RegionRings", p.regionRings); compute.SetInt("_RingCount", p.ringCount);
         compute.SetFloat("_Spacing", p.spacing); compute.SetFloat("_Clearance", p.clearance);
+        compute.SetFloat("_EdgeFadeWidth", p.edgeFadeWidth);
         compute.SetVector("_Rect", new Vector4(p.rect.xMin, p.rect.yMin, p.rect.xMax, p.rect.yMax));
         compute.SetVector("_Offset", offset);
         compute.SetVector("_TileOrigin", terrain.transform.position);

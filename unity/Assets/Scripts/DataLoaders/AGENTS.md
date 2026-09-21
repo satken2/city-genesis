@@ -303,3 +303,5 @@ PathMasterItemの設備項目は街灯・柵・街路樹・配線方式に加え
 ## 都市外背景
 
 `TerrainManager.Background.cs` は任意の50m格子をチャンクメッシュで描画し、都市外設備の接地標高も提供する。詳細地形の常駐セルは都市内に限るが、LodConfigの設備取得範囲とカメラの可動範囲・遠方クリップ距離には背景を含める。背景は編集しない。仕様は `docs/docs/geometries/D_地形形状.md`。
+
+PropScatterItemのedge_fade_widthは外周・穴から内側への密度フェード幅(m)。PropGeometry.Accept/EdgeWeightとForestPlacement.computeは固定格子のUnit(h+6)で同じ間引きを行う。allow_water=trueはwater:障害物だけを除外対象から外し、道路・区画は除外する。CPU候補、GPU森林、TryPick、ForestOverviewの被覆率すべてに適用する。

@@ -1,3 +1,4 @@
+param([switch]$PlacementOnly)
 $ErrorActionPreference = 'Stop'
 $unityRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $project = Join-Path $unityRoot 'Assembly-CSharp.csproj'
@@ -30,7 +31,9 @@ Copy-Item -LiteralPath "$unityRoot/Assets/Editor/ModelPrefabGenerator.cs", "$uni
 Get-ChildItem -LiteralPath "$unityRoot/Assets/Models/Props" | Copy-Item -Destination "$qaRoot/Assets/Models/Props" -Recurse -Force
 Set-Content -LiteralPath "$qaRoot/Packages/manifest.json" -Value '{"dependencies":{"com.unity.render-pipelines.universal":"17.4.0","com.unity.nuget.newtonsoft-json":"3.2.2"}}'
 Set-Content -LiteralPath "$qaRoot/result.txt" -Value 'RUNNING'
-$process = Start-Process -FilePath $unityExe -ArgumentList @('-batchmode', '-projectPath', ('"' + $qaRoot + '"'), '-executeMethod', 'PropsQA.Run', '-propsSourceRoot', ('"' + $unityRoot + '"'), '-logFile', ('"' + "$qaRoot/qa.log" + '"')) -WindowStyle Hidden -PassThru
+$arguments = @('-batchmode', '-projectPath', ('"' + $qaRoot + '"'), '-executeMethod', 'PropsQA.Run', '-propsSourceRoot', ('"' + $unityRoot + '"'), '-logFile', ('"' + "$qaRoot/qa.log" + '"'))
+if ($PlacementOnly) { $arguments += '-propsPlacementOnly' }
+$process = Start-Process -FilePath $unityExe -ArgumentList $arguments -WindowStyle Hidden -PassThru
 if (!$process.WaitForExit(240000)) { Stop-Process -Id $process.Id; throw 'Props QA timed out; inspect Temp/PropsUnityQA/qa.log' }
 Get-Content -LiteralPath "$qaRoot/result.txt"
 if ($process.ExitCode -ne 0 -or !(Select-String -LiteralPath "$qaRoot/result.txt" -Pattern '^PASS' -Quiet)) { exit 1 }

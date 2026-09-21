@@ -10,6 +10,7 @@ public static class PropGeometry
     {
         public Vector2 position;
         public float rotation, scale;
+        public float edgeRank;
     }
 
     public sealed class Region
@@ -70,6 +71,25 @@ public static class PropGeometry
         return (p - a - ab * t).sqrMagnitude;
     }
 
+    public static float EdgeWeight(Vector2 p, Region region, float width)
+    {
+        if (width <= 0) return 1;
+        float distanceSq = float.MaxValue;
+        foreach (var ring in region.rings)
+            for (int i = 0, j = ring.Length - 1; i < ring.Length; j = i++)
+                distanceSq = Mathf.Min(distanceSq, DistanceSquared(p, ring[i], ring[j]));
+        float t = Mathf.Clamp01(Mathf.Sqrt(distanceSq) / width);
+        return t * t * (3 - 2 * t);
+    }
+
+    // 固定順位による間引きなので、幅を広げても残る個体の位置・回転・倍率は変わらない。
+    public static bool Accept(Point point, IList<Region> regions, float width)
+    {
+        foreach (var region in regions)
+            if (region.Contains(point.position) && point.edgeRank < EdgeWeight(point.position, region, width)) return true;
+        return false;
+    }
+
     public static bool Blocked(Vector2 p, float clearance, IList<Vector2> ring, Rect bounds)
     {
         if (p.x < bounds.xMin - clearance || p.x > bounds.xMax + clearance ||
@@ -108,12 +128,12 @@ public static class PropGeometry
             uint h = Hash((uint)x) ^ Hash((uint)z + 0x9e3779b9) ^ Hash((uint)seed);
             return new Point {
                 position = new Vector2((x + Unit(h)) * spacing, (z + Unit(h + 1)) * spacing),
-                rotation = Unit(h + 2) * 360f, scale = 0.8f + Unit(h + 3) * 0.4f
+                rotation = Unit(h + 2) * 360f, scale = 0.8f + Unit(h + 3) * 0.4f, edgeRank = Unit(h + 6)
             };
         }
     }
 
-    public static IEnumerable<Point> Scatter(Rect rect, IList<Region> regions, float density, int seed)
+    public static IEnumerable<Point> Scatter(Rect rect, IList<Region> regions, float density, int seed, float edgeFadeWidth = 0)
     {
         if (density <= 0 || float.IsNaN(density) || float.IsInfinity(density)) yield break;
         float spacing = Mathf.Max(0.5f, Mathf.Sqrt(10000f / density));
@@ -122,8 +142,7 @@ public static class PropGeometry
             {
                 var p = Sample(x, z, spacing, seed);
                 if (!rect.Contains(p.position)) continue;
-                for (int r = 0; r < regions.Count; r++)
-                    if (regions[r].Contains(p.position)) { yield return p; break; }
+                if (Accept(p, regions, edgeFadeWidth)) yield return p;
             }
     }
 }

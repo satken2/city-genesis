@@ -15,6 +15,7 @@ import type { ImmigrationRegulations } from "../regulationTypes";
 
 /** 保存ペイロードの構築や差分判定で使う、スカラー項目（辞書以外）のキー一覧 */
 export const IMMIGRATION_SCALAR_KEYS = [
+  "immigration_enabled",
   "immigration_age_min",
   "immigration_age_max",
   "immigration_allow_single",
@@ -40,7 +41,6 @@ type ImmBoolKey =
 
 /** 世帯構成チェックボックスの並び */
 const HOUSEHOLD_CHECKS: { key: ImmBoolKey; labelKey: string }[] = [
-  { key: "immigration_enabled", labelKey: "regulation.immigrationEnabled" },
   { key: "immigration_allow_single", labelKey: "regulation.immigrationAllowSingle" },
   { key: "immigration_allow_married_no_children", labelKey: "regulation.immigrationAllowMarriedNoChildren" },
   { key: "immigration_allow_with_children", labelKey: "regulation.immigrationAllowWithChildren" },
@@ -119,6 +119,18 @@ export function ImmigrationTab({
       </p>
 
       <div className="regulation-immigration-list">
+        <div className="regulation-immigration-row regulation-immigration-row--check">
+          <label className="regulation-immigration-checkbox">
+            <input
+              type="checkbox"
+              checked={getScalar("immigration_enabled")}
+              onChange={(e) => onBoolChange("immigration_enabled", e.target.checked)}
+            />
+            <span className={isModified("immigration_enabled") ? "regulation-immigration-checkbox--modified" : ""}>
+              {t("regulation.immigrationEnabled")}
+            </span>
+          </label>
+        </div>
         {/* 世帯主の年齢範囲 */}
         <div className="regulation-immigration-row">
           <span

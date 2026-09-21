@@ -1,5 +1,9 @@
 {
   "terrainEditor": {
+    "propEdgeFadeWidth": "境界のぼかし幅 (m)",
+    "propEdgeFadeHint": "0で無効。指定幅の内側で境界に近づくほど本数を減らします。",
+    "propAllowWater": "水域への設置を許可",
+    "propAllowWaterHint": "海・湖でも地形に接地して配置します。道路や区画は引き続き避けます。",
     "loadFailed": "地形データの読み込みに失敗しました",
     "toolsTitle": "編集ツール",
     "open3dPreview": "3Dプレビューを開く",

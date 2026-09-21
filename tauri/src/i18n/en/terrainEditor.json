@@ -1,5 +1,9 @@
 {
   "terrainEditor": {
+    "propEdgeFadeWidth": "Edge fade width (m)",
+    "propEdgeFadeHint": "0 disables fading. Density decreases toward the boundary within this width.",
+    "propAllowWater": "Allow placement in water",
+    "propAllowWaterHint": "Place on terrain beneath seas and lakes. Roads and parcels remain excluded.",
     "loadFailed": "Failed to load terrain data",
     "toolsTitle": "Edit Tools",
     "open3dPreview": "Open 3D Preview",

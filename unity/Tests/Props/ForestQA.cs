@@ -72,9 +72,49 @@ public static partial class PropsQA
             managerType.GetMethod("HideSource").Invoke(manager,new object[]{true,1});
             Check(Chunks.Values.Cast<object>().All(c=>((IList)Field(c,"forests")).Cast<object>().All(p=>(bool)Field(p,"hidden"))),"scatter deletion did not hide GPU forest");
         }
+        CheckScatterOptions();
         CheckGpuHolesAndEdits();
         var zero=new float[33,33]; data.SetHeights(0,0,zero);
         Set(manager,"useGpuForests",false); Apply(Snapshot(10000,true),true); Build(false);
+    }
+
+    static void CheckScatterOptions()
+    {
+        var sampleMethod = asm.GetType("PropGeometry").GetMethod("Sample");
+        foreach (bool water in new[] { false, true })
+        {
+            HashSet<Vector2> previous = null;
+            foreach (int fade in new[] { 0, 40, 100 })
+            {
+                string snapshot = Snapshot(10000, true).Replace("\"seed\":7", "\"seed\":7,\"edge_fade_width\":" + fade + ",\"allow_water\":" + (water ? "true" : "false"));
+                snapshot = snapshot.Replace("\"obstacles\":[", "\"obstacles\":[{\"key\":\"water:0\",\"signature\":\"water\",\"polygon\":[[0,0],[150,0],[150,500],[0,500]]},");
+                Set(manager, "useGpuForests", false); Apply(snapshot, true);
+                var expected = Points();
+                var visible = new HashSet<Vector2>(expected.Where(p => p.Value).Select(p => p.Key));
+                Check(visible.Count > 0, "fade removed all interior trees");
+                Check(visible.Any(p => p.x < 140) == water, "water placement permission mismatch");
+                Check(!visible.Any(p => p.x > 220 && p.x < 240), "water permission disabled road exclusion");
+                if (previous != null) Check(visible.IsProperSubsetOf(previous), "fade did not monotonically thin fixed candidates");
+                previous = visible;
+                Set(manager, "useGpuForests", true); Apply(snapshot, true); GenerateForests();
+                int count = 0;
+                foreach (var chunk in Chunks.Values) foreach (var patch in (IList)Field(chunk, "forests"))
+                {
+                    int n = (int)Field(patch, "count"), width = (int)Field(patch, "gridWidth");
+                    var gpu = new GpuPoint[n]; ((GraphicsBuffer)Field(patch, "points")).GetData(gpu);
+                    for (int i = 0; i < n; i++)
+                    {
+                        var sample = sampleMethod.Invoke(null, new object[] { (int)Field(patch, "startX") + i % width, (int)Field(patch, "startZ") + i / width, (float)Field(patch, "spacing"), (int)Field(patch, "seed") });
+                        var xy = (Vector2)Field(sample, "position");
+                        bool allowed = ((Rect)Field(patch, "rect")).Contains(xy) && visible.Contains(xy);
+                        Check((gpu[i].rotationVisible.y > .5f) == allowed, "CPU/GPU fade or water mismatch");
+                        if (allowed) count++;
+                    }
+                }
+                Check(count == visible.Count, "GPU fade candidate count mismatch");
+            }
+        }
+        results.Add("Scatter options: fade widths 0/40/100, stable thinning, water toggle, road exclusion and CPU/GPU agreement passed");
     }
 
     static void CheckForestFog()
@@ -137,6 +177,14 @@ public static partial class PropsQA
         Check(At(75,75)==0,"forest overview covered lake hole");
         Check(At(450,150)==0,"forest overview covered sea");
         Check(width<=2048 && height<=2048,"forest mask exceeded texture budget");
+        var scatter = ((IList)Field(response, "scatters"))[0];
+        Set(scatter, "allow_water", true); Set(scatter, "edge_fade_width", 100f);
+        var softened = type.GetMethod("Build").Invoke(null, new object[] { response, System.Threading.CancellationToken.None });
+        var softenedPixels = (Color32[])Field(softened, "pixels");
+        byte SoftAt(float x, float z) => softenedPixels[Mathf.FloorToInt((z-bounds.yMin)/bounds.height*height)*width+Mathf.FloorToInt((x-bounds.xMin)/bounds.width*width)].r;
+        Check(SoftAt(75,75) > 0 && SoftAt(450,150) > 0, "overview water permission ignored");
+        Check(SoftAt(230,150) == 0, "overview water permission covered road");
+        Check(SoftAt(2,250) < SoftAt(30,250) && SoftAt(30,250) < SoftAt(150,250), "overview edge did not fade");
         using(var cancel=new System.Threading.CancellationTokenSource())
         {
             cancel.Cancel(); bool canceled=false;

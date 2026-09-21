@@ -1,5 +1,9 @@
 {
   "terrainEditor": {
+    "propEdgeFadeWidth": "边界渐疏宽度 (m)",
+    "propEdgeFadeHint": "0表示关闭。在此宽度的内侧，越靠近边界，数量越少。",
+    "propAllowWater": "允许在水域放置",
+    "propAllowWaterHint": "贴合海洋和湖泊下方的地形放置。仍会避开道路和地块。",
     "loadFailed": "地形数据读取失败",
     "toolsTitle": "编辑工具",
     "open3dPreview": "打开3D预览",

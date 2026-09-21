@@ -1,5 +1,9 @@
 {
   "terrainEditor": {
+    "propEdgeFadeWidth": "경계 흐림 폭 (m)",
+    "propEdgeFadeHint": "0이면 비활성화됩니다. 지정한 폭 안에서 경계에 가까워질수록 배치 밀도가 줄어듭니다.",
+    "propAllowWater": "수역 배치 허용",
+    "propAllowWaterHint": "바다와 호수 아래 지형에 배치합니다. 도로와 필지는 계속 제외합니다.",
     "loadFailed": "지형 데이터를 불러오지 못했습니다",
     "toolsTitle": "편집 도구",
     "open3dPreview": "3D 미리보기 열기",

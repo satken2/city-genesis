@@ -70,7 +70,6 @@ const COLOR_IMMIGRANT = "#f59e0b"; // 移民: 橙
 const COLOR_BIRTH = "#2f9e44"; // 出生: 濃い緑
 const COLOR_INFLOW = "#8ce99a"; // 流入: 薄い緑
 const COLOR_DEATH = "#c92a2a"; // 死亡: 濃い赤
-const COLOR_OUTFLOW = "#ffa8a8"; // 流出: 薄い赤
 
 // 人口ピラミッド用配色（男女で系統分け、国民／移民で濃淡）
 const COLOR_M_NATIONAL = "#228be6";   // 男性・国民: 青
@@ -257,9 +256,9 @@ export function PopulationTab({ apiBaseUrl }: { apiBaseUrl: string }) {
             </div>
           </section>
 
-          {/* 3. 死亡数＋流出数（濃赤＋薄赤の積み上げ棒） */}
+          {/* 3. 死亡数 */}
           <section className="pop-chart">
-            <h3 className="pop-chart__title">{t("statistics.deathsOutflow")}</h3>
+            <h3 className="pop-chart__title">{t("statistics.deaths")}</h3>
             <div className="pop-chart__area">
               {hasHistory ? (
                 <ResponsiveContainer width="100%" height="100%">
@@ -274,13 +273,7 @@ export function PopulationTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                       stackId="r"
                       fill={COLOR_DEATH}
                     />
-                    <Bar
-                      dataKey="emigrations"
-                      name={t("statistics.emigrations")}
-                      stackId="r"
-                      fill={COLOR_OUTFLOW}
-                      radius={[2, 2, 0, 0]}
-                    />
+
                   </BarChart>
                 </ResponsiveContainer>
               ) : (

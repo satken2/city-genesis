@@ -15,6 +15,8 @@ public class PropScatterItem
     public JArray region;
     public List<float> center_point;
     public float density;
+    public float edge_fade_width;
+    public bool allow_water;
     public int seed;
     public int version;
 }
@@ -100,6 +102,7 @@ public class PropManager : BaseApiDataManager
         public float rotation, scale, heightOffset;
         public bool visible;
         public bool explicitInstance;
+        public bool allowWater;
         public ulong rank;
         public DrawLod lod;
         public bool distant;
@@ -334,10 +337,11 @@ public class PropManager : BaseApiDataManager
                     if (IsGpuTree(scatter.data.prop_type)) continue;
                     var model = Model(scatter.data.prop_type);
                     if (model.normal.Count == 0) continue;
-                    foreach (var point in PropGeometry.Scatter(spec.rect, scatter.regions, scatter.data.density, scatter.data.seed))
+                    foreach (var point in PropGeometry.Scatter(spec.rect, scatter.regions, scatter.data.density, scatter.data.seed, scatter.data.edge_fade_width))
                     {
                         var candidate = MakeCandidate(scatter.data.prop_type, point.position, point.rotation, point.scale);
                         candidate.sourceId = scatter.data.prop_scatter_id;
+                        candidate.allowWater = scatter.data.allow_water;
                         candidate.rank = StableSample<Candidate>.Rank(point.position.x, point.position.y, scatter.data.seed);
                         generated.Add(candidate.rank | (1UL << 63), candidate);
                         if ((++visited & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
@@ -366,7 +370,7 @@ public class PropManager : BaseApiDataManager
                 {
                     var p = points[i];
                     // 個別配置はプレイヤーが意図した装飾なので、敷地内や水域でも残す。
-                    p.visible = p.explicitInstance || !Blocked(new Vector2(p.position.x, p.position.z), Model(p.type).Clearance(p.scale), spec.obstacles);
+                    p.visible = p.explicitInstance || !Blocked(new Vector2(p.position.x, p.position.z), Model(p.type).Clearance(p.scale), spec.obstacles, p.allowWater);
                     points[i] = p;
                     if ((i & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
                     { yield return RenderWorkScheduler.Continue; timer.Restart(); if (Canceled(serial, batch)) yield break; }
@@ -382,10 +386,12 @@ public class PropManager : BaseApiDataManager
                 RemoveChunk(spec.key);
                 var chunk = new Chunk { spec = spec, points = points };
                 var obstacles = new List<PropGeometry.Region>();
+                var landObstacles = new List<PropGeometry.Region>();
                 foreach (var obstacle in spec.obstacles)
                 {
                     var region = new PropGeometry.Region { bounds = obstacle.bounds };
                     region.rings.Add(obstacle.ring); region.rings.AddRange(obstacle.holes); obstacles.Add(region);
+                    if (!IsWater(obstacle)) landObstacles.Add(region);
                 }
                 try
                 {
@@ -394,7 +400,7 @@ public class PropManager : BaseApiDataManager
                         if (!IsGpuTree(scatter.data.prop_type)) continue;
                         var model = Model(scatter.data.prop_type);
                         if (model.normal.Count == 0) continue;
-                        var patch = forestRenderer.Create(scatter.data, scatter.regions, obstacles, spec.rect, model, forestQuota);
+                        var patch = forestRenderer.Create(scatter.data, scatter.regions, scatter.data.allow_water ? landObstacles : obstacles, spec.rect, model, forestQuota);
                         if (patch != null) chunk.forests.Add(patch);
                     }
                 }
@@ -441,10 +447,12 @@ public class PropManager : BaseApiDataManager
         if (!models.TryGetValue(type, out var model)) models[type] = model = new PropRenderModel(type);
         return model;
     }
-    private static bool Blocked(Vector2 p, float clearance, List<Obstacle> obstacles)
+    private static bool IsWater(Obstacle obstacle) => obstacle.data.key?.StartsWith("water:", StringComparison.Ordinal) == true;
+
+    private static bool Blocked(Vector2 p, float clearance, List<Obstacle> obstacles, bool allowWater = false)
     {
         foreach (var obstacle in obstacles)
-            if (PropGeometry.BlockedWithHoles(p, clearance, obstacle.ring, obstacle.bounds, obstacle.holes)) return true;
+            if (!(allowWater && IsWater(obstacle)) && PropGeometry.BlockedWithHoles(p, clearance, obstacle.ring, obstacle.bounds, obstacle.holes)) return true;
         return false;
     }
     public bool CanPreview(Vector3 world, int type, float scale)
@@ -480,8 +488,8 @@ public class PropManager : BaseApiDataManager
                 {
                     int cell = patch.count == patch.gridCount ? index : Mathf.FloorToInt((float)index * patch.gridCount / patch.count);
                     var sample = PropGeometry.Sample(patch.startX + cell % patch.gridWidth, patch.startZ + cell / patch.gridWidth, patch.spacing, patch.seed);
-                    if (!patch.rect.Contains(sample.position) || !scatter.regions.Exists(r => r.Contains(sample.position))) continue;
-                    if (Blocked(sample.position, patch.model.Clearance(sample.scale), chunk.spec.obstacles)) continue;
+                    if (!patch.rect.Contains(sample.position) || !PropGeometry.Accept(sample, scatter.regions, scatter.data.edge_fade_width)) continue;
+                    if (Blocked(sample.position, patch.model.Clearance(sample.scale), chunk.spec.obstacles, scatter.data.allow_water)) continue;
                     var position = new Vector3(sample.position.x, 0, sample.position.y); position.y = Height(position);
                     var cam = Camera.main;
                     if (cam != null && Vector3.Distance(position + offset, cam.transform.position) >= DrawLodConfig.PROP_HIDDEN_ENTER_DISTANCE) continue;

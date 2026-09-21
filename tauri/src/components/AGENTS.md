@@ -225,3 +225,5 @@ PathEquipmentPanelの道路設備は街灯・柵・街路樹・配線方式・�
 ## ゲーム中のプロップ配置
 
 `prop/PropPlacementPanel` は `PropTypeSelector` でカテゴリとサムネイル付きタイルを表示する。分類の正は `src/data/propCategories.json`、画像は `src/assets/images/props/{id}.png`。マスターにある種別だけを表示し、未分類は「その他」、画像欠損は名前付きの代替表示にする。カテゴリ切り替えと同一タイルの再選択は仮配置を保ち、別種別の選択で配置をリセットする。選択中の名前は絞り込み結果に関係なく表示し、確定処理中は種別を変更できない。
+
+TerrainPropEditor（TerrainEditorCanvasのプロップタブ）の範囲配置はedge_fade_width（内側のぼかし幅m、0で無効）とallow_water（水域への配置許可）を配置ごとに保存する。TerrainPropsは作業コピー・Undo/Redo・propsサイドカーで共用する。個別配置は水域を常に許可する。

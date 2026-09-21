@@ -1,5 +1,9 @@
 {
   "terrainEditor": {
+    "propEdgeFadeWidth": "Ancho del difuminado del borde (m)",
+    "propEdgeFadeHint": "0 desactiva el efecto. La densidad disminuye hacia el borde dentro de este ancho.",
+    "propAllowWater": "Permitir colocación en el agua",
+    "propAllowWaterHint": "Coloca sobre el terreno bajo mares y lagos. Se siguen excluyendo caminos y parcelas.",
     "loadFailed": "No se pudieron cargar los datos del terreno",
     "toolsTitle": "Herramientas de edición",
     "open3dPreview": "Abrir la vista previa 3D",

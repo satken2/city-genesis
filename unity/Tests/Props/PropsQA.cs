@@ -210,6 +210,14 @@ public static partial class PropsQA
             Drain((IEnumerator)managerType.GetMethod("AdjustPropHeightsForCellsCoroutine").Invoke(manager,new object[]{cells}));
             // 描画はEditorのフレームを分け、同一フレームの描画登録を累積させない。
             CheckGpuForest();
+            if (args.Contains("-propsPlacementOnly"))
+            {
+                managerType.GetMethod("ClearAllCells").Invoke(manager, null);
+                results.Add("PASS placement checks=" + checks + "; render-image comparisons excluded");
+                File.WriteAllLines(output + "/result.txt", results);
+                EditorApplication.Exit(0);
+                return;
+            }
             EditorApplication.update += RenderTick;
         }
         catch(Exception ex){File.WriteAllText(output+"/result.txt",ex.ToString());Debug.LogException(ex);EditorApplication.Exit(1);}
@@ -230,7 +238,7 @@ public static partial class PropsQA
         var response=Json("{\"scatters\":[{\"region\":[[[[0,0],[20,0],[20,20],[0,20]],[[5,5],[15,5],[15,15],[5,15]]],[[[30,0],[40,0],[40,10],[30,10]]]]}]} ");
         var scatter=((IList)Field(response,"scatters"))[0];
         var regions=g.GetMethod("Parse").Invoke(null,new[]{Field(scatter,"region")});
-        var values=(IEnumerable)g.GetMethod("Scatter").Invoke(null,new object[]{new Rect(0,0,40,20),regions,10000f,5});
+        var values=(IEnumerable)g.GetMethod("Scatter").Invoke(null,new object[]{new Rect(0,0,40,20),regions,10000f,5,0f});
         int count=0;foreach(var p in values){var xy=(Vector2)Field(p,"position");Check(!(xy.x>5 && xy.x<15 && xy.y>5 && xy.y<15),"hole has tree");count++;}
         Check(count==400,"hole/multipolygon count="+count);
     }

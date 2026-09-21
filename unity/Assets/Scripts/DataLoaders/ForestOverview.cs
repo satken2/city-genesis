@@ -27,38 +27,42 @@ public sealed class ForestOverview : IDisposable
 
     public static Raster Build(ForestOverviewResponse response, CancellationToken cancel)
     {
-        var regions = new List<(PropGeometry.Region region, int type, byte coverage)>();
+        var regions = new List<(PropGeometry.Region region, int type, float density, float fadeWidth, bool allowWater)>();
         Rect bounds = new Rect();
         foreach (var scatter in response.scatters ?? new List<PropScatterItem>())
         {
             if (scatter.prop_type != 1 && scatter.prop_type != 2) continue;
-            // 樹冠の投影面積から被覆率を推定し、疎林を一面の森林にしない。
-            byte amount = (byte)Mathf.RoundToInt(255 * (1 - Mathf.Exp(-Mathf.Max(0, scatter.density) * (scatter.prop_type == 1 ? 16 : 36) / 10000)));
             foreach (var region in PropGeometry.Parse(scatter.region))
             {
                 bounds = regions.Count == 0 ? region.bounds : Union(bounds, region.bounds);
-                regions.Add((region, scatter.prop_type, amount));
+                regions.Add((region, scatter.prop_type, scatter.density, scatter.edge_fade_width, scatter.allow_water));
             }
         }
         bounds = Rect.MinMaxRect(bounds.xMin - 8, bounds.yMin - 8, bounds.xMax + 8, bounds.yMax + 8);
         float step = Mathf.Max(4, Mathf.Max(bounds.width, bounds.height) / 2048);
         var raster = new Raster { bounds = bounds, width = Mathf.Max(1, Mathf.CeilToInt(bounds.width / step)), height = Mathf.Max(1, Mathf.CeilToInt(bounds.height / step)) };
         raster.pixels = new Color32[raster.width * raster.height];
-        foreach (var item in regions)
-            Fill(raster, item.region, cancel, index => {
-                var p = raster.pixels[index];
-                if (item.type == 1) p.r = (byte)(255 - (255 - p.r) * (255 - item.coverage) / 255);
-                else p.g = (byte)(255 - (255 - p.g) * (255 - item.coverage) / 255);
-                raster.pixels[index] = p;
-            });
+        bool[] land = null;
         if (response.coastline != null)
         {
-            var land = new bool[raster.pixels.Length];
+            land = new bool[raster.pixels.Length];
             var coordinates = response.coastline["coordinates"] as JArray;
             if ((string)response.coastline["type"] == "Polygon") coordinates = new JArray { coordinates };
             foreach (var region in PropGeometry.Parse(coordinates)) Fill(raster, region, cancel, index => land[index] = true);
-            for (int i = 0; i < land.Length; i++) if (!land[i]) raster.pixels[i] = default;
         }
+        foreach (var item in regions)
+            Fill(raster, item.region, cancel, index => {
+                if (!item.allowWater && land != null && !land[index]) return;
+                var position = new Vector2(bounds.xMin + (index % raster.width + .5f) * bounds.width / raster.width,
+                    bounds.yMin + (index / raster.width + .5f) * bounds.height / raster.height);
+                float density = item.density * PropGeometry.EdgeWeight(position, item.region, item.fadeWidth);
+                // 樹冠の投影面積から被覆率を推定し、境界の疎林も地形表現へ反映する。
+                byte amount = (byte)Mathf.RoundToInt(255 * (1 - Mathf.Exp(-Mathf.Max(0, density) * (item.type == 1 ? 16 : 36) / 10000)));
+                var p = raster.pixels[index];
+                if (item.type == 1) p.r = (byte)(255 - (255 - p.r) * (255 - amount) / 255);
+                else p.g = (byte)(255 - (255 - p.g) * (255 - amount) / 255);
+                raster.pixels[index] = p;
+            });
         foreach (var obstacle in response.obstacles ?? new List<PropObstacleItem>())
         {
             if (obstacle.polygon == null || obstacle.polygon.Count < 3) continue;

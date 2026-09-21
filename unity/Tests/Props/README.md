@@ -70,3 +70,9 @@ Forest.shaderはUniversalFragmentPBRと_CLUSTER_LIGHT_LOOPバリアントを使�
 比較画像はgpu-forest-mountain.png（修正版）とgpu-forest-mountain-no-cluster.png（不具合の再現）。本編と同じ描画設定を使うが、実際の都市・天気・カメラの撮影ではない。モデルFBXは変更していない。
 
 遠景森林の検証では、全域マスクの道路・湖・海の除外、最大テクスチャ寸法、取消し、セッション終了時の無効化を確認する。`gpu-forest-overview-boundary.png`は山の左半分をモデル生成済み、右半分を未生成として、実FBXと地形の樹冠表現をつないだ画像。実モデルの材質から得た広葉樹アルベドはlinear RGB約(0.25,0.36,0.17)。`Tests/TerrainAppearance/run-unity.ps1`では通常/UltraFarの森林画像、生成待ち時の置換、1,200〜1,500mの段階的変化を確認する。両地形の画素平均絶対差は約3.09/255で、微小な投影差による細かな樹冠のずれを含む。街全体でのGPU時間・実プレイの見え方はこの独立テストからは保証しない。
+
+## 範囲ごとのぼかし・水域許可
+
+`run.ps1 -PlacementOnly`はモデル・配置・CPU/GPU読み戻し・森林被覆の検証を実行し、連続フレームの画像比較前に終了する。通常の`run.ps1`は画像比較も含む。
+
+`CheckScatterOptions`はぼかし幅0/40/100mと水域許可の組み合わせを検証する。幅を広げると固定候補の部分集合になること、水域の許可後も道路除外が残ること、全GPU候補の表示可否がCPUと一致することを確認する。ForestOverviewでも海・湖への設置許可、道路除外、境界へ向かう被覆率の減少を確認する。
