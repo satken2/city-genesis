@@ -228,6 +228,8 @@ export type AgentData = {
   satis_entertainment?: number;
   /** 世帯の住環境満足度（0.0〜1.0） */
   satis_residential?: number;
+  /** 観光体験充足度（0.0〜1.0。観光客世帯の観光満足度の要素） */
+  satis_tourism?: number;
   /** 世帯タイプ（単身・夫婦・子ありなど。consts.py の FAMILY_* を参照） */
   family_type?: number;
   /** この世帯に所属する市民のリスト */

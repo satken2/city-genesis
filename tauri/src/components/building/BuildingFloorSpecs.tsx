@@ -6,7 +6,8 @@
  * フロア種別は文字なしのアイコンだけで示す(種別名はツールチップ)。出典はマスターの
  * space_limits のキーで、2種類ある:
  *   - 汎用フロア(SPACE_RESIDENCE などのビット値): 表示パネルの「フロア色分け」で選べる
- *     6分類と同じ並び・同じ色で描く(住居=緑・小売=青・工場=黄・オフィス=紫・農地=茶・その他=灰)。
+ *     6分類と同じ並び・同じ色で描き(住居=緑・小売=青・工場=黄・オフィス=紫・農地=茶・その他=灰)、
+ *     ホテルの宿泊フロア(SPACE_LODGING)は桃色のベッドで足す。
  *   - 専用フロア(キー=経済主体の variant ID): 特定の業種しか入居できないフロア。
  *     錠前アイコンにして、ツールチップに入居できる業種名を出す。
  *
@@ -25,6 +26,7 @@ import {
   SPACE_FACTORY,
   SPACE_OFFICE,
   SPACE_FARM,
+  SPACE_LODGING,
 } from "../../constants";
 
 type BuildingFloorSpecsProps = {
@@ -39,7 +41,7 @@ const ICON_PROPS = {
   "aria-hidden": true,
 };
 
-/** 汎用フロア6分類の定義。並び順・色は表示パネルの凡例(DisplayOptionsPanel)と揃える。 */
+/** 汎用フロア分類の定義。並び順・色は表示パネルの凡例(DisplayOptionsPanel)と揃える。 */
 const GENERIC_FLOORS: { spaceType: number; color: string; tooltipKey: string; icon: React.ReactNode }[] = [
   {
     spaceType: SPACE_RESIDENCE,
@@ -94,6 +96,18 @@ const GENERIC_FLOORS: { spaceType: number; color: string; tooltipKey: string; ic
         <path d="M11 22 V12 H13 V22 Z" />
         <path d="M12 12 C12 6 8 3 2 3 C2 9 6 12 12 12 Z" />
         <path d="M12 12 C12 6 16 3 22 3 C22 9 18 12 12 12 Z" />
+      </svg>
+    ),
+  },
+  {
+    spaceType: SPACE_LODGING,
+    color: "#e91e63",
+    tooltipKey: "display.subSpaceLodging",
+    icon: (
+      <svg {...ICON_PROPS}>
+        <path d="M2 18 V7 H4 V13 H22 V18 H20 V16 H4 V18 Z" />
+        <path d="M5 8 H10 V12 H5 Z" />
+        <path d="M11 9 H21 A1 1 0 0 1 22 10 V12 H11 Z" />
       </svg>
     ),
   },

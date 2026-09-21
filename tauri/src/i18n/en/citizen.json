@@ -36,6 +36,9 @@
     "satisNutrition": "Nutrition",
     "satisHealthcare": "Healthcare",
     "satisEntertainment": "Entertainment",
+    "satisTourism": "Tourism",
+    "tourist": "Tourists",
+    "partySize": "Party Size",
     "members": "Members"
   },
   "education": {

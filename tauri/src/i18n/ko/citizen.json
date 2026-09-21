@@ -36,6 +36,9 @@
     "satisNutrition": "영양 충족도",
     "satisHealthcare": "의료 충족도",
     "satisEntertainment": "여가 충족도",
+    "satisTourism": "관광 충족도",
+    "tourist": "관광객",
+    "partySize": "인원",
     "members": "가구 구성원"
   },
   "education": {

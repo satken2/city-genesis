@@ -71,6 +71,10 @@ export type PopulationReport = {
   immigrations: number;
   immigration_applicants?: number;
   emigrations: number;
+  /** 観光客の到着人数(宿泊フロアへのチェックイン)・帰国人数・エポック末の滞在人数 */
+  tourist_arrivals?: number;
+  tourist_departures?: number;
+  tourist_count?: number;
 };
 
 export type ExchangeRateReport = {
@@ -372,6 +376,19 @@ export function EpochResultWindow({
         tone: "normal",
         polarity: "up-good",
       },
+      // 観光客の滞在人数。副表示は到着−帰国の純増減(人)。観光システム未稼働(未定義)の間は出さない。
+      ...(report.population.tourist_count != null
+        ? [
+            {
+              key: "tourists",
+              label: t("epochResult.statTourists"),
+              value: report.population.tourist_count.toLocaleString(),
+              sub: signed((report.population.tourist_arrivals ?? 0) - (report.population.tourist_departures ?? 0)),
+              tone: "normal" as StatTone,
+              polarity: "up-good" as StatPolarity,
+            },
+          ]
+        : []),
       {
         key: "gdp",
         label: t("epochResult.statGdp"),

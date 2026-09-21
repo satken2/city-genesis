@@ -243,6 +243,8 @@ namespace GeneratedModels
         public float? satis_entertainment;
         /// <summary>世帯の住環境満足度（0.0〜1.0）</summary>
         public float? satis_residential;
+        /// <summary>観光体験充足度（0.0〜1.0。観光客世帯の観光満足度の要素）</summary>
+        public float? satis_tourism;
         /// <summary>世帯タイプ（単身・夫婦・子ありなど。consts.py の FAMILY_* を参照）</summary>
         public int? family_type;
         /// <summary>この世帯に所属する市民のリスト</summary>

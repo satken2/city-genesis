@@ -6,6 +6,9 @@
  *
  * 充足度(satis_*)は0.0〜1.0の割合値としてMeterコンポーネントで可視化する。
  * 世帯構成員はCitizenLinkとして表示し、クリックで市民詳細パネルへの遷移を想定している。
+ *
+ * 観光客世帯(VARIANT_TOURIST)は市民を持たず、旅の満足度は娯楽と観光体験で決まるため、
+ * 世帯タイプの代わりに「観光客」と表示し、メーターは娯楽充足度と観光充足度だけを出す。
  */
 
 import { useTranslation } from "react-i18next";
@@ -15,6 +18,7 @@ import {
   FAMILY_COUPLE,
   FAMILY_FAMILY,
   FAMILY_SENIOR,
+  VARIANT_TOURIST,
 } from "../../constants";
 import { Meter } from "../common/Meter";
 import { CitizenLink } from "../common/CitizenLink";
@@ -46,6 +50,7 @@ function getFamilyTypeName(familyType: number, t: (key: string) => string): stri
 
 export function HouseholdInfoPanel({ agent }: HouseholdInfoPanelProps) {
   const { t } = useTranslation();
+  const isTourist = agent.variant === VARIANT_TOURIST;
 
   const automobileIconSrc = agent.has_automobile ? trafficRoad : trafficPedestrian;
   const automobileAlt = agent.has_automobile
@@ -60,9 +65,11 @@ export function HouseholdInfoPanel({ agent }: HouseholdInfoPanelProps) {
             {t("household.familyType")}
           </span>
           <span className="agent-detail-value household-family-type">
-            {agent.family_type != null
-              ? getFamilyTypeName(agent.family_type, t)
-              : "-"}
+            {isTourist
+              ? t("household.tourist")
+              : agent.family_type != null
+                ? getFamilyTypeName(agent.family_type, t)
+                : "-"}
             <img
               className="household-automobile-icon"
               src={automobileIconSrc}
@@ -82,13 +89,13 @@ export function HouseholdInfoPanel({ agent }: HouseholdInfoPanelProps) {
         </div>
 
         <div className="household-info-meters">
-          {agent.satis_nutrition != null && (
+          {!isTourist && agent.satis_nutrition != null && (
             <Meter
               label={t("household.satisNutrition")}
               value={agent.satis_nutrition}
             />
           )}
-          {agent.satis_healthcare != null && (
+          {!isTourist && agent.satis_healthcare != null && (
             <Meter
               label={t("household.satisHealthcare")}
               value={agent.satis_healthcare}
@@ -98,6 +105,12 @@ export function HouseholdInfoPanel({ agent }: HouseholdInfoPanelProps) {
             <Meter
               label={t("household.satisEntertainment")}
               value={agent.satis_entertainment}
+            />
+          )}
+          {isTourist && agent.satis_tourism != null && (
+            <Meter
+              label={t("household.satisTourism")}
+              value={agent.satis_tourism}
             />
           )}
         </div>

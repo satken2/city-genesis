@@ -110,12 +110,14 @@ public static class Constants
     public const int VARIANT_CENTRAL_BANK = 101;
     public const int VARIANT_ELEMENRATY_SCHOOL = 200;
     public const int VARIANT_HOUSEHOLD = 300;
+    public const int VARIANT_TOURIST = 302;
     public const int VARIANT_IMPORT = 400;
     public const int VARIANT_FIRE_STATION = 1052;
     public const int VARIANT_POLICE_STATION = 1053;
     public const int VARIANT_SOLAR_PLANT = 1054;
     public const int VARIANT_SUBSTATION = 1062;
     public const int VARIANT_APARTMENT = 2001;
+    public const int VARIANT_INTERCITY_GATEWAY_OUTSIDE = 1069;
     public const int PATH_VARIANT_ROPEWAY = 601;
     public const int PATH_VARIANT_ROPEWAY_STATION = 602;
     public const int PATH_VARIANT_GRID = 1101;
@@ -144,6 +146,8 @@ public static class Constants
     public const int PRODUCT_ENTERTAINMENT_SERVICE = 215;
     public const int PRODUCT_NURSING_CARE_SERVICE = 216;
     public const int PRODUCT_MEDICAL_SERVICES = 217;
+    public const int PRODUCT_TOURISM_EXPERIENCE = 218;
+    public const int PRODUCT_INTERCITY_TRAVEL = 219;
     public const int PRODUCT_SOFTWARE = 301;
     public const int PRODUCT_WATER_SUPPLY = 302;
     public const int PRODUCT_ELECTRICITY = 303;
@@ -272,6 +276,7 @@ public static class Constants
     public const int SPACE_FACTORY = 8;
     public const int SPACE_OFFICE = 16;
     public const int SPACE_FARM = 32;
+    public const int SPACE_LODGING = 64;
     public const string DATA_AGENT = "EA";
     public const string DATA_BUILDING = "BD";
     public const string DATA_PARCEL = "PC";
@@ -366,7 +371,7 @@ public static class Constants
 
     public static readonly int[] RAIL_VEHICLE_KEYS = new int[] { VEHICLE_METRO_TRAIN, VEHICLE_PASSANGER_TRAIN, VEHICLE_FREIGHT_TRAIN, VEHICLE_HIGH_SPEED_TRAIN };
 
-    public static readonly int[] TENANT_TYPES = new int[] { SPACE_RESIDENCE, SPACE_RETAIL, SPACE_FACTORY, SPACE_OFFICE };
+    public static readonly int[] TENANT_TYPES = new int[] { SPACE_RESIDENCE, SPACE_RETAIL, SPACE_FACTORY, SPACE_OFFICE, SPACE_LODGING };
 
     public static readonly int[] ALERT_AGENT_ICON_BITS = new int[] { ALERT_AGENT_CONSTRUCTION_SHORTAGE, ALERT_AGENT_ON_FIRE, ALERT_AGENT_ACCIDENTAL_FIRE, ALERT_AGENT_CRIME, ALERT_AGENT_CRIME_SIGN, ALERT_AGENT_INFRA_DISCONNECTED };
 

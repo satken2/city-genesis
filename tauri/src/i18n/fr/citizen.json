@@ -36,6 +36,9 @@
     "satisNutrition": "Couverture alimentaire",
     "satisHealthcare": "Couverture sanitaire",
     "satisEntertainment": "Couverture des loisirs",
+    "satisTourism": "Couverture touristique",
+    "tourist": "Touristes",
+    "partySize": "Personnes",
     "members": "Membres du ménage"
   },
   "education": {

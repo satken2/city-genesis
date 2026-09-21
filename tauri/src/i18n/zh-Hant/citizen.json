@@ -36,6 +36,9 @@
     "satisNutrition": "營養滿足度",
     "satisHealthcare": "醫療滿足度",
     "satisEntertainment": "娛樂滿足度",
+    "satisTourism": "觀光滿足度",
+    "tourist": "遊客",
+    "partySize": "人數",
     "members": "家庭成員"
   },
   "education": {

@@ -105,12 +105,14 @@ export const VARIANT_CITY: number = 100;
 export const VARIANT_CENTRAL_BANK: number = 101;
 export const VARIANT_ELEMENRATY_SCHOOL: number = 200;
 export const VARIANT_HOUSEHOLD: number = 300;
+export const VARIANT_TOURIST: number = 302;
 export const VARIANT_IMPORT: number = 400;
 export const VARIANT_FIRE_STATION: number = 1052;
 export const VARIANT_POLICE_STATION: number = 1053;
 export const VARIANT_SOLAR_PLANT: number = 1054;
 export const VARIANT_SUBSTATION: number = 1062;
 export const VARIANT_APARTMENT: number = 2001;
+export const VARIANT_INTERCITY_GATEWAY_OUTSIDE: number = 1069;
 export const PATH_VARIANT_ROPEWAY: number = 601;
 export const PATH_VARIANT_ROPEWAY_STATION: number = 602;
 export const PATH_VARIANT_GRID: number = 1101;
@@ -139,6 +141,8 @@ export const PRODUCT_BEAUTY_SERVICE: number = 214;
 export const PRODUCT_ENTERTAINMENT_SERVICE: number = 215;
 export const PRODUCT_NURSING_CARE_SERVICE: number = 216;
 export const PRODUCT_MEDICAL_SERVICES: number = 217;
+export const PRODUCT_TOURISM_EXPERIENCE: number = 218;
+export const PRODUCT_INTERCITY_TRAVEL: number = 219;
 export const PRODUCT_SOFTWARE: number = 301;
 export const PRODUCT_WATER_SUPPLY: number = 302;
 export const PRODUCT_ELECTRICITY: number = 303;
@@ -267,6 +271,7 @@ export const SPACE_RETAIL: number = 4;
 export const SPACE_FACTORY: number = 8;
 export const SPACE_OFFICE: number = 16;
 export const SPACE_FARM: number = 32;
+export const SPACE_LODGING: number = 64;
 export const DATA_AGENT: string = "EA";
 export const DATA_BUILDING: string = "BD";
 export const DATA_PARCEL: string = "PC";
@@ -359,7 +364,7 @@ export const ROAD_VEHICLE_KEYS: number[] = [10, 11, 12, 13, 14];
 
 export const RAIL_VEHICLE_KEYS: number[] = [20, 21, 22, 23];
 
-export const TENANT_TYPES: number[] = [2, 4, 8, 16];
+export const TENANT_TYPES: number[] = [2, 4, 8, 16, 64];
 
 export const ALERT_AGENT_ICON_BITS: number[] = [1, 2, 4, 8, 16, 32];
 
