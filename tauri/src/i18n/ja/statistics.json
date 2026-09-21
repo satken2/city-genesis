@@ -66,7 +66,6 @@
     "deathAgeDistributionEpochs": "直近{{count}}エポック累計",
     "deathAgeDistributionCityOnly": "死亡年齢分布は都市全体でのみ集計されます",
     "deathCauseNatural": "加齢・疾病",
-    "deathCauseStarvation": "栄養失調",
     "deathCauseOrphan": "世帯消滅",
     "deathCauseTraffic": "交通事故",
     "deathCauseCollapse": "倒壊・火災",
@@ -345,6 +344,8 @@
     "debugSpawnColCost": "コスト計",
     "debugSpawnBestNpv": "NPV（最良パターン）",
     "debugSpawnBestCost": "コスト計（建設+土地+買収解体）",
-    "debugSpawnNoData": "データがありません"
+    "debugSpawnNoData": "データがありません",
+    "sanitationSatisfaction": "衛生状態",
+    "deathCauseSanitation": "衛生悪化"
   }
 }

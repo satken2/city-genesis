@@ -66,7 +66,6 @@
     "deathAgeDistributionEpochs": "Acumulado de las últimas {{count}} épocas",
     "deathAgeDistributionCityOnly": "La distribución de la edad al fallecer solo se calcula para toda la ciudad",
     "deathCauseNatural": "Vejez o enfermedad",
-    "deathCauseStarvation": "Desnutrición",
     "deathCauseOrphan": "Desaparición del hogar",
     "deathCauseTraffic": "Accidente de tránsito",
     "deathCauseCollapse": "Derrumbe o incendio",
@@ -345,6 +344,8 @@
     "debugSpawnColCost": "Costo total",
     "debugSpawnBestNpv": "VPN (mejor patrón)",
     "debugSpawnBestCost": "Costo total (obra + terreno + adquisición y demolición)",
-    "debugSpawnNoData": "No hay datos"
+    "debugSpawnNoData": "No hay datos",
+    "sanitationSatisfaction": "Saneamiento",
+    "deathCauseSanitation": "Saneamiento deficiente"
   }
 }

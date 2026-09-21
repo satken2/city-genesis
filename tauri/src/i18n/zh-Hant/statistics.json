@@ -66,7 +66,6 @@
     "deathAgeDistributionEpochs": "最近{{count}}個紀元累計",
     "deathAgeDistributionCityOnly": "死亡年齡分布僅依全市統計",
     "deathCauseNatural": "衰老・疾病",
-    "deathCauseStarvation": "營養不良",
     "deathCauseOrphan": "家庭消亡",
     "deathCauseTraffic": "交通事故",
     "deathCauseCollapse": "倒塌・火災",
@@ -345,6 +344,8 @@
     "debugSpawnColCost": "成本合計",
     "debugSpawnBestNpv": "NPV（最佳模式）",
     "debugSpawnBestCost": "成本合計（建設+土地+收購拆除）",
-    "debugSpawnNoData": "沒有資料"
+    "debugSpawnNoData": "沒有資料",
+    "sanitationSatisfaction": "衛生狀況",
+    "deathCauseSanitation": "衛生惡化"
   }
 }

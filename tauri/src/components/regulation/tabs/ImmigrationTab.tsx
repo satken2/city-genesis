@@ -33,12 +33,14 @@ type ImmNumberKey =
 
 /** チェックボックス（世帯構成の許可フラグ）の項目 */
 type ImmBoolKey =
+  | "immigration_enabled"
   | "immigration_allow_single"
   | "immigration_allow_married_no_children"
   | "immigration_allow_with_children";
 
 /** 世帯構成チェックボックスの並び */
 const HOUSEHOLD_CHECKS: { key: ImmBoolKey; labelKey: string }[] = [
+  { key: "immigration_enabled", labelKey: "regulation.immigrationEnabled" },
   { key: "immigration_allow_single", labelKey: "regulation.immigrationAllowSingle" },
   { key: "immigration_allow_married_no_children", labelKey: "regulation.immigrationAllowMarriedNoChildren" },
   { key: "immigration_allow_with_children", labelKey: "regulation.immigrationAllowWithChildren" },

@@ -66,7 +66,6 @@
     "deathAgeDistributionEpochs": "Cumul des {{count}} dernières époques",
     "deathAgeDistributionCityOnly": "La répartition de l'âge au décès n'est calculée que pour l'ensemble de la ville",
     "deathCauseNatural": "Vieillesse ou maladie",
-    "deathCauseStarvation": "Malnutrition",
     "deathCauseOrphan": "Disparition du ménage",
     "deathCauseTraffic": "Accident de la route",
     "deathCauseCollapse": "Effondrement ou incendie",
@@ -345,6 +344,8 @@
     "debugSpawnColCost": "Coût total",
     "debugSpawnBestNpv": "VAN (meilleur schéma)",
     "debugSpawnBestCost": "Coût total (chantier + terrain + acquisition et démolition)",
-    "debugSpawnNoData": "Aucune donnée"
+    "debugSpawnNoData": "Aucune donnée",
+    "sanitationSatisfaction": "État sanitaire",
+    "deathCauseSanitation": "Insalubrité"
   }
 }

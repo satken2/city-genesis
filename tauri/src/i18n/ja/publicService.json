@@ -85,6 +85,7 @@
     "repairDescription": "公共建物・道路の補修を開始する耐久度の閾値を設定します。耐久度が閾値を下回ると確率的に補修が開始されます。",
     "repairThresholdBuilding": "公共建物 補修閾値",
     "repairThresholdPath": "道路 補修閾値",
-    "unsavedChanges": "未保存の変更があります"
+    "unsavedChanges": "未保存の変更があります",
+    "immigrationEnabled": "移民の受け入れを許可"
   }
 }

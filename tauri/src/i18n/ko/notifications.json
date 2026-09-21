@@ -24,7 +24,8 @@
       "collapse_with_deaths": "{{count}}개의 건물・도로가 붕괴하여 {{deaths}}명이 사망했습니다",
       "deaths_traffic": "교통사고로 {{count}}명이 사망했습니다",
       "tenant_blocked_by_parcel_size": "지구 「{{zone_name}}」에서 「{{tenant_name}}」이(가) 입주할 수 있는 건물을 지을 수 없습니다(필요 {{required}}m2, 구획 최대 {{max_capacity}}m2). 더 큰 토지 구획이 필요합니다",
-      "unknown": "중대한 사건이 발생했습니다"
+      "unknown": "중대한 사건이 발생했습니다",
+      "sanitation": "{{count}}가구의 위생 상태가 악화되고 있습니다. 하수 및 폐기물 처리를 개선하세요."
     }
   }
 }

@@ -85,6 +85,7 @@
     "repairDescription": "设置公共建筑与道路开始维修的耐久度阈值。耐久度低于阈值时将按概率开始维修。",
     "repairThresholdBuilding": "公共建筑维修阈值",
     "repairThresholdPath": "道路维修阈值",
-    "unsavedChanges": "有未保存的更改"
+    "unsavedChanges": "有未保存的更改",
+    "immigrationEnabled": "允许移民迁入"
   }
 }

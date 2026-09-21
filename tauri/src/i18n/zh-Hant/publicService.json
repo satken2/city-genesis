@@ -85,6 +85,7 @@
     "repairDescription": "設定公共建築與道路開始維修的耐久度閾值。耐久度低於閾值時將依機率開始維修。",
     "repairThresholdBuilding": "公共建築維修閾值",
     "repairThresholdPath": "道路維修閾值",
-    "unsavedChanges": "有未儲存的變更"
+    "unsavedChanges": "有未儲存的變更",
+    "immigrationEnabled": "允許移民遷入"
   }
 }

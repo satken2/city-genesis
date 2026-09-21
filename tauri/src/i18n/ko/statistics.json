@@ -66,7 +66,6 @@
     "deathAgeDistributionEpochs": "최근 {{count}}에포크 누계",
     "deathAgeDistributionCityOnly": "사망 연령 분포는 도시 전체에서만 집계됩니다",
     "deathCauseNatural": "노화・질병",
-    "deathCauseStarvation": "영양실조",
     "deathCauseOrphan": "가구 소멸",
     "deathCauseTraffic": "교통사고",
     "deathCauseCollapse": "붕괴・화재",
@@ -345,6 +344,8 @@
     "debugSpawnColCost": "비용 합계",
     "debugSpawnBestNpv": "NPV(최선 패턴)",
     "debugSpawnBestCost": "비용 합계(건설+토지+매수 철거)",
-    "debugSpawnNoData": "데이터가 없습니다"
+    "debugSpawnNoData": "데이터가 없습니다",
+    "sanitationSatisfaction": "위생 상태",
+    "deathCauseSanitation": "위생 악화"
   }
 }

@@ -29,6 +29,7 @@ export type RegulationsData = {
   // 移民規制（プレイヤーが政策として設定する受け入れ条件）
   immigration_age_min: number;
   immigration_age_max: number;
+  immigration_enabled: boolean;
   immigration_allow_single: boolean;
   immigration_allow_married_no_children: boolean;
   immigration_allow_with_children: boolean;
@@ -60,6 +61,7 @@ export type WelfareRegulations = {
 export type ImmigrationRegulations = {
   immigration_age_min: number;
   immigration_age_max: number;
+  immigration_enabled: boolean;
   immigration_allow_single: boolean;
   immigration_allow_married_no_children: boolean;
   immigration_allow_with_children: boolean;

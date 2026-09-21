@@ -66,7 +66,6 @@
     "deathAgeDistributionEpochs": "Last {{count}} epochs total",
     "deathAgeDistributionCityOnly": "Death age distribution is aggregated city-wide only",
     "deathCauseNatural": "Aging / Illness",
-    "deathCauseStarvation": "Starvation",
     "deathCauseOrphan": "Household Loss",
     "deathCauseTraffic": "Traffic Accident",
     "deathCauseCollapse": "Collapse / Fire",
@@ -345,6 +344,8 @@
     "debugSpawnColCost": "Total cost",
     "debugSpawnBestNpv": "NPV (best pattern)",
     "debugSpawnBestCost": "Total cost (construction + land + acquisition)",
-    "debugSpawnNoData": "No data"
+    "debugSpawnNoData": "No data",
+    "sanitationSatisfaction": "Sanitation",
+    "deathCauseSanitation": "Poor sanitation"
   }
 }

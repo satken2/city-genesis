@@ -85,6 +85,7 @@
     "repairDescription": "Définit le seuil de durabilité à partir duquel la réparation d'un bâtiment public ou d'une route commence. Sous ce seuil, la réparation démarre de façon probabiliste.",
     "repairThresholdBuilding": "Seuil des bâtiments publics",
     "repairThresholdPath": "Seuil des routes",
-    "unsavedChanges": "Des modifications ne sont pas enregistrées"
+    "unsavedChanges": "Des modifications ne sont pas enregistrées",
+    "immigrationEnabled": "Autoriser l’immigration"
   }
 }

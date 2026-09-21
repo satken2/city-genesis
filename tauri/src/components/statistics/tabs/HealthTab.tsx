@@ -2,7 +2,7 @@
  * 保健衛生タブコンポーネント
  *
  * 統計ウィンドウの「保健衛生」タブの中身。GET /api/v1/stats/health から
- * 都市全体および各地区の保健衛生統計（平均寿命推移＋栄養・医療充足度分布）を取得して表示する。
+ * 都市全体および各地区の保健衛生統計（平均寿命推移＋衛生・医療充足度分布）を取得して表示する。
  * データはエポックが変わらない限り再取得しない（useEpochCachedStats によるキャッシュ）。
  *
  * レイアウト:
@@ -12,7 +12,7 @@
  *     - 右側 (50%): 死亡年齢分布グラフ（5歳刻み年齢帯×死因別の積み上げ横棒グラフ）。
  *       都市全体でのみ集計されるため、地区スコープ選択時は案内文を表示する。
  * - 下部 (下半分): 左右2カラム
- *     - 左側 (50%): 栄養充足度グラフ（世帯の nutrition 分布、横向き棒グラフ、隙間なし）。
+ *     - 左側 (50%): 衛生充足度グラフ（世帯の sanitation 分布、横向き棒グラフ、隙間なし）。
  *     - 右側 (50%): 医療充足度グラフ（世帯の healthcare 分布、横向き棒グラフ、隙間なし）。
  */
 
@@ -49,7 +49,7 @@ type DistributionPoint = {
 type DeathAgeBand = {
   band: string;
   natural: number;
-  starvation: number;
+  sanitation: number;
   orphan: number;
   traffic: number;
   collapse: number;
@@ -66,7 +66,7 @@ type Scope = {
   zone_id: number | null;
   name: string | null;
   history: HistoryPoint[];
-  nutrition_distribution: DistributionPoint[];
+  sanitation_distribution: DistributionPoint[];
   healthcare_distribution: DistributionPoint[];
   /** 死因別×年齢帯別の死亡者数。都市全体スコープのみ。地区スコープは null */
   death_age_distribution: DeathAgeDistribution | null;
@@ -79,7 +79,7 @@ type HealthStats = {
 
 // --- 配色 (都市環境や福祉に合ったモダンカラー) ---
 const COLOR_LIFESPAN = "#3b82f6"; // 寿命: ブルー
-const COLOR_NUTRITION = "#10b981"; // 栄養: エメラルドグリーン
+const COLOR_NUTRITION = "#10b981"; // 衛生: エメラルドグリーン
 const COLOR_HEALTHCARE = "#06b6d4"; // 医療: シアン
 
 /**
@@ -89,7 +89,7 @@ const COLOR_HEALTHCARE = "#06b6d4"; // 医療: シアン
  */
 const DEATH_CAUSES = [
   { key: "natural", labelKey: "statistics.deathCauseNatural", color: "#3b82f6" },
-  { key: "starvation", labelKey: "statistics.deathCauseStarvation", color: "#d97706" },
+  { key: "sanitation", labelKey: "statistics.deathCauseSanitation", color: "#d97706" },
   { key: "orphan", labelKey: "statistics.deathCauseOrphan", color: "#8b5cf6" },
   { key: "traffic", labelKey: "statistics.deathCauseTraffic", color: "#0891b2" },
   { key: "collapse", labelKey: "statistics.deathCauseCollapse", color: "#dc2626" },
@@ -303,14 +303,14 @@ export function HealthTab({ apiBaseUrl }: { apiBaseUrl: string }) {
 
       {/* ===== 下部: 充足度分布 (下半分、左右2カラム) ===== */}
       <div className="health-tab__bottom-row">
-        {/* 左半分: 栄養充足度分布 */}
+        {/* 左半分: 衛生充足度分布 */}
         <section className="health-chart health-chart--half">
-          <h3 className="health-chart__title">{t("statistics.nutritionSatisfaction")}</h3>
+          <h3 className="health-chart__title">{t("statistics.sanitationSatisfaction")}</h3>
           <div className="health-chart__area">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 layout="vertical"
-                data={scope.nutrition_distribution}
+                data={scope.sanitation_distribution}
                 barCategoryGap={0}
                 margin={{ top: 5, right: 15, left: 15, bottom: 5 }}
               >
@@ -332,7 +332,7 @@ export function HealthTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                 <Tooltip
                   contentStyle={TOOLTIP_STYLE}
                   labelStyle={{ color: "#fff" }}
-                  formatter={(value: any) => [`${value} ${t("statistics.householdsUnit")}`, t("statistics.nutritionSatisfaction")]}
+                  formatter={(value: any) => [`${value} ${t("statistics.householdsUnit")}`, t("statistics.sanitationSatisfaction")]}
                 />
                 <Bar dataKey="count" fill={COLOR_NUTRITION} />
               </BarChart>

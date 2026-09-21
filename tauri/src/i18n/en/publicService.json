@@ -85,6 +85,7 @@
     "repairDescription": "Set the durability threshold at which public buildings and roads begin repair. When durability falls below the threshold, repair starts probabilistically.",
     "repairThresholdBuilding": "Public Building Threshold",
     "repairThresholdPath": "Road Threshold",
-    "unsavedChanges": "You have unsaved changes"
+    "unsavedChanges": "You have unsaved changes",
+    "immigrationEnabled": "Allow immigration"
   }
 }

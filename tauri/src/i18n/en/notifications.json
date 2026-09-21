@@ -24,7 +24,8 @@
       "collapse_with_deaths": "{{count}} buildings/roads have collapsed, killing {{deaths}} people",
       "deaths_traffic": "{{count}} people died in traffic accidents",
       "tenant_blocked_by_parcel_size": "No building for \"{{tenant_name}}\" can be constructed in district \"{{zone_name}}\" (needs {{required}} m2, largest buildable {{max_capacity}} m2). A larger parcel is required",
-      "unknown": "A critical event has occurred"
+      "unknown": "A critical event has occurred",
+      "sanitation": "Sanitation is deteriorating for {{count}} households. Improve sewage and waste treatment."
     }
   }
 }

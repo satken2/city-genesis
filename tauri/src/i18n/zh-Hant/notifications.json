@@ -24,7 +24,8 @@
       "collapse_with_deaths": "有{{count}}處建築・道路倒塌，{{deaths}}人死亡",
       "deaths_traffic": "交通事故導致{{count}}人死亡",
       "tenant_blocked_by_parcel_size": "在地區「{{zone_name}}」無法建造可容納「{{tenant_name}}」的建築（需要{{required}}m2，地塊最大為{{max_capacity}}m2）。需要更大的地塊",
-      "unknown": "發生了重大事件"
+      "unknown": "發生了重大事件",
+      "sanitation": "{{count}}個家庭的衛生狀況正在惡化。請改善污水和垃圾處理。"
     }
   }
 }

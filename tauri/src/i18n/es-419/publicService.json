@@ -85,6 +85,7 @@
     "repairDescription": "Define el umbral de durabilidad a partir del cual se repara un edificio público o una calle. Cuando la durabilidad cae por debajo del umbral, la reparación inicia de forma probabilística.",
     "repairThresholdBuilding": "Umbral de edificios públicos",
     "repairThresholdPath": "Umbral de calles",
-    "unsavedChanges": "Hay cambios sin guardar"
+    "unsavedChanges": "Hay cambios sin guardar",
+    "immigrationEnabled": "Permitir inmigración"
   }
 }

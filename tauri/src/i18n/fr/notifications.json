@@ -24,7 +24,8 @@
       "collapse_with_deaths": "{{count}} bâtiments ou routes se sont effondrés, faisant {{deaths}} morts",
       "deaths_traffic": "{{count}} personnes sont mortes dans des accidents de la route",
       "tenant_blocked_by_parcel_size": "Dans le quartier « {{zone_name}} », aucun bâtiment pouvant accueillir « {{tenant_name}} » ne peut être construit (il faut {{required}} m2, le maximum de la parcelle est {{max_capacity}} m2). Une parcelle plus grande est nécessaire",
-      "unknown": "Un événement critique est survenu"
+      "unknown": "Un événement critique est survenu",
+      "sanitation": "L’état sanitaire se dégrade pour {{count}} ménages. Améliorez le traitement des eaux usées et des déchets."
     }
   }
 }

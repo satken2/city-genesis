@@ -24,7 +24,8 @@
       "collapse_with_deaths": "{{count}} edificios o calles se derrumbaron y murieron {{deaths}} personas",
       "deaths_traffic": "{{count}} personas murieron en accidentes de tránsito",
       "tenant_blocked_by_parcel_size": "En el distrito «{{zone_name}}» no se puede construir un edificio donde quepa «{{tenant_name}}» (se requieren {{required}} m2, el máximo de la parcela es {{max_capacity}} m2). Hace falta una parcela más grande",
-      "unknown": "Ocurrió un evento crítico"
+      "unknown": "Ocurrió un evento crítico",
+      "sanitation": "El saneamiento empeora para {{count}} hogares. Mejora el tratamiento de aguas residuales y residuos."
     }
   }
 }
