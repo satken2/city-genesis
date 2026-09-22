@@ -135,8 +135,12 @@ function App() {
         setOpenWindowCount(status.open_window_count);
       }
 
-      // HUD各枚・トップメニュー・通知・Tipsは window-registry のポップアップではないため context を持たない
-      const contextlessLabels = ["main", "icon-panel", "cockpit", "system-tray", "display-tray", "topmenu", "notification", "tips"];
+      // window-registry のポップアップ以外(HUD各枚・トップメニュー・通知・Tips・ヒントバー・
+      // チュートリアル・初期設定)は Rust 側が直接生成するウィンドウで、context を持たない
+      const contextlessLabels = [
+        "main", "icon-panel", "cockpit", "system-tray", "display-tray", "topmenu",
+        "notification", "tips", "hintbar", "tutorial", "parameter-setup",
+      ];
       if (!contextlessLabels.includes(label)) {
         const initialContext = await invoke<WindowContext>("get_window_context");
         if (!disposed) {

@@ -14,6 +14,18 @@ import tip11 from "../../assets/images/tips/tip_11.jpg";
 import tip12 from "../../assets/images/tips/tip_12.jpg";
 import tip14 from "../../assets/images/tips/tip_14.jpg";
 import tip15 from "../../assets/images/tips/tip_15.jpg";
+import tip16 from "../../assets/images/tips/tip_16.jpg";
+import tip17 from "../../assets/images/tips/tip_17.jpg";
+import tip18 from "../../assets/images/tips/tip_18.jpg";
+import tip19 from "../../assets/images/tips/tip_19.jpg";
+import tip20 from "../../assets/images/tips/tip_20.jpg";
+import tip21 from "../../assets/images/tips/tip_21.jpg";
+import tip22 from "../../assets/images/tips/tip_22.jpg";
+import tip23 from "../../assets/images/tips/tip_23.jpg";
+import tip24 from "../../assets/images/tips/tip_24.jpg";
+import tip25 from "../../assets/images/tips/tip_25.jpg";
+import tip26 from "../../assets/images/tips/tip_26.jpg";
+import tip27 from "../../assets/images/tips/tip_27.jpg";
 
 type TipItem = {
   id: string;
@@ -36,18 +48,18 @@ const TIPS_LIST: TipItem[] = [
   { id: "tip13", image: tip3 },
   { id: "tip14", image: tip14 },
   { id: "tip15", image: tip15 },
-  { id: "tip16" },
-  { id: "tip17" },
-  { id: "tip18" },
-  { id: "tip19" },
-  { id: "tip20" },
-  { id: "tip21" },
-  { id: "tip22" },
-  { id: "tip23" },
-  { id: "tip24" },
-  { id: "tip25" },
-  { id: "tip26" },
-  { id: "tip27" },
+  { id: "tip16", image: tip16 },
+  { id: "tip17", image: tip17 },
+  { id: "tip18", image: tip18 },
+  { id: "tip19", image: tip19 },
+  { id: "tip20", image: tip20 },
+  { id: "tip21", image: tip21 },
+  { id: "tip22", image: tip22 },
+  { id: "tip23", image: tip23 },
+  { id: "tip24", image: tip24 },
+  { id: "tip25", image: tip25 },
+  { id: "tip26", image: tip26 },
+  { id: "tip27", image: tip27 },
 ];
 
 export function TipsWindow() {

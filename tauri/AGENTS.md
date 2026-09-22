@@ -10,7 +10,7 @@ Unityのグラフィックの上に透明なWebViewウィンドウとして重�
 - **ゲーム中に常駐するHUDは4枚のウィンドウに分かれている**(`icon-panel`=画面左端の縦並びメニュー、`cockpit`=画面下部中央、`system-tray`=画面右下、`display-tray`=画面左下の簡易表示切替)。Unityの3Dビューに重ねる透明ウィンドウは、見た目が透明な領域でもクリックをWebViewが吸ってしまうため、**パネルの実面積ぴったりのウィンドウに分割する必要がある**(1枚の全画面ウィンドウにはできない)。生成・配置・表示切替はRust側(`window.rs`の`create_hud_windows` / `layout_hud_windows` / `set_hud_visible`)、中身は`src/components/hud/`。
 - **ポップアップパネルはすべて `React.lazy` で遅延インポートされる。** メインバンドルから重い依存(`three.js` / `recharts`)を切り離し、新規ウィンドウ起動時のJSパース量を減らすため。ポップアップの `<section>` 内は `<Suspense key={`${window_type}:${entity_id}:${label}`}>` で囲まれ、context切り替え時に内部コンポーネントが確実に再マウントされる(各Panelが `initialEntityId` を `useState` 初期値に取る実装のため、prop変更を追跡できないことを補う)。新しいパネルを追加するときも `lazy(() => import(...))` の形式で追加すること。
 - ポップアップウィンドウの種類(サイズ、単一/複数インスタンスのポリシー等)は`src-tauri/config/window-registry.json`で定義される。同時に開けないウィンドウの組は`window-mutex-groups.json`で定義される。
-- 各ウィンドウは起動時にTauriコマンド`get_window_context`で自分の`WindowContext`(ウィンドウタイプ、対象エンティティ等)を取得する。
+- **`WindowContext`(ウィンドウタイプ、対象エンティティ等)を持つのは`window-registry.json`駆動のポップアップだけ。** それらは起動時にTauriコマンド`get_window_context`で自分の`WindowContext`を取得する。Rust側が直接生成する常駐ウィンドウ(HUD4枚・トップメニュー・通知・Tips・ヒントバー・チュートリアル・初期設定)はcontextを持たず、`App.tsx`の`contextlessLabels`で取得対象から除外する。**ここから漏れたウィンドウは起動時に`get_window_context`が失敗し、同じ`initialize()`内で後続の言語復元まで巻き添えでスキップされる**ため、Rust直接生成のウィンドウを追加したらこの配列にも足すこと。
 - 新しいウィンドウを追加する手順: (1)`src/components/`配下にコンポーネント作成 → (2)`App.tsx`のimport(必ず `lazy(() => import(...))` 形式)と`SPECIALIZED_PANEL_TYPES`に追加 → (3)`window-registry.json`に定義を追加。
 
 # プログラム構造

@@ -4,9 +4,10 @@
  * 画面上部中央に、角丸の枠で囲まれたポップアップ風の表示を行う。
  * ユーザー向けのヒントや操作ガイドを軽く表示するためのもの。
  *
- * - 画面上部中央に固定され、左右 65% の幅を占める
+ * - 画面上部中央に固定され、左右 55% の幅を占める
  * - テキストは 2 行程度表示できる高さを確保する
  * - バツボタンはなく、ユーザーが閉じることはできない
+ * - クリックは透過する(ウィンドウ生成時に Rust 側が `set_ignore_cursor_events` を設定する)
  * - 表示/非表示は次の2条件の AND で決まる。
  *   - `session-state` イベントの `current_save_id`(セーブデータがロードされている間は
  *     テキストの有無に関わらず常に表示し続ける)
@@ -38,8 +39,6 @@ export function Hintbar() {
   const [text, setText] = useState("");
 
   useEffect(() => {
-    appWindow.setIgnoreCursorEvents(true).catch(console.error);
-
     let unlistenText: (() => void) | undefined;
     let unlistenSession: (() => void) | undefined;
     let unlistenSettings: (() => void) | undefined;
