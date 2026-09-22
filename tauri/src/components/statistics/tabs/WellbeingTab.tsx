@@ -186,6 +186,13 @@ export function WellbeingTab({ apiBaseUrl, view }: { apiBaseUrl: string; view: V
     color: AXIS_COLORS[axis],
   }));
   const satisfactionNow = toDisplayValue("satisfaction", current.satisfaction);
+  // 一周は常に100点。未達分を背景色の区画として残し、貢献点だけを着色する。
+  const donutSlices = [...slices, {
+    key: "unfilled",
+    name: t("wellbeing.unfilled"),
+    value: Math.max(0, 100 - slices.reduce((sum, slice) => sum + slice.value, 0)),
+    color: "rgba(255,255,255,0.06)",
+  }];
   const showDots = chartData.length === 1;
 
   return (
@@ -284,15 +291,17 @@ export function WellbeingTab({ apiBaseUrl, view }: { apiBaseUrl: string; view: V
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={slices}
+                    data={donutSlices}
                     dataKey="value"
                     nameKey="name"
                     innerRadius="62%"
                     outerRadius="90%"
                     stroke="none"
+                    startAngle={90}
+                    endAngle={-270}
                     isAnimationActive={false}
                   >
-                    {slices.map((s) => (
+                    {donutSlices.map((s) => (
                       <Cell key={s.key} fill={s.color} />
                     ))}
                   </Pie>

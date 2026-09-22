@@ -19,11 +19,12 @@
     "points": "points",
     "history": "Évolution",
     "composition": "Composition de la satisfaction",
-    "compositionDescription": "Chaque axe contribue à hauteur de 25 %. Les parts représentent sa contribution à la satisfaction.",
+    "compositionDescription": "L’anneau complet représente 100 points. Les segments colorés montrent la contribution de chaque axe ; le fond représente les points manquants.",
     "empty": "Aucun ménage évalué.",
     "satisfactionDescription": "Quatre axes et leur moyenne pour les ménages résidents évalués, hors pénalités municipales liées aux accidents.",
     "leisureDescription": "Temps libre et travail sur l’axe droit ; loisirs et satisfaction sur l’axe gauche. Moins de temps réduit les dépenses de loisirs.",
     "comfortDescription": "Espace, calme, soleil et sécurité déterminent le confort. Le logement est affiché jusqu’à 100 %.",
-    "workDescription": "Le travail fourni est proportionnel à une base de 8 heures. Travailler plus réduit les loisirs ; dépasser durablement 8 heures nuit à la santé. Applicable à la prochaine simulation."
+    "workDescription": "Le travail fourni est proportionnel à une base de 8 heures. Travailler plus réduit les loisirs ; dépasser durablement 8 heures nuit à la santé. Applicable à la prochaine simulation.",
+    "unfilled": "Points manquants sur 100"
   }
 }

@@ -19,11 +19,12 @@
     "points": "puntos",
     "history": "Evolución",
     "composition": "Composición de la satisfacción",
-    "compositionDescription": "Cada eje aporta su promedio ponderado al 25 %. Las porciones muestran su aporte a la satisfacción.",
+    "compositionDescription": "El anillo completo representa 100 puntos. Los segmentos de color muestran el aporte de cada eje; el fondo muestra lo que falta para alcanzar el máximo.",
     "empty": "Aún no hay hogares evaluados.",
     "satisfactionDescription": "Cuatro ejes y su promedio para hogares residentes evaluados. No incluye penalizaciones municipales por accidentes.",
     "leisureDescription": "Tiempo libre y trabajo en el eje derecho; ocio y satisfacción en el izquierdo. Menos tiempo reduce el gasto en ocio.",
     "comfortDescription": "Espacio, tranquilidad, luz solar y seguridad determinan la comodidad. La vivienda se muestra hasta el 100 %.",
-    "workDescription": "El trabajo realizado es proporcional a una base de 8 horas. Las jornadas largas reducen el ocio; superar 8 horas de forma sostenida perjudica la salud. Rige desde la próxima simulación."
+    "workDescription": "El trabajo realizado es proporcional a una base de 8 horas. Las jornadas largas reducen el ocio; superar 8 horas de forma sostenida perjudica la salud. Rige desde la próxima simulación.",
+    "unfilled": "Puntos faltantes para 100"
   }
 }

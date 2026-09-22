@@ -19,11 +19,12 @@
     "points": "points",
     "history": "Trends",
     "composition": "Satisfaction breakdown",
-    "compositionDescription": "Each contribution is the axis average weighted by 25%. Slices show shares of satisfaction.",
+    "compositionDescription": "The full ring represents 100 points. Colored segments show each axis contribution; the background shows the gap to full satisfaction.",
     "empty": "No evaluated household data yet.",
     "satisfactionDescription": "Four axes and their average for evaluated resident households. City-score accident penalties are excluded.",
     "leisureDescription": "Free time and working hours use the right axis; leisure and satisfaction use the left. Less time reduces leisure spending.",
     "comfortDescription": "Housing space, quietness, sunlight and safety determine comfort. Housing adequacy is displayed up to 100%.",
-    "workDescription": "Labor output scales with an 8-hour baseline. Longer hours reduce leisure; sustained work above 8 hours harms health. Applies from the next simulation."
+    "workDescription": "Labor output scales with an 8-hour baseline. Longer hours reduce leisure; sustained work above 8 hours harms health. Applies from the next simulation.",
+    "unfilled": "Gap to 100 points"
   }
 }

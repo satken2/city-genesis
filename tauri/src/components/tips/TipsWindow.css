@@ -107,13 +107,16 @@
   box-shadow: 0 4px 12px rgba(0, 176, 255, 0.25);
 }
 
+/* App.cssのグローバル`button:hover`の方が詳細度が高く、指定しないと地色が半透明白に差し替わる */
 .tips-btn--primary:hover {
+  background: linear-gradient(135deg, #00b0ff 0%, #0081cb 100%);
   transform: translateY(-1.5px);
   box-shadow: 0 6px 18px rgba(0, 176, 255, 0.4);
   filter: brightness(1.05);
 }
 
 .tips-btn--primary:active {
+  background: linear-gradient(135deg, #00b0ff 0%, #0081cb 100%);
   transform: translateY(0);
   box-shadow: 0 2px 6px rgba(0, 176, 255, 0.3);
 }
