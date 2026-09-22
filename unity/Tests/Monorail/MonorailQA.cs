@@ -66,6 +66,15 @@ public static class MonorailQA
             foreach (int id in new[] {308, 309})
             {
                 var car = Vertices($"Props/{id}");
+                var close = Vertices($"Props/{id}_close");
+                for(int axis=0;axis<3;axis++)
+                {
+                    int a=axis;
+                    Check(Mathf.Abs(car.Min(v=>v[a])-close.Min(v=>v[a]))<.05f && Mathf.Abs(car.Max(v=>v[a])-close.Max(v=>v[a]))<.05f,"Close bounds differ");
+                }
+                Check(close.Length>car.Length,"Close detail missing");
+                Check(close.Where(v=>v.y<0).All(v=>Mathf.Abs(v.x)>=.509f),"Close skirt intrudes into guideway");
+                Near(close.Where(v=>Mathf.Abs(v.x)<.4f).Min(v=>v.y),0,"Close tire contact");
                 Near(car.Min(v => v.y), -.70f, "Skirt extends below guideway top");
                 Near(car.Max(v => v.y), 3.85f, "Vehicle height");
                 Near(car.Max(v => v.z), 7, "Forward coupling limit");
@@ -89,9 +98,9 @@ public static class MonorailQA
                 ModelPrefabGenerator.CreateWrapperPrefab(source, wrapper);
             }
             ModelPrefabGenerator.SyncAll();
-            foreach (string relative in new[] {"Paths/p501/track", "Paths/p502/platform", "Props/308", "Props/309"})
+            foreach (string relative in new[] {"Paths/p501/track", "Paths/p502/platform", "Props/308", "Props/309", "Props/308_close", "Props/309_close"})
                 Check(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Resources/Models/" + relative + ".prefab") != null, "Missing generated prefab " + relative);
-            File.WriteAllText(report, $"PASS monorail: {checks} checks, 13 FBX, Unity mesh axes and generated wrappers");
+            File.WriteAllText(report, $"PASS monorail: {checks} checks, normal/close FBX, Unity mesh axes, guideway clearance and generated wrappers");
             EditorApplication.Exit(0);
         }
         catch (Exception e)

@@ -1211,7 +1211,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
        * (しかもその範囲が fetchedBounds として記録され、再取得の判定を狂わせる)。
        */
       let viewReady = false;
-      /** 取得中に別の取得要求が来たか。完了後に取り直して要求の取りこぼしを防ぐ */
+      /** 取得中に別の取得要求(種別追加・ビュー移動)が来たか。完了後に取り直す */
       let vectorLoadPending = false;
 
       let settings: TerrainSettings | null = null;
@@ -1907,9 +1907,10 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           if (!abort.signal.aborted) console.warn("[CityMapCanvas] failed to load vector data:", err);
         } finally {
           vec.loading = false;
+          // 保留した要求はカバレッジ判定を通して取り直す(既に足りていれば何もしない)
           if (vectorLoadPending && !disposed) {
             vectorLoadPending = false;
-            fetchVectorsForViewport();
+            scheduleVectorLoad();
           }
         }
       };
@@ -1936,7 +1937,12 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
        * 非インタラクティブ(埋め込み)ではビューが動かないため実質何もしない。
        */
       const scheduleVectorLoad = () => {
-        if (vec.loading) return;
+        // 取得中はカバレッジ判定ができないので保留する。取りこぼすと、取得の飛行中に
+        // 動かしたビューの外周が「道路も建物も無い帯」のまま次の操作まで残る。
+        if (vec.loading) {
+          vectorLoadPending = true;
+          return;
+        }
         const kinds = neededKinds();
         if (kinds.length === 0) return;
         const allFetched = kinds.every((k) => vec.fetchedKinds.has(k));

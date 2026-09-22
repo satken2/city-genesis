@@ -37,12 +37,36 @@ public static class VehicleModelResolver
         if (!middle) return CreateInstance(type,variantId,parent);
         string part = variantId == 0 ? "middle" : $"middle_{variantId}";
         var prefab = ModelManager.Instance?.GetModel($"Models/Vehicles/{type}/{part}",suppressWarning:true);
-        if (prefab == null) prefab = ModelManager.Instance?.GetModel($"Models/Vehicles/{type}/middle",suppressWarning:true);
+        if (prefab == null)
+        {
+            part = "middle";
+            prefab = ModelManager.Instance?.GetModel($"Models/Vehicles/{type}/{part}",suppressWarning:true);
+        }
         if (prefab == null) return CreateInstance(type,variantId,parent);
         var root = new GameObject("TransitCar"); root.transform.SetParent(parent,false);
         var model = Object.Instantiate(prefab,root.transform);
         model.transform.localPosition = Vector3.zero; model.transform.localRotation = Quaternion.identity;
-        model.SetActive(true); NormalizeModel(root.transform,model.transform); root.SetActive(false); return root;
+        model.SetActive(true); NormalizeModel(root.transform,model.transform);
+        AddCloseLod(root, model, $"Models/Vehicles/{type}/{part}");
+        root.SetActive(false); return root;
+    }
+
+    /// <summary>画面を大きく占める車体だけ接写版を使い、通常版と同じ配置変換を共有する。</summary>
+    private static void AddCloseLod(GameObject root, GameObject normal, string path)
+    {
+        var prefab = ModelManager.Instance?.GetModel(path + "_close", suppressWarning: true);
+        if (prefab == null) return;
+        var close = Object.Instantiate(prefab, root.transform);
+        close.transform.localPosition = normal.transform.localPosition;
+        close.transform.localRotation = normal.transform.localRotation;
+        close.transform.localScale = normal.transform.localScale;
+        close.SetActive(true);
+        var lod = root.AddComponent<LODGroup>();
+        lod.SetLODs(new[] {
+            new LOD(.25f, close.GetComponentsInChildren<Renderer>()),
+            new LOD(0f, normal.GetComponentsInChildren<Renderer>()),
+        });
+        lod.RecalculateBounds();
     }
 
     /// <summary>著作時の配置と長手軸をラッパー内で正規化し、走行側は+Z前方・接地中心原点に統一する。</summary>
@@ -106,6 +130,10 @@ public static class VehicleModelResolver
             model.transform.localRotation = Quaternion.identity;
             model.SetActive(true); // glTF テンプレートは非アクティブで読まれるため明示的に有効化する。
             NormalizeModel(root.transform,model.transform);
+            // 車種別の無印が実際に解決できた場合だけ、その接写版を組み合わせる。
+            string path = $"Models/Vehicles/{vehicleType}/{variantId}";
+            if (ModelManager.Instance?.GetModel(path, suppressWarning: true) == prefab)
+                AddCloseLod(root, model, path);
         }
         else
         {

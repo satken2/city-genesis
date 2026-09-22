@@ -7,11 +7,12 @@
  * データはエポックが変わらない限り再取得しない(useEpochCachedStats によるキャッシュ)。
  *
  * レイアウト(ウィンドウの高さに収める):
- * - 「満足度」表示: 上部に集計範囲、下段を等幅2カラムにして
+ * - 「満足度」「住環境」表示(VIEW_HAS_INDICATOR): 上部に集計範囲、下段を等幅2カラムにして
  *   左=[推移グラフ(選択中の指標を強調し、他の系列は細く薄く描く)]
- *     [構成グラフ(四軸の貢献点の積み上げ面。積み上げた高さが世帯満足度)]の上下2枚、
+ *     [構成グラフ(貢献点の積み上げ面。積み上げた高さがその表示の総合指標)]の上下2枚、
  *   右=[指標切替ボタン][選択指標の説明と現在値・地区間レンジ][地区別の色分け地図]。
- * - 「余暇」「住環境」表示: 説明文 → 現在値のKPIカード列 → 推移グラフの縦積み。
+ * - 「余暇」表示: 説明文 → 現在値のKPIカード列 → 推移グラフの縦積み
+ *   (時間/日と点が混在して1つの指標として並べられないため指標切替を持たない)。
  *
  * 満足度系の値はバックエンドの 0〜1 を100点換算で表示し、
  * 時間(可処分時間・所定労働時間)はそのまま 時間/日 で表示する。
@@ -74,7 +75,8 @@ type WellbeingZone = {
 };
 
 type WellbeingZoneStats = {
-  epoch: number;
+  /** スナップショットが表す確定エポック。エポック未実行なら履歴が無いのでnull */
+  epoch: number | null;
   date: number | null;
   zones: WellbeingZone[];
 };
@@ -104,8 +106,10 @@ type CompositionPart = {
   id: string;
   /** 履歴から読む値のキー */
   source: string;
-  /** 表示名(i18n)と色(SERIES_COLORS)を引くキー */
+  /** 色(SERIES_COLORS)を引くキー。指標切替の選択と突き合わせる対象でもある */
   series: string;
+  /** 表示名のi18nキー。省略時は series を使う(元の指標と値が違う帯だけ指定する) */
+  labelKey?: string;
   /** 指定時は weights[axis] を掛ける。履歴に貢献点そのものが入っていない指標用 */
   weightAxis?: string;
 };
@@ -126,7 +130,8 @@ const VIEW_COMPOSITION: Partial<Record<View, CompositionPart[]>> = {
     weightAxis: axis,
   })),
   comfort: [
-    { id: "housing", source: "comfort_housing", series: "satis_residential" },
+    // 住宅の帯は充足度そのものではなく逓減変換した住宅評価なので、別の表示名を使う
+    { id: "housing", source: "comfort_housing", series: "satis_residential", labelKey: "comfort_housing" },
     { id: "quiet", source: "comfort_quiet", series: "quiet" },
     { id: "sunlight", source: "comfort_sunlight", series: "sunlight" },
     { id: "safety", source: "comfort_safety", series: "safety" },
@@ -235,10 +240,10 @@ function KpiCard({
 }
 
 /**
- * 満足度表示の右カラム(指標切替 + 選択指標の詳細 + 地区別の色分け地図)。
+ * 指標切替 + 選択指標の詳細 + 地区別の色分け地図の右カラム(満足度・住環境表示)。
  *
  * 地区別の現在値はこの画だけが使うため、取得もここに閉じる
- * (余暇・住環境表示ではマウントされないので通信も発生しない)。
+ * (余暇表示ではマウントされないので通信も発生しない)。
  * 選択中の指標は推移グラフの強調とも共有するため、stateは親が持つ。
  */
 function WellbeingSidePanel({
@@ -375,7 +380,15 @@ export function WellbeingTab({ apiBaseUrl, view }: { apiBaseUrl: string; view: V
   );
 
   const keys = VIEW_KEYS[view];
-  const history = data?.history ?? [];
+  const composition = VIEW_COMPOSITION[view];
+  // 積み上げ面は欠測を0として積む(rechartsのstackがnullを0に丸める)ため、「快適さが0に
+  // 落ちた」と読める谷ができる。構成グラフを持つ表示は系列が全てhouseholdsで欠測するので、
+  // 評価済み世帯がいないエポックは両方のグラフから落として横軸を揃える。
+  // 余暇表示は所定労働時間が世帯0でも記録されるため落とさない。
+  const history = useMemo(() => {
+    const points = data?.history ?? [];
+    return composition ? points.filter((p) => Number(p.households) > 0) : points;
+  }, [data, composition]);
   // 折れ線は表示指標に世帯満足度を重ねたもの。満足度表示では指標切替の選択肢も兼ねる。
   const chartKeys = useMemo(() => [...keys, "satisfaction"], [keys]);
   const [selectedIndicator, setIndicator] = useState<string>("satis_wealth");
@@ -394,7 +407,6 @@ export function WellbeingTab({ apiBaseUrl, view }: { apiBaseUrl: string; view: V
 
   // 構成グラフ用の貢献点(100点換算)。満足度の四軸だけAPIのweightsを掛ける
   // (等分の25%をUIに焼き込まない)。住環境は記録済みの貢献値をそのまま使う。
-  const composition = VIEW_COMPOSITION[view];
   const weights = data?.weights;
   const compositionData = useMemo(() => {
     if (!composition) return [];
@@ -434,6 +446,8 @@ export function WellbeingTab({ apiBaseUrl, view }: { apiBaseUrl: string; view: V
         {scope.zone_id == null ? t("statistics.cityWide") : `${scope.name ?? ""} #${scope.zone_id}`}
       </option>)}
     </select>
+    {/* 範囲切替中は前の範囲の数値を描き続けるため、表示が追いついていないことを示す */}
+    {loading && <span className="wellbeing-scope__pending">{t("common.loading")}</span>}
   </div>;
   if (!current) {
     return <div className="wellbeing-tab">{scopeSelector}<div className="wellbeing-tab__empty">{t("wellbeing.empty")}</div></div>;
@@ -579,12 +593,13 @@ export function WellbeingTab({ apiBaseUrl, view }: { apiBaseUrl: string; view: V
                       <Area
                         key={part.id}
                         dataKey={part.id}
-                        name={t(`wellbeing.${part.series}`)}
+                        name={t(`wellbeing.${part.labelKey ?? part.series}`)}
                         stackId="contribution"
                         type="monotone"
                         stroke={SERIES_COLORS[part.series]}
                         fill={SERIES_COLORS[part.series]}
                         fillOpacity={areaOpacity(part.series)}
+                        dot={showDots}
                         isAnimationActive={false}
                       />
                     ))}

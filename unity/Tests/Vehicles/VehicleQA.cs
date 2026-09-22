@@ -283,6 +283,16 @@ public static class VehicleQA
             Near(Vector3.Distance(original.bounds.size,copy.bounds.size),0,.002f,"Vehicle prop dimensions differ");
             var model=New("PropRenderModel",id);
             Check(((IList)Get(model,"normal")).Count>0 && ((IList)Get(model,"far")).Count>0,"Vehicle prop has no drawable parts: "+id);
+            if(id>=370 && id<=379)
+            {
+                var closeSource=Resources.Load<GameObject>("Models/Vehicles/"+paths[index]+"_close");
+                var closeProp=Resources.Load<GameObject>($"Models/Props/{id}_close");
+                Check(closeSource!=null && closeProp!=null,"Missing close vehicle prop: "+id);
+                var a=closeSource.GetComponentInChildren<MeshFilter>(true).sharedMesh;
+                var b=closeProp.GetComponentInChildren<MeshFilter>(true).sharedMesh;
+                Check(a.vertexCount==b.vertexCount && a.triangles.Length==b.triangles.Length,"Close alias topology differs: "+id);
+                Near(Vector3.Distance(a.bounds.size,b.bounds.size),0,.002f,"Close alias bounds differ");
+            }
             Call(model,"Dispose");
         }
     }
@@ -327,7 +337,28 @@ public static class VehicleQA
                 car.SetActive(true);
                 string expected = middle ? (variant==0 ? "middle" : "middle_1") : variant.ToString();
                 foreach(var filter in car.GetComponentsInChildren<MeshFilter>())
-                    Check(AssetDatabase.GetAssetPath(filter.sharedMesh).EndsWith($"/{type}/{expected}.fbx"), "Variant silently falls back: "+type+"/"+expected);
+                {
+                    string asset=AssetDatabase.GetAssetPath(filter.sharedMesh);
+                    Check(asset.EndsWith($"/{type}/{expected}.fbx") || asset.EndsWith($"/{type}/{expected}_close.fbx"), "Variant silently falls back: "+type+"/"+expected);
+                }
+                if(type==14 || type==20 || type==21)
+                {
+                    var lod=car.GetComponent<LODGroup>();
+                    Check(lod!=null,"Close LOD missing");
+                    var levels=lod.GetLODs();
+                    Check(levels.Length==2 && levels[0].screenRelativeTransitionHeight==.25f && levels[1].screenRelativeTransitionHeight==0,"Vehicle LOD thresholds");
+                    foreach(var renderer in levels[0].renderers)
+                        Check(AssetDatabase.GetAssetPath(renderer.GetComponent<MeshFilter>().sharedMesh).EndsWith($"/{expected}_close.fbx"),"Close LOD uses wrong asset");
+                    foreach(var renderer in levels[1].renderers)
+                        Check(AssetDatabase.GetAssetPath(renderer.GetComponent<MeshFilter>().sharedMesh).EndsWith($"/{expected}.fbx"),"Normal LOD uses wrong asset");
+                    var normal=levels[1].renderers[0].bounds;
+                    var close=levels[0].renderers[0].bounds;
+                    Check((normal.min-close.min).magnitude<.09f && (normal.max-close.max).magnitude<.09f,"LOD placement bounds differ");
+                    resolver.GetMethod("FitTransitLength").Invoke(null,new object[]{car,10f});
+                    Near(levels[0].renderers[0].bounds.size.z,10,.06f,"Close nominal length");
+                    Near(levels[1].renderers[0].bounds.size.z,10,.06f,"Normal nominal length");
+                    car.transform.localScale=Vector3.one;
+                }
                 foreach(var filter in car.GetComponentsInChildren<MeshFilter>()) Check(filter.sharedMesh.isReadable,"Vehicle FBX is not readable");
                 var renderers=car.GetComponentsInChildren<Renderer>();
                 Check(renderers.Length>0,"Transit FBX has no renderer");

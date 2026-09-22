@@ -146,6 +146,8 @@ stdout が返らない等の罠がある)。本Skillはプロップ固有の差�
 
 ## 道路・鉄道を走る車両モデル
 
+鉄道の接写版は14（トラム）・20（メトロ）・21（中距離）の全外観と中間車、およびモノレール308/309にある。非公開制作ツールの`pipeline/jobs/build_rail_close.py`が通常の車体断面から曲面外板と細部を著作する。通常FBXは保持する。再生成・比較・専用頂点予算は同ディレクトリの`rail_close.md`を参照する。走行版はVehicleModelResolverのLODGroup、自由配置別名はPropRenderModelで接写を選ぶ。`build_vehicle_props.py`は接写も同期する。
+
 道路車両・編成車両の制作にも共通のBlender基盤を使うが、保存先は `blender/vehicles.blend` と `Assets/Models/Vehicles/{車種}/{モデル名}.fbx`。走行用の全36モデルは自由配置用の数値ID 350〜367・370〜387でも `prop_master` に登録する。制作前に公開 `geometries/O_車両の走行描画.md` の O.10.1 と `unity/Assets/Scripts/Vehicles/AGENTS.md` を読む。
 
 - 原点は接地面・水平中心、Blender -Yが前方。1FBX=1メッシュで既存の車両用 `PROP_*` 材質を共有する。
