@@ -34,6 +34,9 @@ public partial class BuildingPlanManager : MonoBehaviour
     // 構造種別(structure_master のID。0=構造の区別なし)。UIの構造選択と連動し、
     // プレビューメッシュの生成時に BuildingSummary.structure へ設定される(パーツ prefix の解決に効く)。
     private int currentStructure = 0;
+    // 観光名所の種別(landmark_master のID。0=観光名所ではない)。テンプレート作成モードの名所選択と連動し、
+    // プレビューメッシュの生成時に BuildingSummary.landmark へ設定される(パーツ prefix の解決に効く)。
+    private int currentLandmark = 0;
 
     // プレビュー形状のキャッシュ。外観バリアント変更時にバックエンドへ再取得せず
     // キャッシュしたポリゴンからメッシュを再生成するために保持する。
@@ -148,6 +151,8 @@ public partial class BuildingPlanManager : MonoBehaviour
         public float? visual_variant3;
         // 構造種別(未設定の旧スキーマなら null → 0 扱い)
         public int? structure;
+        // 観光名所の種別(観光名所でなければ null → 0 扱い)
+        public int? landmark;
     }
 
     [Serializable]
@@ -187,6 +192,8 @@ public partial class BuildingPlanManager : MonoBehaviour
         agentVariant = variant;
         // 構造の既定は許可構造の最上位(UIの既定と同じ)。UI が明示的に送る structure で上書きされる。
         currentStructure = 0;
+        // 観光名所はテンプレート作成モードの名所選択でしか決まらないので、バリアント変更では未選択に戻す。
+        currentLandmark = 0;
         if (MasterDataStore.Instance != null)
         {
             var masterForStructure = MasterDataStore.Instance.GetAgentMaster(variant);
@@ -280,6 +287,7 @@ public partial class BuildingPlanManager : MonoBehaviour
                 currentConstructionRatio = editingBuildingData.construction_ratio;
                 currentFloors = editingBuildingData.floors;
                 currentStructure = editingBuildingData.structure ?? 0;
+                currentLandmark = editingBuildingData.landmark ?? 0;
 
                 // 外観バリアントを読み込む。
                 // single_agentスキーマがvisual_variantを含まない場合、フィールドはnullとなるため、
@@ -534,6 +542,7 @@ public partial class BuildingPlanManager : MonoBehaviour
             height = height,
             polygon = polygonObjList,
             structure = currentStructure,
+            landmark = currentLandmark,
             visual_variant = currentVisualVariant,
             visual_variant2 = currentVisualVariant2,
             visual_variant3 = currentVisualVariant3,
@@ -633,6 +642,25 @@ public partial class BuildingPlanManager : MonoBehaviour
     {
         currentStructure = structure;
         Debug.Log($"BuildingPlanManager: 構造種別を設定しました: structure={structure}");
+        RebuildPreviewFromCache();
+    }
+
+    /// <summary>
+    /// 観光名所の種別を設定し、プレビューメッシュを再生成する。テンプレート作成モードの名所選択で呼ばれる。
+    /// 名所はパーツ prefix の解決(landmark-{model_prefix})に加えて敷地寸法・階数もマスターが正なので、
+    /// 直接配置のゴーストと placement_state を名所の実寸で作り直す。
+    /// 底面ポリゴン自体はバックエンドの権威プレビューが返すため、ここでは再取得しない。
+    /// </summary>
+    public void SetLandmark(int landmark)
+    {
+        currentLandmark = landmark;
+        if (landmark > 0)
+        {
+            ApplyFootprintDefaults();
+            RebuildAfterSizeChange();
+            EmitPlacementState(false);
+        }
+        Debug.Log($"BuildingPlanManager: 観光名所を設定しました: landmark={landmark}");
         RebuildPreviewFromCache();
     }
 
@@ -890,6 +918,7 @@ public partial class BuildingPlanManager : MonoBehaviour
                         height = shape.height,
                         polygon = polygonObjList,
                         structure = currentStructure,
+                        landmark = currentLandmark,
                         visual_variant = currentVisualVariant,
                         visual_variant2 = currentVisualVariant2,
                         visual_variant3 = currentVisualVariant3,

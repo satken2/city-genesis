@@ -239,6 +239,21 @@ export async function sendEditBuildingUpdateStructure(structure: number): Promis
 }
 
 /**
+ * `edit_building.update_landmark`
+ * 建物建設モードにおいて、観光名所の種別(landmarks マスターのID。0=観光名所ではない)を変更する。
+ * Unity側は名所ごとの専用モデル(Resources/Models/Buildings/landmark-{model_prefix})に
+ * 差し替えてプレビューメッシュを再生成する。
+ */
+export async function sendEditBuildingUpdateLandmark(landmark: number): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "building_construction",
+    entity: null,
+    action: "edit_building:update_landmark",
+    params: { landmark },
+  });
+}
+
+/**
  * `edit_building.update_visual_variant`
  * 建物建設モードにおいて、外観バリアント(visual_variant1/2/3)を変更する。
  * Unity側はキャッシュしている底面ポリゴンを用いて、新しいvisual_variantで

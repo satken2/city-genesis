@@ -109,6 +109,7 @@ public class BuildingInputHandler : MonoBehaviour, IInputHandler
     /// 既存建物コピー建設のコピー元選択。クリックされた建物の variant / floors / visual_variant を
     /// キャッシュ済みの BuildingSummary から読み取り、building_construction:copy_source として UI へ通知する。
     /// 実際のフットプリント寸法はバックエンドがコピー元 agent_id から導出するため送らない。
+    /// 観光名所は都市内1基の一点物でバックエンドがコピー元として拒否するため、選択自体を成立させない。
     /// </summary>
     private void HandlePickBuildingClick()
     {
@@ -120,6 +121,12 @@ public class BuildingInputHandler : MonoBehaviour, IInputHandler
         if (summary == null)
         {
             Debug.LogWarning($"BuildingInputHandler: コピー元建物 {buildingId} のサマリが取得できませんでした");
+            return;
+        }
+
+        if (summary.landmark > 0)
+        {
+            Debug.LogWarning($"BuildingInputHandler: 建物 {buildingId} は観光名所のためコピー元にできません");
             return;
         }
 

@@ -51,11 +51,7 @@ public partial class BuildingPlanManager
         ClearPreview();
         selectedParcelId = -1;
         PlacementMode = BuildingPlacementMode.Parcel;
-        var master = MasterDataStore.Instance?.GetAgentMaster(agentVariant);
-        directWidth = Mathf.Clamp(master?.default_width ?? 20f, 1f, 500f);
-        directDepth = Mathf.Clamp(master?.default_height ?? directWidth, 1f, 500f);
-        currentFloors = master?.min_floors ?? 1;
-        hasDirectParams = true;
+        ApplyFootprintDefaults();
         if (MasterDataStore.Instance != null)
         {
             maxRoadHalfWidth = 0;
@@ -63,6 +59,23 @@ public partial class BuildingPlanManager
                 if (path.type == Constants.PATH_STREET || path.type == Constants.PATH_MOTORWAY)
                     maxRoadHalfWidth = Mathf.Max(maxRoadHalfWidth, path.width * 0.5f);
         }
+    }
+
+    /// <summary>
+    /// 直接配置の底面寸法と階数をマスターの既定値へ揃える。
+    /// 観光名所(currentLandmark > 0)は敷地寸法も階数も landmark_master が正で、
+    /// バックエンドの直接配置も同じ値を強制する(resizable=false のため間口・奥行きの
+    /// 上書き経路も無い)。agent_master の default_width / min_floors から始めると、
+    /// ゴーストが名所の実寸にならず、形状応答の世代照合(階数一致)も成立しない。
+    /// </summary>
+    private void ApplyFootprintDefaults()
+    {
+        var master = MasterDataStore.Instance?.GetAgentMaster(agentVariant);
+        var landmark = currentLandmark > 0 ? MasterDataStore.Instance?.GetLandmarkMaster(currentLandmark) : null;
+        directWidth = Mathf.Clamp(landmark?.width ?? master?.default_width ?? 20f, 1f, 500f);
+        directDepth = Mathf.Clamp(landmark?.depth ?? master?.default_height ?? directWidth, 1f, 500f);
+        currentFloors = landmark?.floors ?? master?.min_floors ?? 1;
+        hasDirectParams = true;
     }
 
     public string PlacementText(string key, string fallback)

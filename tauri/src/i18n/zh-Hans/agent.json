@@ -41,7 +41,9 @@
       "edit": "编辑",
       "startConstruction": "开工",
       "stopConstruction": "暂缓施工",
-      "cancelAbandon": "取消放弃"
+      "cancelAbandon": "取消放弃",
+      "explode": "爆破",
+      "explodeConfirm": "要伪装成事故炸毁这栋建筑吗？\n建筑会立刻倒塌，里面的居民和员工全部死亡。市民情绪将大幅恶化，且此操作无法撤销。"
     },
     "pendingWarning": "该建筑尚处于规划中。请下达开工指令。",
     "alerts": {

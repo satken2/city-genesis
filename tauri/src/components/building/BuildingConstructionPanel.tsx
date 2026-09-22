@@ -22,7 +22,7 @@ import { useTranslation } from "react-i18next";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import type { AgentMasterEntry, ParcelData, StructureMasterEntry } from "../../types";
+import type { AgentMasterEntry, LandmarkMasterEntry, ParcelData, StructureMasterEntry } from "../../types";
 import { resolveAgentIcon } from "../../utils/agentIcon";
 import { resolveParcelIcon } from "../../utils/parcelIcon";
 
@@ -32,6 +32,7 @@ import {
   sendChangeDisplay,
   sendEditBuildingUpdateFloors,
   sendEditBuildingUpdateStructure,
+  sendEditBuildingUpdateLandmark,
   sendEditBuildingUpdateShape,
   sendEditBuildingUpdateEffectRange,
   sendBuildingPlacementCommand,
@@ -56,7 +57,7 @@ import { useVariantAffordability } from "../../hooks/useVariantAffordability";
 import { BuildingFacilityInfoCard } from "./BuildingFacilityInfoCard";
 import { BuildingFloorSpecs } from "./BuildingFloorSpecs";
 import { showNotification } from "../../utils/notification";
-import { BUILDING_PUBLIC, VARIANT_CITY, VARIANT_GENERIC_BUILDING } from "../../constants";
+import { BUILDING_PUBLIC, VARIANT_CITY } from "../../constants";
 import "./BuildingConstructionPanel.css";
 
 // 直接配置モードで default_width が未設定のバリアント用のフォールバック(m)。
@@ -109,6 +110,12 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
   // 構造種別(structures マスターのID)。構造を持つバリアントを選ぶと許可構造の最上位で初期化され、
   // 構造を持たないバリアント(農地など)では null のまま(送信しない=バックエンドが 0 を確定する)。
   const [structure, setStructure] = useState<number | null>(null);
+  // 観光名所(landmarks マスターのID)。名所軸を持つバリアントを選ぶと未配置の最小IDで初期化され、
+  // 名所軸を持たないバリアントでは null のまま(送信しない=バックエンドが 0 を確定する)。
+  const [landmark, setLandmark] = useState<number | null>(null);
+  // すでに都市に存在する名所のID一覧。同じ名所は都市に1基までなので選択肢を無効化する。
+  // 取得に失敗したときは空のままにして選択を妨げない(最終的な拒否はバックエンドが行う)。
+  const [placedLandmarkIds, setPlacedLandmarkIds] = useState<number[]>([]);
   // 建ぺい率(0.0〜1.0)。敷地面積に対する建築面積の上限割合。プレビュー形状・建設コストの算出に用いる。
   const [coverageRatio, setCoverageRatio] = useState(0.6);
   // 外観バリアント(visual_variant1/2/3)。0.0〜1.0の値で建物の外観を決定する。
@@ -173,6 +180,9 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
   // 1エポックの日数。ランニングコストの「1エポック(n日)あたり」注記に使う。
   const [costSimulationDays, setCostSimulationDays] = useState<number | null>(null);
   const [isCostLoading, setIsCostLoading] = useState(false);
+  // 形状プレビュー・建設費見積の取得に失敗した理由(バックエンドの検証メッセージ)。
+  // 失敗すると3Dプレビューも建設情報カードも出ないため、無言の故障に見えないよう画面に理由を出す。
+  const [estimateError, setEstimateError] = useState<string | null>(null);
   // 選択中の施設がインフラ供給施設(効果範囲を持つ)で、効果範囲を3D表示中かどうか。
   // 効果範囲の凡例表示の出し分けに使う。
   const [effectRangeActive, setEffectRangeActive] = useState(false);
@@ -228,6 +238,32 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
 
   const isCityHallPlacedGateActive = !cityHallPlaced && !templateMode;
 
+  /* ---- 配置済みの観光名所を取得 ---- */
+
+  /**
+   * すでに都市にある名所(稼働中・建設中・計画中・倒壊のいずれか)のID一覧を取得する。
+   * 同じ名所を二重に建てられないよう、セレクタの該当項目を無効化するために使う。
+   */
+  useEffect(() => {
+    if (!apiBaseUrl) return;
+    const controller = new AbortController();
+
+    fetchApi<{ landmark_ids: number[] }>(
+      `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/buildings/placed-landmarks`,
+      { signal: controller.signal },
+    )
+      .then((data) => {
+        if (!controller.signal.aborted) setPlacedLandmarkIds(data.landmark_ids ?? []);
+      })
+      .catch((err) => {
+        if (!controller.signal.aborted) {
+          console.error("[BuildingConstruction] Failed to fetch placed landmarks:", err);
+        }
+      });
+
+    return () => controller.abort();
+  }, [apiBaseUrl]);
+
   /* ---- 既存建物編集モード: データ取得 ---- */
   useEffect(() => {
     if (editAgentId == null || !apiBaseUrl) return;
@@ -238,7 +274,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
     })
       .then(async (res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json() as Promise<{ economic_agent: { bd_type: number; variant: number; floors: number; parcel_id: number; structure?: number; visual_variant?: number; visual_variant2?: number; visual_variant3?: number } }>;
+        return res.json() as Promise<{ economic_agent: { bd_type: number; variant: number; floors: number; parcel_id: number; structure?: number; landmark?: number; visual_variant?: number; visual_variant2?: number; visual_variant3?: number } }>;
       })
       .then((data) => {
         if (controller.signal.aborted) return;
@@ -247,6 +283,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         setSelectedVariant(agent.variant);
         setFloors(agent.floors);
         setStructure(agent.structure != null && agent.structure > 0 ? agent.structure : null);
+        setLandmark(agent.landmark != null && agent.landmark > 0 ? agent.landmark : null);
         setParcelId(agent.parcel_id);
         // 既存建物の外観バリアントを初期値として読み込む。
         // single_agentスキーマがvisual_variantを含まない場合はundefinedとなり、
@@ -259,6 +296,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
           building_variant: agent.variant,
           agent_id: editAgentId,
           structure: agent.structure ?? 0,
+          landmark: agent.landmark ?? 0,
         }).catch((err) => {
           console.error("[BuildingConstructionPanel] sendChangeState failed:", err);
         });
@@ -340,11 +378,13 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
    * TYPE_BUILDING(共有建物)だけでなく、building=trueのTYPE_STANDARD(一般施設)、
    * TYPE_EDUCATION(教育機関)、TYPE_TRADE(輸出入拠点)など、
    * 全ての建設可能エージェントを含む。建物種類(bd_type)でグループ化して表示する。
+   * template_only のバリアント(汎用建物・観光名所)はシナリオ制作専用なので、
+   * テンプレートモードでないときは候補から外す。
    */
   const buildingVariants = useMemo(() => {
     if (!masterData) return [];
     return Object.entries(masterData.agents).filter(
-      ([id, entry]) => entry.building && (templateMode || Number(id) !== VARIANT_GENERIC_BUILDING)
+      ([, entry]) => entry.building && (templateMode || !entry.template_only)
     ) as [string, AgentMasterEntry][];
   }, [masterData, templateMode]);
 
@@ -395,6 +435,25 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
   }, [structure, masterData]);
 
   /**
+   * 選択中バリアントに属する観光名所の一覧(ID昇順)。名所軸を持たないバリアントは空。
+   * placed=すでに都市に在る名所で、選択肢としては無効化する。
+   */
+  const landmarkOptions = useMemo((): { id: number; entry: LandmarkMasterEntry; placed: boolean }[] => {
+    if (selectedVariant === null || !masterData?.landmarks) return [];
+    return Object.entries(masterData.landmarks)
+      .map(([idStr, entry]) => ({ id: Number(idStr), entry }))
+      .filter(({ entry }) => entry.agent_variant === selectedVariant)
+      .sort((a, b) => a.id - b.id)
+      .map(({ id, entry }) => ({ id, entry, placed: placedLandmarkIds.includes(id) }));
+  }, [selectedVariant, masterData, placedLandmarkIds]);
+
+  /** 選択中の観光名所のマスター(名所ではない建物は null) */
+  const selectedLandmarkData = useMemo((): LandmarkMasterEntry | null => {
+    if (landmark == null || !masterData) return null;
+    return masterData.landmarks?.[landmark] ?? null;
+  }, [landmark, masterData]);
+
+  /**
    * 階数の上限。バリアントの max_floors と、構造上の最大階数(木造は3階までなど。0=無制限)の
    * 小さい方。バックエンドの検証と同じ規則。
    */
@@ -406,15 +465,18 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
 
   /** 直接配置は地点未固定でも有効。数値入力を位置選びと同時に操作できる。 */
   const isDirectMode = editAgentId == null && placementMode !== "parcel";
-  const directRequestKey = JSON.stringify([selectedVariant, placementRevision, pickedPosition, rectWidth, rectDepth, rectAngle, floors]);
+  const directRequestKey = JSON.stringify([selectedVariant, placementRevision, pickedPosition, rectWidth, rectDepth, rectAngle, floors, landmark]);
   const directPreviewReady = pickedPosition !== null && validatedDirectKey === directRequestKey && !placementCommandPending;
   /** 現在コピー建設モード(既存建物の実寸フットプリントを固定コピー)かどうか。 */
   const isCopyMode = copySourceAgentId !== null;
-  /** 選択中バリアントの底面が可変か。false のとき底面は default_width 四方の正方形で固定。 */
-  const isResizable = selectedVariantData?.resizable ?? true;
-  /** 直接配置の初期底面サイズ(default_width × default_height)。 */
-  const defaultWidth = selectedVariantData?.default_width ?? DEFAULT_BUILDING_WIDTH;
-  const defaultHeight = selectedVariantData?.default_height ?? defaultWidth;
+  /**
+   * 選択中バリアントの底面が可変か。false のとき底面は固定寸法の矩形になる。
+   * 観光名所は名所ごとに敷地寸法が決まっているため、常に固定扱いとする。
+   */
+  const isResizable = (selectedVariantData?.resizable ?? true) && selectedLandmarkData === null;
+  /** 直接配置の初期底面サイズ。観光名所は名所の寸法が優先される。 */
+  const defaultWidth = selectedLandmarkData?.width ?? selectedVariantData?.default_width ?? DEFAULT_BUILDING_WIDTH;
+  const defaultHeight = selectedLandmarkData?.depth ?? selectedVariantData?.default_height ?? defaultWidth;
 
   /** 選択中の土地区画で建設可能な建物種別の表示名一覧（allowed_bd_mask から解決） */
   const allowedBuildingNames = useMemo(() => {
@@ -434,23 +496,24 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
   /* ---- プレビュー取得 ---- */
 
   const fetchPreview = useCallback(
-    async (variant: number, pId: number, f: number, cr: number, copySrc: number | null, signal?: AbortSignal) => {
+    async (variant: number, pId: number, f: number, cr: number, copySrc: number | null, lm: number | null, signal?: AbortSignal) => {
       const url = `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/buildings/preview`;
       // コピーモードでは copy_source_agent_id を送り、元建物の実寸フットプリントを固定コピーする。
       // このとき建ぺい率(coverage_ratio)は使わず、収まり判定(valid/invalid_reason)が返る。
+      // 編集モードでは編集対象自身を一点物(観光名所)の重複判定から外すため exclude_agent_id を送る。
+      // これが無いと、既存の名所を開いただけで「既に存在する」と判定されプレビューが返らない。
       const body = copySrc != null
         ? { copy_source_agent_id: copySrc, parcel_id: pId, floors: f }
-        : { variant, parcel_id: pId, floors: f, coverage_ratio: cr };
+        : { variant, parcel_id: pId, floors: f, coverage_ratio: cr, ...(lm != null ? { landmark: lm } : {}) };
       try {
-        const result = await fetch(url, {
+        const data = await fetchApi<BuildingPreviewData & { valid?: boolean; invalid_reason?: string | null }>(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
+          body: JSON.stringify({ ...body, ...(editAgentId != null ? { exclude_agent_id: editAgentId } : {}) }),
           signal,
         });
-        if (!result.ok) throw new Error(`HTTP ${result.status}`);
-        const data: BuildingPreviewData & { valid?: boolean; invalid_reason?: string | null } = await result.json();
         if (!signal?.aborted) {
+          setEstimateError(null);
           setBuildingPreview(data);
           if (copySrc != null) {
             setCopyValid(data.valid ?? false);
@@ -469,10 +532,12 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       } catch (err) {
         if (!signal?.aborted) {
           console.error("Failed to fetch building preview:", err);
+          setBuildingPreview(null);
+          setEstimateError(err instanceof Error ? err.message : String(err));
         }
       }
     },
-    [apiBaseUrl]
+    [apiBaseUrl, editAgentId]
   );
 
   /* ---- バリアント・土地区画・階数のいずれかが変化したらプレビューを再取得 ---- */
@@ -480,9 +545,9 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
   useEffect(() => {
     if (selectedVariant === null || parcelId === null) return;
     const controller = new AbortController();
-    void fetchPreview(selectedVariant, parcelId, floors, coverageRatio, copySourceAgentId, controller.signal);
+    void fetchPreview(selectedVariant, parcelId, floors, coverageRatio, copySourceAgentId, landmark, controller.signal);
     return () => controller.abort();
-  }, [selectedVariant, parcelId, floors, coverageRatio, copySourceAgentId, fetchPreview]);
+  }, [selectedVariant, parcelId, floors, coverageRatio, copySourceAgentId, landmark, fetchPreview]);
 
   /* ---- 推定建設コストの取得 ---- */
   useEffect(() => {
@@ -500,13 +565,14 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       setOperatingMaterialCost(null);
       setOperatingCostCategory(null);
       setCostSimulationDays(null);
+      setEstimateError(null);
       return;
     }
     const controller = new AbortController();
     setIsCostLoading(true);
 
     const url = `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/buildings/construction-cost`;
-    fetch(url, {
+    fetchApi<Record<string, number | null | undefined>>(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -515,15 +581,17 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         floors,
         construction_ratio: coverageRatio,
         ...(structure != null ? { structure } : {}),
+        ...(landmark != null ? { landmark } : {}),
         // コピーモードでは copy_source_agent_id を送り、忠実コピーなら割引後コストを受け取る。
         ...(copySourceAgentId != null ? { copy_source_agent_id: copySourceAgentId } : {}),
+        // 編集モードでは編集対象自身を観光名所の重複判定から外す(プレビューと同じ理由)。
+        ...(editAgentId != null ? { exclude_agent_id: editAgentId } : {}),
       }),
       signal: controller.signal,
     })
-      .then(async (res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
+      .then((data) => {
         if (!controller.signal.aborted) {
+          setEstimateError(null);
           setEstimatedCost(data.estimated_construction_cost ?? null);
           setEstimatedStandardCost(data.standard_construction_cost ?? null);
           setEstimatedDurationDays(data.estimated_duration_days ?? null);
@@ -543,6 +611,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       .catch((err) => {
         if (!controller.signal.aborted) {
           console.error("[BuildingConstructionPanel] Failed to fetch construction cost:", err);
+          setEstimateError(err instanceof Error ? err.message : String(err));
           setEstimatedCost(null);
           setEstimatedStandardCost(null);
           setEstimatedDurationDays(null);
@@ -563,7 +632,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       });
 
     return () => controller.abort();
-  }, [selectedVariant, parcelId, floors, coverageRatio, copySourceAgentId, structure, apiBaseUrl]);
+  }, [selectedVariant, parcelId, floors, coverageRatio, copySourceAgentId, structure, landmark, apiBaseUrl, editAgentId]);
 
   /* ---- インフラ施設の効果範囲の取得と3D可視化 ---- */
 
@@ -722,11 +791,13 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         width: rectWidth,
         depth: rectDepth,
         angle: rectAngle,
+        ...(landmark != null ? { landmark } : {}),
       }),
       signal: controller.signal,
     })
       .then((data) => {
         if (controller.signal.aborted) return;
+        setEstimateError(null);
         setBuildingPreview({
           polygon: data.polygon,
           height: data.height,
@@ -774,11 +845,12 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       .catch((err) => {
         if (!controller.signal.aborted) {
           console.error("[BuildingConstruction] Failed to fetch direct preview:", err);
+          setEstimateError(err instanceof Error ? err.message : String(err));
         }
       });
 
     return () => controller.abort();
-  }, [selectedVariant, pickedPosition, floors, rectWidth, rectDepth, rectAngle, apiBaseUrl, placementRevision, directRequestKey]);
+  }, [selectedVariant, pickedPosition, floors, rectWidth, rectDepth, rectAngle, landmark, apiBaseUrl, placementRevision, directRequestKey]);
 
   /* ---- 直接配置モード: 推定建設コストの取得 ---- */
   useEffect(() => {
@@ -798,11 +870,13 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         depth: rectDepth,
         angle: rectAngle,
         ...(structure != null ? { structure } : {}),
+        ...(landmark != null ? { landmark } : {}),
       }),
       signal: controller.signal,
     })
       .then((data) => {
         if (controller.signal.aborted) return;
+        setEstimateError(null);
         setEstimatedCost(data.estimated_construction_cost ?? null);
         setEstimatedStandardCost(data.standard_construction_cost ?? null);
         setEstimatedDurationDays(data.estimated_duration_days ?? null);
@@ -820,6 +894,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       .catch((err) => {
         if (!controller.signal.aborted) {
           console.error("[BuildingConstruction] Failed to fetch direct construction cost:", err);
+          setEstimateError(err instanceof Error ? err.message : String(err));
         }
       })
       .finally(() => {
@@ -827,7 +902,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       });
 
     return () => controller.abort();
-  }, [selectedVariant, pickedPosition, floors, rectWidth, rectDepth, rectAngle, structure, apiBaseUrl]);
+  }, [selectedVariant, pickedPosition, floors, rectWidth, rectDepth, rectAngle, structure, landmark, apiBaseUrl]);
 
   /* ---- 構造種別をUnityへ同期(プレビューの外観用) ---- */
 
@@ -841,6 +916,19 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       console.error("[BuildingConstruction] sendEditBuildingUpdateStructure failed:", err);
     });
   }, [selectedVariant, structure]);
+
+  /* ---- 観光名所をUnityへ同期(プレビューの外観用) ---- */
+
+  /**
+   * 観光名所が変わったら Unity へ送り、名所専用モデルでプレビューメッシュを差し替えさせる。
+   * 名所軸を持たないバリアントは 0 を送る。
+   */
+  useEffect(() => {
+    if (selectedVariant === null) return;
+    void sendEditBuildingUpdateLandmark(landmark ?? 0).catch((err) => {
+      console.error("[BuildingConstruction] sendEditBuildingUpdateLandmark failed:", err);
+    });
+  }, [selectedVariant, landmark]);
 
   /* ---- 直接配置モード: インフラ施設の効果範囲の取得(3D送信は共通の送信用useEffectが行う) ---- */
   useEffect(() => {
@@ -909,6 +997,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         setDirectRequiresAcquisition(false);
         setDirectAcquisition(null);
         setEstimatedCost(null);
+        setEstimateError(null);
         setPreviewEffectRegion(null);
         setEffectRangeActive(false);
         void sendClearHighlights(HIGHLIGHT_SOURCE).catch(() => {});
@@ -950,7 +1039,9 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       setDirectInvalidReason(null);
       setDirectRequiresAcquisition(false);
       setDirectAcquisition(null);
+      setEstimateError(null);
       void sendClearHighlights(HIGHLIGHT_SOURCE).catch(() => {});
+      setLandmark(null);
       // コピーモードの状態もリセットする。
       setCopySourceAgentId(null);
       setCopyValid(false);
@@ -1017,7 +1108,8 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
    * 既存建物コピー建設のコピー元選択モードで建物が選ばれたら、その variant / floors /
    * visual_variant をパネルへシードし、コピーモードに入って区画選択フローへ遷移する。
    * バリアント未選択の状態(=コピーボタンが押せる状態)から入るため、selectedVariant で
-   * ガードせず常時購読する。
+   * ガードせず常時購読する。ただしテンプレート専用バリアント(汎用建物・観光名所)は
+   * 通常プレイの建設候補ではないので、コピー元に選ばれても取り込まない。
    */
   useEffect(() => {
     if (!masterData) return;
@@ -1037,6 +1129,18 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         console.log("[BuildingConstruction] building_construction.copy_source", event.payload);
         const p = event.payload;
         const entry = masterData.agents[p.variant];
+        // コピー元に選べない建物は状態を取り込まずに捨てる。取り込むとバリアント一覧の
+        // 絞り込みを迂回して、確定もプレビューもできない行き止まりの選択状態になる。
+        // 観光名所は都市に1基までの一点物なので、テンプレートモードでも複製できない。
+        const isLandmarkVariant = Object.values(masterData.landmarks ?? {})
+          .some((lm) => lm.agent_variant === p.variant);
+        if (isLandmarkVariant || (entry?.template_only && !templateMode)) {
+          void showNotification({
+            message: t("building_construction.copySourceNotAllowed"),
+            durationMs: 4000,
+          });
+          return;
+        }
         setSelectedBdType(entry?.bd_type ?? null);
         setSelectedVariant(p.variant);
         setFloors(p.floors);
@@ -1046,6 +1150,8 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
             ? p.structure
             : defaultStructureOf(entry);
         setStructure(copiedStructure);
+        // 観光名所は都市に1基までなのでコピーの対象外。名所軸は必ず外れた状態で始める。
+        setLandmark(null);
         setCopySourceAgentId(p.source_agent_id);
         setCopyValid(false);
         setCopyInvalidReason(null);
@@ -1067,7 +1173,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       .catch(console.error);
 
     return () => { unlisten?.(); };
-  }, [appWindow, masterData]);
+  }, [appWindow, masterData, templateMode, t]);
 
   /* ---- 土地区画データ取得 ---- */
 
@@ -1128,6 +1234,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
     if (selectedVariant === variantId) {
       setSelectedVariant(null);
       setStructure(null);
+      setLandmark(null);
       // 外観バリアントをリセット
       setVisualVariant(null);
       setVisualVariant2(null);
@@ -1139,18 +1246,23 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       // 建物バリアントを選択した際、そのバリアントのマスターデータに定義された最小階数を初期値として設定する。
       // これにより、1階では建てられない建物（例: 高層ビル）を選択した際にも、適切な階数でプレビューが表示される。
       const entry = masterData?.agents[variantId];
-      const initialFloors = entry?.min_floors ?? 1;
       const initialStructure = defaultStructureOf(entry);
+      // 観光名所バリアントは未配置の最小IDを既定にする(全部配置済みなら最小ID。
+      // 確定はバックエンドが拒否する)。名所は敷地寸法と階数を名所側が決める。
+      const initialLandmark = defaultLandmarkOf(masterData?.landmarks, variantId, placedLandmarkIds);
+      const landmarkEntry = initialLandmark != null ? masterData?.landmarks?.[initialLandmark] : undefined;
+      const initialFloors = landmarkEntry?.floors ?? entry?.min_floors ?? 1;
       setPlacementMode("parcel");
       pendingPlacementRequest.current = null;
       setPlacementCommandPending(false);
       setSelectedVariant(variantId);
       setFloors(initialFloors);
       setStructure(initialStructure);
+      setLandmark(initialLandmark);
       // 直接配置モードの底面サイズを default_width × default_height で初期化する
       // (default_height 未設定なら正方形)。
-      const initialWidth = entry?.default_width ?? DEFAULT_BUILDING_WIDTH;
-      const initialDepth = entry?.default_height ?? initialWidth;
+      const initialWidth = landmarkEntry?.width ?? entry?.default_width ?? DEFAULT_BUILDING_WIDTH;
+      const initialDepth = landmarkEntry?.depth ?? entry?.default_height ?? initialWidth;
       setRectWidth(initialWidth);
       setRectDepth(initialDepth);
       setRectAngle(0);
@@ -1162,6 +1274,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         building_variant: variantId,
         agent_id: editAgentId ?? null,
         structure: initialStructure ?? 0,
+        landmark: initialLandmark ?? 0,
       }).catch((err) => {
         console.error("[BuildingConstruction] sendChangeState failed:", err);
       });
@@ -1178,6 +1291,18 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
     if (structureMax > 0 && floors > structureMax) {
       handleFloorChange(structureMax);
     }
+  }
+
+  /**
+   * 観光名所の変更。名所ごとに敷地寸法と階数が決まっているため、底面と階数も合わせて差し替える。
+   */
+  function handleLandmarkChange(value: number) {
+    setLandmark(value);
+    const entry = masterData?.landmarks?.[value];
+    if (!entry) return;
+    setRectWidth(entry.width);
+    setRectDepth(entry.depth);
+    handleFloorChange(entry.floors);
   }
 
   function handleFloorChange(value: number) {
@@ -1273,6 +1398,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
             construction_ratio: coverageRatio,
             floors,
             ...(structure != null ? { structure } : {}),
+            ...(landmark != null ? { landmark } : {}),
             // コピーモードでは元建物の実寸フットプリントを固定コピーし、忠実コピーなら割引く。
             ...(copySourceAgentId != null ? { copy_source_agent_id: copySourceAgentId } : {}),
             ...buildVisualVariantFields(),
@@ -1315,6 +1441,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
           // 回転角はマイナス・360超も入力可能なため、確定時に mod 360 で [0,360) に正規化する。
           angle: normalizeAngle(rectAngle),
           ...(structure != null ? { structure } : {}),
+          ...(landmark != null ? { landmark } : {}),
           ...(acknowledgeAcquisition ? { acknowledge_acquisition: true } : {}),
           ...buildVisualVariantFields(),
         }),
@@ -1376,7 +1503,9 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
 
   /* ---- 計算値 ---- */
 
-  const heightPerFloor = selectedVariantData?.height_per_floor ?? 3.5;
+  // 観光名所は名所ごとに階高が決まっている(大展望塔=75m/階など)ため、名所の値を優先する。
+  const heightPerFloor =
+    selectedLandmarkData?.height_per_floor ?? selectedVariantData?.height_per_floor ?? 3.5;
   const totalHeight = floors * heightPerFloor;
   const totalFloorArea = buildingArea != null ? buildingArea * floors : null;
 
@@ -1475,7 +1604,10 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
               <div className="bc-description-text">
                 {selectedVariantData.description || "—"}
               </div>
-              <BuildingFloorSpecs entry={selectedVariantData} />
+              <BuildingFloorSpecs
+                entry={selectedVariantData}
+                fixedFloors={selectedLandmarkData?.floors ?? null}
+              />
             </div>
           </div>
 
@@ -1499,6 +1631,55 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
                 <div className="bc-description-text" style={{ marginTop: 6 }}>
                   {selectedStructureData?.description || t("building_construction.structureNote")}
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* 観光名所の選択(名所軸を持つバリアントのみ)。同じ名所は都市に1基までなので、
+              すでに在るものは選べない。敷地寸法と階数は名所ごとに決まっている。
+              既存建物の編集では表示のみ(名所の差し替えは敷地寸法ごと作り直す操作になるため)。 */}
+          {landmarkOptions.length > 0 && (
+            <div className="bc-description-frame" style={{ marginTop: 10 }}>
+              <div className="bc-description-body">
+                <div className="bc-description-name">{t("building_construction.landmark")}</div>
+                <select
+                  className="bc-select"
+                  value={landmark ?? ""}
+                  onChange={(e) => handleLandmarkChange(parseInt(e.target.value))}
+                  disabled={editAgentId != null}
+                >
+                  {landmarkOptions.map(({ id, entry, placed }) => (
+                    <option key={id} value={id} disabled={placed}>
+                      {entry.display_name}
+                      {placed ? t("building_construction.landmarkPlacedSuffix") : ""}
+                    </option>
+                  ))}
+                </select>
+                <div className="bc-description-text" style={{ marginTop: 6 }}>
+                  {selectedLandmarkData?.description || t("building_construction.landmarkNote")}
+                </div>
+                {selectedLandmarkData && (
+                  <div className="bc-description-text" style={{ marginTop: 4 }}>
+                    {t("building_construction.landmarkDimensions", {
+                      width: selectedLandmarkData.width,
+                      depth: selectedLandmarkData.depth,
+                      floors: selectedLandmarkData.floors,
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* プレビュー・建設費見積の取得に失敗したときの理由表示。
+              失敗するとプレビューも費用カードも出ないため、理由を画面に出して無言の故障を避ける。 */}
+          {estimateError !== null && (
+            <div className="bc-description-frame" style={{ marginTop: 10 }}>
+              <div className="bc-description-body">
+                <div className="bc-description-name">
+                  {t("building_construction.estimateFailed")}
+                </div>
+                <div className="bc-description-text bc-direct-invalid">{estimateError}</div>
               </div>
             </div>
           )}
@@ -1659,6 +1840,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
                   max={maxFloorsAllowed}
                   step={1}
                   integerOnly={true}
+                  disabled={selectedLandmarkData !== null}
                 />
                 <span className="bc-stepper-unit">{t("building_construction.unitFloors")}</span>
               </div>
@@ -1713,6 +1895,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
                   max={maxFloorsAllowed}
                   step={1}
                   integerOnly={true}
+                  disabled={selectedLandmarkData !== null}
                 />
                 <span className="bc-stepper-unit">{t("building_construction.unitFloors")}</span>
               </div>
@@ -1828,6 +2011,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
                 setDirectInvalidReason(null);
                 setDirectRequiresAcquisition(false);
                 setDirectAcquisition(null);
+                setEstimateError(null);
                 void sendClearHighlights(HIGHLIGHT_SOURCE).catch(() => {});
                 if (editAgentId == null) {
                   void sendBuildingPlacementCommand(selectedVariant, { reset: true }).catch(console.error);
@@ -1837,6 +2021,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
                   building_variant: selectedVariant,
                   agent_id: editAgentId ?? null,
                   structure: structure ?? 0,
+                  landmark: landmark ?? 0,
                 }).catch((err) => {
                   console.error("[BuildingConstruction] sendChangeState (cancel) failed:", err);
                 });
@@ -1904,6 +2089,23 @@ function defaultStructureOf(entry: AgentMasterEntry | undefined | null): number 
   const ids = entry?.structures ?? [];
   if (ids.length === 0) return null;
   return Math.max(...ids);
+}
+
+/**
+ * バリアントの既定の観光名所(そのバリアントに属する名所のうち、まだ都市に無い最小ID)。
+ * 名所軸を持たないバリアントは null。全て配置済みなら最小IDを返し、確定はバックエンドが拒否する。
+ */
+function defaultLandmarkOf(
+  landmarks: Record<number, LandmarkMasterEntry> | undefined,
+  variantId: number,
+  placedIds: number[],
+): number | null {
+  const ids = Object.entries(landmarks ?? {})
+    .filter(([, entry]) => entry.agent_variant === variantId)
+    .map(([idStr]) => Number(idStr))
+    .sort((a, b) => a - b);
+  if (ids.length === 0) return null;
+  return ids.find((id) => !placedIds.includes(id)) ?? ids[0];
 }
 
 /** Shoelace formula で多角形の面積を計算 */

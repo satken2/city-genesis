@@ -41,7 +41,9 @@
       "edit": "편집",
       "startConstruction": "착공",
       "stopConstruction": "보류",
-      "cancelAbandon": "포기 취소"
+      "cancelAbandon": "포기 취소",
+      "explode": "폭파",
+      "explodeConfirm": "이 건물을 사고로 위장해 폭파할까요?\n건물은 즉시 붕괴하고 안에 있던 주민과 직원은 사망합니다. 시민 감정이 크게 나빠지며 이 조작은 되돌릴 수 없습니다."
     },
     "pendingWarning": "이 건물은 계획 중입니다. 착공을 지시하세요.",
     "alerts": {

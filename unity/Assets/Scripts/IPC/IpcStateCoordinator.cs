@@ -557,6 +557,7 @@ public class IpcStateCoordinator : MonoBehaviour
     /// <summary>
     /// STATE_EDIT_BUILDING: 建物建設モード
     /// ipcParams には UI側で選択された building_variant / agent_id / structure(構造種別) が含まれる。
+    /// テンプレート作成モードの観光名所では landmark(観光名所の種別)も含まれる。
     /// 任意で placement_mode(配置方法の初期値。parcel/free/roadside)を含む。
     /// agent_id が指定されている場合は既存建物の編集モードとして動作する。
     ///
@@ -597,6 +598,11 @@ public class IpcStateCoordinator : MonoBehaviour
                 if (ipcParams.TryGetValue("structure", out object stObj) && stObj != null)
                 {
                     buildingPlanManager.SetStructure(Convert.ToInt32(stObj));
+                }
+                // 観光名所の種別(0=観光名所ではない)。名所ごとにプレビューのパーツフォルダが変わる。
+                if (ipcParams.TryGetValue("landmark", out object lmObj) && lmObj != null)
+                {
+                    buildingPlanManager.SetLandmark(Convert.ToInt32(lmObj));
                 }
             }
 

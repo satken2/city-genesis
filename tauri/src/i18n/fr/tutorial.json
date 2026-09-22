@@ -262,6 +262,10 @@
       "tip26": {
         "title": "Embouteillage électrique",
         "description": "Produire plus d’électricité ne sert à rien si les lignes ne peuvent pas l’acheminer. Avant de construire une autre centrale, vérifiez que le courant ne reste pas coincé en chemin."
+      },
+      "tip27": {
+        "title": "Un fâcheux accident",
+        "description": "Un bâtiment qui gêne vos projets peut être dynamité en maquillant l’opération en accident. Le moral des habitants en souffre beaucoup : rachetez-le et démolissez-le dans les règles quand c’est possible."
       }
     }
   },

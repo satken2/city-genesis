@@ -172,6 +172,7 @@ Assets/Resources/Models/
 │   │       └── yard_shed.prefab     # 検修庫（同上。原点=XZ中心・Y=0接地）
 │   ├── b{bd_type}s{structure}/       # 構造種別つき（任意。b{bd_type} と同じ構成。§3.2）
 │   ├── a{agent_variant}s{structure}/ # 構造種別つき（任意。a{agent_variant} と同じ構成。§3.2）
+│   ├── landmark-{model_prefix}/      # 観光名所ごと（任意。a{agent_variant} と同じ構成。§3.2）
 │   ├── a{agent_variant}/
 │   │   └── {threshold}/
 │   │       ├── base-prebuilt.prefab
@@ -206,7 +207,7 @@ Models/Buildings/{prefix}/{threshold}/{partName}
 
 | 構成要素          | 値                             | 説明                                                        |
 | ------------- | ----------------------------- | --------------------------------------------------------- |
-| **prefix**    | `a{variant}s{structure}` / `a{variant}` / `b{bd_type}s{structure}` / `b{bd_type}` | 建物の構造種別 `structure`（木造=1・準耐火=2・耐火=3。0=構造なし）ごとのフォルダがあればそれを優先する。解決順は `a{variant}s{structure}` → `a{variant}`（`AgentModelConfig` に定義がある場合） → `b{bd_type}s{structure}` → `b{bd_type}` |
+| **prefix**    | `landmark-{model_prefix}` / `a{variant}s{structure}` / `a{variant}` / `b{bd_type}s{structure}` / `b{bd_type}` | 観光名所 `landmark`（0=観光名所ではない）のフォルダを最優先し、次に建物の構造種別 `structure`（木造=1・準耐火=2・耐火=3。0=構造なし）ごとのフォルダを優先する。解決順は `landmark-{model_prefix}` → `a{variant}s{structure}` → `a{variant}`（`AgentModelConfig` に定義がある場合） → `b{bd_type}s{structure}` → `b{bd_type}` |
 | **threshold** | `0`, `250`, `500`, `750` …    | 外観バリアントの閾値フォルダ                                            |
 | **partName**  | `base-w1`, `mid-c2` 等         | レベル・種類・位置番号をハイフン結合                                        |
 
@@ -245,6 +246,15 @@ crane-top        クレーン頂部（工事中表示専用・実寸スケール
 
 工事中表示専用パーツ（scaffold-\* / crane-\*）は、通常の prefix（`a{variant}` / `b{bd_type}`）に加えて、
 全建物共通の**標準パーツ置き場 `Models/Buildings/common/`** へのフォールバックを持つ（[[F5_工事中建物のメッシュ生成]] §2）。
+
+観光名所フォルダ（`landmark-{model_prefix}`）は、東京タワーや自由の女神のような一点物の観光施設を
+名所ごとに作り分けるためのもので、`model_prefix` は `landmark_master` の値（英小文字の識別子）を使う。
+観光名所は用途バリアントを1つ（`agent_master` の「観光名所」）しか持たず `a{variant}` では名所同士を
+区別できないため、このフォルダが prefix の解決順の**先頭**に来る。中身の構成・命名は無印のフォルダと
+同じで、名所は `MODEL_PREBUILT` なので実際に使われるのは `*-prebuilt` と敷地装飾のパーツである。
+どのフォルダが存在するかは `agent_model_config.yaml` の `landmark_prefixes` に列挙され
+（`generate_agent_model_config.py` が実在フォルダから生成する）、`AgentModelConfig.HasLandmarkPrefix`
+が参照する。構造種別つきフォルダと同じく、フォルダを追加したら必ず生成器を再実行すること。
 
 マッシュアップ建物（MODEL_MASHUP）のサブ建物パーツは、`subbuilding_master` の `model_prefix` を
 名前に埋め込んだ `mashup-{model_prefix}-{base|mid|top}-prebuilt` という動的な命名を用いる

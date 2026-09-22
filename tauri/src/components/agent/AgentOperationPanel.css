@@ -42,3 +42,24 @@
   border-color: rgba(255, 170, 80, 0.6);
 }
 
+
+/* 自前のSVGアイコン(爆破ボタン)を画像アイコンと同じ大きさに揃える */
+.operation-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* 取り返しのつかない操作のボタン。誤操作を減らすため赤系で差別化する */
+.operation-btn.operation-btn--danger {
+  background: rgba(220, 60, 50, 0.22);
+  border-color: rgba(255, 110, 90, 0.55);
+  color: #ffd9d3;
+}
+
+.operation-btn.operation-btn--danger:hover:not(:disabled) {
+  background: rgba(220, 60, 50, 0.38);
+}
+
+.operation-btn.operation-btn--danger:active:not(:disabled) {
+  background: rgba(220, 60, 50, 0.5);
+}

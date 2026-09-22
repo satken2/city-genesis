@@ -110,8 +110,15 @@ export type MasterData = {
   agent_types: Record<number, AgentTypeEntry>;
   agents: Record<number, AgentMasterEntry>;
   subbuildings: Record<number, SubBuildingMasterEntry>;
+  structures: Record<number, StructureMasterEntry>;
+  landmarks: Record<number, LandmarkMasterEntry>;
   products: Record<number, ProductMasterEntry>;
   paths: Record<number, PathMasterEntry>;
+  transit: Record<number, TransitMasterEntry>;
+  combined_paths: Record<number, CombinedPathEntry>;
+  budget_categories: Record<number, BudgetCategoryEntry>;
+  resource_types: Record<number, ResourceTypeEntry>;
+  prop_types: Record<number, PropMasterEntry>;
 };
 ```
 

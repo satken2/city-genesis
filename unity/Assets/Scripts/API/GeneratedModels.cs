@@ -106,6 +106,8 @@ namespace GeneratedModels
         public int variant;
         /// <summary>建物の構造種別（structure_master のID。0=構造の区別なし）</summary>
         public int structure;
+        /// <summary>観光名所の種別（landmark_master のID。0=観光名所ではない）</summary>
+        public int landmark;
         /// <summary>建物底面ポリゴンの座標列 [[x, z], ...]</summary>
         public List<object> polygon;
         /// <summary>中心点座標 [x, z]</summary>
@@ -157,6 +159,8 @@ namespace GeneratedModels
         public int variant;
         /// <summary>建物の構造種別（structure_master のID。0=構造の区別なし）</summary>
         public int structure;
+        /// <summary>観光名所の種別（landmark_master のID。0=観光名所ではない）</summary>
+        public int landmark;
         /// <summary>ステータス（計画中・建設中・稼働中など。STATUS_*）</summary>
         public int status;
         /// <summary>ステータス遷移理由</summary>

@@ -47,6 +47,7 @@ const TIPS_LIST: TipItem[] = [
   { id: "tip24" },
   { id: "tip25" },
   { id: "tip26" },
+  { id: "tip27" },
 ];
 
 export function TipsWindow() {

@@ -85,6 +85,7 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `edit_building:update_shape`    | `ui -> graphic`  | 建物建設モードにおいて、建物の底面形状を変更した              |
 | `edit_building:update_floors`   | `ui -> graphic`  | 建物建設モードにおいて、建物の階数を変更した                |
 | `edit_building:update_structure` | `ui -> graphic` | 建物建設モードにおいて、構造種別 `structure`（木造=1・準耐火=2・耐火=3。0=構造なし）を変更した。Unityはキャッシュ済みの底面から、構造つきパーツフォルダ（`a{variant}s{structure}` 等）でプレビューを再生成する。`STATE_EDIT_BUILDING` の遷移パラメータにも `structure` が含まれ、`building_construction:copy_source` はコピー元の `structure` を返す |
+| `edit_building:update_landmark` | `ui -> graphic` | 建物建設モードにおいて、観光名所 `landmark`（`landmark_master` のID。0=観光名所ではない）を変更した。Unityは名所専用モデル（`Resources/Models/Buildings/landmark-{model_prefix}`）でプレビューを再生成する。`STATE_EDIT_BUILDING` の遷移パラメータにも `landmark` が含まれる |
 | `edit_building:update_visual_variant` | `ui -> graphic` | 建物建設モードにおいて、外観バリアント(visual_variant1/2/3)を変更した |
 | `edit_building:update_effect_range` | `ui -> graphic` | 建物建設モードにおいて、インフラ供給施設(変電所・下水処理場・電波塔など)の効果範囲を3D上に可視化する。`region`(新設プレビューの領域。円 `{"type":"circle","center":[x,z],"radius":r}` または不定形 `{"type":"polygon","polygons":[{"exterior":[[x,z]...],"holes":[...]}...]}`)と `existing`(同じサービス財を供給する既存施設のカバー済み領域の配列。各要素は region と同形式)を含む。両方が null/空 のときは表示クリア。値はバックエンドの `POST /api/v1/buildings/preview-effect-range`(プレビュー)と `GET /api/v1/buildings/effect-ranges`(既存)から取得する。効果範囲はプレビュー=緑・既存=青に色分けした面(フィル)と境界線で可視化し、効果範囲内の土地区画のハイライトは行わない |
 | `edit_zone:selected`            | `graphic -> ui`  | 地区編集モードで選択中地区（拡張先・統合先）が変化した（右クリック選択 / 新規作成後の自動選択 / 選択解除）。`zone_id`=0 は選択なし |

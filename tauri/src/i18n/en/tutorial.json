@@ -262,6 +262,10 @@
       "tip26": {
         "title": "An Electrical Traffic Jam",
         "description": "Spare generating capacity is no help if the power lines cannot carry it. Before building another power plant, check for bottlenecks along the way."
+      },
+      "tip27": {
+        "title": "An Unfortunate Accident",
+        "description": "A building that stands in the way of development can be blown up and passed off as an accident. Public sentiment takes a heavy hit, so buy it and demolish it properly when you can."
       }
     }
   },

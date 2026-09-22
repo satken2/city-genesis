@@ -340,8 +340,15 @@ export function AgentDetailPanel({
   /** 立地する土地区画が道路建設などのために市政府と買収交渉中か */
   const underAcquisition = agentData.under_acquisition === true;
 
-  /** マスターデータからバリアントの表示名を取得する */
-  const variantName = masterData?.agents[agentData.variant]?.display_name;
+  /**
+   * マスターデータからバリアントの表示名を取得する。
+   * 観光名所(landmark>0)はバリアント名が「観光名所」で全個体共通になってしまうため、
+   * 名所そのものの名前(大展望塔など)を出す。
+   */
+  const variantName =
+    (agentData.landmark != null && agentData.landmark > 0
+      ? masterData?.landmarks?.[agentData.landmark]?.display_name
+      : undefined) ?? masterData?.agents[agentData.variant]?.display_name;
 
   /**
    * マッシュアップ建物(MODEL_MASHUP)かどうか。該当する建物には、サブ建物(校舎・体育館などの棟)の

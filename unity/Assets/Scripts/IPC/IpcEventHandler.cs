@@ -37,6 +37,7 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnEditBuildingUpdateFloors += HandleEditBuildingUpdateFloors;
             IpcClient.Instance.OnEditBuildingUpdateVisualVariant += HandleEditBuildingUpdateVisualVariant;
             IpcClient.Instance.OnEditBuildingUpdateStructure += HandleEditBuildingUpdateStructure;
+            IpcClient.Instance.OnEditBuildingUpdateLandmark += HandleEditBuildingUpdateLandmark;
             IpcClient.Instance.OnEditBuildingUpdateEffectRange += HandleEditBuildingUpdateEffectRange;
             IpcClient.Instance.OnEditBuildingUpdateDirectParams += HandleEditBuildingUpdateDirectParams;
             IpcClient.Instance.OnParcelShowFrontPath += HandleParcelShowFrontPath;
@@ -72,6 +73,7 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnEditBuildingUpdateFloors -= HandleEditBuildingUpdateFloors;
             IpcClient.Instance.OnEditBuildingUpdateVisualVariant -= HandleEditBuildingUpdateVisualVariant;
             IpcClient.Instance.OnEditBuildingUpdateStructure -= HandleEditBuildingUpdateStructure;
+            IpcClient.Instance.OnEditBuildingUpdateLandmark -= HandleEditBuildingUpdateLandmark;
             IpcClient.Instance.OnEditBuildingUpdateEffectRange -= HandleEditBuildingUpdateEffectRange;
             IpcClient.Instance.OnEditBuildingUpdateDirectParams -= HandleEditBuildingUpdateDirectParams;
             IpcClient.Instance.OnParcelShowFrontPath -= HandleParcelShowFrontPath;
@@ -365,6 +367,19 @@ public class IpcEventHandler : MonoBehaviour
         if (bpm != null)
         {
             bpm.SetStructure(structure);
+        }
+    }
+
+    /// <summary>
+    /// edit_building.update_landmark → BuildingPlanManager.SetLandmark()
+    /// テンプレート作成モードの観光名所の選択変更を受けて、名所専用のパーツでプレビューメッシュを再生成する。
+    /// </summary>
+    private void HandleEditBuildingUpdateLandmark(int landmark)
+    {
+        var bpm = GetBuildingPlanManager();
+        if (bpm != null)
+        {
+            bpm.SetLandmark(landmark);
         }
     }
 

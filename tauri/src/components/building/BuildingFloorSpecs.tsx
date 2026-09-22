@@ -14,6 +14,8 @@
  * 階数はアイコンの右に文字だけで出す(1F〜10F形式。min_floors=max_floors の固定階数は1つだけ)。
  * ここに出すのはバリアント自身の許容階数で、構造種別(木造は3階まで等)による上限は含めない
  * (構造は説明カードの下で選ぶ独立した軸なので、バリアントの仕様としては分けて示す)。
+ * ただし観光名所のように階数そのものが外から固定される場合(fixedFloors)は、
+ * 階数ステッパーも固定値のまま操作できないため、その1つだけを出す。
  */
 
 import { useTranslation } from "react-i18next";
@@ -31,6 +33,8 @@ import {
 
 type BuildingFloorSpecsProps = {
   entry: AgentMasterEntry;
+  /** 階数が外から固定されている場合の階数(観光名所は名所ごとに論理階数が決まる)。 */
+  fixedFloors?: number | null;
 };
 
 /** 24px正方の塗りつぶしアイコン。色は文字色(currentColor)で与える。 */
@@ -130,7 +134,7 @@ const ICON_DEDICATED = (
   </svg>
 );
 
-export function BuildingFloorSpecs({ entry }: BuildingFloorSpecsProps) {
+export function BuildingFloorSpecs({ entry, fixedFloors }: BuildingFloorSpecsProps) {
   const { t } = useTranslation();
   const masterData = useMasterData();
 
@@ -141,11 +145,13 @@ export function BuildingFloorSpecs({ entry }: BuildingFloorSpecsProps) {
   const minFloors = entry.min_floors;
   const maxFloors = entry.max_floors;
   const floorRange =
-    minFloors == null || maxFloors == null
-      ? null
-      : minFloors === maxFloors
-        ? t("building_construction.floorRangeFixed", { value: maxFloors })
-        : t("building_construction.floorRange", { min: minFloors, max: maxFloors });
+    fixedFloors != null
+      ? t("building_construction.floorRangeFixed", { value: fixedFloors })
+      : minFloors == null || maxFloors == null
+        ? null
+        : minFloors === maxFloors
+          ? t("building_construction.floorRangeFixed", { value: maxFloors })
+          : t("building_construction.floorRange", { min: minFloors, max: maxFloors });
 
   if (spaceTypes.length === 0 && floorRange === null) return null;
 

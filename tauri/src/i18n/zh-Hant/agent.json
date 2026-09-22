@@ -41,7 +41,9 @@
       "edit": "編輯",
       "startConstruction": "開工",
       "stopConstruction": "暫緩施工",
-      "cancelAbandon": "取消放棄"
+      "cancelAbandon": "取消放棄",
+      "explode": "爆破",
+      "explodeConfirm": "要偽裝成意外炸毀這棟建築嗎？\n建築會立刻倒塌，裡面的居民與員工全數死亡。市民情緒將大幅惡化，且此操作無法復原。"
     },
     "pendingWarning": "此建築尚在規劃中。請下達開工指令。",
     "alerts": {

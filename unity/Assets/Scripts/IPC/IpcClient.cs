@@ -38,6 +38,8 @@ public class IpcClient : MonoBehaviour
     public event Action<float, float, float> OnEditBuildingUpdateVisualVariant;
     // 構造種別(structure_master のID)の変更。プレビューのパーツ prefix を切り替える。
     public event Action<int> OnEditBuildingUpdateStructure;
+    // 観光名所(landmark_master のID)の変更。プレビューのパーツ prefix を切り替える。
+    public event Action<int> OnEditBuildingUpdateLandmark;
     public event Action<EffectRangePayload> OnEditBuildingUpdateEffectRange;
     // 直接配置モードの矩形パラメータ(width, depth, angle, floors)。UI側の入力変更を受けて、
     // Unityがカーソル追従のリアルタイム矩形ゴーストを描画するために使用する。
@@ -522,6 +524,14 @@ public class IpcClient : MonoBehaviour
                         int structure = GetParamInt(payload, "structure");
                         Debug.Log($"IpcClient: edit_building:update_structure -> {structure}");
                         OnEditBuildingUpdateStructure?.Invoke(structure);
+                    }
+                    break;
+
+                case "edit_building:update_landmark":
+                    {
+                        int landmark = GetParamInt(payload, "landmark");
+                        Debug.Log($"IpcClient: edit_building:update_landmark -> {landmark}");
+                        OnEditBuildingUpdateLandmark?.Invoke(landmark);
                     }
                     break;
 

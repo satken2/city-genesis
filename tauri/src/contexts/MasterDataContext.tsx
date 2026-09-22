@@ -55,6 +55,7 @@ const MASTER_ENDPOINTS: { key: keyof MasterData; path: string }[] = [
   { key: "agents", path: "/api/v1/master/agents" },
   { key: "subbuildings", path: "/api/v1/master/subbuildings" },
   { key: "structures", path: "/api/v1/master/structures" },
+  { key: "landmarks", path: "/api/v1/master/landmarks" },
   { key: "products", path: "/api/v1/master/products" },
   { key: "paths", path: "/api/v1/master/paths" },
   { key: "transit", path: "/api/v1/master/transit" },

@@ -262,6 +262,10 @@
       "tip26": {
         "title": "Un embotellamiento eléctrico",
         "description": "De nada sirve generar electricidad de sobra si las líneas no tienen capacidad para llevarla. Antes de construir otra central, revisa si hay un cuello de botella en el camino."
+      },
+      "tip27": {
+        "title": "Un lamentable accidente",
+        "description": "Un edificio que estorba al desarrollo puede volarse y hacerlo pasar por un accidente. El ánimo ciudadano empeora mucho, así que, de ser posible, cómpralo y demuélelo como corresponde."
       }
     }
   },

@@ -11,6 +11,9 @@ public static class AgentModelConfig
     // 構造種別つきプレハブフォルダ(a{variant}s{structure} / b{bd_type}s{structure})の一覧。
     // 生成器(generate_agent_model_config.py)が実在フォルダから列挙した名前だけが入る。
     private static readonly HashSet<string> structurePrefixes = new(StringComparer.Ordinal);
+    // 観光名所つきプレハブフォルダ(landmark-{model_prefix})の一覧。
+    // 構造種別と同じく、生成器が実在フォルダから列挙した名前だけが入る。
+    private static readonly HashSet<string> landmarkPrefixes = new(StringComparer.Ordinal);
     private static bool isLoaded;
 
     public static bool TryGetAgentDefinition(int agentId, out AgentModelDefinition definition)
@@ -27,6 +30,16 @@ public static class AgentModelConfig
     {
         EnsureLoaded();
         return !string.IsNullOrEmpty(prefix) && structurePrefixes.Contains(prefix);
+    }
+
+    /// <summary>
+    /// 観光名所のプレハブフォルダ(例 "landmark-great_tower")が存在するか。
+    /// BuildingMeshUtils.DeterminePrefix が名所専用パーツの有無判定に使う。
+    /// </summary>
+    public static bool HasLandmarkPrefix(string prefix)
+    {
+        EnsureLoaded();
+        return !string.IsNullOrEmpty(prefix) && landmarkPrefixes.Contains(prefix);
     }
 
     private static void EnsureLoaded()
@@ -54,6 +67,16 @@ public static class AgentModelConfig
                     if (!string.IsNullOrWhiteSpace(prefix))
                     {
                         structurePrefixes.Add(prefix.Trim());
+                    }
+                }
+            }
+            if (root?.landmark_prefixes != null)
+            {
+                foreach (var prefix in root.landmark_prefixes)
+                {
+                    if (!string.IsNullOrWhiteSpace(prefix))
+                    {
+                        landmarkPrefixes.Add(prefix.Trim());
                     }
                 }
             }
@@ -102,13 +125,15 @@ public static class AgentModelConfig
         var root = new AgentModelConfigRoot
         {
             agents = new Dictionary<string, AgentModelDefinition>(),
-            structure_prefixes = new List<string>()
+            structure_prefixes = new List<string>(),
+            landmark_prefixes = new List<string>()
         };
 
         AgentModelDefinition currentDefinition = null;
         bool readingVariants = false;
-        // トップレベルの structure_prefixes: セクションを読んでいる間 true
+        // トップレベルの structure_prefixes: / landmark_prefixes: セクションを読んでいる間 true
         bool readingStructurePrefixes = false;
+        bool readingLandmarkPrefixes = false;
 
         foreach (var rawLine in text.Split(new[] { '\n' }, StringSplitOptions.None))
         {
@@ -128,8 +153,9 @@ public static class AgentModelConfig
 
             if (indent == 0)
             {
-                // トップレベルキーでセクションを切り替える(agents: / structure_prefixes:)
+                // トップレベルキーでセクションを切り替える(agents: / structure_prefixes: / landmark_prefixes:)
                 readingStructurePrefixes = trimmedLine.StartsWith("structure_prefixes:", StringComparison.Ordinal);
+                readingLandmarkPrefixes = trimmedLine.StartsWith("landmark_prefixes:", StringComparison.Ordinal);
                 currentDefinition = null;
                 continue;
             }
@@ -142,6 +168,19 @@ public static class AgentModelConfig
                     if (!string.IsNullOrEmpty(prefix))
                     {
                         root.structure_prefixes.Add(prefix);
+                    }
+                }
+                continue;
+            }
+
+            if (readingLandmarkPrefixes)
+            {
+                if (trimmedLine.StartsWith("-", StringComparison.Ordinal))
+                {
+                    var prefix = TrimQuotes(trimmedLine[1..].Trim());
+                    if (!string.IsNullOrEmpty(prefix))
+                    {
+                        root.landmark_prefixes.Add(prefix);
                     }
                 }
                 continue;
@@ -252,6 +291,7 @@ public static class AgentModelConfig
     {
         public Dictionary<string, AgentModelDefinition> agents;
         public List<string> structure_prefixes;
+        public List<string> landmark_prefixes;
     }
 
     [Serializable]

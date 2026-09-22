@@ -182,12 +182,26 @@ public static class BuildingMeshUtils
         return renderer.sharedMaterials;
     }
 
+    /// <summary>
+    /// 1階あたりの高さ(m)を返す。解決順はパーツ prefix と同じく「名所 → バリアント」で、
+    /// 観光名所(landmark > 0)は landmark_master の階高を優先する。
+    /// バックエンドも建物高さを名所行の階高で確定するため、ここを揃えないと
+    /// 3Dの高さ・カリング半径・炎エフェクトの高さがデータ上の高さとズレる。
+    /// </summary>
     public static float GetFloorHeight(BuildingSummary buildingData)
     {
-        // MasterDataStoreから1階あたりの高さを取得
         float floorHeight = LocalConstants.FLOOR_HEIGHT;
         if (MasterDataStore.Instance != null && MasterDataStore.Instance.IsInitialized)
         {
+            if (buildingData.landmark > 0)
+            {
+                var landmarkMaster = MasterDataStore.Instance.GetLandmarkMaster(buildingData.landmark);
+                if (landmarkMaster != null && landmarkMaster.height_per_floor.HasValue)
+                {
+                    return landmarkMaster.height_per_floor.Value;
+                }
+            }
+
             var agentMaster = MasterDataStore.Instance.GetAgentMaster(buildingData.variant);
             if (agentMaster != null && agentMaster.height_per_floor.HasValue)
             {
@@ -544,10 +558,19 @@ public static class BuildingMeshUtils
     /// (a{variant}s{structure} / b{bd_type}s{structure})があればそれを優先し、無ければ従来どおり
     /// a{variant} → b{bd_type} へ落ちる。構造の差は木造の板壁 / RC の打放しのようにマテリアルや
     /// 壁パーツの差し替えで表現し、ジオメトリの生成方式(model_type)は変えない。
-    /// 解決順: a{v}s{s} → a{v} → b{bd}s{s} → b{bd}
+    /// 解決順: landmark-{model_prefix} → a{v}s{s} → a{v} → b{bd}s{s} → b{bd}
+    ///
+    /// 観光名所(landmark > 0)が先頭なのは、名所が一点物でありながら用途バリアントを
+    /// 1つ(観光名所)しか持たないため、a{variant} では名所同士を区別できないからである。
     /// </summary>
     private static string DeterminePrefix(BuildingSummary buildingData)
     {
+        string landmarkPrefix = DetermineLandmarkPrefix(buildingData.landmark);
+        if (landmarkPrefix != null)
+        {
+            return landmarkPrefix;
+        }
+
         int structure = buildingData.structure;
         string variantPrefix = $"a{buildingData.variant}";
         if (structure > 0 && AgentModelConfig.HasStructurePrefix($"{variantPrefix}s{structure}"))
@@ -565,6 +588,28 @@ public static class BuildingMeshUtils
             return $"b{bdType}s{structure}";
         }
         return $"b{bdType}";
+    }
+
+    /// <summary>
+    /// 観光名所のパーツフォルダ名(landmark-{model_prefix})を返す。名所でない場合、
+    /// マスターから model_prefix を解決できない場合、実在フォルダが無い場合は null。
+    /// 実在判定は agent_model_config.yaml の landmark_prefixes による(構造つきフォルダと同じ方式)。
+    /// </summary>
+    private static string DetermineLandmarkPrefix(int landmark)
+    {
+        if (landmark <= 0 || MasterDataStore.Instance == null || !MasterDataStore.Instance.IsInitialized)
+        {
+            return null;
+        }
+
+        string modelPrefix = MasterDataStore.Instance.GetLandmarkModelPrefix(landmark);
+        if (string.IsNullOrEmpty(modelPrefix))
+        {
+            return null;
+        }
+
+        string prefix = $"landmark-{modelPrefix}";
+        return AgentModelConfig.HasLandmarkPrefix(prefix) ? prefix : null;
     }
 
     private static bool DetermineIsPrebuilt(BuildingSummary buildingData)

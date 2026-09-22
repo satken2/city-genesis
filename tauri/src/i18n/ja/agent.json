@@ -41,7 +41,9 @@
       "edit": "編集",
       "startConstruction": "着工",
       "stopConstruction": "保留",
-      "cancelAbandon": "放棄を解除"
+      "cancelAbandon": "放棄を解除",
+      "explode": "爆破",
+      "explodeConfirm": "この建物を事故に見せかけて爆破しますか？\n建物は即座に倒壊し、中に居た住民と従業員は死亡します。市民感情は大きく悪化し、この操作は取り消せません。"
     },
     "pendingWarning": "この建物は計画中です。着工を指示してください。",
     "alerts": {

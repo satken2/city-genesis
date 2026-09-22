@@ -61,6 +61,8 @@ export type AgentData = {
   variant: number;
   /** 構造種別(structures マスターのID)。0=構造の区別なし。建物以外は未設定 */
   structure?: number;
+  /** 観光名所の種別(landmarks マスターのID)。0=観光名所ではない */
+  landmark?: number;
   status: number;
   /** 現在のステータスになった理由(REASON_*)。0(REASON_NONE)は通常遷移 */
   status_reason?: number;
@@ -452,6 +454,31 @@ export type AgentMasterEntry = {
   // 選択できる構造種別(structures マスターのID一覧、昇順)。未設定・空は構造の区別を持たない
   // バリアント(農地・変電所など。建物の structure は常に 0)。
   structures?: number[];
+  // シナリオ制作(テンプレートモード)でのみ設置できるバリアント。通常プレイの建設パネルには出さない。
+  template_only?: boolean;
+};
+
+/**
+ * 観光名所マスター (landmarks)
+ * 東京タワーのような一点物の観光施設を、バリアントを増やさずに表す直交軸。
+ * 経済主体としては agent_variant(=観光名所バリアント)1つに集約し、
+ * どの名所かをこのIDで切り替える。受入能力は延床から決まるため、ここには持たせない。
+ */
+export type LandmarkMasterEntry = {
+  display_name: string;
+  description?: string;
+  /** この名所が属する経済主体バリアント(agents マスターのID) */
+  agent_variant: number;
+  /** Unity のパーツフォルダ名に使う識別子(landmark-{model_prefix}) */
+  model_prefix: string;
+  /** 敷地の固定寸法(m)。名所ごとに決まっており、プレイヤーは変更できない */
+  width: number;
+  depth: number;
+  /** 論理階数と階高(m)。延床=底面積×階数が受入能力を決める */
+  floors: number;
+  height_per_floor: number;
+  /** 建設費乗数(同じ延床の一般建物の何倍か) */
+  cost_multiplier: number;
 };
 
 /**
@@ -779,6 +806,7 @@ export type MasterData = {
   agents: Record<number, AgentMasterEntry>;
   subbuildings: Record<number, SubBuildingMasterEntry>;
   structures: Record<number, StructureMasterEntry>;
+  landmarks: Record<number, LandmarkMasterEntry>;
   products: Record<number, ProductMasterEntry>;
   paths: Record<number, PathMasterEntry>;
   transit: Record<number, TransitMasterEntry>;

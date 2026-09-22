@@ -93,6 +93,8 @@ export type AgentSummary = {
   variant: number;
   /** 建物の構造種別（structure_master のID。0=構造の区別なし） */
   structure: number;
+  /** 観光名所の種別（landmark_master のID。0=観光名所ではない） */
+  landmark: number;
   /** 建物底面ポリゴンの座標列 [[x, z], ...] */
   polygon?: any[];
   /** 中心点座標 [x, z] */
@@ -142,6 +144,8 @@ export type AgentData = {
   variant: number;
   /** 建物の構造種別（structure_master のID。0=構造の区別なし） */
   structure: number;
+  /** 観光名所の種別（landmark_master のID。0=観光名所ではない） */
+  landmark: number;
   /** ステータス（計画中・建設中・稼働中など。STATUS_*） */
   status: number;
   /** ステータス遷移理由 */

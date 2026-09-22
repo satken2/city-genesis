@@ -16,6 +16,7 @@ import {
   TYPE_TRADE,
 } from "../../constants";
 import { sendSessionReload } from "../../utils/ipc";
+import { fetchApi } from "../../utils/api";
 import purchaseIcon from "../../assets/images/purchase.png";
 import bulldozeIcon from "../../assets/images/bulldoze.png";
 import pauseIcon from "../../assets/images/ui/pause.png";
@@ -30,6 +31,30 @@ async function openBuildingEdit(agentId: number) {
     windowType: "building_construction",
     params: { extra: { editAgentId: agentId } },
   });
+}
+
+/**
+ * 爆破ボタンのアイコン(導火線付きの爆弾)。
+ * 他の操作アイコンと違い外部素材ではなく自前のSVGで描く(素材のクレジット表記を
+ * 増やさないため)。塗りは currentColor なのでボタン側の文字色に追従する。
+ */
+function BombIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="10.5" cy="15.5" r="6.5" fill="currentColor" />
+      <path
+        d="M14.8 10.8 C16.2 9.4 17 8.4 17.6 7.4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+      <path
+        d="M19.5 1.5 L20.4 4.1 L23 5 L20.4 5.9 L19.5 8.5 L18.6 5.9 L16 5 L18.6 4.1 Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
 }
 
 type AgentOperationPanelProps = {
@@ -121,6 +146,25 @@ export function AgentOperationPanel({
     await handleAction("PATCH", { under_maintenance: true });
   }
 
+  // 民間の建物を事故に見せかけて爆破する。専用エンドポイント（/explode）を叩くと
+  // エポック実行を待たずその場で STATUS_COLLAPSED へ移り、廃墟として残る。
+  // 中に居た住民・従業員は次のエポック実行で事故死として確定し、都市スコアが下がる。
+  // 取り返しがつかないうえ誤操作の代償が大きいので、実行前に必ず確認を取る。
+  async function handleExplode() {
+    if (!window.confirm(t("agent.action.explodeConfirm"))) return;
+    setLoading(true);
+    try {
+      await fetchApi(`${base}/api/v1/agents/${agent.agent_id}/explode`, {
+        method: "POST",
+      });
+      onActionPerformed();
+    } catch (err) {
+      console.error("Explode failed:", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   // 倒壊した建物をその場で再建する。専用エンドポイント（/reconstruct）を叩くと
   // STATUS_CONSTRUCTING へ遷移し、以降は通常の建設と同じく建設サービス財を消費して
   // 工事が進み、完了で STATUS_ACTIVE・新品耐久度に戻る。
@@ -185,6 +229,14 @@ export function AgentOperationPanel({
   const canRepair =
     agent.public_facility && !agent.under_maintenance;
 
+  // 爆破は民間の稼働中建物だけを対象にする。公共施設と輸出入拠点は市政府が自前で
+  // 取り壊せるため事故を装う意味がなく、計画中・建設中・廃墟には倒壊させる構造物がない。
+  const canExplode =
+    !agent.public_facility &&
+    agent.is_bd &&
+    agent.type !== TYPE_TRADE &&
+    (agent.status === STATUS_ACTIVE || agent.status === STATUS_PAUSED);
+
   // 廃墟(倒壊・焼失)は修繕ではなく「再建」の対象となる。市政府所有の公共施設に限る。
   const isCollapsed = agent.status === STATUS_COLLAPSED;
   const canReconstruct = agent.public_facility && agent.is_bd && isCollapsed;
@@ -247,6 +299,19 @@ export function AgentOperationPanel({
           onClick={() => void handleRepair()}
         >
           <img src={repairIcon} alt={t("agent.action.repair")} />
+        </button>
+      )}
+      {/* 非合法な取り壊し。買収・解体の手順を踏まずに建物を廃墟にできるが、
+          中に居た市民が事故死して市民感情が大きく悪化する。 */}
+      {canExplode && (
+        <button
+          className="operation-btn operation-btn--danger"
+          type="button"
+          title={t("agent.action.explode")}
+          disabled={loading}
+          onClick={() => void handleExplode()}
+        >
+          <BombIcon />
         </button>
       )}
     </div>

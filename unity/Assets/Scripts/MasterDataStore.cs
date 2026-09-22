@@ -142,6 +142,34 @@ public class MasterDataStore : MonoBehaviour
 		public Dictionary<int, SubBuildingMasterItem> subbuildings;
 	}
 
+	/// <summary>
+	/// 観光名所マスター(landmark_master)の1件分。
+	/// 観光名所は経済主体バリアント1070の1つだけを共有し、どの名所かをIDで切り替える。
+	/// Unity側は model_prefix(パーツフォルダ landmark-{model_prefix} の解決)に加え、
+	/// width / depth / floors(直接配置のゴースト寸法と階数)と height_per_floor(階高)を
+	/// agent_master より優先して使う。これらはバックエンドが強制する値なので、
+	/// Unity側も同じ値から始めないとプレビューと確定結果がズレる。cost_multiplier はUI専用。
+	/// </summary>
+	[Serializable]
+	public class LandmarkMasterItem
+	{
+		public string display_name;
+		public string description;
+		public int? agent_variant;
+		public string model_prefix;
+		public float? width;             // 敷地の固定幅(m)
+		public float? depth;             // 敷地の固定奥行(m)
+		public int? floors;
+		public float? height_per_floor;
+		public float? cost_multiplier;   // 同じ延床の一般建物に対する建設費の倍率
+	}
+
+	[Serializable]
+	public class LandmarksResponse
+	{
+		public Dictionary<int, LandmarkMasterItem> landmarks;
+	}
+
 	[Serializable]
 	public class BuildingTypesResponse
 	{
@@ -192,6 +220,7 @@ public class MasterDataStore : MonoBehaviour
 	private Dictionary<string, ProductItem> productMasterByKey = new Dictionary<string, ProductItem>();
 	private Dictionary<int, AgentMasterItem> agentMasterById = new Dictionary<int, AgentMasterItem>();
 	private Dictionary<int, SubBuildingMasterItem> subBuildingMasterById = new Dictionary<int, SubBuildingMasterItem>();
+	private Dictionary<int, LandmarkMasterItem> landmarkMasterById = new Dictionary<int, LandmarkMasterItem>();
 	private Dictionary<int, PathMasterItem> pathMasterById = new Dictionary<int, PathMasterItem>();
 	private Dictionary<int, TransitMasterItem> transitMasterById = new Dictionary<int, TransitMasterItem>();
 	private Dictionary<int, PathTypeItem> pathTypesById = new Dictionary<int, PathTypeItem>();
@@ -249,6 +278,7 @@ public class MasterDataStore : MonoBehaviour
 		var pathTypesReq = UnityWebRequest.Get($"{ApiClient.BASE_URL}/master/path_types");
 		var agentsReq = UnityWebRequest.Get($"{ApiClient.BASE_URL}/master/agents");
 		var subBuildingsReq = UnityWebRequest.Get($"{ApiClient.BASE_URL}/master/subbuildings");
+		var landmarksReq = UnityWebRequest.Get($"{ApiClient.BASE_URL}/master/landmarks");
 		var buildingTypesReq = UnityWebRequest.Get($"{ApiClient.BASE_URL}/master/bd_types");
 		var parcelTypesReq = UnityWebRequest.Get($"{ApiClient.BASE_URL}/master/parcel_types");
 		var agentTypesReq = UnityWebRequest.Get($"{ApiClient.BASE_URL}/master/agent_types");
@@ -259,6 +289,7 @@ public class MasterDataStore : MonoBehaviour
 		var opPathTypes = pathTypesReq.SendWebRequest();
 		var opAgents = agentsReq.SendWebRequest();
 		var opSubBuildings = subBuildingsReq.SendWebRequest();
+		var opLandmarks = landmarksReq.SendWebRequest();
 		var opBuildingTypes = buildingTypesReq.SendWebRequest();
 		var opParcelTypes = parcelTypesReq.SendWebRequest();
 		var opAgentTypes = agentTypesReq.SendWebRequest();
@@ -270,6 +301,7 @@ public class MasterDataStore : MonoBehaviour
 		yield return opPathTypes;
 		yield return opAgents;
 		yield return opSubBuildings;
+		yield return opLandmarks;
 		yield return opBuildingTypes;
 		yield return opParcelTypes;
 		yield return opAgentTypes;
@@ -388,6 +420,25 @@ public class MasterDataStore : MonoBehaviour
 			Debug.LogError($"MasterDataStore: Failed to load subbuildings master: {subBuildingsReq.error}");
 		}
 
+		// Landmarks (観光名所マスター)
+		if (landmarksReq.result == UnityWebRequest.Result.Success)
+		{
+			try
+			{
+				var resp = JsonConvert.DeserializeObject<LandmarksResponse>(landmarksReq.downloadHandler.text);
+				landmarkMasterById = resp?.landmarks ?? new Dictionary<int, LandmarkMasterItem>();
+				Debug.Log($"MasterDataStore: Landmark master loaded ({landmarkMasterById.Count})");
+			}
+			catch (Exception e)
+			{
+				Debug.LogError($"MasterDataStore: Failed to parse landmarks master: {e.Message}");
+			}
+		}
+		else
+		{
+			Debug.LogError($"MasterDataStore: Failed to load landmarks master: {landmarksReq.error}");
+		}
+
 		// Building types
 		if (buildingTypesReq.result == UnityWebRequest.Result.Success)
 		{
@@ -452,6 +503,7 @@ public class MasterDataStore : MonoBehaviour
 			pathTypesReq.result == UnityWebRequest.Result.Success &&
 			agentsReq.result == UnityWebRequest.Result.Success &&
 			subBuildingsReq.result == UnityWebRequest.Result.Success &&
+			landmarksReq.result == UnityWebRequest.Result.Success &&
 			buildingTypesReq.result == UnityWebRequest.Result.Success &&
 			parcelTypesReq.result == UnityWebRequest.Result.Success &&
 			agentTypesReq.result == UnityWebRequest.Result.Success;
@@ -486,6 +538,30 @@ public class MasterDataStore : MonoBehaviour
 		}
 		result.Sort((a, b) => a.Key.CompareTo(b.Key));
 		return result;
+	}
+
+	/// <summary>
+	/// 観光名所の定義を返す(未定義なら null)。
+	/// </summary>
+	public LandmarkMasterItem GetLandmarkMaster(int landmarkId)
+	{
+		landmarkMasterById.TryGetValue(landmarkId, out var item);
+		return item;
+	}
+
+	public IReadOnlyDictionary<int, LandmarkMasterItem> GetLandmarkMasterDictionary()
+	{
+		return landmarkMasterById;
+	}
+
+	/// <summary>
+	/// 観光名所のパーツフォルダ名に使う model_prefix を返す(未定義なら null)。
+	/// BuildingMeshUtils.DeterminePrefix が landmark-{model_prefix} の組み立てに使う。
+	/// </summary>
+	public string GetLandmarkModelPrefix(int landmarkId)
+	{
+		var item = GetLandmarkMaster(landmarkId);
+		return string.IsNullOrEmpty(item?.model_prefix) ? null : item.model_prefix;
 	}
 
 	public PathMasterItem GetPathMaster(int pathVariant)
