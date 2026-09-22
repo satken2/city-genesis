@@ -85,7 +85,7 @@ F8は描画数、生成予算、フレームp95/p99、キャッシュ推定量�
 
 ## 地形高さの取得
 
-`Utils.GetGroundHeight`（`HeightmapTextureManager.GetTerrainHeight` も委譲）を使う。ロード済みTerrainを正とし、未ロードでは現在標高の全域overviewを参照する。同一XZだけのフレームキャッシュで、タイル差し替え時は `Utils.InvalidateHeightCache()` が必要。全域CPU高さ配列は保持しない。
+`Utils.GetGroundHeight` を使う(別名のラッパーは置かない。同じ処理に複数の名前があると読み手が別物だと誤認する)。ロード済みTerrainを正とし、未ロードでは現在標高の全域overviewを参照する。同一XZだけのフレームキャッシュで、タイル差し替え時は `Utils.InvalidateHeightCache()` が必要。全域CPU高さ配列は保持しない。
 
 ## オブジェクトの命名規則とタグ(変更禁止級の規約)
 

@@ -6,7 +6,7 @@ using UnityEngine;
 public static class FarPlatformPath
 {
     public static bool Handles(PathSummary path) => path != null &&
-        (path.path_variant == 451 || path.path_variant == 461 || path.path_variant == 462 || path.path_variant == 502 || path.path_variant == 602);
+        (path.path_variant == 451 || path.path_variant == 461 || path.path_variant == 462 || path.path_variant == 502 || path.path_variant == Constants.PATH_VARIANT_ROPEWAY_STATION);
 
     public static void GenerateInto(GameObject root, PathSummary path, List<Vector3> points)
     {
@@ -19,7 +19,7 @@ public static class FarPlatformPath
     {
         if (points == null || points.Count < 2) return;
         var builder = new Builder(root, variant, points);
-        if (variant == 602) builder.Ropeway();
+        if (variant == Constants.PATH_VARIANT_ROPEWAY_STATION) builder.Ropeway();
         else
         {
             if (variant == 502) builder.Box("PATH_CONCRETE", -.4f, .4f, -1.08f, .12f);

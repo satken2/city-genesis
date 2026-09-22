@@ -116,7 +116,7 @@ public sealed class PedestrianManager : MonoBehaviour
         float dt = Time.deltaTime;
         if (dt <= 0) return;
         Vector3 center = cameraCellChecker != null ? cameraCellChecker.CurrentWorldPosition : (Camera.main != null ? Camera.main.transform.position : Vector3.zero);
-        if (hasCenter && XZDistanceSquared(center, lastCenter) > renderRadius * renderRadius) ClearPedestrians();
+        if (hasCenter && Utils.XZDistanceSquared(center, lastCenter) > renderRadius * renderRadius) ClearPedestrians();
         lastCenter = center; hasCenter = true;
         scanTimer -= dt;
         if (scanTimer <= 0)
@@ -513,7 +513,7 @@ public sealed class PedestrianManager : MonoBehaviour
             if (!p.Entering)
             {
                 p.Sample(out Vector3 position, out _);
-                if (XZDistanceSquared(position, center) > radius * radius) Despawn(i);
+                if (Utils.XZDistanceSquared(position, center) > radius * radius) Despawn(i);
             }
         }
     }
@@ -639,7 +639,6 @@ public sealed class PedestrianManager : MonoBehaviour
     private static float Traffic(PathSummary p)
         => p.path_traffic != null && p.path_traffic.TryGetValue(Constants.VEHICLE_PEDESTRIAN.ToString(), out float value)
             && !float.IsNaN(value) && !float.IsInfinity(value) ? Mathf.Max(0, value) : 0;
-    private static float XZDistanceSquared(Vector3 a, Vector3 b) => (a.x - b.x) * (a.x - b.x) + (a.z - b.z) * (a.z - b.z);
 
     private void OnGUI()
     {

@@ -505,7 +505,7 @@ public static class ModularBodyBuilder
     /// </summary>
     private static Vector3 GetTerrainConformingVertex(Vector2 point, Vector3 centerPointWorld, float baseGround)
     {
-        float h = HeightmapTextureManager.GetTerrainHeight(new Vector3(point.x + centerPointWorld.x, 1000f, point.y + centerPointWorld.z));
+        float h = Utils.GetGroundHeight(new Vector3(point.x + centerPointWorld.x, 1000f, point.y + centerPointWorld.z));
         return new Vector3(point.x, h - baseGround + GROUND_OFFSET, point.y);
     }
 
@@ -521,7 +521,7 @@ public static class ModularBodyBuilder
         for (int i = 0; i < vertices.Length; i++)
         {
             Vector3 worldPos = vertices[i] + centerPointWorld;
-            float terrainY = HeightmapTextureManager.GetTerrainHeight(new Vector3(worldPos.x, 1000f, worldPos.z));
+            float terrainY = Utils.GetGroundHeight(new Vector3(worldPos.x, 1000f, worldPos.z));
             vertices[i].y = terrainY + vertices[i].y - centerPointWorld.y;
         }
         mesh.vertices = vertices;
@@ -643,7 +643,7 @@ public static class ModularBodyBuilder
                 float centerX = gx + stepX * 0.5f;
                 float centerZ = gz + stepZ * 0.5f;
 
-                if (!IsPointInPolygon2D(new Vector2(centerX, centerZ), polygon))
+                if (!PolygonUtils.Contains(polygon, new Vector2(centerX, centerZ)))
                 {
                     continue;
                 }
@@ -705,25 +705,6 @@ public static class ModularBodyBuilder
         }
 
         UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, () => $"[MBB] タイル: {tileCount}個配置 ({prefix}/{suffix}/tile)");
-    }
-
-    /// <summary>
-    /// 2D点が多角形の内部にあるかを判定する（ray casting algorithm）。
-    /// </summary>
-    private static bool IsPointInPolygon2D(Vector2 point, Vector2[] polygon)
-    {
-        bool inside = false;
-        int j = polygon.Length - 1;
-        for (int i = 0; i < polygon.Length; i++)
-        {
-            if (((polygon[i].y > point.y) != (polygon[j].y > point.y)) &&
-                (point.x < (polygon[j].x - polygon[i].x) * (point.y - polygon[i].y) / (polygon[j].y - polygon[i].y) + polygon[i].x))
-            {
-                inside = !inside;
-            }
-            j = i;
-        }
-        return inside;
     }
 
     /// <summary>

@@ -239,7 +239,7 @@ public class WaterSurfaceManager : MonoBehaviour
         if (ring.Count < 3) return;
 
         // 耳切りは CCW 入力を前提とするため、CCW に正規化する(x=X, y=Z の2Dとして符号付き面積で判定)。
-        if (SignedArea(ring) < 0f) ring.Reverse();
+        if (PolygonUtils.SignedArea(ring) < 0f) ring.Reverse();
 
         Vector2[] poly = ring.ToArray();
         List<int> localTris = BuildingMeshBuilder.TriangulateOrFan(poly);
@@ -257,20 +257,6 @@ public class WaterSurfaceManager : MonoBehaviour
             triangles.Add(baseIndex + localTris[i + 2]);
             triangles.Add(baseIndex + localTris[i + 1]);
         }
-    }
-
-    /// <summary>2Dリング(x=X, y=Z)の符号付き面積。正=CCW。</summary>
-    private static float SignedArea(List<Vector2> ring)
-    {
-        float area = 0f;
-        int n = ring.Count;
-        for (int i = 0; i < n; i++)
-        {
-            Vector2 a = ring[i];
-            Vector2 b = ring[(i + 1) % n];
-            area += a.x * b.y - b.x * a.y;
-        }
-        return area * 0.5f;
     }
 
     /// <summary>
@@ -306,32 +292,18 @@ public class WaterSurfaceManager : MonoBehaviour
     private static (List<Vector2>, List<List<Vector2>>)? ParseSinglePolygon(JToken rings)
     {
         if (!(rings is JArray ringArray) || ringArray.Count == 0) return null;
-        List<Vector2> exterior = ParseRing(ringArray[0]);
+        List<Vector2> exterior = GeneratedModelUtils.ParseRing(ringArray[0]);
         if (exterior == null || exterior.Count < 3) return null;
 
         var holes = new List<List<Vector2>>();
         for (int i = 1; i < ringArray.Count; i++)
         {
-            List<Vector2> hole = ParseRing(ringArray[i]);
+            List<Vector2> hole = GeneratedModelUtils.ParseRing(ringArray[i]);
             if (hole != null && hole.Count >= 3) holes.Add(hole);
         }
         return (exterior, holes);
     }
 
-    /// <summary>[[x, z], [x, z], ...] の点配列を Vector2(x=X, y=Z) のリングに変換する。</summary>
-    private static List<Vector2> ParseRing(JToken ring)
-    {
-        if (!(ring is JArray arr)) return null;
-        var pts = new List<Vector2>(arr.Count);
-        foreach (JToken p in arr)
-        {
-            if (p is JArray pa && pa.Count >= 2)
-            {
-                pts.Add(new Vector2((float)pa[0], (float)pa[1]));
-            }
-        }
-        return pts;
-    }
 
     // === API レスポンス型 ===
 

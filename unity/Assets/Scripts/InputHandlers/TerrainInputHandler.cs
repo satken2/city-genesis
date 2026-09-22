@@ -139,7 +139,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
     public void onClick(int mode)
     {
         Vector3 clickPosition = new Vector3(InputHandler.Instance.posX, 0, InputHandler.Instance.posZ);
-        clickPosition.y = GetTerrainHeight(clickPosition);
+        clickPosition.y = Utils.GetGroundHeight(clickPosition);
         // 道路/鉄道建設モードは RoadPlanManager が自前の吸着半径(snapThreshold)とバリアント
         // フィルタで一度だけ吸着する。ここで共通吸着(インスタンス既定半径・フィルタなし)を
         // 掛けると二重吸着になり、RoadPlanManager 側の半径設定が一切効かなくなる。
@@ -191,7 +191,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
                     // ホバーと同じく、グリッド吸着・グローバルフラグに依存しない専用吸着を使う。
                     // clickPosition は冒頭で通常の ApplySnapping を通っているため、生の地形座標から再吸着する。
                     Vector3 raw = new Vector3(InputHandler.Instance.posX, 0, InputHandler.Instance.posZ);
-                    raw.y = GetTerrainHeight(raw);
+                    raw.y = Utils.GetGroundHeight(raw);
                     GridSetManager.Instance.OnTerrainClicked(ApplySnappingForGridSet(raw));
                 }
                 break;
@@ -255,7 +255,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
     public void onRightClick(int mode)
     {
         Vector3 clickPosition = new Vector3(InputHandler.Instance.posX, 0, InputHandler.Instance.posZ);
-        clickPosition.y = GetTerrainHeight(clickPosition);
+        clickPosition.y = Utils.GetGroundHeight(clickPosition);
         // 道路/鉄道建設モードは RoadPlanManager が自前の吸着半径で吸着するため共通吸着はしない
         // (onClick と同じ理由。二重吸着で RoadPlanManager 側の半径が効かなくなるのを防ぐ)。
         if (mode != InputMode.MODE_ROAD_CONSTRUCTION)
@@ -347,7 +347,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
     public void onHover(int mode)
     {
         Vector3 basePosition = new Vector3(InputHandler.Instance.posX, 0, InputHandler.Instance.posZ);
-        basePosition.y = GetTerrainHeight(basePosition);
+        basePosition.y = Utils.GetGroundHeight(basePosition);
 
         // 接続点編集モードでは吸着を適用しない。ノード吸着(半径10m)が有効なままだと、
         // ドラッグ中の端子ノードが「自分自身の移動前のキャッシュ位置」(nodeGridはPATCH完了まで
@@ -580,12 +580,6 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
             Destroy(currentMarker);
             currentMarker = null;
         }
-    }
-
-    private float GetTerrainHeight(Vector3 worldPosition)
-    {
-        // Utils.GetGroundHeightを使用して、TerrainManagerのタイルからも高さを取得
-        return Utils.GetGroundHeight(worldPosition);
     }
 
     private void OnDestroy()

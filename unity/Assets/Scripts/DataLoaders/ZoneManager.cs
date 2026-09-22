@@ -79,9 +79,6 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
     private OverlayMeshRenderer overlayRenderer;
 
     /// <summary>
-    /// 枠線用マテリアルのインスタンス。地区編集モードの切替で _ZTest を差し替えるため保持する。
-    /// </summary>
-    private Material overlayLineMaterial;
 
     /// <summary>
     /// 地区編集モードで既存地区にホバーした際の半透明フィル描画用レンダラ。
@@ -140,7 +137,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
 
             float[][] poly = kvp.Value.GetPolygonArray();
             if (poly == null || poly.Length < 3) continue;
-            if (IsPointInPolygon(point, poly))
+            if (PolygonUtils.Contains(poly, point.x, point.y))
             {
                 return zoneId;
             }
@@ -159,27 +156,6 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
             return zone.name ?? "";
         }
         return "";
-    }
-
-    /// <summary>
-    /// 2Dの点が多角形の内部にあるかを判定する（ray casting algorithm）。
-    /// </summary>
-    private bool IsPointInPolygon(Vector2 point, float[][] polygon)
-    {
-        bool inside = false;
-        int j = polygon.Length - 1;
-        for (int i = 0; i < polygon.Length; i++)
-        {
-            Vector2 pi = new Vector2(polygon[i][0], polygon[i][1]);
-            Vector2 pj = new Vector2(polygon[j][0], polygon[j][1]);
-            if (((pi.y > point.y) != (pj.y > point.y)) &&
-                (point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x))
-            {
-                inside = !inside;
-            }
-            j = i;
-        }
-        return inside;
     }
 
     private void Awake()
@@ -413,26 +389,17 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
     {
         if (uiCanvasRoot != null) return;
 
-        uiCanvasRoot = new GameObject("ZoneUICanvas");
-        DontDestroyOnLoad(uiCanvasRoot);
-        uiCanvas = uiCanvasRoot.AddComponent<Canvas>();
-        uiCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        uiCanvas.sortingOrder = 60; // 3Dより前、モーダルより後ろ
+        uiCanvas = Utils.CreateOverlayCanvas("ZoneUICanvas", 60, persistent: true); // 3Dより前、モーダルより後ろ
+        uiCanvasRoot = uiCanvas.gameObject;
         uiCanvasRect = uiCanvas.GetComponent<RectTransform>();
-        uiCanvasRoot.AddComponent<CanvasScaler>();
-        uiCanvasRoot.AddComponent<GraphicRaycaster>();
     }
 
     private void EnsureOverlayRenderer()
     {
         if (overlayMeshObj != null) return;
 
-        overlayMeshObj = new GameObject("ZoneOverlayMesh");
-        DontDestroyOnLoad(overlayMeshObj);
-        overlayRenderer = overlayMeshObj.AddComponent<OverlayMeshRenderer>();
-        overlayLineMaterial = new Material(Shader.Find("Custom/OverlayLine"));
-        ApplyOutlineDepthTest();
-        overlayRenderer.Initialize(overlayLineMaterial);
+        overlayRenderer = OverlayMeshRenderer.Create("ZoneOverlayMesh", alwaysOnTop: editOutlineMode, persistent: true);
+        overlayMeshObj = overlayRenderer.gameObject;
     }
 
     /// <summary>
@@ -442,8 +409,8 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
     /// </summary>
     private void ApplyOutlineDepthTest()
     {
-        if (overlayLineMaterial == null) return;
-        overlayLineMaterial.SetFloat(
+        if (overlayRenderer == null) return;
+        overlayRenderer.Material.SetFloat(
             "_ZTest",
             (float)(editOutlineMode
                 ? UnityEngine.Rendering.CompareFunction.Always
@@ -476,19 +443,15 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
     }
 
     /// <summary>
-    /// ホバーフィル用のレンダラを生成する（枠線用とは別インスタンス・別マテリアル）。
-    /// マテリアルの _ZTest を Always(8) にして地形・建物に埋もれず常に手前に塗る。
+    /// ホバーフィル用のレンダラを生成する(枠線用とは別インスタンス・別マテリアル。
+    /// 枠線と違いモードに依らず常に手前に塗る)。
     /// </summary>
     private void EnsureHoverFillRenderer()
     {
         if (hoverFillMeshObj != null) return;
 
-        hoverFillMeshObj = new GameObject("ZoneHoverFillMesh");
-        DontDestroyOnLoad(hoverFillMeshObj);
-        hoverFillRenderer = hoverFillMeshObj.AddComponent<OverlayMeshRenderer>();
-        Material mat = new Material(Shader.Find("Custom/OverlayLine"));
-        mat.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
-        hoverFillRenderer.Initialize(mat);
+        hoverFillRenderer = OverlayMeshRenderer.Create("ZoneHoverFillMesh", alwaysOnTop: true, persistent: true);
+        hoverFillMeshObj = hoverFillRenderer.gameObject;
     }
 
     /// <summary>
@@ -839,15 +802,8 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         }
 
         // 符号付き面積で巻き方向を判定する。内向きの法線は巻き方向で左右が入れ替わる。
-        float area2 = 0f;
-        for (int i = 0; i < n; i++)
-        {
-            Vector2 a = src[i];
-            Vector2 b = src[(i + 1) % n];
-            area2 += a.x * b.y - b.x * a.y;
-        }
-        // 反時計回り(area2>0)なら、進行方向の左が内側。時計回りなら右が内側。
-        float inwardSign = area2 > 0f ? 1f : -1f;
+        // 反時計回り(面積が正)なら、進行方向の左が内側。時計回りなら右が内側。
+        float inwardSign = PolygonUtils.SignedArea(src) > 0f ? 1f : -1f;
 
         var result = new Vector2[n];
         for (int i = 0; i < n; i++)

@@ -421,13 +421,7 @@ public static class HouseRoofBuilder
         {
             Vector2 a = axisPoints[0];
             Vector2 b = axisPoints[1];
-            Vector2 ab = b - a;
-            float len = ab.magnitude;
-            if (len < 1e-5f) return a;
-
-            Vector2 dir = ab / len;
-            float t = Mathf.Clamp01(Vector2.Dot(basePoint - a, dir) / len);
-            return a + ab * t;
+            return PolylineUtils.ClosestPointOnSegment(basePoint, a, b);
         }
 
         Vector2 best = axisPoints[0];
@@ -437,13 +431,8 @@ public static class HouseRoofBuilder
         {
             Vector2 a = axisPoints[i];
             Vector2 b = axisPoints[i + 1];
-            Vector2 ab = b - a;
-            float len = ab.magnitude;
-            if (len < 1e-5f) continue;
-
-            Vector2 dir = ab / len;
-            float t = Mathf.Clamp01(Vector2.Dot(basePoint - a, dir) / len);
-            Vector2 proj = a + ab * t;
+            if ((b - a).sqrMagnitude < 1e-10f) continue;
+            Vector2 proj = PolylineUtils.ClosestPointOnSegment(basePoint, a, b);
             float d2 = (basePoint - proj).sqrMagnitude;
 
             if (d2 < bestDist2)

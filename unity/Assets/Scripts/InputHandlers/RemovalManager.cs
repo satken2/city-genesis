@@ -283,7 +283,7 @@ public class RemovalManager : MonoBehaviour
     private static Vector3 GroundPoint(Vector2 saved, Vector3 offset)
     {
         var p = new Vector3(saved.x, 0f, saved.y) + offset;
-        p.y = HeightmapTextureManager.GetTerrainHeight(p) + 0.3f;
+        p.y = Utils.GetGroundHeight(p) + 0.3f;
         return p;
     }
 
@@ -306,12 +306,9 @@ public class RemovalManager : MonoBehaviour
     private void EnsureOverlayRenderer()
     {
         if (_overlayObj != null) return;
-        _overlayObj = new GameObject("RemovalOverlayMesh");
-        _overlayRenderer = _overlayObj.AddComponent<OverlayMeshRenderer>();
-        var mat = new Material(Shader.Find("Custom/OverlayLine"));
         // 樹冠や建物に埋もれず常に手前に描く(他エディタのギズモと同じ)。
-        mat.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
-        _overlayRenderer.Initialize(mat);
+        _overlayRenderer = OverlayMeshRenderer.Create("RemovalOverlayMesh", alwaysOnTop: true);
+        _overlayObj = _overlayRenderer.gameObject;
     }
 
     // ======================================================================

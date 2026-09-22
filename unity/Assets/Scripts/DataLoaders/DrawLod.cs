@@ -160,10 +160,7 @@ public static class DrawLodEvaluator
         {
             Vector3 a = points[i];
             Vector3 b = points[i + 1];
-            Vector3 ab = b - a;
-            float len2 = ab.sqrMagnitude;
-            float t = len2 > 1e-6f ? Mathf.Clamp01(Vector3.Dot(camPos - a, ab) / len2) : 0f;
-            float d = Vector3.Distance(a + ab * t, camPos);
+            float d = Vector3.Distance(PolylineUtils.ClosestPointOnSegment(camPos, a, b), camPos);
             if (d < best) best = d;
         }
         return best;

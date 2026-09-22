@@ -11,7 +11,6 @@ public class BuildingEditControlMenu : MonoBehaviour
     private readonly List<CursorHudIcon> icons = new List<CursorHudIcon>();
     private readonly Sprite[] modeIcons = new Sprite[3];
     private OverlayMeshRenderer overlay;
-    private Material guideMaterial;
     private GUIStyle dimensionStyle;
     private Vector3 widthLabel, depthLabel;
     private bool guidesVisible;
@@ -19,9 +18,9 @@ public class BuildingEditControlMenu : MonoBehaviour
     public void Initialize(BuildingPlanManager value)
     {
         manager = value;
-        modeIcons[0] = Resources.Load<Sprite>("UIIcons/node-snap");
-        modeIcons[1] = Resources.Load<Sprite>("UIIcons/grid");
-        modeIcons[2] = Resources.Load<Sprite>("UIIcons/road-snap");
+        modeIcons[0] = Utils.LoadUIIcon("node-snap");
+        modeIcons[1] = Utils.LoadUIIcon("grid");
+        modeIcons[2] = Utils.LoadUIIcon("road-snap");
     }
 
     private string Label(int i) => manager.PlacementText(new[] { "parcel", "free", "roadside" }[i],
@@ -99,15 +98,8 @@ public class BuildingEditControlMenu : MonoBehaviour
             if (overlay != null) overlay.gameObject.SetActive(false);
             return;
         }
-        if (overlay == null)
-        {
-            var go = new GameObject("BuildingPlacementGuide");
-            // 頂点はワールド座標なので、編集用オブジェクトの変換を重ねない。
-            overlay = go.AddComponent<OverlayMeshRenderer>();
-            guideMaterial = new Material(Shader.Find("Custom/OverlayLine"));
-            guideMaterial.SetInt("_ZTest", (int)UnityEngine.Rendering.CompareFunction.Always);
-            overlay.Initialize(guideMaterial);
-        }
+        // 頂点はワールド座標なので、編集用オブジェクトの子にせず変換を重ねない。
+        if (overlay == null) overlay = OverlayMeshRenderer.Create("BuildingPlacementGuide", alwaysOnTop: true);
         overlay.gameObject.SetActive(true);
         overlay.BeginFrame();
         BuildingPlacementGeometry.Axes(manager.PlacementAngle, out var u, out var v);
@@ -181,11 +173,6 @@ public class BuildingEditControlMenu : MonoBehaviour
     private void OnDestroy()
     {
         ReleaseUi();
-        if (overlay != null)
-        {
-            Destroy(overlay.GetComponent<MeshFilter>().sharedMesh);
-            Destroy(overlay.gameObject);
-        }
-        if (guideMaterial != null) Destroy(guideMaterial);
+        if (overlay != null) Destroy(overlay.gameObject); // メッシュとマテリアルは OverlayMeshRenderer が解放する
     }
 }

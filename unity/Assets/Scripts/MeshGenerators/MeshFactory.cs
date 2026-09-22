@@ -109,11 +109,11 @@ public interface IPathMeshGenerator
 public static class PathMeshFactory
 {
     // 送電線は径間ごとのたるみと共有鉄塔を持つため、道路用の反復配置から分離する。
-    private static Dictionary<string, IPathMeshGenerator> variantGenerators 
-        = new Dictionary<string, IPathMeshGenerator>()
+    private static Dictionary<int, IPathMeshGenerator> variantGenerators
+        = new Dictionary<int, IPathMeshGenerator>()
         {
-            { "1101", new PowerLinePath() },
-            { "1102", new PowerLinePath() },
+            { Constants.PATH_VARIANT_GRID, new PowerLinePath() },
+            { 1102, new PowerLinePath() },
         };
 
     // model_type → 生成器のマッピング
@@ -130,7 +130,7 @@ public static class PathMeshFactory
         }
 
         // variant固有の生成器があれば最優先
-        if (variantGenerators.TryGetValue(pathData.path_variant.ToString(), out IPathMeshGenerator variantGen))
+        if (variantGenerators.TryGetValue(pathData.path_variant, out IPathMeshGenerator variantGen))
         {
             return variantGen.Generate(pathData, points, startSidewalkSetback, endSidewalkSetback);
         }
@@ -198,7 +198,7 @@ public static class PathMeshFactory
 
         for (int i = 0; i < pointCount; i++)
         {
-            Vector3 direction = ComputeSmoothedDirection(points, i);
+            Vector3 direction = PolylineUtils.SmoothedDirection(points, i);
             Vector3 binormal = Vector3.Cross(Vector3.up, direction);
             if (binormal.sqrMagnitude < 1e-6f)
             {
@@ -253,44 +253,6 @@ public static class PathMeshFactory
         mesh.RecalculateTangents();
 
         return mesh;
-    }
-
-    private static Vector3 ComputeSmoothedDirection(List<Vector3> points, int index)
-    {
-        Vector3 forward = Vector3.zero;
-        Vector3 backward = Vector3.zero;
-
-        if (index < points.Count - 1)
-        {
-            forward = points[index + 1] - points[index];
-        }
-
-        if (index > 0)
-        {
-            backward = points[index] - points[index - 1];
-        }
-
-        if (forward.sqrMagnitude < 1e-6f && backward.sqrMagnitude < 1e-6f)
-        {
-            return Vector3.forward;
-        }
-
-        Vector3 aggregate = Vector3.zero;
-        if (forward.sqrMagnitude >= 1e-6f)
-        {
-            aggregate += forward.normalized;
-        }
-        if (backward.sqrMagnitude >= 1e-6f)
-        {
-            aggregate += backward.normalized;
-        }
-
-        if (aggregate.sqrMagnitude < 1e-6f)
-        {
-            return forward.sqrMagnitude >= 1e-6f ? forward.normalized : backward.normalized;
-        }
-
-        return aggregate.normalized;
     }
 }
 

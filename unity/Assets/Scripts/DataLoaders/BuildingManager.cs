@@ -331,7 +331,7 @@ public class BuildingManager : BaseApiDataManager
         foreach (var item in deferredDetailBuildings)
         {
             float[] point = item.Value.data.centerPointArray;
-            if (point != null && point.Length >= 2 && !allBuildingCells.Contains(PositionToCell(new Vector3(point[0], 0f, point[1]))))
+            if (point != null && point.Length >= 2 && !allBuildingCells.Contains(TerrainManager.WorldToCell(new Vector3(point[0], 0f, point[1]))))
                 obsoleteRequests.Add(item.Key);
         }
         foreach (int id in obsoleteRequests) deferredDetailBuildings.Remove(id);
@@ -470,7 +470,7 @@ public class BuildingManager : BaseApiDataManager
                     ? new Vector3(cp[0], 0, cp[1])
                     : Vector3.zero;
 
-                Vector2Int buildingCell = PositionToCell(buildingPos);
+                Vector2Int buildingCell = TerrainManager.WorldToCell(buildingPos);
                 LodTier desiredTier = dynamicSet.Contains(buildingCell) ? LodTier.Dynamic : (nearSet.Contains(buildingCell) ? LodTier.Near : LodTier.Far);
 
                 bool needsRebuild = false;
@@ -512,7 +512,7 @@ public class BuildingManager : BaseApiDataManager
                     {
                         if (oldBuildingData.status != b.status)
                         {
-                            float groundHeight = HeightmapTextureManager.GetTerrainHeight(new Vector3(buildingPos.x, 1000f, buildingPos.z));
+                            float groundHeight = Utils.GetGroundHeight(new Vector3(buildingPos.x, 1000f, buildingPos.z));
                             Vector3 effectPos = new Vector3(buildingPos.x, groundHeight, buildingPos.z);
                             TriggerBuildingStatusEffect(effectPos, oldBuildingData.status, b.status);
                         }
@@ -699,7 +699,7 @@ public class BuildingManager : BaseApiDataManager
             {
                 if (buildingObjectsCache.TryGetValue(id, out GameObject obj) && obj != null)
                 {
-                    Vector2Int cell = PositionToCell(obj.transform.position);
+                    Vector2Int cell = TerrainManager.WorldToCell(obj.transform.position);
                     DrawLod currentDrawLod = DrawLodInfo.GetDrawLod(obj, DrawLod.Normal);
                     if (cellBuildingLod.TryGetValue(cell, out LodTier tier) && tier != LodTier.UltraFar && currentDrawLod != DrawLod.Far)
                     {
@@ -760,7 +760,7 @@ public class BuildingManager : BaseApiDataManager
     private bool IsDeferredCellReady(BuildingSummary data)
     {
         float[] point = data.centerPointArray;
-        return point == null || point.Length < 2 || loadedCells.Contains(PositionToCell(new Vector3(point[0], 0f, point[1])));
+        return point == null || point.Length < 2 || loadedCells.Contains(TerrainManager.WorldToCell(new Vector3(point[0], 0f, point[1])));
     }
 
     private bool HasPendingInitialDetails
@@ -838,7 +838,7 @@ public class BuildingManager : BaseApiDataManager
                 float[] reqCp = latest.centerPointArray;
                 if (reqCp != null && reqCp.Length >= 2)
                 {
-                    Vector2Int cell = PositionToCell(new Vector3(reqCp[0], 0f, reqCp[1]));
+                    Vector2Int cell = TerrainManager.WorldToCell(new Vector3(reqCp[0], 0f, reqCp[1]));
                     if (!loadedCells.Contains(cell))
                     {
                         deferredDetailBuildings.Remove(bestId);
@@ -1002,7 +1002,7 @@ public class BuildingManager : BaseApiDataManager
         {
             current = DrawLodInfo.GetDrawLod(existing, DrawLod.Normal);
         }
-        float groundY = HeightmapTextureManager.GetTerrainHeight(new Vector3(cp[0], 1000f, cp[1]));
+        float groundY = Utils.GetGroundHeight(new Vector3(cp[0], 1000f, cp[1]));
         float radius = GetBuildingBoundsRadius(data);
         float distance = Vector3.Distance(camPos, new Vector3(cp[0], groundY + radius * 0.5f, cp[1]));
         bool allowClose = closeBuildingIds.Contains(data.agent_id) || closeBuildingIds.Count < DrawLodConfig.MAX_CLOSE_BUILDINGS;
@@ -1114,7 +1114,7 @@ public class BuildingManager : BaseApiDataManager
             }
             else
             {
-                float groundHeight = HeightmapTextureManager.GetTerrainHeight(new Vector3(cx, 1000f, cz));
+                float groundHeight = Utils.GetGroundHeight(new Vector3(cx, 1000f, cz));
                 buildingBaseHeight = groundHeight + 0.01f;
             }
             buildingGO.transform.position = new Vector3(cx, buildingBaseHeight, cz);
@@ -1122,14 +1122,14 @@ public class BuildingManager : BaseApiDataManager
         else
         {
             Vector3 p = buildingGO.transform.position;
-            float groundHeight = HeightmapTextureManager.GetTerrainHeight(new Vector3(p.x, 1000f, p.z));
+            float groundHeight = Utils.GetGroundHeight(new Vector3(p.x, 1000f, p.z));
             buildingGO.transform.position = new Vector3(p.x, groundHeight + 0.01f, p.z);
         }
     }
 
     private void RegisterBuildingCell(int buildingId, Vector3 position)
     {
-        Vector2Int cell = PositionToCell(position);
+        Vector2Int cell = TerrainManager.WorldToCell(position);
         if (buildingCellById.TryGetValue(buildingId, out Vector2Int previousCell) && previousCell != cell)
         {
             RemoveBuildingFromCellLookup(buildingId, previousCell);
@@ -1306,7 +1306,7 @@ public class BuildingManager : BaseApiDataManager
             }
             else
             {
-                float groundHeight = HeightmapTextureManager.GetTerrainHeight(new Vector3(cx, 1000f, cz));
+                float groundHeight = Utils.GetGroundHeight(new Vector3(cx, 1000f, cz));
                 buildingBaseHeight = groundHeight + 0.01f;
             }
             buildingGO.transform.position = new Vector3(cx, buildingBaseHeight, cz);
@@ -1358,14 +1358,10 @@ public class BuildingManager : BaseApiDataManager
     public HashSet<int> QueryBuildingIdsInBounds(float minX, float minZ, float maxX, float maxZ)
     {
         var result = new HashSet<int>();
-        float cellSize = TerrainManager.CellSize;
-        int cx0 = Mathf.FloorToInt(minX / cellSize);
-        int cx1 = Mathf.FloorToInt(maxX / cellSize);
-        int cz0 = Mathf.FloorToInt(minZ / cellSize);
-        int cz1 = Mathf.FloorToInt(maxZ / cellSize);
-        for (int cx = cx0; cx <= cx1; cx++)
+        TerrainManager.WorldRectToCellRange(minX, minZ, maxX, maxZ, out Vector2Int minCell, out Vector2Int maxCell);
+        for (int cx = minCell.x; cx <= maxCell.x; cx++)
         {
-            for (int cz = cz0; cz <= cz1; cz++)
+            for (int cz = minCell.y; cz <= maxCell.y; cz++)
             {
                 if (buildingIdsByCell.TryGetValue(new Vector2Int(cx, cz), out HashSet<int> ids))
                 {
@@ -1416,7 +1412,7 @@ public class BuildingManager : BaseApiDataManager
             ConstructionAmbience.Unregister(ConstructionAmbience.Kind.Building, data.agent_id);
             return;
         }
-        float y = HeightmapTextureManager.GetTerrainHeight(new Vector3(cp[0], 1000f, cp[1]));
+        float y = Utils.GetGroundHeight(new Vector3(cp[0], 1000f, cp[1]));
         ConstructionAmbience.Register(ConstructionAmbience.Kind.Building, data.agent_id, new[] { new Vector3(cp[0], y, cp[1]) });
     }
 
@@ -1697,7 +1693,7 @@ public class BuildingManager : BaseApiDataManager
             }
             else
             {
-                float groundHeight = HeightmapTextureManager.GetTerrainHeight(new Vector3(cx, 1000f, cz));
+                float groundHeight = Utils.GetGroundHeight(new Vector3(cx, 1000f, cz));
                 buildingBaseHeight = groundHeight + 0.01f;
             }
             buildingGO.transform.position = new Vector3(cx, buildingBaseHeight, cz);
@@ -1839,7 +1835,7 @@ public class BuildingManager : BaseApiDataManager
     {
         float[] cp = buildingData.centerPointArray;
         if (cp == null || cp.Length < 2) return false;
-        Vector2Int cell = PositionToCell(new Vector3(cp[0], 0f, cp[1]));
+        Vector2Int cell = TerrainManager.WorldToCell(new Vector3(cp[0], 0f, cp[1]));
         return GetCellLodTier(cell) == LodTier.Dynamic;
     }
 

@@ -17,7 +17,7 @@ public static class DefaultBodyBuilder
         float buildingHeight = floors * floorHeight;
         Vector2[] normalizedFootprint = (Vector2[])footprint.Clone();
 
-        if (SignedArea(normalizedFootprint) < 0f)
+        if (PolygonUtils.SignedArea(normalizedFootprint) < 0f)
         {
             System.Array.Reverse(normalizedFootprint);
         }
@@ -102,16 +102,5 @@ public static class DefaultBodyBuilder
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
         return mesh;
-    }
-
-    private static float SignedArea(Vector2[] polygon)
-    {
-        float area = 0f;
-        for (int i = 0; i < polygon.Length; i++)
-        {
-            int j = (i + 1) % polygon.Length;
-            area += polygon[i].x * polygon[j].y - polygon[j].x * polygon[i].y;
-        }
-        return area * 0.5f;
     }
 }

@@ -92,12 +92,9 @@ public class PathTopologyEditManager : MonoBehaviour
     {
         if (overlayMeshObj != null) return;
 
-        overlayMeshObj = new GameObject("PathTopologyEditOverlayMesh");
-        overlayRenderer = overlayMeshObj.AddComponent<OverlayMeshRenderer>();
-        Material mat = new Material(Shader.Find("Custom/OverlayLine"));
         // 分割点マーカーは道路面や起伏に埋もれず常に手前に出す(RoadPlanManager のギズモと同じ)。
-        mat.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
-        overlayRenderer.Initialize(mat);
+        overlayRenderer = OverlayMeshRenderer.Create("PathTopologyEditOverlayMesh", alwaysOnTop: true);
+        overlayMeshObj = overlayRenderer.gameObject;
     }
 
     // =====================================================================
@@ -334,14 +331,7 @@ public class PathTopologyEditManager : MonoBehaviour
         {
             Vector3 a = polyline[i];
             Vector3 b = polyline[i + 1];
-            Vector2 ab = new Vector2(b.x - a.x, b.z - a.z);
-            float lenSqr = ab.sqrMagnitude;
-
-            float t = 0f;
-            if (lenSqr > 1e-6f)
-            {
-                t = Mathf.Clamp01(Vector2.Dot(new Vector2(p.x - a.x, p.z - a.z), ab) / lenSqr);
-            }
+            float t = PolylineUtils.ProjectOnSegmentXZ(p, a, b);
             Vector3 point = Vector3.Lerp(a, b, t);
 
             float dx = p.x - point.x;

@@ -49,7 +49,7 @@ public class CameraCellChecker : MonoBehaviour
         Vector3 centerPoint;
         if (!DriveMode.TryGetLoadCenter(out centerPoint) && !TryGetGroundHitPoint(out centerPoint)) centerPoint = gameCamera.transform.position;
         CurrentWorldPosition = centerPoint;
-        CurrentCellIndex = ConvertToCellIndex(centerPoint);
+        CurrentCellIndex = TerrainManager.WorldToCell(centerPoint);
         OnCellIndexChanged(CurrentCellIndex);
     }
 
@@ -78,16 +78,6 @@ public class CameraCellChecker : MonoBehaviour
 
         return false;
     }
-
-    private Vector2Int ConvertToCellIndex(Vector3 worldPosition)
-    {
-        // バックエンドの距離をそのままメートルとして扱う
-        float cellSizeInUnity = TerrainManager.CellSize;
-        int cellX = Mathf.FloorToInt(worldPosition.x / cellSizeInUnity);
-        int cellZ = Mathf.FloorToInt(worldPosition.z / cellSizeInUnity);
-        return new Vector2Int(cellX, cellZ);
-    }
-
 
     private void OnCellIndexChanged(Vector2Int newCellIndex)
     {

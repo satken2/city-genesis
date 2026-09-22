@@ -97,8 +97,8 @@ public class RoadOverlayHitDetector
             Vector2 s1 = cam.WorldToScreenPoint(p1World);
             Vector2 s2 = cam.WorldToScreenPoint(p2World);
 
-            float t;
-            float dist = PointToSegmentDistance(mouseScreen, s1, s2, out t);
+            float t = PolylineUtils.ProjectOnSegment(mouseScreen, s1, s2);
+            float dist = Vector2.Distance(mouseScreen, Vector2.Lerp(s1, s2, t));
             if (dist < edgeHitDistance)
             {
                 return new RoadOverlayHit { type = HitTargetType.Edge, index = i, edgeT = t };
@@ -106,24 +106,5 @@ public class RoadOverlayHitDetector
         }
 
         return RoadOverlayHit.None;
-    }
-
-    /// <summary>
-    /// 点から線分への最短距離とパラメータtを計算する。
-    /// </summary>
-    private float PointToSegmentDistance(Vector2 point, Vector2 segA, Vector2 segB, out float t)
-    {
-        Vector2 seg = segB - segA;
-        float lenSq = seg.sqrMagnitude;
-        if (lenSq < 0.0001f)
-        {
-            t = 0f;
-            return Vector2.Distance(point, segA);
-        }
-
-        t = Vector2.Dot(point - segA, seg) / lenSq;
-        t = Mathf.Clamp01(t);
-        Vector2 closest = segA + seg * t;
-        return Vector2.Distance(point, closest);
     }
 }

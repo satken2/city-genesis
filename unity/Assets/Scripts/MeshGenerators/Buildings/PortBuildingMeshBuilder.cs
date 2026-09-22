@@ -68,14 +68,14 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         float variant2 = Mathf.Clamp01(buildingData.visual_variant2);
 
         // center_point のワールド座標（バックエンド座標）と地形高さ。
-        // ModularBuildingMeshBuilder と同じ取得経路（HeightmapTextureManager.GetTerrainHeight）を使い、
+        // ModularBuildingMeshBuilder と同じ取得経路（Utils.GetGroundHeight）を使い、
         // BuildingManager が GameObject を配置する高さと基準を揃える。
         Vector3 centerPointWorld = Vector3.zero;
         if (buildingData.centerPointArray != null && buildingData.centerPointArray.Length >= 2)
         {
             float cx = buildingData.centerPointArray[0];
             float cz = buildingData.centerPointArray[1];
-            float cy = HeightmapTextureManager.GetTerrainHeight(new Vector3(cx, 1000f, cz));
+            float cy = Utils.GetGroundHeight(new Vector3(cx, 1000f, cz));
             centerPointWorld = new Vector3(cx, cy, cz);
         }
 
@@ -403,7 +403,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
             }
 
             Vector2[] quayFootprint = result.ToArray();
-            if (BuildingMeshUtils.SignedArea(quayFootprint) < 0f)
+            if (PolygonUtils.SignedArea(quayFootprint) < 0f)
             {
                 System.Array.Reverse(quayFootprint);
             }
@@ -468,7 +468,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         }
 
         Vector2[] p = (Vector2[])polygon.Clone();
-        if (BuildingMeshUtils.SignedArea(p) < 0f)
+        if (PolygonUtils.SignedArea(p) < 0f)
         {
             System.Array.Reverse(p);
         }
@@ -481,7 +481,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         {
             float wx = p[i].x + centerPointWorld.x;
             float wz = p[i].y + centerPointWorld.z;
-            float seabed = HeightmapTextureManager.GetTerrainHeight(new Vector3(wx, 1000f, wz));
+            float seabed = Utils.GetGroundHeight(new Vector3(wx, 1000f, wz));
             bottomY[i] = Mathf.Min(seabed - centerPointWorld.y, topLocalY - 0.05f);
         }
 

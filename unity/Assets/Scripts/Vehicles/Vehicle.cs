@@ -43,10 +43,9 @@ public sealed class VehiclePolyline
         float best = float.PositiveInfinity, result = 0;
         for (int i = 1; i < points.Length; i++)
         {
-            Vector3 delta = points[i] - points[i - 1]; delta.y = 0;
-            Vector3 offset = point - points[i - 1]; offset.y = 0;
-            float t = delta.sqrMagnitude > .00001f ? Mathf.Clamp01(Vector3.Dot(offset, delta) / delta.sqrMagnitude) : 0;
-            float error = (offset - delta * t).sqrMagnitude;
+            float t = PolylineUtils.ProjectOnSegmentXZ(point, points[i - 1], points[i]);
+            Vector3 closest = Vector3.Lerp(points[i - 1], points[i], t);
+            float error = new Vector2(point.x - closest.x, point.z - closest.z).sqrMagnitude;
             if (error < best) { best = error; result = distances[i - 1] + t * (distances[i] - distances[i - 1]); }
         }
         return result;
@@ -91,8 +90,8 @@ public sealed class VehiclePolyline
         var points = new Vector3[33];
         for (int i = 0; i < points.Length; i++)
         {
-            float t = (float)i / (points.Length - 1), u = 1 - t;
-            points[i] = u * u * u * p0 + 3 * u * u * t * (p0 + t0 * d) + 3 * u * t * t * (p1 - t1 * d) + t * t * t * p1;
+            float t = (float)i / (points.Length - 1);
+            points[i] = PolylineUtils.CubicBezierPoint(p0, p0 + t0 * d, p1 - t1 * d, p1, t);
         }
         return new VehiclePolyline(points);
     }

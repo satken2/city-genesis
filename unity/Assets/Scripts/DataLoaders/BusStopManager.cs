@@ -99,7 +99,7 @@ public sealed class BusStopManager : MonoBehaviour
                 for (int i = 0; i < matrices.Length; i++)
                 {
                     matrices[i] = placements[start + i] * part.local;
-                    var b = PropRenderModel.TransformBounds(part.mesh.bounds, matrices[i]);
+                    var b = Utils.TransformBounds(part.mesh.bounds, matrices[i]);
                     if (i == 0) batchBounds = b; else batchBounds.Encapsulate(b);
                 }
                 batches.Add(matrices); bounds.Add(batchBounds);
@@ -118,7 +118,7 @@ public sealed class BusStopManager : MonoBehaviour
             Vector3 delta = points[i] - points[i - 1];
             Vector3 flat = new Vector3(delta.x, 0, delta.z);
             if (flat.sqrMagnitude < .000001f) continue;
-            float t = Mathf.Clamp01(Vector3.Dot(stop - points[i - 1], flat) / flat.sqrMagnitude);
+            float t = PolylineUtils.ProjectOnSegmentXZ(stop, points[i - 1], points[i]);
             Vector3 candidate = Vector3.Lerp(points[i - 1], points[i], t);
             float distance = new Vector2(stop.x - candidate.x, stop.z - candidate.z).sqrMagnitude;
             if (distance >= best) continue;

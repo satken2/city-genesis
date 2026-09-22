@@ -7,6 +7,7 @@ public static class OpenSpaceLayout
 {
     public const float CellSize = 2.5f;
     const int MaxAxis = 128;
+    public const float BOUNDARY_TOLERANCE = 1e-3f; // 敷地の辺上に置いた点を内側と数えるための余裕(m)。QAテストも参照する
     public sealed class Surface
     {
         public string Material;
@@ -266,32 +267,20 @@ public static class OpenSpaceLayout
         return ((ab1>abTolerance && ab2<-abTolerance)||(ab2>abTolerance && ab1<-abTolerance))
             && ((cd1>cdTolerance && cd2<-cdTolerance)||(cd2>cdTolerance && cd1<-cdTolerance));
     }
-    public static bool ContainsPoint(Vector2[] polygon,Vector2 point)
-    {
-        bool inside=false;
-        for(int i=0,j=polygon.Length-1;i<polygon.Length;j=i++)
-        {
-            Vector2 a=polygon[j],b=polygon[i],ab=b-a;
-            float t=ab.sqrMagnitude>0?Mathf.Clamp01(Vector2.Dot(point-a,ab)/ab.sqrMagnitude):0;
-            if((point-a-ab*t).sqrMagnitude<1e-6f)return true;
-            if((a.y>point.y)!=(b.y>point.y) && point.x<(b.x-a.x)*(point.y-a.y)/(b.y-a.y)+a.x)inside=!inside;
-        }
-        return inside;
-    }
     public static bool ContainsPolygon(Vector2[] polygon,Vector2[] candidate)
     {
         for(int i=0;i<candidate.Length;i++)
         {
             Vector2 a=candidate[i],b=candidate[(i+1)%candidate.Length];
-            if(!ContainsPoint(polygon,a) || !ContainsPoint(polygon,(a+b)*.5f))return false;
+            if(!PolygonUtils.Contains(polygon,a,BOUNDARY_TOLERANCE) || !PolygonUtils.Contains(polygon,(a+b)*.5f,BOUNDARY_TOLERANCE))return false;
             for(int j=0;j<polygon.Length;j++) if(Intersects(a,b,polygon[j],polygon[(j+1)%polygon.Length]))return false;
         }
         return true;
     }
     static bool PolygonsOverlap(Vector2[] a,Vector2[] b)
     {
-        foreach(var p in a)if(ContainsPoint(b,p))return true;
-        foreach(var p in b)if(ContainsPoint(a,p))return true;
+        foreach(var p in a)if(PolygonUtils.Contains(b,p,BOUNDARY_TOLERANCE))return true;
+        foreach(var p in b)if(PolygonUtils.Contains(a,p,BOUNDARY_TOLERANCE))return true;
         for(int i=0;i<a.Length;i++)for(int j=0;j<b.Length;j++)if(Intersects(a[i],a[(i+1)%a.Length],b[j],b[(j+1)%b.Length]))return true;
         return false;
     }

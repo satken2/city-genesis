@@ -1243,7 +1243,7 @@ public class PathManager : BaseApiDataManager
         Vector3 endPos = GetPathPointPosition(endPointList);
         Vector3 centerPos = (startPos + endPos) * 0.5f;
 
-        float groundHeight = HeightmapTextureManager.GetTerrainHeight(new Vector3(centerPos.x, 1000f, centerPos.z));
+        float groundHeight = Utils.GetGroundHeight(new Vector3(centerPos.x, 1000f, centerPos.z));
         centerPos.y = groundHeight;
 
         // 建設中 (STATUS_CONSTRUCTING) から アクティブ (STATUS_ACTIVE) または 完了 (STATUS_COMPLETED) への完成遷移
@@ -1633,7 +1633,7 @@ public class PathManager : BaseApiDataManager
 
             if (obj == null) continue;
 
-            Vector2Int nodeCell = PositionToCell(obj.transform.position);
+            Vector2Int nodeCell = TerrainManager.WorldToCell(obj.transform.position);
             if (cellSet.Contains(nodeCell) && !receivedNodeIds.Contains(nodeId))
             {
                 nodesToRemove.Add(nodeId);
@@ -1747,9 +1747,9 @@ public class PathManager : BaseApiDataManager
         // 地形追従しないパス（桁橋・非追従指定など）は端点も地形へ吸着させない。
         bool farVariantFollows = GetPathFollowTerrain(path);
         if (farVariantFollows && startRelY == farBaseHeight)
-            startPos.y = HeightmapTextureManager.GetTerrainHeight(new Vector3(startPos.x, 1000f, startPos.z)) + RoadPartHeights.ROAD_SPLINE_OFFSET;
+            startPos.y = Utils.GetGroundHeight(new Vector3(startPos.x, 1000f, startPos.z)) + RoadPartHeights.ROAD_SPLINE_OFFSET;
         if (farVariantFollows && endRelY == farBaseHeight)
-            endPos.y = HeightmapTextureManager.GetTerrainHeight(new Vector3(endPos.x, 1000f, endPos.z)) + RoadPartHeights.ROAD_SPLINE_OFFSET;
+            endPos.y = Utils.GetGroundHeight(new Vector3(endPos.x, 1000f, endPos.z)) + RoadPartHeights.ROAD_SPLINE_OFFSET;
 
         List<Vector3> points = new List<Vector3> { startPos, endPos };
         ApplyStationGrade(path, points);
@@ -2006,7 +2006,7 @@ public class PathManager : BaseApiDataManager
         Vector3 iconPos;
         if (cp != null && cp.Length >= 2)
         {
-            float groundHeight = HeightmapTextureManager.GetTerrainHeight(new Vector3(cp[0], 1000f, cp[1]));
+            float groundHeight = Utils.GetGroundHeight(new Vector3(cp[0], 1000f, cp[1]));
             iconPos = new Vector3(cp[0], groundHeight + plannedPathIconYOffset, cp[1]);
         }
         else
@@ -2018,7 +2018,7 @@ public class PathManager : BaseApiDataManager
                 Vector3 start = new Vector3(startList[0], 0, startList[1]);
                 Vector3 end = new Vector3(endList[0], 0, endList[1]);
                 Vector3 mid = (start + end) * 0.5f;
-                float groundHeight = HeightmapTextureManager.GetTerrainHeight(new Vector3(mid.x, 1000f, mid.z));
+                float groundHeight = Utils.GetGroundHeight(new Vector3(mid.x, 1000f, mid.z));
                 iconPos = new Vector3(mid.x, groundHeight + plannedPathIconYOffset, mid.z);
             }
             else
@@ -2823,7 +2823,7 @@ public class PathManager : BaseApiDataManager
 
                         if (followTerrain)
                         {
-                            float groundHeight = HeightmapTextureManager.GetTerrainHeight(new Vector3(x, 1000f, z));
+                            float groundHeight = Utils.GetGroundHeight(new Vector3(x, 1000f, z));
                             result.Add(new Vector3(x, groundHeight + RoadPartHeights.ROAD_SPLINE_OFFSET, z));
                         }
                         else
@@ -2901,9 +2901,9 @@ public class PathManager : BaseApiDataManager
         {
             var a = profile[i - 1]; var b = profile[i];
             Vector2 start = new Vector2(a[0], a[2]);
-            Vector2 delta = new Vector2(b[0] - a[0], b[2] - a[2]);
-            float t = delta.sqrMagnitude > 1e-10f ? Mathf.Clamp01(Vector2.Dot(new Vector2(point.x, point.z) - start, delta) / delta.sqrMagnitude) : 0f;
-            float distance = (new Vector2(point.x, point.z) - start - delta * t).sqrMagnitude;
+            Vector2 end = new Vector2(b[0], b[2]);
+            float t = PolylineUtils.ProjectOnSegment(new Vector2(point.x, point.z), start, end);
+            float distance = (new Vector2(point.x, point.z) - Vector2.Lerp(start, end, t)).sqrMagnitude;
             if (distance < best) { best = distance; height = Mathf.Lerp(a[1], b[1], t); }
         }
         return height;
@@ -3002,7 +3002,7 @@ public class PathManager : BaseApiDataManager
                     float wpRelY = (wp.position != null && wp.position.Length >= 3) ? wp.position[1] : 0f;
                     if (variantFollows && wpRelY == baseHeight)
                     {
-                        float groundHeight = HeightmapTextureManager.GetTerrainHeight(new Vector3(wpPos.x, 1000f, wpPos.z));
+                        float groundHeight = Utils.GetGroundHeight(new Vector3(wpPos.x, 1000f, wpPos.z));
                         wpPos.y = groundHeight + RoadPartHeights.ROAD_SPLINE_OFFSET;
                     }
 
@@ -3014,7 +3014,7 @@ public class PathManager : BaseApiDataManager
                         float nextRelY = (waypointList[i + 1].position != null && waypointList[i + 1].position.Length >= 3) ? waypointList[i + 1].position[1] : 0f;
                         if (variantFollows && nextRelY == baseHeight)
                         {
-                            float groundHeight = HeightmapTextureManager.GetTerrainHeight(new Vector3(nextPos.x, 1000f, nextPos.z));
+                            float groundHeight = Utils.GetGroundHeight(new Vector3(nextPos.x, 1000f, nextPos.z));
                             nextPos.y = groundHeight + RoadPartHeights.ROAD_SPLINE_OFFSET;
                         }
                     }
@@ -3211,23 +3211,8 @@ public class PathManager : BaseApiDataManager
         if (anchor == null || anchor.Count < 2) return null;
         float anchorX = anchor[0];
         float anchorZ = anchor[anchor.Count - 1];
-        float groundY = HeightmapTextureManager.GetTerrainHeight(new Vector3(anchorX, 1000f, anchorZ));
+        float groundY = Utils.GetGroundHeight(new Vector3(anchorX, 1000f, anchorZ));
         return new Vector3(control[0], groundY + control[1] - baseHeight, control[2]);
-    }
-
-    /// <summary>
-    /// 三次ベジエ曲線のパラメータ t における点を計算する。
-    /// B(t) = (1-t)^3 * P0 + 3(1-t)^2*t * P1 + 3(1-t)*t^2 * P2 + t^3 * P3
-    /// </summary>
-    private static Vector3 SampleCubicBezier(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
-    {
-        float u = 1f - t;
-        float u2 = u * u;
-        float u3 = u2 * u;
-        float t2 = t * t;
-        float t3 = t2 * t;
-
-        return u3 * p0 + 3f * u2 * t * p1 + 3f * u * t2 * p2 + t3 * p3;
     }
 
     /// <summary>
@@ -3249,11 +3234,11 @@ public class PathManager : BaseApiDataManager
         for (int s = 1; s <= samples; s++)
         {
             float t = (float)s / (samples + 1);
-            Vector3 sampled = SampleCubicBezier(p0, p1, p2, p3, t);
+            Vector3 sampled = PolylineUtils.CubicBezierPoint(p0, p1, p2, p3, t);
 
             if (followTerrain)
             {
-                float groundHeight = HeightmapTextureManager.GetTerrainHeight(new Vector3(sampled.x, 1000f, sampled.z));
+                float groundHeight = Utils.GetGroundHeight(new Vector3(sampled.x, 1000f, sampled.z));
                 result.Add(new Vector3(sampled.x, groundHeight + RoadPartHeights.ROAD_SPLINE_OFFSET, sampled.z));
             }
             else
@@ -4418,13 +4403,13 @@ public class PathManager : BaseApiDataManager
         if (point.Count >= 3)
         {
             Vector3 scaledPos = new Vector3(point[0], point[1], point[2]);
-                float groundHeight = HeightmapTextureManager.GetTerrainHeight(new Vector3(scaledPos.x, 1000f, scaledPos.z));
+                float groundHeight = Utils.GetGroundHeight(new Vector3(scaledPos.x, 1000f, scaledPos.z));
                 return new Vector3(scaledPos.x, groundHeight + scaledPos.y + RoadPartHeights.ROAD_SPLINE_OFFSET, scaledPos.z);
         }
         else
         {
             Vector3 pos = new Vector3(point[0], 1000.0f, point[1]);
-            pos.y = HeightmapTextureManager.GetTerrainHeight(pos) + RoadPartHeights.ROAD_SPLINE_OFFSET;
+            pos.y = Utils.GetGroundHeight(pos) + RoadPartHeights.ROAD_SPLINE_OFFSET;
             return pos;
         }
     }
@@ -4554,7 +4539,7 @@ public class NodeData
         }
         else
         {
-            float groundHeight = HeightmapTextureManager.GetTerrainHeight(new Vector3(position[0], 1000f, position[1]));
+            float groundHeight = Utils.GetGroundHeight(new Vector3(position[0], 1000f, position[1]));
             return new Vector3(position[0], groundHeight, position[1]);
         }
     }
@@ -4572,7 +4557,7 @@ public class NodeData
     {
         if (position.Length >= 3)
         {
-            float groundHeight = HeightmapTextureManager.GetTerrainHeight(new Vector3(position[0], 1000f, position[2]));
+            float groundHeight = Utils.GetGroundHeight(new Vector3(position[0], 1000f, position[2]));
             return new Vector3(position[0], groundHeight + position[1], position[2]);
         }
         else
@@ -4607,7 +4592,7 @@ public class PathWaypoint
         }
         else
         {
-            float groundHeight = HeightmapTextureManager.GetTerrainHeight(new Vector3(position[0], 1000f, position[1]));
+            float groundHeight = Utils.GetGroundHeight(new Vector3(position[0], 1000f, position[1]));
             return new Vector3(position[0], groundHeight, position[1]);
         }
     }
@@ -4625,7 +4610,7 @@ public class PathWaypoint
     {
         if (position.Length >= 3)
         {
-            float groundHeight = HeightmapTextureManager.GetTerrainHeight(new Vector3(position[0], 1000f, position[2]));
+            float groundHeight = Utils.GetGroundHeight(new Vector3(position[0], 1000f, position[2]));
             return new Vector3(position[0], groundHeight + position[1], position[2]);
         }
         else
@@ -4645,7 +4630,7 @@ public class PathWaypoint
     {
         float x = position[0];
         float z = position.Length >= 3 ? position[2] : position[1];
-        return HeightmapTextureManager.GetTerrainHeight(new Vector3(x, 1000f, z));
+        return Utils.GetGroundHeight(new Vector3(x, 1000f, z));
     }
 
     /// <summary>

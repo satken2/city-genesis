@@ -121,7 +121,7 @@ public static class CoastlineStore
             {
                 Vector2 a = ring[i];
                 Vector2 b = ring[(i + 1) % count];
-                if (SqDistanceToSegment(x, z, a, b) <= thresholdSq)
+                if (PolylineUtils.DistanceToSegmentSq(new Vector2(x, z), a, b) <= thresholdSq)
                 {
                     return true;
                 }
@@ -150,28 +150,13 @@ public static class CoastlineStore
             return false;
         }
 
+        // 複数リングの偶奇合成: 外周で内側、その中の穴(湖)で再び外側になる。
+        Vector2 point = new Vector2(x, z);
         bool inside = false;
         for (int r = 0; r < rings.Count; r++)
         {
-            Vector2[] ring = rings[r];
-            int count = ring.Length;
-            if (count < 3)
-            {
-                continue;
-            }
-            // Vector2 の x=ワールドX、y=ワールドZ。+X 方向へのレイで辺との交差を数える。
-            int j = count - 1;
-            for (int i = 0; i < count; i++)
-            {
-                Vector2 vi = ring[i];
-                Vector2 vj = ring[j];
-                if (((vi.y > z) != (vj.y > z)) &&
-                    (x < (vj.x - vi.x) * (z - vi.y) / (vj.y - vi.y) + vi.x))
-                {
-                    inside = !inside;
-                }
-                j = i;
-            }
+            if (rings[r].Length < 3) continue;
+            if (PolygonUtils.Contains(rings[r], point)) inside = !inside;
         }
         return inside;
     }
@@ -206,7 +191,7 @@ public static class CoastlineStore
             {
                 Vector2 a = ring[i];
                 Vector2 b = ring[(i + 1) % count];
-                float dSq = SqDistanceToSegment(x, z, a, b);
+                float dSq = PolylineUtils.DistanceToSegmentSq(new Vector2(x, z), a, b);
                 if (dSq < minDistSq)
                 {
                     minDistSq = dSq;
@@ -244,22 +229,5 @@ public static class CoastlineStore
             }
         }
         return any;
-    }
-
-    /// <summary>点(px, pz)から線分 a-b までの距離の2乗を返す。</summary>
-    private static float SqDistanceToSegment(float px, float pz, Vector2 a, Vector2 b)
-    {
-        float abx = b.x - a.x;
-        float abz = b.y - a.y;
-        float apx = px - a.x;
-        float apz = pz - a.y;
-        float abLenSq = abx * abx + abz * abz;
-        float t = abLenSq > 1e-9f ? (apx * abx + apz * abz) / abLenSq : 0f;
-        t = Mathf.Clamp01(t);
-        float cx = a.x + t * abx;
-        float cz = a.y + t * abz;
-        float dx = px - cx;
-        float dz = pz - cz;
-        return dx * dx + dz * dz;
     }
 }

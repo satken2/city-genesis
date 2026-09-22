@@ -419,7 +419,7 @@ public class PropManager : BaseApiDataManager
         var p = new Vector3(position.x, 0, position.y); p.y = Height(p) + heightOffset;
         return new Candidate { type = type, position = p, rotation = rotation, scale = scale, heightOffset = heightOffset, lod = DrawLod.Far };
     }
-    private float Height(Vector3 saved) => HeightmapTextureManager.GetTerrainHeight(saved + Offset);
+    private float Height(Vector3 saved) => Utils.GetGroundHeight(saved + Offset);
     private Rect ChunkRect(Vector2Int key) => new Rect(key.x * ChunkSize, key.y * ChunkSize, ChunkSize, ChunkSize);
     private Vector2Int Key(Vector2 p) => new Vector2Int(Mathf.FloorToInt(p.x / ChunkSize), Mathf.FloorToInt(p.y / ChunkSize));
     private IEnumerable<Vector2Int> KeysIn(Rect bounds, Dictionary<Vector2Int, Spec> specs)
@@ -452,7 +452,7 @@ public class PropManager : BaseApiDataManager
     {
         Vector3 saved = world - Offset;
         var key = Key(new Vector2(saved.x, saved.z));
-        var cell = PositionToCell(saved);
+        var cell = TerrainManager.WorldToCell(saved);
         if (!obstacleReadyCells.Contains(cell)) return false;
         return !obstacleGrid.TryGetValue(key, out var obstacles) || !Blocked(new Vector2(saved.x,saved.z), Model(type).Clearance(scale), obstacles);
     }
@@ -486,7 +486,7 @@ public class PropManager : BaseApiDataManager
                     var position = new Vector3(sample.position.x, 0, sample.position.y); position.y = Height(position);
                     var cam = Camera.main;
                     if (cam != null && Vector3.Distance(position + offset, cam.transform.position) >= DrawLodConfig.PROP_HIDDEN_ENTER_DISTANCE) continue;
-                    var bounds = PropRenderModel.TransformBounds(patch.model.bounds,
+                    var bounds = Utils.TransformBounds(patch.model.bounds,
                         Matrix4x4.TRS(position + offset, Quaternion.Euler(0,sample.rotation,0),Vector3.one*sample.scale));
                     if (!bounds.IntersectRay(ray, out float distance) || distance >= best) continue;
                     best = distance; found = true;
@@ -504,7 +504,7 @@ public class PropManager : BaseApiDataManager
                 if (!p.visible || (PropRenderPolicy.NearOnly(p.type) && p.lod == DrawLod.Hidden)) continue;
                 var model = Model(p.type);
                 if (model.normal.Count == 0) continue;
-                var bounds = PropRenderModel.TransformBounds(model.bounds,
+                var bounds = Utils.TransformBounds(model.bounds,
                     Matrix4x4.TRS(p.position + offset, Quaternion.Euler(0, p.rotation, 0), Vector3.one * p.scale));
                 if (!bounds.IntersectRay(ray, out float distance) || distance >= best) continue;
                 best = distance;
@@ -719,7 +719,7 @@ public class PropManager : BaseApiDataManager
                     for (int i = 0; i < count; i++)
                     {
                         matrices[i] = group.Value[start+i] * part.local;
-                        var b = PropRenderModel.TransformBounds(part.mesh.bounds, matrices[i]);
+                        var b = Utils.TransformBounds(part.mesh.bounds, matrices[i]);
                         if (i == 0) bounds = b; else bounds.Encapsulate(b);
                     }
                     next.Add(new DrawBatch { part = part, matrices = matrices, bounds = bounds, shadows = !PropRenderPolicy.NearOnly(group.Key.Item1) && group.Key.Item2 != DrawLod.Far && Vector3.Distance(bounds.center, cameraPosition) < 150f });

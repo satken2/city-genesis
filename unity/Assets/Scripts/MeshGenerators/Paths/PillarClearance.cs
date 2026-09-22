@@ -25,7 +25,7 @@ public static class PillarClearance
         {
             if (filter.sharedMesh == null) continue;
             var matrix = prefab.transform.worldToLocalMatrix * filter.transform.localToWorldMatrix;
-            var bounds = TransformBounds(filter.sharedMesh.bounds, matrix);
+            var bounds = Utils.TransformBounds(filter.sharedMesh.bounds, matrix);
             if (result.HasValue)
             {
                 var combined = result.Value;
@@ -34,16 +34,6 @@ public static class PillarClearance
             }
             else result = bounds;
         }
-        return result;
-    }
-
-    public static Bounds TransformBounds(Bounds bounds, Matrix4x4 matrix)
-    {
-        var result = new Bounds(matrix.MultiplyPoint3x4(bounds.center), Vector3.zero);
-        for (int x = -1; x <= 1; x += 2)
-        for (int y = -1; y <= 1; y += 2)
-        for (int z = -1; z <= 1; z += 2)
-            result.Encapsulate(matrix.MultiplyPoint3x4(bounds.center + Vector3.Scale(bounds.extents, new Vector3(x, y, z))));
         return result;
     }
 

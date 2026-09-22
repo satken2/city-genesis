@@ -42,10 +42,8 @@ public class ParcelPlanRenderer : MonoBehaviour
     {
         if (overlayMeshObj != null) return;
 
-        overlayMeshObj = new GameObject("ParcelPlanOverlayMesh");
-        overlayRenderer = overlayMeshObj.AddComponent<OverlayMeshRenderer>();
-        Material mat = new Material(Shader.Find("Custom/OverlayLine"));
-        overlayRenderer.Initialize(mat);
+        overlayRenderer = OverlayMeshRenderer.Create("ParcelPlanOverlayMesh", alwaysOnTop: false);
+        overlayMeshObj = overlayRenderer.gameObject;
     }
 
     private void Update()

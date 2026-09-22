@@ -176,7 +176,7 @@ public sealed class AmbientVehicleManager : MonoBehaviour
         {
             if ((v.position - camera).sqrMagnitude > DrawDistance * DrawDistance) continue;
             var matrix = Matrix4x4.TRS(v.position + offset, Quaternion.LookRotation(v.Direction, Vector3.up), Vector3.one);
-            var bounds = PropRenderModel.TransformBounds(v.model.bounds, matrix);
+            var bounds = Utils.TransformBounds(v.model.bounds, matrix);
             foreach (var part in v.model.normal)
             {
                 var rp = new RenderParams(part.material)
@@ -396,18 +396,12 @@ public sealed class AmbientVehicleManager : MonoBehaviour
     /// </summary>
     private bool IsOpenSea(Vector3 saved)
     {
+        Vector2 point = new Vector2(saved.x, saved.z);
         int depth = 0;
         foreach (var ring in CoastlineStore.Rings)
         {
             if (ring.Length < 3) continue;
-            bool inside = false;
-            for (int i = 0, j = ring.Length - 1; i < ring.Length; j = i++)
-            {
-                Vector2 a = ring[i], b = ring[j];
-                if ((a.y > saved.z) != (b.y > saved.z) && saved.x < (b.x - a.x) * (saved.z - a.y) / (b.y - a.y) + a.x)
-                    inside = !inside;
-            }
-            if (inside) depth++;
+            if (PolygonUtils.Contains(ring, point)) depth++;
         }
         if (depth != 0) return false;
         float halfW = terrain.GetMapWidth() * .5f, halfH = terrain.GetMapHeight() * .5f;

@@ -44,12 +44,8 @@ public class TransitOverlayManager : MonoBehaviour
     }
     private OverlayMeshRenderer CreateRenderer(string name, int queue)
     {
-        var go = new GameObject(name); go.transform.SetParent(transform);
-        var renderer = go.AddComponent<OverlayMeshRenderer>();
-        var material = new Material(Shader.Find("Custom/OverlayLine"));
-        material.SetInt("_ZTest", (int)UnityEngine.Rendering.CompareFunction.Always);
-        material.renderQueue = queue;
-        renderer.Initialize(material);
+        var renderer = OverlayMeshRenderer.Create(name, alwaysOnTop: true, parent: transform);
+        renderer.Material.renderQueue = queue;
         return renderer;
     }
     public void SetVisibleVariants(HashSet<int> variants)
@@ -174,9 +170,8 @@ public class TransitOverlayManager : MonoBehaviour
         for (int i = 1; i < points.Count; i++)
         {
             Vector2 a = new Vector2(points[i-1].x, points[i-1].z), b = new Vector2(points[i].x, points[i].z);
-            Vector2 d = b - a;
-            float t = d.sqrMagnitude > 0 ? Mathf.Clamp01(Vector2.Dot(target-a, d)/d.sqrMagnitude) : 0;
-            float error = (a+d*t-target).sqrMagnitude;
+            float t = PolylineUtils.ProjectOnSegment(target, a, b);
+            float error = (Vector2.Lerp(a, b, t) - target).sqrMagnitude;
             if (error < best) { best = error; position = Vector3.Lerp(points[i-1], points[i], t) + Vector3.up * .3f; }
         }
         return !float.IsPositiveInfinity(best);
@@ -215,9 +210,8 @@ public class TransitOverlayManager : MonoBehaviour
         {
             Vector3 a = cam.WorldToScreenPoint(s.a), b = cam.WorldToScreenPoint(s.b);
             if (a.z <= cam.nearClipPlane || b.z <= cam.nearClipPlane) continue;
-            Vector2 d = (Vector2)(b-a);
-            float t = d.sqrMagnitude > 0 ? Mathf.Clamp01(Vector2.Dot(mouse-(Vector2)a,d)/d.sqrMagnitude) : 0;
-            if ((mouse-((Vector2)a+d*t)).sqrMagnitude <= 64 && !found.Contains(s.id)) found.Add(s.id);
+            float t = PolylineUtils.ProjectOnSegment(mouse, (Vector2)a, (Vector2)b);
+            if ((mouse - Vector2.Lerp((Vector2)a, (Vector2)b, t)).sqrMagnitude <= 64 && !found.Contains(s.id)) found.Add(s.id);
         }
         return found;
     }

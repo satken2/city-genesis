@@ -85,15 +85,9 @@ public class HighlightManager
         // 敷設中はローカル判定(RoadPlanManager)が横断付近だけの箱を重ねて描く。
         foreach (string id in riverIds)
             RiverStore.AddOccupancyBox(triangles, RiverStore.FindById(id), null, 0f);
+        // 占有箱は深度テストあり(建物や地形に自然に隠れる立体表現)。
         if (occupancyOverlay == null && triangles.Count > 0)
-        {
-            var go = new GameObject("InterferenceOccupancy");
-            occupancyOverlay = go.AddComponent<OverlayMeshRenderer>();
-            var material = new Material(Shader.Find("Custom/OverlayLine"));
-            material.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.LessEqual);
-            occupancyOverlay.Initialize(material);
-            Object.Destroy(material);
-        }
+            occupancyOverlay = OverlayMeshRenderer.Create("InterferenceOccupancy", alwaysOnTop: false);
         if (occupancyOverlay != null)
         {
             occupancyOverlay.BeginFrame();

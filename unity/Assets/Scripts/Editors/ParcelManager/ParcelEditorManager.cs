@@ -228,11 +228,8 @@ public class ParcelEditorManager : MonoBehaviour
     {
         if (anchorOverlayObj != null) return;
 
-        anchorOverlayObj = new GameObject("ParcelPathAnchorOverlay");
-        anchorOverlayRenderer = anchorOverlayObj.AddComponent<OverlayMeshRenderer>();
-        Material mat = new Material(Shader.Find("Custom/OverlayLine"));
-        mat.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
-        anchorOverlayRenderer.Initialize(mat);
+        anchorOverlayRenderer = OverlayMeshRenderer.Create("ParcelPathAnchorOverlay", alwaysOnTop: true);
+        anchorOverlayObj = anchorOverlayRenderer.gameObject;
     }
 
     #region 作成モードの制御
@@ -528,14 +525,7 @@ public class ParcelEditorManager : MonoBehaviour
         {
             Vector3 a = polyline[i];
             Vector3 b = polyline[i + 1];
-            Vector2 ab = new Vector2(b.x - a.x, b.z - a.z);
-            float lenSqr = ab.sqrMagnitude;
-
-            float t = 0f;
-            if (lenSqr > 1e-6f)
-            {
-                t = Mathf.Clamp01(Vector2.Dot(new Vector2(point.x - a.x, point.z - a.z), ab) / lenSqr);
-            }
+            float t = PolylineUtils.ProjectOnSegmentXZ(point, a, b);
             Vector3 candidate = Vector3.Lerp(a, b, t);
 
             float dx = point.x - candidate.x;

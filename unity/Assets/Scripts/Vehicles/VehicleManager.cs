@@ -112,7 +112,7 @@ public partial class VehicleManager : MonoBehaviour
         if (dt <= 0) return;
         Vector3 center = cameraCellChecker != null ? cameraCellChecker.CurrentWorldPosition : (Camera.main != null ? Camera.main.transform.position : Vector3.zero);
         if (DriveMode.TryGetLoadCenter(out var rideCenter)) center = rideCenter;
-        bool jumped = hasCenter && XZDistanceSquared(center, lastCenter) > renderRadius * renderRadius;
+        bool jumped = hasCenter && Utils.XZDistanceSquared(center, lastCenter) > renderRadius * renderRadius;
         if (jumped || lastTrafficHand != CityInfoStore.TrafficHand) ClearVehicles();
         lastTrafficHand = CityInfoStore.TrafficHand;
         lastCenter = center;
@@ -224,8 +224,8 @@ public partial class VehicleManager : MonoBehaviour
             shapeHash = unchecked(shapeHash * 31 + road.data.end_node_id);
             overall ^= shapeHash;
             float range = renderRadius + despawnMargin;
-            if (XZDistanceSquared(road.line.points[0], center) > range * range) overall ^= road.data.path_id * 17;
-            if (XZDistanceSquared(road.line.points[road.line.points.Length - 1], center) > range * range) overall ^= road.data.path_id * 37;
+            if (Utils.XZDistanceSquared(road.line.points[0], center) > range * range) overall ^= road.data.path_id * 17;
+            if (Utils.XZDistanceSquared(road.line.points[road.line.points.Length - 1], center) > range * range) overall ^= road.data.path_id * 37;
             bool allowed = FrontageAllowed(road.data);
             if (allowed) overall ^= road.data.path_id * 79;
             if (allowed && parcelManager != null && buildingManager != null)
@@ -272,7 +272,7 @@ public partial class VehicleManager : MonoBehaviour
             list.Add(state);
             reverse[state] = new List<long>();
             Vector3 end = road.line.points[forward ? road.line.points.Length - 1 : 0];
-            bool sink = XZDistanceSquared(end, center) > radius * radius;
+            bool sink = Utils.XZDistanceSquared(end, center) > radius * radius;
             foreach (var entry in next[road.data.path_id]) if (entry.forward == forward) sink = true;
             if (sink) { ranks[state] = 0; queue.Enqueue(state); }
         }
@@ -590,7 +590,7 @@ public partial class VehicleManager : MonoBehaviour
                 break;
             }
             Place(v);
-            if (invalid || v.fadeElapsed >= Mathf.Max(.01f, fadeDuration) || (v != DrivenVehicle && !v.ExitingRoad && XZDistanceSquared(v.go.transform.position, center) > radius * radius))
+            if (invalid || v.fadeElapsed >= Mathf.Max(.01f, fadeDuration) || (v != DrivenVehicle && !v.ExitingRoad && Utils.XZDistanceSquared(v.go.transform.position, center) > radius * radius))
                 Despawn(i);
         }
     }
@@ -686,7 +686,6 @@ public partial class VehicleManager : MonoBehaviour
         => p.path_traffic != null && p.path_traffic.TryGetValue(type.ToString(), out float value) && !float.IsNaN(value) && !float.IsInfinity(value) ? Mathf.Max(0, value) : 0;
     private static float SpeedFactor(int type) => type == Constants.VEHICLE_TRUCK || type == Constants.VEHICLE_BUS ? .8f : type == Constants.VEHICLE_COMMERCIAL ? .9f : 1;
     private static long Key(int path, int type) => ((long)path << 8) | (uint)type;
-    private static float XZDistanceSquared(Vector3 a, Vector3 b) => (a.x - b.x) * (a.x - b.x) + (a.z - b.z) * (a.z - b.z);
     private void OnGUI()
     {
         if (showDebugOverlay) GUI.Label(new Rect(10, 10, 600, 20), $"Vehicles: {active.Count} / {population.Desired} (mean {population.Target:F2}) roads: {roads.Count}");

@@ -117,15 +117,9 @@ public class ConnectorEditManager : MonoBehaviour
 
     private void EnsureOverlayRenderer()
     {
-        if (overlayMeshObj == null)
-        {
-            overlayMeshObj = new GameObject("ConnectorOverlayMesh");
-            overlayRenderer = overlayMeshObj.AddComponent<OverlayMeshRenderer>();
-            Material mat = new Material(Shader.Find("Custom/OverlayLine"));
-            // 地形に埋もれず常に手前に出す。
-            mat.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
-            overlayRenderer.Initialize(mat);
-        }
+        if (overlayMeshObj != null) return;
+        overlayRenderer = OverlayMeshRenderer.Create("ConnectorOverlayMesh", alwaysOnTop: true);
+        overlayMeshObj = overlayRenderer.gameObject;
     }
 
     /// <summary>
@@ -388,7 +382,7 @@ public class ConnectorEditManager : MonoBehaviour
             rel = nd.position[1];
         }
         Vector3 p = nodeGO.transform.position;
-        p.y = HeightmapTextureManager.GetTerrainHeight(new Vector3(p.x, 1000f, p.z)) + rel;
+        p.y = Utils.GetGroundHeight(new Vector3(p.x, 1000f, p.z)) + rel;
         nodeGO.transform.position = p;
     }
 

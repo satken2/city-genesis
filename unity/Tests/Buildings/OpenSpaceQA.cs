@@ -9,9 +9,10 @@ using UnityEngine;
 // 独立したUnityプロジェクトで本編DLLと実FBXを使い、配置の不変条件と描画を検証する。
 public static class OpenSpaceQA
 {
-    static Type layout,builder;
+    static Type layout,builder,polygonUtils;
     static int checks;
     static object Field(object value,string name)=>value.GetType().GetField(name)?.GetValue(value) ?? value.GetType().GetProperty(name).GetValue(value);
+    static bool ContainsPoint(object polygon,object point)=>(bool)polygonUtils.GetMethod("Contains",new[]{typeof(IReadOnlyList<Vector2>),typeof(Vector2),typeof(float)}).Invoke(null,new object[]{polygon,point,layout.GetField("BOUNDARY_TOLERANCE").GetValue(null)}); // 敷地判定は本体と同じ境界余裕で行う
     static void Require(bool ok,string message){checks++;if(!ok)throw new Exception(message);}
     [Serializable] public class Surface {public string material;public Vector2[] polygon;public float lift;}
     [Serializable] public class Prop {public string part;public Vector2 position;public Vector2 forward;}
@@ -38,7 +39,7 @@ public static class OpenSpaceQA
                 foreach(string dir in new[]{"Temp/bin/Debug","Library/ScriptAssemblies","Assets/Plugins"})
                 {string file=Path.Combine(root,dir,new AssemblyName(e.Name).Name+".dll");if(File.Exists(file))return Assembly.LoadFrom(file);}return null;};
             var assembly=Assembly.LoadFrom(root+"/Temp/bin/Debug/Assembly-CSharp.dll");
-            layout=assembly.GetType("OpenSpaceLayout");builder=assembly.GetType("OpenSpaceBuildingMeshBuilder");
+            layout=assembly.GetType("OpenSpaceLayout");builder=assembly.GetType("OpenSpaceBuildingMeshBuilder");polygonUtils=assembly.GetType("PolygonUtils");
             var cases=new Dictionary<string,Vector2[]> {
                 {"rectangle",new[]{new Vector2(-25,-20),new Vector2(25,-20),new Vector2(25,20),new Vector2(-25,20)}},
                 {"trapezoid",new[]{new Vector2(-25,-20),new Vector2(25,-20),new Vector2(15,20),new Vector2(-12,20)}},
@@ -58,7 +59,7 @@ public static class OpenSpaceQA
                     var snapshot=Export(plan);
                     Require(JsonUtility.ToJson(snapshot)==JsonUtility.ToJson(Export(again)),"Non deterministic "+pair.Key);
                     foreach(var s in snapshot.surfaces)Require((bool)layout.GetMethod("ContainsPolygon").Invoke(null,new object[]{pair.Value,s.polygon}),"Surface outside "+pair.Key);
-                    foreach(var prop in snapshot.props)Require((bool)layout.GetMethod("ContainsPoint").Invoke(null,new object[]{pair.Value,prop.position}),"Prop outside "+pair.Key);
+                    foreach(var prop in snapshot.props)Require(ContainsPoint(pair.Value,prop.position),"Prop outside "+pair.Key);
                     foreach(var bay in (IEnumerable)Field(plan,"ParkingBays"))Require((bool)layout.GetMethod("ContainsPolygon").Invoke(null,new object[]{pair.Value,bay}),"Bay outside");
                     if(pair.Key=="rectangle")
                     {

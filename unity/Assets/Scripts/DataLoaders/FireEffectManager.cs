@@ -267,7 +267,7 @@ public class FireEffectManager : MonoBehaviour
 
         float x = item.center_point[0];
         float z = item.center_point[1];
-        float groundHeight = HeightmapTextureManager.GetTerrainHeight(new Vector3(x, 1000f, z));
+        float groundHeight = Utils.GetGroundHeight(new Vector3(x, 1000f, z));
         worldPos = new Vector3(x, groundHeight, z);
 
         BuildingSummary summary = BuildingManager.Instance != null

@@ -34,6 +34,13 @@ public class RoadPath : IPathMeshGenerator
     /// 交差点メッシュ・歩道コネクタなど、道路と見た目を揃えたいすべての生成器から使うこと
     /// （プレハブの sharedMaterials を直接使うと、通常道路とマテリアルの解決結果がずれる）。
     /// </summary>
+    /// <summary>
+    /// 索道系バリアント(索道・索道駅)かを返す。索道は線形検証・路面高さ補正・駅殻生成で
+    /// 道路と別扱いになるため、判定を一箇所に集約する。
+    /// </summary>
+    public static bool IsRopewayVariant(int variant)
+        => variant == Constants.PATH_VARIANT_ROPEWAY || variant == Constants.PATH_VARIANT_ROPEWAY_STATION;
+
     public static Material GetOrCreateRoadMaterial(Material source)
     {
         if (source == null) return null;
@@ -789,7 +796,7 @@ public class RoadPath : IPathMeshGenerator
         // 索道はケーブルの実寸間隔と原点を保ち、駅の屋根を路面として高さ補正しない。
         // base_height を持つバリアント（送電線）はスプラインが地表に置かれ、モデル自体が電線の地上高を
         // 持つ規約なので、上面をY=0へ揃える補正を掛けると電線が地面に落ちる。
-        bool ropeway = pathData.path_variant == 601 || pathData.path_variant == 602;
+        bool ropeway = IsRopewayVariant(pathData.path_variant);
         GameObject roadBody = CreateSplineMesh(container, spline, $"{variantBase}/body", width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/body", singleSpan: singleSpan, normalizeBodySurface: baseHeight <= 0f);
         if (ropeway)
             CreateSplineMesh(container, spline, $"{variantBase}/station_shell", width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE,
@@ -1014,7 +1021,7 @@ public class RoadPath : IPathMeshGenerator
                 float wpRelY = (wp.position != null && wp.position.Length >= 3) ? wp.position[1] : 0f;
                 if (wpRelY == 0f)
                 {
-                    float groundHeight = HeightmapTextureManager.GetTerrainHeight(new Vector3(wpPos.x, 1000f, wpPos.z));
+                    float groundHeight = Utils.GetGroundHeight(new Vector3(wpPos.x, 1000f, wpPos.z));
                     wpPos.y = groundHeight + RoadPartHeights.ROAD_SPLINE_OFFSET;
                 }
                 anchors.Add(wpPos);
@@ -1642,9 +1649,9 @@ public class RoadPath : IPathMeshGenerator
         pillarScale.y = height / Mathf.Max(0.001f, pillarBounds.GetValueOrDefault().size.y);
 
         // キャップの張り出しは柱本体とは高さが異なる。別々に判定し、干渉時は一組とも生成しない。
-        if (capBounds.HasValue && PillarClearance.Intersects(PillarClearance.TransformBounds(capBounds.Value,
+        if (capBounds.HasValue && PillarClearance.Intersects(Utils.TransformBounds(capBounds.Value,
                 Matrix4x4.TRS(sample.position, rotation, capScale)), obstacles)) return false;
-        if (needsPillar && pillarBounds.HasValue && PillarClearance.Intersects(PillarClearance.TransformBounds(pillarBounds.Value,
+        if (needsPillar && pillarBounds.HasValue && PillarClearance.Intersects(Utils.TransformBounds(pillarBounds.Value,
                 Matrix4x4.TRS(pillarPosition, rotation, pillarScale)), obstacles)) return false;
 
         bool placed = false;

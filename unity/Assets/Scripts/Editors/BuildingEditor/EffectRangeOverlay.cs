@@ -48,22 +48,11 @@ public class EffectRangeOverlay : MonoBehaviour
 
     private void EnsureRenderers()
     {
+        // 塗りは深度テストありで建物に隠れさせ、境界線だけ常に手前に出す。
         if (fillRenderer == null)
-        {
-            var fillObj = new GameObject("EffectRangeFillOverlay");
-            fillObj.transform.SetParent(transform, false);
-            fillRenderer = fillObj.AddComponent<OverlayMeshRenderer>();
-            fillRenderer.Initialize(new Material(Shader.Find("Custom/OverlayLine")));
-        }
+            fillRenderer = OverlayMeshRenderer.Create("EffectRangeFillOverlay", alwaysOnTop: false, parent: transform);
         if (lineRenderer == null)
-        {
-            var lineObj = new GameObject("EffectRangeLineOverlay");
-            lineObj.transform.SetParent(transform, false);
-            lineRenderer = lineObj.AddComponent<OverlayMeshRenderer>();
-            Material mat = new Material(Shader.Find("Custom/OverlayLine"));
-            mat.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
-            lineRenderer.Initialize(mat);
-        }
+            lineRenderer = OverlayMeshRenderer.Create("EffectRangeLineOverlay", alwaysOnTop: true, parent: transform);
     }
 
     /// <summary>効果範囲の表示をすべて消す。</summary>
@@ -260,34 +249,15 @@ public class EffectRangeOverlay : MonoBehaviour
     {
         foreach (var poly in region.polygons)
         {
-            if (!PointInRing(poly.exterior, x, z)) continue;
+            if (!PolygonUtils.Contains(poly.exterior, new Vector2(x, z))) continue;
             bool inHole = false;
             foreach (var hole in poly.holes)
             {
-                if (PointInRing(hole, x, z)) { inHole = true; break; }
+                if (PolygonUtils.Contains(hole, new Vector2(x, z))) { inHole = true; break; }
             }
             if (!inHole) return true;
         }
         return false;
-    }
-
-    /// <summary>even-odd 法によるリング内外判定。</summary>
-    private static bool PointInRing(List<Vector2> ring, float x, float z)
-    {
-        int n = ring.Count;
-        if (n < 3) return false;
-        bool inside = false;
-        for (int i = 0, j = n - 1; i < n; j = i++)
-        {
-            Vector2 pi = ring[i];
-            Vector2 pj = ring[j];
-            if (((pi.y > z) != (pj.y > z)) &&
-                (x < (pj.x - pi.x) * (z - pi.y) / (pj.y - pi.y) + pi.x))
-            {
-                inside = !inside;
-            }
-        }
-        return inside;
     }
 }
 
@@ -369,14 +339,14 @@ public class EffectRangePayload
                 {
                     var pd = new EffectRangePolygonData
                     {
-                        exterior = ParseRing(p["exterior"] as JArray),
+                        exterior = GeneratedModelUtils.ParseRing(p["exterior"]),
                     };
                     var holes = p["holes"] as JArray;
                     if (holes != null)
                     {
                         foreach (var h in holes)
                         {
-                            var hr = ParseRing(h as JArray);
+                            var hr = GeneratedModelUtils.ParseRing(h);
                             if (hr.Count >= 3) pd.holes.Add(hr);
                         }
                     }
@@ -387,16 +357,4 @@ public class EffectRangePayload
         return region;
     }
 
-    private static List<Vector2> ParseRing(JArray arr)
-    {
-        var ring = new List<Vector2>();
-        if (arr == null) return ring;
-        foreach (var pt in arr)
-        {
-            var pa = pt as JArray;
-            if (pa != null && pa.Count >= 2)
-                ring.Add(new Vector2((float)pa[0], (float)pa[1]));
-        }
-        return ring;
-    }
 }

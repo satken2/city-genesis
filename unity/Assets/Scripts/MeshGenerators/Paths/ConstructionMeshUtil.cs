@@ -69,7 +69,7 @@ public static class ConstructionMeshUtil
         float[] groundY = new float[pointCount];
         for (int i = 0; i < pointCount; i++)
         {
-            groundY[i] = HeightmapTextureManager.GetTerrainHeight(new Vector3(points[i].x, 1000f, points[i].z))
+            groundY[i] = Utils.GetGroundHeight(new Vector3(points[i].x, 1000f, points[i].z))
                 + RoadPartHeights.ROAD_SPLINE_OFFSET;
         }
 
@@ -81,7 +81,7 @@ public static class ConstructionMeshUtil
         // 断面: [0]=左端(接地) [1]=左クレスト(盛り上げ) [2]=右クレスト [3]=右端(接地)
         for (int i = 0; i < pointCount; i++)
         {
-            Vector3 direction = ComputeSmoothedDirection(points, i);
+            Vector3 direction = PolylineUtils.SmoothedDirection(points, i);
             Vector3 binormal = Vector3.Cross(Vector3.up, direction);
             if (binormal.sqrMagnitude < 1e-6f)
             {
@@ -202,26 +202,5 @@ public static class ConstructionMeshUtil
             triangles.Add(baseIndex + 3);
             triangles.Add(baseIndex + 2);
         }
-    }
-
-    /// <summary>
-    /// 前後の点とのベクトルを平均したスムーズな進行方向（PathMeshFactory.BuildStripMesh と同じ考え方）。
-    /// </summary>
-    private static Vector3 ComputeSmoothedDirection(List<Vector3> points, int index)
-    {
-        Vector3 direction = Vector3.zero;
-        if (index > 0)
-        {
-            direction += (points[index] - points[index - 1]).normalized;
-        }
-        if (index < points.Count - 1)
-        {
-            direction += (points[index + 1] - points[index]).normalized;
-        }
-        if (direction.sqrMagnitude < 1e-6f)
-        {
-            direction = Vector3.forward;
-        }
-        return direction.normalized;
     }
 }

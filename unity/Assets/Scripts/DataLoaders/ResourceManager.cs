@@ -277,7 +277,6 @@ public class ResourceManager : BaseApiDataManager
     private void RecomputeResourceTouchedCells()
     {
         resourceTouchedCells.Clear();
-        float cellSize = TerrainManager.CellSize;
         foreach (var resource in resourceCache)
         {
             if (resource.polygon == null || resource.polygon.Count < 3) continue;
@@ -295,13 +294,10 @@ public class ResourceManager : BaseApiDataManager
             minX -= EDGE_FADE; maxX += EDGE_FADE;
             minZ -= EDGE_FADE; maxZ += EDGE_FADE;
 
-            int cx0 = Mathf.FloorToInt(minX / cellSize);
-            int cx1 = Mathf.FloorToInt(maxX / cellSize);
-            int cz0 = Mathf.FloorToInt(minZ / cellSize);
-            int cz1 = Mathf.FloorToInt(maxZ / cellSize);
-            for (int cx = cx0; cx <= cx1; cx++)
+            TerrainManager.WorldRectToCellRange(minX, minZ, maxX, maxZ, out Vector2Int minCell, out Vector2Int maxCell);
+            for (int cx = minCell.x; cx <= maxCell.x; cx++)
             {
-                for (int cz = cz0; cz <= cz1; cz++)
+                for (int cz = minCell.y; cz <= maxCell.y; cz++)
                 {
                     resourceTouchedCells.Add(new Vector2Int(cx, cz));
                 }
@@ -395,14 +391,9 @@ public class ResourceManager : BaseApiDataManager
     {
         if (uiCanvasRoot != null) return;
 
-        uiCanvasRoot = new GameObject("ResourceUICanvas");
-        DontDestroyOnLoad(uiCanvasRoot);
-        uiCanvas = uiCanvasRoot.AddComponent<Canvas>();
-        uiCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        uiCanvas.sortingOrder = 55;
+        uiCanvas = Utils.CreateOverlayCanvas("ResourceUICanvas", 55, persistent: true);
+        uiCanvasRoot = uiCanvas.gameObject;
         uiCanvasRect = uiCanvasRoot.GetComponent<RectTransform>();
-        uiCanvasRoot.AddComponent<CanvasScaler>();
-        uiCanvasRoot.AddComponent<GraphicRaycaster>();
 
         // 資源表示の現在の状態に合わせる
         uiCanvasRoot.SetActive(isVisible);
@@ -606,7 +597,7 @@ public class ResourceManager : BaseApiDataManager
                 idxGrid[i, j] = baseVertCount + (i * nz) + j;
 
                 // 地形高さをサンプリングし、Zファイティング防止のために少し浮かす
-                float y = HeightmapTextureManager.GetTerrainHeight(new Vector3(x, 1000f, z)) + HEIGHT_OFFSET;
+                float y = Utils.GetGroundHeight(new Vector3(x, 1000f, z)) + HEIGHT_OFFSET;
 
                 Color vc = baseColor;
                 vc.a = alpha;
@@ -645,37 +636,13 @@ public class ResourceManager : BaseApiDataManager
     }
 
     /// <summary>
-    /// 2Dレイキャストアルゴリズム（ray casting）による多角形の内外判定。
-    /// ZoneManager.IsPointInPolygon と同じアルゴリズムだが、float[] 配列ではなく
-    /// バックエンド応答の List&lt;List&lt;float&gt;&gt; 形式で受けるため独自実装している。
-    /// </summary>
-    private static bool IsPointInPolygon(float x, float z, List<List<float>> polygon)
-    {
-        bool inside = false;
-        int count = polygon.Count;
-        int j = count - 1;
-        for (int i = 0; i < count; i++)
-        {
-            float ix = polygon[i][0], iz = polygon[i][1];
-            float jx = polygon[j][0], jz = polygon[j][1];
-            if (((iz > z) != (jz > z)) &&
-                (x < (jx - ix) * (z - iz) / (jz - iz) + ix))
-            {
-                inside = !inside;
-            }
-            j = i;
-        }
-        return inside;
-    }
-
-    /// <summary>
     /// 多角形への符号付き距離（内側が正、外側が負）を計算する。
-    /// 内外判定は IsPointInPolygon、距離は全エッジへの最短距離の最小値。
+    /// 内外判定は PolygonUtils.Contains、距離は全エッジへの最短距離の最小値。
     /// 非凸多角形にも正しく動作する（符号は内外判定、絶対値は最短エッジ距離）。
     /// </summary>
     private static float SignedDistanceToPolygon(float x, float z, List<List<float>> polygon)
     {
-        bool inside = IsPointInPolygon(x, z, polygon);
+        bool inside = PolygonUtils.Contains(polygon, x, z);
         float minDist = float.PositiveInfinity;
         int count = polygon.Count;
         for (int i = 0; i < count; i++)
@@ -683,32 +650,9 @@ public class ResourceManager : BaseApiDataManager
             int nextI = (i + 1) % count;
             float ax = polygon[i][0], az = polygon[i][1];
             float bx = polygon[nextI][0], bz = polygon[nextI][1];
-            float d = PointToSegmentDistance(x, z, ax, az, bx, bz);
+            float d = PolylineUtils.DistanceToSegment(new Vector2(x, z), new Vector2(ax, az), new Vector2(bx, bz));
             if (d < minDist) minDist = d;
         }
         return inside ? minDist : -minDist;
-    }
-
-    /// <summary>
-    /// 点と線分の最短距離。線分両端が同じ点の場合は点-点距離を返す。
-    /// </summary>
-    private static float PointToSegmentDistance(
-        float px, float pz, float ax, float az, float bx, float bz)
-    {
-        float dx = bx - ax;
-        float dz = bz - az;
-        float lenSq = dx * dx + dz * dz;
-        if (lenSq < 1e-8f)
-        {
-            float ddx = px - ax, ddz = pz - az;
-            return Mathf.Sqrt(ddx * ddx + ddz * ddz);
-        }
-        float t = ((px - ax) * dx + (pz - az) * dz) / lenSq;
-        t = Mathf.Clamp01(t);
-        float cx = ax + t * dx;
-        float cz = az + t * dz;
-        float ex = px - cx;
-        float ez = pz - cz;
-        return Mathf.Sqrt(ex * ex + ez * ez);
     }
 }

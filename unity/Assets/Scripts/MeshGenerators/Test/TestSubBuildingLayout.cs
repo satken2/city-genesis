@@ -332,7 +332,7 @@ public static class TestSubBuildingLayout
         ((int i, int j) anchor, int w, int h, bool rotated) candidate, MashupGrid grid)
     {
         Vector2 center = BlockCenter(grid, candidate.anchor.i, candidate.anchor.j, candidate.w, candidate.h);
-        float distance = DistanceToSegment(center, grid.FrontA, grid.FrontB);
+        float distance = PolylineUtils.DistanceToSegment(center, grid.FrontA, grid.FrontB);
         return (distance, candidate.anchor.j, candidate.anchor.i, candidate.rotated ? 1 : 0);
     }
 
@@ -443,10 +443,10 @@ public static class TestSubBuildingLayout
                 float c = j * cellSize + inset;
                 float d = (j + 1) * cellSize - inset;
                 bool allInside =
-                    IsPointInPolygon(grid.Origin + grid.U * a + grid.V * c, polygon) &&
-                    IsPointInPolygon(grid.Origin + grid.U * b + grid.V * c, polygon) &&
-                    IsPointInPolygon(grid.Origin + grid.U * b + grid.V * d, polygon) &&
-                    IsPointInPolygon(grid.Origin + grid.U * a + grid.V * d, polygon);
+                    PolygonUtils.Contains(polygon, grid.Origin + grid.U * a + grid.V * c) &&
+                    PolygonUtils.Contains(polygon, grid.Origin + grid.U * b + grid.V * c) &&
+                    PolygonUtils.Contains(polygon, grid.Origin + grid.U * b + grid.V * d) &&
+                    PolygonUtils.Contains(polygon, grid.Origin + grid.U * a + grid.V * d);
                 if (allInside)
                 {
                     grid.Cells.Add((i, j));
@@ -454,34 +454,5 @@ public static class TestSubBuildingLayout
             }
         }
         return grid;
-    }
-
-    /// <summary>点がポリゴン内にあるかを交差回数の偶奇(even-odd)ルールで判定する。</summary>
-    private static bool IsPointInPolygon(Vector2 point, Vector2[] polygon)
-    {
-        bool inside = false;
-        int n = polygon.Length;
-        int j = n - 1;
-        for (int i = 0; i < n; i++)
-        {
-            Vector2 vi = polygon[i];
-            Vector2 vj = polygon[j];
-            if (((vi.y > point.y) != (vj.y > point.y)) &&
-                (point.x < (vj.x - vi.x) * (point.y - vi.y) / (vj.y - vi.y) + vi.x))
-            {
-                inside = !inside;
-            }
-            j = i;
-        }
-        return inside;
-    }
-
-    /// <summary>点から線分 a-b までの距離を返す。顔の棟の前面寄せ判定に使う。</summary>
-    private static float DistanceToSegment(Vector2 point, Vector2 a, Vector2 b)
-    {
-        Vector2 ab = b - a;
-        float abLenSq = ab.sqrMagnitude;
-        float t = abLenSq > 1e-9f ? Mathf.Clamp01(Vector2.Dot(point - a, ab) / abLenSq) : 0f;
-        return Vector2.Distance(point, a + ab * t);
     }
 }

@@ -405,7 +405,7 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
             float worldX = local.x + centerPointWorld.x;
             float worldZ = local.y + centerPointWorld.z;
 
-            float boundaryDistance = DistanceToPolygonBoundary(local, boundaryPolygon);
+            float boundaryDistance = PolygonUtils.DistanceToBoundary(boundaryPolygon, local);
             float edgeFactor = Mathf.Clamp01(boundaryDistance / edgeFade);
             // 多オクターブの土ノイズ（土ストリップと共通。大きなうねり+細かい土塊）
             float noise = ConstructionMeshUtil.DirtNoise(worldX, worldZ);
@@ -414,7 +414,7 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
             terrainDeltas[i] = 0f;
             if (isDynamic)
             {
-                terrainDeltas[i] = HeightmapTextureManager.GetTerrainHeight(new Vector3(worldX, 1000f, worldZ)) - centerPointWorld.y;
+                terrainDeltas[i] = Utils.GetGroundHeight(new Vector3(worldX, 1000f, worldZ)) - centerPointWorld.y;
             }
         }
 
@@ -462,24 +462,6 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
         return mesh;
-    }
-
-    /// <summary>点からポリゴン境界（全辺）までの最短距離。</summary>
-    private static float DistanceToPolygonBoundary(Vector2 point, Vector2[] polygon)
-    {
-        float minDistance = float.MaxValue;
-        int n = polygon.Length;
-        for (int i = 0; i < n; i++)
-        {
-            Vector2 a = polygon[i];
-            Vector2 b = polygon[(i + 1) % n];
-            Vector2 ab = b - a;
-            float lengthSq = ab.sqrMagnitude;
-            float t = lengthSq > 1e-8f ? Mathf.Clamp01(Vector2.Dot(point - a, ab) / lengthSq) : 0f;
-            float distance = Vector2.Distance(point, a + ab * t);
-            if (distance < minDistance) minDistance = distance;
-        }
-        return minDistance;
     }
 
     /// <summary>

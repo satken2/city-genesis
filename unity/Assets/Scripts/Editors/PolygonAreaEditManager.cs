@@ -6,23 +6,26 @@ using UnityEngine.UI;
 /// <summary>
 /// 任意ポリゴン編集の進行フェーズ。
 /// Placing: 左クリックで頂点を末尾に追加していく段階(まだポリゴンが閉じていない)。
-/// Editing: 右クリックで形状を確定した後の段階。ParcelShapeEditManager と同じ操作感
-///          (頂点ドラッグ・辺クリックで頂点挿入・右クリックで頂点削除)で調整できる。
+/// Editing: 右クリックで形状を確定した後の段階。頂点ドラッグ・辺クリックで頂点挿入・
+///          右クリックで頂点削除で調整できる。
 /// </summary>
 public enum PolygonEditPhase { Inactive, Placing, Editing }
 
 /// <summary>
-/// 地形上に「任意ポリゴン」を作成するための共通基底クラス。
+/// 地形上で「任意ポリゴン」を作成・編集するための共通基底クラス。
 ///
-/// RoadPlanManager の Placing フェーズ(左クリックで点を配置)と、
-/// ParcelShapeEditManager の Editing フェーズ(頂点ドラッグ・辺挿入・右クリック削除)を
-/// 組み合わせた操作感で、閉じたポリゴンを組み立てる。頂点編集・オーバーレイ描画・
-/// ヒット判定・ドラッグ処理といった「ポリゴンの作り方」は完全にここへ集約し、
-/// 天然資源エリア(<see cref="ResourceAreaEditManager"/>)が本クラスを継承して利用する。
+/// RoadPlanManager と同じ Placing フェーズ(左クリックで点を配置)と、
+/// Editing フェーズ(頂点ドラッグ・辺挿入・右クリック削除)を組み合わせた操作感で
+/// 閉じたポリゴンを組み立てる。頂点編集・オーバーレイ描画・ヒット判定・ドラッグ処理といった
+/// 「ポリゴンの作り方」は完全にここへ集約し、
+/// 天然資源エリアの新規作成(<see cref="ResourceAreaEditManager"/>。Placingから始める)と
+/// 既存の土地区画の形状編集(<see cref="ParcelShapeEditManager"/>。保存済みポリゴンを読み込んで
+/// Editingから始める)が本クラスを継承して利用する。
 ///
 /// 派生クラスが差し替えるのは「完成したポリゴンをどのIPCイベントでUIへ通知するか
-/// (<see cref="EmitShape"/>)」と「オーバーレイの色・キャンバス名」だけである。
-/// 確定(バックエンドへのPOST送信)はいずれのケースもUI(Tauri)側が直接行うため、
+/// (<see cref="EmitShape"/>)」と「オーバーレイの色・キャンバス名」、および
+/// 編集の開始/終了に伴う固有処理(<see cref="FinishEditMode"/> の上書き)だけである。
+/// 確定(バックエンドへのPOST/PATCH送信)はいずれのケースもUI(Tauri)側が直接行うため、
 /// このクラスはポリゴン形状の組み立てとUIへの逐次通知のみを担当する。
 /// </summary>
 public abstract class PolygonAreaEditManager : MonoBehaviour
@@ -153,28 +156,39 @@ public abstract class PolygonAreaEditManager : MonoBehaviour
     {
         Debug.Log($"{GetType().Name}: 任意ポリゴン編集モード開始(新規作成)");
         EnsureOverlayCanvas();
+        ResetEditState(PolygonEditPhase.Placing);
+        EmitShapeUpdate();
+    }
 
-        phase = PolygonEditPhase.Placing;
-        vertices.Clear();
-        selectedVertexIndex = -1;
-        hoveredEdgeIndex = -1;
-        isDragging = false;
-        dragVertexIndex = -1;
-
+    /// <summary>
+    /// 既存のポリゴンを読み込み、頂点配置(Placing)を経ずにEditingフェーズから編集を開始する。
+    /// 保存済み形状の編集(土地区画の形状編集など)で使う。
+    /// </summary>
+    protected void InitializeEditingWithPolygon(IEnumerable<Vector3> polygon)
+    {
+        EnsureOverlayCanvas();
+        ResetEditState(PolygonEditPhase.Editing);
+        vertices.AddRange(polygon);
         EmitShapeUpdate();
     }
 
     /// <summary>
     /// 編集モードを終了し、状態をクリアする。
+    /// 派生クラスは上書きして固有の後始末(非表示にした元オブジェクトの再表示など)を足す。
     /// </summary>
-    public void FinishEditMode()
+    public virtual void FinishEditMode()
     {
         if (overlayRenderer != null)
         {
             overlayRenderer.ClearMesh();
         }
+        ResetEditState(PolygonEditPhase.Inactive);
+    }
 
-        phase = PolygonEditPhase.Inactive;
+    /// <summary>頂点列と選択・ホバー・ドラッグ状態を空にし、指定フェーズへ移る。</summary>
+    private void ResetEditState(PolygonEditPhase nextPhase)
+    {
+        phase = nextPhase;
         vertices.Clear();
         selectedVertexIndex = -1;
         hoveredEdgeIndex = -1;
@@ -210,7 +224,7 @@ public abstract class PolygonAreaEditManager : MonoBehaviour
     /// <summary>
     /// 地形左クリック。
     /// Placing: 頂点をリスト末尾に追加する。
-    /// Editing: 頂点ドラッグ開始、または辺上に頂点を追加する(ParcelShapeEditManagerと同じ)。
+    /// Editing: 頂点ドラッグ開始、または辺上に頂点を追加する。
     /// </summary>
     public void OnTerrainLeftClick(Vector3 worldPos)
     {
@@ -463,7 +477,7 @@ public abstract class PolygonAreaEditManager : MonoBehaviour
             Vector3 s2 = cam.WorldToScreenPoint(vertices[next]);
             if (s1.z < 0 && s2.z < 0) continue;
 
-            float dist = PointToSegmentDistance(mouseScreen, s1, s2);
+            float dist = PolylineUtils.DistanceToSegment(mouseScreen, s1, s2);
             if (dist <= edgeHitThreshold)
             {
                 return new HitResult { type = HitTargetType.Edge, index = i };
@@ -471,16 +485,6 @@ public abstract class PolygonAreaEditManager : MonoBehaviour
         }
 
         return new HitResult { type = HitTargetType.None, index = -1 };
-    }
-
-    protected static float PointToSegmentDistance(Vector2 p, Vector2 a, Vector2 b)
-    {
-        Vector2 ab = b - a;
-        float lenSqr = ab.sqrMagnitude;
-        if (lenSqr < 1e-6f) return Vector2.Distance(p, a);
-        float t = Mathf.Clamp01(Vector2.Dot(p - a, ab) / lenSqr);
-        Vector2 closest = a + ab * t;
-        return Vector2.Distance(p, closest);
     }
 
     // =====================================================================

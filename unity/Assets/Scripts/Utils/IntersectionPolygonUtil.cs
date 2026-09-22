@@ -181,7 +181,7 @@ public static class IntersectionPolygonUtil
             Vector2 delta = XZ(points[i] - points[i - 1]);
             float length = delta.magnitude;
             if (length < 1e-6f) continue;
-            float t = Mathf.Clamp01(Vector2.Dot(XZ(point - points[i - 1]), delta) / (length * length));
+            float t = PolylineUtils.ProjectOnSegment(XZ(point), XZ(points[i - 1]), XZ(points[i]));
             float error = (XZ(point) - Vector2.Lerp(XZ(points[i - 1]), XZ(points[i]), t)).sqrMagnitude;
             if (error < best) { best = error; result = distance + length * t; }
             distance += length;

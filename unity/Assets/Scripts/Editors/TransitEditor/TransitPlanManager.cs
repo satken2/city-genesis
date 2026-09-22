@@ -92,12 +92,9 @@ public class TransitPlanManager : MonoBehaviour
     {
         if (overlayMeshObj != null) return;
 
-        overlayMeshObj = new GameObject("TransitEditorOverlayMesh");
-        overlayRenderer = overlayMeshObj.AddComponent<OverlayMeshRenderer>();
-        Material mat = new Material(Shader.Find("Custom/OverlayLine"));
         // 停留所マーカーや区間線は地形に埋もれず常に手前に出す(RoadPlanManager のギズモと同じ)。
-        mat.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
-        overlayRenderer.Initialize(mat);
+        overlayRenderer = OverlayMeshRenderer.Create("TransitEditorOverlayMesh", alwaysOnTop: true);
+        overlayMeshObj = overlayRenderer.gameObject;
     }
 
     // =====================================================================
@@ -309,7 +306,7 @@ public class TransitPlanManager : MonoBehaviour
             if (seg.path.status != Constants.STATUS_ACTIVE) continue;
 
             Vector3 proj = PolylineUtils.ClosestPointOnSegmentXZ(worldPos, seg.a, seg.b);
-            float dist = HorizontalDistance(worldPos, proj);
+            float dist = Utils.XZDistance(worldPos, proj);
 
             float width = pathManager.GetRoadWidth(seg.path.path_variant);
             float margin = width * 0.5f + STOP_ON_PATH_MARGIN;
@@ -324,17 +321,10 @@ public class TransitPlanManager : MonoBehaviour
 
         if (found)
         {
-            bestPoint.y = HeightmapTextureManager.GetTerrainHeight(new Vector3(bestPoint.x, 1000f, bestPoint.z)) + 0.15f;
+            bestPoint.y = Utils.GetGroundHeight(new Vector3(bestPoint.x, 1000f, bestPoint.z)) + 0.15f;
             snapped = bestPoint;
         }
         return found;
-    }
-
-    private static float HorizontalDistance(Vector3 a, Vector3 b)
-    {
-        float dx = a.x - b.x;
-        float dz = a.z - b.z;
-        return Mathf.Sqrt(dx * dx + dz * dz);
     }
 
     // =====================================================================

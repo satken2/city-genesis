@@ -4,13 +4,10 @@ using UnityEngine;
 /// <summary>道路沿い矩形の基準点と干渉判定。Yに依存しない純粋な幾何計算。</summary>
 public static class BuildingPlacementGeometry
 {
+    /// <summary>線分へのXZ最近接点をY=0に落として返す。以降の矩形計算がYに依存しないための正規化。</summary>
     public static Vector3 Closest(Vector3 p, Vector3 a, Vector3 b)
     {
-        Vector3 d = b - a;
-        d.y = 0;
-        float length2 = d.sqrMagnitude;
-        float t = length2 < 0.000001f ? 0 : Math.Max(0, Math.Min(1, Vector3.Dot(p - a, d) / length2));
-        Vector3 result = a + d * t;
+        Vector3 result = PolylineUtils.ClosestPointOnSegmentXZ(p, a, b);
         result.y = 0;
         return result;
     }

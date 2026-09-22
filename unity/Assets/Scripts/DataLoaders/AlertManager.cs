@@ -64,33 +64,22 @@ public class AlertManager : MonoBehaviour
 {
     public static AlertManager Instance { get; private set; }
 
-    /// <summary>建物(agent)のアラートビット一覧。アイコンを並べる順序でもある。</summary>
-    private static readonly int[] AGENT_ALERT_BITS =
-    {
-        Constants.ALERT_AGENT_CONSTRUCTION_SHORTAGE,
-        Constants.ALERT_AGENT_CRIME,
-        Constants.ALERT_AGENT_CRIME_SIGN,
-        Constants.ALERT_AGENT_INFRA_DISCONNECTED,
-    };
+    /// <summary>
+    /// 建物(agent)のアイコン対象ビット一覧。アイコンを並べる順序でもある。
+    /// 正は consts.py(sync_consts.py が生成する Constants.cs 経由)で、ここで再宣言しない。
+    /// バックエンドの GET /api/v1/alerts も同じリストで配信対象を絞るため、両者は常に一致する。
+    /// </summary>
+    private static readonly int[] AGENT_ALERT_BITS = Constants.ALERT_AGENT_ICON_BITS;
 
     /// <summary>
     /// 建物(agent)のうち、アイコンではなく3Dパーティクルで表現するアラートビット一覧。
     /// アイコンは作らないが、表示フィルタのマスクには含める(表示パネルのトグルで
     /// 炎・煙の表示をON/OFFできるようにするため)。
     /// </summary>
-    private static readonly int[] AGENT_VFX_BITS =
-    {
-        Constants.ALERT_AGENT_ON_FIRE,
-        Constants.ALERT_AGENT_ACCIDENTAL_FIRE,
-    };
+    private static readonly int[] AGENT_VFX_BITS = Constants.ALERT_AGENT_VFX_BITS;
 
-    /// <summary>道路(path)のアラートビット一覧。アイコンを並べる順序でもある。</summary>
-    private static readonly int[] PATH_ALERT_BITS =
-    {
-        Constants.ALERT_PATH_CONSTRUCTION_SHORTAGE,
-        Constants.ALERT_PATH_ACCIDENT,
-        Constants.ALERT_PATH_NO_STATION_HOUSE,
-    };
+    /// <summary>道路(path)のアイコン対象ビット一覧。アイコンを並べる順序でもある。</summary>
+    private static readonly int[] PATH_ALERT_BITS = Constants.ALERT_PATH_ICON_BITS;
 
     /// <summary>全種別を表示するフィルタマスク。UI から指定が来るまでの既定値。</summary>
     public static readonly int DefaultFilterMask = BuildFullFilterMask();
@@ -385,7 +374,7 @@ public class AlertManager : MonoBehaviour
         // 建物の場合は建物メッシュ高さを加えて屋上より上に出す。道路の場合は地形高さ+オフセット。
         float x = item.center_point[0];
         float z = item.center_point[1];
-        float groundHeight = HeightmapTextureManager.GetTerrainHeight(new Vector3(x, 1000f, z));
+        float groundHeight = Utils.GetGroundHeight(new Vector3(x, 1000f, z));
 
         float yOffset = alertIconYOffset;
         if (entityType == "agent" && BuildingManager.Instance != null)
@@ -605,7 +594,7 @@ public class AlertManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ScreenSpaceOverlay Canvas を生成する。ZoneManager.EnsureUICanvas と同じ構成。
+    /// ScreenSpaceOverlay Canvas を生成する。
     /// Canvas を使わず SpriteRenderer + Billboard 方式も考えられるが、距離に依存せず
     /// 常に一定サイズで表示するには ScreenSpaceOverlay が適している。
     /// </summary>
@@ -613,13 +602,9 @@ public class AlertManager : MonoBehaviour
     {
         if (_uiCanvasRoot != null) return;
 
-        _uiCanvasRoot = new GameObject("AlertUICanvas");
-        _uiCanvas = _uiCanvasRoot.AddComponent<Canvas>();
-        _uiCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        _uiCanvas.sortingOrder = canvasSortingOrder; // ZoneManager(60)・旧ConstructionWarning(65)より前面
+        _uiCanvas = Utils.CreateOverlayCanvas("AlertUICanvas", canvasSortingOrder, persistent: false); // ZoneManager(60)より前面
+        _uiCanvasRoot = _uiCanvas.gameObject;
         _uiCanvasRect = _uiCanvasRoot.GetComponent<RectTransform>();
-        _uiCanvasRoot.AddComponent<CanvasScaler>();
-        _uiCanvasRoot.AddComponent<GraphicRaycaster>();
         _uiCanvasRoot.SetActive(_isVisible);
     }
 

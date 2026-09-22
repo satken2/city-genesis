@@ -183,7 +183,7 @@ public class StationHousePath : IPathMeshGenerator
 
     private static Vector3 MakeDeckPoint(float x, float z)
     {
-        float groundY = HeightmapTextureManager.GetTerrainHeight(new Vector3(x, 1000f, z));
+        float groundY = Utils.GetGroundHeight(new Vector3(x, 1000f, z));
         return new Vector3(x, groundY + RoadPartHeights.ROAD_SPLINE_OFFSET, z);
     }
 
@@ -255,7 +255,7 @@ public class StationHousePath : IPathMeshGenerator
         }
         go.name = "House";
 
-        float groundY = HeightmapTextureManager.GetTerrainHeight(new Vector3(position.x, 1000f, position.y));
+        float groundY = Utils.GetGroundHeight(new Vector3(position.x, 1000f, position.y));
         go.transform.localPosition = new Vector3(position.x, groundY, position.y);
         go.transform.localRotation = Quaternion.Euler(0f, footprint.rotationDeg, 0f);
         go.SetActive(true);
@@ -312,7 +312,7 @@ public class StationHousePath : IPathMeshGenerator
             -halfWidth - halfDepth,
         };
 
-        float groundY = HeightmapTextureManager.GetTerrainHeight(new Vector3(footprint.center.x, 1000f, footprint.center.y));
+        float groundY = Utils.GetGroundHeight(new Vector3(footprint.center.x, 1000f, footprint.center.y));
         Vector3 centerWorld = new Vector3(footprint.center.x, groundY, footprint.center.y);
 
         Mesh mesh = ModularBodyBuilder.GenerateTerrainConformingFloorMesh(polygon, centerWorld);

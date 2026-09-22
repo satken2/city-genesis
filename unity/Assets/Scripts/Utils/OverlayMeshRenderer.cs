@@ -93,8 +93,46 @@ public class OverlayMeshRenderer : MonoBehaviour
     private List<PolygonEntry> framePolygons = new List<PolygonEntry>(16);
     private List<PreTriangulatedEntry> framePreTriangulated = new List<PreTriangulatedEntry>(32);
 
+    /// <summary>OverlayLine シェーダーの参照。Shader.Find は名前検索なので一度だけ引いて使い回す。</summary>
+    private static Shader overlayLineShader;
+
+    /// <summary>
+    /// オーバーレイ描画用の GameObject を新規生成し、専用の OverlayLine マテリアルで初期化して返す。
+    /// 頂点はワールド座標で与えるため、親を指定してもオブジェクト自体はワールド原点に置く。
+    /// alwaysOnTop=true は深度テストを無効化(_ZTest=Always)し、起伏地形や建物に埋もれず常に手前へ描く
+    /// (丘の裏や手前の建物を透かすX線状の見え方になるが、ギズモ・強調表示用途では許容する)。
+    /// false はシェーダー既定の LEqual+ポリゴンオフセットのまま(塗りが建物に自然に隠れる用途)。
+    /// persistent=true はシーン遷移をまたいで残す(DontDestroyOnLoad)。
+    /// 描画キューや加算合成など引数にない設定は、戻り値の <see cref="Material"/> に対して呼び出し側が行う。
+    /// </summary>
+    public static OverlayMeshRenderer Create(string name, bool alwaysOnTop, Transform parent = null, bool persistent = false)
+    {
+        var go = new GameObject(name);
+        if (parent != null) go.transform.SetParent(parent, true);
+        if (persistent) DontDestroyOnLoad(go);
+        var renderer = go.AddComponent<OverlayMeshRenderer>();
+        renderer.Initialize(CreateOverlayLineMaterial(alwaysOnTop));
+        return renderer;
+    }
+
+    /// <summary>OverlayLine シェーダーのマテリアルを新規生成する。深度テストの扱いは <see cref="Create"/> と同じ。</summary>
+    public static Material CreateOverlayLineMaterial(bool alwaysOnTop)
+    {
+        if (overlayLineShader == null) overlayLineShader = Shader.Find("Custom/OverlayLine");
+        var mat = new Material(overlayLineShader);
+        if (alwaysOnTop) mat.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
+        return mat;
+    }
+
+    /// <summary>
+    /// このレンダラー専用のマテリアル。各レンダラーは Initialize で渡された自分だけのマテリアルを持つので、
+    /// 複製せずそのまま返す(プロパティ変更は即座に描画へ反映される)。
+    /// </summary>
+    public Material Material => meshRenderer != null ? meshRenderer.sharedMaterial : null;
+
     /// <summary>
     /// 指定のマテリアルで初期化する。MeshFilter/MeshRenderer を自動生成する。
+    /// マテリアルの所有権はこのレンダラーに移り、破棄時にメッシュと一緒に解放する。
     /// </summary>
     public void Initialize(Material material)
     {
@@ -112,6 +150,12 @@ public class OverlayMeshRenderer : MonoBehaviour
         meshFilter.mesh = mesh;
     }
 
+    private void OnDestroy()
+    {
+        if (mesh != null) Destroy(mesh);
+        if (meshRenderer != null && meshRenderer.sharedMaterial != null) Destroy(meshRenderer.sharedMaterial);
+    }
+
     /// <summary>
     /// 頂点色に乗算される全体色（_Tint）を設定する。
     /// メッシュを作り直さずに明滅アニメーションを行うために使う。
@@ -119,7 +163,7 @@ public class OverlayMeshRenderer : MonoBehaviour
     public void SetTint(Color tint)
     {
         if (meshRenderer == null) return;
-        meshRenderer.material.SetColor("_Tint", tint);
+        meshRenderer.sharedMaterial.SetColor("_Tint", tint);
     }
 
     /// <summary>

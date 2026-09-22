@@ -79,10 +79,8 @@ public sealed class ConstructionAmbience : MonoBehaviour
         float bestSqr = (from - best).sqrMagnitude;
         for (int i = 1; i < points.Count; i++)
         {
-            Vector3 a = points[i - 1], b = points[i], ab = b - a;
-            float len = ab.sqrMagnitude;
-            float t = len > 1e-6f ? Mathf.Clamp01(Vector3.Dot(from - a, ab) / len) : 0f;
-            Vector3 p = a + ab * t;
+            Vector3 a = points[i - 1], b = points[i];
+            Vector3 p = PolylineUtils.ClosestPointOnSegment(from, a, b);
             float sqr = (from - p).sqrMagnitude;
             if (sqr < bestSqr) { bestSqr = sqr; best = p; }
         }

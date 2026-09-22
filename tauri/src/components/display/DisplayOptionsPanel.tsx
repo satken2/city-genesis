@@ -13,6 +13,7 @@ import {
   ALERT_AGENT_CRIME_SIGN,
   ALERT_AGENT_INFRA_DISCONNECTED,
   ALERT_AGENT_ICON_BITS,
+  ALERT_AGENT_VFX_BITS,
   ALERT_PATH_CONSTRUCTION_SHORTAGE,
   ALERT_PATH_ACCIDENT,
   ALERT_PATH_NO_STATION_HOUSE,
@@ -256,8 +257,9 @@ function getLegendInfo(layerId: string, modeId: string): LegendInfo {
 
 /**
  * アラート表示フィルタのカード定義。掲載対象は consts.py の
- * ALERT_AGENT_ICON_BITS / ALERT_PATH_ICON_BITS(=Unityのビルボードアイコン表示対象)で、
- * 詳細パネル専用の生産ボトルネック系ビットはここには出さない。
+ * ALERT_AGENT_ICON_BITS + ALERT_AGENT_VFX_BITS / ALERT_PATH_ICON_BITS(=Unityが3D空間に
+ * 表示する対象。火災系はアイコンではなくパーティクル)で、詳細パネル専用の生産ボトルネック系
+ * ビットはここには出さない。
  * 建物(agent)と道路(path)はビット値が重複するため、フィルタマスク上では道路ビットを
  * ALERT_PATH_MASK_SHIFT だけ上位へずらして名前空間を分ける(Unity の AlertManager と同じ規約)。
  * 末尾の ALERT_DISPLAY_RUIN だけは alert ビットではなく status(廃墟)由来のアイコンの表示可否で、
@@ -271,7 +273,7 @@ const ALERT_CARDS = [
     { bit: ALERT_AGENT_CRIME, icon: "alerts/shooting.png", labelKey: "display.alertAgentCrime" },
     { bit: ALERT_AGENT_CRIME_SIGN, icon: "alerts/siren.png", labelKey: "display.alertAgentCrimeSign" },
     { bit: ALERT_AGENT_INFRA_DISCONNECTED, icon: "alerts/electricity.png", labelKey: "display.alertAgentInfraDisconnected" },
-  ].filter((card) => ALERT_AGENT_ICON_BITS.includes(card.bit)),
+  ].filter((card) => ALERT_AGENT_ICON_BITS.includes(card.bit) || ALERT_AGENT_VFX_BITS.includes(card.bit)),
   ...[
     { bit: ALERT_PATH_CONSTRUCTION_SHORTAGE, icon: "alerts/road.png", labelKey: "display.alertPathConstructionShortage" },
     { bit: ALERT_PATH_ACCIDENT, icon: "alerts/car-accident.png", labelKey: "display.alertPathAccident" },

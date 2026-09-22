@@ -246,14 +246,14 @@ public static class TunnelSectionUtil
     /// <summary>点が地表に張り付いているか（地形追従点か）を判定する。</summary>
     private static bool IsOnGround(Vector3 p)
     {
-        float ground = HeightmapTextureManager.GetTerrainHeight(new Vector3(p.x, 1000f, p.z));
+        float ground = Utils.GetGroundHeight(new Vector3(p.x, 1000f, p.z));
         return Mathf.Abs(ground - p.y) <= GROUND_SNAP_EPSILON;
     }
 
     /// <summary>点の深さ（地形標高 − 道路Y。正=地下）を返す。</summary>
     private static float GetDepth(Vector3 p)
     {
-        float ground = HeightmapTextureManager.GetTerrainHeight(new Vector3(p.x, 1000f, p.z));
+        float ground = Utils.GetGroundHeight(new Vector3(p.x, 1000f, p.z));
         return ground - p.y;
     }
 

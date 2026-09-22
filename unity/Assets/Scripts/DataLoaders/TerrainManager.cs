@@ -41,6 +41,24 @@ public partial class TerrainManager : BaseApiDataManager
     /// </summary>
     public static float CellSize { get; private set; } = 500f;
 
+    /// <summary>
+    /// ワールドXZが属するUnityセルインデックス。マップ中心が原点なので負値を取る
+    /// (バックエンドの0-basedセルへは UnityCellToBackendCell で変換する)。
+    /// </summary>
+    public static Vector2Int WorldToCell(float x, float z)
+    {
+        return new Vector2Int(Mathf.FloorToInt(x / CellSize), Mathf.FloorToInt(z / CellSize));
+    }
+
+    public static Vector2Int WorldToCell(Vector3 position) => WorldToCell(position.x, position.z);
+
+    /// <summary>ワールドXZ矩形に重なるUnityセルの範囲(両端を含む)。矩形が跨ぐセルの列挙に使う。</summary>
+    public static void WorldRectToCellRange(float minX, float minZ, float maxX, float maxZ, out Vector2Int minCell, out Vector2Int maxCell)
+    {
+        minCell = WorldToCell(minX, minZ);
+        maxCell = WorldToCell(maxX, maxZ);
+    }
+
     // === 設定 ===
     [Header("Terrain Settings")]
     public Vector3 terrainSize = new Vector3(CellSize, 1200f, CellSize);
@@ -628,7 +646,7 @@ public partial class TerrainManager : BaseApiDataManager
         int targetResolution = GetValidTerrainResolution(Mathf.Max(farRows, farCols));
         var swProc = System.Diagnostics.Stopwatch.StartNew();
         Task<float[,]> task = ProcessHeightmapAsync(rawBytes, farRows, farCols, targetResolution);
-        yield return WaitTask(task);
+        yield return Utils.WaitTask(task);
         UnityLog.If(LocalConstants.UNITY_LOG_TIMING, () => $"[TIMING] TerrainManager  ProcessHeightmapAsync/far: {swProc.ElapsedMilliseconds}ms");
         if (epoch != clearEpoch || task.IsFaulted || task.IsCanceled || task.Result == null) yield break;
 
@@ -678,7 +696,7 @@ public partial class TerrainManager : BaseApiDataManager
             }
             return heights;
         });
-        yield return WaitTask(task);
+        yield return Utils.WaitTask(task);
         if (task.IsFaulted || (batch != null && batch.IsCanceled)) yield break;
         bool applied = false;
         yield return ApplyHeightsStreamed(cellIndex, task.Result, batch, ok => applied = ok);
@@ -890,9 +908,8 @@ public partial class TerrainManager : BaseApiDataManager
     {
         var key = new System.Text.StringBuilder();
         key.Append(clearEpoch);
-        int minX = Mathf.FloorToInt(area.xMin / CellSize), maxX = Mathf.FloorToInt(area.xMax / CellSize);
-        int minZ = Mathf.FloorToInt(area.yMin / CellSize), maxZ = Mathf.FloorToInt(area.yMax / CellSize);
-        for (int z = minZ; z <= maxZ; z++) for (int x = minX; x <= maxX; x++)
+        WorldRectToCellRange(area.xMin, area.yMin, area.xMax, area.yMax, out Vector2Int minCell, out Vector2Int maxCell);
+        for (int z = minCell.y; z <= maxCell.y; z++) for (int x = minCell.x; x <= maxCell.x; x++)
         {
             var cell = new Vector2Int(x, z);
             key.Append(':').Append(x).Append(',').Append(z).Append('=').Append(dynamicCellVersions.TryGetValue(cell, out int version) ? version : -1);
@@ -986,7 +1003,7 @@ public partial class TerrainManager : BaseApiDataManager
 
         Task<UltraFarLandMeshBuilder.MeshData> task = Task.Run(() =>
             UltraFarLandMeshBuilder.Build(mapWidth, mapHeight, gridStep, heightOffset, sampleHeight));
-        yield return WaitTask(task);
+        yield return Utils.WaitTask(task);
         if (batch.IsCanceled || epoch != clearEpoch || task.IsFaulted || task.IsCanceled || task.Result.vertices == null) yield break;
 
         UltraFarLandMeshBuilder.MeshData md = task.Result;
@@ -1463,19 +1480,6 @@ public partial class TerrainManager : BaseApiDataManager
                 ? heights
                 : InterpolateHeightmapArray(heights, gridRows, gridCols, targetResolution);
         });
-    }
-
-    /// <summary>
-    /// Task の完了をコルーチン上で待機する。ただの `while (!task.IsCompleted) yield return null` だが、
-    /// 完了後に例外を再スロー／ログ出力するためのラッパー。
-    /// </summary>
-    private static IEnumerator WaitTask(Task task)
-    {
-        while (!task.IsCompleted) yield return null;
-        if (task.IsFaulted && task.Exception != null)
-        {
-            Debug.LogError($"TerrainManager: Background task failed: {task.Exception.Flatten()}");
-        }
     }
 
     // ================================================================

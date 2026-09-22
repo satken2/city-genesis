@@ -241,17 +241,9 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     {
         if (overlayMeshObj != null) return;
 
-        overlayMeshObj = new GameObject("ParcelOverlayMesh");
-        DontDestroyOnLoad(overlayMeshObj);
-        overlayRenderer = overlayMeshObj.AddComponent<OverlayMeshRenderer>();
-        Material mat = new Material(Shader.Find("Custom/OverlayLine"));
-        // 枠線・ハイライト・データ可視化が起伏地形で地面に埋もれるのを防ぐため、
-        // このマテリアルインスタンス限定で深度テストを無効化する(RoadPlanManager のギズモと同じ対応)。
-        // OverlayLine シェーダー既定の _ZTest=LEqual + ポリゴンオフセットでは、傾斜地で平板ポリゴンが
-        // 曲面地形の下に食い込んで地形に負け、埋まったように見えるため。
-        // 代儝: オーバーレイが丘の裏や手前の建物を貫通してX線状に見える(強調表示用途なので許容)。
-        mat.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
-        overlayRenderer.Initialize(mat);
+        // 枠線・ハイライトは起伏地形で地面に埋もれないよう深度テストなし(alwaysOnTop)で描く。
+        overlayRenderer = OverlayMeshRenderer.Create("ParcelOverlayMesh", alwaysOnTop: true, persistent: true);
+        overlayMeshObj = overlayRenderer.gameObject;
 
         // データ可視化(色分けフィル)専用レンダラー。overlayMeshObj の子にして表示ON/OFFを連動させる。
         // シェーダーは深度テストあり(LEqual)の Custom/OverlayFillTerrainConform。
@@ -453,7 +445,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
                 pos = new Vector3(cp[0], 0, cp[1]);
             }
 
-            Vector2Int objCell = PositionToCell(pos);
+            Vector2Int objCell = TerrainManager.WorldToCell(pos);
             if (cellSet.Contains(objCell) && !receivedIds.Contains(id))
             {
                 idsToRemove.Add(id);
@@ -576,7 +568,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
                 {
                     float cx = centerPoint[0];
                     float cz = centerPoint[1];
-                    Vector2Int cellIndex = PositionToCell(new Vector3(cx, 0f, cz));
+                    Vector2Int cellIndex = TerrainManager.WorldToCell(new Vector3(cx, 0f, cz));
                     if (fullyLoadedCells.Contains(cellIndex))
                     {
                         if (VisualEffectManager.Instance != null)
@@ -706,8 +698,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
             byPath.Add(parcelData.parcel_id);
         }
 
-        Vector2Int cellMin = PositionToCell(new Vector3(minX, 0f, minZ));
-        Vector2Int cellMax = PositionToCell(new Vector3(maxX, 0f, maxZ));
+        TerrainManager.WorldRectToCellRange(minX, minZ, maxX, maxZ, out Vector2Int cellMin, out Vector2Int cellMax);
         for (int cx = cellMin.x; cx <= cellMax.x; cx++)
         {
             for (int cz = cellMin.y; cz <= cellMax.y; cz++)
@@ -777,7 +768,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     /// </summary>
     public int GetParcelIdAtPoint(Vector3 worldPos)
     {
-        Vector2Int cell = PositionToCell(worldPos);
+        Vector2Int cell = TerrainManager.WorldToCell(worldPos);
         if (!parcelIdsByCell.TryGetValue(cell, out HashSet<int> ids)) return -1;
 
         Vector2 point = new Vector2(worldPos.x, worldPos.z);
@@ -785,7 +776,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         {
             if (!parcelSpatialCache.TryGetValue(id, out ParcelSpatialEntry entry)) continue;
             if (!entry.bbox.Contains(point)) continue;
-            if (IsPointInPolygon(point, entry.polygon))
+            if (PolygonUtils.Contains(entry.polygon, point.x, point.y))
             {
                 // 区画同士は重ならないため、最初にマッチした区画を返してよい
                 return id;
@@ -805,7 +796,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         {
             return false;
         }
-        return IsPointInPolygon(new Vector2(worldPos.x, worldPos.z), entry.polygon);
+        return PolygonUtils.Contains(entry.polygon, worldPos.x, worldPos.z);
     }
 
     // 区画境界へクランプした点を境界からどれだけ内側へ寄せるか(m)。
@@ -831,7 +822,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         }
 
         Vector2 point = new Vector2(worldPos.x, worldPos.z);
-        if (IsPointInPolygon(point, entry.polygon))
+        if (PolygonUtils.Contains(entry.polygon, point.x, point.y))
         {
             return true;
         }
@@ -845,7 +836,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
             int next = (i + 1) % polygon.Length;
             Vector2 a = new Vector2(polygon[i][0], polygon[i][1]);
             Vector2 b = new Vector2(polygon[next][0], polygon[next][1]);
-            Vector2 candidate = NearestPointOnSegment(point, a, b);
+            Vector2 candidate = PolylineUtils.ClosestPointOnSegment(point, a, b);
             float sqDist = (candidate - point).sqrMagnitude;
             if (sqDist < bestSqDist)
             {
@@ -860,7 +851,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         if (inward.sqrMagnitude > 1e-8f)
         {
             Vector2 nudged = bestPoint + inward.normalized * ParcelClampInnerMargin;
-            if (IsPointInPolygon(nudged, polygon))
+            if (PolygonUtils.Contains(polygon, nudged.x, nudged.y))
             {
                 bestPoint = nudged;
             }
@@ -868,38 +859,6 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
         clamped = new Vector3(bestPoint.x, worldPos.y, bestPoint.y);
         return true;
-    }
-
-    /// <summary>点 p から線分 [a,b] への最近傍点を返す。</summary>
-    private static Vector2 NearestPointOnSegment(Vector2 p, Vector2 a, Vector2 b)
-    {
-        Vector2 ab = b - a;
-        float lenSq = ab.sqrMagnitude;
-        if (lenSq < 1e-8f) return a;
-        float t = Mathf.Clamp01(Vector2.Dot(p - a, ab) / lenSq);
-        return a + ab * t;
-    }
-
-    /// <summary>
-    /// 2Dの点が多角形の内部にあるかを判定する（ray casting algorithm。ZoneManager と同アルゴリズム）。
-    /// polygon は [i][0]=X, [i][1]=Z のワールド座標。
-    /// </summary>
-    private static bool IsPointInPolygon(Vector2 point, float[][] polygon)
-    {
-        bool inside = false;
-        int j = polygon.Length - 1;
-        for (int i = 0; i < polygon.Length; i++)
-        {
-            float xi = polygon[i][0], zi = polygon[i][1];
-            float xj = polygon[j][0], zj = polygon[j][1];
-            if (((zi > point.y) != (zj > point.y)) &&
-                (point.x < (xj - xi) * (point.y - zi) / (zj - zi) + xi))
-            {
-                inside = !inside;
-            }
-            j = i;
-        }
-        return inside;
     }
 
     private void RegisterWithVisualModeHandler()

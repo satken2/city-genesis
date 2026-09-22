@@ -142,7 +142,7 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
 
         // 区画が斜面にまたがっても棟が浮かない・めり込まないよう、各棟のY基準は
         // 自分の配置座標の地形標高とする（建物GameObjectは中心標高に置かれるため差分にする）。
-        float terrainY = HeightmapTextureManager.GetTerrainHeight(
+        float terrainY = Utils.GetGroundHeight(
             new Vector3(centerPointWorld.x + xzOffset.x, 1000f, centerPointWorld.z + xzOffset.y));
         float baseY = terrainY - centerPointWorld.y;
 

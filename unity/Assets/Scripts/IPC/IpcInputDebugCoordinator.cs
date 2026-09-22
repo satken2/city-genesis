@@ -39,9 +39,7 @@ public class IpcInputDebugCoordinator : MonoBehaviour
                 ? VisualModeHandler.Instance.GetModeName(visualMode)
                 : "N/A";
 
-            string objectTypeName = InputHandler.Instance != null
-                ? InputHandler.Instance.GetObjectTypeName(ot)
-                : ot.ToString();
+            string objectTypeName = InputObjectType.GetName(ot);
 
             objectTypes[ot.ToString()] = new Dictionary<string, object>
             {

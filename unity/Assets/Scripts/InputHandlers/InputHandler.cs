@@ -17,6 +17,22 @@ public static class InputObjectType
     public const int TERRAIN = 5;
     public const int ZONE = 6;
     public const int PROP = 7;
+
+    /// <summary>ログ・デバッグ表示用の日本語名。</summary>
+    public static string GetName(int objectType)
+    {
+        switch (objectType)
+        {
+            case BUILDING: return "建物";
+            case PARCEL: return "土地区画";
+            case PATH: return "道路";
+            case NODE: return "ノード";
+            case TERRAIN: return "地面";
+            case ZONE: return "地区";
+            case PROP: return "プロップ";
+            default: return "不明";
+        }
+    }
 }
 
 /// <summary>
@@ -1284,21 +1300,6 @@ public class InputHandler : MonoBehaviour
     {
         posX = x;
         posZ = z;
-    }
-
-    public string GetObjectTypeName(int objectType)
-    {
-        switch (objectType)
-        {
-            case InputObjectType.BUILDING: return "建物";
-            case InputObjectType.PARCEL: return "土地区画";
-            case InputObjectType.PATH: return "道路";
-            case InputObjectType.NODE: return "ノード";
-            case InputObjectType.TERRAIN: return "地面";
-            case InputObjectType.ZONE: return "地区";
-            case InputObjectType.PROP: return "プロップ";
-            default: return "不明";
-        }
     }
 
     public string GetModeName(int mode)

@@ -288,6 +288,9 @@ Y軸ドラッグは、ポイントを通りカメラ正面を向いた鉛直平�
 ## 8. 土地区画形状編集のドラッグ処理
 
 `ParcelShapeEditManager` は既存の土地区画のポリゴン頂点をドラッグで編集する機能を提供する。
+頂点編集そのもの（ヒット判定・ドラッグ・辺への頂点挿入・削除・オーバーレイ描画）は任意ポリゴン編集の共通基底
+`PolygonAreaEditManager`（天然資源エリアの作成と共用）にあり、`ParcelShapeEditManager` は保存済みポリゴンを読み込んで
+編集フェーズから始めることと、`edit_parcel:update_shape` への通知だけを担う。
 `InputHandler` からのドラッグイベントを以下のように処理する。
 
 1. ドラッグ開始時：`IsMouseOverVertex` で頂点上かを判定し、頂点上なら `StartDrag` を呼び出す
@@ -429,6 +432,8 @@ Y軸ドラッグは、ポイントを通りカメラ正面を向いた鉛直平�
   曲線モードのトグル結果は `edit_path:update_shape` の `is_curved` としてUIへ逆流し、
   UI側の確定送信（`curved`）・形状プレビュー・コスト見積りが追従する。
 
+起動役のポーリング・HUD登録/解除・Ctrl検知でのメニュー開閉・自分が開いたメニューの後始末は
+共通基底 `Editors/EditControlMenuBase` にあり、各起動役は「アクティブ判定」「メニュー項目」「HUDの内容」だけを与える。
 同じ仕組みを地区編集（`ZoneEditControlMenu`。7章）と土地区画作成（`ParcelEditControlMenu`。12章）でも使う。
 
 ## 12. 土地区画作成の操作モデル

@@ -113,7 +113,7 @@ public static class ShedRoofBuilder
 
         // 耳切り法とオフセット方向（外向き法線）は CCW を前提とするため正規化する
         Vector2[] normalized = (Vector2[])footprint.Clone();
-        if (BuildingMeshUtils.SignedArea(normalized) < 0f)
+        if (PolygonUtils.SignedArea(normalized) < 0f)
         {
             System.Array.Reverse(normalized);
         }

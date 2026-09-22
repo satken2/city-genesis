@@ -52,6 +52,9 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
     /// <summary>集約線との交点から接線を揃えた合流点までの走行長。</summary>
     private const float ENTRY_OVERLAP = 4f;
 
+    /// <summary>敷地境界のちょうど上を走る線路を内側と判定するための余裕(m)。</summary>
+    private const float BOUNDARY_TOLERANCE = .01f;
+
     /// <summary>直線ゾーンとして成立する最小長(m)。これを切る行は線路を敷かない。</summary>
     private const float MIN_STRAIGHT_LENGTH = 6f;
 
@@ -101,7 +104,7 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
         {
             float cx = buildingData.centerPointArray[0];
             float cz = buildingData.centerPointArray[1];
-            float cy = HeightmapTextureManager.GetTerrainHeight(new Vector3(cx, 1000f, cz));
+            float cy = Utils.GetGroundHeight(new Vector3(cx, 1000f, cz));
             centerPointWorld = new Vector3(cx, cy, cz);
         }
 
@@ -365,7 +368,7 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
         for (int i = 1; i < n; i++)
         {
             Vector2 mid = (footprint[i] + footprint[(i + 1) % n]) * 0.5f;
-            float dist = DistancePointToSegment(mid, frontA, frontB);
+            float dist = PolylineUtils.DistanceToSegment(mid, frontA, frontB);
             if (dist > bestDist)
             {
                 bestDist = dist;
@@ -373,18 +376,6 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
             }
         }
         return best;
-    }
-
-    private static float DistancePointToSegment(Vector2 p, Vector2 a, Vector2 b)
-    {
-        Vector2 ab = b - a;
-        float len2 = ab.sqrMagnitude;
-        if (len2 < 1e-6f)
-        {
-            return (p - a).magnitude;
-        }
-        float t = Mathf.Clamp01(Vector2.Dot(p - a, ab) / len2);
-        return (p - (a + ab * t)).magnitude;
     }
 
     /// <summary>
@@ -422,9 +413,9 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
                 for (int k=0; k<=64; k++)
                 {
                     float t=k/64f;
-                    if (!ContainsPoint(uv,BezierPoint(p0,p0+Vector2.right*((target.x-end)*.4f),target-direction*ENTRY_OVERLAP,target,t))
-                        || !ContainsPoint(uv,Vector2.Lerp(target,spineEnd,t))
-                        || !ContainsPoint(uv,BezierPoint(spineEnd,spineEnd+direction*3f,merge-Vector2.right*3f,merge,t)))
+                    if (!PolygonUtils.Contains(uv,PolylineUtils.CubicBezierPoint(p0,p0+Vector2.right*((target.x-end)*.4f),target-direction*ENTRY_OVERLAP,target,t),BOUNDARY_TOLERANCE)
+                        || !PolygonUtils.Contains(uv,Vector2.Lerp(target,spineEnd,t),BOUNDARY_TOLERANCE)
+                        || !PolygonUtils.Contains(uv,PolylineUtils.CubicBezierPoint(spineEnd,spineEnd+direction*3f,merge-Vector2.right*3f,merge,t),BOUNDARY_TOLERANCE))
                     { fits=false; break; }
                 }
                 if (fits) rows.Add(new TrackRow { V=v,StraightStart=start,StraightEnd=end,Target=target,
@@ -485,19 +476,6 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
         return nearest<float.MaxValue ? node+direction*nearest : node;
     }
 
-    private static bool ContainsPoint(Vector2[] polygon, Vector2 point)
-    {
-        bool inside = false;
-        for (int i = 0, j = polygon.Length - 1; i < polygon.Length; j = i++)
-        {
-            Vector2 a = polygon[i], b = polygon[j];
-            if (DistancePointToSegment(point, a, b) < .01f) return true;
-            if ((a.y > point.y) != (b.y > point.y)
-                && point.x < (b.x - a.x) * (point.y - a.y) / (b.y - a.y) + a.x) inside = !inside;
-        }
-        return inside;
-    }
-
     /// <summary>弧長に沿ってタイル頂点を曲げる。隣接タイルの境界は同じ位置・接線を使う。</summary>
     private static void PlaceTilesAlongBezier(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3,
         Mesh trackMesh, Material[] trackMats, Mesh wireMesh, Material[] wireMats,
@@ -511,7 +489,7 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
         Vector2 prev = p0;
         for (int i = 1; i <= samples; i++)
         {
-            Vector2 point = BezierPoint(p0, p1, p2, p3, i / (float)samples);
+            Vector2 point = PolylineUtils.CubicBezierPoint(p0, p1, p2, p3, i / (float)samples);
             lengths[i] = lengths[i - 1] + Vector2.Distance(prev, point);
             prev = point;
         }
@@ -535,7 +513,7 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
             {
                 Vector3 local = vertices[v];
                 float t = Parameter((tile + (local.z - minZ) / source.bounds.size.z) * step);
-                Vector2 at = BezierPoint(p0, p1, p2, p3, t);
+                Vector2 at = PolylineUtils.CubicBezierPoint(p0, p1, p2, p3, t);
                 Vector2 tangent = 3f * (1f - t) * (1f - t) * (p1 - p0)
                     + 6f * (1f - t) * t * (p2 - p1) + 3f * t * t * (p3 - p2);
                 Vector3 right = Vector3.Cross(Vector3.up, toDir3(tangent));
@@ -604,12 +582,6 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
             Bend(trackMesh, trackMats, tileMinZ, tile, true);
             Bend(wireMesh, wireMats, wireMinZ, tile, false);
         }
-    }
-
-    private static Vector2 BezierPoint(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3, float t)
-    {
-        float it = 1f - t;
-        return it * it * it * p0 + 3f * it * it * t * p1 + 3f * it * t * t * p2 + t * t * t * p3;
     }
 
     /// <summary>

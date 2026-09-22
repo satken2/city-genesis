@@ -164,12 +164,9 @@ public class PropPlacementManager : MonoBehaviour
     private void EnsureOverlayRenderer()
     {
         if (overlayMeshObj != null) return;
-        overlayMeshObj = new GameObject("PropEditorOverlayMesh");
-        overlayRenderer = overlayMeshObj.AddComponent<OverlayMeshRenderer>();
-        Material mat = new Material(Shader.Find("Custom/OverlayLine"));
         // 散布範囲の頂点・辺は地形に埋もれず常に手前に描く(他エディタのギズモと同じ)。
-        mat.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
-        overlayRenderer.Initialize(mat);
+        overlayRenderer = OverlayMeshRenderer.Create("PropEditorOverlayMesh", alwaysOnTop: true);
+        overlayMeshObj = overlayRenderer.gameObject;
     }
 
     // =====================================================================
@@ -412,7 +409,7 @@ public class PropPlacementManager : MonoBehaviour
     /// <summary>地形標高に指定高さを加える。重なりや種別で配置位置を補正しない。</summary>
     private void ApplyTransform(GameObject go, Vector3 worldPos, float rot, float scl)
     {
-        worldPos.y = HeightmapTextureManager.GetTerrainHeight(worldPos) + height;
+        worldPos.y = Utils.GetGroundHeight(worldPos) + height;
         go.transform.position = worldPos;
         go.transform.rotation = Quaternion.Euler(0f, rot, 0f);
         go.transform.localScale = Vector3.one * scl;
@@ -462,7 +459,7 @@ public class PropPlacementManager : MonoBehaviour
             {
                 if (++candidates > manager.CandidateBudget) yield break;
                 var position = new Vector3(point.position.x, 0, point.position.y) + previewOffset;
-                position.y = HeightmapTextureManager.GetTerrainHeight(position);
+                position.y = Utils.GetGroundHeight(position);
                 if (manager.CanPreview(position, propType, point.scale))
                     matrices.Add(Matrix4x4.TRS(position, Quaternion.Euler(0,point.rotation,0), Vector3.one * point.scale));
                 if ((candidates & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.FrameBudgetMs)

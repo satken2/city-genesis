@@ -43,41 +43,17 @@ public class InputSystemManager : MonoBehaviour
 
     private void OnObjectClicked(int objectType, Vector3 position)
     {
-        string typeName = GetObjectTypeName(objectType);
-
         // 必要に応じて、ここでグローバルな処理を追加
         // 例：効果音の再生、ログの記録など
     }
 
     private void OnObjectHovered(int objectType, Vector3 position, GameObject hoveredObject)
     {
-        string typeName = GetObjectTypeName(objectType);
         // ホバーはフレーム毎に呼ばれるので、ログは出力しない
-        // Debug.Log($"InputSystem: {typeName} がホバーされました at {position}");
+        // Debug.Log($"InputSystem: {InputObjectType.GetName(objectType)} がホバーされました at {position}");
 
         // 必要に応じて、ここでグローバルなホバー処理を追加
         // 例：カーソル変更、UI更新など
-    }
-
-    private string GetObjectTypeName(int objectType)
-    {
-        switch (objectType)
-        {
-            case InputObjectType.BUILDING:
-                return "建物";
-            case InputObjectType.PARCEL:
-                return "土地区画";
-            case InputObjectType.PATH:
-                return "道路";
-            case InputObjectType.NODE:
-                return "ノード";
-            case InputObjectType.TERRAIN:
-                return "地面";
-            case InputObjectType.ZONE:
-                return "地区";
-            default:
-                return "不明";
-        }
     }
 
     #region Public Methods

@@ -1228,12 +1228,12 @@ public class CameraController : MonoBehaviour
 
         const float step = 5f; // サンプリング間隔(m)
         Vector3 prevPos = ray.origin;
-        float prevDiff = ray.origin.y - HeightmapTextureManager.GetTerrainHeight(ray.origin);
+        float prevDiff = ray.origin.y - Utils.GetGroundHeight(ray.origin);
 
         for (float traveled = step; traveled <= rotationRaycastDistance; traveled += step)
         {
             Vector3 pos = ray.origin + ray.direction * traveled;
-            float diff = pos.y - HeightmapTextureManager.GetTerrainHeight(pos);
+            float diff = pos.y - Utils.GetGroundHeight(pos);
 
             if (diff <= 0f)
             {
@@ -1241,7 +1241,7 @@ public class CameraController : MonoBehaviour
                 float denom = prevDiff - diff;
                 float t = Mathf.Approximately(denom, 0f) ? 0f : prevDiff / denom;
                 Vector3 point = Vector3.Lerp(prevPos, pos, t);
-                point.y = HeightmapTextureManager.GetTerrainHeight(point);
+                point.y = Utils.GetGroundHeight(point);
                 hitPoint = point;
                 return true;
             }

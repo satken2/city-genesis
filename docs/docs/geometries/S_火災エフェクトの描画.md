@@ -25,7 +25,7 @@
 
 専用のHTTPエンドポイントは持たない。`AlertManager` が `GET /api/v1/alerts` で取得した応答を、そのまま `FireEffectManager.ApplyAlerts(agents, filterMask)` へ渡す(同じ情報のために2本リクエストを投げないため)。
 
-`AlertManager` 側では火災系の2ビットを `AGENT_VFX_BITS` として分離しており、**アイコンは生成しないが表示フィルタのマスクには含める**。これにより表示パネルのアラートタブの「火災」「失火」トグルで炎・煙の表示をON/OFFでき、アラートレイヤー全体の表示トグル(`AlertManager.IsVisible`)にも追従する。
+火災系の2ビットは `consts.py` の `ALERT_AGENT_VFX_BITS` としてアイコン対象(`ALERT_AGENT_ICON_BITS`)から分離されており、`AlertManager` は**アイコンは生成しないが表示フィルタのマスクには含める**。これにより表示パネルのアラートタブの「火災」「失火」トグルで炎・煙の表示をON/OFFでき、アラートレイヤー全体の表示トグル(`AlertManager.IsVisible`)にも追従する。
 
 ## エフェクトの配置
 

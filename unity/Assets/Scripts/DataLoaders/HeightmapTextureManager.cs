@@ -272,7 +272,4 @@ public class HeightmapTextureManager : MonoBehaviour
         windowInitialized = false;
         Utils.InvalidateHeightCache();
     }
-
-    /// <summary>海面の0mも有効な高さとして扱い、表示タイルから正確に問い合わせる。</summary>
-    public static float GetTerrainHeight(Vector3 position) => Utils.GetGroundHeight(position);
 }

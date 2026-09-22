@@ -194,7 +194,7 @@ public static class TrackIntersectionMeshGenerator
             for (int s = 0; s < sampleCount; s++)
             {
                 float t = (float)s / (sampleCount - 1);
-                Vector2 pt = CubicBezier(start, p1, p2, end, t);
+                Vector2 pt = PolylineUtils.CubicBezierPoint(start, p1, p2, end, t);
                 points.Add(ToLocalTrackPoint(pt, nodePosition, horizontalPlane));
             }
 
@@ -227,12 +227,6 @@ public static class TrackIntersectionMeshGenerator
         }
         laterals.Sort();
         return laterals;
-    }
-
-    private static Vector2 CubicBezier(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3, float t)
-    {
-        float u = 1f - t;
-        return u * u * u * p0 + 3f * u * u * t * p1 + 3f * u * t * t * p2 + t * t * t * p3;
     }
 
     /// <summary>

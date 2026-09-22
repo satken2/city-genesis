@@ -11,7 +11,6 @@ using NetTopologySuite.Geometries;
 /// </summary>
 public class RoadIntersectionMeshGenerator : INodeMeshGenerator
 {
-    private const float TriangulationEpsilon = 1e-5f;
     public NodeMeshResult Generate(int nodeId, Vector3 nodePosition, List<PathSummary> paths, float nodeRelativeY = 0f)
         => GenerateWithSections(nodeId, nodePosition, paths, nodeRelativeY);
 
@@ -131,7 +130,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
     {
         float baseY = horizontalPlane
             ? nodePosition.y
-            : HeightmapTextureManager.GetTerrainHeight(new Vector3(x, 1000f, z));
+            : Utils.GetGroundHeight(new Vector3(x, 1000f, z));
         return baseY + RoadPartHeights.ROAD_SPLINE_OFFSET;
     }
 
@@ -176,9 +175,8 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             for (int i = 1; i < rail.Points.Count; i++)
             {
                 Vector2 a = IntersectionPolygonUtil.XZ(rail.Points[i-1]), b = IntersectionPolygonUtil.XZ(rail.Points[i]);
-                Vector2 delta = b-a;
-                float t = Mathf.Clamp01(Vector2.Dot(IntersectionPolygonUtil.XZ(point)-a,delta) / Mathf.Max(1e-6f,delta.sqrMagnitude));
-                if (Vector2.Distance(IntersectionPolygonUtil.XZ(point),a+delta*t) < TrackPath.PLATFORM_EDGE_OFFSET) return true;
+                Vector2 wallPoint = IntersectionPolygonUtil.XZ(point);
+                if (Vector2.Distance(wallPoint, PolylineUtils.ClosestPointOnSegment(wallPoint, a, b)) < TrackPath.PLATFORM_EDGE_OFFSET) return true;
             }
         return false;
     }
@@ -818,7 +816,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             points[i] = new Vector2((float)coords[i].X, (float)coords[i].Y);
         }
 
-        if (SignedArea(points) < 0f)
+        if (PolygonUtils.SignedArea(points) < 0f)
         {
             Array.Reverse(points);
         }
@@ -833,7 +831,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             vertices.Add(new Vector3(points[i].x - center.x, worldY - center.y, points[i].y - center.z));
         }
 
-        List<int> polygonTriangles = TriangulatePolygon(points);
+        List<int> polygonTriangles = BuildingMeshBuilder.TriangulateEarClip(points);
         if (polygonTriangles.Count == 0)
         {
             throw new InvalidOperationException("交差点の輪郭を三角形化できません。");
@@ -847,108 +845,5 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             triangles.Add(baseIndex + polygonTriangles[i + 2]);
             triangles.Add(baseIndex + polygonTriangles[i + 1]);
         }
-    }
-
-    private static List<int> TriangulatePolygon(Vector2[] polygon)
-    {
-        List<int> triangles = new List<int>();
-        if (polygon == null || polygon.Length < 3)
-        {
-            return triangles;
-        }
-
-        List<int> vertexIndices = new List<int>(polygon.Length);
-        for (int i = 0; i < polygon.Length; i++)
-        {
-            vertexIndices.Add(i);
-        }
-
-        int iterationLimit = polygon.Length * polygon.Length;
-        int iterations = 0;
-        while (vertexIndices.Count > 3 && iterations < iterationLimit)
-        {
-            bool earFound = false;
-            for (int i = 0; i < vertexIndices.Count; i++)
-            {
-                int prev = vertexIndices[(i - 1 + vertexIndices.Count) % vertexIndices.Count];
-                int curr = vertexIndices[i];
-                int next = vertexIndices[(i + 1) % vertexIndices.Count];
-
-                if (Cross(polygon[prev], polygon[curr], polygon[next]) <= TriangulationEpsilon)
-                {
-                    continue;
-                }
-
-                bool containsVertex = false;
-                for (int j = 0; j < vertexIndices.Count; j++)
-                {
-                    int candidate = vertexIndices[j];
-                    if (candidate == prev || candidate == curr || candidate == next)
-                    {
-                        continue;
-                    }
-                    if (IsPointInTriangle(polygon[candidate], polygon[prev], polygon[curr], polygon[next]))
-                    {
-                        containsVertex = true;
-                        break;
-                    }
-                }
-
-                if (containsVertex)
-                {
-                    continue;
-                }
-
-                triangles.Add(prev);
-                triangles.Add(curr);
-                triangles.Add(next);
-                vertexIndices.RemoveAt(i);
-                earFound = true;
-                break;
-            }
-
-            if (!earFound)
-            {
-                return new List<int>();
-            }
-            iterations++;
-        }
-
-        if (vertexIndices.Count == 3)
-        {
-            triangles.Add(vertexIndices[0]);
-            triangles.Add(vertexIndices[1]);
-            triangles.Add(vertexIndices[2]);
-        }
-        return triangles;
-    }
-
-    private static float SignedArea(Vector2[] polygon)
-    {
-        float area = 0f;
-        for (int i = 0; i < polygon.Length; i++)
-        {
-            Vector2 a = polygon[i];
-            Vector2 b = polygon[(i + 1) % polygon.Length];
-            area += a.x * b.y - b.x * a.y;
-        }
-        return area * 0.5f;
-    }
-
-    private static float Cross(Vector2 a, Vector2 b, Vector2 c)
-    {
-        Vector2 ab = b - a;
-        Vector2 ac = c - a;
-        return ab.x * ac.y - ab.y * ac.x;
-    }
-
-    private static bool IsPointInTriangle(Vector2 point, Vector2 a, Vector2 b, Vector2 c)
-    {
-        float cross1 = Cross(a, b, point);
-        float cross2 = Cross(b, c, point);
-        float cross3 = Cross(c, a, point);
-        bool hasNegative = cross1 < -TriangulationEpsilon || cross2 < -TriangulationEpsilon || cross3 < -TriangulationEpsilon;
-        bool hasPositive = cross1 > TriangulationEpsilon || cross2 > TriangulationEpsilon || cross3 > TriangulationEpsilon;
-        return !(hasNegative && hasPositive);
     }
 }

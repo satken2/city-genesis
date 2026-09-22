@@ -1,5 +1,6 @@
 // Assets/Scripts/MeshGeneration/Generators/CarRoadMeshGenerator.cs
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -258,5 +259,62 @@ public static class Utils
         float sum = 0f;
         for (int i = 0; i < widths.Count; i++) sum += widths[i];
         return sum / widths.Count;
+    }
+
+    /// <summary>水平(XZ)距離の二乗。高さ差を無視した範囲判定(描画半径からの離脱など)に使う。</summary>
+    public static float XZDistanceSquared(Vector3 a, Vector3 b)
+    {
+        float dx = a.x - b.x, dz = a.z - b.z;
+        return dx * dx + dz * dz;
+    }
+
+    /// <summary>水平(XZ)距離。高さ差を無視する。</summary>
+    public static float XZDistance(Vector3 a, Vector3 b) => Mathf.Sqrt(XZDistanceSquared(a, b));
+
+    /// <summary>
+    /// ScreenSpaceOverlay の Canvas を新規生成する。3Dオブジェクトに追従するラベルやアイコンを
+    /// カメラ距離に依らず一定サイズで描くための土台で、CanvasScaler と GraphicRaycaster を付けて返す。
+    /// sortingOrder はマネージャー間の前後関係を決める(資源ラベル55 &lt; 地区ラベル60 &lt; アラート70)。
+    /// persistent=true はシーン遷移をまたいで残す(DontDestroyOnLoad)。
+    /// </summary>
+    public static Canvas CreateOverlayCanvas(string name, int sortingOrder, bool persistent)
+    {
+        var root = new GameObject(name);
+        if (persistent) Object.DontDestroyOnLoad(root);
+        var canvas = root.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = sortingOrder;
+        root.AddComponent<CanvasScaler>();
+        root.AddComponent<GraphicRaycaster>();
+        return canvas;
+    }
+
+    /// <summary>
+    /// Resources/UIIcons からアイコン Sprite をロードする。テクスチャの Sprite Mode が Multiple で
+    /// インポートされていると単体ロードが null になるため、その場合はサブスプライトの先頭を採用する(正しい設定は Single)。
+    /// </summary>
+    public static Sprite LoadUIIcon(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return null;
+        var sprite = Resources.Load<Sprite>($"UIIcons/{name}");
+        if (sprite != null) return sprite;
+        var all = Resources.LoadAll<Sprite>($"UIIcons/{name}");
+        return all != null && all.Length > 0 ? all[0] : null;
+    }
+
+    /// <summary>
+    /// ローカルAABBを行列で変換したあとの軸並行境界箱。8隅を変換して包み直すので、
+    /// 回転を含む行列でも元の箱を内包する(回転した箱そのものより大きくなる)。
+    /// </summary>
+    public static Bounds TransformBounds(Bounds bounds, Matrix4x4 matrix)
+    {
+        var result = new Bounds(matrix.MultiplyPoint3x4(bounds.center), Vector3.zero);
+        for (int i = 0; i < 8; i++)
+        {
+            Vector3 corner = bounds.center + Vector3.Scale(bounds.extents,
+                new Vector3((i & 1) == 0 ? -1f : 1f, (i & 2) == 0 ? -1f : 1f, (i & 4) == 0 ? -1f : 1f));
+            result.Encapsulate(matrix.MultiplyPoint3x4(corner));
+        }
+        return result;
     }
 }

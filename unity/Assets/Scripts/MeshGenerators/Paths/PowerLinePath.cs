@@ -7,7 +7,7 @@ using UnityEngine;
 public sealed class PowerLinePath : IPathMeshGenerator
 {
     public static Func<int, List<PathSummary>> ConnectedPaths;
-    public static bool Handles(PathSummary path) => path != null && (path.path_variant == 1101 || path.path_variant == 1102);
+    public static bool Handles(PathSummary path) => path != null && (path.path_variant == Constants.PATH_VARIANT_GRID || path.path_variant == 1102);
     public struct Support
     {
         public Vector3 position;
@@ -23,7 +23,7 @@ public sealed class PowerLinePath : IPathMeshGenerator
         return new Vector3((circuit % 2 == 0 ? -1 : 1) * (6.8f - .7f * level) + (bundle == 0 ? -.22f : .22f), 23 + 5 * level, 0);
     }
 
-    static float BaseHeight(int variant) => MasterDataStore.Instance?.GetPathMaster(variant)?.base_height ?? (variant == 1101 ? 20 : 10);
+    static float BaseHeight(int variant) => MasterDataStore.Instance?.GetPathMaster(variant)?.base_height ?? (variant == Constants.PATH_VARIANT_GRID ? 20 : 10);
     static Vector3 Point(List<float> p, float baseHeight)
     {
         var v = new Vector3(p[0], 0, p[p.Count - 1]);
@@ -94,8 +94,8 @@ public sealed class PowerLinePath : IPathMeshGenerator
         PathDrawContext.SuppressDetailRange = true;
         GenerateInto(root,path,points,PathDrawContext.CurrentDrawLod);
         var elevated = new List<Vector3>();
-        foreach (var p in points) elevated.Add(p + Vector3.up * (path.path_variant == 1101 ? 26 : 13));
-        return new PathMeshResult(PathMeshFactory.BuildStripMesh(elevated,path.path_variant == 1101 ? 14 : 6),true,root);
+        foreach (var p in points) elevated.Add(p + Vector3.up * (path.path_variant == Constants.PATH_VARIANT_GRID ? 26 : 13));
+        return new PathMeshResult(PathMeshFactory.BuildStripMesh(elevated,path.path_variant == Constants.PATH_VARIANT_GRID ? 14 : 6),true,root);
     }
 
     public static void GenerateInto(GameObject root, PathSummary path, List<Vector3> points, DrawLod lod)
@@ -133,19 +133,19 @@ public sealed class PowerLinePath : IPathMeshGenerator
             }
             else GenerateFarTower(visual,s,metal);
             var foundation = new PathStructureMesh(visual,"TowerFoundations",new[] { metal });
-            float foot = s.variant == 1101 ? 3.5f : .9f;
+            float foot = s.variant == Constants.PATH_VARIANT_GRID ? 3.5f : .9f;
             for (int x=-1;x<=1;x+=2) for(int z=-1;z<=1;z+=2)
             {
                 var top=s.position+s.rotation*new Vector3(x*foot,0,z*foot);
                 var bottom=new Vector3(top.x,Utils.GetGroundHeight(top),top.z);
-                if(top.y>bottom.y+.1f) foundation.Bar(bottom,top,s.variant==1101?.22f:.12f,sides:4);
+                if(top.y>bottom.y+.1f) foundation.Bar(bottom,top,s.variant==Constants.PATH_VARIANT_GRID?.22f:.12f,sides:4);
             }
             foundation.Finish();
             if (s.node > 0) holder.AddComponent<PowerLineSupport>().Initialize(s.node,path.path_id,visual,lod);
             if (i == 0) continue;
             if (constructing && (float)i/(supports.Count-1) > ConstructionPathBuilder.DeckProgress(progress)) continue;
             var previous = supports[i-1];
-            bool large = path.path_variant == 1101;
+            bool large = path.path_variant == Constants.PATH_VARIANT_GRID;
             int circuits = large ? 6 : 3;
             int bundles = large && !far ? 2 : 1;
             for (int circuit=0; circuit<circuits; circuit++) for (int bundle=0;bundle<bundles;bundle++)
@@ -154,12 +154,12 @@ public sealed class PowerLinePath : IPathMeshGenerator
                 {
                     int c = support.variant == 1102 ? circuit % 3 : circuit;
                     var local = Attachment(support.variant,c,bundle);
-                    if (far && support.variant == 1101) local.x += .22f;
+                    if (far && support.variant == Constants.PATH_VARIANT_GRID) local.x += .22f;
                     return support.position + support.rotation * local;
                 }
                 Cable(wires,Attach(previous),Attach(s),far,large ? .045f : .032f);
             }
-            Cable(wires,previous.position + Vector3.up*(previous.variant==1101?38:17),s.position+Vector3.up*(s.variant==1101?38:17),far,.025f);
+            Cable(wires,previous.position + Vector3.up*(previous.variant==Constants.PATH_VARIANT_GRID?38:17),s.position+Vector3.up*(s.variant==Constants.PATH_VARIANT_GRID?38:17),far,.025f);
         }
         wires.Finish();
     }
@@ -182,7 +182,7 @@ public sealed class PowerLinePath : IPathMeshGenerator
     static void GenerateFarTower(GameObject parent, Support s, Material material)
     {
         var mesh=new PathStructureMesh(parent,"FarPowerTower",new[] {material});
-        bool large=s.variant==1101;
+        bool large=s.variant==Constants.PATH_VARIANT_GRID;
         float width=large?3.5f:.9f, height=large?38:17;
         Vector3 P(float x,float y,float z)=>s.position+s.rotation*new Vector3(x,y,z);
         for(int x=-1;x<=1;x+=2) for(int z=-1;z<=1;z+=2)

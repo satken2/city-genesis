@@ -13,6 +13,22 @@ using UnityEngine;
 public static class GeneratedModelUtils
 {
     /// <summary>
+    /// GeoJSON 形式のリング [[x, z], [x, z], ...] を Vector2(x=X, y=Z) の点列に変換する。
+    /// 配列でない・null のときは空リストを返す(点数の妥当性は呼び出し側が判定する)。
+    /// 水面ポリゴンや効果範囲ポリゴンなど、生の JSON で届く多角形の共通入口。
+    /// </summary>
+    public static List<Vector2> ParseRing(JToken ring)
+    {
+        if (!(ring is JArray arr)) return new List<Vector2>();
+        var pts = new List<Vector2>(arr.Count);
+        foreach (JToken p in arr)
+        {
+            if (p is JArray pa && pa.Count >= 2) pts.Add(new Vector2((float)pa[0], (float)pa[1]));
+        }
+        return pts;
+    }
+
+    /// <summary>
     /// List&lt;object&gt; を float[] に変換する。
     /// 座標1点分 [x, y] や [x, y, z] などの1次元配列に使用する。
     /// </summary>
@@ -310,10 +326,8 @@ public static class PathSummaryExtensions
         {
             var a = new Vector2(anchorX[i], anchorZ[i]);
             var b = new Vector2(anchorX[i + 1], anchorZ[i + 1]);
-            Vector2 ab = b - a;
-            float lenSqr = ab.sqrMagnitude;
-            float t = lenSqr > 1e-6f ? Mathf.Clamp01(Vector2.Dot(pXZ - a, ab) / lenSqr) : 0f;
-            Vector2 closest = a + ab * t;
+            float t = PolylineUtils.ProjectOnSegment(pXZ, a, b);
+            Vector2 closest = Vector2.Lerp(a, b, t);
             float distSqr = (pXZ - closest).sqrMagnitude;
             if (distSqr < bestDistSqr)
             {

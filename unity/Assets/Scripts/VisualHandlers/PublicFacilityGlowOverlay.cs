@@ -82,17 +82,10 @@ public class PublicFacilityGlowOverlay : MonoBehaviour
         }
         Instance = this;
 
-        var meshObj = new GameObject("PublicFacilityGlowMesh");
-        meshObj.transform.SetParent(transform, false);
-        glowRenderer = meshObj.AddComponent<OverlayMeshRenderer>();
-
-        Material mat = new Material(Shader.Find("Custom/OverlayLine"));
-        // 起伏地形で光が地面に埋もれないよう深度テストを無効化する
-        // (ParcelManager のハイライトと同じ採用済みトレードオフ: 丘の裏でも透けて見える)。
-        mat.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
+        // 起伏地形で光が地面に埋もれないよう深度テストなし(ParcelManager のハイライトと同じトレードオフ)。
+        glowRenderer = OverlayMeshRenderer.Create("PublicFacilityGlowMesh", alwaysOnTop: true, parent: transform);
         // 「塗り」ではなく「光」に見せるため加算合成にする(DstBlend=One)。
-        mat.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.One);
-        glowRenderer.Initialize(mat);
+        glowRenderer.Material.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.One);
     }
 
     private void OnDestroy()

@@ -351,20 +351,6 @@ public static class BuildingMeshUtils
 
 
     /// <summary>
-    /// 多角形の符号付き面積を計算
-    /// </summary>
-    public static float SignedArea(Vector2[] points)
-    {
-        float area = 0f;
-        for (int i = 0; i < points.Length; i++)
-        {
-            int j = (i + 1) % points.Length;
-            area += points[i].x * points[j].y - points[j].x * points[i].y;
-        }
-        return area * 0.5f;
-    }
-
-    /// <summary>
     /// 多角形（CCW）を外側へ一定距離オフセットする。各頂点を隣り合う2辺の外向き法線の
     /// 二等分方向へ移動し、鋭角の頂点で角が痩せないよう移動量を 1/cos で割り増しする。
     /// 屋根の軒の出（けらば・軒先の張り出し）の輪郭を作るために、各屋根ビルダーが共有する。
@@ -521,7 +507,7 @@ public static class BuildingMeshUtils
         }
 
         // 頂点の並びをCCW(反時計回り)に正規化
-        if (BuildingMeshUtils.SignedArea(footprint) < 0f)
+        if (PolygonUtils.SignedArea(footprint) < 0f)
         {
             System.Array.Reverse(footprint);
         }
@@ -706,7 +692,7 @@ public static class BuildingMeshUtils
             }
             else
             {
-                cy = HeightmapTextureManager.GetTerrainHeight(new Vector3(cx, 1000f, cz));
+                cy = Utils.GetGroundHeight(new Vector3(cx, 1000f, cz));
             }
             centerPointWorld = new Vector3(cx, cy, cz);
         }
@@ -722,7 +708,7 @@ public static class BuildingMeshUtils
                     raw[i] = new Vector2(poly[i][0] - cx, poly[i][1] - cz);
                 }
                 parcelFootprint = SanitizeRingPolygon(raw);
-                if (parcelFootprint != null && SignedArea(parcelFootprint) < 0f)
+                if (parcelFootprint != null && PolygonUtils.SignedArea(parcelFootprint) < 0f)
                 {
                     System.Array.Reverse(parcelFootprint);
                 }

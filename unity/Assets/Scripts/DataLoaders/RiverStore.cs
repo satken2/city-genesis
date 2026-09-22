@@ -195,18 +195,11 @@ public class RiverRecord
     public bool Contains(float x, float z)
     {
         if (x < MinX || x > MaxX || z < MinZ || z > MaxZ) return false;
+        Vector2 point = new Vector2(x, z);
         bool inside = false;
         foreach (var ring in Rings)
         {
-            int n = ring.Length;
-            for (int i = 0, j = n - 1; i < n; j = i++)
-            {
-                if ((ring[i].y > z) != (ring[j].y > z))
-                {
-                    float xCross = ring[i].x + (z - ring[i].y) * (ring[j].x - ring[i].x) / (ring[j].y - ring[i].y);
-                    if (x < xCross) inside = !inside;
-                }
-            }
+            if (PolygonUtils.Contains(ring, point)) inside = !inside;
         }
         return inside;
     }

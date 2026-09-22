@@ -36,7 +36,7 @@ public sealed class PropRenderModel : IDisposable
         bool first = true;
         foreach (var part in normal)
         {
-            var b = TransformBounds(part.mesh.bounds, part.local);
+            var b = Utils.TransformBounds(part.mesh.bounds, part.local);
             if (first) { bounds = b; first = false; } else bounds.Encapsulate(b);
         }
         var closePrefab = manager.GetModel($"Models/Props/{name}_close", true);
@@ -62,8 +62,8 @@ public sealed class PropRenderModel : IDisposable
     private void CreateDistantTree()
     {
         if (far.Count == 0) return;
-        var canopy = TransformBounds(far[0].mesh.bounds, far[0].local);
-        foreach (var part in far) canopy.Encapsulate(TransformBounds(part.mesh.bounds, part.local));
+        var canopy = Utils.TransformBounds(far[0].mesh.bounds, far[0].local);
+        foreach (var part in far) canopy.Encapsulate(Utils.TransformBounds(part.mesh.bounds, part.local));
         var a = canopy.min; var b = canopy.max;
         var mesh = new Mesh { name = "PropDistantCrown" };
         mesh.vertices = new[] {new Vector3(a.x,a.y,a.z), new Vector3(b.x,a.y,a.z),
@@ -96,15 +96,6 @@ public sealed class PropRenderModel : IDisposable
                     local = prefab.transform.worldToLocalMatrix * filter.transform.localToWorldMatrix });
             }
         }
-    }
-
-    public static Bounds TransformBounds(Bounds b, Matrix4x4 matrix)
-    {
-        var result = new Bounds(matrix.MultiplyPoint3x4(b.center), Vector3.zero);
-        for (int i = 0; i < 8; i++)
-            result.Encapsulate(matrix.MultiplyPoint3x4(b.center + Vector3.Scale(b.extents,
-                new Vector3((i & 1) == 0 ? -1 : 1, (i & 2) == 0 ? -1 : 1, (i & 4) == 0 ? -1 : 1))));
-        return result;
     }
 
     private static Mesh Simplify(Mesh source, int submesh)

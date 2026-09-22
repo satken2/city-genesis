@@ -175,15 +175,6 @@ public abstract class BaseApiDataManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 指定位置が属するセルインデックスを計算する。
-    /// </summary>
-    protected Vector2Int PositionToCell(Vector3 position)
-    {
-        float cellSize = TerrainManager.CellSize;
-        return new Vector2Int(Mathf.FloorToInt(position.x / cellSize), Mathf.FloorToInt(position.z / cellSize));
-    }
-
-    /// <summary>
     /// 全データをクリアする抽象メソッド
     /// </summary>
     public abstract void ClearAllCells();

@@ -2,7 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 線分の最近接点・距離と、ポリライン(点列)の角丸めを扱う幾何ユーティリティ。
+/// 線分の最近接点・距離、三次ベジエの評価、ポリライン(点列)の進行方向と角丸めを扱う幾何ユーティリティ。
+/// 多角形(閉じたリング)に対する計算は <see cref="PolygonUtils"/> にある。
 /// </summary>
 public static class PolylineUtils
 {
@@ -12,6 +13,21 @@ public static class PolylineUtils
     private static float ProjectionParameter(float dot, float lengthSq)
     {
         return lengthSq <= DEGENERATE_LENGTH_SQ ? 0f : Mathf.Clamp01(dot / lengthSq);
+    }
+
+    /// <summary>線分上の最近接点の位置パラメータ(0=始点、1=終点)。辺上の当たり位置を保持したいヒット判定などで使う。</summary>
+    public static float ProjectOnSegment(Vector2 point, Vector2 start, Vector2 end)
+    {
+        Vector2 delta = end - start;
+        return ProjectionParameter(Vector2.Dot(point - start, delta), delta.sqrMagnitude);
+    }
+
+    /// <summary>XZ射影での位置パラメータ(0=始点、1=終点)。高さ差を無視して道路中心線上の進行距離を求めるときに使う。</summary>
+    public static float ProjectOnSegmentXZ(Vector3 point, Vector3 start, Vector3 end)
+    {
+        Vector2 delta = new Vector2(end.x - start.x, end.z - start.z);
+        Vector2 offset = new Vector2(point.x - start.x, point.z - start.z);
+        return ProjectionParameter(Vector2.Dot(offset, delta), delta.sqrMagnitude);
     }
 
     /// <summary>同じ2D座標系の点と線分を渡す。スクリーン座標の場合は単位がピクセルになる。</summary>
@@ -42,6 +58,55 @@ public static class PolylineUtils
     public static float DistanceToSegmentSq(Vector2 point, Vector2 start, Vector2 end)
     {
         return (point - ClosestPointOnSegment(point, start, end)).sqrMagnitude;
+    }
+
+    public static float DistanceToSegment(Vector2 point, Vector2 start, Vector2 end)
+    {
+        return Mathf.Sqrt(DistanceToSegmentSq(point, start, end));
+    }
+
+    /// <summary>
+    /// 三次ベジエ曲線のパラメータ t における点。
+    /// B(t) = (1-t)^3 P0 + 3(1-t)^2 t P1 + 3(1-t) t^2 P2 + t^3 P3
+    /// 道路プレビュー(RoadPlanManager)と実道路(PathManager)が同じ式を共有し、曲線形状の食い違いを防ぐ。
+    /// </summary>
+    public static Vector3 CubicBezierPoint(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
+    {
+        float u = 1f - t;
+        float u2 = u * u;
+        float t2 = t * t;
+        return u2 * u * p0 + 3f * u2 * t * p1 + 3f * u * t2 * p2 + t2 * t * p3;
+    }
+
+    public static Vector2 CubicBezierPoint(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3, float t)
+    {
+        float u = 1f - t;
+        float u2 = u * u;
+        float t2 = t * t;
+        return u2 * u * p0 + 3f * u2 * t * p1 + 3f * u * t2 * p2 + t2 * t * p3;
+    }
+
+    /// <summary>
+    /// 点列の index 番目における進行方向(前後の辺の単位ベクトルの平均)。帯メッシュの断面を
+    /// 頂点で折れ線状に捻らず滑らかに配置するために使う。端点は片側の辺だけ、前後が打ち消し合う
+    /// 折り返し(180°)は前方の辺を優先し、それも縮退していれば Vector3.forward を返す。
+    /// </summary>
+    public static Vector3 SmoothedDirection(IReadOnlyList<Vector3> points, int index)
+    {
+        Vector3 forward = index < points.Count - 1 ? points[index + 1] - points[index] : Vector3.zero;
+        Vector3 backward = index > 0 ? points[index] - points[index - 1] : Vector3.zero;
+        bool hasForward = forward.sqrMagnitude >= 1e-6f;
+        bool hasBackward = backward.sqrMagnitude >= 1e-6f;
+        if (!hasForward && !hasBackward) return Vector3.forward;
+
+        Vector3 aggregate = Vector3.zero;
+        if (hasForward) aggregate += forward.normalized;
+        if (hasBackward) aggregate += backward.normalized;
+        if (aggregate.sqrMagnitude < 1e-6f)
+        {
+            return hasForward ? forward.normalized : backward.normalized;
+        }
+        return aggregate.normalized;
     }
 
     // これ以下の曲がり角は「ほぼ直線」とみなして丸めず素通しする(度)。

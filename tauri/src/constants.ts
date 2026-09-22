@@ -366,7 +366,9 @@ export const RAIL_VEHICLE_KEYS: number[] = [20, 21, 22, 23];
 
 export const TENANT_TYPES: number[] = [2, 4, 8, 16, 64];
 
-export const ALERT_AGENT_ICON_BITS: number[] = [1, 2, 4, 8, 16, 32];
+export const ALERT_AGENT_ICON_BITS: number[] = [1, 8, 16, 32];
+
+export const ALERT_AGENT_VFX_BITS: number[] = [2, 4];
 
 export const ALERT_PATH_ICON_BITS: number[] = [1, 2, 4];
 

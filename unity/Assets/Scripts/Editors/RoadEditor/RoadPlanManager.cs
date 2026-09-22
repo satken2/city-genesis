@@ -428,27 +428,18 @@ public partial class RoadPlanManager : MonoBehaviour
 
     private void EnsureOverlayRenderer()
     {
+        // ノード・ベジエ制御点・補助線などの編集ギズモと既存パスの辺・ノードは、
+        // 起伏地形でハンドルが地面の裏に回っても埋もれないよう深度テストなしで描く。
         if (overlayMeshObj == null)
         {
-            overlayMeshObj = new GameObject("RoadEditorOverlayMesh");
-            overlayRenderer = overlayMeshObj.AddComponent<OverlayMeshRenderer>();
-            Material mat = new Material(Shader.Find("Custom/OverlayLine"));
-            // ノード・ベジエ制御点・補助線などの編集ギズモは地形に埋もれず常に手前に出す。
-            // OverlayLine の既定 _ZTest=LEqual + ポリゴンオフセットでは、起伏のある地形で
-            // ハンドルが地面の裏に回ると深く埋もれてしまう。このマテリアルインスタンス限定で
-            // _ZTest を Always(8) にして深度テストを無効化する（他オーバーレイには影響しない）。
-            mat.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
-            overlayRenderer.Initialize(mat);
+            overlayRenderer = OverlayMeshRenderer.Create("RoadEditorOverlayMesh", alwaysOnTop: true);
+            overlayMeshObj = overlayRenderer.gameObject;
         }
 
         if (backgroundMeshObj == null)
         {
-            backgroundMeshObj = new GameObject("RoadEditorBackgroundMesh");
-            backgroundRenderer = backgroundMeshObj.AddComponent<OverlayMeshRenderer>();
-            Material bgMat = new Material(Shader.Find("Custom/OverlayLine"));
-            // 既存パスの辺・ノードも同様に地形へ埋もれず手前に表示する
-            bgMat.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Always);
-            backgroundRenderer.Initialize(bgMat);
+            backgroundRenderer = OverlayMeshRenderer.Create("RoadEditorBackgroundMesh", alwaysOnTop: true);
+            backgroundMeshObj = backgroundRenderer.gameObject;
             bgDirty = true;
         }
     }
@@ -2991,11 +2982,11 @@ public partial class RoadPlanManager : MonoBehaviour
                     for (int s = 1; s <= bezierSamplesPerSegment; s++)
                     {
                         float t = (float)s / (bezierSamplesPerSegment + 1);
-                        Vector3 sampled = SampleCubicBezier(p0, p1, p2, p3, t);
+                        Vector3 sampled = PolylineUtils.CubicBezierPoint(p0, p1, p2, p3, t);
                         if (followTerrain)
                         {
                             // XZはベジエ曲線のまま、Yだけ地形高さ＋盛土(線形補間)に追従させる
-                            float gh = HeightmapTextureManager.GetTerrainHeight(new Vector3(sampled.x, 1000f, sampled.z));
+                            float gh = Utils.GetGroundHeight(new Vector3(sampled.x, 1000f, sampled.z));
                             sampled.y = gh + Mathf.Lerp(embStart, embEnd, t) + 0.1f;
                         }
                         renderPoints.Add(sampled);
@@ -3142,7 +3133,7 @@ public partial class RoadPlanManager : MonoBehaviour
             for (int i = 0; i < steps; i++)
             {
                 float t = (float)i / steps;
-                Vector3 p = Curved ? SampleCubicBezier(localA, localC1, localC2, localB, t) : Vector3.Lerp(localA, localB, t);
+                Vector3 p = Curved ? PolylineUtils.CubicBezierPoint(localA, localC1, localC2, localB, t) : Vector3.Lerp(localA, localB, t);
                 if (follow)
                     p.y = Utils.GetGroundHeight(p + origin) - origin.y + Mathf.Lerp(embA, embB, t) + (surfaceOffset ? RoadPartHeights.ROAD_SPLINE_OFFSET : 0f);
                 result.Add(p);
@@ -3152,21 +3143,6 @@ public partial class RoadPlanManager : MonoBehaviour
         result.Add((placing ? renderPoints[renderPoints.Count - 1] : renderPoints[end * stride]) - origin);
         if (followSamples != null) followSamples.Add(followSamples.Count > 0 && followSamples[followSamples.Count - 1]);
         return result;
-    }
-
-    /// <summary>
-    /// 三次ベジエ曲線のパラメータ t における点を計算する。
-    /// B(t) = (1-t)^3 * P0 + 3(1-t)^2*t * P1 + 3(1-t)*t^2 * P2 + t^3 * P3
-    /// </summary>
-    private static Vector3 SampleCubicBezier(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
-    {
-        float u = 1f - t;
-        float u2 = u * u;
-        float u3 = u2 * u;
-        float t2 = t * t;
-        float t3 = t2 * t;
-
-        return u3 * p0 + 3f * u2 * t * p1 + 3f * u * t2 * p2 + t3 * p3;
     }
 
     // =====================================================================
@@ -3478,7 +3454,7 @@ public partial class RoadPlanManager : MonoBehaviour
         IpcClient.Instance.EmitEditPathUpdateShape(pathId, PathType, pointsList, startControl, endControl, embankmentHeights, waypointControls, Curved, PathFollowTerrainOverride, finalized,
             phase == RoadEditorPhase.Editing && points.Count >= 2 && CheckElevationIntersections().Count == 0
             && CheckRiverCrossings().Count == 0 && CheckMaxSpanViolations().Count == 0
-            && (!(PathSubtype == 601 || PathSubtype == 602) || !HasAlignmentViolation),
+            && (!RoadPath.IsRopewayVariant(PathSubtype) || !HasAlignmentViolation),
             BuildShapeSyncExtras());
     }
 
@@ -3641,7 +3617,7 @@ public partial class RoadPlanManager : MonoBehaviour
         cachedAlignmentMaxGradePct = 0f;
         cachedAlignmentGradeLimit = 0f;
         cachedCurveViolation = cachedGradeViolation = false;
-        if (PathSubtype == 601 || PathSubtype == 602)
+        if (RoadPath.IsRopewayVariant(PathSubtype))
         {
             CollectRopewayBendWarnings(violations);
             return violations;
@@ -4086,9 +4062,9 @@ public partial class RoadPlanManager : MonoBehaviour
             for (int j = 1; j <= count; j++)
             {
                 float t = (float)j / count;
-                var next = curved ? SampleCubicBezier(p0, p1, p2, p3, t) : Vector3.Lerp(p0, p3, t);
+                var next = curved ? PolylineUtils.CubicBezierPoint(p0, p1, p2, p3, t) : Vector3.Lerp(p0, p3, t);
                 float absolute = follows ? Utils.GetGroundHeight(next)
-                    : (curved ? SampleCubicBezier(p0 + Vector3.up * g0, p1 + Vector3.up * g0,
+                    : (curved ? PolylineUtils.CubicBezierPoint(p0 + Vector3.up * g0, p1 + Vector3.up * g0,
                         p2 + Vector3.up * g3, p3 + Vector3.up * g3, t).y : Mathf.Lerp(g0 + p0.y, g3 + p3.y, t));
                 var segment = new ElevationSegment(previous, next, previous.y, next.y, followsTerrain);
                 segment.follows = follows;
@@ -4586,7 +4562,7 @@ public partial class RoadPlanManager : MonoBehaviour
         // (b) 中心線頂点がフットプリント内部
         for (int ci = 0; ci < centerline.Count; ci++)
         {
-            if (PointInPolygonXZ(new Vector2(centerline[ci].x, centerline[ci].z), footprint)) return true;
+            if (PolygonUtils.Contains(footprint, new Vector2(centerline[ci].x, centerline[ci].z))) return true;
         }
 
         // (c) 中心線セグメントとフットプリント辺の交差
@@ -4606,24 +4582,6 @@ public partial class RoadPlanManager : MonoBehaviour
         }
 
         return false;
-    }
-
-    /// <summary>点PがXZポリゴン内部にあるか（レイキャスティング法）。</summary>
-    private static bool PointInPolygonXZ(Vector2 p, List<Vector2> poly)
-    {
-        bool inside = false;
-        int n = poly.Count;
-        for (int i = 0, j = n - 1; i < n; j = i++)
-        {
-            Vector2 pi = poly[i];
-            Vector2 pj = poly[j];
-            if (((pi.y > p.y) != (pj.y > p.y)) &&
-                (p.x < (pj.x - pi.x) * (p.y - pi.y) / (pj.y - pi.y) + pi.x))
-            {
-                inside = !inside;
-            }
-        }
-        return inside;
     }
 
     /// <summary>

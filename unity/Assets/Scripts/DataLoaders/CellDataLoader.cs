@@ -514,7 +514,7 @@ public class CellDataLoader : MonoBehaviour
     /// <summary>
     /// 地形追従更新(建物 → 道路 → プロップ)を複数フレームに分散して実行する。
     /// 各ステップはフレーム予算(<see cref="PerformanceConfig.SliceBudgetMs"/>)を超えると次フレームに譲る。
-    /// 建物・道路は <see cref="HeightmapTextureManager.GetTerrainHeight"/> を参照するため、
+    /// 建物・道路は <see cref="Utils.GetGroundHeight"/> を参照するため、
     /// 完成したTerrainタイルだけを参照する。
     /// </summary>
     private IEnumerator TerrainFollowUpCoroutine()
@@ -770,7 +770,7 @@ public class CellDataLoader : MonoBehaviour
 
         // GPU高さ窓と地形高さのフレームキャッシュを無効化する。
         // 無効化しないと、次のセーブのロード中に前のマップの標高が
-        // HeightmapTextureManager.GetTerrainHeight から返り、地形タイル到着前に
+        // Utils.GetGroundHeight から返り、地形タイル到着前に
         // 生成される建物・道路・パスのスプラインが誤った高さで作られる。
         if (heightmapTextureManager != null)
         {

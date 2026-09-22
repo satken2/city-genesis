@@ -52,24 +52,10 @@ public static class PropGeometry
         return Rect.MinMaxRect(min.x, min.y, max.x, max.y);
     }
 
-    public static bool InRing(Vector2 p, IList<Vector2> ring)
-    {
-        bool inside = false;
-        for (int i = 0, j = ring.Count - 1; i < ring.Count; j = i++)
-        {
-            var a = ring[j]; var b = ring[i];
-            if (DistanceSquared(p, a, b) < 1e-10f) return true;
-            if ((a.y > p.y) != (b.y > p.y) && p.x < (b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x) inside = !inside;
-        }
-        return inside;
-    }
+    /// <summary>リング内外判定。辺上(1e-5m以内)の点は内側として扱い、境界にちょうど乗った散布候補を落とさない。</summary>
+    public static bool InRing(Vector2 p, IReadOnlyList<Vector2> ring) => PolygonUtils.Contains(ring, p, BOUNDARY_TOLERANCE);
 
-    public static float DistanceSquared(Vector2 p, Vector2 a, Vector2 b)
-    {
-        var ab = b - a;
-        float t = ab.sqrMagnitude > 0 ? Mathf.Clamp01(Vector2.Dot(p - a, ab) / ab.sqrMagnitude) : 0;
-        return (p - a - ab * t).sqrMagnitude;
-    }
+    private const float BOUNDARY_TOLERANCE = 1e-5f;
 
     public static float EdgeWeight(Vector2 p, Region region, float width)
     {
@@ -77,7 +63,7 @@ public static class PropGeometry
         float distanceSq = float.MaxValue;
         foreach (var ring in region.rings)
             for (int i = 0, j = ring.Length - 1; i < ring.Length; j = i++)
-                distanceSq = Mathf.Min(distanceSq, DistanceSquared(p, ring[i], ring[j]));
+                distanceSq = Mathf.Min(distanceSq, PolylineUtils.DistanceToSegmentSq(p, ring[i], ring[j]));
         float t = Mathf.Clamp01(Mathf.Sqrt(distanceSq) / width);
         return t * t * (3 - 2 * t);
     }
@@ -90,17 +76,17 @@ public static class PropGeometry
         return false;
     }
 
-    public static bool Blocked(Vector2 p, float clearance, IList<Vector2> ring, Rect bounds)
+    public static bool Blocked(Vector2 p, float clearance, IReadOnlyList<Vector2> ring, Rect bounds)
     {
         if (p.x < bounds.xMin - clearance || p.x > bounds.xMax + clearance ||
             p.y < bounds.yMin - clearance || p.y > bounds.yMax + clearance) return false;
         if (InRing(p, ring)) return true;
         for (int i = 0, j = ring.Count - 1; i < ring.Count; j = i++)
-            if (DistanceSquared(p, ring[i], ring[j]) <= clearance * clearance) return true;
+            if (PolylineUtils.DistanceToSegmentSq(p, ring[i], ring[j]) <= clearance * clearance) return true;
         return false;
     }
 
-    public static bool BlockedWithHoles(Vector2 p, float clearance, IList<Vector2> ring,
+    public static bool BlockedWithHoles(Vector2 p, float clearance, IReadOnlyList<Vector2> ring,
         Rect bounds, IList<Vector2[]> holes)
     {
         if (!Blocked(p, clearance, ring, bounds)) return false;
@@ -109,7 +95,7 @@ public static class PropGeometry
             if (!InRing(p, hole)) continue;
             // 水域の穴は島の陸地。岸から離隔分だけ内側に入った点を表示する。
             for (int i = 0, j = hole.Length - 1; i < hole.Length; j = i++)
-                if (DistanceSquared(p, hole[i], hole[j]) <= clearance * clearance) return true;
+                if (PolylineUtils.DistanceToSegmentSq(p, hole[i], hole[j]) <= clearance * clearance) return true;
             return false;
         }
         return true;

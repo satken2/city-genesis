@@ -1141,8 +1141,7 @@ public class MeshTestController : MonoBehaviour
         for (int s = 0; s <= samples + 1; s++)
         {
             float t = (float)s / (samples + 1);
-            float u = 1f - t;
-            Vector3 p = u * u * u * p0 + 3f * u * u * t * p1 + 3f * u * t * t * p2 + t * t * t * p3;
+            Vector3 p = PolylineUtils.CubicBezierPoint(p0, p1, p2, p3, t);
             p.y = forcedY;
             result.Add(p);
         }

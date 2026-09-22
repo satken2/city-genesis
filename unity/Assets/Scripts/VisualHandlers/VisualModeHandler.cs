@@ -116,7 +116,7 @@ public class VisualModeHandler : MonoBehaviour
                 
                 if (enableDebugLog)
                 {
-                    Debug.Log($"VisualModeHandler: {GetObjectTypeName(objectType)} オブジェクトを登録 (現在のモード: {GetModeName(currentMode)}, 総数: {registeredObjects[objectType].Count})");
+                    Debug.Log($"VisualModeHandler: {InputObjectType.GetName(objectType)} オブジェクトを登録 (現在のモード: {GetModeName(currentMode)}, 総数: {registeredObjects[objectType].Count})");
                 }
             }
         }
@@ -130,7 +130,7 @@ public class VisualModeHandler : MonoBehaviour
             {
                 if (enableDebugLog)
                 {
-                    Debug.Log($"VisualModeHandler: {GetObjectTypeName(objectType)} オブジェクトの登録を解除 (残り: {registeredObjects[objectType].Count})");
+                    Debug.Log($"VisualModeHandler: {InputObjectType.GetName(objectType)} オブジェクトの登録を解除 (残り: {registeredObjects[objectType].Count})");
                 }
             }
         }
@@ -143,7 +143,7 @@ public class VisualModeHandler : MonoBehaviour
         // 差分チェック：前回と同じモードなら何もしない
         if (previousModes[objectType] == mode)
         {
-            Debug.Log($"VisualModeHandler.SetMode: {GetObjectTypeName(objectType)} を {GetModeName(mode)} に変更しようとしましたが、前回と同じモードのためスキップします");
+            Debug.Log($"VisualModeHandler.SetMode: {InputObjectType.GetName(objectType)} を {GetModeName(mode)} に変更しようとしましたが、前回と同じモードのためスキップします");
             return;
         }
 
@@ -162,7 +162,7 @@ public class VisualModeHandler : MonoBehaviour
 
         if (enableDebugLog)
         {
-            Debug.Log($"VisualModeHandler: {GetObjectTypeName(objectType)} のモードを {GetModeName(mode)} に変更開始 (対象: {registeredObjects[objectType].Count} オブジェクト)");
+            Debug.Log($"VisualModeHandler: {InputObjectType.GetName(objectType)} のモードを {GetModeName(mode)} に変更開始 (対象: {registeredObjects[objectType].Count} オブジェクト)");
         }
     }
 
@@ -195,7 +195,7 @@ public class VisualModeHandler : MonoBehaviour
 
         if (enableDebugLog)
         {
-            Debug.Log($"VisualModeHandler: {GetObjectTypeName(objectType)} のフラグを {flags} に変更 (対象: {registeredObjects[objectType].Count} オブジェクト)");
+            Debug.Log($"VisualModeHandler: {InputObjectType.GetName(objectType)} のフラグを {flags} に変更 (対象: {registeredObjects[objectType].Count} オブジェクト)");
         }
     }
 
@@ -233,7 +233,7 @@ public class VisualModeHandler : MonoBehaviour
         // 処理完了をログ出力
         if (enableDebugLog)
         {
-            Debug.Log($"VisualModeHandler: {GetObjectTypeName(objectType)} の {processedCount}/{totalCount} オブジェクトのモード変更完了");
+            Debug.Log($"VisualModeHandler: {InputObjectType.GetName(objectType)} の {processedCount}/{totalCount} オブジェクトのモード変更完了");
         }
 
         // 完了したコルーチンを辞書から削除
@@ -273,20 +273,6 @@ public class VisualModeHandler : MonoBehaviour
             {
                 Debug.Log($"VisualModeHandler: 無効なオブジェクト参照 {removedCount} 個をクリーンアップしました");
             }
-        }
-    }
-
-    public string GetObjectTypeName(int objectType)
-    {
-        switch (objectType)
-        {
-            case InputObjectType.BUILDING: return "建物";
-            case InputObjectType.PARCEL: return "土地区画";
-            case InputObjectType.PATH: return "道路";
-            case InputObjectType.NODE: return "ノード";
-            case InputObjectType.TERRAIN: return "地面";
-            case InputObjectType.ZONE: return "地区";
-            default: return "不明";
         }
     }
 

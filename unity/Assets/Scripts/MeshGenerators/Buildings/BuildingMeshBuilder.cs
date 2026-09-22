@@ -381,16 +381,12 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
 
         Vector2[] normalizedFootprint = (Vector2[])footprint.Clone();
 
-        if (SignedArea(normalizedFootprint) < 0f)
+        if (PolygonUtils.SignedArea(normalizedFootprint) < 0f)
         {
             System.Array.Reverse(normalizedFootprint);
         }
 
-        List<int> polygonTriangles = TriangulatePolygon(normalizedFootprint);
-        if (polygonTriangles.Count == 0)
-        {
-            polygonTriangles = GenerateTriangleFanIndices(normalizedFootprint.Length);
-        }
+        List<int> polygonTriangles = TriangulateOrFan(normalizedFootprint);
 
         List<Vector3> vertices = new List<Vector3>();
         List<int> triangles = new List<int>();
@@ -716,7 +712,12 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         }
     }
 
-    private static List<int> TriangulatePolygon(Vector2[] polygon)
+    /// <summary>
+    /// 耳切り法(ear clipping)による三角形分割。凹多角形にも対応するが、自己交差や重複頂点で耳が見つからない
+    /// 場合は空リストを返す。呼び出し側が失敗時の扱い(ファンで埋める/例外にする)を決めたいときに使い、
+    /// 見た目の破綻より欠落を避けたい面は <see cref="TriangulateOrFan"/> を使う。入力はCCW前提。
+    /// </summary>
+    public static List<int> TriangulateEarClip(Vector2[] polygon)
     {
         List<int> triangles = new List<int>();
         if (polygon == null || polygon.Length < 3)
@@ -778,7 +779,6 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
 
             if (!earFound)
             {
-                Debug.LogWarning("BuildingMeshBuilder: 凹多角形の耳切り処理で耳が見つかりませんでした。ファン型の三角形にフォールバックします。");
                 return new List<int>();
             }
 
@@ -808,9 +808,10 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
             return new List<int>();
         }
 
-        List<int> triangles = TriangulatePolygon(polygon);
+        List<int> triangles = TriangulateEarClip(polygon);
         if (triangles.Count == 0)
         {
+            Debug.LogWarning("BuildingMeshBuilder: 凹多角形の耳切り処理で耳が見つかりませんでした。ファン型の三角形にフォールバックします。");
             triangles = GenerateTriangleFanIndices(polygon.Length);
         }
         return triangles;
@@ -1061,17 +1062,6 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         return ab.x * ac.y - ab.y * ac.x;
     }
 
-    private static float SignedArea(Vector2[] polygon)
-    {
-        float area = 0f;
-        for (int i = 0; i < polygon.Length; i++)
-        {
-            int j = (i + 1) % polygon.Length;
-            area += polygon[i].x * polygon[j].y - polygon[j].x * polygon[i].y;
-        }
-        return area * 0.5f;
-    }
-
     /// <summary>
     /// 傾斜地対応（区画基準標高への接地 + 底面フットプリントを押し出したコンクリート基盤の生成）の
     /// 対象となる model_type かどうかを返す。
@@ -1201,7 +1191,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         float minTerrainHeight = float.MaxValue;
         for (int i = 0; i < n; i++)
         {
-            float h = HeightmapTextureManager.GetTerrainHeight(
+            float h = Utils.GetGroundHeight(
                 new Vector3(footprint[i].x + centerPointWorld.x, 1000f, footprint[i].y + centerPointWorld.z));
             if (h < minTerrainHeight)
             {
