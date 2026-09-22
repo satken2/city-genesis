@@ -29,11 +29,21 @@ public static class PlatformQA
             };
             assembly = Assembly.LoadFrom(root + "/Temp/bin/Debug/Assembly-CSharp.dll");
             CheckPlatformContinuation();
-            CheckStationGrade();
+            bool endsOnly = args.Contains("-platformEndsOnly");
+            if (!endsOnly) CheckStationGrade();
             Type modelType = assembly.GetType("ModelManager");
             var model = new GameObject("Models").AddComponent(modelType);
             modelType.GetField("<Instance>k__BackingField", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, model);
             var cache = (IDictionary)modelType.GetField("_modelCache", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(model);
+            if (endsOnly)
+            {
+                foreach (string part in new[] { "buffer_stop", "platform_end" })
+                    cache[$"Models/Paths/p4/{part}"] = AssetDatabase.LoadAssetAtPath<GameObject>($"Assets/Paths/p4/{part}.fbx");
+                CheckTerminations();
+                File.WriteAllText(report, $"PASS platform ends: {checks} checks; continuation floors, real encroachment, rail and monorail end walls");
+                EditorApplication.Exit(0);
+                return;
+            }
             foreach (int variant in new[] { 401, 411, 451, 461 })
             {
                 string asset = $"Assets/Paths/p{variant}/track.fbx";
@@ -273,13 +283,28 @@ public static class PlatformQA
                 new object[] { 1, points, width, 0f, 3f, 3f, neighbors });
             foreach (string side in new[] { "Left", "Right" })
             {
-                if (corridor == null) continue;
-                var far = (float[])corridor.GetType().GetField(side + "DeckFar").GetValue(corridor);
-                Require(far.All(f => Mathf.Abs(f - (width / 2 + 3)) < .001f),
+                var far = corridor == null ? null : (float[])corridor.GetType().GetField(side + "DeckFar").GetValue(corridor);
+                Require(far == null || far.All(f => Mathf.Abs(f - (width / 2 + 3)) < .001f),
                     $"Continuation removes {side} platform floor: width={width}, offset={offset}, reverse={reverse}");
+                if (corridor == null) continue;
                 var omitted = (bool[])corridor.GetType().GetField(side + "PlatformWallOmit").GetValue(corridor);
                 Require(!omitted.Any(v => v), "Continuation removes platform outer wall");
             }
+        }
+        foreach (float side in new[] { -1f, 1f })
+        {
+            var neighbor = Activator.CreateInstance(neighborType);
+            neighborType.GetField("PathId").SetValue(neighbor, 2);
+            neighborType.GetField("Width").SetValue(neighbor, 3f);
+            neighborType.GetField("Points").SetValue(neighbor, new List<Vector3> {
+                new Vector3(side * 4, 6, -10), new Vector3(side * 4, 6, 42) });
+            var neighbors = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(neighborType));
+            neighbors.Add(neighbor);
+            object corridor = assembly.GetType("TrackAdjacency").GetMethod("Compute").Invoke(null,
+                new object[] { 1, new List<Vector3> { new Vector3(0,6,0), new Vector3(0,6,32) }, 3f, 0f, 3f, 3f, neighbors });
+            Require(corridor != null, "Real neighboring track was ignored");
+            var far = (float[])corridor.GetType().GetField((side < 0 ? "Left" : "Right") + "DeckFar").GetValue(corridor);
+            Require(far.All(f => f > 1.5f && f < 2.5f), "Real encroachment no longer trims deck");
         }
     }
 
@@ -303,8 +328,8 @@ public static class PlatformQA
         var relative = (float)assembly.GetType("PathSummaryExtensions").GetMethod("GetRelativeHeightAtPoint").Invoke(null, new object[] { path, 0f, 20f });
         var ground = (float)assembly.GetType("Utils").GetMethod("GetGroundHeight").Invoke(null, new object[] { new Vector3(0,0,20) });
         Require(Mathf.Abs(relative + ground - 100.2f) < .0001f, "Snapping lost fractional design height");
-        var snap = (Vector3)assembly.GetType("TerrainInputHandler").GetMethod("GetClosestPointOnSegmentXZ").Invoke(null,
-            new object[] { new Vector3(0,100,0), new Vector3(0,104,80), new Vector3(3,0,40) });
+        var snap = (Vector3)assembly.GetType("PolylineUtils").GetMethod("ClosestPointOnSegmentXZ").Invoke(null,
+            new object[] { new Vector3(3,0,40), new Vector3(0,100,0), new Vector3(0,104,80) });
         Require(Mathf.Abs(snap.z - 40f) < .0001f && Mathf.Abs(snap.y - 102f) < .0001f, "Ground cursor shifted grade snap along track");
         Type planType = assembly.GetType("RoadPlanManager");
         var planObject = new GameObject("SnapQA");

@@ -1,8 +1,8 @@
 /**
  * 軌道建設パネル専用スタイル
  *
- * モード切替(簡易 / 詳細)と鉄道種別プルダウンのみを定義する。
- * タブバーを含むそれ以外のセクション・ボタン等は道路建設パネル(PathConstructionPanel.css)の
+ * モード切替(簡易 / 詳細)・鉄道種別プルダウンと、タブバーの上書きだけを定義する。
+ * それ以外のセクション・ボタン等は道路建設パネル(PathConstructionPanel.css)の
  * pc-* クラスをそのまま共有する。
  */
 
@@ -50,4 +50,14 @@
   padding: 8px 10px;
 }
 
-/* タブバーは道路建設パネルと共通(PathConstructionPanel.css の pc-tabbar / pc-tab)。 */
+/* ---- タブバー ---- */
+/* 意匠は道路建設パネルと共通(PathConstructionPanel.css の pc-tabbar / pc-tab)で、
+   ここでは折り返しだけを止める。軌道パネルのタブ名は道路より長く、折り返すと
+   そのタブだけ背が伸びてタブバー全体が上下に揺れるため、三点リーダーで省略する
+   (全文はツールチップで読める)。min-width の解除は省略を効かせるために要る。 */
+.tc-tabbar .pc-tab {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

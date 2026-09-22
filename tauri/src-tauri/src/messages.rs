@@ -87,9 +87,10 @@ pub enum WindowLayout {
     #[default]
     Default,
     /// 画面左端に上下いっぱいのサイドパネルとして配置。
-    /// 幅はモニターの40%、高さはタスクバーを除いた画面全体にマージンを空けて広がる。
+    /// 幅はモニターの40%(`width_ratio` があればその比率)、高さはタスクバーを除いた
+    /// 画面全体にマージンを空けて広がる。
     LeftPanel,
-    /// LeftPanel の約半分の幅（モニターの20%）で配置。
+    /// LeftPanel の約半分の幅（モニターの20%。`width_ratio` で上書き可）で配置。
     LeftPanelNarrow,
     /// 画面左端・上端に配置。上下には広げず、レジストリの width/height をそのまま使用する。
     LeftTop,
@@ -129,10 +130,14 @@ pub struct WindowDefinition {
     /// ウィンドウの配置方法。未設定なら Default（中央配置）。
     #[serde(default)]
     pub layout: WindowLayout,
-    /// 作業領域（モニター幅）に対する初期幅の比率。`height_ratio` と両方指定時のみ有効（例: 0.8 = 80%）。
+    /// 作業領域（モニター幅）に対する初期幅の比率（例: 0.8 = 80%）。
+    /// `default` レイアウトでは `height_ratio` と両方指定したときのみ有効で、
+    /// `left_panel` / `left_panel_narrow` / `right_top` / `bottom_center` では
+    /// 単独でレイアウト既定の比率を上書きする。
     #[serde(default)]
     pub width_ratio: Option<f64>,
-    /// タスクバー上の利用可能高さに対する初期高さの比率。`width_ratio` と両方指定時のみ有効。
+    /// タスクバー上の利用可能高さに対する初期高さの比率。`default` レイアウトでは
+    /// `width_ratio` と両方指定時のみ有効。
     #[serde(default)]
     pub height_ratio: Option<f64>,
     /// true の場合、ウィンドウを最大化して表示する。

@@ -361,6 +361,7 @@
     "resizable": true,
     "policy": "single",
     "layout": "left_panel_narrow",
+    "width_ratio": 0.26,
     "empty_shell": true,
     "actions": []
   },

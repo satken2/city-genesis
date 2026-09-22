@@ -29,7 +29,7 @@ foreach ($relativeRoot in @('Assets/Models/Props','Assets/Resources/Models/Props
     Get-ChildItem -LiteralPath (Join-Path $unityRoot $relativeRoot) -Filter 'pedestrian_*' -File | ForEach-Object {
         Copy-Item -LiteralPath $_.FullName -Destination $destination -Force
     }
-    foreach($id in @((350..367)+(370..387))) {
+    foreach($id in @((308..309)+(350..367)+(370..387))) {
         Get-ChildItem -LiteralPath (Join-Path $unityRoot $relativeRoot) -Filter "$id*" -File | ForEach-Object {
             Copy-Item -LiteralPath $_.FullName -Destination $destination -Force
         }

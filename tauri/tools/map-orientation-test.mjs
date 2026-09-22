@@ -79,9 +79,13 @@ function load(path) {
   return exports;
 }
 imports["./roadSurface"] = load("../src/components/map/roadSurface.ts");
+imports["./mapSymbols"] = load("../src/components/map/mapSymbols.ts");
+imports["./mapLabels"] = load("../src/components/map/mapLabels.ts");
 imports["@tauri-apps/api/event"] = { listen: async () => () => {} };
 imports["./transitLineDraw"] = { drawTransitLines() {} };
 const { CityMapCanvas, DEFAULT_CITY_MAP_LAYERS } = load("../src/components/map/CityMapCanvas.tsx");
+assert.deepEqual(Object.keys(DEFAULT_CITY_MAP_LAYERS).filter((key) => DEFAULT_CITY_MAP_LAYERS[key]).sort(),
+  ["allRoads", "buildings", "railways", "stations", "trunkRoads"]);
 const { worldToScreen, screenToWorld } = load("../src/components/path/pathShapeOverlay.ts");
 CityMapCanvas({ apiBaseUrl: "test", showCompass: false,
   layers: Object.fromEntries(Object.keys(DEFAULT_CITY_MAP_LAYERS).map((key) => [key, false])),

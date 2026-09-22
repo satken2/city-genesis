@@ -6,12 +6,17 @@
  * 「モード切替 → 鉄道種別プルダウン → タブ → 規格プルダウン」の順で対象を絞り込む。
  *
  * パネル全体に簡易モードと詳細モードがあり、タブの構成が変わる。
- *   - 簡易モード(既定): 軌道タブ + 駅タブの2枚。駅タブは「相対式(対面ホーム)の複線 +
+ *   - 簡易モード: 軌道タブ + 駅タブの2枚。駅タブは「相対式(対面ホーム)の複線 +
  *     駅舎」を1クリックでまとめて置く固定パッケージで、指定できるのはホーム長(両数)・
  *     高さ・角度・駅舎の種類・建屋の配置端・通路方式。プラットフォームを曲げたり本数を変えたりはできない。
- *   - 詳細モード: 軌道 / プラットフォーム / 駅舎 の3枚。従来どおり1本ずつ自由に敷設する。
+ *   - 詳細モード(既定): 軌道 / プラットフォーム / 駅舎 の3枚。従来どおり1本ずつ自由に敷設する。
  *
  * 鉄道種別プルダウン(鉄道/モノレール/人員搬送)はタブより上位の選択で、タブを切り替えても保持する。
+ * プルダウンとタブは常に同じ位置に出し、現在の選択で意味を持たない組み合わせは消さずに
+ * 無効化する(出し入れするとその下の段が丸ごと上下にずれて読みづらいため)。
+ *   - 駅舎は鉄道種別に依存しないため、駅舎タブでは種別プルダウンを無効化する。
+ *   - 人員搬送(ロープウェイ)は乗り場のパス自体が駅で駅舎を持たないため、駅舎タブと
+ *     駅タブ(駅舎込みのパッケージ)を無効化する。
  * タブの役割:
  *   - 軌道タブ:        通常(TRACK_NORMAL)・橋梁(TRACK_BRIDGE)の線路を敷設する。
  *   - プラットフォームタブ: 駅(TRACK_STATION)の線路を敷設する(ホーム設置側の指定あり)。
@@ -27,8 +32,8 @@
  *
  * 駅舎タブも通常のパス敷設フロー(STATE_EDIT_PATH → confirmPath)に乗る。駅舎は
  * ウェイポイント付き折れ線のパスで、線と交差したプラットフォームがその駅舎の駅に
- * 所属する。鉄道種別に依存しないため種別プルダウンは表示せず、複線展開・ホーム設置側も
- * 無い(カテゴリ=null のまま単一パスとして確定する)。専有エリア(建屋)の位置は
+ * 所属する。鉄道種別に依存せず、複線展開・ホーム設置側も無い
+ * (カテゴリ=null のまま単一パスとして確定する)。専有エリア(建屋)の位置は
  * バックエンドとUnityが線形・周辺線路から同一ロジックで導出するため、パネル側の
  * 追加入力は無い。
  *
@@ -73,6 +78,7 @@ import {
   TRACK_BRIDGE,
   TRACK_STATION,
   PATH_STATION_HOUSE,
+  PATH_CONVEYOR,
 } from "../../constants";
 import "./PathConstructionPanel.css";
 import "./TrackConstructionPanel.css";
@@ -99,12 +105,14 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
   const { affordability: variantAffordability, refresh: refreshAffordability } =
     useVariantAffordability("paths", apiBaseUrl);
 
-  const [mode, setMode] = useState<PanelMode>("simple");
+  const [mode, setMode] = useState<PanelMode>("detail");
   const [tab, setTab] = useState<TrackTab>("track");
   const isStationTab = tab === "station";
   // 鉄道種別(鉄道/モノレール/人員搬送)はタブより上位の絞り込みなので、
   // タブ切り替えで選択が失われないようパネル側で保持する。
   const [railType, setRailType] = useState<number | null>(null);
+  // 人員搬送(ロープウェイ)の駅は乗り場のパスそのもので、駅舎を持たない。
+  const houseDisabled = railType === PATH_CONVEYOR;
 
   /* ---- グリッド設定状態（デフォルト非表示。道路建設パネルと同じ挙動） ---- */
   const [gridMode, setGridMode] = useState<GridDisplayMode>("off");
@@ -245,6 +253,14 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
     },
     [tab, pc],
   );
+
+  /* ---- 駅舎を含むタブを開いたまま人員搬送へ切り替えたら軌道タブへ退避する ---- */
+  useEffect(() => {
+    if (!houseDisabled) return;
+    if (tab === "house" || tab === "station") {
+      handleTabChange("track");
+    }
+  }, [houseDisabled, tab, handleTabChange]);
 
   /* ---- モード切り替え(簡易 ⇔ 詳細) ---- */
   // タブ構成が変わるため、切り替え先に存在しないタブを開いていたら軌道タブへ退避する。
@@ -401,15 +417,15 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
   }
 
   // タブ構成はモードで変わる。簡易=軌道+駅、詳細=軌道+プラットフォーム+駅舎。
-  const tabDefs: { key: TrackTab; label: string }[] = mode === "simple"
+  const tabDefs: { key: TrackTab; label: string; disabled?: boolean }[] = mode === "simple"
     ? [
         { key: "track", label: t("track_construction.trackTab") },
-        { key: "station", label: t("track_construction.stationTab") },
+        { key: "station", label: t("track_construction.stationTab"), disabled: houseDisabled },
       ]
     : [
         { key: "track", label: t("track_construction.trackTab") },
         { key: "platform", label: t("track_construction.platformTab") },
-        { key: "house", label: t("track_construction.houseTab") },
+        { key: "house", label: t("track_construction.houseTab"), disabled: houseDisabled },
       ];
 
   return (
@@ -432,34 +448,36 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
       </div>
 
       {/* 鉄道種別(鉄道 / モノレール / 人員搬送)。タブより上位の絞り込み。
-          駅舎は鉄道種別に依存しないため、駅舎タブでは表示しない。 */}
-      {tab !== "house" && (
-        <div className="tc-railtype-bar">
-          <select
-            className="pc-select tc-railtype-select"
-            value={railType ?? ""}
-            onChange={(e) => {
-              const val = e.target.value;
-              if (val) setRailType(parseInt(val));
-            }}
-          >
-            {railTypeOptions.map((type) => (
-              <option key={type} value={type}>
-                {masterData.path_types[type]?.display_name ?? `Type ${type}`}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
+          駅舎は鉄道種別に依存しないので駅舎タブでは無効化する(消すと下の段がずれる)。 */}
+      <div className="tc-railtype-bar">
+        <select
+          className="pc-select tc-railtype-select"
+          value={railType ?? ""}
+          disabled={tab === "house"}
+          onChange={(e) => {
+            const val = e.target.value;
+            if (val) setRailType(parseInt(val));
+          }}
+        >
+          {railTypeOptions.map((type) => (
+            <option key={type} value={type}>
+              {masterData.path_types[type]?.display_name ?? `Type ${type}`}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      {/* タブバー(モードごとのタブ構成)。意匠は道路建設パネルと共通の pc-tabbar / pc-tab。 */}
-      <div className="pc-tabbar" role="tablist">
+      {/* タブバー(モードごとのタブ構成)。意匠は道路建設パネルと共通の pc-tabbar / pc-tab。
+          tc-tabbar はラベルを1行に収める軌道パネル専用の上書き。 */}
+      <div className="pc-tabbar tc-tabbar" role="tablist">
         {tabDefs.map((tabDef) => (
           <button
             key={tabDef.key}
             type="button"
             role="tab"
             aria-selected={tab === tabDef.key}
+            disabled={tabDef.disabled}
+            title={tabDef.label}
             className={`pc-tab ${tab === tabDef.key ? "active" : ""}`}
             onClick={() => handleTabChange(tabDef.key)}
           >

@@ -35,7 +35,8 @@ export class RoadCenterline {
  * 端を進行方向に直角に切った道路面。2本接続時は共有幅から実幅へsmoothstepで遷移する。
  * 短い道路では両端の遷移距離を半長までに制限し、幅の補正が重なって膨らむのを防ぐ。
  */
-export function roadSurface(points: Point[], width: number, startWidth = width, endWidth = width): Point[] {
+export function roadSurface(points: Point[], width: number, startWidth = width, endWidth = width,
+  startNormal?: Point, endNormal?: Point): Point[] {
   if (points.length < 2) return [];
   const distances = [0];
   for (let i = 1; i < points.length; i++) {
@@ -73,10 +74,11 @@ export function roadSurface(points: Point[], width: number, startWidth = width, 
     const after = normal(i === dense.length - 1 ? dense[i - 1].point : point, dense[Math.min(dense.length - 1, i + 1)].point);
     const nx = before[0] + after[0], nz = before[1] + after[1];
     const norm = Math.hypot(nx, nz);
-    const n: Point = norm > 1e-6 ? [nx / norm, nz / norm] : after;
+    const jointNormal = i === 0 ? startNormal : i === dense.length - 1 ? endNormal : undefined;
+    const n: Point = jointNormal ?? (norm > 1e-6 ? [nx / norm, nz / norm] : after);
     const halfWidth = (width + (startWidth - width) * blend(distance, startLength)
       + (endWidth - width) * blend(total - distance, endLength)) / 2;
-    const offset = halfWidth / Math.max(0.5, n[0] * after[0] + n[1] * after[1]);
+    const offset = jointNormal ? halfWidth : halfWidth / Math.max(0.5, n[0] * after[0] + n[1] * after[1]);
     left.push([point[0] + n[0] * offset, point[1] + n[1] * offset]);
     right.push([point[0] - n[0] * offset, point[1] - n[1] * offset]);
   });

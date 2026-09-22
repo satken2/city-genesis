@@ -397,11 +397,17 @@ fn compute_window_geometry(
             let m_pos = monitor.position().to_logical::<f64>(scale);
 
             let margin = HUD_MARGIN;
-            let width_ratio = if definition.layout == WindowLayout::LeftPanelNarrow {
+            // 幅はレイアウト既定の比率。同じ左ドックでも中身の密度で必要な幅が違うため、
+            // 定義が width_ratio を持つならそちらを優先する。
+            let default_ratio = if definition.layout == WindowLayout::LeftPanelNarrow {
                 0.2
             } else {
                 0.4
             };
+            let width_ratio = definition
+                .width_ratio
+                .filter(|r| *r > 0.0)
+                .unwrap_or(default_ratio);
             let computed_width = (m_size.width * width_ratio).round();
             let computed_height = m_size.height - HUD_BOTTOM_RESERVED - margin * 2.0;
 

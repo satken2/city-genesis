@@ -65,7 +65,7 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 
 ## 線路 (Paths/TrackPath.cs / Paths/TrackIntersectionMeshGenerator.cs)
 
-- ホームの干渉クランプは島式判定と同じ`endClampVirtual`除外を使う。前後へ接続する線路端の虚像で床や外縁壁を切らない。鉄道・モノレールともホーム端壁を生成し、モノレールに専用`platform_end`が無ければp4を共用する。車止めは鉄道だけ。回帰検証は`Tests/Intersections/run-unity.ps1 -Platforms`。
+- ホームの干渉クランプは島式判定と同じ`endClampVirtual`除外を使う。端点上への投影も含め、前後へ接続する線路端の虚像で床や外縁壁を切らない。鉄道・モノレールともホーム端壁を生成し、モノレールに専用`platform_end`が無ければp4を共用する。車止めは鉄道だけ。終端の独立回帰検証は`Tests/Intersections/run-unity.ps1 -PlatformEnds`。
 
 - ホームの `platform` / `platform_wall` は著作タイル長（451/452/461/462は8m）で配置し、道路用の曲率適応タイル分割(1〜8m)を適用しない。曲線用分割はモデル内に持つ。右側用はUnityの+X側で、標準FBX経由ではBlenderの-X側になる。実FBXの左右・支柱周期は `Tests/Intersections/run-unity.ps1 -Platforms` で検査する。
 

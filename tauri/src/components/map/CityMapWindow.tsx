@@ -26,6 +26,11 @@ import {
 } from "./CityMapCanvas";
 import { IPC_EVENT_CAMERA_STATE, sendCameraQueryState } from "../../utils/ipc";
 import "./CityMapWindow.css";
+import { MAP_SYMBOLS, type MapSymbol } from "./mapSymbols";
+
+function MapIcon({ name }: { name: MapSymbol }) {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={MAP_SYMBOLS[name]} /></svg>;
+}
 import { useMapNavigation } from "./CityMapNavigation";
 
 /** ツールバーに並べるレイヤーの表示順 */
@@ -82,15 +87,7 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const zoomRef = useRef<HTMLSpanElement | null>(null);
   const navigation = useMapNavigation(apiBaseUrl, mapRef);
 
-  // 標高色分けは地図の地物(道路・区画・建物)より情報量が多く、都市の読み取りを
-  // 妨げるため既定ではOFFにする(必要なときにツールバーから点ける)。
-  // 公共交通路線は共通既定ではOFF(埋め込み地図に余計な取得をさせない)だが、
-  // 都市を読むためのこのウィンドウでは既定ONにする。
-  const [layers, setLayers] = useState<CityMapLayerVisibility>({
-    ...DEFAULT_CITY_MAP_LAYERS,
-    elevation: false,
-    transitLines: true,
-  });
+  const [layers, setLayers] = useState<CityMapLayerVisibility>({ ...DEFAULT_CITY_MAP_LAYERS });
   const [heatmap, setHeatmap] = useState<CityMapHeatmapKind>("none");
   const [heatmapStats, setHeatmapStats] = useState<CityMapHeatmapStats | null>(null);
   const [camera, setCamera] = useState<CameraMarker | null>(null);
@@ -196,17 +193,17 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       <div className="city-map-window__toolbar">
         <div className="city-map-window__layer-toggles">
           {LAYER_ORDER.map((key) => (
-            <label
+            <button
               key={key}
+              type="button"
               className={`city-map-toggle ${layers[key] ? "city-map-toggle--on" : ""}`}
+              aria-pressed={layers[key]}
+              aria-label={t(`cityMap.layers.${key}`)}
+              title={t(`cityMap.layers.${key}`)}
+              onClick={() => toggleLayer(key)}
             >
-              <input
-                type="checkbox"
-                checked={layers[key]}
-                onChange={() => toggleLayer(key)}
-              />
-              <span>{t(`cityMap.layers.${key}`)}</span>
-            </label>
+              <MapIcon name={key === "stations" ? "station" : key} />
+            </button>
           ))}
         </div>
         {/* ヒートマップ。2種を重ねると色が混ざって読めないため排他選択にする */}
@@ -221,9 +218,12 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
               className={`city-map-heatmap-btn ${
                 heatmap === kind ? "city-map-heatmap-btn--on" : ""
               }`}
+              aria-pressed={heatmap === kind}
+              aria-label={`${t("cityMap.heatmap.title")}: ${t(`cityMap.heatmap.${kind}`)}`}
+              title={`${t("cityMap.heatmap.title")}: ${t(`cityMap.heatmap.${kind}`)}`}
               onClick={() => setHeatmap(kind)}
             >
-              {t(`cityMap.heatmap.${kind}`)}
+              <MapIcon name={kind} />
             </button>
           ))}
         </div>
@@ -231,16 +231,20 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
           <button
             type="button"
             className="city-map-window__btn"
+            title={t("cityMap.fitView")}
+            aria-label={t("cityMap.fitView")}
             onClick={() => mapRef.current?.resetView()}
           >
-            {t("cityMap.fitView")}
+            <MapIcon name="fit" />
           </button>
           <button
             type="button"
             className="city-map-window__btn"
+            title={t("cityMap.reload")}
+            aria-label={t("cityMap.reload")}
             onClick={handleReload}
           >
-            {t("cityMap.reload")}
+            <MapIcon name="reload" />
           </button>
         </div>
       </div>

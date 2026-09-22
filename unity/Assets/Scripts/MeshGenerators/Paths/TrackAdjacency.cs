@@ -615,7 +615,7 @@ public static class TrackAdjacency
     /// XZ平面上でポリラインへの最近接点を求める。closest のYは線分上の補間値
     /// （Y差の判定に使う）、tangent は最近接線分の水平方向単位ベクトル。
     /// clampedAtPolylineEnd は、最近接点がポリラインの始端・終端の端点への
-    /// クランプだった（＝真の垂線の足がポリラインの外にある）場合に true。
+    /// クランプだった（真の垂線の足が端点上またはポリラインの外にある）場合に true。
     /// 交差点ハルで切り詰められた相手の端点が虚像の隣接として採用されるのを
     /// 呼び出し側が除外するために使う。
     /// </summary>
@@ -649,7 +649,7 @@ public static class TrackAdjacency
                 Vector3 tan = b - a;
                 tan.y = 0f;
                 tangent = tan.sqrMagnitude > 1e-8f ? tan.normalized : Vector3.forward;
-                clampedAtPolylineEnd = (i == 0 && tRaw < 0f) || (i == points.Count - 2 && tRaw > 1f);
+                clampedAtPolylineEnd = (i == 0 && tRaw <= 0f) || (i == points.Count - 2 && tRaw >= 1f);
                 found = true;
             }
         }

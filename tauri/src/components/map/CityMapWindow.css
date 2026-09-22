@@ -180,3 +180,37 @@
 .city-map-window__legend-empty {
   color: #6c7a94;
 }
+
+/* 記号ボタンの選択状態は色と枠で示し、キーボード操作にもフォーカスを残す。 */
+.city-map-window .city-map-toggle,
+.city-map-window .city-map-heatmap-btn,
+.city-map-window .city-map-window__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  flex: 0 0 34px;
+  border-radius: 9px;
+}
+
+.city-map-window .city-map-toggle--on,
+.city-map-window .city-map-heatmap-btn--on {
+  background: #315475;
+  border-color: #7bb5df;
+  color: #ffffff;
+}
+
+.city-map-window .city-map-toggle:hover,
+.city-map-window .city-map-heatmap-btn:hover,
+.city-map-window .city-map-window__btn:hover {
+  background: #30445e;
+}
+
+.city-map-window__toolbar button:focus-visible {
+  outline: 2px solid #a6d7fa;
+  outline-offset: 2px;
+}
+
+.city-map-window__heatmap { flex-wrap: wrap; }

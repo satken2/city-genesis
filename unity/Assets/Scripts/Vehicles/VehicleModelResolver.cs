@@ -47,25 +47,31 @@ public static class VehicleModelResolver
         var model = Object.Instantiate(prefab,root.transform);
         model.transform.localPosition = Vector3.zero; model.transform.localRotation = Quaternion.identity;
         model.SetActive(true); NormalizeModel(root.transform,model.transform);
-        AddCloseLod(root, model, $"Models/Vehicles/{type}/{part}");
+        AddModelLods(root, model, $"Models/Vehicles/{type}/{part}");
         root.SetActive(false); return root;
     }
 
     /// <summary>画面を大きく占める車体だけ接写版を使い、通常版と同じ配置変換を共有する。</summary>
-    private static void AddCloseLod(GameObject root, GameObject normal, string path)
+    private static void AddModelLods(GameObject root, GameObject normal, string path)
     {
-        var prefab = ModelManager.Instance?.GetModel(path + "_close", suppressWarning: true);
-        if (prefab == null) return;
-        var close = Object.Instantiate(prefab, root.transform);
-        close.transform.localPosition = normal.transform.localPosition;
-        close.transform.localRotation = normal.transform.localRotation;
-        close.transform.localScale = normal.transform.localScale;
-        close.SetActive(true);
+        var closePrefab = ModelManager.Instance?.GetModel(path + "_close", suppressWarning: true);
+        var farPrefab = ModelManager.Instance?.GetModel(path + "_far", suppressWarning: true);
+        if (closePrefab == null && farPrefab == null) return;
+        var levels = new List<LOD>();
+        Renderer[] InstantiateLod(GameObject prefab)
+        {
+            var model = Object.Instantiate(prefab, root.transform);
+            model.transform.localPosition = normal.transform.localPosition;
+            model.transform.localRotation = normal.transform.localRotation;
+            model.transform.localScale = normal.transform.localScale;
+            model.SetActive(true);
+            return model.GetComponentsInChildren<Renderer>();
+        }
+        if (closePrefab != null) levels.Add(new LOD(.25f, InstantiateLod(closePrefab)));
+        levels.Add(new LOD(farPrefab != null ? .035f : 0f, normal.GetComponentsInChildren<Renderer>()));
+        if (farPrefab != null) levels.Add(new LOD(0f, InstantiateLod(farPrefab)));
         var lod = root.AddComponent<LODGroup>();
-        lod.SetLODs(new[] {
-            new LOD(.25f, close.GetComponentsInChildren<Renderer>()),
-            new LOD(0f, normal.GetComponentsInChildren<Renderer>()),
-        });
+        lod.SetLODs(levels.ToArray());
         lod.RecalculateBounds();
     }
 
@@ -133,7 +139,7 @@ public static class VehicleModelResolver
             // 車種別の無印が実際に解決できた場合だけ、その接写版を組み合わせる。
             string path = $"Models/Vehicles/{vehicleType}/{variantId}";
             if (ModelManager.Instance?.GetModel(path, suppressWarning: true) == prefab)
-                AddCloseLod(root, model, path);
+                AddModelLods(root, model, path);
         }
         else
         {

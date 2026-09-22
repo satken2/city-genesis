@@ -75,6 +75,7 @@ import {
   PATH_TRACK,
   MODEL_PARK,
 } from "../../constants";
+import { drawMapLabels, facilitySymbol, type MapPlace } from "./mapLabels";
 import { RoadCenterline, roadSurface } from "./roadSurface";
 import { drawTransitLines, type TransitLineGeometry } from "./transitLineDraw";
 
@@ -111,19 +112,19 @@ export type CityMapLayerVisibility = {
 };
 
 /**
- * レイヤー表示のデフォルト値(主要レイヤーON、等高線・グリッド・公共交通路線はOFF)。
+ * レイヤー表示のデフォルト値(建物・駅・全道路・幹線道路・線路のみON)。
  * 公共交通路線は都市全体の形状を別APIで取得するため、埋め込み地図では明示的にONにする。
  */
 export const DEFAULT_CITY_MAP_LAYERS: CityMapLayerVisibility = {
-  coastline: true,
+  coastline: false,
   trunkRoads: true,
   allRoads: true,
   railways: true,
   transitLines: false,
-  parcels: true,
+  parcels: false,
   buildings: true,
   stations: true,
-  zoneBorders: true,
+  zoneBorders: false,
   elevation: false,
   contours: false,
   grid: false,
@@ -287,6 +288,8 @@ export type CityMapCanvasProps = {
 /** GET /api/v1/paths のレスポンス要素(描画に必要なフィールドのみ) */
 type ApiPathItem = {
   path_id: number;
+  name?: string | null;
+  center_point?: number[] | null;
   start_node_id?: number;
   end_node_id?: number;
   path_type: number;
@@ -307,6 +310,10 @@ type ApiPathItem = {
 
 /** polygonを持つエンティティ(土地区画・地区・建物)の共通形 */
 type ApiPolygonItem = {
+  agent_id?: number;
+  name?: string | null;
+  type?: number;
+  public_facility?: boolean | number;
   variant?: number;
   polygon?: [number, number][] | null;
   center_point?: number[] | null;
@@ -343,6 +350,7 @@ type RoadBand = { kind: RoadBandKind; trunk: boolean; width: number; path: Path2
 /** 取得済みベクターデータとPath2Dキャッシュ */
 type VectorState = {
   paths: ApiPathItem[];
+  places: MapPlace[];
   parcels: ApiPolygonItem[];
   buildings: ApiPolygonItem[];
   zones: ApiPolygonItem[];
@@ -417,8 +425,9 @@ type TerrainState = {
 
 /** 水域の背景色。海岸線の穴に含まれる川・湖も同じ青で表す。 */
 const BG_COLOR = "#a8d7ed";
-const COLOR_LAND = "#e8efdf";
-const COLOR_PARK = "#b5dfb4";
+const COLOR_LAND_RGB = [211, 248, 226] as const;
+const COLOR_LAND = `rgb(${COLOR_LAND_RGB.join(",")})`;
+const COLOR_PARK = "#a8dab5";
 const COLOR_BUILDING_BORDER = "#cfd4dc";
 
 /** 各レイヤーの描画色 */
@@ -426,9 +435,9 @@ const COLOR_COASTLINE = "#85bfd5";
 const COLOR_ZONE = "#839bad";
 const COLOR_PARCEL = "#d5dccf";
 const COLOR_BUILDING = "#e4e7ed";
-/* 駅の凸包(同じ駅舎に所属するプラットフォーム群の外接凸包)。薄い青灰色の面で
+/* 駅の凸包(同じ駅舎に所属するプラットフォーム群の外接凸包)。赤い半透明の面で
  * 「1つの駅」の範囲を示す */
-const COLOR_STATION = "#aebacb";
+const COLOR_STATION = "#d76a66";
 /* 道路は実幅の面として描くため、種別ごとの塗り色を持つ。
  * 幹線街路は非幹線よりやや濃い灰にして道路網の骨格を読み取れるようにする */
 const COLOR_STREET = "#c6ced3";
@@ -580,7 +589,7 @@ function buildTerrainCanvas(
   const d = img.data;
   for (let i = 0; i < rows * cols; i++) {
     const [r, g, b] = elev[i] <= 0 ? [168, 215, 237]
-      : elevation ? computePixelRGB(elev[i], minLand, maxLand) : [232, 239, 223];
+      : elevation ? computePixelRGB(elev[i], minLand, maxLand) : COLOR_LAND_RGB;
     d[i * 4 + 0] = r;
     d[i * 4 + 1] = g;
     d[i * 4 + 2] = b;
@@ -1059,7 +1068,7 @@ function MapCompass() {
             dominantBaseline="central"
             fontSize={12}
             fontWeight={label.north ? 700 : 500}
-            fill={label.north ? COMPASS_FILL_NORTH_LIGHT : "#bac2de"}
+            fill={label.north ? COMPASS_FILL_NORTH_DARK : "#53636d"}
           >
             {t(label.key)}
           </text>
@@ -1241,6 +1250,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
 
       const vec: VectorState = {
         paths: [],
+        places: [],
         parcels: [],
         buildings: [],
         zones: [],
@@ -1455,7 +1465,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           ctx.stroke(vec.parcelPath);
         }
 
-        // 駅(同じ駅舎に所属するプラットフォーム群の凸包)。薄い青灰色の面+枠線で
+        // 駅(同じ駅舎に所属するプラットフォーム群の凸包)。赤い半透明の面+枠線で
         // 「1つの駅」の範囲を示す。プラットフォーム(線路)はこの上に描かれる。
         if (L.stations && vec.stationHullPath) {
           ctx.globalAlpha = 0.22;
@@ -1507,6 +1517,9 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         if (L.transitLines && vec.transitLines.length > 0) {
           drawTransitLines(ctx, { ...view }, vec.transitLines, transitFocusRef.current);
         }
+
+        drawMapLabels(ctx, view, canvasW, canvasH, vec.zones,
+          vec.places.filter((place) => place.station ? L.stations : L.buildings));
 
         // 上位コンポーネントの重ね描き(敷設中道路・路線図など)
         overlayDrawRef.current?.(ctx, { ...view });
@@ -1797,8 +1810,8 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         // ヒートマップは区画ポリゴンを塗り分けるため、区画レイヤーがOFFでも区画が要る
         if (L.parcels || heatmapRef.current !== "none") kinds.push("parcels");
         if (L.buildings) kinds.push("buildings");
-        // 地区の値塗りは地区ポリゴンを塗り分けるため、枠線レイヤーがOFFでも地区が要る
-        if (L.zoneBorders || zoneFillRef.current) kinds.push("zones");
+        // 地区名は境界線の表示と独立して常時表示する。
+        kinds.push("zones");
         if (L.transitLines) kinds.push("transit");
         return kinds;
       };
@@ -1810,6 +1823,24 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
        */
       const rebuildPathClassification = () => {
         const md = masterDataRef.current;
+        vec.places = [];
+        for (const building of vec.buildings) {
+          const master = building.variant === undefined ? undefined : md?.agents?.[building.variant];
+          const symbol = facilitySymbol(building.variant, building.type ?? master?.type, !!building.public_facility);
+          const center = toXZ(building.center_point);
+          if (symbol && center) vec.places.push({ id: building.agent_id ?? 0, x: center[0], z: center[1],
+            name: building.name || master?.display_name || "", symbol });
+        }
+        for (const path of vec.paths) {
+          const master = md?.paths?.[path.path_variant];
+          if (master?.model_type !== "station_house") continue;
+          const points = collectPathPoints(path);
+          const center = toXZ(path.center_point) ?? (points.length > 0
+            ? [points.reduce((n, p) => n + p[0], 0) / points.length, points.reduce((n, p) => n + p[1], 0) / points.length]
+            : null);
+          if (center) vec.places.push({ id: path.path_id, x: center[0], z: center[1], name: path.name || master.display_name,
+            symbol: "station", station: true });
+        }
         const isPark = (building: ApiPolygonItem) => building.variant !== undefined
           && md?.agents?.[building.variant]?.model_type === MODEL_PARK;
         vec.buildingPath = buildPolygonPath(vec.buildings.filter((b) => !isPark(b)), true);
@@ -1827,10 +1858,29 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
             nodeRoads.set(id, connected);
           }
         }
-        const jointWidth = (p: ApiPathItem, id: number | undefined) => {
+        const away = (p: ApiPathItem, id: number): [number, number] => {
+          const controls: AnchorControls[] = [];
+          const pts = collectPathPoints(p, controls);
+          const start = p.start_node_id === id;
+          const point = start ? pts[0] : pts[pts.length - 1];
+          const adjacent = start ? pts[1] : pts[pts.length - 2];
+          const control = start ? controls[0]?.cOut : controls[controls.length - 1]?.cIn;
+          const target = p.curved && control ? control : adjacent;
+          if (!point || !target) return [0, 0];
+          const dx = target[0] - point[0], dz = target[1] - point[1];
+          const length = Math.hypot(dx, dz);
+          return length > 1e-6 ? [dx / length, dz / length] : [0, 0];
+        };
+        const joint = (p: ApiPathItem, id: number | undefined): { width: number; normal?: [number, number] } => {
           const connected = id == null ? undefined : nodeRoads.get(id);
-          if (!connected || connected.length !== 2 || connected[0] === connected[1]) return widthOf(p);
-          return (widthOf(connected[0]) + widthOf(connected[1])) / 2;
+          if (id == null || !connected || connected.length !== 2 || connected[0] === connected[1]) return { width: widthOf(p) };
+          const other = connected.find((road) => road !== p)!;
+          const a = away(p, id), b = away(other, id);
+          const dx = a[0] - b[0], dz = a[1] - b[1], length = Math.hypot(dx, dz);
+          // 同方向への分岐や縮退した接線は、幅の遷移ではなく元の占有面で扱う。
+          if (a[0] * b[0] + a[1] * b[1] > -0.5 || length < 1e-6) return { width: widthOf(p) };
+          const sign = p.start_node_id === id ? 1 : -1;
+          return { width: Math.min(widthOf(p), widthOf(other)), normal: [-dz / length * sign, dx / length * sign] };
         };
         const rail = new Path2D();
         let hasRail = false;
@@ -1866,14 +1916,14 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
               bands.set(key, band);
             }
             append(band.path, pts);
-            const startWidth = jointWidth(p, p.start_node_id);
-            const endWidth = jointWidth(p, p.end_node_id);
-            if (p.polygon && p.polygon.length >= 3 && startWidth === width && endWidth === width) {
+            const start = joint(p, p.start_node_id);
+            const end = joint(p, p.end_node_id);
+            if (p.polygon && p.polygon.length >= 3 && !start.normal && !end.normal) {
               band.surface.addPath(buildPolygonPath([p], false));
             } else {
               const centerline = new RoadCenterline();
               append(centerline, pts);
-              const polygon = roadSurface(centerline.points, width, startWidth, endWidth);
+              const polygon = roadSurface(centerline.points, width, start.width, end.width, start.normal, end.normal);
               band.surface.addPath(buildPolygonPath([{ polygon }], false));
             }
           }

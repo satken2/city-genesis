@@ -293,6 +293,17 @@ public static class VehicleQA
                 Check(a.vertexCount==b.vertexCount && a.triangles.Length==b.triangles.Length,"Close alias topology differs: "+id);
                 Near(Vector3.Distance(a.bounds.size,b.bounds.size),0,.002f,"Close alias bounds differ");
             }
+            if(id>=370)
+            {
+                var source=Resources.Load<GameObject>("Models/Vehicles/"+paths[index]+"_far");
+                var far=Resources.Load<GameObject>($"Models/Props/{id}_far");
+                Check(source!=null && far!=null,"Missing authored rail far");
+                var a=source.GetComponentInChildren<MeshFilter>(true).sharedMesh;
+                var b=far.GetComponentInChildren<MeshFilter>(true).sharedMesh;
+                Check(a.triangles.Length<=126 && a.triangles.Length==b.triangles.Length,"Far alias budget/topology");
+                foreach(var item in (IList)Get(model,"far"))
+                    Check(AssetDatabase.GetAssetPath((Mesh)Get(item,"mesh")).EndsWith($"/{id}_far.fbx"),"Prop far not selected");
+            }
             Call(model,"Dispose");
         }
     }
@@ -326,6 +337,23 @@ public static class VehicleQA
             foreach(int seed in new[]{0,1,-1,int.MinValue})
                 Check((int)resolver.GetMethod("PickVariantId").Invoke(null,new object[]{vehicleType,seed})>=0,"Negative seed gives invalid variant");
         }
+        foreach(int variant in new[]{0,1})
+        {
+            var car=(GameObject)resolver.GetMethod("CreateInstance").Invoke(null,new object[]{22,variant,null});
+            var lod=car.GetComponent<LODGroup>();
+            Check(lod!=null && lod.GetLODs().Length==2,"Freight normal/far LOD missing");
+            Check(lod.GetLODs()[0].screenRelativeTransitionHeight==.035f,"Freight far threshold");
+            UnityEngine.Object.DestroyImmediate(car);
+        }
+        foreach(int id in new[]{308,309})
+        {
+            var model=New("PropRenderModel",id);
+            var parts=(IList)Get(model,"far");
+            Check(parts.Count>0,"Monorail far missing");
+            foreach(var part in parts)
+                Check(AssetDatabase.GetAssetPath((Mesh)Get(part,"mesh")).EndsWith($"/{id}_far.fbx"),"Monorail authored far not selected");
+            Call(model,"Dispose");
+        }
         VehicleProps();
         Check((int)game.GetType("VehicleModelConfig").GetMethod("GetTransitVehicleType").Invoke(null,new object[]{1003})==14,"LRT model mapping missing");
         foreach (int type in new[]{12,14,20,21,23})
@@ -339,14 +367,14 @@ public static class VehicleQA
                 foreach(var filter in car.GetComponentsInChildren<MeshFilter>())
                 {
                     string asset=AssetDatabase.GetAssetPath(filter.sharedMesh);
-                    Check(asset.EndsWith($"/{type}/{expected}.fbx") || asset.EndsWith($"/{type}/{expected}_close.fbx"), "Variant silently falls back: "+type+"/"+expected);
+                    Check(asset.EndsWith($"/{type}/{expected}.fbx") || asset.EndsWith($"/{type}/{expected}_close.fbx") || asset.EndsWith($"/{type}/{expected}_far.fbx"), "Variant silently falls back: "+type+"/"+expected);
                 }
                 if(type==14 || type==20 || type==21 || type==23)
                 {
                     var lod=car.GetComponent<LODGroup>();
                     Check(lod!=null,"Close LOD missing");
                     var levels=lod.GetLODs();
-                    Check(levels.Length==2 && levels[0].screenRelativeTransitionHeight==.25f && levels[1].screenRelativeTransitionHeight==0,"Vehicle LOD thresholds");
+                    Check(levels.Length==3 && levels[0].screenRelativeTransitionHeight==.25f && levels[1].screenRelativeTransitionHeight==.035f && levels[2].screenRelativeTransitionHeight==0,"Vehicle LOD thresholds");
                     foreach(var renderer in levels[0].renderers)
                         Check(AssetDatabase.GetAssetPath(renderer.GetComponent<MeshFilter>().sharedMesh).EndsWith($"/{expected}_close.fbx"),"Close LOD uses wrong asset");
                     foreach(var renderer in levels[1].renderers)
@@ -392,12 +420,19 @@ public static class VehicleQA
                         }
                         Check(count>100 && max-min>.1f,"High speed windshield must retain its curved surface");
                     }
+                    foreach(var renderer in levels[2].renderers)
+                    {
+                        var mesh=renderer.GetComponent<MeshFilter>().sharedMesh;
+                        Check(AssetDatabase.GetAssetPath(mesh).EndsWith($"/{expected}_far.fbx"),"Wrong far LOD");
+                        Check(mesh.triangles.Length/3<=42,"Rail far triangle budget");
+                    }
                     var normal=levels[1].renderers[0].bounds;
                     var close=levels[0].renderers[0].bounds;
                     Check((normal.min-close.min).magnitude<.09f && (normal.max-close.max).magnitude<.09f,"LOD placement bounds differ");
                     resolver.GetMethod("FitTransitLength").Invoke(null,new object[]{car,10f});
                     Near(levels[0].renderers[0].bounds.size.z,10,.06f,"Close nominal length");
                     Near(levels[1].renderers[0].bounds.size.z,10,.06f,"Normal nominal length");
+                    Near(levels[2].renderers[0].bounds.size.z,10,.06f,"Far nominal length");
                     car.transform.localScale=Vector3.one;
                 }
                 foreach(var filter in car.GetComponentsInChildren<MeshFilter>()) Check(filter.sharedMesh.isReadable,"Vehicle FBX is not readable");

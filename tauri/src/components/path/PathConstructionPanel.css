@@ -48,6 +48,12 @@
   border-color: #4ea1ff;
 }
 
+/* 現在のタブでは選択が意味を持たない場合の無効表示(選択値は見せたまま操作だけ止める)。 */
+.pc-select:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .pc-select option {
   background: #182231;
   color: #f6fbff;
