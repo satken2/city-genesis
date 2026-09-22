@@ -3,6 +3,10 @@
 3Dモデルの原本(カテゴリ別ライブラリ .blend)を置くディレクトリ。`unity/Assets/Models/` のFBXはここからの書き出し物で、FBXを直接編集しない。
 ファイル構成と規約は [README.md](README.md) を参照。
 
+ホテル2016・2017は非公開制作ツールの `build_hotels.py` が `buildings.blend` に通常・接写を著作する。
+2016は3種のprebuiltを階高3.5mで積む4〜5階の中庭旅館、2017は階高3mのモジュラー壁と車寄せ付きentrance。
+遠景はUnityの簡易生成を使う。仕様は公開I文書§9.2、実FBXと三距離の検証は同ツールの `import_hotels.ps1`。
+
 ## 知らないと絶対わからない仕様
 
 - モノレール502のホームドアはplatform_doors.pyの共通造形をbuild_monorail.pyとbuild_platform_close.py（いずれも非公開制作ツール）から呼び、platform本体に組み込む。通常・接写とも8m周期、床上1.3mの腰高ドアで、独立パーツは持たない。

@@ -209,6 +209,16 @@ agents:
     variants:
       - 0
       - 500
+  2016:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  2017:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
   3001:
     model: true
     prebuilt: false
