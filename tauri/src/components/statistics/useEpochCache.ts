@@ -1,23 +1,14 @@
 /**
- * 統計ウィンドウ共通のエポック単位キャッシュフック
- *
- * 統計データはエポック（city.epoch）が変わらない限り内容が変化しないため、
- * 一度取得したレスポンスを「エンドポイント × エポック」をキーにメモ化し、
- * 同一エポック内ではバックエンドへの重いリクエストを再発行しないようにする。
- *
- * 仕組み:
- * 1. まず軽量な GET /api/v1/city で現在の epoch を取得する。
- * 2. `${path}@${epoch}` のキャッシュがあればそれを返す（重いリクエストを叩かない）。
- * 3. キャッシュが無ければ path を取得してキャッシュに格納する。
- *
- * キャッシュはモジュールレベルに保持するため、ウィンドウの再マウントやタブ切替を
- * またいでも保持される。新しいエポックに進むと別キーになるため、自然に最新化される。
+ * 統計レスポンスを同じ接続先・エポック内で再利用する。
+ * 世代が変われば全件破棄し、地区切替による増加も最大32件に制限する。
  */
 
 import { useEffect, useState } from "react";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 
-// `${path}@${epoch}` をキーにしたモジュールレベルのキャッシュ。
+// 古い世代の応答が遅れて届いても、現在のキャッシュには格納しない。
+const CACHE_LIMIT = 32;
+let cacheScope = "";
 const cache = new Map<string, unknown>();
 
 type CityEpochResponse = { city: { epoch: number } };
@@ -60,7 +51,13 @@ export function useEpochCachedStats<T>(
           { signal: controller.signal }
         );
         const epoch = cityRes.city.epoch;
-        const key = `${path}@${epoch}`;
+        if (cancelled) return;
+        const scope = JSON.stringify([apiBaseUrl, epoch]);
+        if (cacheScope !== scope) {
+          cache.clear();
+          cacheScope = scope;
+        }
+        const key = path;
 
         // 同一エポックの取得済みデータがあれば、重いリクエストを発行せずに返す。
         const cached = cache.get(key) as T | undefined;
@@ -74,7 +71,13 @@ export function useEpochCachedStats<T>(
         const data = await fetchApi<T>(buildApiUrl(apiBaseUrl, path), {
           signal: controller.signal,
         });
-        cache.set(key, data);
+        if (!cancelled && cacheScope === scope) {
+          cache.delete(key);
+          cache.set(key, data);
+          if (cache.size > CACHE_LIMIT) {
+            cache.delete(cache.keys().next().value!);
+          }
+        }
         if (!cancelled) {
           setState({ data, loading: false, error: null, epoch });
         }

@@ -22,7 +22,6 @@ import { EmploymentTab } from "./tabs/EmploymentTab";
 import { TradeTab } from "./tabs/TradeTab";
 import { AccidentsTab } from "./tabs/AccidentsTab";
 import { BusinessTab } from "./tabs/BusinessTab";
-import { BusinessHistoryTab } from "./tabs/BusinessHistoryTab";
 import { CommuteTab } from "./tabs/CommuteTab";
 import { RealEstateTab } from "./tabs/RealEstateTab";
 import { InfrastructureTab } from "./tabs/InfrastructureTab";
@@ -38,20 +37,19 @@ type TabDef = {
 };
 
 const TABS: TabDef[] = [
-  { id: "satisfaction", icon: "health", labelKey: "wellbeing.satisfactionTitle" },
-  { id: "leisure", icon: "commute", labelKey: "wellbeing.leisureTitle" },
-  { id: "comfort", icon: "realestate", labelKey: "wellbeing.comfortTitle" },
   { id: "population", icon: "population", labelKey: "statistics.tabPopulation" },
+  { id: "satisfaction", icon: "satisfaction", labelKey: "wellbeing.satisfactionTitle" },
+  { id: "leisure", icon: "leisure", labelKey: "wellbeing.leisureTitle" },
+  { id: "comfort", icon: "comfort", labelKey: "wellbeing.comfortTitle" },
+  { id: "health", icon: "health", labelKey: "statistics.tabHealth" },
   { id: "income", icon: "income", labelKey: "statistics.tabIncome" },
   { id: "economy", icon: "economy", labelKey: "statistics.tabEconomy" },
   { id: "economyTrend", icon: "economyTrend", labelKey: "statistics.tabEconomyTrend" },
-  { id: "health", icon: "health", labelKey: "statistics.tabHealth" },
   { id: "education", icon: "education", labelKey: "statistics.tabEducation" },
   { id: "employment", icon: "employment", labelKey: "statistics.tabEmployment" },
   { id: "trade", icon: "trade", labelKey: "statistics.tabTrade" },
   { id: "accidents", icon: "accidents", labelKey: "statistics.tabAccidents" },
   { id: "business", icon: "business", labelKey: "statistics.tabBusiness" },
-  { id: "businessHistory", icon: "businessHistory", labelKey: "statistics.tabBusinessHistory" },
   { id: "commute", icon: "commute", labelKey: "statistics.tabCommute" },
   { id: "realestate", icon: "realestate", labelKey: "statistics.tabRealEstate" },
   { id: "infrastructure", icon: "infrastructure", labelKey: "statistics.tabInfrastructure" },
@@ -106,6 +104,35 @@ function TabIcon({ icon, className }: { icon: string; className?: string }) {
     return <img src={url} alt="" className={className} draggable={false} />;
   }
 
+  if (icon === "satisfaction") {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M8 9h.01M16 9h.01M7.5 14a5 5 0 0 0 9 0" />
+      </svg>
+    );
+  }
+  if (icon === "leisure") {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 11a9 8 0 0 1 18 0H3ZM8 11c0-4 2-8 4-8s4 4 4 8M12 11v10M5 21h14" />
+      </svg>
+    );
+  }
+  if (icon === "comfort") {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 11l9-8 9 8M5 10v11h14V10M9 21v-7h6v7" />
+      </svg>
+    );
+  }
+  if (icon === "economyTrend") {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 3v18h18M6 16l5-6 4 3 6-8" />
+      </svg>
+    );
+  }
   if (icon === "population") {
     return (
       <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -136,7 +163,7 @@ function TabIcon({ icon, className }: { icon: string; className?: string }) {
   if (icon === "health") {
     return (
       <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+        <path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6V3Z" />
       </svg>
     );
   }
@@ -189,22 +216,12 @@ function TabIcon({ icon, className }: { icon: string; className?: string }) {
       </svg>
     );
   }
-  if (icon === "businessHistory") {
-    // 開店・閉店履歴: 時計を巻き戻す「履歴」アイコン
-    return (
-      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3.5 12a8.5 8.5 0 1 0 2.9-6.4L3 8.5" />
-        <path d="M3 3.5v5h5" />
-        <path d="M12 8v4.2l2.8 1.8" />
-      </svg>
-    );
-  }
   if (icon === "commute") {
-    // 往復や人の移動を表現する双方向垂直矢印のプレミアムなデザイン
     return (
       <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M7 16V4M7 4L3 8M7 4L11 8" />
-        <path d="M17 8v12M17 20l-4-4M17 20l4-4" />
+        <path d="M4 10l2-6h12l2 6M4 17v3M20 17v3" />
+        <rect x="3" y="10" width="18" height="7" rx="2" />
+        <path d="M7 13.5h1M16 13.5h1" />
       </svg>
     );
   }
@@ -329,7 +346,6 @@ export function CityStatisticsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         {activeTab === "trade" && <TradeTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "accidents" && <AccidentsTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "business" && <BusinessTab apiBaseUrl={apiBaseUrl} />}
-        {activeTab === "businessHistory" && <BusinessHistoryTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "commute" && <CommuteTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "realestate" && <RealEstateTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "infrastructure" && <InfrastructureTab apiBaseUrl={apiBaseUrl} />}

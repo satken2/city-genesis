@@ -2,7 +2,7 @@
  * 満足度・余暇・住環境タブコンポーネント
  *
  * 統計ウィンドウの「満足度」「余暇」「住環境」の3タブが共有する中身。
- * GET /api/v1/stats/wellbeing から確定済みの都市平均(直近240エポック)を取得し、
+ * GET /api/v1/stats/wellbeing から確定済みの都市全体または選択地区の平均(直近HISTORY_COUNTエポック（現在120）)を取得し、
  * `view` に応じて表示する指標の組を切り替える。
  * データはエポックが変わらない限り再取得しない(useEpochCachedStats によるキャッシュ)。
  *
@@ -17,7 +17,7 @@
  * 「余暇」表示では時間の系列だけ右軸に載せる。
  */
 
-import { useMemo, type CSSProperties } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import {
   LineChart,
@@ -51,6 +51,7 @@ type HistoryPoint = {
 
 type WellbeingStats = {
   epoch: number;
+  scopes: { zone_id: number | null; name: string | null }[];
   history: HistoryPoint[];
   current: HistoryPoint | null;
   weights: Record<string, number>;
@@ -141,9 +142,10 @@ function KpiCard({
 
 export function WellbeingTab({ apiBaseUrl, view }: { apiBaseUrl: string; view: View }) {
   const { t, i18n } = useTranslation();
+  const [selectedKey, setSelectedKey] = useState("city");
   const { data, loading, error } = useEpochCachedStats<WellbeingStats>(
     apiBaseUrl,
-    "/api/v1/stats/wellbeing"
+    `/api/v1/stats/wellbeing${selectedKey === "city" ? "" : `?zone_id=${selectedKey}`}`
   );
 
   const keys = VIEW_KEYS[view];
@@ -172,8 +174,16 @@ export function WellbeingTab({ apiBaseUrl, view }: { apiBaseUrl: string; view: V
     );
   }
   const current = data.current;
-  if (!current || !current.households) {
-    return <div className="wellbeing-tab__empty">{t("wellbeing.empty")}</div>;
+  const scopeSelector = <div className="wellbeing-scope">
+    <label htmlFor="wellbeing-scope-select">{t("statistics.scopeLabel")}</label>
+    <select id="wellbeing-scope-select" value={selectedKey} onChange={e => setSelectedKey(e.target.value)}>
+      {data.scopes.map(scope => <option key={scope.zone_id ?? "city"} value={scope.zone_id ?? "city"}>
+        {scope.zone_id == null ? t("statistics.cityWide") : `${scope.name ?? ""} #${scope.zone_id}`}
+      </option>)}
+    </select>
+  </div>;
+  if (!current) {
+    return <div className="wellbeing-tab">{scopeSelector}<div className="wellbeing-tab__empty">{t("wellbeing.empty")}</div></div>;
   }
 
   const unitOf = (key: string) => t(isHoursKey(key) ? "wellbeing.hours" : "wellbeing.points");
@@ -200,6 +210,7 @@ export function WellbeingTab({ apiBaseUrl, view }: { apiBaseUrl: string; view: V
       className="wellbeing-tab"
       style={{ "--wellbeing-accent": VIEW_ACCENT[view] } as CSSProperties}
     >
+      {scopeSelector}
       <p className="wellbeing-tab__description">{t(`wellbeing.${view}Description`)}</p>
 
       {/* ===== 中段: 現在値のKPIカード列 ===== */}
