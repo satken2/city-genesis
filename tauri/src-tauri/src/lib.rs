@@ -1495,8 +1495,10 @@ fn begin_initial_loading(app: &tauri::AppHandle, state: &SharedState, needs_setu
     }
     window::set_hud_visible(app, false);
     if let Some(hintbar) = app.get_webview_window("hintbar") { let _ = hintbar.hide(); }
-    ipc::send_ui_action(state, "".into(), None, "game:loading".into(), serde_json::json!({}))?;
-    window::open_tips_window(app, state)
+    let result = ipc::send_ui_action(state, "".into(), None, "game:loading".into(), serde_json::json!({}))
+        .and_then(|_| window::open_tips_window(app, state));
+    if result.is_err() { abort_initial_loading(app, state); }
+    result
 }
 
 fn abort_initial_loading(app: &tauri::AppHandle, state: &SharedState) {
@@ -1507,6 +1509,8 @@ fn abort_initial_loading(app: &tauri::AppHandle, state: &SharedState) {
         guard.loading_started = false;
         guard.graphic_load_ready = false;
         guard.needs_parameter_setup = false;
+        // 既存セッションが残っていれば、次のポーリングで描画を作り直して復帰する。
+        guard.last_save_id = None;
     }
     window::close_tips_window(app);
     if let Some(topmenu) = app.get_webview_window("topmenu") { let _ = topmenu.show(); }
@@ -1525,6 +1529,7 @@ fn send_game_start_ipc(state: &SharedState, _app: &tauri::AppHandle) {
 }
 
 fn show_game_controls(app: &tauri::AppHandle, state: &SharedState) {
+    let _ = app.emit("initial-loading:finished", ());
     window::set_hud_visible(app, true);
     show_hintbar_if_enabled(app);
     let tutorial_id = state.lock().tutorial_id.clone();
@@ -1654,6 +1659,12 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
             }
 
             let base = api_base_url.trim_end_matches('/');
+
+            // このGETより後にPOSTが終わった場合、古い応答を新セッションの状態として採用しない。
+            let (polled_loading_id, load_complete_before_poll) = {
+                let guard = state.lock();
+                (guard.loading_id, guard.backend_load_complete)
+            };
 
             // セッション情報を取得
             // send() 失敗や status != 2xx の場合はリクエスト失敗として扱い、
@@ -1832,7 +1843,8 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
 
             let load_completed = {
                 let mut guard = state.lock();
-                let ready = guard.backend_load_complete && current_save_id.is_some();
+                let ready = load_complete_before_poll && guard.backend_load_complete
+                    && guard.loading_id == polled_loading_id && current_save_id.is_some();
                 if ready { guard.backend_load_complete = false; }
                 ready
             };
@@ -2163,8 +2175,8 @@ pub fn run() {
                                     request_app_exit(&app, &state);
                                 });
                             }
-                            "notification" | "hintbar" | "tutorial" | "parameter-setup"
-                            => {}
+                            "parameter-setup" if event_state.lock().awaiting_parameter_setup => { api.prevent_close(); }
+                            "notification" | "hintbar" | "tutorial" | "parameter-setup" => {}
                             "tips" if event_state.lock().is_loading => { api.prevent_close(); }
                             "tips" => {}
                             _ => {

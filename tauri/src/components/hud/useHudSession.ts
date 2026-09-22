@@ -53,6 +53,12 @@ export function useHudSession(): HudSession {
     let unlistenSession: (() => void) | undefined;
     let unlistenRename: (() => void) | undefined;
     let unlistenEpoch: (() => void) | undefined;
+    let unlistenLoading: (() => void) | undefined;
+
+    listen("initial-loading:finished", () => {
+      setVisible(true);
+      appWindow.show().catch(console.error);
+    }).then((fn) => { unlistenLoading = fn; }).catch(console.error);
 
     listen<SessionStatePayload>("session-state", (event) => {
       const payload = event.payload;
@@ -104,6 +110,7 @@ export function useHudSession(): HudSession {
       unlistenSession?.();
       unlistenRename?.();
       unlistenEpoch?.();
+      unlistenLoading?.();
     };
   }, [appWindow]);
 

@@ -622,7 +622,7 @@ pub async fn handle_incoming_message(
         "game:loaded" => {
             let loading_id = envelope.payload.get("loading_id").and_then(|v| v.as_u64());
             let mut guard = state.lock();
-            if guard.is_loading && loading_id == Some(guard.loading_id) {
+            if guard.is_loading && guard.loading_started && !guard.awaiting_parameter_setup && loading_id == Some(guard.loading_id) {
                 guard.graphic_load_ready = true;
             }
         }

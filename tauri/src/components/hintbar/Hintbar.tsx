@@ -43,6 +43,10 @@ export function Hintbar() {
     let unlistenText: (() => void) | undefined;
     let unlistenSession: (() => void) | undefined;
     let unlistenSettings: (() => void) | undefined;
+    let unlistenLoading: (() => void) | undefined;
+
+    listen("initial-loading:finished", () => setSessionActive(true))
+      .then((fn) => { unlistenLoading = fn; }).catch(console.error);
 
     listen<HintbarPayload>("hintbar:set-text", (event) => {
       setText(event.payload.text);
@@ -79,6 +83,7 @@ export function Hintbar() {
       unlistenText?.();
       unlistenSession?.();
       unlistenSettings?.();
+      unlistenLoading?.();
     };
   }, [appWindow]);
 

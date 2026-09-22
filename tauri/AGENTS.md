@@ -162,3 +162,5 @@ UI側で独自に定義する定数は`local-constants.ts`に定義する。
 開始ボタンは `game:reveal {loading_id}` で黒画面を解除する。通常ロード・シナリオ・チュートリアル・テンプレート編集では初期設定を自動表示しない。空の都市を新規作成した場合だけTipsの次に `ParameterSetupWindow` を表示し、設定完了までHUDを抑制する。設定完了時に都市を再ロードしない。テンプレート編集から手動で開くパラメータ編集は従来どおり使用できる。
 
 HUDとヒントバーは `current_save_id != null && !isLoading` を表示条件とする。`isLoading` は描画準備・開始ボタン待ち・初期設定中を含む。TipsのAlt+F4では待機を解除しない。開始APIの失敗時はTipsを破棄し、ロード状態を解除する。
+
+初期設定またはTipsから通常操作へ進む際はUI内の `initial-loading:finished` イベントでHUDとヒントバーの描画を即座に解禁し、次回のセッションポーリングを待たない。

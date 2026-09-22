@@ -56,6 +56,8 @@ public static class InitialLoadingQA
             var operations = (IDictionary)scheduler.GetField("operations", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
             var operation = Activator.CreateInstance(operationType, true);
             var handle = System.Runtime.Serialization.FormatterServices.GetUninitializedObject(typeof(Coroutine));
+            // 辞書キー専用のハンドルにはネイティブコルーチンが無いため、Unityの解放を呼ばない。
+            GC.SuppressFinalize(handle);
             operations.Add(handle, operation);
             Func<bool> pending = () => (bool)scheduler.GetProperty("HasPendingInitialWork").GetValue(null);
             Check(pending(), "有限ジョブは待機対象");
