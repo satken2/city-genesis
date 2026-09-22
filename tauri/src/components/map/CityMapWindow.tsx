@@ -41,6 +41,7 @@ const LAYER_ORDER: (keyof CityMapLayerVisibility)[] = [
   "allRoads",
   "trunkRoads",
   "railways",
+  "transitLines",
 ];
 
 /** ヒートマップ切り替えの表示順。複数レイヤーと違い1つだけ選ぶ排他選択 */
@@ -83,9 +84,12 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
 
   // 標高色分けは地図の地物(道路・区画・建物)より情報量が多く、都市の読み取りを
   // 妨げるため既定ではOFFにする(必要なときにツールバーから点ける)。
+  // 公共交通路線は共通既定ではOFF(埋め込み地図に余計な取得をさせない)だが、
+  // 都市を読むためのこのウィンドウでは既定ONにする。
   const [layers, setLayers] = useState<CityMapLayerVisibility>({
     ...DEFAULT_CITY_MAP_LAYERS,
     elevation: false,
+    transitLines: true,
   });
   const [heatmap, setHeatmap] = useState<CityMapHeatmapKind>("none");
   const [heatmapStats, setHeatmapStats] = useState<CityMapHeatmapStats | null>(null);

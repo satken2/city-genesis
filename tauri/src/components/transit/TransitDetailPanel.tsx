@@ -7,7 +7,7 @@
  * タブ:
  *   - 基本情報 ... 種別・状態・車両・編成・区間数と、運行実績(乗車回数・収支・混雑率・調達率)
  *   - 設定     ... 運賃・運行間隔・1編成の車両数・路線カラー(PATCH で保存)と路線の廃止
- *   - 路線地図 ... 実地図オーバーレイ(TransitLineMap)
+ *   - 路線地図 ... 実地図上の路線(TransitLineMap。共通地図の公共交通路線レイヤーを当該路線に注目させたもの)
  *   - 路線図   ... 縦型ストリップ路線図(TransitLineDiagram)
  *
  * 運休理由と診断ウィンドウへの導線はタブに依らず常に見える位置(ヘッダ直下)に置く。
@@ -528,10 +528,8 @@ export function TransitDetailPanel({
             {line.stops.length >= 2 ? (
               <TransitLineMap
                 apiBaseUrl={apiBaseUrl}
+                lineAgentId={line.line_agent_id}
                 stops={line.stops}
-                edges={line.edges}
-                color={savedColor}
-                running={running}
               />
             ) : (
               <p className="agent-detail-muted">{t("transit.noStops")}</p>

@@ -26,6 +26,11 @@
  *   - allRoads / trunkRoads / railways : パス(道路・幹線道路・線路)。
  *     道路はマスターデータの全幅(width)をstroke幅に使い、実際の道路幅を持つ
  *     面として描く(街路=灰、高速道路=黄、線路=茶の線)。
+ *   - transitLines : 公共交通路線。GET /api/v1/transit/lines/geometry が返す、実際の下地
+ *     道路・線路に沿った走行形状(停留所間の直線ではない)を路線カラーの帯で描き、停留所を
+ *     リングで示す。描画規則は transitLineDraw.ts。transitFocusLineId で1路線を主役にできる
+ *     (路線詳細の路線地図はこれを使う)。路線の変更通知 "transit:lines_changed" を受けると
+ *     形状を取り直す。
  *
  * ヒートマップ(heatmap propで1種別だけ選ぶ排他表示):
  *   騒音・大気汚染・治安・日照の環境スコアを土地区画の塗り分けで表現する。APIが返すのは
@@ -58,6 +63,7 @@
 
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { listen } from "@tauri-apps/api/event";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import type { MasterData } from "../../types";
@@ -68,6 +74,7 @@ import {
   PATH_WALKWAY,
   PATH_TRACK,
 } from "../../constants";
+import { drawTransitLines, type TransitLineGeometry } from "./transitLineDraw";
 
 /* ============================================================================
  * 公開型
@@ -83,6 +90,8 @@ export type CityMapLayerVisibility = {
   allRoads: boolean;
   /** 線路 */
   railways: boolean;
+  /** 公共交通路線(実際の道路・線路に沿った走行形状と停留所) */
+  transitLines: boolean;
   /** 土地区画の枠線 */
   parcels: boolean;
   /** 建物の底面形状 */
@@ -99,12 +108,16 @@ export type CityMapLayerVisibility = {
   grid: boolean;
 };
 
-/** レイヤー表示のデフォルト値(主要レイヤーON、等高線・グリッドはOFF) */
+/**
+ * レイヤー表示のデフォルト値(主要レイヤーON、等高線・グリッド・公共交通路線はOFF)。
+ * 公共交通路線は都市全体の形状を別APIで取得するため、埋め込み地図では明示的にONにする。
+ */
 export const DEFAULT_CITY_MAP_LAYERS: CityMapLayerVisibility = {
   coastline: true,
   trunkRoads: true,
   allRoads: true,
   railways: true,
+  transitLines: false,
   parcels: true,
   buildings: true,
   stations: true,
@@ -191,6 +204,12 @@ export type CityMapCanvasProps = {
   layers?: Partial<CityMapLayerVisibility>;
   /** 表示するヒートマップの種別(省略時は"none"=非表示) */
   heatmap?: CityMapHeatmapKind;
+  /**
+   * 公共交通路線レイヤーで主役にする路線の line_agent_id。指定するとその路線を最前面に
+   * 始点=緑・終点=赤のリング付きで描き、他の路線は薄くする(路線詳細の路線地図用)。
+   * transitLines レイヤーがOFFなら効果はない。
+   */
+  transitFocusLineId?: number | null;
   /**
    * ヒートマップの実値レンジ・件数の通知。凡例の描画に使う。
    * 非表示のときはnullが渡る。
@@ -331,6 +350,8 @@ type VectorState = {
   buildingPath: Path2D | null;
   /** 駅の凸包(駅舎ごとにまとめたプラットフォーム群の凸包)。半透明の面で描く */
   stationHullPath: Path2D | null;
+  /** 公共交通路線の走行形状(都市全体。bboxに依らない) */
+  transitLines: TransitLineGeometry[];
   /** 確定地区(auto_managed=0)の枠線。実線で描く */
   zonePathConfirmed: Path2D | null;
   /** 自動管理地区(auto_managed=1)の枠線。破線で描き「まだ仮の区割り」であることを示す */
@@ -344,7 +365,7 @@ type VectorState = {
   loading: boolean;
 };
 
-type VectorKind = "paths" | "parcels" | "buildings" | "zones";
+type VectorKind = "paths" | "parcels" | "buildings" | "zones" | "transit";
 
 /** 取得済みヒートマップと色ビンごとのPath2Dキャッシュ */
 type HeatmapState = {
@@ -1048,6 +1069,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       apiBaseUrl,
       layers,
       heatmap = "none",
+      transitFocusLineId = null,
       initialBounds,
       interactive = true,
       showCompass,
@@ -1081,6 +1103,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
     const layersRef = useRef<CityMapLayerVisibility>({ ...DEFAULT_CITY_MAP_LAYERS, ...layers });
     const heatmapRef = useRef<CityMapHeatmapKind>(heatmap);
     const zoneFillRef = useRef<CityMapZoneFill | undefined>(zoneFill);
+    const transitFocusRef = useRef<number | null>(transitFocusLineId);
     const overlayDrawRef = useRef<CityMapCanvasProps["overlayDraw"]>(overlayDraw);
     const animatedOverlayDrawRef = useRef<CityMapCanvasProps["animatedOverlayDraw"]>(animatedOverlayDraw);
     const cursorCbRef = useRef<CityMapCanvasProps["onCursorWorldPos"]>(onCursorWorldPos);
@@ -1122,6 +1145,12 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       engineRef.current?.ensureVectors();
       engineRef.current?.draw();
     }, [layers]);
+
+    /* ---- 注目路線の変更: データは共通なので再描画だけ行う ---- */
+    useEffect(() => {
+      transitFocusRef.current = transitFocusLineId;
+      engineRef.current?.draw();
+    }, [transitFocusLineId]);
 
     /* ---- ヒートマップ種別の変更: 未取得なら取得し、区画データも揃えて再描画する ---- */
     useEffect(() => {
@@ -1210,6 +1239,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         parcelPath: null,
         buildingPath: null,
         stationHullPath: null,
+        transitLines: [],
         zonePathConfirmed: null,
         zonePathAuto: null,
         zoneFillBands: null,
@@ -1450,6 +1480,11 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           ctx.setLineDash([px(6), px(6)]);
           ctx.stroke(vec.railPath);
           ctx.setLineDash([]);
+        }
+
+        // 公共交通路線(実際の道路・線路に沿った帯と停留所)。線路・道路の上、重ね描きの下
+        if (L.transitLines && vec.transitLines.length > 0) {
+          drawTransitLines(ctx, { ...view }, vec.transitLines, transitFocusRef.current);
         }
 
         // 上位コンポーネントの重ね描き(敷設中道路・路線図など)
@@ -1741,6 +1776,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         if (L.buildings) kinds.push("buildings");
         // 地区の値塗りは地区ポリゴンを塗り分けるため、枠線レイヤーがOFFでも地区が要る
         if (L.zoneBorders || zoneFillRef.current) kinds.push("zones");
+        if (L.transitLines) kinds.push("transit");
         return kinds;
       };
 
@@ -1811,6 +1847,17 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         try {
           await Promise.all(
             kinds.map(async (kind) => {
+              if (kind === "transit") {
+                // 路線形状は都市全体を1回で取得し、ビューポート移動では取り直さない
+                // (reload と "transit:lines_changed" が fetchedKinds から外して取り直させる)
+                if (vec.fetchedKinds.has("transit")) return;
+                const data = await fetchApi<{ lines: TransitLineGeometry[] }>(
+                  buildApiUrl(apiBaseUrl, "/api/v1/transit/lines/geometry"),
+                  { signal: abort.signal }
+                );
+                vec.transitLines = data.lines ?? [];
+                return;
+              }
               if (kind === "zones") {
                 // 地区は件数が少ないため全件取得する(bboxはcenter_point基準のため
                 // 巨大ポリゴンが範囲外判定で欠落するのを避ける意図もある)
@@ -2062,6 +2109,20 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         })();
       };
 
+      // 路線の新設・設定変更・廃止(公共交通ウィンドウ/路線詳細が emit)で走行形状を取り直す。
+      // レイヤーOFF中は何もしない(次にONにしたとき ensureVectors が取得する)。
+      let unlistenTransit: (() => void) | undefined;
+      void listen("transit:lines_changed", () => {
+        if (disposed || !layersRef.current.transitLines) return;
+        vec.fetchedKinds.delete("transit");
+        ensureVectors();
+      })
+        .then((fn) => {
+          if (disposed) fn();
+          else unlistenTransit = fn;
+        })
+        .catch(console.error);
+
       resizeCanvas();
       void (async () => {
         await Promise.all([loadTerrain(), loadCoastline()]);
@@ -2098,6 +2159,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         abort.abort();
         engineRef.current = null;
         resizeObserver.disconnect();
+        unlistenTransit?.();
         if (vectorTimer !== null) window.clearTimeout(vectorTimer);
         if (contourTimer !== null) window.clearTimeout(contourTimer);
         if (interactive) {

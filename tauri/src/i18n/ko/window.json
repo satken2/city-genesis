@@ -46,6 +46,7 @@
       "trunkRoads": "간선도로",
       "allRoads": "모든 도로",
       "railways": "선로",
+      "transitLines": "대중교통 노선",
       "parcels": "토지 구획",
       "buildings": "건물",
       "stations": "역",

@@ -50,6 +50,7 @@
       "trunkRoads": "幹線道路",
       "allRoads": "すべての道路",
       "railways": "線路",
+      "transitLines": "公共交通路線",
       "parcels": "土地区画",
       "buildings": "建物",
       "stations": "駅",

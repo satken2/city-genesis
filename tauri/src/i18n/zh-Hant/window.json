@@ -46,6 +46,7 @@
       "trunkRoads": "主幹道",
       "allRoads": "所有道路",
       "railways": "鐵路",
+      "transitLines": "公共交通路線",
       "parcels": "地塊",
       "buildings": "建築",
       "stations": "車站",
