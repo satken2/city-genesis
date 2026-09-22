@@ -122,16 +122,19 @@ public class PreBuiltBuildingMeshBuilder : IBuildingMeshGenerator
         // a{variant}→b{bd_type}→common でフォールバック解決する（floorMaterial が非nullのときだけ描く）。
         // prebuilt は建物中心位置の地形標高に接地する（傾斜地対応の対象外）ため、
         // 超近景（isDynamic）ではフェンス・タイル・地面パネルを地形に追従させる。
-        Vector2[] fenceFootprint = BuildingMeshUtils.ResolveParcelContext(
-            buildingData, useParcelAltitude: false, out _, out Vector3 centerPointWorld);
-        Vector2[] sitePolygon = (fenceFootprint != null && fenceFootprint.Length >= 3) ? fenceFootprint : footprint;
-        Material floorMaterial = BuildingMeshUtils.ResolveFloorMaterialFromMaster(buildingData, glbPrefix);
-        ModularBodyBuilder.GenerateSiteDecorations(
-            glbPrefix, 0,
-            fenceFootprint, sitePolygon, sitePolygon,
-            floorMaterial,
-            centerPointWorld, deformToTerrain: isDynamic,
-            combineInstances, materials, temporaryMeshes);
+        if (BuildingMeshUtils.CurrentDrawLod != DrawLod.Far)
+        {
+            Vector2[] fenceFootprint = BuildingMeshUtils.ResolveParcelContext(
+                buildingData, useParcelAltitude: false, out _, out Vector3 centerPointWorld);
+            Vector2[] sitePolygon = (fenceFootprint != null && fenceFootprint.Length >= 3) ? fenceFootprint : footprint;
+            Material floorMaterial = BuildingMeshUtils.ResolveFloorMaterialFromMaster(buildingData, glbPrefix);
+            ModularBodyBuilder.GenerateSiteDecorations(
+                glbPrefix, 0,
+                fenceFootprint, sitePolygon, sitePolygon,
+                floorMaterial,
+                centerPointWorld, deformToTerrain: isDynamic,
+                combineInstances, materials, temporaryMeshes);
+        }
 
         if (combineInstances.Count == 0)
         {

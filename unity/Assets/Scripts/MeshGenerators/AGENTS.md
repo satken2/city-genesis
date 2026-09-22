@@ -1,5 +1,7 @@
 # MeshGenerators フォルダ
 
+全建物のFarは `GenerateFarBuilding` が共通のprefix解決で閾値0の `base/mid/top-prebuilt_far` を探し、いずれかがあれば `CurrentDrawLod=Far` でPreBuiltへ委譲する。名所や通常のmodel_typeでは分岐しない。パーツ解決は `_far` のみを読み、通常へのフォールバックと敷地装飾を省略する。遠景用パーツが無ければ簡易形状を使う。工事・解体・倒壊の簡易表示は維持する。実FBX・3距離・塔の2/4/8階・敷地寸法と、一般建物・構造別prefix・遠景未提供時の共通経路は非公開制作ツールの `import_landmarks.ps1` で検証する。F3文書を参照。
+
 ホームの任意パーツ`platform_foundation`は外壁下部。`PlatformFoundationGenerator`が天端Y=0を線路面、著作下端を外壁位置の地盤下15cmへ写像する。TrackPathのplatform_wallと同じ左右・島式省略・クリップ範囲を使う。パーツが無いバリアントには追加描画しない。鏡像の巻き順はPathStructureMesh.AppendのreverseWindingで補正する。462の白い外装・屋根は実寸の別パーツ。仕様はN文書、実FBX検証はTests/HighStandardPlatform/run.ps1。
 
 RoadEquipmentGeneratorの柵はfence_type_allowedと個別fence_typeで有効化する。歩道があれば歩車道境界の歩道側0.12m、歩道が無ければ舗装端の内側0.12mへ置く。301は後者で、支柱は最大2m間隔・高さ1m、パネルはp301/fence。実FBX回帰はTests/Intersections/run-unity.ps1 -Equipment。

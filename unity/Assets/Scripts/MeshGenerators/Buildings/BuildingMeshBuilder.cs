@@ -31,7 +31,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     /// <summary>
-    /// 描画LOD付きの生成。Far はパーツを一切読まずフットプリント押し出しの箱(<see cref="GenerateFarBuilding"/>)、
+    /// 描画LOD付きの生成。Far は遠景用prebuiltを優先し、無ければフットプリント押し出しの箱(<see cref="GenerateFarBuilding"/>)、
     /// Close は同じ組み立てで `_close` パーツを優先解決する(BuildingMeshUtils.CurrentDrawLod)。
     /// isDynamicは互換引数。地形追従の要否を表し、描画LODとは独立する。
     /// </summary>
@@ -68,13 +68,36 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     /// <summary>
-    /// 遠景(Far)用の建物メッシュ。フットプリントを階数×階高で押し出した箱で、パーツ・マテリアルを一切読まない。
+    /// 遠景(Far)用の建物メッシュ。建物種別によらず専用prebuiltを優先し、無ければ階数×階高の箱。
     /// 遠景は数が最も多いので、フル詳細と同じ組み立てを走らせてマテリアルだけ差し替える方式は使わない。
     /// 工事中・解体中は箱の高さを1階分にして「まだ建っていない」ことを遠目にも保ち、
     /// 倒壊は瓦礫の高さ(0.5階分)にする。
     /// </summary>
     public static BuildingMeshResult GenerateFarBuilding(BuildingSummary buildingData)
     {
+        if (buildingData.status != Constants.STATUS_CONSTRUCTING
+            && buildingData.status != Constants.STATUS_DEMOLISHING
+            && buildingData.status != Constants.STATUS_COLLAPSED)
+        {
+            string prefix = BuildingMeshUtils.GetGlbPrefix1(buildingData);
+            DrawLod previous = BuildingMeshUtils.CurrentDrawLod;
+            var previousCapture = BuildingExteriorRenderer.Capture;
+            BuildingMeshUtils.CurrentDrawLod = DrawLod.Far;
+            BuildingExteriorRenderer.Capture = null;
+            try
+            {
+                // 通常の生成方式と遠景の著作形式は独立する。モジュラー建物も遠景を完成モデルで提供できる。
+                if (BuildingMeshUtils.GetPartNoPosition(prefix, "base-prebuilt", 0, true) != null
+                    || BuildingMeshUtils.GetPartNoPosition(prefix, "mid-prebuilt", 0, true) != null
+                    || BuildingMeshUtils.GetPartNoPosition(prefix, "top-prebuilt", 0, true) != null)
+                    return prebuiltGenerator.Generate(buildingData, false);
+            }
+            finally
+            {
+                BuildingMeshUtils.CurrentDrawLod = previous;
+                BuildingExteriorRenderer.Capture = previousCapture;
+            }
+        }
         Vector2[] footprint = BuildingMeshUtils.GetFootprint(buildingData);
         float floorHeight = BuildingMeshUtils.GetFloorHeight(buildingData);
         int floors = Mathf.Max(1, buildingData.floors ?? 1);

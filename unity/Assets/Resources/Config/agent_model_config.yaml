@@ -239,3 +239,9 @@ agents:
     prebuilt: false
     variants:
       - 0
+landmark_prefixes:
+  - landmark-ancient_ruins
+  - landmark-colossal_statue
+  - landmark-grand_cathedral
+  - landmark-great_tower
+  - landmark-old_castle

@@ -36,6 +36,11 @@ public static class BuildingMeshUtils
     private static GameObject GetModelForDrawLod(string path, bool suppressWarning)
     {
         if (ModelManager.Instance == null) return null;
+        if (CurrentDrawLod == DrawLod.Far)
+        {
+            // 遠景は専用モデルだけを使い、欠落時に高密度な通常モデルを読み込まない。
+            return ModelManager.Instance.GetModel(path + "_far", true);
+        }
         if (CurrentDrawLod == DrawLod.Close)
         {
             GameObject close = ModelManager.Instance.GetModel(path + CLOSE_SUFFIX, true);
