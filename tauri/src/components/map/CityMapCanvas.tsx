@@ -1176,6 +1176,14 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       const view: CityMapViewState = { offsetX: 0, offsetY: 0, zoom: 1 };
       let canvasW = 0;
       let canvasH = 0;
+      /**
+       * 初期ビューが確定したか。地形取得後の resetView まで view は初期値のままなので、
+       * それ以前にbbox取得を走らせるとワールド原点付近の無意味な範囲を取り込んでしまう
+       * (しかもその範囲が fetchedBounds として記録され、再取得の判定を狂わせる)。
+       */
+      let viewReady = false;
+      /** 取得中に別の取得要求が来たか。完了後に取り直して要求の取りこぼしを防ぐ */
+      let vectorLoadPending = false;
 
       let settings: TerrainSettings | null = null;
       let terrain: TerrainState | null = null;
@@ -1790,7 +1798,13 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       };
 
       const loadVectors = async (kinds: VectorKind[], bounds: CityMapBounds) => {
-        if (vec.loading || kinds.length === 0) return;
+        if (kinds.length === 0) return;
+        // 取得中の要求は捨てずに保留し、完了後に現在の必要種別で取り直す。
+        // 捨てると「レイヤーやzoneFillが増えた直後の要求」が消えて永久に描かれない。
+        if (vec.loading) {
+          vectorLoadPending = true;
+          return;
+        }
         vec.loading = true;
         const bbox = `${bounds.x1},${bounds.z1},${bounds.x2},${bounds.z2}`;
 
@@ -1846,11 +1860,17 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           if (!abort.signal.aborted) console.warn("[CityMapCanvas] failed to load vector data:", err);
         } finally {
           vec.loading = false;
+          if (vectorLoadPending && !disposed) {
+            vectorLoadPending = false;
+            fetchVectorsForViewport();
+          }
         }
       };
 
       /** ビューポート+パディングをbboxとして、現在必要なデータ種別をすべて取得する */
       const fetchVectorsForViewport = () => {
+        // 初期ビュー確定前は取得しない(起動シーケンスが resetView 後に取得する)
+        if (!viewReady) return;
         const b = getViewBounds();
         const pw = (b.x2 - b.x1) * FETCH_PAD;
         const ph = (b.z2 - b.z1) * FETCH_PAD;

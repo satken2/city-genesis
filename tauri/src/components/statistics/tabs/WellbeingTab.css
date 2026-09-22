@@ -174,7 +174,9 @@
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
-.wellbeing-seg__btn:hover {
+/* 選択中のボタンは除く。含めると詳細度でホバー色が --active の文字色に勝ち、
+   系列色のベタ塗りの上に明るい文字が乗ってラベルが読めなくなる。 */
+.wellbeing-seg__btn:not(.wellbeing-seg__btn--active):hover {
   color: #e5e7eb;
   border-color: rgba(255, 255, 255, 0.2);
 }

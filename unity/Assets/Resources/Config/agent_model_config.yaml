@@ -157,12 +157,22 @@ agents:
     prebuilt: false
     variants:
       - 0
+  2004:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
   2006:
     model: true
     prebuilt: false
     variants:
       - 0
   2007:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  2008:
     model: true
     prebuilt: false
     variants:
@@ -178,6 +188,11 @@ agents:
     variants:
       - 0
   2012:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+  2013:
     model: true
     prebuilt: false
     variants:

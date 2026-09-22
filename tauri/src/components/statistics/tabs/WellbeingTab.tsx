@@ -18,7 +18,7 @@
  * 「余暇」表示では時間の系列だけ右軸に載せる。
  */
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import {
   LineChart,
@@ -35,7 +35,6 @@ import {
 import {
   CityMapCanvas,
   getZoneFillRampStops,
-  type CityMapCanvasHandle,
   type CityMapLayerVisibility,
   type CityMapZoneFill,
 } from "../../map/CityMapCanvas";
@@ -248,31 +247,18 @@ function WellbeingSidePanel({
   indicator,
   onSelectIndicator,
   current,
-  epoch,
 }: {
   apiBaseUrl: string;
   keys: string[];
   indicator: string;
   onSelectIndicator: (key: string) => void;
   current: HistoryPoint;
-  epoch: number | null;
 }) {
   const { t } = useTranslation();
-  const { data } = useEpochCachedStats<WellbeingZoneStats>(
+  const { data, error } = useEpochCachedStats<WellbeingZoneStats>(
     apiBaseUrl,
     "/api/v1/stats/wellbeing/zones"
   );
-
-  const mapRef = useRef<CityMapCanvasHandle | null>(null);
-  const mapEpochRef = useRef<number | null>(null);
-  useEffect(() => {
-    // 統計ウィンドウは閉じても非表示になるだけでアンマウントされないため、
-    // エポックが進んだら地区形状を取り直す(初回ロードとの二重取得は避ける)。
-    if (epoch == null) return;
-    const previous = mapEpochRef.current;
-    mapEpochRef.current = epoch;
-    if (previous != null && previous !== epoch) mapRef.current?.reload();
-  }, [epoch]);
 
   // 選択指標の地区別現在値。欠測(母集団世帯0)の地区は塗らない。
   const zoneValues = useMemo(() => {
@@ -361,12 +347,7 @@ function WellbeingSidePanel({
 
       <section className="wellbeing-card wellbeing-card--map">
         <div className="wellbeing-map">
-          <CityMapCanvas
-            ref={mapRef}
-            apiBaseUrl={apiBaseUrl}
-            layers={MAP_LAYERS}
-            zoneFill={zoneFill}
-          />
+          <CityMapCanvas apiBaseUrl={apiBaseUrl} layers={MAP_LAYERS} zoneFill={zoneFill} />
           {zoneRange ? (
             <div className="wellbeing-map__legend">
               <span>{format(toDisplayValue(indicator, zoneRange.min))}</span>
@@ -374,7 +355,10 @@ function WellbeingSidePanel({
               <span>{format(toDisplayValue(indicator, zoneRange.max))}</span>
             </div>
           ) : (
-            <div className="wellbeing-map__empty">{t("wellbeing.zoneMapEmpty")}</div>
+            // 取得失敗を「データなし」と言い切らない(原因の切り分けを妨げるため)
+            <div className="wellbeing-map__empty">
+              {error ? t("common.fetchError") : t("wellbeing.zoneMapEmpty")}
+            </div>
           )}
         </div>
       </section>
@@ -385,7 +369,7 @@ function WellbeingSidePanel({
 export function WellbeingTab({ apiBaseUrl, view }: { apiBaseUrl: string; view: View }) {
   const { t, i18n } = useTranslation();
   const [selectedKey, setSelectedKey] = useState("city");
-  const { data, loading, error, epoch } = useEpochCachedStats<WellbeingStats>(
+  const { data, loading, error } = useEpochCachedStats<WellbeingStats>(
     apiBaseUrl,
     `/api/v1/stats/wellbeing${selectedKey === "city" ? "" : `?zone_id=${selectedKey}`}`
   );
@@ -428,7 +412,10 @@ export function WellbeingTab({ apiBaseUrl, view }: { apiBaseUrl: string; view: V
     });
   }, [history, composition, weights, i18n.language]);
 
-  if (loading) {
+  // 初回だけローディング画面に差し替える。集計範囲の切替では直前のデータを描き続ける
+  // (画面ごと差し替えると地図がアンマウントされ、地形・ベクターの再取得とビューの
+  //  リセットが毎回走ってしまう。地図の内容は集計範囲に依存しない)。
+  if (loading && !data) {
     return <div className="wellbeing-tab__loading">{t("common.loading")}</div>;
   }
   if (error || !data) {
@@ -615,7 +602,6 @@ export function WellbeingTab({ apiBaseUrl, view }: { apiBaseUrl: string; view: V
             indicator={indicator}
             onSelectIndicator={setIndicator}
             current={current}
-            epoch={epoch}
           />
         )}
       </div>
