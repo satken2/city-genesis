@@ -41,7 +41,7 @@ public sealed class PowerLinePath : IPathMeshGenerator
         PathSummary chosen = path;
         if (node > 0 && ConnectedPaths != null)
             foreach (var candidate in ConnectedPaths(node))
-                if (Handles(candidate) && (candidate.path_variant < chosen.path_variant ||
+                if (Handles(candidate) && candidate.path_id != path.path_id && (candidate.path_variant < chosen.path_variant ||
                     candidate.path_variant == chosen.path_variant && candidate.path_id < chosen.path_id)) chosen = candidate;
         var a = chosen.GetStartPointList();
         var b = chosen.GetEndPointList();
@@ -101,12 +101,22 @@ public sealed class PowerLinePath : IPathMeshGenerator
     public static void GenerateInto(GameObject root, PathSummary path, List<Vector3> points, DrawLod lod)
     {
         var supports = Plan(path,points);
-        var metal = RoadPath.GetOrCreateRoadMaterialByName("PATH_METAL") ?? RoadPath.GetOrCreateRoadMaterialByName("BuildingMaterial");
+        var reference = PathDrawContext.ResolvePrefab($"Models/Paths/p{path.path_variant}/pillar_cap",null,out _);
+        Material metal = null;
+        if (reference != null)
+            foreach (var renderer in reference.GetComponentsInChildren<MeshRenderer>())
+                foreach (var material in renderer.sharedMaterials)
+                    if (material != null && material.name.StartsWith("PATH_METAL",StringComparison.Ordinal))
+                        metal = RoadPath.GetOrCreateRoadMaterial(material);
+        metal ??= RoadPath.GetOrCreateRoadMaterialByName("BuildingMaterial");
         var wires = new PathStructureMesh(root,"PowerConductors",new[] { metal });
         bool far = lod == DrawLod.Far;
+        bool constructing = path.status == Constants.STATUS_CONSTRUCTING;
+        float progress = constructing ? ConstructionPathBuilder.Progress(path) : 1;
         for (int i = 0; i < supports.Count; i++)
         {
             var s = supports[i];
+            if (constructing && (float)(i+1)/supports.Count > ConstructionPathBuilder.PierProgress(progress)) continue;
             var holder = new GameObject("PowerSupport"); holder.transform.SetParent(root.transform,false);
             var visual = new GameObject("TowerVisual"); visual.transform.SetParent(holder.transform,false);
             var prefab = far ? null : PathDrawContext.ResolvePrefab($"Models/Paths/p{s.variant}/pillar_cap",null,out _);
@@ -122,8 +132,18 @@ public sealed class PowerLinePath : IPathMeshGenerator
                 }
             }
             else GenerateFarTower(visual,s,metal);
+            var foundation = new PathStructureMesh(visual,"TowerFoundations",new[] { metal });
+            float foot = s.variant == 1101 ? 3.5f : .9f;
+            for (int x=-1;x<=1;x+=2) for(int z=-1;z<=1;z+=2)
+            {
+                var top=s.position+s.rotation*new Vector3(x*foot,0,z*foot);
+                var bottom=new Vector3(top.x,Utils.GetGroundHeight(top),top.z);
+                if(top.y>bottom.y+.1f) foundation.Bar(bottom,top,s.variant==1101?.22f:.12f,sides:4);
+            }
+            foundation.Finish();
             if (s.node > 0) holder.AddComponent<PowerLineSupport>().Initialize(s.node,path.path_id,visual,lod);
             if (i == 0) continue;
+            if (constructing && (float)i/(supports.Count-1) > ConstructionPathBuilder.DeckProgress(progress)) continue;
             var previous = supports[i-1];
             bool large = path.path_variant == 1101;
             int circuits = large ? 6 : 3;
@@ -167,12 +187,13 @@ public sealed class PowerLinePath : IPathMeshGenerator
         Vector3 P(float x,float y,float z)=>s.position+s.rotation*new Vector3(x,y,z);
         for(int x=-1;x<=1;x+=2) for(int z=-1;z<=1;z+=2)
             mesh.Bar(P(x*width,0,z*width),P(x*.35f,height,z*.35f),large?.16f:.08f,sides:4);
-        int levels=large?3:1;
+        int levels=large?3:2;
         for(int i=0;i<levels;i++)
         {
-            float y=large?25+5*i:13.8f, reach=large?6.8f-.7f*i:2.7f;
+            float y=large?25+5*i:i==0?13.8f:16, reach=large?6.8f-.7f*i:i==0?2.7f:2.3f;
             mesh.Bar(P(-reach,y,0),P(reach,y,0),.12f,sides:4);
-            foreach(int side in new[]{-1,1}) mesh.Bar(P(side*reach,y,0),P(side*reach,y-(large?2:1),0),.12f,sides:4);
+            if(large || i==0)
+                foreach(int side in new[]{-1,1}) mesh.Bar(P(side*reach,y,0),P(side*reach,y-(large?2:1),0),.12f,sides:4);
         }
         for(int i=0;i<(large?5:3);i++)
         {

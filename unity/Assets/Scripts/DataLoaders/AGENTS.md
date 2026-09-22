@@ -1,5 +1,7 @@
 # DataLoaders フォルダ
 
+PathManagerの完成した乗り場451/461・462・502・602のFarはFarPlatformPathの簡易立体を使う。屋根・壁・床の色帯を通常と同じ共有材質で保つ。通常道路の帯、施工中、地下非表示の規則は共通のまま。生成メッシュは子のIntersectionMeshOwnerが所有し、遠景キャッシュの退避・復元も通常の経路を使う。
+
 バックエンドから取得したデータをUnityのオブジェクトに変換する処理を定義する。
 都市全体を一度に描画すると重すぎるため、マップをセル(一辺 `TerrainManager.CellSize`、バックエンドの `/terrain/settings` から取得)に区切り、カメラ周辺のセルだけを詳細に描画する。起点は `CellDataLoader.cs`。
 
@@ -315,3 +317,7 @@ PropScatterItemのedge_fade_widthは外周・穴から内側への密度フェ�
 `CellDataLoader.IsInitialSceneReady` は初回地形処理だけでなく、後続の区画・建物・道路・地区・資源・プロップ、敷地装飾・道路区間・コライダーの描画準備を待つ。`RenderWorkScheduler.Start` の任意 `hasPendingWork` は常駐ワーカーの未処理判定で、省略した有限コルーチンは通信待ちを含めて全期間待機対象になる。常駐ワーカーを追加するときは、無限ループ自身を完了条件にしないようこの判定を指定する。建物の上限により意図的に保留している視野外の詳細と、元の表示を維持する遠景結合処理は待ち続けない。
 
 保存カメラの復元と生成完了を連続3フレーム確認して `game:loaded` を送る。初期ロードとは初期視点の常駐セルと全景の描画準備であり、都市全域の詳細モデルを常駐させる意味ではない。開始後のカメラ移動には通常のLODストリーミングを使う。
+
+## 送電線の共有ノード
+
+PathManagerはPowerLinePath.ConnectedPathsへGetPathsConnectedToNodeを渡し、破棄時に解除する。1101/1102は通常・接写・遠景・施工とも専用生成器を使う。登録・接続変更・削除は接続ノードの隣接送電線だけをEnqueuePowerNeighborsで再生成し、キャッシュキーのgeometryRevisionsも更新する。遠景をBuildStripMeshへ戻さない。共有鉄塔の表示所有権はPowerLineSupportが表示中の候補間で引き継ぐ。

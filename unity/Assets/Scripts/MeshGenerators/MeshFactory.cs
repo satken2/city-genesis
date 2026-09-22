@@ -108,10 +108,12 @@ public interface IPathMeshGenerator
 /// </summary>
 public static class PathMeshFactory
 {
-    // variant固有の生成器（将来用。現在は空）
+    // 送電線は径間ごとのたるみと共有鉄塔を持つため、道路用の反復配置から分離する。
     private static Dictionary<string, IPathMeshGenerator> variantGenerators 
         = new Dictionary<string, IPathMeshGenerator>()
         {
+            { "1101", new PowerLinePath() },
+            { "1102", new PowerLinePath() },
         };
 
     // model_type → 生成器のマッピング

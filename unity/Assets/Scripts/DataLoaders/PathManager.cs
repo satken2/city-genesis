@@ -337,6 +337,7 @@ public class PathManager : BaseApiDataManager
         PillarClearance.NeighborProvider = GetPillarObstacles;
         TrackAdjacency.NeighborProvider = GetAdjacentTrackNeighbors;
         TrackPath.ConnectedPathsProvider = GetPathsConnectedToNode;
+        PowerLinePath.ConnectedPaths = GetPathsConnectedToNode;
         TrackPath.InfrastructureConnectionProvider = IsInfrastructureConnection;
     }
 
@@ -350,6 +351,8 @@ public class PathManager : BaseApiDataManager
     private void OnDestroy()
     {
         lodCache.Clear();
+        if (PowerLinePath.ConnectedPaths == (Func<int, List<PathSummary>>)GetPathsConnectedToNode)
+            PowerLinePath.ConnectedPaths = null;
         if (PillarClearance.NeighborProvider == (Func<PathSummary, List<PillarClearance.Corridor>>)GetPillarObstacles)
             PillarClearance.NeighborProvider = null;
         TerrainManager.OnTerrainTileReady -= OnTerrainTileReadyHandler;
@@ -1769,8 +1772,12 @@ public class PathManager : BaseApiDataManager
         }
 
         bool constructing = status == Constants.STATUS_CONSTRUCTING && PathMeshFactory.GetModelType(path) != "none";
-        Mesh mesh = constructing ? null : PathMeshFactory.BuildStripMesh(points, width);
-        if (constructing) ConstructionPathBuilder.GenerateFar(pathGO, path, points, width, GetRoadMaterial());
+        bool powerLine = PowerLinePath.Handles(path);
+        bool farPlatform = !constructing && FarPlatformPath.Handles(path);
+        Mesh mesh = constructing || powerLine || farPlatform ? null : PathMeshFactory.BuildStripMesh(points, width);
+        if (powerLine) PowerLinePath.GenerateInto(pathGO, path, CalculatePathPoints(path), DrawLod.Far);
+        else if (constructing) ConstructionPathBuilder.GenerateFar(pathGO, path, points, width, GetRoadMaterial());
+        else if (farPlatform) FarPlatformPath.GenerateInto(pathGO, path, points);
         if (mesh != null)
         {
             MeshFilter mf = pathGO.AddComponent<MeshFilter>();
@@ -2481,7 +2488,12 @@ public class PathManager : BaseApiDataManager
         var genWatch = System.Diagnostics.Stopwatch.StartNew();
         try
         {
-            if (status == Constants.STATUS_CONSTRUCTING && PathMeshFactory.GetModelType(path) != "none")
+            if (PowerLinePath.Handles(path))
+            {
+                PathDrawContext.Begin(drawLod);
+                meshResult = PathMeshFactory.GeneratePathMesh(path, points);
+            }
+            else if (status == Constants.STATUS_CONSTRUCTING && PathMeshFactory.GetModelType(path) != "none")
             {
                 PathDrawContext.Begin(drawLod);
                 meshResult = GenerateConstructingPathMesh(path, points);
@@ -3480,6 +3492,7 @@ public class PathManager : BaseApiDataManager
         {
             if (oldPath != null)
             {
+                EnqueuePowerNeighbors(oldPath);
                 InvalidateTerrainFollowPath(oldPath);
                 EnqueuePillarNeighborRebuilds(oldPath, GetPathCoveredCellsCached(oldPath));
             }
@@ -3495,6 +3508,7 @@ public class PathManager : BaseApiDataManager
         if (changed)
         {
             RegisterPathCells(path);
+            EnqueuePowerNeighbors(path);
             EnqueuePillarNeighborRebuilds(path, GetPathCoveredCellsCached(path));
         }
     }
@@ -3503,12 +3517,27 @@ public class PathManager : BaseApiDataManager
     {
         if (pathDataCache.TryGetValue(pathId, out var path))
         {
+            EnqueuePowerNeighbors(path);
             InvalidateTerrainFollowPath(path);
             EnqueuePillarNeighborRebuilds(path, GetPathCoveredCellsCached(path));
             RemovePathFromNodeIndex(pathId, path.start_node_id, path.end_node_id);
             pathDataCache.Remove(pathId);
             ConstructionAmbience.Unregister(ConstructionAmbience.Kind.Path, pathId);
         }
+    }
+
+    private void EnqueuePowerNeighbors(PathSummary path)
+    {
+        if (!PowerLinePath.Handles(path)) return;
+        foreach (int node in new[] { path.start_node_id, path.end_node_id })
+            foreach (var neighbor in GetPathsConnectedToNode(node))
+            {
+                if (neighbor.path_id == path.path_id || !PowerLinePath.Handles(neighbor)
+                    || !pendingPillarRebuildIds.Add(neighbor.path_id)) continue;
+                InvalidateTerrainFollowPath(neighbor);
+                geometryRevisions.TryGetValue(neighbor.path_id, out int revision);
+                geometryRevisions[neighbor.path_id] = revision + 1;
+            }
     }
 
     /// <summary>

@@ -41,6 +41,8 @@ stdout が返らない等の罠がある)。本Skillはパス(道路・線路)�
 | Close（必要な部品のみ） | 同じフォルダの `{part}_close.fbx`。留め具、レール締結部、手すりの細い桟、厚みや面取りなど、近距離で見える構造上妥当な細部を加える |
 | Far | Unityの遠景生成を使う。パス用の `_far` は著作しない |
 
+ホーム451/461・462・502と乗り場602のFarは`FarPlatformPath.cs`の簡易断面生成。通常と同じ共有材質で大きな屋根・壁・床を保つ。通常モデルの外形・材質を変えた場合は、この遠景断面との整合も確認する。通常・接写の8m反復とは別に、間引き済みのパス点列を使う。
+
 ### `_close` が実際に使われる対象
 
 - モノレール502のホームドアはplatform本体に組み込む。通常・接写とも上屋と同じ8m周期で、独立パーツに分けない。非公開制作ツールのplatform_doors.pyが共通形状、build_monorail.pyとbuild_platform_close.pyが各LODを著作する。閉状態の外観モデル。
@@ -48,7 +50,7 @@ stdout が返らない等の罠がある)。本Skillはパス(道路・線路)�
 - ロープウェイ602の`station_shell`も`CreateSplineMesh`を通り、`station_shell_close`へ切り替わる。ホーム451/461・462・502と602の接写設備は、非公開の制作ツール`genesis-gallery/pipeline/jobs/build_platform_close.py`が通常モデルから著作する。通常の各ジョブを再実行したら接写ジョブも後に実行する。8m周期・原点・bbox・材質を保持する。再生成・実Unity検証・ミラー同期は同ツールの`pipeline/jobs/platform_close.md`を参照。
 
 - スプラインに沿って敷く `body / line / sidewalk / wall / center`、線路の `track / wire / platform / platform_wall` が対象。高架用も `body_elevated_close` / `track_elevated_close` の命名で扱う。
-- `tree / pillar / pillar_cap / portal / pole / beam` などのInstantiate配置、道路の点設備、ノード内のコネクタ・終端部品は現在無印を使う。**`_close` を書き出すだけでは切り替わらない。** 対象外パーツの接写対応を求められた場合は `genesis-path-geometry` で読み込み経路を確認し、アセットだけで対応済みとしない。
+- 送電線1101/1102の`pillar_cap`は専用生成器がCloseへ切り替える。それ以外の`tree / pillar / pillar_cap / portal / pole / beam`などのInstantiate配置、道路の点設備、ノード内のコネクタ・終端部品は無印を使う。**`_close` を書き出すだけでは切り替わらない。** 対象外パーツの接写対応を求められた場合は `genesis-path-geometry` で読み込み経路を確認し、アセットだけで対応済みとしない。
 - 対象パーツのClose解決順は、バリアントの `_close` → バリアントの無印 → タイプの `_close` → タイプの無印。共通タイプにCloseを追加しても、専用バリアントの無印が優先される場合がある。
 
 ### 造形・軽量化・検証
@@ -235,3 +237,7 @@ p461 8個  body track platform platform_wall platform_panel wire pole beam (電�
 ## 歩行者モールの点設備
 
 303/304/305の舗装・bench/bin/planter/advert/treeは非公開の制作ツール`genesis-gallery/pipeline/jobs/build_mall_paths.py`が著作する。304は幅12mの中央島、305は幅20mで中心から左右4mの2列、303は中央LRTを空ける小型設備。新設備は`bench_type`/`bin_type`/`planter_type`/`advert_type`の各`*_allowed`・`default_*`と個別Pathの0/1選択に従う。規約・位相・向きはG文書§5.5、検証はTests/Lrt/run.ps1。
+
+## 送電線1101・1102
+
+鉄塔pillar_capは通常と_closeを著作し、PowerLinePathがPathDrawContext.ResolvePrefab経由で選択する（Instantiate配置の例外）。大型は38m・3段二導体、小型は17m・3相。Farは同じ支持点からUnityが簡略鉄塔と電線を生成するため、_farは作らない。bodyは120m径間の制作見本で、実行時のたるみは支持点間に生成する。道路幅へ横縮小しない。共有ノードはPowerLineSupportが1基だけ表示する。著作・寸法・再生成は非公開制作ツールgenesis-galleryのpipeline/jobs/power_lines.mdとbuild_power_lines.py、実FBXのLOD・共有所有権の検証はcity-genesis/unity/Tests/PowerLines/run.ps1。

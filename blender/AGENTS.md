@@ -27,3 +27,5 @@
 
 
 鉄道の専用遠景は14/20/21/22/23の全18モデルとモノレール308/309にある。非公開制作ツールの`build_rail_far.py`が車体箱と左右各一枚の窓帯を著作し、車輪・台車・屋上機器を省略する。貨車には窓を付けない。原点と水平範囲は通常版を維持し、車輪・集電装置を省くため上下の範囲は通常版の内側でよい。12〜42三角形、既存材質を共有する。`build_vehicle_props.py`は370〜387の遠景別名も同期する。走行版は画面比率3.5%未満で`_far`を選び、25%以上では存在する`_close`を選ぶ。専用版がないLODは通常へフォールバックする。自由配置はPropRenderModelの既存の投影LODで専用遠景を使う。通常・接写モデルは保持する。
+
+送電鉄塔1101/1102は非公開制作ツールのbuild_power_lines.pyがpaths.blendのpillar_capとpillar_cap_closeを著作する。大型38m・小型17m、両LODのbboxを保持する。bodyは120m径間の制作見本。実行時はPowerLinePathが電線とFarの鉄塔を生成し、bodyを道路のように伸縮しない。制作記録は同ツールのpipeline/jobs/power_lines.md、実FBX検証はUnity Tests/PowerLines/run.ps1。

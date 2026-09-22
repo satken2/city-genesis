@@ -51,7 +51,7 @@ public static class VehicleModelResolver
         root.SetActive(false); return root;
     }
 
-    /// <summary>画面を大きく占める車体だけ接写版を使い、通常版と同じ配置変換を共有する。</summary>
+    /// <summary>投影サイズに応じて接写・通常・遠景を選び、全段階で通常版の配置変換を共有する。</summary>
     private static void AddModelLods(GameObject root, GameObject normal, string path)
     {
         var closePrefab = ModelManager.Instance?.GetModel(path + "_close", suppressWarning: true);
@@ -136,7 +136,7 @@ public static class VehicleModelResolver
             model.transform.localRotation = Quaternion.identity;
             model.SetActive(true); // glTF テンプレートは非アクティブで読まれるため明示的に有効化する。
             NormalizeModel(root.transform,model.transform);
-            // 車種別の無印が実際に解決できた場合だけ、その接写版を組み合わせる。
+            // 車種別の無印が実際に解決できた場合だけ、同じ車種のLODを組み合わせる。
             string path = $"Models/Vehicles/{vehicleType}/{variantId}";
             if (ModelManager.Instance?.GetModel(path, suppressWarning: true) == prefab)
                 AddModelLods(root, model, path);
