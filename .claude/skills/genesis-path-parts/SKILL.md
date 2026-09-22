@@ -43,6 +43,10 @@ stdout が返らない等の罠がある)。本Skillはパス(道路・線路)�
 
 ### `_close` が実際に使われる対象
 
+- モノレール502のホームドアはplatform本体に組み込む。通常・接写とも上屋と同じ8m周期で、独立パーツに分けない。非公開制作ツールのplatform_doors.pyが共通形状、build_monorail.pyとbuild_platform_close.pyが各LODを著作する。閉状態の外観モデル。
+
+- ロープウェイ602の`station_shell`も`CreateSplineMesh`を通り、`station_shell_close`へ切り替わる。ホーム451/461・462・502と602の接写設備は、非公開の制作ツール`genesis-gallery/pipeline/jobs/build_platform_close.py`が通常モデルから著作する。通常の各ジョブを再実行したら接写ジョブも後に実行する。8m周期・原点・bbox・材質を保持する。再生成・実Unity検証・ミラー同期は同ツールの`pipeline/jobs/platform_close.md`を参照。
+
 - スプラインに沿って敷く `body / line / sidewalk / wall / center`、線路の `track / wire / platform / platform_wall` が対象。高架用も `body_elevated_close` / `track_elevated_close` の命名で扱う。
 - `tree / pillar / pillar_cap / portal / pole / beam` などのInstantiate配置、道路の点設備、ノード内のコネクタ・終端部品は現在無印を使う。**`_close` を書き出すだけでは切り替わらない。** 対象外パーツの接写対応を求められた場合は `genesis-path-geometry` で読み込み経路を確認し、アセットだけで対応済みとしない。
 - 対象パーツのClose解決順は、バリアントの `_close` → バリアントの無印 → タイプの `_close` → タイプの無印。共通タイプにCloseを追加しても、専用バリアントの無印が優先される場合がある。

@@ -283,7 +283,7 @@ public static class VehicleQA
             Near(Vector3.Distance(original.bounds.size,copy.bounds.size),0,.002f,"Vehicle prop dimensions differ");
             var model=New("PropRenderModel",id);
             Check(((IList)Get(model,"normal")).Count>0 && ((IList)Get(model,"far")).Count>0,"Vehicle prop has no drawable parts: "+id);
-            if(id>=370 && id<=379)
+            if((id>=370 && id<=379) || (id>=384 && id<=387))
             {
                 var closeSource=Resources.Load<GameObject>("Models/Vehicles/"+paths[index]+"_close");
                 var closeProp=Resources.Load<GameObject>($"Models/Props/{id}_close");
@@ -328,7 +328,7 @@ public static class VehicleQA
         }
         VehicleProps();
         Check((int)game.GetType("VehicleModelConfig").GetMethod("GetTransitVehicleType").Invoke(null,new object[]{1003})==14,"LRT model mapping missing");
-        foreach (int type in new[]{12,14,20,21})
+        foreach (int type in new[]{12,14,20,21,23})
         {
             foreach(int variant in type==14?new[]{0}:new[]{0,1})
             foreach(bool middle in type==12?new[]{false}:new[]{false,true})
@@ -341,7 +341,7 @@ public static class VehicleQA
                     string asset=AssetDatabase.GetAssetPath(filter.sharedMesh);
                     Check(asset.EndsWith($"/{type}/{expected}.fbx") || asset.EndsWith($"/{type}/{expected}_close.fbx"), "Variant silently falls back: "+type+"/"+expected);
                 }
-                if(type==14 || type==20 || type==21)
+                if(type==14 || type==20 || type==21 || type==23)
                 {
                     var lod=car.GetComponent<LODGroup>();
                     Check(lod!=null,"Close LOD missing");
@@ -351,6 +351,47 @@ public static class VehicleQA
                         Check(AssetDatabase.GetAssetPath(renderer.GetComponent<MeshFilter>().sharedMesh).EndsWith($"/{expected}_close.fbx"),"Close LOD uses wrong asset");
                     foreach(var renderer in levels[1].renderers)
                         Check(AssetDatabase.GetAssetPath(renderer.GetComponent<MeshFilter>().sharedMesh).EndsWith($"/{expected}.fbx"),"Normal LOD uses wrong asset");
+                    if((type==20 || type==21) && !middle)
+                    {
+                        var renderer=levels[0].renderers[0];
+                        var mesh=renderer.GetComponent<MeshFilter>().sharedMesh;
+                        var vertices=mesh.vertices;var normals=mesh.normals;
+                        var plane=new List<float>();
+                        float slope=type==20?.07f:.48f;
+                        float front=type==20?10f:10.6f;
+                        for(int sub=0;sub<mesh.subMeshCount;sub++)
+                        {
+                            if(!renderer.sharedMaterials[sub].name.StartsWith("PROP_Glass"))continue;
+                            var indices=mesh.GetTriangles(sub);
+                            for(int i=0;i<indices.Length;i+=3)
+                            {
+                                int a=indices[i],b=indices[i+1],c=indices[i+2];
+                                if((vertices[a].z+vertices[b].z+vertices[c].z)/3<front-1.5f || normals[a].z<.5f)continue;
+                                foreach(int index in new[]{a,b,c})plane.Add(vertices[index].z+slope*vertices[index].y);
+                            }
+                        }
+                        Check(plane.Count==6,"Cab windshield must be one outward-facing planar quad");
+                        float min=float.MaxValue,max=float.MinValue;
+                        foreach(float value in plane){min=Mathf.Min(min,value);max=Mathf.Max(max,value);}
+                        Check(max-min<.0001f,"Cab windshield is curved after FBX import");
+                    }
+                    if(type==23 && !middle)
+                    {
+                        var renderer=levels[0].renderers[0];
+                        var mesh=renderer.GetComponent<MeshFilter>().sharedMesh;
+                        var points=mesh.vertices;var normals=mesh.normals;
+                        float min=1,max=-1;int count=0;
+                        for(int sub=0;sub<mesh.subMeshCount;sub++)
+                        {
+                            if(!renderer.sharedMaterials[sub].name.StartsWith("PROP_Glass"))continue;
+                            foreach(int index in mesh.GetTriangles(sub))
+                            {
+                                if(points[index].z<6 || normals[index].y<.3f)continue;
+                                min=Mathf.Min(min,normals[index].z);max=Mathf.Max(max,normals[index].z);count++;
+                            }
+                        }
+                        Check(count>100 && max-min>.1f,"High speed windshield must retain its curved surface");
+                    }
                     var normal=levels[1].renderers[0].bounds;
                     var close=levels[0].renderers[0].bounds;
                     Check((normal.min-close.min).magnitude<.09f && (normal.max-close.max).magnitude<.09f,"LOD placement bounds differ");

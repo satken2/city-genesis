@@ -346,6 +346,17 @@
     "debugSpawnBestCost": "成本合计（建设+土地+收购拆除）",
     "debugSpawnNoData": "没有数据",
     "sanitationSatisfaction": "卫生状况",
-    "deathCauseSanitation": "卫生恶化"
+    "deathCauseSanitation": "卫生恶化",
+    "carOwnershipTitle": "汽车保有率",
+    "carOwnershipRate": "保有率",
+    "carOwnershipWantRate": "意愿率",
+    "carOwnershipNote": "居民家庭中拥有汽车的比例。地区颜色表示保有率的高低。",
+    "carOwnershipEmpty": "没有各地区的保有率数据。",
+    "zonePopulationTitle": "各地区人口",
+    "zoneName": "地区名",
+    "nightPopulation": "夜间",
+    "daytimePopulation": "白天",
+    "dayNightRatio": "比率",
+    "noZoneData": "不存在地区数据。"
   }
 }

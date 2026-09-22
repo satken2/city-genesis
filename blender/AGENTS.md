@@ -5,7 +5,11 @@
 
 ## 知らないと絶対わからない仕様
 
-- 鉄道の接写版は非公開制作ツールの`build_rail_close.py`が通常の外板断面から曲面を著作する。vehicles.blendの14/20/21とprops.blendの308/309が対象。走行車両の接写版は`build_vehicle_props.py`でProps/370〜379の接写別名へ同期する。通常のFBXは保持する。
+- モノレール502のホームドアはplatform_doors.pyの共通造形をbuild_monorail.pyとbuild_platform_close.py（いずれも非公開制作ツール）から呼び、platform本体に組み込む。通常・接写とも8m周期、床上1.3mの腰高ドアで、独立パーツは持たない。
+
+- ホーム451/461・462・502のplatform/platform_wallとロープウェイ602のstation_shellの接写版は、非公開制作ツールの`build_platform_close.py`が通常形状を基に著作する。通常ジョブの後に接写ジョブを実行する。通常のFBX・bbox・原点・既存材質を保持し、8m周期のベンチ・照明・取付金物を加える。
+
+- 鉄道の接写版は非公開制作ツールの`build_rail_close.py`が通常の外板断面から曲面を著作する。vehicles.blendの14/20/21/23とprops.blendの308/309が対象。走行車両の接写版は`build_vehicle_props.py`でProps/370〜379・384〜387の接写別名へ同期する。通常のFBXは保持する。
 
 - 2000は `residential_parts.py`、2004・2008・2013は `build_retail_industrial_lods.py`（非公開制作ツール）が通常・接写を著作する。2008の広告は `BD_MALL_ADS` と4区画のPNGを共有し、広告文字のジオメトリは持たない。新設prefixの選択設定はUnityの正規ミラー生成後に再生成する。
 
@@ -15,3 +19,8 @@
 - テクスチャは `//../unity/Assets/Models/<カテゴリ>/Textures/` の相対パス参照。このディレクトリを移動・改名すると参照が切れる。
 - Unity は `unity/` 配下しかインポートしないので、ここに .blend を置いても Unity のアセットにはならない(意図的に `unity/` の外にある)。
 - `*.blend1` は Blender の自動バックアップで、`.gitignore` で除外している。履歴はGitが持つので残さない。
+
+メトロ20・中距離21の接写先頭車は、非公開制作ツールの`rail_cab_surfaces.py`が平面の側面・屋根・前面ガラスと、その接合円弧を著作する。全面を膨らませる補間を適用しない。`build_rail_close.py --heads-only`で先頭4外観を再生成できる。
+
+
+高速鉄道23は先頭2外観（0/1）と中間2外観（middle/middle_1）に接写版を持ち、自由配置別名384〜387にも同期する。通常FBXは保持する。高速車の前頭部は長い鼻先と曲面風防を一体の断面座標で著作し、メトロ20・中距離21の平面ガラスとは区別する。再生成は非公開制作ツールの`build_rail_close.py --high-speed-only`と`high_speed_surfaces.py`、比較は`render_high_speed.py`。走行車の既存LODと自由配置用PropRenderModelが接写版を選択し、路線マスターの対応は変更しない。

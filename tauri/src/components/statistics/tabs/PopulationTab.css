@@ -176,6 +176,93 @@
   min-height: 0;
 }
 
+/* ========== 地区別人口(移動統計から取得) ========== */
+
+/* ピラミッドと縦に分け合う。レイアウトの作り込みは後日行う前提の暫定配置 */
+.pop-zones {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 0;
+  flex: 1;
+}
+
+.pop-zones__table-container {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  background: rgba(13, 20, 30, 0.5);
+}
+
+.pop-zones__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  text-align: left;
+}
+
+.pop-zones__table th,
+.pop-zones__table td {
+  padding: 5px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.pop-zones__table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #111827;
+  color: #8ba3bb;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pop-zones__table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.pop-zones__name {
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.pop-zones__num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.pop-zones__empty {
+  padding: 12px;
+  text-align: center;
+  color: #64748b;
+}
+
+/* 昼夜間人口比率のバッジ。昼に寄る=青、夜に寄る=緑 */
+.pop-ratio {
+  display: inline-block;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 4px;
+}
+
+.pop-ratio--day {
+  background: rgba(34, 139, 230, 0.15);
+  color: #4dabf7;
+}
+
+.pop-ratio--night {
+  background: rgba(47, 158, 68, 0.15);
+  color: #69db7c;
+}
+
+.pop-ratio--balanced {
+  background: rgba(255, 255, 255, 0.04);
+  color: #94a3b8;
+}
+
 /* ========== ローディング・エラー ========== */
 
 .pop-tab__loading,

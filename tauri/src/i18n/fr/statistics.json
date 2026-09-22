@@ -346,6 +346,17 @@
     "debugSpawnBestCost": "Coût total (chantier + terrain + acquisition et démolition)",
     "debugSpawnNoData": "Aucune donnée",
     "sanitationSatisfaction": "État sanitaire",
-    "deathCauseSanitation": "Insalubrité"
+    "deathCauseSanitation": "Insalubrité",
+    "carOwnershipTitle": "Taux de motorisation",
+    "carOwnershipRate": "Possession",
+    "carOwnershipWantRate": "Souhait",
+    "carOwnershipNote": "Part des ménages résidents possédant une voiture. La couleur des quartiers indique le taux.",
+    "carOwnershipEmpty": "Aucune donnée de motorisation par quartier.",
+    "zonePopulationTitle": "Population par quartier",
+    "zoneName": "Quartier",
+    "nightPopulation": "Nuit",
+    "daytimePopulation": "Jour",
+    "dayNightRatio": "Ratio",
+    "noZoneData": "Aucune donnée de quartier."
   }
 }

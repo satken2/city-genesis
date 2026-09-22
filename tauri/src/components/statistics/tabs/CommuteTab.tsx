@@ -1,16 +1,13 @@
 /**
  * 移動統計タブコンポーネント
  *
- * GET /api/v1/stats/commute から通勤・通学時間、昼夜人口、地区間流動を取得して表示する。
+ * GET /api/v1/stats/commute から通勤・通学時間、地区間流動、地区別の自動車保有率を
+ * 取得して表示する (同APIが返す地区別の昼夜間人口は人口タブが使う)。
  *
- * レイアウト:
- * - 上下分割 (上1/3, 下2/3)
- *   - 上部 (1/3): 左右分割
- *     - 左上: 移動サマリカード (通勤人数、通学人数、合計移動人数)
- *     - 右上: 通勤・通学時間分布 (横向き積み上げ棒グラフ)
- *   - 下部 (2/3): 左右分割
- *     - 左下: 地区別昼夜間人口 (表形式、昼夜比率付き)
- *     - 右下: 地区間人口移動 (Recharts Sankey ダイアグラム)
+ * レイアウト (左右2:3分割):
+ * - 左上 (1/3 高さ): 通勤・通学時間分布 (横向き積み上げ棒グラフ)
+ * - 左下 (2/3 高さ): 地区別の自動車保有率の色分け地図
+ * - 右 (全高): 地区間人口移動 (Recharts Sankey ダイアグラム)
  */
 
 import { useMemo } from "react";
@@ -25,6 +22,12 @@ import {
   ResponsiveContainer,
   Sankey,
 } from "recharts";
+import {
+  CityMapCanvas,
+  getZoneFillRampStops,
+  type CityMapLayerVisibility,
+  type CityMapZoneFill,
+} from "../../map/CityMapCanvas";
 import { useEpochCachedStats } from "../useEpochCache";
 import "./CommuteTab.css";
 
@@ -42,11 +45,24 @@ type TimeDistPoint = {
   students: number;
 };
 
-type ZonePopPoint = {
+/** 地区別の自動車保有。母集団の住民世帯が0の地区は率が定義できないので null(欠測) */
+type CarOwnershipZone = {
   zone_id: number;
   name: string;
-  night_population: number;
-  daytime_population: number;
+  households: number;
+  owners: number;
+  wanters: number;
+  rate: number | null;
+  want_rate: number | null;
+};
+
+type CarOwnership = {
+  households: number;
+  owners: number;
+  wanters: number;
+  rate: number | null;
+  want_rate: number | null;
+  zones: CarOwnershipZone[];
 };
 
 type ODPoint = {
@@ -61,14 +77,120 @@ type CommuteStats = {
   epoch: number;
   summary: Summary;
   commute_time_distribution: TimeDistPoint[];
-  zone_populations: ZonePopPoint[];
   od_traffic: ODPoint[];
+  car_ownership: CarOwnership;
 };
 
 // --- 配色 ---
 const COLOR_WORKER = "#228be6";      // 通勤者: 濃い青
 const COLOR_STUDENT = "#a5d8ff";     // 通学者: 淡い青 (ユーザー要望の薄い色)
 const COLOR_LINK = "rgba(74, 158, 255, 0.4)"; // Sankey リンク色
+
+/**
+ * 自動車保有率の地図レイヤー。自動車を持つかどうかは公共交通の充実度で決まるため、
+ * 保有率の色分けと公共交通路線を重ねて読めるようにする(満足度タブの地図と違い transitLines をON)。
+ * 再レンダリングでレイヤー変更effectを走らせないようモジュール定数として持つ。
+ */
+const MAP_LAYERS: Partial<CityMapLayerVisibility> = {
+  coastline: true,
+  trunkRoads: true,
+  allRoads: true,
+  railways: true,
+  transitLines: true,
+  parcels: false,
+  buildings: false,
+  stations: true,
+  zoneBorders: true,
+  elevation: false,
+  contours: false,
+  grid: false,
+};
+
+/** 率(0〜1)を百分率の文字列にする。欠測は "—" */
+function formatRate(rate: number | null | undefined): string {
+  return rate == null ? "—" : `${(rate * 100).toFixed(1)}%`;
+}
+
+/**
+ * 地区別の自動車保有率の色分け地図。
+ *
+ * 塗りは地区間のmin〜maxを両端まで引き伸ばした相対値で、地区差が小さくても違いが読める
+ * 代わりに絶対比較ができないため、凡例に実際の保有率を併記する(満足度タブの地図と同じ方式)。
+ */
+function CarOwnershipMap({
+  apiBaseUrl,
+  ownership,
+}: {
+  apiBaseUrl: string;
+  ownership: CarOwnership;
+}) {
+  const { t } = useTranslation();
+
+  // 母集団の住民世帯がいない地区は欠測として塗らない。
+  const zoneValues = useMemo(
+    () =>
+      ownership.zones
+        .filter((z) => typeof z.rate === "number")
+        .map((z) => ({ zoneId: z.zone_id, value: z.rate as number })),
+    [ownership.zones]
+  );
+
+  const zoneRange = useMemo(() => {
+    if (!zoneValues.length) return null;
+    let min = Infinity;
+    let max = -Infinity;
+    for (const { value } of zoneValues) {
+      if (value < min) min = value;
+      if (value > max) max = value;
+    }
+    return { min, max };
+  }, [zoneValues]);
+
+  const zoneFill = useMemo<CityMapZoneFill | undefined>(() => {
+    if (!zoneRange) return undefined;
+    const span = zoneRange.max - zoneRange.min;
+    const values = new Map<number, number>();
+    for (const { zoneId, value } of zoneValues) {
+      values.set(zoneId, span > 0 ? (value - zoneRange.min) / span : 0.5);
+    }
+    return { values };
+  }, [zoneValues, zoneRange]);
+
+  const rampGradient = useMemo(
+    () => `linear-gradient(90deg, ${getZoneFillRampStops().join(", ")})`,
+    []
+  );
+
+  return (
+    <div className="commute-car">
+      <div className="commute-panel-title">{t("statistics.carOwnershipTitle")}</div>
+      <div className="commute-car__summary">
+        <span className="commute-car__metric">
+          {t("statistics.carOwnershipRate")}
+          <b>{formatRate(ownership.rate)}</b>
+        </span>
+        {/* 希望率との差が「買いたいが買えていない」量になるので並べて出す */}
+        <span className="commute-car__metric commute-car__metric--sub">
+          {t("statistics.carOwnershipWantRate")}
+          <b>{formatRate(ownership.want_rate)}</b>
+        </span>
+      </div>
+      <p className="commute-car__note">{t("statistics.carOwnershipNote")}</p>
+      <div className="commute-car__map">
+        <CityMapCanvas apiBaseUrl={apiBaseUrl} layers={MAP_LAYERS} zoneFill={zoneFill} />
+        {zoneRange ? (
+          <div className="commute-car__legend">
+            <span>{formatRate(zoneRange.min)}</span>
+            <span className="commute-car__legend-bar" style={{ background: rampGradient }} />
+            <span>{formatRate(zoneRange.max)}</span>
+          </div>
+        ) : (
+          <div className="commute-car__empty">{t("statistics.carOwnershipEmpty")}</div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t } = useTranslation();
@@ -128,7 +250,7 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
     );
   }
 
-  const { commute_time_distribution, zone_populations } = data;
+  const { commute_time_distribution } = data;
 
   // --- Sankey のカスタムノード描画 ---
   const renderSankeyNode = ({ x, y, width, height, index, payload }: any) => {
@@ -239,52 +361,8 @@ export function CommuteTab({ apiBaseUrl }: { apiBaseUrl: string }) {
           </div>
         </div>
 
-        {/* 左下: 地区別昼夜間人口 (2/3 高さ) */}
-        <div className="commute-zones">
-          <div className="commute-panel-title">地区別人口</div>
-          <div className="commute-zones__table-container">
-            <table className="commute-table">
-              <thead>
-                <tr>
-                  <th>地区名</th>
-                  <th className="text-right">夜間</th>
-                  <th className="text-right">昼間</th>
-                  <th className="text-right">比率</th>
-                </tr>
-              </thead>
-              <tbody>
-                {zone_populations.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="text-center">地区データが存在しません。</td>
-                  </tr>
-                ) : (
-                  zone_populations.map((z) => {
-                    const ratio = z.night_population > 0
-                      ? Math.round((z.daytime_population / z.night_population) * 100)
-                      : 0;
-                    
-                    let ratioClass = "ratio-balanced";
-                    if (ratio > 120) ratioClass = "ratio-day-heavy";
-                    else if (ratio < 80) ratioClass = "ratio-night-heavy";
-
-                    return (
-                      <tr key={z.zone_id}>
-                        <td className="font-semibold">{z.name}</td>
-                        <td className="text-right">{z.night_population.toLocaleString()}</td>
-                        <td className="text-right">{z.daytime_population.toLocaleString()}</td>
-                        <td className="text-right">
-                          <span className={`commute-ratio-badge ${ratioClass}`}>
-                            {z.night_population > 0 ? `${ratio}%` : "0%"}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        {/* 左下: 地区別の自動車保有率 (2/3 高さ) */}
+        <CarOwnershipMap apiBaseUrl={apiBaseUrl} ownership={data.car_ownership} />
       </div>
 
       {/* 右ペイン: 3/5 幅 */}

@@ -4,7 +4,7 @@
 
 ## ドライブモード
 
-走行車両の`{part}_close`は`VehicleModelResolver`が無印と同じ変換で生成し、LODGroupで画面比率25%以上のとき表示する。無印はその下の距離全域を担当し、車両の表示範囲はマネージャーが決める。14/20/21の先頭・中間・全外観に接写版がある。公称長への伸縮は両LODを含むルートへ一度だけ適用する。
+走行車両の`{part}_close`は`VehicleModelResolver`が無印と同じ変換で生成し、LODGroupで画面比率25%以上のとき表示する。無印はその下の距離全域を担当し、車両の表示範囲はマネージャーが決める。14/20/21/23の先頭・中間・全外観に接写版がある。公称長への伸縮は両LODを含むルートへ一度だけ適用する。
 
 `DriveMode`はCockpitの`drive:open`で自己生成され、Unity上に車種/路線選択・開始位置の選択・走行HUDを表示する。翻訳済みの文言はTauriから受け取る。自動車は`VehicleManager.Drive.cs`が通常のactive一覧へ1台追加し、前車追従を共用する。乗車中の車を沿道到着予約・範囲外削除の対象にしない。分岐候補はNPCと共通の`CollectCandidates`で進入方向を検証し、未選択時は最も直進に近い道へ進む。
 
@@ -66,3 +66,6 @@ LRTのモデル対応は1003→車種14。`Vehicles/14/0`が先頭・後尾共�
 
 
 道路モデルは10=10外観、11=4外観、12/13=各2外観。vehicle_model_config.yamlの候補数と実FBXを揃える。鉄道を含む全36モデルはProps/350〜367・370〜387の自由配置別名を持つ。形状の正はvehicles.blendで、別名は非公開制作ツールのbuild_vehicle_props.pyがprops.blendへ同期する。Tests/VehiclesのTransitModels/VehiclePropsが候補数・FBX参照・接地・別名の形状一致を確認する。
+
+
+高速鉄道23は先頭2外観（0/1）と中間2外観（middle/middle_1）に接写版を持ち、自由配置別名384〜387にも同期する。通常FBXは保持する。高速車の前頭部は長い鼻先と曲面風防を一体の断面座標で著作し、メトロ20・中距離21の平面ガラスとは区別する。再生成は非公開制作ツールの`build_rail_close.py --high-speed-only`と`high_speed_surfaces.py`、比較は`render_high_speed.py`。走行車の既存LODと自由配置用PropRenderModelが接写版を選択し、路線マスターの対応は変更しない。

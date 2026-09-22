@@ -78,6 +78,9 @@ function load(path) {
   });
   return exports;
 }
+imports["./roadSurface"] = load("../src/components/map/roadSurface.ts");
+imports["@tauri-apps/api/event"] = { listen: async () => () => {} };
+imports["./transitLineDraw"] = { drawTransitLines() {} };
 const { CityMapCanvas, DEFAULT_CITY_MAP_LAYERS } = load("../src/components/map/CityMapCanvas.tsx");
 const { worldToScreen, screenToWorld } = load("../src/components/path/pathShapeOverlay.ts");
 CityMapCanvas({ apiBaseUrl: "test", showCompass: false,

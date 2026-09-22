@@ -346,6 +346,17 @@
     "debugSpawnBestCost": "Costo total (obra + terreno + adquisición y demolición)",
     "debugSpawnNoData": "No hay datos",
     "sanitationSatisfaction": "Saneamiento",
-    "deathCauseSanitation": "Saneamiento deficiente"
+    "deathCauseSanitation": "Saneamiento deficiente",
+    "carOwnershipTitle": "Tasa de motorización",
+    "carOwnershipRate": "Posesión",
+    "carOwnershipWantRate": "Deseada",
+    "carOwnershipNote": "Proporción de hogares residentes con automóvil. El color del distrito indica la tasa.",
+    "carOwnershipEmpty": "No hay datos de motorización por distrito.",
+    "zonePopulationTitle": "Población por distrito",
+    "zoneName": "Distrito",
+    "nightPopulation": "Noche",
+    "daytimePopulation": "Día",
+    "dayNightRatio": "Proporción",
+    "noZoneData": "No hay datos de distritos."
   }
 }

@@ -346,6 +346,17 @@
     "debugSpawnBestCost": "비용 합계(건설+토지+매수 철거)",
     "debugSpawnNoData": "데이터가 없습니다",
     "sanitationSatisfaction": "위생 상태",
-    "deathCauseSanitation": "위생 악화"
+    "deathCauseSanitation": "위생 악화",
+    "carOwnershipTitle": "자동차 보유율",
+    "carOwnershipRate": "보유율",
+    "carOwnershipWantRate": "희망률",
+    "carOwnershipNote": "거주 가구 중 자동차를 보유한 가구의 비율. 지구 색은 보유율의 높낮이를 나타냅니다.",
+    "carOwnershipEmpty": "지구별 보유율 데이터가 없습니다.",
+    "zonePopulationTitle": "지구별 인구",
+    "zoneName": "지구명",
+    "nightPopulation": "야간",
+    "daytimePopulation": "주간",
+    "dayNightRatio": "비율",
+    "noZoneData": "지구 데이터가 없습니다."
   }
 }

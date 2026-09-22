@@ -11,7 +11,8 @@
  *     1. 人口推移（国民＋移民の積み上げ面グラフ）
  *     2. 出生数＋移民流入数（濃緑＋薄緑の積み上げ棒グラフ）
  *     3. 死亡数＋流出数（濃赤＋薄赤の積み上げ棒グラフ）
- * - 下部右 (25%): 人口ピラミッド（男女で左右、国民／移民で色分け）。
+ * - 下部右 (25%): 人口ピラミッド（男女で左右、国民／移民で色分け）と、
+ *   その下に地区別の昼夜間人口（GET /api/v1/stats/commute から取得）。
  */
 
 import { useMemo, useState } from "react";
@@ -29,6 +30,20 @@ import {
 } from "recharts";
 import { useEpochCachedStats } from "../useEpochCache";
 import "./PopulationTab.css";
+
+// --- バックエンド GET /api/v1/stats/commute のレスポンス型のうち、地区別人口が使う部分 ---
+
+/** 地区別の夜間(居住)人口と昼間人口。昼夜比率は UI 側で求める */
+type ZonePopPoint = {
+  zone_id: number;
+  name: string;
+  night_population: number;
+  daytime_population: number;
+};
+
+type CommuteZoneStats = {
+  zone_populations: ZonePopPoint[];
+};
 
 // --- バックエンド GET /api/v1/stats/population のレスポンス型 ---
 
@@ -91,6 +106,72 @@ const TOOLTIP_STYLE = {
 /** プルダウンの選択キー。都市全体は "city"、地区は zone_id の文字列。 */
 function scopeKey(scope: Scope): string {
   return scope.zone_id == null ? "city" : String(scope.zone_id);
+}
+
+/**
+ * 地区別の昼夜間人口の表。
+ *
+ * 夜間人口(居住地ベース)に対する昼間人口の比率で、その地区が職住どちらに寄っているかを示す。
+ * 値の出所は移動統計 API なので、取得もこの表に閉じる。
+ */
+function ZonePopulationTable({ apiBaseUrl }: { apiBaseUrl: string }) {
+  const { t } = useTranslation();
+  const { data, error } = useEpochCachedStats<CommuteZoneStats>(
+    apiBaseUrl,
+    "/api/v1/stats/commute"
+  );
+  const zones = data?.zone_populations ?? [];
+
+  return (
+    <section className="pop-zones">
+      <h3 className="pop-chart__title">{t("statistics.zonePopulationTitle")}</h3>
+      <div className="pop-zones__table-container">
+        <table className="pop-zones__table">
+          <thead>
+            <tr>
+              <th>{t("statistics.zoneName")}</th>
+              <th className="pop-zones__num">{t("statistics.nightPopulation")}</th>
+              <th className="pop-zones__num">{t("statistics.daytimePopulation")}</th>
+              <th className="pop-zones__num">{t("statistics.dayNightRatio")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {zones.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="pop-zones__empty">
+                  {/* 取得失敗を「データなし」と言い切らない(原因の切り分けを妨げるため) */}
+                  {error ? t("common.fetchError") : t("statistics.noZoneData")}
+                </td>
+              </tr>
+            ) : (
+              zones.map((z) => {
+                const ratio =
+                  z.night_population > 0
+                    ? Math.round((z.daytime_population / z.night_population) * 100)
+                    : 0;
+                let ratioClass = "pop-ratio--balanced";
+                if (ratio > 120) ratioClass = "pop-ratio--day";
+                else if (ratio < 80) ratioClass = "pop-ratio--night";
+
+                return (
+                  <tr key={z.zone_id}>
+                    <td className="pop-zones__name">{z.name}</td>
+                    <td className="pop-zones__num">{z.night_population.toLocaleString()}</td>
+                    <td className="pop-zones__num">{z.daytime_population.toLocaleString()}</td>
+                    <td className="pop-zones__num">
+                      <span className={`pop-ratio ${ratioClass}`}>
+                        {z.night_population > 0 ? `${ratio}%` : "0%"}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
 }
 
 export function PopulationTab({ apiBaseUrl }: { apiBaseUrl: string }) {
@@ -348,6 +429,8 @@ export function PopulationTab({ apiBaseUrl }: { apiBaseUrl: string }) {
               <div className="pop-chart__empty">{t("statistics.noData")}</div>
             )}
           </div>
+
+          <ZonePopulationTable apiBaseUrl={apiBaseUrl} />
         </div>
       </div>
     </div>

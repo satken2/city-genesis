@@ -28,6 +28,7 @@ public static class PlatformQA
                 return null;
             };
             assembly = Assembly.LoadFrom(root + "/Temp/bin/Debug/Assembly-CSharp.dll");
+            CheckPlatformContinuation();
             CheckStationGrade();
             Type modelType = assembly.GetType("ModelManager");
             var model = new GameObject("Models").AddComponent(modelType);
@@ -232,6 +233,54 @@ public static class PlatformQA
         }
         provider.SetValue(null, null);
         infrastructure.SetValue(null, null);
+
+        summary.GetField("path_type").SetValue(path, 5);
+        summary.GetField("path_variant").SetValue(path, 502);
+        foreach (bool left in new[] { false, true })
+        {
+            var parent = new GameObject("MonorailEndsQA");
+            track.GetMethod("CreateTerminations", BindingFlags.Static|BindingFlags.NonPublic).Invoke(null, new object[] {
+                parent, new List<Vector3> { Vector3.zero, new Vector3(0,0,32) }, null, path,
+                3f, 1, left ? 3f : 0f, left ? 0f : 3f, "Models/Paths/p502", "Models/Paths/p5" });
+            var ends = parent.GetComponentsInChildren<Transform>().Where(t => t.name == "TrackPlatformEnd").ToArray();
+            Require(ends.Length == 6, "Monorail platform ends not closed");
+            Require(ends.All(t => Mathf.Abs(t.position.x) >= 1.5f && Mathf.Abs(t.position.x) <= 4.5f), "Monorail end outside deck");
+            Require(!parent.GetComponentsInChildren<Transform>().Any(t => t.name == "TrackBufferStop"), "Rail buffer stop on monorail");
+            UnityEngine.Object.DestroyImmediate(parent);
+        }
+    }
+
+    static void CheckPlatformContinuation()
+    {
+        Type neighborType = assembly.GetType("TrackNeighborInfo");
+        foreach (float width in new[] { 3f, 5f })
+        foreach (float offset in new[] { -.001f, 0f, .001f })
+        foreach (bool reverse in new[] { false, true })
+        {
+            var points = Enumerable.Range(0, 33).Select(z => new Vector3(0, 6, z)).ToList();
+            if (reverse) points.Reverse();
+            var neighbors = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(neighborType));
+            foreach (float end in new[] { 0f, 32f })
+            {
+                var neighbor = Activator.CreateInstance(neighborType);
+                neighborType.GetField("PathId").SetValue(neighbor, end == 0 ? 2 : 3);
+                neighborType.GetField("Width").SetValue(neighbor, width);
+                neighborType.GetField("Points").SetValue(neighbor, new List<Vector3> {
+                    new Vector3(offset, 6, end), new Vector3(offset, 6, end == 0 ? -32 : 64) });
+                neighbors.Add(neighbor);
+            }
+            object corridor = assembly.GetType("TrackAdjacency").GetMethod("Compute").Invoke(null,
+                new object[] { 1, points, width, 0f, 3f, 3f, neighbors });
+            foreach (string side in new[] { "Left", "Right" })
+            {
+                if (corridor == null) continue;
+                var far = (float[])corridor.GetType().GetField(side + "DeckFar").GetValue(corridor);
+                Require(far.All(f => Mathf.Abs(f - (width / 2 + 3)) < .001f),
+                    $"Continuation removes {side} platform floor: width={width}, offset={offset}, reverse={reverse}");
+                var omitted = (bool[])corridor.GetType().GetField(side + "PlatformWallOmit").GetValue(corridor);
+                Require(!omitted.Any(v => v), "Continuation removes platform outer wall");
+            }
+        }
     }
 
     static void CheckStationGrade()

@@ -24,8 +24,8 @@
  *   - parcels   : 土地区画の枠線
  *   - buildings : 建物の底面形状
  *   - allRoads / trunkRoads / railways : パス(道路・幹線道路・線路)。
- *     道路はマスターデータの全幅(width)をstroke幅に使い、実際の道路幅を持つ
- *     面として描く(街路=灰、高速道路=黄、線路=茶の線)。
+ *     道路は占有ポリゴンを面で描き、幅の異なる2本接続では中心線から幅遷移を作る。
+ *     街路=淡灰、高速道路=濃灰、線路=灰色の実線。
  *   - transitLines : 公共交通路線。GET /api/v1/transit/lines/geometry が返す、実際の下地
  *     道路・線路に沿った走行形状(停留所間の直線ではない)を路線カラーの帯で描き、停留所を
  *     リングで示す。描画規則は transitLineDraw.ts。transitFocusLineId で1路線を主役にできる
@@ -73,7 +73,9 @@ import {
   PATH_STREET,
   PATH_WALKWAY,
   PATH_TRACK,
+  MODEL_PARK,
 } from "../../constants";
+import { RoadCenterline, roadSurface } from "./roadSurface";
 import { drawTransitLines, type TransitLineGeometry } from "./transitLineDraw";
 
 /* ============================================================================
@@ -122,7 +124,7 @@ export const DEFAULT_CITY_MAP_LAYERS: CityMapLayerVisibility = {
   buildings: true,
   stations: true,
   zoneBorders: true,
-  elevation: true,
+  elevation: false,
   contours: false,
   grid: false,
 };
@@ -285,6 +287,8 @@ export type CityMapCanvasProps = {
 /** GET /api/v1/paths のレスポンス要素(描画に必要なフィールドのみ) */
 type ApiPathItem = {
   path_id: number;
+  start_node_id?: number;
+  end_node_id?: number;
   path_type: number;
   path_variant: number;
   start_point: number[];
@@ -303,6 +307,7 @@ type ApiPathItem = {
 
 /** polygonを持つエンティティ(土地区画・地区・建物)の共通形 */
 type ApiPolygonItem = {
+  variant?: number;
   polygon?: [number, number][] | null;
   center_point?: number[] | null;
   /** 地区のみ: 1/true=自動管理地区、0/false=確定地区。枠線の実線/破線の描き分けに使う */
@@ -331,11 +336,9 @@ type ApiHeatmap = {
 type RoadBandKind = "street" | "motorway";
 
 /**
- * 同じ描画スタイル(区分・幹線フラグ・幅)の道路をまとめた描画単位。
- * strokeのlineWidthは1回の描画で1値しか指定できないため、実幅で描くには
- * 幅の異なるバリアントを別のPath2Dに分けて構築する必要がある。
+ * 同じ描画スタイルの道路面と、遠景の最小線幅に使う中心線をまとめた描画単位。
  */
-type RoadBand = { kind: RoadBandKind; trunk: boolean; width: number; path: Path2D };
+type RoadBand = { kind: RoadBandKind; trunk: boolean; width: number; path: Path2D; surface: Path2D };
 
 /** 取得済みベクターデータとPath2Dキャッシュ */
 type VectorState = {
@@ -348,6 +351,7 @@ type VectorState = {
   railPath: Path2D | null;
   parcelPath: Path2D | null;
   buildingPath: Path2D | null;
+  parkPath: Path2D | null;
   /** 駅の凸包(駅舎ごとにまとめたプラットフォーム群の凸包)。半透明の面で描く */
   stationHullPath: Path2D | null;
   /** 公共交通路線の走行形状(都市全体。bboxに依らない) */
@@ -402,6 +406,7 @@ type ContourLine = { path: Path2D; major: boolean };
  */
 type TerrainState = {
   canvas: HTMLCanvasElement;
+  baseCanvas: HTMLCanvasElement;
   elev: Float32Array;
   rows: number;
   cols: number;
@@ -410,31 +415,34 @@ type TerrainState = {
   maxLand: number;
 };
 
-/** 背景色。computePixelRGBの海面色と同色にして陸地だけが浮かび上がる見た目にする */
-const BG_COLOR = "#0d0d14";
+/** 水域の背景色。海岸線の穴に含まれる川・湖も同じ青で表す。 */
+const BG_COLOR = "#a8d7ed";
+const COLOR_LAND = "#e8efdf";
+const COLOR_PARK = "#b5dfb4";
+const COLOR_BUILDING_BORDER = "#cfd4dc";
 
 /** 各レイヤーの描画色 */
-const COLOR_COASTLINE = "#89dceb";
-const COLOR_ZONE = "#89b4fa";
-const COLOR_PARCEL = "#585b70";
-const COLOR_BUILDING = "#cba6f7";
-/* 駅の凸包(同じ駅舎に所属するプラットフォーム群の外接凸包)。薄いピンクの面で
+const COLOR_COASTLINE = "#85bfd5";
+const COLOR_ZONE = "#839bad";
+const COLOR_PARCEL = "#d5dccf";
+const COLOR_BUILDING = "#e4e7ed";
+/* 駅の凸包(同じ駅舎に所属するプラットフォーム群の外接凸包)。薄い青灰色の面で
  * 「1つの駅」の範囲を示す */
-const COLOR_STATION = "#f38ba8";
+const COLOR_STATION = "#aebacb";
 /* 道路は実幅の面として描くため、種別ごとの塗り色を持つ。
- * 幹線街路は非幹線よりやや明るい灰にして道路網の骨格を読み取れるようにする */
-const COLOR_STREET = "#82858f";
-const COLOR_STREET_TRUNK = "#a9adb8";
-const COLOR_MOTORWAY = "#f9e2af";
-const COLOR_RAIL = "#a5744c";
+ * 幹線街路は非幹線よりやや濃い灰にして道路網の骨格を読み取れるようにする */
+const COLOR_STREET = "#c6ced3";
+const COLOR_STREET_TRUNK = "#aab7c1";
+const COLOR_MOTORWAY = "#778896";
+const COLOR_RAIL = "#7c8389";
 /* 等高線色。地形色の上では焦げ茶(地形エディタと同じ)、
- * 標高レイヤーOFFの暗い背景の上では白系を使って視認性を保つ */
+ * 標高レイヤーOFFの薄緑の上では灰緑を使って視認性を保つ */
 const COLOR_CONTOUR_ON_TERRAIN = "rgba(40,28,14,0.5)";
 const COLOR_CONTOUR_MAJOR_ON_TERRAIN = "rgba(30,20,10,0.75)";
-const COLOR_CONTOUR_ON_BG = "rgba(255,255,255,0.22)";
-const COLOR_CONTOUR_MAJOR_ON_BG = "rgba(255,255,255,0.38)";
-const COLOR_GRID = "rgba(255,255,255,0.10)";
-const COLOR_GRID_CELL = "rgba(255,255,255,0.35)";
+const COLOR_CONTOUR_ON_BG = "rgba(94,113,80,0.22)";
+const COLOR_CONTOUR_MAJOR_ON_BG = "rgba(94,113,80,0.4)";
+const COLOR_GRID = "rgba(75,99,110,0.12)";
+const COLOR_GRID_CELL = "rgba(75,99,110,0.3)";
 
 /**
  * ヒートマップの色ビン数。区画は数千件になるため1件ずつfillすると重い。
@@ -561,7 +569,8 @@ function buildTerrainCanvas(
   rows: number,
   cols: number,
   minLand: number,
-  maxLand: number
+  maxLand: number,
+  elevation = true
 ): HTMLCanvasElement {
   const cv = document.createElement("canvas");
   cv.width = cols;
@@ -570,7 +579,8 @@ function buildTerrainCanvas(
   const img = ctx.createImageData(cols, rows);
   const d = img.data;
   for (let i = 0; i < rows * cols; i++) {
-    const [r, g, b] = computePixelRGB(elev[i], minLand, maxLand);
+    const [r, g, b] = elev[i] <= 0 ? [168, 215, 237]
+      : elevation ? computePixelRGB(elev[i], minLand, maxLand) : [232, 239, 223];
     d[i * 4 + 0] = r;
     d[i * 4 + 1] = g;
     d[i * 4 + 2] = b;
@@ -771,7 +781,7 @@ function collectPathPoints(item: ApiPathItem, controls?: AnchorControls[]): [num
 }
 
 /** ポリライン群をPath2Dへ追加する(直線パス curved=0 用) */
-function appendPolyline(path: Path2D, pts: [number, number][]): void {
+function appendPolyline(path: Pick<Path2D, "moveTo" | "lineTo">, pts: [number, number][]): void {
   if (pts.length < 2) return;
   path.moveTo(pts[0][0], pts[0][1]);
   for (let i = 1; i < pts.length; i++) path.lineTo(pts[i][0], pts[i][1]);
@@ -784,7 +794,7 @@ function appendPolyline(path: Path2D, pts: [number, number][]): void {
  * 補完式はバックエンドの自動補完(_auto_fill_controls)と同じ計算。
  */
 function appendSmoothPolyline(
-  path: Path2D,
+  path: Pick<Path2D, "moveTo" | "lineTo" | "bezierCurveTo">,
   pts: [number, number][],
   controls?: AnchorControls[]
 ): void {
@@ -970,10 +980,10 @@ type CompassPetal = { points: string; fill: string };
 /* 花弁の色。北だけ赤系にして一目で北が分かるようにし、他方位は無彩色にする。
  * 各方位を反時計回り側=明・時計回り側=暗の2枚に割ることで、平面のSVGでも
  * 折り紙のような陰影が付く(古典的な風配図の描き方) */
-const COMPASS_FILL_NORTH_LIGHT = "#f38ba8";
+const COMPASS_FILL_NORTH_LIGHT = "#e27777";
 const COMPASS_FILL_NORTH_DARK = "#9d4055";
 const COMPASS_FILL_LIGHT = "#cdd6f4";
-const COMPASS_FILL_DARK = "#585b70";
+const COMPASS_FILL_DARK = "#70808d";
 
 /** 中心からの極座標(北=0の時計回り・度)をSVG座標へ変換する。SVGはY軸が下向き */
 function compassPolar(angleDeg: number, radius: number): string {
@@ -1032,8 +1042,8 @@ function MapCompass() {
       style={{ position: "absolute", top: 10, right: 10, pointerEvents: "none" }}
       aria-hidden="true"
     >
-      <circle cx={COMPASS_C} cy={COMPASS_C} r={47} fill="rgba(13,13,20,0.72)" stroke="#45475a" strokeWidth={1.5} />
-      <circle cx={COMPASS_C} cy={COMPASS_C} r={39} fill="none" stroke="#45475a" strokeWidth={1} />
+      <circle cx={COMPASS_C} cy={COMPASS_C} r={47} fill="rgba(255,255,255,0.9)" stroke="#c7d0d4" strokeWidth={1.5} />
+      <circle cx={COMPASS_C} cy={COMPASS_C} r={39} fill="none" stroke="#dce2e4" strokeWidth={1} />
       {COMPASS_PETALS.map((petal, i) => (
         <polygon key={i} points={petal.points} fill={petal.fill} />
       ))}
@@ -1238,6 +1248,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         railPath: null,
         parcelPath: null,
         buildingPath: null,
+        parkPath: null,
         stationHullPath: null,
         transitLines: [],
         zonePathConfirmed: null,
@@ -1335,18 +1346,34 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         const px = (w: number) => w / z; // 画面ピクセル単位の線幅をワールド単位へ
 
         // 標高色分け(最大解像度で色付けした近景マップの画像を世界矩形に張る)
-        if (L.elevation && terrain && settings) {
+        if (terrain && settings) {
+          ctx.save();
+          if (coastPath) ctx.clip(coastPath, "evenodd");
           ctx.imageSmoothingEnabled = true;
           ctx.drawImage(
-            terrain.canvas,
+            L.elevation ? terrain.canvas : terrain.baseCanvas,
             -settings.map_width / 2,
             -settings.map_height / 2,
             settings.map_width,
             settings.map_height
           );
+          ctx.restore();
         }
 
-        // 等高線。地形色の上とレイヤーOFF時の暗い背景の上とで色を切り替える
+        // 陸地の外周と川・湖の穴を一緒に塗り、標高表示に依らず水域を残す。
+        if (coastPath && !L.elevation) {
+          ctx.fillStyle = BG_COLOR;
+          const bounds = getViewBounds();
+          ctx.fillRect(bounds.x1, bounds.z1, bounds.x2 - bounds.x1, bounds.z2 - bounds.z1);
+          ctx.fillStyle = COLOR_LAND;
+          ctx.fill(coastPath, "evenodd");
+        }
+        if (L.buildings && vec.parkPath) {
+          ctx.fillStyle = COLOR_PARK;
+          ctx.fill(vec.parkPath);
+        }
+
+        // 等高線。地形色の上とレイヤーOFF時の薄緑の背景の上とで色を切り替える
         if (L.contours && contours.length > 0) {
           ctx.lineJoin = "round";
           ctx.lineCap = "round";
@@ -1400,7 +1427,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         // 海岸線
         if (L.coastline && coastPath) {
           ctx.strokeStyle = COLOR_COASTLINE;
-          ctx.lineWidth = px(2);
+          ctx.lineWidth = px(0.8);
           ctx.setLineDash([]);
           ctx.stroke(coastPath);
         }
@@ -1428,7 +1455,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           ctx.stroke(vec.parcelPath);
         }
 
-        // 駅(同じ駅舎に所属するプラットフォーム群の凸包)。薄いピンクの面+枠線で
+        // 駅(同じ駅舎に所属するプラットフォーム群の凸包)。薄い青灰色の面+枠線で
         // 「1つの駅」の範囲を示す。プラットフォーム(線路)はこの上に描かれる。
         if (L.stations && vec.stationHullPath) {
           ctx.globalAlpha = 0.22;
@@ -1441,13 +1468,13 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           ctx.stroke(vec.stationHullPath);
         }
 
-        // 建物の底面形状(半透明塗り + 枠線)
+        // 建物の底面形状(淡灰色の面 + 細い枠線)
         if (L.buildings && vec.buildingPath) {
-          ctx.globalAlpha = 0.35;
+          ctx.globalAlpha = 1;
           ctx.fillStyle = COLOR_BUILDING;
           ctx.fill(vec.buildingPath);
           ctx.globalAlpha = 1.0;
-          ctx.strokeStyle = COLOR_BUILDING;
+          ctx.strokeStyle = COLOR_BUILDING_BORDER;
           ctx.lineWidth = px(1);
           ctx.stroke(vec.buildingPath);
         }
@@ -1455,31 +1482,25 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         ctx.lineJoin = "round";
         ctx.lineCap = "round";
 
-        // 道路(実幅の面描画)。lineWidthにマスターの全幅(m)を使い、丸いcap/joinで
-        // つなぐことで道路ポリゴンの近似として描く。ズームアウトで実幅が細くなり
-        // すぎて消えないよう、画面ピクセル単位の最小幅でクランプする
+        // 面が1px未満になる遠景だけ中心線を補う。端点の外へは延ばさない。
+        ctx.lineCap = "butt";
         for (const band of vec.roadBands) {
           if (!(band.trunk ? L.trunkRoads : L.allRoads)) continue;
-          if (band.kind === "motorway") {
-            ctx.strokeStyle = COLOR_MOTORWAY;
-            ctx.lineWidth = Math.max(band.width, px(2.5));
-          } else {
-            ctx.strokeStyle = band.trunk ? COLOR_STREET_TRUNK : COLOR_STREET;
-            ctx.lineWidth = Math.max(band.width, px(1.2));
+          const color = band.kind === "motorway" ? COLOR_MOTORWAY
+            : band.trunk ? COLOR_STREET_TRUNK : COLOR_STREET;
+          ctx.fillStyle = color;
+          ctx.fill(band.surface);
+          if (band.width * z < 1) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = px(1);
+            ctx.stroke(band.path);
           }
-          ctx.stroke(band.path);
         }
-
-        // 線路(茶色の実線の上に背景色の破線を重ねて枕木風の見た目にする)
         if (L.railways && vec.railPath) {
           ctx.strokeStyle = COLOR_RAIL;
-          ctx.lineWidth = px(2);
-          ctx.stroke(vec.railPath);
-          ctx.strokeStyle = BG_COLOR;
-          ctx.lineWidth = px(2);
-          ctx.setLineDash([px(6), px(6)]);
-          ctx.stroke(vec.railPath);
+          ctx.lineWidth = px(1.6);
           ctx.setLineDash([]);
+          ctx.stroke(vec.railPath);
         }
 
         // 公共交通路線(実際の道路・線路に沿った帯と停留所)。線路・道路の上、重ね描きの下
@@ -1579,6 +1600,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
 
           terrain = {
             canvas: buildTerrainCanvas(elev, rows, cols, minLand, maxLand),
+            baseCanvas: buildTerrainCanvas(elev, rows, cols, minLand, maxLand, false),
             elev,
             rows,
             cols,
@@ -1638,7 +1660,8 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
             buildApiUrl(apiBaseUrl, "/api/v1/terrain/coastline"),
             { signal: abort.signal }
           );
-          coastPath = buildCoastlinePath(geo);
+          coastPath = geo.coordinates && (geo.type === "Polygon" || geo.type === "MultiPolygon")
+            ? buildCoastlinePath(geo) : null;
         } catch (err) {
           if (!abort.signal.aborted) console.warn("[CityMapCanvas] failed to load coastline:", err);
         }
@@ -1782,12 +1805,33 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
 
       /**
        * パスを描画区分(街路系/高速道路/線路)ごとに分類してPath2Dを構築する。
-       * 道路はマスターデータのwidth(全幅m)をstroke幅に使って実幅の面として描くため、
-       * 幅の異なるバリアントは別のRoadBandに分ける。
+       * 占有面を優先し、2本接続の幅遷移は保存済み制御点に沿って補間する。
+       * 建物の公園分類もマスター到着後に更新する。
        */
       const rebuildPathClassification = () => {
         const md = masterDataRef.current;
+        const isPark = (building: ApiPolygonItem) => building.variant !== undefined
+          && md?.agents?.[building.variant]?.model_type === MODEL_PARK;
+        vec.buildingPath = buildPolygonPath(vec.buildings.filter((b) => !isPark(b)), true);
+        vec.parkPath = buildPolygonPath(vec.buildings.filter(isPark), true);
         const bands = new Map<string, RoadBand>();
+        const roadTypes = [PATH_STREET, PATH_MOTORWAY, PATH_WALKWAY];
+        const widthOf = (p: ApiPathItem) => md?.paths?.[p.path_variant]?.width ?? FALLBACK_ROAD_WIDTH[p.path_type] ?? 8;
+        const nodeRoads = new Map<number, ApiPathItem[]>();
+        for (const p of vec.paths) {
+          if (!roadTypes.includes(p.path_type)) continue;
+          for (const id of [p.start_node_id, p.end_node_id]) {
+            if (id == null || id <= 0) continue;
+            const connected = nodeRoads.get(id) ?? [];
+            connected.push(p);
+            nodeRoads.set(id, connected);
+          }
+        }
+        const jointWidth = (p: ApiPathItem, id: number | undefined) => {
+          const connected = id == null ? undefined : nodeRoads.get(id);
+          if (!connected || connected.length !== 2 || connected[0] === connected[1]) return widthOf(p);
+          return (widthOf(connected[0]) + widthOf(connected[1])) / 2;
+        };
         const rail = new Path2D();
         let hasRail = false;
 
@@ -1799,7 +1843,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           // 実際には存在しない曲がりが描かれてしまうため、必ずフラグで描き分ける。
           // 曲線パスは保存済み制御点(ドラッグ調整された曲線)があればそれを使う
           const append = p.curved
-            ? (target: Path2D, ap: [number, number][]) => appendSmoothPolyline(target, ap, controls)
+            ? (target: Pick<Path2D, "moveTo" | "lineTo" | "bezierCurveTo">, ap: [number, number][]) => appendSmoothPolyline(target, ap, controls)
             : appendPolyline;
           if (p.path_type === PATH_TRACK) {
             append(rail, pts);
@@ -1818,10 +1862,20 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
             const key = `${kind}:${trunk ? 1 : 0}:${width}`;
             let band = bands.get(key);
             if (!band) {
-              band = { kind, trunk, width, path: new Path2D() };
+              band = { kind, trunk, width, path: new Path2D(), surface: new Path2D() };
               bands.set(key, band);
             }
             append(band.path, pts);
+            const startWidth = jointWidth(p, p.start_node_id);
+            const endWidth = jointWidth(p, p.end_node_id);
+            if (p.polygon && p.polygon.length >= 3 && startWidth === width && endWidth === width) {
+              band.surface.addPath(buildPolygonPath([p], false));
+            } else {
+              const centerline = new RoadCenterline();
+              append(centerline, pts);
+              const polygon = roadSurface(centerline.points, width, startWidth, endWidth);
+              band.surface.addPath(buildPolygonPath([{ polygon }], false));
+            }
           }
         }
         // 描画順: 非幹線街路 → 幹線街路 → 高速道路(後に描くほど上に重なる)
@@ -1896,7 +1950,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
                 const data = await fetchApi<{ buildings: ApiPolygonItem[] }>(url, { signal: abort.signal });
                 vec.buildings = data.buildings ?? [];
                 // 建物のpolygonはcenter_pointからのローカル座標
-                vec.buildingPath = buildPolygonPath(vec.buildings, true);
+                rebuildPathClassification();
               }
             })
           );

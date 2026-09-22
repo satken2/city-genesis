@@ -451,9 +451,10 @@ public static class TrackAdjacency
                             if (outerTo > islandOuterLeft) islandOuterLeft = outerTo;
                         }
                     }
-                    else if (edgeGap < myPlatform + PLATFORM_ENCROACH_CLEARANCE)
+                    else if (!endClampVirtual && edgeGap < myPlatform + PLATFORM_ENCROACH_CLEARANCE)
                     {
                         // 島式が成立しないままホーム（外縁の余裕込み）に他線路の道床が掛かる近接。
+                        // 接続先の端点へクランプされた虚像は、ホームを横切る道床ではない。
                         // デッキを道床の手前までクランプする位置を記録する（角度不問）。
                         float limit = absO - nbHalf - PLATFORM_ENCROACH_CLEARANCE;
                         if (o > 0f) { if (limit < encroachRight) encroachRight = limit; }

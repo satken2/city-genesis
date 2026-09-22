@@ -346,6 +346,17 @@
     "debugSpawnBestCost": "コスト計（建設+土地+買収解体）",
     "debugSpawnNoData": "データがありません",
     "sanitationSatisfaction": "衛生状態",
-    "deathCauseSanitation": "衛生悪化"
+    "deathCauseSanitation": "衛生悪化",
+    "carOwnershipTitle": "自動車保有率",
+    "carOwnershipRate": "保有率",
+    "carOwnershipWantRate": "希望率",
+    "carOwnershipNote": "住民世帯に占める自動車保有世帯の割合。地区の色は保有率の高低を表す。",
+    "carOwnershipEmpty": "地区別の保有率データがありません。",
+    "zonePopulationTitle": "地区別人口",
+    "zoneName": "地区名",
+    "nightPopulation": "夜間",
+    "daytimePopulation": "昼間",
+    "dayNightRatio": "比率",
+    "noZoneData": "地区データが存在しません。"
   }
 }

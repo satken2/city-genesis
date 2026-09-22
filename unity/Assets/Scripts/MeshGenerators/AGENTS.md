@@ -65,6 +65,8 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 
 ## 線路 (Paths/TrackPath.cs / Paths/TrackIntersectionMeshGenerator.cs)
 
+- ホームの干渉クランプは島式判定と同じ`endClampVirtual`除外を使う。前後へ接続する線路端の虚像で床や外縁壁を切らない。鉄道・モノレールともホーム端壁を生成し、モノレールに専用`platform_end`が無ければp4を共用する。車止めは鉄道だけ。回帰検証は`Tests/Intersections/run-unity.ps1 -Platforms`。
+
 - ホームの `platform` / `platform_wall` は著作タイル長（451/452/461/462は8m）で配置し、道路用の曲率適応タイル分割(1〜8m)を適用しない。曲線用分割はモデル内に持つ。右側用はUnityの+X側で、標準FBX経由ではBlenderの-X側になる。実FBXの左右・支柱周期は `Tests/Intersections/run-unity.ps1 -Platforms` で検査する。
 
 - 線路(PATH_TRACK)・モノレール(PATH_MONORAIL)は `TrackPath` が生成する。RoadPath と同じ SplineMesh パーツ組み立て方式で、パーツ構成が異なる: `body`(道床。全幅に引き伸ばし。高架/橋梁はバリアント専用bodyで桁断面を表現) / `track`(1軌道分=レール2本+枕木。**Xスケールせず実寸**で lanes 本を等間隔配置。ゲージ維持のため) / `wire`・`pole`・`beam`(架線系。マスターの `wire_spacing` が null なら非電化でスキップ) / `wall`・`pillar`(道路と共通) / `platform`・`platform_wall`・`platform_panel`(駅パスのプラットフォーム3パーツ。下記)。仕様の正は `genesis-docs/docs/geometries/N_線路メッシュの生成.md`。
@@ -184,6 +186,8 @@ TrackPathの車止めはInfrastructureConnectionProviderが共用インフラノ
 - 車線中心と区画線境界は `RoadPath.cs` の `RoadLaneLayout` が共有する。歩道・側線・中央分離帯を除いた走行帯を分割し、一方通行は全幅、双方向は片側ごとに配置する。車両側へ独立した横オフセット式を追加しない。
 
 ## 共通LOD基盤との関係
+
+モノレール502のホームドアはplatform本体へ組み込み、上屋と同じ8m周期で反復する。通常・接写の両方に閉状態の腰高ドアを持ち、島式でも乗降縁に残る。専用の配置経路は使わない。
 
 長い通常道路の連続スプラインパーツは `SplinePartLod` が固定区間とLODキャッシュを持つ。モデル存在判定の後に分割し、single-span・破線は除外する。対応建物は `BuildingMeshBuilder.Generate(..., separateExterior: true)` で敷地装飾を別ジョブにできる。生成器内から独立の非計測Rebuildを起動せず、共通スケジューラーで同期生成を計測する。
 

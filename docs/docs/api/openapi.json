@@ -11,14 +11,169 @@
           "terrain"
         ],
         "summary": "Get Terrain Maps",
-        "description": "利用可能な地形マップの一覧を取得する。",
+        "description": "ゲーム用地形、またはエディタの複製元に限定した標高原本を列挙する。",
         "operationId": "get_terrain_maps_api_v1_terrain_maps_get",
+        "parameters": [
+          {
+            "name": "original",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Original"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/terrain/maps/{map_id}/props": {
+      "get": {
+        "tags": [
+          "terrain"
+        ],
+        "summary": "Get Terrain Map Props",
+        "description": "編集中の都市に依存せず、登録マップの個別配置・範囲散布定義を返す。",
+        "operationId": "get_terrain_map_props_api_v1_terrain_maps__map_id__props_get",
+        "parameters": [
+          {
+            "name": "map_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Map Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/terrain/maps/{map_id}/features": {
+      "get": {
+        "tags": [
+          "terrain"
+        ],
+        "summary": "Get Terrain Map Features",
+        "description": "既存マップの再編集で川・水面・カメラを引き継ぐ。現在の都市は参照しない。",
+        "operationId": "get_terrain_map_features_api_v1_terrain_maps__map_id__features_get",
+        "parameters": [
+          {
+            "name": "map_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Map Id"
+            }
+          },
+          {
+            "name": "original",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Original"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/terrain/maps/{map_id}/resources": {
+      "get": {
+        "tags": [
+          "terrain"
+        ],
+        "summary": "Get Terrain Map Resources",
+        "description": "エディタ取り込み用に、IDとGeoJSON形状を保ったマップ固有の資源定義を返す。",
+        "operationId": "get_terrain_map_resources_api_v1_terrain_maps__map_id__resources_get",
+        "parameters": [
+          {
+            "name": "map_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Map Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -41,6 +196,16 @@
             "schema": {
               "type": "string",
               "title": "Map Id"
+            }
+          },
+          {
+            "name": "original",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Original"
             }
           }
         ],
@@ -187,6 +352,66 @@
         }
       }
     },
+    "/api/v1/terrain/surface": {
+      "get": {
+        "tags": [
+          "terrain"
+        ],
+        "summary": "Get Surface Tile",
+        "description": "全域共通サンプラーが返す現在地形。float32 LE、共有境界を含む正方格子。",
+        "operationId": "get_surface_tile_api_v1_terrain_surface_get",
+        "parameters": [
+          {
+            "name": "cell_x",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Cell X"
+            }
+          },
+          {
+            "name": "cell_z",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Cell Z"
+            }
+          },
+          {
+            "name": "resolution",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 513,
+              "title": "Resolution"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/terrain/coastline": {
       "get": {
         "tags": [
@@ -215,6 +440,26 @@
         "summary": "Get Water Surfaces",
         "description": "水面（海面以外の湖など）のポリゴン一覧を返す。\n\nレスポンス形式:\n  {\"water_surfaces\": [\n     {\"id\": ..., \"water_level\": <Y標高m>, \"kind\": <種別>,\n      \"polygon\": {\"type\": \"Polygon\"|\"MultiPolygon\", \"coordinates\": [...]}},\n     ...\n  ]}\n\n座標系はワールド座標（マップ中心が(0,0)）。water_level は heightmap と同じ絶対標高\nフレーム（海面=0）で、水面の平面Y高さを表す。フロントエンド（Unity）はこのポリゴンを\nwater_level のYで三角形分割して水面メッシュを描く。\n\n水面は init_game 実行時にマップのサイドカーJSONから読み込まれ、\ncity.terrains[\"water_surfaces\"] にキャッシュされる。海面(Y=0の板)はこの一覧には含めず、\n従来通り別枠で描画する。水面が未設定のマップでは空リストを返す。",
         "operationId": "get_water_surfaces_api_v1_terrain_water_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/terrain/rivers": {
+      "get": {
+        "tags": [
+          "terrain"
+        ],
+        "summary": "Get Rivers",
+        "description": "川の一覧を返す。\n\nレスポンス形式:\n  {\"rivers\": [\n     {\"id\": ..., \"kind\": \"river\",\n      \"polygon\": {\"type\": \"Polygon\"|\"MultiPolygon\", \"coordinates\": [...]},\n      \"profile\": [[x, waterY, z], ...]},\n     ...\n  ]}\n\npolygon は川の範囲（XZワールド座標。穴=中州）、profile は水面標高のプロファイル線\n（上流→下流。y は海面=0 の絶対標高）。範囲内の任意地点の水面標高は「profile 上の最近点の y」\nで決まる。川床は標高データに彫り込み済みなので、フロントエンド（Unity）はこの範囲を覆う\n格子面を profile の標高に置いて水面を描く（RiverSurfaceManager）。\n\n川は init_game 実行時にマップのサイドカーJSON（.rivers.json）から読み込まれ、\ncity.terrains[\"rivers\"] にキャッシュされる。川が無いマップでは空リストを返す。",
+        "operationId": "get_rivers_api_v1_terrain_rivers_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -503,6 +748,198 @@
         }
       }
     },
+    "/api/v1/terrain/background": {
+      "get": {
+        "tags": [
+          "terrain"
+        ],
+        "summary": "Get Background",
+        "operationId": "get_background_api_v1_terrain_background_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/navigation/status": {
+      "get": {
+        "tags": [
+          "navigation"
+        ],
+        "summary": "Status",
+        "operationId": "status_api_v1_navigation_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/navigation/places": {
+      "get": {
+        "tags": [
+          "navigation"
+        ],
+        "summary": "Search",
+        "operationId": "search_api_v1_navigation_places_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "title": "Q"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/navigation/pick": {
+      "get": {
+        "tags": [
+          "navigation"
+        ],
+        "summary": "Pick",
+        "operationId": "pick_api_v1_navigation_pick_get",
+        "parameters": [
+          {
+            "name": "x",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "title": "X"
+            }
+          },
+          {
+            "name": "z",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "title": "Z"
+            }
+          },
+          {
+            "name": "radius",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Radius"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/navigation/route": {
+      "post": {
+        "tags": [
+          "navigation"
+        ],
+        "summary": "Route",
+        "operationId": "route_api_v1_navigation_route_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RouteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/buildings/": {
       "get": {
         "tags": [
@@ -583,6 +1020,25 @@
               "title": "Limit"
             },
             "description": "取得件数の上限（デフォルト: 500）。複数セルをマージBBOXで一括取得する際に大きな値を指定する。"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "描画一覧の継続ID。最初は0、次回はnext_cursorを指定",
+              "title": "Cursor"
+            },
+            "description": "描画一覧の継続ID。最初は0、次回はnext_cursorを指定"
           }
         ],
         "responses": {
@@ -924,6 +1380,26 @@
         }
       }
     },
+    "/api/v1/buildings/variant-affordability": {
+      "get": {
+        "tags": [
+          "buildings"
+        ],
+        "summary": "Get Building Variant Affordability",
+        "description": "全建物バリアントの最小規模（default_width × default_height、min_floors、平地、最安構造）の\n基準費用と、現在の利用可能額での可否を返す。建設パネルが施設プルダウンの選択肢を\n先回りで無効化するための目安で、実際の発注可否は形状の総額で審査される。\n手書きプレーンJSON（endpoints.yaml 不使用）。",
+        "operationId": "get_building_variant_affordability_api_v1_buildings_variant_affordability_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/buildings/effect-ranges": {
       "get": {
         "tags": [
@@ -1013,7 +1489,7 @@
           "buildings"
         ],
         "summary": "Preview Direct",
-        "description": "直接配置モード（土地区画外への建設）の形状プレビューと設置可否を返す。\n\n必須フィールド: variant, position（[x, z] または Unity 由来の [x, y, z]）, floors\n任意フィールド: width, depth（resizable=false のバリアントでは default_width に強制される）,\n                angle（回転角、度数法）\n\n返却値: polygon（中心点原点の相対座標）, height, center_point, area,\n        valid（設置可否）, invalid_reason（不可の理由コード）,\n        requires_acquisition（民間区画の自動買収を承諾すれば確定できるか）,\n        acquisition（買収対象区画・件数・費用見積）,\n        interference（パス敷設と同形式のハイライトペイロード）,\n        width, depth, angle, resizable。\n設置可否の判定は create-direct と同一基準（既存区画・道路との重なり、地形セル解放、\n建物種類と土地区画種類の物理的互換性）で行う。民間区画との重なりは\nrequires_acquisition=True として返り、確定時に acknowledge_acquisition=True を\n渡すことで自動用地買収つきで確定できる。",
+        "description": "直接配置モード（土地区画外への建設）の形状プレビューと設置可否を返す。\n\n必須フィールド: variant, position（[x, z] または Unity 由来の [x, y, z]）, floors\n任意フィールド: width, depth（resizable=false のバリアントでは default_width に強制される）,\n                angle（回転角、度数法）\n\n返却値: polygon（中心点原点の相対座標）, height, center_point, area,\n        valid（設置可否）, invalid_reason（不可の理由コード）,\n        requires_acquisition（民間区画の自動買収を承諾すれば確定できるか）,\n        acquisition（買収対象区画・件数・費用見積）,\n        interference（パス敷設と同形式のハイライトペイロード）,\n        width, depth, angle, resizable。\n設置可否の判定は create-direct と同一基準（既存区画・道路との重なり、建物種類と\n土地区画種類の物理的互換性）で行う。民間区画との重なりは\nrequires_acquisition=True として返り、確定時に acknowledge_acquisition=True を\n渡すことで自動用地買収つきで確定できる。",
         "operationId": "preview_direct_api_v1_buildings_preview_direct_post",
         "requestBody": {
           "content": {
@@ -1323,6 +1799,50 @@
         }
       }
     },
+    "/api/v1/paths/motion": {
+      "post": {
+        "tags": [
+          "paths"
+        ],
+        "summary": "Get Road Motion",
+        "description": "ロード済み道路の描画時間を返す。データの更新や交通シミュレーションは行わない。",
+        "operationId": "get_road_motion_api_v1_paths_motion_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array",
+                "title": "Path Ids"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/paths/": {
       "get": {
         "tags": [
@@ -1403,6 +1923,25 @@
               "title": "Limit"
             },
             "description": "取得件数の上限（デフォルト: 100）。複数セルをマージBBOXで一括取得する際に大きな値を指定する。"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "描画一覧の継続ID。最初は0、次回はnext_cursorを指定",
+              "title": "Cursor"
+            },
+            "description": "描画一覧の継続ID。最初は0、次回はnext_cursorを指定"
           }
         ],
         "responses": {
@@ -1503,6 +2042,26 @@
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paths/variant-affordability": {
+      "get": {
+        "tags": [
+          "paths"
+        ],
+        "summary": "Get Path Variant Affordability",
+        "description": "全パスバリアントの「平地・基準延長」での基準費用と、現在の利用可能額での可否を返す。\n建設パネルが規格プルダウンの選択肢を先回りで無効化するための目安であり、\n実際の発注可否は形状の総額で審査される（utility/construction_funding）。\n手書きプレーンJSON（endpoints.yaml 不使用）。",
+        "operationId": "get_path_variant_affordability_api_v1_paths_variant_affordability_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           }
@@ -1746,8 +2305,134 @@
           "paths"
         ],
         "summary": "Get Path Construction Cost",
-        "description": "計画中パスの推定建設コストを計算する。\nフロントエンドから送信された形状情報をもとに一時的なPathオブジェクトを生成し、\n建設体積と地区の建設サービス財平均価格からコストを算出する。\n\nレスポンス:\n  estimated_construction_cost: 総推定建設コスト（体積 × 単価）\n  volume: 建設体積\n  estimated_duration_days: 推定建設期間（日）。ConstructionStartPhase の着工式と同じ。\n  cost_per_simulation_days: 1エポック(simulation_days日)あたりの支払コスト。\n  simulation_days: 現在の1エポックあたりの日数（フロントで単位表示に使用）。\n  next_epoch_construction_budget: 次エポックの建設予算（city.budgets[LEDGER_CONSTRUCTION]）。\n  construction_supply_ratio / expected_duration_days: 建設サービス財の需給見通し\n  （_estimate_path_supply_outlook 参照）。",
+        "description": "計画中パスの推定建設コストを計算する。\nフロントエンドから送信された形状情報をもとに一時的なPathオブジェクトを生成し、\n建設体積と地区の建設サービス財平均価格からコストを算出する。\n\nレスポンス:\n  estimated_construction_cost: 総推定建設コスト（体積 × 単価）\n  volume: 建設体積\n  estimated_duration_days: 推定建設期間（日）。ConstructionStartPhase の着工式と同じ。\n  cost_per_simulation_days: 1エポック(simulation_days日)あたりの支払コスト。\n  simulation_days: 現在の1エポックあたりの日数（フロントで単位表示に使用）。\n  next_epoch_construction_budget: 次エポックの建設予算（city.budgets[LEDGER_CONSTRUCTION]）。\n  construction_supply_ratio / expected_duration_days: 建設サービス財の需給見通し\n  （_estimate_path_supply_outlook 参照）。\n  alignment: 線形指標（geo_path_alignment.alignment_for_api）。形状から決まる通過速度\n    base_speed・制限速度 max_speed・最小曲線半径 min_curve_radius（直線は null）・\n    最大勾配 max_grade(%)・バリアントの閾値 curve_radius_limit / grade_limit（0=制限なし）・\n    違反区間 curve_violations / grade_violations・alignment_ok。UIは通過速度の表示と\n    閾値超過時の確定ブロックに使う。",
         "operationId": "get_path_construction_cost_api_v1_paths_construction_cost_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Data"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paths/earthwork-preview": {
+      "post": {
+        "tags": [
+          "paths"
+        ],
+        "summary": "Get Path Earthwork Preview",
+        "description": "敷設中の造成形状を返す。DB・地形を変更しない。",
+        "operationId": "get_path_earthwork_preview_api_v1_paths_earthwork_preview_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Data"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paths/propose-route": {
+      "post": {
+        "tags": [
+          "paths"
+        ],
+        "summary": "Propose Path Route",
+        "description": "固定アンカーを通る経路を探索する。都市・地形・建設計画への書込みは行わない。",
+        "operationId": "propose_path_route_api_v1_paths_propose_route_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Data"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paths/validate": {
+      "post": {
+        "tags": [
+          "paths"
+        ],
+        "summary": "Validate Planned Paths",
+        "description": "確定と同じ複線・設計標高を使う、厳しめの読み取り専用衝突検証。",
+        "operationId": "validate_planned_paths_api_v1_paths_validate_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -2281,7 +2966,7 @@
           "parcels"
         ],
         "summary": "Create Parcels",
-        "description": "土地区画を作成する。\nペイロードで作成モードを指定可能:\n- mode: \"empty_area\" | \"tile\" | \"random\" | \"block\" | \"along_path\"\n        | \"split_perimeter\" | \"split_random\" | \"split_rectangle\" | \"manual\"\n- dry_run: true の場合はプレビューのみ返却（実際の作成は行わない）",
+        "description": "土地区画を作成する。\nペイロードで作成モードを指定可能:\n- mode: \"empty_area\" | \"random\" | \"block\" | \"along_path\"\n        | \"split_perimeter\" | \"split_random\" | \"split_rectangle\"\n- dry_run: true の場合はプレビューのみ返却（実際の作成は行わない）",
         "operationId": "create_parcels_api_v1_parcels__post",
         "requestBody": {
           "required": true,
@@ -2404,7 +3089,7 @@
           "parcels"
         ],
         "summary": "Update Parcel Endpoint",
-        "description": "指定したIDのparcelを一部更新する。\nステータスに応じて更新可能なプロパティが異なる:\n- PENDING/SCHEDULED_CONSTRUCTION: status, polygon, restriction_override, limit_coverage_ratio, limit_volume_ratio, limit_height, altitude, facade_edge_index\n- その他: status, restriction_override, limit_coverage_ratio, limit_volume_ratio, limit_height, allowed_bd_mask",
+        "description": "指定したIDのparcelを一部更新する。\nステータスに応じて更新可能なプロパティが異なる:\n- PENDING/SCHEDULED_CONSTRUCTION: status, polygon, restriction_override, limit_coverage_ratio, limit_volume_ratio, limit_height, min_structure, altitude, facade_edge_index\n- その他: status, restriction_override, limit_coverage_ratio, limit_volume_ratio, limit_height, min_structure, allowed_bd_mask",
         "operationId": "update_parcel_endpoint_api_v1_parcels__parcel_id__patch",
         "parameters": [
           {
@@ -2777,7 +3462,7 @@
           "debug"
         ],
         "summary": "Export City Shape Endpoint",
-        "description": "現在ロードされている都市の道路網と土地区画を outputs 配下のJSONへ書き出す。\n\n書き出すのは「同じ都市形状を作り直す手間を省く」ための最小限の情報だけで、\n地区(規制のみ)・パスの形状・土地区画のポリゴンと、建設判定に必要な解放済み\n地形セルの一覧を含む。建物・経済主体・価格などの経済状態は一切含まない。\n\nリクエストボディ(任意):\n  filename: 書き出し先ファイル名。未指定なら日時から自動生成する。",
+        "description": "現在ロードされている都市の道路網と土地区画を outputs 配下のJSONへ書き出す。\n\n書き出すのは「同じ都市形状を作り直す手間を省く」ための最小限の情報だけで、\n地区(規制のみ)・パスの形状・土地区画のポリゴンを含む。建物・経済主体・価格\nなどの経済状態は一切含まない。\n\nリクエストボディ(任意):\n  filename: 書き出し先ファイル名。未指定なら日時から自動生成する。",
         "operationId": "export_city_shape_endpoint_api_v1_debug_city_shape_export_post",
         "requestBody": {
           "content": {
@@ -3938,6 +4623,47 @@
         }
       }
     },
+    "/api/v1/agents/{agent_id}/diagnosis": {
+      "get": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "Get Agent Diagnosis",
+        "description": "経済主体の不調の原因を因果の順にたどった診断木を取得する。\n\nアラートビット(原材料不足・インフラ網未接続・労働力不足・専門人材不足・予算不足・\n建設サービス不足)と公共交通路線の運休/車両不足を症状として、直接の原因→その原因→…を\nノードの木(type / params / targets / children)で返す。ルールは\nservices/agent_diagnosis.py。文言はフロントの i18n キー diagnosis.nodes.<type> が担う。\nエポック確定後の派生値のため endpoints.yaml は使わず手書きプレーンJSON。",
+        "operationId": "get_agent_diagnosis_api_v1_agents__agent_id__diagnosis_get",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Agent Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/agents/{agent_id}/cargo": {
       "get": {
         "tags": [
@@ -4853,7 +5579,7 @@
           "parameters"
         ],
         "summary": "Get Parameters",
-        "description": "現在のゲームパラメータを取得する。\nGENERAL_PARAMS / RATIO_PARAMS と、GENERAL_PARAMS のUI用カテゴリ分類\n(GENERAL_PARAMS_CATEGORIES: キー→カテゴリ名。general_params.yaml 由来)を返す。\nカテゴリ分類はパラメータ設定ウィンドウ(city-genesis/tauri の ParameterSetupWindow)が\nタブ構成を動的に組み立てるための表示メタデータで、マップに含まれないキーは\nプレイヤー向けUIに表示されない内部パラメータを意味する。\ncan_edit が False の場合、パラメータは変更不可（都市創設済みかつ非テンプレート作成モード）。\n返される値は都市濃縮度（CITY_CONDENSATION_FACTOR）適用後の実効値。",
+        "description": "現在のゲームパラメータを取得する。\nGENERAL_PARAMS / RATIO_PARAMS と、GENERAL_PARAMS のUI用表示メタデータ\n(GENERAL_PARAMS_CATEGORIES: キー→カテゴリ名、GENERAL_PARAMS_DISPLAY:\nキー→{label, desc}。ともに general_params.yaml 由来)を返す。\n表示メタデータはパラメータ設定ウィンドウ(city-genesis/tauri の ParameterSetupWindow)が\nタブ構成とラベルを動的に組み立てるためのもので、カテゴリのマップに含まれないキーは\nプレイヤー向けUIに表示されない内部パラメータを意味する。\ncan_edit が False の場合、パラメータは変更不可（都市創設済みかつ非テンプレート作成モード）。\n返される値は都市濃縮度（CITY_CONDENSATION_FACTOR）適用後の実効値。",
         "operationId": "get_parameters_api_v1_parameters_get",
         "responses": {
           "200": {
@@ -4927,6 +5653,110 @@
         }
       }
     },
+    "/api/v1/templates/complete-construction": {
+      "post": {
+        "tags": [
+          "templates"
+        ],
+        "summary": "Complete Construction Endpoint",
+        "description": "計画中・建設中の全パス・全建物を即時竣工させる(*テンプレート作成モードでのみ実行可能)。\n\n実プレイと同じ着工フェーズ→竣工フェーズを通すため、区画の収用・地形の平坦化・\n交差ノードの生成と分割まで通常どおり行われる。着工条件を満たさないもの\n(建物が立つ区画を横切るパスなど)は計画中のまま残り、remaining_* で件数を返す。\nシミュレーション本体を含まないビルドでは 501(SIMULATION_DISABLED)。\nレスポンス後、UI側は Unity にセッション再読み込みを送って地形・道路を再描画させる。",
+        "operationId": "complete_construction_endpoint_api_v1_templates_complete_construction_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/templates/street-grid": {
+      "post": {
+        "tags": [
+          "templates"
+        ],
+        "summary": "Street Grid Endpoint",
+        "description": "多角形の範囲内へ格子状の路地を計画中(SCHEDULED_CONSTRUCTION)で作成する\n(*テンプレート作成モードでのみ実行可能)。\n\nリクエストボディ:\n  points: 範囲多角形の頂点 [[x, z], ...](ワールド座標、3点以上。必須)\n  spacing: 格子間隔(m)。省略時80\n  path_variant: 路地のバリアント(街路に限る)。省略時212(1車線生活道路)\n  angle_deg: 格子の主軸角度(度)。省略時は最寄り街路の向きに揃える\n\n格子線は互いの交点と既存道路との交点で分割して1本ずつ登録するため、後の一括完成で\n交差ノード・T字接続が通常どおり作られる。海岸線外・急勾配・川の横断・既存道路との\n重複・建物のある区画への侵入は棄却し、理由別の本数を rejected で返す。",
+        "operationId": "street_grid_endpoint_api_v1_templates_street_grid_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Data"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/templates/tenant-agent": {
+      "post": {
+        "tags": [
+          "templates"
+        ],
+        "summary": "Tenant Agent Endpoint",
+        "description": "既存の共用建物へ、建物ではない経済主体を入居済み・稼働中で作成する\n(*テンプレート作成モードでのみ実行可能)。\n\nリクエストボディ:\n  variant: 経済主体のバリアント(type が TYPE_STANDARD / TYPE_TRADE かつ building=False。必須)\n  building_agent_id: 入居先の建物エージェントID(TYPE_BUILDING。必須)\n  floors: 占有する階数(共有建物のみ有効。占有面積 = 階数 × 建物の1フロア面積。省略時1)\n\nスポーン・転居フェーズを経ずに入居させるため、占有量の加算・地区/区画の継承・家賃と賃金の\nシード・創業計画(生産目標と雇用枠)・ACTIVE化をまとめて行う。非共有建物は階数にかかわらず\n全床を占有する。空き不足・種別不一致・面積範囲外は 400(VALIDATION_ERROR)。",
+        "operationId": "tenant_agent_endpoint_api_v1_templates_tenant_agent_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Data"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/score/": {
       "get": {
         "tags": [
@@ -4973,6 +5803,25 @@
         ],
         "summary": "subbuildings マスターを取得",
         "operationId": "get_master_subbuildings_api_v1_master_subbuildings_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/master/structures": {
+      "get": {
+        "tags": [
+          "master"
+        ],
+        "summary": "structures マスターを取得",
+        "operationId": "get_master_structures_api_v1_master_structures_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -5310,13 +6159,81 @@
         }
       }
     },
+    "/api/v1/stats/wellbeing": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "Get Wellbeing Statistics",
+        "description": "確定済みの選択範囲の履歴だけを返し、全地区の履歴の一括転送を避ける。",
+        "operationId": "get_wellbeing_statistics_api_v1_stats_wellbeing_get",
+        "parameters": [
+          {
+            "name": "zone_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Zone Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/stats/wellbeing/zones": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "Get Wellbeing Zone Snapshot",
+        "description": "最新確定エポックの地区別現在値を全地区まとめて返す。地区単位の色分け地図が対象。\n\n履歴を持たないので地区数×エポック数の転送にならず、/wellbeing の「履歴は選択範囲だけ」\nという配信方針と両立する。母集団世帯が0の地区は平均が定義できないため各指標をnullで返す\n（地区平均の配列自体は0で埋まるので、欠測判定はhouseholdsで行う）。\nepochは常に「スナップショットが表す確定エポック」で、未実行なら履歴が無いのでnull。",
+        "operationId": "get_wellbeing_zone_snapshot_api_v1_stats_wellbeing_zones_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/stats/health": {
       "get": {
         "tags": [
           "stats"
         ],
         "summary": "Get Health Statistics",
-        "description": "保健衛生統計データ（地区別・都市全体）を取得する。\n\n各スコープは以下を持つ。\n- history: エポックごとの平均死亡年齢の時系列\n- nutrition_distribution / healthcare_distribution: 世帯の充足度分布（20分割）\n- death_age_distribution: 死因別×年齢帯別（5歳刻み、最終帯 85+）の死亡者数。\n    {epochs: 合算した履歴エポック数, bands: [{band, natural, starvation, orphan,\n    traffic, collapse}, ...]}。都市全体でのみ記録しているため、地区スコープでは None。",
+        "description": "保健衛生統計データ（地区別・都市全体）を取得する。\n\n各スコープは以下を持つ。\n- history: エポックごとの平均死亡年齢の時系列\n- sanitation_distribution / healthcare_distribution: 世帯の充足度分布（20分割）\n- death_age_distribution: 死因別×年齢帯別（5歳刻み、最終帯 85+）の死亡者数。\n    {epochs: 合算した履歴エポック数, bands: [{band, natural, sanitation, orphan,\n    traffic, collapse}, ...]}。都市全体でのみ記録しているため、地区スコープでは None。",
         "operationId": "get_health_statistics_api_v1_stats_health_get",
         "responses": {
           "200": {
@@ -5535,7 +6452,7 @@
           "stats"
         ],
         "summary": "Get Commute Statistics",
-        "description": "移動統計データ（通勤・通学時間、昼夜人口、地区間流動）を取得する。",
+        "description": "移動統計データ（通勤・通学時間、昼夜人口、地区間流動、地区別の自動車保有率）を取得する。",
         "operationId": "get_commute_statistics_api_v1_stats_commute_get",
         "responses": {
           "200": {
@@ -5651,6 +6568,26 @@
         }
       }
     },
+    "/api/v1/stats/tourism": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "Get Tourism Statistics",
+        "description": "観光統計を取得する。統計ウィンドウ「観光」タブが参照する。\n\n- summary: エポック末の滞在観光客数・受入可能人数・当エポックの到着/帰国/応募・観光収入\n- history: Cityのリングバッファ（tourist_count / tourist_capacity / tourist_arrivals /\n  tourist_departures / tourist_applicants / tourism_revenue / exchange_rate）の時系列\n- bottleneck: 観光地（観光体験財）と玄関口（都市間旅客輸送財）の施設数・供給能力・実供給・\n  受入換算人数。受入可能人数を決めている側に is_constraint を立てる\n- lodging: 宿泊フロアの容量・占有・空室率、宿泊先を待つ観光客、宿泊費と支払意思額、ホテル棟数\n- satisfaction: 滞在客の平均充足度と帰国候補割合、充足度の分布（10分割ヒストグラム）\n- consumption: 滞在客が当エポックに調達した財の量と金額（財別）\n\n人流の内訳（訪問先）と地区別集計は持たない。",
+        "operationId": "get_tourism_statistics_api_v1_stats_tourism_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/zones/": {
       "get": {
         "tags": [
@@ -5741,7 +6678,7 @@
           "zones"
         ],
         "summary": "Create Zone Endpoint",
-        "description": "zoneを作成する。\nプレイヤーが直接指定するのは地区に所属させる道路のみであり、\n地区のポリゴンは後付けで所属する土地区画の形状から自動計算される。\n任意で name, color, allowed_bd_mask, limit_volume_ratio, limit_height, limit_coverage_ratio を指定可能。\ncolor(\"#rrggbb\")は地区の識別色で、無指定・不正形式ならバックエンドがランダム生成する\n(地区編集モードのUnityは、作成前にカーソル脇へ提示した色をここで送ってくる)。",
+        "description": "zoneを作成する。\nプレイヤーが直接指定するのは地区に所属させる道路のみであり、\n地区のポリゴンは後付けで所属する土地区画の形状から自動計算される。\n任意で name, color, allowed_bd_mask, limit_volume_ratio, limit_height, limit_coverage_ratio, min_structure を指定可能。\ncolor(\"#rrggbb\")は地区の識別色で、無指定・不正形式ならバックエンドがランダム生成する\n(地区編集モードのUnityは、作成前にカーソル脇へ提示した色をここで送ってくる)。",
         "operationId": "create_zone_endpoint_api_v1_zones__post",
         "requestBody": {
           "required": true,
@@ -5875,7 +6812,7 @@
           "zones"
         ],
         "summary": "Update Zone Endpoint",
-        "description": "指定したIDのzoneを一部更新する。\n更新可能なプロパティ: name, path_ids, allowed_bd_mask, limit_volume_ratio, limit_height, limit_coverage_ratio, auto_managed\npath_ids を指定すると、指定された道路リストをこの地区に所属させる。\nname / 規制 / path_ids の編集は自動管理地区を確定地区へ昇格させる。\nauto_managed を明示指定すると昇格は行わず送信値をそのまま適用する(ピン/ピン解除)。",
+        "description": "指定したIDのzoneを一部更新する。\n更新可能なプロパティ: name, path_ids, allowed_bd_mask, limit_volume_ratio, limit_height, limit_coverage_ratio, min_structure, auto_managed\npath_ids を指定すると、指定された道路リストをこの地区に所属させる。\nname / 規制 / path_ids の編集は自動管理地区を確定地区へ昇格させる。\nauto_managed を明示指定すると昇格は行わず送信値をそのまま適用する(ピン/ピン解除)。",
         "operationId": "update_zone_endpoint_api_v1_zones__zone_id__patch",
         "parameters": [
           {
@@ -6786,6 +7723,16 @@
               "default": 10000,
               "title": "Limit"
             }
+          },
+          {
+            "name": "include_obstacles",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Include Obstacles"
+            }
           }
         ],
         "responses": {
@@ -6810,13 +7757,33 @@
         }
       }
     },
+    "/api/v1/props/forest-overview": {
+      "get": {
+        "tags": [
+          "props"
+        ],
+        "summary": "Get Forest Overview",
+        "description": "遠景の森林マスク用の完全な範囲情報。個別配置や木ごとの位置は送らない。",
+        "operationId": "get_forest_overview_api_v1_props_forest_overview_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/props/scatters": {
       "post": {
         "tags": [
           "props"
         ],
         "summary": "Create Prop Scatter",
-        "description": "範囲散布プロップを新規作成する。\n\nペイロード: polygon(必須, 単純ポリゴン [[x, z], ...]) / prop_type(必須) /\ndensity(必須, 本/ヘクタール) / seed(任意, 未指定時はサーバ採番)。\nプロップはゼロコストの装飾のため、テンプレート作成モード以外でも実行可能。\nバリデーション・登録は app.services.crud.crud_props.add_prop_scatter が行う。",
+        "description": "範囲散布プロップを新規作成する。\n\nペイロード: polygon(必須, 単純ポリゴン [[x, z], ...]) / prop_type(必須) /\ndensity(必須, 本/ヘクタール) / seed(任意, 未指定時はサーバ採番)。\nedge_fade_width(任意, m, 既定0) / allow_water(任意, 既定false)。\nプロップはゼロコストの装飾のため、テンプレート作成モード以外でも実行可能。\nバリデーション・登録は app.services.crud.crud_props.add_prop_scatter が行う。",
         "operationId": "create_prop_scatter_api_v1_props_scatters_post",
         "requestBody": {
           "content": {
@@ -6858,7 +7825,7 @@
           "props"
         ],
         "summary": "Patch Prop Scatter",
-        "description": "範囲散布プロップを更新する。更新可能なプロパティは polygon / density / seed のみ。",
+        "description": "範囲散布プロップを更新する。更新可能なプロパティは polygon / density / seed / edge_fade_width / allow_water。",
         "operationId": "patch_prop_scatter_api_v1_props_scatters__prop_scatter_id__patch",
         "parameters": [
           {
@@ -6950,7 +7917,7 @@
           "props"
         ],
         "summary": "Create Prop Instances",
-        "description": "個別配置プロップを一括作成する(1レコード = 配置オブジェクト1個)。\n\nペイロード: instances(必須, [{x, z, rotation, scale, prop_type}, ...])。\n各要素の prop_type を省略した場合はペイロード直下の prop_type が使われる。\n配置パネルで複数打点→確定を1リクエストで送る用途を想定している。",
+        "description": "個別配置プロップを一括作成する(1レコード = 配置オブジェクト1個)。\n\nペイロード: instances(必須, [{x, y, z, rotation, scale, prop_type}, ...])。\nyは地面からの相対高さ(m)。省略時0、負値も許可し、他オブジェクトとの重なりを判定しない。\n各要素の prop_type を省略した場合はペイロード直下の prop_type が使われる。\n配置パネルで複数打点→確定を1リクエストで送る用途を想定している。",
         "operationId": "create_prop_instances_api_v1_props_instances_post",
         "requestBody": {
           "content": {
@@ -7174,6 +8141,26 @@
         }
       }
     },
+    "/api/v1/transit/lines/geometry": {
+      "get": {
+        "tags": [
+          "transit"
+        ],
+        "summary": "Get Transit Line Geometries",
+        "description": "全路線の走行形状(下地の道路・線路に沿った [x,z] 折れ線)と停留所を、2D地図の路線レイヤー用に取得する。\n\n路線一覧(GET /lines)は Unity が定期ポーリングするため、形状配列はここに分離している。",
+        "operationId": "get_transit_line_geometries_api_v1_transit_lines_geometry_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/transit/lines/{line_agent_id}": {
       "get": {
         "tags": [
@@ -7305,6 +8292,171 @@
         }
       }
     },
+    "/api/v1/tags/": {
+      "get": {
+        "tags": [
+          "tags"
+        ],
+        "summary": "Get Tags",
+        "description": "タグ候補の一覧を、タグごとの付与件数つきで返す。",
+        "operationId": "get_tags_api_v1_tags__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tags/projects": {
+      "get": {
+        "tags": [
+          "tags"
+        ],
+        "summary": "Get Tag Projects",
+        "description": "タグ別の建設プロジェクト（アイテム一覧＋建設費・工期の集計）を返す。",
+        "operationId": "get_tag_projects_api_v1_tags_projects_get",
+        "parameters": [
+          {
+            "name": "tag",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "絞り込むタグ名",
+              "title": "Tag"
+            },
+            "description": "絞り込むタグ名"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tags/object": {
+      "get": {
+        "tags": [
+          "tags"
+        ],
+        "summary": "Get Object Tag",
+        "description": "建物・道路1件に付いているタグを返す。詳細パネルの現在値表示に使う。",
+        "operationId": "get_object_tag_api_v1_tags_object_get",
+        "parameters": [
+          {
+            "name": "kind",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "対象の種別（agent=建物 / path=道路）",
+              "title": "Kind"
+            },
+            "description": "対象の種別（agent=建物 / path=道路）"
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "description": "対象のID",
+              "title": "Id"
+            },
+            "description": "対象のID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tags/{tag}": {
+      "delete": {
+        "tags": [
+          "tags"
+        ],
+        "summary": "Delete Tag",
+        "description": "タグ候補を削除し、そのタグが付いた建物・道路からタグを外す。",
+        "operationId": "delete_tag_api_v1_tags__tag__delete",
+        "parameters": [
+          {
+            "name": "tag",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Tag"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/healthz": {
       "get": {
         "summary": "Healthz",
@@ -7350,6 +8502,11 @@
             "type": "integer",
             "title": "Variant",
             "description": "経済主体の小分類（agent_master のバリアントID）"
+          },
+          "structure": {
+            "type": "integer",
+            "title": "Structure",
+            "description": "建物の構造種別（structure_master のID。0=構造の区別なし）"
           },
           "status": {
             "type": "integer",
@@ -7776,6 +8933,18 @@
             "title": "Satis Residential",
             "description": "世帯の住環境満足度（0.0〜1.0）"
           },
+          "satis_tourism": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Satis Tourism",
+            "description": "観光体験充足度（0.0〜1.0。観光客世帯の観光満足度の要素）"
+          },
           "family_type": {
             "anyOf": [
               {
@@ -7849,7 +9018,19 @@
               }
             ],
             "title": "Has Automobile",
-            "description": "世帯が自家用車を保有するか（0/1）"
+            "description": "世帯が自家用車を保有するか（0/1）。当エポックに自動車レンタルを調達できた世帯だけが保有になる"
+          },
+          "wants_automobile": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wants Automobile",
+            "description": "世帯が自家用車の保有を希望しているか（0/1）。次エポックに自動車とガソリンの需要を計画する"
           },
           "utilization": {
             "anyOf": [
@@ -8101,6 +9282,7 @@
           "version",
           "type",
           "variant",
+          "structure",
           "status",
           "alert",
           "created_date",
@@ -8179,6 +9361,11 @@
             "type": "integer",
             "title": "Variant",
             "description": "経済主体の小分類（agent_master のバリアントID）"
+          },
+          "structure": {
+            "type": "integer",
+            "title": "Structure",
+            "description": "建物の構造種別（structure_master のID。0=構造の区別なし）"
           },
           "polygon": {
             "anyOf": [
@@ -8364,6 +9551,7 @@
           "version",
           "type",
           "variant",
+          "structure",
           "status",
           "public_facility",
           "infra_node_id",
@@ -8487,6 +9675,43 @@
         ],
         "title": "ConstructionProgressItem",
         "description": "エポック実行前後での建設対象1件の進捗率とステータス。"
+      },
+      "Endpoint": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "agent",
+              "zone",
+              "stop",
+              "station",
+              "point"
+            ],
+            "title": "Kind"
+          },
+          "id": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Id",
+            "default": 0
+          },
+          "x": {
+            "type": "number",
+            "title": "X",
+            "default": 0
+          },
+          "z": {
+            "type": "number",
+            "title": "Z",
+            "default": 0
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind"
+        ],
+        "title": "Endpoint"
       },
       "EpochReport": {
         "properties": {
@@ -8884,6 +10109,17 @@
             "type": "integer",
             "title": "Node Id"
           },
+          "station_path_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Station Path Id"
+          },
           "type": {
             "anyOf": [
               {
@@ -9069,6 +10305,18 @@
           "emigrations": {
             "type": "integer",
             "title": "Emigrations"
+          },
+          "tourist_arrivals": {
+            "type": "integer",
+            "title": "Tourist Arrivals"
+          },
+          "tourist_departures": {
+            "type": "integer",
+            "title": "Tourist Departures"
+          },
+          "tourist_count": {
+            "type": "integer",
+            "title": "Tourist Count"
           }
         },
         "type": "object",
@@ -9079,7 +10327,10 @@
           "deaths",
           "immigrations",
           "immigration_applicants",
-          "emigrations"
+          "emigrations",
+          "tourist_arrivals",
+          "tourist_departures",
+          "tourist_count"
         ],
         "title": "PopulationReport",
         "description": "エポック実行に伴う人口動態集計。"
@@ -9228,6 +10479,31 @@
           "id"
         ],
         "title": "RefItem"
+      },
+      "RouteRequest": {
+        "properties": {
+          "origin": {
+            "$ref": "#/components/schemas/Endpoint"
+          },
+          "destination": {
+            "$ref": "#/components/schemas/Endpoint"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "pedestrian",
+              "automobile"
+            ],
+            "title": "Mode"
+          }
+        },
+        "type": "object",
+        "required": [
+          "origin",
+          "destination",
+          "mode"
+        ],
+        "title": "RouteRequest"
       },
       "ScoreData": {
         "properties": {

@@ -8,11 +8,11 @@
  * 往路と復路が同じ道路上に重なる(進行方向の矢印が両向きに見える)。
  *
  * 描画規則:
- *   - 稼働中の路線 ... 路線カラーの帯(暗い縁取り付き)。各停留所間の弧長中点に進行方向矢印。
+ *   - 稼働中の路線 ... 路線カラーの帯(白い縁取り付き)。各停留所間の弧長中点に進行方向矢印。
  *   - 運休中の路線 ... 灰色の破線。矢印なし。
  *   - 走行形状が無い路線(下地経路が成立せず journeys が空) ... 区間パスの端点を結ぶ直線を
  *     灰色の破線で描き、位置だけを示す(走行形状ではない)。
- *   - 停留所 ... 路線カラーのリング+暗い芯。複数路線が共有する停留所は白リング。
+ *   - 停留所 ... 路線カラーのリング+白い芯。複数路線が共有する停留所は濃灰リング。
  *   - 注目路線(focusLineId) ... 路線詳細の路線地図のように1路線を主役にする。他の路線は薄く
  *     描き、注目路線は最後に(最前面に)描いて始点=緑・終点=赤のリングで端を強調する。
  *
@@ -41,15 +41,15 @@ export type TransitLineGeometry = {
   segments: { from: [number, number]; to: [number, number]; status: number }[];
 };
 
-/** 帯の縁取り・停留所の芯の色。地形や建物の上でも帯が埋もれないよう暗色にする */
-const COLOR_OUTLINE = "#11111b";
+/** 帯の縁取り・停留所の芯の色。地形や建物の上でも帯が埋もれないよう白色にする */
+const COLOR_OUTLINE = "#ffffff";
 /** 運休中・走行形状なしの路線の色 */
-const COLOR_INACTIVE = "#6c7086";
+const COLOR_INACTIVE = "#7c8389";
 /** 複数路線が共有する停留所のリング色 */
-const COLOR_SHARED_STOP = "#cdd6f4";
+const COLOR_SHARED_STOP = "#556773";
 /** 注目路線の始点・終点のリング色 */
-const COLOR_FOCUS_START = "#a6e3a1";
-const COLOR_FOCUS_END = "#f38ba8";
+const COLOR_FOCUS_START = "#18845b";
+const COLOR_FOCUS_END = "#cf4b50";
 
 /** 注目路線があるときの、それ以外の路線の不透明度 */
 const DIMMED_ALPHA = 0.3;
@@ -124,7 +124,7 @@ function drawArrow(
   ctx.fill();
 }
 
-/** 停留所のリング(外側=fill 色、内側=暗い芯) */
+/** 停留所のリング(外側=fill 色、内側=白い芯) */
 function drawStopMarker(
   ctx: CanvasRenderingContext2D,
   px: (w: number) => number,
@@ -196,15 +196,15 @@ export function drawTransitLines(
         tracePolyline(ctx, j.points);
         ctx.setLineDash([]);
         ctx.strokeStyle = COLOR_OUTLINE;
-        ctx.lineWidth = px(5);
+        ctx.lineWidth = px(7);
         ctx.stroke();
         ctx.strokeStyle = color;
-        ctx.lineWidth = px(3);
+        ctx.lineWidth = px(4);
         ctx.stroke();
       } else {
         tracePolyline(ctx, j.points);
         ctx.strokeStyle = COLOR_INACTIVE;
-        ctx.lineWidth = px(3);
+        ctx.lineWidth = px(4);
         ctx.setLineDash([px(5), px(4)]);
         ctx.stroke();
         ctx.setLineDash([]);

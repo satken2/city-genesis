@@ -453,7 +453,7 @@ public class TrackPath : IPathMeshGenerator
     private static void CreateTerminations(GameObject container, List<Vector3> points, TrackCorridorInfo corridor,
         PathSummary path, float width, int lanes, float leftWidth, float rightWidth, string variantBase, string typeBase)
     {
-        if (path.path_type != Constants.PATH_TRACK) return;
+        if (path.path_type != Constants.PATH_TRACK && path.path_type != Constants.PATH_MONORAIL) return;
         ComputeStripFrames(points, out var rights, out var lengths);
         for (int end = 0; end < 2; end++)
         {
@@ -482,7 +482,7 @@ public class TrackPath : IPathMeshGenerator
                     new Vector2(anchor[0], anchor.Count >= 3 ? anchor[2] : anchor[1])) < .5f;
             // 未ロードや敷設中の仮ノードを終端と断定しない。
             // トンネルで分割された描画区間の坑口も、線路自体の終端とは区別する。
-            if (atAnchor && connections != null && connections.Count > 0 && nodeId > 0 && !trackContinues && lengths[points.Count - 1] >= 3f)
+            if (path.path_type == Constants.PATH_TRACK && atAnchor && connections != null && connections.Count > 0 && nodeId > 0 && !trackContinues && lengths[points.Count - 1] >= 3f)
             {
                 for (int lane = 0; lane < lanes; lane++)
                     PlaceEndPart(container, LoadPrefab($"{variantBase}/buffer_stop", $"{typeBase}/buffer_stop"),
@@ -499,6 +499,9 @@ public class TrackPath : IPathMeshGenerator
                 float far = farValues == null ? width * .5f + pf : farValues[idx];
                 if (float.IsNaN(far) || far <= PLATFORM_EDGE_OFFSET + PLATFORM_DECK_MIN_WIDTH) continue;
                 var prefab = LoadPrefab($"{variantBase}/platform_end", $"{typeBase}/platform_end");
+                // モノレールもホーム面の高さを共有するため、専用部品が無ければ鉄道の端壁を使う。
+                if (prefab == null && path.path_type == Constants.PATH_MONORAIL)
+                    prefab = LoadPrefab($"Models/Paths/p{Constants.PATH_TRACK}/platform_end", null);
                 float span = far - PLATFORM_EDGE_OFFSET;
                 int panels = Mathf.Max(1, Mathf.CeilToInt(span / 1.2f));
                 for (int panel = 0; panel < panels; panel++)

@@ -346,6 +346,17 @@
     "debugSpawnBestCost": "成本合計（建設+土地+收購拆除）",
     "debugSpawnNoData": "沒有資料",
     "sanitationSatisfaction": "衛生狀況",
-    "deathCauseSanitation": "衛生惡化"
+    "deathCauseSanitation": "衛生惡化",
+    "carOwnershipTitle": "汽車持有率",
+    "carOwnershipRate": "持有率",
+    "carOwnershipWantRate": "意願率",
+    "carOwnershipNote": "居民家庭中擁有汽車的比例。地區顏色表示持有率的高低。",
+    "carOwnershipEmpty": "沒有各地區的持有率資料。",
+    "zonePopulationTitle": "各地區人口",
+    "zoneName": "地區名",
+    "nightPopulation": "夜間",
+    "daytimePopulation": "白天",
+    "dayNightRatio": "比率",
+    "noZoneData": "不存在地區資料。"
   }
 }

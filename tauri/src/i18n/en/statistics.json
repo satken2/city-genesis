@@ -346,6 +346,17 @@
     "debugSpawnBestCost": "Total cost (construction + land + acquisition)",
     "debugSpawnNoData": "No data",
     "sanitationSatisfaction": "Sanitation",
-    "deathCauseSanitation": "Poor sanitation"
+    "deathCauseSanitation": "Poor sanitation",
+    "carOwnershipTitle": "Car Ownership Rate",
+    "carOwnershipRate": "Ownership",
+    "carOwnershipWantRate": "Desired",
+    "carOwnershipNote": "Share of resident households that own a car. Zone colors show the ownership rate.",
+    "carOwnershipEmpty": "No per-zone ownership data available.",
+    "zonePopulationTitle": "Population by District",
+    "zoneName": "District",
+    "nightPopulation": "Night",
+    "daytimePopulation": "Day",
+    "dayNightRatio": "Ratio",
+    "noZoneData": "No district data available."
   }
 }
