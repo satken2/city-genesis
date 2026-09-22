@@ -1522,6 +1522,12 @@ fn send_game_start_ipc(state: &SharedState, _app: &tauri::AppHandle) {
         let mut guard = state.lock();
         guard.loading_started = true;
         guard.graphic_load_ready = false;
+        // Unityを起動しないUI開発ではバックエンドの準備完了だけで開始できる。
+        // 接続済みなら描画完了を待ち、配布ビルドにはこの省略処理を含めない。
+        #[cfg(all(debug_assertions, dev))]
+        {
+            guard.graphic_load_ready = !guard.graphic_ready_seen;
+        }
         guard.loading_id
     };
     let _ = ipc::send_ui_action(state, "".into(), None, "session:reload".into(), serde_json::json!({}));

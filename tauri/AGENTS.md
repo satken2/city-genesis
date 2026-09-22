@@ -164,3 +164,6 @@ UI側で独自に定義する定数は`local-constants.ts`に定義する。
 HUDとヒントバーは `current_save_id != null && !isLoading` を表示条件とする。`isLoading` は描画準備・開始ボタン待ち・初期設定中を含む。TipsのAlt+F4では待機を解除しない。開始APIの失敗時はTipsを破棄し、ロード状態を解除する。
 
 初期設定またはTipsから通常操作へ進む際はUI内の `initial-loading:finished` イベントでHUDとヒントバーの描画を即座に解禁し、次回のセッションポーリングを待たない。
+
+
+開発時のUnityなし起動: 通常の `npm run tauri dev`（Rustの `cfg(all(debug_assertions, dev))`）では、Unityの `system:graphic_ready` を一度も受信していない場合に限り、バックエンドの開始要求成功とセッション確認後に描画待ちを省略し、Tipsを開始ボタンへ切り替える。Unityから接続通知を受けた後は描画完了を待つ。待機中にUnityが接続した場合も開始要求を再送して描画待ちに戻る。`tauri build`（`--debug` を含む）およびリリースビルドには省略処理を含めない。環境変数やバックエンドのNuitka／uvicorn判定は使用しない。

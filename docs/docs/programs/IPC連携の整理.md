@@ -455,3 +455,6 @@ world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地�
 UI→Unityは既存の `ui:action` Envelopeの `payload.action` / `payload.params` を使う。`game:loading` は黒画面と入力抑制を開始する。`game:start` のparamsは `{loading_id: 整数}` で、描画準備を開始するが黒画面は維持する。Unity→UIの `game:loaded` はpayload直下の `{loading_id: 整数}` を返す。初期描画完了後、表示解禁まで1秒間隔で再送し、Rustは現在の要求世代だけを受理する。UI→Unityの `game:reveal` は同じloading_idをparamsに載せ、準備済みの世代だけを表示する。
 
 `system:graphic_ready` はプロセスの起動完了であり、都市の描画完了ではない。遅延起動・再接続ではRustが開始要求を再送する。ゲーム中の再接続でもTipsを使い、初期設定は再表示しない。
+
+
+開発時のUnityなし起動: 通常の `npm run tauri dev`（Rustの `cfg(all(debug_assertions, dev))`）では、Unityの `system:graphic_ready` を一度も受信していない場合に限り、バックエンドの開始要求成功とセッション確認後に描画待ちを省略し、Tipsを開始ボタンへ切り替える。Unityから接続通知を受けた後は描画完了を待つ。待機中にUnityが接続した場合も開始要求を再送して描画待ちに戻る。`tauri build`（`--debug` を含む）およびリリースビルドには省略処理を含めない。環境変数やバックエンドのNuitka／uvicorn判定は使用しない。
