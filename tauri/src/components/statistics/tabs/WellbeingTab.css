@@ -1,8 +1,10 @@
 /**
  * 満足度・余暇・住環境タブのスタイル
  *
- * 上部に説明文、中段に現在値のKPIカード列、下段に推移グラフのカード(満足度表示のみ
- * 右に構成ドーナツのカード)を置き、全体をウィンドウの高さに収める(タブ内でスクロールさせない)。
+ * 「満足度」表示は下段を等幅2カラムにして、左=[推移グラフ][構成グラフ]の上下2枚、
+ * 右=[指標切替][詳細][地区別地図]を積む。
+ * 「余暇」「住環境」表示は 説明文 → 現在値のKPIカード列 → 推移グラフ の縦積み。
+ * どちらも全体をウィンドウの高さに収める(タブ内でスクロールさせない)。
  * カードの面・罫線・見出しは雇用タブ等の既存タブと同じダークテーマに合わせる。
  * アクセント色は表示ごとに変わるため、コンポーネント側が --wellbeing-accent で渡す。
  */
@@ -85,6 +87,22 @@
   min-height: 0;
 }
 
+/* 満足度表示はグラフ列と地図列を等幅に割る(地図を読める大きさにするため) */
+.wellbeing-tab__body--split > * {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* グラフ列。満足度表示では推移と構成の2枚を上下で等分し、他の表示では1枚が全部使う */
+.wellbeing-charts {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  min-height: 0;
+}
+
 .wellbeing-card {
   display: flex;
   flex-direction: column;
@@ -100,8 +118,13 @@
   flex: 1;
 }
 
-.wellbeing-card--breakdown {
-  flex: 0 0 280px;
+/* 満足度表示の右カラム。カードの面は各セクションが持つので、ここは素の縦積みの箱 */
+.wellbeing-side {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  min-height: 0;
 }
 
 .wellbeing-card__title {
@@ -129,73 +152,131 @@
   min-height: 0;
 }
 
-/* ========== 満足度の構成(ドーナツ + 内訳) ========== */
+/* ========== 指標切替(四軸 + 世帯満足度) ========== */
 
-.wellbeing-breakdown__chart {
-  flex: 1;
-  min-height: 120px;
-  position: relative;
-}
-
-/* ドーナツの中央に総合値を重ねる。ホバーはドーナツ側に通す */
-.wellbeing-breakdown__center {
-  position: absolute;
-  inset: 0;
+.wellbeing-seg {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 0 0 auto;
 }
 
-.wellbeing-breakdown__center-value {
-  font-size: 20px;
+.wellbeing-seg__btn {
+  padding: 5px 10px;
+  background: rgba(22, 29, 43, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: #9ca3af;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.wellbeing-seg__btn:hover {
+  color: #e5e7eb;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 選択中は系列色のベタ塗り。折れ線・詳細カードの値と同じ色で対応づける
+   (色はコンポーネント側の SERIES_COLORS をインラインstyleで当てる) */
+.wellbeing-seg__btn--active {
+  color: #0b0f19;
+  font-weight: 700;
+}
+
+/* ========== 選択指標の詳細(説明 + 現在値 + 地区間レンジ) ========== */
+
+.wellbeing-detail {
+  flex: 0 0 auto;
+}
+
+.wellbeing-detail__value {
+  font-size: 24px;
   font-weight: 700;
   line-height: 1.1;
+  letter-spacing: -0.5px;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
-.wellbeing-breakdown__center-label {
-  font-size: 9px;
-  color: #8ba3bb;
+.wellbeing-detail__unit {
+  margin-left: 3px;
+  font-size: 10px;
+  font-weight: 500;
+  color: #94a3b8;
 }
 
-.wellbeing-breakdown__legend {
-  list-style: none;
-  margin: 8px 0 0;
-  padding: 0;
+.wellbeing-detail__range {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.wellbeing-breakdown__item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
   font-size: 11px;
   color: #94a3b8;
 }
 
-.wellbeing-breakdown__item i {
-  width: 10px;
-  height: 10px;
-  border-radius: 2px;
-  flex-shrink: 0;
-}
-
-.wellbeing-breakdown__item-name {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.wellbeing-breakdown__item-value {
-  margin-left: auto;
+.wellbeing-detail__range b {
+  margin-left: 4px;
   color: #e2e8f0;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  white-space: nowrap;
+}
+
+/* ========== 地区別の色分け地図 ========== */
+
+/*
+ * 地図は右カラムの残り高さを全部使う。CityMapCanvas は親のサイズに追従するので
+ * 親側で高さを確定させる必要があるが、min-height を置くと統計ペインの
+ * overflow-y が効いてタブがスクロールするため flex: 1 + min-height: 0 だけにする。
+ */
+.wellbeing-card--map {
+  flex: 1;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.wellbeing-map {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+/* 凡例は地図の上に重ねる。塗りは地区間のmin〜maxへの相対値なので実値を両端に併記する */
+.wellbeing-map__legend {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(15, 20, 32, 0.75);
+  font-size: 0.72rem;
+  color: #93a9c0;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.wellbeing-map__legend-bar {
+  width: 80px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.wellbeing-map__empty {
+  position: absolute;
+  inset: auto 8px 8px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(15, 20, 32, 0.75);
+  font-size: 0.72rem;
+  color: #93a9c0;
+  text-align: center;
+  pointer-events: none;
 }
 
 /* ========== ローディング・エラー・データなし ========== */

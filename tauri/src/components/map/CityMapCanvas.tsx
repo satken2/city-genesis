@@ -33,6 +33,12 @@
  *   (発生源の広がりを面で見せる都市全体のビットマップは公開されていない)。
  *   2種を重ねると色が混ざって読めなくなるため、複数ONにできるレイヤーとは分ける。
  *
+ * 地区の値塗り(zoneFill propで地区ごとの値を渡す):
+ *   満足度などの地区単位の指標を地区ポリゴンの塗り分けで表現する。塗りは地区枠線より
+ *   下に敷くので、枠線レイヤーと併用しても境界が残る。正規化と実値レンジの保持は
+ *   呼び出し側の責務(凡例に併記する実値を持つのは呼び出し側だけのため)。
+ *   ヒートマップと同様に値塗りは排他で、両方を同時に渡す使い方はしない。
+ *
  * データ取得:
  *   - パス・土地区画・建物はビューポートにパディングを加えたbboxを指定して取得する。
  *     ビューポートが取得済み範囲の外へ出たらデバウンス付きで再取得する。
@@ -132,6 +138,20 @@ export type CityMapHeatmapStats = {
   count: number;
 };
 
+/**
+ * 地区を値で塗り分ける指定。地区枠線より下に面を敷くので、枠線レイヤーと併用できる。
+ *
+ * 正規化(どのレンジを両端に割り当てるか)と実値レンジの保持は呼び出し側の責務とする。
+ * 指標ごとに「都市全体の絶対値」「地区間のmin〜max」のどちらを両端にすべきかが違い、
+ * 凡例に併記する実値も呼び出し側しか持たないため。
+ */
+export type CityMapZoneFill = {
+  /** zone_id → 0〜1へ正規化した値(1=ランプの高い側)。値が無い地区は塗らない */
+  values: Map<number, number>;
+  /** 低→高のカラーランプ。省略時は ZONE_FILL_DEFAULT_RAMP(低=赤〜高=緑) */
+  ramp?: [number, number, number][];
+};
+
 /** ワールド座標(X-Z平面)の矩形範囲 */
 export type CityMapBounds = { x1: number; z1: number; x2: number; z2: number };
 
@@ -176,6 +196,11 @@ export type CityMapCanvasProps = {
    * 非表示のときはnullが渡る。
    */
   onHeatmapStats?: (stats: CityMapHeatmapStats | null) => void;
+  /**
+   * 地区の値塗り(省略時は塗らない)。ヒートマップと同様に値塗りは排他なので、
+   * 併用すると色が混ざって読めなくなる。
+   */
+  zoneFill?: CityMapZoneFill;
   /** 初期表示範囲(ワールド座標)。省略時はマップ全体にフィットする */
   initialBounds?: CityMapBounds;
   /** マウスによるパン・ズーム操作を許可するか(埋め込みプレビューではfalse推奨) */
@@ -265,6 +290,8 @@ type ApiPolygonItem = {
   auto_managed?: boolean | number;
   /** 土地区画のみ: 区画ID。ヒートマップ値との突き合わせに使う */
   parcel_id?: number;
+  /** 地区のみ: 地区ID。地区の値塗りとの突き合わせに使う */
+  zone_id?: number;
 };
 
 /**
@@ -308,6 +335,8 @@ type VectorState = {
   zonePathConfirmed: Path2D | null;
   /** 自動管理地区(auto_managed=1)の枠線。破線で描き「まだ仮の区割り」であることを示す */
   zonePathAuto: Path2D | null;
+  /** 地区の値塗り。地区は高々100件なので量子化せず1地区=1fillで持つ */
+  zoneFillBands: { path: Path2D; color: string }[] | null;
   /** bbox取得を要求した範囲。カバレッジ判定に使う */
   fetchedBounds: CityMapBounds | null;
   /** 取得済みのデータ種別 */
@@ -408,6 +437,18 @@ const HEATMAP_RAMPS: Record<CityMapHeatmapActiveKind, [number, number, number][]
   sunshine: [[255, 245, 157], [144, 164, 174], [55, 71, 79]],
 };
 
+/**
+ * 地区の値塗りの既定ランプ(低→高)。赤→黄→緑で「高いほど良い」指標を表す。
+ * 悪さスコアを扱うHEATMAP_RAMPSとは向きが逆なので取り違えないこと。
+ * 段階の色は common/Meter の getMeterColor と同じ赤・黄・緑に揃えている。
+ */
+const ZONE_FILL_DEFAULT_RAMP: [number, number, number][] = [
+  [239, 68, 68], [234, 179, 8], [34, 197, 94],
+];
+
+/** 地区塗りの不透明度。地区は面積が大きいため、ヒートマップより薄くして地物を残す */
+const ZONE_FILL_ALPHA = 0.45;
+
 /** ヒートマップ種別ごとの取得先エンドポイント */
 const HEATMAP_ENDPOINT: Record<CityMapHeatmapActiveKind, string> = {
   noise: "/api/v1/city/noise",
@@ -480,6 +521,14 @@ function buildHeatmapBinColors(kind: CityMapHeatmapActiveKind): string[] {
  */
 export function getHeatmapRampStops(kind: CityMapHeatmapActiveKind): string[] {
   return HEATMAP_RAMPS[kind].map(([r, g, b]) => `rgb(${r}, ${g}, ${b})`);
+}
+
+/**
+ * 地区の値塗りのランプのストップ色(低→高)をCSS文字列で返す。
+ * 凡例のグラデーションを地図の塗りと同じ色で描くために公開している。
+ */
+export function getZoneFillRampStops(ramp?: [number, number, number][]): string[] {
+  return (ramp ?? ZONE_FILL_DEFAULT_RAMP).map(([r, g, b]) => `rgb(${r}, ${g}, ${b})`);
 }
 
 /**
@@ -1014,6 +1063,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       cursor,
       onZoomChange,
       onHeatmapStats,
+      zoneFill,
       className,
     },
     ref
@@ -1030,6 +1080,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
     // 常に最新値を参照できるようrefにミラーする(ハンドラの張り直しを避けるため)。
     const layersRef = useRef<CityMapLayerVisibility>({ ...DEFAULT_CITY_MAP_LAYERS, ...layers });
     const heatmapRef = useRef<CityMapHeatmapKind>(heatmap);
+    const zoneFillRef = useRef<CityMapZoneFill | undefined>(zoneFill);
     const overlayDrawRef = useRef<CityMapCanvasProps["overlayDraw"]>(overlayDraw);
     const animatedOverlayDrawRef = useRef<CityMapCanvasProps["animatedOverlayDraw"]>(animatedOverlayDraw);
     const cursorCbRef = useRef<CityMapCanvasProps["onCursorWorldPos"]>(onCursorWorldPos);
@@ -1055,6 +1106,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       ensureVectors: () => void;
       ensureHeatmap: () => void;
       rebuildPathClassification: () => void;
+      rebuildZoneFill: () => void;
     } | null>(null);
 
     // initialBoundsはオブジェクトのため、値が同じなら再初期化しないようキー化する
@@ -1078,6 +1130,14 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       engineRef.current?.ensureHeatmap();
       engineRef.current?.draw();
     }, [heatmap]);
+
+    /* ---- 地区の値塗りの変更: 地区データを揃えてPath2Dを作り直し再描画する ---- */
+    useEffect(() => {
+      zoneFillRef.current = zoneFill;
+      engineRef.current?.ensureVectors();
+      engineRef.current?.rebuildZoneFill();
+      engineRef.current?.draw();
+    }, [zoneFill]);
 
     /* ---- マスターデータ変更: 幹線道路の分類が変わるためPath2Dを再構築する ---- */
     useEffect(() => {
@@ -1144,6 +1204,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         stationHullPath: null,
         zonePathConfirmed: null,
         zonePathAuto: null,
+        zoneFillBands: null,
         fetchedBounds: null,
         fetchedKinds: new Set(),
         loading: false,
@@ -1194,6 +1255,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       };
 
       const resetView = () => {
+        viewReady = true;
         const ib = initialBoundsRef.current;
         if (ib) {
           setViewToBounds(ib);
@@ -1282,6 +1344,17 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           for (let i = 0; i < heat.binPaths.length; i++) {
             ctx.fillStyle = heat.binColors[i];
             ctx.fill(heat.binPaths[i]);
+          }
+          ctx.globalAlpha = 1.0;
+        }
+
+        // 地区の値塗り。地区枠線より先に敷くことで、枠線・道路・建物を潰さずに
+        // 「どの地区が良い/悪いか」を面で見せる。
+        if (vec.zoneFillBands) {
+          ctx.globalAlpha = ZONE_FILL_ALPHA;
+          for (const band of vec.zoneFillBands) {
+            ctx.fillStyle = band.color;
+            ctx.fill(band.path);
           }
           ctx.globalAlpha = 1.0;
         }
@@ -1576,6 +1649,32 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       };
 
       /**
+       * 取得済みの地区ポリゴンとzoneFillの値から、地区ごとの塗りPath2Dを構築する。
+       * 地区ポリゴンはバックエンドが外周1リングへ正規化済みなので穴は考慮しない。
+       */
+      const rebuildZoneFill = () => {
+        const fill = zoneFillRef.current;
+        if (!fill || fill.values.size === 0) {
+          vec.zoneFillBands = null;
+          return;
+        }
+        const ramp = fill.ramp ?? ZONE_FILL_DEFAULT_RAMP;
+        const bands: { path: Path2D; color: string }[] = [];
+        for (const zone of vec.zones) {
+          const poly = zone.polygon;
+          if (!poly || poly.length < 3 || zone.zone_id === undefined) continue;
+          const value = fill.values.get(zone.zone_id);
+          if (value === undefined) continue;
+          const path = new Path2D();
+          path.moveTo(poly[0][0], poly[0][1]);
+          for (let i = 1; i < poly.length; i++) path.lineTo(poly[i][0], poly[i][1]);
+          path.closePath();
+          bands.push({ path, color: rampColor(ramp, value) });
+        }
+        vec.zoneFillBands = bands.length ? bands : null;
+      };
+
+      /**
        * 指定種別のヒートマップを取得する。
        * 値は都市全体の区画分がまとめて返るため、ビューポートに関係なく種別ごとに
        * 1回だけ取得すればよい(ベクターデータのようなbbox再取得は不要)。
@@ -1632,7 +1731,8 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         // ヒートマップは区画ポリゴンを塗り分けるため、区画レイヤーがOFFでも区画が要る
         if (L.parcels || heatmapRef.current !== "none") kinds.push("parcels");
         if (L.buildings) kinds.push("buildings");
-        if (L.zoneBorders) kinds.push("zones");
+        // 地区の値塗りは地区ポリゴンを塗り分けるため、枠線レイヤーがOFFでも地区が要る
+        if (L.zoneBorders || zoneFillRef.current) kinds.push("zones");
         return kinds;
       };
 
@@ -1713,6 +1813,8 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
                   vec.zones.filter((zn) => !!zn.auto_managed),
                   false
                 );
+                // 値塗りは地区ポリゴンそのものなので、地区の入れ替えに追従させる
+                rebuildZoneFill();
                 return;
               }
               const url = buildApiUrl(
@@ -1968,6 +2070,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         ensureVectors,
         ensureHeatmap,
         rebuildPathClassification,
+        rebuildZoneFill,
       };
 
       return () => {

@@ -1,5 +1,5 @@
 [
-  { "id": "nature", "types": [1, 2, 3] },
+  { "id": "nature", "types": [1, 2, 3, 4] },
   { "id": "facilities", "types": [101, 102, 103, 104, 111, 112] },
   { "id": "signs", "types": [121, 122, 123, 124, 125, 126] },
   { "id": "construction", "types": [201, 202, 203, 204] },

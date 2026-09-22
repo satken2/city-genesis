@@ -128,6 +128,8 @@
 
 ## 地形プロップ (PropManager / PropGeometry / PropRenderModel / ForestRenderer)
 
+- `PropRenderPolicy`は種類ごとの描画方針。草（4）は実距離100mでHidden、90m未満でCloseへ復帰し、投影サイズで遠景モデルへ切り替えない。影を送信しない。`RefreshDetail`が水平125m以内の小区画だけ散布候補を生成し、離れると解放する。通常候補`basePoints`と結合した`points`を既存の除外・地形追従・選択・描画に使う。近景散布には別枠65,536候補を固定配分する。草だけの遠方小区画も範囲定義は保持し、セル切替を待たずカメラ移動で復元する。GPU森林・全景森林被覆には草を含めない。
+
 - 種類1/2の範囲配置は既定でForestRendererを使う。GPUが固定格子・seedによる散布、穴付き領域・障害物の判定、Terrain.heightmapTextureからの接地を行う。CPU個体配列・行列は保持しない。通常モデルは約100m以内、90〜110mで木ごとに切替距離を分散し、以遠はFar樹冠、1500mで非表示。カメラ移動では再散布しない。
 - Forest.shaderはURP LitのUniversalFragmentPBRを使う。本編PC_RendererはForward+なので_CLUSTER_LIGHT_LOOPのバリアントが必須。これを省くと主光源の減衰係数を通常Forward用のunity_LightData.zから読み、太陽光による陰影が消え得る。材質の基色・画像・Smoothness・Metallicを引き継ぐ。Tests/PropsはForward+で、同じシーンからクラスタ対応だけを抜いた検証用シェーダーとの輝度差も検査する。
 - ForestPlacement.computeのハッシュとポリゴン判定はPropGeometryと同じ規則。GPU候補は2,000,000個まで（32バイト/個）で、小区画×散布へ配分する。超過時のみ格子を均等抽出する。個別配置・他の種別・GPU非対応時はCPU候補経路を使う。近景もGPU配置なのでモデル切替で座標がずれない。

@@ -308,7 +308,7 @@ Models/Paths/p1/body                   道路ボディ
 - **命名**: `{パーツ名}_close`。無印と**同じ閾値フォルダ**に置く（例: `Models/Buildings/a2000/0/mid-w1_close`）。
 - **解決順**: Close のときは同じ閾値フォルダの `{パーツ名}_close` を先に試し、無ければ無印 `{パーツ名}` を使う（`BuildingMeshUtils.GetModelForDrawLod`）。閾値フォルダの選択（§4.2）とパーツの存在判定は無印の名前で行うため、`_close` だけを置いても無印が無ければ使われない。
 - **対象**: `BuildingMeshUtils.GetPart` / `GetPartNoPosition` / common パーツ経由で解決されるすべてのパーツ（壁・角・ceil・floor・entrance・roofprop・prebuilt・マッシュアップのサブ建物・common）。
-- **規約**: `_close` は無印と bbox・原点・マテリアル構成が一致していること。生成側は配置計算を一切変えずにプレハブだけ差し替える。
+- **規約**: `_close` は無印と原点・配置寸法を一致させ、既存マテリアルを名前で共有する。壁（base/mid/top-w）と玄関は前方（Blender -Y）への追加張り出しを最大1.5m許可するが、幅X・高さZ・背面+Yは維持する。壁の奥行きは配置・伸縮に使われず、玄関は原点へ実寸配置されるため、庇・看板・バルコニーを付けても配置は変わらない。角・既成・タイル・塔屋などは全bboxを一致させる。生成側は配置計算を変えずプレハブを差し替える。
 - **仕組み**: `BuildingMeshBuilder.Generate(data, isDynamic, drawLod)` が生成の前後で静的コンテキスト `BuildingMeshUtils.CurrentDrawLod` を設定・復元し、十数箇所あるパーツ取得がこれを参照する（生成は同期的にメインスレッドで行われる）。`isDynamic`（地形追従の互換引数）と `drawLod`（見え方由来）は独立した引数である。`drawLod` が Far の建物は組み立てを走らせず、`GenerateFarBuilding` がフットプリントを階数×階高で押し出した箱を返す（工事中・解体中は1階分、倒壊は0.5階分の高さ、`MODEL_MODULAR_GROUND` は0.3mの板）。
 
 ---

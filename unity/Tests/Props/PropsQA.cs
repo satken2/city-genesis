@@ -89,7 +89,7 @@ public static partial class PropsQA
             Check(preview.enableInstancing && preview.GetFloat("_Surface") == 1f && preview.GetFloat("_ZWrite") == 0f && preview.renderQueue == 3000, "transparent instanced preview state");
             Check(File.ReadAllText(root + "/ProjectSettings/GraphicsSettings.asset").Contains("m_InstancingStripping: 2"), "player instancing variants retained");
             UnityEngine.Object.DestroyImmediate(preview); UnityEngine.Object.DestroyImmediate(previewSource);
-            foreach(string id in new[]{"1","2","1_far","2_far","101","102","103","104"})
+            foreach(string id in new[]{"1","2","4","1_far","2_far","101","102","103","104"})
             {
                 var model=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Models/Props/"+id+".fbx");
                 Check(model!=null,"missing FBX");
@@ -136,6 +136,7 @@ public static partial class PropsQA
             cache["Models/Props/991"]=dense;
             CheckGeometry();
             CheckManualPlacement();
+            CheckGrass();
             foreach(int count in new[]{1000,10000,50000})
             {
                 var watch=Stopwatch.StartNew();Apply(Snapshot(count,false,count),true);watch.Stop();
@@ -221,6 +222,77 @@ public static partial class PropsQA
             EditorApplication.update += RenderTick;
         }
         catch(Exception ex){File.WriteAllText(output+"/result.txt",ex.ToString());Debug.LogException(ex);EditorApplication.Exit(1);}
+    }
+    static void RefreshGrass()
+    {
+        foreach (var chunk in Chunks.Values)
+            Drain((IEnumerator)managerType.GetMethod("RefreshDetail", flags).Invoke(manager, new object[]{chunk, camera}));
+    }
+    static void CheckGrass()
+    {
+        Vector3 originalCamera = camera.transform.position;
+        string grass = Snapshot(100000, false, 1).Replace("\"prop_type\":1", "\"prop_type\":4");
+        camera.transform.position = new Vector3(250, 2, 250);
+        Apply(grass, true);
+        Check(Points().Count == 0, "grass generated across resident cells before near streaming");
+        RefreshGrass(); Build(false);
+        var original = Points();
+        Check(original.Count > 0 && original.Count <= 65536, "grass resident budget");
+        Check(Chunks.Values.Cast<object>().Any(c => ((Array)Field(c,"points")).Length == 0), "distant grass chunk generated");
+        Check(Chunks.Values.Cast<object>().SelectMany(c=>((IList)Field(c,"batches")).Cast<object>()).All(b=>!(bool)Field(b,"shadows")), "grass cast shadows");
+        var retained = Chunks.Values.Cast<object>().Select(c=>Field(c,"points")).ToArray();
+        RefreshGrass();
+        Check(retained.SequenceEqual(Chunks.Values.Cast<object>().Select(c=>Field(c,"points"))), "stationary grass regenerated");
+        camera.transform.position = new Vector3(1200, 2, 250);
+        RefreshGrass(); Build(false);
+        Check(Points().Count == 0, "distant grass retained");
+        camera.transform.position = new Vector3(250, 2, 250);
+        RefreshGrass(); Build(false);
+        Check(original.Keys.ToHashSet().SetEquals(Points().Keys), "grass moved after reentry");
+        Apply(grass.Replace("\"obstacles\":[]", "\"obstacles\":[{\"key\":\"path:9\",\"signature\":\"road\",\"polygon\":[[220,0],[240,0],[240,500],[220,500]]}]"));
+        RefreshGrass(); Build(false);
+        Check(Points().Keys.ToHashSet().SetEquals(original.Keys), "road moved grass candidates");
+        Check(Points().Any(p=>!p.Value), "road failed to exclude grass");
+        Apply(grass); RefreshGrass(); Build(false);
+        Check(Points().All(p=>p.Value), "grass failed to return after road removal");
+        var model = managerType.GetMethod("Model", flags).Invoke(manager, new object[]{4});
+        var parts = ((IList)Field(model,"normal")).Cast<object>().ToArray();
+        Check(parts.Sum(p=>((Mesh)Field(p,"mesh")).GetTriangles((int)Field(p,"submesh")).Length / 3) == 108, "grass backfaces lost during FBX import");
+        Check(((Bounds)Field(model,"bounds")).max.y < .5f, "grass model scale");
+        camera.transform.position = new Vector3(250,1.6f,246);
+        camera.transform.LookAt(new Vector3(250,.3f,255));
+        Build(false);
+        var rt = new RenderTexture(1000,650,24); camera.targetTexture = rt;
+        managerType.GetMethod("LateUpdate",flags).Invoke(manager,null); camera.Render();
+        RenderTexture.active = rt;
+        var image = new Texture2D(1000,650,TextureFormat.RGB24,false);
+        image.ReadPixels(new Rect(0,0,1000,650),0,0); image.Apply();
+        File.WriteAllBytes(output+"/grass-near.png",image.EncodeToPNG());
+        RenderTexture.active = null; camera.targetTexture = null;
+        UnityEngine.Object.DestroyImmediate(image); UnityEngine.Object.DestroyImmediate(rt);
+        camera.transform.position = new Vector3(250,2,250);
+        Apply(Snapshot(1000000,false,2).Replace("\"prop_type\":1", "\"prop_type\":4"), true);
+        RefreshGrass();
+        Check(Points().Count <= 65536, "dense grass exceeded resident budget");
+        string mixed = grass.Replace("\"instances\":[]", "\"instances\":[{\"prop_instance_id\":99,\"prop_type\":1,\"x\":499,\"y\":0,\"z\":499,\"scale\":1}]");
+        Apply(mixed,true); RefreshGrass();
+        camera.transform.position = new Vector3(1200,2,250); RefreshGrass();
+        Check(Points().Count == 1 && Points().ContainsKey(new Vector2(499,499)), "grass unloading removed another prop");
+        Apply("{\"instances\":[{\"prop_instance_id\":4,\"prop_type\":4,\"x\":250,\"y\":0,\"z\":250,\"scale\":1}],\"scatters\":[],\"obstacles\":[]}", true);
+        Func<int> batches = () => Chunks.Values.Cast<object>().Sum(c=>((IList)Field(c,"batches")).Count);
+        camera.transform.position = new Vector3(250, 2, 155); Build(false);
+        Check(batches() > 0, "near grass missing");
+        camera.transform.position = new Vector3(250, 2, 140); Build(false);
+        Check(batches() == 0, "grass drawn beyond 100m");
+        camera.transform.position = new Vector3(250, 2, 155); Build(false);
+        Check(batches() == 0, "grass hysteresis missing");
+        camera.transform.position = new Vector3(250, 2, 165); Build(false);
+        Check(batches() > 0, "grass failed to reappear within 90m");
+        camera.orthographic = true; camera.orthographicSize = 500; Build(false);
+        Check(batches() > 0, "orthographic grass incorrectly culled by projected size");
+        camera.orthographic = false;
+        camera.transform.position = originalCamera;
+        results.Add("grass: near streaming/reentry, resident budget, road exclusion, 100m/90m hysteresis, orthographic projection and no shadows passed");
     }
     static void CheckGeometry()
     {
