@@ -1,0 +1,29 @@
+{
+  "wellbeing": {
+    "satisfactionTitle": "Satisfaction",
+    "leisureTitle": "Loisirs",
+    "comfortTitle": "Cadre de vie",
+    "workTitle": "Temps de travail",
+    "satis_wealth": "Aisance matérielle",
+    "satis_leisure": "Loisirs",
+    "satis_health": "Santé",
+    "satis_comfort": "Confort de vie",
+    "satisfaction": "Satisfaction des ménages",
+    "leisure_hours": "Temps libre",
+    "work_hours": "Durée du travail",
+    "satis_residential": "Logement adéquat",
+    "quiet": "Calme",
+    "sunlight": "Ensoleillement",
+    "safety": "Sécurité",
+    "hours": "h/jour",
+    "points": "points",
+    "history": "Évolution",
+    "composition": "Composition de la satisfaction",
+    "compositionDescription": "Chaque axe contribue à hauteur de 25 %. Les parts représentent sa contribution à la satisfaction.",
+    "empty": "Aucun ménage évalué.",
+    "satisfactionDescription": "Quatre axes et leur moyenne pour les ménages résidents évalués, hors pénalités municipales liées aux accidents.",
+    "leisureDescription": "Temps libre et travail sur l’axe droit ; loisirs et satisfaction sur l’axe gauche. Moins de temps réduit les dépenses de loisirs.",
+    "comfortDescription": "Espace, calme, soleil et sécurité déterminent le confort. Le logement est affiché jusqu’à 100 %.",
+    "workDescription": "Le travail fourni est proportionnel à une base de 8 heures. Travailler plus réduit les loisirs ; dépasser durablement 8 heures nuit à la santé. Applicable à la prochaine simulation."
+  }
+}

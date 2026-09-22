@@ -1,0 +1,29 @@
+{
+  "wellbeing": {
+    "satisfactionTitle": "만족도",
+    "leisureTitle": "여가",
+    "comfortTitle": "주거 환경",
+    "workTitle": "근로 시간",
+    "satis_wealth": "경제적 풍요",
+    "satis_leisure": "오락·여가",
+    "satis_health": "건강",
+    "satis_comfort": "생활 쾌적도",
+    "satisfaction": "가구 만족도",
+    "leisure_hours": "자유 시간",
+    "work_hours": "소정 근로 시간",
+    "satis_residential": "주거 충족도",
+    "quiet": "정숙함",
+    "sunlight": "일조",
+    "safety": "안전",
+    "hours": "시간/일",
+    "points": "점",
+    "history": "추이",
+    "composition": "만족도 구성",
+    "compositionDescription": "각 축의 평균에 25% 가중치를 적용한 기여 점수입니다. 원의 비율은 만족도 기여를 나타냅니다.",
+    "empty": "평가된 가구 데이터가 없습니다.",
+    "satisfactionDescription": "평가된 주민 가구의 네 축과 그 평균 만족도입니다. 사고 사망에 따른 시정 점수 감점은 제외합니다.",
+    "leisureDescription": "자유 시간과 근로 시간은 오른쪽 축, 여가와 만족도는 왼쪽 축입니다. 시간이 줄면 여가 지출도 줄어듭니다.",
+    "comfortDescription": "주거 면적·정숙함·일조·안전으로 쾌적도를 평가합니다. 주거 충족도는 최대 100%로 표시합니다.",
+    "workDescription": "8시간을 기준으로 노동량이 비례합니다. 장시간 근로는 여가를 줄이고 8시간 초과 근로가 지속되면 건강에 부담을 줍니다. 다음 시뮬레이션부터 적용됩니다."
+  }
+}

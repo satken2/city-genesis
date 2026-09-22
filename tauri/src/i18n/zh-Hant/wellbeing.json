@@ -1,0 +1,29 @@
+{
+  "wellbeing": {
+    "satisfactionTitle": "滿意度",
+    "leisureTitle": "休閒",
+    "comfortTitle": "居住環境",
+    "workTitle": "工作時間",
+    "satis_wealth": "物質富裕度",
+    "satis_leisure": "娛樂與休閒",
+    "satis_health": "健康",
+    "satis_comfort": "生活舒適度",
+    "satisfaction": "家庭滿意度",
+    "leisure_hours": "可支配時間",
+    "work_hours": "規定工作時間",
+    "satis_residential": "住房充足度",
+    "quiet": "安靜程度",
+    "sunlight": "日照",
+    "safety": "安全",
+    "hours": "小時/日",
+    "points": "分",
+    "history": "趨勢",
+    "composition": "滿意度構成",
+    "compositionDescription": "各面向平均值乘以25%權重後得到貢獻分。扇區比例表示對滿意度的貢獻。",
+    "empty": "暫無已評估的家庭資料。",
+    "satisfactionDescription": "顯示已評估居民家庭的四個面向及其平均滿意度，不包含事故死亡造成的施政評分扣分。",
+    "leisureDescription": "可支配時間和工作時間使用右軸，休閒和滿意度使用左軸。時間減少會降低休閒支出。",
+    "comfortDescription": "住房面積、安靜程度、日照和安全共同決定舒適度。住房充足度最多顯示100%。",
+    "workDescription": "勞動量以8小時為基準成比例變化。長時間工作會減少休閒，持續超過8小時會損害健康。下次模擬起生效。"
+  }
+}

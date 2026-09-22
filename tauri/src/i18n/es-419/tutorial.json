@@ -218,6 +218,50 @@
       "tip15": {
         "title": "Nada de crecer a lo loco",
         "description": "Si no hay suficientes parcelas para la demanda, aparecerán calles y parcelas de forma desordenada. Urbaniza con un plan y evita la formación de barrios marginales."
+      },
+      "tip16": {
+        "title": "Concentración industrial",
+        "description": "La productividad aumenta cuando hay industrias similares o productores de materias primas cerca. Crea zonas industriales y distritos tecnológicos para reunir a las empresas."
+      },
+      "tip17": {
+        "title": "¿Puedes trabajar las 24 horas?",
+        "description": "Más horas de trabajo aumentan la productividad. El gasto en entretenimiento y la salud bajan."
+      },
+      "tip18": {
+        "title": "El infierno de ir al trabajo",
+        "description": "Cuanto más largo sea el viaje al trabajo, menos se gasta en entretenimiento."
+      },
+      "tip19": {
+        "title": "Visión de futuro",
+        "description": "No puedes operar trenes más largos que los andenes. Construye tu ferrocarril con espacio para crecer."
+      },
+      "tip20": {
+        "title": "Entierra el problema",
+        "description": "Las calles subterráneas no generan ruido ni contaminación del aire. Hay problemas que sí se resuelven enterrándolos."
+      },
+      "tip21": {
+        "title": "A la sombra del progreso",
+        "description": "Los edificios altos proyectan sombras sobre sus vecinos y empeoran el entorno residencial. El futuro de tu ciudad puede ser brillante, aunque a sus pies reine la oscuridad."
+      },
+      "tip22": {
+        "title": "Mejor un pase que un auto",
+        "description": "Con un transporte público conveniente, hasta quienes tienen dinero dejan el auto y pueden gastar en otras cosas."
+      },
+      "tip23": {
+        "title": "Transportando aire",
+        "description": "Los autobuses vacíos también ocupan las calles. No provoques un embotellamiento con los refuerzos que mandaste para aliviarlo."
+      },
+      "tip24": {
+        "title": "Los topos no pagan renta",
+        "description": "Los túneles a partir de cierta profundidad no requieren comprar terrenos. Si negociar se complica, cava más hondo."
+      },
+      "tip25": {
+        "title": "Al trabajo por los aires",
+        "description": "Los teleféricos permiten viajar incluso por terrenos escarpados. Si llevar transporte público resulta difícil, deja a tus ciudadanos colgados."
+      },
+      "tip26": {
+        "title": "Un embotellamiento eléctrico",
+        "description": "De nada sirve generar electricidad de sobra si las líneas no tienen capacidad para llevarla. Antes de construir otra central, revisa si hay un cuello de botella en el camino."
       }
     }
   },

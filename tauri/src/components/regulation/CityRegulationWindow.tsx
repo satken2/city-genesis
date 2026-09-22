@@ -2,7 +2,7 @@
  * 規制ウィンドウコンポーネント
  *
  * 都市全体の規制・ポリシー設定を管理するウィンドウ。
- * 「制限速度」「建築規制」「補修設定」「移民規制」「社会保障」の5タブ構成で、
+ * 「所定労働時間」「制限速度」「建築規制」「補修設定」「移民規制」「社会保障」の6タブ構成で、
  * このコンポーネントはデータの取得・編集中値の保持・保存とタブ切替だけを担い、
  * 各タブの描画は `tabs/` 配下のコンポーネントに委ねる。
  *
@@ -11,7 +11,7 @@
  *
  * 保存先は2系統:
  * - PATCH /api/v1/city … 制限速度 (max_speed)・補修閾値 (repair_threshold*)
- * - PATCH /api/v1/city/regulations … 建築規制・移民規制・社会保障政策
+ * - PATCH /api/v1/city/regulations … 労働時間・建築規制・移民規制・社会保障政策
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -33,10 +33,12 @@ import { BUILDING_REG_KEYS, BuildingRegulationTab } from "./tabs/BuildingRegulat
 import { RepairTab, type RepairTarget } from "./tabs/RepairTab";
 import { IMMIGRATION_SCALAR_KEYS, ImmigrationTab } from "./tabs/ImmigrationTab";
 import { WELFARE_KEYS, WelfareTab, type WelfareKey } from "./tabs/WelfareTab";
+import { WorkHoursTab } from "./tabs/WorkHoursTab";
 import "./CityRegulationWindow.css";
 
 /** タブの並び。ラベルは各セクションの見出しをそのまま使う */
 const TABS = [
+  { id: "labor", labelKey: "wellbeing.workTitle" },
   { id: "speed", labelKey: "regulation.speedLimitTitle" },
   { id: "building", labelKey: "regulation.buildingRegulationTitle" },
   { id: "repair", labelKey: "regulation.repairTitle" },
@@ -90,6 +92,8 @@ export function CityRegulationWindow({
   /** 社会保障政策の確定値・編集中値（API 単位。給付率は 0〜1 の比率） */
   const [cityWelfare, setCityWelfare] = useState<WelfareRegulations | null>(null);
   const [pendingWelfare, setPendingWelfare] = useState<Partial<WelfareRegulations>>({});
+
+  const [pendingWorkHours, setPendingWorkHours] = useState<number | null>(null);
 
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -274,8 +278,10 @@ export function CityRegulationWindow({
       cityWelfare != null &&
       WELFARE_KEYS.some((key) => (pendingWelfare[key] ?? cityWelfare[key]) !== cityWelfare[key]);
 
-    return { speed, building, repair, immigration, welfare };
+    const labor = pendingWorkHours != null && pendingWorkHours !== cityRegulations?.work_hours;
+    return { labor, speed, building, repair, immigration, welfare };
   }, [
+    pendingWorkHours,
     pendingSpeeds,
     cityMaxSpeed,
     pathVariants,
@@ -319,6 +325,7 @@ export function CityRegulationWindow({
       // 移民規制は bool/dict 型のフィールドを含むため、Partial<RegulationsData> ではなく
       // Record<string, unknown> で保持して JSON 送信する。
       const regulationPayload: Record<string, unknown> = {};
+      if (pendingWorkHours != null) regulationPayload.work_hours = pendingWorkHours;
       if (cityRegulations) {
         for (const key of BUILDING_REG_KEYS) {
           regulationPayload[key] = pendingRegulations[key] ?? cityRegulations[key];
@@ -337,25 +344,18 @@ export function CityRegulationWindow({
         }
       }
 
-      const [speedRes, regulationRes] = await Promise.all([
-        fetch(buildApiUrl(apiBaseUrl, "/api/v1/city"), {
+      await Promise.all([
+        fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/city"), {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(cityPatchPayload),
         }),
-        fetch(buildApiUrl(apiBaseUrl, "/api/v1/city/regulations"), {
+        fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/city/regulations"), {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(regulationPayload),
         }),
       ]);
-
-      if (!speedRes.ok) {
-        throw new Error(`Speed update failed: HTTP ${speedRes.status}`);
-      }
-      if (!regulationRes.ok) {
-        throw new Error(`Regulation update failed: HTTP ${regulationRes.status}`);
-      }
 
       onClose();
     } catch (err) {
@@ -365,6 +365,7 @@ export function CityRegulationWindow({
     }
   }, [
     apiBaseUrl,
+    pendingWorkHours,
     pathVariants,
     pendingSpeeds,
     pendingRepair,
@@ -411,6 +412,7 @@ export function CityRegulationWindow({
       </nav>
 
       <div className="regulation-window__content">
+        {activeTab === "labor" && <WorkHoursTab value={pendingWorkHours ?? cityRegulations.work_hours} onChange={setPendingWorkHours} />}
         {activeTab === "speed" && (
           <SpeedLimitTab
             pathVariants={pathVariants}

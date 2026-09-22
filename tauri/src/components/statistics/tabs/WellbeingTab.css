@@ -1,0 +1,212 @@
+/**
+ * 満足度・余暇・住環境タブのスタイル
+ *
+ * 上部に説明文、中段に現在値のKPIカード列、下段に推移グラフのカード(満足度表示のみ
+ * 右に構成ドーナツのカード)を置き、全体をウィンドウの高さに収める(タブ内でスクロールさせない)。
+ * カードの面・罫線・見出しは雇用タブ等の既存タブと同じダークテーマに合わせる。
+ * アクセント色は表示ごとに変わるため、コンポーネント側が --wellbeing-accent で渡す。
+ */
+
+.wellbeing-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  min-height: 0;
+  color: #e2e8f0;
+}
+
+.wellbeing-tab__description {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #8ba3bb;
+}
+
+/* ========== 中段: KPIカード列 ========== */
+
+.wellbeing-kpi-row {
+  display: flex;
+  gap: 8px;
+}
+
+.wellbeing-kpi-card {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+/* 世帯満足度(総合)のカードだけ枠を強調して、構成要素と区別する */
+.wellbeing-kpi-card--total {
+  border-color: rgba(78, 161, 255, 0.35);
+  background: rgba(78, 161, 255, 0.08);
+}
+
+.wellbeing-kpi-card__label {
+  font-size: 10px;
+  font-weight: 500;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wellbeing-kpi-card__value {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.wellbeing-kpi-card__unit {
+  margin-left: 3px;
+  font-size: 10px;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+/* ========== 下段: グラフカード ========== */
+
+.wellbeing-tab__body {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+.wellbeing-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  padding: 10px 12px;
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.wellbeing-card--chart {
+  flex: 1;
+}
+
+.wellbeing-card--breakdown {
+  flex: 0 0 280px;
+}
+
+.wellbeing-card__title {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #cbd5e1;
+  border-left: 3px solid var(--wellbeing-accent, #38bdf8);
+  padding-left: 8px;
+}
+
+.wellbeing-card__note {
+  margin: 0 0 8px;
+  font-size: 10px;
+  line-height: 1.5;
+  color: #8ba3bb;
+}
+
+/*
+ * グラフ面は flex: 1 で親の残り高さを埋める。段の高さが内容依存になると高さ0に潰れて
+ * ResponsiveContainer が何も描かなくなるため、親側は必ず min-height: 0 の flex 子にする。
+ */
+.wellbeing-chart {
+  flex: 1;
+  min-height: 0;
+}
+
+/* ========== 満足度の構成(ドーナツ + 内訳) ========== */
+
+.wellbeing-breakdown__chart {
+  flex: 1;
+  min-height: 120px;
+  position: relative;
+}
+
+/* ドーナツの中央に総合値を重ねる。ホバーはドーナツ側に通す */
+.wellbeing-breakdown__center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.wellbeing-breakdown__center-value {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.wellbeing-breakdown__center-label {
+  font-size: 9px;
+  color: #8ba3bb;
+}
+
+.wellbeing-breakdown__legend {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.wellbeing-breakdown__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.wellbeing-breakdown__item i {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.wellbeing-breakdown__item-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wellbeing-breakdown__item-value {
+  margin-left: auto;
+  color: #e2e8f0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ========== ローディング・エラー・データなし ========== */
+
+.wellbeing-tab__loading,
+.wellbeing-tab__error,
+.wellbeing-tab__empty {
+  display: grid;
+  place-items: center;
+  height: 200px;
+  color: #9db0c5;
+  font-size: 12px;
+}
+
+.wellbeing-tab__error {
+  color: #ff7171;
+}

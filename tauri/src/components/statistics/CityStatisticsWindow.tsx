@@ -11,6 +11,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { buildApiUrl, fetchApi } from "../../utils/api";
+import { WellbeingTab } from "./tabs/WellbeingTab";
 import { PopulationTab } from "./tabs/PopulationTab";
 import { IncomeTab } from "./tabs/IncomeTab";
 import { EconomyTab } from "./tabs/EconomyTab";
@@ -37,6 +38,9 @@ type TabDef = {
 };
 
 const TABS: TabDef[] = [
+  { id: "satisfaction", icon: "health", labelKey: "wellbeing.satisfactionTitle" },
+  { id: "leisure", icon: "commute", labelKey: "wellbeing.leisureTitle" },
+  { id: "comfort", icon: "realestate", labelKey: "wellbeing.comfortTitle" },
   { id: "population", icon: "population", labelKey: "statistics.tabPopulation" },
   { id: "income", icon: "income", labelKey: "statistics.tabIncome" },
   { id: "economy", icon: "economy", labelKey: "statistics.tabEconomy" },
@@ -314,6 +318,7 @@ export function CityStatisticsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       </nav>
 
       <div className="stats-window__content">
+        {["satisfaction", "leisure", "comfort"].includes(activeTab) && <WellbeingTab apiBaseUrl={apiBaseUrl} view={activeTab as "satisfaction" | "leisure" | "comfort"} />}
         {activeTab === "population" && <PopulationTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "income" && <IncomeTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "economy" && <EconomyTab apiBaseUrl={apiBaseUrl} />}

@@ -218,6 +218,50 @@
       "tip15": {
         "title": "Don't Let It Sprawl",
         "description": "When there are not enough parcels for the demand, roads and parcels appear on their own in a disorderly way. Develop the city deliberately to keep slums from forming."
+      },
+      "tip16": {
+        "title": "Industrial Clusters",
+        "description": "Productivity rises when similar industries or raw material producers are nearby. Create industrial zones and tech districts to bring businesses together."
+      },
+      "tip17": {
+        "title": "Can You Work Around the Clock?",
+        "description": "Longer working hours raise productivity. Entertainment spending and health take the hit."
+      },
+      "tip18": {
+        "title": "Commuter Hell",
+        "description": "Longer commutes mean less spending on entertainment."
+      },
+      "tip19": {
+        "title": "Think Ahead",
+        "description": "You cannot run trains longer than station platforms. Build your railway with room to grow."
+      },
+      "tip20": {
+        "title": "Bury the Problem",
+        "description": "Underground roads produce neither noise nor air pollution. Some problems really can be solved by burying them."
+      },
+      "tip21": {
+        "title": "In the Shadow of Progress",
+        "description": "Tall buildings cast shadows on their neighbors, making the area less pleasant to live in. Your city may have a bright future, but its streets could be in the dark."
+      },
+      "tip22": {
+        "title": "Trade the Keys for a Transit Pass",
+        "description": "With convenient public transit, even wealthy residents can give up their cars and spend their money on other things."
+      },
+      "tip23": {
+        "title": "Now Transporting: Air",
+        "description": "Even empty buses take up road space. Do not turn your congestion relief plan into a traffic jam."
+      },
+      "tip24": {
+        "title": "Moles Pay No Rent",
+        "description": "Tunnels below a certain depth need no land acquisition. If negotiations get tough, dig deeper."
+      },
+      "tip25": {
+        "title": "The High Road to Work",
+        "description": "Cable cars provide transport even on steep terrain. If public transit is hard to build, leave your citizens hanging."
+      },
+      "tip26": {
+        "title": "An Electrical Traffic Jam",
+        "description": "Spare generating capacity is no help if the power lines cannot carry it. Before building another power plant, check for bottlenecks along the way."
       }
     }
   },

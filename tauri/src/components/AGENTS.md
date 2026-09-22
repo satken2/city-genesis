@@ -231,3 +231,7 @@ TerrainPropEditor（TerrainEditorCanvasのプロップタブ）の範囲配置�
 - 移民政策の全体スイッチ `immigration_enabled` は `ImmigrationTab.IMMIGRATION_SCALAR_KEYS` に含める（変更検知・保存双方の正）。健康統計は衛生状態 `sanitation_distribution` と死因 `sanitation` を表示する。
 
 Tipsは初期描画完了まで閉じられず、開始操作後に空の都市の新規作成だけ初期パラメータ設定を表示する。Now Loading...は回転アイコンと文字の光の移動で待機を示す。
+
+Tipsの抽選対象は `tips/TipsWindow.tsx` の `TIPS_LIST`、本文は全7言語の `i18n/<言語>/tutorial.json` の `tips.items` で管理する。追加時は両方に同じIDを登録する。画像は任意で、未指定のTipsはテキストのみを表示する。
+
+統計の`WellbeingTab`は余暇・住環境・満足度の3表示を共有し、`useEpochCachedStats`で`/stats/wellbeing`を取得する。レイアウトは他の統計タブと同じカード構成(説明文 → 現在値のKPIカード列(表示指標+世帯満足度) → 推移グラフのカード。満足度表示だけ右に「満足度の構成」カード)で、ウィンドウの高さに収めタブ内でスクロールさせない(グラフ面は`flex: 1; min-height: 0`で残り高さを埋める)。満足度系は0〜1を100点換算、時間(可処分時間・所定労働時間)は時間/日のまま右軸、満足度は左軸。構成ドーナツは四軸の重み付き貢献点で中央に世帯満足度を重ねる。KPIカードの値色と折れ線の色は同じ表(`SERIES_COLORS`)で対応づけ、見出しの左罫線色は表示ごとに`--wellbeing-accent`で渡す。規制の`WorkHoursTab`は共通保存ボタンから`/city/regulations`のwork_hoursを更新する。文言は全言語のwellbeing.json。

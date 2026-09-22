@@ -22,6 +22,7 @@ export type CityData = {
  * 建築規制（容積率・高さ制限・建ぺい率）と移民規制を含む。
  */
 export type RegulationsData = {
+  work_hours: number;
   limit_volume_ratio: number;
   limit_height: number;
   limit_coverage_ratio: number;

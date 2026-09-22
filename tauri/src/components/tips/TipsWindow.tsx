@@ -17,7 +17,7 @@ import tip15 from "../../assets/images/tips/tip_15.jpg";
 
 type TipItem = {
   id: string;
-  image: string;
+  image?: string;
 };
 
 const TIPS_LIST: TipItem[] = [
@@ -36,6 +36,17 @@ const TIPS_LIST: TipItem[] = [
   { id: "tip13", image: tip3 },
   { id: "tip14", image: tip14 },
   { id: "tip15", image: tip15 },
+  { id: "tip16" },
+  { id: "tip17" },
+  { id: "tip18" },
+  { id: "tip19" },
+  { id: "tip20" },
+  { id: "tip21" },
+  { id: "tip22" },
+  { id: "tip23" },
+  { id: "tip24" },
+  { id: "tip25" },
+  { id: "tip26" },
 ];
 
 export function TipsWindow() {

@@ -218,6 +218,50 @@
       "tip15": {
         "title": "Pas de laisser-faire",
         "description": "Si les parcelles ne suffisent pas à la demande, routes et parcelles apparaissent de façon désordonnée. Aménagez la ville avec méthode pour éviter la formation de bidonvilles."
+      },
+      "tip16": {
+        "title": "Pôles industriels",
+        "description": "La productivité augmente lorsque des industries similaires ou des producteurs de matières premières sont proches. Créez des zones industrielles et des pôles technologiques pour regrouper les entreprises."
+      },
+      "tip17": {
+        "title": "Travailler 24 heures sur 24 ?",
+        "description": "Allonger le temps de travail augmente la productivité. Les dépenses de loisirs et la santé, elles, diminuent."
+      },
+      "tip18": {
+        "title": "Métro, boulot, dodo",
+        "description": "Plus les trajets domicile-travail sont longs, moins les habitants dépensent en loisirs."
+      },
+      "tip19": {
+        "title": "Voir loin",
+        "description": "Impossible de faire circuler des trains plus longs que les quais. Construisez votre réseau ferroviaire en prévoyant de la marge."
+      },
+      "tip20": {
+        "title": "Cachez ce problème",
+        "description": "Les routes souterraines ne produisent ni bruit ni pollution atmosphérique. Certains problèmes se règlent bel et bien en les enterrant."
+      },
+      "tip21": {
+        "title": "À l’ombre du progrès",
+        "description": "Les grands immeubles font de l’ombre à leurs voisins et dégradent le cadre de vie. L’avenir de votre ville peut être radieux, même si ses rues restent dans le noir."
+      },
+      "tip22": {
+        "title": "Un abonnement plutôt qu’une voiture",
+        "description": "Avec des transports en commun pratiques, même les habitants aisés renoncent à la voiture et peuvent dépenser leur argent ailleurs."
+      },
+      "tip23": {
+        "title": "Transport de courants d’air",
+        "description": "Même vides, les bus occupent la chaussée. Évitez de créer des bouchons avec les renforts censés les résorber."
+      },
+      "tip24": {
+        "title": "Les taupes ne paient pas de loyer",
+        "description": "Au-delà d’une certaine profondeur, les tunnels ne nécessitent aucun achat de terrain. Si les négociations s’enlisent, creusez plus profond."
+      },
+      "tip25": {
+        "title": "Aller au travail par les airs",
+        "description": "Les téléphériques permettent de se déplacer même sur les terrains escarpés. Si les transports en commun passent mal, suspendez vos citoyens."
+      },
+      "tip26": {
+        "title": "Embouteillage électrique",
+        "description": "Produire plus d’électricité ne sert à rien si les lignes ne peuvent pas l’acheminer. Avant de construire une autre centrale, vérifiez que le courant ne reste pas coincé en chemin."
       }
     }
   },

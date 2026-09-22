@@ -1,0 +1,29 @@
+{
+  "wellbeing": {
+    "satisfactionTitle": "满意度",
+    "leisureTitle": "休闲",
+    "comfortTitle": "居住环境",
+    "workTitle": "工作时间",
+    "satis_wealth": "物质富裕度",
+    "satis_leisure": "娱乐与休闲",
+    "satis_health": "健康",
+    "satis_comfort": "生活舒适度",
+    "satisfaction": "家庭满意度",
+    "leisure_hours": "可支配时间",
+    "work_hours": "规定工作时间",
+    "satis_residential": "住房充足度",
+    "quiet": "安静程度",
+    "sunlight": "日照",
+    "safety": "安全",
+    "hours": "小时/日",
+    "points": "分",
+    "history": "趋势",
+    "composition": "满意度构成",
+    "compositionDescription": "各维度平均值乘以25%权重后得到贡献分。扇区比例表示对满意度的贡献。",
+    "empty": "暂无已评估的家庭数据。",
+    "satisfactionDescription": "展示已评估居民家庭的四个维度及其平均满意度，不包含事故死亡造成的施政评分扣分。",
+    "leisureDescription": "可支配时间和工作时间使用右轴，休闲和满意度使用左轴。时间减少会降低休闲支出。",
+    "comfortDescription": "住房面积、安静程度、日照和安全共同决定舒适度。住房充足度最多显示100%。",
+    "workDescription": "劳动量以8小时为基准成比例变化。长时间工作会减少休闲，持续超过8小时会损害健康。下次模拟起生效。"
+  }
+}

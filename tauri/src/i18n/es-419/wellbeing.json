@@ -1,0 +1,29 @@
+{
+  "wellbeing": {
+    "satisfactionTitle": "Satisfacción",
+    "leisureTitle": "Ocio",
+    "comfortTitle": "Entorno residencial",
+    "workTitle": "Jornada laboral",
+    "satis_wealth": "Bienestar material",
+    "satis_leisure": "Ocio",
+    "satis_health": "Salud",
+    "satis_comfort": "Comodidad",
+    "satisfaction": "Satisfacción de los hogares",
+    "leisure_hours": "Tiempo libre",
+    "work_hours": "Jornada laboral",
+    "satis_residential": "Vivienda adecuada",
+    "quiet": "Tranquilidad",
+    "sunlight": "Luz solar",
+    "safety": "Seguridad",
+    "hours": "h/día",
+    "points": "puntos",
+    "history": "Evolución",
+    "composition": "Composición de la satisfacción",
+    "compositionDescription": "Cada eje aporta su promedio ponderado al 25 %. Las porciones muestran su aporte a la satisfacción.",
+    "empty": "Aún no hay hogares evaluados.",
+    "satisfactionDescription": "Cuatro ejes y su promedio para hogares residentes evaluados. No incluye penalizaciones municipales por accidentes.",
+    "leisureDescription": "Tiempo libre y trabajo en el eje derecho; ocio y satisfacción en el izquierdo. Menos tiempo reduce el gasto en ocio.",
+    "comfortDescription": "Espacio, tranquilidad, luz solar y seguridad determinan la comodidad. La vivienda se muestra hasta el 100 %.",
+    "workDescription": "El trabajo realizado es proporcional a una base de 8 horas. Las jornadas largas reducen el ocio; superar 8 horas de forma sostenida perjudica la salud. Rige desde la próxima simulación."
+  }
+}
