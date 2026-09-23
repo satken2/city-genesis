@@ -206,6 +206,7 @@ public partial class RoadRenderer : MonoBehaviour
             house_ends = houseEnds,
             passage_mode = passageMode,
             travel_direction = travelDirection,
+            follow_terrain = Constants.VALUE_NONE, // intの既定値0は「非追従」になるため未設定を明示する
             start_point = new List<object> { (object)startPos.x, (object)startRelY, (object)startPos.z },
             end_point = new List<object> { (object)endPos.x, (object)endRelY, (object)endPos.z }
         };
@@ -213,7 +214,7 @@ public partial class RoadRenderer : MonoBehaviour
         if (designed)
         {
             // 造成済みの設計点列を生成器が生地形へ再投影しないようにする。
-            tempPathData.follow_terrain = false;
+            tempPathData.follow_terrain = 0;
             tempPathData.station_grade_profile = new List<object>();
             foreach (var p in componentPoints)
                 tempPathData.station_grade_profile.Add(new List<object> { p.x, p.y, p.z });

@@ -1103,6 +1103,26 @@
         }
       }
     },
+    "/api/v1/buildings/placed-landmarks": {
+      "get": {
+        "tags": [
+          "buildings"
+        ],
+        "summary": "Get Placed Landmarks",
+        "description": "すでにこの都市に存在する観光名所のID一覧（昇順）を返す。\n\n観光名所は都市内１基の一点物なので、建設パネル（テンプレート作成モード）が\n選択済みの名所を選択肢から除くために使う。稼働中・建設中・計画中・倒壊の\nいずれも「存在する」として数える。手書きプレーンJSON（endpoints.yaml 不使用）。",
+        "operationId": "get_placed_landmarks_api_v1_buildings_placed_landmarks_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/buildings/{agent_id}/sub-buildings": {
       "get": {
         "tags": [
@@ -1489,7 +1509,7 @@
           "buildings"
         ],
         "summary": "Preview Direct",
-        "description": "直接配置モード（土地区画外への建設）の形状プレビューと設置可否を返す。\n\n必須フィールド: variant, position（[x, z] または Unity 由来の [x, y, z]）, floors\n任意フィールド: width, depth（resizable=false のバリアントでは default_width に強制される）,\n                angle（回転角、度数法）\n\n返却値: polygon（中心点原点の相対座標）, height, center_point, area,\n        valid（設置可否）, invalid_reason（不可の理由コード）,\n        requires_acquisition（民間区画の自動買収を承諾すれば確定できるか）,\n        acquisition（買収対象区画・件数・費用見積）,\n        interference（パス敷設と同形式のハイライトペイロード）,\n        width, depth, angle, resizable。\n設置可否の判定は create-direct と同一基準（既存区画・道路との重なり、建物種類と\n土地区画種類の物理的互換性）で行う。民間区画との重なりは\nrequires_acquisition=True として返り、確定時に acknowledge_acquisition=True を\n渡すことで自動用地買収つきで確定できる。",
+        "description": "直接配置モード（土地区画外への建設）の形状プレビューと設置可否を返す。\n\n必須フィールド: variant, position（[x, z] または Unity 由来の [x, y, z]）, floors\n任意フィールド: width, depth（resizable=false のバリアントでは default_width に強制される）,\n                angle（回転角、度数法）, landmark（観光名所ID。底面寸法・階数が名所行に固定される）,\n                exclude_agent_id（編集モードの編集対象。名所の一点物判定から自身を外す）\n\n返却値: polygon（中心点原点の相対座標）, height, center_point, area,\n        valid（設置可否）, invalid_reason（不可の理由コード）,\n        requires_acquisition（民間区画の自動買収を承諾すれば確定できるか）,\n        acquisition（買収対象区画・件数・費用見積）,\n        interference（パス敷設と同形式のハイライトペイロード）,\n        width, depth, angle, resizable。\n設置可否の判定は create-direct と同一基準（既存区画・道路との重なり、建物種類と\n土地区画種類の物理的互換性）で行う。民間区画との重なりは\nrequires_acquisition=True として返り、確定時に acknowledge_acquisition=True を\n渡すことで自動用地買収つきで確定できる。",
         "operationId": "preview_direct_api_v1_buildings_preview_direct_post",
         "requestBody": {
           "content": {
@@ -4748,6 +4768,49 @@
         }
       }
     },
+    "/api/v1/agents/{agent_id}/explode": {
+      "post": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "Explode Agent Endpoint",
+        "description": "民間の建物を事故に見せかけて爆破し、その場で廃墟（STATUS_COLLAPSED）にする。\n\nエポック実行を待たずにステータスを倒壊へ移す数少ない操作。表向きの倒壊理由は\n老朽倒壊（REASON_AGING）とし、都市の記録上も自然倒壊と区別しない。犠牲者と\n倒壊イベントの確定は次エポックの BuildingLifecyclePhase が自然倒壊と同じ経路で\n行う。対象は民間の稼働中建物に限る（ロジックは `crud_buildings.explode_building`）。\n\nレスポンスは PATCH /agents/{id} と同形式（更新後の建物を single_agent スキーマで返す）。",
+        "operationId": "explode_agent_endpoint_api_v1_agents__agent_id__explode_post",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Agent Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/citizens/": {
       "get": {
         "tags": [
@@ -5822,6 +5885,25 @@
         ],
         "summary": "structures マスターを取得",
         "operationId": "get_master_structures_api_v1_master_structures_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/master/landmarks": {
+      "get": {
+        "tags": [
+          "master"
+        ],
+        "summary": "landmarks マスターを取得",
+        "operationId": "get_master_landmarks_api_v1_master_landmarks_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -8292,6 +8374,118 @@
         }
       }
     },
+    "/api/v1/interchanges/": {
+      "get": {
+        "tags": [
+          "interchanges"
+        ],
+        "summary": "Get Interchanges",
+        "description": "全インターチェンジの一覧と、再描画判定用の version を取得する。",
+        "operationId": "get_interchanges_api_v1_interchanges__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/interchanges/{interchange_id}": {
+      "get": {
+        "tags": [
+          "interchanges"
+        ],
+        "summary": "Get Interchange",
+        "description": "単一インターチェンジのレコードを取得する。",
+        "operationId": "get_interchange_api_v1_interchanges__interchange_id__get",
+        "parameters": [
+          {
+            "name": "interchange_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Interchange Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "interchanges"
+        ],
+        "summary": "Patch Interchange",
+        "description": "名前を変更する。ペイロード: {\"name\": str}(空文字で未命名に戻す)。",
+        "operationId": "patch_interchange_api_v1_interchanges__interchange_id__patch",
+        "parameters": [
+          {
+            "name": "interchange_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Interchange Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "title": "Data"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/tags/": {
       "get": {
         "tags": [
@@ -8507,6 +8701,11 @@
             "type": "integer",
             "title": "Structure",
             "description": "建物の構造種別（structure_master のID。0=構造の区別なし）"
+          },
+          "landmark": {
+            "type": "integer",
+            "title": "Landmark",
+            "description": "観光名所の種別（landmark_master のID。0=観光名所ではない）"
           },
           "status": {
             "type": "integer",
@@ -9018,19 +9217,7 @@
               }
             ],
             "title": "Has Automobile",
-            "description": "世帯が自家用車を保有するか（0/1）。当エポックに自動車レンタルを調達できた世帯だけが保有になる"
-          },
-          "wants_automobile": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Wants Automobile",
-            "description": "世帯が自家用車の保有を希望しているか（0/1）。次エポックに自動車とガソリンの需要を計画する"
+            "description": "世帯が自家用車を保有するか（0/1）"
           },
           "utilization": {
             "anyOf": [
@@ -9273,6 +9460,26 @@
             ],
             "title": "Enrolled By Skill",
             "description": "スキル別の在籍者数（スキルID→人数）。教育施設のみ (サーバーサイドで計算されるフィールド。型は動的。)"
+          },
+          "parking_capacity": {
+            "type": "number",
+            "title": "Parking Capacity",
+            "description": "建物の駐車容量（台）。建物の作成・更新時に確定する永続値。建物以外は0"
+          },
+          "parking_use_day": {
+            "type": "number",
+            "title": "Parking Use Day",
+            "description": "当エポックの昼間駐車使用量（台）。通勤・通学・来客と、駐車施設が吸収した分"
+          },
+          "parking_use_night": {
+            "type": "number",
+            "title": "Parking Use Night",
+            "description": "当エポックの夜間駐車使用量（台）。居住世帯の保有車と、駐車施設が吸収した分"
+          },
+          "parking_overflow": {
+            "type": "number",
+            "title": "Parking Overflow",
+            "description": "駐車施設でも吸収しきれず路上へあふれた台数（昼夜の大きい方）。建物以外は0"
           }
         },
         "type": "object",
@@ -9283,6 +9490,7 @@
           "type",
           "variant",
           "structure",
+          "landmark",
           "status",
           "alert",
           "created_date",
@@ -9298,7 +9506,11 @@
           "remain_amount",
           "parcel_id",
           "zone_id",
-          "is_bd"
+          "is_bd",
+          "parking_capacity",
+          "parking_use_day",
+          "parking_use_night",
+          "parking_overflow"
         ],
         "title": "AgentData"
       },
@@ -9366,6 +9578,11 @@
             "type": "integer",
             "title": "Structure",
             "description": "建物の構造種別（structure_master のID。0=構造の区別なし）"
+          },
+          "landmark": {
+            "type": "integer",
+            "title": "Landmark",
+            "description": "観光名所の種別（landmark_master のID。0=観光名所ではない）"
           },
           "polygon": {
             "anyOf": [
@@ -9552,6 +9769,7 @@
           "type",
           "variant",
           "structure",
+          "landmark",
           "status",
           "public_facility",
           "infra_node_id",

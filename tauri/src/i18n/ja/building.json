@@ -7,7 +7,12 @@
     "floorsValue": "{{floors}}階（床面積{{area, number}}㎡）",
     "heightLabel": "高さ: {{value}}m",
     "baseAreaLabel": "建築面積: {{area, number}}㎡",
-    "underMaintenance": "修繕中"
+    "underMaintenance": "修繕中",
+    "parkingCapacity": "駐車容量",
+    "parkingCapacityValue": "{{capacity}}台",
+    "parkingDay": "昼間",
+    "parkingNight": "夜間",
+    "parkingUsage": "{{used}} / {{capacity}}台"
   },
   "mashup_edit": {
     "hint": "カードを敷地へドラッグで配置 / ドラッグで移動 / Shift+ドラッグで回転 / Deleteキーで削除",

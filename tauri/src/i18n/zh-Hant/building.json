@@ -7,7 +7,12 @@
     "floorsValue": "{{floors}}層（樓地板面積{{area, number}}㎡）",
     "heightLabel": "高度：{{value}}m",
     "baseAreaLabel": "建築面積：{{area, number}}㎡",
-    "underMaintenance": "修繕中"
+    "underMaintenance": "修繕中",
+    "parkingCapacity": "停車容量",
+    "parkingCapacityValue": "{{capacity}}輛",
+    "parkingDay": "白天",
+    "parkingNight": "夜間",
+    "parkingUsage": "{{used}} / {{capacity}}輛"
   },
   "mashup_edit": {
     "hint": "將卡片拖到用地上配置 / 拖曳移動 / Shift+拖曳旋轉 / Delete鍵刪除",

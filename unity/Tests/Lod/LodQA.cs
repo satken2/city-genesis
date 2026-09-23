@@ -466,7 +466,7 @@ public static class LodQA
         go = new GameObject("PendingPathQA"); go.SetActive(false);
         manager = go.AddComponent(Type("PathManager"));
         var path = Activator.CreateInstance(Type("GeneratedModels.PathSummary"));
-        Set(path,"path_id",72001); Set(path,"version",3); Set(path,"follow_terrain",true);
+        Set(path,"path_id",72001); Set(path,"version",3); Set(path,"follow_terrain",1);
         ((IDictionary)Field(manager,"pathVersionCache"))[72001] = 3;
         Check(!(bool)Call(manager,"HasPathRepresentation",path),"Received version hid a road with no generated object");
         var representation = new GameObject("Path_72001");
@@ -488,7 +488,7 @@ public static class LodQA
         listener.Start();
         int port = ((System.Net.IPEndPoint)listener.LocalEndpoint).Port;
         int status = (int)Type("Constants").GetField("STATUS_PENDING").GetRawConstantValue();
-        string json = "{\"paths\":[{\"path_id\":73001,\"version\":4,\"status\":"+status+",\"follow_terrain\":true,\"start_point\":[10,0,10],\"end_point\":[30,0,10]}],\"next_cursor\":null}";
+        string json = "{\"paths\":[{\"path_id\":73001,\"version\":4,\"status\":"+status+",\"follow_terrain\":1,\"start_point\":[10,0,10],\"end_point\":[30,0,10]}],\"next_cursor\":null}";
         var server = System.Threading.Tasks.Task.Run(async () => {
             for(int i=0;i<2;i++) using(var client = await listener.AcceptTcpClientAsync())
             {
@@ -539,7 +539,7 @@ public static class LodQA
         object Path(int id, float x, int version = 1)
         {
             var p = Activator.CreateInstance(Type("GeneratedModels.PathSummary"));
-            Set(p,"path_id",id); Set(p,"version",version); Set(p,"follow_terrain",true);
+            Set(p,"path_id",id); Set(p,"version",version); Set(p,"follow_terrain",1);
             Set(p,"start_node_id",id+1000);
             var node = Activator.CreateInstance(Type("NodeData"));
             Set(node,"node_id",id+1000); Set(node,"position",new float[] {x,0f,10f});

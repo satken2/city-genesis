@@ -26,6 +26,16 @@
   transition: width 0.3s ease;
 }
 
+/*
+ * 値が100%を超えている。満杯のバーは赤(危険色)で塗られることが多いので、
+ * 赤と見分けられるよう紫寄りの赤紫で光らせる。box-shadow はバー自身の overflow: hidden に切られず外側へ出る
+ */
+.meter-bar--overflow {
+  box-shadow:
+    0 0 0 1px rgba(217, 70, 239, 0.95),
+    0 0 10px 3px rgba(217, 70, 239, 0.65);
+}
+
 .meter-value {
   font-size: 0.75rem;
   color: #c0d0e0;

@@ -299,6 +299,14 @@ namespace GeneratedModels
         public int? max_students;
         /// <summary>スキル別の在籍者数（スキルID→人数）。教育施設のみ サーバーサイドで計算されるフィールド。型は動的。</summary>
         public object enrolled_by_skill;
+        /// <summary>建物の駐車容量（台）。建物の作成・更新時に確定する永続値。建物以外は0</summary>
+        public float parking_capacity;
+        /// <summary>当エポックの昼間駐車使用量（台）。通勤・通学・来客と、駐車施設が吸収した分</summary>
+        public float parking_use_day;
+        /// <summary>当エポックの夜間駐車使用量（台）。居住世帯の保有車と、駐車施設が吸収した分</summary>
+        public float parking_use_night;
+        /// <summary>駐車施設でも吸収しきれず路上へあふれた台数（昼夜の大きい方）。建物以外は0</summary>
+        public float parking_overflow;
     }
 
     [Serializable]
@@ -331,8 +339,8 @@ namespace GeneratedModels
         public int? house_path_id;
         /// <summary>駅ホームの設置側（外側/内側/両側）</summary>
         public int platform_side;
-        /// <summary>地形に追従してパスを変形させるかどうか</summary>
-        public bool follow_terrain;
+        /// <summary>地形追従の個別設定。-1=未設定（バリアント既定に従う）、0=非追従、1=追従</summary>
+        public int follow_terrain;
         /// <summary>始点ノードのID</summary>
         public int start_node_id;
         /// <summary>終点ノードのID</summary>
@@ -416,8 +424,8 @@ namespace GeneratedModels
         public int under_maintenance;
         /// <summary>駅ホームの設置側（外側/内側/両側）</summary>
         public int platform_side;
-        /// <summary>地形に追従してパスを変形させるかどうか</summary>
-        public bool follow_terrain;
+        /// <summary>地形追従の個別設定。-1=未設定（バリアント既定に従う）、0=非追従、1=追従</summary>
+        public int follow_terrain;
         /// <summary>所属地区ID</summary>
         public int zone_id;
         /// <summary>所属地区の名称（zone_idの参照解決）</summary>
@@ -498,6 +506,8 @@ namespace GeneratedModels
         public float parked_cars;
         /// <summary>合法路上駐車容量（台）。稼働中の地上街路以外は0</summary>
         public float street_parking_capacity;
+        /// <summary>路駐率（parked_cars / street_parking_capacity）。1超えは容量超過。容量0のときは0</summary>
+        public float parking_ratio;
     }
 
     [Serializable]

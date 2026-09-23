@@ -7,7 +7,12 @@
     "floorsValue": "{{floors}}층(연면적 {{area, number}}㎡)",
     "heightLabel": "높이: {{value}}m",
     "baseAreaLabel": "건축 면적: {{area, number}}㎡",
-    "underMaintenance": "수선 중"
+    "underMaintenance": "수선 중",
+    "parkingCapacity": "주차 용량",
+    "parkingCapacityValue": "{{capacity}}대",
+    "parkingDay": "주간",
+    "parkingNight": "야간",
+    "parkingUsage": "{{used}} / {{capacity}}대"
   },
   "mashup_edit": {
     "hint": "카드를 부지로 드래그해 배치 / 드래그로 이동 / Shift+드래그로 회전 / Delete 키로 삭제",

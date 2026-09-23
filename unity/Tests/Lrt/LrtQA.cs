@@ -86,7 +86,7 @@ public static class LrtQA
         Set(p, "start_node_id", start ? 1 : key + 10); Set(p, "end_node_id", start ? key + 10 : 1);
         Set(p, "start_point", new List<object> { 0f, 0f, start ? 0f : -50f });
         Set(p, "end_point", new List<object> { 0f, 0f, start ? 50f : 0f });
-        Set(p, "follow_terrain", false); Set(p, "curved", true);
+        Set(p, "follow_terrain", 0); Set(p, "curved", true);
         return p;
     }
     static void ModelDimensions(int id)

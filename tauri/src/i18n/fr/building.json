@@ -7,7 +7,12 @@
     "floorsValue": "{{floors}} étages (surface de plancher {{area, number}} ㎡)",
     "heightLabel": "Hauteur : {{value}} m",
     "baseAreaLabel": "Emprise au sol : {{area, number}} ㎡",
-    "underMaintenance": "En réparation"
+    "underMaintenance": "En réparation",
+    "parkingCapacity": "Capacité de stationnement",
+    "parkingCapacityValue": "{{capacity}} voitures",
+    "parkingDay": "Jour",
+    "parkingNight": "Nuit",
+    "parkingUsage": "{{used}} / {{capacity}} voitures"
   },
   "mashup_edit": {
     "hint": "Glissez une carte sur le terrain pour la placer / glissez pour déplacer / Maj+glisser pour pivoter / touche Suppr pour retirer",

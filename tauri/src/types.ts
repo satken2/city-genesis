@@ -91,6 +91,15 @@ export type AgentData = {
   base_area?: number;
   volume_ratio?: number;
   under_maintenance?: boolean;
+  /** 建物の駐車容量(台)。建物以外は0 */
+  parking_capacity?: number;
+  /**
+   * 当エポックの昼間・夜間の駐車使用量(台)。入居テナント・世帯の需要は入居先の建物に積まれる。
+   * 容量を超えうる(超えた分は駐車施設・路上へあふれる)。保存対象外の派生値なので、
+   * セーブのロード直後は次のエポックまで0になる。
+   */
+  parking_use_day?: number;
+  parking_use_night?: number;
   wage?: number;
   quota?: number;
   total_labor?: number;
@@ -822,6 +831,12 @@ export type PathData = {
   follow_terrain?: number;
   path_traffic: Record<string, number> | null;
   utilization: number | null;
+  /**
+   * 路上駐車台数(台。昼夜の大きい方)と、合法に停められる台数。容量は稼働中の地上の生活道路だけが持ち、
+   * 台数は容量を超えうる。どちらも保存対象外の派生値なので、セーブのロード直後は次のエポックまで0になる。
+   */
+  parked_cars?: number;
+  street_parking_capacity?: number;
   utilization_target?: number | null;
   durability: number | null;
   construction_progress: number | null;

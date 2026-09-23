@@ -51,7 +51,7 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `world:change_state`            | `ui -> graphic`  | グラフィックのモード(通常モード、土地区画作成モード、etc.)を切り替え |
 | `view:change_view`              | `ui -> graphic`  | 地形、建物、区画、道路、環境、アラートなどの表示モードを切り替え（`{layer, mode, sub_mode, flags}`）。`flags` は色モードと独立した表示トグルのCSV文字列（`plan`=計画中の表示、`public`=公共施設ハイライト。road/building レイヤーのみ使用）。**`flags` が `null`（またはキー欠落）の場合は現在のフラグを維持**し、空文字は全トグルOFFを意味する |
 | `view:query_state`              | `ui -> graphic`  | グラフィックプログラムに現在の表示状態を問い合わせる            |
-| `view:apply_preset`             | `ui -> graphic`  | ウィンドウを開いている間だけ表示を差し替える（`{preset}`）。プリセットの中身はUnity側が持ち、UIは名前だけを指定する。**専用の編集ステート（`STATE_*`）を持たないウィンドウ専用**で、ステートを持つ操作ではUnityがステート別の表示プリセットを自動適用する。元の表示への復帰は `STATE_NORMAL` への復帰が担う（[Unity入力制御 §9.1](Unity入力制御.md#91)）。現在のプリセットは `transit`（公共交通の一覧・新設） |
+| `view:apply_preset`             | `ui -> graphic`  | ウィンドウを開いている間だけ表示を差し替える（`{preset}`）。プリセットの中身はUnity側が持ち、UIは名前だけを指定する。**専用の編集ステート（`STATE_*`）を持たないウィンドウ専用**で、ステートを持つ操作ではUnityがステート別の表示プリセットを自動適用する。元の表示への復帰は `STATE_NORMAL` への復帰が担う（[Unity入力制御 §9.1](Unity入力制御.md#91-ステート別の表示プリセット)）。現在のプリセットは `transit`（公共交通の一覧・新設） |
 | `view:current_state`            | `graphic -> ui`  | `view:query_state`への応答、およびステート変更時の表示状態通知。各レイヤーは `{mode, sub_mode, flags}`（`flags` はONのトグルのCSV。無ければ空文字） |
 | `view:set_object_filter`        | `ui -> graphic`  | 建物・道路を**オブジェクト単位**で非表示にする集合を送る（`{hidden_building_ids, hidden_path_ids}`）。差分ではなく毎回「今隠しているものの全集合」を送る。レイヤー単位の`view:change_view`とは直交し、こちらが立っているオブジェクトは色モード・計画中表示に関わらず消える（クリックも拾わない）。状態はUnityのセッション内だけに存在し、バックエンドにもセーブにも残らない。詳細は[建設プロジェクト管理](建設プロジェクト管理.md) |
 | `view:query_object_filter`      | `ui -> graphic`  | オブジェクト単位の表示フィルタの現在値を問い合わせる（パネルを開いたときに送る） |
@@ -127,6 +127,22 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `game:start`                    | `ui -> graphic`  | バックエンドのセッションが作成され、ゲームが開始されたことを通知。ペイロードは空。グラフィックはこれを受けて `GET /api/v1/city` の `camera`（セーブ済みの視点、新規都市ではマップ定義の初期視点）を読み、カメラを復元する（`null` なら原点の既定視点）。既にゲーム中でも送られ、その場合もカメラだけ復元する |
 | `game:end`                      | `ui -> graphic`  | セッションが破棄され、ゲームが終了したことを通知               |
 | `session:reload`                | `ui -> graphic`  | バックエンドからデータを取得して、3Dを再描画する             |
+
+## `world:select_object` の選択対象
+
+ペイロードは `{window_type, entity: {type, id}}`。UIは `window_type` のウィンドウを `entity.id` を対象に開く。`id` は文字列で送る。
+
+| 3D上の選択元 | `window_type` | `entity.type` | `entity.id` |
+|---|---|---|---|
+| 建物 | `agent_detail` | `agent` | 建物（経済主体）ID |
+| 公共交通の路線 | `transit_detail` | `agent` | 路線の経済主体ID |
+| 道路・線路などのパス | `path_detail` | `path` | パスID |
+| 土地区画 | `parcel_detail` | `parcel` | 区画ID |
+| 地区名ラベル | `zone_detail` | `zone` | 地区ID |
+| 天然資源ラベル | `resource_detail` | `resource` | 資源エリアID |
+| インターチェンジ名ラベル | `intersection_detail` | `interchange` | インターチェンジID（`GET /api/v1/interchanges/{id}` の `interchange_id`） |
+
+インターチェンジ（IC/JCT）はバックエンドがランプから自動検出するもので（[道路網のインターチェンジとジャンクション](../economics/3_道路網.md#インターチェンジとジャンクション)）、Unityは道路の閲覧状態（道路・地形の入力モードがともに通常）のときだけ中心にラベルを出す。編集中はラベルを隠すので、このイベントが道路編集のクリックと競合することはない。`intersection_detail` は名前と種別を表示するだけのパネルで、カメラ移動などのアクションは持たない。
 
 ## 確定送信の責務分担
 

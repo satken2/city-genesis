@@ -15,6 +15,8 @@
     "maxGrade": "最大勾配",
     "straightLine": "直線",
     "utilization": "利用率",
+    "streetParking": "路上駐車量",
+    "streetParkingUsage": "{{parked}} / {{capacity}}台",
     "trafficByVehicle": "交通量(1日あたり)",
     "trafficUnitPerDay": "/日",
     "category": {

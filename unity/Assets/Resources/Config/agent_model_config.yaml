@@ -254,6 +254,11 @@ agents:
     prebuilt: false
     variants:
       - 0
+  3005:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
 landmark_prefixes:
   - landmark-ancient_ruins
   - landmark-colossal_statue

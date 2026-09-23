@@ -93,7 +93,7 @@ public static class LandmarkPathsQA
         masters[id]=master;
         var path=Activator.CreateInstance(assembly.GetType("GeneratedModels.PathSummary"));
         Set(path,"path_id",id); Set(path,"path_variant",id); Set(path,"path_type",track?4:2);
-        Set(path,"follow_terrain",false); Set(path,"curved",false); Set(path,"street_tree_type",trees?1:0);
+        Set(path,"follow_terrain",0); Set(path,"curved",false); Set(path,"street_tree_type",trees?1:0);
         var type=assembly.GetType(track?"TrackPath":"RoadPath");
         var setback=Activator.CreateInstance(assembly.GetType("SidewalkSetback"));
         var result=type.GetMethod("Generate").Invoke(Activator.CreateInstance(type),new[]{path,

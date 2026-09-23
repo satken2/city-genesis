@@ -662,8 +662,7 @@ public partial class RoadPlanManager : MonoBehaviour
                 Curved = response.curved && IsCurveAllowed();
                 HouseEnds = response.house_ends ?? "both";
                 PassageMode = response.passage_mode;
-                // 地形追従の個別上書きを復元する（スキーマ再生成前は VALUE_NONE=未設定になり、
-                // バリアント既定に従う。height_editable=false のバリアントでは意味を持たない）。
+                // 地形追従の個別上書きを復元する（height_editable=false のバリアントでは意味を持たない）。
                 PathFollowTerrainOverride = response.GetFollowTerrain();
 
                 // start_point を始点として追加

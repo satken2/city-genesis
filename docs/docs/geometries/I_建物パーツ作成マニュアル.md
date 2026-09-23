@@ -356,3 +356,20 @@ NormalとCloseの水平中心・接地原点・bbox・材質構成は一致さ�
 原本は `blender/buildings.blend`。非公開制作ツールの `build_hotels.py` が著作し、
 `import_hotels.ps1` が正規ミラー生成と実FBXの距離別組み立てを検証する。
 外部素材は使用せず、AI補助による自作ジオメトリの制作記録は同ツールの `hotels.md` に置く。
+
+### 9.3 立体駐車場3005
+
+`a3005/0` はoffice形状・modular_flat方式で、6m幅・3m階高のコンクリート柱と床梁、
+横長の暗い開口、腰壁の防護柵を反復する。base-w1 / mid-w1 / entranceと各Close、
+材質参照用のceil / floorの8パーツで構成する。最上階はmid-w1へフォールバックする。
+entranceは幅7.2mの庇・入庫バー・操作機・P看板を持ち、正面の辺中央へ実寸で1回だけ置く。
+開口面を壁より手前へ重ね、反復する柱が車両入口を塞いで見えないようにする。
+内部のランプ・床・車両は描かず、奥まった不透明面で暗がりを表現する。
+Closeは防護柵の支柱、配管、照明、保護ポールを追加し、幅・階高・原点を保つ。
+可変サイズの輪郭を維持するため、Farは底面と階数から既存の簡易形状を生成する。
+XZ実寸固定の専用prebuilt_farは提供しない。
+
+原本は `blender/buildings.blend`。非公開制作ツールの `build_parking_garage.py` が著作し、
+`import_parking_garage.ps1` が実FBXと幅・階数・3距離を検証して正規ミラーを同期する。
+P記号は外部フォントを使わず描いた自作PNGで、文字のジオメトリは持たない。
+既存材質を共有し、看板だけ `BD_PARKING_SIGN` を使う。制作・開示記録は同ツールの `parking_garage.md`。

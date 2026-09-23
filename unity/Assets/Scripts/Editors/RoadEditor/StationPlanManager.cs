@@ -367,7 +367,7 @@ public class StationPlanManager : MonoBehaviour
 
     /// <summary>
     /// 1本ぶんのプレビューメッシュを生成して previewRoot 配下へぶら下げる。
-    /// designed=true では生成器が地形へ再投影しないよう follow_terrain=false +
+    /// designed=true では生成器が地形へ再投影しないよう follow_terrain=0(非追従) +
     /// station_grade_profile を渡す(RoadRenderer の造成済みプレビューと同じ扱い。
     /// プラットフォームを水平に保つため)。
     /// </summary>
@@ -389,12 +389,13 @@ public class StationPlanManager : MonoBehaviour
             house_ends = ends,
             passage_mode = passageMode,
             travel_direction = travelDirection,
+            follow_terrain = Constants.VALUE_NONE, // intの既定値0は「非追従」になるため未設定を明示する
             start_point = new List<object> { (object)start.x, (object)startRelY, (object)start.z },
             end_point = new List<object> { (object)end.x, (object)endRelY, (object)end.z },
         };
         if (designed)
         {
-            tempPathData.follow_terrain = false;
+            tempPathData.follow_terrain = 0;
             var gradeProfile = new List<object>();
             foreach (var p in points) gradeProfile.Add(new List<object> { p.x, p.y, p.z });
             tempPathData.station_grade_profile = gradeProfile;

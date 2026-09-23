@@ -284,6 +284,14 @@ export type AgentData = {
   max_students?: number;
   /** スキル別の在籍者数（スキルID→人数）。教育施設のみ (サーバーサイドで計算されるフィールド。型は動的。) */
   enrolled_by_skill?: any;
+  /** 建物の駐車容量（台）。建物の作成・更新時に確定する永続値。建物以外は0 */
+  parking_capacity: number;
+  /** 当エポックの昼間駐車使用量（台）。通勤・通学・来客と、駐車施設が吸収した分 */
+  parking_use_day: number;
+  /** 当エポックの夜間駐車使用量（台）。居住世帯の保有車と、駐車施設が吸収した分 */
+  parking_use_night: number;
+  /** 駐車施設でも吸収しきれず路上へあふれた台数（昼夜の大きい方）。建物以外は0 */
+  parking_overflow: number;
 };
 
 export type PathSummary = {
@@ -314,8 +322,8 @@ export type PathSummary = {
   house_path_id?: number;
   /** 駅ホームの設置側（外側/内側/両側） */
   platform_side: number;
-  /** 地形に追従してパスを変形させるかどうか */
-  follow_terrain: boolean;
+  /** 地形追従の個別設定。-1=未設定（バリアント既定に従う）、0=非追従、1=追従 */
+  follow_terrain: number;
   /** 始点ノードのID */
   start_node_id: number;
   /** 終点ノードのID */
@@ -397,8 +405,8 @@ export type PathData = {
   under_maintenance: number;
   /** 駅ホームの設置側（外側/内側/両側） */
   platform_side: number;
-  /** 地形に追従してパスを変形させるかどうか */
-  follow_terrain: boolean;
+  /** 地形追従の個別設定。-1=未設定（バリアント既定に従う）、0=非追従、1=追従 */
+  follow_terrain: number;
   /** 所属地区ID */
   zone_id: number;
   /** 所属地区の名称（zone_idの参照解決） */
@@ -479,6 +487,8 @@ export type PathData = {
   parked_cars: number;
   /** 合法路上駐車容量（台）。稼働中の地上街路以外は0 */
   street_parking_capacity: number;
+  /** 路駐率（parked_cars / street_parking_capacity）。1超えは容量超過。容量0のときは0 */
+  parking_ratio: number;
 };
 
 export type ParcelSummary = {

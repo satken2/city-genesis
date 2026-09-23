@@ -4,12 +4,16 @@
  * 0.0〜1.0 の割合値を水平バーで可視化する。
  * 値の大きさに応じてバーの色が3段階に変化し、直感的な状態把握を可能にする。
  * 耐久度や利用率など、割合で表される指標の表示に使用する。
+ *
+ * 1.0 を超える値(容量超過など)は、目盛りを変えずにバーを100%で頭打ちにしたうえで、
+ * バーの周囲を赤紫に光らせて超過を示す。目盛りを伸縮させないのは、並べた他のメーターとの
+ * 見比べを崩さないため。超過の度合いまで見せたい画面は、呼び出し側で数値を併記する。
  */
 
 import "./Meter.css";
 
 type MeterProps = {
-  /** 0.0〜1.0 の割合値。範囲外の値はクランプされる */
+  /** 0.0〜1.0 の割合値。0未満は0に丸め、1超は100%で頭打ちにして超過表示にする */
   value: number;
   /** メーターの左側に表示するラベル */
   label?: string;
@@ -39,11 +43,12 @@ export function Meter({ value, label, polarity = "positive", color }: MeterProps
   const fillColor =
     color ??
     getMeterColor(polarity === "negative" ? 1 - clampedValue : clampedValue);
+  const isOverflow = value > 1;
 
   return (
     <div className="meter">
       {label && <span className="meter-label">{label}</span>}
-      <div className="meter-bar">
+      <div className={isOverflow ? "meter-bar meter-bar--overflow" : "meter-bar"}>
         <div
           className="meter-fill"
           style={{

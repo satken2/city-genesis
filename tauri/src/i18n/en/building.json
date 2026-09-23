@@ -7,7 +7,12 @@
     "floorsValue": "{{floors}}F (Floor Area {{area, number}}㎡)",
     "heightLabel": "Height: {{value}}m",
     "baseAreaLabel": "Base Area: {{area, number}}㎡",
-    "underMaintenance": "Under Maintenance"
+    "underMaintenance": "Under Maintenance",
+    "parkingCapacity": "Parking Capacity",
+    "parkingCapacityValue": "{{capacity}} cars",
+    "parkingDay": "Daytime",
+    "parkingNight": "Nighttime",
+    "parkingUsage": "{{used}} / {{capacity}} cars"
   },
   "mashup_edit": {
     "hint": "Drag a card onto the site to place / drag to move / Shift+drag to rotate / Delete key to remove",

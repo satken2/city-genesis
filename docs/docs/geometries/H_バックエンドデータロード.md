@@ -65,6 +65,17 @@
 - **差分同期**: `SyncZones` でAPIレスポンスに含まれないゾーンを `RemoveZone` で除去
 - **個別取得**: `CellDataLoader.FetchZone(zoneId)`
 
+### InterchangeManager
+
+インターチェンジ（IC/JCT。[道路網](../economics/3_道路網.md#インターチェンジとジャンクション)）の名前ラベルだけを持つ。内部の道路は普通のパスとして PathManager が描く。
+
+- **描画方式**: Screen Space Overlay Canvas（sortingOrder 62）+ uGUI の Text・Outline・Button。ラベルは `center` の地面高さ＋6mをスクリーン座標へ変換した位置に置き、カメラが1m/2°以上動いたとき・一覧の更新後・地形ロード完了後・表示再開時だけ位置を更新する。カメラの背面と6,000mより遠いものは隠す。文字列は `name`、空なら `IC {id}` / `JCT {id}`。
+- **ロード方式**: セル単位ではなく全量ロード（`GET /interchanges/`）。初回ロードと全量リロードでは未取得のときだけ取得し、`ReloadAllData`（エポック完了・編集確定・`session:reload`）では毎回取り直す。バックエンドはこのAPI呼び出しの時点で道路の変化を再検出するため、取り直しを省くと竣工したランプのインターチェンジが現れない。
+- **差分同期**: 応答の `version` が前回と同じなら何もしない。変わっていればラベルを追加・更新・削除する。
+- **表示条件**: 道路・地形の入力モードがともに通常、ワールド表示中、ドライブUI非表示、道路の表示モードが非表示でないとき。編集中にラベルが道路編集のクリックを奪わないようにするため。
+- **選択**: クリックで `world:select_object`（`window_type=intersection_detail`、`entity.type=interchange`）を送る。
+- **破棄**: `ClearAllManagerData`（セッション切り替え・全量リロード・ゲーム終了）で全ラベルを破棄し、取得中の応答は世代番号で捨てる。
+
 ### TerrainManager
 
 - **LODティア**: Dynamic（解像度513）/ Near（257）/ Far（65）/ UltraFar（33）
@@ -107,5 +118,6 @@ CellDataLoader.UpdateManagers は以下の順序でマネージャーに指示�
 | `DataLoaders/PathManager.cs` | 道路・ノード・交差点のロード・ティア管理・差分同期 |
 | `DataLoaders/ParcelManager.cs` | 区画のロード・2Dオーバーレイ描画・差分同期 |
 | `DataLoaders/ZoneManager.cs` | 地区のロード・UI描画・差分同期 |
+| `DataLoaders/InterchangeManager.cs` | インターチェンジ一覧のロードと名前ラベルの描画・選択 |
 | `DataLoaders/TerrainManager.cs` | 4段階LOD地形ロード・エッジステッチ |
 | `DataLoaders/LodConfig.cs` | ティア定数・セルセット計算 |

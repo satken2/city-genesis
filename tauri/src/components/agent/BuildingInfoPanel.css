@@ -40,6 +40,56 @@
   margin-top: 4px;
 }
 
+/* === 駐車容量(昼間・夜間の2本) === */
+
+.building-parking {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.building-parking-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 8px;
+}
+
+.building-parking-title,
+.building-parking-label {
+  color: #93a9c0;
+  font-weight: 600;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.building-parking-capacity {
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 昼夜で見出しの文字幅が違う言語でもバーの左端が揃うよう、2行で列を共有する */
+.building-parking-grid {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px 8px;
+  padding-left: 8px;
+}
+
+.building-parking-row {
+  display: contents;
+}
+
+.building-parking-value {
+  font-size: 0.75rem;
+  color: #c0d0e0;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
 .building-info-diagram {
   flex: 2;
   min-width: 0;

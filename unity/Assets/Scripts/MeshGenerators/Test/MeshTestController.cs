@@ -462,6 +462,7 @@ public class MeshTestController : MonoBehaviour
             path_variant = variant,
             width = 4f,
             curved = curved,
+            follow_terrain = Constants.VALUE_NONE, // intの既定値0は「非追従」になるため未設定を明示する
         };
     }
 

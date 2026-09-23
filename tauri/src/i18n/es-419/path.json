@@ -15,6 +15,8 @@
     "maxGrade": "Pendiente máx.",
     "straightLine": "Recta",
     "utilization": "Utilización",
+    "streetParking": "Estacionamiento en la calle",
+    "streetParkingUsage": "{{parked}} / {{capacity}} autos",
     "trafficByVehicle": "Tránsito (por día)",
     "trafficUnitPerDay": "/día",
     "category": {

@@ -120,6 +120,13 @@ nav:
     - テンプレート作成支援: programs/テンプレート作成支援.md
   - API Reference: api/index.html
 
+# 既定のslugifyは非ASCII文字を落とすため、日本語見出しの本文をそのままアンカーにできるUnicode版を使う
+markdown_extensions:
+  - toc:
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+
 plugins:
   - search:
       lang:

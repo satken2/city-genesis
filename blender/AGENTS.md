@@ -1,5 +1,7 @@
 # blender/
 
+立体駐車場3005は非公開制作ツールのbuild_parking_garage.pyがa3005/0へ通常・接写の壁とentrance、ceil/floorの8パーツを著作する。6m幅・3m階高で、入口は正面に1回だけ置く。P記号は自作PNG。Farは可変サイズの輪郭を保つ既存簡易生成を使う。import_parking_garage.ps1が実FBXと27ケースを検証して正規ミラーを同期する。仕様は公開I文書、制作記録は同ツールのparking_garage.md。
+
 洋上風力1071・洋上石油1072はtop-prebuiltの通常/接写/遠景、受入基地1073は岸壁に置くroofpropと接写・遠景prebuiltを持つ。1071は1055の白い風車を再利用する。海底1104/1301はbodyと接写だけをpaths.blendに持ち、FarはUnity生成。非公開制作ツールのbuild_offshore.pyが著作し、import_offshore.ps1が実FBXとLODを検証する。制作記録は同ツールのoffshore.md。 1072の多層設備は非公開制作ツールのoffshore_platform.pyに定義し、build_offshore.py --platform-onlyで3LODのみを再著作できる。
 
 観光名所5種類は非公開制作ツールの `build_landmarks.py` が `buildings.blend` の `landmark-*/0/` へ通常・接写・専用遠景を著作する。大展望塔のみNソウルタワー風の白い円柱・段状展望室・赤白アンテナで、75m階高のbase/mid/top、他4種類はtopだけ。既成配置の回転込みでマスターの敷地寸法へ収める。通常12,000・接写40,000・遠景5,000推定頂点/部品。`import_landmarks.ps1` は実FBX・敷地寸法・3距離・塔の2/4/8階を検証して正規ミラーを同期する。仕様は公開F3/I文書。

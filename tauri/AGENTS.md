@@ -46,6 +46,7 @@ Unityのグラフィックの上に透明なWebViewウィンドウとして重�
 | `locale.ts` | 対応言語(`SUPPORTED_LANGUAGES`)と、言語コード→`Intl`用ロケールの変換(`resolveIntlLocale`)・検証(`isSupportedLanguage`)・対応言語コードへの丸め(`resolveSupportedLanguage`。`ja-JP`のような地域付きコードを`ja`へ寄せる。プルダウンの現在値解決に使う)。詳細は「多言語対応」の節 |
 | `date.ts` | ゲーム内仮想暦(1ヶ月=30日/1年=360日)の整形。`formatEpochDate` / `formatEpochDateRange` |
 | `money.ts` | 金額の整形。`formatCompactAmount`(有効3桁のコンパクト表記) / `formatExactAmount`(3桁区切り) |
+| `parking.ts` | 駐車メーター(建物の駐車容量・道路の路上駐車量)の`parkingUsage(used, capacity, fractionDigits)`。台数と容量を表示桁に丸めてから`Meter`用の使用率を返す(生値で割ると、表示は「20 / 20台」なのに端数で100%超として光る食い違いが起きるため)。容量0で使用があれば`+Infinity`(全量が超過) |
 | `settings.ts` | アプリ設定のロード・保存 |
 | `weatherAudio.ts` | AmbienceVolumeSync。CockpitからUnityへmaster×sfxを送る。音声再生はしない |
 | `playSound.ts` | 効果音再生。**音声ファイルは必ず`import`して得たURLを渡すこと**(`"src/assets/sounds/x.opus"`のようなパス文字列を直接渡すとバンドル対象から外れ、開発実行では鳴るのに本番ビルドだけ無音になる) |

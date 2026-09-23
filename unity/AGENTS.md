@@ -11,7 +11,7 @@
 
 ```
 - Assets/Scripts
-  - API                 ... バックエンドと通信するクライアント(ApiClient.cs等)とスキーマ。GeneratedModels.csはopenapi.jsonから自動生成される。HTTP通信は必ずApiClientを経由すること(単体取得=`Get`/大きな一括取得=`GetBulk`。例外は地形バイナリ等の非JSON応答のみ)。`GetBulk`はAcceptヘッダでMessagePackを要求し、対応エンドポイント(bbox一括取得系)ではバイナリで受信して`MsgPackDecoder.cs`でデコードする(Content-Typeで自動判別。呼び出し側は形式を意識しない)。
+  - API                 ... バックエンドと通信するクライアント(ApiClient.cs等)とスキーマ。GeneratedModels.csはバックエンドのレスポンススキーマ定義(endpoints.yaml)から`tools/generate_models.py`で自動生成される(生成物の冒頭に記載)。HTTP通信は必ずApiClientを経由すること(単体取得=`Get`/大きな一括取得=`GetBulk`。例外は地形バイナリ等の非JSON応答のみ)。`GetBulk`はAcceptヘッダでMessagePackを要求し、対応エンドポイント(bbox一括取得系)ではバイナリで受信して`MsgPackDecoder.cs`でデコードする(Content-Typeで自動判別。呼び出し側は形式を意識しない)。
   - DataLoaders         ... バックエンドから取得したデータを元にUnity空間にオブジェクトを作成するプログラム。実際の描画には`MeshGenerators`のプログラムが使われる。(詳細はDataLoaders/AGENTS.md)
   - MeshGenerators      ... 建物や道路の具体的なメッシュ生成アルゴリズム。バリアント→タイプ→デフォルトの順にフォールバックする。(詳細はMeshGenerators/AGENTS.md)
   - Editors             ... 3D空間内で道路・建物・土地区画・地区を編集する際の状態管理や確定後のバックエンド送信。(詳細はEditors/AGENTS.md)

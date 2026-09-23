@@ -400,22 +400,14 @@ public static class PathSummaryExtensions
     }
 
     /// <summary>
-    /// follow_terrain（地形追従の個別設定。-1=未設定[バリアント既定]/0=非追従/1=追従）を
-    /// リフレクションで読む。GetPlatformSide と同じく、endpoint_schemas シート未更新
-    /// （=GeneratedModels.cs にフィールドが無い）でもコンパイル・実行が落ちないための措置。
-    /// フィールドが無い間は VALUE_NONE（未設定＝バリアント既定に従う）を返す。
-    /// スキーマ再生成後は自動的に実データを返すようになる。
+    /// follow_terrain（地形追従の個別設定。-1=未設定[バリアント既定]/0=非追従/1=追従）を返す。
+    /// 実効値（未設定時のバリアント既定の適用）は PathManager.GetPathFollowTerrain(PathSummary) が解決する。
+    /// リフレクションで読むと生成モデルの型の食い違いが黙って未設定扱いに化けるため、
+    /// フィールドを直接参照して型の不一致をコンパイルエラーにする。
     /// </summary>
-    private static readonly System.Reflection.FieldInfo FollowTerrainField =
-        typeof(GeneratedModels.PathSummary).GetField("follow_terrain");
-
     public static int GetFollowTerrain(this GeneratedModels.PathSummary p)
     {
-        if (p == null || FollowTerrainField == null) return Constants.VALUE_NONE;
-        object value = FollowTerrainField.GetValue(p);
-        if (value is int i) return i;
-        if (value is long l) return (int)l;
-        return Constants.VALUE_NONE;
+        return p != null ? p.follow_terrain : Constants.VALUE_NONE;
     }
 }
 

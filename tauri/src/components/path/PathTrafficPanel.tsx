@@ -10,6 +10,9 @@
  * - base_speed / min_curve_radius / max_grade: 形状から決まる通過速度と線形指標(読み取り専用)。
  *   制限速度が通過速度を大きく上回るほど事故が起きやすいため、制限速度設定の隣に並べる
  * - utilization: 現在の利用率をメーターで表示する
+ * - parked_cars / street_parking_capacity: 路上駐車台数を合法に停められる台数に対する割合でメーター表示する。
+ *   台数は容量を超えうる(建物の駐車場からあふれた車が停まる)ので、実数を併記する。
+ *   容量を持つ道路(稼働中の地上の生活道路)と、実際に車が停まっている道路だけに出す
  * - path_traffic: 車両種別ごとの交通量(1日あたりの通過トリップ数)を表形式で表示する
  *
  * 制限速度設定の変更は「保存」ボタン押下時に PATCH リクエストとして送信する。
@@ -19,6 +22,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { PathData } from "../../types";
 import { useMasterData } from "../../contexts/MasterDataContext";
+import { resolveIntlLocale } from "../../utils/locale";
+import { parkingUsage } from "../../utils/parking";
 import { Meter } from "../common/Meter";
 import {
   PATH_MOTORWAY,
@@ -39,8 +44,9 @@ type PathTrafficPanelProps = {
 };
 
 export function PathTrafficPanel({ path, apiBaseUrl, onSaved }: PathTrafficPanelProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const masterData = useMasterData();
+  const locale = resolveIntlLocale(i18n.language);
 
   const [overrideMaxSpeed, setOverrideMaxSpeed] = useState(
     path.override_max_speed
@@ -129,6 +135,16 @@ export function PathTrafficPanel({ path, apiBaseUrl, onSaved }: PathTrafficPanel
 
   const hasTraffic = Object.keys(trafficByCategory).length > 0;
 
+  // 路上駐車は道路1本あたりの台数が小さく端数が意味を持つため、小数1桁で表示する
+  const parkingOnPath =
+    path.street_parking_capacity != null
+      ? parkingUsage(path.parked_cars ?? 0, path.street_parking_capacity, 1)
+      : null;
+  const streetParking =
+    parkingOnPath && (parkingOnPath.capacity > 0 || parkingOnPath.used > 0) ? parkingOnPath : null;
+  const formatParkingCars = (value: number) =>
+    value.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
   return (
     <section className="agent-detail-section path-traffic-section">
       <h3 className="agent-detail-section-title">{t("path.trafficSettings", "交通・速度設定")}</h3>
@@ -214,6 +230,22 @@ export function PathTrafficPanel({ path, apiBaseUrl, onSaved }: PathTrafficPanel
             label={t("path.utilization")}
             value={path.utilization}
           />
+        </div>
+      )}
+
+      {streetParking && (
+        <div className="path-street-parking">
+          <Meter
+            label={t("path.streetParking")}
+            value={streetParking.ratio}
+            polarity="negative"
+          />
+          <span className="path-street-parking-value">
+            {t("path.streetParkingUsage", {
+              parked: formatParkingCars(streetParking.used),
+              capacity: formatParkingCars(streetParking.capacity),
+            })}
+          </span>
         </div>
       )}
 

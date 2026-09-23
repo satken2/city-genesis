@@ -85,7 +85,7 @@ public static class RoadEquipmentQA
         masters[variant] = item;
         var path = Activator.CreateInstance(pathType);
         Set(path, "path_id", variant); Set(path, "path_variant", variant); Set(path, "path_type", type);
-        Set(path, "follow_terrain", false);
+        Set(path, "follow_terrain", 0);
         foreach (string field in new[] { "streetlight_type", "street_tree_type", "fence_type", "utility_mode" }) Set(path, field, 1);
         Set(path, "utility_mode", utilityMode);
         Type roadType = assembly.GetType("RoadPath");
