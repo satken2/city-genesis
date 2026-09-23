@@ -137,6 +137,13 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     /// <summary>パーセル上面を地形からわずかに浮かせ、Zファイティングを避けるオフセット（メートル）</summary>
     private const float ParcelSurfaceOffset = 0.002f;
 
+    /// <summary>
+    /// 海上区画を海面板より上に出すオフセット（メートル）。
+    /// 海面板はシーン上で worldY=0.001 に置かれており、地形用の微小オフセットだけでは
+    /// 差が1mmしかなく、レイキャストが海面に勝てる保証がない。
+    /// </summary>
+    private const float SeaSurfaceClearance = 0.05f;
+
     /// <summary>枠線を地形から浮かせるオフセット（メートル）</summary>
     private const float OutlineHeightOffset = 0.03f;
 
@@ -573,7 +580,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
                     {
                         if (VisualEffectManager.Instance != null)
                         {
-                            float cy = Utils.GetGroundHeight(new Vector3(cx, 1000f, cz));
+                            float cy = GetParcelBaseY(parcelData, cx, cz);
                             VisualEffectManager.Instance.PlayConstructionComplete(new Vector3(cx, cy, cz));
                         }
                     }
@@ -609,7 +616,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
                     centerPoint[0],
                     centerPoint[1]);
 
-                BuildParcelTopLocalYOffsets(points, centroid, out float[] topLocalY, out float parcelBaseHeight);
+                BuildParcelTopLocalYOffsets(points, centroid, parcelData, out float[] topLocalY, out float parcelBaseHeight);
                 Mesh mesh = ParcelMeshFactory.GenerateParcelMesh(points, centroid, 0f, parcelData.usage_id, topLocalY);
                 mf.mesh = mesh;
 
@@ -932,7 +939,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         }
 
         Vector2 centroid = new Vector2(centerPoint[0], centerPoint[1]);
-        BuildParcelTopLocalYOffsets(points, centroid, out float[] topLocalY, out float baseWorldY);
+        BuildParcelTopLocalYOffsets(points, centroid, parcelData, out float[] topLocalY, out float baseWorldY);
 
         parcelGO.transform.position = new Vector3(centroid.x, baseWorldY, centroid.y);
 
@@ -958,16 +965,31 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     }
 
     /// <summary>
-    /// パーセル上面の各頂点が地形の標高に沿うよう、重心を基準としたローカルY（メートル）を求める。
+    /// 区画が載る面のワールドY（メートル）を返す。
+    /// 海上区画（PARCEL_WATER）は地形をサンプルすると海底（worldY&lt;0）が返るため、
+    /// バックエンドが海面基準で持つ altitude を使い、さらに海面板を確実に上回らせる。
     /// </summary>
-    private void BuildParcelTopLocalYOffsets(Vector2[] points, Vector2 centroid, out float[] topVertexLocalY, out float baseWorldY)
+    private static float GetParcelBaseY(ParcelSummary parcelData, float x, float z)
     {
-        float baseGround = Utils.GetGroundHeight(new Vector3(centroid.x, 1000f, centroid.y));
+        if (parcelData != null && parcelData.parcel_type == Constants.PARCEL_WATER)
+        {
+            return parcelData.altitude + SeaSurfaceClearance;
+        }
+        return Utils.GetGroundHeight(new Vector3(x, 1000f, z));
+    }
+
+    /// <summary>
+    /// パーセル上面の各頂点が地形の標高に沿うよう、重心を基準としたローカルY（メートル）を求める。
+    /// 海上区画は基準面が水平なので、全頂点のローカルYが0になる。
+    /// </summary>
+    private void BuildParcelTopLocalYOffsets(Vector2[] points, Vector2 centroid, ParcelSummary parcelData, out float[] topVertexLocalY, out float baseWorldY)
+    {
+        float baseGround = GetParcelBaseY(parcelData, centroid.x, centroid.y);
         baseWorldY = baseGround + ParcelSurfaceOffset;
         topVertexLocalY = new float[points.Length];
         for (int i = 0; i < points.Length; i++)
         {
-            float h = Utils.GetGroundHeight(new Vector3(points[i].x, 1000f, points[i].y)) + ParcelSurfaceOffset;
+            float h = GetParcelBaseY(parcelData, points[i].x, points[i].y) + ParcelSurfaceOffset;
             topVertexLocalY[i] = h - baseWorldY;
         }
     }
@@ -1195,10 +1217,12 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         Vector3[] pts = outline.worldPoints;
         List<Vector3> worldPoints = new List<Vector3>(pts.Length);
 
+        // 枠線頂点は既に区画の基準面（海上区画なら海面）へ載っているので、
+        // オフセットを差し替えるだけでよい（地形の再サンプルは海上で海底を拾う）。
         for (int i = 0; i < pts.Length; i++)
         {
             Vector3 worldPt = pts[i];
-            worldPt.y = Utils.GetGroundHeight(new Vector3(worldPt.x, 1000f, worldPt.z)) + HighlightHeightOffset;
+            worldPt.y += HighlightHeightOffset - OutlineHeightOffset;
             worldPoints.Add(worldPt);
         }
 
@@ -1255,9 +1279,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     /// 建築不可やデータなしの場合は null を返し、描画をスキップする。
     ///
     /// 各 FILTER モードでは、建築規制（allowed_bd_mask）に加えて
-    /// 土地区画種類（parcel_type）との物理的互換性も判定する。
-    /// - 港湾（FILTER_PORT）は沿岸土地区画（PARCEL_SHORE）にのみ建設可能
-    /// - それ以外は通常土地区画（PARCEL_LAND）にのみ建設可能
+    /// 土地区画種類（parcel_type）の立地条件も判定する。
     ///
     /// ZONE_COLOR モードでは、worldCenter(パーセル中心のワールド座標)から
     /// 所属地区を空間判定(ZoneManager.GetZoneIdAtPoint)で求め、その地区の識別色を返す。
@@ -1331,21 +1353,14 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
     /// <summary>
     /// 指定した建物タイプがパーセルに建設可能かを判定する。
-    /// 建築規制（allowed_bd_mask）と物理的互換性（parcel_type）の両方を満たす場合にtrueを返す。
-    /// - 港湾建物（BUILDING_PORT）は沿岸土地区画（PARCEL_SHORE）にのみ建設可能
-    /// - それ以外の建物は通常土地区画（PARCEL_LAND）にのみ建設可能
+    /// 建築規制（allowed_bd_mask）と立地条件（parcel_type）の両方を満たす場合にtrueを返す。
+    /// 立地条件は建設モードで選択中のバリアントの parcel_type を優先する
+    /// （bd_type が同じでも陸・沿岸・海上に分かれるため。洋上風力発電所など）。
     /// </summary>
     private bool IsBuildable(VisualParcelStats stats, int buildingTypeBit)
     {
-        // 建築規制チェック
         if ((stats.allowed_bd_mask & buildingTypeBit) == 0) return false;
-
-        // 物理的互換性チェック
-        if ((buildingTypeBit & Constants.BUILDING_PORT) != 0)
-        {
-            return stats.parcel_type == Constants.PARCEL_SHORE;
-        }
-        return stats.parcel_type == Constants.PARCEL_LAND;
+        return BuildingPlanManager.IsParcelTypeAllowed(stats.parcel_type, buildingTypeBit);
     }
 
     /// <summary>
@@ -1374,7 +1389,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         {
             float x = polygon[i][0];
             float z = polygon[i][1];
-            float y = Utils.GetGroundHeight(new Vector3(x, 1000f, z)) + OutlineHeightOffset;
+            float y = GetParcelBaseY(parcelData, x, z) + OutlineHeightOffset;
             worldPoints[i] = new Vector3(x, y, z);
         }
 
@@ -1383,7 +1398,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         float[] centerArr = parcelData.GetCenterPointArray();
         float cx = centerArr[0];
         float cz = centerArr[1];
-        float cy = Utils.GetGroundHeight(new Vector3(cx, 1000f, cz));
+        float cy = GetParcelBaseY(parcelData, cx, cz);
         Vector3 center = new Vector3(cx, cy, cz);
 
         ParcelOutlineData data = new ParcelOutlineData

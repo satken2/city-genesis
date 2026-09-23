@@ -94,13 +94,15 @@ public static class InfraNetworkUtil
     }
 
     /// <summary>
-    /// パス種別（path_type）がインフラ（電気・水）かを返す。バックエンド consts.PATH_TYPES_INFRA
-    /// と一致させること。電気網/水網の物理的分離はノードビット側で行われるため、ここは
-    /// 「財を区別しない共通のインフラ挙動」の判定にのみ使う。
+    /// パス種別（path_type）がインフラ（電気・水・パイプライン）かを返す。バックエンド
+    /// consts.PATH_TYPES_INFRA と一致させること。網ごとの物理的分離はノードビット側で行われるため、
+    /// ここは「財を区別しない共通のインフラ挙動」の判定にのみ使う。
     /// </summary>
     public static bool IsInfraPathType(int pathType)
     {
-        return pathType == Constants.PATH_ELECTRICITY || pathType == Constants.PATH_WATER;
+        return pathType == Constants.PATH_ELECTRICITY
+            || pathType == Constants.PATH_WATER
+            || pathType == Constants.PATH_PIPELINE;
     }
 
     /// <summary>

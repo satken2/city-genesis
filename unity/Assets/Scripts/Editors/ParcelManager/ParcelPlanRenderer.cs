@@ -20,6 +20,9 @@ public class ParcelPlanRenderer : MonoBehaviour
     public Color markerColor = Color.red;
     public float markerSize = 1.0f;
 
+    /// <summary>海上でプレビュー枠線を置く基準ワールドY（メートル）。海面板(worldY=0.001)の上に出す。</summary>
+    private const float SeaSurfaceY = 0.01f;
+
     private GameObject overlayMeshObj;
     private OverlayMeshRenderer overlayRenderer;
 
@@ -96,6 +99,8 @@ public class ParcelPlanRenderer : MonoBehaviour
 
     /// <summary>
     /// ポリゴン頂点のY座標を地形の高さに合わせて少し浮かせる。
+    /// 海上(地形標高が海面下)では海面板に隠れないよう海面を下限にする。
+    /// 海上区画は完成後も海面基準の altitude に載るため、プレビューと結果の高さが揃う。
     /// </summary>
     private List<Vector3> AdjustPolygonHeight(List<Vector3> polygonPoints)
     {
@@ -103,8 +108,8 @@ public class ParcelPlanRenderer : MonoBehaviour
         List<Vector3> adjusted = new List<Vector3>(polygonPoints.Count);
         foreach (var pt in polygonPoints)
         {
-            float y = Utils.GetGroundHeight(new Vector3(pt.x, 1000f, pt.z)) + 0.1f;
-            adjusted.Add(new Vector3(pt.x, y, pt.z));
+            float ground = Mathf.Max(Utils.GetGroundHeight(new Vector3(pt.x, 1000f, pt.z)), SeaSurfaceY);
+            adjusted.Add(new Vector3(pt.x, ground + 0.1f, pt.z));
         }
         return adjusted;
     }

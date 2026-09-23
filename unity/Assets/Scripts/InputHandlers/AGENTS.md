@@ -29,7 +29,7 @@
 | ファイル | 付与する側 | 説明 |
 | --- | --- | --- |
 | `BuildingInputHandler.cs` | BuildingManager が建物生成時に AddComponent | `buildingId` を保持。クリックでIPC経由の詳細ウィンドウ表示など |
-| `ParcelInputHandler.cs` | ParcelManager | `parcelId` を保持 |
+| `ParcelInputHandler.cs` | ParcelManager | `parcelId` を保持。建物建設モードのクリックでは `ParcelManager.GetParcelSummary(parcelId)` で引いた区画データを `BuildingPlanManager.OnParcelClick` へ渡す(区画の `parcel_type` が無いと立地条件を判定できず、海上専用バリアントを陸の区画へ落とせてしまうため。所有権など他の検証は確定時にバックエンドが行う) |
 | `PathInputHandler.cs` | PathManager (駅舎パスの建屋コライダーには `StationHousePath` が同じ三点セットを付与) | `pathId` を保持。地区編集モードのドラッグ割当(`onZoneDragHover/End`)も担当 |
 | `NodeInputHandler.cs` | 道路編集系 | ドラッグイベント(`onDragStart/Update/End`)を持つ |
 | `TerrainInputHandler.cs` | TerrainManager が各Terrainタイル生成時に AddComponent / `InputHandler.Start` が `SeaObject` タグの海面に AddComponent | 何もない地面のクリック。道路の点配置などはここ経由。海面(Sea)も `SeaObject` タグを付与の上このハンドラで同じく処理する。**建物配置**: Ctrlメニューで区画/自由/道路沿いを明示選択する。区画配置中の地形クリックは無視し、直接配置中はBuildingPlanManagerがPARCEL入力をMODE_NONEへ変えて区画上も地形へ貫通させる。地形クリック・ホバーでは共通吸着をスキップし、道路外縁への吸着をBuildingPlanManagerに委譲する。位置固定は`edit_building:placement_state`でUIへ通知する |
@@ -121,9 +121,10 @@ public class MyObjectInputHandler : MonoBehaviour, IInputHandler
 
 ## 海面(Sea)のクリック扱い(知らないと事故る)
 
-- 海面は `TerrainManager` が管理するTerrainタイルとは別物で、シーンに静的配置された板ポリゴン(`Sea` GameObject, Layer=Water, `Custom/DepthOffsetLit` シェーダー)。`Terrain` コンポーネントを持たないため、素の状態では `GetObjectType` が `-1` を返し、クリックが無反応になる。
+- 海面は `TerrainManager` が管理するTerrainタイルとは別物で、シーン(`GameScene.unity`)に静的配置された板ポリゴン(`Sea` GameObject, Layer=Water, `Custom/DepthOffsetLit` シェーダー)。**ワールドY=0.001 に置かれた水平面**で、マップ全域を覆うまで引き伸ばしてある。`Terrain` コンポーネントを持たないため、素の状態では `GetObjectType` が `-1` を返し、クリックが無反応になる。
 - これを解決するため、Sea には **`SeaObject` タグ**を付与し、`InputHandler.Start` で **`TerrainInputHandler` を AddComponent** する。`GetObjectType` は `SeaObject` タグを `InputObjectType.TERRAIN` に振り分けるため、海面クリックは地形クリックと同じ経路(`TerrainInputHandler.onClick`)に流れる。
-- これにより土地区画作成の点選択(`MODE_PARCEL_CREATION_POINT`)等が海面上でも有効になる。海上区画(`PARCEL_WATER`)として作成できる。
+- これにより土地区画作成の点選択(`MODE_PARCEL_CREATION_POINT`)等が海面上でも有効になる。**区画種別(`parcel_type`)はUnityもUIも送らず、バックエンドが区画ポリゴンの位置から自動判定する**: 海岸線の外周に接するなら沿岸(`PARCEL_SHORE`)、陸地とほとんど重ならなければ海上(`PARCEL_WATER`)、それ以外は陸地(`PARCEL_LAND`)の順に判定する。海岸線データを持たないマップでは判定材料が無いため陸地になる。海上に作った区画は洋上風力発電所のような海上構造物の敷地になる。
+- **海上では `Utils.GetGroundHeight` が海底(負のワールドY)を返す**ため、海上へ出す表示物は海面板より上へ逃がさないと海面に隠れて見えなくなる。地形マーカーは `TerrainInputHandler.ShowMarker` が `SeaMarkerMinY`(0.05m)、区画作成のプレビュー枠は `Editors/ParcelManager/ParcelPlanRenderer.AdjustPolygonHeight` が `SeaSurfaceY`(0.01m)をそれぞれ下限にクランプする。確定後の海上区画・海上の建物の接地高さは地形サンプルではなくバックエンドの区画の基準標高で決まる(`DataLoaders/AGENTS.md`)。
 - Sea には既に `VisualSeaObject`(`VisualHandlers/`)が付与されており、`InputObjectType.TERRAIN` として VisualModeHandler に登録済み。入力系もこれと同じタイプに揃える形。
 - `InputHandler.terrainLayerMask`(Layer 10 Groundのみ)には Water レイヤーが含まれないため、`UpdateTerrainPosition` での `posX/posZ` 更新には影響しない。海域では y=0 平面との交点フォールバックが効くため、`TerrainInputHandler.onClick` に渡る `clickPosition` は正しく算出される。
 

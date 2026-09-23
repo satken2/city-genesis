@@ -34,6 +34,12 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
     public static bool EnableRightAngleSnapping = false; // 90°直角吸着（デフォルトOFF）
     public static bool EnableStraightLineSnapping = false; // 直線延長吸着（デフォルトOFF）
     
+    /// <summary>
+    /// 海上でマーカーを置く最低ワールドY（メートル）。
+    /// 海面板は worldY=0.001 にあるので、マーカーの厚みぶん上へ逃がす。
+    /// </summary>
+    private const float SeaMarkerMinY = 0.05f;
+
     // 現在表示中のマーカー
     private GameObject currentMarker;
     private Vector3 lastMarkerPosition;
@@ -532,6 +538,10 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
 
     private void ShowMarker(Vector3 position)
     {
+        // 海上では地形標高が海底(worldY<0)なので、そのまま置くと海面板に隠れて
+        // どこを指しているか見えなくなる。
+        position.y = Mathf.Max(position.y, SeaMarkerMinY);
+
         // 既存のマーカーがある場合は位置を更新
         if (currentMarker != null)
         {

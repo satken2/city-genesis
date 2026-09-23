@@ -23,6 +23,8 @@ public class MasterDataStore : MonoBehaviour
 		public Dictionary<string, float> space_limits = new();
 		
 		public int? bd_type;
+		// 立地できる土地区画種類(PARCEL_*)。未設定は bd_type の既定(港湾=沿岸/その他=陸地)に倒す。
+		public int? parcel_type;
 		public int? building_shape;
 		public int? model_type;
 		public int? max_floors;

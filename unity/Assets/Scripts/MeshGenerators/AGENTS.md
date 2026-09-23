@@ -29,7 +29,7 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 
 | ファクトリ | ディスパッチ | 備考 |
 | --- | --- | --- |
-| `PathMeshFactory.GeneratePathMesh` | `path_variant` 固有辞書 → `model_type`(`path_master`のフィールド) | **ジェネレータの選択は `model_type` で行う**(`path_type` ではない)。`"default"`→`RoadPath`、`"track"`→`TrackPath`、`"station_house"`→`StationHousePath`、`"none"`→メッシュ生成なし(null返却)。`model_type` 未設定時は `path_type` から推論(PATH_TRACK/MONORAIL→track、それ以外→default)する過渡措置あり。variant 辞書は送電線1101/1102のPowerLinePathを登録する。それ以外のインフラパス(導水管など)は `model_type=default` でRoadPath扱い、body モデル未配置なら白ストリップフォールバックで描画される |
+| `PathMeshFactory.GeneratePathMesh` | `path_variant` 固有辞書 → `model_type`(`path_master`のフィールド) | **ジェネレータの選択は `model_type` で行う**(`path_type` ではない)。`"default"`→`RoadPath`、`"track"`→`TrackPath`、`"station_house"`→`StationHousePath`、`"none"`→メッシュ生成なし(null返却)。`model_type` 未設定時は `path_type` から推論(PATH_TRACK/MONORAIL→track、それ以外→default)する過渡措置あり。variant 辞書は送電線1101/1102のPowerLinePathを登録する。それ以外のインフラパスは `path_master` の `model_type` に従い、導水管1201のような `default` は RoadPath 扱いで body モデル未配置なら白ストリップフォールバックで描画される。海底送電線1104・海底石油パイプライン1301も `default` で、`body_material` に `PATH_METAL` を持つ(海底を這う設備だが、地表と同じ経路で描画される)。`model_type=none` なのは地下送電線1103だけである |
 | `NodeMeshFactory.GenerateNodeMesh` | 常に `RoadIntersectionMeshGenerator` | 接続パスが2本未満なら null。**インフラノード(`type`がインフラ財ビットを含む=`InfraNetworkUtil.IsInfraMask`)は呼び出し側(PathManager.UpdateNodeIntersectionMesh)が事前に除外する**ため交差点アスファルトは生成されない(DataLoaders/AGENTS.md の垂直コネクタの節を参照)。線路が2本以上接続するノードでは `TrackIntersectionMeshGenerator` がレールコネクタを追加計算する(下記「線路」の節参照) |
 | `ParcelMeshFactory.GenerateParcelMesh` | usage_id で辞書検索、未登録は `DefaultParcel` | 現状は常に Default |
 | 建物 | ファクトリを介さず `BuildingMeshBuilder.Generate(buildingData)` を直接呼ぶ | type/variant に応じた Body/Roof ビルダーへ内部で振り分け、該当なしは Default〜 |
@@ -92,7 +92,7 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 
 ## 交差点 (Paths/RoadIntersectionMeshGenerator.cs)
 
-`GenerateWithSections` は `PATH_CONVEYOR` と `PATH_ELECTRICITY` を接続パスから除外する。ケーブルには路面がないため、実ノード（駅との接続を含む）・ウェイポイントのダミーノードの両方で、充填板と切断断面を生成しない。スパンは元のアンカー位置まで描く。混在ノードでもケーブルを道路の交差点形状へ含めない。
+`GenerateWithSections` は `PATH_CONVEYOR`・`PATH_ELECTRICITY`(架空ケーブル)・`PATH_PIPELINE`(パイプライン)を接続パスから除外する。これらには接続点を埋める路面がないため、実ノード（駅との接続を含む）・ウェイポイントのダミーノードの両方で、充填板と切断断面を生成しない。スパンは元のアンカー位置まで描く。混在ノードでもこれらを道路の交差点形状へ含めない。**導水管(`PATH_WATER`)は除外せず、地表の管路として交差点形状を生成する。** インフラ種別をまとめて判定(`InfraNetworkUtil.IsInfraPathType`)しないのはこのためである。
 
 - `IntersectionPolygonUtil`の`PathEndSection`（切断位置・接線・法線・幅）と`IntersectionCorner`（隣接入口間の外周）を本線・路面・歩道・壁・レールが共有する。凸包や独立した矩形で入口を推測しない。
 - `PathManager`から未切断の描画点列と切断距離上限を渡す。`ConnectionPoints`はその点列上の断面中心であり、元のアンカー・制御点を書き換えず`Trim`する。`BuildSpline`は端部ハンドルを区間方向へ固定したBezier補間（内部はCatmull-Rom相当）。

@@ -1,6 +1,7 @@
 
 using UnityEngine;
 using System;
+using GeneratedModels;
 
 /// <summary>
 /// 土地区画オブジェクト用のInputHandler
@@ -118,12 +119,15 @@ public class ParcelInputHandler : MonoBehaviour, IInputHandler
     {
         Debug.Log($"土地区画 {parcelId} での建設が要求されました");
 
-        // 建物建設モードで土地区画がクリックされたら、そのままBuildingPlanManagerに通知する。
-        // 所有権の検証は建設確定時にバックエンド側で行われる。
+        // 建物建設モードで土地区画がクリックされたら、BuildingPlanManagerに通知する。
+        // 区画の実データを渡して立地条件(parcel_type)の判定を成立させる。
+        // 所有権など他の検証は建設確定時にバックエンド側で行われる。
         var buildingPlanManager = FindAnyObjectByType<BuildingPlanManager>();
         if (buildingPlanManager != null)
         {
-            buildingPlanManager.OnParcelClick(parcelId, Vector3.zero, null);
+            var parcelManager = FindAnyObjectByType<ParcelManager>();
+            ParcelSummary summary = parcelManager != null ? parcelManager.GetParcelSummary(parcelId) : null;
+            buildingPlanManager.OnParcelClick(parcelId, Vector3.zero, summary);
         }
         else
         {

@@ -237,6 +237,7 @@ public static class Constants
     public const int PATH_TRANSPORT = 10;
     public const int PATH_ELECTRICITY = 11;
     public const int PATH_WATER = 12;
+    public const int PATH_PIPELINE = 13;
     public const int PATH_STATION_HOUSE = 20;
     public const int DIR_BOTH = 0;
     public const int DIR_FORWARD = 1;

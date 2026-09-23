@@ -22,6 +22,14 @@ public partial class BuildingPlanManager : MonoBehaviour
     public float defaultConstructionRatio = 0.8f; // デフォルトの建蔽率
     public int defaultFloors = 3;           // デフォルトの階数
 
+    /// <summary>
+    /// 建設モードで選択中のバリアントが要求する土地区画種類(agent_master.parcel_type)。
+    /// 0 は「建設モード外」で、表示レイヤーから直接選ばれた建設可能フィルタがこれに当たる。
+    /// 建設可能区画のハイライト(ParcelManager)と区画クリックの検証が同じ条件を見るための持ち回しで、
+    /// バリアント単位の条件を bd_type 単位の FILTER_* モードでは表現できないため別に保持する。
+    /// </summary>
+    public static int SelectedParcelType { get; private set; }
+
     // 実際に使用する建設値（入力値）
     private float currentConstructionRatio = 0.8f;
     private int currentFloors = 3;
@@ -226,15 +234,19 @@ public partial class BuildingPlanManager : MonoBehaviour
                     bdType = agentMaster.bd_type.Value;
                 }
 
-                Debug.Log($"BuildingPlanManager: 建物バリアントを設定しました: {variant}, agent_type: {agentType}, bd_type: {bdType}");
+                SelectedParcelType = agentMaster.parcel_type ?? 0;
+
+                Debug.Log($"BuildingPlanManager: 建物バリアントを設定しました: {variant}, agent_type: {agentType}, bd_type: {bdType}, parcel_type: {SelectedParcelType}");
             }
             else
             {
+                SelectedParcelType = 0;
                 Debug.LogWarning($"BuildingPlanManager: agent_master (variant={variant}) が見つかりません");
             }
         }
         else
         {
+            SelectedParcelType = 0;
             Debug.LogWarning("BuildingPlanManager: MasterDataStore.Instanceがnullです");
             Debug.Log($"BuildingPlanManager: 建物バリアントを設定しました: {variant}");
         }
@@ -331,11 +343,11 @@ public partial class BuildingPlanManager : MonoBehaviour
             return;
         }
 
-        // 建物種類と土地区画種類の物理的互換性をチェック
-        // parcelDataが渡されている場合、parcel_typeとbd_typeの互換性を検証する
-        if (parcelData != null && !IsParcelTypeCompatibleWithBdType(parcelData.parcel_type, bdType))
+        // 建設可能区画のハイライトと同じ条件で立地を弾き、UIへ警告を出す。
+        // parcelData が無い呼び出しは判定できないので、バックエンドの検証に委ねて通す。
+        if (parcelData != null && !IsParcelTypeAllowed(parcelData.parcel_type, bdType))
         {
-            Debug.Log($"BuildingPlanManager: parcel_type={parcelData.parcel_type} は bd_type={bdType} と互換性がありません。クリックを無視します。");
+            Debug.Log($"BuildingPlanManager: parcel_type={parcelData.parcel_type} はバリアント {agentVariant} の立地条件({ResolveRequiredParcelType(bdType)})を満たしません。クリックを無視します。");
             // UIに通知して警告を表示
             if (IpcClient.Instance != null)
             {
@@ -439,7 +451,10 @@ public partial class BuildingPlanManager : MonoBehaviour
         isEditMode = false;
         editingBuildingId = -1;
         editingBuildingData = null;
-        
+        // 建設モードを抜けたら、表示レイヤーから選ぶ建設可能フィルタが
+        // 直前のバリアントの区画種別に引きずられないよう未選択へ戻す。
+        SelectedParcelType = 0;
+
         // 現在の建設値をデフォルト値にリセット
         currentConstructionRatio = defaultConstructionRatio;
         currentFloors = defaultFloors;
@@ -1060,37 +1075,23 @@ public partial class BuildingPlanManager : MonoBehaviour
     // ======================================================================
 
     /// <summary>
-    /// 建物種類（bd_type）と土地区画種類（parcel_type）が物理的に互換性があるかを判定する。
-    /// - 港湾施設（BUILDING_PORT）は沿岸土地区画（PARCEL_SHORE）にのみ建設可能
-    /// - それ以外の建物は通常土地区画（PARCEL_LAND）にのみ建設可能
+    /// 建物が立地できる土地区画種類（PARCEL_*）を返す。
+    /// 建設モードで選択中のバリアントがあれば agent_master.parcel_type をそのまま使い、
+    /// 無い場合（表示レイヤーから bd_type だけでフィルタを選んだ場合）は
+    /// 港湾=沿岸 / それ以外=陸地 という既定へ倒す。
     /// </summary>
-    public static bool IsParcelTypeCompatibleWithBdType(int parcelType, int bdType)
+    public static int ResolveRequiredParcelType(int bdType)
     {
-        if ((bdType & Constants.BUILDING_PORT) != 0)
-        {
-            return parcelType == Constants.PARCEL_SHORE;
-        }
-        return parcelType == Constants.PARCEL_LAND;
+        if (SelectedParcelType > 0) return SelectedParcelType;
+        return (bdType & Constants.BUILDING_PORT) != 0 ? Constants.PARCEL_SHORE : Constants.PARCEL_LAND;
     }
 
     /// <summary>
-    /// 建物種類（bd_type）に対応するパーセル表示フィルタモード（VisualModeParcel.FILTER_*）を返す。
-    /// 建物建設モードに入った際、建設可能な土地区画をハイライトするために使用する。
-    /// bd_typeが0または未知の場合は VisualMode.MODE_BOUNDARY を返す（フィルタなし境界表示）。
+    /// 土地区画種類（parcel_type）がその建物の立地条件を満たすかを判定する。
     /// </summary>
-    public static int BdTypeToParcelFilterMode(int bdType)
+    public static bool IsParcelTypeAllowed(int parcelType, int bdType)
     {
-        if (bdType == Constants.BUILDING_APARTMENT) return VisualModeParcel.FILTER_APARTMENT;
-        if (bdType == Constants.BUILDING_HOUSE) return VisualModeParcel.FILTER_HOUSE;
-        if (bdType == Constants.BUILDING_RETAIL) return VisualModeParcel.FILTER_COMMERCIAL;
-        if (bdType == Constants.BUILDING_FACTORY) return VisualModeParcel.FILTER_FACTORY;
-        if (bdType == Constants.BUILDING_OFFICE) return VisualModeParcel.FILTER_OFFICE;
-        if (bdType == Constants.BUILDING_FARM) return VisualModeParcel.FILTER_FARM;
-        if (bdType == Constants.BUILDING_MINE) return VisualModeParcel.FILTER_MINE;
-        if (bdType == Constants.BUILDING_PORT) return VisualModeParcel.FILTER_PORT;
-        if (bdType == Constants.BUILDING_OTHER || bdType == Constants.BUILDING_PUBLIC)
-            return VisualModeParcel.FILTER_OTHER;
-        return VisualMode.MODE_BOUNDARY;
+        return parcelType == ResolveRequiredParcelType(bdType);
     }
 
     /// <summary>

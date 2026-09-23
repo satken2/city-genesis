@@ -4367,7 +4367,7 @@ public partial class RoadPlanManager : MonoBehaviour
     /// 川の範囲内の各サンプル点で「路面絶対標高 ≥ 水面標高 + RIVER_BRIDGE_MIN_CLEARANCE(橋)」
     /// または「地形標高 − 路面標高 > バリアントのクリアランス高さ(完全埋設トンネル)」の
     /// いずれかを要求する。地形追従スパンは路面＝川床(水面より下)なので必ず違反になる。
-    /// インフラパス(電線・導水管)は地表を占有しないため対象外。
+    /// インフラパス(電線・導水管・パイプライン)は地表を占有しないため対象外。
     ///
     /// 標本化は BuildEditingElevationSegments の各セグメント(直線スパンはスパン全体、曲線は
     /// ベジエ分割片)を RiverCrossingSampleStep 間隔で分割し、追従セグメントは地形高さ、
@@ -4380,8 +4380,7 @@ public partial class RoadPlanManager : MonoBehaviour
             return cachedRiverViolations;
 
         var violations = new List<(RiverRecord river, List<Vector3> points)>();
-        if (!RiverStore.HasRivers || points.Count < 2
-            || PathType == Constants.PATH_ELECTRICITY || PathType == Constants.PATH_WATER)
+        if (!RiverStore.HasRivers || points.Count < 2 || InfraNetworkUtil.IsInfraPathType(PathType))
         {
             cachedRiverViolations = violations;
             return cachedRiverViolations;

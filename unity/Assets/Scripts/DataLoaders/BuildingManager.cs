@@ -1072,6 +1072,51 @@ public class BuildingManager : BaseApiDataManager
         return BuildingMeshBuilder.IsApplicableModelType(modelType);
     }
 
+    /// <summary>建物を地表からわずかに浮かせ、Zファイティングを避けるオフセット（メートル）。</summary>
+    private const float BuildingBaseLift = 0.01f;
+
+    /// <summary>
+    /// 建物の基底高（ワールドY）を決める。敷地の代表標高（parcel.altitude）に載せるか、
+    /// 建物中心の地形標高に載せるかの分岐をここに集約する。
+    ///
+    /// 海上区画（PARCEL_WATER）だけはモデル種別によらず必ず altitude を使う。
+    /// 地形をサンプルすると海底（worldY&lt;0）が返り、洋上風車などが海面下へ沈むため。
+    /// </summary>
+    private float ResolveBuildingBaseHeight(BuildingSummary buildingData, ParcelSummary parcel, float cx, float cz)
+    {
+        if (parcel == null)
+        {
+            parcel = ResolveParcelBelowSeaLevel(cx, cz);
+        }
+        bool useParcelAltitude = parcel != null
+            && (parcel.parcel_type == Constants.PARCEL_WATER || IsBuildingApplicableForAltitude(buildingData));
+        float ground = useParcelAltitude
+            ? parcel.altitude
+            : Utils.GetGroundHeight(new Vector3(cx, 1000f, cz));
+        return ground + BuildingBaseLift;
+    }
+
+    /// <summary>
+    /// 敷地が特定できない建物のうち、地形標高が海面より下にあるものだけ、中心点を含む区画を
+    /// 座標から逆引きする。一括取得のスキーマ（multi_agent）は parcel_id を持たないため、
+    /// 海上構造物はこの経路でしか敷地に辿り着けず、放っておくと海底へ沈む。
+    /// 陸上の建物で無駄な逆引きをしないよう、海面より下のときだけ引く。
+    /// </summary>
+    private ParcelSummary ResolveParcelBelowSeaLevel(float cx, float cz)
+    {
+        if (Utils.GetGroundHeight(new Vector3(cx, 1000f, cz)) >= 0f)
+        {
+            return null;
+        }
+        ParcelManager parcelManager = GetParcelManager();
+        if (parcelManager == null)
+        {
+            return null;
+        }
+        int parcelId = parcelManager.GetParcelIdAtPoint(new Vector3(cx, 0f, cz));
+        return parcelId > 0 ? parcelManager.GetParcelSummary(parcelId) : null;
+    }
+
     /// <summary>
     /// UpdateBuildingHeight で参照する ParcelManager のキャッシュ。
     /// 地形追従で多数の建物を処理する際、建物ごとに FindAnyObjectByType を
@@ -1093,7 +1138,6 @@ public class BuildingManager : BaseApiDataManager
         var idInfo = buildingGO.GetComponent<ObjectIdInfo>();
         if (idInfo != null && buildingDataCache.TryGetValue(idInfo.id, out BuildingSummary buildingData))
         {
-            float buildingBaseHeight;
             ParcelSummary parcel = null;
             if (buildingData.parcel_id > 0)
             {
@@ -1108,22 +1152,14 @@ public class BuildingManager : BaseApiDataManager
             float cx = cp != null && cp.Length >= 2 ? cp[0] : buildingGO.transform.position.x;
             float cz = cp != null && cp.Length >= 2 ? cp[1] : buildingGO.transform.position.z;
 
-            if (parcel != null && IsBuildingApplicableForAltitude(buildingData))
-            {
-                buildingBaseHeight = parcel.altitude + 0.01f;
-            }
-            else
-            {
-                float groundHeight = Utils.GetGroundHeight(new Vector3(cx, 1000f, cz));
-                buildingBaseHeight = groundHeight + 0.01f;
-            }
+            float buildingBaseHeight = ResolveBuildingBaseHeight(buildingData, parcel, cx, cz);
             buildingGO.transform.position = new Vector3(cx, buildingBaseHeight, cz);
         }
         else
         {
             Vector3 p = buildingGO.transform.position;
             float groundHeight = Utils.GetGroundHeight(new Vector3(p.x, 1000f, p.z));
-            buildingGO.transform.position = new Vector3(p.x, groundHeight + 0.01f, p.z);
+            buildingGO.transform.position = new Vector3(p.x, groundHeight + BuildingBaseLift, p.z);
         }
     }
 
@@ -1289,26 +1325,17 @@ public class BuildingManager : BaseApiDataManager
         {
             float cx = cp[0];
             float cz = cp[1];
-            float buildingBaseHeight;
             ParcelSummary parcel = null;
             if (buildingData.parcel_id > 0)
             {
-                ParcelManager parcelManager = UnityEngine.Object.FindAnyObjectByType<ParcelManager>();
+                ParcelManager parcelManager = GetParcelManager();
                 if (parcelManager != null)
                 {
                     parcel = parcelManager.GetParcelSummary(buildingData.parcel_id);
                 }
             }
 
-            if (parcel != null && IsBuildingApplicableForAltitude(buildingData))
-            {
-                buildingBaseHeight = parcel.altitude + 0.01f;
-            }
-            else
-            {
-                float groundHeight = Utils.GetGroundHeight(new Vector3(cx, 1000f, cz));
-                buildingBaseHeight = groundHeight + 0.01f;
-            }
+            float buildingBaseHeight = ResolveBuildingBaseHeight(buildingData, parcel, cx, cz);
             buildingGO.transform.position = new Vector3(cx, buildingBaseHeight, cz);
             RegisterBuildingCell(buildingData.agent_id, buildingGO.transform.position);
         }
@@ -1676,26 +1703,17 @@ public class BuildingManager : BaseApiDataManager
         {
             float cx = cp[0];
             float cz = cp[1];
-            float buildingBaseHeight;
             ParcelSummary parcel = null;
             if (buildingData.parcel_id > 0)
             {
-                ParcelManager parcelManager = UnityEngine.Object.FindAnyObjectByType<ParcelManager>();
+                ParcelManager parcelManager = GetParcelManager();
                 if (parcelManager != null)
                 {
                     parcel = parcelManager.GetParcelSummary(buildingData.parcel_id);
                 }
             }
 
-            if (parcel != null && IsBuildingApplicableForAltitude(buildingData))
-            {
-                buildingBaseHeight = parcel.altitude + 0.01f;
-            }
-            else
-            {
-                float groundHeight = Utils.GetGroundHeight(new Vector3(cx, 1000f, cz));
-                buildingBaseHeight = groundHeight + 0.01f;
-            }
+            float buildingBaseHeight = ResolveBuildingBaseHeight(buildingData, parcel, cx, cz);
             buildingGO.transform.position = new Vector3(cx, buildingBaseHeight, cz);
             RegisterBuildingCell(buildingData.agent_id, buildingGO.transform.position);
         }
