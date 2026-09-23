@@ -77,7 +77,8 @@ public sealed class RopewayCabinManager : MonoBehaviour
         if (worker == null && Time.unscaledTime >= nextScan)
         {
             nextScan = Time.unscaledTime + .5f;
-            worker = RenderWorkScheduler.Start(this, Refresh(store), "ropeway");
+            // 0.5秒ごとに起動し直す常駐の走査なので、初期描画の完了判定を待たせない。
+            worker = RenderWorkScheduler.Start(this, Refresh(store), "ropeway", () => false);
         }
     }
 

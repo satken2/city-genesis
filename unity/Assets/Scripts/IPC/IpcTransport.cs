@@ -126,7 +126,7 @@ public class MmfReader : IDisposable
     /// <summary>
     /// リングバッファから1メッセージを読み出す。
     /// 呼び出し元がMutexを保持している前提。
-    /// nullの場合は読み出せるメッセージがない（またはラップ処理で再試行が必要）。
+    /// nullの場合は読み出せるメッセージがない。
     /// </summary>
     private string TryReadMessageLocked()
     {
@@ -136,18 +136,22 @@ public class MmfReader : IDisposable
         if (readPos == writePos)
             return null;
 
-        // バッファ末尾にlengthプレフィクスが収まらない → ラップ
-        if (readPos + 4 > BUFFER_SIZE)
+        // 末尾にlengthプレフィクスが収まらない、またはラップマーカー(length=0)なら先頭へ戻る。
+        // 先頭に書かれたメッセージは同じ書き込み通知の中で続けて読む
+        // (ここで打ち切ると、次の書き込み通知が来るまで取り残される)。
+        if (readPos + 4 > BUFFER_SIZE || _view.ReadInt32(HEADER_SIZE + readPos) == 0)
         {
+            readPos = 0;
             _view.Write(4, 0);
-            return null;
+            if (readPos == writePos)
+                return null;
         }
 
         int length = _view.ReadInt32(HEADER_SIZE + readPos);
-        if (length == 0)
+        if (length <= 0 || length > BUFFER_SIZE - readPos - 4)
         {
-            // ラップマーカー
-            _view.Write(4, 0);
+            // 長さが壊れている。例外で読み取りスレッドを止めず、未読分を捨てて以降の通信を生かす。
+            _view.Write(4, writePos);
             return null;
         }
 
@@ -230,9 +234,10 @@ public class MmfWriter : IDisposable
                     WriteAt(writePos, data);
                     _view.Write(0, writePos + messageSize);
                 }
-                else if (messageSize <= atStart)
+                else if (messageSize < atStart)
                 {
-                    // ラップ: 現在位置にマーカーを書き、先頭から書く
+                    // ラップ: 現在位置にマーカーを書き、先頭から書く。
+                    // ReadPos ちょうどまで埋めると WritePos == ReadPos(=空)と区別できないため、等号は許さない。
                     if (writePos + 4 <= BUFFER_SIZE)
                         _view.Write(HEADER_SIZE + writePos, 0); // ラップマーカー
                     WriteAt(0, data);

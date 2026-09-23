@@ -61,14 +61,6 @@
         "label": "셋째 자녀 보유율(이민)",
         "desc": "이민 가구 생성 시 자녀를 3명 보유할 확률."
       },
-      "IMMIGRATION_MIN_COUNT": {
-        "label": "최저 이민 가구 수(1에포크)",
-        "desc": "1에포크당 최저 이민 유입 가구 수. 소도시에서의 보정용."
-      },
-      "IMMIGRATION_STOP_UNEMPLOYMENT": {
-        "label": "이민 정지 실업률",
-        "desc": "이 실업률 이상이 되면 이민 유입이 정지됩니다."
-      },
       "IMMIGRATION_ADULT_AGE_MIN": {
         "label": "이민 성인의 최소 연령",
         "desc": "이민으로 유입되는 성인의 최소 연령."

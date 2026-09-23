@@ -23,7 +23,7 @@ HTTP(バックエンド通信)とは別系統であることに注意。Unityと
 
 `drive:open`(UI→Unity)はCockpitのブルドーザー右隣のボタンが送る。paramsは`drive.json`の現在言語のキー→文言の辞書。`IpcClient`が`DriveMode.Ensure().Open`へ渡し、選択パネルとHUDはUnityが保持する。同イベントを表示中に受けると終了する。Rustの`send_window_action`による汎用転送を使い、逆方向の状態配信・新規ウィンドウは持たない。
 
-`ambience:volume {volume}`はTauri→Unityの音量通知（master×sfx、0〜1）。Cockpitが設定変更時と2秒ごとに送り、CameraAmbience・ConstructionAmbience・VehicleAmbience・VisualEffectManagerが所有するAudioSourceへ適用する。高度と天候の音響制御はUnity内で完結する。
+`ambience:volume {volume}`はTauri→Unityの音量通知（master×sfx、0〜1）。Cockpitが設定変更時とUnity起動時(`graphic-reconnected`)に送り、CameraAmbience・ConstructionAmbience・VehicleAmbience・VisualEffectManagerが所有するAudioSourceへ適用する。`IpcClient`は最新の受信値を保持し、`OnAmbienceVolume`へ購読した時点で即時通知する(購読前に届いた1通を取りこぼすと次の設定変更まで無音になるため)。高度と天候の音響制御はUnity内で完結する。
 
 天気は`weather:query`/`weather:set`（UI→Unity、setはidまたはnull=自動）と`weather:state`（Unity→Cockpit、id/locked/rain/presets）で同期する。WeatherControllerが正を保持し、RustはCockpitに中継する。表示名はTauriのweather.json。経済APIへの書き込みは行わない。
 
@@ -46,6 +46,8 @@ HTTP(バックエンド通信)とは別系統であることに注意。Unityと
 ## 知らないとわからないこと
 
 - **MMFの容量`CAPACITY`(1MiB)は`MmfReader`/`MmfWriter`とtauri側`src-tauri/src/ipc.rs`の同名定数の3箇所を必ず揃えること。** 共有メモリは両プロセスとも`CreateOrOpen`で開くため先に起動した側のサイズが採用され、食い違うと片側だけが範囲外を読む。1メッセージがバッファに収まらないと送信側が失敗し、**受信側は何も起きないだけなので「UIは動くがUnityだけ更新が止まる」というサイレント故障になる**(土地区画の一括作成プレビューは数百区画ぶんのポリゴンを載せるため、旧8KBでは広い範囲を指定すると必ず溢れていた)。
+- **Unity不在の間もUI→Unityの送信はMMFに溜まり、次に起動したUnityがまとめて読む。** 満杯になるとTauri側の送信が`MMF buffer full`で失敗し続ける(Editorで再生を止めたままTauriを起動しておくと、周期送信が約2時間で1MiBを埋める)。**このため周期的に送り続けるメッセージは置かない。** Unity再起動後の再同期はUnityが送る`system:graphic_ready`(UIでは`graphic-reconnected`)を起点にするか、Unity側が起動時に自分から状態を送る(`weather:state`など)。
+- 読み取り側はラップマーカーを越えて先頭のメッセージまで同じ通知の中で読み進める(1通知で読み切らないと、次の書き込みまでメッセージが取り残される)。長さが壊れていたら例外で読み取りスレッドを止めず、未読分を捨てて通信を続ける。
 - イベント名は`source`/`destination`と`event`文字列で識別される。エンベロープの用語上、Unity側は"parent"と呼ばれる(Tauri側の`send_to_parent`はUnity宛て送信のこと)。
 - **曲線/直線・吸着の設定系イベントは廃止済み**: `edit_path:change_curved` / `view:set_snapping` は存在しない。曲線/直線・吸着の真実源はUnity側(Ctrlラジアルメニュー、`Editors/RoadEditor/RoadEditControlMenu`)にあり、曲線モードは `edit_path:update_shape` の `is_curved`(点列が空でも常送)としてUIへ逆流する。
 - **標高・盛土はパネルにもステッパーが残る**: `edit_path:change_node`(標高) / `edit_path:change_embankment`(盛土)はUIパネルのステッパー変更をUnityへ送るイベントとして現存(`OnEditPathChangeNode`/`OnEditPathChangeEmbankment`→`RoadPlanManager.OnChangeNodeFromIpc`/`OnChangeEmbankmentFromIpc`)。node_index=-1 は次回配置ノードの値を指す。逆にUnityのキー操作や選択で値が変わると `edit_path:select_node`(標高・盛土を含む)でパネルへ返す双方向同期。既存ノードを選んで数値で微調整する用途のため両方に口を残している。
@@ -88,6 +90,6 @@ edit_path:change_passage_modeのpassage_mode（elevated/ground/underground）は
 
 ## 初期ロードの表示契約
 
-UI→Unityは既存の `ui:action` Envelopeの `payload.action` / `payload.params` を使う。`game:loading` は黒画面と入力抑制を開始する。`game:start` のparamsは `{loading_id: 整数}` で、描画準備を開始するが黒画面は維持する。Unity→UIの `game:loaded` はpayload直下の `{loading_id: 整数}` を返す。初期描画完了後、表示解禁まで1秒間隔で再送し、Rustは現在の要求世代だけを受理する。UI→Unityの `game:reveal` は同じloading_idをparamsに載せ、準備済みの世代だけを表示する。
+UI→Unityは既存の `ui:action` Envelopeの `payload.action` / `payload.params` を使う。`game:loading` は黒画面と入力抑制を開始する。`game:start` のparamsは `{loading_id: 整数}` で、描画準備を開始するが黒画面は維持する。Unity→UIの `game:loaded` はpayload直下の `{loading_id: 整数}` を返す。初期描画完了後、表示解禁まで1秒間隔で再送し、Rustは現在の要求世代だけを受理する。UI→Unityの `game:reveal` は同じloading_idをparamsに載せ、`game:loaded` を通知済みの世代だけを表示する。受信した瞬間の準備状態は再判定しない（Tipsは既に閉じているため、ここで捨てると黒画面から戻れなくなる）。
 
 `system:graphic_ready` はプロセスの起動完了であり、都市の描画完了ではない。遅延起動・再接続ではRustが開始要求を再送する。ゲーム中の再接続でもTipsを使い、初期設定は再表示しない。

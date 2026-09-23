@@ -172,7 +172,7 @@ public static class ConstructionPathBuilder
             if (collision != null) colliderParts.Add(collision);
         }
         if ((elevated ? progress > 0f : progress < 1f) && PathDrawContext.CurrentDrawLod != DrawLod.Far)
-            PlaceVehicles(root, points, width, FrontFraction(progress, elevated), elevated, PathMeshFactory.GetModelType(path) == "track", underground ? clearance : float.PositiveInfinity, progress >= .25f);
+            PlaceVehicles(root, points, width, elevated && progress >= .25f ? built : FrontFraction(progress, elevated), elevated, PathMeshFactory.GetModelType(path) == "track", underground ? clearance : float.PositiveInfinity, progress >= .25f);
 
         Mesh collider = null;
         if (colliderParts.Count > 0)
@@ -208,28 +208,49 @@ public static class ConstructionPathBuilder
         string[] models = elevated ? new[] { installingDeck ? "construction_crane" : "construction_excavator", "construction_excavator" }
             : track ? new[] { "construction_excavator", "construction_roller" }
             : new[] { "construction_paver", "construction_roller", "construction_excavator" };
+        bool onDeck = elevated && installingDeck;
+        float availableEnd = front * length;
         for (int i = 0; i < models.Length; i++)
         {
-            float distance = front * length + (elevated && installingDeck ? -4f - i * 9f : i == 0 ? 3f : i == 1 ? -5f : 11f);
+            var prefab = ModelManager.Instance.GetModel("Models/Props/" + models[i]);
+            if (prefab == null) continue;
+            Bounds bounds = default;
+            float distance = front * length + (i == 0 ? 3f : i == 1 ? -5f : 11f);
+            if (onDeck)
+            {
+                var prefabBounds = PillarClearance.GetPrefabBounds(prefab);
+                if (!prefabBounds.HasValue) continue;
+                bounds = Utils.TransformBounds(prefabBounds.Value, Matrix4x4.Scale(prefab.transform.localScale));
+                if (Mathf.Max(Mathf.Abs(bounds.min.x), Mathf.Abs(bounds.max.x)) > width * .5f) continue;
+                // 架設済みの桁端から実寸と余白を確保し、次の車両は先行車の後端より手前へ置く。
+                distance = availableEnd - Mathf.Max(4f, bounds.max.z + .5f);
+                if (distance + bounds.min.z < .5f) continue;
+            }
             // 短い道路で端へクランプして車両同士を重ねない。
             if (distance < 3f || distance > length - 3f) continue;
             var sample = PathDrawContext.SlicePolylineByFraction(points, distance / length, Math.Min(1, (distance + .5f) / length));
             if (sample.Count < 2) continue;
-            var prefab = ModelManager.Instance.GetModel("Models/Props/" + models[i]);
-            if (prefab == null) continue;
             Vector3 forward = sample[sample.Count - 1] - sample[0];
-            forward.y = 0f;
+            if (!onDeck) forward.y = 0f;
             if (forward.sqrMagnitude < .0001f) continue;
+            Quaternion rotation = Quaternion.LookRotation(forward);
             Vector3 position = sample[0];
             if (Utils.GetGroundHeight(position) - position.y > tunnelClearance) continue;
-            // 高架の工事車両もパス中心線上の地表へ接地する。桁架設後の仕上げ中は配置を固定する。
-            position.y = Utils.GetGroundHeight(position) + RoadPartHeights.ROAD_SPLINE_OFFSET;
-            if (!elevated && distance >= front * length)
-                position.y += LocalConstants.CONSTRUCTION_DIRT_THICKNESS + ConstructionMeshUtil.DirtNoise(position.x, position.z) * LocalConstants.CONSTRUCTION_DIRT_BUMP_AMPLITUDE;
-            else if (!elevated) position.y = sample[0].y + RoadPartHeights.BODY_ABOVE_SPLINE;
+            if (onDeck)
+            {
+                position += Vector3.up * RoadPartHeights.BODY_ABOVE_SPLINE - rotation * Vector3.up * bounds.min.y;
+                availableEnd = distance + bounds.min.z;
+            }
+            else
+            {
+                position.y = Utils.GetGroundHeight(position) + RoadPartHeights.ROAD_SPLINE_OFFSET;
+                if (!elevated && distance >= front * length)
+                    position.y += LocalConstants.CONSTRUCTION_DIRT_THICKNESS + ConstructionMeshUtil.DirtNoise(position.x, position.z) * LocalConstants.CONSTRUCTION_DIRT_BUMP_AMPLITUDE;
+                else if (!elevated) position.y = sample[0].y + RoadPartHeights.BODY_ABOVE_SPLINE;
+            }
             var vehicle = UnityEngine.Object.Instantiate(prefab, root.transform);
             vehicle.name = models[i];
-            vehicle.transform.SetPositionAndRotation(position, Quaternion.LookRotation(forward));
+            vehicle.transform.SetPositionAndRotation(position, rotation);
             foreach (var renderer in vehicle.GetComponentsInChildren<MeshRenderer>())
             {
                 var materials = renderer.sharedMaterials;

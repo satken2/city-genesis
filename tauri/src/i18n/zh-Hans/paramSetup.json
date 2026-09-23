@@ -61,14 +61,6 @@
         "label": "第3个子女持有率（移民）",
         "desc": "移民家庭生成时拥有3个子女的概率。"
       },
-      "IMMIGRATION_MIN_COUNT": {
-        "label": "最低移民家庭数（每纪元）",
-        "desc": "每纪元最低的移民流入家庭数。用于小城市的修正。"
-      },
-      "IMMIGRATION_STOP_UNEMPLOYMENT": {
-        "label": "移民停止失业率",
-        "desc": "失业率达到该值以上时，移民流入停止。"
-      },
       "IMMIGRATION_ADULT_AGE_MIN": {
         "label": "成年移民的最小年龄",
         "desc": "作为移民流入的成年人的最小年龄。"

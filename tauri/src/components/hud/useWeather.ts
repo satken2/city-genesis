@@ -17,7 +17,6 @@ export function useWeather(visible: boolean, templateMode: boolean) {
     if (!visible) { updateWeather(null); setFailed(false); return; }
     let disposed = false;
     let unlisten: (() => void) | undefined;
-    let timer: ReturnType<typeof setInterval> | undefined;
     void listen<WeatherState>(IPC_EVENT_WEATHER_STATE, ({ payload }) => {
       if (disposed || !payload || typeof payload.id !== "string" || !Array.isArray(payload.presets)) return;
       updateWeather(payload);
@@ -25,11 +24,11 @@ export function useWeather(visible: boolean, templateMode: boolean) {
     }).then((fn) => {
       if (disposed) { fn(); return; }
       unlisten = fn;
+      // 問い合わせは表示開始時の1回だけ。Unityは起動時と天候の変化時に自分から weather:state を送る。
+      // 周期的に問い合わせると、Unityが不在の間にMMFへ溜まり続けて満杯にする。
       void queryWeather().catch(console.error);
-      // Unityの再起動・通知取りこぼしから復帰する。抽選や音の再スタートは行わない。
-      timer = setInterval(() => void queryWeather().catch(console.error), 10000);
     }).catch(console.error);
-    return () => { disposed = true; unlisten?.(); if (timer) clearInterval(timer); };
+    return () => { disposed = true; unlisten?.(); };
   }, [visible]);
 
   useEffect(() => {

@@ -46,7 +46,7 @@ Cockpitの日付の横に絵文字と天候名を表示する。`useHudSession.t
 
 Cockpitは幅800px・高さ76pxの独立したWebViewウィンドウである。CSSの絶対配置で候補を外にはみ出させるとウィンドウ境界で切れるため、WebView2の標準選択ポップアップを使う。画面下端では上側の空き領域へ展開され、候補が収まらなければスクロールできる。キーボードで選択・確定・Escで取消しもできる。
 
-`weather:query`（UI→Unity）は現在値の問い合わせ、`weather:set`（UI→Unity）は`{id: string | null}`の選択。nullは固定解除。Unityは選択・固定切替・抽選後および問い合わせ時に`weather:state`（Unity→UI）を返す。応答は`{id, locked, rain, presets:[{id, weight, rain}]}`で、rainは0〜3。IDと候補一覧の正はUnity、表示名と絵文字はTauriにある。未知のIDでは変更せず現在値を返す。Cockpitは購読完了後に問い合わせ、10秒周期の再問い合わせで通知の取りこぼしやUnity再起動から復帰する。UIは応答を受けて表示と雨音を更新する。
+`weather:query`（UI→Unity）は現在値の問い合わせ、`weather:set`（UI→Unity）は`{id: string | null}`の選択。nullは固定解除。Unityは選択・固定切替・抽選後および問い合わせ時に`weather:state`（Unity→UI）を返す。応答は`{id, locked, rain, presets:[{id, weight, rain}]}`で、rainは0〜3。IDと候補一覧の正はUnity、表示名と絵文字はTauriにある。未知のIDでは変更せず現在値を返す。Cockpitは購読完了後に1回だけ問い合わせる。Unityは起動時にも自分から`weather:state`を送るので、Unityの再起動後もUIは再問い合わせなしで復帰する。UIは応答を受けて表示と雨音を更新する。
 
 3Dビューにキーボードフォーカスがある状態で操作する。Unity EditorではGameビューを選択する。
 

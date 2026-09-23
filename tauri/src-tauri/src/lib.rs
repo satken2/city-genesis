@@ -2017,6 +2017,10 @@ pub fn run() {
                 let _ = main_window.hide();
             }
 
+            // コックピットは読み込み直後に音量をUnityへ送り、以後は設定変更とUnity起動時にしか送らない。
+            // ウィンドウより後にIPCを開くと、その1通が「IPC not initialized」で失われるため先に開く。
+            ipc::start_ipc(app.handle().clone(), setup_state.clone());
+
             let loaded_settings = settings::load_settings(app.handle());
             {
                 let mut guard = setup_state.lock();
@@ -2152,7 +2156,6 @@ pub fn run() {
             .build()
             .expect("failed to create notification window");
 
-            ipc::start_ipc(app.handle().clone(), setup_state.clone());
             start_session_polling(setup_state.clone(), app.handle().clone());
             Ok(())
         })

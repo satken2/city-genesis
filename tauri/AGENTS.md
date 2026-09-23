@@ -37,7 +37,7 @@ Unityのグラフィックの上に透明なWebViewウィンドウとして重�
 | ファイル | 内容 |
 | --- | --- |
 | `api.ts` | バックエンドHTTP通信の共通窓口。`fetchApi<T>()`と`buildApiUrl()`。**fetchを直接書かないこと**。fetchApiはAcceptヘッダでMessagePackを受け入れ宣言し、バックエンドの対応エンドポイント(bbox一括取得系)からはバイナリで受信して`@msgpack/msgpack`でデコードする(Content-Typeで自動判別。呼び出し側は形式を意識しない) |
-| `ipc.ts` | Unityへのイベント送信(`sendChangeState`, `sendEditBuildingConfirm`等)。**Unityに何か伝えたいときはここに関数を追加する**。3Dビューの表示切替は2系統: `sendChangeDisplay`(=ユーザーの選択。Unityが通常モードの設定として記憶する)と`sendViewApplyPreset`(=ウィンドウを開いている間だけの一時的な差し替え。閉じると元の表示へ戻る)。**編集作業中だけ表示を変えたいときに前者を使ってはいけない**(ユーザーが選んでいた表示を上書きしてしまう) |
+| `ipc.ts` | Unityへのイベント送信(`sendChangeState`, `sendEditBuildingConfirm`等)。**Unityに何か伝えたいときはここに関数を追加する**。**`setInterval`などで周期的に送ってはいけない**(Unity不在の間の送信はMMFに溜まり続け、約2時間で満杯になって以降の送信が`MMF buffer full`で全滅する)。Unity起動後の再同期は`graphic-reconnected`イベントを受けて送る。3Dビューの表示切替は2系統: `sendChangeDisplay`(=ユーザーの選択。Unityが通常モードの設定として記憶する)と`sendViewApplyPreset`(=ウィンドウを開いている間だけの一時的な差し替え。閉じると元の表示へ戻る)。**編集作業中だけ表示を変えたいときに前者を使ってはいけない**(ユーザーが選んでいた表示を上書きしてしまう) |
 | `notification.ts` | 通知ウィンドウの表示(`showNotification`) |
 | `log.ts` | Rust側ファイルログ(実行ファイル横の`city-genesis/tauri.log`)へのINFO転送(`logInfoToFile`)。本番でconsoleが見えないため、無言で止まりうる重要フロー(エポック実行など)の進行記録に使う。なお未キャッチ例外・unhandledrejection・`console.error`は`main.tsx`が自動で同ログへERROR転送する |
 | `constructionTags.ts` | 建設プロジェクトのタグ(建物・道路に付ける単一の分類ラベル)の共通処理。`fetchTags`(候補一覧) / `fetchTagProjects`(タグ別の工事一覧+集計) / `fetchEntityTag`(**1件の現在値。`tag`は単体取得のレスポンスに載らないので専用の口 GET /tags/object から引く**) / `saveEntityTag`(PATCH agents/paths の`tag`) / `deleteTag` / `TAGS_CHANGED_EVENT`(タグ変更をウィンドウ間に知らせるグローバルイベント名)。**表示・非表示はここでは扱わない**(`hooks/useObjectVisibility`) |

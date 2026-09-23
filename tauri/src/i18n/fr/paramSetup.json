@@ -61,14 +61,6 @@
         "label": "Probabilité de trois enfants (migrants)",
         "desc": "Probabilité qu'un ménage migrant apparaisse avec trois enfants."
       },
-      "IMMIGRATION_MIN_COUNT": {
-        "label": "Nombre minimal de ménages migrants (par époque)",
-        "desc": "Nombre minimal de ménages migrants arrivant par époque. Correctif pour les petites villes."
-      },
-      "IMMIGRATION_STOP_UNEMPLOYMENT": {
-        "label": "Chômage interrompant la migration",
-        "desc": "À partir de ce taux de chômage, l'arrivée de migrants s'interrompt."
-      },
       "IMMIGRATION_ADULT_AGE_MIN": {
         "label": "Âge minimal des migrants adultes",
         "desc": "Âge minimal des adultes arrivant comme migrants."

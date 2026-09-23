@@ -112,7 +112,19 @@ public class IpcClient : MonoBehaviour
     public event Action<string, int, bool> OnRemoveObjectConfirmResult;
     public event Action OnGameStart;
     public event Action OnGameEnd;
-    public event Action<float> OnAmbienceVolume;
+    // 音量は設定変更時とUnity起動通知(system:graphic_ready)への応答でしか届かないため、
+    // 購読より先に届いた値を取りこぼすと次の設定変更まで無音になる。購読時に受信済みの最新値を即時通知する。
+    private Action<float> _onAmbienceVolume;
+    private float? _ambienceVolume;
+    public event Action<float> OnAmbienceVolume
+    {
+        add
+        {
+            _onAmbienceVolume += value;
+            if (_ambienceVolume.HasValue) value(_ambienceVolume.Value);
+        }
+        remove { _onAmbienceVolume -= value; }
+    }
     public event Action OnWeatherQuery;
     public event Action<string> OnWeatherSet;
     // 接道(front_path)の矢印表示。土地区画詳細パネルの開閉に対応する。
@@ -749,7 +761,8 @@ public class IpcClient : MonoBehaviour
                     break;
 
                 case "ambience:volume":
-                    OnAmbienceVolume?.Invoke(GetParamFloat(payload, "volume"));
+                    _ambienceVolume = GetParamFloat(payload, "volume");
+                    _onAmbienceVolume?.Invoke(_ambienceVolume.Value);
                     break;
 
                 case "weather:query":

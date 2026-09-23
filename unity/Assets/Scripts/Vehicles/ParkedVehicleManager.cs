@@ -59,7 +59,8 @@ public sealed class ParkedVehicleManager : MonoBehaviour
         if (worker == null && Time.unscaledTime >= nextScan)
         {
             nextScan = Time.unscaledTime + ScanInterval;
-            worker = RenderWorkScheduler.Start(this, Refresh(center), "parkedVehicles");
+            // 0.5秒ごとに起動し直す常駐の走査なので、初期描画の完了判定を待たせない。
+            worker = RenderWorkScheduler.Start(this, Refresh(center), "parkedVehicles", () => false);
         }
     }
 

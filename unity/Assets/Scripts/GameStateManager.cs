@@ -24,6 +24,7 @@ public class GameStateManager : MonoBehaviour
     public bool IsWorldVisible { get; private set; }
     private int loadingId;
     private bool waitingForInitialLoad;
+    private bool loadedNotified;
     private int readyFrames;
     private float nextReadyNotification;
 
@@ -31,6 +32,7 @@ public class GameStateManager : MonoBehaviour
     {
         IsWorldVisible = false;
         waitingForInitialLoad = false;
+        loadedNotified = false;
         readyFrames = 0;
     }
 
@@ -42,9 +44,14 @@ public class GameStateManager : MonoBehaviour
         nextReadyNotification = 0f;
     }
 
+    /// <summary>
+    /// UIの開始ボタンは game:loaded を受けてから押せるので、通知済みの世代なら表示を解禁する。
+    /// 押した瞬間の準備状態は再判定しない。周期的な描画処理で readyFrames が一時的に0へ戻ると、
+    /// UIは既にTipsを閉じているため開始操作が捨てられ、黒画面のまま戻れなくなる。
+    /// </summary>
     public void RevealWorld(int id)
     {
-        if (id != loadingId || readyFrames < 3) return;
+        if (id != loadingId || !loadedNotified) return;
         IsWorldVisible = true;
         waitingForInitialLoad = false;
     }
@@ -60,6 +67,7 @@ public class GameStateManager : MonoBehaviour
         if (readyFrames >= 3 && Time.unscaledTime >= nextReadyNotification)
         {
             IpcClient.Instance?.EmitGameLoaded(loadingId);
+            loadedNotified = true;
             nextReadyNotification = Time.unscaledTime + 1f;
         }
     }

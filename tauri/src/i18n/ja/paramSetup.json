@@ -61,14 +61,6 @@
         "label": "第3子保有率（移民）",
         "desc": "移民世帯スポーン時に子供を3人持つ確率。"
       },
-      "IMMIGRATION_MIN_COUNT": {
-        "label": "最低移民世帯数（1エポック）",
-        "desc": "1エポックあたりの最低移民流入世帯数。小都市での補正用。"
-      },
-      "IMMIGRATION_STOP_UNEMPLOYMENT": {
-        "label": "移民停止失業率",
-        "desc": "この失業率以上になると移民の流入が停止する。"
-      },
       "IMMIGRATION_ADULT_AGE_MIN": {
         "label": "移民成人の最小年齢",
         "desc": "移民として流入する成人の最小年齢。"

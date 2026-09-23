@@ -35,7 +35,10 @@ Offset  8: Ring buffer data (1048568 bytes)
 
 - 書き込み側がMutexを取得し、リングバッファにメッセージを書き込み、Mutexを解放してEventをSetする。
 - 読み取り側がEventのWaitOneで待機し、通知されたらMutexを取得してメッセージを読み出す。
-- バッファ末尾にメッセージが収まらない場合、ラップマーカー（length = 0）を書き、メッセージを先頭から書く。読み取り側はラップマーカーを見たらReadPosを0にリセットする。
+- バッファ末尾にメッセージが収まらない場合、ラップマーカー（length = 0）を書き、メッセージを先頭から書く。読み取り側はラップマーカーを見たら（または末尾にlengthが収まらなければ）ReadPosを0にリセットし、同じ通知の中で先頭のメッセージを続けて読む。
+- WritePos == ReadPos は「空」を意味する。ラップ時に先頭の空きをReadPosちょうどまで埋めると満杯と空が区別できなくなるため、書き込み側はその書き込みを拒否する。
+- 読み取り側はlengthが範囲外なら未読分を捨て（ReadPosをWritePosに合わせ）、以降の通信を続ける。
+- 受信側のプロセスが起動していない間の送信もバッファに溜まり、受信側は起動後にまとめて読む。空きが足りない書き込みは `MMF buffer full` で失敗する。このため一定周期で送り続けるメッセージは置かない。受信側の再起動後の再同期は、グラフィックが送る `system:graphic_ready` を起点にするか、グラフィック側が起動時に自分から状態を送る。
 
 # イベント種別
 
@@ -436,7 +439,7 @@ world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地�
 
 # 天候の表示と選択
 
-`ambience:volume {volume}`はTauri→Unityの音量通知（master×sfx、0〜1）。Cockpitが設定変更時と2秒ごとに送り、CameraAmbience（環境音）・ConstructionAmbience（工事音）・VehicleAmbience（走行音）・VisualEffectManager（完成・解体音）が所有するAudioSourceへ適用する。高度と天候の音響制御はUnity内で完結する。
+`ambience:volume {volume}`はTauri→Unityの音量通知（master×sfx、0〜1）。Cockpitが設定変更時とグラフィックの起動通知（`system:graphic_ready`）の受信時に送り、CameraAmbience（環境音）・ConstructionAmbience（工事音）・VehicleAmbience（走行音）・VisualEffectManager（完成・解体音）が所有するAudioSourceへ適用する。高度と天候の音響制御はUnity内で完結する。
 
 天候の正はUnityにあり、バックエンドへの書き込みや経済パラメータは追加しない。Cockpitは購読後に問い合わせ、応答した天候に合わせて表示と環境音を更新する。
 
@@ -482,7 +485,7 @@ world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地�
 
 ## 初期ロードの表示契約
 
-UI→Unityは既存の `ui:action` Envelopeの `payload.action` / `payload.params` を使う。`game:loading` は黒画面と入力抑制を開始する。`game:start` のparamsは `{loading_id: 整数}` で、描画準備を開始するが黒画面は維持する。Unity→UIの `game:loaded` はpayload直下の `{loading_id: 整数}` を返す。初期描画完了後、表示解禁まで1秒間隔で再送し、Rustは現在の要求世代だけを受理する。UI→Unityの `game:reveal` は同じloading_idをparamsに載せ、準備済みの世代だけを表示する。
+UI→Unityは既存の `ui:action` Envelopeの `payload.action` / `payload.params` を使う。`game:loading` は黒画面と入力抑制を開始する。`game:start` のparamsは `{loading_id: 整数}` で、描画準備を開始するが黒画面は維持する。Unity→UIの `game:loaded` はpayload直下の `{loading_id: 整数}` を返す。初期描画完了後、表示解禁まで1秒間隔で再送し、Rustは現在の要求世代だけを受理する。UI→Unityの `game:reveal` は同じloading_idをparamsに載せ、`game:loaded` を通知済みの世代だけを表示する。受信した瞬間の準備状態は再判定しない（Tipsは既に閉じているため、ここで捨てると黒画面から戻れなくなる）。
 
 `system:graphic_ready` はプロセスの起動完了であり、都市の描画完了ではない。遅延起動・再接続ではRustが開始要求を再送する。ゲーム中の再接続でもTipsを使い、初期設定は再表示しない。
 

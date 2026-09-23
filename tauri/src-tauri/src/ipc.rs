@@ -139,7 +139,8 @@ impl MmfChannel {
                     self.write_at(write_pos, data);
                     write_i32(self.inner.buffer, 0, (write_pos + message_size) as i32);
                     Ok(())
-                } else if message_size <= at_start {
+                } else if message_size < at_start {
+                    // ReadPos ちょうどまで埋めると WritePos == ReadPos(=空)と区別できないため、等号は許さない。
                     if write_pos + 4 <= BUFFER_SIZE {
                         write_i32(self.inner.buffer, HEADER_SIZE + write_pos, 0);
                     }
@@ -179,40 +180,48 @@ impl MmfChannel {
     fn read_message(&self) -> Option<Vec<u8>> {
         unsafe {
             WaitForSingleObject(self.inner.mutex, INFINITE);
-
-            let write_pos = read_i32(self.inner.buffer, 0) as usize;
-            let read_pos = read_i32(self.inner.buffer, 4) as usize;
-
-            if read_pos == write_pos {
-                ReleaseMutex(self.inner.mutex);
-                return None;
-            }
-
-            if read_pos + 4 > BUFFER_SIZE {
-                write_i32(self.inner.buffer, 4, 0);
-                ReleaseMutex(self.inner.mutex);
-                return None;
-            }
-
-            let length = read_i32(self.inner.buffer, HEADER_SIZE + read_pos) as usize;
-            if length == 0 {
-                write_i32(self.inner.buffer, 4, 0);
-                ReleaseMutex(self.inner.mutex);
-                return None;
-            }
-
-            let mut data = vec![0u8; length];
-            std::ptr::copy_nonoverlapping(
-                self.inner.buffer.add(HEADER_SIZE + read_pos + 4),
-                data.as_mut_ptr(),
-                length,
-            );
-
-            write_i32(self.inner.buffer, 4, (read_pos + 4 + length) as i32);
-
+            let data = self.read_message_locked();
             ReleaseMutex(self.inner.mutex);
-            Some(data)
+            data
         }
+    }
+
+    /// 呼び出し元がMutexを保持している前提。
+    unsafe fn read_message_locked(&self) -> Option<Vec<u8>> {
+        let write_pos = read_i32(self.inner.buffer, 0) as usize;
+        let mut read_pos = read_i32(self.inner.buffer, 4) as usize;
+
+        if read_pos == write_pos {
+            return None;
+        }
+
+        // ラップ後に先頭へ書かれたメッセージは同じ書き込み通知の中で続けて読む。
+        // ここで打ち切ると、次の書き込み通知が来るまで取り残される。
+        if read_pos + 4 > BUFFER_SIZE || read_i32(self.inner.buffer, HEADER_SIZE + read_pos) == 0 {
+            read_pos = 0;
+            write_i32(self.inner.buffer, 4, 0);
+            if read_pos == write_pos {
+                return None;
+            }
+        }
+
+        let length = read_i32(self.inner.buffer, HEADER_SIZE + read_pos);
+        if length <= 0 || length as usize > BUFFER_SIZE - read_pos - 4 {
+            // 長さが壊れている。範囲外を読まず、未読分を捨てて以降の通信を生かす。
+            write_i32(self.inner.buffer, 4, write_pos as i32);
+            return None;
+        }
+        let length = length as usize;
+
+        let mut data = vec![0u8; length];
+        std::ptr::copy_nonoverlapping(
+            self.inner.buffer.add(HEADER_SIZE + read_pos + 4),
+            data.as_mut_ptr(),
+            length,
+        );
+
+        write_i32(self.inner.buffer, 4, (read_pos + 4 + length) as i32);
+        Some(data)
     }
 
     fn wait_for_data(&self, timeout_ms: u32) -> bool {
@@ -691,4 +700,59 @@ fn iso_timestamp() -> String {
         .unwrap_or_else(|_| Duration::from_secs(0))
         .as_secs();
     format!("{now}")
+}
+
+#[cfg(all(test, target_os = "windows"))]
+mod tests {
+    use super::*;
+
+    /// 実運用の名前と衝突しないよう、テストごと・プロセスごとに別名の共有メモリを作る。
+    fn channel(tag: &str) -> MmfChannel {
+        let pid = std::process::id();
+        MmfChannel::create(
+            &format!("genesis-ipc-test-{tag}-{pid}"),
+            &format!("genesis-ipc-test-mutex-{tag}-{pid}"),
+            &format!("genesis-ipc-test-event-{tag}-{pid}"),
+            true,
+        )
+        .unwrap()
+    }
+
+    #[test]
+    fn message_after_wrap_is_read_without_another_write() {
+        let ch = channel("wrap");
+        let payload = |b: u8| vec![b; 400_000];
+        ch.write_message(&payload(b'a')).unwrap();
+        ch.write_message(&payload(b'b')).unwrap();
+        assert_eq!(ch.read_message().unwrap()[0], b'a');
+        assert_eq!(ch.read_message().unwrap()[0], b'b');
+
+        // 末尾に収まらず先頭へラップする。読み手はラップマーカーを越えて同じ呼び出しで読めること。
+        ch.write_message(&payload(b'c')).unwrap();
+        assert_eq!(ch.read_message().unwrap()[0], b'c');
+        assert!(ch.read_message().is_none());
+    }
+
+    #[test]
+    fn wrap_never_fills_up_to_read_pos() {
+        let ch = channel("full");
+        let first = vec![0u8; 600_000];
+        ch.write_message(&first).unwrap();
+        ch.read_message().unwrap();
+
+        // 先頭の空きは ReadPos(600_004)ちょうど。埋め切ると空と区別できないため拒否する。
+        let exact = vec![0u8; 600_000];
+        assert_eq!(ch.write_message(&exact), Err("MMF buffer full".to_string()));
+    }
+
+    #[test]
+    fn corrupted_length_discards_backlog_instead_of_reading_out_of_bounds() {
+        let ch = channel("corrupt");
+        ch.write_message(b"hello").unwrap();
+        unsafe { write_i32(ch.inner.buffer, HEADER_SIZE, -1) };
+        assert!(ch.read_message().is_none());
+
+        ch.write_message(b"next").unwrap();
+        assert_eq!(ch.read_message().unwrap(), b"next");
+    }
 }

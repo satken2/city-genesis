@@ -61,14 +61,6 @@
         "label": "3rd Child Rate (Immigrants)",
         "desc": "Probability that an immigrant household spawns with 3 children."
       },
-      "IMMIGRATION_MIN_COUNT": {
-        "label": "Minimum Immigrant Households (per epoch)",
-        "desc": "Minimum number of immigrant households per epoch. Correction for small cities."
-      },
-      "IMMIGRATION_STOP_UNEMPLOYMENT": {
-        "label": "Immigration Stop Unemployment Rate",
-        "desc": "Immigration halts when unemployment exceeds this rate."
-      },
       "IMMIGRATION_ADULT_AGE_MIN": {
         "label": "Immigrant Adult Minimum Age",
         "desc": "Minimum age of adults flowing in as immigrants."
