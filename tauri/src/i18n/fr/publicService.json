@@ -67,7 +67,7 @@
     "immigrationGenderMale": "Hommes uniquement",
     "immigrationGenderFemale": "Femmes uniquement",
     "immigrationSkillThresholds": "Compétences exigées",
-    "immigrationSkillHint": "Seuls les chefs de ménage remplissant au moins une des compétences sont admis (condition OU)",
+    "immigrationSkillHint": "Seuls les chefs de ménage remplissant au moins une des compétences sont admis (condition OU). Les chefs de ménage immigrés ont généralement des compétences de 1,0 ou moins",
     "immigrationQuota": "Plafond d'accueil",
     "immigrationQuotaUnit": "personnes / époque",
     "immigrationQuotaHint": "0 = illimité",

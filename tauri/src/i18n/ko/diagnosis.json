@@ -40,7 +40,7 @@
       "market_no_supplier": { "title": "도시에 {{product_name}} 공급자가 없습니다", "description": "국내에 가동 중인 생산자가 없고 수입도 되지 않습니다. 생산 시설을 유치하거나 수입 거점을 마련하세요." },
       "market_supply_insufficient": { "title": "{{product_name}} 공급이 수요에 미치지 못합니다", "description": "공급 {{supply}}에 비해 도시 전체 주문은 {{demand}}입니다(생산자 {{producers}}, 수입 거점 {{hubs}})." },
       "market_unmatched": { "title": "{{product_name}}을(를) 시장에서 조달하지 못했습니다", "description": "도시 전체로는 공급 {{supply}}이(가) 주문 {{demand}}을(를) 충족하지만 이 시설에는 도달하지 않았습니다. 거리·가격·공급 범위가 원인일 수 있습니다." },
-      "high_skill_shortage": { "title": "전문 인력을 확보하지 못했습니다", "description": "필요한 고숙련 인력의 최소 인원을 채우지 못해 생산 계획이 0이 되었습니다. 교육 기관 정비나 고학력층 유치가 필요합니다." },
+      "high_skill_shortage": { "title": "전문 인력을 확보하지 못했습니다", "description": "필요한 고숙련 인력의 최소 인원을 채우지 못해 생산 계획이 0이 되었습니다. 고숙련 인력은 대학에서 양성합니다. 대학을 정비하고 모집 정원을 해당 스킬에 배분하세요." },
       "labor_shortage": { "title": "직원이 부족합니다", "description": "필요 노동력 {{quota}} 중 {{total_labor}}만 확보했습니다." },
       "labor_market_tight": { "title": "도시에 일손이 남아 있지 않습니다", "description": "실업률이 {{unemployment_rate}}%로 낮아 고용할 사람이 없습니다. 주택을 늘려 인구를 유입시키세요." },
       "labor_unfilled": { "title": "구직자는 있는데 모이지 않습니다", "description": "실업률은 {{unemployment_rate}}%입니다. 통근 거리가 멀거나, 임금이 낮거나, 기술이 맞지 않을 수 있습니다." },

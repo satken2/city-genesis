@@ -67,7 +67,7 @@
     "immigrationGenderMale": "仅限男性",
     "immigrationGenderFemale": "仅限女性",
     "immigrationSkillThresholds": "技能要求",
-    "immigrationSkillHint": "仅允许满足其中任一技能的户主（OR条件）",
+    "immigrationSkillHint": "仅允许满足其中任一技能的户主（OR条件）。移民户主的技能通常在1.0以下",
     "immigrationQuota": "接收人数上限",
     "immigrationQuotaUnit": "人 / 纪元",
     "immigrationQuotaHint": "0 = 无限制",

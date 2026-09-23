@@ -67,7 +67,7 @@
     "immigrationGenderMale": "Male only",
     "immigrationGenderFemale": "Female only",
     "immigrationSkillThresholds": "Skill Requirements",
-    "immigrationSkillHint": "Applicants with at least one skill meeting the threshold are accepted (OR condition)",
+    "immigrationSkillHint": "Applicants with at least one skill meeting the threshold are accepted (OR condition). Immigrant household heads usually have skills of 1.0 or less",
     "immigrationQuota": "Acceptance Quota",
     "immigrationQuotaUnit": "people / epoch",
     "immigrationQuotaHint": "0 = unlimited",

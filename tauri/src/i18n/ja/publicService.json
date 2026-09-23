@@ -67,7 +67,7 @@
     "immigrationGenderMale": "男性のみ",
     "immigrationGenderFemale": "女性のみ",
     "immigrationSkillThresholds": "スキル要件",
-    "immigrationSkillHint": "いずれかのスキルを満たす世帯主のみ許可します（OR条件）",
+    "immigrationSkillHint": "いずれかのスキルを満たす世帯主のみ許可します（OR条件）。移民の世帯主は通常スキル1.0以下です",
     "immigrationQuota": "受け入れ上限人数",
     "immigrationQuotaUnit": "人 / エポック",
     "immigrationQuotaHint": "0 = 無制限",

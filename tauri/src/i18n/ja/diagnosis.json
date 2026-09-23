@@ -40,7 +40,7 @@
       "market_no_supplier": { "title": "{{product_name}}の供給者が都市にいません", "description": "国内に稼働中の生産者がなく、輸入もされていません。生産施設を誘致するか、輸入拠点を用意してください。" },
       "market_supply_insufficient": { "title": "{{product_name}}の供給が需要に届いていません", "description": "供給 {{supply}} に対して都市全体の注文は {{demand}} です(生産者 {{producers}}・輸入拠点 {{hubs}})。" },
       "market_unmatched": { "title": "{{product_name}}を市場で調達できませんでした", "description": "都市全体では供給 {{supply}} が注文 {{demand}} を満たしていますが、この施設には届きませんでした。距離・価格・供給範囲が原因の可能性があります。" },
-      "high_skill_shortage": { "title": "専門人材を確保できていません", "description": "必要な高スキル人材の最低数を満たせず、生産計画がゼロになっています。教育機関の整備や高学歴層の誘致が必要です。" },
+      "high_skill_shortage": { "title": "専門人材を確保できていません", "description": "必要な高スキル人材の最低数を満たせず、生産計画がゼロになっています。高度人材は大学で育成します。大学を整備し、受け入れ枠を該当スキルに配分してください。" },
       "labor_shortage": { "title": "従業員が不足しています", "description": "必要な労働力 {{quota}} に対して確保できたのは {{total_labor}} です。" },
       "labor_market_tight": { "title": "都市に働き手が残っていません", "description": "失業率が {{unemployment_rate}}% と低く、雇える人がいません。住宅を増やして人口を呼び込んでください。" },
       "labor_unfilled": { "title": "求職者はいるのに集まりません", "description": "失業率は {{unemployment_rate}}% です。通勤距離が遠い、賃金が低い、スキルが合わないなどが考えられます。" },

@@ -40,7 +40,7 @@
       "market_no_supplier": { "title": "城市中没有{{product_name}}的供应者", "description": "国内没有运转中的生产者，也没有进口。请引进生产设施或设立进口枢纽。" },
       "market_supply_insufficient": { "title": "{{product_name}}供应不足以满足需求", "description": "供应 {{supply}}，全市订单 {{demand}}（生产者 {{producers}}，进口枢纽 {{hubs}}）。" },
       "market_unmatched": { "title": "未能在市场上采购到{{product_name}}", "description": "全市供应 {{supply}} 可满足订单 {{demand}}，但未送达该设施。可能是距离、价格或供应范围所致。" },
-      "high_skill_shortage": { "title": "无法确保专业人才", "description": "未满足高技能人才的最低人数，生产计划归零。需要完善教育机构或吸引高学历人口。" },
+      "high_skill_shortage": { "title": "无法确保专业人才", "description": "未满足高技能人才的最低人数，生产计划归零。高技能人才需在大学培养。请建设大学，并将招生名额分配给所需技能。" },
       "labor_shortage": { "title": "员工不足", "description": "所需劳动力 {{quota}}，实际确保 {{total_labor}}。" },
       "labor_market_tight": { "title": "城市中已没有劳动力", "description": "失业率仅 {{unemployment_rate}}%，无人可雇。请增加住宅以吸引人口。" },
       "labor_unfilled": { "title": "有求职者但招不到人", "description": "失业率为 {{unemployment_rate}}%。可能是通勤距离过远、工资偏低或技能不匹配。" },

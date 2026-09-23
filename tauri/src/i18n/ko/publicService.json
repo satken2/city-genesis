@@ -67,7 +67,7 @@
     "immigrationGenderMale": "남성만",
     "immigrationGenderFemale": "여성만",
     "immigrationSkillThresholds": "스킬 요건",
-    "immigrationSkillHint": "어느 하나의 스킬을 충족하는 가구주만 허가합니다(OR 조건)",
+    "immigrationSkillHint": "어느 하나의 스킬을 충족하는 가구주만 허가합니다(OR 조건). 이민 가구주의 스킬은 보통 1.0 이하입니다",
     "immigrationQuota": "수용 상한 인원",
     "immigrationQuotaUnit": "명 / 에포크",
     "immigrationQuotaHint": "0 = 무제한",

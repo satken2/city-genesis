@@ -67,7 +67,7 @@
     "immigrationGenderMale": "Solo hombres",
     "immigrationGenderFemale": "Solo mujeres",
     "immigrationSkillThresholds": "Requisitos de habilidades",
-    "immigrationSkillHint": "Solo se admiten jefes de hogar que cumplan alguna de las habilidades (condición OR)",
+    "immigrationSkillHint": "Solo se admiten jefes de hogar que cumplan alguna de las habilidades (condición OR). Los jefes de hogar inmigrantes suelen tener habilidades de 1.0 o menos",
     "immigrationQuota": "Cupo máximo de admisión",
     "immigrationQuotaUnit": "personas / época",
     "immigrationQuotaHint": "0 = sin límite",
