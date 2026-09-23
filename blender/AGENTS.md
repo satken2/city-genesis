@@ -1,6 +1,6 @@
 # blender/
 
-立体駐車場3005は非公開制作ツールのbuild_parking_garage.pyがa3005/0へ11パーツを著作する。6m幅・3m階高の開放壁、独立入口、屋上腰壁と照明付きtop-w1を通常/接写で持つ。interior-floorで厚さ22cmの各階床・アスファルト屋上を有効化し、黒い奥面を持たない。Farは可変底面を保つ既存簡易生成。import_parking_garage.ps1が実FBX・27組み立て・床の表裏・開口の見通し・凹形状・未指定時の無変更を検証し、正規ミラーを同期する。仕様は公開F1/I文書、制作・AI補助開示記録は非公開制作ツールのpipeline/jobs/parking_garage.md。
+立体駐車場3005は非公開制作ツールのbuild_parking_garage.pyがa3005/0へ17パーツを著作する。6m幅・3m階高の開放壁、独立入口、屋上腰壁と照明付きtop-w1を通常/接写で持つ。interior-floorで厚さ22cmの各階床・アスファルト屋上を有効化し、黒い奥面を持たない。parking_ramp.pyがbase/mid/top-stairと各Closeを著作する。16×6.4m・高低差3mの折り返しスロープを元の頂点3に配置し、描画用の本体だけを後退させる。保存polygon・経済面積・占有コライダーは維持する。Farは可変底面を保つ既存簡易生成。import_parking_garage.ps1が実FBX・27組み立て・床の表裏・開口の見通し・凹形状・未指定時の無変更を検証し、正規ミラーを同期する。仕様は公開F1/I文書、制作・AI補助開示記録は非公開制作ツールのpipeline/jobs/parking_garage.md。
 
 洋上風力1071・洋上石油1072はtop-prebuiltの通常/接写/遠景、受入基地1073は岸壁に置くroofpropと接写・遠景prebuiltを持つ。1071は1055の白い風車を再利用する。海底1104/1301はbodyと接写だけをpaths.blendに持ち、FarはUnity生成。非公開制作ツールのbuild_offshore.pyが著作し、import_offshore.ps1が実FBXとLODを検証する。制作記録は同ツールのoffshore.md。 1072の多層設備は非公開制作ツールのoffshore_platform.pyに定義し、build_offshore.py --platform-onlyで3LODのみを再著作できる。
 

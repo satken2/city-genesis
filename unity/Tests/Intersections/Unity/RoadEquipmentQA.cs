@@ -73,8 +73,9 @@ public static class RoadEquipmentQA
     static void CheckRoad(int variant, float grade, float sign, int utilityMode)
     {
         int type = variant / 100;
-        float width = variant == 301 ? 4 : variant == 231 ? 24 : variant == 221 || variant == 222 ? 12 : variant == 201 || variant == 211 ? 3 : variant == 212 ? 6 : 7;
-        float sidewalk = variant == 231 ? 3 : variant == 221 || variant == 222 ? 2.5f : 0;
+        // 専用の歩道モデルは実マスターの歩道幅で著作され、伸縮すると縁石幅も変わる。柵支柱が縁石に載る条件を実寸で検査する。
+        float width = variant == 301 ? 4 : variant == 222 || variant == 231 ? 24 : variant == 221 ? 12 : variant == 201 || variant == 211 ? 3 : variant == 212 ? 6 : 7;
+        float sidewalk = variant == 222 || variant == 231 ? 3 : variant == 221 ? 2.5f : 0;
         var item = Activator.CreateInstance(itemType);
         Set(item, "width", width); Set(item, "sidewalk_width", sidewalk); Set(item, "lanes", 2);
         Set(item, "follow_terrain", false);

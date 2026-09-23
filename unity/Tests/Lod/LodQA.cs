@@ -18,8 +18,16 @@ public static class LodQA
     static LodQaHost host;
     const BindingFlags Instance = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
     static Type Type(string name) => source.GetType(name, true);
-    static object Call(object target, string name, params object[] args) => target.GetType().GetMethod(name, Instance).Invoke(target, args);
-    static object Static(string type, string name, params object[] args) => Type(type).GetMethod(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, args);
+    static object Call(object target, string name, params object[] args) => Invoke(target.GetType().GetMethod(name, Instance), target, args);
+    static object Static(string type, string name, params object[] args) => Invoke(Type(type).GetMethod(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static), null, args);
+    // リフレクションは省略可能引数を補わない。C#の呼び出しと同じく、渡さなかった末尾の省略可能引数には既定値を使う。
+    static object Invoke(MethodInfo method, object target, object[] args)
+    {
+        var parameters = method.GetParameters();
+        var filled = new List<object>(args);
+        while (filled.Count < parameters.Length && parameters[filled.Count].IsOptional) filled.Add(parameters[filled.Count].DefaultValue);
+        return method.Invoke(target, filled.ToArray());
+    }
     static object Field(object target, string name) => target.GetType().GetField(name, Instance).GetValue(target);
     static void Set(object target, string name, object value) => target.GetType().GetField(name, Instance).SetValue(target, value);
     static void Check(bool pass, string message) { checks++; if (!pass) throw new Exception(message); }

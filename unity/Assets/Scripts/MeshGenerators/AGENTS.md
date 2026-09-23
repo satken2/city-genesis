@@ -6,7 +6,7 @@
 
 ホームの任意パーツ`platform_foundation`は外壁下部。`PlatformFoundationGenerator`が天端Y=0を線路面、著作下端を外壁位置の地盤下15cmへ写像する。TrackPathのplatform_wallと同じ左右・島式省略・クリップ範囲を使う。パーツが無いバリアントには追加描画しない。鏡像の巻き順はPathStructureMesh.AppendのreverseWindingで補正する。462の白い外装・屋根は実寸の別パーツ。仕様はN文書、実FBX検証はTests/HighStandardPlatform/run.ps1。
 
-RoadEquipmentGeneratorの柵はfence_type_allowedと個別fence_typeで有効化する。歩道があれば歩車道境界の歩道側0.12m、歩道が無ければ舗装端の内側0.12mへ置く。301は後者で、支柱は最大2m間隔・高さ1m、パネルはp301/fence。実FBX回帰はTests/Intersections/run-unity.ps1 -Equipment。
+RoadEquipmentGeneratorの柵はfence_type_allowedと個別fence_typeで有効化する。歩道があれば歩車道境界の歩道側0.12m、歩道が無ければ舗装端の内側0.12mへ置く。支柱(0.07m角)は中心位置の歩道上面に接地するため、歩道幅へ伸縮した後の縁石と歩行面の段差が境界から0.085〜0.155mにあると片側が浮く(p222/p242の縁石は歩道3mで0.16m)。301は後者で、支柱は最大2m間隔・高さ1m、パネルはp301/fence。実FBX回帰はTests/Intersections/run-unity.ps1 -Equipment。
 
 ## 植栽中央分離帯・吊り橋・レンガ高架
 
@@ -111,6 +111,9 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 - 数値・描画検証は `Tests/TerrainSurface/run-unity.ps1`。Terrain自身の描画LODも影響するため、頂点の高さ検査だけで完了にしない。
 
 ## 建物 (Buildings/)
+
+- `ExteriorStairBuilder`はmid-stairを持つモジュラー建物の描画用輪郭だけを辺2で後退させ、元の頂点3からbase/mid/top-stairを各階1個積む。XZ実寸、midのY倍率は階高÷mid-w1の著作高さ。階段のbbox高さは手すりを含むため使わない。本体の壁・床・屋根・基盤は後退輪郭、コライダーと保存polygonは元の占有輪郭。壁は階段幅だけ開ける。収まらない敷地・自己交差・SHAPE_FULLには適用しない。仕様はF文書§11.4・I文書§4.11、実FBX検証は非公開制作ツールのimport_parking_garage.ps1。
+
 
 - オープンスペースは `OpenSpaceLayout` が配置計画、`OpenSpaceBuildingMeshBuilder` が地形追従面・実寸FBXへの変換を担う。MODEL_PARKING/ROTARY/PARK=10/11/12。SHAPE_FULLの最初の辺が接道方向。ID・ロード順・LODに依存せずvisual_variant2とセルのハッシュで配置する。Far=0.3m板、工事・倒壊は地面用途。3003舗装広場はGROUND+floorのみ。検証・ギャラリー配置見本の再出力は `Tests/Buildings/run-open-space.ps1`。仕様はF10文書。
 

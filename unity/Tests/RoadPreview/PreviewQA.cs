@@ -44,7 +44,7 @@ public static class PreviewQA
             {
                 type.GetMethod("UpdateSections").Invoke(renderer, new object[] {
                     before, fixedPoints, active, after, 1, 100, true, 0,
-                    new float[] { -5, 5 }, new int[] { 0, 0 }, "both", null });
+                    new float[] { -5, 5 }, new int[] { 0, 0 }, "both", null, "elevated" });
             }
             Update(before, moving);
             var sections = (Array)type.GetField("sections", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(renderer);

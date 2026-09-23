@@ -78,14 +78,21 @@ public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
     {
         bool isGroundModel = modelType == Constants.MODEL_MODULAR_GROUND;
 
+        Vector2[] occupiedFootprint = footprint;
+        int stairSuffix = ModularBodyBuilder.ResolveBuildingVariant(prefix, BuildingMeshUtils.ComputeVariantNumber(visual_variant));
+        var stairs = !isGroundModel && buildingShape != Constants.SHAPE_FULL
+            ? ExteriorStairBuilder.Create(footprint, prefix, stairSuffix, floorHeight) : null;
+        if (stairs != null) footprint = stairs.Body;
+
         // 1. 壁・地面・フェンス生成
         var bodyData = ModularBodyBuilder.GenerateBody(
             footprint, floors, prefix, floorHeight, visual_variant, buildingShape,
-            modelType, fenceFootprint, centerPointWorld, isDynamic, floorMaterial);
+            modelType, fenceFootprint, centerPointWorld, isDynamic, floorMaterial, stairs);
 
         var combineInstances = bodyData.CombineInstances;
         var allMaterials = bodyData.Materials;
         var temporaryMeshes = bodyData.TemporaryMeshes;
+        stairs?.Append(floors, floorHeight, combineInstances, allMaterials, temporaryMeshes);
         int resolvedSuffix = bodyData.ResolvedSuffix;
         // 屋根面は階高グリッドに置く。topパーツが持つパラペットや照明で屋根を持ち上げない。
         float buildingHeight = bodyData.BuildingHeight > 0f ? bodyData.BuildingHeight : floors * floorHeight;
@@ -207,7 +214,7 @@ public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
 
         // 5. コライダー生成
         Vector2[] colliderFootprint = isGroundModel && fenceFootprint != null && fenceFootprint.Length >= 3
-            ? fenceFootprint : footprint;
+            ? fenceFootprint : occupiedFootprint;
         float colliderHeight = isGroundModel ? floorHeight : buildingHeight;
         Mesh colliderMesh = BuildingMeshBuilder.GenerateColliderMesh(colliderFootprint, colliderHeight);
 

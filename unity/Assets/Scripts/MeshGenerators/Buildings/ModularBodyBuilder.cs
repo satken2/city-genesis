@@ -104,7 +104,8 @@ public static class ModularBodyBuilder
         Vector2[] fenceFootprint = null,
         Vector3 centerPointWorld = default,
         bool isDynamic = false,
-        Material floorMaterial = null)
+        Material floorMaterial = null,
+        ExteriorStairBuilder.Layout stairs = null)
     {
         int variantNumber = BuildingMeshUtils.ComputeVariantNumber(visual_variant);
         bool isGroundModel = modelType == Constants.MODEL_MODULAR_GROUND;
@@ -176,19 +177,41 @@ public static class ModularBodyBuilder
 
                     GameObject wallModule = LoadPartWithFallback(prefix, level, "w", position, resolvedSuffix, out Material[] wallMaterials);
                     GameObject cornerModule = LoadPartWithFallback(prefix, level, "c", position, resolvedSuffix, out Material[] cornerMaterials);
+                    if (stairs != null && i == 2 && stairs.OpeningStart <= .01f)
+                        cornerModule = null;
+                    if (stairs != null && i == 3 && stairs.OpeningEnd >= Vector2.Distance(footprint[2], footprint[3]) - .01f)
+                        cornerModule = null;
 
                     if (wallModule != null)
                     {
                         Vector2 p3 = footprint[(i + 2) % n];
                         int nextPosition = (i + 1) % n + 1;
                         GameObject nextCornerModule = LoadPartWithFallback(prefix, level, "c", nextPosition, resolvedSuffix, out _);
+                        if (stairs != null && i == 1 && stairs.OpeningStart <= .01f)
+                            nextCornerModule = null;
+                        if (stairs != null && i == 2 && stairs.OpeningEnd >= Vector2.Distance(p1, p2) - .01f)
+                            nextCornerModule = null;
 
                         // 壁の敷き詰め範囲は、両端の角パーツがこの辺へ実際に張り出す長さぶん内側へ狭める。
                         // 手前側は頂点 p1 の角パーツの送り側アーム、奥側は頂点 p2 の角パーツの受け側アーム。
                         float startOffset = MeasureCornerExtentAlongEdge(cornerModule, p0, p1, p2, targetHeight, true);
                         float endOffset = MeasureCornerExtentAlongEdge(nextCornerModule, p1, p2, p3, targetHeight, false);
 
-                        List<SegmentMeshData> wallSegments = GenerateWallSegments(p1, p2, floorY, wallModule, wallMaterials, targetHeight, startOffset, endOffset);
+                        List<SegmentMeshData> wallSegments;
+                        if (stairs != null && i == 2)
+                        {
+                            // 接続帯には壁を並べない。開口の手すり・扉は階段パーツが持つ。
+                            float length = Vector2.Distance(p1,p2);
+                            Vector2 direction = (p2-p1).normalized;
+                            float from = Mathf.Clamp(stairs.OpeningStart, startOffset, length-endOffset);
+                            float to = Mathf.Clamp(stairs.OpeningEnd, startOffset, length-endOffset);
+                            wallSegments = new List<SegmentMeshData>();
+                            if (from > startOffset + .01f)
+                                wallSegments.AddRange(GenerateWallSegments(p1,p1+direction*from,floorY,wallModule,wallMaterials,targetHeight,startOffset,0));
+                            if (to < length-endOffset-.01f)
+                                wallSegments.AddRange(GenerateWallSegments(p1+direction*to,p2,floorY,wallModule,wallMaterials,targetHeight,0,endOffset));
+                        }
+                        else wallSegments = GenerateWallSegments(p1, p2, floorY, wallModule, wallMaterials, targetHeight, startOffset, endOffset);
                         UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[MBB] F{floor} 壁 pos{position}: {wallSegments.Count}セグメント, materials={FormatMaterials(wallMaterials)}");
                         foreach (var wallSegment in wallSegments)
                         {
@@ -714,7 +737,7 @@ public static class ModularBodyBuilder
     /// mid-w1 が全く存在しない場合は -1 を返す。
     /// MODEL_MODULAR_GROUND の場合は呼び出し側で suffix=0 にフォールバックして継続する。
     /// </summary>
-    private static int ResolveBuildingVariant(string prefix, int variantNumber)
+    public static int ResolveBuildingVariant(string prefix, int variantNumber)
     {
         List<int> candidates = new List<int> { 0 };
         for (int v = 100; v <= 1000; v += 100)
