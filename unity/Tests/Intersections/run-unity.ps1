@@ -17,6 +17,7 @@ New-Item -ItemType Directory -Path $editorAssets -Force | Out-Null
 New-Item -ItemType Directory -Path "$qaRoot/ProjectSettings" -Force | Out-Null
 Copy-Item -LiteralPath "$unityRoot/ProjectSettings/ProjectVersion.txt" -Destination "$qaRoot/ProjectSettings/ProjectVersion.txt" -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Unity/IntersectionQA.cs') -Destination $editorAssets -Force
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Unity/MotorwayMergeQA.cs') -Destination $editorAssets -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Unity/RoadEquipmentQA.cs') -Destination $editorAssets -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Unity/PlatformQA.cs') -Destination $editorAssets -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Unity/RailYardQA.cs') -Destination $editorAssets -Force

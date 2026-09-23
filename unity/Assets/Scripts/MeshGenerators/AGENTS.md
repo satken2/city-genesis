@@ -47,6 +47,8 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 
 ## 道路 (Paths/RoadPath.cs) — Dreamteck Splines ベース
 
+- **1車線ランプの合流**: `MotorwayMergeLayout` は稼働中の本線2本＋流入する1車線一方通行ランプを識別し、既存の下流切断距離の前半を一定幅、後半を絞り込みにする。保存中心線・占有範囲は変えず、周辺との描画上の重なりを許容する。`IntersectionPolygonUtil` の描画輪郭コールバックで共通の `IntersectionCorner` を変更し、路面・桁・壁は既存生成器を使う。区画線と車両は同じ計画を使う。`SidewalkConnectorSpec.Dashed` は点線の接続に使い、実体化を別実装にしない。2車線ランプ・流出・多叉は対象外。G文書§11.7、`Tests/Intersections/Unity/MotorwayMergeQA.cs` を参照。
+
 - **橋脚の干渉回避**: `GeneratePillars` が `PillarClearance.NeighborProvider` から未描画の相手も含む通行空間を取得し、`PlacePillar` が柱とキャップを別々の実寸boundsで検査する。一方が干渉すれば一組とも生成せず、移動・再配分はしない。`GetPrefabBounds` は子Transformを含むルート座標のboundsで、配置時のYaw・scaleを適用する。高さと水平距離を同時に評価し、同じ高さの接続や深いトンネルを誤って除外しない。道路・線路・工事中で共用。検証は `Tests/Pillars`。
 
 - 道路は1枚のメッシュではなく、**プレハブパーツを SplineMesh でスプラインに沿って曲げた子オブジェクトの集合**として生成される。

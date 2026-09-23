@@ -136,7 +136,8 @@ public sealed class TransitRouteGeometry
             }
             if (connector == null || best > 4) return false;
         }
-        else connector = VehiclePolyline.Connector(p0,t0,p1,t1,1f/3f);
+        else connector = paths.GetMotorwayMerge(node)?.Connector(a.data.path_id, b.data.path_id, p0, p1)
+            ?? VehiclePolyline.Connector(p0,t0,p1,t1,1f/3f);
         float progress = Mathf.Clamp01(along/Math.Max(.001f,tail+head));
         connector.Sample((reverse?1-progress:progress)*connector.Length,!reverse,out position,out tangent);
         if (tram) position.y += LrtRoadParts.IsEmbedded(g.data.path_variant) || LrtRoadParts.IsEmbedded(next.data.path_variant) ? LrtRoadParts.RailTop : .355f;

@@ -634,11 +634,14 @@ public partial class VehicleManager : MonoBehaviour
         }
         if (v == DrivenVehicle) RequestedDrivePath = -1;
         v.Sample(out Vector3 p0, out Vector3 t0);
+        var merge = pathManager.GetMotorwayMerge(node);
+        if (merge != null) v.lane = merge.TargetLane(current.path_id, next.data.path_id, v.lane, CityInfoStore.TrafficHand);
         v.SetPath(next.data.path_id, next.line, nextForward);
         v.spawnBlendRemaining = 0; v.arrivalDistance = -1; v.destinationParcel = 0;
         SetLane(v, next, false);
         v.Sample(out Vector3 p1, out Vector3 t1);
-        v.connector = VehiclePolyline.Connector(p0, t0, p1, t1, intersectionCurveTension);
+        v.connector = merge?.Connector(current.path_id, next.data.path_id, p0, p1)
+            ?? VehiclePolyline.Connector(p0, t0, p1, t1, intersectionCurveTension);
         v.connectorS = 0;
         v.connectorSpeed = v.speed;
         SetMotion(v,v.connector.Length);

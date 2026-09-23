@@ -1266,6 +1266,7 @@ public class RoadPath : IPathMeshGenerator
         for (int sub = 0; sub < indices.Length; sub++) indices[sub] = new List<int>();
         for (int tile = 0; tile < tiles; tile++)
         {
+            if (connector.Dashed && (tile * length / tiles) % 6f >= 3f) continue;
             int offset = vertices.Count;
             foreach (var vertex in original)
             {

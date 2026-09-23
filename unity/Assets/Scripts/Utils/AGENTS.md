@@ -2,6 +2,8 @@
 
 汎用ユーティリティの置き場。**新しい汎用処理を書く前に、必ずこの一覧を確認すること。**(Scripts直下の`Utils.cs`にも雑多なユーティリティがあるので併せて確認)
 
+`IntersectionPolygonUtil.ComputeIntersectionPolygon` の任意の `shapeLayout` は、入口断面の計算後に描画専用の外周を調整する。路面ポリゴンの組み立て・検証は共通のままとし、`MotorwayMergeLayout` が1車線ランプに使用する。保存パスや論理占有ポリゴンを変更する入口ではない。
+
 | ファイル | 内容 |
 | --- | --- |
 | `PolylineUtils.cs` | 線分・曲線・点列の幾何計算の共通実装。引数は点・始点・終点の順。`ClosestPointOnSegment`はVector2/Vector3の各座標系、`ClosestPointOnSegmentXZ`は水平射影後にYを補間する。`ProjectOnSegment` / `ProjectOnSegmentXZ`は最近接点の位置パラメータt(0〜1)。`DistanceToSegmentSq` / `DistanceToSegment`はVector2の距離。射影する座標系で長さの二乗が1e-8以下なら始点を返す。画面座標とワールド座標を混ぜない。`CubicBezierPoint`(Vector2/Vector3)は三次ベジエの評価で、道路プレビュー(RoadPlanManager)・実道路(PathManager)・線路・車両基地が共有する(別実装を持つとプレビューと実道路の曲線が食い違う)。`SmoothedDirection`は点列の前後辺を平均した進行方向(帯メッシュの断面配置用)。`RoundCorners`は点列の角丸め |

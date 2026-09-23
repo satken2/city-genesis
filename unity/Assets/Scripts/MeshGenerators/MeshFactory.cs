@@ -297,6 +297,7 @@ public class NodeMeshResult
     public List<RailConnectorSpec> RailConnectors { get; }
 
     public Dictionary<int, Vector3> ConnectionPoints { get; }
+    public MotorwayMergeLayout MotorwayMerge { get; set; }
 
     /// <summary>
     /// path_id → 歩道のセットバック量。交差相手に歩道がない道路の歩道端を、
@@ -333,6 +334,7 @@ public struct SidewalkSetback
 public class SidewalkConnectorSpec
 {
     public string Part = "sidewalk";
+    public bool Dashed;
     public List<Vector2> Directions;
     public Vector3 StartNormal = Vector3.up;
     public Vector3 EndNormal = Vector3.up;

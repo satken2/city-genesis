@@ -70,7 +70,8 @@ public static class IntersectionQA
    CheckFanCaps(specs);
    CheckRailCrossing(asm, pathType, itemType, dict, cache, gen);
    CheckLinearCorner(asm, pathType);
-   File.WriteAllText(root+"/Temp/IntersectionUnityQA/result.txt","PASS vertices="+meshResult.vertexCount+" parts="+specs.Count+" sloped surface seam="+seamError+"; mixed crossing and 2-to-1 rail endpoints");
+   int motorwayCases = MotorwayMergeQA.Run(asm, dict, cache, root);
+   File.WriteAllText(root+"/Temp/IntersectionUnityQA/result.txt","PASS vertices="+meshResult.vertexCount+" parts="+specs.Count+" sloped surface seam="+seamError+"; mixed crossing and 2-to-1 rail endpoints; motorway merges="+motorwayCases);
    EditorApplication.Exit(0);
   } catch(Exception ex){File.WriteAllText(root+"/Temp/IntersectionUnityQA/result.txt",ex.ToString());Debug.LogException(ex);EditorApplication.Exit(1);}
  }

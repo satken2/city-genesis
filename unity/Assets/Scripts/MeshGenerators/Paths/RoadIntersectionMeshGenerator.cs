@@ -37,12 +37,14 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             // 道路端まで地面に引き下げられてしまう。
             bool horizontalPlane = nodeRelativeY != 0f;
 
+            MotorwayMergeLayout merge = null;
             var roadResult = IntersectionPolygonUtil.ComputeIntersectionPolygon(
                 nodeId,
                 nodePos2D,
                 paths,
                 gf,
-                ResolveRoadWidth, pointResolver, cutLimitResolver
+                ResolveRoadWidth, pointResolver, cutLimitResolver,
+                result => merge = MotorwayMergeLayout.Create(nodeId, paths, result, pointResolver)
             );
 
             if (roadResult.RequiresMoreSpace)
@@ -80,6 +82,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
 
             sidewalkConnectors ??= new List<SidewalkConnectorSpec>();
             BuildBoundaryParts(nodeId, nodePosition, horizontalPlane, paths, roadResult.Sections, sidewalkConnectors, roadResult.Corners);
+            merge?.AddMarkings(sidewalkConnectors, nodePosition);
             // 線路（PATH_TRACK/PATH_MONORAIL）が2本以上接続するノードでは、
             // ポイント（分岐器）・平面交差の表現として、転回制約を満たす通行可能ペアにのみ
             // レールコネクタを敷く（TrackIntersectionMeshGenerator参照）。
@@ -95,12 +98,13 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             roadMesh.vertices = meshVertices;
             roadMesh.RecalculateNormals();
             roadMesh.RecalculateBounds();
+            merge?.SetSurface(roadMesh, nodePosition);
             AddBodyShell(roadMesh, nodePosition, roadResult.Sections);
             if (sidewalkConnectors != null) foreach (var connector in sidewalkConnectors)
             {
                 connector.StartNormal = ClosestSectionNormal(connector.Points[0] + nodePosition, roadResult.Sections);
                 connector.EndNormal = ClosestSectionNormal(connector.Points[connector.Points.Count - 1] + nodePosition, roadResult.Sections);
-                AdjustConnectorHeight(connector.Points, nodePosition, roadResult.Sections, connector.Part == "line" ? RoadPartHeights.LINE_ABOVE_SPLINE : RoadPartHeights.SIDEWALK_ABOVE_SPLINE);
+                AdjustConnectorHeight(connector.Points, nodePosition, roadResult.Sections, connector.Part == "line" ? RoadPartHeights.LINE_ABOVE_SPLINE : RoadPartHeights.SIDEWALK_ABOVE_SPLINE, merge);
             }
             if (railConnectors != null) foreach (var connector in railConnectors)
             {
@@ -112,7 +116,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
                         connector.Points[i] += Vector3.up * (Mathf.Lerp(connector.StartRailBase, connector.EndRailBase, t * t * (3 - 2 * t)) - RoadPartHeights.TRACK_ABOVE_SPLINE);
                     }
             }
-            return new NodeMeshResult(roadMesh, roadMaterial, connectionPoints, sidewalkConnectors, railConnectors, sidewalkSetbacks);
+            return new NodeMeshResult(roadMesh, roadMaterial, connectionPoints, sidewalkConnectors, railConnectors, sidewalkSetbacks) { MotorwayMerge = merge };
         }
         catch (Exception ex)
         {
@@ -319,7 +323,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         }
         return normal;
     }
-    private static Vector3 SectionSurfacePoint(Vector3 point, Dictionary<int, PathEndSection> sections, float offset)
+    internal static Vector3 SectionSurfacePoint(Vector3 point, Dictionary<int, PathEndSection> sections, float offset)
     {
         PathEndSection nearest = null;
         float nearestDistance = float.PositiveInfinity;
@@ -354,12 +358,12 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         return weighted / Mathf.Max(weight, 1e-8f);
     }
 
-    private static void AdjustConnectorHeight(List<Vector3> points, Vector3 node, Dictionary<int, PathEndSection> sections, float offset)
+    private static void AdjustConnectorHeight(List<Vector3> points, Vector3 node, Dictionary<int, PathEndSection> sections, float offset, MotorwayMergeLayout merge = null)
     {
         for (int i = 0; i < points.Count; i++)
         {
             var p = points[i];
-            p = SectionSurfacePoint(p + node, sections, offset) - node;
+            p = (merge != null ? merge.SurfacePoint(p + node, offset) : SectionSurfacePoint(p + node, sections, offset)) - node;
             points[i] = p;
         }
     }

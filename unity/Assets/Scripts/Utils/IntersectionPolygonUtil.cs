@@ -45,7 +45,8 @@ public static class IntersectionPolygonUtil
     /// </summary>
     public static IntersectionCalculationResult ComputeIntersectionPolygon(int intersectionNodeId,
         Vector2 intersectionPos, List<PathSummary> paths, GeometryFactory gf,
-        Func<PathSummary, float> widthResolver = null, Func<PathSummary, List<Vector3>> pointResolver = null, Func<PathSummary, float> cutLimitResolver = null)
+        Func<PathSummary, float> widthResolver = null, Func<PathSummary, List<Vector3>> pointResolver = null, Func<PathSummary, float> cutLimitResolver = null,
+        Action<IntersectionCalculationResult> shapeLayout = null)
     {
         var entries = new List<(PathSummary path, List<Vector3> points, float width, Vector2 direction)>();
         foreach (var p in paths.OrderBy(p => p.path_id))
@@ -85,17 +86,13 @@ public static class IntersectionPolygonUtil
             result.ConnectionPoints[e.path.path_id] = section.Center;
         }
         var ordered = result.Sections.OrderBy(s => Mathf.Atan2(s.Value.Direction.y, s.Value.Direction.x)).ThenBy(s => s.Key).ToList();
-        var corners = new List<Coordinate>();
         for (int i = 0; i < ordered.Count; i++)
         {
             var pair = ordered[i];
             var next = ordered[(i + 1) % ordered.Count];
             var s = pair.Value; var n = next.Value;
-            Vector2 right = s.Center - s.Left * s.Width * 0.5f;
             Vector2 left = s.Center + s.Left * s.Width * 0.5f;
             Vector2 end = n.Center - n.Left * n.Width * 0.5f;
-            corners.Add(new Coordinate(right.x, right.y));
-            corners.Add(new Coordinate(left.x, left.y));
             var corner = new IntersectionCorner { FromPath = pair.Key, ToPath = next.Key };
             float length = Vector2.Distance(left, end);
             Vector2 p1 = left - s.Direction * length / 3f;
@@ -107,9 +104,19 @@ public static class IntersectionPolygonUtil
                 Vector2 p = u*u*u*left + 3*u*u*t*p1 + 3*u*t*t*p2 + t*t*t*end;
                 Vector2 direction = (3*u*u*(p1-left) + 6*u*t*(p2-p1) + 3*t*t*(end-p2)).normalized;
                 corner.Points.Add(p); corner.Directions.Add(direction);
-                if (j > 0 && j < count) corners.Add(new Coordinate(p.x,p.y));
             }
             result.Corners.Add(corner);
+        }
+        // 描画専用の接合形状も、同じ入口断面・外周から路面と付帯パーツを作る。
+        shapeLayout?.Invoke(result);
+        var corners = new List<Coordinate>();
+        foreach (var corner in result.Corners)
+        {
+            var section = result.Sections[corner.FromPath];
+            Vector2 right = section.Center - section.Left * section.Width * 0.5f;
+            corners.Add(new Coordinate(right.x, right.y));
+            for (int i = 0; i < corner.Points.Count - 1; i++)
+                corners.Add(new Coordinate(corner.Points[i].x, corner.Points[i].y));
         }
         corners.Add(corners[0].Copy());
         var polygon = gf.CreatePolygon(corners.ToArray());

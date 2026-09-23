@@ -26,6 +26,7 @@ Space長押し中は`DriveMode.SpeedMultiplier`が5になり、一般車と公�
 - 台帳は0.25秒ごとに実体一覧から構築する。交差点中は移動先へ1回だけ数え、到着予約・フェード中も消えるまでは枠を占める。
 - 建物入口の幾何(接道辺の中点→敷地内3mの点、有効性検査)は `RoadsideAccess` に置き、車と歩行者で共有する。`VehicleManager.BuildEntrances` はそのパス幾何の左右を通行側・走行方向へ読み替えるだけ。入口の条件を変えるときは `RoadsideAccess` を直し、片方に別実装を書かない。
 - 車線と区画線は `RoadLaneLayout`（MeshGenerators/Paths/RoadPath.cs）を共有する。通行方向は `CityInfoStore`。交通量は型付き `PathSummary.path_traffic` を読み、utilizationで代用しない。
+- 1車線高速道路流入ランプは `PathManager.GetMotorwayMerge` の計画を区画線と共用し、接合区間の前半を並走・後半を合流として描く。`VehicleManager` はランプ側の本線車線へ接続し、`TransitRouteGeometry` も同じ `Connector` を使う。車両ごとに輪郭・合流判定を再実装しない。完成済み道路の変更はエポック後の既存ロードで反映し、論理経路・容量・移動時間を変更しない。
 - 範囲候補は `GetPathsNearCircle` のセル逆引き。円内区間・発生・デスポーンはすべてrenderRadius+despawnMarginを使う。
 - `AmbientVehicleManager` は空と海の環境演出(高高度の航空機3種・沖合の船舶4種)。経済と無関係で、GameObjectを持たず保存座標+`Graphics.RenderMesh`で描く。船は `CoastlineStore.SignedDistance` の先読み採点で陸地を避け、外洋(リング包含数0)にだけ発生する。距離関数は全辺走査なので毎フレーム呼ばない。飛行機雲・航跡は `AmbientTrail`。モデルは `Props/ambient_*`(固定名。prop_master登録なし)。仕様は公開 `geometries/V_環境演出の乗り物.md`。
 - 走行音は `Weather/VehicleAmbience` へ通知するだけ(車両側はAudioSourceを持たない)。`VehicleManager.Place` が毎フレーム `Report(Kind.Car, go.GetInstanceID(), 位置, speed)`、`Despawn` が `Remove`。`TransitVehicleManager.ReportSound` が描画した編成ごとに中間車位置と路線時計の距離差分から出した速度を `Report`(バス=Kind.Bus、鉄道=Kind.Train)し、セッション切替で `Clear`。通知が1秒途切れた発音体は自動で外れるので、範囲外へ出た編成の明示解除は不要。

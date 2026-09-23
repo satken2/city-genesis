@@ -230,6 +230,10 @@ public class PathManager : BaseApiDataManager
     // 始点側と終点側で分ける
     private Dictionary<int, Vector3> pathStartConnectionPoints = new Dictionary<int, Vector3>();
     private Dictionary<int, Vector3> pathEndConnectionPoints = new Dictionary<int, Vector3>();
+    private readonly Dictionary<int, MotorwayMergeLayout> motorwayMerges = new Dictionary<int, MotorwayMergeLayout>();
+
+    public MotorwayMergeLayout GetMotorwayMerge(int nodeId)
+        => motorwayMerges.TryGetValue(nodeId, out var layout) ? layout : null;
 
     // パスの歩道セットバックキャッシュ (PathID -> SidewalkSetback)。
     // 交差相手に歩道がない交差点では、直線側の歩道だけを車道の切断面より手前で
@@ -3982,6 +3986,9 @@ public class PathManager : BaseApiDataManager
 
         UpdateNodeSidewalkMesh(meshGO, meshResult);
         UpdateNodeRailMesh(meshGO, meshResult);
+        if (meshResult.MotorwayMerge != null) motorwayMerges[nodeId] = meshResult.MotorwayMerge;
+        else motorwayMerges.Remove(nodeId);
+        UpdateMergeCollider(meshGO, meshResult);
 
         if (meshResult.ConnectionPoints != null)
         {
@@ -4063,6 +4070,23 @@ public class PathManager : BaseApiDataManager
             store[pathId] = newValue;
         }
         return true;
+    }
+
+    /// <summary>描画上の拡幅面は本線として選択する。建設時の論理占有判定には使用しない。</summary>
+    private void UpdateMergeCollider(GameObject meshGO, NodeMeshResult result)
+    {
+        const string childName = "MergeSelection";
+        var old = meshGO.transform.Find(childName);
+        if (old != null) Destroy(old.gameObject);
+        if (result.MotorwayMerge == null) return;
+        var selection = new GameObject(childName);
+        selection.transform.SetParent(meshGO.transform, false);
+        selection.tag = PATH_TAG;
+        int pathId = result.MotorwayMerge.OutgoingId;
+        var info = selection.AddComponent<ObjectIdInfo>();
+        info.id = pathId; info.status = Constants.STATUS_ACTIVE;
+        selection.AddComponent<PathInputHandler>().pathId = pathId;
+        RenderWorkScheduler.Start(this, SetColliderAsync(selection, result.Mesh), "PathManager");
     }
 
 
@@ -4163,6 +4187,7 @@ public class PathManager : BaseApiDataManager
 
     private void RemoveNodeIntersectionMesh(int nodeId)
     {
+        motorwayMerges.Remove(nodeId);
         // 交差点が消えたときは切断も解除する。以前の切断点を残すと道路端だけが欠ける。
         foreach (var path in GetPathsConnectedToNode(nodeId))
         {
@@ -4192,6 +4217,7 @@ public class PathManager : BaseApiDataManager
 
     private void ClearIntersectionMeshes()
     {
+        motorwayMerges.Clear();
         foreach (var meshGO in nodeIntersectionMeshes.Values)
         {
             if (meshGO != null)
@@ -4704,7 +4730,7 @@ public class PathMasterItem
 
     /// <summary>
     /// インターチェンジのランプ用バリアントか。バックエンドはランプの連結成分を起点にIC/JCTを自動検出する
-    /// (検出結果は InterchangeManager が表示する)。描画上は通常の道路と同じに扱う。
+    /// (検出結果は InterchangeManager が表示する)。1車線の流入ランプは描画専用の合流形状にも使う。
     /// </summary>
     public bool ramp;
 
