@@ -32,8 +32,8 @@ public static class ConstructionPathBuilder
     }
 
     /// <summary>
-    /// 施工の先端(工事車両が集まる位置)の中心線上の座標。工事音の発音位置に使う。
-    /// 車両の配置(PlaceVehicles)と同じ割合で中心線を辿るので、進捗が変われば車両と一緒に移動する。
+    /// 施工先端の概略の中心線座標。工事音の発音位置に使う。
+    /// 高架の車両は架設済みの桁端から実寸分だけ後退するため、この連続的な進捗位置とは一致しない。
     /// </summary>
     public static Vector3 FrontPoint(PathSummary path, List<Vector3> points, bool underground)
     {

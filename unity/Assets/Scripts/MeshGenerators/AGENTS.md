@@ -114,6 +114,8 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 
 ## 建物 (Buildings/)
 
+- 工事中クレーンは `BuildingMeshBuilder.Generate(..., animateCrane: true)` のときだけ頂部を結合から外し、`BuildingMeshResult.CraneTop` に解決済みプレハブと接続点・基準Yawを返す。呼び出し側は `ConstructionCraneAnimator.Attach` で実体化する。既定falseでは従来の静的結合、Farでは配置情報なし。`MergeSubMeshes` / `EnsureMaterials` は配置情報を保持する。仕様はF5文書§5、実FBX検証は `Tests/Buildings/run-crane.ps1`。
+
 - `ExteriorStairBuilder`はmid-stairを持つモジュラー建物の描画用輪郭だけを辺2で後退させ、元の頂点3からbase/mid/top-stairを各階1個積む。XZ実寸、midのY倍率は階高÷mid-w1の著作高さ。階段のbbox高さは手すりを含むため使わない。本体の壁・床・屋根・基盤は後退輪郭、コライダーと保存polygonは元の占有輪郭。壁は階段幅だけ開ける。収まらない敷地・自己交差・SHAPE_FULLには適用しない。仕様はF文書§11.4・I文書§4.11、実FBX検証は非公開制作ツールのimport_parking_garage.ps1。
 
 
@@ -210,6 +212,8 @@ TrackPathの車止めはInfrastructureConnectionProviderが共用インフラノ
 house_ends（both/start/end）で選択した終端だけ建屋・接地占有を生成する。house_placement=outsideは区間回避、insideは最寄り線路占有区間の外縁に建屋外側辺を合わせる。insideの内側辺は区間上端−余白−奥行き、線路なしは−奥行き。Pythonのresolve_house_positionとUnityのResolveHousePositionを同一に保つ。片側でも終端識別を維持し、outsideは通路延長、insideは通路端移動。上記の「両終端」「線路を常に回避」という説明はoutside/bothの場合に限る。仕様はQ_駅舎パスのメッシュ生成.md §5。
 
 橋脚のYスケールは必要高さ÷プレハブboundsの著作高さ。pillarの天端原点規約は維持するが、柱本体が1m高であると仮定してはいけない。SlicePolylineByFractionは施工端の重複・極小セグメントを統合し、SplineMeshの終端断面が回ることを防ぐ。実FBXの接地下端と施工端はTests/ConstructionPathsで検証する。
+
+ConstructionPathBuilderの高架工事車両は橋脚期間のみ地表へ置く。桁架設以降は離散化済みの架設端を基準に、路面の高さ・勾配へ合わせる。PillarClearance.GetPrefabBoundsで実寸を求め、桁端・先行車両との余白と道路幅を確保できる車両だけ表示する。未架設区間へ車両を置かず、90%以降は桁とともに配置を固定する。
 
 RailYardBuildingMeshBuilderは1060とモノレール車庫1064で共通。幅2m未満のyard_trackは各支持材サブメッシュの実X断面幅で合流を切断する。通常線路の枕木幅を細い単桁へ適用しない。1064は架線パーツを持たない。F9文書とTests/IntersectionsのRailYard検証を参照。
 

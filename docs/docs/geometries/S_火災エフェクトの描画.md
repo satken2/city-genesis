@@ -105,7 +105,7 @@ URPのレンダラは Forward+ のため多灯自体は許容されるが、点�
 - 赤橙の炎30粒を一度だけ放出し、0.3〜0.65秒で消す。
 - 灰色の煙45粒を一度だけ放出し、広がりながら上昇して1.8〜3.2秒で消す。
 - ループとprewarmは無効。画面外でも寿命を進め、3.5秒でルートを破棄する。`timeScale=0` でも演出と後始末は実時間で進む。
-- 建物の子にはせず `VisualEffectManager` の子として管理し、LOD切替に余韻を切らせない。セッションの全消去時は `ClearTransientEffects` で音も含めて破棄する。
+- 建物の子にはせず `VisualEffectManager` の子として管理し、LOD切替に余韻を切らせない。セッションの全消去時は `ClearTransientEffects` で音も含めて破棄する。破棄するのは `VisualEffectManager` 自身が生成した演出だけで、同じAppRootに同居する環境音・天候の子オブジェクトには触れない。
 
 音源は `Resources/Audio/Effects/building-explosion.ogg`（mitchelkの **Explode001**、CC0 1.0）。元WAVを44.1kHz・モノラルのOgg Vorbisへ圧縮して同梱する。音量は既存の `ambience:volume`（master×sfx）に基準ゲイン0.8を掛け、再生途中のミュートも反映する。俯瞰視点で聞き取れるよう距離減衰の範囲を80〜1800mにし、遠端で無音とする。出所・変換コマンドは `unity/Assets/Resources/Audio/Effects/README.md`、ゲーム内クレジットは `tauri/src/data/credits.ts`。
 

@@ -53,6 +53,11 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
 
     public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic = false)
     {
+        return Generate(buildingData, isDynamic, false);
+    }
+
+    public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic, bool animateCrane)
+    {
         if (buildingData == null)
         {
             Debug.LogError("ConstructingBuildingMeshBuilder: buildingData が null です。");
@@ -93,6 +98,7 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
         List<CombineInstance> combineInstances = new List<CombineInstance>();
         List<Material> allMaterials = new List<Material>();
         List<Mesh> temporaryMeshes = new List<Mesh>();
+        ConstructionCraneAnimator.Placement craneTop = null;
 
         Material dirtMaterial = BuildingMeshBuilder.GetConstructionDirtMaterial();
 
@@ -142,9 +148,9 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
             {
                 if (profile.MachineKind == SiteMachineKind.StackedCrane)
                 {
-                    AddCrane(footprint, prefix, visualVariant, buildingData.visual_variant2, floorHeight, builtFloors,
+                    craneTop = AddCrane(footprint, prefix, visualVariant, buildingData.visual_variant2, floorHeight, builtFloors,
                         profile.CraneBasePart, profile.CraneMidPart, profile.CraneTopPart,
-                        combineInstances, allMaterials, temporaryMeshes);
+                        combineInstances, allMaterials, temporaryMeshes, animateCrane);
                 }
                 else // GroundVehicle
                 {
@@ -187,7 +193,7 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
         float colliderHeight = Mathf.Max(builtFloors * floorHeight, floorHeight);
         Mesh colliderMesh = BuildingMeshBuilder.GenerateColliderMesh(colliderFootprint, colliderHeight);
 
-        var result = new BuildingMeshResult(finalMesh, allMaterials.ToArray(), colliderMesh);
+        var result = new BuildingMeshResult(finalMesh, allMaterials.ToArray(), colliderMesh) { CraneTop = craneTop };
         return BuildingMeshBuilder.MergeSubMeshes(result);
     }
 
@@ -284,10 +290,10 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
     /// top は頂部に完全実寸で載せる。base と mid が両方無い場合は何もしない
     /// （top だけあると接地したジブになってしまうため）。
     /// </summary>
-    private static void AddCrane(Vector2[] footprint, string prefix, float visualVariant, float visualVariant2,
+    private static ConstructionCraneAnimator.Placement AddCrane(Vector2[] footprint, string prefix, float visualVariant, float visualVariant2,
         float floorHeight, int builtFloors,
         string basePart, string midPart, string topPart,
-        List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
+        List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes, bool animateCrane)
     {
         GameObject baseModule = BuildingMeshUtils.GetPartWithCommonFallback(prefix, basePart, visualVariant);
         GameObject midModule = BuildingMeshUtils.GetPartWithCommonFallback(prefix, midPart, visualVariant);
@@ -296,7 +302,7 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
         if (baseModule == null && midModule == null)
         {
             UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[CBMB] クレーン: {basePart} / {midPart} パーツなし (prefix={prefix})。クレーンをスキップします。");
-            return;
+            return null;
         }
 
         ComputeMachinePlacement(footprint, visualVariant2, out Vector2 xzOffset, out Quaternion rotation);
@@ -327,10 +333,16 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
 
         if (topModule != null)
         {
+            // 描画専用の旋回では、接続点を原点とする頂部を本体の結合から分離する。
+            if (animateCrane)
+                return new ConstructionCraneAnimator.Placement(topModule,
+                    new Vector3(xzOffset.x, stackY, xzOffset.y), rotation);
+
             // top は一切スケールせず実寸のまま、原点(=最上段midのてっぺん=接続点)を stackY に置く
             BuildingMeshUtils.AddStackedModule(topModule, stackY, null,
                 combineInstances, allMaterials, temporaryMeshes, xzOffset, rotation, alignByOrigin: true);
         }
+        return null;
     }
 
     /// <summary>

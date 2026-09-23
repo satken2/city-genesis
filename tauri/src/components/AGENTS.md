@@ -237,7 +237,7 @@ TerrainPropEditor（TerrainEditorCanvasのプロップタブ）の範囲配置�
 
 - 移民政策の全体スイッチ `immigration_enabled` は `ImmigrationTab.IMMIGRATION_SCALAR_KEYS` に含める（変更検知・保存双方の正）。健康統計は衛生状態 `sanitation_distribution` と死因 `sanitation` を表示する。
 
-Tipsは初期描画完了まで閉じられず、開始操作後に空の都市の新規作成だけ初期パラメータ設定を表示する。Now Loading...は回転アイコンと文字の光の移動で待機を示す。
+Tipsは初期描画完了まで閉じられず(ロード中にバックエンドがセッションを破棄した場合だけ、Rustのポーリングが閉じてトップメニューへ戻す)、開始操作後に空の都市の新規作成だけ初期パラメータ設定を表示する。Now Loading...は回転アイコンと文字の光の移動で待機を示す。
 
 Tipsの抽選対象は `tips/TipsWindow.tsx` の `TIPS_LIST`、本文は全7言語の `i18n/<言語>/tutorial.json` の `tips.items` で管理する。追加時は両方に同じIDを登録する。画像は任意で、未指定のTipsはテキストのみを表示する。
 

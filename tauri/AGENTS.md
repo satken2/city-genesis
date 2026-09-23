@@ -173,6 +173,8 @@ UI側で独自に定義する定数は`local-constants.ts`に定義する。
 
 HUDとヒントバーは `current_save_id != null && !isLoading` を表示条件とする。`isLoading` は描画準備・開始ボタン待ち・初期設定中を含む。TipsのAlt+F4では待機を解除しない。開始APIの失敗時はTipsを破棄し、ロード状態を解除する。
 
+ロード中(Tips・初期設定)にバックエンドがセッションを破棄した場合は、`start_session_polling` の `session_lost_while_loading` がゲーム終了として扱い、Tips・初期設定を閉じてトップメニューへ戻す。通常の `save_id_changed && !is_loading` 判定はロード中を除外するため、これが無いとUnityの `game:loaded` が届かず操作不能になる。POST応答前の `null` は正常なので、`backend_load_complete` か `loading_started` をGET前に確認した同一 `loading_id` の応答だけで判定する。
+
 初期設定またはTipsから通常操作へ進む際はUI内の `initial-loading:finished` イベントでHUDとヒントバーの描画を即座に解禁し、次回のセッションポーリングを待たない。
 
 

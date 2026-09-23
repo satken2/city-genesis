@@ -1667,9 +1667,9 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
             let base = api_base_url.trim_end_matches('/');
 
             // このGETより後にPOSTが終わった場合、古い応答を新セッションの状態として採用しない。
-            let (polled_loading_id, load_complete_before_poll) = {
+            let (polled_loading_id, load_complete_before_poll, started_before_poll) = {
                 let guard = state.lock();
-                (guard.loading_id, guard.backend_load_complete)
+                (guard.loading_id, guard.backend_load_complete, guard.loading_started)
             };
 
             // セッション情報を取得
@@ -1854,7 +1854,13 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                 if ready { guard.backend_load_complete = false; }
                 ready
             };
-            if (save_id_changed && !is_loading) || load_completed {
+            // ロード中の消失は通常のsave_id変化判定から外れるため別に拾う。拾わないとUnityは描画完了を
+            // 通知できず、閉じられないTipsや初期設定のまま操作不能になる。POST応答前は新セッションが
+            // まだ無いのが正常なので、準備完了の確認後に送ったGETだけで判定する。
+            let session_lost_while_loading = is_loading && current_save_id.is_none()
+                && (load_complete_before_poll || started_before_poll)
+                && state.lock().loading_id == polled_loading_id;
+            if (save_id_changed && !is_loading) || load_completed || session_lost_while_loading {
                 let new_save_id = current_save_id.map(|s| s.to_string());
                 {
                     let mut guard = state.lock();
@@ -1875,10 +1881,8 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                     // POSTの応答前にセッションを検知しても、準備完了まではロードしない。
                     if load_completed || !is_loading { send_game_start_ipc(&state, &app); }
 
-                }
-
-                // non-null -> null: ゲーム終了
-                if prev_save_id.is_some() && new_save_id.is_none() {
+                } else {
+                    // null: ゲーム終了。ロード中に消失した場合は前回値もnullのことがある。
                     log::info!("[session-poll] current_save_id がクリアされました。ゲーム終了を検知");
 
                     // 開いているすべてのポップアップウィンドウ（モーダル・パネル）を閉じる。
@@ -1905,11 +1909,15 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                         let _ = topmenu.show();
                     }
                     window::close_tips_window(&app);
+                    window::close_parameter_setup_window(&app);
 
                     {
                         let mut guard = state.lock();
                         guard.is_loading = false;
+                        guard.backend_load_complete = false;
+                        guard.loading_started = false;
                         guard.graphic_load_ready = false;
+                        guard.needs_parameter_setup = false;
                         guard.awaiting_parameter_setup = false;
                         guard.tutorial_id = None;
                     }

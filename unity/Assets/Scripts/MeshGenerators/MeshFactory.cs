@@ -12,6 +12,7 @@ public class BuildingMeshResult
     public Material[] Materials { get; }
     public Mesh ColliderMesh { get; }
     public List<BuildingExteriorRenderer.Build> ExteriorJobs { get; set; }
+    public ConstructionCraneAnimator.Placement CraneTop { get; set; }
 
     public BuildingMeshResult(Mesh mesh, Material[] materials, Mesh colliderMesh = null)
     {

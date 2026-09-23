@@ -16,7 +16,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     private static readonly IBuildingMeshGenerator mashupGenerator = new MashupBuildingMeshBuilder();
     private static readonly IBuildingMeshGenerator railYardGenerator = new RailYardBuildingMeshBuilder();
     private static readonly IBuildingMeshGenerator openSpaceGenerator = new OpenSpaceBuildingMeshBuilder();
-    private static readonly IBuildingMeshGenerator constructingGenerator = new ConstructingBuildingMeshBuilder(ConstructionSiteProfile.Construction);
+    private static readonly ConstructingBuildingMeshBuilder constructingGenerator = new ConstructingBuildingMeshBuilder(ConstructionSiteProfile.Construction);
     private static readonly IBuildingMeshGenerator demolishingGenerator = new ConstructingBuildingMeshBuilder(ConstructionSiteProfile.Demolition);
     private static readonly IBuildingMeshGenerator collapsedGenerator = new CollapsedBuildingMeshBuilder();
 
@@ -34,8 +34,9 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// 描画LOD付きの生成。Far は遠景用prebuiltを優先し、無ければフットプリント押し出しの箱(<see cref="GenerateFarBuilding"/>)、
     /// Close は同じ組み立てで `_close` パーツを優先解決する(BuildingMeshUtils.CurrentDrawLod)。
     /// isDynamicは互換引数。地形追従の要否を表し、描画LODとは独立する。
+    /// animateCrane=true の呼び出し側は、返されたCraneTopを表示モード初期化前にAttachする。
     /// </summary>
-    public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic, DrawLod drawLod, bool separateExterior = false)
+    public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic, DrawLod drawLod, bool separateExterior = false, bool animateCrane = false)
     {
         if (buildingData == null)
         {
@@ -56,7 +57,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         BuildingExteriorRenderer.Capture = jobs;
         try
         {
-            var result = GenerateDetailed(buildingData, isDynamic);
+            var result = GenerateDetailed(buildingData, isDynamic, animateCrane);
             if (result != null) result.ExteriorJobs = jobs;
             return result;
         }
@@ -122,7 +123,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     public static bool IsOpenSpaceModel(int modelType) => modelType == Constants.MODEL_PARKING
         || modelType == Constants.MODEL_ROTARY || modelType == Constants.MODEL_PARK;
 
-    private BuildingMeshResult GenerateDetailed(BuildingSummary buildingData, bool isDynamic)
+    private BuildingMeshResult GenerateDetailed(BuildingSummary buildingData, bool isDynamic, bool animateCrane)
     {
 
         // 工事中/解体中/廃墟は model_type に関わらず専用メッシュで描画する。model_type 分岐より
@@ -133,7 +134,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         //   焼失(status_reason == REASON_FIRE)は焦げた瓦礫マテリアルで描き分ける（ビルダー内で選択）。
         if (buildingData.status == Constants.STATUS_CONSTRUCTING)
         {
-            return EnsureMaterials(constructingGenerator.Generate(buildingData, isDynamic));
+            return EnsureMaterials(constructingGenerator.Generate(buildingData, isDynamic, animateCrane));
         }
         if (buildingData.status == Constants.STATUS_DEMOLISHING)
         {
@@ -289,7 +290,8 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
             mesh.SetTriangles(finalTriangles[i], i);
         }
 
-        return new BuildingMeshResult(mesh, finalMaterials.ToArray(), meshResult.ColliderMesh) { ExteriorJobs = meshResult.ExteriorJobs };
+        return new BuildingMeshResult(mesh, finalMaterials.ToArray(), meshResult.ColliderMesh)
+        { ExteriorJobs = meshResult.ExteriorJobs, CraneTop = meshResult.CraneTop };
     }
 
     private static Material cachedDefaultBuildingMaterial;
@@ -334,7 +336,8 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         // Materials が null または空の場合、デフォルトマテリアルを1つ割り当てる
         if (result.Materials == null || result.Materials.Length == 0)
         {
-            return new BuildingMeshResult(result.Mesh, new[] { fallback }, result.ColliderMesh);
+            return new BuildingMeshResult(result.Mesh, new[] { fallback }, result.ColliderMesh)
+            { ExteriorJobs = result.ExteriorJobs, CraneTop = result.CraneTop };
         }
 
         // 配列内に null が含まれているか確認
@@ -359,7 +362,8 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
             resolved[i] = result.Materials[i] ?? fallback;
         }
 
-        return new BuildingMeshResult(result.Mesh, resolved, result.ColliderMesh);
+        return new BuildingMeshResult(result.Mesh, resolved, result.ColliderMesh)
+        { ExteriorJobs = result.ExteriorJobs, CraneTop = result.CraneTop };
     }
 
     /// <summary>

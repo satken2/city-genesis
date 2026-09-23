@@ -35,6 +35,8 @@ public class VisualEffectManager : MonoBehaviour
     private float settingsVolume;
     private AudioClip explosionSound;
     private readonly List<AudioSource> activeSounds = new List<AudioSource>();
+    // AppRootには環境音・天候など他コンポーネントの子も同居するため、全消去は自分が生成した子だけに限る。
+    private readonly List<GameObject> ownedEffects = new List<GameObject>();
 
     private void Awake()
     {
@@ -93,6 +95,7 @@ public class VisualEffectManager : MonoBehaviour
     public void PlayExplosion(Vector3 position, float radius)
     {
         var effect = FireEffectFactory.CreateExplosion(radius, transform);
+        Track(effect);
         effect.transform.position = position;
         StartCoroutine(DestroyAfterRealtime(effect, 3.5f));
         // 俯瞰カメラからも聞こえる範囲を確保し、都市の反対側では無音にする。
@@ -102,12 +105,20 @@ public class VisualEffectManager : MonoBehaviour
     public void ClearTransientEffects()
     {
         StopAllCoroutines();
-        foreach (Transform child in transform)
+        foreach (var effect in ownedEffects)
         {
-            child.gameObject.SetActive(false);
-            Destroy(child.gameObject);
+            if (effect == null) continue;
+            effect.SetActive(false);
+            Destroy(effect);
         }
+        ownedEffects.Clear();
         activeSounds.Clear();
+    }
+
+    private void Track(GameObject effect)
+    {
+        ownedEffects.RemoveAll(owned => owned == null);
+        ownedEffects.Add(effect);
     }
 
     private IEnumerator DestroyAfterRealtime(GameObject target, float seconds)
@@ -128,6 +139,7 @@ public class VisualEffectManager : MonoBehaviour
         Vector3 spawnPos = position + new Vector3(0f, 0.5f, 0f);
         GameObject particleObj = Instantiate(prefab, spawnPos, Quaternion.identity);
         particleObj.transform.SetParent(transform, true);
+        Track(particleObj);
 
         ParticleSystem ps = particleObj.GetComponent<ParticleSystem>();
         if (ps != null)
@@ -153,6 +165,7 @@ public class VisualEffectManager : MonoBehaviour
 
         GameObject audioObj = new GameObject("3D_Sound_Effect");
         audioObj.transform.SetParent(transform, false);
+        Track(audioObj);
         audioObj.transform.position = position;
 
         AudioSource source = audioObj.AddComponent<AudioSource>();

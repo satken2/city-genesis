@@ -381,11 +381,12 @@ invoke("start_load_game", { saveId })
 
 ```
 ポーリングスレッドが current_save_id: non-null → null の変化を検知
+(初期ロード中は、バックエンドの準備完了を確認した後の null も含む)
   ↓
 [Rust]
-  1. taskbar.hide()
-  2. topmenu.show()
-  3. loading.hide()
+  1. 全ポップアップを閉じ、HUD・ヒントバーを隠す
+  2. Tips・初期設定ウィンドウを閉じ、ロード状態を解除する
+  3. topmenu.show()
   4. Unity に game:end を送信
 ```
 

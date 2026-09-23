@@ -94,6 +94,8 @@ PathManagerの完成した乗り場451/461・462・502・602のFarはFarPlatform
 
 ## 建物 (BuildingManager.cs)
 
+- `ConstructionCraneAnimator` は工事中クレーン頂部だけの描画演出。`BuildingManager` が `animateCrane: true` で受け取った配置情報を、`VisualModeObject` の初期化前に子Rendererへ変換する。接続点のY軸まわりの旋回は建物IDと非スケール時刻から決まり、再生成・LOD復帰でも連続する。子の `RenderCacheIdentity` が生成Meshと複製Materialを所有し、コライダーは持たない。Far・静的プレビューでは動かさない。仕様はF5文書§5。
+
 - `CellDataLoader.FetchBuilding` / `BuildingManager.FetchBuilding` は単体取得の共通入口。`playExplosion: true` は爆破成功IPCだけが指定し、取得した倒壊状態の瓦礫への更新と `VisualEffectManager.PlayExplosion` を同時に行う。通信中の重複と同じversionの通知は演出を重ねず、旧versionの一括取得で表示を巻き戻さない。`ClearAllCells`は未完了取得の世代を無効化し、単発演出も全消去する。フットプリント半径は `FireEffectManager.ResolveFootprintRadius` を火災・爆破で共有する。
 
 - `center_point` が属するセルのティアで Far(箱) / 詳細候補を選び、Near/Dynamic セルでは描画LOD(上記「描画LOD」の節。`DetermineDesiredDrawLod`)で Close / Normal / Far を決める。**Far(箱)は `CreateFarBuildingObject` が `BuildingMeshBuilder.Generate(data, false, DrawLod.Far)` で実寸の箱(フットプリント×階数×階高。工事中/解体中=1階分、倒壊=0.5階分、地面アセット=0.3m板)を生成する**(`ObjectIdInfo.isFarObject=true`、`DrawLodInfo.drawLod=Far`)。Normal/Close は `CreateOrUpdateBuildingObject(data, isDynamic, forceRebuild, drawLod)`。
