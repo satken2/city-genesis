@@ -38,12 +38,22 @@ public sealed class VehiclePolyline
         if (tangent.sqrMagnitude < .001f) tangent = forward ? Vector3.forward : Vector3.back;
     }
 
-    public float Project(Vector3 point)
+    public float Project(Vector3 point) => ProjectRange(point, 0, Length);
+
+    /// <summary>既知の距離付近だけに射影する。路上物の車体検査で道路全長を繰り返し走査しない。</summary>
+    public float ProjectRange(Vector3 point, float from, float to)
     {
         float best = float.PositiveInfinity, result = 0;
-        for (int i = 1; i < points.Length; i++)
+        from = Mathf.Clamp(from, 0, Length);
+        to = Mathf.Clamp(to, from, Length);
+        int first = System.Array.BinarySearch(distances, from);
+        first = Mathf.Clamp(first < 0 ? ~first : first, 1, points.Length - 1);
+        for (int i = first; i < points.Length && distances[i - 1] <= to; i++)
         {
             float t = PolylineUtils.ProjectOnSegmentXZ(point, points[i - 1], points[i]);
+            float length = distances[i] - distances[i - 1];
+            if (length > .0001f)
+                t = Mathf.Clamp(t, Mathf.Clamp01((from - distances[i - 1]) / length), Mathf.Clamp01((to - distances[i - 1]) / length));
             Vector3 closest = Vector3.Lerp(points[i - 1], points[i], t);
             float error = new Vector2(point.x - closest.x, point.z - closest.z).sqrMagnitude;
             if (error < best) { best = error; result = distances[i - 1] + t * (distances[i] - distances[i - 1]); }

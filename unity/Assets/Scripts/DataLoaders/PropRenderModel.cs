@@ -24,6 +24,26 @@ public sealed class PropRenderModel : IDisposable
 
     public PropRenderModel(int type) : this(type.ToString(), type == 1 || type == 2) { }
 
+    /// <summary>配置原点を解決済みのモデルを、GameObjectを個体ごとに持たない静止描画へ渡す。</summary>
+    public PropRenderModel(GameObject root)
+    {
+        var lod = root.GetComponent<LODGroup>();
+        if (lod == null) Extract(root, normal);
+        else
+        {
+            foreach (var level in lod.GetLODs())
+            {
+                var target = level.screenRelativeTransitionHeight >= .25f ? close
+                    : level.screenRelativeTransitionHeight > 0 ? normal : far;
+                Extract(root, target, new HashSet<Renderer>(level.renderers));
+            }
+            if (normal.Count == 0) normal.AddRange(far);
+        }
+        if (close.Count == 0) close.AddRange(normal);
+        if (far.Count == 0) far.AddRange(normal);
+        CalculateBounds();
+    }
+
     /// <summary>固定名のモデル(Props/ambient_* など)も同じ抽出で読む。distantTree は森林の最遠景樹冠を作るか。</summary>
     public PropRenderModel(string name, bool distantTree = false)
     {
@@ -33,12 +53,7 @@ public sealed class PropRenderModel : IDisposable
         if (prefab == null) return;
         Extract(prefab, normal);
         if (normal.Count == 0) return;
-        bool first = true;
-        foreach (var part in normal)
-        {
-            var b = Utils.TransformBounds(part.mesh.bounds, part.local);
-            if (first) { bounds = b; first = false; } else bounds.Encapsulate(b);
-        }
+        CalculateBounds();
         var closePrefab = manager.GetModel($"Models/Props/{name}_close", true);
         if (closePrefab != null) Extract(closePrefab, close);
         if (close.Count == 0) close.AddRange(normal);
@@ -76,13 +91,24 @@ public sealed class PropRenderModel : IDisposable
         distant.Add(new Part {mesh=mesh, material=far[0].material, local=Matrix4x4.identity});
     }
 
-    private void Extract(GameObject prefab, List<Part> parts)
+    private void CalculateBounds()
+    {
+        bool first = true;
+        foreach (var part in normal)
+        {
+            var b = Utils.TransformBounds(part.mesh.bounds, part.local);
+            if (first) { bounds = b; first = false; } else bounds.Encapsulate(b);
+        }
+    }
+
+    private void Extract(GameObject prefab, List<Part> parts, HashSet<Renderer> selected = null)
     {
         var materials = new Dictionary<Material, Material>();
         foreach (var filter in prefab.GetComponentsInChildren<MeshFilter>(true))
         {
             var renderer = filter.GetComponent<MeshRenderer>();
             if (renderer == null || filter.sharedMesh == null) continue;
+            if (selected != null && !selected.Contains(renderer)) continue;
             var source = renderer.sharedMaterials;
             for (int i = 0; i < filter.sharedMesh.subMeshCount && i < source.Length; i++)
             {

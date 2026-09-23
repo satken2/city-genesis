@@ -1,4 +1,4 @@
-param([string]$UnityExe, [switch]$PedestrianModelsOnly, [switch]$TransitOnly, [switch]$DriveOnly)
+param([string]$UnityExe, [switch]$PedestrianModelsOnly, [switch]$TransitOnly, [switch]$DriveOnly, [switch]$ParkingOnly)
 $ErrorActionPreference = 'Stop'
 $unityRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $project = Join-Path $unityRoot 'Assembly-CSharp.csproj'
@@ -13,6 +13,7 @@ $qaRoot = Join-Path $unityRoot 'Temp/VehicleUnityQA'
 $editorAssets = Join-Path $qaRoot 'Assets/Editor'
 New-Item -ItemType Directory -Path $editorAssets -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'VehicleQA.cs') -Destination $editorAssets -Force
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'StreetParkingQA.cs') -Destination $editorAssets -Force
 Copy-Item -LiteralPath (Join-Path $unityRoot 'Assets/Editor/ModelPrefabGenerator.cs') -Destination $editorAssets -Force
 Copy-Item -LiteralPath (Join-Path $unityRoot 'Assets/Editor/ModelImportSettings.cs') -Destination $editorAssets -Force
 foreach ($vehicleType in @('10','11','12','13','14','20','21','22','23')) {
@@ -49,6 +50,7 @@ $qaArguments = @(
 if ($PedestrianModelsOnly) { $qaArguments += '-pedestrianModelsOnly' }
 if ($TransitOnly) { $qaArguments += '-transitOnly' }
 if ($DriveOnly) { $qaArguments += '-driveOnly' }
+if ($ParkingOnly) { $qaArguments += '-parkingOnly' }
 $process = Start-Process -FilePath $UnityExe -ArgumentList $qaArguments -WindowStyle Hidden -PassThru
 $process.WaitForExit()
 $result = Get-Content -LiteralPath $resultPath -Raw

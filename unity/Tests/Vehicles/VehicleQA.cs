@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-public static class VehicleQA
+public static partial class VehicleQA
 {
     static Assembly game;
     static readonly List<string> accessTimings = new List<string>();
@@ -41,6 +41,12 @@ public static class VehicleQA
             ModelImportSettings.EnableReadWriteAll();
             ModelPrefabGenerator.SyncAll();
             game=Assembly.LoadFrom(Path.Combine(source,"Temp/bin/Debug/Assembly-CSharp.dll"));
+            if (Array.IndexOf(args, "-parkingOnly") >= 0)
+            {
+                StreetParking();
+                File.WriteAllText(result, "PASS\nStreet parking: actual models, mix, counts, clearance, curves, grade, directions, lifecycle and API data\n" + string.Join("\n", accessTimings));
+                EditorApplication.Exit(0); return;
+            }
             if (Array.IndexOf(args, "-pedestrianModelsOnly") >= 0)
             {
                 PedestrianModels();
@@ -60,6 +66,7 @@ public static class VehicleQA
                 File.WriteAllText(result,"PASS\nDrive: branch selection, one-way restrictions, protected lifetime, transit start/turnback/loading, camera restore and input cleanup");
                 EditorApplication.Exit(0); return;
             }
+            StreetParking();
             Geometry(); Budget(); Junction(); RoadsideExit(); MotionContract(); TransitModels(); TransitPlacement(); TransitHighlightSelection(); DriveCamera();
             PedestrianBands(); PedestrianModels();
             var report = new List<string>();
