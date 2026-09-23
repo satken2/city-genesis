@@ -31,6 +31,9 @@
  *     リングで示す。描画規則は transitLineDraw.ts。transitFocusLineId で1路線を主役にできる
  *     (路線詳細の路線地図はこれを使う)。路線の変更通知 "transit:lines_changed" を受けると
  *     形状を取り直す。
+ *   - interchanges : インターチェンジ(IC/JCT)。GET /api/v1/interchanges/ を都市全体で取得し、
+ *     中心に記号と名前を描く(未命名は種別の略号+ID)。件数が少ないため地区と同じく
+ *     ベクター取得のたびに取り直し、エポック実行や道路編集による検出結果の変化に追従する。
  *
  * ヒートマップ(heatmap propで1種別だけ選ぶ排他表示):
  *   騒音・大気汚染・治安・日照の環境スコアを土地区画の塗り分けで表現する。APIが返すのは
@@ -66,7 +69,7 @@ import { useTranslation } from "react-i18next";
 import { listen } from "@tauri-apps/api/event";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { useMasterData } from "../../contexts/MasterDataContext";
-import type { MasterData } from "../../types";
+import type { InterchangeListResponse, InterchangeSummary, MasterData } from "../../types";
 import { computePixelRGB, decodeFloat16Array } from "../terrain/terrainData";
 import {
   PATH_MOTORWAY,
@@ -78,6 +81,7 @@ import {
 import { drawMapLabels, facilitySymbol, type MapPlace } from "./mapLabels";
 import { RoadCenterline, roadSurface } from "./roadSurface";
 import { drawTransitLines, type TransitLineGeometry } from "./transitLineDraw";
+import { interchangeDisplayName } from "../intersection/interchangeName";
 
 /* ============================================================================
  * 公開型
@@ -101,6 +105,8 @@ export type CityMapLayerVisibility = {
   buildings: boolean;
   /** 駅(同じ駅舎に所属するプラットフォーム群の凸包) */
   stations: boolean;
+  /** インターチェンジ(IC/JCT)の記号と名前 */
+  interchanges: boolean;
   /** 地区の枠線 */
   zoneBorders: boolean;
   /** 標高に応じた色分け */
@@ -112,7 +118,7 @@ export type CityMapLayerVisibility = {
 };
 
 /**
- * レイヤー表示のデフォルト値(建物・駅・全道路・幹線道路・線路のみON)。
+ * レイヤー表示のデフォルト値(建物・駅・インターチェンジ・全道路・幹線道路・線路のみON)。
  * 公共交通路線は都市全体の形状を別APIで取得するため、埋め込み地図では明示的にONにする。
  */
 export const DEFAULT_CITY_MAP_LAYERS: CityMapLayerVisibility = {
@@ -124,6 +130,7 @@ export const DEFAULT_CITY_MAP_LAYERS: CityMapLayerVisibility = {
   parcels: false,
   buildings: true,
   stations: true,
+  interchanges: true,
   zoneBorders: false,
   elevation: false,
   contours: false,
@@ -364,6 +371,8 @@ type VectorState = {
   stationHullPath: Path2D | null;
   /** 公共交通路線の走行形状(都市全体。bboxに依らない) */
   transitLines: TransitLineGeometry[];
+  /** インターチェンジ(都市全体。bboxに依らない) */
+  interchanges: InterchangeSummary[];
   /** 確定地区(auto_managed=0)の枠線。実線で描く */
   zonePathConfirmed: Path2D | null;
   /** 自動管理地区(auto_managed=1)の枠線。破線で描き「まだ仮の区割り」であることを示す */
@@ -377,7 +386,7 @@ type VectorState = {
   loading: boolean;
 };
 
-type VectorKind = "paths" | "parcels" | "buildings" | "zones" | "transit";
+type VectorKind = "paths" | "parcels" | "buildings" | "zones" | "transit" | "interchanges";
 
 /** 取得済みヒートマップと色ビンごとのPath2Dキャッシュ */
 type HeatmapState = {
@@ -1130,6 +1139,10 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
     const zoomCbRef = useRef<CityMapCanvasProps["onZoomChange"]>(onZoomChange);
     const heatmapStatsCbRef = useRef<CityMapCanvasProps["onHeatmapStats"]>(onHeatmapStats);
     const masterDataRef = useRef<MasterData | null>(masterData);
+    // インターチェンジの未命名時の表示名は描画時に翻訳するため、言語切替にも追従させる
+    const { t } = useTranslation();
+    const tRef = useRef(t);
+    tRef.current = t;
     overlayDrawRef.current = overlayDraw;
     animatedOverlayDrawRef.current = animatedOverlayDraw;
     cursorCbRef.current = onCursorWorldPos;
@@ -1164,6 +1177,11 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       engineRef.current?.ensureVectors();
       engineRef.current?.draw();
     }, [layers]);
+
+    /* ---- 言語の切り替え: 翻訳で作るラベル(インターチェンジの既定名)を描き直す ---- */
+    useEffect(() => {
+      engineRef.current?.draw();
+    }, [t]);
 
     /* ---- 注目路線の変更: データは共通なので再描画だけ行う ---- */
     useEffect(() => {
@@ -1261,6 +1279,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         parkPath: null,
         stationHullPath: null,
         transitLines: [],
+        interchanges: [],
         zonePathConfirmed: null,
         zonePathAuto: null,
         zoneFillBands: null,
@@ -1518,8 +1537,14 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           drawTransitLines(ctx, { ...view }, vec.transitLines, transitFocusRef.current);
         }
 
-        drawMapLabels(ctx, view, canvasW, canvasH, vec.zones,
-          vec.places.filter((place) => place.station ? L.stations : L.buildings));
+        const places = vec.places.filter((place) => place.station ? L.stations : L.buildings);
+        if (L.interchanges) {
+          for (const ic of vec.interchanges) {
+            places.push({ id: ic.interchange_id, x: ic.center[0], z: ic.center[1],
+              name: interchangeDisplayName(ic, tRef.current), symbol: "interchange", interchange: true });
+          }
+        }
+        drawMapLabels(ctx, view, canvasW, canvasH, vec.zones, places);
 
         // 上位コンポーネントの重ね描き(敷設中道路・路線図など)
         overlayDrawRef.current?.(ctx, { ...view });
@@ -1813,6 +1838,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         // 地区名は境界線の表示と独立して常時表示する。
         kinds.push("zones");
         if (L.transitLines) kinds.push("transit");
+        if (L.interchanges) kinds.push("interchanges");
         return kinds;
       };
 
@@ -1960,6 +1986,24 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
                   { signal: abort.signal }
                 );
                 vec.transitLines = data.lines ?? [];
+                return;
+              }
+              if (kind === "interchanges") {
+                // 件数が少ないので地区と同じく毎回全件を取り直す。検出結果はエポック実行や
+                // 道路編集で変わる。失敗しても他の種別の描画を止めないよう、ここで握って空にする。
+                try {
+                  const data = await fetchApi<InterchangeListResponse>(
+                    buildApiUrl(apiBaseUrl, "/api/v1/interchanges/"),
+                    { signal: abort.signal }
+                  );
+                  vec.interchanges = (data.interchanges ?? []).filter(
+                    (ic) => Array.isArray(ic.center) && ic.center.length >= 2
+                  );
+                } catch (err) {
+                  if (abort.signal.aborted) throw err;
+                  console.warn("[CityMapCanvas] failed to load interchanges:", err);
+                  vec.interchanges = [];
+                }
                 return;
               }
               if (kind === "zones") {

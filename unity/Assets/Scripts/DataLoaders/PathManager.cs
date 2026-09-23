@@ -4703,6 +4703,12 @@ public class PathMasterItem
     public bool frontage_allowed;
 
     /// <summary>
+    /// インターチェンジのランプ用バリアントか。バックエンドはランプの連結成分を起点にIC/JCTを自動検出する
+    /// (検出結果は InterchangeManager が表示する)。描画上は通常の道路と同じに扱う。
+    /// </summary>
+    public bool ramp;
+
+    /// <summary>
     /// 許容最小高さ(m)。負の値を持つバリアント（地下道路・地下鉄用線路など）だけが
     /// 地下（相対Y &lt; 0）に建設できる。null は 0（地下禁止）扱い。
     /// </summary>

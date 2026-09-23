@@ -112,6 +112,20 @@
       }
     ]
   },
+  "intersection_detail": {
+    "title": "Interchange Details",
+    "width": 420,
+    "height": 240,
+    "resizable": true,
+    "policy": "single_per_entity",
+    "entity_type": "interchange",
+    "layout": "right_panel",
+    "fetch": {
+      "method": "GET",
+      "path_template": "/api/v1/interchanges/{id}"
+    },
+    "actions": []
+  },
   "zone_merge": {
     "title": "地区の統合",
     "width": 420,

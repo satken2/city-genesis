@@ -10,6 +10,9 @@
     "path_detail",
     "zone_detail"
   ],
+  "intersection_detail": [
+    "intersection_detail"
+  ],
   "agent_detail": [
     "agent_detail"
   ],

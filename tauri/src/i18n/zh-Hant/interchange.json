@@ -1,0 +1,12 @@
+{
+  "interchange": {
+    "kind": {
+      "ic": "交流道",
+      "jct": "系統交流道"
+    },
+    "fallbackName": {
+      "ic": "IC #{{id}}",
+      "jct": "JCT #{{id}}"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "interchange": {
+    "kind": {
+      "ic": "インターチェンジ",
+      "jct": "ジャンクション"
+    },
+    "fallbackName": {
+      "ic": "IC #{{id}}",
+      "jct": "JCT #{{id}}"
+    }
+  }
+}

@@ -1,5 +1,7 @@
 # DataLoaders フォルダ
 
+`PropRenderModel(GameObject)` は `VehicleModelResolver` で原点・向きを解決済みの車両テンプレートから、LODごとのメッシュとインスタンシング用材質を抽出する。路駐はこの入口を使う。共有FBXメッシュは所有せず、複製材質だけをDisposeで解放する。既存のPropsパス指定コンストラクタと抽出・bounds計算を共有する。
+
 PathManagerの完成した乗り場451/461・462・502・602のFarはFarPlatformPathの簡易立体を使う。屋根・壁・床の色帯を通常と同じ共有材質で保つ。通常道路の帯、施工中、地下非表示の規則は共通のまま。生成メッシュは子のIntersectionMeshOwnerが所有し、遠景キャッシュの退避・復元も通常の経路を使う。
 
 バックエンドから取得したデータをUnityのオブジェクトに変換する処理を定義する。
@@ -193,6 +195,15 @@ PathManagerの完成した乗り場451/461・462・502・602のFarはFarPlatform
 - 名前は表示対象路線の詳細APIを10秒間隔・逐次取得する。停留所の下地パスへXZ射影して高さを合わせ、同じ駅舎のラベルを集約する。`WorldCallout` が引出線と配置を担当し、近景を優先して最大80ラベルを表示する。無名はノードIDで表示する。
 - 経路形状は0.5秒周期、カメラの変化では帯の画面幅だけを更新する。セッション変更では取得中のコルーチンと名前キャッシュを破棄する。選択は `InputHandlers/TransitSelection` が処理する。
 
+## インターチェンジ (InterchangeManager.cs)
+
+- IC/JCTはバックエンドがランプ(`PathMasterItem.ramp`=true のバリアント)の連結成分から自動検出する。**道路そのものは普通のパスとして PathManager が描く**ので、このマネージャーが持つのは中心 `center` に置く名前ラベルだけ。プレイヤーがICを作る操作は無い。
+- `GET /interchanges/`(手書きDTO `API/InterchangeSummary.cs`)で都市全体を一度に取る。応答の `version` が前回反映値と同じなら何もしない(レコード集合・名前・構成が変わると上がる)。
+- **取得の入口は2つ**: ①`CellDataLoader.LoadObjectManagers` の `EnsureLoaded`(未要求のときだけ。初回ロード・全量リロード)。②`CellDataLoader.ReloadAllData` の `RequestRefresh`(session:reload・エポック完了・編集確定)。**カメラ移動では取り直さない**。バックエンドの再検出はAPI呼び出し時に遅延実行されるため、②を外すと竣工したランプのICが永久に出ない。取得中の要求は完了後に1回だけ追加実行する。
+- `CellDataLoader.ClearAllManagerData`(セッション切り替え・全量リロード・ゲーム終了)で `Clear` する。取得中の通信は止めず世代番号を進め、古い都市の応答を捨てる。
+- 表示は ZoneManager の地区名と同じ ScreenSpaceOverlay Canvas(sortingOrder=62。地区60より前、アラート70より奥)+ `Text`/`Outline`/`Button`。クリックで `EmitSelectObject("intersection_detail", "interchange", id)`。名前が空なら `IC {id}` / `JCT {id}`(Unityに多言語リソースが無いので略号)。ボタンのRectは文字列幅に詰める(下の道路・建物のクリックを奪わないため)。
+- **通常(閲覧)状態のときだけ表示する**: 道路・地形の入力モードがともに `MODE_NORMAL`、`IsWorldVisible`、ドライブUI非表示、道路の表示モードが `MODE_HIDDEN` でないこと。編集ステートは道路か地形を NORMAL 以外にするので、この判定でラベルが消える(uGUIのラベルを編集中に出すと道路編集のクリックを奪う)。
+- 位置はカメラが1m/2°以上動いたフレームと、一覧更新・地形ロード完了・表示再開の直後だけ `center` の地面高さ(`Utils.GetGroundHeight`)+6mを `WorldToScreenPoint` して更新する。カメラ背面と6,000mより遠いICは隠す。
 
 ## その他の注意
 

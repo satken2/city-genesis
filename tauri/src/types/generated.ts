@@ -364,6 +364,10 @@ export type PathSummary = {
   planter_type: number;
   /** 広告の種類。0=なし、1=標準。道路ごとの保存値。 */
   advert_type: number;
+  /** 路上駐車台数（合法分と超過分の合計。昼夜の大きい方） */
+  parked_cars: number;
+  /** 合法路上駐車容量（台）。稼働中の地上街路以外は0 */
+  street_parking_capacity: number;
 };
 
 export type PathData = {
@@ -471,6 +475,10 @@ export type PathData = {
   planter_type: number;
   /** 広告の種類。0=なし、1=標準。道路ごとの保存値。 */
   advert_type: number;
+  /** 路上駐車台数（合法分と超過分の合計。昼夜の大きい方） */
+  parked_cars: number;
+  /** 合法路上駐車容量（台）。稼働中の地上街路以外は0 */
+  street_parking_capacity: number;
 };
 
 export type ParcelSummary = {

@@ -39,4 +39,13 @@ assert.equal(circles.length, 1);
 assert.deepEqual(circles[0], { x: 300, y: 200 });
 assert.ok(drawn.some((label) => label.name === "School"));
 assert.ok(!drawn.some((label) => label.name === "Overlap" || label.name === "Offscreen"));
-console.log("PASS: facility classification, international school symbol, district coordinates, label collisions, viewport culling");
+drawn.length = 0;
+circles.length = 0;
+drawMapLabels(ctx, { offsetX: -100, offsetY: -100, zoom: 2 }, 800, 600, [],
+  [{ id: 1, name: "Facility", x: 50, z: 0, symbol: "generic" },
+    { id: 9, name: "IC 9", x: 50, z: 0, symbol: "interchange", interchange: true },
+    { id: 2, name: "IC 2", x: 150, z: 0, symbol: "interchange", interchange: true },
+    { id: 30, name: "Station", x: 150, z: 0, symbol: "station", station: true }]);
+assert.deepEqual(circles, [{ x: 500, y: 200 }, { x: 300, y: 200 }]);
+assert.deepEqual(drawn.map((label) => label.name).sort(), ["IC 9", "Station"]);
+console.log("PASS: facility classification, international school symbol, district coordinates, label collisions, viewport culling, station > interchange > facility priority");

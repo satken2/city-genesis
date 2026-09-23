@@ -271,6 +271,39 @@ export type ZoneResponse = {
 };
 
 /**
+ * インターチェンジ(IC/JCT)1件。GET /api/v1/interchanges/ と /{id} が返すレコード。
+ * バックエンドがランプ群から自動検出するもので、生成型(generated.ts)には含まれないため手書きする。
+ * リストはすべて昇順で、座標は [x, z] の水平面座標。
+ */
+export type InterchangeSummary = {
+  interchange_id: number;
+  /** プレイヤーが付けた名前。空文字は未命名(表示側がIDからフォールバック名を作る) */
+  name: string;
+  /** INTERCHANGE_KIND_IC(一般道路の腕を持つ) / INTERCHANGE_KIND_JCT(腕がすべて高速道路) */
+  kind: number;
+  center: [number, number];
+  /** ランプ群の凸包を余白ぶん広げたポリゴン(先頭点の重複なし) */
+  polygon: [number, number][];
+  /** 内部パス(両端がインターチェンジ内にある道路パス) */
+  path_ids: number[];
+  ramp_path_ids: number[];
+  node_ids: number[];
+  /** 外部道路との接続(ポータルノードと、片端だけが内側に入る腕パス) */
+  arms: { node_id: number; path_id: number }[];
+};
+
+/** GET /api/v1/interchanges/ のレスポンス。version は一覧の内容が変わるたびに増える */
+export type InterchangeListResponse = {
+  version: number;
+  interchanges: InterchangeSummary[];
+};
+
+/** GET /api/v1/interchanges/{id} のレスポンス */
+export type InterchangeResponse = {
+  interchange: InterchangeSummary;
+};
+
+/**
  * API /api/v1/parcels/{id} のレスポンス(土地区画データ)
  * single_parcel スキーマに基づくフィールドを定義する
  */
@@ -596,6 +629,11 @@ export type PathMasterEntry = {
   min_height?: number | null;
   /** 幹線道路かどうか。master.yaml の trunk に対応する(都市マップの幹線道路レイヤー等で使用) */
   trunk?: boolean;
+  /**
+   * インターチェンジのランプ用バリアントか。master.yaml の ramp に対応する。
+   * バックエンドはランプの連結成分からインターチェンジを自動検出する(未定義は false)。
+   */
+  ramp?: boolean;
   /**
    * メッシュ生成器の種別。PathMeshFactory がこの値で RoadPath / TrackPath / なし を切り替える。
    * "default" → RoadPath, "track" → TrackPath, "none" → メッシュ生成なし。

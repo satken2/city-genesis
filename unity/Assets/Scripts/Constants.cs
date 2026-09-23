@@ -256,6 +256,10 @@ public static class Constants
     public const float INFRA_TAP_HEIGHT_TOLERANCE = 3.0f;
     public const float RAIL_MIN_HEADWAY_MIN = 2.0f;
     public const float RIVER_BRIDGE_MIN_CLEARANCE = 0.5f;
+    public const int INTERCHANGE_KIND_IC = 1;
+    public const int INTERCHANGE_KIND_JCT = 2;
+    public const float INTERCHANGE_HULL_MARGIN_M = 10.0f;
+    public const int INTERCHANGE_NAME_MAX_LENGTH = 64;
     public const int PAYMENT_MARKET = 0;
     public const int PAYMENT_RENT = 1;
     public const int PAYMENT_SALARY = 2;

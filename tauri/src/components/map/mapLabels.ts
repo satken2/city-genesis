@@ -1,7 +1,8 @@
 import { TYPE_EDUCATION, VARIANT_CITY, VARIANT_FIRE_STATION, VARIANT_POLICE_STATION, VARIANT_SUBSTATION } from "../../constants";
 import { MAP_SYMBOLS, type MapSymbol } from "./mapSymbols";
 
-export type MapPlace = { id: number; x: number; z: number; name: string; symbol: MapSymbol; station?: boolean };
+/** station / interchange はラベル配置の優先度と記号色を決める(駅 → インターチェンジ → 施設の順)。 */
+export type MapPlace = { id: number; x: number; z: number; name: string; symbol: MapSymbol; station?: boolean; interchange?: boolean };
 export type MapDistrict = { name?: string | null; center_point?: number[] | null };
 
 /** 名前や翻訳文で判定しない。汎用施設も公共所有フラグから拾う。 */
@@ -20,6 +21,8 @@ export function facilitySymbol(variant: number | undefined, type: number | undef
 
 const paths = new Map<MapSymbol, Path2D>();
 type Box = { x: number; y: number; w: number; h: number };
+
+const placeRank = (place: MapPlace) => (place.station ? 2 : place.interchange ? 1 : 0);
 
 /** 画面上の寸法を固定し、重なる名称だけを省く。地区名と施設記号を優先する。 */
 export function drawMapLabels(ctx: CanvasRenderingContext2D, view: { offsetX: number; offsetY: number; zoom: number },
@@ -57,13 +60,14 @@ export function drawMapLabels(ctx: CanvasRenderingContext2D, view: { offsetX: nu
   if (view.zoom >= 0.04) {
     const shown: { place: MapPlace; x: number; y: number; color: string }[] = [];
     // ID順を保ち、取得順序によってラベルの優先順位が揺れないようにする。
-    for (const place of [...places].sort((a, b) => Number(!!b.station) - Number(!!a.station) || a.id - b.id)) {
+    for (const place of [...places].sort((a, b) => placeRank(b) - placeRank(a) || a.id - b.id)) {
       const x = (place.x - view.offsetX) * view.zoom, y = (place.z - view.offsetY) * view.zoom;
       if (!visible(x, y)) continue;
       const box = { x: x - 13, y: y - 13, w: 26, h: 26 };
       if (overlaps(box)) continue;
       occupied.push(box);
-      const color = place.symbol === "hospital" || place.symbol === "fire" ? "#d95865" : place.station ? "#657f91" : "#78939c";
+      const color = place.symbol === "hospital" || place.symbol === "fire" ? "#d95865"
+        : place.station ? "#657f91" : place.interchange ? "#3f8660" : "#78939c";
       ctx.beginPath(); ctx.arc(x, y, 11, 0, Math.PI * 2);
       ctx.fillStyle = color; ctx.fill(); ctx.strokeStyle = "white"; ctx.lineWidth = 2.5; ctx.stroke();
       let path = paths.get(place.symbol);

@@ -24,6 +24,7 @@ const CitizenDetailPanel = lazy(() => import("./components/citizen/CitizenDetail
 const DiagnosisPanel = lazy(() => import("./components/diagnosis/DiagnosisPanel").then(m => ({ default: m.DiagnosisPanel })));
 const ParcelDetailPanel = lazy(() => import("./components/parcel/ParcelDetailPanel").then(m => ({ default: m.ParcelDetailPanel })));
 const ZoneDetailPanel = lazy(() => import("./components/zone/ZoneDetailPanel").then(m => ({ default: m.ZoneDetailPanel })));
+const IntersectionDetailPanel = lazy(() => import("./components/intersection/IntersectionDetailPanel").then(m => ({ default: m.IntersectionDetailPanel })));
 const ZoneMergeConfirmWindow = lazy(() => import("./components/zone/ZoneMergeConfirmWindow").then(m => ({ default: m.ZoneMergeConfirmWindow })));
 const BuildingDirectAcquisitionConfirmWindow = lazy(() => import("./components/building/BuildingDirectAcquisitionConfirmWindow").then(m => ({ default: m.BuildingDirectAcquisitionConfirmWindow })));
 const PathConstructionPanel = lazy(() => import("./components/path/PathConstructionPanel").then(m => ({ default: m.PathConstructionPanel })));
@@ -87,7 +88,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * 専用パネルが実装されているウィンドウタイプのセット
  * これらのタイプはジェネリックな JSON 表示ではなく、専用コンポーネントでレンダリングする
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "diagnosis", "parcel_detail", "zone_detail", "zone_merge", "building_direct_acquisition", "path_build", "infra_build", "track_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "settings", "credits", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "new_game", "city_rename", "template_editor", "resource_detail", "resource_edit", "prop_placement", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "street_grid", "agent_creation"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "diagnosis", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "path_build", "infra_build", "track_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "settings", "credits", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "new_game", "city_rename", "template_editor", "resource_detail", "resource_edit", "prop_placement", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "street_grid", "agent_creation"]);
 
 
 function App() {
@@ -384,6 +385,12 @@ function App() {
               />
             ) : context.window_type === "zone_detail" ? (
               <ZoneDetailPanel
+                apiBaseUrl={context.api_base_url}
+                pathTemplate={context.definition.fetch!.path_template}
+                initialEntityId={context.entity?.id ?? ""}
+              />
+            ) : context.window_type === "intersection_detail" ? (
+              <IntersectionDetailPanel
                 apiBaseUrl={context.api_base_url}
                 pathTemplate={context.definition.fetch!.path_template}
                 initialEntityId={context.entity?.id ?? ""}

@@ -381,6 +381,10 @@ namespace GeneratedModels
         public int planter_type;
         /// <summary>広告の種類。0=なし、1=標準。道路ごとの保存値。</summary>
         public int advert_type;
+        /// <summary>路上駐車台数（合法分と超過分の合計。昼夜の大きい方）</summary>
+        public float parked_cars;
+        /// <summary>合法路上駐車容量（台）。稼働中の地上街路以外は0</summary>
+        public float street_parking_capacity;
     }
 
     [Serializable]
@@ -490,6 +494,10 @@ namespace GeneratedModels
         public int planter_type;
         /// <summary>広告の種類。0=なし、1=標準。道路ごとの保存値。</summary>
         public int advert_type;
+        /// <summary>路上駐車台数（合法分と超過分の合計。昼夜の大きい方）</summary>
+        public float parked_cars;
+        /// <summary>合法路上駐車容量（台）。稼働中の地上街路以外は0</summary>
+        public float street_parking_capacity;
     }
 
     [Serializable]

@@ -33,6 +33,10 @@ function MapIcon({ name }: { name: MapSymbol }) {
 }
 import { useMapNavigation } from "./CityMapNavigation";
 
+/** レイヤーキーとツールバー記号の対応。記号名が単数形のものだけ読み替える */
+const layerSymbol = (key: keyof CityMapLayerVisibility): MapSymbol =>
+  key === "stations" ? "station" : key === "interchanges" ? "interchange" : key;
+
 /** ツールバーに並べるレイヤーの表示順 */
 const LAYER_ORDER: (keyof CityMapLayerVisibility)[] = [
   "elevation",
@@ -43,6 +47,7 @@ const LAYER_ORDER: (keyof CityMapLayerVisibility)[] = [
   "parcels",
   "buildings",
   "stations",
+  "interchanges",
   "allRoads",
   "trunkRoads",
   "railways",
@@ -202,7 +207,7 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
               title={t(`cityMap.layers.${key}`)}
               onClick={() => toggleLayer(key)}
             >
-              <MapIcon name={key === "stations" ? "station" : key} />
+              <MapIcon name={layerSymbol(key)} />
             </button>
           ))}
         </div>

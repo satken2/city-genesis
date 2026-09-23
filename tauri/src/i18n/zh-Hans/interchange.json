@@ -1,0 +1,12 @@
+{
+  "interchange": {
+    "kind": {
+      "ic": "互通立交",
+      "jct": "枢纽立交"
+    },
+    "fallbackName": {
+      "ic": "IC #{{id}}",
+      "jct": "JCT #{{id}}"
+    }
+  }
+}

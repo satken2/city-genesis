@@ -1,0 +1,12 @@
+{
+  "interchange": {
+    "kind": {
+      "ic": "Échangeur",
+      "jct": "Nœud autoroutier"
+    },
+    "fallbackName": {
+      "ic": "IC #{{id}}",
+      "jct": "JCT #{{id}}"
+    }
+  }
+}

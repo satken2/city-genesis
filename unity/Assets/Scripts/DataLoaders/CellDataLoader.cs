@@ -15,6 +15,7 @@ public class CellDataLoader : MonoBehaviour
     public HeightmapTextureManager heightmapTextureManager;
     public ResourceManager resourceManager;
     public PropManager propManager;
+    private InterchangeManager interchangeManager;
 
     // オブジェクトを作成するシーン
     private UnityEngine.SceneManagement.Scene targetScene;
@@ -143,6 +144,14 @@ public class CellDataLoader : MonoBehaviour
             GameObject go = new GameObject("PropManager");
             DontDestroyOnLoad(go);
             propManager = go.AddComponent<PropManager>();
+        }
+
+        interchangeManager = FindAnyObjectByType<InterchangeManager>();
+        if (interchangeManager == null)
+        {
+            GameObject go = new GameObject("InterchangeManager");
+            DontDestroyOnLoad(go);
+            interchangeManager = go.AddComponent<InterchangeManager>();
         }
 
         // HeightmapTextureManager の初期化。
@@ -449,6 +458,8 @@ public class CellDataLoader : MonoBehaviour
             UnityLog.If(LocalConstants.UNITY_LOG_LOADER, "CellDataLoader: 地区のリロード開始");
             zoneManager.LoadLodCells(cellSets, isForce);
         }
+        // インターチェンジは都市全体の一覧なので、未取得のときだけ取る(以後の更新は ReloadAllData)。
+        interchangeManager?.EnsureLoaded();
         if (resourceManager != null)
         {
             UnityLog.If(LocalConstants.UNITY_LOG_LOADER, "CellDataLoader: 天然資源のリロード開始");
@@ -690,6 +701,9 @@ public class CellDataLoader : MonoBehaviour
         // 地区の自動作成・統合・分離とポリゴン変化に追随するため、ここで明示的に
         // version 差分リロードを要求する(変化のない地区の再描画はスキップされる)。
         zoneManager?.RequestZoneRefresh();
+        // インターチェンジは道路の竣工・編集でバックエンドが再検出するため、同じく明示的に取り直す
+        // (version が変わっていなければラベルは再構築されない)。
+        interchangeManager?.RequestRefresh();
         // エポック完了後や編集確定後のデータ再取得に追随して、アラートアイコンも更新する。
         // クールダウンにより短時間の連続呼び出しは間引かれる。
         AlertManager.Instance?.Refresh();
@@ -767,6 +781,7 @@ public class CellDataLoader : MonoBehaviour
         terrainManager?.ClearAllCells();
         resourceManager?.ClearAllCells();
         propManager?.ClearAllCells();
+        interchangeManager?.Clear();
 
         // GPU高さ窓と地形高さのフレームキャッシュを無効化する。
         // 無効化しないと、次のセーブのロード中に前のマップの標高が
