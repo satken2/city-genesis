@@ -2947,7 +2947,7 @@ public class PathManager : BaseApiDataManager
     /// 例: base_height=20 で relY=20 の送電線は、3D上は高さ0m（地面）として描画され、
     /// プレハブモデル自体が20mの高さを持つことで送電線が地上を這らないように見せる。
     /// </summary>
-    private List<Vector3> CalculatePathPoints(PathSummary path, bool trimIntersection = true)
+    public List<Vector3> CalculatePathPoints(PathSummary path, bool trimIntersection = true)
     {
         List<Vector3> points = new List<Vector3>();
         var startPointList = path.GetStartPointList();

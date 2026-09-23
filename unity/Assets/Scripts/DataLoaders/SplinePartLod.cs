@@ -139,6 +139,13 @@ public sealed class SplinePartLod : MonoBehaviour
 /// <summary>遅延生成される道路パーツが揃うまで旧道路を保持し、新旧を同じフレームで切り替える。</summary>
 public sealed class PathPresentation : MonoBehaviour
 {
+    public bool IsReady => !pending;
+    /// <summary>生成待ちの非表示を保ったまま、表示再開時に復元する値を更新する。</summary>
+    public void SetRendererForceOff(Renderer renderer, bool value)
+    {
+        if (pending && hidden.ContainsKey(renderer)) hidden[renderer] = value;
+        else renderer.forceRenderingOff = value;
+    }
     private GameObject fallback;
     private RenderObjectCache cache;
     private SplinePartLod[] parts;

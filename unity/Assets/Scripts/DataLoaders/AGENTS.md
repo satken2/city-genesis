@@ -337,3 +337,9 @@ PropScatterItemのedge_fade_widthは外周・穴から内側への密度フェ�
 ## 送電線の共有ノード
 
 PathManagerはPowerLinePath.ConnectedPathsへGetPathsConnectedToNodeを渡し、破棄時に解除する。1101/1102は通常・接写・遠景・施工とも専用生成器を使う。登録・接続変更・削除は接続ノードの隣接送電線だけをEnqueuePowerNeighborsで再生成し、キャッシュキーのgeometryRevisionsも更新する。遠景をBuildStripMeshへ戻さない。共有鉄塔の表示所有権はPowerLineSupportが表示中の候補間で引き継ぐ。
+
+## 索道演出との共有
+
+PathManager.CalculatePathPoints(PathSummary,bool)は、未常駐区間を含む索道スナップショットからも既存の座標・地形高さ・single_spanを使う公開入口。RopewayGeometryはfalseを渡し、道路交差点で切断しない。地形詳細化後は点列を再評価する。
+
+PathPresentation.IsReadyは元のパスを補完する演出の表示条件。SetRendererForceOffは生成待ちの非表示を維持したまま、表示再開時に復元する値を更新する。索道の置き換えケーブルがbody抑制を解除するときに使い、生成途中のRendererを先に表示しない。

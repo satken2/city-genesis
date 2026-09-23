@@ -224,3 +224,5 @@ RoadEquipmentGeneratorはbench/bin/planter/advertを個別の保存値とマス�
 ## 送電線の鉄塔と径間
 
 1101/1102はvariant固有のPowerLinePathを使う。pillar_capを実寸配置し、CloseではPathDrawContext経由でpillar_cap_closeを選ぶ。body/pillar/riserは専用生成器で使わない。PowerLineSupportが共有ノードの候補を登録し、最も詳細な有効候補だけを表示する。無効化・破棄時に所有権を引き継ぐ。姿勢・取付点はConnectedPathsのノード逆引きから共通化する。Farも鉄塔・電線をコード生成し、道路帯にしない。通常・接写・遠景・施工で同じPlanを使う。Tests/PowerLines/run.ps1が実FBXとライフサイクルを検証する。
+
+完成した二駅間の索道はRopewayGeometryの共有点列からRopewayCabinManagerがケーブルをPathStructureMeshで置き換える。元のbodyだけを一時抑制し、支柱・駅殻を保持する。搬器・終端設備は別のGPU描画で、Far・未完成・駅間未接続は従来の静的パスを使う。詳細は公開O文書の索道節。

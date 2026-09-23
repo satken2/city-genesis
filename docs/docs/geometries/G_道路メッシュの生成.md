@@ -68,7 +68,7 @@ pillarは天端0・下端-8m。601は鋼管柱、602は左右の白い角柱で�
 
 602はstation_shellで白い床版・柱・腰壁、両側のガラス壁、濃い青灰色の曲面屋根と天窓を描く。前後は開放する。床版は幅8m、屋根は約8.5m、長手8m。実配置の床上面はスプライン-3.3m、床版下面-3.6mで受け梁へ接続する。ケーブル原点を保つため屋根を路面として扱わない。shellは実寸幅・maxTileLength=0・normalizeBodySurface=falseで反復し、区間の長さに合う整数タイル数へ合わせる。道路用の区間LODは適用しない。鉄道用platform_widthは使用しない。
 
-制作元はblender/paths.blendとgenesis-gallery/pipeline/jobs/build_ropeway.py。既存のPATH系およびBD_WHITE_WALL・BD_WINDOW・BD_DARK_METALを共有する。ガラスは不透明な窓材で表現する。かご・動的なたるみ・終端折り返し機構・階段は含まない。床が地形へ埋まらない高さで敷設する。Unity取り込み後の実寸・接点・床版の接合・自動プレハブ生成はunity/Tests/Ropeway/run.ps1で検証する。
+制作元はblender/paths.blendとgenesis-gallery/pipeline/jobs/build_ropeway.py。既存のPATH系およびBD_WHITE_WALL・BD_WINDOW・BD_DARK_METALを共有する。ガラスは不透明な窓材で表現する。完成した駅間には、`RopewayCabinManager`がかご・U字ケーブル・終端ローターを追加する（[循環描画の仕様](O_車両の走行描画.md#ロープウェイの循環描画)）。動的なたるみ・階段は含まない。床が地形へ埋まらない高さで敷設する。Unity取り込み後の実寸・接点・床版の接合・自動プレハブ生成はunity/Tests/Ropeway/run.ps1で検証する。
 
 ## 概要
 

@@ -1,0 +1,78 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using GeneratedModels;
+using UnityEngine;
+
+/// <summary>セルの外まで含む索道スナップショット。ページの部分成功を断線として公開しない。</summary>
+public sealed class RopewayNetworkStore : MonoBehaviour
+{
+    public static RopewayNetworkStore Instance { get; private set; }
+    public IReadOnlyList<PathSummary> Paths => paths;
+    public int Revision { get; private set; }
+    public int Session { get; private set; } = -1;
+    readonly List<PathSummary> paths = new();
+    Coroutine request;
+    int generation;
+    float nextFetch;
+
+    public static RopewayNetworkStore Ensure()
+    {
+        if (Instance == null) new GameObject("RopewayNetworkStore").AddComponent<RopewayNetworkStore>();
+        return Instance;
+    }
+
+    void Awake() => Instance = this;
+    void OnDestroy() { Clear(); if (Instance == this) Instance = null; }
+    void OnDisable() => Clear();
+
+    void Update()
+    {
+        int session = TransitDataStore.Ensure().Session;
+        if (Session != session) { Clear(); Session = session; }
+        if (GameStateManager.Instance == null || !GameStateManager.Instance.IsGameStarted())
+        { if (request != null || paths.Count > 0) Clear(); return; }
+        if (request == null && Time.unscaledTime >= nextFetch)
+        {
+            nextFetch = Time.unscaledTime + 5;
+            request = StartCoroutine(Fetch(generation));
+        }
+    }
+
+    public void Clear()
+    {
+        generation++;
+        StopAllCoroutines(); request = null;
+        paths.Clear(); Revision++; nextFetch = 0;
+    }
+
+    IEnumerator Fetch(int expectedGeneration)
+    {
+        var received = new List<PathSummary>();
+        int cursor = 0;
+        string filter = Uri.EscapeDataString($"[path_type][eq]{Constants.PATH_CONVEYOR}");
+        try
+        {
+            while (true)
+            {
+                PagedPathListResponse page = null;
+                yield return ApiClient.GetBulk<PagedPathListResponse>($"/paths/?filter={filter}&limit=500&cursor={cursor}", value => page = value);
+                if (expectedGeneration != generation || page?.paths == null) yield break;
+                received.AddRange(page.paths);
+                if (!page.next_cursor.HasValue) break;
+                if (page.next_cursor.Value <= cursor) yield break;
+                cursor = page.next_cursor.Value;
+            }
+            received.Sort((a, b) => a.path_id.CompareTo(b.path_id));
+            bool changed = received.Count != paths.Count;
+            for (int i = 0; !changed && i < paths.Count; i++)
+            {
+                var a = received[i]; var b = paths[i];
+                changed = a.path_id != b.path_id || a.version != b.version || a.status != b.status
+                    || a.path_variant != b.path_variant || a.start_node_id != b.start_node_id || a.end_node_id != b.end_node_id;
+            }
+            if (changed) { paths.Clear(); paths.AddRange(received); Revision++; }
+        }
+        finally { if (expectedGeneration == generation) request = null; }
+    }
+}

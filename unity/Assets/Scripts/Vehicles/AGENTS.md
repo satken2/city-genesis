@@ -81,3 +81,11 @@ LRTのモデル対応は1003→車種14。`Vehicles/14/0`が先頭・後尾共�
 
 
 鉄道の専用遠景は14/20/21/22/23の全18モデルとモノレール308/309にある。非公開制作ツールの`build_rail_far.py`が車体箱と左右各一枚の窓帯を著作し、車輪・台車・屋上機器を省略する。貨車には窓を付けない。原点と水平範囲は通常版を維持し、車輪・集電装置を省くため上下の範囲は通常版の内側でよい。12〜42三角形、既存材質を共有する。`build_vehicle_props.py`は370〜387の遠景別名も同期する。走行版は画面比率3.5%未満で`_far`を選び、25%以上では存在する`_close`を選ぶ。専用版がないLODは通常へフォールバックする。自由配置はPropRenderModelの既存の投影LODで専用遠景を使う。通常・接写モデルは保持する。
+
+## 索道の循環演出
+
+RopewayNetworkStoreは既存/paths/をPATH_CONVEYORで全ページ取得し、成功したスナップショットだけを5秒周期で公開する。RopewayNetworkはACTIVEの601/602から二駅領域以上の鎖・閉路を抽出し、駅のない枝先・未完成・不正な分岐を除外する。連続した602を分割しても駅数は増えない。
+
+RopewayGeometryはPathManager.CalculatePathPoints(path,false)とVehiclePolylineを共用し、ケーブル・搬器吊り点・終端滑車を同じ実寸の点列から決める。開いた路線はU字折り返し、閉路は左右独立の循環。短い駅でも滑車を縮めず端から張り出させる。RopewayCabinManagerは非スケール時間4m/sで搬器を常時循環させ、Normal/Close・480m以内だけGPU描画する。Farには搬器を出さない。経済車両台帳・TransitMotionClock・運行間隔設定は使わない。
+
+元のbody RendererのforceRenderingOffを復元する際はPathPresentation.SetRendererForceOffを使い、生成待ちの抑制を解除しない。都市切替はTransitDataStore.Session、生成はRenderWorkSchedulerで管理する。モデルは吊り点原点のためVehicleModelResolverで接地補正しない。仕様は公開O文書、検証はTests/Ropeway/animation.ps1。
