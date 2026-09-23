@@ -88,6 +88,7 @@
     "effectRangeExisting": "既存施設がカバー済みの範囲",
     "invalidParcel": "この建物はこの土地区画には建設できません",
     "selectParcelHint": "建設予定の土地区画を選択してください",
+    "parcelTypeRequired": "この建物は「{{type}}」の土地区画にしか建設できません",
     "heightLimit": "高さ規制",
     "coverageRatioLimit": "建ぺい率規制",
     "volumeRatioLimit": "容積率規制",

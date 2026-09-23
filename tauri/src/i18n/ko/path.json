@@ -114,6 +114,11 @@
     "platformSideOutside": "바깥쪽",
     "platformSideInside": "안쪽",
     "platformSideBoth": "양쪽",
+    "infra": {
+      "electricity": "전기",
+      "water": "상수도",
+      "oil": "석유"
+    },
     "rail": {
       "parallel": "병주",
       "noVariantForCombo": "이 조합에 대응하는 선로가 없습니다",

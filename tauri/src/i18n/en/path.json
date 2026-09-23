@@ -114,6 +114,11 @@
     "platformSideOutside": "Outside",
     "platformSideInside": "Inside",
     "platformSideBoth": "Both",
+    "infra": {
+      "electricity": "Electricity",
+      "water": "Water",
+      "oil": "Oil"
+    },
     "rail": {
       "parallel": "Parallel Tracks",
       "noVariantForCombo": "No track matches this combination",

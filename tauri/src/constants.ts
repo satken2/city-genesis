@@ -232,6 +232,7 @@ export const PATH_CONVEYOR: number = 6;
 export const PATH_TRANSPORT: number = 10;
 export const PATH_ELECTRICITY: number = 11;
 export const PATH_WATER: number = 12;
+export const PATH_PIPELINE: number = 13;
 export const PATH_STATION_HOUSE: number = 20;
 export const DIR_BOTH: number = 0;
 export const DIR_FORWARD: number = 1;

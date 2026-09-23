@@ -383,3 +383,5 @@ GPUの木の霧はTerrain/Litと同じ`InitializeInputDataFog`でビュー空間
 形状の正本は `blender/vehicles.blend`。非公開制作ツール `genesis-gallery/pipeline/jobs/build_vehicle_props.py` が `props.blend` の数値IDコレクションへ頂点・面・UV・スムーズ法線設定・材質対応を同期する。同名材質を共有し、外部画像は追加しない。走行モデルを再著作した後はこの同期と `Props/{ID}.fbx` の書き出しを行う。全走行モデルとの対応漏れは同期ジョブで検査する。
 
 `prop_master` の表示名登録により配置パネルへ現れる。配置用モデルは通常のPropRenderModelを使い、専用Farが無いため既存の自動簡略化を使う。森林向けの600頂点目安ではなく、乗り物用の制作規約で管理する。独立Unity検証 `Tests/Vehicles/run.ps1 -TransitOnly` では36組の読み込み、走行用と配置用の頂点・三角形数と寸法、PropRenderModelの生成・破棄を確認する。
+
+モノレール308/309の接写版は、非公開制作ツールの`monorail_close_surfaces.py`で平らな側板・丸い屋根肩・傾斜した前面ガラスを著作する。青白塗装、角丸の二重窓枠、扉の敷居・取手、ワイパー、床下の点検カバー、空調ファン、連結部の蛇腹を持つ。文字・ロゴ・参考画像そのものは含めない。全LODで14mの連結ピッチとタイヤ接地原点を共有する。床下カバーは台車部の下端-0.25m、中央部+0.57mを斜面でつなぎ、桁用の半幅0.51mを守る。`build_rail_close.py`へprops.blendを渡すと先頭・中間を再生成する。

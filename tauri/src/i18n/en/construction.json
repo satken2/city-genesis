@@ -88,6 +88,7 @@
     "effectRangeExisting": "Area already covered by existing facilities",
     "invalidParcel": "This building cannot be constructed on this parcel.",
     "selectParcelHint": "Select a parcel for construction",
+    "parcelTypeRequired": "This building can only be built on {{type}} parcels",
     "heightLimit": "Height Limit",
     "coverageRatioLimit": "Coverage Ratio Limit",
     "volumeRatioLimit": "Volume Ratio Limit",

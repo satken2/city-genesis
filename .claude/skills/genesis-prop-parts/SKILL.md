@@ -156,7 +156,7 @@ stdout が返らない等の罠がある)。本Skillはプロップ固有の差�
 - exportのカテゴリは `vehicles`、検証対象は `Assets/Models/Vehicles/{車種}`、ギャラリーは `Vehicles`。Unity回帰は `Tests/Vehicles/run.ps1 -TransitOnly`。自動生成されたResourcesラッパーとFBXのGUIDが対応することを確認する。
 - 再生成ジョブは非公開制作ツール `genesis-gallery/pipeline/jobs/vehicles.md`、LRTは同ディレクトリの `lrt_vehicles.md` を参照する。
 
-手動配置用モノレール308/309は `props.blend` の例外的な車両プロップ。原点は走行タイヤと桁上面の接点で、スカートは高さ-0.70mまで桁の両脇へ下がる。bbox底面を原点に揃え直さない。負の高さでは左右0.51mの桁用離隔を維持し、`Tests/Monorail/run.ps1`で確認する。
+手動配置用モノレール308/309は `props.blend` の例外的な車両プロップ。原点は走行タイヤと桁上面の接点で、スカートは前後の台車部で高さ-0.25mまで桁の両脇へ下がり、中央部の下端は+0.57mへ上がる。bbox底面を原点に揃え直さない。負の高さでは左右0.51mの桁用離隔を維持し、`Tests/Monorail/run.ps1`で確認する。
 
 
 走行車両の自由配置別名は、非公開制作ツール `genesis-gallery/pipeline/jobs/vehicle_prop_catalog.py` が対応表を持つ。`build_vehicle_props.py -- --blend <props.blend>` は隣のvehicles.blendから全モデルの形状・UV・材質を同期する。道路車両は `build_vehicles.py --road-only` で18外観（10種/4種/2種/2種）を再生成し、その後に別名も同期する。鉄道/LRTを再著作した場合も同期が必要。書き出しはvehiclesとpropsの両カテゴリへ行い、Unityの `Tests/Vehicles/run.ps1 -TransitOnly` で別名も確認する。詳細は公開M文書§M.7.6とO文書§O.10.1。
@@ -167,4 +167,4 @@ stdout が返らない等の罠がある)。本Skillはプロップ固有の差�
 高速鉄道23は先頭2外観（0/1）と中間2外観（middle/middle_1）に接写版を持ち、自由配置別名384〜387にも同期する。通常FBXは保持する。高速車の前頭部は長い鼻先と曲面風防を一体の断面座標で著作し、メトロ20・中距離21の平面ガラスとは区別する。再生成は非公開制作ツールの`build_rail_close.py --high-speed-only`と`high_speed_surfaces.py`、比較は`render_high_speed.py`。走行車の既存LODと自由配置用PropRenderModelが接写版を選択し、路線マスターの対応は変更しない。
 
 
-鉄道の専用遠景は14/20/21/22/23の全18モデルとモノレール308/309にある。非公開制作ツールの`build_rail_far.py`が車体箱と左右各一枚の窓帯を著作し、車輪・台車・屋上機器を省略する。貨車には窓を付けない。原点と水平範囲は通常版を維持し、車輪・集電装置を省くため上下の範囲は通常版の内側でよい。12〜42三角形、既存材質を共有する。`build_vehicle_props.py`は370〜387の遠景別名も同期する。走行版は画面比率3.5%未満で`_far`を選び、25%以上では存在する`_close`を選ぶ。専用版がないLODは通常へフォールバックする。自由配置はPropRenderModelの既存の投影LODで専用遠景を使う。通常・接写モデルは保持する。
+鉄道の専用遠景は14/20/21/22/23の全18モデルとモノレール308/309にある。非公開制作ツールの`build_rail_far.py`が車体箱と左右各一枚の窓帯を著作し、車輪・台車・屋上機器を省略する。貨車には窓を付けない。原点と水平範囲は通常版を維持し、車輪・集電装置を省くため上下の範囲は通常版の内側でよい。鉄道12〜42三角形・モノレール62三角形、既存材質を共有する。`build_vehicle_props.py`は370〜387の遠景別名も同期する。走行版は画面比率3.5%未満で`_far`を選び、25%以上では存在する`_close`を選ぶ。専用版がないLODは通常へフォールバックする。自由配置はPropRenderModelの既存の投影LODで専用遠景を使う。通常・接写モデルは保持する。

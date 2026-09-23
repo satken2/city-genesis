@@ -114,6 +114,11 @@
     "platformSideOutside": "Extérieur",
     "platformSideInside": "Intérieur",
     "platformSideBoth": "Des deux côtés",
+    "infra": {
+      "electricity": "Électricité",
+      "water": "Eau",
+      "oil": "Pétrole"
+    },
     "rail": {
       "parallel": "Voies parallèles",
       "noVariantForCombo": "Aucune voie ferrée ne correspond à cette combinaison",

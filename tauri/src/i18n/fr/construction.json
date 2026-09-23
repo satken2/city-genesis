@@ -88,6 +88,7 @@
     "effectRangeExisting": "Zone déjà couverte par les installations existantes",
     "invalidParcel": "Ce bâtiment ne peut pas être construit sur cette parcelle",
     "selectParcelHint": "Sélectionnez la parcelle où construire",
+    "parcelTypeRequired": "Ce bâtiment ne peut être construit que sur des parcelles de type {{type}}",
     "heightLimit": "Hauteur maximale",
     "coverageRatioLimit": "Emprise au sol maximale",
     "volumeRatioLimit": "COS maximal",

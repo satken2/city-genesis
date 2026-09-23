@@ -456,6 +456,9 @@ export type AgentMasterEntry = {
   structures?: number[];
   // シナリオ制作(テンプレートモード)でのみ設置できるバリアント。通常プレイの建設パネルには出さない。
   template_only?: boolean;
+  // 建設できる土地区画種別(constants.ts の PARCEL_*)。区画の parcel_type と完全一致した区画にだけ
+  // 建てられる。未設定は PARCEL_LAND 扱い(バックエンド is_building_compatible_with_parcel_type と同じ規則)。
+  parcel_type?: number;
 };
 
 /**

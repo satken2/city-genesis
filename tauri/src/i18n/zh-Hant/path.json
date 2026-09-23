@@ -114,6 +114,11 @@
     "platformSideOutside": "外側",
     "platformSideInside": "內側",
     "platformSideBoth": "兩側",
+    "infra": {
+      "electricity": "電力",
+      "water": "供水",
+      "oil": "石油"
+    },
     "rail": {
       "parallel": "並行",
       "noVariantForCombo": "沒有對應此組合的軌道",

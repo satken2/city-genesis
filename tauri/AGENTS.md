@@ -128,6 +128,8 @@ export type MasterData = {
 これらのファイルを編集する必要がある場合は、ユーザーに相談すること。
 UI側で独自に定義する定数は`local-constants.ts`に定義する。
 
+`local-constants.ts`には、**自動生成では出力されないバックエンド共有定数の写し**も置く。`PATH_TYPES_INFRA`(=インフラのパス種別の一覧。送電`PATH_ELECTRICITY`/導水`PATH_WATER`/パイプライン`PATH_PIPELINE`の3種)と判定ヘルパ`isInfraPathType`がこれにあたり、**バックエンドの`consts.PATH_TYPES_INFRA`と一致させる契約**(生成器`sync_consts.py`はタプルを出力しないため写しになる)。判定は地形を変形しない・グリッド吸着を切るといった「財を区別しない共通のインフラ挙動」にのみ使い、電力網と水網の物理的分離はノードのビット側が受け持つ。**種別を各コンポーネントで直接列挙しないこと**(種別が増えたときに片方だけ取り残される)。
+
 生成元と生成器はどちらも**非公開のコアシミュレータ側**にある(`constants.ts`の正は`genesis-core/consts.py`、
 生成器は`genesis-core/tools/sync_consts.py`)。このリポジトリ単体では再生成できないので、
 定数の追加・値変更が必要になったら自分で書き足さずユーザーに依頼すること。

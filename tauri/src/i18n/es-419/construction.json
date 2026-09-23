@@ -88,6 +88,7 @@
     "effectRangeExisting": "Zona ya cubierta por instalaciones existentes",
     "invalidParcel": "Este edificio no se puede construir en esta parcela",
     "selectParcelHint": "Selecciona la parcela donde deseas construir",
+    "parcelTypeRequired": "Este edificio solo se puede construir en parcelas de tipo {{type}}",
     "heightLimit": "Límite de altura",
     "coverageRatioLimit": "Límite de ocupación del suelo",
     "volumeRatioLimit": "Límite de coeficiente de construcción",

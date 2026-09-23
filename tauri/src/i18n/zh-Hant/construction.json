@@ -88,6 +88,7 @@
     "effectRangeExisting": "既有設施已覆蓋的範圍",
     "invalidParcel": "此建築無法建於此地塊上",
     "selectParcelHint": "請選擇計畫建設的地塊",
+    "parcelTypeRequired": "此建築只能建在「{{type}}」類型的地塊上",
     "heightLimit": "高度限制",
     "coverageRatioLimit": "建蔽率限制",
     "volumeRatioLimit": "容積率限制",

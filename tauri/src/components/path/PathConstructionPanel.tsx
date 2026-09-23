@@ -230,7 +230,7 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId, categor
 
   /* ---- インフラパス選択時にグリッドを自動オフ ---- */
   useEffect(() => {
-    if (isInfraPathType(pathConstruction.selectedType)) { // 電気・水（PATH_TYPES_INFRA）
+    if (isInfraPathType(pathConstruction.selectedType)) { // 送電・導水・パイプライン（PATH_TYPES_INFRA）
       setGridMode("off");
     }
   }, [pathConstruction.selectedType]);

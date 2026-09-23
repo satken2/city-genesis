@@ -1,15 +1,16 @@
 /**
  * インフラカテゴリのバリアント選択UI。
- * 「電気(PATH_ELECTRICITY)」「水道(PATH_WATER)」をタブで選び、
+ * 「電気(PATH_ELECTRICITY)」「水道(PATH_WATER)」「石油(PATH_PIPELINE)」をタブで選び、
  * その中身のプルダウンでバリアントを選ぶ。
  *
- * 注: path_type 定数(電気=11/水道=12)は最近分割されたが master.yaml の path_types が
- * 未更新のため、タブのラベルはここで明示的に与えてフォールバックする。
+ * タブのラベルは master.yaml の path_types(送電/導水/パイプライン)ではなく i18n で与える。
+ * マスターの表示名は日本語のみで多言語化できないうえ、ここで示したいのは網の設備名ではなく
+ * プレイヤーが運ぶ財のカテゴリだからである。
  */
 
 import { useTranslation } from "react-i18next";
 import type { MasterData, PathMasterEntry } from "../../types";
-import { PATH_ELECTRICITY, PATH_WATER } from "../../constants";
+import { PATH_ELECTRICITY, PATH_WATER, PATH_PIPELINE } from "../../constants";
 import { TypeVariantSelector, type TypeOption } from "./TypeVariantSelector";
 import type { VariantAffordability } from "../../hooks/useVariantAffordability";
 
@@ -27,8 +28,9 @@ type InfraVariantSelectorProps = {
 export function InfraVariantSelector(props: InfraVariantSelectorProps) {
   const { t } = useTranslation();
   const infraTypes: TypeOption[] = [
-    { type: PATH_ELECTRICITY, label: t("path_construction.infra.electricity", "電気") },
-    { type: PATH_WATER, label: t("path_construction.infra.water", "水道") },
+    { type: PATH_ELECTRICITY, label: t("path_construction.infra.electricity") },
+    { type: PATH_WATER, label: t("path_construction.infra.water") },
+    { type: PATH_PIPELINE, label: t("path_construction.infra.oil") },
   ];
   return <TypeVariantSelector options={infraTypes} {...props} />;
 }

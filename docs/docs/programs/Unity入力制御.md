@@ -20,11 +20,13 @@ Rayが命中したオブジェクトはTagまたはコンポーネントの有�
 | `PARCEL` | 2 | Tag `ParcelObject` |
 | `PATH` | 3 | Tag `PathObject` |
 | `NODE` | 4 | Tag `PathNode` |
-| `TERRAIN` | 5 | `Terrain` コンポーネントの有無 |
+| `TERRAIN` | 5 | Tag `SeaObject`、または `Terrain` コンポーネントの有無 |
 | `ZONE` | 6 | Tag `ZoneObject` |
 | `PROP` | 7 | 地形プロップ（個体ごとのColliderを持たないためレイキャストでは判定しない。配置は地形クリック、ブルドーザの削除は `RemovalManager` が画面レイで `PropManager.TryPick` のAABB判定を行い、この値は削除済み集合のキーにだけ使う） |
 
 `MODE_NONE` に設定されたオブジェクトタイプはRayを貫通し、背後にあるオブジェクトが選択対象となる。
+
+海面は `TerrainManager` が管理する地形タイルではなく、`Terrain` コンポーネントを持たない板ポリゴンである。そのため `SeaObject` タグで `TERRAIN` に分類し、`InputHandler` の初期化時に海面へ `TerrainInputHandler` を付与する（既に付いていれば付与しない）。これにより**海面のクリック・ホバーは地形と完全に同じ経路**を流れ、地形と同じモード別の挙動になる。土地区画作成（点選択）も海の上で成立し、そこに作られた区画は海上区画（`PARCEL_WATER`）になる（[土地形状](../geometries/B_土地形状.md) B.5）。
 
 ### 2.2. 入力モード
 
@@ -140,6 +142,8 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 | `MODE_EDIT_PROP` | `PropPlacementManager.OnTerrainLeftClick` に委譲（個別=1個配置／範囲=頂点追加） | 同右（個別=直近取消／範囲=直近頂点取消） | 同 `OnTerrainHover` に委譲（個別=ゴースト追従。中ボタン回転中は位置を固定） |
 | `MODE_REMOVE` | 何もしない（地形に埋もれた空き区画は `InputHandler` の地形→区画置換で区画へ配送される。地形プロップは配送前に `InputHandler` が判定する） | — | — |
 
+海面もこのハンドラで処理される（§2.1）。ただしヒット点のワールドYは海底の地形標高（負）になるため、配置マーカーはそのまま置くと海面板の下に隠れてしまう。マーカーは海面板より上を下限として表示し、どこを指しているかが見えるようにする。土地区画作成のプレビュー枠線も同じく海面を下限に置き、完成後の海上区画（基準標高＝海面）と高さが揃うようにする。
+
 ### 4.2. PathInputHandler（道路）
 
 道路オブジェクトのクリック・ホバーを処理する。地区ドラッグに関する追加メソッドを持つ。
@@ -170,6 +174,8 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 | `MODE_NORMAL` | 土地区画詳細パネルをIPC通知 | 2Dオーバーレイでハイライト |
 | `MODE_BUILDING_CONSTRUCTION` | `BuildingPlanManager.OnParcelClick` に委譲 | 同上 |
 | `MODE_PARCEL_CREATION_SPLIT` | 土地区画エディタに選択を通知 | 同上 |
+
+`MODE_BUILDING_CONSTRUCTION` では区画の実データを添えて委譲し、区画の種別（`parcel_type`）が建設中のバリアントの要求する種別と一致しない場合はクリックを無視してUIへ警告を送る。要求する種別は選択中バリアントのマスターデータ（`agent_master` の `parcel_type`。未設定なら陸地）で、建設可能な区画のハイライトも同じ条件で色分けする（区画の種別と建物の関係は [土地形状](../geometries/B_土地形状.md) B.5）。
 
 ### 4.5. BuildingInputHandler（建物）
 

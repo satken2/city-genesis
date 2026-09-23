@@ -57,7 +57,7 @@ import { useVariantAffordability } from "../../hooks/useVariantAffordability";
 import { BuildingFacilityInfoCard } from "./BuildingFacilityInfoCard";
 import { BuildingFloorSpecs } from "./BuildingFloorSpecs";
 import { showNotification } from "../../utils/notification";
-import { BUILDING_PUBLIC, VARIANT_CITY } from "../../constants";
+import { BUILDING_PUBLIC, PARCEL_LAND, VARIANT_CITY } from "../../constants";
 import "./BuildingConstructionPanel.css";
 
 // 直接配置モードで default_width が未設定のバリアント用のフォールバック(m)。
@@ -492,6 +492,21 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
     }
     return names;
   }, [parcelData, masterData]);
+
+  /**
+   * 選択中バリアントが要求する土地区画種別(未設定は陸地)。
+   * 洋上風力発電所のような海上構造物は水面区画しか受け付けない。
+   * 区画種別は完全一致でしか成立しない(バックエンド is_building_compatible_with_parcel_type と同じ規則)。
+   */
+  const requiredParcelType = selectedVariantData?.parcel_type ?? PARCEL_LAND;
+  const requiredParcelTypeName =
+    masterData?.parcel_types[requiredParcelType]?.display_name ?? String(requiredParcelType);
+  /**
+   * 選択済みの区画が要求種別と食い違っているか。
+   * Unity は非互換な区画のクリックを無視するが、区画を選んだあとにバリアントを切り替えると
+   * 選択が残ったままこの状態になるため、確定前にパネル側で弾く。
+   */
+  const parcelTypeMismatch = parcelData != null && parcelData.parcel_type !== requiredParcelType;
 
   /* ---- プレビュー取得 ---- */
 
@@ -1782,6 +1797,13 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
               <div className="bc-description-body bc-parcel-prompt">
                 <div className="bc-description-text">
                   {t("building_construction.selectParcelHint")}
+                  {/* 陸地以外を要求するバリアント(海上構造物など)は、どの区画を探せばよいか事前に示す */}
+                  {requiredParcelType !== PARCEL_LAND && (
+                    <>
+                      <br />
+                      {t("building_construction.parcelTypeRequired", { type: requiredParcelTypeName })}
+                    </>
+                  )}
                 </div>
               </div>
             ) : (
@@ -1814,6 +1836,14 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
                         )}
                         {allowedBuildingNames.length > 0 && (
                           <>{t("building_construction.allowedBuildings")}: {allowedBuildingNames.join(", ")}</>
+                        )}
+                        {parcelTypeMismatch && (
+                          <>
+                            <br />
+                            <span className="bc-direct-invalid">
+                              {t("building_construction.parcelTypeRequired", { type: requiredParcelTypeName })}
+                            </span>
+                          </>
                         )}
                       </>
                     )}
@@ -2035,13 +2065,14 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
               // 民間区画の自動買収で解消できる(directRequiresAcquisition)なら確定できる。
               // コピーモードは区画選択済みかつフットプリントが収まる(copyValid)なら確定できる。
               // 資金不足(建設費+用地買収見積 > 利用可能額)は確定させない。バックエンドも同じ基準で拒否する。
+              // 区画種別の不一致(海上構造物を陸の区画に置くなど)もバックエンドが拒否するのでここで止める。
               disabled={
                 !isAffordable
                 || (isDirectMode
                   ? !directPreviewReady || !(directValid || directRequiresAcquisition)
                   : isCopyMode
-                    ? parcelId === null || !copyValid
-                    : parcelId === null)
+                    ? parcelId === null || !copyValid || parcelTypeMismatch
+                    : parcelId === null || parcelTypeMismatch)
               }
               type="button"
               onClick={async () => {

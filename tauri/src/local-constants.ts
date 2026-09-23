@@ -112,6 +112,7 @@ import {
   STATUS_COLLAPSED,
   PATH_ELECTRICITY,
   PATH_WATER,
+  PATH_PIPELINE,
   PRODUCT_WATER_SUPPLY,
   PRODUCT_ELECTRICITY,
   PRODUCT_HIGH_ELECTRICITY,
@@ -133,17 +134,17 @@ export const COCKPIT_PUBLIC_SERVICE_PRODUCTS: readonly number[] = [
 ];
 
 /**
- * インフラ・パス種別（電気・水）の集合と判定ヘルパ。
+ * インフラ・パス種別（送電・導水・パイプライン）の集合と判定ヘルパ。
  * バックエンド consts.PATH_TYPES_INFRA に対応する。constants.ts は自動生成で
  * タプル(PATH_TYPES_INFRA)を出力しないため、UI側ではここに集約する。
- * 電気網/水網の物理的分離はノードビット側で行われるため、この判定は地形非変形など
+ * 財ごとの網の物理的分離はノードビット側で行われるため、この判定は地形非変形など
  * 「財を区別しない共通のインフラ挙動」にのみ使う。
  */
-export const PATH_TYPES_INFRA: readonly number[] = [PATH_ELECTRICITY, PATH_WATER];
+export const PATH_TYPES_INFRA: readonly number[] = [PATH_ELECTRICITY, PATH_WATER, PATH_PIPELINE];
 
-/** path_type がインフラ（電気・水）かを返す。 */
+/** path_type がインフラかを返す。 */
 export function isInfraPathType(pathType: number | null | undefined): boolean {
-  return pathType === PATH_ELECTRICITY || pathType === PATH_WATER;
+  return pathType != null && PATH_TYPES_INFRA.includes(pathType);
 }
 
 /**

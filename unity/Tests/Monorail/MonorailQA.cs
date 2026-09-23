@@ -75,7 +75,13 @@ public static class MonorailQA
                 Check(close.Length>car.Length,"Close detail missing");
                 Check(close.Where(v=>v.y<0).All(v=>Mathf.Abs(v.x)>=.509f),"Close skirt intrudes into guideway");
                 Near(close.Where(v=>Mathf.Abs(v.x)<.4f).Min(v=>v.y),0,"Close tire contact");
-                Near(car.Min(v => v.y), -.70f, "Skirt extends below guideway top");
+                Near(car.Min(v => v.y), -.25f, "Short bogie cover below guideway top");
+                Near(close.Min(v => v.y), -.25f, "Close short bogie cover");
+                foreach (var detail in new[] {car, close})
+                {
+                    Near(detail.Where(v => Mathf.Abs(v.z) <= 2.61f).Min(v => v.y), .57f, "Raised central cover");
+                    Check(detail.Where(v => v.y < 0).All(v => Mathf.Abs(v.z) > 2.6f), "Deep cover confined to bogies");
+                }
                 Near(car.Max(v => v.y), 3.85f, "Vehicle height");
                 Near(car.Max(v => v.z), 7, "Forward coupling limit");
                 Near(car.Min(v => v.z), -7, "Rear coupling limit");
@@ -85,7 +91,7 @@ public static class MonorailQA
                 Near(car.Where(v => Mathf.Abs(v.x) < .4f).Min(v => v.y), 0, "Tire contact remains at guideway top");
                 if (id == 308)
                 {
-                    Near(car.Where(v => v.y < -.69f).Max(v => v.z), 5.60f, "Leading skirt lower edge setback");
+                    Near(car.Where(v => v.y < -.249f).Max(v => v.z), 5.60f, "Leading skirt lower edge setback");
                     Check(car.Any(v => Mathf.Abs(v.y-1.24f)<.001f && Mathf.Abs(v.z-6.55f)<.001f), "Leading skirt upper edge");
                 }
             }
