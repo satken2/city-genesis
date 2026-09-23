@@ -87,8 +87,7 @@ public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
         var allMaterials = bodyData.Materials;
         var temporaryMeshes = bodyData.TemporaryMeshes;
         int resolvedSuffix = bodyData.ResolvedSuffix;
-        // 躯体の描画高さ。top階専用パーツが実在する建物では floors × floorHeight と異なるため、
-        // 屋根・塔屋の配置Yとコライダー高さはこの値を正とする。
+        // 屋根面は階高グリッドに置く。topパーツが持つパラペットや照明で屋根を持ち上げない。
         float buildingHeight = bodyData.BuildingHeight > 0f ? bodyData.BuildingHeight : floors * floorHeight;
 
         // 基盤（コンクリート基盤）: 建物底面をY方向に押し出し、傾斜地の谷側で建物が浮いて
@@ -115,6 +114,10 @@ public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
 
         if (!isGroundModel)
         {
+            bool slabRoof = modelType == Constants.MODEL_MODULAR_FLAT;
+            bool hasInteriorFloors = buildingShape != Constants.SHAPE_FULL && InteriorFloorBuilder.Append(
+                footprint, floors, floorHeight, prefix, resolvedSuffix, slabRoof,
+                combineInstances, allMaterials, temporaryMeshes);
             // 2. 屋根生成（model_type に応じて屋根ビルダーを切り替える）
             BuildingMeshResult roofResult = null;
             switch (modelType)
@@ -139,9 +142,10 @@ public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
                     break;
                 case Constants.MODEL_MODULAR_FLAT:
                 default:
-                    roofResult = FlatRoofBuilder.GenerateRoof(
-                        footprint, buildingHeight, prefix, resolvedSuffix,
-                        allMaterials.Count > 0 ? allMaterials.ToArray() : null);
+                    if (!hasInteriorFloors)
+                        roofResult = FlatRoofBuilder.GenerateRoof(
+                            footprint, buildingHeight, prefix, resolvedSuffix,
+                            allMaterials.Count > 0 ? allMaterials.ToArray() : null);
                     break;
             }
 
@@ -151,7 +155,7 @@ public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
                 temporaryMeshes.Add(roofResult.Mesh);
                 UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[MBMB-DEBUG] Roof appended. combineInstances.Count={combineInstances.Count}");
             }
-            else
+            else if (!(hasInteriorFloors && slabRoof))
             {
                 Debug.LogWarning($"[MBMB-DEBUG] Roof is null or mesh is null. roofResult={(roofResult == null ? "null" : "not null")}");
             }

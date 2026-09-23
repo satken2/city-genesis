@@ -229,6 +229,7 @@ partName の構成：
 
 ```
 roofprop         塔屋（§10）
+interior-floor   各階床の厚み・材質参照（任意。F1の各階の床）
 entrance         エントランス（前面の辺の中央・地面レベル。§11）
 ceil             屋上マテリアル用
 floor            地面マテリアル用

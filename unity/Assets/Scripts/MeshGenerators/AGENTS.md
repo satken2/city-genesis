@@ -1,5 +1,7 @@
 # MeshGenerators フォルダ
 
+`InteriorFloorBuilder`はモジュラーの選択済みprefix・閾値に`interior-floor`があるときだけ各階の床を生成する。参照メッシュの高さを床厚、材質0を上面、1を下面・小口に使う。GROUNDとSHAPE_FULLは除外し、地形に変形させない。FLATでは屋上も床として閉じ、FlatRoofBuilderを重ねない。top-wのパラペットや照明で屋上を持ち上げず階高グリッドを保つ。F1/I文書、非公開制作ツールのParkingGarageQA（開口見通し・床表裏・凹形状・未指定時の無変更）を参照。
+
 全建物のFarは `GenerateFarBuilding` が共通のprefix解決で閾値0の `base/mid/top-prebuilt_far` を探し、いずれかがあれば `CurrentDrawLod=Far` でPreBuiltへ委譲する。名所や通常のmodel_typeでは分岐しない。パーツ解決は `_far` のみを読み、通常へのフォールバックと敷地装飾を省略する。遠景用パーツが無ければ簡易形状を使う。工事・解体・倒壊の簡易表示は維持する。実FBX・3距離・塔の2/4/8階・敷地寸法と、一般建物・構造別prefix・遠景未提供時の共通経路は非公開制作ツールの `import_landmarks.ps1` で検証する。F3文書を参照。
 
 ホームの任意パーツ`platform_foundation`は外壁下部。`PlatformFoundationGenerator`が天端Y=0を線路面、著作下端を外壁位置の地盤下15cmへ写像する。TrackPathのplatform_wallと同じ左右・島式省略・クリップ範囲を使う。パーツが無いバリアントには追加描画しない。鏡像の巻き順はPathStructureMesh.AppendのreverseWindingで補正する。462の白い外装・屋根は実寸の別パーツ。仕様はN文書、実FBX検証はTests/HighStandardPlatform/run.ps1。
@@ -37,7 +39,7 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 ## 描画LOD(DrawLod)が生成器に届く経路
 
 - 生成器は**セルのティア表を参照しない**。描画LOD(Close/Normal/Far。`DataLoaders/DrawLod.cs`)は呼び出し側(DataLoaders)が決め、次の2経路で渡す: 建物は `BuildingMeshBuilder.Generate(data, isDynamic, drawLod)` の引数(`isDynamic`=地形追従の互換引数、`drawLod`=見え方由来。独立)。パスは静的コンテキスト `Paths/PathDrawContext.cs`(`CurrentDrawLod` / `DetailFrom・To` / `SuppressDetailRange` / `AdaptiveTileLength`)で、PathManager が生成の前後で `Begin/End` する(コンテキスト外の生成は Normal・全長扱い)。仕様の正は `genesis-docs/docs/geometries/E_LOD処理.md`「描画LOD(オブジェクト単位)」。
-- **Far はパーツを読まない**: 建物は `BuildingMeshBuilder.GenerateFarBuilding`(フットプリント押し出しの箱。工事中/解体中=1階分・倒壊=0.5階分・地面アセット=0.3m板)、パスは PathManager 側の帯(`CreateOrUpdateFarPath` / `AddFarRemainderStrips`)で、生成器のパーツ組み立ては走らない。
+- **Far は簡略化した専用経路を使う**: 建物は `BuildingMeshBuilder.GenerateFarBuilding` が任意の専用prebuilt_farを探し、無ければフットプリント押し出しの箱へ戻る（工事中/解体中=1階分・倒壊=0.5階分・地面アセット=0.3m板）。パスは PathManager 側の帯(`CreateOrUpdateFarPath` / `AddFarRemainderStrips`)で、生成器のパーツ組み立ては走らない。
 - **`_close` の解決点は2箇所だけ**: 建物は `BuildingMeshUtils.GetModelForDrawLod`(`GetPart` / `GetPartNoPosition` / common パーツの共通入口。`CurrentDrawLod==Close` なら同じ閾値フォルダの `{パーツ}_close` を先に試す。存在判定 `HasModelAtPath` は無印名で行うので無印の無い `_close` は使われない)。パスは `PathDrawContext.ResolvePrefab`(`RoadPath.CreateSplineMesh` のプレハブロード。close→無印(バリアント)→close→無印(タイプ))。パスで `_close` が効くのは `CreateSplineMesh` で敷くパーツ(body/line/sidewalk/wall/center/track/wire/platform/platform_wall・駅舎の桁)と、同じ解決器を使う送電鉄塔。その他の`ModelManager.GetModel` を直接呼ぶ Instantiate 配置(tree/pillar/pillar_cap/pole/beam/portal/設備/終端部品)や交差点コネクタ・レールコネクタは常に無印。**新しいパーツ取得をこの2つの入口を迂回して書かないこと。** `_close` は無印と原点・配置寸法を一致させ、材質は既存名で共有する。建物の壁(base/mid/top-w)と玄関だけはBlender -Yへ最大1.5mの追加張り出しを許可するが、幅X・高さZ・背面+Yは維持する。他は全bbox一致。配置計算は共通(`GetRoadPartMesh` も `_close` を剥がして無印と同じ路面原点で扱う)。
 - **詳細描画区間**: `CreateSplineMesh` は呼び出し側のクリップ区間と `PathDrawContext` の詳細区間の共通部分にだけ敷く(`IntersectDetailRange`。`single_span` は1枚造形なので切らない。共通部分が無ければそのパーツは生成しない)。セグメントごとに別スプラインを作る生成器(`GenerateLinearPathWithCorners`)は割合基準が合わないため冒頭で `SuppressDetailRange = true` にする。**複数スプラインを持つ生成器を新設するときも同じ処置が必要。**
 - **曲率適応タイル長**: 生成器は `BuildSpline` 直後に `PathDrawContext.SetAdaptiveTileLength(ComputeAdaptiveTileLength(spline, MAX_EXTRUDE_TILE_LENGTH))` を呼ぶ(RoadPath.Generate / GenerateLinearPathWithCorners の各セグメント / TrackPath)。`CreateSplineMesh` は `maxTileLength` が既定値(`MAX_EXTRUDE_TILE_LENGTH`=1m)のときだけ適応値(1〜8m。弦誤差0.02m以下)に置き換え、明示的に `0`(著作長)を渡すパーツには適用しない。
