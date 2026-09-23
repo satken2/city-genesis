@@ -45,7 +45,7 @@ Space長押し中は`DriveMode.SpeedMultiplier`が5になり、一般車と公�
 - `RoadMotionData` / `RoadMotionControl`: `/paths/motion` の自由秒数・混雑込み秒数を参照。`VehicleManager` は同一道路・方向・車線の前車へ追従し、締切超過時も自由走行平均速度を超えない。表示標本率は0〜1。バス・LRT(`VEHICLE_BUS`/`VEHICLE_TRAM`。路線車両として`TransitVehicleManager`が描く)のランダム生成は行わない。
 - `TransitDataStore`: 色帯と車両で共有する路線一覧。5秒ポーリング＋明示Refresh。Clearで世代を進め、古い都市の応答を破棄する。色帯の表示ON/OFFで取得を止めない。
 - `TransitMotionClock`: コアの `journeys.steps` の等加速度区間・停車を時刻から参照する純粋なクラス。車両需要や待ち時間と同じ時間を使う。
-- `TransitVehicleManager`: 実調達編成数を位相配置し、周辺の車体だけプールから出す。鉄道は停止中心を基準に各車を距離配置し、折り返し中も個体と前後を保つ。欠けたパス・未生成レールコネクタを直線で補完しない。
+- `TransitVehicleManager`: 実調達編成数を位相配置し、周辺の車体だけプールから出す。鉄道は`TransitRouteGeometry.SampleConsist`で停止中心から前後へ剛体配置し、隣接車の車端を共有する。公称車長はワールド座標の弦長で満たし、時計の論理距離へ車長を直接足さない。車体の向きは前後端から求め、細かな線分の接線をピッチへ直接使わない。折り返し中も個体と前後を保つ。欠けたパス・未生成レールコネクタを直線で補完しない。
 - 公共交通の形状更新は0.5秒間隔で、描画可能な路線の経路に含まれる周辺パスだけを計算する。路線なし・車両不足などで描画対象がなければ、周辺パスの検索も点列生成も行わない。
 - モデル対応は `Resources/Config/transit_vehicle_models.json`。外観はvehicle_model_config.yamlから路線ID＋編成番号で固定。先頭/後尾=数値バリアント、中間=middle（0）/middle_{番号}。プールキーにも外観を含める。`VehicleModelResolver` が著作原点・長手軸を接地中心/+Zへ正規化し、公共交通の車体長だけはマスターの公称車長に合わせる。幅と高さは変更しない。
 - `Tests/Vehicles` は独立Unityへ実FBXとラッパーをコピーし、時間積分・停車・前車停止・編成位置・折り返しの連続性も検証する。本編シーンとモデルは変更しない。
@@ -68,6 +68,8 @@ Space長押し中は`DriveMode.SpeedMultiplier`が5になり、一般車と公�
 ## 公共交通の経路共有と選択
 
 `TransitRouteGeometry` は方向付きRunの構築・地形追従点列・生成済みレール接続・車線オフセット・距離補間を車両とハイライトで共有する。形状キャッシュは呼出側ごとに持ち、未ロードのパス・未生成接続を直線補完しない。`TransitVehicleManager.TryPick` は描画中の車体Rendererの境界とレイを交差させ、手前の地形・建物に遮られた車両を除外する。プールから取り出すたびに路線IDを更新し、非表示の車体は選択対象外。ハイライトのON/OFFに依存しない。
+
+鉄道・LRTの軌道横位置は`VehiclePolyline.SampleOffset`で平均接線による頂点オフセットを補間し、線分境界の横跳びを防ぐ。接続スプラインの端部は本線サンプルへ合わせる。`SampleConsist`は偶数編成なら中央連結位置、奇数なら中央車の対称な前後端を起点に解き、隣接車を公称長の弦でつなぐ。回転の時間平滑化で連結を遅らせない。車端を使う描画近似であり台車の独立旋回は持たない。回帰検証は`Tests/Vehicles/TransitConsistQA.cs`（`run.ps1 -TransitOnly`）。
 
 LRTはRoute.VehicleType=VEHICLE_TRAMで最内車線の軌道を使う（LrtRoadParts.Offsetが唯一の正）。303は中央単線、431は通常軌道。路線ハイライトも同じ経路設定を使う。交差点は描画済みRailコネクタへ接続し、踏面高さを加える。バスの外側車線配置と混同しない。
 

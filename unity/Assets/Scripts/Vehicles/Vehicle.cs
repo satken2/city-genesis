@@ -24,6 +24,29 @@ public sealed class VehiclePolyline
     public void Sample(float s, bool forward, out Vector3 position, out Vector3 tangent)
     {
         s = Mathf.Clamp(s, 0, Length);
+        int segment = FindSegment(s);
+        float length = distances[segment] - distances[segment - 1];
+        position = Vector3.Lerp(points[segment - 1], points[segment], length > .0001f ? (s - distances[segment - 1]) / length : 0);
+        tangent = (points[segment] - points[segment - 1]).normalized * (forward ? 1 : -1);
+        if (tangent.sqrMagnitude < .001f) tangent = forward ? Vector3.forward : Vector3.back;
+    }
+
+    /// <summary>頂点ごとに横位置を決めて補間し、線分境界で軌道位置が飛ばないようにする。</summary>
+    public void SampleOffset(float s, bool forward, float offset, out Vector3 position, out Vector3 tangent)
+    {
+        s = Mathf.Clamp(s, 0, Length);
+        int segment = FindSegment(s);
+        float sign = forward ? 1 : -1;
+        Vector3 a = points[segment - 1] + Vector3.Cross(Vector3.up, PolylineUtils.SmoothedDirection(points, segment - 1)).normalized * (offset * sign);
+        Vector3 b = points[segment] + Vector3.Cross(Vector3.up, PolylineUtils.SmoothedDirection(points, segment)).normalized * (offset * sign);
+        float length = distances[segment] - distances[segment - 1];
+        position = Vector3.Lerp(a, b, length > .0001f ? (s - distances[segment - 1]) / length : 0);
+        tangent = (b - a).normalized * sign;
+        if (tangent.sqrMagnitude < .001f) tangent = forward ? Vector3.forward : Vector3.back;
+    }
+
+    private int FindSegment(float s)
+    {
         int lo = 1, hi = distances.Length - 1;
         while (lo < hi)
         {
@@ -32,10 +55,7 @@ public sealed class VehiclePolyline
         }
         int segment = lo;
         while (segment < distances.Length - 1 && distances[segment] - distances[segment - 1] < .0001f) segment++;
-        float length = distances[segment] - distances[segment - 1];
-        position = Vector3.Lerp(points[segment - 1], points[segment], length > .0001f ? (s - distances[segment - 1]) / length : 0);
-        tangent = (points[segment] - points[segment - 1]).normalized * (forward ? 1 : -1);
-        if (tangent.sqrMagnitude < .001f) tangent = forward ? Vector3.forward : Vector3.back;
+        return segment;
     }
 
     public float Project(Vector3 point) => ProjectRange(point, 0, Length);

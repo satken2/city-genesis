@@ -26,6 +26,7 @@ import tip24 from "../../assets/images/tips/tip_24.jpg";
 import tip25 from "../../assets/images/tips/tip_25.jpg";
 import tip26 from "../../assets/images/tips/tip_26.jpg";
 import tip27 from "../../assets/images/tips/tip_27.jpg";
+import reloadIcon from "../../assets/images/menu/tray_reload.png";
 
 type TipItem = {
   id: string;

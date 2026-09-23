@@ -142,15 +142,118 @@ public sealed class TransitRouteGeometry
         connector.Sample((reverse?1-progress:progress)*connector.Length,!reverse,out position,out tangent);
         if (tram) position.y += LrtRoadParts.IsEmbedded(g.data.path_variant) || LrtRoadParts.IsEmbedded(next.data.path_variant) ? LrtRoadParts.RailTop : .355f;
         else if (g.rail) position.y += .2f;
+        if (g.rail || tram)
+        {
+            // 描画点列とスプライン評価の端部の差を吸収し、接続境界の位置を連続にする。
+            Vector3 start = connector.points[reverse ? connector.points.Length-1 : 0];
+            Vector3 end = connector.points[reverse ? 0 : connector.points.Length-1];
+            float height = tram ? (LrtRoadParts.IsEmbedded(g.data.path_variant) || LrtRoadParts.IsEmbedded(next.data.path_variant) ? LrtRoadParts.RailTop : .355f) : .2f;
+            position += Vector3.Lerp(p0-start-Vector3.up*height,p1-end-Vector3.up*height,progress);
+        }
         return true;
+    }
+
+    /// <summary>停止中心から前後へ剛体の車体を並べる。隣接車は同じ車端位置を共有する。</summary>
+    public bool SampleConsist(Route line, double distance, bool referenceForward, float carLength,
+        Vector3[] positions, Vector3[] directions)
+    {
+        int count = positions.Length, middle = count / 2;
+        if (count == 0 || directions.Length != count || carLength <= 0) return false;
+        if (!Sample(line,distance,distance,referenceForward,out var center,out _)) return false;
+        double frontDistance = distance, rearDistance = distance;
+        Vector3 front = center, rear = center;
+        if (count % 2 != 0)
+        {
+            // 奇数編成は中央車の前後を対称に解き、折り返しても同じ剛体配置を再現する。
+            if (!FindCarEnds(line,distance,referenceForward,distance,carLength,0,
+                out rearDistance,out frontDistance,out rear,out front)) return false;
+            positions[middle] = (front+rear)*.5f;
+            directions[middle] = (front-rear).normalized;
+        }
+        for (int car = middle-1; car >= 0; car--)
+        {
+            if (!FindCarEnds(line,distance,referenceForward,frontDistance,carLength,1,
+                out _,out double nextDistance,out var a,out var b)) return false;
+            positions[car] = (a+b)*.5f; directions[car] = (b-a).normalized;
+            frontDistance = nextDistance;
+        }
+        for (int car = middle+count%2; car < count; car++)
+        {
+            if (!FindCarEnds(line,distance,referenceForward,rearDistance,carLength,-1,
+                out double nextDistance,out _,out var a,out var b)) return false;
+            positions[car] = (a+b)*.5f; directions[car] = (b-a).normalized;
+            rearDistance = nextDistance;
+        }
+        return true;
+    }
+
+    private bool FindCarEnds(Route line,double reference,bool forward,double origin,float length,int side,
+        out double rearDistance,out double frontDistance,out Vector3 rear,out Vector3 front)
+    {
+        rearDistance = frontDistance = origin; rear = front = default;
+        var run = line.runs[FindRun(line.runs,origin)];
+        if (!geometry.TryGetValue(run.path,out var g)) return false;
+        // 時計の距離は実寸ではない。換算は探索の刻みだけに使い、車長はワールド座標で検査する。
+        double unitsPerMetre = (run.end-run.start)/Math.Max(.001,g.full.Length*Math.Abs(run.to-run.from));
+        double stride = Math.Max(.00001,length*.25*unitsPerMetre);
+        double low = 0, high = stride;
+        if (!Sample(line,origin,reference,forward,out var previousRear,out _)) return false;
+        Vector3 previousFront = previousRear;
+        bool found = false;
+        for (int probe = 0; probe < 32; probe++,high += stride)
+        {
+            bool valid = SampleCarEnds(line,reference,forward,origin,high,side,out _,out _,out var a,out var b);
+            if (!valid || Vector3.Distance(a,b) >= length) { found = true; break; }
+            // パスを跨いで論理距離の倍率が変わる場合も、実際に進んだ距離で次の刻みを調整する。
+            double travelled = Vector3.Distance(a,previousRear)+Vector3.Distance(b,previousFront);
+            stride *= Math.Clamp(length*.25/Math.Max(.00001,travelled),.25,4);
+            previousRear = a; previousFront = b;
+            low = high;
+        }
+        if (!found) return false;
+        bool solved = false;
+        for (int iteration = 0; iteration < 20; iteration++)
+        {
+            double span = (low+high)*.5;
+            bool valid = SampleCarEnds(line,reference,forward,origin,span,side,
+                out double r,out double f,out var a,out var b);
+            if (!valid) { high = span; continue; }
+            float chord = Vector3.Distance(a,b);
+            // Unityの座標精度は原点から離れるほど粗くなるため、到達不能なmm精度を要求しない。
+            float magnitude = Mathf.Sqrt(Mathf.Max(a.sqrMagnitude,b.sqrMagnitude));
+            float tolerance = Mathf.Max(.001f,magnitude*2e-7f);
+            if (Math.Abs(chord-length) <= tolerance)
+            { rearDistance=r; frontDistance=f; rear=a; front=b; solved=true; break; }
+            if (chord < length) low = span; else high = span;
+        }
+        if (!solved) return false;
+        // 車端の間に未ロードの短いパスや未生成の接続があれば、車体で跨いで補完しない。
+        int first = FindRun(line.runs,rearDistance)+1;
+        for (int i = first; i < line.runs.Count && line.runs[i].start < frontDistance; i++)
+            if (!Sample(line,line.runs[i].start,reference,forward,out _,out _)) return false;
+        return true;
+    }
+
+    private bool SampleCarEnds(Route line,double reference,bool forward,double origin,double span,int side,
+        out double rearDistance,out double frontDistance,out Vector3 rear,out Vector3 front)
+    {
+        rearDistance = origin - (side < 0 ? span : side == 0 ? span*.5 : 0);
+        frontDistance = origin + (side > 0 ? span : side == 0 ? span*.5 : 0);
+        front = default;
+        return Sample(line,rearDistance,reference,forward,out rear,out _)
+            && Sample(line,frontDistance,reference,forward,out front,out _);
     }
 
     private static void SampleTrack(Geometry g,bool forward,float s,bool tram,out Vector3 p,out Vector3 t)
     {
-        g.full.Sample(s,forward,out p,out t);
         float sign = CityInfoStore.TrafficHand == Constants.TRAFFIC_HAND_LEFT ? -1 : 1;
         float offset = tram ? g.tramOffset : g.offset;
-        p += Vector3.Cross(Vector3.up,t).normalized*(offset*sign);
+        if (g.rail || tram) g.full.SampleOffset(s,forward,offset*sign,out p,out t);
+        else
+        {
+            g.full.Sample(s,forward,out p,out t);
+            p += Vector3.Cross(Vector3.up,t).normalized*(offset*sign);
+        }
         p.y += g.rail ? RoadPartHeights.TRACK_ABOVE_SPLINE + (tram ? .355f : .2f)
             : RoadPartHeights.BODY_ABOVE_SPLINE + (tram ? LrtRoadParts.RailTop : 0);
     }

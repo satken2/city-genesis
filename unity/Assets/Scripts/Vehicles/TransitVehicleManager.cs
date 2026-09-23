@@ -137,12 +137,26 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
             if (step < 0) continue;
             bool returning = line.motion.Returning[step];
             var positions = line.positions; var directions = line.directions;
-            bool ready = true, near = false;
-            for (int car = 0; car < cars; car++)
+            bool forward = line.motion.Steps[step].to_fraction > line.motion.Steps[step].from_fraction;
+            bool bus = line.type == Constants.VEHICLE_BUS;
+            if (!bus && !driven)
             {
-                double offset = ((cars-1)*.5-car)*spacing;
-                if (!routeGeometry.Sample(line, distance+offset, distance, line.motion.Steps[step].to_fraction > line.motion.Steps[step].from_fraction, out positions[car], out directions[car])) { ready = false; break; }
-                if (line.type == Constants.VEHICLE_BUS && stopped) BusTurnaround(line,step,trainTime,ref positions[car],ref directions[car]);
+                if (!routeGeometry.Sample(line,distance,distance,forward,out var anchor,out _)) continue;
+                Vector3 delta = anchor-center; delta.y = 0;
+                // 車端探索の前に編成全体が範囲外の候補を除く。先頭だけが見える編成の余白を残す。
+                float reach = renderRadius + (cars*.5f+1)*spacing;
+                if (delta.sqrMagnitude > reach*reach) continue;
+            }
+            bool ready = bus || routeGeometry.SampleConsist(line,distance,forward,spacing,positions,directions);
+            bool near = false;
+            for (int car = 0; ready && car < cars; car++)
+            {
+                if (bus)
+                {
+                    double offset = ((cars-1)*.5-car)*spacing;
+                    if (!routeGeometry.Sample(line,distance+offset,distance,forward,out positions[car],out directions[car])) { ready = false; break; }
+                    if (stopped) BusTurnaround(line,step,trainTime,ref positions[car],ref directions[car]);
+                }
                 Vector3 delta = positions[car]-center; delta.y = 0;
                 near |= delta.sqrMagnitude <= renderRadius*renderRadius;
             }
@@ -179,9 +193,9 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
                 if (!nominalLengths.TryGetValue(go,out float fitted) || fitted != spacing)
                 { VehicleModelResolver.FitTransitLength(go,spacing); nominalLengths[go]=spacing; }
                 lineByVehicle[go] = line.data.line_agent_id;
-                Vector3 forward = directions[car] * (returning && line.type != Constants.VEHICLE_BUS ? -1 : 1);
-                if (identity == cars-1 && cars > 1 && line.type != Constants.VEHICLE_BUS) forward = -forward;
-                go.transform.SetPositionAndRotation(positions[car],Quaternion.LookRotation(forward,Vector3.up));
+                Vector3 bodyForward = directions[car] * (returning && line.type != Constants.VEHICLE_BUS ? -1 : 1);
+                if (identity == cars-1 && cars > 1 && line.type != Constants.VEHICLE_BUS) bodyForward = -bodyForward;
+                go.transform.SetPositionAndRotation(positions[car],Quaternion.LookRotation(bodyForward,Vector3.up));
             }
         }
     }

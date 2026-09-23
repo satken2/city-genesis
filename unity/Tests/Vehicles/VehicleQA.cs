@@ -56,7 +56,7 @@ public static partial class VehicleQA
             }
             if (Array.IndexOf(args,"-transitOnly")>=0)
             {
-                Geometry(); MotionContract(); TransitModels(); TransitPlacement(); TransitHighlightSelection();
+                Geometry(); MotionContract(); TransitModels(); TransitPlacement(); TransitConsistGeometry(); TransitHighlightSelection();
                 File.WriteAllText(result,"PASS\nPublic transport: motion, models, turnback, shared curved geometry, missing paths, vehicle selection and occlusion");
                 EditorApplication.Exit(0); return;
             }
@@ -67,7 +67,7 @@ public static partial class VehicleQA
                 EditorApplication.Exit(0); return;
             }
             StreetParking();
-            Geometry(); Budget(); Junction(); RoadsideExit(); MotionContract(); TransitModels(); TransitPlacement(); TransitHighlightSelection(); DriveCamera();
+            Geometry(); Budget(); Junction(); RoadsideExit(); MotionContract(); TransitModels(); TransitPlacement(); TransitConsistGeometry(); TransitHighlightSelection(); DriveCamera();
             PedestrianBands(); PedestrianModels();
             var report = new List<string>();
             foreach(int split in new[]{1,5}) report.Add(PedestrianNetwork(split,12,1200,false,true));
@@ -207,6 +207,15 @@ public static partial class VehicleQA
         Sample(curved,Property(curved,"Length")*.5f,true,out var expected,out _);
         expected.y+=(float)game.GetType("RoadPartHeights").GetField("TRACK_ABOVE_SPLINE").GetRawConstantValue()+.2f;
         Near(Vector3.Distance((Vector3)sampleArgs[4],expected),0,.01f,"Highlight cuts across curved/elevated track");
+        Set(manager,"clock",23.0); Call(manager,"DrawLine",lines[0],expected);
+        CheckCouplings((Vector3[])Get(lines[0],"positions"),(Vector3[])Get(lines[0],"directions"),20);
+        foreach (DictionaryEntry entry in (IDictionary)Get(manager,"visible"))
+        {
+            var car = ((GameObject)entry.Value).transform;
+            var positions = (Vector3[])Get(lines[0],"positions");
+            Check(Vector3.Distance(car.position,positions[0])<.001f || Vector3.Distance(car.position,positions[1])<.001f,
+                "Rail renderer does not use rigid consist poses");
+        }
         ((IDictionary)Get(routeGeometry,"geometry")).Clear();
         Check(!(bool)Call(routeGeometry,"Sample",sampleArgs),"Missing path was connected by a straight line");
         ((IDictionary)Get(routeGeometry,"geometry")).Add(1,g);
