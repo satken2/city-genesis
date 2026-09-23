@@ -165,6 +165,7 @@ public class DrawLodStatsOverlay : MonoBehaviour
         sb.AppendLine($"[DrawLOD stats] F8 で閉じる   frame {smoothedFrameMs:F1} ms ({(smoothedFrameMs > 0 ? 1000f / smoothedFrameMs : 0):F0} fps)");
         sb.AppendLine($"frame p95 {p95:F1} / p99 {p99:F1} ms | 共通生成 {RenderWorkScheduler.LastFrameMs:F2} / {PerformanceConfig.FrameBudgetMs:F2} ms | 最大単工程 {RenderWorkScheduler.MaximumStepMs:F2} ms");
         sb.AppendLine($"退避メッシュ推定 {RenderObjectCache.TotalBytes/(1024*1024)} / {RenderObjectCache.GlobalLimit/(1024*1024)} MiB | 待機 {RenderWorkScheduler.WaitingCount}");
+        sb.AppendLine($"道路標示 {(RoadMarkingAtlas.ReservedBytes + RoadMarkingAtlas.TableBytes)/(1024*1024)} / {RoadMarkingAtlas.BudgetBytes/(1024*1024)} MiB | ページ {RoadMarkingAtlas.ResidentPages} | 待機 {RoadMarkingAtlas.PendingPages} | 生成 {RoadMarkingAtlas.BakedPages} 再利用 {RoadMarkingAtlas.CacheHits} 退避 {RoadMarkingAtlas.Evictions}");
         if (PropManager.Instance != null) sb.AppendLine($"プロップ {PropManager.Instance.ResidentCandidateCount:N0}候補 / {PropManager.Instance.DistanceHiddenCount:N0}距離非表示 / {PropManager.Instance.SubmittedInstanceCount:N0}描画 / {PropManager.Instance.SubmittedShadowInstances:N0}影");
         if (PropManager.Instance != null) sb.AppendLine($"森林GPU {PropManager.Instance.ForestCandidateCount:N0}格子候補 / {PropManager.Instance.SubmittedForestBatches:N0}描画バッチ");
         AppendCategory("建物", DrawLodStats.Category.Building);
@@ -176,7 +177,8 @@ public class DrawLodStatsOverlay : MonoBehaviour
             Vector3 p = cam.transform.position;
             sb.AppendLine($"camera: ({p.x:F0}, {p.y:F0}, {p.z:F0})  pitch {cam.transform.eulerAngles.x:F0}°  fov {cam.fieldOfView:F0}°");
         }
-        GUI.Box(new Rect(8, 8, 900, 205), sb.ToString(), style);
+        var content = new GUIContent(sb.ToString());
+        GUI.Box(new Rect(8, 8, 900, style.CalcHeight(content, 900)), content, style);
     }
 
     private void AppendCategory(string label, DrawLodStats.Category category)

@@ -129,6 +129,7 @@ public sealed class SplinePartLod : MonoBehaviour
         renderer.sharedMaterial = material;
         renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         go.AddComponent<RenderCacheIdentity>().mesh = mesh;
+        GetComponentInParent<RoadMarkingContext>()?.Apply(go, true);
         return go;
     }
 

@@ -99,7 +99,24 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             roadMesh.RecalculateNormals();
             roadMesh.RecalculateBounds();
             merge?.SetSurface(roadMesh, nodePosition);
+            int surfaceVertexCount = roadMesh.vertexCount;
             AddBodyShell(roadMesh, nodePosition, roadResult.Sections);
+            RoadMarkingPlan markings = null;
+            if (paths.Exists(RoadMarkingRules.HasPaint))
+            {
+                // 混在ノードが未舗装・石畳を代表材質に選んだ場合、その専用の縁や投影を維持する。
+                string surfaceShader = roadMaterial != null ? roadMaterial.shader.name : "";
+                if (surfaceShader != "Custom/PathDirt" && surfaceShader != "Custom/PathPaving")
+                {
+                    markings = RoadMarkingRules.Intersection(sidewalkConnectors);
+                    var coordinates = new List<Vector4>();
+                    var vertices = roadMesh.vertices;
+                    for (int i = 0; i < vertices.Length; i++)
+                        coordinates.Add(new Vector4(vertices[i].x, vertices[i].z, i < surfaceVertexCount ? 1 : 0, 0));
+                    roadMesh.SetUVs(3, coordinates);
+                }
+                sidewalkConnectors.RemoveAll(spec => spec.Part == "line");
+            }
             if (sidewalkConnectors != null) foreach (var connector in sidewalkConnectors)
             {
                 connector.StartNormal = ClosestSectionNormal(connector.Points[0] + nodePosition, roadResult.Sections);
@@ -116,7 +133,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
                         connector.Points[i] += Vector3.up * (Mathf.Lerp(connector.StartRailBase, connector.EndRailBase, t * t * (3 - 2 * t)) - RoadPartHeights.TRACK_ABOVE_SPLINE);
                     }
             }
-            return new NodeMeshResult(roadMesh, roadMaterial, connectionPoints, sidewalkConnectors, railConnectors, sidewalkSetbacks) { MotorwayMerge = merge };
+            return new NodeMeshResult(roadMesh, roadMaterial, connectionPoints, sidewalkConnectors, railConnectors, sidewalkSetbacks) { MotorwayMerge = merge, Markings = markings };
         }
         catch (Exception ex)
         {

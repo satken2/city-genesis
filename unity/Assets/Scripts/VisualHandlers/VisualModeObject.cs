@@ -701,6 +701,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
             {
                 info.renderer.sharedMaterials = info.originalMaterials;
                 info.renderer.SetPropertyBlock(null);
+                RoadMarkingSurface.Restore(info.renderer);
             }
         }
     }

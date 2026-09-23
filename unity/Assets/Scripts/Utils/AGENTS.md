@@ -43,3 +43,5 @@
 PathSummaryExtensions.GetRelativeHeightAtPointはstation_grade_profileがあればXZ射影した設計絶対標高からUtils.GetGroundHeightを引く。基準線なしでは既存のアンカー相対Y補間を使い、描画Yのオフセットを混入させない。
 
 `OccupancyVolumeUtil` は道路幅×占有高さの区間箱と、建物フットプリントの外接矩形×高さの警告箱を三角形列へ追加する。RoadPlanManagerのローカル警告とHighlightManagerの権威警告で共用し、既存オブジェクトのマテリアルを変更しない。検証は `Tests/Occupancy/run-unity.ps1`（独立Unity、結果と画像はTemp/OccupancyQA）。
+
+Utils.ApplyDepthOffsetShaderは路面標示用Custom/RoadSurfaceを保持する。RoadSurface自身が道路の深度オフセットと影・深度パスを持つため、通常のDepthOffsetLitへ置き換えると標示が失われる。

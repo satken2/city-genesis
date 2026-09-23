@@ -589,6 +589,9 @@ public class RoadPath : IPathMeshGenerator
             Debug.LogError($"[RoadPath] SplineMesh Rebuild失敗 '{prefabName}': {ex}");
         }
 
+        if (normalizeBodySurface && prefabName.EndsWith("/body", StringComparison.Ordinal))
+            parent.GetComponentInParent<RoadMarkingContext>()?.Apply(go);
+
         return go;
     }
 
@@ -779,7 +782,7 @@ public class RoadPath : IPathMeshGenerator
     /// 左右は node-frame（ノードから道路外側を見た左右）で渡されるため、ここでスプライン視点へ写像する。
     /// </param>
     /// <param name="endSidewalkSetback">スプライン終端側の歩道セットバック。</param>
-    private void CreateRoadParts(GameObject container, SplineComputer spline, float width, float sidewalkWidth, float sideWidth, int lanes, float? treeSpacing, float wallWidth, float centerWidth, float? pillarSpacing, bool heightEditable, float baseHeight, bool singleSpan, PathSummary pathData, List<Vector3> controlPoints, SidewalkSetback startSidewalkSetback = default, SidewalkSetback endSidewalkSetback = default)
+    private void CreateRoadParts(GameObject container, SplineComputer spline, float width, float sidewalkWidth, float sideWidth, int lanes, float? treeSpacing, float wallWidth, float centerWidth, float? pillarSpacing, bool heightEditable, float baseHeight, bool singleSpan, PathSummary pathData, List<Vector3> controlPoints, SidewalkSetback startSidewalkSetback = default, SidewalkSetback endSidewalkSetback = default, bool startApproach = true, bool endApproach = true)
     {
         string variantBase = $"Models/Paths/p{pathData.path_variant}";
         string typeBase = $"Models/Paths/p{pathData.path_type}";
@@ -789,6 +792,8 @@ public class RoadPath : IPathMeshGenerator
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] モデルベースパス: variant={variantBase}, type(フォールバック)={typeBase}");
 
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[RoadPath] --- 道路パーツ生成開始 ---");
+
+        var markingContext = RoadMarkingContext.Create(container, spline, pathData, startApproach, endApproach);
 
         // Road Body
         // 地形解像度限界・Zファイティングによる埋没を回避するため、道路本体はスプラインから浮かせる。
@@ -807,6 +812,7 @@ public class RoadPath : IPathMeshGenerator
         {
             // モデルがないため、ただの白い板にフォールバックする
             roadBody = CreateFallbackRoadBody(container, spline, width);
+            markingContext?.Apply(roadBody);
             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] body: モデルなしのため白い板にフォールバック");
         }
 
@@ -830,7 +836,7 @@ public class RoadPath : IPathMeshGenerator
         // Side Lines (道路脇の実線)
         // side_width=0 は「区画線を持たない道路」を意味するため、側線も中央線も一切引かない
         // （線の太さは side_width から導くので、0 のまま描くと潰れたメッシュになる）。
-        bool hasLine = sideWidth > 0f;
+        bool hasLine = sideWidth > 0f && markingContext == null;
         if (hasLine)
         {
             // 左側は mirrorX で反転させ、プレハブが非対称でも左右対称に見えるようにする。
@@ -1159,6 +1165,7 @@ public class RoadPath : IPathMeshGenerator
                         cornerObj.AddComponent<IntersectionMeshOwner>().OwnedMesh = cornerResult.Mesh;
                         MeshRenderer mr = cornerObj.AddComponent<MeshRenderer>();
                         if (cornerResult.Material != null) mr.material = cornerResult.Material;
+                        if (cornerResult.Markings != null) cornerObj.AddComponent<RoadMarkingSurface>().Configure(cornerResult.Markings);
 
                         if (cornerResult.SidewalkConnectors != null && cornerResult.SidewalkConnectors.Count > 0)
                         {
@@ -1211,7 +1218,7 @@ public class RoadPath : IPathMeshGenerator
             SplineComputer spline = BuildSpline(segObj, splinePoints, false);
             PathDrawContext.SetAdaptiveTileLength(PathDrawContext.ComputeAdaptiveTileLength(spline, MAX_EXTRUDE_TILE_LENGTH));
 
-            CreateRoadParts(segObj, spline, width, sidewalkWidth, sideWidth, lanes, treeSpacing, wallWidth, centerWidth, pillarSpacing, heightEditable, baseHeight, singleSpan, pathData, splinePoints, segStartSetbacks[i], segEndSetbacks[i]);
+            CreateRoadParts(segObj, spline, width, sidewalkWidth, sideWidth, lanes, treeSpacing, wallWidth, centerWidth, pillarSpacing, heightEditable, baseHeight, singleSpan, pathData, splinePoints, segStartSetbacks[i], segEndSetbacks[i], i == 0, i == segmentStarts.Length - 1);
         }
 
         // コライダー用メッシュの生成
