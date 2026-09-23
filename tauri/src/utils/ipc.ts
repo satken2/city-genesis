@@ -737,6 +737,16 @@ export async function sendSessionReload(): Promise<void> {
   });
 }
 
+/** 爆破APIの成功後、対象建物の再取得・瓦礫への切替・単発エフェクトをUnityへ依頼する。 */
+export async function sendBuildingExploded(agentId: number): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "",
+    entity: null,
+    action: "building:exploded",
+    params: { agent_id: agentId },
+  });
+}
+
 /**
  * `session.force_reload`
  * すべての3Dオブジェクトを消去してからバックエンドからデータを取得し、再描画する。

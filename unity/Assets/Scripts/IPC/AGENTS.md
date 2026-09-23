@@ -19,6 +19,8 @@ HTTP(バックエンド通信)とは別系統であることに注意。Unityと
 
 ## 新しいIPCイベントを追加する手順
 
+`building:exploded {agent_id}` は爆破HTTP API成功後だけUIから送る描画通知。既存の`send_window_action`/`ui:action`を使い、`IpcClient.OnBuildingExploded`→`IpcEventHandler`→`CellDataLoader.FetchBuilding(id, playExplosion: true)`へ渡す。対象1棟の取得・瓦礫への切替・単発演出をまとめ、`session:reload`は併送しない。詳細は公開`programs/IPC連携の整理.md`。
+
 `drive:open`(UI→Unity)はCockpitのブルドーザー右隣のボタンが送る。paramsは`drive.json`の現在言語のキー→文言の辞書。`IpcClient`が`DriveMode.Ensure().Open`へ渡し、選択パネルとHUDはUnityが保持する。同イベントを表示中に受けると終了する。Rustの`send_window_action`による汎用転送を使い、逆方向の状態配信・新規ウィンドウは持たない。
 
 `ambience:volume {volume}`はTauri→Unityの音量通知（master×sfx、0〜1）。Cockpitが設定変更時と2秒ごとに送り、CameraAmbience・ConstructionAmbience・VehicleAmbience・VisualEffectManagerが所有するAudioSourceへ適用する。高度と天候の音響制御はUnity内で完結する。

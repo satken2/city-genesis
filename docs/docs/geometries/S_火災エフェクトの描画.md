@@ -96,7 +96,22 @@ URPのレンダラは Forward+ のため多灯自体は許容されるが、点�
 
 炎・煙・火の粉のテクスチャは**起動時に1度だけコード生成**する(`Mathf.PerlinNoise` による fbm を使った涙型・雲状・光点)。アートアセットの追加なしで成立させるための設計で、生成したテクスチャとマテリアルは静的に共有される。
 
-## パフォーマンス
+## 爆破操作の単発エフェクト
+
+爆破成功通知 `building:exploded` は通常火災のアラートと別に扱う。対象建物の個別再取得後、`STATUS_COLLAPSED` の瓦礫へ即座に切り替え、`VisualEffectManager.PlayExplosion` が同じ場所で炎・煙・3D音を開始する。瓦礫の生成は既存の [倒壊建物のメッシュ生成](F8_倒壊建物のメッシュ生成.md) に委ねる。
+
+`FireEffectFactory.CreateExplosion` は通常火災と同じコード生成テクスチャ・共有マテリアル・`Custom/FireParticle` を使う。底面半径は火災と共通の `FireEffectManager.ResolveFootprintRadius` から取り、2.5〜35mに制限する。設置高さは `BuildingManager.ResolveBuildingBaseHeight` で瓦礫と揃える。
+
+- 赤橙の炎30粒を一度だけ放出し、0.3〜0.65秒で消す。
+- 灰色の煙45粒を一度だけ放出し、広がりながら上昇して1.8〜3.2秒で消す。
+- ループとprewarmは無効。画面外でも寿命を進め、3.5秒でルートを破棄する。`timeScale=0` でも演出と後始末は実時間で進む。
+- 建物の子にはせず `VisualEffectManager` の子として管理し、LOD切替に余韻を切らせない。セッションの全消去時は `ClearTransientEffects` で音も含めて破棄する。
+
+音源は `Resources/Audio/Effects/building-explosion.ogg`（mitchelkの **Explode001**、CC0 1.0）。元WAVを44.1kHz・モノラルのOgg Vorbisへ圧縮して同梱する。音量は既存の `ambience:volume`（master×sfx）に基準ゲイン0.8を掛け、再生途中のミュートも反映する。俯瞰視点で聞き取れるよう距離減衰の範囲を80〜1800mにし、遠端で無音とする。出所・変換コマンドは `unity/Assets/Resources/Audio/Effects/README.md`、ゲーム内クレジットは `tauri/src/data/credits.ts`。
+
+検証は `unity/Tests/Explosion/run-unity.ps1`。本編のランタイム全体をコンパイルした後、独立Unityで炎→煙→消滅の画像、粒子数・音源インポート・音量変更・停止時間中の寿命・セッション全消去を確認する。本編の都市へ爆破要求は送らない。
+
+## 常時火災のパフォーマンス
 
 - 火災件数は都市規模でも高々数十件だが、煙柱はパーティクル数が多いため `maxEffectDistance`(既定1400m)より遠いエフェクトは GameObject ごと非アクティブにする
 - 距離判定と光源の割り当ては `cullIntervalSeconds`(既定0.25秒)ごとにまとめて行う

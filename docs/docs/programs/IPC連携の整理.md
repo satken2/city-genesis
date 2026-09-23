@@ -127,6 +127,7 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `game:start`                    | `ui -> graphic`  | バックエンドのセッションが作成され、ゲームが開始されたことを通知。ペイロードは空。グラフィックはこれを受けて `GET /api/v1/city` の `camera`（セーブ済みの視点、新規都市ではマップ定義の初期視点）を読み、カメラを復元する（`null` なら原点の既定視点）。既にゲーム中でも送られ、その場合もカメラだけ復元する |
 | `game:end`                      | `ui -> graphic`  | セッションが破棄され、ゲームが終了したことを通知               |
 | `session:reload`                | `ui -> graphic`  | バックエンドからデータを取得して、3Dを再描画する             |
+| `building:exploded`             | `ui -> graphic`  | 爆破HTTP APIの成功通知（`{agent_id}`）。既存の個別取得経路で対象建物を瓦礫に更新し、炎・煙・爆発音を一度だけ再生する |
 
 ## `world:select_object` の選択対象
 
@@ -145,6 +146,18 @@ Offset  8: Ring buffer data (1048568 bytes)
 インターチェンジ（IC/JCT）はバックエンドがランプから自動検出するもので（[道路網のインターチェンジとジャンクション](../economics/3_道路網.md#インターチェンジとジャンクション)）、Unityは道路の閲覧状態（道路・地形の入力モードがともに通常）のときだけ中心にラベルを出す。編集中はラベルを隠すので、このイベントが道路編集のクリックと競合することはない。`intersection_detail` は名前と種別を表示するだけのパネルで、カメラ移動などのアクションは持たない。
 
 ## 確定送信の責務分担
+
+### 建物の爆破
+
+`building:exploded`（UI → graphic、params: `{agent_id: 整数}`）は、`AgentOperationPanel` が確認ダイアログを経て `POST /api/v1/agents/{id}/explode` に成功した後だけ送る。爆破の確定はHTTP側で完了しており、IPCは描画更新の通知である。
+
+転送は既存の `send_window_action` → `send_ui_action` → `ui:action` Envelope（`payload.action` / `payload.params`）を使用する。Rustの専用コマンドや別のEnvelopeは設けない。Unityの `IpcClient.OnBuildingExploded` → `IpcEventHandler` → `CellDataLoader.FetchBuilding(id, playExplosion: true)` → `BuildingManager.FetchBuilding` と、既存の個別取得・共通描画スケジューラを通る。
+
+Unityは `GET /buildings/{id}` の最新状態が `STATUS_COLLAPSED` であることを確認し、既存の建物メッシュ生成経路で瓦礫へ切り替える。同じ処理で `VisualEffectManager.PlayExplosion` を一度だけ呼ぶ。再取得中の重複通知と同じversionの再通知は演出を重ねず、セッション切替中に完了した取得結果も破棄する。爆破前の一括取得が後着した場合、その古いversionで表示を戻さない。
+
+この操作では `session:reload` を併送しない。全体リロードが行う海岸線・路線などの取得は不要で、対象1棟の更新と演出だけを同じハンドラで開始する。通常のエポック更新・保存データのロード・解体による状態変化では爆発音を鳴らさない。エフェクトの寿命と音源は [火災エフェクトの描画](../geometries/S_火災エフェクトの描画.md#爆破操作の単発エフェクト) を参照。
+
+### 建設・編集
 
 建設・編集の「確定」をバックエンドへ送信する責務は、**確定操作を所有する側**が持つ。
 

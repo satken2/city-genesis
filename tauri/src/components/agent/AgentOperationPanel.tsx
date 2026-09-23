@@ -15,7 +15,7 @@ import {
   TYPE_HOUSEHOLD,
   TYPE_TRADE,
 } from "../../constants";
-import { sendSessionReload } from "../../utils/ipc";
+import { sendBuildingExploded, sendSessionReload } from "../../utils/ipc";
 import { fetchApi } from "../../utils/api";
 import purchaseIcon from "../../assets/images/purchase.png";
 import bulldozeIcon from "../../assets/images/bulldoze.png";
@@ -157,6 +157,12 @@ export function AgentOperationPanel({
       await fetchApi(`${base}/api/v1/agents/${agent.agent_id}/explode`, {
         method: "POST",
       });
+      // API成功時だけ通知する。3D通知が失敗しても、確定済みの状態はパネルへ反映する。
+      try {
+        await sendBuildingExploded(agent.agent_id);
+      } catch (err) {
+        console.error("Explosion graphics notification failed:", err);
+      }
       onActionPerformed();
     } catch (err) {
       console.error("Explode failed:", err);

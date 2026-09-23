@@ -296,8 +296,9 @@ public class FireEffectManager : MonoBehaviour
     }
 
     /// <summary>建物底面ポリゴンの外接矩形から、中心を基準にした半径を求める。</summary>
-    private static float ResolveFootprintRadius(BuildingSummary summary, float centerX, float centerZ)
+    public static float ResolveFootprintRadius(BuildingSummary summary, float centerX, float centerZ)
     {
+        if (summary?.polygonArray == null) return FALLBACK_RADIUS;
         float minX = float.MaxValue, maxX = float.MinValue;
         float minZ = float.MaxValue, maxZ = float.MinValue;
 

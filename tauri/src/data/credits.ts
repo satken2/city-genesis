@@ -88,6 +88,15 @@ export type CreditEntry = {
  */
 export const CREDIT_ENTRIES: CreditEntry[] = [
   {
+    title: "Explode001",
+    category: "sfx",
+    author: "mitchelk",
+    source: "Freesound",
+    url: "https://freesound.org/people/mitchelk/sounds/136765/",
+    license: "CC0 1.0 — https://creativecommons.org/publicdomain/zero/1.0/",
+    note: "Building explosion. Converted from stereo WAV to mono Ogg Vorbis (44.1 kHz, quality 4). License verified 2026-09-23.",
+  },
+  {
     title: "Paving Stones 033",
     category: "texture",
     source: "ambientCG",

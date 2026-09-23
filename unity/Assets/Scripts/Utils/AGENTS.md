@@ -26,6 +26,8 @@
 | `VisualEffectManager.cs` | 建物・道路の完成/解体遷移でパーティクルと単発3D音を鳴らすシングルトン。**シーン配置ではなくAppRootが生成する**。音量は`ambience:volume`(master×sfx)購読×基準ゲイン0.8で、受信前は無音。クリップはインスペクタ未設定なら`Resources/Audio/Effects/construction-complete`・`demolition`を探す(現状どちらも未配置=無音)。呼び出しはBuildingManager/PathManager/ParcelManagerの`TriggerBuildingStatusEffect`等 |
 | `WindowUtil.cs` | ウィンドウ操作 |
 
+爆破操作は `FireEffectFactory.CreateExplosion`（共有の炎・煙素材で有限バースト）と `VisualEffectManager.PlayExplosion` を使う。音源は `Resources/Audio/Effects/building-explosion.ogg`。通常の完成/解体遷移には爆発を割り当てない。単発音は既存の `Play3DSound` で距離減衰と `ambience:volume` を反映し、再生中の音量変更にも追従する。建物と独立した子オブジェクトを実時間で後始末し、`ClearTransientEffects` は都市の全消去に連動する。検証は `Tests/Explosion/run-unity.ps1`。
+
 `Utils.cs`(Scripts直下)にも以下の汎用処理がある:
 - `GetGroundHeight(Vector3)` ... 同一フレーム・同一XZ座標だけをキャッシュする実タイル高さ取得。近傍座標への丸めは禁止（傾斜地で問い合わせ順に依存する高さになる）。地形の更新・登録・除去時は `InvalidateHeightCache()` を呼ぶ。
 - `TryGetTerrainGrid(Vector3, out Vector2 origin, out Vector2 spacing)` ... 実タイルの格子原点と間隔。全タイル共通解像度の格子にfloorを合わせるために使う。

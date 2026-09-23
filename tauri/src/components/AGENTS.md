@@ -98,7 +98,7 @@ HUDは**4枚の専用Tauriウィンドウ**に分かれている。Unityの3Dビ
 
 **稼働率目標(建設中は建設スピード)も同じ列の右端に置く**(`.operation-btn--util`。`margin-left:auto`で右寄せ)。閉じている間はラベルを持たず「メーターアイコン+現在値%」だけを出し(名称はツールチップ)、押すと列の下にスライダーが開く(`aria-expanded`)。**キャプション「稼働率目標」/「建設スピード」はスライダーを開いたときだけスライダーの左に出す**。アイコンは専用画像が未用意のためコンポーネント内のインラインSVG(`UtilizationIcon`)で、画像ができたら`<img>`へ差し替える。
 
-非公共側の`agent/AgentOperationPanel`には、**民間の稼働中建物(`!public_facility && is_bd && status∈{ACTIVE,PAUSED}`)にだけ「爆破」ボタン**が出る(`POST /api/v1/agents/{id}/explode`)。取り返しがつかず市民が死ぬ操作なので、`.operation-btn--danger`(赤)で他と見分けられるようにし、実行前に必ず`window.confirm`(`agent.action.explodeConfirm`)を挟む。アイコンは素材のクレジット表記を増やさないためコンポーネント内のインラインSVG(`BombIcon`。`currentColor`でボタンの文字色に追従)で描く。押すと即座に`STATUS_COLLAPSED`になる(エポック実行を待たない数少ない操作)。
+非公共側の`agent/AgentOperationPanel`には、**民間の稼働中建物(`!public_facility && is_bd && status∈{ACTIVE,PAUSED}`)にだけ「爆破」ボタン**が出る(`POST /api/v1/agents/{id}/explode`)。取り返しがつかず市民が死ぬ操作なので、`.operation-btn--danger`(赤)で他と見分けられるようにし、実行前に必ず`window.confirm`(`agent.action.explodeConfirm`)を挟む。アイコンは素材のクレジット表記を増やさないためコンポーネント内のインラインSVG(`BombIcon`。`currentColor`でボタンの文字色に追従)で描く。押すと即座に`STATUS_COLLAPSED`になる(エポック実行を待たない数少ない操作)。HTTP成功後だけ`sendBuildingExploded(agent_id)`を送り、Unityが対象1棟を再取得して瓦礫と短い炎・煙・効果音へ反映する。`session:reload`は併送せず、IPC送信失敗時も確定済みの状態はパネルへ反映する。
 
 **放棄(`PATCH {abandoned}`)中は放棄解除以外の操作ボタンをすべて無効化する**(修繕・停止/開始・取り壊しはいずれも維持している施設への操作のため)。放棄トグル自体は放棄中も押せる状態を保つ(でないと解除できなくなる)。バックエンドが`abandoned`を許すのは建物(is_bd=1)かつSTATUS_ACTIVE/STATUS_PAUSEDのときだけなので、UI側も同条件で活性化する。放棄すると稼働中の施設はバックエンド側でSTATUS_PAUSEDへ落ちる(解除しても自動再稼働はしない)。
 

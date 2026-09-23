@@ -92,6 +92,83 @@ public static class FireEffectFactory
         return root;
     }
 
+    /// <summary>爆破操作用の単発噴煙。通常火災の素材だけを共有し、燃え続ける煙柱は作らない。</summary>
+    public static GameObject CreateExplosion(float radius, Transform parent)
+    {
+        EnsureMaterials();
+        var root = new GameObject("BuildingExplosion");
+        root.transform.SetParent(parent, false);
+        float r = Mathf.Clamp(radius, 2.5f, 35f);
+
+        var flames = AddExplosionSystem(root.transform, "BlastFlames", _flameMaterial, 30, r);
+        var main = flames.main;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.3f, 0.65f);
+        main.startSize = new ParticleSystem.MinMaxCurve(r * 0.3f, r * 0.6f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(r * 0.5f, r * 1.1f);
+        SetColorOverLifetime(flames,
+            new[] {
+                new GradientColorKey(new Color(1f, 0.42f, 0.08f), 0f),
+                new GradientColorKey(new Color(0.95f, 0.09f, 0.015f), 0.3f),
+                new GradientColorKey(new Color(0.32f, 0.025f, 0.01f), 1f),
+            },
+            new[] {
+                new GradientAlphaKey(0.9f, 0f),
+                new GradientAlphaKey(0.7f, 0.35f),
+                new GradientAlphaKey(0f, 1f),
+            });
+        SetSizeOverLifetime(flames, new AnimationCurve(new Keyframe(0f, 0.55f), new Keyframe(0.25f, 1f), new Keyframe(1f, 0.2f)));
+
+        var smoke = AddExplosionSystem(root.transform, "BlastSmoke", _smokeMaterial, 45, r);
+        main = smoke.main;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(1.8f, 3.2f);
+        main.startSize = new ParticleSystem.MinMaxCurve(r * 0.35f, r * 0.65f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(r * 0.15f, r * 0.38f);
+        main.startRotation = new ParticleSystem.MinMaxCurve(-Mathf.PI, Mathf.PI);
+        var velocity = smoke.velocityOverLifetime;
+        velocity.enabled = true;
+        velocity.space = ParticleSystemSimulationSpace.Local;
+        velocity.y = Mathf.Max(1.5f, r * 0.3f);
+        SetColorOverLifetime(smoke,
+            new[] {
+                new GradientColorKey(new Color(0.15f, 0.13f, 0.12f), 0f),
+                new GradientColorKey(new Color(0.38f, 0.36f, 0.34f), 0.4f),
+                new GradientColorKey(new Color(0.6f, 0.58f, 0.55f), 1f),
+            },
+            new[] {
+                new GradientAlphaKey(0.15f, 0f),
+                new GradientAlphaKey(0.65f, 0.08f),
+                new GradientAlphaKey(0.35f, 0.5f),
+                new GradientAlphaKey(0f, 1f),
+            });
+        SetSizeOverLifetime(smoke, AnimationCurve.Linear(0f, 0.45f, 1f, 1.8f));
+        SetSwayNoise(smoke, Mathf.Max(0.3f, r * 0.08f), 0.35f, 0.5f);
+        SetRotationOverLifetime(smoke, 18f);
+
+        foreach (var ps in root.GetComponentsInChildren<ParticleSystem>()) ps.Play();
+        return root;
+    }
+
+    private static ParticleSystem AddExplosionSystem(Transform root, string name, Material material, short count, float radius)
+    {
+        var ps = AddSystem(root, name, material, count);
+        var main = ps.main;
+        main.prewarm = false;
+        main.loop = false;
+        main.duration = 0.15f;
+        main.useUnscaledTime = true;
+        // 画面外へ出ても寿命を進め、戻ったときに爆発が再開しないようにする。
+        main.cullingMode = ParticleSystemCullingMode.AlwaysSimulate;
+        var emission = ps.emission;
+        emission.rateOverTime = 0f;
+        emission.SetBursts(new[] { new ParticleSystem.Burst(0f, count) });
+        var shape = ps.shape;
+        shape.shapeType = ParticleSystemShapeType.Cone;
+        shape.angle = 55f;
+        shape.radius = radius * 0.55f;
+        shape.rotation = new Vector3(-90f, 0f, 0f);
+        return ps;
+    }
+
     // ------------------------------------------------------------------
     // パーティクルシステムの構築
     // ------------------------------------------------------------------

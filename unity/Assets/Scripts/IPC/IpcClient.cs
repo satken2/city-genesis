@@ -35,6 +35,7 @@ public class IpcClient : MonoBehaviour
     public event Action<float[][], int, float[], float, int> OnEditBuildingUpdateShape;
     public event Action<Newtonsoft.Json.Linq.JToken> OnEditBuildingPlacementCommand;
     public event Action<int> OnEditBuildingUpdateFloors;
+    public event Action<int> OnBuildingExploded;
     public event Action<float, float, float> OnEditBuildingUpdateVisualVariant;
     // 構造種別(structure_master のID)の変更。プレビューのパーツ prefix を切り替える。
     public event Action<int> OnEditBuildingUpdateStructure;
@@ -689,6 +690,10 @@ public class IpcClient : MonoBehaviour
                 case "session:reload":
                     Debug.Log("IpcClient: session:reload");
                     OnSessionReload?.Invoke();
+                    break;
+
+                case "building:exploded":
+                    OnBuildingExploded?.Invoke(GetParamInt(payload, "agent_id"));
                     break;
 
                 case "session:force_reload":

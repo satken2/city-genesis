@@ -50,6 +50,9 @@ public class BuildingManager : BaseApiDataManager
     /// (次回のマージロードでも「未生成」と判定させ、遅延キューを最新データで更新し続けるため)。
     /// </summary>
     private Dictionary<int, int> buildingVersionCache = new Dictionary<int, int>();
+    private readonly HashSet<int> pendingExplosions = new HashSet<int>();
+    private readonly Dictionary<int, int> explodedVersions = new Dictionary<int, int>();
+    private int explosionGeneration;
 
     // ================================================================
     // 詳細メッシュ生成の視野ゲートと個数上限(LRU)
@@ -283,6 +286,10 @@ public class BuildingManager : BaseApiDataManager
 
     public override void ClearAllCells()
     {
+        explosionGeneration++;
+        pendingExplosions.Clear();
+        explodedVersions.Clear();
+        VisualEffectManager.Instance?.ClearTransientEffects();
         Debug.Log("BuildingManager: 全建物データをクリア");
         foreach (var obj in buildingObjectsCache.Values)
         {
@@ -463,6 +470,10 @@ public class BuildingManager : BaseApiDataManager
             foreach (var b in response.buildings)
             {
                 receivedIds.Add(b.agent_id);
+
+                // 爆破前に開始した一括取得が遅れて届いても、瓦礫を元の建物へ戻さない。
+                if (explodedVersions.TryGetValue(b.agent_id, out int explodedVersion) && b.version < explodedVersion)
+                    continue;
 
                 // 建物のcenter_point位置からLOD tierを判定
                 float[] cp = b.centerPointArray;
@@ -1831,17 +1842,48 @@ public class BuildingManager : BaseApiDataManager
         iconGO.transform.localScale = Vector3.one * plannedBuildingIconScale;
     }
 
-    public IEnumerator FetchBuilding(int agentId)
+    /// <summary>対象1棟を再取得する。爆破成功通知の場合だけ、瓦礫への切替と同時に単発演出を加える。</summary>
+    public IEnumerator FetchBuilding(int agentId, bool playExplosion = false)
     {
-        yield return ApiClient.Get<BuildingSummary>(
-            $"/buildings/{agentId}",
-            building =>
-            {
-                if (building != null)
-                    CreateOrUpdateBuildingObject(building, IsBuildingInDynamicCell(building), drawLod: GetCurrentDrawLod(building.agent_id));
-            },
-            error => Debug.LogError($"FetchBuilding({agentId}) failed: {error}")
-        );
+        if (agentId <= 0 || (playExplosion && !pendingExplosions.Add(agentId))) yield break;
+        int generation = explosionGeneration;
+        try
+        {
+            yield return ApiClient.Get<BuildingSummary>(
+                $"/buildings/{agentId}",
+                building =>
+                {
+                    // セッション切替中に完了した通信は、新しい都市へ持ち込まない。
+                    if (generation != explosionGeneration || building == null)
+                        return;
+                    if (playExplosion && (building.status != Constants.STATUS_COLLAPSED ||
+                        (explodedVersions.TryGetValue(agentId, out int version) && version >= building.version)))
+                        return;
+                    if (buildingDataCache.TryGetValue(agentId, out var cached) && cached.version > building.version)
+                        return;
+                    float[] cp = building.centerPointArray;
+                    if (cp == null || cp.Length < 2) return;
+
+                    DrawLod lod = GetCurrentDrawLod(agentId);
+                    if (lod == DrawLod.Far) CreateFarBuildingObject(building);
+                    else CreateOrUpdateBuildingObject(building, IsBuildingInDynamicCell(building), forceRebuild: true, drawLod: lod);
+                    buildingVersionCache[agentId] = building.version;
+                    if (playExplosion)
+                    {
+                        explodedVersions[agentId] = building.version;
+                        float radius = FireEffectManager.ResolveFootprintRadius(building, cp[0], cp[1]);
+                        var parcel = building.parcel_id > 0 ? GetParcelManager()?.GetParcelSummary(building.parcel_id) : null;
+                        float baseHeight = ResolveBuildingBaseHeight(building, parcel, cp[0], cp[1]);
+                        // 建物の子にはしない。LOD再生成で煙や音の余韻が途中で消えるのを防ぐ。
+                        VisualEffectManager.Instance?.PlayExplosion(new Vector3(cp[0], baseHeight + 0.5f, cp[1]), radius);
+                    }
+                },
+                error => Debug.LogError($"FetchBuilding({agentId}) failed: {error}"));
+        }
+        finally
+        {
+            if (playExplosion && generation == explosionGeneration) pendingExplosions.Remove(agentId);
+        }
     }
 
     /// <summary>

@@ -15,6 +15,7 @@ public class IpcEventHandler : MonoBehaviour
     {
         if (IpcClient.Instance != null)
         {
+            IpcClient.Instance.OnBuildingExploded += HandleBuildingExploded;
             IpcClient.Instance.OnEditPathChangeNode += HandleEditPathChangeNode;
             IpcClient.Instance.OnEditPathChangeEmbankment += HandleEditPathChangeEmbankment;
             IpcClient.Instance.OnEditPathFinish += HandleEditPathFinish;
@@ -51,6 +52,7 @@ public class IpcEventHandler : MonoBehaviour
     {
         if (IpcClient.Instance != null)
         {
+            IpcClient.Instance.OnBuildingExploded -= HandleBuildingExploded;
             IpcClient.Instance.OnEditPathChangeNode -= HandleEditPathChangeNode;
             IpcClient.Instance.OnEditPathChangeEmbankment -= HandleEditPathChangeEmbankment;
             IpcClient.Instance.OnEditPathFinish -= HandleEditPathFinish;
@@ -81,6 +83,11 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnWorldHighlightObjects -= HandleWorldHighlightObjects;
             IpcClient.Instance.OnWorldClearHighlights -= HandleWorldClearHighlights;
         }
+    }
+
+    private void HandleBuildingExploded(int agentId)
+    {
+        CellDataLoader.Instance?.FetchBuilding(agentId, playExplosion: true);
     }
 
     /// <summary>

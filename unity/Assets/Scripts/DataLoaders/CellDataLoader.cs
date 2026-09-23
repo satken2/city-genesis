@@ -829,10 +829,10 @@ public class CellDataLoader : MonoBehaviour
         }
     }
 
-    public void FetchBuilding(int agentId)
+    public void FetchBuilding(int agentId, bool playExplosion = false)
     {
         if (buildingManager != null)
-            RenderWorkScheduler.Start(this, buildingManager.FetchBuilding(agentId), "CellDataLoader");
+            RenderWorkScheduler.Start(this, buildingManager.FetchBuilding(agentId, playExplosion), "CellDataLoader");
     }
 
     public void FetchPath(int pathId)
