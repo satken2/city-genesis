@@ -190,6 +190,7 @@
     "alertPathNoStationHouse": "未归属站房的站台",
     "alertDisplayRuin": "倒塌・烧毁的建筑与道路",
     "toggleShowPlanRoad": "显示规划中的道路",
+    "toggleSpeedLimitSigns": "显示限速标志",
     "toggleShowPlanBuilding": "显示规划中的建筑",
     "toggleHighlightPublic": "高亮公共设施",
     "showContours": "显示等高线",

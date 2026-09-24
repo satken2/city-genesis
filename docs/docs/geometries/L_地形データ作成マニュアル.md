@@ -78,7 +78,7 @@ terrain_editor/
 - **形状:** `grid_rows` × `grid_cols` の2次元配列(行優先)
   - `grid_rows` = `map_height / near_spacing + 1` (Z方向=縦)
   - `grid_cols` = `map_width / near_spacing + 1` (X方向=横)
-- **座標系:** 配列の左上がワールド座標 `(-map_width/2, -map_height/2)`、右下が `(map_width/2, map_height/2)` に対応する(マップ中心がワールド原点)
+- **座標系:** 配列の先頭(行0・列0)がワールド座標 `(-map_width/2, -map_height/2)` の南西隅、末尾が `(map_width/2, map_height/2)` の北東隅に対応する(マップ中心がワールド原点)。行が増えるほど北(ワールド+Z)、列が増えるほど東(+X)へ進むので、画像として見るときは上下を反転すると北が上になる。向きの規約は [[D_地形形状]] §D.3.1
 - **標高0以下のピクセル:** 海面を表す
 - **総バイト数:** `grid_rows * grid_cols * 2`
 

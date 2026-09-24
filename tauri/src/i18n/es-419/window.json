@@ -190,6 +190,7 @@
     "alertPathNoStationHouse": "Andenes sin estación asignada",
     "alertDisplayRuin": "Edificios y calles derrumbados o incendiados",
     "toggleShowPlanRoad": "Mostrar calles planeadas",
+    "toggleSpeedLimitSigns": "Mostrar señales de límite de velocidad",
     "toggleShowPlanBuilding": "Mostrar edificios planeados",
     "toggleHighlightPublic": "Resaltar servicios públicos",
     "showContours": "Mostrar curvas de nivel",

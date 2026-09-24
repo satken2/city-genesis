@@ -321,7 +321,8 @@
   border-color: rgba(255, 255, 255, 0.15);
 }
 
-.do-alert-list > button.do-alert-card {
+.do-alert-list > button.do-alert-card,
+.do-toggle-list > button.do-alert-card {
   width: 100%;
   text-align: left;
   font: inherit;

@@ -190,6 +190,7 @@
     "alertPathNoStationHouse": "역사에 속하지 않은 승강장",
     "alertDisplayRuin": "붕괴・소실된 건물과 도로",
     "toggleShowPlanRoad": "계획 중인 도로 표시",
+    "toggleSpeedLimitSigns": "제한 속도 표지 표시",
     "toggleShowPlanBuilding": "계획 중인 건물 표시",
     "toggleHighlightPublic": "공공시설 강조",
     "showContours": "등고선 표시",

@@ -376,6 +376,8 @@ export type PathSummary = {
   parked_cars: number;
   /** 合法路上駐車容量（台）。稼働中の地上街路以外は0 */
   street_parking_capacity: number;
+  /** 制限速度(km/h) (サーバーサイドで計算されるフィールド。型は動的。) */
+  max_speed?: any;
 };
 
 export type PathData = {

@@ -12,6 +12,7 @@ public sealed class SplinePartLod : MonoBehaviour
 {
     public const float SegmentLength = 128f;
     public bool IsInitialRenderReady => segments.TrueForAll(segment => segment.lod != DrawLod.Hidden);
+    public bool IsBody => body;
     private sealed class Segment
     {
         public double from, to;
@@ -27,11 +28,35 @@ public sealed class SplinePartLod : MonoBehaviour
     private bool body;
     private Material material;
     private Coroutine worker;
+    private Vector3? queriedPosition;
+    private Segment queriedSegment;
+
+    /// <summary>指定位置に現在表示している区間のLOD。生成待ち・退避中はHiddenを返す。</summary>
+    public DrawLod GetDrawLodAtPosition(Vector3 worldPosition)
+    {
+        if (!isActiveAndEnabled || spline == null) return DrawLod.Hidden;
+        // 標識などの固定位置からの照会では、曲線への射影を毎フレーム繰り返さない。
+        if (!queriedPosition.HasValue || queriedPosition.Value != worldPosition)
+        {
+            queriedPosition = worldPosition;
+            queriedSegment = null;
+            double percent = spline.Project(worldPosition).percent;
+            foreach (var segment in segments)
+            {
+                if (percent < segment.from || percent > segment.to) continue;
+                queriedSegment = segment;
+                break;
+            }
+        }
+        return queriedSegment?.shown != null && queriedSegment.shown.activeInHierarchy
+            ? queriedSegment.lod : DrawLod.Hidden;
+    }
 
     public void Configure(SplineComputer source, float partWidth, float offset, float offsetY, bool isBody,
         Material summaryMaterial, double from, double to, Func<DrawLod, double, double, GameObject> factory)
     {
         spline = source; width = partWidth; lateral = offset; height = offsetY; body = isBody; build = factory;
+        queriedPosition = null;
         material = summaryMaterial;
         int count = Mathf.Max(1, Mathf.CeilToInt(spline.CalculateLength() / SegmentLength));
         for (int i = 0; i < count; i++)

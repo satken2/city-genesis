@@ -830,6 +830,19 @@ function clearSelectionTexture(imgData: ImageData, ctx: CanvasRenderingContext2D
 }
 
 /**
+ * ワールド座標 (x, z) に文字を描く。draw() のビュー変換は北(+Z)を画面上にするY反転を含むため、
+ * そのまま fillText すると上下逆になる。描く位置へ移動してからY反転だけを打ち消す
+ * (フォントサイズ・textAlign・textBaseline は呼び出し側の設定がそのまま効く)。
+ */
+function fillWorldText(ctx: CanvasRenderingContext2D, text: string, x: number, z: number): void {
+  ctx.save();
+  ctx.translate(x, z);
+  ctx.scale(1, -1);
+  ctx.fillText(text, 0, 0);
+  ctx.restore();
+}
+
+/**
  * ブラシ(円/四角)のアウトラインをワールド座標系で描画する。draw() 内でビュー変換適用後に呼ぶ。
  * 内側の重み1の境界(実線)に加え、feather>0 のときは外側ににじみ出る範囲の外端(破線)も
  * 併せて描き、「境界の外側がぼける」という新しい挙動をプレビューでも分かるようにする。
@@ -999,7 +1012,7 @@ function strokeResourceAreas(
     ctx.font = `${lineWidth * 9}px sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(labelFor(area.resourceType), cx, cz);
+    fillWorldText(ctx, labelFor(area.resourceType), cx, cz);
   }
 
   // 作図中の資源ポリゴン(未確定)。水面の作図中表示と同じ構成でオレンジ系にする。
@@ -1072,7 +1085,7 @@ function strokeCameraMarker(
   ctx.font = `${lineWidth * 9}px sans-serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "bottom";
-  ctx.fillText("Camera", camera.x, camera.z - lineWidth * 6);
+  fillWorldText(ctx, "Camera", camera.x, camera.z + lineWidth * 6);
 
   if (mouse) {
     ctx.setLineDash([lineWidth * 4, lineWidth * 4]);
@@ -1197,7 +1210,7 @@ function strokeRivers(
     ctx.font = `bold ${lineWidth * 8}px sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(String(index + 1), head.x, head.z);
+    fillWorldText(ctx, String(index + 1), head.x, head.z);
   });
 }
 
@@ -1283,7 +1296,7 @@ function strokeRiverDraft(ctx: CanvasRenderingContext2D, points: WorldPoint[], m
     ctx.lineWidth = lineWidth;
     ctx.stroke();
     ctx.fillStyle = "#10305a";
-    ctx.fillText(String(i + 1), p.x, p.z);
+    fillWorldText(ctx, String(i + 1), p.x, p.z);
   });
 }
 
@@ -1844,11 +1857,12 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
 
   /**
    * ビュー座標→世界座標。
-   * screenX = (worldX - offsetX) * zoom の逆変換。
+   * screenX = (worldX - offsetX) * zoom、screenY = (offsetY - worldZ) * zoom の逆変換。
+   * offsetY は画面上端の世界Z(北=+Zを上に描くため、画面の下へ行くほどZが減る)。
    */
   function screenToWorld(sx: number, sy: number): [number, number] {
     const v = viewRef.current;
-    return [sx / v.zoom + v.offsetX, sy / v.zoom + v.offsetY];
+    return [sx / v.zoom + v.offsetX, v.offsetY - sy / v.zoom];
   }
 
   /** 地形全体が収まるようにビューをリセットする */
@@ -1865,7 +1879,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     viewRef.current = {
       zoom,
       offsetX: -s.mapWidth / 2 - (cssW / zoom - s.mapWidth) / 2,
-      offsetY: -s.mapHeight / 2 - (cssH / zoom - s.mapHeight) / 2,
+      offsetY: s.mapHeight / 2 + (cssH / zoom - s.mapHeight) / 2,
     };
   }
 
@@ -1875,6 +1889,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
    * 世界座標→描画ピクセルの変換は ctx の transform で行い、地形・グリッド・等高線は
    * 全て世界座標系のまま Path2D / drawImage で渡す。これにより大量の等高線線分が
    * あってもストローク1回で描画できる。
+   * 標高配列は行0が南端(世界-Z)なので、Y倍率を負にして北(+Z)を画面上に描く(Unityの俯瞰・
+   * 都市マップと同じ向き)。文字だけはこの反転で上下逆になるため、描く箇所でY反転を打ち消す。
    */
   function draw() {
     const cv = canvasRef.current;
@@ -1906,11 +1922,11 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     const v = viewRef.current;
-    // 世界→CSS 変換: screen = zoom*(world - offset)
-    // 構築順: base(dpr) → translate(-offset*zoom) → scale(zoom)
+    // 世界→CSS 変換: screenX = zoom*(worldX - offsetX), screenY = zoom*(offsetY - worldZ)
+    // 構築順: base(dpr) → translate → scale(zoom, -zoom)
     ctx.save();
-    ctx.translate(-v.offsetX * v.zoom, -v.offsetY * v.zoom);
-    ctx.scale(v.zoom, v.zoom);
+    ctx.translate(-v.offsetX * v.zoom, v.offsetY * v.zoom);
+    ctx.scale(v.zoom, -v.zoom);
 
     // 地形描画(最大解像度のoffscreenを世界矩形に張る)
     if (terrainCanvasRef.current) {
@@ -3991,7 +4007,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         const dy = e.clientY - dragRef.current.startY;
         const v = viewRef.current;
         v.offsetX = dragRef.current.offX - dx / v.zoom;
-        v.offsetY = dragRef.current.offY - dy / v.zoom;
+        // Yは反転描画(+Zが画面上)なので、offsetYはドラッグ量を加算する向きになる。
+        v.offsetY = dragRef.current.offY + dy / v.zoom;
         draw();
         return;
       }

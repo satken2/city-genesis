@@ -44,7 +44,7 @@
   top: 0;
   bottom: 0;
   right: 0;
-  width: 380px;
+  width: 460px;
   height: 100%;
   object-fit: cover;
   pointer-events: none;
@@ -81,10 +81,49 @@
 
 .tips-footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   gap: 12px;
   margin-top: 24px;
   z-index: 2;
+}
+
+.tips-footer-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tips-reload-btn {
+  background: transparent !important;
+  border: none !important;
+  padding: 4px;
+  margin: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.6;
+  transition: opacity 0.2s, transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  box-shadow: none !important;
+}
+
+.tips-reload-btn:hover {
+  background: transparent !important;
+  opacity: 1;
+  transform: rotate(60deg);
+}
+
+.tips-reload-btn:active {
+  background: transparent !important;
+  transform: rotate(180deg);
+}
+
+.tips-reload-icon {
+  width: 20px;
+  height: 20px;
+  display: block;
 }
 
 .tips-btn {

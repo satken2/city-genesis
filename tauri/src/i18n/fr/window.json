@@ -190,6 +190,7 @@
     "alertPathNoStationHouse": "Quais non rattachés à une gare",
     "alertDisplayRuin": "Bâtiments et routes effondrés ou incendiés",
     "toggleShowPlanRoad": "Afficher les routes planifiées",
+    "toggleSpeedLimitSigns": "Afficher les panneaux de limitation de vitesse",
     "toggleShowPlanBuilding": "Afficher les bâtiments planifiés",
     "toggleHighlightPublic": "Mettre en évidence les services publics",
     "showContours": "Afficher les courbes de niveau",

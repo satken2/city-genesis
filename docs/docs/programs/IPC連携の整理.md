@@ -52,7 +52,7 @@ Offset  8: Ring buffer data (1048568 bytes)
 | ------------------------------- | ---------------- | ------------------------------------- |
 | `world:select_object`           | `graphic -> ui`  | オブジェクトを選択する                           |
 | `world:change_state`            | `ui -> graphic`  | グラフィックのモード(通常モード、土地区画作成モード、etc.)を切り替え |
-| `view:change_view`              | `ui -> graphic`  | 地形、建物、区画、道路、環境、アラートなどの表示モードを切り替え（`{layer, mode, sub_mode, flags}`）。`flags` は色モードと独立した表示トグルのCSV文字列（`plan`=計画中の表示、`public`=公共施設ハイライト。road/building レイヤーのみ使用）。**`flags` が `null`（またはキー欠落）の場合は現在のフラグを維持**し、空文字は全トグルOFFを意味する |
+| `view:change_view`              | `ui -> graphic`  | 地形、建物、区画、道路、環境、アラートなどの表示モードを切り替え（`{layer, mode, sub_mode, flags}`）。`flags` は色モードと独立した表示トグルのCSV文字列（`plan`=計画中の表示、`public`=公共施設ハイライト、`speed_limit`=道路・線路の制限速度標識。road/building レイヤーのみ使用）。**`flags` が `null`（またはキー欠落）の場合は現在のフラグを維持**し、空文字は全トグルOFFを意味する |
 | `view:query_state`              | `ui -> graphic`  | グラフィックプログラムに現在の表示状態を問い合わせる            |
 | `view:apply_preset`             | `ui -> graphic`  | ウィンドウを開いている間だけ表示を差し替える（`{preset}`）。プリセットの中身はUnity側が持ち、UIは名前だけを指定する。**専用の編集ステート（`STATE_*`）を持たないウィンドウ専用**で、ステートを持つ操作ではUnityがステート別の表示プリセットを自動適用する。元の表示への復帰は `STATE_NORMAL` への復帰が担う（[Unity入力制御 §9.1](Unity入力制御.md#91-ステート別の表示プリセット)）。現在のプリセットは `transit`（公共交通の一覧・新設） |
 | `view:current_state`            | `graphic -> ui`  | `view:query_state`への応答、およびステート変更時の表示状態通知。各レイヤーは `{mode, sub_mode, flags}`（`flags` はONのトグルのCSV。無ければ空文字） |
@@ -492,3 +492,15 @@ UI→Unityは既存の `ui:action` Envelopeの `payload.action` / `payload.param
 
 
 開発時のUnityなし起動: 通常の `npm run tauri dev`（Rustの `cfg(all(debug_assertions, dev))`）では、Unityの `system:graphic_ready` を一度も受信していない場合に限り、バックエンドの開始要求成功とセッション確認後に描画待ちを省略し、Tipsを開始ボタンへ切り替える。Unityから接続通知を受けた後は描画完了を待つ。待機中にUnityが接続した場合も開始要求を再送して描画待ちに戻る。`tauri build`（`--debug` を含む）およびリリースビルドには省略処理を含めない。環境変数やバックエンドのNuitka／uvicorn判定は使用しない。
+
+## 道路・線路の制限速度標識
+
+表示設定の道路タブの「制限速度標識を表示」は独立したON/OFFボタンで、`view:change_view`の`layer=road`、`flags`の`speed_limit`を使う。既定はOFF。通常表示・交通量などの色分けと併用でき、状態照会と編集モード終了時の復元は他の表示トグルと同じ経路を使う。
+
+Unityの`PathSpeedLimitOverlay`は、一覧APIの`PathSummary.max_speed`をkm/hのまま表示する。対象は街路・高速道路・鉄道・モノレールで、公共交通の路線区間は表示しない。都市の規制から適用された値もパス個別に指定された値も、バックエンドが保持する同じフィールドを読む。線形制約後の`base_speed`や混雑込みの走行速度は使わず、欠損した値を推定しない。
+
+標識は道路・線路の中心を指す、赤い円・白地・青い数字の画面アイコン。`PathManager.TryGetPathLabelPosition`が`center_point`を実際の描画中心線へ射影し、高架・勾配の標高を保持する。カメラ正面を向き、上下アニメーションは付けない。アラートと同じCanvas生成・多言語フォントを使い、基準サイズ100pxを100m基準で0.3〜1.5倍に縮尺する。マウス入力は遮らない。
+
+標識は接写・通常モデルが表示される範囲だけで表示する。長い道路は中心区間の描画LODを参照し、遠景・Hidden・差し替え生成待ちでは隠す（[LOD処理](../geometries/E_LOD処理.md)）。道路の非表示・個別非表示・計画中表示OFF・アンロードにも追従し、都市切り替えで消去する。近傍候補は既存セル逆引きから0.5秒ごとに更新する。表示中のパスの速度変更も通常のデータ再取得後に反映する。
+
+意匠は`SpeedLimitSignStyle`として、数値・位置・表示状態から分離している。現在は全言語で日本式を用い、言語別の意匠はStyle実装と`SetSignStyle`で差し替えられる。写真・画像アセットは使用しない。実装検証は`unity/Tests/SpeedLimitSigns/run.ps1`、APIの値の検証はコア側のスキーマ直列化テストで行う。

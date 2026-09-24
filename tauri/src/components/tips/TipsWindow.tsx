@@ -65,10 +65,21 @@ const TIPS_LIST: TipItem[] = [
 
 export function TipsWindow() {
   const { t } = useTranslation();
-  const [currentIndex] = useState(() => Math.floor(Math.random() * TIPS_LIST.length));
+  const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * TIPS_LIST.length));
   const [ready, setReady] = useState(false);
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState(false);
+
+  const handleReload = () => {
+    if (TIPS_LIST.length <= 1) return;
+    setCurrentIndex((prev) => {
+      let next: number;
+      do {
+        next = Math.floor(Math.random() * TIPS_LIST.length);
+      } while (next === prev);
+      return next;
+    });
+  };
 
   useEffect(() => {
     let disposed = false;
@@ -130,17 +141,27 @@ export function TipsWindow() {
       </div>
 
       <div className="tips-footer">
-        {error && <span role="alert">{t("tips.startError")}</span>}
-        {ready ? (
-          <button className="tips-btn tips-btn--primary" onClick={handleStart} disabled={starting} type="button">
-            {t("tips.startGame")}
-          </button>
-        ) : (
-          <span className="tips-loading" role="status" aria-live="polite">
-            <span className="tips-loading-spinner" aria-hidden="true" />
-            <span className="tips-loading-text">{t("tips.nowLoading")}</span>
-          </span>
-        )}
+        <button
+          type="button"
+          className="tips-reload-btn"
+          onClick={handleReload}
+          title="別のTipsを表示"
+        >
+          <img src={reloadIcon} alt="Reload" className="tips-reload-icon" draggable={false} />
+        </button>
+        <div className="tips-footer-right">
+          {error && <span role="alert">{t("tips.startError")}</span>}
+          {ready ? (
+            <button className="tips-btn tips-btn--primary" onClick={handleStart} disabled={starting} type="button">
+              {t("tips.startGame")}
+            </button>
+          ) : (
+            <span className="tips-loading" role="status" aria-live="polite">
+              <span className="tips-loading-spinner" aria-hidden="true" />
+              <span className="tips-loading-text">{t("tips.nowLoading")}</span>
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

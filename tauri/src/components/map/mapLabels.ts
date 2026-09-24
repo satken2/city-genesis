@@ -38,8 +38,9 @@ export function drawMapLabels(ctx: CanvasRenderingContext2D, view: { offsetX: nu
     ctx.fillText(name, x, y);
   };
   ctx.save();
+  // 地図のCTMは+Zを上にするY反転を含むので、拡縮と一緒にY反転も打ち消して画面ピクセル座標へ戻す。
   ctx.translate(view.offsetX, view.offsetY);
-  ctx.scale(1 / view.zoom, 1 / view.zoom);
+  ctx.scale(1 / view.zoom, -1 / view.zoom);
   ctx.setLineDash([]);
   ctx.textBaseline = "middle";
   ctx.textAlign = "center";
@@ -49,7 +50,7 @@ export function drawMapLabels(ctx: CanvasRenderingContext2D, view: { offsetX: nu
     const point = district.center_point;
     if (!district.name || !point || point.length < 2) continue;
     const x = (point[0] - view.offsetX) * view.zoom;
-    const y = (point[point.length >= 3 ? 2 : 1] - view.offsetY) * view.zoom;
+    const y = (view.offsetY - point[point.length >= 3 ? 2 : 1]) * view.zoom;
     if (!visible(x, y)) continue;
     const w = ctx.measureText(district.name).width;
     const box = { x: x - w / 2 - 5, y: y - 12, w: w + 10, h: 24 };
@@ -61,7 +62,7 @@ export function drawMapLabels(ctx: CanvasRenderingContext2D, view: { offsetX: nu
     const shown: { place: MapPlace; x: number; y: number; color: string }[] = [];
     // ID順を保ち、取得順序によってラベルの優先順位が揺れないようにする。
     for (const place of [...places].sort((a, b) => placeRank(b) - placeRank(a) || a.id - b.id)) {
-      const x = (place.x - view.offsetX) * view.zoom, y = (place.z - view.offsetY) * view.zoom;
+      const x = (place.x - view.offsetX) * view.zoom, y = (view.offsetY - place.z) * view.zoom;
       if (!visible(x, y)) continue;
       const box = { x: x - 13, y: y - 13, w: 26, h: 26 };
       if (overlaps(box)) continue;

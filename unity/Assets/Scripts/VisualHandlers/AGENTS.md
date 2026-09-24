@@ -6,7 +6,7 @@
 ## 仕組み
 
 - `VisualModeHandler`(シングルトン)がオブジェクトタイプ(`InputObjectType`)ごとに現在の**色モード**(`SetMode`/`GetMode`)と**表示フラグ**(`SetFlags`/`GetFlags`、`VisualFlag` のビット和)を保持し、登録済みの `IVisualModeHandler` 群へ `ApplyVisualMode(mode)` を通知する。
-- **色モードとフラグは直交する2系統**: 色モードは排他1択(通常/色分け各種/非表示)、フラグは独立ON/OFF(計画中表示 `SHOW_PLAN` / 公共施設ハイライト `HIGHLIGHT_PUBLIC`)。フラグは `ApplyVisualMode` の引数には乗らず、`VisualModeObject` と `PublicFacilityGlowOverlay` が `GetFlags` をプル参照する(そのため `IVisualModeHandler` インターフェースはフラグを知らない。ParcelManager/ZoneManager にも影響しない)。
+- **色モードとフラグは直交する2系統**: 色モードは排他1択(通常/色分け各種/非表示)、フラグは独立ON/OFF(計画中表示 `SHOW_PLAN` / 公共施設ハイライト `HIGHLIGHT_PUBLIC` / 制限速度標識 `SPEED_LIMIT_SIGNS`)。フラグは `ApplyVisualMode` の引数には乗らず、`VisualModeObject` と `PublicFacilityGlowOverlay` が `GetFlags` をプル参照する(そのため `IVisualModeHandler` インターフェースはフラグを知らない。ParcelManager/ZoneManager にも影響しない)。
 - モード/フラグ変更時の通知は1フレームあたり `batchSize`(既定100)件ずつのバッチ処理。**一括変更しても即座に全部は切り替わらない。**
 - `SetMode` / `SetFlags` は前回と同じ値ならスキップする(差分チェック)。
 - Destroy済み参照は10秒ごとの `PeriodicCleanup` で除去される。
@@ -50,7 +50,7 @@
 
 ## モード定数
 
-- 基本モードは `VisualMode`(MODE_NORMAL / MODE_HIDDEN / MODE_BOUNDARY / MODE_HIGHLIGHT_OWNER)、表示フラグは `VisualFlag`(SHOW_PLAN / HIGHLIGHT_PUBLIC)。いずれも `VisualModeHandler.cs` に定義。旧 `MODE_PLAN` は「計画中表示は色モードと独立トグル」化に伴い廃止し、`VisualFlag.SHOW_PLAN` に置き換えた。
+- 基本モードは `VisualMode`(MODE_NORMAL / MODE_HIDDEN / MODE_BOUNDARY / MODE_HIGHLIGHT_OWNER)、表示フラグは `VisualFlag`(SHOW_PLAN / HIGHLIGHT_PUBLIC / SPEED_LIMIT_SIGNS)。いずれも `VisualModeHandler.cs` に定義。旧 `MODE_PLAN` は「計画中表示は色モードと独立トグル」化に伴い廃止し、`VisualFlag.SHOW_PLAN` に置き換えた。
 - データ可視化モードは `VisualModeEx.cs` にカテゴリ別の定数クラスがあり、**値域でカテゴリを区別**する:
   - `VisualModePath` (100番台): 交通量・速度・歩行者量・耐久度・所属地区色分け(`ZONE_COLOR=104`)
   - `VisualModeParcel` (200番台): 地価、建築可能フィルタ各種、所属地区色分け(`ZONE_COLOR=210`)、環境スコア色分け(`NOISE=211`/`AIR_POLLUTION=212`/`CRIME=213`/`SUNSHINE=214`。`GET /city/noise`等から区画単位スコアを取得して塗る) — ParcelManager が処理
@@ -68,3 +68,13 @@
 非同期で子Rendererを追加・キャッシュ復元する場合は `RefreshMaterials()` を使う。既存Rendererの元材質を保持し、新しいRendererだけ材質を取得したうえで現在の表示を即時適用する。上塗り後の `InitializeMaterials()` は計画色などを元材質として記録してしまうため使わない。既存Rendererそのものの基底材質を置換する場合のみ、元材質へ置換した後にInitializeMaterialsを使う。既定表示用マテリアルはAwakeでロードするためStart前のSetStatusにも適用できる。
 
 公共交通ハイライトはTransitOverlayManagerが独立レイヤーとして管理する。VisualModeの排他色モードやInputModeの編集プリセットは追加しない。詳細はDataLoaders/AGENTS.mdと公開programs/公共交通ハイライト.md。
+
+## 道路・線路の制限速度標識
+
+標識は`DrawLodInfo`がClose/Normalのときだけ表示する。固定区間を持つ長い道路は`SplinePartLod.GetDrawLodAtPosition`で中心の本体区間も確認する。`PathPresentation.IsReady`で差し替え生成を待ち、道路GOの置換時は表示条件の参照先も即座に更新する。既存LODの閾値・ヒステリシスを複製しない。
+
+`VisualFlag.SPEED_LIMIT_SIGNS`（`speed_limit`）は道路レイヤーの独立トグル。`PathSpeedLimitOverlay`は`PathManager.Awake`で1つ生成され、モード/フラグを直接参照する。街路・高速道路・鉄道・モノレールの`PathSummary.max_speed`（km/h）だけを表示し、公共交通区間・歩道・人員搬送・インフラ・駅舎は対象外。`base_speed`・混雑込み速度・マスターの既定速度から補完しない。欠損・非有限・非正値は表示しない。
+
+アイコンは`Utils.CreateOverlayCanvas`（sortingOrder=68）と`UiFontProvider`を共有し、アラートと同じ距離スケール（100m基準、0.3〜1.5倍）で描く。中心位置は固定でボビングや引出線はない。画面外・カメラ背後・道路レイヤー非表示・個別非表示では隠す。計画中などの表示条件は`VisualModeObject.IsVisualVisible`（`SetRenderersEnabled`の結果）を参照し、ステータス判定を再実装しない。
+
+`UI/SpeedLimitSign`が数値表示、`SpeedLimitSignStyle`が意匠を担当する。現在は全言語で日本式の赤い円・白地・青数字を使い、画像アセットは不要。別意匠はStyleの実装を追加し、言語設定側から`PathSpeedLimitOverlay.SetSignStyle`へ渡せる。位置・取得・表示状態のロジックを意匠へ持ち込まない。検証は`Tests/SpeedLimitSigns/run.ps1`。

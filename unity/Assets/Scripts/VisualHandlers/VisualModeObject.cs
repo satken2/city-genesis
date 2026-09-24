@@ -65,6 +65,8 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
     }
 
     private List<RendererInfo> targetRenderers = new List<RendererInfo>();
+    /// <summary>表示モードとステータスの判定結果。付随する画面アイコンも同じ表示条件に追従する。</summary>
+    public bool IsVisualVisible { get; private set; }
     private int objectStatus = Constants.STATUS_ACTIVE; // オブジェクトのステータス
 
     private bool isHovered = false;
@@ -653,6 +655,7 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
 
     private void SetRenderersEnabled(bool enabled)
     {
+        IsVisualVisible = enabled;
         foreach (var info in targetRenderers)
         {
             if (info.renderer != null) info.renderer.enabled = enabled;

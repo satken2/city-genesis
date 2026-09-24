@@ -7,6 +7,9 @@
  * 3Dプレビューウィンドウ(terrain_3d_preview)が開いていなくても、地形エディタ側が保持する
  * 標高配列(elev)だけから独立して生成できる。選択マスクによる水色ハイライトは不要なため、
  * 頂点カラーは標高だけから決まる地形色(computePixelRGB)のみを使う。
+ *
+ * 向きは3Dプレビューと同じで、ワールド座標(北=+Z・東=+X)を右手系のthree.jsに置くと鏡像になるため、
+ * 地形と海面をZ倍率-1のグループに入れて描く。北が画像の奥(上)、東が右になる。
  */
 
 import * as THREE from "three";
@@ -105,8 +108,11 @@ export function captureTerrainThumbnail(
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0d0d14);
-  scene.add(mesh);
-  scene.add(seaMesh);
+  const worldRoot = new THREE.Group();
+  worldRoot.scale.z = -1;
+  worldRoot.add(mesh);
+  worldRoot.add(seaMesh);
+  scene.add(worldRoot);
   scene.add(new THREE.AmbientLight(0x404050, 1.2));
   const sun = new THREE.DirectionalLight(0xffffff, 1.6);
   sun.position.set(0.6, 1, 0.4);

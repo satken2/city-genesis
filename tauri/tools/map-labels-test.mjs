@@ -29,7 +29,8 @@ const ctx = new Proxy({
   fillText: (name, x, y) => drawn.push({ name, x, y }),
   arc: (x, y) => circles.push({ x, y }),
 }, { get: (target, key) => target[key] ?? (() => {}) });
-drawMapLabels(ctx, { offsetX: -100, offsetY: -100, zoom: 2 }, 800, 600,
+// offsetYは画面上端のworld z。地図は+Z(北)を上に描くので、z=0は上端から(100-0)*2=200pxの位置になる。
+drawMapLabels(ctx, { offsetX: -100, offsetY: 100, zoom: 2 }, 800, 600,
   [{ name: "District", center_point: [0, 0] }],
   [{ id: 1, name: "School", x: 50, z: 0, symbol: "school" },
     { id: 2, name: "Overlap", x: 50, z: 0, symbol: "hospital" },
@@ -41,7 +42,7 @@ assert.ok(drawn.some((label) => label.name === "School"));
 assert.ok(!drawn.some((label) => label.name === "Overlap" || label.name === "Offscreen"));
 drawn.length = 0;
 circles.length = 0;
-drawMapLabels(ctx, { offsetX: -100, offsetY: -100, zoom: 2 }, 800, 600, [],
+drawMapLabels(ctx, { offsetX: -100, offsetY: 100, zoom: 2 }, 800, 600, [],
   [{ id: 1, name: "Facility", x: 50, z: 0, symbol: "generic" },
     { id: 9, name: "IC 9", x: 50, z: 0, symbol: "interchange", interchange: true },
     { id: 2, name: "IC 2", x: 150, z: 0, symbol: "interchange", interchange: true },

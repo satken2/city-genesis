@@ -129,6 +129,7 @@ export const DISPLAY_LAYERS: DisplayLayer[] = [
     ],
     toggles: [
       { id: "plan", labelKey: "display.toggleShowPlanRoad", icon: "visual/plan.png" },
+      { id: "speed_limit", labelKey: "display.toggleSpeedLimitSigns", icon: "visual/speed.png" },
     ],
   },
   {

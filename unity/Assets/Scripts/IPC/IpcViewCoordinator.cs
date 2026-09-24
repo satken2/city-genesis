@@ -665,6 +665,9 @@ public class IpcViewCoordinator : MonoBehaviour
                 case "public":
                     result |= VisualFlag.HIGHLIGHT_PUBLIC;
                     break;
+                case "speed_limit":
+                    result |= VisualFlag.SPEED_LIMIT_SIGNS;
+                    break;
             }
         }
         return result;

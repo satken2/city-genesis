@@ -24,6 +24,7 @@ public static class VisualFlag
     public const int NONE = 0;
     public const int SHOW_PLAN = 1 << 0;         // 計画中(TEMPORARY/PENDING/SCHEDULED)のオブジェクトを表示する
     public const int HIGHLIGHT_PUBLIC = 1 << 1;  // 公共施設の敷地を光らせる(BUILDINGのみ有効。描画は PublicFacilityGlowOverlay)
+    public const int SPEED_LIMIT_SIGNS = 1 << 2; // 道路・線路の設定制限速度を標識で表示する
 }
 
 /// <summary>

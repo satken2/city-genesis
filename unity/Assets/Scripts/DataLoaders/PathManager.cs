@@ -33,6 +33,7 @@ public class PathManager : BaseApiDataManager
     private void InvalidateTerrainFollowPath(PathSummary path)
     {
         if (path == null) return;
+        pathLabelPositions.Remove(path.path_id);
         if (terrainFollowCompletedPaths.Remove(path.path_id))
             RenderWorkScheduler.CountEvent("terrainFollow.pathInvalidated");
         terrainFollowCompletedNodes.Remove(path.start_node_id);
@@ -249,6 +250,7 @@ public class PathManager : BaseApiDataManager
     private Dictionary<Vector2Int, HashSet<int>> pathIdsByCell = new Dictionary<Vector2Int, HashSet<int>>();
     private Dictionary<int, HashSet<Vector2Int>> pathCellsById = new Dictionary<int, HashSet<Vector2Int>>();
     private Dictionary<int, List<Vector3>> pathPointsCache = new Dictionary<int, List<Vector3>>();
+    private readonly Dictionary<int, Vector3> pathLabelPositions = new();
 
     /// <summary>
     /// カメラ移動によるLOD更新中は TerrainManager.OnTerrainTileReady がセルごとに発火する。
@@ -331,6 +333,7 @@ public class PathManager : BaseApiDataManager
 
     private void Awake()
     {
+        if (GetComponent<PathSpeedLimitOverlay>() == null) gameObject.AddComponent<PathSpeedLimitOverlay>();
         nodeGrid = new SpatialHash<NodeData>(gridCellSize);
         segmentGrid = new SpatialHash<PathSegment>(gridCellSize);
 
@@ -703,6 +706,7 @@ public class PathManager : BaseApiDataManager
 
     public override void ClearAllCells()
     {
+        GetComponent<PathSpeedLimitOverlay>()?.Clear();
         ClearTerrainFollowProgress();
         Debug.Log("PathManager: 全ノード・道路データをクリア");
         closePathIds.Clear();
@@ -761,6 +765,7 @@ public class PathManager : BaseApiDataManager
         pathIdsByCell.Clear();
         pathCellsById.Clear();
         pathPointsCache.Clear();
+        pathLabelPositions.Clear();
         cellPathLod.Clear();
         awaitingIntersectionNodes.Clear();
         fetchingIntersectionNodeIds.Clear();
@@ -1879,6 +1884,31 @@ public class PathManager : BaseApiDataManager
         if (pts == null || pts.Count < 2)
             return false;
         points = pts;
+        return true;
+    }
+
+    /// <summary>画面ラベルの中心。中心点を描画中心線へ射影し、高架・勾配の高さも保つ。</summary>
+    public bool TryGetPathLabelPosition(int pathId, out Vector3 position)
+    {
+        if (pathLabelPositions.TryGetValue(pathId, out position)) return true;
+        position = default;
+        if (!pathDataCache.TryGetValue(pathId, out var path)) return false;
+        var center = path.GetCenterPointArray();
+        if (center == null || center.Length < 2) return false;
+        // Far切替中には古い描画点列が残るため、無効化後は最新データから共通の形状取得を通す。
+        if (!TryGetPathPolyline(pathId, out var points)) return false;
+        Vector3 target = new Vector3(center[0], 0f, center[1]);
+        float nearest = float.PositiveInfinity;
+        for (int i = 1; i < points.Count; i++)
+        {
+            Vector3 projected = PolylineUtils.ClosestPointOnSegmentXZ(target, points[i - 1], points[i]);
+            float distance = Utils.XZDistanceSquared(projected, target);
+            if (distance >= nearest) continue;
+            nearest = distance;
+            position = projected;
+        }
+        if (float.IsPositiveInfinity(nearest)) return false;
+        pathLabelPositions[pathId] = position;
         return true;
     }
 
@@ -3278,6 +3308,7 @@ public class PathManager : BaseApiDataManager
 
     private void SetupWaypoints(GameObject pathGO, int pathId, List<Vector3> points)
     {
+        pathLabelPositions.Remove(pathId);
         pathPointsCache[pathId] = points;
 
         if (!_showWaypoints) return;
@@ -3608,6 +3639,7 @@ public class PathManager : BaseApiDataManager
     {
         UnregisterPathCells(pathId);
         pathPointsCache.Remove(pathId);
+        pathLabelPositions.Remove(pathId);
         if (pathDataCache.TryGetValue(pathId, out var cachedPath))
         {
             UnregisterPathData(cachedPath);

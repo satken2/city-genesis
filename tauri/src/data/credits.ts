@@ -341,7 +341,7 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     url: "https://maps.gsi.go.jp/development/ichiran.html",
     license: "国土地理院コンテンツ利用規約 — https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html",
     requiredText: "地理院タイル（標高タイル（基盤地図情報数値標高モデル））を加工して作成",
-    note: "Terrain maps: kumejima, iejima, ikishima, naoshima, chichijima. Resampled to a 10 m metric grid, small islets removed and sea floor synthesized. License verified 2026-09-18.",
+    note: "Terrain maps: yoron, aogashima, kumejima, iejima, ikishima, naoshima, chichijima. Resampled to a 10 m metric grid, small islets removed and sea floor synthesized. License verified 2026-09-18.",
   },
   {
     title: "3DEP Bare Earth DEM (Manhattan)",

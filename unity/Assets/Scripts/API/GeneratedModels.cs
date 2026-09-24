@@ -393,6 +393,8 @@ namespace GeneratedModels
         public float parked_cars;
         /// <summary>合法路上駐車容量（台）。稼働中の地上街路以外は0</summary>
         public float street_parking_capacity;
+        /// <summary>制限速度(km/h) サーバーサイドで計算されるフィールド。型は動的。</summary>
+        public object max_speed;
     }
 
     [Serializable]

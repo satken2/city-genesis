@@ -539,8 +539,10 @@ function LayerSection({
           {layer.toggles.map((toggle) => {
             const isEnabled = selection.flags.includes(toggle.id);
             return (
-              <div
+              <button
                 key={toggle.id}
+                type="button"
+                aria-pressed={isEnabled}
                 className={`do-alert-card ${isEnabled ? "enabled" : ""}`}
                 onClick={() => {
                   playSound(clickSrc);
@@ -555,7 +557,7 @@ function LayerSection({
                 />
                 <span className="do-alert-card-text">{t(toggle.labelKey)}</span>
                 <div className="do-alert-card-toggle" />
-              </div>
+              </button>
             );
           })}
         </div>

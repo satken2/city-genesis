@@ -93,3 +93,7 @@ edit_path:change_passage_modeのpassage_mode（elevated/ground/underground）は
 UI→Unityは既存の `ui:action` Envelopeの `payload.action` / `payload.params` を使う。`game:loading` は黒画面と入力抑制を開始する。`game:start` のparamsは `{loading_id: 整数}` で、描画準備を開始するが黒画面は維持する。Unity→UIの `game:loaded` はpayload直下の `{loading_id: 整数}` を返す。初期描画完了後、表示解禁まで1秒間隔で再送し、Rustは現在の要求世代だけを受理する。UI→Unityの `game:reveal` は同じloading_idをparamsに載せ、`game:loaded` を通知済みの世代だけを表示する。受信した瞬間の準備状態は再判定しない（Tipsは既に閉じているため、ここで捨てると黒画面から戻れなくなる）。
 
 `system:graphic_ready` はプロセスの起動完了であり、都市の描画完了ではない。遅延起動・再接続ではRustが開始要求を再送する。ゲーム中の再接続でもTipsを使い、初期設定は再表示しない。
+
+## 制限速度標識トグル
+
+`view:change_view`のroadレイヤーの`flags`は`speed_limit`を受け付ける（`VisualFlag.SPEED_LIMIT_SIGNS`）。通常表示・色分け・planと独立し、既存のcurrent_state・通常状態記憶・編集プリセットからの復元で同期する。標識の数字はHTTPのPathSummary.max_speedから読み、IPCへ速度値を複製しない。

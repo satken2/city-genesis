@@ -15,6 +15,11 @@
  *     ライティングによる陰影で起伏を分かりやすくする。
  *   - 標高0mに、標高マップ全体と同じXZサイズの半透明な海面。
  *
+ * 向き: ワールド座標は北=+Z・東=+X(Unityと同じ左手系の並び)で、標高配列も行0が南端。
+ * three.js は右手系なので、これをそのまま置くと北を奥にしたとき東が左に来る鏡像になる。
+ * 地形・海面・湖・川はZ倍率-1のグループ(worldRootRef)に入れて鏡像を打ち消し、
+ * 各メッシュはワールド座標のまま組み立てる(面の表裏はthree.jsが負の行列式から自動で反転する)。
+ *
  * カメラ操作は右クリックドラッグ=回転、左クリックドラッグ=パン(中クリックは無割り当て)。
  * パンは標高(Y座標)を変えずXZ平面内のみで移動する(OrbitControlsのmouseButtons/
  * screenSpacePanning設定で調整している)。
@@ -132,6 +137,8 @@ export function Terrain3DPreviewCanvas({ mapId }: Terrain3DPreviewCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const sceneRef = useRef<THREE.Scene | null>(null);
+  // ワールド座標で組み立てたメッシュを入れる親。Z倍率-1で右手系の鏡像を打ち消す(冒頭の「向き」参照)。
+  const worldRootRef = useRef<THREE.Group | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
   const terrainMeshRef = useRef<THREE.Mesh | null>(null);
@@ -148,22 +155,22 @@ export function Terrain3DPreviewCanvas({ mapId }: Terrain3DPreviewCanvasProps) {
 
   /** 地形メッシュ・海面メッシュをgridの内容で作り直す(full_state受信時、マップリサイズ時) */
   function rebuildScene(grid: GridState) {
-    const scene = sceneRef.current;
-    if (!scene) return;
+    const root = worldRootRef.current;
+    if (!root) return;
 
     if (terrainMeshRef.current) {
-      scene.remove(terrainMeshRef.current);
+      root.remove(terrainMeshRef.current);
       terrainMeshRef.current.geometry.dispose();
       (terrainMeshRef.current.material as THREE.Material).dispose();
     }
     const geometry = buildTerrainGeometry(grid);
     const material = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, metalness: 0 });
     const mesh = new THREE.Mesh(geometry, material);
-    scene.add(mesh);
+    root.add(mesh);
     terrainMeshRef.current = mesh;
 
     if (seaMeshRef.current) {
-      scene.remove(seaMeshRef.current);
+      root.remove(seaMeshRef.current);
       seaMeshRef.current.geometry.dispose();
       (seaMeshRef.current.material as THREE.Material).dispose();
     }
@@ -178,7 +185,7 @@ export function Terrain3DPreviewCanvas({ mapId }: Terrain3DPreviewCanvasProps) {
       metalness: 0.1,
     });
     const seaMesh = new THREE.Mesh(seaGeometry, seaMaterial);
-    scene.add(seaMesh);
+    root.add(seaMesh);
     seaMeshRef.current = seaMesh;
 
     rebuildWaterSurfaces();
@@ -191,12 +198,12 @@ export function Terrain3DPreviewCanvas({ mapId }: Terrain3DPreviewCanvasProps) {
    * 海面板と同系色の半透明マテリアルを両面描画で使う。
    */
   function rebuildWaterSurfaces() {
-    const scene = sceneRef.current;
-    if (!scene) return;
+    const root = worldRootRef.current;
+    if (!root) return;
 
     // 既存の水面メッシュを破棄する。
     for (const m of waterMeshesRef.current) {
-      scene.remove(m);
+      root.remove(m);
       m.geometry.dispose();
       (m.material as THREE.Material).dispose();
     }
@@ -228,7 +235,7 @@ export function Terrain3DPreviewCanvas({ mapId }: Terrain3DPreviewCanvasProps) {
       });
       const mesh = new THREE.Mesh(geom, mat);
       mesh.position.y = typeof ws.water_level === "number" ? ws.water_level : 0;
-      scene.add(mesh);
+      root.add(mesh);
       waterMeshesRef.current.push(mesh);
     }
   }
@@ -243,11 +250,11 @@ export function Terrain3DPreviewCanvas({ mapId }: Terrain3DPreviewCanvasProps) {
    * 細かく水面を張って岸線の追従を良くする。Z-fighting 回避のため水面をわずかに持ち上げる。
    */
   function rebuildRiverMeshes() {
-    const scene = sceneRef.current;
-    if (!scene) return;
+    const root = worldRootRef.current;
+    if (!root) return;
 
     for (const m of riverMeshesRef.current) {
-      scene.remove(m);
+      root.remove(m);
       m.geometry.dispose();
       (m.material as THREE.Material).dispose();
     }
@@ -277,7 +284,7 @@ export function Terrain3DPreviewCanvas({ mapId }: Terrain3DPreviewCanvasProps) {
         side: THREE.DoubleSide,
       });
       const mesh = new THREE.Mesh(geom, mat);
-      scene.add(mesh);
+      root.add(mesh);
       riverMeshesRef.current.push(mesh);
     }
   }
@@ -356,6 +363,10 @@ export function Terrain3DPreviewCanvas({ mapId }: Terrain3DPreviewCanvasProps) {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0d0d14);
     sceneRef.current = scene;
+    const worldRoot = new THREE.Group();
+    worldRoot.scale.z = -1;
+    scene.add(worldRoot);
+    worldRootRef.current = worldRoot;
 
     const camera = new THREE.PerspectiveCamera(55, 1, 1, 200000);
     cameraRef.current = camera;
@@ -438,6 +449,7 @@ export function Terrain3DPreviewCanvas({ mapId }: Terrain3DPreviewCanvasProps) {
       }
       riverMeshesRef.current = [];
       sceneRef.current = null;
+      worldRootRef.current = null;
       cameraRef.current = null;
       controlsRef.current = null;
     };

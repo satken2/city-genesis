@@ -204,7 +204,8 @@ export function useMapNavigation(apiBaseUrl: string, mapRef: RefObject<CityMapCa
       }
       ctx.beginPath(); ctx.arc(place.x, place.z, px(11), 0, Math.PI * 2);
       ctx.fillStyle = color; ctx.fill(); ctx.strokeStyle = palette.outline; ctx.lineWidth = px(3); ctx.stroke();
-      ctx.save(); ctx.translate(place.x, place.z); ctx.fillStyle = palette.outline;
+      // 地図のCTMは+Zを上にするY反転を含むため、文字だけは反転を打ち消して正立させる。
+      ctx.save(); ctx.translate(place.x, place.z); ctx.scale(1, -1); ctx.fillStyle = palette.outline;
       ctx.font = `bold ${px(12)}px sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(label, 0, 0); ctx.restore();
     };
     if (directions && origin) marker(origin, palette.origin, "A");

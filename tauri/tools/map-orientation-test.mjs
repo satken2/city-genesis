@@ -4,13 +4,14 @@ import vm from "node:vm";
 import ts from "typescript";
 
 // 実コンポーネントの描画変換とイベントを動かす。DOMと通信だけを置き換え、
-// 地形の北側をクリックしたときの座標、パン、ズーム、重ね描きの整合を検査する。
+// 地形の北側(ワールド+Z)をクリックしたときの座標、パン、ズーム、重ね描きの整合を検査する。
 const effects = [];
 const canvases = [];
 let frame;
 let drawn;
 let animated;
 let clicked;
+const texts = [];
 const handle = {};
 const near = (a, b) => assert.ok(Math.abs(a - b) < 1e-8, `${a} != ${b}`);
 function eventTarget() {
@@ -31,7 +32,9 @@ function context() {
     translate: (x, y) => { matrix[4] += matrix[0] * x; matrix[5] += matrix[3] * y; },
     scale: (x, y) => { matrix[0] *= x; matrix[3] *= y; },
     point: (x, z) => ({ x: matrix[0] * x + matrix[4], y: matrix[3] * z + matrix[5] }),
+    fillText: (text, x, y) => texts.push({ text, x: matrix[0] * x + matrix[4], y: matrix[3] * y + matrix[5], upright: matrix[3] > 0 }),
     createImageData: (w, h) => ({ data: new Uint8ClampedArray(w * h * 4) }),
+    measureText: (text) => ({ width: text.length * 8 }),
   }, { get: (obj, key) => obj[key] ?? (() => {}) });
 }
 function canvas() {
@@ -88,10 +91,15 @@ const { CityMapCanvas, DEFAULT_CITY_MAP_LAYERS } = load("../src/components/map/C
 assert.deepEqual(Object.keys(DEFAULT_CITY_MAP_LAYERS).filter((key) => DEFAULT_CITY_MAP_LAYERS[key]).sort(),
   ["allRoads", "buildings", "interchanges", "railways", "stations", "trunkRoads"]);
 const { worldToScreen, screenToWorld } = load("../src/components/path/pathShapeOverlay.ts");
+const { drawMapLabels } = imports["./mapLabels"];
 CityMapCanvas({ apiBaseUrl: "test", showCompass: false,
   layers: Object.fromEntries(Object.keys(DEFAULT_CITY_MAP_LAYERS).map((key) => [key, false])),
-  overlayDraw: (ctx, view) => { drawn = { view, north: ctx.point(0, -50), south: ctx.point(0, 50) }; },
-  animatedOverlayDraw: (ctx) => { animated = ctx.point(0, -50); },
+  overlayDraw: (ctx, view) => {
+    drawn = { view, north: ctx.point(0, 50), south: ctx.point(0, -50) };
+    texts.length = 0;
+    drawMapLabels(ctx, view, 800, 600, [{ name: "N", center_point: [0, 50] }], []);
+  },
+  animatedOverlayDraw: (ctx) => { animated = ctx.point(0, 50); },
   onMapClick: (e) => { clicked = e.world; },
 }, handle);
 const cleanups = effects.map((fn) => fn());
@@ -102,11 +110,15 @@ const click = (p) => {
   base.dispatch("mousedown", { clientX: p.x, clientY: p.y });
   windowMock.dispatch("mouseup", { clientX: p.x, clientY: p.y });
 };
-assert.ok(drawn.north.y < drawn.south.y, "North (-Z) must be above south (+Z)");
-click(screenNorth()); near(clicked.x, 0); near(clicked.z, -50);
-const point = worldToScreen(drawn.view, { x: 0, z: -50 });
+assert.ok(drawn.north.y < drawn.south.y, "North (+Z) must be above south (-Z)");
+click(screenNorth()); near(clicked.x, 0); near(clicked.z, 50);
+// 地名ラベルはY反転を打ち消して、北側の地点と同じ画面位置に正立で描く。
+const label = texts.find((t) => t.text === "N");
+assert.ok(label?.upright, "Map labels must be drawn upright");
+near(label.x, drawn.north.x); near(label.y, drawn.north.y);
+const point = worldToScreen(drawn.view, { x: 0, z: 50 });
 near(point.x, screenNorth().x); near(point.y, screenNorth().y);
-near(screenToWorld(drawn.view, point).z, -50);
+near(screenToWorld(drawn.view, point).z, 50);
 
 const before = screenNorth();
 base.dispatch("mousedown", { clientX: before.x, clientY: before.y });
@@ -116,10 +128,10 @@ near(screenNorth().x, before.x + 30); near(screenNorth().y, before.y + 40);
 const anchor = screenNorth();
 base.dispatch("wheel", { clientX: anchor.x, clientY: anchor.y, deltaY: -1 });
 near(screenNorth().x, anchor.x); near(screenNorth().y, anchor.y);
-click(anchor); near(clicked.z, -50);
-handle.fitBounds({ x1: -20, z1: -80, x2: 20, z2: -20 });
+click(anchor); near(clicked.z, 50);
+handle.fitBounds({ x1: -20, z1: 20, x2: 20, z2: 80 });
 near(screenNorth().x, 400); near(screenNorth().y, 300);
 frame(100);
 near(animated.x, drawn.north.x); near(animated.y, drawn.north.y);
 for (const cleanup of cleanups.reverse()) cleanup?.();
-console.log("PASS: north-up, click coordinates, path editor coordinates, pan, cursor zoom, fitBounds, animated overlay (DPR=2)");
+console.log("PASS: north-up, upright labels, click coordinates, path editor coordinates, pan, cursor zoom, fitBounds, animated overlay (DPR=2)");
