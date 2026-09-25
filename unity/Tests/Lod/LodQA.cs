@@ -447,9 +447,18 @@ public static class LodQA
         var worker = (Coroutine)Static("RenderWorkScheduler","Start",host,Call(manager,"DetailGenerationWorker"),"QA.PendingBuilding");
         for(int i=0;i<10;i++) yield return null;
         Check(queue.Count == 1,"Building request lost before its cell finished loading");
+        Check(!(bool)manager.GetType().GetProperty("HasPendingInitialDetails",Instance).GetValue(manager),"Unregistered-cell building request blocked initial load");
         Static("RenderWorkScheduler","Stop",host,worker);
-        ((HashSet<Vector2Int>)Field(manager,"loadedCells")).Add(Vector2Int.zero);
+        var outside = Activator.CreateInstance(Type("GeneratedModels.BuildingSummary"));
+        Set(outside,"agent_id",71002); Set(outside,"center_point",new List<object> { 100000f,100000f });
+        var outsideRequest = Activator.CreateInstance(request.GetType(),true);
+        Set(outsideRequest,"data",outside); Set(outsideRequest,"drawLod",Lod(2));
+        queue[71002] = outsideRequest;
+        Call(manager,"ApplyLodCellChanges",new List<Vector2Int> { Vector2Int.zero },new List<Vector2Int>(),
+            Activator.CreateInstance(typeof(Dictionary<,>).MakeGenericType(typeof(Vector2Int),Type("LodTier"))));
+        Check(queue.Count == 1 && queue.Contains(71001),"Building request outside the registered cells remained queued");
         Check((bool)Call(manager,"IsDeferredCellReady",data),"Loaded cell did not release pending building");
+        Check((bool)manager.GetType().GetProperty("HasPendingInitialDetails",Instance).GetValue(manager),"Registered-cell building request did not hold initial load");
         foreach (var existing in Object.FindObjectsByType<Camera>(FindObjectsSortMode.None)) Object.DestroyImmediate(existing.gameObject);
         var camera = new GameObject("DeferredBuildingCamera").AddComponent<Camera>(); camera.tag = "MainCamera";
         camera.transform.position = new Vector3(0,5000,0);
@@ -488,7 +497,7 @@ public static class LodQA
         Check(!(bool)Field(manager,"isLodPathBatchActive"),"Canceled road batch left terrain follow-up blocked");
         Object.Destroy(representation); Object.Destroy(go);
         yield return null;
-        results.Add("Pending render work: unloaded-cell building request retained; received-only road version cannot skip rendering");
+        results.Add("Pending render work: unloaded-cell building request retained without blocking initial load; out-of-set request dropped on apply; received-only road version cannot skip rendering");
     }
     static IEnumerator InterruptedPathResponse()
     {

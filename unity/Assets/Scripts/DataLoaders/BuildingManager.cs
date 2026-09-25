@@ -334,14 +334,7 @@ public class BuildingManager : BaseApiDataManager
         activeLodCoroutines.Clear();
 
         var allBuildingCells = new HashSet<Vector2Int>(cellSets.farCells);
-        var obsoleteRequests = new List<int>();
-        foreach (var item in deferredDetailBuildings)
-        {
-            float[] point = item.Value.data.centerPointArray;
-            if (point != null && point.Length >= 2 && !allBuildingCells.Contains(TerrainManager.WorldToCell(new Vector3(point[0], 0f, point[1]))))
-                obsoleteRequests.Add(item.Key);
-        }
-        foreach (int id in obsoleteRequests) deferredDetailBuildings.Remove(id);
+        RemoveDeferredRequestsOutside(allBuildingCells);
         var nearSet = new HashSet<Vector2Int>(cellSets.nearCells);
         var dynamicSet = new HashSet<Vector2Int>(cellSets.dynamicCells);
 
@@ -422,6 +415,23 @@ public class BuildingManager : BaseApiDataManager
             loadedCells.Remove(cell);
             cellBuildingLod.Remove(cell);
         }
+
+        // マージBBOXは常駐セル集合の外接矩形なので、常駐外セルの建物も一括取得に含まれて遅延キューへ積まれる。
+        // そのセルは登録されずワーカーが永久に選出しないため、登録集合が確定したここで除く。
+        RemoveDeferredRequestsOutside(loadedCells);
+    }
+
+    /// <summary>中心セルが cells に含まれない遅延生成要求を取り除く。中心点を持たない要求は残す。</summary>
+    private void RemoveDeferredRequestsOutside(HashSet<Vector2Int> cells)
+    {
+        var obsoleteRequests = new List<int>();
+        foreach (var item in deferredDetailBuildings)
+        {
+            float[] point = item.Value.data.centerPointArray;
+            if (point != null && point.Length >= 2 && !cells.Contains(TerrainManager.WorldToCell(new Vector3(point[0], 0f, point[1]))))
+                obsoleteRequests.Add(item.Key);
+        }
+        foreach (int id in obsoleteRequests) deferredDetailBuildings.Remove(id);
     }
 
     /// <summary>
@@ -778,11 +788,13 @@ public class BuildingManager : BaseApiDataManager
     {
         get
         {
-            if (detailedBuildingIds.Count < maxDetailedBuildingObjects) return deferredDetailBuildings.Count > 0;
             var cam = Camera.main;
-            if (cam == null) return deferredDetailBuildings.Count > 0;
+            bool capReached = cam != null && detailedBuildingIds.Count >= maxDetailedBuildingObjects;
             foreach (var request in deferredDetailBuildings)
             {
+                // ワーカーが選出できない未登録セルの要求は待たない。取得中のセルは一括取得の処理自体が完了判定を塞ぐ。
+                if (!IsDeferredCellReady(request.Value.data)) continue;
+                if (!capReached) return true;
                 if (!buildingDataCache.TryGetValue(request.Key, out var data)) continue;
                 if (ScoreDeferredBuilding(data, cam.transform.position, GetHorizontalForward(cam)) < DEFERRED_OUT_OF_VIEW_PENALTY) return true;
             }

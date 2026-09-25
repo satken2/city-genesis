@@ -1,5 +1,7 @@
 # blender/
 
+ロープウェイの搬器はpaths.blendのp601/cabinへ著作する。地形プロップではなく吊り点原点の点設備で、Normal/Close共通・Far非表示。非公開制作ツールのbuild_ropeway_cabins.py --cabin-onlyがropeway_cabin_surfaces.pyの曲面車体・二重窓枠・湾曲吊り腕を生成する。車底-3.17m、屋根-1.02m、客室中心Blender X=-0.22m、ヨーク中心X=-0.65m。客室外寸は幅1.96m・奥行き2.32m・高さ2.15m、床と天井の厚みを見込む室内高は約1.95m。腰板約0.68m、屋根は窓枠に沿う薄い蓋とする。exportはp601/cabinだけに絞れる。仕様は公開O文書、検証はUnity Tests/Ropeway/animation.ps1。
+
 立体駐車場3005は非公開制作ツールのbuild_parking_garage.pyがa3005/0へ17パーツを著作する。6m幅・3m階高の開放壁、独立入口、屋上腰壁と照明付きtop-w1を通常/接写で持つ。interior-floorで厚さ22cmの各階床・アスファルト屋上を有効化し、黒い奥面を持たない。parking_ramp.pyがbase/mid/top-stairと各Closeを著作する。16×6.4m・高低差3mの折り返しスロープを元の頂点3に配置し、描画用の本体だけを後退させる。保存polygon・経済面積・占有コライダーは維持する。Farは可変底面を保つ既存簡易生成。import_parking_garage.ps1が実FBX・27組み立て・床の表裏・開口の見通し・凹形状・未指定時の無変更を検証し、正規ミラーを同期する。仕様は公開F1/I文書、制作・AI補助開示記録は非公開制作ツールのpipeline/jobs/parking_garage.md。
 
 洋上風力1071・洋上石油1072はtop-prebuiltの通常/接写/遠景、受入基地1073は岸壁に置くroofpropと接写・遠景prebuiltを持つ。1071は1055の白い風車を再利用する。海底1104/1301はbodyと接写だけをpaths.blendに持ち、FarはUnity生成。非公開制作ツールのbuild_offshore.pyが著作し、import_offshore.ps1が実FBXとLODを検証する。制作記録は同ツールのoffshore.md。 1072の多層設備は非公開制作ツールのoffshore_platform.pyに定義し、build_offshore.py --platform-onlyで3LODのみを再著作できる。
