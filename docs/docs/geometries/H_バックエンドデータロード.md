@@ -50,6 +50,7 @@
 - **差分同期**: `SyncPathsInCells` で削除道路を除去
 - **ノード同期**: `SyncNodesInCells` で削除ノードを除去（ノードのセル逆引きで対象セルだけを見る）
 - **交差点メッシュ再生成**: パスの追加/削除/status変化時に、接続ノードの交差点メッシュを `UpdateNodeIntersectionMesh` で再生成。入力署名(ノード位置・種別・接続道路の版・状態・進捗・地形)が前回と同じなら再計算を省く
+- **アンロード**: 離脱セルの道路・ノード・交差点メッシュは分割ワーカーが非表示にする(破棄しない)。常駐セルに跨る道路は残す
 - **個別取得**: `CellDataLoader.FetchPath(pathId)`, `PathManager.RemovePathById(pathId)`
 
 ### ParcelManager

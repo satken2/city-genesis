@@ -67,6 +67,13 @@ public class PathManager : BaseApiDataManager
     {
         pathObjectsCache.TryGetValue(path.path_id, out GameObject old);
         GameObject next = old != null && old.GetComponent<RenderCacheIdentity>()?.key == key ? old : lodCache.Take(key);
+        if (next != null && next != old && !IsCachedBuildTerrainCurrent(next, path))
+        {
+            // キーは地形署名を含まず、地形追従は表示中のGOしか見ないので、退避中に通過セルの地形が変わった版はここで捨てる。
+            RenderWorkScheduler.CountEvent("path.cachedTerrainStale");
+            Destroy(next);
+            next = null;
+        }
         if (next == null)
         {
             RenderWorkScheduler.CountEvent("path.buildRequested");
@@ -81,6 +88,8 @@ public class PathManager : BaseApiDataManager
         }
         SetPathObject(path.path_id, next);
         next.SetActive(true);
+        // 退避中に非表示集合が変わっていることがあるので、生成時と同じくフィルタを引き直す。
+        ObjectVisibilityFilter.ApplyToObject(next, InputObjectType.PATH, path.path_id);
         EnsureEndIntersectionsVisible(path);
         if (lod == DrawLod.Close) closePathIds.Add(path.path_id); else closePathIds.Remove(path.path_id);
         if (updateIntersections) RegisterPathData(path); else SavePathToCache(path);
@@ -1087,6 +1096,7 @@ public class PathManager : BaseApiDataManager
         ClearTerrainFollowQueue();
         pendingTrackNeighborRebuildIds.Clear();
         cellsToKeepVisible.Clear();
+        pendingUnloadCells.Clear();
         lodBatchPendingBuildIds.Clear();
         deferredTerrainReadyCells.Clear();
         deferTerrainTilePathRebuilds = false;
@@ -1283,6 +1293,7 @@ public class PathManager : BaseApiDataManager
         foreach (var cell in cellsToLoad)
         {
             loadedCells.Add(cell);
+            pendingUnloadCells.Remove(cell);
         }
 
         foreach (var kvp in lodUpdates)
@@ -1816,25 +1827,31 @@ public class PathManager : BaseApiDataManager
                 fetchingIntersectionNodeIds.Add(nodeId);
             }
 
-            NodeGeometryResponse response = null;
-            yield return ApiClient.GetBulk<NodeGeometryResponse>(
-                $"/nodes?ids={idsParam}",
-                r => response = r,
-                timingLabel: "PathManager nodes-batch");
-
-            if (response?.nodes != null)
+            // バッチ取消し(RenderWorkScheduler.Stop の Dispose)でもフラグを外す。
+            // 残ると後続バッチがこのノードの取得完了を永久に待ち、IsLodBatchActive が下りなくなる。
+            try
             {
-                foreach (var n in response.nodes)
+                NodeGeometryResponse response = null;
+                yield return ApiClient.GetBulk<NodeGeometryResponse>(
+                    $"/nodes?ids={idsParam}",
+                    r => response = r,
+                    timingLabel: "PathManager nodes-batch");
+
+                if (response?.nodes != null)
                 {
-                    nodeDataCache[n.node_id] = n;
-                    IndexNodeCell(n.node_id);
+                    foreach (var n in response.nodes)
+                    {
+                        nodeDataCache[n.node_id] = n;
+                        IndexNodeCell(n.node_id);
+                    }
                 }
             }
-
-            // リクエスト完了に伴い、対象バッチのフェッチ中フラグを解除する
-            foreach (int nodeId in batch)
+            finally
             {
-                fetchingIntersectionNodeIds.Remove(nodeId);
+                foreach (int nodeId in batch)
+                {
+                    fetchingIntersectionNodeIds.Remove(nodeId);
+                }
             }
         }
     }
@@ -2501,13 +2518,27 @@ public class PathManager : BaseApiDataManager
     }
 
     private readonly HashSet<Vector2Int> unloadCellSet = new HashSet<Vector2Int>();
-    private readonly HashSet<int> unloadCandidatePathIds = new HashSet<int>();
 
     /// <summary>
-    /// 指定セル群に含まれるノード・パス・ウェイポイントオブジェクトを非表示にする(破棄せずプールに残す)。
-    /// ただし、他のロード対象セル（cellsToKeepVisible）に跨っているパスは非表示にしない。
+    /// 非表示化を待つ離脱セル→登録世代。PathUnloadWorker がフレーム予算内で消化する。
+    /// 常駐へ戻ったセルは ApplyLodCellChanges で外す。戻った後のバッチが適用前に取り消されても、
+    /// 再び常駐外になったときに隠し残しを回収できるよう、cellsToKeepVisible に含まれる間は保留して残す。
+    /// </summary>
+    private readonly Dictionary<Vector2Int, int> pendingUnloadCells = new Dictionary<Vector2Int, int>();
+    private int unloadGeneration;
+    private Coroutine pathUnloadWorker;
+
+    /// <summary>PathUnloadWorker が1セル分の対象IDを写し取る再利用リスト。yield を跨いで HashSet を列挙しないために使う。</summary>
+    private readonly List<int> unloadScanPathIds = new List<int>();
+    private readonly List<int> unloadScanNodeIds = new List<int>();
+    private readonly List<int> unloadHiddenEndNodeIds = new List<int>();
+
+    /// <summary>
+    /// 指定セル群を分割アンロードの待ち行列へ積む。ノード・パス・交差点メッシュの非表示化(破棄せず残す)は
+    /// PathUnloadWorker が予算内で行う(離脱セルの道路数百本を1ステップで SetActive(false) するとスパイクになるため)。
+    /// 他のロード対象セル（cellsToKeepVisible）に跨っているパスは非表示にしない。
     /// これにより、セル境界を跨ぐ道路がカメラ移動時に一瞬消えるチラつきを防止する。
-    /// セルごとに全オブジェクトを走査しないよう、アンロードするセルをまとめて1回で処理する。
+    /// 通過セル未登録のGOはセル索引から辿れないので、ここで同期に隠す(通常はほぼ空)。
     /// </summary>
     private void UnloadCellsObjects(List<Vector2Int> cells)
     {
@@ -2519,64 +2550,119 @@ public class PathManager : BaseApiDataManager
         }
         if (unloadCellSet.Count == 0) return;
 
-        // 1点は1セルにしか属さず、アンロードするセルは残すセルに含まれないので、セルの一致だけで判定できる。
-        foreach (var cell in unloadCellSet)
-        {
-            if (!nodeIdsByCell.TryGetValue(cell, out HashSet<int> ids)) continue;
-            foreach (int nodeId in ids)
-            {
-                if (nodeObjectsCache.TryGetValue(nodeId, out GameObject nodeGO) && nodeGO != null && nodeGO.activeSelf) nodeGO.SetActive(false);
-            }
-        }
+        foreach (var cell in unloadCellSet) pendingUnloadCells[cell] = ++unloadGeneration;
+        if (pathUnloadWorker == null)
+            pathUnloadWorker = RenderWorkScheduler.Start(this, PathUnloadWorker(), "PathManager", () => false);
 
-        unloadCandidatePathIds.Clear();
-        foreach (var cell in unloadCellSet)
-        {
-            if (!pathIdsByCell.TryGetValue(cell, out HashSet<int> ids)) continue;
-            foreach (int id in ids) unloadCandidatePathIds.Add(id);
-        }
-        List<int> hiddenEndNodeIds = null;
-        foreach (int pathId in unloadCandidatePathIds)
-        {
-            if (!pathObjectsCache.TryGetValue(pathId, out GameObject pathGO) || pathGO == null || !pathGO.activeSelf) continue;
-            if (pathCellsById.TryGetValue(pathId, out HashSet<Vector2Int> pathCells) && AnyCellIn(pathCells, cellsToKeepVisible)) continue;
-            HideUnloadedPath(pathId, pathGO, ref hiddenEndNodeIds);
-        }
         // 通過セル未登録のGOは辞書の列挙中に隠さず、集めてから隠す。
         List<Vector2Int> unloadCells = null;
         List<Vector2Int> keepCells = null;
         List<int> unregisteredToHide = null;
         foreach (int pathId in unregisteredPathObjectIds)
         {
-            if (unloadCandidatePathIds.Contains(pathId) || !pathObjectsCache.TryGetValue(pathId, out GameObject pathGO) || pathGO == null || !pathGO.activeSelf) continue;
+            if (!pathObjectsCache.TryGetValue(pathId, out GameObject pathGO) || pathGO == null || !pathGO.activeSelf) continue;
             unloadCells ??= new List<Vector2Int>(unloadCellSet);
             keepCells ??= new List<Vector2Int>(cellsToKeepVisible);
             if (IsPathInCells(pathId, pathGO, unloadCells) && !IsPathInCells(pathId, pathGO, keepCells))
                 (unregisteredToHide ??= new List<int>()).Add(pathId);
         }
-        if (unregisteredToHide != null)
-        {
-            foreach (int pathId in unregisteredToHide) HideUnloadedPath(pathId, pathObjectsCache[pathId], ref hiddenEndNodeIds);
-        }
-        unloadCandidatePathIds.Clear();
-
-        // 交差点メッシュは道路GOの子ではないため、接続道路がすべて隠れたときに一緒に隠す。
-        // 1本でも表示中なら残し、見えている道路の端から交差点を欠けさせない。
-        // 別セルにある交差点も、このアンロードで最後の接続道路が隠れたなら隠す。
+        unloadCellSet.Clear();
+        if (unregisteredToHide == null) return;
+        List<int> hiddenEndNodeIds = null;
+        foreach (int pathId in unregisteredToHide) HideUnloadedPath(pathId, pathObjectsCache[pathId], ref hiddenEndNodeIds);
         if (hiddenEndNodeIds != null)
         {
             foreach (int nodeId in hiddenEndNodeIds) HideIntersectionMeshIfOrphaned(nodeId);
         }
-        foreach (var cell in unloadCellSet)
+    }
+
+    /// <summary>待ち行列のセルが、まだ非表示化してよい状態(同じ世代で登録中、かつ常駐外)か。</summary>
+    private bool IsUnloadCellCurrent(Vector2Int cell, int generation)
+        => pendingUnloadCells.TryGetValue(cell, out int current) && current == generation && !cellsToKeepVisible.Contains(cell);
+
+    /// <summary>
+    /// 離脱セルのノード・パス・交差点メッシュを非表示にする常駐ワーカー。1セルずつIDを写し取り、フレーム予算で分割する。
+    /// 再開のたびに、セルが常駐へ戻っていないか・再登録されていないかを確かめ、変わっていればそのスナップショットを捨てる。
+    /// パスは隠す直前に、その時点の cellsToKeepVisible に跨っていないかを確かめる(待機中に後続バッチが表示し直したものを隠さない)。
+    /// </summary>
+    private IEnumerator PathUnloadWorker()
+    {
+        var watch = new System.Diagnostics.Stopwatch();
+        while (true)
         {
-            if (!nodeIdsByCell.TryGetValue(cell, out HashSet<int> ids)) continue;
-            foreach (int nodeId in ids)
+            Vector2Int cell = default;
+            int generation = 0;
+            bool found = false;
+            foreach (var pair in pendingUnloadCells)
             {
-                if (!nodeIntersectionMeshes.TryGetValue(nodeId, out GameObject meshGO) || meshGO == null || !meshGO.activeSelf) continue;
-                if (!HasVisibleConnectedPath(nodeId)) meshGO.SetActive(false);
+                if (cellsToKeepVisible.Contains(pair.Key)) continue;
+                cell = pair.Key;
+                generation = pair.Value;
+                found = true;
+                break;
             }
+            if (!found)
+            {
+                yield return null;
+                continue;
+            }
+
+            unloadScanPathIds.Clear();
+            unloadScanNodeIds.Clear();
+            unloadHiddenEndNodeIds.Clear();
+            if (pathIdsByCell.TryGetValue(cell, out HashSet<int> pathIds)) unloadScanPathIds.AddRange(pathIds);
+            if (nodeIdsByCell.TryGetValue(cell, out HashSet<int> nodeIds)) unloadScanNodeIds.AddRange(nodeIds);
+            List<int> hiddenEndNodeIds = unloadHiddenEndNodeIds;
+
+            bool interrupted = false;
+            int step = 0;
+            watch.Restart();
+            for (int phase = 0; phase < 3 && !interrupted; phase++)
+            {
+                List<int> ids = phase == 1 ? unloadScanPathIds : unloadScanNodeIds;
+                for (int i = 0; i < ids.Count; i++)
+                {
+                    int id = ids[i];
+                    if (phase == 0)
+                    {
+                        if (nodeObjectsCache.TryGetValue(id, out GameObject nodeGO) && nodeGO != null && nodeGO.activeSelf) nodeGO.SetActive(false);
+                    }
+                    else if (phase == 1)
+                    {
+                        if (pathObjectsCache.TryGetValue(id, out GameObject pathGO) && pathGO != null && pathGO.activeSelf
+                            && !(pathCellsById.TryGetValue(id, out HashSet<Vector2Int> pathCells) && AnyCellIn(pathCells, cellsToKeepVisible)))
+                            HideUnloadedPath(id, pathGO, ref hiddenEndNodeIds);
+                    }
+                    else
+                    {
+                        // 交差点メッシュは道路GOの子ではないため、接続道路がすべて隠れたときに一緒に隠す。
+                        // 1本でも表示中なら残し、見えている道路の端から交差点を欠けさせない。
+                        if (nodeIntersectionMeshes.TryGetValue(id, out GameObject meshGO) && meshGO != null && meshGO.activeSelf
+                            && !HasVisibleConnectedPath(id))
+                            meshGO.SetActive(false);
+                    }
+                    if ((++step & 15) == 0 && watch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
+                    {
+                        yield return RenderWorkScheduler.Continue;
+                        watch.Restart();
+                        if (!IsUnloadCellCurrent(cell, generation))
+                        {
+                            interrupted = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            // 別セルにある交差点も、ここで最後の接続道路が隠れたなら隠す。中断時も、隠した道路の分は済ませる
+            // (隠した道路は再走査で拾われないため)。
+            foreach (int nodeId in unloadHiddenEndNodeIds) HideIntersectionMeshIfOrphaned(nodeId);
+            unloadScanPathIds.Clear();
+            unloadScanNodeIds.Clear();
+            unloadHiddenEndNodeIds.Clear();
+            if (!interrupted && IsUnloadCellCurrent(cell, generation))
+                pendingUnloadCells.Remove(cell);
+            yield return RenderWorkScheduler.Continue;
         }
-        unloadCellSet.Clear();
     }
 
     private static bool AnyCellIn(HashSet<Vector2Int> cells, HashSet<Vector2Int> set)
@@ -3659,6 +3745,15 @@ public class PathManager : BaseApiDataManager
             || stamp.progress != ConstructionPathBuilder.Progress(path)) return false;
         geometryRevisions.TryGetValue(path.path_id, out int revision);
         if (revision != stamp.geometryRevision) return false;
+        long signature = ComputeTerrainSignature(path, out bool known);
+        return known && signature == stamp.terrainSignature;
+    }
+
+    /// <summary>退避キャッシュから取り出したGOが、現在の通過セルの地形署名で生成されたものか。署名が不明なら偽。</summary>
+    private bool IsCachedBuildTerrainCurrent(GameObject go, PathSummary path)
+    {
+        PathBuildStamp stamp = go.GetComponent<PathBuildStamp>();
+        if (stamp == null || !stamp.terrainKnown) return false;
         long signature = ComputeTerrainSignature(path, out bool known);
         return known && signature == stamp.terrainSignature;
     }
@@ -5306,31 +5401,39 @@ public class PathManager : BaseApiDataManager
     private IEnumerator FetchNodeAndUpdateIntersection(int nodeId)
     {
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[PathManager] FetchNodeAndUpdateIntersection: fetching node {nodeId}");
-        yield return ApiClient.Get<NodeData>(
-            $"/nodes/{nodeId}",
-            node =>
-            {
-                fetchingIntersectionNodeIds.Remove(nodeId);
-                if (node != null)
+        // 取消しではコールバックが呼ばれないので、フラグの解除は finally でも保証する。
+        try
+        {
+            yield return ApiClient.Get<NodeData>(
+                $"/nodes/{nodeId}",
+                node =>
                 {
-                    UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[PathManager] FetchNodeAndUpdateIntersection: node {nodeId} fetched successfully.");
-                    nodeDataCache[node.node_id] = node;
-                    IndexNodeCell(node.node_id);
-                    UpdateNodeIntersectionMesh(node.node_id);
-                }
-                else
+                    fetchingIntersectionNodeIds.Remove(nodeId);
+                    if (node != null)
+                    {
+                        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[PathManager] FetchNodeAndUpdateIntersection: node {nodeId} fetched successfully.");
+                        nodeDataCache[node.node_id] = node;
+                        IndexNodeCell(node.node_id);
+                        UpdateNodeIntersectionMesh(node.node_id);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[PathManager] FetchNodeAndUpdateIntersection: node {nodeId} response was null.");
+                        RemoveNodeIntersectionMesh(nodeId);
+                    }
+                },
+                error =>
                 {
-                    Debug.LogWarning($"[PathManager] FetchNodeAndUpdateIntersection: node {nodeId} response was null.");
+                    fetchingIntersectionNodeIds.Remove(nodeId);
+                    Debug.LogError($"[PathManager] FetchNodeAndUpdateIntersection: node {nodeId} fetch failed: {error}");
                     RemoveNodeIntersectionMesh(nodeId);
                 }
-            },
-            error =>
-            {
-                fetchingIntersectionNodeIds.Remove(nodeId);
-                Debug.LogError($"[PathManager] FetchNodeAndUpdateIntersection: node {nodeId} fetch failed: {error}");
-                RemoveNodeIntersectionMesh(nodeId);
-            }
-        );
+            );
+        }
+        finally
+        {
+            fetchingIntersectionNodeIds.Remove(nodeId);
+        }
     }
 
     /// <summary>

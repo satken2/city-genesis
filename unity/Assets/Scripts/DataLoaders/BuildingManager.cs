@@ -568,6 +568,10 @@ public class BuildingManager : BaseApiDataManager
         // マージBBOXは常駐セル集合の外接矩形なので、常駐外セルの建物も一括取得に含まれて遅延キューへ積まれる。
         // そのセルは登録されずワーカーが永久に選出しないため、登録集合が確定したここで除く。
         RemoveDeferredRequestsOutside(loadedCells);
+
+        // アラートアイコンの高さは建物GOのメッシュ高さで決まるため、建物の生成が済んだここで再適用を要求する。
+        // 地形はバッチ開始前にロード・追従済みなので、地面高さもこの時点で正しい。
+        AlertManager.Instance?.RefreshPositions();
     }
 
     /// <summary>中心セルが cells に含まれない遅延生成要求を取り除く。中心点を持たない要求は残す。</summary>

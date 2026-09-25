@@ -54,6 +54,8 @@ using UnityEngine.UI;
 /// - カメラセル変更時: CellDataLoader から RefreshPositions() を呼ぶ。alert はエポックと編集でしか
 ///   変わらないため HTTP は取らず、最後の応答を再適用してアイコン高さと火災エフェクトの規模だけを
 ///   ロード済みの地形・建物に合わせ直す。
+/// - 建物バッチの適用時: BuildingManager.ApplyLodCellChanges から RefreshPositions() を呼ぶ。カメラセル変更の
+///   時点では新しい常駐セルの建物が未生成で、アイコンが地面の高さに残るため、生成後に高さを合わせ直す。
 /// - Refresh / RefreshPositions はクールダウン中・取得中の要求を捨てず、Update で後から1回にまとめて実行する。
 ///
 /// パフォーマンス設計
@@ -267,7 +269,7 @@ public class AlertManager : MonoBehaviour
 
     /// <summary>
     /// 表示範囲の変化に合わせて、最後に取得した /alerts 応答をアイコン高さと火災エフェクトへ再適用する。
-    /// カメラセル変更時に呼ばれる。HTTP は取らず、Update でクールダウン単位にまとめて実行する。
+    /// カメラセル変更時と建物バッチの適用時に呼ばれる。HTTP は取らず、Update でクールダウン単位にまとめて実行する。
     /// 応答が未取得(直前の取得が失敗した等)なら、再適用の代わりに取得を要求する。
     /// </summary>
     public void RefreshPositions()

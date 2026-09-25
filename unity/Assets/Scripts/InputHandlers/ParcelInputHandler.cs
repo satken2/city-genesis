@@ -15,17 +15,12 @@ public class ParcelInputHandler : MonoBehaviour, IInputHandler
 
     public int ObjectTypeId => InputObjectType.PARCEL;
 
-    private Renderer objectRenderer;
-    private Material originalMaterial;
-    private Material highlightMaterial;
-
+    // Renderer.material の getter はレンダラーごとに Material を複製し、区画 GO の破棄時にも解放されないため触らない。
     private void Start()
     {
-        objectRenderer = GetComponent<Renderer>();
+        var objectRenderer = GetComponent<Renderer>();
         if (objectRenderer != null)
         {
-            originalMaterial = objectRenderer.material;
-            highlightMaterial = Resources.Load<Material>("HighlightMaterial");
             objectRenderer.enabled = false;
         }
     }

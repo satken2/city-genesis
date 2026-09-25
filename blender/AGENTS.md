@@ -24,10 +24,11 @@
 
 - 鉄道の接写版は非公開制作ツールの`build_rail_close.py`が通常の外板断面から曲面を著作する。vehicles.blendの14/21/23とprops.blendの308/309が対象で、メトロ20は`metro_vehicles.py`が通常と同じ寸法表から接写を作る。走行車両の接写版は`build_vehicle_props.py`でProps/370〜379・384〜389の接写別名へ同期する。通常のFBXは保持する。
 
-- 2000は `residential_parts.py`、2004・2008・2013は `build_retail_industrial_lods.py`（非公開制作ツール）が通常・接写を著作する。2008の広告は `BD_MALL_ADS` と4区画のPNGを共有し、広告文字のジオメトリは持たない。新設prefixの選択設定はUnityの正規ミラー生成後に再生成する。
+- 戸建て2000（a2000・a2000s2・a2000s3）と小屋2015は `house_parts.py`、2004・2008・2013は `build_retail_industrial_lods.py`（いずれも非公開制作ツール）が通常・接写を著作する。2000・2015の遠景は閾値0の `mid/top-prebuilt_far`。附属棟は外階段パーツ（base/mid/top-stair）で持つ。2008の広告は `BD_MALL_ADS` と4区画のPNGを共有し、広告文字のジオメトリは持たない。新設prefixの選択設定はUnityの正規ミラー生成後に再生成する。
 
 - **編集・書き出し・検証の道具は別レポジトリ `genesis-gallery` にある**(ワークスペース上で `city-genesis` と並置される前提。`../genesis-gallery/pipeline/library.py export --category <cat> --only <パス>` でFBXへ書き戻す)。ここには .blend 以外を置かない。
 - 手著作でないモデルは `genesis-gallery/pipeline/jobs/build_*.py` が形状をコードで持っており、ジョブを再実行すると .blend 側の手編集が消える。編集前にジョブの有無を確認すること。
+- 集合住宅2001は `build_a2001_variants.py`（閾値200・800と共通遠景は `apartment_parts.py`）、商業施設付きオフィス2010は `build_a2010.py`（いずれも非公開制作ツール）が著作する。2001の閾値0は旧手著作の移植品で、形状の正はこの .blend（ジョブは著作高さの補正だけを行う）。
 - 建物の汎用接写パーツは非公開制作ツールの `build_building_lods.py` が無印から著作する。通常用を再著作した後はこのジョブも実行する。`lod_author=building_surface_lod_v1` のコレクションだけを再生成し、市政府・戸建て住宅の個別ジョブが持つCloseは保持する。
 - テクスチャは `//../unity/Assets/Models/<カテゴリ>/Textures/` の相対パス参照。このディレクトリを移動・改名すると参照が切れる。
 - Unity は `unity/` 配下しかインポートしないので、ここに .blend を置いても Unity のアセットにはならない(意図的に `unity/` の外にある)。

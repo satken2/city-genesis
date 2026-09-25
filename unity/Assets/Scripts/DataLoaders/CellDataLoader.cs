@@ -57,8 +57,12 @@ public class CellDataLoader : MonoBehaviour
     /// </summary>
     private bool isInitialLoadComplete = false;
     public bool IsInitialLoadComplete => isInitialLoadComplete;
+    /// <summary>
+    /// 初期シーンの表示準備が整ったか。間引きで保留中のカメラバッチ(hasDeferredCameraCell)も未完了として数える。
+    /// 保留中は pendingObjectLoad が空のままなので、数えないと最終視点のバッチ発行前に準備完了と判定されるため。
+    /// </summary>
     public bool IsInitialSceneReady => isInitialLoadComplete
-        && !loadSuspendedUntilReload && pendingObjectLoad == null
+        && !loadSuspendedUntilReload && !hasDeferredCameraCell && pendingObjectLoad == null
         && terrainFollowUpCoroutine == null && pendingFollowUpCells.Count == 0
         && (resourceManager == null || resourceManager.IsInitialLoadReady)
         && !RenderWorkScheduler.HasPendingInitialWork;
@@ -267,7 +271,8 @@ public class CellDataLoader : MonoBehaviour
         UpdateManagers(cellSets, tierChangedCells, isForce: false);
         nextCameraBatchTime = Time.unscaledTime + CAMERA_BATCH_MIN_INTERVAL;
 
-        // 表示範囲が変わったため、ロード済みの地形・建物に合わせてアラートアイコンの高さを再解決する。
+        // 表示範囲が変わったため、アラートアイコンの高さを解決し直す。この時点では新しい常駐セルの地形・建物は
+        // 未ロードなので、最終的な高さは建物バッチの適用時(BuildingManager.ApplyLodCellChanges)に再度合わせる。
         AlertManager.Instance?.RefreshPositions();
     }
 
