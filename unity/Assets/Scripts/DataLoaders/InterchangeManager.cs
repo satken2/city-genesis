@@ -24,6 +24,12 @@ public class InterchangeManager : MonoBehaviour
     private readonly Dictionary<int, InterchangeSummary> interchanges = new Dictionary<int, InterchangeSummary>();
     private readonly Dictionary<int, RectTransform> labels = new Dictionary<int, RectTransform>();
 
+    /// <summary>
+    /// ラベル位置の地面高さ(interchange_id → Y)。カメラが動くたびに全ICを地形サンプルしないためのキャッシュ。
+    /// 地形ロード完了・一覧更新・Clear で捨て、次に表示範囲へ入ったときに取り直す。
+    /// </summary>
+    private readonly Dictionary<int, float> labelGroundY = new Dictionary<int, float>();
+
     private Canvas canvas;
     private RectTransform canvasRect;
     private TerrainManager terrainManager;
@@ -144,12 +150,14 @@ public class InterchangeManager : MonoBehaviour
         }
         labels.Clear();
         interchanges.Clear();
+        labelGroundY.Clear();
     }
 
     private void Apply(InterchangesListResponse response)
     {
         if (response.version == loadedVersion) return;
         loadedVersion = response.version;
+        labelGroundY.Clear();
 
         var received = new HashSet<int>();
         if (response.interchanges != null)
@@ -237,6 +245,7 @@ public class InterchangeManager : MonoBehaviour
 
     private void OnTerrainAllLoaded(IReadOnlyList<Vector2Int> updatedCells)
     {
+        labelGroundY.Clear();
         lastCamPos = Vector3.negativeInfinity;
     }
 
@@ -286,7 +295,19 @@ public class InterchangeManager : MonoBehaviour
             if (rt == null || !interchanges.TryGetValue(kv.Key, out var ic)) continue;
             float x = ic.center[0];
             float z = ic.center[1];
-            float groundY = Utils.GetGroundHeight(new Vector3(x, 1000f, z));
+            // 3D距離は水平距離以上なので、水平距離だけで範囲外と分かるICは地形をサンプルせずに隠す。
+            float dx = x - camPos.x;
+            float dz = z - camPos.z;
+            if (dx * dx + dz * dz > LABEL_MAX_DISTANCE * LABEL_MAX_DISTANCE)
+            {
+                if (rt.gameObject.activeSelf) rt.gameObject.SetActive(false);
+                continue;
+            }
+            if (!labelGroundY.TryGetValue(kv.Key, out float groundY))
+            {
+                groundY = Utils.GetGroundHeight(new Vector3(x, 1000f, z));
+                labelGroundY[kv.Key] = groundY;
+            }
             Vector3 world = new Vector3(x, groundY + LABEL_HEIGHT_OFFSET, z);
             Vector3 screen = cam.WorldToScreenPoint(world);
             bool visible = screen.z > 0f && Vector3.Distance(camPos, world) <= LABEL_MAX_DISTANCE;

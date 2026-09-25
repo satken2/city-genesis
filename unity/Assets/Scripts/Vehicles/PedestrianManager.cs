@@ -18,6 +18,7 @@ public sealed class PedestrianManager : MonoBehaviour
     [Header("描画範囲")]
     [SerializeField] private float renderRadius = 250f;
     [SerializeField] private float despawnMargin = 50f;
+    [SerializeField] private float maxCenterLead = 180f;   // 管理中心をカメラから水平にこの距離以内へ収める。0以下で無制限
     [Header("密度")]
     [SerializeField] private float renderFraction = 1f;   // 歩行者交通量に対する表示倍率。1=等倍、2・4で増やす
     [SerializeField] private float activeHoursPerDay = LocalConstants.VEHICLE_ACTIVE_HOURS_PER_DAY;
@@ -42,8 +43,8 @@ public sealed class PedestrianManager : MonoBehaviour
     private readonly VehiclePopulationBudget population = new VehiclePopulationBudget();
     private ParcelManager parcelManager;
     private BuildingManager buildingManager;
-    private Coroutine accessWorker;
-    private bool initialFill = true;
+    private Coroutine accessWorker, walkWorker;
+    private bool initialFill = true, pendingInitialFill;
     private int accessSignature, accessGeneration;
     private bool accessReady, exitPossible;
     private Dictionary<int, List<Entrance>> entrances = new Dictionary<int, List<Entrance>>();
@@ -66,6 +67,11 @@ public sealed class PedestrianManager : MonoBehaviour
         public float insideLength, halfWidth;
         public float inner, outer, surface;   // 歩行帯の内縁・外縁(中心線からの距離)と高さ
         public bool centered;                 // 歩行者専用道路: 左右に分けず全幅を1本の帯にする
+        public long geometryRevision = -1;    // PathManager.GetPathGeometryRevision。-1 は版不明で点列比較に頼る
+        public Vector3 scanCenter;
+        public float scanRadius;
+        public int spawnPointGeneration = -1; // hasSpawnPoint を計算したときの accessGeneration
+        public bool hasSpawnPoint;
     }
     private sealed class Bucket
     {
@@ -110,18 +116,19 @@ public sealed class PedestrianManager : MonoBehaviour
         if (pathManager == null) { pathManager = FindAnyObjectByType<PathManager>(); if (pathManager == null) return; }
         if (GameStateManager.Instance != null && !GameStateManager.Instance.IsGameStarted())
         {
-            if (active.Count > 0 || walks.Count > 0) ClearPedestrians();
+            if (active.Count > 0 || walks.Count > 0 || walkWorker != null || accessWorker != null) ClearPedestrians();
             return;
         }
         float dt = Time.deltaTime;
         if (dt <= 0) return;
-        Vector3 center = cameraCellChecker != null ? cameraCellChecker.CurrentWorldPosition : (Camera.main != null ? Camera.main.transform.position : Vector3.zero);
-        if (hasCenter && Utils.XZDistanceSquared(center, lastCenter) > renderRadius * renderRadius) ClearPedestrians();
+        Vector3 center = VehicleManager.ResolveTrafficCenter(cameraCellChecker, maxCenterLead);
+        if (hasCenter && Utils.XZDistanceSquared(center, lastCenter) > renderRadius * renderRadius) Recenter();
         lastCenter = center; hasCenter = true;
         scanTimer -= dt;
         if (scanTimer <= 0)
         {
-            RefreshWalks(center);
+            // 常駐の周期ワーカーなので初期ロード待ちの判定には含めない。
+            if (walkWorker == null) walkWorker = RenderWorkScheduler.Start(this, ScanWalks(center), "pedestrianWalks", () => false);
             scanTimer = Mathf.Max(.1f, rangeScanInterval);
         }
         MovePedestrians(dt, center);
@@ -132,6 +139,13 @@ public sealed class PedestrianManager : MonoBehaviour
             densityTimer -= .25f;
             RegulateDensity(.25f);
         }
+    }
+
+    // 初回ステップ前に破棄された iterator は finally を通らないため、ハンドルをここで戻して再有効化後の走査を止めない。
+    private void OnDisable()
+    {
+        RenderWorkScheduler.StopAll(this);
+        walkWorker = null; accessWorker = null;
     }
 
     private void OnDestroy()
@@ -145,8 +159,22 @@ public sealed class PedestrianManager : MonoBehaviour
         active.Clear();
         walks.Clear(); buckets.Clear(); bucketByPath.Clear();
         population.Reset(); scanTimer = 0; densityTimer = 0;
-        if (accessWorker != null) StopCoroutine(accessWorker);
-        accessWorker = null; entrances.Clear(); accessCache.Clear(); initialFill = true; accessReady = false; accessGeneration++;
+        RenderWorkScheduler.Stop(this, walkWorker); walkWorker = null;
+        RenderWorkScheduler.Stop(this, accessWorker); accessWorker = null;
+        entrances.Clear(); accessCache.Clear(); initialFill = true; pendingInitialFill = false; accessReady = false; accessGeneration++;
+    }
+
+    /// <summary>
+    /// 管理中心の大移動。円内の歩行者は歩かせ続け、円外は通常のデスポーンに任せる。
+    /// walks は新しい走査の確定まで分岐に使うので残し、古い区域への発生だけを止める。入口キャッシュは署名で判定するので保持する。
+    /// </summary>
+    private void Recenter()
+    {
+        RenderWorkScheduler.Stop(this, walkWorker); walkWorker = null;
+        RenderWorkScheduler.Stop(this, accessWorker); accessWorker = null;
+        buckets.Clear(); bucketByPath.Clear();
+        scanTimer = 0;
+        pendingInitialFill = true;
     }
 
     /// <summary>
@@ -176,33 +204,94 @@ public sealed class PedestrianManager : MonoBehaviour
         }
     }
 
-    private void RefreshWalks(Vector3 center)
+    /// <summary>
+    /// 周辺の歩行帯のスナップショットを共通予算で分割して作り、完成してから CommitWalks で一括交換する。
+    /// yield を跨いだ道路は最新のパスデータを取り直してから判定する。
+    /// </summary>
+    private IEnumerator ScanWalks(Vector3 center)
     {
-        if (parcelManager == null) parcelManager = FindAnyObjectByType<ParcelManager>();
-        if (buildingManager == null) buildingManager = FindAnyObjectByType<BuildingManager>();
-        var next = new Dictionary<int, Walk>();
-        float radius = Mathf.Max(1, renderRadius + despawnMargin);
-        exitPossible = false;
-        foreach (var data in pathManager.GetPathsNearCircle(center, radius))
+        try
         {
-            if (!Walkable(data)) continue;
-            if (!pathManager.TryGetPathPolyline(data.path_id, out var points) || points.Count < 2) continue;
-            var line = new VehiclePolyline(points);
-            if (line.Length < .01f) continue;
-            var intervals = line.InsideIntervals(center, radius);
-            float length = 0;
-            foreach (var interval in intervals) length += interval.y - interval.x;
-            if (length <= 0) continue;
-            RoadPath.GetPathMasterParams(data, out float width, out float sidewalk, out _, out _, out _, out _, out _, out _, out _, out _, out _);
-            var walk = new Walk { data = data, line = line, intervals = intervals, insideLength = length, halfWidth = width * .5f };
-            ResolveBand(data.path_type, width, sidewalk, bandMargin, shoulderWidth, out walk.inner, out walk.outer, out walk.surface, out walk.centered);
-            next[data.path_id] = walk;
-            foreach (var interval in intervals)
-                if (interval.x > .1f || interval.y < line.Length - .1f) exitPossible = true;
+            if (pathManager == null) yield break;
+            if (parcelManager == null) parcelManager = FindAnyObjectByType<ParcelManager>();
+            if (buildingManager == null) buildingManager = FindAnyObjectByType<BuildingManager>();
+            var next = new Dictionary<int, Walk>();
+            float radius = Mathf.Max(1, renderRadius + despawnMargin);
+            var nearby = pathManager.GetPathsNearCircle(center, radius);
+            var timer = System.Diagnostics.Stopwatch.StartNew();
+            foreach (var candidate in nearby)
+            {
+                if (pathManager == null) yield break;
+                var data = pathManager.GetPathData(candidate.path_id);
+                if (Walkable(data))
+                {
+                    var walk = BuildWalk(data, center, radius);
+                    if (walk != null) next[data.path_id] = walk;
+                }
+                if (timer.Elapsed.TotalMilliseconds >= PerformanceConfig.SliceBudgetMs)
+                {
+                    yield return RenderWorkScheduler.Continue;
+                    timer.Restart();
+                }
+            }
+            CommitWalks(next, center);
         }
+        finally
+        {
+            walkWorker = null;
+        }
+    }
+
+    /// <summary>
+    /// 道路1本の歩行帯。形状の版(不明なら点列の完全一致)・データ・中心が同じなら前回の Walk を返し、
+    /// 形状だけ同じなら点列を使い回す。点列の取得は地形未ロード時に重いので、版が一致すれば呼ばない。
+    /// </summary>
+    private Walk BuildWalk(PathSummary data, Vector3 center, float radius)
+    {
+        int id = data.path_id;
+        walks.TryGetValue(id, out var prev);
+        long revision = pathManager.GetPathGeometryRevision(id);
+        VehiclePolyline line;
+        if (prev != null && revision != -1 && revision == prev.geometryRevision && prev.data == data) line = prev.line;
+        else
+        {
+            if (!pathManager.TryGetPathPolyline(id, out var points) || points.Count < 2) return null;
+            line = prev != null && VehiclePolyline.SameSource(prev.line, points) ? prev.line : new VehiclePolyline(points);
+        }
+        if (line.Length < .01f) return null;
+        if (prev != null && prev.line == line && prev.data == data && prev.geometryRevision == revision
+            && prev.scanCenter == center && prev.scanRadius == radius) return prev;
+        var intervals = line.InsideIntervals(center, radius);
+        float length = 0;
+        foreach (var interval in intervals) length += interval.y - interval.x;
+        if (length <= 0) return null;
+        var walk = new Walk { data = data, line = line, intervals = intervals, insideLength = length,
+            geometryRevision = revision, scanCenter = center, scanRadius = radius };
+        if (prev != null && prev.data == data)
+        {
+            walk.halfWidth = prev.halfWidth; walk.inner = prev.inner; walk.outer = prev.outer;
+            walk.surface = prev.surface; walk.centered = prev.centered;
+        }
+        else
+        {
+            RoadPath.GetPathMasterParams(data, out float width, out float sidewalk, out _, out _, out _, out _, out _, out _, out _, out _, out _);
+            walk.halfWidth = width * .5f;
+            ResolveBand(data.path_type, width, sidewalk, bandMargin, shoulderWidth, out walk.inner, out walk.outer, out walk.surface, out walk.centered);
+        }
+        return walk;
+    }
+
+    private void CommitWalks(Dictionary<int, Walk> next, Vector3 center)
+    {
         walks.Clear();
-        foreach (var entry in next) walks.Add(entry.Key, entry.Value);
-        if (accessWorker == null) accessWorker = StartCoroutine(UpdateAccess(center));
+        exitPossible = false;
+        foreach (var entry in next)
+        {
+            walks.Add(entry.Key, entry.Value);
+            foreach (var interval in entry.Value.intervals)
+                if (interval.x > .1f || interval.y < entry.Value.line.Length - .1f) exitPossible = true;
+        }
+        if (accessWorker == null) accessWorker = RenderWorkScheduler.Start(this, UpdateAccess(center), "pedestrianAccess", () => false);
         var previous = new Dictionary<int, Bucket>(bucketByPath);
         buckets.Clear(); bucketByPath.Clear();
         float total = 0;
@@ -223,65 +312,70 @@ public sealed class PedestrianManager : MonoBehaviour
         foreach (var p in active)
         {
             if (p.InConnector || !walks.TryGetValue(p.pathId, out var walk)) continue;
-            float progress = p.TotalLength > 0 ? p.s / p.TotalLength : 0;
-            p.road = walk.line; p.s = progress * walk.line.Length;
+            if (p.road != walk.line) { p.s = walk.line.RemapFrom(p.road, p.s); p.road = walk.line; }
             PlaceOnBand(p, walk, false);
         }
+        // 新しい区域の目標人数が決まってから初期充填へ戻す。先に戻すと古い目標で即座に打ち切られる。
+        if (pendingInitialFill) { initialFill = true; pendingInitialFill = false; }
     }
 
     // 周辺道路だけを走査し、区画・建物・中心線の版が変わった入口だけ再計算する。
     // 車と違って退出先への逆探索表は持たない(歩行者は交通量重みのランダム歩行で、
-    // 到着予約中は進行方向の先に現れた最初の入口へ入る)。約1msごとに次フレームへ譲る。
+    // 到着予約中は進行方向の先に現れた最初の入口へ入る)。共通予算の中で分割する。
     private IEnumerator UpdateAccess(Vector3 center)
     {
-        yield return null;
-        var snapshot = new Dictionary<int, Walk>(walks);
-        var usedParcels = new HashSet<int>();
-        var next = new Dictionary<int, List<Entrance>>();
-        var timer = System.Diagnostics.Stopwatch.StartNew();
-        int overall = 0;
-        foreach (var walk in snapshot.Values)
+        try
         {
-            var entries = new List<Entrance>();
-            int shapeHash = walk.data.path_id;
-            foreach (var point in walk.line.points) shapeHash = unchecked(shapeHash * 31 + point.GetHashCode());
-            shapeHash = unchecked(shapeHash * 31 + walk.halfWidth.GetHashCode());
-            overall ^= shapeHash;
-            bool allowed = RoadsideAccess.FrontageAllowed(walk.data, true);
-            if (allowed) overall ^= walk.data.path_id * 79;
-            if (allowed && parcelManager != null && buildingManager != null)
+            var snapshot = new Dictionary<int, Walk>(walks);
+            var usedParcels = new HashSet<int>();
+            var next = new Dictionary<int, List<Entrance>>();
+            var timer = System.Diagnostics.Stopwatch.StartNew();
+            int overall = 0;
+            foreach (var walk in snapshot.Values)
             {
-                foreach (int id in new List<int>(parcelManager.GetParcelIdsByFrontPath(walk.data.path_id)))
+                var entries = new List<Entrance>();
+                int shapeHash = unchecked(walk.data.path_id * 486187739 + walk.line.ShapeHash);
+                shapeHash = unchecked(shapeHash * 31 + walk.halfWidth.GetHashCode());
+                overall ^= shapeHash;
+                bool allowed = RoadsideAccess.FrontageAllowed(walk.data, true);
+                if (allowed) overall ^= walk.data.path_id * 79;
+                if (allowed && parcelManager != null && buildingManager != null)
                 {
-                    usedParcels.Add(id);
-                    var parcel = parcelManager.GetParcelSummary(id);
-                    if (parcel == null) continue;
-                    int signature = parcel.version ^ shapeHash;
-                    int building = RoadsideAccess.ActiveBuilding(buildingManager, id, ref signature);
-                    overall ^= signature;
-                    if (!accessCache.TryGetValue(id, out var cached) || cached.signature != signature)
+                    foreach (int id in new List<int>(parcelManager.GetParcelIdsByFrontPath(walk.data.path_id)))
                     {
-                        cached = new AccessCache { signature = signature, entries = new List<Entrance>() };
-                        if (building != 0) BuildEntrances(walk, parcel, building, cached.entries);
-                        accessCache[id] = cached;
+                        usedParcels.Add(id);
+                        var parcel = parcelManager.GetParcelSummary(id);
+                        if (parcel == null) continue;
+                        int signature = parcel.version ^ shapeHash;
+                        int building = RoadsideAccess.ActiveBuilding(buildingManager, id, ref signature);
+                        overall ^= signature;
+                        if (!accessCache.TryGetValue(id, out var cached) || cached.signature != signature)
+                        {
+                            cached = new AccessCache { signature = signature, entries = new List<Entrance>() };
+                            if (building != 0) BuildEntrances(walk, parcel, building, cached.entries);
+                            accessCache[id] = cached;
+                        }
+                        foreach (var entry in cached.entries)
+                            foreach (var interval in walk.intervals)
+                                if (entry.s >= interval.x && entry.s <= interval.y)
+                                { entries.Add(entry); overall ^= entry.parcel * 101; break; }
+                        if (timer.Elapsed.TotalMilliseconds >= PerformanceConfig.SliceBudgetMs) { yield return RenderWorkScheduler.Continue; timer.Restart(); }
                     }
-                    foreach (var entry in cached.entries)
-                        foreach (var interval in walk.intervals)
-                            if (entry.s >= interval.x && entry.s <= interval.y)
-                            { entries.Add(entry); overall ^= entry.parcel * 101; break; }
-                    if (timer.Elapsed.TotalMilliseconds >= 1) { yield return null; timer.Restart(); }
                 }
+                next[walk.data.path_id] = entries;
+                if (timer.Elapsed.TotalMilliseconds >= PerformanceConfig.SliceBudgetMs) { yield return RenderWorkScheduler.Continue; timer.Restart(); }
             }
-            next[walk.data.path_id] = entries;
-            if (timer.Elapsed.TotalMilliseconds >= 1) { yield return null; timer.Restart(); }
+            if (accessReady && overall == accessSignature) yield break;
+            entrances = next; accessSignature = overall; accessReady = true; accessGeneration++;
+            var stale = new List<int>();
+            foreach (int id in accessCache.Keys)
+                if (!usedParcels.Contains(id)) stale.Add(id);
+            foreach (int id in stale) accessCache.Remove(id);
         }
-        if (accessReady && overall == accessSignature) { accessWorker = null; yield break; }
-        entrances = next; accessSignature = overall; accessReady = true; accessGeneration++;
-        var stale = new List<int>();
-        foreach (int id in accessCache.Keys)
-            if (!usedParcels.Contains(id)) stale.Add(id);
-        foreach (int id in stale) accessCache.Remove(id);
-        accessWorker = null;
+        finally
+        {
+            accessWorker = null;
+        }
     }
 
     private void BuildEntrances(Walk walk, ParcelSummary parcel, int building, List<Entrance> result)
@@ -355,8 +449,19 @@ public sealed class PedestrianManager : MonoBehaviour
     }
 
     private float SpawnWeight(Bucket b)
-        => b.target <= 0 || (!initialFill && !HasSpawnPoint(b.walk)) ? 0
+        => b.target <= 0 || (!initialFill && !HasSpawnPointCached(b.walk)) ? 0
             : Mathf.Max(0, b.target - b.count) + Mathf.Max(0, b.target - b.average);
+
+    // entrances の交換は必ず accessGeneration を進め、intervals は Walk 生成時にしか決まらないので、世代比較で無効化できる。
+    private bool HasSpawnPointCached(Walk walk)
+    {
+        if (walk.spawnPointGeneration != accessGeneration)
+        {
+            walk.hasSpawnPoint = HasSpawnPoint(walk);
+            walk.spawnPointGeneration = accessGeneration;
+        }
+        return walk.hasSpawnPoint;
+    }
 
     private bool HasSpawnPoint(Walk walk)
     {

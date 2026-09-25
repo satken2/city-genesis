@@ -79,7 +79,7 @@ public sealed class TransitRouteGeometry
     {
         if (railConnectors.ContainsKey(node)) return;
         var list = new List<VehiclePolyline>(); railConnectors[node] = list;
-        var parent = paths.GetNodeObject(node)?.transform.Find("Rail");
+        var parent = paths.GetNodeIntersectionObject(node)?.transform.Find("Rail");   // 破棄済みでも本物の null が返る
         if (parent == null) return;
         foreach (var spline in parent.GetComponentsInChildren<SplineComputer>())
         {

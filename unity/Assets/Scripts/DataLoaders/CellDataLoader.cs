@@ -28,8 +28,8 @@ public class CellDataLoader : MonoBehaviour
 
     /// <summary>
     /// 現在進行中のロードバッチ。UpdateManagers ごとに新しいバッチを発行し、旧バッチは Cancel する。
-    /// StopCoroutine では停止できない子コルーチン(TerrainManager の並行ロード等)は、
-    /// このバッチの IsCanceled を確認して協調的に停止する。
+    /// StopCoroutine では停止できない子の処理は、このバッチの IsCanceled を確認して協調的に停止する。
+    /// 地形タイルのジョブと背景地形は寿命をセルの常駐とセッションで決めるので、バッチの取消しでは止まらない。
     /// </summary>
     private LoadBatch activeLoadBatch;
 
@@ -71,6 +71,13 @@ public class CellDataLoader : MonoBehaviour
     /// タイルが更新対象にならず古い形状が残る。ロード完了通知(session:reload)で解除する。
     /// </summary>
     private bool loadSuspendedUntilReload = false;
+
+    // 移動中に旧バッチの取消しとやり直しが連続しないよう、カメラ由来の発行間隔の下限を置く。
+    // 間隔が空いた後の最初の変化は即時に発行し、間隔内の通知は最後の1件だけを Update で発行する。
+    private const float CAMERA_BATCH_MIN_INTERVAL = 0.25f;
+    private float nextCameraBatchTime;
+    private bool hasDeferredCameraCell;
+    private Vector2Int deferredCameraCell;
     
     // BaseApiDataManagerがloadedCellsを管理するため、ここでの履歴管理は不要になるが、
     // カメラ移動時の「前回と同じか」判定のために保持してもよい。
@@ -231,9 +238,17 @@ public class CellDataLoader : MonoBehaviour
             return;
         }
 
-
-
+        // 中心セルは合流中も更新する。間に ReloadAllData が来たとき最新の視点で集合を作り、
+        // 後で発行する合流分が同じ集合になって再取得を取り消さないようにするため。
         currentCenterCell = newCenterCellIndex;
+        if (Time.unscaledTime < nextCameraBatchTime)
+        {
+            deferredCameraCell = newCenterCellIndex;
+            hasDeferredCameraCell = true;
+            RenderWorkScheduler.CountEvent("camera.batchDeferred");
+            return;
+        }
+        hasDeferredCameraCell = false;
 
         LodCellSets cellSets = CalculateLodCellSets();
         HashSet<Vector2Int> tierChangedCells = CalculateTierChangedCells(cellSets, isForce: false);
@@ -250,10 +265,20 @@ public class CellDataLoader : MonoBehaviour
         }
 
         UpdateManagers(cellSets, tierChangedCells, isForce: false);
+        nextCameraBatchTime = Time.unscaledTime + CAMERA_BATCH_MIN_INTERVAL;
 
-        // カメラの表示範囲が変わったため、アラートアイコンも更新する。
-        // クールダウンにより短時間の連続呼び出しは間引かれる。
-        AlertManager.Instance?.Refresh();
+        // 表示範囲が変わったため、ロード済みの地形・建物に合わせてアラートアイコンの高さを再解決する。
+        AlertManager.Instance?.RefreshPositions();
+    }
+
+    private void Update()
+    {
+        // 集合は発行時点のカメラから計算し直すので、カメラが止まった後の最後の視点も必ず1回評価される。
+        if (hasDeferredCameraCell && Time.unscaledTime >= nextCameraBatchTime)
+        {
+            hasDeferredCameraCell = false;
+            OnCameraCellChanged(deferredCameraCell);
+        }
     }
 
     /// <summary>
@@ -278,7 +303,7 @@ public class CellDataLoader : MonoBehaviour
             ? Camera.main.transform.forward
             : Vector3.forward;
 
-        return LodConfig.CalculateCellSets(currentCenterCell, viewCenterPosition, cameraPosition, cameraForward, terrainManager, cellSize, mapWidth, mapHeight);
+        return LodConfig.CalculateCellSets(currentCenterCell, viewCenterPosition, cameraPosition, cameraForward, terrainManager, cellSize, mapWidth, mapHeight, currentCellTiers.Keys);
     }
 
     private HashSet<Vector2Int> CalculateTierChangedCells(LodCellSets cellSets, bool isForce)
@@ -375,8 +400,7 @@ public class CellDataLoader : MonoBehaviour
         if (isForce) pathManager?.ClearTerrainFollowProgress();
 
         // 新しいロードバッチを発行し、進行中の旧バッチを協調キャンセルする。
-        // 各マネージャーの親コルーチンは StopCoroutine で停止されるが、
-        // StartCoroutine で起動された子コルーチン(TerrainManager の並行HTTPロード等)は
+        // 各マネージャーの親コルーチンは StopCoroutine で停止されるが、別に起動された子の処理は
         // それでは止まらないため、バッチの IsCanceled を見て自発的に停止する。
         if (activeLoadBatch != null)
         {
@@ -682,6 +706,10 @@ public class CellDataLoader : MonoBehaviour
     public void ReloadAllData()
     {
         PropManager.Instance?.InvalidateForestOverview();
+        // 再取得の合図は要求時に同期で記録する。後続のバッチが取消されても、次のバッチで取り直させるため。
+        terrainManager?.InvalidateCellVersions();
+        buildingManager?.MarkLoadedCellsStale();
+        parcelManager?.MarkLoadedCellsStale();
         Debug.Log("CellDataLoader: ReloadAllData invoked.");
         loadSuspendedUntilReload = false;
         if (currentCenterCell.x != int.MinValue && currentCenterCell.y != int.MinValue)
@@ -800,6 +828,8 @@ public class CellDataLoader : MonoBehaviour
         pendingFollowUpCells.Clear();
         pendingIsForce = false;
         loadSuspendedUntilReload = false;
+        hasDeferredCameraCell = false;
+        nextCameraBatchTime = 0f;
 
         // 視点検出も初期化する。現在セルを未設定に戻した後にカメラが静止したままだと、
         // 視点変化が検出されず OnCameraCellChanged が二度と呼ばれない(海面しか見えない)ため。

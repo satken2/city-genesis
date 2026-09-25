@@ -22,11 +22,18 @@ public static class LodConfig
     public const int MAX_RESIDENT_CELLS = 81;
     public const float MAX_FOCUS_RADIUS = 2500f;
     public const float PRELOAD_MARGIN = 100f;
+    // 既に常駐しているセルを残す側の余裕。回転やズームの微小な変化で縁のセルが出入りを繰り返さないため。
+    public const float RESIDENT_HYSTERESIS_MARGIN = 250f;
 
+    /// <summary>
+    /// 常駐セル(最大 MAX_RESIDENT_CELLS)を近い順に選ぶ。
+    /// previousResident は現在の常駐集合で、境界付近の入れ替わりを抑えるヒステリシスに使う。
+    /// LodQA が省略可能引数を既定値で補ってリフレクション呼び出しするので、オーバーロードを足さないこと。
+    /// </summary>
     public static LodCellSets CalculateCellSets(
         Vector2Int centerCell, Vector3 viewCenterPosition, Vector3 cameraPosition,
         Vector3 cameraForward, TerrainManager terrainManager, float cellSize,
-        int mapWidth, int mapHeight)
+        int mapWidth, int mapHeight, ICollection<Vector2Int> previousResident = null)
     {
         var resident = new List<Vector2Int>();
         if (cellSize <= 0 || mapWidth <= 0 || mapHeight <= 0)
@@ -53,22 +60,29 @@ public static class LodConfig
         }
         Include(viewCenterPosition, radius);
         Include(cameraPosition, 500f);
+        if (previousResident != null)
+            foreach (var cell in previousResident)
+                if (cell.x >= minX && cell.x < maxX && cell.y >= minZ && cell.y < maxZ) candidates.Add(cell);
         var scored = new List<(Vector2Int cell, float score)>();
         foreach (var cell in candidates)
         {
+            bool wasResident = previousResident != null && previousResident.Contains(cell);
+            float keep = wasResident ? RESIDENT_HYSTERESIS_MARGIN : 0f;
             float low = -100f, high = 100f;
             if (terrainManager != null) terrainManager.TryGetCellHeightRange(cell, out low, out high);
             var bounds = new Bounds(new Vector3((cell.x+.5f)*cellSize, (low+high)*.5f, (cell.y+.5f)*cellSize),
                 new Vector3(cellSize, Mathf.Max(1f,high-low),cellSize));
             float nearDistance = bounds.SqrDistance(cameraPosition);
-            Bounds expanded = bounds; expanded.Expand(PRELOAD_MARGIN*2f);
-            if (planes != null && nearDistance > 500f*500f && !GeometryUtility.TestPlanesAABB(planes, expanded)) continue;
+            float nearLimit = 500f + keep;
+            bool alwaysNear = nearDistance <= nearLimit*nearLimit;
+            Bounds expanded = bounds; expanded.Expand(PRELOAD_MARGIN*2f + keep*2f);
+            if (planes != null && !alwaysNear && !GeometryUtility.TestPlanesAABB(planes, expanded)) continue;
             var focus = new Vector3(viewCenterPosition.x, bounds.center.y, viewCenterPosition.z);
             float focusDistance = bounds.SqrDistance(focus);
-            if (focusDistance > radius*radius && nearDistance > 500f*500f) continue;
+            if (focusDistance > (radius+keep)*(radius+keep) && !alwaysNear) continue;
             float score = Mathf.Min(nearDistance, focusDistance + cellSize*cellSize);
             // 再取得境界に余裕を持たせ、微小な移動で常駐集合が入れ替わらないようにする。
-            if (terrainManager != null && terrainManager.HasSurfaceTile(cell)) score *= .8f;
+            if (wasResident || (terrainManager != null && terrainManager.HasSurfaceTile(cell))) score *= .8f;
             scored.Add((cell, score));
         }
         scored.Sort((a,b) => {

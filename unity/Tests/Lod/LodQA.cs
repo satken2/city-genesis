@@ -455,7 +455,7 @@ public static class LodQA
         Set(outsideRequest,"data",outside); Set(outsideRequest,"drawLod",Lod(2));
         queue[71002] = outsideRequest;
         Call(manager,"ApplyLodCellChanges",new List<Vector2Int> { Vector2Int.zero },new List<Vector2Int>(),
-            Activator.CreateInstance(typeof(Dictionary<,>).MakeGenericType(typeof(Vector2Int),Type("LodTier"))));
+            Activator.CreateInstance(typeof(Dictionary<,>).MakeGenericType(typeof(Vector2Int),Type("LodTier"))),Field(manager,"staleMarkRevision"));
         Check(queue.Count == 1 && queue.Contains(71001),"Building request outside the registered cells remained queued");
         Check((bool)Call(manager,"IsDeferredCellReady",data),"Loaded cell did not release pending building");
         Check((bool)manager.GetType().GetProperty("HasPendingInitialDetails",Instance).GetValue(manager),"Registered-cell building request did not hold initial load");

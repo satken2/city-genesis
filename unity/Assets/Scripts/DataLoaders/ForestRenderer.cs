@@ -42,15 +42,12 @@ public sealed class ForestRenderer : IDisposable
     public Patch Create(PropScatterItem data, List<PropGeometry.Region> regions,
         List<PropGeometry.Region> obstacles, Rect rect, PropRenderModel model, int budget)
     {
-        if (!Supported || budget <= 0 || data.density <= 0 || float.IsNaN(data.density) || float.IsInfinity(data.density)) return null;
+        if (!Supported || !Valid(data.density, budget)) return null;
         var p = new Patch { sourceId = data.prop_scatter_id, type = data.prop_type, seed = data.seed,
-            edgeFadeWidth = data.edge_fade_width,
-            rect = rect, model = model, spacing = Mathf.Max(.5f, Mathf.Sqrt(10000f / data.density)),
+            edgeFadeWidth = data.edge_fade_width, rect = rect, model = model,
             clearance = Mathf.Max(model.bounds.extents.x, model.bounds.extents.z) * .15f };
-        p.startX = Mathf.FloorToInt(rect.xMin / p.spacing); p.startZ = Mathf.FloorToInt(rect.yMin / p.spacing);
-        p.gridWidth = Mathf.CeilToInt(rect.xMax / p.spacing) - p.startX;
-        p.gridCount = p.gridWidth * (Mathf.CeilToInt(rect.yMax / p.spacing) - p.startZ);
-        p.count = Mathf.Min(p.gridCount, Mathf.Max(1, budget));
+        Grid(rect, data.density, out p.spacing, out p.startX, out p.startZ, out p.gridWidth, out p.gridCount);
+        p.count = Count(p.gridCount, budget);
         if (p.count <= 0) return null;
         var verts = new List<Vector2>(); var descriptors = new List<Vector4>();
         AddPolygons(regions, rect, 0, verts, descriptors);
@@ -67,6 +64,28 @@ public sealed class ForestRenderer : IDisposable
             return p;
         }
         catch { p.Dispose(); throw; }
+    }
+
+    /// <summary>
+    /// Create と同じ式で求めたパッチの格子候補数。PropManager が小区画の署名に使い、
+    /// 候補予算が変わっても本数が同じなら GPU バッファを作り直さない。
+    /// </summary>
+    public static int PatchCount(Rect rect, float density, int budget)
+    {
+        if (!Valid(density, budget)) return 0;
+        Grid(rect, density, out _, out _, out _, out _, out int gridCount);
+        return Count(gridCount, budget);
+    }
+
+    static bool Valid(float density, int budget) => budget > 0 && density > 0 && !float.IsNaN(density) && !float.IsInfinity(density);
+    static int Count(int gridCount, int budget) => Mathf.Min(gridCount, Mathf.Max(1, budget));
+
+    static void Grid(Rect rect, float density, out float spacing, out int startX, out int startZ, out int gridWidth, out int gridCount)
+    {
+        spacing = Mathf.Max(.5f, Mathf.Sqrt(10000f / density));
+        startX = Mathf.FloorToInt(rect.xMin / spacing); startZ = Mathf.FloorToInt(rect.yMin / spacing);
+        gridWidth = Mathf.CeilToInt(rect.xMax / spacing) - startX;
+        gridCount = gridWidth * (Mathf.CeilToInt(rect.yMax / spacing) - startZ);
     }
 
     static void AddPolygons(List<PropGeometry.Region> polygons, Rect rect, float margin,

@@ -122,12 +122,15 @@ public class PropManager : BaseApiDataManager
         public Matrix4x4[] matrices;
         public Bounds bounds;
         public bool shadows;
+        public bool shadowEligible; // 影を落とす種別・LODか。影の距離判定だけをカメラ移動で更新するために保持する
     }
     private sealed class Chunk
     {
         public Spec spec;
         public Candidate[] points;
         public Candidate[] basePoints;
+        public int offered;      // 通常候補の抽出に投入した総数。予算変更時に切り詰めで済むかを判定する
+        public long terrainStamp = -1; // 点の高さを取った時点の地形の版(TerrainStamp)。-1 は不明
         public bool detailResident;
         public readonly HashSet<int> hiddenScatters = new HashSet<int>();
         public readonly List<DrawBatch> batches = new List<DrawBatch>();
@@ -149,11 +152,35 @@ public class PropManager : BaseApiDataManager
     private readonly Dictionary<Vector2Int, List<Obstacle>> obstacleGrid = new Dictionary<Vector2Int, List<Obstacle>>();
     private readonly HashSet<Vector2Int> obstacleReadyCells = new HashSet<Vector2Int>();
     private readonly Plane[] planes = new Plane[6];
+    // RebuildBatches の作業領域。呼び出し元は単一の DrawWorker だけで逐次実行なので共有する。
+    private readonly Dictionary<(int, DrawLod, bool), List<Matrix4x4>> groupScratch = new Dictionary<(int, DrawLod, bool), List<Matrix4x4>>();
+    private readonly List<(int, DrawLod, bool)> groupKeys = new List<(int, DrawLod, bool)>();
+    private readonly List<DrawBatch> batchScratch = new List<DrawBatch>();
+    private readonly List<Vector2Int> drawKeys = new List<Vector2Int>();
+    private Vector3 lastPassCamera = Vector3.positiveInfinity, lastPassOffset;
+    private float lastPassProjection;
+    private bool lastPassOrtho;
+    // compute dispatch を1フレームに集中させないための、1フレームあたりの GPU 森林の生成点数上限。
+    private const int ForestDispatchBudget = 262144;
+    private int dispatchFrame = -1, dispatched;
+    // 森林パッチの準備・非表示・増減のたびに進める。詳細マスクは版が変わったフレームだけ作り直す。
+    private int forestStateVersion, appliedForestStateVersion = -1;
     private Coroutine loading, worker;
     private Transform anchor;
     private bool visible = true;
     private int generation, candidateCount;
-    public int PreviewRevision { get; private set; }
+    private int activeLoads;
+    private float previewDemandUntil = float.NegativeInfinity;
+    private const float PreviewDemandHoldSeconds = 2f;
+    /// <summary>散布プレビューが直近に障害物を必要としたか。要求が無い間はプロップの無い範囲の障害物を取得しない。</summary>
+    private bool PreviewDemanded => Time.unscaledTime < previewDemandUntil;
+    private int previewRevision;
+    /// <summary>
+    /// 障害物・地形の変化でプレビューの作り直しが要るたびに進む版。
+    /// 散布配置モードの間は PropPlacementManager が毎フレーム読むので、読み取りを散布プレビューの生存確認として需要を延長する。
+    /// </summary>
+    public int PreviewRevision { get { ExtendPreviewDemand(); return previewRevision; } }
+    private void ExtendPreviewDemand() => previewDemandUntil = Time.unscaledTime + PreviewDemandHoldSeconds;
     public Vector3 SceneOffset => Offset;
     public int CandidateBudget => maxResidentCandidates + PropRenderPolicy.DetailCandidateBudget;
     public int ResidentCandidateCount => candidateCount;
@@ -248,6 +275,7 @@ public class PropManager : BaseApiDataManager
                 forestOverview.SetLeafColor(2, Model(2));
             }
             forestOverview.Publish(task.Result);
+            appliedForestStateVersion = -1;
             overviewDirty = false;
         }
         overviewLoading = null;
@@ -255,13 +283,42 @@ public class PropManager : BaseApiDataManager
 
     private IEnumerator Load(List<Vector2Int> cells, bool force, int serial, LoadBatch batch)
     {
-        if (cells.Count == 0) yield break;
-        CalculateMergedBBox(cells, out float x0, out float z0, out float x1, out float z1);
-        PropListResponse response = null;
-        yield return ApiClient.GetBulk<PropListResponse>(FormattableString.Invariant($"/props?bbox={x0},{z0},{x1},{z1}&include_obstacles=true"),
-            data => response = data, error => Debug.LogError($"PropManager: {error}"));
-        if (Canceled(serial, batch) || response == null || response.obstacles == null) yield break;
-        yield return ApplySnapshot(response, cells, force, serial, batch);
+        // 停止時も iterator の Dispose で finally が走るので、実行中の本数を数えられる。
+        activeLoads++;
+        try
+        {
+            if (cells.Count == 0) yield break;
+            CalculateMergedBBox(cells, out float x0, out float z0, out float x1, out float z1);
+            // 障害物は既存プロップの除外と散布プレビューにしか使わない。プロップが1件も無く
+            // プレビューも要求されていなければ、全区画・道路のポリゴン取得を省く。
+            if (!PreviewDemanded)
+            {
+                PropListResponse probe = null;
+                yield return ApiClient.GetBulk<PropListResponse>(FormattableString.Invariant($"/props?bbox={x0},{z0},{x1},{z1}&limit=1"),
+                    data => probe = data, error => Debug.LogError($"PropManager: {error}"), "/props?limit=1", isCanceled: () => Canceled(serial, batch));
+                if (Canceled(serial, batch) || probe == null) yield break;
+                if ((probe.scatters == null || probe.scatters.Count == 0) && (probe.instances == null || probe.instances.Count == 0))
+                {
+                    ApplyEmpty();
+                    yield break;
+                }
+            }
+            PropListResponse response = null;
+            yield return ApiClient.GetBulk<PropListResponse>(FormattableString.Invariant($"/props?bbox={x0},{z0},{x1},{z1}&include_obstacles=true"),
+                data => response = data, error => Debug.LogError($"PropManager: {error}"), isCanceled: () => Canceled(serial, batch));
+            if (Canceled(serial, batch) || response == null || response.obstacles == null) yield break;
+            yield return ApplySnapshot(response, cells, force, serial, batch);
+            loading = null;
+        }
+        finally { activeLoads--; }
+    }
+
+    /// <summary>常駐範囲にプロップが無いときの適用。障害物は未取得なので、どのセルもプレビュー不可のままにする。</summary>
+    private void ApplyEmpty()
+    {
+        LastRegeneratedChunks = 0; LastExclusionUpdatedChunks = 0;
+        foreach (var key in new List<Vector2Int>(chunks.Keys)) RemoveChunk(key);
+        obstacleGrid.Clear(); obstacleReadyCells.Clear(); previewRevision++;
         loading = null;
     }
     private IEnumerator ApplySnapshot(PropListResponse response, List<Vector2Int> cells, bool force, int serial, LoadBatch batch)
@@ -309,12 +366,18 @@ public class PropManager : BaseApiDataManager
             if (Canceled(serial, batch)) yield break;
         }
         obstacleGrid.Clear(); foreach (var pair in nextObstacles) obstacleGrid.Add(pair.Key, pair.Value);
-        obstacleReadyCells.Clear(); obstacleReadyCells.UnionWith(cells); PreviewRevision++;
-        var ordered = new List<Spec>(specs.Values);
+        obstacleReadyCells.Clear(); obstacleReadyCells.UnionWith(cells); previewRevision++;
+        var ordered = new Spec[specs.Count];
+        specs.Values.CopyTo(ordered, 0);
         Vector3 camera = Camera.main != null ? Camera.main.transform.position - Offset : Vector3.zero;
-        ordered.Sort((a, b) => (a.rect.center - new Vector2(camera.x, camera.z)).sqrMagnitude.CompareTo((b.rect.center - new Vector2(camera.x, camera.z)).sqrMagnitude));
+        var cameraXZ = new Vector2(camera.x, camera.z);
+        var distances = new float[ordered.Length];
+        for (int i = 0; i < ordered.Length; i++) distances[i] = (ordered[i].rect.center - cameraXZ).sqrMagnitude;
+        Array.Sort(distances, ordered);
         var keep = new HashSet<Vector2Int>();
-        int activeSpecs = ordered.FindAll(spec => spec.scatters.Exists(s => !PropRenderPolicy.NearOnly(s.data.prop_type)) || spec.instances.Count > 0).Count;
+        int activeSpecs = 0;
+        foreach (var spec in ordered)
+            if (spec.scatters.Exists(s => !PropRenderPolicy.NearOnly(s.data.prop_type)) || spec.instances.Count > 0) activeSpecs++;
         int quota = maxResidentCandidates / Mathf.Max(1, activeSpecs);
         int forestSpecs = 0;
         foreach (var spec in ordered) foreach (var scatter in spec.scatters) if (IsGpuTree(scatter.data.prop_type)) forestSpecs++;
@@ -326,18 +389,45 @@ public class PropManager : BaseApiDataManager
             spec.scatters.Sort((a,b) => a.data.prop_scatter_id.CompareTo(b.data.prop_scatter_id));
             spec.instances.Sort((a,b) => a.prop_instance_id.CompareTo(b.prop_instance_id));
             spec.obstacles.Sort((a,b) => string.CompareOrdinal(a.data.key,b.data.key));
-            spec.sourceSignature = quota + ":" + forestQuota + ":" + GpuForests + ":" + string.Join(";", spec.scatters.ConvertAll(s => $"s{s.data.prop_scatter_id}:{s.data.version}")) + "|" +
+            // 候補予算は常駐小区画数で変わるので署名に入れない。GPU森林は予算で決まる実効本数だけを入れる。
+            spec.sourceSignature = GpuForests + ":" + string.Join(";", spec.scatters.ConvertAll(s => IsGpuTree(s.data.prop_type)
+                    ? $"s{s.data.prop_scatter_id}:{s.data.version}:f{ForestRenderer.PatchCount(spec.rect, s.data.density, forestQuota)}"
+                    : $"s{s.data.prop_scatter_id}:{s.data.version}")) + "|" +
                 string.Join(";", spec.instances.ConvertAll(i => $"i{i.prop_instance_id}:{i.version}"));
             spec.obstacleSignature = string.Join(";", spec.obstacles.ConvertAll(o => o.data.key + ":" + o.data.signature));
             chunks.TryGetValue(spec.key, out var previous);
-            Candidate[] points = previous != null && !force && previous.spec.sourceSignature == spec.sourceSignature ? previous.basePoints : null;
+            bool exclusionChanged = previous == null || previous.spec.obstacleSignature != spec.obstacleSignature;
+            Candidate[] points = null;
+            int offered = 0;
+            if (previous != null && !force && previous.spec.sourceSignature == spec.sourceSignature)
+            {
+                // StableSample は順位の昇順で返すので、容量を減らした結果は現在の配列の先頭と一致する。
+                int have = previous.basePoints.Length, want = Math.Min(previous.offered, quota);
+                offered = previous.offered;
+                if (want == have || (want > have && want < have * 5 / 4)) points = previous.basePoints;
+                else if (want < have)
+                {
+                    var trimmed = new Candidate[want];
+                    Array.Copy(previous.points, trimmed, want);
+                    if (!exclusionChanged)
+                    {
+                        Trim(previous, trimmed);
+                        keep.Add(spec.key);
+                        if (timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs) { yield return RenderWorkScheduler.Continue; timer.Restart(); }
+                        continue;
+                    }
+                    points = trimmed;
+                }
+            }
             if (points == null)
             {
                 var generated = new StableSample<Candidate>(quota);
                 int visited = 0;
+                offered = 0;
                 foreach (var candidate in ScatterCandidates(spec, false))
                 {
                     generated.Add(candidate.rank | (1UL << 63), candidate);
+                    offered++;
                     if ((++visited & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
                     { yield return RenderWorkScheduler.Continue; timer.Restart(); if (Canceled(serial, batch)) yield break; }
                 }
@@ -348,12 +438,12 @@ public class PropManager : BaseApiDataManager
                     candidate.sourceId = point.prop_instance_id;
                     candidate.rank = (uint)point.prop_instance_id;
                     generated.Add(candidate.rank, candidate);
+                    offered++;
                 }
                 points = generated.ToArray();
             }
             keep.Add(spec.key);
             bool sourceChanged = previous == null || !ReferenceEquals(points, previous.basePoints);
-            bool exclusionChanged = previous == null || previous.spec.obstacleSignature != spec.obstacleSignature;
             if (sourceChanged || exclusionChanged || force)
             {
                 if (sourceChanged) LastRegeneratedChunks++;
@@ -369,6 +459,7 @@ public class PropManager : BaseApiDataManager
                     { yield return RenderWorkScheduler.Continue; timer.Restart(); if (Canceled(serial, batch)) yield break; }
                 }
                 // 通信待ちの間に地形追従が終わっていても、コミット時の高さを使う。
+                long terrainStamp = TerrainStamp(spec.cell);
                 for (int i = 0; i < points.Length; i++)
                 {
                     points[i].position.y = Height(points[i].position) + points[i].heightOffset;
@@ -377,7 +468,9 @@ public class PropManager : BaseApiDataManager
                 }
                 var previousBatches = previous != null ? new List<DrawBatch>(previous.batches) : null;
                 RemoveChunk(spec.key);
-                var chunk = new Chunk { spec = spec, points = points, basePoints = points };
+                // 高さを取っている途中に地形が届いた場合は、その通知が旧小区画に当たって失われるので、ここで追従を予約する。
+                var chunk = new Chunk { spec = spec, points = points, basePoints = points, offered = offered,
+                    terrainStamp = terrainStamp, heightDirty = TerrainStamp(spec.cell) != terrainStamp };
                 var obstacles = new List<PropGeometry.Region>();
                 var landObstacles = new List<PropGeometry.Region>();
                 foreach (var obstacle in spec.obstacles)
@@ -400,6 +493,7 @@ public class PropManager : BaseApiDataManager
                 catch { foreach (var patch in chunk.forests) patch.Dispose(); throw; }
                 if (previousBatches != null) { chunk.batches.AddRange(previousBatches); chunk.offset = previous.offset; }
                 chunks.Add(spec.key, chunk); candidateCount += points.Length;
+                if (chunk.forests.Count > 0) forestStateVersion++;
                 if (!chunksByCell.TryGetValue(spec.cell, out var keys)) chunksByCell[spec.cell] = keys = new HashSet<Vector2Int>();
                 keys.Add(spec.key);
             }
@@ -407,6 +501,25 @@ public class PropManager : BaseApiDataManager
         }
         foreach (var key in new List<Vector2Int>(chunks.Keys)) if (!keep.Contains(key)) RemoveChunk(key);
         loading = null;
+    }
+
+    /// <summary>
+    /// 候補予算の縮小を既存の小区画へ反映する。points の先頭は basePoints と同じ並びで、高さ・表示可否は
+    /// points 側が最新なので、そこから切り出す。近景散布は basePoints の後ろに連結されているので残す。
+    /// </summary>
+    private void Trim(Chunk chunk, Candidate[] trimmed)
+    {
+        int have = chunk.basePoints.Length, detail = chunk.points.Length - have;
+        var points = trimmed;
+        if (detail > 0)
+        {
+            points = new Candidate[trimmed.Length + detail];
+            Array.Copy(trimmed, points, trimmed.Length);
+            Array.Copy(chunk.points, have, points, trimmed.Length, detail);
+        }
+        candidateCount += points.Length - chunk.points.Length;
+        chunk.points = points; chunk.basePoints = trimmed;
+        chunk.dirty = true; chunk.revision++;
     }
 
     private static bool FloorExists(PropObstacleItem item)
@@ -424,16 +537,36 @@ public class PropManager : BaseApiDataManager
     private Vector2Int Key(Vector2 p) => new Vector2Int(Mathf.FloorToInt(p.x / ChunkSize), Mathf.FloorToInt(p.y / ChunkSize));
     private IEnumerable<Vector2Int> KeysIn(Rect bounds, Dictionary<Vector2Int, Spec> specs)
     {
-        // 巨大な散布範囲でもマップ全域の区画を列挙しない。
-        foreach (var cell in loadedCells)
+        // 小さい範囲は重なるセルだけを引き、巨大な散布範囲では常駐セルだけを走査してマップ全域を列挙しない。
+        float size = TerrainManager.CellSize;
+        float sum = bounds.xMin + bounds.xMax + bounds.yMin + bounds.yMax;
+        if (sum > float.NegativeInfinity && sum < float.PositiveInfinity)
         {
-            var cellRect = new Rect(cell.x * TerrainManager.CellSize, cell.y * TerrainManager.CellSize, TerrainManager.CellSize, TerrainManager.CellSize);
-            if (!cellRect.Overlaps(bounds)) continue;
-            var min = Key(Vector2.Max(bounds.min, cellRect.min));
-            var max = Vector2Int.Min(Key(Vector2.Min(bounds.max, cellRect.max)), cell * subdivisions + Vector2Int.one * (subdivisions - 1));
-            for (int x = min.x; x <= max.x; x++) for (int z = min.y; z <= max.y; z++)
-            { var key = new Vector2Int(x,z); if (specs.ContainsKey(key)) yield return key; }
+            int x0 = Mathf.FloorToInt(bounds.xMin / size), x1 = Mathf.FloorToInt(bounds.xMax / size);
+            int z0 = Mathf.FloorToInt(bounds.yMin / size), z1 = Mathf.FloorToInt(bounds.yMax / size);
+            long span = ((long)x1 - x0 + 1) * ((long)z1 - z0 + 1);
+            if (span > 0 && span <= loadedCells.Count)
+            {
+                for (int x = x0; x <= x1; x++) for (int z = z0; z <= z1; z++)
+                {
+                    var cell = new Vector2Int(x, z);
+                    if (!loadedCells.Contains(cell)) continue;
+                    foreach (var key in KeysInCell(bounds, cell, specs)) yield return key;
+                }
+                yield break;
+            }
         }
+        foreach (var cell in loadedCells)
+            foreach (var key in KeysInCell(bounds, cell, specs)) yield return key;
+    }
+    private IEnumerable<Vector2Int> KeysInCell(Rect bounds, Vector2Int cell, Dictionary<Vector2Int, Spec> specs)
+    {
+        var cellRect = new Rect(cell.x * TerrainManager.CellSize, cell.y * TerrainManager.CellSize, TerrainManager.CellSize, TerrainManager.CellSize);
+        if (!cellRect.Overlaps(bounds)) yield break;
+        var min = Key(Vector2.Max(bounds.min, cellRect.min));
+        var max = Vector2Int.Min(Key(Vector2.Min(bounds.max, cellRect.max)), cell * subdivisions + Vector2Int.one * (subdivisions - 1));
+        for (int x = min.x; x <= max.x; x++) for (int z = min.y; z <= max.y; z++)
+        { var key = new Vector2Int(x,z); if (specs.ContainsKey(key)) yield return key; }
     }
     private PropRenderModel Model(int type)
     {
@@ -534,7 +667,9 @@ public class PropManager : BaseApiDataManager
         foreach (var chunk in chunks.Values)
         {
             if (scatter) chunk.hiddenScatters.Add(id);
-            if (scatter) foreach (var patch in chunk.forests) if (patch.sourceId == id) patch.hidden = true;
+            if (scatter)
+                foreach (var patch in chunk.forests)
+                    if (patch.sourceId == id && !patch.hidden) { patch.hidden = true; forestStateVersion++; }
             bool changed = false;
             for (int i = 0; i < chunk.points.Length; i++)
             {
@@ -575,10 +710,13 @@ public class PropManager : BaseApiDataManager
         }
     }
 
+    private bool DetailWanted(Chunk chunk, Vector3 worldCamera) =>
+        ChunkDistance(chunk, worldCamera) <= PropRenderPolicy.DetailResidentDistance
+        && chunk.spec.scatters.Exists(s => PropRenderPolicy.NearOnly(s.data.prop_type));
+
     private IEnumerator RefreshDetail(Chunk chunk, Camera cam)
     {
-        bool wanted = ChunkDistance(chunk, cam.transform.position) <= PropRenderPolicy.DetailResidentDistance
-            && chunk.spec.scatters.Exists(s => PropRenderPolicy.NearOnly(s.data.prop_type));
+        bool wanted = DetailWanted(chunk, cam.transform.position);
         if (wanted == chunk.detailResident) yield break;
         int serial = generation, revision = chunk.revision;
         var timer = System.Diagnostics.Stopwatch.StartNew();
@@ -625,54 +763,94 @@ public class PropManager : BaseApiDataManager
             yield return null;
             var cam = Camera.main;
             if (!visible || cam == null) continue;
-            var timer = System.Diagnostics.Stopwatch.StartNew();
-            var keys = new List<Vector2Int>(chunks.Keys);
-            foreach (var key in keys)
+            Vector3 passCamera = cam.transform.position, passOffset = Offset;
+            float passProjection = DrawLodEvaluator.GetTanHalfFov(cam);
+            bool passOrtho = cam.orthographic;
+            // 前回の周回を完了した視点のままで、未処理の小区画も無ければ、巡回しても何も変わらない。
+            bool idle = passCamera == lastPassCamera && passOffset == lastPassOffset && passProjection == lastPassProjection
+                && passOrtho == lastPassOrtho && !HasPendingDrawWork;
+            if (!idle)
             {
-                if (!chunks.TryGetValue(key, out var chunk)) continue;
-                yield return RefreshDetail(chunk, cam);
-                if (!chunks.TryGetValue(key, out var live) || live != chunk) continue;
-                foreach (var patch in chunk.forests)
+                // 世代が進むと途中の小区画が再構築を打ち切るので、その周回は完了扱いにしない。
+                int passGeneration = generation;
+                var timer = System.Diagnostics.Stopwatch.StartNew();
+                drawKeys.Clear(); drawKeys.AddRange(chunks.Keys);
+                for (int k = 0; k < drawKeys.Count; k++)
                 {
-                    if (!patch.dirty && !chunk.heightDirty && chunk.offset == Offset) continue;
-                    if (terrainManager == null) terrainManager = FindAnyObjectByType<TerrainManager>();
-                    if (terrainManager != null && terrainManager.LoadedTerrainTiles.TryGetValue(chunk.spec.cell, out var terrain))
-                        forestRenderer.Generate(patch, terrain, Offset);
-                }
-                if (chunk.points.Length == 0)
-                {
-                    chunk.batches.Clear(); chunk.heightDirty = false; chunk.dirty = false; chunk.offset = Offset;
-                    if (timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
-                    { yield return RenderWorkScheduler.Continue; timer.Restart(); }
-                    continue;
-                }
-                var pos = cam.transform.position;
-                float projection = DrawLodEvaluator.GetTanHalfFov(cam);
-                bool far = !nearCells.Contains(chunk.spec.cell);
-                bool moved = (pos - chunk.lastCamera).sqrMagnitude >= DrawLodConfig.REEVALUATE_CAMERA_MOVE_DISTANCE * DrawLodConfig.REEVALUATE_CAMERA_MOVE_DISTANCE;
-                // 全点が距離で非表示の小区画は、進入閾値の内側へ戻るまでカメラ移動での再構築を省く。
-                bool beyond = ChunkDistance(chunk, pos) >= DrawLodConfig.PROP_HIDDEN_ENTER_DISTANCE;
-                if (chunk.hidden && beyond && !chunk.dirty && !chunk.heightDirty && chunk.offset == Offset) continue;
-                if (chunk.dirty || chunk.heightDirty || chunk.offset != Offset || chunk.far != far || projection != chunk.lastProjection || moved)
-                {
-                    if (chunk.heightDirty)
+                    var key = drawKeys[k];
+                    if (!chunks.TryGetValue(key, out var chunk)) continue;
+                    if (DetailWanted(chunk, cam.transform.position) != chunk.detailResident) yield return RefreshDetail(chunk, cam);
+                    if (!chunks.TryGetValue(key, out var live) || live != chunk) continue;
+                    for (int f = 0; f < chunk.forests.Count; f++)
                     {
-                        for (int i = 0; i < chunk.points.Length; i++)
+                        var patch = chunk.forests[f];
+                        if (!patch.dirty && !chunk.heightDirty && chunk.offset == Offset) continue;
+                        if (terrainManager == null) terrainManager = FindAnyObjectByType<TerrainManager>();
+                        if (terrainManager == null || !terrainManager.LoadedTerrainTiles.TryGetValue(chunk.spec.cell, out var terrain)) continue;
+                        // compute の CPU 側コストはほぼ無く時間予算では止まらないので、生成点数で1フレームの量を抑える。
+                        if (dispatchFrame != Time.frameCount) { dispatchFrame = Time.frameCount; dispatched = 0; }
+                        if (dispatched >= ForestDispatchBudget)
                         {
-                            chunk.points[i].position.y = Height(chunk.points[i].position) + chunk.points[i].heightOffset;
-                            if ((i & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
-                            { yield return RenderWorkScheduler.Continue; timer.Restart(); }
+                            yield return null;
+                            timer.Restart();
+                            dispatchFrame = Time.frameCount; dispatched = 0;
+                            if (!chunks.TryGetValue(key, out live) || live != chunk || patch.points == null) break;
+                            if (terrainManager == null || !terrainManager.LoadedTerrainTiles.TryGetValue(chunk.spec.cell, out terrain)) continue;
                         }
-                        chunk.heightDirty = false; chunk.revision++;
+                        if (forestRenderer.Generate(patch, terrain, Offset)) { dispatched += patch.count; forestStateVersion++; }
                     }
-                    if (!chunks.TryGetValue(key, out var current) || current != chunk) continue;
-                    yield return RebuildBatches(chunk, cam, far, projection);
+                    if (!chunks.TryGetValue(key, out live) || live != chunk) continue;
+                    if (chunk.points.Length == 0)
+                    {
+                        if (chunk.heightDirty) chunk.terrainStamp = TerrainStamp(chunk.spec.cell);
+                        chunk.batches.Clear(); chunk.heightDirty = false; chunk.dirty = false; chunk.offset = Offset;
+                        if (timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
+                        { yield return RenderWorkScheduler.Continue; timer.Restart(); }
+                        continue;
+                    }
+                    var pos = cam.transform.position;
+                    float projection = DrawLodEvaluator.GetTanHalfFov(cam);
+                    bool far = !nearCells.Contains(chunk.spec.cell);
+                    float chunkDistance = ChunkDistance(chunk, pos);
+                    // 遠い小区画ほど同じ移動量での投影サイズの変化が小さいので、再評価の移動量を距離に比例させる。
+                    float move = Mathf.Max(DrawLodConfig.REEVALUATE_CAMERA_MOVE_DISTANCE, chunkDistance * 0.02f);
+                    bool moved = (pos - chunk.lastCamera).sqrMagnitude >= move * move;
+                    // 全点が距離で非表示の小区画は、進入閾値の内側へ戻るまでカメラ移動での再構築を省く。
+                    bool beyond = chunkDistance >= DrawLodConfig.PROP_HIDDEN_ENTER_DISTANCE;
+                    if (chunk.hidden && beyond && !chunk.dirty && !chunk.heightDirty && chunk.offset == Offset) continue;
+                    if (chunk.dirty || chunk.heightDirty || chunk.offset != Offset || chunk.far != far || projection != chunk.lastProjection || moved)
+                    {
+                        if (chunk.heightDirty)
+                        {
+                            long stamp = TerrainStamp(chunk.spec.cell);
+                            var points = chunk.points;
+                            for (int i = 0; i < points.Length; i++)
+                            {
+                                points[i].position.y = Height(points[i].position) + points[i].heightOffset;
+                                if ((i & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
+                                { yield return RenderWorkScheduler.Continue; timer.Restart(); }
+                            }
+                            // 途中で配列の差し替えや地形の到着があれば、次の周回でやり直す。
+                            if (ReferenceEquals(points, chunk.points) && TerrainStamp(chunk.spec.cell) == stamp)
+                            { chunk.heightDirty = false; chunk.terrainStamp = stamp; }
+                            chunk.dirty = true; chunk.revision++;
+                        }
+                        if (!chunks.TryGetValue(key, out var current) || current != chunk) continue;
+                        yield return RebuildBatches(chunk, cam, far, projection);
+                    }
+                    if (timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs) { yield return RenderWorkScheduler.Continue; timer.Restart(); }
                 }
-                if (timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs) { yield return RenderWorkScheduler.Continue; timer.Restart(); }
+                if (generation == passGeneration)
+                { lastPassCamera = passCamera; lastPassOffset = passOffset; lastPassProjection = passProjection; lastPassOrtho = passOrtho; }
+                else lastPassCamera = Vector3.positiveInfinity;
             }
             for (int i = 1; i < DrawLodConfig.REEVALUATE_INTERVAL_FRAMES; i++) yield return null;
         }
     }
+    /// <summary>
+    /// 点ごとの LOD を評価し、変化した小区画だけバッチを作り直す。行列は点の位置・向き・倍率と原点だけで決まるので、
+    /// 点と原点が変わらず LOD も変わらなければ既存のバッチを使い、影の距離判定だけを更新する。
+    /// </summary>
     private IEnumerator RebuildBatches(Chunk chunk, Camera cam, bool far, float projection)
     {
         int serial = generation;
@@ -680,60 +858,95 @@ public class PropManager : BaseApiDataManager
         Vector3 offset = Offset;
         Vector3 cameraPosition = cam.transform.position;
         var timer = System.Diagnostics.Stopwatch.StartNew();
-        var next = new List<DrawBatch>();
-        var grouped = new Dictionary<(int, DrawLod, bool), List<Matrix4x4>>();
+        bool structural = chunk.dirty || chunk.offset != offset;
+        bool changed = false;
         // 小区画の矩形までのXZ距離は各点の実距離の下限なので、進入閾値以上なら個体判定を省いて全点を隠せる。
         bool beyond = ChunkDistance(chunk, cameraPosition) >= DrawLodConfig.PROP_HIDDEN_ENTER_DISTANCE;
         int hiddenCount = 0;
-        for (int i = 0; i < chunk.points.Length; i++)
+        // 途中で予算の切り詰めや近景散布の差し替えで配列が替わっても、別の点へLODを書き込まないよう開始時の配列を使う。
+        var points = chunk.points;
+        for (int i = 0; i < points.Length; i++)
         {
             if ((i & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
             { yield return RenderWorkScheduler.Continue; timer.Restart(); if (serial != generation) yield break; }
-            var p = chunk.points[i]; if (!p.visible) continue;
-            if (beyond) { p.lod = DrawLod.Hidden; p.distant = false; chunk.points[i] = p; hiddenCount++; continue; }
-            var model = Model(p.type);
-            float distance = Vector3.Distance(p.position + offset + model.bounds.center * p.scale, cameraPosition);
-            if (PropRenderPolicy.Hidden(p.type, distance, p.lod))
-            { p.lod = DrawLod.Hidden; p.distant = false; chunk.points[i] = p; hiddenCount++; continue; }
-            float ratio = DrawLodEvaluator.ProjectedRatio(model.Radius * p.scale, cam.orthographic ? 1 : distance, projection);
-            var lod = PropRenderPolicy.NearOnly(p.type) ? DrawLod.Close
-                : DrawLodEvaluator.EvaluateBySize(model.Radius * p.scale, distance, projection, p.lod, true, cam.orthographic);
-            // 常駐範囲では本数を維持し、画面高の1%未満は四角錐へ置き換える。
-            // 戻りを1.2%にして、境界付近の往復でモデルがちらつくのを抑える。
-            p.distant = lod == DrawLod.Far && model.distant.Count > 0 && ratio < (p.distant ? .012f : .01f);
-            p.lod = lod; chunk.points[i] = p;
-            var group = (p.type, lod, p.distant);
-            if (!grouped.TryGetValue(group, out var matrices)) grouped[group] = matrices = new List<Matrix4x4>();
+            var p = points[i]; if (!p.visible) continue;
+            var lod = DrawLod.Hidden;
+            bool distant = false;
+            if (!beyond)
+            {
+                var model = Model(p.type);
+                float distance = Vector3.Distance(p.position + offset + model.bounds.center * p.scale, cameraPosition);
+                if (!PropRenderPolicy.Hidden(p.type, distance, p.lod))
+                {
+                    float ratio = DrawLodEvaluator.ProjectedRatio(model.Radius * p.scale, cam.orthographic ? 1 : distance, projection);
+                    lod = PropRenderPolicy.NearOnly(p.type) ? DrawLod.Close
+                        : DrawLodEvaluator.EvaluateBySize(model.Radius * p.scale, distance, projection, p.lod, true, cam.orthographic);
+                    // 常駐範囲では本数を維持し、画面高の1%未満は四角錐へ置き換える。
+                    // 戻りを1.2%にして、境界付近の往復でモデルがちらつくのを抑える。
+                    distant = lod == DrawLod.Far && model.distant.Count > 0 && ratio < (p.distant ? .012f : .01f);
+                }
+            }
+            if (lod == DrawLod.Hidden) hiddenCount++;
+            if (lod == p.lod && distant == p.distant) continue;
+            // 書き戻した LOD と既存バッチが食い違うので、途中で打ち切られても次の周回で必ず作り直させる。
+            if (!changed) { changed = true; chunk.dirty = true; }
+            p.lod = lod; p.distant = distant; points[i] = p;
+        }
+        bool committable = serial == generation && revision == chunk.revision && offset == Offset && chunks.TryGetValue(chunk.spec.key, out var live) && live == chunk;
+        if (!structural && !changed)
+        {
+            if (!committable) yield break;
+            foreach (var batch in chunk.batches) batch.shadows = batch.shadowEligible && Vector3.Distance(batch.bounds.center, cameraPosition) < 150f;
+            chunk.far = far; chunk.hidden = beyond; chunk.hiddenCount = hiddenCount;
+            chunk.lastCamera = cameraPosition; chunk.lastProjection = projection;
+            yield break;
+        }
+        foreach (var list in groupScratch.Values) list.Clear();
+        groupKeys.Clear(); batchScratch.Clear();
+        for (int i = 0; i < points.Length; i++)
+        {
+            if ((i & 127) == 0 && timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
+            { yield return RenderWorkScheduler.Continue; timer.Restart(); if (serial != generation) yield break; }
+            var p = points[i];
+            if (!p.visible || p.lod == DrawLod.Hidden) continue;
+            var group = (p.type, p.lod, p.distant);
+            if (!groupScratch.TryGetValue(group, out var matrices)) groupScratch[group] = matrices = new List<Matrix4x4>();
+            if (matrices.Count == 0) groupKeys.Add(group);
             matrices.Add(Matrix4x4.TRS(p.position + offset, Quaternion.Euler(0,p.rotation,0), Vector3.one * p.scale));
         }
-        foreach (var group in grouped)
+        for (int g = 0; g < groupKeys.Count; g++)
         {
-            var model = Model(group.Key.Item1);
-            var parts = group.Key.Item3 ? model.distant : group.Key.Item2 == DrawLod.Far ? model.far : group.Key.Item2 == DrawLod.Close ? model.close : model.normal;
+            var key = groupKeys[g];
+            var transforms = groupScratch[key];
+            var model = Model(key.Item1);
+            var parts = key.Item3 ? model.distant : key.Item2 == DrawLod.Far ? model.far : key.Item2 == DrawLod.Close ? model.close : model.normal;
+            bool shadowEligible = !PropRenderPolicy.NearOnly(key.Item1) && key.Item2 != DrawLod.Far;
             foreach (var part in parts)
-                for (int start = 0; start < group.Value.Count; start += BatchSize)
+                for (int start = 0; start < transforms.Count; start += BatchSize)
                 {
-                    int count = Mathf.Min(BatchSize, group.Value.Count - start);
+                    int count = Mathf.Min(BatchSize, transforms.Count - start);
                     var matrices = new Matrix4x4[count];
                     var bounds = new Bounds();
                     for (int i = 0; i < count; i++)
                     {
-                        matrices[i] = group.Value[start+i] * part.local;
+                        matrices[i] = transforms[start+i] * part.local;
                         var b = Utils.TransformBounds(part.mesh.bounds, matrices[i]);
                         if (i == 0) bounds = b; else bounds.Encapsulate(b);
                     }
-                    next.Add(new DrawBatch { part = part, matrices = matrices, bounds = bounds, shadows = !PropRenderPolicy.NearOnly(group.Key.Item1) && group.Key.Item2 != DrawLod.Far && Vector3.Distance(bounds.center, cameraPosition) < 150f });
+                    batchScratch.Add(new DrawBatch { part = part, matrices = matrices, bounds = bounds, shadowEligible = shadowEligible,
+                        shadows = shadowEligible && Vector3.Distance(bounds.center, cameraPosition) < 150f });
                     if (timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs)
                     { yield return RenderWorkScheduler.Continue; timer.Restart(); if (serial != generation) yield break; }
                 }
         }
-        if (serial == generation && revision == chunk.revision && offset == Offset && chunks.TryGetValue(chunk.spec.key, out var live) && live == chunk)
+        if (serial == generation && revision == chunk.revision && offset == Offset && chunks.TryGetValue(chunk.spec.key, out live) && live == chunk)
         {
-            chunk.batches.Clear(); chunk.batches.AddRange(next);
+            chunk.batches.Clear(); chunk.batches.AddRange(batchScratch);
             chunk.dirty = false; chunk.offset = offset; chunk.far = far;
             chunk.hidden = beyond; chunk.hiddenCount = hiddenCount;
             chunk.lastCamera = cameraPosition; chunk.lastProjection = projection;
         }
+        batchScratch.Clear();
     }
     /// <summary>ワールド座標のカメラ位置から小区画の矩形(保存座標)までのXZ距離。矩形内なら0。</summary>
     private float ChunkDistance(Chunk chunk, Vector3 worldCamera)
@@ -744,14 +957,35 @@ public class PropManager : BaseApiDataManager
         float dz = Mathf.Max(rect.yMin - c.z, 0f, c.z - rect.yMax);
         return Mathf.Sqrt(dx * dx + dz * dz);
     }
+    /// <summary>
+    /// セルに表示中の地形タイルの版と地形の世代を1つにした値。タイルが無い・版が不明なら -1。
+    /// 同じ値なら同じ高さなので、LRU からの復元などで同じ版が再到着しても高さを取り直さない。
+    /// </summary>
+    private static long TerrainStamp(Vector2Int cell)
+    {
+        var manager = Utils.CachedTerrainManager;
+        if (manager == null) return -1;
+        int version = manager.GetAttachedTerrainVersion(cell);
+        if (version < 0) return -1;
+        return ((long)(uint)manager.TerrainEpoch << 32) | (uint)version;
+    }
     private void TerrainReady(Vector2Int cell, Terrain terrain)
     {
-        if (!chunksByCell.TryGetValue(cell, out var keys)) return;
-        foreach (var key in keys) if (chunks.TryGetValue(key, out var chunk)) { chunk.heightDirty = true; chunk.revision++; }
-        PreviewRevision++;
+        bool hasChunks = chunksByCell.TryGetValue(cell, out var keys);
+        if (hasChunks)
+        {
+            long stamp = TerrainStamp(cell);
+            foreach (var key in keys)
+                if (chunks.TryGetValue(key, out var chunk) && (stamp < 0 || chunk.terrainStamp != stamp))
+                { chunk.heightDirty = true; chunk.revision++; }
+        }
+        // プロップの無いセルでも、障害物を取得済みなら散布プレビューの高さを取り直す。
+        if (hasChunks || obstacleReadyCells.Contains(cell)) previewRevision++;
     }
     public List<Rect> PreviewRects(Rect bounds)
     {
+        ExtendPreviewDemand();
+        EnsurePreviewObstacles();
         var result = new List<Rect>();
         foreach (var cell in obstacleReadyCells)
             for (int x = 0; x < subdivisions; x++) for (int z = 0; z < subdivisions; z++)
@@ -764,14 +998,24 @@ public class PropManager : BaseApiDataManager
         result.Sort((a,b) => (a.center - new Vector2(position.x,position.z)).sqrMagnitude.CompareTo((b.center - new Vector2(position.x,position.z)).sqrMagnitude));
         return result;
     }
+    /// <summary>
+    /// プロップの無い範囲では障害物を取得していないので、プレビュー要求時に常駐セル全体を障害物付きで取り直す。
+    /// 取得が終わると PreviewRevision が進み、プレビューが作り直される。
+    /// </summary>
+    private void EnsurePreviewObstacles()
+    {
+        if (!visible || activeLoads > 0 || obstacleReadyCells.IsSupersetOf(loadedCells)) return;
+        LoadCells(new List<Vector2Int>(loadedCells), false);
+    }
     private void LateUpdate()
     {
         SubmittedBatchCount = 0; SubmittedInstanceCount = 0; SubmittedShadowInstances = 0;
         SubmittedForestBatches = 0;
         if (!visible) return;
         var cam = Camera.main; if (cam == null) return;
-        if (forestOverview != null && forestOverview.Ready)
+        if (forestOverview != null && forestOverview.Ready && forestStateVersion != appliedForestStateVersion)
         {
+            appliedForestStateVersion = forestStateVersion;
             forestReadyRects.Clear();
             foreach (var chunk in chunks.Values)
             {
@@ -822,6 +1066,7 @@ public class PropManager : BaseApiDataManager
     {
         if (!chunks.TryGetValue(key, out var chunk)) return;
         foreach (var patch in chunk.forests) patch.Dispose();
+        if (chunk.forests.Count > 0) forestStateVersion++;
         candidateCount -= chunk.points.Length; chunks.Remove(key);
         if (chunksByCell.TryGetValue(chunk.spec.cell, out var keys))
         { keys.Remove(key); if (keys.Count == 0) chunksByCell.Remove(chunk.spec.cell); }
@@ -840,7 +1085,8 @@ public class PropManager : BaseApiDataManager
         if (loading != null) RenderWorkScheduler.Stop(this, loading); loading = null;
         foreach (var chunk in chunks.Values) foreach (var patch in chunk.forests) patch.Dispose();
         chunks.Clear(); chunksByCell.Clear(); loadedCells.Clear(); nearCells.Clear();
-        obstacleGrid.Clear(); obstacleReadyCells.Clear(); candidateCount = 0; PreviewRevision++;
+        obstacleGrid.Clear(); obstacleReadyCells.Clear(); candidateCount = 0; previewRevision++;
+        forestStateVersion++; lastPassCamera = Vector3.positiveInfinity;
         foreach (var model in models.Values) model.Dispose(); models.Clear();
         forestRenderer?.Dispose(); forestRenderer = null;
     }

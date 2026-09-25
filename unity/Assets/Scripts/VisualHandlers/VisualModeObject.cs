@@ -163,39 +163,53 @@ public class VisualModeObject : MonoBehaviour, IVisualModeHandler
         return false;
     }
 
+    /// <summary>
+    /// Resources の既定マテリアルを名前ごとに1度だけ読む。詳細建物の生成・復元のたびに約10回の Resources.Load を繰り返さないため。
+    /// 見つからなかった名前も本物の null として覚え、再検索しない。破棄済み(Unity の null)だけは読み直す。
+    /// </summary>
+    private static readonly Dictionary<string, Material> defaultMaterials = new Dictionary<string, Material>();
+
+    private static Material LoadDefault(string name)
+    {
+        if (defaultMaterials.TryGetValue(name, out Material material) && (ReferenceEquals(material, null) || material != null)) return material;
+        material = Resources.Load<Material>(name);
+        defaultMaterials[name] = material;
+        return material;
+    }
+
     private void LoadDefaultMaterials()
     {
-        if (highlightMaterial == null) highlightMaterial = Resources.Load<Material>("HighlightMaterial");
-        if (pendingMaterial == null) pendingMaterial = Resources.Load<Material>("PendingMaterial");
-        if (plannedMaterial == null) plannedMaterial = Resources.Load<Material>("PlannedMaterial");
-        if (constructionMaterial == null) constructionMaterial = Resources.Load<Material>("ConstructionMaterial");
-        if (previewMaterial == null) previewMaterial = Resources.Load<Material>("PreviewBuildingMaterial");
+        if (highlightMaterial == null) highlightMaterial = LoadDefault("HighlightMaterial");
+        if (pendingMaterial == null) pendingMaterial = LoadDefault("PendingMaterial");
+        if (plannedMaterial == null) plannedMaterial = LoadDefault("PlannedMaterial");
+        if (constructionMaterial == null) constructionMaterial = LoadDefault("ConstructionMaterial");
+        if (previewMaterial == null) previewMaterial = LoadDefault("PreviewBuildingMaterial");
 
         // 道路の数値ベース色分け用マテリアル
-        if (pathColorMaterial == null) pathColorMaterial = Resources.Load<Material>("PathColorMaterial");
+        if (pathColorMaterial == null) pathColorMaterial = LoadDefault("PathColorMaterial");
 
         // 建物の数値ベース色分け用マテリアル。
         // Inspectorで未設定の場合はResourcesから読み込む。
         if (buildingColorMaterial == null)
         {
-            buildingColorMaterial = Resources.Load<Material>("BuildingColorMaterial");
+            buildingColorMaterial = LoadDefault("BuildingColorMaterial");
         }
         // Resourcesにも無い場合はフォールバックとしてBuildingMaterialを使用する。
         // BuildingMaterialはDepthOffsetLitシェーダを使用しているため、
         // 建物と同じZ-fighting対策が適用される。
         if (buildingColorMaterial == null)
         {
-            buildingColorMaterial = Resources.Load<Material>("BuildingMaterial");
+            buildingColorMaterial = LoadDefault("BuildingMaterial");
         }
 
         // 建物のフロア色分けモードで、対象フロアを持たない建物の半透明表示用マテリアル。
         if (buildingColorFadeMaterial == null)
         {
-            buildingColorFadeMaterial = Resources.Load<Material>("BuildingColorFadeMaterial");
+            buildingColorFadeMaterial = LoadDefault("BuildingColorFadeMaterial");
         }
 
         // フォールバック
-        if (previewMaterial == null) previewMaterial = Resources.Load<Material>("BuildingMaterial");
+        if (previewMaterial == null) previewMaterial = LoadDefault("BuildingMaterial");
     }
 
     public void SetStatus(int status)

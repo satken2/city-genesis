@@ -148,7 +148,7 @@ public static class PathMeshFactory
                 return stationHouseGenerator.Generate(pathData, points, startSidewalkSetback, endSidewalkSetback);
             case "none":
                 // メッシュ生成なし（経路探索専用パス等）
-                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[PathMeshFactory] model_type=none: メッシュ生成スキップ (variant={pathData.path_variant})");
+                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[PathMeshFactory] model_type=none: メッシュ生成スキップ (variant={pathData.path_variant})");
                 return null;
             case "default":
             default:

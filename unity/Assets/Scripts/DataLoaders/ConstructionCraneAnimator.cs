@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>クレーン頂部を接続点のY軸まわりに旋回させる、シミュレーションと独立した演出。</summary>
@@ -21,24 +22,33 @@ public sealed class ConstructionCraneAnimator : MonoBehaviour
     private int seed;
     private MeshRenderer craneRenderer;
 
+    /// <summary>
+    /// 頂部プレハブごとの結合済みメッシュと DepthOffset マテリアル。頂部の形はプレハブだけで決まるので全建物で共有し、
+    /// 建物GOの破棄や退避キャッシュの追い出しで解放させない(RenderCacheIdentity を付けない)。セッションを跨いで保持する。
+    /// </summary>
+    private static readonly Dictionary<GameObject, (Mesh mesh, Material[] materials)> sharedTops =
+        new Dictionary<GameObject, (Mesh mesh, Material[] materials)>();
+
     public static void Attach(GameObject building, Placement placement, int buildingId)
     {
         if (placement == null || placement.Prefab == null) return;
-        Mesh mesh = BuildingMeshUtils.CombineModuleMeshes(placement.Prefab, out Material[] materials);
-        if (mesh == null) return;
+        if (!sharedTops.TryGetValue(placement.Prefab, out var shared) || shared.mesh == null)
+        {
+            Mesh mesh = BuildingMeshUtils.CombineModuleMeshes(placement.Prefab, out Material[] materials);
+            if (mesh == null) return;
+            var result = BuildingMeshBuilder.EnsureMaterials(
+                BuildingMeshBuilder.MergeSubMeshes(new BuildingMeshResult(mesh, materials)));
+            shared = (result.Mesh, BuildingManager.GetSharedDepthOffsetMaterials(result.Materials));
+            sharedTops[placement.Prefab] = shared;
+        }
 
-        var result = BuildingMeshBuilder.EnsureMaterials(
-            BuildingMeshBuilder.MergeSubMeshes(new BuildingMeshResult(mesh, materials)));
         var top = new GameObject("ConstructionCraneTop");
         top.layer = building.layer;
         top.transform.SetParent(building.transform, false);
         top.transform.localPosition = placement.Position;
-        var owner = top.AddComponent<RenderCacheIdentity>();
-        owner.mesh = mesh;
-        top.AddComponent<MeshFilter>().sharedMesh = mesh;
+        top.AddComponent<MeshFilter>().sharedMesh = shared.mesh;
         var renderer = top.AddComponent<MeshRenderer>();
-        renderer.sharedMaterials = result.Materials;
-        Utils.ApplyDepthOffsetShader(renderer, "ConstructionCrane", owned => owner.materials = owned);
+        renderer.sharedMaterials = shared.materials;
         var animator = top.AddComponent<ConstructionCraneAnimator>();
         animator.baseRotation = placement.Rotation;
         animator.seed = buildingId;

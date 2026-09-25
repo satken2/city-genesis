@@ -8,6 +8,7 @@ using UnityEngine.Rendering;
 public sealed class ParkedVehicleManager : MonoBehaviour
 {
     private const float Radius = 480f;
+    private const float CenterLead = 300f;   // 走行車(VehicleManager.maxCenterLead)と同じ管理中心にそろえる
     private const float ScanInterval = .5f;
     private readonly List<ParkedVehicleLayout.Model> models = new();
     private readonly List<PropRenderModel> renderModels = new();
@@ -19,11 +20,16 @@ public sealed class ParkedVehicleManager : MonoBehaviour
     private float nextScan;
     private Vector3 lastCenter;
     private bool hasCenter;
+    private Vector3 trackedCenter;
+    private bool hasTrackedCenter;
+    private bool forceRebatch;
     private bool modelsReady;
 
     private sealed class Road
     {
-        public List<Vector3> points;
+        public PathSummary data;
+        public VehiclePolyline line;
+        public long geometryRevision = -1;   // PathManager.GetPathGeometryRevision。-1 は版不明で点列比較に頼る
         public List<ParkedVehicleLayout.Placement> slots;
         public float width, sidewalk, divider;
         public int direction, hand, count;
@@ -53,9 +59,15 @@ public sealed class ParkedVehicleManager : MonoBehaviour
         { Clear(); return; }
         if (paths == null) paths = FindAnyObjectByType<PathManager>();
         if (paths == null || Camera.main == null || CameraCellChecker.Instance == null) return;
-        Vector3 center = CameraCellChecker.Instance.CurrentWorldPosition;
-        if (DriveMode.TryGetLoadCenter(out var rideCenter)) center = rideCenter;
-        if (hasCenter && Utils.XZDistanceSquared(center, lastCenter) > Radius * Radius) Clear();
+        Vector3 center = VehicleManager.ResolveTrafficCenter(CameraCellChecker.Instance, CenterLead);
+        // 中心が大きく跳んだら走査をやり直す。配置候補は中心に依存しないので roads は残し、
+        // 新しいバッチができるまで旧バッチを描き続ける。
+        if (hasTrackedCenter && Utils.XZDistanceSquared(center, trackedCenter) > Radius * Radius)
+        {
+            if (worker != null) { RenderWorkScheduler.Stop(this, worker); worker = null; }
+            nextScan = 0; forceRebatch = true;
+        }
+        trackedCenter = center; hasTrackedCenter = true;
         if (worker == null && Time.unscaledTime >= nextScan)
         {
             nextScan = Time.unscaledTime + ScanInterval;
@@ -89,6 +101,9 @@ public sealed class ParkedVehicleManager : MonoBehaviour
             if (candidates.Count > 0 && !modelsReady)
             {
                 if (ModelManager.Instance == null) yield break;
+                // 中断された前回の読み込みの残りを捨てる。models と renderModels は添字で対応させるので途中から足さない。
+                foreach (var model in renderModels) model.Dispose();
+                renderModels.Clear(); models.Clear();
                 foreach (int type in new[] { Constants.VEHICLE_STANDARD, Constants.VEHICLE_COMMERCIAL, Constants.VEHICLE_TRUCK })
                 {
                     var variants = VehicleModelConfig.GetVariants(type);
@@ -106,29 +121,37 @@ public sealed class ParkedVehicleManager : MonoBehaviour
                 }
                 modelsReady = true;
             }
-            bool changed = !hasCenter || Utils.XZDistanceSquared(center, lastCenter) > 1f;
+            bool changed = forceRebatch || !hasCenter || Utils.XZDistanceSquared(center, lastCenter) > 1f;
             var seen = new HashSet<int>();
             foreach (var candidate in candidates)
             {
                 // yield中に削除・再取得された道路は、必ず最新キャッシュで判定する。
                 var data = paths.GetPathData(candidate.path_id);
-                if (!Eligible(data) || paths.GetPathObject(data.path_id) == null ||
-                    !paths.TryGetPathPolyline(data.path_id, out var points)) continue;
-                var line = new VehiclePolyline(points);
+                if (!Eligible(data) || paths.GetPathObject(data.path_id) == null) continue;
+                roads.TryGetValue(data.path_id, out var road);
+                long revision = paths.GetPathGeometryRevision(data.path_id);
+                VehiclePolyline line;
+                if (road != null && revision != -1 && revision == road.geometryRevision && road.data == data) line = road.line;
+                else
+                {
+                    if (!paths.TryGetPathPolyline(data.path_id, out var points)) continue;
+                    line = road != null && VehiclePolyline.SameSource(road.line, points) ? road.line : new VehiclePolyline(points);
+                }
                 if (line.Length <= ParkedVehicleLayout.EndMargin * 2 || line.InsideIntervals(center, Radius).Count == 0) continue;
                 RoadPath.GetPathMasterParams(data, out float width, out float sidewalk, out _, out _, out _,
                     out _, out float divider, out _, out _, out _, out _);
                 seen.Add(data.path_id);
                 int hand = CityInfoStore.TrafficHand;
-                if (!roads.TryGetValue(data.path_id, out var road) || road.width != width || road.sidewalk != sidewalk ||
-                    road.divider != divider || road.direction != data.travel_direction || road.hand != hand || !SamePoints(road.points, points))
+                if (road == null || road.width != width || road.sidewalk != sidewalk ||
+                    road.divider != divider || road.direction != data.travel_direction || road.hand != hand || road.line != line)
                 {
-                    road = new Road { points = points, width = width, sidewalk = sidewalk, divider = divider,
+                    road = new Road { data = data, line = line, geometryRevision = revision, width = width, sidewalk = sidewalk, divider = divider,
                         direction = data.travel_direction, hand = hand,
                         slots = ParkedVehicleLayout.Build(line, data.path_id, width, sidewalk, divider, data.travel_direction, hand, models) };
                     roads[data.path_id] = road;
                     changed = true;
                 }
+                else { road.data = data; road.geometryRevision = revision; }
                 int count = ParkedVehicleLayout.Count(data.parked_cars, road.slots.Count, data.path_id);
                 if (count != road.count) { road.count = count; changed = true; }
                 yield return RenderWorkScheduler.Continue;
@@ -166,23 +189,16 @@ public sealed class ParkedVehicleManager : MonoBehaviour
                 yield return RenderWorkScheduler.Continue;
             }
             batches = next;
-            lastCenter = center; hasCenter = true;
+            lastCenter = center; hasCenter = true; forceRebatch = false;
         }
         finally { worker = null; }
-    }
-
-    private static bool SamePoints(List<Vector3> a, List<Vector3> b)
-    {
-        if (a.Count != b.Count) return false;
-        for (int i = 0; i < a.Count; i++) if (a[i] != b[i]) return false;
-        return true;
     }
 
     private void Clear()
     {
         if (worker != null) RenderWorkScheduler.Stop(this, worker);
         worker = null;
-        roads.Clear(); batches.Clear(); hasCenter = false; nextScan = 0;
+        roads.Clear(); batches.Clear(); hasCenter = false; hasTrackedCenter = false; forceRebatch = false; nextScan = 0;
         if (!modelsReady)
         {
             foreach (var model in renderModels) model.Dispose();

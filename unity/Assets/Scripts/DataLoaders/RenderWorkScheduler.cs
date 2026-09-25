@@ -19,7 +19,7 @@ public static class RenderWorkScheduler
         public double cpuMs, maxMs;
         public long steps, queueFrames, underBudgetQueueFrames;
     }
-    private static readonly Dictionary<string, TimingSample> timingSamples = new Dictionary<string, TimingSample>();
+    private static readonly Dictionary<Type, TimingSample> timingSamples = new Dictionary<Type, TimingSample>();
     private static readonly Dictionary<string, long> eventCounts = new Dictionary<string, long>();
     private static double lastReportTime;
     private static int lastReportFrame;
@@ -35,7 +35,7 @@ public static class RenderWorkScheduler
     private static TimingSample GetTimingSample(IEnumerator routine)
     {
         if (!LocalConstants.UNITY_LOG_TIMING) return null;
-        string key = routine.GetType().FullName;
+        Type key = routine.GetType();
         if (!timingSamples.TryGetValue(key, out var sample))
             timingSamples[key] = sample = new TimingSample();
         return sample;
@@ -55,7 +55,7 @@ public static class RenderWorkScheduler
         {
             var s = item.Value;
             if (s.steps == 0 && s.queueFrames == 0) continue;
-            message.Append($"\n  {item.Key}: cpu={s.cpuMs:F2}ms maxStep={s.maxMs:F2}ms steps={s.steps} queueFrames={s.queueFrames} underBudgetQueueFrames={s.underBudgetQueueFrames}");
+            message.Append($"\n  {item.Key.FullName}: cpu={s.cpuMs:F2}ms maxStep={s.maxMs:F2}ms steps={s.steps} queueFrames={s.queueFrames} underBudgetQueueFrames={s.underBudgetQueueFrames}");
             s.cpuMs = s.maxMs = 0;
             s.steps = s.queueFrames = s.underBudgetQueueFrames = 0;
         }
@@ -76,11 +76,15 @@ public static class RenderWorkScheduler
         public readonly Stack<IEnumerator> stack = new Stack<IEnumerator>();
         public LinkedListNode<Operation> ticket;
         public string category;
-        public int readyFrame;
+        public int readyFrame, ownerId;
         public bool blocked, done, stepping;
         public Func<bool> hasPendingWork;
     }
     private static readonly Dictionary<Coroutine, Operation> operations = new Dictionary<Coroutine, Operation>();
+    // GOの無効化・破棄時に該当operationだけを止めるための索引。キーは開始時のowner.gameObjectのinstanceID。
+    private static readonly Dictionary<int, List<Operation>> operationsByObject = new Dictionary<int, List<Operation>>();
+    private static RenderWorkPump pump;
+    private static bool quitting;
     private static int pumpedFrame = -1;
     public static double LastFrameMs { get; private set; }
     public static double MaximumStepMs { get; private set; }
@@ -102,6 +106,10 @@ public static class RenderWorkScheduler
     {
         foreach (var operation in new List<Operation>(operations.Values)) Finish(operation);
         operations.Clear();
+        operationsByObject.Clear();
+        quitting = false;
+        Application.quitting -= OnQuitting;
+        Application.quitting += OnQuitting;
         frame = pumpedFrame = -1;
         usedMs = LastFrameMs = MaximumStepMs = 0;
         Steps = 0;
@@ -125,14 +133,30 @@ public static class RenderWorkScheduler
 
     public static Coroutine Start(MonoBehaviour owner, IEnumerator routine, string category, Func<bool> hasPendingWork = null)
     {
+        EnsurePump();
         if (owner.GetComponent<RenderWorkLifetime>() == null) owner.gameObject.AddComponent<RenderWorkLifetime>();
-        var operation = new Operation { owner = owner, category = category, hasPendingWork = hasPendingWork, readyFrame = Time.frameCount + 1 };
+        var operation = new Operation { owner = owner, category = category, hasPendingWork = hasPendingWork, readyFrame = Time.frameCount + 1, ownerId = owner.gameObject.GetInstanceID() };
         operation.stack.Push(routine);
         operation.handle = owner.StartCoroutine(Lifetime(operation));
         if (operation.handle == null) { Finish(operation); return null; }
         operations.Add(operation.handle, operation);
+        if (!operationsByObject.TryGetValue(operation.ownerId, out var list))
+            operationsByObject[operation.ownerId] = list = new List<Operation>();
+        list.Add(operation);
         operation.ticket = waiting.AddLast(operation);
         return operation.handle;
+    }
+
+    private static void OnQuitting() => quitting = true;
+
+    // Resetはテストの途中でも呼ばれるため、生きているポンプは作り直さず使い続ける(重複生成の防止)。
+    // 終了処理中の破棄コールバックから作ると、エディタでは再生終了後のシーンへGOが残るため作らない。
+    private static void EnsurePump()
+    {
+        if (pump != null || quitting || !Application.isPlaying) return;
+        var go = new GameObject("RenderWorkPump");
+        UnityEngine.Object.DontDestroyOnLoad(go);
+        pump = go.AddComponent<RenderWorkPump>();
     }
 
     // 呼出側がyield returnできるUnityのハンドルを保ち、実処理は共通ポンプだけで進める。
@@ -149,16 +173,19 @@ public static class RenderWorkScheduler
         if (owner != null) owner.StopCoroutine(handle);
     }
 
+    /// <summary>ownerが破棄済みなら何もしない(破棄済みownerのoperationはPumpが掃除する)。</summary>
     public static void StopAll(MonoBehaviour owner)
     {
-        foreach (var item in new List<KeyValuePair<Coroutine, Operation>>(operations))
-            if (item.Value.owner == owner) Stop(owner, item.Key);
+        if (owner == null || !operationsByObject.TryGetValue(owner.gameObject.GetInstanceID(), out var list)) return;
+        // 停止時のiteratorのfinallyがStart/Stopを再入して索引を書き換えても列挙が壊れないよう複製する。
+        foreach (var operation in list.ToArray())
+            if (ReferenceEquals(operation.owner, owner)) Stop(owner, operation.handle);
     }
 
     internal static void StopGameObject(GameObject owner)
     {
-        foreach (var item in new List<KeyValuePair<Coroutine, Operation>>(operations))
-            if (item.Value.owner == null || item.Value.owner.gameObject == owner) Stop(item.Value.owner, item.Key);
+        if (!operationsByObject.TryGetValue(owner.GetInstanceID(), out var list)) return;
+        foreach (var operation in list.ToArray()) Stop(operation.owner, operation.handle);
     }
 
     private static void Finish(Operation operation)
@@ -167,6 +194,9 @@ public static class RenderWorkScheduler
         if (operation.ticket?.List != null) waiting.Remove(operation.ticket);
         operation.ticket = null;
         if (operation.handle != null) operations.Remove(operation.handle);
+        // 索引に無いoperation(テストが辞書へ直接追加したもの・開始に失敗したもの)も許す。
+        if (operationsByObject.TryGetValue(operation.ownerId, out var list) && list.Remove(operation) && list.Count == 0)
+            operationsByObject.Remove(operation.ownerId);
         if (operation.nativeWait != null && operation.owner != null) operation.owner.StopCoroutine(operation.nativeWait);
         operation.nativeWait = null;
         // MoveNext中の自己取消しでは、iteratorを実行し終えてからfinallyを解放する。
@@ -199,6 +229,9 @@ public static class RenderWorkScheduler
             Operation operation = waiting.First.Value;
             waiting.Remove(operation.ticket);
             waiting.AddLast(operation.ticket);
+            // コンポーネントだけ破棄されたownerはUnityがコルーチンを止めるだけでfinallyを通らないため、ここで解放する。
+            // ネイティブ待機も一緒に止まりblockedが解けないので、blockedの判定より前に確認する。
+            if (operation.owner == null) { Finish(operation); continue; }
             if (operation.blocked || operation.readyFrame > Time.frameCount)
             {
                 if (++skipped >= waiting.Count) break;
@@ -264,14 +297,19 @@ public static class RenderWorkScheduler
     }
 }
 
-/// <summary>GameObjectの非表示・破棄も明示的なコルーチン破棄へ変換する。</summary>
-public sealed class RenderWorkLifetime : MonoBehaviour
+/// <summary>共通ポンプと集約ログを1フレームに1回進める常駐GO。RenderWorkScheduler.Startが自動生成する。</summary>
+public sealed class RenderWorkPump : MonoBehaviour
 {
     private void LateUpdate()
     {
         RenderWorkScheduler.Pump();
         RenderWorkScheduler.ReportTimings();
     }
+}
+
+/// <summary>GameObjectの非表示・破棄も明示的なコルーチン破棄へ変換する。</summary>
+public sealed class RenderWorkLifetime : MonoBehaviour
+{
     private void OnDisable() => RenderWorkScheduler.StopGameObject(gameObject);
     private void OnDestroy() => RenderWorkScheduler.StopGameObject(gameObject);
 }

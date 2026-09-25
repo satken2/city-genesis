@@ -30,6 +30,25 @@ public sealed class SplinePartLod : MonoBehaviour
     private Coroutine worker;
     private Vector3? queriedPosition;
     private Segment queriedSegment;
+    private PathPresentation presentation;
+    private VisualModeObject visual;
+
+    /// <summary>
+    /// 全パーツで共有するカメラ移動の世代。4m 以上動いたフレームで1つ進む。
+    /// 静止中のワーカーは世代が変わるまで WaitUntil(スケジューラの予算外で待つネイティブ待機)で眠り、
+    /// パーツ数ぶんのステップが共通予算を食わないようにする。
+    /// </summary>
+    private static int cameraEpoch;
+    private static int tickFrame = -1;
+    private static LodViewState sharedView; // 構造体なので readonly にすると UpdatePosition が防御的コピーに効いて記録されない。
+    private static readonly Comparison<(float distance, Segment segment)> ByDistance = (a, b) => a.distance.CompareTo(b.distance);
+
+    private static void Tick()
+    {
+        if (Time.frameCount == tickFrame) return;
+        tickFrame = Time.frameCount;
+        if (sharedView.UpdatePosition(Camera.main)) cameraEpoch++;
+    }
 
     /// <summary>指定位置に現在表示している区間のLOD。生成待ち・退避中はHiddenを返す。</summary>
     public DrawLod GetDrawLodAtPosition(Vector3 worldPosition)
@@ -85,24 +104,33 @@ public sealed class SplinePartLod : MonoBehaviour
 
     private IEnumerator Worker()
     {
-        var order = new List<Segment>();
-        var view = new LodViewState();
+        var order = new List<(float distance, Segment segment)>();
+        // 起動直後(初回・退避からの再開)は世代に関係なく必ず評価する。
+        int seenEpoch = -1;
+        var waitMove = new WaitUntil(() => { Tick(); return cameraEpoch != seenEpoch; });
         while (true)
         {
             Camera camera = Camera.main;
             if (camera == null || spline == null) { yield return null; continue; }
-            if (!view.UpdatePosition(camera)) { yield return null; continue; }
+            Tick();
+            if (seenEpoch == cameraEpoch) { yield return waitMove; continue; }
+            seenEpoch = cameraEpoch;
             Vector3 position = transform.InverseTransformPoint(camera.transform.position);
             RenderWorkScheduler.CountEvent("roadSegment.lodScanned", segments.Count);
             order.Clear();
             foreach (var segment in segments)
-                if (DrawLodEvaluator.EvaluatePathByDistance(Mathf.Sqrt(segment.bounds.SqrDistance(position)), segment.lod, true) != segment.lod)
-                    order.Add(segment);
-            order.Sort((a,b) => a.bounds.SqrDistance(position).CompareTo(b.bounds.SqrDistance(position)));
-            foreach (var segment in order)
+            {
+                float distance = Mathf.Sqrt(segment.bounds.SqrDistance(position));
+                if (DrawLodEvaluator.EvaluatePathByDistance(distance, segment.lod, true) != segment.lod)
+                    order.Add((distance, segment));
+            }
+            order.Sort(ByDistance);
+            foreach (var (_, segment) in order)
             {
                 if (!gameObject.activeInHierarchy) break;
                 // 生成待ちの間に移動していても、不要になった詳細パーツを作らない。
+                camera = Camera.main;
+                if (camera == null) { seenEpoch = -1; break; }
                 position = transform.InverseTransformPoint(camera.transform.position);
                 DrawLod desired = DrawLodEvaluator.EvaluatePathByDistance(Mathf.Sqrt(segment.bounds.SqrDistance(position)), segment.lod, true);
                 if (desired == segment.lod) continue;
@@ -122,18 +150,18 @@ public sealed class SplinePartLod : MonoBehaviour
                 if (segment.shown != null) cache.Park(segment.shown);
                 segment.shown = next;
                 segment.lod = desired;
-                var presentation = GetComponentInParent<PathPresentation>();
+                // どちらもパスのルートに付き、退避・復元で親は変わらないので見つかったら保持する。
+                if (presentation == null) presentation = GetComponentInParent<PathPresentation>();
                 if (next != null)
                 {
-                    presentation?.HidePending(next);
+                    if (presentation != null) presentation.HidePending(next);
                     next.SetActive(true);
                 }
-                var visual = GetComponentInParent<VisualModeObject>();
+                if (visual == null) visual = GetComponentInParent<VisualModeObject>();
                 if (visual != null) visual.RefreshMaterials();
-                presentation?.TryCommit();
+                if (presentation != null) presentation.TryCommit();
                 yield return RenderWorkScheduler.Continue;
             }
-            yield return null;
         }
     }
 

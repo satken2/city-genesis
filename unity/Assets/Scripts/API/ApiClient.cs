@@ -78,7 +78,9 @@ public static class ApiClient
     /// <param name="onError">通信失敗・デシリアライズ失敗時のコールバック(エラーログは出力済み)</param>
     /// <param name="timingLabel">TIMINGログの識別子(例: "PathManager nodes")。省略時はpathを使う</param>
     /// <param name="timeoutSeconds">リクエストのタイムアウト秒数</param>
-    public static IEnumerator GetBulk<T>(string path, Action<T> onSuccess, Action<string> onError = null, string timingLabel = null, int timeoutSeconds = 10) where T : class
+    /// <param name="isCanceled">真になったら通信を中断し、デコードもコールバックもしない(ログも出さない)。
+    /// 取消し時は onSuccess も onError も呼ばれないので、呼び出し側は yield の後に自分の取消しを確認すること。</param>
+    public static IEnumerator GetBulk<T>(string path, Action<T> onSuccess, Action<string> onError = null, string timingLabel = null, int timeoutSeconds = 10, Func<bool> isCanceled = null) where T : class
     {
         string url = $"{BASE_URL}{path}";
         string label = timingLabel ?? path;
@@ -90,7 +92,19 @@ public static class ApiClient
             request.SetRequestHeader("Cache-Control", "no-cache");
             request.SetRequestHeader("Accept", BULK_ACCEPT_HEADER);
 
-            yield return request.SendWebRequest();
+            UnityWebRequestAsyncOperation operation = request.SendWebRequest();
+            if (isCanceled == null) yield return operation;
+            else
+            {
+                // WaitUntil はスケジューラ上でネイティブ待機として扱われ、共通予算を消費しない。
+                yield return new WaitUntil(() => operation.isDone || isCanceled());
+                if (isCanceled())
+                {
+                    if (!operation.isDone) request.Abort();
+                    RenderWorkScheduler.CountEvent("api.bulkCanceled");
+                    yield break;
+                }
+            }
 
             if (request.result != UnityWebRequest.Result.Success)
             {
@@ -106,7 +120,7 @@ public static class ApiClient
             byte[] rawData = isMsgPack ? request.downloadHandler.data : null;
             string json = isMsgPack ? null : request.downloadHandler.text;
 
-            int byteLength = request.downloadHandler.data?.Length ?? 0;
+            int byteLength = isMsgPack ? rawData?.Length ?? 0 : (int)request.downloadedBytes;
             string format = isMsgPack ? "msgpack" : "json";
             UnityLog.If(LocalConstants.UNITY_LOG_TIMING, () => $"[TIMING] ApiClient  network/{label}: {swNet.ElapsedMilliseconds}ms ({byteLength} bytes, {format})");
 
@@ -116,6 +130,11 @@ public static class ApiClient
                 : JsonConvert.DeserializeObject<T>(json));
             yield return Utils.WaitTask(deserializeTask);
             UnityLog.If(LocalConstants.UNITY_LOG_TIMING, () => $"[TIMING] ApiClient  deserialize/{label}: {swDeser.ElapsedMilliseconds}ms ({format})");
+            if (isCanceled != null && isCanceled())
+            {
+                RenderWorkScheduler.CountEvent("api.bulkCanceled");
+                yield break;
+            }
 
             if (deserializeTask.IsFaulted || deserializeTask.Result == null)
             {

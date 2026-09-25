@@ -20,9 +20,11 @@ public sealed class ForestOverview : IDisposable
         public Rect bounds;
         public int width, height;
         public Color32[] pixels;
+        public ulong hash; // 寸法・範囲・画素の FNV-1a。同じ内容の再取得で全域テクスチャを作り直さないために使う
     }
     private Texture2D coverage, detail;
     private int detailHash = int.MinValue;
+    private ulong publishedHash;
     public bool Ready => coverage != null;
 
     public static Raster Build(ForestOverviewResponse response, CancellationToken cancel)
@@ -74,7 +76,20 @@ public sealed class ForestOverview : IDisposable
             Fill(raster, region, cancel, index => raster.pixels[index] = default);
         }
         cancel.ThrowIfCancellationRequested();
+        raster.hash = Hash(raster);
         return raster;
+    }
+
+    private static ulong Hash(Raster raster)
+    {
+        const ulong prime = 1099511628211UL;
+        ulong hash = 14695981039346656037UL;
+        void Mix(uint value) { unchecked { hash = (hash ^ value) * prime; } }
+        Mix((uint)raster.width); Mix((uint)raster.height);
+        Mix((uint)BitConverter.SingleToInt32Bits(raster.bounds.xMin)); Mix((uint)BitConverter.SingleToInt32Bits(raster.bounds.yMin));
+        Mix((uint)BitConverter.SingleToInt32Bits(raster.bounds.width)); Mix((uint)BitConverter.SingleToInt32Bits(raster.bounds.height));
+        foreach (var p in raster.pixels) Mix(p.r | (uint)p.g << 8 | (uint)p.b << 16 | (uint)p.a << 24);
+        return hash;
     }
 
     private static Rect Union(Rect a, Rect b) => Rect.MinMaxRect(Mathf.Min(a.xMin,b.xMin), Mathf.Min(a.yMin,b.yMin), Mathf.Max(a.xMax,b.xMax), Mathf.Max(a.yMax,b.yMax));
@@ -111,6 +126,7 @@ public sealed class ForestOverview : IDisposable
     private static Texture2D Texture(int width, int height) => new Texture2D(width, height, TextureFormat.RGBA32, false, true) { wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear, name = "Forest coverage" };
     public void Publish(Raster raster)
     {
+        if (coverage != null && raster.hash == publishedHash) return;
         var next = Texture(raster.width, raster.height);
         next.SetPixels32(raster.pixels); next.Apply(false, true);
         var previous = coverage; coverage = next;
@@ -118,6 +134,7 @@ public sealed class ForestOverview : IDisposable
         Shader.SetGlobalVector("_ForestCoverageRect", Mapping(raster.bounds));
         Shader.SetGlobalFloat("_ForestOverviewEnabled", 1);
         if (previous != null) UnityEngine.Object.Destroy(previous);
+        publishedHash = raster.hash;
     }
 
     public void UpdateDetail(List<Rect> rects, float chunkSize)
@@ -153,8 +170,13 @@ public sealed class ForestOverview : IDisposable
             byte weight = (byte)Mathf.RoundToInt(255 * distance / 100);
             pixels[y * width + x] = new Color32(weight,weight,weight,255);
         }
-        if (detail != null) UnityEngine.Object.Destroy(detail);
-        detail = Texture(width, height); detail.SetPixels32(pixels); detail.Apply(false, true);
+        // 寸法が同じなら同じテクスチャへ書き直す。書き直せるよう CPU 側の画素を残す(最大512²で1MB)。
+        if (detail == null || detail.width != width || detail.height != height)
+        {
+            if (detail != null) UnityEngine.Object.Destroy(detail);
+            detail = Texture(width, height);
+        }
+        detail.SetPixels32(pixels); detail.Apply(false, false);
         Shader.SetGlobalTexture("_ForestDetail", detail);
         Shader.SetGlobalVector("_ForestDetailRect", Mapping(bounds));
     }

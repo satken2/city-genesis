@@ -141,6 +141,13 @@ public static class Utils
             {
                 return managedTerrain;
             }
+
+            // 都市内の地形タイルはすべて TerrainManager の管理下にあり、未常駐セルに他の Terrain は無い。
+            // 下の activeTerrains の配列確保と総当たりを省き、呼び出し側の全景サンプリングへ回す。
+            if (cachedTerrainManager.IsCityCell(TerrainManager.WorldToCell(position)))
+            {
+                return null;
+            }
         }
 
         // TerrainManager から取得できなかった場合（マップ外など）のフォールバック。

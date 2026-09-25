@@ -89,6 +89,15 @@ public class VisualModeHandler : MonoBehaviour
     // 処理中のコルーチン管理
     private Dictionary<int, Coroutine> activeUpdateCoroutines = new Dictionary<int, Coroutine>();
 
+    // registeredObjects のキーと同じ種別。構築後にキーは増減しない(RegisterObject は既存キーにだけ追加する)。
+    private static readonly int[] ObjectTypes =
+    {
+        InputObjectType.BUILDING, InputObjectType.PARCEL, InputObjectType.PATH,
+        InputObjectType.NODE, InputObjectType.TERRAIN, InputObjectType.ZONE
+    };
+    private const int CleanupBatchSize = 2000;
+    private readonly List<IVisualModeHandler> cleanupBuffer = new List<IVisualModeHandler>();
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -144,7 +153,7 @@ public class VisualModeHandler : MonoBehaviour
         // 差分チェック：前回と同じモードなら何もしない
         if (previousModes[objectType] == mode)
         {
-            Debug.Log($"VisualModeHandler.SetMode: {InputObjectType.GetName(objectType)} を {GetModeName(mode)} に変更しようとしましたが、前回と同じモードのためスキップします");
+            if (enableDebugLog) Debug.Log($"VisualModeHandler.SetMode: {InputObjectType.GetName(objectType)} を {GetModeName(mode)} に変更しようとしましたが、前回と同じモードのためスキップします");
             return;
         }
 
@@ -249,26 +258,26 @@ public class VisualModeHandler : MonoBehaviour
         while (true)
         {
             yield return new WaitForSeconds(cleanupInterval);
-            
-            int removedCount = 0;
-            foreach (var objectType in registeredObjects.Keys)
-            {
-                var toRemove = new List<IVisualModeHandler>();
-                
-                foreach (var obj in registeredObjects[objectType])
-                {
-                    if (obj == null || (obj as MonoBehaviour) == null)
-                    {
-                        toRemove.Add(obj);
-                    }
-                }
 
-                foreach (var obj in toRemove)
+            // 登録数万件の Unity null 判定を1フレームに集めないよう分割する。
+            // 走査は写しに対して行うので、yield 中の登録・解除で列挙が壊れない。
+            int removedCount = 0;
+            int budget = CleanupBatchSize;
+            foreach (int objectType in ObjectTypes)
+            {
+                if (!registeredObjects.TryGetValue(objectType, out var set)) continue;
+                cleanupBuffer.Clear();
+                cleanupBuffer.AddRange(set);
+                for (int i = 0; i < cleanupBuffer.Count; i++)
                 {
-                    registeredObjects[objectType].Remove(obj);
-                    removedCount++;
+                    var obj = cleanupBuffer[i];
+                    if ((obj == null || (obj as MonoBehaviour) == null) && set.Remove(obj)) removedCount++;
+                    if (--budget > 0) continue;
+                    budget = CleanupBatchSize;
+                    yield return null;
                 }
             }
+            cleanupBuffer.Clear();
 
             if (removedCount > 0 && enableDebugLog)
             {

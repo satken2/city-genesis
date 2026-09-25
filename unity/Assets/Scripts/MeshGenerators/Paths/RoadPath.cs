@@ -13,6 +13,10 @@ public class RoadPath : IPathMeshGenerator
     private static readonly Dictionary<Mesh, Mesh> MirroredMeshCache = new Dictionary<Mesh, Mesh>();
     private static readonly Dictionary<(Mesh, float), Mesh> PartMeshCache = new Dictionary<(Mesh, float), Mesh>();
     private static readonly Dictionary<Mesh, Mesh> BodyMeshCache = new Dictionary<Mesh, Mesh>();
+    private static readonly Dictionary<Mesh, Bounds> BodySurfaceBoundsCache = new Dictionary<Mesh, Bounds>();
+    /// <summary>歩道コネクタが写すパーツの頂点・UV・三角形。キーは共有プレハブ由来の不変メッシュなので読むだけに使う。</summary>
+    private static readonly Dictionary<Mesh, (Vector3[] vertices, Vector2[] uv, int[][] triangles)> ConnectorSourceCache
+        = new Dictionary<Mesh, (Vector3[], Vector2[], int[][])>();
 
     // Extrude配置の1タイルの最大長（m）。
     // SplineMesh はタイル内の頂点Z位置でしかスプラインを評価しないため、
@@ -51,7 +55,7 @@ public class RoadPath : IPathMeshGenerator
 
         // Resources に同名マテリアルが無いので、FBX由来のマテリアルを複製して共有プールに載せる。
         Material targetMat = new Material(source);
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath]   マテリアルキャッシュ生成(clone): '{key}'");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath]   マテリアルキャッシュ生成(clone): '{key}'");
         RegisterRoadMaterial(key, targetMat);
         return targetMat;
     }
@@ -71,7 +75,7 @@ public class RoadPath : IPathMeshGenerator
         if (loadedMat == null) return null;
 
         Material targetMat = new Material(loadedMat);
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath]   マテリアルキャッシュ生成(Resources): '{materialName}'");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath]   マテリアルキャッシュ生成(Resources): '{materialName}'");
         RegisterRoadMaterial(materialName, targetMat);
         return targetMat;
     }
@@ -89,8 +93,19 @@ public class RoadPath : IPathMeshGenerator
         return GetOrCreateRoadMaterialByName("BuildingMaterial");
     }
 
-    /// <summary>路面幅は桁の張り出しを含む全体 bounds ではなく、最上面の幅から求める。</summary>
+    /// <summary>
+    /// 路面幅は桁の張り出しを含む全体 bounds ではなく、最上面の幅から求める。
+    /// 引数は共有プレハブ由来の不変メッシュなので、メッシュごとに1回だけ頂点を走査する。
+    /// </summary>
     public static Bounds GetBodySurfaceBounds(Mesh mesh)
+    {
+        if (BodySurfaceBoundsCache.TryGetValue(mesh, out Bounds cached)) return cached;
+        Bounds result = ComputeBodySurfaceBounds(mesh);
+        BodySurfaceBoundsCache[mesh] = result;
+        return result;
+    }
+
+    private static Bounds ComputeBodySurfaceBounds(Mesh mesh)
     {
         Bounds bounds = mesh.bounds;
         float left = float.PositiveInfinity, right = float.NegativeInfinity;
@@ -125,13 +140,13 @@ public class RoadPath : IPathMeshGenerator
         Mesh key = originalMesh;
         if (MirroredMeshCache.TryGetValue(key, out Mesh cached))
         {
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath]   ミラーメッシュキャッシュヒット: '{key}'");
+            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath]   ミラーメッシュキャッシュヒット: '{key}'");
             return cached;
         }
 
         Mesh mirrored = CreateMirroredMeshInternal(originalMesh);
         MirroredMeshCache[key] = mirrored;
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath]   ミラーメッシュキャッシュ生成: '{key}'");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath]   ミラーメッシュキャッシュ生成: '{key}'");
         return mirrored;
     }
 
@@ -163,7 +178,7 @@ public class RoadPath : IPathMeshGenerator
 
     public PathMeshResult Generate(PathSummary pathData, List<Vector3> points, SidewalkSetback startSidewalkSetback = default, SidewalkSetback endSidewalkSetback = default)
     {
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] Generate開始: path_id={pathData?.path_id ?? -1}, path_variant={pathData?.path_variant ?? -1}, path_type={pathData?.path_type ?? -1}, points={points?.Count ?? 0}");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] Generate開始: path_id={pathData?.path_id ?? -1}, path_variant={pathData?.path_variant ?? -1}, path_type={pathData?.path_type ?? -1}, points={points?.Count ?? 0}");
 
         if (points == null || points.Count < 2)
         {
@@ -207,12 +222,12 @@ public class RoadPath : IPathMeshGenerator
 
         // コンテナ作成
         GameObject container = new GameObject($"Road_{pathData.path_id}");
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] コンテナ作成: {container.name}");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] コンテナ作成: {container.name}");
 
         SplineComputer spline = BuildSpline(container, points, isCurved);
 
         float splineLength = spline.CalculateLength();
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] スプライン長: {splineLength:F2}m");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] スプライン長: {splineLength:F2}m");
         PathDrawContext.SetAdaptiveTileLength(PathDrawContext.ComputeAdaptiveTileLength(spline, MAX_EXTRUDE_TILE_LENGTH));
 
         // 道路パーツ生成
@@ -223,7 +238,7 @@ public class RoadPath : IPathMeshGenerator
         if (colliderMesh != null)
         {
             colliderMesh.name = $"RoadCollider_{pathData.path_id}";
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] コライダーメッシュ生成成功: 頂点数={colliderMesh.vertexCount}");
+            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] コライダーメッシュ生成成功: 頂点数={colliderMesh.vertexCount}");
         }
         else
         {
@@ -231,7 +246,7 @@ public class RoadPath : IPathMeshGenerator
         }
 
         int childCount = container.transform.childCount;
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] Generate完了: 子オブジェクト数={childCount}, colliderMesh={(colliderMesh != null ? "あり" : "なし")}");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] Generate完了: 子オブジェクト数={childCount}, colliderMesh={(colliderMesh != null ? "あり" : "なし")}");
 
         // デバッグ用: 生成直後のメッシュ状態を確認
         if (LocalConstants.UNITY_LOG_ROAD)
@@ -245,7 +260,7 @@ public class RoadPath : IPathMeshGenerator
             {
                 Bounds totalBounds = allRenderers[0].bounds;
                 for (int i = 1; i < allRenderers.Length; i++) totalBounds.Encapsulate(allRenderers[i].bounds);
-                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] Generate直後: Renderer={allRenderers.Length}件, bounds中心={totalBounds.center}, boundsサイズ={totalBounds.size}");
+                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] Generate直後: Renderer={allRenderers.Length}件, bounds中心={totalBounds.center}, boundsサイズ={totalBounds.size}");
             }
         }
 
@@ -309,7 +324,7 @@ public class RoadPath : IPathMeshGenerator
             prefab = PathDrawContext.ResolvePrefab(prefabName, fallbackPrefabName, out resolvedPrefabName);
             if (prefab != null && resolvedPrefabName != prefabName)
             {
-                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] '{prefabName}' → '{resolvedPrefabName}' を使用");
+                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] '{prefabName}' → '{resolvedPrefabName}' を使用");
             }
         }
 
@@ -341,7 +356,7 @@ public class RoadPath : IPathMeshGenerator
                 });
             return group;
         }
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] プレハブ取得成功: '{prefabName}', mirrorX={mirrorX}");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] プレハブ取得成功: '{prefabName}', mirrorX={mirrorX}");
 
         GameObject go = new GameObject(prefabName);
         go.transform.SetParent(parent.transform, false);
@@ -365,7 +380,7 @@ public class RoadPath : IPathMeshGenerator
              bool isBody = normalizeBodySurface && prefabName.EndsWith("/body", StringComparison.Ordinal);
              Mesh meshToUse = isBody ? GetBodySurfaceMesh(mf.sharedMesh) : GetRoadPartMesh(mf.sharedMesh, resolvedPrefabName);
              Bounds fittingBounds = isBody ? GetBodySurfaceBounds(meshToUse) : meshToUse.bounds;
-             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath]   メッシュ: '{mf.sharedMesh.name}', bounds={mf.sharedMesh.bounds.size}, vertexCount={mf.sharedMesh.vertexCount}");
+             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath]   メッシュ: '{mf.sharedMesh.name}', bounds={mf.sharedMesh.bounds.size}, vertexCount={mf.sharedMesh.vertexCount}");
 
              // ミラーリングが必要な場合はメッシュを複製して反転処理を行う
              if (mirrorX)
@@ -388,7 +403,7 @@ public class RoadPath : IPathMeshGenerator
              float meshCenterX = fittingBounds.center.x;
              if (mirrorX) meshCenterX = -meshCenterX;
              if (compensatePivot) pivotCompensationX = -(meshCenterX * scaleX);
-             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath]   scaleX計算: meshWidth={meshWidth:F3} → scaleX={scaleX:F3} (targetWidth={width}), pivotCompensationX={pivotCompensationX:F3}");
+             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath]   scaleX計算: meshWidth={meshWidth:F3} → scaleX={scaleX:F3} (targetWidth={width}), pivotCompensationX={pivotCompensationX:F3}");
 
              MeshRenderer targetMr = go.GetComponent<MeshRenderer>();
              if (targetMr == null) targetMr = go.AddComponent<MeshRenderer>();
@@ -403,7 +418,7 @@ public class RoadPath : IPathMeshGenerator
                     cachedMaterials[i] = GetOrCreateRoadMaterial(originalMaterials[i]);
                 }
                 targetMr.sharedMaterials = cachedMaterials;
-                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath]   マテリアル割当完了: {cachedMaterials.Length}件");
+                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath]   マテリアル割当完了: {cachedMaterials.Length}件");
             }
             else
             {
@@ -479,7 +494,7 @@ public class RoadPath : IPathMeshGenerator
 
                 channel.minScale = new Vector3(scaleX, 1f, scaleZ);
                 channel.maxScale = new Vector3(scaleX, 1f, scaleZ);
-                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath]   点線チャンネル設定: offset=({offsetX:F3}, {offsetY:F3}), count={channel.count}, clip=({channel.clipFrom:F3}〜{channel.clipTo:F3}), scale=({scaleX:F3}, 1, {scaleZ:F3})");
+                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath]   点線チャンネル設定: offset=({offsetX:F3}, {offsetY:F3}), count={channel.count}, clip=({channel.clipFrom:F3}〜{channel.clipTo:F3}), scale=({scaleX:F3}, 1, {scaleZ:F3})");
             }
             else
             {
@@ -533,7 +548,7 @@ public class RoadPath : IPathMeshGenerator
                     float clippedLen = splineLen * (float)System.Math.Max(0.0, clipTo - clipFrom);
                     channel.count = Mathf.Max(1, Mathf.RoundToInt(clippedLen / tileLen));
                 }
-                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath]   チャンネル設定: offset=({offsetX:F3}, {offsetY:F3}), scale={scaleX:F3}, count={channel.count} (singleSpan={singleSpan}, clip={clipFrom:F3}〜{clipTo:F3})");
+                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath]   チャンネル設定: offset=({offsetX:F3}, {offsetY:F3}), scale={scaleX:F3}, count={channel.count} (singleSpan={singleSpan}, clip={clipFrom:F3}〜{clipTo:F3})");
             }
 
             // ===== 生成前の頂点数バジェットガード =====
@@ -578,8 +593,6 @@ public class RoadPath : IPathMeshGenerator
             }
         }
 
-        splineMesh.updateMethod = SplineUser.UpdateMethod.Update;
-
         try
         {
             splineMesh.RebuildImmediate();
@@ -588,14 +601,30 @@ public class RoadPath : IPathMeshGenerator
         {
             Debug.LogError($"[RoadPath] SplineMesh Rebuild失敗 '{prefabName}': {ex}");
         }
+        SealSplineMesh(splineMesh);
 
         return go;
+    }
+
+    /// <summary>
+    /// 構築済みの SplineMesh を静的な表示物として確定する。
+    /// Dreamteck は生成メッシュを破棄しないので GO に所有させ、コンポーネントを無効化して毎フレームの更新を止める。
+    /// 無効でも RebuildImmediate は動くが、スプラインや Transform を後から変えても自動では再構築されない。
+    /// </summary>
+    public static void SealSplineMesh(SplineMesh splineMesh)
+    {
+        MeshFilter filter = splineMesh.GetComponent<MeshFilter>();
+        if (filter != null && filter.sharedMesh != null)
+            splineMesh.gameObject.AddComponent<IntersectionMeshOwner>().OwnedMesh = filter.sharedMesh;
+        splineMesh.enabled = false;
     }
 
     /// <summary>
     /// 点列からスプライン（SplineComputer）を構築する共通処理。
     /// curved=true は内部点を Catmull-Rom 相当の Bézier で補間し、端の接線は切断断面に合わせる。
     /// RebuildImmediate 済みで返すため、直後の CalculateLength / Evaluate が正しい値を返す。
+    /// 点を後から変えない前提で無効化して返す(Evaluate / Project / CalculateLength は無効でも使える)。
+    /// 無効なので Transform の移動にも追従しない。生成後にコンテナのワールド座標を動かさないこと。
     /// </summary>
     public static SplineComputer BuildSpline(GameObject container, List<Vector3> points, bool isCurved)
     {
@@ -623,11 +652,12 @@ public class RoadPath : IPathMeshGenerator
         }
 
         spline.SetPoints(splinePoints);
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] スプラインポイント設定: {splinePoints.Length}点 curved={isCurved}");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] スプラインポイント設定: {splinePoints.Length}点 curved={isCurved}");
 
         spline.type = isCurved ? Spline.Type.Bezier : Spline.Type.Linear;
         spline.sampleMode = SplineComputer.SampleMode.Uniform;
         spline.RebuildImmediate();
+        spline.enabled = false;
         return spline;
     }
 
@@ -713,6 +743,7 @@ public class RoadPath : IPathMeshGenerator
 
         MeshFilter mf = go.AddComponent<MeshFilter>();
         mf.sharedMesh = mesh;
+        go.AddComponent<IntersectionMeshOwner>().OwnedMesh = mesh;
 
         MeshRenderer mr = go.AddComponent<MeshRenderer>();
         mr.sharedMaterial = GetFallbackRoadMaterial();
@@ -784,9 +815,9 @@ public class RoadPath : IPathMeshGenerator
         string variantBase = $"Models/Paths/p{pathData.path_variant}";
         string typeBase = $"Models/Paths/p{pathData.path_type}";
         // 車線描画のデバッグログはパフォーマンス確保のため、UNITY_LOG_ROADが有効な場合のみ出力する。
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] CreateRoadParts開始: variant={variantBase}, type={typeBase}, width={width}, lanes={lanes}, sidewalkWidth={sidewalkWidth}, sideWidth={sideWidth}, wallWidth={wallWidth}, centerWidth={centerWidth}");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] CreateRoadParts開始: variant={variantBase}, type={typeBase}, width={width}, lanes={lanes}, sidewalkWidth={sidewalkWidth}, sideWidth={sideWidth}, wallWidth={wallWidth}, centerWidth={centerWidth}");
 
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] モデルベースパス: variant={variantBase}, type(フォールバック)={typeBase}");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] モデルベースパス: variant={variantBase}, type(フォールバック)={typeBase}");
 
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[RoadPath] --- 道路パーツ生成開始 ---");
 
@@ -801,13 +832,13 @@ public class RoadPath : IPathMeshGenerator
         if (ropeway)
             CreateSplineMesh(container, spline, $"{variantBase}/station_shell", width, 0f, RoadPartHeights.BODY_ABOVE_SPLINE,
                 stretchToWidth: false, maxTileLength: 0, normalizeBodySurface: false);
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] body: {(roadBody != null ? "生成成功" : "生成失敗（プレハブなし？）")}");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] body: {(roadBody != null ? "生成成功" : "生成失敗（プレハブなし？）")}");
 
         if (roadBody == null)
         {
             // モデルがないため、ただの白い板にフォールバックする
             roadBody = CreateFallbackRoadBody(container, spline, width);
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] body: モデルなしのため白い板にフォールバック");
+            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] body: モデルなしのため白い板にフォールバック");
         }
 
         LrtRoadParts.Generate(container, spline, pathData);
@@ -835,9 +866,9 @@ public class RoadPath : IPathMeshGenerator
         {
             // 左側は mirrorX で反転させ、プレハブが非対称でも左右対称に見えるようにする。
             GameObject leftLine = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, -sideLineCenterOffset, lineOffsetY, true, $"{typeBase}/line");
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] side line(左): {(leftLine != null ? "生成成功" : "生成失敗")}");
+            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] side line(左): {(leftLine != null ? "生成成功" : "生成失敗")}");
             GameObject rightLine = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, sideLineCenterOffset, lineOffsetY, false, $"{typeBase}/line");
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] side line(右): {(rightLine != null ? "生成成功" : "生成失敗")}");
+            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] side line(右): {(rightLine != null ? "生成成功" : "生成失敗")}");
         }
         else
         {
@@ -870,7 +901,7 @@ public class RoadPath : IPathMeshGenerator
                 UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[RoadPath] center パーツなし。line にフォールバック。");
                 centerObj = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, 0f, lineOffsetY, false, $"{typeBase}/line");
             }
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] center: {(centerObj != null ? "生成成功" : "生成失敗")}");
+            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] center: {(centerObj != null ? "生成成功" : "生成失敗")}");
         }
 
         // 車線中心と同じ走行帯を使う。片側通行の全幅レーンも共通定義で分割する。
@@ -901,9 +932,9 @@ public class RoadPath : IPathMeshGenerator
             GetSidewalkClipRange(splineLenForClip, startSidewalkSetback.RightOutwardSetback, endSidewalkSetback.LeftOutwardSetback, out double rightClipFrom, out double rightClipTo);
 
             GameObject leftSidewalk = CreateSplineMesh(container, spline, $"{variantBase}/sidewalk", sidewalkWidth, -sidewalkCenterOffset, RoadPartHeights.SIDEWALK_ABOVE_SPLINE, false, $"{typeBase}/sidewalk", clipFrom: leftClipFrom, clipTo: leftClipTo);
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] sidewalk(左): {(leftSidewalk != null ? "生成成功" : "生成失敗")} clip=({leftClipFrom:F3}〜{leftClipTo:F3})");
+            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] sidewalk(左): {(leftSidewalk != null ? "生成成功" : "生成失敗")} clip=({leftClipFrom:F3}〜{leftClipTo:F3})");
             GameObject rightSidewalk = CreateSplineMesh(container, spline, $"{variantBase}/sidewalk", sidewalkWidth, sidewalkCenterOffset, RoadPartHeights.SIDEWALK_ABOVE_SPLINE, true, $"{typeBase}/sidewalk", clipFrom: rightClipFrom, clipTo: rightClipTo);
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] sidewalk(右・ミラー): {(rightSidewalk != null ? "生成成功" : "生成失敗")} clip=({rightClipFrom:F3}〜{rightClipTo:F3})");
+            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] sidewalk(右・ミラー): {(rightSidewalk != null ? "生成成功" : "生成失敗")} clip=({rightClipFrom:F3}〜{rightClipTo:F3})");
         }
         else
         {
@@ -918,9 +949,9 @@ public class RoadPath : IPathMeshGenerator
             // （歩道は逆の「左側用」規約なので注意。CreateRoadParts の歩道ブロック参照）。
             float wallCenterOffset = (width * 0.5f) + (wallWidth * 0.5f);
             GameObject leftWall = CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, -wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, true, $"{typeBase}/wall");
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] wall(左・ミラー): {(leftWall != null ? "生成成功" : "生成失敗")}");
+            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] wall(左・ミラー): {(leftWall != null ? "生成成功" : "生成失敗")}");
             GameObject rightWall = CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, false, $"{typeBase}/wall");
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] wall(右): {(rightWall != null ? "生成成功" : "生成失敗")}");
+            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] wall(右): {(rightWall != null ? "生成成功" : "生成失敗")}");
         }
         else
         {
@@ -936,7 +967,7 @@ public class RoadPath : IPathMeshGenerator
         if (heightEditable && pillarSpacing.HasValue && pillarSpacing.Value > 0
             && !TunnelSectionUtil.IsUndergroundPath(pathData))
         {
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] 柱: spacing={pillarSpacing.Value}m, base_height={baseHeight}m で配置開始");
+            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] 柱: spacing={pillarSpacing.Value}m, base_height={baseHeight}m で配置開始");
             GeneratePillars(container, spline, pillarSpacing.Value, baseHeight, pathData, variantBase, typeBase);
         }
         else
@@ -968,7 +999,7 @@ public class RoadPath : IPathMeshGenerator
                 if (cmf.sharedMesh != null) totalVerts += cmf.sharedMesh.vertexCount;
             }
         }
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] --- 道路パーツ生成完了 --- 子オブジェクト数={totalChildren}, MeshFilter={meshFilterCount}, Renderer={rendererCount}, 総頂点数={totalVerts}");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] --- 道路パーツ生成完了 --- 子オブジェクト数={totalChildren}, MeshFilter={meshFilterCount}, Renderer={rendererCount}, 総頂点数={totalVerts}");
     }
 
     /// <summary>
@@ -1047,7 +1078,7 @@ public class RoadPath : IPathMeshGenerator
         // (全長を同じ詳細度で描く)。
         PathDrawContext.SuppressDetailRange = true;
         GameObject container = new GameObject($"Road_{pathData.path_id}");
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] 角あり直線道路生成開始: path_id={pathData.path_id}, segments={points.Count - 1}");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] 角あり直線道路生成開始: path_id={pathData.path_id}, segments={points.Count - 1}");
 
         // パラメータ取得
         GetPathMasterParams(pathData, out float width, out float sidewalkWidth, out float sideWidth, out float? treeSpacing, out int lanes, out float wallWidth, out float centerWidth, out float? pillarSpacing, out bool heightEditable, out float baseHeight, out bool _);
@@ -1256,13 +1287,19 @@ public class RoadPath : IPathMeshGenerator
         Mesh endSource = endPrefab != null ? endPrefab.GetComponent<MeshFilter>()?.sharedMesh : null;
         float endHeight = endSource != null ? endSource.bounds.size.y : bounds.size.y;
         int tiles = Mathf.Max(1, Mathf.CeilToInt(length / 0.5f));
-        Vector3[] original = source.vertices;
-        Vector2[] originalUv = source.uv;
+        if (!ConnectorSourceCache.TryGetValue(source, out var sourceArrays))
+        {
+            var triangles = new int[source.subMeshCount][];
+            for (int sub = 0; sub < triangles.Length; sub++) triangles[sub] = source.GetTriangles(sub);
+            sourceArrays = (source.vertices, source.uv, triangles);
+            ConnectorSourceCache[source] = sourceArrays;
+        }
+        Vector3[] original = sourceArrays.vertices;
+        Vector2[] originalUv = sourceArrays.uv;
+        int[][] sourceTriangles = sourceArrays.triangles;
         var vertices = new List<Vector3>();
         var uv = new List<Vector2>();
-        var indices = new List<int>[source.subMeshCount];
-        var sourceTriangles = new int[source.subMeshCount][];
-        for (int sub = 0; sub < sourceTriangles.Length; sub++) sourceTriangles[sub] = source.GetTriangles(sub);
+        var indices = new List<int>[sourceTriangles.Length];
         for (int sub = 0; sub < indices.Length; sub++) indices[sub] = new List<int>();
         for (int tile = 0; tile < tiles; tile++)
         {
@@ -1410,11 +1447,11 @@ public class RoadPath : IPathMeshGenerator
             pillarPrefab = ModelManager.Instance.GetModel(pillarPath);
             if (pillarPrefab == null && !string.IsNullOrEmpty(fallbackPillarPath))
             {
-                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] pillar '{pillarPath}' なし。フォールバック試行: '{fallbackPillarPath}'");
+                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] pillar '{pillarPath}' なし。フォールバック試行: '{fallbackPillarPath}'");
                 pillarPrefab = ModelManager.Instance.GetModel(fallbackPillarPath);
                 if (pillarPrefab != null)
                 {
-                    UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] pillar フォールバック成功: '{fallbackPillarPath}'");
+                    UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] pillar フォールバック成功: '{fallbackPillarPath}'");
                 }
             }
         }
@@ -1428,21 +1465,21 @@ public class RoadPath : IPathMeshGenerator
             pillarCapPrefab = ModelManager.Instance.GetModel(pillarCapPath);
             if (pillarCapPrefab == null && !string.IsNullOrEmpty(fallbackPillarCapPath))
             {
-                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] pillar_cap '{pillarCapPath}' なし。フォールバック試行: '{fallbackPillarCapPath}'");
+                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] pillar_cap '{pillarCapPath}' なし。フォールバック試行: '{fallbackPillarCapPath}'");
                 pillarCapPrefab = ModelManager.Instance.GetModel(fallbackPillarCapPath);
                 if (pillarCapPrefab != null)
                 {
-                    UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] pillar_cap フォールバック成功: '{fallbackPillarCapPath}'");
+                    UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] pillar_cap フォールバック成功: '{fallbackPillarCapPath}'");
                 }
             }
         }
 
         if (pillarPrefab == null && pillarCapPrefab == null)
         {
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] pillar/pillar_cap プレハブ両方なし: '{pillarPath}', '{pillarCapPath}'");
+            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] pillar/pillar_cap プレハブ両方なし: '{pillarPath}', '{pillarCapPath}'");
             return;
         }
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] pillar プレハブロード状況: pillar={(pillarPrefab != null ? "あり" : "なし")}, cap={(pillarCapPrefab != null ? "あり" : "なし")}");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] pillar プレハブロード状況: pillar={(pillarPrefab != null ? "あり" : "なし")}, cap={(pillarCapPrefab != null ? "あり" : "なし")}");
 
         // アンカー点のリストを構築（始点、ウェイポイント、終点）。
         // CalculatePathPoints で base_height 分のYシフトが適用済みのスプラインに投影するため、
@@ -1569,7 +1606,7 @@ public class RoadPath : IPathMeshGenerator
             }
         }
 
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] 柱配置完了: {placedCount}本");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] 柱配置完了: {placedCount}本");
     }
 
     /// <summary>
@@ -1711,7 +1748,7 @@ public class RoadPath : IPathMeshGenerator
             if (master.height_editable.HasValue) heightEditable = master.height_editable.Value;
             if (master.base_height.HasValue) baseHeight = master.base_height.Value;
             if (master.single_span.HasValue) singleSpan = master.single_span.Value;
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[RoadPath] マスターデータ取得成功: width={width}, sidewalkWidth={sidewalkWidth}, sideWidth={sideWidth}, treeSpacing={treeSpacing}, lanes={lanes}, wallWidth={wallWidth}, centerWidth={centerWidth}, pillarSpacing={pillarSpacing}, heightEditable={heightEditable}, baseHeight={baseHeight}, singleSpan={singleSpan}");
+            if (LocalConstants.UNITY_LOG_ROAD) Debug.Log($"[RoadPath] マスターデータ取得成功: width={width}, sidewalkWidth={sidewalkWidth}, sideWidth={sideWidth}, treeSpacing={treeSpacing}, lanes={lanes}, wallWidth={wallWidth}, centerWidth={centerWidth}, pillarSpacing={pillarSpacing}, heightEditable={heightEditable}, baseHeight={baseHeight}, singleSpan={singleSpan}");
         }
         else
         {
@@ -1722,13 +1759,16 @@ public class RoadPath : IPathMeshGenerator
 }
 
 
-/// <summary>手続き生成した交差点メッシュのみを所有し、共有プレハブのメッシュは破棄しない。</summary>
+/// <summary>
+/// 手続き生成したメッシュと SplineMesh が生成したメッシュを GO の寿命に合わせて解放する。共有プレハブのメッシュは登録しない。
+/// 非同期ベイク中のメッシュを即座に破棄しないよう MeshBakeService 経由で解放する。
+/// </summary>
 public sealed class IntersectionMeshOwner : MonoBehaviour
 {
     public Mesh OwnedMesh;
     private void OnDestroy()
     {
-        if (OwnedMesh != null) Destroy(OwnedMesh);
+        MeshBakeService.Release(OwnedMesh);
     }
 }
 

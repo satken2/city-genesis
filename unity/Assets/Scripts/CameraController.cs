@@ -93,6 +93,11 @@ public class CameraController : MonoBehaviour
     private ModeTextDisplay modeTextDisplayRef;
     private bool modeTextDisplayLookupDone = false;
 
+    // ドラッグ開始判定で参照する編集マネージャー。全オブジェクト走査を押下ごとに行わないよう保持し、
+    // 未生成・破棄済み(Unity の null 判定)のときだけ探し直す。編集開始直後の押下も取りこぼさない。
+    private ParcelShapeEditManager parcelShapeEditManagerRef;
+    private RoadPlanManager roadPlanManagerRef;
+
     // フライモードの有効状態を外部へ公開する（他システムからの参照用）。
     public bool IsFlyMode => isFlyMode;
 
@@ -1296,7 +1301,8 @@ public class CameraController : MonoBehaviour
         Vector2 mouseScreen = InputUtil.MousePosition;
 
         // ParcelShapeEditManager の頂点判定
-        var parcelShapeEditManager = FindAnyObjectByType<ParcelShapeEditManager>();
+        if (parcelShapeEditManagerRef == null) parcelShapeEditManagerRef = FindAnyObjectByType<ParcelShapeEditManager>();
+        var parcelShapeEditManager = parcelShapeEditManagerRef;
         if (parcelShapeEditManager != null && parcelShapeEditManager.IsEditMode)
         {
             if (parcelShapeEditManager.IsMouseOverVertex(mouseScreen, cam))
@@ -1306,7 +1312,8 @@ public class CameraController : MonoBehaviour
         }
 
         // RoadPlanManager の編集ハンドル判定
-        var roadPlanManager = FindAnyObjectByType<RoadPlanManager>();
+        if (roadPlanManagerRef == null) roadPlanManagerRef = FindAnyObjectByType<RoadPlanManager>();
+        var roadPlanManager = roadPlanManagerRef;
         if (roadPlanManager != null && roadPlanManager.IsEditMode)
         {
             if (roadPlanManager.IsMouseOverEditHandle(mouseScreen, cam))
@@ -1319,7 +1326,7 @@ public class CameraController : MonoBehaviour
         // マーカー上でドラッグを開始した場合はカメラ移動を抑止し、端子ノードの移動ドラッグを
         // 成立させる(これを行わないと DefaultExecutionOrder が先の CameraController が
         // カメラドラッグを確定させ、InputHandler 側のドラッグ開始を奪ってしまう)。
-        var connectorEditManager = FindAnyObjectByType<ConnectorEditManager>();
+        var connectorEditManager = ConnectorEditManager.Instance;
         if (connectorEditManager != null && connectorEditManager.IsEditMode)
         {
             if (connectorEditManager.IsMouseOverConnector(mouseScreen, cam))

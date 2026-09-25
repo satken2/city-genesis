@@ -89,13 +89,33 @@ public class HeightmapTextureManager : MonoBehaviour
         ReleaseWindowTexture();
     }
 
-    /// <summary>地形タイルのデータ適用完了通知。窓の再構築を次のLateUpdateへ予約する。</summary>
+    /// <summary>地形タイルのデータ適用完了通知。窓に重なるセルなら、窓の再構築を次のLateUpdateへ予約する。</summary>
     private void OnTerrainTileReadyForWindow(Vector2Int cellIndex, Terrain tile)
     {
-        windowDirty = true;
+        MarkSurfaceChanged(cellIndex);
     }
 
     public void MarkSurfaceChanged() => windowDirty = true;
+
+    /// <summary>セルの地形が変わった(公開・除去)ときに呼ぶ。窓に重ならない外縁セルの出入りでは作り直さない。</summary>
+    public void MarkSurfaceChanged(Vector2Int cell)
+    {
+        if (CellOverlapsWindow(cell)) windowDirty = true;
+    }
+
+    /// <summary>
+    /// セルの矩形が現在の窓に重なるか。窓が未初期化なら常に true。
+    /// 窓の再センタリングは常に全体を作り直すので、ここで外したセルも移動後の窓には反映される。
+    /// </summary>
+    private bool CellOverlapsWindow(Vector2Int cell)
+    {
+        if (!windowInitialized) return true;
+        float cellSize = TerrainManager.CellSize;
+        float windowSizeM = WINDOW_RES * WINDOW_TEXEL_M;
+        float minX = cell.x * cellSize, minZ = cell.y * cellSize;
+        return minX <= windowOriginXZ.x + windowSizeM && minX + cellSize >= windowOriginXZ.x
+            && minZ <= windowOriginXZ.y + windowSizeM && minZ + cellSize >= windowOriginXZ.y;
+    }
 
     /// <summary>
     /// 移動窓の維持。カメラが窓中心から離れたら再センタリングし、

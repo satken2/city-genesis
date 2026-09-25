@@ -23,10 +23,29 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
     /// </summary>
     private Dictionary<int, int> zoneVersionCache = new Dictionary<int, int>();
 
-    // 2D UI上の地区名ラベル（zoneId -> Text GameObject）
-    private Dictionary<int, GameObject> zoneLabelUIs = new Dictionary<int, GameObject>();
-    // 2D UI上の建物アイコン（zoneId -> Image GameObjectリスト）
-    private Dictionary<int, List<GameObject>> zoneIconUIs = new Dictionary<int, List<GameObject>>();
+    /// <summary>
+    /// 地区データの版。UpdateZone / RemoveZone / ClearAllCells のたびに1増える。
+    /// 地区IDの空間判定結果などをキャッシュする側が、無効化の判定に使う。
+    /// </summary>
+    public int ZoneRevision { get; private set; }
+
+    // 2D UI上の地区名ラベル（zoneId -> Text の RectTransform）
+    private Dictionary<int, RectTransform> zoneLabelUIs = new Dictionary<int, RectTransform>();
+    // 2D UI上の建物アイコン（zoneId -> Image の RectTransform リスト）
+    private Dictionary<int, List<RectTransform>> zoneIconUIs = new Dictionary<int, List<RectTransform>>();
+
+    /// <summary>
+    /// ラベル・アイコンを置くワールド座標(center_point の XZ + 地形高さ + 2m)。
+    /// 生成時と枠線高さの再計算時にだけサンプルし、カメラ移動のたびには地形を引かない。
+    /// center_point の無い地区(空になった地区)は登録しない。
+    /// </summary>
+    private Dictionary<int, Vector3> zoneLabelAnchors = new Dictionary<int, Vector3>();
+
+    /// <summary>zone.polygon の変換結果。GetZoneIdAtPoint が呼ばれるたびの配列確保を避けるために保持する。</summary>
+    private Dictionary<int, float[][]> zonePolygonCache = new Dictionary<int, float[][]>();
+
+    /// <summary>zone.color をパースした結果。パースできない地区は登録せず、GetZoneColor がシアンを返す。</summary>
+    private Dictionary<int, Color> zoneColorCache = new Dictionary<int, Color>();
 
     /// <summary>
     /// ゾーンの枠線データ。ワールド座標の端点を保持し、
@@ -38,6 +57,55 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         public Vector3 worldB;
     }
     private Dictionary<int, List<ZoneLineEntry>> zoneLinesByZone = new Dictionary<int, List<ZoneLineEntry>>();
+
+    /// <summary>
+    /// 枠線の視錐台カリング単位。地区の枠線を ZONE_LINE_CHUNK_SIZE 本ずつに区切り、
+    /// その端点を包む AABB で視野外の線分をまとめて飛ばす。
+    /// </summary>
+    private struct ZoneLineChunk
+    {
+        public int start;
+        public int count;
+        public Bounds bounds;
+        public float radius; // 余白を足す前の AABB の外接球半径。回転による掃引量の見積りに使う。
+    }
+    private Dictionary<int, List<ZoneLineChunk>> zoneLineChunks = new Dictionary<int, List<ZoneLineChunk>>();
+    private readonly Plane[] frustumPlanes = new Plane[6];
+    private const int ZONE_LINE_CHUNK_SIZE = 32;
+
+    /// <summary>
+    /// チャンクの AABB を各方向へ広げる量(メートル)。
+    /// 線は画素幅で太らせて描くため、端点が視錐台の外でも線の縁が画面に入ることがある。
+    /// </summary>
+    private const float ZONE_CULL_MARGIN = 20f;
+
+    /// <summary>
+    /// 描き直しの間(最大 CAMERA_ROT_THRESHOLD の回転)に視野へ入り得る範囲を覆うための、カメラからの距離1mあたりの追加余白。
+    /// 回転で点が動く量は距離×回転角(ラジアン)以下なので、遠いチャンクほど大きく広げる。
+    /// </summary>
+    private const float ZONE_CULL_SWEEP_PER_METER = CAMERA_ROT_THRESHOLD * Mathf.Deg2Rad;
+
+    /// <summary>
+    /// 地形タイルの更新・脱落後に枠線・ラベルの高さを再計算していない地区。
+    /// 非表示中は再計算を表示ONまで遅らせる(描かれない枠線の再サンプルは無駄なため)。
+    /// 再計算の途中で地形が変わっても、ワーカーは進捗を捨てずにこの集合が空になるまで回り続ける。
+    /// </summary>
+    private readonly HashSet<int> zoneHeightDirtyIds = new HashSet<int>();
+    private Coroutine zoneHeightRefreshCoroutine;
+
+    /// <summary>
+    /// 地形タイルが載っていると通知されたセル。通知のたびにタイルが外れたセルを見つけ、
+    /// そこの枠線を概観の高さ(表示中の地面)へ取り直すために使う。
+    /// </summary>
+    private readonly HashSet<Vector2Int> zoneHeightTileCells = new HashSet<Vector2Int>();
+    private readonly HashSet<Vector2Int> zoneHeightChangedCells = new HashSet<Vector2Int>();
+    private readonly List<Vector2Int> zoneHeightDroppedCells = new List<Vector2Int>();
+
+    /// <summary>セル境界上の点はどちらのタイルでもサンプルされ得るため、地区BBOXをこの量(メートル)広げてセルと照合する。</summary>
+    private const float ZONE_HEIGHT_CELL_MARGIN = 1f;
+
+    /// <summary>枠線の高さ再計算で、何サンプルごとにスケジューラへ制御を返すか。</summary>
+    private const int ZONE_HEIGHT_SAMPLES_PER_STEP = 256;
 
     private const float LINE_THICKNESS = 5f;
 
@@ -100,7 +168,17 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
     private TerrainManager terrainManager;
 
     private bool areZonesLoaded = false;
+
+    /// <summary>
+    /// 全地区ロードが起動済みか。StartZoneLoad が立て、LoadAllZones の finally で必ず下ろす
+    /// (途中で停止されても以後のリロードが止まらないように)。
+    /// 初回ステップ前に停止された iterator は finally を通らないので、停止する側でも下ろす。
+    /// </summary>
     private bool isZoneLoadInProgress = false;
+    private Coroutine zoneLoadCoroutine;
+
+    /// <summary>起動ごとに増える番号。古いロードの finally が新しいロードの進行中フラグを下ろさないようにする。</summary>
+    private int zoneLoadToken = 0;
 
     /// <summary>
     /// ロード進行中に RequestZoneRefresh が呼ばれた場合の追加リロード予約。
@@ -109,11 +187,20 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
     /// </summary>
     private bool zoneRefreshQueued = false;
 
+    /// <summary>
+    /// 予約した追加リロードを version 差分なしの全再描画にするか(ロード中の ReloadAllZonesForced)。
+    /// 進行中のロードは地区を複数フレームに分けて適用するため、途中でキャッシュを空にしても
+    /// 適用済みの地区は描き直されず、応答も編集前の可能性があるので、完了後に取り直す。
+    /// </summary>
+    private bool zoneForcedReloadQueued = false;
+
     // カメラ変化検知によるUI位置更新間引き用
     private Vector3 lastCamPos = Vector3.negativeInfinity;
     private Quaternion lastCamRot = Quaternion.identity;
     private const float CAMERA_POS_THRESHOLD = 1.0f;
     private const float CAMERA_ROT_THRESHOLD = 2.0f;
+
+    private bool IsOverlayVisible => uiCanvasRoot != null && uiCanvasRoot.activeSelf;
 
     public Dictionary<int, ZoneData> GetAllZones()
     {
@@ -135,8 +222,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
                 if (!bbox.Contains(point)) continue;
             }
 
-            float[][] poly = kvp.Value.GetPolygonArray();
-            if (poly == null || poly.Length < 3) continue;
+            if (!zonePolygonCache.TryGetValue(zoneId, out float[][] poly) || poly == null || poly.Length < 3) continue;
             if (PolygonUtils.Contains(poly, point.x, point.y))
             {
                 return zoneId;
@@ -186,10 +272,30 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
     public override void LoadCells(List<Vector2Int> neededCells, bool isForce)
     {
         // 頻繁なロードを避けるため、Force指定時または未ロード時のみ実行
-        if (!isZoneLoadInProgress && (isForce || !areZonesLoaded))
+        if (isForce || !areZonesLoaded)
         {
-            RenderWorkScheduler.Start(this, LoadAllZones(), "ZoneManager");
+            StartZoneLoad();
         }
+    }
+
+    /// <summary>
+    /// 全地区ロードを起動する。起動済みなら何もしない。
+    /// 進行中フラグを起動時に立てるので、同じフレームに複数経路から呼ばれても二重に走らない。
+    /// </summary>
+    private void StartZoneLoad()
+    {
+        if (isZoneLoadInProgress) return;
+        isZoneLoadInProgress = true;
+        zoneLoadCoroutine = RenderWorkScheduler.Start(this, LoadAllZones(++zoneLoadToken), "ZoneManager");
+        if (zoneLoadCoroutine == null) isZoneLoadInProgress = false;
+    }
+
+    private void StopZoneLoad()
+    {
+        RenderWorkScheduler.Stop(this, zoneLoadCoroutine);
+        zoneLoadToken++;
+        zoneLoadCoroutine = null;
+        isZoneLoadInProgress = false;
     }
 
     protected override void UnloadCell(Vector2Int cellIndex)
@@ -199,31 +305,37 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
 
     public override void ClearAllCells()
     {
+        ZoneRevision++;
+        StopZoneLoad();
+        StopZoneLineHeightRefresh();
+        zoneRefreshQueued = false;
+        zoneForcedReloadQueued = false;
+        zoneHeightDirtyIds.Clear();
+        zoneHeightTileCells.Clear();
+
         foreach (var kv in zoneLabelUIs)
         {
             if (kv.Value != null)
             {
-                Destroy(kv.Value);
+                Destroy(kv.Value.gameObject);
             }
         }
         zoneLabelUIs.Clear();
 
         foreach (var kvIcons in zoneIconUIs)
         {
-            foreach (var icon in kvIcons.Value)
-            {
-                if (icon != null)
-                {
-                    Destroy(icon);
-                }
-            }
+            DestroyIcons(kvIcons.Value);
         }
         zoneIconUIs.Clear();
 
         zoneLinesByZone.Clear();
+        zoneLineChunks.Clear();
+        zoneLabelAnchors.Clear();
 
         zoneCache.Clear();
         zoneBboxCache.Clear();
+        zonePolygonCache.Clear();
+        zoneColorCache.Clear();
         zoneVersionCache.Clear();
         loadedCells.Clear();
         areZonesLoaded = false;
@@ -248,7 +360,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
             zoneRefreshQueued = true;
             return;
         }
-        RenderWorkScheduler.Start(this, LoadAllZones(), "ZoneManager");
+        StartZoneLoad();
     }
 
     /// <summary>
@@ -259,77 +371,93 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
     /// </summary>
     public void ReloadAllZonesForced()
     {
+        if (isZoneLoadInProgress)
+        {
+            zoneRefreshQueued = true;
+            zoneForcedReloadQueued = true;
+            return;
+        }
         // 全地区を再描画対象にする(version が同じでも UpdateZone が走るようにする)。
         zoneVersionCache.Clear();
-        // 進行中のロードが無ければ新規に開始する。進行中の場合も、上でキャッシュを空にしたため
-        // その完了時に全地区が再描画される。
-        if (!isZoneLoadInProgress)
-        {
-            RenderWorkScheduler.Start(this, LoadAllZones(), "ZoneManager");
-        }
+        StartZoneLoad();
     }
 
-    public IEnumerator LoadAllZones()
+    /// <summary>
+    /// 全地区を取得し、version が変わった地区だけを1地区ずつ予算内で作り直す。
+    /// StartZoneLoad からだけ起動する(進行中フラグは起動側が立て、ここの finally が下ろす)。
+    /// </summary>
+    private IEnumerator LoadAllZones(int token)
     {
-        if (isZoneLoadInProgress) yield break;
-
-        isZoneLoadInProgress = true;
-        ZonesListResponse response = null;
-        yield return ApiClient.GetBulk<ZonesListResponse>(
-            "/zones/",
-            r => response = r,
-            timingLabel: "ZoneManager zones");
-        if (response == null)
+        try
         {
-            areZonesLoaded = false;
-            isZoneLoadInProgress = false;
-            yield break;
-        }
-
-        HashSet<int> receivedIds = new HashSet<int>();
-
-        if (response != null && response.zones != null)
-        {
-            foreach (var zone in response.zones)
+            ZonesListResponse response = null;
+            yield return ApiClient.GetBulk<ZonesListResponse>(
+                "/zones/",
+                r => response = r,
+                timingLabel: "ZoneManager zones");
+            if (response == null)
             {
-                try
-                {
-                    receivedIds.Add(zone.zone_id);
+                areZonesLoaded = false;
+                yield break;
+            }
 
-                    // version比較: キャッシュと同じversionなら再作成しない
-                    if (zoneVersionCache.TryGetValue(zone.zone_id, out int cachedVersion) && cachedVersion == zone.version)
-                    {
-                        // 何もしない（UI位置は毎フレームUpdateで更新している）
-                    }
-                    else
-                    {
-                        UpdateZone(zone);
-                        zoneVersionCache[zone.zone_id] = zone.version;
-                    }
-                }
-                catch (Exception e)
+            HashSet<int> receivedIds = new HashSet<int>();
+
+            if (response.zones != null)
+            {
+                foreach (var zone in response.zones)
                 {
-                    int zoneId = zone != null ? zone.zone_id : -1;
-                    Debug.LogError($"ZoneManager: ゾーン {zoneId} の描画生成に失敗しました: {e.Message}\n{e.StackTrace}");
+                    bool updated = false;
+                    try
+                    {
+                        receivedIds.Add(zone.zone_id);
+
+                        // version比較: キャッシュと同じversionなら再作成しない
+                        if (!zoneVersionCache.TryGetValue(zone.zone_id, out int cachedVersion) || cachedVersion != zone.version)
+                        {
+                            UpdateZone(zone);
+                            zoneVersionCache[zone.zone_id] = zone.version;
+                            updated = true;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        int zoneId = zone != null ? zone.zone_id : -1;
+                        Debug.LogError($"ZoneManager: ゾーン {zoneId} の描画生成に失敗しました: {e.Message}\n{e.StackTrace}");
+                    }
+                    // 枠線サンプリングと UI 生成は地区ごとに重いので、作り直した地区ごとに予算を確認する。
+                    if (updated) yield return RenderWorkScheduler.Continue;
                 }
             }
-        }
 
-        SyncZones(receivedIds);
-        areZonesLoaded = true;
-        isZoneLoadInProgress = false;
-        // ゾーンデータの更新後にオーバーレイの再描画を確実に行うため、
-        // カメラ位置のトラッキングをリセットする。これにより次のUpdateで
-        // 枠線やラベルの位置が強制的に再計算される。
-        lastCamPos = Vector3.negativeInfinity;
-        Debug.Log($"ZoneManager: ゾーン一覧を読み込みました count={receivedIds.Count}");
+            SyncZones(receivedIds);
+            areZonesLoaded = true;
+            // ゾーンデータの更新後にオーバーレイの再描画を確実に行うため、
+            // カメラ位置のトラッキングをリセットする。これにより次のUpdateで
+            // 枠線やラベルの位置が強制的に再計算される。
+            lastCamPos = Vector3.negativeInfinity;
+            Debug.Log($"ZoneManager: ゾーン一覧を読み込みました count={receivedIds.Count}");
+        }
+        finally
+        {
+            if (token == zoneLoadToken)
+            {
+                isZoneLoadInProgress = false;
+                zoneLoadCoroutine = null;
+            }
+        }
 
         // ロード中に RequestZoneRefresh が予約されていたら、最新状態へ追随するため
         // もう一度リロードする(今回のロードは予約時点より古いスナップショットの可能性がある)。
         if (zoneRefreshQueued)
         {
             zoneRefreshQueued = false;
-            RenderWorkScheduler.Start(this, LoadAllZones(), "ZoneManager");
+            if (zoneForcedReloadQueued)
+            {
+                zoneForcedReloadQueued = false;
+                zoneVersionCache.Clear();
+            }
+            StartZoneLoad();
         }
     }
 
@@ -349,25 +477,47 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
 
     public void RemoveZone(int zoneId)
     {
-        if (zoneLabelUIs.TryGetValue(zoneId, out GameObject labelObj))
-        {
-            Destroy(labelObj);
-            zoneLabelUIs.Remove(zoneId);
-        }
-
-        if (zoneIconUIs.TryGetValue(zoneId, out List<GameObject> icons))
-        {
-            foreach (var icon in icons)
-            {
-                if (icon != null) Destroy(icon);
-            }
-            zoneIconUIs.Remove(zoneId);
-        }
-
-        RemoveZoneLines(zoneId);
+        ZoneRevision++;
+        RemoveZoneVisuals(zoneId);
 
         zoneCache.Remove(zoneId);
         zoneBboxCache.Remove(zoneId);
+        zonePolygonCache.Remove(zoneId);
+        zoneColorCache.Remove(zoneId);
+        // 版を残すと、同じIDが同じ版で戻ったときに描画されない。
+        zoneVersionCache.Remove(zoneId);
+    }
+
+    /// <summary>
+    /// 地区の枠線・ラベル・アイコンとその位置キャッシュを破棄する(RemoveZone と UpdateZone の作り直しで共用)。
+    /// </summary>
+    private void RemoveZoneVisuals(int zoneId)
+    {
+        if (zoneLabelUIs.TryGetValue(zoneId, out RectTransform label))
+        {
+            if (label != null) Destroy(label.gameObject);
+            zoneLabelUIs.Remove(zoneId);
+        }
+
+        if (zoneIconUIs.TryGetValue(zoneId, out List<RectTransform> icons))
+        {
+            DestroyIcons(icons);
+            zoneIconUIs.Remove(zoneId);
+        }
+
+        zoneLabelAnchors.Remove(zoneId);
+        RemoveZoneLines(zoneId);
+        // 作り直す枠線とラベルはその時点の地形でサンプルするので、高さの再計算は要らない。
+        zoneHeightDirtyIds.Remove(zoneId);
+    }
+
+    private void DestroyIcons(List<RectTransform> icons)
+    {
+        if (icons == null) return;
+        foreach (var icon in icons)
+        {
+            if (icon != null) Destroy(icon.gameObject);
+        }
     }
 
     public IEnumerator FetchZone(int zoneId)
@@ -472,8 +622,8 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
             return;
         }
 
-        if (!zoneCache.TryGetValue(zoneId, out ZoneData zone)) return;
-        float[][] poly = zone.GetPolygonArray();
+        if (!zoneCache.ContainsKey(zoneId)) return;
+        zonePolygonCache.TryGetValue(zoneId, out float[][] poly);
         if (poly == null || poly.Length < 3)
         {
             hoverFillRenderer?.ClearMesh();
@@ -530,13 +680,9 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
     /// </summary>
     public Color GetZoneColor(int zoneId)
     {
-        if (zoneId > 0 && zoneCache.TryGetValue(zoneId, out ZoneData zone))
+        if (zoneId > 0 && zoneColorCache.TryGetValue(zoneId, out Color c))
         {
-            string hex = zone.color;
-            if (!string.IsNullOrEmpty(hex) && ColorUtility.TryParseHtmlString(hex, out Color c))
-            {
-                return c;
-            }
+            return c;
         }
         return new Color(0.2f, 0.8f, 1f, 1f); // Fallback to cyan
     }
@@ -553,11 +699,22 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
 
     public void UpdateZone(ZoneData zone)
     {
+        ZoneRevision++;
         float[] centerPoint = zone.GetCenterPointArray();
         zoneCache[zone.zone_id] = zone;
 
+        string hex = zone.color;
+        if (!string.IsNullOrEmpty(hex) && ColorUtility.TryParseHtmlString(hex, out Color zoneColor))
+            zoneColorCache[zone.zone_id] = zoneColor;
+        else
+            zoneColorCache.Remove(zone.zone_id);
+
         // ゾーンポリゴンから BBOX（境界長方形）を計算してキャッシュする
         float[][] polygon = zone.GetPolygonArray();
+        if (polygon != null)
+            zonePolygonCache[zone.zone_id] = polygon;
+        else
+            zonePolygonCache.Remove(zone.zone_id);
         if (polygon != null && polygon.Length > 0)
         {
             float minX = float.MaxValue, maxX = float.MinValue;
@@ -583,22 +740,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         // 拡張で侵食されて空になった地区(polygon=[], center_point=None)は下の早期リターンで
         // 再生成されないため、ここで消しておかないと古い枠線・ラベルが残り続ける(=消滅した地区の
         // ラベルが消えないバグになる)。
-        RemoveZoneLines(zone.zone_id);
-
-        if (zoneLabelUIs.ContainsKey(zone.zone_id))
-        {
-            Destroy(zoneLabelUIs[zone.zone_id]);
-            zoneLabelUIs.Remove(zone.zone_id);
-        }
-
-        if (zoneIconUIs.ContainsKey(zone.zone_id))
-        {
-            foreach (var icon in zoneIconUIs[zone.zone_id])
-            {
-                if (icon != null) Destroy(icon);
-            }
-            zoneIconUIs.Remove(zone.zone_id);
-        }
+        RemoveZoneVisuals(zone.zone_id);
 
         // center_point が未設定のゾーン(空になった地区)は再描画しない。
         // 上で旧描画は破棄済みなので、枠線・ラベルは消えたままになる。
@@ -607,9 +749,11 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
             return;
         }
 
-        zoneIconUIs[zone.zone_id] = new List<GameObject>();
+        zoneIconUIs[zone.zone_id] = new List<RectTransform>();
+        float anchorY = Utils.GetGroundHeight(new Vector3(centerPoint[0], 1000f, centerPoint[1])) + 2f;
+        zoneLabelAnchors[zone.zone_id] = new Vector3(centerPoint[0], anchorY, centerPoint[1]);
 
-        CreateZoneLines(zone);
+        CreateZoneLines(zone.zone_id, polygon);
         CreateZoneLabelUI(zone);
         CreateZoneIconsUI(zone);
 
@@ -658,7 +802,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         int capturedZoneId = zone.zone_id;
         button.onClick.AddListener(() => OnZoneLabelClicked(capturedZoneId));
 
-        zoneLabelUIs[zone.zone_id] = labelGO;
+        zoneLabelUIs[zone.zone_id] = rt;
     }
 
     /// <summary>
@@ -681,7 +825,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
             return;
         }
 
-        var icons = new List<GameObject>();
+        var icons = new List<RectTransform>();
         const float iconSize = 60f;
         int capturedZoneId = zone.zone_id;
 
@@ -711,7 +855,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
             Button button = iconGO.AddComponent<Button>();
             button.onClick.AddListener(() => OnZoneLabelClicked(capturedZoneId));
 
-            icons.Add(iconGO);
+            icons.Add(rt);
         }
 
         zoneIconUIs[zone.zone_id] = icons;
@@ -735,11 +879,10 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
     /// 地形起伏に追従するため、長いセグメントは細分化して各端点の地面高さをサンプリングする。
     /// 実際の描画は OverlayMeshRenderer で行う。
     /// </summary>
-    private void CreateZoneLines(ZoneData zone)
+    private void CreateZoneLines(int zoneId, float[][] polygon)
     {
         EnsureOverlayRenderer();
 
-        float[][] polygon = zone.GetPolygonArray();
         if (polygon == null || polygon.Length < 3) return;
 
         Vector2[] outline = BuildSetbackOutline(polygon, OUTLINE_SETBACK);
@@ -776,7 +919,38 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
                 });
             }
         }
-        zoneLinesByZone[zone.zone_id] = entries;
+        zoneLinesByZone[zoneId] = entries;
+        RebuildZoneLineChunks(zoneId, entries);
+    }
+
+    /// <summary>
+    /// 枠線を ZONE_LINE_CHUNK_SIZE 本ずつに区切り、視錐台カリング用の AABB を作り直す。
+    /// 端点の高さが変わったら(生成時・高さ再計算時)呼ぶ。
+    /// </summary>
+    private void RebuildZoneLineChunks(int zoneId, List<ZoneLineEntry> entries)
+    {
+        if (!zoneLineChunks.TryGetValue(zoneId, out List<ZoneLineChunk> chunks))
+        {
+            chunks = new List<ZoneLineChunk>((entries.Count + ZONE_LINE_CHUNK_SIZE - 1) / ZONE_LINE_CHUNK_SIZE);
+            zoneLineChunks[zoneId] = chunks;
+        }
+        chunks.Clear();
+        for (int start = 0; start < entries.Count; start += ZONE_LINE_CHUNK_SIZE)
+        {
+            int count = Mathf.Min(ZONE_LINE_CHUNK_SIZE, entries.Count - start);
+            Vector3 min = entries[start].worldA;
+            Vector3 max = min;
+            for (int i = start; i < start + count; i++)
+            {
+                min = Vector3.Min(min, Vector3.Min(entries[i].worldA, entries[i].worldB));
+                max = Vector3.Max(max, Vector3.Max(entries[i].worldA, entries[i].worldB));
+            }
+            var bounds = new Bounds();
+            bounds.SetMinMax(min, max);
+            float radius = bounds.extents.magnitude;
+            bounds.Expand(ZONE_CULL_MARGIN * 2f);
+            chunks.Add(new ZoneLineChunk { start = start, count = count, bounds = bounds, radius = radius });
+        }
     }
 
     /// <summary>
@@ -847,15 +1021,13 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
 
     private void RemoveZoneLines(int zoneId)
     {
-        if (zoneLinesByZone.ContainsKey(zoneId))
-        {
-            zoneLinesByZone.Remove(zoneId);
-        }
+        zoneLinesByZone.Remove(zoneId);
+        zoneLineChunks.Remove(zoneId);
     }
 
     private void Update()
     {
-        if (uiCanvasRoot == null || !uiCanvasRoot.activeSelf) return;
+        if (!IsOverlayVisible) return;
 
         Camera cam = Camera.main;
         if (cam == null) return;
@@ -869,7 +1041,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         bool posChanged = Vector3.Distance(currentCamPos, lastCamPos) > CAMERA_POS_THRESHOLD;
         bool rotChanged = Quaternion.Angle(currentCamRot, lastCamRot) > CAMERA_ROT_THRESHOLD;
         // カメラが動いていない場合、枠線の位置もラベルの位置も変わらないためスキップする
-        // (枠線の太さ・選択地区の変化で描き直しが要るときは lastCamPos をリセットしてある)。
+        // (枠線の太さ・選択地区・高さの変化で描き直しが要るときは lastCamPos をリセットしてある)。
         if (!posChanged && !rotChanged)
         {
             return;
@@ -889,6 +1061,7 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         if (overlayRenderer != null)
         {
             overlayRenderer.BeginFrame();
+            GeometryUtility.CalculateFrustumPlanes(cam, frustumPlanes);
 
             // 枠線を描画。地区編集中は太く(選択中の地区はさらに太く)して境界を主役にする。
             foreach (var kvp in zoneLinesByZone)
@@ -901,28 +1074,20 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
                 {
                     thickness = (zoneId == selectedZoneId) ? SELECTED_LINE_THICKNESS : EDIT_LINE_THICKNESS;
                 }
-                for (int i = 0; i < entries.Count; i++)
+
+                if (!zoneLineChunks.TryGetValue(zoneId, out List<ZoneLineChunk> chunks))
                 {
-                    ZoneLineEntry entry = entries[i];
-
-                    Vector3 ca = entry.worldA;
-                    Vector3 cb = entry.worldB;
-
-                    float da = nearPlane.GetDistanceToPoint(ca);
-                    float db = nearPlane.GetDistanceToPoint(cb);
-
-                    if (da < 0f && db < 0f)
-                        continue;
-
-                    if (da < 0f || db < 0f)
-                    {
-                        Vector3 dir = cb - ca;
-                        float t = da / (da - db);
-                        Vector3 p = ca + dir * t;
-                        if (da < 0f) ca = p; else cb = p;
-                    }
-
-                    overlayRenderer.AddSolidLine(ca, cb, outlineColor, thickness);
+                    AddZoneLines(entries, 0, entries.Count, nearPlane, outlineColor, thickness);
+                    continue;
+                }
+                for (int c = 0; c < chunks.Count; c++)
+                {
+                    ZoneLineChunk chunk = chunks[c];
+                    Bounds cullBounds = chunk.bounds;
+                    float sweep = (Vector3.Distance(currentCamPos, cullBounds.center) + chunk.radius) * ZONE_CULL_SWEEP_PER_METER;
+                    cullBounds.Expand(sweep * 2f);
+                    if (!GeometryUtility.TestPlanesAABB(frustumPlanes, cullBounds)) continue;
+                    AddZoneLines(entries, chunk.start, chunk.start + chunk.count, nearPlane, outlineColor, thickness);
                 }
             }
 
@@ -930,46 +1095,76 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
         }
 
         // 2. 地区名ラベルとアイコンの位置更新
-        foreach (var kvp in zoneCache)
+        foreach (var kvp in zoneLabelAnchors)
         {
             int zoneId = kvp.Key;
-            ZoneData zone = kvp.Value;
-            float[] centerPoint = zone.GetCenterPointArray();
-            if (centerPoint == null || centerPoint.Length < 2) continue;
-
-            float groundY = Utils.GetGroundHeight(new Vector3(centerPoint[0], 1000f, centerPoint[1]));
-            Vector3 worldPos = new Vector3(centerPoint[0], groundY + 2f, centerPoint[1]);
-            Vector3 screenPos = cam.WorldToScreenPoint(worldPos);
-            bool isBehind = screenPos.z < 0;
+            Vector3 screenPos = cam.WorldToScreenPoint(kvp.Value);
+            bool visible = screenPos.z >= 0;
 
             // ラベル
-            if (zoneLabelUIs.TryGetValue(zoneId, out GameObject labelObj) && labelObj != null)
+            if (zoneLabelUIs.TryGetValue(zoneId, out RectTransform label) && label != null)
             {
-                labelObj.SetActive(!isBehind);
-                if (!isBehind)
+                SetUiActive(label, visible);
+                if (visible)
                 {
-                    RectTransform rt = labelObj.GetComponent<RectTransform>();
-                    rt.anchoredPosition = new Vector2(screenPos.x, screenPos.y);
+                    label.anchoredPosition = new Vector2(screenPos.x, screenPos.y);
                 }
             }
 
             // アイコン
-            if (zoneIconUIs.TryGetValue(zoneId, out List<GameObject> iconList) && iconList != null)
+            if (zoneIconUIs.TryGetValue(zoneId, out List<RectTransform> iconList) && iconList != null)
             {
                 for (int i = 0; i < iconList.Count; i++)
                 {
-                    GameObject iconObj = iconList[i];
-                    if (iconObj == null) continue;
-                    iconObj.SetActive(!isBehind);
-                    if (!isBehind)
+                    RectTransform icon = iconList[i];
+                    if (icon == null) continue;
+                    SetUiActive(icon, visible);
+                    if (visible)
                     {
-                        RectTransform rt = iconObj.GetComponent<RectTransform>();
                         float offsetX = (i - (iconList.Count - 1) / 2f) * 70f;
-                        rt.anchoredPosition = new Vector2(screenPos.x + offsetX, screenPos.y - 62.5f);
+                        icon.anchoredPosition = new Vector2(screenPos.x + offsetX, screenPos.y - 62.5f);
                     }
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// entries[start..end) をニアクリップ面で切ってオーバーレイへ積む。
+    /// カメラ背面へ抜ける線分は、画面外へ裏返って描かれないよう手前側だけ残す。
+    /// </summary>
+    private void AddZoneLines(List<ZoneLineEntry> entries, int start, int end, Plane nearPlane, Color color, float thickness)
+    {
+        end = Mathf.Min(end, entries.Count);
+        for (int i = start; i < end; i++)
+        {
+            ZoneLineEntry entry = entries[i];
+
+            Vector3 ca = entry.worldA;
+            Vector3 cb = entry.worldB;
+
+            float da = nearPlane.GetDistanceToPoint(ca);
+            float db = nearPlane.GetDistanceToPoint(cb);
+
+            if (da < 0f && db < 0f)
+                continue;
+
+            if (da < 0f || db < 0f)
+            {
+                Vector3 dir = cb - ca;
+                float t = da / (da - db);
+                Vector3 p = ca + dir * t;
+                if (da < 0f) ca = p; else cb = p;
+            }
+
+            overlayRenderer.AddSolidLine(ca, cb, color, thickness);
+        }
+    }
+
+    private static void SetUiActive(RectTransform rt, bool active)
+    {
+        GameObject go = rt.gameObject;
+        if (go.activeSelf != active) go.SetActive(active);
     }
 
     private void OnDestroy()
@@ -985,39 +1180,162 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
     }
 
     /// <summary>
-    /// TerrainManager が全セルのロードを完了した時に呼ばれる。
-    /// ゾーンの枠線ラインの高さを地形に合わせて再計算する。
-    /// (updatedCells 引数はイベントのシグネチャ整合のためで、地区枠線は全件再計算するため未使用)
+    /// TerrainManager のロードバッチ完了時に呼ばれる。
+    /// タイルが(再)生成・LRU復元されたセルと、前回以降にタイルが外れたセル(概観の高さへ戻る)に
+    /// 重なる地区だけを要再計算にし、表示中なら再計算を予算内で始める。実行中なら積むだけで、ワーカーが続けて拾う。
+    /// 非表示中は ApplyVisualMode で表示ONになったときに始める。
     /// </summary>
     private void OnTerrainAllLoaded(IReadOnlyList<Vector2Int> updatedCells)
     {
-        RefreshZoneLineHeights();
+        if (terrainManager == null) return;
+        zoneHeightChangedCells.Clear();
+        if (updatedCells != null)
+        {
+            for (int i = 0; i < updatedCells.Count; i++)
+            {
+                zoneHeightChangedCells.Add(updatedCells[i]);
+                zoneHeightTileCells.Add(updatedCells[i]);
+            }
+        }
+        zoneHeightDroppedCells.Clear();
+        foreach (Vector2Int cell in zoneHeightTileCells)
+        {
+            if (!terrainManager.HasSurfaceTile(cell)) zoneHeightDroppedCells.Add(cell);
+        }
+        foreach (Vector2Int cell in zoneHeightDroppedCells)
+        {
+            zoneHeightTileCells.Remove(cell);
+            zoneHeightChangedCells.Add(cell);
+        }
+        if (zoneHeightChangedCells.Count == 0) return;
+
+        foreach (int zoneId in zoneCache.Keys)
+        {
+            if (ZoneTouchesCells(zoneId, zoneHeightChangedCells)) zoneHeightDirtyIds.Add(zoneId);
+        }
+        if (IsOverlayVisible) StartZoneLineHeightRefresh();
+    }
+
+    /// <summary>地区の枠線(BBOX内)またはラベルのアンカーが、指定セルのいずれかに掛かるか。</summary>
+    private bool ZoneTouchesCells(int zoneId, HashSet<Vector2Int> cells)
+    {
+        if (zoneLabelAnchors.TryGetValue(zoneId, out Vector3 anchor) && cells.Contains(TerrainManager.WorldToCell(anchor)))
+            return true;
+        if (!zoneBboxCache.TryGetValue(zoneId, out Rect bbox)) return false;
+        TerrainManager.WorldRectToCellRange(
+            bbox.xMin - ZONE_HEIGHT_CELL_MARGIN, bbox.yMin - ZONE_HEIGHT_CELL_MARGIN,
+            bbox.xMax + ZONE_HEIGHT_CELL_MARGIN, bbox.yMax + ZONE_HEIGHT_CELL_MARGIN,
+            out Vector2Int minCell, out Vector2Int maxCell);
+        foreach (Vector2Int cell in cells)
+        {
+            if (cell.x >= minCell.x && cell.x <= maxCell.x && cell.y >= minCell.y && cell.y <= maxCell.y) return true;
+        }
+        return false;
+    }
+
+    /// <summary>要再計算の地区があり、ワーカーが止まっていれば始める。実行中のワーカーは新たに積まれた地区も続けて処理する。</summary>
+    private void StartZoneLineHeightRefresh()
+    {
+        if (zoneHeightRefreshCoroutine != null || zoneHeightDirtyIds.Count == 0) return;
+        zoneHeightRefreshCoroutine = RenderWorkScheduler.Start(this, RefreshZoneLineHeightsWorker(), "ZoneManager");
     }
 
     /// <summary>
-    /// 全ゾーンの枠線ラインのワールド座標高さを、現在の地形高さに基づいて更新する。
-    /// ZoneManager は地形に依存しないタイミングでロードされるため、
-    /// 初回生成時に Terrain が未準備だと高さ 0 になってしまう。
-    /// そのため地形ロード完了後に本メソッドを呼び、正しい高さに補正する。
+    /// 高さ再計算を止める。初回ステップ前に止めた iterator は finally を通らないので、ハンドルはここで外す。
     /// </summary>
-    private void RefreshZoneLineHeights()
+    private void StopZoneLineHeightRefresh()
     {
-        foreach (var kvp in zoneLinesByZone)
+        RenderWorkScheduler.Stop(this, zoneHeightRefreshCoroutine);
+        zoneHeightRefreshCoroutine = null;
+    }
+
+    /// <summary>
+    /// 要再計算の地区(zoneHeightDirtyIds)の枠線ラインとラベル位置の高さを、現在の地形高さに基づいて更新する。
+    /// ZoneManager は地形に依存しないタイミングでロードされるため、
+    /// 生成時に Terrain が未準備だと概観の高さや 0 になってしまい、地形タイルの到着後に補正が要る。
+    /// ZONE_HEIGHT_SAMPLES_PER_STEP サンプルごとに制御を返し、その間に UpdateZone で
+    /// 枠線が作り直された地区(最新の地形でサンプル済み)は打ち切る。
+    /// 処理中に積まれた地区は、集合が空になるまで続けて処理する。
+    /// </summary>
+    private IEnumerator RefreshZoneLineHeightsWorker()
+    {
+        bool hasCurrentZone = false;
+        int currentZoneId = 0;
+        try
         {
-            var entries = kvp.Value;
-            for (int i = 0; i < entries.Count; i++)
+            var ids = new List<int>();
+            int samples = 0;
+            while (zoneHeightDirtyIds.Count > 0)
             {
-                ZoneLineEntry entry = entries[i];
+                ids.Clear();
+                ids.AddRange(zoneHeightDirtyIds);
+                foreach (int zoneId in ids)
+                {
+                    if (!zoneHeightDirtyIds.Remove(zoneId)) continue;
+                    hasCurrentZone = true;
+                    currentZoneId = zoneId;
+                    bool aborted = false;
+                    if (zoneLinesByZone.TryGetValue(zoneId, out List<ZoneLineEntry> entries))
+                    {
+                        bool hasPrev = false;
+                        Vector3 prevB = Vector3.zero;
+                        for (int i = 0; i < entries.Count; i++)
+                        {
+                            if (samples >= ZONE_HEIGHT_SAMPLES_PER_STEP)
+                            {
+                                samples = 0;
+                                yield return RenderWorkScheduler.Continue;
+                                if (!zoneLinesByZone.TryGetValue(zoneId, out List<ZoneLineEntry> current) || !ReferenceEquals(current, entries))
+                                {
+                                    aborted = true;
+                                    break;
+                                }
+                            }
 
-                Vector3 wa = entry.worldA;
-                Vector3 wb = entry.worldB;
+                            ZoneLineEntry entry = entries[i];
+                            Vector3 wa = entry.worldA;
+                            Vector3 wb = entry.worldB;
 
-                float newY1 = Utils.GetGroundHeight(new Vector3(wa.x, 1000f, wa.z)) + 0.05f;
-                float newY2 = Utils.GetGroundHeight(new Vector3(wb.x, 1000f, wb.z)) + 0.05f;
+                            // 同じ辺の細分では前の線分の終点と次の線分の始点が同じ座標なので、サンプルを共有する。
+                            float newY1;
+                            if (hasPrev && prevB.x == wa.x && prevB.z == wa.z)
+                            {
+                                newY1 = prevB.y;
+                            }
+                            else
+                            {
+                                newY1 = Utils.GetGroundHeight(new Vector3(wa.x, 1000f, wa.z)) + 0.05f;
+                                samples++;
+                            }
+                            float newY2 = Utils.GetGroundHeight(new Vector3(wb.x, 1000f, wb.z)) + 0.05f;
+                            samples++;
 
-                entry.worldA = new Vector3(wa.x, newY1, wa.z);
-                entry.worldB = new Vector3(wb.x, newY2, wb.z);
+                            entry.worldA = new Vector3(wa.x, newY1, wa.z);
+                            entry.worldB = new Vector3(wb.x, newY2, wb.z);
+                            prevB = entry.worldB;
+                            hasPrev = true;
+                        }
+                        if (!aborted) RebuildZoneLineChunks(zoneId, entries);
+                    }
+
+                    if (!aborted && zoneLabelAnchors.TryGetValue(zoneId, out Vector3 anchor))
+                    {
+                        anchor.y = Utils.GetGroundHeight(new Vector3(anchor.x, 1000f, anchor.z)) + 2f;
+                        zoneLabelAnchors[zoneId] = anchor;
+                        samples++;
+                    }
+                    hasCurrentZone = false;
+                }
+
+                // 高さだけが変わってもカメラが止まっていると Update が描き直さないため、次の Update で必ず描かせる。
+                lastCamPos = Vector3.negativeInfinity;
             }
+        }
+        finally
+        {
+            zoneHeightRefreshCoroutine = null;
+            // 途中で止められた地区は未補正のまま残るので積み直す(ClearAllCells は停止後に集合を空にする)。
+            if (hasCurrentZone && zoneCache.ContainsKey(currentZoneId)) zoneHeightDirtyIds.Add(currentZoneId);
         }
     }
 
@@ -1033,11 +1351,14 @@ public class ZoneManager : BaseApiDataManager, IVisualModeHandler
             overlayMeshObj.SetActive(isVisible);
         }
 
+        // 非表示中に届いた地形の高さ再計算は、表示ONのときに始める。
+        if (isVisible) StartZoneLineHeightRefresh();
+
         // 地区表示をONにした時点でゾーンが未ロードなら、表示操作を契機に全ゾーンを取得する。
         // 通常はカメラセル更新でロードされるが、表示パネルだけを操作した場合でも空のCanvasにならないようにする。
-        if (isVisible && !areZonesLoaded && !isZoneLoadInProgress)
+        if (isVisible && !areZonesLoaded)
         {
-            RenderWorkScheduler.Start(this, LoadAllZones(), "ZoneManager");
+            StartZoneLoad();
         }
     }
 }

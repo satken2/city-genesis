@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Profiling;
 
 /// <summary>完成した描画物を所有権ごと退避する。個別上限と全キャッシュ共通上限でLRUを制限する。</summary>
 public sealed class RenderObjectCache
@@ -15,6 +14,9 @@ public sealed class RenderObjectCache
     }
     public const long GlobalLimit = 512L * 1024 * 1024;
     private static readonly LinkedList<Entry> globalLru = new LinkedList<Entry>();
+    private static readonly List<MeshFilter> filterScratch = new List<MeshFilter>();
+    private static readonly List<MeshCollider> colliderScratch = new List<MeshCollider>();
+    private static readonly HashSet<Mesh> meshScratch = new HashSet<Mesh>();
     public static long TotalBytes { get; private set; }
     private readonly long limit;
     private readonly Dictionary<string, Entry> entries = new Dictionary<string, Entry>();
@@ -57,11 +59,15 @@ public sealed class RenderObjectCache
         if (identity == null || string.IsNullOrEmpty(identity.key)) { Object.Destroy(value); return; }
         if (entries.TryGetValue(identity.key, out var duplicate)) Remove(duplicate, duplicate.value != value);
         long bytes = 4096;
-        var meshes = new HashSet<Mesh>();
-        foreach (var filter in value.GetComponentsInChildren<MeshFilter>(true))
-            if (filter.sharedMesh != null && meshes.Add(filter.sharedMesh)) bytes += Profiler.GetRuntimeMemorySizeLong(filter.sharedMesh);
-        foreach (var collider in value.GetComponentsInChildren<MeshCollider>(true))
-            if (collider.sharedMesh != null && meshes.Add(collider.sharedMesh)) bytes += Profiler.GetRuntimeMemorySizeLong(collider.sharedMesh);
+        value.GetComponentsInChildren(true, filterScratch);
+        foreach (var filter in filterScratch)
+            if (filter.sharedMesh != null && meshScratch.Add(filter.sharedMesh)) bytes += EstimateMeshBytes(filter.sharedMesh);
+        value.GetComponentsInChildren(true, colliderScratch);
+        foreach (var collider in colliderScratch)
+            if (collider.sharedMesh != null && meshScratch.Add(collider.sharedMesh)) bytes += EstimateMeshBytes(collider.sharedMesh);
+        filterScratch.Clear();
+        colliderScratch.Clear();
+        meshScratch.Clear();
         identity.bytes = bytes;
         var entry = new Entry { key = identity.key, value = value, bytes = bytes, owner = this };
         entry.local = lru.AddLast(entry);
@@ -79,6 +85,22 @@ public sealed class RenderObjectCache
             RenderWorkScheduler.CountEvent("renderCache.globalEvicted");
             Remove(globalLru.First.Value, true);
         }
+    }
+
+    /// <summary>
+    /// 頂点バッファとインデックスから見積もるメッシュのメモリ量。Profiler と違い製品ビルドでも有効。
+    /// CPU 側に写しを持つ(isReadable)メッシュは2倍に数える。
+    /// </summary>
+    public static long EstimateMeshBytes(Mesh mesh)
+    {
+        if (mesh == null) return 0;
+        long vertices = mesh.vertexCount;
+        long bytes = 0;
+        for (int stream = 0; stream < mesh.vertexBufferCount; stream++) bytes += mesh.GetVertexBufferStride(stream) * vertices;
+        long indices = 0;
+        for (int sub = 0; sub < mesh.subMeshCount; sub++) indices += mesh.GetIndexCount(sub);
+        bytes += indices * (mesh.indexFormat == UnityEngine.Rendering.IndexFormat.UInt32 ? 4 : 2);
+        return mesh.isReadable ? bytes * 2 : bytes;
     }
 
     public void Clear()

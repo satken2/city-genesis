@@ -144,19 +144,20 @@ public static class LocalConstants
 
 /// <summary>
 /// LocalConstants.UNITY_LOG_* と組み合わせて使う Debug.Log ラッパー。
+/// 計測ログは1バッチで数十行出るため、行ごとのスタックトレース採取を避けて NoStacktrace で出力する。
 /// </summary>
 public static class UnityLog
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void If(bool enabled, object message)
     {
-        if (enabled) Debug.Log(message);
+        if (enabled) Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "{0}", message);
     }
 
     /// <summary>無効時はコールバックが呼ばれない（重い補間を避けたい場合）。</summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void If(bool enabled, Func<object> message)
     {
-        if (enabled) Debug.Log(message());
+        if (enabled) Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "{0}", message());
     }
 }

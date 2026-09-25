@@ -89,6 +89,18 @@ public partial class TerrainManager : BaseApiDataManager
     private Dictionary<Vector2Int, int> dynamicCellVersions = new Dictionary<Vector2Int, int>();
 
     /// <summary>
+    /// /terrain/cell-versions の最後の応答(Unity セル単位)。地形の版はエポックと編集でしか変わらず、
+    /// その後は必ず ReloadAllData → InvalidateCellVersions が来るので、カメラ由来のバッチでは再利用する。
+    /// 取得中に無効化されたら、その応答では dirty を下ろさない(cellVersionsGeneration で判定)。
+    /// </summary>
+    private Dictionary<Vector2Int, int> cachedCellVersions;
+    private float cellVersionsFetchedAt;
+    private bool cellVersionsDirty = true;
+    private int cellVersionsGeneration;
+    // バックエンド側の変更を取りこぼした場合でも、この秒数を超えたら取り直す。
+    private const float CELL_VERSIONS_MAX_AGE = 5f;
+
+    /// <summary>
     /// デバッグモードの有効状態。MinimapOverlay などから参照される。
     /// </summary>
     public bool IsDebugMode { get; set; } = false;
@@ -261,18 +273,130 @@ public partial class TerrainManager : BaseApiDataManager
     /// </summary>
     private class HeightStreamRequest
     {
-        /// <summary>適用するハイトマップ(TILE_RESOLUTION四方、正規化0..1)。適用完了後に解放する。</summary>
+        /// <summary>適用するハイトマップ(TILE_RESOLUTION四方、正規化0..1)。帯の適用を終えたらプールへ返して参照を外す。</summary>
         public float[,] heights;
-        /// <summary>発行元のロードバッチ。適用開始前にキャンセル済みならリクエストごと破棄する(開始後は完走する)。</summary>
-        public LoadBatch batch;
-        /// <summary>処理が終了したか(成功・破棄を問わない)。発行元コルーチンはこれをポーリングして待つ。</summary>
+        /// <summary>LRU から取り出した非表示のタイル。非 null なら帯の適用をせず、このタイルを表示に戻す。</summary>
+        public Terrain restoreTile;
+        /// <summary>発行元のタイルジョブ。取り消されたら帯の途中でも破棄する。テストの直接投入では null で、取り消さない。</summary>
+        public TileJob job;
+        /// <summary>公開と同じステップで dynamicCellVersions に記録する地形版(X-Cell-Version)。</summary>
+        public int version;
+        /// <summary>処理が終了したか(成功・破棄を問わない)。成功時はタイルの公開と同じステップで立つ。</summary>
         public bool done;
         /// <summary>タイルへ適用されたか。破棄・中断時は false。</summary>
         public bool succeeded;
+        /// <summary>OnTerrainTileReady の通知を終えたか。通知しないと決まった場合も真にする。</summary>
+        public bool notified;
     }
 
     /// <summary>セルごとの未開始リクエスト。同一セルに新しいリクエストが来たら未開始の旧リクエストは置き換える(最新が勝つ)。</summary>
     private readonly Dictionary<Vector2Int, HeightStreamRequest> pendingStreamRequests = new Dictionary<Vector2Int, HeightStreamRequest>();
+
+    /// <summary>
+    /// 1セル分のタイルの取得から公開までの作業。寿命はロードバッチではなく「セルが常駐集合にいる間」で、
+    /// バッチが差し替わっても後続のバッチが同じジョブの完了を待つ。途中まで進んだ受信・帯の適用を捨てないため。
+    /// 取消しは UnloadCell・LoadLodCells(常駐外になったセル)・ClearAllCells(epoch)の3か所で行う。
+    /// </summary>
+    private sealed class TileJob
+    {
+        public Vector2Int cell;
+        /// <summary>起動時の版一覧による必要版。これ以上を求めるバッチはこのジョブを再利用する。</summary>
+        public int requiredVersion;
+        public int epoch;
+        /// <summary>強制再取得。LRU の同じ版のタイルを使わずに取り直す。</summary>
+        public bool force;
+        public bool canceled, done;
+        /// <summary>取得スロットを割り当て済みか。解放はジョブの finally だけが行う。</summary>
+        public bool slotGranted;
+    }
+
+    /// <summary>セルごとの実行中タイルジョブ。完了・取消しで外す。</summary>
+    private readonly Dictionary<Vector2Int, TileJob> tileJobs = new Dictionary<Vector2Int, TileJob>();
+
+    /// <summary>取得から公開までを進めているジョブ数。ClearAllCells では戻さず、各ジョブの finally だけが減らす。</summary>
+    private int activeTileDownloads;
+
+    /// <summary>同時に進めるタイルジョブの上限。HTTP 同時数と、受信済みで公開待ちの高さ配列のメモリを抑える。</summary>
+    private const int MAX_PARALLEL_TILE_DOWNLOADS = 4;
+
+    /// <summary>
+    /// 取得スロットの空きを待つジョブ。空いたスロットは <see cref="GrantTileSlots"/> が視野優先の順で1件ずつ割り当てる。
+    /// 各ジョブは自分の割り当てだけを待つので、スロットが1つ空くたびに待機中の全ジョブが起きることはない。
+    /// </summary>
+    private readonly List<TileJob> tileSlotWaiters = new List<TileJob>();
+
+    /// <summary>
+    /// 公開済みで OnTerrainTileReady の通知を待つタイル。通知は <see cref="TileNotifyWorker"/> が別の操作として出すので、
+    /// 通知前の予算待ちの間も <see cref="HeightStreamWorker"/> は次のタイルへ進める。
+    /// </summary>
+    private readonly Queue<TileNotification> pendingTileNotifications = new Queue<TileNotification>();
+    private Coroutine notifyWorkerCoroutine;
+
+    private struct TileNotification
+    {
+        public Vector2Int cell;
+        public Terrain tile;
+        public int epoch;
+        public HeightStreamRequest request;
+    }
+
+    /// <summary>
+    /// 分割できない重い Unity API 呼び出し(SyncHeightmap・タイル生成)と購読者への通知を、
+    /// 共通予算がほぼ未使用の時点で始めるための閾値(予算に対する使用済みの割合)と待ちの上限。
+    /// 上限フレームに達したら予算に関係なく進め、飢餓を防ぐ。
+    /// </summary>
+    private const float FRESH_BUDGET_RATIO = 0.25f;
+    private const int FRESH_BUDGET_MAX_WAIT_FRAMES = 8;
+
+    private static bool HasFreshBudget() => RenderWorkScheduler.UsedMs <= PerformanceConfig.FrameBudgetMs * FRESH_BUDGET_RATIO;
+
+    private bool IsJobCanceled(TileJob job) => job.canceled || job.epoch != clearEpoch;
+
+    private bool IsRequestCanceled(HeightStreamRequest request, int epoch) =>
+        clearEpoch != epoch || (request.job != null && IsJobCanceled(request.job));
+
+    /// <summary>未開始・破棄するリクエストを完了扱いにする。待っているジョブは失敗として抜ける。</summary>
+    private void DiscardRequest(HeightStreamRequest request)
+    {
+        ReleaseRequestResources(request);
+        request.succeeded = false;
+        request.done = true;
+        request.notified = true;
+    }
+
+    /// <summary>
+    /// リクエストが持つ高さ配列をプールへ返し、表示に戻さなかった復元タイルを LRU へ戻す。
+    /// 全消去をまたいだ(epoch が違う)復元タイルは旧セッションの地形なので破棄する。
+    /// </summary>
+    private void ReleaseRequestResources(HeightStreamRequest request)
+    {
+        ReturnHeightBuffer(request.heights);
+        request.heights = null;
+        Terrain tile = request.restoreTile;
+        request.restoreTile = null;
+        if (tile == null) return;
+        if (request.job != null && request.job.epoch == clearEpoch) ParkTile(request.job.cell, tile, request.version);
+        else DestroyTerrainTileObject(tile.gameObject);
+    }
+
+    // === 受信高さ配列のプール ===
+    /// <summary>
+    /// タイル1枚分(TILE_RESOLUTION²、約1MB)の高さ配列の再利用プール。LOH 確保を移動中に繰り返さないため。
+    /// 同時に使うのは取得スロット数+ワーカーの1枚程度なので、上限はそれより少し多くする。
+    /// 出し入れはメインスレッドだけで行い、別スレッドが書いている配列は Task の完了後にだけ返す。
+    /// </summary>
+    private readonly Stack<float[,]> heightBufferPool = new Stack<float[,]>();
+    private const int HEIGHT_BUFFER_POOL_MAX = 6;
+
+    private float[,] RentHeightBuffer() =>
+        heightBufferPool.Count > 0 ? heightBufferPool.Pop() : new float[TILE_RESOLUTION, TILE_RESOLUTION];
+
+    private void ReturnHeightBuffer(float[,] buffer)
+    {
+        if (buffer == null || buffer.GetLength(0) != TILE_RESOLUTION || buffer.GetLength(1) != TILE_RESOLUTION) return;
+        if (heightBufferPool.Count >= HEIGHT_BUFFER_POOL_MAX || heightBufferPool.Contains(buffer)) return;
+        heightBufferPool.Push(buffer);
+    }
 
     /// <summary>ストリーミングを直列消化する常駐ワーカー。最初のリクエスト発行時に起動する。</summary>
     private Coroutine streamWorkerCoroutine;
@@ -302,27 +426,32 @@ public partial class TerrainManager : BaseApiDataManager
     /// <summary>
     /// per-cellタイルがロード済み(=可視)のセルを示すR8マスクテクスチャ(1セル=1テクセル、バックエンドセル座標)。
     /// UltraFar 陸地メッシュのシェーダーが頂点ごとにこれを参照し、タイルのあるセルだけ地中に沈める。
-    /// 毎フレーム terrainTiles の内容から再構築されるが、変化がなければGPUアップロードはスキップされる。
+    /// terrainTiles が変わったとき(loadedCellMaskDirty)だけ作り直し、内容が同じならGPUアップロードもしない。
     /// </summary>
     private Texture2D loadedCellMaskTex;
     private byte[] loadedCellMaskBuf;
     private byte[] loadedCellMaskPrevBuf;
+    /// <summary>terrainTiles を書き換えたら必ず立てる。立て忘れると表示中タイルとマスクがずれ、遠景が突き抜ける。</summary>
+    private bool loadedCellMaskDirty = true;
 
-    // === 遅延破棄プール（アンロード用） ===
+    // === 常駐外タイルの LRU ===
     /// <summary>
-    /// セルがロード範囲外に出た時に、即座にDestroyせず非表示にしてプールする。
-    /// 一定時間後に実際のDestroyを行うことで、カメラがすぐ戻った場合の再ロードとの競合による
-    /// 破棄・再生成の無駄を防ぐ。
-    ///
-    /// なおLODティア変更は退避プールを使わない: タイルは差し替えず、既存TerrainDataへ
-    /// 新しい世代のデータを部分SetHeightsでストリーミング適用する(in-place更新)。
+    /// 常駐外に出たタイル。非表示(非アクティブ)のまま版と一緒に保持し、同じ版以上を求めて再入場したら
+    /// 取得・帯の適用・SyncHeightmap・コライダー生成をせずに表示へ戻す。terrainTiles には含めないので、
+    /// 接地・GPU高さ窓・UltraFar のマスクは保持中のタイルを参照しない。
     /// </summary>
-    private Dictionary<Vector2Int, GameObject> pendingDestroyTerrains = new Dictionary<Vector2Int, GameObject>();
-    /// <summary>
-    /// pendingDestroyTerrains に登録された時刻を記録し、TERRAIN_DESTROY_DELAY 経過後に実際の破棄を行う。
-    /// </summary>
-    private Dictionary<Vector2Int, float> pendingDestroyTimestamps = new Dictionary<Vector2Int, float>();
-    private const float TERRAIN_DESTROY_DELAY = 1.5f;
+    private sealed class CachedTile
+    {
+        public Terrain terrain;
+        public int version;
+        public LinkedListNode<Vector2Int> node;
+    }
+
+    private readonly Dictionary<Vector2Int, CachedTile> tileCache = new Dictionary<Vector2Int, CachedTile>();
+    /// <summary>tileCache の追加順。先頭が最古で、容量超過時はここから破棄する。</summary>
+    private readonly LinkedList<Vector2Int> tileCacheOrder = new LinkedList<Vector2Int>();
+    /// <summary>1枚あたり推定2〜4MB(高さ・GPU高さ・PhysX heightfield)。常駐81枚に対し約3割の余裕で回転の往復を吸収する。</summary>
+    private const int TILE_CACHE_CAPACITY = 24;
 
     /// <summary>
     /// 地形タイルのGameObjectを、TerrainDataアセットもろとも破棄する。
@@ -337,6 +466,49 @@ public partial class TerrainManager : BaseApiDataManager
         TerrainData td = t != null ? t.terrainData : null;
         Destroy(go);
         if (td != null) Destroy(td);
+    }
+
+    /// <summary>
+    /// 常駐外になったタイルを非表示にして LRU の末尾へ入れる。同じセルの古い保持分と、容量を超えた最古の分は破棄する。
+    /// 呼び出し側は terrainTiles からの除外と隣接タイルの再接続を自分で行うこと。
+    /// </summary>
+    private void ParkTile(Vector2Int cell, Terrain tile, int version)
+    {
+        if (tile == null) return;
+        tile.SetNeighbors(null, null, null, null);
+        tile.gameObject.SetActive(false);
+        DropCachedTile(cell, tile.gameObject);
+        tileCache[cell] = new CachedTile { terrain = tile, version = version, node = tileCacheOrder.AddLast(cell) };
+        while (tileCache.Count > TILE_CACHE_CAPACITY)
+        {
+            DropCachedTile(tileCacheOrder.First.Value, null);
+            RenderWorkScheduler.CountEvent("terrain.tileCacheEvicted");
+        }
+    }
+
+    /// <summary>必要版以上の保持タイルがあれば LRU から外して返す。古い版・破棄済みの保持分はその場で破棄する。</summary>
+    private bool TryTakeCachedTile(Vector2Int cell, int requiredVersion, out CachedTile cached)
+    {
+        cached = null;
+        if (!tileCache.TryGetValue(cell, out CachedTile entry)) return false;
+        if (entry.terrain == null || entry.version < requiredVersion)
+        {
+            DropCachedTile(cell, null);
+            return false;
+        }
+        tileCache.Remove(cell);
+        tileCacheOrder.Remove(entry.node);
+        cached = entry;
+        return true;
+    }
+
+    /// <summary>セルの保持タイルを LRU から外して破棄する。keep と同じ GameObject は破棄しない(二重破棄の防止)。</summary>
+    private void DropCachedTile(Vector2Int cell, GameObject keep)
+    {
+        if (!tileCache.TryGetValue(cell, out CachedTile entry)) return;
+        tileCache.Remove(cell);
+        tileCacheOrder.Remove(entry.node);
+        if (entry.terrain != null && entry.terrain.gameObject != keep) DestroyTerrainTileObject(entry.terrain.gameObject);
     }
 
     // === Unityコールバック ===
@@ -372,36 +544,6 @@ public partial class TerrainManager : BaseApiDataManager
         {
             groundCoverMaterialsDirty = false;
             RefreshGroundCoverMaterials();
-        }
-
-        // 遅延破棄プールの処理：TERRAIN_DESTROY_DELAY 経過後に実際のDestroyを行う。
-        // 一度に全件処理してフレームあたりのオーバーヘッドを抑えつつ、
-        // プールの蓄積によるメモリ圧迫を防ぐ。
-        if (pendingDestroyTerrains.Count > 0)
-        {
-            float now = Time.time;
-            List<Vector2Int> keysToDestroy = null;
-            foreach (var kvp in pendingDestroyTerrains)
-            {
-                if (pendingDestroyTimestamps.TryGetValue(kvp.Key, out float deactivatedTime) &&
-                    now - deactivatedTime >= TERRAIN_DESTROY_DELAY)
-                {
-                    if (keysToDestroy == null) keysToDestroy = new List<Vector2Int>();
-                    keysToDestroy.Add(kvp.Key);
-                }
-            }
-            if (keysToDestroy != null)
-            {
-                foreach (var key in keysToDestroy)
-                {
-                    if (pendingDestroyTerrains.TryGetValue(key, out GameObject go))
-                    {
-                        pendingDestroyTerrains.Remove(key);
-                        pendingDestroyTimestamps.Remove(key);
-                        DestroyTerrainTileObject(go);
-                    }
-                }
-            }
         }
     }
 
@@ -638,50 +780,171 @@ public partial class TerrainManager : BaseApiDataManager
     // 超近景（Dynamic）のロード
     // ================================================================
 
-    private IEnumerator LoadSurfaceTile(Vector2Int cellIndex, LoadBatch batch)
+    /// <summary>
+    /// セルのタイルジョブを返す。必要版を満たす実行中のジョブがあり force でなければそれを再利用し、
+    /// そうでなければ旧ジョブを取り消して新しく起動する。
+    /// </summary>
+    private TileJob EnsureTileJob(Vector2Int cell, int requiredVersion, bool force)
     {
-        if (batch != null && batch.IsCanceled) yield break;
-        Vector2Int backend = UnityCellToBackendCell(cellIndex);
-        string url = $"{ApiClient.BASE_URL}/terrain/surface?cell_x={backend.x}&cell_z={backend.y}&resolution={TILE_RESOLUTION}";
-        byte[] bytes;
-        int version;
-        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        if (tileJobs.TryGetValue(cell, out TileJob existing) && !existing.done && !IsJobCanceled(existing))
         {
-            request.timeout = 30;
-            yield return request.SendWebRequest();
-            if (request.result != UnityWebRequest.Result.Success)
+            if (!force && existing.requiredVersion >= requiredVersion)
             {
-                Debug.LogWarning($"地形セル{cellIndex}の取得失敗: {request.error}");
+                RenderWorkScheduler.CountEvent("terrain.tileJobReused");
+                return existing;
+            }
+            CancelTileJob(cell);
+        }
+        var job = new TileJob { cell = cell, requiredVersion = requiredVersion, epoch = clearEpoch, force = force };
+        tileJobs[cell] = job;
+        if (RenderWorkScheduler.Start(this, TileJobRoutine(job), "TerrainManager") == null)
+        {
+            job.done = true;
+            tileJobs.Remove(cell);
+        }
+        return job;
+    }
+
+    /// <summary>セルの実行中ジョブを取り消し、そのジョブの未開始リクエストも破棄する。</summary>
+    private void CancelTileJob(Vector2Int cell)
+    {
+        if (!tileJobs.TryGetValue(cell, out TileJob job)) return;
+        job.canceled = true;
+        tileJobs.Remove(cell);
+        if (pendingStreamRequests.TryGetValue(cell, out HeightStreamRequest request) && request.job == job)
+        {
+            DiscardRequest(request);
+            pendingStreamRequests.Remove(cell);
+        }
+    }
+
+    private static bool AllTileJobsDone(List<TileJob> jobs)
+    {
+        for (int i = 0; i < jobs.Count; i++) if (!jobs[i].done) return false;
+        return true;
+    }
+
+    /// <summary>空いている取得スロットを、待機中のジョブへ視野優先の順(<see cref="ScoreStreamCell"/>)で割り当てる。取り消されたジョブは外す。</summary>
+    private void GrantTileSlots()
+    {
+        for (int i = tileSlotWaiters.Count - 1; i >= 0; i--)
+            if (tileSlotWaiters[i].done || IsJobCanceled(tileSlotWaiters[i])) tileSlotWaiters.RemoveAt(i);
+        if (tileSlotWaiters.Count == 0 || activeTileDownloads >= MAX_PARALLEL_TILE_DOWNLOADS) return;
+        GetStreamViewpoint(out Vector3 camPos, out Vector3 fwd);
+        while (activeTileDownloads < MAX_PARALLEL_TILE_DOWNLOADS && tileSlotWaiters.Count > 0)
+        {
+            int best = 0;
+            float bestScore = float.MaxValue;
+            for (int i = 0; i < tileSlotWaiters.Count; i++)
+            {
+                float score = ScoreStreamCell(tileSlotWaiters[i].cell, camPos, fwd);
+                if (score < bestScore)
+                {
+                    bestScore = score;
+                    best = i;
+                }
+            }
+            TileJob granted = tileSlotWaiters[best];
+            tileSlotWaiters.RemoveAt(best);
+            granted.slotGranted = true;
+            activeTileDownloads++;
+        }
+    }
+
+    /// <summary>
+    /// 1セルのタイルを取得・正規化し、ストリーミング適用と OnTerrainTileReady の通知まで待つ。
+    /// LRU に必要版以上のタイルがあれば、取得スロットを使わずに復元だけを依頼する(force では使わない)。
+    /// 待機はすべてネイティブ待機(WaitUntil)にし、待っている間は共通予算の Step を消費しない。
+    /// </summary>
+    private IEnumerator TileJobRoutine(TileJob job)
+    {
+        Vector2Int cell = job.cell;
+        float[,] buffer = null;
+        Task normalizeTask = null;
+        try
+        {
+            // 初回の Step より前に差し替えられたジョブが、後継ジョブの使う LRU のタイルを先に取らないようにする。
+            if (IsJobCanceled(job)) yield break;
+            if (!job.force && TryTakeCachedTile(cell, job.requiredVersion, out CachedTile cached))
+            {
+                RenderWorkScheduler.CountEvent("terrain.tileCacheHit");
+                var restoreRequest = new HeightStreamRequest { job = job, version = cached.version, restoreTile = cached.terrain };
+                yield return EnqueueAndWait(cell, restoreRequest);
+                // 保持中に破棄されたなどで戻せなかったときだけ、取得へ進む。
+                if (restoreRequest.succeeded || IsJobCanceled(job)) yield break;
+            }
+
+            tileSlotWaiters.Add(job);
+            GrantTileSlots();
+            if (!job.slotGranted) yield return new WaitUntil(() => job.slotGranted || IsJobCanceled(job));
+            if (IsJobCanceled(job)) yield break;
+
+            Vector2Int backend = UnityCellToBackendCell(cell);
+            string url = $"{ApiClient.BASE_URL}/terrain/surface?cell_x={backend.x}&cell_z={backend.y}&resolution={TILE_RESOLUTION}";
+            byte[] bytes;
+            int version;
+            RenderWorkScheduler.CountEvent("terrain.tileDownload");
+            using (UnityWebRequest request = UnityWebRequest.Get(url))
+            {
+                request.timeout = 30;
+                UnityWebRequestAsyncOperation operation = request.SendWebRequest();
+                yield return new WaitUntil(() => operation.isDone || IsJobCanceled(job));
+                if (!operation.isDone)
+                {
+                    request.Abort();
+                    RenderWorkScheduler.CountEvent("terrain.tileDownloadAborted");
+                    yield break;
+                }
+                if (request.result != UnityWebRequest.Result.Success)
+                {
+                    Debug.LogWarning($"地形セル{cell}の取得失敗: {request.error}");
+                    yield break;
+                }
+                bytes = request.downloadHandler.data;
+                version = ParseIntHeader(request, "X-Cell-Version", 0);
+            }
+            if (IsJobCanceled(job)) yield break;
+            float span = terrainSize.y;
+            float below = SeaFloorDepthSpan;
+            float[,] heights = buffer = RentHeightBuffer();
+            // float32 の受信列を多次元配列へ直接写し、その場で正規化する(中間の1次元配列を作らない)。
+            normalizeTask = Task.Run(() =>
+            {
+                if (bytes.Length != TILE_RESOLUTION * TILE_RESOLUTION * sizeof(float)) throw new InvalidOperationException("地形配列のサイズが不正です");
+                Buffer.BlockCopy(bytes, 0, heights, 0, bytes.Length);
+                for (int z = 0; z < TILE_RESOLUTION; z++)
+                    for (int x = 0; x < TILE_RESOLUTION; x++)
+                    {
+                        float value = heights[z, x];
+                        if (float.IsNaN(value) || float.IsInfinity(value)) throw new InvalidOperationException("地形に非有限値があります");
+                        heights[z, x] = Mathf.Clamp01((value + below) / span);
+                    }
+            });
+            Task task = normalizeTask;
+            yield return new WaitUntil(() => task.IsCompleted || IsJobCanceled(job));
+            if (IsJobCanceled(job)) yield break;
+            if (task.IsFaulted || task.IsCanceled)
+            {
+                Debug.LogError($"地形セル{cell}の正規化失敗: {task.Exception?.Flatten()}");
                 yield break;
             }
-            bytes = request.downloadHandler.data;
-            version = ParseIntHeader(request, "X-Cell-Version", 0);
+            var streamRequest = new HeightStreamRequest { heights = buffer, job = job, version = version };
+            buffer = null;
+            yield return EnqueueAndWait(cell, streamRequest);
         }
-        if (batch != null && batch.IsCanceled) yield break;
-        float span = terrainSize.y;
-        float below = SeaFloorDepthSpan;
-        var task = Task.Run(() =>
+        finally
         {
-            int count = TILE_RESOLUTION * TILE_RESOLUTION;
-            if (bytes.Length != count * sizeof(float)) throw new InvalidOperationException("地形配列のサイズが不正です");
-            var values = new float[count];
-            Buffer.BlockCopy(bytes, 0, values, 0, bytes.Length);
-            var heights = new float[TILE_RESOLUTION, TILE_RESOLUTION];
-            for (int i = 0; i < count; i++)
+            // 正規化の Task がまだ書いている配列はプールへ返さず、GC に任せる。
+            if (buffer != null && (normalizeTask == null || normalizeTask.IsCompleted)) ReturnHeightBuffer(buffer);
+            job.done = true;
+            if (job.slotGranted)
             {
-                if (float.IsNaN(values[i]) || float.IsInfinity(values[i])) throw new InvalidOperationException("地形に非有限値があります");
-                heights[i / TILE_RESOLUTION, i % TILE_RESOLUTION] = Mathf.Clamp01((values[i] + below) / span);
+                job.slotGranted = false;
+                activeTileDownloads--;
+                GrantTileSlots();
             }
-            return heights;
-        });
-        yield return Utils.WaitTask(task);
-        if (task.IsFaulted || (batch != null && batch.IsCanceled)) yield break;
-        bool applied = false;
-        yield return ApplyHeightsStreamed(cellIndex, task.Result, batch, ok => applied = ok);
-        if (applied)
-        {
-            dynamicCellVersions[cellIndex] = version;
-            loadedCells.Add(cellIndex);
+            else tileSlotWaiters.Remove(job);
+            if (tileJobs.TryGetValue(cell, out TileJob current) && current == job) tileJobs.Remove(cell);
         }
     }
 
@@ -691,27 +954,27 @@ public partial class TerrainManager : BaseApiDataManager
 
     protected override void UnloadCell(Vector2Int cellIndex)
     {
-        // 未開始のストリーミングリクエストが残っていれば破棄する(範囲外セルへの無駄な適用防止)。
+        // 取得中のジョブと未開始のストリーミングリクエストを破棄する(範囲外セルへの無駄な適用防止)。
+        CancelTileJob(cellIndex);
         if (pendingStreamRequests.TryGetValue(cellIndex, out HeightStreamRequest pendingReq))
         {
-            pendingReq.done = true;
-            pendingReq.succeeded = false;
+            DiscardRequest(pendingReq);
             pendingStreamRequests.Remove(cellIndex);
         }
 
-        if (terrainTiles.ContainsKey(cellIndex))
+        if (terrainTiles.TryGetValue(cellIndex, out Terrain t))
         {
-            Terrain t = terrainTiles[cellIndex];
+            terrainTiles.Remove(cellIndex);
+            loadedCellMaskDirty = true;
+            // 版が分からないタイルは再入場で使えないので保持しない。
             if (t != null)
             {
-                t.gameObject.SetActive(false);
-                pendingDestroyTerrains[cellIndex] = t.gameObject;
-                pendingDestroyTimestamps[cellIndex] = Time.time;
+                if (dynamicCellVersions.TryGetValue(cellIndex, out int version)) ParkTile(cellIndex, t, version);
+                else DestroyTerrainTileObject(t.gameObject);
             }
-            terrainTiles.Remove(cellIndex);
             dynamicCellVersions.Remove(cellIndex);
             Utils.InvalidateHeightCache();
-            HeightmapTextureManager.Instance?.MarkSurfaceChanged();
+            HeightmapTextureManager.Instance?.MarkSurfaceChanged(cellIndex);
             UpdateNeighborsForAdjacents(cellIndex);
         }
     }
@@ -730,12 +993,13 @@ public partial class TerrainManager : BaseApiDataManager
         // clearEpoch のインクリメントにより、適用途中のワーカーは次のバンド適用前に中断し、
         // 破棄済みTerrainDataへの書き込みやクリア後の孤児タイル登録を行わない。
         clearEpoch++;
-        foreach (var kvp in pendingStreamRequests)
-        {
-            kvp.Value.done = true;
-            kvp.Value.succeeded = false;
-        }
+        foreach (var job in tileJobs.Values) job.canceled = true;
+        tileJobs.Clear();
+        foreach (var kvp in pendingStreamRequests) DiscardRequest(kvp.Value);
         pendingStreamRequests.Clear();
+        foreach (var notification in pendingTileNotifications) notification.request.notified = true;
+        pendingTileNotifications.Clear();
+        heightBufferPool.Clear();
 
         // セルごとのTerrain(TerrainDataアセットも併せて破棄する)
         foreach (var kvp in terrainTiles)
@@ -743,17 +1007,17 @@ public partial class TerrainManager : BaseApiDataManager
             if (kvp.Value != null) DestroyTerrainTileObject(kvp.Value.gameObject);
         }
         terrainTiles.Clear();
+        loadedCellMaskDirty = true;
         Utils.InvalidateHeightCache();
         loadedCells.Clear();
         dynamicCellVersions.Clear();
 
-        // 遅延破棄プールのクリーンアップ
-        foreach (var kvp in pendingDestroyTerrains)
+        foreach (var entry in tileCache.Values)
         {
-            DestroyTerrainTileObject(kvp.Value);
+            if (entry.terrain != null) DestroyTerrainTileObject(entry.terrain.gameObject);
         }
-        pendingDestroyTerrains.Clear();
-        pendingDestroyTimestamps.Clear();
+        tileCache.Clear();
+        tileCacheOrder.Clear();
 
         // 超遠景の陸地メッシュ
         if (ultraFarLandObject != null)
@@ -771,6 +1035,9 @@ public partial class TerrainManager : BaseApiDataManager
         farTerrainHeights = null;
         overviewDataRevision = -1;
         overviewRevision = -1;
+        cachedCellVersions = null;
+        cellVersionsDirty = true;
+        cellVersionsGeneration++;
 
         // 設定キャッシュをクリア（session.reset対応）
         terrainSettings = null;
@@ -799,11 +1066,18 @@ public partial class TerrainManager : BaseApiDataManager
         // CellDataLoader 経由(LoadBatch付きオーバーロード)で呼ばれた場合は currentLoadBatch に
         // 新しいバッチが設定済み。直接呼ばれた場合(バッチ未設定または前回バッチがキャンセル済み)は
         // このロード用のバッチを発行する。
-        // StopCoroutine は RunParallelCoroutines が StartCoroutine で起動した子コルーチンを
-        // 停止できないため、子コルーチンはこのバッチの IsCanceled を確認して協調的に停止する。
         if (currentLoadBatch == null || currentLoadBatch.IsCanceled)
         {
             currentLoadBatch = new LoadBatch(cellSets, isForce);
+        }
+
+        // タイルジョブはバッチの取消しでは止まらないので、常駐集合から外れたセルのジョブはここで取り消す。
+        if (tileJobs.Count > 0)
+        {
+            var resident = new HashSet<Vector2Int>(cellSets.farCells ?? new List<Vector2Int>());
+            var jobCells = new List<Vector2Int>(tileJobs.Keys);
+            foreach (var cell in jobCells)
+                if (!resident.Contains(cell)) CancelTileJob(cell);
         }
 
         loadLodCellsCoroutine = RenderWorkScheduler.Start(this, LoadLodCellsCoroutine(cellSets, isForce, currentLoadBatch), "TerrainManager");
@@ -813,19 +1087,30 @@ public partial class TerrainManager : BaseApiDataManager
     {
         yield return EnsureSettingsLoaded();
         if (terrainSettings == null || batch.IsCanceled) yield break;
-        CellVersionsResponse response = null;
-        while (response == null && !batch.IsCanceled)
+        if (isForce || cellVersionsDirty || cachedCellVersions == null || Time.unscaledTime - cellVersionsFetchedAt > CELL_VERSIONS_MAX_AGE)
         {
-            yield return ApiClient.Get<CellVersionsResponse>("/terrain/cell-versions", value => response = value,
-                error => Debug.LogWarning($"地形の版情報取得失敗: {error}"));
-            if (response == null) yield return new WaitForSecondsRealtime(2f);
+            int generation = cellVersionsGeneration;
+            CellVersionsResponse response = null;
+            while (response == null && !batch.IsCanceled)
+            {
+                yield return ApiClient.Get<CellVersionsResponse>("/terrain/cell-versions", value => response = value,
+                    error => Debug.LogWarning($"地形の版情報取得失敗: {error}"));
+                if (response == null) yield return new WaitForSecondsRealtime(2f);
+            }
+            if (batch.IsCanceled) yield break;
+            var fetched = new Dictionary<Vector2Int, int>();
+            if (response.cells != null)
+                foreach (var item in response.cells)
+                    foreach (var cell in BackendCellToUnityCells(new Vector2Int(item.cell_x, item.cell_z)))
+                        fetched[cell] = item.version;
+            cachedCellVersions = fetched;
+            cellVersionsFetchedAt = Time.unscaledTime;
+            if (generation == cellVersionsGeneration) cellVersionsDirty = false;
+            RenderWorkScheduler.CountEvent("terrain.cellVersionsFetched");
         }
-        if (batch.IsCanceled) yield break;
-        var versions = new Dictionary<Vector2Int, int>();
-        if (response?.cells != null)
-            foreach (var item in response.cells)
-                foreach (var cell in BackendCellToUnityCells(new Vector2Int(item.cell_x, item.cell_z)))
-                    versions[cell] = item.version;
+        else RenderWorkScheduler.CountEvent("terrain.cellVersionsReused");
+        // 以降の yield の間に再取得で差し替わっても、このバッチは取得時点の一覧を読み取り専用で使う。
+        Dictionary<Vector2Int, int> versions = cachedCellVersions;
         long revision = 0;
         foreach (int version in versions.Values) revision += version;
         yield return EnsureOverview(revision, batch);
@@ -839,30 +1124,34 @@ public partial class TerrainManager : BaseApiDataManager
         {
             UnloadCell(cell);
             loadedCells.Remove(cell);
-            yield return null;
+            yield return RenderWorkScheduler.Continue;
+            if (batch.IsCanceled) yield break;
         }
         var pending = new List<Vector2Int>(desired);
         Vector3 camera = Camera.main != null ? Camera.main.transform.position : Vector3.zero;
         pending.Sort((a, b) => (new Vector2(a.x * CellSize - camera.x, a.y * CellSize - camera.z)).sqrMagnitude.CompareTo(
             (new Vector2(b.x * CellSize - camera.x, b.y * CellSize - camera.z)).sqrMagnitude));
-        var group = new List<IEnumerator>(4);
+        var jobs = new List<TileJob>();
         bool firstPass = true;
         bool incomplete;
         do
         {
             incomplete = false;
+            jobs.Clear();
             foreach (var cell in pending)
             {
                 int version = versions.TryGetValue(cell, out int value) ? value : 0;
-                if (HasSurfaceTile(cell) && dynamicCellVersions.TryGetValue(cell, out int current) && current >= version && !(isForce && firstPass)) continue;
-                group.Add(LoadSurfaceTile(cell, batch));
-                if (group.Count < 4) continue;
-                yield return RunParallelCoroutines(group.ToArray());
-                group.Clear();
-                if (batch.IsCanceled) yield break;
+                bool force = isForce && firstPass;
+                if (!force && HasSurfaceTile(cell) && dynamicCellVersions.TryGetValue(cell, out int current) && current >= version)
+                {
+                    // 公開済みでも通知前のジョブは待つ。OnAllTerrainLodLoaded を全タイルの通知より後にするため。
+                    if (tileJobs.TryGetValue(cell, out TileJob running) && !running.done && !IsJobCanceled(running)) jobs.Add(running);
+                    continue;
+                }
+                jobs.Add(EnsureTileJob(cell, version, force));
             }
-            yield return RunParallelCoroutines(group.ToArray());
-            group.Clear();
+            // ジョブ自体はバッチの取消しで止めない。後続のバッチが同じジョブを再利用する。
+            if (jobs.Count > 0) yield return new WaitUntil(() => batch.IsCanceled || AllTileJobsDone(jobs));
             if (batch.IsCanceled) yield break;
             foreach (var cell in pending)
             {
@@ -893,6 +1182,92 @@ public partial class TerrainManager : BaseApiDataManager
             key.Append(':').Append(x).Append(',').Append(z).Append('=').Append(dynamicCellVersions.TryGetValue(cell, out int version) ? version : -1);
         }
         return key.ToString();
+    }
+
+    /// <summary>ClearAllCells の世代。署名や版を記録した側が、全クリアをまたいだかの判定に使う。</summary>
+    public int TerrainEpoch => clearEpoch;
+
+    /// <summary>
+    /// 表示中タイルの地形版(/terrain/cell-versions の版。一覧に無いセルは 0)を返す。
+    /// タイルが無い・常駐外・非アクティブのときは -1。メインスレッド専用。
+    /// </summary>
+    public int GetAttachedTerrainVersion(Vector2Int cell)
+    {
+        if (!terrainTiles.TryGetValue(cell, out Terrain tile) || tile == null || !tile.gameObject.activeSelf) return -1;
+        return dynamicCellVersions.TryGetValue(cell, out int version) ? version : -1;
+    }
+
+    /// <summary>
+    /// 地形の版一覧キャッシュを無効化する。データ再取得(CellDataLoader.ReloadAllData)の要求時に同期で呼ぶ。
+    /// </summary>
+    public void InvalidateCellVersions()
+    {
+        cellVersionsDirty = true;
+        cellVersionsGeneration++;
+    }
+
+    /// <summary>
+    /// area に重なる全セルの地形署名。同じ版・同じ全景・同じ世代なら、再入場後も同じ値を返す。
+    /// GetSurfaceStamp の文字列を作らない版で、値が一致すれば高さも同じとみなしてよい。
+    /// </summary>
+    public long GetTerrainSignature(Rect area)
+    {
+        WorldRectToCellRange(area.xMin, area.yMin, area.xMax, area.yMax, out Vector2Int minCell, out Vector2Int maxCell);
+        ulong sum = 0;
+        for (int z = minCell.y; z <= maxCell.y; z++)
+            for (int x = minCell.x; x <= maxCell.x; x++)
+                sum += CellSignatureTerm(new Vector2Int(x, z));
+        return FinishTerrainSignature(sum);
+    }
+
+    /// <summary>任意のセル集合の地形署名(順序に依存しない)。</summary>
+    public long GetTerrainSignature(IReadOnlyList<Vector2Int> cells)
+    {
+        ulong sum = 0;
+        if (cells != null) for (int i = 0; i < cells.Count; i++) sum += CellSignatureTerm(cells[i]);
+        return FinishTerrainSignature(sum);
+    }
+
+    /// <summary>任意のセル集合の地形署名(順序に依存しない)。</summary>
+    public long GetTerrainSignature(HashSet<Vector2Int> cells)
+    {
+        ulong sum = 0;
+        if (cells != null) foreach (var cell in cells) sum += CellSignatureTerm(cell);
+        return FinishTerrainSignature(sum);
+    }
+
+    /// <summary>
+    /// TerrainManager が無い(破棄済みを含む)ときは false。呼び出し側は「不明」として扱い、作り直しを省かないこと。
+    /// </summary>
+    public static bool TryGetTerrainSignature(IReadOnlyList<Vector2Int> cells, out long signature)
+    {
+        TerrainManager manager = Utils.CachedTerrainManager;
+        if (manager == null)
+        {
+            signature = 0;
+            return false;
+        }
+        signature = manager.GetTerrainSignature(cells);
+        return true;
+    }
+
+    // タイルの無いセルは全景の高さを使うので、全景データの版も混ぜる。
+    private ulong CellSignatureTerm(Vector2Int cell)
+    {
+        int version = GetAttachedTerrainVersion(cell);
+        ulong term = SplitMix64((ulong)(((long)cell.x << 32) | (uint)cell.y) ^ SplitMix64((ulong)(version + 1L)));
+        if (version == -1) term = SplitMix64(term ^ (ulong)(farTerrainHeights != null ? overviewDataRevision : -1L));
+        return term;
+    }
+
+    private long FinishTerrainSignature(ulong sum) => (long)SplitMix64(sum ^ SplitMix64((ulong)clearEpoch));
+
+    private static ulong SplitMix64(ulong x)
+    {
+        x += 0x9E3779B97F4A7C15UL;
+        x = (x ^ (x >> 30)) * 0xBF58476D1CE4E5B9UL;
+        x = (x ^ (x >> 27)) * 0x94D049BB133111EBUL;
+        return x ^ (x >> 31);
     }
 
     // データ受信と描画完成を分け、中断後は受信済みデータから未完成メッシュを再生成する。
@@ -928,22 +1303,6 @@ public partial class TerrainManager : BaseApiDataManager
             }
             yield return new WaitForSecondsRealtime(2f);
         }
-    }
-
-    private IEnumerator RunParallelCoroutines(IEnumerator[] coroutines)
-    {
-        if (coroutines == null || coroutines.Length == 0) yield break;
-        int remaining = coroutines.Length;
-        for (int i = 0; i < coroutines.Length; i++)
-            RenderWorkScheduler.Start(this, ParallelWrapper(coroutines[i], () => remaining--), "TerrainManager");
-        while (remaining > 0)
-            yield return null;
-    }
-
-    private IEnumerator ParallelWrapper(IEnumerator coroutine, System.Action onComplete)
-    {
-        yield return RenderWorkScheduler.Start(this, coroutine, "TerrainManager");
-        onComplete?.Invoke();
     }
 
     private IEnumerator BuildUltraFarTerrain(LoadBatch batch, Action onCompleted)
@@ -1096,13 +1455,14 @@ public partial class TerrainManager : BaseApiDataManager
         ultraFarLandMat.SetFloat("_Smoothness", groundLayer != null ? groundLayer.smoothness : ground.smoothness);
         ultraFarLandMat.SetColor("_BaseColor", diffuseTex != null ? Color.white : ground.groundColorA);
 
-        // ロード済みセルでの沈み込み量。判定マスクは UpdateLoadedCellMask が毎フレーム供給する。
+        // ロード済みセルでの沈み込み量。判定マスクは UpdateLoadedCellMask が供給する。
         ultraFarLandMat.SetFloat("_FarGridStep", Mathf.Max(1f, ultraFarGridStep));
         ultraFarLandMat.SetFloat(FarSinkAmountId, ultraFarSinkAmount);
     }
 
     /// <summary>
-    /// ロード済みセルマスク(UltraFar沈み込み用)を terrainTiles の現状から再構築する。毎フレーム呼ばれる。
+    /// ロード済みセルマスク(UltraFar沈み込み用)を terrainTiles の現状から再構築する。毎フレーム呼ばれるが、
+    /// terrainTiles が変わった(loadedCellMaskDirty)ときとテクスチャを作り直したときだけ中身を作る。
     ///
     /// 遠景と通常地形の高さ差による突き抜けを防ぐため、可視タイルのセルをR8マスクにする。
     /// シェーダーは頂点の周囲1グリッド分も調べ、接続面がロード済み範囲内に収まる場合だけ
@@ -1110,7 +1470,7 @@ public partial class TerrainManager : BaseApiDataManager
     ///
     /// テクセル座標はバックエンドセル座標(0-based)。シェーダー側は floor(worldXZ/cellSize)+offset で
     /// 同じ変換を行う(UnityCellToBackendCell と同一の整数オフセット)。
-    /// マスク内容(最大でも数十×数十バイト)は毎フレーム作り直すが、前回と同一ならGPUアップロードしない。
+    /// 前回と同一ならGPUアップロードしない。
     /// </summary>
     private void UpdateLoadedCellMask()
     {
@@ -1146,12 +1506,15 @@ public partial class TerrainManager : BaseApiDataManager
             ultraFarLandMat.SetTexture(LoadedCellMaskId, loadedCellMaskTex);
             ultraFarLandMat.SetVector(LoadedCellMaskParamsId, maskParams);
             ultraFarLandMat.SetVector(LoadedCellMaskTexelId, maskTexel);
+            loadedCellMaskDirty = true;
         }
+        if (!loadedCellMaskDirty) return;
+        loadedCellMaskDirty = false;
 
         // 現在ロード済み(可視)のタイルをマスクに書き込む。
         // ティア変更・リフレッシュ中の旧タイルは terrainTiles に登録・可視のまま維持されるため
         // 自然にマスクに含まれ、差し替え完了までUltraFarメッシュの浮き上がりは起きない。
-        // pendingDestroyTerrains は非表示退避なので含めない。
+        // LRU で保持中の非表示タイルは terrainTiles に無いので含まれない。
         Array.Clear(loadedCellMaskBuf, 0, loadedCellMaskBuf.Length);
         foreach (var kvp in terrainTiles)
         {
@@ -1179,29 +1542,17 @@ public partial class TerrainManager : BaseApiDataManager
     // ================================================================
 
     /// <summary>
-    /// ハイトマップの適用リクエストを発行し、完了(成功・破棄いずれか)まで待機する。
+    /// ハイトマップの適用リクエストを発行し、完了(破棄、または公開と OnTerrainTileReady の通知)まで待機する。
     /// 実際の適用は <see cref="HeightStreamWorker"/> が視野優先の順序・フレーム予算制で
     /// 直列に行う。同一セルの未開始リクエストが既にある場合は最新データで置き換える
     /// (置き換えられた側は「破棄」として完了する)。
     /// </summary>
-    private IEnumerator ApplyHeightsStreamed(Vector2Int cellIndex, float[,] heights, LoadBatch batch, System.Action<bool> onComplete)
+    private IEnumerator EnqueueAndWait(Vector2Int cellIndex, HeightStreamRequest request)
     {
-        var request = new HeightStreamRequest
-        {
-            heights = heights,
-            batch = batch,
-        };
-
-        if (pendingStreamRequests.TryGetValue(cellIndex, out HeightStreamRequest old))
-        {
-            old.done = true;
-            old.succeeded = false;
-        }
+        if (pendingStreamRequests.TryGetValue(cellIndex, out HeightStreamRequest old)) DiscardRequest(old);
         pendingStreamRequests[cellIndex] = request;
         EnsureStreamWorker();
-
-        while (!request.done) yield return null;
-        onComplete?.Invoke(request.succeeded);
+        yield return new WaitUntil(() => request.done && (!request.succeeded || request.notified));
     }
 
     private void EnsureStreamWorker()
@@ -1219,13 +1570,7 @@ public partial class TerrainManager : BaseApiDataManager
     /// </summary>
     private Vector2Int PickBestStreamCell()
     {
-        Camera cam = Camera.main;
-        Vector3 camPos = cam != null ? cam.transform.position : Vector3.zero;
-        Vector3 fwd = cam != null ? cam.transform.forward : Vector3.forward;
-        fwd.y = 0f;
-        if (fwd.sqrMagnitude < 1e-4f) fwd = Vector3.forward;
-        else fwd.Normalize();
-
+        GetStreamViewpoint(out Vector3 camPos, out Vector3 fwd);
         Vector2Int best = default;
         float bestScore = float.MaxValue;
         foreach (var kvp in pendingStreamRequests)
@@ -1238,6 +1583,17 @@ public partial class TerrainManager : BaseApiDataManager
             }
         }
         return best;
+    }
+
+    /// <summary>視野優先の順序付けに使うカメラ位置と水平前方向。カメラが無ければ原点から +Z を向いているとみなす。</summary>
+    private static void GetStreamViewpoint(out Vector3 camPos, out Vector3 fwd)
+    {
+        Camera cam = Camera.main;
+        camPos = cam != null ? cam.transform.position : Vector3.zero;
+        fwd = cam != null ? cam.transform.forward : Vector3.forward;
+        fwd.y = 0f;
+        if (fwd.sqrMagnitude < 1e-4f) fwd = Vector3.forward;
+        else fwd.Normalize();
     }
 
     /// <summary>
@@ -1268,7 +1624,12 @@ public partial class TerrainManager : BaseApiDataManager
 
     /// <summary>
     /// 表示と独立したTerrainDataへ行単位で書き込み、完成後だけ公開する。
-    /// 全消去・バッチ中断では候補を破棄し、既存の表示を不完全な高さへ変更しない。
+    /// 全消去・ジョブ取消しでは候補を破棄し、既存の表示を不完全な高さへ変更しない。
+    /// 分割できない SyncHeightmap・タイル公開はそれぞれ別ステップにし、
+    /// 共通予算がほぼ未使用になるまで(最大 FRESH_BUDGET_MAX_WAIT_FRAMES)待ってから、待ちと同じステップで始める。
+    /// 版・loadedCells・更新セルの記録と done はタイル公開と同じステップで行い、通知の時点で購読者が新しい版を読めるようにする。
+    /// OnTerrainTileReady の通知は <see cref="TileNotifyWorker"/> へ渡し、ワーカーは通知を待たずに次のタイルへ進む。
+    /// テストが直接投入する要求(job==null)は辞書のキーのセルで処理し、取り消さない。
     /// </summary>
     private IEnumerator HeightStreamWorker()
     {
@@ -1284,42 +1645,74 @@ public partial class TerrainManager : BaseApiDataManager
                 active = pendingStreamRequests[cell];
                 pendingStreamRequests.Remove(cell);
                 int epoch = clearEpoch;
-                bool canceled = active.batch != null && active.batch.IsCanceled;
-                int res = active.heights.GetLength(0);
-                if (!canceled)
+                bool canceled = IsRequestCanceled(active, epoch);
+                Terrain published = null;
+                if (active.restoreTile != null)
                 {
+                    if (!canceled)
+                    {
+                        for (int wait = 0; wait < FRESH_BUDGET_MAX_WAIT_FRAMES && !HasFreshBudget(); wait++) yield return null;
+                        if (!IsRequestCanceled(active, epoch))
+                        {
+                            try
+                            {
+                                published = RestoreCachedTile(cell, active);
+                                active.succeeded = published != null;
+                            }
+                            catch (Exception ex) { Debug.LogException(ex); }
+                        }
+                    }
+                }
+                else if (!canceled && active.heights != null)
+                {
+                    int res = active.heights.GetLength(0);
                     staged = new TerrainData { heightmapResolution = res, alphamapResolution = 16, size = terrainSize };
                     for (int row = 0; row < res; row += STREAM_BAND_ROWS)
                     {
-                        canceled = clearEpoch != epoch || (active.batch != null && active.batch.IsCanceled);
+                        canceled = IsRequestCanceled(active, epoch);
                         if (canceled) break;
                         try { ApplyHeightBand(staged, active.heights, res, row, Mathf.Min(STREAM_BAND_ROWS, res-row)); }
                         catch (Exception ex) { Debug.LogException(ex); canceled = true; break; }
                         yield return RenderWorkScheduler.Continue;
                     }
+                    ReturnHeightBuffer(active.heights);
+                    active.heights = null;
                     if (!canceled)
                     {
-                        try { staged.SyncHeightmap(); }
-                        catch (Exception ex) { Debug.LogException(ex); canceled = true; }
-                        yield return RenderWorkScheduler.Continue;
-                    }
-                    canceled |= clearEpoch != epoch || (active.batch != null && active.batch.IsCanceled);
-                    if (!canceled)
-                    {
-                        try
+                        for (int wait = 0; wait < FRESH_BUDGET_MAX_WAIT_FRAMES && !HasFreshBudget(); wait++) yield return null;
+                        canceled = IsRequestCanceled(active, epoch);
+                        if (!canceled)
                         {
-                            // 表示と接地の参照先を同じフレームで入れ替える。未完成の行を公開しない。
-                            AttachTerrainTile(cell, staged);
-                            staged = null;
-                            updatedTerrainCellsThisLoad.Add(cell);
-                            active.succeeded = true;
-                            OnTerrainTileReady?.Invoke(cell, terrainTiles[cell]);
+                            try { staged.SyncHeightmap(); }
+                            catch (Exception ex) { Debug.LogException(ex); canceled = true; }
+                            yield return RenderWorkScheduler.Continue;
                         }
-                        catch (Exception ex) { Debug.LogException(ex); }
+                    }
+                    if (!canceled)
+                    {
+                        for (int wait = 0; wait < FRESH_BUDGET_MAX_WAIT_FRAMES && !HasFreshBudget(); wait++) yield return null;
+                        if (!IsRequestCanceled(active, epoch))
+                        {
+                            try
+                            {
+                                // 表示と接地の参照先を同じフレームで入れ替える。未完成の行を公開しない。
+                                AttachTerrainTile(cell, staged);
+                                staged = null;
+                                published = terrainTiles[cell];
+                                dynamicCellVersions[cell] = active.version;
+                                loadedCells.Add(cell);
+                                updatedTerrainCellsThisLoad.Add(cell);
+                                active.succeeded = true;
+                            }
+                            catch (Exception ex) { Debug.LogException(ex); }
+                        }
                     }
                 }
                 if (staged != null) { Destroy(staged); staged = null; }
+                ReleaseRequestResources(active);
                 active.done = true;
+                if (published != null) EnqueueTileNotification(new TileNotification { cell = cell, tile = published, epoch = epoch, request = active });
+                else active.notified = true;
                 active = null;
                 yield return RenderWorkScheduler.Continue;
             }
@@ -1327,9 +1720,63 @@ public partial class TerrainManager : BaseApiDataManager
         finally
         {
             if (staged != null) Destroy(staged);
-            if (active != null) active.done = true;
+            if (active != null)
+            {
+                ReturnHeightBuffer(active.heights);
+                active.heights = null;
+                if (active.restoreTile != null) DestroyTerrainTileObject(active.restoreTile.gameObject);
+                active.restoreTile = null;
+                active.done = true;
+                active.notified = true;
+            }
             streamWorkerCoroutine = null;
         }
+    }
+
+    /// <summary>
+    /// 公開したタイルの OnTerrainTileReady を通知待ちに積み、通知ワーカーを起こす。
+    /// 自身が非アクティブでワーカーを起動できないとき(テストの直接駆動)は、その場で通知する。
+    /// </summary>
+    private void EnqueueTileNotification(TileNotification notification)
+    {
+        pendingTileNotifications.Enqueue(notification);
+        if (notifyWorkerCoroutine == null && isActiveAndEnabled)
+            notifyWorkerCoroutine = RenderWorkScheduler.Start(this, TileNotifyWorker(), "TerrainManager", () => pendingTileNotifications.Count > 0);
+        if (notifyWorkerCoroutine == null)
+            while (pendingTileNotifications.Count > 0) DispatchTileNotification(pendingTileNotifications.Dequeue());
+    }
+
+    /// <summary>
+    /// 通知待ちを公開順に1件ずつ、共通予算がほぼ未使用になるまで(最大 FRESH_BUDGET_MAX_WAIT_FRAMES)待ってから通知する。
+    /// 待ちを挟まず取り出して通知するので、yield をまたいで手元に持つ通知は無い。待ちが空になったら終了する。
+    /// </summary>
+    private IEnumerator TileNotifyWorker()
+    {
+        try
+        {
+            while (pendingTileNotifications.Count > 0)
+            {
+                for (int wait = 0; wait < FRESH_BUDGET_MAX_WAIT_FRAMES && !HasFreshBudget(); wait++) yield return null;
+                if (pendingTileNotifications.Count == 0) break;
+                DispatchTileNotification(pendingTileNotifications.Dequeue());
+                yield return RenderWorkScheduler.Continue;
+            }
+        }
+        finally
+        {
+            notifyWorkerCoroutine = null;
+        }
+    }
+
+    private void DispatchTileNotification(TileNotification notification)
+    {
+        // 待つ間に全クリア・アンロード・別タイルへの差し替えがあれば、そのタイルはもう表示されていない。
+        if (notification.epoch == clearEpoch && terrainTiles.TryGetValue(notification.cell, out Terrain current) && current == notification.tile)
+        {
+            try { OnTerrainTileReady?.Invoke(notification.cell, notification.tile); }
+            catch (Exception ex) { Debug.LogException(ex); }
+        }
+        notification.request.notified = true;
     }
 
     /// <summary>
@@ -1361,8 +1808,9 @@ public partial class TerrainManager : BaseApiDataManager
     /// <summary>
     /// ストリーミング適用が完了したTerrainDataをGameObject化してセルに登録する。
     /// そのセルに旧タイルがあれば同一フレームで差し替え破棄する(チラつき防止)。
-    /// TerrainCollider への terrainData 代入はコライダーの初期ベイクを伴い重いため、
-    /// 呼び出し側(HeightStreamWorker)はこのメソッドに専有フレームを与えること。
+    /// タイル生成(TerrainCollider の初期ベイクを含む)は分割できず重いため、
+    /// 呼び出し側(HeightStreamWorker)は共通予算の空きを待ってから呼ぶこと。
+    /// TerrainCollider.terrainData は Terrain.CreateTerrainGameObject が設定済みなので再代入しない。
     /// </summary>
     private void AttachTerrainTile(Vector2Int cellIndex, TerrainData tData)
     {
@@ -1398,12 +1846,10 @@ public partial class TerrainManager : BaseApiDataManager
         // タイルが1枚も無いフレームも存在しない。
         terrainTiles.TryGetValue(cellIndex, out Terrain prevTerrain);
         terrainTiles[cellIndex] = terrainComp;
+        loadedCellMaskDirty = true;
         Utils.InvalidateHeightCache();
 
         ApplyTerrainMaterial(terrainComp, tData);
-
-        TerrainCollider col = terrainGO.GetComponent<TerrainCollider>();
-        if (col != null) col.terrainData = tData;
 
         terrainGO.AddComponent<TerrainInputHandler>();
 
@@ -1417,17 +1863,8 @@ public partial class TerrainManager : BaseApiDataManager
         {
             oldTerrainToDestroy = prevTerrain.gameObject;
         }
-        // アンロード直後に同セルが再ロードされた場合(UnloadCell → 再ロードの競合)、
-        // 遅延破棄プールに旧タイルの残骸が残っていることがあるため、ここで併せて破棄する。
-        // 同一GameObjectを二重にDestroyしないよう同一性をガードする。
-        if (pendingDestroyTerrains.Remove(cellIndex, out GameObject pendingGO) && pendingGO != null)
-        {
-            pendingDestroyTimestamps.Remove(cellIndex);
-            if (pendingGO != oldTerrainToDestroy && pendingGO != terrainGO)
-            {
-                DestroyTerrainTileObject(pendingGO);
-            }
-        }
+        // LRU に同じセルの保持分があれば、新しく受信したデータを優先して破棄する。
+        DropCachedTile(cellIndex, oldTerrainToDestroy);
         if (oldTerrainToDestroy != null)
         {
             DestroyTerrainTileObject(oldTerrainToDestroy);
@@ -1436,6 +1873,29 @@ public partial class TerrainManager : BaseApiDataManager
         // 新規タイルの登場で隣接タイルとのLOD継ぎ目を繋ぎ直す。
         // 全タイルが同一解像度のため、SetNeighbors は常に全境界で機能する。
         UpdateNeighbors(cellIndex);
+    }
+
+    /// <summary>
+    /// LRU から取り出したタイルを表示に戻し、版・loadedCells・更新セルを同じステップで記録する。
+    /// 同じセルに別のタイルが表示されていれば破棄する。保持中に破棄されていたら null を返す(呼び出し側は取得へ進む)。
+    /// 通知は新規公開と同じく、呼び出し側が次のステップで行う。
+    /// </summary>
+    private Terrain RestoreCachedTile(Vector2Int cellIndex, HeightStreamRequest request)
+    {
+        Terrain tile = request.restoreTile;
+        request.restoreTile = null;
+        if (tile == null) return null;
+        if (terrainTiles.TryGetValue(cellIndex, out Terrain previous) && previous != null && previous != tile)
+            DestroyTerrainTileObject(previous.gameObject);
+        tile.gameObject.SetActive(true);
+        terrainTiles[cellIndex] = tile;
+        loadedCellMaskDirty = true;
+        dynamicCellVersions[cellIndex] = request.version;
+        loadedCells.Add(cellIndex);
+        updatedTerrainCellsThisLoad.Add(cellIndex);
+        Utils.InvalidateHeightCache();
+        UpdateNeighbors(cellIndex);
+        return tile;
     }
 
     /// <summary>
@@ -1491,7 +1951,7 @@ public partial class TerrainManager : BaseApiDataManager
     ///
     /// 制御点(元の格子点)を必ず通る補間なので、格子点のワールド座標では元サンプルと
     /// 同値になる。隣接タイルは同じ元ハイトマップを接する範囲でサンプリングするため、
-    /// 境界のワールド座標では双方が同値に収束し、縁ブレンド(BlendEdgesTowardAppliedNeighbors)を崩さない。
+    /// 境界のワールド座標では双方が同値に収束し、タイル間に段差ができない(高さの縁ブレンド処理は無い)。
     ///
     /// Catmull-Romは急勾配でわずかにオーバーシュートし得るため、正規化前提で[0,1]に
     /// クランプする(ConvertFloat16BinaryToHeights の Clamp01 と整合)。
@@ -1766,19 +2226,25 @@ public partial class TerrainManager : BaseApiDataManager
         return true;
     }
 
+    /// <summary>
+    /// 座標を含む表示中のタイル。セルの負側の辺ちょうどの点は負側の隣タイルの縁でもあるので、
+    /// 自セルが未常駐なら隣を見る(常駐境界の格子点が全景の高さへ落ちないようにする)。
+    /// </summary>
     public Terrain GetTerrainAtPosition(Vector3 position)
     {
-        Vector2Int cellIndex = new Vector2Int(
-            Mathf.FloorToInt(position.x / terrainSize.x),
-            Mathf.FloorToInt(position.z / terrainSize.z));
-
-        if (terrainTiles.TryGetValue(cellIndex, out Terrain terrain) && terrain != null && terrain.gameObject.activeSelf)
-        {
-            return terrain;
-        }
-
+        int cx = Mathf.FloorToInt(position.x / terrainSize.x);
+        int cz = Mathf.FloorToInt(position.z / terrainSize.z);
+        if (TryGetVisibleTile(cx, cz, out Terrain terrain)) return terrain;
+        bool onMinX = cx * terrainSize.x == position.x;
+        bool onMinZ = cz * terrainSize.z == position.z;
+        if (onMinX && TryGetVisibleTile(cx - 1, cz, out terrain)) return terrain;
+        if (onMinZ && TryGetVisibleTile(cx, cz - 1, out terrain)) return terrain;
+        if (onMinX && onMinZ && TryGetVisibleTile(cx - 1, cz - 1, out terrain)) return terrain;
         return null;
     }
+
+    private bool TryGetVisibleTile(int cx, int cz, out Terrain terrain) =>
+        terrainTiles.TryGetValue(new Vector2Int(cx, cz), out terrain) && terrain != null && terrain.gameObject.activeSelf;
 
     private bool showContourLines = false;
 
@@ -1801,7 +2267,7 @@ public partial class TerrainManager : BaseApiDataManager
     /// <see cref="Terrain.SetNeighbors"/> は隣接 Terrain 同士の heightmapResolution が一致している必要がある。
     /// 現在は全タイルが TILE_RESOLUTION で統一されているため常に一致するが、
     /// 想定外の解像度不一致(遺物タイル等)への防御として判定を残す
-    /// (不一致の境界は接続せず、高さは縁ブレンドで合わせ済み)。
+    /// (不一致の境界は接続しない)。SetNeighbors は LOD の継ぎ目処理だけで、高さは変えない。
     /// </summary>
     private static Terrain NeighborIfSameResolution(Terrain self, Terrain candidate)
     {
@@ -2094,6 +2560,11 @@ public partial class TerrainManager : BaseApiDataManager
             {
                 ApplyTerrainMaterial(kvp.Value, kvp.Value.terrainData);
             }
+        }
+        // LRU の保持分も塗り直し、地表種別の変更前の見た目で復元しないようにする。
+        foreach (var entry in tileCache.Values)
+        {
+            if (entry.terrain != null) ApplyTerrainMaterial(entry.terrain, entry.terrain.terrainData);
         }
     }
 

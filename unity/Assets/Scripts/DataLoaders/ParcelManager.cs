@@ -14,7 +14,8 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
     /// <summary>
     /// パーセル1つ分の枠線データ。ワールド座標の端点を保持し、
-    /// 毎フレーム Update でスクリーン座標に変換して UILineRenderer に渡す。
+    /// カメラが動いたときに UpdateAllParcelOutlines が OverlayMeshRenderer へ渡す。
+    /// 形状・高さが変わるときは CreateParcelOutline が新しいインスタンスに差し替える(中身は書き換えない)。
     /// </summary>
     private class ParcelOutlineData
     {
@@ -25,6 +26,15 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         /// </summary>
         public Vector3 center;
         public Vector3[] worldPoints;
+        /// <summary>
+        /// データ可視化用のファン分割済み三角形(worldPoints から遅延生成)。
+        /// OverlayMeshRenderer.AddPreTriangulated は EndFrame まで参照を保持するので、生成後は変更しない。
+        /// 形状・高さが変わると枠線ごと新しいインスタンスに差し替わるため、無効化は不要。
+        /// </summary>
+        public List<Vector3> fillTriangles;
+        /// <summary>区画中心の所属地区ID(空間判定の結果)。zoneRevision が ZoneManager.ZoneRevision と一致する間だけ有効。</summary>
+        public int zoneId;
+        public int zoneRevision = -1;
     }
 
     private List<ParcelOutlineData> outlines = new List<ParcelOutlineData>();
@@ -48,9 +58,11 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         public List<Vector2Int> cells;
         /// <summary>接道街路のID（front_path_id）。parcelIdsByFrontPath からの削除時の逆引き用。0=接道なし。</summary>
         public int frontPathId;
+        /// <summary>中心点（x=ワールドX, y=ワールドZ）。center_point が無いときは BBOX 中心。</summary>
+        public Vector2 center;
     }
 
-    /// <summary>区画ID → 空間インデックスエントリ。RegisterParcelDataForLines / RemoveParcel / ClearAllCells で同期する。</summary>
+    /// <summary>区画ID → 空間インデックスエントリ。RegisterConvertedParcelData / RemoveParcel / ClearAllCells で同期する。</summary>
     private Dictionary<int, ParcelSpatialEntry> parcelSpatialCache = new Dictionary<int, ParcelSpatialEntry>();
 
     /// <summary>
@@ -65,7 +77,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     /// 「この道路に面している区画」を全区画走査なしで解決するための逆引きインデックス。
     /// 登録は RegisterParcelSpatialIndex、削除は UnregisterParcelSpatialIndex / ClearAllCells で同期する
     /// （parcelIdsByCell と同じ全件走査回避パターン）。front_path_id は parcels の VERSION_TRIGGER_PROPS に
-    /// 含まれるため、接道変更時は version が上がり CreateOrUpdateParcelObject 経由で再登録される。
+    /// 含まれず、接道だけが変わっても version は上がらないため、version 一致時も RefreshCachedSummary で付け替える。
     /// </summary>
     private Dictionary<int, HashSet<int>> parcelIdsByFrontPath = new Dictionary<int, HashSet<int>>();
 
@@ -99,18 +111,88 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     private List<Coroutine> activeLodCoroutines = new List<Coroutine>();
     public bool IsLoading { get; private set; }
 
-    /// <summary>
-    /// セル跨ぎの区画を誤って非表示にしないため、アンロード判定時に
-    /// 「残すべきセル」として参照するセル集合。
-    /// LoadLodCells の先頭で設定され、UnloadCellObjects で使用される。
-    /// </summary>
-    private HashSet<Vector2Int> cellsToKeepVisible = new HashSet<Vector2Int>();
+    private HashSet<Vector2Int> fullyLoadedCells = new HashSet<Vector2Int>();
 
     /// <summary>
-    /// セル単位のロード状態を記録する（LOD非対応だが、loadedCellsの補助として使用）
+    /// 重心セル（center_point が属するセル＝GameObject の XZ 位置のセル）→ 区画IDの集合。
+    /// アンロード時の非表示化と、取得結果に無い区画の削除(SyncParcelsInCells)は重心セルで判定するため、
+    /// 全キャッシュ走査をせずセル内の区画だけを引くのに使う。
+    /// 登録は RegisterConvertedParcelData、削除は RemoveParcel / ClearAllCells で同期する。
     /// </summary>
-    private Dictionary<Vector2Int, bool> cellParcelLoaded = new Dictionary<Vector2Int, bool>();
-    private HashSet<Vector2Int> fullyLoadedCells = new HashSet<Vector2Int>();
+    private readonly Dictionary<Vector2Int, HashSet<int>> parcelIdsByCenterCell = new Dictionary<Vector2Int, HashSet<int>>();
+    private readonly Dictionary<int, Vector2Int> parcelCenterCellById = new Dictionary<int, Vector2Int>();
+
+    /// <summary>
+    /// 常駐から外れ、区画の非表示化を待っているセル。UnloadWorker が予算内で少しずつ処理する。
+    /// 処理前・処理中に常駐へ戻ったセルは LoadLodCells が取り除き、ワーカーはそのセルの処理を打ち切る。
+    /// </summary>
+    private readonly HashSet<Vector2Int> pendingDeactivateCells = new HashSet<Vector2Int>();
+    private readonly List<int> unloadScratch = new List<int>();
+    private Coroutine unloadCoroutine;
+    private const int UnloadDeactivateBatch = 32;
+    private const int UnloadDestroyBatch = 16;
+
+    /// <summary>
+    /// UnloadWorker が非表示化の途中で制御を返しているセルと、その間に常駐へ戻ったか。
+    /// 戻って再表示された後にまた外れると非表示化待ちには残っているので、待ちの有無だけでは再表示を見逃す。
+    /// </summary>
+    private bool hasDeactivatingCell;
+    private Vector2Int deactivatingCell;
+    private bool deactivatingCellReentered;
+
+    /// <summary>
+    /// 非表示化を終えた常駐外セルの古い順リスト。再入場時の再生成を避けるため区画を非表示のまま保持するが、
+    /// 探索に比例して増え続けないよう、上限を超えた古いセルから区画を破棄する(UnloadWorker)。
+    /// 常駐へ戻ったセルは LoadLodCells が取り除く。
+    /// </summary>
+    private readonly LinkedList<Vector2Int> retainedUnloadedCells = new LinkedList<Vector2Int>();
+    private readonly Dictionary<Vector2Int, LinkedListNode<Vector2Int>> retainedCellNodes = new Dictionary<Vector2Int, LinkedListNode<Vector2Int>>();
+    private const int MAX_RETAINED_UNLOADED_CELLS = LodConfig.MAX_RESIDENT_CELLS;
+
+    /// <summary>
+    /// 取得(差分適用)が必要なロード済みセル。新規に常駐へ入ったセルと、MarkLoadedCellsStale・強制・常駐集合不変時の全セル。
+    /// 取得が成功して適用し終えたセルだけ外すので、取消されたロードの分は次の LoadLodCells で取り直される。
+    /// 常にロード済みセル(loadedCells)の部分集合に保つ。
+    /// </summary>
+    private readonly HashSet<Vector2Int> cellsNeedingFetch = new HashSet<Vector2Int>();
+
+    /// <summary>
+    /// 直前の LoadLodCells の常駐集合。同じ集合で再び呼ばれたら(データ再取得か強制)全セルを取り直す安全網に使う。
+    /// </summary>
+    private HashSet<Vector2Int> lastResidentCells;
+
+    /// <summary>
+    /// MarkLoadedCellsStale のたびに増える。取得中に再取得が要求されたら、その取得の完了で要再取得の記録を消さないために使う。
+    /// </summary>
+    private int staleMarkSerial;
+
+    /// <summary>
+    /// /parcels/ の1回の取得件数上限。バックエンドにカーソルが無く先頭から打ち切るため、
+    /// 上限に達した応答は不完全とみなしてセル集合を二分して取り直す。
+    /// </summary>
+    private const int PARCEL_FETCH_LIMIT = 5000;
+    private const int FetchSkipBatch = 64;
+
+    /// <summary>
+    /// 地形タイル到着で地形追従をやり直す区画IDのキュー。terrainRefreshQueued は二重投入防止用。
+    /// 1タイルでセル内の全区画を同期で作り直すと長いフレームになるため、TerrainRefreshWorker が予算内で処理する。
+    /// </summary>
+    private readonly Queue<int> terrainRefreshQueue = new Queue<int>();
+    private readonly HashSet<int> terrainRefreshQueued = new HashSet<int>();
+    private Coroutine terrainRefreshCoroutine;
+
+    /// <summary>
+    /// 再サンプルした高さと枠線の保持値の差がこれ以下なら、地形は変わっていないとみなして作り直さない。
+    /// タイルの再アタッチや版の変わらない再取得でも OnTerrainTileReady は発火するため。
+    /// </summary>
+    private const float TerrainHeightEpsilon = 0.005f;
+
+    /// <summary>TerrainRefreshWorker が、高さ不変で作り直さなかった区画を何件ごとにまとめて予算を返すか。</summary>
+    private const int TerrainRefreshSkipBatch = 16;
+    private const float PolygonXZEpsilon = 1e-4f;
+
+    /// <summary>地形追従の高さサンプルの作業領域。同期処理の中でだけ使い、yield をまたいで保持しない。</summary>
+    private float[] groundSampleScratch = new float[32];
 
     /// <summary>マウスオーバー時のハイライト色。HighlightMaterial.mat と同等の半透明青(αは明瞭化のため引き上げ)</summary>
     private static readonly Color HighlightColor = new Color(0.259f, 0.437f, 1.0f, 0.6f);
@@ -264,42 +346,129 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
     public void RemoveParcel(int parcelId)
     {
-        if (parcelObjectsCache.TryGetValue(parcelId, out GameObject obj) && obj != null)
+        if (parcelObjectsCache.TryGetValue(parcelId, out GameObject obj))
         {
-            Destroy(obj);
+            DestroyParcelObject(obj);
         }
         parcelObjectsCache.Remove(parcelId);
         parcelVisualObjects.Remove(parcelId);
 
         RemoveParcelOutline(parcelId);
         UnregisterParcelSpatialIndex(parcelId);
+        UnregisterParcelCenterCell(parcelId);
         parcelCache.Remove(parcelId);
         // version キャッシュも除去する。残すと同一 parcel_id・同一 version で
-        // 削除→再作成された区画が LoadMergedParcels の version 一致判定でスキップされ、
+        // 削除→再作成された区画が FetchAndApplyCells の version 一致判定でスキップされ、
         // 枠線が復活しなくなる。
         parcelVersionCache.Remove(parcelId);
     }
 
-    protected override void UnloadCell(Vector2Int cellIndex)
+    /// <summary>
+    /// 区画GOを、生成時に new した上面メッシュごと破棄する(GO の破棄だけでは Mesh が残る)。
+    /// MeshCollider は同じ Mesh を共有しているので別に破棄しない。
+    /// </summary>
+    private static void DestroyParcelObject(GameObject obj)
     {
-        UnloadCellObjects(cellIndex);
-        fullyLoadedCells.Remove(cellIndex);
+        if (obj == null) return;
+        MeshFilter mf = obj.GetComponent<MeshFilter>();
+        if (mf != null && mf.sharedMesh != null) Destroy(mf.sharedMesh);
+        Destroy(obj);
     }
 
-    private void UnloadCellObjects(Vector2Int cellIndex)
+    /// <summary>
+    /// セルを非表示化待ちに積む。区画は破棄せず非表示にするだけで、実際の SetActive(false) は UnloadWorker が行う。
+    /// </summary>
+    protected override void UnloadCell(Vector2Int cellIndex)
     {
-        CalculateCellBounds(cellIndex, out float startX, out float endX, out float startZ, out float endZ);
+        pendingDeactivateCells.Add(cellIndex);
+        fullyLoadedCells.Remove(cellIndex);
+        cellsNeedingFetch.Remove(cellIndex);
+    }
 
-        List<Vector2Int> remainingCells = new List<Vector2Int>(cellsToKeepVisible);
-        remainingCells.Remove(cellIndex);
+    private bool HasUnloadWork => pendingDeactivateCells.Count > 0 || retainedUnloadedCells.Count > MAX_RETAINED_UNLOADED_CELLS;
 
-        foreach (var kvp in parcelObjectsCache)
+    private void StartUnloadWorker()
+    {
+        if (unloadCoroutine != null || !HasUnloadWork || !isActiveAndEnabled) return;
+        unloadCoroutine = RenderWorkScheduler.Start(this, UnloadWorker(), "ParcelManager", () => HasUnloadWork);
+    }
+
+    private void AddRetainedCell(Vector2Int cell)
+    {
+        RemoveRetainedCell(cell);
+        retainedCellNodes[cell] = retainedUnloadedCells.AddLast(cell);
+    }
+
+    private void RemoveRetainedCell(Vector2Int cell)
+    {
+        if (!retainedCellNodes.TryGetValue(cell, out LinkedListNode<Vector2Int> node)) return;
+        retainedUnloadedCells.Remove(node);
+        retainedCellNodes.Remove(cell);
+    }
+
+    /// <summary>
+    /// 非表示化待ちのセルを1つずつ取り出し、重心がそのセルにある区画を予算内で非表示にする。
+    /// 非表示化待ちが無くなったら、保持上限を超えた古いセルの区画を予算内で破棄する。
+    /// カメラ移動で止めないよう activeLodCoroutines には入れない。
+    /// </summary>
+    private IEnumerator UnloadWorker()
+    {
+        try
         {
-            if (kvp.Value != null && IsObjectInCell(kvp.Value, startX, endX, startZ, endZ))
+            while (HasUnloadWork)
             {
-                if (!IsObjectInCells(kvp.Value, remainingCells))
-                    kvp.Value.SetActive(false);
+                if (pendingDeactivateCells.Count > 0)
+                {
+                    Vector2Int cell = default;
+                    foreach (Vector2Int c in pendingDeactivateCells) { cell = c; break; }
+
+                    unloadScratch.Clear();
+                    if (parcelIdsByCenterCell.TryGetValue(cell, out HashSet<int> ids)) unloadScratch.AddRange(ids);
+
+                    hasDeactivatingCell = true;
+                    deactivatingCell = cell;
+                    deactivatingCellReentered = false;
+                    bool reentered = false;
+                    for (int i = 0; i < unloadScratch.Count; i++)
+                    {
+                        if (parcelObjectsCache.TryGetValue(unloadScratch[i], out GameObject obj) && obj != null && obj.activeSelf)
+                            obj.SetActive(false);
+                        if ((i + 1) % UnloadDeactivateBatch == 0)
+                        {
+                            yield return RenderWorkScheduler.Continue;
+                            // 常駐へ戻ったセルは打ち切る。非表示済みの区画は取得側の版一致分岐が再表示する。
+                            // 戻った後にまた外れていれば非表示化待ちに残っているので、次の周回で先頭からやり直す。
+                            if (deactivatingCellReentered || !pendingDeactivateCells.Contains(cell)) { reentered = true; break; }
+                        }
+                    }
+                    hasDeactivatingCell = false;
+                    if (!reentered)
+                    {
+                        pendingDeactivateCells.Remove(cell);
+                        AddRetainedCell(cell);
+                    }
+                    yield return RenderWorkScheduler.Continue;
+                    continue;
+                }
+
+                Vector2Int oldest = retainedUnloadedCells.First.Value;
+                RemoveRetainedCell(oldest);
+                unloadScratch.Clear();
+                if (parcelIdsByCenterCell.TryGetValue(oldest, out HashSet<int> oldestIds)) unloadScratch.AddRange(oldestIds);
+                for (int i = 0; i < unloadScratch.Count; i++)
+                {
+                    // 常駐へ戻ったセルの区画は破棄しない(残りは取得側の版一致分岐が再表示する)
+                    if (loadedCells.Contains(oldest)) break;
+                    RemoveParcel(unloadScratch[i]);
+                    if ((i + 1) % UnloadDestroyBatch == 0) yield return RenderWorkScheduler.Continue;
+                }
+                yield return RenderWorkScheduler.Continue;
             }
+        }
+        finally
+        {
+            unloadCoroutine = null;
+            hasDeactivatingCell = false;
         }
     }
 
@@ -317,145 +486,186 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         activeLodCoroutines.Clear();
         IsLoading = false;
 
-        var allParcelCells = new HashSet<Vector2Int>(cellSets.farCells);
-
-        // セル跨ぎの区画を誤って非表示にしないために、
-        // アンロード判定時に参照する「残すべきセル」集合を設定する
-        cellsToKeepVisible = new HashSet<Vector2Int>(allParcelCells);
+        var resident = new HashSet<Vector2Int>(cellSets.farCells);
+        bool sameResident = lastResidentCells != null && lastResidentCells.SetEquals(resident);
+        lastResidentCells = resident;
 
         // 不要セルをアンロード
         var toUnload = new List<Vector2Int>();
         foreach (var cell in loadedCells)
         {
-            if (!allParcelCells.Contains(cell))
+            if (!resident.Contains(cell))
                 toUnload.Add(cell);
         }
         foreach (var cell in toUnload)
         {
             UnloadCell(cell);
             loadedCells.Remove(cell);
-            cellParcelLoaded.Remove(cell);
         }
 
-        // 常に cellSets.farCells の全セルを対象とする。
-        // 未ロードセルは新規ロード、ロード済みセルは version ベースで差分更新される。
-        var cellsToLoad = new List<Vector2Int>();
-        foreach (var cell in cellSets.farCells)
+        // 取得するのは新規に常駐へ入ったセルと要再取得のセルだけ。ロード済みセルの区画は、
+        // データ再取得(MarkLoadedCellsStale)・強制・常駐集合不変(再取得の安全網)のときに取り直す。
+        foreach (var cell in resident)
         {
-            if (isForce && loadedCells.Contains(cell))
+            if (loadedCells.Add(cell))
             {
-                UnloadCell(cell);
-                loadedCells.Remove(cell);
+                cellsNeedingFetch.Add(cell);
+                pendingDeactivateCells.Remove(cell);
+                if (hasDeactivatingCell && deactivatingCell == cell) deactivatingCellReentered = true;
+                RemoveRetainedCell(cell);
             }
-            if (!loadedCells.Contains(cell))
+            else if (isForce || sameResident)
             {
-                cellsToLoad.Add(cell);
-                loadedCells.Add(cell);
-                cellParcelLoaded[cell] = true;
-            }
-            else
-            {
-                cellsToLoad.Add(cell);
+                cellsNeedingFetch.Add(cell);
             }
         }
 
-        if (cellsToLoad.Count > 0)
+        StartUnloadWorker();
+
+        if (cellsNeedingFetch.Count > 0)
         {
             IsLoading = true;
-            activeLodCoroutines.Add(RenderWorkScheduler.Start(this, TrackParcelLoad(cellsToLoad), "ParcelManager"));
+            activeLodCoroutines.Add(RenderWorkScheduler.Start(this, TrackParcelLoad(new List<Vector2Int>(cellsNeedingFetch)), "ParcelManager"));
         }
     }
 
     /// <summary>
-    /// 複数セルのマージBBOXを使って区画を一括取得する。
-    /// 従来のセルごとのAPIコール(最大49回)を1回に削減する。
-    /// 区画はLODティア分けがないため、全データを同一の処理で描画する。
+    /// 要取得セルの区画を取得・適用し終えるまで IsLoading を立てておく(建物は区画の確定後に生成するため)。
     /// </summary>
     private IEnumerator TrackParcelLoad(List<Vector2Int> cells)
     {
-        try { yield return LoadMergedParcels(cells); }
+        try { yield return FetchAndApplyCells(cells); }
         finally { IsLoading = false; }
     }
 
-    private IEnumerator LoadMergedParcels(List<Vector2Int> cells)
+    /// <summary>
+    /// セル群の外接矩形で区画を一括取得し、重心がセル群にある区画だけを差分適用する。
+    /// 外接矩形は常駐外のセルも含み得るので、重心セルで絞らないと常駐外に区画GOが作られ、どのセルからも非表示化されない。
+    /// 応答が件数上限に達したら、打ち切られた応答は適用せずセル群を二分して取り直す。
+    /// 単一セルでも上限に達した場合は適用するが、応答に無い区画の削除(同期)はしない。
+    /// </summary>
+    private IEnumerator FetchAndApplyCells(List<Vector2Int> cells)
     {
+        int serialAtRequest = staleMarkSerial;
         CalculateMergedBBox(cells, out float minX, out float minZ, out float maxX, out float maxZ);
         ParcelListResponse response = null;
         yield return ApiClient.GetBulk<ParcelListResponse>(
-            $"/parcels/?bbox={minX},{minZ},{maxX},{maxZ}&limit=5000",
+            $"/parcels/?bbox={minX},{minZ},{maxX},{maxZ}&limit={PARCEL_FETCH_LIMIT}",
             r => response = r,
             timingLabel: "ParcelManager parcels");
-        if (response == null)
+        // 失敗したセルは cellsNeedingFetch に残り、次の LoadLodCells で取り直される
+        if (response == null) yield break;
+
+        List<ParcelSummary> parcels = response.parcels;
+        int count = parcels != null ? parcels.Count : 0;
+        if (count >= PARCEL_FETCH_LIMIT && cells.Count > 1)
         {
+            SplitCells(cells, out List<Vector2Int> first, out List<Vector2Int> second);
+            response = null;
+            parcels = null;
+            yield return FetchAndApplyCells(first);
+            yield return FetchAndApplyCells(second);
             yield break;
         }
+        bool truncated = count >= PARCEL_FETCH_LIMIT;
 
-        HashSet<int> receivedIds = new HashSet<int>();
-
-        if (response != null && response.parcels != null)
+        var cellSet = new HashSet<Vector2Int>(cells);
+        var receivedIds = new HashSet<int>();
+        int skipped = 0;
+        for (int i = 0; i < count; i++)
         {
-            foreach (var p in response.parcels)
+            ParcelSummary p = parcels[i];
+            if (p == null || !TryGetCenterCell(p, out Vector2Int centerCell) || !cellSet.Contains(centerCell))
             {
-                receivedIds.Add(p.parcel_id);
-
-                // version比較: キャッシュと同じversionなら再作成しない
-                if (parcelVersionCache.TryGetValue(p.parcel_id, out int cachedVersion) && cachedVersion == p.version)
-                {
-                    // 非表示だった既存オブジェクトがあれば再表示する
-                    if (parcelObjectsCache.TryGetValue(p.parcel_id, out GameObject existing) && existing != null && !existing.activeSelf)
-                    {
-                        existing.SetActive(true);
-                    }
-                }
-                else
-                {
-                    CreateOrUpdateParcelObject(p);
-                    parcelVersionCache[p.parcel_id] = p.version;
-                }
-                yield return RenderWorkScheduler.Continue;
+                if (++skipped % FetchSkipBatch == 0) yield return RenderWorkScheduler.Continue;
+                continue;
             }
-        }
+            receivedIds.Add(p.parcel_id);
 
-        // ロード対象セル群に含まれる区画のうち、APIレスポンスに含まれないものを削除する
-        SyncParcelsInCells(cells, receivedIds);
-
-        foreach (var cell in cells)
-        {
-            fullyLoadedCells.Add(cell);
-        }
-    }
-
-    /// <summary>
-    /// 複数セルにまたがる区画の同期処理。
-    /// APIレスポンスに含まれない区画のうち、指定セル群に含まれるものを削除する。
-    /// </summary>
-    private void SyncParcelsInCells(List<Vector2Int> cells, HashSet<int> receivedIds)
-    {
-        List<int> idsToRemove = new List<int>();
-        HashSet<Vector2Int> cellSet = new HashSet<Vector2Int>(cells);
-
-        foreach (var kvp in parcelCache)
-        {
-            int id = kvp.Key;
-            GameObject obj = GetParcelObject(id);
-
-            Vector3 pos;
-            if (obj != null)
+            // version比較: キャッシュと同じversionなら再作成しない
+            if (parcelVersionCache.TryGetValue(p.parcel_id, out int cachedVersion) && cachedVersion == p.version)
             {
-                pos = obj.transform.position;
+                // 非表示だった既存オブジェクトがあれば再表示する
+                if (parcelObjectsCache.TryGetValue(p.parcel_id, out GameObject existing) && existing != null && !existing.activeSelf)
+                {
+                    existing.SetActive(true);
+                }
+                RefreshCachedSummary(p);
             }
             else
             {
-                // GameObject が破棄済みでも parcelCache の中心点でセル判定する
-                float[] cp = kvp.Value.GetCenterPointArray();
-                if (cp == null || cp.Length < 2) continue;
-                pos = new Vector3(cp[0], 0, cp[1]);
+                CreateOrUpdateParcelObject(p);
+                parcelVersionCache[p.parcel_id] = p.version;
             }
+            yield return RenderWorkScheduler.Continue;
+        }
 
-            Vector2Int objCell = TerrainManager.WorldToCell(pos);
-            if (cellSet.Contains(objCell) && !receivedIds.Contains(id))
+        // 取得セル群に重心がある区画のうち、応答に含まれないものを削除する(完全な応答のときだけ)
+        if (!truncated)
+        {
+            SyncParcelsInCells(cellSet, receivedIds);
+        }
+        else
+        {
+            Debug.LogWarning($"ParcelManager: セル {cells[0]} の区画が取得上限 {PARCEL_FETCH_LIMIT} 件に達したため、応答に無い区画の削除を見送ります。");
+        }
+
+        // 取得中に再取得が要求されていたら、この応答は古い可能性があるので要再取得のまま残す
+        bool keepStale = serialAtRequest != staleMarkSerial;
+        foreach (var cell in cells)
+        {
+            if (!keepStale) cellsNeedingFetch.Remove(cell);
+            fullyLoadedCells.Add(cell);
+        }
+        ForceOutlineRedraw();
+    }
+
+    private static bool TryGetCenterCell(ParcelSummary p, out Vector2Int cell)
+    {
+        cell = default;
+        if (p.center_point == null || p.center_point.Count < 2) return false;
+        cell = TerrainManager.WorldToCell(GeneratedModelUtils.ToFloat(p.center_point[0]), GeneratedModelUtils.ToFloat(p.center_point[1]));
+        return true;
+    }
+
+    /// <summary>
+    /// セル群を、セル座標の外接矩形の長辺方向に並べて半分に分ける。
+    /// </summary>
+    private static void SplitCells(List<Vector2Int> cells, out List<Vector2Int> first, out List<Vector2Int> second)
+    {
+        int minX = int.MaxValue, maxX = int.MinValue, minZ = int.MaxValue, maxZ = int.MinValue;
+        foreach (Vector2Int c in cells)
+        {
+            if (c.x < minX) minX = c.x;
+            if (c.x > maxX) maxX = c.x;
+            if (c.y < minZ) minZ = c.y;
+            if (c.y > maxZ) maxZ = c.y;
+        }
+        bool alongX = maxX - minX >= maxZ - minZ;
+        var sorted = new List<Vector2Int>(cells);
+        sorted.Sort((a, b) =>
+        {
+            int order = alongX ? a.x.CompareTo(b.x) : a.y.CompareTo(b.y);
+            if (order != 0) return order;
+            return alongX ? a.y.CompareTo(b.y) : a.x.CompareTo(b.x);
+        });
+        int half = sorted.Count / 2;
+        first = sorted.GetRange(0, half);
+        second = sorted.GetRange(half, sorted.Count - half);
+    }
+
+    /// <summary>
+    /// 重心が指定セル群にあり、APIレスポンスに含まれない区画を削除する。
+    /// </summary>
+    private void SyncParcelsInCells(HashSet<Vector2Int> cellSet, HashSet<int> receivedIds)
+    {
+        List<int> idsToRemove = new List<int>();
+        foreach (Vector2Int cell in cellSet)
+        {
+            if (!parcelIdsByCenterCell.TryGetValue(cell, out HashSet<int> ids)) continue;
+            foreach (int id in ids)
             {
-                idsToRemove.Add(id);
+                if (!receivedIds.Contains(id)) idsToRemove.Add(id);
             }
         }
 
@@ -467,9 +677,28 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
     public override void ClearAllCells()
     {
+        foreach (var c in activeLodCoroutines)
+        {
+            if (c != null) RenderWorkScheduler.Stop(this, c);
+        }
+        activeLodCoroutines.Clear();
+        IsLoading = false;
+        RenderWorkScheduler.Stop(this, unloadCoroutine);
+        unloadCoroutine = null;
+        hasDeactivatingCell = false;
+        RenderWorkScheduler.Stop(this, terrainRefreshCoroutine);
+        terrainRefreshCoroutine = null;
+        pendingDeactivateCells.Clear();
+        retainedUnloadedCells.Clear();
+        retainedCellNodes.Clear();
+        cellsNeedingFetch.Clear();
+        lastResidentCells = null;
+        terrainRefreshQueue.Clear();
+        terrainRefreshQueued.Clear();
+
         foreach (var obj in parcelObjectsCache.Values)
         {
-            if (obj != null) Destroy(obj);
+            DestroyParcelObject(obj);
         }
 
         outlines.Clear();
@@ -481,6 +710,8 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         parcelSpatialCache.Clear();
         parcelIdsByCell.Clear();
         parcelIdsByFrontPath.Clear();
+        parcelIdsByCenterCell.Clear();
+        parcelCenterCellById.Clear();
 
         if (overlayRenderer != null)
         {
@@ -492,7 +723,6 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         }
 
         loadedCells.Clear();
-        cellParcelLoaded.Clear();
         fullyLoadedCells.Clear();
     }
 
@@ -557,7 +787,13 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
                 if (!existingParcel.activeSelf)
                     existingParcel.SetActive(true);
                 // version変更で形状が変わっている可能性があるため、空間インデックスも含めて登録し直す
-                RegisterParcelDataForLines(parcelData);
+                RegisterConvertedParcelData(parcelData, polygon, centerPoint);
+                UpdateParcelStats(parcelData.parcel_id, parcelData);
+                // 形状・高さが枠線の保持値と違うときだけメッシュ・コライダー・枠線を作り直す
+                if (centerPoint != null && centerPoint.Length >= 2)
+                {
+                    RefreshParcelGeometry(parcelData, polygon, new Vector2(centerPoint[0], centerPoint[1]));
+                }
             }
         }
         else
@@ -567,23 +803,17 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
         if (needRecreate)
         {
-            RegisterParcelDataForLines(parcelData);
+            RegisterConvertedParcelData(parcelData, polygon, centerPoint);
+
+            Vector2 center = new Vector2(centerPoint[0], centerPoint[1]);
+            float[] vertexGround = SampleParcelGround(parcelData, polygon, center, out float centerGround);
 
             if (existingParcel == null && CellDataLoader.Instance != null && CellDataLoader.Instance.IsInitialLoadComplete)
             {
-                if (centerPoint != null && centerPoint.Length >= 2)
+                Vector2Int cellIndex = TerrainManager.WorldToCell(center.x, center.y);
+                if (fullyLoadedCells.Contains(cellIndex) && VisualEffectManager.Instance != null)
                 {
-                    float cx = centerPoint[0];
-                    float cz = centerPoint[1];
-                    Vector2Int cellIndex = TerrainManager.WorldToCell(new Vector3(cx, 0f, cz));
-                    if (fullyLoadedCells.Contains(cellIndex))
-                    {
-                        if (VisualEffectManager.Instance != null)
-                        {
-                            float cy = GetParcelBaseY(parcelData, cx, cz);
-                            VisualEffectManager.Instance.PlayConstructionComplete(new Vector3(cx, cy, cz));
-                        }
-                    }
+                    VisualEffectManager.Instance.PlayConstructionComplete(new Vector3(center.x, centerGround, center.y));
                 }
             }
 
@@ -597,38 +827,19 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
             parcelGO.tag = PARCEL_TAG;
 
+            parcelGO.AddComponent<MeshFilter>();
+            MeshRenderer mr = parcelGO.AddComponent<MeshRenderer>();
+            if (vacantParcelMaterial != null)
             {
-                MeshFilter mf = parcelGO.AddComponent<MeshFilter>();
-                MeshRenderer mr = parcelGO.AddComponent<MeshRenderer>();
-                if (vacantParcelMaterial != null)
-                {
-                    mr.material = vacantParcelMaterial;
-                }
-                mr.enabled = false;
-
-                Vector2[] points = new Vector2[polygon.Length];
-                for (int i = 0; i < polygon.Length; i++)
-                {
-                    points[i] = new Vector2(polygon[i][0], polygon[i][1]);
-                }
-
-                Vector2 centroid = new Vector2(
-                    centerPoint[0],
-                    centerPoint[1]);
-
-                BuildParcelTopLocalYOffsets(points, centroid, parcelData, out float[] topLocalY, out float parcelBaseHeight);
-                Mesh mesh = ParcelMeshFactory.GenerateParcelMesh(points, centroid, 0f, parcelData.usage_id, topLocalY);
-                mf.mesh = mesh;
-
-                float cx = centerPoint[0];
-                float cz = centerPoint[1];
-                parcelGO.transform.position = new Vector3(cx, parcelBaseHeight, cz);
-
-                MeshCollider collider = parcelGO.AddComponent<MeshCollider>();
-                collider.sharedMesh = mf.mesh;
-                ParcelInputHandler inputHandler = parcelGO.AddComponent<ParcelInputHandler>();
-                inputHandler.parcelId = parcelData.parcel_id;
+                mr.sharedMaterial = vacantParcelMaterial;
             }
+            mr.enabled = false;
+            parcelGO.AddComponent<MeshCollider>();
+
+            ApplyParcelGeometry(parcelGO, parcelData, polygon, center, vertexGround, centerGround);
+
+            ParcelInputHandler inputHandler = parcelGO.AddComponent<ParcelInputHandler>();
+            inputHandler.parcelId = parcelData.parcel_id;
 
             var vpoComp = parcelGO.AddComponent<VisualParcelObject>();
             parcelVisualObjects[parcelData.parcel_id] = vpoComp;
@@ -638,8 +849,6 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
             parcelObjectsCache[parcelData.parcel_id] = parcelGO;
         }
-
-        CreateParcelOutline(parcelData.parcel_id, parcelData);
     }
 
     public IEnumerator FetchParcel(int parcelId)
@@ -648,8 +857,9 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
             $"/parcels/{parcelId}",
             parcel =>
             {
-                if (parcel != null)
-                    CreateOrUpdateParcelObject(parcel);
+                if (parcel == null) return;
+                CreateOrUpdateParcelObject(parcel);
+                parcelVersionCache[parcel.parcel_id] = parcel.version;
             },
             error => Debug.LogError($"FetchParcel({parcelId}) failed: {error}")
         );
@@ -657,8 +867,54 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
     private void RegisterParcelDataForLines(ParcelSummary parcelData)
     {
+        RegisterConvertedParcelData(parcelData, parcelData.GetPolygonArray(), parcelData.GetCenterPointArray());
+    }
+
+    /// <summary>
+    /// RegisterParcelDataForLines の変換済み座標版。テストがリフレクションで名前だけで引くため、多重定義にしない。
+    /// </summary>
+    private void RegisterConvertedParcelData(ParcelSummary parcelData, float[][] polygon, float[] centerPoint)
+    {
         parcelCache[parcelData.parcel_id] = parcelData;
-        RegisterParcelSpatialIndex(parcelData);
+        RegisterParcelSpatialIndex(parcelData, polygon, centerPoint);
+        RegisterParcelCenterCell(parcelData.parcel_id, centerPoint);
+    }
+
+    /// <summary>
+    /// 区画を重心セルの逆引き(parcelIdsByCenterCell)へ登録する。重心セルが変わった場合は旧セルから外す。
+    /// center_point が無い区画は GameObject を持てないため、登録しない。
+    /// </summary>
+    private void RegisterParcelCenterCell(int parcelId, float[] centerPoint)
+    {
+        if (centerPoint == null || centerPoint.Length < 2)
+        {
+            UnregisterParcelCenterCell(parcelId);
+            return;
+        }
+        Vector2Int cell = TerrainManager.WorldToCell(centerPoint[0], centerPoint[1]);
+        if (parcelCenterCellById.TryGetValue(parcelId, out Vector2Int oldCell))
+        {
+            if (oldCell == cell) return;
+            UnregisterParcelCenterCell(parcelId);
+        }
+        if (!parcelIdsByCenterCell.TryGetValue(cell, out HashSet<int> ids))
+        {
+            ids = new HashSet<int>();
+            parcelIdsByCenterCell[cell] = ids;
+        }
+        ids.Add(parcelId);
+        parcelCenterCellById[parcelId] = cell;
+    }
+
+    private void UnregisterParcelCenterCell(int parcelId)
+    {
+        if (!parcelCenterCellById.TryGetValue(parcelId, out Vector2Int cell)) return;
+        if (parcelIdsByCenterCell.TryGetValue(cell, out HashSet<int> ids))
+        {
+            ids.Remove(parcelId);
+            if (ids.Count == 0) parcelIdsByCenterCell.Remove(cell);
+        }
+        parcelCenterCellById.Remove(parcelId);
     }
 
     /// <summary>
@@ -666,9 +922,8 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     /// ポリゴンのAABBを計算し、AABBが重なる全セル（区画は小さいので通常1〜4セル）へ逆引き登録する。
     /// 既登録の場合は一度削除してから登録し直す（形状変更時のセル移動に対応）。
     /// </summary>
-    private void RegisterParcelSpatialIndex(ParcelSummary parcelData)
+    private void RegisterParcelSpatialIndex(ParcelSummary parcelData, float[][] polygon, float[] centerPoint)
     {
-        float[][] polygon = parcelData.GetPolygonArray();
         if (polygon == null || polygon.Length < 3) return;
 
         UnregisterParcelSpatialIndex(parcelData.parcel_id);
@@ -691,19 +946,13 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
             bbox = Rect.MinMaxRect(minX, minZ, maxX, maxZ),
             polygon = polygon,
             cells = new List<Vector2Int>(),
-            frontPathId = frontPathId
+            frontPathId = frontPathId,
+            center = centerPoint != null && centerPoint.Length >= 2
+                ? new Vector2(centerPoint[0], centerPoint[1])
+                : new Vector2((minX + maxX) * 0.5f, (minZ + maxZ) * 0.5f)
         };
 
-        // 接道街路の逆引きインデックスに登録する（front_path_id が未取得=0 のときは登録しない）。
-        if (frontPathId > 0)
-        {
-            if (!parcelIdsByFrontPath.TryGetValue(frontPathId, out HashSet<int> byPath))
-            {
-                byPath = new HashSet<int>();
-                parcelIdsByFrontPath[frontPathId] = byPath;
-            }
-            byPath.Add(parcelData.parcel_id);
-        }
+        AddFrontPathIndex(frontPathId, parcelData.parcel_id);
 
         TerrainManager.WorldRectToCellRange(minX, minZ, maxX, maxZ, out Vector2Int cellMin, out Vector2Int cellMax);
         for (int cx = cellMin.x; cx <= cellMax.x; cx++)
@@ -740,15 +989,56 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
             }
         }
 
-        // 接道街路の逆引きインデックスからも外す
-        if (entry.frontPathId > 0
-            && parcelIdsByFrontPath.TryGetValue(entry.frontPathId, out HashSet<int> byPath))
-        {
-            byPath.Remove(parcelId);
-            if (byPath.Count == 0) parcelIdsByFrontPath.Remove(entry.frontPathId);
-        }
+        RemoveFrontPathIndex(entry.frontPathId, parcelId);
 
         parcelSpatialCache.Remove(parcelId);
+    }
+
+    /// <summary>接道街路の逆引きインデックスに登録する（front_path_id が未取得=0 のときは登録しない）。</summary>
+    private void AddFrontPathIndex(int frontPathId, int parcelId)
+    {
+        if (frontPathId <= 0) return;
+        if (!parcelIdsByFrontPath.TryGetValue(frontPathId, out HashSet<int> byPath))
+        {
+            byPath = new HashSet<int>();
+            parcelIdsByFrontPath[frontPathId] = byPath;
+        }
+        byPath.Add(parcelId);
+    }
+
+    private void RemoveFrontPathIndex(int frontPathId, int parcelId)
+    {
+        if (frontPathId <= 0 || !parcelIdsByFrontPath.TryGetValue(frontPathId, out HashSet<int> byPath)) return;
+        byPath.Remove(parcelId);
+        if (byPath.Count == 0) parcelIdsByFrontPath.Remove(frontPathId);
+    }
+
+    /// <summary>
+    /// version 一致時に、キャッシュの要約を最新の応答へ差し替える。
+    /// land_price と front_path_id は VERSION_TRIGGER_PROPS に含まれず、version が同じでも変わり得るため。
+    /// version が同じならジオメトリは同じなので、メッシュと空間インデックスの形状は触らない。
+    /// </summary>
+    private void RefreshCachedSummary(ParcelSummary parcelData)
+    {
+        if (!parcelCache.ContainsKey(parcelData.parcel_id)) return;
+        parcelCache[parcelData.parcel_id] = parcelData;
+        UpdateParcelStats(parcelData.parcel_id, parcelData);
+        UpdateFrontPathIndex(parcelData.parcel_id, parcelData.GetFrontPathId());
+    }
+
+    private void UpdateParcelStats(int parcelId, ParcelSummary parcelData)
+    {
+        if (!parcelVisualObjects.TryGetValue(parcelId, out VisualParcelObject vpo) || vpo == null) return;
+        VisualParcelStats stats = vpo.Stats;
+        if (stats != null) stats.InitFrom(parcelData);
+    }
+
+    private void UpdateFrontPathIndex(int parcelId, int frontPathId)
+    {
+        if (!parcelSpatialCache.TryGetValue(parcelId, out ParcelSpatialEntry entry) || entry.frontPathId == frontPathId) return;
+        RemoveFrontPathIndex(entry.frontPathId, parcelId);
+        AddFrontPathIndex(frontPathId, parcelId);
+        entry.frontPathId = frontPathId;
     }
 
     /// <summary>
@@ -804,6 +1094,26 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
             return false;
         }
         return PolygonUtils.Contains(entry.polygon, worldPos.x, worldPos.z);
+    }
+
+    /// <summary>
+    /// 空間インデックスが持つ変換済みポリゴン(ワールドXZ)を確保なしで返す。共有配列なので書き換えないこと。
+    /// 区画が未ロードなら false。
+    /// </summary>
+    public bool TryGetParcelPolygon(int parcelId, out float[][] polygon)
+    {
+        polygon = parcelSpatialCache.TryGetValue(parcelId, out ParcelSpatialEntry entry) ? entry.polygon : null;
+        return polygon != null;
+    }
+
+    /// <summary>
+    /// ロード済みの全セルを「要再取得」にする。データ再取得(CellDataLoader.ReloadAllData)の要求時に同期で呼ぶ。
+    /// 記録はバッチが取消されても残り、そのセルの取得が成功して適用されたときに消える。
+    /// </summary>
+    public void MarkLoadedCellsStale()
+    {
+        cellsNeedingFetch.UnionWith(loadedCells);
+        staleMarkSerial++;
     }
 
     // 区画境界へクランプした点を境界からどれだけ内側へ寄せるか(m)。
@@ -886,33 +1196,33 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     }
 
     /// <summary>
-    /// セル単位の高解像Terrainが後から生成されたとき、既存パーセルの上面・枠線を再サンプルする。
+    /// セル単位の高解像Terrainが後から生成されたとき、そのセルに中心または頂点がある区画を再追従キューへ積む。
+    /// 候補は parcelIdsByCell(BBOXが重なるセル)から引き、実際の再サンプルと作り直しは TerrainRefreshWorker が行う。
     /// </summary>
     private void OnTerrainTileReady(Vector2Int cellIndex, Terrain terrain)
     {
         Utils.InvalidateHeightCache();
+        if (!parcelIdsByCell.TryGetValue(cellIndex, out HashSet<int> ids)) return;
+
         CalculateCellBounds(cellIndex, out float startX, out float endX, out float startZ, out float endZ);
-        foreach (var kvp in parcelCache)
+        foreach (int id in ids)
         {
-            if (ParcelRoughlyInCell(kvp.Value, startX, endX, startZ, endZ))
-            {
-                RefreshParcelConformingToTerrain(kvp.Value);
-            }
+            if (!parcelSpatialCache.TryGetValue(id, out ParcelSpatialEntry entry)) continue;
+            if (!ParcelTouchesCell(entry, startX, endX, startZ, endZ)) continue;
+            if (terrainRefreshQueued.Add(id)) terrainRefreshQueue.Enqueue(id);
         }
+        StartTerrainRefreshWorker();
     }
 
-    private bool ParcelRoughlyInCell(ParcelSummary parcelData, float startX, float endX, float startZ, float endZ)
+    private static bool ParcelTouchesCell(ParcelSpatialEntry entry, float startX, float endX, float startZ, float endZ)
     {
-        float[] centerPoint = parcelData.GetCenterPointArray();
-        if (centerPoint[0] >= startX && centerPoint[0] < endX &&
-            centerPoint[1] >= startZ && centerPoint[1] < endZ)
+        if (entry.center.x >= startX && entry.center.x < endX &&
+            entry.center.y >= startZ && entry.center.y < endZ)
         {
             return true;
         }
 
-        float[][] polygon = parcelData.GetPolygonArray();
-        if (polygon == null) return false;
-        foreach (float[] pt in polygon)
+        foreach (float[] pt in entry.polygon)
         {
             if (pt != null && pt.Length >= 2 &&
                 pt[0] >= startX && pt[0] < endX &&
@@ -921,47 +1231,164 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
                 return true;
             }
         }
-
         return false;
     }
 
-    private void RefreshParcelConformingToTerrain(ParcelSummary parcelData)
+    private void StartTerrainRefreshWorker()
+    {
+        if (terrainRefreshCoroutine != null || terrainRefreshQueue.Count == 0 || !isActiveAndEnabled) return;
+        terrainRefreshCoroutine = RenderWorkScheduler.Start(this, TerrainRefreshWorker(), "ParcelManager", () => terrainRefreshQueue.Count > 0);
+    }
+
+    /// <summary>
+    /// 再追従キューの区画を1件ずつ再サンプルし、高さが変わった区画だけ作り直す。
+    /// 作り直し(メッシュ生成・コライダーのクッキング・枠線)は1件ごとに、高さ不変の判定だけの区画はまとめて予算を返す。
+    /// </summary>
+    private IEnumerator TerrainRefreshWorker()
+    {
+        try
+        {
+            int unchangedSinceYield = 0;
+            while (terrainRefreshQueue.Count > 0)
+            {
+                int parcelId = terrainRefreshQueue.Dequeue();
+                terrainRefreshQueued.Remove(parcelId);
+                if (!parcelCache.TryGetValue(parcelId, out ParcelSummary summary)) continue;
+                // 処理までにタイルが外れた区画を概観の高さで作り直さない(再入場時のタイル到着で再投入される)
+                if (!TouchesAnySurfaceTile(parcelId)) continue;
+
+                if (RefreshParcelConformingToTerrain(summary) || ++unchangedSinceYield >= TerrainRefreshSkipBatch)
+                {
+                    unchangedSinceYield = 0;
+                    yield return RenderWorkScheduler.Continue;
+                }
+            }
+        }
+        finally
+        {
+            terrainRefreshCoroutine = null;
+        }
+    }
+
+    private bool TouchesAnySurfaceTile(int parcelId)
+    {
+        TerrainManager terrainManager = Utils.CachedTerrainManager;
+        if (terrainManager == null) return true;
+        if (!parcelSpatialCache.TryGetValue(parcelId, out ParcelSpatialEntry entry)) return true;
+        foreach (Vector2Int cell in entry.cells)
+        {
+            if (terrainManager.HasSurfaceTile(cell)) return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// 区画を現在の地形へ追従させ直す。作り直したときだけ true を返す。
+    /// ポリゴンと中心は空間インデックスの変換済み値を使う(GetPolygonArray の毎回の確保を避ける)。
+    /// </summary>
+    private bool RefreshParcelConformingToTerrain(ParcelSummary parcelData)
+    {
+        if (parcelSpatialCache.TryGetValue(parcelData.parcel_id, out ParcelSpatialEntry entry))
+        {
+            return RefreshParcelGeometry(parcelData, entry.polygon, entry.center);
+        }
+        float[] centerPoint = parcelData.GetCenterPointArray();
+        if (centerPoint == null || centerPoint.Length < 2) return false;
+        return RefreshParcelGeometry(parcelData, parcelData.GetPolygonArray(), new Vector2(centerPoint[0], centerPoint[1]));
+    }
+
+    /// <summary>
+    /// 地形を再サンプルし、形状(XZ)・高さのどちらかが枠線の保持値と違う区画だけ作り直す。作り直したときだけ true。
+    /// メッシュと枠線は常に同じサンプルから作るので、枠線との比較でメッシュの鮮度も判定できる。
+    /// </summary>
+    private bool RefreshParcelGeometry(ParcelSummary parcelData, float[][] polygon, Vector2 center)
     {
         GameObject parcelGO = GetParcelObject(parcelData.parcel_id);
-        if (parcelGO == null) return;
+        if (parcelGO == null || polygon == null || polygon.Length < 3) return false;
 
-        float[][] polygon = parcelData.GetPolygonArray();
-        float[] centerPoint = parcelData.GetCenterPointArray();
-        Vector2[] points = new Vector2[polygon.Length];
+        float[] vertexGround = SampleParcelGround(parcelData, polygon, center, out float centerGround);
+        if (HasSameGeometry(parcelData.parcel_id, polygon, center, vertexGround, centerGround)) return false;
+
+        ApplyParcelGeometry(parcelGO, parcelData, polygon, center, vertexGround, centerGround);
+        return true;
+    }
+
+    /// <summary>
+    /// 区画の各頂点と中心の地面高さ(GetParcelBaseY)を1回ずつサンプルする。
+    /// 返す配列は作業領域の共有配列なので、長さではなく polygon.Length まで読み、呼び出し元の同期処理の中だけで使うこと。
+    /// </summary>
+    private float[] SampleParcelGround(ParcelSummary parcelData, float[][] polygon, Vector2 center, out float centerGround)
+    {
+        if (groundSampleScratch.Length < polygon.Length)
+        {
+            groundSampleScratch = new float[Mathf.NextPowerOfTwo(polygon.Length)];
+        }
         for (int i = 0; i < polygon.Length; i++)
         {
-            points[i] = new Vector2(polygon[i][0], polygon[i][1]);
+            groundSampleScratch[i] = GetParcelBaseY(parcelData, polygon[i][0], polygon[i][1]);
         }
+        centerGround = GetParcelBaseY(parcelData, center.x, center.y);
+        return groundSampleScratch;
+    }
 
-        Vector2 centroid = new Vector2(centerPoint[0], centerPoint[1]);
-        BuildParcelTopLocalYOffsets(points, centroid, parcelData, out float[] topLocalY, out float baseWorldY);
+    private bool HasSameGeometry(int parcelId, float[][] polygon, Vector2 center, float[] vertexGround, float centerGround)
+    {
+        if (!parcelIdToOutlineIndex.TryGetValue(parcelId, out int index)) return false;
+        ParcelOutlineData outline = outlines[index];
+        if (outline.worldPoints == null || outline.worldPoints.Length != polygon.Length) return false;
+        if (Mathf.Abs(outline.center.x - center.x) > PolygonXZEpsilon
+            || Mathf.Abs(outline.center.z - center.y) > PolygonXZEpsilon
+            || Mathf.Abs(outline.center.y - centerGround) > TerrainHeightEpsilon)
+        {
+            return false;
+        }
+        for (int i = 0; i < polygon.Length; i++)
+        {
+            Vector3 p = outline.worldPoints[i];
+            if (Mathf.Abs(p.x - polygon[i][0]) > PolygonXZEpsilon
+                || Mathf.Abs(p.z - polygon[i][1]) > PolygonXZEpsilon
+                || Mathf.Abs(p.y - OutlineHeightOffset - vertexGround[i]) > TerrainHeightEpsilon)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
 
-        parcelGO.transform.position = new Vector3(centroid.x, baseWorldY, centroid.y);
+    /// <summary>
+    /// サンプル済みの地面高さから、区画の位置・上面メッシュ・コライダー・枠線をまとめて設定する。
+    /// 上面は重心を原点としたローカル座標で、頂点ごとのローカルYを地形に沿わせる(海上区画は全て0)。
+    /// </summary>
+    private void ApplyParcelGeometry(GameObject parcelGO, ParcelSummary parcelData, float[][] polygon, Vector2 center, float[] vertexGround, float centerGround)
+    {
+        parcelGO.transform.position = new Vector3(center.x, centerGround + ParcelSurfaceOffset, center.y);
 
         MeshFilter mf = parcelGO.GetComponent<MeshFilter>();
-        if (mf == null) return;
-
-        Mesh oldMesh = mf.sharedMesh;
-        Mesh newMesh = ParcelMeshFactory.GenerateParcelMesh(points, centroid, 0f, parcelData.usage_id, topLocalY);
-        mf.mesh = newMesh;
-        if (oldMesh != null)
+        if (mf != null)
         {
-            Destroy(oldMesh);
+            Vector2[] points = new Vector2[polygon.Length];
+            float[] topLocalY = new float[polygon.Length];
+            for (int i = 0; i < polygon.Length; i++)
+            {
+                points[i] = new Vector2(polygon[i][0], polygon[i][1]);
+                topLocalY[i] = vertexGround[i] - centerGround;
+            }
+
+            Mesh oldMesh = mf.sharedMesh;
+            Mesh newMesh = ParcelMeshFactory.GenerateParcelMesh(points, center, 0f, parcelData.usage_id, topLocalY);
+            mf.sharedMesh = newMesh;
+            MeshCollider col = parcelGO.GetComponent<MeshCollider>();
+            if (col != null)
+            {
+                col.sharedMesh = newMesh;
+            }
+            if (oldMesh != null && oldMesh != newMesh)
+            {
+                Destroy(oldMesh);
+            }
         }
 
-        MeshCollider col = parcelGO.GetComponent<MeshCollider>();
-        if (col != null)
-        {
-            col.sharedMesh = newMesh;
-        }
-
-        RemoveParcelOutline(parcelData.parcel_id);
-        CreateParcelOutline(parcelData.parcel_id, parcelData);
+        CreateParcelOutline(parcelData.parcel_id, polygon, center, vertexGround, centerGround);
     }
 
     /// <summary>
@@ -976,22 +1403,6 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
             return parcelData.altitude + SeaSurfaceClearance;
         }
         return Utils.GetGroundHeight(new Vector3(x, 1000f, z));
-    }
-
-    /// <summary>
-    /// パーセル上面の各頂点が地形の標高に沿うよう、重心を基準としたローカルY（メートル）を求める。
-    /// 海上区画は基準面が水平なので、全頂点のローカルYが0になる。
-    /// </summary>
-    private void BuildParcelTopLocalYOffsets(Vector2[] points, Vector2 centroid, ParcelSummary parcelData, out float[] topVertexLocalY, out float baseWorldY)
-    {
-        float baseGround = GetParcelBaseY(parcelData, centroid.x, centroid.y);
-        baseWorldY = baseGround + ParcelSurfaceOffset;
-        topVertexLocalY = new float[points.Length];
-        for (int i = 0; i < points.Length; i++)
-        {
-            float h = GetParcelBaseY(parcelData, points[i].x, points[i].y) + ParcelSurfaceOffset;
-            topVertexLocalY[i] = h - baseWorldY;
-        }
     }
 
     /// <summary>
@@ -1158,10 +1569,6 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
             ParcelOutlineData outline = outlines[oi];
             Vector3[] pts = outline.worldPoints;
 
-            int parcelId = outline.parcelId;
-            ParcelSummary parcelData;
-            if (!parcelCache.TryGetValue(parcelId, out parcelData)) continue;
-
             // キャッシュされた中心点を用いてカメラとの距離（の2乗）を算出する。
             // 毎フレームのループ処理内での重い Terrain 標高取得（Utils.GetGroundHeight）を回避するための設計。
             Vector3 center = outline.center;
@@ -1172,6 +1579,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
             // 完全に非表示となる距離の閾値を超えている場合は、平方根の計算を行わずに即座にスキップする。
             // 大半の遠方区画に対する不要な計算（Mathf.Sqrt）を削減し、CPU負荷を軽減するためのカリング処理。
             if (distSq >= DISTANCE_INVISIBLE_SQ) continue;
+            if (!parcelCache.ContainsKey(outline.parcelId)) continue;
 
             // 2乗距離をベースにアルファ値を求める。
             float alpha = CalculateAlphaByDistanceSq(distSq);
@@ -1209,13 +1617,17 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         dataVisRenderer.EndFrame(cam);
     }
 
+    /// <summary>DrawHighlightPolygon の作業用リスト。OverlayMeshRenderer.AddPolygon が中身を複製するので使い回せる。</summary>
+    private readonly List<Vector3> highlightPolygonScratch = new List<Vector3>(16);
+
     /// <summary>
     /// ハイライト対象パーセルのポリゴンをワールド座標のまま塗りつぶし描画に追加する。
     /// </summary>
     private void DrawHighlightPolygon(Camera cam, ParcelOutlineData outline, Color color)
     {
         Vector3[] pts = outline.worldPoints;
-        List<Vector3> worldPoints = new List<Vector3>(pts.Length);
+        List<Vector3> worldPoints = highlightPolygonScratch;
+        worldPoints.Clear();
 
         // 枠線頂点は既に区画の基準面（海上区画なら海面）へ載っているので、
         // オフセットを差し替えるだけでよい（地形の再サンプルは海上で海底を拾う）。
@@ -1251,27 +1663,28 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         VisualParcelStats stats = vpo.Stats;
         if (stats == null) return;
 
-        Color? colorNullable = ResolveDataVisColor(currentParcelVisualMode, stats, outline.center, parcelId);
+        Vector3[] pts = outline.worldPoints;
+        if (pts.Length < 3) return;
+
+        Color? colorNullable = ResolveDataVisColor(currentParcelVisualMode, stats, outline, parcelId);
         if (!colorNullable.HasValue) return;
 
         Color color = colorNullable.Value;
         color.a = DataVisAlpha * alpha;
 
-        Vector3[] pts = outline.worldPoints;
-        if (pts.Length < 3) return;
-
-        List<Vector3> triVerts = new List<Vector3>((pts.Length - 2) * 3);
-        for (int i = 1; i < pts.Length - 1; i++)
+        if (outline.fillTriangles == null)
         {
-            triVerts.Add(pts[0]);
-            triVerts.Add(pts[i]);
-            triVerts.Add(pts[i + 1]);
+            List<Vector3> triVerts = new List<Vector3>((pts.Length - 2) * 3);
+            for (int i = 1; i < pts.Length - 1; i++)
+            {
+                triVerts.Add(pts[0]);
+                triVerts.Add(pts[i]);
+                triVerts.Add(pts[i + 1]);
+            }
+            outline.fillTriangles = triVerts;
         }
 
-        if (triVerts.Count >= 3)
-        {
-            dataVisRenderer.AddPreTriangulated(triVerts, color);
-        }
+        dataVisRenderer.AddPreTriangulated(outline.fillTriangles, color);
     }
 
     /// <summary>
@@ -1281,12 +1694,13 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     /// 各 FILTER モードでは、建築規制（allowed_bd_mask）に加えて
     /// 土地区画種類（parcel_type）の立地条件も判定する。
     ///
-    /// ZONE_COLOR モードでは、worldCenter(パーセル中心のワールド座標)から
+    /// ZONE_COLOR モードでは、区画中心(outline.center)から
     /// 所属地区を空間判定(ZoneManager.GetZoneIdAtPoint)で求め、その地区の識別色を返す。
     /// ParcelSummary には zone_id が含まれないため、地区は空間的に解決する。
+    /// 判定結果は枠線データに ZoneManager.ZoneRevision と組でキャッシュし、地区データが変わるまで再判定しない。
     /// どの地区にも属さない区画は null を返して描画をスキップする。
     /// </summary>
-    private Color? ResolveDataVisColor(int mode, VisualParcelStats stats, Vector3 worldCenter, int parcelId)
+    private Color? ResolveDataVisColor(int mode, VisualParcelStats stats, ParcelOutlineData outline, int parcelId)
     {
         switch (mode)
         {
@@ -1298,10 +1712,16 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
             }
             case VisualModeParcel.ZONE_COLOR:
             {
-                if (ZoneManager.Instance == null) return null;
-                int zoneId = ZoneManager.Instance.GetZoneIdAtPoint(worldCenter);
-                if (zoneId <= 0) return null;
-                return ZoneManager.Instance.GetZoneColor(zoneId);
+                ZoneManager zoneManager = ZoneManager.Instance;
+                if (zoneManager == null) return null;
+                int zoneRevision = zoneManager.ZoneRevision;
+                if (outline.zoneRevision != zoneRevision)
+                {
+                    outline.zoneId = zoneManager.GetZoneIdAtPoint(outline.center);
+                    outline.zoneRevision = zoneRevision;
+                }
+                if (outline.zoneId <= 0) return null;
+                return zoneManager.GetZoneColor(outline.zoneId);
             }
             case VisualModeParcel.FILTER_HOUSE:
                 return IsBuildable(stats, Constants.BUILDING_HOUSE) ? HexToColor(0xa5, 0xd6, 0xa7) : (Color?)null;
@@ -1375,41 +1795,36 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     /// <summary>
     /// パーセルの枠線データを登録する。ポリゴン頂点をワールド座標で保持し、
     /// 実際のスクリーン座標変換は毎フレームの UpdateAllParcelOutlines で行う。
+    /// 高さは上面メッシュと同じサンプル(SampleParcelGround)を受け取り、同じ座標を二重にサンプルしない。
+    /// 既存の枠線は同じ位置で差し替えるので、ホバー中のハイライトは維持される。
     /// </summary>
-    private void CreateParcelOutline(int parcelId, ParcelSummary parcelData)
+    private void CreateParcelOutline(int parcelId, float[][] polygon, Vector2 center, float[] vertexGround, float centerGround)
     {
         EnsureOverlayRenderer();
 
-        RemoveParcelOutline(parcelId);
-
-        float[][] polygon = parcelData.GetPolygonArray();
         Vector3[] worldPoints = new Vector3[polygon.Length];
-
         for (int i = 0; i < polygon.Length; i++)
         {
-            float x = polygon[i][0];
-            float z = polygon[i][1];
-            float y = GetParcelBaseY(parcelData, x, z) + OutlineHeightOffset;
-            worldPoints[i] = new Vector3(x, y, z);
+            worldPoints[i] = new Vector3(polygon[i][0], vertexGround[i] + OutlineHeightOffset, polygon[i][1]);
         }
 
-        // 土地区画の中心座標を取得し、その位置の標高を含めた3D中心点（center）を計算して保持する。
-        // これにより、毎フレームの描画更新処理での Terrain 標高取得を省略し、距離判定を高速化する。
-        float[] centerArr = parcelData.GetCenterPointArray();
-        float cx = centerArr[0];
-        float cz = centerArr[1];
-        float cy = GetParcelBaseY(parcelData, cx, cz);
-        Vector3 center = new Vector3(cx, cy, cz);
-
+        // 中心点は地面高さ込みで保持し、毎フレームの距離判定で地形をサンプルしないようにする。
         ParcelOutlineData data = new ParcelOutlineData
         {
             parcelId = parcelId,
-            center = center,
+            center = new Vector3(center.x, centerGround, center.y),
             worldPoints = worldPoints
         };
 
-        parcelIdToOutlineIndex[parcelId] = outlines.Count;
-        outlines.Add(data);
+        if (parcelIdToOutlineIndex.TryGetValue(parcelId, out int index))
+        {
+            outlines[index] = data;
+        }
+        else
+        {
+            parcelIdToOutlineIndex[parcelId] = outlines.Count;
+            outlines.Add(data);
+        }
 
         // カメラが動いていなくても新規区画の枠線を次フレームで即描画させる。
         ForceOutlineRedraw();

@@ -49,7 +49,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
 
             if (roadResult.RequiresMoreSpace)
             {
-                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[Intersection] node={nodeId}: 接合区間が不足するため道路の切断を行いません。");
+                UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[Intersection] node={nodeId}: 接合区間が不足するため道路の切断を行いません。");
                 return null;
             }
             Dictionary<int, Vector3> connectionPoints = BuildSectionPoints(roadResult.Sections, nodePosition, horizontalPlane, pointResolver != null);

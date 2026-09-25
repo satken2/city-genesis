@@ -8,8 +8,26 @@ public sealed class VehiclePolyline
     public readonly Vector3[] points;
     private readonly float[] distances;
     public float Length => distances[distances.Length - 1];
+    private int shapeHash;
+    private bool shapeHashed;
 
-    public VehiclePolyline(IList<Vector3> source)
+    /// <summary>点列全体のハッシュ。points は構築後に書き換えない約束なので初回だけ計算して保持する。</summary>
+    public int ShapeHash
+    {
+        get
+        {
+            if (!shapeHashed)
+            {
+                int h = points.Length;
+                foreach (var p in points) h = unchecked(h * 31 + p.GetHashCode());
+                shapeHash = h;
+                shapeHashed = true;
+            }
+            return shapeHash;
+        }
+    }
+
+    public VehiclePolyline(IReadOnlyList<Vector3> source)
     {
         if (source == null || source.Count < 2) throw new ArgumentException("走行点列には2点以上必要です。");
         points = new Vector3[source.Count];
@@ -59,6 +77,28 @@ public sealed class VehiclePolyline
     }
 
     public float Project(Vector3 point) => ProjectRange(point, 0, Length);
+
+    /// <summary>点列が完全に同じか。形状が変わっていない道路で構築済みの点列を使い回すために使う。</summary>
+    public static bool SameSource(VehiclePolyline line, IReadOnlyList<Vector3> source)
+    {
+        if (line == null || source == null || line.points.Length != source.Count) return false;
+        for (int i = 0; i < source.Count; i++)
+            if (!line.points[i].Equals(source[i])) return false;
+        return true;
+    }
+
+    /// <summary>
+    /// 旧点列上の距離 s を、この点列の上の同じ地点へ移す。交差点の切断量が変わると進捗率では
+    /// 前後へ跳ぶため、旧位置を元の進捗付近へ射影する。窓を限るのはループ状の道路で反対側へ吸着させないため。
+    /// </summary>
+    public float RemapFrom(VehiclePolyline previous, float s)
+    {
+        if (previous == null || previous == this) return Mathf.Clamp(s, 0, Length);
+        previous.Sample(s, true, out var point, out _);
+        float guess = previous.Length > 0 ? s / previous.Length * Length : 0;
+        float window = Mathf.Abs(Length - previous.Length) + 10f;
+        return ProjectRange(point, guess - window, guess + window);
+    }
 
     /// <summary>既知の距離付近だけに射影する。路上物の車体検査で道路全長を繰り返し走査しない。</summary>
     public float ProjectRange(Vector3 point, float from, float to)
@@ -158,6 +198,19 @@ public class Vehicle
     public bool InIntersection => connector != null;
     public float TotalLength => road.Length;
     public float Remaining => forward ? TotalLength - s : s;
+    /// <summary>到着予約による車線→路肩の寄せ量(0〜1)。予約が無ければ0。</summary>
+    public float ArrivalBlend => arrivalDistance >= 0 ? 1 - Mathf.Clamp01(arrivalDistance / Mathf.Max(.1f, arrivalBlendLength)) : 0;
+
+    /// <summary>
+    /// 到着予約を解除する。発生時の寄せ(spawnBlendRemaining)は同じ車線→路肩の補間なので、
+    /// 現在の寄せ量をそこへ移し、横位置を跳ばさずに走行距離に応じて車線へ戻す。
+    /// </summary>
+    public void ReleaseArrival()
+    {
+        spawnBlendRemaining = Mathf.Max(spawnBlendRemaining, ArrivalBlend * 15f);
+        arrivalDistance = -1;
+        destinationParcel = 0;
+    }
 
     public void SetPath(int id, VehiclePolyline points, bool travelForward, float startS = -1)
     {
@@ -176,8 +229,7 @@ public class Vehicle
         }
         if (InIntersection) { connector.Sample(connectorS, true, out position, out tangent); return; }
         road.Sample(s, forward, out position, out tangent);
-        float blend = Mathf.Clamp01(spawnBlendRemaining / 15f);
-        if (arrivalDistance >= 0) blend = Mathf.Max(blend, 1 - Mathf.Clamp01(arrivalDistance / Mathf.Max(.1f, arrivalBlendLength)));
+        float blend = Mathf.Max(Mathf.Clamp01(spawnBlendRemaining / 15f), ArrivalBlend);
         float offset = Mathf.Lerp(laneOffset, shoulderOffset, blend);
         position += Vector3.Cross(Vector3.up, tangent).normalized * offset;
     }

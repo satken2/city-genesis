@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using GeneratedModels;
@@ -12,6 +13,8 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
     private readonly Dictionary<GameObject, Renderer[]> pickRenderers = new();
     private void Awake() { Instance = this; }
     private void OnDestroy() { if (Instance == this) Instance = null; }
+    // 初回ステップ前に破棄された iterator は finally を通らないため、ハンドルをここで戻して再有効化後の事前生成を止めない。
+    private void OnDisable() { RenderWorkScheduler.Stop(this, warmWorker); warmWorker = null; warmedRevision = -1; }
 
     /// <summary>描画中の車体だけを選ぶ。建物・地形の背後の車両は通常表示から選択できない。</summary>
     public bool TryPick(Ray ray, out int lineId)
@@ -52,11 +55,15 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
     private readonly HashSet<string> used = new();
     private readonly Dictionary<GameObject,float> nominalLengths = new();
     private readonly Dictionary<int,(double distance,double time)> soundTrack = new(); // 走行音の速度を路線時計の距離差分から出すための編成別の前回値
+    private int trainCreationsThisFrame, creationFrame = -1;
+    private int warmedRevision = -1;
+    private Coroutine warmWorker;
     private sealed class Line : TransitRouteGeometry.Route
     {
         public TransitLineSummary data;
         public int type;
         public Vector3[] positions, directions;
+        public string[] keys, modelKeys;   // DrawLine が1編成ぶんの車両キーを置く作業領域(長さは編成両数)
     }
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void Bootstrap()
@@ -71,6 +78,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
         if (session != store.Session)
         {
             StopDrive();
+            RenderWorkScheduler.Stop(this, warmWorker); warmWorker = null; warmedRevision = -1;
             session = store.Session; clock = 0; revision = -1; lines.Clear(); routePaths.Clear(); routeGeometry?.Clear();
             HideUnused(true);
             soundTrack.Clear();
@@ -84,6 +92,12 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
         driveDelta = Time.deltaTime * DriveMode.SpeedMultiplier;
         clock += driveDelta;
         if (revision != store.Revision) { revision = store.Revision; RebuildLines(store.Lines); }
+        if (warmWorker == null && warmedRevision != revision && lines.Count > 0 && ModelManager.Instance != null)
+        {
+            warmedRevision = revision;
+            // 常駐の補助処理なので、初期描画の完了判定を待たせない。
+            warmWorker = RenderWorkScheduler.Start(this, WarmPool(new List<Line>(lines)), "transitWarmup", () => false);
+        }
         Vector3 center = CameraCellChecker.Instance.CurrentWorldPosition;
         if (DriveMode.TryGetLoadCenter(out var rideCenter)) center = rideCenter;
         scanTimer -= Time.deltaTime;
@@ -105,6 +119,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
             line.VehicleType = line.type;
             if (line.motion.Duration <= 0 || line.motion.Length <= 0 || line.type == 0 || data.cars_per_train > maxVisibleCars) continue;
             line.positions = new Vector3[Math.Max(1,data.cars_per_train)]; line.directions = new Vector3[line.positions.Length];
+            line.keys = new string[line.positions.Length]; line.modelKeys = new string[line.positions.Length];
             TransitRouteGeometry.BuildRuns(line);
             lines.Add(line);
             foreach (var run in line.runs) routePaths.Add(run.path);
@@ -122,9 +137,15 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
         routeGeometry.Refresh(routePaths, paths.GetPathsNearCircle(center, renderRadius + margin));
     }
 
+    /// <summary>
+    /// 1路線の編成を配置する。まだ車体の無い外観の編成は、Instantiate と LOD 構築が重いので1フレームに1編成だけ作る。
+    /// 乗車中の編成と一部が表示中の編成は間引かない(欠けや点滅を出さない)。
+    /// </summary>
     private void DrawLine(Line line, Vector3 center)
     {
+        if (creationFrame != Time.frameCount) { creationFrame = Time.frameCount; trainCreationsThisFrame = 0; }
         int cars = Math.Max(1,line.data.cars_per_train), trains = line.data.vehicle_count/cars;
+        if (line.keys == null || line.keys.Length != cars) { line.keys = new string[cars]; line.modelKeys = new string[cars]; }
         float spacing = line.data.length_per_vehicle > 0 ? line.data.length_per_vehicle : VehicleModelResolver.GetVehicleLength(line.type);
         int stride = Math.Max(1,(int)Math.Ceiling((double)trains / Math.Max(1,maxVisibleCars/cars*4)));
         for (int train = 0; train < trains; train += stride)
@@ -175,7 +196,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
                 DrivePosition = positions[cab]; DriveDirection = directions[cab];
             }
             if (!ready || (!driven && !near) || used.Count+cars > maxVisibleCars) continue;
-            ReportSound(line, train, trainTime, distance, positions[cars/2]);
+            bool anyVisible = false, needsCreation = false;
             for (int car = 0; car < cars; car++)
             {
                 // 折り返しでは車体の前後を維持し、進行方向に対する編成順を逆転する。
@@ -183,11 +204,23 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
                 bool middle = identity > 0 && identity < cars-1;
                 string modelKey = line.type + ":" + variant + (middle ? ":middle" : ":lead");
                 string key = line.data.line_agent_id+":"+train+":"+identity+":"+modelKey;
+                line.modelKeys[car] = modelKey; line.keys[car] = key;
+                if (visible.ContainsKey(key)) anyVisible = true;
+                else if (!pool.TryGetValue(modelKey, out var stock) || stock.Count == 0) needsCreation = true;
+            }
+            if (!driven && needsCreation && !anyVisible && trainCreationsThisFrame > 0) continue;
+            ReportSound(line, train, trainTime, distance, positions[cars/2]);
+            bool created = false;
+            for (int car = 0; car < cars; car++)
+            {
+                int identity = returning ? cars-1-car : car;
+                bool middle = identity > 0 && identity < cars-1;
+                string modelKey = line.modelKeys[car], key = line.keys[car];
                 used.Add(key);
                 if (!visible.TryGetValue(key, out var go))
                 {
                     if (pool.TryGetValue(modelKey,out var stack) && stack.Count > 0) go = stack.Pop();
-                    else go = VehicleModelResolver.CreateTransitCar(line.type,middle,transform,variant);
+                    else { go = VehicleModelResolver.CreateTransitCar(line.type,middle,transform,variant); created = true; }
                     go.name = modelKey; visible[key] = go; go.SetActive(true);
                 }
                 if (!nominalLengths.TryGetValue(go,out float fitted) || fitted != spacing)
@@ -197,6 +230,48 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
                 if (identity == cars-1 && cars > 1 && line.type != Constants.VEHICLE_BUS) bodyForward = -bodyForward;
                 go.transform.SetPositionAndRotation(positions[car],Quaternion.LookRotation(bodyForward,Vector3.up));
             }
+            if (created) trainCreationsThisFrame++;
+        }
+    }
+
+    /// <summary>
+    /// 運行中の路線が使う外観・役割(先頭/中間)ごとに車体を1両ずつ前もって作り、初めて見える編成の生成を
+    /// 描画フレームから外す。在庫か表示中の車体がある外観は飛ばす。中断されたら次の Update でやり直す。
+    /// </summary>
+    private IEnumerator WarmPool(List<Line> snapshot)
+    {
+        bool completed = false;
+        try
+        {
+            var variants = new HashSet<int>();
+            foreach (var line in snapshot)
+            {
+                int cars = Math.Max(1,line.data.cars_per_train), trains = line.data.vehicle_count/cars;
+                variants.Clear();
+                for (int train = 0; train < trains; train++)
+                    variants.Add(VehicleModelResolver.PickVariantId(line.type, unchecked(line.data.line_agent_id * 397 + train)));
+                foreach (int variant in variants)
+                for (int role = 0; role < (cars > 2 ? 2 : 1); role++)
+                {
+                    bool middle = role == 1;
+                    string modelKey = line.type + ":" + variant + (middle ? ":middle" : ":lead");
+                    if (pool.TryGetValue(modelKey, out var stack) && stack.Count > 0) continue;
+                    bool shown = false;
+                    foreach (var go in visible.Values) if (go != null && go.name == modelKey) { shown = true; break; }
+                    if (shown) continue;
+                    var car = VehicleModelResolver.CreateTransitCar(line.type, middle, transform, variant);
+                    car.name = modelKey; car.SetActive(false);
+                    if (stack == null) { stack = new Stack<GameObject>(); pool[modelKey] = stack; }
+                    stack.Push(car);
+                    yield return RenderWorkScheduler.Continue;
+                }
+            }
+            completed = true;
+        }
+        finally
+        {
+            warmWorker = null;
+            if (!completed) warmedRevision = -1;
         }
     }
 

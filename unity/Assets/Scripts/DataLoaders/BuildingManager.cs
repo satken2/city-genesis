@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Globalization;
+using System.Runtime.CompilerServices;
 using GeneratedModels;
 
 /// <summary>
@@ -101,9 +103,6 @@ public class BuildingManager : BaseApiDataManager
     /// <summary>建物IDごとの境界球半径(フットプリント中心からの最遠点と高さから算出)。投影比の判定に使う。</summary>
     private readonly Dictionary<int, float> buildingBoundsRadius = new Dictionary<int, float>();
 
-    /// <summary>描画LODを前回判定したときのカメラ位置。一定距離動いたときだけ再判定する。</summary>
-    private Vector3 lastDrawLodCameraPos = new Vector3(float.NaN, 0f, 0f);
-
     /// <summary>建物ID→遅延生成リクエスト。同一IDは最新のリクエストで上書きされる。</summary>
     private readonly Dictionary<int, DeferredDetailRequest> deferredDetailBuildings = new Dictionary<int, DeferredDetailRequest>();
 
@@ -112,6 +111,17 @@ public class BuildingManager : BaseApiDataManager
 
     /// <summary>建物IDごとに「最後に視野内で観測されたフレーム番号」。LRU破棄の優先度に使う。</summary>
     private readonly Dictionary<int, int> buildingLastVisibleFrame = new Dictionary<int, int>();
+
+    /// <summary>遅延生成キューへの投入ごとに進める版。遅延生成ワーカーの空回り判定に使う。</summary>
+    private int deferredRevision;
+
+    /// <summary>
+    /// LRU破棄の候補を最終可視フレームの古い順に並べたもの。破棄のたびに全件を走査しないよう、
+    /// 尽きたときか VISIBILITY_SWEEP_INTERVAL_FRAMES ごとに作り直し、取り出し時に視野内かどうかを確かめ直す。
+    /// </summary>
+    private readonly List<(int lastSeen, int id)> evictionOrder = new List<(int lastSeen, int id)>();
+    private int evictionCursor;
+    private int evictionOrderFrame;
 
 
     /// <summary>
@@ -135,6 +145,53 @@ public class BuildingManager : BaseApiDataManager
     /// バッチのキャンセルタイミングによる取りこぼしへの防御として記録する。
     /// </summary>
     private readonly HashSet<Vector2Int> deferredTerrainReadyCells = new HashSet<Vector2Int>();
+
+    // ================================================================
+    // セル離脱の分割アンロード
+    // ================================================================
+
+    /// <summary>
+    /// 非表示化(退避キャッシュへの Park)を待つ離脱セル→登録世代。CellUnloadWorker がフレーム予算内で消化する。
+    /// 再入場で取り除き、再登録で世代を進める(走査中のスナップショットを古いものとして捨てるため)。
+    /// </summary>
+    private readonly Dictionary<Vector2Int, int> pendingUnloadCells = new Dictionary<Vector2Int, int>();
+    private int unloadGeneration;
+
+    /// <summary>
+    /// 表示中の建物オブジェクトを持ちうる、アンロード中でないセル。loadedCells と別に持つのは、
+    /// 取消されたロードバッチが適用前に生成・再表示した建物を、次のバッチで確実にアンロードするため。
+    /// </summary>
+    private readonly HashSet<Vector2Int> cellsWithShownObjects = new HashSet<Vector2Int>();
+
+    /// <summary>loadedCells を書き換えるたびに進める版。遅延生成ワーカーの空回り判定に使う。</summary>
+    private int loadedCellsRevision;
+
+    /// <summary>CellUnloadWorker が1セル分の対象IDを写し取る再利用リスト。yield を跨いで HashSet を列挙しないために使う。</summary>
+    private readonly List<int> unloadScanIds = new List<int>();
+
+    // ================================================================
+    // 取得範囲の差分化
+    // ================================================================
+
+    /// <summary>
+    /// 次のバッチで取り直すロード済みセル。カメラ由来のバッチは未ロード・ここに記録されたセル・ティア変化セルだけを取得する。
+    /// 記録は MarkLoadedCellsStale が要求時に行い、取得が成功して適用されるまで残す(取消されたバッチでは消さない)。
+    /// </summary>
+    private readonly HashSet<Vector2Int> staleBuildingCells = new HashSet<Vector2Int>();
+
+    /// <summary>MarkLoadedCellsStale の呼び出しごとに進める版。取得中に再取得要求を跨いだバッチの結果を古いとみなすために使う。</summary>
+    private int staleMarkRevision;
+
+    // ================================================================
+    // 地形タイル到着時の作り直し判定
+    // ================================================================
+
+    /// <summary>
+    /// 建物ID→オブジェクトを現在の地形に合わせたときの地形署名(TerrainManager.GetTerrainSignature)。
+    /// タイルの LRU 復元でも OnTerrainTileReady が届くので、署名が変わった建物だけを高さ補正・作り直しの対象にする。
+    /// 記録が無い建物は常に不一致として扱う。
+    /// </summary>
+    private readonly Dictionary<int, long> buildingTerrainSignatures = new Dictionary<int, long>();
 
     [Header("計画中アイコン設定")]
     [Tooltip("計画中(status=3)の建物に表示する2Dアイコン")]
@@ -161,24 +218,31 @@ public class BuildingManager : BaseApiDataManager
         RenderWorkScheduler.Start(this, DetailGenerationWorker(), "BuildingManager", () => HasPendingInitialDetails);
         // カメラ移動に応じて建物ごとの描画LODを再判定する常駐ワーカー。
         RenderWorkScheduler.Start(this, DrawLodReevaluationWorker(), "BuildingManager", () => false);
+        // 離脱セルの建物をフレーム予算内で退避キャッシュへ移す常駐ワーカー。
+        RenderWorkScheduler.Start(this, CellUnloadWorker(), "BuildingManager", () => false);
     }
+
+    /// <summary>LRU用の可視状態スイープの前回カメラ状態。視野は向きに依存するので回転も見る Update で判定する。</summary>
+    private LodViewState sweepViewState;
 
     private void Update()
     {
         // LRU用の可視状態スイープ。毎フレームだと無駄なので一定間隔で行う。
         // 詳細メッシュを持つ建物のうち視野内のものの「最終可視フレーム」を更新する。
+        // カメラ静止中は省く。静止中に生成された建物は MarkBuildingDetailed で最終可視フレームが入るため、LRU順は崩れない。
         if (Time.frameCount % VISIBILITY_SWEEP_INTERVAL_FRAMES != 0) return;
         if (detailedBuildingIds.Count == 0) return;
 
         Camera cam = Camera.main;
         if (cam == null) return;
+        if (!sweepViewState.Update(cam)) return;
         Vector3 camPos = cam.transform.position;
         Vector3 fwd = GetHorizontalForward(cam);
 
         foreach (int id in detailedBuildingIds)
         {
             if (!buildingObjectsCache.TryGetValue(id, out GameObject obj) || obj == null) continue;
-            // 非アクティブ(アンロード済みセルのプール退避中)のオブジェクトは「見えていない」ので
+            // 表示中の建物は常にアクティブ(アンロードは退避キャッシュへ移す)。非アクティブは防御的な扱いで、
             // 最終可視フレームを更新しない(更新するとLRU破棄の対象から外れ続けてしまう)。
             if (!obj.activeInHierarchy) continue;
             if (IsPositionInGenerationView(obj.transform.position, camPos, fwd))
@@ -245,47 +309,71 @@ public class BuildingManager : BaseApiDataManager
             isDynamic = tier != LodTier.UltraFar;
         }
 
-        Camera cam = Camera.main;
-        Vector3 camPos = cam != null ? cam.transform.position : Vector3.zero;
-        Vector3 camFwd = cam != null ? GetHorizontalForward(cam) : Vector3.forward;
-
-        foreach (int buildingId in new List<int>(buildingIds))
+        // ハンドラ内ではメッシュを作り直さない(1セル分の同期再生成がスパイクになるため)。
+        // 高さだけ即時に合わせ、地形追従の造形は遅延キューで視野優先・予算内に作り直す。
+        // 以下の処理は buildingIdsByCell を変更しないので、集合を直接列挙してよい。
+        foreach (int buildingId in buildingIds)
         {
             if (!buildingObjectsCache.TryGetValue(buildingId, out GameObject obj)) continue;
             if (obj == null) continue;
+            if (!buildingDataCache.TryGetValue(buildingId, out BuildingSummary buildingData)) continue;
 
+            // LRU 復元で同じ版のタイルが再公開されただけなら、何もしない。
+            bool known = TryGetBuildingTerrainSignature(buildingData, out long signature);
+            if (known && buildingTerrainSignatures.TryGetValue(buildingId, out long recorded) && recorded == signature) continue;
+
+            UpdateBuildingHeight(obj);
             // 遠景(Far)の箱は地形追従の造形を持たないので、Dynamicセルでも高さ調整だけで足りる。
             DrawLod currentDrawLod = DrawLodInfo.GetDrawLod(obj, DrawLod.Normal);
             if (isDynamic && currentDrawLod != DrawLod.Far)
-            {
-                if (buildingDataCache.TryGetValue(buildingId, out BuildingSummary buildingData))
-                {
-                    // メッシュ再生成は重いので視野内の建物のみ即時に行い、視野外は遅延キューへ
-                    // 積む(視野に入ったら DetailGenerationWorker が現在の地形高さで作り直す)。
-                    if (IsPositionInGenerationView(obj.transform.position, camPos, camFwd))
-                    {
-                        CreateOrUpdateBuildingObject(buildingData, isDynamic: true, forceRebuild: true, drawLod: currentDrawLod);
-                    }
-                    else
-                    {
-                        deferredDetailBuildings[buildingId] = new DeferredDetailRequest
-                        {
-                            data = buildingData,
-                            isDynamic = true,
-                            drawLod = currentDrawLod,
-                        };
-                    }
-                }
-            }
-            else
-            {
-                UpdateBuildingHeight(obj);
-            }
+                QueueDeferredDetail(buildingId, buildingData, true, currentDrawLod);
+
+            if (known) buildingTerrainSignatures[buildingId] = signature;
         }
+    }
+
+    /// <summary>
+    /// 建物の見た目が依存する範囲(建物の境界円と敷地ポリゴンの外接矩形)。再利用キーの地形版と、地形署名の両方に使う。
+    /// </summary>
+    private Rect GetBuildingTerrainBounds(BuildingSummary data, ParcelSummary parcel)
+    {
+        float[] cp = data.centerPointArray;
+        float radius = GetBuildingBoundsRadius(data);
+        var bounds = new Rect(cp != null ? cp[0]-radius : 0, cp != null ? cp[1]-radius : 0, 2*radius, 2*radius);
+        if (parcel == null) return bounds;
+        ParcelKeyPart part = GetParcelKeyPart(parcel);
+        if (part.hasBounds)
+        {
+            bounds.xMin = Mathf.Min(bounds.xMin, part.bounds.xMin); bounds.xMax = Mathf.Max(bounds.xMax, part.bounds.xMax);
+            bounds.yMin = Mathf.Min(bounds.yMin, part.bounds.yMin); bounds.yMax = Mathf.Max(bounds.yMax, part.bounds.yMax);
+        }
+        return bounds;
+    }
+
+    /// <summary>TerrainManager が無い(破棄済みを含む)ときは false。呼び出し側は「不明」として作り直しを省かないこと。</summary>
+    private bool TryGetBuildingTerrainSignature(BuildingSummary data, out long signature)
+    {
+        TerrainManager terrain = Utils.CachedTerrainManager;
+        if (terrain == null)
+        {
+            signature = 0;
+            return false;
+        }
+        signature = terrain.GetTerrainSignature(GetBuildingTerrainBounds(data, GetParcelManager()?.GetParcelSummary(data.parcel_id)));
+        return true;
+    }
+
+    /// <summary>オブジェクトを現在の地形で生成・復元・高さ補正したときに呼び、その時点の地形署名を記録する。</summary>
+    private void RecordBuildingTerrainSignature(BuildingSummary data)
+    {
+        if (TryGetBuildingTerrainSignature(data, out long signature)) buildingTerrainSignatures[data.agent_id] = signature;
+        else buildingTerrainSignatures.Remove(data.agent_id);
     }
 
     public override void ClearAllCells()
     {
+        // 旧データの取得バッチが後から適用されると、そのセルがロード済み扱いになり差分取得で取り直されなくなるので止める。
+        StopActiveLodCoroutines();
         explosionGeneration++;
         pendingExplosions.Clear();
         explodedVersions.Clear();
@@ -312,7 +400,35 @@ public class BuildingManager : BaseApiDataManager
         buildingLastVisibleFrame.Clear();
         closeBuildingIds.Clear();
         buildingBoundsRadius.Clear();
+        pendingUnloadCells.Clear();
+        cellsWithShownObjects.Clear();
+        staleBuildingCells.Clear();
+        staleMarkRevision++;
+        buildingTerrainSignatures.Clear();
+        buildingGeometryRevisions.Clear();
+        evictionOrder.Clear();
+        evictionCursor = 0;
+        loadedCellsRevision++;
         DrawLodStats.ResetCounts(DrawLodStats.Category.Building);
+    }
+
+    private void StopActiveLodCoroutines()
+    {
+        foreach (var c in activeLodCoroutines)
+        {
+            if (c != null) RenderWorkScheduler.Stop(this, c);
+        }
+        activeLodCoroutines.Clear();
+    }
+
+    /// <summary>
+    /// ロード済みの全セルを「要再取得」にする。データ再取得(CellDataLoader.ReloadAllData)の要求時に同期で呼ぶ。
+    /// 記録はバッチが取消されても残り、そのセルの取得が成功して適用されたときに消える。
+    /// </summary>
+    public void MarkLoadedCellsStale()
+    {
+        staleBuildingCells.UnionWith(loadedCells);
+        staleMarkRevision++;
     }
 
     // ================================================================
@@ -327,34 +443,41 @@ public class BuildingManager : BaseApiDataManager
     public override void LoadLodCells(LodCellSets cellSets, HashSet<Vector2Int> tierChangedCells, bool isForce)
     {
         // 実行中の古いコルーチンをすべてキャンセル（カメラ移動による再呼び出し対策）
-        foreach (var c in activeLodCoroutines)
-        {
-            if (c != null) RenderWorkScheduler.Stop(this, c);
-        }
-        activeLodCoroutines.Clear();
+        StopActiveLodCoroutines();
 
         var allBuildingCells = new HashSet<Vector2Int>(cellSets.farCells);
+        // 常駐外へ出たセルは再入場時に未ロードとして取り直されるので、記録は要らない。
+        staleBuildingCells.IntersectWith(allBuildingCells);
+
+        // アンロード途中で常駐へ戻ったセルは非表示化を中断する。退避しきれなかった表示物が残るので、
+        // このバッチが取消されても次のバッチで回収できるよう、表示物セルとして記録し直す。
+        if (pendingUnloadCells.Count > 0)
+        {
+            foreach (var cell in cellSets.farCells)
+                if (pendingUnloadCells.Remove(cell)) cellsWithShownObjects.Add(cell);
+        }
+
         RemoveDeferredRequestsOutside(allBuildingCells);
         var nearSet = new HashSet<Vector2Int>(cellSets.nearCells);
         var dynamicSet = new HashSet<Vector2Int>(cellSets.dynamicCells);
 
+        // ロード済みセルに加え、取消されたバッチが適用前に表示したセル(loadedCells に入っていない)も対象にする。
         var toUnload = new List<Vector2Int>();
         foreach (var cell in loadedCells)
         {
             if (!allBuildingCells.Contains(cell))
                 toUnload.Add(cell);
         }
+        foreach (var cell in cellsWithShownObjects)
+        {
+            if (!allBuildingCells.Contains(cell) && !loadedCells.Contains(cell))
+                toUnload.Add(cell);
+        }
 
-        // 常に cellSets.farCells の全セルを対象とする。
-        // 未ロードセルは新規ロード、ロード済みセルは version ベースで差分更新される。
-        var cellsToLoad = new List<Vector2Int>();
         var lodUpdates = new Dictionary<Vector2Int, LodTier>();
         foreach (var cell in cellSets.farCells)
         {
-            LodTier desiredTier = dynamicSet.Contains(cell) ? LodTier.Dynamic : (nearSet.Contains(cell) ? LodTier.Near : LodTier.Far);
-            cellsToLoad.Add(cell);
-            RenderWorkScheduler.CountEvent(loadedCells.Contains(cell) ? "building.fetchExistingCells" : "building.fetchNewCells");
-            lodUpdates[cell] = desiredTier;
+            lodUpdates[cell] = dynamicSet.Contains(cell) ? LodTier.Dynamic : (nearSet.Contains(cell) ? LodTier.Near : LodTier.Far);
         }
 
         // ティアが実際に変更されたセルを特定する。
@@ -369,13 +492,30 @@ public class BuildingManager : BaseApiDataManager
             }
         }
 
+        // 取得するのは未ロード・要再取得・ティア変化のセルだけ。それ以外のロード済みセルは受信済みのデータと
+        // オブジェクトをそのまま使う(バックエンドの変化は ReloadAllData が MarkLoadedCellsStale で記録する)。
+        var cellsToLoad = new List<Vector2Int>();
+        foreach (var cell in cellSets.farCells)
+        {
+            bool loaded = loadedCells.Contains(cell);
+            if (isForce || !loaded || staleBuildingCells.Contains(cell) || tierChangedBuildingCells.Contains(cell))
+            {
+                cellsToLoad.Add(cell);
+                RenderWorkScheduler.CountEvent(loaded ? "building.fetchExistingCells" : "building.fetchNewCells");
+            }
+            else
+            {
+                RenderWorkScheduler.CountEvent("building.fetchSkippedCells");
+            }
+        }
+
         if (cellsToLoad.Count > 0)
         {
-            activeLodCoroutines.Add(RenderWorkScheduler.Start(this, LoadMergedBuildingsAndApplyCells(cellsToLoad, nearSet, dynamicSet, toUnload, lodUpdates, tierChangedBuildingCells), "BuildingManager"));
+            activeLodCoroutines.Add(RenderWorkScheduler.Start(this, LoadMergedBuildingsAndApplyCells(cellsToLoad, nearSet, dynamicSet, toUnload, lodUpdates, tierChangedBuildingCells, staleMarkRevision), "BuildingManager"));
         }
         else
         {
-            ApplyLodCellChanges(cellsToLoad, toUnload, lodUpdates);
+            ApplyLodCellChanges(cellsToLoad, toUnload, lodUpdates, staleMarkRevision);
         }
     }
 
@@ -384,7 +524,7 @@ public class BuildingManager : BaseApiDataManager
     /// カメラ移動時に古いセルを先に消すと、API待ち時間のあいだ都市が空白になるため、
     /// ロード成功を確認してから可視セル集合を切り替える。
     /// </summary>
-    private IEnumerator LoadMergedBuildingsAndApplyCells(List<Vector2Int> cellsToLoad, HashSet<Vector2Int> nearSet, HashSet<Vector2Int> dynamicSet, List<Vector2Int> cellsToUnload, Dictionary<Vector2Int, LodTier> lodUpdates, HashSet<Vector2Int> tierChangedBuildingCells)
+    private IEnumerator LoadMergedBuildingsAndApplyCells(List<Vector2Int> cellsToLoad, HashSet<Vector2Int> nearSet, HashSet<Vector2Int> dynamicSet, List<Vector2Int> cellsToUnload, Dictionary<Vector2Int, LodTier> lodUpdates, HashSet<Vector2Int> tierChangedBuildingCells, int requestedStaleRevision)
     {
         bool succeeded = false;
         // StartCoroutine ではなく IEnumerator を直接 yield return する。
@@ -394,15 +534,21 @@ public class BuildingManager : BaseApiDataManager
 
         if (!succeeded) yield break;
 
-        ApplyLodCellChanges(cellsToLoad, cellsToUnload, lodUpdates);
+        ApplyLodCellChanges(cellsToLoad, cellsToUnload, lodUpdates, requestedStaleRevision);
     }
 
-    private void ApplyLodCellChanges(List<Vector2Int> cellsToLoad, List<Vector2Int> cellsToUnload, Dictionary<Vector2Int, LodTier> lodUpdates)
+    /// <summary>
+    /// 取得に成功したセルをロード済みにし、離脱セルをアンロードする。requestedStaleRevision はバッチ開始時の
+    /// staleMarkRevision で、取得中に再取得要求があったなら受信データは要求前のものかもしれないので、取得セルを要再取得に残す。
+    /// </summary>
+    private void ApplyLodCellChanges(List<Vector2Int> cellsToLoad, List<Vector2Int> cellsToUnload, Dictionary<Vector2Int, LodTier> lodUpdates, int requestedStaleRevision)
     {
         foreach (var cell in cellsToLoad)
         {
             loadedCells.Add(cell);
         }
+        if (requestedStaleRevision == staleMarkRevision) staleBuildingCells.ExceptWith(cellsToLoad);
+        else staleBuildingCells.UnionWith(cellsToLoad);
 
         foreach (var kvp in lodUpdates)
         {
@@ -411,10 +557,13 @@ public class BuildingManager : BaseApiDataManager
 
         foreach (var cell in cellsToUnload)
         {
-            UnloadCell(cell);
             loadedCells.Remove(cell);
             cellBuildingLod.Remove(cell);
+            staleBuildingCells.Remove(cell);
+            UnloadCell(cell);
         }
+
+        loadedCellsRevision++;
 
         // マージBBOXは常駐セル集合の外接矩形なので、常駐外セルの建物も一括取得に含まれて遅延キューへ積まれる。
         // そのセルは登録されずワーカーが永久に選出しないため、登録集合が確定したここで除く。
@@ -435,29 +584,37 @@ public class BuildingManager : BaseApiDataManager
     }
 
     /// <summary>
-    /// 複数セルのマージBBOXを使って建物を一括取得する。
-    /// 従来のセルごとのAPIコール(最大49回)を1回に削減する。
+    /// 取得セル群を少数の矩形(SplitFetchRects)に分けて建物を一括取得する。
     /// 各建物の位置からLOD tierを判定し、Nearならフル詳細、Farなら白い箱で処理する。
+    /// どれか1つの矩形の取得に失敗したら、全体を失敗として何も適用しない。
     /// </summary>
     private IEnumerator LoadMergedBuildings(List<Vector2Int> cells, HashSet<Vector2Int> nearSet, HashSet<Vector2Int> dynamicSet, HashSet<Vector2Int> tierChangedBuildingCells, Action<bool> onComplete = null)
     {
-        CalculateMergedBBox(cells, out float minX, out float minZ, out float maxX, out float maxZ);
-
+        // 矩形の境界上の建物は隣の矩形にも届くので、IDで重複を除く。
         BuildingsListResponse response = new BuildingsListResponse { buildings = new List<BuildingSummary>() };
-        int cursor = 0;
-        while (true)
+        var fetchedIds = new HashSet<int>();
+        float cellSize = TerrainManager.CellSize;
+        foreach (var rect in SplitFetchRects(cells))
         {
-            BuildingsListResponse page = null;
-            yield return ApiClient.GetBulk<BuildingsListResponse>(
-                $"/buildings/?bbox={minX},{minZ},{maxX},{maxZ}&limit=500&cursor={cursor}", value => page = value,
-                timingLabel: "BuildingManager page");
-            if (page?.buildings == null) { response = null; break; }
-            RenderWorkScheduler.CountEvent("building.received", page.buildings.Count);
-            response.buildings.AddRange(page.buildings);
-            if (!page.next_cursor.HasValue) break;
-            if (page.next_cursor.Value <= cursor) { response = null; break; }
-            cursor = page.next_cursor.Value;
-            yield return null;
+            float minX = rect.min.x * cellSize, minZ = rect.min.y * cellSize;
+            float maxX = (rect.max.x + 1) * cellSize, maxZ = (rect.max.y + 1) * cellSize;
+            int cursor = 0;
+            while (true)
+            {
+                BuildingsListResponse page = null;
+                yield return ApiClient.GetBulk<BuildingsListResponse>(
+                    $"/buildings/?bbox={minX},{minZ},{maxX},{maxZ}&limit=500&cursor={cursor}", value => page = value,
+                    timingLabel: "BuildingManager page");
+                if (page?.buildings == null) { response = null; break; }
+                RenderWorkScheduler.CountEvent("building.received", page.buildings.Count);
+                foreach (var b in page.buildings)
+                    if (b != null && fetchedIds.Add(b.agent_id)) response.buildings.Add(b);
+                if (!page.next_cursor.HasValue) break;
+                if (page.next_cursor.Value <= cursor) { response = null; break; }
+                cursor = page.next_cursor.Value;
+                yield return null;
+            }
+            if (response == null) break;
         }
         if (response == null)
         {
@@ -474,16 +631,17 @@ public class BuildingManager : BaseApiDataManager
         Vector3 viewCamPos = viewCam != null ? viewCam.transform.position : Vector3.zero;
         Vector3 viewCamFwd = viewCam != null ? GetHorizontalForward(viewCam) : Vector3.forward;
         float tanHalfFov = DrawLodEvaluator.GetTanHalfFov(viewCam);
+        bool viewOrtho = viewCam != null && viewCam.orthographic;
+
+        // 矩形の端数や外接矩形への切替で、取得対象外のセル(常駐外やロード済みで取り直さないセル)の建物も届く。
+        // それらは生成しない(常駐外に作るとどのセル集合にも属さず残り、ロード済みセルは既存のままでよい)。
+        var fetchSet = new HashSet<Vector2Int>(cells);
 
         if (response?.buildings != null)
         {
             foreach (var b in response.buildings)
             {
                 receivedIds.Add(b.agent_id);
-
-                // 爆破前に開始した一括取得が遅れて届いても、瓦礫を元の建物へ戻さない。
-                if (explodedVersions.TryGetValue(b.agent_id, out int explodedVersion) && b.version < explodedVersion)
-                    continue;
 
                 // 建物のcenter_point位置からLOD tierを判定
                 float[] cp = b.centerPointArray;
@@ -492,96 +650,100 @@ public class BuildingManager : BaseApiDataManager
                     : Vector3.zero;
 
                 Vector2Int buildingCell = TerrainManager.WorldToCell(buildingPos);
-                LodTier desiredTier = dynamicSet.Contains(buildingCell) ? LodTier.Dynamic : (nearSet.Contains(buildingCell) ? LodTier.Near : LodTier.Far);
-
-                bool needsRebuild = false;
-
-                if (buildingVersionCache.TryGetValue(b.agent_id, out int cachedVersion) && cachedVersion == b.version)
+                if (!fetchSet.Contains(buildingCell))
                 {
-                    // version一致: 通常は再作成不要だが、ティア変更セル内で
-                    // 既存オブジェクトが新しいティアと矛盾する場合は再生成する。
-                    // 例: Far(白い箱)からNear/Dynamicへの遷移や、NearとDynamicの間の遷移（メッシュの地形追従化のため）。
-                    if (tierChangedBuildingCells != null && tierChangedBuildingCells.Contains(buildingCell))
-                    {
-                        if (buildingObjectsCache.TryGetValue(b.agent_id, out GameObject existingTier) && existingTier != null)
-                        {
-                            cellBuildingLod.TryGetValue(buildingCell, out LodTier oldTier);
-                            bool isFarTransition = (oldTier == LodTier.Far) || (desiredTier == LodTier.Far);
-                            needsRebuild = isFarTransition;
-                        }
-                    }
-
-                    if (!needsRebuild)
-                    {
-                        RenderWorkScheduler.CountEvent("building.dataUnchanged");
-                        // 非表示だった既存オブジェクトがあれば再表示する
-                        if (buildingObjectsCache.TryGetValue(b.agent_id, out GameObject existing) && existing != null && !existing.activeSelf)
-                        {
-                            existing.SetActive(true);
-                        }
-                    }
+                    RenderWorkScheduler.CountEvent("building.outsideFetchSkipped");
                 }
-                else
+                // 爆破前に開始した一括取得が遅れて届いても、瓦礫を元の建物へ戻さない。
+                else if (!explodedVersions.TryGetValue(b.agent_id, out int explodedVersion) || b.version >= explodedVersion)
                 {
-                    needsRebuild = true;
-                }
+                    LodTier desiredTier = dynamicSet.Contains(buildingCell) ? LodTier.Dynamic : (nearSet.Contains(buildingCell) ? LodTier.Near : LodTier.Far);
 
-                if (needsRebuild)
-                {
-                    // ステータス変化の検知とエフェクト再生
-                    if (buildingDataCache.TryGetValue(b.agent_id, out BuildingSummary oldBuildingData))
+                    bool needsRebuild = false;
+
+                    if (buildingVersionCache.TryGetValue(b.agent_id, out int cachedVersion) && cachedVersion == b.version)
                     {
-                        if (oldBuildingData.status != b.status)
+                        // version一致: 通常は再作成不要だが、ティア変更セル内で
+                        // 既存オブジェクトが新しいティアと矛盾する場合は再生成する。
+                        // 例: Far(白い箱)からNear/Dynamicへの遷移や、NearとDynamicの間の遷移（メッシュの地形追従化のため）。
+                        if (tierChangedBuildingCells != null && tierChangedBuildingCells.Contains(buildingCell))
                         {
-                            float groundHeight = Utils.GetGroundHeight(new Vector3(buildingPos.x, 1000f, buildingPos.z));
-                            Vector3 effectPos = new Vector3(buildingPos.x, groundHeight, buildingPos.z);
-                            TriggerBuildingStatusEffect(effectPos, oldBuildingData.status, b.status);
+                            if (buildingObjectsCache.TryGetValue(b.agent_id, out GameObject existingTier) && existingTier != null)
+                            {
+                                cellBuildingLod.TryGetValue(buildingCell, out LodTier oldTier);
+                                bool isFarTransition = (oldTier == LodTier.Far) || (desiredTier == LodTier.Far);
+                                needsRebuild = isFarTransition;
+                            }
                         }
-                    }
 
-                    // 新規またはversion変更/ティア変更: オブジェクトを再作成。
-                    // forceRebuild=true でプール再利用をスキップし、必ずメッシュを再生成する。
-                    // isDynamic はこの時点で確定している desiredTier から渡す
-                    // （cellBuildingLod はロード完了後の ApplyLodCellChanges まで旧ティアのままなので参照しない）。
-                    UnityLog.If(LocalConstants.UNITY_LOG_LOADER, () => $"BuildingManager: 建物 {b.agent_id} の再描画を開始 (version {cachedVersion} -> {b.version}, tier -> {desiredTier})");
-
-                    // 描画LODはセルのティアとは別に、建物ごとの画面上の大きさで決める。
-                    // Farセルは箱に固定し、Near/Dynamicセルでも遠くに小さく見える建物は箱にする。
-                    DrawLod desiredDrawLod = DetermineDesiredDrawLod(b, desiredTier, viewCamPos, tanHalfFov);
-
-                    if (desiredDrawLod == DrawLod.Far)
-                    {
-                        // Far(箱)は軽量なので視野に関わらず即時生成する(スカイライン維持)。
-                        CreateFarBuildingObject(b);
-                        buildingVersionCache[b.agent_id] = b.version;
-                    }
-                    else if (!IsPositionInGenerationView(buildingPos, viewCamPos, viewCamFwd))
-                    {
-                        // 視野外: 詳細メッシュは今は生成せず、遅延キューへ積む。
-                        // versionキャッシュは消す(旧オブジェクトのversionが残っていると、
-                        // 次回のマージロードで「生成済み・変更なし」と誤判定されるため。
-                        // DetailGenerationWorker が生成した時点で改めてキャッシュされる)。
-                        // 既存オブジェクトがあれば古いversion/ティアの見た目のまま画面外に残し、
-                        // 視野に入ったらワーカーが作り直す(視野外で建物を消滅させないため)。
-                        // データキャッシュとセル逆引きはオブジェクトが無くても登録し、
-                        // 削除同期(SyncBuildingsInCells)や各種参照が機能するようにする。
-                        buildingVersionCache.Remove(b.agent_id);
-                        RegisterBuildingDataToCache(b);
-                        if (cp != null && cp.Length >= 2)
+                        if (!needsRebuild)
                         {
-                            RegisterBuildingCell(b.agent_id, buildingPos);
+                            RenderWorkScheduler.CountEvent("building.dataUnchanged");
+                            // 表示中の建物は常にアクティブ(アンロードは退避キャッシュへ移す)。再表示は防御的な扱い。
+                            if (buildingObjectsCache.TryGetValue(b.agent_id, out GameObject existing) && existing != null)
+                            {
+                                if (!existing.activeSelf) existing.SetActive(true);
+                                cellsWithShownObjects.Add(buildingCell);
+                            }
                         }
-                        deferredDetailBuildings[b.agent_id] = new DeferredDetailRequest
-                        {
-                            data = b,
-                            isDynamic = desiredTier == LodTier.Dynamic,
-                            drawLod = desiredDrawLod,
-                        };
                     }
                     else
                     {
-                        CreateOrUpdateBuildingObject(b, desiredTier == LodTier.Dynamic, forceRebuild: true, drawLod: desiredDrawLod);
-                        buildingVersionCache[b.agent_id] = b.version;
+                        needsRebuild = true;
+                    }
+
+                    if (needsRebuild)
+                    {
+                        // ステータス変化の検知とエフェクト再生
+                        if (buildingDataCache.TryGetValue(b.agent_id, out BuildingSummary oldBuildingData))
+                        {
+                            if (oldBuildingData.status != b.status)
+                            {
+                                float groundHeight = Utils.GetGroundHeight(new Vector3(buildingPos.x, 1000f, buildingPos.z));
+                                Vector3 effectPos = new Vector3(buildingPos.x, groundHeight, buildingPos.z);
+                                TriggerBuildingStatusEffect(effectPos, oldBuildingData.status, b.status);
+                            }
+                        }
+
+                        // 新規またはversion変更/ティア変更: オブジェクトを再作成。
+                        // forceRebuild=true でプール再利用をスキップし、必ずメッシュを再生成する。
+                        // isDynamic はこの時点で確定している desiredTier から渡す
+                        // （cellBuildingLod はロード完了後の ApplyLodCellChanges まで旧ティアのままなので参照しない）。
+                        UnityLog.If(LocalConstants.UNITY_LOG_LOADER, () => $"BuildingManager: 建物 {b.agent_id} の再描画を開始 (version {cachedVersion} -> {b.version}, tier -> {desiredTier})");
+
+                        // 描画LODはセルのティアでは固定せず、建物ごとの投影比(画面上の大きさ)だけで決める(E_LOD処理.md の方針)。
+                        DrawLod desiredDrawLod = DetermineDesiredDrawLod(b, viewCamPos, tanHalfFov, viewOrtho);
+
+                        if (desiredDrawLod == DrawLod.Far)
+                        {
+                            // Far(箱)は軽量なので視野に関わらず即時生成する(スカイライン維持)。
+                            CreateFarBuildingObject(b);
+                            buildingVersionCache[b.agent_id] = b.version;
+                        }
+                        else if (!IsPositionInGenerationView(buildingPos, viewCamPos, viewCamFwd))
+                        {
+                            // 視野外: 詳細メッシュは今は生成せず、遅延キューへ積む。
+                            // versionキャッシュは消す(旧オブジェクトのversionが残っていると、
+                            // 次回のマージロードで「生成済み・変更なし」と誤判定されるため。
+                            // DetailGenerationWorker が生成した時点で改めてキャッシュされる)。
+                            // 既存オブジェクトがあれば古いversion/ティアの見た目のまま画面外に残し、
+                            // 視野に入ったらワーカーが作り直す(視野外で建物を消滅させないため)。
+                            // データキャッシュとセル逆引きはオブジェクトが無くても登録し、
+                            // 削除同期(SyncBuildingsInCells)や各種参照が機能するようにする。
+                            buildingVersionCache.Remove(b.agent_id);
+                            RegisterBuildingDataToCache(b);
+                            if (cp != null && cp.Length >= 2)
+                            {
+                                bool keepsOldObject = buildingObjectsCache.TryGetValue(b.agent_id, out GameObject deferredOld) && deferredOld != null;
+                                RegisterBuildingCell(b.agent_id, buildingPos, shown: keepsOldObject);
+                            }
+                            QueueDeferredDetail(b.agent_id, b, desiredTier == LodTier.Dynamic, desiredDrawLod);
+                        }
+                        else
+                        {
+                            CreateOrUpdateBuildingObject(b, desiredTier == LodTier.Dynamic, forceRebuild: true, drawLod: desiredDrawLod);
+                            buildingVersionCache[b.agent_id] = b.version;
+                        }
                     }
                 }
 
@@ -599,6 +761,7 @@ public class BuildingManager : BaseApiDataManager
                     viewCamPos = viewCam != null ? viewCam.transform.position : Vector3.zero;
                     viewCamFwd = viewCam != null ? GetHorizontalForward(viewCam) : Vector3.forward;
                     tanHalfFov = DrawLodEvaluator.GetTanHalfFov(viewCam);
+                    viewOrtho = viewCam != null && viewCam.orthographic;
                 }
             }
         }
@@ -610,6 +773,61 @@ public class BuildingManager : BaseApiDataManager
         SyncBuildingsInCells(cells, receivedIds);
 
         onComplete?.Invoke(true);
+    }
+
+    /// <summary>取得矩形の上限。超えるなら外接矩形1つで取る(要求の往復が1フレーム以上ずつ積み重なるため)。</summary>
+    private const int MAX_FETCH_RECTS = 12;
+
+    /// <summary>
+    /// 取得セル群を覆う矩形群(両端を含むセル座標)を返す。差分取得のセル群は L 字や弧になり、外接矩形1つでは
+    /// 取り直さないロード済みセルまで受信・デコードしてしまうため。z 行ごとに x の連続区間を作り、
+    /// 同じ x 区間が連続する行は1つの矩形にまとめる。
+    /// </summary>
+    private static List<(Vector2Int min, Vector2Int max)> SplitFetchRects(List<Vector2Int> cells)
+    {
+        var rects = new List<(Vector2Int min, Vector2Int max)>();
+        if (cells.Count == 0) return rects;
+        var sorted = new List<Vector2Int>(cells);
+        sorted.Sort((a, b) => a.y != b.y ? a.y.CompareTo(b.y) : a.x.CompareTo(b.x));
+
+        var open = new Dictionary<(int x0, int x1), int>();
+        var next = new Dictionary<(int x0, int x1), int>();
+        int prevZ = int.MinValue;
+        int i = 0;
+        while (i < sorted.Count)
+        {
+            int z = sorted[i].y;
+            if (prevZ != int.MinValue && z != prevZ + 1)
+            {
+                foreach (var run in open) rects.Add((new Vector2Int(run.Key.x0, run.Value), new Vector2Int(run.Key.x1, prevZ)));
+                open.Clear();
+            }
+            next.Clear();
+            while (i < sorted.Count && sorted[i].y == z)
+            {
+                int x0 = sorted[i].x, x1 = x0;
+                i++;
+                while (i < sorted.Count && sorted[i].y == z && sorted[i].x <= x1 + 1) x1 = Math.Max(x1, sorted[i++].x);
+                if (open.TryGetValue((x0, x1), out int z0)) open.Remove((x0, x1));
+                else z0 = z;
+                next[(x0, x1)] = z0;
+            }
+            foreach (var run in open) rects.Add((new Vector2Int(run.Key.x0, run.Value), new Vector2Int(run.Key.x1, prevZ)));
+            (open, next) = (next, open);
+            prevZ = z;
+        }
+        foreach (var run in open) rects.Add((new Vector2Int(run.Key.x0, run.Value), new Vector2Int(run.Key.x1, prevZ)));
+
+        if (rects.Count <= MAX_FETCH_RECTS) return rects;
+        Vector2Int min = sorted[0], max = sorted[0];
+        foreach (var cell in sorted)
+        {
+            min = Vector2Int.Min(min, cell);
+            max = Vector2Int.Max(max, cell);
+        }
+        rects.Clear();
+        rects.Add((min, max));
+        return rects;
     }
 
     /// <summary>
@@ -685,6 +903,8 @@ public class BuildingManager : BaseApiDataManager
             buildingVersionCache.Remove(id);
             closeBuildingIds.Remove(id);
             buildingBoundsRadius.Remove(id);
+            buildingTerrainSignatures.Remove(id);
+            buildingGeometryRevisions.Remove(id);
         }
     }
 
@@ -736,12 +956,7 @@ public class BuildingManager : BaseApiDataManager
                             }
                             else
                             {
-                                deferredDetailBuildings[id] = new DeferredDetailRequest
-                                {
-                                    data = buildingData,
-                                    isDynamic = true,
-                                    drawLod = currentDrawLod,
-                                };
+                                QueueDeferredDetail(id, buildingData, true, currentDrawLod);
                             }
                         }
                     }
@@ -771,13 +986,7 @@ public class BuildingManager : BaseApiDataManager
     // 遅延生成ワーカーとLRU破棄
     // ================================================================
 
-    /// <summary>
-    /// 遅延生成キュー(deferredDetailBuildings)を消化する常駐ワーカー。
-    /// 毎フレーム、フレーム予算内で「視野内かつカメラに近い」建物から順に詳細メッシュを生成する。
-    /// 視野外の建物は、詳細メッシュ数が上限(maxDetailedBuildingObjects)に達していない限り
-    /// アイドル的に生成する(振り向き時のポップイン軽減)。上限に達している場合、
-    /// 視野外の建物は生成せずキューに残す(視野に入れば最優先で処理される)。
-    /// </summary>
+    /// <summary>要求の建物のセルがロード完了集合に入っているか。未登録セルの要求は選出せず、削除もしない。</summary>
     private bool IsDeferredCellReady(BuildingSummary data)
     {
         float[] point = data.centerPointArray;
@@ -803,54 +1012,110 @@ public class BuildingManager : BaseApiDataManager
         }
     }
 
+    /// <summary>上位候補の枠数。1回のキュー走査でこの件数まで取り出し、走査コストを償却する。</summary>
+    private const int DEFERRED_TOP_CANDIDATES = 32;
+
+    /// <summary>遅延生成ワーカーの待機を解く条件の署名。キュー・詳細数・ロード済みセル・上限のどれかが変われば変わる。</summary>
+    private int DeferredWorkSignature()
+    {
+        unchecked
+        {
+            int h = deferredRevision;
+            h = h * 31 + deferredDetailBuildings.Count;
+            h = h * 31 + detailedBuildingIds.Count;
+            h = h * 31 + loadedCells.Count;
+            h = h * 31 + loadedCellsRevision;
+            return h * 31 + maxDetailedBuildingObjects;
+        }
+    }
+
+    /// <summary>
+    /// 遅延生成キュー(deferredDetailBuildings)を消化する常駐ワーカー。
+    /// フレーム予算内で「視野内かつカメラに近い」建物から順に詳細メッシュを生成する。視野外の建物は、詳細メッシュ数が
+    /// 上限(maxDetailedBuildingObjects)に達していない限りアイドル的に生成する(振り向き時のポップイン軽減)。
+    /// 上限に達している場合、視野外の詳細化は保留してキューに残し、Farで足りる要求だけを処理する。
+    /// 候補は1回の走査で上位 DEFERRED_TOP_CANDIDATES 件を選び、使い切るか視点が変わるまで使い回す。
+    /// 進められる要求が無ければ、キュー・台帳・カメラのどれかが変わるまで走査しない。
+    /// </summary>
     private IEnumerator DetailGenerationWorker()
     {
+        // 状態はすべてローカルに置く(テストが途中でワーカーを作り直すので、フィールドだと古い状態が残る)。
         var budgetWatch = new System.Diagnostics.Stopwatch();
+        var topScore = new float[DEFERRED_TOP_CANDIDATES];
+        var topId = new int[DEFERRED_TOP_CANDIDATES];
+        int topCount = 0, topCursor = 0, topRevision = 0;
+        // 今の候補群で生成・除去が1件でも起きたか。起きないまま使い切ったら選び直さずに待機する
+        // (上限待ちの保留だけが並ぶとき、同じ候補を選び直す走査を繰り返さないため)。
+        bool topUseful = false;
+        LodViewState topView = default;
+        bool stalled = false;
+        int stalledSignature = 0;
+        LodViewState stalledView = default;
         while (true)
         {
             if (deferredDetailBuildings.Count == 0)
             {
+                stalled = false;
+                topCount = topCursor = 0;
                 yield return null;
                 continue;
             }
 
             Camera cam = Camera.main;
-            Vector3 camPos = cam != null ? cam.transform.position : Vector3.zero;
-            Vector3 fwd = cam != null ? GetHorizontalForward(cam) : Vector3.forward;
+            if (cam == null)
+            {
+                yield return null;
+                continue;
+            }
+            if (stalled)
+            {
+                if (DeferredWorkSignature() == stalledSignature && !stalledView.Update(cam))
+                {
+                    yield return null;
+                    continue;
+                }
+                stalled = false;
+                topCount = topCursor = 0;
+            }
+            // 視点が変わると処理順も保留の判定も変わるので、候補を選び直す。
+            if (topView.Update(cam)) topCount = topCursor = 0;
+            Vector3 camPos = cam.transform.position;
+            Vector3 fwd = GetHorizontalForward(cam);
+            float tanHalfFov = DrawLodEvaluator.GetTanHalfFov(cam);
+            bool ortho = cam.orthographic;
 
             bool progressed = false;
+            bool exhausted = false;
             budgetWatch.Restart();
             while (deferredDetailBuildings.Count > 0 && budgetWatch.Elapsed.TotalMilliseconds <= PerformanceConfig.SliceBudgetMs)
             {
-                // 最優先の1件を線形走査で選ぶ。キューは高々数千件・単純なベクトル演算のみなので、
-                // 毎回の走査コストは生成コストに比べて無視できる。
-                // 比較は「未選択なら無条件採用」のフラグ方式にする(center_point欠損などで
-                // スコアが float.MaxValue になる建物も必ず選出・消化されるようにするため。
-                // センチネル値の大小比較は float の精度で破綻しうる)。
-                int bestId = 0;
-                float bestScore = float.MaxValue;
-                bool found = false;
-                foreach (var kvp in deferredDetailBuildings)
+                if (topCursor >= topCount)
                 {
-                    // 一括取得の適用完了までは未登録セルの要求を取り除かない。
-                    if (!IsDeferredCellReady(kvp.Value.data)) continue;
-                    float score = ScoreDeferredBuilding(kvp.Value.data, camPos, fwd);
-                    if (!found || score < bestScore)
+                    if (topCount > 0 && !topUseful && topRevision == deferredRevision)
                     {
-                        bestScore = score;
-                        bestId = kvp.Key;
-                        found = true;
+                        exhausted = true;
+                        break;
+                    }
+                    topCount = SelectTopDeferredBuildings(camPos, fwd, topScore, topId);
+                    topCursor = 0;
+                    topRevision = deferredRevision;
+                    topUseful = false;
+                    if (topCount == 0)
+                    {
+                        exhausted = true;
+                        break;
                     }
                 }
-                if (!found) break;
+                int id = topId[topCursor];
+                float score = topScore[topCursor];
+                topCursor++;
 
-                // 視野外しか残っておらず上限到達済みなら、このフレームでは何もしない
-                // (視野に入るかLRU破棄で枠が空くのを待つ)。
-                bool bestInView = bestScore < DEFERRED_OUT_OF_VIEW_PENALTY;
-                DeferredDetailRequest req = deferredDetailBuildings[bestId];
-                if (!buildingDataCache.TryGetValue(bestId, out BuildingSummary latest))
+                if (!deferredDetailBuildings.TryGetValue(id, out DeferredDetailRequest req)) continue;
+                if (!IsDeferredCellReady(req.data)) continue;
+                if (!buildingDataCache.TryGetValue(id, out BuildingSummary latest))
                 {
-                    deferredDetailBuildings.Remove(bestId);
+                    deferredDetailBuildings.Remove(id);
+                    topUseful = true;
                     continue;
                 }
 
@@ -864,31 +1129,65 @@ public class BuildingManager : BaseApiDataManager
                     Vector2Int cell = TerrainManager.WorldToCell(new Vector3(reqCp[0], 0f, reqCp[1]));
                     if (!loadedCells.Contains(cell))
                     {
-                        deferredDetailBuildings.Remove(bestId);
+                        deferredDetailBuildings.Remove(id);
+                        topUseful = true;
                         continue;
                     }
                 }
 
-                // 待機中に視点やデータが変わり得るため、生成時点の条件を正とする。
-                cam = Camera.main;
-                if (cam == null) break;
-                camPos = cam.transform.position;
-                fwd = GetHorizontalForward(cam);
+                // 待機中にデータが変わり得るため、最新データと現在のカメラで判定し直す。
                 bool isDynamic = IsBuildingInDynamicCell(latest);
-                DrawLod lod = DetermineDesiredDrawLod(latest, isDynamic ? LodTier.Dynamic : LodTier.Near,
-                    camPos, DrawLodEvaluator.GetTanHalfFov(cam));
-                if (lod != DrawLod.Far && !bestInView && detailedBuildingIds.Count >= maxDetailedBuildingObjects) break;
-                deferredDetailBuildings.Remove(bestId);
+                DrawLod lod = DetermineDesiredDrawLod(latest, camPos, tanHalfFov, ortho);
+                // 上限到達中の視野外の詳細化は保留してキューに残し、後ろの候補(Farで足りる要求など)へ進む。
+                // 候補群の外で保留が続く Far で足りる要求は、カメラ移動時に描画LOD再判定が箱にして消化する。
+                if (lod != DrawLod.Far && score >= DEFERRED_OUT_OF_VIEW_PENALTY && detailedBuildingIds.Count >= maxDetailedBuildingObjects) continue;
+                deferredDetailBuildings.Remove(id);
                 progressed = true;
+                topUseful = true;
                 if (lod != req.drawLod) RenderWorkScheduler.CountEvent("building.deferredLodChanged");
                 if (lod == DrawLod.Far) CreateFarBuildingObject(latest);
                 else CreateOrUpdateBuildingObject(latest, isDynamic, forceRebuild: true, drawLod: lod);
-                buildingVersionCache[bestId] = latest.version;
-                EvictDetailedBuildingsOverCap(camPos, fwd, justCreatedId: bestId);
+                buildingVersionCache[id] = latest.version;
+                EvictDetailedBuildingsOverCap(camPos, fwd, justCreatedId: id);
             }
 
+            // 進められる要求が無かった(候補選び以降の投入も無い)なら、条件が変わるまで待機する。
+            if (!progressed && exhausted && topRevision == deferredRevision)
+            {
+                stalled = true;
+                stalledSignature = DeferredWorkSignature();
+                stalledView = default;
+                stalledView.Update(cam);
+            }
             yield return progressed ? RenderWorkScheduler.Continue : null;
         }
+    }
+
+    /// <summary>
+    /// 遅延キューから処理順スコアの上位を最大 topId.Length 件、昇順に選ぶ(同点は先着を優先)。
+    /// セル未ロードの要求は選ばない。center_point 欠損(スコア float.MaxValue)の要求も枠に空きがあれば選ぶ。
+    /// </summary>
+    private int SelectTopDeferredBuildings(Vector3 camPos, Vector3 camForwardHorizontal, float[] topScore, int[] topId)
+    {
+        int capacity = topId.Length;
+        int count = 0;
+        foreach (var kvp in deferredDetailBuildings)
+        {
+            if (!IsDeferredCellReady(kvp.Value.data)) continue;
+            float score = ScoreDeferredBuilding(kvp.Value.data, camPos, camForwardHorizontal);
+            if (count == capacity && !(score < topScore[capacity - 1])) continue;
+            int at = count < capacity ? count : capacity - 1;
+            while (at > 0 && score < topScore[at - 1])
+            {
+                topScore[at] = topScore[at - 1];
+                topId[at] = topId[at - 1];
+                at--;
+            }
+            topScore[at] = score;
+            topId[at] = kvp.Key;
+            if (count < capacity) count++;
+        }
+        return count;
     }
 
     /// <summary>視野外の遅延建物に加算する処理順ペナルティ。視野内(距離のみ)より必ず後になる。</summary>
@@ -913,61 +1212,73 @@ public class BuildingManager : BaseApiDataManager
     /// 破棄するのはGameObjectのみ: データキャッシュ・セル逆引きは保持し、versionキャッシュを消して
     /// 遅延キューに戻すことで、視野に入れば再生成される。視野内の建物は破棄しない
     /// (視野内の建物だけで上限を超える場合は、見た目を守るため一時的な超過を許容する)。
+    /// 候補は evictionOrder から順に取り出し、並べ直しは1回の呼び出しで高々1回にする。
     /// </summary>
     private void EvictDetailedBuildingsOverCap(Vector3 camPos, Vector3 camForwardHorizontal, int justCreatedId)
     {
+        bool rebuilt = false;
         while (detailedBuildingIds.Count > maxDetailedBuildingObjects)
         {
-            int evictId = 0;
-            int oldestFrame = int.MaxValue;
-            bool found = false;
-            foreach (int id in detailedBuildingIds)
+            if (evictionCursor >= evictionOrder.Count || Time.frameCount - evictionOrderFrame >= VISIBILITY_SWEEP_INTERVAL_FRAMES)
             {
-                if (id == justCreatedId) continue;
-                if (!buildingObjectsCache.TryGetValue(id, out GameObject obj) || obj == null)
-                {
-                    // オブジェクトが既に破棄済みの台帳残骸は最優先で片付ける。
-                    evictId = id;
-                    found = true;
-                    break;
-                }
-                // 非アクティブ(アンロード済みセルのプール退避中)は無条件に破棄候補。
-                // アクティブなオブジェクトは視野内なら破棄しない。
-                if (obj.activeInHierarchy && IsPositionInGenerationView(obj.transform.position, camPos, camForwardHorizontal)) continue;
-                int lastSeen = buildingLastVisibleFrame.TryGetValue(id, out int f) ? f : 0;
-                if (!found || lastSeen < oldestFrame)
-                {
-                    oldestFrame = lastSeen;
-                    evictId = id;
-                    found = true;
-                }
+                if (rebuilt) break;
+                RebuildEvictionOrder(camPos, camForwardHorizontal);
+                rebuilt = true;
             }
-            if (!found) break;
-            EvictDetailedBuilding(evictId);
+            while (evictionCursor < evictionOrder.Count)
+            {
+                int id = evictionOrder[evictionCursor++].id;
+                if (id == justCreatedId || !detailedBuildingIds.Contains(id)) continue;
+                // 並べた後に視野へ入った建物は破棄しない。
+                if (buildingObjectsCache.TryGetValue(id, out GameObject obj) && obj != null && obj.activeInHierarchy
+                    && IsPositionInGenerationView(obj.transform.position, camPos, camForwardHorizontal)) continue;
+                EvictDetailedBuilding(id);
+                break;
+            }
         }
     }
 
     /// <summary>
-    /// 詳細メッシュ建物のGameObjectをLRU破棄する。データキャッシュとセル逆引きは保持し、
-    /// 現在のティアで遅延キューへ戻す(視野に入れば DetailGenerationWorker が再生成する)。
-    /// versionキャッシュを消すことで、マージロードの差分判定でも「未生成」として扱われる。
+    /// LRU破棄の候補を最終可視フレームの古い順に並べ直す。オブジェクトを失った台帳残骸を先頭に置き、
+    /// アクティブで視野内のものは除く。非アクティブのもの(防御的な扱い)は視野に関わらず候補にする。
+    /// </summary>
+    private void RebuildEvictionOrder(Vector3 camPos, Vector3 camForwardHorizontal)
+    {
+        evictionOrder.Clear();
+        evictionCursor = 0;
+        evictionOrderFrame = Time.frameCount;
+        foreach (int id in detailedBuildingIds)
+        {
+            int lastSeen;
+            if (!buildingObjectsCache.TryGetValue(id, out GameObject obj) || obj == null) lastSeen = int.MinValue;
+            else if (obj.activeInHierarchy && IsPositionInGenerationView(obj.transform.position, camPos, camForwardHorizontal)) continue;
+            else lastSeen = buildingLastVisibleFrame.TryGetValue(id, out int frame) ? frame : 0;
+            evictionOrder.Add((lastSeen, id));
+        }
+        evictionOrder.Sort();
+    }
+
+    /// <summary>
+    /// 詳細メッシュ建物をLRU破棄する。表示可能なセルなら Far(箱)に置き換え、詳細メッシュは退避キャッシュへ移る
+    /// (カメラが近づけば描画LOD再判定が詳細化を要求する)。それ以外はオブジェクトを退避して version を消し、
+    /// マージロードの差分判定で「未生成」として扱わせる。データキャッシュとセル逆引きは保持する。
     /// </summary>
     private void EvictDetailedBuilding(int buildingId)
     {
-        if (buildingDataCache.TryGetValue(buildingId, out BuildingSummary data))
+        // 表示可能なセルは、アンロード待ちでなく、ロード済みか取得中のバッチが表示物を置いたセル。
+        // 差分取得ではロード済みセルを取り直さないので、ここで箱を置かないと再入場まで建物が消えたままになる。
+        // 取得中のバッチが取消されて常駐外になったセルも、次の LoadLodCells が表示物セルとしてアンロードするので箱は残らない。
+        // 非アクティブなオブジェクトは防御的な扱いで、箱にせず退避だけする。
+        buildingObjectsCache.TryGetValue(buildingId, out GameObject obj);
+        bool displayable = buildingCellById.TryGetValue(buildingId, out Vector2Int cell) && !pendingUnloadCells.ContainsKey(cell)
+            && (loadedCells.Contains(cell) || cellsWithShownObjects.Contains(cell));
+        bool hidden = obj != null && !obj.activeInHierarchy;
+        if (displayable && !hidden && buildingDataCache.TryGetValue(buildingId, out BuildingSummary data))
         {
             CreateFarBuildingObject(data);
             return;
         }
-        if (buildingObjectsCache.TryGetValue(buildingId, out GameObject obj) && obj != null)
-        {
-            DrawLodStats.OnDrawLodChanged(DrawLodStats.Category.Building, DrawLodInfo.GetDrawLod(obj, DrawLod.Normal), null);
-            lodCache.Park(obj);
-        }
-        buildingObjectsCache.Remove(buildingId);
-        detailedBuildingIds.Remove(buildingId);
-        closeBuildingIds.Remove(buildingId);
-        buildingLastVisibleFrame.Remove(buildingId);
+        ParkBuildingObject(buildingId);
     }
 
     /// <summary>
@@ -1012,81 +1323,127 @@ public class BuildingManager : BaseApiDataManager
     }
 
     /// <summary>
-    /// 建物の望ましい描画LOD。Farセルは箱に固定し、Near/Dynamicセルでは投影比(画面上の大きさ)で決める。
+    /// 建物の望ましい描画LOD。セルのティアでは固定せず、投影比(画面上の大きさ)だけで決める(E_LOD処理.md の方針)。
     /// 既存オブジェクトの描画LODをヒステリシスの基準にする。
     /// </summary>
-    private DrawLod DetermineDesiredDrawLod(BuildingSummary data, LodTier tier, Vector3 camPos, float tanHalfFov)
+    private DrawLod DetermineDesiredDrawLod(BuildingSummary data, Vector3 camPos, float tanHalfFov, bool orthographic)
     {
-
         float[] cp = data.centerPointArray;
         if (cp == null || cp.Length < 2) return DrawLod.Normal;
-        DrawLod current = DrawLod.Normal;
         if (buildingObjectsCache.TryGetValue(data.agent_id, out GameObject existing) && existing != null)
-        {
-            current = DrawLodInfo.GetDrawLod(existing, DrawLod.Normal);
-        }
-        float groundY = Utils.GetGroundHeight(new Vector3(cp[0], 1000f, cp[1]));
-        float radius = GetBuildingBoundsRadius(data);
-        float distance = Vector3.Distance(camPos, new Vector3(cp[0], groundY + radius * 0.5f, cp[1]));
-        bool allowClose = closeBuildingIds.Contains(data.agent_id) || closeBuildingIds.Count < DrawLodConfig.MAX_CLOSE_BUILDINGS;
-        return DrawLodEvaluator.EvaluateBySize(radius, distance, tanHalfFov, current, allowClose, Camera.main != null && Camera.main.orthographic);
+            return EvaluateBuildingDrawLod(data, DrawLodInfo.GetDrawLod(existing, DrawLod.Normal), existing.transform.position.y, camPos, tanHalfFov, orthographic);
+        return EvaluateBuildingDrawLod(data, DrawLod.Normal, Utils.GetGroundHeight(new Vector3(cp[0], 1000f, cp[1])), camPos, tanHalfFov, orthographic);
     }
 
     /// <summary>
-    /// カメラ移動に応じて、生成済みの建物の描画LODを再判定する常駐ワーカー。
-    /// 一定フレームごと、かつカメラが一定距離動いたときだけ全建物を走査する(数千件の距離計算で1ms未満)。
-    /// 変化があった建物は、箱化(Far)なら軽いので即時生成、詳細化(Normal/Close)は遅延キューへ積んで
-    /// DetailGenerationWorker が視野優先・フレーム予算で生成する。生成が終わるまで旧オブジェクトは残る。
+    /// 描画LOD判定の中核。baseY は建物の基準高で、既存オブジェクトがあればその位置を使って地形の標本化を省く
+    /// (区画標高との差は数m程度で、ヒステリシス帯に比べて無視できる)。
     /// </summary>
+    private DrawLod EvaluateBuildingDrawLod(BuildingSummary data, DrawLod current, float baseY, Vector3 camPos, float tanHalfFov, bool orthographic)
+    {
+        float[] cp = data.centerPointArray;
+        if (cp == null || cp.Length < 2) return DrawLod.Normal;
+        float radius = GetBuildingBoundsRadius(data);
+        float distance = Vector3.Distance(camPos, new Vector3(cp[0], baseY + radius * 0.5f, cp[1]));
+        bool allowClose = closeBuildingIds.Contains(data.agent_id) || closeBuildingIds.Count < DrawLodConfig.MAX_CLOSE_BUILDINGS;
+        return DrawLodEvaluator.EvaluateBySize(radius, distance, tanHalfFov, current, allowClose, orthographic);
+    }
+
+    /// <summary>
+    /// 遅延生成キューへの投入口。同じIDは最新の要求で上書きする。
+    /// 投入は必ずここを通すこと(deferredRevision で遅延生成ワーカーの待機を解くため)。
+    /// </summary>
+    private void QueueDeferredDetail(int id, BuildingSummary data, bool isDynamic, DrawLod drawLod)
+    {
+        deferredDetailBuildings[id] = new DeferredDetailRequest { data = data, isDynamic = isDynamic, drawLod = drawLod };
+        deferredRevision++;
+    }
+
+    /// <summary>描画LOD再判定ワーカーが投影比の変化を検出するためのカメラ状態(UpdateProjection 専用)。</summary>
     private LodViewState drawViewState;
 
+    /// <summary>再判定1パスの対象IDのスナップショット。yield を跨いで辞書を列挙しないために使う。</summary>
+    private readonly List<int> drawLodScanIds = new List<int>();
+
+    /// <summary>
+    /// カメラ移動に応じて、ロード済みセルの建物の描画LODを再判定する常駐ワーカー。
+    /// 投影比は位置とFOV(正射影サイズ)だけで決まるので、回転だけの操作では走査しない。
+    /// 走査はフレーム予算で分割する。箱化(Far)は軽いので即時生成し、詳細化(Normal/Close)は遅延キューへ積んで
+    /// DetailGenerationWorker が視野優先・フレーム予算で生成する。生成が終わるまで旧オブジェクトは残る。
+    /// </summary>
     private IEnumerator DrawLodReevaluationWorker()
     {
+        var watch = new System.Diagnostics.Stopwatch();
         while (true)
         {
             for (int i = 0; i < DrawLodConfig.REEVALUATE_INTERVAL_FRAMES; i++) yield return null;
-            if (buildingObjectsCache.Count == 0) continue;
-
+            if (loadedCells.Count == 0) continue;
             Camera cam = Camera.main;
             if (cam == null) continue;
+            if (!drawViewState.UpdateProjection(cam, DrawLodConfig.REEVALUATE_CAMERA_MOVE_DISTANCE)) continue;
+
+            drawLodScanIds.Clear();
+            foreach (var cell in loadedCells)
+                if (buildingIdsByCell.TryGetValue(cell, out HashSet<int> ids)) drawLodScanIds.AddRange(ids);
+            RenderWorkScheduler.CountEvent("building.lodScanned", drawLodScanIds.Count);
+
             Vector3 camPos = cam.transform.position;
-            if (!drawViewState.Update(cam)) continue;
-            RenderWorkScheduler.CountEvent("building.lodScanned", buildingObjectsCache.Count);
             float tanHalfFov = DrawLodEvaluator.GetTanHalfFov(cam);
-
-            // 走査中に辞書を書き換えないよう、変更対象を先に集める。
-            List<(int id, DrawLod lod)> changes = null;
-            foreach (var kvp in buildingObjectsCache)
+            bool ortho = cam.orthographic;
+            float slice = PerformanceConfig.SliceBudgetMs;
+            watch.Restart();
+            for (int i = 0; i < drawLodScanIds.Count; i++)
             {
-                GameObject obj = kvp.Value;
-                if (obj == null || !obj.activeSelf) continue;
-                if (!buildingDataCache.TryGetValue(kvp.Key, out BuildingSummary data)) continue;
-                if (!buildingCellById.TryGetValue(kvp.Key, out Vector2Int cell)) continue;
-                if (!loadedCells.Contains(cell)) continue;
-                LodTier tier = GetCellLodTier(cell);
-                DrawLod current = DrawLodInfo.GetDrawLod(obj, DrawLod.Normal);
-                DrawLod desired = DetermineDesiredDrawLod(data, tier, camPos, tanHalfFov);
-                if (desired == current) continue;
-                changes ??= new List<(int, DrawLod)>();
-                changes.Add((kvp.Key, desired));
-            }
-            if (changes == null) continue;
-
-            foreach (var (id, lod) in changes)
-            {
-                if (!buildingDataCache.TryGetValue(id, out BuildingSummary data)) continue;
-                if (lod == DrawLod.Far)
+                bool heavy = ReevaluateBuildingDrawLod(drawLodScanIds[i], camPos, tanHalfFov, ortho);
+                if ((heavy || (i & 31) == 31) && watch.Elapsed.TotalMilliseconds > slice)
                 {
-                    CreateFarBuildingObject(data);
-                    buildingVersionCache[id] = data.version;
-                }
-                else
-                {
-                    bool isDynamic = buildingCellById.TryGetValue(id, out Vector2Int cell) && GetCellLodTier(cell) == LodTier.Dynamic;
-                    deferredDetailBuildings[id] = new DeferredDetailRequest { data = data, isDynamic = isDynamic, drawLod = lod };
+                    yield return RenderWorkScheduler.Continue;
+                    watch.Restart();
+                    cam = Camera.main;
+                    if (cam == null)
+                    {
+                        // 走査しきれなかった建物を次の機会に拾うため、カメラ状態を未記録に戻す。
+                        drawViewState = default;
+                        break;
+                    }
+                    camPos = cam.transform.position;
+                    tanHalfFov = DrawLodEvaluator.GetTanHalfFov(cam);
+                    ortho = cam.orthographic;
+                    slice = PerformanceConfig.SliceBudgetMs;
                 }
             }
+            drawLodScanIds.Clear();
         }
+    }
+
+    /// <summary>
+    /// 建物1棟の描画LODを再判定する。Far を生成・復元したとき true を返す(呼び出し側の予算確認用)。
+    /// 待機中の遅延要求は、Far で足りるならここで箱にして消化する。オブジェクトの無い詳細化はワーカーに任せる。
+    /// </summary>
+    private bool ReevaluateBuildingDrawLod(int id, Vector3 camPos, float tanHalfFov, bool ortho)
+    {
+        if (!buildingDataCache.TryGetValue(id, out BuildingSummary data)) return false;
+        if (!buildingCellById.TryGetValue(id, out Vector2Int cell) || !loadedCells.Contains(cell)) return false;
+        bool hasObj = buildingObjectsCache.TryGetValue(id, out GameObject obj) && obj != null;
+        bool pending = deferredDetailBuildings.ContainsKey(id);
+        if (!hasObj && !pending) return false;
+        if (hasObj && !obj.activeSelf) return false;
+
+        DrawLod current = hasObj ? DrawLodInfo.GetDrawLod(obj, DrawLod.Normal) : DrawLod.Normal;
+        float[] cp = data.centerPointArray;
+        float baseY = hasObj ? obj.transform.position.y
+            : (cp != null && cp.Length >= 2 ? Utils.GetGroundHeight(new Vector3(cp[0], 1000f, cp[1])) : 0f);
+        DrawLod desired = EvaluateBuildingDrawLod(data, current, baseY, camPos, tanHalfFov, ortho);
+        if (desired == DrawLod.Far)
+        {
+            if (current == DrawLod.Far && !pending) return false;
+            CreateFarBuildingObject(data);
+            buildingVersionCache[id] = data.version;
+            return true;
+        }
+        if (!hasObj || desired == current) return false;
+        QueueDeferredDetail(id, data, GetCellLodTier(cell) == LodTier.Dynamic, desired);
+        return false;
     }
 
     private bool IsBuildingApplicableForAltitude(BuildingSummary buildingData)
@@ -1184,11 +1541,18 @@ public class BuildingManager : BaseApiDataManager
             float groundHeight = Utils.GetGroundHeight(new Vector3(p.x, 1000f, p.z));
             buildingGO.transform.position = new Vector3(p.x, groundHeight + BuildingBaseLift, p.z);
         }
+        // 遠景の結合バッチは位置の変化を自分では検知しないので、動かした側から通知する。
+        FarBuildingMember.RefreshObject(buildingGO);
     }
 
-    private void RegisterBuildingCell(int buildingId, Vector3 position)
+    /// <summary>
+    /// 建物をセル逆引きへ登録する。shown は表示オブジェクトを伴う登録かどうかで、真なら
+    /// そのセルを表示物セル(cellsWithShownObjects)に記録する。データだけの登録(遅延・未ロードセル)は偽で呼ぶ。
+    /// </summary>
+    private void RegisterBuildingCell(int buildingId, Vector3 position, bool shown = true)
     {
         Vector2Int cell = TerrainManager.WorldToCell(position);
+        if (shown) cellsWithShownObjects.Add(cell);
         if (buildingCellById.TryGetValue(buildingId, out Vector2Int previousCell) && previousCell != cell)
         {
             RemoveBuildingFromCellLookup(buildingId, previousCell);
@@ -1220,26 +1584,183 @@ public class BuildingManager : BaseApiDataManager
 
     private readonly RenderObjectCache lodCache = new RenderObjectCache(256L * 1024 * 1024);
 
+    // ================================================================
+    // 再利用キー
+    // ================================================================
+
+    /// <summary>
+    /// データの版が変わらずに見た目が変わる建物(端子位置に追従する車両基地)の形状版。再利用キーに入れて旧形状のキャッシュを使わせない。
+    /// 値は全体の通し番号にして、記録を消した後も過去に発行した版と重ならないようにする。
+    /// </summary>
+    private readonly Dictionary<int, int> buildingGeometryRevisions = new Dictionary<int, int>();
+    private int buildingGeometryRevisionCounter;
+
+    /// <summary>再利用キー用の64bitハッシュ。FNV-1a をワード単位で混ぜ、最後に splitmix64 の撹拌をかける。</summary>
+    private struct RenderKeyHasher
+    {
+        private const ulong NullMarker = 0x9E3779B97F4A7C15UL;
+        private ulong h;
+
+        public static RenderKeyHasher Create() => new RenderKeyHasher { h = 14695981039346656037UL };
+
+        public void Add(ulong v) { h ^= v; h *= 1099511628211UL; }
+        public void Add(int v) => Add((ulong)(uint)v);
+        public void Add(bool v) => Add(v ? 1UL : 0UL);
+        public void Add(float v) => Add(BitConverter.SingleToInt32Bits(v));
+        public void Add(double v) => Add((ulong)BitConverter.DoubleToInt64Bits(v));
+        public void Add(int? v) { Add(v.HasValue); if (v.HasValue) Add(v.Value); }
+        public void Add(float? v) { Add(v.HasValue); if (v.HasValue) Add(v.Value); }
+
+        public void Add(string s)
+        {
+            if (s == null) { Add(NullMarker); return; }
+            Add(s.Length);
+            for (int i = 0; i < s.Length; i++) Add((int)s[i]);
+        }
+
+        public void Add(float[] values)
+        {
+            if (values == null) { Add(NullMarker); return; }
+            Add(values.Length);
+            for (int i = 0; i < values.Length; i++) Add(values[i]);
+        }
+
+        public void Add(float[][] points)
+        {
+            if (points == null) { Add(NullMarker); return; }
+            Add(points.Length);
+            for (int i = 0; i < points.Length; i++) Add(points[i]);
+        }
+
+        /// <summary>型の決まらない値(construction_progress)。数値は型によらず double で比べ、数値にできないものは文字列で比べる。</summary>
+        public void AddValue(object value)
+        {
+            if (value is Newtonsoft.Json.Linq.JValue token) value = token.Value;
+            if (value == null) { Add(NullMarker); return; }
+            if (value is string text) { Add(text); return; }
+            if (value is IConvertible convertible && TryToDouble(convertible, out double number)) { Add(number); return; }
+            Add(value.ToString());
+        }
+
+        private static bool TryToDouble(IConvertible value, out double number)
+        {
+            try
+            {
+                number = Convert.ToDouble(value, CultureInfo.InvariantCulture);
+                return true;
+            }
+            catch (Exception)
+            {
+                number = 0;
+                return false;
+            }
+        }
+
+        public ulong Finish()
+        {
+            ulong z = h + 0x9E3779B97F4A7C15UL;
+            z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9UL;
+            z = (z ^ (z >> 27)) * 0x94D049BB133111EBUL;
+            return z ^ (z >> 31);
+        }
+    }
+
+    /// <summary>
+    /// 建物の見た目を決めるデータ項目のハッシュ(16進)。見た目に影響する項目を追加したら、ここにも加えること。
+    /// BuildingSummary は受信後に書き換えないので、インスタンスごとに1回だけ計算する。
+    /// </summary>
+    private static readonly ConditionalWeakTable<BuildingSummary, string> buildingShapeKeys = new ConditionalWeakTable<BuildingSummary, string>();
+    private static readonly ConditionalWeakTable<BuildingSummary, string>.CreateValueCallback createBuildingShapeKey = d => HashBuildingShape(d).ToString("x16");
+
+    private static ulong HashBuildingShape(BuildingSummary d)
+    {
+        var hasher = RenderKeyHasher.Create();
+        hasher.Add(d.agent_id);
+        hasher.Add(d.variant);
+        hasher.Add(d.bd_type);
+        hasher.Add(d.floors);
+        hasher.Add(d.status);
+        hasher.Add(d.status_reason);
+        hasher.AddValue(d.construction_progress);
+        hasher.Add(d.polygonArray);
+        hasher.Add(d.centerPointArray);
+        hasher.Add(d.visual_variant);
+        hasher.Add(d.visual_variant2);
+        hasher.Add(d.visual_variant3);
+        if (d.sub_buildings == null) hasher.Add(-1);
+        else
+        {
+            hasher.Add(d.sub_buildings.Count);
+            foreach (SubBuildingPlacement sub in d.sub_buildings)
+            {
+                hasher.Add(sub != null);
+                if (sub == null) continue;
+                hasher.Add(sub.subbuilding_id);
+                hasher.Add(sub.model_prefix);
+                hasher.Add(sub.position);
+                hasher.Add(sub.rotation);
+                hasher.Add(sub.floors);
+                hasher.Add(sub.height_per_floor);
+            }
+        }
+        hasher.Add(d.infra_node_id);
+        hasher.Add(d.depot_node_id);
+        return hasher.Finish();
+    }
+
+    /// <summary>
+    /// 区画のうち建物の見た目に効く部分(ポリゴンと基準標高)のキー片と、ポリゴンの外接矩形。
+    /// 版に連動しない項目(地価・接道など)は入れない。入れると区画の再取得のたびに建物を作り直すことになる。
+    /// </summary>
+    private sealed class ParcelKeyPart
+    {
+        public string token;
+        public Rect bounds;
+        public bool hasBounds;
+    }
+
+    private static readonly ConditionalWeakTable<ParcelSummary, ParcelKeyPart> parcelKeyParts = new ConditionalWeakTable<ParcelSummary, ParcelKeyPart>();
+    private static readonly ConditionalWeakTable<ParcelSummary, ParcelKeyPart>.CreateValueCallback createParcelKeyPart = CreateParcelKeyPart;
+
+    private static ParcelKeyPart CreateParcelKeyPart(ParcelSummary parcel)
+    {
+        float[][] polygon = parcel.GetPolygonArray();
+        var hasher = RenderKeyHasher.Create();
+        hasher.Add(polygon);
+        hasher.Add(parcel.altitude);
+        var part = new ParcelKeyPart { token = parcel.parcel_id.ToString(CultureInfo.InvariantCulture) + "/" + hasher.Finish().ToString("x16") };
+        if (polygon == null) return part;
+        foreach (float[] point in polygon)
+        {
+            if (point == null || point.Length < 2) continue;
+            if (!part.hasBounds) part.bounds = new Rect(point[0], point[1], 0f, 0f);
+            else
+            {
+                part.bounds.xMin = Mathf.Min(part.bounds.xMin, point[0]); part.bounds.xMax = Mathf.Max(part.bounds.xMax, point[0]);
+                part.bounds.yMin = Mathf.Min(part.bounds.yMin, point[1]); part.bounds.yMax = Mathf.Max(part.bounds.yMax, point[1]);
+            }
+            part.hasBounds = true;
+        }
+        return part;
+    }
+
+    private static ParcelKeyPart GetParcelKeyPart(ParcelSummary parcel) => parcelKeyParts.GetValue(parcel, createParcelKeyPart);
+
+    /// <summary>
+    /// 描画物の再利用キー。形状・外観・状態・サブ建物・区画・形状版・描画LOD・接地範囲の地形版を区別し、
+    /// version だけの変化では変わらない。同じデータからは常に同じキーになる(テストがキーを外から計算して照合する)。
+    /// </summary>
     private string BuildingRenderKey(BuildingSummary data, DrawLod lod)
     {
         ParcelSummary parcel = GetParcelManager()?.GetParcelSummary(data.parcel_id);
-        float[] cp = data.centerPointArray;
-        float radius = GetBuildingBoundsRadius(data);
-        var bounds = new Rect(cp != null ? cp[0]-radius : 0, cp != null ? cp[1]-radius : 0, 2*radius, 2*radius);
-        var parcelPolygon = parcel?.GetPolygonArray();
-        if (parcelPolygon != null)
-            foreach (float[] point in parcelPolygon)
-            {
-                bounds.xMin = Mathf.Min(bounds.xMin, point[0]); bounds.xMax = Mathf.Max(bounds.xMax, point[0]);
-                bounds.yMin = Mathf.Min(bounds.yMin, point[1]); bounds.yMax = Mathf.Max(bounds.yMax, point[1]);
-            }
         var terrain = Utils.CachedTerrainManager;
-        string surface = terrain != null ? terrain.GetSurfaceStamp(bounds) : "none";
-        return Newtonsoft.Json.JsonConvert.SerializeObject(new {
-            data.agent_id, data.variant, data.bd_type, data.floors, data.status, data.status_reason,
-            data.construction_progress, data.polygon, data.center_point, data.visual_variant,
-            data.visual_variant2, data.visual_variant3, data.sub_buildings, data.infra_node_id, data.depot_node_id,
-            parcelPolygon = parcel?.GetPolygonArray(), altitude = parcel?.altitude, lod, surface
+        string surface = terrain != null ? terrain.GetSurfaceStamp(GetBuildingTerrainBounds(data, parcel)) : "none";
+        buildingGeometryRevisions.TryGetValue(data.agent_id, out int revision);
+        return string.Concat(new[]
+        {
+            data.agent_id.ToString(CultureInfo.InvariantCulture), ":", buildingShapeKeys.GetValue(data, createBuildingShapeKey), ":",
+            revision.ToString(CultureInfo.InvariantCulture), ":", parcel != null ? GetParcelKeyPart(parcel).token : "-", ":",
+            ((int)lod).ToString(CultureInfo.InvariantCulture), ":", surface,
         });
     }
 
@@ -1261,9 +1782,13 @@ public class BuildingManager : BaseApiDataManager
             lodCache.Park(old);
         }
         ready.SetActive(true);
+        // 退避中や再利用前に非表示集合が変わっていることがあるので、生成時と同じくフィルタを引き直す。
+        ObjectVisibilityFilter.ApplyToObject(ready, InputObjectType.BUILDING, data.agent_id);
+        FarBuildingMember.RefreshObject(ready);
         buildingObjectsCache[data.agent_id] = ready;
         RegisterBuildingDataToCache(data);
         UpdateBuildingHeight(ready);
+        RecordBuildingTerrainSignature(data);
         RegisterBuildingCell(data.agent_id, ready.transform.position);
         UpdatePlannedIcon(ready, data);
         if (lod == DrawLod.Far) { detailedBuildingIds.Remove(data.agent_id); closeBuildingIds.Remove(data.agent_id); }
@@ -1290,8 +1815,11 @@ public class BuildingManager : BaseApiDataManager
                 {
                     if (!existing.activeSelf)
                         existing.SetActive(true);
+                    ObjectVisibilityFilter.ApplyToObject(existing, InputObjectType.BUILDING, buildingData.agent_id);
+                    FarBuildingMember.RefreshObject(existing);
                     RegisterBuildingDataToCache(buildingData);
                     UpdateBuildingHeight(existing);
+                    RecordBuildingTerrainSignature(buildingData);
                     RegisterBuildingCell(buildingData.agent_id, existing.transform.position);
                     UpdatePlannedIcon(existing, buildingData);
                     // Farティアになったので、残っていた詳細メッシュの遅延リクエストは無効化する。
@@ -1325,10 +1853,13 @@ public class BuildingManager : BaseApiDataManager
         // 遠景はパーツを読まない箱(フットプリント押し出し)。フル詳細と同じ組み立てを走らせない。
         var farWatch = System.Diagnostics.Stopwatch.StartNew();
         BuildingMeshResult meshResult = new BuildingMeshBuilder().Generate(buildingData, false, DrawLod.Far);
+        // 遠景GOはコライダーを持たないので、生成されたコライダー用メッシュはここで解放する。
+        if (meshResult?.ColliderMesh != null && meshResult.ColliderMesh != meshResult.Mesh)
+            MeshBakeService.Release(meshResult.ColliderMesh);
+        if (meshResult?.Mesh != null) CollapseToSingleSubMesh(meshResult.Mesh);
         var renderIdentity = buildingGO.AddComponent<RenderCacheIdentity>();
         renderIdentity.key = renderKey;
         renderIdentity.mesh = meshResult?.Mesh;
-        renderIdentity.colliderMesh = meshResult?.ColliderMesh;
         DrawLodStats.AddGenerationMs(DrawLodStats.Category.Building, farWatch.Elapsed.TotalMilliseconds);
         if (meshResult?.Mesh != null)
         {
@@ -1339,8 +1870,9 @@ public class BuildingManager : BaseApiDataManager
         DrawLodInfo.Ensure(buildingGO).drawLod = DrawLod.Far;
 
         // 遠景LODの建物は VisualModeObject を持たない(FarBuildingBatcher が輪郭メッシュを
-        // 結合するため)ので、MeshRenderer を直接落として非表示にする。結合バッチからは
-        // FarBuildingMember が enabled の変化を検知して自動的に外れる。
+        // 結合するため)ので、MeshRenderer を直接落として非表示にする。FarBuildingMember は
+        // この後に付けるので、登録時の enabled がそのまま結合可否に反映される。
+        // 生成後に表示を変える経路は FarBuildingMember.RefreshObject で結合バッチへ通知すること。
         ObjectVisibilityFilter.ApplyToObject(buildingGO, InputObjectType.BUILDING, buildingData.agent_id);
 
         float[] cp = buildingData.centerPointArray;
@@ -1360,6 +1892,7 @@ public class BuildingManager : BaseApiDataManager
 
             float buildingBaseHeight = ResolveBuildingBaseHeight(buildingData, parcel, cx, cz);
             buildingGO.transform.position = new Vector3(cx, buildingBaseHeight, cz);
+            RecordBuildingTerrainSignature(buildingData);
             RegisterBuildingCell(buildingData.agent_id, buildingGO.transform.position);
         }
 
@@ -1446,6 +1979,7 @@ public class BuildingManager : BaseApiDataManager
         foreach (var pair in buildingObjectsCache)
         {
             ObjectVisibilityFilter.ApplyToObject(pair.Value, InputObjectType.BUILDING, pair.Key);
+            FarBuildingMember.RefreshObject(pair.Value);
         }
     }
 
@@ -1555,6 +2089,8 @@ public class BuildingManager : BaseApiDataManager
         {
             return;
         }
+        // データの版は変わらないので、形状版を進めて退避キャッシュや表示中オブジェクトの再利用を外す。
+        buildingGeometryRevisions[building.agent_id] = ++buildingGeometryRevisionCounter;
         CreateOrUpdateBuildingObject(building, IsBuildingInDynamicCell(building), forceRebuild: true, drawLod: GetCurrentDrawLod(building.agent_id));
     }
 
@@ -1569,36 +2105,170 @@ public class BuildingManager : BaseApiDataManager
         return DrawLod.Normal;
     }
 
+    /// <summary>
+    /// 離脱セルを分割アンロードの待ち行列へ積む。オブジェクトの非表示化は CellUnloadWorker が予算内で行う
+    /// (1セル数百棟を1ステップで SetActive(false) するとスパイクになるため)。
+    /// </summary>
     protected override void UnloadCell(Vector2Int cellIndex)
     {
+        cellsWithShownObjects.Remove(cellIndex);
         if (!buildingIdsByCell.TryGetValue(cellIndex, out HashSet<int> ids)) return;
+        pendingUnloadCells[cellIndex] = ++unloadGeneration;
 
-        foreach (int id in ids)
+        // 範囲外セルの遅延生成リクエストは破棄する(ワーカーがロード範囲外に
+        // アクティブな建物を復活させないため)。セルが再ロードされれば
+        // マージロードが再度キューへ積み直す。
+        foreach (int id in ids) deferredDetailBuildings.Remove(id);
+    }
+
+    /// <summary>
+    /// 離脱セルの建物を退避キャッシュへ移す常駐ワーカー。1セルずつIDを写し取り、フレーム予算で分割する。
+    /// 再入場や再登録でセルの記録が変わったら、そのスナップショットは捨てる。
+    /// </summary>
+    private IEnumerator CellUnloadWorker()
+    {
+        var watch = new System.Diagnostics.Stopwatch();
+        while (true)
         {
-            if (buildingObjectsCache.TryGetValue(id, out GameObject obj) && obj != null)
+            if (pendingUnloadCells.Count == 0)
             {
-                obj.SetActive(false);
+                yield return null;
+                continue;
             }
-            // 範囲外セルの遅延生成リクエストは破棄する(ワーカーがロード範囲外に
-            // アクティブな建物を復活させないため)。セルが再ロードされれば
-            // マージロードが再度キューへ積み直す。
-            deferredDetailBuildings.Remove(id);
+
+            Vector2Int cell = default;
+            int generation = 0;
+            foreach (var pair in pendingUnloadCells)
+            {
+                cell = pair.Key;
+                generation = pair.Value;
+                break;
+            }
+            unloadScanIds.Clear();
+            if (buildingIdsByCell.TryGetValue(cell, out HashSet<int> ids)) unloadScanIds.AddRange(ids);
+
+            bool interrupted = false;
+            watch.Restart();
+            for (int i = 0; i < unloadScanIds.Count; i++)
+            {
+                ParkUnloadedBuilding(unloadScanIds[i], cell);
+                if ((i & 15) == 15 && watch.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
+                {
+                    yield return RenderWorkScheduler.Continue;
+                    watch.Restart();
+                    if (!pendingUnloadCells.ContainsKey(cell))
+                    {
+                        interrupted = true;
+                        break;
+                    }
+                }
+            }
+            unloadScanIds.Clear();
+            if (!interrupted && pendingUnloadCells.TryGetValue(cell, out int current) && current == generation)
+                pendingUnloadCells.Remove(cell);
+            yield return RenderWorkScheduler.Continue;
         }
     }
 
     /// <summary>
-    /// MeshRendererに設定されたマテリアルのシェーダーを、Z-fighting防止用の
-    /// Custom/DepthOffsetLit に変更する。
-    /// materialプロパティを介してインスタンスをクローンし、元のアセットには影響を与えない。
+    /// 離脱セルの建物オブジェクトを退避キャッシュへ移す。version も消すので、再入場時は needsRebuild になり
+    /// RestoreBuildingLod がキーでキャッシュから復元する(メッシュは作り直さない)。
+    /// データキャッシュ・セル逆引き・端子/区画インデックス・工事音はデータの生存期間に従うので残す。
     /// </summary>
+    private void ParkUnloadedBuilding(int id, Vector2Int cell)
+    {
+        if (loadedCells.Contains(cell)) return;
+        if (!buildingCellById.TryGetValue(id, out Vector2Int currentCell) || currentCell != cell) return;
+        deferredDetailBuildings.Remove(id);
+        if (!buildingObjectsCache.ContainsKey(id)) return;
+        ParkBuildingObject(id);
+    }
+
+    /// <summary>建物オブジェクトを退避キャッシュへ移し、オブジェクトに紐づく台帳と version を外す。</summary>
+    private void ParkBuildingObject(int id)
+    {
+        if (buildingObjectsCache.TryGetValue(id, out GameObject obj) && obj != null)
+        {
+            DrawLodStats.OnDrawLodChanged(DrawLodStats.Category.Building, DrawLodInfo.GetDrawLod(obj, DrawLod.Normal), null);
+            lodCache.Park(obj);
+        }
+        buildingObjectsCache.Remove(id);
+        buildingVersionCache.Remove(id);
+        detailedBuildingIds.Remove(id);
+        closeBuildingIds.Remove(id);
+        buildingLastVisibleFrame.Remove(id);
+        buildingTerrainSignatures.Remove(id);
+    }
+
     /// <summary>
+    /// MeshRendererのマテリアルを、Z-fighting防止用の Custom/DepthOffsetLit へ差し替えた共有マテリアルにする。
+    /// 共有物なので RenderCacheIdentity には所有させない。
+    /// </summary>
     private static void ApplyDepthOffsetShader(MeshRenderer renderer)
     {
-        Utils.ApplyDepthOffsetShader(renderer, "BuildingManager", materials =>
+        if (renderer == null) return;
+        renderer.sharedMaterials = GetSharedDepthOffsetMaterials(renderer.sharedMaterials);
+    }
+
+    private static readonly Dictionary<Material, Material> depthOffsetMaterials = new Dictionary<Material, Material>();
+    private static Shader depthOffsetShader;
+    private static bool depthOffsetShaderMissingWarned;
+
+    /// <summary>
+    /// 元マテリアルごとに1つだけ作った DepthOffsetLit 版を返し、全建物で共有する。
+    /// 建物ごとの色替えは VisualModeObject が sharedMaterials の差し替えとプロパティブロックで行うので、
+    /// 共有して問題ない(建物レンダラーの .material を個別に書き換えてはならない)。セッションを跨いで保持する。
+    /// </summary>
+    internal static Material[] GetSharedDepthOffsetMaterials(Material[] source)
+    {
+        if (source == null) return null;
+        if (depthOffsetShader == null) depthOffsetShader = Shader.Find("Custom/DepthOffsetLit");
+        if (depthOffsetShader == null)
         {
-            var owner = renderer.GetComponent<RenderCacheIdentity>();
-            if (owner != null) owner.materials = materials;
-        });
+            if (!depthOffsetShaderMissingWarned) Debug.LogWarning("BuildingManager: Custom/DepthOffsetLit shader not found");
+            depthOffsetShaderMissingWarned = true;
+            return source;
+        }
+        var result = new Material[source.Length];
+        for (int i = 0; i < source.Length; i++)
+        {
+            Material src = source[i];
+            if (src == null || src.shader == depthOffsetShader)
+            {
+                result[i] = src;
+                continue;
+            }
+            if (!depthOffsetMaterials.TryGetValue(src, out Material shared) || shared == null)
+            {
+                shared = new Material(src) { name = src.name + " (DepthOffset)" };
+                shared.shader = depthOffsetShader;
+                depthOffsetMaterials[src] = shared;
+            }
+            result[i] = shared;
+        }
+        return result;
+    }
+
+    private static readonly List<int> collapseTriangles = new List<int>();
+    private static readonly List<int> collapseSubMeshTriangles = new List<int>();
+
+    /// <summary>
+    /// 遠景は共有マテリアル1つで描くため、prebuilt_far のように複数サブメッシュを持つメッシュを1サブメッシュに畳む。
+    /// マテリアル数を超えるサブメッシュは Unity が描かないので、畳まないと先頭以外が消える。
+    /// </summary>
+    private static void CollapseToSingleSubMesh(Mesh mesh)
+    {
+        if (mesh.subMeshCount <= 1) return;
+        collapseTriangles.Clear();
+        for (int i = 0; i < mesh.subMeshCount; i++)
+        {
+            mesh.GetTriangles(collapseSubMeshTriangles, i);
+            collapseTriangles.AddRange(collapseSubMeshTriangles);
+        }
+        mesh.subMeshCount = 1;
+        mesh.SetTriangles(collapseTriangles, 0);
+        collapseTriangles.Clear();
+        collapseSubMeshTriangles.Clear();
     }
 
     private static Material farBuildingMaterial;
@@ -1652,6 +2322,7 @@ public class BuildingManager : BaseApiDataManager
                         existingBuilding.SetActive(true);
                     RegisterBuildingDataToCache(buildingData);
                     UpdateBuildingHeight(existingBuilding);
+                    RecordBuildingTerrainSignature(buildingData);
                     RegisterBuildingCell(buildingData.agent_id, existingBuilding.transform.position);
                     MarkBuildingDetailed(buildingData.agent_id, drawLod);
                     VisualModeObject vmo = existingBuilding.GetComponent<VisualModeObject>();
@@ -1739,6 +2410,7 @@ public class BuildingManager : BaseApiDataManager
 
             float buildingBaseHeight = ResolveBuildingBaseHeight(buildingData, parcel, cx, cz);
             buildingGO.transform.position = new Vector3(cx, buildingBaseHeight, cz);
+            RecordBuildingTerrainSignature(buildingData);
             RegisterBuildingCell(buildingData.agent_id, buildingGO.transform.position);
         }
 
@@ -1877,10 +2549,23 @@ public class BuildingManager : BaseApiDataManager
                     float[] cp = building.centerPointArray;
                     if (cp == null || cp.Length < 2) return;
 
-                    DrawLod lod = GetCurrentDrawLod(agentId);
-                    if (lod == DrawLod.Far) CreateFarBuildingObject(building);
-                    else CreateOrUpdateBuildingObject(building, IsBuildingInDynamicCell(building), forceRebuild: true, drawLod: lod);
-                    buildingVersionCache[agentId] = building.version;
+                    // ロード範囲外のセルには表示物を作らない(データだけ更新し、再入場時のマージロードで生成させる)。
+                    // 範囲外でも表示中のオブジェクトがあれば、それは更新する(分割アンロードが後で退避する)。
+                    Vector3 center = new Vector3(cp[0], 0f, cp[1]);
+                    bool shownOutside = buildingObjectsCache.TryGetValue(agentId, out GameObject shownObj) && shownObj != null && shownObj.activeSelf;
+                    if (loadedCells.Contains(TerrainManager.WorldToCell(center)) || shownOutside)
+                    {
+                        DrawLod lod = GetCurrentDrawLod(agentId);
+                        if (lod == DrawLod.Far) CreateFarBuildingObject(building);
+                        else CreateOrUpdateBuildingObject(building, IsBuildingInDynamicCell(building), forceRebuild: true, drawLod: lod);
+                        buildingVersionCache[agentId] = building.version;
+                    }
+                    else
+                    {
+                        RegisterBuildingDataToCache(building);
+                        RegisterBuildingCell(agentId, center, shown: false);
+                        buildingVersionCache.Remove(agentId);
+                    }
                     if (playExplosion)
                     {
                         explodedVersions[agentId] = building.version;

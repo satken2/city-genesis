@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using GeneratedModels;
 
@@ -14,19 +15,35 @@ public class TransitOverlayManager : MonoBehaviour
     private readonly Dictionary<int, TransitStopDetail> details = new();
     private readonly List<Rect> occupied = new();
     private readonly Dictionary<int, List<Vector3>> stopPaths = new();
+    private readonly List<(TransitLineSummary data, TransitRouteGeometry.Route route)> routes = new();
+    private readonly HashSet<int> routeIds = new();
+    private readonly HashSet<int> watchedPaths = new(); // 経路と停留所の下地。形状の変化をこの集合の版で検知する
+    private readonly List<SegmentGroup> groups = new();
+    private readonly Plane[] planes = new Plane[6];
+    private static readonly GUIContent labelContent = new();
+    private static readonly LabelOrder labelOrder = new();
     private OverlayMeshRenderer border, ribbon;
     private PathManager paths;
     private TransitRouteGeometry geometry;
     private GUIStyle labelStyle;
-    private float nextGeometry, nextDetails;
-    private bool fetching, dirty;
+    private float nextCheck, nextSafety, nextDetails;
+    private bool fetching, dirty, routesDirty = true, terrainChanged, labelsSorted;
+    private int routesRevision = -1;
+    private long pathSignature;
+    private Vector3 labelsSortedFor;
     private int session = -1;
     private Vector3 cameraPosition;
     private Quaternion cameraRotation;
     private float cameraFov;
     private int screenWidth, screenHeight;
+    /// <summary>形状変化の確認間隔。変化が無ければ SafetyInterval ごとにだけ作り直す。</summary>
+    private const float CheckInterval = .5f, SafetyInterval = 5f;
+    private const int GroupSize = 32;
     private struct Segment { public Vector3 a, b; public int id; public Color color; }
-    private sealed class StopLabel { public Vector3 position; public string text; public Color color; public readonly List<int> lines = new(); public Rect box; public bool shown; }
+    /// <summary>連続する GroupSize 本の線分の外接箱。視錐台カリングの単位にする。</summary>
+    private struct SegmentGroup { public int start, count; public Bounds bounds; }
+    private sealed class StopLabel { public Vector3 position; public string text; public Color color; public readonly List<int> lines = new(); public Rect box; public bool shown; public float distance, width = -1; }
+    private sealed class LabelOrder : IComparer<StopLabel> { public int Compare(StopLabel a, StopLabel b) => a.distance.CompareTo(b.distance); }
     [Serializable] public sealed class Stop { public int node_id, order; public float[] position; public string name; public int? station_path_id, house_path_id; }
     [Serializable] public sealed class TransitStopDetail { public List<Stop> stops; }
 
@@ -41,7 +58,9 @@ public class TransitOverlayManager : MonoBehaviour
         Instance = this;
         border = CreateRenderer("TransitOutline", 3200);
         ribbon = CreateRenderer("TransitRibbon", 3201);
+        TerrainManager.OnTerrainTileReady += OnTerrainReady;
     }
+    private void OnTerrainReady(Vector2Int cell, Terrain terrain) => terrainChanged = true;
     private OverlayMeshRenderer CreateRenderer(string name, int queue)
     {
         var renderer = OverlayMeshRenderer.Create(name, alwaysOnTop: true, parent: transform);
@@ -52,9 +71,9 @@ public class TransitOverlayManager : MonoBehaviour
     {
         visibleVariants.Clear();
         if (variants != null) visibleVariants.UnionWith(variants);
-        dirty = true; nextDetails = 0;
+        dirty = routesDirty = true; nextDetails = 0;
         TransitSelection.Cancel();
-        if (visibleVariants.Count == 0) { segments.Clear(); labels.Clear(); border.ClearMesh(); ribbon.ClearMesh(); }
+        if (visibleVariants.Count == 0) { segments.Clear(); groups.Clear(); labels.Clear(); border.ClearMesh(); ribbon.ClearMesh(); }
     }
     public void MarkDirty() { dirty = true; nextDetails = 0; }
     public void RefreshLines() { TransitDataStore.Ensure().Refresh(); MarkDirty(); }
@@ -71,7 +90,9 @@ public class TransitOverlayManager : MonoBehaviour
         if (session != store.Session)
         {
             session = store.Session; StopAllCoroutines(); fetching = false;
-            details.Clear(); segments.Clear(); labels.Clear(); dirty = true; nextDetails = 0;
+            details.Clear(); segments.Clear(); groups.Clear(); labels.Clear(); routes.Clear(); routeIds.Clear(); watchedPaths.Clear();
+            dirty = routesDirty = true; nextDetails = 0;
+            border.ClearMesh(); ribbon.ClearMesh();
             TransitSelection.Cancel();
         }
         if (visibleVariants.Count == 0 || Camera.main == null) return;
@@ -81,9 +102,20 @@ public class TransitOverlayManager : MonoBehaviour
         geometry ??= new TransitRouteGeometry(paths);
         if (!fetching && Time.unscaledTime >= nextDetails) StartCoroutine(RefreshDetails());
         Camera cam = Camera.main;
-        if (dirty || Time.unscaledTime >= nextGeometry)
+        float now = Time.unscaledTime;
+        bool due = dirty || now >= nextSafety;
+        if (!due && now >= nextCheck)
         {
-            BuildGeometry(); dirty = false; nextGeometry = Time.unscaledTime + .5f;
+            nextCheck = now + CheckInterval;
+            // 版が分かるパスは地形署名込みで比べられるので、地形の到着で作り直すのは版が不明なパスがあるときだけ。
+            due = store.Revision != routesRevision || PathSignature(out bool uncertain) != pathSignature || (terrainChanged && uncertain);
+        }
+        if (due)
+        {
+            if (routesDirty || store.Revision != routesRevision) BuildRoutes(store);
+            BuildGeometry();
+            pathSignature = PathSignature(out _);
+            dirty = terrainChanged = false; nextSafety = now + SafetyInterval; nextCheck = now + CheckInterval;
             Draw(cam);
         }
         else if (cam.transform.position != cameraPosition || cam.transform.rotation != cameraRotation || cam.fieldOfView != cameraFov || Screen.width != screenWidth || Screen.height != screenHeight) Draw(cam);
@@ -91,6 +123,8 @@ public class TransitOverlayManager : MonoBehaviour
     private IEnumerator RefreshDetails()
     {
         fetching = true; nextDetails = Time.unscaledTime + 10;
+        int requestSession = session;
+        bool changed = false;
         var source = new List<TransitLineSummary>(TransitDataStore.Ensure().Lines);
         var alive = new HashSet<int>();
         foreach (var line in source)
@@ -98,30 +132,96 @@ public class TransitOverlayManager : MonoBehaviour
             alive.Add(line.line_agent_id);
             if (!visibleVariants.Contains(line.path_variant)) continue;
             int id = line.line_agent_id;
-            yield return ApiClient.Get<TransitStopDetail>("/transit/lines/" + id, value =>
+            yield return ApiClient.GetBulk<TransitStopDetail>("/transit/lines/" + id, value =>
             {
-                if (value != null) { details[id] = value; dirty = true; }
-            }, _ => { });
+                if (value == null) return;
+                if (!details.TryGetValue(id, out var current)) { details[id] = value; dirty = true; return; } // 初回表示は応答ごとに出す
+                if (SameStops(current, value)) return;
+                details[id] = value; changed = true;
+            }, _ => { }, timingLabel: "/transit/lines/{id}", isCanceled: () => session != requestSession);
         }
-        foreach (int id in new List<int>(details.Keys)) if (!alive.Contains(id)) details.Remove(id);
+        foreach (int id in new List<int>(details.Keys)) if (!alive.Contains(id) && details.Remove(id)) changed = true;
+        if (changed) dirty = true;
         fetching = false;
     }
-    private void BuildGeometry()
+    private static bool SameStops(TransitStopDetail a, TransitStopDetail b)
     {
-        segments.Clear(); labels.Clear(); stopPaths.Clear();
-        var routes = new List<(TransitLineSummary data, TransitRouteGeometry.Route route)>();
-        var ids = new HashSet<int>();
-        foreach (var line in TransitDataStore.Ensure().Lines)
+        if (a.stops == null || b.stops == null) return a.stops == b.stops;
+        if (a.stops.Count != b.stops.Count) return false;
+        for (int i = 0; i < a.stops.Count; i++)
+        {
+            Stop x = a.stops[i], y = b.stops[i];
+            if (x == null || y == null) { if (x != y) return false; continue; }
+            if (x.node_id != y.node_id || x.order != y.order || x.station_path_id != y.station_path_id || x.house_path_id != y.house_path_id
+                || !string.Equals(x.name, y.name, StringComparison.Ordinal) || !SamePosition(x.position, y.position)) return false;
+        }
+        return true;
+    }
+    private static bool SamePosition(float[] a, float[] b)
+    {
+        if (a == null || b == null) return a == b;
+        if (a.Length != b.Length) return false;
+        for (int i = 0; i < a.Length; i++) if (a[i] != b[i]) return false;
+        return true;
+    }
+    /// <summary>表示中の路線の走行経路を作る。路線一覧か表示種別が変わったときだけ呼ぶ。</summary>
+    private void BuildRoutes(TransitDataStore store)
+    {
+        routes.Clear(); routeIds.Clear();
+        foreach (var line in store.Lines)
         {
             if (!visibleVariants.Contains(line.path_variant)) continue;
             var route = new TransitRouteGeometry.Route { motion = new TransitMotionClock(line.journeys), VehicleType = VehicleModelConfig.GetTransitVehicleType(line.path_variant) };
             TransitRouteGeometry.BuildRuns(route);
             routes.Add((line, route));
-            foreach (var run in route.runs) ids.Add(run.path);
+            foreach (var run in route.runs) routeIds.Add(run.path);
         }
+        routesRevision = store.Revision; routesDirty = false;
+    }
+    /// <summary>
+    /// 監視中のパスについて、データの参照・version・描画形状の版をまとめた順序非依存の署名。
+    /// 形状の版が -1(キャッシュ外)のパスがあれば uncertain を立て、地形の到着を変化として扱わせる。
+    /// </summary>
+    private long PathSignature(out bool uncertain)
+    {
+        uncertain = false;
+        ulong sum = 0;
+        unchecked
+        {
+            foreach (int id in watchedPaths)
+            {
+                ulong term = (ulong)id;
+                var data = paths.GetPathData(id);
+                if (data != null)
+                {
+                    long revision = paths.GetPathGeometryRevision(id);
+                    if (revision < 0) uncertain = true;
+                    term = Mix(term ^ Mix((ulong)data.version << 32 ^ (uint)RuntimeHelpers.GetHashCode(data)));
+                    term = Mix(term ^ Mix((ulong)revision));
+                }
+                sum += Mix(term);
+            }
+            return (long)sum;
+        }
+    }
+    private static ulong Mix(ulong x)
+    {
+        unchecked
+        {
+            x += 0x9E3779B97F4A7C15UL;
+            x = (x ^ (x >> 30)) * 0xBF58476D1CE4E5B9UL;
+            x = (x ^ (x >> 27)) * 0x94D049BB133111EBUL;
+            return x ^ (x >> 31);
+        }
+    }
+    private void BuildGeometry()
+    {
+        segments.Clear(); groups.Clear(); labels.Clear(); stopPaths.Clear();
+        watchedPaths.Clear(); watchedPaths.UnionWith(routeIds);
+        labelsSorted = false;
         var candidates = new List<PathSummary>();
-        foreach (int id in ids) { var data = paths.GetPathData(id); if (data != null) candidates.Add(data); }
-        geometry.Refresh(ids, candidates);
+        foreach (int id in routeIds) { var data = paths.GetPathData(id); if (data != null) candidates.Add(data); }
+        geometry.Refresh(routeIds, candidates);
         var grouped = new Dictionary<string, StopLabel>();
         foreach (var item in routes)
         {
@@ -144,7 +244,8 @@ public class TransitOverlayManager : MonoBehaviour
             if (!details.TryGetValue(item.data.line_agent_id, out var detail) || detail.stops == null) continue;
             foreach (var stop in detail.stops)
             {
-                if (stop.position == null || stop.position.Length < 3 || !TryStopPosition(stop, out var position)) continue;
+                if (stop?.station_path_id != null) watchedPaths.Add(stop.station_path_id.Value);
+                if (stop == null || stop.position == null || stop.position.Length < 3 || !TryStopPosition(stop, out var position)) continue;
                 string key = stop.house_path_id.HasValue ? "house:" + stop.house_path_id : "stop:" + stop.station_path_id + ":" + Mathf.RoundToInt(position.x) + ":" + Mathf.RoundToInt(position.z);
                 if (!grouped.TryGetValue(key, out var label))
                 {
@@ -153,6 +254,13 @@ public class TransitOverlayManager : MonoBehaviour
                 }
                 if (!label.lines.Contains(item.data.line_agent_id)) label.lines.Add(item.data.line_agent_id);
             }
+        }
+        for (int start = 0; start < segments.Count; start += GroupSize)
+        {
+            int count = Mathf.Min(GroupSize, segments.Count - start);
+            var bounds = new Bounds(segments[start].a, Vector3.zero);
+            for (int i = start; i < start + count; i++) { bounds.Encapsulate(segments[i].a); bounds.Encapsulate(segments[i].b); }
+            groups.Add(new SegmentGroup { start = start, count = count, bounds = bounds });
         }
     }
     private bool TryStopPosition(Stop stop, out Vector3 position)
@@ -179,19 +287,42 @@ public class TransitOverlayManager : MonoBehaviour
     private void Draw(Camera cam)
     {
         border.BeginFrame(); ribbon.BeginFrame();
-        foreach (var segment in segments)
+        GeometryUtility.CalculateFrustumPlanes(cam, planes);
+        Vector3 eye = cam.transform.position;
+        // OverlayMeshRenderer と同じ換算(投影方式によらず距離×tan(fov/2)/画面高の半分)で、帯の外縁が入る余白を取る。
+        float perPixel = Mathf.Tan(cam.fieldOfView * .5f * Mathf.Deg2Rad) / Mathf.Max(1, Screen.height * .5f);
+        foreach (var group in groups)
         {
-            border.AddSolidLine(segment.a, segment.b, new Color(.04f,.05f,.07f,1), 12);
-            ribbon.AddSolidLine(segment.a, segment.b, segment.color, 8);
+            var bounds = group.bounds;
+            float reach = Vector3.Distance(eye, bounds.center) + bounds.extents.magnitude;
+            bounds.Expand(2 * 12 * reach * perPixel);
+            if (!GeometryUtility.TestPlanesAABB(planes, bounds)) continue;
+            int end = Mathf.Min(group.start + group.count, segments.Count);
+            for (int i = group.start; i < end; i++)
+            {
+                var segment = segments[i];
+                border.AddSolidLine(segment.a, segment.b, new Color(.04f,.05f,.07f,1), 12);
+                ribbon.AddSolidLine(segment.a, segment.b, segment.color, 8);
+            }
         }
         foreach (var label in labels)
         {
+            float margin = 8 * Vector3.Distance(eye, label.position) * perPixel;
+            if (!GeometryUtility.TestPlanesAABB(planes, new Bounds(label.position, Vector3.one * (2 * margin)))) continue;
             border.AddCircle(label.position, 8, Color.black);
             ribbon.AddCircle(label.position, 5, Color.white);
         }
         border.EndFrame(cam); ribbon.EndFrame(cam);
+        SortLabels(eye);
         cameraPosition = cam.transform.position; cameraRotation = cam.transform.rotation; cameraFov = cam.fieldOfView;
         screenWidth = Screen.width; screenHeight = Screen.height;
+    }
+    /// <summary>ラベルを近い順に並べる。OnGUI の配置は先着順なので、近景のラベルが優先される。</summary>
+    private void SortLabels(Vector3 eye)
+    {
+        foreach (var label in labels) label.distance = (label.position - eye).sqrMagnitude;
+        labels.Sort(labelOrder);
+        labelsSorted = true; labelsSortedFor = eye;
     }
     public List<int> Pick(Camera cam, Vector2 mouse)
     {
@@ -221,7 +352,7 @@ public class TransitOverlayManager : MonoBehaviour
         labelStyle ??= new GUIStyle(GUI.skin.label) { font = UiFontProvider.GetFont(14), fontSize = 14, alignment = TextAnchor.MiddleLeft };
         occupied.Clear();
         Camera cam = Camera.main;
-        labels.Sort((a,b) => (a.position-cam.transform.position).sqrMagnitude.CompareTo((b.position-cam.transform.position).sqrMagnitude));
+        if (!labelsSorted || labelsSortedFor != cam.transform.position) SortLabels(cam.transform.position);
         int count = 0;
         foreach (var label in labels)
         {
@@ -229,7 +360,8 @@ public class TransitOverlayManager : MonoBehaviour
             Vector3 projected = cam.WorldToScreenPoint(label.position);
             if (count >= 80 || projected.z <= cam.nearClipPlane || projected.x < 0 || projected.x > Screen.width || projected.y < 0 || projected.y > Screen.height) continue;
             Vector2 anchor = new Vector2(projected.x, Screen.height-projected.y);
-            float width = Mathf.Min(300, labelStyle.CalcSize(new GUIContent(label.text)).x + 24);
+            if (label.width < 0) { labelContent.text = label.text; label.width = Mathf.Min(300, labelStyle.CalcSize(labelContent).x + 24); }
+            float width = label.width;
             if (!WorldCallout.TryPlace(anchor, new Vector2(width,28), occupied, out label.box)) continue;
             label.shown = true; count++;
             WorldCallout.Draw(anchor, label.box, label.text, label.color, labelStyle);
@@ -242,6 +374,7 @@ public class TransitOverlayManager : MonoBehaviour
     }
     private void OnDestroy()
     {
+        TerrainManager.OnTerrainTileReady -= OnTerrainReady;
         foreach (var renderer in new[] { border, ribbon })
         {
             if (renderer == null) continue;

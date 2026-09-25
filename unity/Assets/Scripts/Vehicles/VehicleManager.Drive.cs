@@ -22,7 +22,8 @@ public partial class VehicleManager
         if (!roads.TryGetValue(path, out var road)) return false;
         StopDrive();
         int variant = VehicleModelResolver.PickVariantId(type, Random.Range(0, int.MaxValue));
-        var v = new Vehicle { vehicleType = type, variantId = variant, go = Acquire(type, variant),
+        var go = Acquire(type, ref variant);
+        var v = new Vehicle { vehicleType = type, variantId = variant, go = go,
             speed = MeanSpeed(path, type), age = fadeDuration };
         v.SetPath(path, road.line, forward, road.line.Project(point));
         SetLane(v, road, false);

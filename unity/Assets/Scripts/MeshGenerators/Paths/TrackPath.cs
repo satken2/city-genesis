@@ -151,7 +151,7 @@ public class TrackPath : IPathMeshGenerator
     // 線路に歩道はないため、歩道セットバック（エンドキャップ用）は受け取るだけで使用しない。
     public PathMeshResult Generate(PathSummary pathData, List<Vector3> points, SidewalkSetback startSidewalkSetback = default, SidewalkSetback endSidewalkSetback = default)
     {
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[TrackPath] Generate開始: path_id={pathData?.path_id ?? -1}, path_variant={pathData?.path_variant ?? -1}, path_type={pathData?.path_type ?? -1}, points={points?.Count ?? 0}");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[TrackPath] Generate開始: path_id={pathData?.path_id ?? -1}, path_variant={pathData?.path_variant ?? -1}, path_type={pathData?.path_type ?? -1}, points={points?.Count ?? 0}");
 
         if (points == null || points.Count < 2)
         {
@@ -206,7 +206,7 @@ public class TrackPath : IPathMeshGenerator
             colliderMesh.name = $"TrackCollider_{pathData.path_id}";
         }
 
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[TrackPath] Generate完了: 子オブジェクト数={container.transform.childCount}, colliderMesh={(colliderMesh != null ? "あり" : "なし")}");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[TrackPath] Generate完了: 子オブジェクト数={container.transform.childCount}, colliderMesh={(colliderMesh != null ? "あり" : "なし")}");
         return new PathMeshResult(colliderMesh, true, container);
     }
 
@@ -329,7 +329,7 @@ public class TrackPath : IPathMeshGenerator
         string variantBase = $"Models/Paths/p{pathData.path_variant}";
         string typeBase = $"Models/Paths/p{pathData.path_type}";
         int laneCount = Mathf.Max(1, lanes);
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[TrackPath] CreateTrackParts開始: variant={variantBase}, type={typeBase}, width={width}, lanes={laneCount}, wallWidth={wallWidth}, wireSpacing={wireSpacing}");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[TrackPath] CreateTrackParts開始: variant={variantBase}, type={typeBase}, width={width}, lanes={laneCount}, wallWidth={wallWidth}, wireSpacing={wireSpacing}");
 
         // 地上・高架・地下はバリアントではなくアンカーの高さで決まるため、桁・スラブ軌道・高欄の
         // 描き分けは「地表より高い区間」の percent 区間で行う。地表区間（開削区間を含む）は無印パーツ、
@@ -351,7 +351,7 @@ public class TrackPath : IPathMeshGenerator
             if (ballast == null) ballast = part;
         }
         if (!constructionOnly) BrickArcadeGenerator.Generate(container, spline, pathData, width);
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[TrackPath] body(道床): {(ballast != null ? "生成成功" : "プレハブなし")} 高架区間={elevatedRanges.Count}");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[TrackPath] body(道床): {(ballast != null ? "生成成功" : "プレハブなし")} 高架区間={elevatedRanges.Count}");
 
         // 結合区間では隣の線路との道床の隙間をバラスト帯で埋め、一体の道床に見せる。
         // 道床プレハブが無いバリアント（モノレール等）は道床自体が無いため充填もしない。
@@ -378,7 +378,7 @@ public class TrackPath : IPathMeshGenerator
                 if (track != null) placedTracks++;
             }
         }
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[TrackPath] track(軌道): {placedTracks}/{laneCount}本配置");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[TrackPath] track(軌道): {placedTracks}/{laneCount}本配置");
         if (!constructionOnly) CreateTerminations(container, points, corridor, pathData, width, laneCount, platformLeft, platformRight, variantBase, typeBase);
 
         // 道床も軌道も無いバリアントは白いストリップにフォールバックする（ゲームプレイ継続用）。
@@ -602,12 +602,12 @@ public class TrackPath : IPathMeshGenerator
         // 支柱・柵の周期を保つため著作タイル長で並べる。曲線追従用の分割はモデル内に持つ。
         // 淵（platform）: 原点を線路中心線に合わせ、設置面（線路面）で配置する。
         GameObject edge = RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/platform", 0f, 0f, RoadPartHeights.PLATFORM_BASE_ABOVE_SPLINE, leftSide, $"{typeBase}/platform", stretchToWidth: false, compensatePivot: false, maxTileLength: 0f);
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[TrackPath] platform 淵({sideLabel}): {(edge != null ? "生成成功" : "プレハブなし")}");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[TrackPath] platform 淵({sideLabel}): {(edge != null ? "生成成功" : "プレハブなし")}");
 
         // デッキ（ホーム上面）: 淵（中心線から PLATFORM_EDGE_OFFSET）から外縁
         // （width/2 + platform_width）まで水平の板を動的生成する。
         int deckRuns = BuildPlatformDeckRuns(container, corridor, points, rightDir, cumLength, leftSide, PLATFORM_EDGE_OFFSET, halfWidth + platformWidth, deckMaterial);
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[TrackPath] platform デッキ({sideLabel}): {deckRuns}区間");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[TrackPath] platform デッキ({sideLabel}): {deckRuns}区間");
 
         // 外縁（platform_wall）: 原点を線路中心線に合わせ、設置面（線路面）で配置する
         // （外縁位置への横移動はプレハブ形状が持つ）。
@@ -803,6 +803,7 @@ public class TrackPath : IPathMeshGenerator
         go.transform.SetParent(container.transform, false);
         go.AddComponent<MeshFilter>().sharedMesh = mesh;
         go.AddComponent<MeshRenderer>().sharedMaterial = material;
+        go.AddComponent<IntersectionMeshOwner>().OwnedMesh = mesh;
     }
 
     /// <summary>
@@ -947,7 +948,7 @@ public class TrackPath : IPathMeshGenerator
             count++;
         }
 
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[TrackPath] 架線柱配置完了: {placedCount}組");
+        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[TrackPath] 架線柱配置完了: {placedCount}組");
     }
 
     /// <summary>
@@ -1196,6 +1197,7 @@ public class TrackPath : IPathMeshGenerator
         go.transform.SetParent(container.transform, false);
         go.AddComponent<MeshFilter>().sharedMesh = mesh;
         go.AddComponent<MeshRenderer>().sharedMaterial = bodyMaterial;
+        go.AddComponent<IntersectionMeshOwner>().OwnedMesh = mesh;
     }
 
     /// <summary>
@@ -1224,7 +1226,7 @@ public class TrackPath : IPathMeshGenerator
         MeshFilter prefabMf = prefab != null ? prefab.GetComponent<MeshFilter>() : null;
         if (prefabMf == null || prefabMf.sharedMesh == null)
         {
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, $"[TrackPath] レールコネクタ: rail/track プレハブなし (variant={connector.PrefabVariant}, type={connector.FallbackType})");
+            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[TrackPath] レールコネクタ: rail/track プレハブなし (variant={connector.PrefabVariant}, type={connector.FallbackType})");
             return;
         }
 
@@ -1304,8 +1306,16 @@ public class TrackPath : IPathMeshGenerator
         }
 
         if (go.GetComponent<MeshFilter>() == null) go.AddComponent<MeshFilter>();
-        splineMesh.updateMethod = SplineUser.UpdateMethod.Update;
-        splineMesh.Rebuild();
+        // 呼び出し元の交差点更新の中で構築し、計測外の次フレームの Update へ持ち越さない。
+        try
+        {
+            splineMesh.RebuildImmediate();
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[TrackPath] レールコネクタ Rebuild失敗 '{go.name}': {ex}");
+        }
+        RoadPath.SealSplineMesh(splineMesh);
     }
 
     /// <summary>

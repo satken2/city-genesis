@@ -6,11 +6,44 @@ using GeneratedModels;
 /// <summary>道路・線路の通行空間に入る橋脚を、描画順に依存せず省くための幾何判定。</summary>
 public static class PillarClearance
 {
+    /// <summary>
+    /// 通行空間。Points は PathManager の点列キャッシュと共有することがあるので読み取り専用として扱い、
+    /// 高さの持ち上げは YOffset で表す(判定時に各点のYへ加える)。
+    /// </summary>
     public sealed class Corridor
     {
         public List<Vector3> Points;
         public float HalfWidth;
         public float Height;
+        public float YOffset;
+
+        // テストは Points と HalfWidth を外から差し替えるので、XZ範囲は Points の参照と点数で検証し、HalfWidth は判定時に毎回使う。
+        private List<Vector3> boundsSource;
+        private int boundsCount = -1;
+        private float minX, maxX, minZ, maxZ;
+
+        /// <summary>中心点が点列のXZ範囲から radius より外にあれば真(どの線分とも交差し得ない)。</summary>
+        internal bool IsOutsideXZ(Vector3 center, float radius)
+        {
+            if (!ReferenceEquals(boundsSource, Points) || boundsCount != Points.Count)
+            {
+                boundsSource = Points;
+                boundsCount = Points.Count;
+                minX = minZ = float.PositiveInfinity;
+                maxX = maxZ = float.NegativeInfinity;
+                for (int i = 0; i < Points.Count; i++)
+                {
+                    Vector3 p = Points[i];
+                    if (p.x < minX) minX = p.x;
+                    if (p.x > maxX) maxX = p.x;
+                    if (p.z < minZ) minZ = p.z;
+                    if (p.z > maxZ) maxZ = p.z;
+                }
+            }
+            // 距離判定の float/double 丸め差で交差を取りこぼさないよう、わずかに広げて棄却する。
+            double r = radius + 1e-3;
+            return center.x < minX - r || center.x > maxX + r || center.z < minZ - r || center.z > maxZ + r;
+        }
     }
 
     public static Func<PathSummary, List<Corridor>> NeighborProvider;
@@ -47,10 +80,13 @@ public static class PillarClearance
         float partRadius = new Vector2(part.extents.x, part.extents.z).magnitude;
         foreach (var corridor in corridors)
         {
+            if (corridor.Points == null || corridor.Points.Count < 2) continue;
             float radius = partRadius + corridor.HalfWidth + Margin;
+            if (corridor.IsOutsideXZ(part.center, radius)) continue;
+            Vector3 lift = new Vector3(0f, corridor.YOffset, 0f);
             for (int i = 1; i < corridor.Points.Count; i++)
             {
-                Vector3 a = corridor.Points[i - 1], b = corridor.Points[i];
+                Vector3 a = corridor.Points[i - 1] + lift, b = corridor.Points[i] + lift;
                 double lo = 0, hi = 1;
                 double dy = b.y - a.y;
                 double minY = part.min.y - corridor.Height, maxY = part.max.y;

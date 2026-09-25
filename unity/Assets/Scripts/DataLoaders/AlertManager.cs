@@ -20,7 +20,7 @@ using UnityEngine.UI;
 /// 表示方式
 /// --------
 /// ZoneManager / ResourceManager と同じく ScreenSpaceOverlay Canvas 上に Image を配置する。
-/// Update() で毎フレーム Camera.WorldToScreenPoint を使ってワールド座標からスクリーン座標に
+/// Update() で Camera.WorldToScreenPoint を使ってワールド座標からスクリーン座標に
 /// 変換し、RectTransform.anchoredPosition を更新する。これにより **カメラからの距離に依存せず
 /// 常に一定のスクリーンサイズで表示される**。建物/道路の子にはしないため、VisualModeObject の
 /// ステータス連動や LOD アンロードの影響も受けない。
@@ -49,16 +49,20 @@ using UnityEngine.UI;
 ///
 /// リフレッシュタイミング
 /// --------------------
-/// - game:end IPC 受信時(エポック完走後): GameStateManager から Refresh(forceRefresh: true) を呼ぶ。
-/// - カメラセル変更時: CellDataLoader から Refresh() を呼ぶ。短時間の連続呼び出しはクールダウンで間引く。
-/// - ReloadAllData / ForceReloadAllData 時: 同様に Refresh() を呼ぶ。
+/// - ReloadAllData / ForceReloadAllData 時(エポック後・編集後を含む): CellDataLoader から Refresh() を呼ぶ。
+/// - 表示フィルタ変更時: Refresh(forceRefresh: true)。
+/// - カメラセル変更時: CellDataLoader から RefreshPositions() を呼ぶ。alert はエポックと編集でしか
+///   変わらないため HTTP は取らず、最後の応答を再適用してアイコン高さと火災エフェクトの規模だけを
+///   ロード済みの地形・建物に合わせ直す。
+/// - Refresh / RefreshPositions はクールダウン中・取得中の要求を捨てず、Update で後から1回にまとめて実行する。
 ///
 /// パフォーマンス設計
 /// ------------------
-/// - アラート対象は都市規模でも数十〜数百件程度。スクリーン座標更新も
-///   カメラ移動が閾値未満のフレームはスキップして間引く(ZoneManager と同じ基準)。
 /// - versionキャッシュは持たない(BuildingManager/PathManagerのような差分スキップはしない)。
-///   毎回フル再構築し、HashSet<string> で前回セットとの差分を取って追加/削除する。
+///   応答は毎回全件を走査し、表示ビット構成と廃墟表示が前回と同じ対象はアイコンの GameObject を
+///   使い回して座標だけを更新する。応答に無くなった対象は破棄する。
+/// - スクリーン座標とスケールは、カメラ・画面サイズが変わったフレームか応答の適用直後にだけ再計算する。
+///   背後・画面外のアイコンは非アクティブにして、ボビングの位置更新と Canvas の再バッチから外す。
 /// </summary>
 public class AlertManager : MonoBehaviour
 {
@@ -180,19 +184,41 @@ public class AlertManager : MonoBehaviour
     private Canvas _uiCanvas;
     private RectTransform _uiCanvasRect;
 
-    // 1オブジェクトに複数アイコンを並べるため、キー entityType:id に対して List<GameObject> を保持する。
-    // ZoneManager.zoneIconUIs と静的な構造。
-    private readonly Dictionary<string, List<GameObject>> _icons = new();
-    private readonly Dictionary<string, Vector3> _worldPositions = new();
-    private readonly Dictionary<string, Vector2> _baseScreenPositions = new();
-    private readonly Dictionary<string, bool> _isBehindCache = new();
+    /// <summary>アラート対象1件(キー entityType:id)のアイコン群と、スクリーン配置のキャッシュ。</summary>
+    private sealed class AlertIcon
+    {
+        public readonly List<RectTransform> icons = new();
+        public int bits;         // 表示中のアラートビット(フィルタ適用後)。構成が同じなら GameObject を使い回す。
+        public bool ruin;        // 廃墟アイコンを表示中か
+        public Vector3 world;
+        public Vector2 screen;
+        public float scale = 1f; // icons に書き込み済みの localScale
+        public float phase;      // ボビングの位相。複数アイコンが同期して動かないようにキーのハッシュで決める
+        public bool shown = true;
+    }
+
+    private readonly Dictionary<string, AlertIcon> _entries = new();
+    private readonly HashSet<string> _seenKeys = new();
+    private readonly List<string> _staleKeys = new();
 
     private bool _isRefreshing;
     private float _lastRefreshTime = -1f;
+    private bool _refreshQueued;
+    private bool _queuedForce;
+    // ClearAll・無効化で進める。取得中の旧応答を捨てるための世代番号。
+    private int _generation;
+
+    private AlertsResponse _lastResponse;
+    private bool _positionsQueued;
+    private float _lastPositionsTime = -1f;
 
     // カメラ変化検知によるUI位置更新間引き用(ZoneManager と同じ基準)。
     private Vector3 _lastCamPos = Vector3.negativeInfinity;
     private Quaternion _lastCamRot = Quaternion.identity;
+    private float _lastCamFov = -1f;
+    private int _lastScreenWidth = -1;
+    private int _lastScreenHeight = -1;
+    private bool _screenDirty = true;
     private const float CAMERA_POS_THRESHOLD = 0.005f;
     private const float CAMERA_ROT_THRESHOLD = 0.01f;
 
@@ -211,26 +237,57 @@ public class AlertManager : MonoBehaviour
         if (Instance == this) Instance = null;
     }
 
+    private void OnDisable()
+    {
+        // GameObject の非アクティブ化で RefreshCoroutine が止まると _isRefreshing が戻らないため、
+        // 取得中の世代を捨て、再び有効になった後の Update で取り直す。
+        if (!_isRefreshing) return;
+        _generation++;
+        _isRefreshing = false;
+        _refreshQueued = true;
+    }
+
     /// <summary>
-    /// アラートアイコンを更新する。
-    /// game:end IPC受信時やカメラセル変更時に呼ばれる。
-    /// 短時間に連続呼び出しされた場合はクールダウンとしてスキップする(forceRefresh=trueで回避)。
+    /// /alerts を取り直してアラートアイコンを更新する。
+    /// ReloadAllData / ForceReloadAllData・表示フィルタ変更時に呼ばれる。
+    /// クールダウン中(forceRefresh=false のとき)・取得中・無効中の要求は捨てずに保留し、
+    /// Update で実行できるようになった時点で1回にまとめて取得する。forceRefresh はクールダウンを無視する。
     /// </summary>
     public void Refresh(bool forceRefresh = false)
     {
-        if (!forceRefresh && Time.time - _lastRefreshTime < refreshCooldownSeconds) return;
-        _lastRefreshTime = Time.time;
+        if (_isRefreshing || !isActiveAndEnabled
+            || (!forceRefresh && Time.time - _lastRefreshTime < refreshCooldownSeconds))
+        {
+            _refreshQueued = true;
+            _queuedForce |= forceRefresh;
+            return;
+        }
+        StartRefresh();
+    }
 
-        if (_isRefreshing) return;
-        StartCoroutine(RefreshCoroutine());
+    /// <summary>
+    /// 表示範囲の変化に合わせて、最後に取得した /alerts 応答をアイコン高さと火災エフェクトへ再適用する。
+    /// カメラセル変更時に呼ばれる。HTTP は取らず、Update でクールダウン単位にまとめて実行する。
+    /// 応答が未取得(直前の取得が失敗した等)なら、再適用の代わりに取得を要求する。
+    /// </summary>
+    public void RefreshPositions()
+    {
+        if (_lastResponse == null) { Refresh(); return; }
+        _positionsQueued = true;
     }
 
     /// <summary>
     /// 全てのアラート表現(アイコンと火災エフェクト)をクリアする。
-    /// ForceReloadAllData 等で一括破棄したい場合に使う。
+    /// ForceReloadAllData・セッションリセットで呼ばれ、取得中の応答と保留中の要求も破棄する。
     /// </summary>
     public void ClearAll()
     {
+        _generation++;
+        _isRefreshing = false;
+        _refreshQueued = false;
+        _queuedForce = false;
+        _lastResponse = null;
+        _positionsQueued = false;
         ClearIcons();
         if (FireEffectManager.Instance != null)
         {
@@ -241,30 +298,35 @@ public class AlertManager : MonoBehaviour
     /// <summary>アイコンだけをクリアする。火災エフェクトは FireEffectManager が別に保持する。</summary>
     private void ClearIcons()
     {
-        foreach (var kvp in _icons)
+        foreach (var entry in _entries.Values)
         {
-            foreach (var iconGO in kvp.Value)
-            {
-                if (iconGO != null) Destroy(iconGO);
-            }
+            DestroyIconObjects(entry);
         }
-        _icons.Clear();
-        _worldPositions.Clear();
-        _baseScreenPositions.Clear();
-        _isBehindCache.Clear();
+        _entries.Clear();
     }
 
-    private IEnumerator RefreshCoroutine()
+    private void StartRefresh()
     {
+        _lastRefreshTime = Time.time;
         _isRefreshing = true;
+        StartCoroutine(RefreshCoroutine(_generation));
+    }
 
+    private IEnumerator RefreshCoroutine(int generation)
+    {
         AlertsResponse response = null;
         string errorMsg = null;
-        yield return ApiClient.Get<AlertsResponse>(
+        yield return ApiClient.GetBulk<AlertsResponse>(
             "/alerts/",
             r => response = r,
-            e => errorMsg = e
+            e => errorMsg = e,
+            timingLabel: "/alerts",
+            isCanceled: () => generation != _generation
         );
+
+        // 世代を進めた側(ClearAll / OnDisable)が _isRefreshing を戻している。
+        if (generation != _generation) yield break;
+        _isRefreshing = false;
 
         if (errorMsg != null)
         {
@@ -273,14 +335,36 @@ public class AlertManager : MonoBehaviour
         }
         else if (response != null)
         {
+            // 新しい応答の適用でアイコン高さも解決し直すため、保留中の再適用は不要になる。
+            _positionsQueued = false;
             ApplyAlerts(response);
         }
+    }
 
-        _isRefreshing = false;
+    /// <summary>保留中の取得要求と再適用要求を、実行できるようになった時点で消化する。</summary>
+    private void ProcessQueuedRequests()
+    {
+        if (_refreshQueued && !_isRefreshing
+            && (_queuedForce || Time.time - _lastRefreshTime >= refreshCooldownSeconds))
+        {
+            _refreshQueued = false;
+            _queuedForce = false;
+            StartRefresh();
+        }
+
+        if (_positionsQueued && _lastResponse != null && !_isRefreshing
+            && Time.time - _lastPositionsTime >= refreshCooldownSeconds)
+        {
+            _positionsQueued = false;
+            _lastPositionsTime = Time.time;
+            ApplyAlerts(_lastResponse);
+        }
     }
 
     private void ApplyAlerts(AlertsResponse response)
     {
+        _lastResponse = response;
+
         // 火災エフェクトはアイコン用のCanvasにもAlertIconFactoryにも依存しないため、
         // アイコン側の前提が揃っているかに関わらず先に同期する。
         if (FireEffectManager.Instance != null)
@@ -299,13 +383,13 @@ public class AlertManager : MonoBehaviour
             return;
         }
 
-        var newKeys = new HashSet<string>();
+        _seenKeys.Clear();
         if (response.agents != null)
         {
             foreach (var item in response.agents)
             {
                 string key = MakeKey("agent", item.id);
-                newKeys.Add(key);
+                _seenKeys.Add(key);
                 UpdateIcons(key, item, "agent");
             }
         }
@@ -314,43 +398,42 @@ public class AlertManager : MonoBehaviour
             foreach (var item in response.paths)
             {
                 string key = MakeKey("path", item.id);
-                newKeys.Add(key);
+                _seenKeys.Add(key);
                 UpdateIcons(key, item, "path");
             }
         }
 
         // 不要になったアイコン(アラートが解消された対象)を破棄
-        var toRemove = new List<string>();
-        foreach (var kvp in _icons)
+        _staleKeys.Clear();
+        foreach (var key in _entries.Keys)
         {
-            if (!newKeys.Contains(kvp.Key)) toRemove.Add(kvp.Key);
+            if (!_seenKeys.Contains(key)) _staleKeys.Add(key);
         }
-        foreach (var key in toRemove)
+        foreach (var key in _staleKeys)
         {
             DestroyIcons(key);
         }
+        _staleKeys.Clear();
+        _seenKeys.Clear();
 
-        // 直ちにスクリーン座標を更新するため、カメラ位置トラッキングをリセット。
-        _lastCamPos = Vector3.negativeInfinity;
+        _screenDirty = true;
     }
 
-    /// <summary>
-    /// 指定キーのアイコンを破棄し、位置・スクリーン座標のキャッシュごと登録を消す。
-    /// キャッシュを残すと `_icons` との件数不一致でスクリーン座標更新が毎フレーム走る。
-    /// </summary>
+    /// <summary>指定キーのアイコンを破棄し、スクリーン配置のキャッシュごと登録を消す。</summary>
     private void DestroyIcons(string key)
     {
-        if (_icons.TryGetValue(key, out var iconList))
+        if (!_entries.TryGetValue(key, out var entry)) return;
+        DestroyIconObjects(entry);
+        _entries.Remove(key);
+    }
+
+    private static void DestroyIconObjects(AlertIcon entry)
+    {
+        foreach (var rt in entry.icons)
         {
-            foreach (var iconGO in iconList)
-            {
-                if (iconGO != null) Destroy(iconGO);
-            }
-            _icons.Remove(key);
+            if (rt != null) Destroy(rt.gameObject);
         }
-        _worldPositions.Remove(key);
-        _baseScreenPositions.Remove(key);
-        _isBehindCache.Remove(key);
+        entry.icons.Clear();
     }
 
     private void UpdateIcons(string key, AlertItem item, string entityType)
@@ -361,10 +444,11 @@ public class AlertManager : MonoBehaviour
         // 表示フィルタの専用ビット ALERT_DISPLAY_RUIN で agent/path まとめてON/OFFできる。
         bool isRuin = item.status == Constants.STATUS_COLLAPSED;
         bool showRuin = isRuin && (_filterMask & Constants.ALERT_DISPLAY_RUIN) != 0;
-        List<int> activeBits = EnumerateActiveBits(item.alert, entityType);
+        int[] targetBits = entityType == "agent" ? AGENT_ALERT_BITS : PATH_ALERT_BITS;
+        int bits = ActiveBitMask(item.alert, entityType);
 
         // 表示対象が1つも無ければ(フィルタで全て落ちた場合を含む)、残っているアイコンを破棄して終了する。
-        if (!showRuin && activeBits.Count == 0)
+        if (!showRuin && bits == 0)
         {
             DestroyIcons(key);
             return;
@@ -391,24 +475,28 @@ public class AlertManager : MonoBehaviour
         }
 
         Vector3 worldPos = new Vector3(x, groundHeight + yOffset, z);
-        _worldPositions[key] = worldPos;
 
-        // 立っているビットを列挙し、ビットごとにアイコンを(再)生成する。
-        // 既存のアイコンリストは一度全破棄してから再構築するのが最も単純で安全。
-        // アイコン数は高々ビット数(=alert定数の数)なので数件程度、再生成コストは無視できる。
-        if (_icons.TryGetValue(key, out var existingList))
+        if (_entries.TryGetValue(key, out var entry))
         {
-            foreach (var iconGO in existingList)
+            if (entry.bits == bits && entry.ruin == showRuin && entry.icons.Count > 0)
             {
-                if (iconGO != null) Destroy(iconGO);
+                entry.world = worldPos;
+                return;
             }
-            existingList.Clear();
+            DestroyIconObjects(entry);
         }
         else
         {
-            existingList = new List<GameObject>();
-            _icons[key] = existingList;
+            // 桁落ちによるカクつきを防ぐため、位相シフトは [0, 2π] の範囲に収める。
+            entry = new AlertIcon { phase = (Mathf.Abs(key.GetHashCode()) % 1000) / 1000f * Mathf.PI * 2f };
+            _entries[key] = entry;
         }
+
+        entry.bits = bits;
+        entry.ruin = showRuin;
+        entry.world = worldPos;
+        entry.scale = 1f;
+        entry.shown = true;
 
         // 廃墟アイコン。
         if (showRuin)
@@ -416,24 +504,23 @@ public class AlertManager : MonoBehaviour
             Sprite collapsedSprite = AlertIconFactory.Instance.GetIconForStatusCollapsed(entityType);
             if (collapsedSprite != null)
             {
-                var iconGO = CreateIconObject($"Status_{entityType}_{item.id}_collapsed", collapsedSprite);
-                existingList.Add(iconGO);
+                entry.icons.Add(CreateIconObject($"Status_{entityType}_{item.id}_collapsed", collapsedSprite));
             }
         }
 
-        // アラートビットアイコン。
-        foreach (int bit in activeBits)
+        // アラートビットアイコン。並び順は targetBits の順。
+        foreach (int bit in targetBits)
         {
+            if ((bits & bit) == 0) continue;
             Sprite sprite = entityType == "agent"
                 ? AlertIconFactory.Instance.GetIconForAgent(bit)
                 : AlertIconFactory.Instance.GetIconForPath(bit);
             if (sprite == null) continue; // そのビットに対応するSprite未設定時はスキップ
 
-            var iconGO = CreateIconObject($"Alert_{entityType}_{item.id}_bit{bit}", sprite);
-            existingList.Add(iconGO);
+            entry.icons.Add(CreateIconObject($"Alert_{entityType}_{item.id}_bit{bit}", sprite));
         }
 
-        if (existingList.Count == 0)
+        if (entry.icons.Count == 0)
         {
             // 全ビットのSpriteが未設定等でアイコンが1つも無かった場合、エントリごと削除。
             DestroyIcons(key);
@@ -443,7 +530,7 @@ public class AlertManager : MonoBehaviour
     /// <summary>
     /// アイコンGameObjectを生成してCanvasにアタッチする。
     /// </summary>
-    private GameObject CreateIconObject(string name, Sprite sprite)
+    private RectTransform CreateIconObject(string name, Sprite sprite)
     {
         var iconGO = new GameObject(name);
         iconGO.transform.SetParent(_uiCanvasRect, false);
@@ -458,136 +545,116 @@ public class AlertManager : MonoBehaviour
         rt.pivot = new Vector2(0.5f, 0.5f);
         rt.sizeDelta = new Vector2(alertIconSize, alertIconSize);
 
-        return iconGO;
+        return rt;
     }
 
     /// <summary>
-    /// alert ビットフラグのうち、立っていてかつ表示フィルタで有効なビット値を抽出する。
+    /// alert ビットフラグのうち、立っていてかつ表示フィルタで有効なビットの和を返す。
     /// path のフィルタビットは上位バイトに置かれているため、比較前にマスク側をシフトして下ろす。
     /// STATUS_* による廃墟アイコンはここではなく UpdateIcons で処理する。
     /// </summary>
-    private List<int> EnumerateActiveBits(int alert, string entityType)
+    private int ActiveBitMask(int alert, string entityType)
     {
         bool isAgent = entityType == "agent";
         int[] targetBits = isAgent ? AGENT_ALERT_BITS : PATH_ALERT_BITS;
         int filter = isAgent ? _filterMask : (_filterMask >> Constants.ALERT_PATH_MASK_SHIFT);
 
-        var bits = new List<int>(targetBits.Length);
+        int bits = 0;
         foreach (int bit in targetBits)
         {
-            if ((alert & bit) != 0 && (filter & bit) != 0) bits.Add(bit);
+            if ((alert & bit) != 0 && (filter & bit) != 0) bits |= bit;
         }
         return bits;
     }
 
     private void Update()
     {
+        ProcessQueuedRequests();
+
         if (_uiCanvasRoot == null || !_uiCanvasRoot.activeSelf) return;
-        if (_icons.Count == 0) return;
+        if (_entries.Count == 0) return;
 
         Camera cam = Camera.main;
         if (cam == null) return;
 
-        // 1. カメラが動いた場合は、ベースのスクリーン座標と距離ベースのスケールを更新する。
+        // 1. カメラ・画面サイズが変わった場合は、ベースのスクリーン座標・距離スケール・画面内判定を更新する。
         Vector3 currentCamPos = cam.transform.position;
         Quaternion currentCamRot = cam.transform.rotation;
-        bool posChanged = Vector3.Distance(currentCamPos, _lastCamPos) > CAMERA_POS_THRESHOLD;
-        bool rotChanged = Quaternion.Angle(currentCamRot, _lastCamRot) > CAMERA_ROT_THRESHOLD;
+        float currentFov = cam.orthographic ? cam.orthographicSize : cam.fieldOfView;
+        int screenWidth = Screen.width;
+        int screenHeight = Screen.height;
+        bool camChanged = _screenDirty
+            || screenWidth != _lastScreenWidth
+            || screenHeight != _lastScreenHeight
+            || currentFov != _lastCamFov
+            || Vector3.Distance(currentCamPos, _lastCamPos) > CAMERA_POS_THRESHOLD
+            || Quaternion.Angle(currentCamRot, _lastCamRot) > CAMERA_ROT_THRESHOLD;
 
-        // キャッシュサイズがアイコン数と異なる場合もリフレッシュが必要
-        bool needScreenPosUpdate = posChanged || rotChanged || _baseScreenPositions.Count != _icons.Count;
-
-        if (needScreenPosUpdate)
+        if (camChanged)
         {
+            _screenDirty = false;
             _lastCamPos = currentCamPos;
             _lastCamRot = currentCamRot;
+            _lastCamFov = currentFov;
+            _lastScreenWidth = screenWidth;
+            _lastScreenHeight = screenHeight;
 
-            foreach (var kvp in _icons)
+            foreach (var entry in _entries.Values)
             {
-                string key = kvp.Key;
-                if (!_worldPositions.TryGetValue(key, out Vector3 worldPos)) continue;
+                Vector3 screenPos = cam.WorldToScreenPoint(entry.world);
+                entry.screen = new Vector2(screenPos.x, screenPos.y);
 
-                Vector3 screenPos = cam.WorldToScreenPoint(worldPos);
-                bool isBehind = screenPos.z < 0;
-
-                _baseScreenPositions[key] = new Vector2(screenPos.x, screenPos.y);
-                _isBehindCache[key] = isBehind;
-
-                // 距離に応じたスケールを計算して適用
+                float scale = 1f;
                 if (useDistanceScaling)
                 {
-                    float dist = Vector3.Distance(currentCamPos, worldPos);
-                    float scale = scaleReferenceDistance / Mathf.Max(dist, 0.1f);
-                    scale = Mathf.Clamp(scale, minScale, maxScale);
+                    float dist = Vector3.Distance(currentCamPos, entry.world);
+                    scale = Mathf.Clamp(scaleReferenceDistance / Mathf.Max(dist, 0.1f), minScale, maxScale);
+                }
+                if (scale != entry.scale)
+                {
+                    entry.scale = scale;
                     Vector3 scaleVec = new Vector3(scale, scale, 1f);
-
-                    List<GameObject> iconList = kvp.Value;
-                    if (iconList != null)
+                    foreach (var rt in entry.icons)
                     {
-                        for (int i = 0; i < iconList.Count; i++)
-                        {
-                            GameObject iconGO = iconList[i];
-                            if (iconGO != null)
-                            {
-                                iconGO.transform.localScale = scaleVec;
-                            }
-                        }
+                        if (rt != null) rt.localScale = scaleVec;
                     }
                 }
-                else
+
+                // 横並びの端とボビングの振れ幅まで含めて、アイコンが少しでも画面に掛かる範囲を表示対象にする。
+                float margin = (alertIconSize + alertIconHorizontalSpacing * entry.icons.Count) * Mathf.Max(1f, scale)
+                               + bobbingAmplitude;
+                bool visible = screenPos.z >= 0
+                               && screenPos.x >= -margin && screenPos.x <= screenWidth + margin
+                               && screenPos.y >= -margin && screenPos.y <= screenHeight + margin;
+                if (visible != entry.shown)
                 {
-                    List<GameObject> iconList = kvp.Value;
-                    if (iconList != null)
+                    entry.shown = visible;
+                    foreach (var rt in entry.icons)
                     {
-                        for (int i = 0; i < iconList.Count; i++)
-                        {
-                            GameObject iconGO = iconList[i];
-                            if (iconGO != null)
-                            {
-                                iconGO.transform.localScale = Vector3.one;
-                            }
-                        }
+                        if (rt != null) rt.gameObject.SetActive(visible);
                     }
                 }
             }
         }
 
-        // 2. 毎フレーム、ふわふわアニメーション（および位置）を更新する。
-        // ボビングが有効、またはカメラが移動した（needScreenPosUpdate == true）場合に適用。
-        if (useBobbing || needScreenPosUpdate)
+        // 2. ボビングが有効なら毎フレーム、無効ならカメラ変化時だけ、表示中のアイコンの位置を更新する。
+        if (useBobbing || camChanged)
         {
-            foreach (var kvp in _icons)
+            float bobbingTime = Time.time * bobbingSpeed;
+            foreach (var entry in _entries.Values)
             {
-                string key = kvp.Key;
-                List<GameObject> iconList = kvp.Value;
-                if (iconList == null || iconList.Count == 0) continue;
+                if (!entry.shown) continue;
 
-                if (!_baseScreenPositions.TryGetValue(key, out Vector2 baseScreenPos)) continue;
-                if (!_isBehindCache.TryGetValue(key, out bool isBehind)) continue;
-
-                // 複数アイコンが同期して動くのを避けるため、キーのハッシュで位相をずらす
-                // 桁落ちによるカクつきを防ぐため、位相シフトは [0, 2π] の範囲に収める
-                float phaseShift = useBobbing ? ((Mathf.Abs(key.GetHashCode()) % 1000) / 1000f * Mathf.PI * 2f) : 0f;
-                float bobbingOffset = useBobbing ? (Mathf.Sin(Time.time * bobbingSpeed + phaseShift) * bobbingAmplitude) : 0f;
-
-                int count = iconList.Count;
+                float bobbingOffset = useBobbing ? Mathf.Sin(bobbingTime + entry.phase) * bobbingAmplitude : 0f;
+                int count = entry.icons.Count;
                 for (int i = 0; i < count; i++)
                 {
-                    GameObject iconGO = iconList[i];
-                    if (iconGO == null) continue;
+                    RectTransform rt = entry.icons[i];
+                    if (rt == null) continue;
 
-                    iconGO.SetActive(!isBehind);
-                    if (!isBehind)
-                    {
-                        var rt = iconGO.GetComponent<RectTransform>();
-                        if (rt != null)
-                        {
-                            // スケールを考慮してアイコン同士の間隔を補正する
-                            float currentScale = rt.localScale.x;
-                            float offsetX = (i - (count - 1) / 2f) * alertIconHorizontalSpacing * currentScale;
-                            rt.anchoredPosition = new Vector2(baseScreenPos.x + offsetX, baseScreenPos.y + bobbingOffset);
-                        }
-                    }
+                    // スケールを考慮してアイコン同士の間隔を補正する
+                    float offsetX = (i - (count - 1) / 2f) * alertIconHorizontalSpacing * entry.scale;
+                    rt.anchoredPosition = new Vector2(entry.screen.x + offsetX, entry.screen.y + bobbingOffset);
                 }
             }
         }
@@ -602,6 +669,9 @@ public class AlertManager : MonoBehaviour
     {
         if (_uiCanvasRoot != null) return;
 
+        // Canvas がシーン遷移等で破棄されていれば、子のアイコンも消えているので登録を捨てて作り直させる。
+        ClearIcons();
+        _screenDirty = true;
         _uiCanvas = Utils.CreateOverlayCanvas("AlertUICanvas", canvasSortingOrder, persistent: false); // ZoneManager(60)より前面
         _uiCanvasRoot = _uiCanvas.gameObject;
         _uiCanvasRect = _uiCanvasRoot.GetComponent<RectTransform>();

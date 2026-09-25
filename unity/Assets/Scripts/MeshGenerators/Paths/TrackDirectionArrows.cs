@@ -113,6 +113,8 @@ public class TrackDirectionArrows : MonoBehaviour
         go.transform.SetParent(container.transform, false);
         go.AddComponent<MeshFilter>().sharedMesh = mesh;
         go.AddComponent<MeshRenderer>().sharedMaterial = GetArrowMaterial();
+        // TrackDirectionArrows.Awake が GO を非アクティブにし得る。一度もアクティブにならない GO では OnDestroy が呼ばれないので先に付ける。
+        go.AddComponent<IntersectionMeshOwner>().OwnedMesh = mesh;
         go.AddComponent<TrackDirectionArrows>();
     }
 
