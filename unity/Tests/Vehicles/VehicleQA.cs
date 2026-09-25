@@ -150,7 +150,7 @@ public static partial class VehicleQA
             var journey=Activator.CreateInstance(journeyType);Set(journey,"steps",steps);Set(journey,"returning",returning);journeys.Add(journey);
         }
         var data=New("GeneratedModels.TransitLineSummary");
-        Set(data,"line_agent_id",123);Set(data,"path_variant",1002);Set(data,"cars_per_train",2);Set(data,"vehicle_count",2);
+        Set(data,"line_agent_id",123);Set(data,"path_variant",1002);Set(data,"cars_per_train",2);Set(data,"vehicle_count",2);Set(data,"vehicle_model",2);
         Set(data,"length_per_vehicle",20f);Set(data,"status",(int)game.GetType("Constants").GetField("STATUS_ACTIVE").GetRawConstantValue());Set(data,"journeys",journeys);
         var sourceList=(IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(data.GetType()));sourceList.Add(data);
         Call(manager,"RebuildLines",sourceList);
@@ -168,7 +168,7 @@ public static partial class VehicleQA
             Set(manager,"clock",time);Call(manager,"DrawLine",lines[0],Vector3.forward*250);Call(manager,"HideUnused",false);
             var visible=(IDictionary)Get(manager,"visible");Check(visible.Count==2,"Consist disappears at terminal/time "+time);
             var positions=new List<Vector3>();
-            foreach(DictionaryEntry entry in visible) Check(((GameObject)entry.Value).name.StartsWith("20:1:"),"Consist variant changes or mixes at turnback");
+            foreach(DictionaryEntry entry in visible) Check(((GameObject)entry.Value).name.StartsWith("20:2:"),"Consist ignores the line's vehicle model or mixes at turnback");
             foreach(DictionaryEntry entry in visible)
             {
                 var position=((GameObject)entry.Value).transform.position;positions.Add(position);
@@ -287,9 +287,12 @@ public static partial class VehicleQA
             string middle=type==22?"wagon":"middle";
             paths.Add($"{type}/{middle}");paths.Add($"{type}/{middle}_1");
         }
+        var ids=new List<int>();
+        for(int index=0;index<paths.Count;index++) ids.Add(index<18?350+index:370+index-18);
+        paths.Add("20/2");ids.Add(388);paths.Add("20/middle_2");ids.Add(389);
         for(int index=0;index<paths.Count;index++)
         {
-            int id=index<18?350+index:370+index-18;
+            int id=ids[index];
             var sourceModel=Resources.Load<GameObject>("Models/Vehicles/"+paths[index]);
             var prop=Resources.Load<GameObject>($"Models/Props/{id}");
             Check(sourceModel!=null && prop!=null,"Missing vehicle prop: "+id);
@@ -299,7 +302,7 @@ public static partial class VehicleQA
             Near(Vector3.Distance(original.bounds.size,copy.bounds.size),0,.002f,"Vehicle prop dimensions differ");
             var model=New("PropRenderModel",id);
             Check(((IList)Get(model,"normal")).Count>0 && ((IList)Get(model,"far")).Count>0,"Vehicle prop has no drawable parts: "+id);
-            if((id>=370 && id<=379) || (id>=384 && id<=387))
+            if((id>=370 && id<=379) || (id>=384 && id<=389))
             {
                 var closeSource=Resources.Load<GameObject>("Models/Vehicles/"+paths[index]+"_close");
                 var closeProp=Resources.Load<GameObject>($"Models/Props/{id}_close");
@@ -332,7 +335,7 @@ public static partial class VehicleQA
         foreach(int vehicleType in new[]{10,11,12,13,14,20,21,22,23})
         {
             var variants=(IList)game.GetType("VehicleModelConfig").GetMethod("GetVariants").Invoke(null,new object[]{vehicleType});
-            Check(variants.Count==(vehicleType==10?10:vehicleType==11?4:vehicleType==14?1:2),"Configured variant count differs for "+vehicleType);
+            Check(variants.Count==(vehicleType==10?10:vehicleType==11?4:vehicleType==14?1:vehicleType==20?3:2),"Configured variant count differs for "+vehicleType);
             foreach(int variant in variants)
             {
                 string path=$"Assets/Models/Vehicles/{vehicleType}/{variant}.fbx";
@@ -374,12 +377,12 @@ public static partial class VehicleQA
         Check((int)game.GetType("VehicleModelConfig").GetMethod("GetTransitVehicleType").Invoke(null,new object[]{1003})==14,"LRT model mapping missing");
         foreach (int type in new[]{12,14,20,21,23})
         {
-            foreach(int variant in type==14?new[]{0}:new[]{0,1})
+            foreach(int variant in type==14?new[]{0}:type==20?new[]{0,1,2}:new[]{0,1})
             foreach(bool middle in type==12?new[]{false}:new[]{false,true})
             {
                 var car=(GameObject)resolver.GetMethod("CreateTransitCar").Invoke(null,new object[]{type,middle,null,variant});
                 car.SetActive(true);
-                string expected = middle ? (variant==0 ? "middle" : "middle_1") : variant.ToString();
+                string expected = middle ? (variant==0 ? "middle" : "middle_"+variant) : variant.ToString();
                 foreach(var filter in car.GetComponentsInChildren<MeshFilter>())
                 {
                     string asset=AssetDatabase.GetAssetPath(filter.sharedMesh);
@@ -395,14 +398,14 @@ public static partial class VehicleQA
                         Check(AssetDatabase.GetAssetPath(renderer.GetComponent<MeshFilter>().sharedMesh).EndsWith($"/{expected}_close.fbx"),"Close LOD uses wrong asset");
                     foreach(var renderer in levels[1].renderers)
                         Check(AssetDatabase.GetAssetPath(renderer.GetComponent<MeshFilter>().sharedMesh).EndsWith($"/{expected}.fbx"),"Normal LOD uses wrong asset");
-                    if((type==20 || type==21) && !middle)
+                    if(type==21 && !middle)
                     {
                         var renderer=levels[0].renderers[0];
                         var mesh=renderer.GetComponent<MeshFilter>().sharedMesh;
                         var vertices=mesh.vertices;var normals=mesh.normals;
                         var plane=new List<float>();
-                        float slope=type==20?.07f:.48f;
-                        float front=type==20?10f:10.6f;
+                        float slope=.48f;
+                        float front=10.6f;
                         for(int sub=0;sub<mesh.subMeshCount;sub++)
                         {
                             if(!renderer.sharedMaterials[sub].name.StartsWith("PROP_Glass"))continue;
@@ -418,6 +421,25 @@ public static partial class VehicleQA
                         float min=float.MaxValue,max=float.MinValue;
                         foreach(float value in plane){min=Mathf.Min(min,value);max=Mathf.Max(max,value);}
                         Check(max-min<.0001f,"Cab windshield is curved after FBX import");
+                    }
+                    if(type==20 && !middle)
+                    {
+                        // メトロの3外観は前頭部の窓・キャノピーが前を向いて外板の外に出ていることを確かめる。
+                        var renderer=levels[0].renderers[0];
+                        var mesh=renderer.GetComponent<MeshFilter>().sharedMesh;
+                        var vertices=mesh.vertices;var normals=mesh.normals;
+                        int forward=0;
+                        for(int sub=0;sub<mesh.subMeshCount;sub++)
+                        {
+                            if(!renderer.sharedMaterials[sub].name.StartsWith("PROP_Glass"))continue;
+                            var indices=mesh.GetTriangles(sub);
+                            for(int i=0;i<indices.Length;i+=3)
+                            {
+                                int a=indices[i],b=indices[i+1],c=indices[i+2];
+                                if((vertices[a].z+vertices[b].z+vertices[c].z)/3>8f && (normals[a]+normals[b]+normals[c]).z>.9f) forward++;
+                            }
+                        }
+                        Check(forward>0,"Metro cab glass must face forward: "+expected);
                     }
                     if(type==23 && !middle)
                     {

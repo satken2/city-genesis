@@ -47,7 +47,7 @@ Space長押し中は`DriveMode.SpeedMultiplier`が5になり、一般車と公�
 - `TransitMotionClock`: コアの `journeys.steps` の等加速度区間・停車を時刻から参照する純粋なクラス。車両需要や待ち時間と同じ時間を使う。
 - `TransitVehicleManager`: 実調達編成数を位相配置し、周辺の車体だけプールから出す。鉄道は`TransitRouteGeometry.SampleConsist`で停止中心から前後へ剛体配置し、隣接車の車端を共有する。公称車長はワールド座標の弦長で満たし、時計の論理距離へ車長を直接足さない。車体の向きは前後端から求め、細かな線分の接線をピッチへ直接使わない。折り返し中も個体と前後を保つ。欠けたパス・未生成レールコネクタを直線で補完しない。
 - 公共交通の形状更新は0.5秒間隔で、描画可能な路線の経路に含まれる周辺パスだけを計算する。路線なし・車両不足などで描画対象がなければ、周辺パスの検索も点列生成も行わない。
-- モデル対応は `Resources/Config/transit_vehicle_models.json`。外観はvehicle_model_config.yamlから路線ID＋編成番号で固定。先頭/後尾=数値バリアント、中間=middle（0）/middle_{番号}。プールキーにも外観を含める。`VehicleModelResolver` が著作原点・長手軸を接地中心/+Zへ正規化し、公共交通の車体長だけはマスターの公称車長に合わせる。幅と高さは変更しない。
+- モデル対応は `Resources/Config/transit_vehicle_models.json`。外観は路線の`vehicle_model`(プレイヤー設定)で全編成を揃え、vehicle_model_config.yamlの候補外(未設定-1・未導入の番号)のときだけ路線ID＋編成番号で固定(`VehicleModelResolver.PickTransitVariantId`。描画・プール事前生成の両方で使う)。候補番号はTauriの車両選択カタログ`tauri/src/data/transitVehicleModels.json`と揃える。先頭/後尾=数値バリアント、中間=middle（0）/middle_{番号}。プールキーにも外観を含める。`VehicleModelResolver` が著作原点・長手軸を接地中心/+Zへ正規化し、公共交通の車体長だけはマスターの公称車長に合わせる。幅と高さは変更しない。
 - `Tests/Vehicles` は独立Unityへ実FBXとラッパーをコピーし、時間積分・停車・前車停止・編成位置・折り返しの連続性も検証する。本編シーンとモデルは変更しない。
 
 - vehicle_model_config.yamlの簡易パーサは数値キー・数値配列と行末の#コメントを扱う。コメントをキーに含めると全候補が無視されるため、行末コメントを除いてから解析する。

@@ -2,18 +2,14 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import categories from "../../data/propCategories.json";
 import type { PropMasterEntry } from "../../types";
+import { resolvePropThumbnail } from "../../utils/propThumbnail";
 
-const thumbnails = import.meta.glob<string>("../../assets/images/props/*.png", {
-  eager: true,
-  query: "?url",
-  import: "default",
-});
 const categoryByType = new Map(categories.flatMap(({ id, types }) => types.map((type) => [type, id] as const)));
 
 function PropThumbnail({ id }: { id: number }) {
   const { t } = useTranslation();
   const [failed, setFailed] = useState(false);
-  const url = thumbnails[`../../assets/images/props/${id}.png`];
+  const url = resolvePropThumbnail(id);
   return url && !failed ? (
     <img src={url} alt="" loading="lazy" draggable={false} onError={() => setFailed(true)} />
   ) : (

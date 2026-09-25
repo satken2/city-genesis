@@ -80,6 +80,18 @@
     "fleetFormation": "Rames de {{cars}} voitures × {{trains}}",
     "fleetNone": "Aucun véhicule en service.",
     "fleetMoreTrains": "et {{count}} rame(s) de plus",
-    "fleetShortage": "{{count}} rame(s) n’ont pas pu être formées faute de véhicules."
+    "fleetShortage": "{{count}} rame(s) n’ont pas pu être formées faute de véhicules.",
+    "vehicleModel": "Véhicule",
+    "vehicleModelNote": "Seule l’apparence des véhicules change. La capacité, le coût et la vitesse restent identiques.",
+    "vehicleModels": {
+      "metroStandard": "Standard",
+      "metroFuturistic": "Futuriste",
+      "metroRetro": "Rétro",
+      "cityBus": "Bus urbain",
+      "coach": "Autocar",
+      "lrt": "Tramway",
+      "trainRed": "Bande rouge",
+      "trainBlue": "Bande bleue"
+    }
   }
 }

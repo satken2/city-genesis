@@ -80,6 +80,18 @@
     "fleetFormation": "{{cars}}両編成 × {{trains}}編成",
     "fleetNone": "運行中の車両はありません。",
     "fleetMoreTrains": "ほか {{count}} 編成",
-    "fleetShortage": "{{count}} 編成ぶんの車両が調達できていません。"
+    "fleetShortage": "{{count}} 編成ぶんの車両が調達できていません。",
+    "vehicleModel": "車両",
+    "vehicleModelNote": "車両の見た目だけが変わります。定員・費用・速度は変わりません。",
+    "vehicleModels": {
+      "metroStandard": "スタンダード",
+      "metroFuturistic": "近未来",
+      "metroRetro": "レトロ",
+      "cityBus": "路線バス",
+      "coach": "高速バス",
+      "lrt": "LRT",
+      "trainRed": "赤帯",
+      "trainBlue": "青帯"
+    }
   }
 }

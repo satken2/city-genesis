@@ -20,7 +20,7 @@ Unityのグラフィックの上に透明なWebViewウィンドウとして重�
   - App.tsx            ... 全ウィンドウのエントリポイント(ラベルで分岐)
   - components/        ... ドメイン別のUIコンポーネント(詳細はcomponents/AGENTS.md)
   - contexts/          ... MasterDataContext(マスターデータ), FontSizeContext
-  - data/              ... UI内に静的に持つ掲載データ(credits.ts=クレジット表示の掲載内容)
+  - data/              ... UI内に静的に持つ掲載データ(credits.ts=クレジット表示の掲載内容、propCategories.json=プロップ配置パネルの分類、transitVehicleModels.json=公共交通の車両外観の候補。「公共交通の車両外観カタログ」の節)
   - hooks/             ... 共通Reactフック(useTemplateMode=テンプレートモード判定, useConstructionBudgetRow=建設中/解体中の1エポックコスト・残りエポック数の取得, useVariantAffordability=建設パネルのバリアント単位の資金目安〔GET /{paths,buildings}/variant-affordability〕, useObjectVisibility=建物・道路のオブジェクト単位の表示/非表示〔状態の正はUnity側。バックエンド・セーブには残らない〕)
   - utils/             ... 共通処理(下記の一覧参照)
   - i18n/              ... 多言語リソース(言語ディレクトリごとにドメイン別JSONを配置。index.tsがglobで集約)
@@ -52,6 +52,7 @@ Unityのグラフィックの上に透明なWebViewウィンドウとして重�
 | `playSound.ts` | 効果音再生。**音声ファイルは必ず`import`して得たURLを渡すこと**(`"src/assets/sounds/x.opus"`のようなパス文字列を直接渡すとバンドル対象から外れ、開発実行では鳴るのに本番ビルドだけ無音になる) |
 | `tutorial.ts` | チュートリアルの表示制御 |
 | `agentIcon.ts` / `parcelIcon.ts` / `pathIcon.ts` / `resourceIcon.ts` | 各種アイコン画像の解決 |
+| `propThumbnail.ts` | プロップのサムネイル画像(`src/assets/images/props/{id}.png`)の解決`resolvePropThumbnail(id)`。未生成の種別は`undefined`で、呼び出し側が代替表示にする。`import.meta.glob`(eager・`?url`)で全画像をバンドルする。自由配置パネル(`prop/PropTypeSelector`)と公共交通の車両外観選択(`transit/TransitVehicleSelector`)が共有するので、**プロップ画像のglobを各コンポーネントに書かないこと** |
 
 # 音声アセット
 
@@ -161,7 +162,11 @@ UI側で独自に定義する定数は`local-constants.ts`に定義する。
 
 配置パネルの分類は `src/data/propCategories.json`（カテゴリIDと種別IDの対応）を正とする。表示名と選択可能な種別はバックエンドの `prop_types` を使い、未分類の種別は「その他」に出す。カテゴリ名は全7言語の `construction.json` の `prop_placement.categories` に置く。
 
-`tools/render_prop_thumbnails.py` は数値ID付き通常版FBXから `src/assets/images/props/{id}.png` を生成する独立ツール。PythonとBlenderを使い、非公開制作ツールやマスターは不要。PNGはGit管理し、差分キャッシュは管理しない。UIは `import.meta.glob` で画像をバンドルする。詳細は公開M文書§M.7.8を参照。
+`tools/render_prop_thumbnails.py` は数値ID付き通常版FBXから `src/assets/images/props/{id}.png` を生成する独立ツール。PythonとBlenderを使い、非公開制作ツールやマスターは不要。PNGはGit管理し、差分キャッシュは管理しない。UIは `utils/propThumbnail.ts` の `import.meta.glob` で画像をバンドルする。詳細は公開M文書§M.7.8を参照。
+
+### 公共交通の車両外観カタログ
+
+路線ごとの車両の外観(APIの`vehicle_model`。描画専用で定員・費用・速度は変わらない)の候補は `src/data/transitVehicleModels.json` を正とする。キーは路線種別(transit_masterの`transit_path_id`=区間パスのバリアント)で、値は `{variant, prop, key}` の列。`variant` はUnityの `Resources/Config/vehicle_model_config.yaml` にある車種の候補番号(路線種別→車種の対応はUnityの `Resources/Config/transit_vehicle_models.json`)、`prop` はその外観の先頭車を写した自由配置別名のプロップ種別IDで、そのサムネイルを見本画像に使う(未生成なら文言の代替表示)。表示名は全7言語の `transit.json` の `transit.vehicleModels.<key>`。**Unity側で外観を増減したら、このカタログ・`vehicle_model_config.yaml`・表示名の3つを揃えること。** バックエンドは候補一覧を持たず0以上の整数かだけを検証し、候補外の番号はUnityが路線IDと編成番号による既定の選択へ戻して描く。候補の無い種別(車両を描かないモノレール等)では選択UIを出さない。
 
 ### 初期ロードとTips
 

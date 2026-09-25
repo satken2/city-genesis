@@ -47,6 +47,12 @@ namespace GeneratedModels
         /// 空・解析不能なときだけ種別ごとの自動色へフォールバックする。
         /// </summary>
         public string line_color;
+
+        /// <summary>
+        /// 路線の車両外観(プレイヤー設定)。vehicle_model_config.yaml の候補番号。
+        /// 候補に無い値(未設定の-1を含む)は路線IDと編成番号による既定の選択へ戻す。
+        /// </summary>
+        public int vehicle_model = -1;
     }
 
     /// <summary>GET /api/v1/transit/lines のレスポンス。バックエンドは {"lines": [...]} を返す。</summary>

@@ -80,6 +80,18 @@
     "fleetFormation": "{{cars}} 节编组 × {{trains}} 列",
     "fleetNone": "没有运行中的车辆。",
     "fleetMoreTrains": "另有 {{count}} 列",
-    "fleetShortage": "因车辆不足，有 {{count}} 列无法编组。"
+    "fleetShortage": "因车辆不足，有 {{count}} 列无法编组。",
+    "vehicleModel": "车辆",
+    "vehicleModelNote": "只改变车辆的外观，载客量、费用和速度不变。",
+    "vehicleModels": {
+      "metroStandard": "标准",
+      "metroFuturistic": "未来风",
+      "metroRetro": "复古",
+      "cityBus": "公交车",
+      "coach": "长途客车",
+      "lrt": "轻轨",
+      "trainRed": "红色腰带",
+      "trainBlue": "蓝色腰带"
+    }
   }
 }

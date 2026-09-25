@@ -5,8 +5,8 @@
  * 経済主体詳細(AgentDetailPanel)と同じ右パネルの体裁・タブ構成で、1つの公共交通路線を扱う。
  *
  * タブ:
- *   - 基本情報 ... 種別・状態・車両・編成・区間数と、運行実績(乗車回数・収支・混雑率・調達率)
- *   - 設定     ... 運賃・運行間隔・1編成の車両数・路線カラー(PATCH で保存)と路線の廃止
+ *   - 基本情報 ... 種別・車両の外観・状態・車両・編成・区間数と、運行実績(乗車回数・収支・混雑率・調達率)
+ *   - 設定     ... 運賃・運行間隔・1編成の車両数・路線カラー・車両の外観(PATCH で保存)と路線の廃止
  *   - 路線地図 ... 実地図上の路線(TransitLineMap。共通地図の公共交通路線レイヤーを当該路線に注目させたもの)
  *   - 路線図   ... 縦型ストリップ路線図(TransitLineDiagram)
  *
@@ -32,6 +32,7 @@ import { TRANSIT_LINE_COLOR_PRESETS, resolveTransitColor } from "../../local-con
 import { TransitLineMap } from "./TransitLineMap";
 import { TransitLineDiagram } from "./TransitLineDiagram";
 import { TransitFleetSection } from "./TransitFleetSection";
+import { TransitVehicleLabel, TransitVehicleSelector, transitVehicleOptions } from "./TransitVehicleSelector";
 // 右パネルの体裁(セクション・ラベル/値グリッド・タブ)は経済主体詳細パネルと共有する。
 import "../agent/AgentDetailPanel.css";
 // 運行状態バッジ(.transit-badge)は公共交通ウィンドウの一覧と共通。
@@ -89,6 +90,7 @@ type TransitLineDetail = {
   train_count: number;
   // 路線カラー("#rrggbb")。空文字は未設定で、種別ごとの既定色にフォールバックする。
   line_color: string;
+  vehicle_model: number; // 車両の外観番号(描画専用。候補は TransitVehicleSelector のカタログ)
   vehicle_count: number;
   required_vehicle_count: number;
   revenues: number;
@@ -139,11 +141,12 @@ export function TransitDetailPanel({
   const [refreshKey, setRefreshKey] = useState(0);
   const [activeTab, setActiveTab] = useState<TabId>("basic");
 
-  // 編集中の運賃・運行間隔・1編成の車両数・路線カラー
+  // 編集中の運賃・運行間隔・1編成の車両数・路線カラー・車両の外観
   const [fare, setFare] = useState<number>(0);
   const [headway, setHeadway] = useState<number>(1);
   const [carsPerTrain, setCarsPerTrain] = useState<number>(1);
   const [lineColor, setLineColor] = useState<string>("");
+  const [vehicleModel, setVehicleModel] = useState<number>(0);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -168,6 +171,7 @@ export function TransitDetailPanel({
         setHeadway(Math.round(data.target_headway));
         setCarsPerTrain(Math.max(1, Math.round(data.cars_per_train ?? 1)));
         setLineColor(effectiveLineColor(data));
+        setVehicleModel(data.vehicle_model ?? 0);
         setLoading(false);
       })
       .catch((err: unknown) => {
@@ -184,7 +188,8 @@ export function TransitDetailPanel({
     (fare !== Math.round(line.fare_price) ||
       headway !== Math.round(line.target_headway) ||
       carsPerTrain !== Math.max(1, Math.round(line.cars_per_train ?? 1)) ||
-      lineColor !== effectiveLineColor(line));
+      lineColor !== effectiveLineColor(line) ||
+      vehicleModel !== (line.vehicle_model ?? 0));
 
   const resetEdits = useCallback(() => {
     if (!line) return;
@@ -192,6 +197,7 @@ export function TransitDetailPanel({
     setHeadway(Math.round(line.target_headway));
     setCarsPerTrain(Math.max(1, Math.round(line.cars_per_train ?? 1)));
     setLineColor(effectiveLineColor(line));
+    setVehicleModel(line.vehicle_model ?? 0);
     setSaveError(null);
   }, [line]);
 
@@ -210,6 +216,7 @@ export function TransitDetailPanel({
             target_headway: headway,
             cars_per_train: carsPerTrain,
             line_color: lineColor,
+            vehicle_model: vehicleModel,
           }),
         },
       );
@@ -221,7 +228,7 @@ export function TransitDetailPanel({
     } finally {
       setSaving(false);
     }
-  }, [apiBaseUrl, line, fare, headway, carsPerTrain, lineColor]);
+  }, [apiBaseUrl, line, fare, headway, carsPerTrain, lineColor, vehicleModel]);
 
   const handleDelete = useCallback(async () => {
     if (!line) return;
@@ -273,6 +280,8 @@ export function TransitDetailPanel({
   const vehicleShortage = running && procurementRatio !== null && procurementRatio < 1;
   const savedColor = effectiveLineColor(line);
   const balance = line.revenues - line.expenses;
+  // 車両を描かない種別(モノレール等)は外観の候補を持たないので、外観の行ごと出さない。
+  const hasVehicleOptions = transitVehicleOptions(line.path_variant).length > 0;
 
   const tabs: { id: TabId; label: string }[] = [
     { id: "basic", label: t("transit.tabBasicInfo") },
@@ -347,6 +356,14 @@ export function TransitDetailPanel({
               <div className="agent-detail-grid">
                 <span className="agent-detail-label">{t("transit.colName")}</span>
                 <span className="agent-detail-value">{variantName}</span>
+                {hasVehicleOptions && (
+                  <>
+                    <span className="agent-detail-label">{t("transit.vehicleModel")}</span>
+                    <span className="agent-detail-value">
+                      <TransitVehicleLabel pathVariant={line.path_variant} value={line.vehicle_model ?? 0} />
+                    </span>
+                  </>
+                )}
                 <span className="agent-detail-label">{t("transit.status")}</span>
                 <span className="agent-detail-value">
                   <span className={`transit-badge ${running ? "transit-badge--running" : "transit-badge--suspended"}`}>
@@ -453,6 +470,23 @@ export function TransitDetailPanel({
                 <span className="agent-detail-value transit-detail__color-value">
                   <ColorSwatchPicker value={lineColor} onChange={setLineColor} presets={TRANSIT_LINE_COLOR_PRESETS} />
                 </span>
+                {hasVehicleOptions && (
+                  <>
+                    <span className="agent-detail-label">{t("transit.vehicleModel")}</span>
+                    <span className="agent-detail-value">
+                      <TransitVehicleLabel pathVariant={line.path_variant} value={vehicleModel} />
+                    </span>
+                    <div className="transit-detail__vehicle-models">
+                      <TransitVehicleSelector
+                        pathVariant={line.path_variant}
+                        value={vehicleModel}
+                        onChange={setVehicleModel}
+                        disabled={saving}
+                      />
+                      <p className="transit-detail__note">{t("transit.vehicleModelNote")}</p>
+                    </div>
+                  </>
+                )}
               </div>
               <p className="transit-detail__note">{t("transit.fareNote")}</p>
 

@@ -150,8 +150,8 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
         int stride = Math.Max(1,(int)Math.Ceiling((double)trains / Math.Max(1,maxVisibleCars/cars*4)));
         for (int train = 0; train < trains; train += stride)
         {
-            // 編成の外観は路線IDと編成番号で固定し、往復・プール復帰でも全車を揃える。
-            int variant = VehicleModelResolver.PickVariantId(line.type, unchecked(line.data.line_agent_id * 397 + train));
+            // 路線の選択外観を全編成で使い、候補外のときだけ路線IDと編成番号で固定する。往復・プール復帰でも全車を揃える。
+            int variant = VehicleModelResolver.PickTransitVariantId(line.type, line.data.vehicle_model, unchecked(line.data.line_agent_id * 397 + train));
             bool driven = line.data.line_agent_id == DrivenLineId && train == 0;
             double trainTime = clock + line.motion.Duration*train/trains + (driven ? driveOffset : 0);
             int step = line.motion.AtTime(trainTime, out double distance, out bool stopped);
@@ -249,7 +249,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
                 int cars = Math.Max(1,line.data.cars_per_train), trains = line.data.vehicle_count/cars;
                 variants.Clear();
                 for (int train = 0; train < trains; train++)
-                    variants.Add(VehicleModelResolver.PickVariantId(line.type, unchecked(line.data.line_agent_id * 397 + train)));
+                    variants.Add(VehicleModelResolver.PickTransitVariantId(line.type, line.data.vehicle_model, unchecked(line.data.line_agent_id * 397 + train)));
                 foreach (int variant in variants)
                 for (int role = 0; role < (cars > 2 ? 2 : 1); role++)
                 {

@@ -80,6 +80,18 @@
     "fleetFormation": "{{cars}}-car trains × {{trains}}",
     "fleetNone": "No vehicles are in service.",
     "fleetMoreTrains": "and {{count}} more train(s)",
-    "fleetShortage": "{{count}} train(s) could not be formed due to a vehicle shortage."
+    "fleetShortage": "{{count}} train(s) could not be formed due to a vehicle shortage.",
+    "vehicleModel": "Vehicle",
+    "vehicleModelNote": "Only the look of the vehicles changes. Capacity, cost, and speed stay the same.",
+    "vehicleModels": {
+      "metroStandard": "Standard",
+      "metroFuturistic": "Futuristic",
+      "metroRetro": "Retro",
+      "cityBus": "City bus",
+      "coach": "Coach",
+      "lrt": "LRT",
+      "trainRed": "Red stripe",
+      "trainBlue": "Blue stripe"
+    }
   }
 }

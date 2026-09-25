@@ -1,8 +1,9 @@
 /* ==========================================================================
    TransitDetailPanel.css - 路線詳細パネル(右パネル)
    体裁の大部分は AgentDetailPanel.css(agent-detail-*: セクション・グリッド・タブ)を共有し、
-   ここでは公共交通固有の要素(路線カラー帯・注意バナー・実績タイル・設定ツールバー・
-   廃止ブロック・小型ボタン)だけを定義する。
+   ここでは公共交通固有の要素(路線カラー帯・注意バナー・実績タイル・車両外観の行・
+   設定ツールバー・廃止ブロック・小型ボタン)だけを定義する。外観タイル自体の意匠は
+   TransitVehicleSelector.css が持つ。
    ========================================================================== */
 
 /* ---- 路線カラー帯(ヘッダ直下) ---- */
@@ -140,6 +141,15 @@
   align-items: flex-start;
   padding-top: 8px;
   padding-bottom: 8px;
+}
+
+/* 車両の外観タイルは値の列に収まらないため、グリッドの2列を跨いで並べる */
+.transit-detail__vehicle-models {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 4px;
 }
 
 .transit-detail__note {

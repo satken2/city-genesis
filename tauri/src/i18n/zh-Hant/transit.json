@@ -80,6 +80,18 @@
     "fleetFormation": "{{cars}} 節編組 × {{trains}} 列",
     "fleetNone": "沒有運行中的車輛。",
     "fleetMoreTrains": "另有 {{count}} 列",
-    "fleetShortage": "因車輛不足，有 {{count}} 列無法編組。"
+    "fleetShortage": "因車輛不足，有 {{count}} 列無法編組。",
+    "vehicleModel": "車輛",
+    "vehicleModelNote": "只會改變車輛的外觀，載客量、費用與速度不變。",
+    "vehicleModels": {
+      "metroStandard": "標準",
+      "metroFuturistic": "未來風",
+      "metroRetro": "復古",
+      "cityBus": "公車",
+      "coach": "客運",
+      "lrt": "輕軌",
+      "trainRed": "紅色腰帶",
+      "trainBlue": "藍色腰帶"
+    }
   }
 }

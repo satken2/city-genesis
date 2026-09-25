@@ -118,6 +118,18 @@ public static class VehicleModelResolver
     }
 
     /// <summary>
+    /// 公共交通の編成の外観を決める。プレイヤーが路線に選んだ外観が車種の候補にあればそれを使い、
+    /// 候補外(未設定・モデル未導入の番号)なら <see cref="PickVariantId"/> で seed から決定的に選ぶ。
+    /// </summary>
+    public static int PickTransitVariantId(int vehicleType, int selected, int seed)
+    {
+        var variants = VehicleModelConfig.GetVariants(vehicleType);
+        for (int i = 0; i < variants.Count; i++)
+            if (variants[i] == selected) return selected;
+        return PickVariantId(vehicleType, seed);
+    }
+
+    /// <summary>
     /// 車種+バリアントの描画実体を1つ生成して返す。生成直後は非アクティブ。
     /// 返すのは「接地位置がピボット」のラッパー root で、実際のモデル(fbx/箱)はその子に入る。
     /// これにより VehicleManager は box/fbx を区別せず root の position/rotation を設定できる。

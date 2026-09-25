@@ -80,6 +80,18 @@
     "fleetFormation": "Trenes de {{cars}} vagones × {{trains}}",
     "fleetNone": "No hay vehículos en servicio.",
     "fleetMoreTrains": "y {{count}} tren(es) más",
-    "fleetShortage": "No se pudieron formar {{count}} tren(es) por falta de vehículos."
+    "fleetShortage": "No se pudieron formar {{count}} tren(es) por falta de vehículos.",
+    "vehicleModel": "Vehículo",
+    "vehicleModelNote": "Solo cambia el aspecto de los vehículos. La capacidad, el costo y la velocidad no cambian.",
+    "vehicleModels": {
+      "metroStandard": "Estándar",
+      "metroFuturistic": "Futurista",
+      "metroRetro": "Retro",
+      "cityBus": "Autobús urbano",
+      "coach": "Autobús interurbano",
+      "lrt": "Tren ligero",
+      "trainRed": "Franja roja",
+      "trainBlue": "Franja azul"
+    }
   }
 }

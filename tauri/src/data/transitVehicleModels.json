@@ -1,0 +1,18 @@
+{
+  "1001": [
+    { "variant": 0, "prop": 364, "key": "cityBus" },
+    { "variant": 1, "prop": 365, "key": "coach" }
+  ],
+  "1002": [
+    { "variant": 0, "prop": 372, "key": "metroStandard" },
+    { "variant": 1, "prop": 373, "key": "metroFuturistic" },
+    { "variant": 2, "prop": 388, "key": "metroRetro" }
+  ],
+  "1003": [
+    { "variant": 0, "prop": 370, "key": "lrt" }
+  ],
+  "1005": [
+    { "variant": 0, "prop": 376, "key": "trainRed" },
+    { "variant": 1, "prop": 377, "key": "trainBlue" }
+  ]
+}

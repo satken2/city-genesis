@@ -80,6 +80,18 @@
     "fleetFormation": "{{cars}}량 편성 × {{trains}}편성",
     "fleetNone": "운행 중인 차량이 없습니다.",
     "fleetMoreTrains": "그 외 {{count}}편성",
-    "fleetShortage": "차량 부족으로 {{count}}편성을 구성하지 못했습니다."
+    "fleetShortage": "차량 부족으로 {{count}}편성을 구성하지 못했습니다.",
+    "vehicleModel": "차량",
+    "vehicleModelNote": "차량의 외관만 바뀝니다. 정원·비용·속도는 바뀌지 않습니다.",
+    "vehicleModels": {
+      "metroStandard": "스탠다드",
+      "metroFuturistic": "근미래",
+      "metroRetro": "레트로",
+      "cityBus": "시내버스",
+      "coach": "고속버스",
+      "lrt": "LRT",
+      "trainRed": "빨간 띠",
+      "trainBlue": "파란 띠"
+    }
   }
 }

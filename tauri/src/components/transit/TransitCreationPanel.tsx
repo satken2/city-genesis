@@ -10,7 +10,7 @@
  *   2. 種別を選ぶとグラフィック(Unity)が停留所配置モード(STATE_EDIT_TRANSIT)に入り、
  *      3Dマップ上で停留所を設置できるようになる。設置した停留所座標は
  *      "edit_transit:update_stops" イベントで本パネルに送られてくる。
- *   3. 運賃・目標運行間隔を設定する
+ *   3. 運賃・目標運行間隔・1編成の車両数と、車両の外観(描画専用。候補は TransitVehicleSelector)を設定する
  *   4. [新設する] で POST /api/v1/transit/lines を呼び、路線を新設する
  *      (API の path_variant には選択した種別の transit_path_id =区間パスのバリアントを、
  *       stops には Unity から受け取った停留所座標列を渡す)
@@ -31,6 +31,11 @@ import { showNotification } from "../../utils/notification";
 import { resolveTransitIcon } from "../../utils/pathIcon";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { NumberStepper } from "../common/NumberStepper";
+import {
+  TransitVehicleSelector,
+  defaultTransitVehicleModel,
+  transitVehicleOptions,
+} from "./TransitVehicleSelector";
 import {
   TRANSIT_DEFAULT_FARE,
   TRANSIT_DEFAULT_HEADWAY_MIN,
@@ -70,6 +75,8 @@ export function TransitCreationPanel({
   // 1編成の車両数(cars_per_train)。編成長 = cars_per_train × 1車両長(種別マスター)が
   // 停留所のプラットフォーム長を超えると運休になる。
   const [carsPerTrain, setCarsPerTrain] = useState<number>(TRANSIT_DEFAULT_CARS_PER_TRAIN);
+  // 車両の外観(vehicle_model)。候補は種別ごとに違うため、種別を選び直すとその種別の先頭候補に戻す。
+  const [vehicleModel, setVehicleModel] = useState<number>(0);
   // Unity(グラフィック)側で配置中の停留所座標列([x, y, z] の配列)。
   const [stops, setStops] = useState<number[][]>([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -104,10 +111,11 @@ export function TransitCreationPanel({
 
   // 種別を選ぶと、Unity を停留所配置モード(STATE_EDIT_TRANSIT)にする。
   // 停留所の設置制約(stop_path_variants)と走行網(route_path_variants)を渡し、
-  // Unity 側が吸着対象のパスを絞れるようにする。種別を変えたら停留所はリセットする。
+  // Unity 側が吸着対象のパスを絞れるようにする。種別を変えたら停留所と車両の外観はリセットする。
   useEffect(() => {
     if (!selectedEntry) return;
     setStops([]);
+    setVehicleModel(defaultTransitVehicleModel(selectedEntry.transit_path_id));
     void sendChangeState(
       "STATE_EDIT_TRANSIT",
       {
@@ -159,6 +167,7 @@ export function TransitCreationPanel({
           fare_price: fare,
           target_headway: headway,
           cars_per_train: carsPerTrain,
+          vehicle_model: vehicleModel,
           // Unity 側で配置した停留所座標列。
           stops,
         }),
@@ -188,7 +197,7 @@ export function TransitCreationPanel({
     } finally {
       setIsSaving(false);
     }
-  }, [apiBaseUrl, selectedEntry, fare, headway, stops, onClose, t]);
+  }, [apiBaseUrl, selectedEntry, fare, headway, carsPerTrain, vehicleModel, stops, onClose, t]);
 
   if (!masterData) {
     return <p className="bc-muted">{t("common.loading")}</p>;
@@ -236,6 +245,22 @@ export function TransitCreationPanel({
               <div className="bc-description-name">{selectedEntry.display_name}</div>
               <div className="bc-description-text">{description}</div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 車両の外観(車両を描かない種別では出さない) */}
+      {selectedEntry && transitVehicleOptions(selectedEntry.transit_path_id).length > 0 && (
+        <div className="bc-section">
+          <div className="bc-section-title">{t("transit.vehicleModel")}</div>
+          <TransitVehicleSelector
+            pathVariant={selectedEntry.transit_path_id}
+            value={vehicleModel}
+            onChange={setVehicleModel}
+            disabled={isSaving}
+          />
+          <div className="bc-description-text" style={{ marginTop: 6, opacity: 0.8 }}>
+            {t("transit.vehicleModelNote")}
           </div>
         </div>
       )}
