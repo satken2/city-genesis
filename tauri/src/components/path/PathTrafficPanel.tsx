@@ -1,41 +1,74 @@
 /**
- * パスの交通・速度設定パネル
+ * パスの交通・速度設定セクション
  *
- * パスの交通量情報と制限速度の設定を担うコンポーネント。
+ * パス詳細の基本情報タブに置く、制限速度と交通の状況をまとめたセクション。
+ * - 制限速度・通過速度: PathSpeedLimitEditor(道路標識+都市の値+この道路の入力欄。入力は自動で反映する)
+ * - 利用率・路上駐車量: 横並びのドーナツ。どちらも値が大きいほど逼迫している指標なので色は negative の向き。
+ *   路上駐車は台数が容量を超えうる(建物の駐車場からあふれた車が停まる)ので実数を添え、
+ *   容量を持つ道路(稼働中の地上の生活道路)と実際に車が停まっている道路だけに出す
+ * - 交通量(1日あたり): 車種をアイコンで示した1本のリスト。棒の長さはリスト内の最大値に対する比
  *
- * 表示・編集項目:
- * - override_max_speed: 市の規制(規制ウィンドウのバリアント別制限速度)をこのパスで上書きするか。
- *   ONの間はこのパスだけ規制の変更を受けず、OFFに戻すとバックエンドが規制の値へ戻す
- * - max_speed: override_max_speed が true の場合のみ編集可能な制限速度(km/h)
- * - base_speed / min_curve_radius / max_grade: 形状から決まる通過速度と線形指標(読み取り専用)。
- *   制限速度が通過速度を大きく上回るほど事故が起きやすいため、制限速度設定の隣に並べる
- * - utilization: 現在の利用率をメーターで表示する
- * - parked_cars / street_parking_capacity: 路上駐車台数を合法に停められる台数に対する割合でメーター表示する。
- *   台数は容量を超えうる(建物の駐車場からあふれた車が停まる)ので、実数を併記する。
- *   容量を持つ道路(稼働中の地上の生活道路)と、実際に車が停まっている道路だけに出す
- * - path_traffic: 車両種別ごとの交通量(1日あたりの通過トリップ数)を表形式で表示する
- *
- * 制限速度設定の変更は「保存」ボタン押下時に PATCH リクエストとして送信する。
+ * 制限速度は PATH_TYPES_WITH_SPEED_LIMIT、通過速度は PATH_TYPES_WITH_BASE_SPEED、
+ * 利用率は PATH_TYPES_WITH_UTILIZATION の種別だけに出す(それ以外の種別では意味を持たない値のため)。
+ * 表示する項目が1つも無ければセクションごと出さない。
  */
 
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { PathData } from "../../types";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { resolveIntlLocale } from "../../utils/locale";
 import { parkingUsage } from "../../utils/parking";
-import { Meter } from "../common/Meter";
 import {
+  PATH_TYPES_WITH_BASE_SPEED,
+  PATH_TYPES_WITH_SPEED_LIMIT,
+  PATH_TYPES_WITH_UTILIZATION,
+} from "../../local-constants";
+import { DonutGauge } from "../common/DonutGauge";
+import {
+  PATH_CONVEYOR,
+  PATH_MONORAIL,
   PATH_MOTORWAY,
   PATH_STREET,
-  PATH_WALKWAY,
   PATH_TRACK,
   PATH_TRANSPORT,
+  PATH_WALKWAY,
+  PEDESTRIAN_VEHICLE_KEYS,
+  RAIL_VEHICLE_KEYS,
+  ROAD_VEHICLE_KEYS,
+  TRAFFIC_PEDESTRIAN,
+  TRAFFIC_RAIL,
+  VEHICLE_TO_TRAFFIC,
+  VEHICLE_TRAM,
 } from "../../constants";
+import { PathSpeedLimitEditor } from "./PathSpeedLimitEditor";
+import { VehicleIcon } from "./VehicleIcon";
 import "./PathTrafficPanel.css";
 
-// バックエンド geo_path_alignment.NO_CURVATURE_RADIUS(直線扱いの半径上限)。これ以上は「直線」と表示する。
-const STRAIGHT_RADIUS_THRESHOLD = 1.0e6;
+/**
+ * 交通量リストに常に並べる車種(交通量が0でも行を出し、道路どうしで見比べやすくする)。
+ * ここに無い車種は交通量があるときだけ出す。LRTは一部のバリアント(LRT線路付きの街路・
+ * 歩行者専用道路・LRT専用軌道)にしか走らないため、常設の行には含めない。
+ */
+function listedVehicleKeys(pathType: number): number[] {
+  if (pathType === PATH_STREET || pathType === PATH_MOTORWAY) {
+    return [...PEDESTRIAN_VEHICLE_KEYS, ...ROAD_VEHICLE_KEYS.filter((key) => key !== VEHICLE_TRAM)];
+  }
+  if (pathType === PATH_WALKWAY || pathType === PATH_CONVEYOR || pathType === PATH_TRANSPORT) {
+    return [...PEDESTRIAN_VEHICLE_KEYS];
+  }
+  if (pathType === PATH_TRACK || pathType === PATH_MONORAIL) {
+    return [...RAIL_VEHICLE_KEYS];
+  }
+  return [];
+}
+
+/** 交通カテゴリ(徒歩・道路・鉄道)ごとのアイコンと棒の色 */
+function trafficCategoryModifier(vehicleType: number): string {
+  const category = VEHICLE_TO_TRAFFIC[vehicleType];
+  if (category === TRAFFIC_PEDESTRIAN) return "pedestrian";
+  if (category === TRAFFIC_RAIL) return "rail";
+  return "road";
+}
 
 type PathTrafficPanelProps = {
   path: PathData;
@@ -48,92 +81,8 @@ export function PathTrafficPanel({ path, apiBaseUrl, onSaved }: PathTrafficPanel
   const masterData = useMasterData();
   const locale = resolveIntlLocale(i18n.language);
 
-  const [overrideMaxSpeed, setOverrideMaxSpeed] = useState(
-    path.override_max_speed
-  );
-  const [maxSpeed, setMaxSpeed] = useState<string>(
-    path.max_speed != null ? String(path.max_speed) : ""
-  );
-  const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
-
-  /**
-   * 制限速度設定を PATCH リクエストで保存する
-   */
-  async function handleSave() {
-    setSaving(true);
-    setSaveError(null);
-    const base = apiBaseUrl.replace(/\/+$/, "");
-    const url = `${base}/api/v1/paths/${path.path_id}`;
-
-    const body: Record<string, unknown> = {
-      override_max_speed: overrideMaxSpeed,
-    };
-    if (overrideMaxSpeed) {
-      const parsed = parseFloat(maxSpeed);
-      body.max_speed = isNaN(parsed) ? null : parsed;
-    }
-
-    try {
-      const res = await fetch(url, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const updated = await res.json() as PathData;
-      onSaved(updated);
-    } catch (err) {
-      setSaveError(err instanceof Error ? err.message : "Unknown error");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  /**
-   * 車両種別マスターに基づいて path_traffic の行データを構築し、
-   * カテゴリごとにグループ化する。
-   * パスの種類に応じて表示するカテゴリをフィルタリングする。
-   * マスターに存在しないキーは「ID:xxx」表示にフォールバックする。
-   */
-  const trafficByCategory = (() => {
-    if (!path.path_traffic) return {};
-    
-    // パス種別に応じて表示を許可するカテゴリを判定
-    let allowedCategories: Set<string> | null = null;
-    if (path.path_type === PATH_MOTORWAY || path.path_type === PATH_STREET) {
-      allowedCategories = new Set(["0", "1"]); // 徒歩と道路
-    } else if (path.path_type === PATH_WALKWAY || path.path_type === PATH_TRANSPORT) {
-      allowedCategories = new Set(["0"]); // 徒歩のみ
-    } else if (path.path_type === PATH_TRACK) {
-      allowedCategories = new Set(["2"]); // 鉄道のみ
-    }
-    
-    const groups: Record<string, { key: string; displayName: string; count: number }[]> = {};
-    
-    for (const [key, count] of Object.entries(path.path_traffic)) {
-      const id = Number(key);
-      const vehicleType = masterData?.vehicle_types?.[id];
-      const displayName = vehicleType?.display_name ?? `ID:${key}`;
-      const category = vehicleType?.category ?? "unknown";
-      
-      const catKey = String(category);
-      
-      // 許可されていないカテゴリはスキップ
-      if (allowedCategories && !allowedCategories.has(catKey)) {
-        continue;
-      }
-      
-      if (!groups[catKey]) {
-        groups[catKey] = [];
-      }
-      groups[catKey].push({ key, displayName, count });
-    }
-    
-    return groups;
-  })();
-
-  const hasTraffic = Object.keys(trafficByCategory).length > 0;
+  const showSpeedLimit = PATH_TYPES_WITH_SPEED_LIMIT.includes(path.path_type);
+  const showUtilization = path.utilization != null && PATH_TYPES_WITH_UTILIZATION.includes(path.path_type);
 
   // 路上駐車は道路1本あたりの台数が小さく端数が意味を持つため、小数1桁で表示する
   const parkingOnPath =
@@ -145,136 +94,84 @@ export function PathTrafficPanel({ path, apiBaseUrl, onSaved }: PathTrafficPanel
   const formatParkingCars = (value: number) =>
     value.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
+  const trafficCounts = path.path_traffic ?? {};
+  const vehicleKeys = new Set(listedVehicleKeys(path.path_type));
+  for (const [key, count] of Object.entries(trafficCounts)) {
+    if (count > 0) vehicleKeys.add(Number(key));
+  }
+  const trafficRows = [...vehicleKeys]
+    .sort((a, b) => a - b)
+    .map((vehicleType) => ({ vehicleType, count: trafficCounts[String(vehicleType)] ?? 0 }));
+  const maxTraffic = Math.max(0, ...trafficRows.map((row) => row.count));
+
+  if (!showSpeedLimit && !showUtilization && !streetParking && trafficRows.length === 0) return null;
+
+  const vehicleName = (vehicleType: number) =>
+    t(`path.vehicles.${vehicleType}`, {
+      defaultValue: masterData?.vehicle_types?.[vehicleType]?.display_name ?? `ID:${vehicleType}`,
+    });
+
   return (
     <section className="agent-detail-section path-traffic-section">
-      <h3 className="agent-detail-section-title">{t("path.trafficSettings", "交通・速度設定")}</h3>
-      {/* 制限速度設定 */}
-      <div className="path-speed-block">
-        <label className="path-speed-override-label">
-          <input
-            type="checkbox"
-            className="path-speed-override-check"
-            checked={overrideMaxSpeed}
-            onChange={(e) => setOverrideMaxSpeed(e.target.checked)}
-          />
-          <span className="agent-detail-label">
-            {t("path.overrideMaxSpeed")}
-          </span>
-        </label>
+      <h3 className="agent-detail-section-title">{t("path.trafficSettings")}</h3>
 
-        <div className="path-speed-input-row">
-          <span
-            className={`agent-detail-label ${!overrideMaxSpeed ? "path-speed-label--disabled" : ""}`}
-          >
-            {t("path.maxSpeed")}
-          </span>
-          <input
-            type="number"
-            className="path-speed-input"
-            value={maxSpeed}
-            min={0}
-            disabled={!overrideMaxSpeed}
-            onChange={(e) => setMaxSpeed(e.target.value)}
-          />
-          <span
-            className={`path-speed-unit ${!overrideMaxSpeed ? "path-speed-label--disabled" : ""}`}
-          >
-            km/h
-          </span>
-        </div>
-      </div>
+      {showSpeedLimit && (
+        <PathSpeedLimitEditor
+          path={path}
+          apiBaseUrl={apiBaseUrl}
+          showBaseSpeed={PATH_TYPES_WITH_BASE_SPEED.includes(path.path_type)}
+          onSaved={onSaved}
+        />
+      )}
 
-      {/* 形状から決まる通過速度と線形指標(読み取り専用) */}
-      {path.base_speed != null && (
-        <div className="agent-detail-grid path-alignment-grid">
-          <span className="agent-detail-label">{t("path.baseSpeed")}</span>
-          <span className="agent-detail-value">{Math.round(path.base_speed)} km/h</span>
-          {path.min_curve_radius != null && (
-            <>
-              <span className="agent-detail-label">{t("path.minCurveRadius")}</span>
-              <span className="agent-detail-value">
-                {path.min_curve_radius >= STRAIGHT_RADIUS_THRESHOLD
-                  ? t("path.straightLine")
-                  : `${Math.round(path.min_curve_radius)} m`}
-              </span>
-            </>
+      {(showUtilization || streetParking) && (
+        <div className="path-traffic-gauges">
+          {showUtilization && path.utilization != null && (
+            <DonutGauge value={path.utilization} label={t("path.utilization")} polarity="negative" />
           )}
-          {path.max_grade != null && (
-            <>
-              <span className="agent-detail-label">{t("path.maxGrade")}</span>
-              <span className="agent-detail-value">{path.max_grade.toFixed(1)} %</span>
-            </>
+          {streetParking && (
+            <DonutGauge
+              value={streetParking.ratio}
+              label={t("path.streetParking")}
+              polarity="negative"
+              detail={t("path.streetParkingUsage", {
+                parked: formatParkingCars(streetParking.used),
+                capacity: formatParkingCars(streetParking.capacity),
+              })}
+            />
           )}
         </div>
       )}
 
-      {/* 保存ボタン */}
-      <div className="path-save-row">
-        {saveError && (
-          <span className="path-save-error">{saveError}</span>
-        )}
-        <button
-          className="path-save-btn"
-          type="button"
-          onClick={() => void handleSave()}
-          disabled={saving}
-        >
-          {saving ? t("common.saving") : t("common.save")}
-        </button>
-      </div>
-
-      {/* 利用率 */}
-      {path.utilization != null && (
-        <div className="path-utilization">
-          <Meter
-            label={t("path.utilization")}
-            value={path.utilization}
-          />
-        </div>
-      )}
-
-      {streetParking && (
-        <div className="path-street-parking">
-          <Meter
-            label={t("path.streetParking")}
-            value={streetParking.ratio}
-            polarity="negative"
-          />
-          <span className="path-street-parking-value">
-            {t("path.streetParkingUsage", {
-              parked: formatParkingCars(streetParking.used),
-              capacity: formatParkingCars(streetParking.capacity),
+      {trafficRows.length > 0 && (
+        <div className="path-traffic-list-block">
+          <span className="path-traffic-list-title">{t("path.trafficByVehicle")}</span>
+          <ul className="path-traffic-list">
+            {trafficRows.map(({ vehicleType, count }) => {
+              const name = vehicleName(vehicleType);
+              const modifier = trafficCategoryModifier(vehicleType);
+              const share = maxTraffic > 0 ? (count / maxTraffic) * 100 : 0;
+              return (
+                <li
+                  key={vehicleType}
+                  className={`path-traffic-row path-traffic-row--${modifier}${count > 0 ? "" : " path-traffic-row--zero"}`}
+                  title={name}
+                >
+                  <span className="path-traffic-row__icon">
+                    <VehicleIcon vehicleType={vehicleType} label={name} />
+                  </span>
+                  <span className="path-traffic-row__bar">
+                    <span className="path-traffic-row__fill" style={{ width: `${share}%` }} />
+                  </span>
+                  {/* 交通量は日次の実数(端数あり)なので小数1桁で丸めて単位を付ける */}
+                  <span className="path-traffic-row__count">
+                    {count.toLocaleString(locale, { maximumFractionDigits: 1 })}
+                    {t("path.trafficUnitPerDay")}
+                  </span>
+                </li>
+              );
             })}
-          </span>
-        </div>
-      )}
-
-      {/* 車両種別ごとの交通量 */}
-      {hasTraffic && (
-        <div className="path-traffic-table-block">
-          <span className="agent-detail-label">{t("path.trafficByVehicle")}</span>
-          
-          {Object.entries(trafficByCategory).map(([catKey, rows]) => (
-            <div key={catKey} className="path-traffic-category-group">
-              <h4 className="path-traffic-category-title">
-                {t(`path.category.${catKey}`, { defaultValue: t("path.category.unknown") })}
-              </h4>
-              <table className="path-traffic-table">
-                <tbody>
-                  {rows.map(({ key, displayName, count }) => (
-                    <tr key={key}>
-                      <td className="path-traffic-vehicle">{displayName}</td>
-                      {/* 交通量は日次の実数(端数あり)なので小数1桁で丸めて単位を付ける */}
-                      <td className="path-traffic-count">
-                        {count.toLocaleString(undefined, { maximumFractionDigits: 1 })}
-                        {t("path.trafficUnitPerDay", "/日")}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ))}
+          </ul>
         </div>
       )}
     </section>

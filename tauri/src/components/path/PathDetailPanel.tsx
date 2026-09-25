@@ -6,8 +6,11 @@
  *
  * 表示項目:
  * - InfoHeader: アイコン・ステータス・名前
- * - 基本情報タブ: 所属地区・耐久度・修繕状態・騒音・大気汚染
- * - 交通タブ: 制限速度設定・利用率・路上駐車量・交通量テーブル
+ * - 基本情報タブ:
+ *   - 基本情報セクション: 所属地区・地形追従・最小曲線半径・最大勾配と、
+ *     耐久度・騒音・大気汚染の状態タイル(PathConditionPanel)
+ *   - 交通・速度設定セクション(PathTrafficPanel): 制限速度の標識と入力欄・通過速度・
+ *     利用率と路上駐車量のドーナツ・車種別交通量
  * - 道路設備タブ: 街灯・柵・街路樹・配電方式
  * - 駅舎には駅情報、計画中・工事中には建設工事タブを表示する
  *
@@ -28,6 +31,7 @@ import type { PathInterferenceHighlight } from "../../utils/ipc";
 import { useTemplateMode } from "../../hooks/useTemplateMode";
 import { resolvePathIcon } from "../../utils/pathIcon";
 import { useMasterData } from "../../contexts/MasterDataContext";
+import { PATH_TYPES_WITH_BASE_SPEED } from "../../local-constants";
 import {
   PATH_STREET,
   PATH_STATION_HOUSE,
@@ -58,6 +62,9 @@ import accidentIcon from "../../assets/images/ui/agent_panel/car-accident.png";
 import "../agent/AgentDetailPanel.css";
 import "./PathDetailPanel.css";
 import rocketIcon from "../../assets/images/ui/rocket.png";
+
+// バックエンド geo_path_alignment.NO_CURVATURE_RADIUS(直線扱いの半径上限)。これ以上は「直線」と表示する。
+const STRAIGHT_RADIUS_THRESHOLD = 1.0e6;
 
 type PathDetailPanelProps = {
   apiBaseUrl: string;
@@ -300,7 +307,6 @@ export function PathDetailPanel({
   const tabs: { id: string; label: string }[] = [];
   if (!isPreConstruction) {
     tabs.push({ id: "basic", label: t("path.tabs.basic") });
-    tabs.push({ id: "traffic", label: t("path.tabs.traffic") });
     if (hasEquipment) tabs.push({ id: "equipment", label: t("pathEquipment.title") });
   }
   if (isStationHouse) tabs.push({ id: "station", label: t("station.sectionTitle") });
@@ -317,6 +323,20 @@ export function PathDetailPanel({
     pathData.name !== ""
       ? pathData.name
       : t("path.titleWithId", { id: pathData.path_id });
+
+  // 基本情報セクションの表の行。線形指標は形状から算出する種別でしか意味を持たない
+  // (それ以外の種別では既定値の「直線・0%」のまま)。
+  const showZoneRow = pathData.zone_name != null || canChangeZone;
+  const showFollowTerrainRow = pathData.follow_terrain === 0 || pathData.follow_terrain === 1;
+  const hasAlignment = PATH_TYPES_WITH_BASE_SPEED.includes(pathData.path_type);
+  const showCurveRadiusRow = hasAlignment && pathData.min_curve_radius != null;
+  const showGradeRow = hasAlignment && pathData.max_grade != null;
+  const hasBasicGrid = showZoneRow || showFollowTerrainRow || showCurveRadiusRow || showGradeRow;
+  const hasCondition =
+    !!pathData.under_maintenance ||
+    pathData.durability != null ||
+    pathData.noise != null ||
+    pathData.air_pollution != null;
 
   return (
     <div className="agent-detail">
@@ -463,66 +483,85 @@ export function PathDetailPanel({
         </div>
       )}
 
-      {/* hiddenで表示だけを切り替え、設備・速度の未保存の入力を保持する。 */}
+      {/* hiddenで表示だけを切り替え、設備の未保存の入力と制限速度の反映待ちの入力を保持する。 */}
       {!isPreConstruction && (
         <>
           <div id="path-detail-basic" hidden={activeTab !== "basic"}>
             <div className="agent-detail-tab-content">
-              {/* 基本情報セクション: 所属地区を表示・編集する */}
-              {(pathData.zone_name != null || canChangeZone) && (
+              {/* 基本情報セクション: 所属地区・線形指標の表と、耐久度・騒音・大気汚染の状態タイル */}
+              {(hasBasicGrid || hasCondition) && (
                 <section className="agent-detail-section">
                   <h3 className="agent-detail-section-title">{t("path.tabs.basic")}</h3>
-                  <div className="agent-detail-grid">
-                    <span className="agent-detail-label">{t("path.zoneName")}</span>
-                    <span className="agent-detail-value">
-                      {canChangeZone ? (
-                        <select
-                          className="zone-change-select"
-                          value={pathData.zone_id ?? ""}
-                          disabled={zoneSaving}
-                          onChange={(e) => handleZoneChange(Number(e.target.value))}
-                        >
-                          {zoneOptions.map((z) => (
-                            <option key={z.zone_id} value={z.zone_id}>
-                              {z.zone_name}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <ZoneLink
-                          zoneId={pathData.zone_id}
-                          zoneName={pathData.zone_name ?? ""}
-                        />
+                  {hasBasicGrid && (
+                    <div className="agent-detail-grid">
+                      {showZoneRow && (
+                        <>
+                          <span className="agent-detail-label">{t("path.zoneName")}</span>
+                          <span className="agent-detail-value">
+                            {canChangeZone ? (
+                              <select
+                                className="zone-change-select"
+                                value={pathData.zone_id ?? ""}
+                                disabled={zoneSaving}
+                                onChange={(e) => handleZoneChange(Number(e.target.value))}
+                              >
+                                {zoneOptions.map((z) => (
+                                  <option key={z.zone_id} value={z.zone_id}>
+                                    {z.zone_name}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : (
+                              <ZoneLink
+                                zoneId={pathData.zone_id}
+                                zoneName={pathData.zone_name ?? ""}
+                              />
+                            )}
+                          </span>
+                        </>
                       )}
-                    </span>
-                    {/* 地形追従の個別設定。バリアント既定を上書きしている(0/1)ときだけ表示する。 */}
-                    {(pathData.follow_terrain === 0 || pathData.follow_terrain === 1) && (
-                      <>
-                        <span className="agent-detail-label">{t("path.followTerrain", "地形追従")}</span>
-                        <span className="agent-detail-value">
-                          {pathData.follow_terrain === 1
-                            ? t("path.followTerrainFollow", "する(個別設定)")
-                            : t("path.followTerrainNone", "しない(個別設定)")}
-                        </span>
-                      </>
-                    )}
-                  </div>
+                      {/* 地形追従の個別設定。バリアント既定を上書きしている(0/1)ときだけ表示する。 */}
+                      {showFollowTerrainRow && (
+                        <>
+                          <span className="agent-detail-label">{t("path.followTerrain", "地形追従")}</span>
+                          <span className="agent-detail-value">
+                            {pathData.follow_terrain === 1
+                              ? t("path.followTerrainFollow", "する(個別設定)")
+                              : t("path.followTerrainNone", "しない(個別設定)")}
+                          </span>
+                        </>
+                      )}
+                      {showCurveRadiusRow && pathData.min_curve_radius != null && (
+                        <>
+                          <span className="agent-detail-label">{t("path.minCurveRadius")}</span>
+                          <span className="agent-detail-value">
+                            {pathData.min_curve_radius >= STRAIGHT_RADIUS_THRESHOLD
+                              ? t("path.straightLine")
+                              : `${Math.round(pathData.min_curve_radius)} m`}
+                          </span>
+                        </>
+                      )}
+                      {showGradeRow && pathData.max_grade != null && (
+                        <>
+                          <span className="agent-detail-label">{t("path.maxGrade")}</span>
+                          <span className="agent-detail-value">{pathData.max_grade.toFixed(1)} %</span>
+                        </>
+                      )}
+                    </div>
+                  )}
                   {zoneError && (
                     <div className="zone-change-error">{zoneError}</div>
                   )}
+                  <PathConditionPanel path={pathData} apiBaseUrl={apiBaseUrl} />
                 </section>
               )}
 
-              {/* 物理状態セクション */}
-              <PathConditionPanel path={pathData} />
+              <PathTrafficPanel
+                path={pathData}
+                apiBaseUrl={apiBaseUrl}
+                onSaved={setPathData}
+              />
             </div>
-          </div>
-          <div id="path-detail-traffic" hidden={activeTab !== "traffic"}>
-            <PathTrafficPanel
-              path={pathData}
-              apiBaseUrl={apiBaseUrl}
-              onSaved={setPathData}
-            />
           </div>
           {hasEquipment && (
             <div id="path-detail-equipment" hidden={activeTab !== "equipment"}>

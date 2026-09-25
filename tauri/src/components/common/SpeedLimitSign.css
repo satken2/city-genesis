@@ -1,0 +1,17 @@
+/**
+ * 制限速度標識(共通部品)のスタイル
+ */
+
+.speed-limit-sign {
+  flex: 0 0 auto;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45));
+}
+
+/* 実物の標識に近い、字幅の詰まった太字 */
+.speed-limit-sign__number {
+  fill: #1b5396;
+  font-family: "Arial Narrow", "Roboto Condensed", "Segoe UI", sans-serif;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+}

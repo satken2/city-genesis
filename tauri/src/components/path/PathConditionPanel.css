@@ -1,22 +1,22 @@
 /**
- * パス物理状態パネルのスタイル
+ * パスの状態タイル(耐久度・騒音・大気汚染)のスタイル
  *
- * BuildingInfoPanel.css の構造を踏襲している。
  * maintenance-badge は BuildingInfoPanel.css と同一の定義だが、
  * このパネルは独立して描画されるため再定義する。
  */
 
-.path-condition-section {
+.path-condition {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+  margin-top: 4px;
 }
 
 /*
  * 修繕中バッジ
  * 工事現場の注意テープを模した黄色と黒の斜めストライプ枠線
  */
-.path-condition-section .maintenance-badge {
+.path-condition .maintenance-badge {
   background: #fbbf24;
   color: #000;
   padding: 4px 12px;
@@ -33,10 +33,48 @@
   ) 3;
 }
 
-.path-condition-meter {
-  margin-top: 2px;
+.path-condition-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
 }
 
-.path-condition-grid {
-  margin-top: 2px;
+.path-condition-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 6px 7px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  min-width: 0;
+}
+
+.path-condition-tile__label {
+  color: #93a9c0;
+  font-weight: 600;
+  font-size: 0.74rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.path-condition-tile__icon {
+  display: flex;
+  transition: color 0.3s ease;
+}
+
+.path-condition-icon {
+  width: 40px;
+  height: 40px;
+  overflow: visible;
+}
+
+.path-condition-tile__value {
+  color: #e2eaf2;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }

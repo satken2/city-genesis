@@ -1,172 +1,199 @@
 /**
- * パス交通・速度設定パネルのスタイル
+ * パスの交通・速度設定セクションのスタイル
+ * (制限速度ブロック PathSpeedLimitEditor・利用率/路上駐車のドーナツ・車種別交通量リスト)
  */
 
 .path-traffic-section {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
-/* === 制限速度設定ブロック === */
+/* === 制限速度ブロック: 左に標識、右に「都市の値・この道路の入力欄・通過速度」の表 === */
 
-.path-speed-block {
+.path-speed-limit {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  align-items: center;
+  gap: 14px;
 }
 
-.path-speed-override-label {
+.path-speed-limit__rows {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+.path-speed-limit__label {
+  color: #93a9c0;
+  font-weight: 600;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.path-speed-limit__value {
   display: flex;
   align-items: center;
   gap: 6px;
-  cursor: pointer;
+  min-width: 0;
+  min-height: 24px;
+  font-size: 0.8rem;
+  color: #e2eaf2;
+  font-variant-numeric: tabular-nums;
 }
 
-.path-speed-override-check {
-  width: 14px;
-  height: 14px;
-  cursor: pointer;
-  accent-color: #22c55e;
+/* 都市の制限速度は参考値なので薄く出す */
+.path-speed-limit__label--reference,
+.path-speed-limit__value--reference {
+  opacity: 0.55;
+  font-weight: 400;
 }
 
-.path-speed-input-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding-left: 20px;
-}
-
-.path-speed-label--disabled {
-  opacity: 0.45;
-}
-
-.path-speed-input {
-  width: 80px;
+.path-speed-limit__input {
+  width: 64px;
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 4px;
   color: #e2eaf2;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
   padding: 2px 6px;
   line-height: 18px;
 }
 
-.path-speed-input:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
+.path-speed-limit__input::placeholder {
+  color: #6b8299;
+  font-weight: 400;
+  font-size: 0.75rem;
+  text-align: right;
 }
 
-.path-speed-input:focus:not(:disabled) {
+.path-speed-limit__input:focus {
   outline: none;
   border-color: rgba(99, 179, 237, 0.6);
 }
 
-.path-speed-unit {
+.path-speed-limit__input[aria-invalid="true"] {
+  border-color: rgba(252, 129, 129, 0.8);
+}
+
+.path-speed-limit__unit {
   font-size: 0.78rem;
   color: #93a9c0;
 }
 
-/* === 保存ボタン行 === */
-
-.path-save-row {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.path-save-error {
-  color: #fc8181;
-  font-size: 0.76rem;
-}
-
-.path-save-btn {
-  padding: 4px 14px;
-  font-size: 0.8rem;
-  border-radius: 6px;
-  background: rgba(34, 197, 94, 0.18);
-  border: 1px solid rgba(34, 197, 94, 0.4);
-  color: #86efac;
-  cursor: pointer;
-  transition: background 0.1s;
-}
-
-.path-save-btn:hover:not(:disabled) {
-  background: rgba(34, 197, 94, 0.28);
-}
-
-.path-save-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* === 利用率メーター === */
-
-.path-utilization {
-  margin-top: 2px;
-}
-
-/* === 路上駐車量メーター(右に台数を併記) === */
-
-.path-street-parking {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.path-street-parking .meter {
-  flex: 1;
+.path-speed-limit__status {
+  font-size: 0.72rem;
+  line-height: 1.2;
   min-width: 0;
 }
 
-.path-street-parking-value {
-  flex-shrink: 0;
-  font-size: 0.75rem;
-  color: #c0d0e0;
+.path-speed-limit__status--saving {
+  color: #93a9c0;
+}
+
+.path-speed-limit__status--saved {
+  color: #86efac;
+}
+
+.path-speed-limit__status--error {
+  color: #fc8181;
+}
+
+/* === 利用率・路上駐車量のドーナツ(横並び) === */
+
+.path-traffic-gauges {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+}
+
+/* === 車種別交通量リスト === */
+
+.path-traffic-list-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.path-traffic-list-title {
+  color: #93a9c0;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.path-traffic-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.path-traffic-row {
+  --traffic-color: #60a5fa;
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) 84px;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.path-traffic-row:nth-child(even) {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.path-traffic-row--pedestrian {
+  --traffic-color: #34d399;
+}
+
+.path-traffic-row--rail {
+  --traffic-color: #a78bfa;
+}
+
+.path-traffic-row__icon {
+  display: flex;
+  color: var(--traffic-color);
+}
+
+.vehicle-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.path-traffic-row__bar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.path-traffic-row__fill {
+  display: block;
+  height: 100%;
+  background: var(--traffic-color);
+  opacity: 0.75;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.path-traffic-row__count {
+  text-align: right;
+  font-size: 0.78rem;
+  color: #e2eaf2;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
-/* === 車両種別交通量テーブル === */
-
-.path-traffic-table-block {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.path-traffic-category-group {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.path-traffic-category-title {
-  font-size: 0.78rem;
-  color: #e2eaf2;
-  margin: 0;
-  padding-bottom: 2px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.path-traffic-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.78rem;
-}
-
-.path-traffic-table tr:nth-child(even) {
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.path-traffic-vehicle {
-  color: #93a9c0;
-  padding: 2px 6px 2px 0;
-}
-
-.path-traffic-count {
-  text-align: right;
-  padding: 2px 0 2px 6px;
-  font-variant-numeric: tabular-nums;
+/* 交通量0の車種は行を残したまま控えめにする */
+.path-traffic-row--zero .path-traffic-row__icon,
+.path-traffic-row--zero .path-traffic-row__count {
+  opacity: 0.4;
 }

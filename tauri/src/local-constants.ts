@@ -110,6 +110,13 @@ import {
   STATUS_CANCELED,
   STATUS_EMPTY,
   STATUS_COLLAPSED,
+  PATH_STREET,
+  PATH_MOTORWAY,
+  PATH_WALKWAY,
+  PATH_TRACK,
+  PATH_MONORAIL,
+  PATH_CONVEYOR,
+  PATH_TRANSPORT,
   PATH_ELECTRICITY,
   PATH_WATER,
   PATH_PIPELINE,
@@ -146,6 +153,32 @@ export const PATH_TYPES_INFRA: readonly number[] = [PATH_ELECTRICITY, PATH_WATER
 export function isInfraPathType(pathType: number | null | undefined): boolean {
   return pathType != null && PATH_TYPES_INFRA.includes(pathType);
 }
+
+/**
+ * 形状から通過速度(base_speed)・最小曲線半径・最大勾配を算出するパス種別。
+ * バックエンド geo_path_alignment.SPEED_PATH_TYPES に対応する。これ以外の種別の値は
+ * 算出されない既定値(0・直線)のままなので、パス詳細に表示しない。
+ */
+export const PATH_TYPES_WITH_BASE_SPEED: readonly number[] = [PATH_STREET, PATH_MOTORWAY, PATH_TRACK, PATH_MONORAIL];
+
+/**
+ * パス詳細で制限速度(標識と個別指定)を扱うパス種別。通過速度を持つ種別に加えて歩道を含める。
+ * 歩行者の速度には効かないが、歩行者専用道路(LRT付き)を走るLRTがこの値を上限に走るため。
+ * 人員搬送は設備の巡航速度で動き、公共交通の区間パス・インフラ・駅舎は通過時間を持たないので含めない。
+ */
+export const PATH_TYPES_WITH_SPEED_LIMIT: readonly number[] = [...PATH_TYPES_WITH_BASE_SPEED, PATH_WALKWAY];
+
+/**
+ * 利用率(utilization)を算出するパス種別。バックエンド PathUtilizationPhase に対応する。
+ * これ以外の種別の利用率は常に0なので、パス詳細に表示しない。
+ */
+export const PATH_TYPES_WITH_UTILIZATION: readonly number[] = [
+  PATH_STREET,
+  PATH_MOTORWAY,
+  PATH_TRACK,
+  PATH_CONVEYOR,
+  PATH_TRANSPORT,
+];
 
 /**
  * ステータスごとの表示スタイルを定義する

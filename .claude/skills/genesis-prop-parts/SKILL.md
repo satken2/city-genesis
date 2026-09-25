@@ -146,9 +146,9 @@ stdout が返らない等の罠がある)。本Skillはプロップ固有の差�
 
 ## 道路・鉄道を走る車両モデル
 
-鉄道の接写版は14（トラム）・20（メトロ）・21（中距離）・23（高速鉄道）の全外観と中間車、およびモノレール308/309にある。非公開制作ツールの`pipeline/jobs/build_rail_close.py`が通常の車体断面から曲面外板と細部を著作する。通常FBXは保持する。再生成・比較・専用頂点予算は同ディレクトリの`rail_close.md`を参照する。走行版はVehicleModelResolverのLODGroup、自由配置別名はPropRenderModelで接写を選ぶ。`build_vehicle_props.py`は接写も同期する。
+鉄道の接写版は14（トラム）・20（メトロ）・21（中距離）・23（高速鉄道）の全外観と中間車、およびモノレール308/309にある。非公開制作ツールの`pipeline/jobs/build_rail_close.py`が通常の車体断面から曲面外板と細部を著作する(メトロ20だけは`metro_vehicles.py`が通常と同じ寸法表から作る)。通常FBXは保持する。再生成・比較・専用頂点予算は同ディレクトリの`rail_close.md`を参照する。走行版はVehicleModelResolverのLODGroup、自由配置別名はPropRenderModelで接写を選ぶ。`build_vehicle_props.py`は接写も同期する。
 
-道路車両・編成車両の制作にも共通のBlender基盤を使うが、保存先は `blender/vehicles.blend` と `Assets/Models/Vehicles/{車種}/{モデル名}.fbx`。走行用の全36モデルは自由配置用の数値ID 350〜367・370〜387でも `prop_master` に登録する。制作前に公開 `geometries/O_車両の走行描画.md` の O.10.1 と `unity/Assets/Scripts/Vehicles/AGENTS.md` を読む。
+道路車両・編成車両の制作にも共通のBlender基盤を使うが、保存先は `blender/vehicles.blend` と `Assets/Models/Vehicles/{車種}/{モデル名}.fbx`。走行用の全38モデルは自由配置用の数値ID 350〜367・370〜389でも `prop_master` に登録する。制作前に公開 `geometries/O_車両の走行描画.md` の O.10.1 と `unity/Assets/Scripts/Vehicles/AGENTS.md` を読む。
 
 - 原点は接地面・水平中心、Blender -Yが前方。1FBX=1メッシュで既存の車両用 `PROP_*` 材質を共有する。
 - 先頭・後尾は数値バリアント、中間は `middle` / `middle_1`。LRT車種14は `0` と `middle` の1外観。最後尾の反転はUnityが行う。
@@ -161,10 +161,12 @@ stdout が返らない等の罠がある)。本Skillはプロップ固有の差�
 
 走行車両の自由配置別名は、非公開制作ツール `genesis-gallery/pipeline/jobs/vehicle_prop_catalog.py` が対応表を持つ。`build_vehicle_props.py -- --blend <props.blend>` は隣のvehicles.blendから全モデルの形状・UV・材質を同期する。道路車両は `build_vehicles.py --road-only` で18外観（10種/4種/2種/2種）を再生成し、その後に別名も同期する。鉄道/LRTを再著作した場合も同期が必要。書き出しはvehiclesとpropsの両カテゴリへ行い、Unityの `Tests/Vehicles/run.ps1 -TransitOnly` で別名も確認する。詳細は公開M文書§M.7.6とO文書§O.10.1。
 
-メトロ20・中距離21の接写先頭車は、非公開制作ツールの`rail_cab_surfaces.py`が平面の側面・屋根・前面ガラスと、その接合円弧を著作する。全面を膨らませる補間を適用しない。`build_rail_close.py --heads-only`で先頭4外観を再生成できる。
+中距離21の接写先頭車は、非公開制作ツールの`rail_cab_surfaces.py`が平面の側面・屋根・前面ガラスと、その接合円弧を著作する。全面を膨らませる補間を適用しない。`build_rail_close.py --heads-only`で先頭2外観を再生成できる。
+
+メトロ20は3外観(0=スタンダード・1=近未来・2=レトロ)で、路線ごとにプレイヤーが選ぶ(API `vehicle_model`)。非公開制作ツールの`metro_vehicles.py`が通常・接写・遠景を同じ寸法表から著作し(`build_vehicles.py`/`build_rail_close.py`/`build_rail_far.py`の`--metro-only`)、自由配置別名は372〜375・388・389。仕様・再生成・制作記録は非公開制作ツールの`pipeline/jobs/metro_vehicles.md`。
 
 
-高速鉄道23は先頭2外観（0/1）と中間2外観（middle/middle_1）に接写版を持ち、自由配置別名384〜387にも同期する。通常FBXは保持する。高速車の前頭部は長い鼻先と曲面風防を一体の断面座標で著作し、メトロ20・中距離21の平面ガラスとは区別する。再生成は非公開制作ツールの`build_rail_close.py --high-speed-only`と`high_speed_surfaces.py`、比較は`render_high_speed.py`。走行車の既存LODと自由配置用PropRenderModelが接写版を選択し、路線マスターの対応は変更しない。
+高速鉄道23は先頭2外観（0/1）と中間2外観（middle/middle_1）に接写版を持ち、自由配置別名384〜387にも同期する。通常FBXは保持する。高速車の前頭部は長い鼻先と曲面風防を一体の断面座標で著作し、中距離21の平面ガラスとは区別する。再生成は非公開制作ツールの`build_rail_close.py --high-speed-only`と`high_speed_surfaces.py`、比較は`render_high_speed.py`。走行車の既存LODと自由配置用PropRenderModelが接写版を選択し、路線マスターの対応は変更しない。
 
 
-鉄道の専用遠景は14/20/21/22/23の全18モデルとモノレール308/309にある。非公開制作ツールの`build_rail_far.py`が車体箱と左右各一枚の窓帯を著作し、車輪・台車・屋上機器を省略する。貨車には窓を付けない。原点と水平範囲は通常版を維持し、車輪・集電装置を省くため上下の範囲は通常版の内側でよい。鉄道12〜42三角形・モノレール62三角形、既存材質を共有する。`build_vehicle_props.py`は370〜387の遠景別名も同期する。走行版は画面比率3.5%未満で`_far`を選び、25%以上では存在する`_close`を選ぶ。専用版がないLODは通常へフォールバックする。自由配置はPropRenderModelの既存の投影LODで専用遠景を使う。通常・接写モデルは保持する。
+鉄道の専用遠景は14/20/21/22/23の全20モデルとモノレール308/309にある。非公開制作ツールの`build_rail_far.py`が車体箱と左右各一枚の窓帯を著作し、車輪・台車・屋上機器を省略する。貨車には窓を付けない。原点と水平範囲は通常版を維持し、車輪・集電装置を省くため上下の範囲は通常版の内側でよい。鉄道12〜42三角形・モノレール62三角形、既存材質を共有する。`build_vehicle_props.py`は370〜389の遠景別名も同期する。走行版は画面比率3.5%未満で`_far`を選び、25%以上では存在する`_close`を選ぶ。専用版がないLODは通常へフォールバックする。自由配置はPropRenderModelの既存の投影LODで専用遠景を使う。通常・接写モデルは保持する。
