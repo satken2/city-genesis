@@ -79,7 +79,7 @@ public class PathManager : BaseApiDataManager
                 old != null ? DrawLodInfo.GetDrawLod(old, DrawLod.Normal) : (DrawLod?)null, lod);
             PathPresentation.Replace(next, old, lodCache);
         }
-        pathObjectsCache[path.path_id] = next;
+        SetPathObject(path.path_id, next);
         next.SetActive(true);
         EnsureEndIntersectionsVisible(path);
         if (lod == DrawLod.Close) closePathIds.Add(path.path_id); else closePathIds.Remove(path.path_id);
@@ -253,6 +253,19 @@ public class PathManager : BaseApiDataManager
     private Dictionary<int, PathSummary> pathDataCache = new Dictionary<int, PathSummary>();
     private Dictionary<int, HashSet<int>> pathsByNodeIndex = new Dictionary<int, HashSet<int>>();
     private Dictionary<int, GameObject> nodeIntersectionMeshes = new Dictionary<int, GameObject>();
+
+    /// <summary>
+    /// nodeDataCache のセル逆引き。セル単位の同期・アンロードで、プールに残る全ノードを走査せずに
+    /// 対象セルのノードGO・交差点メッシュだけを引く。nodeDataCache の追加・座標変更・削除と一緒に更新する。
+    /// </summary>
+    private readonly Dictionary<Vector2Int, HashSet<int>> nodeIdsByCell = new Dictionary<Vector2Int, HashSet<int>>();
+    private readonly Dictionary<int, Vector2Int> nodeCellById = new Dictionary<int, Vector2Int>();
+
+    /// <summary>
+    /// pathObjectsCache にあるのに通過セル(pathCellsById)が未登録のパスID。セル逆引きで拾えないGOだけを
+    /// 位置判定に回し、プール全体を走査しないために使う。
+    /// </summary>
+    private readonly HashSet<int> unregisteredPathObjectIds = new HashSet<int>();
 
     /// <summary>
     /// 交差点メッシュを最後に生成できたときの入力署名(ComputeNodeIntersectionSignature)。
@@ -573,24 +586,39 @@ public class PathManager : BaseApiDataManager
         float minDist = DrawLodEvaluator.MinDistanceToPolyline(anchors, camPos);
         bool allowClose = closePathIds.Contains(path.path_id) || closePathIds.Count < DrawLodConfig.MAX_CLOSE_PATHS;
         DrawLod lod = DrawLodEvaluator.EvaluatePathByDistance(minDist, current, allowClose);
-        if (lod == DrawLod.Far) return lod;
+        if (lod != DrawLod.Close) return lod;
 
-        if (length >= 256f && IsSegmentedLongRoad(path)) return DrawLod.Normal;
-        return lod;
+        // 路面本体を SplinePartLod の固定区間で描く道路は親を通常LODに固定し、Close/Normal の切替を区間に任せる
+        // (親を作り直すと全区間・設備・橋脚を再生成するため)。区間化は交差点で切った描画長・工事中・トンネル分割で
+        // 決まるので、生成済みなら実物を見る。遠景の帯は区間を持たないため、初回と同じく推定で決める。
+        if (existing != null && current != DrawLod.Far) return HasBodySegments(existing) ? DrawLod.Normal : DrawLod.Close;
+        return length >= 256f && IsSegmentedLongRoad(path) ? DrawLod.Normal : DrawLod.Close;
+    }
+
+    private static readonly List<SplinePartLod> splinePartLodBuffer = new List<SplinePartLod>();
+
+    private static bool HasBodySegments(GameObject pathGO)
+    {
+        pathGO.GetComponentsInChildren(true, splinePartLodBuffer);
+        bool found = splinePartLodBuffer.Exists(part => part.IsBody);
+        splinePartLodBuffer.Clear();
+        return found;
     }
 
     /// <summary>
-    /// 連続パーツを SplinePartLod の固定区間に分けて描く通常道路か。親を通常LODに固定し、
-    /// Close/Normal の切替は区間に任せる(親を作り直すと全区間・設備・橋脚を再生成するため)。
-    /// 条件は RoadPath.CreateSplineMesh が区間化する条件(路面の高さ補正あり・single_span でない・
+    /// 未生成のパスについて、路面本体が SplinePartLod の固定区間に分かれる通常道路かを推定する。
+    /// 条件は RoadPath.CreateSplineMesh が body を区間化する条件(base_height<=0・single_span でない・
     /// 詳細区間を抑止する角付き折れ線でない)に揃える。線路(model_type=track)は対象外。
+    /// 外れても、生成後の再判定で実物(HasBodySegments)に合わせて1回作り直すだけで収束する。
     /// </summary>
     private static bool IsSegmentedLongRoad(PathSummary path)
     {
         if (PathMeshFactory.GetModelType(path) != "default") return false;
         if (PowerLinePath.Handles(path) || RoadPath.IsRopewayVariant(path.path_variant)) return false;
-        if (MasterDataStore.Instance?.GetPathMaster(path.path_variant)?.single_span ?? false) return false;
-        return path.curved || (path.GetWaypointList()?.Count ?? 0) == 0;
+        if (path.status == Constants.STATUS_CONSTRUCTING) return false;
+        var master = MasterDataStore.Instance?.GetPathMaster(path.path_variant);
+        if ((master?.single_span ?? false) || (master?.base_height ?? 0f) > 0f) return false;
+        return path.curved || (path.waypoints?.Count ?? 0) == 0;
     }
 
     /// <summary>
@@ -716,6 +744,13 @@ public class PathManager : BaseApiDataManager
             }
             for (int i = 0; i < drawLodChangeIds.Count; i++)
             {
+                // バッチ中に作ると、交差点の切断点が確定する前の形がバッチの生成済みとして数えられ、
+                // バッチ側の再生成が重複スキップされる。残りは捨てて次の周期で走査し直す。
+                if (isLodPathBatchActive)
+                {
+                    drawViewState = default;
+                    break;
+                }
                 // yield の間にデータが差し替わることがあるため、古いインスタンスで上書きしないよう毎回引き直す。
                 if (!pathDataCache.TryGetValue(drawLodChangeIds[i], out PathSummary path)) continue;
                 TryRebuildPathOnce(path, LodTier.Near, false, false, "描画LOD");
@@ -997,6 +1032,8 @@ public class PathManager : BaseApiDataManager
             if (obj != null) Destroy(obj);
         }
         nodeObjectsCache.Clear();
+        nodeIdsByCell.Clear();
+        nodeCellById.Clear();
 
         // パス削除
         foreach (var obj in pathObjectsCache.Values)
@@ -1004,6 +1041,7 @@ public class PathManager : BaseApiDataManager
             if (obj != null) Destroy(obj);
         }
         pathObjectsCache.Clear();
+        unregisteredPathObjectIds.Clear();
 
         // ウェイポイント削除 (パスの子要素として管理されるようになったため、個別の管理は不要だが、念のためタグ検索で残骸を消す)
         GameObject[] waypointObjects = GameObject.FindGameObjectsWithTag(WAYPOINT_TAG);
@@ -1789,6 +1827,7 @@ public class PathManager : BaseApiDataManager
                 foreach (var n in response.nodes)
                 {
                     nodeDataCache[n.node_id] = n;
+                    IndexNodeCell(n.node_id);
                 }
             }
 
@@ -1926,10 +1965,10 @@ public class PathManager : BaseApiDataManager
         {
             if (pathObjectsCache.TryGetValue(pathId, out GameObject obj) && obj != null) pathsToRemove.Add(pathId);
         }
-        foreach (var kvp in pathObjectsCache)
+        foreach (int pathId in unregisteredPathObjectIds)
         {
-            if (kvp.Value == null || pathCellsById.ContainsKey(kvp.Key) || receivedIds.Contains(kvp.Key) || candidateIds.Contains(kvp.Key)) continue;
-            if (IsPathInCells(kvp.Key, kvp.Value, cells)) pathsToRemove.Add(kvp.Key);
+            if (receivedIds.Contains(pathId) || candidateIds.Contains(pathId)) continue;
+            if (pathObjectsCache.TryGetValue(pathId, out GameObject obj) && obj != null && IsPathInCells(pathId, obj, cells)) pathsToRemove.Add(pathId);
         }
 
         foreach (int pathId in pathsToRemove)
@@ -1959,39 +1998,59 @@ public class PathManager : BaseApiDataManager
             {
                 if (obj != null) DrawLodStats.OnDrawLodChanged(DrawLodStats.Category.Path, DrawLodInfo.GetDrawLod(obj, DrawLod.Normal), null);
                 Destroy(obj);
-                pathObjectsCache.Remove(pathId);
+                RemovePathObject(pathId);
             }
             closePathIds.Remove(pathId);
         }
     }
 
     /// <summary>
+    /// ノードをデータ座標のセルへ索引する。ノードGO・交差点メッシュはノード座標のXZに置かれるので、
+    /// transform を読まずデータの座標で求める(GetAbsolutePosition は地形高さを引くので使わない)。
+    /// </summary>
+    private void IndexNodeCell(int nodeId)
+    {
+        if (!nodeDataCache.TryGetValue(nodeId, out NodeData node) || node?.position == null || node.position.Length < 2)
+        {
+            UnindexNodeCell(nodeId);
+            return;
+        }
+        Vector2Int cell = TerrainManager.WorldToCell(node.position[0], node.position.Length >= 3 ? node.position[2] : node.position[1]);
+        if (nodeCellById.TryGetValue(nodeId, out Vector2Int indexed) && indexed == cell) return;
+        UnindexNodeCell(nodeId);
+        nodeCellById[nodeId] = cell;
+        if (!nodeIdsByCell.TryGetValue(cell, out HashSet<int> ids))
+        {
+            ids = new HashSet<int>();
+            nodeIdsByCell[cell] = ids;
+        }
+        ids.Add(nodeId);
+    }
+
+    private void UnindexNodeCell(int nodeId)
+    {
+        if (!nodeCellById.Remove(nodeId, out Vector2Int cell)) return;
+        if (!nodeIdsByCell.TryGetValue(cell, out HashSet<int> ids)) return;
+        ids.Remove(nodeId);
+        if (ids.Count == 0) nodeIdsByCell.Remove(cell);
+    }
+
+    /// <summary>
     /// 複数セルにまたがるノードの同期処理（差分更新用）。
     /// APIレスポンスに含まれないノードのうち、指定セル群に含まれるものを削除する。
     /// </summary>
-    /// <summary>
-    /// ノードGOが属するセル。GOはノード座標のXZに置かれるので、transform を読まずノードデータの座標で求める
-    /// (GetAbsolutePosition は地形高さを引くので使わない)。データが無いときだけGOの位置を使う。
-    /// </summary>
-    private Vector2Int GetNodeObjectCell(int nodeId, GameObject obj)
-    {
-        if (nodeDataCache.TryGetValue(nodeId, out NodeData node) && node?.position != null && node.position.Length >= 2)
-            return TerrainManager.WorldToCell(node.position[0], node.position.Length >= 3 ? node.position[2] : node.position[1]);
-        return TerrainManager.WorldToCell(obj.transform.position);
-    }
-
     private void SyncNodesInCells(List<Vector2Int> cells, HashSet<int> receivedNodeIds)
     {
         List<int> nodesToRemove = new List<int>();
-        HashSet<Vector2Int> cellSet = new HashSet<Vector2Int>(cells);
 
-        foreach (var kvp in nodeObjectsCache)
+        foreach (var cell in cells)
         {
-            int nodeId = kvp.Key;
-            GameObject obj = kvp.Value;
-
-            if (obj == null || receivedNodeIds.Contains(nodeId)) continue;
-            if (cellSet.Contains(GetNodeObjectCell(nodeId, obj))) nodesToRemove.Add(nodeId);
+            if (!nodeIdsByCell.TryGetValue(cell, out HashSet<int> ids)) continue;
+            foreach (int nodeId in ids)
+            {
+                if (receivedNodeIds.Contains(nodeId)) continue;
+                if (nodeObjectsCache.TryGetValue(nodeId, out GameObject obj) && obj != null) nodesToRemove.Add(nodeId);
+            }
         }
 
         foreach (var nodeId in nodesToRemove)
@@ -2006,6 +2065,7 @@ public class PathManager : BaseApiDataManager
                     nodeGrid?.Remove(removedNode, removedNode.GetAbsolutePosition());
                 }
                 nodeDataCache.Remove(nodeId);
+                UnindexNodeCell(nodeId);
                 RemoveNodeIntersectionMesh(nodeId);
             }
         }
@@ -2066,7 +2126,7 @@ public class PathManager : BaseApiDataManager
             }
             else
             {
-                pathObjectsCache.Remove(path.path_id);
+                RemovePathObject(path.path_id);
             }
         }
 
@@ -2166,7 +2226,7 @@ public class PathManager : BaseApiDataManager
 
         // 辞書は即座に新しいオブジェクトに更新する。
         // これにより、短時間に同じIDで再描画が呼ばれてもオブジェクトが増殖しない。
-        pathObjectsCache[path.path_id] = pathGO;
+        SetPathObject(path.path_id, pathGO);
 
         // 固定区間パーツは非同期に揃うため、初回生成が完了してから旧表示と差し替える。
         if (oldPath != null)
@@ -2460,10 +2520,13 @@ public class PathManager : BaseApiDataManager
         if (unloadCellSet.Count == 0) return;
 
         // 1点は1セルにしか属さず、アンロードするセルは残すセルに含まれないので、セルの一致だけで判定できる。
-        foreach (var kvp in nodeObjectsCache)
+        foreach (var cell in unloadCellSet)
         {
-            if (kvp.Value != null && kvp.Value.activeSelf && unloadCellSet.Contains(GetNodeObjectCell(kvp.Key, kvp.Value)))
-                kvp.Value.SetActive(false);
+            if (!nodeIdsByCell.TryGetValue(cell, out HashSet<int> ids)) continue;
+            foreach (int nodeId in ids)
+            {
+                if (nodeObjectsCache.TryGetValue(nodeId, out GameObject nodeGO) && nodeGO != null && nodeGO.activeSelf) nodeGO.SetActive(false);
+            }
         }
 
         unloadCandidatePathIds.Clear();
@@ -2483,13 +2546,13 @@ public class PathManager : BaseApiDataManager
         List<Vector2Int> unloadCells = null;
         List<Vector2Int> keepCells = null;
         List<int> unregisteredToHide = null;
-        foreach (var kvp in pathObjectsCache)
+        foreach (int pathId in unregisteredPathObjectIds)
         {
-            if (kvp.Value == null || !kvp.Value.activeSelf || pathCellsById.ContainsKey(kvp.Key) || unloadCandidatePathIds.Contains(kvp.Key)) continue;
+            if (unloadCandidatePathIds.Contains(pathId) || !pathObjectsCache.TryGetValue(pathId, out GameObject pathGO) || pathGO == null || !pathGO.activeSelf) continue;
             unloadCells ??= new List<Vector2Int>(unloadCellSet);
             keepCells ??= new List<Vector2Int>(cellsToKeepVisible);
-            if (IsPathInCells(kvp.Key, kvp.Value, unloadCells) && !IsPathInCells(kvp.Key, kvp.Value, keepCells))
-                (unregisteredToHide ??= new List<int>()).Add(kvp.Key);
+            if (IsPathInCells(pathId, pathGO, unloadCells) && !IsPathInCells(pathId, pathGO, keepCells))
+                (unregisteredToHide ??= new List<int>()).Add(pathId);
         }
         if (unregisteredToHide != null)
         {
@@ -2504,11 +2567,14 @@ public class PathManager : BaseApiDataManager
         {
             foreach (int nodeId in hiddenEndNodeIds) HideIntersectionMeshIfOrphaned(nodeId);
         }
-        foreach (var kvp in nodeIntersectionMeshes)
+        foreach (var cell in unloadCellSet)
         {
-            GameObject meshGO = kvp.Value;
-            if (meshGO == null || !meshGO.activeSelf || !unloadCellSet.Contains(TerrainManager.WorldToCell(meshGO.transform.position))) continue;
-            if (!HasVisibleConnectedPath(kvp.Key)) meshGO.SetActive(false);
+            if (!nodeIdsByCell.TryGetValue(cell, out HashSet<int> ids)) continue;
+            foreach (int nodeId in ids)
+            {
+                if (!nodeIntersectionMeshes.TryGetValue(nodeId, out GameObject meshGO) || meshGO == null || !meshGO.activeSelf) continue;
+                if (!HasVisibleConnectedPath(nodeId)) meshGO.SetActive(false);
+            }
         }
         unloadCellSet.Clear();
     }
@@ -2626,6 +2692,7 @@ public class PathManager : BaseApiDataManager
             nodeGrid?.Add(node, pos);
             NodeDataVersion++;
         }
+        IndexNodeCell(node.node_id);
 
         GameObject existingNode = GetNodeObject(node.node_id);
         if (existingNode != null)
@@ -3068,7 +3135,7 @@ public class PathManager : BaseApiDataManager
 
         // 辞書は即座に新しいオブジェクトに更新する。
         // これにより、短時間に同じIDで再描画が呼ばれてもオブジェクトが増殖しない。
-        pathObjectsCache[path.path_id] = pathGO;
+        SetPathObject(path.path_id, pathGO);
         DrawLodStats.OnDrawLodChanged(DrawLodStats.Category.Path,
             oldPath != null ? DrawLodInfo.GetDrawLod(oldPath, DrawLod.Normal) : (DrawLod?)null, drawLod);
 
@@ -4301,7 +4368,7 @@ public class PathManager : BaseApiDataManager
             DrawLodStats.OnDrawLodChanged(DrawLodStats.Category.Path, DrawLodInfo.GetDrawLod(obj, DrawLod.Normal), null);
             Destroy(obj);
         }
-        pathObjectsCache.Remove(pathId);
+        RemovePathObject(pathId);
         closePathIds.Remove(pathId);
     }
 
@@ -4328,8 +4395,8 @@ public class PathManager : BaseApiDataManager
     ///
     /// pathSegmentsByPathId を用いて線分と矩形の交差判定を行うことで、
     /// セル内に始点・ウェイポイントがない「通過のみ」の道路も正しく再構築対象に含める。
-    /// セル境界をまたぐ道路が縁ブレンド(BlendEdgesTowardAppliedNeighbors)後の高さに正しく
-    /// 追従できるよう、対象セルと上下左右の隣接セルを合わせた範囲で交差判定を行う。
+    /// 登録線分は道路の中心線だけなので、道路幅や橋脚の分だけ隣のセルの地形に掛かる道路を
+    /// 取りこぼさないよう、対象セルと上下左右の隣接セルを合わせた範囲で交差判定を行う。
     /// </summary>
     private void OnTerrainTileReadyHandler(Vector2Int cellIndex, Terrain terrain)
     {
@@ -5033,11 +5100,26 @@ public class PathManager : BaseApiDataManager
             }
             ids.Add(path.path_id);
         }
+        unregisteredPathObjectIds.Remove(path.path_id);
+    }
+
+    /// <summary>パスGOを登録する。通過セルが未登録なら unregisteredPathObjectIds で追跡する。</summary>
+    private void SetPathObject(int pathId, GameObject pathGO)
+    {
+        pathObjectsCache[pathId] = pathGO;
+        if (!pathCellsById.ContainsKey(pathId)) unregisteredPathObjectIds.Add(pathId);
+    }
+
+    private void RemovePathObject(int pathId)
+    {
+        pathObjectsCache.Remove(pathId);
+        unregisteredPathObjectIds.Remove(pathId);
     }
 
     private void UnregisterPathCells(int pathId)
     {
         pathCellsVersion.Remove(pathId);
+        if (pathObjectsCache.ContainsKey(pathId)) unregisteredPathObjectIds.Add(pathId);
         if (!pathCellsById.TryGetValue(pathId, out HashSet<Vector2Int> cells)) return;
 
         foreach (var cell in cells)
@@ -5233,6 +5315,7 @@ public class PathManager : BaseApiDataManager
                 {
                     UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[PathManager] FetchNodeAndUpdateIntersection: node {nodeId} fetched successfully.");
                     nodeDataCache[node.node_id] = node;
+                    IndexNodeCell(node.node_id);
                     UpdateNodeIntersectionMesh(node.node_id);
                 }
                 else

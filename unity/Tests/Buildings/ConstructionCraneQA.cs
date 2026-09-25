@@ -112,7 +112,7 @@ public static class ConstructionCraneQA
                 for (int i = 0; i < localVertices.Length; i++)
                     Require(Vector3.Distance(position + rotation * localVertices[i], staticVertices[i]) < .001f, "Pivot or scale changed");
                 Require(top.GetComponent<Collider>() == null, "Unexpected crane collider");
-                Require(top.GetComponent(assembly.GetType("RenderCacheIdentity")) != null, "Mesh owner missing");
+                Require(top.GetComponent(assembly.GetType("RenderCacheIdentity")) == null, "Shared top mesh must not be owned by a building");
                 Quaternion pose = top.localRotation;
                 building.SetActive(false);
                 building.SetActive(true);
@@ -120,6 +120,7 @@ public static class ConstructionCraneQA
                 var rebuilt = new GameObject("Rebuilt");
                 animator.GetMethod("Attach").Invoke(null, new object[] { rebuilt, placement, 91 });
                 Require(Quaternion.Angle(pose, rebuilt.transform.GetChild(0).localRotation) < .001f, "Rebuild resets rotation");
+                Require(rebuilt.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh == topMesh, "Top mesh not shared per prefab");
                 UnityEngine.Object.DestroyImmediate(building);
                 UnityEngine.Object.DestroyImmediate(rebuilt);
                 foreach (Mesh mesh in temporary) UnityEngine.Object.DestroyImmediate(mesh);

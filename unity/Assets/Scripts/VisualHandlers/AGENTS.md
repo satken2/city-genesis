@@ -9,7 +9,7 @@
 - **色モードとフラグは直交する2系統**: 色モードは排他1択(通常/色分け各種/非表示)、フラグは独立ON/OFF(計画中表示 `SHOW_PLAN` / 公共施設ハイライト `HIGHLIGHT_PUBLIC` / 制限速度標識 `SPEED_LIMIT_SIGNS`)。フラグは `ApplyVisualMode` の引数には乗らず、`VisualModeObject` と `PublicFacilityGlowOverlay` が `GetFlags` をプル参照する(そのため `IVisualModeHandler` インターフェースはフラグを知らない。ParcelManager/ZoneManager にも影響しない)。
 - モード/フラグ変更時の通知は1フレームあたり `batchSize`(既定100)件ずつのバッチ処理。**一括変更しても即座に全部は切り替わらない。**
 - `SetMode` / `SetFlags` は前回と同じ値ならスキップする(差分チェック)。
-- Destroy済み参照は10秒ごとの `PeriodicCleanup` で除去される。
+- Destroy済み参照は10秒ごとの `PeriodicCleanup` で除去される。登録集合の写しを取り、1フレームあたり2,000件ずつ分割して走査する(数万件の Unity null 判定を1フレームに集めないため)。
 
 ## オブジェクト単位の表示フィルタ(ObjectVisibilityFilter)
 
@@ -17,19 +17,20 @@
 - **`UpdateVisuals` の最優先分岐**で、建設中・計画中の常時表示やハイライトを含む何よりも先に Renderer とコライダーを落とす(プレイヤーが明示的に消した状態なので、クリックも拾わせない)。
 - 入力は UI(Tauri)からの `view:set_object_filter`(建設プロジェクトのタグ単位／詳細パネルの個別切替)だけで、**差分ではなくIDの全集合**が毎回届く。状態の正はUnity側にあり、`view:object_filter_state` でUIへ返す。**バックエンドにもセーブにも残らない**(タグ自体は保存されるが、隠しているかどうかは保存しない)。
 - 差分ロードで後から生成されるオブジェクトにも効かせるため、**生成側(`BuildingManager` / `PathManager`)が生成直後に `IsHidden` を引く**。集合が変わったときは各マネージャーの `RefreshVisibilityFilter()` がキャッシュ済みオブジェクトへ反映する(シーン全体は走査しない)。
-- **遠景LODの建物は `VisualModeObject` を持たない**(`FarBuildingBatcher` が輪郭メッシュを結合するため)ので `MeshRenderer.enabled` を直接落とす(`ObjectVisibilityFilter.ApplyToObject`)。`FarBuildingMember` が `enabled` の変化を検知して結合バッチから自動的に外れる。
+- **遠景LODの建物は `VisualModeObject` を持たない**(`FarBuildingBatcher` が輪郭メッシュを結合するため)ので `MeshRenderer.enabled` を直接落とす(`ObjectVisibilityFilter.ApplyToObject`)。結合バッチは `enabled` の変化を自分では検知しない(毎フレームのポーリングは無い)ので、`ApplyToObject` を呼んだ側が直後に `FarBuildingMember.RefreshObject(go)` で通知する(`BuildingManager.RefreshVisibilityFilter`・生成・キャッシュからの復元)。遠景建物の `Renderer.enabled`・Transform・sharedMaterial・プロパティブロックを変える経路を足すときも同じ。有効化・無効化(SetActive・Destroy・退避)は `OnEnable` / `OnDisable` で自動的に伝わる。
 - セッションのリセット(新規都市・ロード)では `IpcStateCoordinator.HandleSessionReset` が必ずクリアする。IDは都市ごとに別物のため。
 - アラートアイコン(`AlertManager`)はこのフィルタと連動しない(レイヤー単位の非表示でも同じ)。
 
 ## IVisualModeHandler の実装者は2種類ある(重要)
 
 1. **`VisualModeObject`** — 建物・道路・交差点・地形タイル等、個々のGameObjectに付くコンポーネント。生成元(BuildingManager/PathManager/TerrainManager)が AddComponent し、`Start()` で自動的に VisualModeHandler に登録される。
-2. **マネージャー自身** — `ParcelManager` と `ZoneManager` は自分が `IVisualModeHandler` を実装して1件だけ登録される。パーセルの枠線・データ可視化はGameObject単位ではなく `OverlayMeshRenderer` による一括描画のため。
+2. **マネージャー自身** — `ParcelManager` と `ZoneManager` は自分が `IVisualModeHandler` を実装して1件だけ登録される。パーセルの枠線・データ可視化はGameObject単位ではなく `OverlayMeshRenderer` による一括描画のため。**区画個体(`VisualParcelObject`)は登録しない**(区画レイヤーの登録は ParcelManager の1件だけ)。
 
 ## VisualModeObject の挙動(知らないと事故る)
 
 - `InitializeMaterials()` が呼ばれた時点の `sharedMaterials` を「オリジナルマテリアル」として記憶し、ハイライト解除時にこれへ戻す。**メッシュやマテリアルを後から差し替えた場合は `InitializeMaterials()` を呼び直さないと、古いマテリアルに戻されてしまう。**
 - `useChildRenderers` / `ignoreSelfRenderer`: 道路や建物は子オブジェクト(SplineMeshのパーツ等)にRendererがあるため、両方trueにして子だけを対象にするのが通例。
+- 既定表示用マテリアル(Resources)は名前ごとに static キャッシュする(見つからなかった名前も再検索しない)。
 - `preventMaterialChange`: 表示/非表示のみ制御しマテリアルを変えない(交差点メッシュ等)。SpriteRenderer・TextMeshPro・進行方向矢印(`TrackDirectionArrows`付きレンダラー)は自動的に対象外。
 - **ステータス連動**: `SetStatus(status)` で設定されたオブジェクトステータスがモードより優先される。
   - `STATUS_CONSTRUCTING` / `STATUS_DEMOLISHING` / `STATUS_COLLAPSED` → 常に表示+**オリジナルマテリアル**(ホバー中はハイライト)。メッシュ自体が専用の表示(建設中/解体中=土マウンド/土ストリップ+足場+建機等、`ConstructingBuildingMeshBuilder` / `PathManager.GenerateConstructingPathMesh`。倒壊=瓦礫マウンド+倒壊片、`CollapsedBuildingMeshBuilder`)のため、色モードで塗り潰さずオリジナルを出す(旧仕様の `ConstructionMaterial`(黄色)一括上塗りは廃止)。マテリアルアセット自体は `ConstructionDirt` 未配置時のフォールバック先(`BuildingMeshBuilder.GetConstructionDirtMaterial`)として存続している
@@ -57,7 +58,7 @@
   - `VisualModeBuilding` (300番台): 人口・家賃・耐久度・フロア種別色分け、所属地区色分け(`ZONE_COLOR=309`)
   - `VisualModeTerrain` (400番台): 透過・標高色分け — `VisualTerrainObject` が処理(`TRANSPARENT` のみ非表示、他は表示)
 - **環境スコア(騒音=`NOISE` 211 / 大気汚染=`AIR_POLLUTION` 212 / 治安=`CRIME` 213)は区画レイヤーのモード**。バックエンドが持つのは区画中心でサンプリング済みの区画単位スコアで、面として描くための都市全体のビットマップは公開されていないため、地形ではなく区画の塗り分けで表現する。値は `ParcelSummary` に含まれず `ParcelManager` が `/city/noise`・`/pollution`・`/crime` から別途取得する(下記)
-- 統計値の供給源は `VisualPathStats` / `VisualBuildingStats` / `VisualParcelStats`(各マネージャーが生成時に `InitFrom(summary)` で初期化)。`VisualBuildingObject` / `VisualParcelObject` が色決定ロジックを持つ。
+- 統計値の供給源は `VisualPathStats` / `VisualBuildingStats` / `VisualParcelStats`(各マネージャーが生成時に `InitFrom(summary)` で初期化)。建物の色決定ロジックは `VisualBuildingObject` が持つ。区画の色決定は `ParcelManager.ResolveDataVisColor` が行い、`VisualParcelObject` は `VisualParcelStats` を渡すだけの軽量コンポーネント(VisualModeHandler には登録しない)。
 - **所属地区色分け(`ZONE_COLOR`)**: 道路・建物・区画の各レイヤーに存在する。地区の識別色はバックエンドの `zone.color`(HEX文字列)を `ZoneManager.GetZoneColor(zoneId)` で Color に変換して使用する(旧4色パレットではない)。道路は `VisualPathStats.zone_id`、建物は `VisualBuildingStats.zone_id` から所属地区を取得する。区画は `ParcelSummary` に zone_id がないため、`ZoneManager.GetZoneIdAtPoint(区画中心)` で空間的に所属地区を判定する。地区編集中の新規地区プレビュー(`ZoneEditContext.PREVIEW_SENTINEL`)だけは地区がまだ存在しないため、`ZoneEditContext.PreviewColor`(ツール選択時にUnityが引いた色)で塗る。**地区編集モードでは道路だけを`ZONE_COLOR`にし、区画・建物は通常表示のままにする**(区画・建物まで塗ると画面が地区色で埋まって道路の所属変化が読めない。地区の広がりは`ZoneManager`の枠線が示す)。
 - **適用直後の一時色付け(tempZoneId)**: 地区編集モードで道路をクリックした瞬間、バックエンドの応答を待たずに適用先の地区色を先行表示する(`VisualModeObject.SetTempZoneId`。ZONE_COLOR時に `ResolveEffectiveZoneId` が tempZoneId を最優先。新規作成は `ZoneEditContext.PREVIEW_SENTINEL`)。対象は `ZoneEditContext.tempColoredPathIds` で追跡し、送信結果(成功/失敗の両方)・モード終了で `ZoneEditContext.ClearTempVisuals` が `ClearTempZoneId` を呼んで明示的に戻す。**リロード任せにしてはいけない**(送信失敗時はversion不変でリロードが再描画せず一時色が残るため)。
 

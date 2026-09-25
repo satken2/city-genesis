@@ -232,7 +232,7 @@ Blender `(x,y,z)` は Unity `(-x,z,-y)` になるため、ライブラリでは�
 歩道コネクタと同じ「幾何情報と実体化の分離」パターンに従う。
 
 - `TrackIntersectionMeshGenerator.BuildRailConnectorSpecs`: 通行可能ペアの判定とコネクタ点列（`RailConnectorSpec`）の計算。`RoadIntersectionMeshGenerator.Generate` から呼ばれ、`NodeMeshResult.RailConnectors` として返る
-- `TrackPath.CreateRailConnectorObject`: レールプレハブを SplineMesh で曲げて実体化。`PathManager.UpdateNodeRailMesh` が NodeMesh の子（`Rail`）として生成する
+- `TrackPath.CreateRailConnectorObject`: レールプレハブを SplineMesh で曲げて実体化。`PathManager.UpdateNodeRailMesh` が NodeMesh の子（`Rail`）として生成する。次フレームの更新を待たずにその場で `RebuildImmediate` し、構築後は SplineMesh を無効化して生成メッシュを `IntersectionMeshOwner` に所有させる（[G doc §4.3](G_道路メッシュの生成.md)）。公共交通の車両は生成直後からこのレールを経路として参照できる
 
 ### 4.5 防音壁の接続
 

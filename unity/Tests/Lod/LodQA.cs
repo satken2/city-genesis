@@ -81,6 +81,7 @@ public static class LodQA
     static IEnumerator Suite()
     {
         StableSelection();
+        BuildingFetchRects();
         ProjectionAndResidency();
         LargeMapCameraRange();
         yield return OverviewSessionSwitch();
@@ -367,6 +368,45 @@ public static class LodQA
         int[] a = Select(50,false), b = Select(50,true), c = Select(100,false);
         for (int i = 0; i < a.Length; i++) Check(a[i] == b[i] && a[i] == c[i], "Stable thinning changed with traversal order or budget");
         results.Add("Stable thinning: 10,000 candidates; order-independent and nested subsets");
+    }
+    static void BuildingFetchRects()
+    {
+        List<(Vector2Int min, Vector2Int max)> Split(List<Vector2Int> cells)
+        {
+            var list = new List<(Vector2Int min, Vector2Int max)>();
+            foreach (var rect in (IEnumerable)Static("BuildingManager","SplitFetchRects",cells)) list.Add(((Vector2Int, Vector2Int))rect);
+            return list;
+        }
+        void Exact(string name, List<Vector2Int> cells)
+        {
+            var rects = Split(cells);
+            var wanted = new HashSet<Vector2Int>(cells);
+            var covered = new HashSet<Vector2Int>();
+            foreach (var (min, max) in rects)
+                for (int z = min.y; z <= max.y; z++)
+                    for (int x = min.x; x <= max.x; x++)
+                    {
+                        var cell = new Vector2Int(x, z);
+                        Check(covered.Add(cell), $"{name}: fetch rectangles overlap at {cell}");
+                        Check(wanted.Contains(cell), $"{name}: fetch rectangle includes unrequested cell {cell}");
+                    }
+            Check(covered.SetEquals(wanted), $"{name}: fetch rectangles miss requested cells");
+        }
+        var shapeL = new List<Vector2Int>();
+        for (int i = 0; i < 6; i++) { shapeL.Add(new Vector2Int(i, 0)); shapeL.Add(new Vector2Int(0, i + 1)); }
+        Exact("L shape", shapeL);
+        var arc = new List<Vector2Int>();
+        for (int z = 0; z < 5; z++) for (int x = z; x < z + 3; x++) arc.Add(new Vector2Int(x, z));
+        Exact("arc", arc);
+        Exact("islands", new List<Vector2Int> { new Vector2Int(0,0), new Vector2Int(1,0), new Vector2Int(5,0), new Vector2Int(0,3), new Vector2Int(1,3) });
+        Exact("duplicates", new List<Vector2Int> { new Vector2Int(2,2), new Vector2Int(2,2), new Vector2Int(3,2), new Vector2Int(3,3), new Vector2Int(2,3), new Vector2Int(3,3) });
+        Check(Split(new List<Vector2Int>()).Count == 0, "Empty fetch produced a rectangle");
+        var scattered = new List<Vector2Int>();
+        for (int i = 0; i < 13; i++) scattered.Add(new Vector2Int(i * 2, i % 2 * 2));
+        var fallback = Split(scattered);
+        Check(fallback.Count == 1 && fallback[0].min == new Vector2Int(0,0) && fallback[0].max == new Vector2Int(24,2),
+            "Too many fetch rectangles did not fall back to the bounding rectangle");
+        results.Add("Building fetch rectangles: L/arc/islands/duplicates covered exactly without overlap; >12 rectangles fall back to bounds");
     }
     static IEnumerator RoadSegmentsCameraMoves()
     {
@@ -832,7 +872,7 @@ public static class LodQA
         var changedRenderer = objects[1].GetComponent<MeshRenderer>();
         var block = new MaterialPropertyBlock(); block.SetColor("_BaseColor", Color.red);
         changedRenderer.SetPropertyBlock(block);
-        Call(objects[1].GetComponent(Type("FarBuildingMember")), "LateUpdate");
+        Call(objects[1].GetComponent(Type("FarBuildingMember")), "Refresh");
         Check(!changedRenderer.forceRenderingOff, "Per-building display override left an incorrect summary");
         for(int i=0;i<12;i++) yield return null;
         Check(!changedRenderer.forceRenderingOff, "Property-block renderer was incorrectly batched");

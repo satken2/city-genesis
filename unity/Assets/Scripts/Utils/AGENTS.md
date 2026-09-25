@@ -29,9 +29,9 @@
 爆破操作は `FireEffectFactory.CreateExplosion`（共有の炎・煙素材で有限バースト）と `VisualEffectManager.PlayExplosion` を使う。音源は `Resources/Audio/Effects/building-explosion.ogg`。通常の完成/解体遷移には爆発を割り当てない。単発音は既存の `Play3DSound` で距離減衰と `ambience:volume` を反映し、再生中の音量変更にも追従する。建物と独立した子オブジェクトを実時間で後始末し、`ClearTransientEffects` は都市の全消去に連動する。AppRootのGameObjectには`CameraAmbience`の音源や天候の反射プローブ・雨粒など他コンポーネントの子も同居するため、`ClearTransientEffects`は自分が生成して登録した子(`ownedEffects`)だけを破棄する。`transform`の子を一括破棄すると環境音が`MissingReferenceException`を毎フレーム出す。検証は `Tests/Explosion/run-unity.ps1`。
 
 `Utils.cs`(Scripts直下)にも以下の汎用処理がある:
-- `GetGroundHeight(Vector3)` ... 同一フレーム・同一XZ座標だけをキャッシュする実タイル高さ取得。近傍座標への丸めは禁止（傾斜地で問い合わせ順に依存する高さになる）。地形の更新・登録・除去時は `InvalidateHeightCache()` を呼ぶ。
+- `GetGroundHeight(Vector3)` ... 同一フレーム・同一XZ座標だけをキャッシュする実タイル高さ取得。近傍座標への丸めは禁止（傾斜地で問い合わせ順に依存する高さになる）。地形の更新・登録・除去時は `InvalidateHeightCache()` を呼ぶ。表示中のタイルが無い位置は `TerrainManager.TrySampleOverview`(都市内は全景、都市外は背景)へフォールバックし、都市内の未常駐セルでは `Terrain.activeTerrains` を走査しない。セルの min 辺ちょうどの点は、自セルが未常駐なら負側の隣接タイルを使う。
 - `TryGetTerrainGrid(Vector3, out Vector2 origin, out Vector2 spacing)` ... 実タイルの格子原点と間隔。全タイル共通解像度の格子にfloorを合わせるために使う。
-- `ApplyDepthOffsetShader(MeshRenderer, contextName)` ... DepthOffsetLitシェーダー(URP Litベース+Offset -1,-1のZ-fighting対策バリアント)を一括適用(キャッシュ付き)。PathManager / BuildingManager から使用。
+- `ApplyDepthOffsetShader(MeshRenderer, contextName)` ... DepthOffsetLitシェーダー(URP Litベース+Offset -1,-1のZ-fighting対策バリアント)を一括適用(シェーダー参照だけキャッシュ)。`Renderer.materials` でレンダラーごとに複製する(複製は `onInstantiated` で所有者へ渡さない限り解放されない)ので、大量に作る描画物には使わない。建物は `BuildingManager.GetSharedDepthOffsetMaterials`、道路の遠景の帯・ノードは PathManager の共有マテリアルを使う(現在このメソッドの呼び出し元は無い)。
 - `DestroyObjectAfterFrames(MonoBehaviour, GameObject)` ... 2フレーム遅延でオブジェクト破棄(ポッピング防止)。各マネージャーから使用。
 - `CalculateAverageWidth(List<float>)` ... 幅リストの平均値を計算。歩道コネクタ等で使用。
 - `TransformBounds(Bounds, Matrix4x4)` ... ローカルAABBを行列で変換した後の外接AABB(8隅を包み直す)。プロップ・柱・環境車両の配置後バウンズ計算で共用。

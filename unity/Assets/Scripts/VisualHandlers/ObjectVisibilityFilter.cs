@@ -78,8 +78,8 @@ public static class ObjectVisibilityFilter
     /// <summary>
     /// 生成直後のオブジェクトへフィルタを適用する。
     /// 遠景LODの建物は VisualModeObject を持たない(FarBuildingBatcher が結合するため)ので、
-    /// MeshRenderer を直接落とす。FarBuildingMember が enabled の変化を検知して
-    /// 結合バッチからも自動的に外れる。
+    /// MeshRenderer を直接落とす。結合バッチは enabled の変化を自動では検知しないので、
+    /// 呼び出し側(BuildingManager)が直後に FarBuildingMember.RefreshObject で通知すること。
     /// </summary>
     public static void ApplyToObject(GameObject target, int objectType, int id)
     {
