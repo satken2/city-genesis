@@ -256,6 +256,11 @@ public static class Constants
     public const float INFRA_TAP_HEIGHT_TOLERANCE = 3.0f;
     public const float RAIL_MIN_HEADWAY_MIN = 2.0f;
     public const float RIVER_BRIDGE_MIN_CLEARANCE = 0.5f;
+    public const int GROUND_COVER_GRASSLAND = 1;
+    public const int GROUND_COVER_DESERT = 2;
+    public const int GROUND_COVER_LUSH = 3;
+    public const int GROUND_COVER_SNOW = 4;
+    public const int GROUND_COVER_SEMI_ARID = 5;
     public const int INTERCHANGE_KIND_IC = 1;
     public const int INTERCHANGE_KIND_JCT = 2;
     public const float INTERCHANGE_HULL_MARGIN_M = 10.0f;
@@ -375,6 +380,8 @@ public static class Constants
     public static readonly int[] ROAD_VEHICLE_KEYS = new int[] { VEHICLE_STANDARD, VEHICLE_TRUCK, VEHICLE_BUS, VEHICLE_COMMERCIAL, VEHICLE_TRAM };
 
     public static readonly int[] RAIL_VEHICLE_KEYS = new int[] { VEHICLE_METRO_TRAIN, VEHICLE_PASSANGER_TRAIN, VEHICLE_FREIGHT_TRAIN, VEHICLE_HIGH_SPEED_TRAIN };
+
+    public static readonly int[] GROUND_COVER_TYPES = new int[] { GROUND_COVER_GRASSLAND, GROUND_COVER_DESERT, GROUND_COVER_LUSH, GROUND_COVER_SNOW, GROUND_COVER_SEMI_ARID };
 
     public static readonly int[] TENANT_TYPES = new int[] { SPACE_RESIDENCE, SPACE_RETAIL, SPACE_FACTORY, SPACE_OFFICE, SPACE_LODGING };
 

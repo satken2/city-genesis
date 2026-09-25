@@ -64,7 +64,7 @@ const imports = {
       ? { map_width: 100, map_height: 200, near_map_spacing: 100, cell_size: 100 }
       : { type: "Polygon", coordinates: [] },
   },
-  "../terrain/terrainData": { computePixelRGB: () => [0, 0, 0], decodeFloat16Array: () => new Float32Array(6) },
+  "../terrain/terrainData": { computePixelRGB: () => [0, 0, 0], decodeFloat16Array: () => new Float32Array(6), normalizeGroundCover: () => 1 },
   "../../constants": { PATH_MOTORWAY: 1, PATH_STREET: 2, PATH_WALKWAY: 3, PATH_TRACK: 4 },
 };
 function load(path) {

@@ -14,5 +14,14 @@
     "copying": "Copiando...",
     "copyFailed": "No se pudieron obtener los datos del terreno",
     "gameTerrainsHelp": "Incluye ríos, recursos, elementos decorativos y más."
+  },
+  "groundCover": {
+    "label": "Cobertura del suelo",
+    "hint": "Cambia el color y la textura del suelo en el juego y los colores de los mapas 2D. No afecta la simulación.",
+    "1": "Pradera",
+    "2": "Desierto",
+    "3": "Pradera frondosa",
+    "4": "Campo nevado",
+    "5": "Semiárido"
   }
 }

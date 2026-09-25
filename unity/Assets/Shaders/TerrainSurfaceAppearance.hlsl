@@ -32,9 +32,20 @@ float _TerrainDetailNormalScale;    // ノイズ周期の逆数(1/m)。C#側で�
 // ここはベース色+ノイズのモザイクに集中し役割を二重掛けしない。
 float _ProceduralGroundBlend;   // 0=テクスチャ, 1=完全手続き
 float _ProceduralGroundScale;   // 大局モザイクの周期(m)
-float4 _TerrainGroundColorA;    // ベース(草)
-float4 _TerrainGroundColorB;    // 乾いた土のパッチ
+float4 _TerrainGroundColorA;    // ベース
+float4 _TerrainGroundColorB;    // 大きなパッチ
 float4 _TerrainGroundColorC;    // 明色(細かい斑で薄く混ぜる)
+
+// --- 地面テクスチャの使い方(地表種別ごと。TerrainManager が GroundCoverProfile から渡す) ---
+// 草原・濃い草地は草のテクスチャの色をそのまま混ぜる。砂漠・雪原・乾燥地は色を持ち込まず、
+// 平均輝度との比(=濃淡)だけを下地色へ掛ける。草の緑や写真の色味が手続きの配色へ漏れないようにするため。
+float _GroundTextureColorWeight; // 1=色をそのまま, 0=濃淡だけ
+float _GroundTextureLuminance;   // テクスチャの平均輝度(リニア)。濃淡の基準
+float _GroundTextureContrast;    // 濃淡の強調倍率(色の差が小さい砂のテクスチャで上げる)
+
+// --- 風紋(砂漠など。0で無効) ---
+float _GroundRippleStrength;
+float _GroundRippleWavelength;   // 波長(m)
 
 // Global variables for contour lines
 float _ShowContour;
@@ -150,10 +161,37 @@ void ApplyGroundDetailNormal(float3 positionWS, float3 geoNormalWS, inout float3
 }
 
 /// <summary>
+/// 風紋: 一方向に並ぶ細かい波を法線に与える(砂漠の砂など)。向きを数百m単位のノイズで、
+/// 位相を数m単位のノイズで揺らし、定規で引いたような縞に見せない。
+/// 波長が画面上で潰れる遠景ではモアレになるため、カメラからの距離で消す。
+/// </summary>
+void ApplyGroundRipples(float3 positionWS, float3 geoNormalWS, inout float3 normalWS)
+{
+    float strength = _GroundRippleStrength;
+    if (strength <= 0.0001)
+        return;
+
+    float flat = saturate(geoNormalWS.y);
+    float fade = 1.0 - smoothstep(40.0, 90.0, distance(_WorldSpaceCameraPos, positionWS));
+    float weight = strength * flat * flat * fade;
+    if (weight <= 0.0001)
+        return;
+
+    float2 p = positionWS.xz;
+    float angle = 0.7 + (TerrainMacroNoise(p / 150.0) - 0.5) * 1.2;
+    float2 dir = float2(cos(angle), sin(angle));
+    float phase = dot(p, dir) * (6.2831853 / max(_GroundRippleWavelength, 0.05)) + TerrainMacroFbm(p / 9.0) * 8.0;
+    // 断面を風上側が緩く風下側が急な形にするため、基本波の傾きへ2倍波を足す
+    float slope = cos(phase) + 0.35 * cos(2.0 * phase);
+    normalWS = normalize(normalWS - float3(dir.x, 0.0, dir.y) * (slope * weight));
+}
+
+/// <summary>
 /// 地面のベースアルベドを手続き生成する(テクスチャの単純タイリング反復を消すため)。
-/// 大局モザイク(低周波fbm)で草↔乾いた土を切り替え、細かい斑(高周波fbm)で明色を薄く混ぜて
+/// 大局モザイク(低周波fbm)で下地色A↔Bのパッチを切り替え、細かい斑(高周波fbm)で明色を薄く混ぜて
 /// 単調さを崩す。texAlbedo(TerrainLayer由来のサンプル色)とは _ProceduralGroundBlend で混合し、
 /// 1で完全に手続き色へ置き換わる(=拾い物テクスチャの反復が完全に消える)。
+/// テクスチャ側の寄与は _GroundTextureColorWeight に従い、色そのものか濃淡だけかを選ぶ。
 /// geoNormalWS は将来の傾斜連動用に受けるが、標高/傾斜の色被せは ApplyTerrainColorGrade が
 /// 担うためここでは使わない(役割の二重掛け回避)。
 /// </summary>
@@ -166,7 +204,7 @@ half3 ComputeProceduralGroundAlbedo(float3 positionWS, float3 geoNormalWS, half3
     float scale = max(_ProceduralGroundScale, 1.0);
     float2 p = positionWS.xz / scale;
 
-    // 大局モザイク: 低周波fbmで A(草) ↔ B(乾いた土) を切り替える
+    // 大局モザイク: 低周波fbmで A ↔ B を切り替える
     float macro = saturate(TerrainMacroFbm(p) / 0.875);
     // 中〜細スケールの斑: 高周波fbmで細かい濃淡
     float detail = saturate(TerrainMacroFbm(p * 6.3 + float2(11.5, 5.2)) / 0.875);
@@ -176,7 +214,15 @@ half3 ComputeProceduralGroundAlbedo(float3 positionWS, float3 geoNormalWS, half3
     // 細かい斑で C(明色) を薄く混ぜ、ベタ塗り感を消す
     ground = lerp(ground, (half3)_TerrainGroundColorC.rgb, (half)(detail * 0.25));
 
-    return lerp(texAlbedo, ground, (half)blend);
+    half3 texTerm = texAlbedo;
+    if (_GroundTextureColorWeight < 0.999)
+    {
+        half texLuminance = dot(texAlbedo, half3(0.2126, 0.7152, 0.0722));
+        half ratio = (half)(1.0 + (texLuminance / max(_GroundTextureLuminance, 0.001) - 1.0) * _GroundTextureContrast);
+        texTerm = lerp(ground * max(ratio, (half)0.0), texAlbedo, (half)saturate(_GroundTextureColorWeight));
+    }
+
+    return lerp(texTerm, ground, (half)blend);
 }
 
 // ピクセル幅の芯とアンチエイリアスを持つ線。水平面の全面着色と密集時の塗り潰しを防ぐ。
@@ -267,9 +313,10 @@ half4 CliffTerrainFragmentPBR(InputData inputData, half3 albedo, half metallic, 
     // 地面のベースアルベドを手続き生成で置き換える(テクスチャ反復を消す)。
     // 崖ブレンドはこの手続きベース色の上に岩を lerp するので、崖の非退行が保たれる。
     albedo = ComputeProceduralGroundAlbedo(inputData.positionWS, cliffGeoNormalWS, albedo);
-    // 平地の手続きディテール法線を先に乗せてから崖ブレンドする。
-    // (崖マスクが高い箇所は ApplyCliffRock の lerp でこのディテール法線から岩法線へ移る)
+    // 平地の手続きディテール法線と風紋を先に乗せてから崖ブレンドする。
+    // (崖マスクが高い箇所は ApplyCliffRock の lerp でこれらの法線から岩法線へ移る)
     ApplyGroundDetailNormal(inputData.positionWS, cliffGeoNormalWS, inputData.normalWS);
+    ApplyGroundRipples(inputData.positionWS, cliffGeoNormalWS, inputData.normalWS);
     // 川岸の砂地はベース色へ、川床は岩ブレンドへ合流させ、岩化後に濡れの暗色を乗せる
     // (TerrainRiverBank.hlsl。川マスク未生成なら何も変えない)
     half riverBed;

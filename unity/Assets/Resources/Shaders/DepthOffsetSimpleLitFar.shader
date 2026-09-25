@@ -26,6 +26,14 @@ Shader "Custom/DepthOffsetSimpleLitFar"
         _TerrainMacroVariationScale("Macro Variation Scale", Float) = 350.0
         _TerrainMacroVariationTint("Macro Variation Tint", Color) = (0.85, 0.95, 0.75, 1.0)
 
+        // 地表種別ごとの地面テクスチャの使い方・風紋。実行時は TerrainManager が GroundCoverProfile の値を設定する。
+        // 既定値は草原(テクスチャの色をそのまま使い、風紋なし)と同じ見た目になる値。
+        _GroundTextureColorWeight("Ground Texture Color Weight", Range(0.0, 1.0)) = 1.0
+        _GroundTextureLuminance("Ground Texture Luminance", Float) = 0.25
+        _GroundTextureContrast("Ground Texture Contrast", Float) = 1.0
+        _GroundRippleStrength("Ground Ripple Strength", Range(0.0, 1.0)) = 0.0
+        _GroundRippleWavelength("Ground Ripple Wavelength (m)", Float) = 0.6
+
         // 崖(急傾斜)への岩テクスチャブレンド設定。実行時は TerrainManager の
         // ApplyTerrainMaterialSettings がタイルごとの materialTemplate に設定する。
         // 既定値は TerrainManager.cs の SerializeField 既定値と一致させること。
@@ -42,6 +50,8 @@ Shader "Custom/DepthOffsetSimpleLitFar"
         _CliffFallbackColor("Cliff Fallback Color", Color) = (0.42, 0.36, 0.30, 1.0)
         _CliffLowlandStart("Cliff Lowland Start Height (m)", Float) = 2.0
         _CliffLowlandFull("Cliff Lowland Full Height (m)", Float) = 0.0
+        _CliffRockTint("Cliff Rock Tint", Color) = (1.0, 1.0, 1.0, 1.0)
+        _ShoreSandColor("Shore Sand Color (A = Weight)", Color) = (0.80, 0.72, 0.56, 0.0)
 
         _GroundMetallic("Ground Metallic", Range(0, 1)) = 0
 

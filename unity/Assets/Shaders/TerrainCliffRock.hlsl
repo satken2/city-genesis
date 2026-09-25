@@ -40,19 +40,21 @@ float _CliffTexturesLoaded;   // 1=テクスチャ設定済み。0なら単色�
 float4 _CliffFallbackColor;   // テクスチャ未設定時の岩色
 float _CliffLowlandStart;     // 低地岩化の開始標高(m)。これ以上は傾斜のみで判定
 float _CliffLowlandFull;      // 低地岩化が最大になる標高(m)。これ以下(海面下含む)は一律で岩
+float4 _CliffRockTint;        // 岩の色に掛ける色(地表種別ごと。白=岩テクスチャのまま)
+float4 _ShoreSandColor;       // rgb=波打ち際の砂の色, a=低地の岩を砂へ置き換える割合(0=岩のまま)
 
 /// <summary>
-/// 傾斜から岩ブレンド率(0=草のまま, 1=完全に岩)を求める。
+/// 岩ブレンド率を「傾斜による分」と「低地による分」に分けて求める(0=下地のまま, 1=完全に岩)。
 /// 閾値にワールドノイズを加算することで、等高線状の均一な帯にならず
-/// 草と岩の境界が自然に入り乱れる。
+/// 下地と岩の境界が自然に入り乱れる。
 /// </summary>
-half ComputeCliffMask(float3 normalWS, float3 positionWS)
+void ComputeCliffMasks(float3 normalWS, float3 positionWS, out half slopeMask, out half lowlandMask)
 {
     // --- 傾斜ベース: 急斜面ほど岩 ---
     float slope = 1.0 - saturate(normalWS.y); // 0=水平, 1=垂直
     float jitter = (TerrainMacroNoise(positionWS.xz / max(_CliffNoiseScale, 1.0)) - 0.5) * _CliffNoiseStrength;
     float threshold = _CliffSlopeThreshold + jitter;
-    float slopeMask = saturate((slope - threshold) / max(_CliffSlopeBlend, 1e-3));
+    slopeMask = (half)saturate((slope - threshold) / max(_CliffSlopeBlend, 1e-3));
 
     // --- 標高ベース: 低地(海面下・浅瀬)は傾斜に関係なく岩 ---
     // positionWS.y は標高(m)。海面がワールドY=0。_CliffLowlandStart(例:2m)から
@@ -61,10 +63,15 @@ half ComputeCliffMask(float3 normalWS, float3 positionWS)
     float heightNoise = (TerrainMacroNoise(positionWS.xz / max(_CliffNoiseScale, 1.0) + 31.7) - 0.5) * 2.0;
     float lowlandStart = _CliffLowlandStart + heightNoise; // ノイズ振幅は±1m相当
     float lowlandSpan = max(lowlandStart - _CliffLowlandFull, 1e-3);
-    float lowlandMask = saturate((lowlandStart - positionWS.y) / lowlandSpan);
+    lowlandMask = (half)saturate((lowlandStart - positionWS.y) / lowlandSpan);
+}
 
-    // 傾斜・標高いずれかの条件で岩になる
-    return (half)max(slopeMask, lowlandMask);
+/// <summary>傾斜・標高いずれかの条件で岩になる率。</summary>
+half ComputeCliffMask(float3 normalWS, float3 positionWS)
+{
+    half slopeMask, lowlandMask;
+    ComputeCliffMasks(normalWS, positionWS, slopeMask, lowlandMask);
+    return max(slopeMask, lowlandMask);
 }
 
 /// <summary>
@@ -79,10 +86,16 @@ half ComputeCliffMask(float3 normalWS, float3 positionWS)
 /// 斜面だけ岩化する(山の片側だけ岩になる)方向依存バグの原因になるため。
 /// normalWS(シェーディング法線)は岩の法線をブレンドする出力先としてのみ使う。
 /// extraRockMask は傾斜・標高以外の理由で岩にしたい率(川床マスク。TerrainRiverBank.hlsl)。
+/// 低地の岩は _ShoreSandColor.a の割合だけ砂へ置き換える(砂漠・乾燥地の砂浜と、浅い海の砂の海底)。
+/// 急斜面と川床は置き換えず岩のまま残す。
 /// </summary>
 void ApplyCliffRock(float3 positionWS, float3 geoNormalWS, inout float3 normalWS, inout half3 albedo, inout half smoothness, half extraRockMask)
 {
-    half mask = max(ComputeCliffMask(geoNormalWS, positionWS), extraRockMask);
+    half slopeMask, lowlandMask;
+    ComputeCliffMasks(geoNormalWS, positionWS, slopeMask, lowlandMask);
+    half shoreSand = (half)saturate(_ShoreSandColor.a);
+    half mask = max(max(slopeMask, lowlandMask * (1 - shoreSand)), extraRockMask);
+    albedo = lerp(albedo, (half3)_ShoreSandColor.rgb, lowlandMask * shoreSand * (1 - mask));
 
     // 平地ピクセルはテクスチャタップ0で早期脱出する。
     // 動的分岐内の暗黙微分(ミップ選択)は理論上未定義だが、分岐境界では
@@ -95,7 +108,7 @@ void ApplyCliffRock(float3 positionWS, float3 geoNormalWS, inout float3 normalWS
     {
         // テクスチャ未設定でも破綻しないフォールバック。
         // プレライティングの単色ブレンドなので、旧実装と違い陰影は残る。
-        albedo = lerp(albedo, (half3)_CliffFallbackColor.rgb, mask);
+        albedo = lerp(albedo, (half3)(_CliffFallbackColor.rgb * _CliffRockTint.rgb), mask);
         smoothness = lerp(smoothness, (half)_CliffSmoothness, mask);
         return;
     }
@@ -109,9 +122,10 @@ void ApplyCliffRock(float3 positionWS, float3 geoNormalWS, inout float3 normalWS
     float2 uvZ = positionWS.xy * _CliffUvScale; // Z軸投影(南北向きの崖面)
 
     // アルベド 3タップ
-    half3 rock = SAMPLE_TEXTURE2D(_CliffAlbedoMap, sampler_CliffAlbedoMap, uvX).rgb * w.x
+    half3 rock = (SAMPLE_TEXTURE2D(_CliffAlbedoMap, sampler_CliffAlbedoMap, uvX).rgb * w.x
                + SAMPLE_TEXTURE2D(_CliffAlbedoMap, sampler_CliffAlbedoMap, uvY).rgb * w.y
-               + SAMPLE_TEXTURE2D(_CliffAlbedoMap, sampler_CliffAlbedoMap, uvZ).rgb * w.z;
+               + SAMPLE_TEXTURE2D(_CliffAlbedoMap, sampler_CliffAlbedoMap, uvZ).rgb * w.z)
+               * (half3)_CliffRockTint.rgb;
 
     // 法線 3タップ + Whiteoutブレンドでワールド空間へ再投影
     // (Ben Golus "Normal Mapping for a Triplanar Shader" の方式。

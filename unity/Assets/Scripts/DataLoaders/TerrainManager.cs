@@ -7,11 +7,10 @@ using UnityEngine.Networking;
 using Newtonsoft.Json;
 
 /// <summary>
-/// バックエンドAPIから3段階LOD（遠景/近景/超近景）の標高マップを取得し、Terrainを配置するマネージャー。
-/// ・遠景: /api/v1/terrain/far （マップ全体、常時表示）
-/// ・近景: /api/v1/terrain/near?bbox=... （カメラ周辺、中解像度）
-/// ・超近景: /api/v1/terrain/dynamic?bbox=... （セル単位、最高解像度、404時は近景にフォールバック）
-/// ・セルサイズは /api/v1/terrain/settings から遅延取得
+/// バックエンドの地形APIから標高を取得し、常駐セルの Terrain タイルと全域の超遠景陸地メッシュを配置するマネージャー。
+/// ・常駐セル: /api/v1/terrain/surface (セル単位の float32、513格子)。一時TerrainDataへ分割適用してから差し替える
+/// ・全景: /api/v1/terrain/far (マップ全体の粗い標高)から超遠景の陸地メッシュを作る
+/// ・マップ寸法とセルサイズは /api/v1/terrain/settings、地表種別は /api/v1/city から取得する
 /// </summary>
 public partial class TerrainManager : BaseApiDataManager
 {
@@ -125,63 +124,32 @@ public partial class TerrainManager : BaseApiDataManager
     [SerializeField] private float ultraFarSinkAmount = 100f;
 
     [Header("Default Material Settings")]
-    [SerializeField] private Color defaultTerrainColor = new Color(0.2f, 0.8f, 0.2f);
-    [SerializeField] private Texture2D defaultDiffuseTexture;
-    [SerializeField] private Texture2D defaultNormalTexture;
-    [SerializeField] private Vector2 defaultTileSize = Vector2.zero;
     [SerializeField] private float defaultMetallic = 0f;
-    // スタイライズ向けに完全マット(0)をやめ、柔らかいスペキュラで陰影に立体感を出す。
-    // 平地の手続きディテール法線(terrainDetailNormalStrength)と併せて、太陽角度が
-    // 変わったときの光の起伏を生む。注意: この値はシーン(GameScene.unity)にシリアライズ
-    // されているため、既存シーンのインスタンスにはシーン側の値が優先される。実際に反映
-    // するにはシーンの TerrainManager.defaultSmoothness も更新すること。
-    [SerializeField] private float defaultSmoothness = 0.15f;
 
+    // 地表種別(Constants.GROUND_COVER_*)で変わる見た目は GroundCoverPalette のプロファイルが持つ。
+    // 下地のテクスチャ・手続きの色・凹凸・スムースネス、照明後の大きな濃淡と色補正の色、岩の色味と波打ち際で、
+    // ApplyTerrainMaterialSettings が都市の地表種別のプロファイルを地形タイル・超遠景・都市外背景へ同じく渡す。
+    // 地面は法線マップを使わず、凹凸は手続きのディテール法線と風紋で出す
+    // (シェーダーは Assets/Shaders/TerrainSurfaceAppearance.hlsl)。
+    [Header("Ground Cover")]
+    /// <summary>地表種別ごとの見た目。未設定なら Resources の GroundCoverPalette を、それも無ければコード既定値を使う。</summary>
+    [SerializeField] private GroundCoverPalette groundCoverPalette;
+    /// <summary>0以外なら都市の地表種別の代わりにこの種別(Constants.GROUND_COVER_*)で描く。エディタで種別を見比べるためのもの。</summary>
+    [SerializeField] private int groundCoverPreview = 0;
+
+    // 以下は地表種別に依存しない共通の値。
     [Header("Terrain Macro Variation Settings")]
-    [SerializeField, Range(0f, 0.5f)] private float terrainMacroVariationStrength = 0.12f;
     [SerializeField] private float terrainMacroVariationScale = 350f;
-    [SerializeField] private Color terrainMacroVariationTint = new Color(0.85f, 0.95f, 0.75f, 1f);
 
-    // スタイライズ向けのカラーグレード・ディテール法線設定。シェーダー実装は
-    // Assets/Shaders/TerrainSurfaceAppearance.hlsl(ApplyTerrainColorGrade /
-    // ApplyGroundDetailNormal)。写真テクスチャの精細さではなく色設計・法線で
-    // 「破綻なく整った」非写実の地表を作るための層。新規フィールドのためシーンに
-    // シリアライズ値が無く、ここのコード既定値がそのまま実行時に反映される。
     [Header("Terrain Color Grade Settings")]
-    /// <summary>カラーグレードの強度。0で無効(従来の見た目)。標高・傾斜に応じた色被せの効き。</summary>
-    [SerializeField, Range(0f, 1f)] private float terrainColorGradeStrength = 0.22f;
     /// <summary>低地色になる標高(m)。海面(0m)付近を想定。</summary>
     [SerializeField] private float terrainColorGradeLowHeight = 0f;
     /// <summary>高地色になる標高(m)。これ以上の標高は一様に高地色へ寄る。</summary>
     [SerializeField] private float terrainColorGradeHighHeight = 300f;
-    /// <summary>低地のティント(≈1.0付近で明度維持しつつ僅かに色付け)。やや暖色の緑。</summary>
-    [SerializeField] private Color terrainLowColor = new Color(0.82f, 0.88f, 0.68f, 1f);
-    /// <summary>高地のティント。寒色・低彩度で標高感を出す。</summary>
-    [SerializeField] private Color terrainHighColor = new Color(0.90f, 0.92f, 0.98f, 1f);
-    /// <summary>急斜面のティント。土・岩肌寄りのアースカラー。</summary>
-    [SerializeField] private Color terrainSlopeColor = new Color(0.72f, 0.66f, 0.55f, 1f);
 
     [Header("Terrain Detail Normal Settings")]
-    /// <summary>平地の手続きディテール法線の強度。0で無効。法線マップテクスチャは使わない。</summary>
-    [SerializeField, Range(0f, 1f)] private float terrainDetailNormalStrength = 0.25f;
     /// <summary>ディテール法線ノイズのタイリング周期(m)。小さいほど細かい凹凸。</summary>
     [SerializeField] private float terrainDetailNormalTilingMeters = 3.5f;
-
-    // 地面のベースアルベドの手続き生成設定。シェーダー実装は
-    // TerrainSurfaceAppearance.hlsl の ComputeProceduralGroundAlbedo。
-    // 拾い物テクスチャの単純タイリング反復を消すため、ベース色自体を多スケールノイズで作る。
-    // 新規SerializeFieldのためシーンに値が無く、ここのコード既定値が実行時に反映される。
-    [Header("Terrain Procedural Ground Settings")]
-    /// <summary>手続き色とテクスチャ由来色の混合率。0=テクスチャのみ, 1=完全手続き(反復ゼロ)。</summary>
-    [SerializeField, Range(0f, 1f)] private float terrainProceduralGroundBlend = 0.85f;
-    /// <summary>大局モザイク(草↔乾いた土のパッチ)の周期(m)。大きいほどパッチが広い。</summary>
-    [SerializeField] private float terrainProceduralGroundScale = 40f;
-    /// <summary>ベース色(草)。実アルベド相当(概ね0.2〜0.6)。</summary>
-    [SerializeField] private Color terrainGroundColorA = new Color(0.38f, 0.47f, 0.26f, 1f);
-    /// <summary>乾いた土のパッチ色。大局モザイクで差し込まれる。</summary>
-    [SerializeField] private Color terrainGroundColorB = new Color(0.55f, 0.48f, 0.34f, 1f);
-    /// <summary>明色(乾いた草のハイライト)。細かい斑で薄く混ぜてベタ塗り感を消す。</summary>
-    [SerializeField] private Color terrainGroundColorC = new Color(0.62f, 0.66f, 0.45f, 1f);
 
     // 崖(急傾斜)への岩テクスチャブレンド設定。シェーダー側の実装は
     // Assets/Shaders/TerrainCliffRock.hlsl(トリプラナーマッピング+法線マップ)。
@@ -221,24 +189,20 @@ public partial class TerrainManager : BaseApiDataManager
     /// <summary>Resources からの岩テクスチャフォールバック解決を一度だけ行うためのフラグ。</summary>
     private bool cliffTexturesResolved = false;
 
-    private static readonly int TerrainMacroVariationStrengthId = Shader.PropertyToID("_TerrainMacroVariationStrength");
-    private static readonly int TerrainMacroVariationScaleId = Shader.PropertyToID("_TerrainMacroVariationScale");
-    private static readonly int TerrainMacroVariationTintId = Shader.PropertyToID("_TerrainMacroVariationTint");
+    /// <summary>都市の地表種別(GET /api/v1/city の ground_cover)。セッション開始時に FetchCoastline が取得する。</summary>
+    private int cityGroundCover = Constants.GROUND_COVER_GRASSLAND;
+    /// <summary>Resources からのパレット解決を一度だけ行うためのフラグ。</summary>
+    private bool groundCoverPaletteResolved = false;
+    /// <summary>パレットのInspector編集を、次のフレームで1回だけ地形へ反映するためのフラグ。</summary>
+    private bool groundCoverMaterialsDirty = false;
+    private static readonly GroundCoverProfile[] DefaultGroundCoverProfiles = GroundCoverProfile.CreateDefaults();
+    private readonly Dictionary<string, Texture2D> groundTextureCache = new Dictionary<string, Texture2D>();
 
-    private static readonly int TerrainColorGradeStrengthId = Shader.PropertyToID("_TerrainColorGradeStrength");
+    private static readonly int TerrainMacroVariationScaleId = Shader.PropertyToID("_TerrainMacroVariationScale");
+
     private static readonly int TerrainColorGradeLowHeightId = Shader.PropertyToID("_TerrainColorGradeLowHeight");
     private static readonly int TerrainColorGradeHighHeightId = Shader.PropertyToID("_TerrainColorGradeHighHeight");
-    private static readonly int TerrainLowColorId = Shader.PropertyToID("_TerrainLowColor");
-    private static readonly int TerrainHighColorId = Shader.PropertyToID("_TerrainHighColor");
-    private static readonly int TerrainSlopeColorId = Shader.PropertyToID("_TerrainSlopeColor");
-    private static readonly int TerrainDetailNormalStrengthId = Shader.PropertyToID("_TerrainDetailNormalStrength");
     private static readonly int TerrainDetailNormalScaleId = Shader.PropertyToID("_TerrainDetailNormalScale");
-
-    private static readonly int ProceduralGroundBlendId = Shader.PropertyToID("_ProceduralGroundBlend");
-    private static readonly int ProceduralGroundScaleId = Shader.PropertyToID("_ProceduralGroundScale");
-    private static readonly int TerrainGroundColorAId = Shader.PropertyToID("_TerrainGroundColorA");
-    private static readonly int TerrainGroundColorBId = Shader.PropertyToID("_TerrainGroundColorB");
-    private static readonly int TerrainGroundColorCId = Shader.PropertyToID("_TerrainGroundColorC");
 
     private static readonly int CliffAlbedoMapId = Shader.PropertyToID("_CliffAlbedoMap");
     private static readonly int CliffNormalMapId = Shader.PropertyToID("_CliffNormalMap");
@@ -385,10 +349,12 @@ public partial class TerrainManager : BaseApiDataManager
         // インスタンスを静的キャッシュに登録する。
         // これにより数千回/フレームの GetGroundHeight 呼び出しが O(1) になる。
         Utils.RegisterTerrainManager(this);
+        GroundCoverPalette.Changed += MarkGroundCoverMaterialsDirty;
     }
 
     private void OnDestroy()
     {
+        GroundCoverPalette.Changed -= MarkGroundCoverMaterialsDirty;
         // TerrainManager が破棄された際にキャッシュ参照をクリアし、
         // 以降の GetGroundHeight でフォールバックパスを使用するようにする。
         if (Utils.CachedTerrainManager == this)
@@ -401,6 +367,12 @@ public partial class TerrainManager : BaseApiDataManager
     {
         UpdateCameraClipDistance();
         UpdateLoadedCellMask();
+
+        if (groundCoverMaterialsDirty)
+        {
+            groundCoverMaterialsDirty = false;
+            RefreshGroundCoverMaterials();
+        }
 
         // 遅延破棄プールの処理：TERRAIN_DESTROY_DELAY 経過後に実際のDestroyを行う。
         // 一度に全件処理してフレームあたりのオーバーヘッドを抑えつつ、
@@ -467,10 +439,16 @@ public partial class TerrainManager : BaseApiDataManager
         cliffTilingMeters = Mathf.Max(1f, cliffTilingMeters);
         cliffNoiseScale = Mathf.Max(1f, cliffNoiseScale);
 
-        if (Application.isPlaying && terrainTiles != null)
-        {
-            RefreshAllTerrainMaterials();
-        }
+        MarkGroundCoverMaterialsDirty();
+    }
+
+    /// <summary>
+    /// Play中に地表の見た目の設定(Inspector・パレット)が変わったとき、次の Update で1回だけ反映させる。
+    /// 値の変更通知はスライダーのドラッグ中に何度も来るため、その場でタイルを作り直さない。
+    /// </summary>
+    private void MarkGroundCoverMaterialsDirty()
+    {
+        if (Application.isPlaying && terrainTiles != null) groundCoverMaterialsDirty = true;
     }
 
     // ================================================================
@@ -1064,12 +1042,12 @@ public partial class TerrainManager : BaseApiDataManager
 
     /// <summary>
     /// UltraFar 陸地の地面テクスチャ(per-cellタイルと同じもの)とタイリングを取得する。
-    /// customTerrainLayers[0] があればそれを、なければ defaultDiffuseTexture を使う。
+    /// customTerrainLayers[0] があればそれを、なければ地表種別のテクスチャを使う。
     /// </summary>
-    private Texture2D GetUltraFarDiffuseTexture(out Vector2 tileSize)
+    private Texture2D GetUltraFarDiffuseTexture(GroundCoverProfile ground, out Vector2 tileSize)
     {
-        Texture2D diffuseTex = defaultDiffuseTexture;
-        tileSize = defaultTileSize;
+        Texture2D diffuseTex = ResolveGroundTexture(ground);
+        tileSize = ground.textureTileSize;
 
         if (customTerrainLayers != null && customTerrainLayers.Length > 0 && customTerrainLayers[0] != null)
         {
@@ -1077,7 +1055,7 @@ public partial class TerrainManager : BaseApiDataManager
             tileSize = customTerrainLayers[0].tileSize;
         }
 
-        if (tileSize == Vector2.zero)
+        if (tileSize.x <= 0f || tileSize.y <= 0f)
         {
             tileSize = new Vector2(terrainSize.x, terrainSize.z);
         }
@@ -1088,11 +1066,12 @@ public partial class TerrainManager : BaseApiDataManager
     /// UltraFar 陸地メッシュ用のマテリアルを必要に応じて生成する。
     /// シェーダーは Custom/DepthOffsetSimpleLitFar(Offset 4,4)で per-cell 地形・海面より奥に描画する。
     /// per-cell タイルと同じ地面テクスチャを、頂点のワールドXZ座標をUVとして同じタイリングで貼る。
-    /// 草・土の手続き色、岩肌、法線ディテールとPBR照明はTerrainと共通の設定・HLSLを使う。
+    /// 地表種別の手続き色、岩肌、法線ディテールとPBR照明はTerrainと共通の設定・HLSLを使う。
     /// 沈み込みマスクは <see cref="UpdateLoadedCellMask"/> が担う。
     /// </summary>
     private void EnsureUltraFarLandMaterials()
     {
+        GroundCoverProfile ground = ActiveGroundCover;
         Shader sh = ultraFarLandShader;
         if (sh == null) sh = Shader.Find("Custom/DepthOffsetSimpleLitFar");
         if (sh == null)
@@ -1105,21 +1084,17 @@ public partial class TerrainManager : BaseApiDataManager
         else ultraFarLandMat.shader = sh;
 
         // per-cell タイルと同じ地面テクスチャ・タイリングを適用する(UVはワールドXZ座標)。
-        Texture2D diffuseTex = GetUltraFarDiffuseTexture(out Vector2 tileSize);
-        if (diffuseTex != null)
-        {
-            ultraFarLandMat.SetTexture("_BaseMap", diffuseTex);
-
-            Vector4 tilingOffset = new Vector4(1f / tileSize.x, 1f / tileSize.y, 0f, 0f);
-            ultraFarLandMat.SetVector("_BaseMap_ST", tilingOffset);
-        }
+        // テクスチャが無い場合は白の既定テクスチャに下地色Aを掛け、タイルの単色代用と揃える。
+        Texture2D diffuseTex = GetUltraFarDiffuseTexture(ground, out Vector2 tileSize);
+        ultraFarLandMat.SetTexture("_BaseMap", diffuseTex != null ? diffuseTex : Texture2D.whiteTexture);
+        ultraFarLandMat.SetVector("_BaseMap_ST", new Vector4(1f / tileSize.x, 1f / tileSize.y, 0f, 0f));
 
         ApplyTerrainMaterialSettings(ultraFarLandMat);
         TerrainLayer groundLayer = customTerrainLayers != null && customTerrainLayers.Length > 0
             ? customTerrainLayers[0] : null;
         ultraFarLandMat.SetFloat("_GroundMetallic", groundLayer != null ? groundLayer.metallic : defaultMetallic);
-        ultraFarLandMat.SetFloat("_Smoothness", groundLayer != null ? groundLayer.smoothness : defaultSmoothness);
-        ultraFarLandMat.SetColor("_BaseColor", diffuseTex != null ? Color.white : defaultTerrainColor);
+        ultraFarLandMat.SetFloat("_Smoothness", groundLayer != null ? groundLayer.smoothness : ground.smoothness);
+        ultraFarLandMat.SetColor("_BaseColor", diffuseTex != null ? Color.white : ground.groundColorA);
 
         // ロード済みセルでの沈み込み量。判定マスクは UpdateLoadedCellMask が毎フレーム供給する。
         ultraFarLandMat.SetFloat("_FarGridStep", Mathf.Max(1f, ultraFarGridStep));
@@ -1638,6 +1613,9 @@ public partial class TerrainManager : BaseApiDataManager
             yield break;
         }
 
+        // 地表種別は地形タイル・超遠景のマテリアル生成より前に確定させる(後続のロードがこの値で塗る)。
+        yield return FetchCityGroundCover();
+
         string error = null;
 
         yield return ApiClient.Get<CoastlineResponse>(
@@ -1672,6 +1650,36 @@ public partial class TerrainManager : BaseApiDataManager
         {
             yield return RiverSurfaceManager.Instance.LoadAndBuild();
         }
+    }
+
+    /// <summary>
+    /// 都市の地表種別を GET /api/v1/city から取得し、変わっていれば表示中の地形マテリアルへ反映する。
+    /// 取得に失敗したら前回の種別のまま描く(見た目だけの属性なので、地形のロードは止めない)。
+    /// </summary>
+    private IEnumerator FetchCityGroundCover()
+    {
+        int groundCover = cityGroundCover;
+        yield return ApiClient.Get<CityGroundCoverEnvelope>(
+            "/city/",
+            response => { if (response?.city != null) groundCover = response.city.ground_cover; },
+            err => Debug.LogWarning($"TerrainManager: 地表種別の取得に失敗したため前回の種別で描きます: {err}")
+        );
+        if (groundCover == cityGroundCover) yield break;
+        cityGroundCover = groundCover;
+        RefreshGroundCoverMaterials();
+    }
+
+    /// <summary>GET /api/v1/city のうち地表種別だけを読むレスポンス。</summary>
+    [System.Serializable]
+    private class CityGroundCoverEnvelope
+    {
+        public CityGroundCoverFields city;
+    }
+
+    [System.Serializable]
+    private class CityGroundCoverFields
+    {
+        public int ground_cover = Constants.GROUND_COVER_GRASSLAND;
     }
 
     /// <summary>
@@ -1983,28 +1991,15 @@ public partial class TerrainManager : BaseApiDataManager
     {
         if (material == null) return;
 
-        material.SetFloat(TerrainMacroVariationStrengthId, terrainMacroVariationStrength);
-        material.SetFloat(TerrainMacroVariationScaleId, Mathf.Max(1f, terrainMacroVariationScale));
-        material.SetColor(TerrainMacroVariationTintId, terrainMacroVariationTint);
+        // 地表種別で変わる値(下地の色・凹凸・照明後の色被せ・岩の色味と波打ち際)
+        ActiveGroundCover.ApplyTo(material);
 
-        // スタイライズ向けカラーグレード(標高・傾斜ベースの色被せ)
-        material.SetFloat(TerrainColorGradeStrengthId, terrainColorGradeStrength);
+        // 以下は地表種別に依存しない共通の値。
+        material.SetFloat(TerrainMacroVariationScaleId, Mathf.Max(1f, terrainMacroVariationScale));
         material.SetFloat(TerrainColorGradeLowHeightId, terrainColorGradeLowHeight);
         material.SetFloat(TerrainColorGradeHighHeightId, Mathf.Max(terrainColorGradeLowHeight + 1f, terrainColorGradeHighHeight));
-        material.SetColor(TerrainLowColorId, terrainLowColor);
-        material.SetColor(TerrainHighColorId, terrainHighColor);
-        material.SetColor(TerrainSlopeColorId, terrainSlopeColor);
-
-        // 平地の手続きディテール法線。シェーダーは周期の逆数(1/m)を乗算で使う。
-        material.SetFloat(TerrainDetailNormalStrengthId, terrainDetailNormalStrength);
+        // シェーダーはディテール法線の周期の逆数(1/m)を乗算で使う
         material.SetFloat(TerrainDetailNormalScaleId, 1f / Mathf.Max(0.01f, terrainDetailNormalTilingMeters));
-
-        // 地面のベースアルベドの手続き生成(テクスチャ反復の抑制)
-        material.SetFloat(ProceduralGroundBlendId, terrainProceduralGroundBlend);
-        material.SetFloat(ProceduralGroundScaleId, Mathf.Max(1f, terrainProceduralGroundScale));
-        material.SetColor(TerrainGroundColorAId, terrainGroundColorA);
-        material.SetColor(TerrainGroundColorBId, terrainGroundColorB);
-        material.SetColor(TerrainGroundColorCId, terrainGroundColorC);
 
         EnsureCliffTextures();
 
@@ -2059,49 +2054,35 @@ public partial class TerrainManager : BaseApiDataManager
         }
     }
 
+    /// <summary>
+    /// 地表種別のテクスチャ1枚の TerrainLayer をタイルに設定する。
+    /// 法線マップは設定しない(凹凸は手続きのディテール法線と風紋。UltraFar陸地メッシュも法線マップを持たないため揃う)。
+    /// テクスチャが見つからない場合は下地色Aの単色テクスチャで代用する。
+    /// </summary>
     private void ApplyDefaultTerrainMaterial(TerrainData terrainData, TerrainTileResources resources)
     {
-        TerrainLayer normalLayer = resources.Own(new TerrainLayer());
+        GroundCoverProfile ground = ActiveGroundCover;
+        TerrainLayer groundLayer = resources.Own(new TerrainLayer());
 
-        if (defaultDiffuseTexture != null)
+        Texture2D diffuseTex = ResolveGroundTexture(ground);
+        if (diffuseTex == null)
         {
-            normalLayer.diffuseTexture = defaultDiffuseTexture;
+            diffuseTex = resources.Own(new Texture2D(1, 1));
+            diffuseTex.SetPixel(0, 0, ground.groundColorA);
+            diffuseTex.Apply();
         }
-        else
-        {
-            Texture2D tex = resources.Own(new Texture2D(1, 1));
-            tex.SetPixel(0, 0, defaultTerrainColor);
-            tex.Apply();
-            normalLayer.diffuseTexture = tex;
-        }
+        groundLayer.diffuseTexture = diffuseTex;
 
-        // defaultNormalTexture が defaultDiffuseTexture と同一の場合は法線マップとして使わない。
-        // シーン(GameScene.unity)には過去の設定ミスでカラーテクスチャ(草)が法線マップ欄に
-        // 流用されており、これをTerrainLayerに渡すと _NORMALMAP が有効化されて
-        // 地形全体の法線がデタラメな一方向に傾く(→崖の岩ブレンドが特定の向きの斜面
-        // だけに出る・傾斜が過大評価される等、方向依存の描画バグの原因になる)。
-        // UltraFar陸地メッシュが法線マップを設定しないのと同じ理由の防御措置。
-        if (defaultNormalTexture != null && defaultNormalTexture == defaultDiffuseTexture)
-        {
-            Debug.LogWarning(
-                "TerrainManager: defaultNormalTexture に defaultDiffuseTexture と同じカラーテクスチャが" +
-                "設定されているため、法線マップとしては使用しません。シーンの設定を確認してください。");
-        }
-        else if (defaultNormalTexture != null)
-        {
-            normalLayer.normalMapTexture = defaultNormalTexture;
-        }
-
-        Vector2 tileSize = defaultTileSize;
-        if (tileSize == Vector2.zero)
+        Vector2 tileSize = ground.textureTileSize;
+        if (tileSize.x <= 0f || tileSize.y <= 0f)
         {
             tileSize = new Vector2(terrainSize.x, terrainSize.z);
         }
-        normalLayer.tileSize = tileSize;
-        normalLayer.metallic = defaultMetallic;
-        normalLayer.smoothness = defaultSmoothness;
+        groundLayer.tileSize = tileSize;
+        groundLayer.metallic = defaultMetallic;
+        groundLayer.smoothness = ground.smoothness;
 
-        terrainData.terrainLayers = new TerrainLayer[] { normalLayer };
+        terrainData.terrainLayers = new TerrainLayer[] { groundLayer };
     }
 
     [ContextMenu("Refresh Terrain Materials")]
@@ -2114,6 +2095,66 @@ public partial class TerrainManager : BaseApiDataManager
                 ApplyTerrainMaterial(kvp.Value, kvp.Value.terrainData);
             }
         }
+    }
+
+    /// <summary>
+    /// 地表の見た目の変更(地表種別の切り替え・Inspectorでの調整)を、表示中の地形タイル・超遠景・都市外背景へ反映する。
+    /// 背景は超遠景マテリアルの複製なので、値を写し直してから沈み込みだけ無効に戻す。
+    /// </summary>
+    private void RefreshGroundCoverMaterials()
+    {
+        RefreshAllTerrainMaterials();
+        if (ultraFarLandMat == null) return;
+        EnsureUltraFarLandMaterials();
+        if (backgroundMaterial != null)
+        {
+            backgroundMaterial.CopyPropertiesFromMaterial(ultraFarLandMat);
+            backgroundMaterial.SetFloat(FarSinkAmountId, 0f);
+        }
+    }
+
+    /// <summary>
+    /// 現在描いている地表種別のプロファイル。Inspector の groundCoverPreview が0以外ならそれを優先する。
+    /// パレットに無い種別はコード既定値を使い、未知の種別は草原で描く。
+    /// </summary>
+    private GroundCoverProfile ActiveGroundCover
+    {
+        get
+        {
+            int groundCover = groundCoverPreview != 0 ? groundCoverPreview : cityGroundCover;
+            if (groundCoverPalette == null && !groundCoverPaletteResolved)
+            {
+                groundCoverPaletteResolved = true;
+                groundCoverPalette = Resources.Load<GroundCoverPalette>(GroundCoverPalette.ResourcePath);
+            }
+            GroundCoverProfile profile = groundCoverPalette != null ? groundCoverPalette.Find(groundCover) : null;
+            return profile ?? FindDefaultGroundCover(groundCover) ?? FindDefaultGroundCover(Constants.GROUND_COVER_GRASSLAND);
+        }
+    }
+
+    private static GroundCoverProfile FindDefaultGroundCover(int groundCover)
+    {
+        foreach (GroundCoverProfile profile in DefaultGroundCoverProfiles)
+        {
+            if (profile.groundCover == groundCover) return profile;
+        }
+        return null;
+    }
+
+    /// <summary>プロファイルの地面テクスチャ。見つからなければ警告を1回だけ出して null を返す。</summary>
+    private Texture2D ResolveGroundTexture(GroundCoverProfile ground)
+    {
+        if (string.IsNullOrEmpty(ground.textureResource)) return null;
+        if (!groundTextureCache.TryGetValue(ground.textureResource, out Texture2D texture))
+        {
+            texture = Resources.Load<Texture2D>(ground.textureResource);
+            if (texture == null)
+            {
+                Debug.LogWarning($"TerrainManager: 地面テクスチャ Resources/{ground.textureResource} が見つからないため、下地色Aの単色で描きます。");
+            }
+            groundTextureCache[ground.textureResource] = texture;
+        }
+        return texture;
     }
 
     // ================================================================

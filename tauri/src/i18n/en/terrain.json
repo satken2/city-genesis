@@ -14,5 +14,14 @@
     "copying": "Copying...",
     "copyFailed": "Failed to fetch terrain data",
     "gameTerrainsHelp": "Includes rivers, resources, props, and more."
+  },
+  "groundCover": {
+    "label": "Ground Cover",
+    "hint": "Changes the color and texture of the ground in the game and the colors of 2D maps. It does not affect the simulation.",
+    "1": "Grassland",
+    "2": "Desert",
+    "3": "Lush Meadow",
+    "4": "Snowfield",
+    "5": "Semi-arid"
   }
 }

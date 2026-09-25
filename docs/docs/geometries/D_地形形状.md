@@ -240,6 +240,32 @@ Unity は `GET /api/v1/terrain/rivers` で川の一覧を取得し（`RiverSurfa
 
 HTTPの `/terrain/maps` と `/terrain/maps/{id}/near` は `original=true` のときだけ原本用登録表を参照する。原本を書き換えるAPIは設けない。
 
+## D.15. 地表種別（ground_cover）
+
+マップごとの地表の見た目（草原・砂漠など）を表す属性。描画だけに使い、経済シミュレーションは参照しない。マップに1つだけ持ち、マップ内で塗り分けることはない。
+
+### D.15.1. データモデル
+
+| 値 | 定数（`consts.py`） | 見た目 |
+| --- | --- | --- |
+| 1 | `GROUND_COVER_GRASSLAND` | 草原。ステップのような黄緑の草地。未指定時の既定 |
+| 2 | `GROUND_COVER_DESERT` | 砂漠。砂色の地面と近景の風紋、砂浜の海岸、砂岩色の崖 |
+| 3 | `GROUND_COVER_LUSH` | 濃い草地。温帯〜亜寒帯の鬱蒼とした深い緑 |
+| 4 | `GROUND_COVER_SNOW` | 雪原。白〜青白の地面。急斜面は灰色の岩 |
+| 5 | `GROUND_COVER_SEMI_ARID` | 乾燥地。地中海性・半乾燥気候の枯れ草と低木、砂浜の海岸 |
+
+### D.15.2. 永続化と都市への反映
+
+`terrain_maps.yaml` のマップエントリの `ground_cover` キーに整数で書く（地形エディタのエクスポートが自動で書く。キーが無ければ草原）。未知の値は草原として読む。地形エディタの作業コピーでは `meta.json` の `ground_cover` に保持し、「メタデータ編集」で選ぶ。
+
+都市は地表種別をセーブに持たず、元になったマップ（`City.terrain_map_id`）の定義から引く。値は `GET /api/v1/city` の `ground_cover` で読め、`PATCH` では変更できない。登録表で種別を変えると、そのマップで作った既存のセーブとテンプレートの見た目にも反映される。マップ指定の無い都市と、登録表から消えたマップの都市は草原になる。
+
+`GET /api/v1/terrain/maps` の各要素と `/terrain/maps/{id}/features` も `ground_cover` を返す（ニューゲーム画面の表示と地形エディタの取り込み用。原本は常に草原を返す）。
+
+### D.15.3. 描画
+
+Unityの `TerrainManager` がセッション開始時（`FetchCoastline`）に `GET /api/v1/city` から種別を読み、`GroundCoverPalette` の対応するプロファイルを地形タイル・超遠景の陸地メッシュ・都市外背景のマテリアルへ同じ値で設定する。描画の詳細は [E_LOD処理](E_LOD処理.md) の「地表のスタイライズ表現」を参照。Tauriの2D表示（地形エディタの2D・3Dプレビュー・サムネイル・都市マップ）は、同じ種別で標高のカラーランプを切り替える。
+
 
 ## 都市外の背景地形
 

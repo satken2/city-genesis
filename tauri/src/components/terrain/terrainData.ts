@@ -1,4 +1,12 @@
 import type { TerrainProps } from "./TerrainPropEditor";
+import {
+  GROUND_COVER_DESERT,
+  GROUND_COVER_GRASSLAND,
+  GROUND_COVER_LUSH,
+  GROUND_COVER_SEMI_ARID,
+  GROUND_COVER_SNOW,
+  GROUND_COVER_TYPES,
+} from "../../constants";
 
 /**
  * 地形データの符号化・色マッピングの共通ロジック。
@@ -112,6 +120,8 @@ export type TerrainEditorData = {
   /** カメラ初期状態。未設定なら null。 */
   camera: TerrainCameraPayload | null;
   background: { file_name: string; origin?: [number, number] } | null;
+  /** 地表種別(GROUND_COVER_*)。未設定なら null(草原として扱う)。 */
+  ground_cover: number | null;
 };
 
 /** float16(IEEE 754 half)のビット表現を float32 相当に変換する */
@@ -203,33 +213,50 @@ export function uint8ToBase64(bytes: Uint8Array): string {
   return btoa(bin);
 }
 
+type Rgb = [number, number, number];
+
 /**
- * 標高を0..1に正規化した値から地形色を得る。
- * 低=緑、高=茶色の色マップで、海面(標高0以下)は背景色にする。
- * 都市マップ(components/map/CityMapCanvas)の標高色分けも同系統のランプを使っている。
+ * 地表種別(GROUND_COVER_*)ごとの標高カラーランプ。低地・中腹・高地の3色を線形補間する。
+ * Unity の地表の配色(GroundCoverPalette)を2D表示向けに要約したもので、地形エディタ・3Dプレビュー・
+ * サムネイル・都市マップで同じマップを同じ系統の色で見せる。草原は低地=緑→高地=茶のランプ。
  */
-export function terrainColor(t: number): [number, number, number] {
+const GROUND_COVER_RAMPS: Record<number, [Rgb, Rgb, Rgb]> = {
+  [GROUND_COVER_GRASSLAND]: [[45, 106, 79], [140, 160, 60], [160, 100, 30]],
+  [GROUND_COVER_DESERT]: [[222, 196, 146], [204, 166, 112], [158, 112, 72]],
+  [GROUND_COVER_LUSH]: [[26, 84, 50], [72, 124, 52], [122, 98, 60]],
+  [GROUND_COVER_SNOW]: [[208, 218, 230], [236, 240, 246], [150, 156, 166]],
+  [GROUND_COVER_SEMI_ARID]: [[180, 160, 96], [168, 150, 92], [150, 112, 72]],
+};
+
+/** 未設定・未知の値を草原に丸めた地表種別。 */
+export function normalizeGroundCover(value: unknown): number {
+  return typeof value === "number" && GROUND_COVER_TYPES.includes(value) ? value : GROUND_COVER_GRASSLAND;
+}
+
+/**
+ * 標高を0..1に正規化した値から地形色を得る。海面(標高0以下)の扱いは computePixelRGB が持つ。
+ */
+export function terrainColor(t: number, groundCover: number = GROUND_COVER_GRASSLAND): Rgb {
   const clamped = Math.max(0, Math.min(1, t));
-  let r: number, g: number, b: number;
-  if (clamped < 0.5) {
-    const s2 = clamped * 2;
-    r = Math.round(45 + s2 * (140 - 45));
-    g = Math.round(106 + s2 * (160 - 106));
-    b = Math.round(79 + s2 * (60 - 79));
-  } else {
-    const s2 = (clamped - 0.5) * 2;
-    r = Math.round(140 + s2 * (160 - 140));
-    g = Math.round(160 + s2 * (100 - 160));
-    b = Math.round(60 + s2 * (30 - 60));
-  }
-  return [r, g, b];
+  const [low, mid, high] = GROUND_COVER_RAMPS[normalizeGroundCover(groundCover)];
+  const [from, to, s2]: [Rgb, Rgb, number] = clamped < 0.5 ? [low, mid, clamped * 2] : [mid, high, (clamped - 0.5) * 2];
+  return [
+    Math.round(from[0] + s2 * (to[0] - from[0])),
+    Math.round(from[1] + s2 * (to[1] - from[1])),
+    Math.round(from[2] + s2 * (to[2] - from[2])),
+  ];
 }
 
 /** 標高1点から地形テクスチャのRGBを求める。海面(標高0以下)は背景色にする。 */
-export function computePixelRGB(e: number, minLand: number, maxLand: number): [number, number, number] {
+export function computePixelRGB(
+  e: number,
+  minLand: number,
+  maxLand: number,
+  groundCover: number = GROUND_COVER_GRASSLAND
+): Rgb {
   if (e <= 0) return [0x0d, 0x0d, 0x14];
   const t = (e - minLand) / (maxLand - minLand);
-  return terrainColor(t);
+  return terrainColor(t, groundCover);
 }
 
 /**
@@ -241,9 +268,10 @@ export function computeVertexColor(
   elev: number,
   minLand: number,
   maxLand: number,
-  maskWeight: number
+  maskWeight: number,
+  groundCover: number = GROUND_COVER_GRASSLAND
 ): [number, number, number] {
-  const [tr, tg, tb] = computePixelRGB(elev, minLand, maxLand);
+  const [tr, tg, tb] = computePixelRGB(elev, minLand, maxLand, groundCover);
   const a = (Math.max(0, Math.min(1, maskWeight)) * 160) / 255;
   const hr = 80, hg = 190, hb = 255;
   return [
@@ -342,6 +370,8 @@ export type Terrain3DFullStatePayload = {
    *  川の変化(彫り込み確定・削除)は標高も全域で変化するため、専用の差分イベントは
    *  設けず full_state に相乗りさせる。 */
   rivers: RiverPayload[];
+  /** 地表種別(GROUND_COVER_*)。3Dプレビューの地形の頂点色を2Dエディタと同じランプにする。 */
+  groundCover: number;
 };
 
 export type Terrain3DSelectionDeltaPayload = GridRect & {

@@ -53,6 +53,7 @@ import { showNotification } from "../../utils/notification";
 import { NumberStepper } from "../common/NumberStepper";
 import { NEW_TERRAIN_INITIAL_ELEVATION_M } from "../../local-constants";
 import { useMasterData } from "../../contexts/MasterDataContext";
+import { GROUND_COVER_GRASSLAND, GROUND_COVER_TYPES } from "../../constants";
 import {
   type TerrainEditorData,
   type WaterSurfacePayload,
@@ -71,6 +72,7 @@ import {
   encodeFloat16Array,
   uint8ToBase64,
   computePixelRGB,
+  normalizeGroundCover,
   extractElevRect,
   quantizeMaskRect,
   EVT_TERRAIN_3D_REQUEST_STATE,
@@ -779,14 +781,15 @@ function refreshTerrainTexture(
   minLand: number,
   maxLand: number,
   imgData: ImageData,
-  ctx: CanvasRenderingContext2D
+  ctx: CanvasRenderingContext2D,
+  groundCover: number
 ): void {
   const data = imgData.data;
   for (let r = rect.rMin; r <= rect.rMax; r++) {
     const rowBase = r * cols;
     for (let c = rect.cMin; c <= rect.cMax; c++) {
       const i = rowBase + c;
-      const [red, g, b] = computePixelRGB(elev[i], minLand, maxLand);
+      const [red, g, b] = computePixelRGB(elev[i], minLand, maxLand, groundCover);
       data[i * 4 + 0] = red;
       data[i * 4 + 1] = g;
       data[i * 4 + 2] = b;
@@ -1789,6 +1792,12 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   const cameraRef = useRef<TerrainCameraPayload | null>(null);
   const backgroundRef = useRef<TerrainEditorData["background"]>(null);
 
+  // === 地表種別 ===
+  // エクスポート(meta.json / terrain_maps.yaml の ground_cover)の対象で、2D・3Dプレビュー・サムネイルの
+  // 地形色のランプも決める。描画関数はイベントのクロージャから呼ばれ state を読めないため実体は ref に持つ。
+  const groundCoverRef = useRef<number>(GROUND_COVER_GRASSLAND);
+  const [groundCover, setGroundCover] = useState<number>(GROUND_COVER_GRASSLAND);
+
   // 資源種別の表示名の対応表。draw()(イベントハンドラのクロージャから呼ばれ、React state を
   // 直接読めない)がラベル描画に使うため、マスターデータの変化を ref へミラーする。
   // マスターデータ未取得の間は空のままで、ラベルは「#種別ID」へフォールバックする。
@@ -2114,6 +2123,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       maskBase64: uint8ToBase64(quantizeMaskRect(mask, s.cols, fullRect)),
       waterSurfaces: serializeWaterSurfacesForPreview(),
       rivers: serializeRiversForDisplay(),
+      groundCover: groundCoverRef.current,
     };
     void emit(EVT_TERRAIN_3D_FULL_STATE, payload);
   }
@@ -2673,10 +2683,18 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     if (!s || !elev) return;
     const fullRect: DirtyRect = { rMin: 0, rMax: s.rows - 1, cMin: 0, cMax: s.cols - 1 };
     if (terrainImageDataRef.current && terrainCtxRef.current) {
-      refreshTerrainTexture(fullRect, elev, s.cols, s.minLand, s.maxLand, terrainImageDataRef.current, terrainCtxRef.current);
+      refreshTerrainTexture(fullRect, elev, s.cols, s.minLand, s.maxLand, terrainImageDataRef.current, terrainCtxRef.current, groundCoverRef.current);
     }
     rebuildContoursAtCurrentZoom();
     emitTerrain3dFullState();
+  }
+
+  /** 地表種別を差し替える。repaint なら地形色を塗り直して3Dプレビューにも送り直す(選択範囲・表示位置は保つ)。 */
+  function applyGroundCover(value: unknown, repaint: boolean) {
+    const next = normalizeGroundCover(value);
+    groundCoverRef.current = next;
+    setGroundCover(next);
+    if (repaint) refreshDisplayedTerrain();
   }
 
   /**
@@ -3360,7 +3378,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       ts.noiseParams
     );
     if (terrainImageDataRef.current && terrainCtxRef.current) {
-      refreshTerrainTexture(bounds, elev, s.cols, s.minLand, s.maxLand, terrainImageDataRef.current, terrainCtxRef.current);
+      refreshTerrainTexture(bounds, elev, s.cols, s.minLand, s.maxLand, terrainImageDataRef.current, terrainCtxRef.current, groundCoverRef.current);
     }
     rebuildContoursAtCurrentZoom();
     const elevDeltaPayload: Terrain3DElevationDeltaPayload = {
@@ -3391,7 +3409,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   function finishErosion(s: TerrainSettings, elev: Float32Array) {
     const fullRect: DirtyRect = { rMin: 0, rMax: s.rows - 1, cMin: 0, cMax: s.cols - 1 };
     if (terrainImageDataRef.current && terrainCtxRef.current) {
-      refreshTerrainTexture(fullRect, elev, s.cols, s.minLand, s.maxLand, terrainImageDataRef.current, terrainCtxRef.current);
+      refreshTerrainTexture(fullRect, elev, s.cols, s.minLand, s.maxLand, terrainImageDataRef.current, terrainCtxRef.current, groundCoverRef.current);
     }
     rebuildContoursAtCurrentZoom();
     const payload: Terrain3DElevationDeltaPayload = {
@@ -3477,7 +3495,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     const img = octx.createImageData(cols, rows);
     const px = img.data;
     for (let i = 0; i < count; i++) {
-      const [r, g, b] = computePixelRGB(elev[i], minLand, maxLand);
+      const [r, g, b] = computePixelRGB(elev[i], minLand, maxLand, groundCoverRef.current);
       px[i * 4] = r; px[i * 4 + 1] = g; px[i * 4 + 2] = b; px[i * 4 + 3] = 255;
     }
     octx.putImageData(img, 0, 0);
@@ -3729,7 +3747,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         s.mapHeight,
         s.spacing,
         s.minLand,
-        s.maxLand
+        s.maxLand,
+        groundCoverRef.current
       );
       const result = await invoke<{ yaml_updated: boolean }>("export_terrain_as_npy", {
         mapId: mapIdInput.trim() || mapId,
@@ -3749,6 +3768,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         props: propEditor.current.data.current,
         camera: cameraRef.current,
         background: backgroundRef.current,
+        groundCover: groundCoverRef.current,
       });
       setExportStatus("exported");
       // エクスポート先にterrain_maps.yamlが見つからなかった場合は、通知ポップアップで知らせる。
@@ -3784,6 +3804,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         const data = await invoke<TerrainEditorData>("load_terrain_editor_data", { mapId });
         backgroundRef.current = data.background;
         if (cancelled) return;
+        applyGroundCover(data.ground_cover, false);
 
         const bytes = base64ToUint8(data.data_base64);
         const count = data.grid_rows * data.grid_cols;
@@ -4165,6 +4186,20 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                   <span className="terrain-editor-param-label">{t("terrainEditor.metaCellSize", { defaultValue: "セルサイズ" })}</span>
                   <NumberStepper value={cellSize} onChange={setCellSize} min={1} max={5000} step={10} disabled={status !== "ready"} />
                 </div>
+                <div className="terrain-editor-param-row">
+                  <span className="terrain-editor-param-label">{t("groundCover.label")}</span>
+                  <select
+                    className="terrain-editor-select"
+                    value={groundCover}
+                    onChange={(e) => applyGroundCover(Number(e.target.value), true)}
+                    disabled={status !== "ready"}
+                  >
+                    {GROUND_COVER_TYPES.map((type) => (
+                      <option key={type} value={type}>{t(`groundCover.${type}`)}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="terrain-editor-hint">{t("groundCover.hint")}</div>
                 {settingsRef.current && (
                   <div className="terrain-editor-meta-readonly">
                     {t("terrainEditor.metaReadonlySummary", {

@@ -6,13 +6,14 @@
  * 一度だけ描画し、160x120のPNG画像をbase64文字列として返す。
  * 3Dプレビューウィンドウ(terrain_3d_preview)が開いていなくても、地形エディタ側が保持する
  * 標高配列(elev)だけから独立して生成できる。選択マスクによる水色ハイライトは不要なため、
- * 頂点カラーは標高だけから決まる地形色(computePixelRGB)のみを使う。
+ * 頂点カラーは標高と地表種別から決まる地形色(computePixelRGB)のみを使う。
  *
  * 向きは3Dプレビューと同じで、ワールド座標(北=+Z・東=+X)を右手系のthree.jsに置くと鏡像になるため、
  * 地形と海面をZ倍率-1のグループに入れて描く。北が画像の奥(上)、東が右になる。
  */
 
 import * as THREE from "three";
+import { GROUND_COVER_GRASSLAND } from "../../constants";
 import { computePixelRGB } from "./terrainData";
 
 /** サムネイル画像の出力サイズ(px) */
@@ -28,7 +29,8 @@ function buildThumbnailGeometry(
   mapHeight: number,
   spacing: number,
   minLand: number,
-  maxLand: number
+  maxLand: number,
+  groundCover: number
 ): THREE.BufferGeometry {
   const count = rows * cols;
   const positions = new Float32Array(count * 3);
@@ -45,7 +47,7 @@ function buildThumbnailGeometry(
       positions[vi * 3 + 0] = wx;
       positions[vi * 3 + 1] = elev[vi];
       positions[vi * 3 + 2] = wz;
-      const [cr, cg, cb] = computePixelRGB(elev[vi], minLand, maxLand);
+      const [cr, cg, cb] = computePixelRGB(elev[vi], minLand, maxLand, groundCover);
       colors[vi * 3 + 0] = cr / 255;
       colors[vi * 3 + 1] = cg / 255;
       colors[vi * 3 + 2] = cb / 255;
@@ -89,9 +91,10 @@ export function captureTerrainThumbnail(
   mapHeight: number,
   spacing: number,
   minLand: number,
-  maxLand: number
+  maxLand: number,
+  groundCover: number = GROUND_COVER_GRASSLAND
 ): string {
-  const geometry = buildThumbnailGeometry(elev, rows, cols, mapWidth, mapHeight, spacing, minLand, maxLand);
+  const geometry = buildThumbnailGeometry(elev, rows, cols, mapWidth, mapHeight, spacing, minLand, maxLand, groundCover);
   const material = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, metalness: 0 });
   const mesh = new THREE.Mesh(geometry, material);
 

@@ -1,10 +1,16 @@
 $ErrorActionPreference = 'Stop'
 $unityRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $qaRoot = Join-Path $unityRoot 'Temp/TerrainAppearanceQA'
-foreach ($folder in @('Assets/Editor', 'Assets/Resources/Shaders', 'Assets/Shaders', 'Assets/Settings', 'Packages', 'ProjectSettings')) {
+foreach ($folder in @('Assets/Editor', 'Assets/Scripts', 'Assets/Resources/Shaders', 'Assets/Resources/Terrain', 'Assets/Resources/Textures', 'Assets/Shaders', 'Assets/Settings', 'Packages', 'ProjectSettings')) {
     New-Item -ItemType Directory -Path (Join-Path $qaRoot $folder) -Force | Out-Null
 }
 Copy-Item "$PSScriptRoot/TerrainAppearanceQA.cs" "$qaRoot/Assets/Editor" -Force
+# 地表種別のプロファイル(本編と同じ ApplyTo で描く)と、それが参照する定数・パレット・地面テクスチャ
+Copy-Item "$unityRoot/Assets/Scripts/DataLoaders/GroundCoverPalette.cs*" "$qaRoot/Assets/Scripts" -Force
+Copy-Item "$unityRoot/Assets/Scripts/Constants.cs*" "$qaRoot/Assets/Scripts" -Force
+Copy-Item "$unityRoot/Assets/Resources/Terrain/GroundCoverPalette.asset*" "$qaRoot/Assets/Resources/Terrain" -Force
+Copy-Item "$unityRoot/Assets/Resources/Textures/ground-*" "$qaRoot/Assets/Resources/Textures" -Force
+Copy-Item "$unityRoot/Assets/Resources/grass-2500-mm-architextures.jpg*" "$qaRoot/Assets/Resources" -Force
 foreach ($name in @('DepthOffsetTerrainLit.shader', 'DepthOffsetSimpleLitFar.shader')) {
     Copy-Item "$unityRoot/Assets/Resources/Shaders/$name" "$qaRoot/Assets/Resources/Shaders" -Force
 }

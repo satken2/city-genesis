@@ -30,6 +30,7 @@ import { loadAppSettings } from "../../utils/settings";
 import { SUPPORTED_LANGUAGES, resolveSupportedLanguage } from "../../utils/locale";
 import { TUTORIAL_SCENARIOS } from "../tutorial/tutorialSteps";
 import { TerrainMapThumbnail } from "../common/TerrainMapThumbnail";
+import { normalizeGroundCover } from "../terrain/terrainData";
 import "./NewGameWindow.css";
 
 type NewGameWindowProps = {
@@ -46,6 +47,8 @@ type TerrainMapEntry = {
   id: string;
   name: string;
   settings: Record<string, unknown>;
+  /** 地表種別(GROUND_COVER_*)。詳細パネルに種別名を出す */
+  ground_cover?: number;
 };
 
 /**
@@ -105,6 +108,8 @@ type DetailView = {
   mapName: string | null;
   /** マップサイズの表示文字列（例: 7000m × 6000m）。不明なら null */
   mapSize: string | null;
+  /** 地表種別の表示名。マップが特定できないときは null */
+  groundCover: string | null;
   /** 達成条件のフリーテキスト。未設定なら null */
   objective: string | null;
   /** 開始ボタンのラベル */
@@ -316,6 +321,7 @@ export function NewGameWindow({
         description: t("newGame.terrainDetailDesc"),
         mapName: null,
         mapSize: formatMapSize(map.settings),
+        groundCover: t(`groundCover.${normalizeGroundCover(map.ground_cover)}`),
         objective: null,
         startLabel: t("newGame.startTerrainButton"),
         onStart: () => void handleStartTerrain(map.id),
@@ -334,6 +340,7 @@ export function NewGameWindow({
         description: t(scenario.descriptionKey),
         mapName: flatMap ? flatMap.name : null,
         mapSize: formatMapSize(flatMap?.settings),
+        groundCover: flatMap ? t(`groundCover.${normalizeGroundCover(flatMap.ground_cover)}`) : null,
         objective: t("newGame.tutorialObjective"),
         startLabel: t("newGame.startScenarioButton"),
         onStart: () => void handleStartTutorial(scenario.id),
@@ -355,6 +362,7 @@ export function NewGameWindow({
       description: template.scenario_description || t("newGame.detailNoDescription"),
       mapName: terrainMap?.name || template.terrain_map_name || null,
       mapSize: formatMapSize(terrainMap?.settings),
+      groundCover: terrainMap ? t(`groundCover.${normalizeGroundCover(terrainMap.ground_cover)}`) : null,
       objective: template.scenario_objective || null,
       startLabel: t("newGame.startScenarioButton"),
       onStart: () => void handleStartTemplate(template),
@@ -626,6 +634,13 @@ export function NewGameWindow({
                 <div className="new-game-detail-block">
                   <h3 className="new-game-detail-block-title">{t("newGame.detailMapSizeLabel")}</h3>
                   <p className="new-game-detail-block-text">{detail.mapSize}</p>
+                </div>
+              )}
+
+              {detail.groundCover && (
+                <div className="new-game-detail-block">
+                  <h3 className="new-game-detail-block-title">{t("groundCover.label")}</h3>
+                  <p className="new-game-detail-block-text">{detail.groundCover}</p>
                 </div>
               )}
 

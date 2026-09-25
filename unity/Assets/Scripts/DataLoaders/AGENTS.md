@@ -51,7 +51,9 @@ PathManagerの完成した乗り場451/461・462・502・602のFarはFarPlatform
 
 遠景の沈み込みは `UltraFarTerrainSink.hlsl` をForward・Shadow・GBuffer・Depth・DepthNormalsで共用する。`_FarGridStep` はビルダーと同じ格子間隔（最低1m）を渡す。頂点の周囲1格子分が全てロード済みの場合だけ沈め、境界をまたぐ面は元の高さに残す。頂点自身のセルだけで沈めると三角形の補間が未ロード側も引き下げ、海が見える裂け目を作る。`Tests/TerrainAppearance/run-unity.ps1` が境界・アンロード・領域移動と内部沈み込みを描画検証する。
 
-通常TerrainとUltraFarメッシュは `Assets/Shaders/TerrainSurfaceAppearance.hlsl` の手続き地表色・ディテール法線・岩肌・PBR照明を共用する。設定は両方とも `TerrainManager.ApplyTerrainMaterialSettings` から渡す。UltraFarのシェーダー名 `Custom/DepthOffsetSimpleLitFar` は既存参照のため維持しているが、Forwardの照明はPBRである。マクロバリエーション・カラーグレード・等高線は両方とも照明・霧の後に掛ける。遠景だけ `_BaseColor` で色を変えると霧・手続き色への作用が変わるため使わない。地形の色を調整するときは遠景にも反映し、`Tests/TerrainAppearance/run-unity.ps1` で比較描画を確認する。
+通常TerrainとUltraFarメッシュは `Assets/Shaders/TerrainSurfaceAppearance.hlsl` の手続き地表色・ディテール法線・岩肌・PBR照明を共用する。設定は両方とも `TerrainManager.ApplyTerrainMaterialSettings` から渡す。
+
+**地表種別(マップ単位の地表の見た目)は `GroundCoverPalette.cs` が持つ。** 種別(`Constants.GROUND_COVER_*`)ごとの `GroundCoverProfile` に、地面テクスチャ(Resources パスとタイル寸法)・テクスチャの使い方(色そのまま/濃淡だけ)・スムースネス・手続きの下地色3色・凹凸と風紋・照明後の大きな濃淡と色補正の色・岩の色味と砂浜がまとまっている。値の正は `Resources/Terrain/GroundCoverPalette.asset` で、無い種別はコード既定値 `GroundCoverProfile.CreateDefaults` を使う(草原の既定値は調整済みだったシーンの値そのもの)。マテリアルへ値を移すのは `GroundCoverProfile.ApplyTo` だけで、`TerrainManager` と `Tests/TerrainAppearance` が共用する(対応づけを書き写さない)。種別に依存しない値(大きな濃淡の周期・色補正の標高範囲・ディテール法線の周期・崖の判定)は `TerrainManager` の Inspector に残る。都市の種別は `FetchCoastline` が `GET /api/v1/city` の `ground_cover` から地形タイル生成より前に読み、変わっていれば `RefreshGroundCoverMaterials` で表示中のタイル・超遠景・都市外背景(超遠景マテリアルの複製なので値を写し直す)へ反映する。Inspector の `groundCoverPreview` を0以外にすると、その種別で描く(Play中の見比べ用)。パレットや Inspector の編集は `groundCoverMaterialsDirty` で次の Update に1回だけ反映する(ドラッグ中の連続通知でタイルを作り直し続けないため)。地面は法線マップを使わない。UltraFarのシェーダー名 `Custom/DepthOffsetSimpleLitFar` は既存参照のため維持しているが、Forwardの照明はPBRである。マクロバリエーション・カラーグレード・等高線は両方とも照明・霧の後に掛ける。遠景だけ `_BaseColor` で色を変えると霧・手続き色への作用が変わるため使わない。地形の色を調整するときは遠景にも反映し、`Tests/TerrainAppearance/run-unity.ps1` で比較描画を確認する。
 
 
 

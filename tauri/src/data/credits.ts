@@ -335,6 +335,24 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     note: "Terrain cliff",
   },
   {
+    title: "Aerial Beach 01 (砂の地面テクスチャ)",
+    category: "texture",
+    author: "Rob Tuytel",
+    source: "Poly Haven",
+    url: "https://polyhaven.com/a/aerial_beach_01",
+    license: "CC0 1.0",
+    note: "Terrain ground: desert and snowfield (2K diffuse). License verified 2026-09-25.",
+  },
+  {
+    title: "Withered Grass (枯れ草の地面テクスチャ)",
+    category: "texture",
+    author: "Charlotte Baglioni",
+    source: "Poly Haven",
+    url: "https://polyhaven.com/a/withered_grass",
+    license: "CC0 1.0",
+    note: "Terrain ground: semi-arid (2K diffuse). License verified 2026-09-25.",
+  },
+  {
     title: "標高タイル(基盤地図情報数値標高モデル)",
     category: "data",
     source: "国土地理院 地理院タイル",
@@ -373,12 +391,34 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     note: "Terrain map: santorini. Data has been modified: resampled to a 10 m metric grid, cropped to the Santorini caldera group and sea floor synthesized. Not endorsed by Copernicus, ESA or Airbus. License verified 2026-09-20.",
   },
   {
+    title: "Copernicus DEM GLO-30 (Bahrain)",
+    category: "data",
+    source: "Copernicus / ESA / Airbus Defence and Space GmbH / DLR",
+    url: "https://registry.opendata.aws/copernicus-dem/",
+    license: "Licence for Copernicus DEM instance COP-DEM-GLO-30-F (Global 30m Full, Free & Open)",
+    requiredText:
+      "produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved\n" +
+      "The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30",
+    note: "Terrain map: bahrain (and its background terrain). Data has been modified: resampled to a 10 m metric grid (background: 50 m), cropped to northern Bahrain, small islets removed and sea floor synthesized. Not endorsed by Copernicus, ESA or Airbus. License verified 2026-09-25.",
+  },
+  {
+    title: "Copernicus DEM GLO-30 (Dakar)",
+    category: "data",
+    source: "Copernicus / ESA / Airbus Defence and Space GmbH / DLR",
+    url: "https://registry.opendata.aws/copernicus-dem/",
+    license: "Licence for Copernicus DEM instance COP-DEM-GLO-30-F (Global 30m Full, Free & Open)",
+    requiredText:
+      "produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved\n" +
+      "The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30",
+    note: "Terrain map: dakar (and its background terrain). Data has been modified: resampled to a 10 m metric grid (background: 50 m), cropped to the tip of the Cap-Vert peninsula, small islets removed and sea floor synthesized. Not endorsed by Copernicus, ESA or Airbus. License verified 2026-09-25.",
+  },
+  {
     title: "ASTER Global Digital Elevation Map",
     category: "data",
     source: "NASA / METI / AIST / Japan Space Systems / U.S.-Japan ASTER Science Team",
     url: "https://asterweb.jpl.nasa.gov/gdem.asp",
     requiredText: "ASTER Global Digital Elevation Map, NASA/METI/AIST/Japan Space Systems, and U.S./Japan ASTER Science Team",
-    note: "Void-fill pixels inside Copernicus DEM GLO-30, present on land in terrain map santorini.",
+    note: "Void-fill pixels inside Copernicus DEM GLO-30, present on land in terrain maps santorini and dakar.",
   },
   {
     title: "SRTM Digital Elevation Data",
@@ -386,7 +426,7 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     source: "NASA / U.S. Geological Survey",
     url: "https://doi.org/10.5067/MEaSUREs/SRTM/SRTMGL1.003",
     requiredText: "SRTM Digital Elevation Data produced by NASA and the U.S. Geological Survey",
-    note: "Void-fill pixels inside Copernicus DEM GLO-30, present on land in terrain map santorini.",
+    note: "Void-fill pixels inside Copernicus DEM GLO-30, present on land in terrain maps santorini, bahrain and dakar.",
   },
 ];
 

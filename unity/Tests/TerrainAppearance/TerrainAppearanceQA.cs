@@ -71,6 +71,7 @@ public static class TerrainAppearanceQA
                 if (error > 3) throw new Exception(report);
                 if (b.All(x => x.r > 240 && x.b > 240 && x.g < 10)) throw new Exception("Error shader rendered");
             }
+            report += CheckGroundCovers(camera, terrain, farGO, near, far, layer, root);
             report += CheckForest(camera, terrainGO, farGO, root);
             report += CheckContours(camera, terrainGO, farGO, root);
             report += CheckLoadedBoundary(camera, terrainGO, farGO, far, root);
@@ -85,6 +86,108 @@ public static class TerrainAppearanceQA
             File.WriteAllText(root + "/result.txt", "FAIL " + e);
             EditorApplication.Exit(1);
         }
+    }
+
+    /// <summary>
+    /// 地表種別5種を本編と同じ GroundCoverProfile.ApplyTo で描き、Terrain と遠景メッシュの平均色の一致、
+    /// 種別どうしの見分け、テクスチャの欠落を検査する。起伏と海岸を付けた近景の比較画像
+    /// ground-cover-sheet.png(左から GROUND_COVER_TYPES の順)も出力する。
+    /// 遠景メッシュは Plane の UV で貼るため模様の位置は Terrain と揃わず、平均色だけを比べる。
+    /// マテリアルは複製して使い、終了時に元のマテリアル・レイヤー・地形へ戻す。
+    /// </summary>
+    static string CheckGroundCovers(Camera camera, Terrain terrain, GameObject farGO, Material near, Material far, TerrainLayer layer, string root)
+    {
+        RenderSettings.fog = false;
+        var farRenderer = farGO.GetComponent<Renderer>();
+        var nearGround = new Material(near);
+        var farGround = new Material(far);
+        terrain.materialTemplate = nearGround;
+        farRenderer.sharedMaterial = farGround;
+        var baseTexture = layer.diffuseTexture;
+        var baseTileSize = layer.tileSize;
+        float baseSmoothness = layer.smoothness;
+        var palette = Resources.Load<GroundCoverPalette>(GroundCoverPalette.ResourcePath);
+        var report = palette != null ? "ground cover: palette asset\n" : "ground cover: code defaults (palette asset missing)\n";
+        var means = new System.Collections.Generic.List<Vector3>();
+        var sheet = new Texture2D(256 * Constants.GROUND_COVER_TYPES.Length, 256, TextureFormat.RGB24, false);
+        for (int i = 0; i < Constants.GROUND_COVER_TYPES.Length; i++)
+        {
+            int type = Constants.GROUND_COVER_TYPES[i];
+            GroundCoverProfile profile = (palette != null ? palette.Find(type) : null) ?? GroundCoverProfile.CreateDefault(type);
+            var texture = string.IsNullOrEmpty(profile.textureResource) ? null : Resources.Load<Texture2D>(profile.textureResource);
+            if (!string.IsNullOrEmpty(profile.textureResource) && texture == null)
+                throw new Exception("Ground texture missing: Resources/" + profile.textureResource);
+            layer.diffuseTexture = texture != null ? texture : Texture2D.whiteTexture;
+            layer.tileSize = profile.textureTileSize;
+            layer.smoothness = profile.smoothness;
+            farGround.SetTexture("_BaseMap", layer.diffuseTexture);
+            farGround.SetVector("_BaseMap_ST", new Vector4(1 / profile.textureTileSize.x, 1 / profile.textureTileSize.y, 0, 0));
+            farGround.SetFloat("_Smoothness", profile.smoothness);
+            profile.ApplyTo(nearGround);
+            profile.ApplyTo(farGround);
+
+            farGO.SetActive(false); terrain.gameObject.SetActive(true);
+            var a = Capture(camera, root + $"/ground-{type}-near.png");
+            farGO.SetActive(true); terrain.gameObject.SetActive(false);
+            var b = Capture(camera, root + $"/ground-{type}-far.png");
+            if (b.All(x => x.r > 240 && x.b > 240 && x.g < 10)) throw new Exception("Error shader rendered for ground cover " + type);
+            Vector3 meanA = Mean(a), meanB = Mean(b);
+            float difference = Mathf.Max(Mathf.Abs(meanA.x - meanB.x), Mathf.Max(Mathf.Abs(meanA.y - meanB.y), Mathf.Abs(meanA.z - meanB.z)));
+            report += $"ground cover {type}: mean RGB={meanA.x:F0},{meanA.y:F0},{meanA.z:F0}; Terrain/UltraFar max channel difference={difference:F1}/255\n";
+            if (difference > 6) throw new Exception(report);
+            means.Add(meanA);
+
+            farGO.SetActive(false); terrain.gameObject.SetActive(true);
+            sheet.SetPixels32(256 * i, 0, 256, 256, CaptureRelief(camera, terrain, root + $"/ground-{type}-relief.png"));
+        }
+        for (int i = 0; i < means.Count; i++)
+            for (int j = i + 1; j < means.Count; j++)
+                if (Vector3.Distance(means[i], means[j]) < 12)
+                    throw new Exception(report + $"Ground covers {Constants.GROUND_COVER_TYPES[i]} and {Constants.GROUND_COVER_TYPES[j]} look alike");
+        sheet.Apply();
+        File.WriteAllBytes(root + "/ground-cover-sheet.png", sheet.EncodeToPNG());
+        UnityEngine.Object.DestroyImmediate(sheet);
+
+        layer.diffuseTexture = baseTexture;
+        layer.tileSize = baseTileSize;
+        layer.smoothness = baseSmoothness;
+        terrain.materialTemplate = near;
+        farRenderer.sharedMaterial = far;
+        UnityEngine.Object.DestroyImmediate(nearGround);
+        UnityEngine.Object.DestroyImmediate(farGround);
+        return report;
+    }
+
+    /// <summary>
+    /// 海(標高0m未満)から急斜面の丘へ上がる起伏を付けて近景を撮り、元の平らな地形へ戻す。
+    /// 波打ち際の砂浜・崖の岩・標高による色補正を目視するための画像で、合否判定には使わない。
+    /// </summary>
+    static Color32[] CaptureRelief(Camera camera, Terrain terrain, string path)
+    {
+        var data = terrain.terrainData;
+        var position = terrain.transform.position;
+        var heights = new float[33, 33];
+        for (int z = 0; z < 33; z++)
+            for (int x = 0; x < 33; x++)
+            {
+                float shore = x / 32f * .18f;
+                float hill = Mathf.Clamp01(1 - Vector2.Distance(new Vector2(x, z), new Vector2(24, 16)) / 7f) * .45f;
+                heights[z, x] = shore + hill;
+            }
+        data.SetHeights(0, 0, heights);
+        terrain.transform.position = new Vector3(position.x, -6, position.z);
+        var pixels = Capture(camera, path);
+        data.SetHeights(0, 0, new float[33, 33]);
+        terrain.transform.position = position;
+        return pixels;
+    }
+
+    static Vector3 Mean(Color32[] pixels)
+    {
+        return new Vector3(
+            (float)pixels.Average(p => (double)p.r),
+            (float)pixels.Average(p => (double)p.g),
+            (float)pixels.Average(p => (double)p.b));
     }
 
     static string CheckForest(Camera camera, GameObject terrainGO, GameObject farGO, string root)

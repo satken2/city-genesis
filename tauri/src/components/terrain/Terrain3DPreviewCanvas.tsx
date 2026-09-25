@@ -42,6 +42,7 @@ import {
   base64ToUint8,
   decodeFloat16Array,
   computeVertexColor,
+  normalizeGroundCover,
   dequantizeMaskRectInto,
   applyElevRectInto,
   EVT_TERRAIN_3D_REQUEST_STATE,
@@ -69,6 +70,8 @@ type GridState = {
   maxLand: number;
   elev: Float32Array;
   mask: Float32Array;
+  /** 地表種別(GROUND_COVER_*)。頂点色のランプを2Dエディタと揃える。 */
+  groundCover: number;
 };
 
 /**
@@ -85,7 +88,7 @@ function markRangeDirty(attr: THREE.BufferAttribute, startElement: number, count
 
 /** 標高・選択マスクからハイトフィールドの頂点位置・頂点カラー・三角形インデックスを構築する */
 function buildTerrainGeometry(grid: GridState): THREE.BufferGeometry {
-  const { rows, cols, mapWidth, mapHeight, spacing, elev, mask, minLand, maxLand } = grid;
+  const { rows, cols, mapWidth, mapHeight, spacing, elev, mask, minLand, maxLand, groundCover } = grid;
   const count = rows * cols;
   const positions = new Float32Array(count * 3);
   const colors = new Float32Array(count * 3);
@@ -101,7 +104,7 @@ function buildTerrainGeometry(grid: GridState): THREE.BufferGeometry {
       positions[vi * 3 + 0] = wx;
       positions[vi * 3 + 1] = elev[vi];
       positions[vi * 3 + 2] = wz;
-      const [cr, cg, cb] = computeVertexColor(elev[vi], minLand, maxLand, mask[vi]);
+      const [cr, cg, cb] = computeVertexColor(elev[vi], minLand, maxLand, mask[vi], groundCover);
       colors[vi * 3 + 0] = cr / 255;
       colors[vi * 3 + 1] = cg / 255;
       colors[vi * 3 + 2] = cb / 255;
@@ -314,7 +317,7 @@ export function Terrain3DPreviewCanvas({ mapId }: Terrain3DPreviewCanvasProps) {
       const rowBase = r * cols;
       for (let c = rect.cMin; c <= rect.cMax; c++) {
         const vi = rowBase + c;
-        const [cr, cg, cb] = computeVertexColor(grid.elev[vi], grid.minLand, grid.maxLand, grid.mask[vi]);
+        const [cr, cg, cb] = computeVertexColor(grid.elev[vi], grid.minLand, grid.maxLand, grid.mask[vi], grid.groundCover);
         colorArray[vi * 3 + 0] = cr / 255;
         colorArray[vi * 3 + 1] = cg / 255;
         colorArray[vi * 3 + 2] = cb / 255;
@@ -338,7 +341,7 @@ export function Terrain3DPreviewCanvas({ mapId }: Terrain3DPreviewCanvasProps) {
       for (let c = rect.cMin; c <= rect.cMax; c++) {
         const vi = rowBase + c;
         posArray[vi * 3 + 1] = grid.elev[vi];
-        const [cr, cg, cb] = computeVertexColor(grid.elev[vi], grid.minLand, grid.maxLand, grid.mask[vi]);
+        const [cr, cg, cb] = computeVertexColor(grid.elev[vi], grid.minLand, grid.maxLand, grid.mask[vi], grid.groundCover);
         colorArray[vi * 3 + 0] = cr / 255;
         colorArray[vi * 3 + 1] = cg / 255;
         colorArray[vi * 3 + 2] = cb / 255;
@@ -486,6 +489,7 @@ export function Terrain3DPreviewCanvas({ mapId }: Terrain3DPreviewCanvasProps) {
         maxLand: payload.maxLand,
         elev,
         mask,
+        groundCover: normalizeGroundCover(payload.groundCover),
       };
       latestWaterRef.current = Array.isArray(payload.waterSurfaces) ? payload.waterSurfaces : [];
       latestRiversRef.current = Array.isArray(payload.rivers) ? payload.rivers : [];

@@ -14,5 +14,14 @@
     "copying": "Copie...",
     "copyFailed": "Échec de la récupération des données de terrain",
     "gameTerrainsHelp": "Contient les rivières, les ressources, les éléments décoratifs et plus encore."
+  },
+  "groundCover": {
+    "label": "Couverture du sol",
+    "hint": "Change la couleur et la texture du sol dans le jeu ainsi que les couleurs des cartes 2D. N'affecte pas la simulation.",
+    "1": "Prairie",
+    "2": "Désert",
+    "3": "Prairie luxuriante",
+    "4": "Champ de neige",
+    "5": "Semi-aride"
   }
 }

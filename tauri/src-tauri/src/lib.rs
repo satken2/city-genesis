@@ -689,6 +689,7 @@ async fn copy_terrain_for_editor(
         "rivers": features["rivers"],
         "camera": features["camera"],
         "background": features["background"],
+        "ground_cover": features["ground_cover"],
     });
     std::fs::write(map_dir.join("meta.json"), meta.to_string())
         .map_err(|e| format!("meta.json の書き込みに失敗しました: {e}"))?;
@@ -770,6 +771,8 @@ struct TerrainEditorData {
     /// 仕様の正は同 §D.13。
     camera: serde_json::Value,
     background: serde_json::Value,
+    /// 地表種別(GROUND_COVER_*)。未設定なら null で、フロントエンドが草原として扱う。仕様の正は同 §D.15。
+    ground_cover: serde_json::Value,
 }
 
 #[tauri::command]
@@ -840,6 +843,7 @@ fn load_terrain_editor_data(
             .unwrap_or_else(|| serde_json::json!({"instances": [], "scatters": []})),
         camera: meta.get("camera").cloned().unwrap_or(serde_json::Value::Null),
         background: meta.get("background").cloned().unwrap_or(serde_json::Value::Null),
+        ground_cover: meta.get("ground_cover").cloned().unwrap_or(serde_json::Value::Null),
     })
 }
 
@@ -934,6 +938,7 @@ fn export_terrain_as_npy(
     props: Option<serde_json::Value>,
     camera: Option<serde_json::Value>,
     background: Option<serde_json::Value>,
+    ground_cover: Option<i64>,
 ) -> Result<ExportTerrainResult, String> {
     use base64::Engine;
     // 付随JSONを含め、最初のファイルを書く前に原本への出力を拒否する。
@@ -1052,6 +1057,7 @@ fn export_terrain_as_npy(
                     cell_size,
                     camera_spec.as_ref(),
                     background.as_ref(),
+                    ground_cover,
                 )?;
                 true
             } else {
@@ -1098,6 +1104,7 @@ fn upsert_terrain_yaml_entry(
     cell_size: f64,
     camera: Option<&TerrainCameraSpec>,
     background: Option<&serde_json::Value>,
+    ground_cover: Option<i64>,
 ) -> Result<(), String> {
     let original = std::fs::read_to_string(yaml_path)
         .map_err(|e| format!("terrain_maps.yaml の読み込みに失敗しました: {e}"))?;
@@ -1149,6 +1156,8 @@ fn upsert_terrain_yaml_entry(
     // 背景は不変の原本を参照する。JSONのオブジェクト表記はYAMLでも有効。
     let background_text = background.filter(|v| !v.is_null())
         .map(|v| format!("\n  background: {v}")).unwrap_or_default();
+    // 地表種別(GROUND_COVER_*)は1つの整数。値の検証はバックエンドの terrain_registry が読み込み時に行う。
+    let ground_cover_text = ground_cover.map(|v| format!("\n  ground_cover: {v}")).unwrap_or_default();
     let entry_text = format!(
         "# {map_id}\n\
          {map_id}:\n\
@@ -1162,7 +1171,7 @@ fn upsert_terrain_yaml_entry(
         \x20   near_map_spacing: {near_map_spacing}\n\
         \x20   far_map_spacing: {far_map_spacing}\n\
         \x20   dynamic_map_spacing: 1\n\
-        \x20   cell_size: {cell_size}{camera_text}{background_text}",
+        \x20   cell_size: {cell_size}{camera_text}{background_text}{ground_cover_text}",
         map_width = map_width as i64,
         map_height = map_height as i64,
         near_map_spacing = near_map_spacing as i64,
@@ -1219,6 +1228,7 @@ mod terrain_yaml_entry_tests {
         upsert_terrain_yaml_entry(
             &path, "island", "terrains/map_island.npy".to_string(),
             10.0, 1000.0, 1000.0, 10.0, 200.0, 500.0, None, Some(&serde_json::json!({"file_name":"terrains/original/bg.npy"})),
+            Some(2),
         ).unwrap();
         let text = std::fs::read_to_string(&path).unwrap();
         std::fs::remove_dir_all(&dir).ok();
@@ -1233,6 +1243,7 @@ mod terrain_yaml_entry_tests {
         assert!(text.starts_with("# island\n"), "{text}");
         assert!(text.contains("    cell_size: 500\n"), "{text}");
         assert!(text.contains("terrains/original/bg.npy"), "{text}");
+        assert!(text.contains("\n  ground_cover: 2\n"), "{text}");
     }
 }
 

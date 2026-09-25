@@ -72,7 +72,7 @@ import { listen } from "@tauri-apps/api/event";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import type { InterchangeListResponse, InterchangeSummary, MasterData } from "../../types";
-import { computePixelRGB, decodeFloat16Array } from "../terrain/terrainData";
+import { computePixelRGB, decodeFloat16Array, normalizeGroundCover } from "../terrain/terrainData";
 import {
   PATH_MOTORWAY,
   PATH_STREET,
@@ -582,7 +582,7 @@ export function getZoneFillRampStops(ramp?: [number, number, number][]): string[
 
 /**
  * 標高配列を色付けしたオフスクリーンCanvasを生成する。
- * 色は地形エディタと同じ computePixelRGB(低地=緑、高地=茶色、海面=背景色)を使う。
+ * 色は地形エディタと同じ computePixelRGB(都市の地表種別のランプ。海面=背景色)を使う。
  */
 function buildTerrainCanvas(
   elev: Float32Array,
@@ -590,7 +590,8 @@ function buildTerrainCanvas(
   cols: number,
   minLand: number,
   maxLand: number,
-  elevation = true
+  elevation: boolean,
+  groundCover: number
 ): HTMLCanvasElement {
   const cv = document.createElement("canvas");
   cv.width = cols;
@@ -600,7 +601,7 @@ function buildTerrainCanvas(
   const d = img.data;
   for (let i = 0; i < rows * cols; i++) {
     const [r, g, b] = elev[i] <= 0 ? [168, 215, 237]
-      : elevation ? computePixelRGB(elev[i], minLand, maxLand) : COLOR_LAND_RGB;
+      : elevation ? computePixelRGB(elev[i], minLand, maxLand, groundCover) : COLOR_LAND_RGB;
     d[i * 4 + 0] = r;
     d[i * 4 + 1] = g;
     d[i * 4 + 2] = b;
@@ -1591,10 +1592,18 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
        */
       const loadTerrain = async () => {
         try {
-          settings = await fetchApi<TerrainSettings>(
-            buildApiUrl(apiBaseUrl, "/api/v1/terrain/settings"),
-            { signal: abort.signal }
-          );
+          // 地表種別は標高の配色だけに使う。取れなくても地図は草原の配色で描く。
+          const [loadedSettings, groundCover] = await Promise.all([
+            fetchApi<TerrainSettings>(
+              buildApiUrl(apiBaseUrl, "/api/v1/terrain/settings"),
+              { signal: abort.signal }
+            ),
+            fetchApi<{ city?: { ground_cover?: number } }>(
+              buildApiUrl(apiBaseUrl, "/api/v1/city"),
+              { signal: abort.signal }
+            ).then((res) => normalizeGroundCover(res.city?.ground_cover), () => normalizeGroundCover(undefined)),
+          ]);
+          settings = loadedSettings;
 
           // グリッドPath2Dを構築(100m + セル境界)
           gridMinor = buildGridPath(settings.map_width, settings.map_height, GRID_MINOR_INTERVAL);
@@ -1639,8 +1648,8 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           if (maxLand - minLand < 1) maxLand = minLand + 1;
 
           terrain = {
-            canvas: buildTerrainCanvas(elev, rows, cols, minLand, maxLand),
-            baseCanvas: buildTerrainCanvas(elev, rows, cols, minLand, maxLand, false),
+            canvas: buildTerrainCanvas(elev, rows, cols, minLand, maxLand, true, groundCover),
+            baseCanvas: buildTerrainCanvas(elev, rows, cols, minLand, maxLand, false, groundCover),
             elev,
             rows,
             cols,
