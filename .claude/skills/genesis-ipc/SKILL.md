@@ -17,7 +17,7 @@ description: City Genesisのモジュール間通信(HTTP API、MemoryMappedFile
 
 ## 読むべきAGENTS.md
 - ルート `S:/city/genesis/AGENTS.md` (通信経路の全体表)
-- `city-genesis/unity/Assets/Scripts/IPC/AGENTS.md` (MMF通信の詳細、Envelope構造の一致要件、新規イベント追加手順)
+- `city-genesis/unity/Assets/Scripts/IPC/AGENTS.md` (Envelope構造の一致要件と、揃えないと無言で壊れる契約。イベントを追加・変更するときの変更箇所は `IPC連携の整理.md` の同名の節)
 - `city-genesis/tauri/src-tauri/AGENTS.md` (`ipc.rs`, `messages.rs`)
 - `genesis-core/app/controllers/AGENTS.md` (HTTPエンドポイント一覧)
 
@@ -28,6 +28,6 @@ description: City Genesisのモジュール間通信(HTTP API、MemoryMappedFile
 
 ## 進め方
 1. 公開ドキュメントで通信経路全体(HTTP/MMFのどちらを使うべきか)を把握する
-2. Envelope構造やイベント追加手順は`IPC/AGENTS.md`を必ず確認する(UnityとUI/バックエンドで構造が一致していないと通信が壊れるため)
+2. Envelope構造は`IPC/AGENTS.md`、イベント追加時の変更箇所は`IPC連携の整理.md`を必ず確認する(UnityとUI/バックエンドで構造が一致していないと通信が壊れるため)
 3. 実装ファイルを編集する(MMFの場合は送信側・受信側の両方を変更する)
 4. 仕様に影響する変更をしたら、対応するドキュメントの更新が必要になる旨をユーザーに伝える(このSkill自身はドキュメントを編集しない)

@@ -8,15 +8,16 @@ description: City Genesisの地区/土地区画のジオメトリ観点のロジ
 このSkillはコード本体を持たない「道しるべ」です。実際の仕様・ロジックは以下のドキュメントに書かれているので、実装前に必ず読むこと。
 
 ## 読むべきドキュメント(概念、公開)
-- `city-genesis/docs/docs/geometries/B_土地形状.md`
+- `city-genesis/docs/docs/geometries/B_土地形状.md` (区画分割・ボロノイ分割の手順は §B.4)
+- `city-genesis/docs/docs/geometries/H_バックエンドデータロード.md` (ParcelManager / ZoneManager の描画)
 
 ## 読むべきドキュメント(非公開)
-- 該当なし(ボロノイ分割等はAGENTS.mdに記載のみ)
+- `genesis-core/docs/game-logic/地区の処理ロジック.md`
 
 ## 読むべきAGENTS.md
-- `genesis-core/app/services/geometry/AGENTS.md` (`geo_parcels.py`: 海岸線ユーティリティ、`subdivide_parcels`、`get_path_parcels`; `geo_zones.py`: `recalculate_zone_geometry`)
+- `genesis-core/app/services/geometry/AGENTS.md` (海岸線ユーティリティの使い分け、`geo_parcels.py` / `geo_zones.py` の入口関数)
 - `city-genesis/unity/Assets/Scripts/MeshGenerators/AGENTS.md` (`Percels/DefaultParcel.cs`)
-- `city-genesis/unity/Assets/Scripts/DataLoaders/AGENTS.md` (ParcelManager/ZoneManagerの`OverlayMeshRenderer`描画節)
+- `city-genesis/unity/Assets/Scripts/DataLoaders/AGENTS.md` (区画・地区の節の規約)
 
 ## 編集対象になりやすいディレクトリ/ファイル
 - バックエンド: `genesis-core/app/services/geometry/geo_parcels.py`, `geo_zones.py`
@@ -24,6 +25,6 @@ description: City Genesisの地区/土地区画のジオメトリ観点のロジ
 
 ## 進め方
 1. 公開ドキュメントで土地形状の生成方針を把握する
-2. 該当AGENTS.mdでボロノイ分割・海岸線処理・オーバーレイ描画の既存実装を確認する
+2. 該当AGENTS.mdで海岸線ユーティリティの使い分けと既存の入口関数を確認する(二重実装を防ぐ)
 3. 実装ファイルを編集する
 4. 仕様に影響する変更をしたら、対応するドキュメントの更新が必要になる旨をユーザーに伝える(このSkill自身はドキュメントを編集しない)

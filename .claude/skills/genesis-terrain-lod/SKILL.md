@@ -17,7 +17,7 @@ description: City Genesisの地形/LOD/セル分割まわり(heightmap、LODテ�
 
 ## 読むべきAGENTS.md
 - `city-genesis/unity/AGENTS.md` (ルートのデータロード全体像・座標系変換の要点)
-- `city-genesis/unity/Assets/Scripts/DataLoaders/AGENTS.md` (LODティア表、TerrainManagerの節が特に詳細: heightmap取得、海岸線、超遠景メッシュ、Z-fighting対策)
+- `city-genesis/unity/Assets/Scripts/DataLoaders/AGENTS.md` (地形の節: 知らないと事故る順序制約と規約。ティア表・海岸線・超遠景メッシュ・Z-fighting対策の仕様は D / E / K 文書)
 - `genesis-core/app/services/AGENTS.md` (`terrain_registry.py`)
 
 ## 編集対象になりやすいディレクトリ/ファイル
@@ -26,6 +26,6 @@ description: City Genesisの地形/LOD/セル分割まわり(heightmap、LODテ�
 
 ## 進め方
 1. 公開ドキュメントで地形データ構造・LOD段階の全体像を把握する
-2. 詳細ロジックドキュメントとDataLoaders/AGENTS.mdでLODティア表・Z-fighting対策など細かい仕様を確認する
+2. 詳細ロジックドキュメントで細かい仕様を、DataLoaders/AGENTS.mdで順序制約と罠を確認する
 3. 実装ファイルを編集する
 4. 仕様に影響する変更をしたら、対応するドキュメントの更新が必要になる旨をユーザーに伝える(このSkill自身はドキュメントを編集しない)

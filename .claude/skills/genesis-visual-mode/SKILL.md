@@ -7,11 +7,12 @@ description: City GenesisのUnity表示モード(VisualMode: ヒートマップ�
 
 このSkillはコード本体を持たない「道しるべ」です。実際の仕様・ロジックは以下のドキュメントに書かれているので、実装前に必ず読むこと。
 
-## 読むべきドキュメント
-- city-genesis/docs側に専用の対応ドキュメントが見当たらない(調査時点で未整備の可能性がある)。まずAGENTS.mdを読み、実装から仕様を把握すること。もしドキュメントの不在に気づいたらAGENTS.mdの運用ルールに従って追記を検討する(ただしこのSkill自身は編集しない)。
+## 読むべきドキュメント(概念、公開)
+- `city-genesis/docs/docs/programs/Unity表示モード.md` (最重要。色モードと表示フラグ、モード定数の値域、`IVisualModeHandler`の2実装パターン、`VisualModeObject`のステータス連動、地区色分け、常駐オーバーレイ)
+- `city-genesis/docs/docs/programs/Unity入力制御.md` (別系統である入力モードとの関係)
 
 ## 読むべきAGENTS.md
-- `city-genesis/unity/Assets/Scripts/VisualHandlers/AGENTS.md` (最重要。`VisualModeHandler`、`IVisualModeHandler`の2実装パターン、`VisualModeObject`のステータス連動、モード定数`VisualMode`/`VisualModeEx`の値域分類、地区色分けの仕組み)
+- `city-genesis/unity/Assets/Scripts/VisualHandlers/AGENTS.md` (ファイル一覧と、知らないと事故る規約: 色モード×フラグの直交と一括通知、マテリアルの初期化と更新、一時色の明示復帰など)
 - `city-genesis/unity/AGENTS.md` (「モード系は2系統ある」の節でVisualModeとInputModeの区別を明記)
 - UI側の連動: `city-genesis/tauri/src/components/AGENTS.md` (`components/display/`配下、ヒートマップ切替の操作)
 
@@ -21,7 +22,7 @@ description: City GenesisのUnity表示モード(VisualMode: ヒートマップ�
 - UI側: `city-genesis/tauri/src/components/display/`配下
 
 ## 進め方
-1. `VisualHandlers/AGENTS.md`で`IVisualModeHandler`パターンとモード定数の値域を把握する(新モード追加時は既存パターンに沿わせる)
-2. ルートAGENTS.mdでInputModeとの違いを再確認する(取り違えるとバグの元)
+1. `Unity表示モード.md`で`IVisualModeHandler`パターンとモード定数の値域を把握し、`VisualHandlers/AGENTS.md`で規約を確認する(新モード追加時は既存パターンに沿わせる)
+2. `unity/AGENTS.md`の「モード系は2系統」でInputModeとの違いを再確認する(取り違えるとバグの元)
 3. 実装ファイルを編集する
-4. 仕様に影響する変更をしたら、対応するドキュメント(不足していれば新設も含め)の更新が必要になる旨をユーザーに伝える(このSkill自身はドキュメントを編集しない)
+4. 仕様に影響する変更をしたら、対応するドキュメント(`Unity表示モード.md`)の更新が必要になる旨をユーザーに伝える(このSkill自身はドキュメントを編集しない)

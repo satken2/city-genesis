@@ -8,14 +8,14 @@ description: City Genesisの3Dメッシュ生成処理全般(MeshFactoryのデ�
 このSkillはコード本体を持たない「道しるべ」です。実際の仕様・ロジックは以下のドキュメントに書かれているので、実装前に必ず読むこと。
 
 ## 読むべきドキュメント(概念、公開)
-- `city-genesis/docs/docs/geometries/F_建物メッシュの生成.md` (建物の共通仕様。生成方式固有は `F1_`〜`F5_` の別ファイル)
+- `city-genesis/docs/docs/geometries/F_建物メッシュの生成.md` (建物の共通仕様。生成方式固有は `F1_`〜`F10_` の別ファイル)
 - `city-genesis/docs/docs/geometries/G_道路メッシュの生成.md`
 
 ## 読むべきドキュメント(非公開)
 - 該当なし(Unity実装のため公開ドキュメント側のみ)
 
 ## 読むべきAGENTS.md
-- `city-genesis/unity/Assets/Scripts/MeshGenerators/AGENTS.md` (最重要。`MeshFactory.cs`のディスパッチ表、道路/交差点/建物/土地区画/超遠景陸地メッシュの各節)
+- `city-genesis/unity/Assets/Scripts/MeshGenerators/AGENTS.md` (最重要。`MeshFactory.cs`のディスパッチ表、生成器のファイル一覧、DrawLodの経路、知らないと事故る規約)
 
 ## 編集対象になりやすいディレクトリ/ファイル
 - `city-genesis/unity/Assets/Scripts/MeshGenerators/`配下全体

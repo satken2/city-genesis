@@ -14,13 +14,13 @@ description: City Genesisのパス/ノード(道路・鉄道)のジオメトリ�
 - 線路・LRTを触るとき: `city-genesis/docs/docs/geometries/N_線路メッシュの生成.md`(LRT専用軌道431の節)と G文書の「LRT付き道路222・242・歩行者道303」節
 
 ## 読むべきAGENTS.md
-- `city-genesis/unity/Assets/Scripts/MeshGenerators/AGENTS.md` (RoadPath/RoadIntersectionMeshGeneratorの節)
-- `city-genesis/unity/Assets/Scripts/DataLoaders/AGENTS.md` (PathManagerの節。`CalculatePathPoints`とバックエンド`PathEntity._auto_fill_controls`は**同一ロジックを維持する必要がある**仕様が明記されているので、片方だけ直して終わらせないこと)
+- `city-genesis/unity/Assets/Scripts/MeshGenerators/AGENTS.md` (`Paths/`の生成器一覧、DrawLodの経路、規約、バックエンドとの鏡写し表)
+- `city-genesis/unity/Assets/Scripts/DataLoaders/AGENTS.md` (道路の節。`CalculatePathPoints`の制御点自動計算はバックエンド`Path._auto_fill_controls`と**同一式を維持する必要がある**ので、片方だけ直して終わらせないこと)
 - `genesis-core/app/services/geometry/AGENTS.md` (`geo_bezier.py`, `geo_paths.py`)
 
 ## 編集対象になりやすいディレクトリ/ファイル
 - Unity: `city-genesis/unity/Assets/Scripts/MeshGenerators/Paths/RoadPath.cs`, `RoadIntersectionMeshGenerator.cs`, `city-genesis/unity/Assets/Scripts/DataLoaders/PathManager.cs`, `Utils/IntersectionPolygonUtil.cs`
-- LRT(222/242/303/431): 軌道の横位置・踏面の高さ・停留所ホームの寸法は `MeshGenerators/Paths/LrtRoadParts.cs` が唯一の正(車両・交差点コネクタ・設備・歩行帯が参照する)。LRTの線路は1本のパスで上下線を持つ複線(DIR_BOTH固定)で、通常鉄道の「一方通行の単線2本」とは別方式。レールがつながる組の判定は `TrackIntersectionMeshGenerator.RailsConnect`(交差点コネクタと TrackPath の車止めが共有)。停留所の相対式ホームは `MeshGenerators/Paths/LrtPlatformParts.cs` が下地パスの生成の一部として描く(停留所は路線サマリの `stop_points` を `DataLoaders/LrtStopPlatforms.cs` が索引化し、範囲が変わったパスを `PathManager.RequestLrtPlatformRebuild` で作り直す。デッキは交差点で切断済みの区間へ収め、デッキ端の外側のスロープは交差点ハル上や行き止まり端の先へはみ出してよい。範囲の決め方の詳細・431の架線柱移設と高欄省略・303の設備抑止は MeshGenerators/AGENTS.md の LRT の節)。回帰検証は `city-genesis/unity/Tests/Lrt/run.ps1`
+- LRT(222/242/303/431): 軌道の横位置・踏面の高さ・停留所ホームの寸法は `MeshGenerators/Paths/LrtRoadParts.cs` が唯一の正(車両・交差点コネクタ・設備・歩行帯が参照する)。LRTの線路は1本のパスで上下線を持つ複線(DIR_BOTH固定)で、通常鉄道の「一方通行の単線2本」とは別方式。レールがつながる組の判定は `TrackIntersectionMeshGenerator.RailsConnect`(交差点コネクタと TrackPath の車止めが共有)。停留所の相対式ホームは `MeshGenerators/Paths/LrtPlatformParts.cs` が下地パスの生成の一部として描く(停留所は路線サマリの `stop_points` を `DataLoaders/LrtStopPlatforms.cs` が索引化し、範囲が変わったパスを `PathManager.RequestLrtPlatformRebuild` で作り直す。デッキは交差点で切断済みの区間へ収め、デッキ端の外側のスロープは交差点ハル上や行き止まり端の先へはみ出してよい。範囲の決め方の詳細・431の架線柱移設と高欄省略・303の設備抑止は G文書「LRT停留所のホーム」と N文書「431の停留所ホーム」)。回帰検証は `city-genesis/unity/Tests/Lrt/run.ps1`
 - バックエンド: `genesis-core/app/services/geometry/geo_bezier.py`, `geo_paths.py`(`create_road_polygon_from_path`, 交差判定)
 
 ## 進め方

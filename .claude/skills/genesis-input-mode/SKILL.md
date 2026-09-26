@@ -14,16 +14,16 @@ description: City GenesisのUnity入力モード(InputMode: クリック/ドラ�
 - 該当なし
 
 ## 読むべきAGENTS.md
-- `city-genesis/unity/Assets/Scripts/InputHandlers/AGENTS.md` (最重要。基本フロー、クリック/ドラッグ判定の閾値ロジック、各ハンドラ一覧、`InputMode`定数、新規ハンドラ実装テンプレート、海面クリックの特殊扱い)
+- `city-genesis/unity/Assets/Scripts/InputHandlers/AGENTS.md` (最重要。ハンドラ一覧、クリック/ドラッグ判定と入力ゲートの罠、海面クリックの特殊扱い。`InputMode`定数の値域とプリセットは公開ドキュメント `Unity入力制御.md` §2 が正)
 - `city-genesis/unity/Assets/Scripts/Editors/AGENTS.md` (入力モードから編集フローへの委譲の流れ)
 - `city-genesis/unity/AGENTS.md` (「モード系は2系統ある」の節でVisualModeとの区別を明記)
 
 ## 編集対象になりやすいディレクトリ/ファイル
-- `city-genesis/unity/Assets/Scripts/InputHandlers/InputHandler.cs`, `BuildingInputHandler.cs`, `ParcelInputHandler.cs`, `PathInputHandler.cs`, `NodeInputHandler.cs`, `TerrainInputHandler.cs`, `ZoneInputHander.cs`
+- `city-genesis/unity/Assets/Scripts/InputHandlers/InputSystemManager.cs`, `IInputHandler.cs`, `InputHandler.cs`, `BuildingInputHandler.cs`, `ParcelInputHandler.cs`, `PathInputHandler.cs`, `NodeInputHandler.cs`, `TerrainInputHandler.cs`, `RemovalManager.cs`, `TransitSelection.cs`
 - 関連(編集フローへの委譲先): `city-genesis/unity/Assets/Scripts/Editors/`配下(`RoadEditor/RoadPlanManager.cs`, `BuildingEditor/BuildingPlanManager.cs`, `ParcelManager/ParcelEditorManager.cs`)
 
 ## 進め方
-1. `InputHandlers/AGENTS.md`で新規ハンドラ実装テンプレートとクリック/ドラッグ判定ロジックを把握する(既存パターンを踏襲する)
+1. `InputHandlers/AGENTS.md`でハンドラ一覧と判定の罠を把握する。新規ハンドラは既存ハンドラ(`IInputHandler`実装。コライダーとタグが必須)のパターンを踏襲する
 2. `Editors/AGENTS.md`で入力モードから編集フローへの委譲の流れを確認する
 3. 実装ファイルを編集する
 4. 仕様に影響する変更をしたら、対応するドキュメントの更新が必要になる旨をユーザーに伝える(このSkill自身はドキュメントを編集しない)
