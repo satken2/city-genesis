@@ -130,8 +130,8 @@
   "resource_construction": {
     "selectType": "-- 请选择资源类型 --",
     "settings": "设置",
-    "maxAmount": "最大容量",
-    "recoveryRate": "恢复率",
+    "maxAmount": "储量上限",
+    "recoveryRate": "恢复率（每日）",
     "shapeInfo": "形状信息",
     "noVerticesYet": "请点击地形放置多边形",
     "vertexCount": "顶点数",
@@ -139,6 +139,40 @@
     "confirming": "确定中...",
     "confirmFailedUnknown": "资源区域确定失败。请修改形状后重试。",
     "cancel": "取消"
+  },
+  "resourcePreset": {
+    "label": "参考",
+    "presets": {
+      "oilField": {
+        "name": "常规油田",
+        "note": "油田的可采储量（1单位=1桶原油）。与面积成正比，不会恢复"
+      },
+      "oreDeposit": {
+        "name": "露天矿床",
+        "note": "可露天开采的矿床矿量（1单位=1kg）。与面积成正比，不会恢复"
+      },
+      "river": {
+        "name": "河流",
+        "note": "由流量决定的水源（1单位=1m³）。上限为可取水量的30天份，每个纪元都会恢复到满量"
+      },
+      "lake": {
+        "name": "湖泊・水库",
+        "note": "与面积成正比的蓄水，由入流恢复（1单位=1m³）。取水超过入流时水位会下降"
+      },
+      "groundwater": {
+        "name": "地下水",
+        "note": "与面积成正比的含水层储量，靠雨水补给缓慢恢复（1单位=1m³）。过度抽取后需要很多年才能恢复"
+      }
+    },
+    "summary": {
+      "area": "面积 {{area}}",
+      "amount": "储量 {{amount}}",
+      "yield": "可持续采取量 约{{amount}}/日",
+      "refillDays": "从空到满约{{days}}天",
+      "refillYears": "从空到满约{{years}}年",
+      "nonRenewable": "不会恢复（采多少减多少）",
+      "needsShape": "绘制形状后将按面积填入储量"
+    }
   },
   "prop_placement": {
     "height": "距地面高度（米）",

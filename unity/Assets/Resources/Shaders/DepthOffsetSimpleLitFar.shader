@@ -19,6 +19,7 @@ Shader "Custom/DepthOffsetSimpleLitFar"
         [NoScaleOffset] _LoadedCellMask("Loaded Cell Mask", 2D) = "black" {}
         _LoadedCellMaskParams("Loaded Cell Mask Params", Vector) = (0, 0, 0, 0) // x:1/cellSize y:offsetX z:offsetY
         _LoadedCellMaskTexel("Loaded Cell Mask Texel", Vector) = (0, 0, 0, 0)   // x:1/cellsX y:1/cellsY
+        _FarCityRect("City Rect", Vector) = (0, 0, 0, 0)                        // xy:南西隅 zw:北東隅。既定は無効
         _FarSinkAmount("Far Sink Amount", Float) = 100.0
         _FarGridStep("Far Grid Step (m)", Float) = 80.0
 

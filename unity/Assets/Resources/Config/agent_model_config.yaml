@@ -151,7 +151,7 @@ agents:
       - 0
   1073:
     model: true
-    prebuilt: true
+    prebuilt: false
     variants:
       - 0
   2000:
@@ -159,14 +159,19 @@ agents:
     prebuilt: false
     variants:
       - 0
-      - 500
+      - 200
+      - 400
+      - 600
+      - 800
   2001:
     model: true
     prebuilt: false
     variants:
       - 0
+      - 200
       - 400
-      - 700
+      - 600
+      - 800
   2002:
     model: true
     prebuilt: false
@@ -231,7 +236,10 @@ agents:
     prebuilt: false
     variants:
       - 0
-      - 500
+      - 200
+      - 400
+      - 600
+      - 800
   2016:
     model: true
     prebuilt: true
@@ -267,6 +275,9 @@ agents:
     prebuilt: false
     variants:
       - 0
+structure_prefixes:
+  - a2000s2
+  - a2000s3
 landmark_prefixes:
   - landmark-ancient_ruins
   - landmark-colossal_statue

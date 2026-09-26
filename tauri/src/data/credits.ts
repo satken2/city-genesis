@@ -97,6 +97,15 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     note: "Building explosion. Converted from stereo WAV to mono Ogg Vorbis (44.1 kHz, quality 4). License verified 2026-09-23.",
   },
   {
+    title: "drip.wav",
+    category: "sfx",
+    author: "Nightflame",
+    source: "Freesound",
+    url: "https://freesound.org/people/Nightflame/sounds/188642/",
+    license: "CC0 1.0 — https://creativecommons.org/publicdomain/zero/1.0/",
+    note: "Placing a stop or waypoint in the transit route editor. Converted from mono WAV to mono Ogg Vorbis (44.1 kHz, quality 4). License verified 2026-09-26.",
+  },
+  {
     title: "Paving Stones 033",
     category: "texture",
     source: "ambientCG",

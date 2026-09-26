@@ -2982,7 +2982,8 @@ public class PathManager : BaseApiDataManager
 
     /// <summary>
     /// TrackAdjacency.NeighborProvider の実体。指定線路の近接候補線路の描画点列と幅、
-    /// 駅パスならプラットフォームの左右張り出し幅（島式ホームの結合判定用）を返す。
+    /// 駅パスならプラットフォームの左右張り出し幅（島式ホームの結合判定用）、LRTの線路なら
+    /// 停留所のホーム区間（主線路の架線柱をホームの外へ出すため）を返す。
     /// 点列は生成済みならキャッシュ(pathPointsCache)を使い、未生成（同一ロード内で
     /// 相手がまだ描画されていない等）なら CalculatePathPoints で算出する。
     /// 工事中(STATUS_CONSTRUCTING)の線路は完成パーツを描画しない（土ストリップ表示）ため
@@ -3014,6 +3015,15 @@ public class PathManager : BaseApiDataManager
                 TrackPath.ResolvePlatformExtents(other, otherMaster.platform_width.Value, out platformLeft, out platformRight);
             }
 
+            // LRTの停留所のホーム区間。相手が自分の描画で使うのと同じ索引・点列から、点列の3D累積距離で求める。
+            List<Vector2> lrtZones = null;
+            if (LrtRoadParts.IsLrt(other.path_variant))
+            {
+                var lrtSpans = LrtPlatformParts.Resolve(other, points, new VehiclePolyline(points).Length);
+                if (lrtSpans.Count > 0)
+                    lrtZones = LrtPlatformParts.ZoneRanges(lrtSpans, LrtRoadParts.PlatformRampLength(other.path_variant), LrtRoadParts.PLATFORM_TRACK_ZONE_MARGIN);
+            }
+
             result.Add(new TrackNeighborInfo
             {
                 PathId = id,
@@ -3021,6 +3031,8 @@ public class PathManager : BaseApiDataManager
                 Width = GetRoadWidth(other.path_variant),
                 PlatformLeft = platformLeft,
                 PlatformRight = platformRight,
+                LrtPlatformZones = lrtZones,
+                LrtPlatformOuter = lrtZones != null ? LrtRoadParts.PlatformOuterOffset(other) : 0f,
             });
         }
         return result;
@@ -4320,10 +4332,17 @@ public class PathManager : BaseApiDataManager
     /// LRT停留所のホーム範囲(LrtStopPlatforms の索引)が変わったパスを作り直す。描画キーの revision を進めて
     /// 退避中の古いGOを再利用させず、生成済みのGOがあるパスだけを地形追従再生成キューへ積む(未生成のパスは
     /// 次の生成で索引を読む)。通知より後に作り直したGOはワーカーが省く。
+    /// 近接する線路も作り直す(結合コリドーの主線路は相手のホーム区間を避けて架線柱を立てるため)。
     /// </summary>
     public void RequestLrtPlatformRebuild(IEnumerable<int> pathIds)
     {
+        var targets = new HashSet<int>();
         foreach (int id in pathIds)
+        {
+            targets.Add(id);
+            if (pathDataCache.TryGetValue(id, out PathSummary path)) targets.UnionWith(CollectNearbyTrackPathIds(path));
+        }
+        foreach (int id in targets)
         {
             geometryRevisions.TryGetValue(id, out int revision);
             geometryRevisions[id] = revision + 1;

@@ -130,8 +130,8 @@
   "resource_construction": {
     "selectType": "-- Selecciona el tipo de recurso --",
     "settings": "Ajustes",
-    "maxAmount": "Capacidad máxima",
-    "recoveryRate": "Tasa de recuperación",
+    "maxAmount": "Tope del yacimiento",
+    "recoveryRate": "Tasa de recuperación (por día)",
     "shapeInfo": "Información de la forma",
     "noVerticesYet": "Haz clic en el terreno para colocar el polígono",
     "vertexCount": "Número de vértices",
@@ -139,6 +139,40 @@
     "confirming": "Confirmando...",
     "confirmFailedUnknown": "No se pudo confirmar el área de recursos. Modifica la forma e inténtalo de nuevo.",
     "cancel": "Cancelar"
+  },
+  "resourcePreset": {
+    "label": "Referencia",
+    "presets": {
+      "oilField": {
+        "name": "Yacimiento petrolero convencional",
+        "note": "Reservas recuperables de un yacimiento petrolero (1 unidad = 1 barril de crudo). Proporcional al área; no se recupera."
+      },
+      "oreDeposit": {
+        "name": "Yacimiento a cielo abierto",
+        "note": "Tonelaje de un yacimiento explotable a cielo abierto (1 unidad = 1 kg). Proporcional al área; no se recupera."
+      },
+      "river": {
+        "name": "Río",
+        "note": "Fuente de agua definida por su caudal (1 unidad = 1 m³). El tope equivale a 30 días de agua captable y se rellena en cada época."
+      },
+      "lake": {
+        "name": "Lago / embalse",
+        "note": "Almacenamiento proporcional al área que se repone con el caudal de entrada (1 unidad = 1 m³). Captar más que la entrada hace bajar el nivel."
+      },
+      "groundwater": {
+        "name": "Agua subterránea",
+        "note": "Almacenamiento del acuífero proporcional al área, con recarga lenta por la lluvia (1 unidad = 1 m³). Si se sobreexplota, tarda muchos años en recuperarse."
+      }
+    },
+    "summary": {
+      "area": "Área {{area}}",
+      "amount": "Reserva {{amount}}",
+      "yield": "Extracción sostenible ~{{amount}}/día",
+      "refillDays": "De vacío a lleno en ~{{days}} días",
+      "refillYears": "De vacío a lleno en ~{{years}} años",
+      "nonRenewable": "No se recupera (se agota al extraer)",
+      "needsShape": "Dibuja la forma para asignar una reserva según su área"
+    }
   },
   "prop_placement": {
     "height": "Altura sobre el suelo (m)",

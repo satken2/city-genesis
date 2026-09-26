@@ -1,0 +1,124 @@
+/* ==========================================================================
+   TransitEstimateCard.css - 路線の収支見込みカード
+   新設パネル(bc-*)と路線詳細の設定タブ(agent-detail-*)の両方に置くため、カード自体は地色を持たず、
+   色は App.css の --flat-* トークンだけを使う。結論の行(収支見込み)だけが面を持ち、左端の実線ブロックと
+   数値の色で黒字/赤字を示す(運行実績タイルと同じ意匠)。
+   ========================================================================== */
+
+.transit-estimate {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: opacity 0.15s ease;
+}
+
+/* 取り直し中は直前の結果を薄く残す */
+.transit-estimate--stale {
+  opacity: 0.55;
+}
+
+.transit-estimate__rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.transit-estimate__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.transit-estimate__row:last-child {
+  border-bottom: none;
+}
+
+.transit-estimate__label {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--flat-text-label);
+}
+
+.transit-estimate__value {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 0;
+  text-align: right;
+}
+
+.transit-estimate__main {
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--flat-text);
+  white-space: nowrap;
+}
+
+.transit-estimate__sub {
+  font-size: 0.66rem;
+  line-height: 1.35;
+  color: var(--flat-text-muted);
+}
+
+/* ---- 結論の行(収支見込み) ---- */
+.transit-estimate__row--total {
+  margin: 3px 0;
+  padding: 6px 10px;
+  border-bottom: none;
+  border-radius: 4px;
+  background: var(--flat-raised);
+  box-shadow: var(--flat-shadow-sm);
+}
+
+.transit-estimate__row--total .transit-estimate__main {
+  font-size: 0.92rem;
+}
+
+.transit-estimate__row--positive {
+  box-shadow: inset 4px 0 0 var(--flat-good), var(--flat-shadow-sm);
+}
+.transit-estimate__row--positive .transit-estimate__main {
+  color: var(--flat-good);
+}
+
+.transit-estimate__row--negative {
+  box-shadow: inset 4px 0 0 var(--flat-danger), var(--flat-shadow-sm);
+}
+.transit-estimate__row--negative .transit-estimate__main {
+  color: var(--flat-danger);
+}
+
+/* ---- 注記・警告 ---- */
+.transit-estimate__note {
+  margin: 0;
+  font-size: 0.66rem;
+  line-height: 1.45;
+  color: var(--flat-text-muted);
+}
+
+.transit-estimate__warning {
+  margin: 0;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  line-height: 1.4;
+  color: var(--flat-warn);
+  background: var(--flat-warn-surface);
+}
+
+.transit-estimate__muted {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--flat-text-muted);
+}
+
+.transit-estimate__error {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--flat-danger);
+}

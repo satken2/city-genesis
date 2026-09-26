@@ -12,7 +12,8 @@
  *   2. グラフィックプログラム側で地形をクリックして頂点を配置し、任意ポリゴンを作成する
  *      (ParcelShapeEditManagerと同じ操作感: 頂点ドラッグ・辺クリックで頂点追加・右クリックで頂点削除)
  *   3. 編集中のポリゴンはIPC(edit_resource:update_shape)で随時パネルに通知される
- *   4. 最大容量・回復率を設定する
+ *   4. 埋蔵量上限・回復率を設定する。初期値は種別ごとの目安(data/resourcePresets.ts)で、
+ *      面積比例の目安なら形状の面積に追従する(地形エディタの資源編集タブと共通)
  *   5. [確定] でバックエンドの POST /api/v1/resources に直接送信する(道路建設と同じく
  *      Tauri側が直接バックエンド送信を行い、成功後にUnity側の編集状態をリセットする)
  */
@@ -22,6 +23,10 @@ import { useTranslation } from "react-i18next";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { NumberStepper } from "../common/NumberStepper";
+import { ringSignedArea } from "../terrain/riverGeometry";
+import { ResourcePresetHint } from "./ResourcePresetHint";
+import { useResourcePresetInputs } from "../../hooks/useResourcePresetInputs";
+import { RESOURCE_MAX_AMOUNT_LIMIT } from "../../data/resourcePresets";
 
 import { setHintbarText } from "../../utils/hintbar";
 import { showNotification } from "../../utils/notification";
@@ -43,10 +48,14 @@ export function ResourceConstructionPanel({ apiBaseUrl, onClose }: ResourceConst
   const masterData = useMasterData();
 
   const [selectedType, setSelectedType] = useState<number | null>(null);
-  const [maxAmount, setMaxAmount] = useState<number>(1000);
-  const [recoveryRate, setRecoveryRate] = useState<number>(0.01);
   const [polygon, setPolygon] = useState<number[][]>([]);
   const [isConfirming, setIsConfirming] = useState(false);
+
+  // 頂点は [x, z](m)で届く。3点未満は面積0として扱い、面積比例の目安は形状待ちになる。
+  const areaM2 = polygon.length >= 3 ? Math.abs(ringSignedArea(polygon)) : 0;
+  const productId = selectedType !== null ? masterData?.resource_types[selectedType]?.product_id ?? null : null;
+  const presetInputs = useResourcePresetInputs(productId, areaM2);
+  const { maxAmount, recoveryRate, reset: resetPresetInputs } = presetInputs;
 
   /* ---- Unity側で編集中のポリゴンが変化するたびに通知を受信する ---- */
   useEffect(() => {
@@ -105,8 +114,9 @@ export function ResourceConstructionPanel({ apiBaseUrl, onClose }: ResourceConst
   const handleCancel = useCallback(() => {
     setSelectedType(null);
     setPolygon([]);
+    resetPresetInputs();
     sendChangeState("STATE_NORMAL").catch(() => {});
-  }, []);
+  }, [resetPresetInputs]);
 
   /**
    * 確定ボタンを押した際のハンドラ。
@@ -170,19 +180,37 @@ export function ResourceConstructionPanel({ apiBaseUrl, onClose }: ResourceConst
         </select>
       </div>
 
-      {/* 容量・回復率設定 */}
+      {/* 埋蔵量上限・回復率設定 */}
       {selectedType !== null && (
         <div className="pc-section">
           <div className="pc-section-title">{t("resource_construction.settings")}</div>
+
+          {presetInputs.presets.length > 1 && (
+            <div className="pc-settings-row">
+              <span className="pc-settings-label">{t("resourcePreset.label")}</span>
+              <select
+                className="pc-select"
+                value={presetInputs.preset?.key ?? ""}
+                onChange={(e) => presetInputs.selectPreset(e.target.value)}
+              >
+                {presetInputs.presets.map((preset) => (
+                  <option key={preset.key} value={preset.key}>
+                    {t(`resourcePreset.presets.${preset.key}.name`)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className="pc-settings-row">
             <span className="pc-settings-label">{t("resource_construction.maxAmount")}</span>
             <div className="pc-stepper-row">
               <NumberStepper
+                className="number-stepper--wide"
                 value={maxAmount}
-                onChange={setMaxAmount}
+                onChange={presetInputs.setMaxAmount}
                 min={1}
-                max={10000000}
+                max={RESOURCE_MAX_AMOUNT_LIMIT}
                 step={100}
                 integerOnly={true}
               />
@@ -194,14 +222,23 @@ export function ResourceConstructionPanel({ apiBaseUrl, onClose }: ResourceConst
             <div className="pc-stepper-row">
               <NumberStepper
                 value={recoveryRate}
-                onChange={setRecoveryRate}
+                onChange={presetInputs.setRecoveryRate}
                 min={0}
                 max={1}
-                step={0.001}
+                step={0.0001}
                 integerOnly={false}
               />
             </div>
           </div>
+
+          <ResourcePresetHint
+            preset={presetInputs.preset}
+            areaM2={areaM2}
+            maxAmount={maxAmount}
+            recoveryRate={recoveryRate}
+            awaitingShape={presetInputs.awaitingShape}
+            className="pc-hint"
+          />
         </div>
       )}
 

@@ -6,20 +6,23 @@
  *
  * タブ:
  *   - 基本情報 ... 種別・車両の外観・状態・車両・編成・区間数と、運行実績(乗車回数・収支・混雑率・調達率)
- *   - 設定     ... 運賃・運行間隔・1編成の車両数・路線カラー・車両の外観(PATCH で保存)と路線の廃止
+ *   - 設定     ... 運賃・運行間隔・1編成の車両数・路線カラー・車両の外観(PATCH で保存)、経路の編集、路線の廃止。
+ *                運賃・運行間隔・車両数の直下に、編集中の値での収支見込み(TransitEstimateCard)を出す。
+ *                経路(停留所・経由点の巡回順)の編集は新設パネル(transit_creation)を経路編集モードで開いて行う
  *   - 路線地図 ... 実地図上の路線(TransitLineMap。共通地図の公共交通路線レイヤーを当該路線に注目させたもの)
  *   - 路線図   ... 縦型ストリップ路線図(TransitLineDiagram)
  *
  * 運休理由と診断ウィンドウへの導線はタブに依らず常に見える位置(ヘッダ直下)に置く。
  * データは GET /api/v1/transit/lines/{id} から取得し、設定の保存は PATCH、廃止は DELETE。
- * 保存・削除後は "transit:lines_changed" で公共交通ウィンドウに再取得を促し、
+ * 保存・削除後は "transit:lines_changed" で公共交通ウィンドウに再取得を促し(経路編集パネルが経路を
+ * 更新したときも同じ通知を受けて取り直す)、
  * Unityの共有路線データは定期取得で更新し、ユーザーの表示設定は維持する。
  */
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
-import { emit } from "@tauri-apps/api/event";
+import { emit, listen } from "@tauri-apps/api/event";
 import { buildApiUrl } from "../../utils/api";
 import { InfoHeader } from "../common/InfoHeader";
 import { NumberStepper } from "../common/NumberStepper";
@@ -33,6 +36,9 @@ import { TransitLineMap } from "./TransitLineMap";
 import { TransitLineDiagram } from "./TransitLineDiagram";
 import { TransitFleetSection } from "./TransitFleetSection";
 import { TransitVehicleLabel, TransitVehicleSelector, transitVehicleOptions } from "./TransitVehicleSelector";
+import { pauseReasonKey } from "./transitPauseReason";
+import { TransitEstimateCard } from "./TransitEstimateCard";
+import { useTransitEstimate } from "../../hooks/useTransitEstimate";
 // 右パネルの体裁(セクション・ラベル/値グリッド・タブ)は経済主体詳細パネルと共有する。
 import "../agent/AgentDetailPanel.css";
 // 運行状態バッジ(.transit-badge)は公共交通ウィンドウの一覧と共通。
@@ -46,8 +52,8 @@ type TransitSegment = {
 };
 
 /**
- * 停留所ノード。路線図上の「駅」として描画する単位。順序はバックエンド側で
- * 区間パスのトポロジーから復元したもの(order=0 が始点、order=last が終点)。
+ * 停留所ノード。路線図上の「駅」として描画する単位。巡回順(1周で2回訪れる停留所は最初の訪問)に
+ * 1回ずつ並び、order はその順番。
  * name は停留所が乗る下地パスから解決した表示名(駅舎所属なら駅名、街路なら道路名)で、
  * 既定名のままの無名停留所は null(UI が連番で補う)。house_path_id は駅名の出所の駅舎パス。
  */
@@ -62,13 +68,21 @@ export type TransitStop = {
 };
 
 /**
- * 路線の1区間(停留所間を結ぶ PATH_TRANSPORT)。路線図上の「線」として描画する単位。
- * travel_direction はバックエンド consts.py の DIR_* と同じ値:
- *   0 (DIR_BOTH)     = 双方向(バス・LRT等。1本の道路や複線一体の軌道を往復運行)
- *   1 (DIR_FORWARD)  = start→end 片方向(複線の往路側)
- *   2 (DIR_BACKWARD) = end→start 片方向(複線の復路側)
- * UI はこれで進行方向の矢印を描き分ける。
+ * 路線の1区間(巡回順で隣り合う停留所を結ぶ PATH_TRANSPORT)。路線図上の「線」として描画する単位。
+ * 区間パスは路線の進行方向の一方通行で、from_node_id → to_node_id が進む向き(travel_direction は
+ * DIR_FORWARD)。下地の線路の通行方向とは別物。路線図は status(運休区間の破線)にだけ使う。
  */
+/**
+ * 路線の巡回点(停留所・経由点を巡回順に並べたもの。最後の点の次は先頭の点)。
+ * turnback は車両がその停留所で折り返すか(往復運行の端。運休中は false)。経由点の node_id は null。
+ */
+export type TransitRoutePointSummary = {
+  kind: "stop" | "waypoint";
+  position: [number, number, number];
+  node_id: number | null;
+  turnback: boolean;
+};
+
 export type TransitEdge = {
   path_id: number;
   from_node_id: number;
@@ -98,20 +112,13 @@ type TransitLineDetail = {
   ridership: number;
   avg_utilization: number;
   path_count: number;
-  // 運休理由コード(null / "route_disconnected" / "return_leg_blocked" / "no_underlay" / "train_too_long")。
+  // 運休理由コード(null / "route_disconnected" / "no_underlay" / "train_too_long")。
   pause_reason: string | null;
   segments: TransitSegment[];
-  // 路線図描画用の停留所(順序付き)と区間エッジ。GET /api/v1/transit/lines/{id} が返す。
+  // 路線図描画用の停留所(巡回順に1回ずつ)・巡回点・区間エッジ。GET /api/v1/transit/lines/{id} が返す。
   stops: TransitStop[];
+  route_points: TransitRoutePointSummary[];
   edges: TransitEdge[];
-};
-
-// 運休理由コード → i18n キー。未知コードは汎用文言にフォールバックする。
-const PAUSE_REASON_KEYS: Record<string, string> = {
-  return_leg_blocked: "transit.pauseReason.returnLegBlocked",
-  route_disconnected: "transit.pauseReason.routeDisconnected",
-  no_underlay: "transit.pauseReason.noUnderlay",
-  train_too_long: "transit.pauseReason.trainTooLong",
 };
 
 type TabId = "basic" | "settings" | "map" | "diagram";
@@ -183,6 +190,28 @@ export function TransitDetailPanel({
     return () => controller.abort();
   }, [url, refreshKey]);
 
+  // 経路編集パネルなど、他のウィンドウで路線が変わったら取り直す。
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    listen("transit:lines_changed", () => setRefreshKey((k) => k + 1))
+      .then((fn) => {
+        unlisten = fn;
+      })
+      .catch(console.error);
+    return () => {
+      unlisten?.();
+    };
+  }, []);
+
+  /** 新設パネルを経路編集モードで開き、この路線の停留所・経由点を3Dマップ上で編集させる */
+  const openRouteEditor = useCallback(() => {
+    if (!line) return;
+    void invoke("open_registered_window", {
+      windowType: "transit_creation",
+      params: { extra: { editLineId: line.line_agent_id, titleKey: "windowType.transit_route_edit" } },
+    });
+  }, [line]);
+
   const isDirty =
     line != null &&
     (fare !== Math.round(line.fare_price) ||
@@ -248,6 +277,21 @@ export function TransitDetailPanel({
     }
   }, [apiBaseUrl, line]);
 
+  // 収支見込みは設定タブを開いている間だけ、保存前の編集中の値で取り直す(保存してから採算に気づく手戻りを防ぐ)。
+  const { estimate, loading: estimateLoading, error: estimateError } = useTransitEstimate(
+    apiBaseUrl,
+    line != null && activeTab === "settings"
+      ? {
+          kind: "line",
+          lineAgentId: line.line_agent_id,
+          farePrice: fare,
+          targetHeadway: headway,
+          carsPerTrain,
+        }
+      : null,
+    refreshKey,
+  );
+
   if (loading) {
     return <p className="agent-detail-muted">{t("common.loading")}</p>;
   }
@@ -267,12 +311,7 @@ export function TransitDetailPanel({
   // 車両不足は基本情報の「調達/必要」表記と運行実績の調達率メーターで示す。
   const running = line.status === STATUS_ACTIVE;
   // 運休時は理由を表示する。理由コードが無い/未知の運休(車両不足など)は汎用文言にする。
-  const pauseReasonText = running
-    ? null
-    : t(
-        (line.pause_reason && PAUSE_REASON_KEYS[line.pause_reason]) ||
-          "transit.pauseReason.generic",
-      );
+  const pauseReasonText = running ? null : t(pauseReasonKey(line.pause_reason));
   const procurementRatio =
     line.required_vehicle_count > 0
       ? line.vehicle_count / line.required_vehicle_count
@@ -280,6 +319,11 @@ export function TransitDetailPanel({
   const vehicleShortage = running && procurementRatio !== null && procurementRatio < 1;
   const savedColor = effectiveLineColor(line);
   const balance = line.revenues - line.expenses;
+  // 収支見込みが保存済みの設定ではなく編集中の値によるものかを見出しに示す(路線カラー・外観は採算に関係しない)。
+  const estimateEdited =
+    fare !== Math.round(line.fare_price) ||
+    headway !== Math.round(line.target_headway) ||
+    carsPerTrain !== Math.max(1, Math.round(line.cars_per_train ?? 1));
   // 車両を描かない種別(モノレール等)は外観の候補を持たないので、外観の行ごと出さない。
   const hasVehicleOptions = transitVehicleOptions(line.path_variant).length > 0;
 
@@ -466,6 +510,16 @@ export function TransitDetailPanel({
                   <NumberStepper value={carsPerTrain} onChange={setCarsPerTrain} min={1} max={20} step={1} integerOnly={true} />
                   <span className="transit-detail__unit">{t("transit.carsUnit")}</span>
                 </span>
+                {/* 採算に効くのは上の3項目だけなので、その直下で変更のたびに試算し直す */}
+                <div className="transit-detail__estimate">
+                  <div className="transit-detail__estimate-title">
+                    {t("transit.estimate.title")}
+                    {estimateEdited && (
+                      <span className="transit-detail__estimate-tag">{t("transit.estimate.editedTag")}</span>
+                    )}
+                  </div>
+                  <TransitEstimateCard estimate={estimate} loading={estimateLoading} error={estimateError} />
+                </div>
                 <span className="agent-detail-label">{t("transit.lineColor")}</span>
                 <span className="agent-detail-value transit-detail__color-value">
                   <ColorSwatchPicker value={lineColor} onChange={setLineColor} presets={TRANSIT_LINE_COLOR_PRESETS} />
@@ -488,7 +542,6 @@ export function TransitDetailPanel({
                   </>
                 )}
               </div>
-              <p className="transit-detail__note">{t("transit.fareNote")}</p>
 
               {/* 保存ツールバー: 左に未保存の注記、右に「元に戻す」「保存」 */}
               <div className="transit-detail__toolbar">
@@ -515,6 +568,22 @@ export function TransitDetailPanel({
                 </div>
               </div>
               {saveError && <p className="transit-detail__error">{saveError}</p>}
+            </section>
+
+            {/* 経路(停留所・経由点の巡回順)の編集。3Dマップ上で行うので、編集パネルを開くボタンだけを置く */}
+            <section className="agent-detail-section">
+              <h3 className="agent-detail-section-title">{t("transit.routeSection")}</h3>
+              <div className="transit-detail__route-row">
+                <span className="transit-detail__route-desc">
+                  {t("transit.routeSummary", {
+                    stops: line.route_points.filter((p) => p.kind === "stop").length,
+                    waypoints: line.route_points.filter((p) => p.kind === "waypoint").length,
+                  })}
+                </span>
+                <button type="button" className="transit-detail__btn transit-detail__btn--ghost" onClick={openRouteEditor}>
+                  {t("transit.editRoute")}
+                </button>
+              </div>
             </section>
 
             {/* 路線の廃止。誤操作を避けるため設定タブの末尾に控えめに置き、2段階で確認する */}
@@ -574,7 +643,13 @@ export function TransitDetailPanel({
         {activeTab === "diagram" && (
           <section className="agent-detail-section">
             {line.stops.length >= 2 ? (
-              <TransitLineDiagram stops={line.stops} edges={line.edges} color={savedColor} running={running} />
+              <TransitLineDiagram
+                stops={line.stops}
+                routePoints={line.route_points}
+                edges={line.edges}
+                color={savedColor}
+                running={running}
+              />
             ) : (
               <p className="agent-detail-muted">{t("transit.noStops")}</p>
             )}

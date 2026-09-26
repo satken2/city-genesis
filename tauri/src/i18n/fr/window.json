@@ -36,6 +36,7 @@
     "terrain_3d_preview": "Aperçu 3D du terrain",
     "transit_management": "Transports publics",
     "transit_creation": "Nouvelle ligne de transport",
+    "transit_route_edit": "Modifier l'itinéraire de la ligne",
     "transit_detail": "Détail de la ligne",
     "prop_placement": "Placement de décors",
     "mashup_edit": "Disposition des annexes",

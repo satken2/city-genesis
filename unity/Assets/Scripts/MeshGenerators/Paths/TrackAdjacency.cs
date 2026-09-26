@@ -25,6 +25,15 @@ public class TrackNeighborInfo
     public float PlatformLeft;
 
     public float PlatformRight;
+
+    /// <summary>
+    /// LRT停留所のホーム区間(Points の始点からの3D累積距離。LrtPlatformParts.ZoneRanges)。無ければ null。
+    /// 結合コリドーの主線路は、相手のこの区間では相手のホーム外縁(LrtPlatformOuter)の外に架線柱を立てる。
+    /// </summary>
+    public List<Vector2> LrtPlatformZones;
+
+    /// <summary>LRT停留所のホーム外縁の中心線からの距離(LrtRoadParts.PlatformOuterOffset。両側)。</summary>
+    public float LrtPlatformOuter;
 }
 
 /// <summary>
@@ -127,6 +136,15 @@ public class TrackCorridorInfo
 
     public bool[] RightPlatformWallOmit;
 
+    /// <summary>
+    /// 左側のLRT停留所のホーム(自道床の外〜ホーム外縁+余裕)の帯に他線路の道床が掛かる点。
+    /// ホームは停留所の位置で決まり線路の配置では動かせないので、この点ではその側のホームを描かない
+    /// (分岐の喉元や並走する線路の本体の上にデッキ・スロープを載せない)。LRTの線路でなければ常に false。
+    /// </summary>
+    public bool[] LeftLrtPlatformBlocked;
+
+    public bool[] RightLrtPlatformBlocked;
+
     /// <summary>点列のどこかに結合区間が存在するか。false のコリドーは生成されない。</summary>
     public bool AnyCoverage;
 
@@ -170,6 +188,30 @@ public class TrackCorridorInfo
     {
         bool[] omit = leftSide ? LeftPlatformWallOmit : RightPlatformWallOmit;
         return GetClearPercentIntervals(i => omit[i], minRunLength);
+    }
+
+    /// <summary>
+    /// 指定側でLRT停留所のホームを描けない連続区間を、スプライン始点からの距離(m。x の昇順)で返す。
+    /// 区間境界はサンプル点の中間位置で、端の点が塞がれていればその先へ無限に伸ばす
+    /// (切断端の外へはみ出すスロープも他線路の上には置かない)。
+    /// </summary>
+    public List<Vector2> GetLrtPlatformBlockedRanges(bool leftSide)
+    {
+        bool[] blocked = leftSide ? LeftLrtPlatformBlocked : RightLrtPlatformBlocked;
+        var result = new List<Vector2>();
+        int n = Points.Count;
+        int i = 0;
+        while (i < n)
+        {
+            if (!blocked[i]) { i++; continue; }
+            int s = i;
+            while (i < n && blocked[i]) i++;
+            int e = i - 1;
+            float from = s == 0 ? float.NegativeInfinity : (CumulativeLength[s - 1] + CumulativeLength[s]) * 0.5f;
+            float to = e == n - 1 ? float.PositiveInfinity : (CumulativeLength[e] + CumulativeLength[e + 1]) * 0.5f;
+            result.Add(new Vector2(from, to));
+        }
+        return result;
     }
 
     /// <summary>
@@ -242,11 +284,16 @@ public static class TrackAdjacency
     // 上面を片側の高さで共有できる誤差だけを許し、道床結合の高さ許容値と区別する。
     private const float PLATFORM_JOIN_MAX_DY = 0.02f;
 
-    /// <summary>コリドーの1メンバー（自分自身または隣接線路）。O は自中心線からの符号付き横位置。</summary>
+    /// <summary>
+    /// コリドーの1メンバー（自分自身または隣接線路）。O は自中心線からの符号付き横位置。
+    /// Reach はコリドーの外端とする半幅で、通常は道床の半幅。LRT停留所のホーム区間では、外端+POLE_MARGIN に
+    /// 立つ架線柱がホーム外縁+PLATFORM_POLE_CLEARANCE に来るよう広げる（連結判定は Half で行う）。
+    /// </summary>
     private struct Member
     {
         public float O;
         public float Half;
+        public float Reach;
         public int Id;
     }
 
@@ -274,8 +321,12 @@ public static class TrackAdjacency
     ///     （道床結合の柱コリドー化と同じ主線路方式）
     ///   - 島式が成立しない近接（張り出し幅の合計を超えるが道床がホームに掛かる等）では
     ///     platform_wall を省略し、デッキを相手道床の手前までクランプする
+    ///
+    /// ownLrtPlatformOuter はLRTの線路(431)の停留所ホーム外縁の中心線からの距離（LRTでなければ0）。
+    /// ホームは停留所の位置で決まるので、どの点でもその帯に他線路の道床が掛かるかだけを記録する
+    /// （Left/RightLrtPlatformBlocked。道床結合はホームの有無に関わらず行う）。
     /// </summary>
-    public static TrackCorridorInfo Compute(int ownPathId, List<Vector3> ownPoints, float ownWidth, float ownWallWidth, float ownPlatformLeft, float ownPlatformRight, List<TrackNeighborInfo> neighbors)
+    public static TrackCorridorInfo Compute(int ownPathId, List<Vector3> ownPoints, float ownWidth, float ownWallWidth, float ownPlatformLeft, float ownPlatformRight, List<TrackNeighborInfo> neighbors, float ownLrtPlatformOuter = 0f)
     {
         if (ownPoints == null || ownPoints.Count < 2 || neighbors == null || neighbors.Count == 0) return null;
 
@@ -303,6 +354,8 @@ public static class TrackAdjacency
             RightDeckJoined = new bool[n],
             LeftPlatformWallOmit = new bool[n],
             RightPlatformWallOmit = new bool[n],
+            LeftLrtPlatformBlocked = new bool[n],
+            RightLrtPlatformBlocked = new bool[n],
         };
 
         float cum = 0f;
@@ -331,6 +384,7 @@ public static class TrackAdjacency
         float cosMaxConvergeAngle = Mathf.Cos(LocalConstants.TRACK_MERGE_MAX_CONVERGE_ANGLE_DEG * Mathf.Deg2Rad);
         bool anyWallBlock = false;
         bool anyPlatform = false;
+        bool anyLrtPlatformBlock = false;
         var members = new List<Member>(neighbors.Count + 1);
 
         for (int i = 0; i < n; i++)
@@ -348,7 +402,7 @@ public static class TrackAdjacency
             info.RightDir[i] = right;
 
             members.Clear();
-            members.Add(new Member { O = 0f, Half = ownHalf, Id = ownPathId });
+            members.Add(new Member { O = 0f, Half = ownHalf, Reach = ownHalf, Id = ownPathId });
 
             // プラットフォームの結合/干渉のサンプル単位の集計（左右それぞれ）。
             // island*   ... 島式結合の相手がいるか・最寄りの相手道床エッジ・最小path_id・島全幅の外縁
@@ -364,7 +418,7 @@ public static class TrackAdjacency
                 TrackNeighborInfo nb = neighbors[j];
                 if (nb?.Points == null || nb.Points.Count < 2) continue;
                 if (!nbBounds[j].Contains(new Vector2(ownPos.x, ownPos.z))) continue;
-                if (!TryClosestPointOnPolylineXZ(nb.Points, ownPos, out Vector3 cp, out Vector3 nbTan, out bool clampedAtPolylineEnd)) continue;
+                if (!TryClosestPointOnPolylineXZ(nb.Points, ownPos, out Vector3 cp, out Vector3 nbTan, out bool clampedAtPolylineEnd, out float nbAlong)) continue;
 
                 // Y方向にも近い（同じ高さ層を走っている）ことを要求する。
                 // 高架と地上、地上と地下トンネルのように層が違う線路は結合しない。
@@ -406,6 +460,23 @@ public static class TrackAdjacency
                     {
                         info.LeftWallBlocked[i] = true;
                         anyWallBlock = true;
+                    }
+                }
+
+                // LRTの停留所ホームの帯（自道床の外〜ホーム外縁+余裕。角度不問）に他線路の道床が掛かるか。
+                // 帯の内側を自道床の縁から取るのは、前後へ続く線路の端の像を拾わないため。
+                if (ownLrtPlatformOuter > 0f && !endClampVirtual)
+                {
+                    float zoneMax = ownLrtPlatformOuter + PLATFORM_ENCROACH_CLEARANCE;
+                    if (o + nbHalf > ownHalf && o - nbHalf < zoneMax)
+                    {
+                        info.RightLrtPlatformBlocked[i] = true;
+                        anyLrtPlatformBlock = true;
+                    }
+                    if (-o + nbHalf > ownHalf && -o - nbHalf < zoneMax)
+                    {
+                        info.LeftLrtPlatformBlocked[i] = true;
+                        anyLrtPlatformBlock = true;
                     }
                 }
 
@@ -484,7 +555,11 @@ public static class TrackAdjacency
 
                 if (Mathf.Abs(o) < 0.01f) continue;
 
-                members.Add(new Member { O = o, Half = nbHalf, Id = nb.PathId });
+                // 相手のLRT停留所のホーム区間では、主線路が立てる架線柱を相手のホーム外縁の外へ出す。
+                float reach = nbHalf;
+                if (nb.LrtPlatformOuter > 0f && LrtPlatformParts.Contains(nb.LrtPlatformZones, nbAlong))
+                    reach = Mathf.Max(reach, nb.LrtPlatformOuter + LrtRoadParts.PLATFORM_POLE_CLEARANCE - TrackPath.POLE_MARGIN);
+                members.Add(new Member { O = o, Half = nbHalf, Reach = reach, Id = nb.PathId });
             }
 
             // プラットフォームの結合/干渉の確定（道床結合のメンバー有無に関わらず反映する）。
@@ -569,8 +644,8 @@ public static class TrackAdjacency
             info.AnyCoverage = true;
             // 島式ホームの柱コリドー化（上の確定処理）が反対側で先に張り出しを広げている
             // ことがあるため、上書きではなく最大値で合成する。
-            info.LeftExtent[i] = Mathf.Max(info.LeftExtent[i], -(members[lo].O - members[lo].Half));
-            info.RightExtent[i] = Mathf.Max(info.RightExtent[i], members[hi].O + members[hi].Half);
+            info.LeftExtent[i] = Mathf.Max(info.LeftExtent[i], -(members[lo].O - members[lo].Reach));
+            info.RightExtent[i] = Mathf.Max(info.RightExtent[i], members[hi].O + members[hi].Reach);
 
             int minId = ownPathId;
             for (int m = lo; m <= hi; m++)
@@ -593,7 +668,7 @@ public static class TrackAdjacency
             }
         }
 
-        return (info.AnyCoverage || anyWallBlock || anyPlatform) ? info : null;
+        return (info.AnyCoverage || anyWallBlock || anyPlatform || anyLrtPlatformBlock) ? info : null;
     }
 
     /// <summary>点列のXZ AABBを margin 分拡張した Rect を返す（点列不正時は空Rect）。</summary>
@@ -617,17 +692,19 @@ public static class TrackAdjacency
     /// clampedAtPolylineEnd は、最近接点がポリラインの始端・終端の端点への
     /// クランプだった（真の垂線の足が端点上またはポリラインの外にある）場合に true。
     /// 交差点ハルで切り詰められた相手の端点が虚像の隣接として採用されるのを
-    /// 呼び出し側が除外するために使う。
+    /// 呼び出し側が除外するために使う。along は最近接点までの点列の3D累積距離。
     /// </summary>
-    private static bool TryClosestPointOnPolylineXZ(List<Vector3> points, Vector3 query, out Vector3 closest, out Vector3 tangent, out bool clampedAtPolylineEnd)
+    private static bool TryClosestPointOnPolylineXZ(List<Vector3> points, Vector3 query, out Vector3 closest, out Vector3 tangent, out bool clampedAtPolylineEnd, out float along)
     {
         closest = query;
         tangent = Vector3.forward;
         clampedAtPolylineEnd = false;
+        along = 0f;
         float bestSq = float.MaxValue;
         bool found = false;
+        float start = 0f;
 
-        for (int i = 0; i < points.Count - 1; i++)
+        for (int i = 0; i < points.Count - 1; i++, start += Vector3.Distance(points[i - 1], points[i]))
         {
             Vector3 a = points[i];
             Vector3 b = points[i + 1];
@@ -650,6 +727,7 @@ public static class TrackAdjacency
                 tan.y = 0f;
                 tangent = tan.sqrMagnitude > 1e-8f ? tan.normalized : Vector3.forward;
                 clampedAtPolylineEnd = (i == 0 && tRaw <= 0f) || (i == points.Count - 2 && tRaw >= 1f);
+                along = start + Vector3.Distance(a, b) * t;
                 found = true;
             }
         }

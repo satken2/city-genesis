@@ -51,7 +51,7 @@
     "currentAmount": "Current Amount",
     "consumptionTrend": "Consumption Trend",
     "amountTrend": "Amount Trend",
-    "recoveryAmount": "Recovery",
+    "recoveryAmount": "Recovery / epoch",
     "maxAmount": "Max Amount",
     "unknownResource": "Unknown Resource"
   },

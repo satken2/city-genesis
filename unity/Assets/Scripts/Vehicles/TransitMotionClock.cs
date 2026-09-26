@@ -9,9 +9,12 @@ public sealed class TransitMotionClock
     public readonly List<double> Times = new();
     public readonly List<double> Distances = new();
     public readonly List<int> JourneyIndices = new();
-    public readonly List<bool> Returning = new();
+    /// <summary>各区間で編成の向きが先頭区間と逆か(コアの journeys.reversed)。運転台と車両の並びの反転に使う。</summary>
+    public readonly List<bool> Reversed = new();
     public double Duration { get; private set; }
     public double Length { get; private set; }
+    /// <summary>1周の継ぎ目(先頭の停留所)で折り返さずに走り続ける路線か(環状運転など)。</summary>
+    public bool Closed { get; private set; }
 
     public TransitMotionClock(List<TransitJourney> journeys)
     {
@@ -23,11 +26,12 @@ public sealed class TransitMotionClock
             {
                 if (step.duration_seconds <= 0 || double.IsNaN(step.duration_seconds) || double.IsInfinity(step.duration_seconds)) continue;
                 Times.Add(Duration); Distances.Add(Length); Steps.Add(step);
-                JourneyIndices.Add(j); Returning.Add(journeys[j].returning);
+                JourneyIndices.Add(j); Reversed.Add(journeys[j].reversed);
                 Duration += step.duration_seconds + Math.Max(0, step.dwell_seconds);
                 Length += step.length_m;
             }
         }
+        Closed = Steps.Count > 0 && journeys.Count > 0 && !journeys[0].turnback;
     }
 
     public int AtTime(double seconds, out double distance, out bool stopped)

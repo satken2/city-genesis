@@ -62,6 +62,9 @@ public static class LrtQA
             foreach (int id in new[] { 222, 242, 303, 431 }) { PlatformModels(id); Platforms(id); }
             PlatformFallback();
             ElevatedPlatformWalls();
+            PlatformClip();
+            foreach (int id in new[] { 222, 242, 303 }) CornerPlatforms(id);
+            NeighborPlatforms();
             foreach (int id in new[] { 303, 304, 305 }) Mall(id);
             ExportPrefabs();
             File.WriteAllText(root + "/Temp/LrtUnityQA/result.txt", "PASS LRT: " + checks + " checks; FBX, double track straight/curve/slope, all LRT connections, buffer stops, stop index, stop platforms, wrapper prefabs");
@@ -122,13 +125,21 @@ public static class LrtQA
         Check(Mathf.Abs(Float("PlatformOuterOffset", PathData(id)) - (ExpectedOffset(id) + 1.35f + width)) < .0001f, "platform outer edge " + id);
         Check(Mathf.Abs(Float("PlatformSurfaceAboveSpline", id) - ((id == 431 ? .475f : .125f) + .3f)) < .0001f, "platform surface " + id);
         Check(Mathf.Abs(Float("PlatformRampLength", id) - (id == 431 ? 6f : 3f)) < .0001f, "platform ramp " + id);
-        // 舗装・道床は複線の全幅で著作し、マスター幅(303=12m、431=7m)へ伸縮させない。
+        // 舗装・道床は複線の全幅(303=12m、431=7m)で著作する。RoadPathは最上面(最高点から2mm以内)の幅を
+        // マスター幅へ合わせるので、最上面も原点高さで全幅に届き、描画の横倍率が1になること。
         if (id == 303 || id == 431)
+        {
+            float full = id == 303 ? 12f : 7f;
             foreach (string body in id == 431 ? new[] { "body", "body_close" } : new[] { "body" })
             {
-                var bounds = ModelMesh(id, body).bounds;
-                Check(Mathf.Abs(bounds.size.x - (id == 303 ? 12f : 7f)) < .01f && Mathf.Abs(bounds.center.x) < .01f, $"{body} width {id}: {bounds.size.x}");
+                var bodyMesh = ModelMesh(id, body);
+                var surface = (Bounds)asm.GetType("RoadPath").GetMethod("GetBodySurfaceBounds").Invoke(null, new object[] { bodyMesh });
+                Check(Mathf.Abs(bodyMesh.bounds.size.x - full) < .01f && Mathf.Abs(bodyMesh.bounds.center.x) < .01f, $"{body} width {id}: {bodyMesh.bounds.size.x}");
+                Check(Mathf.Abs(surface.size.x - full) < .01f && Mathf.Abs(surface.center.x) < .01f && Mathf.Abs(bodyMesh.bounds.max.y) < .002f,
+                    $"{body} surface {id}: width {surface.size.x} at {bodyMesh.bounds.max.y}");
             }
+            DrawnBody(id, full);
+        }
         if (id == 303) MallPole((float)parts.GetField("MALL_POLE_OFFSET").GetRawConstantValue());
         if (id == 431) return;
         mesh = ((GameObject)models[$"Models/Paths/p{id}/lrt_wire"]).GetComponent<MeshFilter>().sharedMesh;
@@ -315,6 +326,14 @@ public static class LrtQA
                 Check(placed.All(t => t.position.z < 25f || t.position.z > 55f), "mall equipment kept clear of platform");
                 Check(go.GetComponentsInChildren<Transform>().Count(t => t.name == "LrtShelter") == 2, "mall platform shelters");
                 UnityEngine.Object.DestroyImmediate(go);
+                // 終端近くの停留所(デッキ61〜83m)は切断端の80mまで描き、点設備を置かない区間(57m〜)もそれに追随する。
+                UseStops(Stop(.9f, 22));
+                go = Generate(303, path, points);
+                var decks = go.GetComponentsInChildren<MeshRenderer>().Where(r => r.name.EndsWith("/lrt_platform")).ToArray();
+                Check(decks.Length == 2 && decks.All(d => Mathf.Abs(d.bounds.min.z - 61) < .1f && Mathf.Abs(d.bounds.max.z - 80) < .1f), "mall platform clamped to cut end");
+                placed = go.GetComponentsInChildren<Transform>().Where(t => equipment.Any(e => t.name.StartsWith(e + "("))).ToArray();
+                Check(placed.Length > 0 && placed.All(t => t.position.z < 57f), "mall equipment kept clear of clamped platform");
+                UnityEngine.Object.DestroyImmediate(go);
             }
             finally { UseStops(); }
         }
@@ -388,8 +407,8 @@ public static class LrtQA
         for (float z = from; z <= to + .001f; z += 1f) line.Add(new Vector3(0, 0, z));
         return line;
     }
-    static IList Layout(IList stopList, List<Vector3> full, List<Vector3> trimmed, List<Vector3> drawn, float splineLength, float ramp) =>
-        (IList)PlatformParts.GetMethod("Layout").Invoke(null, new object[] { stopList, full, trimmed, drawn, splineLength, ramp });
+    static IList Layout(IList stopList, List<Vector3> full, List<Vector3> trimmed, List<Vector3> drawn, float splineLength) =>
+        (IList)PlatformParts.GetMethod("Layout").Invoke(null, new object[] { stopList, full, trimmed, drawn, splineLength });
     static float Number(object target, string field) => Convert.ToSingle(target.GetType().GetField(field).GetValue(target));
     static void ExpectSpan(IList spans, int index, float from, float to, bool rampFrom, bool rampTo, string label)
     {
@@ -404,28 +423,54 @@ public static class LrtQA
     {
         // 未切断100m・切断済み10〜90m。停止中心50m・デッキ22mは、描画点列(=切断済み)の始点から29〜51m。
         List<Vector3> full = Line(0, 100), trimmed = Line(10, 90);
-        var spans = Layout(StopList(Stop(.5f, 22)), full, trimmed, trimmed, 80, 3);
+        var spans = Layout(StopList(Stop(.5f, 22)), full, trimmed, trimmed, 80);
         Check(spans.Count == 1, "single platform"); ExpectSpan(spans, 0, 29, 51, true, true, "single platform");
-        ExpectSpan(Layout(StopList(Stop(.5f, 22)), full, trimmed, trimmed, 160, 3), 0, 58, 102, true, true, "spline length scale");
+        ExpectSpan(Layout(StopList(Stop(.5f, 22)), full, trimmed, trimmed, 160), 0, 58, 102, true, true, "spline length scale");
         // 重なりと2m未満の隙間は併合し、2m以上なら別のホームにする。
-        spans = Layout(StopList(Stop(.5f, 22), Stop(.68f, 12)), full, trimmed, trimmed, 80, 3);
+        spans = Layout(StopList(Stop(.5f, 22), Stop(.68f, 12)), full, trimmed, trimmed, 80);
         Check(spans.Count == 1, "merge gap < 2m"); ExpectSpan(spans, 0, 29, 64, true, true, "merge gap < 2m");
-        Check(Layout(StopList(Stop(.5f, 22), Stop(.72f, 12)), full, trimmed, trimmed, 80, 3).Count == 2, "separate gap >= 2m");
-        spans = Layout(StopList(Stop(.5f, 32), Stop(.5f, 22)), full, trimmed, trimmed, 80, 3);
+        Check(Layout(StopList(Stop(.5f, 22), Stop(.72f, 12)), full, trimmed, trimmed, 80).Count == 2, "separate gap >= 2m");
+        spans = Layout(StopList(Stop(.5f, 32), Stop(.5f, 22)), full, trimmed, trimmed, 80);
         Check(spans.Count == 1, "shared stop"); ExpectSpan(spans, 0, 24, 56, true, true, "shared stop keeps longest");
-        // 両端スロープぶんを残して切断済み区間へ収め、収めた後に4m未満なら描かない。
-        ExpectSpan(Layout(StopList(Stop(.1f, 22)), full, trimmed, trimmed, 80, 3), 0, 3, 11, true, true, "clamped to cut");
-        ExpectSpan(Layout(StopList(Stop(.1f, 22)), full, trimmed, trimmed, 80, 6), 0, 6, 11, true, true, "clamped with 431 ramp");
-        Check(Layout(StopList(Stop(.05f, 22)), full, trimmed, trimmed, 80, 3).Count == 0, "too short after clamp");
-        // トンネルで分けた描画区間では区間内だけを描き、区間で切られた端にはスロープを置かない。
-        ExpectSpan(Layout(StopList(Stop(.5f, 22)), full, trimmed, Line(40, 90), 50, 3), 0, 0, 21, false, true, "tunnel run");
-        Check(Layout(StopList(Stop(.5f, 22)), full, trimmed, Line(70, 90), 20, 3).Count == 0, "platform outside run");
-        // ホーム区間(デッキ+スロープ+余裕)は重なれば1つにまとめる。
-        var zones = (IList)PlatformParts.GetMethod("ZoneRanges").Invoke(null, new object[] {
-            Layout(StopList(Stop(.5f, 22), Stop(.72f, 12)), full, trimmed, trimmed, 80, 3), 3f, 1f });
+        // デッキは切断済み区間の端まで使い(スロープは切断端の外へ出る)、収めた後に4m未満なら描かない。
+        ExpectSpan(Layout(StopList(Stop(.1f, 22)), full, trimmed, trimmed, 80), 0, 0, 11, true, true, "clamped to cut start");
+        ExpectSpan(Layout(StopList(Stop(.9f, 22)), full, trimmed, trimmed, 80), 0, 69, 80, true, true, "clamped to cut end");
+        ExpectSpan(Layout(StopList(Stop(.05f, 22)), full, trimmed, trimmed, 80), 0, 0, 6, true, true, "short deck kept at cut");
+        Check(Layout(StopList(Stop(.06f, 12)), full, trimmed, trimmed, 80).Count == 0, "too short after clamp");
+        // トンネルで分けた描画区間では区間内だけを描き、区間で切られた端にはスロープを置かない(切断端には置く)。
+        ExpectSpan(Layout(StopList(Stop(.5f, 22)), full, trimmed, Line(40, 90), 50), 0, 0, 21, false, true, "tunnel run");
+        ExpectSpan(Layout(StopList(Stop(.9f, 22)), full, trimmed, Line(40, 90), 50), 0, 39, 50, true, true, "tunnel run clamped to cut end");
+        ExpectSpan(Layout(StopList(Stop(.1f, 22)), full, trimmed, Line(10, 40), 30), 0, 0, 11, true, true, "run before tunnel clamped to cut start");
+        ExpectSpan(Layout(StopList(Stop(.4f, 22)), full, trimmed, Line(10, 40), 30), 0, 19, 30, true, false, "run before tunnel");
+        Check(Layout(StopList(Stop(.5f, 22)), full, trimmed, Line(70, 90), 20).Count == 0, "platform outside run");
+        // ホーム区間(デッキ+スロープ+余裕)は重なれば1つにまとめ、切断端のデッキではスプラインの外まで伸びる。
+        var zoneRanges = PlatformParts.GetMethod("ZoneRanges");
+        var zones = (IList)zoneRanges.Invoke(null, new object[] { Layout(StopList(Stop(.5f, 22), Stop(.72f, 12)), full, trimmed, trimmed, 80), 3f, 1f });
         Check(zones.Count == 1 && Mathf.Abs(((Vector2)zones[0]).x - 25) < .01f && Mathf.Abs(((Vector2)zones[0]).y - 72) < .01f, "platform zones merged");
+        zones = (IList)zoneRanges.Invoke(null, new object[] { Layout(StopList(Stop(.9f, 22)), full, trimmed, trimmed, 80), 3f, 1f });
+        Check(zones.Count == 1 && Mathf.Abs(((Vector2)zones[0]).x - 65) < .01f && Mathf.Abs(((Vector2)zones[0]).y - 84) < .01f, "platform zone follows clamped deck");
     }
     static Mesh ModelMesh(int id, string part) => ((GameObject)models[$"Models/Paths/p{id}/{part}"]).GetComponent<MeshFilter>().sharedMesh;
+    /// <summary>直線に敷いた舗装・道床が通常・接写ともマスター幅で描かれ、上面がスプライン+BODY_ABOVE_SPLINEにあること。</summary>
+    static void DrawnBody(int id, float width)
+    {
+        var context = asm.GetType("PathDrawContext");
+        float surface = (float)asm.GetType("RoadPartHeights").GetField("BODY_ABOVE_SPLINE").GetRawConstantValue();
+        foreach (string lod in new[] { "Normal", "Close" })
+        {
+            context.GetMethod("Begin").Invoke(null, new[] { Enum.Parse(asm.GetType("DrawLod"), lod), 0.0, 1.0 });
+            try
+            {
+                var go = Generate(id, PathData(id), Straight());
+                var bodies = go.GetComponentsInChildren<MeshRenderer>().Where(r => r.name.EndsWith("/body")).ToArray();
+                Check(bodies.Length > 0 && bodies.All(r => Mathf.Abs(r.bounds.size.x - width) < .02f && Mathf.Abs(r.bounds.center.x) < .02f
+                    && Mathf.Abs(r.bounds.max.y - surface) < .005f),
+                    $"drawn body {id} {lod}: " + string.Join(", ", bodies.Select(r => $"{r.bounds.size.x}@{r.bounds.max.y}")));
+                UnityEngine.Object.DestroyImmediate(go);
+            }
+            finally { context.GetMethod("End").Invoke(null, null); }
+        }
+    }
     static float PlatformWidth(int id) => id == 222 || id == 242 ? 1.2f : 2f;
     static void PlatformModels(int id)
     {
@@ -440,12 +485,23 @@ public static class LrtQA
         var end = ModelMesh(id, "lrt_platform_end");
         Check(Mathf.Abs(end.bounds.min.x + width / 2) < .02f && Mathf.Abs(end.bounds.max.x - width / 2) < .02f, "ramp model width " + id);
         Check(end.bounds.min.z > -.02f && Mathf.Abs(end.bounds.max.z - ramp) < .05f, "ramp model length " + id);
-        // 下端は前後の地面に揃う(埋め込み軌道は路面=踏面-0.025m、431はスプライン面=踏面-0.475m)。
+        // 先端の上面は、埋め込み軌道ではレール踏面+0.01m(路面+0.035m)、431はスプライン面(踏面-0.475m)。
+        // 側面の下端はどちらも地面より下へ埋める。
         var roadParts = asm.GetType("LrtRoadParts");
-        float foot = id == 431 ? -(float)roadParts.GetMethod("RailTopAboveSpline").Invoke(null, new object[] { id })
-            : -(float)roadParts.GetField("EMBEDDED_RAIL_TOP").GetRawConstantValue();
+        float railTop = (float)roadParts.GetMethod("RailTopAboveSpline").Invoke(null, new object[] { id });
+        float ground = id == 431 ? -railTop : -(float)roadParts.GetField("EMBEDDED_RAIL_TOP").GetRawConstantValue();
+        float foot = id == 431 ? ground : .01f;
         float footTop = end.vertices.Where(v => v.z > ramp - .05f).Max(v => v.y);
-        Check(end.vertices.Where(v => v.z < .05f).Max(v => v.y) > .28f && Mathf.Abs(footTop - foot) < .01f, $"ramp model slope {id}: foot {footTop} != {foot}");
+        Check(end.vertices.Where(v => v.z < .05f).Max(v => v.y) > .28f && Mathf.Abs(footTop - foot) < .002f, $"ramp model slope {id}: foot {footTop} != {foot}");
+        Check(end.bounds.min.y < ground - .05f, $"ramp model buried {id}: {end.bounds.min.y}");
+        // ホームの下を通る車線境界線の破線(スプライン+LINE_ABOVE_SPLINE+CENTER_LINE_EXTRA に line を置く)より先端を高くする。
+        if (models.Contains($"Models/Paths/p{id}/line"))
+        {
+            var heights = asm.GetType("RoadPartHeights");
+            float dash = (float)heights.GetField("LINE_ABOVE_SPLINE").GetRawConstantValue()
+                + (float)heights.GetField("CENTER_LINE_EXTRA").GetRawConstantValue() + ModelMesh(id, "line").bounds.max.y;
+            Check(footTop > dash - railTop, $"ramp foot covers lane markings {id}: {footTop} <= {dash - railTop}");
+        }
         // 上屋は設置面原点で、床に接する柱・脚・背板は背面(+X)側だけにあり、軌道側(-X)が開いている。
         var shelter = ModelMesh(id, "lrt_shelter");
         Check(Mathf.Abs(shelter.bounds.min.y) < .02f && shelter.bounds.size.x <= width && shelter.bounds.max.z < 2.05f && shelter.bounds.min.z > -2.05f,
@@ -494,6 +550,9 @@ public static class LrtQA
                 bool start = t.position.z < 60;
                 Check(Mathf.Abs(Mathf.Abs(t.position.x) - (inner + width / 2)) < .02f && Mathf.Abs(t.position.y - rail) < .02f, "ramp position " + id);
                 Check(Mathf.Abs(t.position.z - (start ? 49 : 71)) < .05f && Vector3.Dot(t.forward, start ? Vector3.back : Vector3.forward) > .999f, "ramp faces outward " + id);
+                // 先端の上面は埋め込み軌道でレール踏面+0.01m(路面0.1m+0.035m)、431でスプライン面。
+                float foot = RampFootY(t, id == 431 ? 6f : 3f);
+                Check(Mathf.Abs(foot - (id == 431 ? 0f : rail + .01f)) < .002f, $"ramp foot height {id}: {foot}");
             }
             float back = ModelMesh(id, "lrt_shelter").bounds.max.x;
             var shelters = go.GetComponentsInChildren<Transform>().Where(t => t.name == "LrtShelter").ToArray();
@@ -515,6 +574,7 @@ public static class LrtQA
                 }
             }
             UnityEngine.Object.DestroyImmediate(go);
+            PlatformAtCutEnd(id);
             // 停留所が無いパスにはホームを描かない。
             UseStops();
             go = Generate(id, PathData(id), Straight());
@@ -522,6 +582,40 @@ public static class LrtQA
             UnityEngine.Object.DestroyImmediate(go);
         }
         finally { UseStops(); }
+    }
+    static float RampFootY(Transform ramp, float length) =>
+        ramp.GetComponent<MeshFilter>().sharedMesh.vertices.Where(v => v.z > length - .05f).Max(v => ramp.TransformPoint(v).y);
+    static void PlatformAtCutEnd(int id)
+    {
+        // 120mの終端近くに4両(停止中心102m・デッキ81〜123m)。デッキは切断端の120mまで、終端側のスロープは端の外へ出る。
+        float ramp = id == 431 ? 6f : 3f;
+        UseStops(Stop(.85f, 42));
+        var go = Generate(id, PathData(id), Straight());
+        try
+        {
+            var decks = go.GetComponentsInChildren<MeshRenderer>().Where(r => r.name.EndsWith("/lrt_platform")).ToArray();
+            Check(decks.Length == 2 && decks.All(d => Mathf.Abs(d.bounds.min.z - 81) < .1f && Mathf.Abs(d.bounds.max.z - 120) < .1f),
+                $"platform clamped to cut end {id}: " + string.Join(", ", decks.Select(d => d.bounds.min.z + ".." + d.bounds.max.z)));
+            var ends = go.GetComponentsInChildren<MeshRenderer>().Where(r => r.name == "LrtPlatformEnd").ToArray();
+            Check(ends.Length == 4, "platform ramps at cut end " + id);
+            foreach (var r in ends)
+            {
+                bool start = r.transform.position.z < 100;
+                Check(Mathf.Abs(r.transform.position.z - (start ? 81 : 120)) < .05f, $"ramp at clamped deck end {id}: {r.transform.position.z}");
+                if (!start) Check(Mathf.Abs(r.bounds.max.z - (120 + ramp)) < .05f, $"ramp overhangs cut end {id}: {r.bounds.max.z}");
+            }
+            Check(go.GetComponentsInChildren<Transform>().Count(t => t.name == "LrtShelter" && Mathf.Abs(t.position.z - 100.5f) < .05f) == 2, "shelters on clamped deck " + id);
+            if (id == 431)
+            {
+                // ホーム区間(81−6−2=73m〜)に入る75m・105mの架線柱は外縁+0.5mへ移し、15m・45mは道床端+0.5mのまま。
+                float outer = ExpectedOffset(id) + 1.35f + PlatformWidth(id);
+                var poles = go.GetComponentsInChildren<Transform>().Where(t => t.name == "pole(Clone)").ToArray();
+                Check(poles.Any(t => t.position.z > 73) && poles.Any(t => t.position.z < 73), "431 poles around clamped platform");
+                foreach (var t in poles)
+                    Check(Mathf.Abs(Mathf.Abs(t.position.x) - (t.position.z > 73 ? outer + .5f : 4f)) < .02f, $"431 pole offset at cut end z={t.position.z} x={t.position.x}");
+            }
+        }
+        finally { UnityEngine.Object.DestroyImmediate(go); UseStops(); }
     }
     static void PlatformFallback()
     {
@@ -574,8 +668,170 @@ public static class LrtQA
             Check(walls.All(w => w.bounds.max.z < 41.5f || w.bounds.min.z > 78.5f), "elevated walls omitted at platform");
             Check(go.GetComponentsInChildren<MeshRenderer>().Count(r => r.name.EndsWith("/lrt_platform")) == 2, "elevated platforms");
             UnityEngine.Object.DestroyImmediate(go);
+            // 切断端まで伸ばしたデッキ(81〜120m)では、高欄を省く区間も73mから終端までになる。
+            UseStops(Stop(.85f, 42));
+            go = Generate(431, PathData(431), Straight(10f));
+            walls = go.GetComponentsInChildren<MeshRenderer>().Where(r => r.name.EndsWith("/wall")).ToArray();
+            Check(walls.Length > 0 && walls.All(w => w.bounds.max.z < 73.5f), "elevated walls omitted up to cut end");
+            UnityEngine.Object.DestroyImmediate(go);
         }
         finally { UseStops(); Master(431); }
+    }
+    static object SpanOf(float from, float to, bool rampFrom = true, bool rampTo = true)
+    {
+        var span = Activator.CreateInstance(asm.GetType("LrtPlatformParts+Span"));
+        Set(span, "From", from); Set(span, "To", to); Set(span, "RampAtFrom", rampFrom); Set(span, "RampAtTo", rampTo);
+        return span;
+    }
+    static IList Clip(object span, List<Vector2> blocked, float ramp) =>
+        (IList)PlatformParts.GetMethod("Clip").Invoke(null, new object[] { span, blocked, ramp });
+    static void PlatformClip()
+    {
+        // 他の線路で切られた端にはスロープを置かず、本来の端でもスロープの踏み面が塞がれていれば置かない。除いて残った4m未満の切れ端は捨てる。
+        var span = SpanOf(10, 40);
+        ExpectSpan(Clip(span, new List<Vector2> { new Vector2(float.NegativeInfinity, 15) }, 6), 0, 15, 40, false, true, "clip start");
+        var pieces = Clip(span, new List<Vector2> { new Vector2(20, 25) }, 6);
+        Check(pieces.Count == 2, "clip middle");
+        ExpectSpan(pieces, 0, 10, 20, true, false, "clip middle first"); ExpectSpan(pieces, 1, 25, 40, false, true, "clip middle second");
+        ExpectSpan(Clip(span, new List<Vector2> { new Vector2(43, float.PositiveInfinity) }, 6), 0, 10, 40, true, false, "ramp footprint blocked");
+        ExpectSpan(Clip(span, new List<Vector2> { new Vector2(47, float.PositiveInfinity) }, 6), 0, 10, 40, true, true, "ramp footprint clear");
+        Check(Clip(span, new List<Vector2> { new Vector2(12, 38) }, 6).Count == 0, "clipped pieces too short");
+        // 何も除かない区間は、トンネルの描画区間で切れた4m未満の区間もそのまま返す。
+        ExpectSpan(Clip(SpanOf(10, 13, false, true), null, 6), 0, 10, 13, false, true, "clip keeps short run piece");
+    }
+    // 角のある道路の検証に使う折れ線(0→60mで30°右へ曲がり、さらに60m)。CornerPoint は距離→点、CornerAlong は点→距離。
+    static readonly Vector3 CornerDirection = new Vector3(Mathf.Sin(30f * Mathf.Deg2Rad), 0, Mathf.Cos(30f * Mathf.Deg2Rad));
+    static Vector3 CornerPoint(float distance) => distance <= 60 ? new Vector3(0, 0, distance) : new Vector3(0, 0, 60) + CornerDirection * (distance - 60);
+    static float CornerAlong(Vector3 p)
+    {
+        var flat = new Vector3(p.x, 0, p.z);
+        float first = Mathf.Clamp(flat.z, 0, 60), second = Mathf.Clamp(Vector3.Dot(flat - CornerPoint(60), CornerDirection), 0, 60);
+        return (flat - CornerPoint(first)).sqrMagnitude <= (flat - CornerPoint(60 + second)).sqrMagnitude ? first : 60 + second;
+    }
+    static void CornerPlatforms(int id)
+    {
+        // curved=false で角のある道路の角をまたぐ4両(停止中心66m・デッキ45〜87m)は、角で切れず各側1本のデッキになり、
+        // スロープは本来の両端だけ、上屋は各側1基。303 の点設備はパス全体で求めたホーム区間(41〜91m)の外にだけ置く
+        // (角の後ろのセグメントでも、その始点からの距離へ写した区間を避ける)。
+        Master(id);
+        var path = PathData(id);
+        string[] fields = { "streetlight_type", "street_tree_type", "bench_type", "bin_type", "planter_type", "advert_type" };
+        if (id == 303)
+        {
+            Set(masters[id], "tree_spacing", 24f);
+            foreach (string f in fields) { Set(masters[id], f + "_allowed", true); Set(path, f, 1); }
+        }
+        Vector3 end = CornerPoint(120);
+        Set(path, "curved", false);
+        Set(path, "end_point", new List<object> { end.x, 0f, end.z });
+        Set(path, "waypoints", new List<object> { new Dictionary<string, object> { { "position", new List<object> { 0f, 0f, 60f } } } });
+        UseStops(Stop(.55f, 42));
+        try
+        {
+            var go = Generate(id, path, new List<Vector3> { Vector3.zero, CornerPoint(60), end });
+            float rail = .125f, lateral = ExpectedOffset(id) + 1.35f + PlatformWidth(id) / 2;
+            var decks = go.GetComponentsInChildren<MeshRenderer>().Where(r => r.name.EndsWith("/lrt_platform")).ToArray();
+            Check(decks.Length == 2 && decks.All(d => d.bounds.min.z < 45.5f && d.bounds.max.z > 80f),
+                $"corner platform continuous {id}: " + string.Join(", ", decks.Select(d => d.bounds.ToString())));
+            var ends = go.GetComponentsInChildren<Transform>().Where(t => t.name == "LrtPlatformEnd").ToArray();
+            Check(ends.Length == 4, $"corner platform ramps {id}: {ends.Length}");
+            foreach (float distance in new[] { 45f, 87f })
+            {
+                Vector3 forward = distance < 60 ? Vector3.forward : CornerDirection, right = Vector3.Cross(Vector3.up, forward);
+                foreach (int side in new[] { -1, 1 })
+                {
+                    Vector3 expected = CornerPoint(distance) + right * (side * lateral) + Vector3.up * rail;
+                    Check(ends.Count(t => (t.position - expected).magnitude < .05f) == 1,
+                        $"corner ramp at {distance} side {side} {id}: expected {expected}, got " + string.Join(", ", ends.Select(t => t.position.ToString("F3"))));
+                }
+            }
+            var shelters = go.GetComponentsInChildren<Transform>().Where(t => t.name == "LrtShelter").ToArray();
+            Check(shelters.Length == 2 && shelters.All(t => Mathf.Abs(CornerAlong(t.position) - 66) < .05f), $"corner platform shelters {id}: {shelters.Length}");
+            if (id == 303)
+            {
+                string[] equipment = { "bench", "bin", "planter", "advert", "tree", "streetlight" };
+                var placed = go.GetComponentsInChildren<Transform>().Where(t => equipment.Any(e => t.name.StartsWith(e + "("))).ToArray();
+                Check(placed.Any(t => CornerAlong(t.position) < 41) && placed.Any(t => CornerAlong(t.position) > 91), "corner mall equipment outside platform");
+                foreach (var t in placed)
+                    Check(CornerAlong(t.position) < 41.05f || CornerAlong(t.position) > 90.95f, $"corner mall equipment kept clear: {t.name} at {CornerAlong(t.position)}");
+            }
+            UnityEngine.Object.DestroyImmediate(go);
+        }
+        finally { UseStops(); Master(id); }
+    }
+    // 近接線路。TrackAdjacency.NeighborProvider は設定した相手をそのまま返す。
+    static readonly List<object> trackNeighbors = new List<object>();
+    static List<T> TrackNeighbors<TPath, T>(TPath path) => trackNeighbors.Cast<T>().ToList();
+    static void UseTrackNeighbors(params object[] items)
+    {
+        trackNeighbors.Clear(); trackNeighbors.AddRange(items);
+        var provider = asm.GetType("TrackAdjacency").GetField("NeighborProvider");
+        provider.SetValue(null, items.Length == 0 ? null : Delegate.CreateDelegate(provider.FieldType,
+            typeof(LrtQA).GetMethod("TrackNeighbors", BindingFlags.Static | BindingFlags.NonPublic)
+                .MakeGenericMethod(asm.GetType("GeneratedModels.PathSummary"), asm.GetType("TrackNeighborInfo"))));
+    }
+    static object TrackNeighbor(int id, List<Vector3> points, List<Vector2> zones = null)
+    {
+        var info = Activator.CreateInstance(asm.GetType("TrackNeighborInfo"));
+        Set(info, "PathId", id); Set(info, "Points", points); Set(info, "Width", 7f);
+        if (zones != null) { Set(info, "LrtPlatformZones", zones); Set(info, "LrtPlatformOuter", ExpectedOffset(431) + 1.35f + PlatformWidth(431)); }
+        return info;
+    }
+    static void NeighborPlatforms()
+    {
+        Master(431);
+        float outer = ExpectedOffset(431) + 1.35f + PlatformWidth(431);
+        List<Vector3> Offset(float x) => Straight().Select(p => p + new Vector3(x, 0, 0)).ToList();
+        MeshRenderer[] Decks(GameObject go) => go.GetComponentsInChildren<MeshRenderer>().Where(r => r.name.EndsWith("/lrt_platform")).ToArray();
+        Transform[] Named(GameObject go, string name) => go.GetComponentsInChildren<Transform>().Where(t => t.name == name).ToArray();
+        UseStops(Stop(.5f, 22));
+        try
+        {
+            // 道床の隙間1mで並走する431の側は、道床がホーム外縁+0.3mより近いのでホームを描かない。
+            // 反対側は通常どおり(デッキ49〜71m・スロープ2基・上屋1基)。柱はコリドーの主線路(id=0)が立てる。
+            UseTrackNeighbors(TrackNeighbor(0, Offset(-8)));
+            var go = Generate(431, PathData(431), Straight());
+            var decks = Decks(go);
+            Check(decks.Length == 1 && decks[0].bounds.center.x > 0 && Mathf.Abs(decks[0].bounds.min.z - 49) < .1f && Mathf.Abs(decks[0].bounds.max.z - 71) < .1f,
+                "platform omitted beside parallel track: " + string.Join(", ", decks.Select(d => d.bounds.ToString())));
+            Check(Named(go, "LrtPlatformEnd").Length == 2 && Named(go, "LrtPlatformEnd").All(t => t.position.x > 0), "ramps only on free side");
+            Check(Named(go, "LrtShelter").Length == 1 && Named(go, "LrtShelter")[0].position.x > 0, "shelter only on free side");
+            Check(Named(go, "pole(Clone)").Length == 0, "coupled non-primary places no poles");
+            UnityEngine.Object.DestroyImmediate(go);
+            // 隙間3mなら相手の道床はホーム外縁+0.3mより遠いので両側に描く。
+            UseTrackNeighbors(TrackNeighbor(0, Offset(-10)));
+            go = Generate(431, PathData(431), Straight());
+            Check(Decks(go).Length == 2, "platforms kept beside distant parallel track");
+            UnityEngine.Object.DestroyImmediate(go);
+            // 主線路(id=0)は、相手(id=1)のホーム区間(41〜79m)では相手のホーム外縁+0.5mの外に柱を立て、区間外は相手の道床端+0.5m。
+            UseStops();
+            UseTrackNeighbors(TrackNeighbor(1, Offset(8), new List<Vector2> { new Vector2(41, 79) }));
+            go = Generate(431, PathData(431, 0), Straight());
+            var poles = Named(go, "pole(Clone)");
+            Check(poles.Any(t => t.position.z > 41 && t.position.z < 79) && poles.Any(t => t.position.z < 41 || t.position.z > 79), "primary poles around neighbor platform");
+            foreach (var t in poles)
+            {
+                bool zone = t.position.z > 41 && t.position.z < 79;
+                float expected = t.position.x > 0 ? 8 + (zone ? outer : 3.5f) + .5f : -4f;
+                Check(Mathf.Abs(t.position.x - expected) < .02f, $"primary pole clears neighbor platform z={t.position.z} x={t.position.x} expected {expected}");
+            }
+            UnityEngine.Object.DestroyImmediate(go);
+            // 始端で中心間隔7.5mから15°で分かれていく431の側は、道床がホームの帯に掛かる区間(〜7.5m)を除いて描き、
+            // 除いた端にはスロープを置かない。反対側はデッキ1〜23mの両端にスロープを置く。
+            UseStops(Stop(.1f, 22));
+            Vector3 branch = new Vector3(Mathf.Sin(15f * Mathf.Deg2Rad), 0, Mathf.Cos(15f * Mathf.Deg2Rad));
+            UseTrackNeighbors(TrackNeighbor(0, Enumerable.Range(0, 25).Select(i => new Vector3(7.5f, 0, 0) + branch * (i * 5)).ToList()));
+            go = Generate(431, PathData(431), Straight());
+            decks = Decks(go);
+            Check(decks.Length == 2 && decks.Any(d => d.bounds.center.x > 0 && Mathf.Abs(d.bounds.min.z - 7.5f) < .1f && Mathf.Abs(d.bounds.max.z - 23) < .1f)
+                && decks.Any(d => d.bounds.center.x < 0 && Mathf.Abs(d.bounds.min.z - 1) < .1f && Mathf.Abs(d.bounds.max.z - 23) < .1f),
+                "platform trimmed beside diverging track: " + string.Join(", ", decks.Select(d => d.bounds.ToString())));
+            var ends = Named(go, "LrtPlatformEnd");
+            Check(ends.Length == 3 && ends.Count(t => t.position.x > 0) == 1 && ends.Where(t => t.position.x > 0).All(t => Mathf.Abs(t.position.z - 23) < .05f),
+                "no ramp where diverging track trims platform: " + string.Join(", ", ends.Select(t => t.position.ToString())));
+            UnityEngine.Object.DestroyImmediate(go);
+        }
+        finally { UseStops(); UseTrackNeighbors(); }
     }
     static void ExportPrefabs()
     {

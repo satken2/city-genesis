@@ -51,7 +51,7 @@
     "currentAmount": "Quantité actuelle",
     "consumptionTrend": "Évolution de la consommation",
     "amountTrend": "Évolution des réserves",
-    "recoveryAmount": "Régénération",
+    "recoveryAmount": "Régénération/époque",
     "maxAmount": "Quantité maximale",
     "unknownResource": "Ressource inconnue"
   },

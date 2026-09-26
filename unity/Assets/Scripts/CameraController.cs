@@ -97,6 +97,7 @@ public class CameraController : MonoBehaviour
     // 未生成・破棄済み(Unity の null 判定)のときだけ探し直す。編集開始直後の押下も取りこぼさない。
     private ParcelShapeEditManager parcelShapeEditManagerRef;
     private RoadPlanManager roadPlanManagerRef;
+    private TransitPlanManager transitPlanManagerRef;
 
     // フライモードの有効状態を外部へ公開する（他システムからの参照用）。
     public bool IsFlyMode => isFlyMode;
@@ -1320,6 +1321,14 @@ public class CameraController : MonoBehaviour
             {
                 return true;
             }
+        }
+
+        // TransitPlanManager の巡回点・区間の判定。停留所・経由点の移動と、区間のドラッグでの経由点の挿入を
+        // カメラの移動ドラッグに奪わせない(IsMouseOverDraggable は編集フェーズの間だけ真を返す)。
+        if (transitPlanManagerRef == null) transitPlanManagerRef = FindAnyObjectByType<TransitPlanManager>();
+        if (transitPlanManagerRef != null && transitPlanManagerRef.IsMouseOverDraggable(mouseScreen))
+        {
+            return true;
         }
 
         // ConnectorEditManager の接続端子マーカー判定。

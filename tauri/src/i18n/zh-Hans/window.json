@@ -36,6 +36,7 @@
     "terrain_3d_preview": "地形3D预览",
     "transit_management": "公共交通",
     "transit_creation": "新建公共交通线路",
+    "transit_route_edit": "编辑线路走向",
     "transit_detail": "线路详情",
     "prop_placement": "装饰物放置",
     "mashup_edit": "附属建筑布局",

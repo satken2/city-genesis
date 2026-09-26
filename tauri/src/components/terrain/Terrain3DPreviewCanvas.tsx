@@ -35,6 +35,7 @@ import {
   type WaterSurfacePayload,
   type RiverPayload,
   type Terrain3DRequestStatePayload,
+  type Terrain3DDetachPayload,
   type Terrain3DFullStatePayload,
   type Terrain3DSelectionDeltaPayload,
   type Terrain3DSelectionResetPayload,
@@ -46,6 +47,7 @@ import {
   dequantizeMaskRectInto,
   applyElevRectInto,
   EVT_TERRAIN_3D_REQUEST_STATE,
+  EVT_TERRAIN_3D_DETACH,
   EVT_TERRAIN_3D_FULL_STATE,
   EVT_TERRAIN_3D_SELECTION_DELTA,
   EVT_TERRAIN_3D_SELECTION_RESET,
@@ -459,18 +461,21 @@ export function Terrain3DPreviewCanvas({ mapId }: Terrain3DPreviewCanvasProps) {
   }, []);
 
   /**
-   * terrain_editorウィンドウとのイベント同期。マウント時に現在の全状態を要求し、
-   * 以後はfull_state/selection_delta/selection_reset/elevation_deltaを購読して
-   * グリッド状態とメッシュを更新し続ける。
+   * terrain_editorウィンドウとのイベント同期。full_state/selection_delta/selection_reset/
+   * elevation_deltaの購読を張り終えてから現在の全状態を要求し(先に要求すると応答を取りこぼしうる)、
+   * 以後はグリッド状態とメッシュを更新し続ける。エディタは接続中のプレビューにだけ状態を送るので、
+   * ウィンドウが非表示になったら detach、表示に戻ったら改めて request_state を送る
+   * (エディタは切断中に状態が変わっていなければ送り直さない)。
    */
   useEffect(() => {
     let cancelled = false;
+    const sessionId = crypto.randomUUID();
     let unlistenFull: (() => void) | null = null;
     let unlistenSelDelta: (() => void) | null = null;
     let unlistenSelReset: (() => void) | null = null;
     let unlistenElevDelta: (() => void) | null = null;
 
-    listen<Terrain3DFullStatePayload>(EVT_TERRAIN_3D_FULL_STATE, (event) => {
+    const fullReady = listen<Terrain3DFullStatePayload>(EVT_TERRAIN_3D_FULL_STATE, (event) => {
       const payload = event.payload;
       if (payload.mapId !== mapId) return;
       const count = payload.rows * payload.cols;
@@ -503,7 +508,7 @@ export function Terrain3DPreviewCanvas({ mapId }: Terrain3DPreviewCanvasProps) {
       else unlistenFull = fn;
     });
 
-    listen<Terrain3DSelectionDeltaPayload>(EVT_TERRAIN_3D_SELECTION_DELTA, (event) => {
+    const selDeltaReady = listen<Terrain3DSelectionDeltaPayload>(EVT_TERRAIN_3D_SELECTION_DELTA, (event) => {
       const payload = event.payload;
       const grid = gridRef.current;
       if (!grid || payload.mapId !== mapId) return;
@@ -515,7 +520,7 @@ export function Terrain3DPreviewCanvas({ mapId }: Terrain3DPreviewCanvasProps) {
       else unlistenSelDelta = fn;
     });
 
-    listen<Terrain3DSelectionResetPayload>(EVT_TERRAIN_3D_SELECTION_RESET, (event) => {
+    const selResetReady = listen<Terrain3DSelectionResetPayload>(EVT_TERRAIN_3D_SELECTION_RESET, (event) => {
       const grid = gridRef.current;
       if (!grid || event.payload.mapId !== mapId) return;
       grid.mask.fill(0);
@@ -525,7 +530,7 @@ export function Terrain3DPreviewCanvas({ mapId }: Terrain3DPreviewCanvasProps) {
       else unlistenSelReset = fn;
     });
 
-    listen<Terrain3DElevationDeltaPayload>(EVT_TERRAIN_3D_ELEVATION_DELTA, (event) => {
+    const elevDeltaReady = listen<Terrain3DElevationDeltaPayload>(EVT_TERRAIN_3D_ELEVATION_DELTA, (event) => {
       const payload = event.payload;
       const grid = gridRef.current;
       if (!grid || payload.mapId !== mapId) return;
@@ -539,10 +544,26 @@ export function Terrain3DPreviewCanvas({ mapId }: Terrain3DPreviewCanvasProps) {
       else unlistenElevDelta = fn;
     });
 
-    void emit(EVT_TERRAIN_3D_REQUEST_STATE, { mapId } satisfies Terrain3DRequestStatePayload);
+    const requestState = () => void emit(EVT_TERRAIN_3D_REQUEST_STATE, { mapId, sessionId } satisfies Terrain3DRequestStatePayload);
+    const detach = () => void emit(EVT_TERRAIN_3D_DETACH, { mapId, sessionId } satisfies Terrain3DDetachPayload);
+    // マウント直後は表示状態に関係なく要求する(表示状態を正しく報告しない環境でもデータが届くように)
+    let listening = false;
+    void Promise.all([fullReady, selDeltaReady, selResetReady, elevDeltaReady]).then(() => {
+      if (cancelled) return;
+      listening = true;
+      requestState();
+    });
+    function onVisibilityChange() {
+      if (!listening) return;
+      if (document.visibilityState === "hidden") detach();
+      else requestState();
+    }
+    document.addEventListener("visibilitychange", onVisibilityChange);
 
     return () => {
       cancelled = true;
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      if (listening) detach();
       unlistenFull?.();
       unlistenSelDelta?.();
       unlistenSelReset?.();

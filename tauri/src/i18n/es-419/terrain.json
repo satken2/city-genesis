@@ -23,5 +23,16 @@
     "3": "Pradera frondosa",
     "4": "Campo nevado",
     "5": "Semiárido"
+  },
+  "climate": {
+    "label": "Clima",
+    "hint": "Define cómo se comporta el tiempo en cada estación (con qué frecuencia hay sol, lluvia o nieve). No afecta la simulación.",
+    "1": "Templado húmedo",
+    "2": "Subtropical",
+    "3": "Continental húmedo",
+    "4": "Mediterráneo",
+    "5": "Estepa",
+    "6": "Desértico",
+    "7": "Subártico"
   }
 }

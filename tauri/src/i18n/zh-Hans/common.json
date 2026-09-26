@@ -51,7 +51,7 @@
     "currentAmount": "当前储量",
     "consumptionTrend": "消耗量走势",
     "amountTrend": "剩余量走势",
-    "recoveryAmount": "恢复量",
+    "recoveryAmount": "恢复量/纪元",
     "maxAmount": "最大储量",
     "unknownResource": "未知资源"
   },

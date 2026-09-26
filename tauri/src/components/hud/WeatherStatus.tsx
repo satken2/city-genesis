@@ -3,7 +3,8 @@ import type { WeatherState } from "../../utils/ipc";
 
 const icons: Record<string, string> = {
   clear: "☀️", high_clouds: "🌤️", fair: "🌤️", broken_clouds: "⛅", overcast: "☁️",
-  rain_clouds: "🌧️", fog: "🌫️", sunset: "🌇", drizzle: "🌦️", rain: "🌧️", heavy_rain: "⛈️",
+  rain_clouds: "🌧️", fog: "🌫️", drizzle: "🌦️", rain: "🌧️", heavy_rain: "⛈️",
+  light_snow: "🌨️", snow: "❄️", blizzard: "🌬️",
 };
 
 export function WeatherStatus({ weather, editable, failed, onSelect }: {

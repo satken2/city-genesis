@@ -557,8 +557,8 @@ pub async fn handle_incoming_message(
         "edit_resource:update_shape" => {
             let _ = app.emit("edit_resource:update_shape", envelope.payload);
         }
-        "edit_transit:update_stops" => {
-            let _ = app.emit("edit_transit:update_stops", envelope.payload);
+        "edit_transit:update_points" => {
+            let _ = app.emit("edit_transit:update_points", envelope.payload);
         }
         "edit_zone:selected" => {
             let _ = app.emit("edit_zone:selected", envelope.payload);
@@ -649,6 +649,7 @@ pub async fn handle_incoming_message(
                 let mut guard = state.lock();
                 let seen = guard.graphic_ready_seen;
                 guard.graphic_ready_seen = true;
+                guard.graphic_connected = true;
                 seen
             };
             if is_reconnect {
@@ -672,6 +673,19 @@ pub async fn handle_incoming_message(
             // 起動直後の Unity は自分をフォアグラウンドにするため、UI が裏に回りうる。
             window::reassert_topmost(&app);
             let _ = app.emit("graphic-reconnected", envelope.payload);
+        }
+        "system:graphic_stopped" => {
+            // Unity の正常終了(Editor の Play 停止を含む)。クラッシュでは届かない。
+            // 開発時の Unity なし起動で描画完了を待っている最中に Unity が止まると
+            // game:loaded は二度と来ないので、その場で Tips を開始ボタンへ切り替える。
+            let mut guard = state.lock();
+            guard.graphic_connected = false;
+            #[cfg(all(debug_assertions, dev))]
+            {
+                if guard.is_loading && guard.loading_started && !guard.awaiting_parameter_setup {
+                    guard.graphic_load_ready = true;
+                }
+            }
         }
         "notification:show" => {
             if let Some(win) = app.get_webview_window(crate::window::LABEL_COCKPIT) {

@@ -36,6 +36,7 @@
     "terrain_3d_preview": "Terrain 3D Preview",
     "transit_management": "Public Transit",
     "transit_creation": "New Transit Line",
+    "transit_route_edit": "Edit Line Route",
     "transit_detail": "Line Detail",
     "prop_placement": "Prop Placement",
     "mashup_edit": "Sub-Building Layout",

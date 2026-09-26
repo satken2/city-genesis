@@ -810,7 +810,11 @@ public class RoadPath : IPathMeshGenerator
     /// 左右は node-frame（ノードから道路外側を見た左右）で渡されるため、ここでスプライン視点へ写像する。
     /// </param>
     /// <param name="endSidewalkSetback">スプライン終端側の歩道セットバック。</param>
-    private void CreateRoadParts(GameObject container, SplineComputer spline, float width, float sidewalkWidth, float sideWidth, int lanes, float? treeSpacing, float wallWidth, float centerWidth, float? pillarSpacing, bool heightEditable, float baseHeight, bool singleSpan, PathSummary pathData, List<Vector3> controlPoints, SidewalkSetback startSidewalkSetback = default, SidewalkSetback endSidewalkSetback = default)
+    /// <param name="segmentPlatformZones">
+    /// 角のある直線道路のセグメントでは null 以外。LRT停留所のホームは呼び出し側がパス全体で描くのでここでは描かず、
+    /// このセグメントのスプライン距離へ写したホーム区間(303 の設備抑止用)を受け取る。
+    /// </param>
+    private void CreateRoadParts(GameObject container, SplineComputer spline, float width, float sidewalkWidth, float sideWidth, int lanes, float? treeSpacing, float wallWidth, float centerWidth, float? pillarSpacing, bool heightEditable, float baseHeight, bool singleSpan, PathSummary pathData, List<Vector3> controlPoints, SidewalkSetback startSidewalkSetback = default, SidewalkSetback endSidewalkSetback = default, List<Vector2> segmentPlatformZones = null)
     {
         string variantBase = $"Models/Paths/p{pathData.path_variant}";
         string typeBase = $"Models/Paths/p{pathData.path_type}";
@@ -842,7 +846,8 @@ public class RoadPath : IPathMeshGenerator
         }
 
         // 併用軌道(222/242/303)と停留所のホーム。303 はホーム区間に沿道設備を置かない(下の RoadEquipmentGenerator)。
-        List<LrtPlatformParts.Span> lrtPlatforms = LrtPlatformParts.Resolve(pathData, controlPoints, spline.CalculateLength());
+        List<LrtPlatformParts.Span> lrtPlatforms = segmentPlatformZones == null
+            ? LrtPlatformParts.Resolve(pathData, controlPoints, spline.CalculateLength()) : null;
         LrtRoadParts.Generate(container, spline, pathData, lrtPlatforms);
 
         // オフセット計算（CreateSplineMesh に渡すのはすべて「パーツ中心の位置」。
@@ -962,7 +967,7 @@ public class RoadPath : IPathMeshGenerator
 
         RoadEquipmentGenerator.Generate(container, spline, pathData, width, sidewalkWidth, treeSpacing,
             pathData.path_variant == 303
-                ? LrtPlatformParts.ZoneRanges(lrtPlatforms, LrtRoadParts.PlatformRampLength(303), LrtRoadParts.PLATFORM_EQUIPMENT_ZONE_MARGIN)
+                ? segmentPlatformZones ?? LrtPlatformParts.ZoneRanges(lrtPlatforms, LrtRoadParts.PlatformRampLength(303), LrtRoadParts.PLATFORM_EQUIPMENT_ZONE_MARGIN)
                 : null);
         SuspensionBridgeGenerator.Generate(container, spline, pathData, width);
 
@@ -1214,7 +1219,8 @@ public class RoadPath : IPathMeshGenerator
             }
         }
 
-        // セグメントごとにスプラインを生成
+        // セグメントごとのスプライン点列(折れ点では角の切断位置で終わる)
+        var segmentPoints = new List<Vector3>[segmentStarts.Length];
         List<Vector3> allSubdividedPoints = new List<Vector3>();
         for (int i = 0; i < segmentStarts.Length; i++)
         {
@@ -1241,13 +1247,21 @@ public class RoadPath : IPathMeshGenerator
                 splinePoints = PathManager.SubdividePointsWithTerrain(anchorPoints, PathManager.TERRAIN_SAMPLE_INTERVAL, followTerrain);
             }
             allSubdividedPoints.AddRange(splinePoints);
+            segmentPoints[i] = splinePoints;
+        }
 
+        List<Vector2>[] segmentPlatformZones = CreateCornerPathLrtPlatforms(container, pathData, points, segmentPoints);
+
+        // セグメントごとにスプラインを生成
+        for (int i = 0; i < segmentPoints.Length; i++)
+        {
+            if (segmentPoints[i] == null) continue;
             GameObject segObj = new GameObject($"Segment_{i}");
             segObj.transform.SetParent(container.transform, false);
-            SplineComputer spline = BuildSpline(segObj, splinePoints, false);
+            SplineComputer spline = BuildSpline(segObj, segmentPoints[i], false);
             PathDrawContext.SetAdaptiveTileLength(PathDrawContext.ComputeAdaptiveTileLength(spline, MAX_EXTRUDE_TILE_LENGTH));
 
-            CreateRoadParts(segObj, spline, width, sidewalkWidth, sideWidth, lanes, treeSpacing, wallWidth, centerWidth, pillarSpacing, heightEditable, baseHeight, singleSpan, pathData, splinePoints, segStartSetbacks[i], segEndSetbacks[i]);
+            CreateRoadParts(segObj, spline, width, sidewalkWidth, sideWidth, lanes, treeSpacing, wallWidth, centerWidth, pillarSpacing, heightEditable, baseHeight, singleSpan, pathData, segmentPoints[i], segStartSetbacks[i], segEndSetbacks[i], segmentPlatformZones?[i]);
         }
 
         // コライダー用メッシュの生成
@@ -1259,6 +1273,71 @@ public class RoadPath : IPathMeshGenerator
         }
 
         return new PathMeshResult(colliderMesh, true, container);
+    }
+
+    /// <summary>
+    /// 角のある直線道路(222/242/303)のLRT停留所のホームを、セグメントの点列と角の頂点を順につないだパス全体の
+    /// 折れ線スプライン1本に描く(角で切ると、角の区間にデッキが無く、角ごとにスロープと上屋が付くため)。
+    /// 角の上は折れ線の線路(TrackPath)と同じく折れたまま押し出す簡易表現。
+    /// LRTの併用軌道でなければ null、そうでなければ各セグメントのスプライン距離へ写したホーム区間
+    /// (303 の設備抑止用。303 以外・停留所なしは空)をセグメントごとに返す。
+    /// </summary>
+    private static List<Vector2>[] CreateCornerPathLrtPlatforms(GameObject container, PathSummary pathData, List<Vector3> corners, List<Vector3>[] segmentPoints)
+    {
+        if (!LrtRoadParts.IsEmbedded(pathData.path_variant)) return null;
+        var line = new List<Vector3>();
+        var offsets = new float[segmentPoints.Length];
+        float length = 0f;
+        void Append(Vector3 point)
+        {
+            if (line.Count > 0)
+            {
+                float step = Vector3.Distance(line[line.Count - 1], point);
+                if (step < 0.01f) return;
+                length += step;
+            }
+            line.Add(point);
+        }
+        for (int i = 0; i < segmentPoints.Length; i++)
+        {
+            if (segmentPoints[i] == null) continue;
+            // 角の区間は平らな角メッシュの上なので地形追従しない。Linear スプラインは各区間の接線を前の区間の向きと
+            // 平均する(linearAverageDirection)ので、細かく刻んで角の後ろの接線のずれを1区間に留める。
+            var legs = line.Count > 0 ? new List<Vector3> { line[line.Count - 1], corners[i], segmentPoints[i][0] } : new List<Vector3> { segmentPoints[i][0] };
+            foreach (var point in PathManager.SubdividePointsWithTerrain(legs, PathManager.TERRAIN_SAMPLE_INTERVAL, false)) Append(point);
+            offsets[i] = length;
+            for (int k = 1; k < segmentPoints[i].Count; k++) Append(segmentPoints[i][k]);
+        }
+
+        List<Vector2> zones = null;
+        List<LrtPlatformParts.Span> spans = line.Count >= 2 ? LrtPlatformParts.Resolve(pathData, line, length) : null;
+        if (spans != null && spans.Count > 0)
+        {
+            if (pathData.path_variant == 303)
+                zones = LrtPlatformParts.ZoneRanges(spans, LrtRoadParts.PlatformRampLength(303), LrtRoadParts.PLATFORM_EQUIPMENT_ZONE_MARGIN);
+            var platformObj = new GameObject("LrtPlatforms");
+            platformObj.transform.SetParent(container.transform, false);
+            SplineComputer spline = BuildSpline(platformObj, line, false);
+            // スプライン長は角のサンプリングで点列長とわずかに違うので、スプライン距離へ比例換算する。
+            float scale = spline.CalculateLength() / length;
+            for (int i = 0; i < spans.Count; i++)
+            {
+                var span = spans[i];
+                span.From *= scale;
+                span.To *= scale;
+                spans[i] = span;
+            }
+            LrtPlatformParts.Generate(platformObj, spline, pathData, spans);
+        }
+
+        var result = new List<Vector2>[segmentPoints.Length];
+        for (int i = 0; i < result.Length; i++)
+        {
+            result[i] = new List<Vector2>();
+            if (zones != null)
+                foreach (var zone in zones) result[i].Add(zone - new Vector2(offsets[i], offsets[i]));
+        }
+        return result;
     }
 
     /// <summary>

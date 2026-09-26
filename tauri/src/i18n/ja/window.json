@@ -33,6 +33,7 @@
     "terrain_3d_preview": "地形3Dプレビュー",
     "transit_management": "公共交通",
     "transit_creation": "公共交通の新設",
+    "transit_route_edit": "路線の経路編集",
     "transit_detail": "路線詳細",
     "prop_placement": "プロップ配置",
     "track_build": "軌道建設",

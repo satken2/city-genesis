@@ -14,10 +14,12 @@
       "overcast": "Overcast",
       "rain_clouds": "Rain clouds",
       "fog": "Fog",
-      "sunset": "Sunset",
       "drizzle": "Drizzle",
       "rain": "Rain",
-      "heavy_rain": "Heavy rain"
+      "heavy_rain": "Heavy rain",
+      "light_snow": "Light snow",
+      "snow": "Snow",
+      "blizzard": "Blizzard"
     }
   }
 }

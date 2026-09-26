@@ -156,7 +156,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
             double trainTime = clock + line.motion.Duration*train/trains + (driven ? driveOffset : 0);
             int step = line.motion.AtTime(trainTime, out double distance, out bool stopped);
             if (step < 0) continue;
-            bool returning = line.motion.Returning[step];
+            bool reversed = line.motion.Reversed[step];
             var positions = line.positions; var directions = line.directions;
             bool forward = line.motion.Steps[step].to_fraction > line.motion.Steps[step].from_fraction;
             bool bus = line.type == Constants.VEHICLE_BUS;
@@ -192,7 +192,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
                     foreach (var entry in visible) if (entry.Key.StartsWith(prefix, StringComparison.Ordinal)) used.Add(entry.Key);
                     continue;
                 }
-                int cab = returning ? cars - 1 : 0;
+                int cab = reversed ? cars - 1 : 0;
                 DrivePosition = positions[cab]; DriveDirection = directions[cab];
             }
             if (!ready || (!driven && !near) || used.Count+cars > maxVisibleCars) continue;
@@ -200,7 +200,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
             for (int car = 0; car < cars; car++)
             {
                 // 折り返しでは車体の前後を維持し、進行方向に対する編成順を逆転する。
-                int identity = returning ? cars-1-car : car;
+                int identity = reversed ? cars-1-car : car;
                 bool middle = identity > 0 && identity < cars-1;
                 string modelKey = line.type + ":" + variant + (middle ? ":middle" : ":lead");
                 string key = line.data.line_agent_id+":"+train+":"+identity+":"+modelKey;
@@ -213,7 +213,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
             bool created = false;
             for (int car = 0; car < cars; car++)
             {
-                int identity = returning ? cars-1-car : car;
+                int identity = reversed ? cars-1-car : car;
                 bool middle = identity > 0 && identity < cars-1;
                 string modelKey = line.modelKeys[car], key = line.keys[car];
                 used.Add(key);
@@ -226,7 +226,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
                 if (!nominalLengths.TryGetValue(go,out float fitted) || fitted != spacing)
                 { VehicleModelResolver.FitTransitLength(go,spacing); nominalLengths[go]=spacing; }
                 lineByVehicle[go] = line.data.line_agent_id;
-                Vector3 bodyForward = directions[car] * (returning && line.type != Constants.VEHICLE_BUS ? -1 : 1);
+                Vector3 bodyForward = directions[car] * (reversed && line.type != Constants.VEHICLE_BUS ? -1 : 1);
                 if (identity == cars-1 && cars > 1 && line.type != Constants.VEHICLE_BUS) bodyForward = -bodyForward;
                 go.transform.SetPositionAndRotation(positions[car],Quaternion.LookRotation(bodyForward,Vector3.up));
             }

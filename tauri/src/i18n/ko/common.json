@@ -51,7 +51,7 @@
     "currentAmount": "현재량",
     "consumptionTrend": "소비량 추이",
     "amountTrend": "잔량 추이",
-    "recoveryAmount": "회복량",
+    "recoveryAmount": "회복량/에포크",
     "maxAmount": "최대량",
     "unknownResource": "알 수 없는 자원"
   },

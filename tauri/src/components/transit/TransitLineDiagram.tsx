@@ -10,23 +10,27 @@
  * 隣接行の半分どうしが1つの区間パスを表す。区間が運休(status≠ACTIVE)なら、その区間に
  * あたる上下の半分を破線・灰色で描く。
  *
- * 停留所名は GET /api/v1/transit/lines/{id} が下地パスから解決した name を使い、
- * 無名(バス停など)は「停留所 N」で補う。駅舎に所属する停留所(house_path_id あり)は
- * 駅名をクリックで駅舎パスの詳細ウィンドウ(path_detail)を開く。
+ * 路線は停留所を巡回順にたどって先頭へ戻るループで、並べ方は折り返し(route_points の turnback)で決める。
+ *   - 折り返しがちょうど2か所(往復運行): 一方の折り返しからもう一方までの片道を1本の線で描き、両端を
+ *     終端の二重丸にする。帰りは同じ停留所を逆にたどる(複線なら反対側のホーム)ので描かない。
+ *   - それ以外(環状運転や、途中で何度も折り返す運行): 巡回順の全停留所を並べ、末尾の下に先頭停留所名を
+ *     薄く再掲して「戻る」ことを示す。折り返す停留所には「折り返し」の札を付ける。
  *
- * 環状路線(末尾の停留所から先頭へ戻る区間パスがある)は末尾の下に先頭停留所名を
- * 薄く再掲して「戻る」ことを示す。
+ * 停留所名は GET /api/v1/transit/lines/{id} が下地パスから解決した name を使い、
+ * 無名(バス停など)は「停留所 N」(N は stops の順番)で補う。駅舎に所属する停留所(house_path_id あり)は
+ * 駅名をクリックで駅舎パスの詳細ウィンドウ(path_detail)を開く。
  */
 
 import { useMemo, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { STATUS_ACTIVE } from "../../constants";
-import type { TransitStop, TransitEdge } from "./TransitDetailPanel";
+import type { TransitStop, TransitEdge, TransitRoutePointSummary } from "./TransitDetailPanel";
 import "./TransitLineDiagram.css";
 
 type TransitLineDiagramProps = {
   stops: TransitStop[];
+  routePoints: TransitRoutePointSummary[];
   edges: TransitEdge[];
   /** 路線カラー("#rrggbb") */
   color: string;
@@ -34,36 +38,53 @@ type TransitLineDiagramProps = {
   running: boolean;
 };
 
-/** 2停留所を結ぶ区間パスを(向きを問わず)引くためのキー */
-function pairKey(a: number, b: number): string {
-  return a < b ? `${a}:${b}` : `${b}:${a}`;
-}
+/** 路線図の1行(停留所への1回の訪問) */
+type Visit = { nodeId: number; turnback: boolean };
 
-export function TransitLineDiagram({ stops, edges, color, running }: TransitLineDiagramProps) {
+export function TransitLineDiagram({ stops, routePoints, edges, color, running }: TransitLineDiagramProps) {
   const { t } = useTranslation();
 
-  // 停留所ペア → 区間パス。運休区間の判定と環状判定に使う。
-  const edgeByPair = useMemo(() => {
+  // 区間パスは進行方向の一方通行なので、出発→到着の向き付きで引く。
+  const edgeByLeg = useMemo(() => {
     const m = new Map<string, TransitEdge>();
-    for (const e of edges) m.set(pairKey(e.from_node_id, e.to_node_id), e);
+    for (const e of edges) m.set(`${e.from_node_id}>${e.to_node_id}`, e);
     return m;
   }, [edges]);
 
-  const ordered = useMemo(() => [...stops].sort((a, b) => a.order - b.order), [stops]);
-  const last = ordered.length - 1;
-  // 3停留所以上で末尾→先頭の区間パスがあれば環状路線(2停留所の往復は環状ではない)。
-  const loopEdge =
-    ordered.length >= 3 ? edgeByPair.get(pairKey(ordered[0].node_id, ordered[last].node_id)) : undefined;
-  const loopActive = loopEdge !== undefined && running && loopEdge.status === STATUS_ACTIVE;
+  const stopIndex = useMemo(() => new Map(stops.map((s, i) => [s.node_id, i])), [stops]);
 
-  const stopLabel = (s: TransitStop, index: number) =>
-    s.name && s.name !== "" ? s.name : t("transit.stopFallbackName", { n: index + 1 });
+  const visits: Visit[] = useMemo(
+    () =>
+      routePoints
+        .filter((p) => p.kind === "stop" && p.node_id != null)
+        .map((p) => ({ nodeId: p.node_id as number, turnback: p.turnback })),
+    [routePoints],
+  );
 
-  /** 区間(停留所 i と i+1 の間)が運行中か。路線が運休なら全区間を運休扱いにする */
-  const segmentActive = (i: number): boolean => {
+  // 往復運行なら片道(折り返し→折り返し)だけ、それ以外は1周の全訪問を並べる。
+  const { rows, isRoundTrip } = useMemo(() => {
+    const turnbacks = visits.flatMap((v, i) => (v.turnback ? [i] : []));
+    if (turnbacks.length !== 2) return { rows: visits, isRoundTrip: false };
+    const [from, to] = turnbacks;
+    return { rows: visits.slice(from, to + 1), isRoundTrip: true };
+  }, [visits]);
+
+  const last = rows.length - 1;
+  const legActive = (a: Visit, b: Visit): boolean => {
     if (!running) return false;
-    const e = edgeByPair.get(pairKey(ordered[i].node_id, ordered[i + 1].node_id));
+    const e = edgeByLeg.get(`${a.nodeId}>${b.nodeId}`);
     return e ? e.status === STATUS_ACTIVE : true;
+  };
+  const loopBack = !isRoundTrip && rows.length >= 2;
+  const loopActive = loopBack && legActive(rows[last], rows[0]);
+
+  const stopOf = (v: Visit) => {
+    const index = stopIndex.get(v.nodeId) ?? 0;
+    return { stop: stops[index], index };
+  };
+  const stopLabel = (v: Visit) => {
+    const { stop, index } = stopOf(v);
+    return stop?.name && stop.name !== "" ? stop.name : t("transit.stopFallbackName", { n: index + 1 });
   };
 
   const openStation = (housePathId: number) => {
@@ -78,55 +99,55 @@ export function TransitLineDiagram({ stops, edges, color, running }: TransitLine
   return (
     <div className="tld" style={{ "--tld-color": color } as CSSProperties}>
       <div className="tld__summary">
-        <span className="tld__summary-count">{t("transit.stopsCountValue", { count: ordered.length })}</span>
-        {ordered.length >= 2 && (
+        <span className="tld__summary-count">{t("transit.stopsCountValue", { count: stops.length })}</span>
+        {rows.length >= 2 && (
           <span className="tld__summary-ends">
-            {stopLabel(ordered[0], 0)}
-            <span className="tld__summary-arrow">⇄</span>
-            {stopLabel(ordered[last], last)}
+            {stopLabel(rows[0])}
+            <span className="tld__summary-arrow">{isRoundTrip ? "⇄" : "↺"}</span>
+            {isRoundTrip ? stopLabel(rows[last]) : null}
           </span>
         )}
       </div>
 
       <ol className="tld__list">
-        {ordered.map((s, i) => {
-          const isTerminal = i === 0 || i === last;
-          const upActive = i > 0 ? segmentActive(i - 1) : true;
-          const downActive = i < last ? segmentActive(i) : loopActive;
-          const label = stopLabel(s, i);
+        {rows.map((v, i) => {
+          const isTerminal = isRoundTrip && (i === 0 || i === last);
+          const upActive = i > 0 ? legActive(rows[i - 1], v) : true;
+          const downActive = i < last ? legActive(v, rows[i + 1]) : loopActive;
+          const { stop } = stopOf(v);
+          const label = stopLabel(v);
           return (
-            <li key={s.node_id} className="tld__row">
+            <li key={i} className="tld__row">
               <span className="tld__index">{String(i + 1).padStart(2, "0")}</span>
               <span className="tld__track" aria-hidden="true">
                 {i > 0 && <span className={`${segClass(upActive)} tld__seg--up`} />}
-                {(i < last || loopEdge) && <span className={`${segClass(downActive)} tld__seg--down`} />}
+                {(i < last || loopBack) && <span className={`${segClass(downActive)} tld__seg--down`} />}
                 <span className={`tld__dot${isTerminal ? " tld__dot--terminal" : ""}`} />
               </span>
-              {s.house_path_id ? (
+              {stop?.house_path_id ? (
                 <button
                   type="button"
                   className="tld__name tld__name--link"
                   title={t("transit.openStation")}
-                  onClick={() => openStation(s.house_path_id as number)}
+                  onClick={() => openStation(stop.house_path_id as number)}
                 >
                   {label}
                 </button>
               ) : (
                 <span className="tld__name">{label}</span>
               )}
+              {!isRoundTrip && v.turnback && <span className="tld__badge">{t("transit.turnback")}</span>}
             </li>
           );
         })}
-        {loopEdge && (
+        {loopBack && (
           <li className="tld__row tld__row--loop">
             <span className="tld__index" />
             <span className="tld__track" aria-hidden="true">
               <span className={`${segClass(loopActive)} tld__seg--up`} />
               <span className="tld__loop-mark">↺</span>
             </span>
-            <span className="tld__name tld__name--loop">
-              {t("transit.loopLine", { name: stopLabel(ordered[0], 0) })}
-            </span>
+            <span className="tld__name tld__name--loop">{t("transit.loopLine", { name: stopLabel(rows[0]) })}</span>
           </li>
         )}
       </ol>

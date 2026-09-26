@@ -76,6 +76,13 @@ public class TransitOverlayManager : MonoBehaviour
         if (visibleVariants.Count == 0) { segments.Clear(); groups.Clear(); labels.Clear(); border.ClearMesh(); ribbon.ClearMesh(); }
     }
     public void MarkDirty() { dirty = true; nextDetails = 0; }
+    /// <summary>経路を編集中の路線(-1=なし)。編集中の新しい経路のプレビューと重ならないよう、この路線の色帯と停留所名を出さない。</summary>
+    public int HiddenLineId
+    {
+        get => hiddenLineId;
+        set { if (hiddenLineId == value) return; hiddenLineId = value; dirty = routesDirty = true; }
+    }
+    private int hiddenLineId = -1;
     public void RefreshLines() { TransitDataStore.Ensure().Refresh(); MarkDirty(); }
     public void Clear()
     {
@@ -170,7 +177,7 @@ public class TransitOverlayManager : MonoBehaviour
         routes.Clear(); routeIds.Clear();
         foreach (var line in store.Lines)
         {
-            if (!visibleVariants.Contains(line.path_variant)) continue;
+            if (!visibleVariants.Contains(line.path_variant) || line.line_agent_id == hiddenLineId) continue;
             var route = new TransitRouteGeometry.Route { motion = new TransitMotionClock(line.journeys), VehicleType = VehicleModelConfig.GetTransitVehicleType(line.path_variant) };
             TransitRouteGeometry.BuildRuns(route);
             routes.Add((line, route));
@@ -229,7 +236,7 @@ public class TransitOverlayManager : MonoBehaviour
             // 未ロードの区間では線を切る。標本間隔を固定し、カメラ更新で経路自体を作り直さない。
             foreach (var run in item.route.runs)
             {
-                if (!geometry.HasPath(run.path)) continue;
+                if (run.Wrapped || !geometry.HasPath(run.path)) continue;
                 int count = Mathf.Max(1, Mathf.CeilToInt((float)(run.end - run.start) / 2));
                 bool connected = false; Vector3 previous = default;
                 for (int i = 0; i <= count; i++)

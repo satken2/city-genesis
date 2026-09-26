@@ -2,9 +2,12 @@
  * 公共交通ウィンドウ
  *
  * window_type="transit_management" の画面中央ウィンドウ。
- * 現在稼働中の公共交通機関(路線)の一覧を表形式で表示し、各路線の
- * 収支・稼働率(混雑率)・乗車数・車両数・運賃・運行間隔を確認できる。
- * 運賃と運行間隔はインラインで編集して保存でき、路線の新設・削除も行える。
+ * 路線の一覧を路線種別のタブ(すべて + transit_master の各種別)で絞り込んで表示し、各路線の
+ * 車両数・調達率・乗車回数・混雑率・運賃収入を確認できる。運賃と運行間隔はインラインで編集して
+ * 保存でき、路線の新設・削除も行える。
+ *
+ * 種別タブは transit_master の並び(マスターID順)で、路線の path_variant を transit_path_id と
+ * 突き合わせて振り分ける。路線が1本も無い種別もタブは出す(路線の増減でタブの位置が動かないように)。
  *
  * データは GET /api/v1/transit/lines から取得する。運賃/運行間隔の更新は
  * PATCH /api/v1/transit/lines/{id}、削除は DELETE /api/v1/transit/lines/{id}。
@@ -21,12 +24,16 @@ import { listen } from "@tauri-apps/api/event";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { setHintbarText } from "../../utils/hintbar";
 import { sendViewApplyPreset, VIEW_PRESET_TRANSIT } from "../../utils/ipc";
+import { resolveIntlLocale } from "../../utils/locale";
 import { resolveTransitIcon } from "../../utils/pathIcon";
+import { useMasterData } from "../../contexts/MasterDataContext";
+import { Money } from "../common/Money";
 // 混雑率(稼働率)メーターは、統計ウィンドウの消防署/警察署の逼迫度メーターと同じ
 // コンポーネントを再利用する。import により AccidentsTab.css(.usage-meter)も読み込まれる。
 import { UsageMeter } from "../statistics/tabs/AccidentsTab";
 import { STATUS_ACTIVE } from "../../constants";
 import { resolveTransitColor } from "../../local-constants";
+import { pauseReasonKey } from "./transitPauseReason";
 import "./TransitManagementWindow.css";
 
 /** GET /api/v1/transit/lines の1路線分のレスポンス型 */
@@ -46,16 +53,25 @@ type TransitLine = {
   ridership: number;
   avg_utilization: number;
   path_count: number;
-  // 運休理由コード(null / "route_disconnected" / "return_leg_blocked" / "no_underlay")。
+  // 運休理由コード(null / "route_disconnected" / "return_leg_blocked" / "no_underlay" / "train_too_long")。
   pause_reason: string | null;
 };
 
-// 運休理由コード → i18n キー。未知コードは汎用文言にフォールバックする。
-const PAUSE_REASON_KEYS: Record<string, string> = {
-  return_leg_blocked: "transit.pauseReason.returnLegBlocked",
-  route_disconnected: "transit.pauseReason.routeDisconnected",
-  no_underlay: "transit.pauseReason.noUnderlay",
+/** 表示中のタブ。"all" 以外は路線種別(路線の path_variant = transit_master の transit_path_id) */
+type TabKey = "all" | number;
+
+type TabDef = {
+  key: TabKey;
+  label: string;
+  /** 種別アイコン。「すべて」タブは持たない */
+  icon: string | null;
+  count: number;
 };
+
+/** 路線名。未命名の路線は ID で示す(路線詳細パネルのヘッダと同じ表記) */
+function lineDisplayName(line: TransitLine): string {
+  return line.name ? line.name : `#${line.line_agent_id}`;
+}
 
 export function TransitManagementWindow({
   apiBaseUrl,
@@ -64,17 +80,20 @@ export function TransitManagementWindow({
   apiBaseUrl: string;
   onClose: () => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const masterData = useMasterData();
+  const locale = resolveIntlLocale(i18n.language);
 
   const [lines, setLines] = useState<TransitLine[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<TabKey>("all");
   // 路線ごとの編集中の運賃・運行間隔(line_agent_id をキーにする)
   const [edits, setEdits] = useState<Record<number, { fare: number; headway: number }>>({});
   const [savingId, setSavingId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   useEffect(() => {
-    setHintbarText(t("transit.hint"));
+    setHintbarText(t("hint.transitManagement"));
     return () => {
       setHintbarText("");
     };
@@ -194,6 +213,8 @@ export function TransitManagementWindow({
 
   const handleDelete = useCallback(
     async (line: TransitLine) => {
+      // 停留所・区間ごと消えて取り消せないため、路線詳細パネルの廃止と同じく確認を挟む。
+      if (!window.confirm(`${lineDisplayName(line)}\n${t("transit.deleteDescription")}`)) return;
       setDeletingId(line.line_agent_id);
       setError(null);
       try {
@@ -215,7 +236,7 @@ export function TransitManagementWindow({
         setDeletingId(null);
       }
     },
-    [apiBaseUrl, load],
+    [apiBaseUrl, load, t],
   );
 
   const openCreation = useCallback(() => {
@@ -231,16 +252,23 @@ export function TransitManagementWindow({
     });
   }, []);
 
-  const totals = useMemo(() => {
-    if (!lines) return { revenues: 0, ridership: 0 };
-    return lines.reduce(
-      (acc, l) => ({
-        revenues: acc.revenues + l.revenues,
-        ridership: acc.ridership + l.ridership,
-      }),
-      { revenues: 0, ridership: 0 },
-    );
-  }, [lines]);
+  const tabs = useMemo<TabDef[]>(() => {
+    const all = lines ?? [];
+    const typeTabs = masterData
+      ? Object.values(masterData.transit).map((entry) => ({
+          key: entry.transit_path_id,
+          label: entry.display_name,
+          icon: resolveTransitIcon(entry.transit_path_id),
+          count: all.filter((line) => line.path_variant === entry.transit_path_id).length,
+        }))
+      : [];
+    return [{ key: "all", label: t("transit.tabAll"), icon: null, count: all.length }, ...typeTabs];
+  }, [lines, masterData, t]);
+
+  const visibleLines = useMemo(() => {
+    if (!lines) return [];
+    return activeTab === "all" ? lines : lines.filter((line) => line.path_variant === activeTab);
+  }, [lines, activeTab]);
 
   if (error && !lines) {
     return <div className="transit-window__error">{error}</div>;
@@ -251,32 +279,40 @@ export function TransitManagementWindow({
 
   return (
     <div className="transit-window">
-      {/* ヘッダー: 都市全体の集計と新設ボタン */}
-      <div className="transit-window__header">
-        <div className="transit-window__summary">
-          <div className="transit-summary-card">
-            <span className="transit-summary-card__label">{t("transit.lineCount")}</span>
-            <span className="transit-summary-card__value">{lines.length}</span>
-          </div>
-          <div className="transit-summary-card">
-            <span className="transit-summary-card__label">{t("transit.totalRidership")}</span>
-            <span className="transit-summary-card__value">{Math.round(totals.ridership).toLocaleString()}</span>
-          </div>
-          <div className="transit-summary-card">
-            <span className="transit-summary-card__label">{t("transit.totalRevenues")}</span>
-            <span className="transit-summary-card__value">{Math.round(totals.revenues).toLocaleString()}</span>
-          </div>
+      {/* 種別タブと新設ボタン。タブの台座の下罫線を行全体に引き、ボタンはその右端に置く */}
+      <div className="transit-window__bar">
+        <div className="transit-tabs" role="tablist">
+          {tabs.map((tab) => {
+            const active = tab.key === activeTab;
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                className={`transit-tab${active ? " transit-tab--active" : ""}`}
+                onClick={() => setActiveTab(tab.key)}
+              >
+                {tab.icon && <img src={tab.icon} alt="" className="transit-tab__icon" draggable={false} />}
+                <span>{tab.label}</span>
+                <span className="transit-tab__count">{tab.count}</span>
+              </button>
+            );
+          })}
         </div>
         <button className="transit-window__new-btn" type="button" onClick={openCreation}>
           {t("transit.newLine")}
         </button>
       </div>
 
-      {error && <div className="transit-window__error-inline">{error}</div>}
+      {error && (
+        <div className="transit-window__error-inline" role="alert">
+          {error}
+        </div>
+      )}
 
-      {/* 路線一覧テーブル */}
-      <div className="transit-table-wrapper">
-        {lines.length === 0 ? (
+      <div className="transit-table-wrapper" role="tabpanel">
+        {visibleLines.length === 0 ? (
           <div className="transit-window__empty">{t("transit.noLines")}</div>
         ) : (
           <table className="transit-table">
@@ -284,120 +320,145 @@ export function TransitManagementWindow({
               <tr>
                 <th>{t("transit.colName")}</th>
                 <th className="transit-table__num">{t("transit.colVehicles")}</th>
-                <th className="transit-table__util">{t("transit.colVehicleProcurement")}</th>
+                <th>{t("transit.colVehicleProcurement")}</th>
                 <th className="transit-table__num">{t("transit.colRidership")}</th>
-                <th className="transit-table__util">{t("transit.colUtilization")}</th>
+                <th>{t("transit.colUtilization")}</th>
                 <th className="transit-table__num">{t("transit.colRevenues")}</th>
                 <th className="transit-table__num">{t("transit.colFare")}</th>
                 <th className="transit-table__num">{t("transit.colHeadway")}</th>
-                <th className="transit-table__actions">{t("transit.colActions")}</th>
+                <th aria-hidden="true" />
               </tr>
             </thead>
             <tbody>
-              {lines.map((line) => {
+              {visibleLines.map((line) => {
                 const edit = edits[line.line_agent_id] ?? {
                   fare: line.fare_price,
                   headway: line.target_headway,
                 };
+                const dirty = isDirty(line);
+                const saving = savingId === line.line_agent_id;
+                const deleting = deletingId === line.line_agent_id;
                 // 運行状態は路線エージェントの status で判定する(STATUS_ACTIVE=運行中)。
                 // 車両不足は別途「調達率」列で示すため、車両0でも運休扱いにはしない。
                 const running = line.status === STATUS_ACTIVE;
-                // 運休バッジのツールチップに理由を出す(詳細を開かなくても原因が分かるように)。
-                const pauseReasonText = running
-                  ? undefined
-                  : t(
-                      (line.pause_reason && PAUSE_REASON_KEYS[line.pause_reason]) ||
-                        "transit.pauseReason.generic",
-                    );
                 const procurementRatio =
                   line.required_vehicle_count > 0
                     ? line.vehicle_count / line.required_vehicle_count
                     : null;
+                const displayName = lineDisplayName(line);
                 return (
                   <tr key={line.line_agent_id}>
-                    <td className="transit-table__name">
-                      <img src={resolveTransitIcon(line.path_variant)} alt="" className="transit-table__mode-icon" draggable={false} />
-                      {/* 路線カラーの縦帯。3D の路線色帯・詳細パネルの帯と同じ色で路線を見分ける */}
-                      <span
-                        className="transit-table__color"
-                        style={{ background: line.line_color || resolveTransitColor(line.path_variant) }}
-                        aria-hidden="true"
-                      />
-                      <div className="transit-table__name-body">
+                    <td>
+                      <div className={`transit-line${running ? "" : " transit-line--suspended"}`}>
+                        {/* 路線カラーの縦帯。3D の路線色帯・詳細パネルの帯と同じ色で路線を見分ける */}
+                        <span
+                          className="transit-line__stripe"
+                          style={{ background: line.line_color || resolveTransitColor(line.path_variant) }}
+                          aria-hidden="true"
+                        />
+                        <img
+                          src={resolveTransitIcon(line.path_variant)}
+                          alt=""
+                          className="transit-line__icon"
+                          draggable={false}
+                        />
                         <button
                           type="button"
-                          className="transit-table__name-text entity-link"
-                          title={line.name ?? ""}
+                          className="transit-line__name entity-link"
+                          title={displayName}
                           onClick={() => openDetail(line.line_agent_id)}
                         >
-                          {line.name ?? `#${line.line_agent_id}`}
+                          {displayName}
                         </button>
-                        <span
-                          className={`transit-badge ${running ? "transit-badge--running" : "transit-badge--suspended"}`}
-                          title={pauseReasonText}
-                        >
-                          {running ? t("transit.running") : t("transit.suspended")}
-                        </span>
+                        {/* 運行中が平常なので印は運休にだけ付け、理由はツールチップで示す
+                            (詳細を開かなくても原因が分かるように) */}
+                        {!running && (
+                          <span
+                            className="transit-badge transit-badge--suspended"
+                            title={t(pauseReasonKey(line.pause_reason))}
+                          >
+                            {t("transit.suspended")}
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td className="transit-table__num">
-                      {procurementRatio === null
-                        ? Math.round(line.vehicle_count)
-                        : `${Math.round(line.vehicle_count)} / ${Math.round(line.required_vehicle_count)}`}
-                    </td>
-                    <td className="transit-table__util">
-                      {procurementRatio === null ? (
-                        "—"
-                      ) : (
-                        <UsageMeter usage_ratio={procurementRatio} goodHigh />
+                      {Math.round(line.vehicle_count)}
+                      {procurementRatio !== null && (
+                        <span className="transit-table__sub"> / {Math.round(line.required_vehicle_count)}</span>
                       )}
                     </td>
-                    <td className="transit-table__num">{Math.round(line.ridership).toLocaleString()}</td>
-                    <td className="transit-table__util">
-                      <UsageMeter usage_ratio={line.avg_utilization} />
+                    <td>
+                      <div className="transit-table__meter">
+                        {procurementRatio === null ? (
+                          <span className="transit-table__sub">—</span>
+                        ) : (
+                          <UsageMeter usage_ratio={procurementRatio} goodHigh />
+                        )}
+                      </div>
                     </td>
-                    <td className="transit-table__num">{Math.round(line.revenues).toLocaleString()}</td>
+                    <td className="transit-table__num">{Math.round(line.ridership).toLocaleString(locale)}</td>
+                    <td>
+                      <div className="transit-table__meter">
+                        <UsageMeter usage_ratio={line.avg_utilization} />
+                      </div>
+                    </td>
+                    <td className="transit-table__num">
+                      <Money value={Math.round(line.revenues)} />
+                    </td>
                     <td className="transit-table__num">
                       <input
                         type="number"
-                        className="transit-table__input"
+                        className={`transit-table__input${edit.fare !== line.fare_price ? " transit-table__input--dirty" : ""}`}
                         value={Math.round(edit.fare)}
                         min={0}
                         step={10}
                         onChange={(e) =>
                           handleEditChange(line.line_agent_id, "fare", Math.max(0, parseInt(e.target.value) || 0))
                         }
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && dirty && !saving) void handleSave(line);
+                        }}
                       />
                     </td>
                     <td className="transit-table__num">
                       <input
                         type="number"
-                        className="transit-table__input"
+                        className={`transit-table__input transit-table__input--short${edit.headway !== line.target_headway ? " transit-table__input--dirty" : ""}`}
                         value={Math.round(edit.headway)}
                         min={1}
                         step={1}
                         onChange={(e) =>
                           handleEditChange(line.line_agent_id, "headway", Math.max(1, parseInt(e.target.value) || 1))
                         }
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && dirty && !saving) void handleSave(line);
+                        }}
                       />
                     </td>
-                    <td className="transit-table__actions">
-                      <button
-                        type="button"
-                        className="transit-btn transit-btn--save"
-                        disabled={!isDirty(line) || savingId === line.line_agent_id}
-                        onClick={() => void handleSave(line)}
-                      >
-                        {savingId === line.line_agent_id ? t("common.processing") : t("transit.save")}
-                      </button>
-                      <button
-                        type="button"
-                        className="transit-btn transit-btn--delete"
-                        disabled={deletingId === line.line_agent_id}
-                        onClick={() => void handleDelete(line)}
-                      >
-                        {deletingId === line.line_agent_id ? t("common.processing") : t("transit.delete")}
-                      </button>
+                    <td>
+                      <div className="transit-table__actions">
+                        <button
+                          type="button"
+                          className={`transit-icon-btn transit-icon-btn--save${saving ? " transit-icon-btn--busy" : ""}`}
+                          title={t("transit.save")}
+                          aria-label={t("transit.save")}
+                          disabled={!dirty || saving}
+                          onClick={() => void handleSave(line)}
+                        >
+                          <SaveIcon />
+                        </button>
+                        <button
+                          type="button"
+                          className={`transit-icon-btn transit-icon-btn--delete${deleting ? " transit-icon-btn--busy" : ""}`}
+                          title={t("transit.delete")}
+                          aria-label={t("transit.delete")}
+                          disabled={deleting}
+                          onClick={() => void handleDelete(line)}
+                        >
+                          <DeleteIcon />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -406,13 +467,38 @@ export function TransitManagementWindow({
           </table>
         )}
       </div>
-
-      <div className="transit-window__footer">
-        <span className="transit-window__note">{t("transit.fareNote")}</span>
-        <button className="transit-window__close-btn" type="button" onClick={onClose}>
-          {t("common.close")}
-        </button>
-      </div>
     </div>
+  );
+}
+
+/** 保存ボタンのチェック印。専用画像が無いためインラインSVGで描き、ボタンの文字色に追従させる */
+function SaveIcon() {
+  return (
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <path
+        d="M3 8.5l3.2 3.2L13 4.8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/** 削除ボタンのごみ箱。SaveIcon と同じくインラインSVG */
+function DeleteIcon() {
+  return (
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <path
+        d="M2.5 4.5h11M6.2 4.5V2.8h3.6v1.7M4 4.5l.8 9h6.4l.8-9M6.8 7v4M9.2 7v4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

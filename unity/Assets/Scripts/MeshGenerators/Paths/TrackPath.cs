@@ -65,7 +65,8 @@ using GeneratedModels;
 /// （null または 0 以下なら非電化としてスキップ）。
 ///
 /// LRT専用軌道431の停留所には、駅パスのプラットフォームとは別に LrtPlatformParts が相対式ホームを描く
-/// （停留所の位置は路線の stop_points から。ホーム区間の架線柱はホームの外へ移し、高欄は立てない）。
+/// （停留所の位置は路線の stop_points から。ホーム区間の架線柱はホームの外へ移し、高欄は立てない。
+/// 他の線路の道床が掛かる側はその区間だけホームを描かず、結合コリドーの主線路は相手のホームの外に柱を立てる）。
 ///
 /// すべてのパーツはプレハブ未配置ならスキップされ、道床も軌道も無い場合は白いストリップに
 /// フォールバックするため、アートアセットが揃う前でもゲームプレイは継続できる。
@@ -102,8 +103,8 @@ public class TrackPath : IPathMeshGenerator
     public static System.Func<int, List<PathSummary>> ConnectedPathsProvider;
     /// <summary>共用インフラ接続ノード。施設内へ軌道が続くため車止めを置かない。</summary>
     public static System.Func<int, bool> InfrastructureConnectionProvider;
-    /// <summary>架線柱を道床の端からどれだけ外側に立てるか（m）。</summary>
-    private const float POLE_MARGIN = 0.5f;
+    /// <summary>架線柱をコリドーの端（道床の端）からどれだけ外側に立てるか（m）。</summary>
+    public const float POLE_MARGIN = 0.5f;
 
     /// <summary>
     /// プラットフォームの淵（デッキの線路側エッジ）の線路中心線からの距離(m)。
@@ -298,7 +299,8 @@ public class TrackPath : IPathMeshGenerator
             List<TrackNeighborInfo> trackNeighbors = TrackAdjacency.NeighborProvider(pathData);
             if (trackNeighbors != null && trackNeighbors.Count > 0)
             {
-                corridor = TrackAdjacency.Compute(pathData.path_id, points, width, wallWidth, platformLeft, platformRight, trackNeighbors);
+                corridor = TrackAdjacency.Compute(pathData.path_id, points, width, wallWidth, platformLeft, platformRight, trackNeighbors,
+                    LrtRoadParts.IsLrt(pathData.path_variant) ? LrtRoadParts.PlatformOuterOffset(pathData) : 0f);
             }
         }
         return corridor;
@@ -385,8 +387,10 @@ public class TrackPath : IPathMeshGenerator
         if (!constructionOnly) CreateTerminations(container, points, corridor, pathData, width, laneCount, platformLeft, platformRight, variantBase, typeBase);
 
         // LRT停留所のホーム(431)。ホーム区間(両端スロープ+余裕)では架線柱をホームの外へ移し、高架の高欄を省く。
+        // 他の線路の道床が掛かる側はその区間を除いて描く(架線柱と高欄のホーム区間は除く前のデッキで取る)。
         List<LrtPlatformParts.Span> lrtPlatforms = constructionOnly ? null : LrtPlatformParts.Resolve(pathData, points, spline.CalculateLength());
-        LrtPlatformParts.Generate(container, spline, pathData, lrtPlatforms);
+        LrtPlatformParts.Generate(container, spline, pathData, lrtPlatforms,
+            corridor?.GetLrtPlatformBlockedRanges(leftSide: true), corridor?.GetLrtPlatformBlockedRanges(leftSide: false));
         List<Vector2> lrtPlatformZones = LrtPlatformParts.ZoneRanges(lrtPlatforms,
             LrtRoadParts.PlatformRampLength(pathData.path_variant), LrtRoadParts.PLATFORM_TRACK_ZONE_MARGIN);
 
@@ -891,7 +895,8 @@ public class TrackPath : IPathMeshGenerator
     /// 突き抜けないよう、ホーム外縁のさらに外側（+POLE_MARGIN）に立てる。
     /// 現実の駅でもホーム外縁に架線柱が並ぶため見た目も正しい。梁は柱間全幅に引き伸ばされる。
     /// LRT停留所のホーム区間(lrtPlatformZones。スプライン距離)では、両側の柱を中心線から
-    /// lrtPoleOffset(ホーム外縁+PLATFORM_POLE_CLEARANCE)以上離す。
+    /// lrtPoleOffset(ホーム外縁+PLATFORM_POLE_CLEARANCE)以上離す。結合相手のLRTのホーム区間では、
+    /// コリドーの張り出しが相手のホーム外縁まで広がっている(TrackAdjacency の Member.Reach)。
     /// </summary>
     private static void GeneratePolesAndBeams(GameObject container, SplineComputer spline, float spacing, float width, string variantBase, string typeBase, TrackCorridorInfo corridor = null, float platformLeft = 0f, float platformRight = 0f, List<Vector2> lrtPlatformZones = null, float lrtPoleOffset = 0f)
     {

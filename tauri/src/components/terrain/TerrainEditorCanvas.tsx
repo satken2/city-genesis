@@ -2,10 +2,12 @@
  * 地形エディタのキャンバス本体。
  *
  * EditorWindow から terrain_editor ウィンドウとして開かれ、指定された地形マップの
- * 作業コピー(near.bin) を読み込んで最大解像度(nearマップ解像度)で描画する。
- * 通常のゲーム表示が far近景をLOD切り替えするのに対し、本エディタは常に最大解像度で
- * 描画し、さらに等高線と100m間隔のグリッドを重ね描きする。グリッドのうちセル境界
- * (cell_size間隔)にあたる線は、通常のグリッドより濃く強調して描く。
+ * 作業コピー(near.bin) を読み込んで、その解像度(nearマップ解像度)のまま描画する。
+ * 地図は3枚のキャンバスを重ねて描く。最下段の WebGL2 キャンバス(terrainEditorRenderer.ts)が
+ * 標高から地形の色・選択範囲のハイライト・100m間隔のグリッド・セル境界(cell_size間隔。
+ * 通常のグリッドより濃く強調する)・等高線を画素単位で描き、その上の Canvas2D が確定済みの
+ * 水面・川・資源・プロップ・カメラを描いてマウス操作も受け、最上段の Canvas2D がブラシや
+ * 作図中の図形などマウスに追従するものを描く(renderFrame 参照)。
  *
  * マウス操作は左クリック/左ドラッグ/右クリックで役割を分けており、モード切替は持たない。
  *   - 左クリック(その場でボタンを離す): 範囲選択を単発適用(ブラシ1回分の合成、
@@ -32,7 +34,7 @@
  *     海底生成(海面が一律0mのデータの海マスを、海岸からの距離に応じた水深へ彫り下げて
  *     陸と連続する海底を作る)の3種類。アルゴリズム本体は terrainErosion.ts /
  *     terrainSeaFloor.ts に分離されており、本ファイルはパラメータUIと実行後の
- *     再描画(テクスチャ・等高線・3Dプレビュー送信)のみを担当する。
+ *     再描画(地形層への標高の転送・3Dプレビュー送信)のみを担当する。
  *
  * 地形編集・水面編集・川編集に加えて「資源編集」タブがあり、天然資源エリア(鉱脈・油田
  * などのポリゴン領域)を水面と同じ作図フローでオーサリングできる。資源は経済シミュレー
@@ -53,7 +55,7 @@ import { showNotification } from "../../utils/notification";
 import { NumberStepper } from "../common/NumberStepper";
 import { NEW_TERRAIN_INITIAL_ELEVATION_M } from "../../local-constants";
 import { useMasterData } from "../../contexts/MasterDataContext";
-import { GROUND_COVER_GRASSLAND, GROUND_COVER_TYPES } from "../../constants";
+import { CLIMATE_TEMPERATE, CLIMATE_TYPES, GROUND_COVER_GRASSLAND, GROUND_COVER_TYPES } from "../../constants";
 import {
   type TerrainEditorData,
   type WaterSurfacePayload,
@@ -63,6 +65,7 @@ import {
   type TerrainCameraPayload,
   type GridRect,
   type Terrain3DRequestStatePayload,
+  type Terrain3DDetachPayload,
   type Terrain3DFullStatePayload,
   type Terrain3DSelectionDeltaPayload,
   type Terrain3DSelectionResetPayload,
@@ -71,16 +74,20 @@ import {
   base64ToUint8,
   encodeFloat16Array,
   uint8ToBase64,
-  computePixelRGB,
+  groundCoverRamp,
+  normalizeClimate,
   normalizeGroundCover,
   extractElevRect,
   quantizeMaskRect,
+  SEA_RGB,
   EVT_TERRAIN_3D_REQUEST_STATE,
+  EVT_TERRAIN_3D_DETACH,
   EVT_TERRAIN_3D_FULL_STATE,
   EVT_TERRAIN_3D_SELECTION_DELTA,
   EVT_TERRAIN_3D_SELECTION_RESET,
   EVT_TERRAIN_3D_ELEVATION_DELTA,
 } from "./terrainData";
+import { TerrainEditorRenderer } from "./terrainEditorRenderer";
 import {
   type ThermalErosionParams,
   type HydraulicErosionParams,
@@ -105,22 +112,19 @@ import {
   dischargeFromWidth,
   nearestPointIndex,
 } from "./terrainRiver";
-import { polygonArea, polygonParts, translatePolygon } from "./riverGeometry";
+import { polygonArea, polygonParts, ringSignedArea, translatePolygon } from "./riverGeometry";
 import { captureTerrainThumbnail } from "./terrainThumbnail";
+import { ResourcePresetHint } from "../resource/ResourcePresetHint";
+import { useResourcePresetInputs } from "../../hooks/useResourcePresetInputs";
+import { RESOURCE_MAX_AMOUNT_LIMIT } from "../../data/resourcePresets";
+import { formatCompactAmount } from "../../utils/money";
+import { resolveIntlLocale } from "../../utils/locale";
 import "./TerrainEditorCanvas.css";
 import { TerrainPropEditor, useTerrainPropEditor, emptyTerrainProps, type TerrainProps } from "./TerrainPropEditor";
 
 type TerrainEditorCanvasProps = {
   /** 編集対象の地形マップID。window-registry の entity_id 経由で渡される。 */
   mapId: string;
-};
-
-/** 1本の等高線(ある標高レベルに対する worldly Path2D) */
-type Contour = {
-  level: number;
-  path: Path2D;
-  /** 主要等高線(毎5本)かどうか。描画 lineWidth を切り替えるために使う */
-  major: boolean;
 };
 
 /** パン・ズームのビュー状態。ドラッグ中の高頻度更新で再描画を抑えるため ref で保持する */
@@ -248,6 +252,15 @@ const CONTOUR_REFINE_ZOOM_THRESHOLD = 6;
 const CLICK_VS_DRAG_THRESHOLD_PX = 4;
 
 /**
+ * 3Dプレビューへの全状態の送信は、変更がこの時間(ms)止むまで待って1回にまとめる。全状態は標高全体を
+ * 符号化し、受け取ったプレビューもメッシュを作り直すため。Undo直後に続く彫り込みプレビューの再構築
+ * (150msのデバウンス)やステッパーの連打がまとまるよう、そのデバウンスより長くしてある。
+ */
+const PREVIEW_FULL_STATE_QUIET_MS = 200;
+/** 変更が続いていても、最初の変更からこの時間(ms)が経ったら送る(プレビューが古いまま止まらないように) */
+const PREVIEW_FULL_STATE_MAX_WAIT_MS = 1000;
+
+/**
  * カメラ初期状態を新しく置くときの既定値。高さはゲーム側 CameraController の初期高度
  * (baseInitialHeight=150m)に、見下ろし角は通常プレイの俯瞰に合わせる。
  */
@@ -269,138 +282,6 @@ function pickContourIntervalForZoom(baseInterval: number, baseZoom: number, curr
   if (currentZoom <= refineStartZoom) return baseInterval;
   const factor = currentZoom / refineStartZoom;
   return Math.max(1, niceIntervalAtOrBelow(baseInterval / factor));
-}
-
-/** 100m グリッドの Path2D を世界座標系で構築する */
-function buildGridPath(mapWidth: number, mapHeight: number, interval: number): Path2D {
-  const path = new Path2D();
-  const halfW = mapWidth / 2;
-  const halfH = mapHeight / 2;
-  // 縦線(世界X方向)
-  for (let x = -halfW; x <= halfW; x += interval) {
-    path.moveTo(x, -halfH);
-    path.lineTo(x, halfH);
-  }
-  // 横線(世界Z方向)。半端な端の線は [0, halfW) のループで漏れるのを防ぐため終端も個別に引く
-  for (let z = -halfH; z <= halfH; z += interval) {
-    path.moveTo(-halfW, z);
-    path.lineTo(halfW, z);
-  }
-  // 浮動小数点の累積誤差で端が1px足りないのを補うため、最端線を明示的に引く
-  path.moveTo(halfW, -halfH);
-  path.lineTo(halfW, halfH);
-  path.moveTo(-halfW, halfH);
-  path.lineTo(halfW, halfH);
-  return path;
-}
-
-/**
- * Marching Squares で全等高線を構築する。
- *
- * 各セル(2x2グリッド点)で4隅の標高を調べ、指定レベルを跨ぐセルについて
- * エッジ上の交点を線形補間で求めて線分を追加する。saddle ケース(5,10)は
- * 2本の線分になる。全ての線分は世界座標で Path2D に蓄積し、描画時に
- * ビュー変換を適用してストロークする。
- *
- * interval は呼び出し側で決める(初回ロード時は pickContourInterval、その後は
- * ズーム倍率に応じて pickContourIntervalForZoom で細分化した値を渡す)。
- *
- * セル数が大きくても全レベル一度に構築可能なよう、各セルの4隅min/maxで
- * レベルを跨がないセルをスキップする最適化を入れている。
- */
-function buildContours(
-  elev: Float32Array,
-  rows: number,
-  cols: number,
-  spacing: number,
-  mapWidth: number,
-  mapHeight: number,
-  minLand: number,
-  maxLand: number,
-  interval: number
-): Contour[] {
-  const halfW = mapWidth / 2;
-  const halfH = mapHeight / 2;
-  // グリッド点(col,row) → 世界X,Z
-  // 世界X = col*spacing - halfW, 世界Z = row*spacing - halfH
-
-  // 等高線レベル群(0 < L <= maxLand の interval倍数)
-  const levels: number[] = [];
-  const start = Math.ceil(minLand / interval) * interval;
-  for (let L = start; L <= maxLand; L += interval) {
-    if (L > 0) levels.push(L);
-  }
-  if (levels.length === 0 && maxLand > 0) levels.push(Math.max(start, interval));
-
-  const contours: Contour[] = [];
-  for (let li = 0; li < levels.length; li++) {
-    const L = levels[li];
-    const path = new Path2D();
-    const major = li % 5 === 0;
-
-    for (let r = 0; r < rows - 1; r++) {
-      const baseZ = r * spacing - halfH;
-      const rowBase = r * cols;
-      const rowNext = rowBase + cols;
-      for (let c = 0; c < cols - 1; c++) {
-        const a = elev[rowBase + c]; // 左上 TL
-        const b = elev[rowBase + c + 1]; // 右上 TR
-        const cc = elev[rowNext + c + 1]; // 右下 BR
-        const d = elev[rowNext + c]; // 左下 BL
-        const mn = Math.min(a, b, cc, d);
-        const mx = Math.max(a, b, cc, d);
-        if (L < mn || L > mx) continue;
-
-        // 4隅の inside(>=L) ビット
-        const caseIdx =
-          (a >= L ? 1 : 0) | (b >= L ? 2 : 0) | (cc >= L ? 4 : 0) | (d >= L ? 8 : 0);
-        if (caseIdx === 0 || caseIdx === 15) continue;
-
-        const baseX = c * spacing - halfW;
-        // 各エッジの交点を線形補間で求める
-        // top = A(左上)→B(右上), right = B→C, bottom = D(左下)→C, left = A→D
-        const pTop = (L - a) / (b - a);
-        const pRight = (L - b) / (cc - b);
-        const pBottom = (L - d) / (cc - d);
-        const pLeft = (L - a) / (d - a);
-
-        const topX = baseX + pTop * spacing;
-        const topZ = baseZ;
-        const rightX = baseX + spacing;
-        const rightZ = baseZ + pRight * spacing;
-        const botX = baseX + pBottom * spacing;
-        const botZ = baseZ + spacing;
-        const leftX = baseX;
-        const leftZ = baseZ + pLeft * spacing;
-
-        // case毎に線分を追加。saddle(5,10)は2本。
-        // 便宜上 moveTo→lineTo で各線分を個別に引く(ストロークなので向きは不問)。
-        const addSeg = (x1: number, z1: number, x2: number, z2: number) => {
-          path.moveTo(x1, z1);
-          path.lineTo(x2, z2);
-        };
-        switch (caseIdx) {
-          case 1: addSeg(leftX, leftZ, topX, topZ); break;
-          case 2: addSeg(topX, topZ, rightX, rightZ); break;
-          case 3: addSeg(leftX, leftZ, rightX, rightZ); break;
-          case 4: addSeg(rightX, rightZ, botX, botZ); break;
-          case 5: addSeg(topX, topZ, rightX, rightZ); addSeg(leftX, leftZ, botX, botZ); break;
-          case 6: addSeg(topX, topZ, botX, botZ); break;
-          case 7: addSeg(leftX, leftZ, botX, botZ); break;
-          case 8: addSeg(leftX, leftZ, botX, botZ); break;
-          case 9: addSeg(topX, topZ, botX, botZ); break;
-          case 10: addSeg(topX, topZ, leftX, leftZ); addSeg(rightX, rightZ, botX, botZ); break;
-          case 11: addSeg(rightX, rightZ, botX, botZ); break;
-          case 12: addSeg(leftX, leftZ, rightX, rightZ); break;
-          case 13: addSeg(topX, topZ, rightX, rightZ); break;
-          case 14: addSeg(leftX, leftZ, topX, topZ); break;
-          default: break;
-        }
-      }
-    }
-    contours.push({ level: L, path, major });
-  }
-  return contours;
 }
 
 /* ============================================================================
@@ -440,7 +321,7 @@ type NoiseToolParams = {
   bias: NoiseBias;
 };
 
-/** グリッド範囲(テクスチャの部分更新や選択範囲の外接矩形に使う) */
+/** グリッド範囲(地形層への部分転送や選択範囲の外接矩形に使う) */
 type DirtyRect = { rMin: number; rMax: number; cMin: number; cMax: number };
 
 /**
@@ -500,7 +381,7 @@ function fractalNoise2D(wx: number, wz: number, scale: number, octaves: number):
 /**
  * 円/四角ブラシの(回転後の)ワールド空間バウンディングボックス半径を求める。
  * feather (境界のぼかし幅)を指定すると、にじみ出た範囲まで含めた外接矩形になる
- * (選択マスクへの反映やテクスチャ差分更新の走査範囲をにじみ分だけ広げるために使う)。
+ * (選択マスクへの反映や地形層への部分転送の範囲をにじみ分だけ広げるために使う)。
  */
 function shapeAabbHalfExtents(size: number, aspect: number, angleDeg: number, feather: number = 0): { hx: number; hz: number } {
   const rad = (angleDeg * Math.PI) / 180;
@@ -773,63 +654,20 @@ function applySelectionOperation(
   }
 }
 
-/** 標高が変化したグリッド範囲だけ地形テクスチャ(ImageData)を塗り直し、Canvasへ反映する */
-function refreshTerrainTexture(
-  rect: DirtyRect,
-  elev: Float32Array,
-  cols: number,
-  minLand: number,
-  maxLand: number,
-  imgData: ImageData,
-  ctx: CanvasRenderingContext2D,
-  groundCover: number
-): void {
-  const data = imgData.data;
-  for (let r = rect.rMin; r <= rect.rMax; r++) {
-    const rowBase = r * cols;
-    for (let c = rect.cMin; c <= rect.cMax; c++) {
-      const i = rowBase + c;
-      const [red, g, b] = computePixelRGB(elev[i], minLand, maxLand, groundCover);
-      data[i * 4 + 0] = red;
-      data[i * 4 + 1] = g;
-      data[i * 4 + 2] = b;
-      data[i * 4 + 3] = 255;
-    }
-  }
-  const w = rect.cMax - rect.cMin + 1;
-  const h = rect.rMax - rect.rMin + 1;
-  ctx.putImageData(imgData, 0, 0, rect.cMin, rect.rMin, w, h);
-}
-
-/** selectionMask の値(0..1)を反映した半透明ハイライトを選択オーバーレイテクスチャへ書き込む */
-function refreshSelectionTexture(
-  rect: DirtyRect,
-  mask: Float32Array,
-  cols: number,
-  imgData: ImageData,
-  ctx: CanvasRenderingContext2D
-): void {
-  const data = imgData.data;
-  for (let r = rect.rMin; r <= rect.rMax; r++) {
-    const rowBase = r * cols;
-    for (let c = rect.cMin; c <= rect.cMax; c++) {
-      const i = rowBase + c;
-      const w = Math.max(0, Math.min(1, mask[i]));
-      data[i * 4 + 0] = 80;
-      data[i * 4 + 1] = 190;
-      data[i * 4 + 2] = 255;
-      data[i * 4 + 3] = Math.round(w * 160);
-    }
-  }
-  const w = rect.cMax - rect.cMin + 1;
-  const h = rect.rMax - rect.rMin + 1;
-  ctx.putImageData(imgData, 0, 0, rect.cMin, rect.rMin, w, h);
-}
-
-/** 選択オーバーレイテクスチャ全体を透明にクリアする(「選択範囲をリセット」時に呼ぶ) */
-function clearSelectionTexture(imgData: ImageData, ctx: CanvasRenderingContext2D): void {
-  imgData.data.fill(0);
-  ctx.putImageData(imgData, 0, 0);
+/**
+ * Canvas2D の層(ベクター層・カーソル層)を消去し、世界座標のまま描けるビュー変換を掛ける。
+ * 描き終えたら呼び出し側で ctx.restore() する。
+ * 世界→CSS 変換は screenX = zoom*(worldX - offsetX), screenY = zoom*(offsetY - worldZ)。
+ * 標高配列は行0が南端(世界-Z)なので、Y倍率を負にして北(+Z)を画面上に描く(Unityの俯瞰・
+ * 都市マップ・地形層と同じ向き)。文字だけはこの反転で上下逆になるため fillWorldText で打ち消す。
+ */
+function beginWorldLayer(ctx: CanvasRenderingContext2D, view: ViewState, dpr: number): void {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.save();
+  ctx.translate(-view.offsetX * view.zoom, view.offsetY * view.zoom);
+  ctx.scale(view.zoom, -view.zoom);
 }
 
 /**
@@ -1042,12 +880,10 @@ function strokeResourceAreas(
  * カメラ初期状態のマーカーを2Dキャンバスへ描画する。draw() 内でビュー変換適用後に呼ぶ。
  * 位置の丸と、yaw の向きへ伸びる視線(矢印)と視野を示す扇形を描く。yaw は北(+Z)を0とする
  * 時計回りなので、向きベクトルは (sin(yaw), cos(yaw))(2D都市マップのカメラマーカーと同じ)。
- * カメラ編集タブで注視点を指定する操作の目安として、mouse が渡されたら位置からマウスまで破線を引く。
  */
 function strokeCameraMarker(
   ctx: CanvasRenderingContext2D,
   camera: TerrainCameraPayload | null,
-  mouse: WorldPoint | null,
   lineWidth: number
 ): void {
   if (!camera) return;
@@ -1089,16 +925,25 @@ function strokeCameraMarker(
   ctx.textAlign = "center";
   ctx.textBaseline = "bottom";
   fillWorldText(ctx, "Camera", camera.x, camera.z + lineWidth * 6);
+  ctx.restore();
+}
 
-  if (mouse) {
-    ctx.setLineDash([lineWidth * 4, lineWidth * 4]);
-    ctx.strokeStyle = "rgba(255,230,90,0.6)";
-    ctx.beginPath();
-    ctx.moveTo(camera.x, camera.z);
-    ctx.lineTo(mouse.x, mouse.z);
-    ctx.stroke();
-    ctx.setLineDash([]);
-  }
+/** カメラ編集タブで注視点を指定する操作の目安として、カメラ位置からマウスまで破線を引く */
+function strokeCameraAimLine(
+  ctx: CanvasRenderingContext2D,
+  camera: TerrainCameraPayload | null,
+  mouse: WorldPoint | null,
+  lineWidth: number
+): void {
+  if (!camera || !mouse) return;
+  ctx.save();
+  ctx.lineWidth = lineWidth;
+  ctx.setLineDash([lineWidth * 4, lineWidth * 4]);
+  ctx.strokeStyle = "rgba(255,230,90,0.6)";
+  ctx.beginPath();
+  ctx.moveTo(camera.x, camera.z);
+  ctx.lineTo(mouse.x, mouse.z);
+  ctx.stroke();
   ctx.restore();
 }
 
@@ -1111,6 +956,15 @@ type RiverDrawOptions = {
   /** 一覧で選択中の川ID(強調表示)。null なら無し */
   selectedId: string | null;
 };
+
+/**
+ * 川の中心線・範囲ポリゴンの Path2D を形状ごとに1回だけ作るキャッシュ。川(EditorRiver)と範囲は
+ * 変更のたびに新しい配列・オブジェクトへ差し替える運用(Undoスタックが同じオブジェクトを参照するため)
+ * なので、配列・オブジェクト自体をキーにでき、形状が変われば作り直される。マウスを動かすたびの
+ * 再描画で数千点の川を組み直さないために使う。
+ */
+const riverLinePathCache = new WeakMap<EditorRiver["points"], { path: Path2D; avgWidth: number }>();
+const riverFillPathCache = new WeakMap<WaterPolygonGeoJson, Path2D>();
 
 /**
  * 川を2Dキャンバスへ描画する。draw() 内でビュー変換適用後に呼ぶ。
@@ -1129,6 +983,8 @@ function strokeRivers(
 ): void {
   const buildPath = (river: EditorRiver): { path: Path2D; avgWidth: number } | null => {
     if (river.points.length < 2) return null;
+    const cached = riverLinePathCache.get(river.points);
+    if (cached) return cached;
     const path = new Path2D();
     path.moveTo(river.points[0].x, river.points[0].z);
     let widthSum = 0;
@@ -1136,9 +992,13 @@ function strokeRivers(
       path.lineTo(river.points[i].x, river.points[i].z);
       widthSum += river.points[i].width;
     }
-    return { path, avgWidth: widthSum / (river.points.length - 1) };
+    const built = { path, avgWidth: widthSum / (river.points.length - 1) };
+    riverLinePathCache.set(river.points, built);
+    return built;
   };
   const buildFill = (polygon: WaterPolygonGeoJson): Path2D => {
+    const cached = riverFillPathCache.get(polygon);
+    if (cached) return cached;
     const fill = new Path2D();
     for (const part of polygonParts(polygon)) {
       for (const ring of part) {
@@ -1148,6 +1008,7 @@ function strokeRivers(
         fill.closePath();
       }
     }
+    riverFillPathCache.set(polygon, fill);
     return fill;
   };
 
@@ -1339,11 +1200,15 @@ function strokeRiverControlPoints(ctx: CanvasRenderingContext2D, cps: ReadonlyAr
 }
 
 export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   // 資源編集タブの種別プルダウン・種別ラベル表示に使う(resource_master 由来)。
   // 地形エディタ自体はバックエンド非依存で動くため、未取得(null)でも他タブは全機能が使える。
   const masterData = useMasterData();
+  // 地図は3枚のキャンバスを重ねて描く(renderFrame 参照)。下から地形層(WebGL2)、ベクター層
+  // (Canvas2D。マウス操作もここで受ける)、カーソル層(Canvas2D)。
+  const terrainGlCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const cursorCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const coordOverlayRef = useRef<HTMLDivElement | null>(null);
   const zoomOverlayRef = useRef<HTMLDivElement | null>(null);
 
@@ -1351,31 +1216,25 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [errorMsg, setErrorMsg] = useState<string>("");
 
-  // 地形データの実体は再描画の度に参照するため ref に保持する。
-  // 一度ロードすれば不変なので state ではなく ref。
-  const terrainCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const gridPathRef = useRef<Path2D | null>(null);
-  // セル境界(cell_size間隔)のグリッド。通常のグリッドより濃く重ね描きして区別する。
-  // cell_size はメタデータ欄で編集可能なため、変更の度に再構築する(cellSize用useEffect参照)。
-  // draw() 内で使う間隔もこの ref に持たせ、cellSize state を直接参照しない
-  // (draw() はズーム/パン等のイベントハンドラからも呼ばれ、それらのクロージャは
-  // status 変更時にしか張り直されないため、state を直接読むと値が古くなるのを避けるため)。
-  const cellGridPathRef = useRef<Path2D | null>(null);
+  // 地形層(地形色・選択範囲・グリッド・等高線)の描画器。初めて地形を置くときに作り、
+  // アンマウントで GL 資源を解放する。WebGL2 が使えない環境では作れず、ロードがエラーになる。
+  const rendererRef = useRef<TerrainEditorRenderer | null>(null);
+  // 描画の予約。draw()/drawCursorLayer() は requestAnimationFrame を1つ予約するだけで、1フレームに
+  // 何度呼ばれても描画は1回にまとまる。fullFramePendingRef はそのフレームで全層を描き直すか。
+  const frameRequestRef = useRef<number | null>(null);
+  const fullFramePendingRef = useRef(false);
+  // セル境界(cell_size間隔)のグリッド間隔。cell_size はメタデータ欄で編集可能で、描画は
+  // イベントハンドラのクロージャ(status 変更時にしか張り直されない)からも呼ばれるため、
+  // cellSize state ではなくこの ref から読む。
   const cellGridIntervalRef = useRef<number>(500);
-  const contoursRef = useRef<Contour[]>([]);
   const settingsRef = useRef<TerrainSettings | null>(null);
   const viewRef = useRef<ViewState>({ offsetX: 0, offsetY: 0, zoom: 1 });
 
   // 等高線間隔のズーム追従。baseIntervalRef/baseZoomRefは地形全体が収まる基準ズームでの
-  // 間隔とその時のズーム倍率(resetView直後に確定)。そこからズームインした分だけ
-  // pickContourIntervalForZoomで間隔を細分化する。contoursRefは常にcontourIntervalRefの
-  // 間隔で構築済みの状態を保つ。
+  // 間隔とその時のズーム倍率(resetView直後に確定)。描画のたびに、そこからズームインした分だけ
+  // pickContourIntervalForZoomで間隔を細分化する。
   const baseIntervalRef = useRef<number>(100);
   const baseZoomRef = useRef<number>(1);
-  const contourIntervalRef = useRef<number>(100);
-  // ズーム操作中に毎フレーム等高線を再構築すると重いため、ズームが落ち着いてから
-  // 一度だけ再構築するデバウンス用タイマー。
-  const contourZoomTimerRef = useRef<number | null>(null);
 
   const dragRef = useRef<{ active: boolean; startX: number; startY: number; offX: number; offY: number }>({
     active: false,
@@ -1390,27 +1249,15 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   const leftDownRef = useRef<{ x: number; y: number } | null>(null);
 
   // 標高データ本体。「適用」ボタン押下時にのみ書き換わる(このコンポーネント内で完結し、
-  // バックエンドの状態には影響しない)。
+  // バックエンドの状態には影響しない)。書き換えたら変化した範囲を描画器へ転送する。
   const elevRef = useRef<Float32Array | null>(null);
-  // 地形テクスチャのImageDataと、それを描いているオフスクリーンCanvasの2Dコンテキスト。
-  // 適用時は変化したセルの範囲だけ塗り直す(refreshTerrainTexture)ことで、マップ全体を
-  // 毎回再構築するコストを避けている。
-  const terrainImageDataRef = useRef<ImageData | null>(null);
-  const terrainCtxRef = useRef<CanvasRenderingContext2D | null>(null);
 
   // 選択範囲(selectionMask)本体。グリッド点ごとに0..1の重みを持ち、ブラシ/ポリゴンで
   // クリックする度に最大値合成(union)でマージされる。「適用」ボタンで編集方法を適用する
   // 対象になり、「選択範囲をリセット」で明示的にクリアするまで保持される。
   const selectionMaskRef = useRef<Float32Array | null>(null);
-  // 選択範囲を半透明ハイライトとして描画するためのオフスクリーンCanvas/ImageData/コンテキスト。
-  // 地形テクスチャと同様、変化したセル範囲だけ塗り直す。
-  const selectionCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const selectionImageDataRef = useRef<ImageData | null>(null);
-  const selectionCtxRef = useRef<CanvasRenderingContext2D | null>(null);
-  // ポリゴンが閉じた状態でのにじみプレビューを描画するための一時的Canvas/ImageData/コンテキスト
-  const polygonPreviewCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const polygonPreviewImageDataRef = useRef<ImageData | null>(null);
-  const polygonPreviewCtxRef = useRef<CanvasRenderingContext2D | null>(null);
+  // ポリゴンが閉じた状態でのにじみプレビューの重み(0..255、格子と同じ並び)。描画器へ転送して表示する。
+  const polygonPreviewWeightsRef = useRef<Uint8Array | null>(null);
   // 選択範囲の外接矩形(グリッド範囲)。「適用」時の走査範囲になるほか、選択の有無判定にも使う。
   const selectionBoundsRef = useRef<DirtyRect | null>(null);
 
@@ -1421,6 +1268,20 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     pendingSelectionRect: null,
     rafId: null,
   });
+
+  // --- 3Dプレビューとの接続(契約は terrainData.ts のイベント定義を参照) ---
+  // 接続中(request_state を受けて detach されていない)プレビューの sessionId。空なら何も送らない。
+  const previewSessionsRef = useRef<Set<string>>(new Set());
+  // 3Dプレビューへ送る状態(標高・選択範囲・水面・川・地表種別)の世代。変更のたびに進める。
+  const previewStateVersionRef = useRef(0);
+  // 接続中のプレビューへ最後に送り終えた世代と、切断したプレビューが切断時点で受け取っていた世代。
+  // 非表示から戻ったプレビューは、その間に状態が変わっていなければ全状態を受け取り直さない
+  // (大きなマップでは全状態の受信とメッシュの作り直しに数秒かかるため)。
+  const previewSentVersionRef = useRef(0);
+  const detachedPreviewVersionsRef = useRef<Map<string, number>>(new Map());
+  // 全状態の送信予約と、予約中の最初の変更の時刻(performance.now)。連続する変更を1回の送信にまとめる。
+  const fullStateTimerRef = useRef<number | null>(null);
+  const fullStatePendingSinceRef = useRef<number | null>(null);
 
   // --- 編集ツールのUI状態 ---
   // 「移動」と「編集」でモードを分けず、常に左クリックが範囲選択(単発)・左ドラッグが
@@ -1475,10 +1336,9 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   // 確定(閉じる)になる(水面編集と同じ2段階: 形状を閉じる→種別・埋蔵量等を設定→確定)。
   // 実体は resourceAreasRef / resourcePointsRef。
   const [resourceMode, setResourceMode] = useState(false);
-  // 次に作成する資源のパラメータ。種別はマスターデータ(resource_master)から選ぶ。
+  // 次に作成する資源の種別。マスターデータ(resource_master)から選ぶ。埋蔵量上限・回復率は
+  // 種別の目安から導出する(resourceInputs。作図中の頂点列 resourcePointsRef の宣言の後で求める)。
   const [resourceTypeInput, setResourceTypeInput] = useState<number | null>(null);
-  const [resourceMaxAmountInput, setResourceMaxAmountInput] = useState(1000);
-  const [resourceRecoveryRateInput, setResourceRecoveryRateInput] = useState(0);
   // 作図中の資源ポリゴンが「閉じた(形状確定済み)」状態か(水面の waterPolygonClosed と同じ)。
   const [resourcePolygonClosed, setResourcePolygonClosed] = useState(false);
   // 作図中ポリゴンの頂点数と、作成済み資源の一覧表示用ミラー(実体は resourceAreasRef)。
@@ -1547,7 +1407,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   // --- 彫り込みプレビュー ---
   // 未彫り込みの川を「今の深さ係数で彫ったらこうなる」を、実際の標高データ(elevRef)を変えずに
   // 表示するための仕組み。previewElevRef は elevRef のコピーに未彫り込みの川を彫った表示用配列で、
-  // テクスチャ・等高線・3Dプレビューはこれがあればこちらを表示する(displayElev)。
+  // 地形層・3Dプレビューはこれがあればこちらを表示する(displayElev)。
   // previewPolygonsRef はプレビュー地形上で抽出した未彫り込みの川の範囲(水面表示用)。
   // 実際の彫り込み(確定)は従来どおり carveRiverObjects が elevRef へ行う。
   const previewElevRef = useRef<Float32Array | null>(null);
@@ -1787,6 +1647,15 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   const resourceAreasRef = useRef<EditorResourceArea[]>([]);
   const resourcePointsRef = useRef<WorldPoint[]>([]);
 
+  // 次に作成する資源の埋蔵量上限・回復率。初期値は種別ごとの目安で、面積比例の目安は作図中の
+  // 形状の面積に追従する(頂点の増減・形状を閉じる操作は resourcePointCount 等の state 更新を伴い、
+  // そのたびに再描画されるため ref から面積を計算してよい)。
+  const resourceDraftAreaM2 =
+    resourcePointCount >= 3 ? Math.abs(ringSignedArea(resourcePointsRef.current.map((p) => [p.x, p.z]))) : 0;
+  const resourceProductId =
+    resourceTypeInput !== null ? masterData?.resource_types[resourceTypeInput]?.product_id ?? null : null;
+  const resourceInputs = useResourcePresetInputs(resourceProductId, resourceDraftAreaM2);
+
   // === カメラ初期状態の実体 ===
   // エクスポート(meta.json / terrain_maps.yaml の camera)の対象。3Dプレビューへは送らない。
   const cameraRef = useRef<TerrainCameraPayload | null>(null);
@@ -1797,6 +1666,10 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   // 地形色のランプも決める。描画関数はイベントのクロージャから呼ばれ state を読めないため実体は ref に持つ。
   const groundCoverRef = useRef<number>(GROUND_COVER_GRASSLAND);
   const [groundCover, setGroundCover] = useState<number>(GROUND_COVER_GRASSLAND);
+
+  // === 気候区分 ===
+  // エクスポート(meta.json / terrain_maps.yaml の climate)の対象。ゲーム内の天気の出方だけを決め、エディタの描画には使わない。
+  const [climate, setClimate] = useState<number>(CLIMATE_TEMPERATE);
 
   // 資源種別の表示名の対応表。draw()(イベントハンドラのクロージャから呼ばれ、React state を
   // 直接読めない)がラベル描画に使うため、マスターデータの変化を ref へミラーする。
@@ -1827,10 +1700,15 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     }
   }, [shape]);
 
-  /** アンマウント時、等高線再構築の予約タイマーが残っていれば止める */
+  /** アンマウント時、描画と全状態送信の予約を止め、地形層の GL 資源を解放する */
   useEffect(() => {
     return () => {
-      if (contourZoomTimerRef.current != null) window.clearTimeout(contourZoomTimerRef.current);
+      if (frameRequestRef.current != null) cancelAnimationFrame(frameRequestRef.current);
+      frameRequestRef.current = null;
+      if (fullStateTimerRef.current != null) window.clearTimeout(fullStateTimerRef.current);
+      fullStateTimerRef.current = null;
+      rendererRef.current?.dispose();
+      rendererRef.current = null;
     };
   }, []);
 
@@ -1842,24 +1720,35 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   }, []);
 
   /**
-   * 3Dプレビューウィンドウ(terrain_3d_preview)が自身のマウント時に送ってくる
-   * request_state イベントを受け、現在の全状態を送り返す。プレビューを一度閉じて
-   * 開き直した場合や、エディタより後からプレビューを開いた場合でも、ディスクの
-   * 保存済みデータではなく編集中のメモリ上の状態と同期させるためのハンドシェイク。
+   * 3Dプレビューウィンドウ(terrain_3d_preview)との接続管理。プレビューはマウント時・再表示時に
+   * request_state、非表示・アンマウント時に detach を送ってくる。request_state には編集中の
+   * メモリ上の全状態を返す(エディタより後から開いた・開き直したプレビューも、ディスクの保存済み
+   * データではなく編集中の状態と同期させるため)。ただし切断していた間に状態が変わっていなければ
+   * 送り直さない。状態を送るのは接続中のプレビューがあるときだけ。
    */
   useEffect(() => {
-    let unlisten: (() => void) | null = null;
     let cancelled = false;
-    listen<Terrain3DRequestStatePayload>(EVT_TERRAIN_3D_REQUEST_STATE, (event) => {
-      if (event.payload.mapId !== mapId) return;
-      emitTerrain3dFullState();
-    }).then((fn) => {
+    const unlisteners: (() => void)[] = [];
+    const keep = (fn: () => void) => {
       if (cancelled) fn();
-      else unlisten = fn;
-    });
+      else unlisteners.push(fn);
+    };
+    listen<Terrain3DRequestStatePayload>(EVT_TERRAIN_3D_REQUEST_STATE, (event) => {
+      const { mapId: target, sessionId } = event.payload;
+      if (target !== mapId) return;
+      const detachedAt = detachedPreviewVersionsRef.current.get(sessionId);
+      detachedPreviewVersionsRef.current.delete(sessionId);
+      previewSessionsRef.current.add(sessionId);
+      if (detachedAt !== previewStateVersionRef.current) emitTerrain3dFullState();
+    }).then(keep);
+    listen<Terrain3DDetachPayload>(EVT_TERRAIN_3D_DETACH, (event) => {
+      const { mapId: target, sessionId } = event.payload;
+      if (target !== mapId || !previewSessionsRef.current.delete(sessionId)) return;
+      detachedPreviewVersionsRef.current.set(sessionId, previewSentVersionRef.current);
+    }).then(keep);
     return () => {
       cancelled = true;
-      if (unlisten) unlisten();
+      for (const fn of unlisteners) fn();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapId]);
@@ -1892,21 +1781,43 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     };
   }
 
-  /**
-   * 1フレーム分の描画。
-   *
-   * 世界座標→描画ピクセルの変換は ctx の transform で行い、地形・グリッド・等高線は
-   * 全て世界座標系のまま Path2D / drawImage で渡す。これにより大量の等高線線分が
-   * あってもストローク1回で描画できる。
-   * 標高配列は行0が南端(世界-Z)なので、Y倍率を負にして北(+Z)を画面上に描く(Unityの俯瞰・
-   * 都市マップと同じ向き)。文字だけはこの反転で上下逆になるため、描く箇所でY反転を打ち消す。
-   */
+  /** 次のフレームで地図の全層を描き直す。1フレームに何度呼んでも描画は1回にまとまる */
   function draw() {
+    requestFrame(true);
+  }
+
+  /** 次のフレームでカーソル層だけを描き直す。マウスが動いただけでビューも編集データも変わらないときに使う */
+  function drawCursorLayer() {
+    requestFrame(false);
+  }
+
+  function requestFrame(full: boolean) {
+    if (full) fullFramePendingRef.current = true;
+    if (frameRequestRef.current != null) return;
+    frameRequestRef.current = requestAnimationFrame(() => {
+      frameRequestRef.current = null;
+      const fullFrame = fullFramePendingRef.current;
+      fullFramePendingRef.current = false;
+      renderFrame(fullFrame);
+    });
+  }
+
+  /**
+   * 1フレーム分の描画。地図は3枚のキャンバスを重ねて描く。
+   *   - 地形層(WebGL2): 地形色・選択範囲・100mグリッド・セル境界・等高線。描画器が描く
+   *   - ベクター層(Canvas2D): 確定済みの水面・川・資源・プロップ・カメラ
+   *   - カーソル層(Canvas2D): ブラシ・作図中の図形・川のノードなど、マウスに追従して変わるもの
+   * full=false(マウスが動いただけ)のフレームはカーソル層だけを描き直し、川や資源が多くても
+   * ホバーの負荷が増えないようにする。
+   */
+  function renderFrame(full: boolean) {
     const cv = canvasRef.current;
+    const cursorCv = cursorCanvasRef.current;
     const s = settingsRef.current;
-    if (!cv || !s) return;
+    if (!cv || !cursorCv || !s) return;
     const ctx = cv.getContext("2d");
-    if (!ctx) return;
+    const cursorCtx = cursorCv.getContext("2d");
+    if (!ctx || !cursorCtx) return;
     const ts = toolStateRef.current;
 
     const dpr = window.devicePixelRatio || 1;
@@ -1914,201 +1825,117 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     const cssH = cv.clientHeight;
     if (cssW === 0 || cssH === 0) return;
 
-    // バッキングストアを CSS サイズ × dpr に揃える
+    // 3枚のバッキングストアを CSS サイズ × dpr に揃える。大きさが変わると中身が消えるので全層を描き直す
     const bw = Math.round(cssW * dpr);
     const bh = Math.round(cssH * dpr);
-    if (cv.width !== bw || cv.height !== bh) {
-      cv.width = bw;
-      cv.height = bh;
-    }
-
-    // ベースはデバイスピクセル。背景を塗る。
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.fillStyle = "#0d0d14";
-    ctx.fillRect(0, 0, cv.width, cv.height);
-
-    // 以降 CSS ピピクセル座標系で描く
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-    const v = viewRef.current;
-    // 世界→CSS 変換: screenX = zoom*(worldX - offsetX), screenY = zoom*(offsetY - worldZ)
-    // 構築順: base(dpr) → translate → scale(zoom, -zoom)
-    ctx.save();
-    ctx.translate(-v.offsetX * v.zoom, v.offsetY * v.zoom);
-    ctx.scale(v.zoom, -v.zoom);
-
-    // 地形描画(最大解像度のoffscreenを世界矩形に張る)
-    if (terrainCanvasRef.current) {
-      ctx.imageSmoothingEnabled = true;
-      ctx.drawImage(
-        terrainCanvasRef.current,
-        -s.mapWidth / 2,
-        -s.mapHeight / 2,
-        s.mapWidth,
-        s.mapHeight
-      );
-    }
-
-    // 選択範囲のハイライト(半透明オーバーレイ。地形の上・グリッド/等高線の下に重ねる)
-    if (selectionCanvasRef.current) {
-      ctx.drawImage(
-        selectionCanvasRef.current,
-        -s.mapWidth / 2,
-        -s.mapHeight / 2,
-        s.mapWidth,
-        s.mapHeight
-      );
-    }
-
-    // ポリゴン仮確定プレビューのハイライト
-    if (polygonPreviewCanvasRef.current && ts.polygonClosed) {
-      ctx.drawImage(
-        polygonPreviewCanvasRef.current,
-        -s.mapWidth / 2,
-        -s.mapHeight / 2,
-        s.mapWidth,
-        s.mapHeight
-      );
-    }
-
-    // 線幅は世界単位で指定→画面では zoom 倍になる。1px にするには 1/zoom。
-    const thinW = 1 / v.zoom;
-    const majorW = 1.5 / v.zoom;
-
-    // 100m グリッド。ズームで細かすぎるときは描かない。
-    if (gridPathRef.current && 100 * v.zoom >= 6) {
-      ctx.strokeStyle = "rgba(255,255,255,0.12)";
-      ctx.lineWidth = thinW;
-      ctx.stroke(gridPathRef.current);
-    }
-
-    // セル境界グリッド(cell_size間隔)。通常グリッドの上から濃く重ね描きして強調する。
-    if (cellGridPathRef.current && cellGridIntervalRef.current * v.zoom >= 4) {
-      ctx.strokeStyle = "rgba(255,255,255,0.45)";
-      ctx.lineWidth = majorW;
-      ctx.stroke(cellGridPathRef.current);
-    }
-
-    // 等高線
-    if (contoursRef.current.length > 0) {
-      ctx.lineJoin = "round";
-      ctx.lineCap = "round";
-      for (const cnt of contoursRef.current) {
-        ctx.strokeStyle = cnt.major ? "rgba(30,20,10,0.75)" : "rgba(40,28,14,0.5)";
-        ctx.lineWidth = cnt.major ? majorW : thinW;
-        ctx.stroke(cnt.path);
+    for (const canvas of [terrainGlCanvasRef.current, cv, cursorCv]) {
+      if (canvas && (canvas.width !== bw || canvas.height !== bh)) {
+        canvas.width = bw;
+        canvas.height = bh;
+        full = true;
       }
     }
 
+    const v = viewRef.current;
+    const lineW = 1.5 / v.zoom;
+    if (full) {
+      const contourInterval = pickContourIntervalForZoom(baseIntervalRef.current, baseZoomRef.current, v.zoom);
+      rendererRef.current?.render({
+        offsetX: v.offsetX,
+        offsetY: v.offsetY,
+        zoom: v.zoom,
+        dpr,
+        minLand: s.minLand,
+        maxLand: s.maxLand,
+        ramp: groundCoverRamp(groundCoverRef.current),
+        sea: SEA_RGB,
+        contourInterval,
+        contourMajorStart: Math.ceil(s.minLand / contourInterval),
+        gridInterval: 100,
+        showGrid: 100 * v.zoom >= 6, // 線が詰まりすぎる縮尺では描かない
+        cellInterval: cellGridIntervalRef.current,
+        showCellGrid: cellGridIntervalRef.current * v.zoom >= 4,
+        showPolygonPreview: ts.polygonClosed,
+      });
+
+      beginWorldLayer(ctx, v, dpr);
+      strokeWaterSurfaces(ctx, waterSurfacesRef.current, [], null, lineW);
+      // 川。彫り込み済みは濃青の帯+中心線、未彫り込み(計算直後)は水色の破線。
+      strokeRivers(ctx, riversRef.current, lineW, {
+        previewPolygons: previewPolygonsRef.current,
+        waterVisible: riverWaterVisibleRef.current,
+        selectedId: selectedRiverIdRef.current,
+      });
+      strokeResourceAreas(ctx, resourceAreasRef.current, resourceTypeLabel, [], null, lineW);
+      propEditor.current.drawPlaced(ctx, v.zoom);
+      strokeCameraMarker(ctx, cameraRef.current, lineW);
+      ctx.restore();
+
+      // オーバーレイ表示更新(直接 DOM 替換で React 再描画を回避)
+      if (zoomOverlayRef.current) {
+        zoomOverlayRef.current.textContent = Math.round(v.zoom * 100) + "%";
+      }
+    }
+
+    beginWorldLayer(cursorCtx, v, dpr);
+    const cursor = brushWorldPosRef.current;
     // ブラシ/ポリゴンのプレビュー(常時表示。モード切替を廃止したため編集ツールは常に有効)。
     // 水面モード・資源モード・川の作図/ノード編集中は標高編集のブラシ/ポリゴンプレビューは
     // 表示しない(操作が水面/資源/流路の作図に切り替わるため)。
-    const previewLineW = 1.5 / v.zoom;
     if (activeTabRef.current === "prop" || ts.waterMode || ts.resourceMode || ts.cameraMode || ts.riverPointerMode !== "rain") {
       // 水面/資源/カメラ/流路編集モードでは何も描かない(それぞれ下の stroke* で描く)。
     } else if (ts.shape === "polygon") {
-      strokePolygonPreview(ctx, polygonPointsRef.current, ts.polygonClosed ? null : brushWorldPosRef.current, previewLineW);
-    } else if (brushWorldPosRef.current) {
-      strokeBrushOutline(ctx, brushWorldPosRef.current.x, brushWorldPosRef.current.z, ts.shape, ts.brushParams, ts.featherWidth, previewLineW);
+      strokePolygonPreview(cursorCtx, polygonPointsRef.current, ts.polygonClosed ? null : cursor, lineW);
+    } else if (cursor) {
+      strokeBrushOutline(cursorCtx, cursor.x, cursor.z, ts.shape, ts.brushParams, ts.featherWidth, lineW);
     }
-
-    // 水面(海面以外の湖など)。確定済みは常に表示し、作図中の頂点は水面モードのときだけ追従表示する。
-    strokeWaterSurfaces(
-      ctx,
-      waterSurfacesRef.current,
-      ts.waterMode ? waterPointsRef.current : [],
-      // 形状を閉じたらマウス追従線は消す(閉じたポリゴンをそのまま見せる)。
-      ts.waterMode && !ts.waterPolygonClosed ? brushWorldPosRef.current : null,
-      previewLineW
-    );
-
-    // 川。彫り込み済みは濃青の帯+中心線、未彫り込み(計算直後)は水色の破線。
-    strokeRivers(ctx, riversRef.current, previewLineW, {
-      previewPolygons: previewPolygonsRef.current,
-      waterVisible: riverWaterVisibleRef.current,
-      selectedId: selectedRiverIdRef.current,
-    });
-
+    // 作図中の水面・資源の頂点。形状を閉じたらマウス追従線は消す(閉じたポリゴンをそのまま見せる)。
+    if (ts.waterMode) strokeWaterSurfaces(cursorCtx, [], waterPointsRef.current, ts.waterPolygonClosed ? null : cursor, lineW);
+    if (ts.resourceMode) {
+      strokeResourceAreas(cursorCtx, [], resourceTypeLabel, resourcePointsRef.current, ts.resourcePolygonClosed ? null : cursor, lineW);
+    }
     // 流路の手動作図(作図中の頂点列)と、ノード編集中の川の制御点ハンドル
     if (ts.riverPointerMode === "draw") {
-      strokeRiverDraft(ctx, riverDraftPointsRef.current, brushWorldPosRef.current, previewLineW);
+      strokeRiverDraft(cursorCtx, riverDraftPointsRef.current, cursor, lineW);
     } else if (ts.riverPointerMode === "node") {
       const target = nodeEditTargetRiver();
-      if (target?.controlPoints) strokeRiverControlPoints(ctx, target.controlPoints, hoveredRiverNodeRef.current, previewLineW);
+      if (target?.controlPoints) strokeRiverControlPoints(cursorCtx, target.controlPoints, hoveredRiverNodeRef.current, lineW);
     }
-
-    // 天然資源エリア。確定済みは常に表示し、作図中の頂点は資源編集タブのときだけ追従表示する。
-    strokeResourceAreas(
-      ctx,
-      resourceAreasRef.current,
-      resourceTypeLabel,
-      ts.resourceMode ? resourcePointsRef.current : [],
-      ts.resourceMode && !ts.resourcePolygonClosed ? brushWorldPosRef.current : null,
-      previewLineW
-    );
-
-    // カメラ初期状態のマーカー。常に表示し、カメラ編集タブのときだけ注視点指定の目安線を追従表示する。
-    propEditor.current.draw(ctx, v.zoom, activeTabRef.current === "prop", brushWorldPosRef.current);
-    strokeCameraMarker(ctx, cameraRef.current, ts.cameraMode ? brushWorldPosRef.current : null, previewLineW);
-
-    ctx.restore();
-
-    // オーバーレイ表示更新(直接 DOM 替換で React 再描画を回避)
-    if (zoomOverlayRef.current) {
-      zoomOverlayRef.current.textContent = Math.round(v.zoom * 100) + "%";
-    }
+    if (activeTabRef.current === "prop") propEditor.current.drawDraft(cursorCtx, v.zoom, cursor);
+    if (ts.cameraMode) strokeCameraAimLine(cursorCtx, cameraRef.current, cursor, lineW);
+    cursorCtx.restore();
   }
 
   /**
-   * 現在のズーム倍率に応じた間隔で、全セルから等高線を再構築する。
-   * marching squares はセル数に比例するコストなので、ドラッグ中は行わず「適用」実行時
-   * など標高が確定したタイミング、またはズーム操作が落ち着いたタイミングでのみ呼ぶ。
-   */
-  /**
    * 表示に使う標高配列。彫り込みプレビュー中はプレビュー配列、それ以外は実データ。
-   * テクスチャの全域塗り直し・等高線・3Dプレビュー送信はこれを読む(実データを書き換える
+   * 地形層の表示(描画器への転送)と3Dプレビュー送信はこれを読む(実データを書き換える
    * 編集処理は必ず elevRef を直接使うこと)。
    */
   function displayElev(): Float32Array | null {
     return previewElevRef.current ?? elevRef.current;
   }
 
-  function rebuildContoursAtCurrentZoom() {
-    const s = settingsRef.current;
+  /** 表示用の標高(displayElev)の rect 部分を描画器へ転送し直して再描画する。rect を省略すると全域 */
+  function refreshTerrainLayer(rect?: DirtyRect) {
     const elev = displayElev();
-    if (!s || !elev) return;
-    const interval = pickContourIntervalForZoom(baseIntervalRef.current, baseZoomRef.current, viewRef.current.zoom);
-    contourIntervalRef.current = interval;
-    contoursRef.current = buildContours(elev, s.rows, s.cols, s.spacing, s.mapWidth, s.mapHeight, s.minLand, s.maxLand, interval);
+    if (elev) rendererRef.current?.updateElevation(elev, rect);
     draw();
   }
 
   /**
-   * ズームで等高線間隔を細かくすべきか判定し、必要ならデバウンスして再構築する。
-   * ホイール操作の度に毎回 marching squares を回すと重いため、間隔の候補値が実際に
-   * 変わる場合のみ、ズームが少し落ち着いてから(150ms)まとめて再構築する。
-   */
-  function scheduleContourZoomRefresh() {
-    const desired = pickContourIntervalForZoom(baseIntervalRef.current, baseZoomRef.current, viewRef.current.zoom);
-    if (desired === contourIntervalRef.current) return;
-    if (contourZoomTimerRef.current != null) window.clearTimeout(contourZoomTimerRef.current);
-    contourZoomTimerRef.current = window.setTimeout(() => {
-      contourZoomTimerRef.current = null;
-      rebuildContoursAtCurrentZoom();
-    }, 150);
-  }
-
-  /**
-   * 3Dプレビューウィンドウ(開いていれば)へ、現在の標高・選択マスク・メタデータの全体を送る。
-   * ロード完了時・マップリサイズ確定時、およびプレビュー側からの request_state 受信時に呼ぶ。
-   * プレビューウィンドウが開いていなくても emit 自体は無害(誰も listen していないだけ)なので、
-   * 開いているかどうかの判定は行わない。
+   * 現在の標高・選択マスク・メタデータの全体を、接続中の3Dプレビューへすぐに送る。
+   * 予約済みの送信はこれで済むので取り消す。refだけを読むので、どのクロージャから呼んでもよい。
    */
   function emitTerrain3dFullState() {
+    if (fullStateTimerRef.current != null) {
+      window.clearTimeout(fullStateTimerRef.current);
+      fullStateTimerRef.current = null;
+    }
+    fullStatePendingSinceRef.current = null;
     const s = settingsRef.current;
     const elev = displayElev();
     const mask = selectionMaskRef.current;
-    if (!s || !elev || !mask) return;
+    if (previewSessionsRef.current.size === 0 || !s || !elev || !mask) return;
     const fullRect: GridRect = { rMin: 0, rMax: s.rows - 1, cMin: 0, cMax: s.cols - 1 };
     const payload: Terrain3DFullStatePayload = {
       mapId,
@@ -2126,6 +1953,38 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       groundCover: groundCoverRef.current,
     };
     void emit(EVT_TERRAIN_3D_FULL_STATE, payload);
+    previewSentVersionRef.current = previewStateVersionRef.current;
+  }
+
+  /**
+   * 3Dプレビューへ送る状態が変わったことを記録し、接続中のプレビューがあれば全状態の送信を
+   * 予約する(ロード・リサイズ・Undo/Redo・水面・川・地表種別など、差分イベントの無い変更)。
+   * 呼ばれるたびに予約を後ろへずらし(最初の変更から PREVIEW_FULL_STATE_MAX_WAIT_MS まで)、
+   * 送る内容は送信時点の状態で作るので、続けて起きた変更は1回の送信にまとまる。
+   */
+  function scheduleTerrain3dFullState() {
+    previewStateVersionRef.current++;
+    if (previewSessionsRef.current.size === 0) return;
+    const now = performance.now();
+    const since = fullStatePendingSinceRef.current ?? now;
+    fullStatePendingSinceRef.current = since;
+    if (fullStateTimerRef.current != null) window.clearTimeout(fullStateTimerRef.current);
+    const delay = Math.max(0, Math.min(PREVIEW_FULL_STATE_QUIET_MS, since + PREVIEW_FULL_STATE_MAX_WAIT_MS - now));
+    fullStateTimerRef.current = window.setTimeout(() => {
+      fullStateTimerRef.current = null;
+      emitTerrain3dFullState();
+    }, delay);
+  }
+
+  /**
+   * 3Dプレビューへ差分イベントを送る。状態の変更時には先に previewStateVersionRef を進めておくこと。
+   * 接続中のプレビューが無いとき、全状態の送信を予約済みのとき(その全状態に今回の変更も含まれる)は
+   * 送らない。payload は送るときだけ作る(符号化が重いため)。
+   */
+  function emitPreviewDelta<T>(event: string, buildPayload: () => T) {
+    if (previewSessionsRef.current.size === 0 || fullStateTimerRef.current != null) return;
+    void emit(event, buildPayload());
+    previewSentVersionRef.current = previewStateVersionRef.current;
   }
 
   /**
@@ -2134,6 +1993,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
    * (rAFで間引く)。
    */
   function schedulePreviewSelectionSync(rect: DirtyRect) {
+    previewStateVersionRef.current++;
     const sync = previewSyncRef.current;
     sync.pendingSelectionRect = unionDirtyRect(sync.pendingSelectionRect, rect);
     if (sync.rafId != null) return;
@@ -2144,12 +2004,11 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       const s = settingsRef.current;
       const mask = selectionMaskRef.current;
       if (!pending || !s || !mask) return;
-      const payload: Terrain3DSelectionDeltaPayload = {
+      emitPreviewDelta(EVT_TERRAIN_3D_SELECTION_DELTA, (): Terrain3DSelectionDeltaPayload => ({
         mapId,
         ...pending,
         maskRectBase64: uint8ToBase64(quantizeMaskRect(mask, s.cols, pending)),
-      };
-      void emit(EVT_TERRAIN_3D_SELECTION_DELTA, payload);
+      }));
     });
   }
 
@@ -2158,9 +2017,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     const s = settingsRef.current;
     const mask = selectionMaskRef.current;
     const pos = brushWorldPosRef.current;
-    const imgData = selectionImageDataRef.current;
-    const selCtx = selectionCtxRef.current;
-    if (!s || !mask || !pos || !imgData || !selCtx) return;
+    if (!s || !mask || !pos) return;
     const ts = toolStateRef.current;
     if (ts.shape !== "circle" && ts.shape !== "rect") return;
     const rect = mergeShapeIntoSelection(
@@ -2179,7 +2036,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     );
     if (!rect) return;
     selectionBoundsRef.current = unionDirtyRect(selectionBoundsRef.current, rect);
-    refreshSelectionTexture(rect, mask, s.cols, imgData, selCtx);
+    rendererRef.current?.updateSelection(mask, rect);
     setHasSelection(true);
     draw();
     schedulePreviewSelectionSync(rect);
@@ -2205,9 +2062,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     const s = settingsRef.current;
     const mask = selectionMaskRef.current;
     const poly = polygonPointsRef.current;
-    const imgData = selectionImageDataRef.current;
-    const selCtx = selectionCtxRef.current;
-    if (!s || !mask || !imgData || !selCtx || poly.length < 3) return;
+    if (!s || !mask || poly.length < 3) return;
     const ts = toolStateRef.current;
     const rect = mergePolygonIntoSelection(
       mask,
@@ -2222,7 +2077,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     );
     if (rect) {
       selectionBoundsRef.current = unionDirtyRect(selectionBoundsRef.current, rect);
-      refreshSelectionTexture(rect, mask, s.cols, imgData, selCtx);
+      rendererRef.current?.updateSelection(mask, rect);
       setHasSelection(true);
       schedulePreviewSelectionSync(rect);
     }
@@ -2306,7 +2161,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     setWaterPointCount(0);
     setWaterPolygonClosed(false);
     draw();
-    emitTerrain3dFullState();
+    scheduleTerrain3dFullState();
   }
 
   /** 最後に作成した水面を1枚削除する。 */
@@ -2315,7 +2170,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     waterSurfacesRef.current = waterSurfacesRef.current.slice(0, -1);
     setWaterSurfaceCount(waterSurfacesRef.current.length);
     draw();
-    emitTerrain3dFullState();
+    scheduleTerrain3dFullState();
   }
 
   /** 作成済みの水面をすべて削除する。作図中の頂点も破棄する。 */
@@ -2326,7 +2181,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     setWaterPointCount(0);
     setWaterPolygonClosed(false);
     draw();
-    emitTerrain3dFullState();
+    scheduleTerrain3dFullState();
   }
 
   /** 内部表現の水面一覧を、保存・送信用の GeoJSON ライク(WaterSurfacePayload)に変換する(確定済みのみ)。 */
@@ -2346,10 +2201,11 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
    * 3Dプレビュー送信用の水面一覧。確定済みの水面に加えて、「形状を閉じたが未確定の水面」を
    * 現在の水位(waterLevelInput)で仮の1枚として含める。これにより、確定前でも水位を変えると
    * 3Dプレビューの水面が上下する。エクスポートには使わない(未確定分を含めないため)。
+   * 送信予約のタイマーやイベントのクロージャからも呼ばれるので、state ではなく toolStateRef を読む。
    */
   function serializeWaterSurfacesForPreview(): WaterSurfacePayload[] {
     const list = serializeWaterSurfaces();
-    if (waterPolygonClosed && waterPointsRef.current.length >= 3) {
+    if (toolStateRef.current.waterPolygonClosed && waterPointsRef.current.length >= 3) {
       list.push({
         id: "__water_preview__",
         water_level: toolStateRef.current.waterLevelInput,
@@ -2433,7 +2289,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   /**
    * 閉じた(形状確定済みの)資源ポリゴン(頂点3つ以上)を、現在の種別・埋蔵量上限・回復率で
    * 1件の資源エリアとして登録する。「資源を確定」ボタンから呼ぶ。種別未選択なら何もしない
-   * (ボタン側も無効化されている)。
+   * (ボタン側も無効化されている)。手入力した値は1件ごとに捨て、次の形状は再び目安から始める。
    */
   function confirmResourceArea() {
     const poly = resourcePointsRef.current;
@@ -2441,8 +2297,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     const area: EditorResourceArea = {
       id: `resource_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
       resourceType: resourceTypeInput,
-      maxAmount: resourceMaxAmountInput,
-      recoveryRate: resourceRecoveryRateInput,
+      maxAmount: resourceInputs.maxAmount,
+      recoveryRate: resourceInputs.recoveryRate,
       points: poly.map((p) => ({ x: p.x, z: p.z })),
     };
     resourceAreasRef.current = [...resourceAreasRef.current, area];
@@ -2450,6 +2306,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     resourcePointsRef.current = [];
     setResourcePointCount(0);
     setResourcePolygonClosed(false);
+    resourceInputs.reset();
     draw();
   }
 
@@ -2481,7 +2338,6 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     }));
   }
 
-  /** meta.json / サイドカーから読み込んだ ResourceAreaPayload 配列を内部表現へ変換する。 */
   /* ============================================================================
    * カメラ初期状態(カメラ編集タブ)
    *
@@ -2549,6 +2405,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     return { x: payload.x, y: payload.y, z: payload.z, yaw: payload.yaw, pitch: payload.pitch };
   }
 
+  /** meta.json / サイドカーから読み込んだ ResourceAreaPayload 配列を内部表現へ変換する。 */
   function deserializeResourceAreas(payload: ResourceAreaPayload[] | undefined): EditorResourceArea[] {
     if (!Array.isArray(payload)) return [];
     const result: EditorResourceArea[] = [];
@@ -2665,7 +2522,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     pushUndoState();
     recomputeRiverPolygons(s, elev);
     draw();
-    emitTerrain3dFullState();
+    scheduleTerrain3dFullState();
   }
 
   /* ============================================================================
@@ -2676,25 +2533,24 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
    * 反映する。水面表示を切ると範囲の塗りと3Dの水面が消え、川底の地形だけが見える。
    * ========================================================================== */
 
-  /** 表示中の標高(実データまたはプレビュー)でテクスチャ全域・等高線・3Dプレビューを更新する */
+  /** 表示中の標高(実データまたはプレビュー)で地形層と3Dプレビューを更新する */
   function refreshDisplayedTerrain() {
-    const s = settingsRef.current;
-    const elev = displayElev();
-    if (!s || !elev) return;
-    const fullRect: DirtyRect = { rMin: 0, rMax: s.rows - 1, cMin: 0, cMax: s.cols - 1 };
-    if (terrainImageDataRef.current && terrainCtxRef.current) {
-      refreshTerrainTexture(fullRect, elev, s.cols, s.minLand, s.maxLand, terrainImageDataRef.current, terrainCtxRef.current, groundCoverRef.current);
-    }
-    rebuildContoursAtCurrentZoom();
-    emitTerrain3dFullState();
+    refreshTerrainLayer();
+    scheduleTerrain3dFullState();
   }
 
-  /** 地表種別を差し替える。repaint なら地形色を塗り直して3Dプレビューにも送り直す(選択範囲・表示位置は保つ)。 */
+  /**
+   * 地表種別を差し替える。repaint なら2D表示を描き直して3Dプレビューにも送り直す(選択範囲・表示位置は保つ)。
+   * 2D表示の地形色は描画時にランプを渡して塗るので、標高の転送はやり直さない。
+   */
   function applyGroundCover(value: unknown, repaint: boolean) {
     const next = normalizeGroundCover(value);
     groundCoverRef.current = next;
     setGroundCover(next);
-    if (repaint) refreshDisplayedTerrain();
+    if (repaint) {
+      draw();
+      scheduleTerrain3dFullState();
+    }
   }
 
   /**
@@ -2711,7 +2567,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       previewElevRef.current = null;
       previewPolygonsRef.current = new Map();
       // 実データ表示へ戻す。彫り込み確定直後(実データが変わった)にもここを通るため、
-      // プレビューの有無にかかわらずテクスチャ全域を塗り直す
+      // プレビューの有無にかかわらず標高全域を描画器へ転送し直す
       refreshDisplayedTerrain();
       return;
     }
@@ -2794,7 +2650,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     riverWaterVisibleRef.current = visible;
     setRiverWaterVisible(visible);
     draw();
-    emitTerrain3dFullState();
+    scheduleTerrain3dFullState();
   }
 
   /** 一覧の行クリック: 川を選択して2Dキャンバス上で強調表示する(同じ行の再クリックで解除) */
@@ -2860,15 +2716,14 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
   }
 
   /**
-   * 彫り込み後の共通処理: 川の範囲ポリゴンの抽出(彫り込み済み全川)・地形テクスチャの
-   * 全域塗り直し・等高線再構築・3Dプレビューへの全状態送信。複数の川がマップ全域に及ぶため、
-   * 侵食の finishErosion と同じく全域rectで塗り直す。3Dプレビューへは川リストも変わるため、
-   * 標高差分ではなく full_state を送る。
+   * 彫り込み後の共通処理: 川の範囲ポリゴンの抽出(彫り込み済み全川)・地形層への標高全域の
+   * 転送・3Dプレビューへの全状態送信。複数の川がマップ全域に及ぶため、侵食の finishErosion と
+   * 同じく全域を転送し直す。3Dプレビューへは川リストも変わるため、標高差分ではなく full_state を送る。
    */
   function finishRiverCarve(s: TerrainSettings, elev: Float32Array) {
     recomputeRiverPolygons(s, elev);
     // 残った未彫り込みの川のプレビューを新しい実データの上で作り直す(無ければ実データ表示へ戻る)。
-    // どちらの経路でもテクスチャ全域・等高線・3Dプレビューが更新される。
+    // どちらの経路でも地形層(標高全域)と3Dプレビューが更新される。
     rebuildRiverPreview();
   }
 
@@ -3261,15 +3116,14 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     hoveredRiverNodeRef.current = index;
   }
 
-  /** ポリゴンが閉じた状態のとき、ぼかし幅を含む仮の選択範囲をプレビューCanvasへ書き込む */
+  /** ポリゴンが閉じた状態のとき、ぼかし幅を含む仮の選択範囲の重みを作って描画器へ転送する */
   function refreshPolygonPreviewTexture() {
     const s = settingsRef.current;
     const poly = polygonPointsRef.current;
-    const imgData = polygonPreviewImageDataRef.current;
-    const ctx = polygonPreviewCtxRef.current;
-    if (!s || !imgData || !ctx) return;
+    const weights = polygonPreviewWeightsRef.current;
+    if (!s || !weights) return;
 
-    imgData.data.fill(0);
+    weights.fill(0);
 
     if (polygonClosed && poly.length >= 3) {
       const halfW = s.mapWidth / 2;
@@ -3293,7 +3147,6 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       const rMin = Math.max(0, Math.floor((minZ - margin + halfH) / spacing));
       const rMax = Math.min(rows - 1, Math.ceil((maxZ + margin + halfH) / spacing));
 
-      const data = imgData.data;
       if (cMin <= cMax && rMin <= rMax) {
         for (let r = rMin; r <= rMax; r++) {
           const wz = r * spacing - halfH;
@@ -3312,32 +3165,20 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
               continue;
             }
             if (weight <= 0) continue;
-            const i = rowBase + c;
-            data[i * 4 + 0] = 80;
-            data[i * 4 + 1] = 190;
-            data[i * 4 + 2] = 255;
-            data[i * 4 + 3] = Math.round(weight * 160);
+            weights[rowBase + c] = Math.round(weight * 255);
           }
         }
       }
     }
-    ctx.putImageData(imgData, 0, 0);
+    rendererRef.current?.updatePolygonPreview(weights);
     draw();
   }
 
-  // polygonClosed, featherWidth, selectionFalloff の変更を監視し、ポリゴンプレビューを更新する
+  // polygonClosed, featherWidth, selectionFalloff の変更を監視し、ポリゴンプレビューを更新する。
+  // 閉じていない間は描画側が表示しない(showPolygonPreview)ので、重みは次に閉じたときに作り直す。
   useEffect(() => {
-    if (polygonClosed) {
-      refreshPolygonPreviewTexture();
-    } else {
-      const imgData = polygonPreviewImageDataRef.current;
-      const ctx = polygonPreviewCtxRef.current;
-      if (imgData && ctx) {
-        imgData.data.fill(0);
-        ctx.putImageData(imgData, 0, 0);
-        draw();
-      }
-    }
+    if (polygonClosed) refreshPolygonPreviewTexture();
+    else draw();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [polygonClosed, featherWidth, selectionFalloff]);
 
@@ -3346,13 +3187,12 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     const mask = selectionMaskRef.current;
     if (mask) mask.fill(0);
     selectionBoundsRef.current = null;
-    const imgData = selectionImageDataRef.current;
-    const selCtx = selectionCtxRef.current;
-    if (imgData && selCtx) clearSelectionTexture(imgData, selCtx);
+    rendererRef.current?.clearSelection();
     clearPolygonPoints();
     setHasSelection(false);
     draw();
-    void emit(EVT_TERRAIN_3D_SELECTION_RESET, { mapId } satisfies Terrain3DSelectionResetPayload);
+    previewStateVersionRef.current++;
+    emitPreviewDelta(EVT_TERRAIN_3D_SELECTION_RESET, (): Terrain3DSelectionResetPayload => ({ mapId }));
   }
 
   /** 現在の選択範囲に、現在選ばれている編集方法を1回適用する(「適用」ボタン押下時) */
@@ -3377,16 +3217,13 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       ts.flattenParams,
       ts.noiseParams
     );
-    if (terrainImageDataRef.current && terrainCtxRef.current) {
-      refreshTerrainTexture(bounds, elev, s.cols, s.minLand, s.maxLand, terrainImageDataRef.current, terrainCtxRef.current, groundCoverRef.current);
-    }
-    rebuildContoursAtCurrentZoom();
-    const elevDeltaPayload: Terrain3DElevationDeltaPayload = {
+    refreshTerrainLayer(bounds);
+    previewStateVersionRef.current++;
+    emitPreviewDelta(EVT_TERRAIN_3D_ELEVATION_DELTA, (): Terrain3DElevationDeltaPayload => ({
       mapId,
       ...bounds,
       elevRectBase64: uint8ToBase64(encodeFloat16Array(extractElevRect(elev, s.cols, bounds))),
-    };
-    void emit(EVT_TERRAIN_3D_ELEVATION_DELTA, elevDeltaPayload);
+    }));
   }
 
   /**
@@ -3402,22 +3239,18 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
 
   /**
    * 自動編集(侵食)の適用後共通処理。侵食は選択範囲を起点にしても土砂や雨粒が境界を越えて
-   * 流れ、変化範囲が選択矩形ちょうどにはならないため、選択の有無に関わらず全域rectで
-   * テクスチャを塗り直し、等高線を再構築(内部でdraw()される)し、3Dプレビューへ全域の
-   * 標高差分を送る。
+   * 流れ、変化範囲が選択矩形ちょうどにはならないため、選択の有無に関わらず全域を描画器へ
+   * 転送し直し、3Dプレビューへ全域の標高差分を送る。
    */
   function finishErosion(s: TerrainSettings, elev: Float32Array) {
     const fullRect: DirtyRect = { rMin: 0, rMax: s.rows - 1, cMin: 0, cMax: s.cols - 1 };
-    if (terrainImageDataRef.current && terrainCtxRef.current) {
-      refreshTerrainTexture(fullRect, elev, s.cols, s.minLand, s.maxLand, terrainImageDataRef.current, terrainCtxRef.current, groundCoverRef.current);
-    }
-    rebuildContoursAtCurrentZoom();
-    const payload: Terrain3DElevationDeltaPayload = {
+    refreshTerrainLayer();
+    previewStateVersionRef.current++;
+    emitPreviewDelta(EVT_TERRAIN_3D_ELEVATION_DELTA, (): Terrain3DElevationDeltaPayload => ({
       mapId,
       ...fullRect,
       elevRectBase64: uint8ToBase64(encodeFloat16Array(extractElevRect(elev, s.cols, fullRect))),
-    };
-    void emit(EVT_TERRAIN_3D_ELEVATION_DELTA, payload);
+    }));
   }
 
   /**
@@ -3462,10 +3295,22 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     finishErosion(s, elev);
   }
 
+  /** 地形層の描画器を返す。未作成なら作る。WebGL2 が使えない環境では Error を投げる */
+  function ensureRenderer(): TerrainEditorRenderer {
+    if (rendererRef.current) return rendererRef.current;
+    const canvas = terrainGlCanvasRef.current;
+    const renderer = canvas ? TerrainEditorRenderer.create(canvas, draw) : null;
+    if (!renderer) throw new Error(t("terrainEditor.webglUnavailable"));
+    rendererRef.current = renderer;
+    return renderer;
+  }
+
   /**
-   * 標高配列と新しいマップ寸法を与えて、地形テクスチャ・選択キャンバス・等高線・グリッド・
-   * settingsRef を一括で再構築する。マップリサイズ時とロード時の共通処理。
-   * 標高レンジ(minLand, maxLand)も再計算し、resetView() と draw() も行う。
+   * 標高配列と新しいマップ寸法を与えて、地形層(描画器の標高・選択範囲)・選択マスク・
+   * settingsRef を一括で作り直す。ロード・マップリサイズ・Undo/Redo の共通処理。
+   * 標高レンジ(minLand, maxLand)も再計算し、resetView() と draw() も行う。彫り込みプレビューは
+   * 古い標高から作ったもので格子の寸法も違いうるので破棄する(作り直しの予約は呼び出し側)。
+   * 描画器に地形を置けない(WebGL2 が無い・GPUのテクスチャ上限を超える)ときは、何も変えずに Error を投げる。
    */
   function rebuildTerrainVisuals(
     elev: Float32Array,
@@ -3477,7 +3322,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     cellSizeParam?: number,
   ) {
     const count = rows * cols;
-    const cs = cellSizeParam ?? (cellSize > 0 ? cellSize : 500);
+    const cs = cellSizeParam ?? cellGridIntervalRef.current;
 
     let minLand = Infinity;
     let maxLand = -Infinity;
@@ -3488,65 +3333,28 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     if (!isFinite(minLand) || !isFinite(maxLand)) { minLand = 0; maxLand = 1; }
     if (maxLand - minLand < 1) maxLand = minLand + 1;
 
-    const off = document.createElement("canvas");
-    off.width = cols;
-    off.height = rows;
-    const octx = off.getContext("2d")!;
-    const img = octx.createImageData(cols, rows);
-    const px = img.data;
-    for (let i = 0; i < count; i++) {
-      const [r, g, b] = computePixelRGB(elev[i], minLand, maxLand, groundCoverRef.current);
-      px[i * 4] = r; px[i * 4 + 1] = g; px[i * 4 + 2] = b; px[i * 4 + 3] = 255;
+    const uploaded = ensureRenderer().setTerrain({ rows, cols, spacing, mapWidth, mapHeight }, elev);
+    if (!uploaded.ok) {
+      throw new Error(t("terrainEditor.terrainTooLargeForGpu", { cols, rows, max: uploaded.maxTextureSize }));
     }
-    octx.putImageData(img, 0, 0);
-
-    const selOff = document.createElement("canvas");
-    selOff.width = cols;
-    selOff.height = rows;
-    const selOctx = selOff.getContext("2d")!;
-    const selImg = selOctx.createImageData(cols, rows);
-    selOctx.putImageData(selImg, 0, 0);
-
-    const baseInterval = pickContourInterval(maxLand - minLand);
 
     elevRef.current = elev;
-    terrainCanvasRef.current = off;
-    terrainImageDataRef.current = img;
-    terrainCtxRef.current = octx;
-    const polyPreviewOff = document.createElement("canvas");
-    polyPreviewOff.width = cols;
-    polyPreviewOff.height = rows;
-    const polyPreviewOctx = polyPreviewOff.getContext("2d")!;
-    const polyPreviewImg = polyPreviewOctx.createImageData(cols, rows);
-    polyPreviewOctx.putImageData(polyPreviewImg, 0, 0);
-
-    selectionCanvasRef.current = selOff;
-    selectionImageDataRef.current = selImg;
-    selectionCtxRef.current = selOctx;
-    polygonPreviewCanvasRef.current = polyPreviewOff;
-    polygonPreviewImageDataRef.current = polyPreviewImg;
-    polygonPreviewCtxRef.current = polyPreviewOctx;
+    previewElevRef.current = null;
+    previewPolygonsRef.current = new Map();
     selectionMaskRef.current = new Float32Array(count);
+    polygonPreviewWeightsRef.current = new Uint8Array(count);
     selectionBoundsRef.current = null;
     setHasSelection(false);
-
-    gridPathRef.current = buildGridPath(mapWidth, mapHeight, 100);
-    cellGridPathRef.current = buildGridPath(mapWidth, mapHeight, cs);
     cellGridIntervalRef.current = cs;
-
-    contoursRef.current = buildContours(elev, rows, cols, spacing, mapWidth, mapHeight, minLand, maxLand, baseInterval);
-
     settingsRef.current = { mapWidth, mapHeight, spacing, rows, cols, minLand, maxLand };
 
     resetView();
-    baseIntervalRef.current = baseInterval;
+    baseIntervalRef.current = pickContourInterval(maxLand - minLand);
     baseZoomRef.current = viewRef.current.zoom;
-    contourIntervalRef.current = baseInterval;
 
     draw();
-    // ロード完了時・マップリサイズ確定時は、グリッド形状自体が変わりうるため
-    // (選択マスクもここで全クリアされているため)、3Dプレビューへ全状態を送り直す。
-    emitTerrain3dFullState();
+    // グリッド形状自体が変わりうるうえ選択マスクも全クリアしたので、3Dプレビューへ全状態を送り直す。
+    scheduleTerrain3dFullState();
   }
 
   /**
@@ -3626,6 +3434,12 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
 
     const newCols = newMapWidth / s.spacing + 1;
     const newRows = newMapHeight / s.spacing + 1;
+    const maxTextureSize = rendererRef.current?.maxTextureSize ?? Infinity;
+    if (newCols > maxTextureSize || newRows > maxTextureSize) {
+      setResizeStatus("error");
+      setResizeErrorMsg(t("terrainEditor.terrainTooLargeForGpu", { cols: newCols, rows: newRows, max: maxTextureSize }));
+      return;
+    }
     const newCount = newRows * newCols;
     const newElev = new Float32Array(newCount);
     const oldCols = s.cols;
@@ -3689,6 +3503,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     shiftVectorFeatures(shiftX, shiftZ);
 
     rebuildTerrainVisuals(newElev, newMapWidth, newMapHeight, s.spacing, newRows, newCols);
+    // 彫り込みプレビューは rebuildTerrainVisuals が破棄するので、新しい地形で作り直す(川編集タブ以外では解除のまま)
+    scheduleRiverPreviewRebuild();
 
     setResizeStatus("ok");
   }
@@ -3769,6 +3585,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         camera: cameraRef.current,
         background: backgroundRef.current,
         groundCover: groundCoverRef.current,
+        climate,
       });
       setExportStatus("exported");
       // エクスポート先にterrain_maps.yamlが見つからなかった場合は、通知ポップアップで知らせる。
@@ -3805,6 +3622,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         backgroundRef.current = data.background;
         if (cancelled) return;
         applyGroundCover(data.ground_cover, false);
+        setClimate(normalizeClimate(data.climate));
 
         const bytes = base64ToUint8(data.data_base64);
         const count = data.grid_rows * data.grid_cols;
@@ -3823,7 +3641,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
         setFarSpacing(data.far_spacing > 0 ? data.far_spacing : 200);
         setCellSize(data.cell_size > 0 ? data.cell_size : 500);
 
-        // 標高レンジ計算・テクスチャ構築・等高線・グリッド・settingsRef 設定・リセットビュー・描画
+        // 標高レンジ計算・地形層への転送・選択マスクの初期化・settingsRef 設定・リセットビュー・描画
         // は rebuildTerrainVisuals で一括実行する。
         rebuildTerrainVisuals(
           elev,
@@ -3890,15 +3708,13 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
    * 形状を閉じた未確定の水面は現在の水位で仮表示されるため、水位を変えると3Dの水面が上下する。
    */
   useEffect(() => {
-    if (status === "ready") emitTerrain3dFullState();
+    if (status === "ready") scheduleTerrain3dFullState();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, waterLevelInput, waterPolygonClosed]);
 
-  /** セルサイズ(メタデータ欄で編集可能)を変えたら、セル境界グリッドを作り直す */
+  /** セルサイズ(メタデータ欄で編集可能)を変えたら、セル境界グリッドの間隔を差し替える */
   useEffect(() => {
-    const s = settingsRef.current;
-    if (status === "ready" && s && cellSize > 0) {
-      cellGridPathRef.current = buildGridPath(s.mapWidth, s.mapHeight, cellSize);
+    if (status === "ready" && cellSize > 0) {
       cellGridIntervalRef.current = cellSize;
       draw();
     }
@@ -4039,7 +3855,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
           const [wx, wz] = screenToWorld(mx, my);
           updateRiverNodeHover(wx, wz);
         }
-        draw();
+        // ブラシ・作図中の追従線・ノードの強調はすべてカーソル層にあるので、そこだけ描き直す
+        drawCursorLayer();
       }
     }
 
@@ -4103,9 +3920,8 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
       const [wxAfter, wyAfter] = screenToWorld(mx, my);
       v.offsetX += wxBefore - wxAfter;
       v.offsetY += wyBefore - wyAfter;
+      // 等高線の間隔も描画時にズーム倍率から決まるので、描き直すだけで細かくなる
       draw();
-      // 拡大したら等高線を細かくする(ズームが落ち着いてからデバウンスして再構築)
-      scheduleContourZoomRefresh();
     }
 
     function onContextMenu(e: MouseEvent) {
@@ -4200,6 +4016,20 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                   </select>
                 </div>
                 <div className="terrain-editor-hint">{t("groundCover.hint")}</div>
+                <div className="terrain-editor-param-row">
+                  <span className="terrain-editor-param-label">{t("climate.label")}</span>
+                  <select
+                    className="terrain-editor-select"
+                    value={climate}
+                    onChange={(e) => setClimate(normalizeClimate(Number(e.target.value)))}
+                    disabled={status !== "ready"}
+                  >
+                    {CLIMATE_TYPES.map((type) => (
+                      <option key={type} value={type}>{t(`climate.${type}`)}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="terrain-editor-hint">{t("climate.hint")}</div>
                 {settingsRef.current && (
                   <div className="terrain-editor-meta-readonly">
                     {t("terrainEditor.metaReadonlySummary", {
@@ -4617,13 +4447,31 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                           ))}
                       </select>
                     </div>
+                    {resourceInputs.presets.length > 1 && (
+                      <div className="terrain-editor-param-row">
+                        <span className="terrain-editor-param-label">{t("resourcePreset.label")}</span>
+                        <select
+                          className="terrain-editor-select"
+                          value={resourceInputs.preset?.key ?? ""}
+                          onChange={(e) => resourceInputs.selectPreset(e.target.value)}
+                          disabled={status !== "ready"}
+                        >
+                          {resourceInputs.presets.map((preset) => (
+                            <option key={preset.key} value={preset.key}>
+                              {t(`resourcePreset.presets.${preset.key}.name`)}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
                     <div className="terrain-editor-param-row">
                       <span className="terrain-editor-param-label">{t("terrainEditor.resourceMaxAmount", { defaultValue: "埋蔵量上限" })}</span>
                       <NumberStepper
-                        value={resourceMaxAmountInput}
-                        onChange={setResourceMaxAmountInput}
+                        className="number-stepper--wide"
+                        value={resourceInputs.maxAmount}
+                        onChange={resourceInputs.setMaxAmount}
                         min={1}
-                        max={10000000}
+                        max={RESOURCE_MAX_AMOUNT_LIMIT}
                         step={100}
                         integerOnly={true}
                         disabled={status !== "ready"}
@@ -4632,20 +4480,23 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                     <div className="terrain-editor-param-row">
                       <span className="terrain-editor-param-label">{t("terrainEditor.resourceRecoveryRate", { defaultValue: "回復率(1日あたり)" })}</span>
                       <NumberStepper
-                        value={resourceRecoveryRateInput}
-                        onChange={setResourceRecoveryRateInput}
+                        value={resourceInputs.recoveryRate}
+                        onChange={resourceInputs.setRecoveryRate}
                         min={0}
                         max={1}
-                        step={0.001}
+                        step={0.0001}
                         integerOnly={false}
                         disabled={status !== "ready"}
                       />
                     </div>
-                    <div className="terrain-editor-hint">
-                      {t("terrainEditor.resourceRecoveryHint", {
-                        defaultValue: "回復率0は採取した分だけ枯渇する非再生資源(鉱脈・油田など)になります",
-                      })}
-                    </div>
+                    <ResourcePresetHint
+                      preset={resourceInputs.preset}
+                      areaM2={resourceDraftAreaM2}
+                      maxAmount={resourceInputs.maxAmount}
+                      recoveryRate={resourceInputs.recoveryRate}
+                      awaitingShape={resourceInputs.awaitingShape}
+                      className="terrain-editor-hint"
+                    />
                     <div className="terrain-editor-polygon-count">
                       {resourcePolygonClosed
                         ? t("terrainEditor.resourceShapeClosed", { defaultValue: "形状を確定しました。種別・埋蔵量を設定して「資源を確定」を押してください" })
@@ -4723,7 +4574,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
                               <span className="terrain-editor-selection-status">
                                 {t("terrainEditor.resourceListItemDetail", {
                                   defaultValue: `上限${area.maxAmount} / 回復${area.recoveryRate}`,
-                                  maxAmount: area.maxAmount,
+                                  maxAmount: formatCompactAmount(area.maxAmount, resolveIntlLocale(i18n.language)),
                                   recoveryRate: area.recoveryRate,
                                 })}
                               </span>
@@ -5653,7 +5504,9 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
             {errorMsg || t("terrainEditor.loadFailed", { defaultValue: "地形データの読み込みに失敗しました" })}
           </div>
         )}
-        <canvas ref={canvasRef} className="terrain-editor-canvas" />
+        <canvas ref={terrainGlCanvasRef} className="terrain-editor-canvas terrain-editor-canvas--terrain" />
+        <canvas ref={canvasRef} className="terrain-editor-canvas terrain-editor-canvas--vectors" />
+        <canvas ref={cursorCanvasRef} className="terrain-editor-canvas terrain-editor-canvas--cursor" />
         <div className="terrain-editor-coord-overlay" ref={coordOverlayRef}>---, ---</div>
         <div className="terrain-editor-zoom-overlay" ref={zoomOverlayRef}>100%</div>
       </div>

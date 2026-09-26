@@ -38,7 +38,7 @@ public sealed partial class TransitVehicleManager
         }
         DrivenLineId = lineId;
         driveOffset = time - clock;
-        int cab = line.motion.Returning[step] ? line.positions.Length - 1 : 0;
+        int cab = line.motion.Reversed[step] ? line.positions.Length - 1 : 0;
         DrivePosition = line.positions[cab]; DriveDirection = line.directions[cab]; DriveWaiting = false;
         return true;
     }

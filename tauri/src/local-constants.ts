@@ -155,15 +155,23 @@ export function isInfraPathType(pathType: number | null | undefined): boolean {
 }
 
 /**
- * 形状から通過速度(base_speed)・最小曲線半径・最大勾配を算出するパス種別。
+ * 形状から最小曲線半径・最大勾配を算出するパス種別。
  * バックエンド geo_path_alignment.SPEED_PATH_TYPES に対応する。これ以外の種別の値は
  * 算出されない既定値(0・直線)のままなので、パス詳細に表示しない。
  */
-export const PATH_TYPES_WITH_BASE_SPEED: readonly number[] = [PATH_STREET, PATH_MOTORWAY, PATH_TRACK, PATH_MONORAIL];
+export const PATH_TYPES_WITH_ALIGNMENT: readonly number[] = [PATH_STREET, PATH_MOTORWAY, PATH_TRACK, PATH_MONORAIL];
+
+/**
+ * パス詳細で通過速度(base_speed)を表示するパス種別。自動車が走る道路だけ。
+ * 線路・モノレールは制限速度を規制で変えない前提(既定300km/h)で通過速度がその天井に張り付き、
+ * 実際の列車の速度は曲線半径と路線種別の最高速度で決まるため、表示しても意味を持たない。
+ */
+export const PATH_TYPES_WITH_BASE_SPEED: readonly number[] = [PATH_STREET, PATH_MOTORWAY];
 
 /**
  * パス詳細で制限速度(標識と個別指定)を扱うパス種別。通過速度を持つ種別に加えて歩道を含める。
  * 歩行者の速度には効かないが、歩行者専用道路(LRT付き)を走るLRTがこの値を上限に走るため。
+ * 線路・モノレールはプレイヤーが制限速度を設定する意味が無いので含めない(規制ウィンドウも同じ)。
  * 人員搬送は設備の巡航速度で動き、公共交通の区間パス・インフラ・駅舎は通過時間を持たないので含めない。
  */
 export const PATH_TYPES_WITH_SPEED_LIMIT: readonly number[] = [...PATH_TYPES_WITH_BASE_SPEED, PATH_WALKWAY];

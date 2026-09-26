@@ -15,7 +15,7 @@
  * 一覧のタイルはサムネイルと名前だけを出す。説明・達成条件は右カラムに集約する。
  *
  * 右カラム（詳細パネル）はタイルをクリックして選択した対象の内容を表示する。
- * サムネイルを大きく出し、その下にタイトル・説明・舞台となるマップ・達成条件を並べる。
+ * サムネイルを大きく出し、その下にタイトル・説明・舞台となるマップ(大きさ・地表・気候)・達成条件を並べる。
  * シナリオの説明文・達成条件はテンプレート作成者が記入するフリーテキストで、
  * セーブデータのメタデータ（GET /api/v1/saves?template=true）に含まれる。
  *
@@ -30,7 +30,7 @@ import { loadAppSettings } from "../../utils/settings";
 import { SUPPORTED_LANGUAGES, resolveSupportedLanguage } from "../../utils/locale";
 import { TUTORIAL_SCENARIOS } from "../tutorial/tutorialSteps";
 import { TerrainMapThumbnail } from "../common/TerrainMapThumbnail";
-import { normalizeGroundCover } from "../terrain/terrainData";
+import { normalizeClimate, normalizeGroundCover } from "../terrain/terrainData";
 import "./NewGameWindow.css";
 
 type NewGameWindowProps = {
@@ -49,6 +49,8 @@ type TerrainMapEntry = {
   settings: Record<string, unknown>;
   /** 地表種別(GROUND_COVER_*)。詳細パネルに種別名を出す */
   ground_cover?: number;
+  /** 気候区分(CLIMATE_*)。詳細パネルに気候名を出す */
+  climate?: number;
 };
 
 /**
@@ -110,6 +112,8 @@ type DetailView = {
   mapSize: string | null;
   /** 地表種別の表示名。マップが特定できないときは null */
   groundCover: string | null;
+  /** 気候区分の表示名。マップが特定できないときは null */
+  climate: string | null;
   /** 達成条件のフリーテキスト。未設定なら null */
   objective: string | null;
   /** 開始ボタンのラベル */
@@ -322,6 +326,7 @@ export function NewGameWindow({
         mapName: null,
         mapSize: formatMapSize(map.settings),
         groundCover: t(`groundCover.${normalizeGroundCover(map.ground_cover)}`),
+        climate: t(`climate.${normalizeClimate(map.climate)}`),
         objective: null,
         startLabel: t("newGame.startTerrainButton"),
         onStart: () => void handleStartTerrain(map.id),
@@ -341,6 +346,7 @@ export function NewGameWindow({
         mapName: flatMap ? flatMap.name : null,
         mapSize: formatMapSize(flatMap?.settings),
         groundCover: flatMap ? t(`groundCover.${normalizeGroundCover(flatMap.ground_cover)}`) : null,
+        climate: flatMap ? t(`climate.${normalizeClimate(flatMap.climate)}`) : null,
         objective: t("newGame.tutorialObjective"),
         startLabel: t("newGame.startScenarioButton"),
         onStart: () => void handleStartTutorial(scenario.id),
@@ -363,6 +369,7 @@ export function NewGameWindow({
       mapName: terrainMap?.name || template.terrain_map_name || null,
       mapSize: formatMapSize(terrainMap?.settings),
       groundCover: terrainMap ? t(`groundCover.${normalizeGroundCover(terrainMap.ground_cover)}`) : null,
+      climate: terrainMap ? t(`climate.${normalizeClimate(terrainMap.climate)}`) : null,
       objective: template.scenario_objective || null,
       startLabel: t("newGame.startScenarioButton"),
       onStart: () => void handleStartTemplate(template),
@@ -641,6 +648,13 @@ export function NewGameWindow({
                 <div className="new-game-detail-block">
                   <h3 className="new-game-detail-block-title">{t("groundCover.label")}</h3>
                   <p className="new-game-detail-block-text">{detail.groundCover}</p>
+                </div>
+              )}
+
+              {detail.climate && (
+                <div className="new-game-detail-block">
+                  <h3 className="new-game-detail-block-title">{t("climate.label")}</h3>
+                  <p className="new-game-detail-block-text">{detail.climate}</p>
                 </div>
               )}
 

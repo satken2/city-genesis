@@ -51,7 +51,7 @@
     "currentAmount": "現在量",
     "consumptionTrend": "消費量推移",
     "amountTrend": "残量推移",
-    "recoveryAmount": "回復量",
+    "recoveryAmount": "回復量/エポック",
     "maxAmount": "最大量",
     "unknownResource": "不明な資源"
   },

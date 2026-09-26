@@ -755,6 +755,60 @@ export type TransitMasterEntry = {
 };
 
 /**
+ * 路線の巡回点(POST /api/v1/transit/lines・PUT .../lines/{id}/route の points の要素)。
+ * 巡回順に並べ、最後の点の次は先頭の点に戻る。stop=停留所、waypoint=停車せずに必ず通る経由点。
+ */
+export type TransitRoutePoint = {
+  kind: "stop" | "waypoint";
+  /** [x, y, z] のワールド座標 */
+  position: [number, number, number];
+};
+
+/**
+ * 路線の収支見込み(POST /api/v1/transit/lines/estimate・/lines/{id}/estimate の応答。手書きJSON)。
+ * 車両をすべて調達できたときの値で、金額はすべて1エポックあたり。数値は ok=false のとき null。
+ */
+export type TransitLineEstimate = {
+  ok: boolean;
+  /**
+   * 試算できない理由。運休理由コード(route_disconnected / no_underlay / train_too_long)か、
+   * insufficient_stops(停留所が2つ未満)・invalid_stop(停留所・経由点が置けない位置にある)・no_distance(走行距離0)
+   */
+  reason: string | null;
+  fare_price: number;
+  target_headway: number;
+  cars_per_train: number;
+  simulation_days: number;
+  /** 収入見込みで想定した乗車率(0〜1) */
+  load_factor: number;
+  round_trip_length_m: number | null;
+  round_trip_minutes: number | null;
+  train_count: number | null;
+  vehicles_required: number | null;
+  /** 実効運行間隔(分)。短い路線は1編成でも目標より短い間隔で折り返す */
+  effective_headway: number | null;
+  /** 1日に路線を1周する便数(路線上のどの区間もこの本数が通る) */
+  trips_per_day: number | null;
+  /** 1日あたり輸送容量(人)。1日の便数×1編成の定員 */
+  capacity_per_day: number | null;
+  /** 想定乗車率での1日あたり乗車回数(1周のうちに乗客が2回入れ替わる=往復運行なら行きと帰りで1回ずつ、とみなす) */
+  riders_per_day: number | null;
+  revenue: number | null;
+  /** 車両1両の1エポックあたりリース料 */
+  lease_price: number | null;
+  /** リース料の根拠。depot=車両基地の供給価格 / fixed=公共サービス価格の固定価格 / estimated=車両基地の原価見積もり */
+  lease_price_basis: "depot" | "fixed" | "estimated" | null;
+  operating_cost: number | null;
+  balance: number | null;
+  /** 運営原価を運賃収入で賄える乗車率。1を超えると満員でも赤字 */
+  break_even_load_factor: number | null;
+  /** 路線の走行網につながった稼働中の車両基地があるか(試算できないときは null) */
+  depot_connected: boolean | null;
+  /** この設定を確定すると容量を超える線路(作成・更新の事前検証と同じ判定) */
+  track_overloads: { path_id: number; load: number; capacity: number }[];
+};
+
+/**
  * 予算カテゴリマスター (budget_categories)
  */
 export type BudgetCategoryEntry = MasterNameEntry;

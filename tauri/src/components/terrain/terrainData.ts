@@ -1,5 +1,7 @@
 import type { TerrainProps } from "./TerrainPropEditor";
 import {
+  CLIMATE_TEMPERATE,
+  CLIMATE_TYPES,
   GROUND_COVER_DESERT,
   GROUND_COVER_GRASSLAND,
   GROUND_COVER_LUSH,
@@ -122,6 +124,8 @@ export type TerrainEditorData = {
   background: { file_name: string; origin?: [number, number] } | null;
   /** 地表種別(GROUND_COVER_*)。未設定なら null(草原として扱う)。 */
   ground_cover: number | null;
+  /** 気候区分(CLIMATE_*)。未設定なら null(温暖湿潤として扱う)。 */
+  climate: number | null;
 };
 
 /** float16(IEEE 754 half)のビット表現を float32 相当に変換する */
@@ -140,47 +144,41 @@ export function decodeFloat16(bits: number): number {
   return (sign ? -1 : 1) * Math.pow(2, exp - 15) * (1 + frac / 1024);
 }
 
-/** base64 文字列を Uint8Array にデコードする */
-export function base64ToUint8(b64: string): Uint8Array {
-  const bin = atob(b64);
-  const out = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-  return out;
-}
+/**
+ * float16 のビット表現(0〜65535)→ 値の対応表。数百万点の標高を変換するとき、1点ごとに
+ * Math.pow を呼ぶと100ms単位の時間がかかるため、初回利用時に全ビット表現ぶんを作って引く。
+ */
+let float16Table: Float32Array | null = null;
 
 /** float16 LE バイト列を Float32Array に変換する */
 export function decodeFloat16Array(bytes: Uint8Array, count: number): Float32Array {
+  if (!float16Table) {
+    float16Table = new Float32Array(0x10000);
+    for (let bits = 0; bits < 0x10000; bits++) float16Table[bits] = decodeFloat16(bits);
+  }
+  const table = float16Table;
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const out = new Float32Array(count);
   for (let i = 0; i < count; i++) {
-    out[i] = decodeFloat16(view.getUint16(i * 2, true));
+    out[i] = table[view.getUint16(i * 2, true)];
   }
   return out;
 }
 
 /**
- * float32 の値を float16(IEEE 754 half)のビット表現へ変換する(decodeFloat16の逆)。
+ * float32 のビット表現を float16(IEEE 754 half)のビット表現へ変換する。
  * 地形の標高データは通常 float16 の正規化数の範囲(絶対値 約6e-5〜65504)に収まるため、
- * 非正規化数への丸めは省略し、極端な値は 0 または ±Infinity として扱う。
+ * 非正規化数への丸めは省略し、極端な値は 0 または ±Infinity として扱う。NaN は符号なしの 0x7e00。
  */
-export function encodeFloat16(value: number): number {
-  if (Number.isNaN(value)) return 0x7e00;
-  const sign = value < 0 || Object.is(value, -0) ? 0x8000 : 0;
-  const abs = Math.abs(value);
-  if (abs === 0) return sign;
-  if (!isFinite(abs)) return sign | 0x7c00;
-
-  const buf = new ArrayBuffer(4);
-  const f32 = new Float32Array(buf);
-  const u32 = new Uint32Array(buf);
-  f32[0] = abs;
-  const bits = u32[0];
+function float32BitsToFloat16(bits: number): number {
+  const sign = (bits >>> 16) & 0x8000;
   const exp32 = (bits >>> 23) & 0xff;
   const mantissa32 = bits & 0x7fffff;
+  if (exp32 === 0xff) return mantissa32 !== 0 ? 0x7e00 : sign | 0x7c00;
 
   let exp16 = exp32 - 127 + 15;
   if (exp16 >= 0x1f) return sign | 0x7c00; // オーバーフロー→Infinity
-  if (exp16 <= 0) return sign; // アンダーフロー→0に丸める
+  if (exp16 <= 0) return sign; // アンダーフロー(±0を含む)→0に丸める
 
   // 23bit仮数部を10bitに丸める(中間ビットを足してから右シフト=四捨五入)
   let mantissa16 = (mantissa32 + 0x00001000) >>> 13;
@@ -193,18 +191,49 @@ export function encodeFloat16(value: number): number {
   return sign | (exp16 << 10) | mantissa16;
 }
 
-/** Float32Array を float16 LE バイト列(Uint8Array)へ変換する */
+/** encodeFloat16 が値を float32 のビット表現へ読み替えるための作業領域 */
+const scratchFloat32 = new Float32Array(1);
+const scratchFloat32Bits = new Uint32Array(scratchFloat32.buffer);
+
+/** 数値を float16(IEEE 754 half)のビット表現へ変換する(decodeFloat16の逆)。値は一度 float32 へ丸める。 */
+export function encodeFloat16(value: number): number {
+  scratchFloat32[0] = value;
+  return float32BitsToFloat16(scratchFloat32Bits[0]);
+}
+
+/** Float32Array を float16 LE バイト列(Uint8Array)へ変換する。値をコピーせず、同じメモリをビット列として読む。 */
 export function encodeFloat16Array(values: Float32Array): Uint8Array {
+  const bits = new Uint32Array(values.buffer, values.byteOffset, values.length);
   const out = new Uint8Array(values.length * 2);
   const view = new DataView(out.buffer);
-  for (let i = 0; i < values.length; i++) {
-    view.setUint16(i * 2, encodeFloat16(values[i]), true);
+  for (let i = 0; i < bits.length; i++) {
+    view.setUint16(i * 2, float32BitsToFloat16(bits[i]), true);
   }
   return out;
 }
 
-/** Uint8Array を base64 文字列にエンコードする(atobの逆)。巨大配列でもスタックを溢れさせないようチャンク処理する。 */
+/**
+ * base64 のネイティブ実装(Uint8Array.prototype.toBase64 / Uint8Array.fromBase64)。
+ * 型定義が標準ライブラリにまだ無いため、ここで最小限の形を宣言して存在を確かめてから使う。
+ * JS実装は数MBの標高データで数百msかかるのに対し、ネイティブ実装は数msで終わる。
+ */
+type NativeBase64Bytes = Uint8Array & { toBase64?: () => string };
+type NativeBase64Ctor = typeof Uint8Array & { fromBase64?: (base64: string) => Uint8Array };
+
+/** base64 文字列を Uint8Array にデコードする */
+export function base64ToUint8(b64: string): Uint8Array {
+  const ctor = Uint8Array as NativeBase64Ctor;
+  if (typeof ctor.fromBase64 === "function") return ctor.fromBase64(b64);
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+
+/** Uint8Array を base64 文字列にエンコードする(atobの逆)。JS実装は巨大配列でもスタックを溢れさせないようチャンク処理する。 */
 export function uint8ToBase64(bytes: Uint8Array): string {
+  const native = bytes as NativeBase64Bytes;
+  if (typeof native.toBase64 === "function") return native.toBase64();
   const chunkSize = 0x8000;
   let bin = "";
   for (let i = 0; i < bytes.length; i += chunkSize) {
@@ -213,7 +242,7 @@ export function uint8ToBase64(bytes: Uint8Array): string {
   return btoa(bin);
 }
 
-type Rgb = [number, number, number];
+export type Rgb = [number, number, number];
 
 /**
  * 地表種別(GROUND_COVER_*)ごとの標高カラーランプ。低地・中腹・高地の3色を線形補間する。
@@ -228,9 +257,22 @@ const GROUND_COVER_RAMPS: Record<number, [Rgb, Rgb, Rgb]> = {
   [GROUND_COVER_SEMI_ARID]: [[180, 160, 96], [168, 150, 92], [150, 112, 72]],
 };
 
+/** 海面(標高0以下)の色。地形エディタの2D表示では背景色も兼ねる。 */
+export const SEA_RGB: Rgb = [0x0d, 0x0d, 0x14];
+
 /** 未設定・未知の値を草原に丸めた地表種別。 */
 export function normalizeGroundCover(value: unknown): number {
   return typeof value === "number" && GROUND_COVER_TYPES.includes(value) ? value : GROUND_COVER_GRASSLAND;
+}
+
+/** 未設定・未知の値を温暖湿潤に丸めた気候区分。 */
+export function normalizeClimate(value: unknown): number {
+  return typeof value === "number" && CLIMATE_TYPES.includes(value) ? value : CLIMATE_TEMPERATE;
+}
+
+/** 地表種別の標高カラーランプ([低地, 中腹, 高地])。地形エディタのシェーダーも同じ3色で塗る。 */
+export function groundCoverRamp(groundCover: number = GROUND_COVER_GRASSLAND): [Rgb, Rgb, Rgb] {
+  return GROUND_COVER_RAMPS[normalizeGroundCover(groundCover)];
 }
 
 /**
@@ -238,7 +280,7 @@ export function normalizeGroundCover(value: unknown): number {
  */
 export function terrainColor(t: number, groundCover: number = GROUND_COVER_GRASSLAND): Rgb {
   const clamped = Math.max(0, Math.min(1, t));
-  const [low, mid, high] = GROUND_COVER_RAMPS[normalizeGroundCover(groundCover)];
+  const [low, mid, high] = groundCoverRamp(groundCover);
   const [from, to, s2]: [Rgb, Rgb, number] = clamped < 0.5 ? [low, mid, clamped * 2] : [mid, high, (clamped - 0.5) * 2];
   return [
     Math.round(from[0] + s2 * (to[0] - from[0])),
@@ -247,14 +289,14 @@ export function terrainColor(t: number, groundCover: number = GROUND_COVER_GRASS
   ];
 }
 
-/** 標高1点から地形テクスチャのRGBを求める。海面(標高0以下)は背景色にする。 */
+/** 標高1点から地形テクスチャのRGBを求める。海面(標高0以下)は SEA_RGB にする。 */
 export function computePixelRGB(
   e: number,
   minLand: number,
   maxLand: number,
   groundCover: number = GROUND_COVER_GRASSLAND
 ): Rgb {
-  if (e <= 0) return [0x0d, 0x0d, 0x14];
+  if (e <= 0) return [SEA_RGB[0], SEA_RGB[1], SEA_RGB[2]];
   const t = (e - minLand) / (maxLand - minLand);
   return terrainColor(t, groundCover);
 }
@@ -336,10 +378,18 @@ export function applyElevRectInto(dst: Float32Array, cols: number, rect: GridRec
  * 別ウィンドウ同士のリアルタイム同期は、このアプリの既存パターン(FontSizeContext等)に
  * 倣い、Tauriの emit/listen による全ウィンドウブロードキャスト + mapId によるフィルタで
  * 行う(emitTo による特定ウィンドウ宛て送信は使わない)。
+ *
+ * エディタは request_state を送ってきて detach していないプレビューがあるときだけ状態を送る。
+ * 全状態は標高を丸ごと符号化するため大きなマップでは数十MBになり、プレビューを開いていない
+ * 間まで編集のたびに送ると操作が重くなるため。プレビューはマウントごとに sessionId を作り、
+ * 表示されたら request_state、非表示・アンマウントで detach を送る(Tauriのイベントは到着順が
+ * 保証されないので、どのマウントの接続/切断かを sessionId で区別する)。
  * ========================================================================== */
 
-/** プレビュー側がマウント時に現在の全状態を要求するイベント */
+/** プレビュー側がマウント時・再表示時に現在の全状態を要求するイベント */
 export const EVT_TERRAIN_3D_REQUEST_STATE = "terrain_3d_preview:request_state";
+/** プレビュー側が非表示・アンマウントになり、状態の送信が不要になったことを知らせるイベント */
+export const EVT_TERRAIN_3D_DETACH = "terrain_3d_preview:detach";
 /** エディタ側が保持する標高・選択マスク・メタデータの全体を送るイベント(要求時・ロード時・リサイズ確定時) */
 export const EVT_TERRAIN_3D_FULL_STATE = "terrain_3d_preview:full_state";
 /** ブラシ/ポリゴンの選択範囲(水色ハイライト)差分を送るイベント(ドラッグ中も含めリアルタイム) */
@@ -349,7 +399,9 @@ export const EVT_TERRAIN_3D_SELECTION_RESET = "terrain_3d_preview:selection_rese
 /** 「適用」ボタン押下で確定した標高差分を送るイベント */
 export const EVT_TERRAIN_3D_ELEVATION_DELTA = "terrain_3d_preview:elevation_delta";
 
-export type Terrain3DRequestStatePayload = { mapId: string };
+/** sessionId はプレビューのマウントごとに作る一意な文字列 */
+export type Terrain3DRequestStatePayload = { mapId: string; sessionId: string };
+export type Terrain3DDetachPayload = { mapId: string; sessionId: string };
 
 export type Terrain3DFullStatePayload = {
   mapId: string;

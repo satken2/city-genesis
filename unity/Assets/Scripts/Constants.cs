@@ -261,6 +261,13 @@ public static class Constants
     public const int GROUND_COVER_LUSH = 3;
     public const int GROUND_COVER_SNOW = 4;
     public const int GROUND_COVER_SEMI_ARID = 5;
+    public const int CLIMATE_TEMPERATE = 1;
+    public const int CLIMATE_SUBTROPICAL = 2;
+    public const int CLIMATE_CONTINENTAL = 3;
+    public const int CLIMATE_MEDITERRANEAN = 4;
+    public const int CLIMATE_STEPPE = 5;
+    public const int CLIMATE_DESERT = 6;
+    public const int CLIMATE_SUBARCTIC = 7;
     public const int INTERCHANGE_KIND_IC = 1;
     public const int INTERCHANGE_KIND_JCT = 2;
     public const float INTERCHANGE_HULL_MARGIN_M = 10.0f;
@@ -382,6 +389,8 @@ public static class Constants
     public static readonly int[] RAIL_VEHICLE_KEYS = new int[] { VEHICLE_METRO_TRAIN, VEHICLE_PASSANGER_TRAIN, VEHICLE_FREIGHT_TRAIN, VEHICLE_HIGH_SPEED_TRAIN };
 
     public static readonly int[] GROUND_COVER_TYPES = new int[] { GROUND_COVER_GRASSLAND, GROUND_COVER_DESERT, GROUND_COVER_LUSH, GROUND_COVER_SNOW, GROUND_COVER_SEMI_ARID };
+
+    public static readonly int[] CLIMATE_TYPES = new int[] { CLIMATE_TEMPERATE, CLIMATE_SUBTROPICAL, CLIMATE_CONTINENTAL, CLIMATE_MEDITERRANEAN, CLIMATE_STEPPE, CLIMATE_DESERT, CLIMATE_SUBARCTIC };
 
     public static readonly int[] TENANT_TYPES = new int[] { SPACE_RESIDENCE, SPACE_RETAIL, SPACE_FACTORY, SPACE_OFFICE, SPACE_LODGING };
 

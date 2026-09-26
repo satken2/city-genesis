@@ -19,11 +19,13 @@ export async function sendAmbienceVolume(volume: number): Promise<void> {
   await invoke("send_window_action", { windowType: "cockpit", entity: null, action: "ambience:volume", params: { volume } });
 }
 
+/** rain/snow は0=なし〜3=強い。weight は今の気候・季節での出現割合(%)で、0の天気も手動では選べる。 */
 export type WeatherState = {
   id: string;
   locked: boolean;
   rain: number;
-  presets: { id: string; weight: number; rain: number }[];
+  snow: number;
+  presets: { id: string; weight: number; rain: number; snow: number }[];
 };
 
 export async function queryWeather(): Promise<void> {
@@ -33,6 +35,14 @@ export async function queryWeather(): Promise<void> {
 /** id=nullは固定を解除する。天気の正はUnityの応答とし、UIでは抽選しない。 */
 export async function setWeather(id: string | null): Promise<void> {
   await invoke("send_window_action", { windowType: "cockpit", entity: null, action: "weather:set", params: { id } });
+}
+
+/**
+ * エポック実行の開始(true)と終了(false)をUnityへ知らせる。Unityは開始で日を早送りで沈めて暗転し、
+ * 終了後に都市を読み直してから日の出へ進める。実行1回につき開始と終了を1通ずつ送る。
+ */
+export async function sendEpochExecuting(executing: boolean): Promise<void> {
+  await invoke("send_window_action", { windowType: "", entity: null, action: "epoch:executing", params: { executing } });
 }
 
 /**
@@ -1276,11 +1286,12 @@ export const IPC_EVENT_VIEW_GRID_TOGGLED = "view:grid_toggled";
 export const IPC_EVENT_EDIT_RESOURCE_UPDATE_SHAPE = "edit_resource:update_shape";
 
 /**
- * 公共交通の路線設置モードにおいて、配置中の停留所の座標列が変更された(Unity → UI)。
- * ペイロードは { stops: number[][] }（各停留所は [x, y, z]。公共交通パスは相対Y=0）。
- * 新設パネル(TransitCreationPanel)がこれを受けて停留所数の表示と POST 用の停留所列を更新する。
+ * 公共交通の路線設置モードにおいて、配置中の巡回点(停留所・経由点)が変更された(Unity → UI)。
+ * ペイロードは { points: TransitRoutePoint[] }(巡回順。各点は {kind: "stop" | "waypoint", position: [x, y, z]}。
+ * 公共交通パスは相対Y=0 なので y は0)。路線の新設・経路編集パネル(TransitCreationPanel)がこれを受けて
+ * 停留所・経由点の数の表示と、確定で送る巡回点を更新する。
  */
-export const IPC_EVENT_EDIT_TRANSIT_UPDATE_STOPS = "edit_transit:update_stops";
+export const IPC_EVENT_EDIT_TRANSIT_UPDATE_POINTS = "edit_transit:update_points";
 
 /**
  * プロップ配置(個別モード)において、配置済みインスタンス列が変更された(Unity → UI)。

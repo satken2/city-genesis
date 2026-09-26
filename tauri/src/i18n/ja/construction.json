@@ -130,8 +130,8 @@
   "resource_construction": {
     "selectType": "-- 資源種別を選択 --",
     "settings": "設定",
-    "maxAmount": "最大容量",
-    "recoveryRate": "回復率",
+    "maxAmount": "埋蔵量上限",
+    "recoveryRate": "回復率(1日あたり)",
     "shapeInfo": "形状情報",
     "noVerticesYet": "地形をクリックしてポリゴンを配置してください",
     "vertexCount": "頂点数",
@@ -139,6 +139,40 @@
     "confirming": "確定中...",
     "confirmFailedUnknown": "資源エリアの確定に失敗しました。形状を変更して再度お試しください。",
     "cancel": "キャンセル"
+  },
+  "resourcePreset": {
+    "label": "目安",
+    "presets": {
+      "oilField": {
+        "name": "在来型油田",
+        "note": "油田の可採埋蔵量(1単位=原油1バレル)。面積に比例し、回復しない"
+      },
+      "oreDeposit": {
+        "name": "露天掘り鉱床",
+        "note": "露天掘りできる鉱床の鉱量(1単位=1kg)。面積に比例し、回復しない"
+      },
+      "river": {
+        "name": "河川",
+        "note": "流量で決まる水源(1単位=1m³)。上限は取水できる水量の30日分で、毎エポック満タンに戻る"
+      },
+      "lake": {
+        "name": "湖沼・ダム湖",
+        "note": "面積に比例した貯水と、流入による回復(1単位=1m³)。流入を超えて取水すると水位が下がる"
+      },
+      "groundwater": {
+        "name": "地下水",
+        "note": "面積に比例した帯水層の貯留と、雨水の涵養によるゆっくりした回復(1単位=1m³)。汲み過ぎると元に戻るまで長い年月がかかる"
+      }
+    },
+    "summary": {
+      "area": "面積 {{area}}",
+      "amount": "埋蔵量 {{amount}}",
+      "yield": "持続採取量 約{{amount}}/日",
+      "refillDays": "空から満タンまで約{{days}}日",
+      "refillYears": "空から満タンまで約{{years}}年",
+      "nonRenewable": "回復しない(採った分だけ減る)",
+      "needsShape": "形状を描くと、面積に応じた埋蔵量が入ります"
+    }
   },
   "prop_placement": {
     "height": "地面からの高さ(m)",

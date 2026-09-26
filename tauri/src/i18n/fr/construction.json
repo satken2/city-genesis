@@ -130,8 +130,8 @@
   "resource_construction": {
     "selectType": "-- Choisir le type de ressource --",
     "settings": "Réglages",
-    "maxAmount": "Capacité maximale",
-    "recoveryRate": "Taux de régénération",
+    "maxAmount": "Gisement maximal",
+    "recoveryRate": "Taux de régénération (par jour)",
     "shapeInfo": "Informations sur la forme",
     "noVerticesYet": "Cliquez sur le terrain pour tracer le polygone",
     "vertexCount": "Nombre de sommets",
@@ -139,6 +139,40 @@
     "confirming": "Validation...",
     "confirmFailedUnknown": "Échec de la validation de la zone de ressources. Modifiez la forme et réessayez.",
     "cancel": "Annuler"
+  },
+  "resourcePreset": {
+    "label": "Préréglage",
+    "presets": {
+      "oilField": {
+        "name": "Gisement pétrolier conventionnel",
+        "note": "Réserves récupérables d'un gisement pétrolier (1 unité = 1 baril de brut). Proportionnel à la surface ; ne se régénère pas."
+      },
+      "oreDeposit": {
+        "name": "Gisement à ciel ouvert",
+        "note": "Tonnage d'un gisement exploitable à ciel ouvert (1 unité = 1 kg). Proportionnel à la surface ; ne se régénère pas."
+      },
+      "river": {
+        "name": "Rivière",
+        "note": "Source d'eau définie par son débit (1 unité = 1 m³). Le plafond correspond à 30 jours d'eau prélevable et se remplit à chaque époque."
+      },
+      "lake": {
+        "name": "Lac / retenue",
+        "note": "Réserve proportionnelle à la surface, reconstituée par les apports (1 unité = 1 m³). Prélever plus que les apports fait baisser le niveau."
+      },
+      "groundwater": {
+        "name": "Eaux souterraines",
+        "note": "Réserve de l'aquifère proportionnelle à la surface, avec une recharge lente par la pluie (1 unité = 1 m³). Une surexploitation met de nombreuses années à se résorber."
+      }
+    },
+    "summary": {
+      "area": "Surface {{area}}",
+      "amount": "Réserve {{amount}}",
+      "yield": "Prélèvement durable ~{{amount}}/jour",
+      "refillDays": "Du vide au plein en ~{{days}} jours",
+      "refillYears": "Du vide au plein en ~{{years}} ans",
+      "nonRenewable": "Ne se régénère pas (s'épuise à l'extraction)",
+      "needsShape": "Tracez la forme pour obtenir une réserve selon sa surface"
+    }
   },
   "prop_placement": {
     "height": "Hauteur au-dessus du sol (m)",

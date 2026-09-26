@@ -127,6 +127,8 @@ public class IpcClient : MonoBehaviour
     }
     public event Action OnWeatherQuery;
     public event Action<string> OnWeatherSet;
+    // エポック実行の開始(true)と終了(false)。天気の時刻演出(日没→暗転→日の出)に使う。
+    public event Action<bool> OnEpochExecuting;
     // 接道(front_path)の矢印表示。土地区画詳細パネルの開閉に対応する。
     public event Action<int> OnParcelShowFrontPath;
     public event Action OnParcelHideFrontPath;
@@ -199,9 +201,13 @@ public class IpcClient : MonoBehaviour
 
     /// <summary>
     /// IPC接続を切断する。
+    /// 閉じる前に system:graphic_stopped を送り、Tauri 側が Unity を未接続扱いに戻せるようにする
+    /// (Editor の Play 停止も OnApplicationQuit 経由でここに来る。クラッシュ時は送れない)。
     /// </summary>
     public void Disconnect()
     {
+        EmitGraphicStopped();
+
         if (_reader != null)
         {
             _reader.OnMessageReceived -= HandleIncomingMessage;
@@ -777,6 +783,10 @@ public class IpcClient : MonoBehaviour
                     OnWeatherSet?.Invoke(GetParamString(payload, "id"));
                     break;
 
+                case "epoch:executing":
+                    OnEpochExecuting?.Invoke(bool.TryParse(GetParamString(payload, "executing"), out bool executing) && executing);
+                    break;
+
                 case "view:set_grid":
                     {
                         string mode = GetParamString(payload, "mode") ?? "off";
@@ -1229,19 +1239,19 @@ public class IpcClient : MonoBehaviour
     }
 
     /// <summary>
-    /// edit_transit:update_stops イベントを送信する。
-    /// 公共交通の路線設置モードにおいて、配置中の停留所座標列が変更されたことをUIに通知する。
-    /// 各停留所は [x, y, z]（公共交通パスは相対Y=0のため y は0）。新設パネル
-    /// (TransitCreationPanel)がこれを受けて停留所数の表示とPOST用の停留所列を更新する。
+    /// edit_transit:update_points イベントを送信する。
+    /// 公共交通の路線設置モードにおいて、配置中の巡回点(停留所・経由点を巡回順に並べたもの)が変更されたことを
+    /// UIに通知する。各点は {kind: "stop" | "waypoint", position: [x, y, z]}(公共交通パスは相対Y=0のため y は0)。
+    /// 新設・経路編集パネル(TransitCreationPanel)がこれを受けて停留所・経由点の数の表示と確定で送る巡回点を更新する。
     /// </summary>
-    public void EmitEditTransitUpdateStops(List<List<float>> stops)
+    public void EmitEditTransitUpdatePoints(List<Dictionary<string, object>> points)
     {
         var payload = new Dictionary<string, object>
         {
-            ["stops"] = stops
+            ["points"] = points
         };
 
-        SendEnvelope("edit_transit:update_stops", payload);
+        SendEnvelope("edit_transit:update_points", payload);
     }
 
     /// <summary>
@@ -1424,11 +1434,11 @@ public class IpcClient : MonoBehaviour
         });
     }
 
-    public void EmitWeatherState(string id, bool locked, int rain, object[] presets)
+    public void EmitWeatherState(string id, bool locked, int rain, int snow, object[] presets)
     {
         SendEnvelope("weather:state", new Dictionary<string, object>
         {
-            ["id"] = id, ["locked"] = locked, ["rain"] = rain, ["presets"] = presets
+            ["id"] = id, ["locked"] = locked, ["rain"] = rain, ["snow"] = snow, ["presets"] = presets
         });
     }
 
@@ -1447,19 +1457,33 @@ public class IpcClient : MonoBehaviour
     }
 
     /// <summary>
-    /// system:graphic_ready イベントを送信する。
-    /// Unity の起動完了(初回起動・クラッシュ後の自動再起動とも)を Tauri に通知する。
-    /// Tauri 側は2回目以降の受信(=クラッシュ後の再起動)でのみポップアップを一掃する
-    /// (初回はユーザーが操作中のロード画面などを閉じないため表示に触れない)。
+    /// game:loaded イベントを送信する。初期描画が完了した要求世代を Tauri に通知する。
     /// </summary>
     public void EmitGameLoaded(int loadingId)
     {
         SendEnvelope("game:loaded", new Dictionary<string, object> { { "loading_id", loadingId } });
     }
 
+    /// <summary>
+    /// system:graphic_ready イベントを送信する。
+    /// Unity の起動完了(初回起動・クラッシュ後の自動再起動とも)を Tauri に通知する。
+    /// Tauri 側は2回目以降の受信(=クラッシュ後の再起動)でのみポップアップを一掃する
+    /// (初回はユーザーが操作中のロード画面などを閉じないため表示に触れない)。
+    /// </summary>
     public void EmitGraphicReady()
     {
         SendEnvelope("system:graphic_ready", new Dictionary<string, object>());
+    }
+
+    /// <summary>
+    /// system:graphic_stopped イベントを送信する。
+    /// Unity の正常終了(Editor の Play 停止を含む)を Tauri に通知し、接続中フラグを下ろさせる。
+    /// これが無いと、Tauri は開発時の Unity なし起動でも一度接続した後は描画完了を待ち続け、
+    /// Play を止めた後の再ロードで Tips が「Now Loading」から戻れなくなる。
+    /// </summary>
+    public void EmitGraphicStopped()
+    {
+        SendEnvelope("system:graphic_stopped", new Dictionary<string, object>());
     }
 
     // ======================================================================

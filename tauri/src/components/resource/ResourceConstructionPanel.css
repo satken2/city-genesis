@@ -100,6 +100,14 @@
   line-height: 22px;
 }
 
+/* 目安の説明と入力値の読み替え(ResourcePresetHint) */
+.pc-hint {
+  font-size: 0.7rem;
+  color: #93a9c0;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
 .pc-no-nodes-message {
   font-size: 0.72rem;
   color: #93a9c0;

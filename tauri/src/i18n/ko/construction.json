@@ -130,8 +130,8 @@
   "resource_construction": {
     "selectType": "-- 자원 종류 선택 --",
     "settings": "설정",
-    "maxAmount": "최대 용량",
-    "recoveryRate": "회복률",
+    "maxAmount": "매장량 상한",
+    "recoveryRate": "회복률(1일당)",
     "shapeInfo": "형상 정보",
     "noVerticesYet": "지형을 클릭해 폴리곤을 배치하세요",
     "vertexCount": "정점 수",
@@ -139,6 +139,40 @@
     "confirming": "확정 중...",
     "confirmFailedUnknown": "자원 영역 확정에 실패했습니다. 형상을 변경해 다시 시도하세요.",
     "cancel": "취소"
+  },
+  "resourcePreset": {
+    "label": "기준",
+    "presets": {
+      "oilField": {
+        "name": "재래형 유전",
+        "note": "유전의 가채 매장량(1단위=원유 1배럴). 면적에 비례하며 회복되지 않음"
+      },
+      "oreDeposit": {
+        "name": "노천 광상",
+        "note": "노천 채굴이 가능한 광상의 광량(1단위=1kg). 면적에 비례하며 회복되지 않음"
+      },
+      "river": {
+        "name": "하천",
+        "note": "유량으로 정해지는 수원(1단위=1m³). 상한은 취수 가능한 수량의 30일분이며, 에포크마다 가득 찬다"
+      },
+      "lake": {
+        "name": "호수・댐호",
+        "note": "면적에 비례하는 저수량과 유입에 의한 회복(1단위=1m³). 유입량보다 많이 취수하면 수위가 내려간다"
+      },
+      "groundwater": {
+        "name": "지하수",
+        "note": "면적에 비례하는 대수층 저류와 빗물 함양에 의한 느린 회복(1단위=1m³). 과잉 양수하면 회복에 오랜 세월이 걸린다"
+      }
+    },
+    "summary": {
+      "area": "면적 {{area}}",
+      "amount": "매장량 {{amount}}",
+      "yield": "지속 채취량 약 {{amount}}/일",
+      "refillDays": "비었다가 가득 찰 때까지 약 {{days}}일",
+      "refillYears": "비었다가 가득 찰 때까지 약 {{years}}년",
+      "nonRenewable": "회복되지 않음(채취한 만큼 줄어듦)",
+      "needsShape": "형상을 그리면 면적에 따른 매장량이 입력됩니다"
+    }
   },
   "prop_placement": {
     "height": "지면으로부터 높이(m)",

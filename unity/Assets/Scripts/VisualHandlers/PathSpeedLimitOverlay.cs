@@ -149,8 +149,9 @@ public sealed class PathSpeedLimitOverlay : MonoBehaviour
     public static bool TryGetSpeedLimit(PathSummary path, out float speed)
     {
         speed = 0f;
-        if (path == null || (path.path_type != Constants.PATH_STREET && path.path_type != Constants.PATH_MOTORWAY
-            && path.path_type != Constants.PATH_TRACK && path.path_type != Constants.PATH_MONORAIL)) return false;
+        // 標識を出すのは自動車が走る道路だけ。線路・モノレールの制限速度はプレイヤーが設定しない
+        // 名目値(既定300km/h)で、列車の速度は曲線半径と路線種別の最高速度で決まるため表示しない。
+        if (path == null || (path.path_type != Constants.PATH_STREET && path.path_type != Constants.PATH_MOTORWAY)) return false;
         if (path.max_speed == null) return false;
         speed = GeneratedModelUtils.ToFloat(path.max_speed);
         return speed > 0f && !float.IsNaN(speed) && !float.IsInfinity(speed);

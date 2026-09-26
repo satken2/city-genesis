@@ -20,8 +20,8 @@ Unityのグラフィックの上に透明なWebViewウィンドウとして重�
   - App.tsx            ... 全ウィンドウのエントリポイント(ラベルで分岐)
   - components/        ... ドメイン別のUIコンポーネント(詳細はcomponents/AGENTS.md)
   - contexts/          ... MasterDataContext(マスターデータ), FontSizeContext
-  - data/              ... UI内に静的に持つ掲載データ(credits.ts=クレジット表示の掲載内容、propCategories.json=プロップ配置パネルの分類、transitVehicleModels.json=公共交通の車両外観の候補。「公共交通の車両外観カタログ」の節)
-  - hooks/             ... 共通Reactフック(useTemplateMode=テンプレートモード判定, useConstructionBudgetRow=建設中/解体中の1エポックコスト・残りエポック数の取得, useVariantAffordability=建設パネルのバリアント単位の資金目安〔GET /{paths,buildings}/variant-affordability〕, useObjectVisibility=建物・道路のオブジェクト単位の表示/非表示〔状態の正はUnity側。バックエンド・セーブには残らない〕)
+  - data/              ... UI内に静的に持つ掲載データ(credits.ts=クレジット表示の掲載内容、propCategories.json=プロップ配置パネルの分類、transitVehicleModels.json=公共交通の車両外観の候補。「公共交通の車両外観カタログ」の節、resourcePresets.ts=天然資源エリアの埋蔵量上限・回復率の目安。提供物資ごとの型〔河川・地下水など〕と、面積比例か定量か。値の根拠は公開ドキュメント economics/21_天然資源.md §21.9)
+  - hooks/             ... 共通Reactフック(useTemplateMode=テンプレートモード判定, useConstructionBudgetRow=建設中/解体中の1エポックコスト・残りエポック数の取得, useVariantAffordability=建設パネルのバリアント単位の資金目安〔GET /{paths,buildings}/variant-affordability〕, useObjectVisibility=建物・道路のオブジェクト単位の表示/非表示〔状態の正はUnity側。バックエンド・セーブには残らない〕, useTransitEstimate=公共交通路線の収支見込み〔POST /transit/lines/estimate・/lines/{id}/estimate。入力が落ち着いてから取得し古い要求は中断、取得中は直前の結果を残す〕, useResourcePresetInputs=天然資源エリア作成フォームの目安・埋蔵量上限・回復率〔目安から導出し面積比例なら形状の面積に追従、手入力が優先、種別が変わると全部捨てる。地形エディタの資源編集タブと resource/ResourceConstructionPanel が共有〕)
   - utils/             ... 共通処理(下記の一覧参照)
   - i18n/              ... 多言語リソース(言語ディレクトリごとにドメイン別JSONを配置。index.tsがglobで集約)
   - types.ts           ... 共通型定義(WindowContext, AgentData等)
@@ -183,4 +183,4 @@ HUDとヒントバーは `current_save_id != null && !isLoading` を表示条件
 初期設定またはTipsから通常操作へ進む際はUI内の `initial-loading:finished` イベントでHUDとヒントバーの描画を即座に解禁し、次回のセッションポーリングを待たない。
 
 
-開発時のUnityなし起動: 通常の `npm run tauri dev`（Rustの `cfg(all(debug_assertions, dev))`）では、Unityの `system:graphic_ready` を一度も受信していない場合に限り、バックエンドの開始要求成功とセッション確認後に描画待ちを省略し、Tipsを開始ボタンへ切り替える。Unityから接続通知を受けた後は描画完了を待つ。待機中にUnityが接続した場合も開始要求を再送して描画待ちに戻る。`tauri build`（`--debug` を含む）およびリリースビルドには省略処理を含めない。環境変数やバックエンドのNuitka／uvicorn判定は使用しない。
+開発時のUnityなし起動: 通常の `npm run tauri dev`（Rustの `cfg(all(debug_assertions, dev))`）では、Unityが接続中でない場合に限り、バックエンドの開始要求成功とセッション確認後に描画待ちを省略し、Tipsを開始ボタンへ切り替える。接続中かどうかは `graphic_connected`（`system:graphic_ready` で立ち、`system:graphic_stopped`＝正常終了・EditorのPlay停止で下りる）で判定し、再接続時のポップアップ一掃に使う `graphic_ready_seen`（一度立ったら戻さない）とは別に持つ。「一度でも接続したか」で判定するとPlayを止めた後の再ロードで永遠に待つ。接続中は描画完了を待ち、待機中にUnityが停止した場合はその時点で開始ボタンへ切り替える。待機中にUnityが接続した場合は開始要求を再送して描画待ちに戻る。`tauri build`（`--debug` を含む）およびリリースビルドには省略処理を含めない。環境変数やバックエンドのNuitka／uvicorn判定は使用しない。

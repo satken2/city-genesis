@@ -7,7 +7,7 @@
  * 構成:
  * 1. 情報カード ... アイコン + 資源名・現在量・上限量・回復量(マスターデータ解決)
  * 2. 残量推移グラフ ... current_amount 履歴(max_amount の基準線付き)
- * 3. 採取量推移グラフ ... consumption_amount 履歴(回復量の基準線付き)
+ * 3. 採取量推移グラフ ... consumption_amount 履歴(1エポックあたりの回復量の基準線付き)
  *
  * グラフは API が返す新しい順の配列からゼロパディングをトリムしたうえで reverse() し、
  * 古い→新しいの時系列順で描画する。
@@ -146,6 +146,22 @@ export function ResourceDetailPanel({
     };
   }, [url]);
 
+  // 採取量の履歴はエポックあたりの量なので、比べる回復量もエポック長を掛けてそろえる。
+  const [simulationDays, setSimulationDays] = useState<number | null>(null);
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchApi<{ city: { simulation_days: number } }>(buildApiUrl(apiBaseUrl, "/api/v1/city"), {
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!controller.signal.aborted) setSimulationDays(response.city.simulation_days);
+      })
+      .catch((err: unknown) => {
+        if (!controller.signal.aborted) console.error("[ResourceDetailPanel] Failed to fetch city:", err);
+      });
+    return () => controller.abort();
+  }, [apiBaseUrl]);
+
   // グラフ用に末尾ゼロをトリムしてから古い→新しい順へ整える。
   const reserveSeries = useMemo(
     () => (resourceData ? trimTrailingZeros([...resourceData.current_amount]).reverse() : []),
@@ -185,8 +201,11 @@ export function ResourceDetailPanel({
       ? Math.round((latestReserve / resourceData.max_amount) * 100)
       : null;
 
-  /** 回復量 = 上限量 × 回復率 */
+  /** 1日あたりの回復量 = 上限量 × 回復率 */
   const recoveryAmount = resourceData.max_amount * resourceData.recovery_rate;
+  // 1エポックで回復するのは上限量まで(それ以上は満タンで打ち切られる)。
+  const recoveryPerEpoch =
+    simulationDays != null ? Math.min(resourceData.max_amount, recoveryAmount * simulationDays) : null;
 
   return (
     <div className="resource-detail">
@@ -260,10 +279,14 @@ export function ResourceDetailPanel({
           data={consumptionSeries}
           color="#f87171"
           height={180}
-          referenceLine={{
-            value: Math.round(recoveryAmount),
-            label: `${t("resource.recoveryAmount")}: ${Math.round(recoveryAmount).toLocaleString()} ${unit}`,
-          }}
+          referenceLine={
+            recoveryPerEpoch != null
+              ? {
+                  value: Math.round(recoveryPerEpoch),
+                  label: `${t("resource.recoveryAmount")}: ${Math.round(recoveryPerEpoch).toLocaleString()} ${unit}`,
+                }
+              : undefined
+          }
           formatter={formatWithUnit}
         />
       </section>

@@ -66,10 +66,10 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `edit_path:select_node`         | `graphic -> ui`  | パス敷設モードにおいて、敷設済みノードを選択した（`node_id`, `height`=相対標高, `embankment_height` を含む。`node_id=-1` は次回配置ノードの値）。UIパネルの標高・盛土ステッパーの表示と編集対象ノードを同期する。Unityのキー操作や吸着で値が変わったときも送られる |
 | `edit_path:change_node`         | `ui -> graphic`  | パス敷設モードにおいて、パネルの標高ステッパーからノードの相対標高を変更した（`node_index`, `height`。`node_index=-1` は次回配置値）。曲線/直線・吸着はラジアルメニューが真実源だが、標高・盛土は既存ノードを選んで数値で微調整する用途のためパネルにもステッパーを残し、Unityキー操作と双方向同期する |
 | `edit_path:change_embankment`   | `ui -> graphic`  | パス敷設モードにおいて、パネルの盛土ステッパーから盛土オフセット(-5〜+5m)を変更した（`node_index`, `embankment_height`。`node_index=-1` は次回配置値） |
-| `edit_path:update_shape`        | `graphic -> ui`  | パス敷設モードにおいて、敷設中パスの形状が変更された。`selected_points`（全アンカー `[x, 相対高さ, z]`）、`start_control` / `end_control`（端点のベジエ制御点）、`waypoint_controls`（中間アンカーごとの `{control_in, control_out}`。未設定は `null`）、`embankment_heights`、`is_curved`（曲線モードの現在値。真実源はUnity側のラジアルメニューで、点列が空でも常に送られる）、`follow_terrain`（地形追従の個別設定。`-1`＝未設定／`0`＝非追従／`1`＝追従。真実源はUnity側で常に送られる）を含む。UIは確定送信時にこれらの制御点を `start_control` / `end_control` / `waypoints` として、`is_curved` を `curved` として、`follow_terrain`（`-1` 以外のときのみ）をそのままバックエンドへ渡し、調整した形状を永続化する。**2Dパス形状編集パネル向けの追加フィールド**: `phase`（`placing`/`editing`/`inactive`）、`selected_index`（3D側で選択中のノード添字。-1=未選択）、`lateral_offsets`（複線の横オフセット列。単線は空）、`alignment`（検証済み線形、取得待ちではUnityのローカル推定。`radius_limit`/`grade_limit`/`min_curve_radius`/`max_grade`、約5m間隔の `samples`=`[x, z, 曲線半径(直線はnull), 勾配%, 始点からの距離m, 路面の絶対標高, 地盤の絶対標高]`、原因別違反区間の最悪値 `labels`、アンカーと同順の `nodes`=`[始点からの距離m, アンカー直下の地盤標高]`。線形評価の対象外の種別では省略）、`height_editable`（バリアントが標高編集可能か。縦断面ストリップの表示条件）、`min_height`（相対高さの下限m）。全WebViewへブロードキャストされるため、敷設パネルと2Dパネルの両方が同じイベントを受ける |
+| `edit_path:update_shape`        | `graphic -> ui`  | パス敷設モードにおいて、敷設中パスの形状が変更された。`selected_points`（全アンカー `[x, 相対高さ, z]`）、`start_control` / `end_control`（端点のベジエ制御点）、`waypoint_controls`（中間アンカーごとの `{control_in, control_out}`。未設定は `null`）、`embankment_heights`、`is_curved`（曲線モードの現在値。真実源はUnity側のラジアルメニューで、点列が空でも常に送られる）、`follow_terrain`（地形追従の個別設定。`-1`＝未設定／`0`＝非追従／`1`＝追従。真実源はUnity側で常に送られる）を含む。UIは確定送信時にこれらの制御点を `start_control` / `end_control` / `waypoints` として、`is_curved` を `curved` として、`follow_terrain`（`-1` 以外のときのみ）をそのままバックエンドへ渡し、調整した形状を永続化する。**2Dパス形状編集パネル向けの追加フィールド**: `phase`（`placing`/`editing`/`inactive`）、`selected_index`（3D側で選択中のノード添字。-1=未選択）、`lateral_offsets`（複線の横オフセット列。単線と、1本で複線を持つLRT専用軌道は空）、`alignment`（検証済み線形、取得待ちではUnityのローカル推定。`radius_limit`/`grade_limit`/`min_curve_radius`/`max_grade`、約5m間隔の `samples`=`[x, z, 曲線半径(直線はnull), 勾配%, 始点からの距離m, 路面の絶対標高, 地盤の絶対標高]`、原因別違反区間の最悪値 `labels`、アンカーと同順の `nodes`=`[始点からの距離m, アンカー直下の地盤標高]`。線形評価の対象外の種別では省略）、`height_editable`（バリアントが標高編集可能か。縦断面ストリップの表示条件）、`min_height`（相対高さの下限m）。全WebViewへブロードキャストされるため、敷設パネルと2Dパネルの両方が同じイベントを受ける |
 | `edit_path:change_platform_side` | `ui -> graphic` | 駅パス敷設モードにおいて、ホーム設置側（`platform_side`=外側/内側/両側。`PLATFORM_SIDE_*`）を変更する。Unity側は敷設中プレビューメッシュのプラットフォーム張り出し側を即座に切り替える。駅バリアント（`platform_width>0`）以外では無視される。初期値は `world:change_state`（`STATE_EDIT_PATH`）の `platform_side` で渡し、以後の切り替えをこのイベントで逐次反映する |
 | `edit_path:set_follow_terrain`  | `ui -> graphic`  | パス敷設モードにおいて、地形追従の個別設定（`value`=`-1`未設定/`0`非追従/`1`追従）を変更する。Unity側は敷設中プレビューの地形追従・トンネル可視化を即座に切り替え、確定送信用に `edit_path:update_shape` の `follow_terrain` としてUIへ返す。`height_editable` のバリアント以外では無視される |
-| `edit_path:change_lateral_offsets` | `ui -> graphic` | パス敷設モードにおいて、複合パス（軌道複線＝単線パス群の平行敷設）の各線の横オフセット（`lateral_offsets`=float配列。m。敷設方向右が正）と進行方向（`travel_directions`=int配列。`DIR_*`。`lateral_offsets` とindex対応）を変更する。Unity側は敷設中プレビューメッシュを各オフセット位置の平行パス群として即座に描き直す（空配列は単一パス＝中心線1本のプレビューに戻す）。進行方向は駅バリアントのホーム設置側の解決と進行方向矢印の表示に使われる。UIパネルで線路数・進行方向を変えたときに送られ、配置中のノード列は維持される。初期値は `world:change_state`（`STATE_EDIT_PATH`）の `lateral_offsets` / `travel_directions` で渡し、以後の変更をこのイベントで逐次反映する。確定時の平行展開・一括作成はUI側が行うため、このイベントはプレビュー表示専用 |
+| `edit_path:change_lateral_offsets` | `ui -> graphic` | パス敷設モードにおいて、複合パス（軌道複線＝単線パス群の平行敷設）の各線の横オフセット（`lateral_offsets`=float配列。m。敷設方向右が正）と進行方向（`travel_directions`=int配列。`DIR_*`。`lateral_offsets` とindex対応）を変更する。Unity側は敷設中プレビューメッシュを各オフセット位置の平行パス群として即座に描き直す（空配列は単一パス＝中心線1本のプレビューに戻す）。進行方向は駅バリアントのホーム設置側の解決と進行方向矢印の表示に使われる。UIパネルで線路数・進行方向を変えたときに送られ、配置中のノード列は維持される。初期値は `world:change_state`（`STATE_EDIT_PATH`）の `lateral_offsets` / `travel_directions` で渡し、以後の変更をこのイベントで逐次反映する。確定時の平行展開・一括作成はUI側が行うため、このイベントはプレビュー表示専用。1本で複線を持つ線路バリアント（線路・モノレールで `lanes`≥2。現行はLRT専用軌道431）と人員搬送（`PATH_CONVEYOR`）は平行展開の対象外で、UIは空の `lateral_offsets` / `travel_directions` を送り、Unityは単一パスでプレビューする（431の2軌道はそのパスの中に描かれる）。確定時も1本のパスを `travel_direction`=`DIR_BOTH` で作成する |
 | `edit_path:shape_command`       | `ui -> graphic`  | 2Dパス形状編集パネル（`path_shape_editor`）からのノード・制御点操作。`op`=`select_node`（`index`）/ `move_node`（`index`,`x`,`z`）/ `move_control`（`index`,`which`=`in`/`out`,`x`,`z`）/ `insert_node`（`edge_index`,`x`,`z`）/ `remove_node`（`index`）。XZだけを動かし、地面相対の高さ・制御点の絶対標高はUnity側が維持する（3DのXZドラッグと同じ規則）。吸着は適用しない。**ドラッグ中は送らずドラッグ終了時に1回だけ送る**。Unityは `Editing` フェーズ以外・3Dでドラッグ中は無視し、適用後は `edit_path:update_shape`（全状態）と、ノード操作なら `edit_path:select_node` を返す |
 | `edit_path:query_shape`         | `ui -> graphic`  | 敷設中パスの現在形状の問い合わせ。Unityは `edit_path:update_shape` を1回返す（セッション外なら `phase=inactive`）。`update_shape` は変化時にしか送られないため、開くたびに再マウントされる2Dパス形状編集パネルがマウント時に送る（`camera:query_state` と同じ問い合わせ応答型） |
 | `edit_path:select_merge_target` | `graphic -> ui`  | パス結合の相手選択モード（`STATE_MERGE_PATH`）において、結合相手のパスがクリックされた（`path_id`, `path_name`）。UI（パス詳細パネル）はこのIDで `POST /api/v1/paths/merge`（`dry_run=true`）を叩き、結合前後の長さを表示してから確定する |
@@ -108,8 +108,8 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `edit_parcel:update_shape`      | `graphic -> ui`  | 土地区画形状編集モードでポリゴンが変更された                   |
 | `edit_resource:update_shape`    | `graphic -> ui`  | 資源エリア編集モード(新規作成)において、編集中のポリゴンが変更された(polygon のみ、新規エリアのためIDは含まない) |
 | `edit_resource:finish`          | `ui -> graphic`  | 資源エリア編集モードを終了する。UI側が `POST /api/v1/resources` の送信に成功した後に送信され、Unity側の編集状態をリセットしてデータをリロードする（`edit_path:finish` と同じ役割） |
-| `edit_transit:update_stops`     | `graphic -> ui`  | 公共交通の路線設置モードにおいて、配置中の停留所座標列が変更された（`{ stops: [[x,y,z], ...] }`。公共交通パスは相対Y=0のため y は0）。新設パネルが停留所数の表示とPOST用の停留所列を更新する |
-| `edit_transit:finish`           | `ui -> graphic`  | 公共交通の路線設置モードを終了する。UI側が `POST /api/v1/transit/lines` の送信に成功した後に送信され、Unity側の停留所配置状態をリセットしてデータをリロードする（`edit_resource:finish` と同じ役割） |
+| `edit_transit:update_points`    | `graphic -> ui`  | 公共交通の路線設置モードにおいて、配置中の巡回点（停留所・経由点を巡回順に並べたもの）が変更された（`{ points: [{ kind: "stop" | "waypoint", position: [x,y,z] }, ...] }`。公共交通パスは相対Y=0のため y は0）。新設・経路編集パネルが停留所・経由点の数の表示と確定で送る巡回点を更新する |
+| `edit_transit:finish`           | `ui -> graphic`  | 公共交通の路線設置モードを終了する。UI側が `POST /api/v1/transit/lines`（新設）または `PUT /api/v1/transit/lines/{id}/route`（経路編集）の送信に成功した後に送信され、Unity側の巡回点の配置状態をリセットしてデータをリロードする（`edit_resource:finish` と同じ役割） |
 | `edit_prop:change_settings`     | `ui -> graphic`  | プロップ配置モードにおいて、回転角/スケール(個別)・密度/seed(範囲)を変更する（送られてきたキーのみを含む `{ rotation?, scale?, density?, seed? }`）。Unity は配置中のゴースト/散布プレビューに即反映する |
 | `edit_prop:update_instances`    | `graphic -> ui`  | プロップ配置(個別モード)において、配置済みインスタンス列が変更された（`{ instances: [{x, z, rotation, scale}, ...] }`）。配置パネルが配置数の表示とPOST用のインスタンス列を更新する |
 | `edit_prop:update_shape`        | `graphic -> ui`  | プロップ配置(範囲モード)において、散布範囲ポリゴンが変更された（`{ polygon: [[x,z], ...] }`。`edit_resource:update_shape` と同形） |
@@ -125,6 +125,7 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `system:ping`                   | `ui <-> graphic` | 疎通確認用                                 |
 | `system:pong`                   | `ui -> graphic`  | pingへの応答                              |
 | `system:graphic_ready`          | `graphic -> ui`  | グラフィックの起動とIPC初期化の完了通知。毎起動時に送られ、2回目以降(クラッシュ後の自動再起動)ではUIがポップアップを一掃する |
+| `system:graphic_stopped`        | `graphic -> ui`  | グラフィックの正常終了通知。`OnApplicationQuit`(EditorのPlay停止でも発火)でMMFを閉じる直前に送る。UIはグラフィックを未接続扱いに戻し、開発時のUnityなし起動でTipsが描画完了を待っていればその場で開始ボタンへ切り替える。クラッシュ時は送られない |
 | `system:focus_gained`           | `graphic -> ui`  | グラフィックのウィンドウがフォアグラウンドになった通知(`OnApplicationFocus(true)`)。フルスクリーン扱いのグラフィックが活性化するとシェルが最前面指定のUIを裏へ回すことがあるため、UIはこれを受けて表示中の全ウィンドウの最前面を打ち直す。UIが裏に回ったときの復帰経路 |
 | `session:reset`                 | `ui -> graphic`  | 現在の3Dオブジェクトや地形のデータを全てクリアする。以後 `session:reload` が届くまでカメラ由来のロードとカメラ状態の `PATCH /api/v1/city` を止める（バックエンドが新しい都市を準備している間に中途半端なデータや前の視点を取り込まないため） |
 | `game:start`                    | `ui -> graphic`  | バックエンドのセッションが作成され、ゲームが開始されたことを通知。ペイロードは空。グラフィックはこれを受けて `GET /api/v1/city` の `camera`（セーブ済みの視点、新規都市ではマップ定義の初期視点）を読み、カメラを復元する（`null` なら原点の既定視点）。既にゲーム中でも送られ、その場合もカメラだけ復元する |
@@ -194,7 +195,17 @@ Unityのグラフィックプログラムは、いくつかのステートを持
 
 `STATE_EDIT_RESOURCE` はテンプレート作成モード専用で、天然資源エリアの新規作成にのみ使用する（既存エリアの編集はまだ実装されていない）。Terrain上の操作は2フェーズに分かれる: Placing(左クリックで頂点を末尾に追加していく)→Editing(頂点数3以上で右クリックすると形状が確定し、`STATE_EDIT_PARCEL_SHAPE` と同じ操作感の頂点ドラッグ・辺クリック挿入・右クリック削除に切り替わる)。バックエンドへの確定送信(`POST /api/v1/resources`)はUI側が直接行い、成功後に `edit_resource:finish` を送信してUnity側の編集状態をリセットする。
 
-`STATE_EDIT_TRANSIT` は公共交通の路線設置モードで、公共交通の新設パネル（`transit_creation`）で路線種別を選ぶと遷移する。`world:change_state` の params に `path_variant`（選択した種別の区間パスのバリアント＝`transit_master` の `transit_path_id`）と `stop_path_variants`（停留所を設置できる下地パスのバリアント一覧）を含める。Unity は `RoadPlanManager` と似た操作感で停留所を配置する: 左クリックで停留所を追加（**停留所は `stop_path_variants` に属する稼働中パス＝駅・街路などの上にのみ吸着でき、外れた場所には置けない**。バックエンドの `_resolve_stop_paths` 制約と一致）、右クリックで確定して編集フェーズへ、編集フェーズでは停留所ドラッグ移動・区間クリックで挿入・停留所右クリックで削除ができる。配置・編集のたびに停留所座標列を `edit_transit:update_stops` でUIへ送出し、確定時の `POST /api/v1/transit/lines`（`path_variant` と `stops` を含む）はUI側が直接行う。成功後に `edit_transit:finish` を送信してUnity側の編集状態をリセットし、新設された公共交通パスをオーバーレイに反映させる。
+`STATE_EDIT_TRANSIT` は公共交通の路線設置モードで、公共交通の新設パネル（`transit_creation`）で路線種別を選ぶと遷移する。路線詳細の「経路を編集」も同じパネルを経路編集モード（ウィンドウを開くときの `params.extra.editLineId`）で開いて遷移する。`world:change_state` の params は次のとおり。
+
+- `path_variant` … 路線種別の区間パスのバリアント（＝`transit_master` の `transit_path_id`）
+- `stop_path_variants` … 停留所を設置できる下地パスのバリアント一覧
+- `route_path_variants` … 車両が走行できる下地パスのバリアント一覧。経由点は `stop_path_variants` とこれの和に属するパスの上に置ける
+- `points` … 始めの巡回点（`edit_transit:update_points` と同じ形）。新設では空、経路編集では路線の現在の巡回点（路線詳細 API の `route_points`）
+- `line_agent_id` … 経路を編集する路線（新設は null）。Unity はこの路線の路線色帯を編集中だけ隠し、プレビューと重ならないようにする
+
+路線は巡回点を順にたどり、最後の点から先頭の点へ戻る閉じたループである（[公共交通機関](../economics/6_公共交通機関.md) 6.2）。Unity の操作は2フェーズに分かれる。配置フェーズでは左クリックで停留所を末尾に追加し、既存の停留所をクリックすると同じ停留所を再び訪れる停留所として追加し、先頭の停留所をクリックする（停留所2つ以上）か右クリックで編集フェーズへ移る。編集フェーズでは停留所・経由点のドラッグで移動、区間（最後の点から先頭の点への区間を含む）のクリックで停留所の挿入、区間のドラッグで経由点の挿入、停留所・経由点の右クリックで削除ができる。**停留所は `stop_path_variants`、経由点は走行網に属する稼働中パスの上にのみ吸着でき、外れた場所には置けない**（路線の作成・経路の更新時にバックエンドが検証する設置制約（[公共交通機関](../economics/6_公共交通機関.md) 6.4）と一致）。停留所・経由点を置くと効果音を鳴らす（音量はUIの効果音設定 `ambience:volume` に従う）。
+
+巡回点が変わるたびに Unity は `edit_transit:update_points` でUIへ送り、あわせて `POST /api/v1/transit/lines/route-preview`（都市を変えない経路の試算。[公共交通機関](../economics/6_公共交通機関.md) 6.8）を少し待ってから呼んで、返った区間ごとの走行データを路線色帯と同じ見た目の帯として実際の道路・線路に沿って描く。下地でつながらない区間は、その区間の巡回点を結ぶ赤い破線で示す。確定時の `POST /api/v1/transit/lines`（新設。`path_variant` と `points` を含む）と `PUT /api/v1/transit/lines/{id}/route`（経路編集。`points` を含む）はUI側が直接行う。成功後に `edit_transit:finish` を送信してUnity側の編集状態をリセットし、新しい公共交通パスをオーバーレイに反映させる。LRT路線の停留所のホームは配置中には描かず、作成後に路線一覧（`GET /api/v1/transit/lines`）の `stop_points` から下地パスの再生成で現れる（[道路メッシュの生成](../geometries/G_道路メッシュの生成.md#lrt停留所のホーム)）。
 
 設置済みの公共交通パス（`PATH_TRANSPORT`）は、`view:change_view` の `transit` レイヤーで路線種別ごとに表示ON/OFFできる（`sub_mode` に表示する `transit_path_id` のCSV文字列を渡す）。Unity は種別色の帯（オーバーレイ）として下地道路の上に描画する。
 
@@ -438,19 +449,20 @@ world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地�
 `edit_path:update_shape` は `can_confirm` を常送します。これはUnityの形状確定状態とローカル交差検証（立体交差と川の横断）を合わせた真偽値で、形状が未確定または干渉中ならfalseです。Tauriはこの値だけで確定を許可せず、同じ全線ペイロードの `/paths/validate` 応答も照合します。既存の `world:highlight_objects` によるパス・建物の警告は、メッシュ着色ではなく半透明の占有箱として描画します。同イベントの params には `colliding_river_ids`（地表レベルで横切っている川のID文字列の配列。`/paths/validate` と `/paths/interference` の同名フィールドをそのまま渡す）も含み、Unity は該当する川の範囲を同じ占有箱で示します。
 敷設パネルは `/paths/validate` の `alignment_violations` を保持し、線番号（1始まり）と各線の始点からの距離区間を添えて曲率・勾配違反を表示します。パス干渉・川横断・形状未確定・検証待ち・検証エラーを区別し、APIエラーの理由は省略せず再試行ボタンを出します。原因不明の拒否を赤い干渉と断定しません。送信直前の再検証でも同じ説明を使い、古い形状の結果は表示しません。2D表示はUnityの推定値なので、全線検証で拒否された区間を敷設パネルの案内で確認できます。費用欄は確定不可でも2点以上あれば表示します。
 
-# 天候の表示と選択
+# 天気の表示と選択
 
-`ambience:volume {volume}`はTauri→Unityの音量通知（master×sfx、0〜1）。Cockpitが設定変更時とグラフィックの起動通知（`system:graphic_ready`）の受信時に送り、CameraAmbience（環境音）・ConstructionAmbience（工事音）・VehicleAmbience（走行音）・VisualEffectManager（完成・解体音）が所有するAudioSourceへ適用する。高度と天候の音響制御はUnity内で完結する。
+`ambience:volume {volume}`はTauri→Unityの音量通知（master×sfx、0〜1）。Cockpitが設定変更時とグラフィックの起動通知（`system:graphic_ready`）の受信時に送り、CameraAmbience（環境音）・ConstructionAmbience（工事音）・VehicleAmbience（走行音）・VisualEffectManager（完成・解体音）が所有するAudioSourceへ適用する。高度と天気の音響制御はUnity内で完結する。
 
-天候の正はUnityにあり、バックエンドへの書き込みや経済パラメータは追加しない。Cockpitは購読後に問い合わせ、応答した天候に合わせて表示と環境音を更新する。
+天気と時刻の正はUnityにあり、バックエンドへの書き込みや経済パラメータは追加しない。マップの気候区分だけはUnityが `GET /api/v1/city` の `climate` から読む。Cockpitは購読後に問い合わせ、応答した天気に合わせて表示を更新する。
 
 | イベント | 方向 | ペイロード・意味 |
 | --- | --- | --- |
-| `weather:query` | Tauri → Unity | 現在の天候を問い合わせる |
+| `weather:query` | Tauri → Unity | 現在の天気を問い合わせる |
 | `weather:set` | Tauri → Unity | `{id: string または null}`。有効なIDは選択して固定、nullは固定を解除。未知のIDは無視 |
-| `weather:state` | Unity → Cockpit | `{id, locked, rain, presets:[{id, weight, rain}]}`。rainは0=なし、1=霧雨、2=雨、3=大雨 |
+| `weather:state` | Unity → Cockpit | `{id, locked, rain, snow, presets:[{id, weight, rain, snow}]}`。rainは0=なし、1=霧雨、2=雨、3=大雨。snowは0=なし、1=小雪、2=雪、3=吹雪。weightは今の気候・季節での出現割合(%) |
+| `epoch:executing` | Tauri → Unity | `{executing: bool}`。エポック実行の開始(true)と終了(false)。Unityは開始で日を早送りで沈めて暗転し、終了後に都市を読み直してから日の出へ進める |
 
-送信は`utils/ipc.ts`の`queryWeather` / `setWeather`から`send_window_action`へ、受信はRust `ipc.rs`でCockpitだけに配信する。Unityは選択・抽選・固定変更後にも状態を送る。候補とウェイトはUnityが持ち、Tauriに抽選処理を複製しない。テンプレートモードOFF時はUIから固定解除を送る。詳細は[天気と環境光](../geometries/U_天気と環境光.md)を参照。
+送信は`utils/ipc.ts`の`queryWeather` / `setWeather` / `sendEpochExecuting`から`send_window_action`へ、`weather:state`はRust `ipc.rs`でCockpitだけに配信する。Unityは天気の切り替わり・固定変更・出現割合の変化のたびに状態を送る。候補と出現割合はUnityが持ち、Tauriに抽選処理を複製しない。テンプレートモードOFF時はUIから固定解除を送る。`epoch:executing`はエポック実行確認ウィンドウが、ウィンドウ間イベント`epoch:executing`(タスクバーの無効化)と同じ時点で1回ずつ送る。成功時は`session:reload`の後に終了を送る。詳細は[天気と環境光](../geometries/U_天気と環境光.md)を参照。
 
 
 `/paths/validate` の `alignments` は敷設する全線の設計後の線形指標で、費用カードと確定可否の表示に優先する。`/paths/earthwork-preview` の `path_profiles` は各線の `[x,絶対標高,z]` 配列で、Unityは形状確定後の3Dモデルに使用する。道路・地上線路は造成後、高架は設計縦断を表示する。操作中のHUD・2D線形はローカルの近似値である。
@@ -491,7 +503,7 @@ UI→Unityは既存の `ui:action` Envelopeの `payload.action` / `payload.param
 `system:graphic_ready` はプロセスの起動完了であり、都市の描画完了ではない。遅延起動・再接続ではRustが開始要求を再送する。ゲーム中の再接続でもTipsを使い、初期設定は再表示しない。
 
 
-開発時のUnityなし起動: 通常の `npm run tauri dev`（Rustの `cfg(all(debug_assertions, dev))`）では、Unityの `system:graphic_ready` を一度も受信していない場合に限り、バックエンドの開始要求成功とセッション確認後に描画待ちを省略し、Tipsを開始ボタンへ切り替える。Unityから接続通知を受けた後は描画完了を待つ。待機中にUnityが接続した場合も開始要求を再送して描画待ちに戻る。`tauri build`（`--debug` を含む）およびリリースビルドには省略処理を含めない。環境変数やバックエンドのNuitka／uvicorn判定は使用しない。
+開発時のUnityなし起動: 通常の `npm run tauri dev`（Rustの `cfg(all(debug_assertions, dev))`）では、Unityが接続中でない場合に限り、バックエンドの開始要求成功とセッション確認後に描画待ちを省略し、Tipsを開始ボタンへ切り替える。接続中かどうかは `system:graphic_ready`（接続）と `system:graphic_stopped`（正常終了・EditorのPlay停止）で追跡し、「一度でも接続したか」では判定しない（それだとPlayを止めた後の再ロードで永遠に待つ）。接続中は描画完了を待ち、待機中にUnityが停止した場合はその時点で開始ボタンへ切り替える。待機中にUnityが接続した場合は開始要求を再送して描画待ちに戻る。`tauri build`（`--debug` を含む）およびリリースビルドには省略処理を含めない。環境変数やバックエンドのNuitka／uvicorn判定は使用しない。
 
 ## 道路・線路の制限速度標識
 

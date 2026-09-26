@@ -34,12 +34,11 @@ namespace GeneratedModels
         public int path_count;
 
         /// <summary>
-        /// 車両が走行する下地の道路/線路パスID列(往路+復路)。
-        /// TransitOverlayManager が各パスの実ジオメトリを連結して路線色帯を描くために使う。
+        /// 車両が1周で走行する下地の道路/線路パスID列。路線色帯と車両の描画は journeys を使い、これは使わない。
         /// </summary>
         public List<int> route_path_ids;
 
-        /// <summary>運休理由コード(None / "route_disconnected" / "return_leg_blocked" / "no_underlay")。</summary>
+        /// <summary>運休理由コード(None / "route_disconnected" / "no_underlay" / "train_too_long")。</summary>
         public string pause_reason;
 
         /// <summary>
@@ -55,7 +54,7 @@ namespace GeneratedModels
         public int vehicle_model = -1;
 
         /// <summary>
-        /// 停留所ごとの停止位置(停留所順)。コアが停留所から直接計算するので、運休中で journeys が空でも返る。
+        /// 停留所ごとの停止位置(巡回順に停留所ごとに1回)。コアが停留所から直接計算するので、運休中で journeys が空でも返る。
         /// LRT停留所のホーム(LrtStopPlatforms)の位置の正。詳細APIの stops(路線図の表示用)とは別物。
         /// </summary>
         public List<TransitStopPoint> stop_points;
@@ -86,11 +85,16 @@ namespace GeneratedModels
         public List<TransitLineSummary> lines;
     }
 
+    /// <summary>
+    /// 停留所から次の停留所までの1区間。路線は巡回順に区間をたどり、最後の区間の次は先頭の区間に戻る。
+    /// turnback は出発停留所で折り返すか、reversed は案内軌条系の編成の向きが先頭区間と逆か
+    /// (折り返すたびに反転する。バスは車体の向きを変えて走るので常に false)。
+    /// </summary>
     [Serializable]
     public class TransitJourney
     {
         public int from_stop_id, to_stop_id, transport_path_id;
-        public bool returning;
+        public bool turnback, reversed;
         public List<TransitMotionStep> steps;
     }
 

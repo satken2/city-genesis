@@ -679,7 +679,6 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
     <div className="pc-layout">
       {/* セクション分けされたバリアント選択（3DビューのCtrlラジアルメニューと同じ状態を指す） */}
       <div className="pc-sections-container">
-        <p className="pc-mode-hint">{t("parcel_creation.modeWheelHint")}</p>
         {CREATION_SECTIONS.map((section) => (
           <div key={section.titleKey} className="pc-section-group">
             <h3 className="pc-section-title">{t(section.titleKey)}</h3>

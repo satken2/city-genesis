@@ -87,6 +87,12 @@ pub struct AppState {
     /// Unity より先に起動した UI 側でユーザーが開いているウィンドウ
     /// (ロード画面など)を巻き込んで閉じないために区別する。
     pub graphic_ready_seen: bool,
+    /// Graphic(Unity) が現在接続中かどうか。system:graphic_ready で立ち、
+    /// system:graphic_stopped(正常終了・Editor の Play 停止)で下りる。クラッシュでは
+    /// 下りないが、スーパーバイザが再起動した Unity の graphic_ready で整合する。
+    /// 開発時の「Unity なし起動」で描画待ちを省略するかの判定に使う
+    /// (graphic_ready_seen は再接続判定用で、一度立ったら戻さない)。
+    pub graphic_connected: bool,
 }
 
 #[derive(Clone)]
@@ -144,6 +150,7 @@ impl SharedState {
             backend_process: None,
             backend_launch_command,
             graphic_ready_seen: false,
+            graphic_connected: false,
         })))
     }
 

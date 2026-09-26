@@ -256,6 +256,13 @@ export const GROUND_COVER_DESERT: number = 2;
 export const GROUND_COVER_LUSH: number = 3;
 export const GROUND_COVER_SNOW: number = 4;
 export const GROUND_COVER_SEMI_ARID: number = 5;
+export const CLIMATE_TEMPERATE: number = 1;
+export const CLIMATE_SUBTROPICAL: number = 2;
+export const CLIMATE_CONTINENTAL: number = 3;
+export const CLIMATE_MEDITERRANEAN: number = 4;
+export const CLIMATE_STEPPE: number = 5;
+export const CLIMATE_DESERT: number = 6;
+export const CLIMATE_SUBARCTIC: number = 7;
 export const INTERCHANGE_KIND_IC: number = 1;
 export const INTERCHANGE_KIND_JCT: number = 2;
 export const INTERCHANGE_HULL_MARGIN_M: number = 10.0;
@@ -375,6 +382,8 @@ export const ROAD_VEHICLE_KEYS: number[] = [10, 11, 12, 13, 14];
 export const RAIL_VEHICLE_KEYS: number[] = [20, 21, 22, 23];
 
 export const GROUND_COVER_TYPES: number[] = [1, 2, 3, 4, 5];
+
+export const CLIMATE_TYPES: number[] = [1, 2, 3, 4, 5, 6, 7];
 
 export const TENANT_TYPES: number[] = [2, 4, 8, 16, 64];
 

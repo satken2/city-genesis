@@ -330,7 +330,9 @@ function App() {
             >
               <div className="titlebar-text">
                 <span className="titlebar-title">
-                  {t(`windowType.${context.window_type}`, { defaultValue: context.title })}
+                  {t((windowExtra(context)?.titleKey as string | undefined) ?? `windowType.${context.window_type}`, {
+                    defaultValue: context.title,
+                  })}
                 </span>
               </div>
             </div>
@@ -461,11 +463,7 @@ function App() {
               <BuildingConstructionPanel
                 apiBaseUrl={context.api_base_url}
                 onClose={closeWindow}
-                editAgentId={
-                  (context.params as Record<string, unknown> | null)?.extra
-                    ? ((context.params as Record<string, unknown>).extra as Record<string, unknown>).editAgentId as number | undefined
-                    : undefined
-                }
+                editAgentId={windowExtra(context)?.editAgentId as number | undefined}
               />
             ) : context.window_type === "mashup_edit" ? (
               <MashupEditPanel
@@ -482,7 +480,13 @@ function App() {
             ) : context.window_type === "transit_management" ? (
               <TransitManagementWindow apiBaseUrl={context.api_base_url} onClose={closeWindow} />
             ) : context.window_type === "transit_creation" ? (
-              <TransitCreationPanel apiBaseUrl={context.api_base_url} onClose={closeWindow} />
+              // editLineId があれば既存路線の経路編集。路線を切り替えて開き直したとき状態が残らないよう key で作り直す
+              <TransitCreationPanel
+                key={String(windowExtra(context)?.editLineId ?? "new")}
+                apiBaseUrl={context.api_base_url}
+                onClose={closeWindow}
+                editLineId={windowExtra(context)?.editLineId as number | undefined}
+              />
             ) : context.window_type === "transit_detail" ? (
               <TransitDetailPanel
                 apiBaseUrl={context.api_base_url}
@@ -644,6 +648,16 @@ function App() {
       )}
     </MasterDataProvider>
   );
+}
+
+/**
+ * ウィンドウを開くときに params.extra で渡された追加情報(編集対象のIDなど)を返す。
+ * titleKey があれば、タイトルバーはウィンドウ種別の既定名の代わりにその i18n キーの文言を出す
+ * (同じウィンドウを新設と編集で使い分けるとき用)。
+ */
+function windowExtra(context: WindowContext): Record<string, unknown> | undefined {
+  const params = context.params as Record<string, unknown> | null;
+  return (params?.extra as Record<string, unknown> | undefined) ?? undefined;
 }
 
 function WindowMeta({ context }: { context: WindowContext }) {

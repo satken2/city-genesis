@@ -25,7 +25,7 @@ pub const HUD_WINDOW_LABELS: [&str; 4] = [
 pub const HUD_MARGIN: f64 = 8.0;
 
 /// アイコンパネル(画面左端・縦並びのメニューアイコン)の幅。
-/// `IconPanel.css` のボタン寸法(50px)+ パネルの左右パディング(4px×2)と一致させること。
+/// `IconPanel.css` のボタン寸法(46px)+ パネルの左右パディング(6px×2)と一致させること。
 /// 足りないとボタンが切れ、余ると透明領域がクリックを吸ってUnityを操作できなくなる。
 pub const ICON_PANEL_WIDTH: f64 = 58.0;
 /// アイコンパネルの初期高さ。実際の高さはアイコン数で変わるため、

@@ -23,5 +23,16 @@
     "3": "Lush Meadow",
     "4": "Snowfield",
     "5": "Semi-arid"
+  },
+  "climate": {
+    "label": "Climate",
+    "hint": "Sets how the weather behaves in each season (how often it is sunny, rainy, or snowy). It does not affect the simulation.",
+    "1": "Humid temperate",
+    "2": "Subtropical",
+    "3": "Humid continental",
+    "4": "Mediterranean",
+    "5": "Steppe",
+    "6": "Desert",
+    "7": "Subarctic"
   }
 }

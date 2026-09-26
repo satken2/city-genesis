@@ -21,7 +21,7 @@ public static class LrtPlatformParts
 
     /// <summary>
     /// 描画点列上のデッキ区間。From/To は描画点列の始点からのスプライン距離(m)。
-    /// トンネルの描画区間で切られた端はデッキの本当の端ではないので、スロープを置かない。
+    /// トンネルの描画区間や他の線路(Clip)で切られた端はデッキの本当の端ではないので、スロープを置かない。
     /// </summary>
     public struct Span
     {
@@ -52,16 +52,16 @@ public static class LrtPlatformParts
         var full = PolylineProvider?.Invoke(path.path_id, false);
         var trimmed = PolylineProvider?.Invoke(path.path_id, true);
         return Layout(stops, full != null && full.Count >= 2 ? full : drawn, trimmed != null && trimmed.Count >= 2 ? trimmed : drawn,
-            drawn, splineLength, LrtRoadParts.PlatformRampLength(path.path_variant));
+            drawn, splineLength);
     }
 
     /// <summary>
-    /// 停留所を未切断点列上の距離区間にして併合し、両端スロープが交差点へ出ないよう切断済み区間の内側
-    /// (両端からスロープ長)へ収め、収めた後に PLATFORM_MIN_LENGTH 未満のデッキは捨てる。
-    /// 残ったデッキを描画点列の範囲で切り、描画点列の距離をスプライン長へ比例換算して返す。
+    /// 停留所を未切断点列上の距離区間にして併合し、切断済み区間へ収め、収めた後に PLATFORM_MIN_LENGTH 未満のデッキは捨てる。
+    /// 停車する編成を覆うことを優先するので、デッキは切断端まで使い、その外側のスロープは交差点ハル上や
+    /// 行き止まり端の先へはみ出してよい。残ったデッキを描画点列の範囲で切り、描画点列の距離をスプライン長へ比例換算して返す。
     /// </summary>
     public static List<Span> Layout(IReadOnlyList<Stop> stops, IReadOnlyList<Vector3> full, IReadOnlyList<Vector3> trimmed,
-        IReadOnlyList<Vector3> drawn, float splineLength, float rampLength)
+        IReadOnlyList<Vector3> drawn, float splineLength)
     {
         var result = new List<Span>();
         var line = new VehiclePolyline(full);
@@ -71,7 +71,7 @@ public static class LrtPlatformParts
         float scale = splineLength / (drawnEnd - drawnStart);
         foreach (var deck in MergeDecks(stops, line.Length))
         {
-            float from = Mathf.Max(deck.x, trimStart + rampLength), to = Mathf.Min(deck.y, trimEnd - rampLength);
+            float from = Mathf.Max(deck.x, trimStart), to = Mathf.Min(deck.y, trimEnd);
             if (to - from < LrtRoadParts.PLATFORM_MIN_LENGTH) continue;
             float drawnFrom = Mathf.Max(from, drawnStart), drawnTo = Mathf.Min(to, drawnEnd);
             if (drawnTo - drawnFrom < END_TOLERANCE) continue;
@@ -113,7 +113,7 @@ public static class LrtPlatformParts
 
     /// <summary>
     /// ホーム区間(デッキ+両端スロープ+margin)をスプライン距離の区間(x=始端, y=終端)として昇順・併合済みで返す。
-    /// 431 の架線柱の移設・高欄の省略と、303 の沿道設備の抑止が使う。
+    /// 431 の架線柱の移設・高欄の省略と、303 の沿道設備の抑止が使う。デッキが切断端にあると区間はスプラインの外まで伸びる。
     /// </summary>
     public static List<Vector2> ZoneRanges(List<Span> spans, float rampLength, float margin)
     {
@@ -157,10 +157,54 @@ public static class LrtPlatformParts
     }
 
     /// <summary>
+    /// デッキ区間から、その側でホームを描けない区間(blocked。スプライン距離で x の昇順・互いに重ならない)を除いた残りを返す。
+    /// 除いた境目は他の線路に接する端なのでスロープを置かず、本来の端でもスロープの踏み面(端から rampLength)が
+    /// blocked に掛かれば置かない。除いて残った PLATFORM_MIN_LENGTH 未満の切れ端は捨てる
+    /// (何も除かなかった区間は、トンネルの描画区間で切れた短い区間も含めてそのまま返す)。
+    /// </summary>
+    public static List<Span> Clip(Span span, IReadOnlyList<Vector2> blocked, float rampLength)
+    {
+        var pieces = new List<Span>();
+        var current = span;
+        bool cut = false;
+        if (blocked != null)
+            foreach (var range in blocked)
+            {
+                if (range.y <= current.From || range.x >= current.To) continue;
+                cut = true;
+                if (range.x > current.From)
+                    pieces.Add(new Span { From = current.From, To = range.x, RampAtFrom = current.RampAtFrom });
+                current = new Span { From = range.y, To = current.To, RampAtTo = current.RampAtTo };
+                if (current.To <= current.From) break;
+            }
+        if (current.To > current.From) pieces.Add(current);
+        if (cut) pieces.RemoveAll(piece => piece.Length < LrtRoadParts.PLATFORM_MIN_LENGTH);
+        for (int i = 0; i < pieces.Count; i++)
+        {
+            var piece = pieces[i];
+            piece.RampAtFrom &= !Overlaps(blocked, piece.From - rampLength, piece.From);
+            piece.RampAtTo &= !Overlaps(blocked, piece.To, piece.To + rampLength);
+            pieces[i] = piece;
+        }
+        return pieces;
+    }
+
+    private static bool Overlaps(IReadOnlyList<Vector2> ranges, float from, float to)
+    {
+        if (ranges == null) return false;
+        foreach (var range in ranges)
+            if (range.x < to && range.y > from) return true;
+        return false;
+    }
+
+    /// <summary>
     /// ホームを両側に描く。部品はバリアント→タイプの順で解決し、無ければスキップする。
     /// lrt_platform だけは無ければ手続き生成の簡易スラブで代替する(停留所の位置が最低限見えるように)。
+    /// leftBlocked / rightBlocked は他の線路の道床がホームの帯に掛かる区間(スプライン距離。431 の結合コリドーが
+    /// 求める)で、その側はそこを除いて描く。上屋は各側で最も長く残ったデッキの中央に1基置く。
     /// </summary>
-    public static void Generate(GameObject parent, SplineComputer spline, PathSummary path, List<Span> spans)
+    public static void Generate(GameObject parent, SplineComputer spline, PathSummary path, List<Span> spans,
+        IReadOnlyList<Vector2> leftBlocked = null, IReadOnlyList<Vector2> rightBlocked = null)
     {
         if (spans == null || spans.Count == 0 || spline == null) return;
         int variant = path.path_variant;
@@ -175,26 +219,29 @@ public static class LrtPlatformParts
         float shelterBack = 0f;
         MeshFilter shelterFilter = shelter != null ? shelter.GetComponent<MeshFilter>() : null;
         if (shelterFilter != null && shelterFilter.sharedMesh != null) shelterBack = shelterFilter.sharedMesh.bounds.max.x;
+        float rampLength = LrtRoadParts.PlatformRampLength(variant);
         foreach (var span in spans)
-        {
-            double from = Percent(spline, span.From), to = Percent(spline, span.To);
-            if (to - from < 1e-6) continue;
-            double middle = Percent(spline, (span.From + span.To) * .5f);
             for (int side = -1; side <= 1; side += 2)
             {
-                // 右側用のモデルを軌道中心へ原点で置き、左側はXミラーで外向きにする。著作長4mの造形周期を保つ。
-                if (modeled)
-                    RoadPath.CreateSplineMesh(parent, spline, variantBase + "/lrt_platform", width, side * track, railTop, side < 0,
-                        typeBase + "/lrt_platform", stretchToWidth: false, clipFrom: from, clipTo: to, compensatePivot: false,
-                        maxTileLength: 0f, normalizeBodySurface: false);
-                else BuildSlab(parent, spline, from, to, side, inner, outer, surface);
-                float rampLateral = side * (inner + width * .5f);
-                if (span.RampAtFrom) PlaceRamp(parent, end, spline, from, false, rampLateral, railTop);
-                if (span.RampAtTo) PlaceRamp(parent, end, spline, to, true, rampLateral, railTop);
-                if (shelter != null && span.Length >= LrtRoadParts.SHELTER_MIN_DECK_LENGTH)
-                    PlaceShelter(parent, shelter, spline, middle, side, outer - shelterBack, surface);
+                Span? longest = null;
+                foreach (var piece in Clip(span, side < 0 ? leftBlocked : rightBlocked, rampLength))
+                {
+                    double from = Percent(spline, piece.From), to = Percent(spline, piece.To);
+                    if (to - from < 1e-6) continue;
+                    // 右側用のモデルを軌道中心へ原点で置き、左側はXミラーで外向きにする。著作長4mの造形周期を保つ。
+                    if (modeled)
+                        RoadPath.CreateSplineMesh(parent, spline, variantBase + "/lrt_platform", width, side * track, railTop, side < 0,
+                            typeBase + "/lrt_platform", stretchToWidth: false, clipFrom: from, clipTo: to, compensatePivot: false,
+                            maxTileLength: 0f, normalizeBodySurface: false);
+                    else BuildSlab(parent, spline, from, to, side, inner, outer, surface);
+                    float rampLateral = side * (inner + width * .5f);
+                    if (piece.RampAtFrom) PlaceRamp(parent, end, spline, from, false, rampLateral, railTop);
+                    if (piece.RampAtTo) PlaceRamp(parent, end, spline, to, true, rampLateral, railTop);
+                    if (longest == null || piece.Length > longest.Value.Length) longest = piece;
+                }
+                if (shelter != null && longest != null && longest.Value.Length >= LrtRoadParts.SHELTER_MIN_DECK_LENGTH)
+                    PlaceShelter(parent, shelter, spline, Percent(spline, (longest.Value.From + longest.Value.To) * .5f), side, outer - shelterBack, surface);
             }
-        }
     }
 
     private static double Percent(SplineComputer spline, float distance) =>
@@ -206,7 +253,10 @@ public static class LrtPlatformParts
     private static GameObject LoadOptional(string variantBase, string typeBase, string part) =>
         ModelManager.Instance?.GetModel($"{variantBase}/{part}", true) ?? ModelManager.Instance?.GetModel($"{typeBase}/{part}", true);
 
-    /// <summary>スロープは +Z がデッキから外向きで、勾配に沿わせて傾ける(下端を前後の路面に合わせるため)。</summary>
+    /// <summary>
+    /// スロープは +Z がデッキから外向きで、デッキ端の勾配に沿わせて傾ける(先端を前後の路面・道床に揃えるため)。
+    /// デッキが切断端にあるときは切断済みスプラインの外(交差点ハル上・行き止まりの先)へ伸びる。
+    /// </summary>
     private static void PlaceRamp(GameObject parent, GameObject prefab, SplineComputer spline, double percent, bool outwardForward, float lateral, float railTop)
     {
         if (prefab == null || !InDetailRange(percent)) return;

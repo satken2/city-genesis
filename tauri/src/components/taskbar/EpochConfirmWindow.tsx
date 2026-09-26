@@ -13,7 +13,8 @@
  * 実行を確定したらこの確認ウィンドウは一旦 hide() で非表示にし、右下に「エポック実行中」
  * の通知を出す。実行(fetch)はこの非表示ウィンドウ内で継続させる(webviewは破棄しない)。
  * 実行中はウィンドウ間イベント `epoch:executing` をブロードキャストし、タスクバーの
- * ボタンを無効化させる(受信側は Taskbar.tsx)。
+ * ボタンを無効化させる(受信側は Taskbar.tsx)。同じ開始・終了をUnityにも送り、
+ * 日を早送りで沈めて暗転し、終了後に日の出から朝へ進める演出に使わせる。
  *
  * エポック実行完了後は、結果や達成クエストを**別の独立したウィンドウ**として開く
  * (HUDから他のウィンドウを開くのと同じ open_registered_window 経由)。
@@ -35,7 +36,7 @@ import { useTranslation } from "react-i18next";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { emit } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
-import { sendSessionReload } from "../../utils/ipc";
+import { sendEpochExecuting, sendSessionReload } from "../../utils/ipc";
 import { logInfoToFile } from "../../utils/log";
 import { showNotification, dismissNotification } from "../../utils/notification";
 import { formatEpochDate } from "../../utils/date";
@@ -59,6 +60,17 @@ type EpochConfirmWindowProps = {
   apiBaseUrl: string;
   onClose: () => void;
 };
+
+/**
+ * エポック実行中かどうかを知らせる。ウィンドウ間イベントはタスクバーのボタン無効化に、
+ * Unityへの通知は時刻の演出(日没→暗転→日の出)に使う。Unityへ届かなくても実行は続ける。
+ */
+async function announceExecuting(executing: boolean): Promise<void> {
+  await emit("epoch:executing", { executing });
+  await sendEpochExecuting(executing).catch((error) => {
+    console.warn("failed to send epoch:executing to graphic", error);
+  });
+}
 
 /** 選択可能なエポック数の上限(通常プレイ)。テンプレートモードでは適用しない */
 const MAX_EPOCH_COUNT = 10;
@@ -103,8 +115,8 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
     // このフローは失敗しても画面に何も出ないまま止まりうるため、
     // どの await まで到達したかをファイルログに記録して本番で追跡できるようにする。
     logInfoToFile(`epoch confirm: start count=${epochCount}`);
-    // 実行中はタスクバーのボタンを無効化させるため、ウィンドウ間イベントを送る。
-    await emit("epoch:executing", { executing: true });
+    // 実行中はタスクバーのボタンを無効化させ、Unityは日を沈めて暗転する。
+    await announceExecuting(true);
     // 確認ウィンドウを一旦消し、右下に実行中通知を出す。
     // ウィンドウは破棄せず非表示にするだけなので、下の fetch はこのまま継続する。
     // durationMs を指定しないので、完了時にこちらが明示的に消すまで通知は表示され続ける。
@@ -126,7 +138,7 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
         // console.error は main.tsx によりファイルログへERROR転送されるので本番でも追跡できる。
         console.error(`epoch confirm: rejected status=${res.status} reason=${reason}`);
         await dismissNotification();
-        await emit("epoch:executing", { executing: false });
+        await announceExecuting(false);
         await getCurrentWindow().show().catch((err) => {
           console.warn("failed to show epoch_confirm window", err);
         });
@@ -147,7 +159,7 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
 
       // 実行完了。通知を消し、タスクバーを再有効化する。
       await dismissNotification();
-      await emit("epoch:executing", { executing: false });
+      await announceExecuting(false);
 
       const quests: QuestNotification[] = data.completed_quests ?? [];
       const failedQuests: QuestNotification[] = data.failed_quests ?? [];
@@ -200,7 +212,7 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
       // 失敗時は通知を消し、タスクバーを再有効化したうえで確認ウィンドウを再表示し、
       // ユーザーが再操作できるようにする。
       await dismissNotification();
-      await emit("epoch:executing", { executing: false });
+      await announceExecuting(false);
       await getCurrentWindow().show().catch((err) => {
         console.warn("failed to show epoch_confirm window", err);
       });

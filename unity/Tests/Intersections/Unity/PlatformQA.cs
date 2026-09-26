@@ -280,7 +280,7 @@ public static class PlatformQA
                 neighbors.Add(neighbor);
             }
             object corridor = assembly.GetType("TrackAdjacency").GetMethod("Compute").Invoke(null,
-                new object[] { 1, points, width, 0f, 3f, 3f, neighbors });
+                new object[] { 1, points, width, 0f, 3f, 3f, neighbors, 0f });
             foreach (string side in new[] { "Left", "Right" })
             {
                 var far = corridor == null ? null : (float[])corridor.GetType().GetField(side + "DeckFar").GetValue(corridor);
@@ -301,7 +301,7 @@ public static class PlatformQA
             var neighbors = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(neighborType));
             neighbors.Add(neighbor);
             object corridor = assembly.GetType("TrackAdjacency").GetMethod("Compute").Invoke(null,
-                new object[] { 1, new List<Vector3> { new Vector3(0,6,0), new Vector3(0,6,32) }, 3f, 0f, 3f, 3f, neighbors });
+                new object[] { 1, new List<Vector3> { new Vector3(0,6,0), new Vector3(0,6,32) }, 3f, 0f, 3f, 3f, neighbors, 0f });
             Require(corridor != null, "Real neighboring track was ignored");
             var far = (float[])corridor.GetType().GetField((side < 0 ? "Left" : "Right") + "DeckFar").GetValue(corridor);
             Require(far.All(f => f > 1.5f && f < 2.5f), "Real encroachment no longer trims deck");
@@ -358,7 +358,7 @@ public static class PlatformQA
             var neighbors = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(neighborType));
             neighbors.Add(neighbor);
             var corridor = assembly.GetType("TrackAdjacency").GetMethod("Compute").Invoke(null, new object[] {
-                1, new List<Vector3> { Vector3.zero, new Vector3(0,0,80) }, 5f, 0f, 0f, 3f, neighbors
+                1, new List<Vector3> { Vector3.zero, new Vector3(0,0,80) }, 5f, 0f, 0f, 3f, neighbors, 0f
             });
             bool joined = corridor != null && ((bool[])corridor.GetType().GetField("RightDeckJoined").GetValue(corridor)).Any(v => v);
             Require(joined == (difference <= .02f), "Island deck height tolerance mismatch");

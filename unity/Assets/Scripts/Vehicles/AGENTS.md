@@ -8,11 +8,11 @@
 
 `ParkedVehicleLayout` は交差点切断済みの `VehiclePolyline` と `RoadPath.GetPathMasterParams` の寸法を使う。歩道を除いた両側車道端へ配置し、切断端から5m、縁石から0.2mを空ける。車種は乗用車60%・商用車30%・トラック10%で道路IDと候補番号から固定し、既存全16外観を使う。車幅が片側に収まらない候補、カーブで歩道・中央分離帯に張り出す候補、車体どうしが重なる候補は除く。台数は候補上限で頭打ち。整数台数を保ち、小数は道路ID固定の確率丸めとする。路駐量そのものは変更しない。
 
-モデルは `VehicleModelResolver.CreateInstance` で接地原点・前方軸を正規化したテンプレートから `PropRenderModel(GameObject)` で抽出する。個体GO・音源・コライダーを作らず、通常モデルを511件以下のGPUインスタンシングで描く。描画半径480m、0.5秒間隔のセル逆引き走査、形状・寸法・通行方向の変更時だけ候補再生成。台数だけの変更ではモデル・候補を維持する。形状の比較は `PathManager.GetPathGeometryRevision` とデータ参照の一致で行い、一致すれば点列を取得しない(版が不明なら点列の完全一致で比較)。管理中心は走行車と同じ `VehicleManager.ResolveTrafficCenter`(`CenterLead`=300m)。中心が大きく跳んでも roads と描画バッチは捨てず、新しいバッチができるまで旧表示を残す。生成は `RenderWorkScheduler` のStart/Stopを対で使い、都市切替は `TransitDataStore.Session` でクリアする。検証は `Tests/Vehicles/run.ps1 -ParkingOnly`。
+モデルは `VehicleModelResolver.CreateInstance` で接地原点・前方軸を正規化したテンプレートから `PropRenderModel(GameObject)` で抽出する。個体GO・音源・コライダーを作らず、通常モデルを511件以下のGPUインスタンシングで描く(車両の接写・遠景があっても通常の部品だけを使う)。描画半径480m、0.5秒間隔のセル逆引き走査、形状・寸法・通行方向の変更時だけ候補再生成。台数だけの変更ではモデル・候補を維持する。形状の比較は `PathManager.GetPathGeometryRevision` とデータ参照の一致で行い、一致すれば点列を取得しない(版が不明なら点列の完全一致で比較)。管理中心は走行車と同じ `VehicleManager.ResolveTrafficCenter`(`CenterLead`=300m)。中心が大きく跳んでも roads と描画バッチは捨てず、新しいバッチができるまで旧表示を残す。生成は `RenderWorkScheduler` のStart/Stopを対で使い、都市切替は `TransitDataStore.Session` でクリアする。検証は `Tests/Vehicles/run.ps1 -ParkingOnly`。
 
 ## ドライブモード
 
-走行車両の`{part}_close`は`VehicleModelResolver`が無印と同じ変換で生成し、LODGroupで画面比率25%以上のとき表示する。無印は画面比率3.5〜25%、専用遠景は3.5%未満を担当し、車両の表示範囲はマネージャーが決める。14/20/21/23の先頭・中間・全外観に接写版がある。公称長への伸縮は全LODを含むルートへ一度だけ適用する。
+走行車両の`{part}_close`は`VehicleModelResolver`が無印と同じ変換で生成し、LODGroupで画面比率25%以上のとき表示する。無印は画面比率3.5〜25%、専用遠景は3.5%未満を担当し、車両の表示範囲はマネージャーが決める。14/20/21/23の先頭・中間・全外観と、道路車両10〜13の全18外観に接写版がある。道路車両は全外観に専用遠景も持つ。公称長への伸縮は全LODを含むルートへ一度だけ適用する。
 
 `DriveMode`はCockpitの`drive:open`で自己生成され、Unity上に車種/路線選択・開始位置の選択・走行HUDを表示する。翻訳済みの文言はTauriから受け取る。自動車は`VehicleManager.Drive.cs`が通常のactive一覧へ1台追加し、前車追従を共用する。乗車中の車を沿道到着予約・範囲外削除の対象にしない。分岐候補はNPCと共通の`CollectCandidates`で進入方向を検証し、未選択時は最も直進に近い道へ進む。
 
@@ -48,7 +48,7 @@ Space長押し中は`DriveMode.SpeedMultiplier`が5になり、一般車と公�
 - 時間・流量の契約の正は公開 `geometries/T_交通シミュレーションと走行描画の整合.md`。平均速度に独立した交差点減速・駅停車を重ねてはならない。
 - `RoadMotionData` / `RoadMotionControl`: `/paths/motion` の自由秒数・混雑込み秒数を参照。`VehicleManager` は同一道路・方向・車線の前車へ追従し、締切超過時も自由走行平均速度を超えない。表示標本率は0〜1。バス・LRT(`VEHICLE_BUS`/`VEHICLE_TRAM`。路線車両として`TransitVehicleManager`が描く)のランダム生成は行わない。
 - `TransitDataStore`: 色帯と車両で共有する路線一覧。5秒ポーリング＋明示Refresh。Clearで世代を進め、古い都市の応答を破棄する。色帯の表示ON/OFFで取得を止めない。LRT停留所のホーム(DataLoaders/`LrtStopPlatforms`)も同じ一覧の `stop_points`(停留所ごとの下地パスと停止中心の割合。運休中でも返る)を読む。
-- `TransitMotionClock`: コアの `journeys.steps` の等加速度区間・停車を時刻から参照する純粋なクラス。車両需要や待ち時間と同じ時間を使う。
+- `TransitMotionClock`: コアの `journeys.steps` の等加速度区間・停車を時刻から参照する純粋なクラス。車両需要や待ち時間と同じ時間を使う。路線は巡回点をたどる閉じたループで、区間ごとの `Reversed`(コアの `journeys.reversed`=案内軌条系の編成の向きが先頭区間と逆か)で運転台と車両の並びを反転する。先頭区間の `turnback` が偽の路線(環状運転など)は `Closed` になり、`TransitRouteGeometry.BuildRuns` が1周の前後に1周ずらした走行区間の写し(`Run.Wrapped`)を並べて、継ぎ目を跨ぐ編成の車端を隣の区間として解く。写しは経路そのものの描画(路線色帯・経路プレビュー)では飛ばす。駅のホーム(`platform_width` を持つバリアント)はパスの通行方向によらず両方向に走れるものとして扱う(`TransitRouteGeometry` の `Geometry.platform`。コアの下地経路と同じ規則)。
 - `TransitVehicleManager`: 実調達編成数を位相配置し、周辺の車体だけプールから出す。車体が無い外観の編成は1フレームに1編成だけ新しく生成する(乗車中の編成と一部が表示中の編成は除く)。路線一覧を更新するたびに、運行中の外観×役割(先頭/中間)ごとに1両ずつ `transitWarmup` ワーカーで共通予算の中で事前生成する。鉄道は`TransitRouteGeometry.SampleConsist`で停止中心から前後へ剛体配置し、隣接車の車端を共有する。公称車長はワールド座標の弦長で満たし、時計の論理距離へ車長を直接足さない。車体の向きは前後端から求め、細かな線分の接線をピッチへ直接使わない。折り返し中も個体と前後を保つ。欠けたパス・未生成レールコネクタを直線で補完しない。
 - 公共交通の形状更新は0.5秒間隔で、描画可能な路線の経路に含まれる周辺パスだけを計算する。路線なし・車両不足などで描画対象がなければ、周辺パスの検索も点列生成も行わない。
 - モデル対応は `Resources/Config/transit_vehicle_models.json`。外観は路線の`vehicle_model`(プレイヤー設定)で全編成を揃え、vehicle_model_config.yamlの候補外(未設定-1・未導入の番号)のときだけ路線ID＋編成番号で固定(`VehicleModelResolver.PickTransitVariantId`。描画・プール事前生成の両方で使う)。候補番号はTauriの車両選択カタログ`tauri/src/data/transitVehicleModels.json`と揃える。先頭/後尾=数値バリアント、中間=middle（0）/middle_{番号}。プールキーにも外観を含める。`VehicleModelResolver` が著作原点・長手軸を接地中心/+Zへ正規化し、公共交通の車体長だけはマスターの公称車長に合わせる。幅と高さは変更しない。
@@ -80,7 +80,7 @@ LRTはRoute.VehicleType=VEHICLE_TRAMで、1本のパス上の左右対称の複�
 LRTのモデル対応は1003→車種14。`Vehicles/14/0`が先頭・後尾共用、`middle`が集電装置付き中間車で、外観候補は0のみ。公称車長10mの低床車体を既存の編成配置で使う。原本は`blender/vehicles.blend`。
 
 
-道路モデルは10=10外観、11=4外観、12/13=各2外観。メトロ20・中距離21・高速鉄道23は各3外観(0=スタンダード・1=近未来・2=レトロ、中間車はmiddle/middle_1/middle_2)、貨物22は2外観。vehicle_model_config.yamlの候補数と実FBXを揃える。鉄道を含む全42モデルはProps/350〜367・370〜393の自由配置別名を持つ(3外観目はメトロ388/389・中距離390/391・高速392/393)。高速鉄道23は公共交通の路線種別(transit_vehicle_models.json)に無く、候補は自由配置と将来の路線種別のためにある。形状の正はvehicles.blendで、別名は非公開制作ツールのbuild_vehicle_props.pyがprops.blendへ同期する。Tests/VehiclesのTransitModels/VehiclePropsが候補数・FBX参照・接地・別名の形状一致を確認する。
+道路モデルは10=10外観、11=4外観、12/13=各2外観で、全外観が接写・遠景を持つ(公開O文書§O.10.3)。メトロ20・中距離21・高速鉄道23は各3外観(0=スタンダード・1=近未来・2=レトロ、中間車はmiddle/middle_1/middle_2)、貨物22は2外観。vehicle_model_config.yamlの候補数と実FBXを揃える。鉄道を含む全42モデルはProps/350〜367・370〜393の自由配置別名を持つ(3外観目はメトロ388/389・中距離390/391・高速392/393)。高速鉄道23は公共交通の路線種別(transit_vehicle_models.json)に無く、候補は自由配置と将来の路線種別のためにある。形状の正はvehicles.blendで、別名は非公開制作ツールのbuild_vehicle_props.pyがprops.blendへ同期する。Tests/VehiclesのTransitModels/VehiclePropsが候補数・FBX参照・接地・道路車両の3段階のLOD・別名の形状一致(接写・遠景を含む)を確認する。
 
 
 メトロ20・中距離21・高速鉄道23の3外観は、非公開制作ツールの外観モジュール(`metro_vehicles.py`・`intercity_vehicles.py`・`high_speed_vehicles.py`)が通常・接写・遠景を同じ寸法表から著作する。連結面はメトロ±10m・中距離と高速±12.5mで、中距離の公称車長25mへ等倍で合う。走行車の既存LODと自由配置用PropRenderModelが接写版・遠景版を選択し、路線マスターの対応は変更しない。

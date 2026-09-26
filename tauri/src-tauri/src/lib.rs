@@ -690,6 +690,7 @@ async fn copy_terrain_for_editor(
         "camera": features["camera"],
         "background": features["background"],
         "ground_cover": features["ground_cover"],
+        "climate": features["climate"],
     });
     std::fs::write(map_dir.join("meta.json"), meta.to_string())
         .map_err(|e| format!("meta.json の書き込みに失敗しました: {e}"))?;
@@ -773,6 +774,8 @@ struct TerrainEditorData {
     background: serde_json::Value,
     /// 地表種別(GROUND_COVER_*)。未設定なら null で、フロントエンドが草原として扱う。仕様の正は同 §D.15。
     ground_cover: serde_json::Value,
+    /// 気候区分(CLIMATE_*)。未設定なら null で、フロントエンドが温暖湿潤として扱う。仕様の正は同 §D.16。
+    climate: serde_json::Value,
 }
 
 #[tauri::command]
@@ -844,6 +847,7 @@ fn load_terrain_editor_data(
         camera: meta.get("camera").cloned().unwrap_or(serde_json::Value::Null),
         background: meta.get("background").cloned().unwrap_or(serde_json::Value::Null),
         ground_cover: meta.get("ground_cover").cloned().unwrap_or(serde_json::Value::Null),
+        climate: meta.get("climate").cloned().unwrap_or(serde_json::Value::Null),
     })
 }
 
@@ -939,6 +943,7 @@ fn export_terrain_as_npy(
     camera: Option<serde_json::Value>,
     background: Option<serde_json::Value>,
     ground_cover: Option<i64>,
+    climate: Option<i64>,
 ) -> Result<ExportTerrainResult, String> {
     use base64::Engine;
     // 付随JSONを含め、最初のファイルを書く前に原本への出力を拒否する。
@@ -1058,6 +1063,7 @@ fn export_terrain_as_npy(
                     camera_spec.as_ref(),
                     background.as_ref(),
                     ground_cover,
+                    climate,
                 )?;
                 true
             } else {
@@ -1105,6 +1111,7 @@ fn upsert_terrain_yaml_entry(
     camera: Option<&TerrainCameraSpec>,
     background: Option<&serde_json::Value>,
     ground_cover: Option<i64>,
+    climate: Option<i64>,
 ) -> Result<(), String> {
     let original = std::fs::read_to_string(yaml_path)
         .map_err(|e| format!("terrain_maps.yaml の読み込みに失敗しました: {e}"))?;
@@ -1158,6 +1165,8 @@ fn upsert_terrain_yaml_entry(
         .map(|v| format!("\n  background: {v}")).unwrap_or_default();
     // 地表種別(GROUND_COVER_*)は1つの整数。値の検証はバックエンドの terrain_registry が読み込み時に行う。
     let ground_cover_text = ground_cover.map(|v| format!("\n  ground_cover: {v}")).unwrap_or_default();
+    // 気候区分(CLIMATE_*)も1つの整数で、検証はバックエンドの terrain_registry が読み込み時に行う。
+    let climate_text = climate.map(|v| format!("\n  climate: {v}")).unwrap_or_default();
     let entry_text = format!(
         "# {map_id}\n\
          {map_id}:\n\
@@ -1171,7 +1180,7 @@ fn upsert_terrain_yaml_entry(
         \x20   near_map_spacing: {near_map_spacing}\n\
         \x20   far_map_spacing: {far_map_spacing}\n\
         \x20   dynamic_map_spacing: 1\n\
-        \x20   cell_size: {cell_size}{camera_text}{background_text}{ground_cover_text}",
+        \x20   cell_size: {cell_size}{camera_text}{background_text}{ground_cover_text}{climate_text}",
         map_width = map_width as i64,
         map_height = map_height as i64,
         near_map_spacing = near_map_spacing as i64,
@@ -1228,7 +1237,7 @@ mod terrain_yaml_entry_tests {
         upsert_terrain_yaml_entry(
             &path, "island", "terrains/map_island.npy".to_string(),
             10.0, 1000.0, 1000.0, 10.0, 200.0, 500.0, None, Some(&serde_json::json!({"file_name":"terrains/original/bg.npy"})),
-            Some(2),
+            Some(2), Some(6),
         ).unwrap();
         let text = std::fs::read_to_string(&path).unwrap();
         std::fs::remove_dir_all(&dir).ok();
@@ -1243,7 +1252,7 @@ mod terrain_yaml_entry_tests {
         assert!(text.starts_with("# island\n"), "{text}");
         assert!(text.contains("    cell_size: 500\n"), "{text}");
         assert!(text.contains("terrains/original/bg.npy"), "{text}");
-        assert!(text.contains("\n  ground_cover: 2\n"), "{text}");
+        assert!(text.contains("\n  ground_cover: 2\n  climate: 6\n"), "{text}");
     }
 }
 
@@ -1534,10 +1543,12 @@ fn send_game_start_ipc(state: &SharedState, _app: &tauri::AppHandle) {
         guard.loading_started = true;
         guard.graphic_load_ready = false;
         // Unityを起動しないUI開発ではバックエンドの準備完了だけで開始できる。
-        // 接続済みなら描画完了を待ち、配布ビルドにはこの省略処理を含めない。
+        // 接続中なら描画完了を待ち、配布ビルドにはこの省略処理を含めない。
+        // 判定は「現在接続中か」(graphic_connected)であり「一度でも接続したか」ではない。
+        // 後者だとEditorのPlayを止めた後の再ロードで永遠に待つ。
         #[cfg(all(debug_assertions, dev))]
         {
-            guard.graphic_load_ready = !guard.graphic_ready_seen;
+            guard.graphic_load_ready = !guard.graphic_connected;
         }
         guard.loading_id
     };

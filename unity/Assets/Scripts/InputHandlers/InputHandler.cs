@@ -878,8 +878,8 @@ public class InputHandler : MonoBehaviour
             var transitPlanManager = FindAnyObjectByType<TransitPlanManager>();
             if (transitPlanManager != null && transitPlanManager.IsEditingPhase)
             {
-                // 停留所マーカー上でドラッグ開始した場合は停留所の移動ドラッグを開始する
-                if (transitPlanManager.IsMouseOverStop(InputUtil.MousePosition, Camera.main))
+                // 停留所・経由点のマーカー上なら点の移動、区間の上なら経由点を追加して動かすドラッグを開始する
+                if (transitPlanManager.IsMouseOverDraggable(InputUtil.MousePosition))
                 {
                     isDragging = true;
                     dragStartPosition = new Vector3(posX, 0, posZ);

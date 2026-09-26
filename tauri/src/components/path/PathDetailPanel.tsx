@@ -31,7 +31,7 @@ import type { PathInterferenceHighlight } from "../../utils/ipc";
 import { useTemplateMode } from "../../hooks/useTemplateMode";
 import { resolvePathIcon } from "../../utils/pathIcon";
 import { useMasterData } from "../../contexts/MasterDataContext";
-import { PATH_TYPES_WITH_BASE_SPEED } from "../../local-constants";
+import { PATH_TYPES_WITH_ALIGNMENT } from "../../local-constants";
 import {
   PATH_STREET,
   PATH_STATION_HOUSE,
@@ -328,7 +328,7 @@ export function PathDetailPanel({
   // (それ以外の種別では既定値の「直線・0%」のまま)。
   const showZoneRow = pathData.zone_name != null || canChangeZone;
   const showFollowTerrainRow = pathData.follow_terrain === 0 || pathData.follow_terrain === 1;
-  const hasAlignment = PATH_TYPES_WITH_BASE_SPEED.includes(pathData.path_type);
+  const hasAlignment = PATH_TYPES_WITH_ALIGNMENT.includes(pathData.path_type);
   const minCurveRadius = hasAlignment ? pathData.min_curve_radius ?? null : null;
   const maxGrade = hasAlignment ? pathData.max_grade ?? null : null;
   const hasBasicGrid = showZoneRow || showFollowTerrainRow || minCurveRadius != null || maxGrade != null;

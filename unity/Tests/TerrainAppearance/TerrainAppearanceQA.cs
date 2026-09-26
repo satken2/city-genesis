@@ -327,6 +327,21 @@ public static class TerrainAppearanceQA
             // 状態2は内部の沈み込み確認。状態4は余白を縮め、境界の裂け目を再現する対照。
             if (state == 2 || state == 4 ? seaPixels == 0 : seaPixels != 0) throw new Exception(report);
         }
+
+        // 都市境界: 遠景は都市の中にしか面が無いので、全セルがロード済みなら境界から1格子の帯まで沈める。
+        // 都市範囲を渡す本編の設定と、渡さない対照(境界の帯が沈まずに残る)を比べる。
+        mask.SetPixelData(Enumerable.Repeat((byte)255, 9).ToArray(), 0); mask.Apply();
+        terrainGO.SetActive(false);
+        far.SetFloat("_FarGridStep", 80);
+        foreach (bool cityRect in new[] { true, false })
+        {
+            far.SetVector("_FarCityRect", cityRect ? new Vector4(-200, -200, 400, 400) : Vector4.zero);
+            var pixels = Capture(camera, root + $"/city-edge-{(cityRect ? "rect" : "none")}.png");
+            int landPixels = pixels.Count(c => !(c.b > 150 && c.r < 30 && c.g < 30));
+            report += $"city edge rect={cityRect}: unsunk far pixels={landPixels}\n";
+            if (cityRect ? landPixels != 0 : landPixels == 0) throw new Exception(report);
+        }
+        far.SetVector("_FarCityRect", Vector4.zero);
         return report;
     }
 

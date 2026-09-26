@@ -49,6 +49,13 @@
 - メッシュはカメラ非依存なので毎フレーム作らず 0.4 秒間隔で再構築(建物・区画のストリーミング追従はこの周期)。明滅はメッシュではなくマテリアルの `_Tint` を毎フレーム更新して表現する。
 - **`public_facility` は `multi_agent` スキーマに追加されるまで常に false**(=光らない)。endpoint_schemas シートへの行追加と `generate_models.py` の再生成が前提。
 
+## CityBoundaryOverlay(都市範囲の境界線)
+
+- 詳細地形の矩形(都市範囲)の境界に、半透明の白い太い破線を**常時**描く常駐オーバーレイ。モード・フラグに依らず、`GameStateManager.IsWorldVisible` の間だけ出す。`TerrainManager.Awake` が同じGameObjectに追加する(シーン配置不要)。
+- 描画は `OverlayMeshRenderer`(深度テストあり)。境界を10mおきにサンプルして地表(海の上は海面Y=0)から0.3m浮かせ、線の太さは画面上のピクセルで一定にする。カメラが動いたときだけ作り直す。
+- 破線の周期はチャンク(32サンプル)ごとにカメラ距離から2の累乗メートルへ丸め、境界に沿った累積距離が周期の倍数の位置から描く。周期が2倍刻みなので、ズームやチャンクの継ぎ目でも破線がワールドに固定されたまま入れ子になり、画面上を流れない。画面上で細かすぎる起伏には追従させず間引くが、矩形の隅は必ず通す。
+- 高さは `OnAllTerrainLodLoaded` で、境界に接するセルのタイルの到着・破棄があったサンプルだけ読み直す(地形設定が消えるセッション切り替えでは境界ごと作り直す)。
+
 ## モード定数
 
 - 基本モードは `VisualMode`(MODE_NORMAL / MODE_HIDDEN / MODE_BOUNDARY / MODE_HIGHLIGHT_OWNER)、表示フラグは `VisualFlag`(SHOW_PLAN / HIGHLIGHT_PUBLIC / SPEED_LIMIT_SIGNS)。いずれも `VisualModeHandler.cs` に定義。旧 `MODE_PLAN` は「計画中表示は色モードと独立トグル」化に伴い廃止し、`VisualFlag.SHOW_PLAN` に置き換えた。

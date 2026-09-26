@@ -280,14 +280,25 @@
   height: 100%;
 }
 
+/* 下から地形層(WebGL2)・ベクター層・カーソル層(Canvas2D)を重ねる。マウス操作はベクター層だけが受ける。 */
 .terrain-editor-canvas {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
+}
+
+.terrain-editor-canvas--terrain,
+.terrain-editor-canvas--cursor {
+  pointer-events: none;
+}
+
+.terrain-editor-canvas--vectors {
   cursor: grab;
 }
 
-.terrain-editor-canvas:active {
+.terrain-editor-canvas--vectors:active {
   cursor: grabbing;
 }
 

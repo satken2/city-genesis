@@ -51,7 +51,7 @@
     "currentAmount": "Cantidad actual",
     "consumptionTrend": "Tendencia de consumo",
     "amountTrend": "Tendencia de reservas",
-    "recoveryAmount": "Recuperación",
+    "recoveryAmount": "Recuperación/época",
     "maxAmount": "Cantidad máxima",
     "unknownResource": "Recurso desconocido"
   },

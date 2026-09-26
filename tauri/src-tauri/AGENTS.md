@@ -66,4 +66,4 @@ Tauri(Rust)側のプログラム。ウィンドウ管理とUnityとのMMF(Memory
 HUDとヒントバーは `current_save_id != null && !isLoading` を表示条件とする。`isLoading` は描画準備・開始ボタン待ち・初期設定中を含む。TipsのAlt+F4では待機を解除しない。開始APIの失敗時はTipsを破棄し、ロード状態を解除する。
 
 
-開発時のUnityなし起動: 通常の `npm run tauri dev`（Rustの `cfg(all(debug_assertions, dev))`）では、Unityの `system:graphic_ready` を一度も受信していない場合に限り、バックエンドの開始要求成功とセッション確認後に描画待ちを省略し、Tipsを開始ボタンへ切り替える。Unityから接続通知を受けた後は描画完了を待つ。待機中にUnityが接続した場合も開始要求を再送して描画待ちに戻る。`tauri build`（`--debug` を含む）およびリリースビルドには省略処理を含めない。環境変数やバックエンドのNuitka／uvicorn判定は使用しない。
+開発時のUnityなし起動: 通常の `npm run tauri dev`（Rustの `cfg(all(debug_assertions, dev))`）では、Unityが接続中でない場合に限り、バックエンドの開始要求成功とセッション確認後に描画待ちを省略し、Tipsを開始ボタンへ切り替える。接続中かどうかは `graphic_connected`（`system:graphic_ready` で立ち、`system:graphic_stopped`＝正常終了・EditorのPlay停止で下りる）で判定し、再接続時のポップアップ一掃に使う `graphic_ready_seen`（一度立ったら戻さない）とは別に持つ。「一度でも接続したか」で判定するとPlayを止めた後の再ロードで永遠に待つ。接続中は描画完了を待ち、待機中にUnityが停止した場合はその時点で開始ボタンへ切り替える。待機中にUnityが接続した場合は開始要求を再送して描画待ちに戻る。`tauri build`（`--debug` を含む）およびリリースビルドには省略処理を含めない。環境変数やバックエンドのNuitka／uvicorn判定は使用しない。

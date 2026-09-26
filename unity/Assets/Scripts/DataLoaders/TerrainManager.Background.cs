@@ -130,8 +130,9 @@ public partial class TerrainManager
             }
             backgroundHeightsReady = true;
             UpdateCameraClipDistance();
-            EnsureUltraFarLandMaterials();
-            backgroundMaterial = new Material(ultraFarLandMat) { name = "BackgroundTerrain" };
+            // 背景は都市外にしかなく詳細地形と重ならないので、沈み込み(_FarSinkAmount)はシェーダー既定値ではなく0にする。
+            backgroundMaterial = new Material(ResolveFarTerrainShader()) { name = "BackgroundTerrain" };
+            ApplyFarTerrainMaterialSettings(backgroundMaterial);
             backgroundMaterial.SetFloat(FarSinkAmountId, 0f);
             // 大きな背景も一枚の巨大メッシュにせず、描画のカリングと生成の中断を可能にする。
             const int chunk = 64;

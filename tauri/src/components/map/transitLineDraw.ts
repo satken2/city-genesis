@@ -4,8 +4,8 @@
  * データは GET /api/v1/transit/lines/geometry が返す走行形状で、停留所間を直線で結ぶのではなく
  * 実際の下地道路・線路に沿った [x, z] 折れ線(journeys)を持つ。バックエンドが
  * `TransitLine.journeys`(停留所間ごとの走行プロファイル)を下地パスのベジエ形状から
- * 切り出したものなので、複線の往路・復路は物理的に別の線路上に描かれ、バス等の街路走行は
- * 往路と復路が同じ道路上に重なる(進行方向の矢印が両向きに見える)。
+ * 切り出したものなので、複線の行きと帰りは物理的に別の線路上に描かれ、バス等の街路走行は
+ * 行きと帰りが同じ道路上に重なる(進行方向の矢印が両向きに見える)。
  *
  * 描画規則:
  *   - 稼働中の路線 ... 路線カラーの帯(白い縁取り付き)。各停留所間の弧長中点に進行方向矢印。
@@ -14,7 +14,7 @@
  *     灰色の破線で描き、位置だけを示す(走行形状ではない)。
  *   - 停留所 ... 路線カラーのリング+白い芯。複数路線が共有する停留所は濃灰リング。
  *   - 注目路線(focusLineId) ... 路線詳細の路線地図のように1路線を主役にする。他の路線は薄く
- *     描き、注目路線は最後に(最前面に)描いて始点=緑・終点=赤のリングで端を強調する。
+ *     描き、注目路線は最後に(最前面に)描いて、巡回の先頭の停留所=緑・折り返す停留所=赤のリングで強調する。
  *
  * 座標系は CityMapCanvas の overlayDraw と同じワールド座標(X-Z 平面、+Z=北が画面上)で、
  * 線幅・半径・矢印の寸法は view.zoom で割って画面上で一定の見た目にする。
@@ -33,10 +33,10 @@ export type TransitLineGeometry = {
   /** 路線カラー("#rrggbb")。空文字は未設定で種別ごとの既定色にフォールバックする */
   line_color: string;
   pause_reason: string | null;
-  /** 停留所。往路の出現順(始点→終点)。走行形状が無い路線は順不同 */
-  stops: { node_id: number; position: [number, number]; name: string | null }[];
-  /** 停留所間ごとの走行形状。往路(returning=false)が停留所順に並び、その後に復路が続く */
-  journeys: { returning: boolean; points: [number, number][] }[];
+  /** 停留所。巡回順に1回ずつ(1周で2回訪れる停留所は最初の訪問)。turnback はその停留所で車両が折り返すか */
+  stops: { node_id: number; position: [number, number]; name: string | null; turnback: boolean }[];
+  /** 停留所間ごとの走行形状(巡回順)。turnback は区間の出発停留所で折り返すか */
+  journeys: { turnback: boolean; points: [number, number][] }[];
   /** 区間パスの端点を結ぶ直線。走行形状が無い路線の位置表示にだけ使う */
   segments: { from: [number, number]; to: [number, number]; status: number }[];
 };
@@ -47,7 +47,7 @@ const COLOR_OUTLINE = "#ffffff";
 const COLOR_INACTIVE = "#7c8389";
 /** 複数路線が共有する停留所のリング色 */
 const COLOR_SHARED_STOP = "#556773";
-/** 注目路線の始点・終点のリング色 */
+/** 注目路線の巡回の先頭・折り返す停留所のリング色 */
 const COLOR_FOCUS_START = "#18845b";
 const COLOR_FOCUS_END = "#cf4b50";
 
@@ -226,7 +226,6 @@ export function drawTransitLines(
   for (const line of ordered) {
     const dimmed = hasFocus && line.line_agent_id !== focusLineId;
     const color = effectiveTransitLineColor(line);
-    const last = line.stops.length - 1;
     line.stops.forEach((s, i) => {
       let mark = marks.get(s.node_id);
       if (!mark) {
@@ -236,8 +235,9 @@ export function drawTransitLines(
       mark.colors.add(color);
       if (!dimmed) mark.dimmed = false;
       if (hasFocus && !dimmed) {
-        // 注目路線の始点=緑・終点=赤(1停留所だけの路線は端を強調しない)
-        mark.focusFill = last > 0 && i === 0 ? COLOR_FOCUS_START : last > 0 && i === last ? COLOR_FOCUS_END : color;
+        // 注目路線の巡回の先頭=緑・折り返す停留所=赤(1停留所だけの路線は強調しない)
+        const multi = line.stops.length > 1;
+        mark.focusFill = multi && i === 0 ? COLOR_FOCUS_START : multi && s.turnback ? COLOR_FOCUS_END : color;
       }
     });
   }

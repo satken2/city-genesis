@@ -25,7 +25,9 @@ HTTP(バックエンド通信)とは別系統であることに注意。Unityと
 
 `ambience:volume {volume}`はTauri→Unityの音量通知（master×sfx、0〜1）。Cockpitが設定変更時とUnity起動時(`graphic-reconnected`)に送り、CameraAmbience・ConstructionAmbience・VehicleAmbience・VisualEffectManagerが所有するAudioSourceへ適用する。`IpcClient`は最新の受信値を保持し、`OnAmbienceVolume`へ購読した時点で即時通知する(購読前に届いた1通を取りこぼすと次の設定変更まで無音になるため)。高度と天候の音響制御はUnity内で完結する。
 
-天気は`weather:query`/`weather:set`（UI→Unity、setはidまたはnull=自動）と`weather:state`（Unity→Cockpit、id/locked/rain/presets）で同期する。WeatherControllerが正を保持し、RustはCockpitに中継する。表示名はTauriのweather.json。経済APIへの書き込みは行わない。
+天気は`weather:query`/`weather:set`（UI→Unity、setはidまたはnull=自動）と`weather:state`（Unity→Cockpit、id/locked/rain/snow/presets。presetsの各要素はid/weight/rain/snowで、weightは今の気候・季節での出現割合）で同期する。WeatherControllerが正を保持し、RustはCockpitに中継する。表示名はTauriのweather.json。経済APIへの書き込みは行わない。
+
+`epoch:executing {executing: bool}`（UI→Unity）はエポック実行確認ウィンドウが実行の開始(true)と終了(false)に1通ずつ送る（成功時は`session:reload`の後に終了）。`IpcClient.OnEpochExecuting`→`WeatherController`が、開始で日を早送りで沈めて暗転し、終了で都市を読み直してから日の出へ進める。周期送信ではないのでUnity不在中に溜まっても2通ずつに留まる。
 
 1. `IpcClient.cs`に型付きイベント(`event Action<...> OnXxx`)または送信メソッドを追加
 2. city-genesis/tauri側にも対応する送受信を追加(`city-genesis/tauri/src/utils/ipc.ts`と`city-genesis/tauri/src-tauri/src/`)
@@ -33,13 +35,13 @@ HTTP(バックエンド通信)とは別系統であることに注意。Unityと
 
 ## 編集モードのステート同期(参考)
 
-- `world:change_state` は `IpcStateCoordinator.HandleChangeState` が受け、`STATE_*` ごとに InputMode プリセット + VisualMode をまとめて切り替える。`STATE_EDIT_TRANSIT`(公共交通の路線設置)は params の `path_variant` と `stop_path_variants`(int配列。`ReadIntArray` で JArray→int[] 変換)を読み、`TransitPlanManager` を動的生成・初期化する。
+- `world:change_state` は `IpcStateCoordinator.HandleChangeState` が受け、`STATE_*` ごとに InputMode プリセット + VisualMode をまとめて切り替える。`STATE_EDIT_TRANSIT`(公共交通の路線設置・経路編集)は params の `path_variant`・`stop_path_variants`・`route_path_variants`(int配列。`ReadIntArray` で JArray→int[] 変換)・`points`(始めの巡回点 [{kind, position}]。`ReadTransitPoints`。新設は空)・`line_agent_id`(経路編集の対象路線。新設はnull)を読み、`TransitPlanManager` を動的生成・初期化する。
 - `view:change_view` は `IpcViewCoordinator` が受け、レイヤーごとに VisualMode を切り替える。params は `{layer, mode, sub_mode, flags}`。`flags` は色モードと独立した表示トグル(CSV。`"plan"`=計画中表示 / `"public"`=公共施設ハイライト。road/building レイヤーのみ使用)で、**null は「現在のフラグを維持」**(建設パネル等がモードだけ切り替える呼び出しでトグルを壊さないため)・空文字は「全OFF」を意味する。`ApplyRoadMode`/`ApplyBuildingMode` が `ParseFlags` で `VisualFlag` ビットへ変換し `VisualModeHandler.SetFlags` に渡す。`view:current_state`(Unity→UI)の各レイヤーにも `flags` キーが載る。編集ステートのプリセット(`SyncFromState`)は road/building を「default+plan」に強制し(地区編集は flags 空)、STATE_NORMAL 復帰時に `_normalStateMemory`(mode/subMode/flags の3要素)から復元する。`transit` レイヤーは `ApplyTransitMode` が sub_mode(表示する `transit_path_id` のCSV)をパースして `TransitOverlayManager.SetVisibleVariants` に渡す。
 - **表示状態の正は `IpcViewCoordinator` のレイヤー記憶(`_layerModes`/`_layerSubModes`/`_layerFlags`)に一本化されている。** 編集ステート中の表示も `SyncFromState` のステート別プリセット(`ApplyConstructionPreset` / `ApplyLandEditPreset` / `ApplyTransitPreset`)が `ForceLayer` 経由で適用するので、**`IpcStateCoordinator` の `ApplyState*` から `VisualModeHandler` を直接触ってはいけない**(記憶とUIへ通知する表示状態が実際の見え方とズレる。実際、地区編集では「UIには建物=地区色分けと表示されるのに建物は通常表示」という食い違いが起きていた)。`SyncFromState` が扱わないステート(`STATE_EDIT_RESOURCE`/`STATE_EDIT_PROP`/`STATE_EDIT_PARCEL_SHAPE`/`STATE_EDIT_CONNECTOR`/`STATE_SET_GRID`)だけは従来どおり `ApplyState*` 側で表示を設定している。
 - **ステートを抜けると表示は元に戻る。** `ForceLayer` の変更は記憶(`_normalStateMemory`)に載せず、`STATE_NORMAL` 復帰時に `RestoreNormalLayerModes` が「通常モード中にユーザーが `view:change_view` で選んだ表示」へ戻す(記憶が無いレイヤーは `NORMAL_DEFAULTS`=UI側 `DISPLAY_LAYERS` の初期値)。**プリセットで強制するレイヤーは必ず `NORMAL_DEFAULTS` にも載せること**(載せ忘れると「記憶が無ければ現在値を維持」になり編集中の表示が通常モードへ残る)。地形だけは色モードを強制せず等高線サブモードのみ触るので個別扱い。
 - **専用の編集ステートを持たないウィンドウ用に `view:apply_preset`(UI→Unity, params `preset`)がある。** `IpcClient` が `IpcViewCoordinator.ApplyPreset` へ渡し、ステート別プリセットと同じ経路で表示を差し替える。現在のプリセットは `PRESET_TRANSIT`(公共交通の一覧`transit_management`・新設`transit_creation`が使う。全路線種別+計画中の道路・建物)。**復帰は `STATE_NORMAL` 頼みなので、使うウィンドウ種別をTauri側 `window.rs` の `EDIT_MODE_WINDOW_TYPES` に載せること**(×で閉じてもRustが `STATE_NORMAL` を送るようにする)。
 - **オブジェクト単位の表示フィルタは `view:change_view` とは別のイベント系統**: `view:set_object_filter`(UI→Unity, params `hidden_building_ids`/`hidden_path_ids`。`IpcClient.OnViewSetObjectFilter` → `IpcViewCoordinator.HandleSetObjectFilter` → `ObjectVisibilityFilter.SetHidden`)で建物・道路をIDで隠す。**差分ではなく毎回「今隠しているものの全集合」が届く**契約で、UIはタグ名ではなくIDを送る(グラフィック側にタグの概念を持ち込まない)。現在値は `view:query_object_filter`(UI→Unity)→`view:object_filter_state`(Unity→UI, `EmitViewObjectFilterState`)で返し、複数のパネルが同じ状態を見る(`view:query_state`/`view:current_state` と同じ形)。**この状態はバックエンドにもセーブにも残らず、セッションリセットで捨てる**。詳細は genesis-docs/docs/programs/建設プロジェクト管理.md
-- `edit_transit:update_stops`(Unity→UI, `IpcClient.EmitEditTransitUpdateStops`)は路線設置中の停留所座標列を通知する。`edit_transit:finish`(UI→Unity)は `IpcEventHandler.HandleEditTransitFinish` が受け、`TransitPlanManager.FinishPlacement` + `CellDataLoader.ReloadAllData` + `TransitOverlayManager.MarkDirty` を実行する(`edit_resource:finish` と同じ枠組み)。
+- `edit_transit:update_points`(Unity→UI, `IpcClient.EmitEditTransitUpdatePoints`)は路線設置中の巡回点(停留所・経由点を巡回順に並べた {kind, position} の列)を通知する。`edit_transit:finish`(UI→Unity)は `IpcEventHandler.HandleEditTransitFinish` が受け、`TransitPlanManager.FinishPlacement` + `CellDataLoader.ReloadAllData` + `TransitOverlayManager.MarkDirty` を実行する(`edit_resource:finish` と同じ枠組み)。
 - `edit_prop:placement_settings`(Unity→UI, `IpcClient.EmitEditPropPlacementSettings(rotation, height)`)はプロップ個別配置の3D側操作(中ボタン回転・PageUp/PageDown)で変わった設定をパネルへ書き戻す(UIはエコーしない)。ブルドーザの確認付き削除は `remove_object:request_confirm`(Unity→UI, `EmitRemoveObjectRequestConfirm(object_type, id, prop_type)`。Rustはコックピット宛にだけ中継)と `remove_object:confirm_result`(UI→Unity, `OnRemoveObjectConfirmResult(object_type, id, accepted)` → `IpcEventHandler.HandleRemoveObjectConfirmResult` → `RemovalManager.OnConfirmResult`)の往復。現状の object_type は `"prop_scatter"` のみ。
 - 既存区画の形状編集は `edit_parcel:update_shape`（`EmitEditParcelUpdateShape(parcelId, polygon)`）で `ParcelDetailPanel` へ通知する。確定のPATCHはUIが送り、成功後の `edit_parcel:finish_shape_edit` で `ParcelShapeEditManager.CompleteEditMode` と通常モードへの復帰を行う。新規区画の任意ポリゴン作図用イベントは持たない。
 
@@ -93,6 +95,8 @@ edit_path:change_passage_modeのpassage_mode（elevated/ground/underground）は
 UI→Unityは既存の `ui:action` Envelopeの `payload.action` / `payload.params` を使う。`game:loading` は黒画面と入力抑制を開始する。`game:start` のparamsは `{loading_id: 整数}` で、描画準備を開始するが黒画面は維持する。Unity→UIの `game:loaded` はpayload直下の `{loading_id: 整数}` を返す。初期描画完了後、表示解禁まで1秒間隔で再送し、Rustは現在の要求世代だけを受理する。UI→Unityの `game:reveal` は同じloading_idをparamsに載せ、`game:loaded` を通知済みの世代だけを表示する。受信した瞬間の準備状態は再判定しない（Tipsは既に閉じているため、ここで捨てると黒画面から戻れなくなる）。
 
 `system:graphic_ready` はプロセスの起動完了であり、都市の描画完了ではない。遅延起動・再接続ではRustが開始要求を再送する。ゲーム中の再接続でもTipsを使い、初期設定は再表示しない。
+
+`system:graphic_stopped` は `IpcClient.Disconnect()` がMMFを閉じる直前に送る正常終了通知で、`AppRoot.OnApplicationQuit`（EditorのPlay停止でも発火）と `IpcClient.OnDestroy` から届く。Rustはこれで接続中フラグを下ろし、開発時のUnityなし起動でTipsが描画完了を待っていればその場で開始ボタンへ切り替える。クラッシュでは送られない（その場合はスーパーバイザが再起動したUnityの `system:graphic_ready` で整合する）。
 
 ## 制限速度標識トグル
 

@@ -68,6 +68,11 @@
   -moz-appearance: textfield;
 }
 
+/* 桁の大きい値(天然資源の埋蔵量など)を切れずに表示するための幅広版。className で指定する */
+.number-stepper--wide .number-stepper__input {
+  width: 116px;
+}
+
 .number-stepper__input::-webkit-inner-spin-button,
 .number-stepper__input::-webkit-outer-spin-button {
   -webkit-appearance: none;

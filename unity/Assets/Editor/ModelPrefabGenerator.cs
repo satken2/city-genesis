@@ -16,7 +16,8 @@ using UnityEngine;
 /// - プレハブはFBXルートをオーバーライドなしで包む「純粋なラッパー(プレハブバリアント)」として生成する。
 /// - コンポーネント追加・マテリアル差し替え等の実質的な手動編集があるプレハブは上書きせずスキップして警告する。
 /// - FBXの新規追加・移動時は AssetPostprocessor(ModelPrefabImportWatcher)が自動で対応プレハブを生成する。
-/// - 対応FBXを失った孤児プレハブは自動削除しない。Delete Orphans メニューから明示的に削除する。
+/// - 対応FBXを失った孤児プレハブは自動削除しない。Delete Orphans メニューから明示的に削除する
+///   (削除で空になったミラーフォルダも併せて消す)。
 /// </summary>
 public static class ModelPrefabGenerator
 {
@@ -92,20 +93,73 @@ public static class ModelPrefabGenerator
         }
 
         string list = string.Join("\n", orphans);
-        bool ok = EditorUtility.DisplayDialog(
-            "Model Prefabs",
-            $"対応FBXのない孤児プレハブ {orphans.Count}件 を削除します。\n\n{list}",
-            "削除する", "キャンセル");
-        if (!ok) return;
+        // バッチモード(-executeMethod)では確認ダイアログを出せないため、明示的な呼び出しを承認とみなす
+        if (!Application.isBatchMode)
+        {
+            bool ok = EditorUtility.DisplayDialog(
+                "Model Prefabs",
+                $"対応FBXのない孤児プレハブ {orphans.Count}件 を削除します。\n\n{list}",
+                "削除する", "キャンセル");
+            if (!ok) return;
+        }
 
+        var deleted = new List<string>();
         foreach (string orphan in orphans)
         {
-            if (!AssetDatabase.DeleteAsset(orphan))
+            if (AssetDatabase.DeleteAsset(orphan))
+            {
+                deleted.Add(orphan);
+            }
+            else
             {
                 Debug.LogError($"ModelPrefabGenerator: 削除に失敗: {orphan}");
             }
         }
-        Debug.Log($"ModelPrefabGenerator: 孤児プレハブ {orphans.Count}件 を削除しました。");
+        int deletedFolders = DeleteEmptiedFolders(deleted);
+        Debug.Log($"ModelPrefabGenerator: 孤児プレハブ {deleted.Count}件 と空になったフォルダ {deletedFolders}件 を削除しました。\n" +
+                  string.Join("\n", deleted));
+    }
+
+    /// <summary>
+    /// 孤児プレハブの削除で空になったミラーフォルダを親へさかのぼって削除する(PrefabRoot 自体は残す)。
+    /// 空フォルダを残すとフォルダの .meta だけがバージョン管理に残り、閾値フォルダ名を列挙する
+    /// agent_model_config.yaml の生成器(genesis-core/tools/generate_agent_model_config.py)にも旧閾値が載り続ける。
+    /// </summary>
+    private static int DeleteEmptiedFolders(IEnumerable<string> deletedPrefabPaths)
+    {
+        var folders = new HashSet<string>(StringComparer.Ordinal);
+        foreach (string prefabPath in deletedPrefabPaths)
+        {
+            for (string folder = ParentFolder(prefabPath);
+                 folder.StartsWith(PrefabRoot + "/", StringComparison.Ordinal);
+                 folder = ParentFolder(folder))
+            {
+                folders.Add(folder);
+            }
+        }
+
+        int count = 0;
+        // 子フォルダを消して初めて親が空になるので、深い順に判定する
+        foreach (string folder in folders.OrderByDescending(f => f.Count(c => c == '/')))
+        {
+            if (Directory.Exists(folder) && !Directory.EnumerateFileSystemEntries(folder).Any())
+            {
+                if (AssetDatabase.DeleteAsset(folder))
+                {
+                    count++;
+                }
+                else
+                {
+                    Debug.LogError($"ModelPrefabGenerator: フォルダの削除に失敗: {folder}");
+                }
+            }
+        }
+        return count;
+    }
+
+    private static string ParentFolder(string assetPath)
+    {
+        return (Path.GetDirectoryName(assetPath) ?? string.Empty).Replace('\\', '/');
     }
 
     /// <summary>FBX 1件をミラープレハブと同期する。</summary>

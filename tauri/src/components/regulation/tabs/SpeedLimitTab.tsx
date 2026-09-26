@@ -12,7 +12,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useMasterData } from "../../../contexts/MasterDataContext";
-import { PATH_MONORAIL, PATH_MOTORWAY, PATH_STREET, PATH_TRACK } from "../../../constants";
+import { PATH_MOTORWAY, PATH_STREET } from "../../../constants";
 import type { PathVariantInfo, SpeedMap } from "../regulationTypes";
 
 /**
@@ -28,7 +28,7 @@ import type { PathVariantInfo, SpeedMap } from "../regulationTypes";
  * 除外リストではなく許可リストにしているのは、マスターへパス種別が増えたときに
  * 「効かない設定」が黙って画面に出るのを防ぐため。
  */
-const EDITABLE_PATH_TYPE_IDS = new Set([PATH_STREET, PATH_MOTORWAY, PATH_TRACK, PATH_MONORAIL]);
+const EDITABLE_PATH_TYPE_IDS = new Set([PATH_STREET, PATH_MOTORWAY]);
 
 /** マスターに default_speed_limit が無いバリアントの既定速度 (km/h) */
 export const FALLBACK_SPEED_LIMIT = 40;

@@ -21,6 +21,8 @@ public sealed class TransitRouteGeometry
         public int path;
         public double start, end;
         public float from, to;
+        /// <summary>継ぎ目の前後で車端を解くために1周ずらして足した写し。色帯などで経路そのものを描くときは飛ばす。</summary>
+        public bool Wrapped;
         public bool Forward => to > from;
     }
     private sealed class Geometry
@@ -29,6 +31,8 @@ public sealed class TransitRouteGeometry
         public VehiclePolyline full, trimmed;
         public float trimStart, trimEnd, offset, tramOffset;
         public bool rail;
+        /// <summary>駅のホーム(platform_width を持つバリアント)。停車中に折り返せるよう通行方向によらず両方向に走れる</summary>
+        public bool platform;
     }
 
     public TransitRouteGeometry(PathManager paths) { this.paths = paths; }
@@ -47,7 +51,17 @@ public sealed class TransitRouteGeometry
             { previous.to = s.to_fraction; previous.end += s.length_m; }
             else line.runs.Add(new Run { path = s.path_id, start = line.motion.Distances[i], end = line.motion.Distances[i]+s.length_m, from = s.from_fraction, to = s.to_fraction });
         }
+        // 継ぎ目で折り返さない路線は、1周の前後に1周ずらした写しを並べ、継ぎ目を跨ぐ編成の車端を隣の走行区間として解けるようにする。
+        if (!line.motion.Closed || line.runs.Count == 0) return;
+        double length = line.motion.Length;
+        var body = new List<Run>(line.runs);
+        line.runs.Clear();
+        foreach (var r in body) line.runs.Add(Shifted(r, -length));
+        line.runs.AddRange(body);
+        foreach (var r in body) line.runs.Add(Shifted(r, length));
     }
+    private static Run Shifted(Run r, double by)
+        => new Run { path = r.path, start = r.start + by, end = r.end + by, from = r.from, to = r.to, Wrapped = true };
     public void Refresh(HashSet<int> routePaths, IEnumerable<PathSummary> candidates)
     {
         Clear();
@@ -55,7 +69,8 @@ public sealed class TransitRouteGeometry
         {
             if (!routePaths.Contains(data.path_id) || data.status != Constants.STATUS_ACTIVE || !paths.TryGetPathPolyline(data.path_id, out var full, false) || full.Count < 2) continue;
             if (!paths.TryGetPathPolyline(data.path_id, out var trimmed) || trimmed.Count < 2) continue;
-            var g = new Geometry { data = data, full = new VehiclePolyline(full), trimmed = new VehiclePolyline(trimmed), rail = TrackIntersectionMeshGenerator.IsTrackType(data.path_type) };
+            var g = new Geometry { data = data, full = new VehiclePolyline(full), trimmed = new VehiclePolyline(trimmed), rail = TrackIntersectionMeshGenerator.IsTrackType(data.path_type),
+                platform = (MasterDataStore.Instance?.GetPathMaster(data.path_variant)?.platform_width ?? 0f) > 0f };
             g.trimStart = g.full.Project(trimmed[0]); g.trimEnd = g.full.Project(trimmed[trimmed.Count-1]);
             if (g.rail)
             {
@@ -100,7 +115,7 @@ public sealed class TransitRouteGeometry
         // 終点で逆方向の脚へ車体を曲げず、同じ線路上に編成を保つ。
         if (index != refRun && line.runs[index].Forward != line.runs[refRun].Forward && line.runs[index].path == line.runs[refRun].path) index = refRun;
         var run = line.runs[index];
-        if (!geometry.TryGetValue(run.path,out var g) || !VehicleManager.DirectionAllowsEntry(g.data.travel_direction,run.Forward)) return false;
+        if (!geometry.TryGetValue(run.path,out var g) || !(g.platform || VehicleManager.DirectionAllowsEntry(g.data.travel_direction,run.Forward))) return false;
         float fraction = run.from+(float)((distance-run.start)/Math.Max(.001,run.end-run.start))*(run.to-run.from);
         float s = fraction*g.full.Length;
         if (s < -.01 || s > g.full.Length+.01) return false;

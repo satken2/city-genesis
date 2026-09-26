@@ -41,7 +41,7 @@ public sealed class CameraAmbience : MonoBehaviour
         if (!active) { StopAudio(); return; }
         var position = camera.transform.position;
         float proximity = Proximity(RelativeHeight(position.y, Utils.GetGroundHeight(position)));
-        int rain = WeatherController.Instance == null ? 0 : WeatherPreset.All[WeatherController.Instance.CurrentIndex].Rain;
+        float rain = WeatherController.Instance == null ? 0f : WeatherController.Instance.RainAmount;
         for (int i = 0; i < sources.Length; i++)
         {
             gains[i] = Mathf.MoveTowards(gains[i], TargetGain(i, proximity, rain), Time.unscaledDeltaTime / 1.5f);
@@ -66,12 +66,13 @@ public sealed class CameraAmbience : MonoBehaviour
         return t * t * (3f - 2f * t);
     }
 
-    public static float TargetGain(int channel, float proximity, int rain)
+    /// <summary>雨量は0〜3の連続値で、天気が移り変わる途中は隣り合う2段の雨音を配分して入れ替える。</summary>
+    public static float TargetGain(int channel, float proximity, float rain)
     {
         if (channel == 0) return 0.5f - 0.3f * proximity;
         if (channel == 4) return 0.7f * proximity;
-        if (channel != rain) return 0f;
-        return channel == 1 ? 0.4f : channel == 2 ? 0.6f : channel == 3 ? 0.8f : 0f;
+        float share = Mathf.Clamp01(1f - Mathf.Abs(rain - channel));
+        return share * (channel == 1 ? 0.4f : channel == 2 ? 0.6f : 0.8f);
     }
 
     public static float? RelativeHeight(float cameraY, float groundY)

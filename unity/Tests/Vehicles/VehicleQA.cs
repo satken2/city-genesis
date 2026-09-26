@@ -147,7 +147,7 @@ public static partial class VehicleQA
             Set(step,"path_id",1);Set(step,"from_fraction",returning?.96f:.04f);Set(step,"to_fraction",returning?.04f:.96f);
             Set(step,"length_m",460f);Set(step,"start_speed_mps",10f);Set(step,"end_speed_mps",10f);
             Set(step,"duration_seconds",46.0);Set(step,"dwell_seconds",4.0);steps.Add(step);
-            var journey=Activator.CreateInstance(journeyType);Set(journey,"steps",steps);Set(journey,"returning",returning);journeys.Add(journey);
+            var journey=Activator.CreateInstance(journeyType);Set(journey,"steps",steps);Set(journey,"turnback",true);Set(journey,"reversed",returning);journeys.Add(journey);
         }
         var data=New("GeneratedModels.TransitLineSummary");
         Set(data,"line_agent_id",123);Set(data,"path_variant",1002);Set(data,"cars_per_train",2);Set(data,"vehicle_count",2);Set(data,"vehicle_model",2);
@@ -304,7 +304,7 @@ public static partial class VehicleQA
             Near(Vector3.Distance(original.bounds.size,copy.bounds.size),0,.002f,"Vehicle prop dimensions differ");
             var model=New("PropRenderModel",id);
             Check(((IList)Get(model,"normal")).Count>0 && ((IList)Get(model,"far")).Count>0,"Vehicle prop has no drawable parts: "+id);
-            if((id>=370 && id<=379) || (id>=384 && id<=393))
+            if(id<=367 || (id>=370 && id<=379) || (id>=384 && id<=393))
             {
                 var closeSource=Resources.Load<GameObject>("Models/Vehicles/"+paths[index]+"_close");
                 var closeProp=Resources.Load<GameObject>($"Models/Props/{id}_close");
@@ -314,11 +314,10 @@ public static partial class VehicleQA
                 Check(a.vertexCount==b.vertexCount && a.triangles.Length==b.triangles.Length,"Close alias topology differs: "+id);
                 Near(Vector3.Distance(a.bounds.size,b.bounds.size),0,.002f,"Close alias bounds differ");
             }
-            if(id>=370)
             {
                 var source=Resources.Load<GameObject>("Models/Vehicles/"+paths[index]+"_far");
                 var far=Resources.Load<GameObject>($"Models/Props/{id}_far");
-                Check(source!=null && far!=null,"Missing authored rail far");
+                Check(source!=null && far!=null,"Missing authored vehicle far: "+id);
                 var a=source.GetComponentInChildren<MeshFilter>(true).sharedMesh;
                 var b=far.GetComponentInChildren<MeshFilter>(true).sharedMesh;
                 Check(a.triangles.Length<=126 && a.triangles.Length==b.triangles.Length,"Far alias budget/topology");
@@ -327,6 +326,27 @@ public static partial class VehicleQA
             }
             Call(model,"Dispose");
         }
+    }
+
+    // 道路車両は全外観が接写・通常・遠景の3段階を持つ。閾値と参照先、遠景の三角形数、接写が通常と同じ配置寸法で
+    // 遠景が通常の高さの範囲に収まることを確かめる。
+    static void RoadLods(GameObject car, int type, int variant)
+    {
+        var lod=car.GetComponent<LODGroup>();
+        Check(lod!=null,"Road vehicle LOD missing: "+type+"/"+variant);
+        var levels=lod.GetLODs();
+        Check(levels.Length==3 && levels[0].screenRelativeTransitionHeight==.25f && levels[1].screenRelativeTransitionHeight==.035f && levels[2].screenRelativeTransitionHeight==0,"Road vehicle LOD thresholds: "+type+"/"+variant);
+        string[] suffix={"_close","","_far"};
+        for(int i=0;i<3;i++)
+            foreach(var renderer in levels[i].renderers)
+                Check(AssetDatabase.GetAssetPath(renderer.GetComponent<MeshFilter>().sharedMesh).EndsWith($"/{type}/{variant}{suffix[i]}.fbx"),"Road LOD uses wrong asset: "+type+"/"+variant+suffix[i]);
+        foreach(var renderer in levels[2].renderers)
+            Check(renderer.GetComponent<MeshFilter>().sharedMesh.triangles.Length/3<=42,"Road far triangle budget: "+type+"/"+variant);
+        var normal=levels[1].renderers[0].bounds;
+        var close=levels[0].renderers[0].bounds;
+        var far=levels[2].renderers[0].bounds;
+        Check((normal.min-close.min).magnitude<.09f && (normal.max-close.max).magnitude<.09f,"Road LOD placement bounds differ: "+type+"/"+variant);
+        Check(Mathf.Abs(far.min.y-normal.min.y)<.05f && far.max.y<=normal.max.y+.05f,"Road far height range: "+type+"/"+variant);
     }
 
     static void TransitModels()
@@ -353,6 +373,7 @@ public static partial class VehicleQA
                 foreach(var renderer in renderers)bounds.Encapsulate(renderer.bounds);
                 Near(bounds.min.y,0,.02f,"Road vehicle floats");
                 Check(bounds.size.z>3 && bounds.size.z<13 && bounds.size.x>1.4f && bounds.size.x<3,"Road vehicle dimensions");
+                RoadLods(car,vehicleType,variant);
                 UnityEngine.Object.DestroyImmediate(car);
             }
             foreach(int seed in new[]{0,1,-1,int.MinValue})

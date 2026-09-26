@@ -421,6 +421,7 @@ public partial class TerrainManager : BaseApiDataManager
     private static readonly int LoadedCellMaskId = Shader.PropertyToID("_LoadedCellMask");
     private static readonly int LoadedCellMaskParamsId = Shader.PropertyToID("_LoadedCellMaskParams");
     private static readonly int LoadedCellMaskTexelId = Shader.PropertyToID("_LoadedCellMaskTexel");
+    private static readonly int FarCityRectId = Shader.PropertyToID("_FarCityRect");
     private static readonly int FarSinkAmountId = Shader.PropertyToID("_FarSinkAmount");
 
     /// <summary>
@@ -522,6 +523,7 @@ public partial class TerrainManager : BaseApiDataManager
         // これにより数千回/フレームの GetGroundHeight 呼び出しが O(1) になる。
         Utils.RegisterTerrainManager(this);
         GroundCoverPalette.Changed += MarkGroundCoverMaterialsDirty;
+        if (GetComponent<CityBoundaryOverlay>() == null) gameObject.AddComponent<CityBoundaryOverlay>();
     }
 
     private void OnDestroy()
@@ -1424,13 +1426,20 @@ public partial class TerrainManager : BaseApiDataManager
     /// <summary>
     /// UltraFar 陸地メッシュ用のマテリアルを必要に応じて生成する。
     /// シェーダーは Custom/DepthOffsetSimpleLitFar(Offset 4,4)で per-cell 地形・海面より奥に描画する。
-    /// per-cell タイルと同じ地面テクスチャを、頂点のワールドXZ座標をUVとして同じタイリングで貼る。
-    /// 地表種別の手続き色、岩肌、法線ディテールとPBR照明はTerrainと共通の設定・HLSLを使う。
-    /// 沈み込みマスクは <see cref="UpdateLoadedCellMask"/> が担う。
+    /// 見た目の設定は <see cref="ApplyFarTerrainMaterialSettings"/>、沈み込みマスクは <see cref="UpdateLoadedCellMask"/> が担う。
     /// </summary>
     private void EnsureUltraFarLandMaterials()
     {
-        GroundCoverProfile ground = ActiveGroundCover;
+        Shader sh = ResolveFarTerrainShader();
+        if (ultraFarLandMat == null) ultraFarLandMat = new Material(sh) { name = "UltraFarLand" };
+        else ultraFarLandMat.shader = sh;
+        ApplyFarTerrainMaterialSettings(ultraFarLandMat);
+        // ロード済みセルでの沈み込み量。判定マスクは UpdateLoadedCellMask が供給する。
+        ultraFarLandMat.SetFloat(FarSinkAmountId, ultraFarSinkAmount);
+    }
+
+    private Shader ResolveFarTerrainShader()
+    {
         Shader sh = ultraFarLandShader;
         if (sh == null) sh = Shader.Find("Custom/DepthOffsetSimpleLitFar");
         if (sh == null)
@@ -1438,26 +1447,31 @@ public partial class TerrainManager : BaseApiDataManager
             Debug.LogWarning("TerrainManager: Custom/DepthOffsetSimpleLitFar shader not found; falling back to URP Simple Lit");
             sh = Shader.Find("Universal Render Pipeline/Simple Lit");
         }
+        return sh;
+    }
 
-        if (ultraFarLandMat == null) ultraFarLandMat = new Material(sh) { name = "UltraFarLand" };
-        else ultraFarLandMat.shader = sh;
-
-        // per-cell タイルと同じ地面テクスチャ・タイリングを適用する(UVはワールドXZ座標)。
+    /// <summary>
+    /// 遠景メッシュ(UltraFar 陸地・都市外背景)のマテリアルへ、per-cell タイルと同じ見た目の設定を直接書き込む。
+    /// per-cell タイルと同じ地面テクスチャを、頂点のワールドXZ座標をUVとして同じタイリングで貼る。
+    /// 地表種別の手続き色、岩肌、法線ディテールとPBR照明はTerrainと共通の設定・HLSLを使う。
+    /// 手続き色や色被せの値はシェーダーの Properties に宣言していないため、new Material(既存マテリアル) の
+    /// 複製では落ちる。遠景マテリアルを増やすときも複製せず、必ずこの関数で設定する。
+    /// </summary>
+    private void ApplyFarTerrainMaterialSettings(Material material)
+    {
+        GroundCoverProfile ground = ActiveGroundCover;
         // テクスチャが無い場合は白の既定テクスチャに下地色Aを掛け、タイルの単色代用と揃える。
         Texture2D diffuseTex = GetUltraFarDiffuseTexture(ground, out Vector2 tileSize);
-        ultraFarLandMat.SetTexture("_BaseMap", diffuseTex != null ? diffuseTex : Texture2D.whiteTexture);
-        ultraFarLandMat.SetVector("_BaseMap_ST", new Vector4(1f / tileSize.x, 1f / tileSize.y, 0f, 0f));
+        material.SetTexture("_BaseMap", diffuseTex != null ? diffuseTex : Texture2D.whiteTexture);
+        material.SetVector("_BaseMap_ST", new Vector4(1f / tileSize.x, 1f / tileSize.y, 0f, 0f));
 
-        ApplyTerrainMaterialSettings(ultraFarLandMat);
+        ApplyTerrainMaterialSettings(material);
         TerrainLayer groundLayer = customTerrainLayers != null && customTerrainLayers.Length > 0
             ? customTerrainLayers[0] : null;
-        ultraFarLandMat.SetFloat("_GroundMetallic", groundLayer != null ? groundLayer.metallic : defaultMetallic);
-        ultraFarLandMat.SetFloat("_Smoothness", groundLayer != null ? groundLayer.smoothness : ground.smoothness);
-        ultraFarLandMat.SetColor("_BaseColor", diffuseTex != null ? Color.white : ground.groundColorA);
-
-        // ロード済みセルでの沈み込み量。判定マスクは UpdateLoadedCellMask が供給する。
-        ultraFarLandMat.SetFloat("_FarGridStep", Mathf.Max(1f, ultraFarGridStep));
-        ultraFarLandMat.SetFloat(FarSinkAmountId, ultraFarSinkAmount);
+        material.SetFloat("_GroundMetallic", groundLayer != null ? groundLayer.metallic : defaultMetallic);
+        material.SetFloat("_Smoothness", groundLayer != null ? groundLayer.smoothness : ground.smoothness);
+        material.SetColor("_BaseColor", diffuseTex != null ? Color.white : ground.groundColorA);
+        material.SetFloat("_FarGridStep", Mathf.Max(1f, ultraFarGridStep));
     }
 
     /// <summary>
@@ -1467,6 +1481,7 @@ public partial class TerrainManager : BaseApiDataManager
     /// 遠景と通常地形の高さ差による突き抜けを防ぐため、可視タイルのセルをR8マスクにする。
     /// シェーダーは頂点の周囲1グリッド分も調べ、接続面がロード済み範囲内に収まる場合だけ
     /// 地中へ沈める。境界をまたぐ面は元の高さに保ち、未ロード側が海面下へ下がるのを防ぐ。
+    /// 都市の外には遠景の面が無いので、都市範囲(_FarCityRect)の外側の近傍は境界上のセルとして判定する。
     ///
     /// テクセル座標はバックエンドセル座標(0-based)。シェーダー側は floor(worldXZ/cellSize)+offset で
     /// 同じ変換を行う(UnityCellToBackendCell と同一の整数オフセット)。
@@ -1506,6 +1521,8 @@ public partial class TerrainManager : BaseApiDataManager
             ultraFarLandMat.SetTexture(LoadedCellMaskId, loadedCellMaskTex);
             ultraFarLandMat.SetVector(LoadedCellMaskParamsId, maskParams);
             ultraFarLandMat.SetVector(LoadedCellMaskTexelId, maskTexel);
+            ultraFarLandMat.SetVector(FarCityRectId, new Vector4(
+                -GetMapWidth() * 0.5f, -GetMapHeight() * 0.5f, GetMapWidth() * 0.5f, GetMapHeight() * 0.5f));
             loadedCellMaskDirty = true;
         }
         if (!loadedCellMaskDirty) return;
@@ -2008,6 +2025,8 @@ public partial class TerrainManager : BaseApiDataManager
     // 公開メソッド
     // ================================================================
 
+    /// <summary>都市の地形設定を受信済みか。未受信の間 GetMapWidth / GetMapHeight は暫定値を返す。</summary>
+    public bool HasTerrainSettings => terrainSettings != null;
     public int GetMapWidth() => terrainSettings?.map_width ?? 10000;
     public int GetMapHeight() => terrainSettings?.map_height ?? 10000;
 
@@ -2570,18 +2589,12 @@ public partial class TerrainManager : BaseApiDataManager
 
     /// <summary>
     /// 地表の見た目の変更(地表種別の切り替え・Inspectorでの調整)を、表示中の地形タイル・超遠景・都市外背景へ反映する。
-    /// 背景は超遠景マテリアルの複製なので、値を写し直してから沈み込みだけ無効に戻す。
     /// </summary>
     private void RefreshGroundCoverMaterials()
     {
         RefreshAllTerrainMaterials();
-        if (ultraFarLandMat == null) return;
-        EnsureUltraFarLandMaterials();
-        if (backgroundMaterial != null)
-        {
-            backgroundMaterial.CopyPropertiesFromMaterial(ultraFarLandMat);
-            backgroundMaterial.SetFloat(FarSinkAmountId, 0f);
-        }
+        if (ultraFarLandMat != null) EnsureUltraFarLandMaterials();
+        if (backgroundMaterial != null) ApplyFarTerrainMaterialSettings(backgroundMaterial);
     }
 
     /// <summary>

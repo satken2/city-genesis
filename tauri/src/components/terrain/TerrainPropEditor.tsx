@@ -77,9 +77,7 @@ export function useTerrainPropEditor(beforeChange: () => void, redraw: () => voi
     };
     refresh();
   }
-  function draw(ctx: CanvasRenderingContext2D, zoom: number, active: boolean, cursor: { x: number; z: number } | null) {
-    ctx.save();
-    ctx.lineWidth = 1.5 / zoom;
+  function painter(ctx: CanvasRenderingContext2D, zoom: number, cursor: { x: number; z: number } | null) {
     function region(points: number[][], closed: boolean, pending: boolean) {
       if (!points.length) return;
       ctx.strokeStyle = pending ? "#ffd280" : "#7fe0a0";
@@ -97,13 +95,24 @@ export function useTerrainPropEditor(beforeChange: () => void, redraw: () => voi
       const angle = p.rotation * Math.PI / 180;
       ctx.beginPath(); ctx.moveTo(p.x, p.z); ctx.lineTo(p.x + Math.sin(angle) * r * 2, p.z + Math.cos(angle) * r * 2); ctx.stroke();
     }
+    ctx.lineWidth = 1.5 / zoom;
+    return { region, marker };
+  }
+  /** 確定済みの配置を描く。地図のうちパン・ズーム・データ変更のときだけ描き直す層へ描く */
+  function drawPlaced(ctx: CanvasRenderingContext2D, zoom: number) {
+    ctx.save();
+    const { region, marker } = painter(ctx, zoom, null);
     data.current.scatters.forEach(p => region(p.polygon, true, false));
     data.current.instances.forEach(p => marker(p, false));
-    if (active) {
-      draft.current.instances.forEach(p => marker(p, true));
-      if (mode === "scatter") region(draft.current.polygon, draft.current.closed, true);
-      else if (cursor && type !== null) marker({ id: "", prop_type: type, ...cursor, y: height, rotation, scale }, true);
-    }
+    ctx.restore();
+  }
+  /** 作図中の下書きとカーソル位置の仮マーカーを描く。マウスを動かすたびに描き直すカーソル層へ描く */
+  function drawDraft(ctx: CanvasRenderingContext2D, zoom: number, cursor: { x: number; z: number } | null) {
+    ctx.save();
+    const { region, marker } = painter(ctx, zoom, cursor);
+    draft.current.instances.forEach(p => marker(p, true));
+    if (mode === "scatter") region(draft.current.polygon, draft.current.closed, true);
+    else if (cursor && type !== null) marker({ id: "", prop_type: type, ...cursor, y: height, rotation, scale }, true);
     ctx.restore();
   }
   // キャンバスのイベントは再登録されないので、呼び出し口だけを最新レンダーへ差し替える。
@@ -111,7 +120,7 @@ export function useTerrainPropEditor(beforeChange: () => void, redraw: () => voi
     edgeFadeWidth, setEdgeFadeWidth, allowWater, setAllowWater,
     setMode: (v: "instance" | "scatter") => { setMode(v); reset(); },
     setType: (v: number | null) => { setType(v); reset(); },
-    reset, restore, click, closePolygon, confirm, remove, shift, draw };
+    reset, restore, click, closePolygon, confirm, remove, shift, drawPlaced, drawDraft };
   const latest = useRef(actions);
   latest.current = actions;
   useEffect(() => { redraw(); }, [revision, mode, type, height, rotation, scale, density, seed]);

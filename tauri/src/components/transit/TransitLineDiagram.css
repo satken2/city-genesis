@@ -148,6 +148,18 @@
   color: #4ea1ff;
 }
 
+/* 環状運転などで途中の停留所が折り返し点になっていることを示す札 */
+.tld__badge {
+  flex: 0 0 auto;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  border: 1px solid var(--tld-color);
+  font-size: 0.66rem;
+  line-height: 1.5;
+  color: #c9d6e3;
+}
+
 /* 環状路線の「先頭へ戻る」行 */
 .tld__row--loop {
   height: 30px;

@@ -828,6 +828,9 @@ public class IpcStateCoordinator : MonoBehaviour
 
         int pathVariant = 0;
         int[] stopPathVariants = System.Array.Empty<int>();
+        int[] routePathVariants = System.Array.Empty<int>();
+        var points = new List<TransitPlanManager.RoutePoint>();
+        int lineAgentId = -1;
         if (ipcParams != null)
         {
             if (ipcParams.TryGetValue("path_variant", out object pvObj) && pvObj != null)
@@ -838,18 +841,47 @@ public class IpcStateCoordinator : MonoBehaviour
             {
                 stopPathVariants = ReadIntArray(spvObj);
             }
+            if (ipcParams.TryGetValue("route_path_variants", out object rpvObj) && rpvObj != null)
+            {
+                routePathVariants = ReadIntArray(rpvObj);
+            }
+            if (ipcParams.TryGetValue("points", out object pointsObj) && pointsObj != null)
+            {
+                points = ReadTransitPoints(pointsObj);
+            }
+            if (ipcParams.TryGetValue("line_agent_id", out object lineObj) && lineObj != null)
+            {
+                lineAgentId = Convert.ToInt32(lineObj);
+            }
         }
 
-        // TransitPlanManager を路線設置モードで初期化(無ければ動的生成)。
+        // TransitPlanManager を路線設置モードで初期化(無ければ動的生成)。経路編集では現在の巡回点から始める。
         var transitPlanManager = FindAnyObjectByType<TransitPlanManager>();
         if (transitPlanManager == null)
         {
             var go = new GameObject("TransitPlanManager");
             transitPlanManager = go.AddComponent<TransitPlanManager>();
         }
-        transitPlanManager.InitializeTransitPlacement(pathVariant, stopPathVariants);
+        transitPlanManager.InitializeTransitPlacement(pathVariant, stopPathVariants, routePathVariants, points, lineAgentId);
 
-        Debug.Log($"IpcStateCoordinator: 公共交通設置モード -> path_variant={pathVariant}, stop_variants={stopPathVariants.Length}");
+        Debug.Log($"IpcStateCoordinator: 公共交通設置モード -> path_variant={pathVariant}, stop_variants={stopPathVariants.Length}, points={points.Count}, line={lineAgentId}");
+    }
+
+    /// <summary>
+    /// STATE_EDIT_TRANSIT の points(巡回点 [{kind, position:[x,y,z]}] の配列)を読む。形式の崩れた要素は飛ばす。
+    /// </summary>
+    private static List<TransitPlanManager.RoutePoint> ReadTransitPoints(object value)
+    {
+        var result = new List<TransitPlanManager.RoutePoint>();
+        if (value is not Newtonsoft.Json.Linq.JArray array) return result;
+        foreach (var token in array)
+        {
+            if (token is not Newtonsoft.Json.Linq.JObject item) continue;
+            if (item["position"] is not Newtonsoft.Json.Linq.JArray position || position.Count < 3) continue;
+            var world = new Vector3((float)position[0], (float)position[1], (float)position[2]);
+            result.Add(new TransitPlanManager.RoutePoint(world, (string)item["kind"] == "waypoint"));
+        }
+        return result;
     }
 
     /// <summary>

@@ -23,5 +23,16 @@
     "3": "Prairie luxuriante",
     "4": "Champ de neige",
     "5": "Semi-aride"
+  },
+  "climate": {
+    "label": "Climat",
+    "hint": "Définit la météo de chaque saison (fréquence du soleil, de la pluie et de la neige). N'affecte pas la simulation.",
+    "1": "Tempéré humide",
+    "2": "Subtropical",
+    "3": "Continental humide",
+    "4": "Méditerranéen",
+    "5": "Steppique",
+    "6": "Désertique",
+    "7": "Subarctique"
   }
 }

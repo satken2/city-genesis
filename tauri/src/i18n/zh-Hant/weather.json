@@ -14,10 +14,12 @@
       "overcast": "陰天",
       "rain_clouds": "雨雲",
       "fog": "霧",
-      "sunset": "晚霞",
       "drizzle": "毛毛雨",
       "rain": "雨",
-      "heavy_rain": "大雨"
+      "heavy_rain": "大雨",
+      "light_snow": "小雪",
+      "snow": "雪",
+      "blizzard": "暴風雪"
     }
   }
 }

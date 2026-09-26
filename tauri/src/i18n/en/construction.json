@@ -130,8 +130,8 @@
   "resource_construction": {
     "selectType": "-- Select Resource Type --",
     "settings": "Settings",
-    "maxAmount": "Max Capacity",
-    "recoveryRate": "Recovery Rate",
+    "maxAmount": "Max Deposit",
+    "recoveryRate": "Recovery Rate (per day)",
     "shapeInfo": "Shape Info",
     "noVerticesYet": "Click on the terrain to place polygon vertices",
     "vertexCount": "Vertices",
@@ -139,6 +139,40 @@
     "confirming": "Confirming...",
     "confirmFailedUnknown": "Failed to confirm the resource area. Please modify the shape and try again.",
     "cancel": "Cancel"
+  },
+  "resourcePreset": {
+    "label": "Preset",
+    "presets": {
+      "oilField": {
+        "name": "Conventional oil field",
+        "note": "Recoverable reserves of an oil field (1 unit = 1 barrel of crude). Scales with area and does not recover."
+      },
+      "oreDeposit": {
+        "name": "Open-pit ore deposit",
+        "note": "Tonnage of a deposit that can be mined open-pit (1 unit = 1 kg). Scales with area and does not recover."
+      },
+      "river": {
+        "name": "River",
+        "note": "A water source defined by its flow (1 unit = 1 m³). The cap is 30 days of withdrawable water and refills every epoch."
+      },
+      "lake": {
+        "name": "Lake / reservoir",
+        "note": "Storage proportional to area, refilled by inflow (1 unit = 1 m³). Drawing more than the inflow lowers the water level."
+      },
+      "groundwater": {
+        "name": "Groundwater",
+        "note": "Aquifer storage proportional to area with slow recharge from rainfall (1 unit = 1 m³). Once over-pumped, it takes many years to recover."
+      }
+    },
+    "summary": {
+      "area": "Area {{area}}",
+      "amount": "Reserve {{amount}}",
+      "yield": "Sustainable yield ~{{amount}}/day",
+      "refillDays": "Empty to full in ~{{days}} days",
+      "refillYears": "Empty to full in ~{{years}} years",
+      "nonRenewable": "Does not recover (depletes as extracted)",
+      "needsShape": "Draw the shape to fill in a reserve based on its area"
+    }
   },
   "prop_placement": {
     "height": "Height above ground (m)",

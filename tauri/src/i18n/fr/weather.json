@@ -14,10 +14,12 @@
       "overcast": "Ciel couvert",
       "rain_clouds": "Nuages de pluie",
       "fog": "Brouillard",
-      "sunset": "Coucher de soleil",
       "drizzle": "Bruine",
       "rain": "Pluie",
-      "heavy_rain": "Forte pluie"
+      "heavy_rain": "Forte pluie",
+      "light_snow": "Neige faible",
+      "snow": "Neige",
+      "blizzard": "Blizzard"
     }
   }
 }

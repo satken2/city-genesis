@@ -1,37 +1,75 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
-/// <summary>エポックの確定値だけを読み、Unity内の空・照明を管理する。</summary>
+/// <summary>
+/// 天気・時刻・気候から、Unity内の空・照明・霧・降水を管理する。経済・マスター・セーブには書き込まない。
+/// 天気はエポックと無関係に隣り合う天気へゆっくり移り変わり(WeatherChain)、時刻は WeatherClock が進める。
+/// 気候と季節は GET /api/v1/city の climate と current_date から読み、天気の出現割合(WeatherClimate)を決める。
+/// </summary>
 public sealed class WeatherController : MonoBehaviour
 {
     public static WeatherController Instance { get; private set; }
     public int CurrentIndex { get; private set; }
     public bool Locked { get; private set; }
-    public float TransitionSeconds = 3f;
+    public float TransitionSeconds = 45f;
+    public int Climate { get; private set; } = Constants.CLIMATE_TEMPERATE;
+    public int Season { get; private set; } = WeatherClimate.Spring;
+    public WeatherClock Clock { get; } = new WeatherClock();
+
+    /// <summary>移り変わりの途中を含む今の雨量(0〜3)。環境音が雨音の強さに使う。</summary>
+    public float RainAmount => Blended().Rain;
+
     private readonly System.Random random = new System.Random();
     private readonly WeatherEpochTracker epochs = new WeatherEpochTracker();
     private IpcClient ipc;
     private GameStateManager state;
     private Coroutine query;
-    private bool pending, suspended, panel;
-    private float retryAt;
+    private bool pending, suspended, panel, awaitingDawn, redrawAtDawn;
+    private float retryAt, dwellLeft, probeAt, cookieAt;
     private Material sky;
     private Light sun;
     private Texture2D cookie;
     private UniversalAdditionalLightData sunData;
-    private WeatherPreset from, target;
-    private float blend = 1f;
-    private float cloudSeed;
+    private Look fromLook, toLook;
+    private float blend = 1f, blendSeconds = 1f;
+    private float cloudSeed, cookieCoverage = -1f, cookieThickness = -1f;
+    private IReadOnlyList<int> weights = WeatherClimate.Weights(Constants.CLIMATE_TEMPERATE, WeatherClimate.Spring);
     private EnvironmentSnapshot original;
     private GUIStyle panelStyle;
     private ReflectionProbe reflection;
-    private WeatherRain precipitation;
+    private WeatherPrecipitation precipitation;
 
-    private sealed class CityResponse { public CityEpoch city; }
-    private sealed class CityEpoch { public int? epoch; }
+    private static readonly Color LowSunZenith = Hex("696E9B"), LowSunHorizon = Hex("ECA68D"), LowSunLight = Hex("FFA477"), LowSunCloud = Hex("EDB7AB");
+    private static readonly Color NightZenith = Hex("05070D"), NightHorizon = Hex("0B1019"), NightCloud = Hex("0C1018");
+
+    private sealed class CityResponse { public CityState city; }
+    private sealed class CityState { public int? epoch; public int? climate; public int? current_date; }
+
+    /// <summary>天気の見た目。移り変わりの途中は前後の天気の間を補間する。</summary>
+    private struct Look
+    {
+        public Color Zenith, Horizon, Sun, Cloud;
+        public float Intensity, Coverage, Thickness, Haze, Shadow, Rain, Snow;
+
+        public static Look Of(WeatherPreset p) => new Look
+        {
+            Zenith = p.Zenith, Horizon = p.Horizon, Sun = p.Sun, Cloud = p.Cloud, Intensity = p.Intensity,
+            Coverage = p.Coverage, Thickness = p.Thickness, Haze = p.Haze, Shadow = p.Shadow, Rain = p.Rain, Snow = p.Snow,
+        };
+
+        public static Look Lerp(Look a, Look b, float t) => new Look
+        {
+            Zenith = Color.Lerp(a.Zenith, b.Zenith, t), Horizon = Color.Lerp(a.Horizon, b.Horizon, t),
+            Sun = Color.Lerp(a.Sun, b.Sun, t), Cloud = Color.Lerp(a.Cloud, b.Cloud, t),
+            Intensity = Mathf.Lerp(a.Intensity, b.Intensity, t), Coverage = Mathf.Lerp(a.Coverage, b.Coverage, t),
+            Thickness = Mathf.Lerp(a.Thickness, b.Thickness, t), Haze = Mathf.Lerp(a.Haze, b.Haze, t),
+            Shadow = Mathf.Lerp(a.Shadow, b.Shadow, t), Rain = Mathf.Lerp(a.Rain, b.Rain, t), Snow = Mathf.Lerp(a.Snow, b.Snow, t),
+        };
+    }
 
     private void Awake()
     {
@@ -85,8 +123,9 @@ public sealed class WeatherController : MonoBehaviour
         reflection.resolution = 64;
         reflection.size = Vector3.one * 1000000f;
         reflection.importance = 0;
-        precipitation = gameObject.AddComponent<WeatherRain>();
-        SelectWeather(WeatherEpochTracker.Next(random), false, true);
+        precipitation = gameObject.AddComponent<WeatherPrecipitation>();
+        cloudSeed = NewSeed();
+        StartWeather(WeatherChain.Sample(random, weights));
     }
 
     private void Update()
@@ -94,23 +133,13 @@ public sealed class WeatherController : MonoBehaviour
         if (sky == null) return;
         BindEvents();
         if (pending && query == null && !suspended && Time.unscaledTime >= retryAt)
-            query = StartCoroutine(ReadEpoch());
-        if (blend < 1f)
-        {
-            blend = Mathf.Min(1, blend + Time.unscaledDeltaTime / Mathf.Max(0.01f, TransitionSeconds));
-            ApplyEnvironment(Mathf.SmoothStep(0, 1, blend));
-            if (blend >= 1f) reflection.RenderProbe();
-        }
-        var keyboard = Keyboard.current;
-        if (keyboard == null) return;
-        if (keyboard.f9Key.wasPressedThisFrame) panel = !panel;
-        if (!panel) return;
-        if (keyboard.f6Key.wasPressedThisFrame)
-            SelectWeather((CurrentIndex + WeatherPreset.All.Count - 1) % WeatherPreset.All.Count, true, true);
-        if (keyboard.f7Key.wasPressedThisFrame)
-            SelectWeather((CurrentIndex + 1) % WeatherPreset.All.Count, true, true);
-        if (keyboard.f10Key.wasPressedThisFrame) { Locked = !Locked; PublishWeather(); }
-        if (keyboard.f11Key.wasPressedThisFrame) { Locked = false; Randomize(1); }
+            query = StartCoroutine(ReadCity());
+        float seconds = Time.unscaledDeltaTime;
+        if (Clock.Advance(seconds)) OnDawn();
+        AdvanceWeather(seconds);
+        ApplyEnvironment();
+        RefreshSky(false);
+        HandleKeys();
     }
 
     private void BindEvents()
@@ -121,11 +150,12 @@ public sealed class WeatherController : MonoBehaviour
             ipc = IpcClient.Instance;
             if (ipc != null)
             {
-                ipc.OnSessionReload += RequestEpoch;
-                ipc.OnSessionForceReload += RequestEpoch;
+                ipc.OnSessionReload += RequestCity;
+                ipc.OnSessionForceReload += RequestCity;
                 ipc.OnSessionReset += Suspend;
                 ipc.OnGameEnd += Suspend;
                 ipc.OnGameStart += BeginSession;
+                ipc.OnEpochExecuting += SetEpochExecuting;
                 ipc.OnWeatherQuery += PublishWeather;
                 ipc.OnWeatherSet += SetWeatherFromUi;
                 PublishWeather();
@@ -154,9 +184,8 @@ public sealed class WeatherController : MonoBehaviour
         CancelQuery();
         epochs.Reset();
         suspended = false;
-        pending = true;
-        retryAt = 0;
-        if (precipitation != null && target != null) precipitation.SetRain(target.Rain);
+        awaitingDawn = redrawAtDawn = false;
+        RequestCity();
     }
 
     private void Suspend()
@@ -165,7 +194,8 @@ public sealed class WeatherController : MonoBehaviour
         epochs.Reset();
         suspended = true;
         pending = false;
-        if (precipitation != null) precipitation.SetRain(0);
+        awaitingDawn = redrawAtDawn = false;
+        Clock.StartMorning();
     }
 
     private void CancelQuery()
@@ -174,9 +204,21 @@ public sealed class WeatherController : MonoBehaviour
         query = null;
     }
 
-    private void RequestEpoch() { pending = true; retryAt = 0; }
+    private void RequestCity() { pending = true; retryAt = 0; }
 
-    private IEnumerator ReadEpoch()
+    /// <summary>
+    /// エポック実行の開始と終了(UIの epoch:executing)。開始で日を早送りで沈めて暗転し、
+    /// 終了後は処理後の都市を読んでから日の出へ進める(読み終える前に明けると、明るくなってから天気が変わって見える)。
+    /// </summary>
+    private void SetEpochExecuting(bool executing)
+    {
+        if (suspended) return;
+        if (executing) { awaitingDawn = false; Clock.BeginNight(); return; }
+        awaitingDawn = true;
+        RequestCity();
+    }
+
+    private IEnumerator ReadCity()
     {
         // 同時要求は直列化し、取得中に届いたリロードも次の1回として残す。
         pending = false;
@@ -185,94 +227,191 @@ public sealed class WeatherController : MonoBehaviour
         {
             if (response?.city?.epoch == null) return;
             received = true;
-            int advanced = epochs.Observe(response.city.epoch.Value);
-            if (advanced > 0 && !Locked) Randomize(advanced);
+            ApplyCity(response.city);
         }, _ => { });
-        if (!received) { pending = true; retryAt = Time.unscaledTime + 5f; }
         query = null;
+        if (!received) { pending = true; retryAt = Time.unscaledTime + 5f; }
+        // 読めなかったときも日の出へ進め、バックエンドが止まっていても暗いままにしない。
+        if (awaitingDawn && (!received || !pending))
+        {
+            awaitingDawn = false;
+            Clock.RequestDawn();
+        }
     }
 
-    private void Randomize(int count)
+    private void ApplyCity(CityState city)
     {
-        int next = CurrentIndex;
-        for (int i = 0; i < count; i++) next = WeatherEpochTracker.Next(random);
-        SelectWeather(next, false, false);
+        bool sessionStart = !epochs.Epoch.HasValue;
+        int advanced = epochs.Observe(city.epoch.Value);
+        Climate = WeatherClimate.Normalize(city.climate ?? Constants.CLIMATE_TEMPERATE);
+        if (city.current_date.HasValue) Season = WeatherClimate.SeasonOf(city.current_date.Value);
+        var next = WeatherClimate.Weights(Climate, Season);
+        bool changed = !ReferenceEquals(next, weights);
+        weights = next;
+        if (sessionStart)
+        {
+            // セッション開始はロード画面の裏なので、その都市の気候・季節で天気を選び直して朝から始める。
+            if (!Locked) { cloudSeed = NewSeed(); StartWeather(WeatherChain.Sample(random, weights)); }
+            Clock.StartMorning();
+        }
+        else if (advanced > 0)
+        {
+            // エポックが進んだ = 日をまたいだ。暗転前なら早送りで暗転させ、明けたところで天気を引き直す。
+            redrawAtDawn = true;
+            Clock.BeginNight();
+            Clock.RequestDawn();
+        }
+        if (changed) PublishWeather();
     }
 
+    /// <summary>暗転が明けた瞬間。エポックが進んでいれば、日の出の前に新しい日の天気へ切り替える。</summary>
+    private void OnDawn()
+    {
+        if (!redrawAtDawn) return;
+        redrawAtDawn = false;
+        if (Locked) return;
+        cloudSeed = NewSeed();
+        StartWeather(WeatherChain.Sample(random, weights));
+    }
+
+    private void AdvanceWeather(float seconds)
+    {
+        if (blend < 1f) blend = Mathf.Min(1f, blend + seconds / blendSeconds);
+        // 暗転中の天気は日の出の直前に引き直すので進めない。
+        if (Locked || Clock.IsDarkening) return;
+        dwellLeft -= seconds;
+        if (dwellLeft > 0f) return;
+        int next = WeatherChain.Step(random, CurrentIndex, weights);
+        dwellLeft = WeatherChain.Dwell(random, next);
+        if (next != CurrentIndex) BeginTransition(next, TransitionSeconds);
+    }
+
+    /// <summary>途中から見始めた天気として即座に切り替える。残りの持続時間は1回分の途中から数える。</summary>
+    private void StartWeather(int index)
+    {
+        dwellLeft = WeatherChain.Dwell(random, index) * (float)random.NextDouble();
+        BeginTransition(index, 0f);
+        ApplyEnvironment();
+        RefreshSky(true);
+        precipitation.ClearStopped();
+    }
+
+    private void BeginTransition(int index, float seconds)
+    {
+        fromLook = Blended();
+        toLook = Look.Of(WeatherPreset.All[index]);
+        CurrentIndex = index;
+        blendSeconds = Mathf.Max(0.01f, seconds);
+        blend = seconds > 0f ? 0f : 1f;
+        PublishWeather();
+    }
+
+    private Look Blended() => Look.Lerp(fromLook, toLook, Mathf.SmoothStep(0f, 1f, blend));
+
+    /// <summary>天気を選んで表示する。既定は撮影用の即時切り替え+固定。</summary>
     public void SelectWeather(int index, bool lockWeather = true, bool immediate = true)
     {
         if (sky == null || index < 0 || index >= WeatherPreset.All.Count) return;
-        // 連続選択では遷移を確定してから次の遷移を始め、参照元を常にプリセットに保つ。
-        if (target != null && blend < 1f) ApplyEnvironment(1);
-        from = target ?? WeatherPreset.All[index];
-        target = WeatherPreset.All[index];
-        CurrentIndex = index;
         Locked = lockWeather;
-        cloudSeed = index * 13.71f;
-        blend = immediate ? 1f : 0f;
-        BuildCookie();
-        ApplyEnvironment(blend);
-        if (immediate) reflection.RenderProbe();
-        precipitation.SetRain(target.Rain);
+        dwellLeft = WeatherChain.Dwell(random, index);
+        BeginTransition(index, immediate ? 0f : TransitionSeconds);
+        if (!immediate) return;
+        ApplyEnvironment();
+        RefreshSky(true);
+        precipitation.ClearStopped();
+    }
+
+    /// <summary>固定を切り替える。解除すると今の天気から自然な移り変わりを再開する。</summary>
+    public void SetLocked(bool value)
+    {
+        Locked = value;
+        if (!value) dwellLeft = WeatherChain.Dwell(random, CurrentIndex) * (float)random.NextDouble();
         PublishWeather();
     }
 
     public void SetWeatherFromUi(string id)
     {
-        if (string.IsNullOrEmpty(id)) { Locked = false; PublishWeather(); return; }
-        for (int i = 0; i < WeatherPreset.All.Count; i++)
-            if (WeatherPreset.All[i].Id == id) { SelectWeather(i); return; }
-        PublishWeather();
+        if (string.IsNullOrEmpty(id)) { SetLocked(false); return; }
+        int index = WeatherPreset.IndexOf(id);
+        if (index >= 0) SelectWeather(index);
+        else PublishWeather();
     }
 
     public void PublishWeather()
     {
-        if (sky == null || target == null || IpcClient.Instance == null) return;
+        if (sky == null || IpcClient.Instance == null) return;
         var options = new object[WeatherPreset.All.Count];
         for (int i = 0; i < options.Length; i++)
         {
             var preset = WeatherPreset.All[i];
-            options[i] = new { id = preset.Id, weight = preset.Weight, rain = preset.Rain };
+            options[i] = new { id = preset.Id, weight = weights[i], rain = preset.Rain, snow = preset.Snow };
         }
-        IpcClient.Instance.EmitWeatherState(target.Id, Locked, target.Rain, options);
+        var current = WeatherPreset.All[CurrentIndex];
+        IpcClient.Instance.EmitWeatherState(current.Id, Locked, current.Rain, current.Snow, options);
     }
 
-    private void ApplyEnvironment(float t)
+    private void ApplyEnvironment()
     {
-        Color horizon = Color.Lerp(from.Horizon, target.Horizon, t);
-        Color zenith = Color.Lerp(from.Zenith, target.Zenith, t);
-        Color sunlight = Color.Lerp(from.Sun, target.Sun, t);
-        float haze = Mathf.Lerp(from.Haze, target.Haze, t);
-        // プリセットの方位は太陽のある方向。Light.forwardは光の進む向きなので反転する。
-        sun.transform.rotation = Quaternion.Slerp(Quaternion.Euler(from.Elevation, from.Azimuth + 180f, 0),
-            Quaternion.Euler(target.Elevation, target.Azimuth + 180f, 0), t);
+        Look look = Blended();
+        float elevation = Clock.Elevation, darkness = Clock.Darkness;
+        // 太陽が低いほど夕焼けの色へ寄せ、暗転・薄明では夜の色へ寄せる。厚い雲の下では夕焼けの色づきが弱い。
+        float golden = (1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(2f, 22f, elevation))) * (1f - 0.8f * look.Coverage);
+        Color zenith = Color.Lerp(Color.Lerp(look.Zenith, LowSunZenith, golden), NightZenith, darkness);
+        Color horizon = Color.Lerp(Color.Lerp(look.Horizon, LowSunHorizon, golden), NightHorizon, darkness);
+        Color cloudColor = Color.Lerp(Color.Lerp(look.Cloud, LowSunCloud, golden), NightCloud, darkness);
+        Color sunlight = Color.Lerp(look.Sun, LowSunLight, golden);
+        // 直射光は地平線の少し下で消し、日没直後の残照は空の色だけで表す。低い太陽は大気を長く通るぶん弱い。
+        float daylight = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(-3f, 5f, elevation)) * (1f - darkness);
+        float lowSun = Mathf.Lerp(0.6f, 1f, Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0f, 30f, elevation)));
+        // 方位は太陽のある方向で、Light.forward は光の進む向きなので反転する。地平線より下からは照らさない。
+        sun.transform.rotation = Quaternion.Euler(Mathf.Max(elevation, 2f), Clock.Azimuth + 180f, 0f);
         sun.color = sunlight;
-        sun.intensity = Mathf.Lerp(from.Intensity, target.Intensity, t);
-        sun.shadowStrength = Mathf.Lerp(from.Shadow, target.Shadow, t);
+        sun.intensity = look.Intensity * lowSun * daylight;
+        sun.shadowStrength = look.Shadow * daylight;
         sky.SetColor("_Zenith", zenith);
         sky.SetColor("_Horizon", horizon);
-        sky.SetColor("_SunColor", sunlight);
-        sky.SetColor("_CloudColor", Color.Lerp(from.Cloud, target.Cloud, t));
-        sky.SetVector("_SunDirection", -sun.transform.forward);
-        sky.SetFloat("_Coverage", Mathf.Lerp(from.Coverage, target.Coverage, t));
-        sky.SetFloat("_Thickness", Mathf.Lerp(from.Thickness, target.Thickness, t));
+        sky.SetColor("_SunColor", sunlight * (1f - darkness));
+        sky.SetColor("_CloudColor", cloudColor);
+        sky.SetVector("_SunDirection", SunDirection(elevation, Clock.Azimuth));
+        sky.SetFloat("_Coverage", look.Coverage);
+        sky.SetFloat("_Thickness", look.Thickness);
         sky.SetFloat("_Seed", cloudSeed);
         RenderSettings.ambientSkyColor = Color.Lerp(zenith, horizon, 0.55f) * 0.75f;
         RenderSettings.ambientEquatorColor = horizon * 0.48f;
         RenderSettings.ambientGroundColor = horizon * 0.22f;
         // URPの動的メッシュへ渡すSHも明示する。空の再ベイクを待たず、曇天の拡散光を反映する。
-        float coverage = Mathf.Lerp(from.Coverage, target.Coverage, t);
         var ambient = new SphericalHarmonicsL2();
-        ambient.AddAmbientLight(horizon.linear * Mathf.Lerp(0.28f, 0.48f, coverage));
+        ambient.AddAmbientLight(horizon.linear * Mathf.Lerp(0.28f, 0.48f, look.Coverage));
         ambient.AddDirectionalLight(Vector3.up, zenith.linear, 0.12f);
         RenderSettings.ambientProbe = ambient;
         RenderSettings.fogColor = horizon;
-        RenderSettings.fogStartDistance = Mathf.Lerp(1000, 60, haze);
-        RenderSettings.fogEndDistance = Mathf.Lerp(6500, 1200, haze);
+        RenderSettings.fogStartDistance = Mathf.Lerp(1000, 60, look.Haze);
+        RenderSettings.fogEndDistance = Mathf.Lerp(6500, 1200, look.Haze);
+        precipitation.SetLevels(look.Rain, look.Snow, 1f - darkness);
     }
 
-    private void BuildCookie()
+    /// <summary>空の反射と雲影は作り直しが重いので、変化が溜まったときと一定間隔でだけ更新する。</summary>
+    private void RefreshSky(bool force)
     {
+        Look look = Blended();
+        float now = Time.unscaledTime;
+        bool cloudsMoved = Mathf.Abs(look.Coverage - cookieCoverage) > 0.02f || Mathf.Abs(look.Thickness - cookieThickness) > 0.04f;
+        if (force || (cloudsMoved && now >= cookieAt))
+        {
+            BuildCookie(look.Coverage, look.Thickness);
+            cookieAt = now + 0.5f;
+        }
+        if (force || now >= probeAt)
+        {
+            reflection.RenderProbe();
+            probeAt = now + 3f;
+        }
+    }
+
+    private void BuildCookie(float coverage, float thickness)
+    {
+        cookieCoverage = coverage;
+        cookieThickness = thickness;
         // 周期境界をブレンドして、都市上で雲影のタイルの継ぎ目が見えないようにする。
         var pixels = new Color[128 * 128];
         for (int y = 0; y < 128; y++)
@@ -282,8 +421,8 @@ public sealed class WeatherController : MonoBehaviour
             float Noise(float a, float b) => Mathf.PerlinNoise(a * 5 + cloudSeed, b * 5 + cloudSeed);
             float n = Mathf.Lerp(Mathf.Lerp(Noise(u,v), Noise(u-1,v), u),
                 Mathf.Lerp(Noise(u,v-1), Noise(u-1,v-1), u), v);
-            float shade = Mathf.SmoothStep(0, 1, Mathf.InverseLerp(1-target.Coverage, 1.25f-target.Coverage, n));
-            float value = 1 - shade * Mathf.Min(0.5f, target.Thickness * 0.45f);
+            float shade = Mathf.SmoothStep(0, 1, Mathf.InverseLerp(1-coverage, 1.25f-coverage, n));
+            float value = 1 - shade * Mathf.Min(0.5f, thickness * 0.45f);
             pixels[y * 128 + x] = new Color(value, value, value, 1);
         }
         cookie.SetPixels(pixels);
@@ -291,26 +430,58 @@ public sealed class WeatherController : MonoBehaviour
         sun.cookie = cookie;
     }
 
+    private void HandleKeys()
+    {
+        var keyboard = Keyboard.current;
+        if (keyboard == null) return;
+        if (keyboard.f9Key.wasPressedThisFrame) panel = !panel;
+        if (!panel) return;
+        int count = WeatherPreset.All.Count;
+        if (keyboard.f6Key.wasPressedThisFrame) SelectWeather((CurrentIndex + count - 1) % count);
+        if (keyboard.f7Key.wasPressedThisFrame) SelectWeather((CurrentIndex + 1) % count);
+        if (keyboard.f10Key.wasPressedThisFrame) SetLocked(!Locked);
+        if (keyboard.f11Key.wasPressedThisFrame) { Locked = false; StartWeather(WeatherChain.Sample(random, weights)); }
+        if (keyboard.f3Key.wasPressedThisFrame) Clock.Step(-1f);
+        if (keyboard.f4Key.wasPressedThisFrame) Clock.Step(1f);
+        if (keyboard.f5Key.wasPressedThisFrame) Clock.Paused = !Clock.Paused;
+    }
+
     private void OnGUI()
     {
         if (!panel || sky == null) return;
         if (panelStyle == null) panelStyle = new GUIStyle(GUI.skin.box)
             { font = UiFontProvider.GetFont(16), fontSize = 16, alignment = TextAnchor.UpperLeft, padding = new RectOffset(16,16,12,12) };
-        GUI.Box(new Rect(20, 70, 430, 132),
-            $"天気 / Weather   {CurrentIndex + 1:00}/{WeatherPreset.All.Count}\n{WeatherPreset.All[CurrentIndex].Name}   {(Locked ? "固定 / Locked" : "自動 / Auto")}\nF6/F7 選択   F10 固定   F11 再抽選\nF9 パネルを閉じる（撮影前に非表示）", panelStyle);
+        float hours = Clock.Hours;
+        int hour = Mathf.FloorToInt(hours), minute = Mathf.FloorToInt((hours - hour) * 60f);
+        GUI.Box(new Rect(20, 70, 560, 176),
+            $"天気 / Weather   {CurrentIndex + 1:00}/{WeatherPreset.All.Count}  {WeatherPreset.All[CurrentIndex].Name}   {(Locked ? "固定 / Locked" : "自動 / Auto")}\n" +
+            $"気候 / Climate   {WeatherClimate.Name(Climate)}   {WeatherClimate.SeasonName(Season)}\n" +
+            $"時刻 / Time   {hour:00}:{minute:00}{(Clock.Paused ? "   停止 / Paused" : "")}\n" +
+            "F6/F7 天気   F10 固定   F11 再抽選\nF3/F4 時刻を1時間戻す/進める   F5 時刻の停止\nF9 パネルを閉じる（撮影前に非表示）", panelStyle);
     }
 
     private void UnbindIpc()
     {
         if (ipc == null) return;
-        ipc.OnSessionReload -= RequestEpoch;
-        ipc.OnSessionForceReload -= RequestEpoch;
+        ipc.OnSessionReload -= RequestCity;
+        ipc.OnSessionForceReload -= RequestCity;
         ipc.OnSessionReset -= Suspend;
         ipc.OnGameEnd -= Suspend;
         ipc.OnGameStart -= BeginSession;
+        ipc.OnEpochExecuting -= SetEpochExecuting;
         ipc.OnWeatherQuery -= PublishWeather;
         ipc.OnWeatherSet -= SetWeatherFromUi;
     }
+
+    private float NewSeed() => (float)(random.NextDouble() * 100.0);
+
+    private static Vector3 SunDirection(float elevation, float azimuth)
+    {
+        float e = elevation * Mathf.Deg2Rad, a = azimuth * Mathf.Deg2Rad;
+        return new Vector3(Mathf.Sin(a) * Mathf.Cos(e), Mathf.Sin(e), Mathf.Cos(a) * Mathf.Cos(e));
+    }
+
+    private static Color Hex(string hex) { ColorUtility.TryParseHtmlString("#" + hex, out var c); return c; }
 
     private void OnDisable()
     {
@@ -336,9 +507,9 @@ public sealed class WeatherController : MonoBehaviour
         sunData.lightCookieSize = new Vector2(2600, 2600);
         sun.cookie = cookie;
         reflection.enabled = true;
-        ApplyEnvironment(blend);
-        reflection.RenderProbe();
-        if (precipitation != null) { precipitation.enabled = true; precipitation.SetRain(target.Rain); }
+        if (precipitation != null) precipitation.enabled = true;
+        ApplyEnvironment();
+        RefreshSky(true);
     }
 
     private void OnDestroy()
