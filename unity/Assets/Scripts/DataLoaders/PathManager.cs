@@ -262,6 +262,7 @@ public class PathManager : BaseApiDataManager
     private Dictionary<int, PathSummary> pathDataCache = new Dictionary<int, PathSummary>();
     private Dictionary<int, HashSet<int>> pathsByNodeIndex = new Dictionary<int, HashSet<int>>();
     private Dictionary<int, GameObject> nodeIntersectionMeshes = new Dictionary<int, GameObject>();
+    private readonly Dictionary<int, string> nodeMarkingSignatures = new();
 
     /// <summary>
     /// nodeDataCache のセル逆引き。セル単位の同期・アンロードで、プールに残る全ノードを走査せずに
@@ -426,6 +427,12 @@ public class PathManager : BaseApiDataManager
         PillarClearance.NeighborProvider = GetPillarObstacles;
         TrackAdjacency.NeighborProvider = GetAdjacentTrackNeighbors;
         TrackPath.ConnectedPathsProvider = GetPathsConnectedToNode;
+        RoadMarkingRules.ConnectedPaths = GetPathsConnectedToNode;
+        RoadMarkingRules.IsApproachEndpoint = (path, start, point) =>
+        {
+            var connections = start ? pathStartConnectionPoints : pathEndConnectionPoints;
+            return connections.TryGetValue(path.path_id, out var cut) && Vector3.Distance(cut, point) < 1f;
+        };
         PowerLinePath.ConnectedPaths = GetPathsConnectedToNode;
         TrackPath.InfrastructureConnectionProvider = IsInfrastructureConnection;
         LrtPlatformParts.PolylineProvider = GetLrtPlatformPolyline;
@@ -444,6 +451,12 @@ public class PathManager : BaseApiDataManager
 
     private void OnDestroy()
     {
+        if (RoadMarkingRules.ConnectedPaths == (Func<int, List<PathSummary>>)GetPathsConnectedToNode)
+        {
+            RoadMarkingRules.ConnectedPaths = null;
+            RoadMarkingRules.IsApproachEndpoint = null;
+            RoadMarkingAtlas.Clear();
+        }
         lodCache.Clear();
         if (PowerLinePath.ConnectedPaths == (Func<int, List<PathSummary>>)GetPathsConnectedToNode)
             PowerLinePath.ConnectedPaths = null;
@@ -1028,6 +1041,7 @@ public class PathManager : BaseApiDataManager
     public override void ClearAllCells()
     {
         GetComponent<PathSpeedLimitOverlay>()?.Clear();
+        RoadMarkingAtlas.Clear();
         ClearTerrainFollowProgress();
         Debug.Log("PathManager: 全ノード・道路データをクリア");
         closePathIds.Clear();
@@ -4857,6 +4871,9 @@ public class PathManager : BaseApiDataManager
             return;
         }
 
+        string markingSignature = RoadMarkingRules.JunctionSignature(nodeId, connectedPaths);
+        bool markingsChanged = !nodeMarkingSignatures.TryGetValue(nodeId, out var oldMarkingSignature) || oldMarkingSignature != markingSignature;
+
         Vector3 absolutePos = nodeData.GetAbsolutePosition();
         // 切断前の点列を共用し、本線の勾配と切断断面の高さを一致させる。
         var originalPoints = new Dictionary<int, List<Vector3>>();
@@ -4918,6 +4935,16 @@ public class PathManager : BaseApiDataManager
             mr.material = meshResult.Material;
         }
 
+        var markingSurface = meshGO.GetComponent<RoadMarkingSurface>();
+        if (meshResult.Markings != null)
+        {
+            if (markingSurface == null) markingSurface = meshGO.AddComponent<RoadMarkingSurface>();
+            markingSurface.Configure(meshResult.Markings);
+        }
+        else if (markingSurface != null) Destroy(markingSurface);
+        meshGO.GetComponent<VisualModeObject>().InitializeMaterials();
+        nodeMarkingSignatures[nodeId] = markingSignature;
+
         UpdateNodeSidewalkMesh(meshGO, meshResult);
         UpdateNodeRailMesh(meshGO, meshResult);
         if (meshResult.MotorwayMerge != null) motorwayMerges[nodeId] = meshResult.MotorwayMerge;
@@ -4930,7 +4957,7 @@ public class PathManager : BaseApiDataManager
             {
                 int pathId = kvp.Key;
                 Vector3 newPoint = kvp.Value;
-                bool changed = false;
+                bool changed = markingsChanged;
 
                 if (pathDataCache.TryGetValue(pathId, out PathSummary path))
                 {
@@ -5110,6 +5137,7 @@ public class PathManager : BaseApiDataManager
 
     private void RemoveNodeIntersectionMesh(int nodeId)
     {
+        nodeMarkingSignatures.Remove(nodeId);
         motorwayMerges.Remove(nodeId);
         // 交差点が消えたときは切断も解除する。以前の切断点を残すと道路端だけが欠ける。
         foreach (var path in GetPathsConnectedToNode(nodeId))
@@ -5172,6 +5200,7 @@ public class PathManager : BaseApiDataManager
         motorwayMerges.Clear();
         nodeIntersectionSignatures.Clear();
         deferredNewNodeIntersectionIds.Clear();
+        nodeMarkingSignatures.Clear();
         foreach (var meshGO in nodeIntersectionMeshes.Values)
         {
             if (meshGO != null)

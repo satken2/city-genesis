@@ -33,6 +33,9 @@ public sealed class TransitRouteGeometry
         public bool rail;
         /// <summary>駅のホーム(platform_width を持つバリアント)。停車中に折り返せるよう通行方向によらず両方向に走れる</summary>
         public bool platform;
+        public RoadLaneLayout lanes;
+        public RoadMarkingTurns startTurns, endTurns;
+        public Vector2 startIncoming, endIncoming;
     }
 
     public TransitRouteGeometry(PathManager paths) { this.paths = paths; }
@@ -82,6 +85,14 @@ public sealed class TransitRouteGeometry
             {
                 RoadPath.GetPathMasterParams(data, out float width, out float sidewalk, out float side, out _, out int lanes, out _, out float divider, out _, out _, out _, out _);
                 g.offset = Math.Abs(new RoadLaneLayout(width,sidewalk,side,divider,lanes,data.travel_direction).Center(0,CityInfoStore.TrafficHand));
+                g.lanes = new RoadLaneLayout(width,sidewalk,side,divider,lanes,data.travel_direction);
+                g.startIncoming = -RoadMarkingRules.Outward(data, data.start_node_id);
+                g.endIncoming = -RoadMarkingRules.Outward(data, data.end_node_id);
+                if (RoadMarkingRules.HasPaint(data) && g.trimmed.Length >= 25f)
+                {
+                    g.startTurns = RoadMarkingRules.Available(data, data.start_node_id);
+                    g.endTurns = RoadMarkingRules.Available(data, data.end_node_id);
+                }
             }
             g.tramOffset = LrtRoadParts.IsLrt(data.path_variant) ? LrtRoadParts.Offset(data) : g.offset;
             if (LrtRoadParts.IsEmbedded(data.path_variant))
@@ -120,21 +131,21 @@ public sealed class TransitRouteGeometry
         float s = fraction*g.full.Length;
         if (s < -.01 || s > g.full.Length+.01) return false;
         if (s >= g.trimStart && s <= g.trimEnd)
-        { SampleTrack(g,run.Forward,s,tram,out position,out tangent); return true; }
+        { SampleRun(line,index,s,tram,out position,out tangent); return true; }
         bool ahead = run.Forward ? s > g.trimEnd : s < g.trimStart;
         int otherIndex = index+(ahead ? 1 : -1);
         if (otherIndex < 0 || otherIndex >= line.runs.Count)
-        { SampleTrack(g,run.Forward,s,tram,out position,out tangent); return true; }
+        { SampleRun(line,index,s,tram,out position,out tangent); return true; }
         var other = line.runs[otherIndex];
         if (other.path == run.path)
-        { SampleTrack(g,run.Forward,s,tram,out position,out tangent); return true; }
+        { SampleRun(line,index,s,tram,out position,out tangent); return true; }
         if (!geometry.TryGetValue(other.path,out var next)) return false;
         var a = ahead ? g : next; var b = ahead ? next : g;
         var ra = ahead ? run : other; var rb = ahead ? other : run;
         int node = ra.Forward ? a.data.end_node_id : a.data.start_node_id;
         if (node != (rb.Forward ? b.data.start_node_id : b.data.end_node_id)) return false;
-        SampleTrack(a,ra.Forward,ra.Forward?a.trimEnd:a.trimStart,tram,out var p0,out var t0);
-        SampleTrack(b,rb.Forward,rb.Forward?b.trimStart:b.trimEnd,tram,out var p1,out var t1);
+        SampleRun(line,ahead?index:otherIndex,ra.Forward?a.trimEnd:a.trimStart,tram,out var p0,out var t0);
+        SampleRun(line,ahead?otherIndex:index,rb.Forward?b.trimStart:b.trimEnd,tram,out var p1,out var t1);
         float tail = ra.Forward?a.full.Length-a.trimEnd:a.trimStart;
         float head = rb.Forward?b.trimStart:b.full.Length-b.trimEnd;
         float along = ahead ? (run.Forward?s-g.trimEnd:g.trimStart-s) : tail+(run.Forward?s:g.full.Length-s);
@@ -273,6 +284,32 @@ public sealed class TransitRouteGeometry
         }
         p.y += tram ? LrtRoadParts.RailTopAboveSpline(g.data.path_variant)
             : g.rail ? RoadPartHeights.TRACK_ABOVE_SPLINE + .2f : RoadPartHeights.BODY_ABOVE_SPLINE;
+    }
+
+    private void SampleRun(Route route, int index, float s, bool tram, out Vector3 position, out Vector3 tangent)
+    {
+        var run = route.runs[index]; var g = geometry[run.path];
+        SampleTrack(g, run.Forward, s, tram, out position, out tangent);
+        if (g.rail || tram || index + 1 >= route.runs.Count) return;
+        var available = run.Forward ? g.endTurns : g.startTurns;
+        if (available == RoadMarkingTurns.None) return;
+        var nextRun = route.runs[index + 1];
+        if (!geometry.TryGetValue(nextRun.path, out var next) || nextRun.path == run.path) return;
+        int node = run.Forward ? g.data.end_node_id : g.data.start_node_id;
+        if (node != (nextRun.Forward ? next.data.start_node_id : next.data.end_node_id)) return;
+        Vector2 outgoing = -(nextRun.Forward ? next.startIncoming : next.endIncoming);
+        if (outgoing.sqrMagnitude < .1f) outgoing = RoadMarkingRules.Outward(next.data, node);
+        var turn = RoadMarkingRules.Turn(run.Forward ? g.endIncoming : g.startIncoming, outgoing);
+        int lane = RoadMarkingRules.LaneForTurn(available, turn, g.lanes.Count, CityInfoStore.TrafficHand);
+        float target = g.lanes.Center(lane, CityInfoStore.TrafficHand);
+        float original = g.offset * (CityInfoStore.TrafficHand == Constants.TRAFFIC_HAND_LEFT ? -1 : 1);
+        float remaining = run.Forward ? g.trimEnd - s : s - g.trimStart;
+        float length = Mathf.Min(30f, g.trimmed.Length * .4f);
+        float blend = Mathf.SmoothStep(0f, 1f, 1f - Mathf.Clamp01((remaining - 12f) / Mathf.Max(1f, length)));
+        Vector3 right = Vector3.Cross(Vector3.up, tangent).normalized;
+        position += right * ((target - original) * blend);
+        float progress = Mathf.Clamp01(1f - (remaining - 12f) / Mathf.Max(1f, length));
+        tangent = (tangent + right * ((target - original) * 6f * progress * (1f - progress) / Mathf.Max(1f, length))).normalized;
     }
     private static int FindRun(List<Run> runs,double distance)
     {

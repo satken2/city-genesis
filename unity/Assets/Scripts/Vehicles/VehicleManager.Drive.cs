@@ -51,12 +51,21 @@ public partial class VehicleManager
     {
         candidates.Clear();
         float total = 0;
+        RoadMarkingTurns allowed = RoadMarkingTurns.None;
+        Vector2 incoming = Vector2.zero;
+        if (v.TotalLength >= 25f && roads.TryGetValue(v.pathId, out var current) && RoadMarkingRules.HasPaint(current.data))
+        {
+            var available = RoadMarkingRules.Available(current.data, node);
+            allowed = RoadMarkingRules.ForLane(available, v.lane, current.lanes.Count, CityInfoStore.TrafficHand);
+            incoming = -RoadMarkingRules.Outward(current.data, node);
+        }
         foreach (var data in pathManager.GetPathsConnectedToNode(node))
         {
             if (data.path_id == v.pathId || !Drivable(data) || !roads.TryGetValue(data.path_id, out var road)) continue;
             bool forward = data.start_node_id == node;
             if (!forward && data.end_node_id != node) continue;
             if (!DirectionAllowsEntry(data.travel_direction, forward)) continue;
+            if (allowed != RoadMarkingTurns.None && (RoadMarkingRules.Turn(incoming, RoadMarkingRules.Outward(data, node)) & allowed) == 0) continue;
             float weight = Traffic(data, v.vehicleType);
             candidates.Add((road, forward, weight)); total += weight;
         }

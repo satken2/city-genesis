@@ -86,3 +86,5 @@
 アイコンは`Utils.CreateOverlayCanvas`（sortingOrder=68）と`UiFontProvider`を共有し、アラートと同じ距離スケール（100m基準、0.3〜1.5倍）で描く。中心位置は固定でボビングや引出線はない。画面外・カメラ背後・道路レイヤー非表示・個別非表示では隠す。計画中などの表示条件は`VisualModeObject.IsVisualVisible`（`SetRenderersEnabled`の結果）を参照し、ステータス判定を再実装しない。
 
 `UI/SpeedLimitSign`が数値表示、`SpeedLimitSignStyle`が意匠を担当する。現在は全言語で日本式の赤い円・白地・青数字を使い、画像アセットは不要。別意匠はStyleの実装を追加し、言語設定側から`PathSpeedLimitOverlay.SetSignStyle`へ渡せる。位置・取得・表示状態のロジックを意匠へ持ち込まない。検証は`Tests/SpeedLimitSigns/run.ps1`。
+
+RoadMarkingSurfaceを持つRendererは通常材質の復元時にRoadMarkingSurface.Restoreを呼び、クリアされたMaterialPropertyBlockの標示座標・ページ表を復元する。ApplyPropertiesは既存のプロパティを読み取ってから標示項目だけを更新する。

@@ -205,7 +205,7 @@ public static class Utils
         bool changed = false;
         for (int i = 0; i < mats.Length; i++)
         {
-            if (mats[i] != null && mats[i].shader != offsetShader)
+            if (mats[i] != null && mats[i].shader != offsetShader && mats[i].shader.name != "Custom/RoadSurface")
             {
                 mats[i].shader = offsetShader;
                 changed = true;

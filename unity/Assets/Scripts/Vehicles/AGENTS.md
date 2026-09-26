@@ -95,3 +95,7 @@ RopewayNetworkStoreは既存/paths/をPATH_CONVEYORで全ページ取得し、�
 RopewayGeometryはPathManager.CalculatePathPoints(path,false)とVehiclePolylineを共用し、ケーブル・搬器吊り点・終端滑車を同じ実寸の点列から決める。開いた路線はU字折り返し、閉路は左右独立の循環。短い駅でも滑車を縮めず端から張り出させる。RopewayCabinManagerは非スケール時間4m/sで搬器を常時循環させ、Normal/Close・480m以内だけGPU描画する。Farには搬器を出さない。経済車両台帳・TransitMotionClock・運行間隔設定は使わない。
 
 元のbody RendererのforceRenderingOffを復元する際はPathPresentation.SetRendererForceOffを使い、生成待ちの抑制を解除しない。都市切替はTransitDataStore.Session、生成はRenderWorkSchedulerで管理する。モデルは吊り点原点のためVehicleModelResolverで接地補正しない。仕様は公開O文書、検証はTests/Ropeway/animation.ps1。
+
+## 路面標示との共有規則
+
+舗装街路の進入矢印と一般車の出口候補はRoadMarkingRulesの方向割り当てを共有する（描画区間25m以上）。TransitRouteGeometryは次の路線道路に合う車線へバスを滑らかに寄せ、LRT/鉄道には適用しない。時間APIやシミュレーターの経路制約は変えず、描画だけに使う。路面標示はG文書§8.3を参照。
