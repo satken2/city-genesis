@@ -306,6 +306,9 @@ public class PathManager : BaseApiDataManager
     private Dictionary<int, Vector3> pathEndConnectionPoints = new Dictionary<int, Vector3>();
     private readonly Dictionary<int, MotorwayMergeLayout> motorwayMerges = new Dictionary<int, MotorwayMergeLayout>();
 
+    /// <summary>板を持たない合流ノード(本線をノードでつなぎ、ランプを本線の路面へ取り込む)。</summary>
+    private readonly HashSet<int> slablessMergeNodes = new HashSet<int>();
+
     public MotorwayMergeLayout GetMotorwayMerge(int nodeId)
         => motorwayMerges.TryGetValue(nodeId, out var layout) ? layout : null;
 
@@ -426,6 +429,8 @@ public class PathManager : BaseApiDataManager
         // キャッシュ済みパスデータとセル空間インデックスが必要なためPathManagerが担う。
         PillarClearance.NeighborProvider = GetPillarObstacles;
         TrackAdjacency.NeighborProvider = GetAdjacentTrackNeighbors;
+        RoadAdjacency.NeighborProvider = GetAdjacentRoadNeighbors;
+        RoadAdjacency.EndJoinProvider = GetRoadEndJoin;
         TrackPath.ConnectedPathsProvider = GetPathsConnectedToNode;
         RoadMarkingRules.ConnectedPaths = GetPathsConnectedToNode;
         RoadMarkingRules.IsApproachEndpoint = (path, start, point) =>
@@ -471,6 +476,11 @@ public class PathManager : BaseApiDataManager
             TrackAdjacency.NeighborProvider = null;
             TrackPath.ConnectedPathsProvider = null;
             TrackPath.InfrastructureConnectionProvider = null;
+        }
+        if (RoadAdjacency.NeighborProvider == (Func<PathSummary, List<RoadNeighborInfo>>)GetAdjacentRoadNeighbors)
+        {
+            RoadAdjacency.NeighborProvider = null;
+            RoadAdjacency.EndJoinProvider = null;
         }
     }
 
@@ -1531,7 +1541,9 @@ public class PathManager : BaseApiDataManager
 
                 // 線路の結合描画: この線路の変更で近くに並走する線路の結合状態が
                 // 変わり得るため、近接線路を再生成対象に積む（バッチ中は終了後に実行）。
+                // 高速道路の本線とランプの結合描画も同じ理由で相手側を作り直す。
                 EnqueueAdjacentTrackNeighborRebuilds(p);
+                EnqueueAdjacentRoadMergeRebuilds(p, affectedNodeIds);
 
                 LodTier tier = DeterminePathLodTier(p, nearSet, dynamicSet);
 
@@ -2021,6 +2033,7 @@ public class PathManager : BaseApiDataManager
                 // （防音壁・架線柱の復活）ため、近接線路を再生成対象に積む。
                 // 通過セルキャッシュを参照するため UnregisterPathCells より前に行うこと。
                 EnqueueAdjacentTrackNeighborRebuilds(removedPath);
+                EnqueueAdjacentRoadMergeRebuilds(removedPath, affectedNodeIds);
             }
 
             UnregisterPathDataById(pathId);
@@ -2031,6 +2044,7 @@ public class PathManager : BaseApiDataManager
             pathEndConnectionPoints.Remove(pathId);
             pathStartSidewalkSetbacks.Remove(pathId);
             pathEndSidewalkSetbacks.Remove(pathId);
+            DropRoadEndJoins(pathId);
             pathVersionCache.Remove(pathId);
 
             if (pathObjectsCache.TryGetValue(pathId, out GameObject obj))
@@ -2387,7 +2401,7 @@ public class PathManager : BaseApiDataManager
     }
 
     /// <summary>
-    /// ノードの交差点メッシュ GO(NodeMesh_*。子に Sidewalk / Rail を持つ)。無ければ null。
+    /// ノードの交差点メッシュ GO(NodeMesh_*。子に Sidewalk / Rail / Signals を持つ)。無ければ null。
     /// GetNodeObject が返すノード円柱とは別物。
     /// </summary>
     public GameObject GetNodeIntersectionObject(int nodeId)
@@ -3085,6 +3099,105 @@ public class PathManager : BaseApiDataManager
         pendingTrackNeighborRebuildIds.Clear();
     }
 
+    // ================================================================
+    // 高速道路の本線とランプの結合描画（RoadAdjacency）のサポート
+    // ================================================================
+
+    /// <summary>
+    /// 指定した高速道路の近接候補(通過セル＋隣接セルに登録されている高速道路)のうち、
+    /// ランプかどうかが wantRamps に一致するもの。幾何的な判定は RoadAdjacency.Compute が行う。
+    /// </summary>
+    private List<int> CollectNearbyRoadMergeIds(PathSummary path, bool wantRamps)
+    {
+        var result = new List<int>();
+        if (!RoadAdjacency.IsMotorway(path)) return result;
+        // 生成中の新データはまだ通過セルが登録されていないことがあるので、そのときだけ計算し直す。
+        bool registered = pathDataCache.TryGetValue(path.path_id, out PathSummary current) && ReferenceEquals(current, path);
+        var seen = new HashSet<int>();
+        foreach (var cell in registered ? GetPathCoveredCellsCached(path) : GetPathCoveredCells(path))
+            for (int dx = -1; dx <= 1; dx++)
+                for (int dy = -1; dy <= 1; dy++)
+                {
+                    if (!pathIdsByCell.TryGetValue(new Vector2Int(cell.x + dx, cell.y + dy), out HashSet<int> ids)) continue;
+                    foreach (int id in ids)
+                    {
+                        if (id == path.path_id || !seen.Add(id)) continue;
+                        if (!pathDataCache.TryGetValue(id, out PathSummary other)) continue;
+                        if (RoadAdjacency.IsMotorway(other) && RoadAdjacency.IsRamp(other) == wantRamps) result.Add(id);
+                    }
+                }
+        return result;
+    }
+
+    /// <summary>
+    /// RoadAdjacency.NeighborProvider の実体。本線にはランプ、ランプには本線の、稼働中の近接候補を返す。
+    /// 点列は切断前の描画点列で、ランプは本線へ寄せた後の高さを持つ(本線の点列はランプに依存しない)。
+    /// 工事中の道路は完成した路面を描かないので結合相手に含めない。
+    /// </summary>
+    public List<RoadNeighborInfo> GetAdjacentRoadNeighbors(PathSummary path)
+    {
+        var result = new List<RoadNeighborInfo>();
+        if (!RoadAdjacency.IsMotorway(path)) return result;
+        foreach (int id in CollectNearbyRoadMergeIds(path, !RoadAdjacency.IsRamp(path)))
+        {
+            if (!pathDataCache.TryGetValue(id, out PathSummary other) || other.status != Constants.STATUS_ACTIVE) continue;
+            var points = GetUntrimmedPoints(other, out _);
+            if (points == null || points.Count < 2) continue;
+            result.Add(new RoadNeighborInfo { PathId = id, Points = points, Width = GetRoadWidth(other.path_variant) });
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// データ変更(新規・version変化・削除)のあった高速道路の近くで、結合相手になり得る道路を作り直す。
+    /// 本線の変更はランプの描画高さを変える。ランプの点列キャッシュと両端の交差点の入力署名は本線の署名を含むので
+    /// (ComputeRoadMergeSignature)、ここではランプの両端のノードを affectedNodeIds へ積んで計算し直させる
+    /// (呼び出し側が、変更したパスの登録・削除を終えてから交差点を更新する)。
+    /// 通過セルキャッシュを参照するため UnregisterPathCells より前に呼ぶこと。
+    /// </summary>
+    private void EnqueueAdjacentRoadMergeRebuilds(PathSummary path, ICollection<int> affectedNodeIds)
+    {
+        if (!RoadAdjacency.IsMotorway(path)) return;
+        bool ramp = RoadAdjacency.IsRamp(path);
+        foreach (int id in CollectNearbyRoadMergeIds(path, !ramp))
+        {
+            if (!pathDataCache.TryGetValue(id, out PathSummary other)) continue;
+            pendingTrackNeighborRebuildIds.Add(id);
+            geometryRevisions.TryGetValue(id, out int revision);
+            geometryRevisions[id] = revision + 1;
+            if (ramp) continue;
+            InvalidateTerrainFollowPath(other);
+            if (other.start_node_id > 0) affectedNodeIds.Add(other.start_node_id);
+            if (other.end_node_id > 0) affectedNodeIds.Add(other.end_node_id);
+        }
+        FlushPendingTrackNeighborRebuilds(null);
+    }
+
+    /// <summary>ノードで本線が交差点の板を挟まずに続く端(MotorwayMergeLayout)。キーは RoadEndKey。</summary>
+    private readonly Dictionary<long, RoadEndJoin> roadEndJoins = new Dictionary<long, RoadEndJoin>();
+
+    private static long RoadEndKey(int pathId, bool start) => ((long)pathId << 1) | (start ? 1L : 0L);
+
+    private RoadEndJoin GetRoadEndJoin(PathSummary path, bool start)
+        => path != null && roadEndJoins.TryGetValue(RoadEndKey(path.path_id, start), out var join) ? join : default;
+
+    private void DropRoadEndJoins(int pathId)
+    {
+        roadEndJoins.Remove(RoadEndKey(pathId, true));
+        roadEndJoins.Remove(RoadEndKey(pathId, false));
+    }
+
+    /// <summary>ノードの計算結果でその端の扱いを更新し、変わったら真を返す(道路の作り直しが要る)。</summary>
+    private bool SetRoadEndJoin(PathSummary path, int nodeId, RoadEndJoin join)
+    {
+        long key = RoadEndKey(path.path_id, path.start_node_id == nodeId);
+        roadEndJoins.TryGetValue(key, out var current);
+        if (current.Continuous == join.Continuous && current.OwnsSupport == join.OwnsSupport) return false;
+        if (join.Continuous) roadEndJoins[key] = join;
+        else roadEndJoins.Remove(key);
+        return true;
+    }
+
     /// <param name="drawLod">描画LOD(Normal / Close)。Far は CreateOrUpdateFarPath が担当する。</param>
     /// <param name="detailFrom">詳細パーツを敷く区間の始点(全長に対する割合)。区間外は遠景の帯で埋める。</param>
     /// <param name="detailTo">詳細パーツを敷く区間の終点。</param>
@@ -3663,6 +3776,7 @@ public class PathManager : BaseApiDataManager
     /// <summary>
     /// 検証済みのキャッシュ項目。外れていれば計算し直して保存する。キャッシュ対象外なら null。
     /// 地形署名が不明(TerrainManager が無い)ときは、高さの変化を検知できないのでキャッシュしない。
+    /// ランプは寄せ先の本線の署名も混ぜる(本線の地形・データが変わると描画高さが変わるため)。
     /// </summary>
     private PointsEntry GetUntrimmedEntry(PathSummary path)
     {
@@ -3674,6 +3788,7 @@ public class PathManager : BaseApiDataManager
             DropUntrimmedPoints(path.path_id);
             return null;
         }
+        signature = (long)SignatureMix((ulong)signature ^ (ulong)ComputeRoadMergeSignature(path));
         if (untrimmedPointsCache.TryGetValue(path.path_id, out PointsEntry entry)
             && ReferenceEquals(entry.source, path) && entry.terrainSignature == signature) return entry;
         entry ??= new PointsEntry();
@@ -3754,10 +3869,28 @@ public class PathManager : BaseApiDataManager
             t = SignatureMix(t ^ (uint)p.status ^ ((ulong)(otherIsJunction ? 1u : 0u) << 32) ^ ((ulong)(p.start_node_id == nodeId ? 1u : 0u) << 33));
             t = SignatureMix(t ^ (uint)BitConverter.SingleToInt32Bits(ConstructionPathBuilder.Progress(p)));
             t = SignatureMix(t ^ (ulong)ComputeTerrainSignature(p, out _));
+            t = SignatureMix(t ^ (ulong)ComputeRoadMergeSignature(p));
             pathSum += t;
         }
         known = true;
         return (long)SignatureMix(h ^ pathSum ^ (ulong)connected.Count);
+    }
+
+    /// <summary>
+    /// ランプの描画高さが依存する、近くの稼働中の本線の集合・版・地形の署名。ランプ以外は0。
+    /// ランプの点列キャッシュと両端の交差点の入力署名に混ぜ、本線の変化で作り直させる。
+    /// </summary>
+    private long ComputeRoadMergeSignature(PathSummary path)
+    {
+        if (!RoadAdjacency.IsRamp(path)) return 0;
+        ulong sum = 0;
+        foreach (int id in CollectNearbyRoadMergeIds(path, false))
+        {
+            if (!pathDataCache.TryGetValue(id, out PathSummary main) || main.status != Constants.STATUS_ACTIVE) continue;
+            ulong t = SignatureMix((ulong)(uint)id ^ ((ulong)(uint)main.version << 32));
+            sum += SignatureMix(t ^ (ulong)ComputeTerrainSignature(main, out _));
+        }
+        return (long)sum;
     }
 
     /// <summary>SplitMix64 の攪拌。署名の各項を混ぜるのに使う。</summary>
@@ -3811,8 +3944,24 @@ public class PathManager : BaseApiDataManager
         stamp.geometryRevision = buildRevision;
     }
 
-    /// <summary>未切断の点列(CalculatePathPoints の本体)。毎回サンプリングし直し、キャッシュは見ない。</summary>
+    /// <summary>
+    /// 未切断の点列(CalculatePathPoints の本体)。毎回サンプリングし直し、キャッシュは見ない。
+    /// 高速道路のランプは、本線と結合する区間の高さを本線の路面へ寄せる(RoadAdjacency。描画専用)。
+    /// 寄せ先の本線の変化は点列キャッシュの署名(ComputeRoadMergeSignature)が検知する。
+    /// </summary>
     private List<Vector3> ComputeUntrimmedPathPoints(PathSummary path)
+    {
+        List<Vector3> points = ComputeDesignedPathPoints(path);
+        if (points == null || points.Count < 2 || !RoadAdjacency.IsRamp(path)) return points;
+        var neighbors = GetAdjacentRoadNeighbors(path);
+        if (neighbors.Count == 0) return points;
+        var master = MasterDataStore.Instance?.GetPathMaster(path.path_variant);
+        var corridor = RoadAdjacency.Compute(points, GetRoadWidth(path.path_variant), Mathf.Max(0f, master?.wall_width ?? 0f), true, neighbors);
+        return RoadAdjacency.ApplyRampHeights(points, corridor);
+    }
+
+    /// <summary>保存された縦断(アンカー・制御点・駅や接続の設計縦断)どおりの未切断の点列。</summary>
+    private List<Vector3> ComputeDesignedPathPoints(PathSummary path)
     {
         List<Vector3> points = new List<Vector3>();
         var startPointList = path.GetStartPointList();
@@ -4511,10 +4660,12 @@ public class PathManager : BaseApiDataManager
     {
         if (!pathObjectsCache.TryGetValue(pathId, out GameObject obj)) return;
 
+        var mergeNodes = new HashSet<int>();
         if (pathDataCache.TryGetValue(pathId, out PathSummary removedPath))
         {
             // 撤去した線路と並走していた線路の結合を解くため、通過セルキャッシュを消す前に積む。
             EnqueueAdjacentTrackNeighborRebuilds(removedPath);
+            EnqueueAdjacentRoadMergeRebuilds(removedPath, mergeNodes);
         }
 
         UnregisterPathDataById(pathId);
@@ -4525,6 +4676,7 @@ public class PathManager : BaseApiDataManager
         pathEndConnectionPoints.Remove(pathId);
         pathStartSidewalkSetbacks.Remove(pathId);
         pathEndSidewalkSetbacks.Remove(pathId);
+        DropRoadEndJoins(pathId);
         pathVersionCache.Remove(pathId);
 
         if (obj != null)
@@ -4534,6 +4686,12 @@ public class PathManager : BaseApiDataManager
         }
         RemovePathObject(pathId);
         closePathIds.Remove(pathId);
+        // 撤去した本線へ寄せていたランプの端の交差点を、撤去後の状態で計算し直す。
+        foreach (int node in mergeNodes)
+        {
+            if (isLodPathBatchActive) deferredLodIntersectionNodeIds.Add(node);
+            else UpdateNodeIntersectionMesh(node);
+        }
     }
 
     private void UnregisterPathDataById(int pathId)
@@ -4863,9 +5021,9 @@ public class PathManager : BaseApiDataManager
 
         long signature = ComputeNodeIntersectionSignature(nodeId, nodeData, connectedPaths, out bool signatureKnown);
         if (signatureKnown && nodeIntersectionSignatures.TryGetValue(nodeId, out long builtSignature) && builtSignature == signature
-            && nodeIntersectionMeshes.TryGetValue(nodeId, out GameObject unchangedMesh) && unchangedMesh != null)
+            && ((nodeIntersectionMeshes.TryGetValue(nodeId, out GameObject unchangedMesh) && unchangedMesh != null) || slablessMergeNodes.Contains(nodeId)))
         {
-            if (!unchangedMesh.activeSelf) unchangedMesh.SetActive(true);
+            if (unchangedMesh != null && !unchangedMesh.activeSelf) unchangedMesh.SetActive(true);
             awaitingIntersectionNodes.Remove(nodeId);
             RenderWorkScheduler.CountEvent("intersection.inputUnchanged");
             return;
@@ -4886,7 +5044,9 @@ public class PathManager : BaseApiDataManager
             absolutePos.y = nodePoints[0].y;
         }
         NodeMeshResult meshResult = NodeMeshFactory.GenerateNodeMesh(nodeId, absolutePos, connectedPaths, nodeData.GetRelativeHeight(), p => originalPoints[p.path_id], p => GetIntersectionCutLimit(p, nodeId, originalPoints[p.path_id]));
-        if (meshResult == null || meshResult.Mesh == null)
+        // 高速道路の本線をノードでつなぎ、ランプを本線の路面へ取り込む合流は板を持たない(MotorwayMergeLayout)。
+        bool slabless = meshResult != null && meshResult.Mesh == null && meshResult.MotorwayMerge != null;
+        if (!slabless && (meshResult == null || meshResult.Mesh == null))
         {
             Debug.LogWarning($"[PathManager] meshResult or mesh is null for nodeId={nodeId}, removing mesh.");
             RemoveNodeIntersectionMesh(nodeId);
@@ -4901,6 +5061,81 @@ public class PathManager : BaseApiDataManager
         if (signatureKnown) nodeIntersectionSignatures[nodeId] = signature;
         else nodeIntersectionSignatures.Remove(nodeId);
 
+        if (slabless)
+        {
+            if (nodeIntersectionMeshes.TryGetValue(nodeId, out var staleMesh))
+            {
+                if (staleMesh != null) Destroy(staleMesh);
+                nodeIntersectionMeshes.Remove(nodeId);
+            }
+            slablessMergeNodes.Add(nodeId);
+            nodeMarkingSignatures[nodeId] = markingSignature;
+        }
+        else
+        {
+            slablessMergeNodes.Remove(nodeId);
+            UpdateNodeSlab(nodeId, absolutePos, meshResult, markingSignature);
+        }
+        if (meshResult.MotorwayMerge != null) motorwayMerges[nodeId] = meshResult.MotorwayMerge;
+        else motorwayMerges.Remove(nodeId);
+
+        // 本線をノードでつなぐ端は、分離帯の端を丸めず、つなぎ目の橋脚を片方だけが立てる。
+        var joinChanged = new HashSet<int>();
+        foreach (var path in connectedPaths)
+        {
+            var merge = meshResult.MotorwayMerge;
+            bool main = slabless && (path.path_id == merge.MainA || path.path_id == merge.MainB);
+            var join = main ? new RoadEndJoin { Continuous = true, OwnsSupport = path.path_id == Mathf.Min(merge.MainA, merge.MainB) } : default;
+            if (SetRoadEndJoin(path, nodeId, join)) joinChanged.Add(path.path_id);
+        }
+        foreach (var path in connectedPaths)
+            if (joinChanged.Contains(path.path_id) && (meshResult.ConnectionPoints == null || !meshResult.ConnectionPoints.ContainsKey(path.path_id)))
+                OnIntersectionCutChanged(path, rebuild: pathObjectsCache.ContainsKey(path.path_id));
+
+        if (meshResult.ConnectionPoints != null)
+        {
+            foreach (var kvp in meshResult.ConnectionPoints)
+            {
+                int pathId = kvp.Key;
+                Vector3 newPoint = kvp.Value;
+                bool changed = markingsChanged || joinChanged.Contains(pathId);
+
+                if (pathDataCache.TryGetValue(pathId, out PathSummary path))
+                {
+                    if (path.start_node_id == nodeId)
+                    {
+                        if (!pathStartConnectionPoints.TryGetValue(pathId, out Vector3 current) || Vector3.Distance(current, newPoint) > 0.01f)
+                        {
+                            pathStartConnectionPoints[pathId] = newPoint;
+                            changed = true;
+                        }
+                        if (ApplySidewalkSetback(pathStartSidewalkSetbacks, pathId, meshResult.SidewalkSetbacks))
+                        {
+                            changed = true;
+                        }
+                    }
+                    else if (path.end_node_id == nodeId)
+                    {
+                        if (!pathEndConnectionPoints.TryGetValue(pathId, out Vector3 current) || Vector3.Distance(current, newPoint) > 0.01f)
+                        {
+                            pathEndConnectionPoints[pathId] = newPoint;
+                            changed = true;
+                        }
+                        if (ApplySidewalkSetback(pathEndSidewalkSetbacks, pathId, meshResult.SidewalkSetbacks))
+                        {
+                            changed = true;
+                        }
+                    }
+
+                    if (changed) OnIntersectionCutChanged(path, rebuild: true);
+                }
+            }
+        }
+    }
+
+    /// <summary>交差点の板と付帯パーツ(歩道・壁・レール・標示)を生成結果で置き換える。</summary>
+    private void UpdateNodeSlab(int nodeId, Vector3 absolutePos, NodeMeshResult meshResult, string markingSignature)
+    {
         if (!nodeIntersectionMeshes.TryGetValue(nodeId, out var meshGO))
         {
             meshGO = new GameObject($"NodeMesh_{nodeId}");
@@ -4947,49 +5182,7 @@ public class PathManager : BaseApiDataManager
 
         UpdateNodeSidewalkMesh(meshGO, meshResult);
         UpdateNodeRailMesh(meshGO, meshResult);
-        if (meshResult.MotorwayMerge != null) motorwayMerges[nodeId] = meshResult.MotorwayMerge;
-        else motorwayMerges.Remove(nodeId);
-        UpdateMergeCollider(meshGO, meshResult);
-
-        if (meshResult.ConnectionPoints != null)
-        {
-            foreach (var kvp in meshResult.ConnectionPoints)
-            {
-                int pathId = kvp.Key;
-                Vector3 newPoint = kvp.Value;
-                bool changed = markingsChanged;
-
-                if (pathDataCache.TryGetValue(pathId, out PathSummary path))
-                {
-                    if (path.start_node_id == nodeId)
-                    {
-                        if (!pathStartConnectionPoints.TryGetValue(pathId, out Vector3 current) || Vector3.Distance(current, newPoint) > 0.01f)
-                        {
-                            pathStartConnectionPoints[pathId] = newPoint;
-                            changed = true;
-                        }
-                        if (ApplySidewalkSetback(pathStartSidewalkSetbacks, pathId, meshResult.SidewalkSetbacks))
-                        {
-                            changed = true;
-                        }
-                    }
-                    else if (path.end_node_id == nodeId)
-                    {
-                        if (!pathEndConnectionPoints.TryGetValue(pathId, out Vector3 current) || Vector3.Distance(current, newPoint) > 0.01f)
-                        {
-                            pathEndConnectionPoints[pathId] = newPoint;
-                            changed = true;
-                        }
-                        if (ApplySidewalkSetback(pathEndSidewalkSetbacks, pathId, meshResult.SidewalkSetbacks))
-                        {
-                            changed = true;
-                        }
-                    }
-
-                    if (changed) OnIntersectionCutChanged(path, rebuild: true);
-                }
-            }
-        }
+        TrafficSignalBuilder.Apply(meshGO, meshResult.TrafficSignals);
     }
 
     /// <summary>
@@ -5020,23 +5213,6 @@ public class PathManager : BaseApiDataManager
             store[pathId] = newValue;
         }
         return true;
-    }
-
-    /// <summary>描画上の拡幅面は本線として選択する。建設時の論理占有判定には使用しない。</summary>
-    private void UpdateMergeCollider(GameObject meshGO, NodeMeshResult result)
-    {
-        const string childName = "MergeSelection";
-        var old = meshGO.transform.Find(childName);
-        if (old != null) Destroy(old.gameObject);
-        if (result.MotorwayMerge == null) return;
-        var selection = new GameObject(childName);
-        selection.transform.SetParent(meshGO.transform, false);
-        selection.tag = PATH_TAG;
-        int pathId = result.MotorwayMerge.OutgoingId;
-        var info = selection.AddComponent<ObjectIdInfo>();
-        info.id = pathId; info.status = Constants.STATUS_ACTIVE;
-        selection.AddComponent<PathInputHandler>().pathId = pathId;
-        RenderWorkScheduler.Start(this, SetColliderAsync(selection, result.Mesh), "PathManager");
     }
 
 
@@ -5139,13 +5315,14 @@ public class PathManager : BaseApiDataManager
     {
         nodeMarkingSignatures.Remove(nodeId);
         motorwayMerges.Remove(nodeId);
+        slablessMergeNodes.Remove(nodeId);
         // 交差点が消えたときは切断も解除する。以前の切断点を残すと道路端だけが欠ける。
         foreach (var path in GetPathsConnectedToNode(nodeId))
         {
-            bool changed = false;
+            bool changed = SetRoadEndJoin(path, nodeId, default);
             if (path.start_node_id == nodeId)
             {
-                changed = pathStartConnectionPoints.Remove(path.path_id);
+                changed |= pathStartConnectionPoints.Remove(path.path_id);
                 pathStartSidewalkSetbacks.Remove(path.path_id);
             }
             if (path.end_node_id == nodeId)
@@ -5198,6 +5375,8 @@ public class PathManager : BaseApiDataManager
     private void ClearIntersectionMeshes()
     {
         motorwayMerges.Clear();
+        slablessMergeNodes.Clear();
+        roadEndJoins.Clear();
         nodeIntersectionSignatures.Clear();
         deferredNewNodeIntersectionIds.Clear();
         nodeMarkingSignatures.Clear();
@@ -5744,7 +5923,8 @@ public class PathMasterItem
 
     /// <summary>
     /// インターチェンジのランプ用バリアントか。バックエンドはランプの連結成分を起点にIC/JCTを自動検出する
-    /// (検出結果は InterchangeManager が表示する)。1車線の流入ランプは描画専用の合流形状にも使う。
+    /// (検出結果は InterchangeManager が表示する)。描画では、ランプでない高速道路を本線とみなし、
+    /// ランプを本線の路面へ結合・取り込む(RoadAdjacency / MotorwayMergeLayout)。
     /// </summary>
     public bool ramp;
 

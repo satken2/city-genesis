@@ -32,7 +32,18 @@ public static class VehicleModelResolver
         return Mathf.Max(1,Mathf.Max(bounds.size.x,bounds.size.z));
     }
 
+    /// <summary>
+    /// 路線車両の1両を生成する。中間車は外観の middle 系モデル、無ければ外観0の middle、それも無ければ先頭車を使う。
+    /// 帯の塗装スロットは <see cref="TransitLivery"/> へ生成時に登録し、配置のたびに路線色で塗る。
+    /// </summary>
     public static GameObject CreateTransitCar(int type, bool middle, Transform parent, int variantId = 0)
+    {
+        var car = CreateTransitModel(type, middle, parent, variantId);
+        TransitLivery.Register(car, type, variantId);
+        return car;
+    }
+
+    private static GameObject CreateTransitModel(int type, bool middle, Transform parent, int variantId)
     {
         if (!middle) return CreateInstance(type,variantId,parent);
         string part = variantId == 0 ? "middle" : $"middle_{variantId}";

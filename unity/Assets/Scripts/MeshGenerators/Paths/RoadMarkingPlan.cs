@@ -59,26 +59,33 @@ public sealed class RoadMarkingPlan
     /// <summary>進行方向の矢印。形状はコードで生成し、外部の画像素材を必要としない。</summary>
     public void Arrow(Vector2 center, Vector2 forward, RoadMarkingTurns turns, float scale = 1f)
     {
+        if (turns == RoadMarkingTurns.None) return;
         Vector2 right = new Vector2(-forward.y, forward.x);
         Vector2 tail = center - forward * 1.6f * scale;
-        Strip(tail, center + forward * .9f * scale, .18f * scale);
-        if ((turns & RoadMarkingTurns.Straight) != 0) Head(center + forward * 1.65f * scale, forward, scale);
+        Vector2 elbow = center - forward * .2f * scale;
+        bool straight = (turns & RoadMarkingTurns.Straight) != 0;
+        Strip(tail, straight ? center + forward * .9f * scale : elbow, .18f * scale);
+        if (straight) Head(center + forward * 1.65f * scale, forward, scale);
         foreach (int side in new[] { -1, 1 })
         {
             var turn = side < 0 ? RoadMarkingTurns.Left : RoadMarkingTurns.Right;
             if ((turns & turn) == 0) continue;
-            Vector2 elbow = center + forward * .15f * scale;
-            Vector2 tip = elbow + right * side * 1.05f * scale + forward * .55f * scale;
-            Strip(elbow, tip - right * side * .35f * scale, .18f * scale);
-            Head(tip, right * side, scale * .8f);
+            Vector2 direction = right * side;
+            Vector2 tip = elbow + direction * 1.05f * scale + forward * .55f * scale;
+            Vector2 headBase = Head(tip, direction, scale * .8f);
+            // 枝は先端三角形の底辺中央へ接続し、最後の短い区間を転回方向へ向ける。
+            Vector2 bend = headBase - direction * .1f * scale;
+            Strip(elbow, bend, .18f * scale);
+            Strip(bend, headBase + direction * .09f * scale, .18f * scale);
         }
     }
 
-    private void Head(Vector2 tip, Vector2 direction, float scale)
+    private Vector2 Head(Vector2 tip, Vector2 direction, float scale)
     {
         Vector2 side = new Vector2(-direction.y, direction.x) * .42f * scale;
         Vector2 back = tip - direction * .85f * scale;
         Triangle(tip, back - side, back + side);
+        return back;
     }
 
     public Mesh GetMesh()

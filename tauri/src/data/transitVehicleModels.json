@@ -11,6 +11,9 @@
   "1003": [
     { "variant": 0, "prop": 370, "key": "lrt" }
   ],
+  "1004": [
+    { "variant": 0, "prop": 308, "key": "monorail" }
+  ],
   "1005": [
     { "variant": 0, "prop": 376, "key": "trainStandard" },
     { "variant": 1, "prop": 377, "key": "trainFuturistic" },

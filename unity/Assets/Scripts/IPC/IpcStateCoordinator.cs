@@ -35,6 +35,7 @@ public class IpcStateCoordinator : MonoBehaviour
             IpcClient.Instance.OnEditPathCancelTopologyEdit += HandleEditPathCancelTopologyEdit;
             IpcClient.Instance.OnEditPathFinishTopologyEdit += HandleEditPathFinishTopologyEdit;
             IpcClient.Instance.OnBuildingConstructionPickSource += HandleBuildingConstructionPickSource;
+            IpcClient.Instance.OnEditRoadCancel += HandleEditRoadCancel;
         }
     }
 
@@ -60,6 +61,7 @@ public class IpcStateCoordinator : MonoBehaviour
             IpcClient.Instance.OnEditPathCancelTopologyEdit -= HandleEditPathCancelTopologyEdit;
             IpcClient.Instance.OnEditPathFinishTopologyEdit -= HandleEditPathFinishTopologyEdit;
             IpcClient.Instance.OnBuildingConstructionPickSource -= HandleBuildingConstructionPickSource;
+            IpcClient.Instance.OnEditRoadCancel -= HandleEditRoadCancel;
         }
     }
 
@@ -126,6 +128,12 @@ public class IpcStateCoordinator : MonoBehaviour
             && PathTopologyEditManager.Instance != null && PathTopologyEditManager.Instance.IsActive)
         {
             PathTopologyEditManager.Instance.EndMode();
+        }
+
+        // 道路の区間編集モードから別モードへ直接遷移した場合にも、区間編集の帯を確実に片付ける。
+        if (state != "STATE_EDIT_ROAD_MEMBERS" && RoadMemberEditManager.Instance != null && RoadMemberEditManager.Instance.IsActive)
+        {
+            RoadMemberEditManager.Instance.End();
         }
 
         // 駅パッケージ配置から別モードへ直接遷移した場合にも、駅のゴーストを確実に片付ける
@@ -214,6 +222,12 @@ public class IpcStateCoordinator : MonoBehaviour
                 // WindowUtil.BringToForeground() は呼ばない(Unityを最前面にすると
                 // パネルが操作できなくなる)。
                 ApplyStatePathTopologyEdit(state, ipcParams);
+                break;
+
+            case "STATE_EDIT_ROAD_MEMBERS":
+                // 道路の区間編集モード。区間をクリックするたびに道路詳細パネルが所属を更新して
+                // 結果を表示するため、パス結合と同じく WindowUtil.BringToForeground() は呼ばない。
+                ApplyStateEditRoadMembers(ipcParams);
                 break;
 
             default:
@@ -340,6 +354,9 @@ public class IpcStateCoordinator : MonoBehaviour
         {
             PathTopologyEditManager.Instance.EndMode();
         }
+
+        // 道路の区間編集モードを終了する(区間編集の帯を消す。道路詳細パネルの強調は残す)。
+        RoadMemberEditManager.Instance?.End();
     }
 
     /// <summary>
@@ -411,6 +428,58 @@ public class IpcStateCoordinator : MonoBehaviour
 
         if (isMerge) manager.BeginMergeMode(pathId);
         else manager.BeginSplitMode(pathId);
+    }
+
+    /// <summary>
+    /// STATE_EDIT_ROAD_MEMBERS: 道路の区間編集モード。
+    /// params は {road_id, color, path_ids}(開始時点の所属区間)。街路・高速道路の区間だけを
+    /// クリック可能にし、クリックは RoadMemberEditManager が edit_road:toggle_path として UI へ送る。
+    /// 表示は計画中の区間も選べるよう道路敷設モードと同じ「計画表示」に揃える(SyncFromState)。
+    /// </summary>
+    private void ApplyStateEditRoadMembers(Dictionary<string, object> ipcParams)
+    {
+        int roadId = 0;
+        if (ipcParams != null && ipcParams.TryGetValue("road_id", out object ridObj) && ridObj != null)
+        {
+            roadId = Convert.ToInt32(ridObj);
+        }
+        if (roadId <= 0)
+        {
+            Debug.LogWarning("IpcStateCoordinator: STATE_EDIT_ROAD_MEMBERS に road_id が指定されていません");
+            return;
+        }
+        string color = ipcParams.TryGetValue("color", out object colorObj) ? colorObj?.ToString() : null;
+        int[] pathIds = ipcParams.TryGetValue("path_ids", out object idsObj) ? ReadIntArray(idsObj) : System.Array.Empty<int>();
+
+        if (InputSystemManager.Instance != null)
+        {
+            InputSystemManager.Instance.SetModePreset(InputModePreset.ROAD_MEMBER_EDIT);
+        }
+
+        // VisualMode の適用は IpcViewCoordinator.SyncFromState(ステート別の表示プリセット)が行う。
+
+        RoadMemberEditManager.Ensure().Begin(roadId, RoadManager.ParseColor(color), pathIds);
+    }
+
+    /// <summary>
+    /// edit_road:cancel: 道路詳細パネルのウィンドウが閉じられた。区間編集モード中なら打ち切って通常モードへ戻す。
+    /// パネルのウィンドウは閉じても非表示になるだけでアンマウント処理が走らないため、Rust 側が送る
+    /// (edit_path:cancel_topology_edit と同じ理由)。モード中でなければ他のモードを巻き込まないよう何もしない。
+    /// </summary>
+    private void HandleEditRoadCancel()
+    {
+        var manager = RoadMemberEditManager.Instance;
+        if (manager == null || !manager.IsActive) return;
+
+        manager.End();
+        ApplyStateNormal();
+
+        var coordinator = FindAnyObjectByType<IpcViewCoordinator>();
+        if (coordinator != null)
+        {
+            coordinator.SyncFromState("STATE_NORMAL");
+            coordinator.ApplyAllLayerModes();
+        }
     }
 
     /// <summary>
@@ -1358,6 +1427,10 @@ public class IpcStateCoordinator : MonoBehaviour
         // オブジェクト単位の表示フィルタは建物ID・パスIDの集合なので、別の都市を
         // 読み込むと全く別のオブジェクトを指してしまう。セッションの切り替えでは必ず捨てる。
         ObjectVisibilityFilter.Clear();
+
+        // 道路の強調・区間編集もパスIDの集合なので、別の都市では別の区間を指してしまう。
+        RoadMemberEditManager.Instance?.End();
+        RoadFocusOverlay.Instance?.ClearAll();
 
         // カメラ状態のバックエンド送信を止める。新しい都市の準備中に前の視点を PATCH すると、
         // ロード後に適用するはずの保存視点を上書きしてしまうため(game:start で再開する)。

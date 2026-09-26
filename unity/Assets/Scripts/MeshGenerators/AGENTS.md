@@ -47,7 +47,11 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 
 ## 道路 (Paths/RoadPath.cs) — Dreamteck Splines ベース
 
-- **1車線ランプの合流**: `MotorwayMergeLayout` は稼働中の本線2本＋流入する1車線一方通行ランプを識別し、既存の下流切断距離の前半を一定幅、後半を絞り込みにする。保存中心線・占有範囲は変えず、周辺との描画上の重なりを許容する。`IntersectionPolygonUtil` の描画輪郭コールバックで共通の `IntersectionCorner` を変更し、路面・桁・壁は既存生成器を使う。区画線と車両は同じ計画を使う。`SidewalkConnectorSpec.Dashed` は点線の接続に使い、実体化を別実装にしない。2車線ランプ・流出・多叉は対象外。G文書§11.7、`Tests/Intersections/Unity/MotorwayMergeQA.cs` を参照。
+- **高速道路の本線とランプ**(G文書§11.7): 本線=ランプ(`path_master.ramp`)でない `PATH_MOTORWAY`。一般道路には適用しない。すべて描画専用。
+  - **結合区間** `Paths/RoadAdjacency.cs`: 線路の `TrackAdjacency` と同じく自分の点列に沿って相手側(本線↔ランプ)を探し、`RoadCorridorInfo`(左右の結合・壁の遮り・本線の隙間舗装の外端・ランプの寄せ先の高さ)を返す。閾値は `LocalConstants.ROAD_MERGE_*`(隙間2m・30度・隣接1m/重なり4mの高さ差)。相手は `RoadAdjacency.NeighborProvider`(PathManager)が稼働中のものだけ渡す。`RoadPath.CreateRoadParts` が結合区間の壁を区間クリップで省き(`TrackCorridorInfo.ClearPercentIntervals` を共用)、本線だけが隙間を `RoadMergeFiller_*` で舗装し(本線より `ROAD_MERGE_SINK`×2 下げる。材質は body_material が正)、`RoadMarkingContext.OverrideSideLine` で本線のランプ側の路側線を点線・ランプの本線側を非表示にする(**body の生成より前に呼ぶ**。シェーダーへは `_RoadBandSpans` で渡る)。結合区間には路肩の設備を置かない。
+  - **ランプの描画高さ**: `RoadAdjacency.ApplyRampHeights` が結合区間を本線の路面−`ROAD_MERGE_SINK` に寄せ、外は高さの差に比例した長さ(加わる勾配≤4%)で保存縦断へ戻す。適用は `PathManager.ComputeUntrimmedPathPoints`(点列キャッシュ)で、路面・橋脚・交差点断面・車両・遠景が同じ点列を使う。本線の点列はランプに依存しない。
+  - **合流ノード** `Paths/MotorwayMergeLayout.cs`: 本線=最も一直線に続く稼働中の本線2本(内積<−0.8)。本線が2度以内の折れで同じ幅に続き、他の枝がすべて取り込めるランプ(稼働中・30度以内・本線より狭い・外縁が本線の縁を越える位置が切断上限内)なら `NeedsSlab=false` で、`RoadIntersectionMeshGenerator` は Mesh=null の `NodeMeshResult`(切断位置=本線はノード端、ランプは外縁が本線の縁を越える位置)を返す。それ以外は全枝で板を作り、`MainLineSurface` で板の本線部分を本線の縦断そのものにする(`SectionSurfacePoint` の mainLine 引数)。本線がノードでつながる端は `RoadEndJoin`(`RoadAdjacency.EndJoinProvider`)で分離帯の丸め端を省き、橋脚は path_id の小さい方だけが立てる(`GeneratePillars` の skipStart/skipEnd)。`TargetLane` は取り込んだランプから本線へ入る車線を返す(接続曲線は通常の交差点と同じ)。
+  - 検証は `Tests/Intersections/run.ps1`(.NET の判定)と `run-unity.ps1`(`MotorwayMergeQA`。実FBXの壁・隙間の舗装・路側線の区間・板なしノード・描画例)。
 
 - **橋脚の干渉回避**: `GeneratePillars` が `PillarClearance.NeighborProvider` から未描画の相手も含む通行空間を取得し、`PlacePillar` が柱とキャップを別々の実寸boundsで検査する。一方が干渉すれば一組とも生成せず、移動・再配分はしない。`GetPrefabBounds` は子Transformを含むルート座標のboundsで、配置時のYaw・scaleを適用する。高さと水平距離を同時に評価し、同じ高さの接続や深いトンネルを誤って除外しない。道路・線路・工事中で共用。`Corridor.Points` は PathManager の未切断点列キャッシュと共有することがあるので読み取り専用で、持ち上げ(BODY_ABOVE_SPLINE)は `Corridor.YOffset`(判定時に各点のYへ加える)で表す。点列のXZ範囲は `Points` の参照と点数で検証する遅延キャッシュで、範囲外の柱はその corridor を線分判定せずに棄却する。`HalfWidth` はキャッシュせず判定のたびに読む。検証は `Tests/Pillars`。
 
@@ -108,6 +112,14 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 - 軌道は横位置順の多対一対応で全軌道端へ接続する。転回可否は論理端点接線（曲線は制御点優先）、描画は切断断面の接線・勾配を使う。線路とモノレールを相互接続しない。ホーム側・レール通路に干渉する壁は省略する。
 - 反対側も交差点なら各端45%、終端なら95%まで切断する。折れ線/single_spanは次のアンカーを越えない。空間不足・自己交差は`RequiresMoreSpace`で検出し、切断を見送る。近接交差点の一体化は未実装。
 - 仕様は`city-genesis/docs/docs/geometries/G_道路メッシュの生成.md`§11、数値検証は`unity/Tests/Intersections/run.ps1`。
+
+## 交差点の信号機 (Paths/TrafficSignalLayout.cs / TrafficSignalBuilder.cs / TrafficSignalStyle.cs)
+
+- 描画専用の装飾(経済・経路・車両の挙動に無関係。灯火の現示も持たない)。設置判定は`TrafficSignalLayout.IsSignalized`: 完成済みの道路(街路・高速道路)の腕が3本以上、うちセンターラインで上下線の分かれた双方向の街路(`HasCenterLine`=`RoadLaneLayout`で双方向・lanes 2以上・Outer>Inner)が2本以上。
+- `GenerateWithSections`が同じ切断断面・外周(`IntersectionCorner`)・歩道セットバックから`TrafficSignalLayout.Build`で配置を求め、`NodeMeshResult.TrafficSignals`で返す。実体化は`PathManager.UpdateNodeSlab`→`TrafficSignalBuilder.Apply`(NodeMesh_*の子`Signals`を作り直す)。配置の入力は交差点の入力署名に含まれるものだけにすること(様式を切り替え可能にするときは署名に様式を足す)。
+- 配置は日本式で通行側に鏡像: 流入路ごとに1基、直進先の腕(45度以内)の切断面から0.5m外側・通行側の歩道(縁石から0.5m。歩道が無ければ路端外0.5mの地表)に柱、灯器は流出する向きの車線群の中央の上。直進先が無ければ流入車線の延長上の角の外周の歩道に立てる。柱の接地高さは`RoadEquipmentGenerator.SurfaceHeight`(歩道の歩行面)と`SectionSurfacePoint`、歩道の幅は`ResolveSidewalkWidth`を共用する。
+- モデルは`TrafficSignalStyle`が`Models/Props/traffic_signal_{Key}_{pole|arm|head}`を解決する(現在は`jp`固定)。3部品とも原点=柱の接地面の高さ、アームはローカルZの単位長を長手だけ伸縮、灯器は吊り金具の真下が原点で表示面+Z。材質は`RoadPath.GetOrCreateRoadMaterial`の共有プール、結合メッシュは`IntersectionMeshOwner`が解放し、LODGroupで投影比`DrawLodConfig.NORMAL_EXIT_RATIO`未満は描かない。
+- 実FBX・本編生成器の検証は`unity/Tests/TrafficSignals/run.ps1`(設置条件・左右通行・灯器位置/向き・接地・結合メッシュ・画像)。
 ## 地表との整合
 
 - 道路の中心線サンプリング（`PathManager.TERRAIN_SAMPLE_INTERVAL`）は1m。Extrudeタイル長は曲率適応(急カーブ・起伏で1mまで詰まり、直線・平坦で最大8m。上記「描画LOD」の節)。保存曲線と相対高さは維持し、地形のサンプル間の起伏を拾う。
@@ -118,10 +130,10 @@ DataLoaders のマネージャー群から呼ばれる(呼び出し側のフロ�
 
 - 工事中クレーンは `BuildingMeshBuilder.Generate(..., animateCrane: true)` のときだけ頂部を結合から外し、`BuildingMeshResult.CraneTop` に解決済みプレハブと接続点・基準Yawを返す。呼び出し側は `ConstructionCraneAnimator.Attach` で実体化する。既定falseでは従来の静的結合、Farでは配置情報なし。`MergeSubMeshes` / `EnsureMaterials` は配置情報を保持する。仕様はF5文書§5、実FBX検証は `Tests/Buildings/run-crane.ps1`。
 
-- `ExteriorStairBuilder`はmid-stairを持つモジュラー建物の描画用輪郭だけを辺2で後退させ、元の頂点3からbase/mid/top-stairを各階1個積む。XZ実寸、midのY倍率は階高÷mid-w1の著作高さ。階段のbbox高さは手すりを含むため使わない。本体の壁・床・屋根・基盤は後退輪郭、コライダーと保存polygonは元の占有輪郭。壁は階段幅だけ開ける。収まらない敷地・自己交差・SHAPE_FULLには適用しない。仕様はF文書§11.4・I文書§4.11、実FBX検証は非公開制作ツールのimport_parking_garage.ps1。
+- `ExteriorStairBuilder`は辺ごとの外階段`{base|mid|top}-stair{辺index+1}`を扱う。`mid-stair{n}`がある辺だけ描画用輪郭を後退させ(隣の辺も後退していれば後退線どうしの交点)、元のその辺の終点からパーツを各階1個積む。位置番号のフォールバックはしない(base/topだけ同じ辺のmidへ戻る)。採否は辺0から順に`TryLayout`で判定し、収まらない・自己交差・先に採用した階段や本体と重なる辺は省略する。XZ実寸、midのY倍率は階高÷mid-w1の著作高さ。階段のbbox高さは手すりを含むため使わない。本体の壁・床・屋根・基盤・エントランスは後退輪郭、コライダーと保存polygonは元の占有輪郭。壁は`Layout.TryGetOpening`の幅だけ開け、開口端の角は`Layout.OmitsCorner`で省く。SHAPE_FULLには適用しない。仕様はF文書§11.4・I文書§4.11、実FBX検証は非公開制作ツールのimport_parking_garage.ps1。
 
 
-- オープンスペースは `OpenSpaceLayout` が配置計画、`OpenSpaceBuildingMeshBuilder` が地形追従面・実寸FBXへの変換を担う。MODEL_PARKING/ROTARY/PARK=10/11/12。SHAPE_FULLの最初の辺が接道方向。ID・ロード順・LODに依存せずvisual_variant2とセルのハッシュで配置する。Far=0.3m板、工事・倒壊は地面用途。3003舗装広場はGROUND+floorのみ。検証・ギャラリー配置見本の再出力は `Tests/Buildings/run-open-space.ps1`。仕様はF10文書。
+- オープンスペースは `OpenSpaceLayout` が配置計画、`OpenSpaceBuildingMeshBuilder` が地形追従面・実寸FBXへの変換を担う。MODEL_PARKING/ROTARY/PARK=10/11/12。SHAPE_FULLの最初の辺が接道方向。ID・ロード順・LODに依存せずvisual_variant2とセルのハッシュで配置する。Far=0.3m板、工事・倒壊は地面用途。3003舗装広場はGROUND+floorのみ。計画の面(`Surface`)は穴(`Holes`)と側面の材質(`Side`)を持てる。穴のある面は `OpenSpaceBuildingMeshBuilder.Triangulate`(NTSの制約付きドロネー)、地形への切り抜きは三角形を渡す `BuildingMeshBuilder.GenerateTerrainSurfaceMesh` のオーバーロード(UV付き)を使う。`Side` のある面は縁石で上げた面で、地面の0.05m下から天端まで側面を張り、装飾はその天端に載る。駅前ロータリーは接道辺の局所座標でNTSの膨張・収縮と `OverlayNGRobust` の集合演算から周回路・島・乗降場・出入口を作る(旧来の `Geometry.Union` 等は接道辺上の重なりで TopologyException になるので使わない)。検証・ギャラリー配置見本の再出力は `Tests/Buildings/run-open-space.ps1`。仕様はF10文書。
 
 - 角の配置方向は `ComputeCornerRotation` でCCWの送り辺を内角の半分だけ回した**内角側の二等分線**から求める。単位辺ベクトルの和ではL字の凹角が180度反転するため使わない。壁の張り出し計測も同じ二等分線を共有する。凹角へ開閉できる2本のボーンがないパーツは `IsUnsupportedConcaveCorner` で配置・オフセット計測の両方から省き、壁を頂点まで敷く。実FBXの凸角・凹角と壁オフセットの回帰検証は `Tests/Buildings/run-unity.ps1`。
 
@@ -238,4 +250,6 @@ RoadEquipmentGeneratorはbench/bin/planter/advertを個別の保存値とマス�
 
 ## 路面標示
 
-舗装街路・高速道路（side_width > 0）はRoadMarkingContextでスプラインの距離/横断座標を作り、bodyのUV3へ上面フラグとともに渡す。Close/Normalの固定区間で同じ座標を使い、白線用lineパーツは生成しない。RoadMarkingPlanは横断歩道・停止線・矢印・接合線の焼き込み用2D形状。交差点ではSidewalkConnectorSpecのlineだけを計画へ移し、桁殻に上面フラグを付けない。RoadMarkingSurfaceは既存Rendererへ材質とページ表を結び付ける。線形・交差点ポリゴンや保存車線数は変更しない。G文書§8.3、E文書の画像予算、Tests/RoadMarkingsを参照。
+舗装街路・高速道路（side_width > 0）はRoadMarkingContextでスプラインの距離/横断座標を作り、bodyのUV3へ上面フラグとともに渡す。線(Bands)ごとに描く距離の範囲(BandSpans)を持ち、先頭2本が左右の路側線(OverrideSideLine が添字で参照)。Close/Normalの固定区間で同じ座標を使い、白線用lineパーツは生成しない。RoadMarkingPlanは横断歩道・停止線・矢印・接合線の焼き込み用2D形状。交差点ではSidewalkConnectorSpecのlineだけを計画へ移し、桁殻に上面フラグを付けない。RoadMarkingSurfaceは既存Rendererへ材質とページ表を結び付ける。線形・交差点ポリゴンや保存車線数は変更しない。G文書§8.3、E文書の画像予算、Tests/RoadMarkingsを参照。
+
+RoadSurfaceの色描画はOffset 0,-1の一定補正だけを使う。傾き依存の補正はbodyの反復端面を舗装より手前へ出すため使わない。矢印の左右先端は基準点より前方0.35mに置き、枝を先端三角形の底辺中央へ接続する。直進を許可しない中央軸は分岐点で止める。Tests/RoadMarkingsは内部端面を除いた画像との比較と全7種の矢印の連結・穴を検査する。

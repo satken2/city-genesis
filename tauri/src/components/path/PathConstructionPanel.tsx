@@ -20,6 +20,7 @@
  * パネルにもステッパーを残す(Unityのキー操作と双方向同期)。
  * パネルが持つのはバリアント選択・標高/盛土・ホーム設置側・グリッド設定(サイズ/角度)・
  * 形状プレビュー・コスト・確定/キャンセル。
+ * 街路・高速道路の新規敷設では、所属道路(名前付き道路)の選択も持つ(PathRoadAssignmentSection)。
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -40,6 +41,9 @@ import { RoadVariantSelector } from "./RoadVariantSelector";
 import { InfraVariantSelector } from "./InfraVariantSelector";
 import { PathVariantDescription } from "./PathVariantDescription";
 import { PathBuildSections } from "./PathBuildSections";
+import { PathRoadAssignmentSection } from "./PathRoadAssignmentSection";
+import { usePathRoadAssignment } from "./usePathRoadAssignment";
+import { isNamedRoadPathType } from "../road/roadApi";
 import type { PathCategory } from "./usePathConstruction";
 import "./PathConstructionPanel.css";
 
@@ -144,6 +148,14 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId, categor
   const activeCategory: PathCategory | null =
     editPathId != null ? pathConstruction.category : category;
 
+  /**
+   * 所属道路の選択は、街路・高速道路の新規敷設のときだけ扱う(既存パスの形状編集では所属を変えない。
+   * 所属の変更はパス詳細・道路詳細で行う)。
+   */
+  const roadAssignmentEnabled = editPathId == null && activeCategory === "road"
+    && pathConstruction.selectedVariant !== null && isNamedRoadPathType(pathConstruction.selectedType);
+  const roadAssignment = usePathRoadAssignment(apiBaseUrl, roadAssignmentEnabled, pathConstruction.rawPoints);
+
   /* ---- ハンドラ ---- */
 
   /**
@@ -174,7 +186,12 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId, categor
   const handleConfirm = useCallback(async () => {
     setIsConfirming(true);
     try {
-      await pathConstruction.confirmPath();
+      const createdPathIds = await pathConstruction.confirmPath(roadAssignment.postFields);
+      // 道路の作成は敷設とは別の要求なので、失敗しても敷設の成功は取り消さずに知らせるだけにする。
+      await roadAssignment.finalize(createdPathIds).catch((err) => {
+        console.error("[PathConstructionPanel] road assignment failed:", err);
+        void showNotification({ message: t("path_construction.road.createFailed"), durationMs: 8000 });
+      });
       // 成功時: Unityに編集終了を通知してデータをリロードさせる
       await sendEditPathFinish();
       // 確定した形状の2D編集パネルは役目を終えるので閉じる(開いていなければ何もしない)
@@ -214,7 +231,7 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId, categor
       }
       void showNotification({ message: displayMessage, durationMs: 8000 });
     }
-  }, [editPathId, onClose, pathConstruction, refreshAffordability, t]);
+  }, [editPathId, onClose, pathConstruction, refreshAffordability, roadAssignment, t]);
 
   /**
    * キャンセルボタンを押した際のハンドラ。
@@ -339,6 +356,10 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId, categor
 
       {/* 選択中バリアントの説明カード */}
       <PathVariantDescription entry={pathConstruction.selectedVariantData} />
+
+      {roadAssignmentEnabled && (
+        <PathRoadAssignmentSection assignment={roadAssignment} disabled={isConfirming} />
+      )}
 
       {/*
         説明カードより下の共通ボディ(形状・グリッド・プレビュー・コスト・確定/キャンセル)は

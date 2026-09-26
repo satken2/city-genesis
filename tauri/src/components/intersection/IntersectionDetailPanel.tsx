@@ -3,16 +3,17 @@
  *
  * window_type="intersection_detail" のポップアップウィンドウで表示する専用パネル。
  * インターチェンジはバックエンドがランプ群から自動検出するもので、プレイヤーが作る実体ではない。
- * 3Dビューのラベルクリックで開き、名前と種別を表示する。
+ * 3Dビューのラベルクリックで開き、名前と種別、どの道路からどの道路へ行けるかの接続図を表示する。
  */
 
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { PATH_MOTORWAY } from "../../constants";
-import type { InterchangeResponse, InterchangeSummary } from "../../types";
+import type { InterchangeArmDetail, InterchangeResponse, InterchangeSummary } from "../../types";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { resolvePathIcon } from "../../utils/pathIcon";
 import { InfoHeader } from "../common/InfoHeader";
+import { InterchangeConnectionDiagram } from "./InterchangeConnectionDiagram";
 import { interchangeDisplayName, interchangeKindLabel } from "./interchangeName";
 
 type IntersectionDetailPanelProps = {
@@ -28,6 +29,7 @@ export function IntersectionDetailPanel({
 }: IntersectionDetailPanelProps) {
   const { t } = useTranslation();
   const [interchange, setInterchange] = useState<InterchangeSummary | null>(null);
+  const [arms, setArms] = useState<InterchangeArmDetail[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,6 +45,7 @@ export function IntersectionDetailPanel({
       .then((data) => {
         if (!controller.signal.aborted) {
           setInterchange(data.interchange);
+          setArms(data.arms ?? []);
           setLoading(false);
         }
       })
@@ -79,6 +82,9 @@ export function IntersectionDetailPanel({
         name={interchangeDisplayName(interchange, t)}
         showStatus={false}
       />
+      <section className="agent-detail-section">
+        <InterchangeConnectionDiagram arms={arms} connections={interchange.connections ?? []} />
+      </section>
     </div>
   );
 }

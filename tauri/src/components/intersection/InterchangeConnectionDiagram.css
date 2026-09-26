@@ -1,0 +1,67 @@
+/**
+ * インターチェンジの接続図のスタイル
+ *
+ * 道路の箱はパス詳細の状態タイル(PathConditionPanel.css)と同じ面・枠・文字色にそろえる。
+ * 箱の高さと間隔は矢印の座標と一致させるため、コンポーネントの定数からインラインで与える。
+ */
+
+.ic-conn {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ic-conn__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  row-gap: 6px;
+  align-items: start;
+}
+
+.ic-conn__head {
+  color: #93a9c0;
+  font-weight: 600;
+  font-size: 0.74rem;
+}
+
+.ic-conn__roads {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ic-conn__road {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 0 8px 0 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  min-width: 0;
+}
+
+.ic-conn__road-name,
+.ic-conn__road-zone {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ic-conn__road-name {
+  color: #e2eaf2;
+  font-size: 0.8rem;
+}
+
+.ic-conn__road-zone {
+  color: #93a9c0;
+  font-size: 0.72rem;
+  min-height: 1.2em;
+}
+
+.ic-conn__links {
+  display: block;
+  overflow: visible;
+}

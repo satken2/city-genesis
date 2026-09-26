@@ -3,7 +3,12 @@ guid: 732a2b697528f064c9e919836b1f142c
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: BD_MALL_ADS
+    second: {fileID: 2100000, guid: c2fdfeb357140084595b7707749afefb, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

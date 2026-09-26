@@ -2,7 +2,7 @@
  * 車種アイコン(パス詳細の交通量リスト用)
  *
  * vehicle_types の車種IDごとに、24×24 の線画アイコンを返す。外部素材を使わない自作の図形で、
- * 色は currentColor に従う。道路を走る車両は横から見た姿、鉄道は線路の上に描いて区別する。
+ * 色は currentColor に従う。道路を走る車両は横から見た姿、鉄道は線路の上、モノレールは柱に載った軌道桁の上に描いて区別する。
  * 未知の車種は汎用の丸印にフォールバックする。
  */
 
@@ -13,6 +13,7 @@ import {
   VEHICLE_FREIGHT_TRAIN,
   VEHICLE_HIGH_SPEED_TRAIN,
   VEHICLE_METRO_TRAIN,
+  VEHICLE_MONORAIL,
   VEHICLE_PASSANGER_TRAIN,
   VEHICLE_PEDESTRIAN,
   VEHICLE_STANDARD,
@@ -96,6 +97,14 @@ const VEHICLE_SHAPES: Record<number, ReactNode> = {
       <path d="M1.5 17.5V9H12.5Q19 9 22.5 16.2Q22.9 17.5 21.5 17.5Z" />
       <path d="M4 12H14.5" />
       {RAIL}
+    </>
+  ),
+  [VEHICLE_MONORAIL]: (
+    <>
+      <path d="M3 15V7.5Q3 5 5.5 5H18.5Q21 5 21 7.5V15Z" />
+      <path d="M5.5 9H18.5" />
+      <path d="M1.5 16.5H22.5V19H1.5Z" />
+      <path d="M12 19V22.5" />
     </>
   ),
 };

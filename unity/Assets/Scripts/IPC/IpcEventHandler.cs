@@ -45,6 +45,10 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnParcelHideFrontPath += HandleParcelHideFrontPath;
             IpcClient.Instance.OnWorldHighlightObjects += HandleWorldHighlightObjects;
             IpcClient.Instance.OnWorldClearHighlights += HandleWorldClearHighlights;
+            IpcClient.Instance.OnWorldSetRoadFocus += HandleWorldSetRoadFocus;
+            IpcClient.Instance.OnWorldClearRoadFocus += HandleWorldClearRoadFocus;
+            IpcClient.Instance.OnWorldRefreshRoads += HandleWorldRefreshRoads;
+            IpcClient.Instance.OnEditRoadSetMembers += HandleEditRoadSetMembers;
         }
     }
 
@@ -82,6 +86,10 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnParcelHideFrontPath -= HandleParcelHideFrontPath;
             IpcClient.Instance.OnWorldHighlightObjects -= HandleWorldHighlightObjects;
             IpcClient.Instance.OnWorldClearHighlights -= HandleWorldClearHighlights;
+            IpcClient.Instance.OnWorldSetRoadFocus -= HandleWorldSetRoadFocus;
+            IpcClient.Instance.OnWorldClearRoadFocus -= HandleWorldClearRoadFocus;
+            IpcClient.Instance.OnWorldRefreshRoads -= HandleWorldRefreshRoads;
+            IpcClient.Instance.OnEditRoadSetMembers -= HandleEditRoadSetMembers;
         }
     }
 
@@ -460,6 +468,32 @@ public class IpcEventHandler : MonoBehaviour
     private void HandleWorldClearHighlights(string source)
     {
         _highlightManager.Clear(source);
+    }
+
+    /// <summary>
+    /// world.set_road_focus → RoadFocusOverlay.SetFocus()
+    /// 道路詳細パネルが開いている道路の区間を道路色の帯で強調する(干渉用の world:highlight_objects とは別系統)。
+    /// </summary>
+    private void HandleWorldSetRoadFocus(int roadId, string color, int[] pathIds)
+    {
+        RoadFocusOverlay.Ensure().SetFocus(RoadManager.ParseColor(color), pathIds);
+    }
+
+    private void HandleWorldClearRoadFocus()
+    {
+        RoadFocusOverlay.Instance?.ClearFocus();
+    }
+
+    /// <summary>world.refresh_roads → RoadManager.RequestRefresh()(version が同じならラベルは作り直さない)</summary>
+    private void HandleWorldRefreshRoads()
+    {
+        RoadManager.Instance?.RequestRefresh();
+    }
+
+    /// <summary>edit_road.set_members → RoadMemberEditManager.SetMembers()(区間編集モード中でなければ無視)</summary>
+    private void HandleEditRoadSetMembers(int roadId, int[] pathIds, int[] previewPathIds)
+    {
+        RoadMemberEditManager.Instance?.SetMembers(roadId, pathIds, previewPathIds);
     }
 
     private RoadPlanManager GetRoadPlanManager()

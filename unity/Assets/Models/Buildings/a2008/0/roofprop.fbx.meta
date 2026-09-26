@@ -3,7 +3,17 @@ guid: 6ce5fbb8412c2194ba5a20ea20927630
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: BD_MALL_ADS
+    second: {fileID: 2100000, guid: c2fdfeb357140084595b7707749afefb, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: BD_PARKING_SIGN
+    second: {fileID: 2100000, guid: 27d5054a8162f544da4a898f5f1db2d7, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

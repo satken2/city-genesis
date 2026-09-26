@@ -1,6 +1,18 @@
 {
   "path": {
     "titleWithId": "路径 #{{id}}",
+    "titleInRoad": "{{road}}（路段 #{{id}}）",
+    "road": {
+      "label": "所属道路",
+      "none": "无（无名道路）",
+      "createNew": "＋ 新建道路…",
+      "newPlaceholder": "道路名称（留空则显示编号）",
+      "create": "创建",
+      "cancel": "取消",
+      "openDetail": "道路详情",
+      "saveFailed": "无法更改所属道路",
+      "createFailed": "无法创建道路"
+    },
     "zoneName": "所属地区",
     "followTerrain": "地形追随",
     "followTerrainFollow": "追随（单独设置）",
@@ -39,7 +51,8 @@
       "20": "地铁",
       "21": "客运铁路",
       "22": "货运铁路",
-      "23": "高速铁路"
+      "23": "高速铁路",
+      "24": "单轨列车"
     },
     "action": {
       "delete": "删除",
@@ -154,6 +167,12 @@
       "maxGrade": "最大坡度",
       "maxSpan": "最大跨度",
       "minHeight": "最小高度"
+    },
+    "road": {
+      "title": "所属道路",
+      "extending": "将延长“{{name}}”",
+      "newNote": "确定后，将用铺设的路段新建道路。",
+      "createFailed": "路段已铺设，但无法新建道路。"
     }
   },
   "track_construction": {

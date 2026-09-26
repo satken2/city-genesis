@@ -39,6 +39,7 @@ const PublicFacilitiesWindow = lazy(() => import("./components/budget/PublicFaci
 const TransitManagementWindow = lazy(() => import("./components/transit/TransitManagementWindow").then(m => ({ default: m.TransitManagementWindow })));
 const TransitCreationPanel = lazy(() => import("./components/transit/TransitCreationPanel").then(m => ({ default: m.TransitCreationPanel })));
 const TransitDetailPanel = lazy(() => import("./components/transit/TransitDetailPanel").then(m => ({ default: m.TransitDetailPanel })));
+const RoadDetailPanel = lazy(() => import("./components/road/RoadDetailPanel").then(m => ({ default: m.RoadDetailPanel })));
 const SettingsWindow = lazy(() => import("./components/taskbar/SettingsWindow").then(m => ({ default: m.SettingsWindow })));
 const CreditsWindow = lazy(() => import("./components/taskbar/CreditsWindow").then(m => ({ default: m.CreditsWindow })));
 const SaveLoadWindow = lazy(() => import("./components/taskbar/SaveLoadWindow").then(m => ({ default: m.SaveLoadWindow })));
@@ -88,7 +89,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * 専用パネルが実装されているウィンドウタイプのセット
  * これらのタイプはジェネリックな JSON 表示ではなく、専用コンポーネントでレンダリングする
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "diagnosis", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "path_build", "infra_build", "track_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "settings", "credits", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "new_game", "city_rename", "template_editor", "resource_detail", "resource_edit", "prop_placement", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "street_grid", "agent_creation"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "diagnosis", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "path_build", "infra_build", "track_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "new_game", "city_rename", "template_editor", "resource_detail", "resource_edit", "prop_placement", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "street_grid", "agent_creation"]);
 
 
 function App() {
@@ -492,6 +493,13 @@ function App() {
                 apiBaseUrl={context.api_base_url}
                 pathTemplate={context.definition.fetch!.path_template}
                 initialEntityId={context.entity?.id ?? ""}
+              />
+            ) : context.window_type === "road_detail" ? (
+              <RoadDetailPanel
+                apiBaseUrl={context.api_base_url}
+                initialEntityId={context.entity?.id ?? ""}
+                offerTrace={windowExtra(context)?.offerTrace === true}
+                seedPathId={windowExtra(context)?.seedPathId as number | undefined}
               />
             ) : context.window_type === "settings" ? (
               <SettingsWindow apiBaseUrl={context.api_base_url} />

@@ -65,6 +65,12 @@ stdout が返らない等の罠がある)。本Skillはプロップ固有の差�
   同じ `props.blend` / `Props/` に置く。固定名のFBXは描画コードが直接読み、手動配置用には数値ID別名を `prop_master` に登録する。
   `ambient_*` は船が喫水線原点(船体は原点より下)なので、バリデータは接地検査をせず水平中心と専用予算だけを見る。
   再生成は `pipeline/jobs/ambient_vehicles.md`。
+- **交差点の信号機** `traffic_signal_{様式}_{pole|arm|head}`(G文書§11.8)も固定名モデルで、`prop_master` に登録しない。
+  Unityが交差点ごとに3部品を1メッシュへ結合するので、原点は3部品とも柱の接地面の高さに揃え、取付高さはモデルが持つ。
+  アームはBlender Y+0.5(柱の軸)〜-0.5(先端)の単位長で長手だけ伸縮され、灯器は吊り金具の真下が原点で表示面をBlender -Yへ向ける。
+  バリデータは柱の軸・アームの単位長・灯器の下端4.5m以上を検査し、アームと灯器には接地検査をしない。
+  様式を足すときは同じ3部品を `traffic_signal_{新様式}_*` で作り、Unityの `TrafficSignalStyle` に様式を登録する。
+  著作は非公開制作ツールの `pipeline/jobs/build_prop_traffic_signals.py`、寸法・再生成は同じ場所の `traffic_signals.md`。
 - 旧手著作ファイル `S:\city\BlenderModels\props.blend` の Trees はこのライブラリへ移植済み
   (Trains/Vehicles は `vehicles.blend` へ移植済み)。**BlenderModels は参照しない**。
 

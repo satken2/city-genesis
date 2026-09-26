@@ -194,7 +194,11 @@ public static class RoadEquipmentGenerator
         return new Pose(position, Quaternion.LookRotation(offset < 0f ? -forward : forward, Vector3.up));
     }
 
-    private static float SurfaceHeight(PathSummary path, string part, float widthFraction = 0f)
+    /// <summary>
+    /// 道路パーツ(body/sidewalk/center)の上面のスプラインからの高さ。widthFraction はパーツ幅に対する横位置
+    /// (-0.5〜0.5。歩道は+側が縁石)。交差点の信号機の柱もこの高さに立てる。
+    /// </summary>
+    internal static float SurfaceHeight(PathSummary path, string part, float widthFraction = 0f)
     {
         // bodyは生成時に上面をY=0へ揃える。歩道も採用したモデル系列のbody高を除く。
         if (part == "body") return RoadPartHeights.BODY_ABOVE_SPLINE;

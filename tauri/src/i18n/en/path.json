@@ -1,6 +1,18 @@
 {
   "path": {
     "titleWithId": "Path #{{id}}",
+    "titleInRoad": "{{road}} (section #{{id}})",
+    "road": {
+      "label": "Road",
+      "none": "None (unnamed road)",
+      "createNew": "+ New road…",
+      "newPlaceholder": "Road name (blank shows a number)",
+      "create": "Create",
+      "cancel": "Cancel",
+      "openDetail": "Road details",
+      "saveFailed": "Could not change the road",
+      "createFailed": "Could not create the road"
+    },
     "zoneName": "District",
     "followTerrain": "Terrain Follow",
     "followTerrainFollow": "Yes (overridden)",
@@ -39,7 +51,8 @@
       "20": "Metro",
       "21": "Passenger trains",
       "22": "Freight trains",
-      "23": "High-speed trains"
+      "23": "High-speed trains",
+      "24": "Monorail"
     },
     "action": {
       "delete": "Delete",
@@ -154,6 +167,12 @@
       "maxGrade": "Max. grade",
       "maxSpan": "Max. span length",
       "minHeight": "Min. height"
+    },
+    "road": {
+      "title": "Road",
+      "extending": "Extends {{name}}",
+      "newNote": "When you confirm, a new road is created from the sections you build.",
+      "createFailed": "The sections were built, but the new road could not be created."
     }
   },
   "track_construction": {

@@ -82,7 +82,7 @@
     "fleetMoreTrains": "그 외 {{count}}편성",
     "fleetShortage": "차량 부족으로 {{count}}편성을 구성하지 못했습니다.",
     "vehicleModel": "차량",
-    "vehicleModelNote": "차량의 외관만 바뀝니다. 정원·비용·속도는 바뀌지 않습니다.",
+    "vehicleModelNote": "차량의 외관만 바뀝니다. 정원·비용·속도는 바뀌지 않습니다. 차체의 띠는 노선 색으로 칠해집니다.",
     "estimate": {
       "title": "수지 전망",
       "editedTag": "저장 전 설정으로 산출",
@@ -125,7 +125,8 @@
       "lrt": "LRT",
       "trainStandard": "스탠다드",
       "trainFuturistic": "근미래",
-      "trainRetro": "레트로"
+      "trainRetro": "레트로",
+      "monorail": "모노레일"
     }
   }
 }

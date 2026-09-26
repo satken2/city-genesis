@@ -853,8 +853,7 @@ public partial class VehicleManager : MonoBehaviour
         v.spawnBlendRemaining = 0; v.arrivalDistance = -1; v.destinationParcel = 0;
         SetLane(v, next, false);
         v.Sample(out Vector3 p1, out Vector3 t1);
-        v.connector = merge?.Connector(current.path_id, next.data.path_id, p0, p1)
-            ?? VehiclePolyline.Connector(p0, t0, p1, t1, intersectionCurveTension);
+        v.connector = VehiclePolyline.Connector(p0, t0, p1, t1, intersectionCurveTension);
         v.connectorS = 0;
         v.connectorSpeed = v.speed;
         SetMotion(v,v.connector.Length);

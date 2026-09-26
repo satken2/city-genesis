@@ -7,6 +7,12 @@
     "fallbackName": {
       "ic": "IC #{{id}}",
       "jct": "JCT #{{id}}"
+    },
+    "connections": {
+      "from": "출발 도로",
+      "to": "도착 도로",
+      "road": "{{type}} #{{id}}",
+      "none": "연결된 도로 쌍이 없습니다."
     }
   }
 }

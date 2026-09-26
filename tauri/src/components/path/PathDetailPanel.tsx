@@ -5,7 +5,8 @@
  * パスのヘッダー情報(アイコン・ステータス・名前)と各種属性を表示する。
  *
  * 表示項目:
- * - InfoHeader: アイコン・ステータス・名前
+ * - InfoHeader: アイコン・ステータス・名前(名前が空で道路に属していれば「道路名(区間 #id)」)
+ * - 街路・高速道路には所属道路の行(road/RoadMembershipRow)
  * - 基本情報タブ:
  *   - 基本情報セクション: 所属地区・地形追従・最小曲線半径・最大勾配と、
  *     耐久度・騒音・大気汚染の状態タイル(PathConditionPanel)
@@ -24,6 +25,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import type { NearbyZoneEntry, PathData } from "../../types";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { sendHighlightObjects, sendClearHighlights } from "../../utils/ipc";
@@ -41,10 +43,13 @@ import {
   STATUS_DEMOLISHING,
   ALERT_PATH_CONSTRUCTION_SHORTAGE,
   ALERT_PATH_ACCIDENT,
-  ALERT_PATH_NO_STATION_HOUSE
+  ALERT_PATH_NO_STATION_HOUSE,
+  VALUE_NONE
 } from "../../constants";
 import { InfoHeader } from "../common/InfoHeader";
 import { TagRow } from "../common/TagRow";
+import { RoadMembershipRow, useRoadList, type PathRoadFields } from "../road/RoadMembershipRow";
+import { hasRoad, isNamedRoadPathType, roadDisplayName, ROADS_CHANGED_EVENT } from "../road/roadApi";
 import { ZoneLink } from "../common/ZoneLink";
 import { StationInfoSection } from "./StationInfoSection";
 import { PathConditionPanel } from "./PathConditionPanel";
@@ -80,7 +85,7 @@ export function PathDetailPanel({
   const { t } = useTranslation();
   const masterData = useMasterData();
   const templateMode = useTemplateMode(apiBaseUrl);
-  const [pathData, setPathData] = useState<PathData | null>(null);
+  const [pathData, setPathData] = useState<(PathData & PathRoadFields) | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState<string | null>(null);
@@ -101,7 +106,7 @@ export function PathDetailPanel({
     fetch(url, { signal: controller.signal })
       .then(async (res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json() as Promise<PathData>;
+        return res.json() as Promise<PathData & PathRoadFields>;
       })
       .then((data) => {
         if (!controller.signal.aborted) {
@@ -120,6 +125,28 @@ export function PathDetailPanel({
       controller.abort();
     };
   }, [url, refreshKey]);
+
+  const isNamedRoad = isNamedRoadPathType(pathData?.path_type);
+  const { roads } = useRoadList(apiBaseUrl, isNamedRoad);
+
+  // 所属道路は道路詳細・他のパス詳細からも変わる。パネル全体を取り直すと設備の未保存の入力が
+  // 消えるので、変更通知では road_id だけを差し替える。
+  const refreshRoadMembership = useCallback(async () => {
+    try {
+      const data = await fetchApi<PathData & PathRoadFields>(url);
+      setPathData((prev) => (prev && prev.path_id === data.path_id ? { ...prev, road_id: data.road_id } : prev));
+    } catch (err) {
+      console.error("[PathDetailPanel] road membership refresh failed:", err);
+    }
+  }, [url]);
+
+  useEffect(() => {
+    if (!isNamedRoad) return;
+    const unlistenPromise = listen(ROADS_CHANGED_EVENT, () => void refreshRoadMembership());
+    return () => {
+      void unlistenPromise.then((unlisten) => unlisten());
+    };
+  }, [isNamedRoad, refreshRoadMembership]);
 
   const isPreConstruction = pathData?.status === STATUS_SCHEDULED_CONSTRUCTION || pathData?.status === STATUS_PENDING;
   const isConstructing = pathData?.status === STATUS_CONSTRUCTING;
@@ -316,13 +343,19 @@ export function PathDetailPanel({
     : (showConstructionInfo && (isPreConstruction || isConstructing) ? "construction" : tabs[0]?.id);
 
   /**
-   * パスの表示名はIDベースで生成する。
-   * name が設定されている場合はそちらを優先する。
+   * パスの表示名。name(区間名)があればそれ、無ければ所属道路の名前と区間ID、
+   * 道路にも属さなければIDから作る。
    */
+  const roadId = hasRoad(pathData.road_id) ? pathData.road_id : null;
   const displayName =
     pathData.name !== ""
       ? pathData.name
-      : t("path.titleWithId", { id: pathData.path_id });
+      : roadId !== null
+        ? t("path.titleInRoad", {
+          road: roadDisplayName(roads.find((road) => road.road_id === roadId)?.name, roadId, t),
+          id: pathData.path_id,
+        })
+        : t("path.titleWithId", { id: pathData.path_id });
 
   // 基本情報セクションの表の行。線形指標は形状から算出する種別でしか意味を持たない
   // (それ以外の種別では既定値の「直線・0%」のまま)。
@@ -352,6 +385,19 @@ export function PathDetailPanel({
 
       {/* 建設プロジェクトのタグと、この道路だけを3Dビューで隠す切り替え。 */}
       <TagRow apiBaseUrl={apiBaseUrl} kind="path" entityId={pathData.path_id} />
+
+      {/* 区間をどの道路(名前付き道路)に属させるか。道路に属せるのは街路と高速道路だけ。 */}
+      {isNamedRoad && (
+        <RoadMembershipRow
+          apiBaseUrl={apiBaseUrl}
+          pathId={pathData.path_id}
+          roadId={roadId}
+          roads={roads}
+          onChanged={(next) =>
+            setPathData((prev) => (prev ? { ...prev, road_id: next ?? VALUE_NONE } : prev))
+          }
+        />
+      )}
 
       <PathOperationPanel
         path={pathData}

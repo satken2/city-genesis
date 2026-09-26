@@ -1,0 +1,27 @@
+/* 所属道路の選択。タグ行(common/TagSelect.css)のクラスを借り、道路固有の部分だけをここに置く。 */
+.road-membership-row {
+  flex-wrap: wrap;
+}
+
+/* 選択中の道路の色。地図・3Dの強調帯と同じ色で、どの道路かを見分けやすくする。 */
+.road-select__swatch {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+.road-membership-row__error {
+  padding-left: 2px;
+}
+
+/* 道路建設パネルの延長の案内(「〇〇を延長します」) */
+.road-select__note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 0.72rem;
+  color: #a9c7e3;
+}

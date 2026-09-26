@@ -830,6 +830,19 @@ public class RoadPath : IPathMeshGenerator
 
         var markingContext = RoadMarkingContext.Create(container, spline, pathData, startApproach, endApproach);
 
+        // 高速道路の本線とランプが近接する区間は一つの路面として描く(RoadAdjacency)。
+        // 路側線の描き分けは body の生成時にシェーダーへ渡るので、body より先に決める。
+        bool ramp = RoadAdjacency.IsRamp(pathData);
+        RoadCorridorInfo corridor = ResolveRoadCorridor(pathData, controlPoints, width, wallWidth, ramp);
+        if (corridor != null && markingContext != null)
+        {
+            // 本線は結合区間の路側線を合流車線との境界の点線にし、ランプは本線側の路側線を描かない。
+            markingContext.OverrideSideLine(true, SplineDistances(corridor.GetMergedPercentRanges(true), markingContext.Length), !ramp);
+            markingContext.OverrideSideLine(false, SplineDistances(corridor.GetMergedPercentRanges(false), markingContext.Length), !ramp);
+        }
+        RoadEndJoin startJoin = ResolveEndJoin(pathData, true, startApproach, controlPoints);
+        RoadEndJoin endJoin = ResolveEndJoin(pathData, false, endApproach, controlPoints);
+
         // Road Body
         // 地形解像度限界・Zファイティングによる埋没を回避するため、道路本体はスプラインから浮かせる。
         // single_span=true の場合は body をタイル化せず1枚で引き伸ばす（アンカー点間の直線スパン）。
@@ -850,6 +863,7 @@ public class RoadPath : IPathMeshGenerator
             markingContext?.Apply(roadBody);
             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] body: モデルなしのため白い板にフォールバック");
         }
+        if (corridor != null && !ramp) CreateMergeFillers(container, corridor, width * 0.5f, ResolveBodyMaterial(pathData, variantBase, typeBase));
 
         // 併用軌道(222/242/303)と停留所のホーム。303 はホーム区間に沿道設備を置かない(下の RoadEquipmentGenerator)。
         List<LrtPlatformParts.Span> lrtPlatforms = segmentPlatformZones == null
@@ -895,17 +909,19 @@ public class RoadPath : IPathMeshGenerator
             float length = spline.CalculateLength();
             bool rounded = PathDrawContext.ResolvePrefab($"{variantBase}/center_start", $"{typeBase}/center_start", out _) != null
                 && PathDrawContext.ResolvePrefab($"{variantBase}/center_end", $"{typeBase}/center_end", out _) != null;
-            double from = rounded ? ClampSplinePercent(spline.Travel(0, centerWidth * .5f, Spline.Direction.Forward)) : 0;
-            double to = rounded ? ClampSplinePercent(spline.Travel(1, centerWidth * .5f, Spline.Direction.Backward)) : 1;
+            // 本線の続きへ直接つながる端は、分離帯も途切れさせずに続ける。
+            bool roundStart = rounded && !startJoin.Continuous, roundEnd = rounded && !endJoin.Continuous;
+            double from = roundStart ? ClampSplinePercent(spline.Travel(0, centerWidth * .5f, Spline.Direction.Forward)) : 0;
+            double to = roundEnd ? ClampSplinePercent(spline.Travel(1, centerWidth * .5f, Spline.Direction.Backward)) : 1;
             // 短い切断区間へ半円を重ねず、通行口を空ける。LODの境界には新しい端部を作らない。
             bool fits = !rounded || length > centerWidth + .1f;
             GameObject centerObj = fits ? CreateSplineMesh(container, spline, $"{variantBase}/center", centerWidth, 0f, RoadPartHeights.BODY_ABOVE_SPLINE, false, $"{typeBase}/center", clipFrom: from, clipTo: to) : null;
             if (rounded && fits)
             {
-                if (PathDrawContext.IntersectDetailRange(0, from, out _, out _))
+                if (roundStart && PathDrawContext.IntersectDetailRange(0, from, out _, out _))
                     CreateSplineMesh(container, spline, $"{variantBase}/center_start", centerWidth, 0f, RoadPartHeights.BODY_ABOVE_SPLINE,
                     fallbackPrefabName: $"{typeBase}/center_start", clipFrom: 0, clipTo: from, maxTileLength: 0, singleSpan: true);
-                if (PathDrawContext.IntersectDetailRange(to, 1, out _, out _))
+                if (roundEnd && PathDrawContext.IntersectDetailRange(to, 1, out _, out _))
                     CreateSplineMesh(container, spline, $"{variantBase}/center_end", centerWidth, 0f, RoadPartHeights.BODY_ABOVE_SPLINE,
                     fallbackPrefabName: $"{typeBase}/center_end", clipFrom: to, clipTo: 1, maxTileLength: 0, singleSpan: true);
             }
@@ -960,21 +976,23 @@ public class RoadPath : IPathMeshGenerator
             // 壁は道路の外側 [width/2, width/2 + wallWidth] に立てる。
             // 「右側用パーツ」の規約で、右側は原型のまま、左側は X ミラー
             // （歩道は逆の「左側用」規約なので注意。CreateRoadParts の歩道ブロック参照）。
+            // 高速道路の本線とランプの結合区間では、間の壁と相手の路面に掛かる壁を立てない。
             float wallCenterOffset = (width * 0.5f) + (wallWidth * 0.5f);
-            GameObject leftWall = CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, -wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, true, $"{typeBase}/wall");
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] wall(左・ミラー): {(leftWall != null ? "生成成功" : "生成失敗")}");
-            GameObject rightWall = CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, false, $"{typeBase}/wall");
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] wall(右): {(rightWall != null ? "生成成功" : "生成失敗")}");
+            foreach (var range in WallRanges(corridor, left: true))
+                CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, -wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, true, $"{typeBase}/wall", clipFrom: range.From, clipTo: range.To);
+            foreach (var range in WallRanges(corridor, left: false))
+                CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, false, $"{typeBase}/wall", clipFrom: range.From, clipTo: range.To);
         }
         else
         {
             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[RoadPath] wallWidth <= 0: 壁なし");
         }
 
+        // 結合区間は一つの路面なので、路肩の設備を路面の中に立てない。
         RoadEquipmentGenerator.Generate(container, spline, pathData, width, sidewalkWidth, treeSpacing,
             pathData.path_variant == 303
                 ? segmentPlatformZones ?? LrtPlatformParts.ZoneRanges(lrtPlatforms, LrtRoadParts.PlatformRampLength(303), LrtRoadParts.PLATFORM_EQUIPMENT_ZONE_MARGIN)
-                : null);
+                : corridor != null ? SplineDistances(corridor.GetMergedPercentRanges(null), spline.CalculateLength()) : null);
         SuspensionBridgeGenerator.Generate(container, spline, pathData, width);
 
         // 柱
@@ -984,7 +1002,9 @@ public class RoadPath : IPathMeshGenerator
             && !TunnelSectionUtil.IsUndergroundPath(pathData))
         {
             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] 柱: spacing={pillarSpacing.Value}m, base_height={baseHeight}m で配置開始");
-            GeneratePillars(container, spline, pillarSpacing.Value, baseHeight, pathData, variantBase, typeBase);
+            // 本線の続きへ直接つながる端の橋脚は、つながる2本のうち片方だけが立てる。
+            GeneratePillars(container, spline, pillarSpacing.Value, baseHeight, pathData, variantBase, typeBase,
+                startJoin.Continuous && !startJoin.OwnsSupport, endJoin.Continuous && !endJoin.OwnsSupport);
         }
         else
         {
@@ -1039,6 +1059,115 @@ public class RoadPath : IPathMeshGenerator
         float scale = total > splineLen * 0.8f ? (splineLen * 0.8f) / total : 1f;
         clipFrom = Mathf.Max(0f, startSetback) * scale / splineLen;
         clipTo = 1.0 - Mathf.Max(0f, endSetback) * scale / splineLen;
+    }
+
+    private const float MERGE_WALL_MIN_RUN_LENGTH = 1.0f; // 結合区間の間に残る細切れの壁を立てない長さ(m)
+    private const float MERGE_FILLER_EDGE_INSET = 0.3f; // 隙間の舗装を両側の路面の下へ潜らせる幅(m)
+    private const float MERGE_FILLER_MIN_LENGTH = 1.0f; // これより短い隙間の舗装は作らない(m)
+
+    /// <summary>高速道路の本線とランプの結合区間。点列はこのスプラインの制御点。</summary>
+    private static RoadCorridorInfo ResolveRoadCorridor(PathSummary pathData, List<Vector3> points, float width, float wallWidth, bool ramp)
+    {
+        if (!RoadAdjacency.IsMotorway(pathData) || RoadAdjacency.NeighborProvider == null || points == null) return null;
+        var neighbors = RoadAdjacency.NeighborProvider(pathData);
+        return neighbors != null && neighbors.Count > 0 ? RoadAdjacency.Compute(points, width, wallWidth, ramp, neighbors) : null;
+    }
+
+    private static List<Vector2> SplineDistances(List<TrackCorridorInfo.PercentRange> ranges, float length)
+    {
+        var result = new List<Vector2>(ranges.Count);
+        foreach (var range in ranges) result.Add(new Vector2((float)range.From * length, (float)range.To * length));
+        return result;
+    }
+
+    /// <summary>描画用に分割した区間の端(トンネルの坑口など)は道路の端として扱わない。</summary>
+    private static RoadEndJoin ResolveEndJoin(PathSummary pathData, bool start, bool pathEnd, List<Vector3> points)
+    {
+        if (!pathEnd || points == null || points.Count == 0) return default;
+        Vector3 point = start ? points[0] : points[points.Count - 1];
+        if (RoadMarkingRules.IsApproachEndpoint != null && !RoadMarkingRules.IsApproachEndpoint(pathData, start, point)) return default;
+        return RoadAdjacency.EndJoin(pathData, start);
+    }
+
+    private static List<TrackCorridorInfo.PercentRange> WallRanges(RoadCorridorInfo corridor, bool left)
+        => corridor != null ? corridor.GetWallPercentIntervals(left, MERGE_WALL_MIN_RUN_LENGTH)
+            : new List<TrackCorridorInfo.PercentRange> { new TrackCorridorInfo.PercentRange { From = 0.0, To = 1.0 } };
+
+    /// <summary>交差点の路面(RoadIntersectionMeshGenerator)と同じく、マスターの body_material を路面の材質の正とする。</summary>
+    private static Material ResolveBodyMaterial(PathSummary pathData, string variantBase, string typeBase)
+    {
+        var master = MasterDataStore.Instance?.GetPathMaster(pathData.path_variant);
+        Material named = master != null ? GetOrCreateRoadMaterialByName(master.body_material) : null;
+        if (named != null) return named;
+        GameObject prefab = PathDrawContext.ResolvePrefab($"{variantBase}/body", $"{typeBase}/body", out _);
+        Material source = prefab != null ? prefab.GetComponent<MeshRenderer>()?.sharedMaterial : null;
+        return source != null ? GetOrCreateRoadMaterial(source) : null;
+    }
+
+    /// <summary>
+    /// 本線とランプの路面の隙間を舗装する帯。二重に作らないよう本線だけが生成する。
+    /// 本線の路面から ROAD_MERGE_SINK の2倍下げ、本線とランプ(本線より ROAD_MERGE_SINK 低い)の路面の下へ縁を潜らせる。
+    /// </summary>
+    private static void CreateMergeFillers(GameObject container, RoadCorridorInfo corridor, float halfWidth, Material material)
+    {
+        if (material == null) return;
+        foreach (bool left in new[] { true, false })
+        {
+            float[] fillTo = left ? corridor.LeftFillTo : corridor.RightFillTo;
+            int n = corridor.Points.Count, i = 0, run = 0;
+            while (i < n)
+            {
+                if (float.IsNaN(fillTo[i])) { i++; continue; }
+                int first = i;
+                while (i < n && !float.IsNaN(fillTo[i])) i++;
+                int last = i - 1;
+                if (last - first < 1 || corridor.CumulativeLength[last] - corridor.CumulativeLength[first] < MERGE_FILLER_MIN_LENGTH) continue;
+                BuildMergeFiller(container, corridor, first, last, left, halfWidth, fillTo, material, run++);
+            }
+        }
+    }
+
+    private static void BuildMergeFiller(GameObject container, RoadCorridorInfo corridor, int first, int last, bool left,
+        float halfWidth, float[] fillTo, Material material, int run)
+    {
+        int count = last - first + 1;
+        var vertices = new Vector3[count * 2];
+        var normals = new Vector3[count * 2];
+        var uvs = new Vector2[count * 2];
+        var triangles = new int[(count - 1) * 6];
+        float near = halfWidth - MERGE_FILLER_EDGE_INSET;
+        float lift = RoadPartHeights.BODY_ABOVE_SPLINE - 2f * LocalConstants.ROAD_MERGE_SINK;
+        for (int k = 0; k < count; k++)
+        {
+            int index = first + k;
+            Vector3 origin = corridor.Points[index] + Vector3.up * lift;
+            float far = fillTo[index] + MERGE_FILLER_EDGE_INSET;
+            // 頂点は横位置の小さい側から並べ、上向きの面の巻き順を保つ。
+            float a = left ? -far : near, b = left ? -near : far;
+            vertices[k * 2] = origin + corridor.RightDir[index] * a;
+            vertices[k * 2 + 1] = origin + corridor.RightDir[index] * b;
+            normals[k * 2] = normals[k * 2 + 1] = Vector3.up;
+            float v = corridor.CumulativeLength[index] * 0.25f;
+            uvs[k * 2] = new Vector2(a * 0.25f, v);
+            uvs[k * 2 + 1] = new Vector2(b * 0.25f, v);
+        }
+        for (int k = 0, t = 0; k < count - 1; k++)
+        {
+            int v0 = k * 2;
+            triangles[t++] = v0; triangles[t++] = v0 + 2; triangles[t++] = v0 + 1;
+            triangles[t++] = v0 + 1; triangles[t++] = v0 + 2; triangles[t++] = v0 + 3;
+        }
+        var mesh = new Mesh { name = $"RoadMergeFiller_{(left ? "L" : "R")}_{run}" };
+        mesh.vertices = vertices;
+        mesh.normals = normals;
+        mesh.uv = uvs;
+        mesh.triangles = triangles;
+        mesh.RecalculateBounds();
+        var go = new GameObject(mesh.name);
+        go.transform.SetParent(container.transform, false);
+        go.AddComponent<MeshFilter>().sharedMesh = mesh;
+        go.AddComponent<MeshRenderer>().sharedMaterial = material;
+        go.AddComponent<IntersectionMeshOwner>().OwnedMesh = mesh;
     }
 
     /// <summary>
@@ -1514,9 +1643,12 @@ public class RoadPath : IPathMeshGenerator
     /// GeneratePillars はアンカー点のYからも base_height を引いてスプラインと合わせる。
     /// RoadPath（高架道路）と TrackPath（高架線路）の共通処理。
     /// </summary>
-    public static void GeneratePillars(GameObject container, SplineComputer spline, float pillarSpacing, float baseHeight, PathSummary pathData, string variantBase, string typeBase)
+    /// <param name="skipStart">始端の橋脚を立てない(同じ位置に続きの道路が立てる端)。</param>
+    /// <param name="skipEnd">終端の橋脚を立てない。</param>
+    public static void GeneratePillars(GameObject container, SplineComputer spline, float pillarSpacing, float baseHeight, PathSummary pathData, string variantBase, string typeBase,
+        bool skipStart = false, bool skipEnd = false)
     {
-        GeneratePillarsCore(container, spline, pillarSpacing, baseHeight, pathData, variantBase, typeBase, null);
+        GeneratePillarsCore(container, spline, pillarSpacing, baseHeight, pathData, variantBase, typeBase, null, skipStart, skipEnd);
     }
 
     /// <summary>完成時と同じ干渉判定済みの橋脚を、接地原点を持つ施工単位として返す。</summary>
@@ -1527,7 +1659,8 @@ public class RoadPath : IPathMeshGenerator
     }
 
     private static void GeneratePillarsCore(GameObject container, SplineComputer spline, float pillarSpacing,
-        float baseHeight, PathSummary pathData, string variantBase, string typeBase, System.Action<GameObject, double> onSupport)
+        float baseHeight, PathSummary pathData, string variantBase, string typeBase, System.Action<GameObject, double> onSupport,
+        bool skipStart = false, bool skipEnd = false)
     {
         // プレハブのロード（バリアント→タイプのフォールバック）
         string pillarPath = $"{variantBase}/pillar";
@@ -1654,7 +1787,7 @@ public class RoadPath : IPathMeshGenerator
         // パス全体の開始点（最初のアンカー点）も干渉判定付きの配置候補とする。
         // 各セグメントのループでは終端側のみに柱を配置するため、開始点にも個別に配置することで、
         // 重複を防ぎつつパス全体の開始端と終了端の両方に柱を過不足なく配置するための仕様。
-        if (anchorPercents.Count > 0)
+        if (anchorPercents.Count > 0 && !skipStart)
         {
             if (TryPlace(anchorPercents[0]))
             {
@@ -1667,6 +1800,7 @@ public class RoadPath : IPathMeshGenerator
         {
             double startPct = anchorPercents[i];
             double endPct = anchorPercents[i + 1];
+            bool lastSegment = i == anchors.Count - 2;
 
             // セグメントのスプライン上の長さを概算
             float segSplineLength = EstimateSegmentSplineLength(spline, startPct, endPct);
@@ -1679,6 +1813,7 @@ public class RoadPath : IPathMeshGenerator
                 int divisions = Mathf.CeilToInt(segSplineLength / pillarSpacing);
                 for (int j = 1; j <= divisions; j++)
                 {
+                    if (skipEnd && lastSegment && j == divisions) continue;
                     double t = (double)j / divisions;
                     double placementPct = startPct + (endPct - startPct) * t;
                     if (TryPlace(placementPct))
@@ -1690,7 +1825,7 @@ public class RoadPath : IPathMeshGenerator
             else
             {
                 // 短いセグメントは終点に1本のみ配置する
-                if (TryPlace(endPct))
+                if (!(skipEnd && lastSegment) && TryPlace(endPct))
                 {
                     placedCount++;
                 }

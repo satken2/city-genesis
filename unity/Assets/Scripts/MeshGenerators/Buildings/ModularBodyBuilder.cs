@@ -177,9 +177,7 @@ public static class ModularBodyBuilder
 
                     GameObject wallModule = LoadPartWithFallback(prefix, level, "w", position, resolvedSuffix, out Material[] wallMaterials);
                     GameObject cornerModule = LoadPartWithFallback(prefix, level, "c", position, resolvedSuffix, out Material[] cornerMaterials);
-                    if (stairs != null && i == 2 && stairs.OpeningStart <= .01f)
-                        cornerModule = null;
-                    if (stairs != null && i == 3 && stairs.OpeningEnd >= Vector2.Distance(footprint[2], footprint[3]) - .01f)
+                    if (stairs != null && stairs.OmitsCorner(i))
                         cornerModule = null;
 
                     if (wallModule != null)
@@ -187,9 +185,7 @@ public static class ModularBodyBuilder
                         Vector2 p3 = footprint[(i + 2) % n];
                         int nextPosition = (i + 1) % n + 1;
                         GameObject nextCornerModule = LoadPartWithFallback(prefix, level, "c", nextPosition, resolvedSuffix, out _);
-                        if (stairs != null && i == 1 && stairs.OpeningStart <= .01f)
-                            nextCornerModule = null;
-                        if (stairs != null && i == 2 && stairs.OpeningEnd >= Vector2.Distance(p1, p2) - .01f)
+                        if (stairs != null && stairs.OmitsCorner((i + 1) % n))
                             nextCornerModule = null;
 
                         // 壁の敷き詰め範囲は、両端の角パーツがこの辺へ実際に張り出す長さぶん内側へ狭める。
@@ -198,13 +194,13 @@ public static class ModularBodyBuilder
                         float endOffset = MeasureCornerExtentAlongEdge(nextCornerModule, p1, p2, p3, targetHeight, false);
 
                         List<SegmentMeshData> wallSegments;
-                        if (stairs != null && i == 2)
+                        if (stairs != null && stairs.TryGetOpening(i, out float openingStart, out float openingEnd))
                         {
                             // 接続帯には壁を並べない。開口の手すり・扉は階段パーツが持つ。
                             float length = Vector2.Distance(p1,p2);
                             Vector2 direction = (p2-p1).normalized;
-                            float from = Mathf.Clamp(stairs.OpeningStart, startOffset, length-endOffset);
-                            float to = Mathf.Clamp(stairs.OpeningEnd, startOffset, length-endOffset);
+                            float from = Mathf.Clamp(openingStart, startOffset, length-endOffset);
+                            float to = Mathf.Clamp(openingEnd, startOffset, length-endOffset);
                             wallSegments = new List<SegmentMeshData>();
                             if (from > startOffset + .01f)
                                 wallSegments.AddRange(GenerateWallSegments(p1,p1+direction*from,floorY,wallModule,wallMaterials,targetHeight,startOffset,0));

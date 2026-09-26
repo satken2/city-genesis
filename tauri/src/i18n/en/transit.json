@@ -82,7 +82,7 @@
     "fleetMoreTrains": "and {{count}} more train(s)",
     "fleetShortage": "{{count}} train(s) could not be formed due to a vehicle shortage.",
     "vehicleModel": "Vehicle",
-    "vehicleModelNote": "Only the look of the vehicles changes. Capacity, cost, and speed stay the same.",
+    "vehicleModelNote": "Only the look of the vehicles changes. Capacity, cost, and speed stay the same. The stripes on the body are painted in the line color.",
     "estimate": {
       "title": "Projected balance",
       "editedTag": "With unsaved settings",
@@ -125,7 +125,8 @@
       "lrt": "LRT",
       "trainStandard": "Standard",
       "trainFuturistic": "Futuristic",
-      "trainRetro": "Retro"
+      "trainRetro": "Retro",
+      "monorail": "Monorail"
     }
   }
 }

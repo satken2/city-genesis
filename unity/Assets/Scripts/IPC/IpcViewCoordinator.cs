@@ -232,6 +232,7 @@ public class IpcViewCoordinator : MonoBehaviour
             case "STATE_EDIT_STATION":
             case "STATE_MERGE_PATH":
             case "STATE_SPLIT_PATH":
+            case "STATE_EDIT_ROAD_MEMBERS":
                 ApplyConstructionPreset("border", null);
                 break;
 

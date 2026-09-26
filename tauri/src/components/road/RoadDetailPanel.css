@@ -1,0 +1,174 @@
+/* ==========================================================================
+   RoadDetailPanel.css - 道路詳細パネル(右パネル)
+   セクション・グリッド・タブは AgentDetailPanel.css、道路色の帯・タイル・小型ボタン・削除ブロックは
+   TransitDetailPanel.css を共有し、ここでは道路固有の要素(区間編集中・延長候補の帯、通知行、表の折り返し、
+   路線チップ)だけを定義する。
+   ========================================================================== */
+
+/* ---- 区間編集中の帯(タブに依らず常に見せる) ---- */
+.road-detail__editing,
+.road-detail__preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+
+.road-detail__editing {
+  border: 1px solid rgba(96, 165, 250, 0.45);
+  background: rgba(59, 130, 246, 0.12);
+}
+
+.road-detail__preview {
+  border: 1px dashed rgba(148, 163, 184, 0.5);
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.road-detail__editing-text,
+.road-detail__preview-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: #d8e3ee;
+}
+
+/* ---- 操作結果の一行通知 ---- */
+.road-detail__notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.road-detail__notice--info {
+  color: #9fc3e6;
+}
+
+.road-detail__notice--error {
+  color: #ff9a9a;
+}
+
+.road-detail__notice-close {
+  margin-left: auto;
+  padding: 0 4px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 0.9rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.road-detail__notice-close:hover {
+  opacity: 1;
+}
+
+/* ---- 削除済み ---- */
+.road-detail__deleted {
+  padding: 12px;
+  font-size: 0.8rem;
+  color: #d8e3ee;
+}
+
+.road-detail__deleted p {
+  margin: 6px 0 0;
+  font-size: 0.74rem;
+  color: #93a9c0;
+}
+
+/* ---- 基本情報 ---- */
+.road-detail__tile--link {
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.road-detail__tile--link:hover {
+  filter: brightness(1.15);
+}
+
+.road-detail__tile-hint {
+  font-size: 0.64rem;
+  color: #6b8299;
+  font-variant-numeric: tabular-nums;
+}
+
+.road-detail__grid {
+  align-items: center;
+}
+
+/* 地区・車線構成・路線など、値が複数並ぶ行は折り返す */
+.road-detail__wrap {
+  flex-wrap: wrap;
+  row-gap: 3px;
+}
+
+.road-detail__zone {
+  display: inline-flex;
+  align-items: center;
+}
+
+.road-detail__sep {
+  color: #6b8299;
+}
+
+.road-detail__muted {
+  color: #6b8299;
+}
+
+.road-detail__warn-tag {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.64rem;
+  font-weight: 600;
+  color: var(--flat-warn);
+  background: var(--flat-warn-surface);
+}
+
+.road-detail__line-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-right: 6px;
+  padding: 2px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  background: transparent;
+  color: #d8e3ee;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.road-detail__line-chip:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.road-detail__line-chip i {
+  display: inline-block;
+  width: 10px;
+  height: 4px;
+  border-radius: 2px;
+}
+
+/* ---- 設定タブの操作行(説明 + ボタン) ---- */
+.road-detail__action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.road-detail__action-desc {
+  min-width: 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: #8397ab;
+}

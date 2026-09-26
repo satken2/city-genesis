@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
@@ -12,15 +13,26 @@ public static class OpenSpaceQA
     static Type layout,builder,polygonUtils;
     static int checks;
     static object Field(object value,string name)=>value.GetType().GetField(name)?.GetValue(value) ?? value.GetType().GetProperty(name).GetValue(value);
+    static object Optional(object value,string name)=>value.GetType().GetField(name).GetValue(value); // null を取り得る公開フィールド
     static bool ContainsPoint(object polygon,object point)=>(bool)polygonUtils.GetMethod("Contains",new[]{typeof(IReadOnlyList<Vector2>),typeof(Vector2),typeof(float)}).Invoke(null,new object[]{polygon,point,layout.GetField("BOUNDARY_TOLERANCE").GetValue(null)}); // 敷地判定は本体と同じ境界余裕で行う
     static void Require(bool ok,string message){checks++;if(!ok)throw new Exception(message);}
-    [Serializable] public class Surface {public string material;public Vector2[] polygon;public float lift;}
+    [Serializable] public class Ring {public Vector2[] points;}
+    [Serializable] public class Surface {public string material;public Vector2[] polygon;public List<Ring> holes=new List<Ring>();public float lift;public string side;public Vector2[] points;public int[] triangles;}
     [Serializable] public class Prop {public string part;public Vector2 position;public Vector2 forward;}
     [Serializable] public class Snapshot {public Vector2[] polygon;public List<Surface> surfaces=new List<Surface>();public List<Prop> props=new List<Prop>();}
+    // ギャラリーは本編と同じ三角形分割で面を描くので、穴のある面も分割済みの頂点と添字を書き出す。
     static Snapshot Export(object plan)
     {
         var s=new Snapshot {polygon=(Vector2[])Field(plan,"Polygon")};
-        foreach(var item in (IEnumerable)Field(plan,"Surfaces"))s.surfaces.Add(new Surface {material=(string)Field(item,"Material"),polygon=(Vector2[])Field(item,"Polygon"),lift=(float)Field(item,"Lift")});
+        var triangulate=builder.GetMethod("Triangulate");
+        foreach(var item in (IEnumerable)Field(plan,"Surfaces"))
+        {
+            var surface=new Surface {material=(string)Field(item,"Material"),polygon=(Vector2[])Field(item,"Polygon"),lift=(float)Field(item,"Lift"),side=(string)Optional(item,"Side")};
+            if(Optional(item,"Holes") is Vector2[][] holes)foreach(var hole in holes)surface.holes.Add(new Ring {points=hole});
+            var args=new object[]{item,null,null};triangulate.Invoke(null,args);
+            surface.points=((List<Vector2>)args[1]).ToArray();surface.triangles=((List<int>)args[2]).ToArray();
+            s.surfaces.Add(surface);
+        }
         foreach(var item in (IEnumerable)Field(plan,"Props"))s.props.Add(new Prop {part=(string)Field(item,"Part"),position=(Vector2)Field(item,"Position"),forward=(Vector2)Field(item,"Forward")});
         return s;
     }
@@ -30,7 +42,17 @@ public static class OpenSpaceQA
     }
     public static void Run()
     {
-        if(!EditorApplication.isPlaying){ModelPrefabGenerator.SyncAll();SessionState.SetBool("OpenSpaceQA.Pending",true);EditorApplication.EnterPlaymode();return;}
+        if(!EditorApplication.isPlaying)
+        {
+            // 看板の共有材質へ再マップしたFBXは、前回の検証で材質が無いまま取り込まれていると欠けたまま残るので取り込み直す。
+            AssetDatabase.Refresh();
+            foreach(string f in Directory.GetFiles("Assets/Models/Buildings","*.fbx",SearchOption.AllDirectories))
+            {
+                string path=f.Replace('\\','/');
+                if(File.ReadAllText(path+".meta").Contains("type: UnityEngine:Material"))AssetDatabase.ImportAsset(path,ImportAssetOptions.ForceUpdate);
+            }
+            ModelPrefabGenerator.SyncAll();SessionState.SetBool("OpenSpaceQA.Pending",true);EditorApplication.EnterPlaymode();return;
+        }
         var args=Environment.GetCommandLineArgs();string root=args[Array.IndexOf(args,"-sourceRoot")+1];
         string output=root+"/Temp/OpenSpaceQA";
         try
@@ -65,17 +87,36 @@ public static class OpenSpaceQA
                     {
                         Require(model!=10 || ((ICollection)Field(plan,"ParkingBays")).Count>0,"Missing bays");
                         Require(model!=11 || (bool)Field(plan,"HasLoop"),"Missing rotary loop");
+                        Require(model!=11 || new[]{"site_shelter","site_light","site_clock","site_tree"}.All(n=>snapshot.props.Any(x=>x.part==n)),"Missing rotary furniture");
+                        Require(model!=11 || snapshot.surfaces.Any(x=>x.side!=null),"Missing raised curb surfaces");
                         Require(snapshot.props.Count>0,"Missing furniture");
                     }
                     var rotated=new Vector2[pair.Value.Length];var q=Quaternion.Euler(0,0,37);
                     for(int i=0;i<rotated.Length;i++){var v=q*(Vector3)pair.Value[i];rotated[i]=new Vector2(v.x+100,v.y-55);}
                     var rplan=layout.GetMethod("Create").Invoke(null,new object[]{rotated,model,.5f});
                     Require(((ICollection)Field(plan,"ParkingBays")).Count==((ICollection)Field(rplan,"ParkingBays")).Count,"Rotation changes bay count "+pair.Key);
+                    // 周回路は接道辺の局所座標で作るので、回転・平行移動しても装飾の数と周回の有無は変わらない(境界際の丸め誤差で1〜2個の差は許す)。
+                    Require(model!=11 || (bool)Field(plan,"HasLoop")==(bool)Field(rplan,"HasLoop"),"Rotation changes rotary loop "+pair.Key);
+                    Require(model!=11 || Math.Abs(snapshot.props.Count-Export(rplan).props.Count)<=2,"Rotation changes rotary furniture "+pair.Key);
                     object result=builder.GetMethod("Build").Invoke(null,new object[]{plan,parts,Vector3.zero,false,null});
                     Mesh mesh=(Mesh)Field(result,"Mesh"),collider=(Mesh)Field(result,"ColliderMesh");
                     Require(mesh.vertexCount>0 && collider.vertexCount>0,"Empty surface/collider");
                     foreach(var v in mesh.vertices)Require(!float.IsNaN(v.x)&&!float.IsInfinity(v.y),"Non finite vertex");
-                    if(pair.Key=="rectangle"||pair.Key=="trapezoid"||pair.Key=="concave")Render(mesh,(Material[])Field(result,"Materials"),output+"/"+variant+"-"+pair.Key+".png");
+                    // 看板の共有材質へ再マップした部品で材質が欠けると、本編でも描画されない。
+                    Require(((Material[])Field(result,"Materials")).All(m=>m!=null),"Missing material in "+variant+" "+pair.Key+": "+string.Join(",",parts.Where(x=>x.Value.GetComponentsInChildren<Renderer>().Any(r=>r.sharedMaterials.Any(m=>m==null))).Select(x=>x.Key)));
+                    if(pair.Key=="rectangle"||pair.Key=="trapezoid"||pair.Key=="concave"||(model==11&&(pair.Key=="triangle"||pair.Key=="notch")))Render(mesh,(Material[])Field(result,"Materials"),output+"/"+variant+"-"+pair.Key+".png");
+                    // 駅前ロータリーは visual_variant2 で外周の丸み・歩道幅・出入口が変わる。別の値でも敷地内に収まることを確かめ、見本を残す。
+                    if(model==11&&pair.Key=="rectangle")
+                        foreach(float other in new[]{.12f,.87f})
+                        {
+                            var alt=Export(layout.GetMethod("Create").Invoke(null,new object[]{pair.Value,model,other}));
+                            foreach(var s2 in alt.surfaces)Require((bool)layout.GetMethod("ContainsPolygon").Invoke(null,new object[]{pair.Value,s2.polygon}),"Surface outside seed "+other);
+                            var altPlan=layout.GetMethod("Create").Invoke(null,new object[]{pair.Value,model,other});
+                            object altResult=builder.GetMethod("Build").Invoke(null,new object[]{altPlan,parts,Vector3.zero,false,null});
+                            Mesh altMesh=(Mesh)Field(altResult,"Mesh");
+                            Render(altMesh,(Material[])Field(altResult,"Materials"),output+"/"+variant+"-rectangle-"+Mathf.RoundToInt(other*100)+".png");
+                            UnityEngine.Object.Destroy(altMesh);UnityEngine.Object.Destroy((Mesh)Field(altResult,"ColliderMesh"));
+                        }
                     if(pair.Key=="rectangle")File.WriteAllText(output+"/a"+variant+".json",JsonUtility.ToJson(snapshot,true));
                     UnityEngine.Object.Destroy(mesh);UnityEngine.Object.Destroy(collider);
                 }

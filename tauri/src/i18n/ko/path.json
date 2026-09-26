@@ -1,6 +1,18 @@
 {
   "path": {
     "titleWithId": "경로 #{{id}}",
+    "titleInRoad": "{{road}} (구간 #{{id}})",
+    "road": {
+      "label": "소속 도로",
+      "none": "없음 (이름 없는 길)",
+      "createNew": "+ 새 도로…",
+      "newPlaceholder": "도로 이름 (비워 두면 번호로 표시)",
+      "create": "만들기",
+      "cancel": "취소",
+      "openDetail": "도로 상세",
+      "saveFailed": "소속 도로를 변경하지 못했습니다",
+      "createFailed": "도로를 만들지 못했습니다"
+    },
     "zoneName": "소속 지구",
     "followTerrain": "지형 추종",
     "followTerrainFollow": "함(개별 설정)",
@@ -39,7 +51,8 @@
       "20": "지하철",
       "21": "여객 철도",
       "22": "화물 철도",
-      "23": "고속 철도"
+      "23": "고속 철도",
+      "24": "모노레일"
     },
     "action": {
       "delete": "삭제",
@@ -154,6 +167,12 @@
       "maxGrade": "최대 경사",
       "maxSpan": "최대 경간 길이",
       "minHeight": "최소 높이"
+    },
+    "road": {
+      "title": "소속 도로",
+      "extending": "{{name}}을(를) 연장합니다",
+      "newNote": "확정하면 부설한 구간으로 새 도로를 만듭니다.",
+      "createFailed": "구간은 부설했지만 새 도로를 만들지 못했습니다."
     }
   },
   "track_construction": {

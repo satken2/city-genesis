@@ -1,6 +1,18 @@
 {
   "path": {
     "titleWithId": "Vía n.º {{id}}",
+    "titleInRoad": "{{road}} (tramo n.º {{id}})",
+    "road": {
+      "label": "Carretera",
+      "none": "Ninguna (calle sin nombre)",
+      "createNew": "+ Nueva carretera…",
+      "newPlaceholder": "Nombre de la carretera (vacío: se muestra un número)",
+      "create": "Crear",
+      "cancel": "Cancelar",
+      "openDetail": "Detalles de la carretera",
+      "saveFailed": "No se pudo cambiar la carretera",
+      "createFailed": "No se pudo crear la carretera"
+    },
     "zoneName": "Distrito",
     "followTerrain": "Seguimiento del terreno",
     "followTerrainFollow": "Sí (ajuste individual)",
@@ -39,7 +51,8 @@
       "20": "Metro",
       "21": "Trenes de pasajeros",
       "22": "Trenes de carga",
-      "23": "Trenes de alta velocidad"
+      "23": "Trenes de alta velocidad",
+      "24": "Monorriel"
     },
     "action": {
       "delete": "Eliminar",
@@ -154,6 +167,12 @@
       "maxGrade": "Pendiente máxima",
       "maxSpan": "Longitud máxima de tramo",
       "minHeight": "Altura mínima"
+    },
+    "road": {
+      "title": "Carretera",
+      "extending": "Se prolonga {{name}}",
+      "newNote": "Al confirmar, se creará una nueva carretera con los tramos construidos.",
+      "createFailed": "Los tramos se construyeron, pero no se pudo crear la nueva carretera."
     }
   },
   "track_construction": {

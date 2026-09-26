@@ -141,6 +141,15 @@ public class IpcClient : MonoBehaviour
     // 第1引数はハイライトの発信元(source/windowType)。ソースごとに独立レイヤーで扱う。
     public event Action<string, PathInterferencePayload> OnWorldHighlightObjects;
     public event Action<string> OnWorldClearHighlights;
+    // 道路詳細パネルの強調表示(road_id, color "#rrggbb", path_ids)。送られるたびに全置換する。
+    public event Action<int, string, int[]> OnWorldSetRoadFocus;
+    public event Action OnWorldClearRoadFocus;
+    // 道路の作成・改名・所属変更・削除の直後に、道路一覧(道路名ラベル)を取り直させる。
+    public event Action OnWorldRefreshRoads;
+    // 区間編集モード中の所属区間と追加候補の全集合(road_id, path_ids, preview_path_ids)。
+    public event Action<int, int[], int[]> OnEditRoadSetMembers;
+    // 道路詳細パネルのウィンドウが閉じられた(Rust の window.rs が送る)。区間編集モード中でなければ何もしない。
+    public event Action OnEditRoadCancel;
 
     /// <summary>
     /// Tauriからsystem.readyを受信済みかどうか。
@@ -700,6 +709,41 @@ public class IpcClient : MonoBehaviour
                     }
                     break;
 
+                case "world:set_road_focus":
+                    {
+                        int roadId = GetParamInt(payload, "road_id");
+                        string color = GetParamString(payload, "color");
+                        int[] pathIds = GetParamInt1D(payload, "path_ids") ?? Array.Empty<int>();
+                        Debug.Log($"IpcClient: world:set_road_focus -> road={roadId}, paths={pathIds.Length}");
+                        OnWorldSetRoadFocus?.Invoke(roadId, color, pathIds);
+                    }
+                    break;
+
+                case "world:clear_road_focus":
+                    Debug.Log("IpcClient: world:clear_road_focus");
+                    OnWorldClearRoadFocus?.Invoke();
+                    break;
+
+                case "world:refresh_roads":
+                    Debug.Log("IpcClient: world:refresh_roads");
+                    OnWorldRefreshRoads?.Invoke();
+                    break;
+
+                case "edit_road:set_members":
+                    {
+                        int roadId = GetParamInt(payload, "road_id");
+                        int[] pathIds = GetParamInt1D(payload, "path_ids") ?? Array.Empty<int>();
+                        int[] previewPathIds = GetParamInt1D(payload, "preview_path_ids") ?? Array.Empty<int>();
+                        Debug.Log($"IpcClient: edit_road:set_members -> road={roadId}, paths={pathIds.Length}, preview={previewPathIds.Length}");
+                        OnEditRoadSetMembers?.Invoke(roadId, pathIds, previewPathIds);
+                    }
+                    break;
+
+                case "edit_road:cancel":
+                    Debug.Log("IpcClient: edit_road:cancel");
+                    OnEditRoadCancel?.Invoke();
+                    break;
+
                 case "session:reset":
                     Debug.Log("IpcClient: session:reset");
                     OnSessionReset?.Invoke();
@@ -957,6 +1001,25 @@ public class IpcClient : MonoBehaviour
         };
 
         SendEnvelope("edit_path:select_split_point", payload);
+    }
+
+    /// <summary>
+    /// edit_road:toggle_path イベントを送信する。
+    /// 道路の区間編集モード(STATE_EDIT_ROAD_MEMBERS)で街路・高速道路の区間がクリックされたことをUIに通知する。
+    /// 所属の付け外し(shift=true は直進方向へたどった区間をまとめて追加)はUIがAPIで行い、
+    /// 結果の全集合を edit_road:set_members で送り返す。
+    /// </summary>
+    public void EmitRoadTogglePath(int pathId, string pathName, int pathType, bool shift)
+    {
+        var payload = new Dictionary<string, object>
+        {
+            ["path_id"] = pathId,
+            ["path_name"] = pathName ?? "",
+            ["path_type"] = pathType,
+            ["shift"] = shift
+        };
+
+        SendEnvelope("edit_road:toggle_path", payload);
     }
 
     /// <summary>

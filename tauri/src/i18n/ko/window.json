@@ -8,6 +8,7 @@
     "zone_detail": "지구 상세",
     "intersection_detail": "나들목 상세",
     "path_detail": "경로 상세",
+    "road_detail": "도로 상세",
     "path_build": "도로 건설",
     "track_build": "궤도 건설",
     "infra_build": "인프라 건설",

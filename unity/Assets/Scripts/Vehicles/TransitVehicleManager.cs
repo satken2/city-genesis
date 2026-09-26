@@ -64,6 +64,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
         public int type;
         public Vector3[] positions, directions;
         public string[] keys, modelKeys;   // DrawLine が1編成ぶんの車両キーを置く作業領域(長さは編成両数)
+        public Color32? livery;             // 車体の帯を塗る路線色(未設定なら元の塗装)
     }
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void Bootstrap()
@@ -81,6 +82,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
             RenderWorkScheduler.Stop(this, warmWorker); warmWorker = null; warmedRevision = -1;
             session = store.Session; clock = 0; revision = -1; lines.Clear(); routePaths.Clear(); routeGeometry?.Clear();
             HideUnused(true);
+            TransitLivery.Reset();
             soundTrack.Clear();
             VehicleAmbience.Clear(VehicleAmbience.Kind.Bus);
             VehicleAmbience.Clear(VehicleAmbience.Kind.Train);
@@ -115,7 +117,8 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
         foreach (var data in source)
         {
             if (data.status != Constants.STATUS_ACTIVE || data.vehicle_count < Math.Max(1, data.cars_per_train)) continue;
-            var line = new Line { data = data, motion = new TransitMotionClock(data.journeys), type = VehicleModelConfig.GetTransitVehicleType(data.path_variant) };
+            var line = new Line { data = data, motion = new TransitMotionClock(data.journeys), type = VehicleModelConfig.GetTransitVehicleType(data.path_variant),
+                livery = TransitLivery.Parse(data.line_color) };
             line.VehicleType = line.type;
             if (line.motion.Duration <= 0 || line.motion.Length <= 0 || line.type == 0 || data.cars_per_train > maxVisibleCars) continue;
             line.positions = new Vector3[Math.Max(1,data.cars_per_train)]; line.directions = new Vector3[line.positions.Length];
@@ -226,6 +229,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
                 if (!nominalLengths.TryGetValue(go,out float fitted) || fitted != spacing)
                 { VehicleModelResolver.FitTransitLength(go,spacing); nominalLengths[go]=spacing; }
                 lineByVehicle[go] = line.data.line_agent_id;
+                TransitLivery.Apply(go, line.livery);
                 Vector3 bodyForward = directions[car] * (reversed && line.type != Constants.VEHICLE_BUS ? -1 : 1);
                 if (identity == cars-1 && cars > 1 && line.type != Constants.VEHICLE_BUS) bodyForward = -bodyForward;
                 go.transform.SetPositionAndRotation(positions[car],Quaternion.LookRotation(bodyForward,Vector3.up));

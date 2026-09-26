@@ -223,6 +223,7 @@ public static class Constants
     public const int VEHICLE_PASSANGER_TRAIN = 21;
     public const int VEHICLE_FREIGHT_TRAIN = 22;
     public const int VEHICLE_HIGH_SPEED_TRAIN = 23;
+    public const int VEHICLE_MONORAIL = 24;
     public const int SHAPE_HOUSE = 1;
     public const int SHAPE_OFFICE = 2;
     public const int SHAPE_COMMERCIAL = 3;
@@ -272,6 +273,8 @@ public static class Constants
     public const int INTERCHANGE_KIND_JCT = 2;
     public const float INTERCHANGE_HULL_MARGIN_M = 10.0f;
     public const int INTERCHANGE_NAME_MAX_LENGTH = 64;
+    public const int ROAD_NAME_MAX_LENGTH = 64;
+    public const float ROAD_TRACE_MAX_DEFLECTION_DEG = 30.0f;
     public const int PAYMENT_MARKET = 0;
     public const int PAYMENT_RENT = 1;
     public const int PAYMENT_SALARY = 2;
@@ -357,7 +360,8 @@ public static class Constants
         { VEHICLE_METRO_TRAIN, TRAFFIC_RAIL },
         { VEHICLE_PASSANGER_TRAIN, TRAFFIC_RAIL },
         { VEHICLE_FREIGHT_TRAIN, TRAFFIC_RAIL },
-        { VEHICLE_HIGH_SPEED_TRAIN, TRAFFIC_RAIL }
+        { VEHICLE_HIGH_SPEED_TRAIN, TRAFFIC_RAIL },
+        { VEHICLE_MONORAIL, TRAFFIC_RAIL }
     };
 
     public static readonly Dictionary<int, string> STATUS_NAME_MAP = new Dictionary<int, string>
@@ -386,11 +390,15 @@ public static class Constants
 
     public static readonly int[] ROAD_VEHICLE_KEYS = new int[] { VEHICLE_STANDARD, VEHICLE_TRUCK, VEHICLE_BUS, VEHICLE_COMMERCIAL, VEHICLE_TRAM };
 
-    public static readonly int[] RAIL_VEHICLE_KEYS = new int[] { VEHICLE_METRO_TRAIN, VEHICLE_PASSANGER_TRAIN, VEHICLE_FREIGHT_TRAIN, VEHICLE_HIGH_SPEED_TRAIN };
+    public static readonly int[] RAIL_VEHICLE_KEYS = new int[] { VEHICLE_METRO_TRAIN, VEHICLE_PASSANGER_TRAIN, VEHICLE_FREIGHT_TRAIN, VEHICLE_HIGH_SPEED_TRAIN, VEHICLE_MONORAIL };
 
     public static readonly int[] GROUND_COVER_TYPES = new int[] { GROUND_COVER_GRASSLAND, GROUND_COVER_DESERT, GROUND_COVER_LUSH, GROUND_COVER_SNOW, GROUND_COVER_SEMI_ARID };
 
     public static readonly int[] CLIMATE_TYPES = new int[] { CLIMATE_TEMPERATE, CLIMATE_SUBTROPICAL, CLIMATE_CONTINENTAL, CLIMATE_MEDITERRANEAN, CLIMATE_STEPPE, CLIMATE_DESERT, CLIMATE_SUBARCTIC };
+
+    public static readonly int[] PATH_TYPES_NAMED_ROAD = new int[] { PATH_STREET, PATH_MOTORWAY };
+
+    public static readonly string[] ROAD_COLOR_PALETTE = new string[] { "#7F77DD", "#E4572E", "#1D9E75", "#D4537E", "#2E86DE", "#BA7517", "#0F6E56", "#993C1D" };
 
     public static readonly int[] TENANT_TYPES = new int[] { SPACE_RESIDENCE, SPACE_RETAIL, SPACE_FACTORY, SPACE_OFFICE, SPACE_LODGING };
 

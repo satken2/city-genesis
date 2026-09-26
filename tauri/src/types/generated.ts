@@ -301,7 +301,7 @@ export type PathSummary = {
   name: string;
   /** 見た目の更新版数。フロントの差分描画トリガーとして使う */
   version: number;
-  /** 幹線道路かどうか（0/1。マスター由来の読み取り専用値） */
+  /** 幹線道路かどうか（高速道路、または道路(road_id)に属する街路なら真） */
   trunk: boolean;
   /** パスの大分類（道路・街路・線路・公共交通・インフラなど。PATH_*） */
   path_type: number;
@@ -378,6 +378,10 @@ export type PathSummary = {
   street_parking_capacity: number;
   /** 制限速度(km/h) (サーバーサイドで計算されるフィールド。型は動的。) */
   max_speed?: any;
+  /** 所属する道路(名前付き道路)のID。-1(VALUE_NONE)は道路に属さない名もなき道 */
+  road_id?: number;
+  /** 形状から決まる通過速度(km/h)。制限速度・曲線半径・縦断勾配・端点の加減速から算出 */
+  base_speed: number;
 };
 
 export type PathData = {
@@ -491,6 +495,8 @@ export type PathData = {
   street_parking_capacity: number;
   /** 路駐率（parked_cars / street_parking_capacity）。1超えは容量超過。容量0のときは0 */
   parking_ratio: number;
+  /** 所属する道路(名前付き道路)のID。-1(VALUE_NONE)は道路に属さない名もなき道 */
+  road_id?: number;
 };
 
 export type ParcelSummary = {

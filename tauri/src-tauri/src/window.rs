@@ -915,6 +915,25 @@ pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) 
                 "parcel:hide_front_path".to_string(),
                 json!({}),
             );
+        } else if wt == "road_detail" {
+            // 道路詳細パネルが閉じられたとき、3Dの道路の強調帯を消し、区間編集モード中なら打ち切る。
+            // ウィンドウは非表示(再利用待ち)になるだけでReact側のアンマウント処理が走らないため、
+            // クローズ処理側で明示的に送る(path_detail と同じ理由)。Unity側は区間編集モード中で
+            // なければ edit_road:cancel を無視する。
+            let _ = ipc::send_ui_action(
+                state,
+                wt.clone(),
+                None,
+                "world:clear_road_focus".to_string(),
+                json!({}),
+            );
+            let _ = ipc::send_ui_action(
+                state,
+                wt.clone(),
+                None,
+                "edit_road:cancel".to_string(),
+                json!({}),
+            );
         } else if wt == "path_detail" {
             // パス詳細パネルが閉じられたとき、着工前パスの干渉ハイライトをクリアする。
             // ウィンドウは非表示(再利用待ち)になるだけでReact側のアンマウント処理による

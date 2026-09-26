@@ -1,6 +1,18 @@
 {
   "path": {
     "titleWithId": "Voie n° {{id}}",
+    "titleInRoad": "{{road}} (tronçon n° {{id}})",
+    "road": {
+      "label": "Route",
+      "none": "Aucune (voie sans nom)",
+      "createNew": "+ Nouvelle route…",
+      "newPlaceholder": "Nom de la route (vide : affichée par numéro)",
+      "create": "Créer",
+      "cancel": "Annuler",
+      "openDetail": "Détails de la route",
+      "saveFailed": "Impossible de changer la route",
+      "createFailed": "Impossible de créer la route"
+    },
     "zoneName": "Quartier",
     "followTerrain": "Suivi du terrain",
     "followTerrainFollow": "Oui (réglage individuel)",
@@ -39,7 +51,8 @@
       "20": "Métro",
       "21": "Trains de voyageurs",
       "22": "Trains de fret",
-      "23": "Trains à grande vitesse"
+      "23": "Trains à grande vitesse",
+      "24": "Monorail"
     },
     "action": {
       "delete": "Supprimer",
@@ -154,6 +167,12 @@
       "maxGrade": "Pente maximale",
       "maxSpan": "Portée maximale",
       "minHeight": "Hauteur minimale"
+    },
+    "road": {
+      "title": "Route",
+      "extending": "Prolonge {{name}}",
+      "newNote": "À la confirmation, une nouvelle route sera créée avec les tronçons construits.",
+      "createFailed": "Les tronçons ont été construits, mais la nouvelle route n'a pas pu être créée."
     }
   },
   "track_construction": {

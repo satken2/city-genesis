@@ -14,11 +14,17 @@ public sealed class RoadMarkingContext : MonoBehaviour
     public float Phase { get; private set; }
     public Vector4 Approaches { get; private set; }
     public Vector4[] Bands { get; private set; }
+
+    /// <summary>Bands と同じ添字の描画区間(x=始端, y=終端のスプライン距離 m)。区間外にはその線を描かない。</summary>
+    public Vector4[] BandSpans { get; private set; }
     public int BandCount { get; private set; }
     private readonly List<Vector3> points = new();
     private readonly List<float> distances = new();
     private readonly Dictionary<Vector2Int, List<int>> cells = new();
+    private readonly List<Vector4> bandList = new();
+    private readonly List<Vector4> spanList = new();
     private const float CellSize = 16f;
+    private const float Unbounded = 1e9f;
 
     public static RoadMarkingContext Create(GameObject parent, SplineComputer spline, PathSummary path,
         bool startApproach, bool endApproach)
@@ -40,16 +46,69 @@ public sealed class RoadMarkingContext : MonoBehaviour
         }
         context.Length = distance;
         context.Phase = ProjectPlanDistance(path, context.points[0]);
-        var bands = new List<Vector4> { new(-context.Lanes.Outer, context.LineWidth, 0, 0), new(context.Lanes.Outer, context.LineWidth, 0, 0) };
-        foreach (var boundary in context.Lanes.Boundaries()) bands.Add(new Vector4(boundary.offset, context.LineWidth, boundary.dashed ? 1 : 0, 1));
-        // 対応車線数を超えた標示だけを制限し、シェーダーの配列を越えない。
-        context.Bands = new Vector4[32];
-        context.BandCount = Mathf.Min(context.Bands.Length, bands.Count);
-        bands.CopyTo(0, context.Bands, 0, context.BandCount);
+        // 先頭の2本は左右の路側線(OverrideSideLine が添字で参照する)。
+        context.bandList.Add(new Vector4(-context.Lanes.Outer, context.LineWidth, 0, 0));
+        context.bandList.Add(new Vector4(context.Lanes.Outer, context.LineWidth, 0, 0));
+        foreach (var boundary in context.Lanes.Boundaries()) context.bandList.Add(new Vector4(boundary.offset, context.LineWidth, boundary.dashed ? 1 : 0, 1));
+        foreach (var _ in context.bandList) context.spanList.Add(new Vector4(-Unbounded, Unbounded, 0, 0));
+        context.RefreshBands();
         context.Plan = new RoadMarkingPlan();
         if (startApproach) context.BuildApproach(path, true, sidewalk, center);
         if (endApproach) context.BuildApproach(path, false, sidewalk, center);
         return context;
+    }
+
+    /// <summary>
+    /// 路側線を区間ごとに描き分ける。ranges(スプライン距離 m。x=始端, y=終端の昇順)の内側は dashed なら点線、
+    /// 偽なら描かず、外側は実線のまま。高速道路の本線とランプの結合区間(RoadAdjacency)に使う。
+    /// body の生成時にシェーダーへ渡すので、body を生成する前に呼ぶこと。
+    /// </summary>
+    public void OverrideSideLine(bool left, List<Vector2> ranges, bool dashed)
+    {
+        if (ranges == null || ranges.Count == 0) return;
+        int index = left ? 0 : 1;
+        Vector4 band = bandList[index];
+        var pieces = new List<(Vector2 span, bool inside)>();
+        float cursor = -Unbounded;
+        foreach (var range in ranges)
+        {
+            // 道路の端に接する区間は端の外まで延ばし、端に長さ0の実線を残さない。
+            float from = range.x <= 1e-3f ? -Unbounded : range.x;
+            float to = range.y >= Length - 1e-3f ? Unbounded : range.y;
+            if (from > cursor) pieces.Add((new Vector2(cursor, from), false));
+            pieces.Add((new Vector2(from, to), true));
+            cursor = Mathf.Max(cursor, to);
+        }
+        if (cursor < Unbounded) pieces.Add((new Vector2(cursor, Unbounded), false));
+        bool first = true;
+        foreach (var (span, inside) in pieces)
+        {
+            if (inside && !dashed) continue;
+            var piece = new Vector4(band.x, band.y, inside ? 1 : band.z, band.w);
+            var spanValue = new Vector4(span.x, span.y, 0, 0);
+            if (first)
+            {
+                bandList[index] = piece;
+                spanList[index] = spanValue;
+                first = false;
+            }
+            else
+            {
+                bandList.Add(piece);
+                spanList.Add(spanValue);
+            }
+        }
+        RefreshBands();
+    }
+
+    private void RefreshBands()
+    {
+        // 対応車線数を超えた標示だけを制限し、シェーダーの配列を越えない。
+        Bands = new Vector4[32];
+        BandSpans = new Vector4[32];
+        BandCount = Mathf.Min(Bands.Length, bandList.Count);
+        bandList.CopyTo(0, Bands, 0, BandCount);
+        spanList.CopyTo(0, BandSpans, 0, BandCount);
     }
 
     private static float ProjectPlanDistance(PathSummary path, Vector3 p)

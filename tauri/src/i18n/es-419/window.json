@@ -8,6 +8,7 @@
     "zone_detail": "Detalle del distrito",
     "intersection_detail": "Detalle del intercambiador",
     "path_detail": "Detalle de la vía",
+    "road_detail": "Detalle de la carretera",
     "path_build": "Construcción de vías",
     "track_build": "Construcción de vías férreas",
     "infra_build": "Construcción de infraestructura",

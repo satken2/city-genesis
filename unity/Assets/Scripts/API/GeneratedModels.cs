@@ -318,7 +318,7 @@ namespace GeneratedModels
         public string name;
         /// <summary>見た目の更新版数。フロントの差分描画トリガーとして使う</summary>
         public int version;
-        /// <summary>幹線道路かどうか（0/1。マスター由来の読み取り専用値）</summary>
+        /// <summary>幹線道路かどうか（高速道路、または道路(road_id)に属する街路なら真）</summary>
         public bool trunk;
         /// <summary>パスの大分類（道路・街路・線路・公共交通・インフラなど。PATH_*）</summary>
         public int path_type;
@@ -395,6 +395,10 @@ namespace GeneratedModels
         public float street_parking_capacity;
         /// <summary>制限速度(km/h) サーバーサイドで計算されるフィールド。型は動的。</summary>
         public object max_speed;
+        /// <summary>所属する道路(名前付き道路)のID。-1(VALUE_NONE)は道路に属さない名もなき道</summary>
+        public int? road_id;
+        /// <summary>形状から決まる通過速度(km/h)。制限速度・曲線半径・縦断勾配・端点の加減速から算出</summary>
+        public float base_speed;
     }
 
     [Serializable]
@@ -510,6 +514,8 @@ namespace GeneratedModels
         public float street_parking_capacity;
         /// <summary>路駐率（parked_cars / street_parking_capacity）。1超えは容量超過。容量0のときは0</summary>
         public float parking_ratio;
+        /// <summary>所属する道路(名前付き道路)のID。-1(VALUE_NONE)は道路に属さない名もなき道</summary>
+        public int? road_id;
     }
 
     [Serializable]

@@ -12,6 +12,8 @@ let drawn;
 let animated;
 let clicked;
 const texts = [];
+const paints = [];
+let pathsResponse = { paths: [] };
 const handle = {};
 const near = (a, b) => assert.ok(Math.abs(a - b) < 1e-8, `${a} != ${b}`);
 function eventTarget() {
@@ -35,6 +37,8 @@ function context() {
     fillText: (text, x, y) => texts.push({ text, x: matrix[0] * x + matrix[4], y: matrix[3] * y + matrix[5], upright: matrix[3] > 0 }),
     createImageData: (w, h) => ({ data: new Uint8ClampedArray(w * h * 4) }),
     measureText: (text) => ({ width: text.length * 8 }),
+    fill: function () { paints.push({ op: "fill", style: this.fillStyle, alpha: this.globalAlpha ?? 1 }); },
+    stroke: function () { paints.push({ op: "stroke", style: this.strokeStyle, alpha: this.globalAlpha ?? 1 }); },
   }, { get: (obj, key) => obj[key] ?? (() => {}) });
 }
 function canvas() {
@@ -62,10 +66,17 @@ const imports = {
     buildApiUrl: (_, path) => path,
     fetchApi: async (url) => url.endsWith("settings")
       ? { map_width: 100, map_height: 200, near_map_spacing: 100, cell_size: 100 }
+      : url.startsWith("/api/v1/paths") ? pathsResponse
       : { type: "Polygon", coordinates: [] },
   },
   "../terrain/terrainData": { computePixelRGB: () => [0, 0, 0], decodeFloat16Array: () => new Float32Array(6), normalizeGroundCover: () => 1 },
-  "../../constants": { PATH_MOTORWAY: 1, PATH_STREET: 2, PATH_WALKWAY: 3, PATH_TRACK: 4 },
+  "../../constants": { PATH_MOTORWAY: 1, PATH_STREET: 2, PATH_WALKWAY: 3, PATH_TRACK: 4, ROAD_COLOR_PALETTE: ["#7F77DD"] },
+  "../road/roadApi": {
+    fetchRoadList: async () => ({ version: 0, roads: [] }),
+    hasRoad: (id) => id != null && id > 0,
+    roadDisplayName: (name, id) => name || `Road ${id}`,
+    ROADS_CHANGED_EVENT: "roads:changed",
+  },
 };
 function load(path) {
   const { outputText } = ts.transpileModule(readFileSync(new URL(path, import.meta.url), "utf8"), {
@@ -76,7 +87,7 @@ function load(path) {
     exports, require: (name) => { assert.ok(name in imports, name); return imports[name]; },
     window: windowMock, document: { createElement: canvas }, console, AbortController,
     ResizeObserver: class { observe() {} disconnect() {} },
-    Path2D: class { moveTo() {} lineTo() {} closePath() {} },
+    Path2D: class { moveTo() {} lineTo() {} closePath() {} addPath() {} bezierCurveTo() {} },
     fetch: async () => ({ ok: true, arrayBuffer: async () => new ArrayBuffer(12) }),
   });
   return exports;
@@ -134,4 +145,28 @@ near(screenNorth().x, 400); near(screenNorth().y, 300);
 frame(100);
 near(animated.x, drawn.north.x); near(animated.y, drawn.north.y);
 for (const cleanup of cleanups.reverse()) cleanup?.();
-console.log("PASS: north-up, upright labels, click coordinates, path editor coordinates, pan, cursor zoom, fitBounds, animated overlay (DPR=2)");
+
+// 幹線道路レイヤーは高速道路と道路(road_id)に属する区間だけを描き、強調の帯は道路色で重ねる。
+const street = (id, x, roadId, type = 2) => ({ path_id: id, path_type: type, path_variant: 0, road_id: roadId,
+  start_point: [x, 0, 0], end_point: [x, 0, 50], curved: 0 });
+pathsResponse = { paths: [street(1, 0, -1), street(2, 10, 3), street(3, 20, -1, 1)] };
+const renderMap = async (props) => {
+  const effectStart = effects.length;
+  CityMapCanvas({ apiBaseUrl: "test", showCompass: false,
+    layers: { ...Object.fromEntries(Object.keys(DEFAULT_CITY_MAP_LAYERS).map((key) => [key, false])), trunkRoads: true },
+    ...props }, {});
+  const disposers = effects.slice(effectStart).map((fn) => fn());
+  for (let i = 0; i < 10; i++) await new Promise((resolve) => setImmediate(resolve));
+  for (const dispose of disposers.reverse()) dispose?.();
+};
+paints.length = 0;
+await renderMap({});
+const fills = paints.filter((p) => p.op === "fill").map((p) => p.style);
+assert.ok(fills.includes("#aab7c1"), "a street that belongs to a road is a trunk road");
+assert.ok(fills.includes("#778896"), "motorways are always trunk roads");
+assert.ok(!fills.includes("#c6ced3"), "streets without a road are not trunk roads");
+paints.length = 0;
+await renderMap({ focusPathIds: [2], focusColor: "#E4572E", focusDimOthers: true });
+assert.ok(paints.some((p) => p.op === "stroke" && p.style === "#E4572E" && p.alpha === 1), "the focused section is drawn in the road color");
+assert.ok(paints.some((p) => p.op === "fill" && p.style === "#aab7c1" && p.alpha < 1), "other roads are dimmed while focusing");
+console.log("PASS: north-up, upright labels, click coordinates, path editor coordinates, pan, cursor zoom, fitBounds, animated overlay (DPR=2), trunk roads = motorways + road members, road focus band");

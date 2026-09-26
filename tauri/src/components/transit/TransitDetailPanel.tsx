@@ -324,7 +324,7 @@ export function TransitDetailPanel({
     fare !== Math.round(line.fare_price) ||
     headway !== Math.round(line.target_headway) ||
     carsPerTrain !== Math.max(1, Math.round(line.cars_per_train ?? 1));
-  // 車両を描かない種別(モノレール等)は外観の候補を持たないので、外観の行ごと出さない。
+  // 外観の候補を持たない種別(カタログ未登録)は、外観の行ごと出さない。
   const hasVehicleOptions = transitVehicleOptions(line.path_variant).length > 0;
 
   const tabs: { id: TabId; label: string }[] = [

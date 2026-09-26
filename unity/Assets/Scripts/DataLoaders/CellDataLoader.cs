@@ -16,6 +16,7 @@ public class CellDataLoader : MonoBehaviour
     public ResourceManager resourceManager;
     public PropManager propManager;
     private InterchangeManager interchangeManager;
+    private RoadManager roadManager;
 
     // オブジェクトを作成するシーン
     private UnityEngine.SceneManagement.Scene targetScene;
@@ -163,6 +164,14 @@ public class CellDataLoader : MonoBehaviour
             GameObject go = new GameObject("InterchangeManager");
             DontDestroyOnLoad(go);
             interchangeManager = go.AddComponent<InterchangeManager>();
+        }
+
+        roadManager = FindAnyObjectByType<RoadManager>();
+        if (roadManager == null)
+        {
+            GameObject go = new GameObject("RoadManager");
+            DontDestroyOnLoad(go);
+            roadManager = go.AddComponent<RoadManager>();
         }
 
         // HeightmapTextureManager の初期化。
@@ -489,6 +498,7 @@ public class CellDataLoader : MonoBehaviour
         }
         // インターチェンジは都市全体の一覧なので、未取得のときだけ取る(以後の更新は ReloadAllData)。
         interchangeManager?.EnsureLoaded();
+        roadManager?.EnsureLoaded();
         if (resourceManager != null)
         {
             UnityLog.If(LocalConstants.UNITY_LOG_LOADER, "CellDataLoader: 天然資源のリロード開始");
@@ -737,6 +747,8 @@ public class CellDataLoader : MonoBehaviour
         // インターチェンジは道路の竣工・編集でバックエンドが再検出するため、同じく明示的に取り直す
         // (version が変わっていなければラベルは再構築されない)。
         interchangeManager?.RequestRefresh();
+        // 道路名のラベルも区間の竣工・撤去・分割で位置と所属が変わるため同様に取り直す。
+        roadManager?.RequestRefresh();
         // エポック完了後や編集確定後のデータ再取得に追随して、アラートアイコンも更新する。
         // クールダウンにより短時間の連続呼び出しは間引かれる。
         AlertManager.Instance?.Refresh();
@@ -815,6 +827,7 @@ public class CellDataLoader : MonoBehaviour
         resourceManager?.ClearAllCells();
         propManager?.ClearAllCells();
         interchangeManager?.Clear();
+        roadManager?.Clear();
 
         // GPU高さ窓と地形高さのフレームキャッシュを無効化する。
         // 無効化しないと、次のセーブのロード中に前のマップの標高が

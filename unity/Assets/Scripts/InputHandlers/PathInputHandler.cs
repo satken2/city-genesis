@@ -70,6 +70,9 @@ public class PathInputHandler : MonoBehaviour, IInputHandler
                 // クリックされたパスがどれかに関わらずマネージャの射影結果を使う。
                 PathTopologyEditManager.Instance?.OnClickForSplit();
                 break;
+            case InputMode.MODE_EDIT_ROAD_MEMBERS:
+                RoadMemberEditManager.Instance?.OnPathClicked(pathId);
+                break;
             case InputMode.MODE_NONE:
                 // 何もしない
                 break;
@@ -102,6 +105,18 @@ public class PathInputHandler : MonoBehaviour, IInputHandler
             {
                 visualModeObject.SetHover(true);
                 TooltipManager.Instance?.Show("クリックでこのパスと結合");
+            }
+            return;
+        }
+
+        // 道路の区間編集モードでは、道路に含められる区間(街路・高速道路)だけをハイライトする
+        if (mode == InputMode.MODE_EDIT_ROAD_MEMBERS)
+        {
+            if (RoadMemberEditManager.Instance != null
+                && RoadMemberEditManager.Instance.OnPathHoverStart(pathId)
+                && visualModeObject != null)
+            {
+                visualModeObject.SetHover(true);
             }
             return;
         }
@@ -158,6 +173,10 @@ public class PathInputHandler : MonoBehaviour, IInputHandler
         if (mode == InputMode.MODE_ZONE_EDIT || mode == InputMode.MODE_PATH_MERGE)
         {
             TooltipManager.Instance?.Hide();
+        }
+        else if (mode == InputMode.MODE_EDIT_ROAD_MEMBERS)
+        {
+            RoadMemberEditManager.Instance?.OnPathHoverEnd(pathId);
         }
     }
 

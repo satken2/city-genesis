@@ -18,7 +18,7 @@
     "cancel": "Cancelar",
     "directions": "Cómo llegar",
     "explore": "Descubre tu ciudad",
-    "intro": "Busca instalaciones, estaciones o distritos, o selecciona un lugar en el mapa.",
+    "intro": "Busca instalaciones, estaciones, distritos o carreteras, o selecciona un lugar en el mapa.",
     "chooseOrigin": "Busca un origen o elige uno en el mapa.",
     "routing": "Buscando ruta…",
     "showRoute": "Ver ruta completa",
@@ -37,7 +37,8 @@
       "zone": "Distrito",
       "stop": "Parada",
       "station": "Estación",
-      "point": "Punto"
+      "point": "Punto",
+      "road": "Carretera"
     },
     "leg": {
       "walk": "Caminar",

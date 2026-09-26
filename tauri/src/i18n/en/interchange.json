@@ -7,6 +7,12 @@
     "fallbackName": {
       "ic": "IC #{{id}}",
       "jct": "JCT #{{id}}"
+    },
+    "connections": {
+      "from": "From",
+      "to": "To",
+      "road": "{{type}} #{{id}}",
+      "none": "No connected road pairs."
     }
   }
 }

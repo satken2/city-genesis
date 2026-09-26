@@ -82,7 +82,7 @@
     "fleetMoreTrains": "另有 {{count}} 列",
     "fleetShortage": "因车辆不足，有 {{count}} 列无法编组。",
     "vehicleModel": "车辆",
-    "vehicleModelNote": "只改变车辆的外观，载客量、费用和速度不变。",
+    "vehicleModelNote": "只改变车辆的外观，载客量、费用和速度不变。车身的色带会涂成线路颜色。",
     "estimate": {
       "title": "收支预测",
       "editedTag": "按未保存的设置估算",
@@ -125,7 +125,8 @@
       "lrt": "轻轨",
       "trainStandard": "标准",
       "trainFuturistic": "未来风",
-      "trainRetro": "复古"
+      "trainRetro": "复古",
+      "monorail": "单轨列车"
     }
   }
 }

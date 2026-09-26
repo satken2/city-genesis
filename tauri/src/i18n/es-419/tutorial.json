@@ -266,6 +266,34 @@
       "tip27": {
         "title": "Un lamentable accidente",
         "description": "Un edificio que estorba al desarrollo puede volarse y hacerlo pasar por un accidente. El ánimo ciudadano empeora mucho, así que, de ser posible, cómpralo y demuélelo como corresponde."
+      },
+      "tip28": {
+        "title": "A falta de tierra, el mar",
+        "description": "¿Falta espacio en tierra? Construye plataformas petroleras y turbinas eólicas en el mar. Conéctalas a tu red de transporte terrestre mediante tuberías y cables submarinos."
+      },
+      "tip29": {
+        "title": "El infierno de los semáforos",
+        "description": "Cada intersección añade otro semáforo en rojo. Si creas una cuadrícula demasiado apretada, los conductores se detendrán en cada manzana y su paciencia se agotará antes de llegar."
+      },
+      "tip30": {
+        "title": "Buena visibilidad",
+        "description": "Las torres de telecomunicaciones cubren un área mayor cuanto más altas se construyan y a mayor elevación. Las señales bloqueadas por montañas no se solucionan aumentando la potencia a la fuerza."
+      },
+      "tip31": {
+        "title": "El fruto del mar",
+        "description": "Si no encuentras fuentes de agua dulce, puedes construir una planta desalinizadora en la costa. Eso sí, requiere mucha electricidad. Tras buscar agua, te tocará buscar energía."
+      },
+      "tip32": {
+        "title": "Otra forma de seguridad",
+        "description": "El desempleo es una de las causas del crimen. No construyas solo comisarías; genera también puestos de trabajo. Antes de sufrir por el presupuesto policial, prueba con medidas de empleo."
+      },
+      "tip33": {
+        "title": "Cuentas para el futuro",
+        "description": "Tanto los edificios como las carreteras exigen costes de mantenimiento. Construir de más solo porque te sobra dinero te dejará ahogado en reparaciones. Recuerda que el alcalde del futuro seguirás siendo tú."
+      },
+      "tip34": {
+        "title": "Cuidado con sobreexplotar",
+        "description": "Si extraes agua a un ritmo mayor del que la fuente se recarga, terminarás en escasez. Añadir más bombas no creará más agua."
       }
     }
   },

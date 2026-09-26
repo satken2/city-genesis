@@ -29,7 +29,8 @@ Shader "Custom/RoadSurface"
         {
             Name "ForwardLit"
             Tags { "LightMode"="UniversalForward" }
-            Cull Back ZWrite On Offset -1, -1
+            // 傾き依存の補正は反復するbodyの端面を路面より手前へ出すため、一定量の補正だけを使う。
+            Cull Back ZWrite On Offset 0, -1
             HLSLPROGRAM
             #pragma target 4.5
             #pragma vertex RoadVertex

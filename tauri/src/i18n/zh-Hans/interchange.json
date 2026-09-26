@@ -7,6 +7,12 @@
     "fallbackName": {
       "ic": "IC #{{id}}",
       "jct": "JCT #{{id}}"
+    },
+    "connections": {
+      "from": "出发道路",
+      "to": "到达道路",
+      "road": "{{type}} #{{id}}",
+      "none": "没有相连的道路组合。"
     }
   }
 }

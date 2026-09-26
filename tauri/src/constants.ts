@@ -218,6 +218,7 @@ export const VEHICLE_METRO_TRAIN: number = 20;
 export const VEHICLE_PASSANGER_TRAIN: number = 21;
 export const VEHICLE_FREIGHT_TRAIN: number = 22;
 export const VEHICLE_HIGH_SPEED_TRAIN: number = 23;
+export const VEHICLE_MONORAIL: number = 24;
 export const SHAPE_HOUSE: number = 1;
 export const SHAPE_OFFICE: number = 2;
 export const SHAPE_COMMERCIAL: number = 3;
@@ -267,6 +268,8 @@ export const INTERCHANGE_KIND_IC: number = 1;
 export const INTERCHANGE_KIND_JCT: number = 2;
 export const INTERCHANGE_HULL_MARGIN_M: number = 10.0;
 export const INTERCHANGE_NAME_MAX_LENGTH: number = 64;
+export const ROAD_NAME_MAX_LENGTH: number = 64;
+export const ROAD_TRACE_MAX_DEFLECTION_DEG: number = 30.0;
 export const PAYMENT_MARKET: number = 0;
 export const PAYMENT_RENT: number = 1;
 export const PAYMENT_SALARY: number = 2;
@@ -352,6 +355,7 @@ export const VEHICLE_TO_TRAFFIC: Record<number, number> = {
   21: 2,
   22: 2,
   23: 2,
+  24: 2,
 };
 
 export const STATUS_NAME_MAP: Record<number, string> = {
@@ -379,11 +383,15 @@ export const PEDESTRIAN_VEHICLE_KEYS: number[] = [0];
 
 export const ROAD_VEHICLE_KEYS: number[] = [10, 11, 12, 13, 14];
 
-export const RAIL_VEHICLE_KEYS: number[] = [20, 21, 22, 23];
+export const RAIL_VEHICLE_KEYS: number[] = [20, 21, 22, 23, 24];
 
 export const GROUND_COVER_TYPES: number[] = [1, 2, 3, 4, 5];
 
 export const CLIMATE_TYPES: number[] = [1, 2, 3, 4, 5, 6, 7];
+
+export const PATH_TYPES_NAMED_ROAD: number[] = [1, 2];
+
+export const ROAD_COLOR_PALETTE: string[] = ["#7F77DD", "#E4572E", "#1D9E75", "#D4537E", "#2E86DE", "#BA7517", "#0F6E56", "#993C1D"];
 
 export const TENANT_TYPES: number[] = [2, 4, 8, 16, 64];
 

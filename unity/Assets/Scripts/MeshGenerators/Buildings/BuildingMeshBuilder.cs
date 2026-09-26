@@ -892,14 +892,88 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     /// <summary>
+    /// 三角形分割の内部の辺をDelaunay条件で張り替え(Lawsonの辺交換)、耳切りが作る細い三角形の扇を解消する。
+    /// 片側にしか三角形の無い外周の辺は張り替えないので輪郭は変わらない。三角形はXZの反時計回りで渡し、その場で置き換える。
+    /// 同一円周上の4点は張り替えず、往復を起こさない。
+    /// </summary>
+    public static void FlipToDelaunay(IReadOnlyList<Vector2> verts, List<(int a, int b, int c)> triangles)
+    {
+        if (verts == null || triangles == null) return;
+        var owner = new Dictionary<long, int>();
+        for (int pass = 0; pass < MAX_DELAUNAY_FLIP_PASSES; pass++)
+        {
+            owner.Clear();
+            for (int t = 0; t < triangles.Count; t++)
+            {
+                var (a, b, c) = triangles[t];
+                owner[DirectedEdgeKey(a, b)] = t; owner[DirectedEdgeKey(b, c)] = t; owner[DirectedEdgeKey(c, a)] = t;
+            }
+            // 1回の走査では張り替えた三角形を再び使わない(辺の索引が古くなるため)。残りは次の走査で処理する。
+            var touched = new bool[triangles.Count];
+            bool flipped = false;
+            for (int t = 0; t < triangles.Count; t++)
+            {
+                if (touched[t]) continue;
+                var (a, b, c) = triangles[t];
+                for (int e = 0; e < 3; e++)
+                {
+                    int u = e == 0 ? a : e == 1 ? b : c;
+                    int v = e == 0 ? b : e == 1 ? c : a;
+                    int p = e == 0 ? c : e == 1 ? a : b;
+                    if (!owner.TryGetValue(DirectedEdgeKey(v, u), out int n) || touched[n]) continue;
+                    var (na, nb, nc) = triangles[n];
+                    int q = na != u && na != v ? na : nb != u && nb != v ? nb : nc;
+                    if (!IsInsideCircumcircle(verts[u], verts[v], verts[p], verts[q])) continue;
+                    if (Cross2D(verts[u], verts[q], verts[p]) <= 1e-9 || Cross2D(verts[q], verts[v], verts[p]) <= 1e-9) continue;
+                    triangles[t] = (u, q, p);
+                    triangles[n] = (q, v, p);
+                    touched[t] = touched[n] = true;
+                    flipped = true;
+                    break;
+                }
+            }
+            if (!flipped) return;
+        }
+    }
+
+    /// <summary>辺交換の走査回数の上限。巨大な分割で収束が遅い場合も打ち切る(打ち切っても分割は有効なまま)。</summary>
+    private const int MAX_DELAUNAY_FLIP_PASSES = 256;
+
+    private static long DirectedEdgeKey(int from, int to) => ((long)from << 32) | (uint)to;
+
+    private static double Cross2D(Vector2 a, Vector2 b, Vector2 c)
+        => ((double)b.x - a.x) * ((double)c.y - a.y) - ((double)b.y - a.y) * ((double)c.x - a.x);
+
+    /// <summary>点 d が反時計回りの三角形 abc の外接円の内側にあるか。座標の大きいワールド座標でも d 基準の倍精度で判定する。</summary>
+    private static bool IsInsideCircumcircle(Vector2 a, Vector2 b, Vector2 c, Vector2 d)
+    {
+        double adx = (double)a.x - d.x, ady = (double)a.y - d.y;
+        double bdx = (double)b.x - d.x, bdy = (double)b.y - d.y;
+        double cdx = (double)c.x - d.x, cdy = (double)c.y - d.y;
+        double det = (adx * adx + ady * ady) * (bdx * cdy - cdx * bdy)
+            - (bdx * bdx + bdy * bdy) * (adx * cdy - cdx * ady)
+            + (cdx * cdx + cdy * cdy) * (adx * bdy - bdx * ady);
+        return det > 1e-9;
+    }
+
+    /// <summary>
     /// 敷地を地形格子の三角形で切り抜く。格子内部の高さも同じ三角形上で補間し、
     /// 異なる三角形分割や双線形補間による地表との交差を防ぐ。
     /// 地形未ロード時は null を返し、呼び出し側の暫定メッシュへフォールバックする。
     /// </summary>
     public static Mesh GenerateTerrainSurfaceMesh(Vector2[] footprint, Vector3 center, float offset)
     {
+        return GenerateTerrainSurfaceMesh(footprint, TriangulateOrFan(footprint), center, offset, false);
+    }
+
+    /// <summary>
+    /// 三角形分割済みの面(穴のある面を含む)を地形格子で切り抜く。三角形はXZの反時計回りで渡す。
+    /// withUv では局所XZ座標(1m=1)をUVに入れ、舗装などの画像を敷地の向きによらず同じ密度で貼る。
+    /// </summary>
+    public static Mesh GenerateTerrainSurfaceMesh(IReadOnlyList<Vector2> footprint, IReadOnlyList<int> source,
+        Vector3 center, float offset, bool withUv)
+    {
         if (!Utils.TryGetTerrainGrid(center, out Vector2 origin, out Vector2 spacing)) return null;
-        var source = TriangulateOrFan(footprint);
         var vertices = new List<Vector3>();
         var indices = new List<int>();
         var vertexMap = new Dictionary<Vector2Int, int>();
@@ -980,6 +1054,12 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         var mesh = new Mesh { indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
         mesh.SetVertices(vertices);
         mesh.SetTriangles(indices, 0);
+        if (withUv)
+        {
+            var uv = new List<Vector2>(vertices.Count);
+            foreach (Vector3 v in vertices) uv.Add(new Vector2(v.x, v.z));
+            mesh.SetUVs(0, uv);
+        }
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
         return mesh;

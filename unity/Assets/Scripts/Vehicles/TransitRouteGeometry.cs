@@ -162,14 +162,13 @@ public sealed class TransitRouteGeometry
             }
             if (connector == null || best > 4) return false;
         }
-        else connector = paths.GetMotorwayMerge(node)?.Connector(a.data.path_id, b.data.path_id, p0, p1)
-            ?? VehiclePolyline.Connector(p0,t0,p1,t1,1f/3f);
+        else connector = VehiclePolyline.Connector(p0,t0,p1,t1,1f/3f);
         float progress = Mathf.Clamp01(along/Math.Max(.001f,tail+head));
         connector.Sample((reverse?1-progress:progress)*connector.Length,!reverse,out position,out tangent);
         // レールコネクタのスプラインは軌道パーツの原点の高さにあるので踏面までを足す。埋め込み軌道を含む接続は lrt_track で描かれる。
         float height = tram ? (LrtRoadParts.IsEmbedded(g.data.path_variant) || LrtRoadParts.IsEmbedded(next.data.path_variant)
                 ? LrtRoadParts.EMBEDDED_RAIL_TOP : LrtRoadParts.DEDICATED_RAIL_TOP)
-            : g.rail ? .2f : 0f;
+            : g.rail ? RunningSurface(g) : 0f;
         position.y += height;
         if (g.rail || tram)
         {
@@ -283,8 +282,11 @@ public sealed class TransitRouteGeometry
             p += Vector3.Cross(Vector3.up,t).normalized*(offset*sign);
         }
         p.y += tram ? LrtRoadParts.RailTopAboveSpline(g.data.path_variant)
-            : g.rail ? RoadPartHeights.TRACK_ABOVE_SPLINE + .2f : RoadPartHeights.BODY_ABOVE_SPLINE;
+            : g.rail ? RoadPartHeights.TRACK_ABOVE_SPLINE + RunningSurface(g) : RoadPartHeights.BODY_ABOVE_SPLINE;
     }
+
+    /// <summary>軌道パーツの原点から車輪の接地面までの高さ。鉄道はレール頭頂、跨座式モノレールは軌道桁の天端が原点なので0。</summary>
+    private static float RunningSurface(Geometry g) => g.data.path_type == Constants.PATH_MONORAIL ? 0f : .2f;
 
     private void SampleRun(Route route, int index, float s, bool tram, out Vector3 position, out Vector3 tangent)
     {

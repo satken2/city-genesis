@@ -1,4 +1,4 @@
-param([string]$UnityExe)
+﻿param([string]$UnityExe)
 $ErrorActionPreference = 'Stop'
 $unityRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 & (Join-Path $PSScriptRoot '../BuildRuntime.ps1')
@@ -12,8 +12,14 @@ New-Item -ItemType Directory -Path "$qaRoot/Assets/Editor", "$qaRoot/ProjectSett
 Copy-Item "$unityRoot/ProjectSettings/ProjectVersion.txt" "$qaRoot/ProjectSettings/ProjectVersion.txt" -Force
 Copy-Item "$PSScriptRoot/OpenSpaceQA.cs" "$qaRoot/Assets/Editor/OpenSpaceQA.cs" -Force
 Copy-Item "$unityRoot/Assets/Editor/ModelPrefabGenerator.cs" "$qaRoot/Assets/Editor/ModelPrefabGenerator.cs" -Force
-New-Item -ItemType Directory -Path "$qaRoot/Assets/Models/Props/Textures" -Force | Out-Null
+New-Item -ItemType Directory -Path "$qaRoot/Assets/Models/Props/Textures","$qaRoot/Assets/Models/Buildings/Textures" -Force | Out-Null
 Copy-Item "$unityRoot/Assets/Models/Props/Textures/PROP_LEAF_GREEN_color.png*" "$qaRoot/Assets/Models/Props/Textures" -Force
+# 駅前ロータリーの上屋の広告とタクシー乗り場の看板は建物と共有の画像を使い、インポーターが同名の共有材質へ再マップしている。
+New-Item -ItemType Directory -Path "$qaRoot/Assets/Models/Buildings/Materials" -Force | Out-Null
+foreach ($name in 'BD_MALL_ADS','BD_SIGN_ATLAS') {
+    Copy-Item "$unityRoot/Assets/Models/Buildings/Textures/$name.png*" "$qaRoot/Assets/Models/Buildings/Textures" -Force
+    if (Test-Path "$unityRoot/Assets/Models/Buildings/Materials/$name.mat") { Copy-Item "$unityRoot/Assets/Models/Buildings/Materials/$name.mat*" "$qaRoot/Assets/Models/Buildings/Materials" -Force }
+}
 foreach ($id in 3001,3002,3003,3004) {
     New-Item -ItemType Directory -Path "$qaRoot/Assets/Models/Buildings/a$id/0" -Force | Out-Null
     Get-ChildItem "$unityRoot/Assets/Models/Buildings/a$id/0" -File | ForEach-Object {

@@ -3,7 +3,12 @@ guid: de08dc099ef07bb4b9bcc8965924ea97
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: BD_SIGN_ATLAS
+    second: {fileID: 2100000, guid: 83023076b74138448a1644edb367de68, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

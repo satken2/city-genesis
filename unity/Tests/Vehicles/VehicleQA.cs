@@ -207,6 +207,11 @@ public static partial class VehicleQA
         Sample(curved,Property(curved,"Length")*.5f,true,out var expected,out _);
         expected.y+=(float)game.GetType("RoadPartHeights").GetField("TRACK_ABOVE_SPLINE").GetRawConstantValue()+.2f;
         Near(Vector3.Distance((Vector3)sampleArgs[4],expected),0,.01f,"Highlight cuts across curved/elevated track");
+        // 跨座式モノレールの車両は軌道桁の天端(軌道パーツの原点)に接地し、鉄道のレール頭頂の分だけ浮かない。
+        Set(path,"path_type",(int)game.GetType("Constants").GetField("PATH_MONORAIL").GetRawConstantValue());
+        Check((bool)Call(routeGeometry,"Sample",sampleArgs),"Monorail route rejects loaded curve");
+        Near(((Vector3)sampleArgs[4]).y,expected.y-.2f,.01f,"Monorail car is not on the guideway top");
+        Set(path,"path_type",0);
         Set(manager,"clock",23.0); Call(manager,"DrawLine",lines[0],expected);
         CheckCouplings((Vector3[])Get(lines[0],"positions"),(Vector3[])Get(lines[0],"directions"),20);
         foreach (DictionaryEntry entry in (IDictionary)Get(manager,"visible"))
@@ -354,10 +359,10 @@ public static partial class VehicleQA
         var manager=new GameObject("ModelManagerQA").AddComponent(game.GetType("ModelManager"));
         game.GetType("ModelManager").GetProperty("Instance").SetValue(null,manager);
         var resolver=game.GetType("VehicleModelResolver");
-        foreach(int vehicleType in new[]{10,11,12,13,14,20,21,22,23})
+        foreach(int vehicleType in new[]{10,11,12,13,14,20,21,22,23,24})
         {
             var variants=(IList)game.GetType("VehicleModelConfig").GetMethod("GetVariants").Invoke(null,new object[]{vehicleType});
-            Check(variants.Count==(vehicleType==10?10:vehicleType==11?4:vehicleType==14?1:vehicleType==20||vehicleType==21||vehicleType==23?3:2),"Configured variant count differs for "+vehicleType);
+            Check(variants.Count==(vehicleType==10?10:vehicleType==11?4:vehicleType==14||vehicleType==24?1:vehicleType==20||vehicleType==21||vehicleType==23?3:2),"Configured variant count differs for "+vehicleType);
             foreach(int variant in variants)
             {
                 string path=$"Assets/Models/Vehicles/{vehicleType}/{variant}.fbx";
@@ -398,9 +403,15 @@ public static partial class VehicleQA
         }
         VehicleProps();
         Check((int)game.GetType("VehicleModelConfig").GetMethod("GetTransitVehicleType").Invoke(null,new object[]{1003})==14,"LRT model mapping missing");
-        foreach (int type in new[]{12,14,20,21,23})
+        Check((int)game.GetType("VehicleModelConfig").GetMethod("GetTransitVehicleType").Invoke(null,new object[]{1004})==24,"Monorail model mapping missing");
+        // 走行用のモノレール車両24は自由配置の308/309と同じFBXを置く。原本はprops.blendなので、片方だけ更新されていないことを確かめる。
+        foreach(var pair in new[]{("0","308"),("middle","309")})
+        foreach(string suffix in new[]{"","_close","_far"})
+            Check(System.Linq.Enumerable.SequenceEqual(File.ReadAllBytes($"Assets/Models/Vehicles/24/{pair.Item1}{suffix}.fbx"),File.ReadAllBytes($"Assets/Models/Props/{pair.Item2}{suffix}.fbx")),
+                "Monorail vehicle differs from its prop original: "+pair.Item1+suffix);
+        foreach (int type in new[]{12,14,20,21,23,24})
         {
-            foreach(int variant in type==14?new[]{0}:type==12?new[]{0,1}:new[]{0,1,2})
+            foreach(int variant in type==14||type==24?new[]{0}:type==12?new[]{0,1}:new[]{0,1,2})
             foreach(bool middle in type==12?new[]{false}:new[]{false,true})
             {
                 var car=(GameObject)resolver.GetMethod("CreateTransitCar").Invoke(null,new object[]{type,middle,null,variant});
@@ -411,7 +422,7 @@ public static partial class VehicleQA
                     string asset=AssetDatabase.GetAssetPath(filter.sharedMesh);
                     Check(asset.EndsWith($"/{type}/{expected}.fbx") || asset.EndsWith($"/{type}/{expected}_close.fbx") || asset.EndsWith($"/{type}/{expected}_far.fbx"), "Variant silently falls back: "+type+"/"+expected);
                 }
-                if(type==14 || type==20 || type==21 || type==23)
+                if(type==14 || type==20 || type==21 || type==23 || type==24)
                 {
                     var lod=car.GetComponent<LODGroup>();
                     Check(lod!=null,"Close LOD missing");
@@ -463,7 +474,7 @@ public static partial class VehicleQA
                     {
                         var mesh=renderer.GetComponent<MeshFilter>().sharedMesh;
                         Check(AssetDatabase.GetAssetPath(mesh).EndsWith($"/{expected}_far.fbx"),"Wrong far LOD");
-                        Check(mesh.triangles.Length/3<=42,"Rail far triangle budget");
+                        Check(mesh.triangles.Length/3<=(type==24?64:42),"Rail far triangle budget");
                     }
                     var normal=levels[1].renderers[0].bounds;
                     var close=levels[0].renderers[0].bounds;
@@ -492,6 +503,7 @@ public static partial class VehicleQA
                 UnityEngine.Object.DestroyImmediate(car);
             }
         }
+        LiveryColors();
         UnityEngine.Object.DestroyImmediate(manager.gameObject);
     }
 

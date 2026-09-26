@@ -9,6 +9,7 @@ TEXTURE2D_ARRAY(_RoadMarkingAtlas1); SAMPLER(sampler_RoadMarkingAtlas1);
 TEXTURE2D_ARRAY(_RoadMarkingAtlas2); SAMPLER(sampler_RoadMarkingAtlas2);
 float4 _RoadPageGrid;
 float4 _RoadBands[32];
+float4 _RoadBandSpans[32];
 float4 _RoadDistances;
 float4 _RoadApproaches;
 float _RoadBandCount, _RoadPaintEnabled;
@@ -77,6 +78,9 @@ float RoadLines(float2 st)
     for (int i = 0; i < min(32, (int)_RoadBandCount); i++)
     {
         float4 band = _RoadBands[i];
+        float4 span = _RoadBandSpans[i];
+        // 区間で描き分けた線(高速道路の合流区間の路側線など)は、担当する距離の範囲だけに描く。
+        if (st.x < span.x || st.x > span.y) continue;
         float bandCoverage = saturate((band.y * .5 - abs(st.y - band.x)) / across + .5);
         if (band.w > .5 && crossing) bandCoverage = 0;
         if (band.z > .5 && !junction)

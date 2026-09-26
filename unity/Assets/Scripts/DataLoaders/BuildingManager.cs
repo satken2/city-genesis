@@ -2246,6 +2246,15 @@ public class BuildingManager : BaseApiDataManager
             {
                 shared = new Material(src) { name = src.name + " (DepthOffset)" };
                 shared.shader = depthOffsetShader;
+                // 広告・看板の共有材質(組み込みStandard)は画像と色を _MainTex/_Color に持つ。
+                // DepthOffsetLit は URP Lit と同じく _BaseMap/_BaseColor を読むので写し替える。
+                if (!src.HasProperty("_BaseMap") && src.HasProperty("_MainTex"))
+                {
+                    shared.SetTexture("_BaseMap", src.GetTexture("_MainTex"));
+                    shared.SetTextureScale("_BaseMap", src.GetTextureScale("_MainTex"));
+                    shared.SetTextureOffset("_BaseMap", src.GetTextureOffset("_MainTex"));
+                    if (src.HasProperty("_Color")) shared.SetColor("_BaseColor", src.GetColor("_Color"));
+                }
                 depthOffsetMaterials[src] = shared;
             }
             result[i] = shared;

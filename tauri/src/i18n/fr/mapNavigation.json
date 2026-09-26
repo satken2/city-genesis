@@ -18,7 +18,7 @@
     "cancel": "Annuler",
     "directions": "Itinéraire",
     "explore": "Découvrez votre ville",
-    "intro": "Recherchez un établissement, une gare ou un quartier, ou choisissez un lieu sur la carte.",
+    "intro": "Recherchez un établissement, une gare, un quartier ou une route, ou choisissez un lieu sur la carte.",
     "chooseOrigin": "Recherchez un départ ou choisissez-le sur la carte.",
     "routing": "Recherche d’itinéraire…",
     "showRoute": "Voir tout l’itinéraire",
@@ -37,7 +37,8 @@
       "zone": "Quartier",
       "stop": "Arrêt",
       "station": "Gare",
-      "point": "Point"
+      "point": "Point",
+      "road": "Route"
     },
     "leg": {
       "walk": "Marche",

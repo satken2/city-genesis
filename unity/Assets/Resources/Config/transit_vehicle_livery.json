@@ -1,0 +1,7 @@
+{
+  "12": { "0": ["PROP_Body_Blue"], "1": ["PROP_ExpCrimson"] },
+  "14": { "0": ["PROP_Body_Red"] },
+  "20": { "0": ["PROP_MetroBlue"], "1": ["PROP_MetroCyan"], "2": ["PROP_ExpCrimson"] },
+  "21": { "0": ["PROP_IcTeal"], "1": ["PROP_IcGold"], "2": ["PROP_ExpCrimson"] },
+  "24": { "0": ["PROP_ShinkBlue"] }
+}

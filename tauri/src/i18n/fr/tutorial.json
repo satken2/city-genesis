@@ -266,6 +266,34 @@
       "tip27": {
         "title": "Un fâcheux accident",
         "description": "Un bâtiment qui gêne vos projets peut être dynamité en maquillant l’opération en accident. Le moral des habitants en souffre beaucoup : rachetez-le et démolissez-le dans les règles quand c’est possible."
+      },
+      "tip28": {
+        "title": "Pas de terre ? Cap sur la mer",
+        "description": "À court d'espace sur la terre ferme ? Construisez des plates-formes pétrolières et des éoliennes en pleine mer. Raccordez-les au réseau terrestre avec des pipelines et des câbles sous-marins."
+      },
+      "tip29": {
+        "title": "L'enfer des feux rouges",
+        "description": "Chaque intersection ajoute un feu rouge. Un quadrillage trop serré bloquera les conducteurs à chaque carrefour, et leur patience aura disparu bien avant leur arrivée."
+      },
+      "tip30": {
+        "title": "Dégagez la vue",
+        "description": "Plus une tour de télécommunications est haute et perchée en altitude, plus sa zone de couverture est vaste. Les ondes bloquées par les montagnes ne se contournent pas par la seule force de volonté."
+      },
+      "tip31": {
+        "title": "Les bienfaits de la mer",
+        "description": "Si vous ne trouvez pas de source d'eau douce, vous pouvez ériger une usine de dessalement sur la côte. Elle consomme toutefois beaucoup d'énergie. Après avoir cherché de l'eau, cherchez de l'électricité."
+      },
+      "tip32": {
+        "title": "Une autre forme de sécurité",
+        "description": "Le chômage est l'un des principaux facteurs d'insécurité. N'installez pas seulement des commissariats, créez aussi des emplois. Avant de vous ruiner en budget de sécurité, misez sur l'embauche."
+      },
+      "tip33": {
+        "title": "La facture de demain",
+        "description": "Chaque bâtiment et chaque route entraîne des frais d'entretien réguliers. Trop construire sous prétexte d'avoir des fonds vous exposera à des coûts de réparation écrasants. Le maire de demain, c'est encore vous."
+      },
+      "tip34": {
+        "title": "Attention au surpompage",
+        "description": "Si vous puisez plus d'eau que la source ne peut en reconstituer, la pénurie sera inévitable. Multiplier les pompes ne fera pas jaillir plus d'eau."
       }
     }
   },

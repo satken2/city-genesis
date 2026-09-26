@@ -45,8 +45,7 @@ public static class IntersectionPolygonUtil
     /// </summary>
     public static IntersectionCalculationResult ComputeIntersectionPolygon(int intersectionNodeId,
         Vector2 intersectionPos, List<PathSummary> paths, GeometryFactory gf,
-        Func<PathSummary, float> widthResolver = null, Func<PathSummary, List<Vector3>> pointResolver = null, Func<PathSummary, float> cutLimitResolver = null,
-        Action<IntersectionCalculationResult> shapeLayout = null)
+        Func<PathSummary, float> widthResolver = null, Func<PathSummary, List<Vector3>> pointResolver = null, Func<PathSummary, float> cutLimitResolver = null)
     {
         var entries = new List<(PathSummary path, List<Vector3> points, float width, Vector2 direction)>();
         foreach (var p in paths.OrderBy(p => p.path_id))
@@ -107,8 +106,6 @@ public static class IntersectionPolygonUtil
             }
             result.Corners.Add(corner);
         }
-        // 描画専用の接合形状も、同じ入口断面・外周から路面と付帯パーツを作る。
-        shapeLayout?.Invoke(result);
         var corners = new List<Coordinate>();
         foreach (var corner in result.Corners)
         {

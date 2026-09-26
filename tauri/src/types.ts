@@ -299,6 +299,19 @@ export type InterchangeSummary = {
   node_ids: number[];
   /** 外部道路との接続(ポータルノードと、片端だけが内側に入る腕パス) */
   arms: { node_id: number; path_id: number }[];
+  /** 鋭角転回せずに行ける腕の組 [進入腕パスID, 退出腕パスID]。同じ腕へ戻るUターンは含まない */
+  connections: [number, number][];
+};
+
+/** GET /api/v1/interchanges/{id} が返す腕ごとの道路情報 */
+export type InterchangeArmDetail = {
+  node_id: number;
+  path_id: number;
+  /** 腕の道路の種別(PATH_STREET / PATH_MOTORWAY)。道路が見つからなければ null */
+  path_type: number | null;
+  zone_id: number;
+  /** 所属地区の名前。地区に属していなければ null */
+  zone_name: string | null;
 };
 
 /** GET /api/v1/interchanges/ のレスポンス。version は一覧の内容が変わるたびに増える */
@@ -310,6 +323,7 @@ export type InterchangeListResponse = {
 /** GET /api/v1/interchanges/{id} のレスポンス */
 export type InterchangeResponse = {
   interchange: InterchangeSummary;
+  arms: InterchangeArmDetail[];
 };
 
 /**

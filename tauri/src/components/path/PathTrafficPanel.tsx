@@ -37,6 +37,7 @@ import {
   ROAD_VEHICLE_KEYS,
   TRAFFIC_PEDESTRIAN,
   TRAFFIC_RAIL,
+  VEHICLE_MONORAIL,
   VEHICLE_TO_TRAFFIC,
   VEHICLE_TRAM,
 } from "../../constants";
@@ -48,6 +49,7 @@ import "./PathTrafficPanel.css";
  * 交通量リストに常に並べる車種(交通量が0でも行を出し、道路どうしで見比べやすくする)。
  * ここに無い車種は交通量があるときだけ出す。LRTは一部のバリアント(LRT線路付きの街路・
  * 歩行者専用道路・LRT専用軌道)にしか走らず、高速道路は歩行者が通らないため、それぞれ常設の行には含めない。
+ * モノレールの軌道はモノレールの車両だけが走り、鉄道の線路にはモノレールの車両が走らない。
  */
 function listedVehicleKeys(pathType: number): number[] {
   const roadVehicles = ROAD_VEHICLE_KEYS.filter((key) => key !== VEHICLE_TRAM);
@@ -60,8 +62,11 @@ function listedVehicleKeys(pathType: number): number[] {
   if (pathType === PATH_WALKWAY || pathType === PATH_CONVEYOR || pathType === PATH_TRANSPORT) {
     return [...PEDESTRIAN_VEHICLE_KEYS];
   }
-  if (pathType === PATH_TRACK || pathType === PATH_MONORAIL) {
-    return [...RAIL_VEHICLE_KEYS];
+  if (pathType === PATH_TRACK) {
+    return RAIL_VEHICLE_KEYS.filter((key) => key !== VEHICLE_MONORAIL);
+  }
+  if (pathType === PATH_MONORAIL) {
+    return [VEHICLE_MONORAIL];
   }
   return [];
 }

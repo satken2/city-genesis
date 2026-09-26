@@ -2,11 +2,13 @@ import { useCallback, useEffect, useRef, useState, type RefObject } from "react"
 import { useTranslation } from "react-i18next";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { resolveIntlLocale } from "../../utils/locale";
+import { fetchRoadDetail } from "../road/roadApi";
 import type { CityMapCanvasHandle, CityMapPointerEvent, CityMapViewState } from "./CityMapCanvas";
 import "./CityMapNavigation.css";
 
+/** road は名前付き道路(id=road_id、x/z=道路名の最初の表示位置、polygon=[]) */
 type Place = {
-  kind: "agent" | "zone" | "stop" | "station" | "point";
+  kind: "agent" | "zone" | "stop" | "station" | "point" | "road";
   id: number; name: string; x: number; z: number;
   zone_id: number; zone_name: string; parcel_id: number | null; polygon: number[][];
 };
@@ -21,6 +23,11 @@ type Route = {
 };
 type Status = { ready: boolean; busy: boolean; snapshot: string | null; session: string | null };
 type Field = "origin" | "destination";
+/** 場所検索で選んだ道路の強調表示。CityMapCanvas の focusPathIds / focusColor に渡す */
+export type MapRoadFocus = { roadId: number; pathIds: number[]; color: string };
+
+/** 候補の記号。道路は面や点ではなく線の場所なので記号を分ける */
+const placeGlyph = (p: Place) => (p.kind === "road" ? "═" : "⌖");
 
 function SearchField({ apiBaseUrl, value, label, onSelect, onClear, refresh }: {
   apiBaseUrl: string; value: Place | null; label: string; onSelect: (p: Place) => void;
@@ -80,7 +87,7 @@ function SearchField({ apiBaseUrl, value, label, onSelect, onClear, refresh }: {
         : !results.length ? <p>{t("mapNavigation.noResults")}</p> : results.map((p, i) =>
           <button type="button" key={`${p.kind}-${p.id}`} id={`${listId}-${i}`} role="option" aria-selected={active === i}
             className={active === i ? "is-active" : ""} onMouseEnter={() => setActive(i)} onClick={() => select(p)}>
-            <span className="map-nav-search__pin" aria-hidden="true">⌖</span><span><strong>{name(p)}</strong>
+            <span className="map-nav-search__pin" aria-hidden="true">{placeGlyph(p)}</span><span><strong>{name(p)}</strong>
               <small>{t(`mapNavigation.kind.${p.kind}`)}{p.zone_name ? ` · ${p.zone_name}` : ""}</small></span>
           </button>)}
     </div>}
@@ -102,8 +109,10 @@ export function useMapNavigation(apiBaseUrl: string, mapRef: RefObject<CityMapCa
   const [refresh, setRefresh] = useState(0);
   const [activeLeg, setActiveLeg] = useState<number | null>(null);
   const [overlayVersion, setOverlayVersion] = useState(0);
+  const [roadFocus, setRoadFocus] = useState<MapRoadFocus | null>(null);
   const previous = useRef<Status | null>(null);
   const pickRequest = useRef<AbortController | null>(null);
+  const roadRequest = useRef<AbortController | null>(null);
   const url = useCallback((path: string) => buildApiUrl(apiBaseUrl, `/api/v1/navigation/${path}`), [apiBaseUrl]);
   const fit = useCallback((points: number[][]) => {
     if (!points.length) return;
@@ -119,7 +128,25 @@ export function useMapNavigation(apiBaseUrl: string, mapRef: RefObject<CityMapCa
     pickRequest.current?.abort(); setPicking(null); setPickError(false); setRoute(null); setActiveLeg(null);
     if (field === "origin") setOrigin(place); else setDestination(place);
     fit(place.polygon.length ? place.polygon : [[place.x, place.z]]);
-  }, [fit]);
+    if (place.kind !== "road") return;
+    // 道路は候補に形状を持たないので、詳細から範囲と区間を引いて全体を収め、区間を強調する。
+    roadRequest.current?.abort();
+    const controller = new AbortController(); roadRequest.current = controller;
+    fetchRoadDetail(apiBaseUrl, place.id, controller.signal).then(road => {
+      if (controller.signal.aborted) return;
+      setRoadFocus({ roadId: road.road_id, pathIds: road.path_ids, color: road.color });
+      if (road.bbox) fit([[road.bbox[0], road.bbox[1]], [road.bbox[2], road.bbox[3]]]);
+    }).catch(() => { if (!controller.signal.aborted) setRoadFocus(null); });
+  }, [fit, apiBaseUrl]);
+  // 強調は、出発地・目的地のどちらかとして選ばれている道路だけに出す。
+  useEffect(() => {
+    const roads = [destination, directions ? origin : null].filter((p): p is Place => p?.kind === "road");
+    if (!roadFocus || !roads.some(p => p.id === roadFocus.roadId)) {
+      if (roadFocus) setRoadFocus(null);
+      if (!roads.length) roadRequest.current?.abort();
+    }
+  }, [destination, origin, directions, roadFocus]);
+  useEffect(() => () => roadRequest.current?.abort(), []);
   useEffect(() => {
     const controller = new AbortController();
     let timer = 0;
@@ -145,7 +172,10 @@ export function useMapNavigation(apiBaseUrl: string, mapRef: RefObject<CityMapCa
     setRoute(null); setActiveLeg(null); setBusy(false);
     if (!directions || !origin || !destination || !status?.ready || statusError) return;
     setBusy(true);
-    const endpoint = (p: Place) => ({ kind: p.kind, id: p.id, x: p.x, z: p.z });
+    // 経路探索は道路という場所を知らないので、道路は代表点(道路名の表示位置)を地図上の地点として渡す。
+    const endpoint = (p: Place) => p.kind === "road"
+      ? { kind: "point", id: 0, x: p.x, z: p.z }
+      : { kind: p.kind, id: p.id, x: p.x, z: p.z };
     fetchApi<Route>(url("route"), { method: "POST", signal: controller.signal,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ origin: endpoint(origin), destination: endpoint(destination), mode })
@@ -245,7 +275,7 @@ export function useMapNavigation(apiBaseUrl: string, mapRef: RefObject<CityMapCa
         <button type="button" onClick={() => { pickRequest.current?.abort(); setPicking(null); }}>{t("mapNavigation.cancel")}</button></div>}
       {pickError && <p role="alert">{t("mapNavigation.error")}</p>}
       {!directions && (destination ? <div className="map-nav__place">
-        <div className="map-nav__place-icon" aria-hidden="true">⌖</div><h2>{displayName(destination)}</h2>
+        <div className="map-nav__place-icon" aria-hidden="true">{placeGlyph(destination)}</div><h2>{displayName(destination)}</h2>
         <p>{t(`mapNavigation.kind.${destination.kind}`)}{destination.zone_name ? ` · ${destination.zone_name}` : ""}</p>
         <button type="button" className="map-nav__primary" onClick={() => { setDirections(true); setPicking(null); }}>
           ↱ {t("mapNavigation.directions")}</button>
@@ -271,7 +301,7 @@ export function useMapNavigation(apiBaseUrl: string, mapRef: RefObject<CityMapCa
       </>}
     </div>
   </aside>;
-  return { sidebar, draw, overlayVersion, onMapClick, picking, reload: () => {
+  return { sidebar, draw, overlayVersion, onMapClick, picking, roadFocus, reload: () => {
     pickRequest.current?.abort(); setRoute(null); setRefresh(v => v + 1);
   } };
 }

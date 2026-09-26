@@ -214,16 +214,19 @@ public class TrackCorridorInfo
         return result;
     }
 
+    private List<PercentRange> GetClearPercentIntervals(System.Func<int, bool> isOmitted, float minRunLength)
+        => ClearPercentIntervals(CumulativeLength, TotalLength, isOmitted, minRunLength);
+
     /// <summary>
-    /// isOmitted が false の連続区間をスプライン percent の区間として返す共通処理。
+    /// isOmitted が false の連続区間をスプライン percent の区間として返す共通処理(道路の結合区間 RoadCorridorInfo も使う)。
     /// 区間境界はサンプル点の中間位置。minRunLength(m) 未満の細切れ区間は
     /// スリバー防止のため出力しない。
     /// </summary>
-    private List<PercentRange> GetClearPercentIntervals(System.Func<int, bool> isOmitted, float minRunLength)
+    public static List<PercentRange> ClearPercentIntervals(float[] cumulativeLength, float totalLength, System.Func<int, bool> isOmitted, float minRunLength)
     {
         var result = new List<PercentRange>();
-        int n = Points.Count;
-        if (TotalLength <= 0f)
+        int n = cumulativeLength.Length;
+        if (totalLength <= 0f)
         {
             result.Add(new PercentRange { From = 0.0, To = 1.0 });
             return result;
@@ -237,11 +240,11 @@ public class TrackCorridorInfo
             while (i < n && !isOmitted(i)) i++;
             int e = i - 1;
 
-            float fromLen = (s == 0) ? 0f : (CumulativeLength[s - 1] + CumulativeLength[s]) * 0.5f;
-            float toLen = (e == n - 1) ? TotalLength : (CumulativeLength[e] + CumulativeLength[e + 1]) * 0.5f;
+            float fromLen = (s == 0) ? 0f : (cumulativeLength[s - 1] + cumulativeLength[s]) * 0.5f;
+            float toLen = (e == n - 1) ? totalLength : (cumulativeLength[e] + cumulativeLength[e + 1]) * 0.5f;
             if (toLen - fromLen < minRunLength) continue;
 
-            result.Add(new PercentRange { From = fromLen / TotalLength, To = toLen / TotalLength });
+            result.Add(new PercentRange { From = fromLen / totalLength, To = toLen / totalLength });
         }
         return result;
     }
@@ -672,7 +675,7 @@ public static class TrackAdjacency
     }
 
     /// <summary>点列のXZ AABBを margin 分拡張した Rect を返す（点列不正時は空Rect）。</summary>
-    private static Rect ComputeExpandedBoundsXZ(List<Vector3> points, float margin)
+    internal static Rect ComputeExpandedBoundsXZ(List<Vector3> points, float margin)
     {
         if (points == null || points.Count == 0) return new Rect(0f, 0f, -1f, -1f);
         float minX = float.MaxValue, minZ = float.MaxValue, maxX = float.MinValue, maxZ = float.MinValue;
@@ -694,7 +697,7 @@ public static class TrackAdjacency
     /// 交差点ハルで切り詰められた相手の端点が虚像の隣接として採用されるのを
     /// 呼び出し側が除外するために使う。along は最近接点までの点列の3D累積距離。
     /// </summary>
-    private static bool TryClosestPointOnPolylineXZ(List<Vector3> points, Vector3 query, out Vector3 closest, out Vector3 tangent, out bool clampedAtPolylineEnd, out float along)
+    internal static bool TryClosestPointOnPolylineXZ(List<Vector3> points, Vector3 query, out Vector3 closest, out Vector3 tangent, out bool clampedAtPolylineEnd, out float along)
     {
         closest = query;
         tangent = Vector3.forward;

@@ -77,6 +77,16 @@
 
 公共交通ハイライトはTransitOverlayManagerが独立レイヤーとして管理する。VisualModeの排他色モードやInputModeの編集プリセットは追加しない。詳細はDataLoaders/AGENTS.mdと公開programs/公共交通ハイライト.md。
 
+## RoadFocusOverlay(道路の強調帯)
+
+- 道路(名前付き道路)の区間を中心線に沿った道路色の帯で最前面に描く。`TransitOverlayManager` と同じく `OverlayMeshRenderer`(`alwaysOnTop`、描画キュー3202〜3204=公共交通の帯より手前)で、画面上の幅はズームによらず一定(縁取り14px・帯9px)。`RoadFocusOverlay.Ensure()` で遅延生成する。
+- 描く集合は2系統: ①強調=道路詳細パネルが開いている道路の区間(`world:set_road_focus` で全置換、`world:clear_road_focus` で消去)。②区間編集=`RoadMemberEditManager` が渡す所属区間(道路色)と自動延長の追加候補(同じ色の半透明、縁取りなし)、ホバー中の区間の白い細線。**区間編集中は①を描かない**(①の集合はパネルが取り直すまで古く、外した区間が残って見えるため)。編集の終了で①に戻る。既存の `world:highlight_objects`(干渉用の警告色)とは別系統で、VisualMode・InputMode には何も追加しない。
+- 帯は未切断の中心線(`PathManager.TryGetPathPolyline(id, out pts, trimIntersection:false)`)を使い、交差点の中でも途切れさせない。未ロードの区間は描かない。形状は0.5秒ごとに区間の署名(データ参照・version・`GetPathGeometryRevision`)を比べて変化したときだけ作り直し(5秒ごとの安全再構築あり)、カメラの変化では帯の画面幅だけ更新する。32本単位の外接箱で視錐台カリングする。セッションリセットで `ClearAll`。
+
+## 道路統計(VisualPathStats)のデータ源
+
+- `utilization`・`durability`・`zone_id` は `PathSummary` の同名フィールド、`effective_speed` は `PathSummary.base_speed`(形状から決まる通過速度 km/h)、`pedestrian_traffic` は `path_traffic` の歩行者キー(`VEHICLE_PEDESTRIAN` を文字列にした `"0"`。1日あたりの通過トリップ数)。存在しないフィールドをリフレクションで読むと常に0になり、速度・歩行者の色分けが無反応になるので、フィールドは直接参照する。
+
 ## 道路・線路の制限速度標識
 
 標識は`DrawLodInfo`がClose/Normalのときだけ表示する。固定区間を持つ長い道路は`SplinePartLod.GetDrawLodAtPosition`で中心の本体区間も確認する。`PathPresentation.IsReady`で差し替え生成を待ち、道路GOの置換時は表示条件の参照先も即座に更新する。既存LODの閾値・ヒステリシスを複製しない。

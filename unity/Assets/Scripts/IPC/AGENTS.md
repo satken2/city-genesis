@@ -101,3 +101,16 @@ UI→Unityは既存の `ui:action` Envelopeの `payload.action` / `payload.param
 ## 制限速度標識トグル
 
 `view:change_view`のroadレイヤーの`flags`は`speed_limit`を受け付ける（`VisualFlag.SPEED_LIMIT_SIGNS`）。通常表示・色分け・planと独立し、既存のcurrent_state・通常状態記憶・編集プリセットからの復元で同期する。標識の数字はHTTPのPathSummary.max_speedから読み、IPCへ速度値を複製しない。
+
+## 道路(名前付き道路)のIPC
+
+送信側はTauriの `utils/ipc.ts` の「道路(名前付き道路)」節。UI→Unity はすべて既存の `send_window_action`/`ui:action` の汎用転送で、Rust の `ipc.rs` には Unity→UI の `edit_road:toggle_path` の中継だけがある。いずれも操作時に1通ずつ送るイベントで、周期送信はしない。
+
+- `world:set_road_focus {road_id, color, path_ids}`(UI→Unity): 道路詳細パネルが開いている道路の区間を道路色の帯で強調する。送られるたびに全置換。`IpcClient.OnWorldSetRoadFocus` → `IpcEventHandler` → `RoadFocusOverlay.SetFocus`。`world:clear_road_focus {}` で消す(パネルのクローズ時は Rust の `window.rs` も送る)。干渉表示の `world:highlight_objects` とは別系統。
+- `world:refresh_roads {}`(UI→Unity): 道路の作成・改名・所属変更・削除の直後に送られ、`RoadManager.RequestRefresh` で一覧(道路名ラベル)を取り直す。version が同じならラベルは作り直さない。
+- `world:change_state` の `STATE_EDIT_ROAD_MEMBERS`(params `{state, road_id, color, path_ids}`): 区間編集モード。`IpcStateCoordinator.ApplyStateEditRoadMembers` が入力プリセット `ROAD_MEMBER_EDIT` と `RoadMemberEditManager.Begin` を行い、表示は `SyncFromState` の建設系プリセット(計画中の区間も選べるよう plan 表示)。**`WindowUtil.BringToForeground()` は呼ばない**(詳細パネルを操作し続けるため)。終了は `STATE_NORMAL`(`sendEndRoadMemberEdit`)。
+- `edit_road:set_members {road_id, path_ids, preview_path_ids}`(UI→Unity): 区間編集中の所属区間と自動延長の追加候補の全集合。`RoadMemberEditManager.SetMembers`(モード中でない・別の道路宛ては無視)。
+- `edit_road:toggle_path {path_id, path_name, path_type, shift}`(Unity→UI, `IpcClient.EmitRoadTogglePath`): 区間編集中に街路・高速道路の区間がクリックされた。shift=Shift キー押下。付け外しはUIがAPIで行い、結果を `set_members` で返す。
+- `edit_road:cancel {}`(UI→Unity。パネルのクローズ時に Rust の `window.rs` が送る): 区間編集モード中なら `HandleEditRoadCancel` が終了して通常モードへ戻す。モード中でなければ何もしない(`edit_path:cancel_topology_edit` と同じ理由と方式)。
+- 道路名ラベルのクリックは `world:select_object {window_type:"road_detail", entity:{type:"road", id:"<road_id>"}}`(`EmitSelectObject`)。
+- セッションリセットでは区間編集を終了し、強調も消す(パスIDの集合は別の都市では別の区間を指すため)。

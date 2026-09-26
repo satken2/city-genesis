@@ -505,6 +505,11 @@ pub async fn handle_incoming_message(
             // パネルは結合プレビュー(dry_run)を取得して長さを表示し、確定を待つ。
             let _ = app.emit("edit_path:select_merge_target", envelope.payload);
         }
+        "edit_road:toggle_path" => {
+            // 道路の区間編集モードでクリックされた区間を道路詳細パネルへ中継する。
+            // 所属の付け外しはパネルが道路APIで行い、結果の全集合をUnityへ送り返す。
+            let _ = app.emit("edit_road:toggle_path", envelope.payload);
+        }
         "edit_path:select_split_point" => {
             // パス分割の分割点選択モードで選ばれた地点をパス詳細パネルへ中継する。
             // パネルは分割プレビュー(dry_run)を取得して前半・後半の長さを表示し、確定を待つ。

@@ -8,6 +8,7 @@
     "zone_detail": "Zone Details",
     "intersection_detail": "Interchange Details",
     "path_detail": "Path Details",
+    "road_detail": "Road Details",
     "path_build": "Path Construction",
     "track_build": "Track Construction",
     "infra_build": "Infrastructure Construction",

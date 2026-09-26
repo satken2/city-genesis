@@ -32,7 +32,7 @@ export type TransitVehicleOption = {
 
 const OPTIONS_BY_PATH_VARIANT: Record<string, TransitVehicleOption[]> = catalog;
 
-/** 路線種別(区間パスのバリアント)の外観候補。車両を描かない種別(モノレール等)は空。 */
+/** 路線種別(区間パスのバリアント)の外観候補。カタログに無い種別は空。 */
 export function transitVehicleOptions(pathVariant: number): TransitVehicleOption[] {
   return OPTIONS_BY_PATH_VARIANT[String(pathVariant)] ?? [];
 }

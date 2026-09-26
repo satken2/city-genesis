@@ -1,6 +1,18 @@
 {
   "path": {
     "titleWithId": "路徑 #{{id}}",
+    "titleInRoad": "{{road}}（路段 #{{id}}）",
+    "road": {
+      "label": "所屬道路",
+      "none": "無（無名道路）",
+      "createNew": "＋ 新增道路…",
+      "newPlaceholder": "道路名稱（留空則顯示編號）",
+      "create": "建立",
+      "cancel": "取消",
+      "openDetail": "道路詳情",
+      "saveFailed": "無法變更所屬道路",
+      "createFailed": "無法建立道路"
+    },
     "zoneName": "所屬地區",
     "followTerrain": "地形追隨",
     "followTerrainFollow": "追隨（個別設定）",
@@ -39,7 +51,8 @@
       "20": "地鐵",
       "21": "客運鐵路",
       "22": "貨運鐵路",
-      "23": "高速鐵路"
+      "23": "高速鐵路",
+      "24": "單軌列車"
     },
     "action": {
       "delete": "刪除",
@@ -154,6 +167,12 @@
       "maxGrade": "最大坡度",
       "maxSpan": "最大跨度",
       "minHeight": "最小高度"
+    },
+    "road": {
+      "title": "所屬道路",
+      "extending": "將延長「{{name}}」",
+      "newNote": "確定後，將以鋪設的路段新增道路。",
+      "createFailed": "路段已鋪設，但無法新增道路。"
     }
   },
   "track_construction": {

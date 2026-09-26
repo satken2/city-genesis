@@ -1,6 +1,18 @@
 {
   "path": {
     "titleWithId": "パス #{{id}}",
+    "titleInRoad": "{{road}}(区間 #{{id}})",
+    "road": {
+      "label": "所属道路",
+      "none": "なし(名もなき道)",
+      "createNew": "＋ 新しい道路…",
+      "newPlaceholder": "道路名(空欄なら番号で表示)",
+      "create": "作成",
+      "cancel": "キャンセル",
+      "openDetail": "道路の詳細",
+      "saveFailed": "所属道路を変更できませんでした",
+      "createFailed": "道路を作成できませんでした"
+    },
     "zoneName": "所属地区",
     "followTerrain": "地形追従",
     "followTerrainFollow": "する(個別設定)",
@@ -39,7 +51,8 @@
       "20": "地下鉄",
       "21": "旅客鉄道",
       "22": "貨物鉄道",
-      "23": "高速鉄道"
+      "23": "高速鉄道",
+      "24": "モノレール"
     },
     "action": {
       "delete": "削除",
@@ -154,6 +167,12 @@
       "maxGrade": "最大勾配",
       "maxSpan": "最大スパン長",
       "minHeight": "最小高さ"
+    },
+    "road": {
+      "title": "所属道路",
+      "extending": "「{{name}}」を延長します",
+      "newNote": "確定すると、敷設した区間で新しい道路を作成します。",
+      "createFailed": "道路は敷設しましたが、新しい道路を作成できませんでした。"
     }
   },
   "track_construction": {

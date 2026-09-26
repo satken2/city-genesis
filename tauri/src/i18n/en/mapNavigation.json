@@ -18,7 +18,7 @@
     "cancel": "Cancel",
     "directions": "Directions",
     "explore": "Discover your city",
-    "intro": "Search for facilities, stations or districts, or select a place on the map.",
+    "intro": "Search for facilities, stations, districts or roads, or select a place on the map.",
     "chooseOrigin": "Search for a starting point or choose one on the map.",
     "routing": "Finding a route…",
     "showRoute": "Show full route",
@@ -37,7 +37,8 @@
       "zone": "District",
       "stop": "Stop",
       "station": "Station",
-      "point": "Point"
+      "point": "Point",
+      "road": "Road"
     },
     "leg": {
       "walk": "Walk",

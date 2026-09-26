@@ -82,7 +82,7 @@
     "fleetMoreTrains": "另有 {{count}} 列",
     "fleetShortage": "因車輛不足，有 {{count}} 列無法編組。",
     "vehicleModel": "車輛",
-    "vehicleModelNote": "只會改變車輛的外觀，載客量、費用與速度不變。",
+    "vehicleModelNote": "只會改變車輛的外觀，載客量、費用與速度不變。車身的色帶會塗成路線顏色。",
     "estimate": {
       "title": "收支預測",
       "editedTag": "以未儲存的設定估算",
@@ -125,7 +125,8 @@
       "lrt": "輕軌",
       "trainStandard": "標準",
       "trainFuturistic": "未來風",
-      "trainRetro": "復古"
+      "trainRetro": "復古",
+      "monorail": "單軌列車"
     }
   }
 }

@@ -64,7 +64,8 @@ export type GraphicState =
   | "STATE_EDIT_CONNECTOR"
   | "STATE_REMOVE_OBJECTS"
   | "STATE_MERGE_PATH"
-  | "STATE_SPLIT_PATH";
+  | "STATE_SPLIT_PATH"
+  | "STATE_EDIT_ROAD_MEMBERS";
 
 /* ---- ui -> graphic 方向の送信 ---- */
 
@@ -970,6 +971,100 @@ export async function sendFinishPathTopologyEdit(removedPathId: number): Promise
     params: { removed_path_id: removedPathId },
   });
 }
+
+/* ---- 道路(名前付き道路) ---- */
+
+/**
+ * `world.set_road_focus`
+ * 道路詳細パネルで開いている道路の区間を、3Dビュー上に道路色の帯で強調する。
+ * 帯は区間の中心線に沿って最前面に描く(公共交通ハイライトと同じ描き方)。送るたびに置き換わる。
+ */
+export async function sendRoadFocus(roadId: number, color: string, pathIds: number[]): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "road_detail",
+    entity: null,
+    action: "world:set_road_focus",
+    params: { road_id: roadId, color, path_ids: pathIds },
+  });
+}
+
+/** `world.clear_road_focus` 道路の強調表示を消す(パネルを閉じたときは Rust 側も送る) */
+export async function sendClearRoadFocus(): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "road_detail",
+    entity: null,
+    action: "world:clear_road_focus",
+    params: {},
+  });
+}
+
+/**
+ * `world.refresh_roads`
+ * 道路の作成・改名・所属変更・削除のあとに送り、Unity に道路一覧(GET /api/v1/roads/)を取り直させる。
+ * 道路名の3Dラベルは一覧の version が変わったときだけ作り直される。
+ */
+export async function sendRefreshRoads(windowType: string = "road_detail"): Promise<void> {
+  await invoke("send_window_action", {
+    windowType,
+    entity: null,
+    action: "world:refresh_roads",
+    params: {},
+  });
+}
+
+/**
+ * `world.change_state` (STATE_EDIT_ROAD_MEMBERS)
+ * 道路の区間編集モードを開始する。Unity は現在の所属区間を道路色で示し、街路・高速道路の
+ * 区間がクリックされるたびに `edit_road:toggle_path` を返す(所属の付け外しはUIがAPIで行う)。
+ */
+export async function sendStartRoadMemberEdit(roadId: number, color: string, pathIds: number[]): Promise<void> {
+  await sendChangeState(
+    "STATE_EDIT_ROAD_MEMBERS",
+    { road_id: roadId, color, path_ids: pathIds },
+    "road_detail",
+  );
+}
+
+/**
+ * `edit_road.set_members`
+ * 区間編集モード中に、所属区間の集合(全集合)と、直進方向の自動延長で追加候補になった区間を送る。
+ * 差分ではなく毎回全集合を送る。previewPathIds は薄い色で示す候補(確定前)。
+ */
+export async function sendRoadEditSetMembers(
+  roadId: number,
+  pathIds: number[],
+  previewPathIds: number[] = [],
+): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "road_detail",
+    entity: null,
+    action: "edit_road:set_members",
+    params: { road_id: roadId, path_ids: pathIds, preview_path_ids: previewPathIds },
+  });
+}
+
+/**
+ * `world.change_state` (STATE_NORMAL)
+ * 道路の区間編集モードを終える。パネルを閉じたときは Rust 側が `edit_road:cancel` を送る
+ * (Unity は区間編集モード中でなければ何もしない)。
+ */
+export async function sendEndRoadMemberEdit(): Promise<void> {
+  await sendChangeState("STATE_NORMAL", undefined, "road_detail");
+}
+
+/**
+ * 区間編集モードで区間がクリックされた(Unity → UI)。
+ * ペイロードは { path_id, path_name, path_type, shift }。shift=true は Shift+クリックで、
+ * その区間から直進方向へたどった区間をまとめて追加する操作を表す。
+ */
+export const IPC_EVENT_ROAD_TOGGLE_PATH = "edit_road:toggle_path";
+
+export type RoadTogglePathPayload = {
+  path_id: number;
+  path_name: string;
+  path_type: number;
+  shift: boolean;
+};
 
 /**
  * `view.set_grid`

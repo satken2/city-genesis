@@ -15,9 +15,10 @@ New-Item -ItemType Directory -Path $editorAssets -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'VehicleQA.cs') -Destination $editorAssets -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'StreetParkingQA.cs') -Destination $editorAssets -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'TransitConsistQA.cs') -Destination $editorAssets -Force
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'TransitLiveryQA.cs') -Destination $editorAssets -Force
 Copy-Item -LiteralPath (Join-Path $unityRoot 'Assets/Editor/ModelPrefabGenerator.cs') -Destination $editorAssets -Force
 Copy-Item -LiteralPath (Join-Path $unityRoot 'Assets/Editor/ModelImportSettings.cs') -Destination $editorAssets -Force
-foreach ($vehicleType in @('10','11','12','13','14','20','21','22','23')) {
+foreach ($vehicleType in @('10','11','12','13','14','20','21','22','23','24')) {
     foreach ($relativeRoot in @('Assets/Models/Vehicles','Assets/Resources/Models/Vehicles')) {
         $destination = Join-Path $qaRoot $relativeRoot
         New-Item -ItemType Directory -Path $destination -Force | Out-Null
@@ -41,6 +42,7 @@ $configDestination = Join-Path $qaRoot 'Assets/Resources/Config'
 New-Item -ItemType Directory -Path $configDestination -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $unityRoot 'Assets/Resources/Config/transit_vehicle_models.json') -Destination $configDestination -Force
 Copy-Item -LiteralPath (Join-Path $unityRoot 'Assets/Resources/Config/vehicle_model_config.yaml') -Destination $configDestination -Force
+Copy-Item -LiteralPath (Join-Path $unityRoot 'Assets/Resources/Config/transit_vehicle_livery.json') -Destination $configDestination -Force
 $resultPath = Join-Path $qaRoot 'result.txt' 
 Set-Content -LiteralPath $resultPath -Value 'RUNNING'
 $qaArguments = @(

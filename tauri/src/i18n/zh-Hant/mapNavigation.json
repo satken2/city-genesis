@@ -18,7 +18,7 @@
     "cancel": "取消",
     "directions": "前往此處",
     "explore": "探索你的城市",
-    "intro": "搜尋設施、車站或地區，或在地圖上選擇地點。",
+    "intro": "搜尋設施、車站、地區或道路，或在地圖上選擇地點。",
     "chooseOrigin": "搜尋出發地，或在地圖上選擇。",
     "routing": "正在搜尋路線…",
     "showRoute": "顯示完整路線",
@@ -37,7 +37,8 @@
       "zone": "地區",
       "stop": "站點",
       "station": "車站",
-      "point": "地點"
+      "point": "地點",
+      "road": "道路"
     },
     "leg": {
       "walk": "步行",

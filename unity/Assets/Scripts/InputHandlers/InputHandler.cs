@@ -74,6 +74,9 @@ public static class InputMode
     // 駅パッケージ配置モード(軌道建設パネルの簡易モード → 駅タブ)。地形クリックで
     // プラットフォーム複線+駅舎のゴーストの設置地点を固定する。実処理は StationPlanManager。
     public const int MODE_EDIT_STATION = 21;
+    // 道路(名前付き道路)の区間編集モード。街路・高速道路の区間のクリックを UI へ通知するだけで、
+    // 所属の付け外しは UI が API で行う。実処理は RoadMemberEditManager。
+    public const int MODE_EDIT_ROAD_MEMBERS = 22;
 }
 
 /// <summary>
@@ -107,6 +110,8 @@ public static class InputModePreset
     public const int PICK_BUILDING = 19;
     // 駅パッケージ配置プリセット。地形だけをクリック可能にする(プロップ配置と同型)。
     public const int STATION_PLACEMENT = 20;
+    // 道路の区間編集プリセット。パスだけをクリック可能にする(パス結合の相手選択と同型)。
+    public const int ROAD_MEMBER_EDIT = 21;
 }
 
 /// <summary>
@@ -772,12 +777,13 @@ public class InputHandler : MonoBehaviour
 
         int currentMode = GetModeForObjectType(objectType);
 
-        // ブルドーザ(削除)・パス結合/分割の選択・地区編集はクリックのみ対応。ドラッグは
+        // ブルドーザ(削除)・パス結合/分割の選択・道路の区間編集・地区編集はクリックのみ対応。ドラッグは
         // 無効化し、誤って RoadPlanManager 等のドラッグ処理へフォールバックしないよう即座に return する
         // (地区編集の左ドラッグはカメラパンに任せる)。
         if (currentMode == InputMode.MODE_REMOVE
             || currentMode == InputMode.MODE_PATH_MERGE
             || currentMode == InputMode.MODE_PATH_SPLIT
+            || currentMode == InputMode.MODE_EDIT_ROAD_MEMBERS
             || currentMode == InputMode.MODE_ZONE_EDIT)
         {
             return;
@@ -1272,6 +1278,17 @@ public class InputHandler : MonoBehaviour
                 Debug.Log("InputHandler: コピー元建物選択モードプリセットを設定しました");
                 break;
 
+            case InputModePreset.ROAD_MEMBER_EDIT:
+                // 道路の区間編集。区間のクリックだけを受け、他は誤操作防止で無効化する。
+                SetMode(InputObjectType.PATH, InputMode.MODE_EDIT_ROAD_MEMBERS);
+                SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
+                SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
+                SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
+                SetMode(InputObjectType.TERRAIN, InputMode.MODE_NONE);
+                SetMode(InputObjectType.ZONE, InputMode.MODE_NONE);
+                Debug.Log("InputHandler: 道路の区間編集モードプリセットを設定しました");
+                break;
+
             default:
                 Debug.LogWarning($"InputHandler: 不明なプリセット {preset} です");
                 break;
@@ -1321,6 +1338,7 @@ public class InputHandler : MonoBehaviour
             case InputMode.MODE_EDIT_TRANSIT: return "公共交通設置";
             case InputMode.MODE_EDIT_PROP: return "プロップ配置";
             case InputMode.MODE_EDIT_CONNECTOR: return "接続点編集";
+            case InputMode.MODE_EDIT_ROAD_MEMBERS: return "道路の区間編集";
             default: return "UNKNOWN";
         }
     }

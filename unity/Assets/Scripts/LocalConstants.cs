@@ -73,6 +73,17 @@ public static class LocalConstants
     /// </summary>
     public const float TRACK_MERGE_MAX_CONVERGE_ANGLE_DEG = 45.0f;
 
+    public const float ROAD_MERGE_MAX_EDGE_GAP = 2.0f; // 高速道路の本線とランプの路面の縁がこの隙間以内なら一つの路面につなぐ(m)
+    public const float ROAD_MERGE_MAX_ANGLE_DEG = 30.0f; // 本線とランプを結合・取り込みとみなす最大の角度差(度)
+    public const float ROAD_MERGE_MAX_DY = 1.0f; // 路面が重ならず隣り合う区間で結合する最大の高さ差(m)
+    public const float ROAD_MERGE_OVERLAP_MAX_DY = 4.0f; // 路面が重なる区間でランプを本線の高さへ寄せる最大の高さ差(m)
+    public const float ROAD_MERGE_SINK = 0.02f; // 結合したランプの路面を本線より下げる量。重なる路面のZファイティングを防ぐ(m)
+    public const float ROAD_MERGE_MAX_ADDED_GRADE = 0.04f; // 本線へ寄せた高さをランプ本来の縦断へ戻す区間で加わる勾配の上限
+    public const float ROAD_MERGE_MIN_TRANSITION = 20f; // ランプの高さを戻す区間の最短長(m)
+    public const float ROAD_MERGE_MAX_TRANSITION = 120f; // ランプの高さを戻す区間の最長長(m)
+    public const float ROAD_MERGE_MAX_MAIN_BEND_DEG = 2.0f; // 交差点の板なしで本線をつなぐノードで許す本線の折れ角(度)
+    public const float INTERSECTION_SURFACE_MAX_EDGE = 2.0f; // 交差点の路面の三角形の最大辺長(m)。内部頂点で勾配の曲面をなぞり、対角線で折れないようにする
+
     // ------------------------------------------------------------------
     // 工事中(STATUS_CONSTRUCTING)の3D表示
     // 建物: 敷地を覆う土マウンド + 足場リング(scaffold-wall/corner) + クレーン(crane-base/mid/top)

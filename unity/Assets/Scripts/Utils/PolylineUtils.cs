@@ -66,6 +66,22 @@ public static class PolylineUtils
     }
 
     /// <summary>
+    /// 半直線 origin + t·direction(t&gt;0)と線分の交点。distance は direction の長さを単位とした t、
+    /// segmentT は線分上の位置パラメータ(0=始点、1=終点)。平行なら偽。
+    /// </summary>
+    public static bool IntersectRaySegment(Vector2 origin, Vector2 direction, Vector2 start, Vector2 end, out float distance, out float segmentT)
+    {
+        Vector2 edge = end - start;
+        float denominator = direction.x * edge.y - direction.y * edge.x;
+        distance = segmentT = 0f;
+        if (Mathf.Abs(denominator) < 1e-8f) return false;
+        Vector2 offset = start - origin;
+        distance = (offset.x * edge.y - offset.y * edge.x) / denominator;
+        segmentT = (offset.x * direction.y - offset.y * direction.x) / denominator;
+        return distance > 0f && segmentT >= 0f && segmentT <= 1f;
+    }
+
+    /// <summary>
     /// 三次ベジエ曲線のパラメータ t における点。
     /// B(t) = (1-t)^3 P0 + 3(1-t)^2 t P1 + 3(1-t) t^2 P2 + t^3 P3
     /// 道路プレビュー(RoadPlanManager)と実道路(PathManager)が同じ式を共有し、曲線形状の食い違いを防ぐ。

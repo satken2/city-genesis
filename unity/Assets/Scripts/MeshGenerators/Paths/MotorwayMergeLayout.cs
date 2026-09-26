@@ -4,306 +4,206 @@ using UnityEngine;
 using GeneratedModels;
 
 /// <summary>
-/// 本線2本と流入する1車線ランプの描画形状。保存中心線と占有ポリゴンは変更しない。
-/// 下流の切断距離の前半で車線幅を保ち、後半だけを絞る。周辺物との干渉は調べない。
+/// 高速道路のノードで本線を優先する描画計画。本線は、稼働中でランプでない高速道路のうちノードで最も一直線に続く2本。
+/// 浅い角度で入る稼働中のランプは本線の路面へ取り込み、ランプの路面が本線の縁の内側へ入りきる位置で切る
+/// (そこから先のランプは本線の路面の下にある。高さは RoadAdjacency が本線へ寄せる)。
+/// 本線がほぼ一直線で同じ幅、かつ本線以外の枝をすべて取り込めるときは交差点の板を作らず、本線の2本をノードまで描いてつなぐ。
+/// それ以外は通常どおり全枝で板を作り、板の高さだけを本線の縦断に合わせる。
+/// 保存形状・占有範囲・交通容量は変えない。
 /// </summary>
 public sealed class MotorwayMergeLayout
 {
-    public int RampId => ramp.Path.path_id;
-    public int IncomingId => incoming.Path.path_id;
-    public int OutgoingId => outgoing.Path.path_id;
-    public float ParallelLength => outgoing.Section.Distance * .5f;
-    public float LaneWidth => ramp.Lanes.Outer * 2f;
-
     private sealed class Arm
     {
         public PathSummary Path;
-        public PathEndSection Section;
         public List<Vector3> Points;
-        public RoadLaneLayout Lanes;
-        public float SideWidth, CenterWidth;
-
-        public Arm(PathSummary path, PathEndSection section, List<Vector3> points)
-        {
-            Path = path; Section = section; Points = points;
-            RoadPath.GetPathMasterParams(path, out float width, out float sidewalk, out float side, out _,
-                out int lanes, out _, out float center, out _, out _, out _, out _);
-            Lanes = new RoadLaneLayout(width, sidewalk, side, center, lanes, path.travel_direction);
-            SideWidth = side; CenterWidth = center;
-        }
+        public Vector2 Direction;
+        public float Width;
+        public PathMasterItem Master;
     }
 
-    private readonly Arm ramp, incoming, outgoing;
-    private readonly float side;
-    private readonly Dictionary<int, PathEndSection> sections;
-    private readonly List<IntersectionCorner> corners;
-    private readonly Dictionary<(int from, int to, Vector3 start, Vector3 end), VehiclePolyline> connectors = new();
-    private Vector3[] surfaceVertices;
-    private int[] surfaceTriangles;
-    private Vector3 surfaceOrigin;
+    public int MainA { get; }
+    public int MainB { get; }
 
-    private MotorwayMergeLayout(Arm ramp, Arm incoming, Arm outgoing, float side,
-        IntersectionPolygonUtil.IntersectionCalculationResult result)
+    /// <summary>交差点の板を作るか。偽なら本線の2本をノードでつなぎ、取り込んだランプだけを切る。</summary>
+    public bool NeedsSlab { get; }
+
+    /// <summary>板を作らないときの切断位置。本線はノード端、取り込んだランプは本線の路面へ入りきる位置。</summary>
+    public Dictionary<int, Vector3> ConnectionPoints { get; } = new Dictionary<int, Vector3>();
+
+    /// <summary>板の高さを本線の縦断に合わせるための本線の中心線。</summary>
+    public MainLineSurface Surface { get; }
+
+    private readonly Vector2 node;
+    private readonly Dictionary<int, Arm> mains = new Dictionary<int, Arm>();
+    private readonly Dictionary<int, Vector2> absorbedReference = new Dictionary<int, Vector2>();
+
+    private MotorwayMergeLayout(Vector2 node, Arm a, Arm b, bool needsSlab)
     {
-        this.ramp = ramp; this.incoming = incoming; this.outgoing = outgoing; this.side = side;
-        sections = result.Sections; corners = result.Corners;
+        this.node = node;
+        MainA = a.Path.path_id;
+        MainB = b.Path.path_id;
+        NeedsSlab = needsSlab;
+        mains[MainA] = a;
+        mains[MainB] = b;
+        Surface = new MainLineSurface(MainA, a.Points, MainB, b.Points, Mathf.Max(a.Width, b.Width));
     }
 
-    public static MotorwayMergeLayout Create(int nodeId, List<PathSummary> paths,
-        IntersectionPolygonUtil.IntersectionCalculationResult result, Func<PathSummary, List<Vector3>> pointResolver)
+    public bool IsAbsorbed(int pathId) => absorbedReference.ContainsKey(pathId);
+
+    /// <param name="masters">バリアント→マスター。null なら MasterDataStore。</param>
+    public static MotorwayMergeLayout Create(int nodeId, List<PathSummary> paths, Func<PathSummary, List<Vector3>> pointResolver,
+        Func<PathSummary, float> cutLimitResolver, Func<int, PathMasterItem> masters = null)
     {
-        if (paths.Count != 3 || result.Sections.Count != 3 || MasterDataStore.Instance == null) return null;
-        Arm ramp = null;
-        var main = new List<Arm>();
+        if (nodeId <= 0 || paths == null || paths.Count < 2) return null;
+        masters ??= variant => MasterDataStore.Instance?.GetPathMaster(variant);
+        var arms = new List<Arm>();
         foreach (var path in paths)
         {
-            if (path.path_type != Constants.PATH_MOTORWAY || path.status != Constants.STATUS_ACTIVE) return null;
-            var master = MasterDataStore.Instance.GetPathMaster(path.path_variant);
-            if (master == null || (master.sidewalk_width ?? 0f) > 0f) return null;
-            var points = new List<Vector3>(pointResolver != null ? pointResolver(path) : IntersectionPolygonUtil.SamplePlan(path));
-            if (path.end_node_id == nodeId) points.Reverse();
-            var arm = new Arm(path, result.Sections[path.path_id], points);
-            if (master.ramp)
+            bool start = path.start_node_id == nodeId, end = path.end_node_id == nodeId;
+            if (!start && !end) continue;
+            if (start && end) return null;
+            var source = pointResolver != null ? pointResolver(path) : IntersectionPolygonUtil.SamplePlan(path);
+            if (source == null || source.Count < 2) return null;
+            var points = new List<Vector3>(source);
+            if (end) points.Reverse();
+            var master = masters(path.path_variant);
+            arms.Add(new Arm
             {
-                if (ramp != null || !arm.Lanes.OneWay || arm.Lanes.Count != 1
-                    || !VehicleManager.DirectionAllowsEntry(path.travel_direction, path.end_node_id == nodeId)) return null;
-                ramp = arm;
-            }
-            else main.Add(arm);
+                Path = path, Points = points, Master = master,
+                Direction = IntersectionPolygonUtil.AtDistance(points, 0f).Direction,
+                Width = master != null && master.width > 0f ? master.width : path.width,
+            });
         }
-        if (ramp == null || main.Count != 2) return null;
-        // 本線の継続判定は通常の2本接合と同じ角度を使う。分岐や横断交差を合流に読み替えない。
-        var a = IntersectionPolygonUtil.AtDistance(main[0].Points, 0).Direction;
-        var b = IntersectionPolygonUtil.AtDistance(main[1].Points, 0).Direction;
-        if (Vector2.Dot(a, b) >= -.8f) return null;
-        var rampDirection = -IntersectionPolygonUtil.AtDistance(ramp.Points, 0).Direction;
-        int outIndex = Vector2.Dot(rampDirection, a) > Vector2.Dot(rampDirection, b) ? 0 : 1;
-        Arm outgoing = main[outIndex], incoming = main[1 - outIndex];
-        if (!VehicleManager.DirectionAllowsEntry(outgoing.Path.travel_direction, outgoing.Path.start_node_id == nodeId)
-            || !VehicleManager.DirectionAllowsEntry(incoming.Path.travel_direction, incoming.Path.end_node_id == nodeId)) return null;
-        var start = IntersectionPolygonUtil.AtDistance(outgoing.Points, 0);
-        float side = Mathf.Sign(Vector2.Dot(ramp.Section.Center - start.Center, start.Left));
-        // 双方向本線では対向車線や中央分離帯を横断する接続には適用しない。
-        if (!outgoing.Lanes.OneWay && side * -outgoing.Lanes.Center(0, CityInfoStore.TrafficHand) <= 0f) return null;
-        var layout = new MotorwayMergeLayout(ramp, incoming, outgoing, side, result);
-        layout.ReplaceOuterCorner();
-        layout.ReplaceMainlineCorner();
+        arms.Sort((x, y) => x.Path.path_id.CompareTo(y.Path.path_id));
+
+        // 通常の2本接合と同じ角度で本線の継続を判定し、分岐や横断を本線に読み替えない。
+        Arm a = null, b = null;
+        float best = -0.8f;
+        for (int i = 0; i < arms.Count; i++)
+            for (int j = i + 1; j < arms.Count; j++)
+            {
+                if (!IsMain(arms[i]) || !IsMain(arms[j])) continue;
+                float dot = Vector2.Dot(arms[i].Direction, arms[j].Direction);
+                if (dot < best) { best = dot; a = arms[i]; b = arms[j]; }
+            }
+        if (a == null) return null;
+
+        Vector2 nodeXZ = IntersectionPolygonUtil.XZ(a.Points[0]);
+        bool straight = best <= -Mathf.Cos(LocalConstants.ROAD_MERGE_MAX_MAIN_BEND_DEG * Mathf.Deg2Rad)
+            && Mathf.Abs(a.Width - b.Width) < 0.01f;
+        var absorbed = new Dictionary<int, Vector3>();
+        bool allAbsorbed = straight && arms.Count > 2;
+        foreach (var arm in arms)
+        {
+            if (!allAbsorbed) break;
+            if (arm == a || arm == b) continue;
+            if (TryAbsorb(arm, a, b, cutLimitResolver, out Vector3 cut)) absorbed[arm.Path.path_id] = cut;
+            else allAbsorbed = false;
+        }
+
+        var layout = new MotorwayMergeLayout(nodeXZ, a, b, !allAbsorbed);
+        if (!allAbsorbed) return layout;
+        layout.ConnectionPoints[a.Path.path_id] = a.Points[0];
+        layout.ConnectionPoints[b.Path.path_id] = b.Points[0];
+        foreach (var pair in absorbed)
+        {
+            layout.ConnectionPoints[pair.Key] = pair.Value;
+            layout.absorbedReference[pair.Key] = IntersectionPolygonUtil.XZ(pair.Value);
+        }
         return layout;
     }
 
-    private static float Smooth(float t) => Mathf.SmoothStep(0f, 1f, t);
-    private float Taper(float distance) => Smooth((distance - ParallelLength) / ParallelLength);
-    private float ParallelOuter => outgoing.Lanes.Outer + LaneWidth + ramp.SideWidth * .5f;
-    private float ParallelCenter => outgoing.Lanes.Outer + LaneWidth * .5f;
+    private static bool IsMain(Arm arm)
+        => arm.Path.path_type == Constants.PATH_MOTORWAY && arm.Path.status == Constants.STATUS_ACTIVE
+            && arm.Master != null && !arm.Master.ramp;
 
-    private Vector3 DownstreamPoint(float distance, float offset)
+    /// <summary>
+    /// ランプが近い方の本線の路面へ入りきっている区間の外端(ノードからの距離)を求める。
+    /// ランプの路面の外縁が本線の縁を越える最初の位置で、切断の上限より遠い・向きが離れすぎる・高さが離れすぎる場合は取り込まない。
+    /// </summary>
+    private static bool TryAbsorb(Arm ramp, Arm a, Arm b, Func<PathSummary, float> cutLimitResolver, out Vector3 cut)
     {
-        var sample = IntersectionPolygonUtil.AtDistance(outgoing.Points, distance);
-        return sample.Position + new Vector3(sample.Left.x, 0f, sample.Left.y) * offset;
-    }
-
-    private static List<Vector3> Curve(Vector3 start, Vector2 fromDirection, Vector3 end, Vector2 toDirection)
-    {
-        // 平面の接線付き補間も通常の車両接続と共用し、高さは生成後に路面へ合わせる。
-        start.y = end.y = 0f;
-        return new List<Vector3>(VehiclePolyline.Connector(start, new Vector3(fromDirection.x, 0f, fromDirection.y),
-            end, new Vector3(toDirection.x, 0f, toDirection.y), 1f / 3f).points);
-    }
-
-    private void ReplaceOuterCorner()
-    {
-        var corner = corners.Find(c => c.FromPath == RampId && c.ToPath == OutgoingId
-            || c.FromPath == OutgoingId && c.ToPath == RampId);
-        bool reverse = corner.FromPath != RampId;
-        Vector2 first = corner.Points[reverse ? corner.Points.Count - 1 : 0];
-        var points = Curve(new Vector3(first.x, 0f, first.y), -ramp.Section.Direction,
-            DownstreamPoint(0, side * ParallelOuter), IntersectionPolygonUtil.AtDistance(outgoing.Points, 0).Direction);
-        int count = Mathf.Clamp(Mathf.CeilToInt(outgoing.Section.Distance / .5f), 16, 256);
-        // 偶数分割で並走・絞り込み境界を必ず含める。
-        count += count % 2;
-        for (int i = 1; i <= count; i++)
+        cut = default;
+        if (ramp.Path.path_type != Constants.PATH_MOTORWAY || ramp.Path.status != Constants.STATUS_ACTIVE
+            || ramp.Master == null || !ramp.Master.ramp) return false;
+        Arm into = Vector2.Dot(ramp.Direction, a.Direction) >= Vector2.Dot(ramp.Direction, b.Direction) ? a : b;
+        if (Vector2.Dot(ramp.Direction, into.Direction) < Mathf.Cos(LocalConstants.ROAD_MERGE_MAX_ANGLE_DEG * Mathf.Deg2Rad)) return false;
+        float mainHalf = into.Width * 0.5f, rampHalf = ramp.Width * 0.5f;
+        if (rampHalf >= mainHalf) return false;
+        float limit = cutLimitResolver != null ? cutLimitResolver(ramp.Path) : IntersectionPolygonUtil.Length(ramp.Points) * 0.95f;
+        float previous = rampHalf - mainHalf, traveled = 0f;
+        for (int i = 1; i < ramp.Points.Count; i++)
         {
-            float distance = outgoing.Section.Distance * i / count;
-            float width = Mathf.Lerp(ParallelOuter, outgoing.Section.Width * .5f, Taper(distance));
-            points.Add(DownstreamPoint(distance, side * width));
+            float step = Vector2.Distance(IntersectionPolygonUtil.XZ(ramp.Points[i - 1]), IntersectionPolygonUtil.XZ(ramp.Points[i]));
+            if (step < 1e-6f) continue;
+            Vector3 point = ramp.Points[i];
+            if (!TrackAdjacency.TryClosestPointOnPolylineXZ(into.Points, point, out Vector3 closest, out _, out _, out _)) return false;
+            if (Mathf.Abs(closest.y - point.y) > LocalConstants.ROAD_MERGE_OVERLAP_MAX_DY) return false;
+            float excess = Vector2.Distance(IntersectionPolygonUtil.XZ(point), IntersectionPolygonUtil.XZ(closest)) + rampHalf - mainHalf;
+            if (excess > 0f)
+            {
+                float distance = traveled + step * (-previous / (excess - previous));
+                if (distance < 0.5f || distance > limit) return false;
+                cut = IntersectionPolygonUtil.AtDistance(ramp.Points, distance).Position;
+                return true;
+            }
+            previous = excess;
+            traveled += step;
+            if (traveled > limit) return false;
         }
-        SetCorner(corner, points, reverse);
+        return false;
     }
 
-    private void ReplaceMainlineCorner()
-    {
-        var corner = corners.Find(c => c.FromPath == IncomingId && c.ToPath == OutgoingId
-            || c.FromPath == OutgoingId && c.ToPath == IncomingId);
-        SetCorner(corner, MainLine(-side * incoming.Section.Width * .5f, -side * outgoing.Section.Width * .5f),
-            corner.FromPath != IncomingId);
-    }
-
-    private void SetCorner(IntersectionCorner corner, List<Vector3> points, bool reverse)
-    {
-        if (reverse) points.Reverse();
-        corner.Points.Clear(); corner.Directions.Clear();
-        for (int i = 0; i < points.Count; i++)
-        {
-            corner.Points.Add(IntersectionPolygonUtil.XZ(points[i]));
-            corner.Directions.Add(IntersectionPolygonUtil.XZ(PolylineUtils.SmoothedDirection(points, i)));
-        }
-        corner.Directions[0] = -sections[corner.FromPath].Direction;
-        corner.Directions[corner.Directions.Count - 1] = sections[corner.ToPath].Direction;
-    }
-
-    /// <summary>上面の三角形だけを保持し、生成済み路面と白線・走行位置の高さを一致させる。</summary>
-    internal void SetSurface(Mesh mesh, Vector3 origin)
-    {
-        surfaceVertices = mesh.vertices; surfaceTriangles = mesh.triangles; surfaceOrigin = origin;
-    }
-
-    internal Vector3 SurfacePoint(Vector3 point, float offset)
-    {
-        Vector3 local = point - surfaceOrigin;
-        if (surfaceTriangles != null) for (int i = 0; i < surfaceTriangles.Length; i += 3)
-        {
-            Vector3 a = surfaceVertices[surfaceTriangles[i]], b = surfaceVertices[surfaceTriangles[i + 1]], c = surfaceVertices[surfaceTriangles[i + 2]];
-            float determinant = (b.z - c.z) * (a.x - c.x) + (c.x - b.x) * (a.z - c.z);
-            if (Mathf.Abs(determinant) < 1e-8f) continue;
-            float u = ((b.z - c.z) * (local.x - c.x) + (c.x - b.x) * (local.z - c.z)) / determinant;
-            float v = ((c.z - a.z) * (local.x - c.x) + (a.x - c.x) * (local.z - c.z)) / determinant;
-            if (u < -1e-5f || v < -1e-5f || u + v > 1.00001f) continue;
-            point.y = a.y * u + b.y * v + c.y * (1f - u - v) + surfaceOrigin.y + offset - RoadPartHeights.BODY_ABOVE_SPLINE;
-            return point;
-        }
-        // 壁の中心は路面外縁の外側にあるため、通常の断面補間で高さを延長する。
-        return RoadIntersectionMeshGenerator.SectionSurfacePoint(point, sections, offset);
-    }
-
-    /// <summary>外側・内側は通行側と独立に求め、右側ランプも隣接する車線へつなぐ。</summary>
+    /// <summary>
+    /// 取り込んだランプから本線へ入る車両は、ランプの側に最も近い車線へ入る。外側・内側は通行側と独立に求める。
+    /// </summary>
     public int TargetLane(int fromPath, int toPath, int lane, int trafficHand)
     {
-        if (fromPath != RampId || toPath != OutgoingId) return lane;
-        int target = 0;
+        if (!absorbedReference.TryGetValue(fromPath, out Vector2 reference) || !mains.TryGetValue(toPath, out Arm to)) return lane;
+        RoadPath.GetPathMasterParams(to.Path, out float width, out float sidewalk, out float side, out _,
+            out int lanes, out _, out float center, out _, out _, out _, out _);
+        var layout = new RoadLaneLayout(width, sidewalk, side, center, lanes, to.Path.travel_direction);
+        float rampSide = Mathf.Sign(Vector2.Dot(reference - node, new Vector2(-to.Direction.y, to.Direction.x)));
+        int target = lane;
         float best = float.NegativeInfinity;
-        for (int i = 0; i < outgoing.Lanes.Count; i++)
+        for (int i = 0; i < layout.Count; i++)
         {
-            float position = -outgoing.Lanes.Center(i, trafficHand) * side;
+            float position = -layout.Center(i, trafficHand) * rampSide;
             if (position > best) { best = position; target = i; }
         }
         return target;
     }
+}
 
-    private List<Vector3> MainLine(float startOffset, float endOffset)
+/// <summary>ノードをまたぐ本線の中心線。交差点の板の高さを本線の縦断に合わせる。</summary>
+public sealed class MainLineSurface
+{
+    private readonly List<Vector3> line;
+    private readonly float half;
+
+    public int ArmA { get; }
+    public int ArmB { get; }
+
+    /// <param name="a">本線の片方の点列(ノードから外向き)。</param>
+    /// <param name="b">本線のもう片方の点列(ノードから外向き)。</param>
+    public MainLineSurface(int armA, List<Vector3> a, int armB, List<Vector3> b, float width)
     {
-        var points = new List<Vector3>();
-        float before = incoming.Section.Distance, after = outgoing.Section.Distance, total = before + after;
-        int count = Mathf.Clamp(Mathf.CeilToInt(total / .5f), 16, 256);
-        for (int i = 0; i <= count; i++)
-        {
-            float distance = total * i / count;
-            bool entering = distance <= before;
-            var sample = IntersectionPolygonUtil.AtDistance(entering ? incoming.Points : outgoing.Points,
-                entering ? before - distance : distance - before);
-            Vector2 left = sample.Left * (entering ? -1f : 1f);
-            float offset = Mathf.Lerp(startOffset, endOffset, Smooth(distance / total));
-            points.Add(sample.Position + new Vector3(left.x, 0f, left.y) * offset);
-        }
-        return points;
+        ArmA = armA;
+        ArmB = armB;
+        half = width * 0.5f;
+        line = new List<Vector3>(a.Count + b.Count);
+        for (int i = a.Count - 1; i >= 0; i--) line.Add(a[i]);
+        for (int i = 1; i < b.Count; i++) line.Add(b[i]);
     }
 
-    private List<Vector3> RampLine(Vector3 start, float targetOffset)
+    /// <summary>本線の路面の高さ(スプライン点の高さ)。outside は本線の路面の縁から外側への水平距離。</summary>
+    public float Height(Vector2 point, out float outside)
     {
-        var points = Curve(start, -ramp.Section.Direction, DownstreamPoint(0, side * ParallelCenter),
-            IntersectionPolygonUtil.AtDistance(outgoing.Points, 0).Direction);
-        int count = Mathf.Clamp(Mathf.CeilToInt(outgoing.Section.Distance / .5f), 16, 256);
-        count += count % 2;
-        for (int i = 1; i <= count; i++)
-        {
-            float distance = outgoing.Section.Distance * i / count;
-            points.Add(DownstreamPoint(distance, Mathf.Lerp(side * ParallelCenter, targetOffset, Taper(distance))));
-        }
-        return points;
-    }
-
-    /// <summary>路面と同じ高さ補間を使い、車両ごとの端点高さ（バス等の接地差も含む）を維持する。</summary>
-    public VehiclePolyline Connector(int fromPath, int toPath, Vector3 start, Vector3 end)
-    {
-        var key = (fromPath, toPath, start, end);
-        if (connectors.TryGetValue(key, out var cached)) return cached;
-        List<Vector3> points;
-        if (fromPath == RampId && toPath == OutgoingId)
-            points = RampLine(start, Vector2.Dot(IntersectionPolygonUtil.XZ(end) - outgoing.Section.Center, outgoing.Section.Left));
-        else if (fromPath == IncomingId && toPath == OutgoingId)
-            points = MainLine(-Vector2.Dot(IntersectionPolygonUtil.XZ(start) - incoming.Section.Center, incoming.Section.Left),
-                Vector2.Dot(IntersectionPolygonUtil.XZ(end) - outgoing.Section.Center, outgoing.Section.Left));
-        else if (fromPath == OutgoingId && toPath == IncomingId)
-        {
-            points = MainLine(-Vector2.Dot(IntersectionPolygonUtil.XZ(end) - incoming.Section.Center, incoming.Section.Left),
-                Vector2.Dot(IntersectionPolygonUtil.XZ(start) - outgoing.Section.Center, outgoing.Section.Left));
-            points.Reverse();
-        }
-        else return null;
-        float fromHeight = start.y - sections[fromPath].Position.y, toHeight = end.y - sections[toPath].Position.y;
-        for (int i = 0; i < points.Count; i++)
-            points[i] = SurfacePoint(points[i], Mathf.Lerp(fromHeight, toHeight, (float)i / (points.Count - 1)));
-        points[0] = start; points[points.Count - 1] = end;
-        var connector = new VehiclePolyline(points);
-        connectors[key] = connector;
-        return connector;
-    }
-
-    public void AddMarkings(List<SidewalkConnectorSpec> specs, Vector3 node)
-    {
-        // 本線の中央分離帯を交差点口で終端せず、同じ本線点列に沿って継続する。
-        if (incoming.CenterWidth > 0f && outgoing.CenterWidth > 0f)
-        {
-            specs.RemoveAll(s => s.Part == "center");
-            AddPart(specs, MainLine(0, 0), incoming, outgoing, incoming.CenterWidth, outgoing.CenterWidth, node, "center");
-        }
-        if (incoming.SideWidth <= 0f || outgoing.SideWidth <= 0f || ramp.SideWidth <= 0f) return;
-        var a = new List<(float offset, bool dashed)>(incoming.Lanes.Boundaries());
-        var b = new List<(float offset, bool dashed)>(outgoing.Lanes.Boundaries());
-        // Boundariesは保存パスの向きに対して左右対称なので、本線進行方向の左オフセットへそのまま対応付ける。
-        int count = Mathf.Max(a.Count, b.Count);
-        for (int i = 0; i < count; i++)
-        {
-            float from = a.Count == 0 ? 0 : a[Mathf.Min(i, a.Count - 1)].offset;
-            float to = b.Count == 0 ? 0 : b[Mathf.Min(i, b.Count - 1)].offset;
-            bool dashed = (a.Count == 0 || a[Mathf.Min(i, a.Count - 1)].dashed)
-                && (b.Count == 0 || b[Mathf.Min(i, b.Count - 1)].dashed);
-            AddPart(specs, MainLine(from, to), incoming, outgoing, incoming.SideWidth * .3f, outgoing.SideWidth * .3f, node, "line", dashed);
-        }
-        foreach (var corner in corners)
-        {
-            Arm from = FindArm(corner.FromPath), to = FindArm(corner.ToPath);
-            var points = new List<Vector3>();
-            for (int i = 0; i < corner.Points.Count; i++)
-            {
-                float inset = Mathf.Lerp(from.SideWidth, to.SideWidth, Smooth((float)i / (corner.Points.Count - 1))) * .5f;
-                Vector2 direction = corner.Directions[i];
-                Vector2 p = corner.Points[i] + new Vector2(-direction.y, direction.x) * inset;
-                points.Add(new Vector3(p.x, 0f, p.y));
-            }
-            AddPart(specs, points, from, to, from.SideWidth * .3f, to.SideWidth * .3f, node, "line");
-        }
-        var boundary = new List<Vector3>();
-        for (int i = 0; i <= 32; i++)
-            boundary.Add(DownstreamPoint(outgoing.Section.Distance * i / 32f, side * outgoing.Lanes.Outer));
-        AddPart(specs, boundary, outgoing, outgoing, outgoing.SideWidth * .3f, outgoing.SideWidth * .3f, node, "line", true);
-    }
-
-    private Arm FindArm(int path) => path == RampId ? ramp : path == IncomingId ? incoming : outgoing;
-
-    private static void AddPart(List<SidewalkConnectorSpec> specs, List<Vector3> points, Arm from, Arm to,
-        float fromWidth, float toWidth, Vector3 node, string part, bool dashed = false)
-    {
-        var widths = new List<float>(points.Count);
-        for (int i = 0; i < points.Count; i++)
-        {
-            points[i] -= node;
-            widths.Add(Mathf.Lerp(fromWidth, toWidth, Smooth((float)i / (points.Count - 1))));
-        }
-        specs.Add(new SidewalkConnectorSpec(points, widths, from.Path.path_variant, from.Path.path_type)
-        {
-            Part = part, Dashed = dashed, EndPrefabVariant = to.Path.path_variant, EndFallbackType = to.Path.path_type,
-            StartDirection = IntersectionPolygonUtil.XZ(points[1] - points[0]).normalized,
-            EndDirection = IntersectionPolygonUtil.XZ(points[points.Count - 1] - points[points.Count - 2]).normalized,
-        });
+        outside = float.PositiveInfinity;
+        if (!TrackAdjacency.TryClosestPointOnPolylineXZ(line, new Vector3(point.x, 0f, point.y), out Vector3 closest, out _, out _, out _))
+            return 0f;
+        outside = Mathf.Max(0f, Vector2.Distance(point, IntersectionPolygonUtil.XZ(closest)) - half);
+        return closest.y;
     }
 }

@@ -2,11 +2,13 @@
 
 ロープウェイの搬器はpaths.blendのp601/cabinへ著作する。地形プロップではなく吊り点原点の点設備で、Normal/Close共通・Far非表示。非公開制作ツールのbuild_ropeway_cabins.py --cabin-onlyがropeway_cabin_surfaces.pyの曲面車体・二重窓枠・湾曲吊り腕を生成する。車底-3.17m、屋根-1.02m、客室中心Blender X=-0.22m、ヨーク中心X=-0.65m。客室外寸は幅1.96m・奥行き2.32m・高さ2.15m、床と天井の厚みを見込む室内高は約1.95m。腰板約0.68m、屋根は窓枠に沿う薄い蓋とする。exportはp601/cabinだけに絞れる。仕様は公開O文書、検証はUnity Tests/Ropeway/animation.ps1。
 
-立体駐車場3005は非公開制作ツールのbuild_parking_garage.pyがa3005/0へ17パーツを著作する。6m幅・3m階高の開放壁、独立入口、屋上腰壁と照明付きtop-w1を通常/接写で持つ。interior-floorで厚さ22cmの各階床・アスファルト屋上を有効化し、黒い奥面を持たない。parking_ramp.pyがbase/mid/top-stairと各Closeを著作する。16×6.4m・高低差3mの折り返しスロープを元の頂点3に配置し、描画用の本体だけを後退させる。保存polygon・経済面積・占有コライダーは維持する。Farは可変底面を保つ既存簡易生成。import_parking_garage.ps1が実FBX・27組み立て・床の表裏・開口の見通し・凹形状・未指定時の無変更を検証し、正規ミラーを同期する。仕様は公開F1/I文書、制作・AI補助開示記録は非公開制作ツールのpipeline/jobs/parking_garage.md。
+立体駐車場3005は非公開制作ツールのbuild_parking_garage.pyがa3005/0へ17パーツを著作する。6m幅・3m階高の開放壁、独立入口、屋上腰壁と照明付きtop-w1を通常/接写で持つ。interior-floorで厚さ22cmの各階床・アスファルト屋上を有効化し、黒い奥面を持たない。parking_ramp.pyが正面の辺の外階段パーツbase/mid/top-stair1と各Closeを著作する。16×6.4m・高低差3mの折り返しスロープを元の頂点1に配置し、描画用の本体だけを後退させる。保存polygon・経済面積・占有コライダーは維持する。Farは可変底面を保つ既存簡易生成。import_parking_garage.ps1が実FBX・27組み立て・床の表裏・開口の見通し・凹形状・未指定時の無変更を検証し、正規ミラーを同期する。仕様は公開F1/I文書、制作・AI補助開示記録は非公開制作ツールのpipeline/jobs/parking_garage.md。
 
 洋上風力1071・洋上石油1072はtop-prebuiltの通常/接写/遠景、受入基地1073は岸壁に置くroofpropと接写・遠景prebuiltを持つ。1071は1055の白い風車を再利用する。海底1104/1301はbodyと接写だけをpaths.blendに持ち、FarはUnity生成。非公開制作ツールのbuild_offshore.pyが著作し、import_offshore.ps1が実FBXとLODを検証する。制作記録は同ツールのoffshore.md。 1072の多層設備は非公開制作ツールのoffshore_platform.pyに定義し、build_offshore.py --platform-onlyで3LODのみを再著作できる。
 
 観光名所5種類は非公開制作ツールの `build_landmarks.py` が `buildings.blend` の `landmark-*/0/` へ通常・接写・専用遠景を著作する。大展望塔のみNソウルタワー風の白い円柱・段状展望室・赤白アンテナで、75m階高のbase/mid/top、他4種類はtopだけ。既成配置の回転込みでマスターの敷地寸法へ収める。通常12,000・接写40,000・遠景5,000推定頂点/部品。`import_landmarks.ps1` は実FBX・敷地寸法・3距離・塔の2/4/8階を検証して正規ミラーを同期する。仕様は公開F3/I文書。
+
+交差点の信号機 `traffic_signal_jp_{pole,arm,head}` は非公開制作ツールの `build_prop_traffic_signals.py` が props.blend へ著作する。Unityが交差点ごとに3部品を1メッシュへ結合するので、原点は3部品とも柱の接地面の高さ、アームはBlender Y±0.5の単位長で長手だけ伸縮され、灯器は吊り金具の真下が原点で表示面-Y。仕様は公開G文書§11.8、実FBX検証はUnity Tests/TrafficSignals/run.ps1。
 
 3Dモデルの原本(カテゴリ別ライブラリ .blend)を置くディレクトリ。`unity/Assets/Models/` のFBXはここからの書き出し物で、FBXを直接編集しない。
 ファイル構成と規約は [README.md](README.md) を参照。
@@ -24,7 +26,11 @@
 
 - 鉄道の接写版は非公開制作ツールの`build_rail_close.py`が通常の外板断面から曲面を著作する。vehicles.blendの14/21/23とprops.blendの308/309が対象で、メトロ20は`metro_vehicles.py`が通常と同じ寸法表から接写を作る。走行車両の接写版は`build_vehicle_props.py`でProps/370〜379・384〜389の接写別名へ同期する。通常のFBXは保持する。
 
-- 戸建て2000（a2000・a2000s2・a2000s3）と小屋2015は `house_parts.py`、2004・2008・2013は `build_retail_industrial_lods.py`（いずれも非公開制作ツール）が通常・接写を著作する。2000・2015の遠景は閾値0の `mid/top-prebuilt_far`。附属棟は外階段パーツ（base/mid/top-stair）で持つ。2008の広告は `BD_MALL_ADS` と4区画のPNGを共有し、広告文字のジオメトリは持たない。新設prefixの選択設定はUnityの正規ミラー生成後に再生成する。
+- 戸建て2000（a2000・a2000s2・a2000s3）と小屋2015は `house_parts.py`、2004・2008・2013は `build_retail_industrial_lods.py`（いずれも非公開制作ツール）が通常・接写を著作する。2000・2015の遠景は閾値0の `mid/top-prebuilt_far`。附属棟は背面の辺の外階段パーツ（base/mid/top-stair3）で持つ。2008の広告は `BD_MALL_ADS` と4区画のPNGを共有し、広告文字のジオメトリは持たない。新設prefixの選択設定はUnityの正規ミラー生成後に再生成する。
+
+- props.blend の308/309(手動配置のモノレール車両)は、モノレール路線の走行車両(Unityの `Models/Vehicles/24/0`・`middle`)の原本でもある。308/309のFBXを書き出し直したら、同じファイルを `Vehicles/24` にも置く(`unity/Tests/Vehicles/run.ps1 -TransitOnly` がバイト一致を検査する)。
+
+- 路線車両(vehicles.blendのバス12・LRT14・メトロ20・中距離21と、props.blendの308/309)の帯は専用の材質で塗り分けてあり、Unityがその材質だけを路線カラーで塗り替える(`unity/Assets/Resources/Config/transit_vehicle_livery.json`、公開O文書§O.10.4)。帯の材質を車体の他の部位に流用しないこと。
 
 - **編集・書き出し・検証の道具は別レポジトリ `genesis-gallery` にある**(ワークスペース上で `city-genesis` と並置される前提。`../genesis-gallery/pipeline/library.py export --category <cat> --only <パス>` でFBXへ書き戻す)。ここには .blend 以外を置かない。
 - 手著作でないモデルは `genesis-gallery/pipeline/jobs/build_*.py` が形状をコードで持っており、ジョブを再実行すると .blend 側の手編集が消える。編集前にジョブの有無を確認すること。

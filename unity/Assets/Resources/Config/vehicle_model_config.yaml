@@ -25,3 +25,5 @@ vehicles:
     variants: [0, 1]
   23: # VEHICLE_HIGH_SPEED_TRAIN
     variants: [0, 1, 2]
+  24: # VEHICLE_MONORAIL
+    variants: [0]

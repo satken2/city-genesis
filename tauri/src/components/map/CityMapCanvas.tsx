@@ -28,6 +28,9 @@
  *   - allRoads / trunkRoads / railways : パス(道路・幹線道路・線路)。
  *     道路は占有ポリゴンを面で描き、幅の異なる2本接続では中心線から幅遷移を作る。
  *     街路=淡灰、高速道路=濃灰、線路=灰色の実線。
+ *     幹線道路は「高速道路」と「道路(名前付き道路。road_id を持つ区間)に属する街路」。
+ *     幹線道路レイヤーには道路名のラベルも追従する(GET /api/v1/roads/ の label_points に、
+ *     道路の向きへ回転させて描く。配置と衝突回避は mapLabels.ts)。
  *   - transitLines : 公共交通路線。GET /api/v1/transit/lines/geometry が返す、実際の下地
  *     道路・線路に沿った走行形状(停留所間の直線ではない)を路線カラーの帯で描き、停留所を
  *     リングで示す。描画規則は transitLineDraw.ts。transitFocusLineId で1路線を主役にできる
@@ -53,8 +56,13 @@
  *   - パス・土地区画・建物はビューポートにパディングを加えたbboxを指定して取得する。
  *     ビューポートが取得済み範囲の外へ出たらデバウンス付きで再取得する。
  *   - 地区は件数が少ない(上限100件)ため全件取得する。
- *   - 幹線道路の判定はマスターデータ(paths[variant].trunk)で行う
- *     (高速道路はtrunkフラグにかかわらず常に幹線扱い)。
+ *   - 幹線道路の判定はパスごとの path_type と road_id で行う(マスターに幹線の列は無い)。
+ *   - 道路一覧(道路名ラベル用)は件数が少ないため都市全体を取得し、インターチェンジと同じく
+ *     ベクター取得のたびと道路の変更通知 "roads:changed" で取り直す。
+ *
+ * 道路の強調(focusPathIds / previewPathIds):
+ *   道路詳細の全体図や場所検索で、1本の道路の区間を道路色の帯で道路・線路の上(ラベルの下)に
+ *   重ねる。preview は確定前の候補で、同じ色の破線で描く。focusDimOthers で他の道路・線路を薄くする。
  *
  * 方位コンパス(showCompass):
  *   地図は常に北(ワールド+Z)が画面上の固定ビューなので、コンパスも回転しない
@@ -79,11 +87,14 @@ import {
   PATH_WALKWAY,
   PATH_TRACK,
   MODEL_PARK,
+  ROAD_COLOR_PALETTE,
 } from "../../constants";
-import { drawMapLabels, facilitySymbol, type MapPlace } from "./mapLabels";
+import { drawMapLabels, facilitySymbol, type MapPlace, type MapRoadLabel } from "./mapLabels";
 import { RoadCenterline, roadSurface } from "./roadSurface";
 import { drawTransitLines, type TransitLineGeometry } from "./transitLineDraw";
 import { interchangeDisplayName } from "../intersection/interchangeName";
+import { fetchRoadList, hasRoad, roadDisplayName, ROADS_CHANGED_EVENT } from "../road/roadApi";
+import type { RoadSummary } from "../road/roadTypes";
 
 /* ============================================================================
  * 公開型
@@ -93,7 +104,7 @@ import { interchangeDisplayName } from "../intersection/interchangeName";
 export type CityMapLayerVisibility = {
   /** 海岸線 */
   coastline: boolean;
-  /** 幹線道路(master.yamlのtrunkフラグを持つバリアント) */
+  /** 幹線道路(高速道路と、道路〔road_id〕に属する街路)と道路名のラベル */
   trunkRoads: boolean;
   /** すべての道路(自動車道・街路・歩道) */
   allRoads: boolean;
@@ -223,6 +234,18 @@ export type CityMapCanvasProps = {
    */
   transitFocusLineId?: number | null;
   /**
+   * 道路色の帯で強調する区間のパスID(道路詳細の全体図・場所検索の道路)。道路・線路の上、
+   * ラベルの下に描く。読み込み済み(表示範囲内)の区間だけが描かれるので、呼び出し側は
+   * 表示範囲を区間の範囲に合わせること。
+   */
+  focusPathIds?: number[] | null;
+  /** 強調の帯の色("#rrggbb")。省略時は ROAD_COLOR_PALETTE の先頭 */
+  focusColor?: string | null;
+  /** 強調中に他の道路・線路を薄くするか */
+  focusDimOthers?: boolean;
+  /** 確定前の候補として強調色の破線で示す区間のパスID(直進方向の延長の候補など) */
+  previewPathIds?: number[] | null;
+  /**
    * ヒートマップの実値レンジ・件数の通知。凡例の描画に使う。
    * 非表示のときはnullが渡る。
    */
@@ -315,6 +338,8 @@ type ApiPathItem = {
   polygon?: [number, number][] | null;
   /** 所属する駅舎パスのID。プラットフォームのみ有効で、未所属・非プラットフォームは0以下 */
   house_path_id?: number;
+  /** 所属する道路のID。未所属は VALUE_NONE(-1)。幹線道路の判定に使う */
+  road_id?: number | null;
 };
 
 /** polygonを持つエンティティ(土地区画・地区・建物)の共通形 */
@@ -375,6 +400,11 @@ type VectorState = {
   transitLines: TransitLineGeometry[];
   /** インターチェンジ(都市全体。bboxに依らない) */
   interchanges: InterchangeSummary[];
+  /** 道路一覧(都市全体。bboxに依らない)。道路名ラベルに使う */
+  roads: RoadSummary[];
+  /** 強調する区間・候補の区間の中心線 */
+  focusPath: Path2D | null;
+  previewPath: Path2D | null;
   /** 確定地区(auto_managed=0)の枠線。実線で描く */
   zonePathConfirmed: Path2D | null;
   /** 自動管理地区(auto_managed=1)の枠線。破線で描き「まだ仮の区割り」であることを示す */
@@ -388,7 +418,7 @@ type VectorState = {
   loading: boolean;
 };
 
-type VectorKind = "paths" | "parcels" | "buildings" | "zones" | "transit" | "interchanges";
+type VectorKind = "paths" | "parcels" | "buildings" | "zones" | "transit" | "interchanges" | "roads";
 
 /** 取得済みヒートマップと色ビンごとのPath2Dキャッシュ */
 type HeatmapState = {
@@ -455,6 +485,12 @@ const COLOR_STREET = "#c6ced3";
 const COLOR_STREET_TRUNK = "#aab7c1";
 const COLOR_MOTORWAY = "#778896";
 const COLOR_RAIL = "#7c8389";
+/** 道路の強調時に、強調していない道路・線路を描く不透明度 */
+const FOCUS_DIM_ALPHA = 0.35;
+/** 強調の帯の画面上の幅(px)。道路の実幅によらず一定にして、遠景でも道筋を追えるようにする */
+const FOCUS_BAND_PX = 6;
+const FOCUS_BAND_EDGE_PX = 9;
+const PREVIEW_BAND_PX = 4;
 /* 等高線色。地形色の上では焦げ茶(地形エディタと同じ)、
  * 標高レイヤーOFFの薄緑の上では灰緑を使って視認性を保つ */
 const COLOR_CONTOUR_ON_TERRAIN = "rgba(40,28,14,0.5)";
@@ -1101,6 +1137,10 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       layers,
       heatmap = "none",
       transitFocusLineId = null,
+      focusPathIds = null,
+      focusColor = null,
+      focusDimOthers = false,
+      previewPathIds = null,
       initialBounds,
       interactive = true,
       showCompass,
@@ -1135,6 +1175,8 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
     const heatmapRef = useRef<CityMapHeatmapKind>(heatmap);
     const zoneFillRef = useRef<CityMapZoneFill | undefined>(zoneFill);
     const transitFocusRef = useRef<number | null>(transitFocusLineId);
+    const roadFocusRef = useRef({ focusPathIds, previewPathIds, focusColor, focusDimOthers });
+    roadFocusRef.current = { focusPathIds, previewPathIds, focusColor, focusDimOthers };
     const overlayDrawRef = useRef<CityMapCanvasProps["overlayDraw"]>(overlayDraw);
     const animatedOverlayDrawRef = useRef<CityMapCanvasProps["animatedOverlayDraw"]>(animatedOverlayDraw);
     const cursorCbRef = useRef<CityMapCanvasProps["onCursorWorldPos"]>(onCursorWorldPos);
@@ -1165,6 +1207,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       ensureHeatmap: () => void;
       rebuildPathClassification: () => void;
       rebuildZoneFill: () => void;
+      rebuildRoadFocus: () => void;
     } | null>(null);
 
     // initialBoundsはオブジェクトのため、値が同じなら再初期化しないようキー化する
@@ -1192,6 +1235,15 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       engineRef.current?.draw();
     }, [transitFocusLineId]);
 
+    /* ---- 道路の強調の変更: 区間の中心線を作り直して再描画する(区間が未取得なら取得する) ---- */
+    const focusKey = (focusPathIds ?? []).join(",");
+    const previewKey = (previewPathIds ?? []).join(",");
+    useEffect(() => {
+      engineRef.current?.ensureVectors();
+      engineRef.current?.rebuildRoadFocus();
+      engineRef.current?.draw();
+    }, [focusKey, previewKey, focusColor, focusDimOthers]);
+
     /* ---- ヒートマップ種別の変更: 未取得なら取得し、区画データも揃えて再描画する ---- */
     useEffect(() => {
       heatmapRef.current = heatmap;
@@ -1208,7 +1260,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       engineRef.current?.draw();
     }, [zoneFill]);
 
-    /* ---- マスターデータ変更: 幹線道路の分類が変わるためPath2Dを再構築する ---- */
+    /* ---- マスターデータ変更: 道路幅・公園・駅の分類が変わるためPath2Dを再構築する ---- */
     useEffect(() => {
       masterDataRef.current = masterData;
       engineRef.current?.rebuildPathClassification();
@@ -1283,6 +1335,9 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         stationHullPath: null,
         transitLines: [],
         interchanges: [],
+        roads: [],
+        focusPath: null,
+        previewPath: null,
         zonePathConfirmed: null,
         zonePathAuto: null,
         zoneFillBands: null,
@@ -1516,6 +1571,9 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
 
         // 面が1px未満になる遠景だけ中心線を補う。端点の外へは延ばさない。
         ctx.lineCap = "butt";
+        const focus = roadFocusRef.current;
+        const dimmed = focus.focusDimOthers && (vec.focusPath !== null || vec.previewPath !== null);
+        if (dimmed) ctx.globalAlpha = FOCUS_DIM_ALPHA;
         for (const band of vec.roadBands) {
           if (!(band.trunk ? L.trunkRoads : L.allRoads)) continue;
           const color = band.kind === "motorway" ? COLOR_MOTORWAY
@@ -1534,10 +1592,33 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           ctx.setLineDash([]);
           ctx.stroke(vec.railPath);
         }
+        ctx.globalAlpha = 1.0;
 
         // 公共交通路線(実際の道路・線路に沿った帯と停留所)。線路・道路の上、重ね描きの下
         if (L.transitLines && vec.transitLines.length > 0) {
           drawTransitLines(ctx, { ...view }, vec.transitLines, transitFocusRef.current);
+        }
+
+        // 道路の強調。白い縁取りの上に道路色の帯を重ね、候補は同じ色の破線で示す
+        const focusColorValue = focus.focusColor || ROAD_COLOR_PALETTE[0];
+        ctx.lineJoin = "round";
+        if (vec.focusPath) {
+          ctx.lineCap = "round";
+          ctx.setLineDash([]);
+          ctx.strokeStyle = "rgba(255,255,255,0.9)";
+          ctx.lineWidth = px(FOCUS_BAND_EDGE_PX);
+          ctx.stroke(vec.focusPath);
+          ctx.strokeStyle = focusColorValue;
+          ctx.lineWidth = px(FOCUS_BAND_PX);
+          ctx.stroke(vec.focusPath);
+        }
+        if (vec.previewPath) {
+          ctx.lineCap = "butt";
+          ctx.strokeStyle = focusColorValue;
+          ctx.lineWidth = px(PREVIEW_BAND_PX);
+          ctx.setLineDash([px(10), px(7)]);
+          ctx.stroke(vec.previewPath);
+          ctx.setLineDash([]);
         }
 
         const places = vec.places.filter((place) => place.station ? L.stations : L.buildings);
@@ -1547,7 +1628,16 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
               name: interchangeDisplayName(ic, tRef.current), symbol: "interchange", interchange: true });
           }
         }
-        drawMapLabels(ctx, view, canvasW, canvasH, vec.zones, places);
+        const roadLabels: MapRoadLabel[] = [];
+        if (L.trunkRoads) {
+          for (const road of vec.roads) {
+            const name = roadDisplayName(road.name, road.road_id, tRef.current);
+            for (const point of road.label_points) {
+              roadLabels.push({ roadId: road.road_id, name, color: road.color, x: point.x, z: point.z, angleDeg: point.angle_deg });
+            }
+          }
+        }
+        drawMapLabels(ctx, view, canvasW, canvasH, vec.zones, places, roadLabels);
 
         // 上位コンポーネントの重ね描き(敷設中道路・路線図など)
         overlayDrawRef.current?.(ctx, { ...view });
@@ -1842,7 +1932,9 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       const neededKinds = (): VectorKind[] => {
         const L = layersRef.current;
         const kinds: VectorKind[] = [];
-        if (L.trunkRoads || L.allRoads || L.railways || L.stations) kinds.push("paths");
+        const focus = roadFocusRef.current;
+        if (L.trunkRoads || L.allRoads || L.railways || L.stations
+          || (focus.focusPathIds?.length ?? 0) > 0 || (focus.previewPathIds?.length ?? 0) > 0) kinds.push("paths");
         // ヒートマップは区画ポリゴンを塗り分けるため、区画レイヤーがOFFでも区画が要る
         if (L.parcels || heatmapRef.current !== "none") kinds.push("parcels");
         if (L.buildings) kinds.push("buildings");
@@ -1850,7 +1942,31 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         kinds.push("zones");
         if (L.transitLines) kinds.push("transit");
         if (L.interchanges) kinds.push("interchanges");
+        if (L.trunkRoads) kinds.push("roads");
         return kinds;
+      };
+
+      /** 強調する区間・候補の区間の中心線を、取得済みのパスから組み立てる */
+      const rebuildRoadFocus = () => {
+        const { focusPathIds: focusIds, previewPathIds: previewIds } = roadFocusRef.current;
+        const build = (ids: number[] | null | undefined): Path2D | null => {
+          if (!ids || ids.length === 0) return null;
+          const wanted = new Set(ids);
+          const path = new Path2D();
+          let any = false;
+          for (const p of vec.paths) {
+            if (!wanted.has(p.path_id)) continue;
+            const controls: AnchorControls[] = [];
+            const pts = collectPathPoints(p, controls);
+            if (pts.length < 2) continue;
+            if (p.curved) appendSmoothPolyline(path, pts, controls);
+            else appendPolyline(path, pts);
+            any = true;
+          }
+          return any ? path : null;
+        };
+        vec.focusPath = build(focusIds);
+        vec.previewPath = build(previewIds);
       };
 
       /**
@@ -1941,9 +2057,8 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
             p.path_type === PATH_WALKWAY
           ) {
             const master = md?.paths?.[p.path_variant];
-            // 幹線道路レイヤーの対象判定はマスターのtrunkフラグ。ただし高速道路は
-            // 都市の骨格として常に見せたいため、フラグにかかわらず幹線扱い
-            const trunk = p.path_type === PATH_MOTORWAY || Boolean(master?.trunk);
+            // 幹線道路は、都市の骨格である高速道路と、プレイヤーが名前を付けて道路にまとめた区間
+            const trunk = p.path_type === PATH_MOTORWAY || hasRoad(p.road_id);
             const kind: RoadBandKind = p.path_type === PATH_MOTORWAY ? "motorway" : "street";
             const width = master?.width ?? FALLBACK_ROAD_WIDTH[p.path_type] ?? 8;
             const key = `${kind}:${trunk ? 1 : 0}:${width}`;
@@ -1972,6 +2087,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         // 駅(駅舎ごとにまとめたプラットフォーム群の凸包)。platform_width判定に
         // マスターデータが要るため、道路分類と同じタイミングで再構築する。
         vec.stationHullPath = buildStationHullPath(vec.paths, md);
+        rebuildRoadFocus();
       };
 
       const loadVectors = async (kinds: VectorKind[], bounds: CityMapBounds) => {
@@ -2014,6 +2130,18 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
                   if (abort.signal.aborted) throw err;
                   console.warn("[CityMapCanvas] failed to load interchanges:", err);
                   vec.interchanges = [];
+                }
+                return;
+              }
+              if (kind === "roads") {
+                // インターチェンジと同じく毎回全件を取り直し、失敗しても他の種別を巻き込まない
+                try {
+                  const data = await fetchRoadList(apiBaseUrl, abort.signal);
+                  vec.roads = (data.roads ?? []).filter((road) => Array.isArray(road.label_points));
+                } catch (err) {
+                  if (abort.signal.aborted) throw err;
+                  console.warn("[CityMapCanvas] failed to load roads:", err);
+                  vec.roads = [];
                 }
                 return;
               }
@@ -2289,6 +2417,21 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         })
         .catch(console.error);
 
+      // 道路の作成・改名・所属変更・削除で道路名ラベルが変わる。所属が変わるとパスの road_id
+      // (幹線の分類)も変わるので、道路一覧と一緒にパスも取り直す。
+      let unlistenRoads: (() => void) | undefined;
+      void listen(ROADS_CHANGED_EVENT, () => {
+        if (disposed) return;
+        vec.fetchedKinds.delete("roads");
+        vec.fetchedKinds.delete("paths");
+        ensureVectors();
+      })
+        .then((fn) => {
+          if (disposed) fn();
+          else unlistenRoads = fn;
+        })
+        .catch(console.error);
+
       resizeCanvas();
       void (async () => {
         await Promise.all([loadTerrain(), loadCoastline()]);
@@ -2318,6 +2461,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         ensureHeatmap,
         rebuildPathClassification,
         rebuildZoneFill,
+        rebuildRoadFocus,
       };
 
       return () => {
@@ -2326,6 +2470,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         engineRef.current = null;
         resizeObserver.disconnect();
         unlistenTransit?.();
+        unlistenRoads?.();
         if (vectorTimer !== null) window.clearTimeout(vectorTimer);
         if (contourTimer !== null) window.clearTimeout(contourTimer);
         if (interactive) {

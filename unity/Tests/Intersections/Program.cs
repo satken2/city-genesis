@@ -93,6 +93,226 @@ internal static class Program
         controlled.curved=false;
         Check(RoadIntersectionMeshGenerator.TryGetPathDirectionFromNode(1,controlled,out origin,out reference)
             && Vector2.Dot((reference-origin).normalized,Vector2.right) > .999f, "折れ線が無効な制御点を参照しています。");
-        Console.WriteLine($"PASS: {layouts} layouts, {constrained} constrained layouts, original curve preservation, input-order invariance.");
+        int merges = CheckMotorwayMerges();
+        string surfaces = CheckSlopedSurfaces(factory);
+        Console.WriteLine($"PASS: {layouts} layouts, {constrained} constrained layouts, original curve preservation, input-order invariance, {merges} motorway merge checks, sloped surfaces [{surfaces}].");
+    }
+
+    /// <summary>
+    /// 勾配のある交差点の路面を、本編と同じ三角形分割・高さ・法線で組み立てて検査する。
+    /// 隣り合う三角形の折れ角、頂点法線と面の向きの差、口での本線の勾配・法線との差を測る。
+    /// </summary>
+    private static string CheckSlopedSurfaces(GeometryFactory factory)
+    {
+        var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static;
+        var generator = typeof(RoadIntersectionMeshGenerator);
+        var triangulate = generator.GetMethod("TriangulateSurface", flags);
+        var surfacePoint = generator.GetMethod("SectionSurfacePoint", flags);
+        var surfaceNormal = generator.GetMethod("SurfaceNormal", flags);
+        float Grade(float degrees, float slope) => slope * MathF.Cos(degrees * MathF.PI / 180);
+        var cases = new (string name, float[] degrees, float[] grades, float[] widths)[]
+        {
+            ("steep-y", new[] { 0f, 120f, 240f }, new[] { .2f, -.1f, 0f }, new[] { 16f, 8f, 8f }),
+            ("plane8-y", new[] { 30f, 150f, 270f }, new[] { Grade(30, .08f), Grade(150, .08f), Grade(270, .08f) }, new[] { 12f, 12f, 8f }),
+            ("plane6-cross", new[] { 0f, 90f, 180f, 270f }, new[] { .06f, 0f, -.06f, 0f }, new[] { 12f, 12f, 12f, 12f }),
+            ("crest-y", new[] { 0f, 110f, 230f }, new[] { -.05f, -.05f, -.05f }, new[] { 12f, 8f, 8f }),
+        };
+        var report = new List<string>();
+        foreach (var c in cases)
+        {
+            var paths = new List<PathSummary>();
+            var points = new Dictionary<int, List<Vector3>>();
+            for (int i = 0; i < c.degrees.Length; i++)
+            {
+                paths.Add(new PathSummary { path_id = i + 1, start_node_id = 1, end_node_id = 100 + i, width = c.widths[i] });
+                points[i + 1] = Ray(c.degrees[i], 80f, c.grades[i]);
+            }
+            var result = IntersectionPolygonUtil.ComputeIntersectionPolygon(1, Vector2.zero, paths, factory, null, p => points[p.path_id]);
+            Check(!result.RequiresMoreSpace, $"{c.name}: 交差点を組み立てられません。");
+            var plan = new List<Vector2>();
+            List<int> triangles;
+            if (triangulate != null) triangles = (List<int>)triangulate.Invoke(null, new object[] { result.Geometry, plan });
+            else
+            {
+                var ring = ((Polygon)result.Geometry).ExteriorRing.Coordinates;
+                for (int i = 0; i < ring.Length - 1; i++) plan.Add(new Vector2((float)ring[i].X, (float)ring[i].Y));
+                if (PolygonUtils.SignedArea(plan.ToArray()) < 0f) plan.Reverse();
+                triangles = BuildingMeshBuilder.TriangulateEarClip(plan.ToArray());
+            }
+            var vertices = plan.Select(p => (Vector3)surfacePoint.Invoke(null, new object[] { new Vector3(p.x, 0f, p.y), result.Sections, 0f, null })).ToList();
+            var faces = new List<Vector3>();
+            var averaged = new Vector3[vertices.Count];
+            var edges = new Dictionary<(int, int), List<int>>();
+            for (int t = 0; t < triangles.Count; t += 3)
+            {
+                int a = triangles[t], b = triangles[t + 1], d = triangles[t + 2];
+                Vector3 cross = Vector3.Cross(vertices[b] - vertices[a], vertices[d] - vertices[a]);
+                if (cross.y < 0f) cross = -cross;
+                faces.Add(cross.normalized);
+                foreach (int v in new[] { a, b, d }) averaged[v] += cross;
+                foreach (var (u, w) in new[] { (a, b), (b, d), (d, a) })
+                {
+                    var key = (Math.Min(u, w), Math.Max(u, w));
+                    if (!edges.TryGetValue(key, out var list)) edges[key] = list = new List<int>();
+                    list.Add(t / 3);
+                }
+            }
+            Vector3 NormalAt(int v) => surfaceNormal != null
+                ? (Vector3)surfaceNormal.Invoke(null, new object[] { vertices[v], result.Sections, null })
+                : averaged[v].normalized;
+            float fold = 0f, shade = 0f, mouthNormal = 0f, mouthGrade = 0f;
+            foreach (var list in edges.Values)
+                if (list.Count == 2) { float ang = Vector3.Angle(faces[list[0]], faces[list[1]]); if (ang > fold) { fold = ang; foreach (int f in list) { int t0=f*3; float area = MathF.Abs((plan[triangles[t0+1]].x-plan[triangles[t0]].x)*(plan[triangles[t0+2]].y-plan[triangles[t0]].y)-(plan[triangles[t0+2]].x-plan[triangles[t0]].x)*(plan[triangles[t0+1]].y-plan[triangles[t0]].y))*.5f; Console.WriteLine($"DBG {c.name} ang={ang:0.0} tri={f} planArea={area:0.0000} n={faces[f]}"); } } }
+            for (int t = 0; t < triangles.Count; t++)
+                shade = MathF.Max(shade, Vector3.Angle(NormalAt(triangles[t]), faces[t / 3]));
+            foreach (var section in result.Sections.Values)
+            {
+                for (int v = 0; v < vertices.Count; v++)
+                {
+                    Vector2 delta = plan[v] - section.Center;
+                    if (MathF.Abs(Vector2.Dot(delta, section.Direction)) > 1e-3f || MathF.Abs(Vector2.Dot(delta, section.Left)) > section.Width * .5f + 1e-3f) continue;
+                    mouthNormal = MathF.Max(mouthNormal, Vector3.Angle(NormalAt(v), section.Normal));
+                }
+                Vector2 inner = section.Center - section.Direction * .5f;
+                float innerY = ((Vector3)surfacePoint.Invoke(null, new object[] { new Vector3(inner.x, 0f, inner.y), result.Sections, 0f, null })).y;
+                float grade = section.Tangent.y / new Vector2(section.Tangent.x, section.Tangent.z).magnitude;
+                mouthGrade = MathF.Max(mouthGrade, MathF.Abs((section.Position.y - innerY) / .5f - grade));
+            }
+            report.Add($"{c.name}: vertices={vertices.Count} fold={fold:0.00}° shade={shade:0.00}° mouthNormal={mouthNormal:0.00}° mouthGrade={mouthGrade:0.0000}");
+        }
+        return string.Join("; ", report);
+    }
+
+    private static readonly Dictionary<int, PathMasterItem> masters = new()
+    {
+        [101] = new PathMasterItem { width = 14f, lanes = 4, sidewalk_width = 0f, side_width = .5f, center_width = 1f, wall_width = .2f },
+        [102] = new PathMasterItem { width = 5.5f, lanes = 1, sidewalk_width = 0f, side_width = .5f, wall_width = .2f, ramp = true },
+        [221] = new PathMasterItem { width = 12f, lanes = 2, sidewalk_width = 2.5f, side_width = .5f },
+    };
+
+    private static PathSummary Arm(int id, int variant, int start, int end, int type = Constants.PATH_MOTORWAY, int status = Constants.STATUS_ACTIVE)
+        => new PathSummary { path_id = id, path_variant = variant, path_type = type, status = status, start_node_id = start, end_node_id = end, width = masters[variant].width };
+
+    /// <summary>ノードから外向きに、指定方位(度。0=+X)と縦断勾配で伸びる1m間隔の直線。</summary>
+    private static List<Vector3> Ray(float degrees, float length, float grade, float lateral = 0f)
+    {
+        var direction = new Vector3(MathF.Cos(degrees * MathF.PI / 180), 0, MathF.Sin(degrees * MathF.PI / 180));
+        var side = new Vector3(-direction.z, 0, direction.x);
+        var points = new List<Vector3>();
+        for (float s = 0; s <= length + 1e-3f; s += 1f) points.Add(direction * s + side * lateral + Vector3.up * (10 + grade * s));
+        return points;
+    }
+
+    private static int CheckMotorwayMerges()
+    {
+        int checks = 0;
+        const float sink = LocalConstants.ROAD_MERGE_SINK;
+
+        // 並走: 隙間1mのランプは本線の右側で結合し、隙間を本線が舗装し、ランプは本線の高さへ寄る。
+        var main = Ray(0, 200, .03f);
+        var parallel = Ray(0, 120, 0f, -(7f + 1f + 2.75f));
+        for (int i = 0; i < parallel.Count; i++) parallel[i] += new Vector3(40f, .03f * (parallel[i].x + 40f) + .3f, 0f);
+        var mainCorridor = RoadAdjacency.Compute(main, 14f, .2f, false, new List<RoadNeighborInfo> { new() { PathId = 2, Points = parallel, Width = 5.5f } });
+        Check(mainCorridor != null, "並走するランプが結合されません。");
+        bool rightSide = mainCorridor.RightMerged[80];
+        Check(rightSide != mainCorridor.LeftMerged[80] && !mainCorridor.RightMerged[10] && !mainCorridor.LeftMerged[10], "結合区間が並走区間と一致しません。");
+        float fill = rightSide ? mainCorridor.RightFillTo[80] : mainCorridor.LeftFillTo[80];
+        Check(MathF.Abs(fill - 8f) < .01f, "隙間の舗装がランプの路面の縁まで届きません。");
+        var walls = mainCorridor.GetWallPercentIntervals(!rightSide, 1f);
+        Check(walls.Count == 2 && walls[0].To * 200 < 42 && walls[1].From * 200 > 158, "ランプ側の壁が並走区間で省かれません。");
+        Check(mainCorridor.GetWallPercentIntervals(rightSide, 1f).Count == 1, "反対側の壁が欠けました。");
+        var rampCorridor = RoadAdjacency.Compute(parallel, 5.5f, .2f, true, new List<RoadNeighborInfo> { new() { PathId = 1, Points = main, Width = 14f } });
+        Check(rampCorridor != null && !float.IsNaN(rampCorridor.TargetY[60]) && MathF.Abs(rampCorridor.TargetY[60] - main[100].y) < .01f, "ランプの寄せ先が本線の路面の高さになりません。");
+        var lifted = RoadAdjacency.ApplyRampHeights(parallel, rampCorridor);
+        Check(MathF.Abs(lifted[60].y - (main[100].y - sink)) < .001f, "結合区間のランプが本線より少し下の高さになりません。");
+        checks += 6;
+
+        // 隙間が広い・高さが離れて隣り合うだけの道路は結合しない。路面が重なる区間は高さが離れていても結合する。
+        var far = Ray(0, 120, 0f, -(7f + 3f + 2.75f));
+        Check(RoadAdjacency.Compute(main, 14f, .2f, false, new List<RoadNeighborInfo> { new() { PathId = 2, Points = far, Width = 5.5f } }) == null, "離れた並走が結合されました。");
+        var low = Ray(0, 120, 0f, -(7f + 1f + 2.75f));
+        for (int i = 0; i < low.Count; i++) low[i] += Vector3.down * 2f;
+        Check(RoadAdjacency.Compute(main, 14f, .2f, false, new List<RoadNeighborInfo> { new() { PathId = 2, Points = low, Width = 5.5f } }) == null, "高さの異なる隣接路が結合されました。");
+        var overlapping = Ray(0, 120, 0f, -(7f - 1f + 2.75f));
+        for (int i = 0; i < overlapping.Count; i++) overlapping[i] += Vector3.down * 2f;
+        Check(RoadAdjacency.Compute(overlapping, 5.5f, .2f, true, new List<RoadNeighborInfo> { new() { PathId = 1, Points = main, Width = 14f } }) != null, "路面の重なるランプが結合されません。");
+        checks += 3;
+
+        // 浅い角度で本線から分かれて下るランプ: 本線の路面に重なる区間は本線へ寄せ、外側は勾配の上限内で元の縦断へ戻す。
+        var mainArm = Ray(0, 200, 0f);
+        var ramp = Ray(20, 150, -.06f);
+        var diverge = RoadAdjacency.Compute(ramp, 5.5f, .2f, true, new List<RoadNeighborInfo> { new() { PathId = 1, Points = mainArm, Width = 14f } });
+        Check(diverge != null && !float.IsNaN(diverge.TargetY[5]) && float.IsNaN(diverge.TargetY[60]), "取り付け部の結合区間が不正です。");
+        var shaped = RoadAdjacency.ApplyRampHeights(ramp, diverge);
+        Check(MathF.Abs(shaped[5].y - (10 - sink)) < .001f, "本線と重なるランプの路面が本線の高さへ寄りません。");
+        Check(MathF.Abs(shaped[shaped.Count - 1].y - ramp[ramp.Count - 1].y) < .001f, "ランプの遠い端の高さが変わりました。");
+        float steepest = 0;
+        for (int i = 1; i < shaped.Count; i++)
+            if (float.IsNaN(diverge.TargetY[i - 1]))
+                steepest = MathF.Max(steepest, MathF.Abs((shaped[i].y - ramp[i].y) - (shaped[i - 1].y - ramp[i - 1].y)));
+        Check(steepest <= LocalConstants.ROAD_MERGE_MAX_ADDED_GRADE + .005f, "元の縦断へ戻す区間の勾配が急すぎます。");
+        checks += 4;
+
+        // ノード: 一直線の本線と浅い角度のランプは板を作らず、ランプを本線の路面へ入りきる位置で切る。
+        foreach (float angle in new[] { 10f, 20f })
+        foreach (bool reversed in new[] { false, true })
+        {
+            var points = new Dictionary<int, List<Vector3>> { [1] = Ray(180, 150, 0f), [2] = Ray(0, 150, 0f), [3] = Ray(angle, 150, 0f), [4] = Ray(-angle, 150, 0f) };
+            var paths = new List<PathSummary> { Arm(1, 101, 10, 1), Arm(2, 101, 1, 11), Arm(3, 102, reversed ? 12 : 1, reversed ? 1 : 12), Arm(4, 102, 1, 13) };
+            List<Vector3> Resolve(PathSummary p) { var list = new List<Vector3>(points[p.path_id]); if (p.end_node_id == 1) list.Reverse(); return list; }
+            var layout = MotorwayMergeLayout.Create(1, paths, Resolve, p => 100f, v => masters[v]);
+            Check(layout != null && !layout.NeedsSlab && layout.MainA == 1 && layout.MainB == 2, "一直線の本線とランプで板が作られました。");
+            float expected = (7f - 2.75f) / MathF.Sin(angle * MathF.PI / 180);
+            foreach (int rampId in new[] { 3, 4 })
+            {
+                float cut = IntersectionPolygonUtil.XZ(layout.ConnectionPoints[rampId]).magnitude;
+                Check(MathF.Abs(cut - expected) < .05f, $"ランプの切断位置が本線の縁と一致しません: {cut} / {expected}");
+            }
+            Check(layout.ConnectionPoints[1] == points[1][0] && layout.ConnectionPoints[2] == points[2][0], "本線がノードで切られました。");
+            checks += 4;
+        }
+
+        {
+            var points = new Dictionary<int, List<Vector3>> { [1] = Ray(180, 150, 0f), [2] = Ray(0, 150, 0f), [3] = Ray(45, 150, 0f) };
+            var paths = new List<PathSummary> { Arm(1, 101, 10, 1), Arm(2, 101, 1, 11), Arm(3, 102, 1, 12) };
+            List<Vector3> Resolve(PathSummary p) { var list = new List<Vector3>(points[p.path_id]); if (p.end_node_id == 1) list.Reverse(); return list; }
+            var steep = MotorwayMergeLayout.Create(1, paths, Resolve, p => 100f, v => masters[v]);
+            Check(steep != null && steep.NeedsSlab && steep.Surface != null, "角度の大きいランプを本線へ取り込みました。");
+            paths[2] = Arm(3, 102, 1, 12, status: Constants.STATUS_CONSTRUCTING);
+            points[3] = Ray(20, 150, 0f);
+            Check(MotorwayMergeLayout.Create(1, paths, Resolve, p => 100f, v => masters[v]).NeedsSlab, "工事中のランプを本線へ取り込みました。");
+            points[2] = Ray(10, 150, 0f);
+            paths[2] = Arm(3, 102, 1, 12);
+            Check(MotorwayMergeLayout.Create(1, paths, Resolve, p => 100f, v => masters[v]).NeedsSlab, "折れた本線を板なしでつなぎました。");
+            var streets = new List<PathSummary> { Arm(1, 221, 10, 1, Constants.PATH_STREET), Arm(2, 221, 1, 11, Constants.PATH_STREET), Arm(3, 221, 1, 12, Constants.PATH_STREET) };
+            Check(MotorwayMergeLayout.Create(1, streets, Resolve, p => 100f, v => masters[v]) == null, "一般道路に本線の扱いを適用しました。");
+            Check(MotorwayMergeLayout.Create(-1, paths, Resolve, p => 100f, v => masters[v]) == null, "折れ線の仮ノードに本線の扱いを適用しました。");
+            checks += 5;
+        }
+
+        // 板を作る交差点でも本線の上は本線の縦断そのもの。口で水平になって折れない。
+        {
+            var sloped = new Dictionary<int, List<Vector3>> { [1] = Ray(180, 150, -.05f), [2] = Ray(0, 150, .05f), [3] = Ray(60, 150, 0f) };
+            var surface = new MainLineSurface(1, sloped[1], 2, sloped[2], 14f);
+            var sections = new Dictionary<int, PathEndSection>();
+            foreach (var pair in sloped)
+            {
+                var section = IntersectionPolygonUtil.AtDistance(pair.Value, 12f);
+                section.Width = pair.Key == 3 ? 5.5f : 14f;
+                sections[pair.Key] = section;
+            }
+            var method = typeof(RoadIntersectionMeshGenerator).GetMethod("SectionSurfacePoint", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+            float SurfaceAt(Vector3 p, MainLineSurface main) => ((Vector3)method.Invoke(null, new object[] { p, sections, 0f, main })).y;
+            float worst = 0;
+            for (float x = -11.5f; x <= 11.5f; x += .5f)
+                worst = MathF.Max(worst, MathF.Abs(SurfaceAt(new Vector3(x, 0, 2f), surface) - (10 + .05f * x)));
+            Check(worst < .001f, $"本線の上の高さが本線の縦断から外れます: {worst}");
+            float plain = 0;
+            for (float x = -11.5f; x <= 11.5f; x += .5f)
+                plain = MathF.Max(plain, MathF.Abs(SurfaceAt(new Vector3(x, 0, 2f), null) - (10 + .05f * x)));
+            Check(plain > .01f, $"本線を使わない補間でも本線の縦断と一致しています(検査条件の誤り): {plain}");
+            checks += 2;
+        }
+        return checks;
     }
 }

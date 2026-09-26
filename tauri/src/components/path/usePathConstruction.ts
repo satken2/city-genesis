@@ -828,7 +828,11 @@ export function usePathConstruction(
     return () => { cancelled = true; clearTimeout(timer); };
   }, [apiBaseUrl, shapePhase, shapeRevision, localCanConfirm, validationKey, validationAttempt]);
 
-  const confirmPath = useCallback(async (): Promise<void> => {
+  /**
+   * 確定送信。新規作成のときは extraFields を各パスへ足して送り(道路建設パネルの所属道路 road_id など。
+   * 事前検証と見積りの送信形状には含めない)、作成されたパスIDの一覧を返す。既存パスの更新では空配列。
+   */
+  const confirmPath = useCallback(async (extraFields?: Record<string, unknown>): Promise<number[]> => {
     if (!apiBaseUrl || !constructionBody || !canConfirm || !localCanConfirmRef.current
         || currentValidationKey.current !== validationKey || currentShapeRevision.current !== shapeRevision) {
       throw new Error(validationMessages.join("\n") || t("path_construction.collisionChecking"));
@@ -858,7 +862,9 @@ export function usePathConstruction(
     const response = await fetchApi<{ paths: Array<{ path_id: number }> }>(
       `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/${pathId ?? ""}`,
       { method: pathId == null ? "POST" : "PATCH", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(pathId == null ? constructionBody : constructionBody.paths[0]) }
+        body: JSON.stringify(pathId == null
+          ? { ...constructionBody, paths: constructionBody.paths.map((p) => ({ ...p, ...extraFields })) }
+          : constructionBody.paths[0]) }
     );
     setValidation(null);
     localCanConfirmRef.current = false;
@@ -867,6 +873,7 @@ export function usePathConstruction(
     if (pathId == null && response?.paths?.length) {
       void invoke("open_registered_window", { windowType: "path_detail", entityId: String(response.paths[0].path_id) });
     }
+    return pathId == null ? (response?.paths ?? []).map((p) => p.path_id) : [];
   }, [apiBaseUrl, constructionBody, canConfirm, validationKey, shapeRevision, pathId, t, validationMessages]);
 
   /* ---- 都市の通行方向を取得(既定の進行方向割り当てに使う) ---- */

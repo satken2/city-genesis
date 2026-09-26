@@ -52,8 +52,10 @@ public static class RoadMarkingsQA
             CheckRules();
             object plan = Activator.CreateInstance(Type("RoadMarkingPlan"));
             Method(plan, "Strip", new Vector2(-28, 3), new Vector2(28, 3), .5f);
-            Method(plan, "Strip", new Vector2(-13, -25), new Vector2(-13, 25), .5f);
+            Method(plan, "Strip", new Vector2(-13, -25), new Vector2(-13, 17), .5f);
             Method(plan, "Arrow", new Vector2(8, 10), Vector2.up, Enum.ToObject(Type("RoadMarkingTurns"), 7), 2f);
+            for (int turns = 1; turns <= 7; turns++)
+                Method(plan, "Arrow", new Vector2((turns - 4) * 8, 22), Vector2.up, Enum.ToObject(Type("RoadMarkingTurns"), turns), 1.5f);
             for (int i = -20; i <= 20; i += 2) Method(plan, "Strip", new Vector2(i, -15), new Vector2(i, -10), .8f);
             plane = CreateSurface("Flat", plan, Vector3.zero);
             surface = plane.GetComponent(Type("RoadMarkingSurface"));
@@ -112,6 +114,7 @@ public static class RoadMarkingsQA
                 Require(light>1000 && dark>1000,$"Paint/asphalt separation: light={light}, dark={dark}");
                 Require(!pixels.Any(p=>p.r>240 && p.b>240 && p.g<20),"Error shader pixels");
                 report.Add($"PASS: direct surface paint; light={light}, dark={dark}");
+                CheckArrowImages();
                 long allocated=(long)Property("RoadMarkingAtlas","ReservedBytes");
                 Require(allocated+(long)Property("RoadMarkingAtlas","TableBytes") <= 128L*1024*1024,"Memory cap");
                 // EditModeでは通常のMonoBehaviour通知が走らないため、同じコールバックを明示する。
@@ -132,7 +135,7 @@ public static class RoadMarkingsQA
             }
             if (step == 22)
             {
-                Capture("road.png");
+                CheckRoadSeams();
                 CheckJunction();
             }
             if (step == 42)
@@ -151,6 +154,100 @@ public static class RoadMarkingsQA
             }
         }
         catch(Exception e){Finish(e);}
+    }
+
+    static void CheckArrowImages()
+    {
+        var target = camera.targetTexture;
+        camera.targetTexture = new RenderTexture(1344, 192, 24);
+        camera.aspect = 7; camera.orthographicSize = 4; camera.transform.position = new Vector3(0, 70, 22);
+        var pixels = Capture("arrows.png");
+        for (int turns = 1; turns <= 7; turns++)
+        {
+            // 各矢印だけを囲み、隣の標示を含めずに塗装の連結性と閉じた穴を検査する。
+            const int width = 96, height = 144;
+            int left = (turns - 1) * 192 + 48, bottom = 24;
+            var paint = new bool[width * height];
+            for (int y = 0; y < height; y++) for (int x = 0; x < width; x++)
+            {
+                var p = pixels[(bottom + y) * 1344 + left + x];
+                paint[y * width + x] = p.r > 140 && p.g > 140 && p.b > 100;
+            }
+            var seen = new bool[paint.Length];
+            int components = 0, holes = 0;
+            var queue = new Queue<int>();
+            for (int i = 0; i < paint.Length; i++)
+            {
+                if (seen[i]) continue;
+                bool white = paint[i], border = false;
+                queue.Enqueue(i); seen[i] = true;
+                while (queue.Count > 0)
+                {
+                    int current = queue.Dequeue(), x = current % width, y = current / width;
+                    border |= x == 0 || y == 0 || x == width - 1 || y == height - 1;
+                    foreach (int neighbor in new[] { x > 0 ? current - 1 : -1, x + 1 < width ? current + 1 : -1,
+                        y > 0 ? current - width : -1, y + 1 < height ? current + width : -1 })
+                        if (neighbor >= 0 && !seen[neighbor] && paint[neighbor] == white)
+                        { seen[neighbor] = true; queue.Enqueue(neighbor); }
+                }
+                if (white) components++; else if (!border) holes++;
+            }
+            Require(components == 1 && holes == 0, $"Arrow {turns}: connected paint={components}, holes={holes}");
+            if ((turns & 2) == 0)
+                Require(!paint.Skip(100 * width).Any(p => p), $"Turn-only arrow {turns} has no forward stub");
+        }
+        UnityEngine.Object.DestroyImmediate(camera.targetTexture);
+        camera.targetTexture = target; camera.ResetAspect(); camera.orthographicSize = 36;
+        camera.transform.position = new Vector3(0, 70, 0);
+        camera.orthographicSize = 4; camera.transform.position = new Vector3(8, 70, 10);
+        Capture("arrow-close.png");
+        camera.orthographicSize = 36; camera.transform.position = new Vector3(0, 70, 0);
+        report.Add("PASS: all seven arrow masks have connected heads, no enclosed holes, no turn-only forward stub");
+    }
+
+    static void CheckRoadSeams()
+    {
+        var filters = roads.SelectMany(r => r.GetComponentsInChildren<MeshFilter>())
+            .Where(f => f.GetComponent(Type("RoadMarkingSurface")) != null).ToArray();
+        var originals = filters.Select(f => f.sharedMesh).ToArray();
+        var references = originals.Select(m => UnityEngine.Object.Instantiate(m)).ToArray();
+        int removed = 0;
+        for (int f = 0; f < filters.Length; f++)
+        {
+            var vertices = references[f].vertices;
+            for (int s = 0; s < references[f].subMeshCount; s++)
+            {
+                var triangles = references[f].GetTriangles(s); var kept = new List<int>();
+                for (int t = 0; t < triangles.Length; t += 3)
+                {
+                    Vector3 a = vertices[triangles[t]], b = vertices[triangles[t + 1]], c = vertices[triangles[t + 2]];
+                    var normal = filters[f].transform.TransformDirection(Vector3.Cross(b - a, c - a).normalized);
+                    var center = filters[f].transform.TransformPoint((a + b + c) / 3f);
+                    // 外周の端面は残し、本来隠れる反復部品の内部端面だけを参照画像から除く。
+                    if (Mathf.Abs(normal.z) > .7f && Mathf.Abs(normal.y) < .7f && Mathf.Abs(center.z) < 65f)
+                    { removed++; continue; }
+                    kept.Add(triangles[t]); kept.Add(triangles[t + 1]); kept.Add(triangles[t + 2]);
+                }
+                references[f].SetTriangles(kept, s);
+            }
+        }
+        Require(removed > 100, "Seam fixture includes repeated internal cap faces");
+        var position = camera.transform.position; var rotation = camera.transform.rotation;
+        foreach (var view in new[] { ("road", position), ("road-oblique", new Vector3(80, 95, -90)), ("road-low", new Vector3(-70, 50, -100)) })
+        {
+            camera.transform.position = view.Item2;
+            if (view.Item1 == "road") camera.transform.rotation = rotation; else camera.transform.LookAt(new Vector3(0, 4, 0));
+            for (int f = 0; f < filters.Length; f++) filters[f].sharedMesh = originals[f];
+            var actual = Capture(view.Item1 + ".png");
+            Require(actual.Count(p => p.r > 140 && p.g > 140 && p.b > 100) > 100, view.Item1 + " contains painted road");
+            for (int f = 0; f < filters.Length; f++) filters[f].sharedMesh = references[f];
+            var reference = Capture(view.Item1 + "-surface-reference.png");
+            int changed = actual.Zip(reference, (a, b) => Mathf.Max(Mathf.Abs(a.r - b.r), Mathf.Abs(a.g - b.g), Mathf.Abs(a.b - b.b))).Count(d => d > 10);
+            Require(changed <= 32, $"{view.Item1}: hidden caps affect {changed} pixels");
+        }
+        for (int f = 0; f < filters.Length; f++) { filters[f].sharedMesh = originals[f]; UnityEngine.Object.DestroyImmediate(references[f]); }
+        camera.transform.SetPositionAndRotation(position, rotation);
+        report.Add("PASS: repeated FBX cap faces produce no surface seams from top, oblique and low views");
     }
 
     static void CheckRoad()

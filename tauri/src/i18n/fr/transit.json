@@ -82,7 +82,7 @@
     "fleetMoreTrains": "et {{count}} rame(s) de plus",
     "fleetShortage": "{{count}} rame(s) n’ont pas pu être formées faute de véhicules.",
     "vehicleModel": "Véhicule",
-    "vehicleModelNote": "Seule l’apparence des véhicules change. La capacité, le coût et la vitesse restent identiques.",
+    "vehicleModelNote": "Seule l’apparence des véhicules change. La capacité, le coût et la vitesse restent identiques. Les bandes de la caisse sont peintes aux couleurs de la ligne.",
     "estimate": {
       "title": "Bilan prévisionnel",
       "editedTag": "Avec les réglages non enregistrés",
@@ -125,7 +125,8 @@
       "lrt": "Tramway",
       "trainStandard": "Standard",
       "trainFuturistic": "Futuriste",
-      "trainRetro": "Rétro"
+      "trainRetro": "Rétro",
+      "monorail": "Monorail"
     }
   }
 }

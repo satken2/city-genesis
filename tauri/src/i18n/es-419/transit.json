@@ -82,7 +82,7 @@
     "fleetMoreTrains": "y {{count}} tren(es) más",
     "fleetShortage": "No se pudieron formar {{count}} tren(es) por falta de vehículos.",
     "vehicleModel": "Vehículo",
-    "vehicleModelNote": "Solo cambia el aspecto de los vehículos. La capacidad, el costo y la velocidad no cambian.",
+    "vehicleModelNote": "Solo cambia el aspecto de los vehículos. La capacidad, el costo y la velocidad no cambian. Las franjas de la carrocería se pintan con el color de la línea.",
     "estimate": {
       "title": "Balance previsto",
       "editedTag": "Con los cambios sin guardar",
@@ -125,7 +125,8 @@
       "lrt": "Tren ligero",
       "trainStandard": "Estándar",
       "trainFuturistic": "Futurista",
-      "trainRetro": "Retro"
+      "trainRetro": "Retro",
+      "monorail": "Monorriel"
     }
   }
 }

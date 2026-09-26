@@ -33,7 +33,7 @@ platform_wallと同じ島式結合・近接線路による省略範囲、左右�
 
 502のホームは中心線から1.5〜4.5m、上面はスプライン+1.5m。platformが乗降縁・黄色帯・桁から張り出す床版と受け梁を持ち、platform_wallが外縁のガラス壁、platform_panelが動的デッキの材質を供給する。右側用の形状はBlender -X側へ著作し、Unityでは+X側となる。長手8mタイルを1m以下に分割して曲線へ追従する。上屋はホーム幅全体を覆う白い折板屋根（最高5.22m）と4m周期の金属柱で、platformに含める。外壁は天端4.82mのガラス面・2m周期の白い縦枠・金属横桟を持つ。島式結合では壁だけが省略され、上屋は残る。階段は含まない。
 
-制作元は`genesis-gallery/pipeline/jobs/build_monorail.py`と`blender/paths.blend`。車両の先頭車308・中間車309は[M文書](M_地形プロップ.md)の手動配置プロップで、原点を桁の上面へ置くと床高がホームに揃う。UnityのFBX取り込み検証は`Tests/Monorail/run.ps1`。
+制作元は`genesis-gallery/pipeline/jobs/build_monorail.py`と`blender/paths.blend`。車両の先頭車308・中間車309は[M文書](M_地形プロップ.md)の手動配置プロップで、原点を桁の上面へ置くと床高がホームに揃う。モノレール路線の走行車両は同じFBXを`Vehicles/24`に置いたもので、原点を桁の上面に合わせて走る（[O文書](O_車両の走行描画.md)）。UnityのFBX取り込み検証は`Tests/Monorail/run.ps1`。
 
 ## レンガアーチ高架（404・414）
 

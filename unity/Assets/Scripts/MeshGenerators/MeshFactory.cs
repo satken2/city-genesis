@@ -301,6 +301,9 @@ public class NodeMeshResult
     public MotorwayMergeLayout MotorwayMerge { get; set; }
     public RoadMarkingPlan Markings { get; set; }
 
+    /// <summary>交差点に置く信号機(TrafficSignalLayout)。置かない交差点は null。実体化は TrafficSignalBuilder.Apply が行う。</summary>
+    public List<TrafficSignalPlacement> TrafficSignals { get; set; }
+
     /// <summary>
     /// path_id → 歩道のセットバック量。交差相手に歩道がない道路の歩道端を、
     /// 車道の切断面（ConnectionPoint）より道路外側へ後退させて終端するために使う。

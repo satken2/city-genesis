@@ -37,14 +37,19 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             // 道路端まで地面に引き下げられてしまう。
             bool horizontalPlane = nodeRelativeY != 0f;
 
-            MotorwayMergeLayout merge = null;
+            // 高速道路の本線を優先する。取り込めるランプしか無ければ板を作らず、本線をノードまで描いてつなぐ。
+            MotorwayMergeLayout merge = MotorwayMergeLayout.Create(nodeId, paths, pointResolver, cutLimitResolver);
+            if (merge != null && !merge.NeedsSlab)
+            {
+                return new NodeMeshResult(null, null, merge.ConnectionPoints) { MotorwayMerge = merge };
+            }
+            MainLineSurface mainLine = merge?.Surface;
             var roadResult = IntersectionPolygonUtil.ComputeIntersectionPolygon(
                 nodeId,
                 nodePos2D,
                 paths,
                 gf,
-                ResolveRoadWidth, pointResolver, cutLimitResolver,
-                result => merge = MotorwayMergeLayout.Create(nodeId, paths, result, pointResolver)
+                ResolveRoadWidth, pointResolver, cutLimitResolver
             );
 
             if (roadResult.RequiresMoreSpace)
@@ -53,7 +58,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
                 return null;
             }
             Dictionary<int, Vector3> connectionPoints = BuildSectionPoints(roadResult.Sections, nodePosition, horizontalPlane, pointResolver != null);
-            Mesh roadMesh = ConvertGeometryToMesh(roadResult.Geometry, nodePosition, horizontalPlane, "RoadIntersection");
+            Mesh roadMesh = BuildSurfaceMesh(roadResult.Geometry, nodePosition, roadResult.Sections, mainLine, "RoadIntersection");
             if (roadMesh == null)
             {
                 return null;
@@ -82,23 +87,12 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
 
             sidewalkConnectors ??= new List<SidewalkConnectorSpec>();
             BuildBoundaryParts(nodeId, nodePosition, horizontalPlane, paths, roadResult.Sections, sidewalkConnectors, roadResult.Corners);
-            merge?.AddMarkings(sidewalkConnectors, nodePosition);
             // 線路（PATH_TRACK/PATH_MONORAIL）が2本以上接続するノードでは、
             // ポイント（分岐器）・平面交差の表現として、転回制約を満たす通行可能ペアにのみ
             // レールコネクタを敷く（TrackIntersectionMeshGenerator参照）。
             List<RailConnectorSpec> railConnectors = TrackIntersectionMeshGenerator.BuildRailConnectorSpecs(nodeId, nodePosition, horizontalPlane, paths, roadResult.ConnectionPoints, roadResult.Sections);
 
             sidewalkConnectors.RemoveAll(spec => spec.Part == "wall" && WallBlocksRail(spec, railConnectors));
-            var meshVertices = roadMesh.vertices;
-            for (int i = 0; i < meshVertices.Length; i++)
-            {
-                Vector3 world = meshVertices[i] + nodePosition;
-                meshVertices[i] = SectionSurfacePoint(world, roadResult.Sections, RoadPartHeights.BODY_ABOVE_SPLINE) - nodePosition;
-            }
-            roadMesh.vertices = meshVertices;
-            roadMesh.RecalculateNormals();
-            roadMesh.RecalculateBounds();
-            merge?.SetSurface(roadMesh, nodePosition);
             int surfaceVertexCount = roadMesh.vertexCount;
             AddBodyShell(roadMesh, nodePosition, roadResult.Sections);
             RoadMarkingPlan markings = null;
@@ -121,11 +115,11 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             {
                 connector.StartNormal = ClosestSectionNormal(connector.Points[0] + nodePosition, roadResult.Sections);
                 connector.EndNormal = ClosestSectionNormal(connector.Points[connector.Points.Count - 1] + nodePosition, roadResult.Sections);
-                AdjustConnectorHeight(connector.Points, nodePosition, roadResult.Sections, connector.Part == "line" ? RoadPartHeights.LINE_ABOVE_SPLINE : RoadPartHeights.SIDEWALK_ABOVE_SPLINE, merge);
+                AdjustConnectorHeight(connector.Points, nodePosition, roadResult.Sections, connector.Part == "line" ? RoadPartHeights.LINE_ABOVE_SPLINE : RoadPartHeights.SIDEWALK_ABOVE_SPLINE, mainLine);
             }
             if (railConnectors != null) foreach (var connector in railConnectors)
             {
-                AdjustConnectorHeight(connector.Points, nodePosition, roadResult.Sections, RoadPartHeights.TRACK_ABOVE_SPLINE);
+                AdjustConnectorHeight(connector.Points, nodePosition, roadResult.Sections, RoadPartHeights.TRACK_ABOVE_SPLINE, mainLine);
                 if (connector.EmbeddedLrt)
                     for (int i = 0; i < connector.Points.Count; i++)
                     {
@@ -133,7 +127,9 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
                         connector.Points[i] += Vector3.up * (Mathf.Lerp(connector.StartRailBase, connector.EndRailBase, t * t * (3 - 2 * t)) - RoadPartHeights.TRACK_ABOVE_SPLINE);
                     }
             }
-            return new NodeMeshResult(roadMesh, roadMaterial, connectionPoints, sidewalkConnectors, railConnectors, sidewalkSetbacks) { MotorwayMerge = merge, Markings = markings };
+            var trafficSignals = TrafficSignalLayout.Build(nodeId, horizontalPlane, paths, roadResult.Sections, roadResult.Corners,
+                sidewalkSetbacks, mainLine, TrafficSignalStyle.Current.MinReach);
+            return new NodeMeshResult(roadMesh, roadMaterial, connectionPoints, sidewalkConnectors, railConnectors, sidewalkSetbacks) { MotorwayMerge = merge, Markings = markings, TrafficSignals = trafficSignals };
         }
         catch (Exception ex)
         {
@@ -285,7 +281,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
     }
     private static void AddBodyShell(Mesh mesh, Vector3 node, Dictionary<int, PathEndSection> sections)
     {
-        var top = mesh.vertices; var topTriangles = mesh.triangles;
+        var top = mesh.vertices; var topTriangles = mesh.triangles; var topNormals = mesh.normals;
         var vertices = new List<Vector3>(top); var triangles = new List<int>(topTriangles);
         bool hasDepth = false;
         for (int i = 0; i < top.Length; i++)
@@ -310,9 +306,8 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             triangles.Add(top.Length + topTriangles[i]); triangles.Add(top.Length + topTriangles[i+2]); triangles.Add(top.Length + topTriangles[i+1]);
         }
         // 輪郭の入口断面は本線のbodyと接合するため閉じず、交差点外周だけに小口を張る。
-        for (int i = 0; i < top.Length; i++)
+        foreach (var (i, j) in OutlineEdges(topTriangles))
         {
-            int j = (i+1) % top.Length;
             bool mouth = false;
             foreach (var section in sections.Values)
             {
@@ -328,6 +323,29 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         mesh.SetVertices(vertices); mesh.SetTriangles(triangles,0);
         var colors = new Color[vertices.Count]; Array.Fill(colors,Color.white); mesh.colors=colors;
         mesh.RecalculateNormals(); mesh.RecalculateBounds();
+        var normals = mesh.normals; Array.Copy(topNormals, normals, top.Length); mesh.normals = normals;
+    }
+
+    /// <summary>
+    /// 上面の外周の辺を、XZ上の反時計回り(外周をたどる向き)の頂点対で返す。
+    /// 内部頂点を持つ上面では頂点の並びが外周順にならないため、片側にしか三角形の無い辺として求める。
+    /// </summary>
+    private static List<(int from, int to)> OutlineEdges(int[] triangles)
+    {
+        var directed = new HashSet<(int, int)>();
+        for (int i = 0; i < triangles.Length; i += 3)
+        {
+            directed.Add((triangles[i], triangles[i+1])); directed.Add((triangles[i+1], triangles[i+2])); directed.Add((triangles[i+2], triangles[i]));
+        }
+        // 上面の三角形は上向きにするためXZの時計回りで登録されているので、外周の辺は逆向きにたどる。
+        var outline = new List<(int from, int to)>();
+        for (int i = 0; i < triangles.Length; i += 3)
+            for (int k = 0; k < 3; k++)
+            {
+                int u = triangles[i + k], v = triangles[i + (k + 1) % 3];
+                if (!directed.Contains((v, u))) outline.Add((v, u));
+            }
+        return outline;
     }
     private static Vector3 ClosestSectionNormal(Vector3 point, Dictionary<int, PathEndSection> sections)
     {
@@ -340,7 +358,11 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         }
         return normal;
     }
-    internal static Vector3 SectionSurfacePoint(Vector3 point, Dictionary<int, PathEndSection> sections, float offset)
+    /// <param name="mainLine">
+    /// 高速道路の本線。指定すると本線の路面の上は本線の縦断そのものの高さにし、本線の口は補間に使わず、
+    /// 外側は本線の路面の縁と他の枝の口から補間する。
+    /// </param>
+    internal static Vector3 SectionSurfacePoint(Vector3 point, Dictionary<int, PathEndSection> sections, float offset, MainLineSurface mainLine = null)
     {
         PathEndSection nearest = null;
         float nearestDistance = float.PositiveInfinity;
@@ -355,33 +377,66 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             point.y = nearest.Position.y;
             return point + Vector3.up * offset;
         }
-        point.y = SectionHeight(point, sections) + offset;
+        point.y = SectionHeight(point, sections, mainLine) + offset;
         return point;
     }
-    private static float SectionHeight(Vector3 point, Dictionary<int, PathEndSection> sections)
+    /// <summary>
+    /// 交差点の路面の高さ。各口の断面から本線の縦断勾配を交差点の内側へ延ばした高さを、口までの距離の2乗に
+    /// 反比例する重みで混ぜる。口では高さも勾配も本線と一致して折れず、一様な斜面ではほぼその斜面になる。
+    /// 延長は口からノードまでの距離の2倍を尺度に滑らかに頭打ちにし、遠い口の勾配で山や谷を作らない。
+    /// </summary>
+    private static float SectionHeight(Vector3 point, Dictionary<int, PathEndSection> sections, MainLineSurface mainLine)
     {
         float weighted = 0f, weight = 0f;
-        foreach (var section in sections.Values)
+        if (mainLine != null)
         {
+            float height = mainLine.Height(IntersectionPolygonUtil.XZ(point), out float outside);
+            if (outside < 1e-4f) return height;
+            float w = 1f / (outside * outside);
+            weighted += height * w;
+            weight += w;
+        }
+        foreach (var pair in sections)
+        {
+            if (mainLine != null && (pair.Key == mainLine.ArmA || pair.Key == mainLine.ArmB)) continue;
+            var section = pair.Value;
             Vector2 delta = IntersectionPolygonUtil.XZ(point) - section.Center;
             float along = Vector2.Dot(delta, section.Direction);
             float across = Mathf.Max(0f, Mathf.Abs(Vector2.Dot(delta, section.Left)) - section.Width * 0.5f);
             float distance = along * along + across * across;
             if (distance < 1e-8f) return section.Position.y;
+            float reach = Mathf.Max(1f, section.Distance * 2f);
+            float height = section.Position.y + SectionGrade(section) * reach * (float)Math.Tanh(along / reach);
             float w = 1f / distance;
-            weighted += section.Position.y * w;
+            weighted += height * w;
             weight += w;
         }
         return weighted / Mathf.Max(weight, 1e-8f);
     }
 
-    private static void AdjustConnectorHeight(List<Vector3> points, Vector3 node, Dictionary<int, PathEndSection> sections, float offset, MotorwayMergeLayout merge = null)
+    /// <summary>口での本線の縦断勾配(ノードから外向きに進むときの上り勾配)。</summary>
+    private static float SectionGrade(PathEndSection section)
+    {
+        float run = new Vector2(section.Tangent.x, section.Tangent.z).magnitude;
+        return run > 1e-4f ? section.Tangent.y / run : 0f;
+    }
+
+    /// <summary>
+    /// 路面の高さの曲面の法線を中心差分で求める。三角形の形に依らない陰影になり、口では本線の断面法線と一致する。
+    /// </summary>
+    internal static Vector3 SurfaceNormal(Vector3 point, Dictionary<int, PathEndSection> sections, MainLineSurface mainLine = null)
+    {
+        const float step = 0.05f;
+        float dx = SectionHeight(point + Vector3.right * step, sections, mainLine) - SectionHeight(point - Vector3.right * step, sections, mainLine);
+        float dz = SectionHeight(point + Vector3.forward * step, sections, mainLine) - SectionHeight(point - Vector3.forward * step, sections, mainLine);
+        return new Vector3(-dx, 2f * step, -dz).normalized;
+    }
+
+    private static void AdjustConnectorHeight(List<Vector3> points, Vector3 node, Dictionary<int, PathEndSection> sections, float offset, MainLineSurface mainLine)
     {
         for (int i = 0; i < points.Count; i++)
         {
-            var p = points[i];
-            p = (merge != null ? merge.SurfacePoint(p + node, offset) : SectionSurfacePoint(p + node, sections, offset)) - node;
-            points[i] = p;
+            points[i] = SectionSurfacePoint(points[i] + node, sections, offset, mainLine) - node;
         }
     }
     private static Dictionary<int, Vector3> BuildSectionPoints(Dictionary<int, PathEndSection> sections, Vector3 nodePosition, bool horizontalPlane, bool absolute)
@@ -407,7 +462,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         return path.width > 0f ? path.width : 4.0f;
     }
 
-    private static float ResolveSidewalkWidth(PathSummary path)
+    internal static float ResolveSidewalkWidth(PathSummary path)
     {
         if (TrackIntersectionMeshGenerator.IsTrackType(path.path_type)) return 0f;
         // sidewalk_width が 0 以下の道路は歩道を持たない道路として扱う。
@@ -774,21 +829,42 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         return material;
     }
 
-    private static Mesh ConvertGeometryToMesh(Geometry geometry, Vector3 center, bool horizontalPlane, string meshName)
+    /// <summary>
+    /// 交差点の路面の上面メッシュを作る。高さは <see cref="SectionSurfacePoint"/>、法線は <see cref="SurfaceNormal"/> の曲面から求める。
+    /// </summary>
+    private static Mesh BuildSurfaceMesh(Geometry geometry, Vector3 center, Dictionary<int, PathEndSection> sections, MainLineSurface mainLine, string meshName)
     {
         if (geometry == null || geometry.IsEmpty)
         {
             return null;
         }
 
-        List<Vector3> vertices = new List<Vector3>();
-        List<int> triangles = new List<int>();
-
-        AddGeometryToMesh(geometry, center, horizontalPlane, vertices, triangles);
-
-        if (vertices.Count < 3 || triangles.Count < 3)
+        var points = new List<Vector2>();
+        List<int> surface = TriangulateSurface(geometry, points);
+        if (points.Count < 3 || surface.Count < 3)
         {
             return null;
+        }
+
+        var vertices = new List<Vector3>(points.Count);
+        var normals = new List<Vector3>(points.Count);
+        foreach (Vector2 point in points)
+        {
+            // 路面は切断断面で通常道路の路面上面(スプライン + BODY_ABOVE_SPLINE)と同じ高さになる。
+            // 道路は切断点で交差点の縁まで切り詰められているため、領域の重なりによるZファイティングは起きない。
+            Vector3 world = SectionSurfacePoint(new Vector3(point.x, 0f, point.y), sections, RoadPartHeights.BODY_ABOVE_SPLINE, mainLine);
+            vertices.Add(world - center);
+            normals.Add(SurfaceNormal(world, sections, mainLine));
+        }
+
+        // Unity の XZ 平面では、2D 上で反時計回りの三角形をそのまま置くと法線が下向きになる。
+        // 描画面を上向きにするため、三角形単位で巻き順を反転してから登録する。
+        var triangles = new List<int>(surface.Count);
+        for (int i = 0; i < surface.Count; i += 3)
+        {
+            triangles.Add(surface[i]);
+            triangles.Add(surface[i + 2]);
+            triangles.Add(surface[i + 1]);
         }
 
         Mesh mesh = new Mesh();
@@ -802,30 +878,36 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         Color[] colors = new Color[vertices.Count];
         Array.Fill(colors, Color.white);
         mesh.SetColors(colors);
-        mesh.RecalculateNormals();
+        mesh.SetNormals(normals);
         mesh.RecalculateBounds();
         mesh.RecalculateTangents();
         return mesh;
     }
 
-    private static void AddGeometryToMesh(Geometry geometry, Vector3 center, bool horizontalPlane, List<Vector3> vertices, List<int> triangles)
+    /// <summary>
+    /// 交差点の輪郭を路面用に三角形分割する。耳切りが作る細い三角形の扇をDelaunay化し、辺長が
+    /// INTERSECTION_SURFACE_MAX_EDGE 以下になるまで細分化して内部頂点を置き、もう一度Delaunay化する。
+    /// 外周の頂点だけでは高さの曲面を三角形の平面でしか近似できず、対角線が折れ線として見えるため。
+    /// points にはワールドXZ座標を追記し、三角形はXZの反時計回りの頂点番号で返す。
+    /// </summary>
+    internal static List<int> TriangulateSurface(Geometry geometry, List<Vector2> points)
     {
+        var triangles = new List<int>();
         if (geometry is Polygon polygon)
         {
-            AddPolygonToMesh(polygon, center, horizontalPlane, vertices, triangles);
-            return;
+            AppendPolygonSurface(polygon, points, triangles);
         }
-
-        if (geometry is MultiPolygon || geometry is GeometryCollection)
+        else if (geometry is MultiPolygon || geometry is GeometryCollection)
         {
             for (int i = 0; i < geometry.NumGeometries; i++)
             {
-                AddGeometryToMesh(geometry.GetGeometryN(i), center, horizontalPlane, vertices, triangles);
+                triangles.AddRange(TriangulateSurface(geometry.GetGeometryN(i), points));
             }
         }
+        return triangles;
     }
 
-    private static void AddPolygonToMesh(Polygon polygon, Vector3 center, bool horizontalPlane, List<Vector3> vertices, List<int> triangles)
+    private static void AppendPolygonSurface(Polygon polygon, List<Vector2> points, List<int> triangles)
     {
         Coordinate[] coords = polygon.ExteriorRing.Coordinates;
         if (coords == null || coords.Length < 4)
@@ -833,40 +915,37 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             return;
         }
 
-        Vector2[] points = new Vector2[coords.Length - 1];
+        Vector2[] ring = new Vector2[coords.Length - 1];
         for (int i = 0; i < coords.Length - 1; i++)
         {
-            points[i] = new Vector2((float)coords[i].X, (float)coords[i].Y);
+            ring[i] = new Vector2((float)coords[i].X, (float)coords[i].Y);
         }
-
-        if (PolygonUtils.SignedArea(points) < 0f)
+        if (PolygonUtils.SignedArea(ring) < 0f)
         {
-            Array.Reverse(points);
+            Array.Reverse(ring);
         }
 
-        int baseIndex = vertices.Count;
-        for (int i = 0; i < points.Length; i++)
-        {
-            // アスファルト面は基準面 + BODY_ABOVE_SPLINE で、通常道路の路面上面と同一平面になる。
-            // 道路は切断点で交差点の縁まで切り詰められているため、領域の重なりによる
-            // Zファイティングは起きない。
-            float worldY = SampleBaseSurfaceY(points[i].x, points[i].y, center, horizontalPlane) + RoadPartHeights.BODY_ABOVE_SPLINE;
-            vertices.Add(new Vector3(points[i].x - center.x, worldY - center.y, points[i].y - center.z));
-        }
-
-        List<int> polygonTriangles = BuildingMeshBuilder.TriangulateEarClip(points);
-        if (polygonTriangles.Count == 0)
+        List<int> earClip = BuildingMeshBuilder.TriangulateEarClip(ring);
+        if (earClip.Count == 0)
         {
             throw new InvalidOperationException("交差点の輪郭を三角形化できません。");
         }
+        var local = new List<Vector2>(ring);
+        var coarse = new List<(int a, int b, int c)>(earClip.Count / 3);
+        for (int i = 0; i < earClip.Count; i += 3) coarse.Add((earClip[i], earClip[i + 1], earClip[i + 2]));
+        BuildingMeshBuilder.FlipToDelaunay(local, coarse);
+        var flat = new List<int>(earClip.Count);
+        foreach (var (a, b, c) in coarse) { flat.Add(a); flat.Add(b); flat.Add(c); }
+        var fine = BuildingMeshBuilder.SubdivideTrianglesByEdgeLength(local, flat, LocalConstants.INTERSECTION_SURFACE_MAX_EDGE);
+        BuildingMeshBuilder.FlipToDelaunay(local, fine);
 
-        // Unity の XZ 平面では、2D 上で反時計回りの三角形をそのまま置くと法線が下向きになる。
-        // 描画面を上向きにするため、三角形単位で巻き順を反転してから登録する。
-        for (int i = 0; i < polygonTriangles.Count; i += 3)
+        int baseIndex = points.Count;
+        points.AddRange(local);
+        foreach (var (a, b, c) in fine)
         {
-            triangles.Add(baseIndex + polygonTriangles[i]);
-            triangles.Add(baseIndex + polygonTriangles[i + 2]);
-            triangles.Add(baseIndex + polygonTriangles[i + 1]);
+            triangles.Add(baseIndex + a);
+            triangles.Add(baseIndex + b);
+            triangles.Add(baseIndex + c);
         }
     }
 }

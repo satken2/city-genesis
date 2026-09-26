@@ -112,6 +112,7 @@ public sealed class RoadMarkingSurface : MonoBehaviour
         if (Context != null)
         {
             properties.SetVectorArray("_RoadBands", Context.Bands);
+            properties.SetVectorArray("_RoadBandSpans", Context.BandSpans);
             properties.SetVector("_RoadDistances", new Vector4(Context.Length, Context.Phase, 0, 0));
             properties.SetVector("_RoadApproaches", Context.Approaches);
         }

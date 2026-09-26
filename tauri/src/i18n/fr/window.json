@@ -8,6 +8,7 @@
     "zone_detail": "Détail du quartier",
     "intersection_detail": "Détail de l'échangeur",
     "path_detail": "Détail de la voie",
+    "road_detail": "Détail de la route",
     "path_build": "Construction de voies",
     "track_build": "Construction ferroviaire",
     "infra_build": "Construction d'infrastructures",

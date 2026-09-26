@@ -30,6 +30,13 @@ import tip24 from "../../assets/images/tips/tip_24.jpg";
 import tip25 from "../../assets/images/tips/tip_25.jpg";
 import tip26 from "../../assets/images/tips/tip_26.jpg";
 import tip27 from "../../assets/images/tips/tip_27.jpg";
+import tip28 from "../../assets/images/tips/tip_28.jpg";
+import tip29 from "../../assets/images/tips/tip_29.jpg";
+import tip30 from "../../assets/images/tips/tip_30.jpg";
+import tip31 from "../../assets/images/tips/tip_31.jpg";
+import tip32 from "../../assets/images/tips/tip_32.jpg";
+import tip33 from "../../assets/images/tips/tip_33.jpg";
+import tip34 from "../../assets/images/tips/tip_34.jpg";
 import reloadIcon from "../../assets/images/menu/tray_reload.png";
 
 type TipItem = {
@@ -65,6 +72,13 @@ const TIPS_LIST: TipItem[] = [
   { id: "tip25", image: tip25 },
   { id: "tip26", image: tip26 },
   { id: "tip27", image: tip27 },
+  { id: "tip28", image: tip28 },
+  { id: "tip29", image: tip29 },
+  { id: "tip30", image: tip30 },
+  { id: "tip31", image: tip31 },
+  { id: "tip32", image: tip32 },
+  { id: "tip33", image: tip33 },
+  { id: "tip34", image: tip34 },
 ];
 
 export function TipsWindow() {

@@ -266,6 +266,34 @@
       "tip27": {
         "title": "An Unfortunate Accident",
         "description": "A building that stands in the way of development can be blown up and passed off as an accident. Public sentiment takes a heavy hit, so buy it and demolish it properly when you can."
+      },
+      "tip28": {
+        "title": "No Land? Take to the Sea",
+        "description": "Running out of room on land? Build offshore oil platforms and wind turbines out at sea. Connect them to your onshore transport grid with undersea pipelines and power cables."
+      },
+      "tip29": {
+        "title": "Red Light Hell",
+        "description": "Every intersection adds another red light. Grid layouts packed too closely together will trap drivers at every single block, and their patience will run out long before they reach their destination."
+      },
+      "tip30": {
+        "title": "Good Line of Sight",
+        "description": "Radio towers cover a wider area the higher they are built and the higher the ground. Signals blocked by mountains can't be overcome by sheer willpower alone."
+      },
+      "tip31": {
+        "title": "Bounty of the Sea",
+        "description": "If you can't find a freshwater source, you can build a desalination plant along the coast. It does require significant power, though. Finding water leads right into finding electricity."
+      },
+      "tip32": {
+        "title": "Another Form of Policing",
+        "description": "Unemployment is one of the root causes of crime. Don't just build police stations—provide jobs. Before agonizing over your police budget, consider investing in employment programs."
+      },
+      "tip33": {
+        "title": "Bills for the Future",
+        "description": "Both buildings and roads demand ongoing maintenance once built. If you overbuild just because you have spare cash, repair bills will haunt you later. Remember, that future mayor is still you."
+      },
+      "tip34": {
+        "title": "Don't Over-Pump",
+        "description": "If you pump water faster than the aquifer can replenish, you'll eventually face a shortage. Adding more pumps won't create more water."
       }
     }
   },

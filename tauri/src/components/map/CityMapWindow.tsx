@@ -269,6 +269,8 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
           overlayVersion={(camera?.seq ?? 0) + navigation.overlayVersion}
           onMapClick={navigation.onMapClick}
           cursor={navigation.picking ? "crosshair" : undefined}
+          focusPathIds={navigation.roadFocus?.pathIds ?? null}
+          focusColor={navigation.roadFocus?.color ?? null}
         />
         {/* ヒートマップの凡例。塗り色はエポックごとのmin〜maxを両端まで
             引き伸ばした相対値なので、実値レンジを併記して絶対水準を伝える */}
