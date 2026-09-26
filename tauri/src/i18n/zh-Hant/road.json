@@ -16,6 +16,7 @@
     "segmentRemoved": "已將路段 #{{id}} 移出道路。",
     "segmentsAdded": "已新增{{n}}個路段。",
     "memberEditHint": "點擊路段以新增或移除 / Shift+點擊可一併新增從該路段直行延伸的路段",
+    "memberEditHintFor": "正在編輯「{{road}}」的路段 — {{hint}}",
     "memberEditing": "正在編輯路段(目前 {{n}}個路段)",
     "memberEditDone": "完成",
     "traceOffer": "要把直行方向的 {{n}}個路段 也歸入同一條道路嗎?",
@@ -24,7 +25,7 @@
     "traceConfirm": "新增",
     "dismiss": "關閉",
     "deletedTitle": "這條道路已被刪除",
-    "deletedDescription": "所有路段都已移出，或道路已被刪除。路段仍作為無名道路保留。",
+    "deletedDescription": "所有路段都已移出，或道路已被刪除。路段仍保留，但不屬於任何道路。",
     "openMaxVcSegment": "開啟最壅塞路段的詳情",
     "tabs": {
       "basic": "基本資訊",
@@ -49,6 +50,7 @@
       "speedLimit": "速限",
       "travelTime": "所需時間",
       "travelTimeUnavailable": "含有規劃中或施工中的路段，無法計算",
+      "travelTimeUnavailableImpassable": "含有未營運或無法通行的路段，無法計算",
       "travelTimeValue": "{{congested}}(自由通行 {{free}})",
       "travelSpeed": "旅行速度",
       "travelSpeedValue": "{{congested}}(自由通行 {{free}})",
@@ -69,10 +71,10 @@
       "segmentsTitle": "路段",
       "segmentsSummary": "{{n}}個路段・{{length}}",
       "editSegments": "編輯路段",
-      "traceDescription": "從道路兩端出發，把在路口直行延伸的無名道路作為候選。",
+      "traceDescription": "從道路兩端出發，把在路口直行延伸、且不屬於任何道路的路段作為候選。",
       "trace": "從兩端沿直行方向延伸",
       "deleteTitle": "刪除道路",
-      "deleteDescription": "只刪除道路的歸組和名稱。路段(路徑)仍作為無名道路保留。",
+      "deleteDescription": "只刪除道路的歸組和名稱。路段(路徑)仍保留，但不屬於任何道路。",
       "cancel": "取消",
       "deleteConfirm": "刪除",
       "delete": "刪除"
@@ -91,9 +93,8 @@
       "bridge": "橋",
       "origin": "起點",
       "terminus": "終點",
-      "interchange": "{{name}} {{kind}}",
-      "interchangeUnnamed": "{{kind}}",
       "stopUnnamed": "站點",
+      "branch": "支線 {{name}}",
       "lanes": "{{n}}車道",
       "trafficValue": "{{traffic}}輛/日・{{vc}}",
       "trafficValueNoVc": "{{traffic}}輛/日",
@@ -104,7 +105,7 @@
       "legendMid": "50~80%",
       "legendHigh": "80%以上",
       "legendNoCapacity": "無容量",
-      "legendInactive": "規劃中·施工中",
+      "legendInactive": "未營運的路段",
       "legendWidth": "線寬=車道數",
       "trafficHeader": "交通量・壅塞度"
     },
@@ -132,7 +133,7 @@
         "parking": "輛"
       },
       "noSegment": "無路段(未連接)",
-      "sumNote": "上下行分離的路段顯示兩個方向的合計。",
+      "sumNote": "車種構成為上下行合計。上下行分離的路段，另以線條疊加各方向的合計。",
       "noData": "沒有可顯示的數值。"
     }
   }

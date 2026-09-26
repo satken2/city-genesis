@@ -510,6 +510,19 @@ pub async fn handle_incoming_message(
             // 所属の付け外しはパネルが道路APIで行い、結果の全集合をUnityへ送り返す。
             let _ = app.emit("edit_road:toggle_path", envelope.payload);
         }
+        "edit_road:ended" => {
+            // Unity の区間編集モードが終わった(完了・Esc・別のモードへの切り替え・閉じたパネルの
+            // edit_road:cancel など理由を問わない)ことを道路詳細パネルへ中継する。
+            // パネルは road_id が自分の道路なら、何も送り返さずに編集中の表示を落とす。
+            let _ = app.emit("edit_road:ended", envelope.payload);
+        }
+        "world:roads_changed" => {
+            // Unity の操作(ブルドーザーでの区間の撤去など)で道路の所属・存在が変わった可能性を、
+            // UI の道路の変更通知 roads:changed (roadApi.ts の ROADS_CHANGED_EVENT)として全ウィンドウへ流す。
+            // 道路詳細・パス詳細・都市マップはこれを受けて道路を取り直す。Unity は自分で道路一覧を取り直すので
+            // world:refresh_roads は送り返さない。
+            let _ = app.emit("roads:changed", envelope.payload);
+        }
         "edit_path:select_split_point" => {
             // パス分割の分割点選択モードで選ばれた地点をパス詳細パネルへ中継する。
             // パネルは分割プレビュー(dry_run)を取得して前半・後半の長さを表示し、確定を待つ。

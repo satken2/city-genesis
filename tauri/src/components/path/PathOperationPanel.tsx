@@ -12,6 +12,7 @@ import {
   STATUS_DEMOLISHING,
 } from "../../constants";
 import { sendSessionReload } from "../../utils/ipc";
+import { notifyRoadsChanged } from "../road/roadApi";
 import type { PathTopologyEditMode } from "./PathTopologyEditPanel";
 import trashIcon from "../../assets/images/ui/trash.png";
 import bulldozeIcon from "../../assets/images/bulldoze.png";
@@ -72,6 +73,8 @@ export function PathOperationPanel({
         body: JSON.stringify({ status: newStatus }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      // 道路詳細の「計画中・工事中の延長」や路線図の破線表示が変わる
+      await notifyRoadsChanged(undefined, "path_detail");
       onActionPerformed();
     } catch (err) {
       console.error("Toggle status failed:", err);
@@ -89,6 +92,8 @@ export function PathOperationPanel({
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       // Unity側にデータの再ロードを指示する
       await sendSessionReload();
+      // 削除で道路の所属が外れ、0本になった道路は消える。閉じたウィンドウは非表示で再利用されるので、閉じる前に知らせる
+      await notifyRoadsChanged(undefined, "path_detail");
       await invoke("close_current_window");
     } catch (err) {
       console.error("Delete failed:", err);
@@ -127,6 +132,7 @@ export function PathOperationPanel({
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       await sendSessionReload();
+      await notifyRoadsChanged(undefined, "path_detail");
       onActionPerformed();
     } catch (err) {
       console.error("Demolish failed:", err);
@@ -148,6 +154,7 @@ export function PathOperationPanel({
       );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       await sendSessionReload();
+      await notifyRoadsChanged(undefined, "path_detail");
       onActionPerformed();
     } catch (err) {
       console.error("Reconstruct failed:", err);

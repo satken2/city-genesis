@@ -16,6 +16,7 @@
     "segmentRemoved": "区間 #{{id}} を道路から外しました。",
     "segmentsAdded": "{{n}}区間を追加しました。",
     "memberEditHint": "区間をクリックで追加・除外 / Shift+クリックでその区間から直進方向へまとめて追加",
+    "memberEditHintFor": "「{{road}}」の区間を編集中 — {{hint}}",
     "memberEditing": "区間を編集中(現在 {{n}}区間)",
     "memberEditDone": "完了",
     "traceOffer": "直進方向の {{n}}区間 も同じ道路にしますか?",
@@ -49,6 +50,7 @@
       "speedLimit": "制限速度",
       "travelTime": "所要時間",
       "travelTimeUnavailable": "計画中・工事中の区間を含むため算出できません",
+      "travelTimeUnavailableImpassable": "稼働していない区間や通行できない区間を含むため算出できません",
       "travelTimeValue": "{{congested}}(自由走行 {{free}})",
       "travelSpeed": "旅行速度",
       "travelSpeedValue": "{{congested}}(自由走行 {{free}})",
@@ -91,9 +93,8 @@
       "bridge": "橋",
       "origin": "起点",
       "terminus": "終点",
-      "interchange": "{{name}} {{kind}}",
-      "interchangeUnnamed": "{{kind}}",
       "stopUnnamed": "停留所",
+      "branch": "枝 {{name}}",
       "lanes": "{{n}}車線",
       "trafficValue": "{{traffic}}台/日・{{vc}}",
       "trafficValueNoVc": "{{traffic}}台/日",
@@ -104,7 +105,7 @@
       "legendMid": "50〜80%",
       "legendHigh": "80%以上",
       "legendNoCapacity": "容量なし",
-      "legendInactive": "計画中・工事中",
+      "legendInactive": "稼働していない区間",
       "legendWidth": "線の太さ=車線数",
       "trafficHeader": "交通量・混雑度"
     },
@@ -132,7 +133,7 @@
         "parking": "台"
       },
       "noSegment": "区間なし(未接続)",
-      "sumNote": "上下線が分かれている区間は、両方向の合計を表示しています。",
+      "sumNote": "車種別の内訳は上下線の合計です。上下線が分かれている区間は、方向別の合計を線で重ねています。",
       "noData": "表示できる値がありません。"
     }
   }

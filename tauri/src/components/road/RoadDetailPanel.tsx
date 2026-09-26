@@ -17,7 +17,9 @@
  * (ウィンドウは非表示で再利用され、アンマウント処理が走らないことがあるため)。
  *
  * 区間編集モード中は Unity から届く edit_road:toggle_path で所属を付け外しし、結果の全集合を
- * edit_road:set_members で送り返す。道路・所属を変えたら notifyRoadsChanged で他ウィンドウと Unity に知らせる。
+ * edit_road:set_members で送り返す。Unity のモードは UI の知らない理由(Esc・別のモードへの切り替えなど)でも
+ * 終わるので、編集中の表示は Unity の edit_road:ended を受けて落とす。
+ * 道路・所属を変えたら notifyRoadsChanged で他ウィンドウと Unity に知らせる。
  * 道路の区間が0本になるとバックエンドが道路を削除するので、取得が404になったら削除済みの表示に切り替える。
  */
 
@@ -29,15 +31,17 @@ import { emit, listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { ApiError } from "../../utils/api";
 import {
+  IPC_EVENT_ROAD_EDIT_ENDED,
   IPC_EVENT_ROAD_TOGGLE_PATH,
   sendClearRoadFocus,
   sendEndRoadMemberEdit,
   sendRoadEditSetMembers,
   sendRoadFocus,
   sendStartRoadMemberEdit,
+  type RoadEditEndedPayload,
   type RoadTogglePathPayload,
 } from "../../utils/ipc";
-import { setHintbarText } from "../../utils/hintbar";
+import { clearHintbarTextIf, setHintbarText } from "../../utils/hintbar";
 import { resolveIntlLocale } from "../../utils/locale";
 import { resolvePathIcon } from "../../utils/pathIcon";
 import { ROAD_COLOR_PALETTE, ROAD_NAME_MAX_LENGTH } from "../../constants";
@@ -53,12 +57,13 @@ import {
   fetchRoadList,
   isNamedRoadPathType,
   notifyRoadsChanged,
+  resolveTraceBbox,
   roadDisplayName,
   traceRoad,
   updateRoad,
   updateRoadMembers,
 } from "./roadApi";
-import type { RoadDetail, RoadSummary } from "./roadTypes";
+import type { RoadDetail, RoadSummary, RoadTraceResponse } from "./roadTypes";
 import {
   ROAD_VC_CONGESTED,
   dominantPathType,
@@ -89,8 +94,11 @@ type RoadDetailPanelProps = {
 
 type Notice = { text: string; tone: "info" | "error" };
 
-/** 追加候補(直進方向の自動延長)。offer=true は新規作成直後の提案 */
-type TracePreview = { ids: number[]; offer: boolean };
+/**
+ * 追加候補(直進方向の自動延長)。offer=true は新規作成直後の提案。
+ * bbox は候補の範囲で、全体図の表示範囲に含める(範囲外の区間は地図に読み込まれず描けないため)。
+ */
+type TracePreview = { ids: number[]; offer: boolean; bbox: [number, number, number, number] | null };
 
 /**
  * 区間編集モードを始めた道路詳細パネルが、他の道路詳細パネルへ知らせる Tauri のグローバルイベント
@@ -98,6 +106,9 @@ type TracePreview = { ids: number[]; offer: boolean };
  * 届くため、後から始めたパネル以外は編集中の状態を捨てる(残すと別の道路へ区間を付け替えてしまう)。
  */
 const ROAD_MEMBER_EDIT_STARTED_EVENT = "road:member_edit_started";
+
+/** 道路詳細を閉じるときに Rust(window.rs)がそのパネルだけへ送るイベント */
+const ROAD_PANEL_CLOSING_EVENT = "road:panel_closing";
 
 /**
  * 閉じたパネルはウィンドウが非表示で残り、リスナーも生きている。非表示のパネルから3Dの強調帯や
@@ -139,6 +150,10 @@ export function RoadDetailPanel({ apiBaseUrl, initialEntityId, offerTrace = fals
   const lastMembersSigRef = useRef<string>("");
   const toggleChainRef = useRef<Promise<void>>(Promise.resolve());
   const offeredRef = useRef(false);
+  /** 区間編集の開始ごとの番号。Unity の edit_road:ended と照合し、遅れて届いた前回の終了で新しい編集を落とさない */
+  const sessionRef = useRef(0);
+  /** このパネルがヒントバーに出した案内(片付けるときに、他のパネルの案内を消さないよう照合する) */
+  const hintTextRef = useRef("");
 
   const refresh = useCallback(() => setRefreshKey((k) => k + 1), []);
 
@@ -209,7 +224,6 @@ export function RoadDetailPanel({ apiBaseUrl, initialEntityId, offerTrace = fals
   }, [focusSig]);
 
   // 3Dの強調帯は1本だけなので、道路詳細を複数開いているときはフォーカスを得たパネルの道路を出し直す
-  // (別の道路詳細を閉じると Rust 側が強調帯を消すため、残ったパネルを触れば戻るようにする)
   const focusRef = useRef<{ roadId: number; color: string; ids: number[] } | null>(null);
   focusRef.current = road && focusIds ? { roadId: road.road_id, color: road.color, ids: focusIds } : null;
   useEffect(() => {
@@ -236,20 +250,14 @@ export function RoadDetailPanel({ apiBaseUrl, initialEntityId, offerTrace = fals
     previewRef.current = tracePreview?.ids ?? [];
   }, [tracePreview]);
 
+  // アンマウント時には何も送らない。閉じたときの後始末は Rust が行い、非表示のウィンドウが別の種類に
+  // 転用されてアンマウントされる時点では、表示中の別の道路詳細の強調やヒントを消してしまうため。
   useEffect(() => {
     if (!deleted) return;
     void isWindowVisible().then((visible) => {
-      if (visible) void sendClearRoadFocus();
+      if (visible) void sendClearRoadFocus(roadId);
     });
-  }, [deleted]);
-
-  useEffect(
-    () => () => {
-      void sendClearRoadFocus();
-      if (editingRef.current) void setHintbarText("");
-    },
-    [],
-  );
+  }, [deleted, roadId]);
 
   /** 区間編集モード中の所属・候補を Unity へ送る(同じ内容は送り直さない) */
   const syncEditMembers = useCallback(
@@ -277,19 +285,25 @@ export function RoadDetailPanel({ apiBaseUrl, initialEntityId, offerTrace = fals
   }, [apiBaseUrl]);
 
   /* ---- 区間編集モード ---- */
+  /**
+   * 編集中の表示を落とす(Unity へは何も送らない)。clearHint=true なら自分の案内をヒントバーから片付ける。
+   * 別の道路詳細が編集を始めたときは、その案内で上書き済みなので片付けない。
+   */
+  const dropMemberEdit = useCallback((clearHint: boolean) => {
+    editingRef.current = false;
+    lastMembersSigRef.current = "";
+    setMemberEditing(false);
+    if (clearHint && hintTextRef.current !== "") void clearHintbarTextIf(hintTextRef.current);
+    hintTextRef.current = "";
+  }, []);
+
+  // Unity はこの道路の区間編集モード中のときだけ終える。UI の知らないうちに別のモードへ移っていても
+  // それを打ち切らないので、非表示のパネル・削除や404の後始末から呼んでもよい
   const endMemberEdit = useCallback(() => {
     if (!editingRef.current) return;
-    editingRef.current = false;
-    setMemberEditing(false);
-    lastMembersSigRef.current = "";
-    // 非表示のパネルでは Rust が閉じる時点で edit_road:cancel を送り済みで、STATE_NORMAL を送ると
-    // 他のパネルが始めた編集モードを打ち切ってしまう
-    void isWindowVisible().then((visible) => {
-      if (!visible) return;
-      void sendEndRoadMemberEdit();
-      void setHintbarText("");
-    });
-  }, []);
+    dropMemberEdit(true);
+    void sendEndRoadMemberEdit(roadId);
+  }, [dropMemberEdit, roadId]);
 
   // 他の道路詳細パネルが区間編集モードを始めたら、こちらの編集中の状態は Unity 側で無効になっている
   useEffect(() => {
@@ -298,9 +312,7 @@ export function RoadDetailPanel({ apiBaseUrl, initialEntityId, offerTrace = fals
     let disposed = false;
     listen<{ label: string }>(ROAD_MEMBER_EDIT_STARTED_EVENT, (event) => {
       if (event.payload.label === ownLabel || !editingRef.current) return;
-      editingRef.current = false;
-      lastMembersSigRef.current = "";
-      setMemberEditing(false);
+      dropMemberEdit(false);
     })
       .then((fn) => (disposed ? fn() : (unlisten = fn)))
       .catch(console.error);
@@ -308,16 +320,62 @@ export function RoadDetailPanel({ apiBaseUrl, initialEntityId, offerTrace = fals
       disposed = true;
       unlisten?.();
     };
-  }, []);
+  }, [dropMemberEdit]);
+
+  // Unity の区間編集モードが終わった(理由を問わない)。自分の道路の今回の編集なら表示を落とす
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    let disposed = false;
+    listen<RoadEditEndedPayload>(IPC_EVENT_ROAD_EDIT_ENDED, (event) => {
+      const { road_id: endedRoadId, session_id: sessionId } = event.payload;
+      if (!editingRef.current || endedRoadId !== roadId) return;
+      // 番号は正の整数で採番する。欠けている・0以下(Unity が受け取れなかったときの既定値)は照合できないので道路IDだけで判断する
+      const endedSession = Number(sessionId);
+      if (Number.isFinite(endedSession) && endedSession > 0 && endedSession !== sessionRef.current) return;
+      dropMemberEdit(true);
+    })
+      .then((fn) => (disposed ? fn() : (unlisten = fn)))
+      .catch(console.error);
+    return () => {
+      disposed = true;
+      unlisten?.();
+    };
+  }, [roadId, dropMemberEdit]);
+
+  // 閉じられた。Unity のモードは Rust が edit_road:cancel で終えるので、表示と案内だけ片付ける
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    let disposed = false;
+    getCurrentWindow()
+      .listen(ROAD_PANEL_CLOSING_EVENT, () => {
+        if (editingRef.current) dropMemberEdit(true);
+        setTracePreview(null);
+      })
+      .then((fn) => (disposed ? fn() : (unlisten = fn)))
+      .catch(console.error);
+    return () => {
+      disposed = true;
+      unlisten?.();
+    };
+  }, [dropMemberEdit]);
 
   const startMemberEdit = useCallback(() => {
     if (!road) return;
     editingRef.current = true;
     setMemberEditing(true);
     lastMembersSigRef.current = `${road.path_ids.join(",")}|`;
+    // Unity 側で int に収まる正の値にする。時刻から採るのは、閉じて開き直した同じ道路のパネル(前回の番号を覚えていない)とも重ならないため
+    const nextSession = (Date.now() % 1_000_000_000) || 1;
+    sessionRef.current = nextSession !== sessionRef.current ? nextSession : (nextSession % 999_999_999) + 1;
     void emit(ROAD_MEMBER_EDIT_STARTED_EVENT, { label: getCurrentWindow().label });
-    void sendStartRoadMemberEdit(road.road_id, road.color, road.path_ids);
-    void setHintbarText(t("road.memberEditHint"));
+    void sendStartRoadMemberEdit(road.road_id, road.color, road.path_ids, sessionRef.current);
+    // 道路名を含めて他の道路詳細の案内と区別できるようにする(片付けるときの照合に使う)
+    const hint = t("road.memberEditHintFor", {
+      road: roadDisplayName(road.name, road.road_id, t),
+      hint: t("road.memberEditHint"),
+    });
+    hintTextRef.current = hint;
+    void setHintbarText(hint);
     loadRoadList();
     setNotice(null);
   }, [road, t, loadRoadList]);
@@ -395,7 +453,11 @@ export function RoadDetailPanel({ apiBaseUrl, initialEntityId, offerTrace = fals
       // 連打で所属の更新が前後しないよう、1件ずつ順に処理する
       toggleChainRef.current = toggleChainRef.current
         .then(() => handleToggle(event.payload))
-        .catch((err: unknown) => setNotice({ text: errorText(err, t), tone: "error" }));
+        .catch((err: unknown) => {
+          setNotice({ text: errorText(err, t), tone: "error" });
+          // 他の操作で区間が消えていた(分割・結合・削除)なら、取り直して次のクリックに備える
+          refresh();
+        });
     })
       .then((fn) => (disposed ? fn() : (unlisten = fn)))
       .catch(console.error);
@@ -403,28 +465,29 @@ export function RoadDetailPanel({ apiBaseUrl, initialEntityId, offerTrace = fals
       disposed = true;
       unlisten?.();
     };
-  }, [memberEditing, handleToggle, t]);
+  }, [memberEditing, handleToggle, t, refresh]);
 
   /* ---- 直進方向の自動延長 ---- */
   const showTracePreview = useCallback(
-    (ids: number[], offer: boolean) => {
-      const fresh = ids.filter((id) => !membersRef.current.includes(id));
+    async (res: RoadTraceResponse, offer: boolean) => {
+      const fresh = res.path_ids.filter((id) => !membersRef.current.includes(id));
       if (fresh.length === 0) {
         if (!offer) setNotice({ text: t("road.noTraceCandidates"), tone: "info" });
         setTracePreview(null);
         return;
       }
-      setTracePreview({ ids: fresh, offer });
+      const bbox = await resolveTraceBbox(apiBaseUrl, res, fresh).catch(() => null);
+      setTracePreview({ ids: fresh, offer, bbox });
       setNotice(null);
     },
-    [t],
+    [apiBaseUrl, t],
   );
 
   const handleTraceFromEnds = useCallback(async () => {
     setBusy(true);
     try {
       const res = await traceRoad(apiBaseUrl, { roadId });
-      showTracePreview(res.path_ids, false);
+      await showTracePreview(res, false);
     } catch (err) {
       setNotice({ text: errorText(err, t), tone: "error" });
     } finally {
@@ -437,7 +500,7 @@ export function RoadDetailPanel({ apiBaseUrl, initialEntityId, offerTrace = fals
     if (!road || !offerTrace || seedPathId == null || offeredRef.current) return;
     offeredRef.current = true;
     traceRoad(apiBaseUrl, { pathId: seedPathId, roadId })
-      .then((res) => showTracePreview(res.path_ids, true))
+      .then((res) => showTracePreview(res, true))
       .catch(console.error);
   }, [road, offerTrace, seedPathId, apiBaseUrl, roadId, showTracePreview]);
 
@@ -698,8 +761,15 @@ export function RoadDetailPanel({ apiBaseUrl, initialEntityId, offerTrace = fals
 
                 <span className="agent-detail-label">{t("road.stats.travelTime")}</span>
                 <span className="agent-detail-value road-detail__wrap">
+                  {/* 算出できない理由は、計画中・工事中の区間があるときだけそれと言い、無ければ稼働停止・通行不能を挙げる */}
                   {stats.travel_time_min == null && stats.travel_time_free_min == null
-                    ? <span className="road-detail__muted">{t("road.stats.travelTimeUnavailable")}</span>
+                    ? (
+                        <span className="road-detail__muted">
+                          {t(stats.planned_length_m > 0
+                            ? "road.stats.travelTimeUnavailable"
+                            : "road.stats.travelTimeUnavailableImpassable")}
+                        </span>
+                      )
                     : t("road.stats.travelTimeValue", {
                         congested: minutes(stats.travel_time_min),
                         free: minutes(stats.travel_time_free_min),
@@ -777,6 +847,7 @@ export function RoadDetailPanel({ apiBaseUrl, initialEntityId, offerTrace = fals
               pathIds={road.path_ids}
               color={road.color}
               previewPathIds={tracePreview?.ids ?? null}
+              previewBbox={tracePreview?.bbox ?? null}
             />
           </section>
         )}

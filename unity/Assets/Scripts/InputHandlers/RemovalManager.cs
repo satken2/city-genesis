@@ -18,6 +18,10 @@ using GeneratedModels;
 /// - 削除クリック時に trash 効果音を鳴らす(クリップは IpcStateCoordinator から渡される)。
 /// - 削除成功後は差分リロード(CellDataLoader.ReloadAllData)を短時間デバウンスして
 ///   一度だけ呼び、3D表現を実データに追随させる。区画は即時にローカル除去する。
+/// - 道路(名前付き道路)に属する区間を消したときは、
+///   同じデバウンスの終わりに world:roads_changed を UI へ1回送り、道路一覧も取り直す。
+///   UI の道路操作は UI 自身が notifyRoadsChanged するが、ブルドーザは UI を通らないため
+///   (区間が0本になった道路はバックエンドが削除するので、開いている詳細パネルに知らせる必要がある)。
 ///
 /// 地形プロップは個体ごとの GameObject/Collider を持たない(GPUインスタンシング)ため、
 /// InputHandler のレイキャストには掛からない。クリック/ホバー時に InputHandler が本クラスへ
@@ -61,6 +65,8 @@ public class RemovalManager : MonoBehaviour
     private bool _reloadScheduled = false;
     private float _reloadDeadline = 0f;
     private const float RELOAD_DEBOUNCE_SECONDS = 0.35f;
+    /// <summary>次のデバウンス明けに world:roads_changed を送るか(道路に属する区間の削除が成功した)。</summary>
+    private bool _roadsChangedPending = false;
 
     // UIの確認待ち中の範囲配置プロップID(0=待ちなし)。待ち中は別の範囲配置クリックを受けない。
     private int _pendingScatterId = 0;
@@ -182,10 +188,15 @@ public class RemovalManager : MonoBehaviour
             default: return;
         }
 
+        // 所属は削除前に引く(削除後に取り直した一覧からは消えている)。一覧の取り直し前に所属した区間も
+        // 拾えるようパスの road_id も見る(古くて余計に送っても、UI が取り直すだけで害はない)。
+        bool isRoadMember = objectType == InputObjectType.PATH && IsRoadMemberPath(id);
+
         _processed.Add(key);
         PlayClickSound();
         StartCoroutine(DeleteRequest(endpoint, id, () =>
         {
+            if (isRoadMember) _roadsChangedPending = true;
             // 区画は即時にローカル除去してオーバーレイ・コライダーを消す
             // (以後 GetParcelIdAtPoint でも拾われなくなる)。建物/道路の3D表現除去は差分リロードに委ねる。
             if (objectType == InputObjectType.PARCEL)
@@ -194,6 +205,14 @@ public class RemovalManager : MonoBehaviour
                 _parcelManager?.RemoveParcel(id);
             }
         }));
+    }
+
+    private bool IsRoadMemberPath(int pathId)
+    {
+        if (RoadManager.Instance != null && RoadManager.Instance.GetRoadIdOfPath(pathId) > 0) return true;
+        if (_pathManager == null) _pathManager = FindAnyObjectByType<PathManager>();
+        PathSummary p = _pathManager != null ? _pathManager.GetPathData(pathId) : null;
+        return p != null && p.road_id.HasValue && p.road_id.Value > 0;
     }
 
     // ======================================================================
@@ -367,9 +386,17 @@ public class RemovalManager : MonoBehaviour
             yield return null;
         }
         _reloadScheduled = false;
+        bool roadsChanged = _roadsChangedPending;
+        _roadsChangedPending = false;
+        if (roadsChanged) IpcClient.Instance?.EmitRoadsChanged();
         if (CellDataLoader.Instance != null)
         {
+            // 道路一覧の取り直し(RoadManager.RequestRefresh)も ReloadAllData に含まれる。
             CellDataLoader.Instance.ReloadAllData();
+        }
+        else if (roadsChanged)
+        {
+            RoadManager.Instance?.RequestRefresh();
         }
     }
 }

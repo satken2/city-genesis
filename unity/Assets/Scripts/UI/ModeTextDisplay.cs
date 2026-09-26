@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -20,36 +19,23 @@ public class ModeTextDisplay : MonoBehaviour
         ("STATE_FLY_MODE", "STATE_FLY_MODE (Shift + F to exit)"),
     };
 
-    // 直近にIPCから受信したステート。フライモード終了時にこのキャプションへ戻すために保持する。
+    // 直近に適用されたステート。フライモード終了時にこのキャプションへ戻すために保持する。
     private string lastState = "STATE_NORMAL";
 
+    // IPC の world:change_state ではなく、Unity が実際に適用したステートを購読する。
+    // パネルを閉じたときの編集モードの打ち切りや Esc など、Unity 内部で通常モードへ戻る経路にも追従するため。
     private void OnEnable()
     {
-        TrySubscribe();
-    }
-
-    private void Start()
-    {
-        // OnEnableがIpcClient.Awakeより前に実行された場合のフォールバック
-        TrySubscribe();
+        IpcStateCoordinator.OnStateApplied -= OnStateChanged;
+        IpcStateCoordinator.OnStateApplied += OnStateChanged;
     }
 
     private void OnDisable()
     {
-        if (IpcClient.Instance != null)
-            IpcClient.Instance.OnWorldChangeState -= OnStateChanged;
+        IpcStateCoordinator.OnStateApplied -= OnStateChanged;
     }
 
-    private void TrySubscribe()
-    {
-        if (IpcClient.Instance != null)
-        {
-            IpcClient.Instance.OnWorldChangeState -= OnStateChanged;
-            IpcClient.Instance.OnWorldChangeState += OnStateChanged;
-        }
-    }
-
-    private void OnStateChanged(string state, Dictionary<string, object> ipcParams)
+    private void OnStateChanged(string state)
     {
         // フライモード中にIPCステートが届いた場合でも、直近ステートは記録しておき、
         // 表示自体はフライモードのキャプションを優先する（終了時に正しく復帰させるため）。

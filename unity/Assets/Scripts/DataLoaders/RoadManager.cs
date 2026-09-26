@@ -184,11 +184,14 @@ public class RoadManager : MonoBehaviour
         return roadIdByPath.TryGetValue(pathId, out int roadId) ? roadId : Constants.VALUE_NONE;
     }
 
-    /// <summary>名前が空なら番号だけにする(Unityには多言語リソースが無いため翻訳不要な表記を使う)。</summary>
+    /// <summary>
+    /// 名前が空なら UI の road.unnamed と同じ「道路 #id」にする(Unity には多言語リソースが無いため、
+    /// 周りのツールチップ文言と同じく日本語固定)。3D の道路名ラベルは名前の無い道路を出さないので使わない。
+    /// </summary>
     public static string GetDisplayName(RoadSummary road)
     {
         if (road == null) return "";
-        return string.IsNullOrWhiteSpace(road.name) ? $"#{road.road_id}" : road.name;
+        return string.IsNullOrWhiteSpace(road.name) ? $"道路 #{road.road_id}" : road.name;
     }
 
     /// <summary>"#rrggbb" を色にする。読めなければ白。</summary>

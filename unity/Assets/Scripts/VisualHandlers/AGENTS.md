@@ -80,12 +80,12 @@
 ## RoadFocusOverlay(道路の強調帯)
 
 - 道路(名前付き道路)の区間を中心線に沿った道路色の帯で最前面に描く。`TransitOverlayManager` と同じく `OverlayMeshRenderer`(`alwaysOnTop`、描画キュー3202〜3204=公共交通の帯より手前)で、画面上の幅はズームによらず一定(縁取り14px・帯9px)。`RoadFocusOverlay.Ensure()` で遅延生成する。
-- 描く集合は2系統: ①強調=道路詳細パネルが開いている道路の区間(`world:set_road_focus` で全置換、`world:clear_road_focus` で消去)。②区間編集=`RoadMemberEditManager` が渡す所属区間(道路色)と自動延長の追加候補(同じ色の半透明、縁取りなし)、ホバー中の区間の白い細線。**区間編集中は①を描かない**(①の集合はパネルが取り直すまで古く、外した区間が残って見えるため)。編集の終了で①に戻る。既存の `world:highlight_objects`(干渉用の警告色)とは別系統で、VisualMode・InputMode には何も追加しない。
-- 帯は未切断の中心線(`PathManager.TryGetPathPolyline(id, out pts, trimIntersection:false)`)を使い、交差点の中でも途切れさせない。未ロードの区間は描かない。形状は0.5秒ごとに区間の署名(データ参照・version・`GetPathGeometryRevision`)を比べて変化したときだけ作り直し(5秒ごとの安全再構築あり)、カメラの変化では帯の画面幅だけ更新する。32本単位の外接箱で視錐台カリングする。セッションリセットで `ClearAll`。
+- 描く集合は2系統: ①強調=道路詳細パネルが開いている道路の区間(`world:set_road_focus` で全置換、`world:clear_road_focus` で消去。road_id 付きの消去は強調中の道路と一致するときだけ)。②区間編集=`RoadMemberEditManager` が渡す所属区間(道路色)と自動延長の追加候補(同じ色の半透明、縁取りなし)、ホバー中の区間の白い細線。**区間編集中は①を描かない**(①の集合はパネルが取り直すまで古く、外した区間が残って見えるため)。編集の終了で①に戻る。既存の `world:highlight_objects`(干渉用の警告色)とは別系統で、VisualMode・InputMode には何も追加しない。
+- 帯は未切断の中心線(`PathManager.TryGetUntrimmedPolylineShared`。キャッシュの共有点列を複製せず読み取り専用で受け取る)を使い、交差点の中でも途切れさせない。未ロードの区間は描かない。形状は0.5秒ごとに区間の署名(データ参照・version・`GetPathGeometryRevision`)を比べて変化したときだけ作り直し(5秒ごとの安全再構築あり)、カメラの変化では帯の画面幅だけ更新する。ホバーの白線は本体と別系統(専用の dirty と署名)で、ホバーの出入りではホバー線だけを作り直して描き、本体の帯の点列取得・メッシュ再構築は起こさない。32本単位の外接箱で視錐台カリングする。セッションリセットで `ClearAll`。
 
 ## 道路統計(VisualPathStats)のデータ源
 
-- `utilization`・`durability`・`zone_id` は `PathSummary` の同名フィールド、`effective_speed` は `PathSummary.base_speed`(形状から決まる通過速度 km/h)、`pedestrian_traffic` は `path_traffic` の歩行者キー(`VEHICLE_PEDESTRIAN` を文字列にした `"0"`。1日あたりの通過トリップ数)。存在しないフィールドをリフレクションで読むと常に0になり、速度・歩行者の色分けが無反応になるので、フィールドは直接参照する。
+- `utilization`・`durability`・`zone_id` は `PathSummary` の同名フィールド、`effective_speed` は `PathSummary.base_speed`(形状から決まる通過速度 km/h。カーブ・勾配・交差点での加減速を含むので、短い区間ほど制限速度より低い。このため速度色分けの名称は「通過速度色分け」)、`pedestrian_traffic` は `path_traffic` の歩行者キー(`VEHICLE_PEDESTRIAN` を文字列にした `"0"`。1日あたりの通過トリップ数)。存在しないフィールドをリフレクションで読むと常に0になり、速度・歩行者の色分けが無反応になるので、フィールドは直接参照する。
 
 ## 道路・線路の制限速度標識
 

@@ -786,6 +786,15 @@ pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) 
         let guard = state.lock();
         guard.open_windows.get(label).map(|w| w.window_type.clone())
     };
+    let entity_id: Option<i64> = {
+        let guard = state.lock();
+        guard
+            .open_windows
+            .get(label)
+            .and_then(|w| w.entity.as_ref())
+            .and_then(|e| e.id.as_ref())
+            .and_then(|id| id.parse::<i64>().ok())
+    };
 
     // 冪等性のため、エントリが存在しない場合または既に非表示(再利用待ち)の場合は何もしない。
     // 二回目以降の呼び出しはここで早期リターンする。
@@ -916,24 +925,33 @@ pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) 
                 json!({}),
             );
         } else if wt == "road_detail" {
-            // 道路詳細パネルが閉じられたとき、3Dの道路の強調帯を消し、区間編集モード中なら打ち切る。
+            // 道路詳細パネルが閉じられたとき、3Dの道路の強調帯を消し、この道路の区間編集モード中なら打ち切る。
             // ウィンドウは非表示(再利用待ち)になるだけでReact側のアンマウント処理が走らないため、
-            // クローズ処理側で明示的に送る(path_detail と同じ理由)。Unity側は区間編集モード中で
-            // なければ edit_road:cancel を無視する。
+            // クローズ処理側で明示的に送る(path_detail と同じ理由)。
+            // 道路詳細は道路ごとに1枚ずつ同時に開けるので、閉じた道路の road_id を載せる。Unity は
+            // 区間編集モード中でないか、別の道路の編集中なら edit_road:cancel を無視する
+            // (載せないと、別の道路詳細パネルが進めている編集まで打ち切ってしまう)。
+            let params = match entity_id {
+                Some(id) => json!({ "road_id": id }),
+                None => json!({}),
+            };
             let _ = ipc::send_ui_action(
                 state,
                 wt.clone(),
                 None,
                 "world:clear_road_focus".to_string(),
-                json!({}),
+                params.clone(),
             );
             let _ = ipc::send_ui_action(
                 state,
                 wt.clone(),
                 None,
                 "edit_road:cancel".to_string(),
-                json!({}),
+                params,
             );
+            // 閉じるパネル自身にも知らせ、区間編集中の表示とヒントバーの案内を片付けさせる
+            // (パネルはマウントされたまま非表示になり、閉じられたことを他に知る手段がない)。
+            let _ = app.emit_to(label, "road:panel_closing", json!({}));
         } else if wt == "path_detail" {
             // パス詳細パネルが閉じられたとき、着工前パスの干渉ハイライトをクリアする。
             // ウィンドウは非表示(再利用待ち)になるだけでReact側のアンマウント処理による

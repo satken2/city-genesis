@@ -4,7 +4,7 @@
     "titleInRoad": "{{road}} (section #{{id}})",
     "road": {
       "label": "Road",
-      "none": "None (unnamed road)",
+      "none": "None (not part of a road)",
       "createNew": "+ New road…",
       "newPlaceholder": "Road name (blank shows a number)",
       "create": "Create",

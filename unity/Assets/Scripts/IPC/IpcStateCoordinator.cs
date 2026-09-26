@@ -13,6 +13,13 @@ public class IpcStateCoordinator : MonoBehaviour
     // インスペクタで Assets/Sounds/trash.mp3 を割り当てる。
     [SerializeField] private AudioClip trashSound;
 
+    /// <summary>
+    /// Unity が実際に適用したステート。world:change_state の受信だけでなく、パネルを閉じたときの
+    /// 編集モードの打ち切りや Esc など、Unity 内部で通常モードへ戻したときにも発火する
+    /// (モード表示を IPC のステートだけで追うと、内部の復帰に追従できないため)。
+    /// </summary>
+    public static event Action<string> OnStateApplied;
+
     private void OnEnable()
     {
         if (IpcClient.Instance != null)
@@ -130,7 +137,8 @@ public class IpcStateCoordinator : MonoBehaviour
             PathTopologyEditManager.Instance.EndMode();
         }
 
-        // 道路の区間編集モードから別モードへ直接遷移した場合にも、区間編集の帯を確実に片付ける。
+        // 道路の区間編集モードから別モードへ直接遷移した場合にも、区間編集の帯を確実に片付ける
+        // (End が edit_road:ended を送り、開いたままの道路詳細パネルの「区間を編集中」を解除させる)。
         if (state != "STATE_EDIT_ROAD_MEMBERS" && RoadMemberEditManager.Instance != null && RoadMemberEditManager.Instance.IsActive)
         {
             RoadMemberEditManager.Instance.End();
@@ -248,6 +256,26 @@ public class IpcStateCoordinator : MonoBehaviour
                 coordinator.ApplyAllLayerModes();
             }
         }
+
+        OnStateApplied?.Invoke(state);
+    }
+
+    /// <summary>
+    /// UI から STATE_NORMAL が届いたときと同じ手順で、Unity 内部の理由により通常モードへ戻す。
+    /// 表示は記憶された通常状態を復元してから一括適用する(ApplyStateNormal の注記を参照)。
+    /// </summary>
+    private void ReturnToNormalState()
+    {
+        ApplyStateNormal();
+
+        var coordinator = FindAnyObjectByType<IpcViewCoordinator>();
+        if (coordinator != null)
+        {
+            coordinator.SyncFromState("STATE_NORMAL");
+            coordinator.ApplyAllLayerModes();
+        }
+
+        OnStateApplied?.Invoke("STATE_NORMAL");
     }
 
     /// <summary>
@@ -432,7 +460,8 @@ public class IpcStateCoordinator : MonoBehaviour
 
     /// <summary>
     /// STATE_EDIT_ROAD_MEMBERS: 道路の区間編集モード。
-    /// params は {road_id, color, path_ids}(開始時点の所属区間)。街路・高速道路の区間だけを
+    /// params は {road_id, color, path_ids, session_id}(path_ids は開始時点の所属区間。session_id は
+    /// 終了時の edit_road:ended でそのまま返す照合用の値で、省略可)。街路・高速道路の区間だけを
     /// クリック可能にし、クリックは RoadMemberEditManager が edit_road:toggle_path として UI へ送る。
     /// 表示は計画中の区間も選べるよう道路敷設モードと同じ「計画表示」に揃える(SyncFromState)。
     /// </summary>
@@ -450,6 +479,7 @@ public class IpcStateCoordinator : MonoBehaviour
         }
         string color = ipcParams.TryGetValue("color", out object colorObj) ? colorObj?.ToString() : null;
         int[] pathIds = ipcParams.TryGetValue("path_ids", out object idsObj) ? ReadIntArray(idsObj) : System.Array.Empty<int>();
+        object sessionId = ipcParams.TryGetValue("session_id", out object sessionObj) ? ReadSessionId(sessionObj) : null;
 
         if (InputSystemManager.Instance != null)
         {
@@ -458,28 +488,50 @@ public class IpcStateCoordinator : MonoBehaviour
 
         // VisualMode の適用は IpcViewCoordinator.SyncFromState(ステート別の表示プリセット)が行う。
 
-        RoadMemberEditManager.Ensure().Begin(roadId, RoadManager.ParseColor(color), pathIds);
+        RoadMemberEditManager.Ensure().Begin(roadId, RoadManager.ParseColor(color), pathIds, sessionId);
     }
 
     /// <summary>
-    /// edit_road:cancel: 道路詳細パネルのウィンドウが閉じられた。区間編集モード中なら打ち切って通常モードへ戻す。
-    /// パネルのウィンドウは閉じても非表示になるだけでアンマウント処理が走らないため、Rust 側が送る
-    /// (edit_path:cancel_topology_edit と同じ理由)。モード中でなければ他のモードを巻き込まないよう何もしない。
+    /// params.session_id を、受け取った JSON の型のまま返せる値にする(整数は long、文字列は string)。
+    /// UI は edit_road:ended の session_id を厳密比較するため、数値を文字列に変えたりしない。
+    /// 整数・文字列以外(null・小数・配列など)は照合に使えないので null(返すときに省く)。
     /// </summary>
-    private void HandleEditRoadCancel()
+    private static object ReadSessionId(object value)
+    {
+        if (value is Newtonsoft.Json.Linq.JValue jValue) value = jValue.Value;
+        switch (value)
+        {
+            case string s: return s;
+            case long l: return l;
+            case int i: return (long)i;
+            default: return null;
+        }
+    }
+
+    /// <summary>
+    /// edit_road:cancel {road_id}: 道路詳細パネルの「完了」、またはそのパネルのウィンドウが閉じられた
+    /// (閉じたときは、非表示になるだけでアンマウント処理が走らないため Rust 側が送る。
+    /// edit_path:cancel_topology_edit と同じ理由)。その道路の区間編集モード中なら打ち切って通常モードへ戻す。
+    /// 別の道路の編集中やモード外では何もしない(残ったパネルの古い「完了」や、関係のないパネルを閉じたことで
+    /// 道路敷設など他のモードや他の道路の編集を巻き込まないため)。
+    /// </summary>
+    private void HandleEditRoadCancel(int roadId)
+    {
+        var manager = RoadMemberEditManager.Instance;
+        if (manager == null || !manager.IsActive || manager.RoadId != roadId) return;
+
+        manager.End();
+        ReturnToNormalState();
+    }
+
+    /// <summary>区間編集モード中の Esc(RoadMemberEditManager から呼ばれる)。通常モードへ戻す。</summary>
+    public void ExitRoadMemberEditToNormal()
     {
         var manager = RoadMemberEditManager.Instance;
         if (manager == null || !manager.IsActive) return;
 
         manager.End();
-        ApplyStateNormal();
-
-        var coordinator = FindAnyObjectByType<IpcViewCoordinator>();
-        if (coordinator != null)
-        {
-            coordinator.SyncFromState("STATE_NORMAL");
-            coordinator.ApplyAllLayerModes();
-        }
+        ReturnToNormalState();
     }
 
     /// <summary>
@@ -502,14 +554,7 @@ public class IpcStateCoordinator : MonoBehaviour
             FindAnyObjectByType<PathManager>()?.RemovePathLocally(removedPathId);
         }
 
-        ApplyStateNormal();
-
-        var coordinator = FindAnyObjectByType<IpcViewCoordinator>();
-        if (coordinator != null)
-        {
-            coordinator.SyncFromState("STATE_NORMAL");
-            coordinator.ApplyAllLayerModes();
-        }
+        ReturnToNormalState();
 
         // 再取得は最後に開始する(この後に状態遷移が割り込むと、進行中の差分リロードの
         // コルーチンが取り消されて削除・再生成が中途半端に終わる)。
@@ -531,14 +576,7 @@ public class IpcStateCoordinator : MonoBehaviour
         if (manager == null || !manager.IsActive) return;
 
         manager.EndMode();
-        ApplyStateNormal();
-
-        var coordinator = FindAnyObjectByType<IpcViewCoordinator>();
-        if (coordinator != null)
-        {
-            coordinator.SyncFromState("STATE_NORMAL");
-            coordinator.ApplyAllLayerModes();
-        }
+        ReturnToNormalState();
     }
 
     /// <summary>

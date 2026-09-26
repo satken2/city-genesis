@@ -4,7 +4,7 @@
     "titleInRoad": "{{road}} (tramo n.º {{id}})",
     "road": {
       "label": "Carretera",
-      "none": "Ninguna (calle sin nombre)",
+      "none": "Ninguna (no pertenece a una carretera)",
       "createNew": "+ Nueva carretera…",
       "newPlaceholder": "Nombre de la carretera (vacío: se muestra un número)",
       "create": "Crear",

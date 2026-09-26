@@ -145,7 +145,7 @@
     "modePropVisible": "表示",
     "modeRoadDefault": "通常表示",
     "modeRoadTraffic": "交通量色分け",
-    "modeRoadSpeed": "速度規制色分け",
+    "modeRoadSpeed": "通過速度色分け",
     "modeRoadDurability": "耐久度色分け",
     "modeRoadZone": "所属地区色分け",
     "modeBuildingDefault": "通常表示",

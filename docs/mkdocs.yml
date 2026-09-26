@@ -104,6 +104,7 @@ nav:
     - 歩行者の描画: geometries/W_歩行者の描画.md
   - プログラム連携:
     - 都市マップの検索と経路案内: programs/都市マップの検索と経路案内.md
+    - 道路の詳細と道路名: programs/道路の詳細と道路名.md
     - IPC連携: programs/IPC連携の整理.md
     - コンポーネント連携: programs/コンポーネント連携.md
     - モックバックエンド: programs/モックバックエンド.md

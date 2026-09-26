@@ -61,7 +61,7 @@ assert.equal(deg(roadLabelScreenAngle(-135)), -45);
 assert.equal(deg(roadLabelScreenAngle(135)), 45);
 assert.equal(Math.abs(deg(roadLabelScreenAngle(90))), 90);
 assert.equal(deg(roadLabelScreenAngle(90)), deg(roadLabelScreenAngle(-90)));
-// 配置の優先度: 駅・インターチェンジの記号 → 道路名 → 施設記号。
+// 配置の優先度: 駅・インターチェンジの記号 → 駅・インターチェンジの名前 → 道路名 → 施設記号 → 施設名。
 drawn.length = 0;
 circles.length = 0;
 rotations.length = 0;
@@ -79,4 +79,11 @@ assert.deepEqual(anchors.get("Ave"), { x: 500, y: 200 });
 assert.deepEqual(rotations.map(deg), [-45]);
 assert.ok(!drawn.some((label) => label.name === "Blocked Rd" || label.name === "Offscreen Rd"));
 assert.ok(drawn.some((label) => label.name === "IC 5"));
-console.log("PASS: facility classification, international school symbol, district coordinates, label collisions, viewport culling, station > interchange > road name > facility priority, upright road name rotation");
+// インターチェンジの名前は道路名より先に場所を取る。左端のICは名前を右にしか置けず、そこへ重なる道路名が省かれる。
+drawn.length = 0;
+drawMapLabels(ctx, { offsetX: -100, offsetY: 100, zoom: 2 }, 800, 600, [],
+  [{ id: 6, name: "Interchange 6", x: -80, z: 0, symbol: "interchange", interchange: true }],
+  [{ roadId: 5, name: "Ring", color: "#7F77DD", x: -45, z: 0, angleDeg: 0 }]);
+assert.ok(drawn.some((label) => label.name === "Interchange 6"), "the interchange name must win over the road name");
+assert.ok(!drawn.some((label) => label.name === "Ring"), "the road name over the interchange name must be dropped");
+console.log("PASS: facility classification, international school symbol, district coordinates, label collisions, viewport culling, station/interchange symbols and names > road name > facility priority, unnamed roads skipped, upright road name rotation");

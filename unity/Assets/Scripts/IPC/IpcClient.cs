@@ -143,13 +143,15 @@ public class IpcClient : MonoBehaviour
     public event Action<string> OnWorldClearHighlights;
     // 道路詳細パネルの強調表示(road_id, color "#rrggbb", path_ids)。送られるたびに全置換する。
     public event Action<int, string, int[]> OnWorldSetRoadFocus;
-    public event Action OnWorldClearRoadFocus;
+    // 強調の解除(road_id)。road_id が無い(0)ときは無条件に消し、あるときはその道路の強調だけを消す。
+    public event Action<int> OnWorldClearRoadFocus;
     // 道路の作成・改名・所属変更・削除の直後に、道路一覧(道路名ラベル)を取り直させる。
     public event Action OnWorldRefreshRoads;
     // 区間編集モード中の所属区間と追加候補の全集合(road_id, path_ids, preview_path_ids)。
     public event Action<int, int[], int[]> OnEditRoadSetMembers;
-    // 道路詳細パネルのウィンドウが閉じられた(Rust の window.rs が送る)。区間編集モード中でなければ何もしない。
-    public event Action OnEditRoadCancel;
+    // 区間編集の終了要求(road_id)。パネルの「完了」と、ウィンドウを閉じたときの Rust(window.rs)が送る。
+    // その道路の区間編集モード中でなければ何もしない。
+    public event Action<int> OnEditRoadCancel;
 
     /// <summary>
     /// Tauriからsystem.readyを受信済みかどうか。
@@ -720,8 +722,11 @@ public class IpcClient : MonoBehaviour
                     break;
 
                 case "world:clear_road_focus":
-                    Debug.Log("IpcClient: world:clear_road_focus");
-                    OnWorldClearRoadFocus?.Invoke();
+                    {
+                        int roadId = GetParamInt(payload, "road_id");
+                        Debug.Log($"IpcClient: world:clear_road_focus -> road={roadId}");
+                        OnWorldClearRoadFocus?.Invoke(roadId);
+                    }
                     break;
 
                 case "world:refresh_roads":
@@ -740,8 +745,11 @@ public class IpcClient : MonoBehaviour
                     break;
 
                 case "edit_road:cancel":
-                    Debug.Log("IpcClient: edit_road:cancel");
-                    OnEditRoadCancel?.Invoke();
+                    {
+                        int roadId = GetParamInt(payload, "road_id");
+                        Debug.Log($"IpcClient: edit_road:cancel -> road={roadId}");
+                        OnEditRoadCancel?.Invoke(roadId);
+                    }
                     break;
 
                 case "session:reset":
@@ -1020,6 +1028,37 @@ public class IpcClient : MonoBehaviour
         };
 
         SendEnvelope("edit_road:toggle_path", payload);
+    }
+
+    /// <summary>
+    /// edit_road:ended イベントを送信する。
+    /// 道路の区間編集モード(STATE_EDIT_ROAD_MEMBERS)が終わったことを、終了の理由を問わずUIに通知する
+    /// (他ステートへの直接遷移・Esc・セッションリセットなど、パネルが関与しない終了にUIを追従させるため)。
+    /// sessionId は開始時の STATE_EDIT_ROAD_MEMBERS に UI が付けた値で、型を変えずに返す
+    /// (パネルは厳密比較で照合する)。null なら session_id キーを省く。
+    /// モードを抜けるときに1回だけ送り、周期送信はしない。
+    /// </summary>
+    public void EmitRoadMemberEditEnded(int roadId, object sessionId = null)
+    {
+        var payload = new Dictionary<string, object>
+        {
+            ["road_id"] = roadId
+        };
+        if (sessionId != null) payload["session_id"] = sessionId;
+
+        SendEnvelope("edit_road:ended", payload);
+    }
+
+    /// <summary>
+    /// world:roads_changed イベントを送信する。
+    /// UI を通さずに道路(名前付き道路)の区間が消えた(ブルドーザでの削除)ことを UI に知らせ、
+    /// 道路一覧・道路詳細パネル・都市マップの道路名を取り直させる。区間が0本になった道路は
+    /// バックエンドが削除するため、開いている詳細パネルはこれで削除済みを表示できる。
+    /// 削除が成功したときだけ送り、周期送信はしない。
+    /// </summary>
+    public void EmitRoadsChanged()
+    {
+        SendEnvelope("world:roads_changed", new Dictionary<string, object>());
     }
 
     /// <summary>

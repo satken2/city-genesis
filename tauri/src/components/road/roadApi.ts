@@ -113,6 +113,39 @@ export function traceRoad(
 }
 
 /**
+ * 追加候補(trace の結果のうち pathIds)の範囲 [minx, minz, maxx, maxz]。全体図は範囲で区間を読み込むので、
+ * 候補を表示範囲に含めるために使う。応答に bbox があればそれを使い、無ければ候補の区間を1本ずつ引いて
+ * 端点の範囲で近似する(曲線の膨らみは全体図側の余白で吸収する)。
+ */
+export async function resolveTraceBbox(
+  apiBaseUrl: string,
+  res: RoadTraceResponse,
+  pathIds: number[],
+): Promise<[number, number, number, number] | null> {
+  if (res.bbox !== undefined) return res.bbox;
+  if (pathIds.length === 0) return null;
+  const paths = await Promise.all(
+    pathIds.map((id) =>
+      fetchApi<{ start_point?: number[]; end_point?: number[] }>(buildApiUrl(apiBaseUrl, "/api/v1/paths/{id}", String(id)))
+        .catch(() => null),
+    ),
+  );
+  let box: [number, number, number, number] | null = null;
+  for (const p of paths) {
+    for (const pt of [p?.start_point, p?.end_point]) {
+      if (!pt || pt.length < 2) continue;
+      // 端点は [x, y, z] か [x, z]
+      const x = pt[0];
+      const z = pt.length >= 3 ? pt[2] : pt[1];
+      box = box
+        ? [Math.min(box[0], x), Math.min(box[1], z), Math.max(box[2], x), Math.max(box[3], z)]
+        : [x, z, x, z];
+    }
+  }
+  return box;
+}
+
+/**
  * 新しく敷く道路の端点が、既存の道路の端に接しているかを問い合わせる。
  * 端点の位置に端を持つ区間(腕)のうち、同じ道路に属するものがちょうど1本なら、その道路の延長として提案される。
  */

@@ -650,8 +650,6 @@ export type PathMasterEntry = {
    * 未定義は 0(地下禁止)扱い。
    */
   min_height?: number | null;
-  /** 幹線道路かどうか。master.yaml の trunk に対応する(都市マップの幹線道路レイヤー等で使用) */
-  trunk?: boolean;
   /**
    * インターチェンジのランプ用バリアントか。master.yaml の ramp に対応する。
    * バックエンドはランプの連結成分からインターチェンジを自動検出する(未定義は false)。

@@ -49,7 +49,7 @@ import {
 import { InfoHeader } from "../common/InfoHeader";
 import { TagRow } from "../common/TagRow";
 import { RoadMembershipRow, useRoadList, type PathRoadFields } from "../road/RoadMembershipRow";
-import { hasRoad, isNamedRoadPathType, roadDisplayName, ROADS_CHANGED_EVENT } from "../road/roadApi";
+import { hasRoad, isNamedRoadPathType, notifyRoadsChanged, roadDisplayName, ROADS_CHANGED_EVENT } from "../road/roadApi";
 import { ZoneLink } from "../common/ZoneLink";
 import { StationInfoSection } from "./StationInfoSection";
 import { PathConditionPanel } from "./PathConditionPanel";
@@ -240,6 +240,8 @@ export function PathDetailPanel({
           throw new Error(`HTTP ${res.status}: ${body}`);
         }
         setRefreshKey((k) => k + 1);
+        // 道路詳細の「計画中・工事中の延長」や路線図の破線表示が変わる
+        await notifyRoadsChanged(undefined, "path_detail");
       })
       .catch((err) => {
         console.error("Failed to update path status:", err);

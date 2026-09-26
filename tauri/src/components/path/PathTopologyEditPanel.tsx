@@ -29,6 +29,7 @@ import {
   IPC_EVENT_EDIT_PATH_SELECT_MERGE_TARGET,
   IPC_EVENT_EDIT_PATH_SELECT_SPLIT_POINT,
 } from "../../utils/ipc";
+import { notifyRoadsChanged } from "../road/roadApi";
 import "./PathTopologyEditPanel.css";
 
 /** 結合と分割のどちらの操作中かを表す。 */
@@ -236,6 +237,8 @@ export function PathTopologyEditPanel({
         await sendFinishPathTopologyEdit(
           mode === "merge" ? (mergeTarget?.path_id ?? 0) : 0,
         );
+        // 分割は後半へ road_id を引き継ぎ、結合は吸収した側の所属を受け継ぐので、道路の区間の集合が変わる
+        await notifyRoadsChanged(undefined, "path_detail");
         onCompleted();
         onClose();
       })

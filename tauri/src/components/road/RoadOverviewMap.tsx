@@ -7,7 +7,8 @@
  * このコンポーネントは表示範囲の決定だけを担う。
  *
  * CityMapCanvas のベクターは表示範囲(bbox)で取得されるため、範囲に入っていない区間は
- * 読み込まれず帯も描けない。そのため表示範囲は道路の bbox に余白を足して合わせ、bbox が変わったら追従する。
+ * 読み込まれず帯も描けない。そのため表示範囲は道路の bbox(候補があれば候補の範囲も合わせたもの)に
+ * 余白を足して合わせ、範囲が変わったら追従する。
  */
 
 import { useEffect, useMemo, useRef } from "react";
@@ -48,7 +49,17 @@ type RoadOverviewMapProps = {
   color: string;
   /** 確定前の追加候補(直進方向の自動延長) */
   previewPathIds: number[] | null;
+  /** 追加候補の範囲 [minx, minz, maxx, maxz] */
+  previewBbox?: [number, number, number, number] | null;
 };
+
+type Bbox = [number, number, number, number];
+
+function unionBbox(a: Bbox | null, b: Bbox | null | undefined): Bbox | null {
+  if (!a) return b ?? null;
+  if (!b) return a;
+  return [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[2], b[2]), Math.max(a[3], b[3])];
+}
 
 function boundsFromBbox(bbox: [number, number, number, number] | null): CityMapBounds | null {
   if (!bbox) return null;
@@ -57,20 +68,23 @@ function boundsFromBbox(bbox: [number, number, number, number] | null): CityMapB
   return { x1: minX - margin, z1: minZ - margin, x2: maxX + margin, z2: maxZ + margin };
 }
 
-export function RoadOverviewMap({ apiBaseUrl, bbox, pathIds, color, previewPathIds }: RoadOverviewMapProps) {
+export function RoadOverviewMap({ apiBaseUrl, bbox, pathIds, color, previewPathIds, previewBbox }: RoadOverviewMapProps) {
   const mapRef = useRef<CityMapCanvasHandle>(null);
-  const bboxKey = bbox ? bbox.join(",") : "";
+  // 候補が出たら候補込みの範囲へ寄り、確定・取り消しで候補が消えたら道路の範囲へ戻る
+  const fitBbox = unionBbox(bbox, previewPathIds && previewPathIds.length > 0 ? previewBbox : null);
+  const fitKey = fitBbox ? fitBbox.join(",") : "";
 
   // 初期範囲は初回マウント時だけ渡し、以降の変化は fitBounds で追従する(初期化effectを再走させない)。
+  // 候補は設定タブで出てから全体図タブを初めて開くことが多いので、初期範囲の時点で候補を含める。
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const initialBounds = useMemo(() => boundsFromBbox(bbox) ?? undefined, []);
+  const initialBounds = useMemo(() => boundsFromBbox(fitBbox) ?? undefined, []);
 
   useEffect(() => {
-    const bounds = boundsFromBbox(bbox);
+    const bounds = boundsFromBbox(fitBbox);
     if (bounds) mapRef.current?.fitBounds(bounds);
     // bbox は取り直しのたびに新しい配列になるので、値の文字列で比較する
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bboxKey]);
+  }, [fitKey]);
 
   return (
     <div className="road-overview-map">

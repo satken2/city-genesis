@@ -70,13 +70,10 @@ const imports = {
       : { type: "Polygon", coordinates: [] },
   },
   "../terrain/terrainData": { computePixelRGB: () => [0, 0, 0], decodeFloat16Array: () => new Float32Array(6), normalizeGroundCover: () => 1 },
-  "../../constants": { PATH_MOTORWAY: 1, PATH_STREET: 2, PATH_WALKWAY: 3, PATH_TRACK: 4, ROAD_COLOR_PALETTE: ["#7F77DD"] },
-  "../road/roadApi": {
-    fetchRoadList: async () => ({ version: 0, roads: [] }),
-    hasRoad: (id) => id != null && id > 0,
-    roadDisplayName: (name, id) => name || `Road ${id}`,
-    ROADS_CHANGED_EVENT: "roads:changed",
-  },
+  "../../constants": { PATH_MOTORWAY: 1, PATH_STREET: 2, PATH_WALKWAY: 3, PATH_TRACK: 4, ROAD_COLOR_PALETTE: ["#7F77DD"],
+    VALUE_NONE: -1, PATH_TYPES_NAMED_ROAD: [2, 1] },
+  "../../utils/ipc": { sendRefreshRoads: async () => {} },
+  "@tauri-apps/api/window": { getCurrentWindow: () => ({ isVisible: async () => true, onFocusChanged: async () => () => {} }) },
 };
 function load(path) {
   const { outputText } = ts.transpileModule(readFileSync(new URL(path, import.meta.url), "utf8"), {
@@ -95,7 +92,13 @@ function load(path) {
 imports["./roadSurface"] = load("../src/components/map/roadSurface.ts");
 imports["./mapSymbols"] = load("../src/components/map/mapSymbols.ts");
 imports["./mapLabels"] = load("../src/components/map/mapLabels.ts");
-imports["@tauri-apps/api/event"] = { listen: async () => () => {} };
+imports["@tauri-apps/api/event"] = { listen: async () => () => {}, emit: async () => {} };
+// 幹線の判定は本物の hasRoad で検査する(一覧の取得だけ差し替える)
+const roadApi = load("../src/components/road/roadApi.ts");
+imports["../road/roadApi"] = { ...roadApi, fetchRoadList: async () => ({ version: 0, roads: [] }) };
+for (const [id, expected] of [[-1, false], [0, false], [null, false], [undefined, false], [3, true]]) {
+  assert.equal(roadApi.hasRoad(id), expected, `hasRoad(${id})`);
+}
 imports["./transitLineDraw"] = { drawTransitLines() {} };
 imports["../intersection/interchangeName"] = load("../src/components/intersection/interchangeName.ts");
 const { CityMapCanvas, DEFAULT_CITY_MAP_LAYERS } = load("../src/components/map/CityMapCanvas.tsx");
@@ -149,11 +152,12 @@ for (const cleanup of cleanups.reverse()) cleanup?.();
 // 幹線道路レイヤーは高速道路と道路(road_id)に属する区間だけを描き、強調の帯は道路色で重ねる。
 const street = (id, x, roadId, type = 2) => ({ path_id: id, path_type: type, path_variant: 0, road_id: roadId,
   start_point: [x, 0, 0], end_point: [x, 0, 50], curved: 0 });
-pathsResponse = { paths: [street(1, 0, -1), street(2, 10, 3), street(3, 20, -1, 1)] };
-const renderMap = async (props) => {
+pathsResponse = { paths: [street(1, 0, -1), street(2, 10, 3), street(3, 20, -1, 1), street(4, 30, 0)] };
+const renderMap = async (props, layerOverrides = {}) => {
   const effectStart = effects.length;
   CityMapCanvas({ apiBaseUrl: "test", showCompass: false,
-    layers: { ...Object.fromEntries(Object.keys(DEFAULT_CITY_MAP_LAYERS).map((key) => [key, false])), trunkRoads: true },
+    layers: { ...Object.fromEntries(Object.keys(DEFAULT_CITY_MAP_LAYERS).map((key) => [key, false])), trunkRoads: true,
+      ...layerOverrides },
     ...props }, {});
   const disposers = effects.slice(effectStart).map((fn) => fn());
   for (let i = 0; i < 10; i++) await new Promise((resolve) => setImmediate(resolve));
@@ -164,7 +168,15 @@ await renderMap({});
 const fills = paints.filter((p) => p.op === "fill").map((p) => p.style);
 assert.ok(fills.includes("#aab7c1"), "a street that belongs to a road is a trunk road");
 assert.ok(fills.includes("#778896"), "motorways are always trunk roads");
-assert.ok(!fills.includes("#c6ced3"), "streets without a road are not trunk roads");
+// 幹線だけのレイヤーでは幹線でない帯を描かないので、次の assert は余計な帯が無いことだけを見る
+assert.ok(!fills.includes("#c6ced3"), "nothing but trunk roads is drawn on the trunk layer");
+// 全道路レイヤーも ON にすると、road_id の無い街路(-1・0)は一般の街路の色で塗られる。幹線扱いの退行ならこの色が消える
+paints.length = 0;
+await renderMap({}, { allRoads: true });
+const allFills = paints.filter((p) => p.op === "fill").map((p) => p.style);
+assert.ok(allFills.includes("#c6ced3"), "streets without a road are ordinary streets");
+assert.ok(allFills.includes("#aab7c1"), "a street that belongs to a road stays a trunk road with all roads on");
+assert.ok(allFills.includes("#778896"), "motorways stay trunk roads with all roads on");
 paints.length = 0;
 await renderMap({ focusPathIds: [2], focusColor: "#E4572E", focusDimOthers: true });
 assert.ok(paints.some((p) => p.op === "stroke" && p.style === "#E4572E" && p.alpha === 1), "the focused section is drawn in the road color");

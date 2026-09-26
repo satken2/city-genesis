@@ -39,7 +39,8 @@ const placeRank = (place: MapPlace) => (place.station ? 2 : place.interchange ? 
 
 /**
  * 画面上の寸法を固定し、重なる名称だけを省く。
- * 配置の優先度は 地区名 → 駅・インターチェンジの記号 → 道路名 → 施設記号 → 名称(駅・インターチェンジ・施設の順)。
+ * 配置の優先度は 地区名 → 駅・インターチェンジの記号 → 駅・インターチェンジの名前 → 道路名 → 施設記号 → 施設名。
+ * 名前の無い道路(name が空)は描かない。
  */
 export function drawMapLabels(ctx: CanvasRenderingContext2D, view: { offsetX: number; offsetY: number; zoom: number },
   width: number, height: number, districts: MapDistrict[], places: MapPlace[], roads: MapRoadLabel[] = []): void {
@@ -95,7 +96,23 @@ export function drawMapLabels(ctx: CanvasRenderingContext2D, view: { offsetX: nu
       shown.push({ place, x, y, color });
     }
   };
+  /** 記号を置けた場所の名前を、記号の右→左の順に空いている側へ置く */
+  const drawNames = (targets: typeof shown) => {
+    if (view.zoom < 0.1) return;
+    ctx.font = '12px system-ui, sans-serif'; ctx.textAlign = "left";
+    for (const { place, x, y, color } of targets) {
+      if (!place.name) continue;
+      const w = ctx.measureText(place.name).width;
+      for (const tx of [x + 17, x - 17 - w]) {
+        const box = { x: tx - 3, y: y - 9, w: w + 6, h: 18 };
+        if (box.x < 4 || box.x + box.w > width - 4 || overlaps(box)) continue;
+        occupied.push(box); text(place.name, tx, y, color); break;
+      }
+    }
+  };
+  // 駅・インターチェンジは記号をすべて置いてから名前を置き、名前まで道路名より先に場所を取る
   drawSymbols(sorted.filter((place) => placeRank(place) > 0));
+  drawNames(shown.filter(({ place }) => placeRank(place) > 0));
   // 道路名は道路の向きに沿って回転させる。回転した文字の当たり判定は、文字の高さ四方の箱を
   // 基線に沿って並べて近似する(外接矩形1つだと斜めの長い名前が周囲を広く塞いでしまうため)。
   ctx.font = '600 13px system-ui, sans-serif';
@@ -125,17 +142,6 @@ export function drawMapLabels(ctx: CanvasRenderingContext2D, view: { offsetX: nu
     ctx.restore();
   }
   drawSymbols(sorted.filter((place) => placeRank(place) === 0));
-  if (view.zoom >= 0.04) {
-    ctx.font = '12px system-ui, sans-serif'; ctx.textAlign = "left";
-    for (const { place, x, y, color } of shown) {
-      if (!place.name || view.zoom < 0.1) continue;
-      const w = ctx.measureText(place.name).width;
-      for (const tx of [x + 17, x - 17 - w]) {
-        const box = { x: tx - 3, y: y - 9, w: w + 6, h: 18 };
-        if (box.x < 4 || box.x + box.w > width - 4 || overlaps(box)) continue;
-        occupied.push(box); text(place.name, tx, y, color); break;
-      }
-    }
-  }
+  drawNames(shown.filter(({ place }) => placeRank(place) === 0));
   ctx.restore();
 }

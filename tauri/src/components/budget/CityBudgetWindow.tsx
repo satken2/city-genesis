@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { setHintbarText } from "../../utils/hintbar";
@@ -11,6 +12,7 @@ import { formatEpochDateRange } from "../../utils/date";
 import { resolveIntlLocale } from "../../utils/locale";
 import { Money } from "../common/Money";
 import { formatCompactAmount, formatExactAmount } from "../../utils/money";
+import { hasRoad, roadDisplayName } from "../road/roadApi";
 import {
   ResponsiveContainer,
   BarChart,
@@ -39,7 +41,11 @@ type BudgetAgent = {
   /** 社会保障カテゴリの給付種別行(実体エンティティなし)。welfare_kind は i18n キー budget.welfare.* に対応 */
   welfare_id?: number;
   welfare_kind?: string;
+  /** パスの行は区間名をそのまま返す(既定名は空文字)。表示名は UI が rowDisplayName で補う */
   name: string;
+  /** パスの行の所属道路(未所属は VALUE_NONE)とその名前(未所属は空文字) */
+  road_id?: number;
+  road_name?: string;
   category_id: number;
   variant?: number;
   status: number;
@@ -49,6 +55,22 @@ type BudgetAgent = {
   construction_cost_per_epoch?: number;
   remaining_epochs?: number | null;
 };
+
+/**
+ * 行の表示名。社会保障の給付種別行は実体を持たないため i18n(budget.welfare.*)で解決する(バックエンドの name はフォールバック)。
+ * パスの行は区間名が空なら、所属道路があれば「道路名(区間 #id)」、無ければ「パス #id」を補う(パス詳細のヘッダと同じ規則)。
+ */
+function rowDisplayName(a: BudgetAgent, t: TFunction): string {
+  if (a.kind === "welfare" && a.welfare_kind) {
+    return t(`budget.welfare.${a.welfare_kind}`, { defaultValue: a.name });
+  }
+  if (a.kind === "path" && a.name === "") {
+    return hasRoad(a.road_id)
+      ? t("path.titleInRoad", { road: roadDisplayName(a.road_name, a.road_id, t), id: a.path_id })
+      : t("path.titleWithId", { id: a.path_id });
+  }
+  return a.name;
+}
 
 /** エージェント/道路/土地区画/給付種別を一意に識別するキー（稼働率の編集state・PATCH対象の識別に使う） */
 function rowKey(a: BudgetAgent): string {
@@ -788,10 +810,7 @@ export function CityBudgetWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       .map((agent) => ({
         ...agent,
         rowKeyStr: rowKey(agent),
-        // 社会保障の給付種別行は実体を持たないため、名称は i18n(budget.welfare.*)で解決する(バックエンドの name はフォールバック)
-        name: agent.kind === "welfare" && agent.welfare_kind
-          ? t(`budget.welfare.${agent.welfare_kind}`, { defaultValue: agent.name })
-          : agent.name,
+        name: rowDisplayName(agent, t),
         // 施設別の「必要金額」。この行の合計（agentsTotal.projected）はカテゴリの
         // 必要金額（baseAmounts[catId]）と常に一致する（同一の projected_expense を使うため）。
         projected_preview: agent.projected_expense,

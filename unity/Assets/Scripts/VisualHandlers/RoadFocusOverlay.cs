@@ -15,6 +15,7 @@ using UnityEngine;
 ///
 /// 形状は区間の版(PathManager.GetPathGeometryRevision)とデータの参照を署名にして定期的に比べ、
 /// 区間のロード・形状の変化で作り直す。未ロードの区間は描かない。
+/// ホバーの白線は別系統(hoverDirty)で、変わってもホバー線だけを作り直し、本体の帯には触れない。
 /// </summary>
 public sealed class RoadFocusOverlay : MonoBehaviour
 {
@@ -41,6 +42,7 @@ public sealed class RoadFocusOverlay : MonoBehaviour
     private readonly List<Segment> hoverSegments = new List<Segment>();
     private readonly Plane[] planes = new Plane[6];
 
+    private int focusRoadId = Constants.VALUE_NONE;
     private Color focusColor = Color.white;
     private Color memberColor = Color.white;
     private bool editing;
@@ -48,8 +50,8 @@ public sealed class RoadFocusOverlay : MonoBehaviour
 
     private OverlayMeshRenderer border, ribbon, hover;
     private PathManager paths;
-    private bool dirty, terrainChanged, drawn;
-    private long pathSignature;
+    private bool dirty, hoverDirty, terrainChanged, drawn;
+    private long pathSignature, hoverSignature;
     private float nextCheck, nextSafety;
     private Vector3 cameraPosition;
     private Quaternion cameraRotation;
@@ -83,15 +85,19 @@ public sealed class RoadFocusOverlay : MonoBehaviour
     private void OnTerrainReady(Vector2Int cell, Terrain terrain) => terrainChanged = true;
 
     /// <summary>道路詳細パネルの強調を置き換える(送られるたびに全置換)。</summary>
-    public void SetFocus(Color color, IEnumerable<int> pathIds)
+    public void SetFocus(int roadId, Color color, IEnumerable<int> pathIds)
     {
+        focusRoadId = roadId;
         focusColor = color;
         Replace(focusIds, pathIds);
         dirty = true;
     }
 
-    public void ClearFocus()
+    /// <summary>強調を消す。roadId が正なら、いま強調している道路と一致するときだけ消す。</summary>
+    public void ClearFocus(int roadId = Constants.VALUE_NONE)
     {
+        if (roadId > 0 && roadId != focusRoadId) return;
+        focusRoadId = Constants.VALUE_NONE;
         focusIds.Clear();
         dirty = true;
     }
@@ -122,7 +128,7 @@ public sealed class RoadFocusOverlay : MonoBehaviour
     {
         if (hoverPathId == pathId) return;
         hoverPathId = pathId;
-        dirty = true;
+        hoverDirty = true;
     }
 
     /// <summary>カーソルが離れた区間のホバー線を消す(次の区間のホバーが先に届いていれば何もしない)。</summary>
@@ -133,6 +139,7 @@ public sealed class RoadFocusOverlay : MonoBehaviour
 
     public void ClearAll()
     {
+        focusRoadId = Constants.VALUE_NONE;
         focusIds.Clear();
         ClearEditLayers();
     }
@@ -164,27 +171,44 @@ public sealed class RoadFocusOverlay : MonoBehaviour
         if (paths == null) return;
 
         float now = Time.unscaledTime;
+        bool hoverChanged = hoverDirty;
         bool due = dirty || !drawn || now >= nextSafety;
         if (!due && now >= nextCheck)
         {
             nextCheck = now + CheckInterval;
             // 版が分かる区間は地形署名込みで比べられるので、地形の到着で作り直すのは版が不明な区間があるときだけ。
             due = PathSignature(out bool uncertain) != pathSignature || (terrainChanged && uncertain);
+            hoverChanged |= HoverSignature() != hoverSignature;
         }
         if (due)
         {
             BuildGeometry();
             pathSignature = PathSignature(out _);
-            dirty = terrainChanged = false;
+            hoverSignature = HoverSignature();
+            dirty = hoverDirty = terrainChanged = false;
             nextSafety = now + SafetyInterval;
             nextCheck = now + CheckInterval;
             Draw(cam);
+            return;
         }
-        else if (cam.transform.position != cameraPosition || cam.transform.rotation != cameraRotation
+        if (hoverChanged) RebuildHover();
+        if (cam.transform.position != cameraPosition || cam.transform.rotation != cameraRotation
             || cam.fieldOfView != cameraFov || Screen.width != screenWidth || Screen.height != screenHeight)
         {
             Draw(cam);
         }
+        else if (hoverChanged)
+        {
+            DrawHover(cam);
+        }
+    }
+
+    private void RebuildHover()
+    {
+        hoverDirty = false;
+        hoverSegments.Clear();
+        if (editing && hoverPathId > 0) AddPath(hoverPathId, HoverColor, false, hoverSegments);
+        hoverSignature = HoverSignature();
     }
 
     private void CollectWatched()
@@ -194,7 +218,6 @@ public sealed class RoadFocusOverlay : MonoBehaviour
         {
             watchedIds.UnionWith(memberIds);
             watchedIds.UnionWith(previewIds);
-            if (hoverPathId > 0) watchedIds.Add(hoverPathId);
         }
         else
         {
@@ -203,8 +226,9 @@ public sealed class RoadFocusOverlay : MonoBehaviour
     }
 
     /// <summary>
-    /// 描く区間について、データの参照・version・描画形状の版をまとめた順序非依存の署名。
+    /// 本体の帯で描く区間について、データの参照・version・描画形状の版をまとめた順序非依存の署名。
     /// 形状の版が -1(キャッシュ外)の区間があれば uncertain を立て、地形の到着を変化として扱わせる。
+    /// ホバー区間は含めない(ホバーの出入りで本体を作り直さないため。ホバー線は HoverSignature で別に見る)。
     /// </summary>
     private long PathSignature(out bool uncertain)
     {
@@ -212,20 +236,32 @@ public sealed class RoadFocusOverlay : MonoBehaviour
         ulong sum = 0;
         unchecked
         {
-            foreach (int id in watchedIds)
-            {
-                ulong term = (ulong)id;
-                var data = paths.GetPathData(id);
-                if (data != null)
-                {
-                    long revision = paths.GetPathGeometryRevision(id);
-                    if (revision < 0) uncertain = true;
-                    term = Mix(term ^ Mix((ulong)data.version << 32 ^ (uint)RuntimeHelpers.GetHashCode(data)));
-                    term = Mix(term ^ Mix((ulong)revision));
-                }
-                sum += Mix(term);
-            }
+            foreach (int id in watchedIds) sum += PathTerm(id, ref uncertain);
             return (long)sum;
+        }
+    }
+
+    private long HoverSignature()
+    {
+        if (!editing || hoverPathId <= 0) return 0;
+        bool uncertain = false;
+        return (long)PathTerm(hoverPathId, ref uncertain);
+    }
+
+    private ulong PathTerm(int id, ref bool uncertain)
+    {
+        unchecked
+        {
+            ulong term = (ulong)id;
+            var data = paths.GetPathData(id);
+            if (data != null)
+            {
+                long revision = paths.GetPathGeometryRevision(id);
+                if (revision < 0) uncertain = true;
+                term = Mix(term ^ Mix((ulong)data.version << 32 ^ (uint)RuntimeHelpers.GetHashCode(data)));
+                term = Mix(term ^ Mix((ulong)revision));
+            }
+            return Mix(term);
         }
     }
 
@@ -275,7 +311,7 @@ public sealed class RoadFocusOverlay : MonoBehaviour
     /// <summary>未切断の中心線(交差点の中まで通す)を線分に分けて積む。帯が交差点で途切れないようにするため。</summary>
     private void AddPath(int id, Color color, bool bordered, List<Segment> target)
     {
-        if (!paths.TryGetPathPolyline(id, out var points, false)) return;
+        if (!paths.TryGetUntrimmedPolylineShared(id, out var points)) return;
         Vector3 previous = points[0];
         for (int i = 1; i < points.Count; i++)
         {
@@ -288,9 +324,10 @@ public sealed class RoadFocusOverlay : MonoBehaviour
         }
     }
 
+    /// <summary>本体の帯とホバー線の両方を描き直す。</summary>
     private void Draw(Camera cam)
     {
-        border.BeginFrame(); ribbon.BeginFrame(); hover.BeginFrame();
+        border.BeginFrame(); ribbon.BeginFrame();
         GeometryUtility.CalculateFrustumPlanes(cam, planes);
         Vector3 eye = cam.transform.position;
         // OverlayMeshRenderer と同じ換算(距離×tan(fov/2)/画面高の半分)で、帯の外縁が入る余白を取る。
@@ -309,11 +346,18 @@ public sealed class RoadFocusOverlay : MonoBehaviour
                 ribbon.AddSolidLine(segment.a, segment.b, segment.color, RibbonPixels);
             }
         }
-        foreach (var segment in hoverSegments) hover.AddSolidLine(segment.a, segment.b, segment.color, HoverPixels);
-        border.EndFrame(cam); ribbon.EndFrame(cam); hover.EndFrame(cam);
+        border.EndFrame(cam); ribbon.EndFrame(cam);
+        DrawHover(cam);
         drawn = true;
         cameraPosition = cam.transform.position; cameraRotation = cam.transform.rotation; cameraFov = cam.fieldOfView;
         screenWidth = Screen.width; screenHeight = Screen.height;
+    }
+
+    private void DrawHover(Camera cam)
+    {
+        hover.BeginFrame();
+        foreach (var segment in hoverSegments) hover.AddSolidLine(segment.a, segment.b, segment.color, HoverPixels);
+        hover.EndFrame(cam);
     }
 
     private void OnDestroy()

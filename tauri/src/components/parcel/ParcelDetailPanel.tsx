@@ -372,6 +372,11 @@ export function ParcelDetailPanel({
   /** 土地区画の表示名はIDベースで生成する */
   const displayName = t("parcel.titleWithId", { id: parcelData.parcel_id });
 
+  // 接道の有無は ID で判定する(パス名は既定で空文字なので、名前では接道が無いように見える)
+  const hasFrontPath = parcelData.front_path_id != null && parcelData.front_path_id > 0;
+  /** 接道の表示名。名前の無いパスは「パス #id」 */
+  const frontPathLabel = (id: number, name?: string | null) => name || t("path.titleWithId", { id });
+
   return (
     <div className="agent-detail">
       <InfoHeader
@@ -482,17 +487,17 @@ export function ParcelDetailPanel({
             {t("parcel.altitudeValue", { value: parcelData.altitude })}
           </span>
 
-          {(parcelData.front_path_name || frontPathCandidates.length > 0) && (
+          {(hasFrontPath || frontPathCandidates.length > 0) && (
             <>
               <span className="agent-detail-label">{t("parcel.frontPath")}</span>
               <span className="agent-detail-value">
                 {(() => {
                   // 候補が無い場合は従来通り読み取り専用のリンク表示にフォールバックする。
                   if (frontPathCandidates.length === 0) {
-                    return parcelData.front_path_name ? (
+                    return hasFrontPath ? (
                       <PathLink
                         pathId={parcelData.front_path_id}
-                        pathName={parcelData.front_path_name}
+                        pathName={frontPathLabel(parcelData.front_path_id, parcelData.front_path_name)}
                       />
                     ) : (
                       <span className="agent-detail-muted">
@@ -506,7 +511,7 @@ export function ParcelDetailPanel({
                   const currentId = parcelData.front_path_id;
                   const hasCurrent = frontPathCandidates.some((c) => c.path_id === currentId);
                   const options: FrontPathCandidate[] = [...frontPathCandidates];
-                  if (currentId && !hasCurrent) {
+                  if (hasFrontPath && !hasCurrent) {
                     options.unshift({
                       path_id: currentId,
                       distance: 0,
@@ -534,7 +539,7 @@ export function ParcelDetailPanel({
                       >
                         {options.map((c) => {
                           const label = t("parcel.frontPathOption", {
-                            name: c.name ?? `#${c.path_id}`,
+                            name: frontPathLabel(c.path_id, c.name),
                             distance: Math.round(c.distance),
                           });
                           return (

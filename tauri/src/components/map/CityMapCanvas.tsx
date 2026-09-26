@@ -77,6 +77,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { listen } from "@tauri-apps/api/event";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import type { InterchangeListResponse, InterchangeSummary, MasterData } from "../../types";
@@ -93,7 +94,7 @@ import { drawMapLabels, facilitySymbol, type MapPlace, type MapRoadLabel } from 
 import { RoadCenterline, roadSurface } from "./roadSurface";
 import { drawTransitLines, type TransitLineGeometry } from "./transitLineDraw";
 import { interchangeDisplayName } from "../intersection/interchangeName";
-import { fetchRoadList, hasRoad, roadDisplayName, ROADS_CHANGED_EVENT } from "../road/roadApi";
+import { fetchRoadList, hasRoad, ROADS_CHANGED_EVENT } from "../road/roadApi";
 import type { RoadSummary } from "../road/roadTypes";
 
 /* ============================================================================
@@ -557,6 +558,8 @@ const COVER_MARGIN = 0.15;
 const VECTOR_DEBOUNCE_MS = 300;
 /** ズーム変更に伴う等高線再構築のデバウンス(ms) */
 const CONTOUR_DEBOUNCE_MS = 150;
+/** 道路の変更通知(区間編集ではクリックごとに届く)をまとめる間隔(ms) */
+const ROADS_REFRESH_DEBOUNCE_MS = 150;
 /**
  * 等高線を細分化し始めるズーム倍率の猶予。基準ズーム(全体フィット表示)から
  * この倍率までは間隔を細かくしない(地形エディタと同じ値)。
@@ -1628,12 +1631,13 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
               name: interchangeDisplayName(ic, tRef.current), symbol: "interchange", interchange: true });
           }
         }
+        // 未命名の道路は「道路 #id」を補わずに空のまま渡し、drawMapLabels が省く(番号だけのラベルは
+        // 地区名・施設名の置き場を奪うだけで、Unity の3Dラベル・場所検索も未命名の道路を出さない)
         const roadLabels: MapRoadLabel[] = [];
         if (L.trunkRoads) {
           for (const road of vec.roads) {
-            const name = roadDisplayName(road.name, road.road_id, tRef.current);
             for (const point of road.label_points) {
-              roadLabels.push({ roadId: road.road_id, name, color: road.color, x: point.x, z: point.z, angleDeg: point.angle_deg });
+              roadLabels.push({ roadId: road.road_id, name: road.name, color: road.color, x: point.x, z: point.z, angleDeg: point.angle_deg });
             }
           }
         }
@@ -2199,7 +2203,31 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
             vectorLoadPending = false;
             scheduleVectorLoad();
           }
+          if (pendingRefreshKinds.size > 0 && !disposed) {
+            const pending = [...pendingRefreshKinds];
+            pendingRefreshKinds.clear();
+            refreshKinds(pending);
+          }
         }
+      };
+
+      /**
+       * 指定した種別だけを、取得済みの範囲で取り直す(道路の変更通知など、一部の種別だけが古くなったとき)。
+       * 取得済みの印は消さずに上書きさせる。消すと scheduleVectorLoad が「未取得の種別がある」と見て
+       * 全種別を取り直してしまうため。取得中なら種別だけ控えておき、終わってから同じ範囲で取り直す。
+       */
+      const pendingRefreshKinds = new Set<VectorKind>();
+      const refreshKinds = (requested: VectorKind[]) => {
+        // 初回の取得が済んでいなければ何もしない(済めば全種別がそろう)
+        if (!vec.fetchedBounds) return;
+        const needed = neededKinds();
+        const kinds = requested.filter((k) => needed.includes(k));
+        if (kinds.length === 0) return;
+        if (vec.loading) {
+          for (const k of kinds) pendingRefreshKinds.add(k);
+          return;
+        }
+        void loadVectors(kinds, vec.fetchedBounds);
       };
 
       /** ビューポート+パディングをbboxとして、現在必要なデータ種別をすべて取得する */
@@ -2418,17 +2446,48 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         .catch(console.error);
 
       // 道路の作成・改名・所属変更・削除で道路名ラベルが変わる。所属が変わるとパスの road_id
-      // (幹線の分類)も変わるので、道路一覧と一緒にパスも取り直す。
+      // (幹線の分類)も変わるので、道路一覧とパスだけを取り直す(区画・建物・地区は関係しない)。
+      // 区間編集モードではクリックのたびに届くので、続けて届いた通知はまとめる。
+      // 閉じた地図(非表示のウィンドウ)は取り直さない。開き直すと再マウントされて全部を取り直すが、
+      // 非表示のまま再表示される場合に備えて、取り逃した通知はフォーカスを得たときに反映する。
       let unlistenRoads: (() => void) | undefined;
+      let unlistenFocus: (() => void) | undefined;
+      let roadsTimer: number | null = null;
+      let roadsStale = false;
+      const refreshRoads = () => {
+        if (roadsTimer !== null) window.clearTimeout(roadsTimer);
+        roadsTimer = window.setTimeout(() => {
+          roadsTimer = null;
+          if (disposed) return;
+          void getCurrentWindow()
+            .isVisible()
+            .catch(() => true)
+            .then((visible) => {
+              if (disposed) return;
+              if (!visible) {
+                roadsStale = true;
+                return;
+              }
+              roadsStale = false;
+              refreshKinds(["roads", "paths"]);
+            });
+        }, ROADS_REFRESH_DEBOUNCE_MS);
+      };
       void listen(ROADS_CHANGED_EVENT, () => {
-        if (disposed) return;
-        vec.fetchedKinds.delete("roads");
-        vec.fetchedKinds.delete("paths");
-        ensureVectors();
+        if (!disposed) refreshRoads();
       })
         .then((fn) => {
           if (disposed) fn();
           else unlistenRoads = fn;
+        })
+        .catch(console.error);
+      void getCurrentWindow()
+        .onFocusChanged(({ payload: focused }) => {
+          if (focused && roadsStale && !disposed) refreshRoads();
+        })
+        .then((fn) => {
+          if (disposed) fn();
+          else unlistenFocus = fn;
         })
         .catch(console.error);
 
@@ -2471,6 +2530,8 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         resizeObserver.disconnect();
         unlistenTransit?.();
         unlistenRoads?.();
+        unlistenFocus?.();
+        if (roadsTimer !== null) window.clearTimeout(roadsTimer);
         if (vectorTimer !== null) window.clearTimeout(vectorTimer);
         if (contourTimer !== null) window.clearTimeout(contourTimer);
         if (interactive) {

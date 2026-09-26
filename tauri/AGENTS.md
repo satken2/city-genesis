@@ -42,7 +42,7 @@ Unityのグラフィックの上に透明なWebViewウィンドウとして重�
 | `log.ts` | Rust側ファイルログ(実行ファイル横の`city-genesis/tauri.log`)へのINFO転送(`logInfoToFile`)。本番でconsoleが見えないため、無言で止まりうる重要フロー(エポック実行など)の進行記録に使う。なお未キャッチ例外・unhandledrejection・`console.error`は`main.tsx`が自動で同ログへERROR転送する |
 | `constructionTags.ts` | 建設プロジェクトのタグ(建物・道路に付ける単一の分類ラベル)の共通処理。`fetchTags`(候補一覧) / `fetchTagProjects`(タグ別の工事一覧+集計) / `fetchEntityTag`(**1件の現在値。`tag`は単体取得のレスポンスに載らないので専用の口 GET /tags/object から引く**) / `saveEntityTag`(PATCH agents/paths の`tag`) / `deleteTag` / `TAGS_CHANGED_EVENT`(タグ変更をウィンドウ間に知らせるグローバルイベント名)。**表示・非表示はここでは扱わない**(`hooks/useObjectVisibility`) |
 | `cityNotifications.ts` | L1通知(重大通知)の共通処理。`fetchL1Notifications`(GET /api/v1/notifications)・`formatL1NotificationMessage`(i18nキー`notifications.types.<type>`への差し込み。未知typeはフォールバック)・`NOTIFICATION_ENTITY_WINDOW_TYPES`(通知対象→詳細ウィンドウの対応表)。コックピット(hud/Cockpit.tsx)とCityNotificationsWindowが共用 |
-| `hintbar.ts` | 画面下部ヒントバーのテキスト設定 |
+| `hintbar.ts` | 画面下部ヒントバーのテキスト設定。`setHintbarText`(置き換え)と`clearHintbarTextIf(expected)`(表示中の文字列が expected のときだけ消す。自分が出した案内を後から片付けるときに使い、その間に別のパネルが出した案内を消さない) |
 | `locale.ts` | 対応言語(`SUPPORTED_LANGUAGES`)と、言語コード→`Intl`用ロケールの変換(`resolveIntlLocale`)・検証(`isSupportedLanguage`)・対応言語コードへの丸め(`resolveSupportedLanguage`。`ja-JP`のような地域付きコードを`ja`へ寄せる。プルダウンの現在値解決に使う)。詳細は「多言語対応」の節 |
 | `date.ts` | ゲーム内仮想暦(1ヶ月=30日/1年=360日)の整形。`formatEpochDate` / `formatEpochDateRange` |
 | `money.ts` | 金額の整形。`formatCompactAmount`(有効3桁のコンパクト表記) / `formatExactAmount`(3桁区切り) |

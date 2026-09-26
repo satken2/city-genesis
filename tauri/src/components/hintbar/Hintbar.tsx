@@ -25,6 +25,8 @@ import "./Hintbar.css";
 
 export type HintbarPayload = {
   text: string;
+  /** 指定されていれば、現在の表示がこの文字列のときだけ置き換える(`clearHintbarTextIf`) */
+  only_if?: string;
 };
 
 type SessionStatePayload = {
@@ -48,7 +50,8 @@ export function Hintbar() {
       .then((fn) => { unlistenLoading = fn; }).catch(console.error);
 
     listen<HintbarPayload>("hintbar:set-text", (event) => {
-      setText(event.payload.text);
+      const { text: next, only_if: onlyIf } = event.payload;
+      setText((prev) => (onlyIf == null || prev === onlyIf ? next : prev));
     })
       .then((fn) => {
         unlistenText = fn;

@@ -132,6 +132,14 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `game:end`                      | `ui -> graphic`  | セッションが破棄され、ゲームが終了したことを通知               |
 | `session:reload`                | `ui -> graphic`  | バックエンドからデータを取得して、3Dを再描画する             |
 | `building:exploded`             | `ui -> graphic`  | 爆破HTTP APIの成功通知（`{agent_id}`）。既存の個別取得経路で対象建物を瓦礫に更新し、炎・煙・爆発音を一度だけ再生する |
+| `world:set_road_focus`          | `ui -> graphic`  | 道路詳細パネル（`road_detail`）が開いている道路の区間を、3Dビューに道路色の帯で強調する（`{road_id, color, path_ids}`）。帯は区間の中心線に沿って最前面に、画面上で一定の幅で描く。送るたびに全置換する。干渉の警告用の `world:highlight_objects` とは別の仕組み。詳細は[道路の詳細と道路名](道路の詳細と道路名.md#強調帯) |
+| `world:clear_road_focus`        | `ui -> graphic`  | 道路の強調を消す（`{road_id?}`）。`road_id` があれば強調中の道路と同じときだけ消し（道路詳細は道路ごとに同時に開けるため、別のパネルの強調を消さない）、無ければ無条件に消す。道路詳細のウィンドウが閉じられたときは Rust（`window.rs`）が閉じた道路の `road_id` を載せて送る |
+| `world:refresh_roads`           | `ui -> graphic`  | 道路（名前付き道路）の作成・改名・所属変更・削除のあとに送り、Unity に道路一覧（`GET /api/v1/roads/`）を取り直させる（`{}`）。一覧の `version` が同じなら道路名ラベルは作り直さない |
+| `edit_road:set_members`         | `ui -> graphic`  | 道路の区間編集モード（`STATE_EDIT_ROAD_MEMBERS`）で、所属区間と追加候補の全集合を送る（`{road_id, path_ids, preview_path_ids}`）。差分ではなく毎回全集合。Unity は所属区間を道路色、候補を半透明の道路色の帯で示す。モード中でない・別の道路宛ての通知は無視する |
+| `edit_road:cancel`              | `ui -> graphic`  | 道路の区間編集モードを終える（`{road_id}`）。Unity はその道路の区間編集モード中のときだけ終了して通常モードへ戻し、モード外・別の道路の編集中・`road_id` の無い通知は無視する（`STATE_NORMAL` と違い、道路の敷設など他のモードを巻き込まない）。道路詳細パネルの「完了」と、そのウィンドウが閉じられたときの Rust（`window.rs`）が送る |
+| `edit_road:toggle_path`         | `graphic -> ui`  | 道路の区間編集モードで、街路・高速道路の区間がクリックされた（`{path_id, path_name, path_type, shift}`。`shift` は Shift キーの押下で、その区間から直進方向へたどった区間をまとめて追加する操作を表す）。所属の付け外しは道路詳細パネルが道路APIで行い、結果を `edit_road:set_members` で送り返す（`edit_path:select_merge_target` と同じ責務分担）。Rust は全ウィンドウへ中継する |
+| `edit_road:ended`               | `graphic -> ui`  | 道路の区間編集モードが終わった（`{road_id, session_id?}`）。完了・Esc・他のステートへの遷移・閉じたパネルの `edit_road:cancel`・セッションのリセットなど理由を問わず、モードを抜けるたびに1回だけ送る。道路詳細パネルは自分の道路なら何も送り返さずに編集中の表示を落とす。`session_id` は開始時の `STATE_EDIT_ROAD_MEMBERS` の `session_id` を Unity が型を変えずにそのまま返したもので、開始時に無かった（または整数でも文字列でもなかった）ときはキーごと省く。パネルは正の整数の `session_id` が含まれていれば開始時の値と一致するときだけ受け入れ（遅れて届いた前回の終了で新しい編集を落とさないため）、含まれていなければ道路IDだけで判断する。Rust は全ウィンドウへ中継する |
+| `world:roads_changed`           | `graphic -> ui`  | UI を通さずに道路（名前付き道路）の区間が消えたことを知らせる（`{}`）。送り手はブルドーザでのパスの削除で、削除したパスが道路の区間だったときだけ、削除の成功後、差分リロードのまとめ待ちが明けた時点で1回送る（続けて削除しても1通にまとまる。周期送信はしない）。区間が0本になった道路はバックエンドが削除するので、道路詳細パネルはこれを受けて取り直し、削除済みを表示できる。Rust は Tauri のグローバルイベント `roads:changed`（UI の道路の変更通知と同じもの。ペイロードはそのまま）として全ウィンドウへ流す。Unity は差分リロードで自分の道路一覧を取り直すので、`world:refresh_roads` は送り返さない |
 
 ## `world:select_object` の選択対象
 
@@ -146,6 +154,7 @@ Offset  8: Ring buffer data (1048568 bytes)
 | 地区名ラベル | `zone_detail` | `zone` | 地区ID |
 | 天然資源ラベル | `resource_detail` | `resource` | 資源エリアID |
 | インターチェンジ名ラベル | `intersection_detail` | `interchange` | インターチェンジID（`GET /api/v1/interchanges/{id}` の `interchange_id`） |
+| 道路名ラベル | `road_detail` | `road` | 道路（名前付き道路）ID（`GET /api/v1/roads/{id}` の `road_id`） |
 
 インターチェンジ（IC/JCT）はバックエンドがランプから自動検出するもので（[道路網のインターチェンジとジャンクション](../economics/3_道路網.md#インターチェンジとジャンクション)）、Unityは道路の閲覧状態（道路・地形の入力モードがともに通常）のときだけ中心にラベルを出す。編集中はラベルを隠すので、このイベントが道路編集のクリックと競合することはない。`intersection_detail` は名前と種別、どの道路からどの道路へ行けるかの接続図を表示するパネルで、カメラ移動などのアクションは持たない。
 
@@ -173,23 +182,23 @@ Unityは `GET /buildings/{id}` の最新状態が `STATUS_COLLAPSED` である�
 Unityのグラフィックプログラムは、いくつかのステートを持つ。各モードの実体はUnityのC#で定義された「表示モード（`VisualMode`）」「入力モード（`InputMode`）」のセットである。
 ステートごとに以下のようになる。空欄は何もしないという意味。
 
-|                         | `STATE_NORMAL` | `STATE_EDIT_PATH` | `STATE_EDIT_BUILDING` | `STATE_EDIT_ZONE` | `STATE_EDIT_PARCEL_SHAPE` | `STATE_EDIT_RESOURCE` |
-| ----------------------- | -------------- | ----------------- | --------------------- | ----------------- | ------------------------- | ---------------------- |
-| `Parcel - VisualMode`   | 表示しない          | 表示する              | 表示する                  | 表示する              | 境界線表示（編集対象のみ非表示）          | 境界線表示                  |
-| `Parcel - Click`        | 詳細情報表示         | -                 | 建設場所選択                | -                 | -                         | -                      |
-| `Parcel - Mouseover`    | ハイライト          | -                 | ハイライト                 | -                 | -                         | -                      |
-| `Building - VisualMode` | 通常表示           | 計画中の建物も表示         | 計画中の建物も表示             | 計画中の建物も表示         | 計画中の建物も表示                 | 計画中の建物も表示              |
-| `Building - Click`      | 詳細情報表示         | -                 | -                     | -                 | -                         | -                      |
-| `Building - Mouseover`  | ハイライト          | -                 | -                     | -                 | -                         | -                      |
-| `Path - VisualMode`     | 通常表示           | 計画中のパスも表示         | 計画中のパスも表示             | 地区色分け表示           | 計画中のパスも表示                 | 計画中のパスも表示              |
-| `Path - Click`          | 詳細情報表示         | -                 | -                     | 選択中地区へ即時割当（Shift+クリックで新規作成） | -                         | -                      |
-| `Path - Mouseover`      | ハイライト          | -                 | -                     | 操作案内ツールチップ表示      | -                         | -                      |
-| `Terrain - VisualMode`  | 通常表示           | 通常表示              | 通常表示                  | 通常表示              | 通常表示                      | 通常表示                   |
-| `Terrain - Click`       | -              | ノード追加             | 直接配置: 地点確定          | -                 | 頂点ドラッグ/辺上追加               | 頂点追加（Placing）/ 頂点ドラッグ・辺上追加（Editing） |
-| `Terrain - Mouseover`   | -              | マーカー移動            | 直接配置: 矩形ゴースト追従       | -                 | 辺ハイライト                    | 辺ハイライト（Editingのみ）       |
-| `Zone - VisualMode`     | 表示しない          | 表示する              | 表示する                  | 表示する              | 非表示                       | 非表示                    |
-| `Zone - Click`          | 詳細情報表示         | -                 | -                     | -                 | -                         | -                      |
-| `Zone - Mouseover`      | ハイライト          | -                 | -                     | -                 |                           |                        |
+|                         | `STATE_NORMAL` | `STATE_EDIT_PATH` | `STATE_EDIT_BUILDING` | `STATE_EDIT_ZONE` | `STATE_EDIT_PARCEL_SHAPE` | `STATE_EDIT_RESOURCE` | `STATE_EDIT_ROAD_MEMBERS` |
+| ----------------------- | -------------- | ----------------- | --------------------- | ----------------- | ------------------------- | ---------------------- | ---------------------- |
+| `Parcel - VisualMode`   | 表示しない          | 表示する              | 表示する                  | 表示する              | 境界線表示（編集対象のみ非表示）          | 境界線表示                  | 表示する |
+| `Parcel - Click`        | 詳細情報表示         | -                 | 建設場所選択                | -                 | -                         | -                      | - |
+| `Parcel - Mouseover`    | ハイライト          | -                 | ハイライト                 | -                 | -                         | -                      | - |
+| `Building - VisualMode` | 通常表示           | 計画中の建物も表示         | 計画中の建物も表示             | 計画中の建物も表示         | 計画中の建物も表示                 | 計画中の建物も表示              | 計画中の建物も表示 |
+| `Building - Click`      | 詳細情報表示         | -                 | -                     | -                 | -                         | -                      | - |
+| `Building - Mouseover`  | ハイライト          | -                 | -                     | -                 | -                         | -                      | - |
+| `Path - VisualMode`     | 通常表示           | 計画中のパスも表示         | 計画中のパスも表示             | 地区色分け表示           | 計画中のパスも表示                 | 計画中のパスも表示              | 計画中のパスも表示（所属区間を道路色の帯で強調） |
+| `Path - Click`          | 詳細情報表示         | -                 | -                     | 選択中地区へ即時割当（Shift+クリックで新規作成） | -                         | -                      | 街路・高速道路の区間の付け外しをUIへ通知（`edit_road:toggle_path`） |
+| `Path - Mouseover`      | ハイライト          | -                 | -                     | 操作案内ツールチップ表示      | -                         | -                      | 街路・高速道路の区間をハイライト＋操作案内ツールチップ（他の種別は拒否のツールチップ） |
+| `Terrain - VisualMode`  | 通常表示           | 通常表示              | 通常表示                  | 通常表示              | 通常表示                      | 通常表示                   | 通常表示 |
+| `Terrain - Click`       | -              | ノード追加             | 直接配置: 地点確定          | -                 | 頂点ドラッグ/辺上追加               | 頂点追加（Placing）/ 頂点ドラッグ・辺上追加（Editing） | - |
+| `Terrain - Mouseover`   | -              | マーカー移動            | 直接配置: 矩形ゴースト追従       | -                 | 辺ハイライト                    | 辺ハイライト（Editingのみ）       | - |
+| `Zone - VisualMode`     | 表示しない          | 表示する              | 表示する                  | 表示する              | 非表示                       | 非表示                    | 表示する |
+| `Zone - Click`          | 詳細情報表示         | -                 | -                     | -                 | -                         | -                      | - |
+| `Zone - Mouseover`      | ハイライト          | -                 | -                     | -                 |                           |                        | - |
 
 `STATE_EDIT_BUILDING` の**直接配置**（土地区画外への建設）では、底面が「回転付き矩形」でありUnity単独で生成できるため、地形ホバー中にカーソル追従のリアルタイム矩形ゴーストを表示する（`BuildingPlanManager` が `edit_building:update_direct_params` で受け取った `width`/`depth`/`angle`/`floors` からローカル生成する。バックエンド往復不要）。中ボタンドラッグで矩形を1度単位で即時回転でき（地点確定の前後どちらでも有効）、回転はリリース時に `edit_building:update_direct_angle` でUIへ1回だけ通知して回転ステッパーに反映する。左クリックで地点を確定（`edit_building:select_point` に確定時の `angle` を含めてUIへ通知）すると、以降はUIの `POST /api/v1/buildings/preview-direct` → `edit_building:update_shape` が権威プレビューとなる（回転角の正規化=mod 360 はUIの確定送信 `POST /api/v1/buildings/direct` 時のみ）。土地区画上へのホバーではゴーストを表示せず区画ハイライトへ切り替わる。土地区画への設置は回転角指定・リアルタイムゴーストの対象外（形状はバックエンド依存のため）。
 
@@ -516,3 +525,13 @@ Unityの`PathSpeedLimitOverlay`は、一覧APIの`PathSummary.max_speed`をkm/h�
 標識は接写・通常モデルが表示される範囲だけで表示する。長い道路は中心区間の描画LODを参照し、遠景・Hidden・差し替え生成待ちでは隠す（[LOD処理](../geometries/E_LOD処理.md)）。道路の非表示・個別非表示・計画中表示OFF・アンロードにも追従し、都市切り替えで消去する。近傍候補は既存セル逆引きから0.5秒ごとに更新する。表示中のパスの速度変更も通常のデータ再取得後に反映する。
 
 意匠は`SpeedLimitSignStyle`として、数値・位置・表示状態から分離している。現在は全言語で日本式を用い、言語別の意匠はStyle実装と`SetSignStyle`で差し替えられる。写真・画像アセットは使用しない。実装検証は`unity/Tests/SpeedLimitSigns/run.ps1`、APIの値の検証はコア側のスキーマ直列化テストで行う。
+
+## 道路の区間編集モード
+
+`STATE_EDIT_ROAD_MEMBERS` は道路（名前付き道路。[道路網](../economics/3_道路網.md#35-道路名前付き道路)）の区間を3Dビューのクリックで付け外しするモードで、道路詳細パネル（`road_detail`）の設定タブの「区間を編集」で遷移する。`world:change_state` の params は `{state, road_id, color, path_ids, session_id}`（`path_ids` は開始時点の所属区間、`session_id` は開始のたびにパネルが採番する番号で、`edit_road:ended` の照合に使う）。
+
+Unity は `RoadMemberEditManager` が担う。入力プリセット `ROAD_MEMBER_EDIT`（PATH=`MODE_EDIT_ROAD_MEMBERS`、他=`MODE_NONE`）で街路・高速道路の区間のクリックだけを受け付け、`edit_road:toggle_path` を UI へ送る。表示は `STATE_EDIT_PATH` と同じ建設系の表示プリセットで、計画中の区間も選べる。所属の付け外しは UI が `POST /api/v1/roads/{id}/members` で行い、結果の全集合を `edit_road:set_members` で送り返すので、Unity は所属を先回りして書き換えない。詳細パネルで結果を見ながら続けて操作するため、`STATE_MERGE_PATH` と同じくこのステートでは Unity ウィンドウを最前面化しない。
+
+終了はパネルの「完了」の `edit_road:cancel {road_id}` で行い、`STATE_NORMAL` は送らない（UI の知らないうちに Unity が別のモードへ移っていた場合に、それを打ち切らないため）。`STATE_NORMAL`・他のステートへの直接の遷移・Unity にフォーカスがあるときの Esc・セッションのリセット・別の道路（または同じ道路の別の `session_id`）での開始でもモードは終わり、どの場合も Unity が `edit_road:ended` を1回送る。`edit_road:ended` には、終わったモードの開始時の `session_id` を型を変えずに添える（開始時に無ければ省く）。モードが終わっても `world:set_road_focus` の強調は残る。
+
+道路詳細のウィンドウが閉じられたときは、Rust（`window.rs` の `close_window_by_label`）が閉じた道路の `road_id` を載せて `world:clear_road_focus` と `edit_road:cancel` を送る（ポップアップは非表示になるだけでアンマウント処理が走らないため。`edit_path:cancel_topology_edit` と同じ理由）。`road_detail` は `EDIT_MODE_WINDOW_TYPES` に入れない。パネル・3Dの強調帯・道路名ラベルを含む全体の仕様は[道路の詳細と道路名](道路の詳細と道路名.md)を参照。

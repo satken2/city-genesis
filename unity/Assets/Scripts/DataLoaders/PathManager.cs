@@ -2351,6 +2351,22 @@ public class PathManager : BaseApiDataManager
         return true;
     }
 
+    /// <summary>
+    /// 未切断の中心線を読み取り専用で返す。キャッシュ済みなら共有の点列をそのまま返すので複製しない
+    /// (毎回描き直すオーバーレイが、点列を読むだけのためにリストを確保しないようにする)。書き換えないこと。
+    /// </summary>
+    public bool TryGetUntrimmedPolylineShared(int pathId, out IReadOnlyList<Vector3> points)
+    {
+        points = null;
+        if (!pathDataCache.TryGetValue(pathId, out PathSummary path) || path == null)
+            return false;
+        List<Vector3> pts = GetUntrimmedPoints(path, out _);
+        if (pts == null || pts.Count < 2)
+            return false;
+        points = pts;
+        return true;
+    }
+
     /// <summary>画面ラベルの中心。中心点を描画中心線へ射影し、高架・勾配の高さも保つ。</summary>
     public bool TryGetPathLabelPosition(int pathId, out Vector3 position)
     {

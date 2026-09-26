@@ -60,6 +60,7 @@ import {
 import { describeMaxSpanViolations, describePathValidation, pathValidationShapeKey, type PathValidationResult } from "./pathValidation";
 import { fetchApi } from "../../utils/api";
 import type { PathAlignmentSummary } from "../../types";
+import { notifyRoadsChanged } from "../road/roadApi";
 import {
   DIR_BOTH,
   PATH_STATION_HOUSE,
@@ -870,6 +871,9 @@ export function usePathConstruction(
     localCanConfirmRef.current = false;
     setLocalCanConfirm(false);
     void sendClearHighlights("path_build");
+    // 種別を問わず知らせる。敷設は交差・吸着で既存の道路区間を分割して所属区間を増やし、既存パスの編集は
+    // 延長・形状を変え、バリアントの変更で街路・高速道路でなくなれば所属も外れるため
+    void notifyRoadsChanged(undefined, "path_build");
     if (pathId == null && response?.paths?.length) {
       void invoke("open_registered_window", { windowType: "path_detail", entityId: String(response.paths[0].path_id) });
     }

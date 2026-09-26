@@ -2,11 +2,12 @@
  * 道路の交通量プロファイル(道路詳細パネルの「交通量」タブ)
  *
  * 横軸をキロ程にとり、基準線と並行区間(上下線)の値を区間ごとの階段状グラフで描く。指標は切り替え式:
- *   - 交通量: 車種別の積み上げ(上下線の合計=断面交通量)+ 容量の線
- *   - 混雑度: 交通量÷容量(%。1で頭打ちにしない)。50/80/100% の参照線
+ *   - 交通量: 車種別の積み上げ(上下線の合計=断面交通量)+ 容量の線。上下線が分かれている道路では
+ *     方向別の合計の線を重ねる(車種×方向の積み上げにすると系列が膨らみ読めないため、内訳は合計だけ)
+ *   - 混雑度: 交通量÷容量(%。1で頭打ちにしない)。50/80/100% の参照線(軸は参照線まで必ず広げる)
  *   - 旅行速度: 混雑込み(区間長÷所要時間)と自由走行(破線)
  *   - 騒音・耐久度・路上駐車(駐車台数と容量の線)
- * 交通量以外は、上下線が分かれている区間の下り/上りを別系列にする(双方向の区間は「双方向」の系列)。
+ * 上下線が分かれている区間の下り/上りは別系列にする(双方向の区間は「双方向」の系列)。
  * 稼働中でない区間は交通が無いので値を出さない(耐久度だけは出す)。塊の途切れは線が切れる。
  *
  * ツールチップの位置合わせのため、行は区間の境目に加えてキロ程を細かく刻んだ点にも置く
@@ -103,6 +104,7 @@ function intervalValues(covering: RoadSegment[], vehicleKeys: number[]): Row {
     row[`pid_${dir}`] = s.path_id;
     row[`dur_${dir}`] = s.durability * 100;
     if (s.status !== STATUS_ACTIVE) continue;
+    row[`tr_${dir}`] = s.road_traffic;
     row[`vc_${dir}`] = s.vc != null ? s.vc * 100 : null;
     row[`spd_${dir}`] = segmentSpeedKmh(s, false);
     row[`spdf_${dir}`] = segmentSpeedKmh(s, true);
@@ -187,6 +189,9 @@ export function RoadTrafficProfile({ road }: RoadTrafficProfileProps) {
             area: true,
           })),
           { key: "cap", name: t("road.traffic.capacity"), color: CAPACITY_COLOR, dashed: true },
+          ...(multi
+            ? dirs.map((d) => ({ key: `tr_${d}`, name: dirName(t("road.traffic.metric.traffic"), d), color: DIRECTION_COLORS[d] }))
+            : []),
         ];
       case "vc":
         return dirs.map((d) => ({ key: `vc_${d}`, name: dirName(t("road.traffic.metric.vc"), d), color: DIRECTION_COLORS[d] }));
@@ -308,9 +313,9 @@ export function RoadTrafficProfile({ road }: RoadTrafficProfileProps) {
               <Tooltip content={renderTooltip} cursor={{ stroke: "rgba(255,255,255,0.3)" }} isAnimationActive={false} />
               {metric === "vc" && (
                 <>
-                  <ReferenceLine y={50} stroke={ROAD_COLOR_VC_MID} strokeDasharray="4 4" />
-                  <ReferenceLine y={80} stroke={ROAD_COLOR_VC_HIGH} strokeDasharray="4 4" />
-                  <ReferenceLine y={100} stroke={REF_100_COLOR} />
+                  <ReferenceLine y={50} stroke={ROAD_COLOR_VC_MID} strokeDasharray="4 4" ifOverflow="extendDomain" />
+                  <ReferenceLine y={80} stroke={ROAD_COLOR_VC_HIGH} strokeDasharray="4 4" ifOverflow="extendDomain" />
+                  <ReferenceLine y={100} stroke={REF_100_COLOR} ifOverflow="extendDomain" />
                 </>
               )}
               {series.map((s) =>

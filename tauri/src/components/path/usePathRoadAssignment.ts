@@ -76,7 +76,8 @@ export function usePathRoadAssignment(apiBaseUrl: string | undefined, enabled: b
     enabled && choice.kind === "road" ? { road_id: choice.roadId } : undefined;
 
   /**
-   * 確定送信の成功後に呼ぶ。新しい道路なら作成されたパスで道路を作り、道路の変更を知らせる。
+   * 確定送信の成功後に呼ぶ。新しい道路なら作成されたパスで道路を作り、道路の変更を知らせる
+   * (既存の道路へ載せた場合と「なし」の場合の通知は、確定送信 usePathConstruction.confirmPath が済ませている)。
    * 次の1本は提案からやり直す(続けて敷く区間は、いま作った道路の端から延長として提案される)。
    */
   const finalize = useCallback(
@@ -89,8 +90,6 @@ export function usePathRoadAssignment(apiBaseUrl: string | undefined, enabled: b
       if (current.kind === "new" && createdPathIds.length > 0) {
         await createRoad(apiBaseUrl, { name: current.name.trim(), path_ids: createdPathIds });
         await notifyRoadsChanged(undefined, "path_build");
-      } else if (current.kind === "road") {
-        await notifyRoadsChanged(current.roadId, "path_build");
       }
     },
     [enabled, apiBaseUrl, choice],

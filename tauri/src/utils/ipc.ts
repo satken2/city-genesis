@@ -988,13 +988,16 @@ export async function sendRoadFocus(roadId: number, color: string, pathIds: numb
   });
 }
 
-/** `world.clear_road_focus` 道路の強調表示を消す(パネルを閉じたときは Rust 側も送る) */
-export async function sendClearRoadFocus(): Promise<void> {
+/**
+ * `world.clear_road_focus` 道路の強調表示を消す(パネルを閉じたときは Rust 側も送る)。
+ * roadId を渡すと、Unity は強調中の道路がそれと同じときだけ消す(別の道路詳細パネルの強調を消さないため)。
+ */
+export async function sendClearRoadFocus(roadId?: number): Promise<void> {
   await invoke("send_window_action", {
     windowType: "road_detail",
     entity: null,
     action: "world:clear_road_focus",
-    params: {},
+    params: roadId != null ? { road_id: roadId } : {},
   });
 }
 
@@ -1016,11 +1019,18 @@ export async function sendRefreshRoads(windowType: string = "road_detail"): Prom
  * `world.change_state` (STATE_EDIT_ROAD_MEMBERS)
  * 道路の区間編集モードを開始する。Unity は現在の所属区間を道路色で示し、街路・高速道路の
  * 区間がクリックされるたびに `edit_road:toggle_path` を返す(所属の付け外しはUIがAPIで行う)。
+ * sessionId はパネルが編集を始めるたびに採番する正の整数。Unity はモード終了時の `edit_road:ended` に
+ * そのまま返し、パネルは遅れて届いた前回の終了通知で新しい編集を落とさないよう照合する。
  */
-export async function sendStartRoadMemberEdit(roadId: number, color: string, pathIds: number[]): Promise<void> {
+export async function sendStartRoadMemberEdit(
+  roadId: number,
+  color: string,
+  pathIds: number[],
+  sessionId: number,
+): Promise<void> {
   await sendChangeState(
     "STATE_EDIT_ROAD_MEMBERS",
-    { road_id: roadId, color, path_ids: pathIds },
+    { road_id: roadId, color, path_ids: pathIds, session_id: sessionId },
     "road_detail",
   );
 }
@@ -1044,12 +1054,19 @@ export async function sendRoadEditSetMembers(
 }
 
 /**
- * `world.change_state` (STATE_NORMAL)
- * 道路の区間編集モードを終える。パネルを閉じたときは Rust 側が `edit_road:cancel` を送る
- * (Unity は区間編集モード中でなければ何もしない)。
+ * `edit_road.cancel`
+ * 道路の区間編集モードを終える。Unity はこの道路の区間編集モード中のときだけ終了して通常モードへ戻し、
+ * それ以外(別のモードへ移った後・別の道路の編集中)は何もしない。STATE_NORMAL を送らないのは、
+ * UI の知らないうちに Unity が別のモード(道路の敷設など)へ移っていた場合にそれを打ち切らないため。
+ * パネルを閉じたときは Rust 側が同じ `edit_road:cancel` を送る。
  */
-export async function sendEndRoadMemberEdit(): Promise<void> {
-  await sendChangeState("STATE_NORMAL", undefined, "road_detail");
+export async function sendEndRoadMemberEdit(roadId: number): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "road_detail",
+    entity: null,
+    action: "edit_road:cancel",
+    params: { road_id: roadId },
+  });
 }
 
 /**
@@ -1064,6 +1081,18 @@ export type RoadTogglePathPayload = {
   path_name: string;
   path_type: number;
   shift: boolean;
+};
+
+/**
+ * Unity の区間編集モードが終わった(Unity → UI)。理由(完了・Esc・別のモードへの切り替え・
+ * 閉じたパネルの edit_road:cancel・セッションのリセットなど)は問わず、モードを抜けるたびに届く。
+ * session_id は開始時の STATE_EDIT_ROAD_MEMBERS に載せた値(Unity が返さない場合は無い)。
+ */
+export const IPC_EVENT_ROAD_EDIT_ENDED = "edit_road:ended";
+
+export type RoadEditEndedPayload = {
+  road_id: number;
+  session_id?: number;
 };
 
 /**

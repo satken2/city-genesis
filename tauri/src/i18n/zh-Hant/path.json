@@ -4,7 +4,7 @@
     "titleInRoad": "{{road}}（路段 #{{id}}）",
     "road": {
       "label": "所屬道路",
-      "none": "無（無名道路）",
+      "none": "無（不屬於任何道路）",
       "createNew": "＋ 新增道路…",
       "newPlaceholder": "道路名稱（留空則顯示編號）",
       "create": "建立",

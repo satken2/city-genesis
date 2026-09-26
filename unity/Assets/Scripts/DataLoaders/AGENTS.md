@@ -243,7 +243,7 @@ UltraFar のロード済みマスクは `terrainTiles` が変わったとき(`lo
 ## 道路名ラベル (RoadManager.cs)
 
 - 道路(名前付き道路)は区間(パス)をまとめる名札で、所属の正は区間側の `PathSummary.road_id`(未所属は -1)。**区間そのものは普通のパスとして PathManager が描く**ので、このマネージャーが持つのは一覧と道路名のラベルだけ。3Dの強調帯は `VisualHandlers/RoadFocusOverlay`、区間編集モードは `Editors/RoadEditor/RoadMemberEditManager`。
-- `GET /roads/`(**末尾スラッシュ必須**。手書きDTO `API/RoadSummary.cs`)で都市全体を一度に取る。応答の `version`(2^48未満の整数なので long)が前回反映値と同じなら何もしない。取得の入口は InterchangeManager と同じ `CellDataLoader` の `EnsureLoaded`(初回・全量リロード)と `ReloadAllData` の `RequestRefresh`、加えてUIの `world:refresh_roads`(道路の作成・改名・所属変更・削除の直後)。カメラ移動では取り直さない。`ClearAllManagerData` で `Clear`(世代番号で古い都市の応答を捨てる)。
+- `GET /roads/`(**末尾スラッシュ必須**。手書きDTO `API/RoadSummary.cs`)で都市全体を一度に取る。応答の `version`(2^48未満の整数なので long)が前回反映値と同じなら何もしない。取得の入口は InterchangeManager と同じ `CellDataLoader` の `EnsureLoaded`(初回・全量リロード)と `ReloadAllData` の `RequestRefresh`、加えてUIの `world:refresh_roads`(道路の作成・改名・所属変更・削除の直後)。ブルドーザで道路の区間を消したときは `RemovalManager` が `world:roads_changed` をUIへ送り、一覧は削除後の `ReloadAllData` で取り直す。カメラ移動では取り直さない。`ClearAllManagerData` で `Clear`(世代番号で古い都市の応答を捨てる)。
 - ラベルは `label_points` ごと(塊ごとの中点+長い塊は約1500mおき)の ScreenSpaceOverlay Canvas(sortingOrder=61。地区60とIC 62の間)+ `Text`/`Outline`/`Button`。クリックで `EmitSelectObject("road_detail", "road", id)`。**名前が空の道路はラベルを出さない**(UIは翻訳済みの「道路 #id」を補うが、Unityは多言語リソースを持たない)。ボタンのRectは文字列幅に詰める(回転込みで当たり判定されるので、下の道路・建物のクリックを奪う範囲を最小にする)。
 - 文字は `angle_deg`(ワールドXZの `atan2(dz, dx)`)を画面へ投影した向きに回転し、逆さにならないよう (-90°, 90°] に収める。配置はカメラが1m/1°以上動いたフレームだけ行い、画面外・カメラ背面・4,000mより遠いものを除いてから**近い順に置き、既に置いたラベルの外接矩形(回転込み+余白)と重なるものは隠す**(最大60件)。表示条件は IC ラベルと同じ(世界表示中・通常モード・道路レイヤーが非表示でない)。
 - ラベルの高さは近く(30m以内)のロード済みの所属区間の中心線(`TryGetPathPolyline(trim:false)`)から拾う(高架・橋でも路面に沿わせるため)。区間が未ロードなら地表高さで仮置きし、2秒後に取り直す。地形ロード完了・一覧更新で捨てる。

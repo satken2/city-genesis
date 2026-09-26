@@ -476,12 +476,16 @@ public class IpcEventHandler : MonoBehaviour
     /// </summary>
     private void HandleWorldSetRoadFocus(int roadId, string color, int[] pathIds)
     {
-        RoadFocusOverlay.Ensure().SetFocus(RoadManager.ParseColor(color), pathIds);
+        RoadFocusOverlay.Ensure().SetFocus(roadId, RoadManager.ParseColor(color), pathIds);
     }
 
-    private void HandleWorldClearRoadFocus()
+    /// <summary>
+    /// world.clear_road_focus → RoadFocusOverlay.ClearFocus()。
+    /// road_id 付きならその道路の強調だけを消す(別の道路詳細パネルを閉じても、開いている方の強調を残すため)。
+    /// </summary>
+    private void HandleWorldClearRoadFocus(int roadId)
     {
-        RoadFocusOverlay.Instance?.ClearFocus();
+        RoadFocusOverlay.Instance?.ClearFocus(roadId);
     }
 
     /// <summary>world.refresh_roads → RoadManager.RequestRefresh()(version が同じならラベルは作り直さない)</summary>

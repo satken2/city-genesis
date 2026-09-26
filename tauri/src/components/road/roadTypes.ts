@@ -71,6 +71,11 @@ export type RoadSegment = {
   role: RoadSegmentRole;
   from_km: number;
   to_km: number;
+  /**
+   * branch の区間が基準線に取り付くキロ程(路線図で枝を描き出す位置)。基準線か並行区間につながる端点の位置で、
+   * つながる端点が無ければ基準線に近い方の端を基準線へ投影した位置。main / parallel は null
+   */
+  attach_km: number | null;
   length_m: number;
   direction: RoadSegmentDirection;
   zone_id: number;
@@ -170,6 +175,7 @@ export type RoadDetail = RoadSummary & {
 export type RoadMutationResponse = { road: RoadSummary };
 export type RoadMembersResponse = { road: RoadSummary | null; deleted: boolean };
 export type RoadDeleteResponse = { deleted: true; cleared_path_ids: number[] };
-export type RoadTraceResponse = { path_ids: number[] };
+/** bbox は候補の区間の範囲 [minx, minz, maxx, maxz](候補が無ければ null)。古いバックエンドは返さない */
+export type RoadTraceResponse = { path_ids: number[]; bbox?: [number, number, number, number] | null };
 export type RoadExtensionCandidate = { road_id: number; name: string; color: string; point_index: number };
 export type RoadExtensionCandidatesResponse = { candidates: RoadExtensionCandidate[] };

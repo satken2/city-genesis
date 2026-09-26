@@ -8,7 +8,7 @@ using UnityEngine;
 public static class VisualModePath
 {
     public const int UTILIZATION = 100;   // 利用率 0..1 -> 白→赤
-    public const int SPEED = 101;         // 平均速度 0..100 -> 赤→緑
+    public const int SPEED = 101;         // 通過速度(PathSummary.base_speed。カーブ・勾配・交差点での加減速込み)0..100km/h -> 赤→緑
     public const int PEDESTRIAN = 102;    // 人流 0..100 -> グレー→青
     public const int DURABILITY = 103;    // 耐久性 0..1 -> 赤→緑
     public const int ZONE_COLOR = 104;    // 所属地区色分け (道路を地区ごとの色で塗る。色はバックエンドの zone.color)

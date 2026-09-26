@@ -11,6 +11,11 @@ using GeneratedModels;
 /// クリックされるたびに edit_road:toggle_path を UI へ送るだけで、所属の付け外しそのものは
 /// UI が API(POST /roads/{id}/members)で行い、結果の全集合を edit_road:set_members で送り返す
 /// (パスの結合相手の選択と同じ責務分担)。帯はその応答で更新するので、クリック直後には変わらない。
+///
+/// モードはパネル以外の理由(他ステートへの直接遷移・セッションリセット・Esc・別の道路での開始)でも
+/// 終わるため、終わるたびに End() が edit_road:ended {road_id, session_id} を UI へ1回送り、パネルの
+/// 「区間を編集中」表示を解除させる。session_id は開始時に UI が付けた値をそのまま返す(パネルが
+/// 遅れて届いた前回の終了通知と区別するため。開始時に無ければ省く)。
 /// </summary>
 public class RoadMemberEditManager : MonoBehaviour
 {
@@ -23,6 +28,9 @@ public class RoadMemberEditManager : MonoBehaviour
 
     public bool IsActive { get; private set; }
     public int RoadId { get; private set; } = Constants.VALUE_NONE;
+
+    /// <summary>開始時の params.session_id(JSON の数値は long、文字列は string のまま)。無ければ null。</summary>
+    public object SessionId { get; private set; }
 
     public static RoadMemberEditManager Ensure()
     {
@@ -45,11 +53,16 @@ public class RoadMemberEditManager : MonoBehaviour
         if (Instance == this) Instance = null;
     }
 
-    /// <summary>区間編集モードを開始する。pathIds は開始時点の所属区間。</summary>
-    public void Begin(int roadId, Color roadColor, IEnumerable<int> pathIds)
+    /// <summary>
+    /// 区間編集モードを開始する。pathIds は開始時点の所属区間。
+    /// 編集中に別の道路、または同じ道路の別のセッションで開始されたら、前のセッションの終了を先に通知する。
+    /// </summary>
+    public void Begin(int roadId, Color roadColor, IEnumerable<int> pathIds, object sessionId = null)
     {
+        if (IsActive && (RoadId != roadId || !Equals(SessionId, sessionId))) End();
         IsActive = true;
         RoadId = roadId;
+        SessionId = sessionId;
         color = roadColor;
         Replace(members, pathIds);
         preview.Clear();
@@ -69,17 +82,34 @@ public class RoadMemberEditManager : MonoBehaviour
         RoadFocusOverlay.Ensure().SetEditLayers(color, members, preview);
     }
 
-    /// <summary>モードを終了し、区間編集の帯を消す(道路詳細パネルの強調は残す)。</summary>
+    /// <summary>
+    /// モードを終了し、区間編集の帯を消す(道路詳細パネルの強調は残す)。モード中だったときだけ、
+    /// 終了の理由を問わず edit_road:ended を UI へ送る。入力モードと表示の復帰は呼び出し側(IpcStateCoordinator)が行う。
+    /// </summary>
     public void End()
     {
         if (!IsActive) return;
+        int endedRoadId = RoadId;
+        object endedSessionId = SessionId;
         IsActive = false;
         RoadId = Constants.VALUE_NONE;
+        SessionId = null;
         members.Clear();
         preview.Clear();
         RoadFocusOverlay.Instance?.ClearEditLayers();
         TooltipManager.Instance?.Hide();
-        Debug.Log("RoadMemberEditManager: 区間編集モードを終了しました");
+        IpcClient.Instance?.EmitRoadMemberEditEnded(endedRoadId, endedSessionId);
+        Debug.Log($"RoadMemberEditManager: 区間編集モードを終了しました road={endedRoadId}");
+    }
+
+    /// <summary>
+    /// Unity 側の Esc でもモードを終えて通常モードへ戻す(パネルは edit_road:ended で追従する)。
+    /// パネルを前面に出さないモードなので、Unity にフォーカスがあるときの押下だけを拾う。
+    /// </summary>
+    private void Update()
+    {
+        if (!IsActive || !Application.isFocused || !InputUtil.KeyWasPressedThisFrame(Key.Escape)) return;
+        FindAnyObjectByType<IpcStateCoordinator>()?.ExitRoadMemberEditToNormal();
     }
 
     private static void Replace(HashSet<int> target, IEnumerable<int> source)

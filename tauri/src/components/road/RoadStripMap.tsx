@@ -5,10 +5,14 @@
  *   - 左: キロ程の目盛りと、制限速度が変わる所の小さな標識
  *   - 中央: 区間の線。太さ=車線数、色=混雑度(50%/80%で緑/黄/赤)。計画中・工事中は灰色の破線、容量なしは灰色。
  *     上下線が分かれた区間(parallel)は基準線の右に並べ、一方通行には進む向きの矢印を付ける。
- *     枝線(branch)はさらに右の列に、分岐位置からの短い接続線付きで描く。トンネル・橋は線の両脇の縁取りで示す。
+ *     トンネル・橋は線の両脇の縁取りで示す。
  *   - 中央右: 交差する道路名(名前付きなら道路色。クリックでその道路の詳細)・IC/JCT・停留所・区間名・
- *     塊の途切れ(「未接続 約○m」)
- *   - 右: 区間ごとの交通量の棒と「台/日・混雑度%」
+ *     塊の途切れ(「未接続 約○m」)・枝線(branch)
+ *   - 右: 区間ごとの交通量の棒と「台/日・混雑度%」(並行区間も自身の行を持つ)
+ *
+ * 枝線は分岐位置(バックエンドが返す基準線への取り付き位置 attach_km。無ければ基準線へ投影した範囲の起点側の端)の
+ * ラベル行として積み、行ごとに接続線と区間長に比例した短い横棒・交通量を出す。基準線からほぼ直角に出る枝は
+ * 投影範囲がほぼ0なので、縦の線で描くと点に潰れ、同じキロ程の枝どうしが重なって見分けられないため。
  *
  * 縦方向はキロ程に比例させつつ、隣り合う目印(イベント・区間の境目・区間の中点)どうしが最低限の間隔を
  * 保つよう区分線形に引き伸ばす(短い区間に交差点が密集しても文字が重ならない)。塊の間の途切れは
@@ -21,12 +25,12 @@ import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { invoke } from "@tauri-apps/api/core";
 import {
-  INTERCHANGE_KIND_JCT,
   PATH_MOTORWAY,
   PATH_TRACK,
   STATUS_ACTIVE,
 } from "../../constants";
 import { resolveIntlLocale } from "../../utils/locale";
+import { interchangeDisplayName } from "../intersection/interchangeName";
 import { roadDisplayName } from "./roadApi";
 import type { RoadCrossing, RoadDetail, RoadSegment } from "./roadTypes";
 import {
@@ -49,8 +53,11 @@ const AXIS_X = 32;
 const SIGN_X = 46;
 const LINE_X = 76;
 const PARALLEL_DX = 8;
-const BRANCH_X = LINE_X + 26;
 const LABEL_X = 118;
+const BRANCH_BAR_X = LINE_X + 10;
+const BRANCH_BAR_MAX = LABEL_X - 6 - BRANCH_BAR_X;
+const BRANCH_BAR_MIN = 8;
+const BRANCH_M_PER_PX = 20;
 const TRAFFIC_W = 128;
 const LINE_H = 14;
 const LABEL_FONT = 11;
@@ -75,6 +82,8 @@ type LabelLine = {
   bold?: boolean;
   onClick?: () => void;
   title?: string;
+  /** 枝線の行。行の位置に接続線・横棒・交通量の棒を描く */
+  branch?: RoadSegment;
 };
 
 type Key = { km: number; lines: LabelLine[]; minH: number };
@@ -109,6 +118,14 @@ function fitText(text: string, maxPx: number, fontPx: number): string {
 
 function openWindow(windowType: string, id: number) {
   void invoke("open_registered_window", { windowType, entityId: String(id) });
+}
+
+/** 区間の「台/日・混雑度%」。稼働中でなければステータス名 */
+function trafficText(s: RoadSegment, t: TFunction, locale: string): string {
+  if (s.status !== STATUS_ACTIVE) return t(`status.${s.status}`, { defaultValue: "" });
+  return s.vc != null
+    ? t("road.strip.trafficValue", { traffic: formatInt(s.road_traffic, locale), vc: formatPercentValue(s.vc, locale) })
+    : t("road.strip.trafficValueNoVc", { traffic: formatInt(s.road_traffic, locale) });
 }
 
 function crossingLabel(c: RoadCrossing, t: TFunction): LabelLine {
@@ -216,6 +233,17 @@ export function RoadStripMap({ road }: RoadStripMapProps) {
       });
     }
 
+    // 右端の交通量の行。区間の中点のキーに1行ずつ置き、同じキーに複数(基準線と並行区間)あれば縦に並べる
+    const trafficRowsAt = new Map<Key, number[]>();
+    const addTrafficRow = (s: { lo: number; hi: number; path_id: number }) => {
+      const k = keyAt((s.lo + s.hi) / 2);
+      const rows = trafficRowsAt.get(k) ?? [];
+      rows.push(s.path_id);
+      trafficRowsAt.set(k, rows);
+      k.minH = Math.max(k.minH, rows.length * TRAFFIC_ROW_H);
+      return k;
+    };
+
     // 制限速度が前の区間から変わる所(各塊の先頭を含む)に標識を置く
     const signs: { km: number; speed: number }[] = [];
     let prevSection = -1;
@@ -223,8 +251,7 @@ export function RoadStripMap({ road }: RoadStripMapProps) {
     for (const s of mains) {
       keyAt(s.lo);
       keyAt(s.hi);
-      const mid = keyAt((s.lo + s.hi) / 2);
-      mid.minH = Math.max(mid.minH, TRAFFIC_ROW_H);
+      const mid = addTrafficRow(s);
       if (s.name !== "" || s.structure != null) {
         mid.lines.push({
           text: s.name !== "" ? s.name : t(s.structure === "tunnel" ? "road.strip.tunnel" : "road.strip.bridge"),
@@ -243,9 +270,29 @@ export function RoadStripMap({ road }: RoadStripMapProps) {
       prevSection = s.section_index;
       prevSpeed = s.speed_limit;
     }
-    for (const s of [...parallels, ...branches]) {
+    for (const s of parallels) {
       keyAt(s.lo);
       keyAt(s.hi);
+      addTrafficRow(s);
+    }
+    const trafficRowOf = new Map<number, { km: number; dy: number }>();
+    for (const [k, rows] of trafficRowsAt) {
+      rows.forEach((id, i) => trafficRowOf.set(id, { km: k.km, dy: (i - (rows.length - 1) / 2) * TRAFFIC_ROW_H }));
+    }
+
+    const attachKmOf = (s: (typeof branches)[number]): number => {
+      return s.attach_km != null && Number.isFinite(s.attach_km) ? Math.min(totalKm, Math.max(0, s.attach_km)) : s.lo;
+    };
+    for (const s of [...branches].sort((a, b) => attachKmOf(a) - attachKmOf(b) || a.path_id - b.path_id)) {
+      const name = s.name !== "" ? s.name : t("road.pathWithId", { id: s.path_id });
+      keyAt(attachKmOf(s)).lines.push({
+        text: [t("road.strip.branch", { name }), trafficText(s, t, locale)].filter((p) => p !== "").join(" · "),
+        color: "#c9d6e3",
+        glyph: "none",
+        onClick: () => openWindow("path_detail", s.path_id),
+        title: t("road.strip.openPath"),
+        branch: s,
+      });
     }
 
     const markers: { km: number; kind: "crossing" | "interchange" | "stop" | "cap"; sides?: ("left" | "right")[]; color?: string }[] = [];
@@ -274,9 +321,9 @@ export function RoadStripMap({ road }: RoadStripMapProps) {
         const named = ev.crossings.find((c) => c.road_color);
         markers.push({ km: ev.km, kind: "crossing", sides: [...sides], color: named?.road_color ?? CROSSING_GRAY });
       } else if (ev.kind === "interchange") {
-        const kind = ev.interchange_kind === INTERCHANGE_KIND_JCT ? "JCT" : "IC";
+        // 地図・3D・交差点詳細と同じ表示名(名前そのもの、未命名なら略号+ID)にする
         k.lines.push({
-          text: ev.name !== "" ? t("road.strip.interchange", { name: ev.name, kind }) : t("road.strip.interchangeUnnamed", { kind }),
+          text: interchangeDisplayName({ interchange_id: ev.interchange_id, name: ev.name, kind: ev.interchange_kind }, t),
           color: "#bbf7d0",
           glyph: "interchange",
           bold: true,
@@ -342,11 +389,11 @@ export function RoadStripMap({ road }: RoadStripMapProps) {
     const overlapsParallel = (s: { lo: number; hi: number }) =>
       parallels.some((p) => p.lo < s.hi - KM_EPS && p.hi > s.lo + KM_EPS);
 
-    const maxTraffic = Math.max(0, ...[...mains, ...parallels].map((s) => s.road_traffic));
+    const maxTraffic = Math.max(0, ...[...mains, ...parallels, ...branches].map((s) => s.road_traffic));
 
     return {
-      keys, yOf, height, ticks, step, signs, markers, gaps, mains, parallels, branches,
-      overlapsParallel, maxTraffic, heightOf,
+      keys, yOf, height, ticks, step, signs, markers, gaps, mains, parallels,
+      overlapsParallel, maxTraffic, heightOf, trafficRowOf,
     };
   }, [road, t, locale]);
 
@@ -425,29 +472,49 @@ export function RoadStripMap({ road }: RoadStripMapProps) {
     );
   };
 
-  const renderTrafficBar = (s: (typeof layout.mains)[number], withText: boolean, dy: number) => {
-    const y1 = layout.yOf(s.lo);
-    const y2 = layout.yOf(s.hi);
-    const midY = (y1 + y2) / 2 + dy;
-    const inactive = s.status !== STATUS_ACTIVE;
-    const len = !inactive && layout.maxTraffic > 0 ? Math.max(1, (s.road_traffic / layout.maxTraffic) * barMax) : 0;
-    const text = inactive
-      ? t(`status.${s.status}`, { defaultValue: "" })
-      : s.vc != null
-        ? t("road.strip.trafficValue", { traffic: formatInt(s.road_traffic, locale), vc: formatPercentValue(s.vc, locale) })
-        : t("road.strip.trafficValueNoVc", { traffic: formatInt(s.road_traffic, locale) });
+  const trafficBarLength = (s: RoadSegment) =>
+    s.status === STATUS_ACTIVE && layout.maxTraffic > 0 ? Math.max(1, (s.road_traffic / layout.maxTraffic) * barMax) : 0;
+
+  /** 基準線・並行区間の交通量の行(行の高さは layout が中点のキーに確保済み) */
+  const renderTrafficBar = (s: (typeof layout.mains)[number]) => {
+    const row = layout.trafficRowOf.get(s.path_id);
+    if (!row) return null;
+    const midY = layout.yOf(row.km) + row.dy;
+    const len = trafficBarLength(s);
     return (
       <g key={`tr-${s.path_id}`} className="road-strip__segment" onClick={() => openWindow("path_detail", s.path_id)}>
         <title>{segmentTitle(s)}</title>
-        {withText && y2 - y1 >= TRAFFIC_ROW_H - 2 && (
-          <text x={width - 6} y={midY - 3} textAnchor="end" className="road-strip__traffic-text">
-            {s.direction !== "both" ? (s.direction === "down" ? "▼ " : "▲ ") : ""}
-            {text}
-          </text>
-        )}
-        <rect x={trafficX} y={midY + 1} width={barMax} height={withText ? 5 : 4} rx={2} fill="rgba(255,255,255,0.06)" />
-        {len > 0 && <rect x={trafficX} y={midY + 1} width={len} height={withText ? 5 : 4} rx={2} fill={segmentColor(s)} />}
+        <text x={width - 6} y={midY - 3} textAnchor="end" className="road-strip__traffic-text">
+          {s.direction !== "both" ? (s.direction === "down" ? "▼ " : "▲ ") : ""}
+          {trafficText(s, t, locale)}
+        </text>
+        <rect x={trafficX} y={midY + 1} width={barMax} height={5} rx={2} fill="rgba(255,255,255,0.06)" />
+        {len > 0 && <rect x={trafficX} y={midY + 1} width={len} height={5} rx={2} fill={segmentColor(s)} />}
       </g>
+    );
+  };
+
+  /** 枝線の行: 分岐位置からの接続線・区間長に比例した横棒・右端の交通量の棒(数値はラベルに含める) */
+  const renderBranchRow = (s: RoadSegment, keyY: number, y: number) => {
+    const color = segmentColor(s);
+    const barLen = Math.max(BRANCH_BAR_MIN, Math.min(BRANCH_BAR_MAX, s.length_m / BRANCH_M_PER_PX));
+    const len = trafficBarLength(s);
+    return (
+      <>
+        <rect x={LINE_X} y={y - LINE_H / 2} width={width - LINE_X} height={LINE_H} fill="transparent" />
+        <path d={`M ${LINE_X} ${keyY} L ${BRANCH_BAR_X} ${y}`} fill="none" stroke={color} strokeWidth={1.5} strokeOpacity={0.7} />
+        <line
+          x1={BRANCH_BAR_X}
+          x2={BRANCH_BAR_X + barLen}
+          y1={y}
+          y2={y}
+          stroke={color}
+          strokeWidth={Math.min(6, laneWidth(s.lanes))}
+          strokeDasharray={s.status !== STATUS_ACTIVE ? "4 3" : undefined}
+        />
+        <rect x={trafficX} y={y - 2} width={barMax} height={4} rx={2} fill="rgba(255,255,255,0.06)" />
+        {len > 0 && <rect x={trafficX} y={y - 2} width={len} height={4} rx={2} fill={color} />}
+      </>
     );
   };
 
@@ -530,14 +597,6 @@ export function RoadStripMap({ road }: RoadStripMapProps) {
           );
         })}
 
-        {/* 枝線: 分岐位置からの接続線 + 右の列の線 */}
-        {layout.branches.map((s) => (
-          <g key={`br-${s.path_id}`}>
-            <line x1={LINE_X} x2={BRANCH_X} y1={layout.yOf(s.lo)} y2={layout.yOf(s.lo)} stroke={segmentColor(s)} strokeWidth={2} strokeOpacity={0.7} />
-            {renderSegment(s, BRANCH_X, `brs-${s.path_id}`)}
-          </g>
-        ))}
-
         {/* 並行区間(上下線の反対側)と基準線 */}
         {layout.parallels.map((s) => renderSegment(s, LINE_X + PARALLEL_DX, `par-${s.path_id}`))}
         {layout.mains.map((s) =>
@@ -584,7 +643,9 @@ export function RoadStripMap({ road }: RoadStripMapProps) {
           const top = cy - ((k.lines.length - 1) * LINE_H) / 2;
           return (
             <g key={`lbl-${k.km}`}>
-              <line x1={LINE_X + 14} x2={LABEL_X - 4} y1={cy} y2={cy} className="road-strip__leader" />
+              {k.lines.some((line) => !line.branch) && (
+                <line x1={LINE_X + 14} x2={LABEL_X - 4} y1={cy} y2={cy} className="road-strip__leader" />
+              )}
               {k.lines.map((line, i) => {
                 const y = top + i * LINE_H;
                 const glyph = renderGlyph(line, LABEL_X, y);
@@ -596,6 +657,7 @@ export function RoadStripMap({ road }: RoadStripMapProps) {
                     onClick={line.onClick}
                   >
                     {line.title && <title>{line.title}</title>}
+                    {line.branch && renderBranchRow(line.branch, cy, y)}
                     {glyph}
                     <text
                       x={tx}
@@ -615,8 +677,8 @@ export function RoadStripMap({ road }: RoadStripMapProps) {
         })}
 
         {/* 右端: 区間ごとの交通量 */}
-        {layout.mains.map((s) => renderTrafficBar(s, true, 0))}
-        {layout.parallels.map((s) => renderTrafficBar(s, false, 7))}
+        {layout.mains.map((s) => renderTrafficBar(s))}
+        {layout.parallels.map((s) => renderTrafficBar(s))}
       </svg>
     </div>
   );

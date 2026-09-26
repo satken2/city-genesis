@@ -145,7 +145,7 @@
     "modePropVisible": "표시",
     "modeRoadDefault": "일반 표시",
     "modeRoadTraffic": "교통량 색상 구분",
-    "modeRoadSpeed": "속도 규제 색상 구분",
+    "modeRoadSpeed": "통과 속도 색상 구분",
     "modeRoadDurability": "내구도 색상 구분",
     "modeRoadZone": "소속 지구 색상 구분",
     "modeBuildingDefault": "일반 표시",

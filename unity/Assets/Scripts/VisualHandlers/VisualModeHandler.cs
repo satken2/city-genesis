@@ -295,7 +295,7 @@ public class VisualModeHandler : MonoBehaviour
             case VisualMode.MODE_BOUNDARY: return "境界表示";
             case VisualMode.MODE_HIGHLIGHT_OWNER: return "ハイライト表示";
             case VisualModePath.UTILIZATION: return "交通量色分け";
-            case VisualModePath.SPEED: return "制限速度色分け";
+            case VisualModePath.SPEED: return "通過速度色分け";
             case VisualModePath.PEDESTRIAN: return "歩行者量色分け";
             case VisualModePath.DURABILITY: return "耐久度色分け";
             case VisualModePath.ZONE_COLOR: return "所属地区色分け";

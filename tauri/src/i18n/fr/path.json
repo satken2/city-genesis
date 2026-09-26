@@ -4,7 +4,7 @@
     "titleInRoad": "{{road}} (tronçon n° {{id}})",
     "road": {
       "label": "Route",
-      "none": "Aucune (voie sans nom)",
+      "none": "Aucune (hors route nommée)",
       "createNew": "+ Nouvelle route…",
       "newPlaceholder": "Nom de la route (vide : affichée par numéro)",
       "create": "Créer",

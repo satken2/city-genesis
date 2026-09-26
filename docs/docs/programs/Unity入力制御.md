@@ -49,6 +49,7 @@ Rayが命中したオブジェクトはTagまたはコンポーネントの有�
 | `MODE_EDIT_RESOURCE` | 12 | 資源エリア編集モード |
 | `MODE_EDIT_TRANSIT` | 13 | 公共交通設置モード |
 | `MODE_EDIT_PROP` | 14 | プロップ配置モード（個別配置・範囲散布） |
+| `MODE_EDIT_ROAD_MEMBERS` | 22 | 道路（名前付き道路）の区間編集モード。街路・高速道路の区間のクリックをUIへ通知する |
 
 接続点編集（`STATE_EDIT_CONNECTOR`）では専用のモード定数を追加せず、既存の `MODE_EDIT`（=7、既存オブジェクトの編集モード）を NODE に適用して接続端子ノードをドラッグ移動する。
 
@@ -69,12 +70,15 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 | `PARCEL_SHAPE_EDIT` | PARCEL_SHAPE_EDIT | NONE | NONE | NONE | NONE | NONE |
 | `PROP_PLACEMENT` | EDIT_PROP | NONE | NONE | NONE | NONE | NONE |
 | `CONNECTOR_EDIT` | NONE | NONE | EDIT | NONE | NONE | NONE |
+| `ROAD_MEMBER_EDIT` | NONE | EDIT_ROAD_MEMBERS | NONE | NONE | NONE | NONE |
 
 表の「—」はプリセットで明示的に設定されないオブジェクトタイプを示す（前回の設定が維持される）。
 
 `CONNECTOR_EDIT` は `STATE_EDIT_CONNECTOR`（接続点編集）で適用され、NODE のみを `MODE_EDIT`（ドラッグ移動）にして施設の接続端子ノード（`infra_node_id` / `depot_node_id`）を移動できるようにする。対象ノードの強調表示と、非電化の路線専用ノードへの `NodeInputHandler` 後付けは `ConnectorEditManager` が担う。ドラッグ確定時は `NodeInputHandler` が `PATCH /api/v1/nodes/{node_id}` を送り、パスが接続済みのノードはバックエンドが移動を拒否して元位置に戻る。詳細は `IPC連携の整理.md` の `STATE_EDIT_CONNECTOR` を参照。
 
 `PROP_PLACEMENT` は `STATE_EDIT_PROP`（プロップ配置）で適用され、地形クリックでプロップを配置する。`IpcStateCoordinator.ApplyStateEditProp` が `PropPlacementManager` を動的生成し、個別配置（`edit_prop:update_instances`）／範囲散布（`edit_prop:update_shape`）のモードごとに処理する。詳細は `IPC連携の整理.md` の `STATE_EDIT_PROP` を参照。
+
+`ROAD_MEMBER_EDIT` は `STATE_EDIT_ROAD_MEMBERS`（道路の区間編集）で適用され、PATH だけを `MODE_EDIT_ROAD_MEMBERS` にして他のオブジェクトタイプはクリックを無効化する（パス結合の相手選択と同型）。`IpcStateCoordinator.ApplyStateEditRoadMembers` が `RoadMemberEditManager` を生成して開始し、区間のクリックは `RoadMemberEditManager.OnPathClicked` が `edit_road:toggle_path` として UI へ送る。所属の付け外しは UI が API で行うので、Unity は所属を書き換えない。詳細は[道路の詳細と道路名の区間編集モード](道路の詳細と道路名.md#区間編集モード)を参照。
 
 ## 3. 入力フロー
 
@@ -95,7 +99,7 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 - 編集ハンドル（道路の制御点や土地区画の頂点）上でドラッグを開始した場合、`CameraController` はドラッグを開始しない。
 ### 3.3. ドラッグを持たないモード
 
-ブルドーザ（`MODE_REMOVE`）、パス結合・分割の対象選択（`MODE_PATH_MERGE` / `MODE_PATH_SPLIT`）、地区編集（`MODE_ZONE_EDIT`）はクリックのみで操作する。
+ブルドーザ（`MODE_REMOVE`）、パス結合・分割の対象選択（`MODE_PATH_MERGE` / `MODE_PATH_SPLIT`）、道路の区間編集（`MODE_EDIT_ROAD_MEMBERS`）、地区編集（`MODE_ZONE_EDIT`）はクリックのみで操作する。
 ブルドーザ中のクリックは、レイキャストのヒット物へ配送する前に地形プロップを判定する（`InputHandler.TryRemovePropAtScreenPoint` → `RemovalManager.TryRemovePropAt`。プロップはColliderを持たないため `PropManager.TryPick` のAABB判定で、ヒット物より手前にある最も近い1本を選ぶ）。プロップを拾えた場合は背後の建物・区画へは配送しない。ホバーも同様に `RemovalManager.UpdatePropHover` で赤い枠を出す。
 これらのモードでは `StartDrag` / `StartTerrainDrag` の冒頭で即座に return し、ドラッグ状態に入らない
 （入らないと既定の経路で道路エディタのドラッグ処理へフォールバックしてしまう）。
@@ -154,6 +158,7 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 | `MODE_ZONE_EDIT` | 道路を地区に追加・選択トグル | — | 地区プレビュー色でハイライト |
 | `MODE_PARCEL_CREATION_PATH` | 土地区画エディタに道路選択を通知 | — | 選択可能な道路のみハイライト |
 | `MODE_ROAD_CONSTRUCTION` | 地形クリックとして処理 | 同右 | ハイライトをスキップ |
+| `MODE_EDIT_ROAD_MEMBERS` | `RoadMemberEditManager.OnPathClicked` に委譲（街路・高速道路なら `edit_road:toggle_path` をUIへ送る。それ以外の種別はツールチップで拒否） | — | 街路・高速道路の区間だけハイライトし、操作案内のツールチップを出す（それ以外の種別は拒否のツールチップのみ） |
 
 ### 4.3. NodeInputHandler（ノード）
 
@@ -319,6 +324,7 @@ Y軸ドラッグは、ポイントを通りカメラ正面を向いた鉛直平�
 | `STATE_EDIT_PARCEL_SHAPE` | `PARCEL_SHAPE_EDIT` | `ParcelShapeEditManager.InitializeEditMode` |
 | `STATE_EDIT_PROP` | `PROP_PLACEMENT` | `PropPlacementManager` の初期化（個別配置／範囲散布） |
 | `STATE_EDIT_CONNECTOR` | `CONNECTOR_EDIT` | `ConnectorEditManager.EnterEditMode`（接続端子ノードの強調＋ドラッグ有効化） |
+| `STATE_EDIT_ROAD_MEMBERS` | `ROAD_MEMBER_EDIT` | `RoadMemberEditManager.Begin`（所属区間を道路色の帯で表示。詳細パネルを操作し続けるため Unity ウィンドウは最前面化しない） |
 
 ### 9.1. ステート別の表示プリセット
 
@@ -328,7 +334,7 @@ Y軸ドラッグは、ポイントを通りカメラ正面を向いた鉛直平�
 
 | ステート（操作） | 強制する表示 |
 |---|---|
-| `STATE_EDIT_PATH` / `STATE_EDIT_STATION` / `STATE_MERGE_PATH` / `STATE_SPLIT_PATH` / `STATE_EDIT_BUILDING`（道路・線路・インフラ・建物の設置） | 区画（建物建設は建設可能な区画の色分け、他は境界線）・地区・等高線を表示、計画中の道路と建物を表示、プロップを非表示 |
+| `STATE_EDIT_PATH` / `STATE_EDIT_STATION` / `STATE_MERGE_PATH` / `STATE_SPLIT_PATH` / `STATE_EDIT_ROAD_MEMBERS` / `STATE_EDIT_BUILDING`（道路・線路・インフラ・建物の設置、道路の区間編集） | 区画（建物建設は建設可能な区画の色分け、他は境界線）・地区・等高線を表示、計画中の道路と建物を表示、プロップを非表示 |
 | `STATE_EDIT_PARCEL`（土地区画編集） | 区画・地区を表示、計画中の道路と建物を表示 |
 | `STATE_EDIT_ZONE`（地区編集） | 区画・地区を表示、道路のみ地区色分け、計画中表示と公共施設ハイライトはOFF |
 | `STATE_EDIT_TRANSIT` ＋ プリセット `transit`（公共交通の一覧・新設） | 公共交通路線を全種別表示、計画中の道路と建物を表示 |
