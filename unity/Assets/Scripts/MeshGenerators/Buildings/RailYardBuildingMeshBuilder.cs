@@ -5,8 +5,8 @@ using GeneratedModels;
 /// <summary>
 /// 鉄道車両基地（MODEL_RAIL_YARD）のメッシュ生成器。
 ///
-/// 車両基地は走行網の接続端子ノード（depot_node_id。電化前提の共用接続ノード）へ
-/// 引き込み線路が溶接される施設で、敷地内の線路をその端子位置へ収束させて描画する。
+/// 車両基地は走行網の接続端子ノード（depot_node_id。鉄道車両基地・モノレール車庫では電力と共用の
+/// 接続ノード）へ引き込み線路が溶接される施設で、敷地内の線路をその端子位置へ収束させて描画する。
 /// フットプリントと端子ノード位置から次の2ゾーンをプロシージャルに組み立てる:
 ///
 ///   1. 並行線路ゾーン … 端子と反対側の敷地に、直線の線路（yard_track タイル）を
@@ -19,9 +19,12 @@ using GeneratedModels;
 /// 軌間と高さは実寸を維持する。yard_beam は柱間へXスケールする。
 ///
 /// 端子ノードの位置は PathManager のノードキャッシュから引く。未ロード・テストシーン
-/// では、バックエンドの初期配置（接道辺から最も遠い辺の中点。crud_agents.py の
-/// _connection_node_position）を模した位置へフォールバックする。端子の移動が確定した
+/// では、バックエンドの初期配置（接道辺から最も遠い辺の中点。LRT車両基地は前面辺の中点。
+/// crud_agents.py の _connection_node_position）を模した位置へフォールバックする。端子の移動が確定した
 /// ときは BuildingManager.OnTerminalNodeMoved がこの建物を再生成する。
+///
+/// 端子へ入る引き込み線が1本で複線のパス（LRT専用軌道431）の基地は、端子の手前を同じ軌道間隔の
+/// 複線にする。片側の軌道が集約線で、もう片側は渡り線で集約線へ合流する。
 ///
 /// 高さはすべてローカルY=0の水平面（center_point 位置の地形標高に接地。傾斜地の
 /// 起伏やノードの相対高さには追従しない）。
@@ -44,6 +47,11 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
 
     /// <summary>端子ノード手前の直線リード線の長さ(m)。曲線はこの始点へ収束する。</summary>
     private const float LEAD_LENGTH = 6f;
+
+    /// <summary>複線の引き込み線の2本目で、端子から渡り線の始点までの直線長(m)。</summary>
+    private const float SECOND_LEAD_STRAIGHT = 3f;
+    /// <summary>2本目が集約線へ合流する渡り線の走行長(m)。軌道中心間隔3.5mで最小曲線半径が約17mになる。</summary>
+    private const float SECOND_LEAD_RUN = 16f;
 
     /// <summary>集約線の横移動1mに対する走行長。隣接線の合流点は10m間隔になる。</summary>
     private const float LADDER_RUN_PER_LATERAL = 2f;
@@ -87,6 +95,13 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
         public Vector2 MergePoint;  // 同じ側の集約線が中央線へ接続する位置
     }
 
+    /// <summary>基地が車両を送り出す走行網から決まる、端子と引き込み線の描き方。</summary>
+    private struct YardProfile
+    {
+        public bool TerminalOnFrontage; // 端子の初期位置が前面辺（頂点0→1）の中点
+        public float LeadHalfSpacing;   // 端子へ入る複線の軌道中心の半間隔。単線は0
+    }
+
     public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic = false)
     {
         if (buildingData == null || buildingData.polygonArray == null || buildingData.polygonArray.Length < 3)
@@ -109,7 +124,8 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
         }
 
         // 端子ノードのローカルXZ位置（未ロード時はバックエンドの初期配置を模したフォールバック）。
-        Vector2 nodeLocal = ResolveTerminalNodeLocal(buildingData, centerPointWorld, footprint);
+        YardProfile profile = ResolveProfile(buildingData.variant);
+        Vector2 nodeLocal = ResolveTerminalNodeLocal(buildingData, centerPointWorld, footprint, profile.TerminalOnFrontage);
 
         // ローカル基底: U=敷地の初期接続辺へ向かう線路方向、V=その左手垂直。
         Vector2 centroid = Vector2.zero;
@@ -120,7 +136,7 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
         centroid /= footprint.Length;
 
         // 端子の横移動で全線の向きが回転しないよう、敷地の初期接続辺を方向の基準にする。
-        Vector2 u2 = ResolveTerminalNodeLocal(null, centerPointWorld, footprint) - centroid;
+        Vector2 u2 = ResolveTerminalNodeLocal(null, centerPointWorld, footprint, profile.TerminalOnFrontage) - centroid;
         if (u2.sqrMagnitude < 1e-4f)
         {
             // 端子が重心に一致する退化ケース。前面辺（頂点0→1）の法線方向を使う
@@ -142,14 +158,16 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
             vMax = Mathf.Max(vMax, uv[i].y);
         }
         Vector2 nodeUV = new Vector2(Vector2.Dot(nodeLocal - centroid, u2), Vector2.Dot(nodeLocal - centroid, v2));
-        float leadStartU = nodeUV.x - LEAD_LENGTH;
+        // 複線の引き込み線では、端子の片側の軌道位置へ構内の線路を集約する（単線は端子そのもの）。
+        Vector2 trunkNode = nodeUV - new Vector2(0f, profile.LeadHalfSpacing);
+        float leadStartU = trunkNode.x - LEAD_LENGTH;
 
         // 並行線路の行割り（敷地の横幅から本数を決め、中央寄せで並べる）
         float usable = (vMax - vMin) - SIDE_MARGIN * 2f;
         int trackCount = Mathf.Clamp(Mathf.FloorToInt(usable / TRACK_SPACING) + 1, 1, MAX_TRACKS);
         float vCenter = (vMin + vMax) * 0.5f;
 
-        List<TrackRow> rows = PlanRows(uv, nodeUV, vCenter, trackCount);
+        List<TrackRow> rows = PlanRows(uv, trunkNode, vCenter, trackCount);
 
 
         if (rows.Count == 0)
@@ -240,10 +258,25 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
                 trackMesh, trackMats, wireMesh, wireMats, tileLength, tileMinZ, wireMinZ,
                 ToLocal3, ToDir3, combineInstances, materials, temporaryMeshes, true);
         }
-        Vector2 lead = new Vector2(leadStartU, nodeUV.y);
-        PlaceTilesAlongBezier(lead, lead + Vector2.right * 2f, nodeUV - Vector2.right * 2f, nodeUV,
+        Vector2 lead = new Vector2(leadStartU, trunkNode.y);
+        PlaceTilesAlongBezier(lead, lead + Vector2.right * 2f, trunkNode - Vector2.right * 2f, trunkNode,
             trackMesh, trackMats, wireMesh, wireMats, tileLength, tileMinZ, wireMinZ,
             ToLocal3, ToDir3, combineInstances, materials, temporaryMeshes, false);
+
+        // 複線の2本目: 端子から直線で入り、渡り線で集約線へ合流する（合流側の支持材は集約線の外縁で切る）。
+        float secondMergeU = float.NaN;
+        if (profile.LeadHalfSpacing > 0f
+            && TryPlanSecondLead(uv, rows, nodeUV, trunkNode, out Vector2 secondEnd, out Vector2 secondStart, out Vector2 secondMerge))
+        {
+            PlaceTilesAlongBezier(secondStart, secondStart + Vector2.right, secondEnd - Vector2.right, secondEnd,
+                trackMesh, trackMats, wireMesh, wireMats, tileLength, tileMinZ, wireMinZ,
+                ToLocal3, ToDir3, combineInstances, materials, temporaryMeshes, false);
+            Vector2 handle = Vector2.right * (SECOND_LEAD_RUN * .4f);
+            PlaceTilesAlongBezier(secondStart, secondStart - handle, secondMerge + handle, secondMerge,
+                trackMesh, trackMats, wireMesh, wireMats, tileLength, tileMinZ, wireMinZ,
+                ToLocal3, ToDir3, combineInstances, materials, temporaryMeshes, true);
+            secondMergeU = secondMerge.x;
+        }
 
         // --- 3. 検修庫: 先頭2線の行き止まり側を覆う（直線ゾーンに十分な長さがある場合のみ） ---
         // 架線柱より先に位置を確定し、庫の区間には門型柱を立てない（梁が庫を貫通するため）
@@ -276,6 +309,8 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
                 uCommonStart = Mathf.Max(uCommonStart, row.StraightStart);
                 uCommonEnd = Mathf.Min(uCommonEnd, row.StraightEnd);
             }
+            // 2本目の渡り線は行の外を横切るので、その区間には柱を立てない。
+            if (!float.IsNaN(secondMergeU)) uCommonEnd = Mathf.Min(uCommonEnd, secondMergeU - 2f);
             float vLeft = vTrackMin - POLE_OFFSET;
             float vRight = vTrackMax + POLE_OFFSET;
             // yard_pole は「右側用」（軌道中心側が-X）。基準回転では -X が +V を向くため、
@@ -316,7 +351,7 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
             null,
             centerPointWorld, deformToTerrain: isDynamic,
             combineInstances, materials, temporaryMeshes,
-            fenceOpeningCenter: ResolveFenceOpening(sitePolygon,nodeLocal,u2), fenceOpeningRadius: 3f);
+            fenceOpeningCenter: ResolveFenceOpening(sitePolygon,nodeLocal,u2), fenceOpeningRadius: 3f + profile.LeadHalfSpacing);
 
         UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
             $"[RailYardBMB] agent={buildingData.agent_id} prefix={prefix} tracks={rows.Count} " +
@@ -342,10 +377,11 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
     /// <summary>
     /// 端子ノード（depot_node_id / 共用時は infra_node_id と同一）のローカルXZ位置を解決する。
     /// PathManager のノードキャッシュに無い場合（未ロード・テストシーン）は、バックエンドの
-    /// 初期配置ロジック（接道辺=前面辺から最も遠い辺の中点。crud_agents._connection_node_position）
-    /// を模した位置へフォールバックする。ユーザーが端子を移動していない限り両者は一致する。
+    /// 初期配置ロジック（接道辺=前面辺から最も遠い辺の中点。onFrontage なら前面辺の中点。
+    /// crud_agents._connection_node_position）を模した位置へフォールバックする。
+    /// ユーザーが端子を移動していない限り両者は一致する。
     /// </summary>
-    private static Vector2 ResolveTerminalNodeLocal(BuildingSummary buildingData, Vector3 centerPointWorld, Vector2[] footprint)
+    private static Vector2 ResolveTerminalNodeLocal(BuildingSummary buildingData, Vector3 centerPointWorld, Vector2[] footprint, bool onFrontage)
     {
         int nodeId = buildingData == null ? 0 : buildingData.depot_node_id > 0 ? buildingData.depot_node_id : buildingData.infra_node_id;
         if (nodeId > 0)
@@ -359,8 +395,10 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
             }
         }
 
-        // フォールバック: 前面辺（頂点0→1）から最も遠い辺の中点
         int n = footprint.Length;
+        if (onFrontage) return (footprint[0] + footprint[1 % n]) * 0.5f;
+
+        // フォールバック: 前面辺（頂点0→1）から最も遠い辺の中点
         Vector2 frontA = footprint[0];
         Vector2 frontB = footprint[1 % n];
         Vector2 best = (footprint[0] + footprint[n / 2]) * 0.5f;
@@ -376,6 +414,66 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
             }
         }
         return best;
+    }
+
+    /// <summary>
+    /// 基地の供給する車両財（agent_master.supply）を使う路線種別の走行網から、端子と引き込み線の
+    /// 描き方を導く。溶接を要する軌道系と街路の両方を走る網（LRT）は端子が前面辺にあり
+    /// （バックエンドの transit_route.depot_terminal_on_frontage と同じ判定）、複線の線路パス
+    /// （lanes≥2）を持つ網は引き込み線がその軌道間隔の複線になる。マスター未取得（テストシーン等）は
+    /// 鉄道車両基地と同じ描き方。
+    /// </summary>
+    private static YardProfile ResolveProfile(int agentVariant)
+    {
+        var profile = new YardProfile();
+        MasterDataStore store = MasterDataStore.Instance;
+        if (store == null || !store.GetAgentMasterDictionary().TryGetValue(agentVariant, out var agent) || agent.supply == null)
+            return profile;
+        var paths = store.GetPathMasterDictionary();
+        bool guided = false, road = false;
+        foreach (var transit in store.GetTransitMasterDictionary().Values)
+        {
+            if (transit.vehicle != agent.supply) continue;
+            foreach (List<int> variants in new[] { transit.route_path_variants, transit.stop_path_variants })
+            {
+                if (variants == null) continue;
+                foreach (int variant in variants)
+                {
+                    if (!paths.TryGetValue(variant, out PathMasterItem path)) continue;
+                    guided |= path.type == Constants.PATH_TRACK || path.type == Constants.PATH_MONORAIL;
+                    road |= path.type == Constants.PATH_STREET || path.type == Constants.PATH_WALKWAY;
+                    if (path.type == Constants.PATH_TRACK && (path.lanes ?? 1) >= 2)
+                        profile.LeadHalfSpacing = Mathf.Max(profile.LeadHalfSpacing,
+                            Mathf.Abs(TrackPath.GetTrackCenterOffset(path.width, path.lanes.Value, 0)));
+                }
+            }
+        }
+        profile.TerminalOnFrontage = guided && road;
+        return profile;
+    }
+
+    /// <summary>
+    /// 複線の引き込み線の2本目を計画する。端子の反対側の軌道位置から SECOND_LEAD_STRAIGHT だけ直進し、
+    /// SECOND_LEAD_RUN の渡り線で集約線の直線区間へ合流する。合流点が集約線の直線区間に無い、
+    /// または線路が敷地に収まらない場合は false（集約線の1本だけで端子へ入る）。
+    /// </summary>
+    private static bool TryPlanSecondLead(Vector2[] uv, List<TrackRow> rows, Vector2 node, Vector2 trunkNode,
+        out Vector2 end, out Vector2 start, out Vector2 merge)
+    {
+        end = node + (node - trunkNode);
+        start = end - Vector2.right * SECOND_LEAD_STRAIGHT;
+        merge = new Vector2(start.x - SECOND_LEAD_RUN, trunkNode.y);
+        int trunk = rows.FindIndex(row => row.Side == 0);
+        if (trunk < 0 || merge.x < rows[trunk].StraightStart) return false;
+        Vector2 handle = Vector2.right * (SECOND_LEAD_RUN * .4f);
+        for (int k = 0; k <= 64; k++)
+        {
+            float t = k / 64f;
+            if (!PolygonUtils.Contains(uv, Vector2.Lerp(start, end, t), BOUNDARY_TOLERANCE)
+                || !PolygonUtils.Contains(uv, PolylineUtils.CubicBezierPoint(start, start - handle, merge + handle, merge, t), BOUNDARY_TOLERANCE))
+                return false;
+        }
+        return true;
     }
 
     /// <summary>

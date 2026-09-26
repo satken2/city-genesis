@@ -2017,8 +2017,8 @@ public class BuildingManager : BaseApiDataManager
     }
 
     /// <summary>
-    /// 建物データをキャッシュに登録し、インフラ接続端子ノードの逆引きインデックス
-    /// （buildingIdByInfraNodeId）を同期する。buildingDataCache への直接代入は禁止で、
+    /// 建物データをキャッシュに登録し、接続端子ノードの逆引きインデックス
+    /// （buildingIdByInfraNodeId / buildingIdByDepotNodeId）を同期する。buildingDataCache への直接代入は禁止で、
     /// 必ずこのメソッドを通すこと（逆引きインデックスの整合性を保つため）。
     /// </summary>
     private void RegisterBuildingDataToCache(BuildingSummary buildingData)
@@ -2030,6 +2030,10 @@ public class BuildingManager : BaseApiDataManager
             if (oldData.infra_node_id > 0 && oldData.infra_node_id != buildingData.infra_node_id)
             {
                 buildingIdByInfraNodeId.Remove(oldData.infra_node_id);
+            }
+            if (oldData.depot_node_id > 0 && oldData.depot_node_id != buildingData.depot_node_id)
+            {
+                buildingIdByDepotNodeId.Remove(oldData.depot_node_id);
             }
             if (oldData.parcel_id > 0 && oldData.parcel_id != buildingData.parcel_id
                 && buildingIdsByParcel.TryGetValue(oldData.parcel_id, out HashSet<int> oldByParcel))
@@ -2046,6 +2050,10 @@ public class BuildingManager : BaseApiDataManager
         if (buildingData.infra_node_id > 0)
         {
             buildingIdByInfraNodeId[buildingData.infra_node_id] = buildingData.agent_id;
+        }
+        if (buildingData.depot_node_id > 0)
+        {
+            buildingIdByDepotNodeId[buildingData.depot_node_id] = buildingData.agent_id;
         }
 
         if (buildingData.parcel_id > 0)
@@ -2086,6 +2094,14 @@ public class BuildingManager : BaseApiDataManager
         return buildingIdByInfraNodeId.TryGetValue(nodeId, out int agentId)
             && buildingDataCache.TryGetValue(agentId, out building)
             && building != null;
+    }
+
+    /// <summary>
+    /// 車両基地の接続端子ノード（agents.depot_node_id）かを返す。施設が未ロードの場合は false。
+    /// </summary>
+    public bool IsDepotTerminalNode(int nodeId)
+    {
+        return nodeId > 0 && buildingIdByDepotNodeId.ContainsKey(nodeId);
     }
 
     /// <summary>

@@ -595,3 +595,20 @@ Unityでは看板画像を持つFBXのインポーターを `Models/Buildings/Ma
 
 原本は `blender/buildings.blend`。再生成用ジョブは非公開の制作ツール `genesis-gallery/pipeline/jobs/build_a2008.py`、
 実Unityでの検証は `import_commercial.ps1`、制作記録は `a2008.md`。
+
+## 10. バス車庫1061
+
+バス車庫は車両基地のなかで唯一、敷地内に線路を持たない。区画全面（`SHAPE_FULL`）を覆う平屋根（`MODEL_MODULAR_FLAT`）の車庫棟として、通常のモジュラー建物の仕組みで描く。
+`SHAPE_FULL` は最上階レベルだけを描くので、1階建てのバス車庫では `mid-w1` が接地し、著作高さのまま全辺に並ぶ。
+パーツは `mid-w1` と `ceil` の2個。
+
+| パーツ | 内容 |
+| --- | --- |
+| `mid-w1` | バス1台分の間口5m。両端に半分ずつ持つコンクリートの柱型（隣の壁と合わせて0.5m）、高さ4.5mの閉じたシャッター（壁面から0.14m奥）、巻取りボックス、金属パネルの上壁と高窓、笠木。高さ6.3mで、屋根面より0.3m高いパラペットが屋根の縁を隠す |
+| `ceil` | 平屋根の材質 `BD_METAL_ROOF` の参照 |
+
+屋根面は階数×階高に置かれるので、マスターの `height_per_floor` は6.0mにする。
+車両基地1060・1064・1065は線路を持つ別の生成方式（[[F9_車両基地のメッシュ生成]]）。
+
+原本は `blender/buildings.blend`。再生成用ジョブは非公開の制作ツール `genesis-gallery/pipeline/jobs/build_a1061.py`、実Unityでの検証とミラー同期は `import_depots.ps1`。
+
