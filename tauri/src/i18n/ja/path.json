@@ -8,8 +8,18 @@
     "durability": "耐久度",
     "noise": "騒音",
     "airPollution": "大気汚染",
-    "overrideMaxSpeed": "制限速度を個別に設定",
+    "saturationRatio": "{{label}}：飽和水準の{{percent}}%",
     "maxSpeed": "制限速度",
+    "trafficSettings": "交通・速度設定",
+    "citySpeedLimit": "都市の制限速度",
+    "roadSpeedLimit": "この道路の制限速度",
+    "roadSpeedLimitUnset": "未設定",
+    "roadSpeedLimitHelp": "空欄にすると都市の制限速度に従います。入力すると少し待ってから自動で反映されます。",
+    "speedLimitSign": "制限速度 {{speed}}",
+    "speedLimitSaving": "反映中…",
+    "speedLimitSaved": "反映しました",
+    "speedLimitSaveFailed": "反映に失敗しました",
+    "speedLimitInvalid": "0〜{{max}}の数値を入力",
     "baseSpeed": "通過速度",
     "minCurveRadius": "最小曲線半径",
     "maxGrade": "最大勾配",
@@ -19,11 +29,17 @@
     "streetParkingUsage": "{{parked}} / {{capacity}}台",
     "trafficByVehicle": "交通量(1日あたり)",
     "trafficUnitPerDay": "/日",
-    "category": {
+    "vehicles": {
       "0": "徒歩",
-      "1": "道路",
-      "2": "鉄道",
-      "unknown": "不明"
+      "10": "自動車",
+      "11": "トラック",
+      "12": "バス",
+      "13": "商用車",
+      "14": "LRT",
+      "20": "地下鉄",
+      "21": "旅客鉄道",
+      "22": "貨物鉄道",
+      "23": "高速鉄道"
     },
     "action": {
       "delete": "削除",
@@ -73,7 +89,6 @@
     "tabConstructionInfo": "建設工事",
     "tabs": {
       "basic": "基本情報",
-      "traffic": "交通",
       "construction": "建設工事"
     }
   },
@@ -130,7 +145,8 @@
       "spacingShrink": "縮める",
       "dirForward": "順方向",
       "dirBackward": "逆方向",
-      "dirBoth": "両方向"
+      "dirBoth": "両方向",
+      "builtInDoubleTrack": "この線路は1本で上下線(複線)を表します。両方向に通行でき、線路数・進行方向・線路間隔は設定できません。"
     },
     "openShapeEditor": "2Dで編集",
     "spec": {

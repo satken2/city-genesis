@@ -428,7 +428,12 @@ public class PathManager : BaseApiDataManager
         TrackPath.ConnectedPathsProvider = GetPathsConnectedToNode;
         PowerLinePath.ConnectedPaths = GetPathsConnectedToNode;
         TrackPath.InfrastructureConnectionProvider = IsInfrastructureConnection;
+        LrtPlatformParts.PolylineProvider = GetLrtPlatformPolyline;
     }
+
+    /// <summary>LRT停留所のホームの範囲を、車両と同じ未切断点列と切断位置で解決するための点列。</summary>
+    private List<Vector3> GetLrtPlatformPolyline(int pathId, bool trimIntersection) =>
+        TryGetPathPolyline(pathId, out var points, trimIntersection) ? points : null;
 
     private void Start()
     {
@@ -444,6 +449,8 @@ public class PathManager : BaseApiDataManager
             PowerLinePath.ConnectedPaths = null;
         if (PillarClearance.NeighborProvider == (Func<PathSummary, List<PillarClearance.Corridor>>)GetPillarObstacles)
             PillarClearance.NeighborProvider = null;
+        if (LrtPlatformParts.PolylineProvider == (Func<int, bool, List<Vector3>>)GetLrtPlatformPolyline)
+            LrtPlatformParts.PolylineProvider = null;
         TerrainManager.OnTerrainTileReady -= OnTerrainTileReadyHandler;
 
         if (TrackAdjacency.NeighborProvider == (System.Func<PathSummary, List<TrackNeighborInfo>>)GetAdjacentTrackNeighbors)
@@ -1095,6 +1102,7 @@ public class PathManager : BaseApiDataManager
         overloadedIntersectionNodeIds.Clear();
         ClearTerrainFollowQueue();
         pendingTrackNeighborRebuildIds.Clear();
+        pendingLrtPlatformRebuildSerials.Clear();
         cellsToKeepVisible.Clear();
         pendingUnloadCells.Clear();
         lodBatchPendingBuildIds.Clear();
@@ -2960,8 +2968,10 @@ public class PathManager : BaseApiDataManager
                     {
                         if (id == path.path_id || !seen.Add(id)) continue;
                         if (!pathDataCache.TryGetValue(id, out PathSummary other)) continue;
-                        // 線路とモノレールのように種別の異なるパスは結合しない
+                        // 線路とモノレールのように種別の異なるパスは結合しない。
+                        // LRTの専用軌道は1本で複線を持つ別系統なので、同じ PATH_TRACK の通常鉄道とも結合しない。
                         if (other.path_type != path.path_type) continue;
+                        if (LrtRoadParts.IsLrt(other.path_variant) != LrtRoadParts.IsLrt(path.path_variant)) continue;
                         result.Add(id);
                     }
                 }
@@ -4303,9 +4313,35 @@ public class PathManager : BaseApiDataManager
         }
     }
 
+    /// <summary>LRT停留所のホーム範囲が変わったパスと、通知時点の生成通し番号。LODバッチ外の LateUpdate で再生成キューへ移す。</summary>
+    private readonly Dictionary<int, long> pendingLrtPlatformRebuildSerials = new Dictionary<int, long>();
+
+    /// <summary>
+    /// LRT停留所のホーム範囲(LrtStopPlatforms の索引)が変わったパスを作り直す。描画キーの revision を進めて
+    /// 退避中の古いGOを再利用させず、生成済みのGOがあるパスだけを地形追従再生成キューへ積む(未生成のパスは
+    /// 次の生成で索引を読む)。通知より後に作り直したGOはワーカーが省く。
+    /// </summary>
+    public void RequestLrtPlatformRebuild(IEnumerable<int> pathIds)
+    {
+        foreach (int id in pathIds)
+        {
+            geometryRevisions.TryGetValue(id, out int revision);
+            geometryRevisions[id] = revision + 1;
+            if (pathDataCache.ContainsKey(id) && pathObjectsCache.TryGetValue(id, out GameObject go) && go != null)
+                pendingLrtPlatformRebuildSerials[id] = pathBuildSerialCounter;
+        }
+    }
+
     private void LateUpdate()
     {
-        if (isLodPathBatchActive || pendingPillarRebuildIds.Count == 0) return;
+        if (isLodPathBatchActive) return;
+        if (pendingLrtPlatformRebuildSerials.Count > 0)
+        {
+            foreach (var kvp in pendingLrtPlatformRebuildSerials)
+                EnqueueTerrainFollowPath(kvp.Key, kvp.Value, TerrainFollowQueueReason.Other);
+            pendingLrtPlatformRebuildSerials.Clear();
+        }
+        if (pendingPillarRebuildIds.Count == 0) return;
         // 同一フレームの登録・削除完了を待つ。バッチ途中に描かれた橋脚も最新の周辺データで再評価する。
         // 通知より後に作られたGO(バッチのフェーズ2など)は、取り出し時に通し番号で省く。
         foreach (int id in pendingPillarRebuildIds)

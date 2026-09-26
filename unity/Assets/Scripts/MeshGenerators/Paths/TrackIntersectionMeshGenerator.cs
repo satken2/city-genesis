@@ -41,6 +41,18 @@ public static class TrackIntersectionMeshGenerator
     }
 
     /// <summary>
+    /// ノードで2本のパスのレールがつながるか(転回角は問わない)。LRTの走行網(222/242/303/431)どうしは
+    /// パス種別が違ってもつながり、LRTと通常鉄道、線路とモノレールはつながらない。
+    /// 交差点のレールコネクタと線路端の車止め(TrackPath)がこの規則を共有する。
+    /// </summary>
+    public static bool RailsConnect(int typeA, int variantA, int typeB, int variantB)
+    {
+        bool lrtA = LrtRoadParts.IsLrt(variantA), lrtB = LrtRoadParts.IsLrt(variantB);
+        if (lrtA || lrtB) return lrtA && lrtB;
+        return typeA == typeB;
+    }
+
+    /// <summary>
     /// ノードに接続する1本の線路について、コネクタ計算に必要な情報。
     /// Direction はノードから線路の内部へ向かうXZ単位ベクトル（=端点接線の外向き）。
     /// </summary>
@@ -118,8 +130,8 @@ public static class TrackIntersectionMeshGenerator
             {
                 TrackEntry a = entries[i];
                 TrackEntry b = entries[j];
-                bool lrtPair = LrtRoadParts.IsLrt(a.PathVariant) && LrtRoadParts.IsLrt(b.PathVariant);
-                if (!lrtPair && (a.PathType != b.PathType || LrtRoadParts.IsLrt(a.PathVariant) || LrtRoadParts.IsLrt(b.PathVariant))) continue;
+                if (!RailsConnect(a.PathType, a.PathVariant, b.PathType, b.PathVariant)) continue;
+                bool lrtPair = LrtRoadParts.IsLrt(a.PathVariant);   // 接続できる組は両方LRTか両方LRT以外
 
                 // A→Bの偏向角: 到着方向(-a.Direction)と発進方向(b.Direction)のなす角。
                 // B→Aも同じ角度になる（対称）ため、順序なしペアごとに1回だけ判定すればよい。
@@ -201,8 +213,8 @@ public static class TrackIntersectionMeshGenerator
             specs.Add(new RailConnectorSpec(points, prefabSource.PathVariant, prefabSource.PathType) {
                 StartDirection = travelA, EndDirection = travelB, StartSlope = -a.Slope, EndSlope = b.Slope,
                 EmbeddedLrt = embedded,
-                StartRailBase = embedded && !LrtRoadParts.IsEmbedded(a.PathVariant) ? RoadPartHeights.TRACK_ABOVE_SPLINE + .355f - LrtRoadParts.RailTop : RoadPartHeights.BODY_ABOVE_SPLINE,
-                EndRailBase = embedded && !LrtRoadParts.IsEmbedded(b.PathVariant) ? RoadPartHeights.TRACK_ABOVE_SPLINE + .355f - LrtRoadParts.RailTop : RoadPartHeights.BODY_ABOVE_SPLINE,
+                StartRailBase = embedded ? LrtRoadParts.RailTopAboveSpline(a.PathVariant) - LrtRoadParts.EMBEDDED_RAIL_TOP : RoadPartHeights.BODY_ABOVE_SPLINE,
+                EndRailBase = embedded ? LrtRoadParts.RailTopAboveSpline(b.PathVariant) - LrtRoadParts.EMBEDDED_RAIL_TOP : RoadPartHeights.BODY_ABOVE_SPLINE,
                 StartWireOffset = LrtRoadParts.IsEmbedded(a.PathVariant) ? 0 : -.28f,
                 EndWireOffset = LrtRoadParts.IsEmbedded(b.PathVariant) ? 0 : -.28f
             });
@@ -212,18 +224,23 @@ public static class TrackIntersectionMeshGenerator
     /// <summary>
     /// 線路の全軌道の横位置（走行フレームの符号付き距離）を昇順で返す。
     /// 軌道オフセットの導出は TrackPath.GetTrackCenterOffset と同一（本線の軌道位置と一致させる）。
+    /// 道路上の併用軌道は LrtRoadParts.TrackLaterals（本線の lrt_track と同じ横位置）を使う。
     /// </summary>
     private static List<float> BuildSortedLaterals(TrackEntry entry, float sign)
     {
+        List<float> laterals;
         if (LrtRoadParts.IsEmbedded(entry.PathVariant))
         {
-            float offset = LrtRoadParts.Offset(entry.Path);
-            return entry.PathVariant == 303 ? new List<float> { 0 } : new List<float> { -offset, offset };
+            laterals = LrtRoadParts.TrackLaterals(entry.Path);
+            for (int i = 0; i < laterals.Count; i++) laterals[i] *= sign;
         }
-        List<float> laterals = new List<float>(entry.Lanes);
-        for (int i = 0; i < entry.Lanes; i++)
+        else
         {
-            laterals.Add(TrackPath.GetTrackCenterOffset(entry.Width, entry.Lanes, i) * sign);
+            laterals = new List<float>(entry.Lanes);
+            for (int i = 0; i < entry.Lanes; i++)
+            {
+                laterals.Add(TrackPath.GetTrackCenterOffset(entry.Width, entry.Lanes, i) * sign);
+            }
         }
         laterals.Sort();
         return laterals;

@@ -39,7 +39,7 @@
       "returnLegBlocked": "Interrompue car le trajet retour est impraticable sur le réseau support. Une double voie (voie en sens inverse) est nécessaire.",
       "routeDisconnected": "Interrompue car l'itinéraire support entre les arrêts est coupé.",
       "noUnderlay": "Interrompue car le réseau de circulation de ce type de ligne n'est pas aménagé.",
-      "trainTooLong": "Interrompue car la rame est plus longue que le quai. Réduisez le nombre de voitures par rame ou allongez la gare (le quai).",
+      "trainTooLong": "Interrompue car la rame est plus longue que le tronçon où se trouve l'arrêt (quai de gare, ou tronçon de rue ou de voie). Réduisez le nombre de voitures par rame ou allongez ce tronçon.",
       "generic": "Interrompue."
     },
     "cancel": "Annuler",
@@ -53,6 +53,7 @@
     "noStops": "Aucun arrêt.",
     "noVariants": "Aucune variante de transport public disponible.",
     "placeStopHint": "Sur la carte 3D, faites un clic gauche sur une voie où ce type de ligne peut recevoir des arrêts (gares, rues, etc.) pour en placer un. Le clic droit valide ou supprime.",
+    "autoPlatformNote": "Placer un arrêt crée automatiquement des quais des deux côtés de la voie ou de la rue à cet endroit. Leur longueur suit celle de la rame : inutile de poser des quais séparément.",
     "stopCountLabel": "Arrêts placés",
     "stopsUnit": "",
     "needTwoStops": "Il faut au moins deux arrêts pour créer une ligne.",
@@ -90,8 +91,9 @@
       "cityBus": "Bus urbain",
       "coach": "Autocar",
       "lrt": "Tramway",
-      "trainRed": "Bande rouge",
-      "trainBlue": "Bande bleue"
+      "trainStandard": "Standard",
+      "trainFuturistic": "Futuriste",
+      "trainRetro": "Rétro"
     }
   }
 }

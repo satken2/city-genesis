@@ -39,7 +39,7 @@
       "returnLegBlocked": "Suspendida porque el trayecto de regreso no es transitable en la red subyacente. Hace falta doble vía (una vía en sentido contrario).",
       "routeDisconnected": "Suspendida porque la ruta subyacente entre paradas está interrumpida.",
       "noUnderlay": "Suspendida porque la red de circulación de este tipo de línea no está construida.",
-      "trainTooLong": "Suspendida porque el convoy es más largo que el andén. Reduce los vagones por convoy o amplía la estación (el andén).",
+      "trainTooLong": "Suspendida porque el convoy es más largo que el tramo donde está la parada (el andén de una estación, o un tramo de calle o de vía). Reduce los vagones por convoy o prolonga ese tramo.",
       "generic": "Suspendida."
     },
     "cancel": "Cancelar",
@@ -53,6 +53,7 @@
     "noStops": "No hay paradas.",
     "noVariants": "No hay variantes de transporte público.",
     "placeStopHint": "En el mapa 3D, haz clic izquierdo sobre una vía donde este tipo de línea pueda tener paradas (estaciones, calles, etc.) para colocar una. Con clic derecho confirmas o eliminas.",
+    "autoPlatformNote": "Al colocar una parada se crean automáticamente andenes a ambos lados de la vía o la calle en ese punto. Su longitud se ajusta a la del convoy, así que no hace falta construir andenes por separado.",
     "stopCountLabel": "Paradas colocadas",
     "stopsUnit": "",
     "needTwoStops": "Se necesitan al menos dos paradas para crear una línea.",
@@ -90,8 +91,9 @@
       "cityBus": "Autobús urbano",
       "coach": "Autobús interurbano",
       "lrt": "Tren ligero",
-      "trainRed": "Franja roja",
-      "trainBlue": "Franja azul"
+      "trainStandard": "Estándar",
+      "trainFuturistic": "Futurista",
+      "trainRetro": "Retro"
     }
   }
 }

@@ -12,7 +12,9 @@
  *     線路間隔の既定はバリアントのマスター幅で、広げる/縮めるボタンで一定範囲内を
  *     調整できる(パス1本確定ごとに既定へ戻る)。
  *     複線は中心線を平行な単線パス群へ展開して一括敷設する(railComponents)。
- *     人員搬送(ロープウェイ等)は道路と同じ「両方向の単一パス1本」扱いで、複線展開しない。
+ *     人員搬送(ロープウェイ等)と、1本で上下線を持つ複線一体の線路(LRT専用軌道。線路系で
+ *     lanes≥2)は、道路と同じ「両方向(DIR_BOTH)の単一パス1本」扱いで複線展開しない
+ *     (判定は railBuild.isSingleRailPathVariant)。
  *
  * 状態:
  *   category: 選択中のカテゴリ("road" | "rail" | "infra")
@@ -60,7 +62,6 @@ import { fetchApi } from "../../utils/api";
 import type { PathAlignmentSummary } from "../../types";
 import {
   DIR_BOTH,
-  PATH_CONVEYOR,
   PATH_STATION_HOUSE,
   PATH_TRACK,
   PLATFORM_SIDE_OUTSIDE,
@@ -82,6 +83,7 @@ import {
   TRACK_SPACING_MAX_FACTOR,
   clampTrackSpacing,
   isRailType,
+  isSingleRailPathVariant,
   defaultTravelDirections,
   cycleDirection,
   buildRailComponents,
@@ -392,13 +394,12 @@ export function usePathConstruction(
    * 新規敷設の軌道カテゴリでのみ生成し、道路・インフラ・既存パス編集では null。
    * null のときは単一パスとして扱う(confirmPath / コスト見積り / プレビュー共通)。
    * 単線(trackCount=1)でも travel_direction を送るためコンポーネント経路を使う。
-   * 人員搬送(ロープウェイ等)は描画・敷設とも道路と同じ「両方向の単一パス1本」なので複線展開しない。
+   * 人員搬送(ロープウェイ等)と複線一体の線路(LRT専用軌道)は「両方向の単一パス1本」なので複線展開しない。
    */
   const railComponents = useMemo((): CombinedPathComponent[] | null => {
     if (!isRail || selectedVariant === null || pathId != null) return null;
-    // 複線展開するのは線路・モノレールだけ。人員搬送・駅舎パスなど
-    // それ以外の type は単一パス扱い。
-    if (selectedVariantData?.type === PATH_CONVEYOR || !isRailType(selectedVariantData?.type)) return null;
+    // 複線展開するのは単線の線路・モノレールだけ。駅舎パスなど軌道以外の type も単一パス扱い。
+    if (!isRailType(selectedVariantData?.type) || isSingleRailPathVariant(selectedVariantData)) return null;
     return buildRailComponents(selectedVariant, trackCount, trackSpacing, trackDirections);
   }, [isRail, selectedVariant, selectedVariantData, pathId, trackCount, trackSpacing, trackDirections]);
 
@@ -415,7 +416,7 @@ export function usePathConstruction(
 
   /**
    * Unityの3Dプレビューへ渡す複合パス(軌道複線)の各線横オフセット(m)を求める。
-   * 軌道の新規敷設のみ非空で、道路・インフラ・人員搬送・既存パス編集は
+   * 軌道の新規敷設のみ非空で、道路・インフラ・人員搬送・複線一体の線路・既存パス編集は
    * 空配列(=中心線1本の単一プレビュー)。railComponents と同じ条件・同じ導出
    * (線路間隔=マスター幅+調整量)だが、STATE_EDIT_PATH 送信時点では
    * selectedVariant がまだ更新されていないため variantId 引数で直接計算する。
@@ -423,7 +424,7 @@ export function usePathConstruction(
    */
   const lateralOffsetsForVariant = useCallback((variantId: number, spacingDelta: number = trackSpacingDelta): number[] => {
     const data = masterData?.paths?.[variantId];
-    if (pathId != null || !data || !isRailType(data.type) || data.type === PATH_CONVEYOR) {
+    if (pathId != null || !data || !isRailType(data.type) || isSingleRailPathVariant(data)) {
       return [];
     }
     const base = typeof data.width === "number" && data.width > 0 ? data.width : FALLBACK_TRACK_SPACING;
@@ -438,7 +439,7 @@ export function usePathConstruction(
    */
   const travelDirectionsForVariant = useCallback((variantId: number): number[] => {
     const data = masterData?.paths?.[variantId];
-    if (pathId != null || !data || !isRailType(data.type) || data.type === PATH_CONVEYOR) {
+    if (pathId != null || !data || !isRailType(data.type) || isSingleRailPathVariant(data)) {
       return [];
     }
     return trackDirections;
@@ -616,7 +617,9 @@ export function usePathConstruction(
    *
    * 軌道複線(railComponents 非null)は、中心線を各コンポーネントの横/高さオフセットで
    * 平行パス群へ展開し、travel_direction を設定して1回のPOSTで一括作成する。
-   * それ以外(道路・インフラ・単一パス・既存パス編集)は従来どおり単一パスとして送る。
+   * それ以外(道路・インフラ・単一パス・既存パス編集)は単一パスとして送る。単一パスで敷く
+   * 軌道バリアント(人員搬送・複線一体の線路)は travel_direction=DIR_BOTH を明示する
+   * (複線一体の線路はバックエンドが DIR_BOTH 以外を拒否する)。
    */
   // 事前検証と確定が同じ全線・制御点を送るため、送信形状を一度だけ組み立てる。
   const constructionBody = useMemo(() => {
@@ -707,6 +710,10 @@ export function usePathConstruction(
       end_point: [rawPoints[rawPoints.length - 1][0], rawPoints[rawPoints.length - 1][1], rawPoints[rawPoints.length - 1][2]],
       curved: isCurved,
     };
+
+    if (isSingleRailPathVariant(selectedVariantData)) {
+      pathData.travel_direction = DIR_BOTH;
+    }
 
     if (pathId != null) delete pathData.house_ends;
 

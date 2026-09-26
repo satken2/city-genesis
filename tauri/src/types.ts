@@ -743,6 +743,7 @@ export type CombinedPathEntry = {
  *   路線作成 API の path_variant にはこの値を渡す
  * - stop_path_variants: 停留所ノードを設置できる下地パスのバリアント一覧
  * - route_path_variants: 路線の車両が走行(経由)できる下地パスのバリアント一覧
+ * - vehicle_type: 車両の車種(VEHICLE_*)。VEHICLE_TRAM(LRT)の停留所には Unity がホームを自動で描く
  */
 export type TransitMasterEntry = {
   display_name: string;
@@ -750,6 +751,7 @@ export type TransitMasterEntry = {
   transit_path_id: number;
   stop_path_variants: number[];
   route_path_variants: number[];
+  vehicle_type?: number;
 };
 
 /**

@@ -39,7 +39,7 @@
       "returnLegBlocked": "由于返程在底层无法通行而停运。需要复线化（铺设反向轨道）。",
       "routeDisconnected": "由于停靠站之间的底层路径被切断而停运。",
       "noUnderlay": "由于该线路类型的运行网络尚未建设而停运。",
-      "trainTooLong": "由于编组长度超过站台长度而停运。请减少每列编组车辆数，或延长车站（站台）。",
+      "trainTooLong": "由于编组长度超过停靠站所在区段（车站站台，或道路、轨道区段）的长度而停运。请减少每列编组车辆数，或延长该区段。",
       "generic": "已停运。"
     },
     "cancel": "取消",
@@ -53,6 +53,7 @@
     "noStops": "没有停靠站。",
     "noVariants": "没有公共交通的变体。",
     "placeStopHint": "在3D地图上，左键点击该线路类型可设置停靠站的路径（车站、街道等）来放置停靠站。右键可确定或删除。",
+    "autoPlatformNote": "放置停靠站后，会在该位置的轨道或道路两侧自动建成站台。站台长度根据编组长度确定，无需另行铺设。",
     "stopCountLabel": "已放置的停靠站",
     "stopsUnit": "处",
     "needTwoStops": "创建线路至少需要2个停靠站。",
@@ -90,8 +91,9 @@
       "cityBus": "公交车",
       "coach": "长途客车",
       "lrt": "轻轨",
-      "trainRed": "红色腰带",
-      "trainBlue": "蓝色腰带"
+      "trainStandard": "标准",
+      "trainFuturistic": "未来风",
+      "trainRetro": "复古"
     }
   }
 }

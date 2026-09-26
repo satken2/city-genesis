@@ -15,8 +15,12 @@ public static class RoadEquipmentGenerator
     private const float BoxSpacing = 64f;
     private static readonly Dictionary<string, Material> Materials = new();
 
+    /// <param name="keepClear">
+    /// 点設備(電柱・街灯・樹木・ベンチ等)を置かないスプライン距離の区間(x=始端, y=終端)。303 のLRT停留所の
+    /// ホーム区間を渡す。柵は舗装端にありホームと重ならないので対象外。
+    /// </param>
     public static void Generate(GameObject parent, SplineComputer spline, PathSummary path,
-        float width, float sidewalkWidth, float? treeSpacing)
+        float width, float sidewalkWidth, float? treeSpacing, IReadOnlyList<Vector2> keepClear = null)
     {
         var master = MasterDataStore.Instance?.GetPathMaster(path.path_variant);
         if (master == null || (path.streetlight_type == 0 && path.fence_type == 0 && path.street_tree_type == 0 && path.utility_mode == 0
@@ -41,11 +45,10 @@ public static class RoadEquipmentGenerator
         float surface = SurfaceHeight(path, sidewalkWidth > 0f ? "sidewalk" : "body");
         if (lrtMall && master.wire_spacing.GetValueOrDefault() > 0f)
         {
-            // 中央単線の片持ち柱は道路中心から右3.4m。架線柱の足元にも設備を重ねない。
-            float spacing = master.wire_spacing.Value;
-            float margin = Mathf.Min(spacing * .5f, 5f);
-            for (float d = margin; d <= length - margin; d += spacing)
-                Reserve(occupied, Sample(spline, d, 3.4f, surface).position, 2f);
+            // 複線の架線柱は両側に立つ。設備の列(道路端から0.9m内側)は車体の通る範囲の外にあり、柱の足元だけを避ける。
+            foreach (float d in LrtRoadParts.PoleDistances(length, master.wire_spacing.Value))
+                for (int side = -1; side <= 1; side += 2)
+                    Reserve(occupied, Sample(spline, d, side * LrtRoadParts.MALL_POLE_OFFSET, surface).position, 2f);
         }
         var metal = new Batch(parent, "EquipmentMetal", MaterialFor("PATH_EQUIPMENT_METAL", new Color(0.32f, 0.35f, 0.37f)));
         var concrete = new Batch(parent, "EquipmentConcrete", MaterialFor("PATH_EQUIPMENT_CONCRETE", new Color(0.62f, 0.61f, 0.57f)));
@@ -59,7 +62,7 @@ public static class RoadEquipmentGenerator
         {
             bool overhead = path.utility_mode == Constants.PATH_UTILITY_OVERHEAD;
             Vector3? previous = null;
-            foreach (float distance in Distances(length, overhead ? PoleSpacing : BoxSpacing, 0f))
+            foreach (float distance in Distances(length, overhead ? PoleSpacing : BoxSpacing, 0f, keepClear))
             {
                 Pose pose = Sample(spline, distance, offset, surface);
                 if (!Reserve(occupied, pose.position, 2f)) continue;
@@ -84,7 +87,7 @@ public static class RoadEquipmentGenerator
         {
             // 狭い生活道路は始点から終点へ向かう右側だけで照明をまかなう。
             int firstSide = centralMall || path.path_variant == 211 || path.path_variant == 212 ? 1 : -1;
-            foreach (float distance in Distances(length, LampSpacing, LampSpacing * 0.25f))
+            foreach (float distance in Distances(length, LampSpacing, LampSpacing * 0.25f, keepClear))
                 for (int side = firstSide; side <= 1; side += 2)
                 {
                     Pose pose = Sample(spline, distance, offset * side, surface);
@@ -103,14 +106,14 @@ public static class RoadEquipmentGenerator
             if (centerTree != null && centerWidth > 0f && length > centerWidth + EndClearance * 2f)
             {
                 float centerSurface = SurfaceHeight(path, "center");
-                foreach (float distance in Distances(length, spacing, spacing * .5f))
+                foreach (float distance in Distances(length, spacing, spacing * .5f, keepClear))
                 {
                     if (distance < centerWidth * .5f + EndClearance || distance > length - centerWidth * .5f - EndClearance) continue;
                     Pose pose = Sample(spline, distance, 0f, centerSurface);
                     if (Reserve(occupied, pose.position, 3f)) PlacePrefab(parent, centerTree, pose);
                 }
             }
-            foreach (float distance in Distances(length, spacing, spacing * 0.5f))
+            foreach (float distance in Distances(length, spacing, spacing * 0.5f, keepClear))
                 for (int side = centralMall ? 1 : -1; side <= 1; side += 2)
                 {
                     Pose pose = Sample(spline, distance, offset * side, surface);
@@ -132,7 +135,7 @@ public static class RoadEquipmentGenerator
             if (prefab == null) return;
             bool pair = !centralMall || part == "bench";
             float lateral = centralMall ? (pair ? .95f : 0f) : offset;
-            foreach (float distance in Distances(length, spacing, phase))
+            foreach (float distance in Distances(length, spacing, phase, keepClear))
                 for (int side = pair ? -1 : 1; side <= 1; side += 2)
                 {
                     Pose pose = Sample(spline, distance, lateral * side, surface);
@@ -171,9 +174,10 @@ public static class RoadEquipmentGenerator
         metal.Finish(); concrete.Finish(); lamp.Finish(); leaves.Finish();
     }
 
-    private static IEnumerable<float> Distances(float length, float spacing, float phase)
+    private static IEnumerable<float> Distances(float length, float spacing, float phase, IReadOnlyList<Vector2> keepClear)
     {
-        for (float d = EndClearance + phase; d <= length - EndClearance; d += spacing) yield return d;
+        for (float d = EndClearance + phase; d <= length - EndClearance; d += spacing)
+            if (!LrtPlatformParts.Contains(keepClear, d)) yield return d;
     }
 
     private static Pose Sample(SplineComputer spline, float distance, float offset, float surface)

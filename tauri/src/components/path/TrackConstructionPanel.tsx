@@ -18,7 +18,8 @@
  *   - 人員搬送(ロープウェイ)は乗り場のパス自体が駅で駅舎を持たないため、駅舎タブと
  *     駅タブ(駅舎込みのパッケージ)を無効化する。
  * タブの役割:
- *   - 軌道タブ:        通常(TRACK_NORMAL)・橋梁(TRACK_BRIDGE)の線路を敷設する。
+ *   - 軌道タブ:        通常(TRACK_NORMAL)・橋梁(TRACK_BRIDGE)の線路を敷設する。1本で上下線を
+ *     持つ複線一体の線路(LRT専用軌道)は複線構成を持たず、両方向の単一パス1本で敷く。
  *   - プラットフォームタブ: 駅(TRACK_STATION)の線路を敷設する(ホーム設置側の指定あり)。
  *   - 駅舎タブ:        駅舎パス(type=PATH_STATION_HOUSE のバリアント)を敷設する。
  *   - 駅タブ(簡易):    上記2つをまとめたパッケージ。形状の組み立てとゴーストはUnityの
@@ -522,10 +523,12 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
             </div>
           )}
 
-          {/* 線路数・進行方向・線路間隔は軌道の複線構成専用(駅舎は常に単一の折れ線) */}
+          {/* 線路数・進行方向・線路間隔は軌道の複線構成専用(駅舎は常に単一の折れ線)。
+              人員搬送では出さず、複線一体の線路(LRT専用軌道)では注記だけを出す。 */}
           {tab !== "house" && (
             <RailTrackLayoutSettings
               railType={railType}
+              variant={pc.selectedVariantData}
               trackCount={pc.trackCount}
               trackSpacing={pc.trackSpacing}
               canWidenSpacing={pc.canWidenTrackSpacing}

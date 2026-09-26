@@ -11,6 +11,7 @@
  * 保存ボタンは持たない。入力が止まってから SAVE_DELAY_MS 待って自動で PATCH する(連続入力を1回にまとめる)。
  * フォーカスが外れたとき・Enter では待たずに反映する。標識は入力中の値を即座に映す
  * (個別指定は常に都市の値より優先されるため、反映前でも最終的な値が確定している)。
+ * ただし入力が不正な間と反映に失敗したときは、サーバー上で実際に効いている値を映す。
  */
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
@@ -20,6 +21,7 @@ import { PATH_DEFAULT } from "../../constants";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { resolveIntlLocale } from "../../utils/locale";
 import { SpeedLimitSign } from "../common/SpeedLimitSign";
+import "./PathSpeedLimitEditor.css";
 
 /** 入力が止まってから反映するまでの待ち時間(ms) */
 const SAVE_DELAY_MS = 800;
@@ -52,9 +54,25 @@ function parseSpeedInput(text: string): ParsedSpeedInput {
   return speed <= SPEED_LIMIT_INPUT_MAX ? { kind: "override", speed } : { kind: "invalid" };
 }
 
+/** 入力から送るべき個別指定を求める。空欄は null(都市の値に従う)、不正な入力は undefined(送らない) */
+function overrideTargetOf(text: string): number | null | undefined {
+  const parsed = parseSpeedInput(text);
+  if (parsed.kind === "invalid") return undefined;
+  return parsed.kind === "override" ? parsed.speed : null;
+}
+
 /** サーバー上の個別指定の値。個別指定なし(都市の値に従う)は null */
 function savedOverrideOf(path: PathData): number | null {
   return path.override_max_speed && path.max_speed != null ? path.max_speed : null;
+}
+
+/**
+ * 個別指定どうしが同じか。サーバーは制限速度を float32 で持つため、33.3 を送ると 33.29999… が返る。
+ * 厳密に比べると「送信中に書き換えられた」と誤判定して送り直しが止まらなくなるので、許容差で比べる。
+ */
+function sameOverride(a: number | null, b: number | null): boolean {
+  if (a == null || b == null) return a === b;
+  return Math.abs(a - b) < 1e-3;
 }
 
 type PathSpeedLimitEditorProps = {
@@ -72,7 +90,8 @@ export function PathSpeedLimitEditor({ path, apiBaseUrl, showBaseSpeed, onSaved 
 
   const [input, setInput] = useState(() => {
     const saved = savedOverrideOf(path);
-    return saved != null ? String(saved) : "";
+    // float32 由来の端数(33.29999…)を落として入力欄に出す
+    return saved != null ? String(Number(saved.toPrecision(6))) : "";
   });
   const [cityLimit, setCityLimit] = useState<number | null>(null);
   const [status, setStatus] = useState<SaveStatus>("idle");
@@ -105,14 +124,11 @@ export function PathSpeedLimitEditor({ path, apiBaseUrl, showBaseSpeed, onSaved 
 
   const save = useCallback(async () => {
     if (savingRef.current) return; // 送信中の変更は、送信完了後の再チェックで送られる
-    const parsed = parseSpeedInput(latestInputRef.current);
-    if (parsed.kind === "invalid") return;
-    const target = parsed.kind === "override" ? parsed.speed : null;
-    if (target === savedOverrideRef.current) return;
+    const target = overrideTargetOf(latestInputRef.current);
+    if (target === undefined || sameOverride(target, savedOverrideRef.current)) return;
 
     savingRef.current = true;
     setStatus("saving");
-    let ok = false;
     try {
       const updated = await fetchApi<PathData>(buildApiUrl(apiBaseUrl, "/api/v1/paths/{id}", String(pathId)), {
         method: "PATCH",
@@ -123,16 +139,21 @@ export function PathSpeedLimitEditor({ path, apiBaseUrl, showBaseSpeed, onSaved 
       });
       savedOverrideRef.current = savedOverrideOf(updated);
       onSaved(updated);
-      ok = true;
-      setStatus("saved");
     } catch (err) {
+      // 失敗時は送り直さない(同じ内容で失敗し続けるため)。次の入力・フォーカス喪失で再送される。
       console.error("[PathSpeedLimitEditor] speed limit update failed:", err);
       setStatus("error");
+      return;
     } finally {
       savingRef.current = false;
     }
-    // 送信中に書き換えられた分を送り直す(失敗時に送り直すと失敗し続けるので送らない)。
-    if (ok) void saveRef.current();
+    // 送信中に書き換えられていれば送り直し、そうでなければ反映済みにする。
+    const latest = overrideTargetOf(latestInputRef.current);
+    if (latest !== undefined && !sameOverride(latest, savedOverrideRef.current)) {
+      void saveRef.current();
+    } else {
+      setStatus("saved");
+    }
   }, [apiBaseUrl, pathId, onSaved]);
 
   useEffect(() => {
@@ -165,12 +186,13 @@ export function PathSpeedLimitEditor({ path, apiBaseUrl, showBaseSpeed, onSaved 
   const parsed = parseSpeedInput(input);
   // 標識に出す最終的な制限速度。個別指定は都市の値より常に優先する。空欄で都市の値が未取得の間は、
   // サーバー上で個別指定が無ければパスの値そのものが都市の値なのでそれを使う。
+  // 入力が不正なときと反映に失敗したときは、サーバー上で実際に効いている値を出す。
   const effectiveSpeed =
-    parsed.kind === "override"
-      ? parsed.speed
-      : parsed.kind === "inherit"
-        ? cityLimit ?? (path.override_max_speed ? null : path.max_speed)
-        : path.max_speed;
+    parsed.kind === "invalid" || status === "error"
+      ? path.max_speed
+      : parsed.kind === "override"
+        ? parsed.speed
+        : cityLimit ?? (path.override_max_speed ? null : path.max_speed);
 
   const formatSpeed = (speed: number) => `${speed.toLocaleString(locale, { maximumFractionDigits: 1 })} km/h`;
 
@@ -213,6 +235,7 @@ export function PathSpeedLimitEditor({ path, apiBaseUrl, showBaseSpeed, onSaved 
             type="text"
             inputMode="decimal"
             autoComplete="off"
+            spellCheck={false}
             className="path-speed-limit__input"
             value={input}
             placeholder={t("path.roadSpeedLimitUnset")}

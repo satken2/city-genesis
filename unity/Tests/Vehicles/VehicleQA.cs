@@ -290,6 +290,8 @@ public static partial class VehicleQA
         var ids=new List<int>();
         for(int index=0;index<paths.Count;index++) ids.Add(index<18?350+index:370+index-18);
         paths.Add("20/2");ids.Add(388);paths.Add("20/middle_2");ids.Add(389);
+        paths.Add("21/2");ids.Add(390);paths.Add("21/middle_2");ids.Add(391);
+        paths.Add("23/2");ids.Add(392);paths.Add("23/middle_2");ids.Add(393);
         for(int index=0;index<paths.Count;index++)
         {
             int id=ids[index];
@@ -302,7 +304,7 @@ public static partial class VehicleQA
             Near(Vector3.Distance(original.bounds.size,copy.bounds.size),0,.002f,"Vehicle prop dimensions differ");
             var model=New("PropRenderModel",id);
             Check(((IList)Get(model,"normal")).Count>0 && ((IList)Get(model,"far")).Count>0,"Vehicle prop has no drawable parts: "+id);
-            if((id>=370 && id<=379) || (id>=384 && id<=389))
+            if((id>=370 && id<=379) || (id>=384 && id<=393))
             {
                 var closeSource=Resources.Load<GameObject>("Models/Vehicles/"+paths[index]+"_close");
                 var closeProp=Resources.Load<GameObject>($"Models/Props/{id}_close");
@@ -335,7 +337,7 @@ public static partial class VehicleQA
         foreach(int vehicleType in new[]{10,11,12,13,14,20,21,22,23})
         {
             var variants=(IList)game.GetType("VehicleModelConfig").GetMethod("GetVariants").Invoke(null,new object[]{vehicleType});
-            Check(variants.Count==(vehicleType==10?10:vehicleType==11?4:vehicleType==14?1:vehicleType==20?3:2),"Configured variant count differs for "+vehicleType);
+            Check(variants.Count==(vehicleType==10?10:vehicleType==11?4:vehicleType==14?1:vehicleType==20||vehicleType==21||vehicleType==23?3:2),"Configured variant count differs for "+vehicleType);
             foreach(int variant in variants)
             {
                 string path=$"Assets/Models/Vehicles/{vehicleType}/{variant}.fbx";
@@ -377,7 +379,7 @@ public static partial class VehicleQA
         Check((int)game.GetType("VehicleModelConfig").GetMethod("GetTransitVehicleType").Invoke(null,new object[]{1003})==14,"LRT model mapping missing");
         foreach (int type in new[]{12,14,20,21,23})
         {
-            foreach(int variant in type==14?new[]{0}:type==20?new[]{0,1,2}:new[]{0,1})
+            foreach(int variant in type==14?new[]{0}:type==12?new[]{0,1}:new[]{0,1,2})
             foreach(bool middle in type==12?new[]{false}:new[]{false,true})
             {
                 var car=(GameObject)resolver.GetMethod("CreateTransitCar").Invoke(null,new object[]{type,middle,null,variant});
@@ -398,33 +400,9 @@ public static partial class VehicleQA
                         Check(AssetDatabase.GetAssetPath(renderer.GetComponent<MeshFilter>().sharedMesh).EndsWith($"/{expected}_close.fbx"),"Close LOD uses wrong asset");
                     foreach(var renderer in levels[1].renderers)
                         Check(AssetDatabase.GetAssetPath(renderer.GetComponent<MeshFilter>().sharedMesh).EndsWith($"/{expected}.fbx"),"Normal LOD uses wrong asset");
-                    if(type==21 && !middle)
+                    if((type==20 || type==21) && !middle)
                     {
-                        var renderer=levels[0].renderers[0];
-                        var mesh=renderer.GetComponent<MeshFilter>().sharedMesh;
-                        var vertices=mesh.vertices;var normals=mesh.normals;
-                        var plane=new List<float>();
-                        float slope=.48f;
-                        float front=10.6f;
-                        for(int sub=0;sub<mesh.subMeshCount;sub++)
-                        {
-                            if(!renderer.sharedMaterials[sub].name.StartsWith("PROP_Glass"))continue;
-                            var indices=mesh.GetTriangles(sub);
-                            for(int i=0;i<indices.Length;i+=3)
-                            {
-                                int a=indices[i],b=indices[i+1],c=indices[i+2];
-                                if((vertices[a].z+vertices[b].z+vertices[c].z)/3<front-1.5f || normals[a].z<.5f)continue;
-                                foreach(int index in new[]{a,b,c})plane.Add(vertices[index].z+slope*vertices[index].y);
-                            }
-                        }
-                        Check(plane.Count==6,"Cab windshield must be one outward-facing planar quad");
-                        float min=float.MaxValue,max=float.MinValue;
-                        foreach(float value in plane){min=Mathf.Min(min,value);max=Mathf.Max(max,value);}
-                        Check(max-min<.0001f,"Cab windshield is curved after FBX import");
-                    }
-                    if(type==20 && !middle)
-                    {
-                        // メトロの3外観は前頭部の窓・キャノピーが前を向いて外板の外に出ていることを確かめる。
+                        // メトロ・中距離の3外観は前頭部の窓・キャノピーが前を向いて外板の外に出ていることを確かめる。
                         var renderer=levels[0].renderers[0];
                         var mesh=renderer.GetComponent<MeshFilter>().sharedMesh;
                         var vertices=mesh.vertices;var normals=mesh.normals;
@@ -439,24 +417,26 @@ public static partial class VehicleQA
                                 if((vertices[a].z+vertices[b].z+vertices[c].z)/3>8f && (normals[a]+normals[b]+normals[c]).z>.9f) forward++;
                             }
                         }
-                        Check(forward>0,"Metro cab glass must face forward: "+expected);
+                        Check(forward>0,"Cab glass must face forward: "+type+"/"+expected);
                     }
                     if(type==23 && !middle)
                     {
                         var renderer=levels[0].renderers[0];
                         var mesh=renderer.GetComponent<MeshFilter>().sharedMesh;
                         var points=mesh.vertices;var normals=mesh.normals;
-                        float min=1,max=-1;int count=0;
+                        // 高速車の運転台窓は鼻先の上面の曲面に沿う。前後か左右のどちらかへ曲がりが残っていることを確かめる。
+                        float min=1,max=-1,minX=1,maxX=-1;int count=0;
                         for(int sub=0;sub<mesh.subMeshCount;sub++)
                         {
                             if(!renderer.sharedMaterials[sub].name.StartsWith("PROP_Glass"))continue;
                             foreach(int index in mesh.GetTriangles(sub))
                             {
-                                if(points[index].z<6 || normals[index].y<.3f)continue;
-                                min=Mathf.Min(min,normals[index].z);max=Mathf.Max(max,normals[index].z);count++;
+                                if(points[index].z<0 || normals[index].y<.3f)continue;
+                                min=Mathf.Min(min,normals[index].z);max=Mathf.Max(max,normals[index].z);
+                                minX=Mathf.Min(minX,normals[index].x);maxX=Mathf.Max(maxX,normals[index].x);count++;
                             }
                         }
-                        Check(count>100 && max-min>.1f,"High speed windshield must retain its curved surface");
+                        Check(count>100 && Mathf.Max(max-min,maxX-minX)>.1f,"High speed windshield must retain its curved surface: "+expected);
                     }
                     foreach(var renderer in levels[2].renderers)
                     {
@@ -773,15 +753,19 @@ public static partial class VehicleQA
         var resolve=game.GetType("PedestrianManager").GetMethod("ResolveBand");
         int street=(int)game.GetType("Constants").GetField("PATH_STREET").GetRawConstantValue();
         int walkway=(int)game.GetType("Constants").GetField("PATH_WALKWAY").GetRawConstantValue();
-        object[] a={street,12f,2.5f,.3f,1f,null,null,null,null};resolve.Invoke(null,a);
-        Near((float)a[5],3.8f,.001f,"Sidewalk band inner");Near((float)a[6],5.7f,.001f,"Sidewalk band outer");
-        Near((float)a[7],.3f,.001f,"Sidewalk surface height");Check(!(bool)a[8],"Sidewalk band is centred");
-        a=new object[]{street,6f,0f,.3f,1f,null,null,null,null};resolve.Invoke(null,a);
-        Near((float)a[5],2f,.001f,"Shoulder band inner");Near((float)a[6],2.7f,.001f,"Shoulder band outer");Near((float)a[7],.1f,.001f,"Shoulder on road surface");
-        a=new object[]{walkway,4f,0f,.3f,1f,null,null,null,null};resolve.Invoke(null,a);
-        Check((bool)a[8] && (float)a[5]==0,"Walkway band not centred");Near((float)a[6],1.7f,.001f,"Walkway band outer");
-        a=new object[]{street,1f,0f,.3f,1f,null,null,null,null};resolve.Invoke(null,a);
-        Check((float)a[5]<=(float)a[6],"Narrow road band inverted");
+        object[] a={street,211,12f,2.5f,.3f,1f,null,null,null,null};resolve.Invoke(null,a);
+        Near((float)a[6],3.8f,.001f,"Sidewalk band inner");Near((float)a[7],5.7f,.001f,"Sidewalk band outer");
+        Near((float)a[8],.3f,.001f,"Sidewalk surface height");Check(!(bool)a[9],"Sidewalk band is centred");
+        a=new object[]{street,211,6f,0f,.3f,1f,null,null,null,null};resolve.Invoke(null,a);
+        Near((float)a[6],2f,.001f,"Shoulder band inner");Near((float)a[7],2.7f,.001f,"Shoulder band outer");Near((float)a[8],.1f,.001f,"Shoulder on road surface");
+        a=new object[]{walkway,301,4f,0f,.3f,1f,null,null,null,null};resolve.Invoke(null,a);
+        Check((bool)a[9] && (float)a[6]==0,"Walkway band not centred");Near((float)a[7],1.7f,.001f,"Walkway band outer");
+        // LRT付き歩行者専用道路303は複線の車体(軌道中心±1.75m+半幅1.27m)を避けた左右の帯。
+        a=new object[]{walkway,303,12f,0f,.3f,1f,null,null,null,null};resolve.Invoke(null,a);
+        Check(!(bool)a[9],"LRT walkway band spans the tracks");Near((float)a[6],3.32f,.001f,"LRT walkway band inner");
+        Near((float)a[7],5.7f,.001f,"LRT walkway band outer");Near((float)a[8],.1f,.001f,"LRT walkway on road surface");
+        a=new object[]{street,211,1f,0f,.3f,1f,null,null,null,null};resolve.Invoke(null,a);
+        Check((float)a[6]<=(float)a[7],"Narrow road band inverted");
         var p=New("Pedestrian");Call(p,"SetPath",1,Line(Vector3.zero,Vector3.forward*100),true,50f);
         Set(p,"side",1);Set(p,"lateral",4f);Set(p,"surface",.3f);
         object[] sample={null,null};Call(p,"Sample",sample);

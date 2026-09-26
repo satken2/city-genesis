@@ -16,6 +16,7 @@
   width: 76px;
   height: 76px;
   flex: 0 0 auto;
+  overflow: visible; /* 超過時の発光を枠で切らない */
 }
 
 .donut-gauge__track {
@@ -27,8 +28,11 @@
   transition: stroke-dasharray 0.3s ease, stroke 0.3s ease;
 }
 
-/* Meter の超過表示(.meter-bar--overflow)と同じ赤紫の発光。円環の形に沿わせるため drop-shadow で描く */
-.donut-gauge--overflow .donut-gauge__chart {
+/*
+ * Meter の超過表示(.meter-bar--overflow)と同じ赤紫の発光。円環の形に沿わせるため drop-shadow で描き、
+ * 中央の数字まで滲まないよう円環のグループだけに掛ける
+ */
+.donut-gauge--overflow .donut-gauge__ring {
   filter: drop-shadow(0 0 2px rgba(217, 70, 239, 0.95)) drop-shadow(0 0 6px rgba(217, 70, 239, 0.65));
 }
 

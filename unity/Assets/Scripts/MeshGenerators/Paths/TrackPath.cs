@@ -64,6 +64,9 @@ using GeneratedModels;
 /// 電化（wire / pole / beam の配置）はマスターデータの wire_spacing で制御する
 /// （null または 0 以下なら非電化としてスキップ）。
 ///
+/// LRT専用軌道431の停留所には、駅パスのプラットフォームとは別に LrtPlatformParts が相対式ホームを描く
+/// （停留所の位置は路線の stop_points から。ホーム区間の架線柱はホームの外へ移し、高欄は立てない）。
+///
 /// すべてのパーツはプレハブ未配置ならスキップされ、道床も軌道も無い場合は白いストリップに
 /// フォールバックするため、アートアセットが揃う前でもゲームプレイは継続できる。
 ///
@@ -381,6 +384,12 @@ public class TrackPath : IPathMeshGenerator
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[TrackPath] track(軌道): {placedTracks}/{laneCount}本配置");
         if (!constructionOnly) CreateTerminations(container, points, corridor, pathData, width, laneCount, platformLeft, platformRight, variantBase, typeBase);
 
+        // LRT停留所のホーム(431)。ホーム区間(両端スロープ+余裕)では架線柱をホームの外へ移し、高架の高欄を省く。
+        List<LrtPlatformParts.Span> lrtPlatforms = constructionOnly ? null : LrtPlatformParts.Resolve(pathData, points, spline.CalculateLength());
+        LrtPlatformParts.Generate(container, spline, pathData, lrtPlatforms);
+        List<Vector2> lrtPlatformZones = LrtPlatformParts.ZoneRanges(lrtPlatforms,
+            LrtRoadParts.PlatformRampLength(pathData.path_variant), LrtRoadParts.PLATFORM_TRACK_ZONE_MARGIN);
+
         // 道床も軌道も無いバリアントは白いストリップにフォールバックする（ゲームプレイ継続用）。
         // 軌道モデルだけがある構成（モノレール等、道床が不要なバリアント）では道床なしが正常。
         if (ballast == null && placedTracks == 0)
@@ -407,7 +416,9 @@ public class TrackPath : IPathMeshGenerator
                 float offset = GetTrackCenterOffset(width, laneCount, i);
                 RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/wire", width / laneCount, offset, RoadPartHeights.OVERHEAD_ABOVE_SPLINE, false, $"{typeBase}/wire", isDashed: false, stretchToWidth: false);
             }
-            GeneratePolesAndBeams(container, spline, wireSpacing.Value, width, variantBase, typeBase, corridor, platformLeft, platformRight);
+            float lrtPoleOffset = lrtPlatformZones.Count > 0
+                ? LrtRoadParts.PlatformOuterOffset(pathData) + LrtRoadParts.PLATFORM_POLE_CLEARANCE : 0f;
+            GeneratePolesAndBeams(container, spline, wireSpacing.Value, width, variantBase, typeBase, corridor, platformLeft, platformRight, lrtPlatformZones, lrtPoleOffset);
         }
         else
         {
@@ -419,19 +430,21 @@ public class TrackPath : IPathMeshGenerator
         // （分岐などで間隔が開き結合が解けた区間では壁が復活する）。
         // プラットフォームがある側には壁を立てない（乗降空間を防音壁で塞がないため。
         // ホーム外縁の壁・柵は platform_wall が担う）。ホームの無い側は通常どおり立てる。
+        // LRT停留所のホームは両側にあり、ホーム区間では両側とも立てない（ホームの柵が担う）。
         if (wallWidth > 0f && elevatedRanges.Count > 0)
         {
             float wallCenterOffset = (width * 0.5f) + (wallWidth * 0.5f);
+            List<TrackCorridorInfo.PercentRange> wallRanges = IntersectRanges(elevatedRanges, LrtPlatformParts.OutsidePercentRanges(spline, lrtPlatformZones));
             if (platformLeft <= 0f)
             {
-                foreach (var range in IntersectRanges(GetWallPercentRanges(corridor, leftSide: true), elevatedRanges))
+                foreach (var range in IntersectRanges(GetWallPercentRanges(corridor, leftSide: true), wallRanges))
                 {
                     RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, -wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, true, $"{typeBase}/wall", clipFrom: range.From, clipTo: range.To);
                 }
             }
             if (platformRight <= 0f)
             {
-                foreach (var range in IntersectRanges(GetWallPercentRanges(corridor, leftSide: false), elevatedRanges))
+                foreach (var range in IntersectRanges(GetWallPercentRanges(corridor, leftSide: false), wallRanges))
                 {
                     RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, false, $"{typeBase}/wall", clipFrom: range.From, clipTo: range.To);
                 }
@@ -448,6 +461,8 @@ public class TrackPath : IPathMeshGenerator
 
     /// <summary>
     /// 接続ノード単位で終端を解決する。近接するだけの並走線は車止めの有無に影響しない。
+    /// 線路が続くかはレールコネクタと同じ TrackIntersectionMeshGenerator.RailsConnect で判定する
+    /// (LRT専用軌道431は道路上の併用軌道へ続き、通常鉄道とだけ接するノードは終端)。
     /// ホーム端は島式デッキの描画担当が実幅に合わせて生成する。
     /// </summary>
     private static void CreateTerminations(GameObject container, List<Vector3> points, TrackCorridorInfo corridor,
@@ -465,7 +480,8 @@ public class TrackPath : IPathMeshGenerator
             if (connections != null)
                 foreach (var other in connections)
                 {
-                    if (other.path_id == path.path_id || other.path_type != path.path_type) continue;
+                    if (other.path_id == path.path_id
+                        || !TrackIntersectionMeshGenerator.RailsConnect(path.path_type, path.path_variant, other.path_type, other.path_variant)) continue;
                     trackContinues = true;
                     GetTrackMasterParams(other, out _, out _, out _, out _, out _, out _, out _, out float pfWidth);
                     ResolvePlatformExtents(other, pfWidth, out float otherLeft, out float otherRight);
@@ -874,8 +890,10 @@ public class TrackPath : IPathMeshGenerator
     /// プラットフォームがある側（platformLeft / platformRight > 0）では、柱がホームを
     /// 突き抜けないよう、ホーム外縁のさらに外側（+POLE_MARGIN）に立てる。
     /// 現実の駅でもホーム外縁に架線柱が並ぶため見た目も正しい。梁は柱間全幅に引き伸ばされる。
+    /// LRT停留所のホーム区間(lrtPlatformZones。スプライン距離)では、両側の柱を中心線から
+    /// lrtPoleOffset(ホーム外縁+PLATFORM_POLE_CLEARANCE)以上離す。
     /// </summary>
-    private static void GeneratePolesAndBeams(GameObject container, SplineComputer spline, float spacing, float width, string variantBase, string typeBase, TrackCorridorInfo corridor = null, float platformLeft = 0f, float platformRight = 0f)
+    private static void GeneratePolesAndBeams(GameObject container, SplineComputer spline, float spacing, float width, string variantBase, string typeBase, TrackCorridorInfo corridor = null, float platformLeft = 0f, float platformRight = 0f, List<Vector2> lrtPlatformZones = null, float lrtPoleOffset = 0f)
     {
         GameObject polePrefab = LoadPrefab($"{variantBase}/pole", $"{typeBase}/pole");
         GameObject beamPrefab = LoadPrefab($"{variantBase}/beam", $"{typeBase}/beam");
@@ -936,8 +954,14 @@ public class TrackPath : IPathMeshGenerator
 
             if (place)
             {
+                float leftPole = leftHalf + POLE_MARGIN, rightPole = rightHalf + POLE_MARGIN;
+                if (LrtPlatformParts.Contains(lrtPlatformZones, currentDistance))
+                {
+                    leftPole = Mathf.Max(leftPole, lrtPoleOffset);
+                    rightPole = Mathf.Max(rightPole, lrtPoleOffset);
+                }
                 SplineSample sample = spline.Evaluate(currentPercent);
-                PlacePoleSet(container, polePrefab, beamPrefab, sample, leftHalf + POLE_MARGIN, rightHalf + POLE_MARGIN);
+                PlacePoleSet(container, polePrefab, beamPrefab, sample, leftPole, rightPole);
                 placedCount++;
             }
 

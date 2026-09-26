@@ -8,8 +8,18 @@
     "durability": "耐久度",
     "noise": "噪音",
     "airPollution": "大气污染",
-    "overrideMaxSpeed": "单独设置限速",
+    "saturationRatio": "{{label}}：饱和水平的{{percent}}%",
     "maxSpeed": "限速",
+    "trafficSettings": "交通与速度设置",
+    "citySpeedLimit": "城市限速",
+    "roadSpeedLimit": "本道路限速",
+    "roadSpeedLimitUnset": "未设置",
+    "roadSpeedLimitHelp": "留空则沿用城市限速。输入后稍等片刻会自动生效。",
+    "speedLimitSign": "限速 {{speed}}",
+    "speedLimitSaving": "正在应用…",
+    "speedLimitSaved": "已应用",
+    "speedLimitSaveFailed": "应用失败",
+    "speedLimitInvalid": "请输入0～{{max}}",
     "baseSpeed": "通行速度",
     "minCurveRadius": "最小曲线半径",
     "maxGrade": "最大坡度",
@@ -19,11 +29,17 @@
     "streetParkingUsage": "{{parked}} / {{capacity}}辆",
     "trafficByVehicle": "交通量（每日）",
     "trafficUnitPerDay": "/日",
-    "category": {
+    "vehicles": {
       "0": "步行",
-      "1": "道路",
-      "2": "铁路",
-      "unknown": "未知"
+      "10": "汽车",
+      "11": "卡车",
+      "12": "公交车",
+      "13": "商用车",
+      "14": "轻轨",
+      "20": "地铁",
+      "21": "客运铁路",
+      "22": "货运铁路",
+      "23": "高速铁路"
     },
     "action": {
       "delete": "删除",
@@ -73,7 +89,6 @@
     "tabConstructionInfo": "建设工程",
     "tabs": {
       "basic": "基本信息",
-      "traffic": "交通",
       "construction": "建设工程"
     }
   },
@@ -130,7 +145,8 @@
       "spacingShrink": "收窄",
       "dirForward": "顺方向",
       "dirBackward": "逆方向",
-      "dirBoth": "双方向"
+      "dirBoth": "双方向",
+      "builtInDoubleTrack": "该线路以1条路径表示上下行（复线）。可双向通行，因此无法设置线路数、行驶方向和线路间距。"
     },
     "openShapeEditor": "2D编辑",
     "spec": {

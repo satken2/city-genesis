@@ -49,7 +49,7 @@
       "line_paused_route_disconnected": { "title": "Itinéraire entre arrêts coupé", "description": "Des arrêts consécutifs ne sont pas reliés par une voie ou une rue. Reconstruisez la section coupée." },
       "line_paused_return_leg_blocked": { "title": "Trajet retour bloqué par le sens de circulation", "description": "L'aller fonctionne mais il n'y a pas de voie pour le retour. Doublez la voie ou utilisez une voie bidirectionnelle." },
       "line_paused_no_underlay": { "title": "L'arrêt n'a plus de voie support", "description": "La voie ou la rue portant l'arrêt n'existe plus." },
-      "line_paused_train_too_long": { "title": "Train plus long que le quai", "description": "Réduisez le nombre de voitures par train ou allongez la gare." },
+      "line_paused_train_too_long": { "title": "Train plus long que le tronçon de l'arrêt", "description": "Réduisez le nombre de voitures par train ou allongez le tronçon où se trouve l'arrêt (quai de gare, ou tronçon de rue ou de voie)." },
       "line_no_vehicle_product": { "title": "Aucun véhicule défini pour ce type de ligne", "description": "" },
       "line_vehicle_shortage": { "title": "Véhicules non approvisionnés", "description": "Obtenu {{received}} voitures sur {{required}} nécessaires." },
       "line_off_network": { "title": "La ligne n'est sur aucun réseau", "description": "L'itinéraire de la ligne n'est relié à aucune voie ni rue." },

@@ -49,7 +49,7 @@
       "line_paused_route_disconnected": { "title": "停留所間の経路が分断されています", "description": "連続する停留所の間が線路・街路でつながっていません。分断箇所を再建してください。" },
       "line_paused_return_leg_blocked": { "title": "復路が通行方向で塞がれています", "description": "往路は通れますが復路の線路がありません。複線化するか双方向の線路にしてください。" },
       "line_paused_no_underlay": { "title": "停留所の下地パスがありません", "description": "停留所が乗っていた線路・街路が失われています。" },
-      "line_paused_train_too_long": { "title": "編成がプラットフォームより長すぎます", "description": "1編成の車両数を減らすか、駅を延伸してください。" },
+      "line_paused_train_too_long": { "title": "編成が停留所のある区間より長すぎます", "description": "1編成の車両数を減らすか、停留所のある区間(駅のホームや、道路・軌道の区間)を延伸してください。" },
       "line_no_vehicle_product": { "title": "この路線種別には車両が定義されていません", "description": "" },
       "line_vehicle_shortage": { "title": "車両を調達できていません", "description": "必要 {{required}} 両に対して調達できたのは {{received}} 両です。" },
       "line_off_network": { "title": "路線が走行網に乗っていません", "description": "路線の下地経路がどの線路・街路とも結ばれていません。" },

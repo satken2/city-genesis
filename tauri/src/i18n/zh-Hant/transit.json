@@ -39,7 +39,7 @@
       "returnLegBlocked": "由於回程在底層無法通行而停駛。需要複線化（鋪設反向軌道）。",
       "routeDisconnected": "由於停靠站之間的底層路徑中斷而停駛。",
       "noUnderlay": "由於此路線類型的行駛網路尚未建設而停駛。",
-      "trainTooLong": "由於編組長度超過月台長度而停駛。請減少每列編組車輛數，或延長車站（月台）。",
+      "trainTooLong": "由於編組長度超過停靠站所在區段（車站月台，或道路、軌道區段）的長度而停駛。請減少每列編組車輛數，或延長該區段。",
       "generic": "已停駛。"
     },
     "cancel": "取消",
@@ -53,6 +53,7 @@
     "noStops": "沒有停靠站。",
     "noVariants": "沒有大眾運輸的變體。",
     "placeStopHint": "在3D地圖上，左鍵點擊此路線類型可設置停靠站的路徑（車站、街道等）來放置停靠站。右鍵可確定或刪除。",
+    "autoPlatformNote": "放置停靠站後，會在該位置的軌道或道路兩側自動建成月台。月台長度依編組長度決定，無需另行鋪設。",
     "stopCountLabel": "已放置的停靠站",
     "stopsUnit": "處",
     "needTwoStops": "建立路線至少需要2個停靠站。",
@@ -90,8 +91,9 @@
       "cityBus": "公車",
       "coach": "客運",
       "lrt": "輕軌",
-      "trainRed": "紅色腰帶",
-      "trainBlue": "藍色腰帶"
+      "trainStandard": "標準",
+      "trainFuturistic": "未來風",
+      "trainRetro": "復古"
     }
   }
 }

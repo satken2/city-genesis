@@ -67,12 +67,34 @@ public static class PolygonUtils
     }
 
     /// <summary>
+    /// 水平線 z 上で <see cref="Contains"/> の半直線が数える交差のX座標を crossings に追加する(並べ替えない)。
+    /// 同じ z の点の内外は「x より大きい交差の個数」の偶奇で決まり、Contains と同じ結果になる。
+    /// 格子のように同じ行の点を多数判定するとき、点ごとに全辺を走査せずに済む。
+    /// </summary>
+    public static void AppendRayCrossings(IReadOnlyList<Vector2> polygon, float z, List<float> crossings)
+    {
+        int n = polygon.Count;
+        for (int i = 0, j = n - 1; i < n; j = i++)
+        {
+            Vector2 vi = polygon[i];
+            Vector2 vj = polygon[j];
+            if ((vi.y > z) != (vj.y > z)) crossings.Add(RayCrossingX(vi.x, vi.y, vj.x, vj.y, z));
+        }
+    }
+
+    /// <summary>
     /// 点(x, z)から+X方向へ伸ばした半直線が辺 i-j と交わるか。
     /// 高さ比較を片側開区間にすることで、半直線が頂点をちょうど通る場合の二重カウントを避ける。
     /// </summary>
     private static bool CrossesRay(float xi, float zi, float xj, float zj, float x, float z)
     {
-        return ((zi > z) != (zj > z)) && (x < (xj - xi) * (z - zi) / (zj - zi) + xi);
+        return ((zi > z) != (zj > z)) && (x < RayCrossingX(xi, zi, xj, zj, z));
+    }
+
+    /// <summary>辺 i-j と水平線 z の交点のX座標。辺が z をまたぐときだけ呼ぶ。</summary>
+    private static float RayCrossingX(float xi, float zi, float xj, float zj, float z)
+    {
+        return (xj - xi) * (z - zi) / (zj - zi) + xi;
     }
 
     /// <summary>符号付き面積(靴紐公式)。正=反時計回り(CCW)。巻き順の正規化判定に使う。</summary>

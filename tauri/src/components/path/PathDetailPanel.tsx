@@ -329,9 +329,9 @@ export function PathDetailPanel({
   const showZoneRow = pathData.zone_name != null || canChangeZone;
   const showFollowTerrainRow = pathData.follow_terrain === 0 || pathData.follow_terrain === 1;
   const hasAlignment = PATH_TYPES_WITH_BASE_SPEED.includes(pathData.path_type);
-  const showCurveRadiusRow = hasAlignment && pathData.min_curve_radius != null;
-  const showGradeRow = hasAlignment && pathData.max_grade != null;
-  const hasBasicGrid = showZoneRow || showFollowTerrainRow || showCurveRadiusRow || showGradeRow;
+  const minCurveRadius = hasAlignment ? pathData.min_curve_radius ?? null : null;
+  const maxGrade = hasAlignment ? pathData.max_grade ?? null : null;
+  const hasBasicGrid = showZoneRow || showFollowTerrainRow || minCurveRadius != null || maxGrade != null;
   const hasCondition =
     !!pathData.under_maintenance ||
     pathData.durability != null ||
@@ -531,20 +531,20 @@ export function PathDetailPanel({
                           </span>
                         </>
                       )}
-                      {showCurveRadiusRow && pathData.min_curve_radius != null && (
+                      {minCurveRadius != null && (
                         <>
                           <span className="agent-detail-label">{t("path.minCurveRadius")}</span>
                           <span className="agent-detail-value">
-                            {pathData.min_curve_radius >= STRAIGHT_RADIUS_THRESHOLD
+                            {minCurveRadius >= STRAIGHT_RADIUS_THRESHOLD
                               ? t("path.straightLine")
-                              : `${Math.round(pathData.min_curve_radius)} m`}
+                              : `${Math.round(minCurveRadius)} m`}
                           </span>
                         </>
                       )}
-                      {showGradeRow && pathData.max_grade != null && (
+                      {maxGrade != null && (
                         <>
                           <span className="agent-detail-label">{t("path.maxGrade")}</span>
-                          <span className="agent-detail-value">{pathData.max_grade.toFixed(1)} %</span>
+                          <span className="agent-detail-value">{maxGrade.toFixed(1)} %</span>
                         </>
                       )}
                     </div>

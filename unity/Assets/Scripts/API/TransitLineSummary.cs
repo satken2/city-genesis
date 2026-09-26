@@ -53,6 +53,30 @@ namespace GeneratedModels
         /// 候補に無い値(未設定の-1を含む)は路線IDと編成番号による既定の選択へ戻す。
         /// </summary>
         public int vehicle_model = -1;
+
+        /// <summary>
+        /// 停留所ごとの停止位置(停留所順)。コアが停留所から直接計算するので、運休中で journeys が空でも返る。
+        /// LRT停留所のホーム(LrtStopPlatforms)の位置の正。詳細APIの stops(路線図の表示用)とは別物。
+        /// </summary>
+        public List<TransitStopPoint> stop_points;
+    }
+
+    [Serializable]
+    public class TransitStopPoint
+    {
+        public int node_id;
+
+        /// <summary>
+        /// 停留所の下地パス。ノードの記録が無効(交差点分割でIDが変わった等)ならコアがジオメトリ探索で
+        /// 解決した現在のパス。解決できなければ null(fraction も null)。
+        /// </summary>
+        public int? station_path_id;
+
+        /// <summary>
+        /// 下地パス上の停止中心(編成の中心)の距離割合。車両の停止位置(journeys の to_fraction)と同じ関数・
+        /// 同じクランプで求めた値で、Unity では未切断の3D点列の長さを掛けて距離にする(TransitRouteGeometry と同じ写像)。
+        /// </summary>
+        public float? fraction;
     }
 
     /// <summary>GET /api/v1/transit/lines のレスポンス。バックエンドは {"lines": [...]} を返す。</summary>

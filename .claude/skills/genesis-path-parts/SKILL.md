@@ -81,6 +81,7 @@ stdout が返らない等の罠がある)。本Skillはパス(道路・線路)�
 | 分岐器のレールコネクタ | `rail` (無ければ `track` で代用) | — |
 | 電化(架線柱・門型梁) | `pole` / `beam` | `wire_spacing` |
 | 駅のホーム | `platform` / `platform_wall` / `platform_panel` | `platform_width` |
+| LRT停留所のホーム | `lrt_platform`(+ `lrt_platform_end` / `lrt_shelter`) | transit_master のLRT停留所リスト(下記「LRTの併用軌道と専用軌道」) |
 
 ### 既存アセットの実例
 
@@ -122,6 +123,9 @@ p461 8個  body track platform platform_wall platform_panel wire pole beam (電�
 | `pole` | 設置面(柱は上方向) | 「右側用」。腕金は -X(軌道中心)向き。左側はY軸180°回転 |
 | `beam` | スプライン中心の設置面 | X幅が柱間に引き伸ばされる |
 | `platform` / `platform_wall` | **原点=線路中心線・線路面** | 「右側用」。縁は X=+1.5m 固定、上面造形は原点から1.5m高さ |
+| `lrt_platform` | **原点=軌道中心線・レール踏面**(上面は踏面+0.30m) | 「右側用」。乗降縁は X=+1.35m 固定。左側はXミラー |
+| `lrt_platform_end` | デッキ端の断面中央・レール踏面 | +Z がデッキから外向き。左右対称でミラーしない |
+| `lrt_shelter` | デッキ上面・足跡中心 | 開放面が -X(軌道側)。左側はY軸180°回転 |
 
 - **Z方向(進行方向)が1タイル**の長さ。道路の連続面は10m程度でよい(生成側が1m以下へ圧縮して反復する)。
   支柱・ベンチを含むホームは8mの造形周期を保ち、曲線用の分割をモデル内に持つ。
@@ -175,6 +179,9 @@ p461 8個  body track platform platform_wall platform_panel wire pole beam (電�
      著作寸法が規約とずれているサイン)
    - 電化バリアント(`wire_spacing`設定)は架線・架線柱・門型梁付きでプレビュー
      される(柱間隔は見やすさのため最大15mに詰められる)
+   - 線路の軌道・架線は `lanes` 本を TrackPath と同じ横位置(幅を lanes 等分した各中心)に並べる
+   - `lrt_platform` を持つLRTバリアントは、直線56mの中央に2両編成相当の相対式ホーム
+     (両側・両端スロープ・中央の上屋)を置き、`pillar` があっても地上で見せる
    - 交差点・曲線・分岐器・近接線路の結合描画はプレビュー対象外(実機でしか確認できない)
 8. **マスターデータの更新が必要か判定し、必要なら反映する**(下記)
 
@@ -225,18 +232,33 @@ p461 8個  body track platform platform_wall platform_panel wire pole beam (電�
 
 ## LRTの併用軌道と専用軌道
 
-222（幅24m・4車線）／242（幅32m・6車線）は中央寄りの左右1車線を自動車と共用し、303（幅8m）は中央単線。`lanes`を道路上の軌道数として扱わない。詳細は公開G文書「LRT付き道路222・242・歩行者道303」、専用軌道431はN文書を参照。
+LRTの線路は1本のパスで複線(上下線)を表す。222（幅24m・4車線）／242（幅32m・6車線）は中央寄りの左右1車線を自動車と共用し、軌道中心は最内車線中心（±2.5625m／±2.541667m）。303（幅12m）は中心±1.75mの2軌道、431（幅7m・lanes 2）はTrackPathが±1.75mへ2軌道を敷く（軌道中心間隔3.5m）。道路の`lanes`を道路上の軌道数として扱わない。詳細は公開G文書「LRT付き道路222・242・歩行者道303」、専用軌道431はN文書を参照。
 
 - 道路用は`lrt_track`／`lrt_wire`／`lrt_pole`。RoadPathがLrtRoadPartsで追加配置する。通常鉄道のtrack/pole/beamと混ぜない。
 - lrt_trackは幅3m、レール中心±0.7175m、踏面Z=0.025m。lrt_wireの中心はZ=5.30m。原点はどちらも路面で、UnityはBODY_ABOVE_SPLINEを加える。
-- lrt_poleは道路中心・路面原点の実寸配置。222/242は中央T字柱、303は端の片持ち柱を原点からずらして著作する。bounds中心へ再配置しない。架線系はwire_spacingが正の場合だけ描く。
-- 431は411と同じ通常の電化軌道パーツをメッシュ共有する。新規バリアントはpath_masterだけでなく、transit_masterのLRT走行・停留所リストにも追加する。
-- 非公開の制作ツールにある`genesis-gallery/pipeline/jobs/build_lrt_paths.py`が著作元。exportは`--only p222/lrt_,p222/body,p222/sidewalk,p222/line,p222/center,p242/,p303/,p431/`で既存設備の不要な再出力を避ける。
-- 検証はバリデータと`city-genesis/unity/Tests/Lrt/run.ps1`。レール位置、直立柱、カーブ、相互接続、FBXとラッパープレハブのGUIDを確認する。
+- lrt_poleは道路中心・路面原点の実寸配置。222/242は中央T字柱、303は両側X=±5.4mの2本柱で、各腕が近い方の軌道（±1.75m）へ出る。bounds中心へ再配置しない。架線系はwire_spacingが正の場合だけ描く。
+- 303のbodyは幅12mの段差のない舗装。石畳|x|<3.25m（軌道敷）・白い境界帯3.25〜3.45m（PATH_CONCRETE）・暖色レンガ3.45〜5.8m・縁5.8〜6.0m。設備列は±5.1m。
+- 431のbody/body_closeは幅7.0mの複線道床（411の断面意匠。肩±3.2m・下端-0.55m・軌道間に+0.09mの盛り）。軌道の道床天端層（外端は軌道中心から1.6m）を法面から浮かせないための専用形状。それ以外（track/wire/pole/beam/高架系/portal）は411とメッシュ共有する。
+- 新規バリアントはpath_masterだけでなく、transit_masterのLRT走行・停留所リストにも追加する。
+
+### LRT停留所のホーム
+
+Unityが停留所の下地パスへ相対式ホーム（各軌道の外側）を自動で描く。部品は各バリアントのフォルダに置き（p242はp222と同形状を共有）、無ければスキップする（`lrt_platform`だけは簡易スラブで代替）。通常（無印）のみ著作し、`_close`は作らない。下表の寸法はUnity座標（+X=軌道から外向き、+Y上）で、レール踏面・軌道中心が基準。
+
+| パーツ | 原点と配置 | 寸法・造形 |
+|---|---|---|
+| `lrt_platform` | 軌道中心線・レール踏面。右側用（Blender -X）で左側はXミラー。著作長4mを`maxTileLength: 0`で反復するため、モデル内を長手1m以下で分割する | 乗降縁X=1.35（車体半幅1.27+0.08）、デッキ上面Y=+0.30、幅W=1.2m（222/242）／2.0m（303/431）、側面の下端Y=-0.15（222/242/303）／-0.9（431）。内縁に白い縁石と点状ブロック帯、上面は舗装、外縁に防護柵（222/242/431。303は無し） |
+| `lrt_platform_end` | デッキ端の断面中央（横位置=軌道中心+1.35+W/2）・レール踏面。+Zがデッキから外向き。左右対称でミラーしない | 上面はZ=0でY=+0.30から、222/242/303はZ=3.0でY=-0.025（路面）、431はZ=6.0でY=-0.475（スプライン基準面）まで下る。X±W/2、側面は各下端まで |
+| `lrt_shelter` | デッキ上面・足跡中心。開放面が-X（軌道側）。右側は外縁に背を付け、左側はY軸180°回転 | 足跡X∈[-0.45,0.45]・Z∈[-2,2]。背面の2本柱と片持ち屋根（上面から約2.4m）、背面の板の前にベンチ。全バリアント共有（p222で著作） |
+
+- 材質は既存のみ（PATH_CONCRETE・PATH_PAVING_STONE・PATH_YELLOW_BLOCK・PATH_METAL・PATH_WOOD・BD_WINDOW・BD_CONCRETE）。外部素材を取り込まない。
+- 柵は外縁から0.075m以内、上屋の背面の柱・板は外縁から0.09m以上内側に置き、上屋を外縁に寄せても柵と重ならないようにする。
+- 非公開の制作ツールにある`genesis-gallery/pipeline/jobs/build_lrt_paths.py`が著作元（ホーム部品・431道床を含む。303の舗装と設備は`build_mall_paths.py`）。exportの`--only`は部分一致なので、変更したものだけを指定する（例 `p222/lrt_platform,p222/lrt_shelter,p303/body,p303/lrt_pole,p431/body,p431/lrt_`）。`p431/body`は`body_elevated`にも一致する。
+- 検証はバリデータ（lrt_track/lrt_wire/lrt_pole/lrt_platform/lrt_platform_end/lrt_shelterの原点・寸法。デッキ上面は材質別bboxで測る）と`city-genesis/unity/Tests/Lrt/run.ps1`。レール位置、直立柱、カーブ、相互接続、FBXとラッパープレハブのGUIDに加え、実FBXとUnity定数の突き合わせ（303/431の舗装・道床の全幅12m/7m、303の柱の足元±5.4m=`LrtRoadParts.MALL_POLE_OFFSET`と吊り金具±1.75m、ホーム部品の内縁・幅・上面・著作長、スロープの長さと下端=前後の地面）を確認する。
 
 ## 歩行者モールの点設備
 
-303/304/305の舗装・bench/bin/planter/advert/treeは非公開の制作ツール`genesis-gallery/pipeline/jobs/build_mall_paths.py`が著作する。304は幅12mの中央島、305は幅20mで中心から左右4mの2列、303は中央LRTを空ける小型設備。新設備は`bench_type`/`bin_type`/`planter_type`/`advert_type`の各`*_allowed`・`default_*`と個別Pathの0/1選択に従う。規約・位相・向きはG文書§5.5、検証はTests/Lrt/run.ps1。
+303/304/305の舗装・bench/bin/planter/advert/treeは非公開の制作ツール`genesis-gallery/pipeline/jobs/build_mall_paths.py`が著作する。304は幅12mの中央島、305は幅20mで中心から左右4mの2列、303は複線LRTの外側（±5.1m）に並べる小型設備。新設備は`bench_type`/`bin_type`/`planter_type`/`advert_type`の各`*_allowed`・`default_*`と個別Pathの0/1選択に従う。規約・位相・向きはG文書§5.5、検証はTests/Lrt/run.ps1。
 
 ## 送電線1101・1102
 

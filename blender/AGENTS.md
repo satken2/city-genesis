@@ -29,6 +29,7 @@
 - **編集・書き出し・検証の道具は別レポジトリ `genesis-gallery` にある**(ワークスペース上で `city-genesis` と並置される前提。`../genesis-gallery/pipeline/library.py export --category <cat> --only <パス>` でFBXへ書き戻す)。ここには .blend 以外を置かない。
 - 手著作でないモデルは `genesis-gallery/pipeline/jobs/build_*.py` が形状をコードで持っており、ジョブを再実行すると .blend 側の手編集が消える。編集前にジョブの有無を確認すること。
 - 集合住宅2001は `build_a2001_variants.py`（閾値200・800と共通遠景は `apartment_parts.py`）、商業施設付きオフィス2010は `build_a2010.py`（いずれも非公開制作ツール）が著作する。2001の閾値0は旧手著作の移植品で、形状の正はこの .blend（ジョブは著作高さの補正だけを行う）。
+- 小規模オフィス2002・大規模オフィス2012の閾値200/400/600/800は非公開制作ツールの `build_office_variants.py` が通常・接写を著作する。閾値0は別(2002は `build_a2002.py`、2012は旧手著作の移植品)で、このジョブは触らない。材質 `BD_BLUE_GLASS`・`BD_RED_BRICK` はこのジョブが新設した共有材。仕様は公開I文書§9.7。
 - 建物の汎用接写パーツは非公開制作ツールの `build_building_lods.py` が無印から著作する。通常用を再著作した後はこのジョブも実行する。`lod_author=building_surface_lod_v1` のコレクションだけを再生成し、市政府・戸建て住宅の個別ジョブが持つCloseは保持する。
 - テクスチャは `//../unity/Assets/Models/<カテゴリ>/Textures/` の相対パス参照。このディレクトリを移動・改名すると参照が切れる。
 - Unity は `unity/` 配下しかインポートしないので、ここに .blend を置いても Unity のアセットにはならない(意図的に `unity/` の外にある)。

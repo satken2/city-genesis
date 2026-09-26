@@ -68,7 +68,7 @@ public sealed class TransitRouteGeometry
                 RoadPath.GetPathMasterParams(data, out float width, out float sidewalk, out float side, out _, out int lanes, out _, out float divider, out _, out _, out _, out _);
                 g.offset = Math.Abs(new RoadLaneLayout(width,sidewalk,side,divider,lanes,data.travel_direction).Center(0,CityInfoStore.TrafficHand));
             }
-            g.tramOffset = LrtRoadParts.IsEmbedded(data.path_variant) ? LrtRoadParts.Offset(data) : g.offset;
+            g.tramOffset = LrtRoadParts.IsLrt(data.path_variant) ? LrtRoadParts.Offset(data) : g.offset;
             if (LrtRoadParts.IsEmbedded(data.path_variant))
             { ReadRailConnectors(data.start_node_id); ReadRailConnectors(data.end_node_id); }
             geometry[data.path_id] = g;
@@ -140,14 +140,16 @@ public sealed class TransitRouteGeometry
             ?? VehiclePolyline.Connector(p0,t0,p1,t1,1f/3f);
         float progress = Mathf.Clamp01(along/Math.Max(.001f,tail+head));
         connector.Sample((reverse?1-progress:progress)*connector.Length,!reverse,out position,out tangent);
-        if (tram) position.y += LrtRoadParts.IsEmbedded(g.data.path_variant) || LrtRoadParts.IsEmbedded(next.data.path_variant) ? LrtRoadParts.RailTop : .355f;
-        else if (g.rail) position.y += .2f;
+        // レールコネクタのスプラインは軌道パーツの原点の高さにあるので踏面までを足す。埋め込み軌道を含む接続は lrt_track で描かれる。
+        float height = tram ? (LrtRoadParts.IsEmbedded(g.data.path_variant) || LrtRoadParts.IsEmbedded(next.data.path_variant)
+                ? LrtRoadParts.EMBEDDED_RAIL_TOP : LrtRoadParts.DEDICATED_RAIL_TOP)
+            : g.rail ? .2f : 0f;
+        position.y += height;
         if (g.rail || tram)
         {
             // 描画点列とスプライン評価の端部の差を吸収し、接続境界の位置を連続にする。
             Vector3 start = connector.points[reverse ? connector.points.Length-1 : 0];
             Vector3 end = connector.points[reverse ? 0 : connector.points.Length-1];
-            float height = tram ? (LrtRoadParts.IsEmbedded(g.data.path_variant) || LrtRoadParts.IsEmbedded(next.data.path_variant) ? LrtRoadParts.RailTop : .355f) : .2f;
             position += Vector3.Lerp(p0-start-Vector3.up*height,p1-end-Vector3.up*height,progress);
         }
         return true;
@@ -254,8 +256,8 @@ public sealed class TransitRouteGeometry
             g.full.Sample(s,forward,out p,out t);
             p += Vector3.Cross(Vector3.up,t).normalized*(offset*sign);
         }
-        p.y += g.rail ? RoadPartHeights.TRACK_ABOVE_SPLINE + (tram ? .355f : .2f)
-            : RoadPartHeights.BODY_ABOVE_SPLINE + (tram ? LrtRoadParts.RailTop : 0);
+        p.y += tram ? LrtRoadParts.RailTopAboveSpline(g.data.path_variant)
+            : g.rail ? RoadPartHeights.TRACK_ABOVE_SPLINE + .2f : RoadPartHeights.BODY_ABOVE_SPLINE;
     }
     private static int FindRun(List<Run> runs,double distance)
     {

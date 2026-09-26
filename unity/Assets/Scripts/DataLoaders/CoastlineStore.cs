@@ -137,10 +137,6 @@ public static class CoastlineStore
     /// バックエンドの海岸線は外周リングと湖などの穴リングをまとめて持つが、
     /// すべてのリングを通して交差回数を数えると、外周のみの内側=奇数=陸地、
     /// 外周かつ穴の内側=偶数=海(湖)、と穴が自然に扱われる。
-    ///
-    /// 用途: 超遠景(UltraFar)地形は解像度が極めて粗く(マップ全体で33)、標高0m付近の
-    /// 地形がうねって海面板を突き抜ける。near_map ベースで精密に抽出されたこの海岸線で
-    /// land/sea を判定し、海サンプルを海面レベルへ潰すことで突き抜けを防ぐ。
     /// 海岸線が未ロード、または陸地が存在しない場合は false を返す(呼び出し側でフォールバック)。
     /// </summary>
     public static bool IsLand(float x, float z)
@@ -164,12 +160,8 @@ public static class CoastlineStore
     /// <summary>
     /// 指定したワールド座標(x, z; バックエンド座標)から海岸線までの符号付き距離を返す。
     /// 陸地内が正、海(陸地外)が負。絶対値は全リングの全辺への最短距離。
-    ///
-    /// 用途: UltraFar陸地メッシュ生成(<see cref="UltraFarLandMeshBuilder"/>)で、
-    /// グリッドセルを海岸線でクリップする際の符号付きフィールドとして使う。
-    /// 辺の交差点(符号反転位置)を線形補間で求めることで、グリッド解像度より細かい
-    /// 滑らかな海岸線が得られる。海岸線が未ロード/陸地なしの場合は負の無限大を返す
-    /// (=全域を海とみなす)。
+    /// 1点ごとに全辺を走査するので、格子全体を求めるときは <see cref="SampleSignedDistanceGrid"/> を使う。
+    /// 海岸線が未ロード/陸地なしの場合は負の無限大を返す(=全域を海とみなす)。
     /// </summary>
     public static float SignedDistance(float x, float z)
     {
@@ -201,6 +193,77 @@ public static class CoastlineStore
 
         float dist = Mathf.Sqrt(minDistSq);
         return IsLand(x, z) ? dist : -dist;
+    }
+
+    /// <summary>
+    /// 格子点 (xs[i], zs[j]) ごとの符号付き距離を [i, j] に並べて返す。xs・zs は昇順で渡す。
+    /// 符号は <see cref="IsLand"/>、絶対値は <see cref="SignedDistance"/> と同じ値で、maxDistance より遠い点だけ
+    /// ±maxDistance に丸める。格子点ごとに SignedDistance を呼ぶと格子点数×海岸線の頂点数に比例して遅いため、
+    /// 内外は行ごとの半直線の交差、距離は近傍の辺だけから求める。
+    /// </summary>
+    public static float[,] SampleSignedDistanceGrid(float[] xs, float[] zs, float maxDistance)
+    {
+        var result = new float[xs.Length, zs.Length];
+        // 内外と距離で2回走査するので、途中で差し替わっても同じリング集合を使う。
+        Vector2[][] snapshot = rings.ToArray();
+
+        var crossings = new List<float>();
+        for (int j = 0; j < zs.Length; j++)
+        {
+            crossings.Clear();
+            foreach (Vector2[] ring in snapshot)
+            {
+                if (ring.Length >= 3) PolygonUtils.AppendRayCrossings(ring, zs[j], crossings);
+            }
+            crossings.Sort();
+            int passed = 0;
+            for (int i = 0; i < xs.Length; i++)
+            {
+                while (passed < crossings.Count && crossings[passed] <= xs[i]) passed++;
+                result[i, j] = ((crossings.Count - passed) & 1) == 1 ? maxDistance : -maxDistance;
+            }
+        }
+
+        // 辺を maxDistance 以下の間隔の点で登録する。辺上のどの点も最寄りの登録点から maxDistance/2 以内なので、
+        // 半径 reach の候補に maxDistance 以内の全辺が入る。
+        float reach = maxDistance * 1.5f;
+        var segments = new List<(Vector2 start, Vector2 end)>();
+        var hash = new SpatialHash<int>(reach);
+        foreach (Vector2[] ring in snapshot)
+        {
+            int count = ring.Length;
+            if (count < 2) continue;
+            for (int i = 0; i < count; i++)
+            {
+                Vector2 a = ring[i];
+                Vector2 b = ring[(i + 1) % count];
+                int samples = Mathf.Max(1, Mathf.CeilToInt(Vector2.Distance(a, b) / maxDistance));
+                for (int k = 0; k < samples; k++)
+                {
+                    Vector2 p = Vector2.Lerp(a, b, (k + 0.5f) / samples);
+                    hash.Add(segments.Count, new Vector3(p.x, 0f, p.y));
+                }
+                segments.Add((a, b));
+            }
+        }
+
+        float maxDistanceSq = maxDistance * maxDistance;
+        for (int i = 0; i < xs.Length; i++)
+        {
+            for (int j = 0; j < zs.Length; j++)
+            {
+                var point = new Vector2(xs[i], zs[j]);
+                float minDistanceSq = maxDistanceSq;
+                foreach (int index in hash.Query(new Vector3(point.x, 0f, point.y), reach))
+                {
+                    float distanceSq = PolylineUtils.DistanceToSegmentSq(point, segments[index].start, segments[index].end);
+                    if (distanceSq < minDistanceSq) minDistanceSq = distanceSq;
+                }
+                float distance = Mathf.Sqrt(minDistanceSq);
+                result[i, j] = result[i, j] > 0f ? distance : -distance;
+            }
+        }
+        return result;
     }
 
     /// <summary>

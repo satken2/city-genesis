@@ -39,7 +39,7 @@
       "returnLegBlocked": "Suspended: the return trip is blocked on the underlying track. A double track (an opposite-direction track) is required.",
       "routeDisconnected": "Suspended: the underlying route between stops is severed.",
       "noUnderlay": "Suspended: the running network for this line type is not configured.",
-      "trainTooLong": "Suspended: the train is longer than the platform. Reduce the cars per train, or extend the station (platform).",
+      "trainTooLong": "Suspended: the train is longer than the section its stop is on (a station platform, or a street or track section). Reduce the cars per train, or extend that section.",
       "generic": "Suspended."
     },
     "cancel": "Cancel",
@@ -53,6 +53,7 @@
     "noStops": "No stops.",
     "noVariants": "No public transit variants available.",
     "placeStopHint": "On the 3D map, left-click on a path where this line type can place stops (stations, streets, etc.) to add a stop. Right-click to finalize or delete.",
+    "autoPlatformNote": "Placing a stop automatically builds platforms on both sides of the track or street at that spot. Their length follows the train length, so you don't need to lay platforms separately.",
     "stopCountLabel": "Placed stops",
     "stopsUnit": "",
     "needTwoStops": "A line needs at least two stops.",
@@ -90,8 +91,9 @@
       "cityBus": "City bus",
       "coach": "Coach",
       "lrt": "LRT",
-      "trainRed": "Red stripe",
-      "trainBlue": "Blue stripe"
+      "trainStandard": "Standard",
+      "trainFuturistic": "Futuristic",
+      "trainRetro": "Retro"
     }
   }
 }

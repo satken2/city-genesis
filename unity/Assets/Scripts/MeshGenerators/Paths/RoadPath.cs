@@ -841,7 +841,9 @@ public class RoadPath : IPathMeshGenerator
             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] body: モデルなしのため白い板にフォールバック");
         }
 
-        LrtRoadParts.Generate(container, spline, pathData);
+        // 併用軌道(222/242/303)と停留所のホーム。303 はホーム区間に沿道設備を置かない(下の RoadEquipmentGenerator)。
+        List<LrtPlatformParts.Span> lrtPlatforms = LrtPlatformParts.Resolve(pathData, controlPoints, spline.CalculateLength());
+        LrtRoadParts.Generate(container, spline, pathData, lrtPlatforms);
 
         // オフセット計算（CreateSplineMesh に渡すのはすべて「パーツ中心の位置」。
         // プレハブのピボット位置の差は CreateSplineMesh 側で bounds 中心基準に補正される）
@@ -958,7 +960,10 @@ public class RoadPath : IPathMeshGenerator
             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[RoadPath] wallWidth <= 0: 壁なし");
         }
 
-        RoadEquipmentGenerator.Generate(container, spline, pathData, width, sidewalkWidth, treeSpacing);
+        RoadEquipmentGenerator.Generate(container, spline, pathData, width, sidewalkWidth, treeSpacing,
+            pathData.path_variant == 303
+                ? LrtPlatformParts.ZoneRanges(lrtPlatforms, LrtRoadParts.PlatformRampLength(303), LrtRoadParts.PLATFORM_EQUIPMENT_ZONE_MARGIN)
+                : null);
         SuspensionBridgeGenerator.Generate(container, spline, pathData, width);
 
         // 柱

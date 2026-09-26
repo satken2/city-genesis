@@ -1,0 +1,98 @@
+/**
+ * パスの制限速度ブロック(PathSpeedLimitEditor)のスタイル
+ * 左に標識、右に「都市の制限速度・この道路の入力欄・通過速度」の表を並べる。
+ */
+
+.path-speed-limit {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.path-speed-limit__rows {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+.path-speed-limit__label {
+  color: #93a9c0;
+  font-weight: 600;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.path-speed-limit__value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 24px;
+  font-size: 0.8rem;
+  color: #e2eaf2;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 都市の制限速度は参考値なので薄く出す */
+.path-speed-limit__label--reference,
+.path-speed-limit__value--reference {
+  opacity: 0.55;
+  font-weight: 400;
+}
+
+.path-speed-limit__input {
+  width: 72px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+  color: #e2eaf2;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  padding: 2px 6px;
+  line-height: 18px;
+}
+
+.path-speed-limit__input::placeholder {
+  color: #6b8299;
+  font-weight: 400;
+  font-size: 0.75rem;
+  text-align: right;
+}
+
+.path-speed-limit__input:focus {
+  outline: none;
+  border-color: rgba(99, 179, 237, 0.6);
+}
+
+.path-speed-limit__input[aria-invalid="true"] {
+  border-color: rgba(252, 129, 129, 0.8);
+}
+
+.path-speed-limit__unit {
+  font-size: 0.78rem;
+  color: #93a9c0;
+}
+
+.path-speed-limit__status {
+  font-size: 0.72rem;
+  line-height: 1.2;
+  min-width: 0;
+}
+
+.path-speed-limit__status--saving {
+  color: #93a9c0;
+}
+
+.path-speed-limit__status--saved {
+  color: #86efac;
+}
+
+.path-speed-limit__status--error {
+  color: #fc8181;
+}

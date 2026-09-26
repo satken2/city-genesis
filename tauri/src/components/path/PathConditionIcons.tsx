@@ -13,12 +13,15 @@ import type { ReactNode } from "react";
 type LeveledIconProps = {
   /** 0 が最良。null は値が評価できない状態で、図形の基本形だけを描く */
   level: number | null;
+  /** 一辺の大きさ(px) */
+  size?: number;
 };
 
-function IconFrame({ children }: { children: ReactNode }) {
+function IconFrame({ size = 40, children }: { size?: number; children: ReactNode }) {
   return (
     <svg
-      className="path-condition-icon"
+      width={size}
+      height={size}
       viewBox="0 0 32 32"
       stroke="currentColor"
       strokeLinecap="round"
@@ -40,11 +43,11 @@ const DURABILITY_CRACKS = [
   "M4 16.5L8 16L10 18L12 19M17 19.5L21 21",
 ];
 
-export function DurabilityIcon({ level }: LeveledIconProps) {
+export function DurabilityIcon({ level, size }: LeveledIconProps) {
   const lv = level ?? 0;
   const broken = lv >= DURABILITY_ICON_MAX_LEVEL;
   return (
-    <IconFrame>
+    <IconFrame size={size}>
       {broken ? (
         <>
           <path
@@ -71,9 +74,9 @@ const NOISE_WAVES = [
   "M26 6.5Q32 16 26 25.5",
 ];
 
-export function NoiseIcon({ level }: LeveledIconProps) {
+export function NoiseIcon({ level, size }: LeveledIconProps) {
   return (
-    <IconFrame>
+    <IconFrame size={size}>
       <path d="M4 12H9.5L16 6.5V25.5L9.5 20H4Z" fill="currentColor" fillOpacity="0.25" strokeWidth="2" />
       {NOISE_WAVES.slice(0, level ?? 0).map((d) => (
         <path key={d} d={d} fill="none" strokeWidth="2.2" />
@@ -89,10 +92,10 @@ const POLLUTION_PARTICLES: [number, number][][] = [
   [[12.5, 30], [19.5, 30]],
 ];
 
-export function PollutionIcon({ level }: LeveledIconProps) {
+export function PollutionIcon({ level, size }: LeveledIconProps) {
   const lv = level ?? 0;
   return (
-    <IconFrame>
+    <IconFrame size={size}>
       <path
         d="M9 19H23A5 5 0 0 0 23.6 9.05A7 7 0 0 0 10.2 7.6A5.5 5.5 0 0 0 9 19Z"
         fill="currentColor"

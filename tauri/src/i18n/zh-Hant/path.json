@@ -8,8 +8,18 @@
     "durability": "耐久度",
     "noise": "噪音",
     "airPollution": "空氣污染",
-    "overrideMaxSpeed": "個別設定速限",
+    "saturationRatio": "{{label}}：飽和水準的{{percent}}%",
     "maxSpeed": "速限",
+    "trafficSettings": "交通與速度設定",
+    "citySpeedLimit": "城市速限",
+    "roadSpeedLimit": "本道路速限",
+    "roadSpeedLimitUnset": "未設定",
+    "roadSpeedLimitHelp": "留空則沿用城市速限。輸入後稍待片刻會自動生效。",
+    "speedLimitSign": "速限 {{speed}}",
+    "speedLimitSaving": "正在套用…",
+    "speedLimitSaved": "已套用",
+    "speedLimitSaveFailed": "套用失敗",
+    "speedLimitInvalid": "請輸入0～{{max}}",
     "baseSpeed": "通行速度",
     "minCurveRadius": "最小曲線半徑",
     "maxGrade": "最大坡度",
@@ -19,11 +29,17 @@
     "streetParkingUsage": "{{parked}} / {{capacity}}輛",
     "trafficByVehicle": "交通量（每日）",
     "trafficUnitPerDay": "/日",
-    "category": {
+    "vehicles": {
       "0": "步行",
-      "1": "道路",
-      "2": "鐵路",
-      "unknown": "未知"
+      "10": "汽車",
+      "11": "卡車",
+      "12": "公車",
+      "13": "商用車",
+      "14": "輕軌",
+      "20": "地鐵",
+      "21": "客運鐵路",
+      "22": "貨運鐵路",
+      "23": "高速鐵路"
     },
     "action": {
       "delete": "刪除",
@@ -73,7 +89,6 @@
     "tabConstructionInfo": "建設工程",
     "tabs": {
       "basic": "基本資訊",
-      "traffic": "交通",
       "construction": "建設工程"
     }
   },
@@ -130,7 +145,8 @@
       "spacingShrink": "縮窄",
       "dirForward": "順方向",
       "dirBackward": "逆方向",
-      "dirBoth": "雙方向"
+      "dirBoth": "雙方向",
+      "builtInDoubleTrack": "此軌道以1條路徑表示上下行（複線）。可雙向通行，因此無法設定軌道數、行駛方向與軌道間距。"
     },
     "openShapeEditor": "2D編輯",
     "spec": {

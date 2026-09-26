@@ -15,7 +15,7 @@ using UnityEngine;
 /// ため、海は既存の海面板がそのまま担い、突き抜けや Z-fighting が原理的に発生しない。
 ///
 /// 手法は <c>ResourceManager</c> のグリッド細分化と同系統で、陸地のAABBを <c>gridStep</c>
-/// 間隔のグリッドに切り、各グリッド頂点で海岸線への符号付き距離(<see cref="CoastlineStore.SignedDistance"/>)
+/// 間隔のグリッドに切り、各グリッド頂点で海岸線への符号付き距離(<see cref="CoastlineStore.SampleSignedDistanceGrid"/>)
 /// と far_map 高さをサンプリングする。各グリッドセルは「辺をたどり、陸側コーナーと海岸線交差点を
 /// 順に拾う」マーチングスクエア的クリップで陸地ポリゴンに切り出すため、海岸線はグリッド解像度より
 /// 細かく(交差点を線形補間して)滑らかに出る。高さで頂点を持ち上げることで粗い起伏も表現する。
@@ -81,15 +81,16 @@ public static class UltraFarLandMeshBuilder
         for (int i = 0; i < nx; i++) gx[i] = minX + i * gridStep;
         for (int j = 0; j < nz; j++) gz[j] = minZ + j * gridStep;
 
-        var sGrid = new float[nx, nz]; // 符号付き距離(陸+ / 海-)
+        // 符号付き距離(陸+ / 海-)。補間に使うのは符号が反転する辺の両端だけで、その辺は海岸線と交わるため
+        // 両端から海岸線までは gridStep 以内に収まる。それより遠い点の距離は丸めた値でよい。
+        var sGrid = hasCoastline ? CoastlineStore.SampleSignedDistanceGrid(gx, gz, gridStep) : new float[nx, nz];
         var yGrid = new float[nx, nz]; // 地表ワールドY(オフセット込み)
         for (int i = 0; i < nx; i++)
         {
             for (int j = 0; j < nz; j++)
             {
-                float x = gx[i], z = gz[j];
-                sGrid[i, j] = hasCoastline ? CoastlineStore.SignedDistance(x, z) : 1f;
-                yGrid[i, j] = sampleHeight(x, z) + heightOffset;
+                if (!hasCoastline) sGrid[i, j] = 1f;
+                yGrid[i, j] = sampleHeight(gx[i], gz[j]) + heightOffset;
             }
         }
 

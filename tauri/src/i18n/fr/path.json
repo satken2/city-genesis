@@ -8,8 +8,18 @@
     "durability": "Durabilité",
     "noise": "Bruit",
     "airPollution": "Pollution de l'air",
-    "overrideMaxSpeed": "Définir la limitation de vitesse individuellement",
+    "saturationRatio": "{{label}} : {{percent}} % du niveau de saturation",
     "maxSpeed": "Limitation de vitesse",
+    "trafficSettings": "Trafic et vitesse",
+    "citySpeedLimit": "Limitation de la ville",
+    "roadSpeedLimit": "Limitation de cette voie",
+    "roadSpeedLimitUnset": "Non défini",
+    "roadSpeedLimitHelp": "Laissez vide pour suivre la limitation de vitesse de la ville. Les modifications s'appliquent automatiquement après une courte pause.",
+    "speedLimitSign": "Limitation de vitesse {{speed}}",
+    "speedLimitSaving": "Application…",
+    "speedLimitSaved": "Appliqué",
+    "speedLimitSaveFailed": "Échec de l'application",
+    "speedLimitInvalid": "Saisir 0–{{max}}",
     "baseSpeed": "Vitesse de passage",
     "minCurveRadius": "Rayon de courbe min.",
     "maxGrade": "Pente max.",
@@ -19,11 +29,17 @@
     "streetParkingUsage": "{{parked}} / {{capacity}} voitures",
     "trafficByVehicle": "Trafic (par jour)",
     "trafficUnitPerDay": "/jour",
-    "category": {
-      "0": "Piéton",
-      "1": "Route",
-      "2": "Rail",
-      "unknown": "Inconnu"
+    "vehicles": {
+      "0": "Piétons",
+      "10": "Voitures",
+      "11": "Camions",
+      "12": "Bus",
+      "13": "Véhicules utilitaires",
+      "14": "Tramway",
+      "20": "Métro",
+      "21": "Trains de voyageurs",
+      "22": "Trains de fret",
+      "23": "Trains à grande vitesse"
     },
     "action": {
       "delete": "Supprimer",
@@ -73,7 +89,6 @@
     "tabConstructionInfo": "Chantier",
     "tabs": {
       "basic": "Général",
-      "traffic": "Circulation",
       "construction": "Travaux"
     }
   },
@@ -130,7 +145,8 @@
       "spacingShrink": "Resserrer",
       "dirForward": "Sens aller",
       "dirBackward": "Sens retour",
-      "dirBoth": "Deux sens"
+      "dirBoth": "Deux sens",
+      "builtInDoubleTrack": "Cette voie représente les deux sens (double voie) avec un seul tracé. Elle se parcourt dans les deux sens : le nombre de voies, le sens et l'écartement ne sont pas réglables."
     },
     "openShapeEditor": "Éditer en 2D",
     "spec": {

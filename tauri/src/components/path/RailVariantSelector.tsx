@@ -15,7 +15,7 @@ import type { PathMasterEntry } from "../../types";
 import type { VariantAffordability } from "../../hooks/useVariantAffordability";
 
 type RailVariantSelectorProps = {
-  /** 敷設できる規格(単線バリアント)の候補一覧。呼び出し側で絞り込み済み。 */
+  /** 敷設できる規格(単線バリアントと、1本で上下線を持つ複線一体の線路)の候補一覧。呼び出し側で絞り込み済み。 */
   variantOptions: { id: number; data: PathMasterEntry }[];
   /** プルダウンで選択中のバリアントID(未解決なら null) */
   selectedVariant: number | null;

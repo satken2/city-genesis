@@ -3,7 +3,7 @@
  *
  * パス詳細の基本情報タブに置く、制限速度と交通の状況をまとめたセクション。
  * - 制限速度・通過速度: PathSpeedLimitEditor(道路標識+都市の値+この道路の入力欄。入力は自動で反映する)
- * - 利用率・路上駐車量: 横並びのドーナツ。どちらも値が大きいほど逼迫している指標なので色は negative の向き。
+ * - 利用率・路上駐車量: 横並びのドーナツ。どちらも容量に対する使用率(逼迫度)なので congestionColor で塗る。
  *   路上駐車は台数が容量を超えうる(建物の駐車場からあふれた車が停まる)ので実数を添え、
  *   容量を持つ道路(稼働中の地上の生活道路)と実際に車が停まっている道路だけに出す
  * - 交通量(1日あたり): 車種をアイコンで示した1本のリスト。棒の長さはリスト内の最大値に対する比
@@ -47,11 +47,15 @@ import "./PathTrafficPanel.css";
 /**
  * 交通量リストに常に並べる車種(交通量が0でも行を出し、道路どうしで見比べやすくする)。
  * ここに無い車種は交通量があるときだけ出す。LRTは一部のバリアント(LRT線路付きの街路・
- * 歩行者専用道路・LRT専用軌道)にしか走らないため、常設の行には含めない。
+ * 歩行者専用道路・LRT専用軌道)にしか走らず、高速道路は歩行者が通らないため、それぞれ常設の行には含めない。
  */
 function listedVehicleKeys(pathType: number): number[] {
-  if (pathType === PATH_STREET || pathType === PATH_MOTORWAY) {
-    return [...PEDESTRIAN_VEHICLE_KEYS, ...ROAD_VEHICLE_KEYS.filter((key) => key !== VEHICLE_TRAM)];
+  const roadVehicles = ROAD_VEHICLE_KEYS.filter((key) => key !== VEHICLE_TRAM);
+  if (pathType === PATH_STREET) {
+    return [...PEDESTRIAN_VEHICLE_KEYS, ...roadVehicles];
+  }
+  if (pathType === PATH_MOTORWAY) {
+    return roadVehicles;
   }
   if (pathType === PATH_WALKWAY || pathType === PATH_CONVEYOR || pathType === PATH_TRANSPORT) {
     return [...PEDESTRIAN_VEHICLE_KEYS];
@@ -60,6 +64,16 @@ function listedVehicleKeys(pathType: number): number[] {
     return [...RAIL_VEHICLE_KEYS];
   }
   return [];
+}
+
+/**
+ * 容量に対する使用率の色。半分までは余裕、8割を超えると逼迫とみなす
+ * (統計ウィンドウの道路の混雑率 statistics/tabs/AccidentsTab の UsageMeter と同じ閾値)。
+ */
+function congestionColor(ratio: number): string {
+  if (ratio > 0.8) return "#ef4444";
+  if (ratio > 0.5) return "#f59e0b";
+  return "#10b981";
 }
 
 /** 交通カテゴリ(徒歩・道路・鉄道)ごとのアイコンと棒の色 */
@@ -127,13 +141,17 @@ export function PathTrafficPanel({ path, apiBaseUrl, onSaved }: PathTrafficPanel
       {(showUtilization || streetParking) && (
         <div className="path-traffic-gauges">
           {showUtilization && path.utilization != null && (
-            <DonutGauge value={path.utilization} label={t("path.utilization")} polarity="negative" />
+            <DonutGauge
+              value={path.utilization}
+              label={t("path.utilization")}
+              color={congestionColor(path.utilization)}
+            />
           )}
           {streetParking && (
             <DonutGauge
               value={streetParking.ratio}
               label={t("path.streetParking")}
-              polarity="negative"
+              color={congestionColor(streetParking.ratio)}
               detail={t("path.streetParkingUsage", {
                 parked: formatParkingCars(streetParking.used),
                 capacity: formatParkingCars(streetParking.capacity),

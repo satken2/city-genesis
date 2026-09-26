@@ -8,8 +8,18 @@
     "durability": "Durability",
     "noise": "Noise",
     "airPollution": "Air Pollution",
-    "overrideMaxSpeed": "Override speed limit",
+    "saturationRatio": "{{label}}: {{percent}}% of saturation level",
     "maxSpeed": "Speed Limit",
+    "trafficSettings": "Traffic & Speed",
+    "citySpeedLimit": "City speed limit",
+    "roadSpeedLimit": "This road's limit",
+    "roadSpeedLimitUnset": "Not set",
+    "roadSpeedLimitHelp": "Leave blank to follow the city speed limit. Changes are applied automatically after a short pause.",
+    "speedLimitSign": "Speed limit {{speed}}",
+    "speedLimitSaving": "Applying…",
+    "speedLimitSaved": "Applied",
+    "speedLimitSaveFailed": "Failed to apply",
+    "speedLimitInvalid": "Enter 0–{{max}}",
     "baseSpeed": "Travel Speed",
     "minCurveRadius": "Min. Curve Radius",
     "maxGrade": "Max. Grade",
@@ -19,11 +29,17 @@
     "streetParkingUsage": "{{parked}} / {{capacity}} cars",
     "trafficByVehicle": "Traffic (per day)",
     "trafficUnitPerDay": "/day",
-    "category": {
-      "0": "Walking",
-      "1": "Road",
-      "2": "Rail",
-      "unknown": "Unknown"
+    "vehicles": {
+      "0": "Pedestrians",
+      "10": "Cars",
+      "11": "Trucks",
+      "12": "Buses",
+      "13": "Commercial vehicles",
+      "14": "LRT",
+      "20": "Metro",
+      "21": "Passenger trains",
+      "22": "Freight trains",
+      "23": "High-speed trains"
     },
     "action": {
       "delete": "Delete",
@@ -73,7 +89,6 @@
     "tabConstructionInfo": "Construction",
     "tabs": {
       "basic": "Overview",
-      "traffic": "Traffic",
       "construction": "Construction"
     }
   },
@@ -130,7 +145,8 @@
       "spacingShrink": "Narrow",
       "dirForward": "Forward",
       "dirBackward": "Backward",
-      "dirBoth": "Both ways"
+      "dirBoth": "Both ways",
+      "builtInDoubleTrack": "This track represents both directions (double track) with a single path. Trains run both ways on it, so the number of tracks, direction and spacing cannot be set."
     },
     "openShapeEditor": "Edit in 2D",
     "spec": {

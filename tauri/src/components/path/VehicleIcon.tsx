@@ -106,12 +106,15 @@ type VehicleIconProps = {
   vehicleType: number;
   /** 読み上げとツールチップに使う車種名 */
   label: string;
+  /** 一辺の大きさ(px) */
+  size?: number;
 };
 
-export function VehicleIcon({ vehicleType, label }: VehicleIconProps) {
+export function VehicleIcon({ vehicleType, label, size = 22 }: VehicleIconProps) {
   return (
     <svg
-      className="vehicle-icon"
+      width={size}
+      height={size}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"

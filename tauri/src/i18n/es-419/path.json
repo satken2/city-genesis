@@ -8,8 +8,18 @@
     "durability": "Durabilidad",
     "noise": "Ruido",
     "airPollution": "Contaminación del aire",
-    "overrideMaxSpeed": "Definir el límite de velocidad individualmente",
+    "saturationRatio": "{{label}}: {{percent}} % del nivel de saturación",
     "maxSpeed": "Límite de velocidad",
+    "trafficSettings": "Tránsito y velocidad",
+    "citySpeedLimit": "Límite de la ciudad",
+    "roadSpeedLimit": "Límite de esta vía",
+    "roadSpeedLimitUnset": "Sin definir",
+    "roadSpeedLimitHelp": "Déjalo en blanco para seguir el límite de velocidad de la ciudad. Los cambios se aplican automáticamente tras una breve pausa.",
+    "speedLimitSign": "Límite de velocidad {{speed}}",
+    "speedLimitSaving": "Aplicando…",
+    "speedLimitSaved": "Aplicado",
+    "speedLimitSaveFailed": "No se pudo aplicar",
+    "speedLimitInvalid": "Ingresa 0–{{max}}",
     "baseSpeed": "Velocidad de paso",
     "minCurveRadius": "Radio de curva mín.",
     "maxGrade": "Pendiente máx.",
@@ -19,11 +29,17 @@
     "streetParkingUsage": "{{parked}} / {{capacity}} autos",
     "trafficByVehicle": "Tránsito (por día)",
     "trafficUnitPerDay": "/día",
-    "category": {
-      "0": "Peatonal",
-      "1": "Carretera",
-      "2": "Ferrocarril",
-      "unknown": "Desconocido"
+    "vehicles": {
+      "0": "Peatones",
+      "10": "Automóviles",
+      "11": "Camiones",
+      "12": "Autobuses",
+      "13": "Vehículos comerciales",
+      "14": "Tren ligero",
+      "20": "Metro",
+      "21": "Trenes de pasajeros",
+      "22": "Trenes de carga",
+      "23": "Trenes de alta velocidad"
     },
     "action": {
       "delete": "Eliminar",
@@ -73,7 +89,6 @@
     "tabConstructionInfo": "Obra",
     "tabs": {
       "basic": "Información",
-      "traffic": "Tráfico",
       "construction": "Construcción"
     }
   },
@@ -130,7 +145,8 @@
       "spacingShrink": "Reducir",
       "dirForward": "Sentido de ida",
       "dirBackward": "Sentido contrario",
-      "dirBoth": "Ambos sentidos"
+      "dirBoth": "Ambos sentidos",
+      "builtInDoubleTrack": "Esta vía representa ambos sentidos (doble vía) con un solo trazado. Se circula en ambos sentidos, por lo que no se pueden configurar el número de vías, el sentido ni la separación."
     },
     "openShapeEditor": "Editar en 2D",
     "spec": {

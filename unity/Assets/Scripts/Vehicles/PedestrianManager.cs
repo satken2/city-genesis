@@ -66,7 +66,7 @@ public sealed class PedestrianManager : MonoBehaviour
         public List<Vector2> intervals;
         public float insideLength, halfWidth;
         public float inner, outer, surface;   // 歩行帯の内縁・外縁(中心線からの距離)と高さ
-        public bool centered;                 // 歩行者専用道路: 左右に分けず全幅を1本の帯にする
+        public bool centered;                 // LRT軌道の無い歩行者専用道路: 左右に分けず全幅を1本の帯にする
         public long geometryRevision = -1;    // PathManager.GetPathGeometryRevision。-1 は版不明で点列比較に頼る
         public Vector3 scanCenter;
         public float scanRadius;
@@ -179,15 +179,18 @@ public sealed class PedestrianManager : MonoBehaviour
 
     /// <summary>
     /// 歩行帯を道路の寸法から決める。歩道があればその上、無ければ路肩(道路端から shoulder の幅)、
-    /// 歩行者専用道路は全幅。高さは歩道上面か路面(RoadPartHeights の規約)。
+    /// 歩行者専用道路は全幅。LRT軌道を持つ歩行者専用道路(303)は複線の車体が通る範囲を除いた左右の2帯。
+    /// 高さは歩道上面か路面(RoadPartHeights の規約)。
     /// </summary>
-    public static void ResolveBand(int pathType, float width, float sidewalk, float margin, float shoulder,
+    public static void ResolveBand(int pathType, int pathVariant, float width, float sidewalk, float margin, float shoulder,
         out float inner, out float outer, out float surface, out bool centered)
     {
-        centered = pathType == Constants.PATH_WALKWAY;
-        if (centered)
+        bool walkway = pathType == Constants.PATH_WALKWAY;
+        centered = walkway && !LrtRoadParts.IsEmbedded(pathVariant);
+        if (walkway)
         {
-            inner = 0; outer = Mathf.Max(0, width * .5f - margin);
+            inner = centered ? 0 : LrtRoadParts.MALL_VEHICLE_ENVELOPE + margin;
+            outer = Mathf.Max(inner, width * .5f - margin);
             surface = RoadPartHeights.BODY_ABOVE_SPLINE;
         }
         else if (sidewalk > 0)
@@ -276,7 +279,7 @@ public sealed class PedestrianManager : MonoBehaviour
         {
             RoadPath.GetPathMasterParams(data, out float width, out float sidewalk, out _, out _, out _, out _, out _, out _, out _, out _, out _);
             walk.halfWidth = width * .5f;
-            ResolveBand(data.path_type, width, sidewalk, bandMargin, shoulderWidth, out walk.inner, out walk.outer, out walk.surface, out walk.centered);
+            ResolveBand(data.path_type, data.path_variant, width, sidewalk, bandMargin, shoulderWidth, out walk.inner, out walk.outer, out walk.surface, out walk.centered);
         }
         return walk;
     }

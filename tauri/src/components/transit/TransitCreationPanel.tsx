@@ -17,6 +17,8 @@
  *
  * 停留所は路線種別の stop_path_variants に属するパス(駅・街路など)の上にのみ設置できるため、
  * Unity 側がその制約に沿って吸着する(制約はここで渡す stop_path_variants で伝える)。
+ * LRT(車種が VEHICLE_TRAM の種別)はホームをパスとして敷かず、停留所を置いた軌道・道路の上に
+ * Unity がホームを自動で描くので、その旨を注記する。
  * 作成に成功したら "transit:lines_changed" イベントを発火し、公共交通ウィンドウ
  * (transit_management) に一覧の再取得を促す。本パネルを開いている間は公共交通の表示をONにする。
  */
@@ -41,7 +43,7 @@ import {
   TRANSIT_DEFAULT_HEADWAY_MIN,
   TRANSIT_DEFAULT_CARS_PER_TRAIN,
 } from "../../local-constants";
-import { STATUS_ACTIVE } from "../../constants";
+import { STATUS_ACTIVE, VEHICLE_TRAM } from "../../constants";
 import {
   sendChangeState,
   sendViewApplyPreset,
@@ -73,7 +75,7 @@ export function TransitCreationPanel({
   const [fare, setFare] = useState<number>(TRANSIT_DEFAULT_FARE);
   const [headway, setHeadway] = useState<number>(TRANSIT_DEFAULT_HEADWAY_MIN);
   // 1編成の車両数(cars_per_train)。編成長 = cars_per_train × 1車両長(種別マスター)が
-  // 停留所のプラットフォーム長を超えると運休になる。
+  // 停留所の乗る下地パス(駅のホームや、交差点で区切られた道路・軌道の区間)の長さを超えると運休になる。
   const [carsPerTrain, setCarsPerTrain] = useState<number>(TRANSIT_DEFAULT_CARS_PER_TRAIN);
   // 車両の外観(vehicle_model)。候補は種別ごとに違うため、種別を選び直すとその種別の先頭候補に戻す。
   const [vehicleModel, setVehicleModel] = useState<number>(0);
@@ -303,6 +305,11 @@ export function TransitCreationPanel({
           <div className="bc-description-text" style={{ marginTop: 8 }}>
             {t("transit.placeStopHint")}
           </div>
+          {selectedEntry.vehicle_type === VEHICLE_TRAM && (
+            <div className="bc-description-text" style={{ marginTop: 6, opacity: 0.8 }}>
+              {t("transit.autoPlatformNote")}
+            </div>
+          )}
           <div className="bc-description-text" style={{ marginTop: 6, opacity: 0.8 }}>
             {t("transit.roundTripNote")}
           </div>

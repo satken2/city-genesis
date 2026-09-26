@@ -64,7 +64,7 @@ export type TransitStop = {
 /**
  * 路線の1区間(停留所間を結ぶ PATH_TRANSPORT)。路線図上の「線」として描画する単位。
  * travel_direction はバックエンド consts.py の DIR_* と同じ値:
- *   0 (DIR_BOTH)     = 双方向(バス等。1本の道路を往復運行)
+ *   0 (DIR_BOTH)     = 双方向(バス・LRT等。1本の道路や複線一体の軌道を往復運行)
  *   1 (DIR_FORWARD)  = start→end 片方向(複線の往路側)
  *   2 (DIR_BACKWARD) = end→start 片方向(複線の復路側)
  * UI はこれで進行方向の矢印を描き分ける。

@@ -130,7 +130,7 @@ export type MasterData = {
 これらのファイルを編集する必要がある場合は、ユーザーに相談すること。
 UI側で独自に定義する定数は`local-constants.ts`に定義する。
 
-`local-constants.ts`には、**自動生成では出力されないバックエンド共有定数の写し**も置く。`PATH_TYPES_INFRA`(=インフラのパス種別の一覧。送電`PATH_ELECTRICITY`/導水`PATH_WATER`/パイプライン`PATH_PIPELINE`の3種)と判定ヘルパ`isInfraPathType`がこれにあたり、**バックエンドの`consts.PATH_TYPES_INFRA`と一致させる契約**(生成器`sync_consts.py`はタプルを出力しないため写しになる)。判定は地形を変形しない・グリッド吸着を切るといった「財を区別しない共通のインフラ挙動」にのみ使い、電力網と水網の物理的分離はノードのビット側が受け持つ。**種別を各コンポーネントで直接列挙しないこと**(種別が増えたときに片方だけ取り残される)。
+`local-constants.ts`には、**自動生成では出力されないバックエンド共有定数の写し**も置く。`PATH_TYPES_INFRA`(=インフラのパス種別の一覧。送電`PATH_ELECTRICITY`/導水`PATH_WATER`/パイプライン`PATH_PIPELINE`の3種)と判定ヘルパ`isInfraPathType`がこれにあたり、**バックエンドの`consts.PATH_TYPES_INFRA`と一致させる契約**(生成器`sync_consts.py`はタプルを出力しないため写しになる)。判定は地形を変形しない・グリッド吸着を切るといった「財を区別しない共通のインフラ挙動」にのみ使い、電力網と水網の物理的分離はノードのビット側が受け持つ。**種別を各コンポーネントで直接列挙しないこと**(種別が増えたときに片方だけ取り残される)。同じ理由で、パス詳細が「その種別で意味を持つ値か」を判定する種別集合もここに置く: `PATH_TYPES_WITH_BASE_SPEED`(通過速度・最小曲線半径・最大勾配を算出する種別。バックエンド`geo_path_alignment.SPEED_PATH_TYPES`の写し)、`PATH_TYPES_WITH_SPEED_LIMIT`(制限速度を扱う種別。前者+LRTが走る歩道)、`PATH_TYPES_WITH_UTILIZATION`(利用率を算出する種別。バックエンド`PathUtilizationPhase`の写し)。バックエンド側の対象種別を変えたらこちらも合わせること。
 
 生成元と生成器はどちらも**非公開のコアシミュレータ側**にある(`constants.ts`の正は`genesis-core/consts.py`、
 生成器は`genesis-core/tools/sync_consts.py`)。このリポジトリ単体では再生成できないので、
