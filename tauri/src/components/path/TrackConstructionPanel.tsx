@@ -43,6 +43,9 @@
  * 線路・道路と交差してもノードを作らず接続もしないため、吸着すると端点が線路上に
  * 乗って建屋が線路を避けきれなくなる。グリッド吸着だけはプレイヤーが明示的に出した
  * グリッドへの整列なので有効なまま(このパネルのグリッド設定も駅舎タブで使える)。
+ *
+ * 敷くパスに付ける建設プロジェクトのタグ(PathTagSection)は全タブで共通の1つを持ち、
+ * 連続設置・タブ切り替えの間も保持する。
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -50,6 +53,7 @@ import { StationHouseEndsSelect } from "./StationHouseEndsSelect";
 import { StationPassageModeSelect } from "./StationPassageModeSelect";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
+import { emit } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useMasterData } from "../../contexts/MasterDataContext";
 
@@ -72,6 +76,8 @@ import { RailTrackLayoutSettings } from "./RailTrackLayoutSettings";
 import { PathVariantDescription } from "./PathVariantDescription";
 import { PathBuildSections } from "./PathBuildSections";
 import { StationBuildSections } from "./StationBuildSections";
+import { PathTagSection } from "./PathTagSection";
+import { TAGS_CHANGED_EVENT } from "../../utils/constructionTags";
 import { useStationConstruction } from "./useStationConstruction";
 import { availableRailTypes, railVariantsForTrackTypes } from "./railBuild";
 import {
@@ -122,6 +128,15 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
   const [gridOrigin, setGridOrigin] = useState<{ x: number; z: number } | null>(null);
 
   const [isConfirming, setIsConfirming] = useState(false);
+
+  // 敷くパスに付ける建設プロジェクトのタグ(空文字=付けない)。
+  const [projectTag, setProjectTag] = useState("");
+  const tagFields = useMemo(() => (projectTag ? { tag: projectTag } : undefined), [projectTag]);
+
+  /** タグ付きで敷いたら、開いている建設プロジェクトウィンドウとタグ選択に一覧を取り直させる。 */
+  const notifyTagAssigned = useCallback(() => {
+    if (projectTag) void emit(TAGS_CHANGED_EVENT, { tag: projectTag }).catch(console.error);
+  }, [projectTag]);
 
   /* ---- 角度設定モード中のグリッド表示状態の退避・復元(道路建設パネルと同一) ---- */
   const prevGridModeRef = useRef<GridDisplayMode | null>(null);
@@ -282,7 +297,8 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
   const handleConfirmPath = useCallback(async () => {
     setIsConfirming(true);
     try {
-      await pc.confirmPath();
+      await pc.confirmPath(tagFields);
+      notifyTagAssigned();
       await sendEditPathFinish();
       // 確定した形状の2D編集パネルは役目を終えるので閉じる(開いていなければ何もしない)
       void invoke("close_registered_window", { windowType: "path_shape_editor" }).catch(console.error);
@@ -309,7 +325,7 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
       }
       void showNotification({ message: displayMessage, durationMs: 8000 });
     }
-  }, [pc, refreshAffordability, t]);
+  }, [pc, tagFields, notifyTagAssigned, refreshAffordability, t]);
 
   /** 軌道パスのキャンセル(配置中の仮形状だけをクリアして同じバリアントで引き直す)。 */
   const handleCancelPath = useCallback(() => {
@@ -320,7 +336,8 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
   const handleConfirmStation = useCallback(async () => {
     setIsConfirming(true);
     try {
-      await sc.confirmStation();
+      await sc.confirmStation(tagFields);
+      notifyTagAssigned();
       // Unity 側の配置状態をリセットしてデータを再取得させる(道路敷設と同じ後始末)。
       await sendEditPathFinish();
       refreshAffordability();
@@ -342,7 +359,7 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
       }
       void showNotification({ message: displayMessage, durationMs: 8000 });
     }
-  }, [sc, refreshAffordability, t]);
+  }, [sc, tagFields, notifyTagAssigned, refreshAffordability, t]);
 
   /** 駅パッケージのキャンセル(固定した地点だけを捨てて置き直す。寸法・角度は維持)。 */
   const handleCancelStation = useCallback(() => {
@@ -495,6 +512,12 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
           <StationHouseEndsSelect value={sc.houseEnds} onChange={sc.setHouseEnds} />
           <StationPassageModeSelect value={sc.passageMode} onChange={sc.setPassageMode} />
         </div>
+        <PathTagSection
+          apiBaseUrl={apiBaseUrl ?? ""}
+          value={projectTag}
+          onChange={setProjectTag}
+          disabled={isConfirming}
+        />
         <StationBuildSections
           sc={sc}
           platformVariantOptions={variantOptions}
@@ -537,6 +560,15 @@ export function TrackConstructionPanel({ apiBaseUrl }: TrackConstructionPanelPro
               onChangeTrackCount={pc.changeTrackCount}
               onAdjustSpacing={pc.adjustTrackSpacing}
               onCycleDirection={pc.cycleTrackDirection}
+            />
+          )}
+
+          {pc.selectedVariant !== null && (
+            <PathTagSection
+              apiBaseUrl={apiBaseUrl ?? ""}
+              value={projectTag}
+              onChange={setProjectTag}
+              disabled={isConfirming}
             />
           )}
 

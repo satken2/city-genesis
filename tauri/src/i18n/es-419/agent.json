@@ -62,7 +62,9 @@
       "stopConstruction": "Suspender obra",
       "cancelAbandon": "Cancelar abandono",
       "explode": "Dinamitar",
-      "explodeConfirm": "¿Volar este edificio y hacerlo pasar por un accidente?\nEl edificio se derrumba de inmediato y mueren todos los residentes y empleados que estén dentro. El ánimo ciudadano se deteriorará mucho y la acción no se puede deshacer."
+      "explodeConfirm": "¿Volar este edificio y hacerlo pasar por un accidente?\nEl edificio se derrumba de inmediato y mueren todos los residentes y empleados que estén dentro. El ánimo ciudadano se deteriorará mucho y la acción no se puede deshacer.",
+      "explodeTitle": "Dinamitar edificio",
+      "explodeConfirmAction": "Dinamitar"
     },
     "pendingWarning": "Este edificio está en proyecto. Ordena el inicio de la obra.",
     "alerts": {

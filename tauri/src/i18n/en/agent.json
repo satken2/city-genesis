@@ -62,7 +62,9 @@
       "stopConstruction": "Suspend Construction",
       "cancelAbandon": "Cancel Abandonment",
       "explode": "Blow Up",
-      "explodeConfirm": "Blow up this building and stage it as an accident?\nThe building collapses at once and everyone living or working inside is killed. Public sentiment will suffer badly, and this cannot be undone."
+      "explodeConfirm": "Blow up this building and stage it as an accident?\nThe building collapses at once and everyone living or working inside is killed. Public sentiment will suffer badly, and this cannot be undone.",
+      "explodeTitle": "Blow Up Building",
+      "explodeConfirmAction": "Blow Up"
     },
     "pendingWarning": "This building is planned. Please command to start construction.",
     "alerts": {

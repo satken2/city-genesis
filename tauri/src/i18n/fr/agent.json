@@ -62,7 +62,9 @@
       "stopConstruction": "Mettre le chantier en attente",
       "cancelAbandon": "Annuler l'abandon",
       "explode": "Dynamiter",
-      "explodeConfirm": "Dynamiter ce bâtiment en maquillant l'opération en accident ?\nLe bâtiment s'effondre immédiatement et tous ses habitants et employés périssent. Le moral des habitants en souffrira beaucoup et l'action est irréversible."
+      "explodeConfirm": "Dynamiter ce bâtiment en maquillant l'opération en accident ?\nLe bâtiment s'effondre immédiatement et tous ses habitants et employés périssent. Le moral des habitants en souffrira beaucoup et l'action est irréversible.",
+      "explodeTitle": "Dynamiter le bâtiment",
+      "explodeConfirmAction": "Dynamiter"
     },
     "pendingWarning": "Ce bâtiment est à l'état de projet. Ordonnez le démarrage du chantier.",
     "alerts": {

@@ -54,7 +54,8 @@
       "restarting": "再起動中...",
       "restartFailed": "再起動に失敗しました",
       "restartUnavailable": "設定を保存しました。変更はゲームの次回起動時に反映されます",
-      "confirmRestart": "演算処理を{mode}に変更します。メインプログラムを再起動してよろしいですか？"
+      "confirmRestart": "演算処理を{{mode}}に変更します。メインプログラムを再起動してよろしいですか？",
+      "restartAction": "再起動する"
     },
     "windowReset": {
       "label": "ウィンドウ位置・サイズ",

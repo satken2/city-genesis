@@ -1,256 +1,99 @@
 # MeshGenerators フォルダ
 
-`InteriorFloorBuilder`はモジュラーの選択済みprefix・閾値に`interior-floor`があるときだけ各階の床を生成する。参照メッシュの高さを床厚、材質0を上面、1を下面・小口に使う。GROUNDとSHAPE_FULLは除外し、地形に変形させない。FLATでは屋上も床として閉じ、FlatRoofBuilderを重ねない。top-wのパラペットや照明で屋上を持ち上げず階高グリッドを保つ。F1/I文書、非公開制作ツールのParkingGarageQA（開口見通し・床表裏・凹形状・未指定時の無変更）を参照。
+建物・土地区画・パス(道路/線路/駅舎/送電線)・交差点・超遠景陸地のメッシュ生成器。
+`DataLoaders/` のマネージャー群から呼ばれる純粋な生成器で、呼び出し側のフロー・キャッシュ・再生成トリガーは `DataLoaders/AGENTS.md` を参照。
+仕様の正は公開ドキュメント `city-genesis/docs/docs/geometries/`(以下 F・G 等の頭文字と節番号で示す)。ここは入り口であり、個別生成器の寸法・部材名・造形の細部はドキュメント側に書く。
 
-全建物のFarは `GenerateFarBuilding` が共通のprefix解決で閾値0の `base/mid/top-prebuilt_far` を探し、いずれかがあれば `CurrentDrawLod=Far` でPreBuiltへ委譲する。名所や通常のmodel_typeでは分岐しない。パーツ解決は `_far` のみを読み、通常へのフォールバックと敷地装飾を省略する。遠景用パーツが無ければ簡易形状を使う。工事・解体・倒壊の簡易表示は維持する。実FBX・3距離・塔の2/4/8階・敷地寸法と、一般建物・構造別prefix・遠景未提供時の共通経路は非公開制作ツールの `import_landmarks.ps1` で検証する。F3文書を参照。
+## ディスパッチ (MeshFactory.cs)
 
-ホームの任意パーツ`platform_foundation`は外壁下部。`PlatformFoundationGenerator`が天端Y=0を線路面、著作下端を外壁位置の地盤下15cmへ写像する。TrackPathのplatform_wallと同じ左右・島式省略・クリップ範囲を使う。パーツが無いバリアントには追加描画しない。鏡像の巻き順はPathStructureMesh.AppendのreverseWindingで補正する。462の白い外装・屋根は実寸の別パーツ。仕様はN文書、実FBX検証はTests/HighStandardPlatform/run.ps1。
+| 入口 | 振り分け |
+| --- | --- |
+| `PathMeshFactory.GeneratePathMesh` | `path_variant` 固有辞書(送電線1101/1102→`PowerLinePath`) → `path_master.model_type`(`default`→`RoadPath`、`track`→`TrackPath`、`station_house`→`StationHousePath`、`none`→null)。`path_type` では選ばない |
+| `NodeMeshFactory.GenerateNodeMesh` | 常に `RoadIntersectionMeshGenerator`(接続2本未満は null)。線路2本以上なら `TrackIntersectionMeshGenerator` がレールコネクタを追加。インフラノードは呼び出し側が除外 |
+| `ParcelMeshFactory.GenerateParcelMesh` | usage_id 辞書、未登録は `DefaultParcel`(現状は常に Default) |
+| 建物 | ファクトリを介さず `BuildingMeshBuilder.Generate(data, isDynamic, drawLod)`。status(工事中/解体中→Constructing、倒壊→Collapsed)で先に分岐し、次に `model_type`。該当なしは白い箱 |
 
-RoadEquipmentGeneratorの柵はfence_type_allowedと個別fence_typeで有効化する。歩道があれば歩車道境界の歩道側0.12m、歩道が無ければ舗装端の内側0.12mへ置く。支柱(0.07m角)は中心位置の歩道上面に接地するため、歩道幅へ伸縮した後の縁石と歩行面の段差が境界から0.085〜0.155mにあると片側が浮く(p222/p242の縁石は歩道3mで0.16m)。301は後者で、支柱は最大2m間隔・高さ1m、パネルはp301/fence。実FBX回帰はTests/Intersections/run-unity.ps1 -Equipment。
+交差点の生成器は PATH_CONVEYOR/ELECTRICITY/PIPELINE を接続から外すが、導水管(PATH_WATER)は地表の管路として路面を作る。`InfraNetworkUtil.IsInfraPathType` で一括判定しないのはこのため。
 
-## 植栽中央分離帯・吊り橋・レンガ高架
+## ファイル一覧
 
-吊り橋主塔の幅倍率はmax(1,道路幅/12)。塔高はclamp(径間長×0.12,8,80)×幅倍率、柱の幅と奥行きはモデル内で幅倍率を適用済み。柱中心と主ケーブルは道路端から0.8m×幅倍率、地盤までの脚半径は0.85m×幅倍率。2車線以下は基準寸法。モデルの塔頂原点12mを変更せず、縦方向の幅倍率をモデルとコードで二重に掛けない。
+| 直下 | 役割 |
+| --- | --- |
+| `MeshFactory.cs` | ファクトリと結果型。`PathMeshResult.Mesh` はコライダー用ストリップで描画用ではない |
+| `AgentModelConfig.cs` | `agent_model_config.yaml` のローダー。使うのはエージェントIDの有無・`structure_prefixes`・`landmark_prefixes` だけ |
+| `UltraFarLandMeshBuilder.cs` | 海岸線ポリゴンから超遠景の陸地シルエットを純データで返す(E「超遠景」) |
+| `Percels/DefaultParcel.cs` | 区画の上面(ファン分割。凹ポリゴンでは破綻し得る)+押し出し側面 |
+| `Test/` | 確認用シーン専用。本編からは参照されない |
 
-254/256のcenterは下幅0.8m・上幅0.32m・高さ0.9mのコンクリート分離帯。マスターcenter_width=0.8によりRoadLaneLayoutが区画線・車両の走行帯から除く。
+| `Paths/` | 役割(参照先) |
+| --- | --- |
+| `RoadPath.cs` | 道路。線路・駅舎・工事中とも共用する共通ヘルパーの置き場: `CreateSplineMesh` / `BuildSpline` / `SealSplineMesh` / `BuildColliderMeshFromSpline` / `CreateFallbackRoadBody` / `GeneratePillars` / `GetOrCreateRoadMaterial(ByName)` / `GetPathMasterParams` / `RoadLaneLayout` / `IntersectionMeshOwner`。再実装しない(G) |
+| `RoadPartHeights.cs` | パーツ高さオフセット定数の唯一の正(G§4.4) |
+| `PathDrawContext.cs` | 描画LOD・詳細区間・曲率適応タイル長・`_close` 解決(`ResolvePrefab`)の静的コンテキスト |
+| `RoadAdjacency.cs` / `MotorwayMergeLayout.cs` | 高速道路の本線↔ランプ結合・板なし合流ノード(G§11.7) |
+| `PillarClearance.cs` | 橋脚と他パス通行空間の干渉判定。道路・線路・工事中・レンガ高架で共用(G§8.7) |
+| `RoadEquipmentGenerator.cs` | 街灯・電柱・街路樹・柵・ベンチ等の点設備(G§8.6・§5.5) |
+| `RoadMarkingContext.cs` / `RoadMarkingPlan.cs` / `RoadMarkingSurface.cs` | 路面標示(G§8.3、E「路面標示のLODと画像予算」) |
+| `SuspensionBridgeGenerator.cs` / `BrickArcadeGenerator.cs` / `PathStructureMesh.cs` | 吊り橋251〜256・レンガアーチ高架404/414と、その結合器(G「植栽中央分離帯と道路吊り橋」、N「レンガアーチ高架」) |
+| `PowerLinePath.cs` / `PowerLineSupport.cs` | 送電線1101/1102 の専用生成器と共有ノードの鉄塔所有権(G「送電線の専用描画」) |
+| `ConstructionPathBuilder.cs` / `ConstructionMeshUtil.cs` | 工事中パス(G§15) |
+| `RoadIntersectionMeshGenerator.cs` | 交差点(G§11、J「Unity側の交差点メッシュの再計算」) |
+| `TrafficSignalLayout.cs` / `TrafficSignalBuilder.cs` / `TrafficSignalStyle.cs` | 交差点の信号機。描画専用(G§11.8) |
+| `TrackPath.cs` | 線路・モノレール・LRT専用軌道431(N) |
+| `TrackIntersectionMeshGenerator.cs` | ポイント・平面交差のレールコネクタ。`RailsConnect` は車止めとも共有(N§4) |
+| `TrackAdjacency.cs` | 近接線路の結合(複線見え化)・島式ホーム(N§7.4・§8) |
+| `TrackDirectionArrows.cs` / `PlatformFoundationGenerator.cs` / `FarPlatformPath.cs` | 一方通行線路の矢印(敷設モードのみ。N§9)・高架ホーム外壁下部(N「高規格高架PF」)・駅と乗り場の遠景簡易立体(N§6) |
+| `LrtRoadParts.cs` / `LrtPlatformParts.cs` | LRT の軌道位置・踏面・ホーム寸法の唯一の正と、併用軌道・停留所ホーム(G「LRT付き道路」「LRT停留所のホーム」、N「LRT専用軌道431」) |
+| `StationHousePath.cs` | 駅舎パス(連絡橋+両終端の建屋)(Q) |
 
-吊り橋のtruss（254/256）は8m著作長の反復で、bodyのsingle_span伸縮を適用しない。SuspensionBridgeGeneratorがCreateSplineMeshへmaxTileLength: 0・stretchToWidth: falseで渡す。路面下端は254が3.2m、256が4.2m。251/252はトラスなしでbody厚1.1/1.3m。主ケーブルは半径0.25m・12角、吊材は半径0.035m。実FBX検証はこれらの厚み・太さも検査する。
-
-trussはnormalizeBodySurface: falseで道路用の区間LOD（路面への帯化）から除外し、橋全体のLODで扱う。頂点予算による整数タイル分割はそのまま使う。
-
-241のcenter_start/center_endは中心帯の両端を半円にする。RoadPathは切断済みスプラインを半径分だけ後退させ、キャップを1個ずつ配置する。LODで作られた詳細区間の端には置かない。center_treeはRoadEquipmentGeneratorがstreet_tree_typeと連動して植栽面へ置き、キャップから3m空ける。G文書の植栽中央分離帯節を参照。
-
-251/252/254/256は既存RoadPath（default/single_span）で桁を生成し、SuspensionBridgeGeneratorがtowerのある径間へ塔とケーブルを追加する。塔は20%/80%位置、縦寸法だけ径間に合わせ、ケーブルと吊材は動的生成する。404/414はTrackPathのarcadeをBrickArcadeGeneratorが8m基準で敷き、下端を地盤へ写像する。各アーチの変形後boundsをPillarClearanceで判定し、通行空間と重なるタイルを丸ごと省く。判定上端は道床面から1cm下げ、同標高の隣接線路を除外する。道床・軌道は維持する。
-
-PathStructureMeshは上記構造物専用の結合器で、60,000頂点ごとに分割し、パスの共有マテリアル・IntersectionMeshOwnerを使う。生成器の選択と保存パスの幾何は変更しない。実FBX検証はTests/Intersections/run-unity.ps1 -LandmarkPaths。
-
-建物・土地区画・パス(道路)・交差点の具体的なメッシュ生成アルゴリズム。
-DataLoaders のマネージャー群から呼ばれる(呼び出し側のフローは `DataLoaders/AGENTS.md` 参照)。
-
-## ディスパッチの仕組み (MeshFactory.cs)
-
-| ファクトリ | ディスパッチ | 備考 |
-| --- | --- | --- |
-| `PathMeshFactory.GeneratePathMesh` | `path_variant` 固有辞書 → `model_type`(`path_master`のフィールド) | **ジェネレータの選択は `model_type` で行う**(`path_type` ではない)。`"default"`→`RoadPath`、`"track"`→`TrackPath`、`"station_house"`→`StationHousePath`、`"none"`→メッシュ生成なし(null返却)。`model_type` 未設定時は `path_type` から推論(PATH_TRACK/MONORAIL→track、それ以外→default)する過渡措置あり。variant 辞書は送電線1101/1102のPowerLinePathを登録する。それ以外のインフラパスは `path_master` の `model_type` に従い、導水管1201のような `default` は RoadPath 扱いで body モデル未配置なら白ストリップフォールバックで描画される。海底送電線1104・海底石油パイプライン1301も `default` で、`body_material` に `PATH_METAL` を持つ(海底を這う設備だが、地表と同じ経路で描画される)。`model_type=none` なのは地下送電線1103だけである |
-| `NodeMeshFactory.GenerateNodeMesh` | 常に `RoadIntersectionMeshGenerator` | 接続パスが2本未満なら null。**インフラノード(`type`がインフラ財ビットを含む=`InfraNetworkUtil.IsInfraMask`)は呼び出し側(PathManager.UpdateNodeIntersectionMesh)が事前に除外する**ため交差点アスファルトは生成されない(DataLoaders/AGENTS.md の垂直コネクタの節を参照)。線路が2本以上接続するノードでは `TrackIntersectionMeshGenerator` がレールコネクタを追加計算する(下記「線路」の節参照) |
-| `ParcelMeshFactory.GenerateParcelMesh` | usage_id で辞書検索、未登録は `DefaultParcel` | 現状は常に Default |
-| 建物 | ファクトリを介さず `BuildingMeshBuilder.Generate(buildingData)` を直接呼ぶ | type/variant に応じた Body/Roof ビルダーへ内部で振り分け、該当なしは Default〜 |
+| `Buildings/` | 役割(参照先) |
+| --- | --- |
+| `BuildingMeshBuilder.cs` | 入口。static 幾何ユーティリティ(`GenerateColliderMesh` / `MergeSubMeshes` / `TriangulateOrFan` / `TriangulateEarClip`=失敗時は空 / `SubdivideTrianglesByEdgeLength` / `FlipToDelaunay` / `InsertInteriorPoints` / `GenerateTerrainSurfaceMesh` / `GenerateFoundationMesh` / `GenerateEntrance` / `GenerateRoofprop`)(F§15) |
+| `BuildingMeshUtils.cs` | パーツ解決(prefix・`_close`・common)・`CombineModuleMeshes`・`AddStackedModule`・`ResolveParcelContext`・`SanitizeRingPolygon`・屋根共通幾何 |
+| `ModularBuildingMeshBuilder.cs` / `ModularBodyBuilder.cs` / `DefaultBodyBuilder.cs` | モジュラー躯体(壁・角の敷き詰め `BuildWallRun`、敷地装飾 `GenerateSiteDecorations`)と白箱フォールバック(F・F1) |
+| `FlatRoofBuilder.cs` / `HouseRoofBuilder.cs` / `GableRoofBuilder.cs` / `ShedRoofBuilder.cs` / `InteriorFloorBuilder.cs` / `ExteriorStairBuilder.cs` | 屋根4種・各階の床(F1)、辺ごとの外階段(F§11.4) |
+| `PreBuiltBuildingMeshBuilder.cs` / `MashupBuildingMeshBuilder.cs` / `PortBuildingMeshBuilder.cs` / `RailYardBuildingMeshBuilder.cs` | 既成・観光名所(F3)、複数棟(F6。割り付けはバックエンド解決済み)、港湾岸壁(F4)、車両基地(F9) |
+| `OpenSpaceLayout.cs` / `OpenSpaceBuildingMeshBuilder.cs` | 駐車場・駅前ロータリー・公園(F10) |
+| `ConstructingBuildingMeshBuilder.cs` / `ConstructionSiteProfile.cs` / `CollapsedBuildingMeshBuilder.cs` | 工事中・解体中(profile 差分で共用。F5・F7)、倒壊(F8) |
 
 ## 描画LOD(DrawLod)が生成器に届く経路
 
-- 生成器は**セルのティア表を参照しない**。描画LOD(Close/Normal/Far。`DataLoaders/DrawLod.cs`)は呼び出し側(DataLoaders)が決め、次の2経路で渡す: 建物は `BuildingMeshBuilder.Generate(data, isDynamic, drawLod)` の引数(`isDynamic`=地形追従の互換引数、`drawLod`=見え方由来。独立)。パスは静的コンテキスト `Paths/PathDrawContext.cs`(`CurrentDrawLod` / `DetailFrom・To` / `SuppressDetailRange` / `AdaptiveTileLength`)で、PathManager が生成の前後で `Begin/End` する(コンテキスト外の生成は Normal・全長扱い)。仕様の正は `genesis-docs/docs/geometries/E_LOD処理.md`「描画LOD(オブジェクト単位)」。
-- **Far は簡略化した専用経路を使う**: 建物は `BuildingMeshBuilder.GenerateFarBuilding` が任意の専用prebuilt_farを探し、無ければフットプリント押し出しの箱へ戻る（工事中/解体中=1階分・倒壊=0.5階分・地面アセット=0.3m板）。パスは PathManager 側の帯(`CreateOrUpdateFarPath` / `AddFarRemainderStrips`)で、生成器のパーツ組み立ては走らない。
-- **`_close` の解決点は2箇所だけ**: 建物は `BuildingMeshUtils.GetModelForDrawLod`(`GetPart` / `GetPartNoPosition` / common パーツの共通入口。`CurrentDrawLod==Close` なら同じ閾値フォルダの `{パーツ}_close` を先に試す。存在判定 `HasModelAtPath` は無印名で行うので無印の無い `_close` は使われない)。パスは `PathDrawContext.ResolvePrefab`(`RoadPath.CreateSplineMesh` のプレハブロード。close→無印(バリアント)→close→無印(タイプ))。パスで `_close` が効くのは `CreateSplineMesh` で敷くパーツ(body/line/sidewalk/wall/center/track/wire/platform/platform_wall・駅舎の桁)と、同じ解決器を使う送電鉄塔。その他の`ModelManager.GetModel` を直接呼ぶ Instantiate 配置(tree/pillar/pillar_cap/pole/beam/portal/設備/終端部品)や交差点コネクタ・レールコネクタは常に無印。**新しいパーツ取得をこの2つの入口を迂回して書かないこと。** `_close` は無印と原点・配置寸法を一致させ、材質は既存名で共有する。建物の壁(base/mid/top-w)と玄関だけはBlender -Yへ最大1.5mの追加張り出しを許可するが、幅X・高さZ・背面+Yは維持する。他は全bbox一致。配置計算は共通(`GetRoadPartMesh` も `_close` を剥がして無印と同じ路面原点で扱う)。
-- **詳細描画区間**: `CreateSplineMesh` は呼び出し側のクリップ区間と `PathDrawContext` の詳細区間の共通部分にだけ敷く(`IntersectDetailRange`。`single_span` は1枚造形なので切らない。共通部分が無ければそのパーツは生成しない)。セグメントごとに別スプラインを作る生成器(`GenerateLinearPathWithCorners`)は割合基準が合わないため冒頭で `SuppressDetailRange = true` にする。**複数スプラインを持つ生成器を新設するときも同じ処置が必要。**
-- **曲率適応タイル長**: 生成器は `BuildSpline` 直後に `PathDrawContext.SetAdaptiveTileLength(ComputeAdaptiveTileLength(spline, MAX_EXTRUDE_TILE_LENGTH))` を呼ぶ(RoadPath.Generate / GenerateLinearPathWithCorners の各セグメント / TrackPath)。`CreateSplineMesh` は `maxTileLength` が既定値(`MAX_EXTRUDE_TILE_LENGTH`=1m)のときだけ適応値(1〜8m。弦誤差0.02m以下)に置き換え、明示的に `0`(著作長)を渡すパーツには適用しない。
-- **頂点予算 `RoadPath.SPLINE_MESH_VERTEX_BUDGET`**(public const 60000): SplineMesh 1個の「パーツ頂点数×タイル数」の上限。著作長(maxTileLength≤0)のパーツは整数タイル単位で `_Sections` に分割、それ以外はタイル数クランプ、パーツ単体で超えれば生成中止。通常軌道の経路を通らない `TrackPath.CreateRailConnectorObject` も同定数でクランプする。新しい SplineMesh 生成経路を足すときは同じガードを入れ、構築後に `RoadPath.SealSplineMesh` を呼ぶこと(下記「共通ヘルパー」)。
+- 生成器はセルのティア表を見ない。DrawLod は呼び出し側が決め、建物は `Generate` の引数、パスは `PathDrawContext.Begin/End` で渡る。コンテキスト外の生成は Normal・全長扱い(E「物体の描画LOD」)。
+- Far は専用経路。建物は `GenerateFarBuilding`(`*-prebuilt_far` が無ければフットプリント押し出しの箱)、パスは PathManager 側の帯で生成器のパーツ組み立ては走らない(例外: `FarPlatformPath`・`PowerLinePath`)。
+- `_close` の解決点は2箇所だけ。建物は `BuildingMeshUtils.GetModelForDrawLod`、パスは `PathDrawContext.ResolvePrefab`(`CreateSplineMesh` で敷くパーツと送電鉄塔のみ。Instantiate 配置の tree/pillar/pole/設備やコネクタは常に無印)。新しいパーツ取得をこの2つを迂回して書かない。
+- `CreateSplineMesh` はクリップ区間と `PathDrawContext` の詳細区間の共通部分にだけ敷く。セグメントごとに別スプラインを作る生成器は割合基準が合わないので冒頭で `SuppressDetailRange = true` にする(`GenerateLinearPathWithCorners` が例)。複数スプラインの生成器を新設するときも同じ。
+- 曲率適応タイル長は `BuildSpline` 直後に `SetAdaptiveTileLength(ComputeAdaptiveTileLength(...))` を呼んで有効化する。`maxTileLength` に明示 `0`(著作長)を渡すパーツには適用されない。
 
-## 道路 (Paths/RoadPath.cs) — Dreamteck Splines ベース
+## 知らないと事故る規約
 
-- **高速道路の本線とランプ**(G文書§11.7): 本線=ランプ(`path_master.ramp`)でない `PATH_MOTORWAY`。一般道路には適用しない。すべて描画専用。
-  - **結合区間** `Paths/RoadAdjacency.cs`: 線路の `TrackAdjacency` と同じく自分の点列に沿って相手側(本線↔ランプ)を探し、`RoadCorridorInfo`(左右の結合・壁の遮り・本線の隙間舗装の外端・ランプの寄せ先の高さ)を返す。閾値は `LocalConstants.ROAD_MERGE_*`(隙間2m・30度・隣接1m/重なり4mの高さ差)。相手は `RoadAdjacency.NeighborProvider`(PathManager)が稼働中のものだけ渡す。`RoadPath.CreateRoadParts` が結合区間の壁を区間クリップで省き(`TrackCorridorInfo.ClearPercentIntervals` を共用)、本線だけが隙間を `RoadMergeFiller_*` で舗装し(本線より `ROAD_MERGE_SINK`×2 下げる。材質は body_material が正)、`RoadMarkingContext.OverrideSideLine` で本線のランプ側の路側線を点線・ランプの本線側を非表示にする(**body の生成より前に呼ぶ**。シェーダーへは `_RoadBandSpans` で渡る)。結合区間には路肩の設備を置かない。
-  - **ランプの描画高さ**: `RoadAdjacency.ApplyRampHeights` が結合区間を本線の路面−`ROAD_MERGE_SINK` に寄せ、外は高さの差に比例した長さ(加わる勾配≤4%)で保存縦断へ戻す。適用は `PathManager.ComputeUntrimmedPathPoints`(点列キャッシュ)で、路面・橋脚・交差点断面・車両・遠景が同じ点列を使う。本線の点列はランプに依存しない。
-  - **合流ノード** `Paths/MotorwayMergeLayout.cs`: 本線=最も一直線に続く稼働中の本線2本(内積<−0.8)。本線が2度以内の折れで同じ幅に続き、他の枝がすべて取り込めるランプ(稼働中・30度以内・本線より狭い・外縁が本線の縁を越える位置が切断上限内)なら `NeedsSlab=false` で、`RoadIntersectionMeshGenerator` は Mesh=null の `NodeMeshResult`(切断位置=本線はノード端、ランプは外縁が本線の縁を越える位置)を返す。それ以外は全枝で板を作り、`MainLineSurface` で板の本線部分を本線の縦断そのものにする(`SectionSurfacePoint` の mainLine 引数)。本線がノードでつながる端は `RoadEndJoin`(`RoadAdjacency.EndJoinProvider`)で分離帯の丸め端を省き、橋脚は path_id の小さい方だけが立てる(`GeneratePillars` の skipStart/skipEnd)。`TargetLane` は取り込んだランプから本線へ入る車線を返す(接続曲線は通常の交差点と同じ)。
-  - 検証は `Tests/Intersections/run.ps1`(.NET の判定)と `run-unity.ps1`(`MotorwayMergeQA`。実FBXの壁・隙間の舗装・路側線の区間・板なしノード・描画例)。
+- 隣接情報は PathManager.Awake が差す静的プロバイダ経由(`PillarClearance` / `TrackAdjacency` / `RoadAdjacency` の `NeighborProvider`、`TrackPath.ConnectedPathsProvider` / `InfrastructureConnectionProvider`、`LrtPlatformParts.StopProvider` / `PolylineProvider`、`PowerLinePath.ConnectedPaths`)。
+  - 未設定のテストシーンでは結合・干渉回避が黙って無効になる。結合描画は描画専用でバックエンドに影響しない。
+- SplineMesh の頂点予算 `RoadPath.SPLINE_MESH_VERTEX_BUDGET`(60000)を超えると Dreamteck が毎フレームエラーを出し続ける。新しい SplineMesh 生成経路は同じガードを入れ、構築後に `RoadPath.SealSplineMesh` を呼ぶ。封印後は点や Transform を変えても再構築されない(形を変えるなら作り直す)。
+- `IntersectionMeshOwner` は手続き生成メッシュと SplineMesh の生成メッシュだけを所有し(共有プレハブは登録しない)、`OnDestroy` で解放する。一度もアクティブにならなかった GO では `OnDestroy` が呼ばれないので、`SetActive(false)` より先に付ける。
+- 高さオフセットは `RoadPartHeights` に集約し、ハードコードの高さ値を書かない。body の幅・横中心は `GetBodySurfaceBounds`(最上面)で測る。
+- `GetBodySurfaceBounds` / `CreateSidewalkConnectorObject` / `MirroredMeshCache` / `MaterialCache` は static キャッシュ。引数は共有プレハブ由来の不変メッシュに限る(可変メッシュを渡すと古い結果が返る)。
+- マテリアルはパス系が `RoadPath.GetOrCreateRoadMaterial`、建物系がパーツプレハブの `sharedMaterials`(R§7)。生成器ごとの `Resources.Load<Material>` / `new Material` を増やさず、URP なので Built-in 用 `Standard` を生成しない。
+  - 特定バリアントだけ専用シェーダーにする唯一の口は `Resources/{マテリアル名}.mat`(例: G§16 の `Custom/PathDirt`。頂点α規約を持つメッシュ専用で他の body に流用しない)。
+- 車線中心・区画線境界は `RoadLaneLayout`、LRT の軌道位置・踏面・ホーム寸法は `LrtRoadParts` が唯一の正。車両・交差点・設備側に独立した横オフセット式を書かない。
+- 建物は mid レベルだけ Y を階高スケールし、base/top/fence/mashup は著作寸法のまま。配置は階高グリッドなので著作高さとのズレは隙間として出るのが仕様(F§6.3・§6.4)。`ResolveParcelContext` の区画ポリゴンは center_point 基準のローカルXZ(ワールドで扱うと敷地装飾が建物から離れる)。
+- 建物のパーツが無言で消えるときは FBX の Read/Write Enabled を疑う(壁・角・prebuilt は頂点を読み、ceil/floor は参照専用なので屋根と地面だけ残る)。強制は `Assets/Editor/ModelImportSettings.cs`(`unity/AGENTS.md`「モデルアセットの構成」)。
+- `a{variant}` / `a{v}s{structure}` / `landmark-{prefix}` フォルダを足したら `genesis-core/tools/generate_agent_model_config.py` を再実行する。`agent_model_config.yaml` に無いフォルダは無印・`b{bd_type}` へ黙ってフォールバックし、プレハブがあっても白い箱になる(F§3.1・§4)。
+- 交差点・信号機の配置入力は PathManager の交差点署名に含まれるものだけにする(署名外の入力は変えても再生成されない)。
+- `UltraFarLandMeshBuilder` は格子点ごとに `CoastlineStore.SignedDistance` を呼ばず一括版 `SampleSignedDistanceGrid` を使う。初期ロードで地形より先に走るので、遅いと `game:loaded` が出ず Tips が止まる。Mesh の組み立てはメインスレッド専用で、ビルダーは純データを返す。
+- 道路系の冗長ログは `UnityLog.If(LocalConstants.UNITY_LOG_ROAD, ...)`。常時 `Debug.Log` しない。
 
-- **橋脚の干渉回避**: `GeneratePillars` が `PillarClearance.NeighborProvider` から未描画の相手も含む通行空間を取得し、`PlacePillar` が柱とキャップを別々の実寸boundsで検査する。一方が干渉すれば一組とも生成せず、移動・再配分はしない。`GetPrefabBounds` は子Transformを含むルート座標のboundsで、配置時のYaw・scaleを適用する。高さと水平距離を同時に評価し、同じ高さの接続や深いトンネルを誤って除外しない。道路・線路・工事中で共用。`Corridor.Points` は PathManager の未切断点列キャッシュと共有することがあるので読み取り専用で、持ち上げ(BODY_ABOVE_SPLINE)は `Corridor.YOffset`(判定時に各点のYへ加える)で表す。点列のXZ範囲は `Points` の参照と点数で検証する遅延キャッシュで、範囲外の柱はその corridor を線分判定せずに棄却する。`HalfWidth` はキャッシュせず判定のたびに読む。検証は `Tests/Pillars`。
+## バックエンドとの鏡写し(片方だけ変えない)
 
-- 道路は1枚のメッシュではなく、**プレハブパーツを SplineMesh でスプラインに沿って曲げた子オブジェクトの集合**として生成される。
-  - パーツ: `body` / `line`(実線・点線) / `sidewalk` / `wall` / `center` / `tree`(Instantiate配置) / `pillar`(高架用、Instantiate配置) / `pillar_cap`(柱の上部キャップ用、Y方向非伸縮、Instantiate配置)
-  - プレハブは `PathDrawContext.ResolvePrefab` 経由で `Models/Paths/p{path_variant}/{パーツ名}` をロードし、無ければ `Models/Paths/p{path_type}/{パーツ名}` にフォールバックする(描画LODが Close なら各段で `{パーツ名}_close` を先に試す。上記「描画LOD」の節)。**新しいバリアントを追加するときはモデルを置くだけでよい**(コード変更不要)。道路本体（`body`）のモデルがない場合は、スプラインに沿った白い板（ストリップメッシュ）を動的に生成してフォールバックする。
-  - 幅はマスターデータ(`MasterDataStore.GetPathMaster(path_variant)`)の width / sidewalk_width / lanes / center_width 等から決まり、プレハブメッシュの `bounds.size.x` との比率でスケールされる。
-  - **横方向の配置は「パーツ中心の位置」で指定し、プレハブのピボット位置(中心/端)の差は `CreateSplineMesh` が bounds 中心基準に自動補正する**。プレハブの高さ方向のピボット規約(body=路面上面、line/sidewalk/wall=下端、pillar/pillar_cap=上端(路面原点))は `RoadPartHeights.cs` と `genesis-docs/docs/geometries/G_道路メッシュの生成.md §6.4` を参照。
-  - 左右非対称パーツの向き規約はパーツごとに異なる: **wall は「右側用」(右側=原型・左側=Xミラー)、sidewalk は「左側用」(縁石＝道路中心側の面が +X＝進行方向右側。左側=原型・右側=Xミラー)**。交差点内の歩道コネクタ/エンドキャップ(`RoadIntersectionMeshGenerator`)もこの sidewalk 規約でスプラインの進行方向を選ぶ。ミラーは `CreateMirroredMeshInternal` でX反転メッシュを複製(法線反転+三角形インデックス逆順)。**ミラーメッシュは静的キャッシュ(`MirroredMeshCache`)で元Meshの参照単位に再利用される**ため、同じプレハブから2回目以降は複製が発生しない。
-  - **高さオフセットは `RoadPartHeights` の定数に集約されている**(スプライン点=地形+0.1、body=スプライン+0.1で路面上面=地形+0.2、line=+0.12 等)。ハードコードの高さ値を書かないこと。
-  - **Extrudeタイル長は上限を切ってタイル数を明示する**(autoCountは使わない)。Z分割のないプレハブがタイル単位で弦近似され、縦カーブで他パーツと上下にずれるのを防ぐため。上限は `MAX_EXTRUDE_TILE_LENGTH`(1m)を基準に、スプラインの曲率に応じて1〜8mへ伸ばす(`PathDrawContext.AdaptiveTileLength`。上記「描画LOD」の節)。`CreateSplineMesh` の `maxTileLength` 引数で上書きでき、**0以下なら上限なし=プレハブのZ実寸をそのままタイル長にする**(縦カーブを持たない折れ線スプライン専用。駅舎パスの連絡橋で使う)。**`single_span=true`のバリアントは例外**: body をタイル化せず `count=1` で1枚引き伸ばし、アンカー点(柱)間の直線スパンにする（地形追従しない高架橋・桁橋用）。スプラインも地形追従細分化せずアンカー点のみで構築する。
-- 車線数・中央分離帯の有無でラインの本数/実線/点線が変わる(`CreateRoadParts`)。点線は SplineMesh の Place モードで等間隔配置。**ダッシュはZピボット補正+clipFrom/clipToで両端から半ダッシュ分内側に制限**し、道路端からの突き出しを防ぐ。
-- `PathMeshResult` の意味: `Mesh`=**コライダー用ストリップメッシュ**(描画用ではない)、`GeneratedObject`=描画用パーツ群のコンテナ、`ModulesCreated`=パーツ生成済みフラグ。コライダーは PathManager 側で `Physics.BakeMesh` を別スレッド実行してから装着される。
-- `curved=false`+ウェイポイントありの道路は `GenerateLinearPathWithCorners`: セグメントごとに独立スプラインを作り、角はダミーの PathSummary 2本を `NodeMeshFactory` に渡して交差点と同じロジックで切断・充填する。LRT(222/242/303)の停留所ホームだけはセグメントで描かず、`CreateCornerPathLrtPlatforms` がセグメント点列と角の頂点(角の区間は1m刻み・地形追従なし)をつないだパス全体の折れ線スプライン(子 `LrtPlatforms`)に1回だけ描く(角でデッキが途切れたり、角ごとにスロープ・上屋が増えたりしないため)。303の設備抑止区間は各セグメントの始点からの距離へ写し、`CreateRoadParts` の `segmentPlatformZones` で渡す(非nullならセグメントではホームを描かない)。Linear スプラインは各区間の接線を前の区間と平均する(Dreamteck の `linearAverageDirection`)ので、長い区間を1本で置くと角の後ろ全体の向きがずれる。
-- マスターデータ取得(`GetPathMaster`)は `GetPathMasterParams` 静的メソッドに集約されている。`Generate` / `GenerateLinearPathWithCorners` 両方から呼ばれる。
-- 高さ(Y)は呼び出し元(PathManager.CalculatePathPoints)で既に地形追従済みの点列を受け取る。相対Y制御の考え方はルートAGENTS.mdの「Y座標の考え方」参照。
-- **地下パス（負の相対Yを持つ）**: 点列の分割は呼び出し元(`PathManager.GenerateUndergroundPathMesh` + `Utils/TunnelSectionUtil`)が行い、RoadPath/TrackPath は描画区間ごとに呼ばれる。トンネル区間の境界に置く `portal` パーツ（`Models/Paths/p{variant}/portal`、ローカル+Zがトンネル内部向き）の配置も PathManager 側。RoadPath 側では地下パスに柱（pillar）を配置しない（地下パスは橋脚の配置対象外）。
-- **路面の見た目の差し替え口は `Resources/{マテリアル名}.mat`**: `GetOrCreateRoadMaterial` が FBX 埋め込みマテリアルの名前で `Resources.Load<Material>` を試し、あればそちらへ再割当する。**コードを変更せずに特定バリアントだけ専用シェーダーにできる唯一の経路**。未舗装路(variant 201)がこれを使っており、body の `PATH_SAND` マテリアル(`Resources/PATH_SAND.mat`)に手続き土シェーダー `Custom/PathDirt`(`Resources/Shaders/PathDirt.shader` + `Assets/Shaders/PathDirt.hlsl`)を当てて、ワールドXZノイズの色ムラ・砂利斑・凹凸法線と、**頂点カラーのα(路面中核=1／なじませスカート外端=0)を縁マスクにしたアルファクリップ**で路肩を地面へ溶かしている。仕様の正は `genesis-docs/docs/geometries/G_道路メッシュの生成.md §16`。**このシェーダーは規約どおりの頂点カラーを持つメッシュ専用で、他の body へ流用しないこと。**
-- **RoadPath は線路と共用する共通ヘルパーの置き場でもある**: `CreateSplineMesh`（`stretchToWidth=false` でXスケール1の実寸配置になる。レール・架線用。生成頂点数は `SPLINE_MESH_VERTEX_BUDGET`=public const 60000 を上限にクランプ／整数タイル分割される）/ `BuildSpline`（点列→SplineComputer。`RebuildImmediate` 後に SplineComputer を無効化して返す）/ `BuildColliderMeshFromSpline` / `CreateFallbackRoadBody` / `GeneratePillars` / `GetOrCreateRoadMaterial`(+マテリアル名だけを渡す `GetOrCreateRoadMaterialByName`。Resources に同名 .mat が無ければ null) / `GetPathMasterParams` は public static で、`TrackPath` や PathManager（工事中パス生成）からも呼ばれる。**同等の処理を再実装しないこと。**
-  - **生成後のスプラインは静的な表示物**: `CreateSplineMesh` とレールコネクタは構築後に `RoadPath.SealSplineMesh` で SplineMesh を無効化し、生成メッシュを `IntersectionMeshOwner` に所有させる(Dreamteck は生成メッシュを自分で破棄しない)。無効化により毎フレームの更新は走らないが、**生成後にスプラインの点・チャンネル・コンテナのワールド Transform を変えても自動では再構築・再サンプルされない**(Cached の `Evaluate` / `Project` / `CalculateLength` も古いまま)。形を変えたいときは作り直すこと。新しい SplineMesh 生成経路を足すときも `SealSplineMesh` を呼ぶ。
-  - `GetBodySurfaceBounds` はメッシュごとに結果を static キャッシュする(引数は共有プレハブ由来の不変メッシュに限る)。`CreateSidewalkConnectorObject` もソースメッシュの頂点・UV・三角形配列を static キャッシュするので、ソースに実行時生成の可変メッシュを渡さないこと。
-- **工事中の道路・線路**: `ConstructionPathBuilder` が進捗別に組み立てる。地上は累積距離で始点から路面・軌道を伸ばし、残りに土を置く。施工済み区間にはwallも配置する。線路は`TrackPath.CreateConstructionParts`で完成時と共通の高架区間判定・body/trackの高架パーツ選択・隣接線路/ホーム側のwall省略を使う。架線・中央分離帯などの仕上げ設備は生成しない。高架は0〜25%橋脚、25〜90%桁単位の架設、90%以降は固定。高架に土は生成せず、工事車両はパス中心線上の地表に置く。橋脚は `RoadPath.GenerateConstructionPillars` が完成時と同じ内部候補・干渉判定を使い、接地原点の施工単位を返す。`ConstructionPathDirt` は頂点α規約を満たす専用の土ストリップへ `Custom/PathDirt` を適用する。車両4種はProps/construction_*の固定装飾。仕様は公開G文書§15、検証はTests/ConstructionPaths。
+| Unity | genesis-core(非公開) |
+| --- | --- |
+| `TrackPath.ResolvePlatformExtents`(`platform_side`→左右。`DIR_BACKWARD` は反転) | `geo_paths.get_platform_extension_widths`(ホームの敷地) |
+| `StationHousePath` の専有エリア(`ComputeEndFootprints` / `ResolveHousePosition`) | `geo_station_house.py`(建屋の占有) |
+| `TrackIntersectionMeshGenerator` の転回閾値 `RAIL_MAX_TURN_ANGLE_DEG` | `parameters.yaml` の同名値と経路探索の転回制約 |
+| `Test/TestSubBuildingLayout`(テスト専用の棟配置) | `crud_buildings.generate_sub_building_layout` + `geo_buildings.generate_mashup_cells` |
 
-## 線路 (Paths/TrackPath.cs / Paths/TrackIntersectionMeshGenerator.cs)
+## 参照先
 
-- ホームの干渉クランプは島式判定と同じ`endClampVirtual`除外を使う。端点上への投影も含め、前後へ接続する線路端の虚像で床や外縁壁を切らない。鉄道・モノレールともホーム端壁を生成し、モノレールに専用`platform_end`が無ければp4を共用する。車止めは鉄道だけ。終端の独立回帰検証は`Tests/Intersections/run-unity.ps1 -PlatformEnds`。
-
-- ホームの `platform` / `platform_wall` は著作タイル長（451/452/461/462は8m）で配置し、道路用の曲率適応タイル分割(1〜8m)を適用しない。曲線用分割はモデル内に持つ。右側用はUnityの+X側で、標準FBX経由ではBlenderの-X側になる。実FBXの左右・支柱周期は `Tests/Intersections/run-unity.ps1 -Platforms` で検査する。
-
-- 線路(PATH_TRACK)・モノレール(PATH_MONORAIL)は `TrackPath` が生成する。RoadPath と同じ SplineMesh パーツ組み立て方式で、パーツ構成が異なる: `body`(道床。全幅に引き伸ばし。高架/橋梁はバリアント専用bodyで桁断面を表現) / `track`(1軌道分=レール2本+枕木。**Xスケールせず実寸**で lanes 本を等間隔配置。ゲージ維持のため) / `wire`・`pole`・`beam`(架線系。マスターの `wire_spacing` が null なら非電化でスキップ) / `wall`・`pillar`(道路と共通) / `platform`・`platform_wall`・`platform_panel`(駅パスのプラットフォーム3パーツ。下記)。仕様の正は `genesis-docs/docs/geometries/N_線路メッシュの生成.md`。
-- 軌道オフセットは `TrackPath.GetTrackCenterOffset`(width/lanes等分の帯の中央)に集約されており、ノード内レールコネクタの軌道位置もこれを共有する。
-- 道床(body)と軌道(track)が両方無いときだけ白ストリップにフォールバックする。**モノレールは body 無し(track=桁のみ)が正常構成**。
-- **駅パスのプラットフォーム(3パーツ構成)**: 駅パスの width は通常線路と同じ「線路コリドーの幅」で、線路部分は通常線路と同一描画(前後の線路とシームレス)。ホームは片側ごとに①`platform`(淵。黄線・ホームドア・縁の垂直面)、②デッキ(ホーム上面。`TrackPath.BuildPlatformDeckMesh`が**厚さ15cmの浮いた板**=上面+底面+外縁・妻面の小口を動的生成。上面=ホーム面`PLATFORM_SURFACE_ABOVE_SPLINE`(1.5m)-2cm。支柱は生成しない=platform淵パーツの造形が持つ。マテリアルは`platform_panel`プレハブから採取、**未配置なら共通コンクリートにフォールバック=スキップしない**)、③`platform_wall`(外縁の壁・柵・ベンチ。percent区間クリップ対応)で構成される。**淵・外縁プレハブは原点=線路中心線・線路面(`PLATFORM_BASE_ABOVE_SPLINE`=0m)で実寸配置され、縁(中心線から±1.5m固定=`TrackPath.PLATFORM_EDGE_OFFSET`。width/2より線路側)・外縁(±(width/2+platform_width))への横位置とホーム面(1.5m)までの立ち上がりはプレハブ形状が持つ**(モデルはマスター値・高さ定数に一致させて作る。ずれるとデッキと食い違う。platform_wallにはデッキ外縁の小口と同一平面の垂直面を持たせない)。**デッキの幅=マスターの `platform_width`・高さ=コード定数が正**(敷地・コライダーと描画が構造的に一致)。設置側はパスの `platform_side`(共有定数 `PLATFORM_SIDE_OUTSIDE/INSIDE/BOTH`。**PathSummaryへのアクセスは `GetPlatformSide()` 拡張メソッド=リフレクション経由**。スキーマ未再生成でも落ちない)で、内側/外側→左右の解決は `TrackPath.ResolvePlatformExtents`(`CityInfoStore.TrafficHand` と `travel_direction` 基準。左側通行=内側は走行方向右。**DIR_BACKWARD は幾何フレームで左右が反転する**=複線の上下線は幾何方向が同じで走行方向だけ逆のため、反転しないと外側指定でも両線のホームが同じ側に出る)。**この解決はバックエンドの敷地ポリゴン算出(geo_paths.get_platform_extension_widths)の鏡写しで、片方だけ変えると敷地と見た目が食い違う。**ホーム側では①架線柱をホーム外縁+マージンへ外出し、②防音壁を立てない(ホーム無し側のみ通常どおり立てる。外縁の壁は platform_wall が担う)、③道床の結合描画(バラスト充填・柱コリドー化)をしない(`TrackAdjacency.Compute` がホーム側の隣接線路をチェーン連結から除外する)、④コライダーをホーム込みの非対称幅(`BuildColliderMeshFromSpline` の lateralOffset)にする。仕様の正は `genesis-docs/docs/geometries/N_線路メッシュの生成.md §7`。
-- **島式ホームの結合描画**: 互いに向き合うホームを持つほぼ平行(20°以内・Y差1m以内)な駅パスで、道床エッジ間ギャップが両ホームの `platform_width` 合計以下なら `TrackAdjacency.Compute` が島式結合を判定する(`TrackCorridorInfo.Left/RightDeckFar`(デッキ外縁。NaN=張らない)・`DeckJoined`(外縁スカート省略)・`PlatformWallOmit`)。結合区間では①デッキは**path_id小の側が相手の淵ライン(相手中心線から1.5m固定)まで全幅を1枚張る**(相手側は張らない。線路間隔の調整UIにも追従)、②platform_wallは両側省略、③架線柱は最小path_idの線路が島全幅(相手の外縁側ホーム込み)の外側に立てる(Extent拡張+SuppressPoleSet。道床結合の主線路方式と共通)。島式が成立しない近接(他線路の道床がホーム外縁に掛かる)ではplatform_wall省略+デッキを道床手前までクランプ。プレビューの線どうしには適用されない。仕様の正は同ドキュメント §7.4。
-- **近接線路の結合描画(複線見え化)**: 通常鉄道の内部データに「複線」の単位は無く、複線は一方通行の単線線路2本で表現される(LRTの線路だけは1本のパスで複線。下記LrtRoadPartsの節)。XZ・Yともに近接して並走する**同じpath_typeで、LRTかどうか(`LrtRoadParts.IsLrt`)も同じ**線路は `TrackAdjacency.Compute`(Paths/TrackAdjacency.cs。閾値=`LocalConstants.TRACK_MERGE_*`、エッジギャップのチェーン連結で3本以上もコリドー化)が結合コリドーを計算し、TrackPath が①道床ギャップのバラスト帯充填(**path_id小の側が担当**して二重生成を防ぐ。道床天端-2cm・両側に0.5m食い込み)、②結合側の防音壁の区間クリップ省略、③架線柱/ビームの**コリドー内最小path_idの線路(主線路)のみ**によるコリドー全幅配置を行う。合流・分岐で収束中の線路(接線が揃う前)もエッジギャップが閾値以下なら結合を開始する(`TRACK_MERGE_MAX_CONVERGE_ANGLE_DEG`=45°。20°に揃うのを待つと複線合流で壁が相手の本体に被る)。防音壁は結合判定と独立に、他線路の道床が壁の位置に物理的に掛かる区間でも省略される(角度不問。`Left/RightWallBlocked`)。LRTの線路(431)は同じ角度不問の判定で、自分の停留所ホームの帯(道床端〜ホーム外縁+`PLATFORM_ENCROACH_CLEARANCE`)に他線路の道床が掛かる点を `Left/RightLrtPlatformBlocked` に記録し(`Compute` の `ownLrtPlatformOuter`)、`GetLrtPlatformBlockedRanges` で距離区間にして LrtPlatformParts へ渡す。相手が停留所ホーム区間(`TrackNeighborInfo.LrtPlatformZones`)にある点では、そのメンバーのコリドー外端を相手のホーム外縁+`PLATFORM_POLE_CLEARANCE`−`POLE_MARGIN` まで広げ(`Member.Reach`。連結判定は道床幅のまま)、主線路の柱が相手のホームを貫かないようにする。相手線路の端点(交差点ハルの切断点)への最近接クランプが道床の重なる距離で起きた場合は虚像として隣接に採用しない(外側の壁が数m抜け落ちる誤判定の防止)。隣接線路の点列は `TrackAdjacency.NeighborProvider`(PathManager.Awake が設定)から取得し、未設定(テストシーン等)なら単独描画。結合は描画専用でバックエンドには影響しない。隣接線路の変更・撤去時の再生成はPathManager側(DataLoaders/AGENTS.md参照)。仕様の正は `genesis-docs/docs/geometries/N_線路メッシュの生成.md §8`。
-- **進行方向矢印(Paths/TrackDirectionArrows.cs)**: 一方通行の線路(travel_direction=DIR_FORWARD/BACKWARD)には進行方向を示す黄色い平板矢印のオーバーレイが子オブジェクト(`DirectionArrows`)として付く(双方向は無し)。**表示は道路敷設モード(STATE_EDIT_PATH)のみ**で、`IpcStateCoordinator` がステート変更時に `TrackDirectionArrows.SetVisible` を一括切替する(生成時は Awake が現在のフラグに従う)。矢印レンダラーは `VisualModeObject.ShouldPreventMaterialChange` でマテリアル変更対象外(ホバー/計画中でも固有色維持)。高さは `RoadPartHeights.DIRECTION_ARROW_ABOVE_SPLINE`。仕様の正は `genesis-docs/docs/geometries/N_線路メッシュの生成.md §9`。
-- **ポイント(分岐器)・平面交差**: 交差点の共通外周・切断断面は道路と共通(`RoadIntersectionMeshGenerator`)。`TrackIntersectionMeshGenerator.BuildRailConnectorSpecs` が「偏向角 ≤ `LocalConstants.RAIL_MAX_TURN_ANGLE_DEG`(45°) の通行可能な線路ペア」にのみレールコネクタ(`RailConnectorSpec`)を計算し、`NodeMeshResult.RailConnectors` として返す。実体化は `TrackPath.CreateRailConnectorObject`(PathManager.UpdateNodeRailMesh から呼ばれる)で、次フレームの Update を待たずにその場で `RebuildImmediate` して `SealSplineMesh` する。**この閾値と判定はバックエンドの転回制約(parameters.yaml の RAIL_MAX_TURN_ANGLE_DEG、transit_route のエッジベースDijkstra)の鏡写しであり、片方だけ変えると見た目と経路探索が食い違う。**
-
-## 駅舎パス (Paths/StationHousePath.cs)
-
-- 駅舎(PATH_STATION_HOUSE, `model_type="station_house"`)はウェイポイント付き折れ線のパスで、描画は「線に沿った連絡橋(桁)」+「両終端の専有エリアに建屋」の2要素で構成される。プラットフォームは別パス(駅パス)で、駅舎パスの線と交差したホームがその駅に所属する(所属管理はバックエンド)。
-- **連絡橋**: 各アンカー点(始点・ウェイポイント・終点)をそのXZ直下の地形標高(+`ROAD_SPLINE_OFFSET`)に置き、アンカー間を直線で結ぶ(地形追従の細分化はしない)。パーツは RoadPath の共通ヘルパー(`BuildSpline` / `CreateSplineMesh`)を再利用し、対応する専用bodyまたは方式名パーツを使い、無ければ共通通路(p20/passage_elevated・passage_ground)へフォールバック。**桁のプレハブ規約は「原点=地面(`RoadPartHeights.STATION_BRIDGE_BASE_ABOVE_SPLINE`=0)・XZとも実寸」**で、デッキの地上高・橋脚・欄干はすべてプレハブ形状が持つ(架線柱・プラットフォームと同じ)。したがって `stretchToWidth: false`(マスターの `width` は敷地ポリゴンとコライダー幅にだけ使う)、コードは桁の高さのパラメータを持たず柱も生成しない。**body の敷き方はマスターの `single_span` に従い、`maxTileLength: 0`(上限なし=プレハブのZ実寸をタイル長にする)で折れ線に沿って敷き詰める**。`single_span=true` は count=1 の引き伸ばしになり、Z分割を持たないプレハブではタイルが始点〜終点の弦になってウェイポイントが素通りされるため、造形のある桁では false にすること。クリック用の帯コライダーは body プレハブのメッシュ天端(`bounds.max.y`)へ持ち上げて、見えているデッキの位置でクリックを受ける。
-- 駅舎パスは `PathManager.UsesTunnelMesh` の対象外(生成器が自前でアンカーを持ち上げるので、地表基準の深さ判定で区間分割すると橋と建屋が分割数ぶん二重生成される)。
-- **建屋・地面パネル**: 駅舎パーツの解決は `ResolveStationPart` = `Models/Stations/{variant}/{パーツ名}` → `Models/Stations/{パーツ名}`(全駅舎共通)。両終端の専有エリア矩形(`ComputeEndFootprints`)に `body` プレハブを**スケールなし(実寸規約)**で配置し、Yはその位置の地形標高に接地する。**プレハブの原点は矩形の内側の辺の中点 `modelOrigin`**(=スライドが無ければ駅舎パスの端点そのもの。奥行きの広がりも house_offset の横ずれもプレハブの造形が持つ前提なので、コードで中心へ寄せたりオフセットを足したりしない)、`body` が無いときの仮箱(house_width × 8m × house_depth。仮箱のみスケール可)は矩形そのものの可視化なので `center`(横ずれ込み)。**スライドした場合は連絡橋も `modelOrigin` まで延長する**(`BuildBridgeAnchorPoints`。バックエンドの占有ポリゴンも同じ延長込み)。**地面パネルは矩形の範囲に張り、建物の地面パネル(`ModularBodyBuilder.GenerateTerrainConformingFloorMesh` を共有)と同じく `floor` パーツはマテリアル供給元にすぎず、パーツが無ければ描画しない**(既定マテリアルへフォールバックしない)。建物と違い `draw_floor` 相当のマスターフラグは無くパーツの有無だけで決まり、LODティアに関係なく常に地形追従させる。ポリゴンは**CCW**で渡すこと(耳切り分割とパネルの巻き順反転がCCW前提。CWだと法線が下を向く)。
-- **専有エリア算出はバックエンド `geo_station_house.py` の移植**(決定的アルゴリズム。両側で同一の結果になることが契約): 終端の外向き方向を s 軸、その右手(`RightAxis` = 建屋のローカル+X)を lat 軸とし、半径 `STATION_HOUSE_TRACK_SEARCH_RADIUS`(150m)内の軌道系パス(PATH_TRACK/PATH_MONORAIL)のセグメントを横方向コリドー(|lat − house_offset| ≤ house_width/2 + クリアランス)にクリップして s 軸上の占有区間を収集、区間マージ後「s_in=0 または各区間終端」の候補のうち矩形の占める [s_in, s_in+奥行き] がどの区間とも重ならない最小の s_in ≥ 0 を**矩形の内側の辺の位置**とする(**矩形は終端を中心に置かず、終端から外側へ広がる**。中心は s_in + 奥行き半分、さらに右方向へ house_offset ずらす)。線路の占有半幅(`RailSideExtents`)は**左右非対称**= 線路幅/2 + `TrackPath.ResolvePlatformExtents` の片側張り出し(バックエンドの敷地ポリゴンと同一解決。両側に platform_width を見込むとホームの無い側にホーム1本ぶんの無駄な隙間が空く)で、線路セグメント右方向の s 軸/lat 軸成分 (cs, cr) を掛けて各軸へ配分し、それぞれに `STATION_HOUSE_TRACK_CLEARANCE_MARGIN`(1m)を足す。寸法・横ずれはマスターの `house_width`/`house_depth`/`house_offset`(欠落時は `STATION_HOUSE_DEFAULT_WIDTH/DEPTH` と0)。セグメント供給は `PathManager.QueryNearbySegments`(空間ハッシュ)。**バックエンド側を変更する場合は必ずここも揃えること。**
-- **クリックは他のパスと同じ PathObject(パス詳細)**: 駅=駅舎パスそのもの(駅名はパスの `name`)で、専用の駅詳細ウィンドウは無い(駅セクションの表示はUI側のパス詳細パネルが担う)。橋の帯コライダーメッシュは `PathMeshResult.Mesh` として返し、PathManager が pathGO へ通常どおりコライダー・タグ・ハンドラを装着する。建屋はコライダーが子オブジェクト側にあるため、pathGO と同じ三点セット(`PathObject` タグ・`PathInputHandler`・`ObjectIdInfo`)を建屋のコライダーオブジェクトにも付与する(InputHandler はヒットしたコライダーの GameObject 自身のタグ・ハンドラを見るため)。
-- 敷設プレビュー(RoadRenderer → PathMeshFactory)でも同じ生成器が走る。仮 PathSummary(path_id=0)でも専有エリア計算は動く(自パス除外は path_id が一致するときだけスキップ)。プレビュー中は入力プリセットが PATH を MODE_NONE にするためコライダーはレイキャストを貫通する。
-
-## 交差点 (Paths/RoadIntersectionMeshGenerator.cs)
-
-`GenerateWithSections` は `PATH_CONVEYOR`・`PATH_ELECTRICITY`(架空ケーブル)・`PATH_PIPELINE`(パイプライン)を接続パスから除外する。これらには接続点を埋める路面がないため、実ノード（駅との接続を含む）・ウェイポイントのダミーノードの両方で、充填板と切断断面を生成しない。スパンは元のアンカー位置まで描く。混在ノードでもこれらを道路の交差点形状へ含めない。**導水管(`PATH_WATER`)は除外せず、地表の管路として交差点形状を生成する。** インフラ種別をまとめて判定(`InfraNetworkUtil.IsInfraPathType`)しないのはこのためである。
-
-- `IntersectionPolygonUtil`の`PathEndSection`（切断位置・接線・法線・幅）と`IntersectionCorner`（隣接入口間の外周）を本線・路面・歩道・壁・レールが共有する。凸包や独立した矩形で入口を推測しない。
-- `PathManager`から未切断の描画点列と切断距離上限を渡す。`ConnectionPoints`はその点列上の断面中心であり、元のアンカー・制御点を書き換えず`Trim`する。`BuildSpline`は端部ハンドルを区間方向へ固定したBezier補間（内部はCatmull-Rom相当）。
-- `SidewalkConnectorSpec.Part`は`sidewalk/wall/center/line`。`RoadPath.CreateSidewalkConnectorObject`がプレハブをタイル変形する。幅補間はX方向のみで、`SplinePoint.size`による高さの変形を避ける。歩道なしの相手へは道路外縁を中心とした四分円の扇形終端、壁なしの相手へは先細り終端を作る。2本の移行部では中央分離帯・側線・車線境界も接続する。
-- 接続材質は開始側、高さは相手プレハブのboundsまで補間する。異なる断面トポロジーの完全モーフィングや材質の領域分割は行わない。
-- 路面の高さは`SectionHeight`(各口の縦断勾配を内側へ延ばした高さの距離2乗逆数混合。口で高さ・勾配が本線と一致)、法線は`SurfaceNormal`(同じ曲面の中心差分)が正。`SectionSurfacePoint`は歩道・壁・レール・信号柱の接地も兼ねるので、路面だけ別の高さにしないこと。上面は`TriangulateSurface`が耳切り→`FlipToDelaunay`→(路面が平面でなければ)2m格子の`InsertInteriorPoints`+4m超の辺の分割→再Delaunayで作る。外周の頂点だけに戻すと三角形の対角線が折れ線に見える。上面は内部頂点を持つので頂点の並びは外周順ではなく、小口は`OutlineEdges`(片側にしか三角形の無い辺)に張る。`AddBodyShell`は上面の法線を`RecalculateNormals`で潰さずに戻す。検証は`Tests/Intersections/run.ps1`の勾配のある路面(折れ角・法線・口の勾配・頂点数)と`run-unity.ps1`の口の法線の継ぎ目。
-- 本線断面を高さの境界条件にし、bodyの厚みに応じて底面と外周小口を作る。`IntersectionMeshOwner`は手続き生成メッシュと SplineMesh の生成メッシュだけを所有し、`MeshBakeService.Release` 経由で解放する(共有プレハブのメッシュは登録しない)。解放は `OnDestroy` で行うが、一度もアクティブにならなかった GO では `OnDestroy` が呼ばれないので、GO を非アクティブにする処理より先に付けること。
-- 軌道は横位置順の多対一対応で全軌道端へ接続する。転回可否は論理端点接線（曲線は制御点優先）、描画は切断断面の接線・勾配を使う。線路とモノレールを相互接続しない。ホーム側・レール通路に干渉する壁は省略する。
-- 反対側も交差点なら各端45%、終端なら95%まで切断する。折れ線/single_spanは次のアンカーを越えない。空間不足・自己交差は`RequiresMoreSpace`で検出し、切断を見送る。近接交差点の一体化は未実装。
-- 仕様は`city-genesis/docs/docs/geometries/G_道路メッシュの生成.md`§11、数値検証は`unity/Tests/Intersections/run.ps1`。
-
-## 交差点の信号機 (Paths/TrafficSignalLayout.cs / TrafficSignalBuilder.cs / TrafficSignalStyle.cs)
-
-- 描画専用の装飾(経済・経路・車両の挙動に無関係。灯火の現示も持たない)。設置判定は`TrafficSignalLayout.IsSignalized`: 完成済みの道路(街路・高速道路)の腕が3本以上、うちセンターラインで上下線の分かれた双方向の街路(`HasCenterLine`=`RoadLaneLayout`で双方向・lanes 2以上・Outer>Inner)が2本以上。
-- `GenerateWithSections`が同じ切断断面・外周(`IntersectionCorner`)・歩道セットバックから`TrafficSignalLayout.Build`で配置を求め、`NodeMeshResult.TrafficSignals`で返す。実体化は`PathManager.UpdateNodeSlab`→`TrafficSignalBuilder.Apply`(NodeMesh_*の子`Signals`を作り直す)。配置の入力は交差点の入力署名に含まれるものだけにすること(様式を切り替え可能にするときは署名に様式を足す)。
-- 配置は日本式で通行側に鏡像: 流入路ごとに1基、直進先の腕(45度以内)の切断面から0.5m外側・通行側の歩道(縁石から0.5m。歩道が無ければ路端外0.5mの地表)に柱、灯器は流出する向きの車線群の中央の上。直進先が無ければ流入車線の延長上の角の外周の歩道に立てる。柱の接地高さは`RoadEquipmentGenerator.SurfaceHeight`(歩道の歩行面)と`SectionSurfacePoint`、歩道の幅は`ResolveSidewalkWidth`を共用する。
-- モデルは`TrafficSignalStyle`が`Models/Props/traffic_signal_{Key}_{pole|arm|head}`を解決する(現在は`jp`固定)。3部品とも原点=柱の接地面の高さ、アームはローカルZの単位長を長手だけ伸縮、灯器は吊り金具の真下が原点で表示面+Z。材質は`RoadPath.GetOrCreateRoadMaterial`の共有プール、結合メッシュは`IntersectionMeshOwner`が解放し、LODGroupで投影比`DrawLodConfig.NORMAL_EXIT_RATIO`未満は描かない。
-- 実FBX・本編生成器の検証は`unity/Tests/TrafficSignals/run.ps1`(設置条件・左右通行・灯器位置/向き・接地・結合メッシュ・画像)。
-## 地表との整合
-
-- 道路の中心線サンプリング（`PathManager.TERRAIN_SAMPLE_INTERVAL`）は1m。Extrudeタイル長は曲率適応(急カーブ・起伏で1mまで詰まり、直線・平坦で最大8m。上記「描画LOD」の節)。保存曲線と相対高さは維持し、地形のサンプル間の起伏を拾う。
-- floorは `BuildingMeshBuilder.GenerateTerrainSurfaceMesh` で敷地を実タイルの格子三角形に切り抜く。対角線はXZ最小点→最大点、境界の高さも同じ三角形で補間する。`Utils.TryGetTerrainGrid` と実タイルの高さ取得を使う。0.1mm単位の交点溶接で法線の継ぎ目を抑える。地形未ロード時だけ従来の最大辺長6m分割へフォールバックする。
-- 数値・描画検証は `Tests/TerrainSurface/run-unity.ps1`。Terrain自身の描画LODも影響するため、頂点の高さ検査だけで完了にしない。
-
-## 建物 (Buildings/)
-
-- 工事中クレーンは `BuildingMeshBuilder.Generate(..., animateCrane: true)` のときだけ頂部を結合から外し、`BuildingMeshResult.CraneTop` に解決済みプレハブと接続点・基準Yawを返す。呼び出し側は `ConstructionCraneAnimator.Attach` で実体化する。既定falseでは従来の静的結合、Farでは配置情報なし。`MergeSubMeshes` / `EnsureMaterials` は配置情報を保持する。仕様はF5文書§5、実FBX検証は `Tests/Buildings/run-crane.ps1`。
-
-- `ExteriorStairBuilder`は辺ごとの外階段`{base|mid|top}-stair{辺index+1}`を扱う。`mid-stair{n}`がある辺だけ描画用輪郭を後退させ(隣の辺も後退していれば後退線どうしの交点)、元のその辺の終点からパーツを各階1個積む。位置番号のフォールバックはしない(base/topだけ同じ辺のmidへ戻る)。採否は辺0から順に`TryLayout`で判定し、収まらない・自己交差・先に採用した階段や本体と重なる辺は省略する。XZ実寸、midのY倍率は階高÷mid-w1の著作高さ。階段のbbox高さは手すりを含むため使わない。本体の壁・床・屋根・基盤・エントランスは後退輪郭、コライダーと保存polygonは元の占有輪郭。壁は`Layout.TryGetOpening`の幅だけ開け、開口端の角は`Layout.OmitsCorner`で省く。SHAPE_FULLには適用しない。仕様はF文書§11.4・I文書§4.11、実FBX検証は非公開制作ツールのimport_parking_garage.ps1。
-
-
-- オープンスペースは `OpenSpaceLayout` が配置計画、`OpenSpaceBuildingMeshBuilder` が地形追従面・実寸FBXへの変換を担う。MODEL_PARKING/ROTARY/PARK=10/11/12。SHAPE_FULLの最初の辺が接道方向。ID・ロード順・LODに依存せずvisual_variant2とセルのハッシュで配置する。Far=0.3m板、工事・倒壊は地面用途。3003舗装広場はGROUND+floorのみ。計画の面(`Surface`)は穴(`Holes`)と側面の材質(`Side`)を持てる。穴のある面は `OpenSpaceBuildingMeshBuilder.Triangulate`(NTSの制約付きドロネー)、地形への切り抜きは三角形を渡す `BuildingMeshBuilder.GenerateTerrainSurfaceMesh` のオーバーロード(UV付き)を使う。`Side` のある面は縁石で上げた面で、地面の0.05m下から天端まで側面を張り、装飾はその天端に載る。駅前ロータリーは接道辺の局所座標でNTSの膨張・収縮と `OverlayNGRobust` の集合演算から周回路・島・乗降場・出入口を作る(旧来の `Geometry.Union` 等は接道辺上の重なりで TopologyException になるので使わない)。検証・ギャラリー配置見本の再出力は `Tests/Buildings/run-open-space.ps1`。仕様はF10文書。
-
-- 角の配置方向は `ComputeCornerRotation` でCCWの送り辺を内角の半分だけ回した**内角側の二等分線**から求める。単位辺ベクトルの和ではL字の凹角が180度反転するため使わない。壁の張り出し計測も同じ二等分線を共有する。凹角へ開閉できる2本のボーンがないパーツは `IsUnsupportedConcaveCorner` で配置・オフセット計測の両方から省き、壁を頂点まで敷く。実FBXの凸角・凹角と壁オフセットの回帰検証は `Tests/Buildings/run-unity.ps1`。
-
-- **角の接続はリグが正しいことが前提**。ボーンなしの静的な90度角は、張り出しを測っても非直角の辺に接続しない。敷地のfence-cは2本のボーンを必須とする。標準FBXではBlender +X/+YがUnityメッシュ −X/−Zになり、Bone(0番)をX側、Bone.001(1番)をY側へ割り当てる。両ボーンのheadは角原点、直線との接続端は単一ボーンへ完全追従させる。農地b32の制作例と回転符号はI文書§4・F文書§7を参照。
-- **仕様ドキュメントは生成方式ごとに分かれている**: 共通(パーツ命名・バリアント解決・壁/角の敷き詰め・基盤・フェンス・塔屋・エントランス・コライダー)は `genesis-docs/docs/geometries/F_建物メッシュの生成.md`、方式固有は `F1_モジュラー建物`(屋根4種+SHAPE_FULL) / `F2_地面アセット`(GROUND) / `F3_既成建物`(PREBUILT) / `F4_港湾岸壁`(PORT) / `F5_工事中建物`(STATUS_CONSTRUCTING) / `F6_マッシュアップ建物`(MASHUP) / `F9_車両基地`(RAIL_YARD)。共通ロジックを触るときは F を、方式固有を触るときは該当ファイルを見る。
-- `BuildingMeshBuilder` が入口。`BuildingMeshBuilder.Generate` は**まず status で分岐し(`STATUS_CONSTRUCTING`/`STATUS_DEMOLISHING` → `ConstructingBuildingMeshBuilder`(profile 差分で共用)、`STATUS_COLLAPSED` → `CollapsedBuildingMeshBuilder`。いずれも model_type 分岐より先)**、次にマスターデータの `model_type` で分岐する: `MODEL_MODULAR_*`→`ModularBuildingMeshBuilder`、`MODEL_PREBUILT`→`PreBuiltBuildingMeshBuilder`、`MODEL_PORT`→`PortBuildingMeshBuilder`、`MODEL_MASHUP`→`MashupBuildingMeshBuilder`、`MODEL_RAIL_YARD`→`RailYardBuildingMeshBuilder`、該当なし→白い箱。`ModularBuildingMeshBuilder` は Body(`ModularBodyBuilder` 等) と Roof(`FlatRoofBuilder` / `HouseRoofBuilder` / `GableRoofBuilder` / `ShedRoofBuilder`) を組み合わせる。**躯体は model_type で分岐しない**(MODULAR_* はどれも同じ壁・角の敷き詰め→`mid-w1` がどの閾値フォルダにも無ければ `DefaultBodyBuilder` の白い箱)。屋根だけが差分で、**どの屋根も立ち上がりは階高基準・屋根面のマテリアルは `ceil` パーツ**という共通規約に従う(建物高さ比例にすると階数の多い建物だけ屋根が巨大になる)。
-- 戻り値 `BuildingMeshResult` は描画用 `Mesh` + `Materials` + コライダー用 `ColliderMesh`。
-- 遠景(描画LOD=Far)の箱も同じ `BuildingMeshBuilder` で生成される(`Generate(data, isDynamic, DrawLod.Far)` → `GenerateFarBuilding`。パーツ・マテリアルを一切読まず、フットプリントを階数×階高で押し出す。工事中/解体中=1階分、倒壊=0.5階分、地面アセット=0.3m板)。マテリアルは呼び出し側(BuildingManager)が全棟共有の `GetFarBuildingMaterial()` を当てる。Normal/Close は `GenerateDetailed` で、`BuildingMeshUtils.CurrentDrawLod` を生成の間だけ設定・復元する(`_close` の解決は上記「描画LOD」の節)。
-- **パーツのスケール規則は「XZは実寸、Yは中層だけ階高スケール」**: 壁・角・prebuilt・mashupサブ建物のパーツはXZを一切スケールされず、Blenderでの著作サイズ(1ユニット=1m)のまま描画される(壁の幅Xだけは辺への敷き詰め端数を吸収するぶん伸縮する)。Yは**中層(mid)レベルの階と `mid-prebuilt` だけ階高(`height_per_floor`)へスケール**し、**1階(base)・最上階(top)・フェンス・マッシュアップのサブ建物パーツ(mid含む全パーツ)はスケールしない**(階高4mでも `base-w1` が15mなら1階は15m)。工事中の足場・クレーンも従来どおり階高へYスケールする。実装は `BuildWallRun`/`DetermineCornerScale` の `targetHeight` が正の値のときだけスケールし、無スケールは `NO_Y_SCALE`(0)を渡す方式。**判定は「階のレベル」で行う**ので、`base-w1` が無くて `mid-w1` へフォールバックした1階もスケールされない(パーツ名ではなく階の位置で決める)。XZ実寸<0.3m のパーツ(cm単位FBX等)は補正されず極小のまま描画されるため `WarnUndersizedPartOnce` が警告を出す(補正はしない=実寸で再エクスポートするのが唯一の対処)。
-- **スケールしないのは形状だけで、配置位置は常に階高グリッド**: 各階の床面Y=`階 × floorHeight`、`BodyMeshData.BuildingHeight`=`floors × floorHeight`、prebuiltの段も`消費段数 × floorHeight`(段を進めるのは存在するパーツだけなのでbase/mid欠落時にtopが接地する)。**マッシュアップのサブ建物だけは例外**で、段位置も著作高さの累積(階高グリッド不使用=隙間・埋もれが出ない)。屋根・塔屋・コライダーはこの高さを使う。**著作高さと階高のズレは隙間・埋もれとして出るのが仕様**で、補正しない(1階パーツ1m/階高4mなら3mの空隙、10mなら2階パーツに埋もれる)。prebuilt/mashupのコライダーだけは例外的に「実際に描画したメッシュの天端の最大値」(`maxDrawnTop`)を使い、背高のbase/topでもクリックできるようにしている。
-- **壁の敷き詰め(`ModularBodyBuilder.BuildWallRun`)**: 建物の壁・フェンス・足場の壁はすべてこの1本の共通処理で辺に敷き詰められる(`GenerateWallSegments` / `GenerateFenceSegments` は薄いラッパー)。①辺長から両端の角パーツの張り出しを引いて有効長を出す→②有効長÷著作幅を**四捨五入**して枚数を決める(切り捨てだと伸ばす側にしか吸収できず最大2倍間延びする)→③有効長を枚数で割ったスロット幅へXスケールで合わせ込む(合計は厳密に有効長=はみ出し・隙間なし)→④メッシュのX範囲がスロットに一致するよう原点をずらす(`bounds.max.x × scaleX`。中央ピボットの標準パーツではスロット中央になる)。**角パーツの張り出しは `MeasureCornerExtentAlongEdge` で測る**: ローカルX/ZのAABBではなく、**実配置と同じ回転・スケールを掛けた頂点を辺方向へ射影した最大値**なので、アームの著作軸向き・辺方向の造作・角パーツ不在(=0)に依存せず必ず「角の終わり」から壁が始まる。射影先はバインドポーズ(内角90°=二等分線±45°)の辺方向で、ボーン変形後の実張り出しと一致する。角パーツの配置回転は `ComputeCornerRotation` が唯一の正で、配置(`GenerateCornerCore`)と計測が必ず同じ値を使う(片方だけ変えると壁と角がずれる)。**パーツ解決(`LoadPartWithFallback`)は壁(w)・角(c)共通で位置フォールバック(c3→c1)+レベルフォールバック(base/top/fence→mid)を適用する**: midにも角パーツが無い建物では角なし=張り出し0として壁を辺いっぱいに敷く(角は建物単位のオプトイン。mid-c1だけ置けば全レベルの角がそれになる)。
-- **prebuilt(`PreBuiltBuildingMeshBuilder`)の積み上げ規則**: base-prebuilt / mid-prebuilt / top-prebuilt を下から積む。baseとtopは論理階数(floors)のうち各1階分を消費し、midは残り階数分繰り返す。**base/topは `AddStackedModule(fitHeight: null)` = 無スケール実寸、midだけ `fitHeight: floorHeight` でYスケールする。段のY位置は階高グリッド**で、段を進めるのは存在するパーツだけなのでbase/midファイルが無い建物ではtopが接地する(完成済みモデルをtop-prebuilt 1つで表現できる)。base/topの実寸が論理高さ(floors×階高)をはみ出すのは許容(コライダーは`maxDrawnTop`=描画実高に合わせる)。`alignByOrigin: true` なのでモデル原点(y=0)が段の接続点=底面。積み上げの天面を塞ぐパネルは生成しない(上から見える面はパーツのモデル側で閉じる)。フェンス(fence-w/c)・タイル(tile)・地面パネル(floor)は `ModularBodyBuilder.GenerateSiteDecorations`(モジュラーと共通の敷地装飾処理)で土地区画に配置される(フェンス・タイルは該当パーツがある場合のみ。**地面パネルはマスターの `draw_floor=yes` の建物だけ描画**し、マテリアルは `BuildingMeshUtils.ResolveFloorMaterialFromMaster`→`SelectFloorMaterialWithFallback`で floor パーツを a{variant}→b{bd_type}→common で解決する=無ければ描画なし・デフォルトフォールバックなし。呼び出し側で解決した `Material floorMaterial` を `GenerateSiteDecorations` に渡す方式で、モジュラー/prebuilt 共通。**タイル・地面パネルの対象ポリゴンは土地区画全体**(建物底面だけに張るとパネルが建物の真下に隠れて見えない。区画が取得できない場合は建物底面へフォールバック)で、これも全 model_type 共通。prebuilt は地形接地なので isDynamic で地形追従)。FBXの読み込みは `BuildingMeshUtils.CombineModuleMeshes`(全MeshFilter/SkinnedMeshRendererをノードTransform込みで結合)を使うため複数オブジェクト構成のFBXも欠けない。
-- **マッシュアップ建物(`MashupBuildingMeshBuilder.cs`, MODEL_MASHUP)**: 「1施設=複数棟」の建物。土地区画の8m×8mセル分割と棟の割り付けは**バックエンドが解決済み**で、Unityは `BuildingSummary.sub_buildings`(各棟の `model_prefix` / `position`(center_point基準XZ) / `rotation`(度・壁と同じ回転規約=モデルX軸を辺方向に向ける→`Euler(0, -rotation+180, 0)`。モデルX方向=マスター `width` のセル確保方向) / `floors` / `height_per_floor`)を受けて描画するだけ(セル分割ロジックは持たない)。各棟は `mashup-{model_prefix}-{base|mid|top}-prebuilt` パーツを下から積むが、prebuilt と異なり**全パーツ無スケール実寸・段位置は著作高さの累積**(階高グリッド不使用。`height_per_floor` は白い箱代替の高さにだけ使用)で、さらに**閾値フォルダをパーツごとに独立スキャン**(`GetPartBySuffixScan`、commonフォールバックなし)する。各棟のY基準は自分の配置座標の地形標高(中心標高との差分。区画が斜面にまたがっても浮かない)。3パーツ全欠落の棟は1セル分の白い箱で代替。敷地装飾はフェンス+地面パネルのみ(タイルなし)、塔屋・エントランスなし。コライダーは**土地区画ポリゴン**を最大描画高さまで押し出す。サブメッシュ爆発を防ぐため最後に `MergeSubMeshes` を通す。仕様の正は `genesis-docs/docs/geometries/F6_マッシュアップ建物のメッシュ生成.md`。
-- **パーツが無言で消えるときはまず FBX の Read/Write を疑う**: 壁・角・prebuilt・entrance は `Mesh.vertices` を読んで配置行列を焼き込むため、インポート設定の Read/Write Enabled が無効だと頂点が空で返り何も描画されない。一方 `ceil`/`floor`/`generic-wall` はマテリアル参照専用で頂点を読まないので、屋根と地面だけ残って**壁だけ消える**という紛らわしい見え方になる。設定の強制と一括修正は `Assets/Editor/ModelImportSettings.cs`(ルート `AGENTS.md` の「モデルアセットの構成」参照)。
-- **バリアントの定義とプレフィックス決定 (`agent_model_config.yaml`)**: `a{variant}` 形式のプレハブフォルダを prefix として使用するためには、 `city-genesis/unity/Assets/Resources/Config/agent_model_config.yaml` に該当するバリアントIDが定義されている必要がある。定義がない場合は `b{bd_type}` にフォールバックしてしまい、プレハブが存在していても見つからずに白い箱になる。新しく建物モデル（`a{variant}`フォルダ）を追加・変更した際は、必ず `genesis-core/tools/generate_agent_model_config.py` を実行して設定ファイルを再生成・同期すること。Unityが使うのはエージェントIDの有無と `structure_prefixes` / `landmark_prefixes` だけで、各エントリの `variants`・`prebuilt` は参照しない(外観閾値はミラープレハブの `mid-w1` の有無で決まる。F文書§4.2)。
-- **構造種別つきプレフィックス(`a{variant}s{structure}` / `b{bd_type}s{structure}`)**: 建物の `structure`(木造=1・準耐火=2・耐火=3。0=構造なし)が正なら、`BuildingMeshUtils.DeterminePrefix` は `a{v}s{s}` → `a{v}` → `b{bd}s{s}` → `b{bd}` の順で解決する。構造つきフォルダの存在は `agent_model_config.yaml` の `structure_prefixes`(生成器が `[ab]\d+s\d+` 形式の実在フォルダを列挙)を `AgentModelConfig.HasStructurePrefix` で引くだけなので、**フォルダを足したら必ず `generate_agent_model_config.py` を再実行**すること(無ければ無印フォルダにフォールバックし、見た目は構造で変わらない)。構造はパーツ・マテリアルの差し替えだけで、model_type(生成方式)は変えない。プレビュー(`BuildingPlanManager`)は `currentStructure` を `BuildingSummary.structure` に載せ、`edit_building:update_structure` / `STATE_EDIT_BUILDING` の `structure` で更新される。
-- **観光名所プレフィックス(`landmark-{model_prefix}`)**: 建物の `landmark`(`landmark_master` のID。0=観光名所ではない)が正なら、`DeterminePrefix` は構造つきフォルダより**先に**名所フォルダを試す。名所は一点物でありながら用途バリアントを1つ(観光名所)しか持たず、`a{variant}` では名所同士を区別できないため解決順の先頭に置く。`model_prefix` は `MasterDataStore.GetLandmarkModelPrefix`(`GET /master/landmarks`)で引き、フォルダの存在は `agent_model_config.yaml` の `landmark_prefixes`(生成器が `landmark-*` の実在フォルダを列挙)を `AgentModelConfig.HasLandmarkPrefix` で確認する。**フォルダを足したら必ず `generate_agent_model_config.py` を再実行**すること。名所は `MODEL_PREBUILT` なので描くのは `PreBuiltBuildingMeshBuilder`。階高も同じ「名所 → バリアント」の順で、`BuildingMeshUtils.GetFloorHeight` は `landmark_master` の `height_per_floor` を `agent_master` より優先する(バックエンドの建物高さと一致させるため。カリング半径や炎エフェクトの高さもこの値を使う)。プレビュー(`BuildingPlanManager`)は `currentLandmark` を `BuildingSummary.landmark` に載せ、`edit_building:update_landmark` / `STATE_EDIT_BUILDING` の `landmark` で更新される。
-- **切妻屋根(`GableRoofBuilder`, MODEL_MODULAR_GABLE)**: 屋根は棟線で割った**厚みのある板2枚**(裏面+表面+外周の小口。棟線上の辺は相手の板と接するので小口なし)。屋根面の高さは棟線からの水平距離だけで決まり、**勾配は棟高(クランプ後)と壁の半幅から逆算**するため屋根面は壁の位置でちょうど躯体天端を通る=平側に隙間が出ない。板が塞がない妻側の三角形は `AddGableWalls` が壁外周の各辺に垂直な板を張って埋める(棟線をまたぐ辺は棟位置で2分割)。**マテリアルは屋根面=`ceil`・妻壁=`generic-wall`(無地の壁。マテリアル参照専用パーツ)の2サブメッシュ**で、`BuildingMeshUtils.SelectGenericWallMaterial` が a→フォールバック(躯体の壁マテリアル)→既定の順に解決する。仕様の正は `genesis-docs/docs/geometries/F1_モジュラー建物のメッシュ生成.md §3`。
-- **片流れ屋根(`ShedRoofBuilder`, MODEL_MODULAR_SHED)**: 粗末な小屋のトタン屋根。棟を持たない**薄い板1枚**(厚み0.08m。裏面+表面+外周全周の小口)を最小面積外接矩形の**短辺方向**へ一方向だけ傾ける。**傾斜の向きは前面の辺(頂点0→頂点1。塔屋・エントランスと同じ規約)側が低くなるように決める**ので、軒先が接道側を向く(前面辺が傾斜方向とほぼ直交して決められない場合は短辺方向のまま)。立ち上がりは階高×0.35、勾配は立ち上がり÷全幅の逆算なので**屋根面は低い側の壁の位置でちょうど躯体天端を通る**。壁天端と裏面の隙間は切妻と同じ `generic-wall` の妻壁で塞ぐ(低い側は高さ0に潰れ、高い側は矩形、側面は三角形。屋根面が折れないので辺の分割は不要)。マテリアルは屋根面=`ceil`・妻壁=`generic-wall` の2サブメッシュ。方向を決められない退化ポリゴンは平屋根へフォールバック。仕様の正は `genesis-docs/docs/geometries/F1_モジュラー建物のメッシュ生成.md §4`。
-- **住宅風三角屋根(`HouseRoofBuilder`, MODEL_MODULAR_HOUSE)**: 底面を軒の出(0.4m)だけ広げたポリゴンから棟線を求め、底面の各頂点を棟線へ射影して寄棟状の傾斜面を張る(L字対応)。棟線の両端は立ち上がり×2 だけセットバックする。**棟の立ち上がりは階高の半分**(切妻と同値)、**マテリアルは `ceil` パーツ**(`BuildingMeshUtils.SelectRoofMaterial`)で、幾何もマテリアルも他の屋根と同じ規約。妻側も傾斜するので妻壁は不要。仕様の正は `genesis-docs/docs/geometries/F1_モジュラー建物のメッシュ生成.md §2`。
-- **屋根ビルダー共通のポリゴン幾何は `BuildingMeshUtils`**: 軒の出の輪郭を作る `OffsetPolygonOutward`(CCW前提。頂点を隣接2辺の外向き法線の二等分方向へ移動し、鋭角で痩せないよう 1/cos 割り増し)と、棟線・傾斜方向を決める `TryResolveMinAreaRect`(回転キャリパーの最小面積外接矩形。長辺=切妻の棟線方向、短辺=片流れの傾斜方向)は House/Gable/Shed が共有する。片方だけ書き換えると屋根ごとに軒の出や棟の向きがずれるので、屋根固有のパラメータ(厚み・立ち上がり・軒の出の長さ)だけを各ビルダーの const に持たせること。
-- **傾斜地対応(接地高さとコンクリート基盤)**: `BuildingMeshBuilder.IsApplicableModelType`(MODEL_MODULAR_FLAT/HOUSE/GABLE/SHED)の建物は、土地区画の基準標高 `parcel.altitude`(=接道の路面高さ。配置は BuildingManager 側)の水平面に接地し、建物底面フットプリントをY方向に押し出したコンクリート基盤(`BuildingMeshBuilder.GenerateFoundationMesh`、マテリアルは共通の `Resources/COMMON_CONCRETE`→`GetCommonConcreteMaterial`)で谷側の隙間を埋める。**土地区画ポリゴンは押し出さない**。GROUND/PREBUILT/PORT/MASHUP は対象外(中心位置の地形標高に直接接地・基盤なし)。工事中(`ConstructingBuildingMeshBuilder`)は同形状の基盤を土マテリアルで生成する。仕様の正は `genesis-docs/docs/geometries/F_建物メッシュの生成.md §2.4 / §8.2`。
-- **建物底面(`BuildingMeshUtils.GetFootprint`)と区画ポリゴン(`ResolveParcelContext`)は縮退頂点を間引いてから返す**: バックエンドのポリゴンは shapely 由来の閉環重複(末尾=先頭)や、道路用地の切り取りで入る共線中間頂点を含むことがある(契約上許容。`B_土地形状.md`。区画全面を使う農地などは建物底面=区画ポリゴンなので建物側にも入る)。壁・フェンスは1頂点=1角パーツなので、縮退頂点があると角パーツがX字に折れる/開ききって暴れる。`SanitizeRingPolygon` が縮退辺(0.01m未満)と共線頂点(最後に残した頂点からの累積方向変化5°未満。単独判定だと緩いカーブが弦に潰れる)を**元の頂点順を保ったまま**除去する(頂点0=前面の辺の規約を守るため)。3頂点未満に落ちたら footprint は生データ続行・区画は null(=footprintへフォールバック)。仕様の正は `genesis-docs/docs/geometries/F_建物メッシュの生成.md §2.2`。
-- `BuildingMeshBuilder` は static 幾何ユーティリティ(`GenerateSimpleBuilding` / `GenerateColliderMesh` / `GenerateHorizontalPolygonMesh` / `MergeSubMeshes` / `TriangulateOrFan`(耳切り+ファンフォールバック。失敗時は警告ログ) / `TriangulateEarClip`(耳切りのみ。失敗時は空リストを返すので、ファンで誤った面を張るより例外にしたい交差点輪郭(`RoadIntersectionMeshGenerator`)が使う) / `SubdivideTrianglesByEdgeLength`(長辺を中点分割して内部頂点を作る細分化。中点は無向`EdgeKey`で溶接=T字接合の隙間なし。起伏地形へ追従する面メッシュ用) / `FlipToDelaunay`(内部の辺をDelaunay条件で張り替えて細い三角形を解消。外周の辺は変えない) / `InsertInteriorPoints`(Delaunay化済みの分割へ点を追加し局所的に張り替える。近い点を続けて渡すと探索が速い) / `EdgeKey` / `GenerateRoofprop` / `GenerateEntrance` / `GenerateFoundationMesh`)も提供する。各ビルダーから再利用する。
-- **エントランス(`entrance`パーツ)**: モジュラー建物(GROUND以外)で、底面ポリゴンの**最初の辺(頂点0→頂点1)の中央・地面レベル(ローカルY=0)**に1つ配置されるオプションパーツ(`BuildingMeshBuilder.GenerateEntrance`)。原点は壁のアライメント面で、回転は壁系パーツと同じ規約(辺方向へ向けてY軸180°反転)、**スケールは一切なし(実寸)**。SHAPE_FULL は最上階しか描画しないため1階建ての場合のみ配置。パーツが無ければスキップ。仕様の正は `genesis-docs/docs/geometries/F_建物メッシュの生成.md §11`。地面パネルの地形追従(`ModularBodyBuilder.GenerateTerrainConformingFloorMesh`)と工事中の土マウンド(`ConstructingBuildingMeshBuilder.GenerateDirtMoundMesh`)がこの細分化を共有する。
-- **工事中の建物 (`ConstructingBuildingMeshBuilder.cs`, STATUS_CONSTRUCTING)**: model_type に関わらず「土マウンド(敷地全体を覆う厚み+Perlin凹凸の土。細分化は長辺の中点分割) + 足場(scaffold-wall/scaffold-corner。**通常建物の壁・角と全く同じ配置ロジック**=`GenerateWallSegments`/`GenerateCornerSegment`をフットプリント上でそのまま使う。角ヒンジ=フットプリント頂点。オフセットなし。**足場とクレーンだけは例外的に各段をYのみ階高スケールする**=建物本体・フェンスの無スケール規約とは異なる。進捗分の階数を生成) + クレーン(crane-base/mid/top) + ceil天面(施工済み階を footprint パネルで塞ぐ)」を生成する。進捗は `construction_progress`(%)→`builtFloors=ceil(進捗×floors)`(最低1)。工事系パーツは `BuildingMeshUtils.GetPartWithCommonFallback` で **a{variant}→b{bd_type}→`Models/Buildings/common/`(標準パーツ。suffixフォルダなし)** の順に解決され、無ければスキップされる(オプショナル)。土マテリアルは `BuildingMeshBuilder.GetConstructionDirtMaterial()`(`Resources/ConstructionDirt`→`ConstructionMaterial`→デフォルトのフォールバック)。足場の生成は `ModularBodyBuilder.GenerateScaffoldSegments`(通常建物の壁・角ループの流用)、クレーン等の積み上げモジュールは `BuildingMeshUtils.AddStackedModule`(旧 PreBuilt の `AddPrebuiltModule` を共通化したもの)。**クレーンは `AddStackedModule(alignByOrigin: true)` で「モデル原点(y=0)=接続点」基準で積む**(prebuilt の bounds.min.y 基準と異なり、原点より下に張り出す top でも段間の隙間が出ない)。敷地ポリゴン+centerPointWorld の解決は `BuildingMeshUtils.ResolveParcelContext`(Modular/PreBuilt と共通。**返り値の区画ポリゴンは center_point 基準のローカルXZ座標**=footprint と同じ規約。ワールド座標のまま扱うと敷地装飾が建物から離れた位置に生成される)。MODEL_MODULAR_GROUND / MODEL_PORT は土のみ(足場・クレーン・ceilなし)。仕様の正は `genesis-docs/docs/geometries/F5_工事中建物のメッシュ生成.md`。
-- **解体中の建物 (`ConstructingBuildingMeshBuilder` + `ConstructionSiteProfile.Demolition`, STATUS_DEMOLISHING)**: 建設中と**全く同じロジック**を profile 差分だけで共用する。使用パーツが `demo-scaffold-wall`/`demo-scaffold-corner`/`demo-ceil`(色違い足場)に替わり、建機がタワークレーン(段積み)ではなく `excavator`(地上建機を実寸で1台・階数ゲートなし)になる。差分は `ConstructionSiteProfile`(`Construction`/`Demolition` プリセット、`SiteMachineKind` で StackedCrane/GroundVehicle を切替)に集約。進捗の取り込みは建設中と同一。仕様の正は `genesis-docs/docs/geometries/F7_解体中建物のメッシュ生成.md`。
-- **倒壊した建物 (`CollapsedBuildingMeshBuilder.cs`, STATUS_COLLAPSED)**: 「瓦礫マウンド + 任意の倒壊片」を生成する。瓦礫マウンドは工事中の `ConstructingBuildingMeshBuilder.GenerateDirtMoundMesh`(internal static 化・厚み/振幅を引数で上書き)を `CONSTRUCTION_RUBBLE_THICKNESS`/`CONSTRUCTION_RUBBLE_BUMP_AMPLITUDE` で流用し、区画ポリゴンに完全追従。マテリアルは `BuildingMeshBuilder.GetCollapsedRubbleMaterial()`(`Resources/CollapsedRubble`→土マテリアルにフォールバック)。倒壊片は `collapse` パーツを footprint の XZ AABB へ非一様スケールでフィット(充填率 `COLLAPSE_FRAGMENT_FILL`、高さ上限 `COLLAPSE_FRAGMENT_MAX_HEIGHT`)、無ければマウンドのみ(オプショナル)。GROUND/PORT は躯体片なし。仕様の正は `genesis-docs/docs/geometries/F8_倒壊建物のメッシュ生成.md`。
-- **港湾の岸壁 (`PortBuildingMeshBuilder.cs`, MODEL_PORT)**: 海岸土地区画(PARCEL_SHORE)の港湾(BUILDING_PORT)用。**バックエンドは区画ポリゴンを海岸線でクリップしない**(矩形等のまま)ため、`SHAPE_FULL` の底面外周と海岸線(陸地領域=`CoastlineStore.Rings` の偶奇合成(XOR)。NTS Geometry を `CoastlineStore.Version` 単位で静的キャッシュ)の交点から最遠2点=左端A・右端Bを求め、それぞれを海側へ `lerp(0.2, 1, visual_variant1/2)×奥行き上限` だけ突き出した A'・B' を結ぶ**直線**で底面をカット(陸側を残す)して岸壁フットプリントとし、厚みのある板(岸壁スラブ)を上下に押し出してプロシージャル生成する。**海側境界は海岸線をなぞらず常に直線**。カットは底面との交差なので区画外にはみ出さない。カット不能時(交点2未満/海側頂点なし/幾何演算失敗)は元形状のまま進む。モジュラーの壁・角は使わない。**上面高さは海面+2m固定**(`visual_variant3` は不使用)。マテリアルは**上面=floor・側面/下面=ceil**: 上面は敷地全体の地面パネル(draw_floor。`GenerateSiteDecorations` で土地区画全体に地形追従描画、モジュラー/prebuiltと共通)と同一マテリアルにして床続きに見せる。floor 解決は `ResolveFloorMaterialFromMaster`(a→b→common)、無効時は floor パーツ直参照→デフォルト白。下面は各頂点の地形(海底)高さに合わせる(`HeightmapTextureManager.GetTerrainHeight`)。塔屋は岸壁中央に直線エッジの向きで配置。**荷役クレーン(`port_crane`パーツ、閾値0固定)は水際=カット直線上に乗った辺に沿って等間隔配置**(`PlacePortCranes`。**スケールなし=実寸**、モデル原点が水際の境界線上・岸壁上面高さ、**ローカル+Zが海側**(壁系パーツの回転規約とは別物)、間隔=パーツ実寸幅×4.5(`CRANE_SPACING_RATIO`)・辺あたり最低1基/岸壁あたり最大8基・辺長がパーツ幅未満なら0基。カット不能な建物では水際が定まらないので配置しない)。**交点・海側判定には `CoastlineStore`(`DataLoaders/`)を参照する**(セッション開始時に `TerrainManager.FetchCoastline` がロード済み)。仕様の正は `genesis-docs/docs/geometries/F4_港湾岸壁のメッシュ生成.md`。
-
-- **鉄道車両基地 (`RailYardBuildingMeshBuilder.cs`, MODEL_RAIL_YARD)**: 接続点を通る中央直線を先に確保し、左右それぞれの最外側線から斜め集約線を延ばす。同じ側の留置線は集約線の途中へ合流する。集約線は横1m/U2m、合流点のU間隔10m。中央線へ単調に近づき、接続後は端子まで直進する。Uは敷地の初期接続辺基準で、端子の横移動では全線を回転させない。TryGetRowStartは終端を含む敷地内区間だけを選び、境界上は±1mmもサンプルする。成立しない候補行だけ省き、1行の失敗で施設全体を棄却しない。曲線の頂点変形・支持材外縁クリップ・floor非表示はF9参照。端子移動時はBuildingManager.OnTerminalNodeMovedが再生成する。実FBXと端子移動の検査は `Tests/Intersections/run-unity.ps1 -RailYard`。
-
-## 超遠景の陸地メッシュ (UltraFarLandMeshBuilder.cs)
-
-- 超遠景(UltraFar)の「陸地シルエット」を、海岸線ポリゴン(`CoastlineStore`)から直接メッシュ化する。`TerrainManager.BuildUltraFarTerrain` から呼ばれる(従来の Unity Terrain ハイトマップ方式を置き換えたもの)。
-- 陸地AABBを `gridStep` 間隔のグリッドに切り、各セルを「辺をたどり陸側コーナー+海岸線交差点を拾う」マーチングスクエア的クリップで陸地ポリゴンに切り出す。交差点は格子全体の符号付き距離(`CoastlineStore.SampleSignedDistanceGrid`)の符号反転位置の線形補間で求めるため、海岸線はグリッド解像度より細かく滑らかに出る。海(陸地外)はメッシュを作らない(海面板が担う)。
-- **格子点ごとに `CoastlineStore.SignedDistance`(全辺走査)を呼ばないこと。** 所要時間が格子点数×海岸線の頂点数に比例し、26km四方・海岸線8,560頂点の都市ではEditorで1分以上かかる。この生成は初期ロードで地形タイルより先に走る(`TerrainManager.EnsureOverview`)ため、その間は区画・建物のロードも始まらず、`game:loaded` が送られないままTipsが「Now Loading」で止まる。一括版は内外を行ごとの半直線交差(`PolygonUtils.AppendRayCrossings`)、距離を `SpatialHash` で近傍の辺だけから求め、`gridStep` より遠い点の距離は ±`gridStep` に丸める。補間に使う符号反転辺の両端は必ず `gridStep` 以内に海岸線があるので、メッシュは全辺走査と同一になる。
-- 頂点Yは渡された `sampleHeight`(far_map 由来)で粗い起伏を付け、`heightOffset` 持ち上げる。三角形は単一のサブメッシュにまとめ、呼び出し側はマテリアル1枚を割り当てる。
-- **スムース法線**: `MeshData.normals` に位置溶接済みのスムース法線を返す(`BuildSmoothNormals`)。頂点はグリッドセルごとに個別追加され境界に重複頂点ができるため、`Mesh.RecalculateNormals` だと境界でファセット状の陰影になる。面積重み付き面法線を同一ワールドXZ位置(量子化キー)へ集約して正規化することで、頂点を溶接せず法線値だけをセルをまたいで共有する。呼び出し側(`TerrainManager.BuildUltraFarTerrain`)は `md.normals` を `Mesh.SetNormals` する。
-- **Mesh の組み立てはメインスレッド専用**。本ビルダーは純粋なデータ(`MeshData`: 頂点 + スムース法線 + 三角形)のみ返すので、重い符号付き距離計算・法線集約を含む呼び出しは Task.Run でバックグラウンド実行してよい(`CoastlineStore` と渡すデリゲートがビルド中に不変であること)。
-
-## 土地区画 (Percels/DefaultParcel.cs)
-
-- ポリゴンを重心原点のローカル座標でファン分割した上面+押し出し側面のメッシュ。`topVertexLocalY`(頂点ごとの地形高さオフセット)を渡すと上面が地形の傾斜に沿う。
-- 凹ポリゴンはファン分割では破綻し得る点に注意。
-
-## 注意点
-
-- `Test/` はメッシュ生成の確認用シーン専用(MeshTestController 等)。ゲーム本編からは参照されない。
-  - マッシュアップ建物(MODEL_MASHUP)は、実ゲームではバックエンドが生成する配置計画(sub_buildings)をテストでは `Test/TestSubBuildingLayout.cs` が自前生成する。これはバックエンド(genesis-core: `crud_buildings.generate_sub_building_layout` + `geo_buildings.generate_mashup_cells`)の移植なので、**バックエンド側の配置ロジックを変更したら移植も追従させる**こと。サブ建物マスターは MasterDataStore が `GET /master/subbuildings` からロードする(`GetSubBuildingsForVariant`。本編コードは未使用でテスト専用)。底面は建物本体ではなく棟を並べる土地区画なので、パネルの幅・奥行き入力は無視して 72m×48m(9×6セル)固定になる。
-  - 港湾(MODEL_PORT)は、岸壁カットに必要な海岸線をテストではダミー注入する(MeshTestController が `CoastlineStore.SetFromGeoJson` へ底面を斜めに横切る巨大矩形リングを渡す。+Z側が海)。ダミーはサンプル破棄時に `CoastlineStore.Clear` で片付けられ、本編シーンへは持ち越されない。
-- **マテリアルの解決規約(どの面がどこからマテリアルを得て、どうフォールバックするか)の正は `genesis-docs/docs/geometries/R_マテリアルの解決.md`**。要点は「パス系は必ず `RoadPath.GetOrCreateRoadMaterial`(名前キーの共有プール+renderQueue補正)を経由し、建物系はパーツプレハブの `sharedMaterials` をそのまま使う」。生成器ごとに独自の `Resources.Load<Material>` や `new Material` を増やさないこと。
-- RoadPath のマテリアルとミラーメッシュは**静的キャッシュ**(`MaterialCache` / `MirroredMeshCache`)でマテリアル名・元Mesh参照単位に管理される。同じバリアントの道路パーツはキャッシュ済みインスタンスを共有するため、再生成時のメモリリークやドローコール増加は起きない。Zファイティング回避の `renderQueue + 1` もキャッシュ生成時に一度だけ適用される。
-- 道路系の冗長ログは `UnityLog.If(LocalConstants.UNITY_LOG_ROAD, ...)` を使うこと(常時 `Debug.Log` を呼ばない)。
-
-- 道路body の幅・横中心は GetBodySurfaceBounds の最上面（2mm許容）で測る。桁・スカートを含む全体boundsを使うと路面が公称幅より狭くなる。生成用共有メッシュで上面Yを0に補正する。TrackPathの地上道床も同じ経路なので、線路のbodyは最上面の幅がwidthへ伸び(411/461の台形道床は天端3.7m、接写3.33mが5m)、最上面より上に盛りを置くとそれが幅の基準になる。全幅で描きたい道床(431の7m)は最上面を全幅・原点高さに著作する。地面原点の駅舎橋と、RoadPathで扱う `base_height` バリアントは `CreateSplineMesh(normalizeBodySurface: false)` でモデルの高さを保ち、道路用の区間LOD（スプライン面への帯化）も適用しない。接地原点のキャップを持つ `base_height` バリアントでは、`PlacePillar` は「路面と地表の差 + base_height」で置く／置かないを判定し、柱本体だけを路面と地表の差で伸ばす。SplineMeshの高さオフセットはワールド上方向、モデルの厚みは断面法線方向。
-
-歩道・ラインは採用したモデル系列のbody上面Yを引いた共有メッシュを使う（GetRoadPartMesh）。bodyだけをY=0へ補正すると、路面高を含むp2の付属パーツが0.5m浮く。歩道終端は道路外縁を扇の中心とし、縁石を外側へ90度回す。幅ゼロの尖端にしない。
-
-## 道路の付帯設備 (Paths/RoadEquipmentGenerator.cs)
-
-RoadPathの街路樹配置はRoadEquipmentGeneratorへ集約している。PathSummaryの設備4項目を参照し、masterの*_allowedで制限する。0は明示なしでモデルのフォールバックによって復活させない。極小路地211・1車線生活道路212の街灯は始点→終点の右側だけに置き、その他は両側に置く。未舗装路201は街灯をマスターで設置不可とし、地中配線ボックスは描画時に省略する。架空配線の電柱・電線は通常どおり生成する。街灯・電柱・箱・樹木は共通の距離配置・直立処理・近傍グリッドで重複回避。柵は歩道とは独立し、交差点切断面から3m手前で閉じる。標準簡易形状は材質ごとに結合しIntersectionMeshOwnerが所有。詳細・プレハブ規約・配線の制限はGドキュメント§8.6。
-
-設備の接地は未補正FBXのbounds.max.yではなく、GetRoadPartMeshで路面原点へ補正した歩道の設置横位置の上面を参照する。縁石と歩行面の高さを区別する。body面はBODY_ABOVE_SPLINEに固定。スプライン上の定数オフセットはワールド上方向、歩道厚は断面法線方向へ加える。街灯の張り出し方向はBlenderのX符号を前提にせず、Unityに読み込んだメッシュのbounds中心Xで判断して内向きにする。実FBXの接地・方向検査はTests/Intersections/run-unity.ps1 -Equipment。
-点設備はプレハブ原点の一致だけに頼らず、メッシュ下端のYも補正して接地する（旧共通モデル対応）。
-
-## 駅の標高と島式結合
-
-共通標高を持つTrackPathはPathManagerで補正・切断済みの点列を使う。モデルだけを地形へ戻してはいけない。TrackAdjacencyの島式デッキ結合は高さ差2cm以内に限り、一般の道床結合の1m許容値とは区別する。
-
-- TrackPathはbuffer_stop（車止め）とplatform_end（妻壁・柵）をバリアント→タイプで読む。終端はConnectedPathsProviderのノード接続情報で判定し、線路が続くかはレールコネクタと同じ`TrackIntersectionMeshGenerator.RailsConnect`で決める（431は222/242/303へ続き、通常鉄道とだけ接する端は終端）。ホーム端は島式デッキの担当側だけが実幅で閉じる。軌道はmaxTileLength: 0で著作周期を保ち、RoadPathはこのモードの頂点数上限時にタイル数を減らさず整数タイル単位の複数メッシュへ分割する。
-
-TrackPathの車止めはInfrastructureConnectionProviderが共用インフラノードと判定した端点には配置しない。PathManagerがノードtypeのインフラビットを供給するため、建物のロード順に依存しない。
-
-- 車両基地のfence-w1は区画外周（未取得時は底面）へ配置する。GenerateSiteDecorationsの省略可能なfenceOpeningCenter/fenceOpeningRadiusで引き込み線の境界通過位置に半径3mの開口を設ける。指定がなければ従来どおり全周を囲う。
-
-- 車線中心と区画線境界は `RoadPath.cs` の `RoadLaneLayout` が共有する。歩道・側線・中央分離帯を除いた走行帯を分割し、一方通行は全幅、双方向は片側ごとに配置する。車両側へ独立した横オフセット式を追加しない。
-
-## 共通LOD基盤との関係
-
-`FarPlatformPath`は451/461・462・502・602の遠景乗り場を生成する。通常FBXから同名材質を拾い、RoadPathの共有材質解決を通して屋根・床・窓・ホーム端の粗い断面を描く。8mタイルを反復せず、間引き済みのパス点列を押し出す。上屋と床の支柱は最大16m間隔の両面交差板、小物と細い金物は省略する。各生成メッシュはIntersectionMeshOwnerが所有する。左右は通常と同じResolvePlatformExtents。遠景FBXを追加する方式ではない。
-
-モノレール502のホームドアはplatform本体へ組み込み、上屋と同じ8m周期で反復する。通常・接写の両方に閉状態の腰高ドアを持ち、島式でも乗降縁に残る。専用の配置経路は使わない。
-
-長い通常道路の連続スプラインパーツは `SplinePartLod` が固定区間とLODキャッシュを持つ。モデル存在判定の後に分割し、single-span・破線は除外する。対応建物は `BuildingMeshBuilder.Generate(..., separateExterior: true)` で敷地装飾を別ジョブにできる。生成器内から独立の非計測Rebuildを起動せず、共通スケジューラーで同期生成を計測する。
-
-## 駅舎の配置方式
-
-通路bodyの未配置時（地下駅舎2002・2012を含む）は `CreateFallbackRoadBody` の板を使う。代替材質とパーツの空マテリアル配列は、URP対応の明灰色の `BuildingMaterial` を `GetOrCreateRoadMaterialByName` で共有する。Built-in用の `Standard` シェーダーを生成してはならない。
-
-house_ends（both/start/end）で選択した終端だけ建屋・接地占有を生成する。house_placement=outsideは区間回避、insideは最寄り線路占有区間の外縁に建屋外側辺を合わせる。insideの内側辺は区間上端−余白−奥行き、線路なしは−奥行き。Pythonのresolve_house_positionとUnityのResolveHousePositionを同一に保つ。片側でも終端識別を維持し、outsideは通路延長、insideは通路端移動。上記の「両終端」「線路を常に回避」という説明はoutside/bothの場合に限る。仕様はQ_駅舎パスのメッシュ生成.md §5。
-
-橋脚のYスケールは必要高さ÷プレハブboundsの著作高さ。pillarの天端原点規約は維持するが、柱本体が1m高であると仮定してはいけない。SlicePolylineByFractionは施工端の重複・極小セグメントを統合し、SplineMeshの終端断面が回ることを防ぐ。実FBXの接地下端と施工端はTests/ConstructionPathsで検証する。
-
-ConstructionPathBuilderの高架工事車両は橋脚期間のみ地表へ置く。桁架設以降は離散化済みの架設端を基準に、路面の高さ・勾配へ合わせる。PillarClearance.GetPrefabBoundsで実寸を求め、桁端・先行車両との余白と道路幅を確保できる車両だけ表示する。未架設区間へ車両を置かず、90%以降は桁とともに配置を固定する。
-
-RailYardBuildingMeshBuilderは1060とモノレール車庫1064・LRT車両基地1065で共通。幅2m未満のyard_trackは各支持材サブメッシュの実X断面幅で合流を切断する。通常線路の枕木幅を細い単桁へ適用しない。1064は架線パーツを持たない。基地ごとの差は`ResolveProfile`がマスター(agent_master.supply→transit_master.vehicle→走行網のpath_master)から導く: 溶接を要する線路と街路の両方を走る網(LRT)は端子が前面辺の中点(未ロード時のフォールバックとU基準も同じ)、lanes≥2の線路パス(431)を含む網は端子の手前が複線で、中央線を片側の軌道位置へずらし、2本目は渡り線(`TryPlanSecondLead`)で合流する。マスター未取得のテストでは1060と同じ描き方。F9文書§12、Tests/IntersectionsのRailYard検証、非公開制作ツールのimport_depots.ps1を参照。
-
-ロープウェイ601/602のbodyはCreateSplineMeshの共通入口で幅伸縮・路面上面補正を無効にし、ケーブル中心間隔4.2mを施工中も維持する。602のstation_shellは実寸幅・原点維持・maxTileLength=0で8m周期の駅屋根と壁を反復する。道路用の区間LODは適用しない。仕様は公開G文書、制作元はgenesis-galleryのbuild_ropeway.py。
-
-StationHousePathはpassage_mode=undergroundで通路の描画・コライダーを省き建屋だけ残す。全駅舎で3方式を許可し、2001/2011の上空・2003/2013の地上は専用body、それ以外は方式名パーツをバリアント→p20へ解決する。建屋の接続部との見た目の不一致は許容する。
-
-LRTの線路(222/242/303/431)は1本のパスで上下線を持つ左右対称の複線(DIR_BOTH固定)で、通常鉄道の「一方通行の単線2本」とは別方式。`LrtRoadParts`が軌道・車両・停留所ホームの寸法の唯一の正: `Offset`(軌道中心の横距離。222/242=双方向の最内車線中心、303=`MALL_TRACK_OFFSET`1.75m、431=`TrackPath.GetTrackCenterOffset`で幅7m・2線の1.75m)、`TrackLaterals`(全軌道の横位置)、`RailTopAboveSpline`(踏面。埋め込み0.125m/431は0.475m)、ホーム寸法(`PLATFORM_*`・`PlatformWidth`・`PlatformRampLength`・`PlatformInner/OuterOffset`・`PlatformSurfaceAboveSpline`・`PlatformDeckLength`・`SHELTER_MIN_DECK_LENGTH`)、架線柱の距離列`PoleDistances`。車両(TransitRouteGeometry)・交差点・設備・歩行帯はここを参照し、値を再定義しない。道路上ではRoadPathへ`TrackLaterals`の2軌道にlrt_track/lrt_wireを追加する。lrt_track/lrt_wireは路面原点で実寸、lrt_poleは道路中心原点・Yawのみ(303は±5.4mの両側柱の造形)。431はTrackPathがマスターのwidth/lanesで2軌道を描く。レールがつながる組は`TrackIntersectionMeshGenerator.RailsConnect`(LRT同士、またはLRT以外の同じpath_type)で、交差点コネクタと車止めが共有する。埋め込み側を含むコネクタはRailConnectorSpecの始終端高さで専用軌道との差を補間する。LRTと通常鉄道は近接結合描画しない。仕様はG・N文書、実FBX検証はTests/Lrt/run.ps1。
-
-LRT停留所の相対式ホームは`Paths/LrtPlatformParts`が下地パスの生成の一部として描く(431はTrackPath.CreateTrackParts、222/242/303はRoadPath.CreateRoadParts→`LrtRoadParts.Generate`の引数。角のある直線道路はRoadPathがパス全体の折れ線スプラインで1回だけ描く=上記「道路」の節。工事中の`CreateConstructionParts`では解決しない)。停留所は`StopProvider`(DataLoaders/LrtStopPlatformsの索引。{割合, デッキ長})、点列は`PolylineProvider`(PathManager)から取り、どちらも未設定ならホームなし/描画点列を全体とみなす。`Resolve`→`Layout`の順に、①停止中心=割合×未切断3D点列長、デッキ=中心±デッキ長/2、②重なり・`PLATFORM_MERGE_GAP`未満の隙間を併合(`MergeDecks`)、③切断済み区間[切断始端, 切断終端]へ収め、`PLATFORM_MIN_LENGTH`未満は捨てる(編成を覆うことを優先し、スロープ長ぶん内側へは寄せない。デッキ端の外側に置くスロープは切断済み区間の外=交差点ハル上や行き止まり端の先へはみ出してよい)、④描画点列(トンネルの描画区間を含む)の範囲で切り、描画点列の距離をスプライン長へ比例換算する。描画区間で切られた端にはスロープを置かない(`Span.RampAtFrom/To`。切断端には置く)。⑤`Generate`は側ごとに、他の線路の道床が掛かる区間(431の結合コリドーの`GetLrtPlatformBlockedRanges`。端の点が塞がれていれば切断端の外まで)を`Clip`で除き、除いた端と、スロープの踏み面(端から外へスロープ長)が塞がれた本来の端にはスロープを置かず、除いて残った`PLATFORM_MIN_LENGTH`未満の切れ端は捨てる(分岐の喉元や並走する431の上にデッキ・スロープを載せない)。描画は両側とも、`lrt_platform`を`CreateSplineMesh`(原点=軌道中心`±Offset`・踏面`RailTopAboveSpline`、右側用で左はmirrorX、`compensatePivot:false`・`stretchToWidth:false`・`maxTileLength:0`・`normalizeBodySurface:false`=区間LODに載せずスロープ・上屋と同じ親LODで出す)、デッキ端の外側に`lrt_platform_end`(断面中央=軌道中心±(1.35+W/2)・踏面、+Zを外向きにして勾配に沿わせる。先端の上面は222/242/303が踏面+0.01m(路面+0.035m。ホームの下を通る車線境界線の破線=路面+0.025〜+0.033mを覆う)、431がスプライン面(踏面−0.475m)。長さ3m/431は6m)、各側で最も長く残ったデッキが`SHELTER_MIN_DECK_LENGTH`以上ならその中央に`lrt_shelter`を1基(デッキ上面、背面+Xをモデル実寸のbounds.max.xで外縁に付ける。左はY軸180°)。部品はバリアント→タイプで解決し、`lrt_platform`だけは無ければ共通コンクリートの簡易スラブ(内縁〜外縁、上面=踏面+0.30、下端=スプライン−0.3m)で代替する。ホーム区間(`ZoneRanges`=デッキ±(スロープ長+余裕)。クランプ後・⑤で除く前のデッキから求めるので追随し、切断端のデッキではスプラインの外まで伸びる)は、431では`PLATFORM_TRACK_ZONE_MARGIN`(2m)で架線柱を両側とも外縁+`PLATFORM_POLE_CLEARANCE`以上へ移し(梁は柱間へ伸縮)、高架の高欄を両側とも省く。303では`PLATFORM_EQUIPMENT_ZONE_MARGIN`(1m)でRoadEquipmentGeneratorの点設備を置かない。222/242の中央柱・303の両側柱は動かさない。
-
-RoadEquipmentGeneratorはbench/bin/planter/advertを個別の保存値とマスターの許可で配置する。304は中央島（ベンチだけ左右0.95mで外向き）、305は中央から左右4mの2列、303は道路端から0.9m内側（幅12mで±5.1m。複線の車体範囲±3.02mの外）。303は両側架線柱（±5.4m、`LrtRoadParts.PoleDistances`）の足元を予約し、各設備の位相と空間ハッシュで重なりを避ける。引数`keepClear`（スプライン距離の区間。303のLRT停留所のホーム区間）の中には点設備（電柱・街灯・樹木・ベンチ等）を置かない。柵は舗装端にありホームと重ならないので対象外。公開G文書§5.5、Tests/Lrt/run.ps1参照。
-
-## 送電線の鉄塔と径間
-
-1101/1102はvariant固有のPowerLinePathを使う。pillar_capを実寸配置し、CloseではPathDrawContext経由でpillar_cap_closeを選ぶ。body/pillar/riserは専用生成器で使わない。PowerLineSupportが共有ノードの候補を登録し、最も詳細な有効候補だけを表示する。無効化・破棄時に所有権を引き継ぐ。姿勢・取付点はConnectedPathsのノード逆引きから共通化する。Farも鉄塔・電線をコード生成し、道路帯にしない。通常・接写・遠景・施工で同じPlanを使う。Tests/PowerLines/run.ps1が実FBXとライフサイクルを検証する。
-
-完成した二駅間の索道はRopewayGeometryの共有点列からRopewayCabinManagerがケーブルをPathStructureMeshで置き換える。元のbodyだけを一時抑制し、支柱・駅殻を保持する。搬器・終端設備は別のGPU描画で、Far・未完成・駅間未接続は従来の静的パスを使う。詳細は公開O文書の索道節。
-
-## 路面標示
-
-舗装街路・高速道路（side_width > 0）はRoadMarkingContextでスプラインの距離/横断座標を作り、bodyのUV3へ上面フラグとともに渡す。線(Bands)ごとに描く距離の範囲(BandSpans)を持ち、先頭2本が左右の路側線(OverrideSideLine が添字で参照)。Close/Normalの固定区間で同じ座標を使い、白線用lineパーツは生成しない。RoadMarkingPlanは横断歩道・停止線・矢印・接合線の焼き込み用2D形状。交差点ではSidewalkConnectorSpecのlineだけを計画へ移し、桁殻に上面フラグを付けない。RoadMarkingSurfaceは既存Rendererへ材質とページ表を結び付ける。線形・交差点ポリゴンや保存車線数は変更しない。G文書§8.3、E文書の画像予算、Tests/RoadMarkingsを参照。
-
-RoadSurfaceの色描画はOffset 0,-1の一定補正だけを使う。傾き依存の補正はbodyの反復端面を舗装より手前へ出すため使わない。矢印の左右先端は基準点より前方0.35mに置き、枝を先端三角形の底辺中央へ接続する。直進を許可しない中央軸は分岐点で止める。Tests/RoadMarkingsは内部端面を除いた画像との比較と全7種の矢印の連結・穴を検査する。
+- 仕様: `A_パス形状` / `C_建物形状` / `E_LOD処理` / `F_建物メッシュの生成` と `F1`〜`F10` / `G_道路メッシュの生成` / `J_パスの交差処理` / `N_線路メッシュの生成` / `Q_駅舎パスのメッシュ生成` / `R_マテリアルの解決` / `P_マテリアル共有とエクスポート`
+- Skill: `genesis-mesh-generation`(横断)、`genesis-building-geometry`、`genesis-path-geometry`。FBX制作は `genesis-building-parts` / `genesis-path-parts` / `genesis-prop-parts`
+- 実FBX回帰検証: `city-genesis/unity/Tests/`(生成器ごとのサブフォルダと README)
+- `unity/AGENTS.md`「Y座標の考え方」(パスの Y は地面からの相対高さ)・「モデルアセットの構成」(FBX とミラープレハブ)

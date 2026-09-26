@@ -156,6 +156,14 @@
     "policy": "single",
     "actions": []
   },
+  "confirm_dialog": {
+    "title": "確認",
+    "width": 420,
+    "height": 220,
+    "resizable": false,
+    "policy": "single",
+    "actions": []
+  },
   "resource_detail": {
     "title": "Resource Details",
     "width": 460,

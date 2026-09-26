@@ -71,6 +71,15 @@ materials:
 
 公式DLC も FBX を Editor でインポートするため、§3.2 がそのまま使える。さらに DLC を AssetBundle / Addressables に焼き込む際、**base ゲームが持つ共有マテリアルを依存参照**させれば、DLC 建物が base のマテリアルを使い回せる（DLC 側にコピーを持たない）。**DLC で何十棟追加してもマテリアル・テクスチャが重複しない**のはこの経路による。
 
+### 3.4 FBX の取り込み規約（ミラープレハブと Read/Write）
+
+`Assets/Models`（Buildings / Paths / Props / Stations / Vehicles）が FBX の置き場で、ランタイム（`Utils/ModelManager`）は `Assets/Resources/Models` にある**同一相対パスのラッパープレハブ**を `"Models/Buildings/{型}/{variant}/{パーツ}"` の文字列パスで `Resources.Load` する。このミラーは手動で維持しない。
+
+- FBX を追加・移動すると、エディタ拡張 `Assets/Editor/ModelPrefabGenerator.cs` が対応プレハブを自動生成する。一括同期はメニュー `Tools/Model Prefabs/Sync All`。生成物は FBX をオーバーライドなしで包む純粋なラッパーで、手動編集（コンポーネント追加・材質差し替え）したプレハブは同期ツールが上書きせずスキップして警告する。
+- FBX の削除・移動で孤児になったプレハブは自動では消えない。`Tools/Model Prefabs/Delete Orphans` で削除する（空になったミラーフォルダも消す。`-batchmode -executeMethod ModelPrefabGenerator.DeleteOrphans` は確認ダイアログなしで実行される）。ランタイムはミラーだけを読み FBX の有無を見ないので、閾値フォルダを消した・移したときは必ず実行する。FBX を `.meta` ごと移すと旧パスのミラーが移動先の FBX を GUID で参照し続け、旧閾値が外観として選ばれ続ける。消した場合は親の無い壊れたプレハブバリアントが残る。
+- `Assets/Models` 配下のモデルは Read/Write Enabled（`ModelImporter.isReadable`）が必須。メッシュ生成はパーツの頂点を読み出して配置行列を焼き込むため、無効だと頂点が取れずエラーログだけ出して**そのパーツが無言で消える**（材質しか使わない屋根・地面パネルは残るので「壁だけ描画されない」部分欠けになる）。Unity の既定値は無効なので、`Assets/Editor/ModelImportSettings.cs` がインポート時に一律で有効化する。既存アセットの一括修正は `Tools/Models/Enable Read-Write (Assets/Models)`、確認だけなら `Tools/Models/List Non-Readable Models`。
+- 接写用モデルは、無印 `{パーツ}.fbx`（Normal。制作の基準）と同じフォルダに任意で `{パーツ}_close.fbx` を置く。原点と配置寸法は無印と一致させ、材質は既存名で共有する。無印が無い `_close` は使われない（存在判定は無印名で行う）。対象パーツと寸法の例外、遠景（`_far`）の扱いは対象ごとに異なるので、[建物](F_建物メッシュの生成.md) §3.5・[道路](G_道路メッシュの生成.md)・[車両](O_車両の走行描画.md) §O.10.2〜O.10.3 を参照する。ミラープレハブは無印と同じ仕組みで自動生成される。
+
 ---
 
 ## 4. glTF / glb での共有（Mod）

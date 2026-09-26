@@ -21,12 +21,14 @@
  * パネルが持つのはバリアント選択・標高/盛土・ホーム設置側・グリッド設定(サイズ/角度)・
  * 形状プレビュー・コスト・確定/キャンセル。
  * 街路・高速道路の新規敷設では、所属道路(名前付き道路)の選択も持つ(PathRoadAssignmentSection)。
+ * 新規敷設では、敷くパスに付ける建設プロジェクトのタグも選べる(PathTagSection)。
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
+import { emit } from "@tauri-apps/api/event";
 import { useMasterData } from "../../contexts/MasterDataContext";
 
 import { setHintbarText } from "../../utils/hintbar";
@@ -42,6 +44,8 @@ import { InfraVariantSelector } from "./InfraVariantSelector";
 import { PathVariantDescription } from "./PathVariantDescription";
 import { PathBuildSections } from "./PathBuildSections";
 import { PathRoadAssignmentSection } from "./PathRoadAssignmentSection";
+import { PathTagSection } from "./PathTagSection";
+import { TAGS_CHANGED_EVENT } from "../../utils/constructionTags";
 import { usePathRoadAssignment } from "./usePathRoadAssignment";
 import { isNamedRoadPathType } from "../road/roadApi";
 import type { PathCategory } from "./usePathConstruction";
@@ -101,6 +105,9 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId, categor
 
   /* ---- 確定処理中状態 ---- */
   const [isConfirming, setIsConfirming] = useState(false);
+
+  /* ---- 敷くパスに付ける建設プロジェクトのタグ(空文字=付けない)。連続設置の間は保持する ---- */
+  const [projectTag, setProjectTag] = useState("");
 
   /* ---- 角度設定モード中のグリッド表示状態の退避・復元 ---- */
   // 吸着フラグの退避・復元はUnity側(GridSetManager)が行うため、パネルはグリッド表示だけ面倒を見る。
@@ -186,7 +193,13 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId, categor
   const handleConfirm = useCallback(async () => {
     setIsConfirming(true);
     try {
-      const createdPathIds = await pathConstruction.confirmPath(roadAssignment.postFields);
+      const createdPathIds = await pathConstruction.confirmPath({
+        ...roadAssignment.postFields,
+        ...(projectTag ? { tag: projectTag } : {}),
+      });
+      if (projectTag && createdPathIds.length > 0) {
+        void emit(TAGS_CHANGED_EVENT, { tag: projectTag }).catch(console.error);
+      }
       // 道路の作成は敷設とは別の要求なので、失敗しても敷設の成功は取り消さずに知らせるだけにする。
       await roadAssignment.finalize(createdPathIds).catch((err) => {
         console.error("[PathConstructionPanel] road assignment failed:", err);
@@ -231,7 +244,7 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId, categor
       }
       void showNotification({ message: displayMessage, durationMs: 8000 });
     }
-  }, [editPathId, onClose, pathConstruction, refreshAffordability, roadAssignment, t]);
+  }, [editPathId, onClose, pathConstruction, projectTag, refreshAffordability, roadAssignment, t]);
 
   /**
    * キャンセルボタンを押した際のハンドラ。
@@ -359,6 +372,16 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId, categor
 
       {roadAssignmentEnabled && (
         <PathRoadAssignmentSection assignment={roadAssignment} disabled={isConfirming} />
+      )}
+
+      {/* 既存パスの形状編集ではタグを変えない(タグの付け替えはパス詳細で行う)。 */}
+      {editPathId == null && pathConstruction.selectedVariant !== null && (
+        <PathTagSection
+          apiBaseUrl={apiBaseUrl ?? ""}
+          value={projectTag}
+          onChange={setProjectTag}
+          disabled={isConfirming}
+        />
       )}
 
       {/*

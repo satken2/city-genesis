@@ -1,47 +1,46 @@
-# Utils フォルダ
+# Utils
 
-汎用ユーティリティの置き場。**新しい汎用処理を書く前に、必ずこの一覧を確認すること。**(Scripts直下の`Utils.cs`にも雑多なユーティリティがあるので併せて確認)
+汎用ユーティリティの置き場。新しい汎用処理を書く前に、必ずこの一覧と Scripts 直下の `Utils.cs` を確認し、各 Manager やビルダーに再実装しない。docs パスは `city-genesis/docs/docs/` 起点。
 
-`IntersectionPolygonUtil.ComputeIntersectionPolygon` の任意の `shapeLayout` は、入口断面の計算後に描画専用の外周を調整する。路面ポリゴンの組み立て・検証は共通のままとし、`MotorwayMergeLayout` が1車線ランプに使用する。保存パスや論理占有ポリゴンを変更する入口ではない。
+## ファイル
 
 | ファイル | 内容 |
 | --- | --- |
-| `PolylineUtils.cs` | 線分・曲線・点列の幾何計算の共通実装。引数は点・始点・終点の順。`ClosestPointOnSegment`はVector2/Vector3の各座標系、`ClosestPointOnSegmentXZ`は水平射影後にYを補間する。`ProjectOnSegment` / `ProjectOnSegmentXZ`は最近接点の位置パラメータt(0〜1)。`DistanceToSegmentSq` / `DistanceToSegment`はVector2の距離。`IntersectRaySegment`は半直線と線分の交点(半直線上の距離と線分上の位置パラメータ。交差点の信号機が角の外周を探すのに使う)。射影する座標系で長さの二乗が1e-8以下なら始点を返す。画面座標とワールド座標を混ぜない。`CubicBezierPoint`(Vector2/Vector3)は三次ベジエの評価で、道路プレビュー(RoadPlanManager)・実道路(PathManager)・線路・車両基地が共有する(別実装を持つとプレビューと実道路の曲線が食い違う)。`SmoothedDirection`は点列の前後辺を平均した進行方向(帯メッシュの断面配置用)。`RoundCorners`は点列の角丸め |
-| `PolygonUtils.cs` | 閉じた2D多角形(Vector2の x=X, y=Z)の共通実装。`Contains`は偶奇則(レイキャスティング)の内外判定で、`IReadOnlyList<Vector2>`のほか区画・地区が保持する`float[][]`、資源応答の`List<List<float>>`をそのまま受ける(変換配列を作らない)。境界上の点を確実に含めたいときは`boundaryTolerance`付きを使う(OpenSpaceLayout・車両基地)。`AppendRayCrossings`は水平線z上で`Contains`の半直線が数える交差のX座標を列挙する(同じ行の多数の点を「xより大きい交差の個数の偶奇」で判定する走査線用。格子全体の内外を点ごとの全辺走査なしで求める。`CoastlineStore.SampleSignedDistanceGrid`が使う)。`SignedArea`は符号付き面積(正=CCW。巻き順の正規化に使う)、`DistanceToBoundary`は全辺への最短距離。**多角形の内外判定・面積・線分距離を各Managerやビルダーに再実装しないこと** |
-| `SpatialHash.cs` | 汎用の空間ハッシュ`SpatialHash<T>`。「半径r以内のオブジェクト候補抽出」はこれを使う(自前で全件走査しない) |
-| `ModelManager.cs` | モデルのロードとキャッシュ(シングルトン)。persistentDataPathのglTF/glbを優先し、なければ`Resources/Models`配下のプレハブにフォールバック。同じモデルを二度ロードしない。Resources側のプレハブは`Assets/Models`のFBXから自動生成される(unity直下AGENTS.mdの「モデルアセットの構成」参照) |
-| `GeneratedModelUtils.cs` | 自動生成スキーマ(GeneratedModels)関連の補助。`ParseRing(JToken)` は GeoJSON リング `[[x,z],...]` を `List<Vector2>`(x=X, y=Z)に変換する共通入口(配列でなければ空リスト。水面・効果範囲ポリゴンが使用。各Managerに再実装しないこと) |
-| `AgentIconFactory.cs` / `BuildingIconFactory.cs` / `PathIconFactory.cs` / `AlertIconFactory.cs` | 各種アイコンの生成。AlertIconFactory は alert ビット種別ごとのアイコンを agent/path 別に管理(Dictionary キーは `(entityType, bit)`)。**`consts.py`の`ALERT_AGENT_*`・`ALERT_PATH_*`のうち、アイコンで表現するビットに`[SerializeField] Sprite`フィールドを持つ**(火災系2ビット=`ON_FIRE`/`ACCIDENTAL_FIRE`はパーティクル表現のためフィールドを持たない)。Sprite未割当のビットは`GetIcon`がnullを返し`AlertManager`が無言でスキップするため、アラート定数を追加したらフィールド追加・`InitializeAlertIcons`への登録・シーン(`GameScene.unity`)での割当まで行うこと。詳細は `genesis-docs/docs/programs/アラートフラグ管理.md` 参照 |
-| `FireEffectFactory.cs` | 火災(炎+火の粉+黒煙+点光源)・失火(白煙のみ)のパーティクル一式を、建物の底面半径と高さに合わせて手続き的に組み立てる静的ファクトリ。**テクスチャ・マテリアルはコード生成で全エフェクト共有**(アートアセット不要。マテリアルは3種類しか存在しない)。描画は `Resources/Shaders/FireParticle.shader`(前乗算アルファ+ソフトパーティクル)。**`AddComponent<ParticleSystem>`直後は playOnAwake で再生状態のため、`duration`/`prewarm` を触る前に必ず `Stop` すること**(停止中しか変更できない)。煙の「ゆらゆら」は `SetSwayNoise` が担当し、通常の `SetNoise` と違って **`damping=false`(有効だと低周波でほぼ揺れない)+ `separateAxes` で水平だけ強く揺らす**(Yも同じ強度で揺らすと上昇が波打って痙攣して見える)。`prewarm` は `duration` ぶんしか空回ししないので **`duration` は寿命上限に合わせる**(足りないと煙柱が上まで伸びない)。呼び出しは `DataLoaders/FireEffectManager`。詳細は `genesis-docs/docs/geometries/S_火災エフェクトの描画.md` 参照 |
-| `InfraNetworkUtil.cs` | ノードの溶接互換(吸着可否)判定。バックエンドの溶接ルール(ビット積)をフロントで再現する。ノードの`type`はビットフラグ(NODE_ROAD/NODE_RAIL/…と、インフラ財ごとのビット`GetInfraNodeBit`のOR。バックエンド`MasterData.get_infra_node_bit`と一致)で、吸着は**「ノードのtypeマスク & パスのマスク(`GetRequiredNodeTypeForPath`=バックエンド`type_p2n`相当) が非0」**で判定する(`IsNodeSnappable` / `IsPathSnappable`)。網互換(電力vs水道)もこのビット積に畳み込まれており、旧`GetNodeInfraProducts`等の製品集合照合は廃止。マスクがインフラ財ビットを含むか(=インフラノード/インフラパスか)は`IsInfraMask` / `IsInfraPathVariant`で判定する。**パス種別そのものがインフラかの判定は`IsInfraPathType`(送電`PATH_ELECTRICITY`/導水`PATH_WATER`/パイプライン`PATH_PIPELINE`の3種)で、バックエンドの共有定数`consts.PATH_TYPES_INFRA`と一致させる契約**(種別が増えたらこの3つ組と同時に直す。「財を区別しない共通のインフラ挙動」=交差点メッシュの対象外・川の地表横断判定の対象外などの判定にのみ使い、電力網と水網の物理的分離はノードビット側が受け持つ)。**利用側で`PATH_ELECTRICITY`・`PATH_WATER`を直接列挙しないこと**(種別追加時に片方だけ取り残される)。端子ノードの所属施設識別は依然`BuildingManager.TryGetInfraTerminalOwner`(建物側`infra_node_id`の逆引き)を使う(ノードAPIはownerを公開しない片方向参照)。TerrainInputHandlerのスナップとRoadPlanManagerのガイド描画・端子マーカーが使用 |
-| `Billboard.cs` | 常にカメラを向くオブジェクト |
-| `IntersectionPolygonUtil.cs` | 本線と共有する`PathEndSection`、外周`IntersectionCorner`、経路距離評価`AtDistance`、点列の切断`Trim`、保存制御点を使う`SamplePlan`。空間不足は`RequiresMoreSpace`で明示する |
-| `TunnelSectionUtil.cs` | 地下パス(トンネル)の区間分類。地下判定(`IsUndergroundPath`=負の相対Yアンカーを持つか)、点列の描画区間分割(`SplitDrawableRuns`: 深さ=地形標高−道路Yがクリアランス高さ`height`を超える区間を除外し坑口位置を返す)、トンネル区間の抽出(`CollectTunnelRuns`: 道路エディタのプレビュー用)、**トンネル区間の有無判定(`HasTunnelSection`: 相対Y=0の非追従パスが丘に潜るかを安価に判定。地下メッシュ経路/Far非表示のゲート)**。**`SplitRuns`系と`HasTunnelSection`は`pathFollowsTerrain`引数を取り、falseのとき地表張り付きショートカット(`IsOnGround`)を無効化して常に深さ評価する**(地表近くを通る非追従デッキが誤って追従扱いされ丘の隆起を見逃すのを防ぐ)。バックエンド`geo_path_depth.py`(`path_uses_depth_classification`)と同一の分類定義。PathManager/RoadPath/RoadPlanManagerが使用 |
-| `MultiValueTableBuilder.cs` | 複数値テーブルUIの構築 |
-| ObjectIdInfo.cs | GameObjectのメタデータ(id/status/isFarObject/role)を保持するコンポーネント。名前の文字列パースに代わる安全なデータ参照手段として各Managerが使用する |
-| OverlayMeshRenderer.cs | オーバーレイ用メッシュ描画。**生成は静的ファクトリ `Create(name, alwaysOnTop, parent, persistent)` を使う**(GameObject生成+`Custom/OverlayLine` マテリアル+`Initialize` を一括で行い、シェーダー参照をキャッシュする。各Managerで `new GameObject`+`Shader.Find` を書かないこと)。`alwaysOnTop=true` は `_ZTest=Always` で地形・建物に埋もれず常に手前に描く(丘の裏も透けるX線状。枠線・ギズモ・ハイライト用途で採用済みのトレードオフ)、`false` はシェーダー既定の LEqual+負のデプスオフセット(Offset -1, -20)で塗りが建物に自然に隠れる。描画キューや加算合成など追加設定は `Material` プロパティ(レンダラー専用マテリアル。複製しない)に対して行う。メッシュとマテリアルは `OnDestroy` で自動解放する。`AddPreTriangulated` は単色版と**頂点色版**の2種(頂点色版はグラデーション表現用)。シェーダーのマテリアルプロパティで `_ZTest`、`_SrcBlend`/`_DstBlend`(既定はアルファブレンド。`_DstBlend=One` で加算=光の表現)、`_Tint`(頂点色に乗算。`SetTint` でメッシュを作り直さず明滅させる)を制御できる。 |
-| StackedBreakdownMeter.cs | 積み上げメーター表示 |
-| `UILineRenderer.cs` | UI上の線描画 |
-| `UISoundEffectPlayer.cs` | 効果音再生 |
-| `VisualEffectManager.cs` | 建物・道路の完成/解体遷移でパーティクルと単発3D音を鳴らすシングルトン。**シーン配置ではなくAppRootが生成する**。音量は`ambience:volume`(master×sfx)購読×基準ゲイン0.8で、受信前は無音。クリップはインスペクタ未設定なら`Resources/Audio/Effects/construction-complete`・`demolition`を探す(現状どちらも未配置=無音)。呼び出しはBuildingManager/PathManager/ParcelManagerの`TriggerBuildingStatusEffect`等 |
-| `WindowUtil.cs` | ウィンドウ操作 |
+| `PolylineUtils.cs` | 線分・曲線・点列の幾何。`ClosestPointOnSegment`(Vector2/3) / `ClosestPointOnSegmentXZ` / `ProjectOnSegment(XZ)` / `DistanceToSegment(Sq)` / `IntersectRaySegment` / `CubicBezierPoint` / `SmoothedDirection` / `RoundCorners` |
+| `PolygonUtils.cs` | 閉じた2D多角形(x=X, y=Z)。`Contains`(偶奇則。`IReadOnlyList<Vector2>` / `float[][]` / `List<List<float>>` を直接受ける。境界上を含めるなら `boundaryTolerance` 付き) / `AppendRayCrossings`(走査線用) / `SignedArea`(正=CCW) / `DistanceToBoundary` |
+| `SpatialHash.cs` | `SpatialHash<T>`。「半径r以内の候補抽出」はこれを使い、自前で全件走査しない。巨大半径の Query はフリーズする |
+| `ModelManager.cs` | モデルのロードとキャッシュ(シングルトン)。persistentDataPath の glTF/glb を優先し、無ければ `Resources/Models` のミラープレハブ。同じモデルを二度ロードしない |
+| `GeneratedModelUtils.cs` | `ParseRing(JToken)`(GeoJSON リング→`List<Vector2>`) / `PathSummaryExtensions.GetRelativeHeightAtPoint`(`station_grade_profile` があれば設計絶対標高−地形、無ければアンカー相対Yの補間) |
+| `AgentIconFactory.cs` / `BuildingIconFactory.cs` / `PathIconFactory.cs` / `AlertIconFactory.cs` | アイコン生成。`AlertIconFactory` はアラートビット `(entityType, bit)` ごとの Sprite |
+| `FireEffectFactory.cs` | 火災・失火・爆破のパーティクル一式を建物寸法に合わせて手続き生成(テクスチャ・材質はコード生成で共有)。呼び出しは `DataLoaders/FireEffectManager`。調整の勘所は `geometries/S_火災エフェクトの描画.md` |
+| `VisualEffectManager.cs` | 完成/解体/爆破の遷移でパーティクルと単発3D音を鳴らすシングルトン(AppRoot が生成)。検証 `Tests/Explosion/run-unity.ps1` |
+| `InfraNetworkUtil.cs` | ノード溶接互換(吸着可否)。`IsNodeSnappable` / `IsPathSnappable` / `IsInfraMask` / `IsInfraPathVariant` / `IsInfraPathType` |
+| `IntersectionPolygonUtil.cs` | 交差点の路面ポリゴン。`PathEndSection` / `IntersectionCorner` / `AtDistance` / `Trim` / `SamplePlan` / `RequiresMoreSpace`。任意 `shapeLayout` は描画専用の外周調整で、保存パス・論理占有は変えない |
+| `TunnelSectionUtil.cs` | 地下パスの区間分類(バックエンド `geo_path_depth.py` と同一定義)。`IsUndergroundPath` / `SplitDrawableRuns` / `CollectTunnelRuns` / `HasTunnelSection` |
+| `OccupancyVolumeUtil.cs` | 道路・建物の占有警告箱の三角形列。`RoadPlanManager` と `HighlightManager` で共用し、既存の材質は変えない。検証 `Tests/Occupancy/run-unity.ps1` |
+| `OverlayMeshRenderer.cs` | オーバーレイ用メッシュ描画(`Custom/OverlayLine`)。生成は静的ファクトリ `Create(name, alwaysOnTop, parent, persistent)` |
+| `ObjectIdInfo.cs` | GameObject のメタデータ(id / status / isFarObject / role)。名前の文字列パースの代わり |
+| `Billboard.cs` / `UILineRenderer.cs` / `WindowUtil.cs` | 常にカメラを向く / UI 上の線描画 / ウィンドウ操作 |
 
-爆破操作は `FireEffectFactory.CreateExplosion`（共有の炎・煙素材で有限バースト）と `VisualEffectManager.PlayExplosion` を使う。音源は `Resources/Audio/Effects/building-explosion.ogg`。通常の完成/解体遷移には爆発を割り当てない。単発音は既存の `Play3DSound` で距離減衰と `ambience:volume` を反映し、再生中の音量変更にも追従する。建物と独立した子オブジェクトを実時間で後始末し、`ClearTransientEffects` は都市の全消去に連動する。AppRootのGameObjectには`CameraAmbience`の音源や天候の反射プローブ・雨粒など他コンポーネントの子も同居するため、`ClearTransientEffects`は自分が生成して登録した子(`ownedEffects`)だけを破棄する。`transform`の子を一括破棄すると環境音が`MissingReferenceException`を毎フレーム出す。検証は `Tests/Explosion/run-unity.ps1`。
+## 知らないと事故ること
 
-`Utils.cs`(Scripts直下)にも以下の汎用処理がある:
-- `GetGroundHeight(Vector3)` ... 同一フレーム・同一XZ座標だけをキャッシュする実タイル高さ取得。近傍座標への丸めは禁止（傾斜地で問い合わせ順に依存する高さになる）。地形の更新・登録・除去時は `InvalidateHeightCache()` を呼ぶ。表示中のタイルが無い位置は `TerrainManager.TrySampleOverview`(都市内は全景、都市外は背景)へフォールバックし、都市内の未常駐セルでは `Terrain.activeTerrains` を走査しない。セルの min 辺ちょうどの点は、自セルが未常駐なら負側の隣接タイルを使う。
-- `TryGetTerrainGrid(Vector3, out Vector2 origin, out Vector2 spacing)` ... 実タイルの格子原点と間隔。全タイル共通解像度の格子にfloorを合わせるために使う。
-- `ApplyDepthOffsetShader(MeshRenderer, contextName)` ... DepthOffsetLitシェーダー(URP Litベース+Offset -1,-1のZ-fighting対策バリアント)を一括適用(シェーダー参照だけキャッシュ)。`Renderer.materials` でレンダラーごとに複製する(複製は `onInstantiated` で所有者へ渡さない限り解放されない)ので、大量に作る描画物には使わない。建物は `BuildingManager.GetSharedDepthOffsetMaterials`、道路の遠景の帯・ノードは PathManager の共有マテリアルを使う(現在このメソッドの呼び出し元は無い)。
-- `DestroyObjectAfterFrames(MonoBehaviour, GameObject)` ... 2フレーム遅延でオブジェクト破棄(ポッピング防止)。各マネージャーから使用。
-- `CalculateAverageWidth(List<float>)` ... 幅リストの平均値を計算。歩道コネクタ等で使用。
-- `TransformBounds(Bounds, Matrix4x4)` ... ローカルAABBを行列で変換した後の外接AABB(8隅を包み直す)。プロップ・柱・環境車両の配置後バウンズ計算で共用。
-- `WaitTask(Task)` ... Task の完了をコルーチンで待ち、失敗時は例外をログ出力する。ApiClient / BuildingManager / PathManager / TerrainManager のバックグラウンド処理待ちで共用(各Managerに再実装しないこと)。
-- `XZDistanceSquared(Vector3, Vector3)` / `XZDistance(Vector3, Vector3)` ... 高さ差を無視した水平距離(の二乗)。車両・歩行者の描画半径判定、停留所の道路近接判定で使用。
-- `CreateOverlayCanvas(name, sortingOrder, persistent)` ... ScreenSpaceOverlay の Canvas(CanvasScaler+GraphicRaycaster付き)を生成する。3Dオブジェクト追従ラベルの土台で、ZoneManager(60)・ResourceManager(55)・AlertManager(70)が共用。sortingOrder が前後関係を決める。
-- `LoadUIIcon(name)` ... `Resources/UIIcons/{name}` の Sprite をロードする。Sprite Mode が Multiple でインポートされていると単体ロードが null になるため、その場合はサブスプライトの先頭を採用する(正しい設定は Single)。編集モードのラジアルメニュー/HUDが使用。
+- `PolylineUtils` の引数は点・始点・終点の順。射影する座標系で線分長²が 1e-8 以下なら始点を返す。画面座標とワールド座標を混ぜない。`CubicBezierPoint` は道路プレビュー・実道路・線路・車両基地が共有する(別実装は曲線を食い違わせる)。
+- `InfraNetworkUtil`: ノード `type` はビットフラグで、吸着は「ノードのマスク & パスの必要マスク(`GetRequiredNodeTypeForPath`=バックエンド `type_p2n`)が非0」。網互換(電力vs水道)もこのビット積に含まれる。
+  - `IsInfraPathType` は `consts.PATH_TYPES_INFRA` と一致させる契約。利用側で `PATH_ELECTRICITY` / `PATH_WATER` を直接列挙しない(種別追加時に片方が取り残される)。端子ノードの所属施設は `BuildingManager.TryGetInfraTerminalOwner`。
+- `TunnelSectionUtil` の `SplitRuns` 系と `HasTunnelSection` は `pathFollowsTerrain=false` で地表張り付きショートカットを無効化し、常に深さ評価する(非追従デッキが丘の隆起を見逃さないため)。
+- `OverlayMeshRenderer`: 各 Manager で `new GameObject`+`Shader.Find` を書かない。`alwaysOnTop=true` は `_ZTest=Always`(丘の裏も透ける。枠線・ギズモ用)、`false` は LEqual+負のデプスオフセット。
+  - 追加設定は `Material` プロパティ(`_DstBlend=One` で加算、`_Tint` でメッシュを作り直さず明滅)。`AddPreTriangulated` は単色版と頂点色版。次の `BeginFrame` まで前フレームのメッシュを保持するので、内容が変わったフレームだけ作り直す。
+- `AlertIconFactory`: Sprite 未割当のビットは `GetIcon` が null を返し `AlertManager` が無言でスキップする。アラート定数を追加したらシーンでの割当まで行う(手順は `programs/アラートフラグ管理.md`)。
+- `FireEffectFactory`: `AddComponent<ParticleSystem>` 直後は再生状態なので、`duration` / `prewarm` を触る前に `Stop`。
+- `VisualEffectManager.ClearTransientEffects` は自分が生成した子(`ownedEffects`)だけを破棄する。同居する `CameraAmbience` 等の子を一括破棄すると環境音が毎フレーム `MissingReferenceException` を出す。
 
-PathSummaryExtensions.GetRelativeHeightAtPointはstation_grade_profileがあればXZ射影した設計絶対標高からUtils.GetGroundHeightを引く。基準線なしでは既存のアンカー相対Y補間を使い、描画Yのオフセットを混入させない。
+## `Utils.cs`(Scripts 直下)
 
-`OccupancyVolumeUtil` は道路幅×占有高さの区間箱と、建物フットプリントの外接矩形×高さの警告箱を三角形列へ追加する。RoadPlanManagerのローカル警告とHighlightManagerの権威警告で共用し、既存オブジェクトのマテリアルを変更しない。検証は `Tests/Occupancy/run-unity.ps1`（独立Unity、結果と画像はTemp/OccupancyQA）。
-
-Utils.ApplyDepthOffsetShaderは路面標示用Custom/RoadSurfaceを保持する。RoadSurface自身が道路の深度オフセットと影・深度パスを持つため、通常のDepthOffsetLitへ置き換えると標示が失われる。
+- `GetGroundHeight(Vector3)`: 実タイルの高さ。同一フレーム・同一XZだけキャッシュし、近傍座標へ丸めない(傾斜地で問い合わせ順に依存する)。地形の更新・登録・除去時は `InvalidateHeightCache()`。未常駐の位置は全景・背景へフォールバックする。
+- `TryGetTerrainGrid(Vector3, out origin, out spacing)`: 実タイルの格子原点と間隔。
+- `ApplyDepthOffsetShader(MeshRenderer, contextName, onInstantiated)`: `DepthOffsetLit` を適用。レンダラーごとに材質を複製するので大量の描画物には使わず、建物は `BuildingManager.GetSharedDepthOffsetMaterials`、道路遠景は `PathManager` の共有材質を使う。路面標示用 `Custom/RoadSurface` は保持する(置き換えると標示が消える)。
+- `DestroyObjectAfterFrames(MonoBehaviour, GameObject)`: 2フレーム遅延の破棄(ポッピング防止)。
+- `WaitTask(Task)`: Task をコルーチンで待ち、失敗時は例外をログ出力。
+- `CalculateAverageWidth(List<float>)`、`TransformBounds(Bounds, Matrix4x4)`(変換後の8隅を包み直す外接AABB)、`XZDistance(Squared)`(水平距離)、`GetCameraHorizontalForward` / `IsInHorizontalView`(視野優先処理の水平視野判定)。
+- `CreateOverlayCanvas(name, sortingOrder, persistent)`: ScreenSpaceOverlay の Canvas。sortingOrder が前後関係を決める(`programs/アラートフラグ管理.md` §Canvas sortingOrder 階層)。
+- `LoadUIIcon(name)`: `Resources/UIIcons/{name}` の Sprite。Sprite Mode が Multiple だと単体ロードが null になるためサブスプライト先頭を採用する(正しい設定は Single)。

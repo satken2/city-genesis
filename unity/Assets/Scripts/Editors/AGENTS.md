@@ -1,129 +1,59 @@
 # Editors フォルダ
 
-3D空間内で道路・建物・土地区画・地区を編集する際の状態管理を担う。パネル確定型の編集(道路・建物・区画・資源・公共交通・プロップ)の確定送信はUI(Tauri)側が直接行い、このフォルダは形状の組み立てとUIへの逐次通知・確定後のリセットを担う(地区の即時割当・接続端子移動などの3Dジェスチャ完結型のみUnityが直接送信する)。
+3Dビュー内で道路・建物・土地区画・地区・資源エリア・公共交通・プロップを編集するときの状態管理(形状の組み立て、プレビュー描画、UIへの逐次通知、確定後のリセット)を担う。マウス入力は`InputHandlers/`が受け、入力モードに応じてここへ委譲される。
 
-## 編集フローの全体像(知らないとわからない)
+## 確定送信の契約
 
-道路・線路の接続縦断はearthwork-previewの`path_profiles`を使う。編集停止後はメッシュとローカル勾配警告を同じ絶対標高から作り、受信時に警告キャッシュを破棄する。設計済み点列へ地形追従の平滑化を重ねない。取得待ち・ドラッグ中はローカル近似、確定可否は全線validateが正。
-
-編集操作は3つのコンポーネントの連携で成立する。
-
-1. **UI(Tauri/city-genesis/tauri)**: 建設ウィンドウでバリアント選択・確定ボタン → IPCでUnityに通知
-2. **Editors(このフォルダ)**: IPCイベントを受けて編集モードに入り、マウス操作で形状を組み立てる。プレビューはバックエンドの`/preview`系エンドポイントを使う
-3. **確定時**: UI(Tauri)が直接バックエンドのPOST/PATCH系エンドポイントに送信し、成功後に `edit_*:finish` 系イベント(または `session:reload`)でUnity側の編集状態をリセットしてDataLoadersが再描画する。例外は3Dジェスチャで完結する操作(地区の即時割当、接続端子のドラッグ移動)で、これらはUnityが直接送信する
-
-入力イベント自体は`InputHandlers/`が受け、入力モード(`InputSystemManager`)に応じてここへ委譲される。
-
-線分への射影・距離は`PolylineUtils`へ委譲する。道路・停留所の水平吸着はXZ版、接続点・停留所の画面ヒット判定はVector2の二乗距離を使う。道路の接線候補検索の3D射影はVector3版を使い、入力ハンドラを幾何ユーティリティとして呼ばない。
+- パネル確定型(道路・建物・区画・資源・公共交通・プロップ・駅パッケージ・結合/分割・区間編集)の確定はUI(Tauri)が直接バックエンドへ送る。ここは`edit_*:update_*`で形状を逐次通知し、成功後の`edit_*:finish`系(または`session:reload`)でリセットするだけ。
+- 3Dジェスチャ完結型(地区の作成・拡張、接続端子のドラッグ移動)だけはUnityが直接送信する。地区の統合は不可逆なのでUIの確認ウィンドウを経由する。
+- ローカル判定(交差・川横断・線形・干渉)は表示用の推定で、権威はバックエンド(`/paths/validate`等)。ローカル線形推定で`can_confirm`を拒否しない。例外はロープウェイの折れ角(地形に依存せず確定的なので直接禁止)。
+- 詳細は`docs/programs/IPC連携の整理.md`の「確定送信の責務分担」「グラフィックプログラムのステート」。
 
 ## ファイル一覧
 
-| フォルダ | 内容 |
+| ファイル | 内容 |
 | --- | --- |
-| `RoadEditor/` | 道路編集。中核は`RoadPlanManager.cs`(フェーズ: Inactive→Placing→Editing。左クリックで点配置、右クリックで形状確定、ドラッグで制御点調整)。すべてのパスは三次ベジエで、制御点はCatmull-Romスプラインに基づき自動計算され、ドラッグで個別調整できる。調整した制御点(端点=`start_control`/`end_control`、中間=ウェイポイントの`control_in`/`control_out`)は`EmitShapeUpdate`が`edit_path:update_shape`(`waypoint_controls`キー)でUIへ送り、UIの確定送信でバックエンドに永続化される。**制御点ごとに手動調整フラグ(`PathBuildPoint.control_in_manual`/`control_out_manual`)を持ち、`RecomputeAllControlPoints`はフラグの立っていない制御点だけを自動計算する**(制御点ドラッグで立つ。`EnforceCollinearControls`で追従させた反対側にも立てる=片方だけ再計算されて一直線が崩れるのを防ぐ。`AlignEndpointControlsToExistingPaths`も手動調整済みの端点は整列しない)。**頂点ドラッグの移動軸は`anchorDragAxis`(XZ/Y)で、選択済み頂点の再クリックでトグルする**(`HandleEditingClick`。標高編集不可バリアントはXZ固定。別頂点の選択・選択解除・削除・フェーズ遷移でXZへ戻す=`SelectPoint`経由)。Yドラッグは`BeginVerticalDrag`/`UpdateVerticalDrag`が「頂点を通りカメラ正面向きの鉛直平面とマウスレイの交点Y」の開始時からの差分を相対高さに加える(真上視点は画面縦ピクセル換算にフォールバック。XZ吸着なし。`HasSelectedNode`/`IsVerticalDragMode`をHUDが矢印表示に使う)。**頂点の移動・標高変更は必ず`MoveAnchorPosition`を通す**: 移動した頂点の手動制御点はアンカーと同じXZ量だけ平行移動し(Yはアンカーの絶対標高の移動量だけ平行移動する)、未調整の制御点だけ再計算する。隣接頂点の手動制御点は動かさない。`RecomputeAllControlPoints(resetManual: true)`でフラグごと全消去する(=`SetCurved`)。既存パスの編集再開(`LoadExistingPath`)では保存済み制御点を退避→全自動計算→上書き復元の順で反映し、保存値と自動計算値の乖離(0.05m超)がある制御点だけ手動扱いにする(確定送信には自動計算値も明示的に載るため、全部を手動扱いにすると再開後の頂点移動で制御点が一切追従しなくなる)。**端点が既存パスの端点に接続している場合、`RecomputeAllControlPoints`末尾の`AlignEndpointControlsToExistingPaths`が端点制御点(start_control/end_control)を既存パスの延長線方向へ整列させ、接続部で道路が折れないようにする**(「直線延長」吸着フラグ`TerrainInputHandler.EnableStraightLineSnapping`がONのときのみ適用。自動接線との角度差が`Constants.PATH_TANGENT_ALIGN_MAX_ANGLE_DEG`〔20°、consts.py同期〕以内のときだけ整列し〔明らかに別方向へ引いた曲線は尊重〕、交差点接続などで候補が複数あるときは角度差最小を採用。**直線延長吸着は敷設セッションの開始時〔`InitializeRoadPlacement`で継続配置の設定を伴わない呼び出し=新規敷設・既存パス編集の開始〕に必ずOFFへ戻す**〔道路・軌道・インフラ、曲線/直線を問わず既定OFF。整列させたければラジアルメニューでONにする。継続配置はセッション中の手動設定を保つ〕。`SetCurved`は整列の適用有無が変わるため切替時に`RecomputeAllControlPoints(resetManual: true)`を呼び直す=曲線⇔直線トグルで手動調整済み制御点は失われる。バックエンド`add_path`にも制御点省略時の同等整列がある〔`geo_paths.align_endpoint_controls_to_connected_paths`。UI経由は整列済み制御点を明示送信するため二重適用にならない〕)。標高(高架:1/2キー)と盛土オフセット(-5〜+5m:3/4キー)をノードごとに設定可能。盛土は全道路タイプで利用可能で、道路のY座標は0のまま着工時に地形を変形させる。標高の下限はマスターの`min_height`(負の値を持つ地下対応バリアントのみ地下=負の標高に潜れる。未定義は0)。**地下パス・非追従パスの編集中はトンネル区間(深さ>クリアランス高さ)をオレンジのオーバーレイ線で可視化**(`DrawTunnelSections`、`Utils/TunnelSectionUtil.CollectTunnelRuns`。実効非追従なら相対Y=0でも可視化対象)。**地形追従の個別上書き(`PathFollowTerrainOverride`=-1未設定/0非追従/1追従)は`SetFollowTerrain`で受け(`edit_path:set_follow_terrain`。height_editableバリアント限定)、実効値は`EffectiveFollowTerrain()`=個別上書き優先→`PathManager.GetPathFollowTerrain(PathSubtype)`で解決する。プレビュー点列・立体交差・トンネル可視化がこれを参照し、`EmitShapeUpdate`の`follow_terrain`でUIへ逆流、`LoadExistingPath`で既存値を復元する**。**立体交差の警告プレビュー(`CheckElevationIntersections`)は、地下パスが絡むペアのみ相対高さでなく絶対標高(地形標高+相対高さ)で判定する**(バックエンド`validate_path_elevation_intersections`と同じルール。地形追従セグメントは交差点位置の地形標高を使う)。**インフラパス敷設中は、敷設中バリアントと同一網（網互換）の施設接続端子ノードの上空に「反転した赤い四角錐」マーカーを回転＋ボビングのアニメーション付きで描画する**(`DrawInfraTerminalMarkers`。端子判定は`BuildingManager.TryGetInfraTerminalOwner`のinfra_node_id逆引き。アニメーションのため背景メッシュではなく毎フレームの`overlayRenderer`パスで描く)。**建物干渉のローカル推定(`CheckBuildingInterference`)は、インフラを流せるバリアント(送電線・導水管・パイプライン・電化線路=infra_products非空)の敷設中、同一網のインフラ需給施設を除外する**(施設の`infra_node_id`端子ノードと敷設中バリアントの網互換=`InfraNetworkUtil.IsNodeSnappable`のビット積で判定。端子ノード未ロード時は除外しない=安全側で赤表示。端子は施設の区画内にあり引き込みで建物と重なるのが正常な配線のため。バックエンド権威`compute_path_interference`の`building_ids`も同一基準で除外し、ローカル推定と権威ハイライトが揃う)。`RoadRenderer.cs`がプレビュー描画、`RoadVertex.cs`が頂点、`RoadOverlayHitDetector.cs`が既存道路へのヒット判定。**曲線/直線(`Curved`)と吸着7フラグの真実源はUnity側**で、切り替えは`RoadEditControlMenu.cs`(RoadPlanManagerに常駐するCtrlラジアルメニュー+カーソルHUDのドライバ。開閉のライフサイクルは共通基底`EditControlMenuBase`、汎用部品は`UI/RadialMenu/RadialMenuController`と`UI/CursorStatusHud`)が行い、曲線・吸着のUIパネル設定イベント(`edit_path:change_curved`/`view:set_snapping`)は廃止済み。曲線モードは`EmitShapeUpdate`の`is_curved`でUIへ逆流し確定送信の`curved`になる(点列が空でも常送)。**駅舎パス(マスターのtype=`PATH_STATION_HOUSE`)の敷設中は`SnappingSuppressed`が真になり、`ApplySnapping`が冒頭で打ち切って既存の地物への吸着(ノード/パス/直線延長/直角/並行・終端揃え、`AlignEndpointControlsToExistingPaths`も)を一切行わない**(グリッド吸着だけは通す。駅舎の線は線路・道路と交差してもノードを作らず接続もしないため、吸着すると端点が線路上に乗り建屋が線路を避けきれなくなる。ラジアルメニュー・カーソルHUDも該当項目をグレー/OFFで描く)。**標高・盛土はパネルにもステッパーが残る**: `edit_path:change_node`/`change_embankment`→`OnChangeNodeFromIpc`/`OnChangeEmbankmentFromIpc`でパネルの数値変更を選択中ノード(nodeIndex=-1は次回配置値)へ反映し、逆にUnityのキー操作や選択で変わった値は`EmitSelectNode`/`EmitCurrentHeight`(`edit_path:select_node`)でパネルへ返す双方向同期(既存ノードを選んで数値で微調整する用途のため両方に口を残している)。**例外はホーム設置側(`PlatformSide`)で、これだけはUnityの操作系に無くUIパネルのトグルが真実源のため、`edit_path:change_platform_side`→`SetPlatformSide`でUIから逐次受け取り、駅パスプレビューのプラットフォーム張り出し側(`RoadRenderer`→`TrackPath`)に反映する**(初期値は`STATE_EDIT_PATH`の`platform_side` params)。**軌道複線(=単線パス群の平行敷設)のプレビューも同型**: 各線の横オフセット列`LateralOffsets`(m、敷設方向右が正。空=単一パス)と進行方向列`TravelDirections`(`DIR_*`。index対応)はUIパネルの線路数・進行方向設定が真実源で、`edit_path:change_lateral_offsets`→`SetLateralOffsets`で逐次受け取り(初期値は`STATE_EDIT_PATH`の`lateral_offsets`/`travel_directions` params)、`RoadRenderer`が中心線をオフセットした点列ごとにプレビューメッシュを平行N本生成する(オフセット計算`OffsetPolylineLateral`はTauri側`pathOffset.ts`のマイター平均と同一ロジックで、確定後の敷設位置と一致させる)。進行方向は各線の仮PathSummaryの`travel_direction`に載り、駅バリアントのホーム設置側の解決と進行方向矢印が確定後と同じ見た目になる。確定時の平行展開・一括POSTはUI側が行う。**軌道複線敷設中の吸着はオフセット考慮版(`TryOffsetAwareRailSnap`)**: 確定後は平行な単線パス群に分解されて「グループ」の実体が残らないため、素朴にグループ中心線を既存線路の中心線へ吸着させると全線路が横にズレて1本も接続できない。そこで`LateralOffsets`に0以外のオフセットがある間は、吸着対象(ノード/建設中端点/セグメント)の位置Eと接線tから「グループ内のいずれかの線路がEに乗る中心線位置 C=E±perp(t)·オフセット」を候補列挙してカーソル最寄りの候補へ吸着する(既存複線の中心にカーソルを置くと左右の線路由来の候補が重なり、同構成の延長では全線路の端点が一致する)。ヒット時は共通ノード/パス吸着をスキップする(Cが既存線路の中心線へ引き戻されるため)。並行OFF時はグリッド吸着が最優先。並行ON時は接続吸着→並行補助→グリッドの順で、詳細は後述。単線([0])・道路・既存パス編集は共通の接続吸着を使う。曲線初期値は`InitializeRoadPlacement`が`IsCurveAllowed()`(マスターの`curve_allowed`)から決める。標高・盛土キーは**Placingフェーズでも有効**(選択ノードなし時は次回配置値`currentHeight`/`currentEmbankmentHeight`を増減)。ラジアルメニュー表示中の入力は`RadialMenuController.IsOpen`をInputHandler/CameraControllerがゲートする(キーボード起動でドラッグ掴みではないため`CameraController.IsMouseOverEditHandle`への追加は不要)。**線形制約(最小曲線半径・最大勾配)のローカル推定(`CheckAlignmentViolations`)**: `GetRenderPoints`+配置中ホバー位置を1m間隔・絶対標高付きに補間し(`BuildAlignmentSamples`。直線モードの地上スパンは各点で地形高さ)、前後`LocalConstants.PATH_CURVATURE_WINDOW_M`の3点円の半径と、`PATH_GRADE_SMOOTH_MIN_M`の移動平均後の前後差の勾配を求め、マスター(`PathMasterEntry.min_curve_radius`/`max_grade`。0=制限なし)を超える区間を`DrawAlignmentWarnings`が赤い太線で描く。ローカル線形推定だけでは`can_confirm`を禁止せず、HUD(`RoadEditControlMenu`)に「R 半径m  G 勾配%」(違反時は`!`前置)を出す。バックエンド`geo_path_alignment`と同一規則を維持すること(権威はバックエンド) |
-| `BuildingEditor/` | 建物建設。`BuildingPlanManager.cs`が区画配置とプレビューを管理し、`BuildingPlanManager.Placement.cs`が直接配置の状態・キー入力・道路吸着を持つ。`BuildingEditControlMenu.cs`はCtrlラジアル・カーソルHUD・寸法線。初期は区画配置(`STATE_EDIT_BUILDING`のparams`placement_mode`=parcel/free/roadsideで上書き可。`IpcStateCoordinator`が`DirectAllowed`確定後に`SetPlacementMode`で適用する。都市創設時の市庁舎はUIが`free`を指定)、自由配置/道路沿い配置ではPARCEL入力をMODE_NONEにして区画上でも地形へ貫通する。`1/2`で間口±1m、`3/4`で奥行き±1m、Shiftで5m、長押しリピート。寸法はマスターの`default_width/default_height/resizable`に従い(観光名所は`landmark_master`の`width`/`depth`/`floors`が`agent_master`より優先。バックエンドも同じ値を強制するため、ゴーストと`placement_state`・世代照合の階数をそこから始める)、道路吸着中は道路側の辺中央を固定して奥行きを背面へ伸ばす。道路幅には歩道が含まれるためwidth/2を外縁とする。近傍セグメントを重複除去して距離順に評価し、地上・接道可能な道路だけへ吸着する。曲線は区間接線へ向け、矩形が地上道路と重なる候補は除外する。幾何計算は`BuildingPlacementGeometry.cs`。左クリックは位置固定、Esc/パネルの取消しは寸法と配置方法を保って選び直し。自由配置のみ中ドラッグで回転(中ボタン回転・キー長押しリピート・入力ブロック判定はEditors直下の`PlacementInput.cs`をプロップ個別配置と共用)。既存建物編集・忠実コピーは区画配置専用。パネルは`placement_command`で変更フィールドだけ送り、Unityは`placement_state`で位置・寸法・角度・世代を一括通知する。`update_shape`の`placement_revision`で古い直接配置プレビューを破棄する。建設確定(通常/直接/既存編集)はTauriがHTTP送信する。**建設可能区画のハイライト(`DataLoaders/ParcelManager.IsBuildable`)は「建築規制`allowed_bd_mask`に建物種類`bd_type`のビットが立つこと」と「選択中バリアントが要求する土地区画種類と一致すること」の2条件で決まる**。要求区画種類は`ResolveRequiredParcelType(bdType)`が解決し、建設モードに入るときに`agent_master.parcel_type`から拾った`SelectedParcelType`(static。建設モードを抜けると0へ戻す)があればそれを、無ければ表示レイヤーから`bd_type`だけでフィルタを選んだ場合として港湾=沿岸/それ以外=陸地の既定へ倒す。一致判定は`IsParcelTypeAllowed(parcelType, bdType)`の完全一致。**区画クリックの検証(`OnParcelClick`)もこの2つのstaticメソッドを共有する**ので、ハイライトされない区画をクリックしても無視され`EmitEditBuildingInvalidParcel`でUIへ警告が出る(区画データが渡らない呼び出しは判定できないのでバックエンドの検証に委ねて通す)。バリアント単位の条件は`bd_type`単位の`FILTER_*`表示モードでは表現できない(同じ`bd_type`でも陸・沿岸・海上に分かれる。洋上風力発電所など)ため、`SelectedParcelType`を別に持ち回す。`EffectRangeOverlay`は`update_effect_range`の施設効果範囲を描画。検証は`Tests/BuildingPlacement/run.ps1`と`run-unity.ps1`。 |
-| `ParcelManager/` | 土地区画の作成・分割・形状編集。`ParcelEditorManager.cs`が中核(点選択/パス選択/区画分割の「選択」系)。**作成方法(`parcel_creation_mode`)の真実源は`ParcelEditorManager.CurrentMode`で、切り替えは`ParcelEditControlMenu.cs`(Ctrlラジアル+カーソルHUDのドライバ。`RoadEditControlMenu`/`ZoneEditControlMenu`と同じく共通基底`EditControlMenuBase`の派生で、`IsActive`をポーリングして自律開閉する)が行う**。モード定義(ラベル/アイコン名/HUDの案内文/選択対象の種別/`InputModePreset`)は`ParcelEditorManager.Modes`の1テーブルに集約してあり、入力プリセットの切替・選択状態のリセットはすべて`ApplyCreationMode`→`ResetSelection`に集約される(`IpcStateCoordinator`のSTATE_EDIT_PARCELも`EnterCreationMode`経由で同じ経路を通す)。**Unity起点の切替は`edit_parcel:set_mode`でUIへ通知し、UI起点(パネルのタイル)は`world:change_state`で届くので通知しない**(往復ループ防止)。**Escは選択のリセットで作成モードからは抜けない**(`ResetSelection(notifyUi:true)`。選択済みでもフラグが落ちているだけなので判定は`IsActive`で行う——選択モードのフラグで判定すると一番Escを使いたい「選択済みを選び直す」場面で反応しなくなる)。**作成の確定でもモードを抜けない**: UIが`edit_parcel:reset_selection`を送り`ResetSelection`が選択だけ捨てて連続作成できる。矩形の幅・奥行きはパネルが真実源で`edit_parcel:set_rect_params`→`SetRectPreviewSize`が受け、角度ドラッグ中のローカル矩形プレビューにのみ使う。**道路沿い作成(`along_path`)では、クリック地点を対象パスの中心線へ射影したアンカーを`edit_parcel:select_path`の`position`に載せてUIへ渡す**(`OnPathSelected`。パネルの作成範囲が「クリック地点」のとき、バックエンドがその周辺の1〜5区画だけを作る基準になる)。アンカーは「道路を横切る棒＋円」のマーカーで3Dビューに出す(`DrawPathAnchorMarker`。`PathTopologyEditManager`の分割点マーカーと同型で、専用の`OverlayMeshRenderer`+`_ZTest=Always`)。**`edit_parcel:select_path`の送信元は`ParcelEditorManager.OnPathSelected`に一本化してある**(`PathInputHandler`にも送信コードがあり二重発火していた。射影済みアンカーを載せる都合でもマネージャ側に寄せる必要がある)。`ParcelPlanRenderer.cs`がプレビュー描画、`ParcelShapeEdit～`が既存区画の頂点編集(`ParcelShapeEditManager`はEditors直下の共通基底`PolygonAreaEditManager`の派生で、保存済みポリゴンを読み込んでEditingフェーズから始める。差分はIPC通知先と元区画オブジェクトの表示制御だけ。**確定送信=PATCH /parcels/{id}はUI(Tauri)側が直接行い、保存成功後に届く`edit_parcel:finish_shape_edit`で`ParcelShapeEditManager.CompleteEditMode`が編集終了・リロード・枠線再描画を行う**)。新規作成の順序は道路沿い・ブロック一括・ランダム・単一区画。ブロック一括は周辺道路から沿道区画を生成し中央を空地にする。任意形状は作成後の頂点編集で調整する。 |
-| `PolygonAreaEditManager.cs` | (Editors直下)地形上に「任意ポリゴン」を作る共通基底クラス。**頂点配置(左クリック)→仮確定(右クリック)→頂点ドラッグ/辺挿入/右クリック削除**という操作感・オーバーレイ描画・ヒット判定・ドラッグ処理を全て集約し、`ResourceAreaEditManager`(天然資源の新規作成=Placingから開始)と`ParcelManager/ParcelShapeEditManager`(既存区画の形状編集=`InitializeEditingWithPolygon`でEditingから開始)が継承して再利用する。派生が差し替えるのは「完成ポリゴンをどのIPCイベントで通知するか(`EmitShape`)」「オーバーレイの色・キャンバス名」と、必要なら`FinishEditMode`の上書きによる固有の後始末だけ。**頂点編集・ヒット判定・描画のロジックを派生側に複製しないこと。**オーバーレイ描画は`ParcelManager/ParcelShapeEditOverlayRenderer`(区画固有の状態を持たない汎用部品)を再利用。TerrainInputHandler/InputHandlerからは派生の具体型(`ResourceAreaEditManager`/`ParcelShapeEditManager`)を`FindAnyObjectByType`で解決してディスパッチする |
-| `EditControlMenuBase.cs` | (Editors直下)編集モード中の「Ctrl長押しラジアルメニュー+カーソルHUD」ドライバの共通基底。対象マネージャと同じGameObjectに常駐し、`IsSessionActive`をポーリングしてHUDの登録/解除・Ctrl検知でのメニュー開閉・自分が開いたメニューの後始末(`OnDisable`含む)を一手に持つ。派生(`RoadEditor/RoadEditControlMenu`・`ZoneEditor/ZoneEditControlMenu`・`ParcelManager/ParcelEditControlMenu`)は`IsSessionActive`/`MenuItems`/`BuildHudContent`を与えるだけで、確定直後の追加処理は`OnMenuCommitted`で足す(道路の吸着プレビュー再計算)。アイコンは`Utils.LoadUIIcon`でロードする(各ドライバに独自ローダを書かない)。**新たにCtrlメニューを持つ編集モードを足すときはこれを継承し、開閉処理を各ドライバに書かないこと。**`BuildingEditor/BuildingEditControlMenu`だけは項目を開くたびに再構築しEsc/フォーカス喪失でも閉じる独自実装で、まだ基底に乗っていない |
-| `RoadEditor/StationPlanManager.cs` | 駅パッケージ配置(`STATE_EDIT_STATION`。軌道建設パネルの**簡易モードの駅タブ**)を司る。プラットフォーム複線(相対式=ホームは外側固定)と駅舎を1クリックでまとめて置くためのモードで、`RoadPlanManager` とは別系統の自己完結したマネージャ(`TransitPlanManager`/`PropPlacementManager` と同じ枠組み。`IpcStateCoordinator` が動的生成する)。**プレイヤーが指定するのはホーム長・高さ・角度・規格だけで、形状は固定**——折れ線の編集・曲線・吸着・グリッドを持たず、**共通吸着も掛けない**(中心線は複線の「間」を通るため既存線路へ吸着すると半間隔ずれる)。操作は建物の自由配置・プロップの個別配置と同じで、カーソル追従のゴースト→左クリックで地点固定→パネルの確定、中ボタンドラッグで回転・PageUp/PageDownで高さ・Esc/右クリックで固定解除(`PlacementInput.cs` 共用)。プレビューは `PathMeshFactory` へ仮 `PathSummary` を渡して実パスと同じメッシュを3本ぶん生成する(`RoadRenderer.GenerateComponentPreview` と同じ手法。マテリアルは `RoadPlanManager.previewMaterial` を借りる)。**プラットフォームは `follow_terrain=0`(非追従)+`station_grade_profile` で水平に固定し、駅舎の線は地形追従のまま**(連絡橋のデッキ高さはプレハブの造形が持つ規約のため)。**駅舎の線の長さはホームの外縁より外で終わる長さを自動で取る**——建屋は線路に重なると外側へスライドするが、敷設中の線路はまだ存在せずスライド計算に入らないため、最初から外側で終わらせないとプレビューと確定後で建屋の位置がずれる。ゴーストの再生成は実メッシュを作り直すので**カーソル追従中は0.1秒間隔に間引く**(位置は毎フレーム取り込む)。確定送信(プラットフォーム2本+駅舎1本の一括POST)と干渉・線形の検証はUI側が行い、ローカル判定は持たない |
-| `PlacementInput.cs` | (Editors直下)配置エディタが共有するキー/マウス操作の部品。`PlacementInput.IsBlocked`(ウィンドウ非フォーカス・ラジアルメニュー表示中・カメラのフライモード/ドラッグ中・UI上のポインタなら配置操作を止める)、`MiddleDragRotation`(中ボタンドラッグの回転。0.5度/pxを1度単位に量子化し端数を持ち越す。`Update`が Started/Rotated/Released を返し、`Cancel`はリリース通知なしで打ち切る)、`KeyRepeat`(長押しリピート: 初回0.35秒・以後0.075秒)。建物直接配置の回転/寸法キー、プロップ個別配置の回転/PageUp・PageDown高さ、駅パッケージ配置(`StationPlanManager`)の回転/高さで使う。**新たに3D側のキー・中ボタン操作を足すときはここを使い、各マネージャに独自実装しない。** |
-| `ResourceManager/` | 天然資源エリアの新規作成(テンプレート作成モード専用)。`ResourceAreaEditManager.cs`が中核で、頂点編集ロジックは共通基底`PolygonAreaEditManager`(上記)を継承。Placing(左クリックで頂点を末尾に追加)→Editing(右クリックで確定後、頂点ドラッグ・辺クリック挿入・右クリック削除)。オーバーレイは暖色系(オレンジ)。**バックエンドへの確定送信(POST /api/v1/resources)はUI(Tauri)側が直接行い、このマネージャはポリゴン形状の組み立てとUIへの逐次通知(`edit_resource:update_shape`)のみを担う**(道路建設と同じ責務分担) |
-| `TransitEditor/` | 公共交通の路線設置と経路編集。`TransitPlanManager.cs`が中核(フェーズ: Inactive→Placing→Editing。`RoadPlanManager`に似た操作感だが**巡回点(停留所と経由点)を巡回順に並べるだけ**でベジエ制御点/標高/盛土は持たない)。**路線は巡回点をたどる閉じたループで、最後の点の次は先頭の点**(往復運行は行きと帰りの停留所を並べる)。**Placing: 左クリックで停留所を末尾に追加(既存の停留所をクリックすると同じ停留所の再訪として追加、先頭の停留所をクリック〔停留所2つ以上〕か右クリックでEditingへ)。Editing: 停留所・経由点のドラッグで移動、区間(末尾→先頭を含む)のクリックで停留所を挿入、区間のドラッグで経由点を挿入して動かす(一度も吸着できずに離した経由点は取り消す)、右クリックで削除**。吸着は`PathManager.QueryNearbySegments`の候補を停留所=`stop_path_variants`・経由点=走行網(`route_path_variants ∪ stop_path_variants`)で絞った中心線への射影で、射影距離が「パス幅/2 + STOP_ON_PATH_MARGIN(2m)」以内でなければ置かない(=バックエンド`_resolve_route_points`と一致)。高さは吸着先のパスの点列から取る。**経路プレビュー**: 巡回点が変わるたびに`POST /transit/lines/route-preview`を0.25秒の待ちを置いて呼び(`RoadEarthworkPreview`と同じ要求キー+送信済みキーの方式)、区間ごとの走行データを区間ごとの`TransitRouteGeometry.Route`にして(継ぎ目の写しを作らないよう`turnback=true`にする)路線色帯と同じ輪郭12px+帯8pxで描く(描画順3202/3203=路線色帯の手前)。つながらない区間はその区間の巡回点を結ぶ赤い破線、応答待ちの間は巡回点を結ぶ直線。マーカーは`Utils/OverlayMeshRenderer`(`_ZTest=Always`のギズモ)で、停留所=四角(巡回の先頭は緑)、経由点=丸。停留所・経由点を置いたとき(追加・挿入・ドラッグで動かして離したとき)に`Resources/Audio/Effects/transit-point-place`を2Dで鳴らす(音量は`IpcClient.OnAmbienceVolume`=UIの効果音設定)。**確定送信(新設`POST /api/v1/transit/lines`・経路編集`PUT /api/v1/transit/lines/{id}/route`)はUI(Tauri)側が直接行い、このマネージャは巡回点の組み立て・プレビュー・UIへの逐次通知(`edit_transit:update_points`、各点は{kind, position:[x,0,z]}。ドラッグ中は送らず離したときに送る)のみを担う**(資源編集と同じ責務分担)。`IpcStateCoordinator`が`STATE_EDIT_TRANSIT`遷移時に動的生成・初期化(`InitializeTransitPlacement(path_variant, stop_path_variants, route_path_variants, points, line_agent_id)`。`points`があれば経路編集としてEditingから始め、`line_agent_id`の路線色帯を`TransitOverlayManager.HiddenLineId`で隠す)し、依存(カメラ/PathManager/マテリアル/効果音)は実行時に自己解決するためシーン事前配置は不要。地形上のドラッグでは`StartDrag`が呼ばれず`ProcessMouseDrag`だけが届く(InputHandlers/AGENTS.mdの罠)ので、左ボタンを押した画面位置を覚えて最初の`ProcessMouseDrag`で掴む(遅延グラブ)。点・区間の上で始めたドラッグは`CameraController.IsMouseOverEditHandle`が`IsMouseOverDraggable`で判定してカメラ移動にしない。設置済み公共交通パスの表示は`DataLoaders/TransitOverlayManager`が担う |
-| `ZoneEditor/` | 地区編集のツール切替ドライバ`ZoneEditControlMenu.cs`(地区編集の状態自体はScripts直下の`ZoneEditContext.cs`)。**`RoadEditControlMenu`と同じ共通基底`EditControlMenuBase`に乗ったCtrlラジアルメニュー+カーソルHUDドライバ**で、`ZoneEditContext`と同じGameObjectに`IpcStateCoordinator.ApplyStateEditZone`が常駐させ、`ctx.IsActive`をポーリングして自律動作する。項目は「新規地区の作成(Create)」「既存地区の拡張(Expand)」「地区の統合(Merge)」の3つで、選択すると`ZoneEditContext.SetTool`で真実源`CurrentTool`を切り替える(ONリング=現在ツール)。**操作モデルは3ツール共通で「右クリックで対象地区を選ぶ→左クリックで適用」**(旧仕様のShift+ドラッグ拡張は廃止)。カーソルHUDには現在ツールのアイコンに加えて**操作対象の色チップ**を常時出す(Create=これから作る地区の色`PreviewColor`、Expand/Merge=選択中地区の識別色と名前)。作成の識別色はツール選択のたびにUnityが`Color.HSVToRGB(random, 0.65, 0.90)`で引き直し(バックエンド`crud_zones._generate_zone_color`と同じ配色ルール)、そのまま`POST /zones/`の`color`として送る=提示した色の地区が作られる。**作成・拡張はUnityが直接バックエンドへ送信する**(3Dジェスチャ完結型の例外パターン)が、**統合だけは地区がひとつ消える不可逆操作なので`edit_zone:request_merge`でUIへ投げ、確定専用の小ウィンドウ(`zone_merge` = ZoneMergeConfirmWindow)の確定ボタンでUI側が`POST /zones/{id}/merge`を送る**(結果は`edit_zone:finish_merge`で戻り`ZoneEditContext.OnMergeFinished`が再取得する)。クリック時の入力振り分け・選択地区の解決は`InputHandlers/`側(`PathInputHandler`/`TerrainInputHandler`/`InputHandler`。詳細はInputHandlers/AGENTS.md)。汎用部品は`UI/RadialMenu/RadialMenuController`・`UI/CursorStatusHud`・`UI/UiFontProvider`(道路編集と共用) |
-| `RoadEditor/PathTopologyEditManager.cs` | 既存パスの**結合(merge)・分割(split)における3Dビュー上の対象選択**を司るシングルトン。パス詳細パネルの結合/分割ボタン→`STATE_MERGE_PATH`/`STATE_SPLIT_PATH`で`BeginMergeMode`/`BeginSplitMode`。**結合**は対象パスを青、候補パスを黄、選択済みを緑で着色し(着色は`VisualModeObject.SetInterferenceHighlight`を流用)、クリックされた候補を`edit_path:select_merge_target`でUIへ返す。候補の前段フィルタは「端点ノードを共有」「その共有ノードに繋がるパスが対象を含めて2本だけ」「稼働中」「同一バリアント」の4条件のみで、**曲線の折れ(偏向角)・通行方向の矛盾・自己ループなどの残りの条件はバックエンドのdry_runが判定しパネルにエラー表示される**(Unity側で全条件を再実装しない)。**分割**はカーソルのワールド座標を対象パスの中心線(`PathManager.TryGetPathPolyline`)へ射影し、`OverlayMeshRenderer`(`Custom/OverlayLine`+`_ZTest=Always`)でマーカー(パスを横切る棒＋円)を描き、クリックされた点を`edit_path:select_split_point`で返す。受付範囲は「パス幅の半分+20m」。長さプレビュー(dry_run)と確定送信はUI(Tauri)側が行う(建設パネルと同じ責務分担)。終了(`EndMode`)は`STATE_NORMAL`で`IpcStateCoordinator`から呼ばれ、着色とマーカーを戻す |
-| `RoadEditor/RoadMemberEditManager.cs` | 道路(名前付き道路)の**区間編集モード**(`STATE_EDIT_ROAD_MEMBERS`、params `{road_id, color, path_ids, session_id}`)の3D側を司るシングルトン(`Ensure()` で遅延生成)。入力プリセット `ROAD_MEMBER_EDIT`(パスだけ `MODE_EDIT_ROAD_MEMBERS`)で、街路・高速道路(`Constants.PATH_TYPES_NAMED_ROAD`)の区間のクリックを `edit_road:toggle_path`(`{path_id, path_name, path_type, shift}`。shift=Shiftキー押下で「直進方向へまとめて追加」)としてUIへ送るだけ。**所属の付け外しはUIがAPI(`POST /roads/{id}/members`)で行い、結果の全集合が `edit_road:set_members`(`{road_id, path_ids, preview_path_ids}`)で届いてから帯が変わる**(Unityは所属を先回りして書き換えない。パス結合の相手選択と同じ責務分担)。モード中でない・別の道路宛ての `set_members` は無視する。それ以外の種別はホバー・クリックでツールチップを出して拒否し、ホバー色も付けない。帯の描画は `VisualHandlers/RoadFocusOverlay` の区間編集レイヤー。終了は `STATE_NORMAL`(`ApplyStateNormal`)・別ステートへの直接遷移・`edit_road:cancel {road_id}`(パネルの「完了」とパネルのクローズ時にRustが送る。その道路の編集中でなければ無視)・Unity にフォーカスがあるときの Esc(`IpcStateCoordinator.ExitRoadMemberEditToNormal`)・セッションリセット・別の道路(または同じ道路の別の session_id)での `Begin` で、区間編集の帯だけを消して道路詳細パネルの強調(`world:set_road_focus`)は残す。**どの理由でも `End()` がモード中だったときだけ `edit_road:ended {road_id, session_id}` をUIへ1回送り**、パネルの「区間を編集中」表示を解除させる(`session_id` は開始時の値を型を変えずに返し、無ければ省く)。付け替えのツールチップの道路名は `RoadManager.GetDisplayName`(名前が空なら UI の `road.unnamed` と同じ「道路 #id」)。**`WindowUtil.BringToForeground()` は呼ばない**(詳細パネルで結果を見ながら続けて操作するため) |
-| `ConnectorEditManager.cs` | 施設の接続端子ノード(インフラ接続点`infra_node_id` / 走行網接続点`depot_node_id` / 共用接続ノード)のハイライトとドラッグ移動編集を司るシングルトン。AgentDetailPanelが施設を表示中は`ShowConnectors`で端子ノード上空に**逆四角錐マーカー**(`InfrastructureMarkerUtility.DrawPyramid`、回転＋ボビング)を読み取り専用で表示。「接続点を編集」ボタン→`STATE_EDIT_CONNECTOR`で`EnterEditMode`になり、マーカーを掴んで端子を移動できる。**移動編集はマーカー(ノード実体の上空に浮くオーバーレイ)をスクリーン座標で当たり判定して掴む方式**で、**掴み開始は`ProcessMouseDrag`初回呼び出しの遅延グラブ**(`RoadPlanManager.ProcessMouseDrag`と同型。地形コライダーヒット時のドラッグは`InputHandler.StartTerrainDrag`を通らず、マネージャのStartDragなしに`ProcessMouseDrag`だけが呼ばれるため——`InputHandlers/AGENTS.md`の罠参照)。当たり判定`IsMouseOverConnector`は「ノード地表点〜マーカー天面のスクリーン線分」との距離+ズーム比例半径(最低45px)で、四角錐本体とその真下の空間のどこでも掴める。実移動とPATCH送信(`PATCH /nodes/{id}`。端子ロール`connector_terminal`。positionは`[x,相対高さ,z]`)は`NodeInputHandler`へ委譲し、ドラッグ中のYは`ApplyTerrainFollowY`が地形高さ+相対高さへ毎フレーム補正する。**入力は`MODE_EDIT_CONNECTOR`(TERRAIN)の地形ドラッグとして受ける**(ノードのコライダーとマーカー位置がずれるためコライダーへのレイキャストは使わない。NODEは`MODE_NONE`で貫通。`TerrainInputHandler.onHover`の吸着はこのモードで無効=端子が自分の旧キャッシュ位置へ吸着するのを防ぐ)。**`CameraController.IsMouseOverEditHandle`にもこのマーカー判定を追加してあり**、これが無いと先に走るカメラドラッグが掴みを奪う。**端子のドラッグ移動は施設が立地する土地区画の範囲内へクランプされる**(`EnterEditMode`が`STATE_EDIT_CONNECTOR`のparams`agent_id`〔欠損時は`BuildingManager.TryGetInfraTerminalOwner`の逆引きへフォールバック〕から立地区画を解決して`ParcelManager.SetHighlightedParcel`で可動範囲をハイライトし、`ProcessMouseDrag`/`ProcessMouseDragEnd`が`ParcelManager.TryClampPointToParcel`でXZを区画内へ射影する。施設/区画が未ロードで解決できないときはクランプ無効=バックエンドの区画外PATCH拒否+`NodeInputHandler.SaveNodePosition`のロールバックに委ねる)。端子にパスが1本でも接続済みだとバックエンドが移動を拒否する(未接続時のみ移動可・移動先は立地区画内のみ、[[genesis-docs 26_インフラ網 §26.3]]) |
+| `RoadEditor/RoadPlanManager*.cs` | 道路・線路・インフラの敷設と既存パスの形状編集(Inactive→Placing→Editing)。partial: `ParallelSnap`・`Earthwork`・`ShapeSync`(2Dパネル同期)・`RouteProposal`・`AlignmentLabels`/`NodeLabels` |
+| `RoadEditor/RoadRenderer*.cs`、`RoadVertex.cs`、`RoadOverlayHitDetector.cs` | プレビューメッシュ(詳細区間+操作中の帯=`Sections`)、頂点表示、既存道路へのヒット判定 |
+| `RoadEditor/RoadParallelSnapGeometry.cs` | 並行吸着のXZ射影計算 |
+| `RoadEditor/RoadEarthworkPreview.cs` | `/paths/earthwork-preview`の`path_profiles`(造成後の絶対標高)を取得するだけ。切土・盛土の体積は表示しない |
+| `RoadEditor/RoadEditControlMenu.cs` | 道路編集のCtrlラジアルメニュー+カーソルHUD。曲線/直線と吸着フラグの切替はここだけ |
+| `RoadEditor/StationPlanManager.cs` | 駅パッケージ配置(`STATE_EDIT_STATION`)。形状固定のゴースト配置で、共通吸着を掛けない |
+| `RoadEditor/PathTopologyEditManager.cs` | 既存パスの結合相手・分割点の選択。候補の前段フィルタだけ持ち、残りの条件はバックエンドのdry_run |
+| `RoadEditor/RoadMemberEditManager.cs` | 名前付き道路の区間編集。クリックを`edit_road:toggle_path`で知らせるだけで所属は書き換えない |
+| `BuildingEditor/` | 建物建設。`BuildingPlanManager`(区画配置)、`.Placement`(自由/道路沿い配置)、`BuildingPlacementGeometry`、`BuildingEditControlMenu`(基底に乗らない独自実装)、`EffectRangeOverlay` |
+| `ParcelManager/` | 土地区画の作成・分割・形状編集。作成方法の真実源は`ParcelEditorManager.CurrentMode`(モード表`Modes`)。他に`ParcelEditControlMenu`・`ParcelPlanRenderer`・`ParcelShapeEditManager` |
+| `ResourceManager/ResourceAreaEditManager.cs` | 天然資源エリアの新規作成(テンプレート作成専用) |
+| `TransitEditor/TransitPlanManager.cs` | 公共交通の路線設置・経路編集。巡回点を並べるだけで制御点・標高は持たない。経路プレビューは`/transit/lines/route-preview` |
+| `ZoneEditor/ZoneEditControlMenu.cs` | 地区編集の3ツール切替。状態本体は`Scripts/ZoneEditContext.cs` |
+| `PropEditor/PropPlacementManager.cs` | プロップの個別配置・範囲散布プレビュー(`PropGeometry`/`PropManager.CanPreview`を永続描画と共用) |
+| `ConnectorEditManager.cs` | 接続端子ノードのマーカー表示とドラッグ移動(`STATE_EDIT_CONNECTOR`)。実移動とPATCHは`NodeInputHandler`へ委譲 |
+| `PolygonAreaEditManager.cs` | 任意ポリゴン編集の共通基底(資源エリア・区画形状編集) |
+| `EditControlMenuBase.cs` | Ctrlラジアルメニュー+カーソルHUDドライバの共通基底(道路・地区・区画) |
+| `PlacementInput.cs` | 配置エディタ共用の入力部品(`IsBlocked`・中ボタン回転・キー長押しリピート) |
 
-## 道路の並行・終端揃えスナップ
+## 必ず守る規約
 
-`RoadPlanManager.ParallelSnap.cs` は候補検索・設定・ガイド描画、`RoadParallelSnapGeometry.cs` はXZ射影を担う。
-直線モード専用で、基準パスも非曲線のみ。配置は直前の点、編集ドラッグは前後の隣接点を基準にする。
-終端揃えは実際のパス両端からの垂線との交点へ吸着し、始点未配置時も垂線へ吸着できる。
-`QueryNearbySegments` の100m候補を線分距離で絞り、自己・非互換パスを除外する。全パス走査は追加しない。
-並行有効時は接続→並行・端揃え→グリッド→直線延長→直角の順。共通吸着の`skipGrid`で順序を調整し、
-接続成立フラグ(`lastSnapWasElevated`は地上接続でもtrue)があれば位置・標高を再補正しない。
-2設定の真実源は`RoadPlanManager`のstaticプロパティ。初期OFF、セッション間で保持、曲線時は実効OFF。
-Ctrlメニューは8項目、HUDは最大9アイコン(移動軸矢印1+曲線1+吸着7)。並行の2アイコンと移動軸の2アイコンは`RoadEditControlMenu`が図形として生成・破棄する。
-メニュー閉鎖時は生のホバー座標から再評価する。ガイドは`overlayRenderer`に描き、吸着自体はXZのみを変える。
-回帰検証は`Tests/RoadSnapping/run.ps1`、操作確認項目は同ディレクトリのREADME。
+- 新しいポリゴン編集・Ctrlメニュー・配置キー操作は上の共通基底/部品を使い、各マネージャに複製しない。
+- 曲線/直線・吸着フラグ・区画の作成方法の真実源はUnity側(ラジアルメニュー)。ホーム設置側・複線のオフセット/進行方向・駅舎の`HouseEnds`/`PassageMode`・矩形区画の寸法はUIパネルが真実源。標高・盛土だけは双方向同期(`edit_path:change_node`⇔`select_node`)。
+- 頂点の移動・標高変更は必ず`RoadPlanManager.MoveAnchorPosition`を通す(手動制御点の平行移動と未調整制御点の再計算を一箇所で行う)。2Dパネルの`shape_command`も同じ経路に委譲し、吸着は通さない。
+- 制御点はエディタ内では絶対標高、保存・IPCでは所属アンカー直下の地盤基準の相対Y(`ControlToRelativeList`⇔`RestoreControl`)。
+- 造成後の縦断(`path_profiles`)は操作停止後の3Dモデルにだけ使い、操作中はローカル近似。応答は要求キー一致時のみ採用し、生成器へ`follow_terrain=0`+一時の`station_grade_profile`を渡して生地形へ再投影させない。
+- 線分への射影・距離は`Utils/PolylineUtils`に委譲する。
+- `edit_parcel:select_path`は`ParcelEditorManager.OnPathSelected`だけが送る(射影済みアンカーを載せるため。`PathInputHandler`からも送ると二重発火)。
 
-## 道路プレビュー描画の注意(知らないとわからない)
+## 知らないと壊れる罠
 
-- `RoadPlanManager.Earthwork.cs` は同じアンカー・制御点・盛土・並行オフセットから造成プレビューを要求する。`RoadEarthworkPreview` は250ms静止後に `/paths/earthwork-preview` を1要求ずつ送り、形状変更時に旧メッシュを消し、古い応答を破棄する。切土橙・盛土青の半透明体積は専用`EarthworkPreview`シェーダーで地形越しに表示する（道路本体には適用しない）。確定・キャンセル時は`Clear`、破棄時はメッシュ・マテリアル・表示GOも解放する。`RoadRenderer.OffsetPolylineLateral`は道路表示と造成要求で共用する。
+- 地形ドラッグでは各マネージャの`StartDrag`は呼ばれず`ProcessMouseDrag`だけが毎フレーム届く。掴む対象は初回呼び出しで決める(遅延グラブ)。`CameraController.IsMouseOverEditHandle`にも当たり判定を足さないとカメラドラッグに掴みを奪われる(`InputHandlers/AGENTS.md`)。
+- `RoadPlanManager`のオーバーレイは2本。`overlayRenderer`は毎フレーム`BeginFrame`でクリアされる(配置点・ハンドル・端子マーカー)。`backgroundRenderer`はカメラ5m移動/`bgDirty`/`PathManager.NodeDataVersion`変化のときだけ作り直すキャッシュ(既存の辺・ノード)。既存物を`overlayRenderer`へ描くと同フレームで消えて何も表示されない。
+- ギズモのマテリアルだけ`_ZTest=Always`で常に手前。道路本体のプレビューには適用しない(地形をX線状に貫通して見える)。埋没は地形追従で防ぐ。
+- 曲線モードの`GetRenderPoints`はベジエを直接サンプリングするため、地上区間(相対高さ≒0)のYを地形+盛土へ追従させる処理(`PathManager.SampleBezierSegmentWithTerrain`と同一)を内に持つ。省くとアンカー間の起伏を無視して道路が丘に埋まる。
+- 駅舎パス(type=`PATH_STATION_HOUSE`)の敷設中は`SnappingSuppressed`で既存地物への吸着を全て止める(グリッドのみ有効)。フラグ自体は書き換えない。
+- 複線敷設中の吸着はオフセット考慮版`TryOffsetAwareRailSnap`。中心線を素朴に吸着させると全線路がずれて1本も接続できない。
+- インフラパス敷設中の建物干渉推定は同一網の需給施設を除外する(端子は区画内にあり、引き込みで建物と重なるのが正常)。端子未ロード時は除外しない=安全側で赤。
 
-- **道路プレビューは詳細な前区間・操作中の帯・詳細な後区間を別々に保持する**（`RoadRenderer.Sections.cs`）。`RoadPlanManager.UpdatePreviewSections` は配置中のホバー終点を詳細区間に含めない。曲線配置中は直前の1区間も帯へ含め、仮終点を追加したCatmull-Rom接線で末尾2区間をベジエ描画する（手動制御点は尊重）。打点時には自動制御点を再計算し、配置済み区間も曲線にする。帯の曲線は制御多角形長を基準に約2m・最低16・最大4096分割で再標本化する。ドラッグは直線の両隣、曲線アンカーの前後2区間（隣接アンカーの自動接線も変わるため）、制御点の両隣を帯にし、終了時に詳細へ戻す。詳細区間は同じ点列・設定ならGOを再利用し、変更時だけ本番の `PathMeshFactory` で生成する。帯はMeshと出力リストを再利用し、複線・ホームの左右幅を保持する。地形追従・盛土・高架は `GetMovingPreviewPoints` で反映する（保存形状は変更しない。線形評価とは `SamplePreviewSpans` を共有する）。生成器が返すクリック用メッシュとフォールバック、帯のMeshはRoadRendererが解放する。駅舎の区間分割境界には端部建屋を生成しない。検証は `Tests/RoadPreview/run-unity.ps1`。
+## 参照先
 
-- **プレビュー点群(`RoadPlanManager.GetRenderPoints`)の地形追従は曲線/直線で経路が違う。** 直線モードは点列をそのまま渡し、`RoadPath.Generate` 内の `SubdividePointsWithTerrain` が中間点を地形高さに追従させる。曲線モードは `GetRenderPoints` がベジエを直接サンプリングするため、**ここで地上道路(相対高さ≒0)のサンプル点Yを地形高さ＋盛土に追従させないと、ベジエがアンカー間の起伏を無視してYを補間し、丘や谷で道路が地形に埋まる**。実道路を生成する `PathManager.SampleBezierSegmentWithTerrain` と同じロジックを `GetRenderPoints` 内に持つ(高架=相対高さ>0の区間はベジエYのまま立体を維持)。
-
-- **編集ギズモ(ノード・ベジエ制御点・補助線・既存パスの辺/ノード)は地形に埋もれず常に手前に出す。** `RoadPlanManager.EnsureOverlayRenderer` が `overlayRenderer` / `backgroundRenderer` を `OverlayMeshRenderer.Create(..., alwaysOnTop: true)` で生成し、そのマテリアルだけ `_ZTest = Always(8)` で深度テストを無効化する(このマテリアルインスタンス限定。`OverlayLine` シェーダーの既定は `LEqual`+ポリゴンオフセットで、起伏地形ではハンドルが裏に回ると埋もれるため)。道路本体のプレビューメッシュは深度テストを残し、上記の地形追従で埋没を防ぐ(メッシュを ZTest Always にするとX線状に地形を貫通して見えるため不可)。
-
-- **`RoadPlanManager` は2本のオーバーレイレンダラーを使い分けており、出力先を混ぜてはいけない。** `overlayRenderer` は毎フレーム `BeginFrame` でクリアして再構築するパス(配置中ポイント・ハンドル・端子マーカー等のアニメーションする要素)、`backgroundRenderer` は再構築条件を満たしたフレームだけ作り直すキャッシュパス(既存パスの辺・既存ノードの四角。`DrawExistingEdges` / `DrawExistingNodes` は必ずこちらへ出力する)。過去に `DrawExistingNodes` が誤って `overlayRenderer` へ出力し、書いた同フレームでクリアされて「ノードが一切描画されない」バグがあった。背景の再構築条件は「カメラ5m以上移動 / `bgDirty` / `PathManager.NodeDataVersion` の変化(ノードの非同期ロード到着・削除の検知)」の3つ。
-
-## 建物の配置ガイド
-
-建物の`BuildingEditControlMenu`が描く輪郭・寸法線・吸着マーカーはワールド座標。`BuildingPlacementGuide`は親を持たない単位Transformで描画し、編集用オブジェクトの子にしない。コントロール無効化時は非表示、破棄時はガイドと所有するメッシュ・マテリアルも破棄する。
-
-## 小数標高と継続配置
-
-鉄道は地上バリアントでも保存設計標高へ吸着できる。複線の横オフセット後も接続先の絶対標高を保ち、候補位置の地形で相対Yを解決する。点ドラッグも吸着高さを優先。InitializeRoadPlacementの初期設定引数は継続配置の高さ・盛土・曲線・地形追従を受け取り、既存パス編集では保存値が優先する。
-
-## プロップの散布プレビュー
-
-個別配置は全種別で任意の地面相対高さを使う。PropPlacementManagerのheightは初期化・change_settingsから設定し、地形標高へ加えてゴーストを配置する。設定変更は次の配置だけに効き、打点済みの仮配置は各点の高さを保持する。3D側では`PropPlacementManager.Update`が中ボタンドラッグ回転(ドラッグ中はゴースト位置を固定し左クリック打点を無視)とPageUp/PageDownの高さ変更(0.1m、Shiftで1m。cm単位に丸める)を受け、`IpcClient.EmitEditPropPlacementSettings`(`edit_prop:placement_settings`)でパネルへ書き戻す(回転はリリース時に1回、高さは変更ごと)。UIはこれをエコーしない。既存プロップの削除はこのマネージャではなく`InputHandlers/RemovalManager`(ブルドーザ)が担う。update_instancesのyが相対高さ、XZはSceneOffsetを除いた保存座標。地形クリックの共通吸着は個別・散布とも無効。階段はProps/101・102（壁と屋根付き本体）、103・104（屋根なし入口）の手動配置だけで、駅への自動接続や床開口はしない。
-
-`PropEditor/PropPlacementManager`は`PropGeometry`の固定座標散布と`PropManager.CanPreview`の障害物判定を共用する。ロード済み・障害物取得済みの小区画だけを半透明GPUインスタンシングで描画し、`PreviewRevision`変更時に更新する。散布スケールは永続側と同じ0.8〜1.2で、個別配置用scaleを乗算しない。個別配置の編集用GameObjectは重なり判定を行わず表示する。CanPreviewの障害物・ロード範囲判定は散布プレビュー専用であり、個別配置へ適用しない。UIへの保存送信は従来どおりTauri側が行う。
-
-駅舎のHouseEndsはプレビュー仮PathSummaryとRoadRendererの再生成キーに含める。建設中はA/Bの端点ラベルを表示し、既存形状編集時はロード済みhouse_endsを使う。
-
-## 道路敷設の衝突と確定
-
-`EmitShapeUpdate` の `can_confirm` はEditingフェーズかつローカル交差なし・川の地表横断なし(`CheckRiverCrossings`=`RiverStore` の範囲内で「路面≥水面+`RIVER_BRIDGE_MIN_CLEARANCE`(橋)」でも「深さ>クリアランス高さ(完全埋設)」でもないサンプルが無い。インフラパスは対象外。バックエンド `geo_rivers.validate_path_river_crossings` と同一規則)の場合だけtrue。川の違反は横断付近の範囲を `RiverStore.AddOccupancyBox` の箱で示す。Tauriは全線の `/paths/validate` と併せて確定を許可する。ローカルは占有高さを削らず、バックエンド確定だけ50cmの緩衝を持つ。`SampleElevationSegments` は非追従区間をアンカーの絶対標高で補間し、既存パスは保存制御点と `station_grade_profile` も参照する。警告は `OccupancyVolumeUtil` の半透明箱で、道路本体を赤くしない。形状・複線設定変更時は箱キャッシュと権威警告を無効化する。
-
-## 線形制約のプレビューと確定
-
-曲率・勾配のローカル推定は `SamplePreviewSpans` で操作中の帯と同じ制御点・仮終点の接線を使い、描画用高さオフセットを除いて評価する。固定17区間の `GetRenderPoints` の折れ線を直接評価しない。曲線長に応じて密に標本化した後、全長を約1mの等間隔へ再標本化する（各区間の端数切り上げは不可）。地形追従区間の勾配平滑化距離は `PathMasterItem.smooth_factor` と10mの大きい方。違反原因と区間内の最悪値・制限値は3D位置に追従する区間ラベルで示す。
-
-ローカル線形値は中心線の推定であり、保存設計標高や複線展開後の全線を解決するバックエンドと完全一致する保証はない。`can_confirm` をローカル線形推定で拒否しない。Tauriの既存 `/paths/validate` 全線検証が最新形状で成功した場合だけ確定でき、登録時にも線形制約を検証する。ローカルの交差・川横断ゲートは維持する。回帰検証は `Tests/RoadPreview/run-unity.ps1`。
-
-## 制御点の高さ基準
-
-エディタ内の制御点は絶対標高を保持する。保存・IPCの相対Yは必ず所属アンカー直下の地盤基準で、`ControlToRelativeList` と `RestoreControl` が互いに逆変換となる。端点・ウェイポイントとも同じ。制御点直下の地盤を加減算しない。XZドラッグ、反対ハンドルの平面整列、接続先への接線整列では元の制御点Yを維持する。手動ハンドルを持つアンカーの移動ではXYZを同じ量だけ平行移動し、縦断接線を保持する。地形追従の可否はスパンの評価で決まり、制御点を地形へ貼り付けて代用しない。Tests/RoadPreviewは実Terrain上で高さの往復変換と編集を検証する。
-
-区間ラベルの値は小数2桁で表示し、半径は「下限○m未満」、勾配は「上限○%超過」と併記する。判定には丸め前の値を使う。`H` は選択点または次回配置点の地面相対高さであり、全アンカーの絶対標高を水平に固定する値ではない。
-
-曲率のローカル評価は始点を原点とする相対座標でベジエ補間・等間隔再標本化・半径計算を完了させ、警告線の描画時だけワールド座標へ戻す。大きなワールド座標をfloatで補間してから差分を取ると、端部の1m窓で丸め誤差が増幅され、緩曲線を急曲線と誤認するため。地形サンプルだけは元のワールド座標で行う。
-
-区間ラベルは `RoadPlanManager.AlignmentLabels.cs` が管理する。原因別の連続違反区間を集計し、各区間の最悪値の位置へ引出線をつなぐ。画面外・背面・編集終了時・ラジアルメニュー表示中は描かない。投影位置が重なるラベルは位置をずらす。アイコンは線で手続き描画し、外部素材・クリック受付は追加しない。形状変更で集計と文字列を無効化する。
-
-
-地形追従サンプルだけに造成用の勾配平滑化を適用する。高架・地下など非追従サンプルは約1m線分の実水平距離と標高差で勾配を求める。平坦区間に隣の坂の勾配を広げない。
-
-勾配の上限比較には0.001パーセントポイントの数値誤差を許容し、上限ちょうどの線路を標高差分の丸め誤差で拒否しません。
-
-## 2Dパス形状編集パネルとの同期(`RoadPlanManager.ShapeSync.cs`)
-
-Tauriの2Dパス形状編集パネル(`path_shape_editor`)は形状を持たず、`edit_path:shape_command` でノード・制御点の操作を送ってくる。`ApplyShapeCommand` は既存の `MoveAnchorPosition`(地面相対の高さを維持・手動制御点を平行移動)/ 制御点の絶対標高維持+`EnforceCollinearControls` / `InsertPointOnEdge` / `RemovePoint` / `SelectPoint` へ委譲し、吸着(`ApplySnapping`)は通さない。Editingフェーズ以外と3Dドラッグ中(`isDragging`)は無視する。適用後は3Dドラッグ終了と同じく `EmitShapeUpdate` + `EmitSelectNode`。`BuildShapeSyncExtras` が `update_shape` に `phase`/`selected_index`/`lateral_offsets`/`alignment` を足す。`alignment` は `CheckAlignmentViolations` が保持した1mサンプル(`cachedAlignmentSamplesWorld`/`cachedAlignmentRadius`/`cachedAlignmentGradePct`)を約5m間隔に間引いたもの(各要素に累積距離・路面の絶対標高・地盤標高も載せ、2Dの縦断面ストリップが使う)と区間ラベル(`alignmentLabels`)、各アンカーの縦断面位置 `nodes`(XZで最も近い1mサンプルの累積距離とアンカー直下の地盤高)で、無限大の半径は null にする(JSONに載せられないため)。`height_editable`/`min_height` も載せる。2Dの縦断面ストリップからの高さ変更は既存の `edit_path:change_node`(`OnChangeNodeFromIpc`)で届く。ノード番号(1始まり)のIMGUIラベルは `RoadPlanManager.NodeLabels.cs`(`DrawNodeNumberLabels`。AlignmentLabels の OnGUI から呼ぶ。選択中は青背景)で、2Dの地図・ストリップと同じ番号を3Dに出して対応付ける。`edit_path:query_shape` には `EmitShapeUpdateOnRequest` で現在形状を返す(セッション外は `phase=inactive`。2Dパネルはこれで自分を閉じる)。
-
-
-形状確定後・ドラッグ停止中の3DモデルはRoadEarthworkPreviewのpath_profiles（各線の造成後の絶対標高）を使う。取得中と操作中はローカル推定に戻す。応答の要求キー一致後にだけモデルを再生成し、生成器へfollow_terrain=0と一時のstation_grade_profileを渡して生地形への再投影を防ぐ。操作中のHUD・2D線形は近似、確定可否と費用欄は全線validateの設計縦断を正とする。
-
-
-造成の切土・盛土を示すオレンジ／青の半透明ボリュームと体積凡例は表示しない。RoadEarthworkPreviewは造成後のpath_profiles取得だけを担い、道路・線路モデル自体の標高へ反映する。
-
-## 経路提案の編集状態
-
-`RoadEditor/RoadPlanManager.RouteProposal.cs`は経路提案の絶対座標ペイロード、世代、提案前の復元を管理する。`PathBuildPoint.proposalGenerated`で補助点を区別し、手動移動で指定点へ昇格する。`InvalidateShapeCache`で世代を更新し、古いapply_route/undo_routeを拒否する。提案の制御点は手動フラグで自動補完から保護する。造成プレビューも制御点固有のYを保持する。詳細は公開`programs/経路提案.md`、検証は`Tests/RoadPreview/run-unity.ps1`。
-
-ノード間距離の上限 `max_span` は `CheckMaxSpanViolations` がXZ直線距離で判定する。赤線・`can_confirm`・`ShapeSync` の `max_span_violations` は同じ結果を使う。ペイロードは `{segment_index, distance, limit}` の配列で、解消時も空配列を送る。
-
-## 線形警告の共有
-
-建設パネルが取得した全線 `/paths/validate` の `alignments` を `shape_command` の `apply_alignment` で受け、`revision` が一致する場合だけ採用する。警告線・区間ラベル・要約値は検証応答の `preview` と指標を使い、Unityでは再計算しない。複線の全線を表示し、要約は最悪値。形状・設定変更で破棄し、待機中・操作中はローカル推定へ戻す。`earthwork-preview` 受信は3D更新後に `EmitShapeUpdate` も呼ぶが、採用済みの検証結果を上書きしない。
-
-道路線形ラベルの引出線はUI/WorldCallout.DrawLineを共用する。ラベルの内容・違反判定はRoadPlanManager.AlignmentLabelsが保持する。
-
-## ロープウェイの水平折れ角
-
-`RoadPlanManager` は601/602の各ウェイポイントで前後アンカー間の水平進行方向の変化を5度以内に制限する。上下勾配は含めず、許容誤差は0.001度、水平重複点は無効。`RopewayBendAngle` とバックエンド `geo_path_alignment.ropeway_bend_violations` の規則を一致させる。配置中はホバー位置も含めて赤線・角度ラベルを表示し、編集中の違反は `can_confirm=false` とする。地形に依存しない確定的な判定のため、道路の半径・勾配のローカル推定と異なり確定を直接禁止する。
-
-PassageModeはRoadPlanManager/RoadRendererとStationPlanManagerのプレビュー・再生成キーへ含める。駅舎は移動中も全体を専用生成器で描き、地下通路に汎用の地上帯を残さない。
+- 公開docs: `programs/Unity入力制御.md`、`programs/IPC連携の整理.md`(ステートとイベント契約)、`geometries/A_パス形状.md`・`J_パスの交差処理.md`、`geometries/G_道路メッシュの生成.md`「敷設・形状編集時のプレビュー」、`geometries/N_線路メッシュの生成.md`§8.4、`geometries/M_地形プロップ.md`§M.7、`programs/経路提案.md`、`programs/道路の詳細と道路名.md`。
+- Skill: `genesis-input-mode`、`genesis-path-geometry`。表示モードは別系統で`genesis-visual-mode`。
+- 回帰検証: `unity/Tests/RoadSnapping`、`Tests/RoadPreview`、`Tests/BuildingPlacement`。

@@ -49,9 +49,15 @@ Rayが命中したオブジェクトはTagまたはコンポーネントの有�
 | `MODE_EDIT_RESOURCE` | 12 | 資源エリア編集モード |
 | `MODE_EDIT_TRANSIT` | 13 | 公共交通設置モード |
 | `MODE_EDIT_PROP` | 14 | プロップ配置モード（個別配置・範囲散布） |
+| `MODE_EDIT_CONNECTOR` | 15 | 施設の接続端子ノードの移動編集モード。TERRAIN に適用し、端子マーカーを地形ドラッグとして掴む（§5.3） |
+| `MODE_REMOVE` | 17 | ブルドーザ（空き地区画・計画中の建物と道路・地形プロップの削除）。実処理は `RemovalManager` |
+| `MODE_PATH_MERGE` | 18 | パス結合の相手選択。候補パスのクリックだけを受け付ける |
+| `MODE_PATH_SPLIT` | 19 | パス分割の分割点選択。PATH と TERRAIN に適用し、どちらのクリックも対象パスの中心線へ射影する |
+| `MODE_PICK_BUILDING` | 20 | 既存建物のコピー建設・経済主体作成の入居先の選択。建物だけをクリック可能にする |
+| `MODE_EDIT_STATION` | 21 | 駅パッケージ配置モード（軌道建設パネルの簡易モードの駅タブ）。TERRAIN に適用する |
 | `MODE_EDIT_ROAD_MEMBERS` | 22 | 道路（名前付き道路）の区間編集モード。街路・高速道路の区間のクリックをUIへ通知する |
 
-接続点編集（`STATE_EDIT_CONNECTOR`）では専用のモード定数を追加せず、既存の `MODE_EDIT`（=7、既存オブジェクトの編集モード）を NODE に適用して接続端子ノードをドラッグ移動する。
+接続点編集（`STATE_EDIT_CONNECTOR`）の端子マーカー（逆四角錐）はノード実体の上空に浮くオーバーレイで、ノードのコライダーとは位置がずれる。そのためノードへのレイキャストではなく TERRAIN の `MODE_EDIT_CONNECTOR` の地形ドラッグとして受け、`ConnectorEditManager` がスクリーン座標のマーカー当たり判定で掴む対象を決める（NODE は `MODE_NONE` で貫通させる）。
 
 ### 2.3. モードプリセット
 
@@ -68,13 +74,21 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 | `PARCEL_CREATION_SPLIT` | — | NONE | — | PARCEL_CREATION_SPLIT | NONE | — |
 | `ZONE_EDIT` | ZONE_EDIT | ZONE_EDIT | NONE | NONE | NONE | ZONE_EDIT |
 | `PARCEL_SHAPE_EDIT` | PARCEL_SHAPE_EDIT | NONE | NONE | NONE | NONE | NONE |
+| `SET_GRID` | SET_GRID | NONE | NONE | NONE | NONE | NONE |
+| `EDIT_RESOURCE` | EDIT_RESOURCE | NONE | NONE | NONE | NONE | NONE |
+| `TRANSIT_CONSTRUCTION` | EDIT_TRANSIT | NONE | NONE | NONE | NONE | NONE |
 | `PROP_PLACEMENT` | EDIT_PROP | NONE | NONE | NONE | NONE | NONE |
-| `CONNECTOR_EDIT` | NONE | NONE | EDIT | NONE | NONE | NONE |
+| `STATION_PLACEMENT` | EDIT_STATION | NONE | NONE | NONE | NONE | NONE |
+| `CONNECTOR_EDIT` | EDIT_CONNECTOR | NONE | NONE | NONE | NONE | NONE |
+| `REMOVE_OBJECTS` | REMOVE | REMOVE | NONE | REMOVE | REMOVE | NONE |
+| `PATH_MERGE` | NONE | PATH_MERGE | NONE | NONE | NONE | NONE |
+| `PATH_SPLIT` | PATH_SPLIT | PATH_SPLIT | NONE | NONE | NONE | NONE |
+| `PICK_BUILDING` | NONE | NONE | NONE | NONE | PICK_BUILDING | NONE |
 | `ROAD_MEMBER_EDIT` | NONE | EDIT_ROAD_MEMBERS | NONE | NONE | NONE | NONE |
 
 表の「—」はプリセットで明示的に設定されないオブジェクトタイプを示す（前回の設定が維持される）。
 
-`CONNECTOR_EDIT` は `STATE_EDIT_CONNECTOR`（接続点編集）で適用され、NODE のみを `MODE_EDIT`（ドラッグ移動）にして施設の接続端子ノード（`infra_node_id` / `depot_node_id`）を移動できるようにする。対象ノードの強調表示と、非電化の路線専用ノードへの `NodeInputHandler` 後付けは `ConnectorEditManager` が担う。ドラッグ確定時は `NodeInputHandler` が `PATCH /api/v1/nodes/{node_id}` を送り、パスが接続済みのノードはバックエンドが移動を拒否して元位置に戻る。詳細は `IPC連携の整理.md` の `STATE_EDIT_CONNECTOR` を参照。
+`CONNECTOR_EDIT` は `STATE_EDIT_CONNECTOR`（接続点編集）で適用され、TERRAIN を `MODE_EDIT_CONNECTOR` にして施設の接続端子ノード（`infra_node_id` / `depot_node_id`）のマーカーを地形ドラッグで掴めるようにする（§2.2）。対象ノードの強調表示・掴む対象の決定・立地区画内へのクランプは `ConnectorEditManager` が担い、実移動と `PATCH /api/v1/nodes/{node_id}` の送信は `NodeInputHandler` に委譲する（端子ノードに `NodeInputHandler` が無ければ後付けする）。パスが接続済みのノードはバックエンドが移動を拒否し、元位置に戻る。詳細は `IPC連携の整理.md` の `STATE_EDIT_CONNECTOR` を参照。
 
 `PROP_PLACEMENT` は `STATE_EDIT_PROP`（プロップ配置）で適用され、地形クリックでプロップを配置する。`IpcStateCoordinator.ApplyStateEditProp` が `PropPlacementManager` を動的生成し、個別配置（`edit_prop:update_instances`）／範囲散布（`edit_prop:update_shape`）のモードごとに処理する。詳細は `IPC連携の整理.md` の `STATE_EDIT_PROP` を参照。
 
@@ -97,6 +111,11 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 - `InputHandler` は `CameraController.IsMouseDragging` がtrueの間、ホバーをクリアし、ペンディング中のクリック・ドラッグを破棄する。
 - `CameraController` は `IsPendingDrag` の間は `InputHandler` 側のクリック候補記録を許容する（`IsPendingDrag` は `IsMouseDragging` ではない）。
 - 編集ハンドル（道路の制御点や土地区画の頂点）上でドラッグを開始した場合、`CameraController` はドラッグを開始しない。
+
+右クリックも同様に、マウスダウン時には発火しない。マウスアップまでの移動が閾値未満なら `onRightClick`、閾値以上なら右ドラッグ（カメラ回転）とみなして発火しない。`CameraController` 側の右回転も同じ閾値の保留方式（`isPendingRotate`）で始まる。`CameraController` は `[DefaultExecutionOrder(-100)]` で先に走るため、押下フレームで `IsMouseRotating` を見て判定すると右クリックが必ず回転に食われる。判定は移動量で行う。
+
+UI上にポインタがある間・カメラドラッグ中・フライモード中（`CameraController.IsFlyMode`）・ラジアルメニュー表示中（11章）は、`InputHandler.Update` 先頭のゲートで入力処理全体を非破壊的に止める。入力プリセットは変えないので、抜ければ元の入力状態がそのまま復帰する。
+
 ### 3.3. ドラッグを持たないモード
 
 ブルドーザ（`MODE_REMOVE`）、パス結合・分割の対象選択（`MODE_PATH_MERGE` / `MODE_PATH_SPLIT`）、道路の区間編集（`MODE_EDIT_ROAD_MEMBERS`）、地区編集（`MODE_ZONE_EDIT`）はクリックのみで操作する。
@@ -137,7 +156,7 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 |-------|-----------|-----------|-------|
 | `MODE_NORMAL` | ログ出力 | — | スナップ位置計算・マウス位置上書き |
 | `MODE_ROAD_CONSTRUCTION` | `RoadPlanManager.OnTerrainLeftClick` に委譲 | 同右 | `RoadPlanManager.OnTerrainHover` に委譲 |
-| `MODE_ZONE_EDIT` | 何もしない | — | 地区ポリゴン内判定・ツールチップ表示 |
+| `MODE_ZONE_EDIT` | Mergeツールのときだけカーソル下の地区を統合元にする（7章） | カーソル下の地区を選択（地区外なら選択解除） | カーソル下の地区の半透明フィル表示 |
 | `MODE_BUILDING_CONSTRUCTION` | `BuildingPlanManager.OnTerrainClickDirect` に委譲（直接配置=区画外地点の確定） | — | `BuildingPlanManager.OnTerrainHoverDirect` に委譲（直接配置=カーソル追従の矩形ゴースト表示）。ホバー離脱時 `HideDirectGhost` |
 | `MODE_PARCEL_CREATION_POINT` | 土地区画エディタに点を通知 | — | 配置マーカー表示 |
 | `MODE_PARCEL_SHAPE_EDIT` | `ParcelShapeEditManager.OnTerrainLeftClick` に委譲 | 同右 | 頂点ホバー判定 |
@@ -150,12 +169,12 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 
 ### 4.2. PathInputHandler（道路）
 
-道路オブジェクトのクリック・ホバーを処理する。地区ドラッグに関する追加メソッドを持つ。
+道路オブジェクトのクリック・ホバーを処理する。
 
 | モード | 左クリック | 右クリック | ホバー |
 |-------|-----------|-----------|-------|
 | `MODE_NORMAL` | 道路詳細パネルをIPC通知 | — | ハイライト表示 |
-| `MODE_ZONE_EDIT` | 道路を地区に追加・選択トグル | — | 地区プレビュー色でハイライト |
+| `MODE_ZONE_EDIT` | 現在ツールの適用（Create=その街路で新規地区を作成／Expand=選択中地区へ追加／Merge=統合の要求。7章） | 対象地区の選択（その道路の `zone_id`） | 操作案内ツールチップ表示 |
 | `MODE_PARCEL_CREATION_PATH` | 土地区画エディタに道路選択を通知 | — | 選択可能な道路のみハイライト |
 | `MODE_ROAD_CONSTRUCTION` | 地形クリックとして処理 | 同右 | ハイライトをスキップ |
 | `MODE_EDIT_ROAD_MEMBERS` | `RoadMemberEditManager.OnPathClicked` に委譲（街路・高速道路なら `edit_road:toggle_path` をUIへ送る。それ以外の種別はツールチップで拒否） | — | 街路・高速道路の区間だけハイライトし、操作案内のツールチップを出す（それ以外の種別は拒否のツールチップのみ） |
@@ -195,13 +214,9 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 
 `InputHandler` はドラッグの種類を以下の優先度で判定する。
 
-### 5.1. 地区ドラッグ（最優先）
+### 5.1. 地区編集にドラッグは無い
 
-条件：地形または道路上でドラッグ開始、かつマウス位置が地区ポリゴン内、かつ地形モードが `MODE_ZONE_EDIT`。
-
-1. `InputHandler.StartZoneDrag(zoneId)` が呼ばれ、UIにドラッグ開始を通知
-2. ドラッグ中、`InputHandler.UpdateDrag()` でホバーしている道路に `PathInputHandler.onZoneDragHover` を呼び出し
-3. ドラッグ終了時、`InputHandler.EndDrag()` で道路に `PathInputHandler.onZoneDragEnd` を呼び出し、地区に道路を追加
+地区編集（`MODE_ZONE_EDIT`）はクリックだけで操作し（7章）、左ドラッグは通常どおりカメラの移動になる（§3.3）。
 
 ### 5.2. ノードドラッグ
 
@@ -222,9 +237,14 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 | `MODE_ROAD_CONSTRUCTION` / `MODE_EDIT` | `RoadPlanManager` | 道路のポイント・制御点のドラッグ移動 |
 | `MODE_PARCEL_CREATION_POINT` | `ParcelEditorManager` | 土地区画の回転操作 |
 | `MODE_PARCEL_SHAPE_EDIT` | `ParcelShapeEditManager` | 土地区画頂点のドラッグ移動 |
+| `MODE_EDIT_RESOURCE` | `ResourceAreaEditManager` | 資源エリア頂点のドラッグ移動 |
+| `MODE_EDIT_TRANSIT` | `TransitPlanManager` | 停留所・経由点の移動、区間のドラッグでの経由点の挿入 |
+| `MODE_EDIT_CONNECTOR` | `ConnectorEditManager` | 接続端子マーカーのドラッグ移動（XZは施設が立地する土地区画の内側へクランプ） |
 
 道路編集中の場合、ドラッグ開始前に `RoadPlanManager.IsMouseOverEditHandle` で制御点上かどうかを判定する。
 制御点上でなければ地形ドラッグとして道路のポイント移動を開始する。
+
+地形コライダー（Terrain／海面）にヒットした通常のケースでは、ドラッグはオブジェクトクリック候補（type=TERRAIN）から `StartDrag()` → `UpdateDrag()` と流れ、各マネージャの掴み開始処理（`StartDrag`）は呼ばれずに `ProcessMouseDrag(worldPos)` だけが毎フレーム届く。`InputHandler.StartTerrainDrag()` はレイキャストが何にもヒットしなかった場合のフォールバックでしかない。そのため地形ドラッグを受けるマネージャ（`RoadPlanManager`・`ConnectorEditManager`・`TransitPlanManager`）は、`ProcessMouseDrag` の初回呼び出しで現在のマウス位置から掴む対象を決める（遅延グラブ）。掴みたい対象の上でカメラドラッグが先に始まらないよう、`CameraController.IsMouseOverEditHandle` にもその対象の当たり判定を加える。
 
 ### 5.4. カメラドラッグ
 
@@ -254,6 +274,10 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 ポイントのドラッグには2つの移動軸がある。ポイントをクリックして選択した直後は **XZ（地面に沿った移動）** で、選択中のポイントをもう一度クリックすると **Y（地面からの高さ）** に切り替わり、以後はクリックのたびにトグルする。別のポイントを選ぶか空クリックで選択解除するとXZに戻る。標高編集不可のバリアント（街路など）はXZ固定。現在の軸はカーソル脇のHUDに両向き矢印（横=XZ、縦=Y）で表示される。
 Y軸ドラッグは、ポイントを通りカメラ正面を向いた鉛直平面とマウスレイの交点の高さをドラッグ開始時からの差分で適用する（斜め視点ではカーソルの上下とポイントの上下が一致する）。ほぼ真上からの視点では平面とレイが平行に近づくため、ポイント奥行きでの1ピクセルあたりの長さを画面縦座標に掛けた換算に切り替わる。下限はキー操作と同じくバリアントの `min_height`。XZ吸着は適用しない。
 制御点は Catmull-Rom スプラインから自動計算されるが、ドラッグした制御点は手動調整済みとして扱われ、以後のポイント移動・挿入・削除・標高変更で自動計算に戻されない。手動調整済みの制御点は、その制御点が属するポイントを動かしたときだけアンカーと一緒に平行移動する（隣接ポイントの移動には追従しない）。曲線/直線モードの切り替えでは手動調整は破棄され、全制御点が自動計算し直される。
+既存パスの編集再開では、保存済みの制御点と自動計算値が一定以上（0.05m）ずれている制御点だけを手動調整済みとして復元する。確定送信には自動計算値も明示的に載るため、保存値をすべて手動扱いにすると、再開後にポイントを動かしても制御点が一切追従しなくなる。
+
+端点が既存パスの端点に接続していて直線延長吸着（10章）がONのときは、端点の制御点を既存パスの延長線方向へ整列させ、接続部で道路が折れないようにする。整列は自動接線との角度差が `PATH_TANGENT_ALIGN_MAX_ANGLE_DEG`（20°。`consts.py` から同期）以内のときだけ行い、明らかに別方向へ引いた曲線は尊重する。交差点接続など候補が複数あるときは角度差が最小のものを採り、手動調整済みの端点制御点は整列しない。バックエンドも制御点が省略された登録に同じ整列を行うが、UIは整列済みの制御点を明示送信するため二重には適用されない。
+
 確定ボタンでバックエンドにデータを送信する。
 
 `Editing` フェーズの操作はUIの2Dパス形状編集パネル（`path_shape_editor`）からも行える。パネルは `edit_path:shape_command`（ノード移動・制御点移動・辺への挿入・削除・選択。XZのみ、吸着なし）を送り、`RoadPlanManager.ApplyShapeCommand` が3Dと同じロジックで適用して `edit_path:update_shape` で全状態を返す。3Dでドラッグ中のコマンドは無視される。高架・地下では2Dパネルの縦断面ストリップから既存の `edit_path:change_node` で高さだけを変えられる。各ノードには1始まりの番号ラベル（IMGUI。選択中は強調）を3Dビューに出し、2Dパネルと同じ番号で対応付ける。
@@ -296,6 +320,12 @@ Y軸ドラッグは、ポイントを通りカメラ正面を向いた鉛直平�
 確定専用の小ウィンドウ（`zone_merge`）の確定ボタンでUI側が `POST /api/v1/zones/{id}/merge` を送る
 （結果は `edit_zone:finish_merge` で戻る）。
 
+Unity側の実装で守る点は次の3つ。
+
+- **拡張の連続性はフロントで確認する。** `POST /api/v1/paths/batch-zone` は選択が1本だけだと連続性を検証しないため、そのまま送ると離れた道路が地区に混ざる。`PathInputHandler.IsConnectedToZone` が選択中地区の道路網と繋がっている街路だけを送る。
+- **適用直後の先行着色は明示的に戻す。** 応答を待たずにクリックした街路へ適用先の色（新規作成はプレビュー色）を仮に乗せ、送信結果（成功・失敗とも）とモード終了で `ZoneEditContext.ClearTempVisuals` が戻す。失敗時はデータの版が変わらずリロードが再描画しないため、リロード任せにはできない。
+- **既存地区のホバーフィル。** 地区編集中にカーソルが既存地区の領域に入ると `ZoneManager.SetHoverFillZone` が半透明フィルを描く。判定結果は `InputHandler.HoveredZoneId` として公開され、地形のクリック・右クリックからカーソル下の地区を解決するのに使う。地区のホバー判定は地区編集モード中だけ行う（通常プレイの毎フレーム負荷を避ける）。
+
 ## 8. 土地区画形状編集のドラッグ処理
 
 `ParcelShapeEditManager` は既存の土地区画のポリゴン頂点をドラッグで編集する機能を提供する。
@@ -325,6 +355,12 @@ Y軸ドラッグは、ポイントを通りカメラ正面を向いた鉛直平�
 | `STATE_EDIT_PROP` | `PROP_PLACEMENT` | `PropPlacementManager` の初期化（個別配置／範囲散布） |
 | `STATE_EDIT_CONNECTOR` | `CONNECTOR_EDIT` | `ConnectorEditManager.EnterEditMode`（接続端子ノードの強調＋ドラッグ有効化） |
 | `STATE_EDIT_ROAD_MEMBERS` | `ROAD_MEMBER_EDIT` | `RoadMemberEditManager.Begin`（所属区間を道路色の帯で表示。詳細パネルを操作し続けるため Unity ウィンドウは最前面化しない） |
+| `STATE_EDIT_RESOURCE` | `EDIT_RESOURCE` | `ResourceAreaEditManager` の初期化（天然資源エリアの新規作成） |
+| `STATE_EDIT_TRANSIT` | `TRANSIT_CONSTRUCTION` | `TransitPlanManager` を動的生成して `InitializeTransitPlacement`（`points` があれば経路編集として Editing から開始） |
+| `STATE_EDIT_STATION` | `STATION_PLACEMENT` | `StationPlanManager` を動的生成（駅パッケージ配置） |
+| `STATE_MERGE_PATH` / `STATE_SPLIT_PATH` | `PATH_MERGE` / `PATH_SPLIT` | `PathTopologyEditManager.BeginMergeMode` / `BeginSplitMode`（Unity ウィンドウは最前面化しない） |
+| `STATE_REMOVE_OBJECTS` | `REMOVE_OBJECTS` | ブルドーザ（`RemovalManager`） |
+| `STATE_SET_GRID` | `SET_GRID` | `GridSetManager`（吸着フラグを退避して「ノード吸着のみON」にする。10章） |
 
 ### 9.1. ステート別の表示プリセット
 
@@ -371,6 +407,12 @@ Y軸ドラッグは、ポイントを通りカメラ正面を向いた鉛直平�
 
 `RoadPlanManager` は TerrainInputHandler の共通スナップに加えて、直角スナップを独自に実装している。
 直角スナップは、ノードまたは道路セグメント上に配置されたポイントから既存の道路に直角に交わる方向へのスナップを提供する。
+
+共通吸着は `TerrainInputHandler.onClick/onRightClick/onHover` の冒頭で全モードに掛かる（既定半径10m・バリアントフィルタ無し）が、次のモードは通さない。道路・線路の建設（`MODE_ROAD_CONSTRUCTION`）は `RoadPlanManager` が自前の吸着半径 `snapThreshold` と網互換フィルタで一度だけ吸着する（共通吸着も掛けると二重吸着になり、`snapThreshold` を変えても吸着範囲が変わらない）。接続点編集（`MODE_EDIT_CONNECTOR`）はドラッグ中の端子が自分の旧位置へ吸着し続けるのを防ぐため、パス分割（`MODE_PATH_SPLIT`）は端点へ引き寄せられると常に「端点に近すぎる」分割になるため、駅パッケージ配置（`MODE_EDIT_STATION`）とプロップ配置（`MODE_EDIT_PROP`）は任意の地点に置くため、それぞれ通さない。
+
+吸着で引き継ぐ相対高さは、バックエンドが保存している相対Yから取る（ノード＝ノードの相対高さ、パス区間＝アンカー相対YのXZ最近傍区間での線形補間、建設中の端点＝その端点の相対Y。保存設計標高のある線路だけは基準線の絶対標高から地形を引いて求める）。描画用点列の絶対Yから逆算してはならない。描画点列には地形起伏・描画オフセット・高さ源の違いによる残差が乗るため、地面のパスへ吸着しただけで端点が地下／空中扱いになり、見た目は繋がっているのにインフラのT字タップがバックエンドの高さ判定で成立しない「幽霊接続」になる。
+
+複線（単線パス群の平行敷設。`lateral_offsets` に0以外がある間）の吸着はオフセット考慮版で行う。確定後は平行な単線パス群に分解されてグループの実体が残らないため、グループ中心線を既存線路の中心線へ素朴に吸着させると全線路が横にずれて1本も接続できない。吸着対象（ノード・建設中端点・区間）の位置と接線から「グループ内のいずれかの線路がその位置に乗る中心線位置」を候補として列挙し、カーソル最寄りの候補へ吸着する。同構成の延長では全線路の端点が一致する。
 
 吸着のON/OFFフラグ（`TerrainInputHandler.Enable*Snapping` の static 変数群）の真実源はUnity側にあり、
 切り替えは後述のCtrlラジアルメニューで行う（UIパネルからの設定イベントは存在しない）。
@@ -523,6 +565,8 @@ MODE_EDIT_PROPはクリック・ホバーともTerrainInputHandlerの共通吸�
 評価用の曲線は操作中のプレビューと同じ制御点から作る。配置中はカーソルを仮終点として、直前区間の接線変化も含める。曲線の長さに応じた密な標本を作り、全長を約1m等間隔へ再標本化する。粗い描画用折れ線の折れ角を曲率として測らない。標高に描画用の浮かせ量は含めず、勾配を取る前にマスターの `smooth_factor`（最小10m）の移動平均を適用する。
 
 区間ラベルと赤線は操作中の中心線の推定値。地形、保存された設計標高、複線の各線についての最終判断はバックエンドが行う。Unityの線形警告だけでは確定を禁止せず、パネルは最新の形状に対する全線の検証成功を待って確定を許可する。急カーブ・急勾配はこの事前検証と登録時検証で拒否する。
+
+例外はロープウェイ（[人員搬送設備](../economics/30_人員搬送設備.md) §30.3）の水平折れ角で、各ウェイポイントで前後の区間の水平進行方向の変化を5度以内に制限する。地形に依存しない確定的な判定のため、Unityは配置中のホバー位置も含めて赤線と角度ラベルを出し、編集中の違反は `can_confirm=false` で確定を直接禁止する。判定規則はバックエンドと同一に保つ（上下の勾配は含めず、許容誤差は0.001度、水平に重なる点は無効）。
 
 ### 高架の制御点と縦断形状
 

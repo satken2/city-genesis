@@ -7,6 +7,7 @@ import { ScenarioInfoSection } from "./ScenarioInfoSection";
 import type { Quest, QuestClauseState } from "../../types";
 import { ResponsiveContainer, ComposedChart, Bar, Line, CartesianGrid, ReferenceLine, XAxis, YAxis, Tooltip } from "recharts";
 import { resolveIntlLocale } from "../../utils/locale";
+import { requestConfirm } from "../../utils/confirmDialog";
 import { SatisfactionFace, getSatisfactionAppearance } from "../common/SatisfactionFace";
 import { Meter } from "../common/Meter";
 import "./AchievementsWindow.css";
@@ -156,7 +157,12 @@ export function AchievementsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   async function handleDeleteQuest(e: ReactMouseEvent, questId: number) {
     e.stopPropagation();
     if (deletingQuestId !== null) return;
-    const confirmed = window.confirm(t("achievements.deleteQuestConfirm"));
+    const confirmed = await requestConfirm({
+      titleKey: "achievements.deleteQuest",
+      message: t("achievements.deleteQuestConfirm"),
+      confirmLabel: t("common.delete"),
+      tone: "danger",
+    });
     if (!confirmed) return;
 
     setDeletingQuestId(questId);

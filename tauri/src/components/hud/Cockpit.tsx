@@ -38,6 +38,7 @@ import { setHintbarText } from "../../utils/hintbar";
 import { formatEpochDate } from "../../utils/date";
 import { resolveIntlLocale } from "../../utils/locale";
 import { BgmManager } from "../../utils/bgm";
+import { requestConfirm } from "../../utils/confirmDialog";
 import {
   fetchL1Notifications,
   isCautionNotification,
@@ -117,14 +118,19 @@ export function Cockpit() {
     appWindow
       .listen<{ object_type: string; id: number; prop_type?: number }>(
         IPC_EVENT_REMOVE_OBJECT_REQUEST_CONFIRM,
-        (event) => {
+        async (event) => {
           const payload = event.payload;
           if (!payload?.object_type || payload.id == null) return;
           const name =
             payload.prop_type != null
               ? masterData?.prop_types?.[payload.prop_type]?.display_name ?? String(payload.prop_type)
               : "";
-          const accepted = window.confirm(t("taskbar.bulldozerConfirmScatter", { name }));
+          // 取消・×閉じでも false が返るので、Unity 側の確認待ちは必ず解除される
+          const accepted = await requestConfirm({
+            message: t("taskbar.bulldozerConfirmScatter", { name }),
+            confirmLabel: t("common.delete"),
+            tone: "danger",
+          });
           void sendRemoveObjectConfirmResult(payload.object_type, payload.id, accepted).catch(console.error);
         },
       )

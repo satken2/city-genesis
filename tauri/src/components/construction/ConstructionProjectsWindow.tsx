@@ -6,8 +6,9 @@
  *
  * - データ源は GET /api/v1/tags/projects。集計(残り事業費・残り工期)はバックエンドが行い、
  *   ここでは並べて表示するだけ(建設費の算式をUI側に二重実装しない)。
- * - タグの付け外しは各エンティティの詳細パネル(`common/TagSelect`)で行う。ここは閲覧と
- *   表示・非表示の切り替えに徹する。
+ * - タグは建設パネルで設置するときに選ぶか、着工前・建設中の詳細パネル(`common/TagSelect`)で
+ *   付け外しする。竣工した工事もタグは残り、竣工済みの行として表に並ぶ。
+ *   ここは閲覧と表示・非表示の切り替え・タグの削除に徹する。
  * - 表示・非表示はタグ単位(見出しの目アイコン)と行単位(各行の目アイコン)の2粒度。
  *   状態はバックエンドに保存されずUnityがセッション内で持つ(`useObjectVisibility`)。
  */
@@ -28,6 +29,7 @@ import {
 } from "../../utils/constructionTags";
 import { formatCompactAmount, formatExactAmount } from "../../utils/money";
 import { resolveIntlLocale } from "../../utils/locale";
+import { requestConfirm } from "../../utils/confirmDialog";
 import { StatusBadge } from "../common/StatusBadge";
 import "./ConstructionProjectsWindow.css";
 
@@ -70,13 +72,18 @@ export function ConstructionProjectsWindow({ apiBaseUrl }: ConstructionProjectsW
     return () => controller.abort();
   }, [apiBaseUrl, reload]);
 
-  // 詳細パネルでタグが付け替えられたら一覧を取り直す(ウィンドウをまたぐのでイベントで受ける)。
+  // 詳細パネル・建設パネルでタグが付け替えられたら一覧を取り直す(ウィンドウをまたぐのでイベントで受ける)。
+  // エポックが終わったときも取り直す(残り工期・建設費・竣工件数が進むため)。
   useEffect(() => {
-    const unlistenPromise = listen(TAGS_CHANGED_EVENT, () => {
+    const unlistenTags = listen(TAGS_CHANGED_EVENT, () => {
       void reload();
     });
+    const unlistenEpoch = listen<{ executing: boolean }>("epoch:executing", (event) => {
+      if (!event.payload.executing) void reload();
+    });
     return () => {
-      void unlistenPromise.then((unlisten) => unlisten());
+      void unlistenTags.then((unlisten) => unlisten());
+      void unlistenEpoch.then((unlisten) => unlisten());
     };
   }, [reload]);
 
@@ -94,7 +101,13 @@ export function ConstructionProjectsWindow({ apiBaseUrl }: ConstructionProjectsW
 
   /** タグを削除する(付いている建物・道路からも外れる)。 */
   async function handleDeleteTag(tag: string) {
-    if (!window.confirm(t("constructionProjects.confirmDeleteTag", { tag }))) return;
+    const confirmed = await requestConfirm({
+      titleKey: "constructionProjects.deleteTag",
+      message: t("constructionProjects.confirmDeleteTag", { tag }),
+      confirmLabel: t("common.delete"),
+      tone: "danger",
+    });
+    if (!confirmed) return;
     try {
       await deleteTag(apiBaseUrl, tag);
       await emit(TAGS_CHANGED_EVENT, { tag });

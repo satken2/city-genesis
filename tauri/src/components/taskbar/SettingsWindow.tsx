@@ -27,6 +27,7 @@ import { useTranslation } from "react-i18next";
 import { FONT_SIZE_PRESETS, useFontSize } from "../../contexts/FontSizeContext";
 import { loadAppSettings, saveAppSettings, type AppSettings } from "../../utils/settings";
 import { fetchApi, ApiError } from "../../utils/api";
+import { requestConfirm } from "../../utils/confirmDialog";
 import {
   SUPPORTED_LANGUAGES,
   isSupportedLanguage,
@@ -292,9 +293,11 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
 
   async function handleGpuToggle(enableGpu: boolean) {
     const mode = enableGpu ? t("settings.compute.gpu") : t("settings.compute.cpu");
-    if (!window.confirm(t("settings.compute.confirmRestart", { mode }))) {
-      return;
-    }
+    const confirmed = await requestConfirm({
+      message: t("settings.compute.confirmRestart", { mode }),
+      confirmLabel: t("settings.compute.restartAction"),
+    });
+    if (!confirmed) return;
 
     setGpuRestarting(true);
     const baseUrl = apiBaseUrl.replace(/\/+$/, "");

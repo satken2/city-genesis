@@ -26,6 +26,7 @@ import { setHintbarText } from "../../utils/hintbar";
 import { sendViewApplyPreset, VIEW_PRESET_TRANSIT } from "../../utils/ipc";
 import { resolveIntlLocale } from "../../utils/locale";
 import { resolveTransitIcon } from "../../utils/pathIcon";
+import { requestConfirm } from "../../utils/confirmDialog";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { Money } from "../common/Money";
 // 混雑率(稼働率)メーターは、統計ウィンドウの消防署/警察署の逼迫度メーターと同じ
@@ -214,7 +215,13 @@ export function TransitManagementWindow({
   const handleDelete = useCallback(
     async (line: TransitLine) => {
       // 停留所・区間ごと消えて取り消せないため、路線詳細パネルの廃止と同じく確認を挟む。
-      if (!window.confirm(`${lineDisplayName(line)}\n${t("transit.deleteDescription")}`)) return;
+      const confirmed = await requestConfirm({
+        titleKey: "transit.deleteTitle",
+        message: `${lineDisplayName(line)}\n${t("transit.deleteDescription")}`,
+        confirmLabel: t("transit.deleteConfirm"),
+        tone: "danger",
+      });
+      if (!confirmed) return;
       setDeletingId(line.line_agent_id);
       setError(null);
       try {

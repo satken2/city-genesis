@@ -46,6 +46,15 @@ Offset  8: Ring buffer data (1048568 bytes)
 
 イベント名は全レイヤー（Unity / Rust / フロントエンド）でコロン区切りで統一する（例: `edit_path:select_node`）。
 
+## イベントを追加・変更するときの変更箇所
+
+1つのイベントは Unity・Rust・フロントエンドの3箇所にまたがる。どこかが欠けても実行時エラーにはならず、単に届かない。
+
+- **Envelope**: `unity/Assets/Scripts/IPC/IpcEnvelope.cs` と `tauri/src-tauri/src/messages.rs` の `Envelope` は同一構造（`version` / `request_id` / `timestamp` / `source` / `destination` / `event` / `payload`）に保つ。パースできない通知は両側とも捨てる。
+- **UI → graphic**: フロントエンドの `src/utils/ipc.ts` から Tauri コマンド `send_window_action` を呼ぶ。Rust はこれを `ui:action` Envelope（`payload.action` にイベント名、`payload.params` に引数）として汎用転送するので、Rust 側の変更は要らない。Unity は `IpcClient` の型付きイベント（`OnXxx`）で受け、`IpcEventHandler` / `IpcStateCoordinator` / `IpcViewCoordinator` が処理する。
+- **graphic → UI**: Unity は `IpcClient.EmitXxx` で `event` 直下の名前として送る。Rust `ipc.rs` の受信 match に中継の分岐（全ウィンドウへの `emit`、常駐のコックピットだけが扱うものは `emit_to`）を追加しないと、どの WebView にも届かない。フロントエンドは同名の Tauri イベントを `listen` する。
+- 追加・変更したイベントは、このページの一覧と関連する機能のページに反映する。
+
 ## 一覧
 
 | イベント種類                          | コール方向            | 内容                                    |
@@ -177,6 +186,8 @@ Unityは `GET /buildings/{id}` の最新状態が `STATUS_COLLAPSED` である�
 - **パネル確定型**（建物建設・パス敷設・土地区画の作成/形状編集・資源エリア・公共交通・プロップ配置）: UI(Tauri)のパネルに確定ボタンがあるため、**UIが直接バックエンドへPOST/PATCHする**。成功後に `edit_*:finish` 系イベント（または `session:reload`）を送り、Unity側の編集状態をリセットしてデータをリロードさせる。Unityは形状の組み立てと `edit_*:update_*` 系イベントによるUIへの逐次通知のみを担う。
 - **3Dジェスチャ完結型**（地区の塗り分け＝クリック/ドラッグの即時割当、接続端子ノードのドラッグ移動）: パネルの確定ボタンを持たず3D上の操作で完結するため、**Unityが直接バックエンドへ送信する**。
 
+確定後の後始末（編集状態のリセット・消えたオブジェクトの破棄・通常モードへの復帰・データの再取得）は `edit_*:finish` 系の1イベントにまとめ、Unity がその中で順序を持って実行する。`session:reload` と `world:change_state` を別々に送ってはいけない。差分リロードは複数フレームにまたがる処理で、後続の状態遷移が割り込むと再生成・削除が中途半端に終わる。確定しないキャンセルは `STATE_NORMAL` の送信で足りる。
+
 # グラフィックプログラムのステート
 
 Unityのグラフィックプログラムは、いくつかのステートを持つ。各モードの実体はUnityのC#で定義された「表示モード（`VisualMode`）」「入力モード（`InputMode`）」のセットである。
@@ -222,7 +233,7 @@ Unityのグラフィックプログラムは、いくつかのステートを持
 
 `STATE_EDIT_STATION` は駅パッケージ配置モードで、軌道建設パネル（`track_build`）の**簡易モードの「駅」タブ**が使う。プラットフォーム（複線の相対式＝対面ホーム）と駅舎をひとまとめにして1クリックで置くためのモードで、`world:change_state` の params に `platform_variant` / `house_variant` / `platform_length`（m） / `track_spacing`（m） / `height`（相対m） / `angle`（度。北＝ワールド+Zが0の時計回り） / `travel_directions`（各線の `DIR_*`） / `house_ends` を含める。
 
-Unity は `StationPlanManager` が担う。カーソル追従の半透明ゴースト（プラットフォーム2本＋駅舎1本を実パスと同じメッシュ生成器で描く）→ 左クリックで配置地点を固定 → パネルの確定ボタンで発注、という流れで、**建物の自由配置・プロップの個別配置と同じ操作**（中ボタンドラッグで回転、PageUp/PageDown で高さ、Esc または右クリックで地点の固定解除）を共通部品 `Editors/PlacementInput.cs` で提供する。形状は固定なので折れ線の編集・曲線・吸着・グリッドは持たない（**共通吸着も適用しない**——中心線は複線の「間」を通るため、既存の線路やノードへ吸着すると半間隔ぶんずれる）。プラットフォームは中心点の地盤標高＋指定の高さで水平に揃え、駅舎の線は地面に沿わせる（連絡橋のデッキ高さは駅舎プレハブの造形が持つため）。
+Unity は `StationPlanManager` が担う。カーソル追従の半透明ゴースト（プラットフォーム2本＋駅舎1本を実パスと同じメッシュ生成器で描く）→ 左クリックで配置地点を固定 → パネルの確定ボタンで発注、という流れで、**建物の自由配置・プロップの個別配置と同じ操作**（中ボタンドラッグで回転、PageUp/PageDown で高さ、Esc または右クリックで地点の固定解除）を共通部品 `Editors/PlacementInput.cs` で提供する。形状は固定なので折れ線の編集・曲線・吸着・グリッドは持たない（**共通吸着も適用しない**——中心線は複線の「間」を通るため、既存の線路やノードへ吸着すると半間隔ぶんずれる）。プラットフォームは中心点の地盤標高＋指定の高さで水平に揃え、駅舎の線は地面に沿わせる（連絡橋のデッキ高さは駅舎プレハブの造形が持つため）。駅舎の線の長さはプラットフォームの外縁より外で終わる長さを自動で取る。建屋は線路に重なると外側へスライドするが、敷設中の線路はまだ存在せずスライド計算に入らないため、最初から外側で終わらせないとプレビューと確定後で建屋の位置がずれる。
 
 確定送信は UI 側が `POST /api/v1/paths`（プラットフォーム2本＋駅舎1本、`align_station_tracks: true`）で1回にまとめて行い、成功後に `edit_path:finish` で Unity 側の状態をリセットしてから `STATE_EDIT_STATION` を再送して連続設置に戻す。干渉・川横断・線形の検証も UI 側の `POST /paths/validate`（全3本）が権威で、Unity 側はローカル判定を持たない。
 
@@ -232,7 +243,7 @@ Unity は `PathTopologyEditManager` が対象選択を担う。**結合**では�
 
 選択結果は `edit_path:select_merge_target` / `edit_path:select_split_point` でUIへ返り、UIは同じエンドポイントの `dry_run=true` で結合後・分割後の長さを取得してパネルに表示する。プレイヤーが確定するとUIが `dry_run` なしで再送し、成功後に `edit_path:finish_topology_edit` を**1発だけ**送ってUnity側の後始末（着色・マーカーのクリア、消えたパスの破棄、通常モード復帰、再描画）をまとめて行わせる。キャンセル時のみ `STATE_NORMAL` を送る。長さを確認して確定するパネルを操作し続ける必要があるため、`STATE_EDIT_CONNECTOR` と同じくこのステートでは Unity ウィンドウを最前面化しない。
 
-`STATE_EDIT_CONNECTOR` は施設の接続端子ノード（インフラ接続点 `infra_node_id` / 走行網接続点 `depot_node_id`。[[26_インフラ網]]の接続端子ノード参照）をドラッグで移動する編集モードで、経済主体詳細パネル（`agent_detail`）の「接続点の編集」トグルボタンで遷移する。`world:change_state` の params に `agent_id` / `infra_node_id` / `depot_node_id` を含める。Unity は `ConnectorEditManager` が対象ノードを強制表示・色付きマーカーで強調し、入力プリセット `CONNECTOR_EDIT`（NODE=`MODE_EDIT`、他=`MODE_NONE`）で対象ノードのみドラッグ移動可能にする。ドラッグ確定時は `NodeInputHandler` が `PATCH /api/v1/nodes/{node_id}`（position）を送る。**ノード位置の変更はパスが1本も接続されていない場合のみ許可され**、接続済みノードの移動はバックエンドが拒否し、Unity は元位置に自動で戻す（[[26_インフラ網]] §26.3 の端子位置移動制限）。トグルボタンを持つ `agent_detail` パネルを前面に残すため、このステートでは他の編集ステートと異なり Unity ウィンドウを最前面化しない。編集を終了すると `STATE_NORMAL` を送り、パネルが開いている間は `edit_connector:show` を再送して読み取り専用ハイライトに戻す。
+`STATE_EDIT_CONNECTOR` は施設の接続端子ノード（インフラ接続点 `infra_node_id` / 走行網接続点 `depot_node_id`。[[26_インフラ網]]の接続端子ノード参照）をドラッグで移動する編集モードで、経済主体詳細パネル（`agent_detail`）の「接続点の編集」トグルボタンで遷移する。`world:change_state` の params に `agent_id` / `infra_node_id` / `depot_node_id` を含める。Unity は `ConnectorEditManager` が対象ノードを強制表示・逆四角錐マーカーで強調し、入力プリセット `CONNECTOR_EDIT`（TERRAIN=`MODE_EDIT_CONNECTOR`、他=`MODE_NONE`）でマーカーを地形ドラッグとして掴んで移動する（マーカーはノード実体の上空に浮くため、ノードのコライダーへのレイキャストは使わない。[Unity入力制御](Unity入力制御.md) §5.3）。ドラッグ中のXZは施設が立地する土地区画の内側へクランプし、ドラッグ確定時は `NodeInputHandler` が `PATCH /api/v1/nodes/{node_id}`（position）を送る。**ノード位置の変更はパスが1本も接続されていない場合のみ許可され**、接続済みノードの移動はバックエンドが拒否し、Unity は元位置に自動で戻す（[[26_インフラ網]] §26.3 の端子位置移動制限）。トグルボタンを持つ `agent_detail` パネルを前面に残すため、このステートでは他の編集ステートと異なり Unity ウィンドウを最前面化しない。編集を終了すると `STATE_NORMAL` を送り、パネルが開いている間は `edit_connector:show` を再送して読み取り専用ハイライトに戻す。
 
 # 起動フロー
 

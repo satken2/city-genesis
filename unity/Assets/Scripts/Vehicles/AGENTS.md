@@ -1,103 +1,55 @@
 # Vehicles
 
-車両は描画専用で、経済シミュレーションや永続エンティティへ書き戻さない。仕様は `city-genesis/docs/docs/geometries/O_車両の走行描画.md`。
+描画専用の交通演出。一般車・公共交通の編成・歩行者・路上駐車・索道の搬器・空と海の環境演出を、バックエンドの集計値(交通量・走行時間・路線)から再現する。経済シミュレーション・永続エンティティ・セーブへは書き戻さない。
 
-## 路上駐車
+- 時間と流量の契約の正は `geometries/T_交通シミュレーションと走行描画の整合.md`(平均速度に独立した交差点減速や駅停車を重ねない)。
+- docs パスは `city-genesis/docs/docs/` 起点。
 
-`ParkedVehicleManager` はシーンロード後に自己生成する。`PathSummary.parked_cars` を静止台数として扱い、稼働中の `PATH_STREET` かつ `street_parking_capacity > 0` の道路だけに表示する。`path_traffic`・走行車両の台帳・建物駐車とは独立している。
+## ファイル
 
-`ParkedVehicleLayout` は交差点切断済みの `VehiclePolyline` と `RoadPath.GetPathMasterParams` の寸法を使う。歩道を除いた両側車道端へ配置し、切断端から5m、縁石から0.2mを空ける。車種は乗用車60%・商用車30%・トラック10%で道路IDと候補番号から固定し、既存全16外観を使う。車幅が片側に収まらない候補、カーブで歩道・中央分離帯に張り出す候補、車体どうしが重なる候補は除く。台数は候補上限で頭打ち。整数台数を保ち、小数は道路ID固定の確率丸めとする。路駐量そのものは変更しない。
+| ファイル | 役割 |
+| --- | --- |
+| `Vehicle.cs` | 車1台の状態と移動。`VehiclePolyline`(累積距離付き点列・円内区間・射影・軌道オフセット)も同居 |
+| `VehicleManager.cs` / `.Drive.cs` | 一般車の道路スナップショット・分岐・密度調整・プール・沿道到着。`VehiclePopulationBudget`(全体枠)も同居。Drive はドライブモードの1台 |
+| `RoadMotionData.cs` | `/paths/motion` の自由秒数・混雑込み秒数と、前車追従の速度制御 `RoadMotionControl` |
+| `RoadsideAccess.cs` | 建物入口の幾何と有効性検査。車と歩行者で共有 |
+| `Pedestrian.cs` / `PedestrianManager.cs` | 歩行者(GameObject なしの instanced 描画) |
+| `ParkedVehicleManager.cs` / `ParkedVehicleLayout.cs` | 路上駐車(`PathSummary.parked_cars` の静止台数を GPU インスタンシング) |
+| `TransitDataStore.cs` | 路線一覧の共有ストア(5秒ポーリング+明示 Refresh)。`Session` が都市切替の世代 |
+| `TransitMotionClock.cs` | コアの `journeys.steps` を時刻から参照する純粋な時計 |
+| `TransitRouteGeometry.cs` | 方向付き Run・地形追従点列・レール接続・車線オフセット・編成配置 `SampleConsist`。車両とハイライトで共有 |
+| `TransitVehicleManager.cs` / `.Drive.cs` | 公共交通の編成描画・選択 `TryPick`・走行音通知。Drive は乗車編成の時計合わせ |
+| `TransitLivery.cs` | 路線カラー(`line_color`)の塗装 |
+| `VehicleModelConfig.cs` / `VehicleModelResolver.cs` | `vehicle_model_config.yaml` の解析と、モデル解決・接地原点/前方軸の正規化・LODGroup 構成 |
+| `DriveMode.cs` | ドライブモードの選択UI・開始位置・走行HUD |
+| `RopewayNetworkStore.cs` / `RopewayNetwork.cs` / `RopewayGeometry.cs` / `RopewayCabinManager.cs` | 索道(PATH_CONVEYOR)の駅間抽出・ケーブル形状・搬器の循環描画 |
+| `AmbientVehicleManager.cs` / `AmbientTrail.cs` | 空と海の環境演出(航空機3種・船舶4種)と飛行機雲・航跡 |
 
-モデルは `VehicleModelResolver.CreateInstance` で接地原点・前方軸を正規化したテンプレートから `PropRenderModel(GameObject)` で抽出する。個体GO・音源・コライダーを作らず、通常モデルを511件以下のGPUインスタンシングで描く(車両の接写・遠景があっても通常の部品だけを使う)。描画半径480m、0.5秒間隔のセル逆引き走査、形状・寸法・通行方向の変更時だけ候補再生成。台数だけの変更ではモデル・候補を維持する。形状の比較は `PathManager.GetPathGeometryRevision` とデータ参照の一致で行い、一致すれば点列を取得しない(版が不明なら点列の完全一致で比較)。管理中心は走行車と同じ `VehicleManager.ResolveTrafficCenter`(`CenterLead`=300m)。中心が大きく跳んでも roads と描画バッチは捨てず、新しいバッチができるまで旧表示を残す。生成は `RenderWorkScheduler` のStart/Stopを対で使い、都市切替は `TransitDataStore.Session` でクリアする。検証は `Tests/Vehicles/run.ps1 -ParkingOnly`。
+## 知らないと事故る不変条件
 
-## ドライブモード
+- `VehiclePolyline.points` は構築後に書き換えない(`ShapeHash` のキャッシュ・`SameSource` の比較・Road の使い回しの前提)。交差点の点列は車線オフセット済みなので二重に横へずらさない。
+  - 四隅検査など局所射影は `ProjectRange`(累積距離範囲の二分探索)、全長射影は `Project`。
+- 道路スナップショット(`vehicleRoads` / `pedestrianWalks` ワーカー)は共通予算で分割構築し、完成後に一括交換する。`roads` / `walks` への代入は Commit と Clear に限る(途中の集合を車に見せない)。乗車開始 `StartDrive` だけ同期版 `RefreshRoads` を使う。
+- 管理中心は `VehicleManager.ResolveTrafficCenter`(走行車300m・歩行者180m・路駐が使う。公共交通・索道は従来の中心)。大移動は `ClearVehicles` ではなく `Recenter`。`accessCache.Clear()` は全消去のときだけ。
+- 入口表(`vehicleAccess` / `pedestrianAccess` ワーカー)は変更時だけ再計算し、逆探索表を全車で共有する。車ごとの探索や毎フレームの建物全件検索は禁止。
+  - entrances を差し替えたら必ず `accessGeneration` を進める(`SpawnWeight.HasSpawnPoint` が `spawnPointGeneration` との比較でキャッシュしている)。
+- ノード遷移で台数超過を理由にデスポーンしない。到着予約は交差点を跨ぎ、路肩寄せは道路内だけ。
+  - 沿道到着は `PATH_STREET` かつ `frontage_allowed` の建物付き接道区画だけ(高速道路・空き地・行き止まりに退出位置を作らない)。入口の条件を変えるときは `RoadsideAccess` を直し、車・歩行者の片方に別実装を書かない。
+- `RenderWorkScheduler` のワーカーは `hasPendingWork = () => false` で登録し、ハンドルと実行中フラグは iterator の finally で戻す。初回 Step 前に破棄されたワーカーは finally が走らないので、各 Manager は `OnDisable` でも戻す。
+- 車線・区画線は `RoadLaneLayout`(MeshGenerators/Paths/RoadPath.cs)、通行方向は `CityInfoStore`、高速道路の合流は `PathManager.GetMotorwayMerge`、進入矢印との整合は `RoadMarkingRules` を共有する。車両側で輪郭・合流・車線を再実装しない。
+  - 交通量は型付き `PathSummary.path_traffic` を読み、`utilization` で代用しない。
+- 公共交通: 欠けたパス・未生成のレールコネクタを直線で補完しない(表示しない)。公称車長はワールド座標の弦長で満たし、時計の論理距離に車長を足さない。
+  - LRT・鉄道の交差点レールは `PathManager.GetNodeIntersectionObject`(`NodeMesh_*`)の子 `Rail` から読む(`GetNodeObject` のノード円柱とは別物)。軌道の横位置と踏面高さの正は `LrtRoadParts`。
+  - 停止中心はコアと同じ「割合×未切断3D点列長」で求め、片方だけ別の式にしない。
+- 路線カラーは `MaterialPropertyBlock` を使わない(SRP Batcher から外れる)。塗る材質の唯一の正は `Resources/Config/transit_vehicle_livery.json`。新しい外観は帯を専用材質で著作して表に登録する。
+- モデル対応は `Resources/Config/transit_vehicle_models.json`、候補番号は Tauri の `tauri/src/data/transitVehicleModels.json` と揃える。
+  - モノレール(車種24)の FBX は手動配置プロップ308/309と同一ファイルのコピー。308/309を書き出し直したら24にも置き直す(`Tests/Vehicles` がバイト一致を検査)。
+- 歩行者の `side` / `lateral` はパス幾何(始点→終点)に対する左右で、反転しても符号を変えない。`PedestrianManager.ResolveBand` は `Tests/Vehicles/VehicleQA.cs` がリフレクションで同じ引数列を呼ぶので、シグネチャを変えたら QA も直す。
+- 索道の body Renderer の抑制・復元は `PathPresentation.SetRendererForceOff` を介し、生成待ちの抑制を解除しない。搬器モデルは吊り点原点なので `VehicleModelResolver` で接地補正しない。
+- 走行音は `Weather/VehicleAmbience.Report` へ通知するだけ(車両側に AudioSource を持たない)。都市切替は `TransitDataStore.Session` でクリアする。
 
-走行車両の`{part}_close`は`VehicleModelResolver`が無印と同じ変換で生成し、LODGroupで画面比率25%以上のとき表示する。無印は画面比率3.5〜25%、専用遠景は3.5%未満を担当し、車両の表示範囲はマネージャーが決める。14/20/21/23の先頭・中間・全外観と、道路車両10〜13の全18外観に接写版がある。道路車両は全外観に専用遠景も持つ。公称長への伸縮は全LODを含むルートへ一度だけ適用する。
+## 参照
 
-`DriveMode`はCockpitの`drive:open`で自己生成され、Unity上に車種/路線選択・開始位置の選択・走行HUDを表示する。翻訳済みの文言はTauriから受け取る。自動車は`VehicleManager.Drive.cs`が通常のactive一覧へ1台追加し、前車追従を共用する。乗車中の車を沿道到着予約・範囲外削除の対象にしない。分岐候補はNPCと共通の`CollectCandidates`で進入方向を検証し、未選択時は最も直進に近い道へ進む。
-
-鉄道は`TransitVehicleManager.Drive.cs`が既存路線の第1編成の時計位相を開始位置へ合わせる。路線の往復方向を区別して等加速度時計を逆算し、停車・編成配置・折り返しは通常描画と共用する。折り返しでも同じ車両(identity=0)を追従する。線路形状が欠けたら乗車編成の時計を戻し、最後の位置と描画を保持して待つ。
-
-Space長押し中は`DriveMode.SpeedMultiplier`が5になり、一般車と公共交通の描画時間を一緒に進める。`Time.timeScale`・経済時間・APIポーリング周期は変えない。一般車は1/30秒以下の刻みで前車間隔を再評価する。カメラ/周辺交通/セルロードの中心は乗車位置で、通常入力とカメラ保存は乗車UI表示中に制御する。Esc・編集モード遷移・リロードで解除し、都市切替では古い視点を復元しない。新しい走行モードの定数・バックエンドAPI・セーブ項目は持たない。
-
-- `Vehicle` と `VehiclePolyline` は移動状態と距離補間。`VehiclePolyline` の points は構築後に書き換えない(`ShapeHash` のキャッシュ・`SameSource` の比較・Road の使い回しの前提)。`ProjectRange` は累積距離範囲を二分探索して局所射影し、路駐車体の四隅の検査を道路全長の走査にしない。通常の全長射影は `Project`。交差点は車線オフセット済みの点列なので二重に横へずらさない。端を越えたフレームの残り時間を捨てない。
-- `VehicleManager` は道路スナップショット・分岐・密度調整・プール。ノード遷移で台数超過を理由にデスポーンしてはいけない。到着予約は交差点を跨ぎ、路肩寄せは道路内だけで行う。
-- **道路スナップショット**: 0.5秒ごとの走査は `vehicleRoads` / `pedestrianWalks` ワーカー(RenderWorkScheduler、`() => false`)で共通予算内に分割して構築し、完成後に一括交換する(途中の集合を車に見せない)。`roads` / `walks` への代入は Commit と Clear に限る。Road/Walk は `geometryRevision`(`PathManager.GetPathGeometryRevision`。-1 なら `VehiclePolyline.SameSource` で点列の完全一致)・data・scanCenter・scanRadius が同じなら使い回し、形状だけ同じなら点列を使い回す(版が一致すれば点列を取得しない)。乗車開始(`StartDrive`)だけは同期版 `RefreshRoads` を使う。点列が差し替わった車は、旧点列上の位置を新点列の元の進捗付近(±(長さ差+10m))へ射影して移す(`VehiclePolyline.RemapFrom`)。点列インスタンスが同じなら移さない。
-- **管理中心と大移動**: 管理中心は `VehicleManager.ResolveTrafficCenter`(`CameraCellChecker.CurrentWorldPosition` をカメラ位置から水平 `maxCenterLead` 以内へ寄せた点。乗車中は乗車位置)で、使うのは走行車(300m)・歩行者(180m)・路駐だけ。公共交通・索道は従来の中心を使う。通行方向の変更・ゲーム未開始では全消去する。大移動では `ClearVehicles` でなく `Recenter` を使う: 円内の車は残し、roads を新しい走査の確定まで保持し、発生バケットを空にして即時に再走査し、確定後に初期充填へ戻す。入口キャッシュは保持し(**`accessCache.Clear()` は全消去だけで行う**)、円外の車は通常のデスポーンに任せる。
-- **プール**: 車種・外観単位の long キー。デスポーンはスケール0で即座に隠し、`SetActive(false)` は `ProcessPendingDeactivation` だけが1フレーム `deactivationBudgetMs`(0.3ms、最低4件)の予算で行う。補充は `spawnBudgetMs`(1ms)の予算で打ち切り(1台目は必ず試みる)、超えた分(backlog)は制御周期の無いフレームで繰り越して消化する。外観の在庫が無ければ同じ車種の在庫で代替し(`Acquire` の ref variant)、variantId を実際の外観へ書き換える。ゲーム開始後、ModelManager が使えるようになったら環境交通(バス・LRT を除く)の各外観を1台ずつ `vehicleWarmup` ワーカーで事前生成する。発生時は抽選した車線から順に試し、同じ道路・方向・車線の前後8m以内に車がいれば別の車線へ回す(全車線が塞がっていればその制御周期では発生しない)。
-- ワーカーのハンドルと実行中フラグは iterator の finally で null に戻すが、初回の Step より前に破棄されたワーカーは finally を実行しないので、VehicleManager / PedestrianManager / TransitVehicleManager は `OnDisable` でもハンドルと実行中フラグを戻す。
-- 全体枠は `VehiclePopulationBudget`。道路別の端数を切り上げず、合算後に整数化する。実在台数をObserveで返し、到着・補充の遅れを端数へ繰り越す。
-- 台帳は0.25秒ごとに実体一覧から構築する。交差点中は移動先へ1回だけ数え、到着予約・フェード中も消えるまでは枠を占める。
-- 建物入口の幾何(接道辺の中点→敷地内3mの点、有効性検査)は `RoadsideAccess` に置き、車と歩行者で共有する。`VehicleManager.BuildEntrances` はそのパス幾何の左右を通行側・走行方向へ読み替えるだけ。入口の条件を変えるときは `RoadsideAccess` を直し、片方に別実装を書かない。
-- 車線と区画線は `RoadLaneLayout`（MeshGenerators/Paths/RoadPath.cs）を共有する。通行方向は `CityInfoStore`。交通量は型付き `PathSummary.path_traffic` を読み、utilizationで代用しない。
-- 1車線高速道路流入ランプは `PathManager.GetMotorwayMerge` の計画を区画線と共用し、接合区間の前半を並走・後半を合流として描く。`VehicleManager` はランプ側の本線車線へ接続し、`TransitRouteGeometry` も同じ `Connector` を使う。車両ごとに輪郭・合流判定を再実装しない。完成済み道路の変更はエポック後の既存ロードで反映し、論理経路・容量・移動時間を変更しない。
-- 範囲候補は `GetPathsNearCircle` のセル逆引き。円内区間・発生・デスポーンはすべてrenderRadius+despawnMarginを使う。
-- `AmbientVehicleManager` は空と海の環境演出(高高度の航空機3種・沖合の船舶4種)。経済と無関係で、GameObjectを持たず保存座標+`Graphics.RenderMesh`で描く。船は `CoastlineStore.SignedDistance` の先読み採点で陸地を避け、外洋(リング包含数0)にだけ発生する。距離関数は全辺走査なので毎フレーム呼ばない。飛行機雲・航跡は `AmbientTrail`。モデルは `Props/ambient_*`(固定名。prop_master登録なし)。仕様は公開 `geometries/V_環境演出の乗り物.md`。
-- 走行音は `Weather/VehicleAmbience` へ通知するだけ(車両側はAudioSourceを持たない)。`VehicleManager.Place` が毎フレーム `Report(Kind.Car, go.GetInstanceID(), 位置, speed)`、`Despawn` が `Remove`。`TransitVehicleManager.ReportSound` が描画した編成ごとに中間車位置と路線時計の距離差分から出した速度を `Report`(バス=Kind.Bus、鉄道=Kind.Train)し、セッション切替で `Clear`。通知が1秒途切れた発音体は自動で外れるので、範囲外へ出た編成の明示解除は不要。
-- 回帰検証は `unity/Tests/Vehicles/run.ps1`。独立Unityで本編アセンブリを実行し、本編シーンを変更しない。
-
-- 到着時は `BeginRoadsideExit` でその場の90度旋回→実寸の横移動を行い、検証済みの敷地内退出点へ抜けた後だけフェードする。退出中は道路スナップショット更新で位置を戻さず、管理円外でも退出を完了させる。
-
-- 沿道到着はPATH_STREETかつfrontage_allowedの建物付き接道区画だけ。高速道路・空き地・行き止まりで任意の退出位置を作らない。到着先なしの場合は実体を維持し、補充を抑える。
-- UpdateAccessのワーカー(RenderWorkScheduler の `vehicleAccess` / `pedestrianAccess`、`hasPendingWork` は `() => false`)で周辺区画の入口を変更時だけ再計算し、道路方向付き逆探索表を全車で共有する。車ごとの探索や毎フレームの建物全件検索は禁止。入口探索は道路進入時・表の世代変更時のみ。ワーカーは try/finally で `accessWorker` を null に戻す。`SpawnWeight` の `HasSpawnPoint` は `Road/Walk.spawnPointGeneration` と `accessGeneration` の比較でキャッシュするので、**entrances を差し替えるときは必ず `accessGeneration` を進めること**。入口表の再公開で同じ入口(同じ区画・距離差0.5m未満)を選び直したときは寄せの進み具合を保つ。入口を失ったときや別の入口へ替わるときは、寄せ量を発生時の寄せ(`spawnBlendRemaining`)へ移し、現在の横位置から走行距離に応じて車線へ戻す。
-- 出口候補・道路接続・管理円外の端点が不変なら逆探索表を再構築しない。作業は共通予算(`PerformanceConfig.SliceBudgetMs`)で協調中断する（単一区画やJITの時間を含む厳密上限ではない）。形状の署名には点列ごとに一度だけ計算する `VehiclePolyline.ShapeHash` を使う。yieldを跨ぐ接道区画ID列はコピーし、ロードによる集合変更で列挙を壊さない。
-- 通常補充は入口か管理円への進入境界。初期配置だけは道路途中に置ける。退出点は区画内部で検証し、退出直前にも建物と接道の存在を確認する。
-
-## 共通時間と公共交通
-
-- 時間・流量の契約の正は公開 `geometries/T_交通シミュレーションと走行描画の整合.md`。平均速度に独立した交差点減速・駅停車を重ねてはならない。
-- `RoadMotionData` / `RoadMotionControl`: `/paths/motion` の自由秒数・混雑込み秒数を参照。`VehicleManager` は同一道路・方向・車線の前車へ追従し、締切超過時も自由走行平均速度を超えない。表示標本率は0〜1。バス・LRT(`VEHICLE_BUS`/`VEHICLE_TRAM`。路線車両として`TransitVehicleManager`が描く)のランダム生成は行わない。
-- `TransitDataStore`: 色帯と車両で共有する路線一覧。5秒ポーリング＋明示Refresh。Clearで世代を進め、古い都市の応答を破棄する。色帯の表示ON/OFFで取得を止めない。LRT停留所のホーム(DataLoaders/`LrtStopPlatforms`)も同じ一覧の `stop_points`(停留所ごとの下地パスと停止中心の割合。運休中でも返る)を読む。
-- `TransitMotionClock`: コアの `journeys.steps` の等加速度区間・停車を時刻から参照する純粋なクラス。車両需要や待ち時間と同じ時間を使う。路線は巡回点をたどる閉じたループで、区間ごとの `Reversed`(コアの `journeys.reversed`=案内軌条系の編成の向きが先頭区間と逆か)で運転台と車両の並びを反転する。先頭区間の `turnback` が偽の路線(環状運転など)は `Closed` になり、`TransitRouteGeometry.BuildRuns` が1周の前後に1周ずらした走行区間の写し(`Run.Wrapped`)を並べて、継ぎ目を跨ぐ編成の車端を隣の区間として解く。写しは経路そのものの描画(路線色帯・経路プレビュー)では飛ばす。駅のホーム(`platform_width` を持つバリアント)はパスの通行方向によらず両方向に走れるものとして扱う(`TransitRouteGeometry` の `Geometry.platform`。コアの下地経路と同じ規則)。
-- `TransitVehicleManager`: 実調達編成数を位相配置し、周辺の車体だけプールから出す。車体が無い外観の編成は1フレームに1編成だけ新しく生成する(乗車中の編成と一部が表示中の編成は除く)。路線一覧を更新するたびに、運行中の外観×役割(先頭/中間)ごとに1両ずつ `transitWarmup` ワーカーで共通予算の中で事前生成する。鉄道は`TransitRouteGeometry.SampleConsist`で停止中心から前後へ剛体配置し、隣接車の車端を共有する。公称車長はワールド座標の弦長で満たし、時計の論理距離へ車長を直接足さない。車体の向きは前後端から求め、細かな線分の接線をピッチへ直接使わない。折り返し中も個体と前後を保つ。欠けたパス・未生成レールコネクタを直線で補完しない。
-- 公共交通の形状更新は0.5秒間隔で、描画可能な路線の経路に含まれる周辺パスだけを計算する。路線なし・車両不足などで描画対象がなければ、周辺パスの検索も点列生成も行わない。
-- モデル対応は `Resources/Config/transit_vehicle_models.json`。外観は路線の`vehicle_model`(プレイヤー設定)で全編成を揃え、vehicle_model_config.yamlの候補外(未設定-1・未導入の番号)のときだけ路線ID＋編成番号で固定(`VehicleModelResolver.PickTransitVariantId`。描画・プール事前生成の両方で使う)。候補番号はTauriの車両選択カタログ`tauri/src/data/transitVehicleModels.json`と揃える。先頭/後尾=数値バリアント、中間=middle（0）/middle_{番号}。プールキーにも外観を含める。`VehicleModelResolver` が著作原点・長手軸を接地中心/+Zへ正規化し、公共交通の車体長だけはマスターの公称車長に合わせる。幅と高さは変更しない。
-- **路線カラーの塗装**: `TransitLivery` が車体の帯などを路線の `line_color` で塗る。塗る材質は `Resources/Config/transit_vehicle_livery.json`(車種→外観番号→材質名)が唯一の正で、車体の生成時(`VehicleModelResolver.CreateTransitCar` の中)に全LODから該当スロットを記録し、`DrawLine` が配置のたびに `Apply` する(前回と同じ色なら何もしない。プールは路線をまたぐので毎回呼ぶ)。**`MaterialPropertyBlock` は使わない**(SRP Batcher から外れる)。「元の材質×色」の複製をキャッシュして `sharedMaterials` のスロットだけ差し替え、都市切替で `Reset` が元へ戻して複製を破棄する。材質はFBXごとの埋め込みなので、同名の材質を持つ乗用車・プロップには波及しない。新しい外観は帯を専用の材質で著作し、表に登録すること。仕様は公開O文書§O.10.4。
-- **モノレール(1004→車種24)**: `Models/Vehicles/24/0`・`middle`(+`_close`・`_far`)は手動配置プロップ308/309と同じFBXのコピー(原本は `blender/props.blend`)。308/309を書き出し直したら24にも置き直す(`Tests/Vehicles` がバイト一致を検査する)。車両の原点は軌道桁の天端で、`TransitRouteGeometry.RunningSurface` がモノレールだけ走行面の高さを0にする(鉄道はレール頭頂の0.2m)。遠景は64三角形以内。
-- `Tests/Vehicles` は独立Unityへ実FBXとラッパーをコピーし、時間積分・停車・前車停止・編成位置・折り返しの連続性も検証する。本編シーンとモデルは変更しない。
-
-- vehicle_model_config.yamlの簡易パーサは数値キー・数値配列と行末の#コメントを扱う。コメントをキーに含めると全候補が無視されるため、行末コメントを除いてから解析する。
-
-## 歩行者
-
-仕様は公開 `geometries/W_歩行者の描画.md`。台数調整の考え方は車と同じで、パスの端で消さない。
-
-- `PedestrianManager` は `AfterSceneLoad` で自己生成する(シーンに置かない)。対象は `PATH_STREET` / `PATH_WALKWAY` のみで、交通量は `path_traffic["0"]`(VEHICLE_PEDESTRIAN)。時間API(`/paths/motion`)は呼ばず、速度は `LocalConstants.PEDESTRIAN_WALK_SPEED` の個体定数。`renderFraction` は交通量に対する表示倍率(1=等倍。2・4で増やす)で、最低密度は設けない。
-- 歩行帯は `PedestrianManager.ResolveBand`(歩道あり=歩道の上、歩道なし=路肩、歩行者専用道路=全幅。LRT付きの303だけは複線の車体範囲`LrtRoadParts.MALL_VEHICLE_ENVELOPE`(±3.02m)+余白を除いた左右2帯)。引数にpath_variantを取り、`Tests/Vehicles/VehicleQA.cs`がリフレクションで同じ引数列を呼ぶ。高さは `RoadPartHeights` + `LocalConstants.PEDESTRIAN_SIDEWALK_SURFACE`。
-- `Pedestrian.side` / `lateral` は**パス幾何(始点→終点)に対する左右**。反転しても符号を変えない(同じ歩道に留まる)。交差点では進行方向に対する左右を保って次のパスへ写し、ベジエで結ぶ(車道を斜めに横切ってよい)。`travel_direction` は見ない。行き止まりはどこでも折り返す。
-- 到着は逆探索表を持たず、到着予約中に進行方向の先へ現れた最初の入口へ入る(同じ側を優先、無ければ反対側へ横断)。閉じた網に入口も円外への出口も無ければ到着を予約しない。
-- 実体はGameObjectを持たない。`PropRenderModel("pedestrian_{n}")` の `normal` パーツを `LateUpdate` で `Graphics.RenderMeshInstanced`(1023件ずつ)で描く。FBXが無ければ人型の箱。走行音の通知はしない。
-- モデルは `Assets/Models/Props/pedestrian_{0..5}.fbx`(固定名。prop_master未登録。1体332三角形・400未満)。著作は genesis-gallery の `pipeline/jobs/build_pedestrians.py`。
-- 駅の入口・ホーム上の待機・連絡橋の歩行は未実装(W doc §W.10)。
-- 検証は `Tests/Vehicles/run.ps1` に同居(`PedestrianBands` / `PedestrianModels` / `PedestrianNetwork`)。`-PedestrianModelsOnly`でモデルだけ検査でき、取り込み後の面の閉鎖・巻き順・法線・各部位の外向きも確認する。
-
-## 公共交通の経路共有と選択
-
-`TransitRouteGeometry` は方向付きRunの構築・地形追従点列・生成済みレール接続・車線オフセット・距離補間を車両とハイライトで共有する。形状キャッシュは呼出側ごとに持ち、未ロードのパス・未生成接続を直線補完しない。`TransitVehicleManager.TryPick` は描画中の車体Rendererの境界とレイを交差させ、手前の地形・建物に遮られた車両を除外する。プールから取り出すたびに路線IDを更新し、非表示の車体は選択対象外。ハイライトのON/OFFに依存しない。
-
-鉄道・LRTの軌道横位置は`VehiclePolyline.SampleOffset`で平均接線による頂点オフセットを補間し、線分境界の横跳びを防ぐ。接続スプラインの端部は本線サンプルへ合わせる。`SampleConsist`は偶数編成なら中央連結位置、奇数なら中央車の対称な前後端を起点に解き、隣接車を公称長の弦でつなぐ。回転の時間平滑化で連結を遅らせない。車端を使う描画近似であり台車の独立旋回は持たない。回帰検証は`Tests/Vehicles/TransitConsistQA.cs`（`run.ps1 -TransitOnly`）。
-
-LRTはRoute.VehicleType=VEHICLE_TRAMで、1本のパス上の左右対称の複線(222/242は最内車線、303・431は±1.75m)の通行側の軌道を使う。横位置は`LrtRoadParts.Offset`、踏面の高さは`LrtRoadParts.RailTopAboveSpline`(埋め込み0.125m/431は0.475m)が唯一の正で、`SampleOffset`の符号(正=進行方向右)と通行側から往路・復路の軌道が決まる。同じパス上で折り返すと往路と復路の軌道が左右で入れ替わるので、発車時に編成が反対側の軌道へ移る(渡り線の補間はしない)。停留所のホーム(`LrtPlatformParts`)は停止位置と同じ「割合×未切断3D点列長」で中心を決めるので、停車した編成とホームの前後位置は揃う(ホームだけは交差点へ出ないよう切断済み区間へ収めるため、パス端の停留所では編成より短くなる)。コアは `stop_points` と journeys の停止中心を同じ関数で求める契約なので、片方だけの位置を別の式で作らないこと。路線ハイライトも同じ経路設定を使う。交差点は描画済みRailコネクタへ接続し、踏面高さを加える。LRT・鉄道の交差点レールコネクタは `PathManager.GetNodeIntersectionObject`(`NodeMesh_*`)の子 `Rail` から読む(`GetNodeObject` のノード円柱とは別物)。バスの外側車線配置と混同しない。
-
-LRTのモデル対応は1003→車種14。`Vehicles/14/0`が先頭・後尾共用、`middle`が集電装置付き中間車で、外観候補は0のみ。公称車長10mの低床車体を既存の編成配置で使う。原本は`blender/vehicles.blend`。
-
-
-道路モデルは10=10外観、11=4外観、12/13=各2外観で、全外観が接写・遠景を持つ(公開O文書§O.10.3)。メトロ20・中距離21・高速鉄道23は各3外観(0=スタンダード・1=近未来・2=レトロ、中間車はmiddle/middle_1/middle_2)、貨物22は2外観。vehicle_model_config.yamlの候補数と実FBXを揃える。鉄道を含む全42モデルはProps/350〜367・370〜393の自由配置別名を持つ(3外観目はメトロ388/389・中距離390/391・高速392/393)。高速鉄道23は公共交通の路線種別(transit_vehicle_models.json)に無く、候補は自由配置と将来の路線種別のためにある。形状の正はvehicles.blendで、別名は非公開制作ツールのbuild_vehicle_props.pyがprops.blendへ同期する。Tests/VehiclesのTransitModels/VehiclePropsが候補数・FBX参照・接地・道路車両の3段階のLOD・別名の形状一致(接写・遠景を含む)を確認する。
-
-
-メトロ20・中距離21・高速鉄道23の3外観は、非公開制作ツールの外観モジュール(`metro_vehicles.py`・`intercity_vehicles.py`・`high_speed_vehicles.py`)が通常・接写・遠景を同じ寸法表から著作する。連結面はメトロ±10m・中距離と高速±12.5mで、中距離の公称車長25mへ等倍で合う。走行車の既存LODと自由配置用PropRenderModelが接写版・遠景版を選択し、路線マスターの対応は変更しない。
-
-
-鉄道の専用遠景は14/20/21/22/23の全24モデルとモノレール308/309にある。非公開制作ツールの`build_rail_far.py`が車体箱と左右各一枚の窓帯を著作し、車輪・台車・屋上機器を省略する。貨車には窓を付けない。原点と水平範囲は通常版を維持し、車輪・集電装置を省くため上下の範囲は通常版の内側でよい。12〜42三角形、既存材質を共有する。`build_vehicle_props.py`は370〜393の遠景別名も同期する。走行版は画面比率3.5%未満で`_far`を選び、25%以上では存在する`_close`を選ぶ。専用版がないLODは通常へフォールバックする。自由配置はPropRenderModelの既存の投影LODで専用遠景を使う。通常・接写モデルは保持する。
-
-## 索道の循環演出
-
-RopewayNetworkStoreは既存/paths/をPATH_CONVEYORで全ページ取得し、成功したスナップショットだけを5秒周期で公開する。RopewayNetworkはACTIVEの601/602から二駅領域以上の鎖・閉路を抽出し、駅のない枝先・未完成・不正な分岐を除外する。連続した602を分割しても駅数は増えない。
-
-RopewayGeometryはPathManager.CalculatePathPoints(path,false)とVehiclePolylineを共用し、ケーブル・搬器吊り点・終端滑車を同じ実寸の点列から決める。開いた路線はU字折り返し、閉路は左右独立の循環。短い駅でも滑車を縮めず端から張り出させる。RopewayCabinManagerは非スケール時間4m/sで搬器を常時循環させ、Normal/Close・480m以内だけGPU描画する。Farには搬器を出さない。経済車両台帳・TransitMotionClock・運行間隔設定は使わない。
-
-元のbody RendererのforceRenderingOffを復元する際はPathPresentation.SetRendererForceOffを使い、生成待ちの抑制を解除しない。都市切替はTransitDataStore.Session、生成はRenderWorkSchedulerで管理する。モデルは吊り点原点のためVehicleModelResolverで接地補正しない。仕様は公開O文書、検証はTests/Ropeway/animation.ps1。
-
-## 路面標示との共有規則
-
-舗装街路の進入矢印と一般車の出口候補はRoadMarkingRulesの方向割り当てを共有する（描画区間25m以上）。TransitRouteGeometryは次の路線道路に合う車線へバスを滑らかに寄せ、LRT/鉄道には適用しない。時間APIやシミュレーターの経路制約は変えず、描画だけに使う。路面標示はG文書§8.3を参照。
+- 仕様: `geometries/O_車両の走行描画.md`(一般車・路駐・公共交通・車両アセット・路線カラー・LRT軌道・ドライブ・索道・路面標示との共有)
+- 関連: `geometries/W_歩行者の描画.md`、`V_環境演出の乗り物.md`、`T_交通シミュレーションと走行描画の整合.md`、`programs/サウンドシステム.md`(走行音)、`programs/公共交通ハイライト.md`
+- 検証: `unity/Tests/Vehicles/run.ps1`(`-TransitOnly` / `-DriveOnly` / `-ParkingOnly` / `-PedestrianModelsOnly`)、`unity/Tests/Ropeway/animation.ps1`

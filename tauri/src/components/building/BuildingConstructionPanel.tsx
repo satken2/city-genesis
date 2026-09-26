@@ -21,7 +21,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
+import { emit, listen } from "@tauri-apps/api/event";
 import type { AgentMasterEntry, LandmarkMasterEntry, ParcelData, StructureMasterEntry } from "../../types";
 import { resolveAgentIcon } from "../../utils/agentIcon";
 import { resolveParcelIcon } from "../../utils/parcelIcon";
@@ -50,6 +50,8 @@ import type { BuildingPlacementState, EffectRangeRegion, PathInterferenceHighlig
 import { fetchApi, ApiError } from "../../utils/api";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { NumberStepper } from "../common/NumberStepper";
+import { TagPicker } from "../common/TagPicker";
+import { TAGS_CHANGED_EVENT } from "../../utils/constructionTags";
 
 import { ConstructionInfoCard } from "../common/ConstructionInfoCard";
 import { isConstructionAffordable } from "../../utils/constructionFunding";
@@ -116,6 +118,8 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
   // すでに都市に存在する名所のID一覧。同じ名所は都市に1基までなので選択肢を無効化する。
   // 取得に失敗したときは空のままにして選択を妨げない(最終的な拒否はバックエンドが行う)。
   const [placedLandmarkIds, setPlacedLandmarkIds] = useState<number[]>([]);
+  // 設置する建物に付ける建設プロジェクトのタグ(空文字=付けない)。作成リクエストに載せて一緒に保存する。
+  const [projectTag, setProjectTag] = useState("");
   // 建ぺい率(0.0〜1.0)。敷地面積に対する建築面積の上限割合。プレビュー形状・建設コストの算出に用いる。
   const [coverageRatio, setCoverageRatio] = useState(0.6);
   // 外観バリアント(visual_variant1/2/3)。0.0〜1.0の値で建物の外観を決定する。
@@ -1383,6 +1387,11 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
     };
   }
 
+  /** タグ付きで設置したら、開いている建設プロジェクトウィンドウとタグ選択に一覧を取り直させる。 */
+  function notifyTagAssigned() {
+    if (projectTag) void emit(TAGS_CHANGED_EVENT, { tag: projectTag }).catch(console.error);
+  }
+
   /**
    * 区画モードの建設確定ハンドラ。UI が直接バックエンドに送信する(道路建設と同じ責務分担)。
    * 新規建設は POST /buildings、既存建物の編集は PATCH /agents/{id} を呼ぶ。
@@ -1416,9 +1425,11 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
             ...(landmark != null ? { landmark } : {}),
             // コピーモードでは元建物の実寸フットプリントを固定コピーし、忠実コピーなら割引く。
             ...(copySourceAgentId != null ? { copy_source_agent_id: copySourceAgentId } : {}),
+            ...(projectTag ? { tag: projectTag } : {}),
             ...buildVisualVariantFields(),
           }),
         });
+        notifyTagAssigned();
         if (created && created.agent_id) {
           void invoke("open_registered_window", {
             windowType: "agent_detail",
@@ -1458,9 +1469,11 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
           ...(structure != null ? { structure } : {}),
           ...(landmark != null ? { landmark } : {}),
           ...(acknowledgeAcquisition ? { acknowledge_acquisition: true } : {}),
+          ...(projectTag ? { tag: projectTag } : {}),
           ...buildVisualVariantFields(),
         }),
       });
+      notifyTagAssigned();
       if (created && created.agent_id) {
         void invoke("open_registered_window", {
           windowType: "agent_detail",
@@ -1894,6 +1907,15 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* 建設プロジェクトのタグ。新設する建物に付けて作成する(既存建物は詳細パネルで付け替える)。
+          市庁舎は設置と同時に竣工してタグを付けられないので出さない。 */}
+      {selectedVariantData && editAgentId == null && selectedVariant !== VARIANT_CITY && (
+        <div className="bc-section">
+          <div className="bc-section-title">{t("tag.label")}</div>
+          <TagPicker apiBaseUrl={apiBaseUrl} value={projectTag} onChange={setProjectTag} />
         </div>
       )}
 

@@ -48,6 +48,7 @@ import {
 } from "../../constants";
 import { InfoHeader } from "../common/InfoHeader";
 import { TagRow } from "../common/TagRow";
+import { isTaggable } from "../../utils/constructionTags";
 import { RoadMembershipRow, useRoadList, type PathRoadFields } from "../road/RoadMembershipRow";
 import { hasRoad, isNamedRoadPathType, notifyRoadsChanged, roadDisplayName, ROADS_CHANGED_EVENT } from "../road/roadApi";
 import { ZoneLink } from "../common/ZoneLink";
@@ -385,8 +386,12 @@ export function PathDetailPanel({
         nameValue={pathData.name}
       />
 
-      {/* 建設プロジェクトのタグと、この道路だけを3Dビューで隠す切り替え。 */}
-      <TagRow apiBaseUrl={apiBaseUrl} kind="path" entityId={pathData.path_id} />
+      {/* 建設プロジェクトのタグと、この道路だけを3Dビューで隠す切り替え。
+          タグを付け替えられるのは着工前・建設中の道路だけなので、その間だけ行を出す
+          (竣工後もタグ自体は残り、建設プロジェクトウィンドウで竣工済みとして数えられる)。 */}
+      {isTaggable("path", pathData.status) && (
+        <TagRow apiBaseUrl={apiBaseUrl} kind="path" entityId={pathData.path_id} />
+      )}
 
       {/* 区間をどの道路(名前付き道路)に属させるか。道路に属せるのは街路と高速道路だけ。 */}
       {isNamedRoad && (

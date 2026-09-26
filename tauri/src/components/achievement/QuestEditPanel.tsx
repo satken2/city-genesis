@@ -35,6 +35,7 @@ import type {
   QuestNotify,
   QuestTier,
 } from "../../types";
+import { requestConfirm } from "../../utils/confirmDialog";
 import "./QuestEditPanel.css";
 
 type QuestEditPanelProps = {
@@ -384,7 +385,12 @@ export function QuestEditPanel({ apiBaseUrl, onClose, editQuestId }: QuestEditPa
   /** 削除処理(編集モードのみ)。確認ダイアログの後に DELETE を呼ぶ */
   async function handleDelete() {
     if (!isEditMode || deleting) return;
-    const confirmed = window.confirm(t("achievementQuests.deleteConfirm"));
+    const confirmed = await requestConfirm({
+      titleKey: "achievements.deleteQuest",
+      message: t("achievementQuests.deleteConfirm"),
+      confirmLabel: t("common.delete"),
+      tone: "danger",
+    });
     if (!confirmed) return;
 
     setDeleting(true);
