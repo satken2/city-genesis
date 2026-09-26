@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import type { AgentData } from "../../types";
@@ -17,6 +17,7 @@ import {
 } from "../../constants";
 import { sendBuildingExploded, sendSessionReload } from "../../utils/ipc";
 import { fetchApi } from "../../utils/api";
+import { requestConfirm } from "../../utils/confirmDialog";
 import purchaseIcon from "../../assets/images/purchase.png";
 import bulldozeIcon from "../../assets/images/bulldoze.png";
 import pauseIcon from "../../assets/images/ui/pause.png";
@@ -74,6 +75,14 @@ export function AgentOperationPanel({
 }: AgentOperationPanelProps) {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   if (NO_OPERATION_TYPES.has(agent.type)) {
     return null;
@@ -151,7 +160,15 @@ export function AgentOperationPanel({
   // 中に居た住民・従業員は次のエポック実行で事故死として確定し、都市スコアが下がる。
   // 取り返しがつかないうえ誤操作の代償が大きいので、実行前に必ず確認を取る。
   async function handleExplode() {
-    if (!window.confirm(t("agent.action.explodeConfirm"))) return;
+    const confirmed = await requestConfirm({
+      titleKey: "agent.action.explodeTitle",
+      message: t("agent.action.explodeConfirm"),
+      confirmLabel: t("agent.action.explodeConfirmAction"),
+      tone: "danger",
+    });
+    // 確認中に詳細パネルが別の建物へ切り替わっていたら、確認文の「この建物」が
+    // 画面上の建物と食い違うので実行しない
+    if (!confirmed || !mountedRef.current) return;
     setLoading(true);
     try {
       await fetchApi(`${base}/api/v1/agents/${agent.agent_id}/explode`, {

@@ -54,7 +54,8 @@
       "restarting": "Restarting...",
       "restartFailed": "Restart failed",
       "restartUnavailable": "Settings saved. Changes will take effect the next time the game starts",
-      "confirmRestart": "Switch compute mode to {mode}? The main program will restart."
+      "confirmRestart": "Switch compute mode to {{mode}}? The main program will restart.",
+      "restartAction": "Restart"
     },
     "windowReset": {
       "label": "Window Position & Size",

@@ -54,7 +54,8 @@
       "restarting": "Redémarrage...",
       "restartFailed": "Échec du redémarrage",
       "restartUnavailable": "Paramètres enregistrés. Les changements prendront effet au prochain démarrage du jeu",
-      "confirmRestart": "Basculer le calcul sur {mode} ? Le programme principal va redémarrer."
+      "confirmRestart": "Basculer le calcul sur {{mode}} ? Le programme principal va redémarrer.",
+      "restartAction": "Redémarrer"
     },
     "windowReset": {
       "label": "Position et taille des fenêtres",

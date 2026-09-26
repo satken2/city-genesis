@@ -54,7 +54,8 @@
       "restarting": "重新啟動中...",
       "restartFailed": "重新啟動失敗",
       "restartUnavailable": "已儲存設定。變更將在下次啟動遊戲時生效",
-      "confirmRestart": "將運算處理變更為{mode}。確定要重新啟動主程式嗎？"
+      "confirmRestart": "將運算處理變更為{{mode}}。確定要重新啟動主程式嗎？",
+      "restartAction": "重新啟動"
     },
     "windowReset": {
       "label": "視窗位置與大小",

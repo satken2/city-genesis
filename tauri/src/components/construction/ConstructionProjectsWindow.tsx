@@ -28,6 +28,7 @@ import {
 } from "../../utils/constructionTags";
 import { formatCompactAmount, formatExactAmount } from "../../utils/money";
 import { resolveIntlLocale } from "../../utils/locale";
+import { requestConfirm } from "../../utils/confirmDialog";
 import { StatusBadge } from "../common/StatusBadge";
 import "./ConstructionProjectsWindow.css";
 
@@ -94,7 +95,13 @@ export function ConstructionProjectsWindow({ apiBaseUrl }: ConstructionProjectsW
 
   /** タグを削除する(付いている建物・道路からも外れる)。 */
   async function handleDeleteTag(tag: string) {
-    if (!window.confirm(t("constructionProjects.confirmDeleteTag", { tag }))) return;
+    const confirmed = await requestConfirm({
+      titleKey: "constructionProjects.deleteTag",
+      message: t("constructionProjects.confirmDeleteTag", { tag }),
+      confirmLabel: t("common.delete"),
+      tone: "danger",
+    });
+    if (!confirmed) return;
     try {
       await deleteTag(apiBaseUrl, tag);
       await emit(TAGS_CHANGED_EVENT, { tag });

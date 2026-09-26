@@ -54,7 +54,8 @@
       "restarting": "Reiniciando...",
       "restartFailed": "No se pudo reiniciar",
       "restartUnavailable": "Ajustes guardados. Los cambios se aplicarán al iniciar el juego la próxima vez",
-      "confirmRestart": "Se cambiará el procesamiento a {mode}. ¿Reiniciar el programa principal?"
+      "confirmRestart": "Se cambiará el procesamiento a {{mode}}. ¿Reiniciar el programa principal?",
+      "restartAction": "Reiniciar"
     },
     "windowReset": {
       "label": "Posición y tamaño de las ventanas",

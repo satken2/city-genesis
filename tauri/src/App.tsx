@@ -26,6 +26,7 @@ const ParcelDetailPanel = lazy(() => import("./components/parcel/ParcelDetailPan
 const ZoneDetailPanel = lazy(() => import("./components/zone/ZoneDetailPanel").then(m => ({ default: m.ZoneDetailPanel })));
 const IntersectionDetailPanel = lazy(() => import("./components/intersection/IntersectionDetailPanel").then(m => ({ default: m.IntersectionDetailPanel })));
 const ZoneMergeConfirmWindow = lazy(() => import("./components/zone/ZoneMergeConfirmWindow").then(m => ({ default: m.ZoneMergeConfirmWindow })));
+const ConfirmDialogWindow = lazy(() => import("./components/common/ConfirmDialogWindow").then(m => ({ default: m.ConfirmDialogWindow })));
 const BuildingDirectAcquisitionConfirmWindow = lazy(() => import("./components/building/BuildingDirectAcquisitionConfirmWindow").then(m => ({ default: m.BuildingDirectAcquisitionConfirmWindow })));
 const PathConstructionPanel = lazy(() => import("./components/path/PathConstructionPanel").then(m => ({ default: m.PathConstructionPanel })));
 const TrackConstructionPanel = lazy(() => import("./components/path/TrackConstructionPanel").then(m => ({ default: m.TrackConstructionPanel })));
@@ -72,6 +73,7 @@ const AgentCreationPanel = lazy(() => import("./components/template/AgentCreatio
 import type { EpochReport } from "./components/taskbar/EpochResultWindow";
 import type { PendingZoneMerge } from "./components/zone/ZoneMergeConfirmWindow";
 import type { PendingDirectAcquisition } from "./components/building/BuildingDirectAcquisitionConfirmWindow";
+import { emitConfirmDialogResult, type ConfirmDialogRequest } from "./utils/confirmDialog";
 
 import { IconPanel } from "./components/hud/IconPanel";
 import { Cockpit } from "./components/hud/Cockpit";
@@ -89,7 +91,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * 専用パネルが実装されているウィンドウタイプのセット
  * これらのタイプはジェネリックな JSON 表示ではなく、専用コンポーネントでレンダリングする
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "diagnosis", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "path_build", "infra_build", "track_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "new_game", "city_rename", "template_editor", "resource_detail", "resource_edit", "prop_placement", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "street_grid", "agent_creation"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "diagnosis", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "infra_build", "track_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "new_game", "city_rename", "template_editor", "resource_detail", "resource_edit", "prop_placement", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "street_grid", "agent_creation"]);
 
 
 function App() {
@@ -255,6 +257,11 @@ function App() {
     try {
       if (context) {
         await emit("bgm:release", { id: context.window_type });
+        // 確認ウィンドウを×で閉じたら取消として返す(確定・取消ボタン経由なら回答済みで、呼び出し側が重複を無視する)
+        const confirmRequest = windowExtra(context)?.confirmRequest as ConfirmDialogRequest | undefined;
+        if (context.window_type === "confirm_dialog" && confirmRequest) {
+          await emitConfirmDialogResult(confirmRequest.requestId, false);
+        }
       }
       await invoke("close_current_window");
     } catch {
@@ -406,6 +413,11 @@ function App() {
                     ? ((context.params as Record<string, unknown>).extra as Record<string, unknown>).pendingMerge as PendingZoneMerge | undefined
                     : undefined
                 }
+                onClose={closeWindow}
+              />
+            ) : context.window_type === "confirm_dialog" ? (
+              <ConfirmDialogWindow
+                request={windowExtra(context)?.confirmRequest as ConfirmDialogRequest | undefined}
                 onClose={closeWindow}
               />
             ) : context.window_type === "building_direct_acquisition" ? (

@@ -15,6 +15,8 @@
     "minutes": "分鐘",
     "processing": "處理中...",
     "cancel": "取消",
+    "ok": "確定",
+    "delete": "刪除",
     "colorPresets": "預設顏色",
     "colorHex": "顏色代碼"
   },

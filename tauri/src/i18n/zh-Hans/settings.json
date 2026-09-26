@@ -54,7 +54,8 @@
       "restarting": "重启中...",
       "restartFailed": "重启失败",
       "restartUnavailable": "已保存设置。更改将在下次启动游戏时生效",
-      "confirmRestart": "将运算处理更改为{mode}。确定要重启主程序吗？"
+      "confirmRestart": "将运算处理更改为{{mode}}。确定要重启主程序吗？",
+      "restartAction": "重启"
     },
     "windowReset": {
       "label": "窗口位置与大小",
