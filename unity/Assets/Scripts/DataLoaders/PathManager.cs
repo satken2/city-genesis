@@ -488,7 +488,10 @@ public class PathManager : BaseApiDataManager
     {
         // 共用ノードの資格は建物のロード順に依存せず判定できる。
         NodeData node = GetNodeData(nodeId);
-        return node != null && InfraNetworkUtil.IsInfraMask(node.type);
+        if (node == null) return false;
+        if (InfraNetworkUtil.IsInfraMask(node.type)) return true;
+        // 電力ビットを持たない車両基地の端子(LRT車両基地)は建物側の逆引きで判定する。
+        return BuildingManager.Instance != null && BuildingManager.Instance.IsDepotTerminalNode(nodeId);
     }
 
     // ================================================================

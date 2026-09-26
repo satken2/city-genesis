@@ -1,4 +1,4 @@
-param([string]$UnityExe)
+﻿param([string]$UnityExe)
 $ErrorActionPreference = 'Stop'
 $unityRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 & (Join-Path $PSScriptRoot '../BuildRuntime.ps1')
@@ -25,9 +25,9 @@ foreach ($name in 'PC_RPAsset.asset','PC_Renderer.asset','DefaultVolumeProfile.a
     Copy-Item "$unityRoot/Assets/Settings/$name*" "$qaRoot/Assets/Settings" -Force
 }
 Copy-Item "$unityRoot/ProjectSettings/ProjectVersion.txt" "$qaRoot/ProjectSettings" -Force
-$manifest = Get-Content "$unityRoot/Packages/manifest.json" -Raw | ConvertFrom-Json -AsHashtable
-$manifest.dependencies.Remove('com.rlabrecque.steamworks.net')
-$manifest.dependencies.Remove('com.siccity.gltfutility')
+$manifest = Get-Content "$unityRoot/Packages/manifest.json" -Raw | ConvertFrom-Json
+$manifest.dependencies.PSObject.Properties.Remove('com.rlabrecque.steamworks.net')
+$manifest.dependencies.PSObject.Properties.Remove('com.siccity.gltfutility')
 $manifest | ConvertTo-Json -Depth 10 | Set-Content "$qaRoot/Packages/manifest.json"
 Set-Content "$qaRoot/result.txt" 'RUNNING'
 $process = Start-Process -FilePath $UnityExe -ArgumentList @('-batchmode','-projectPath',('"'+$qaRoot+'"'),'-executeMethod','ConstructionPathQA.Run','-sourceRoot',('"'+$unityRoot+'"'),'-logFile',('"'+$qaRoot+'/qa.log"')) -WindowStyle Hidden -PassThru

@@ -16,9 +16,9 @@ foreach ($name in @('PC_RPAsset.asset', 'PC_Renderer.asset', 'DefaultVolumeProfi
     Copy-Item "$unityRoot/Assets/Settings/$name*" "$qaRoot/Assets/Settings" -Force
 }
 Copy-Item "$unityRoot/ProjectSettings/ProjectVersion.txt" "$qaRoot/ProjectSettings" -Force
-$manifest = Get-Content "$unityRoot/Packages/manifest.json" -Raw | ConvertFrom-Json -AsHashtable
-[void]$manifest.dependencies.Remove('com.rlabrecque.steamworks.net')
-[void]$manifest.dependencies.Remove('com.siccity.gltfutility')
+$manifest = Get-Content "$unityRoot/Packages/manifest.json" -Raw | ConvertFrom-Json
+$manifest.dependencies.PSObject.Properties.Remove('com.rlabrecque.steamworks.net')
+$manifest.dependencies.PSObject.Properties.Remove('com.siccity.gltfutility')
 $manifest | ConvertTo-Json -Depth 10 | Set-Content "$qaRoot/Packages/manifest.json"
 Set-Content "$qaRoot/result.txt" 'RUNNING'
 $process = Start-Process -FilePath 'C:/Program Files/Unity/Hub/Editor/6000.4.2f1/Editor/Unity.exe' -ArgumentList @('-batchmode', '-projectPath', ('"' + $qaRoot + '"'), '-executeMethod', 'ExplosionQA.Run', '-logFile', ('"' + $qaRoot + '/qa.log"')) -WindowStyle Hidden -PassThru

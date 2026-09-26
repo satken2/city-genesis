@@ -38,6 +38,13 @@ public class BuildingManager : BaseApiDataManager
     private Dictionary<int, int> buildingIdByInfraNodeId = new Dictionary<int, int>();
 
     /// <summary>
+    /// 車両基地の接続端子ノードID（agents.depot_node_id）→ 建物agent_id の逆引きインデックス。
+    /// 電力ビットを持たない車両基地の端子（LRT車両基地）はノードの type だけでは施設の端子と判別できないため、
+    /// 線路の終端判定（車止めの有無）でこれを引く。管理規約は buildingIdByInfraNodeId と同じ。
+    /// </summary>
+    private Dictionary<int, int> buildingIdByDepotNodeId = new Dictionary<int, int>();
+
+    /// <summary>
     /// 土地区画ID（agents.parcel_id）→ その区画に建つ建物agent_idの集合の逆引きインデックス。
     /// 「この区画の上に建っている建物」を全建物走査なしで解決するために使う。
     /// buildingDataCache への登録は必ず RegisterBuildingDataToCache を通し、
@@ -389,6 +396,7 @@ public class BuildingManager : BaseApiDataManager
         buildingDataCache.Clear();
         ConstructionAmbience.Clear(ConstructionAmbience.Kind.Building);
         buildingIdByInfraNodeId.Clear();
+        buildingIdByDepotNodeId.Clear();
         buildingIdsByParcel.Clear();
         buildingIdsByCell.Clear();
         buildingCellById.Clear();
@@ -890,6 +898,10 @@ public class BuildingManager : BaseApiDataManager
                 if (removedData.infra_node_id > 0)
                 {
                     buildingIdByInfraNodeId.Remove(removedData.infra_node_id);
+                }
+                if (removedData.depot_node_id > 0)
+                {
+                    buildingIdByDepotNodeId.Remove(removedData.depot_node_id);
                 }
                 if (removedData.parcel_id > 0
                     && buildingIdsByParcel.TryGetValue(removedData.parcel_id, out HashSet<int> byParcel))

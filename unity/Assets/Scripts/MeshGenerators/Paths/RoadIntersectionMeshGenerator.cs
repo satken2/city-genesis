@@ -414,6 +414,18 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         return weighted / Mathf.Max(weight, 1e-8f);
     }
 
+    /// <summary>全ての口が同じ高さで縦断勾配も無いか。このとき路面の高さは一定で、平面になる。</summary>
+    private static bool IsLevel(Dictionary<int, PathEndSection> sections)
+    {
+        float? height = null;
+        foreach (var section in sections.Values)
+        {
+            height ??= section.Position.y;
+            if (Mathf.Abs(SectionGrade(section)) > 1e-4f || Mathf.Abs(section.Position.y - height.Value) > 1e-3f) return false;
+        }
+        return true;
+    }
+
     /// <summary>口での本線の縦断勾配(ノードから外向きに進むときの上り勾配)。</summary>
     private static float SectionGrade(PathEndSection section)
     {
@@ -840,7 +852,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         }
 
         var points = new List<Vector2>();
-        List<int> surface = TriangulateSurface(geometry, points);
+        List<int> surface = TriangulateSurface(geometry, points, mainLine != null || !IsLevel(sections));
         if (points.Count < 3 || surface.Count < 3)
         {
             return null;
@@ -885,29 +897,30 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
     }
 
     /// <summary>
-    /// 交差点の輪郭を路面用に三角形分割する。耳切りが作る細い三角形の扇をDelaunay化し、辺長が
-    /// INTERSECTION_SURFACE_MAX_EDGE 以下になるまで細分化して内部頂点を置き、もう一度Delaunay化する。
-    /// 外周の頂点だけでは高さの曲面を三角形の平面でしか近似できず、対角線が折れ線として見えるため。
+    /// 交差点の輪郭を路面用に三角形分割する。耳切りが作る細い三角形の扇はDelaunay化して解消する。
+    /// refine では INTERSECTION_SURFACE_VERTEX_SPACING 間隔の正三角形格子の内部頂点を入れ、間隔の2倍より長い
+    /// 外周の辺(入口断面など)も分割する。外周の頂点だけでは勾配のある高さの曲面を大きな平面でしか近似できず、
+    /// 対角線が折れ線として見えるため。路面が平面なら内部頂点は要らない。
     /// points にはワールドXZ座標を追記し、三角形はXZの反時計回りの頂点番号で返す。
     /// </summary>
-    internal static List<int> TriangulateSurface(Geometry geometry, List<Vector2> points)
+    internal static List<int> TriangulateSurface(Geometry geometry, List<Vector2> points, bool refine)
     {
         var triangles = new List<int>();
         if (geometry is Polygon polygon)
         {
-            AppendPolygonSurface(polygon, points, triangles);
+            AppendPolygonSurface(polygon, points, triangles, refine);
         }
         else if (geometry is MultiPolygon || geometry is GeometryCollection)
         {
             for (int i = 0; i < geometry.NumGeometries; i++)
             {
-                triangles.AddRange(TriangulateSurface(geometry.GetGeometryN(i), points));
+                triangles.AddRange(TriangulateSurface(geometry.GetGeometryN(i), points, refine));
             }
         }
         return triangles;
     }
 
-    private static void AppendPolygonSurface(Polygon polygon, List<Vector2> points, List<int> triangles)
+    private static void AppendPolygonSurface(Polygon polygon, List<Vector2> points, List<int> triangles, bool refine)
     {
         Coordinate[] coords = polygon.ExteriorRing.Coordinates;
         if (coords == null || coords.Length < 4)
@@ -930,14 +943,20 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         {
             throw new InvalidOperationException("交差点の輪郭を三角形化できません。");
         }
+        const float spacing = LocalConstants.INTERSECTION_SURFACE_VERTEX_SPACING;
         var local = new List<Vector2>(ring);
         var coarse = new List<(int a, int b, int c)>(earClip.Count / 3);
         for (int i = 0; i < earClip.Count; i += 3) coarse.Add((earClip[i], earClip[i + 1], earClip[i + 2]));
         BuildingMeshBuilder.FlipToDelaunay(local, coarse);
-        var flat = new List<int>(earClip.Count);
-        foreach (var (a, b, c) in coarse) { flat.Add(a); flat.Add(b); flat.Add(c); }
-        var fine = BuildingMeshBuilder.SubdivideTrianglesByEdgeLength(local, flat, LocalConstants.INTERSECTION_SURFACE_MAX_EDGE);
-        BuildingMeshBuilder.FlipToDelaunay(local, fine);
+        var fine = coarse;
+        if (refine)
+        {
+            BuildingMeshBuilder.InsertInteriorPoints(local, coarse, SurfaceLattice(ring, spacing));
+            var flat = new List<int>(coarse.Count * 3);
+            foreach (var (a, b, c) in coarse) { flat.Add(a); flat.Add(b); flat.Add(c); }
+            fine = BuildingMeshBuilder.SubdivideTrianglesByEdgeLength(local, flat, spacing * 2f);
+            BuildingMeshBuilder.FlipToDelaunay(local, fine);
+        }
 
         int baseIndex = points.Count;
         points.AddRange(local);
@@ -946,6 +965,33 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             triangles.Add(baseIndex + a);
             triangles.Add(baseIndex + b);
             triangles.Add(baseIndex + c);
+        }
+    }
+
+    /// <summary>
+    /// 輪郭の内側の正三角形格子の点。外周から間隔の半分以内の点は外周の頂点と細い三角形を作るので除く。
+    /// 格子はワールド座標に固定し、同じ輪郭からは常に同じ頂点になるようにする。
+    /// </summary>
+    private static IEnumerable<Vector2> SurfaceLattice(Vector2[] ring, float spacing)
+    {
+        Vector2 min = ring[0], max = ring[0];
+        foreach (Vector2 p in ring) { min = Vector2.Min(min, p); max = Vector2.Max(max, p); }
+        float row = spacing * Mathf.Sqrt(3f) * 0.5f;
+        var crossings = new List<float>();
+        for (int j = Mathf.FloorToInt(min.y / row); j <= Mathf.CeilToInt(max.y / row); j++)
+        {
+            float z = j * row, offset = (j & 1) * spacing * 0.5f;
+            crossings.Clear();
+            PolygonUtils.AppendRayCrossings(ring, z, crossings);
+            crossings.Sort();
+            for (int k = 0; k + 1 < crossings.Count; k += 2)
+            {
+                for (int i = Mathf.CeilToInt((crossings[k] - offset) / spacing); i * spacing + offset < crossings[k + 1]; i++)
+                {
+                    var point = new Vector2(i * spacing + offset, z);
+                    if (PolygonUtils.DistanceToBoundary(ring, point) >= spacing * 0.5f) yield return point;
+                }
+            }
         }
     }
 }

@@ -101,7 +101,7 @@ public class TrackPath : IPathMeshGenerator
 {
     /// <summary>ノード逆引きによる接続パス。未設定時は車止めの配置を保留する。</summary>
     public static System.Func<int, List<PathSummary>> ConnectedPathsProvider;
-    /// <summary>共用インフラ接続ノード。施設内へ軌道が続くため車止めを置かない。</summary>
+    /// <summary>共用インフラ接続ノードと車両基地の接続端子。施設内へ軌道が続くため車止めを置かない。</summary>
     public static System.Func<int, bool> InfrastructureConnectionProvider;
     /// <summary>架線柱をコリドーの端（道床の端）からどれだけ外側に立てるか（m）。</summary>
     public const float POLE_MARGIN = 0.5f;

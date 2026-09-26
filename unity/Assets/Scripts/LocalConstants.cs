@@ -82,7 +82,7 @@ public static class LocalConstants
     public const float ROAD_MERGE_MIN_TRANSITION = 20f; // ランプの高さを戻す区間の最短長(m)
     public const float ROAD_MERGE_MAX_TRANSITION = 120f; // ランプの高さを戻す区間の最長長(m)
     public const float ROAD_MERGE_MAX_MAIN_BEND_DEG = 2.0f; // 交差点の板なしで本線をつなぐノードで許す本線の折れ角(度)
-    public const float INTERSECTION_SURFACE_MAX_EDGE = 2.0f; // 交差点の路面の三角形の最大辺長(m)。内部頂点で勾配の曲面をなぞり、対角線で折れないようにする
+    public const float INTERSECTION_SURFACE_VERTEX_SPACING = 2.0f; // 交差点の路面の内部頂点の間隔(m)。勾配の曲面を細かい三角形でなぞり、対角線で折れないようにする
 
     // ------------------------------------------------------------------
     // 工事中(STATUS_CONSTRUCTING)の3D表示

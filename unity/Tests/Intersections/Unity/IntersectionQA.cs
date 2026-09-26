@@ -19,6 +19,7 @@ public static class IntersectionQA
  static Dictionary<int,List<Vector3>> points=new Dictionary<int,List<Vector3>>();
  static Dictionary<string,List<Vector3>> partVertices=new Dictionary<string,List<Vector3>>();
  static Dictionary<int,List<Vector3>> bodyVertices=new Dictionary<int,List<Vector3>>();
+ static Dictionary<int,List<Vector3>> bodyNormals=new Dictionary<int,List<Vector3>>();
  static List<Vector3> Samples<T>(T p) {return points[(int)p.GetType().GetField("path_id").GetValue(p)];}
  public static void Run()
  {
@@ -53,7 +54,7 @@ public static class IntersectionQA
    for(int i=0;i<specs.Count;i++)create.Invoke(null,new object[]{surface.transform,specs[i],i});
    var cuts=(IDictionary)result.GetType().GetProperty("ConnectionPoints").GetValue(result);
    var road=Activator.CreateInstance(asm.GetType("RoadPath"));var setback=Activator.CreateInstance(asm.GetType("SidewalkSetback"));
-   foreach(var p in paths) {int id=(int)pathType.GetField("path_id").GetValue(p); var piece=new List<Vector3>{(Vector3)cuts[id],points[id][1]};var roadResult=road.GetType().GetMethod("Generate").Invoke(road,new object[]{p,piece,setback,setback});if(roadResult==null)throw new Exception("road null");var go=(GameObject)roadResult.GetType().GetProperty("GeneratedObject").GetValue(roadResult);foreach(var comp in go.GetComponentsInChildren<Component>()){if(comp==null||comp.GetType().Name!="SplineMesh")continue;var rebuild=comp.GetType().GetMethod("RebuildImmediate");var pars=rebuild.GetParameters();rebuild.Invoke(comp,pars.Length==0?null:new object[]{true});}foreach(var filter in go.GetComponentsInChildren<MeshFilter>()){string part=filter.gameObject.name.Split('/').Last();if(filter.sharedMesh!=null){if(!partVertices.ContainsKey(part))partVertices[part]=new List<Vector3>();foreach(var v in filter.sharedMesh.vertices)partVertices[part].Add(filter.transform.TransformPoint(v));}}bodyVertices[id]=new List<Vector3>();foreach(var filter in go.GetComponentsInChildren<MeshFilter>()){if(filter.gameObject.name.EndsWith("/body")&&filter.sharedMesh!=null)foreach(var v in filter.sharedMesh.vertices)bodyVertices[id].Add(filter.transform.TransformPoint(v));}}
+   foreach(var p in paths) {int id=(int)pathType.GetField("path_id").GetValue(p); var piece=new List<Vector3>{(Vector3)cuts[id],points[id][1]};var roadResult=road.GetType().GetMethod("Generate").Invoke(road,new object[]{p,piece,setback,setback});if(roadResult==null)throw new Exception("road null");var go=(GameObject)roadResult.GetType().GetProperty("GeneratedObject").GetValue(roadResult);foreach(var comp in go.GetComponentsInChildren<Component>()){if(comp==null||comp.GetType().Name!="SplineMesh")continue;var rebuild=comp.GetType().GetMethod("RebuildImmediate");var pars=rebuild.GetParameters();rebuild.Invoke(comp,pars.Length==0?null:new object[]{true});}foreach(var filter in go.GetComponentsInChildren<MeshFilter>()){string part=filter.gameObject.name.Split('/').Last();if(filter.sharedMesh!=null){if(!partVertices.ContainsKey(part))partVertices[part]=new List<Vector3>();foreach(var v in filter.sharedMesh.vertices)partVertices[part].Add(filter.transform.TransformPoint(v));}}bodyVertices[id]=new List<Vector3>();bodyNormals[id]=new List<Vector3>();foreach(var filter in go.GetComponentsInChildren<MeshFilter>()){if(filter.gameObject.name.EndsWith("/body")&&filter.sharedMesh!=null){foreach(var v in filter.sharedMesh.vertices)bodyVertices[id].Add(filter.transform.TransformPoint(v));foreach(var n in filter.sharedMesh.normals)bodyNormals[id].Add(filter.transform.TransformDirection(n).normalized);}}}
    var cam=new GameObject("Camera").AddComponent<Camera>();cam.transform.position=new Vector3(0,45,-35);cam.transform.LookAt(Vector3.zero);cam.orthographic=true;cam.orthographicSize=23;cam.clearFlags=CameraClearFlags.SolidColor;cam.backgroundColor=new Color(.12f,.15f,.18f);
    var light=new GameObject("Light").AddComponent<Light>();light.type=LightType.Directional;light.transform.rotation=Quaternion.Euler(55,-25,0);
    var rt=new RenderTexture(1000,800,24);cam.targetTexture=rt;cam.Render();RenderTexture.active=rt;var tex=new Texture2D(1000,800,TextureFormat.RGB24,false);tex.ReadPixels(new Rect(0,0,1000,800),0,0);tex.Apply();File.WriteAllBytes(root+"/Temp/IntersectionUnityQA/preview.png",tex.EncodeToPNG());
@@ -65,13 +66,25 @@ public static class IntersectionQA
     foreach(float sign in new[]{-1f,1f}) {Vector3 expected=cut+right*width*.5f*sign+Vector3.up*.1f;float nearest=float.PositiveInfinity;foreach(var v in meshResult.vertices)nearest=Mathf.Min(nearest,Vector3.Distance(v,expected));seamError=Mathf.Max(seamError,nearest);if(bodyVertices[id].Count==0)throw new Exception("missing road body");float bodyNearest=bodyVertices[id].Min(v=>Vector3.Distance(v,expected));seamError=Mathf.Max(seamError,bodyNearest);}
    }
    if(seamError>.001f)throw new Exception("surface seam error="+seamError);
+   // 口では交差点の路面の法線が本線のbodyの上面の法線と一致し、継ぎ目で陰影が変わらない。
+   float normalSeam=0f;var slabVertices=meshResult.vertices;var slabNormals=meshResult.normals;
+   foreach(var p in paths){
+    int id=(int)pathType.GetField("path_id").GetValue(p);Vector3 cut=(Vector3)cuts[id];Vector3 direction=(points[id][1]-cut).normalized;Vector3 right=Vector3.Cross(Vector3.up,direction).normalized;
+    float width=(float)itemType.GetField("width").GetValue(dict[100+id-1]);
+    foreach(float sign in new[]{-.5f,0f,.5f}){Vector3 at=cut+right*width*sign+Vector3.up*.1f;
+     int slab=-1;for(int v=0;v<slabVertices.Length;v++)if(slabNormals[v].y>.5f&&(slab<0||Vector3.Distance(slabVertices[v],at)<Vector3.Distance(slabVertices[slab],at)))slab=v;
+     int body=-1;for(int v=0;v<bodyVertices[id].Count;v++)if(bodyNormals[id][v].y>.5f&&(body<0||Vector3.Distance(bodyVertices[id][v],at)<Vector3.Distance(bodyVertices[id][body],at)))body=v;
+     if(Vector3.Distance(slabVertices[slab],at)>.5f||Vector3.Distance(bodyVertices[id][body],at)>1.5f)continue;
+     normalSeam=Mathf.Max(normalSeam,Vector3.Angle(slabNormals[slab],bodyNormals[id][body]));}
+   }
+   if(normalSeam>1f)throw new Exception("surface normal seam="+normalSeam);
    CheckPartSeams(surface, specs, cuts, paths, pathType, cache);
    CheckSurfaceOrigins(asm,cache);
    CheckFanCaps(specs);
    CheckRailCrossing(asm, pathType, itemType, dict, cache, gen);
    CheckLinearCorner(asm, pathType);
    int motorwayCases = MotorwayMergeQA.Run(asm, dict, cache, root);
-   File.WriteAllText(root+"/Temp/IntersectionUnityQA/result.txt","PASS vertices="+meshResult.vertexCount+" parts="+specs.Count+" sloped surface seam="+seamError+"; mixed crossing and 2-to-1 rail endpoints; motorway merges="+motorwayCases);
+   File.WriteAllText(root+"/Temp/IntersectionUnityQA/result.txt","PASS vertices="+meshResult.vertexCount+" parts="+specs.Count+" sloped surface seam="+seamError+" normal seam="+normalSeam+"; mixed crossing and 2-to-1 rail endpoints; motorway merges="+motorwayCases);
    EditorApplication.Exit(0);
   } catch(Exception ex){File.WriteAllText(root+"/Temp/IntersectionUnityQA/result.txt",ex.ToString());Debug.LogException(ex);EditorApplication.Exit(1);}
  }

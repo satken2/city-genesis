@@ -100,7 +100,7 @@ internal static class Program
 
     /// <summary>
     /// 勾配のある交差点の路面を、本編と同じ三角形分割・高さ・法線で組み立てて検査する。
-    /// 隣り合う三角形の折れ角、頂点法線と面の向きの差、口での本線の勾配・法線との差を測る。
+    /// 隣り合う三角形の折れ角、頂点法線と面の向きの差、口での本線の勾配・法線との差、頂点数を測る。
     /// </summary>
     private static string CheckSlopedSurfaces(GeometryFactory factory)
     {
@@ -109,13 +109,18 @@ internal static class Program
         var triangulate = generator.GetMethod("TriangulateSurface", flags);
         var surfacePoint = generator.GetMethod("SectionSurfacePoint", flags);
         var surfaceNormal = generator.GetMethod("SurfaceNormal", flags);
+        var isLevel = generator.GetMethod("IsLevel", flags);
         float Grade(float degrees, float slope) => slope * MathF.Cos(degrees * MathF.PI / 180);
-        var cases = new (string name, float[] degrees, float[] grades, float[] widths)[]
+        var far = new Vector2(7000f, -3000f);
+        var cases = new (string name, float[] degrees, float[] grades, float[] widths, Vector2 origin)[]
         {
-            ("steep-y", new[] { 0f, 120f, 240f }, new[] { .2f, -.1f, 0f }, new[] { 16f, 8f, 8f }),
-            ("plane8-y", new[] { 30f, 150f, 270f }, new[] { Grade(30, .08f), Grade(150, .08f), Grade(270, .08f) }, new[] { 12f, 12f, 8f }),
-            ("plane6-cross", new[] { 0f, 90f, 180f, 270f }, new[] { .06f, 0f, -.06f, 0f }, new[] { 12f, 12f, 12f, 12f }),
-            ("crest-y", new[] { 0f, 110f, 230f }, new[] { -.05f, -.05f, -.05f }, new[] { 12f, 8f, 8f }),
+            ("steep-y", new[] { 0f, 120f, 240f }, new[] { .2f, -.1f, 0f }, new[] { 16f, 8f, 8f }, Vector2.zero),
+            ("plane8-y", new[] { 30f, 150f, 270f }, new[] { Grade(30, .08f), Grade(150, .08f), Grade(270, .08f) }, new[] { 12f, 12f, 8f }, Vector2.zero),
+            ("plane8-y-far", new[] { 30f, 150f, 270f }, new[] { Grade(30, .08f), Grade(150, .08f), Grade(270, .08f) }, new[] { 12f, 12f, 8f }, far),
+            ("plane6-cross", new[] { 0f, 90f, 180f, 270f }, new[] { .06f, 0f, -.06f, 0f }, new[] { 12f, 12f, 12f, 12f }, Vector2.zero),
+            ("crest-y", new[] { 0f, 110f, 230f }, new[] { -.05f, -.05f, -.05f }, new[] { 12f, 8f, 8f }, Vector2.zero),
+            ("flat-cross", new[] { 0f, 90f, 180f, 270f }, new[] { 0f, 0f, 0f, 0f }, new[] { 12f, 12f, 12f, 12f }, Vector2.zero),
+            ("wide-cross", new[] { 10f, 100f, 190f, 280f }, new[] { Grade(10, .05f), Grade(100, .05f), Grade(190, .05f), Grade(280, .05f) }, new[] { 30f, 30f, 30f, 30f }, Vector2.zero),
         };
         var report = new List<string>();
         foreach (var c in cases)
@@ -125,31 +130,24 @@ internal static class Program
             for (int i = 0; i < c.degrees.Length; i++)
             {
                 paths.Add(new PathSummary { path_id = i + 1, start_node_id = 1, end_node_id = 100 + i, width = c.widths[i] });
-                points[i + 1] = Ray(c.degrees[i], 80f, c.grades[i]);
+                points[i + 1] = Ray(c.degrees[i], 80f, c.grades[i]).Select(p => p + new Vector3(c.origin.x, 0f, c.origin.y)).ToList();
             }
-            var result = IntersectionPolygonUtil.ComputeIntersectionPolygon(1, Vector2.zero, paths, factory, null, p => points[p.path_id]);
+            var result = IntersectionPolygonUtil.ComputeIntersectionPolygon(1, c.origin, paths, factory, null, p => points[p.path_id]);
             Check(!result.RequiresMoreSpace, $"{c.name}: 交差点を組み立てられません。");
             var plan = new List<Vector2>();
-            List<int> triangles;
-            if (triangulate != null) triangles = (List<int>)triangulate.Invoke(null, new object[] { result.Geometry, plan });
-            else
-            {
-                var ring = ((Polygon)result.Geometry).ExteriorRing.Coordinates;
-                for (int i = 0; i < ring.Length - 1; i++) plan.Add(new Vector2((float)ring[i].X, (float)ring[i].Y));
-                if (PolygonUtils.SignedArea(plan.ToArray()) < 0f) plan.Reverse();
-                triangles = BuildingMeshBuilder.TriangulateEarClip(plan.ToArray());
-            }
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            bool refine = !(bool)isLevel.Invoke(null, new object[] { result.Sections });
+            var triangles = (List<int>)triangulate.Invoke(null, new object[] { result.Geometry, plan, refine });
+            watch.Stop();
             var vertices = plan.Select(p => (Vector3)surfacePoint.Invoke(null, new object[] { new Vector3(p.x, 0f, p.y), result.Sections, 0f, null })).ToList();
+            Vector3 NormalAt(int v) => (Vector3)surfaceNormal.Invoke(null, new object[] { vertices[v], result.Sections, null });
             var faces = new List<Vector3>();
-            var averaged = new Vector3[vertices.Count];
             var edges = new Dictionary<(int, int), List<int>>();
             for (int t = 0; t < triangles.Count; t += 3)
             {
                 int a = triangles[t], b = triangles[t + 1], d = triangles[t + 2];
                 Vector3 cross = Vector3.Cross(vertices[b] - vertices[a], vertices[d] - vertices[a]);
-                if (cross.y < 0f) cross = -cross;
-                faces.Add(cross.normalized);
-                foreach (int v in new[] { a, b, d }) averaged[v] += cross;
+                faces.Add((cross.y < 0f ? -cross : cross).normalized);
                 foreach (var (u, w) in new[] { (a, b), (b, d), (d, a) })
                 {
                     var key = (Math.Min(u, w), Math.Max(u, w));
@@ -157,12 +155,10 @@ internal static class Program
                     list.Add(t / 3);
                 }
             }
-            Vector3 NormalAt(int v) => surfaceNormal != null
-                ? (Vector3)surfaceNormal.Invoke(null, new object[] { vertices[v], result.Sections, null })
-                : averaged[v].normalized;
+            Check(edges.Values.All(list => list.Count <= 2), $"{c.name}: 路面の三角形が重なっています。");
             float fold = 0f, shade = 0f, mouthNormal = 0f, mouthGrade = 0f;
             foreach (var list in edges.Values)
-                if (list.Count == 2) { float ang = Vector3.Angle(faces[list[0]], faces[list[1]]); if (ang > fold) { fold = ang; foreach (int f in list) { int t0=f*3; float area = MathF.Abs((plan[triangles[t0+1]].x-plan[triangles[t0]].x)*(plan[triangles[t0+2]].y-plan[triangles[t0]].y)-(plan[triangles[t0+2]].x-plan[triangles[t0]].x)*(plan[triangles[t0+1]].y-plan[triangles[t0]].y))*.5f; Console.WriteLine($"DBG {c.name} ang={ang:0.0} tri={f} planArea={area:0.0000} n={faces[f]}"); } } }
+                if (list.Count == 2) fold = MathF.Max(fold, Vector3.Angle(faces[list[0]], faces[list[1]]));
             for (int t = 0; t < triangles.Count; t++)
                 shade = MathF.Max(shade, Vector3.Angle(NormalAt(triangles[t]), faces[t / 3]));
             foreach (var section in result.Sections.Values)
@@ -178,7 +174,16 @@ internal static class Program
                 float grade = section.Tangent.y / new Vector2(section.Tangent.x, section.Tangent.z).magnitude;
                 mouthGrade = MathF.Max(mouthGrade, MathF.Abs((section.Position.y - innerY) / .5f - grade));
             }
-            report.Add($"{c.name}: vertices={vertices.Count} fold={fold:0.00}° shade={shade:0.00}° mouthNormal={mouthNormal:0.00}° mouthGrade={mouthGrade:0.0000}");
+            int ring = ((Polygon)result.Geometry).ExteriorRing.NumPoints - 1;
+            Check(refine == (c.grades.Any(g => g != 0f)), $"{c.name}: 内部頂点を置くかの判定が路面の勾配と合いません。");
+            Check(refine || vertices.Count == ring, $"{c.name}: 平面の交差点に内部頂点が置かれました。");
+            float budget = ring * 2 + (float)result.Geometry.Area / (LocalConstants.INTERSECTION_SURFACE_VERTEX_SPACING * LocalConstants.INTERSECTION_SURFACE_VERTEX_SPACING) * 2f;
+            Check(fold < 8f, $"{c.name}: 隣り合う三角形が {fold}° 折れています。");
+            Check(shade < 8f, $"{c.name}: 頂点法線が三角形の向きから {shade}° 外れています。");
+            Check(mouthNormal < .5f, $"{c.name}: 口の法線が本線の断面法線から {mouthNormal}° 外れています。");
+            Check(mouthGrade < .01f, $"{c.name}: 口の内側の勾配が本線の縦断勾配から {mouthGrade} 外れています。");
+            Check(vertices.Count <= budget, $"{c.name}: 頂点数 {vertices.Count} が面積に対して多すぎます(上限 {budget:0})。");
+            report.Add($"{c.name}: vertices={vertices.Count} fold={fold:0.0}° shade={shade:0.0}° {watch.Elapsed.TotalMilliseconds:0.0}ms");
         }
         return string.Join("; ", report);
     }

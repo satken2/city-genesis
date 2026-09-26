@@ -894,52 +894,153 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// <summary>
     /// 三角形分割の内部の辺をDelaunay条件で張り替え(Lawsonの辺交換)、耳切りが作る細い三角形の扇を解消する。
     /// 片側にしか三角形の無い外周の辺は張り替えないので輪郭は変わらない。三角形はXZの反時計回りで渡し、その場で置き換える。
-    /// 同一円周上の4点は張り替えず、往復を起こさない。
     /// </summary>
     public static void FlipToDelaunay(IReadOnlyList<Vector2> verts, List<(int a, int b, int c)> triangles)
     {
         if (verts == null || triangles == null) return;
-        var owner = new Dictionary<long, int>();
-        for (int pass = 0; pass < MAX_DELAUNAY_FLIP_PASSES; pass++)
+        var mesh = new EdgeIndexedTriangulation(verts, triangles);
+        mesh.PushAllEdges();
+        mesh.Legalize();
+    }
+
+    /// <summary>
+    /// Delaunay化済みの三角形分割の内部へ点を1つずつ追加し、周囲の辺を張り替えてDelaunay条件を保つ。
+    /// 辺の上や分割の外に落ちる点は追加しない。三角形はXZの反時計回りで渡す。
+    /// 近い点を続けて渡すと、直前に追加した位置から辿って含む三角形を探すので速い。
+    /// </summary>
+    public static void InsertInteriorPoints(List<Vector2> verts, List<(int a, int b, int c)> triangles, IEnumerable<Vector2> points)
+    {
+        if (verts == null || triangles == null || points == null) return;
+        var mesh = new EdgeIndexedTriangulation(verts, triangles);
+        foreach (Vector2 point in points)
         {
-            owner.Clear();
-            for (int t = 0; t < triangles.Count; t++)
-            {
-                var (a, b, c) = triangles[t];
-                owner[DirectedEdgeKey(a, b)] = t; owner[DirectedEdgeKey(b, c)] = t; owner[DirectedEdgeKey(c, a)] = t;
-            }
-            // 1回の走査では張り替えた三角形を再び使わない(辺の索引が古くなるため)。残りは次の走査で処理する。
-            var touched = new bool[triangles.Count];
-            bool flipped = false;
-            for (int t = 0; t < triangles.Count; t++)
-            {
-                if (touched[t]) continue;
-                var (a, b, c) = triangles[t];
-                for (int e = 0; e < 3; e++)
-                {
-                    int u = e == 0 ? a : e == 1 ? b : c;
-                    int v = e == 0 ? b : e == 1 ? c : a;
-                    int p = e == 0 ? c : e == 1 ? a : b;
-                    if (!owner.TryGetValue(DirectedEdgeKey(v, u), out int n) || touched[n]) continue;
-                    var (na, nb, nc) = triangles[n];
-                    int q = na != u && na != v ? na : nb != u && nb != v ? nb : nc;
-                    if (!IsInsideCircumcircle(verts[u], verts[v], verts[p], verts[q])) continue;
-                    if (Cross2D(verts[u], verts[q], verts[p]) <= 1e-9 || Cross2D(verts[q], verts[v], verts[p]) <= 1e-9) continue;
-                    triangles[t] = (u, q, p);
-                    triangles[n] = (q, v, p);
-                    touched[t] = touched[n] = true;
-                    flipped = true;
-                    break;
-                }
-            }
-            if (!flipped) return;
+            int container = mesh.Locate(point);
+            if (container < 0) continue;
+            var (a, b, c) = triangles[container];
+            int index = verts.Count;
+            verts.Add(point);
+            mesh.Replace(container, (a, b, index));
+            mesh.Add((b, c, index));
+            mesh.Add((c, a, index));
+            mesh.Push(a, b); mesh.Push(b, c); mesh.Push(c, a);
+            mesh.Legalize();
         }
     }
 
-    /// <summary>辺交換の走査回数の上限。巨大な分割で収束が遅い場合も打ち切る(打ち切っても分割は有効なまま)。</summary>
-    private const int MAX_DELAUNAY_FLIP_PASSES = 256;
+    /// <summary>辺交換の回数の上限(三角形1つあたり)。浮動小数の誤差で収束しない場合も打ち切る(打ち切っても分割は有効なまま)。</summary>
+    private const int MAX_DELAUNAY_FLIPS_PER_TRIANGLE = 64;
 
-    private static long DirectedEdgeKey(int from, int to) => ((long)from << 32) | (uint)to;
+    /// <summary>有向辺から三角形を引く索引を持ち、辺交換と点の位置探索を局所的に行う三角形分割。</summary>
+    private sealed class EdgeIndexedTriangulation
+    {
+        private readonly IReadOnlyList<Vector2> verts;
+        private readonly List<(int a, int b, int c)> triangles;
+        private readonly Dictionary<long, int> owner;
+        private readonly Stack<(int u, int v)> pending = new Stack<(int u, int v)>();
+        private int flipBudget;
+        private int lastFound;
+
+        public EdgeIndexedTriangulation(IReadOnlyList<Vector2> verts, List<(int a, int b, int c)> triangles)
+        {
+            this.verts = verts;
+            this.triangles = triangles;
+            owner = new Dictionary<long, int>(triangles.Count * 3);
+            for (int t = 0; t < triangles.Count; t++) Index(t);
+            flipBudget = Mathf.Max(1, triangles.Count) * MAX_DELAUNAY_FLIPS_PER_TRIANGLE;
+        }
+
+        public void Push(int u, int v) => pending.Push((u, v));
+
+        public void PushAllEdges()
+        {
+            foreach (var (a, b, c) in triangles) { Push(a, b); Push(b, c); Push(c, a); }
+        }
+
+        public void Add((int a, int b, int c) triangle)
+        {
+            triangles.Add(triangle);
+            Index(triangles.Count - 1);
+            flipBudget += MAX_DELAUNAY_FLIPS_PER_TRIANGLE;
+        }
+
+        /// <summary>三角形を置き換える。辺交換では相手の三角形が同じ有向辺を先に引き継いでいるので、自分を指す索引だけ消す。</summary>
+        public void Replace(int t, (int a, int b, int c) triangle)
+        {
+            var (a, b, c) = triangles[t];
+            Unindex(Key(a, b), t); Unindex(Key(b, c), t); Unindex(Key(c, a), t);
+            triangles[t] = triangle;
+            Index(t);
+        }
+
+        private void Unindex(long key, int t)
+        {
+            if (owner.TryGetValue(key, out int current) && current == t) owner.Remove(key);
+        }
+
+        public void Legalize()
+        {
+            while (pending.Count > 0 && flipBudget > 0)
+            {
+                var (u, v) = pending.Pop();
+                if (!owner.TryGetValue(Key(u, v), out int t) || !owner.TryGetValue(Key(v, u), out int n)) continue;
+                int p = Opposite(triangles[t], u, v);
+                int q = Opposite(triangles[n], v, u);
+                if (!IsInsideCircumcircle(verts[u], verts[v], verts[p], verts[q])) continue;
+                if (Cross2D(verts[u], verts[q], verts[p]) <= 1e-9 || Cross2D(verts[q], verts[v], verts[p]) <= 1e-9) continue;
+                // (u,v,p)+(v,u,q) の対角線 u-v を p-q へ張り替え、四角形の外周4辺を再検査する。
+                Replace(t, (u, q, p));
+                Replace(n, (q, v, p));
+                Push(u, q); Push(q, v); Push(v, p); Push(p, u);
+                flipBudget--;
+            }
+            pending.Clear();
+        }
+
+        /// <summary>
+        /// 点を内部に含む三角形。前回見つけた三角形から点の側へ辺を渡って辿り、外周に突き当たったら全件を調べる
+        /// (凹んだ輪郭では直線的に辿れないことがある)。辺の上の点は -1。
+        /// </summary>
+        public int Locate(Vector2 point)
+        {
+            int t = lastFound < triangles.Count ? lastFound : 0;
+            for (int step = 0; step <= triangles.Count; step++)
+            {
+                var (a, b, c) = triangles[t];
+                int next = -1;
+                if (Cross2D(verts[a], verts[b], point) < 0 && owner.TryGetValue(Key(b, a), out int nab)) next = nab;
+                else if (Cross2D(verts[b], verts[c], point) < 0 && owner.TryGetValue(Key(c, b), out int nbc)) next = nbc;
+                else if (Cross2D(verts[c], verts[a], point) < 0 && owner.TryGetValue(Key(a, c), out int nca)) next = nca;
+                if (next < 0) break;
+                t = next;
+            }
+            if (Contains(t, point)) return lastFound = t;
+            for (int i = triangles.Count - 1; i >= 0; i--)
+                if (Contains(i, point)) return lastFound = i;
+            return -1;
+        }
+
+        private bool Contains(int t, Vector2 point)
+        {
+            var (a, b, c) = triangles[t];
+            return Cross2D(verts[a], verts[b], point) > 1e-6 && Cross2D(verts[b], verts[c], point) > 1e-6 && Cross2D(verts[c], verts[a], point) > 1e-6;
+        }
+
+        private void Index(int t)
+        {
+            var (a, b, c) = triangles[t];
+            owner[Key(a, b)] = t; owner[Key(b, c)] = t; owner[Key(c, a)] = t;
+        }
+
+        private static long Key(int from, int to) => ((long)from << 32) | (uint)to;
+
+        /// <summary>有向辺 from→to を持つ三角形の残りの頂点。</summary>
+        private static int Opposite((int a, int b, int c) triangle, int from, int to)
+        {
+            if (triangle.a == from && triangle.b == to) return triangle.c;
+            if (triangle.b == from && triangle.c == to) return triangle.a;
+            return triangle.b;
+        }
+    }
 
     private static double Cross2D(Vector2 a, Vector2 b, Vector2 c)
         => ((double)b.x - a.x) * ((double)c.y - a.y) - ((double)b.y - a.y) * ((double)c.x - a.x);

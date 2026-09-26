@@ -96,6 +96,8 @@ public class MasterDataStore : MonoBehaviour
 		public int transit_path_id;
 		public List<int> stop_path_variants = new();
 		public List<int> route_path_variants = new();
+		// 路線が車両基地から調達する車両財の商品ID。車両基地(supply が同じ商品)の走行網の逆引きに使う。
+		public int? vehicle;
 	}
 
 	[Serializable]
