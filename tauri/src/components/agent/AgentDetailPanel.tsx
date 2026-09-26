@@ -42,6 +42,7 @@ import { resolveAgentIcon } from "../../utils/agentIcon";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { InfoHeader } from "../common/InfoHeader";
 import { TagRow } from "../common/TagRow";
+import { isTaggable } from "../../utils/constructionTags";
 import { AgentAlertsPanel } from "./AgentAlertsPanel";
 import { AgentBasicInfoPanel } from "./AgentBasicInfoPanel";
 import { BuildingInfo } from "./BuildingInfo";
@@ -463,8 +464,9 @@ export function AgentDetailPanel({
       />
 
       {/* 建設プロジェクトのタグと、この建物だけを3Dビューで隠す切り替え。
-          タグは建物(is_bd)にだけ付く(世帯やテナントは工事の対象にならないため)。 */}
-      {agentData.is_bd && (
+          タグを付け替えられるのは着工前・建設中の公共施設だけなので、その間だけ行を出す
+          (竣工後もタグ自体は残り、建設プロジェクトウィンドウで竣工済みとして数えられる)。 */}
+      {agentData.is_bd && isTaggable("agent", agentData.status, agentData.public_facility) && (
         <TagRow apiBaseUrl={apiBaseUrl} kind="agent" entityId={agentData.agent_id} />
       )}
 

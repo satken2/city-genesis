@@ -403,8 +403,11 @@ export function useStationConstruction(
     enterPlacementMode();
   }, [clearCost, enterPlacementMode]);
 
-  /** プラットフォーム2本と駅舎1本を1回のPOSTで発注する。 */
-  const confirmStation = useCallback(async (): Promise<void> => {
+  /**
+   * プラットフォーム2本と駅舎1本を1回のPOSTで発注する。
+   * extraFields は各パスへ足して送る(建設パネルで選んだタグなど。事前検証の送信形状には含めない)。
+   */
+  const confirmStation = useCallback(async (extraFields?: Record<string, unknown>): Promise<void> => {
     if (!apiBaseUrl || !constructionBody || !canConfirm || currentValidationKey.current !== validationKey) {
       throw new Error(validationMessages.join("\n") || t("path_construction.collisionChecking"));
     }
@@ -431,7 +434,8 @@ export function useStationConstruction(
 
     const response = await fetchApi<{ paths: Array<{ path_id: number }> }>(
       `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/`,
-      { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(constructionBody) },
+      { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...constructionBody, paths: constructionBody.paths.map((p) => ({ ...p, ...extraFields })) }) },
     );
     void sendClearHighlights("path_build");
     // 駅=駅舎パスそのものなので、作成した駅舎(最後の要素)の詳細を開いて駅名を確認できるようにする。

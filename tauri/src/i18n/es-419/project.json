@@ -12,7 +12,7 @@
   },
   "constructionProjects": {
     "description": "Agrupa las obras según la etiqueta de edificios y calles, y suma su costo y su duración. Mostrar u ocultar solo dura esta sesión y no se guarda.",
-    "empty": "Todavía no hay edificios ni calles con etiqueta. Agrega una desde un panel de detalle.",
+    "empty": "Todavía no hay obras con etiqueta. Elige una al colocar desde un panel de construcción, o agrégala desde el panel de detalle de un edificio público o una calle planificados o en construcción.",
     "loadFailed": "No se pudieron cargar los proyectos de construcción",
     "totalCost": "Costo estimado",
     "duration": "Tiempo restante",

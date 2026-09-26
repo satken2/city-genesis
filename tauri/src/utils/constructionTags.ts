@@ -5,10 +5,34 @@
  * 一方で「タグ単位／オブジェクト単位の表示・非表示」はバックエンドに一切保存されず、
  * Unityがセッション内の状態として持つ(`sendSetObjectFilter` でIDの全集合を送る)。
  *
- * タグ選択UI(`common/TagSelect`)・建設プロジェクトウィンドウ・建物/道路の詳細パネルが共用する。
+ * 新たにタグを付けられるのは着工前・建設中の公共施設と道路だけ(`isTaggable`)。
+ * 付いたタグは竣工・倒壊しても外れない(プロジェクトの表で竣工済みの件数を見せ続けるため)。
+ *
+ * タグ選択UI(`common/TagPicker`・`common/TagSelect`)・建設プロジェクトウィンドウ・
+ * 建物/道路の詳細パネル・建設パネルが共用する。
  */
 
+import { STATUS_CONSTRUCTING, STATUS_PENDING, STATUS_SCHEDULED_CONSTRUCTION } from "../constants";
 import { buildApiUrl, fetchApi } from "./api";
+
+/**
+ * タグを付けられるステータス(着工保留中・計画中・建設中)。
+ * バックエンド `crud_tags.TAGGABLE_STATUSES` の写しで、一致させる契約。
+ */
+export const TAGGABLE_STATUSES: readonly number[] = [
+  STATUS_PENDING,
+  STATUS_SCHEDULED_CONSTRUCTION,
+  STATUS_CONSTRUCTING,
+];
+
+/**
+ * 建物・道路に新たにタグを付けられる状態か(バックエンド `crud_tags.is_taggable` と同じ規則)。
+ * 建物は市政府の施設に限る。道路は常に市の資産なので `publicFacility` を見ない。
+ */
+export function isTaggable(kind: "agent" | "path", status: number, publicFacility?: boolean): boolean {
+  if (!TAGGABLE_STATUSES.includes(status)) return false;
+  return kind === "path" || !!publicFacility;
+}
 
 /** タグ候補1件。件数0のタグも候補として残る(付け外ししても選択肢が消えないように)。 */
 export type TagSummary = {
@@ -24,8 +48,6 @@ export type TagProjectItem = {
   name: string;
   variant: number;
   status: number;
-  /** 公共施設か(道路は常に市の資産なので1)。民間の建物は市の建設予算には計上されない。 */
-  public_facility: number;
   /** 残りの建設費見込み(竣工済みは0) */
   remaining_cost: number;
   /** 1エポックあたりの建設費見込み */
