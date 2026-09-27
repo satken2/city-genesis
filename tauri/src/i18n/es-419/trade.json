@@ -17,6 +17,8 @@
     "description": "Este puerto importa mercancías desde fuera de la región para abastecer los mercados de la ciudad, y compra la producción excedente de la ciudad para exportarla.",
     "capacity": "Capacidad de manejo",
     "perEpochPerDirection": "/época (por cada sentido)",
+    "linkCapacity": "Capacidad de carga internacional",
+    "areaCapacity": "Límite por superficie",
     "importHandled": "Volumen importado",
     "exportHandled": "Volumen exportado",
     "utilization": "Utilización",

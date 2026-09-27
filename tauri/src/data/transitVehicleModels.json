@@ -18,5 +18,17 @@
     { "variant": 0, "prop": 376, "key": "trainStandard" },
     { "variant": 1, "prop": 377, "key": "trainFuturistic" },
     { "variant": 2, "prop": 390, "key": "trainRetro" }
+  ],
+  "1006": [
+    { "variant": 0, "prop": 380, "key": "freightRed" },
+    { "variant": 1, "prop": 381, "key": "freightBlue" }
+  ],
+  "1007": [
+    { "variant": 0, "prop": 380, "key": "freightRed" },
+    { "variant": 1, "prop": 381, "key": "freightBlue" }
+  ],
+  "1008": [
+    { "variant": 0, "prop": 380, "key": "freightRed" },
+    { "variant": 1, "prop": 381, "key": "freightBlue" }
   ]
 }

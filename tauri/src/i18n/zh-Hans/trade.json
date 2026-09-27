@@ -17,6 +17,8 @@
     "description": "该口岸从域外进口商品供应给城市内的市场，并收购城市内的过剩产品出口到域外。",
     "capacity": "处理能力",
     "perEpochPerDirection": "/纪元（进出口各自）",
+    "linkCapacity": "国际货运运力",
+    "areaCapacity": "按面积的上限",
     "importHandled": "进口处理量",
     "exportHandled": "出口处理量",
     "utilization": "利用率",

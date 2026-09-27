@@ -126,7 +126,9 @@
       "trainStandard": "标准",
       "trainFuturistic": "未来风",
       "trainRetro": "复古",
-      "monorail": "单轨列车"
+      "monorail": "单轨列车",
+      "freightRed": "红色机车",
+      "freightBlue": "蓝色机车"
     }
   }
 }

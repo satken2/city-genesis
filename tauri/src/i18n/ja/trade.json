@@ -17,6 +17,8 @@
     "description": "この拠点は域外から商品を輸入して都市内の市場へ供給し、都市内の余剰生産物を買い取って域外へ輸出します。",
     "capacity": "取扱能力",
     "perEpochPerDirection": "/エポック(輸出入それぞれ)",
+    "linkCapacity": "国際貨物の輸送枠",
+    "areaCapacity": "面積による上限",
     "importHandled": "輸入取扱量",
     "exportHandled": "輸出取扱量",
     "utilization": "稼働率",
