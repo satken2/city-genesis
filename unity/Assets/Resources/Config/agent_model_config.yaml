@@ -1,4 +1,9 @@
 agents:
+  4:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
   100:
     model: true
     prebuilt: true
@@ -27,6 +32,11 @@ agents:
   403:
     model: true
     prebuilt: false
+    variants:
+      - 0
+  404:
+    model: true
+    prebuilt: true
     variants:
       - 0
   1001:
@@ -162,6 +172,31 @@ agents:
   1073:
     model: true
     prebuilt: false
+    variants:
+      - 0
+  1077:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1078:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1079:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1080:
+    model: true
+    prebuilt: true
+    variants:
+      - 0
+  1081:
+    model: true
+    prebuilt: true
     variants:
       - 0
   2000:

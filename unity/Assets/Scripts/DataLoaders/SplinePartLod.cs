@@ -143,7 +143,8 @@ public sealed class SplinePartLod : MonoBehaviour
                     next = desired == DrawLod.Far ? BuildStrip(segment) : build(desired, segment.from, segment.to);
                     if (next != null)
                     {
-                        var identity = next.GetComponent<RenderCacheIdentity>() ?? next.AddComponent<RenderCacheIdentity>();
+                        var identity = next.GetComponent<RenderCacheIdentity>();
+                        if (identity == null) identity = next.AddComponent<RenderCacheIdentity>();
                         identity.key = key;
                     }
                 }
@@ -212,7 +213,8 @@ public sealed class PathPresentation : MonoBehaviour
         var prior = previous != null ? previous.GetComponent<PathPresentation>() : null;
         GameObject visible = prior != null && prior.fallback != null ? prior.TakeFallback() : previous;
         if (previous != null && previous != visible) cache.Park(previous);
-        var state = next.GetComponent<PathPresentation>() ?? next.AddComponent<PathPresentation>();
+        var state = next.GetComponent<PathPresentation>();
+        if (state == null) state = next.AddComponent<PathPresentation>();
         state.fallback = visible;
         state.cache = cache;
         state.parts = next.GetComponentsInChildren<SplinePartLod>(true);

@@ -219,7 +219,8 @@ public sealed class RoadMarkingContext : MonoBehaviour
         for (int i = 0; i < vertices.Length; i++) uv.Add(Coordinate(body.transform.TransformPoint(vertices[i]),
             normals.Length == vertices.Length ? body.transform.TransformDirection(normals[i]) : Vector3.up));
         mesh.SetUVs(3, uv);
-        var surface = body.GetComponent<RoadMarkingSurface>() ?? body.AddComponent<RoadMarkingSurface>();
+        var surface = body.GetComponent<RoadMarkingSurface>();
+        if (surface == null) surface = body.AddComponent<RoadMarkingSurface>();
         surface.Configure(Plan, this, far);
     }
 

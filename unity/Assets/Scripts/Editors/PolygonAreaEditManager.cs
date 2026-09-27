@@ -23,7 +23,7 @@ public enum PolygonEditPhase { Inactive, Placing, Editing }
 /// Editingから始める)が本クラスを継承して利用する。
 ///
 /// 派生クラスが差し替えるのは「完成したポリゴンをどのIPCイベントでUIへ通知するか
-/// (<see cref="EmitShape"/>)」と「オーバーレイの色・キャンバス名」、および
+/// (<see cref="EmitShape"/>)」と「オーバーレイの色・キャンバス名・ドラッグ時の吸着方針」、および
 /// 編集の開始/終了に伴う固有処理(<see cref="FinishEditMode"/> の上書き)だけである。
 /// 確定(バックエンドへのPOST/PATCH送信)はいずれのケースもUI(Tauri)側が直接行うため、
 /// このクラスはポリゴン形状の組み立てとUIへの逐次通知のみを担当する。
@@ -48,7 +48,6 @@ public abstract class PolygonAreaEditManager : MonoBehaviour
     // ドラッグ状態(Editingフェーズのみ使用)
     protected bool isDragging = false;
     protected int dragVertexIndex = -1;
-    protected float dragScreenDepth;
 
     // オーバーレイ描画。ParcelShapeEditOverlayRenderer は頂点・辺の2D描画に特化した
     // 汎用コンポーネントで区画固有の状態を持たないため、そのまま再利用する。
@@ -85,6 +84,9 @@ public abstract class PolygonAreaEditManager : MonoBehaviour
 
     /// <summary>選択中の頂点の色(既定は緑)。</summary>
     protected virtual Color SelectedVertexColor => new Color(0.2f, 1f, 0.4f);
+
+    /// <summary>頂点ドラッグに共通吸着を適用するか。編集対象ごとの固定方針。</summary>
+    protected virtual bool UseDragSnapping => true;
 
     // =====================================================================
     // ライフサイクル
@@ -249,7 +251,6 @@ public abstract class PolygonAreaEditManager : MonoBehaviour
             selectedVertexIndex = hit.index;
             isDragging = true;
             dragVertexIndex = hit.index;
-            dragScreenDepth = cam.WorldToScreenPoint(vertices[hit.index]).z;
             Debug.Log($"{GetType().Name}: 頂点{hit.index}を選択してドラッグ開始");
         }
         else if (hit.type == HitTargetType.Edge)
@@ -319,7 +320,6 @@ public abstract class PolygonAreaEditManager : MonoBehaviour
             selectedVertexIndex = hit.index;
             isDragging = true;
             dragVertexIndex = hit.index;
-            dragScreenDepth = cam.WorldToScreenPoint(vertices[hit.index]).z;
             Debug.Log($"{GetType().Name}: 頂点{hit.index}を選択してドラッグ開始");
         }
     }
@@ -357,7 +357,6 @@ public abstract class PolygonAreaEditManager : MonoBehaviour
                 selectedVertexIndex = hit.index;
                 isDragging = true;
                 dragVertexIndex = hit.index;
-                dragScreenDepth = cam.WorldToScreenPoint(vertices[hit.index]).z;
                 Debug.Log($"{GetType().Name}: 頂点{hit.index}を選択してドラッグ開始");
             }
             else
@@ -366,11 +365,11 @@ public abstract class PolygonAreaEditManager : MonoBehaviour
             }
         }
 
-        Vector3 mouseScreenPos = InputUtil.MousePosition;
-        Vector3 newWorldPos = cam.ScreenToWorldPoint(new Vector3(mouseScreenPos.x, mouseScreenPos.y, dragScreenDepth));
+        // 固定深度で逆投影すると斜め視点で地面からずれるため、入力側が求めた地形交点のXZを使う。
+        Vector3 newWorldPos = worldPos;
         newWorldPos.y = Utils.GetGroundHeight(newWorldPos);
 
-        if (terrainInputHandler != null)
+        if (UseDragSnapping && terrainInputHandler != null)
         {
             newWorldPos = terrainInputHandler.ApplySnapping(newWorldPos);
         }

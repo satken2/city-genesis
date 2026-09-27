@@ -81,7 +81,7 @@ const TIPS_LIST: TipItem[] = [
   { id: "tip34", image: tip34 },
 ];
 
-export function TipsWindow() {
+export function TipsWindow({ mode = "initial" }: { mode?: "initial" | "epoch" }) {
   const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * TIPS_LIST.length));
   const [ready, setReady] = useState(false);
@@ -100,6 +100,7 @@ export function TipsWindow() {
   };
 
   useEffect(() => {
+    if (mode === "epoch") return;
     let disposed = false;
     let timer: ReturnType<typeof setTimeout>;
     const refresh = async () => {
@@ -114,10 +115,10 @@ export function TipsWindow() {
     };
     void refresh();
     return () => { disposed = true; clearTimeout(timer); };
-  }, []);
+  }, [mode]);
 
   const handleStart = async () => {
-    if (!ready || starting) return;
+    if (mode !== "initial" || !ready || starting) return;
     setStarting(true);
     setError(false);
     try {
@@ -169,14 +170,14 @@ export function TipsWindow() {
         </button>
         <div className="tips-footer-right">
           {error && <span role="alert">{t("tips.startError")}</span>}
-          {ready ? (
+          {mode === "initial" && ready ? (
             <button className="tips-btn tips-btn--primary" onClick={handleStart} disabled={starting} type="button">
               {t("tips.startGame")}
             </button>
           ) : (
             <span className="tips-loading" role="status" aria-live="polite">
               <span className="tips-loading-spinner" aria-hidden="true" />
-              <span className="tips-loading-text">{t("tips.nowLoading")}</span>
+              <span className="tips-loading-text">{t(mode === "epoch" ? "epochConfirm.executing" : "tips.nowLoading")}</span>
             </span>
           )}
         </div>

@@ -33,6 +33,8 @@ Tauri(Rust)側。ウィンドウ管理(HUD・ポップアップ・Tips)、Unity�
 
 ### ウィンドウ
 
+- エポック演出は`epoch_presentation_id`で開始から結果画面クローズまで保持する。`epoch_result`の`params.extra.epochPresentationId`を`close_window_by_label`で照合して終了する(Reactのアンマウントに頼らない)。Tipsは`open_tips_window_with_mode`の引数で初期ロード/エポックを切り替え、エポック側は処理完了時に閉じる。
+
 - ウィンドウを生成する(`WebviewWindowBuilder::build()`に至る)コマンドは必ず`async fn`。同期コマンドはメインスレッドで走り、`build()`はイベントループへ投げて完了を待つので自分で塞いだままフリーズする。コマンド以外(イベントハンドラ等)から生成するときは`std::thread::spawn`で逃がす(`enqueue_notification`が実例)。
 - 新しいウィンドウラベルは`capabilities/default.json`の`windows`にも追加する(漏れるとそのウィンドウからTauriコマンドを呼べない。ポップアップは`popup-*`で網羅済み)。
 - topmostの打ち直しは`reassert_topmost`(HWNDへ直接`SetWindowPos(HWND_TOPMOST)`)で行う。`set_always_on_top(true)`ではtaoが新旧フラグに差分が無いと`SetWindowPos`を発行せず、裏に回った状態から戻れない。呼び出し箇所は`set_hud_visible(true)`直後・`WindowEvent::Focused(false)`・`system:focus_gained`・`system:graphic_ready`。

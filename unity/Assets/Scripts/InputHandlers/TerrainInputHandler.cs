@@ -155,7 +155,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         // ノードへ引き寄せられると意図した位置から半間隔ぶんずれる(位置と角度は数値入力で決める)。
         if (mode != InputMode.MODE_ROAD_CONSTRUCTION && mode != InputMode.MODE_PATH_SPLIT
             && mode != InputMode.MODE_BUILDING_CONSTRUCTION && mode != InputMode.MODE_EDIT_PROP
-            && mode != InputMode.MODE_EDIT_STATION)
+            && mode != InputMode.MODE_EDIT_STATION && mode != InputMode.MODE_PARCEL_SHAPE_EDIT)
         {
             clickPosition = ApplySnapping(clickPosition);
         }
@@ -264,7 +264,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         clickPosition.y = Utils.GetGroundHeight(clickPosition);
         // 道路/鉄道建設モードは RoadPlanManager が自前の吸着半径で吸着するため共通吸着はしない
         // (onClick と同じ理由。二重吸着で RoadPlanManager 側の半径が効かなくなるのを防ぐ)。
-        if (mode != InputMode.MODE_ROAD_CONSTRUCTION)
+        if (mode != InputMode.MODE_ROAD_CONSTRUCTION && mode != InputMode.MODE_PARCEL_SHAPE_EDIT)
         {
             clickPosition = ApplySnapping(clickPosition);
         }
@@ -365,6 +365,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         // 端点ノード付近でカーソルが端点へ引き寄せられ、常に「端点に近すぎる」分割になって
         // バックエンドに拒否されるため。分割点は中心線への射影(PathTopologyEditManager)で決める。
         bool skipSnap = mode == InputMode.MODE_EDIT_CONNECTOR
+                     || mode == InputMode.MODE_PARCEL_SHAPE_EDIT
                      || mode == InputMode.MODE_EDIT_PROP
                      || mode == InputMode.MODE_EDIT_STATION
                      || mode == InputMode.MODE_BUILDING_CONSTRUCTION

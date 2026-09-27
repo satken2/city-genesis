@@ -35,6 +35,7 @@
 ## 必ず守る規約
 
 - 新しいポリゴン編集・Ctrlメニュー・配置キー操作は上の共通基底/部品を使い、各マネージャに複製しない。
+- `PolygonAreaEditManager`の頂点ドラッグは`InputHandler`が地形との交点から求めた`worldPos`のXZを使い、地形高さを適用する。固定深度の`ScreenToWorldPoint`で逆投影すると斜め視点でカーソルからずれるため使わない。共通吸着は`UseDragSnapping`で制御し、`ParcelShapeEditManager`は常にfalse。区画形状編集は頂点移動・挿入とも吸着なし固定で、共有吸着フラグやグリッド表示には依存しない。
 - 曲線/直線・吸着フラグ・区画の作成方法の真実源はUnity側(ラジアルメニュー)。ホーム設置側・複線のオフセット/進行方向・駅舎の`HouseEnds`/`PassageMode`・矩形区画の寸法はUIパネルが真実源。標高・盛土だけは双方向同期(`edit_path:change_node`⇔`select_node`)。
 - 頂点の移動・標高変更は必ず`RoadPlanManager.MoveAnchorPosition`を通す(手動制御点の平行移動と未調整制御点の再計算を一箇所で行う)。2Dパネルの`shape_command`も同じ経路に委譲し、吸着は通さない。
 - 制御点はエディタ内では絶対標高、保存・IPCでは所属アンカー直下の地盤基準の相対Y(`ControlToRelativeList`⇔`RestoreControl`)。

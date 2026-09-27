@@ -42,7 +42,7 @@
 | `TrackPath.cs` | 線路・モノレール・LRT専用軌道431(N) |
 | `TrackIntersectionMeshGenerator.cs` | ポイント・平面交差のレールコネクタ。`RailsConnect` は車止めとも共有(N§4) |
 | `TrackAdjacency.cs` | 近接線路の結合(複線見え化)・島式ホーム(N§7.4・§8) |
-| `TrackDirectionArrows.cs` / `PlatformFoundationGenerator.cs` / `FarPlatformPath.cs` | 一方通行線路の矢印(敷設モードのみ。N§9)・高架ホーム外壁下部(N「高規格高架PF」)・駅と乗り場の遠景簡易立体(N§6。対象バリアントは `FarPlatformPath.Handles` に列挙。コンテナ貨物PF 463 は上屋の無い荷役床だけ) |
+| `TrackDirectionArrows.cs` / `PlatformFoundationGenerator.cs` / `FarPlatformPath.cs` | 一方通行線路の矢印(敷設モードのみ。N§9)・高架ホーム外壁下部(N「高規格高架PF」)・駅と乗り場の遠景簡易立体(N§6。対象バリアントは `FarPlatformPath.Handles` に列挙。貨物PF 463〜465 は上屋の無い荷役床に品目別の設備を載せ、コンテナは通常パーツの16mタイルと同じ区間に並べる) |
 | `LrtRoadParts.cs` / `LrtPlatformParts.cs` | LRT の軌道位置・踏面・ホーム寸法の唯一の正と、併用軌道・停留所ホーム(G「LRT付き道路」「LRT停留所のホーム」、N「LRT専用軌道431」) |
 | `StationHousePath.cs` | 駅舎パス(連絡橋+両終端の建屋)(Q) |
 

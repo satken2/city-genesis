@@ -480,9 +480,13 @@ world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地�
 | `weather:query` | Tauri → Unity | 現在の天気を問い合わせる |
 | `weather:set` | Tauri → Unity | `{id: string または null}`。有効なIDは選択して固定、nullは固定を解除。未知のIDは無視 |
 | `weather:state` | Unity → Cockpit | `{id, locked, rain, snow, presets:[{id, weight, rain, snow}]}`。rainは0=なし、1=霧雨、2=雨、3=大雨。snowは0=なし、1=小雪、2=雪、3=吹雪。weightは今の気候・季節での出現割合(%) |
-| `epoch:executing` | Tauri → Unity | `{executing: bool}`。エポック実行の開始(true)と終了(false)。Unityは開始で日を早送りで沈めて暗転し、終了後に都市を読み直してから日の出へ進める |
+| `epoch:prepare` | Tauri → Unity | `{id: string}`。エポック演出の開始。1.5秒の日没と0.5秒の画面フェードを開始し、結果画面を閉じるまで黒幕を保持する |
+| `epoch:darkened` | Unity → Tauri | `{id: string}`。黒幕描画後の通知。Rustは現在の演出IDのみUIへ中継し、UIは処理の完了状況に応じて結果またはTipsを表示する |
+| `epoch:executing` | Tauri → Unity | `{executing: bool}`。falseは結果画面のクローズ・結果なし・失敗による演出終了。都市を読み直し、0.5秒のフェードインと1.5秒の日の出へ進む。trueはIDなしの日没開始にも対応する |
 
-送信は`utils/ipc.ts`の`queryWeather` / `setWeather` / `sendEpochExecuting`から`send_window_action`へ、`weather:state`はRust `ipc.rs`でCockpitだけに配信する。Unityは天気の切り替わり・固定変更・出現割合の変化のたびに状態を送る。候補と出現割合はUnityが持ち、Tauriに抽選処理を複製しない。テンプレートモードOFF時はUIから固定解除を送る。`epoch:executing`はエポック実行確認ウィンドウが、ウィンドウ間イベント`epoch:executing`(タスクバーの無効化)と同じ時点で1回ずつ送る。成功時は`session:reload`の後に終了を送る。詳細は[天気と環境光](../geometries/U_天気と環境光.md)を参照。
+天気の送信は`utils/ipc.ts`の`queryWeather` / `setWeather`から`send_window_action`へ、`weather:state`はRust `ipc.rs`でCockpitだけに配信する。Unityは天気の切り替わり・固定変更・出現割合の変化のたびに状態を送る。候補と出現割合はUnityが持ち、Tauriに抽選処理を複製しない。テンプレートモードOFF時はUIから固定解除を送る。
+
+エポック演出は`utils/epochPresentation.ts`から`begin_epoch_presentation`を呼び、RustがIDを保持して開始を送る。HTTP実行は日没と並行し、`utils/epochFlow.ts`で暗転完了まで応答の表示を保留する。`set_epoch_tips_visible`は初期ロードと独立したTipsを開閉する。結果画面の`params.extra.epochPresentationId`を共通クローズ処理が読み、`finish_epoch_presentation`で演出を終了する。Tauri内の`epoch:executing`はHUDの無効化に使い、開始から結果画面のクローズまでtrueを維持する。詳細は[天気と環境光](../geometries/U_天気と環境光.md)を参照。
 
 
 `/paths/validate` の `alignments` は敷設する全線の設計後の線形指標で、費用カードと確定可否の表示に優先する。`/paths/earthwork-preview` の `path_profiles` は各線の `[x,絶対標高,z]` 配列で、Unityは形状確定後の3Dモデルに使用する。道路・地上線路は造成後、高架は設計縦断を表示する。操作中のHUD・2D線形はローカルの近似値である。

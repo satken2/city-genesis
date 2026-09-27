@@ -12,6 +12,11 @@ public class IpcClient : MonoBehaviour
     public event Action OnWeatherQuery;
     public event Action<string> OnWeatherSet;
     public event Action<bool> OnEpochExecuting;
+    public event Action<string> OnEpochPrepare;
+    public string DarkenedId;
+    public int DarkenedCount;
+    public void PrepareEpoch(string id) => OnEpochPrepare?.Invoke(id);
+    public void EmitEpochDarkened(string id) { DarkenedId = id; DarkenedCount++; }
     public int Publishes;
     public string WeatherId;
     public int Rain, Snow;
@@ -192,14 +197,18 @@ public sealed class WeatherQaHost : MonoBehaviour
         Check(peak > 0.5f && peak < 0.6f, "twilight dims without going dark");
         clock.BeginNight();
         Check(clock.Current == WeatherClock.Stage.Dusk, "epoch fast-forwards to dusk");
-        clock.Advance(WeatherClock.DuskSeconds * 0.5f);
-        Check(clock.Phase > 0.5f && clock.Darkness < 0.2f, "sun sweeps across the sky before darkening");
-        clock.Advance(WeatherClock.DuskSeconds);
-        Check(clock.Current == WeatherClock.Stage.Night && clock.Darkness == 1f, "processing waits in the dark");
+        clock.Advance(WeatherClock.SunsetSeconds);
+        Check(Mathf.Abs(clock.Elevation - WeatherClock.LowestElevation) < 0.001f && clock.FadeAlpha == 0f, "sunset completes after 1.5 seconds before the screen fade starts");
+        clock.Advance(WeatherClock.FadeSeconds * 0.5f);
+        Check(clock.FadeAlpha > 0f && clock.FadeAlpha < 1f, "screen fades only after sunset");
+        clock.Advance(WeatherClock.FadeSeconds * 0.5f);
+        Check(clock.Current == WeatherClock.Stage.Night && clock.Darkness == 1f && clock.FadeAlpha == 1f, "full black after exactly two seconds");
         Check(!clock.Advance(30f) && clock.Current == WeatherClock.Stage.Night, "dark until the epoch completes");
         clock.RequestDawn();
         Check(clock.Advance(0.01f) && clock.Current == WeatherClock.Stage.Dawn, "dawn starts once and reports it");
-        clock.Advance(WeatherClock.DawnSeconds);
+        clock.Advance(WeatherClock.FadeSeconds);
+        Check(clock.FadeAlpha == 0f && clock.Elevation == WeatherClock.LowestElevation, "return fades in for half a second before sunrise");
+        clock.Advance(WeatherClock.SunsetSeconds);
         Check(clock.Current == WeatherClock.Stage.Day && Mathf.Approximately(clock.Phase, WeatherClock.MorningPhase) && clock.Darkness == 0f, "dawn ends in the morning");
         clock.BeginNight(); clock.RequestDawn();
         clock.Advance(WeatherClock.DuskSeconds + 0.1f);
@@ -228,10 +237,17 @@ public sealed class WeatherQaHost : MonoBehaviour
         yield return Frames(4);
         Check(ApiClient.Reads > reads && !controller.Clock.IsDarkening, "editing reload reads the city without passing a night");
 
-        ipc.Executing(true);
-        yield return Until(() => controller.Clock.Current == WeatherClock.Stage.Night, 5f, "epoch start darkens");
+        ipc.PrepareEpoch("result-hold");
         ApiClient.Epoch = 6; ApiClient.Date = Day(1, 10);
-        ipc.Reload(); ipc.Executing(false);
+        ipc.Reload();
+        yield return Until(() => controller.Clock.Current == WeatherClock.Stage.Night, 5f, "fast epoch still finishes sunset");
+        yield return Frames(10);
+        Check(controller.Clock.Current == WeatherClock.Stage.Night && controller.Clock.FadeAlpha == 1f, "backend completion does not reveal the city before closing the result");
+        Check(ipc.DarkenedId == "result-hold" && ipc.DarkenedCount == 1, "black screen acknowledgement is sent once after applying the overlay");
+        ipc.PrepareEpoch("result-hold");
+        yield return Frames(4);
+        Check(ipc.DarkenedCount == 1 && controller.Clock.Current == WeatherClock.Stage.Night, "duplicate prepare does not replay sunset");
+        ipc.Executing(false);
         yield return Until(() => controller.Clock.Current == WeatherClock.Stage.Day, 10f, "epoch end brings the morning");
         var desertWinter = WeatherClimate.Weights(Constants.CLIMATE_DESERT, WeatherClimate.Winter);
         Check(controller.Season == WeatherClimate.Winter && desertWinter[controller.CurrentIndex] > 0, "new day uses the new season");
@@ -469,14 +485,31 @@ public sealed class WeatherQaHost : MonoBehaviour
         yield return Frames(4);
         Check(sun.intensity == 0f, "epoch night is dark");
         Capture(camera, "t_night");
+        // オフスクリーン撮影にも黒幕を含め、照明の暗さではなく全画素が黒いことを検査する。
+        var fadeCanvas = controller.GetComponentInChildren<Canvas>();
+        Check(fadeCanvas.renderMode == RenderMode.ScreenSpaceOverlay && fadeCanvas.sortingOrder == short.MaxValue, "black overlay covers the entire game view");
+        fadeCanvas.renderMode = RenderMode.ScreenSpaceCamera;
+        fadeCanvas.worldCamera = camera;
+        fadeCanvas.planeDistance = 1f;
+        Canvas.ForceUpdateCanvases();
+        yield return Frames(4);
+        Capture(camera, "t_blackout", true);
+        fadeCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
         ipc.Executing(false);
         yield return Until(() => controller.Clock.Current == WeatherClock.Stage.Day, 10f, "morning after the capture");
     }
-    private void Capture(Camera camera, string name)
+    private void Capture(Camera camera, string name, bool requireBlack = false)
     {
         RenderTexture.active = camera.targetTexture;
         var pixels = new Texture2D(1280,720,TextureFormat.RGB24,false);
         pixels.ReadPixels(new Rect(0,0,1280,720),0,0); pixels.Apply();
+        if (requireBlack)
+        {
+            bool black = true;
+            foreach (var pixel in pixels.GetPixels32())
+                if (pixel.r > 1 || pixel.g > 1 || pixel.b > 1) { black = false; break; }
+            Check(black, "blackout covers every pixel, including sky and unlit surfaces");
+        }
         File.WriteAllBytes(root + $"/Captures/{name}.png", pixels.EncodeToPNG());
         Destroy(pixels); RenderTexture.active = null;
     }

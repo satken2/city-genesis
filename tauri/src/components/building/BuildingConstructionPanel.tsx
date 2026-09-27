@@ -382,7 +382,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
    * TYPE_BUILDING(共有建物)だけでなく、building=trueのTYPE_STANDARD(一般施設)、
    * TYPE_EDUCATION(教育機関)、TYPE_TRADE(輸出入拠点)など、
    * 全ての建設可能エージェントを含む。建物種類(bd_type)でグループ化して表示する。
-   * template_only のバリアント(汎用建物・観光名所)はシナリオ制作専用なので、
+   * template_only のバリアント(国境検問所・観光名所)はシナリオ制作専用なので、
    * テンプレートモードでないときは候補から外す。
    */
   const buildingVariants = useMemo(() => {
@@ -1127,7 +1127,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
    * 既存建物コピー建設のコピー元選択モードで建物が選ばれたら、その variant / floors /
    * visual_variant をパネルへシードし、コピーモードに入って区画選択フローへ遷移する。
    * バリアント未選択の状態(=コピーボタンが押せる状態)から入るため、selectedVariant で
-   * ガードせず常時購読する。ただしテンプレート専用バリアント(汎用建物・観光名所)は
+   * ガードせず常時購読する。ただしテンプレート専用バリアント(国境検問所・観光名所)は
    * 通常プレイの建設候補ではないので、コピー元に選ばれても取り込まない。
    */
   useEffect(() => {

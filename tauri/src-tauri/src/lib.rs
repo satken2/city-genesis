@@ -115,6 +115,48 @@ fn get_connection_status(state: tauri::State<'_, SharedState>) -> Value {
     window::get_connection_status(state.inner())
 }
 
+#[tauri::command]
+fn begin_epoch_presentation(app: tauri::AppHandle, state: tauri::State<'_, SharedState>, id: String) -> Result<bool, String> {
+    let connected = {
+        let mut guard = state.lock();
+        if guard.is_loading || guard.epoch_presentation_id.is_some() {
+            return Err("エポック演出または初期ロードが進行中です".into());
+        }
+        guard.epoch_presentation_id = Some(id.clone());
+        guard.graphic_connected
+    };
+    if connected {
+        if let Err(error) = ipc::send_ui_action(state.inner(), "".into(), None, "epoch:prepare".into(), serde_json::json!({"id": id})) {
+            window::finish_epoch_presentation(&app, state.inner(), &id);
+            return Err(error);
+        }
+    }
+    let _ = app.emit("epoch:executing", serde_json::json!({"executing": true}));
+    Ok(connected)
+}
+
+#[tauri::command]
+async fn set_epoch_tips_visible(app: tauri::AppHandle, state: tauri::State<'_, SharedState>, id: String, visible: bool) -> Result<(), String> {
+    let monitor = {
+        let guard = state.lock();
+        if guard.epoch_presentation_id.as_deref() != Some(&id) { return Ok(()); }
+        guard.current_monitor_index
+    };
+    if visible { window::open_tips_window_with_mode(&app, monitor, true)?; }
+    else { window::close_tips_window(&app); }
+    Ok(())
+}
+
+#[tauri::command]
+fn finish_epoch_presentation(app: tauri::AppHandle, state: tauri::State<'_, SharedState>, id: String) {
+    window::finish_epoch_presentation(&app, state.inner(), &id);
+}
+
+#[tauri::command]
+fn is_epoch_presentation_current(state: tauri::State<'_, SharedState>, id: String) -> bool {
+    state.lock().epoch_presentation_id.as_deref() == Some(&id)
+}
+
 /// アイコンパネルの高さをReact側の実測値に合わせる。
 /// アイコン数がテンプレートモードの有無で変わるため、中身の高さが変わるたびに
 /// React(`IconPanel`)から通知させ、ウィンドウに透明な余白ができないようにする。
@@ -1502,6 +1544,7 @@ fn resize_notification_window(
 
 /// ロード要求の世代を進め、前セッションの完了通知を無視する。
 fn begin_initial_loading(app: &tauri::AppHandle, state: &SharedState, needs_setup: bool) -> Result<(), String> {
+    window::cancel_epoch_presentation(app, state);
     {
         let mut guard = state.lock();
         guard.loading_id += 1;
@@ -1906,6 +1949,7 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
                 } else {
                     // null: ゲーム終了。ロード中に消失した場合は前回値もnullのことがある。
                     log::info!("[session-poll] current_save_id がクリアされました。ゲーム終了を検知");
+                    window::cancel_epoch_presentation(&app, &state);
 
                     // 開いているすべてのポップアップウィンドウ（モーダル・パネル）を閉じる。
                     // トップメニューに戻る前に残っている UI を一掃し、編集モードの後始末も行う。
@@ -2216,7 +2260,7 @@ pub fn run() {
                             }
                             "parameter-setup" if event_state.lock().awaiting_parameter_setup => { api.prevent_close(); }
                             "notification" | "hintbar" | "tutorial" | "parameter-setup" => {}
-                            "tips" if event_state.lock().is_loading => { api.prevent_close(); }
+                            "tips" if { let guard = event_state.lock(); guard.is_loading || guard.epoch_presentation_id.is_some() } => { api.prevent_close(); }
                             "tips" => {}
                             _ => {
                                 let is_managed_popup = {
@@ -2271,6 +2315,10 @@ pub fn run() {
             get_window_context,
             close_current_window,
             send_window_action,
+            begin_epoch_presentation,
+            set_epoch_tips_visible,
+            finish_epoch_presentation,
+            is_epoch_presentation_current,
             get_connection_status,
             resize_icon_panel,
             resize_system_tray,

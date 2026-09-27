@@ -19,7 +19,8 @@
  * 占有量の実体は面積(m²)で階の概念は無いが、制作者には「階数」で指定させ、
  * 占有面積 = 階数 × 建物の1フロア面積(base_area) として送る。上限は
  * その種別(space_type)の空き面積 ÷ 1フロア面積。非共有建物は1テナントが全床を占有する
- * 契約なので階数は固定で、既に入居者がいれば選べない。
+ * 契約なので階数は固定で、既に入居者がいれば選べない。TYPE_DEFAULT の建物(国境検問所)は
+ * 市庁舎と同じ台帳入居で、床種別と空きを扱わず、上限は建物の階数になる。
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -33,7 +34,7 @@ import {
 } from "../../utils/ipc";
 import { ApiError, buildApiUrl, fetchApi } from "../../utils/api";
 import { useMasterData } from "../../contexts/MasterDataContext";
-import { STATUS_ACTIVE, STATUS_PAUSED, TYPE_BUILDING, TYPE_STANDARD, TYPE_TRADE } from "../../constants";
+import { STATUS_ACTIVE, STATUS_PAUSED, TYPE_BUILDING, TYPE_DEFAULT, TYPE_STANDARD, TYPE_TRADE } from "../../constants";
 import type { AgentData } from "../../types";
 import "./AgentCreationPanel.css";
 
@@ -58,7 +59,7 @@ type TenantAgentResult = {
   space_type: number;
   realestate_amount: number;
   floors: number;
-  vacancy_after: number;
+  vacancy_after: number | null;
 };
 
 /** Unityの建物選択モードからの通知(source_agent_id 以外は使わない) */
@@ -172,13 +173,20 @@ export function AgentCreationPanel({ apiBaseUrl }: { apiBaseUrl: string }) {
   const buildingEntry = building ? masterData?.agents[building.variant] : undefined;
   const availability = useMemo(() => {
     if (!building || !variantEntry) return null;
-    if (!building.is_bd || building.type !== TYPE_BUILDING) {
+    // TYPE_DEFAULT の建物(国境検問所)は市庁舎と同じ台帳入居で、床種別と空きを扱わない(バックエンドと同じ判定)。
+    const ledger = building.is_bd && building.type === TYPE_DEFAULT;
+    if (!building.is_bd || (building.type !== TYPE_BUILDING && !ledger)) {
       return { ok: false as const, reasonKey: "templateTools.agentCreation.notSharedBuilding" };
     }
     if (building.status !== STATUS_ACTIVE && building.status !== STATUS_PAUSED) {
       return { ok: false as const, reasonKey: "templateTools.agentCreation.statusUnavailable" };
     }
     const baseArea = building.base_area ?? 0;
+    if (ledger) {
+      // 階数は建物の階数まで。空きを持たないので同じ建物へ何件でも入れられる。
+      const maxFloors = Math.max(1, building.floors ?? 1);
+      return { ok: true as const, shared: true, ledger: true, baseArea, vacancy: 0, maxFloors, minFloors: 1 };
+    }
     const spaceKey = String(variantEntry.space_type);
     const capacity = building.capacity?.[spaceKey] ?? 0;
     const occupied = building.occupied?.[spaceKey] ?? 0;
@@ -192,14 +200,14 @@ export function AgentCreationPanel({ apiBaseUrl }: { apiBaseUrl: string }) {
         return { ok: false as const, reasonKey: "templateTools.agentCreation.alreadyOccupied" };
       }
       const fullFloors = Math.max(1, Math.round(capacity / baseArea));
-      return { ok: true as const, shared: false, baseArea, vacancy: capacity, maxFloors: fullFloors, minFloors: fullFloors };
+      return { ok: true as const, shared: false, ledger: false, baseArea, vacancy: capacity, maxFloors: fullFloors, minFloors: fullFloors };
     }
     const vacancy = Math.max(capacity - occupied, 0);
     const maxFloors = Math.floor(vacancy / baseArea + FLOOR_EPSILON);
     if (maxFloors < 1) {
       return { ok: false as const, reasonKey: "templateTools.agentCreation.noSpaceType" };
     }
-    return { ok: true as const, shared: true, baseArea, vacancy, maxFloors, minFloors: 1 };
+    return { ok: true as const, shared: true, ledger: false, baseArea, vacancy, maxFloors, minFloors: 1 };
   }, [building, variantEntry, buildingEntry]);
 
   // 建物やバリアントが変わって上限が動いたら、階数を範囲内へ丸める。
@@ -332,12 +340,14 @@ export function AgentCreationPanel({ apiBaseUrl }: { apiBaseUrl: string }) {
           <div className="agent-creation__label">{t("templateTools.agentCreation.floors")}</div>
           {availability.shared ? (
             <>
-              <p className="agent-creation__note">
-                {t("templateTools.agentCreation.vacancy", {
-                  floors: availability.maxFloors,
-                  area: formatArea(availability.vacancy),
-                })}
-              </p>
+              {!availability.ledger && (
+                <p className="agent-creation__note">
+                  {t("templateTools.agentCreation.vacancy", {
+                    floors: availability.maxFloors,
+                    area: formatArea(availability.vacancy),
+                  })}
+                </p>
+              )}
               <div className="agent-creation__row">
                 <input
                   type="range"

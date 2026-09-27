@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.UI;
 
 /// <summary>
 /// 天気・時刻・気候から、Unity内の空・照明・霧・降水を管理する。経済・マスター・セーブには書き込まない。
@@ -29,6 +30,10 @@ public sealed class WeatherController : MonoBehaviour
     private GameStateManager state;
     private Coroutine query;
     private bool pending, suspended, panel, awaitingDawn, redrawAtDawn;
+    private bool holdingEpoch, darkenedSent;
+    private string presentationId;
+    private int blackFrame = -1;
+    private CanvasGroup fadeOverlay;
     private float retryAt, dwellLeft, probeAt, cookieAt;
     private Material sky;
     private Light sun;
@@ -126,6 +131,7 @@ public sealed class WeatherController : MonoBehaviour
         precipitation = gameObject.AddComponent<WeatherPrecipitation>();
         cloudSeed = NewSeed();
         StartWeather(WeatherChain.Sample(random, weights));
+        CreateFadeOverlay();
     }
 
     private void Update()
@@ -138,6 +144,14 @@ public sealed class WeatherController : MonoBehaviour
         if (Clock.Advance(seconds)) OnDawn();
         AdvanceWeather(seconds);
         ApplyEnvironment();
+        fadeOverlay.alpha = Clock.FadeAlpha;
+        // 黒幕を反映したフレームを挟んで通知し、UIが先に結果を表示しないようにする。
+        if (presentationId != null && !darkenedSent && blackFrame >= 0 && Time.frameCount > blackFrame)
+        {
+            darkenedSent = true;
+            ipc?.EmitEpochDarkened(presentationId);
+        }
+        if (Clock.FadeAlpha >= 1f && blackFrame < 0) blackFrame = Time.frameCount;
         RefreshSky(false);
         HandleKeys();
     }
@@ -156,6 +170,7 @@ public sealed class WeatherController : MonoBehaviour
                 ipc.OnGameEnd += Suspend;
                 ipc.OnGameStart += BeginSession;
                 ipc.OnEpochExecuting += SetEpochExecuting;
+                ipc.OnEpochPrepare += PrepareEpoch;
                 ipc.OnWeatherQuery += PublishWeather;
                 ipc.OnWeatherSet += SetWeatherFromUi;
                 PublishWeather();
@@ -185,6 +200,8 @@ public sealed class WeatherController : MonoBehaviour
         epochs.Reset();
         suspended = false;
         awaitingDawn = redrawAtDawn = false;
+        holdingEpoch = false;
+        presentationId = null;
         RequestCity();
     }
 
@@ -195,6 +212,8 @@ public sealed class WeatherController : MonoBehaviour
         suspended = true;
         pending = false;
         awaitingDawn = redrawAtDawn = false;
+        holdingEpoch = false;
+        presentationId = null;
         Clock.StartMorning();
     }
 
@@ -207,15 +226,26 @@ public sealed class WeatherController : MonoBehaviour
     private void RequestCity() { pending = true; retryAt = 0; }
 
     /// <summary>
-    /// エポック実行の開始と終了(UIの epoch:executing)。開始で日を早送りで沈めて暗転し、
-    /// 終了後は処理後の都市を読んでから日の出へ進める(読み終える前に明けると、明るくなってから天気が変わって見える)。
+    /// エポック演出の開始と終了。結果画面を閉じた後は都市を読んでから日の出へ進める。
+    /// 読み終える前に明けると、明るくなってから天気が変わって見える。
     /// </summary>
     private void SetEpochExecuting(bool executing)
     {
         if (suspended) return;
+        holdingEpoch = executing;
         if (executing) { awaitingDawn = false; Clock.BeginNight(); return; }
+        presentationId = null;
         awaitingDawn = true;
         RequestCity();
+    }
+
+    private void PrepareEpoch(string id)
+    {
+        if (suspended || string.IsNullOrEmpty(id) || presentationId == id) return;
+        presentationId = id;
+        darkenedSent = false;
+        blackFrame = -1;
+        SetEpochExecuting(true);
     }
 
     private IEnumerator ReadCity()
@@ -252,14 +282,17 @@ public sealed class WeatherController : MonoBehaviour
         {
             // セッション開始はロード画面の裏なので、その都市の気候・季節で天気を選び直して朝から始める。
             if (!Locked) { cloudSeed = NewSeed(); StartWeather(WeatherChain.Sample(random, weights)); }
-            Clock.StartMorning();
+            if (!holdingEpoch) Clock.StartMorning();
         }
         else if (advanced > 0)
         {
             // エポックが進んだ = 日をまたいだ。暗転前なら早送りで暗転させ、明けたところで天気を引き直す。
             redrawAtDawn = true;
-            Clock.BeginNight();
-            Clock.RequestDawn();
+            if (!holdingEpoch)
+            {
+                Clock.BeginNight();
+                Clock.RequestDawn();
+            }
         }
         if (changed) PublishWeather();
     }
@@ -448,7 +481,7 @@ public sealed class WeatherController : MonoBehaviour
 
     private void OnGUI()
     {
-        if (!panel || sky == null) return;
+        if (!panel || sky == null || Clock.FadeAlpha > 0f) return;
         if (panelStyle == null) panelStyle = new GUIStyle(GUI.skin.box)
             { font = UiFontProvider.GetFont(16), fontSize = 16, alignment = TextAnchor.UpperLeft, padding = new RectOffset(16,16,12,12) };
         float hours = Clock.Hours;
@@ -460,6 +493,26 @@ public sealed class WeatherController : MonoBehaviour
             "F6/F7 天気   F10 固定   F11 再抽選\nF3/F4 時刻を1時間戻す/進める   F5 時刻の停止\nF9 パネルを閉じる（撮影前に非表示）", panelStyle);
     }
 
+    private void CreateFadeOverlay()
+    {
+        // ScreenSpaceOverlayはライティングや都市側のUnlitマテリアルに依存せず、画面全体を黒く覆う。
+        var root = new GameObject("Epoch fade", typeof(RectTransform), typeof(Canvas), typeof(CanvasGroup));
+        root.transform.SetParent(transform, false);
+        var canvas = root.GetComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = short.MaxValue;
+        fadeOverlay = root.GetComponent<CanvasGroup>();
+        fadeOverlay.alpha = 0f;
+        fadeOverlay.blocksRaycasts = false;
+        var image = new GameObject("Black", typeof(RectTransform), typeof(Image)).GetComponent<Image>();
+        image.transform.SetParent(root.transform, false);
+        image.color = Color.black;
+        image.raycastTarget = false;
+        image.rectTransform.anchorMin = Vector2.zero;
+        image.rectTransform.anchorMax = Vector2.one;
+        image.rectTransform.offsetMin = image.rectTransform.offsetMax = Vector2.zero;
+    }
+
     private void UnbindIpc()
     {
         if (ipc == null) return;
@@ -469,6 +522,7 @@ public sealed class WeatherController : MonoBehaviour
         ipc.OnGameEnd -= Suspend;
         ipc.OnGameStart -= BeginSession;
         ipc.OnEpochExecuting -= SetEpochExecuting;
+        ipc.OnEpochPrepare -= PrepareEpoch;
         ipc.OnWeatherQuery -= PublishWeather;
         ipc.OnWeatherSet -= SetWeatherFromUi;
     }
@@ -485,6 +539,7 @@ public sealed class WeatherController : MonoBehaviour
 
     private void OnDisable()
     {
+        if (fadeOverlay != null) fadeOverlay.alpha = 0f;
         UnbindIpc(); ipc = null;
         if (state != null) state.OnStateChanged -= StateChanged;
         state = null;
@@ -514,6 +569,7 @@ public sealed class WeatherController : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (fadeOverlay != null) Destroy(fadeOverlay.gameObject);
         if (Instance == this) Instance = null;
         if (sky != null) Destroy(sky);
         if (cookie != null) Destroy(cookie);

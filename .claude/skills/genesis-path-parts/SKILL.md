@@ -95,6 +95,7 @@ p4   8個  body track platform pole beam pillar wall portal    (電化+駅)
 p411 5個  body track wire pole beam                (電化地上線路)
 p413 6個  body track wall wire pole beam           (電化鉄橋。poleはトラス上弦取付)
 p461 8個  body track platform platform_wall platform_panel wire pole beam (電化駅+上屋)
+p463〜465 18〜19個 461と同じ線路・架線・高架の14個(メッシュ共有) + platform platform_wall platform_panel + 接写(463=platform_wall_close、464・465=platform_close platform_wall_close) (貨物PF)
 ```
 
 電化バリアント(411系/461系)のパーツは `pipeline/jobs/build_electric_rail.py` の
@@ -263,3 +264,13 @@ Unityが停留所の下地パスへ相対式ホーム（各軌道の外側）を
 ## 送電線1101・1102
 
 鉄塔pillar_capは通常と_closeを著作し、PowerLinePathがPathDrawContext.ResolvePrefab経由で選択する（Instantiate配置の例外）。大型は38m・3段二導体、小型は17m・3相。Farは同じ支持点からUnityが簡略鉄塔と電線を生成するため、_farは作らない。bodyは120m径間の制作見本で、実行時のたるみは支持点間に生成する。道路幅へ横縮小しない。共有ノードはPowerLineSupportが1基だけ表示する。著作・寸法・再生成は非公開制作ツールgenesis-galleryのpipeline/jobs/power_lines.mdとbuild_power_lines.py、実FBXのLOD・共有所有権の検証はcity-genesis/unity/Tests/PowerLines/run.ps1。
+
+## 貨物PF（463・464・465）
+
+旅客のホームと同じ3パーツ構成（淵・動的デッキ・外縁）で、platform_widthは463=14・464=12・465=10m、16mタイル・長手1m分割。規約の正はN文書「貨物PF（463・464・465）」。
+
+- 電化線路の門型梁はホームをまたいで下弦がスプライン+6.27mを通るので、デッキ上の造形は6.1m以下に収める（コンテナは2段に積めない）。
+- 島式結合で外縁（platform_wall）が省略されても残したい線路際の荷役設備（コンベヤ・シュート・積込架台）はplatformに、デッキ上の貨物はplatform_wallに置く。
+- 道床・軌道・架線・高架用部品は461とメッシュ共有なので、461を作り直したら貨物PFのジョブも再実行する。遠景は`FarPlatformPath`の品目別断面で、通常の外形を変えたら合わせる。
+- 接写は同じジョブが`freight_platforms.CLOSE_PARTS`の`{part}_close`を著作し、通常とbbox（0.05m以内）・材質の組を揃える（ジョブがassert）。463は`platform_wall_close`だけで、`platform`は通常を使う。`build_platform_close.py`の対象ではない。
+- 著作・寸法・再生成は非公開制作ツールgenesis-galleryの`pipeline/jobs/freight_facilities.md`と`build_freight_platforms.py`、実FBX・ホーム生成（通常・接写の解決）・架線とのクリアランスの検証は`pipeline/import_freight.ps1`。

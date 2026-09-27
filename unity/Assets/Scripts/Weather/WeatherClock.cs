@@ -3,14 +3,16 @@ using UnityEngine;
 /// <summary>
 /// 描画用の時刻。日の出から日没まで約10分で進み、エポックとは無関係に流れる。夜は描かず、日没のあとは
 /// 薄明を短く挟んで次の日の出へつなぐ(太陽の方位が西から東へ飛ぶのを、太陽が地平線下にある暗い間に済ませる)。
-/// エポック実行中は早送りで日を沈めて暗転し、処理が終わると日の出から朝へ進める。
+/// エポック実行中は日を沈めて暗転し、結果画面を閉じると日の出から朝へ進める。
 /// </summary>
 public sealed class WeatherClock
 {
     public const float DaySeconds = 600f;
     public const float TwilightSeconds = 20f;
-    public const float DuskSeconds = 2.5f;
-    public const float DawnSeconds = 4f;
+    public const float SunsetSeconds = 1.5f;
+    public const float FadeSeconds = 0.5f;
+    public const float DuskSeconds = SunsetSeconds + FadeSeconds;
+    public const float DawnSeconds = DuskSeconds;
     public const float MorningPhase = 0.12f;      // 暗転明け・セッション開始の位置(日の出から約1.5時間)
     public const float MaxElevation = 55f;        // 正午の太陽高度(度)
     public const float BelowHorizon = 0.02f;      // 日没後・日の出前に地平線下へ沈む量(昼の長さに対する割合)
@@ -24,13 +26,16 @@ public sealed class WeatherClock
     /// <summary>太陽の通り道の位置。0=日の出、0.5=正午、1=日没。負と1超は地平線下。</summary>
     public float Phase { get; private set; } = MorningPhase;
 
-    /// <summary>0=昼の明るさ、1=真っ暗。</summary>
+    /// <summary>0=昼の環境光、1=夜の環境光。完全な黒画面はFadeAlphaで作る。</summary>
     public float Darkness { get; private set; }
+
+    /// <summary>環境光と独立した全画面の黒幕。日没完了後にだけフェードする。</summary>
+    public float FadeAlpha { get; private set; }
 
     /// <summary>昼の時刻の進行を止める(撮影用)。暗転と日の出の演出は止めない。</summary>
     public bool Paused;
 
-    private float progress, startPhase, startDarkness;
+    private float progress, startPhase, startDarkness, startFadeAlpha;
     private bool dawnRequested;
 
     public float Elevation => ElevationAt(Phase);
@@ -68,8 +73,10 @@ public sealed class WeatherClock
             case Stage.Dusk:
                 progress += seconds / DuskSeconds;
                 float t = Mathf.Clamp01(progress);
-                Phase = Mathf.Lerp(startPhase, 1f + BelowHorizon, Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t / 0.7f)));
-                Darkness = Mathf.Lerp(startDarkness, 1f, Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.55f, 1f, t)));
+                float sunset = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t * DuskSeconds / SunsetSeconds));
+                Phase = Mathf.Lerp(startPhase, 1f + BelowHorizon, sunset);
+                Darkness = Mathf.Lerp(startDarkness, 1f, sunset);
+                FadeAlpha = Mathf.Lerp(startFadeAlpha, 1f, Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((t * DuskSeconds - SunsetSeconds) / FadeSeconds)));
                 if (progress >= 1f) { Current = Stage.Night; Phase = 1f + BelowHorizon; Darkness = 1f; }
                 break;
             case Stage.Night:
@@ -82,8 +89,10 @@ public sealed class WeatherClock
             case Stage.Dawn:
                 progress += seconds / DawnSeconds;
                 float u = Mathf.Clamp01(progress);
-                Phase = Mathf.Lerp(-BelowHorizon, MorningPhase, Mathf.SmoothStep(0f, 1f, u));
-                Darkness = 1f - Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(u / 0.45f));
+                FadeAlpha = 1f - Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(u * DawnSeconds / FadeSeconds));
+                float sunrise = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((u * DawnSeconds - FadeSeconds) / SunsetSeconds));
+                Phase = Mathf.Lerp(-BelowHorizon, MorningPhase, sunrise);
+                Darkness = 1f - sunrise;
                 if (progress >= 1f) { Current = Stage.Day; Phase = MorningPhase; Darkness = 0f; }
                 break;
         }
@@ -96,12 +105,13 @@ public sealed class WeatherClock
         if (IsDarkening) return;
         startPhase = Phase;
         startDarkness = Darkness;
+        startFadeAlpha = FadeAlpha;
         progress = 0f;
         dawnRequested = false;
         Current = Stage.Dusk;
     }
 
-    /// <summary>エポック完了。暗転しきったところで日の出を始める。暗転していなければ何もしない。</summary>
+    /// <summary>結果画面のクローズまたは失敗による復帰。暗転していなければ何もしない。</summary>
     public void RequestDawn()
     {
         if (IsDarkening) dawnRequested = true;
@@ -113,6 +123,7 @@ public sealed class WeatherClock
         Current = Stage.Day;
         Phase = MorningPhase;
         Darkness = 0f;
+        FadeAlpha = 0f;
         dawnRequested = false;
     }
 

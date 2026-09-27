@@ -337,9 +337,10 @@ public partial class BuildingPlanManager : MonoBehaviour
             return;
         }
 
-        if (agentType == 0 || agentVariant == 0)
+        // 未選択はバリアントだけで判定する。国境検問所は type=TYPE_DEFAULT(0) なので type では判定できない。
+        if (agentVariant == 0)
         {
-            Debug.LogWarning("建物タイプまたはバリアントが設定されていません");
+            Debug.LogWarning("バリアントが設定されていません");
             return;
         }
 
@@ -416,9 +417,10 @@ public partial class BuildingPlanManager : MonoBehaviour
             return;
         }
 
-        if (agentType == 0 || agentVariant == 0)
+        // 国境検問所は type=TYPE_DEFAULT(0) なので、未選択はバリアントだけで判定する。
+        if (agentVariant == 0)
         {
-            Debug.LogWarning("建物タイプまたはバリアントが設定されていません");
+            Debug.LogWarning("バリアントが設定されていません");
             return;
         }
 

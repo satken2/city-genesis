@@ -22,6 +22,9 @@ public class ParcelShapeEditManager : PolygonAreaEditManager
 
     protected override string OverlayCanvasName => "ParcelShapeEditOverlayCanvas";
 
+    // 区画境界は道路際でも自由に調整できるよう、共有の吸着設定にかかわらず吸着しない。
+    protected override bool UseDragSnapping => false;
+
     // 区画境界は道路と同系の青で描く(資源エリアの暖色と区別する)
     protected override Color EdgeColor => new Color(0.3f, 0.6f, 1f);
     protected override Color VertexColor => new Color(0.54f, 0.71f, 0.98f);

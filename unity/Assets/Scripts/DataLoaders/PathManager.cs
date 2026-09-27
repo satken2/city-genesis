@@ -5178,7 +5178,8 @@ public class PathManager : BaseApiDataManager
         }
 
         MeshFilter mf = meshGO.GetComponent<MeshFilter>();
-        var owner = meshGO.GetComponent<IntersectionMeshOwner>() ?? meshGO.AddComponent<IntersectionMeshOwner>();
+        var owner = meshGO.GetComponent<IntersectionMeshOwner>();
+        if (owner == null) owner = meshGO.AddComponent<IntersectionMeshOwner>();
         if (owner.OwnedMesh != meshResult.Mesh) MeshBakeService.Release(owner.OwnedMesh);
         owner.OwnedMesh = meshResult.Mesh;
         mf.sharedMesh = meshResult.Mesh;

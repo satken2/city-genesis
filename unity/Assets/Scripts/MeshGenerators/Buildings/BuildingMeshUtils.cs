@@ -1,6 +1,7 @@
 // Assets/Scripts/MeshGeneration/Generators/CarRoadMeshGenerator.cs
 using UnityEngine;
 using System.Collections.Generic;
+using Unity.Collections;
 using GeneratedModels;
 
 public static class BuildingMeshUtils
@@ -56,6 +57,8 @@ public static class BuildingMeshUtils
     /// (位置・回転・スケール)も頂点に反映される。サブメッシュは元レンダラーのサブメッシュ単位で
     /// 維持され、materials には各サブメッシュに対応する共有マテリアルが同じ順序で返る。
     /// SkinnedMeshRenderer はバインドポーズのままベイクして取り込む(ボーン変形は行わない)。
+    /// 頂点はサブメッシュごとの連続区画に並び、各区画はそのサブメッシュが参照する頂点だけを持つ
+    /// (<see cref="CompactSubMeshVertices"/>)。このため結果をサブメッシュ単位で再び結合しても頂点は複製されない。
     /// メッシュが1つも見つからない場合は null。返されたメッシュは呼び出し側が破棄すること。
     /// </summary>
     public static Mesh CombineModuleMeshes(GameObject prefab, out Material[] materials)
@@ -68,7 +71,7 @@ public static class BuildingMeshUtils
 
         List<CombineInstance> instances = new List<CombineInstance>();
         List<Material> materialList = new List<Material>();
-        List<Mesh> bakedMeshes = new List<Mesh>();
+        List<Mesh> temporaryMeshes = new List<Mesh>();
 
         // プレハブルート基準のローカル座標へ変換する行列。
         // プレハブアセットのルートは通常 identity だが、ルート自体にTransformが付いている場合にも対応する。
@@ -84,7 +87,7 @@ public static class BuildingMeshUtils
 
             Matrix4x4 localToRoot = rootInverse * mf.transform.localToWorldMatrix;
             Material[] rendererMaterials = mf.GetComponent<Renderer>()?.sharedMaterials;
-            AddSubMeshInstances(mf.sharedMesh, localToRoot, rendererMaterials, instances, materialList);
+            AddSubMeshInstances(mf.sharedMesh, localToRoot, rendererMaterials, instances, materialList, temporaryMeshes);
         }
 
         // SkinnedMeshRenderer はプレハブアセット上では直接ベイクできないため、一時インスタンスを作ってベイクする。
@@ -105,10 +108,10 @@ public static class BuildingMeshUtils
 
                     Mesh baked = new Mesh();
                     smr.BakeMesh(baked);
-                    bakedMeshes.Add(baked);
+                    temporaryMeshes.Add(baked);
 
                     Matrix4x4 localToRoot = instanceRootInverse * smr.transform.localToWorldMatrix;
-                    AddSubMeshInstances(baked, localToRoot, smr.sharedMaterials, instances, materialList);
+                    AddSubMeshInstances(baked, localToRoot, smr.sharedMaterials, instances, materialList, temporaryMeshes);
                 }
             }
             finally
@@ -119,9 +122,9 @@ public static class BuildingMeshUtils
 
         if (instances.Count == 0)
         {
-            foreach (Mesh baked in bakedMeshes)
+            foreach (Mesh temporary in temporaryMeshes)
             {
-                Object.Destroy(baked);
+                Object.Destroy(temporary);
             }
             return null;
         }
@@ -131,9 +134,9 @@ public static class BuildingMeshUtils
         combined.CombineMeshes(instances.ToArray(), false, true);
         combined.RecalculateBounds();
 
-        foreach (Mesh baked in bakedMeshes)
+        foreach (Mesh temporary in temporaryMeshes)
         {
-            Object.Destroy(baked);
+            Object.Destroy(temporary);
         }
 
         materials = materialList.ToArray();
@@ -143,15 +146,22 @@ public static class BuildingMeshUtils
     /// <summary>
     /// CombineModuleMeshes の内部処理。メッシュの全サブメッシュを CombineInstance として登録し、
     /// 対応するマテリアル(不足分は最後の要素、無ければ null)をマテリアルリストへ同期追加する。
+    /// 頂点を詰め直した一時メッシュを作った場合は temporaryMeshes へ積む(結合後に破棄する)。
     /// </summary>
     private static void AddSubMeshInstances(Mesh mesh, Matrix4x4 transform, Material[] rendererMaterials,
-        List<CombineInstance> instances, List<Material> materialList)
+        List<CombineInstance> instances, List<Material> materialList, List<Mesh> temporaryMeshes)
     {
-        for (int subIndex = 0; subIndex < mesh.subMeshCount; subIndex++)
+        Mesh source = CompactSubMeshVertices(mesh);
+        if (source != mesh)
+        {
+            temporaryMeshes.Add(source);
+        }
+
+        for (int subIndex = 0; subIndex < source.subMeshCount; subIndex++)
         {
             instances.Add(new CombineInstance
             {
-                mesh = mesh,
+                mesh = source,
                 subMeshIndex = subIndex,
                 transform = transform
             });
@@ -162,6 +172,190 @@ public static class BuildingMeshUtils
                 material = rendererMaterials[Mathf.Min(subIndex, rendererMaterials.Length - 1)];
             }
             materialList.Add(material);
+        }
+    }
+
+    /// <summary>
+    /// 各サブメッシュが参照する頂点だけをサブメッシュごとの連続区画へ詰め直した一時メッシュを返す。
+    /// インデックス範囲の中に未参照の頂点を持つサブメッシュが無ければ、元のメッシュをそのまま返す。
+    ///
+    /// Mesh.CombineMeshes はサブメッシュ単位の CombineInstance でも、そのサブメッシュのインデックスの
+    /// 最小〜最大の範囲にある頂点を丸ごと写す。FBX取り込みの頂点溶接は位置・法線・UVが同じ頂点を材質を
+    /// またいで1つにまとめる(実寸キューブ投影UVでは、同じ向きで面一に接する別材質の面の頂点が一致する)ため、
+    /// 後のサブメッシュの範囲が前のサブメッシュの区画まで伸び、間にある未参照の頂点まで複製される。
+    /// 区画内は元の頂点順を保ち、複数のサブメッシュが共有する頂点はサブメッシュごとに持たせる。
+    /// どちらも CombineMeshes が元から写していたとおりなので、結合結果は未参照の頂点が消える以外は変わらない。
+    /// 頂点はストリームのバイト列のまま写すので、属性の種類と形式も元のメッシュと同じになる。
+    /// </summary>
+    private static Mesh CompactSubMeshVertices(Mesh mesh)
+    {
+        int subMeshCount = mesh.subMeshCount;
+        int vertexCount = mesh.vertexCount;
+        if (!mesh.isReadable || subMeshCount == 0 || vertexCount == 0)
+        {
+            return mesh;
+        }
+
+        // mark[v] == s + 1 は「サブメッシュ s の走査で頂点 v を数え済み」の印。
+        int[][] subMeshIndices = new int[subMeshCount][];
+        int[] firstVertex = new int[subMeshCount];
+        int[] usedCount = new int[subMeshCount];
+        int[] mark = new int[vertexCount];
+        int packedVertexCount = 0;
+        int packedIndexCount = 0;
+        bool hasUnreferenced = false;
+        for (int s = 0; s < subMeshCount; s++)
+        {
+            int[] indices = mesh.GetIndices(s);
+            int min = int.MaxValue;
+            int max = -1;
+            int used = 0;
+            foreach (int index in indices)
+            {
+                if (mark[index] == s + 1)
+                {
+                    continue;
+                }
+                mark[index] = s + 1;
+                used++;
+                if (index < min) min = index;
+                if (index > max) max = index;
+            }
+            subMeshIndices[s] = indices;
+            firstVertex[s] = min;
+            usedCount[s] = used;
+            packedVertexCount += used;
+            packedIndexCount += indices.Length;
+            hasUnreferenced |= used > 0 && max - min + 1 > used;
+        }
+        if (!hasUnreferenced)
+        {
+            return mesh;
+        }
+
+        using (Mesh.MeshDataArray sourceArray = Mesh.AcquireReadOnlyMeshData(mesh))
+        {
+            Mesh.MeshData source = sourceArray[0];
+            Mesh.MeshDataArray packedArray = Mesh.AllocateWritableMeshData(1);
+            bool applied = false;
+            try
+            {
+                Mesh.MeshData packed = packedArray[0];
+                packed.SetVertexBufferParams(packedVertexCount, mesh.GetVertexAttributes());
+                int streamCount = source.vertexBufferCount;
+                if (packed.vertexBufferCount != streamCount)
+                {
+                    return mesh;
+                }
+                var sourceStreams = new NativeArray<byte>[streamCount];
+                var packedStreams = new NativeArray<byte>[streamCount];
+                int[] strides = new int[streamCount];
+                for (int stream = 0; stream < streamCount; stream++)
+                {
+                    strides[stream] = source.GetVertexBufferStride(stream);
+                    // 同じ属性記述なら同じレイアウトになる前提でバイト列を写す。崩れていれば詰め直さない。
+                    if (packed.GetVertexBufferStride(stream) != strides[stream])
+                    {
+                        return mesh;
+                    }
+                    if (strides[stream] > 0)
+                    {
+                        sourceStreams[stream] = source.GetVertexData<byte>(stream);
+                        packedStreams[stream] = packed.GetVertexData<byte>(stream);
+                    }
+                }
+
+                packed.SetIndexBufferParams(packedIndexCount, UnityEngine.Rendering.IndexFormat.UInt32);
+                NativeArray<uint> packedIndices = packed.GetIndexData<uint>();
+                var descriptors = new UnityEngine.Rendering.SubMeshDescriptor[subMeshCount];
+                int[] remap = new int[vertexCount];
+                int nextVertex = 0;
+                int nextIndex = 0;
+                for (int s = 0; s < subMeshCount; s++)
+                {
+                    // 他のサブメッシュの印と区別できる負の印を、このサブメッシュの参照頂点に付け直してから走査する。
+                    int marker = -(s + 1);
+                    int[] indices = subMeshIndices[s];
+                    foreach (int index in indices)
+                    {
+                        mark[index] = marker;
+                    }
+
+                    int blockStart = nextVertex;
+                    int runSource = 0;
+                    int runTarget = 0;
+                    int runLength = 0;
+                    for (int v = firstVertex[s], remaining = usedCount[s]; remaining > 0; v++)
+                    {
+                        if (mark[v] != marker)
+                        {
+                            continue;
+                        }
+                        remaining--;
+                        remap[v] = nextVertex;
+                        if (runLength > 0 && runSource + runLength == v)
+                        {
+                            runLength++;
+                        }
+                        else
+                        {
+                            CopyVertexRun(sourceStreams, packedStreams, strides, runSource, runTarget, runLength);
+                            runSource = v;
+                            runTarget = nextVertex;
+                            runLength = 1;
+                        }
+                        nextVertex++;
+                    }
+                    CopyVertexRun(sourceStreams, packedStreams, strides, runSource, runTarget, runLength);
+
+                    for (int i = 0; i < indices.Length; i++)
+                    {
+                        packedIndices[nextIndex + i] = (uint)remap[indices[i]];
+                    }
+                    descriptors[s] = new UnityEngine.Rendering.SubMeshDescriptor(nextIndex, indices.Length, mesh.GetTopology(s))
+                    {
+                        firstVertex = blockStart,
+                        vertexCount = nextVertex - blockStart,
+                    };
+                    nextIndex += indices.Length;
+                }
+
+                packed.subMeshCount = subMeshCount;
+                for (int s = 0; s < subMeshCount; s++)
+                {
+                    packed.SetSubMesh(s, descriptors[s]);
+                }
+
+                Mesh compacted = new Mesh { name = mesh.name };
+                Mesh.ApplyAndDisposeWritableMeshData(packedArray, compacted);
+                applied = true;
+                return compacted;
+            }
+            finally
+            {
+                if (!applied)
+                {
+                    packedArray.Dispose();
+                }
+            }
+        }
+    }
+
+    /// <summary>元の頂点番号 sourceVertex からの連続 count 頂点を、全ストリームについて targetVertex 以降へ写す。</summary>
+    private static void CopyVertexRun(NativeArray<byte>[] source, NativeArray<byte>[] target, int[] strides,
+        int sourceVertex, int targetVertex, int count)
+    {
+        if (count == 0)
+        {
+            return;
+        }
+        for (int stream = 0; stream < strides.Length; stream++)
+        {
+            int stride = strides[stream];
+            if (stride > 0)
+            {
+                NativeArray<byte>.Copy(source[stream], sourceVertex * stride, target[stream], targetVertex * stride, count * stride);
+            }
         }
     }
 

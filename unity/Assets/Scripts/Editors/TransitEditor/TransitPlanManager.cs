@@ -143,7 +143,9 @@ public class TransitPlanManager : MonoBehaviour
         gameCamera = Camera.main;
         pathManager = FindAnyObjectByType<PathManager>();
         EnsureRenderers();
-        audioSource = GetComponent<AudioSource>() ?? gameObject.AddComponent<AudioSource>();
+        // エディタの GetComponent は欠けたコンポーネントを偽 null で返し、?? はそれを null と見なさないので == で判定する。
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
         placeSound = Resources.Load<AudioClip>(PLACE_SOUND);
     }

@@ -79,6 +79,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 | `costRatio.ts` | 建設コストの標準コスト比の色分け(建物・道路で共用) |
 | `playSound.ts` / `bgm.ts` | 効果音(URLごとにキャッシュ)・BGM(`BgmManager`。Cockpitだけが所有) |
 | `weatherAudio.ts` | 音量設定をUnityへ送るだけ(再生しない) |
+| `epochPresentation.ts` / `epochFlow.ts` | 演出ID付きの暗転通知待ち、HTTPと日没の並行実行、処理時間に応じたTipsの開閉。結果画面のクローズまで黒幕を保持する |
 | `agentIcon.ts` / `parcelIcon.ts` / `pathIcon.ts` / `resourceIcon.ts` / `ledgerIcon.ts` | 各種アイコン画像の解決 |
 | `propThumbnail.ts` | プロップサムネイルの解決。画像のglobはここ1箇所だけ |
 

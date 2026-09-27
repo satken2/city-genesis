@@ -5,11 +5,11 @@ using UnityEngine;
 /// <summary>遠景の乗り場。通常パーツの材質で大きな断面だけを押し出し、小物や8mタイル反復を省く。</summary>
 public static class FarPlatformPath
 {
-    // 463 は貨物PF(貨物列車専用のホーム)。
-    const int FreightPlatformVariant = 463;
+    // 貨物PF(貨物列車専用のホーム)。463=コンテナ、464=鉱石、465=石油。
+    static bool IsFreight(int variant) => variant == 463 || variant == 464 || variant == 465;
 
     public static bool Handles(PathSummary path) => path != null &&
-        (path.path_variant == 451 || path.path_variant == 461 || path.path_variant == 462 || path.path_variant == FreightPlatformVariant
+        (path.path_variant == 451 || path.path_variant == 461 || path.path_variant == 462 || IsFreight(path.path_variant)
          || path.path_variant == 502 || path.path_variant == Constants.PATH_VARIANT_ROPEWAY_STATION);
 
     public static void GenerateInto(GameObject root, PathSummary path, List<Vector3> points)
@@ -68,7 +68,6 @@ public static class FarPlatformPath
             }
         }
 
-        Vector3 At(int i, Vector2 p) => points[i] + right[i] * p.x + Vector3.up * p.y;
         void Face(string mat, params Vector3[] face)
         {
             if (!vertices.ContainsKey(mat)) { vertices[mat] = new List<Vector3>(); triangles[mat] = new List<int>(); }
@@ -78,18 +77,21 @@ public static class FarPlatformPath
         }
 
         // 断面はX/Y平面の反時計回り。両側の法線を保つため左右反転後も順序を揃える。
-        void Prism(string mat, Vector2[] profile, int side = 1)
+        void Prism(string mat, Vector2[] profile, int side = 1) => Extrude(mat, profile, side, points, right);
+
+        void Extrude(string mat, Vector2[] profile, int side, IList<Vector3> pts, IList<Vector3> rights)
         {
             var p = (Vector2[])profile.Clone();
             if (side < 0) { for (int i = 0; i < p.Length; i++) p[i].x = -p[i].x; System.Array.Reverse(p); }
-            for (int j = 0; j + 1 < points.Count; j++)
+            Vector3 Pt(int j, Vector2 q) => pts[j] + rights[j] * q.x + Vector3.up * q.y;
+            for (int j = 0; j + 1 < pts.Count; j++)
                 for (int i = 0; i < p.Length; i++)
                 {
                     int n = (i + 1) % p.Length;
-                    Face(mat, At(j, p[i]), At(j, p[n]), At(j + 1, p[n]), At(j + 1, p[i]));
+                    Face(mat, Pt(j, p[i]), Pt(j, p[n]), Pt(j + 1, p[n]), Pt(j + 1, p[i]));
                 }
             var first = new Vector3[p.Length]; var last = new Vector3[p.Length];
-            for (int i = 0; i < p.Length; i++) { first[i] = At(0, p[p.Length - i - 1]); last[i] = At(points.Count - 1, p[i]); }
+            for (int i = 0; i < p.Length; i++) { first[i] = Pt(0, p[p.Length - i - 1]); last[i] = Pt(pts.Count - 1, p[i]); }
             Face(mat, first); Face(mat, last);
         }
         public void Box(string mat, float x0, float x1, float y0, float y1, int side = 1)
@@ -97,14 +99,7 @@ public static class FarPlatformPath
 
         public void Platform(int side, int type)
         {
-            if (type == FreightPlatformVariant)
-            {
-                // 貨物のホームは荷役用の広い床だけで、旅客の上屋・点字ブロック・柵を持たない。
-                float width = MasterDataStore.Instance?.GetPathMaster(type)?.platform_width ?? 6f;
-                Box("PATH_CONCRETE", 2.3f, 2.3f + width, -.3f, 1.2f, side);
-                Box("PATH_ASPHALT", 2.3f, 2.3f + width, 1.2f, 1.21f, side);
-                return;
-            }
+            if (IsFreight(type)) { Freight(side, type); return; }
             float outer = type == 502 ? 4.5f : 5.5f;
             Box("PATH_CONCRETE",type == 502 ? .3f : 2.3f,outer,type == 502 ? -1.08f : -.3f,type == 502 ? -.83f : .10f,side);
             Posts(side,outer-.2f,type == 502 ? -.83f : .10f,1.2f,"PATH_CONCRETE");
@@ -135,10 +130,74 @@ public static class FarPlatformPath
             }
         }
 
-        void Posts(int side, float x, float bottom, float top, string material)
+        // 貨物PFは荷役床に品目ごとの設備を載せる。位置は通常パーツ(16mタイル)の造形に合わせ、
+        // 床の外縁だけをマスターの platform_width から取る(Unityの動的デッキと同じ淵1.5m〜外縁、上面1.48m)。
+        const float FreightTile = 16f;
+
+        void Freight(int side, int type)
+        {
+            float outer = 2.5f + (MasterDataStore.Instance?.GetPathMaster(type)?.platform_width ?? (type == 463 ? 14f : type == 464 ? 12f : 10f));
+            Box("PATH_CONCRETE", 1.5f, outer, -.4f, 1.46f, side);
+            Box(type == 463 ? "PATH_ASPHALT" : type == 464 ? "BD_IRON_DUST" : "PATH_CONCRETE", 1.5f, outer, 1.46f, 1.48f, side);
+            if (type == 463)
+            {
+                Dashes(side, 8.55f, 11.0f, 1.48f, 4.07f, ("PROP_ContainerRed", .97f, 7.03f), ("PROP_ContainerGreen", 8.14f, 11.86f));
+                Dashes(side, 11.65f, 14.1f, 1.48f, 4.07f, ("PROP_ContainerBlue", .14f, 3.86f), ("PROP_ContainerRed", 4.14f, 7.86f), ("BD_WHITE_WALL", 8.97f, 15.03f));
+            }
+            else if (type == 464)
+            {
+                Box("BD_METAL_PANEL", 2.45f, 4.35f, 4.95f, 5.75f, side);
+                Posts(side, 3.4f, 1.48f, 4.95f, "BD_DARK_METAL", 8f);
+                Box("BD_CONCRETE", outer - .95f, outer - .1f, 1.48f, 4.3f, side);
+                Prism("BD_IRON_ORE", new[] { new Vector2(7.1f, 1.47f), new Vector2(outer - .95f, 1.47f), new Vector2(outer - .95f, 3.7f), new Vector2(10.9f, 3.7f) }, side);
+            }
+            else
+            {
+                Box("PATH_METAL", 2.35f, 3.65f, 4.45f, 4.55f, side);
+                Box("BD_YELLOW", 2.35f, 2.41f, 5.5f, 5.6f, side);
+                Box("BD_YELLOW", 3.59f, 3.65f, 5.5f, 5.6f, side);
+                Posts(side, 3.0f, 1.48f, 4.45f, "PATH_METAL", 8f);
+                Box("PATH_PIPELINE", 6.3f, 9.5f, 1.8f, 2.4f, side);
+            }
+        }
+
+        // タイル内の区間 [a, b] ごとに箱を並べる。通常パーツと同じく全長に最も近い整数タイルへ伸縮した周期を使う。
+        void Dashes(int side, float x0, float x1, float y0, float y1, params (string mat, float a, float b)[] spans)
+        {
+            var cum = new float[points.Count];
+            for (int i = 1; i < points.Count; i++) cum[i] = cum[i - 1] + Vector3.Distance(points[i - 1], points[i]);
+            float total = cum[points.Count - 1];
+            if (total < .01f) return;
+            int tiles = Mathf.Max(1, Mathf.RoundToInt(total / FreightTile));
+            float tile = total / tiles;
+            var profile = new[] { new Vector2(x0, y0), new Vector2(x1, y0), new Vector2(x1, y1), new Vector2(x0, y1) };
+            for (int t = 0; t < tiles; t++)
+                foreach (var span in spans)
+                {
+                    float s0 = (t + span.a / FreightTile) * tile, s1 = (t + span.b / FreightTile) * tile;
+                    var pts = new List<Vector3>(); var rights = new List<Vector3>();
+                    for (int i = 1; i < points.Count; i++)
+                    {
+                        if (cum[i] <= s0) continue;
+                        if (pts.Count == 0) AddAt(i, s0, cum, pts, rights);
+                        if (cum[i] >= s1) { AddAt(i, s1, cum, pts, rights); break; }
+                        pts.Add(points[i]); rights.Add(right[i]);
+                    }
+                    if (pts.Count >= 2) Extrude(span.mat, profile, side, pts, rights);
+                }
+        }
+
+        void AddAt(int i, float s, float[] cum, List<Vector3> pts, List<Vector3> rights)
+        {
+            float t = Mathf.InverseLerp(cum[i - 1], cum[i], s);
+            pts.Add(Vector3.Lerp(points[i - 1], points[i], t));
+            rights.Add(Vector3.Slerp(right[i - 1], right[i], t).normalized);
+        }
+
+        void Posts(int side, float x, float bottom, float top, string material, float spacing = 16f)
         {
             float total = 0; for (int i=1;i<points.Count;i++) total += Vector3.Distance(points[i-1],points[i]);
-            int count = Mathf.Max(1,Mathf.CeilToInt(total/16f));
+            int count = Mathf.Max(1,Mathf.CeilToInt(total/spacing));
             for (int k=0;k<count;k++)
             {
                 float target=(k+.5f)*total/count, walked=0;

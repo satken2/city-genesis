@@ -127,8 +127,9 @@ public class IpcClient : MonoBehaviour
     }
     public event Action OnWeatherQuery;
     public event Action<string> OnWeatherSet;
-    // エポック実行の開始(true)と終了(false)。天気の時刻演出(日没→暗転→日の出)に使う。
+    // エポック演出の開始(true)と結果画面クローズ時の終了(false)。日没→暗転→日の出に使う。
     public event Action<bool> OnEpochExecuting;
+    public event Action<string> OnEpochPrepare;
     // 接道(front_path)の矢印表示。土地区画詳細パネルの開閉に対応する。
     public event Action<int> OnParcelShowFrontPath;
     public event Action OnParcelHideFrontPath;
@@ -839,6 +840,10 @@ public class IpcClient : MonoBehaviour
                     OnEpochExecuting?.Invoke(bool.TryParse(GetParamString(payload, "executing"), out bool executing) && executing);
                     break;
 
+                case "epoch:prepare":
+                    OnEpochPrepare?.Invoke(GetParamString(payload, "id"));
+                    break;
+
                 case "view:set_grid":
                     {
                         string mode = GetParamString(payload, "mode") ?? "off";
@@ -1542,6 +1547,11 @@ public class IpcClient : MonoBehaviour
         {
             ["id"] = id, ["locked"] = locked, ["rain"] = rain, ["snow"] = snow, ["presets"] = presets
         });
+    }
+
+    public void EmitEpochDarkened(string id)
+    {
+        SendEnvelope("epoch:darkened", new Dictionary<string, object> { ["id"] = id });
     }
 
     /// <summary>

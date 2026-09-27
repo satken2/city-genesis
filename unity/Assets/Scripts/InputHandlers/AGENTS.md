@@ -27,6 +27,7 @@
 - 地形ヒット時、区画の入力モードが`MODE_NONE`でなければ`ParcelManager.GetParcelIdAtPoint`で配送先を区画へ差し替える(起伏地では区画コライダーが地形に埋まりレイキャストで拾えない)。クリック候補は`RaycastHit`ではなく「対象GameObject+ヒット点」で持つ。
 - 共通吸着`ApplySnapping`(既定半径10m)は`TerrainInputHandler`の各イベント冒頭で掛かるが、`MODE_ROAD_CONSTRUCTION`/`MODE_EDIT_CONNECTOR`/`MODE_PATH_SPLIT`/`MODE_EDIT_STATION`/`MODE_EDIT_PROP`は通さない。道路は`RoadPlanManager.snapThreshold`(シーンのシリアライズ値が優先)で一度だけ吸着するため、共通側も掛けると二重吸着になり半径を変えても効かない。
 - 吸着で引き継ぐ相対高さはバックエンド保存の相対Y(ノード/アンカー補間/建設中端点)から取り、描画点列の絶対Yから逆算しない。残差を継承すると地面のパスへ吸着しただけで端点が地下/空中扱いになり、インフラのT字タップが無言で不成立になる(幽霊接続)。
+- `MODE_PARCEL_SHAPE_EDIT`はクリック・右クリック・ホバーの共通吸着をすべて通さない。ホバーで`OverrideMousePosition`に吸着座標を渡すと後続のドラッグにも混入するため、頂点ドラッグ側だけで無効化してはならない。区画形状編集の吸着は常に無効で、切り替え操作は持たない。
 - 吸着フラグの真実源は`TerrainInputHandler`のstatic変数群(`Enable*Snapping`。既定Node=T/Path=T/他=F。敷設モードを跨いで保持)。切替はCtrlラジアルメニューだけで、UIからの設定イベントは無い。グリッド吸着は`GridOverlay`の表示と連動し、`GridSetManager`は角度設定中に退避・復元する。
 - `TerrainInputHandler`は地形タイルごとに付くコンポーネント。`Update`の条件は軽く保つ(Escの区画選択リセットは`ParcelEditorManager.Update`側で行う)。
 - 入力ゲート: UI上のポインタ・カメラドラッグ中・フライモード(`CameraController.IsFlyMode`)・ラジアルメニュー表示中(`RadialMenuController.IsOpen`)は`InputHandler.Update`先頭で非破壊的に止める。メニューのCanvasにはGraphicRaycasterが無いのでEventSystemのUI判定では止まらない。

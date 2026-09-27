@@ -9,12 +9,10 @@
  * テンプレートモード(シナリオ制作)では上限を外し、数値を直接入力できる
  * (都市を育てるために数百エポックを一気に回す用途。1回のHTTPリクエストで完了まで待つ)。
  *
- * 都市が大きくなるとエポック実行(POST /api/v1/epochs)に時間がかかりうるため、
- * 実行を確定したらこの確認ウィンドウは一旦 hide() で非表示にし、右下に「エポック実行中」
- * の通知を出す。実行(fetch)はこの非表示ウィンドウ内で継続させる(webviewは破棄しない)。
- * 実行中はウィンドウ間イベント `epoch:executing` をブロードキャストし、タスクバーの
- * ボタンを無効化させる(受信側は Taskbar.tsx)。同じ開始・終了をUnityにも送り、
- * 日を早送りで沈めて暗転し、終了後に日の出から朝へ進める演出に使わせる。
+ * 確定直後にHTTP実行と日没演出を並行して開始する。確認ウィンドウは非表示で実行を維持する。
+ * 日没1.5秒・暗転0.5秒の描画完了後、実行済みなら結果へ、未完了ならTipsへ進む。
+ * Tipsは実行完了時に自動で閉じる。結果画面を閉じるまでは背景を黒く保ち、HUDも無効にする。
+ * 朝への復帰は結果画面の共通クローズ処理が担当する(×・閉じるボタンの両方)。
  *
  * エポック実行完了後は、結果や達成クエストを**別の独立したウィンドウ**として開く
  * (HUDから他のウィンドウを開くのと同じ open_registered_window 経由)。
@@ -27,18 +25,21 @@
  * いずれの場合も、確認ウィンドウ自身は役目を終えて onClose で閉じる。
  *
  * バックエンドが実行を拒否した場合(403=Steam未認証のエポック上限、503=シャットダウン中 等)や
- * 通信エラーの場合は、通知とタスクバー無効化を解除して確認ウィンドウを再表示する。
+ * 通信エラーの場合は、演出とタスクバー無効化を解除して確認ウィンドウを再表示する。
  * エラーレスポンス時はさらに、その理由を通知ポップアップで表示する。
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { emit } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
-import { sendEpochExecuting, sendSessionReload } from "../../utils/ipc";
+import { sendSessionReload } from "../../utils/ipc";
+import { ApiError, buildApiUrl, fetchApi } from "../../utils/api";
+import { beginEpochPresentation } from "../../utils/epochPresentation";
+import { runEpochWithPresentation } from "../../utils/epochFlow";
+import type { EpochReport } from "./EpochResultWindow";
 import { logInfoToFile } from "../../utils/log";
-import { showNotification, dismissNotification } from "../../utils/notification";
+import { showNotification } from "../../utils/notification";
 import { formatEpochDate } from "../../utils/date";
 import { resolveIntlLocale } from "../../utils/locale";
 import { useTemplateMode } from "../../hooks/useTemplateMode";
@@ -61,16 +62,13 @@ type EpochConfirmWindowProps = {
   onClose: () => void;
 };
 
-/**
- * エポック実行中かどうかを知らせる。ウィンドウ間イベントはタスクバーのボタン無効化に、
- * Unityへの通知は時刻の演出(日没→暗転→日の出)に使う。Unityへ届かなくても実行は続ける。
- */
-async function announceExecuting(executing: boolean): Promise<void> {
-  await emit("epoch:executing", { executing });
-  await sendEpochExecuting(executing).catch((error) => {
-    console.warn("failed to send epoch:executing to graphic", error);
-  });
-}
+type EpochResponse = {
+  epoch?: number;
+  current_date: number;
+  epoch_report?: EpochReport;
+  completed_quests?: QuestNotification[];
+  failed_quests?: QuestNotification[];
+};
 
 /** 選択可能なエポック数の上限(通常プレイ)。テンプレートモードでは適用しない */
 const MAX_EPOCH_COUNT = 10;
@@ -82,6 +80,7 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
   const { i18n, t } = useTranslation();
   const [city, setCity] = useState<CityData | null>(null);
   const [executing, setExecuting] = useState(false);
+  const executingRef = useRef(false);
   const [epochCount, setEpochCount] = useState(1);
   const templateMode = useTemplateMode(apiBaseUrl);
   const maxEpochCount = templateMode ? TEMPLATE_MAX_EPOCH_COUNT : MAX_EPOCH_COUNT;
@@ -97,9 +96,7 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
   }
 
   useEffect(() => {
-    const baseUrl = apiBaseUrl.replace(/\/+$/, "");
-    fetch(`${baseUrl}/api/v1/city`)
-      .then((res) => res.json())
+    fetchApi<{ city: CityData }>(buildApiUrl(apiBaseUrl, "/api/v1/city"))
       .then((data) => setCity(data.city))
       .catch(console.error);
   }, [apiBaseUrl]);
@@ -111,55 +108,26 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
     : "—";
 
   async function handleConfirm() {
+    if (executingRef.current) return;
+    executingRef.current = true;
     setExecuting(true);
-    // このフローは失敗しても画面に何も出ないまま止まりうるため、
-    // どの await まで到達したかをファイルログに記録して本番で追跡できるようにする。
     logInfoToFile(`epoch confirm: start count=${epochCount}`);
-    // 実行中はタスクバーのボタンを無効化させ、Unityは日を沈めて暗転する。
-    await announceExecuting(true);
-    // 確認ウィンドウを一旦消し、右下に実行中通知を出す。
-    // ウィンドウは破棄せず非表示にするだけなので、下の fetch はこのまま継続する。
-    // durationMs を指定しないので、完了時にこちらが明示的に消すまで通知は表示され続ける。
-    await getCurrentWindow().hide().catch((error) => {
-      console.warn("failed to hide epoch_confirm window", error);
-    });
-    await showNotification({ message: t("epochConfirm.executing") });
-
+    let presentation: Awaited<ReturnType<typeof beginEpochPresentation>> | undefined;
+    let simulationCompleted = false;
     try {
-      const baseUrl = apiBaseUrl.replace(/\/+$/, "");
-      logInfoToFile(`epoch confirm: POST ${baseUrl}/api/v1/epochs?count=${epochCount}`);
-      const res = await fetch(`${baseUrl}/api/v1/epochs?count=${epochCount}`, { method: "POST" });
-      logInfoToFile(`epoch confirm: response status=${res.status}`);
-      if (!res.ok) {
-        // バックエンドが実行を拒否した場合。レポート無しの成功として扱うと結果ウィンドウも
-        // エラーも出ない無言の失敗になるため、ここで理由を必ずユーザーに可視化する。
-        const body = await res.json().catch(() => null);
-        const reason = typeof body?.error === "string" ? body.error : `HTTP ${res.status}`;
-        // console.error は main.tsx によりファイルログへERROR転送されるので本番でも追跡できる。
-        console.error(`epoch confirm: rejected status=${res.status} reason=${reason}`);
-        await dismissNotification();
-        await announceExecuting(false);
-        await getCurrentWindow().show().catch((err) => {
-          console.warn("failed to show epoch_confirm window", err);
-        });
-        // 403はSteam未認証時のエポック数上限に固有のステータスなので専用文言で案内する。
-        void showNotification({
-          message:
-            res.status === 403
-              ? t("epochConfirm.errorSteamLimit")
-              : t("epochConfirm.errorFailed", { reason }),
-          durationMs: 8000,
-        });
-        setExecuting(false);
-        return;
-      }
-      const data = await res.json();
-      await sendSessionReload();
+      presentation = await beginEpochPresentation();
+      void getCurrentWindow().hide().catch(console.error);
+      const url = buildApiUrl(apiBaseUrl, `/api/v1/epochs?count=${epochCount}`);
+      logInfoToFile(`epoch confirm: POST ${url}`);
+      const data = await runEpochWithPresentation(
+        () => fetchApi<EpochResponse>(url, { method: "POST" }),
+        presentation.darkened,
+        presentation.setTipsVisible,
+      );
+      simulationCompleted = true;
+      if (!await presentation.isCurrent()) return;
+      await sendSessionReload().catch(console.error);
       logInfoToFile(`epoch confirm: done epoch=${data.epoch ?? "?"}`);
-
-      // 実行完了。通知を消し、タスクバーを再有効化する。
-      await dismissNotification();
-      await announceExecuting(false);
 
       const quests: QuestNotification[] = data.completed_quests ?? [];
       const failedQuests: QuestNotification[] = data.failed_quests ?? [];
@@ -188,6 +156,7 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
           windowType: "epoch_result",
           params: {
             extra: {
+              epochPresentationId: presentation.id,
               report: data.epoch_report,
               epochCount,
               currentDate: Number(data.current_date),
@@ -205,18 +174,25 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
         });
       }
 
+      if (!data.epoch_report) await presentation.finish();
+
       // 確認ウィンドウは役目を終えたので閉じる。
       onClose();
     } catch (error) {
       console.error("failed to execute epoch", error);
-      // 失敗時は通知を消し、タスクバーを再有効化したうえで確認ウィンドウを再表示し、
-      // ユーザーが再操作できるようにする。
-      await dismissNotification();
-      await announceExecuting(false);
-      await getCurrentWindow().show().catch((err) => {
-        console.warn("failed to show epoch_confirm window", err);
+      if (presentation && !await presentation.isCurrent().catch(() => true)) return;
+      await presentation?.finish().catch(console.error);
+      // 実行済みの処理を、結果表示の失敗だけで再実行させない。
+      if (simulationCompleted) onClose();
+      else await getCurrentWindow().show().catch(console.error);
+      void showNotification({
+        message: error instanceof ApiError && error.status === 403
+          ? t("epochConfirm.errorSteamLimit")
+          : t("epochConfirm.errorFailed", { reason: error instanceof Error ? error.message : String(error) }),
+        durationMs: 8000,
       });
       setExecuting(false);
+      executingRef.current = false;
     }
   }
 

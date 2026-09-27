@@ -38,14 +38,6 @@ export async function setWeather(id: string | null): Promise<void> {
 }
 
 /**
- * エポック実行の開始(true)と終了(false)をUnityへ知らせる。Unityは開始で日を早送りで沈めて暗転し、
- * 終了後に都市を読み直してから日の出へ進める。実行1回につき開始と終了を1通ずつ送る。
- */
-export async function sendEpochExecuting(executing: boolean): Promise<void> {
-  await invoke("send_window_action", { windowType: "", entity: null, action: "epoch:executing", params: { executing } });
-}
-
-/**
  * グラフィックプログラムのステート種別
  * @see genesis-docs/programs/IPC連携の整理.md「グラフィックプログラムのステート」
  */

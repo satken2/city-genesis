@@ -11,9 +11,9 @@ Unity の環境表現だけを扱う。天気・時刻・気候から空・光�
 | `WeatherPreset.cs` | 13種類の天気の見た目・降水量・平均持続時間の正。昼間の見た目で、太陽の向きと夕焼けは持たない(時刻が決める) |
 | `WeatherClimate.cs` | 気候区分(`Constants.CLIMATE_*`)×季節(`current_date` の月)ごとの天気の出現割合(%)の表の正。各行の合計は100 |
 | `WeatherChain.cs` | 隣り合う天気を1歩ずつ進むメトロポリス法の移り変わり。長時間の滞在割合が表に一致する。`Sample` は途中から見始めるときの選び直し |
-| `WeatherClock.cs` | 描画用の時刻(日の出→日没600秒、夜は描かない)。`BeginNight`(早送り→暗転) / `RequestDawn` / `Advance`(日の出を始めた瞬間だけ true) |
+| `WeatherClock.cs` | 描画用の時刻(日の出→日没600秒、夜は描かない)。`BeginNight`(日没1.5秒→黒幕0.5秒) / `RequestDawn`(黒幕解除0.5秒→朝1.5秒) / `Advance`(日の出を始めた瞬間だけ true)。環境光の`Darkness`と画面の`FadeAlpha`は独立 |
 | `WeatherEpochTracker.cs` | 初回取得(セッション開始)と実際のエポック増分の区別。編集リロードでは何もしない |
-| `WeatherController.cs` | AppRoot が生成。毎フレーム時刻・天気を進めて空・光・霧・環境光・降水へ反映し、`epoch:executing` / `weather:query` / `weather:set` を受けて `weather:state` を返す |
+| `WeatherController.cs` | AppRoot が生成。毎フレーム時刻・天気を進めて空・光・霧・環境光・降水へ反映。`epoch:prepare`で日没と黒幕を開始し、描画後に`epoch:darkened`を一度返す。`epoch:executing false`まで黒幕を保持。天気は`weather:query` / `weather:set`を受けて`weather:state`を返す |
 | `WeatherPrecipitation.cs` | カメラ近傍だけの雨粒・雪片(`RainStreak.shader` / `Snowflake.shader`) |
 | `CameraAmbience.cs` | 環境音。地表相対高度で近景音を混ぜ、雨量で隣り合う2段の雨音を配分する |
 | `ConstructionAmbience.cs` | 工事現場の3Dループ音。`BuildingManager` / `PathManager` が `Register` / `Unregister` / `Clear` で現場を登録 |

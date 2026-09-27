@@ -342,7 +342,7 @@ export const PATH_EQUIPMENT_STANDARD: number = 1;
 export const PATH_UTILITY_NONE: number = 0;
 export const PATH_UTILITY_OVERHEAD: number = 1;
 export const PATH_UTILITY_UNDERGROUND: number = 2;
-export const VARIANT_GENERIC_BUILDING: number = 4;
+export const VARIANT_BORDER_CHECKPOINT: number = 4;
 
 export const VEHICLE_TO_TRAFFIC: Record<number, number> = {
   0: 0,

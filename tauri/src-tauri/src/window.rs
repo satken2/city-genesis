@@ -780,6 +780,31 @@ const EDIT_MODE_WINDOW_TYPES: &[&str] = &[
     "agent_creation",
 ];
 
+/// セッション切り替えでは、古いHTTP応答でTipsや結果を再表示させない。
+pub fn cancel_epoch_presentation(app: &AppHandle, state: &SharedState) {
+    let id = state.lock().epoch_presentation_id.clone();
+    if let Some(id) = id {
+        finish_epoch_presentation(app, state, &id);
+        let _ = app.emit("epoch:darkened", json!({"id": id}));
+    }
+}
+
+pub fn finish_epoch_presentation(app: &AppHandle, state: &SharedState, id: &str) {
+    let connected = {
+        let mut guard = state.lock();
+        if guard.epoch_presentation_id.as_deref() != Some(id) { return; }
+        guard.epoch_presentation_id = None;
+        guard.graphic_connected
+    };
+    close_tips_window(app);
+    if connected {
+        if let Err(error) = ipc::send_ui_action(state, "".into(), None, "epoch:executing".into(), json!({"executing": false})) {
+            log::error!("epoch presentation finish: {error}");
+        }
+    }
+    let _ = app.emit("epoch:executing", json!({"executing": false}));
+}
+
 pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) -> Result<(), String> {
     // ウィンドウタイプを先に取得しておく(非表示マーク後も参照できるが、取得時の意図を明確にするため)。
     let window_type = {
@@ -808,6 +833,12 @@ pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) 
     };
     if !should_close {
         return Ok(());
+    }
+
+    if window_type.as_deref() == Some("epoch_result") {
+        let id = state.lock().open_windows.get(label)
+            .and_then(|w| w.params.get("extra")?.get("epochPresentationId")?.as_str().map(str::to_owned));
+        if let Some(id) = id { finish_epoch_presentation(app, state, &id); }
     }
 
     // 編集モードのウィンドウが閉じられたら STATE_NORMAL に戻す。
@@ -1210,6 +1241,11 @@ pub fn open_tips_window(app: &AppHandle, state: &SharedState) -> Result<(), Stri
 /// Tips of the Day ウィンドウをモニターインデックス指定で表示する。
 /// ウィンドウ生成は非同期コマンドまたはワーカースレッドから行う。
 pub fn open_tips_window_on_monitor(app: &AppHandle, monitor_index: usize) -> Result<(), String> {
+    open_tips_window_with_mode(app, monitor_index, false)
+}
+
+/// 初期ロードは開始ボタン待ち、エポック待機は呼び出し元が完了時に閉じる。
+pub fn open_tips_window_with_mode(app: &AppHandle, monitor_index: usize, epoch: bool) -> Result<(), String> {
     if app.get_webview_window("tips").is_some() {
         return Ok(());
     }
@@ -1226,7 +1262,7 @@ pub fn open_tips_window_on_monitor(app: &AppHandle, monitor_index: usize) -> Res
     let mut builder = WebviewWindowBuilder::new(
         app,
         "tips",
-        WebviewUrl::App("index.html".into()),
+        WebviewUrl::App(if epoch { "index.html?tipsMode=epoch" } else { "index.html" }.into()),
     )
     .title("Today's Tips")
     .decorations(false)

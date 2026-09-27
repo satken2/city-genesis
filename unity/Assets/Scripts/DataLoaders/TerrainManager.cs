@@ -2391,13 +2391,14 @@ public partial class TerrainManager : BaseApiDataManager
     /// </summary>
     private void ApplyTerrainMaterial(Terrain terrain, TerrainData terrainData)
     {
-        var resources = terrain.GetComponent<TerrainTileResources>() ?? terrain.gameObject.AddComponent<TerrainTileResources>();
+        var resources = terrain.GetComponent<TerrainTileResources>();
+        if (resources == null) resources = terrain.gameObject.AddComponent<TerrainTileResources>();
         resources.Clear();
         terrain.materialTemplate = null;
         if (useCustomMaterial && customTerrainMaterial != null)
         {
             terrain.materialTemplate = customTerrainMaterial;
-            ApplyTerrainOffsetMaterial(terrain);
+            ApplyTerrainOffsetMaterial(terrain, resources);
             return;
         }
 
@@ -2411,13 +2412,13 @@ public partial class TerrainManager : BaseApiDataManager
             if (validLayers.Count > 0)
             {
                 terrainData.terrainLayers = validLayers.ToArray();
-                ApplyTerrainOffsetMaterial(terrain);
+                ApplyTerrainOffsetMaterial(terrain, resources);
                 return;
             }
         }
 
         ApplyDefaultTerrainMaterial(terrainData, resources);
-        ApplyTerrainOffsetMaterial(terrain);
+        ApplyTerrainOffsetMaterial(terrain, resources);
     }
 
     /// <summary>
@@ -2433,7 +2434,7 @@ public partial class TerrainManager : BaseApiDataManager
     /// (アセット本体の書き換えを防ぐため)。クローン済みかは名前サフィックスで識別し、
     /// 再適用時の二重クローンを避ける。
     /// </summary>
-    private void ApplyTerrainOffsetMaterial(Terrain terrain)
+    private void ApplyTerrainOffsetMaterial(Terrain terrain, TerrainTileResources resources)
     {
         if (terrain == null) return;
 
@@ -2460,13 +2461,13 @@ public partial class TerrainManager : BaseApiDataManager
                 cloned.shader = offsetShader;
                 cloned.name = mat.name + TILE_MATERIAL_SUFFIX;
                 terrain.materialTemplate = cloned;
-                terrain.GetComponent<TerrainTileResources>().Own(cloned);
+                resources.Own(cloned);
             }
         }
         else
         {
             terrain.materialTemplate = new Material(offsetShader) { name = "TerrainTile" + TILE_MATERIAL_SUFFIX };
-            terrain.GetComponent<TerrainTileResources>().Own(terrain.materialTemplate);
+            resources.Own(terrain.materialTemplate);
         }
 
         ApplyTerrainMaterialSettings(terrain.materialTemplate);

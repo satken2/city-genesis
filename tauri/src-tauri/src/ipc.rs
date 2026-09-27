@@ -618,6 +618,12 @@ pub async fn handle_incoming_message(
         "weather:state" => {
             let _ = app.emit_to(window::LABEL_COCKPIT, "weather:state", envelope.payload);
         }
+        "epoch:darkened" => {
+            let current = state.lock().epoch_presentation_id.clone();
+            if current.is_some() && envelope.payload.get("id").and_then(|id| id.as_str()) == current.as_deref() {
+                let _ = app.emit("epoch:darkened", envelope.payload);
+            }
+        }
         "view:grid_angle_changed" => {
             let _ = app.emit("view:grid_angle_changed", envelope.payload);
         }
