@@ -9,7 +9,7 @@
 - 手著作でないモデルは `genesis-gallery/pipeline/jobs/build_*.py` が形状をコードで持っており、ジョブを再実行すると .blend 側の手編集が消える。編集前にジョブの有無を確認する。ジョブと対象モデルの対応・制作記録は `genesis-gallery/pipeline/jobs/*.md`。
 - 通常(Normal)を再著作したら、接写(Close)・遠景(Far)を別ジョブで著作しているモデルはそのジョブも実行し直す。接写ジョブは通常の FBX・bbox・原点・材質を保つ前提で作られている。
 - `props.blend` の 308/309(手動配置のモノレール車両)は、走行車両 `Models/Vehicles/24/0`・`middle` の原本でもある。書き出し直したら同じファイルを `Vehicles/24` にも置く(`unity/Tests/Vehicles/run.ps1 -TransitOnly` がバイト一致を検査する)。
-- 路線車両(vehicles.blend のバス12・LRT14・メトロ20・中距離21、props.blend の 308/309)の帯は専用の材質で塗り分けてあり、Unity がその材質だけを路線カラーで塗り替える(`unity/Assets/Resources/Config/transit_vehicle_livery.json`)。帯の材質を車体の他の部位に流用しない。
+- 路線車両(vehicles.blend のバス12・LRT14・メトロ20・中距離21・貨物22の機関車、props.blend の 308/309)の帯は専用の材質で塗り分けてあり、Unity がその材質だけを路線カラーで塗り替える(`unity/Assets/Resources/Config/transit_vehicle_livery.json`)。帯の材質を車体の他の部位に流用しない。
 - テクスチャは `//../unity/Assets/Models/<カテゴリ>/Textures/` の相対パス参照。このディレクトリを移動・改名すると参照が切れる。
 - Unity は `unity/` 配下しかインポートしないので、ここに .blend を置いても Unity のアセットにはならない(意図的に `unity/` の外にある)。
 - `*.blend1` は Blender の自動バックアップで `.gitignore` 済み。履歴は Git が持つので残さない。

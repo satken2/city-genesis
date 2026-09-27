@@ -22,7 +22,7 @@ vehicles:
   21: # VEHICLE_PASSANGER_TRAIN
     variants: [0, 1, 2]
   22: # VEHICLE_FREIGHT_TRAIN
-    variants: [0, 1]
+    variants: [0, 1, 2]
   23: # VEHICLE_HIGH_SPEED_TRAIN
     variants: [0, 1, 2]
   24: # VEHICLE_MONORAIL

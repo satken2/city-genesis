@@ -297,6 +297,7 @@ public static partial class VehicleQA
         paths.Add("20/2");ids.Add(388);paths.Add("20/middle_2");ids.Add(389);
         paths.Add("21/2");ids.Add(390);paths.Add("21/middle_2");ids.Add(391);
         paths.Add("23/2");ids.Add(392);paths.Add("23/middle_2");ids.Add(393);
+        paths.Add("22/2");ids.Add(394);paths.Add("22/wagon_2");ids.Add(395);
         for(int index=0;index<paths.Count;index++)
         {
             int id=ids[index];
@@ -309,7 +310,6 @@ public static partial class VehicleQA
             Near(Vector3.Distance(original.bounds.size,copy.bounds.size),0,.002f,"Vehicle prop dimensions differ");
             var model=New("PropRenderModel",id);
             Check(((IList)Get(model,"normal")).Count>0 && ((IList)Get(model,"far")).Count>0,"Vehicle prop has no drawable parts: "+id);
-            if(id<=367 || (id>=370 && id<=379) || (id>=384 && id<=393))
             {
                 var closeSource=Resources.Load<GameObject>("Models/Vehicles/"+paths[index]+"_close");
                 var closeProp=Resources.Load<GameObject>($"Models/Props/{id}_close");
@@ -362,7 +362,7 @@ public static partial class VehicleQA
         foreach(int vehicleType in new[]{10,11,12,13,14,20,21,22,23,24})
         {
             var variants=(IList)game.GetType("VehicleModelConfig").GetMethod("GetVariants").Invoke(null,new object[]{vehicleType});
-            Check(variants.Count==(vehicleType==10?10:vehicleType==11?4:vehicleType==14||vehicleType==24?1:vehicleType==20||vehicleType==21||vehicleType==23?3:2),"Configured variant count differs for "+vehicleType);
+            Check(variants.Count==(vehicleType==10?10:vehicleType==11?4:vehicleType==14||vehicleType==24?1:vehicleType==12||vehicleType==13?2:3),"Configured variant count differs for "+vehicleType);
             foreach(int variant in variants)
             {
                 string path=$"Assets/Models/Vehicles/{vehicleType}/{variant}.fbx";
@@ -384,14 +384,6 @@ public static partial class VehicleQA
             foreach(int seed in new[]{0,1,-1,int.MinValue})
                 Check((int)resolver.GetMethod("PickVariantId").Invoke(null,new object[]{vehicleType,seed})>=0,"Negative seed gives invalid variant");
         }
-        foreach(int variant in new[]{0,1})
-        {
-            var car=(GameObject)resolver.GetMethod("CreateInstance").Invoke(null,new object[]{22,variant,null});
-            var lod=car.GetComponent<LODGroup>();
-            Check(lod!=null && lod.GetLODs().Length==2,"Freight normal/far LOD missing");
-            Check(lod.GetLODs()[0].screenRelativeTransitionHeight==.035f,"Freight far threshold");
-            UnityEngine.Object.DestroyImmediate(car);
-        }
         foreach(int id in new[]{308,309})
         {
             var model=New("PropRenderModel",id);
@@ -409,10 +401,11 @@ public static partial class VehicleQA
         foreach(string suffix in new[]{"","_close","_far"})
             Check(System.Linq.Enumerable.SequenceEqual(File.ReadAllBytes($"Assets/Models/Vehicles/24/{pair.Item1}{suffix}.fbx"),File.ReadAllBytes($"Assets/Models/Props/{pair.Item2}{suffix}.fbx")),
                 "Monorail vehicle differs from its prop original: "+pair.Item1+suffix);
-        foreach (int type in new[]{12,14,20,21,23,24})
+        // 貨物22は機関車(数値名)だけを確かめる。貨車は機関車の外観と独立に選ぶ前提なので middle 系の名前を持たない。
+        foreach (int type in new[]{12,14,20,21,22,23,24})
         {
             foreach(int variant in type==14||type==24?new[]{0}:type==12?new[]{0,1}:new[]{0,1,2})
-            foreach(bool middle in type==12?new[]{false}:new[]{false,true})
+            foreach(bool middle in type==12||type==22?new[]{false}:new[]{false,true})
             {
                 var car=(GameObject)resolver.GetMethod("CreateTransitCar").Invoke(null,new object[]{type,middle,null,variant});
                 car.SetActive(true);
@@ -422,7 +415,7 @@ public static partial class VehicleQA
                     string asset=AssetDatabase.GetAssetPath(filter.sharedMesh);
                     Check(asset.EndsWith($"/{type}/{expected}.fbx") || asset.EndsWith($"/{type}/{expected}_close.fbx") || asset.EndsWith($"/{type}/{expected}_far.fbx"), "Variant silently falls back: "+type+"/"+expected);
                 }
-                if(type==14 || type==20 || type==21 || type==23 || type==24)
+                if(type==14 || type==20 || type==21 || type==22 || type==23 || type==24)
                 {
                     var lod=car.GetComponent<LODGroup>();
                     Check(lod!=null,"Close LOD missing");
