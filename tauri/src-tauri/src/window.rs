@@ -598,13 +598,26 @@ pub async fn open_window(app: AppHandle, state: SharedState, payload: OpenWindow
     };
 
     if let Some(label) = existing_label {
-        {
+        let was_hidden = {
             let mut guard = state.lock();
             let was_hidden = guard
                 .open_windows
                 .get(&label)
                 .map(|w| w.hidden)
                 .unwrap_or(false);
+            // 下の排他クローズで LRU 上限の本破棄や転用に巻き込まれないよう、先に LRU から外す。
+            if was_hidden {
+                guard.hidden_lru.retain(|l| l != &label);
+            }
+            was_hidden
+        };
+        // 非表示からの再表示は新規に開くのと同じなので排他グループを適用する。
+        // 自身はまだ hidden なので、自分の種別を含むグループでも自身は閉じられない。
+        if was_hidden {
+            apply_mutex_rules(&app, &state, &payload.window_type)?;
+        }
+        {
+            let mut guard = state.lock();
             // 非表示(再利用待ち)状態から復帰させる。表示中の場合は hidden フラグは既に false。
             // 再表示は「閉じたウィンドウを開き直した」操作なので open_seq を進め、
             // React 側にパネルの再マウント(=状態リセット)を要求する。
@@ -614,7 +627,6 @@ pub async fn open_window(app: AppHandle, state: SharedState, payload: OpenWindow
                     w.hidden = false;
                     w.open_seq += 1;
                 }
-                guard.hidden_lru.retain(|l| l != &label);
             }
             // entity/params を最新要求で上書きする(同一 instance_key だが参照ポイントが変わる可能性がある)。
             if let Some(window) = guard.open_windows.get_mut(&label) {
@@ -768,12 +780,18 @@ pub async fn open_window(app: AppHandle, state: SharedState, payload: OpenWindow
 /// 表示を元へ戻すのはUnityの `STATE_NORMAL` 復帰なので、ここに載せないと
 /// ×で閉じたときに差し替えた表示が残り続ける(ウィンドウは非表示になるだけで
 /// React側のアンマウント処理が走らないため、パネル任せにはできない)。
+///
+/// 一覧の種別が別に表示中だと閉じても STATE_NORMAL を送らないので、ここに足す種別は
+/// `window-mutex-groups.json` で既存の種別と双方向に排他にする(併存させると、後から閉じた側でも
+/// Unity が編集ステートに取り残される)。
 const EDIT_MODE_WINDOW_TYPES: &[&str] = &[
     "parcel_creation",
     "path_build",
     "infra_build",
     "track_build",
     "building_construction",
+    "resource_edit",
+    "prop_placement",
     "transit_management",
     "transit_creation",
     // 建物の選択で入力プリセットを上書きする(MODE_PICK_BUILDING)。選択待ちのまま閉じても戻すため。
@@ -843,8 +861,7 @@ pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) 
 
     // 編集モードのウィンドウが閉じられたら STATE_NORMAL に戻す。
     // ただし、他に編集モードのウィンドウがまだ表示中の場合は戻さない。
-    // 例えば道路敷設中に誤って地区パネルを開いて閉じた場合、
-    // 道路敷設を継続できるよう、STATE_NORMAL への強制遷移を防ぐ。
+    // 例えば公共交通の一覧を閉じても、そこから開いた新設パネルの路線設置(STATE_EDIT_TRANSIT)は続ける。
     // 建設確定後に計画表示に切り替える処理は、UI 側の各パネルで確定ボタン押下時に個別に行う。
     // ここでは一律で view:change_view を送らない。
     if let Some(ref wt) = window_type {

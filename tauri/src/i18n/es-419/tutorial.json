@@ -50,11 +50,11 @@
       },
       "step5": {
         "title": "Abramos el detalle del distrito",
-        "description": "Resulta que en el distrito recién creado hay una veta mineral. Parece buena idea destinar esta zona a una cantera. Haz clic en la etiqueta del distrito recién creado para abrir su panel de detalle."
+        "description": "Resulta que en el distrito recién creado hay una veta mineral. Parece buena idea destinar esta zona a una mina. Haz clic en la etiqueta del distrito recién creado para abrir su panel de detalle."
       },
       "step6": {
         "title": "Definamos la normativa de construcción",
-        "description": "En la normativa de construcción, en la parte baja del panel, puedes elegir qué edificios pueden levantarse en las parcelas de este distrito. Como aquí solo queremos canteras, haz clic en todos los demás edificios para desactivarlos."
+        "description": "En la normativa de construcción, en la parte baja del panel, puedes elegir qué edificios pueden levantarse en las parcelas de este distrito. Como aquí solo queremos minas, haz clic en todos los demás edificios para desactivarlos."
       },
       "step7": {
         "title": "Revisemos una parcela",
@@ -62,7 +62,7 @@
       },
       "step8": {
         "title": "La normativa se aplicó",
-        "description": "Si miras la parte baja del panel de la parcela, verás que se refleja la restricción del distrito que solo permite canteras. En esta parcela ya no se puede construir nada que no sea una cantera."
+        "description": "Si miras la parte baja del panel de la parcela, verás que se refleja la restricción del distrito que solo permite minas. En esta parcela ya no se puede construir nada que no sea una mina."
       }
     },
     "scenario3": {
@@ -213,8 +213,8 @@
         "description": "Inspeccionar el yacimiento。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
       },
       "step2": {
-        "title": "Construir una cantera",
-        "description": "Construir una cantera。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+        "title": "Construir una mina",
+        "description": "Construir una mina。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
       },
       "step3": {
         "title": "Construir una estación de carga de mineral",

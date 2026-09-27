@@ -173,7 +173,7 @@ function getLegendInfo(layerId: string, modeId: string): LegendInfo {
             { color: "#fbc02d", label: "工場" },
             { color: "#9c27b0", label: "オフィス" },
             { color: "#795548", label: "農地" },
-            { color: "#ff9800", label: "採石場" },
+            { color: "#ff9800", label: "鉱山" },
             { color: "#00bcd4", label: "港" },
             { color: "#9e9e9e", label: "その他" },
             { color: "#f44336", label: "公共施設" },

@@ -50,11 +50,11 @@
       },
       "step5": {
         "title": "Ouvrons le détail du quartier",
-        "description": "On constate qu'un filon se trouve à l'emplacement du quartier nouvellement créé. Cette zone semble se prêter à une carrière. Cliquez sur l'étiquette du nouveau quartier pour ouvrir son panneau de détail."
+        "description": "On constate qu'un filon se trouve à l'emplacement du quartier nouvellement créé. Cette zone semble se prêter à une mine. Cliquez sur l'étiquette du nouveau quartier pour ouvrir son panneau de détail."
       },
       "step6": {
         "title": "Définissons la réglementation de construction",
-        "description": "Dans la réglementation de construction, en bas du panneau, vous pouvez choisir quels bâtiments sont autorisés sur les parcelles de ce quartier. Ici, nous ne voulons que des carrières : cliquez sur tous les autres bâtiments pour les désactiver."
+        "description": "Dans la réglementation de construction, en bas du panneau, vous pouvez choisir quels bâtiments sont autorisés sur les parcelles de ce quartier. Ici, nous ne voulons que des mines : cliquez sur tous les autres bâtiments pour les désactiver."
       },
       "step7": {
         "title": "Vérifions une parcelle",
@@ -62,7 +62,7 @@
       },
       "step8": {
         "title": "La réglementation est appliquée",
-        "description": "En regardant le bas du panneau de la parcelle, vous voyez que la restriction définie au niveau du quartier — n'autoriser que les carrières — est bien répercutée. Sur cette parcelle, il n'est plus possible de construire autre chose qu'une carrière."
+        "description": "En regardant le bas du panneau de la parcelle, vous voyez que la restriction définie au niveau du quartier — n'autoriser que les mines — est bien répercutée. Sur cette parcelle, il n'est plus possible de construire autre chose qu'une mine."
       }
     },
     "scenario3": {
@@ -213,8 +213,8 @@
         "description": "Inspecter le gisement。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
       },
       "step2": {
-        "title": "Construire une carrière",
-        "description": "Construire une carrière。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+        "title": "Construire une mine",
+        "description": "Construire une mine。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
       },
       "step3": {
         "title": "Construire la gare de chargement",

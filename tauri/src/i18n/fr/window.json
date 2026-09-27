@@ -22,7 +22,7 @@
     "save_load": "Sauvegarder / Charger",
     "save_list": "Liste des sauvegardes",
     "new_game": "Nouvelle partie",
-    "city_rename": "Renommer la ville",
+    "city_rename": "Paramètres de la ville",
     "resource_detail": "Détail de la ressource",
     "achievements": "Succès",
     "city_regulation": "Réglementations",
@@ -82,7 +82,7 @@
   },
   "cityRename": {
     "label": "Nom de la ville",
-    "tooltip": "Cliquez pour renommer la ville"
+    "tooltip": "Cliquer pour ouvrir les paramètres de la ville"
   },
   "taskbar": {
     "menuMap": "Carte",

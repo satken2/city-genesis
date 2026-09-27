@@ -22,7 +22,7 @@
     "save_load": "存档・读档",
     "save_list": "存档列表",
     "new_game": "新游戏",
-    "city_rename": "修改城市名称",
+    "city_rename": "城市设置",
     "resource_detail": "资源详情",
     "achievements": "成就",
     "city_regulation": "法规",
@@ -82,7 +82,7 @@
   },
   "cityRename": {
     "label": "城市名称",
-    "tooltip": "点击修改城市名称"
+    "tooltip": "点击打开城市设置"
   },
   "taskbar": {
     "menuMap": "地图",

@@ -566,8 +566,8 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
         targetElementId: undefined,
       },
       {
-        // 地区の建築規制で採石場のみを許可する。
-        // 完了条件: 右上の道路が属する地区の allowed_bd_mask が採石場のみであること。
+        // 地区の建築規制で鉱山のみを許可する。
+        // 完了条件: 右上の道路が属する地区の allowed_bd_mask が鉱山のみであること。
         id: 6,
         image: getStepImage(6),
         titleKey: "tutorial.scenario2.step6.title",

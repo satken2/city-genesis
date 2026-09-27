@@ -27,9 +27,21 @@ using GeneratedModels;
 /// 土地区画ポリゴンに沿って描画する。タイル（tile）は敷かない。
 /// コライダーは土地区画ポリゴンを描画された最大高さまで押し出す
 /// （区画のどこをクリックしても建物を選択できるようにするため）。
+///
+/// 露天掘り（MODEL_OPEN_PIT）も同じ組み立てで、設備は前庭に並んだサブ建物として届く。
+/// 区画の奥はバックエンドが地形そのものを掘り下げた穴なので、区画を押し出した形
+/// （コライダー・白い箱）で穴を塞がず、地形に沿う区画の面と設備の箱をコライダーにする。
 /// </summary>
 public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
 {
+    private readonly bool openPit;
+
+    /// <param name="openPit">露天掘り（MODEL_OPEN_PIT）として生成する。</param>
+    public MashupBuildingMeshBuilder(bool openPit = false)
+    {
+        this.openPit = openPit;
+    }
+
     /// <summary>
     /// BuildingSummary からマッシュアップ建物メッシュを生成する。
     /// isDynamic が true の場合、フェンス・地面パネルを地形に追従させる。
@@ -58,7 +70,9 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
 
         // --- サブ建物の積み上げ ---
         // maxTopY は描画された最も高いサブ建物の天端（ローカルY）。コライダーの高さに使う。
+        // facilityBounds は露天掘りのコライダーに使う棟ごとの外接箱（建物ローカル座標）。
         float maxTopY = 0f;
+        var facilityBounds = new List<Bounds>();
         if (buildingData.sub_buildings != null)
         {
             foreach (SubBuildingPlacement placement in buildingData.sub_buildings)
@@ -70,10 +84,15 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
                         $"[Mashup] agent_id={buildingData.agent_id} の sub_buildings に不正なエントリがあるためスキップします。");
                     continue;
                 }
+                int firstMesh = temporaryMeshes.Count;
                 float topY = GenerateSubBuilding(
                     placement, glbPrefix, variantNumber, floorHeight, centerPointWorld,
                     combineInstances, materials, temporaryMeshes);
                 maxTopY = Mathf.Max(maxTopY, topY);
+                if (openPit && TryEncapsulate(temporaryMeshes, firstMesh, out Bounds bounds))
+                {
+                    facilityBounds.Add(bounds);
+                }
             }
         }
 
@@ -92,7 +111,7 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
             centerPointWorld, deformToTerrain: isDynamic,
             combineInstances, materials, temporaryMeshes);
 
-        if (combineInstances.Count == 0)
+        if (combineInstances.Count == 0 && !openPit)
         {
             // サブ建物が未登録で敷地装飾パーツも無い場合は、建物底面の白い箱で存在だけ示す。
             CleanupMeshes(temporaryMeshes);
@@ -108,11 +127,20 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
         CleanupMeshes(temporaryMeshes);
 
         // コライダーは土地区画全体（取得できなければ建物底面）を描画された最大高さまで押し出す。
+        // 露天掘りは建物の原点が穴の底にあり押し出すと前庭に届かないので、地形に沿う面と設備の箱にする。
         Vector2[] colliderFootprint = sitePolygon;
         float colliderHeight = Mathf.Max(maxTopY, floorHeight);
-        Mesh colliderMesh = (colliderFootprint != null && colliderFootprint.Length >= 3)
-            ? BuildingMeshBuilder.GenerateColliderMesh(colliderFootprint, colliderHeight)
-            : null;
+        Mesh colliderMesh;
+        if (openPit)
+        {
+            colliderMesh = GenerateOpenPitCollider(colliderFootprint, centerPointWorld, facilityBounds);
+        }
+        else
+        {
+            colliderMesh = (colliderFootprint != null && colliderFootprint.Length >= 3)
+                ? BuildingMeshBuilder.GenerateColliderMesh(colliderFootprint, colliderHeight)
+                : null;
+        }
 
         // セル数×パーツ数でサブメッシュが増えるため、同一マテリアルを統合してドローコールを抑える。
         return BuildingMeshBuilder.MergeSubMeshes(new BuildingMeshResult(finalMesh, materials.ToArray(), colliderMesh));
@@ -256,6 +284,69 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
         });
         materials.Add(null);
         temporaryMeshes.Add(box);
+    }
+
+    /// <summary>
+    /// temporaryMeshes の firstMesh 以降（1棟分のパーツ。配置変換済み）の外接箱を返す。
+    /// </summary>
+    private static bool TryEncapsulate(List<Mesh> meshes, int firstMesh, out Bounds bounds)
+    {
+        bounds = default;
+        bool found = false;
+        for (int i = firstMesh; i < meshes.Count; i++)
+        {
+            if (meshes[i] == null) continue;
+            if (!found)
+            {
+                bounds = meshes[i].bounds;
+                found = true;
+            }
+            else
+            {
+                bounds.Encapsulate(meshes[i].bounds);
+            }
+        }
+        return found;
+    }
+
+    /// <summary>
+    /// 露天掘りのコライダー。区画を地形に沿って覆う面（穴の底・段・前庭のどこでもクリックできる）と、
+    /// 設備ごとの外接箱（横から見た設備もクリックできる）を結合する。
+    /// </summary>
+    private static Mesh GenerateOpenPitCollider(Vector2[] sitePolygon, Vector3 centerPointWorld, List<Bounds> facilityBounds)
+    {
+        var parts = new List<CombineInstance>();
+        var owned = new List<Mesh>();
+        Mesh ground = ModularBodyBuilder.GenerateTerrainConformingFloorMesh(sitePolygon, centerPointWorld);
+        if (ground != null)
+        {
+            owned.Add(ground);
+            parts.Add(new CombineInstance { mesh = ground, transform = Matrix4x4.identity });
+        }
+        foreach (Bounds b in facilityBounds)
+        {
+            Vector2[] rect =
+            {
+                new Vector2(b.min.x, b.min.z),
+                new Vector2(b.max.x, b.min.z),
+                new Vector2(b.max.x, b.max.z),
+                new Vector2(b.min.x, b.max.z),
+            };
+            Mesh box = BuildingMeshBuilder.GenerateColliderMesh(rect, Mathf.Max(0.1f, b.size.y));
+            if (box == null) continue;
+            owned.Add(box);
+            parts.Add(new CombineInstance { mesh = box, transform = Matrix4x4.Translate(new Vector3(0f, b.min.y, 0f)) });
+        }
+        if (parts.Count == 0)
+        {
+            CleanupMeshes(owned);
+            return null;
+        }
+        var collider = new Mesh { name = "OpenPitCollider", indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
+        collider.CombineMeshes(parts.ToArray(), true, true);
+        collider.RecalculateBounds();
+        CleanupMeshes(owned);
+        return collider;
     }
 
     /// <summary>

@@ -104,6 +104,8 @@ export const TRAY_ICONS: HudIconDef[] = [
  * 上書きする(MODE_PICK_BUILDING)ため同じ扱いにする。
  * これらを開くと Unity は STATE_REMOVE_OBJECTS を上書きするため、
  * ブルドーザ・地区編集トグルを連動して OFF にする必要がある。
+ * 引くのは `IconPanel` がクリックされたアイコンの `windowType` だけなので、`MENU_ICONS` から開く種別だけを載せる。
+ * 閉じたときに STATE_NORMAL へ戻す Rust 側(`window.rs`)の同名の一覧とは別物。
  */
 export const EDIT_MODE_WINDOW_TYPES = new Set<string>([
   "path_build",

@@ -22,7 +22,7 @@
     "save_load": "세이브・로드",
     "save_list": "세이브 데이터 목록",
     "new_game": "새 게임",
-    "city_rename": "도시 이름 변경",
+    "city_rename": "도시 설정",
     "resource_detail": "천연자원 상세",
     "achievements": "업적",
     "city_regulation": "규제",
@@ -82,7 +82,7 @@
   },
   "cityRename": {
     "label": "도시 이름",
-    "tooltip": "클릭하여 도시 이름 변경"
+    "tooltip": "클릭하여 도시 설정 열기"
   },
   "taskbar": {
     "menuMap": "지도",

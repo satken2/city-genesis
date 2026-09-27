@@ -1,0 +1,34 @@
+{
+  "citySettings": {
+    "general": "Datos de la ciudad",
+    "approximation": "Aproximación de la simulación",
+    "intro": "Se planean opciones para simplificar los cálculos en ciudades grandes. Aún no se pueden cambiar estos ajustes.",
+    "warning": "Estos cambios pueden afectar el equilibrio del juego. No se pueden deshacer.",
+    "irreversible": "Los efectos de la aproximación permanecen en épocas posteriores. Una vez activada, no se podrá desactivar ni reducir.",
+    "undecided": "Por definir",
+    "candidates": "opciones como máximo",
+    "epochs": "épocas entre revisiones",
+    "off": "No",
+    "on": "Sí",
+    "goods": {
+      "label": "Opciones de compra",
+      "description": "Limita los proveedores comparados por precio y distancia."
+    },
+    "jobs": {
+      "label": "Opciones de empleo",
+      "description": "Limita los empleadores comparados por salario y condiciones de traslado."
+    },
+    "housing": {
+      "label": "Opciones de vivienda",
+      "description": "Limita las viviendas comparadas por renta y ubicación."
+    },
+    "interval": {
+      "label": "Intervalo de decisiones habituales",
+      "description": "Revisa con menor frecuencia las opciones de compras, empleo y vivienda."
+    },
+    "aggregation": {
+      "label": "Agrupar ciudadanos y hogares similares",
+      "description": "Toma algunas decisiones en conjunto para ciudadanos u hogares con condiciones similares."
+    }
+  }
+}

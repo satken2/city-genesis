@@ -22,7 +22,7 @@
     "save_load": "Save / Load",
     "save_list": "Save Data List",
     "new_game": "New Game",
-    "city_rename": "Rename City",
+    "city_rename": "City settings",
     "resource_detail": "Resource Details",
     "achievements": "Achievements",
     "city_regulation": "Regulations",
@@ -82,7 +82,7 @@
   },
   "cityRename": {
     "label": "City name",
-    "tooltip": "Click to rename the city"
+    "tooltip": "Click to open city settings"
   },
   "taskbar": {
     "menuMap": "Map",

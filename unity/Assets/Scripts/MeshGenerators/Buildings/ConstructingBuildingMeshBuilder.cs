@@ -35,7 +35,7 @@ using GeneratedModels;
 /// このビルダーが再実行され、足場・建機が伸びていく（解体中も同一ロジック）。
 ///
 /// 既知の割り切り:
-/// - MODEL_MODULAR_GROUND（畑・庭）と MODEL_PORT（岸壁）は土マウンドのみ（足場・建機なし）。
+/// - MODEL_MODULAR_GROUND（畑・庭）・MODEL_PORT（岸壁）・MODEL_OPEN_PIT（露天掘り）は土マウンドのみ（足場・建機なし）。
 /// - MODEL_PORT では敷地が海岸線を含むため、土が海面上に描かれることがある。
 /// </summary>
 public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
@@ -124,12 +124,13 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
         }
 
         // --- 3. 足場リングとクレーン ---
-        // 地面アセット（畑・庭）・岸壁・車両基地には足場・クレーンを立てない（土のみの現場表現）
+        // 地面アセット（畑・庭）・岸壁・車両基地・露天掘りには足場・クレーンを立てない（土のみの現場表現）
         bool wantsStructures = footprint != null
             && modelType != Constants.MODEL_MODULAR_GROUND
             && !BuildingMeshBuilder.IsOpenSpaceModel(modelType)
             && modelType != Constants.MODEL_PORT
-            && modelType != Constants.MODEL_RAIL_YARD;
+            && modelType != Constants.MODEL_RAIL_YARD
+            && modelType != Constants.MODEL_OPEN_PIT;
 
         if (wantsStructures)
         {

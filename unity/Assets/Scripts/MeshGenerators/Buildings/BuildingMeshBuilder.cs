@@ -14,6 +14,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     private static readonly IBuildingMeshGenerator prebuiltGenerator = new PreBuiltBuildingMeshBuilder();
     private static readonly IBuildingMeshGenerator portGenerator = new PortBuildingMeshBuilder();
     private static readonly IBuildingMeshGenerator mashupGenerator = new MashupBuildingMeshBuilder();
+    private static readonly IBuildingMeshGenerator openPitGenerator = new MashupBuildingMeshBuilder(openPit: true);
     private static readonly IBuildingMeshGenerator railYardGenerator = new RailYardBuildingMeshBuilder();
     private static readonly IBuildingMeshGenerator openSpaceGenerator = new OpenSpaceBuildingMeshBuilder();
     private static readonly ConstructingBuildingMeshBuilder constructingGenerator = new ConstructingBuildingMeshBuilder(ConstructionSiteProfile.Construction);
@@ -73,9 +74,14 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// 遠景は数が最も多いので、フル詳細と同じ組み立てを走らせてマテリアルだけ差し替える方式は使わない。
     /// 工事中・解体中は箱の高さを1階分にして「まだ建っていない」ことを遠目にも保ち、
     /// 倒壊は瓦礫の高さ(0.5階分)にする。
+    /// 露天掘りは何も描かない。穴は地形そのもので、中心位置の高さに置く箱や板は穴に蓋をしてしまう。
     /// </summary>
     public static BuildingMeshResult GenerateFarBuilding(BuildingSummary buildingData)
     {
+        if (GetModelType(buildingData) == Constants.MODEL_OPEN_PIT)
+        {
+            return new BuildingMeshResult(new Mesh(), null);
+        }
         if (buildingData.status != Constants.STATUS_CONSTRUCTING
             && buildingData.status != Constants.STATUS_DEMOLISHING
             && buildingData.status != Constants.STATUS_COLLAPSED)
@@ -170,6 +176,9 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
                 break;
             case Constants.MODEL_MASHUP:
                 result = mashupGenerator.Generate(buildingData, isDynamic);
+                break;
+            case Constants.MODEL_OPEN_PIT:
+                result = openPitGenerator.Generate(buildingData, isDynamic);
                 break;
             case Constants.MODEL_RAIL_YARD:
                 result = railYardGenerator.Generate(buildingData, isDynamic);

@@ -136,10 +136,11 @@ public class MeshTestController : MonoBehaviour
         // model_type はバリアントだけで決まるため、底面ポリゴンを作る前に判定できる。
         int modelType = BuildingMeshBuilder.GetModelType(new BuildingSummary { variant = variant });
 
-        // マッシュアップ建物の底面は建物本体ではなく複数の棟を並べる土地区画なので、
+        // マッシュアップ建物(露天掘りを含む)の底面は建物本体ではなく複数の棟を並べる土地区画なので、
         // 入力サイズのままだと最大の棟(4×6セル=32m×48m)すら収まらず配置に失敗する。
         // 主要な棟が確実に収まる広さの区画を固定で与える。
-        if (modelType == Constants.MODEL_MASHUP)
+        bool hasSubBuildings = modelType == Constants.MODEL_MASHUP || modelType == Constants.MODEL_OPEN_PIT;
+        if (hasSubBuildings)
         {
             width = MASHUP_PARCEL_WIDTH;
             height = MASHUP_PARCEL_DEPTH;
@@ -153,9 +154,10 @@ public class MeshTestController : MonoBehaviour
         // マッシュアップ建物は配置計画(sub_buildings)が無いと白い箱になるため、
         // バックエンドと同じアルゴリズムの移植(TestSubBuildingLayout)で自前生成する。
         // テストでは底面ポリゴンをそのまま土地区画とみなす。
-        if (modelType == Constants.MODEL_MASHUP)
+        if (hasSubBuildings)
         {
-            buildingData.sub_buildings = TestSubBuildingLayout.Generate(variant, ToVector2Polygon(polygonCoords), floors);
+            buildingData.sub_buildings = TestSubBuildingLayout.Generate(
+                variant, ToVector2Polygon(polygonCoords), floors, modelType == Constants.MODEL_OPEN_PIT);
             if (buildingData.sub_buildings == null)
             {
                 Debug.LogWarning($"[MeshTest] variant={variant} は subbuilding_master に棟定義が無いため、サブ建物なしで生成します。");

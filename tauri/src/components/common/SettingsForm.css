@@ -1,0 +1,291 @@
+/**
+ * 設定フォームの共通スタイル定義
+ *
+ * 意匠はトップメニュー系のウィンドウ(ニューゲーム・セーブ/ロード)と揃える:
+ * 枠線・角丸・発光を使わず、ベタ塗りの四角と落ち影だけで面の高さを表す。
+ * 配色は App.css の --flat-* トークンが唯一の正なので、直値を書かないこと。
+ *
+ * 構成は「グループ見出し + 設定行を積んだカード」の縦並び。
+ * 1行は左に項目名(と補足文)、右に操作UIを置く。行同士は2pxの隙間で分け、
+ * 隙間から沈んだ面色が覗くことで区切り線の代わりにする。
+ *
+ * 寸法は rem ではなく px で指定する。ルートのフォントサイズは本ウィンドウで
+ * 変更する設定項目そのものであり、rem だと文字サイズを変えた瞬間に
+ * 設定画面自体のレイアウトが崩れるため。
+ */
+
+.settings-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  height: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 見出しは左端の実線ブロックで段を示す */
+.settings-group-title {
+  margin: 0;
+  padding: 2px 0 2px 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--flat-text);
+  box-shadow: inset 4px 0 0 var(--flat-accent);
+}
+
+/* 下地の沈んだ面が行間の隙間から覗き、罫線を引かずに行を分ける */
+.settings-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background-color: var(--flat-sunken);
+  box-shadow: var(--flat-shadow);
+}
+
+.settings-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 12px 14px;
+  background-color: var(--flat-surface);
+}
+
+.settings-row-label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.settings-row-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--flat-text);
+}
+
+.settings-row-desc {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--flat-text-muted);
+}
+
+/* 操作UIは右端に寄せる。行が狭いときは折り返して下段へ落ちる */
+.settings-row-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* 項目名の右に添える「Coming soon」の札 */
+.settings-row-badge {
+  margin-left: 8px;
+  padding: 2px 6px;
+  background-color: var(--flat-sunken);
+  color: var(--flat-text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* 未提供の項目。項目名は読める濃さを残し、操作UIだけ沈めてクリックも通さない */
+.settings-row--disabled .settings-row-name {
+  color: var(--flat-text-muted);
+}
+
+.settings-row--disabled .settings-row-control {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* 音量スライダーのように操作UIを横幅いっぱいに使う行 */
+.settings-row--stretch .settings-row-label {
+  flex: 0 0 150px;
+}
+
+.settings-row--stretch .settings-row-control {
+  flex: 1 1 180px;
+}
+
+/* =========================================================================
+ * セグメント選択(プリセット・二択・CPU/GPU で共用)
+ * ========================================================================= */
+
+/* 溝の上にボタンを2px間隔で並べ、ひと続きの操作系であることを示す */
+.settings-seg {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  background-color: var(--flat-sunken);
+}
+
+.settings-seg-btn {
+  min-width: 56px;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 0;
+  background-color: var(--flat-raised);
+  color: var(--flat-text-body);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.settings-seg-btn:hover:not(:disabled) {
+  background-color: var(--flat-raised-hover);
+}
+
+/* 選択中は下端の実線ブロックで示す(左端ブロックは横並びだと読み取りづらいため) */
+.settings-seg-btn.active {
+  background-color: var(--flat-selected);
+  color: #ffffff;
+  box-shadow: inset 0 -3px 0 var(--flat-accent);
+}
+
+.settings-seg-btn:disabled {
+  cursor: not-allowed;
+}
+
+/* 選択中でない無効ボタンだけを沈ませる(選択中は現在値の表示として色を保つ) */
+.settings-seg-btn:disabled:not(.active) {
+  opacity: 0.5;
+}
+
+/* プリセットの実サイズ(18pxなど)をラベルの下に小さく添える */
+.settings-seg-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+/* =========================================================================
+ * 数値入力・プルダウン・ボタン
+ * ========================================================================= */
+
+.settings-number {
+  width: 56px;
+  padding: 7px 8px;
+  border: none;
+  border-radius: 0;
+  background-color: var(--flat-sunken);
+  color: var(--flat-text);
+  font-family: inherit;
+  font-size: 12px;
+  text-align: right;
+  outline: none;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.settings-number:focus {
+  background-color: var(--flat-raised);
+  box-shadow: inset 0 -2px 0 var(--flat-accent);
+}
+
+/* スピンボタンは幅を食うだけで押しづらいので消す */
+.settings-number::-webkit-inner-spin-button,
+.settings-number::-webkit-outer-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+.settings-unit {
+  font-size: 11px;
+  color: var(--flat-text-muted);
+}
+
+/* 三角マークを重ねるため、プルダウンは相対配置のラッパで包む */
+.settings-select-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.settings-select {
+  appearance: none;
+  min-width: 190px;
+  padding: 8px 32px 8px 12px;
+  border: none;
+  border-radius: 0;
+  background-color: var(--flat-raised);
+  color: var(--flat-text);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.settings-select:hover {
+  background-color: var(--flat-raised-hover);
+}
+
+.settings-select:focus {
+  box-shadow: inset 0 -2px 0 var(--flat-accent);
+}
+
+/* 展開中のリストはブラウザ描画なので、最低限の配色だけ合わせる */
+.settings-select option {
+  background-color: var(--flat-surface);
+  color: var(--flat-text);
+}
+
+.settings-select-wrap::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 13px;
+  width: 6px;
+  height: 6px;
+  margin-top: -5px;
+  border-right: 2px solid var(--flat-accent);
+  border-bottom: 2px solid var(--flat-accent);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.settings-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 0;
+  background-color: var(--flat-raised);
+  color: var(--flat-text-body);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.settings-btn:hover:not(:disabled) {
+  background-color: var(--flat-raised-hover);
+}
+
+.settings-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 左右の山括弧はラベルより一段明るくして方向を目立たせる */
+.settings-btn-chevron {
+  color: var(--flat-accent);
+  font-weight: 700;
+}
+

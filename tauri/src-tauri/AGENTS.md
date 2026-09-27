@@ -41,7 +41,10 @@ Tauri(Rust)側。ウィンドウ管理(HUD・ポップアップ・Tips)、Unity�
 - 新しいウィンドウラベルは`capabilities/default.json`の`windows`にも追加する(漏れるとそのウィンドウからTauriコマンドを呼べない。ポップアップは`popup-*`で網羅済み)。
 - topmostの打ち直しは`reassert_topmost`(HWNDへ直接`SetWindowPos(HWND_TOPMOST)`)で行う。`set_always_on_top(true)`ではtaoが新旧フラグに差分が無いと`SetWindowPos`を発行せず、裏に回った状態から戻れない。呼び出し箇所は`set_hud_visible(true)`直後・`WindowEvent::Focused(false)`・`system:focus_gained`・`system:graphic_ready`。
 - ポップアップのクローズは破棄ではなく非表示+LRU再利用(`MAX_HIDDEN_WINDOWS`)。閉じたときの後始末(`STATE_NORMAL`復帰、ハイライト消去、`edit_path:cancel_topology_edit`・`edit_road:cancel`・`edit_zone:finish_merge {merged:0}`等)はReactのアンマウントでは走らないので`close_window_by_label`に書く。LRU上限での本破棄時には再実行しない。
-- `EDIT_MODE_WINDOW_TYPES`は「閉じたらUnityを`STATE_NORMAL`へ戻すウィンドウ」の一覧。編集ステートに入るものに加え、`view:apply_preset`で表示を差し替えるもの(`transit_management`・`transit_creation`)や入力プリセットを上書きするもの(`agent_creation`)も含める。他の編集ウィンドウが表示中なら送らない。
+- `EDIT_MODE_WINDOW_TYPES`は「閉じたらUnityを`STATE_NORMAL`へ戻すウィンドウ」の一覧。編集ステートに入るもの(`resource_edit`・`prop_placement`を含む)に加え、`view:apply_preset`で表示を差し替えるもの(`transit_management`・`transit_creation`)や入力プリセットを上書きするもの(`agent_creation`)も含める。パネルのアンマウント時の`STATE_NORMAL`は×では走らないので、編集ステートに入るウィンドウを足し忘れるとUnityが編集ステートのまま固まる。
+  - 一覧の別の種別が表示中なら送らない。併存させると後から閉じた側でも戻らないので、一覧に足す種別は`window-mutex-groups.json`で既存の種別と双方向に排他にする(キーは開く側の種別なので両方向に書く)。
+  - UI側`hud/hudCommon.ts`の同名の集合は「HUDのアイコンから開くとブルドーザ・地区編集を解除する」一覧で、対象も意味も別。
+- 排他グループは新規に開くときだけでなく、非表示(再利用待ち)ウィンドウの再表示でも適用する。
 - 他のモードを巻き込んではいけないパネル(`road_detail`・`path_detail`)はこの一覧に入れず、対象IDを載せた専用cancelを送る。
 - 再利用でもReactの状態は`open_seq`(世代番号)で必ずリセットされる。非表示→再表示と転用でインクリメントして`WindowContextDto`で配り、`App.tsx`が再マウントキーに含める。表示中への再オープン要求では増やさない。ラベルは不変で、転用は`window-context-updated`で新contextを配る。
 - ジオメトリ記憶(`saved_geometries`)は内側(クライアント領域)基準。`outer_size`で記憶すると復元側の`set_size`が内側基準なので開き直すたびに枠の分だけ膨張する。

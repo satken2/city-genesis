@@ -5,7 +5,7 @@
  * ウィンドウのタイトルバーは App.tsx の titlebar コンポーネントが担当するため、
  * 本コンポーネント内にはタイトルや閉じるボタンを含めない。
  *
- * 設定項目は4つのグループに分けて並べる:
+ * 設定項目は5つのグループに分けて並べる:
  * - 一般: 言語（対応言語は utils/locale.ts の SUPPORTED_LANGUAGES）、
  *   文字サイズ（プリセット大・中・小またはカスタム入力 8〜32px）、ヒントバーの表示
  * - 画面: HUD(アイコンパネル・コックピット・システムトレイ)を別のモニターに移動する、
@@ -20,7 +20,6 @@ import {
   useEffect,
   useState,
   type CSSProperties,
-  type ReactNode,
 } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useTranslation } from "react-i18next";
@@ -33,6 +32,7 @@ import {
   isSupportedLanguage,
   resolveSupportedLanguage,
 } from "../../utils/locale";
+import { SettingsRow } from "../common/SettingsRow";
 import "./SettingsWindow.css";
 
 /**
@@ -58,47 +58,6 @@ const FONT_SIZE_MAX = 32;
  * true に戻すだけで状態取得・切り替え・再起動の一連の動作が復活する。
  */
 const COMPUTE_SETTING_ENABLED: boolean = false;
-
-/**
- * 設定1項目分の行
- * 左に項目名と補足文、右に操作UIを置く。
- * stretch を立てると操作UIが横幅いっぱいに伸びる(音量スライダー用)。
- * disabled は未提供の項目向けで、操作UIを沈ませてクリックも通さない。
- */
-function SettingsRow({
-  label,
-  description,
-  badge,
-  stretch = false,
-  disabled = false,
-  children,
-}: {
-  label: string;
-  description?: ReactNode;
-  badge?: string;
-  stretch?: boolean;
-  disabled?: boolean;
-  children: ReactNode;
-}) {
-  const modifiers = [
-    stretch ? "settings-row--stretch" : "",
-    disabled ? "settings-row--disabled" : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
-  return (
-    <div className={`settings-row ${modifiers}`}>
-      <div className="settings-row-label">
-        <span className="settings-row-name">
-          {label}
-          {badge != null && <span className="settings-row-badge">{badge}</span>}
-        </span>
-        {description != null && <span className="settings-row-desc">{description}</span>}
-      </div>
-      <div className="settings-row-control">{children}</div>
-    </div>
-  );
-}
 
 export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t, i18n } = useTranslation();

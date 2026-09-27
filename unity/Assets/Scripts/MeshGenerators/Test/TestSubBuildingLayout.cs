@@ -61,7 +61,8 @@ public static class TestSubBuildingLayout
     /// <param name="variant">建物バリアント</param>
     /// <param name="parcelPolygon">土地区画とみなすポリゴン(中心原点のローカルXZ座標)</param>
     /// <param name="parentFloors">親建物の階数(棟ごとの階数の導出元)</param>
-    public static List<SubBuildingPlacement> Generate(int variant, Vector2[] parcelPolygon, int parentFloors)
+    /// <param name="openPit">露天掘り(MODEL_OPEN_PIT)。前庭のセルだけに配置する</param>
+    public static List<SubBuildingPlacement> Generate(int variant, Vector2[] parcelPolygon, int parentFloors, bool openPit = false)
     {
         if (MasterDataStore.Instance == null || !MasterDataStore.Instance.IsInitialized)
         {
@@ -81,6 +82,10 @@ public static class TestSubBuildingLayout
         }
 
         MashupGrid grid = BuildMashupCells(parcelPolygon, Constants.MASHUP_CELL_SIZE);
+        if (openPit)
+        {
+            KeepYardCells(grid, parcelPolygon, Constants.MASHUP_CELL_SIZE);
+        }
         if (grid.Cells.Count == 0)
         {
             Debug.LogWarning("[MeshTest] 区画が小さすぎるため、サブ建物を配置できませんでした。");
@@ -382,6 +387,20 @@ public static class TestSubBuildingLayout
         float su = (i + cellW * 0.5f) * Constants.MASHUP_CELL_SIZE;
         float sv = (j + cellH * 0.5f) * Constants.MASHUP_CELL_SIZE;
         return grid.Origin + grid.U * su + grid.V * sv;
+    }
+
+    /// <summary>
+    /// 露天掘りの前庭(前面辺から OPEN_PIT_YARD_DEPTH 以内)に全体が入るセルだけを残す。
+    /// 前面辺から敷地の奥へ向かう向きは、前面辺の中点から V 方向へわずかに進んだ点が区画に入るかで決める。
+    /// </summary>
+    private static void KeepYardCells(MashupGrid grid, Vector2[] polygon, float cellSize)
+    {
+        Vector2 middle = (grid.FrontA + grid.FrontB) * 0.5f;
+        Vector2 inward = PolygonUtils.Contains(polygon, middle + grid.V * 0.05f) ? grid.V : -grid.V;
+        float baseDepth = Vector2.Dot(grid.Origin - grid.FrontA, inward);
+        float step = Vector2.Dot(grid.V, inward);
+        grid.Cells.RemoveWhere(c => baseDepth + Mathf.Max(c.j * cellSize * step, (c.j + 1) * cellSize * step)
+            > Constants.OPEN_PIT_YARD_DEPTH + 1e-6f);
     }
 
     /// <summary>

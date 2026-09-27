@@ -1,84 +1,77 @@
-/**
- * 都市名変更ウィンドウのスタイル
- * 入力欄1つとボタン2つだけの小さなウィンドウで、ボタンは右下に寄せる。
- */
-
-.city-rename {
+/** フォームの意匠は SettingsRow の共通CSSを使い、ここでは都市設定の配置だけを補う。 */
+.city-settings {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 16px;
   height: 100%;
+  min-height: 0;
+}
+
+.city-settings .city-settings-body {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+}
+
+.city-settings .settings-group {
+  flex-shrink: 0;
+}
+
+.city-settings .city-settings-name {
+  width: 100%;
+  min-width: 0;
   box-sizing: border-box;
+  text-align: left;
 }
 
-.city-rename-label {
-  font-size: 13px;
-  color: #cccccc;
+.city-settings .settings-number[type="number"] {
+  width: 90px;
 }
 
-.city-rename-input {
-  padding: 8px 10px;
-  border: 1px solid #555555;
-  border-radius: 4px;
-  background-color: rgba(255, 255, 255, 0.06);
-  color: #ffffff;
-  font-size: 14px;
-}
-
-.city-rename-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-}
-
-.city-rename-input:disabled {
-  opacity: 0.6;
-}
-
-.city-rename-error {
+.city-settings-intro {
   margin: 0;
-  font-size: 13px;
-  color: #f87171;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--flat-text-muted);
 }
 
-.city-rename-actions {
+.city-settings-warning {
+  padding: 12px 14px;
+  background: var(--flat-warn-surface);
+  color: var(--flat-warn);
+  box-shadow: inset 4px 0 0 var(--flat-warn);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.city-settings-warning p {
+  margin: 6px 0 0;
+  color: var(--flat-text-body);
+}
+
+.city-settings-footer {
+  flex-shrink: 0;
+  padding: 12px 20px;
+  background: var(--flat-surface);
+}
+
+.city-settings-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
-  margin-top: auto;
 }
 
-.city-rename-save-btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  background-color: #3b82f6;
-  color: #ffffff;
-  font-size: 13px;
-  cursor: pointer;
-  transition: background-color 0.15s;
+.city-settings .city-settings-save {
+  background: var(--flat-selected);
+  color: var(--flat-text);
 }
 
-.city-rename-save-btn:hover:not(:disabled) {
-  background-color: #2563eb;
+.city-settings .city-settings-save:hover:not(:disabled) {
+  background: var(--flat-selected-hover);
 }
 
-.city-rename-save-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.city-rename-cancel-btn {
-  padding: 8px 16px;
-  border: 1px solid #555555;
-  border-radius: 4px;
-  background-color: transparent;
-  color: #cccccc;
-  font-size: 13px;
-  cursor: pointer;
-  transition: background-color 0.15s;
-}
-
-.city-rename-cancel-btn:hover {
-  background-color: rgba(255, 255, 255, 0.08);
+.city-settings-error {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: var(--flat-danger);
 }

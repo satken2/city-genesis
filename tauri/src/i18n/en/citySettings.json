@@ -1,0 +1,34 @@
+{
+  "citySettings": {
+    "general": "City details",
+    "approximation": "Simulation approximation",
+    "intro": "Options to simplify calculations for large cities are planned. These settings cannot be changed yet.",
+    "warning": "These changes may affect game balance. They cannot be undone.",
+    "irreversible": "Changes caused by approximation persist in later epochs. Once enabled, approximation cannot be disabled or reduced.",
+    "undecided": "TBD",
+    "candidates": "candidates max.",
+    "epochs": "epochs between reviews",
+    "off": "Off",
+    "on": "On",
+    "goods": {
+      "label": "Purchase candidates",
+      "description": "Limit the suppliers compared by price and distance."
+    },
+    "jobs": {
+      "label": "Job candidates",
+      "description": "Limit the employers compared by wages and commuting conditions."
+    },
+    "housing": {
+      "label": "Housing candidates",
+      "description": "Limit the homes compared by rent and location."
+    },
+    "interval": {
+      "label": "Routine decision interval",
+      "description": "Review shopping, job and housing choices less often."
+    },
+    "aggregation": {
+      "label": "Group similar citizens and households",
+      "description": "Make some decisions collectively for citizens or households with similar circumstances."
+    }
+  }
+}

@@ -48,7 +48,7 @@
 1. ドメインフォルダにコンポーネントを作る
 2. `App.tsx`にimportし、`SPECIALIZED_PANEL_TYPES`に追加して分岐を書く
 3. `src-tauri/config/window-registry.json`に定義(`empty_shell: true`で共通余白`.content`の`padding`が外れ、余白とスクロールをパネルが持つ)
-4. 排他にするウィンドウがあれば`window-mutex-groups.json`に追加
+4. 排他にするウィンドウがあれば`window-mutex-groups.json`に追加。Unityの編集ステートに入るウィンドウは`window.rs`の`EDIT_MODE_WINDOW_TYPES`に足し、既存の編集ウィンドウと双方向に排他にする(`src-tauri/AGENTS.md`)
 
 初期内容や新設/編集の使い分けは`params.extra`(`App.tsx`の`windowExtra`。`titleKey`でタイトル差し替え可)で渡す。イベントを投げてからウィンドウを開くと購読が間に合わない。
 
@@ -64,6 +64,7 @@
 | `Meter` / `DonutGauge` | 0〜1のメーター。`polarity="negative"`で悪さ指標。1超は全箇所一律に頭打ち+赤紫の発光 |
 | `FiscalSankey` | 財政Sankey。歳入項目の定義と支出カテゴリ色はここに置き、予算ウィンドウも共用 |
 | `ColorSwatchPicker` | 色選択。OSのカラーダイアログは最前面固定の透明ウィンドウの裏に開くので使わない |
+| `SettingsRow` / `SettingsForm.css` | アプリ設定・都市設定の共通フォーム。見出し・カード・設定行・Coming soon・セグメント選択・入力欄は同じ意匠を使う。`disabled` は表示用なので子の操作部品にもネイティブの `disabled` を指定する |
 
 このほか`SatisfactionFace`・`SpeedLimitSign`・グラフ類・`NumberStepper`・`Money`等がある。フック`hooks/useVariantAffordability`は資金目安でプルダウンを無効化する。
 
@@ -80,6 +81,8 @@
 ## 個別パネルの契約(知らないと壊すもの)
 
 - ロード画面(`taskbar/SaveListWindow`): 開くたびにセーブ一覧と現在のセーブ情報を`fetchApi`の`cache: "reload"`で取得する。画像URLへランダムなクエリは付けない。地形・セーブ・シナリオのサムネイルのキャッシュ期限は配信APIが2時間に設定する。
+
+- 都市設定(`taskbar/CityRenameWindow`、種別 `city_rename`): コックピットの都市名から開く。保存する値は都市名のみ。近似設定は Coming soon の無効な表示で、値の保持・送信を行わない。不可逆の警告は名称変更ではなく近似設定の節に置く。
 
 - ニューゲーム(`taskbar/NewGameWindow`): 地形の名称・自然地理の説明は全7言語の`terrainProfiles.json`に置き、`data/terrainProfiles.ts`で対象IDを管理する。収録地形の表示名は地形や景観を表す短い名称とし、実在・架空の固有地名を使わない。説明にも固有名詞・人間の都市・歴史・文化を含めない。マップIDは表示名と分けて維持する。気候はAPIの`climate`を`normalizeClimate`で正規化して`climate.<値>`で表示する。マップIDから別の気候を割り当てない。未指定時の既定は温暖湿潤であり、「未分類」ではない。サイズはkm、地表は`GroundCoverIcon`の自作SVGで表示する。
 - エポック実行(`taskbar/EpochConfirmWindow`): HTTPを日没と並行して開始し、黒幕の描画完了後だけ結果またはTipsへ進む。結果を閉じるまでは演出IDとHUD無効化を維持する。結果画面の終了はRustの共通クローズ処理が担当する。`TipsWindow`の`mode="epoch"`は初期ロードの開始ボタンを使わず、呼び出し元が処理完了時に閉じる。

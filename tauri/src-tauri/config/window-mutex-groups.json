@@ -27,11 +27,15 @@
   ],
   "building_construction": [
     "building_construction",
-    "agent_creation"
+    "agent_creation",
+    "resource_edit",
+    "prop_placement"
   ],
   "agent_creation": [
     "building_construction",
-    "agent_creation"
+    "agent_creation",
+    "resource_edit",
+    "prop_placement"
   ],
   "city_budget": [
     "city_budget"
@@ -46,7 +50,9 @@
     "city_statistics"
   ],
   "parcel_creation": [
-    "parcel_creation"
+    "parcel_creation",
+    "resource_edit",
+    "prop_placement"
   ],
   "natural_resources": [
     "natural_resources"
@@ -61,10 +67,53 @@
     "achievements"
   ],
   "path_build": [
-    "path_build"
+    "path_build",
+    "resource_edit",
+    "prop_placement"
+  ],
+  "infra_build": [
+    "infra_build",
+    "resource_edit",
+    "prop_placement"
+  ],
+  "track_build": [
+    "track_build",
+    "resource_edit",
+    "prop_placement"
+  ],
+  "transit_management": [
+    "transit_management",
+    "resource_edit",
+    "prop_placement"
+  ],
+  "transit_creation": [
+    "transit_creation",
+    "resource_edit",
+    "prop_placement"
+  ],
+  "prop_placement": [
+    "parcel_creation",
+    "path_build",
+    "infra_build",
+    "track_build",
+    "building_construction",
+    "transit_management",
+    "transit_creation",
+    "agent_creation",
+    "resource_edit",
+    "prop_placement"
   ],
   "resource_edit": [
-    "resource_edit"
+    "parcel_creation",
+    "path_build",
+    "infra_build",
+    "track_build",
+    "building_construction",
+    "transit_management",
+    "transit_creation",
+    "agent_creation",
+    "resource_edit",
+    "prop_placement"
   ],
   "save_load": [
     "save_load"

@@ -50,11 +50,11 @@
       },
       "step5": {
         "title": "Open District Details",
-        "description": "You can see there's an ore vein where you created the new district. This area looks like a good spot for a quarry. Click the label of the district you just created to open its detail panel. (Completion: the district detail panel is open.)"
+        "description": "You can see there's an ore vein where you created the new district. This area looks like a good spot for a mine. Click the label of the district you just created to open its detail panel. (Completion: the district detail panel is open.)"
       },
       "step6": {
         "title": "Set Building Regulations",
-        "description": "Using the building regulations near the bottom of the panel, you can choose which buildings may be built on the parcels in this district. We only want quarries here, so click every building other than the quarry to disable them. (Completion: only the quarry is allowed in the new district.)"
+        "description": "Using the building regulations near the bottom of the panel, you can choose which buildings may be built on the parcels in this district. We only want mines here, so click every building other than the mine to disable them. (Completion: only the mine is allowed in the new district.)"
       },
       "step7": {
         "title": "Check a Parcel",
@@ -62,7 +62,7 @@
       },
       "step8": {
         "title": "Regulation Applied",
-        "description": "Looking near the bottom of the parcel panel, you can see the district's regulation allowing only quarries is reflected here. You can no longer build anything other than a quarry on this parcel."
+        "description": "Looking near the bottom of the parcel panel, you can see the district's regulation allowing only mines is reflected here. You can no longer build anything other than a mine on this parcel."
       }
     },
     "scenario3": {
@@ -213,12 +213,12 @@
         "description": "Enable natural resources and open the marked inland deposit details."
       },
       "step2": {
-        "title": "Build a quarry",
-        "description": "Build a quarry on the marked ore parcel. Confirmation completes each facility."
+        "title": "Build a mine",
+        "description": "Build a mine on the marked ore parcel. Confirmation completes each facility."
       },
       "step3": {
         "title": "Build an ore loading station",
-        "description": "Build an ore loading station on the parcel beside the track north of the quarry."
+        "description": "Build an ore loading station on the parcel beside the track north of the mine."
       },
       "step4": {
         "title": "Build an ore unloading station",

@@ -41,14 +41,14 @@
     "track_build": "軌道建設",
     "infra_build": "インフラ建設",
     "mashup_edit": "サブ建物の配置",
-    "city_rename": "都市名の変更",
+    "city_rename": "都市設定",
     "path_shape_editor": "パス形状編集",
     "scenario_manager": "シナリオ管理",
     "scenario_metadata": "紹介情報"
   },
   "cityRename": {
     "label": "都市名",
-    "tooltip": "クリックして都市名を変更"
+    "tooltip": "クリックして都市設定を開く"
   },
   "cityMap": {
     "layers": {
