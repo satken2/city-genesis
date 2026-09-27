@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
 [DefaultExecutionOrder(-100)]
-public class CameraController : MonoBehaviour
+public partial class CameraController : MonoBehaviour
 {
     [Header("基準速度設定（バックエンド基準）")]
     public float baseMoveSpeed = 150.0f;    // カメラの移動速度（バックエンド基準）
@@ -89,7 +89,7 @@ public class CameraController : MonoBehaviour
     // TerrainManager の遅延取得を一度だけ試みたか。存在しないシーンで毎フレーム走査するのを防ぐ。
     private bool terrainManagerLookupDone = false;
 
-    // フライモードのキャプション表示に使う ModeTextDisplay 参照（初回に遅延取得）。
+    // カメラ専用モードのキャプション表示に使う参照（初回に遅延取得）。
     private ModeTextDisplay modeTextDisplayRef;
     private bool modeTextDisplayLookupDone = false;
 
@@ -232,6 +232,10 @@ public class CameraController : MonoBehaviour
         {
             flyModeButton.onClick.AddListener(ToggleFlyMode);
         }
+        if (cinematicModeButton != null)
+        {
+            cinematicModeButton.onClick.AddListener(ToggleCinematicMode);
+        }
         UpdateUIButtons();
 
         currentHeight = transform.position.y; // 初期の高さを記録
@@ -240,6 +244,7 @@ public class CameraController : MonoBehaviour
 
     private void OnDisable()
     {
+        StopCinematicMode();
         // MonoBehaviour が無効化される際にイベント購読を解除し、メモリリークを防ぐ
         if (GameStateManager.Instance != null)
         {
@@ -307,6 +312,7 @@ public class CameraController : MonoBehaviour
     /// </summary>
     public void SuspendCameraSync()
     {
+        StopCinematicMode();
         syncEnabled = false;
         syncDirty = false;
         if (applySessionCameraCoroutine != null)
@@ -424,15 +430,12 @@ public class CameraController : MonoBehaviour
     /// </summary>
     public void SetView(Vector3 position, Quaternion rotation)
     {
+        StopCinematicMode();
         if (cam == null)
         {
             cam = GetComponent<Camera>();
         }
-        EndMouseRotation();
-        StopFocus();
-        isMouseDragging = false;
-        isPendingDrag = false;
-        dragVelocity = Vector3.zero;
+        CancelCameraGestures();
 
         transform.position = position;
         transform.rotation = rotation;
@@ -455,6 +458,14 @@ public class CameraController : MonoBehaviour
 
     void Update()
     {
+        if (cinematicModeButton != null)
+            cinematicModeButton.interactable = IsCinematicMode || CanStartCinematicMode();
+        if (IsCinematicMode)
+        {
+            if (!CanStartCinematicMode()) StopCinematicMode();
+            else if (Application.isFocused) HandleCinematicMovement(Time.unscaledDeltaTime);
+            return;
+        }
         if (GameStateManager.Instance != null && !GameStateManager.Instance.IsWorldVisible) return;
         if (DriveMode.BlocksCamera) return;
         // GameStateManager を持つシーン（ゲーム本編）では、ゲーム開始前やロードによる
@@ -739,6 +750,7 @@ public class CameraController : MonoBehaviour
     {
         if (cam == null) return;
         if (isTopDownMode == enable) return;
+        StopCinematicMode();
 
         if (enable)
         {
@@ -786,6 +798,7 @@ public class CameraController : MonoBehaviour
 
         if (enable)
         {
+            StopCinematicMode();
             // フライモードは透視投影が前提。真上（正射）モード中なら解除する。
             if (isTopDownMode)
             {
@@ -793,11 +806,7 @@ public class CameraController : MonoBehaviour
             }
 
             // 進行中のマウス操作・フォーカス演出を打ち切り、フライモードの入力と競合させない。
-            EndMouseRotation();
-            StopFocus();
-            isMouseDragging = false;
-            isPendingDrag = false;
-            dragVelocity = Vector3.zero;
+            CancelCameraGestures();
 
             // 現在のカメラ向きからヨー・ピッチを初期化し、切り替え時に視線が飛ばないようにする。
             Vector3 euler = transform.rotation.eulerAngles;
@@ -812,7 +821,7 @@ public class CameraController : MonoBehaviour
 
             // ステートキャプションを STATE_FLY_MODE の案内に切り替える。
             // （マウス入力の無効化自体は InputHandler が IsFlyMode を見て行う。）
-            NotifyFlyModeCaption(true);
+            RefreshCameraModeCaption();
         }
         else
         {
@@ -826,17 +835,17 @@ public class CameraController : MonoBehaviour
             isFlyMode = false;
 
             // キャプションを直前のステートへ戻す。
-            NotifyFlyModeCaption(false);
+            RefreshCameraModeCaption();
         }
 
         UpdateUIButtons();
     }
 
     /// <summary>
-    /// フライモードの開始・終了に合わせてステートキャプション（ModeTextDisplay）を切り替える。
+    /// カメラ専用モードに合わせてステートキャプション（ModeTextDisplay）を切り替える。
     /// ModeTextDisplay が存在しないシーン（メッシュテスト等）では何もしない。
     /// </summary>
-    private void NotifyFlyModeCaption(bool entering)
+    private void RefreshCameraModeCaption()
     {
         if (modeTextDisplayRef == null)
         {
@@ -846,13 +855,18 @@ public class CameraController : MonoBehaviour
             if (modeTextDisplayRef == null) return;
         }
 
-        if (entering)
+        if (IsCinematicMode)
+        {
+            modeTextDisplayRef.ShowCinematicMode(cinematicMode == CinematicMode.Orbit,
+                cinematicPaused, cinematicHasPivot, cinematicDirection < 0f);
+        }
+        else if (isFlyMode)
         {
             modeTextDisplayRef.ShowFlyMode();
         }
         else
         {
-            modeTextDisplayRef.HideFlyMode();
+            modeTextDisplayRef.RestoreState();
         }
     }
 
@@ -1126,22 +1140,28 @@ public class CameraController : MonoBehaviour
         StopFocus();
 
         previousMousePosition = InputUtil.MousePosition;
-        rotationPivot = GetRotationPivotPoint();
+        InitializeOrbit(GetRotationPivotPoint(), true);
+        isMouseRotating = true;
+    }
+
+    private void InitializeOrbit(Vector3 pivot, bool clampPitch)
+    {
+        rotationPivot = pivot;
         rotationDistance = Vector3.Distance(transform.position, rotationPivot);
         rotationDistance = Mathf.Max(rotationDistance, 0.01f);
 
         Vector3 toCamera = transform.position - rotationPivot;
         Vector3 toCameraNormalized = toCamera.normalized;
-        orbitYaw = Mathf.Atan2(toCamera.x, toCamera.z) * Mathf.Rad2Deg;
+        orbitYaw = toCamera.x * toCamera.x + toCamera.z * toCamera.z < 0.0001f
+            ? transform.eulerAngles.y - 180f
+            : Mathf.Atan2(toCamera.x, toCamera.z) * Mathf.Rad2Deg;
         orbitPitch = Mathf.Asin(toCameraNormalized.y) * Mathf.Rad2Deg;
-        float clampedPitch = Mathf.Clamp(orbitPitch, minOrbitPitch, maxOrbitPitch);
+        float clampedPitch = clampPitch ? Mathf.Clamp(orbitPitch, minOrbitPitch, maxOrbitPitch) : orbitPitch;
         if (!Mathf.Approximately(clampedPitch, orbitPitch))
         {
             orbitPitch = clampedPitch;
             ApplyOrbitPosition();
         }
-
-        isMouseRotating = true;
     }
 
     private void UpdateMouseRotation()
@@ -1176,7 +1196,8 @@ public class CameraController : MonoBehaviour
         ) * rotationDistance;
 
         transform.position = rotationPivot + offset;
-        transform.LookAt(rotationPivot);
+        // 真上の撮影でもヨーを保持する。LookAt は視線と上方向が平行になると方位が定まらない。
+        transform.rotation = Quaternion.Euler(orbitPitch, orbitYaw + 180f, 0f);
         currentHeight = transform.position.y;
 
         if (isTopDownMode && cam != null)
@@ -1187,33 +1208,42 @@ public class CameraController : MonoBehaviour
 
     private Vector3 GetRotationPivotPoint()
     {
-        Ray ray = cam.ScreenPointToRay(new Vector3(Screen.width * 0.5f, Screen.height * 0.5f));
+        return TryGetRotationPivotPoint(out Vector3 pivot, false)
+            ? pivot : transform.position + transform.forward * 10f;
+    }
 
-        // 回転中心は「画面中央が指している地表の点」でなければならない。
-        // 地形タイルは "Ground" レイヤーのコライダー(TerrainCollider)を持つため、
-        // これに限定してレイキャストすることで、起伏のある地形でも実際の地表面(丘の上など)と
-        // 交差した点が得られる。
-        //
-        // rotationGroundMask(既定 DefaultRaycastLayers)のように全レイヤーを対象にすると、
-        // ワールドY≈0に配置された海面板(SeaObject)に当たってしまい、回転中心が地表ではなく
-        // Y=0へ落ちる。起伏地形で「意図しないY=0を中心に回ってしまう」症状の原因になるため、
-        // ここでは Ground レイヤーのみを対象にして海面板を除外する。
+    private bool TryGetRotationPivotPoint(out Vector3 pivot, bool includeBuildingsAndSea)
+    {
+        Ray ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
         int groundMask = LayerMask.GetMask("Ground");
-        if (groundMask != 0 && Physics.Raycast(ray, out RaycastHit hit, rotationRaycastDistance, groundMask))
+        bool hasGround = false;
+        bool found = false;
+        float closest = float.PositiveInfinity;
+        pivot = default;
+
+        // 通常の右ドラッグは地表のみ、撮影は建物と海面も対象とする。
+        // 区画や道路の選択用コライダーが手前にあっても回転中心を奪わない。
+        int mask = includeBuildingsAndSea ? rotationGroundMask.value | groundMask : groundMask;
+        foreach (RaycastHit hit in Physics.RaycastAll(ray, rotationRaycastDistance, mask, QueryTriggerInteraction.Ignore))
         {
-            return hit.point;
+            bool isGround = (groundMask & (1 << hit.collider.gameObject.layer)) != 0;
+            hasGround |= isGround;
+            if (!isGround && !(includeBuildingsAndSea &&
+                (hit.collider.CompareTag("BuildingObject") || hit.collider.CompareTag("SeaObject")))) continue;
+            if (hit.distance >= closest) continue;
+            closest = hit.distance;
+            pivot = hit.point;
+            found = true;
         }
 
-        // 地形コライダーに当たらない領域(コライダーを持たない超遠景メッシュ領域など)では、
-        // CPU高さ配列に対してレイマーチし、起伏を考慮した地表面との交点を求める。
-        // これも失敗した場合のみ、旧来の y=0 平面フォールバックに頼らず地表高さで補正する。
-        if (RaycastTerrainHeightField(ray, out Vector3 marchPoint))
+        // コライダーを持たない遠景でも、既存の高さ配列との交点を候補に含める。
+        if (!hasGround && RaycastTerrainHeightField(ray, out Vector3 marchPoint)
+            && Vector3.Distance(ray.origin, marchPoint) < closest)
         {
-            return marchPoint;
+            pivot = marchPoint;
+            found = true;
         }
-
-        // 地平線より上を向いているなど地表交点が取れない場合の最終フォールバック。
-        return transform.position + transform.forward * 10f;
+        return found;
     }
 
     /// <summary>
@@ -1236,6 +1266,9 @@ public class CameraController : MonoBehaviour
         const float step = 5f; // サンプリング間隔(m)
         Vector3 prevPos = ray.origin;
         float prevDiff = ray.origin.y - Utils.GetGroundHeight(ray.origin);
+        // 固定高度の撮影では地形内部に入ることもある。地表より下からの下向きレイを
+        // 頭上の地表へ補正すると、画面中央にない点を注視して視線が跳ぶため採用しない。
+        if (prevDiff < 0f) return false;
 
         for (float traveled = step; traveled <= rotationRaycastDistance; traveled += step)
         {

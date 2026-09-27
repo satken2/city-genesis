@@ -8,51 +8,51 @@
         "description": "Flat land beside the sea stretches toward the eastern horizon. A gentle coastline unfolds without high mountains or deep valleys."
       },
       "yoron": {
-        "name": "Yoron Island",
+        "name": "Coral Shallows",
         "description": "A low island in warm seas. Uplifted coral limestone forms gentle plateaus, with shallow lagoons beyond white beaches. Summers are hot and humid; the sea keeps winters mild."
       },
       "aogashima": {
-        "name": "Aogashima",
+        "name": "Crater Within a Crater",
         "description": "A small volcanic island rises steeply from the open ocean. Sea cliffs enclose a deep caldera with another cone on its floor. Warm currents surround slopes swept by moist sea winds and rain."
       },
       "kumejima": {
-        "name": "Kume Island",
+        "name": "White Sand Tail",
         "description": "A rugged island in warm seas. Slopes descend from northern and southern uplands to low ground, coral reefs and white sandbars. Long, humid summers bring seasonal rains and fierce storms."
       },
       "iejima": {
-        "name": "Ie Island",
+        "name": "Lone Peak Plateau",
         "description": "A low island in shallow seas. A single sharp rocky peak rises from a broad limestone plateau. Beaches alternate with cliffs; summers are hot and humid, while winter winds sweep in from the sea."
       },
       "ikishima": {
-        "name": "Iki Island",
+        "name": "Coves and Hills",
         "description": "An island surrounded by warm currents. Gentle basalt hills give way to lowlands, with rocky shores and beaches along an indented coast. Summers are humid, and winters bring cold seasonal winds."
       },
       "naoshima": {
-        "name": "Naoshima",
+        "name": "Isle of Calm",
         "description": "A small island in a sheltered inland sea. Low granite hills reach the shore, leaving small plains and coves at the mouths of valleys. Surrounding mountains intercept rain clouds, keeping rainfall relatively low."
       },
       "chichijima": {
-        "name": "Chichijima",
+        "name": "Deep Green Bay",
         "description": "A warm island isolated by wide seas. Deep valleys cut through volcanic hills, and bays interrupt steep coastal cliffs. Winters remain mild, dense greenery covers the slopes, and sea winds cross the ridges."
       },
       "santorini": {
-        "name": "Santorini",
+        "name": "Azure Crescent",
         "description": "A volcanic arc of land in a deep blue sea. High cliffs encircle a sea-filled caldera, while outer slopes descend to the coast. Summers bring intense sunshine and scant rain; most precipitation falls in winter."
       },
       "hongkong": {
-        "name": "Hong Kong Island",
+        "name": "Mountain Strait",
         "description": "A mountainous island beside a continental shore. Short valleys fall from steep ridges to an indented coast, with straits winding between nearby islands. Summer monsoons bring abundant rain; winters are cooler and dry."
       },
       "manhattan": {
-        "name": "Manhattan Island",
+        "name": "Slender Estuary Isle",
         "description": "A long, narrow island at a great river's mouth. A broad river to the west and a tidal strait to the east enclose rocky rises and lowlands. Humid summers give way to cold, snowy winters."
       },
       "bahrain": {
-        "name": "Bahrain Island",
+        "name": "Sandy Plains",
         "description": "A dry island in a shallow gulf. Low sandy ground and limestone plains surround parched inland hills. Summers bring intense heat, and the little rain that falls arrives mainly in winter."
       },
       "dakar": {
-        "name": "Dakar (Cap-Vert Peninsula)",
+        "name": "Sea Breeze Cape",
         "description": "A peninsula projecting into the ocean from a continent's western tip. Rocky shores and sandy beaches fringe low plateaus and volcanic hills. A long dry season gives way to brief summer rains, while sea breezes sweep across the sunlit land."
       }
     }

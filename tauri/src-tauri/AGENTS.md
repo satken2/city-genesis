@@ -33,6 +33,8 @@ Tauri(Rust)側。ウィンドウ管理(HUD・ポップアップ・Tips)、Unity�
 
 ### ウィンドウ
 
+- `close_window_by_label` は `tutorial:window_visibility` をTutorialへ送る。非表示WebViewは再利用されアンマウントされないので、この通知とUI側の実表示判定を併用してチュートリアルのウィンドウ条件を失効させる。
+
 - エポック演出は`epoch_presentation_id`で開始から結果画面クローズまで保持する。`epoch_result`の`params.extra.epochPresentationId`を`close_window_by_label`で照合して終了する(Reactのアンマウントに頼らない)。Tipsは`open_tips_window_with_mode`の引数で初期ロード/エポックを切り替え、エポック側は処理完了時に閉じる。
 
 - ウィンドウを生成する(`WebviewWindowBuilder::build()`に至る)コマンドは必ず`async fn`。同期コマンドはメインスレッドで走り、`build()`はイベントループへ投げて完了を待つので自分で塞いだままフリーズする。コマンド以外(イベントハンドラ等)から生成するときは`std::thread::spawn`で逃がす(`enqueue_notification`が実例)。
@@ -59,3 +61,9 @@ Tauri(Rust)側。ウィンドウ管理(HUD・ポップアップ・Tips)、Unity�
 - docs: `programs/IPC連携の整理.md`(イベント一覧・起動フロー・初期ロードの表示契約)、`programs/コンポーネント連携.md`(プロセス構成・セッション・UIのウィンドウ管理)、`geometries/L_地形データ作成マニュアル.md`と`D_地形形状.md` §D.10〜D.14(地形エディタの入出力)
 - Skill: `genesis-ipc`
 - React側のウィンドウ追加手順・HUD構成: `../AGENTS.md`。Unity側の契約: `unity/Assets/Scripts/IPC/AGENTS.md`
+
+## 版の照合
+
+- `src/version.rs` は `../../version.json` の埋め込み定義、HTTP契約ヘッダー、コア照合、ロード事前検証、シナリオ書き出しの共通窓口。
+- Unityは `system:graphic_ready` にフロント版・API契約・IPC契約・コア照合結果を付ける。`system:ready` で照合結果を返す。不一致は `graphic_contract_error` に保持し、Unityなしの開発起動として迂回しない。
+- ゲーム開始コマンドは、ポップアップや現セッションを閉じる前に版・保存データ・確認済みフラグを検査する。

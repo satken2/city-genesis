@@ -188,6 +188,21 @@ public static class LrtQA
         Check(filters.Count(f => f.name.EndsWith(wirePart)) == 2, "wire count " + id);
         if (!curved && slope == 0)
         {
+            if (id != 431)
+                foreach (var f in filters.Where(f => f.name.EndsWith("/body") || f.name.EndsWith("/sidewalk") || f.name.EndsWith("/lrt_track")))
+                {
+                    var mesh = f.sharedMesh; var v = mesh.vertices; var tri = mesh.triangles;
+                    int internalCaps = 0, startCaps = 0, endCaps = 0;
+                    for (int t = 0; t < tri.Length; t += 3)
+                    {
+                        var a = v[tri[t]]; var b = v[tri[t + 1]]; var c = v[tri[t + 2]];
+                        if (Mathf.Abs(Vector3.Cross(b - a, c - a).normalized.z) < .999f) continue;
+                        if (Mathf.Abs(a.z - mesh.bounds.min.z) < .001f) startCaps++;
+                        else if (Mathf.Abs(a.z - mesh.bounds.max.z) < .001f) endCaps++;
+                        else internalCaps++;
+                    }
+                    Check(internalCaps == 0 && startCaps > 0 && endCaps > 0, "closed ends without internal shadow caps " + id + " " + f.name);
+                }
             // 直線では各軌道メッシュの横中心が軌道中心(左右対称の±offset)に一致する。
             var centers = tracks.Select(f => f.GetComponent<Renderer>().bounds.center.x).ToArray();
             Check(centers.All(x => Mathf.Abs(Mathf.Abs(x) - ExpectedOffset(id)) < .02f) && centers.Any(x => x < 0) && centers.Any(x => x > 0), "track lateral " + id);
@@ -729,6 +744,15 @@ public static class LrtQA
         try
         {
             var go = Generate(id, path, new List<Vector3> { Vector3.zero, CornerPoint(60), end });
+            var corner = go.transform.Find("Corner_0");
+            Check(corner != null, "corner surface " + id);
+            var cornerParts = corner.GetComponentsInChildren<MeshFilter>();
+            foreach (string part in new[] { "/lrt_track", "/lrt_wire" })
+            {
+                var connectors = cornerParts.Where(f => f.name.EndsWith(part)).ToArray();
+                Check(connectors.Length == 2 && connectors.All(f => f.sharedMesh != null && f.sharedMesh.vertexCount > 0),
+                    $"corner double track continuity {id} {part}");
+            }
             float rail = .125f, lateral = ExpectedOffset(id) + 1.35f + PlatformWidth(id) / 2;
             var decks = go.GetComponentsInChildren<MeshRenderer>().Where(r => r.name.EndsWith("/lrt_platform")).ToArray();
             Check(decks.Length == 2 && decks.All(d => d.bounds.min.z < 45.5f && d.bounds.max.z > 80f),

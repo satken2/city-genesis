@@ -1,0 +1,174 @@
+{
+  "version": 1,
+  "id": "highway",
+  "setup": [],
+  "steps": [
+    {
+      "id": "highway.1",
+      "legacyStep": 1,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.highway.step1.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.road"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                0,
+                0,
+                0
+              ]
+            ]
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.crossing",
+            "equals": true
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "highway",
+          "action": "commission_paths"
+        },
+        {
+          "type": "reload"
+        }
+      ]
+    },
+    {
+      "id": "highway.2",
+      "legacyStep": 2,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.highway.step2.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.road"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.name",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "highway.3",
+      "legacyStep": 3,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.highway.step3.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.road"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                100,
+                0,
+                0
+              ]
+            ]
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.ramp",
+            "equals": true
+          }
+        ]
+      },
+      "beforeCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "highway",
+          "action": "commission_paths"
+        },
+        {
+          "type": "reload"
+        }
+      ]
+    },
+    {
+      "id": "highway.4",
+      "legacyStep": 4,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.highway.step4.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.road"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "window",
+            "window": "intersection_detail"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.ramp",
+            "equals": true
+          }
+        ]
+      }
+    }
+  ]
+}

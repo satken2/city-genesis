@@ -3,6 +3,10 @@ use std::fs;
 use std::path::PathBuf;
 
 fn main() {
+    let source = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap()).join("../../version.json");
+    println!("cargo:rerun-if-changed={}", source.display());
+    let version: serde_json::Value = serde_json::from_str(&fs::read_to_string(source).unwrap()).unwrap();
+    assert_eq!(version["frontend_version"].as_str().unwrap(), env::var("CARGO_PKG_VERSION").unwrap(), "Run npm run sync:version");
     tauri_build::build();
 
     // 実行ファイルと同じディレクトリに配置する設定ファイルを、

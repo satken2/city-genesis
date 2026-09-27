@@ -6,6 +6,8 @@ Tauri製UI(`city-genesis/tauri`)とのMemoryMappedFile(MMF)通信を担当する
 
 ## ファイル一覧
 
+`tutorial:apply` は `TutorialRuntime` へ委譲し、適用通知を `tutorial:applied` で返す。`session:reset` と `game:end` ではチュートリアル制限を解除する。定義とrevisionの契約は `docs/docs/programs/チュートリアル基盤.md` を参照する。
+
 | ファイル | 内容 |
 | --- | --- |
 | `IpcClient.cs` | シングルトンの高レベルクライアント。型付きの`On*`イベントと`Emit*`送信API。受信はMMF読み取りスレッドから`Update()`でメインスレッドへディスパッチされるので、購読ハンドラからUnity APIを直接呼べる |
@@ -43,3 +45,9 @@ Tauri製UI(`city-genesis/tauri`)とのMemoryMappedFile(MMF)通信を担当する
 - docs: `programs/IPC連携の整理.md`(プロトコルの正)、`programs/コンポーネント連携.md`(起動順序・セッション・UIのウィンドウ管理)、`programs/Unity入力制御.md`、機能別ページ(`経路提案.md`・`道路の詳細と道路名.md`・`建設プロジェクト管理.md`・`公共交通ハイライト.md`)
 - Skill: `genesis-ipc`(イベント追加の進め方)、`genesis-input-mode`/`genesis-visual-mode`(InputMode/VisualMode)
 - Rust側の契約: `city-genesis/tauri/src-tauri/AGENTS.md`
+
+## 起動時の互換性
+
+- `FrontendVersion` はリポジトリ直下 `version.json` から生成する。手編集せず `tauri` の `npm run sync:version` を使う。
+- `system:graphic_ready` / `system:ready` でフロント版・API契約・IPC契約を照合する。`IpcClient.ProtocolCompatible` と `BackendCompatibility.Compatible` の両方が成立するまでゲーム用操作を受け付けない。
+- 起動直後・コア接続状態の変化時だけ起動通知を送る。同じ通知を定期的にMMFへ溜めない。

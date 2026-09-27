@@ -4,6 +4,8 @@
 
 ## ファイル一覧
 
+チュートリアルの `world.mode=blocked` は `InputHandler` の入口でワールド編集を停止する。カメラ操作はこのゲートの外にある。指定位置への道路配置は `TutorialRuntime` と `RoadPlanManager.Tutorial` が通常の建設条件へ追加する制約であり、通常プレイでは無効。
+
 | ファイル | 内容 |
 | --- | --- |
 | `InputHandler.cs` | 中核。レイキャスト、タグによる種別判定、クリック/ドラッグ判定、モード定数(`InputMode`/`InputModePreset`/`InputObjectType`)、入力ゲート |
@@ -30,7 +32,8 @@
 - `MODE_PARCEL_SHAPE_EDIT`と`MODE_EDIT_GRADING`(造成範囲の作図)はクリック・右クリック・ホバーの共通吸着をすべて通さない。ホバーで`OverrideMousePosition`に吸着座標を渡すと後続のドラッグにも混入するため、頂点ドラッグ側だけで無効化してはならない。どちらも吸着は常に無効で、切り替え操作は持たない(造成は頂点が道路の中心線に吸い付くと範囲がパスに掛かり、発注で必ず拒否される)。
 - 吸着フラグの真実源は`TerrainInputHandler`のstatic変数群(`Enable*Snapping`。既定Node=T/Path=T/他=F。敷設モードを跨いで保持)。切替はCtrlラジアルメニューだけで、UIからの設定イベントは無い。グリッド吸着は`GridOverlay`の表示と連動し、`GridSetManager`は角度設定中に退避・復元する。
 - `TerrainInputHandler`は地形タイルごとに付くコンポーネント。`Update`の条件は軽く保つ(Escの区画選択リセットは`ParcelEditorManager.Update`側で行う)。
-- 入力ゲート: UI上のポインタ・カメラドラッグ中・フライモード(`CameraController.IsFlyMode`)・ラジアルメニュー表示中(`RadialMenuController.IsOpen`)は`InputHandler.Update`先頭で非破壊的に止める。メニューのCanvasにはGraphicRaycasterが無いのでEventSystemのUI判定では止まらない。
+- 入力ゲート: UI上のポインタ・カメラドラッグ中・フライ/撮影モード(`CameraController.BlocksWorldInput`)・ドライブ(`DriveMode.IsOpen`)・ラジアルメニュー表示中(`RadialMenuController.IsOpen`)は`InputHandler.Update`先頭で非破壊的に止める。撮影終了フレームも遮断し、Escを背後の操作へ流さない。メニューのCanvasにはGraphicRaycasterが無いのでEventSystemのUI判定では止まらない。
+- `IsNormalMode`は全オブジェクトの入力モードが`MODE_NORMAL`であることを返す。撮影とドライブの開始可否で共用する(各編集マネージャ自身もキーを読むため、入力ゲートだけで編集操作を止めようとしない)。
 - マウス・カメラが動かず入力も無いフレームは`lastRay`キャッシュで`RaycastAll`ごと省略する。地区のホバー判定(`ZoneManager.GetZoneIdAtPoint`)は地区編集中だけ行う。
 - 地区拡張の連続性はフロント(`PathInputHandler.IsConnectedToZone`)で確認する。`POST /paths/batch-zone`は1本だけの選択では連続性を検証しない。適用直後の先行着色は`ZoneEditContext.ClearTempVisuals`で明示的に戻す(失敗時は版が変わらずリロードが再描画しない)。
 - 沿道区画作成の道路選択(`IsPathSelectableForParcelCreation`)は稼働中・街路・`frontage_allowed`が条件で、道路橋223は不可。地区編集の街路選択は別条件で橋も対象。

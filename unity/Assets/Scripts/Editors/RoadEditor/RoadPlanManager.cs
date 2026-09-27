@@ -401,6 +401,7 @@ public partial class RoadPlanManager : MonoBehaviour
     void Update()
     {
         if (phase == RoadEditorPhase.Inactive) return;
+        if (TutorialRuntime.PathRestricted || TutorialRuntime.BlocksWorldInput) return;
 
         if (phase == RoadEditorPhase.Editing)
         {
@@ -578,6 +579,7 @@ public partial class RoadPlanManager : MonoBehaviour
 
     public void SetCurved(bool curved)
     {
+        if (TutorialRuntime.PathRestricted && curved) return;
         ResetParallelSnap();
         // curve_allowed=false のバリアント(送電線など)では曲線化を拒否する
         Curved = curved && IsCurveAllowed();
@@ -615,6 +617,7 @@ public partial class RoadPlanManager : MonoBehaviour
         // 既存パス編集の設定は、後続のLoadExistingPathで保存値に置き換える。
         PathFollowTerrainOverride = IsHeightEditable() ? initialFollowTerrain ?? Constants.VALUE_NONE : Constants.VALUE_NONE;
         Curved = IsCurveAllowed() && (initialCurved ?? true);
+        ApplyTutorialPathSettings();
         // 「直線延長」吸着は曲線/直線・道路/軌道/インフラを問わず常にOFFから始める
         // (敷設中に既存パスの延長線へ引き寄せられるのを既定の挙動にしない)。
         // 継続配置(UIが敷設設定を渡す)ではセッション中の手動の吸着設定をそのまま保つ。
@@ -852,6 +855,7 @@ public partial class RoadPlanManager : MonoBehaviour
     /// </summary>
     public void OnTerrainLeftClick(Vector3 worldPos)
     {
+        if (!TutorialRuntime.AllowRoadClick(worldPos, points.Count, false, PathSubtype, phase == RoadEditorPhase.Placing)) return;
         if (phase == RoadEditorPhase.Placing)
         {
             Vector3 snapped = ApplySnapping(worldPos);
@@ -893,6 +897,7 @@ public partial class RoadPlanManager : MonoBehaviour
     /// </summary>
     public void OnTerrainRightClick(Vector3 worldPos)
     {
+        if (!TutorialRuntime.AllowRoadClick(worldPos, points.Count, true, PathSubtype, phase == RoadEditorPhase.Placing)) return;
         if (phase == RoadEditorPhase.Placing)
         {
             FinalizePath(worldPos);
@@ -932,6 +937,7 @@ public partial class RoadPlanManager : MonoBehaviour
     /// </summary>
     public void ProcessMouseDrag(Vector3 worldPos)
     {
+        if (TutorialRuntime.PathRestricted || TutorialRuntime.BlocksWorldInput) return;
         if (phase != RoadEditorPhase.Editing) return;
 
         // ドラッグ未開始の場合、現在のマウス位置でドラッグ対象を決定する。
@@ -1851,6 +1857,12 @@ public partial class RoadPlanManager : MonoBehaviour
     /// </summary>
     private Vector3 ApplySnapping(Vector3 basePos)
     {
+        if (TutorialRuntime.PathRestricted)
+        {
+            lastSnapWasElevated = false;
+            lastSnapRelHeight = 0;
+            return TutorialRuntime.TrySnap(basePos, points.Count == 0 ? 0 : 1, out var guided) ? guided : basePos;
+        }
         lastRawSnapPosition = basePos;
         hasRawSnapPosition = true;
         Vector3 rawPosition = basePos;
@@ -3161,6 +3173,7 @@ public partial class RoadPlanManager : MonoBehaviour
     /// </summary>
     public void OnChangeNodeFromIpc(int nodeIndex, float height)
     {
+        if (TutorialRuntime.PathRestricted) return;
         // 標高編集不可のバリアント（街路など）ではIPCによる標高変更を無視する
         if (!IsHeightEditable()) return;
 
@@ -3192,6 +3205,7 @@ public partial class RoadPlanManager : MonoBehaviour
     /// </summary>
     public void OnChangeEmbankmentFromIpc(int nodeIndex, float embankmentHeight)
     {
+        if (TutorialRuntime.PathRestricted) return;
         // -5〜+5の範囲にクランプ
         embankmentHeight = Mathf.Clamp(embankmentHeight, -5f, 5f);
 
@@ -3458,7 +3472,8 @@ public partial class RoadPlanManager : MonoBehaviour
         IpcClient.Instance.EmitEditPathUpdateShape(pathId, PathType, pointsList, startControl, endControl, embankmentHeights, waypointControls, Curved, PathFollowTerrainOverride, finalized,
             phase == RoadEditorPhase.Editing && points.Count >= 2 && CheckElevationIntersections().Count == 0
             && CheckRiverCrossings().Count == 0 && CheckSeaLakeCrossings().Count == 0 && CheckMaxSpanViolations().Count == 0
-            && (!RoadPath.IsRopewayVariant(PathSubtype) || !HasAlignmentViolation),
+            && (!RoadPath.IsRopewayVariant(PathSubtype) || !HasAlignmentViolation)
+            && TutorialRuntime.AcceptsPath(points, PathSubtype, Curved),
             BuildShapeSyncExtras());
     }
 

@@ -82,6 +82,7 @@
     "fleetMoreTrains": "et {{count}} rame(s) de plus",
     "fleetShortage": "{{count}} rame(s) n’ont pas pu être formées faute de véhicules.",
     "vehicleModel": "Véhicule",
+    "freightConsistNote": "Le total comprend une locomotive. Seuls les wagons transportent du fret ; un train nécessite au moins deux véhicules.",
     "vehicleModelNote": "Seule l’apparence des véhicules change. La capacité, le coût et la vitesse restent identiques. Les bandes de la caisse sont peintes aux couleurs de la ligne.",
     "estimate": {
       "title": "Bilan prévisionnel",
@@ -127,8 +128,9 @@
       "trainFuturistic": "Futuriste",
       "trainRetro": "Rétro",
       "monorail": "Monorail",
-      "freightRed": "Locomotive rouge",
-      "freightBlue": "Locomotive bleue"
+      "freightJr": "Style fret japonais",
+      "freightAmerican": "Style américain",
+      "freightIndian": "Style ferroviaire indien"
     }
   }
 }

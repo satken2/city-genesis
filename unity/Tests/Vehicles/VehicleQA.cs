@@ -168,7 +168,7 @@ public static partial class VehicleQA
             Set(manager,"clock",time);Call(manager,"DrawLine",lines[0],Vector3.forward*250);Call(manager,"HideUnused",false);
             var visible=(IDictionary)Get(manager,"visible");Check(visible.Count==2,"Consist disappears at terminal/time "+time);
             var positions=new List<Vector3>();
-            foreach(DictionaryEntry entry in visible) Check(((GameObject)entry.Value).name.StartsWith("20:2:"),"Consist ignores the line's vehicle model or mixes at turnback");
+            foreach(DictionaryEntry entry in visible) Check(((GameObject)entry.Value).name == "20:2","Consist ignores the line's vehicle model or mixes at turnback");
             foreach(DictionaryEntry entry in visible)
             {
                 var position=((GameObject)entry.Value).transform.position;positions.Add(position);
@@ -251,6 +251,7 @@ public static partial class VehicleQA
         Call(manager,"RebuildLines",sourceList);
         Call(manager,"RefreshGeometry",Vector3.zero);
         Check(lines.Count==0,"Removed route retained");
+        FreightConsists(manager, data, sourceList, journeys, routeGeometry, g, path);
         UnityEngine.Object.DestroyImmediate(manager.gameObject);UnityEngine.Object.DestroyImmediate(models.gameObject);
     }
 
@@ -407,9 +408,9 @@ public static partial class VehicleQA
             foreach(int variant in type==14||type==24?new[]{0}:type==12?new[]{0,1}:new[]{0,1,2})
             foreach(bool middle in type==12||type==22?new[]{false}:new[]{false,true})
             {
-                var car=(GameObject)resolver.GetMethod("CreateTransitCar").Invoke(null,new object[]{type,middle,null,variant});
-                car.SetActive(true);
                 string expected = middle ? (variant==0 ? "middle" : "middle_"+variant) : variant.ToString();
+                var car=(GameObject)resolver.GetMethod("CreateTransitCar").Invoke(null,new object[]{type,expected,null,variant});
+                car.SetActive(true);
                 foreach(var filter in car.GetComponentsInChildren<MeshFilter>())
                 {
                     string asset=AssetDatabase.GetAssetPath(filter.sharedMesh);

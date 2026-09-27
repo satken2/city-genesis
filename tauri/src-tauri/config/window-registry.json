@@ -416,6 +416,7 @@
     "width": 800,
     "height": 800,
     "width_ratio": 0.3333,
+    "height_ratio": 1.0,
     "resizable": true,
     "policy": "single",
     "layout": "right_top",
@@ -478,7 +479,7 @@
   "save_load": {
     "title": "セーブ・ロード",
     "width": 420,
-    "height": 340,
+    "height": 400,
     "resizable": false,
     "policy": "single",
     "empty_shell": true,
@@ -586,6 +587,24 @@
     "resizable": true,
     "policy": "single",
     "layout": "left_panel_narrow",
+    "actions": []
+  },
+  "scenario_manager": {
+    "title": "シナリオ管理",
+    "width": 1040,
+    "height": 740,
+    "resizable": true,
+    "policy": "single",
+    "empty_shell": true,
+    "actions": []
+  },
+  "scenario_metadata": {
+    "title": "シナリオの紹介情報",
+    "width": 600,
+    "height": 780,
+    "resizable": true,
+    "policy": "single",
+    "empty_shell": true,
     "actions": []
   }
 }

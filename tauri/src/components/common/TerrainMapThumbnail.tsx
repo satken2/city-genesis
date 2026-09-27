@@ -3,8 +3,8 @@
  * サムネイル画像を表示する共通部品。
  *
  * サムネイルは GET /api/v1/terrain/maps/{map_id}/thumbnail から取得する。地形エディタで
- * 編集した地形を .npy エクスポートした際にだけ同じ場所へサムネイルPNGが生成されるため、
- * 組み込みマップ(与論島・青ヶ島等)や未生成のマップでは404になる。その場合は
+ * .npyエクスポート時または一括再生成ツールで、海が透過の平面図PNGを生成する。
+ * 未生成のマップでは404になる。その場合は
  * プレースホルダ(背景色のみのdiv)にフォールバックする。
  *
  * サイズはCSSクラスで決まる。既定はタイル用(new-game-tile-image)で、
@@ -39,8 +39,8 @@ export function TerrainMapThumbnail({
   const base = apiBaseUrl.replace(/\/+$/, "");
   return (
     <img
-      className={className}
-      src={`${base}/api/v1/terrain/maps/${mapId}/thumbnail`}
+      className={`${className} terrain-map-thumbnail`}
+      src={`${base}/api/v1/terrain/maps/${encodeURIComponent(mapId)}/thumbnail`}
       alt=""
       onError={() => setFailedId(mapId)}
     />

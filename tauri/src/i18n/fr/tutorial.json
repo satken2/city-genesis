@@ -150,7 +150,113 @@
     "checking": "Vérification...",
     "failed": "Les conditions ne sont pas remplies. Réessayez.",
     "completed": "Tutoriel terminé ! Beau travail.",
-    "stepProgress": "Étape {{current}} / {{total}}"
+    "stepProgress": "Étape {{current}} / {{total}}",
+    "guide": {
+      "openRoad": "Ouvrez le panneau de construction avec l’icône de route.",
+      "selectRoad": "Sélectionnez la rue à deux voies au niveau du sol. Seule la variante demandée est disponible.",
+      "placeStart": "Faites un clic gauche dans le cercle cyan pour placer le début de la route.",
+      "placeEnd": "Faites un clic gauche dans le cercle jaune pour placer la fin de la route.",
+      "finalizeRoad": "Faites un clic droit dans la vue 3D pour terminer le tracé de la route.",
+      "confirmRoad": "Confirmez dans le panneau de construction pour enregistrer la route, puis appuyez sur Terminer.",
+      "failed": "Échec de la préparation ou de la communication. Réessayez ; si le problème persiste, quittez et lancez le tutoriel dans une nouvelle ville.",
+      "retry": "Réessayer",
+      "exit": "Quitter",
+      "exitFailed": "Impossible de quitter. Réessayez.",
+      "placementRequired": "Utilisez la variante et les positions indiquées pour la route.",
+      "preparing": "Préparation de la ville du tutoriel."
+    },
+    "trade": {
+      "title": "Développer le commerce international",
+      "description": "Apprenez à exporter des marchandises par mer et à en importer par rail en construisant un port à conteneurs et une gare de fret internationale.",
+      "step1": {
+        "title": "Construire un port à conteneurs",
+        "description": "Construire un port à conteneurs。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+      },
+      "step2": {
+        "title": "Vérifier les exportations alimentaires",
+        "description": "Vérifier les exportations alimentaires。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+      },
+      "step3": {
+        "title": "Construire une gare de fret internationale",
+        "description": "Construire une gare de fret internationale。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+      },
+      "step4": {
+        "title": "Vérifier les importations ferroviaires",
+        "description": "Vérifier les importations ferroviaires。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+      }
+    },
+    "highway": {
+      "title": "Construire une autoroute",
+      "description": "Apprenez à construire une autoroute surélevée et des bretelles pour créer un échangeur relié aux routes locales.",
+      "step1": {
+        "title": "Croiser la rue en viaduc",
+        "description": "Croiser la rue en viaduc。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+      },
+      "step2": {
+        "title": "Nommer l’autoroute",
+        "description": "Nommer l’autoroute。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+      },
+      "step3": {
+        "title": "Construire une bretelle",
+        "description": "Construire une bretelle。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+      },
+      "step4": {
+        "title": "Inspecter l’échangeur",
+        "description": "Inspecter l’échangeur。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+      }
+    },
+    "mining": {
+      "title": "Extraire des ressources",
+      "description": "Apprenez à extraire du minerai, à le transporter par rail et à l’exporter en aménageant une mine, des gares de fret et un port de vrac.",
+      "step1": {
+        "title": "Inspecter le gisement",
+        "description": "Inspecter le gisement。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+      },
+      "step2": {
+        "title": "Construire une carrière",
+        "description": "Construire une carrière。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+      },
+      "step3": {
+        "title": "Construire la gare de chargement",
+        "description": "Construire la gare de chargement。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+      },
+      "step4": {
+        "title": "Construire la gare de déchargement",
+        "description": "Construire la gare de déchargement。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+      },
+      "step5": {
+        "title": "Construire un port de vrac",
+        "description": "Construire un port de vrac。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+      },
+      "step6": {
+        "title": "Avancer d’une époque",
+        "description": "Avancer d’une époque。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+      },
+      "step7": {
+        "title": "Vérifier les exportations de minerai",
+        "description": "Vérifier les exportations de minerai。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+      }
+    },
+    "tourism": {
+      "title": "Développer le tourisme",
+      "description": "Apprenez à attirer des touristes et à développer la fréquentation des restaurants et des bus en construisant un hôtel et un terminal de passagers.",
+      "step1": {
+        "title": "Construire un hôtel près des ruines",
+        "description": "Construire un hôtel près des ruines。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+      },
+      "step2": {
+        "title": "Construire un terminal de passagers",
+        "description": "Construire un terminal de passagers。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+      },
+      "step3": {
+        "title": "Avancer les époques",
+        "description": "Avancer les époques。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+      },
+      "step4": {
+        "title": "Vérifier recettes et fréquentation du bus",
+        "description": "Vérifier recettes et fréquentation du bus。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
+      }
+    }
   },
   "tips": {
     "startGame": "Commencer la partie",

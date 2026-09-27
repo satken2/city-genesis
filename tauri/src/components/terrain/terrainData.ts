@@ -244,6 +244,20 @@ export function uint8ToBase64(bytes: Uint8Array): string {
 
 export type Rgb = [number, number, number];
 
+/** 陸地の標高範囲。平地でも色の正規化でゼロ除算しないよう最低1m幅を持たせる。 */
+export function landElevationRange(elev: Float32Array): { minLand: number; maxLand: number } {
+  let minLand = Infinity;
+  let maxLand = -Infinity;
+  for (const e of elev) {
+    if (e > 0 && Number.isFinite(e)) {
+      minLand = Math.min(minLand, e);
+      maxLand = Math.max(maxLand, e);
+    }
+  }
+  if (!Number.isFinite(minLand)) return { minLand: 0, maxLand: 1 };
+  return { minLand, maxLand: Math.max(maxLand, minLand + 1) };
+}
+
 /**
  * 地表種別(GROUND_COVER_*)ごとの標高カラーランプ。低地・中腹・高地の3色を線形補間する。
  * Unity の地表の配色(GroundCoverPalette)を2D表示向けに要約したもので、地形エディタ・3Dプレビュー・

@@ -34,6 +34,7 @@
 | `RoadAdjacency.cs` / `MotorwayMergeLayout.cs` | 高速道路の本線↔ランプ結合・板なし合流ノード(G§11.7) |
 | `PillarClearance.cs` | 橋脚と他パス通行空間の干渉判定。道路・線路・工事中・レンガ高架で共用(G§8.7) |
 | `RoadEquipmentGenerator.cs` | 街灯・電柱・街路樹・柵・ベンチ等の点設備(G§8.6・§5.5) |
+| `RoadAccessPlan.cs` | 施設の間口を道路片側の切断区間へ変換し、接続舗装を生成する(G「施設への接続」) |
 | `RoadMarkingContext.cs` / `RoadMarkingPlan.cs` / `RoadMarkingSurface.cs` | 路面標示(G§8.3、E「路面標示のLODと画像予算」) |
 | `SuspensionBridgeGenerator.cs` / `BrickArcadeGenerator.cs` / `PathStructureMesh.cs` | 吊り橋251〜256・レンガアーチ高架404/414と、その結合器(G「植栽中央分離帯と道路吊り橋」、N「レンガアーチ高架」) |
 | `PowerLinePath.cs` / `PowerLineSupport.cs` | 送電線1101/1102 の専用生成器と共有ノードの鉄塔所有権(G「送電線の専用描画」) |
@@ -55,6 +56,7 @@
 | `FlatRoofBuilder.cs` / `HouseRoofBuilder.cs` / `GableRoofBuilder.cs` / `ShedRoofBuilder.cs` / `InteriorFloorBuilder.cs` / `ExteriorStairBuilder.cs` | 屋根4種・各階の床(F1)、辺ごとの外階段(F§11.4) |
 | `PreBuiltBuildingMeshBuilder.cs` / `MashupBuildingMeshBuilder.cs` / `PortBuildingMeshBuilder.cs` / `RailYardBuildingMeshBuilder.cs` | 既成・観光名所(F3)、複数棟(F6。割り付けはバックエンド解決済み)、港湾岸壁(F4。区画が埋立地の岸壁の陸側で面していれば(`FindFacingReclaimedQuays`)スラブを作らず、その岸壁区間ごとの外向き法線・天端でクレーンを並べる。面していなければ区画の中の水際の両端を結ぶ弦で直線カットしたスラブ)、車両基地(F9) |
 | `OpenSpaceLayout.cs` / `OpenSpaceBuildingMeshBuilder.cs` | 駐車場・駅前ロータリー・公園(F10) |
+| `BuildingRoadAccess.cs` | 施設側の決定論的な間口(ロータリーの舗装交線・既成モデルのEmpty)。描画GOを間口の正にしない(F§16) |
 | `ConstructingBuildingMeshBuilder.cs` / `ConstructionSiteProfile.cs` / `CollapsedBuildingMeshBuilder.cs` | 工事中・解体中(profile 差分で共用。F5・F7)、倒壊(F8) |
 
 ## 描画LOD(DrawLod)が生成器に届く経路
@@ -70,6 +72,7 @@
 - 隣接情報は PathManager.Awake が差す静的プロバイダ経由(`PillarClearance` / `TrackAdjacency` / `RoadAdjacency` の `NeighborProvider`、`TrackPath.ConnectedPathsProvider` / `InfrastructureConnectionProvider`、`LrtPlatformParts.StopProvider` / `PolylineProvider`、`PowerLinePath.ConnectedPaths`)。
   - 未設定のテストシーンでは結合・干渉回避が黙って無効になる。結合描画は描画専用でバックエンドに影響しない。
 - SplineMesh の頂点予算 `RoadPath.SPLINE_MESH_VERTEX_BUDGET`(60000)を超えると Dreamteck が毎フレームエラーを出し続ける。新しい SplineMesh 生成経路は同じガードを入れ、構築後に `RoadPath.SealSplineMesh` を呼ぶ。封印後は点や Transform を変えても再構築されない(形を変えるなら作り直す)。
+- `CreateSplineMesh` の連続する `body`・`sidewalk`・`lrt_track` は、`RemoveInternalTileCaps` が内部端面だけを除いて斜光の縞状の影を抑える。両外端は保持する。Dreamteck のタイル順・元頂点順を使うので、メッシュ結合や頂点最適化の順序を変える場合はこの前提も確認する。
 - `IntersectionMeshOwner` は手続き生成メッシュと SplineMesh の生成メッシュだけを所有し(共有プレハブは登録しない)、`OnDestroy` で解放する。一度もアクティブにならなかった GO では `OnDestroy` が呼ばれないので、`SetActive(false)` より先に付ける。
 - 高さオフセットは `RoadPartHeights` に集約し、ハードコードの高さ値を書かない。body の幅・横中心は `GetBodySurfaceBounds`(最上面)で測る。
 - `GetBodySurfaceBounds` / `CreateSidewalkConnectorObject` / `MirroredMeshCache` / `MaterialCache` は static キャッシュ。引数は共有プレハブ由来の不変メッシュに限る(可変メッシュを渡すと古い結果が返る)。

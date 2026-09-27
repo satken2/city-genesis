@@ -82,6 +82,7 @@
     "fleetMoreTrains": "and {{count}} more train(s)",
     "fleetShortage": "{{count}} train(s) could not be formed due to a vehicle shortage.",
     "vehicleModel": "Vehicle",
+    "freightConsistNote": "Total cars include one locomotive. Only wagons carry cargo; a train needs at least two cars.",
     "vehicleModelNote": "Only the look of the vehicles changes. Capacity, cost, and speed stay the same. The stripes on the body are painted in the line color.",
     "estimate": {
       "title": "Projected balance",
@@ -127,8 +128,9 @@
       "trainFuturistic": "Futuristic",
       "trainRetro": "Retro",
       "monorail": "Monorail",
-      "freightRed": "Red locomotive",
-      "freightBlue": "Blue locomotive"
+      "freightJr": "Japanese freight style",
+      "freightAmerican": "American style",
+      "freightIndian": "Indian Railways style"
     }
   }
 }

@@ -108,7 +108,7 @@ terrain_editor/
 | ファイル | 内容 |
 |---|---|
 | `.npy` | 近景標高マップ(float16、`grid_rows` × `grid_cols`) |
-| `.png` | サムネイル画像(160x120のPNG) |
+| `.png` | サムネイル画像(長辺512px、北上・海透過の平面図PNG) |
 | `.water.json` | 水面ポリゴン(version 1)。[[D_地形形状]] §D.10 |
 | `.rivers.json` | 川の範囲ポリゴンと水面標高のプロファイル(version 2)。同 §D.11。川床の彫り込みそのものは `.npy` に含まれる |
 | `.resources.json` | 天然資源エリア(version 1)。同 §D.12 |
@@ -116,7 +116,7 @@ terrain_editor/
 
 付随JSONは中身が空でも必ず書き出されるため、以前のエクスポートで残った古い定義が読まれ続けることはない。カメラ初期状態だけはサイドカーではなく `terrain_maps.yaml` のエントリに書かれる(3.4節)。
 
-サムネイル画像はこのエクスポート時に、その時点の標高データから生成される。生成は3Dプレビューと同じハイトフィールドメッシュ・頂点カラーを、3Dプレビューウィンドウを開かずにオフスクリーンで一度だけ描画する方式で行い、視点も3Dプレビューを開いた直後と同じ「地形全体が収まる斜め上から」になる。
+サムネイル画像はエクスポートする標高データから生成する。北が上・東が右の平面図で、地図の全範囲と縦横比を保つ。標高0m以下は透明、陸地は2Dエディタと同じ標高カラーランプで描く(草原なら緑から茶)。地表種別も反映する。選択範囲・等高線・プロップ・湖や川の水面は重ねず、3Dプレビューを開く必要はない。
 
 `.npy` への変換はTauri側(Rust)がヘッダを自前で組み立てて行う。外部プロセスも一時ファイルも介さないため、ユーザー環境にPythonは不要である。書き出しに失敗した場合はエディタ画面にエラーメッセージが表示される。
 
@@ -202,7 +202,19 @@ my_island:
 
 > **`settings` の整合性ルール:** `map_width` と `map_height` は `cell_size` の2倍の整数倍、`far_map_spacing` は `near_map_spacing` の整数倍、`near_map_spacing` は `dynamic_map_spacing` の整数倍である必要がある。詳細は [[D_地形形状]] を参照。エディタから作成したマップサイズは常にこのルールを満たすため、自動追記されるエントリでは通常意識する必要はない。
 
-### 3.5. ゲームで確認する
+### 3.5. 登録済み地形のサムネイルを一括再生成する
+
+`tauri/tools/regenerate_terrain_thumbnails.py`にゲーム用の`terrain_maps.yaml`を渡す。Pythonの`numpy`・`Pillow`・`PyYAML`、Node.js、`tauri/`での`npm install`が必要。登録表は`assets/terrains/terrain_maps.yaml`という配置を前提とし、`file_name`を`assets/`基準で解決する。
+
+```sh
+python tauri/tools/regenerate_terrain_thumbnails.py /path/to/assets/terrains/terrain_maps.yaml
+```
+
+登録済みの全地形について、標高配列と地表種別から`.npy`と同名のPNGを作り直す。`--map-id yoron`のようにIDを指定すると対象を絞れる(複数指定可)。`terrain-thumbnail-render.mjs`を通してエディタ保存時と同じ`terrainThumbnail.ts`を実行するため、配色や海岸処理を別実装として持たない。標高・登録表・`original/`は変更しない。生成先は既存のサムネイルAPIがそのまま参照するので、画像用の設定追加は不要。
+
+標高データ由来の画像にも元データの出典表記が適用される。収録地形の出典は`src/data/credits.ts`の既存の地形データ項目にまとめて記録する。描画の検証は`tauri/`で`node tools/terrain-thumbnail-test.mjs`を実行する。
+
+### 3.6. ゲームで確認する
 
 登録表はバックエンドの起動時に読み込まれるため、バックエンドを再起動してからゲームの「ニューゲーム」ウィンドウを開く。地形マップ一覧に新しいマップが表示され、選択してゲームを開始すれば、編集した地形が反映される。
 

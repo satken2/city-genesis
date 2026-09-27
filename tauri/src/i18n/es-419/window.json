@@ -43,7 +43,9 @@
     "prop_placement": "Colocación de props",
     "mashup_edit": "Distribución de anexos",
     "path_shape_editor": "Editor de forma de vía",
-    "grading": "Movimiento de tierras"
+    "grading": "Movimiento de tierras",
+    "scenario_manager": "Gestor de escenarios",
+    "scenario_metadata": "Información"
   },
   "cityMap": {
     "layers": {

@@ -561,3 +561,9 @@ Unity は `RoadMemberEditManager` が担う。入力プリセット `ROAD_MEMBER
 終了はパネルの「完了」の `edit_road:cancel {road_id}` で行い、`STATE_NORMAL` は送らない（UI の知らないうちに Unity が別のモードへ移っていた場合に、それを打ち切らないため）。`STATE_NORMAL`・他のステートへの直接の遷移・Unity にフォーカスがあるときの Esc・セッションのリセット・別の道路（または同じ道路の別の `session_id`）での開始でもモードは終わり、どの場合も Unity が `edit_road:ended` を1回送る。`edit_road:ended` には、終わったモードの開始時の `session_id` を型を変えずに添える（開始時に無ければ省く）。モードが終わっても `world:set_road_focus` の強調は残る。
 
 道路詳細のウィンドウが閉じられたときは、Rust（`window.rs` の `close_window_by_label`）が閉じた道路の `road_id` を載せて `world:clear_road_focus` と `edit_road:cancel` を送る（ポップアップは非表示になるだけでアンマウント処理が走らないため。`edit_path:cancel_topology_edit` と同じ理由）。`road_detail` は `EDIT_MODE_WINDOW_TYPES` に入れない。パネル・3Dの強調帯・道路名ラベルを含む全体の仕様は[道路の詳細と道路名](道路の詳細と道路名.md)を参照。
+
+## 起動・再接続時の版照合
+
+`system:graphic_ready` のペイロードは `frontend_version`、`api_contract_version`、`ipc_contract_version`、`core_compatible`。UIは自身の契約番号との一致を検査し、`system:ready` に自身の同3項目と `accepted` を返す。Envelope自体の `version: "1.0"` は変更しない。
+
+UnityはコアとのHTTP契約とUIとのIPC契約が成立するまでマスター取得・ゲーム用操作・セッションポーリングによる開始を解禁しない。不一致のUnityを未接続として扱い、開発用の描画待ち省略に流さない。コアのAPI照合は再起動に備えて再実行する。詳細は[バージョニングと互換性](バージョニングと互換性.md)。

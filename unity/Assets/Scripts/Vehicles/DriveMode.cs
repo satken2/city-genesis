@@ -60,9 +60,8 @@ public sealed class DriveMode : MonoBehaviour
         if (open) { Close(true); return; }
         // 編集ハンドラ自身もキーを受けるため、編集中に入力ゲートだけを被せない。
         var input = InputHandler.Instance;
-        foreach (int type in new[] { InputObjectType.TERRAIN, InputObjectType.PATH, InputObjectType.BUILDING, InputObjectType.PARCEL, InputObjectType.NODE })
-            if (input != null && input.GetMode(type) != InputMode.MODE_NORMAL)
-            { message = L("finishEditing"); noticeUntil = Time.unscaledTime + 5; return; }
+        if (input != null && !input.IsNormalMode)
+        { message = L("finishEditing"); noticeUntil = Time.unscaledTime + 5; return; }
         cameraRef = Camera.main;
         cars = FindAnyObjectByType<VehicleManager>();
         trains = TransitVehicleManager.Instance;

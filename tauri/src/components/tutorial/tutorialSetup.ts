@@ -14,7 +14,7 @@
  * 既に構築済みの都市に対して二重に実行されることはない。
  */
 
-import { fetchApi } from "../../utils/api";
+import { fetchLessonApi as fetchApi } from "../../tutorial/legacyApi";
 import { sendSessionReload } from "../../utils/ipc";
 import {
   STATUS_ACTIVE,

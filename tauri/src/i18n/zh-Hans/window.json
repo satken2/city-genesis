@@ -43,7 +43,9 @@
     "prop_placement": "装饰物放置",
     "mashup_edit": "附属建筑布局",
     "path_shape_editor": "路径形状编辑",
-    "grading": "土方工程"
+    "grading": "土方工程",
+    "scenario_manager": "场景管理",
+    "scenario_metadata": "介绍信息"
   },
   "cityMap": {
     "layers": {

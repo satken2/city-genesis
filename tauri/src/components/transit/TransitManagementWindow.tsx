@@ -286,9 +286,13 @@ export function TransitManagementWindow({
 
   return (
     <div className="transit-window">
-      {/* 種別タブと新設ボタン。タブの台座の下罫線を行全体に引き、ボタンはその右端に置く */}
-      <div className="transit-window__bar">
-        <div className="transit-tabs" role="tablist">
+      {/* 左サイドバー: 路線新設ボタンと路線種別の縦並びタブ */}
+      <aside className="transit-sidebar">
+        <button className="transit-window__new-btn" type="button" onClick={openCreation}>
+          <PlusIcon />
+          <span>{t("transit.newLine")}</span>
+        </button>
+        <div className="transit-tabs" role="tablist" aria-orientation="vertical">
           {tabs.map((tab) => {
             const active = tab.key === activeTab;
             return (
@@ -300,25 +304,28 @@ export function TransitManagementWindow({
                 className={`transit-tab${active ? " transit-tab--active" : ""}`}
                 onClick={() => setActiveTab(tab.key)}
               >
-                {tab.icon && <img src={tab.icon} alt="" className="transit-tab__icon" draggable={false} />}
-                <span>{tab.label}</span>
+                {tab.icon ? (
+                  <img src={tab.icon} alt="" className="transit-tab__icon" draggable={false} />
+                ) : (
+                  <AllLinesIcon />
+                )}
+                <span className="transit-tab__label">{tab.label}</span>
                 <span className="transit-tab__count">{tab.count}</span>
               </button>
             );
           })}
         </div>
-        <button className="transit-window__new-btn" type="button" onClick={openCreation}>
-          {t("transit.newLine")}
-        </button>
-      </div>
+      </aside>
 
-      {error && (
-        <div className="transit-window__error-inline" role="alert">
-          {error}
-        </div>
-      )}
+      {/* 右メインペイン: エラー表示と路線一覧テーブル */}
+      <section className="transit-main">
+        {error && (
+          <div className="transit-window__error-inline" role="alert">
+            {error}
+          </div>
+        )}
 
-      <div className="transit-table-wrapper" role="tabpanel">
+        <div className="transit-table-wrapper" role="tabpanel">
         {visibleLines.length === 0 ? (
           <div className="transit-window__empty">{t("transit.noLines")}</div>
         ) : (
@@ -474,7 +481,43 @@ export function TransitManagementWindow({
           </table>
         )}
       </div>
+      </section>
     </div>
+  );
+}
+
+/** 路線新設ボタンの「+」アイコン。インラインSVGでボタンの文字色に追従 */
+function PlusIcon() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      width="14"
+      height="14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <line x1="8" y1="3" x2="8" y2="13" />
+      <line x1="3" y1="8" x2="13" y2="8" />
+    </svg>
+  );
+}
+
+/** 「すべて」タブ用のアイコン。全路線のリスト一覧を表すインラインSVG */
+function AllLinesIcon() {
+  return (
+    <svg
+      className="transit-tab__icon transit-tab__icon--all"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <rect x="2.5" y="4" width="15" height="2" rx="1" />
+      <rect x="2.5" y="9" width="15" height="2" rx="1" />
+      <rect x="2.5" y="14" width="15" height="2" rx="1" />
+    </svg>
   );
 }
 
@@ -509,3 +552,4 @@ function DeleteIcon() {
     </svg>
   );
 }
+

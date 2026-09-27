@@ -14,8 +14,6 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
     public BuildingMeshResult Generate(BuildingSummary data,bool isDynamic=false)
     {
         BuildingMeshUtils.ResolveParcelContext(data,out _,out Vector3 center);
-        // SHAPE_FULLの建物輪郭は区画全面かつ最初の辺が接道側に正規化されている。
-        var polygon=BuildingMeshUtils.GetFootprint(data);
         var naming=BuildingMeshUtils.ResolveModelNaming(data);
         var parts=new Dictionary<string,GameObject>();
         foreach(string part in Parts)
@@ -23,8 +21,7 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
             var prefab=BuildingMeshUtils.GetPartBySuffixScan(naming.Prefix,part,BuildingMeshUtils.ComputeVariantNumber(data.visual_variant));
             if(prefab!=null)parts[part]=prefab;
         }
-        int modelType=MasterDataStore.Instance.GetAgentMaster(data.variant).model_type ?? Constants.MODEL_PARKING;
-        var plan=OpenSpaceLayout.Create(polygon,modelType,data.visual_variant2);
+        var plan=BuildingRoadAccessIndex.GetOpenSpacePlan(data);
         return Build(plan,parts,center,true,BuildingMeshUtils.ResolveFloorMaterialFromMaster(data,naming.Prefix));
     }
     /// <summary>検証・展示も本編と同じ配置と実FBXを使う。flatは地形の無い展示専用。</summary>

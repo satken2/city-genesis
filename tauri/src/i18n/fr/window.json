@@ -43,7 +43,9 @@
     "prop_placement": "Placement de décors",
     "mashup_edit": "Disposition des annexes",
     "path_shape_editor": "Édition de la forme de la voie",
-    "grading": "Terrassement"
+    "grading": "Terrassement",
+    "scenario_manager": "Gestion des scénarios",
+    "scenario_metadata": "Présentation"
   },
   "cityMap": {
     "layers": {

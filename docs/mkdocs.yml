@@ -109,6 +109,10 @@ nav:
     - 道路の詳細と道路名: programs/道路の詳細と道路名.md
     - IPC連携: programs/IPC連携の整理.md
     - コンポーネント連携: programs/コンポーネント連携.md
+    - バージョニングと互換性: programs/バージョニングと互換性.md
+    - セーブデータ仕様: programs/セーブデータ仕様.md
+    - シナリオ制作と配布: programs/シナリオ制作と配布.md
+    - チュートリアル基盤: programs/チュートリアル基盤.md
     - モックバックエンド: programs/モックバックエンド.md
     - Unity入力制御: programs/Unity入力制御.md
     - Unity表示モード: programs/Unity表示モード.md

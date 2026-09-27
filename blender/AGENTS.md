@@ -12,6 +12,7 @@
 - 路線車両(vehicles.blend のバス12・LRT14・メトロ20・中距離21・貨物22の機関車、props.blend の 308/309)の帯は専用の材質で塗り分けてあり、Unity がその材質だけを路線カラーで塗り替える(`unity/Assets/Resources/Config/transit_vehicle_livery.json`)。帯の材質を車体の他の部位に流用しない。
 - テクスチャは `//../unity/Assets/Models/<カテゴリ>/Textures/` の相対パス参照。このディレクトリを移動・改名すると参照が切れる。
 - Unity は `unity/` 配下しかインポートしないので、ここに .blend を置いても Unity のアセットにはならない(意図的に `unity/` の外にある)。
+- 既成建物の道路間口は `road_access_{entry|exit|both}_*` と子Empty `a`・`b`・`inside` をモデル内に保持する(I文書§11)。通常・接写・遠景で同じ位置にし、FBXへこの階層も出力する。1081は貨物駅ジョブがマーカーを再生成する。
 - `*.blend1` は Blender の自動バックアップで `.gitignore` 済み。履歴は Git が持つので残さない。
 
 ## 詳細の参照先

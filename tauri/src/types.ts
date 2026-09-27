@@ -764,6 +764,8 @@ export type TransitMasterEntry = {
   stop_path_variants: number[];
   route_path_variants: number[];
   vehicle_type?: number;
+  /** 貨物路線の総両数には、積載しない機関車1両を含む。 */
+  freight?: boolean;
 };
 
 /**

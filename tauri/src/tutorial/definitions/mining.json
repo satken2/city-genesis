@@ -1,0 +1,316 @@
+{
+  "version": 1,
+  "id": "mining",
+  "setup": [],
+  "steps": [
+    {
+      "id": "mining.1",
+      "legacyStep": 1,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.mining.step1.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.visibility"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                235,
+                0,
+                40
+              ]
+            ]
+          },
+          "until": {
+            "type": "window",
+            "window": "resource_detail"
+          }
+        }
+      ]
+    },
+    {
+      "id": "mining.2",
+      "legacyStep": 2,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.mining.step2.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                235,
+                0,
+                40
+              ]
+            ]
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.mine",
+            "equals": true
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "mining",
+          "action": "commission_mine"
+        },
+        {
+          "type": "reload"
+        }
+      ]
+    },
+    {
+      "id": "mining.3",
+      "legacyStep": 3,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.mining.step3.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                220,
+                0,
+                125
+              ]
+            ]
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.loading",
+            "equals": true
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "mining",
+          "action": "commission_loading"
+        },
+        {
+          "type": "reload"
+        }
+      ]
+    },
+    {
+      "id": "mining.4",
+      "legacyStep": 4,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.mining.step4.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -90,
+                0,
+                125
+              ]
+            ]
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.unloading",
+            "equals": true
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "mining",
+          "action": "commission_unloading"
+        },
+        {
+          "type": "reload"
+        }
+      ]
+    },
+    {
+      "id": "mining.5",
+      "legacyStep": 5,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.mining.step5.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -247,
+                0,
+                95
+              ]
+            ]
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.port",
+            "equals": true
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "mining",
+          "action": "commission_port"
+        },
+        {
+          "type": "reload"
+        },
+        {
+          "type": "scenarioAction",
+          "scenario": "mining",
+          "action": "operations"
+        }
+      ]
+    },
+    {
+      "id": "mining.6",
+      "legacyStep": 6,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.mining.step6.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.execute"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.epoch_advanced",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "mining.7",
+      "legacyStep": 7,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.mining.step7.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.execute"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -247,
+                0,
+                95
+              ]
+            ]
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.exports",
+            "equals": true
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -150,7 +150,113 @@
     "checking": "Comprobando...",
     "failed": "No se cumplen las condiciones. Inténtalo de nuevo.",
     "completed": "¡Tutorial completado! Buen trabajo.",
-    "stepProgress": "Paso {{current}} / {{total}}"
+    "stepProgress": "Paso {{current}} / {{total}}",
+    "guide": {
+      "openRoad": "Abre el panel de construcción con el ícono de carretera.",
+      "selectRoad": "Selecciona la calle de dos carriles a nivel del suelo. Solo está disponible la variante indicada.",
+      "placeStart": "Haz clic izquierdo dentro del círculo celeste para colocar el inicio de la carretera.",
+      "placeEnd": "Haz clic izquierdo dentro del círculo amarillo para colocar el final de la carretera.",
+      "finalizeRoad": "Haz clic derecho en la vista 3D para finalizar la forma de la carretera.",
+      "confirmRoad": "Confirma en el panel de construcción para guardar la carretera y luego pulsa Completar.",
+      "failed": "Falló la preparación o la comunicación. Reintenta; si el problema persiste, sal e inicia el tutorial en una ciudad nueva.",
+      "retry": "Reintentar",
+      "exit": "Salir",
+      "exitFailed": "No se pudo salir. Inténtalo de nuevo.",
+      "placementRequired": "Usa la variante y las posiciones de carretera indicadas.",
+      "preparing": "Preparando la ciudad del tutorial."
+    },
+    "trade": {
+      "title": "Iniciar el comercio internacional",
+      "description": "Aprende a exportar mercancías por mar e importarlas por ferrocarril construyendo un puerto de contenedores y una estación internacional de carga.",
+      "step1": {
+        "title": "Construir un puerto de contenedores",
+        "description": "Construir un puerto de contenedores。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+      },
+      "step2": {
+        "title": "Confirmar exportaciones de alimentos",
+        "description": "Confirmar exportaciones de alimentos。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+      },
+      "step3": {
+        "title": "Construir una estación internacional de carga",
+        "description": "Construir una estación internacional de carga。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+      },
+      "step4": {
+        "title": "Confirmar importaciones por tren",
+        "description": "Confirmar importaciones por tren。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+      }
+    },
+    "highway": {
+      "title": "Construir una autopista",
+      "description": "Aprende a construir una autopista elevada y rampas para crear un enlace con las calles locales.",
+      "step1": {
+        "title": "Cruzar la calle con un viaducto",
+        "description": "Cruzar la calle con un viaducto。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+      },
+      "step2": {
+        "title": "Nombrar la autopista",
+        "description": "Nombrar la autopista。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+      },
+      "step3": {
+        "title": "Construir una rampa",
+        "description": "Construir una rampa。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+      },
+      "step4": {
+        "title": "Inspeccionar el intercambiador",
+        "description": "Inspeccionar el intercambiador。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+      }
+    },
+    "mining": {
+      "title": "Extraer recursos",
+      "description": "Aprende a extraer mineral, transportarlo por ferrocarril y exportarlo construyendo una mina, estaciones de carga y un puerto de graneles.",
+      "step1": {
+        "title": "Inspeccionar el yacimiento",
+        "description": "Inspeccionar el yacimiento。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+      },
+      "step2": {
+        "title": "Construir una cantera",
+        "description": "Construir una cantera。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+      },
+      "step3": {
+        "title": "Construir una estación de carga de mineral",
+        "description": "Construir una estación de carga de mineral。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+      },
+      "step4": {
+        "title": "Construir una estación de descarga",
+        "description": "Construir una estación de descarga。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+      },
+      "step5": {
+        "title": "Construir un puerto a granel",
+        "description": "Construir un puerto a granel。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+      },
+      "step6": {
+        "title": "Avanzar una época",
+        "description": "Avanzar una época。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+      },
+      "step7": {
+        "title": "Confirmar exportaciones de mineral",
+        "description": "Confirmar exportaciones de mineral。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+      }
+    },
+    "tourism": {
+      "title": "Desarrollar el turismo",
+      "description": "Aprende a atraer turistas y fomentar el uso de restaurantes y autobuses construyendo un hotel y una terminal de pasajeros.",
+      "step1": {
+        "title": "Construir un hotel junto a las ruinas",
+        "description": "Construir un hotel junto a las ruinas。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+      },
+      "step2": {
+        "title": "Construir una terminal de pasajeros",
+        "description": "Construir una terminal de pasajeros。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+      },
+      "step3": {
+        "title": "Avanzar épocas",
+        "description": "Avanzar épocas。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+      },
+      "step4": {
+        "title": "Verificar ingresos y pasajeros del autobús",
+        "description": "Verificar ingresos y pasajeros del autobús。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
+      }
+    }
   },
   "tips": {
     "startGame": "Comenzar partida",

@@ -56,6 +56,11 @@ public abstract class EditControlMenuBase : MonoBehaviour
         }
 
         if (!active) return;
+        if (TutorialRuntime.PathRestricted || TutorialRuntime.BlocksWorldInput)
+        {
+            if (menuOpenedByThis) { RadialMenuController.Instance?.CloseAndCancel(); menuOpenedByThis = false; }
+            return;
+        }
 
         bool ctrlHeld = InputUtil.KeyPressed(Key.LeftCtrl) || InputUtil.KeyPressed(Key.RightCtrl);
         bool ctrlPressedNow = InputUtil.KeyWasPressedThisFrame(Key.LeftCtrl) || InputUtil.KeyWasPressedThisFrame(Key.RightCtrl);

@@ -20,15 +20,18 @@
     { "variant": 2, "prop": 390, "key": "trainRetro" }
   ],
   "1006": [
-    { "variant": 0, "prop": 380, "key": "freightRed" },
-    { "variant": 1, "prop": 381, "key": "freightBlue" }
+    { "variant": 0, "prop": 380, "key": "freightJr" },
+    { "variant": 1, "prop": 381, "key": "freightAmerican" },
+    { "variant": 2, "prop": 394, "key": "freightIndian" }
   ],
   "1007": [
-    { "variant": 0, "prop": 380, "key": "freightRed" },
-    { "variant": 1, "prop": 381, "key": "freightBlue" }
+    { "variant": 0, "prop": 380, "key": "freightJr" },
+    { "variant": 1, "prop": 381, "key": "freightAmerican" },
+    { "variant": 2, "prop": 394, "key": "freightIndian" }
   ],
   "1008": [
-    { "variant": 0, "prop": 380, "key": "freightRed" },
-    { "variant": 1, "prop": 381, "key": "freightBlue" }
+    { "variant": 0, "prop": 380, "key": "freightJr" },
+    { "variant": 1, "prop": 381, "key": "freightAmerican" },
+    { "variant": 2, "prop": 394, "key": "freightIndian" }
   ]
 }

@@ -1,6 +1,6 @@
 [package]
 name = "city-genesis"
-version = "0.1.0"
+version = "1.0.0"
 description = "UI component of city genesis"
 authors = ["Sato Kenta"]
 edition = "2021"
@@ -15,6 +15,7 @@ name = "genesis_ui_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
+serde_json = "1"
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
@@ -24,7 +25,7 @@ tauri-plugin-dialog = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 toml = "0.8"
-tokio = { version = "1", features = ["sync", "rt"] }
+tokio = { version = "1", features = ["sync", "rt", "time"] }
 log = "0.4"
 fern = { version = "0.7", features = ["chrono"] }
 chrono = "0.4"

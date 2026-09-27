@@ -75,6 +75,7 @@ import {
   encodeFloat16Array,
   uint8ToBase64,
   groundCoverRamp,
+  landElevationRange,
   normalizeClimate,
   normalizeGroundCover,
   extractElevRect,
@@ -3324,14 +3325,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     const count = rows * cols;
     const cs = cellSizeParam ?? cellGridIntervalRef.current;
 
-    let minLand = Infinity;
-    let maxLand = -Infinity;
-    for (let i = 0; i < count; i++) {
-      const e = elev[i];
-      if (e > 0) { if (e < minLand) minLand = e; if (e > maxLand) maxLand = e; }
-    }
-    if (!isFinite(minLand) || !isFinite(maxLand)) { minLand = 0; maxLand = 1; }
-    if (maxLand - minLand < 1) maxLand = minLand + 1;
+    const { minLand, maxLand } = landElevationRange(elev);
 
     const uploaded = ensureRenderer().setTerrain({ rows, cols, spacing, mapWidth, mapHeight }, elev);
     if (!uploaded.ok) {
@@ -3528,7 +3522,7 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
    * 保存先パスは @tauri-apps/plugin-dialog の保存ダイアログでユーザーに選ばせ、
    * その後 Tauriコマンド export_terrain_as_npy に現在の標高データ(メモリ上の elev 配列)を
    * そのまま渡す。.npy への変換はRust側が自前で行う(外部プロセスに依存しない)。
-   * サムネイル画像(160x120のPNG)もこの時点の標高データから生成し、.npyと同じファイル名
+   * サムネイル画像(長辺512px・海が透過の平面図)も保存する標高データから生成し、.npyと同じファイル名
    * (拡張子だけ.png)で同じ場所に書き出す。
    */
   async function handleExportTerrainAsNpy() {
@@ -3555,17 +3549,15 @@ export function TerrainEditorCanvas({ mapId }: TerrainEditorCanvasProps) {
     try {
       const bytes = encodeFloat16Array(elev);
       const dataBase64 = uint8ToBase64(bytes);
-      const thumbnailBase64 = captureTerrainThumbnail(
-        elev,
-        s.rows,
-        s.cols,
-        s.mapWidth,
-        s.mapHeight,
-        s.spacing,
-        s.minLand,
-        s.maxLand,
-        groundCoverRef.current
-      );
+      const thumbnailBase64 = captureTerrainThumbnail({
+        elev: decodeFloat16Array(bytes, elev.length),
+        rows: s.rows,
+        cols: s.cols,
+        mapWidth: s.mapWidth,
+        mapHeight: s.mapHeight,
+        spacing: s.spacing,
+        groundCover: groundCoverRef.current,
+      });
       const result = await invoke<{ yaml_updated: boolean }>("export_terrain_as_npy", {
         mapId: mapIdInput.trim() || mapId,
         mapWidth: s.mapWidth,

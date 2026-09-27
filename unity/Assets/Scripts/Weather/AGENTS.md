@@ -28,5 +28,6 @@ Unity の環境表現だけを扱う。天気・時刻・気候から空・光�
 - シーンの主光源を再利用し、追加の太陽を作らない。無効化時に元の環境を戻し、ランタイム所有アセットは破棄時に解放する。都市オブジェクトには触れない。
 - 工事音の現場座標はバックエンド座標(FloatingOrigin のずれを含まない)で持ち、再生時にずれを足す。GameObject には紐づけない。
 - 音量は `ambience:volume` の購読(受信前は無音)。`AudioListener.volume` は書き換えず、所有する AudioSource だけに適用する。
+- 走行音の距離感は `VehicleAmbience.CreateVoice` のCustom減衰とローパス距離カーブで管理する。車・バスは120m、鉄道は400mまでとし、鉄道の音量減衰は緩やかにする。鉄道の走行音3本・モーター音1本は同じ設定を共有する。距離軸は最大距離で正規化し、終端の音量は0。速度ゲインへ距離減衰を重複して掛けない。
 - F9 パネルのキー(F6/F7 天気、F10 固定、F11 選び直し、F3/F4 時刻、F5 停止)を増やすときは、カメラ・Steam 撮影(F12)・LOD統計(F8)と競合させない。
 - `Tests/Weather/run-unity.ps1` は本フォルダの `*.cs` と `Constants.cs`・`Utils/PolylineUtils.cs`・`UI/UiFontProvider.cs` だけを写して単独コンパイルする。他ファイルへの依存を増やすと QA が壊れる。音声だけの検証は `run-vehicle-audio.ps1`。

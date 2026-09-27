@@ -324,7 +324,7 @@ pub fn start_ipc(app: AppHandle, state: SharedState) {
         }
 
         // system.ready を最初に送信
-        let ready = make_envelope("tauri", "parent", "system:ready", json!({}));
+        let ready = make_envelope("tauri", "parent", "system:ready", crate::version::definition());
         let _ = send_to_parent(&state, ready);
 
         // リーダースレッド起動
@@ -348,6 +348,11 @@ pub fn start_ipc(app: AppHandle, state: SharedState) {
 /// メッセージをUnityに送信する。
 /// MMFに直接書き込む（Mutex取得→書き込み→Event通知）。
 pub fn send_to_parent(state: &SharedState, envelope: Envelope) -> Result<(), String> {
+    if !envelope.event.starts_with("system:") {
+        if let Some(error) = &state.lock().graphic_contract_error {
+            return Err(error.clone());
+        }
+    }
     #[cfg(target_os = "windows")]
     {
         let json = serde_json::to_string(&envelope).map_err(|e| e.to_string())?;
@@ -482,6 +487,9 @@ pub async fn handle_incoming_message(
     state: SharedState,
     envelope: Envelope,
 ) -> Result<(), String> {
+    if !envelope.event.starts_with("system:") && !state.lock().graphic_connected {
+        return Ok(());
+    }
     match envelope.event.as_str() {
         "world:select_object" => {
             let payload: OpenWindowPayload =
@@ -496,6 +504,9 @@ pub async fn handle_incoming_message(
         }
         "edit_path:select_node" => {
             let _ = app.emit("edit_path:select_node", envelope.payload);
+        }
+        "tutorial:applied" => {
+            let _ = app.emit_to("tutorial", "tutorial:applied", envelope.payload);
         }
         "edit_path:update_shape" => {
             let _ = app.emit("edit_path:update_shape", envelope.payload);
@@ -663,6 +674,24 @@ pub async fn handle_incoming_message(
             }
         }
         "system:graphic_ready" => {
+            let expected = crate::version::definition();
+            let compatible = envelope.payload["ipc_contract_version"] == expected["ipc_contract_version"]
+                && envelope.payload["api_contract_version"] == expected["api_contract_version"]
+                && envelope.payload["core_compatible"] == true;
+            {
+                let mut guard = state.lock();
+                guard.graphic_version = envelope.payload["frontend_version"].as_str().map(str::to_owned);
+                guard.graphic_contract_error = if compatible { None } else { Some("IPC_CONTRACT_MISMATCH".into()) };
+                guard.graphic_connected = compatible;
+            }
+            let mut reply = expected;
+            reply["accepted"] = json!(compatible);
+            send_to_parent(&state, make_envelope("tauri", "parent", "system:ready", reply))?;
+            if !compatible {
+                let _ = app.emit("compatibility-error", "IPC_CONTRACT_MISMATCH");
+                return Ok(());
+            }
+
             // Unity の起動完了通知。初回起動と、クラッシュ後にスーパーバイザ
             // (genesis.py)が Unity を自動再起動した場合の両方で送られてくる。
             // ポップアップの一掃は2回目以降(=クラッシュ後の再起動)に限る。

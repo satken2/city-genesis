@@ -43,7 +43,9 @@
     "prop_placement": "Prop Placement",
     "mashup_edit": "Sub-Building Layout",
     "path_shape_editor": "Path Shape Editor",
-    "grading": "Earthworks"
+    "grading": "Earthworks",
+    "scenario_manager": "Scenario manager",
+    "scenario_metadata": "Metadata"
   },
   "cityMap": {
     "layers": {

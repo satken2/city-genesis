@@ -1,17 +1,6 @@
 /**
- * セーブ・ロードウィンドウコンポーネント
- *
- * システムトレイのセーブアイコンから開くポップアップウィンドウの中身。
- * 以下の4つのアクションを提供する:
- *
- * - ニューゲーム: 現在のゲームを破棄して新規セッションを開始する
- * - 上書きセーブ: 現在のセーブIDで上書き保存する
- * - 別名セーブ: 新しいセーブIDで新規保存する
- * - ロード: セーブデータ一覧ウィンドウ(save_list)を開く
- *
- * 各操作はバックエンドAPI(/api/v1/system/saves, /api/v1/sessions)と通信する。
- * 処理中はボタンを無効化し、ステータスメッセージで結果を通知する。
- * ニューゲームはデータ消失を伴うため、確認ダイアログを挟む。
+ * セーブ・ロードとセッション切替のメニュー。
+ * テンプレート保存は都市の編集モードで利用でき、保存後に紹介情報を開く。
  */
 
 import { useState, useCallback, useEffect } from "react";
@@ -19,6 +8,9 @@ import { invoke } from "@tauri-apps/api/core";
 import { useTranslation } from "react-i18next";
 import { sendSessionReset, sendSessionReload } from "../../utils/ipc";
 import "./SaveLoadWindow.css";
+import { fetchApi } from "../../utils/api";
+import { saveError } from "../../utils/saves";
+import { emit } from "@tauri-apps/api/event";
 
 type SaveLoadWindowProps = {
   apiBaseUrl: string;
@@ -42,6 +34,7 @@ type StatusMessage = {
 type SessionInfo = {
   current_save_id: string | null;
   debug_execution: boolean;
+  template_mode: boolean;
 };
 
 export function SaveLoadWindow({ apiBaseUrl, onClose: _onClose }: SaveLoadWindowProps) {
@@ -51,6 +44,7 @@ export function SaveLoadWindow({ apiBaseUrl, onClose: _onClose }: SaveLoadWindow
   const [currentSaveId, setCurrentSaveId] = useState<string | null>(null);
   const [confirmAction, setConfirmAction] = useState<"newGame" | "quitGame" | "returnToTop" | null>(null);
   const [debugExecution, setDebugExecution] = useState(false);
+  const [templateMode, setTemplateMode] = useState(false);
 
   /**
    * ウィンドウ初期化時にセッション情報を取得し、
@@ -59,11 +53,11 @@ export function SaveLoadWindow({ apiBaseUrl, onClose: _onClose }: SaveLoadWindow
   useEffect(() => {
     if (!apiBaseUrl) return;
     const base = apiBaseUrl.replace(/\/+$/, "");
-    fetch(`${base}/api/v1/sessions`)
-      .then((res) => res.json())
+    fetchApi<SessionInfo>(`${base}/api/v1/sessions`)
       .then((data: SessionInfo) => {
         setCurrentSaveId(data.current_save_id);
         setDebugExecution(data.debug_execution ?? false);
+        setTemplateMode(data.template_mode);
       })
       .catch(() => {
         /* セッション取得失敗時は上書きセーブを無効化するのみ */
@@ -93,7 +87,7 @@ export function SaveLoadWindow({ apiBaseUrl, onClose: _onClose }: SaveLoadWindow
 
   /**
    * 上書きセーブの実行
-   * PUT /api/v1/system/saves/{save_id} で現在のセーブIDに上書き保存する。
+   * PUT /api/v1/saves/{save_id} で現在のセーブIDに上書き保存する。
    * セーブIDが未取得(セッション未ロード)の場合は実行しない。
    */
   const handleOverwriteSave = useCallback(async () => {
@@ -102,10 +96,9 @@ export function SaveLoadWindow({ apiBaseUrl, onClose: _onClose }: SaveLoadWindow
     setStatus({ text: t("saveLoad.saving"), type: "info" });
     try {
       const base = apiBaseUrl.replace(/\/+$/, "");
-      const res = await fetch(`${base}/api/v1/saves/${currentSaveId}`, {
+      const data = await fetchApi<{ success?: boolean; save_id?: string; id?: string; error?: string }>(`${base}/api/v1/saves/${currentSaveId}`, {
         method: "PUT",
       });
-      const data = await res.json();
       if (data.success) {
         setStatus({ text: t("saveLoad.saveSuccess"), type: "success" });
       } else {
@@ -120,7 +113,7 @@ export function SaveLoadWindow({ apiBaseUrl, onClose: _onClose }: SaveLoadWindow
 
   /**
    * 別名セーブの実行
-   * POST /api/v1/system/saves で新しいセーブIDを採番して新規保存する。
+   * POST /api/v1/saves で新しいセーブIDを採番して新規保存する。
    * 成功時に currentSaveId を更新する。
    */
   const handleSaveAs = useCallback(async () => {
@@ -128,8 +121,7 @@ export function SaveLoadWindow({ apiBaseUrl, onClose: _onClose }: SaveLoadWindow
     setStatus({ text: t("saveLoad.saving"), type: "info" });
     try {
       const base = apiBaseUrl.replace(/\/+$/, "");
-      const res = await fetch(`${base}/api/v1/saves`, { method: "POST" });
-      const data = await res.json();
+      const data = await fetchApi<{ success?: boolean; save_id?: string; id?: string; error?: string }>(`${base}/api/v1/saves`, { method: "POST" });
       if (data.success) {
         setCurrentSaveId(data.save_id ?? data.id ?? null);
         setStatus({ text: t("saveLoad.saveSuccess"), type: "success" });
@@ -141,6 +133,17 @@ export function SaveLoadWindow({ apiBaseUrl, onClose: _onClose }: SaveLoadWindow
     } finally {
       setBusy(false);
     }
+  }, [apiBaseUrl, t]);
+
+  const handleSaveTemplate = useCallback(async () => {
+    setBusy(true); setStatus(null);
+    try {
+      const data = await fetchApi<{ id: string }>(`${apiBaseUrl.replace(/\/+$/, "")}/api/v1/templates`, { method: "POST" });
+      await emit("scenarios:changed");
+      await invoke("open_registered_window", { windowType: "scenario_metadata", params: { extra: { scenarioId: data.id } } });
+      setStatus({ text: t("saveLoad.saveSuccess"), type: "success" });
+    } catch (error) { setStatus({ text: saveError(error, t), type: "error" }); }
+    finally { setBusy(false); }
   }, [apiBaseUrl, t]);
 
   /**
@@ -166,11 +169,10 @@ export function SaveLoadWindow({ apiBaseUrl, onClose: _onClose }: SaveLoadWindow
     setStatus({ text: t("saveLoad.loading"), type: "info" });
     try {
       const base = apiBaseUrl.replace(/\/+$/, "");
-      const res = await fetch(`${base}/api/v1/system/debug-init`, {
+      const data = await fetchApi<{ success?: boolean; save_id?: string; id?: string; error?: string }>(`${base}/api/v1/system/debug-init`, {
         method: "POST",
       });
-      const data = await res.json();
-      if (res.ok) {
+      if (!data.error) {
         await sendSessionReload().catch(() => {});
         setStatus({ text: t("saveLoad.newGameSuccess"), type: "success" });
       } else {
@@ -195,8 +197,7 @@ export function SaveLoadWindow({ apiBaseUrl, onClose: _onClose }: SaveLoadWindow
     setConfirmAction(null);
     try {
       const base = apiBaseUrl.replace(/\/+$/, "");
-      const res = await fetch(`${base}/api/v1/sessions`, { method: "DELETE" });
-      const data = await res.json();
+      const data = await fetchApi<{ success?: boolean; save_id?: string; id?: string; error?: string }>(`${base}/api/v1/sessions`, { method: "DELETE" });
       if (data.success) {
         // グラフィックプログラムの3Dオブジェクトをクリア
         await sendSessionReset().catch(() => {});
@@ -263,6 +264,10 @@ export function SaveLoadWindow({ apiBaseUrl, onClose: _onClose }: SaveLoadWindow
           type="button"
         >
           {t("saveLoad.saveAs")}
+        </button>
+        <button className="save-load-action-btn" onClick={handleSaveTemplate} disabled={busy || !templateMode}
+          title={!templateMode ? t("scenarios.templateModeRequired") : undefined} type="button">
+          {t("scenarios.saveTemplate")}
         </button>
         <button
           className="save-load-action-btn save-load-action-btn--accent"

@@ -93,6 +93,8 @@ pub struct AppState {
     /// 開発時の「Unity なし起動」で描画待ちを省略するかの判定に使う
     /// (graphic_ready_seen は再接続判定用で、一度立ったら戻さない)。
     pub graphic_connected: bool,
+    pub graphic_contract_error: Option<String>,
+    pub graphic_version: Option<String>,
     /// 日没開始から結果画面を閉じるまでの演出。古いウィンドウの終了通知を区別する。
     pub epoch_presentation_id: Option<String>,
 }
@@ -153,6 +155,8 @@ impl SharedState {
             backend_launch_command,
             graphic_ready_seen: false,
             graphic_connected: false,
+            graphic_contract_error: None,
+            graphic_version: None,
             epoch_presentation_id: None,
         })))
     }

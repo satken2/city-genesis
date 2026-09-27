@@ -64,6 +64,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
         public int type;
         public Vector3[] positions, directions;
         public string[] keys, modelKeys;   // DrawLine が1編成ぶんの車両キーを置く作業領域(長さは編成両数)
+        public VehicleModelConfig.TransitCarModel[] models;
         public Color32? livery;             // 車体の帯を塗る路線色(未設定なら元の塗装)
     }
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -123,6 +124,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
             if (line.motion.Duration <= 0 || line.motion.Length <= 0 || line.type == 0 || data.cars_per_train > maxVisibleCars) continue;
             line.positions = new Vector3[Math.Max(1,data.cars_per_train)]; line.directions = new Vector3[line.positions.Length];
             line.keys = new string[line.positions.Length]; line.modelKeys = new string[line.positions.Length];
+            line.models = new VehicleModelConfig.TransitCarModel[line.positions.Length];
             TransitRouteGeometry.BuildRuns(line);
             lines.Add(line);
             foreach (var run in line.runs) routePaths.Add(run.path);
@@ -208,8 +210,9 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
             {
                 // 折り返しでは車体の前後を維持し、進行方向に対する編成順を逆転する。
                 int identity = reversed ? cars-1-car : car;
-                bool middle = identity > 0 && identity < cars-1;
-                string modelKey = line.type + ":" + variant + (middle ? ":middle" : ":lead");
+                var model = VehicleModelConfig.GetTransitCarModel(line.data.path_variant, variant, identity, cars);
+                line.models[car] = model;
+                string modelKey = line.type + ":" + model.Part;
                 string key = line.data.line_agent_id+":"+train+":"+identity+":"+modelKey;
                 line.modelKeys[car] = modelKey; line.keys[car] = key;
                 if (visible.ContainsKey(key)) anyVisible = true;
@@ -220,14 +223,13 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
             bool created = false;
             for (int car = 0; car < cars; car++)
             {
-                int identity = reversed ? cars-1-car : car;
-                bool middle = identity > 0 && identity < cars-1;
+                var model = line.models[car];
                 string modelKey = line.modelKeys[car], key = line.keys[car];
                 used.Add(key);
                 if (!visible.TryGetValue(key, out var go))
                 {
                     if (pool.TryGetValue(modelKey,out var stack) && stack.Count > 0) go = stack.Pop();
-                    else { go = VehicleModelResolver.CreateTransitCar(line.type,middle,transform,variant); created = true; }
+                    else { go = VehicleModelResolver.CreateTransitCar(line.type,model.Part,transform,model.LiveryVariant); created = true; }
                     go.name = modelKey; visible[key] = go; go.SetActive(true);
                 }
                 if (!nominalLengths.TryGetValue(go,out float fitted) || fitted != spacing)
@@ -235,7 +237,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
                 lineByVehicle[go] = line.data.line_agent_id;
                 TransitLivery.Apply(go, line.livery);
                 Vector3 bodyForward = directions[car] * (reversed && line.type != Constants.VEHICLE_BUS ? -1 : 1);
-                if (identity == cars-1 && cars > 1 && line.type != Constants.VEHICLE_BUS) bodyForward = -bodyForward;
+                if (model.ReverseBody) bodyForward = -bodyForward;
                 go.transform.SetPositionAndRotation(positions[car],Quaternion.LookRotation(bodyForward,Vector3.up));
             }
             if (created) trainCreationsThisFrame++;
@@ -243,7 +245,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 運行中の路線が使う外観・役割(先頭/中間)ごとに車体を1両ずつ前もって作り、初めて見える編成の生成を
+    /// 運行中の路線が使う実体モデルごとに車体を1両ずつ前もって作り、初めて見える編成の生成を
     /// 描画フレームから外す。在庫か表示中の車体がある外観は飛ばす。中断されたら次の Update でやり直す。
     /// </summary>
     private IEnumerator WarmPool(List<Line> snapshot)
@@ -252,6 +254,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
         try
         {
             var variants = new HashSet<int>();
+            var seen = new HashSet<string>();
             foreach (var line in snapshot)
             {
                 int cars = Math.Max(1,line.data.cars_per_train), trains = line.data.vehicle_count/cars;
@@ -259,15 +262,16 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
                 for (int train = 0; train < trains; train++)
                     variants.Add(VehicleModelResolver.PickTransitVariantId(line.type, line.data.vehicle_model, unchecked(line.data.line_agent_id * 397 + train)));
                 foreach (int variant in variants)
-                for (int role = 0; role < (cars > 2 ? 2 : 1); role++)
+                for (int identity = 0; identity < cars; identity++)
                 {
-                    bool middle = role == 1;
-                    string modelKey = line.type + ":" + variant + (middle ? ":middle" : ":lead");
+                    var model = VehicleModelConfig.GetTransitCarModel(line.data.path_variant, variant, identity, cars);
+                    string modelKey = line.type + ":" + model.Part;
+                    if (!seen.Add(modelKey)) continue;
                     if (pool.TryGetValue(modelKey, out var stack) && stack.Count > 0) continue;
                     bool shown = false;
                     foreach (var go in visible.Values) if (go != null && go.name == modelKey) { shown = true; break; }
                     if (shown) continue;
-                    var car = VehicleModelResolver.CreateTransitCar(line.type, middle, transform, variant);
+                    var car = VehicleModelResolver.CreateTransitCar(line.type, model.Part, transform, model.LiveryVariant);
                     car.name = modelKey; car.SetActive(false);
                     if (stack == null) { stack = new Stack<GameObject>(); pool[modelKey] = stack; }
                     stack.Push(car);

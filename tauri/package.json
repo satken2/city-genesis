@@ -1,21 +1,28 @@
 {
   "name": "city-genesis/tauri",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "sync:version": "node tools/sync-version.mjs",
+    "predev": "npm run sync:version",
+    "prebuild": "npm run sync:version",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
     "mock-parent": "node tools/mock-parent/server.mjs",
-    "cleanup-dev": "powershell -ExecutionPolicy Bypass -File tools/cleanup-dev.ps1"
+    "cleanup-dev": "powershell -ExecutionPolicy Bypass -File tools/cleanup-dev.ps1",
+    "test:scenarios": "node tools/scenarios/run.mjs",
+    "test:tutorial": "node tools/tutorial/run.mjs",
+    "check:tutorial": "node tools/tutorial/run.mjs"
   },
   "dependencies": {
     "@msgpack/msgpack": "^3.1.3",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-dialog": "^2",
     "@tauri-apps/plugin-opener": "^2",
+    "ajv": "^8.20.0",
     "i18next": "^26.0.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -29,6 +36,7 @@
     "@types/react-dom": "^18.3.1",
     "@types/three": "^0.185.0",
     "@vitejs/plugin-react": "^4.3.4",
+    "happy-dom": "^20.14.5",
     "typescript": "~5.6.2",
     "vite": "^6.0.3"
   }

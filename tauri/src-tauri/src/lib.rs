@@ -4,6 +4,7 @@ mod settings;
 mod state;
 mod terrain_export_paths;
 mod window;
+mod version;
 
 use messages::{BackendLaunchConfig, EntityRef, GraphicLaunchConfig, MutexGroups, WindowRegistry};
 use serde_json::Value;
@@ -351,7 +352,7 @@ async fn start_new_game(
     };
     let url = format!("{}/api/v1/sessions", api_base_url.trim_end_matches('/'));
 
-    let client = reqwest::Client::new();
+    let client = version::client();
     let res = client
         .post(&url)
         .timeout(Duration::from_secs(60))
@@ -372,7 +373,7 @@ async fn start_new_game(
             let mut guard = state.lock();
             guard.is_loading = false;
         }
-        return Err(format!("セッション作成に失敗しました: {status}"));
+        return Err(format!("セッション作成に失敗しました: {status} {body}"));
     }
 
     log::info!("[start_new_game] セッション作成リクエスト成功。ポーリング待機に委譲");
@@ -398,14 +399,20 @@ async fn create_session(
     is_tutorial: Option<bool>,
     template_mode: Option<bool>,
     tutorial_id: Option<String>,
+    accept_balance_change: Option<bool>,
 ) -> Result<(), String> {
     log::info!(
         "[create_session] terrain_map_id={:?} template_id={:?} city_name={:?} language={:?} simulation_days={:?} is_tutorial={:?} template_mode={:?} tutorial_id={:?}",
         terrain_map_id, template_id, city_name, language, simulation_days, is_tutorial, template_mode, tutorial_id
     );
 
+    version::verify_core(state.inner()).await?;
+    if let Some(id) = &template_id {
+        version::validate_load(state.inner(), id, true, accept_balance_change.unwrap_or(false)).await?;
+    }
+
     // Unity が起動していなければ起動する
-    window::launch_graphic(state.inner())?;
+    version::prepare_graphic(state.inner()).await?;
 
     if let Some(topmenu) = app.get_webview_window("topmenu") {
         let _ = topmenu.hide();
@@ -446,6 +453,8 @@ async fn create_session(
         simulation_days: Option<u32>,
         is_tutorial: Option<bool>,
         template_mode: Option<bool>,
+        tutorial_id: Option<String>,
+        accept_balance_change: bool,
     }
     let query_params = SessionParams {
         terrain_map_id: terrain_map_id.clone(),
@@ -455,9 +464,11 @@ async fn create_session(
         simulation_days,
         is_tutorial,
         template_mode,
+        tutorial_id: tutorial_id.clone(),
+        accept_balance_change: accept_balance_change.unwrap_or(false),
     };
 
-    let client = reqwest::Client::new();
+    let client = version::client();
     let res = client
         .post(&url)
         .query(&query_params)
@@ -478,7 +489,7 @@ async fn create_session(
             let mut guard = state.lock();
             guard.is_loading = false;
         }
-        return Err(format!("セッション作成に失敗しました: {status}"));
+        return Err(format!("セッション作成に失敗しました: {status} {body}"));
     }
 
     // カメラの初期視点はUIを経由しない。グラフィックが game:start 受信時に
@@ -496,10 +507,12 @@ async fn start_load_game(
     app: tauri::AppHandle,
     state: tauri::State<'_, SharedState>,
     save_id: String,
+    accept_balance_change: Option<bool>,
 ) -> Result<(), String> {
     log::info!("[start_load_game] save_id={} でロード開始", save_id);
 
-    window::launch_graphic(state.inner())?;
+    version::validate_load(state.inner(), &save_id, false, accept_balance_change.unwrap_or(false)).await?;
+    version::prepare_graphic(state.inner()).await?;
 
     if let Some(topmenu) = app.get_webview_window("topmenu") {
         let _ = topmenu.hide();
@@ -519,10 +532,10 @@ async fn start_load_game(
     };
     let url = format!("{}/api/v1/sessions", api_base_url.trim_end_matches('/'));
 
-    let client = reqwest::Client::new();
+    let client = version::client();
     let res = client
         .post(&url)
-        .query(&[("save_id", &save_id)])
+        .query(&[("save_id", save_id.as_str()), ("accept_balance_change", if accept_balance_change.unwrap_or(false) { "true" } else { "false" })])
         .timeout(Duration::from_secs(60))
         .send()
         .await
@@ -540,7 +553,7 @@ async fn start_load_game(
             let mut guard = state.lock();
             guard.is_loading = false;
         }
-        return Err(format!("ロードに失敗しました: {status}"));
+        return Err(format!("ロードに失敗しました: {status} {body}"));
     }
 
     log::info!("[start_load_game] ロードリクエスト成功。ポーリング待機に委譲");
@@ -631,7 +644,7 @@ async fn copy_terrain_for_editor(
     let original = original.unwrap_or(false);
     let url = format!("{}/api/v1/terrain/maps/{}/near?original={}", base, map_id, original);
 
-    let client = reqwest::Client::new();
+    let client = version::client();
     let res = client
         .get(&url)
         .timeout(Duration::from_secs(60))
@@ -1334,7 +1347,8 @@ async fn start_debug_init(
 ) -> Result<(), String> {
     log::info!("[start_debug_init] デバッグ初期化を開始");
 
-    window::launch_graphic(state.inner())?;
+    version::verify_core(state.inner()).await?;
+    version::prepare_graphic(state.inner()).await?;
 
     if let Some(topmenu) = app.get_webview_window("topmenu") {
         let _ = topmenu.hide();
@@ -1352,7 +1366,7 @@ async fn start_debug_init(
     };
     let url = format!("{}/api/v1/system/debug-init", api_base_url.trim_end_matches('/'));
 
-    let client = reqwest::Client::new();
+    let client = version::client();
     let res = client
         .post(&url)
         .timeout(Duration::from_secs(60))
@@ -1372,7 +1386,7 @@ async fn start_debug_init(
             let mut guard = state.lock();
             guard.is_loading = false;
         }
-        return Err(format!("セッション作成に失敗しました: {status}"));
+        return Err(format!("セッション作成に失敗しました: {status} {body}"));
     }
 
     log::info!("[start_new_game] セッション作成リクエスト成功。ポーリング待機に委譲");
@@ -1475,7 +1489,7 @@ fn request_app_exit(app: &tauri::AppHandle, state: &SharedState) {
         guard.api_base_url.trim_end_matches('/').to_string()
     };
     if !base.is_empty() {
-        let client = reqwest::blocking::Client::builder()
+        let client = reqwest::blocking::Client::builder().default_headers(version::headers())
             .timeout(Duration::from_secs(2))
             .build()
             .unwrap_or_default();
@@ -1701,7 +1715,7 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
         // クライアントをループ外で生成してコネクションプールを維持する。
         // localhost 内の通信でも、都度クライアントを作り直すと TCP コネクションの
         // 確立に時間がかかり、Python 側の GIL や接続キューの影響でタイムアウトしやすくなる。
-        let client = reqwest::blocking::Client::builder()
+        let client = reqwest::blocking::Client::builder().default_headers(version::headers())
             .timeout(Duration::from_secs(10))
             // Python 側 (uvicorn) の keep-alive タイムアウトより短く設定することで、
             // サーバ側ですでに切断された idle コネクションを再利用してしまい、
@@ -1730,6 +1744,18 @@ fn start_session_polling(state: SharedState, app: tauri::AppHandle) {
             }
 
             let base = api_base_url.trim_end_matches('/');
+
+            let compatible = client.get(format!("{}/api/v1/system/version", base)).send()
+                .ok().filter(|response| response.status().is_success())
+                .and_then(|response| response.json::<Value>().ok())
+                .map(|remote| remote["api_contract_version"] == version::definition()["api_contract_version"])
+                .unwrap_or(false);
+            if !compatible || state.lock().graphic_contract_error.is_some() {
+                window::set_hud_visible(&app, false);
+                if let Some(topmenu) = app.get_webview_window("topmenu") { let _ = topmenu.show(); }
+                std::thread::sleep(Duration::from_secs(5));
+                continue;
+            }
 
             // このGETより後にPOSTが終わった場合、古い応答を新セッションの状態として採用しない。
             let (polled_loading_id, load_complete_before_poll, started_before_poll) = {
@@ -2329,6 +2355,8 @@ pub fn run() {
             launch_graphic,
             start_new_game,
             start_load_game,
+            version::export_scenario,
+            version::get_frontend_status,
             start_debug_init,
             create_session,
             start_backend,

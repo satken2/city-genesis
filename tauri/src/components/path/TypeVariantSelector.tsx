@@ -10,6 +10,7 @@
  */
 
 import { useMemo } from "react";
+import { tutorialVariantAllowed, useGuideSnapshot } from "../../tutorial/TutorialLayer";
 import { useTranslation } from "react-i18next";
 import type { MasterData, PathMasterEntry } from "../../types";
 import type { VariantAffordability } from "../../hooks/useVariantAffordability";
@@ -47,6 +48,7 @@ export function TypeVariantSelector({
   affordability = null,
 }: TypeVariantSelectorProps) {
   const { t } = useTranslation();
+  useGuideSnapshot();
   const isUnaffordable = (variantId: number) =>
     affordability != null && !affordability.unlimited && affordability.variants[variantId]?.affordable === false;
 
@@ -65,6 +67,7 @@ export function TypeVariantSelector({
           return (
             <button
               key={opt.type}
+              data-guide="path.type"
               type="button"
               role="tab"
               aria-selected={selectedType === opt.type}
@@ -88,6 +91,7 @@ export function TypeVariantSelector({
           <div className="pc-empty-variants">{t("path_construction.noVariants")}</div>
         ) : (
           <select
+            data-guide="path.variant"
             className="pc-select"
             value={selectedVariant ?? ""}
             disabled={disabled}
@@ -95,13 +99,13 @@ export function TypeVariantSelector({
               const val = e.target.value;
               if (val) {
                 const variantId = parseInt(val);
-                if (selectedVariant !== variantId) onSelectVariant(variantId);
+                if (selectedVariant !== variantId && tutorialVariantAllowed(variantId)) onSelectVariant(variantId);
               }
             }}
           >
             <option value="">{t("path_construction.selectTypeFirst")}</option>
             {variants.map((v) => (
-              <option key={v.id} value={v.id} disabled={isUnaffordable(v.id)}>
+              <option key={v.id} value={v.id} disabled={isUnaffordable(v.id) || !tutorialVariantAllowed(v.id)}>
                 {v.data.display_name}
                 {isUnaffordable(v.id) ? t("construction.variantUnaffordableSuffix") : ""}
               </option>

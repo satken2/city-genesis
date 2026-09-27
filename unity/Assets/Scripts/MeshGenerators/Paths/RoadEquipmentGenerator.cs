@@ -20,7 +20,7 @@ public static class RoadEquipmentGenerator
     /// ホーム区間を渡す。柵は舗装端にありホームと重ならないので対象外。
     /// </param>
     public static void Generate(GameObject parent, SplineComputer spline, PathSummary path,
-        float width, float sidewalkWidth, float? treeSpacing, IReadOnlyList<Vector2> keepClear = null)
+        float width, float sidewalkWidth, float? treeSpacing, IReadOnlyList<Vector2> keepClear = null, RoadAccessPlan access = null)
     {
         var master = MasterDataStore.Instance?.GetPathMaster(path.path_variant);
         if (master == null || (path.streetlight_type == 0 && path.fence_type == 0 && path.street_tree_type == 0 && path.utility_mode == 0
@@ -64,6 +64,7 @@ public static class RoadEquipmentGenerator
             Vector3? previous = null;
             foreach (float distance in Distances(length, overhead ? PoleSpacing : BoxSpacing, 0f, keepClear))
             {
+                if (access?.Blocks(1, distance, 1f) == true) continue;
                 Pose pose = Sample(spline, distance, offset, surface);
                 if (!Reserve(occupied, pose.position, 2f)) continue;
                 if (!PlacePrefab(parent, Prefab(overhead ? "utility_pole" : "utility_box"), pose))
@@ -90,6 +91,7 @@ public static class RoadEquipmentGenerator
             foreach (float distance in Distances(length, LampSpacing, LampSpacing * 0.25f, keepClear))
                 for (int side = firstSide; side <= 1; side += 2)
                 {
+                    if (access?.Blocks(side, distance, 1f) == true) continue;
                     Pose pose = Sample(spline, distance, offset * side, surface);
                     if (!Reserve(occupied, pose.position, 2f)) continue;
                     if (PlacePrefab(parent, Prefab("streetlight"), pose, faceRoad: true)) continue;
@@ -116,6 +118,7 @@ public static class RoadEquipmentGenerator
             foreach (float distance in Distances(length, spacing, spacing * 0.5f, keepClear))
                 for (int side = centralMall ? 1 : -1; side <= 1; side += 2)
                 {
+                    if (access?.Blocks(side, distance, 1.5f) == true) continue;
                     Pose pose = Sample(spline, distance, offset * side, surface);
                     if (!Reserve(occupied, pose.position, 3f)) continue;
                     if (PlacePrefab(parent, Prefab("tree"), pose)) continue;
@@ -138,6 +141,7 @@ public static class RoadEquipmentGenerator
             foreach (float distance in Distances(length, spacing, phase, keepClear))
                 for (int side = pair ? -1 : 1; side <= 1; side += 2)
                 {
+                    if (access?.Blocks(side, distance, clearance) == true) continue;
                     Pose pose = Sample(spline, distance, lateral * side, surface);
                     // 中央島のベンチは外向き。2列型は中央通路へ向け、店舗前を空ける。
                     if (centralMall && part == "bench") pose.rotation *= Quaternion.Euler(0f, 180f, 0f);
@@ -155,13 +159,18 @@ public static class RoadEquipmentGenerator
             for (int side = -1; side <= 1; side += 2)
             {
                 Pose previous = Sample(spline, EndClearance, side * fenceOffset, fenceSurface);
-                metal.Box(previous, new Vector3(0f, 0.5f, 0f), new Vector3(0.07f, 1f, 0.07f));
+                if (access?.Blocks(side, EndClearance, .05f) != true)
+                    metal.Box(previous, new Vector3(0f, 0.5f, 0f), new Vector3(0.07f, 1f, 0.07f));
                 // 柵は歩道と独立して終端を閉じる。交差点内部に自動接続しないため通行口を塞がない。
                 for (float d = EndClearance; d < length - EndClearance;)
                 {
+                    float previousDistance = d;
                     d = Mathf.Min(d + 2f, length - EndClearance);
                     Pose next = Sample(spline, d, side * fenceOffset, fenceSurface);
-                    metal.Box(next, new Vector3(0f, 0.5f, 0f), new Vector3(0.07f, 1f, 0.07f));
+                    if (access?.Blocks(side, d, .05f) != true)
+                        metal.Box(next, new Vector3(0f, 0.5f, 0f), new Vector3(0.07f, 1f, 0.07f));
+                    if (access?.Blocks(side, (d + previousDistance) * .5f, (d - previousDistance) * .5f + .05f) == true)
+                    { previous = next; continue; }
                     if (!PlaceFencePanel(parent, Prefab("fence"), previous.position, next.position))
                     {
                         metal.Bar(previous.position + Vector3.up * 0.5f, next.position + Vector3.up * 0.5f, 0.05f);

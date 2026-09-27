@@ -26,6 +26,9 @@ import { emit } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import { TUTORIAL_SCENARIOS } from "./tutorialSteps";
 import { runTutorialSetup } from "./tutorialSetup";
+import { useTutorialGuide } from "../../tutorial/useTutorialGuide";
+import { fetchApi } from "../../utils/api";
+import { showNotification } from "../../utils/notification";
 import "./Tutorial.css";
 
 /** localStorage にチュートリアル進捗を保存する際のキーのプレフィックス */
@@ -106,11 +109,12 @@ export function Tutorial() {
 
   const steps = currentScenario.steps;
   const totalSteps = steps.length;
+  const guide = useTutorialGuide(visible && !completed && !showComplete, tutorialId, currentStep + 1, saveId, apiBaseUrl);
 
   // チュートリアルの有効状態とターゲットボタンの同期処理
   useEffect(() => {
     const active = visible && !completed && !showComplete;
-    const target = active ? steps[currentStep]?.targetElementId : undefined;
+    const target = active && !guide.managed ? steps[currentStep]?.targetElementId : undefined;
 
     localStorage.setItem("tutorial_active", String(active));
     if (target) {
@@ -132,7 +136,7 @@ export function Tutorial() {
         targetElementId: undefined,
       }).catch(console.error);
     };
-  }, [visible, completed, currentStep, showComplete]);
+  }, [visible, completed, currentStep, showComplete, guide.managed, steps]);
 
   /**
    * 前回のセーブ ID を保持する ref。
@@ -155,12 +159,12 @@ export function Tutorial() {
    * ここでも saveId + tutorialId 単位でガードして無駄な呼び出しを避ける。
    */
   useEffect(() => {
-    if (!visible || !apiBaseUrl || !saveId) return;
+    if (!visible || !apiBaseUrl || !saveId || guide.hasSetup) return;
     const key = `${saveId}_${tutorialId}`;
     if (setupRanForRef.current === key) return;
     setupRanForRef.current = key;
     void runTutorialSetup(tutorialId, apiBaseUrl);
-  }, [visible, apiBaseUrl, saveId, tutorialId]);
+  }, [visible, apiBaseUrl, saveId, tutorialId, guide.hasSetup]);
 
   useEffect(() => {
     let unlistenSession: (() => void) | undefined;
@@ -187,6 +191,8 @@ export function Tutorial() {
           // セーブ ID が変化した場合のみ進捗を復元する
           if (current_save_id !== prevSaveIdRef.current) {
             prevSaveIdRef.current = current_save_id;
+            setReturningToMenu(false);
+            setCheckState("idle");
             const storedStep = loadProgress(current_save_id, activeTutorialId, activeTotalSteps);
             if (storedStep >= activeTotalSteps) {
               // 既に完了している場合は即座に非表示にする
@@ -199,6 +205,12 @@ export function Tutorial() {
               setShowComplete(false);
             }
           }
+        } else {
+          prevSaveIdRef.current = null;
+          setSaveId(null);
+          setVisible(false);
+          setReturningToMenu(false);
+          setCheckState("idle");
         }
 
         // API URL はセッションペイロードから取得する
@@ -250,7 +262,7 @@ export function Tutorial() {
 
   /** 完了ボタン押下時の検証処理 */
   const handleComplete = useCallback(async () => {
-    if (checkState === "checking" || !apiBaseUrl) return;
+    if (checkState === "checking" || !apiBaseUrl || !guide.ready) return;
 
     const step = steps[currentStep];
     if (!step) return;
@@ -262,17 +274,17 @@ export function Tutorial() {
       // ここで完成させておかないと何度押しても条件を満たせない。
       // 前提整備の失敗は検証を止めない(条件未達として通常どおり不合格になる)。
       try {
-        await step.prepare?.(apiBaseUrl);
+        if (!guide.managed) await step.prepare?.(apiBaseUrl);
       } catch (e) {
         console.error("Tutorial step prepare failed:", e);
       }
 
-      const passed = await step.validate(apiBaseUrl);
+      const passed = guide.managed ? await guide.check() : await step.validate(apiBaseUrl);
       if (passed) {
         // 検証成功時、ステップ固有の副作用(例: 建設スキップによる強制稼働)を実行する。
         // 副作用の失敗はチュートリアルの進行を止めないよう握りつぶす。
         try {
-          await step.onComplete?.(apiBaseUrl);
+          if (!guide.managed) await step.onComplete?.(apiBaseUrl);
         } catch (e) {
           console.error("Tutorial step onComplete failed:", e);
         }
@@ -332,7 +344,7 @@ export function Tutorial() {
       setCheckState("failed");
       setTimeout(() => setCheckState("idle"), 3000);
     }
-  }, [checkState, apiBaseUrl, currentStep, saveId]);
+  }, [checkState, apiBaseUrl, currentStep, saveId, guide, steps, tutorialId, totalSteps]);
 
   /**
    * 完了メッセージの「メニューに戻る」ボタン押下時の処理。
@@ -344,11 +356,12 @@ export function Tutorial() {
     if (returningToMenu || !apiBaseUrl) return;
     setReturningToMenu(true);
     try {
-      await fetch(`${apiBaseUrl}/api/v1/sessions`, { method: "DELETE" });
+      await fetchApi(`${apiBaseUrl}/api/v1/sessions`, { method: "DELETE" });
     } catch {
-      // 通信エラーでも UI 側のポーリングが状態変化を検知して画面遷移する
+      setReturningToMenu(false);
+      void showNotification({ message: t("tutorial.guide.exitFailed") });
     }
-  }, [returningToMenu, apiBaseUrl]);
+  }, [returningToMenu, apiBaseUrl, t]);
 
   if (!visible) {
     return null;
@@ -425,9 +438,10 @@ export function Tutorial() {
               {step ? t(step.titleKey) : ""}
             </div>
             <div className="tutorial-step-description">
-              {step ? t(step.descriptionKey) : ""}
+              {guide.failed ? t("tutorial.guide.failed") : guide.textKey ? t(guide.textKey) : step ? t(step.descriptionKey) : ""}
             </div>
             <div className="tutorial-actions">
+              {guide.failed && <button className="tutorial-complete-button" type="button" onClick={guide.retry}>{t("tutorial.guide.retry")}</button>}
               {checkState === "failed" && (
                 <span className="tutorial-status tutorial-status--error">
                   {t("tutorial.failed")}
@@ -441,14 +455,16 @@ export function Tutorial() {
               <button
                 className="tutorial-complete-button"
                 onClick={() => void handleComplete()}
-                disabled={checkState === "checking"}
+                disabled={checkState === "checking" || !guide.ready}
                 type="button"
               >
                 {checkState === "checking"
                   ? t("tutorial.checking")
                   : t(buttonTextKey)}
               </button>
+              <button className="tutorial-complete-button" type="button" onClick={() => void handleReturnToMenu()} disabled={returningToMenu}>{t("tutorial.guide.exit")}</button>
             </div>
+            {import.meta.env.DEV && guide.managed && <details className="tutorial-guide-debug"><summary>Guide</summary>{guide.debug}</details>}
           </div>
         </div>
         {renderProgress()}

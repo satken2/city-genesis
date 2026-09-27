@@ -4,6 +4,7 @@
 
 ## Unity
 
+- 非表示のUnityでInput Systemへ合成キーを送る検証は、検証プロセスの`Application.runInBackground = true`、`InputSystem.settings.backgroundBehavior = IgnoreFocus`、`editorInputBehaviorInPlayMode = AllDeviceInputAlwaysGoesToGameView`を設定する。既定のままでは`QueueStateEvent`後に`InputSystem.Update`してもキーがゲーム側へ届かず、操作本体が正しくても失敗する(`Tests/Camera`のハーネス)。
 - `UnityEngine.Object` 派生の値に `??` / `?.` / `is null` を使わない。これらは参照比較なので、破棄済みオブジェクトや、エディタの `GetComponent` が欠けたコンポーネントの代わりに返す偽 null を null と見なさない(`GetComponent<T>() ?? AddComponent<T>()` はエディタで追加されない)。`== null` か `TryGetComponent` で判定する。
 - 偽 null を返すのは、組み込みコンポーネント型(`AudioSource`・`MeshFilter` など)に対する `GetComponent<T>()` / `Component.GetComponent<T>()` / `GetComponent(Type)` だけ。自作 MonoBehaviour が欠けているときは本物の null が返る。`GetComponentInParent` / `GetComponentInChildren` / `TryGetComponent` は組み込み型でも本物の null。偽 null のプロパティを `?.` で読むと MissingComponentException になる(6000.4.2f1 の編集モード・プレイモードで実測)。
 - `Awake` が例外を投げたコンポーネントは Unity が無効化し、以後 `Update` / `LateUpdate` が呼ばれない。他スクリプトから直接呼ぶメソッドは動くため、「操作は通るのに何も描かれない」形で現れる(例: 公共交通の路線設置で、停留所は置けるのにマーカーが一切出なかった)。
@@ -22,5 +23,6 @@
  
 ## UI / Tauri
 
-- セーブデータやシナリオテンプレートのサムネイル画像表示は、シナリオ固有のサムネイル画像が存在すれば最優先で表示し、未設定または404の場合は舞台となる地形マップのサムネイル(`/api/v1/terrain/maps/{id}/thumbnail`)へフォールバックする(`ScenarioThumbnail.tsx`)。
+- チュートリアルの初期配置は現行HTTP契約を確認する。`POST /parcels` は `mode: empty_area` などを受け付け、旧チュートリアルにある `mode: manual` は未対応。空き領域作成の成功応答は `{ "parcel": 数値ID }`。道路マスターの名称は「2車線道路」であり、表示文に残る「2車線生活道路」で検索すると見つからない。新基盤は属性でバリアントを解決する。
 
+- セーブデータやシナリオテンプレートのサムネイル画像表示は、シナリオ固有のサムネイル画像が存在すれば最優先で表示し、未設定または404の場合は舞台となる地形マップのサムネイル(`/api/v1/terrain/maps/{id}/thumbnail`)へフォールバックする(`ScenarioThumbnail.tsx`)。

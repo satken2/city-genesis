@@ -59,6 +59,8 @@ import {
 } from "../../utils/ipc";
 import { describeMaxSpanViolations, describePathValidation, pathValidationShapeKey, type PathValidationResult } from "./pathValidation";
 import { fetchApi } from "../../utils/api";
+import { allowsPathBody, GUIDE_QUERY, observe, snapshot } from "../../tutorial/bus";
+import { useGuideSnapshot } from "../../tutorial/TutorialLayer";
 import type { PathAlignmentSummary } from "../../types";
 import { notifyRoadsChanged } from "../road/roadApi";
 import {
@@ -213,6 +215,7 @@ export function usePathConstruction(
   pathId?: number | null,
 ) {
   const { t } = useTranslation();
+  useGuideSnapshot();
   const [category, setCategory] = useState<PathCategory | null>(null);
   const [selectedType, setSelectedType] = useState<number | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<number | null>(null);
@@ -783,10 +786,20 @@ export function usePathConstruction(
     setValidationAttempt((value) => value + 1);
   }, []);
   const validationKey = JSON.stringify({ ...constructionBody, exclude_path_id: pathId ?? null });
+  useEffect(() => {
+    const win = getCurrentWindow();
+    let disposed = false, stop: (() => void) | undefined;
+    const report = async () => {
+      if (await win.isVisible() && !disposed) await observe({ pathVariant: selectedVariant ?? -1, pathShape: { selected_points: rawPoints, phase: shapePhase, is_curved: curveMode === "curved" } });
+    };
+    void win.listen(GUIDE_QUERY, () => void report()).then(fn => { if (disposed) fn(); else stop = fn; });
+    void report();
+    return () => { disposed = true; stop?.(); };
+  }, [selectedVariant, rawPoints, shapePhase, curveMode]);
   const currentValidationKey = useRef(validationKey);
   currentValidationKey.current = validationKey;
   const canConfirm = localCanConfirm && constructionBody !== null
-    && validation?.key === validationKey && validation.result?.is_valid === true;
+    && validation?.key === validationKey && validation.result?.is_valid === true && allowsPathBody(constructionBody);
   const validationMessages = maxSpanViolations.length > 0
     ? describeMaxSpanViolations(maxSpanViolations, t)
     : !localCanConfirm
@@ -842,6 +855,8 @@ export function usePathConstruction(
    * 事前検証と見積りの送信形状には含めない)、作成されたパスIDの一覧を返す。既存パスの更新では空配列。
    */
   const confirmPath = useCallback(async (extraFields?: Record<string, unknown>): Promise<number[]> => {
+    const tutorialState = snapshot();
+    if (!allowsPathBody(constructionBody)) throw new Error(t("tutorial.guide.placementRequired"));
     if (!apiBaseUrl || !constructionBody || !canConfirm || !localCanConfirmRef.current
         || currentValidationKey.current !== validationKey || currentShapeRevision.current !== shapeRevision) {
       throw new Error(validationMessages.join("\n") || t("path_construction.collisionChecking"));
@@ -868,13 +883,18 @@ export function usePathConstruction(
     if (!checked.is_valid) {
       throw new Error(describePathValidation(checked, t).join("\n"));
     }
+    const submission = { ...constructionBody, paths: constructionBody.paths.map(p => ({ ...p, ...extraFields })) };
+    if (!allowsPathBody(submission) || (tutorialState?.active && snapshot()?.runId !== tutorialState.runId)) throw new Error(t("tutorial.guide.placementRequired"));
     const response = await fetchApi<{ paths: Array<{ path_id: number }> }>(
       `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/${pathId ?? ""}`,
       { method: pathId == null ? "POST" : "PATCH", headers: { "Content-Type": "application/json" },
         body: JSON.stringify(pathId == null
-          ? { ...constructionBody, paths: constructionBody.paths.map((p) => ({ ...p, ...extraFields })) }
+          ? submission
           : constructionBody.paths[0]) }
     );
+    if (pathId == null && tutorialState?.active && snapshot()?.runId === tutorialState.runId) {
+      await observe({ savedPaths: (response?.paths ?? []).map(p => p.path_id) });
+    }
     setValidation(null);
     localCanConfirmRef.current = false;
     setLocalCanConfirm(false);

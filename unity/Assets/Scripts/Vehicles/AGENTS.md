@@ -27,6 +27,7 @@
 
 ## 知らないと事故る不変条件
 
+- ドライブと撮影の開始可否は`InputHandler.IsNormalMode`で編集との排他を判定する。ドライブ開始時の`CameraController.SetView`は撮影とマウス操作を終了し、カメラを同時に更新させない。
 - `VehiclePolyline.points` は構築後に書き換えない(`ShapeHash` のキャッシュ・`SameSource` の比較・Road の使い回しの前提)。交差点の点列は車線オフセット済みなので二重に横へずらさない。
   - 四隅検査など局所射影は `ProjectRange`(累積距離範囲の二分探索)、全長射影は `Project`。
 - 道路スナップショット(`vehicleRoads` / `pedestrianWalks` ワーカー)は共通予算で分割構築し、完成後に一括交換する。`roads` / `walks` への代入は Commit と Clear に限る(途中の集合を車に見せない)。乗車開始 `StartDrive` だけ同期版 `RefreshRoads` を使う。
@@ -42,7 +43,7 @@
   - LRT・鉄道の交差点レールは `PathManager.GetNodeIntersectionObject`(`NodeMesh_*`)の子 `Rail` から読む(`GetNodeObject` のノード円柱とは別物)。軌道の横位置と踏面高さの正は `LrtRoadParts`。
   - 停止中心はコアと同じ「割合×未切断3D点列長」で求め、片方だけ別の式にしない。
 - 路線カラーは `MaterialPropertyBlock` を使わない(SRP Batcher から外れる)。塗る材質の唯一の正は `Resources/Config/transit_vehicle_livery.json`。新しい外観は帯を専用材質で著作して表に登録する。
-- モデル対応は `Resources/Config/transit_vehicle_models.json`、候補番号は Tauri の `tauri/src/data/transitVehicleModels.json` と揃える。
+- モデル対応は `Resources/Config/transit_vehicle_models.json`（路線種別→`vehicle_type`・任意の`wagon`）、候補番号は Tauri の `tauri/src/data/transitVehicleModels.json` と揃える。編成内の実体モデル・塗装対象・後尾反転は `VehicleModelConfig.GetTransitCarModel` を描画と事前生成で共有する。貨物は機関車1両＋路線種別の貨車で、総両数と公称車長は路線サマリに従う。折り返しで機関車を先頭へ移さない。
   - モノレール(車種24)の FBX は手動配置プロップ308/309と同一ファイルのコピー。308/309を書き出し直したら24にも置き直す(`Tests/Vehicles` がバイト一致を検査)。
 - 歩行者の `side` / `lateral` はパス幾何(始点→終点)に対する左右で、反転しても符号を変えない。`PedestrianManager.ResolveBand` は `Tests/Vehicles/VehicleQA.cs` がリフレクションで同じ引数列を呼ぶので、シグネチャを変えたら QA も直す。
 - 索道の body Renderer の抑制・復元は `PathPresentation.SetRendererForceOff` を介し、生成待ちの抑制を解除しない。搬器モデルは吊り点原点なので `VehicleModelResolver` で接地補正しない。

@@ -16,6 +16,7 @@ City Genesis の3D描画プログラム。バックエンド(FastAPI)とは HTTP
 | `InputHandlers/` | クリック・ドラッグ・キー入力=入力モード(`InputHandlers/AGENTS.md`) |
 | `VisualHandlers/` | 表示/非表示・ハイライト・データ可視化=ビジュアルモードと常駐オーバーレイ(`VisualHandlers/AGENTS.md`) |
 | `IPC/` | Tauri との MemoryMappedFile 通信、編集ステート・表示状態の同期(`IPC/AGENTS.md`) |
+| `Tutorial/` | Tauriの指示に従う一時マーカーと操作制限。都市データ・シナリオ進捗を保持しない |
 | `Vehicles/` | 描画専用の交通演出(一般車・公共交通・歩行者・路駐・索道・環境演出)(`Vehicles/AGENTS.md`) |
 | `Weather/` | 天気・時刻・環境光・降水と、環境音・工事音・走行音(`Weather/AGENTS.md`) |
 | `Utils/`、`Utils.cs` | 汎用ユーティリティ。新しい汎用処理を書く前に必ず確認(`Utils/AGENTS.md`) |
@@ -24,7 +25,7 @@ City Genesis の3D描画プログラム。バックエンド(FastAPI)とは HTTP
 | `AppRoot.cs` | 起動処理。天気・音・エフェクトのシングルトンをここで生成する(シーン配置しない) |
 | `GameStateManager.cs` | ゲーム状態(シングルトン)と状態変化イベント。`IsGameStarted()`=データ取得の許可、`IsWorldVisible`=表示の許可 |
 | `MasterDataStore.cs` | マスターデータの保持。道路幅・車線数などの描画パラメータの正 |
-| `CameraController.cs` / `CameraCellChecker.cs` | カメラ操作とバックエンド `City.camera` との視点同期 / 視野中心セルの判定と `CellDataLoader` への通知(ロードの起点) |
+| `CameraController.cs` / `.Cinematic.cs` / `CameraCellChecker.cs` | カメラ操作・撮影モードとバックエンド `City.camera` との視点同期 / 視野中心セルの判定と `CellDataLoader` への通知(ロードの起点) |
 | `Constants.cs` / `LocalConstants.cs` | 共有定数(自動生成) / Unity ローカルの定数とログフラグ |
 | `ZoneEditContext.cs`、`InputUtil.cs`、`LoadingOverlay.cs` | 地区編集の状態、入力抑制、ロード中の黒画面 |
 
@@ -51,6 +52,7 @@ City Genesis の3D描画プログラム。バックエンド(FastAPI)とは HTTP
 
 - 入力モード(`InputSystemManager` / `InputHandlers/`)はクリックで何が起きるか、ビジュアルモード(`VisualModeHandler` / `VisualHandlers/`)はどう見えるか。編集モードでは UI からの IPC を起点に両方をセットで切り替える(`programs/Unity入力制御.md` §9、`programs/Unity表示モード.md`)。
 - ドライブ(`Vehicles/DriveMode`)は描画専用の乗車操作で、両モードの定数を増やさない(`geometries/O_車両の走行描画.md` §O.12)。
+- 撮影(`CameraController.Cinematic.cs`)もUnity内のカメラ操作として管理する。`GameScene`の`MinimapToggleButton`を`cinematicModeButton`へ接続し、モード1=画面中央の地面・建物・海面の周回、モード2=視線角と絶対高度を保つ水平移動。回転軸取得・周回計算・操作中断は通常カメラと共有する。編集との排他は`InputHandler.IsNormalMode`、3D選択の抑止は`CameraController.BlocksWorldInput`を使う。操作・速度・復帰の仕様は`programs/Unity入力制御.md`「撮影モード」、検証は`Tests/Camera/run-unity.ps1`。
 
 ### ロードと生成予算
 
@@ -77,3 +79,7 @@ City Genesis の3D描画プログラム。バックエンド(FastAPI)とは HTTP
 ## 参照
 
 上記以外の入口: `geometries/K_Unity差分ロード整理.md`(差分ロード・初期ロード完了)、`M_地形プロップ.md`、`programs/コンポーネント連携.md`(起動順序・セッション・カメラ同期)、`programs/IPC連携の整理.md`、`geometries/U_天気と環境光.md`、`programs/サウンドシステム.md`。
+
+## フロントの版
+
+`FrontendVersion.cs` は公開リポジトリ直下 `version.json` から生成する。同期は `tauri` で `npm run sync:version`。`FrontendVersionCheck` はPlay開始・Playerビルド時に同期を検査する。`BackendCompatibility` とIPCの照合が成立してからマスター取得・セッション復帰を始める。

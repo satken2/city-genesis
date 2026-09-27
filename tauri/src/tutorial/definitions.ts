@@ -1,0 +1,54 @@
+import Ajv from "ajv";
+import schema from "./schema.json";
+import basic from "./definitions/basic.json";
+import infra from "./definitions/scenario3.json";
+import trade from "./definitions/trade.json";
+import highway from "./definitions/highway.json";
+import mining from "./definitions/mining.json";
+import tourism from "./definitions/tourism.json";
+
+import type { Definition } from "./model";
+import * as constants from "../constants";
+
+/** DOMの構造や翻訳文ではなく、登録済みの操作名だけを定義で指定する。 */
+export const TARGETS = ["hud.road", "hud.construction", "hud.land", "hud.district", "hud.execute", "hud.visibility", "hud.track", "hud.transport", "path.type", "path.variant", "path.confirm", "path.cancel", "window.path_build", "window.agent_detail"];
+const validateSchema = new Ajv({ allErrors: true, strict: false }).compile(schema);
+export function validateDefinition(value: unknown): asserts value is Definition {
+  if (!validateSchema(value)) throw new Error(JSON.stringify(validateSchema.errors));
+  const definition = value as Definition;
+  const bindings = new Set<string>();
+  const walk = (node: unknown, visit: (value: Record<string, unknown>) => void) => {
+    if (Array.isArray(node)) node.forEach(v => walk(v, visit));
+    else if (node && typeof node === "object") { visit(node as Record<string, unknown>); Object.values(node).forEach(v => walk(v, visit)); }
+  };
+  walk(definition, node => { if (typeof node.bind === "string") bindings.add(node.bind); });
+  walk(definition, node => {
+    if (typeof node.$constant === "string" && node.$constant !== "TUTORIAL_STREET" && !(node.$constant in constants)) throw new Error(`Unknown constant: ${node.$constant}`);
+    for (const key of ["$ref", "target", "from", "to"]) if (typeof node[key] === "string" && !bindings.has(node[key] as string)) throw new Error(`Unknown binding: ${node[key]}`);
+    if (("$ref" in node || "$constant" in node) && Object.keys(node).length !== 1) throw new Error("References must have exactly one key");
+    if (node.type === "create" && node.resource === "parcels" && (node.body as Record<string, unknown>).mode !== "empty_area") throw new Error("Tutorial parcels use empty_area (one returned ID)");
+    if (node.type === "create" && node.resource === "paths" && (!Array.isArray((node.body as Record<string, unknown>).paths) || ((node.body as Record<string, unknown>).paths as unknown[]).length !== 1)) throw new Error("Create one bound path per action");
+  });
+  const ids = new Set<string>(), indices = new Set<number>();
+  for (const step of definition.steps) {
+    if (ids.has(step.id) || indices.has(step.legacyStep)) throw new Error(`Duplicate step: ${step.id}`);
+    ids.add(step.id); indices.add(step.legacyStep);
+    const phases = new Set<string>();
+    for (const phase of step.phases) {
+      if (phases.has(phase.id)) throw new Error(`Duplicate phase: ${phase.id}`);
+      phases.add(phase.id);
+      for (const target of [...phase.ui.allow, ...phase.ui.highlight]) {
+        if (!TARGETS.includes(target)) throw new Error(`Unknown tutorial target: ${target}`);
+      }
+      if (phase.ui.policy === "strict" && phase.ui.allow.some(t => t.startsWith("window."))) throw new Error("strict requires individual controls");
+      if (phase.world.mode === "path" && !phase.world.path) throw new Error(`Missing path constraint: ${step.id}`);
+      if (phase.world.path) {
+        const [a, b] = phase.world.path.points;
+        if (a[1] !== 0 || b[1] !== 0) throw new Error("Tutorial path v1 supports ground-level endpoints only");
+        if (Math.hypot(a[0] - b[0], a[2] - b[2]) < 1) throw new Error("Tutorial path endpoints overlap");
+      }
+    }
+  }
+}
+export const DEFINITIONS: Record<string, Definition> = {};
+for (const value of [basic, infra, trade, highway, mining, tourism]) { validateDefinition(value); DEFINITIONS[value.id] = value; }

@@ -12,7 +12,7 @@ public sealed class VehicleAmbience : MonoBehaviour
     public enum Kind { Car = 0, Bus = 1, Train = 2 }
 
     public const int CarVoices = 6, TrainVoices = 3;
-    public const float CarMinDistance = 5f, CarMaxDistance = 120f, TrainMinDistance = 20f, TrainMaxDistance = 300f;
+    public const float CarMinDistance = 5f, CarMaxDistance = 120f, TrainMinDistance = 10f, TrainMaxDistance = 400f;
     public const float RefreshSeconds = 0.25f, FadeSeconds = 0.3f, StaleSeconds = 1f;
 
     private sealed class Emitter
@@ -89,26 +89,49 @@ public sealed class VehicleAmbience : MonoBehaviour
             clips[i] = Resources.Load<AudioClip>("Audio/Vehicles/" + clipNames[i]);
             if (clips[i] == null) Debug.LogError("VehicleAmbience: 音源がありません: " + clipNames[i]);
         }
-        for (int i = 0; i < carVoices.Length; i++) carVoices[i] = CreateVoice("Vehicle voice car " + i, CarMinDistance, CarMaxDistance);
+        for (int i = 0; i < carVoices.Length; i++) carVoices[i] = CreateVoice("Vehicle voice car " + i, false);
         for (int i = 0; i < trainVoices.Length; i++)
         {
-            trainVoices[i] = CreateVoice("Vehicle voice train " + i, TrainMinDistance, TrainMaxDistance);
-            trainVoices[i].slow = CreateVoice("Vehicle rolling slow " + i, TrainMinDistance, TrainMaxDistance).source;
-            trainVoices[i].fast = CreateVoice("Vehicle rolling fast " + i, TrainMinDistance, TrainMaxDistance).source;
-            trainVoices[i].motor = CreateVoice("Vehicle motor train " + i, TrainMinDistance, TrainMaxDistance).source;
+            trainVoices[i] = CreateVoice("Vehicle voice train " + i, true);
+            trainVoices[i].slow = CreateVoice("Vehicle rolling slow " + i, true).source;
+            trainVoices[i].fast = CreateVoice("Vehicle rolling fast " + i, true).source;
+            trainVoices[i].motor = CreateVoice("Vehicle motor train " + i, true).source;
         }
     }
 
-    private static Voice CreateVoice(string name, float minDistance, float maxDistance)
+    private static Voice CreateVoice(string name, bool train)
     {
+        float minDistance = train ? TrainMinDistance : CarMinDistance;
+        float maxDistance = train ? TrainMaxDistance : CarMaxDistance;
         // 音源は親を持たないルートに置く。FloatingOriginが全Transformを個別にずらすため、親子にすると二重にずれる。
         var source = new GameObject(name).AddComponent<AudioSource>();
         source.playOnAwake = false;
         source.loop = true;
         source.spatialBlend = 1f;
-        source.rolloffMode = AudioRolloffMode.Linear;
+        source.rolloffMode = AudioRolloffMode.Custom;
         source.minDistance = minDistance;
         source.maxDistance = maxDistance;
+        // 距離軸は最大距離を1とする。近景の迫力を保ち、遠景は低い響きだけが薄く残るようにする。
+        float near = minDistance / maxDistance;
+        // 鉄道は大きな音源として遠方まで聞かせる。音量の届く距離と、高音が失われる距離は独立させる。
+        var volumeCurve = train ? new AnimationCurve(
+            new Keyframe(0f, 1f), new Keyframe(near, 1f),
+            new Keyframe(30f / maxDistance, 0.8f), new Keyframe(50f / maxDistance, 0.65f),
+            new Keyframe(100f / maxDistance, 0.4f), new Keyframe(200f / maxDistance, 0.18f),
+            new Keyframe(300f / maxDistance, 0.07f), new Keyframe(1f, 0f)) : new AnimationCurve(
+            new Keyframe(0f, 1f), new Keyframe(near, 1f),
+            new Keyframe(near * 3f, 0.35f), new Keyframe(near * 5f, 0.2f),
+            new Keyframe(near * 10f, 0.08f), new Keyframe(near * 20f, 0.02f), new Keyframe(1f, 0f));
+        source.SetCustomCurve(AudioSourceCurveType.CustomRolloff, volumeCurve);
+        var lowPass = source.gameObject.AddComponent<AudioLowPassFilter>();
+        lowPass.lowpassResonanceQ = 1f;
+        // 周波数はHz。Unity側の距離カーブに任せ、音源の移動とリスナーの移動の両方へ追従させる。
+        var cutoffCurve = new AnimationCurve(
+            new Keyframe(0f, 22000f), new Keyframe(near, 22000f),
+            new Keyframe(near * 3f, 14000f), new Keyframe(near * 5f, 10000f),
+            new Keyframe(near * 10f, 6000f), new Keyframe(near * 20f, 3500f), new Keyframe(1f, 2500f));
+        if (train) cutoffCurve.AddKey(new Keyframe(300f / maxDistance, 2500f));
+        lowPass.customCutoffCurve = cutoffCurve;
         source.dopplerLevel = 0f; // カメラが高速移動するため、ドップラーを残すと音程が揺れる。
         source.volume = 0f;
         return new Voice { source = source };

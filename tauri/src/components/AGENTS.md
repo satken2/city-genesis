@@ -4,6 +4,8 @@
 
 ## フォルダ一覧
 
+チュートリアルの表示は `tutorial/`、JSON定義・進行・各WebViewの制限は `../tutorial/`。通常コンポーネントは安定した操作名の `data-guide` と観測・確定直前の接点を提供し、シナリオ固有の条件を持たない。登録済み操作名は `../tutorial/definitions.ts` が正。
+
 | フォルダ | 内容 |
 | --- | --- |
 | `agent` / `citizen` | 経済主体・建物・世帯・市民の詳細パネル(`AgentDetailPanel`とタブ群) |
@@ -78,7 +80,9 @@
 
 ## 個別パネルの契約(知らないと壊すもの)
 
-- ニューゲーム(`taskbar/NewGameWindow`): 地形の名称・自然地理の説明は全7言語の`terrainProfiles.json`に置き、`data/terrainProfiles.ts`で対象IDを管理する。実在の固有名詞はタイトルに使い、説明には固有名詞・人間の都市・歴史・文化を含めない。気候はAPIの`climate`を`normalizeClimate`で正規化して`climate.<値>`で表示する。マップIDから別の気候を割り当てない。未指定時の既定は温暖湿潤であり、「未分類」ではない。サイズはkm、地表は`GroundCoverIcon`の自作SVGで表示する。
+- ロード画面(`taskbar/SaveListWindow`): 開くたびにセーブ一覧と現在のセーブ情報を`fetchApi`の`cache: "reload"`で取得する。画像URLへランダムなクエリは付けない。地形・セーブ・シナリオのサムネイルのキャッシュ期限は配信APIが2時間に設定する。
+
+- ニューゲーム(`taskbar/NewGameWindow`): 地形の名称・自然地理の説明は全7言語の`terrainProfiles.json`に置き、`data/terrainProfiles.ts`で対象IDを管理する。収録地形の表示名は地形や景観を表す短い名称とし、実在・架空の固有地名を使わない。説明にも固有名詞・人間の都市・歴史・文化を含めない。マップIDは表示名と分けて維持する。気候はAPIの`climate`を`normalizeClimate`で正規化して`climate.<値>`で表示する。マップIDから別の気候を割り当てない。未指定時の既定は温暖湿潤であり、「未分類」ではない。サイズはkm、地表は`GroundCoverIcon`の自作SVGで表示する。
 - エポック実行(`taskbar/EpochConfirmWindow`): HTTPを日没と並行して開始し、黒幕の描画完了後だけ結果またはTipsへ進む。結果を閉じるまでは演出IDとHUD無効化を維持する。結果画面の終了はRustの共通クローズ処理が担当する。`TipsWindow`の`mode="epoch"`は初期ロードの開始ボタンを使わず、呼び出し元が処理完了時に閉じる。
 
 - 建物建設(`building/`): 配置方法・寸法の真実源はUnity(`edit_building:placement_state`)。要求区画種別・観光名所の一点物・構造種別の階数上限はパネル側でも弾く(区画選択後のバリアント変更で不一致が残る)。
@@ -97,9 +101,10 @@
   - 造成工事の主体の判定は`isGradingVariant`(TYPE_OPEN_SPACEの広場とtypeが同じ)。建設工事タブは`GET /grading/{agent_id}`(プレビューは自分の区画に当たって拒否される)、公共施設パネルは取り壊しと編集を出さない、建物建設の一覧から外す。
 - 制限速度: 送信値と応答の比較は許容差で行う(バックエンドはfloat32)。規制タブ(`SpeedLimitTab`)は許可リスト`EDITABLE_PATH_TYPE_IDS`で、保存は全バリアント分を送る。
 - 予算(`budget/CityBudgetWindow`): 比率は自動保存で`AUTO_SAVE_DEBOUNCE_MS`のデバウンス必須(PATCHは再導出を伴い重い)。rechartsはCSS変数を解決できないのでグラフ色だけ直値定数。
-- 公共交通(`transit/`): 路線カラーの正はバックエンドの`line_color`。作成/更新/削除後は`emit("transit:lines_changed")`。収支見込みはバックエンドの試算を並べるだけ。
+- 公共交通(`transit/`): 路線カラーの正はバックエンドの`line_color`。作成/更新/削除後は`emit("transit:lines_changed")`。収支見込みはバックエンドの試算を並べるだけ。貨物は `TransitMasterEntry.freight` で判定し、編成の総両数（機関車1両を含む）の下限を2にする。外観候補は新設・詳細が `TransitVehicleSelector` と同じカタログを共有する。
 - 道路詳細(`road/`): 型・API・変更通知は`roadTypes.ts` / `roadApi.ts`が唯一の窓口(道路を変えたら`notifyRoadsChanged`)。強調帯はアンマウント時に送らず、区間編集の終了に`STATE_NORMAL`を送らない。
 - 地形エディタ(`terrain/`): 実データの編集は`elevRef`、表示だけ`displayElev()`。川・水面・資源のオブジェクトと配列はin-placeで書き換えず差し替える(Undoと描画キャッシュが同じ参照を持つ)。
+  - 地形PNGは`terrainThumbnail.ts`で作る北上・海透過の平面図(長辺512px)。保存時と`tools/regenerate_terrain_thumbnails.py`の一括生成は同じ描画処理を使う。標高色と陸地の標高範囲は`terrainData.ts`が正。`TerrainMapThumbnail`は縦横比を保ち全域を表示する。
   - 3Dプレビューに関わる変更は`scheduleTerrain3dFullState()`か`emitPreviewDelta`を必ず通す。カーソル層にはマウス位置だけで変わるものしか描かない。
 - パラメータ設定(`parameter-setup/`): `GET /api/v1/parameters`のメタデータ駆動。パラメータを増やすだけならi18n追加は不要(タブ名`paramSetup.category.*`だけ要る)。
 
@@ -115,3 +120,9 @@
   - 概念とAPI: `economics/`の3_道路網・6_公共交通機関・12_建物・19_環境・22_予算管理・29_駅と駅舎。地形エディタは`geometries/D_地形形状.md` §D.10〜D.16、プロップは`M_地形プロップ.md`。
 - 親の`tauri/AGENTS.md`(utils一覧、フラット意匠トークン、多言語、マスターデータ、車両外観カタログ)。
 - Skill: `genesis-ipc`(IPC/API)、`genesis-input-mode`(Unity側の編集モード)、`genesis-visual-mode`(表示モード)、`asset-credits`(素材)。
+
+## シナリオの管理と紹介情報
+
+- `template/ScenarioManagerWindow` は同梱・ダウンロード・自作のカード一覧。`scenario_manager` / `scenario_metadata` はレジストリ駆動のポップアップで、後者へ `params.extra.scenarioId` を渡す。
+- 紹介文入力は `common/ScenarioTextFields`、画像は `ScenarioThumbnail`、保存版と互換性は `SaveVersionInfo`。同じ項目の入力・表示を各画面で再実装しない。
+- 変更通知は `scenarios:changed`。保存成功後に紹介情報を開き、投稿は別操作として確認する。投稿先の可否はコアの一覧レスポンスに従う。

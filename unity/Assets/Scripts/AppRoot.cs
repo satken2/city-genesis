@@ -22,7 +22,7 @@ public class AppRoot : MonoBehaviour
         DontDestroyOnLoad(gameObject); 
     }
 
-    private void Start()
+    private IEnumerator Start()
     {
         UnityEngine.Debug.Log("AppRoot: Starting app...");
 
@@ -73,7 +73,12 @@ public class AppRoot : MonoBehaviour
         // (genesis.py)が Unity を自動再起動した場合の両方で毎回送信する。
         // Tauri 側は2回目以降の受信(=クラッシュ後の再起動)でのみポップアップを
         // 一掃する。初回はユーザーが操作中のロード画面などを閉じないため何もしない。
-        IpcClient.Instance?.EmitGraphicReady();
+        do {
+            yield return BackendCompatibility.Verify();
+            IpcClient.Instance?.EmitGraphicReady();
+            if (!BackendCompatibility.Compatible) yield return new WaitForSeconds(2f);
+        } while (!BackendCompatibility.Compatible);
+        yield return new WaitUntil(() => IpcClient.Instance != null && IpcClient.Instance.ProtocolCompatible);
 
         if (WeatherController.Instance == null)
             gameObject.AddComponent<WeatherController>();
@@ -95,6 +100,8 @@ public class AppRoot : MonoBehaviour
         // UI（Tauri）より後から起動した場合、IPC 経由の game:start イベントを
         // 受け損ねる可能性があるため、自らバックエンドに問い合わせてゲーム開始状態を確認する。
         StartCoroutine(PollBackendSessionState());
+
+        StartCoroutine(WatchBackendContract());
 
         // 本番ビルド（exe）でのみ、定期的にバックエンドの生存を確認する。
         // 開発ビルド（Development Build）やエディタ実行時は、一時的な通信切れでも終了しない。
@@ -126,7 +133,7 @@ public class AppRoot : MonoBehaviour
                 yield break;
             }
 
-            if (GameStateManager.Instance != null)
+            if (GameStateManager.Instance != null && BackendCompatibility.Compatible && IpcClient.Instance != null && IpcClient.Instance.ProtocolCompatible)
             {
                 using (var req = UnityWebRequest.Get($"{ApiClient.BASE_URL}/sessions"))
                 {
@@ -152,6 +159,20 @@ public class AppRoot : MonoBehaviour
             }
 
             yield return new WaitForSeconds(2f);
+        }
+    }
+
+    private IEnumerator WatchBackendContract()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(5f);
+            bool wasCompatible = BackendCompatibility.Compatible;
+            yield return BackendCompatibility.Verify();
+            if (wasCompatible == BackendCompatibility.Compatible) continue;
+            if (!BackendCompatibility.Compatible) GameStateManager.Instance?.SetGameStarted(false, null);
+            IpcClient.Instance?.EmitGraphicReady();
+            if (BackendCompatibility.Compatible) StartCoroutine(PollBackendSessionState());
         }
     }
 

@@ -14,7 +14,11 @@ import { useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { EpochDate } from "../common/EpochDate";
+import { fetchApi } from "../../utils/api";
 import "./SaveListWindow.css";
+import "../template/Scenarios.css";
+import { SaveEntry, prepareSaveLoad, saveError } from "../../utils/saves";
+import { SaveVersionInfo } from "../common/SaveVersionInfo";
 
 type SaveListWindowProps = {
   apiBaseUrl: string;
@@ -23,22 +27,12 @@ type SaveListWindowProps = {
 
 /**
  * セーブデータのメタデータエントリ
- * GET /api/v1/system/saves の各要素の型
+ * GET /api/v1/saves の各要素の型
  */
-type SaveEntry = {
-  id: string;
-  city_name: string;
-  population: number;
-  current_date: number;
-  epoch: number;
-  simulation_days: number;
-  saved_at: string;
-  is_scenario: boolean;
-  language: string;
-};
+
 
 /**
- * GET /api/v1/system/saves レスポンスの型
+ * GET /api/v1/saves レスポンスの型
  */
 type SavesResponse = {
   success: boolean;
@@ -73,6 +67,7 @@ export function SaveListWindow({ apiBaseUrl, onClose }: SaveListWindowProps) {
   /**
    * ウィンドウ初期化時にセーブデータ一覧とセッション情報を同時に取得する。
    * セッション情報は現在のセーブIDを取得するために使用する(ハイライト表示用)。
+   * 上書き保存や削除を即座に反映するため、HTTPキャッシュを使わず再取得する。
    */
   useEffect(() => {
     if (!apiBaseUrl) return;
@@ -81,21 +76,21 @@ export function SaveListWindow({ apiBaseUrl, onClose }: SaveListWindowProps) {
     async function fetchData() {
       setLoading(true);
       try {
-        const [savesRes, sessionRes] = await Promise.all([
-          fetch(`${base}/api/v1/saves`),
-          fetch(`${base}/api/v1/sessions`),
+        const [savesResult, sessionResult] = await Promise.allSettled([
+          fetchApi<SavesResponse>(`${base}/api/v1/saves`, { cache: "reload" }),
+          fetchApi<SessionInfo>(`${base}/api/v1/sessions`, { cache: "reload" }),
         ]);
 
-        if (savesRes.ok) {
-          const savesData: SavesResponse = await savesRes.json();
+        if (savesResult.status === "fulfilled") {
+          const savesData = savesResult.value;
           if (savesData.success && savesData.saves) {
             const entries = Object.values(savesData.saves);
             setSaveEntries(entries);
           }
         }
 
-        if (sessionRes.ok) {
-          const sessionData: SessionInfo = await sessionRes.json();
+        if (sessionResult.status === "fulfilled") {
+          const sessionData = sessionResult.value;
           setCurrentSaveId(sessionData.current_save_id);
         }
       } catch {
@@ -120,20 +115,21 @@ export function SaveListWindow({ apiBaseUrl, onClose }: SaveListWindowProps) {
       setConfirmSaveId(null);
       setStatus({ text: t("saveList.loading"), type: "info" });
       try {
-        await invoke("start_load_game", { saveId });
+        if (!await prepareSaveLoad(apiBaseUrl, saveId, false, t)) { setStatus(null); return; }
+        await invoke("start_load_game", { saveId, acceptBalanceChange: true });
         setCurrentSaveId(saveId);
         setStatus({ text: t("saveList.loadSuccess"), type: "success" });
         onClose();
       } catch (error) {
         setStatus({
-          text: error instanceof Error ? error.message : t("saveList.loadFailed"),
+          text: saveError(error, t),
           type: "error",
         });
       } finally {
         setBusy(false);
       }
     },
-    [t, onClose],
+    [apiBaseUrl, t, onClose],
   );
 
   /**
@@ -146,15 +142,9 @@ export function SaveListWindow({ apiBaseUrl, onClose }: SaveListWindowProps) {
       setBusy(true);
       setConfirmDeleteId(null);
       try {
-        const res = await fetch(`${base}/api/v1/saves/${saveId}`, {
-          method: "DELETE",
-        });
-        if (res.ok) {
-          setSaveEntries((prev) => prev.filter((e) => e.id !== saveId));
-          setStatus({ text: t("saveList.deleteSuccess"), type: "success" });
-        } else {
-          setStatus({ text: t("saveList.deleteFailed"), type: "error" });
-        }
+        await fetchApi(`${base}/api/v1/saves/${encodeURIComponent(saveId)}`, { method: "DELETE" });
+        setSaveEntries((prev) => prev.filter((e) => e.id !== saveId));
+        setStatus({ text: t("saveList.deleteSuccess"), type: "success" });
       } catch {
         setStatus({ text: t("saveList.deleteFailed"), type: "error" });
       } finally {
@@ -228,7 +218,7 @@ export function SaveListWindow({ apiBaseUrl, onClose }: SaveListWindowProps) {
                       <button
                         className="save-list-card-load-btn"
                         onClick={() => setConfirmSaveId(entry.id)}
-                        disabled={busy}
+                        disabled={busy || entry.compatibility?.loadable === false}
                         type="button"
                       >
                         {t("saveList.loadButton")}
@@ -243,13 +233,14 @@ export function SaveListWindow({ apiBaseUrl, onClose }: SaveListWindowProps) {
                       </button>
                     </div>
                   </div>
+                  <SaveVersionInfo entry={entry} />
                   <div className="save-list-card-meta">
                     <span>
-                      {t("saveList.population")}: {entry.population.toLocaleString()}
+                      {t("saveList.population")}: {(entry.population ?? 0).toLocaleString()}
                     </span>
                     <span>
                       {t("saveList.inGameDate")}:{" "}
-                      <EpochDate daysSinceEpoch={entry.current_date} />
+                      <EpochDate daysSinceEpoch={entry.current_date ?? 0} />
                     </span>
                   </div>
                   <div className="save-list-card-savedat">

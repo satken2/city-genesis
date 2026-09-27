@@ -17,6 +17,7 @@
 | `ReclaimedLandStore.cs` / `ReclaimedLandManager.cs` | 埋立地の静的ストア(帯の天端 `TryGetBandTop`・港向けの岸壁区間 `GetQuaySegments`・中身の版 `ContentVersion`) / 岸壁(天端と垂直の面)の GameObject・地形の版による作り直し・`OnContentChanged` |
 | `PathManager.cs` / `SplinePartLod.cs` / `RoadMarkingAtlas.cs` | 道路・線路・ノード・交差点 / 長い道路の区間LOD / 路面標示画像の予算 |
 | `BuildingManager.cs` / `BuildingExteriorRenderer.cs` / `FarBuildingBatcher.cs` / `ConstructionCraneAnimator.cs` | 建物 / 敷地装飾 / 遠景結合 / クレーン演出 |
+| `BuildingRoadAccessIndex.cs` | 建物データに同期する道路間口と配置計画の索引。GOのアンロードでは消さず、実削除・全消去で解除。変更時はPathManagerがセル逆引きで道路の描画版と再生成キューを更新する |
 | `ParcelManager.cs` / `ZoneManager.cs` / `ResourceManager.cs` | 区画 / 地区 / 天然資源ヒートマップ |
 | `PropManager.cs` ほか `Prop*.cs` / `StableSample.cs` / `ForestRenderer.cs` / `ForestOverview.cs` | プロップ(下記) |
 | `AlertManager.cs` / `FireEffectManager.cs` | アラートアイコン / 火災パーティクル |

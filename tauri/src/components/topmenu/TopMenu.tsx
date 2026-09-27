@@ -9,6 +9,8 @@ import exitIcon from "../../assets/images/exit.png";
 import githubIcon from "../../assets/images/github.png";
 import settingIcon from "../../assets/images/setting.png";
 import "./TopMenu.css";
+import { fetchApi, buildApiUrl } from "../../utils/api";
+import { CoreVersion, frontendVersion } from "../../utils/version";
 
 type SessionStatePayload = {
   current_save_id: string | null;
@@ -17,9 +19,29 @@ type SessionStatePayload = {
   isLoading: boolean;
 };
 
-export function TopMenu() {
+export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t } = useTranslation();
   const appWindow = useMemo(() => getCurrentWindow(), []);
+  const [core, setCore] = useState<CoreVersion | null>(null);
+  const [versionError, setVersionError] = useState("");
+  useEffect(() => {
+    if (!apiBaseUrl) return;
+    let active = true;
+    const refresh = () => {
+      void Promise.all([
+        fetchApi<CoreVersion>(buildApiUrl(apiBaseUrl, "/api/v1/system/version"), { cache: "no-store" }),
+        invoke<{ error: string | null }>("get_frontend_status"),
+      ]).then(([value, status]) => {
+        if (!active) return;
+        setCore(value);
+        const error = value.api_contract_version !== frontendVersion.api_contract_version ? "API_CONTRACT_MISMATCH" : status.error;
+        setVersionError(error ? t(`saveCompatibility.${error}`) : "");
+      }).catch(() => { if (active) { setCore(null); setVersionError(t("saveCompatibility.versionUnavailable")); } });
+    };
+    refresh();
+    const timer = setInterval(refresh, 5000);
+    return () => { active = false; clearInterval(timer); };
+  }, [apiBaseUrl, t]);
   const [quitting, setQuitting] = useState(false);
   const [debugExecution, setDebugExecution] = useState(false);
 
@@ -37,6 +59,8 @@ export function TopMenu() {
       .listen<SessionStatePayload>("session-state", (event) => {
         const payload = event.payload;
         setDebugExecution((payload.session?.debug_execution as boolean) ?? false);
+
+        if (versionError) { void appWindow.show(); return; }
 
         // ローディング中はトップメニューを隠す。
         // Tips が前面に表示されており、トップメニューがその上に出てくるのを防ぐ。
@@ -60,7 +84,7 @@ export function TopMenu() {
     return () => {
       unlisten?.();
     };
-  }, [appWindow]);
+  }, [appWindow, versionError]);
 
   /**
    * 新規ゲームボタン押下時の処理。
@@ -149,29 +173,33 @@ export function TopMenu() {
         <button
           className="topmenu-btn topmenu-btn-primary"
           onClick={handleNewGame}
+          disabled={!core || !!versionError}
           type="button"
         >
           {t("topmenu.newGame")}
         </button>
-        <button className="topmenu-btn" onClick={handleLoad} type="button">
+        <button className="topmenu-btn" onClick={handleLoad} disabled={!core || !!versionError} type="button">
           {t("topmenu.load")}
         </button>
-        <button className="topmenu-btn" onClick={handleEditor} type="button">
+        <button className="topmenu-btn" onClick={handleEditor} disabled={!core || !!versionError} type="button">
           {t("topmenu.editor")}
         </button>
       </div>
 
       {/**
        * デバッグ初期化ボタン。
-       * デバッグ実行時のみウィンドウ左下に表示する。
+       * デバッグ実行時のみ設定・シナリオ管理ボタンの左に表示する。
        */}
       {debugExecution && (
         <button
           className="topmenu-btn topmenu-btn-debug"
           onClick={handleDebugInit}
+          disabled={!core || !!versionError}
+          title={t("topmenu.debugInit")}
+          aria-label={t("topmenu.debugInit")}
           type="button"
         >
-          {t("topmenu.debugInit")}
+          D
         </button>
       )}
 
@@ -190,6 +218,14 @@ export function TopMenu() {
         <span className="topmenu-github-label">satken2/city-genesis</span>
       </button>
 
+      <div className="topmenu-versions"><span>core {core ? `v${core.core_version}` : t("saveCompatibility.unknown")}</span><span>ui v{frontendVersion.frontend_version}</span>
+        {versionError && <span role="alert">{versionError}</span>}</div>
+      <button className="topmenu-btn topmenu-btn-scenarios" title={t("scenarios.manage")} aria-label={t("scenarios.manage")}
+        onClick={() => void invoke("open_registered_window", { windowType: "scenario_manager" })}>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+          <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
+        </svg>
+      </button>
       {/**
        * オプションボタン。
        * 終了ボタンの左側に正方形で配置し、アイコン画像のみを表示する。

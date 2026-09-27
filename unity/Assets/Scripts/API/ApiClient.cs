@@ -26,6 +26,8 @@ public static class ApiClient
         string url = $"{BASE_URL}{path}";
         using (UnityWebRequest request = UnityWebRequest.Get(url))
         {
+            request.timeout = 10;
+            request.SetRequestHeader("X-City-Genesis-API", FrontendVersion.ApiContract.ToString());
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
@@ -92,6 +94,7 @@ public static class ApiClient
             request.SetRequestHeader("Cache-Control", "no-cache");
             request.SetRequestHeader("Accept", BULK_ACCEPT_HEADER);
 
+            request.SetRequestHeader("X-City-Genesis-API", FrontendVersion.ApiContract.ToString());
             UnityWebRequestAsyncOperation operation = request.SendWebRequest();
             if (isCanceled == null) yield return operation;
             else
@@ -167,6 +170,7 @@ public static class ApiClient
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
             
+            request.SetRequestHeader("X-City-Genesis-API", FrontendVersion.ApiContract.ToString());
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
@@ -208,6 +212,7 @@ public static class ApiClient
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
 
+            request.SetRequestHeader("X-City-Genesis-API", FrontendVersion.ApiContract.ToString());
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)

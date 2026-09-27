@@ -1,0 +1,51 @@
+import assert from "node:assert/strict";
+import React, { act } from "react";
+import { createRoot } from "react-dom/client";
+import { Window } from "happy-dom";
+import { useTutorialGuide } from "../../src/tutorial/useTutorialGuide";
+import { snapshot, GUIDE_OBSERVE } from "../../src/tutorial/bus";
+import { emit, fixture } from "./mock-runtime";
+const browser = new Window();
+for (const name of ["window", "document", "navigator", "localStorage"]) Object.defineProperty(globalThis, name, { configurable: true, value: name === "window" ? browser : (browser as any)[name] });
+Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+let guide: ReturnType<typeof useTutorialGuide>;
+function Harness({ scenario, step, save = "A" }: { scenario: string; step: number; save?: string }) { guide = useTutorialGuide(true, scenario, step, save, "http://test"); return null; }
+const root = createRoot(document.createElement("div"));
+const settle = async (fn: () => void | Promise<void>) => {
+  await act(async () => { await fn(); });
+  await act(async () => { await new Promise(r => setTimeout(r, 10)); });
+};
+const observation = async (data: object) => { const current = snapshot()!; await settle(() => emit(GUIDE_OBSERVE, { runId: current.runId, revision: current.revision, ...data })); };
+await settle(() => root.render(<Harness scenario="basic" step={2} />));
+assert.equal(guide!.ready, true, JSON.stringify({ guide, snapshot: snapshot() })); assert.equal(snapshot()?.phaseId, "open");
+await observation({ label: "road", window: "path_build", visible: true, pathVariant: 201 });
+assert.equal(snapshot()?.phaseId, "variant");
+await observation({ pathVariant: 221 }); assert.equal(snapshot()?.phaseId, "start");
+await observation({ pathShape: { selected_points: [[-100, 0, 0]], phase: "placing" } }); assert.equal(snapshot()?.phaseId, "end");
+await settle(() => emit("tutorial:window_visibility", { label: "road", window: "path_build", visible: false }));
+assert.equal(snapshot()?.phaseId, "open");
+await observation({ label: "road", window: "path_build", visible: true, pathVariant: 221 }); assert.equal(snapshot()?.phaseId, "start");
+await observation({ pathShape: { selected_points: [[-100, 0, 0], [100, 0, 0]], phase: "placing" } }); assert.equal(snapshot()?.phaseId, "finalize");
+await settle(async () => { assert.equal(await guide!.check(), false); });
+await observation({ pathShape: { selected_points: [[-100, 0, 0], [100, 0, 0]], phase: "editing" } }); assert.equal(snapshot()?.phaseId, "confirm");
+fixture.records.set("paths:9", { path_id: 9, path_variant: 221, start_point: [-100, 0, 0], end_point: [100, 0, 0], curved: false, status: 3 });
+await observation({ savedPaths: [9] });
+await observation({ pathShape: { selected_points: [], phase: "placing" } });
+assert.equal(snapshot()?.phaseId, "confirm");
+await settle(async () => { assert.equal(await guide!.check(), true); });
+const former = snapshot()!;
+await settle(() => root.render(<Harness scenario="basic" step={2} save="B" />));
+assert.equal(snapshot()?.phaseId, "open");
+await settle(() => emit(GUIDE_OBSERVE, { runId: former.runId, revision: former.revision, savedPaths: [999] }));
+assert.equal(JSON.parse(localStorage.getItem("tutorial_runtime_v1:basic:B")!).bindings["basic.road"], undefined);
+fixture.creates = 0; fixture.failComplete = true;
+// 失敗時のログをこのケースだけ抑え、例外を成功と取り違えないよう状態を確認する。
+const log = console.error; console.error = () => {};
+try { await settle(() => root.render(<Harness scenario="scenario3" step={1} save="C" />)); } finally { console.error = log; }
+assert.equal(guide!.failed, true); assert.equal(guide!.ready, false); assert.equal(fixture.creates, 1);
+await settle(() => guide!.retry());
+assert.equal(guide!.failed, false); assert.equal(guide!.ready, true); assert.equal(fixture.creates, 6);
+await settle(() => root.unmount());
+assert.equal(snapshot()?.active, false);
+await browser.happyDOM.close();
+console.log("PASS: tutorial hook progression, close/reopen, stale events, save isolation, setup retry and cleanup");

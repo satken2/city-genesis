@@ -147,6 +147,17 @@ public class InputHandler : MonoBehaviour
         { InputObjectType.ZONE, InputMode.MODE_NORMAL }
     };
 
+    /// <summary>独自のキー処理を持つ編集モードと、撮影・乗車の操作を同時に有効にしない。</summary>
+    public bool IsNormalMode
+    {
+        get
+        {
+            foreach (int mode in objectTypeModes.Values)
+                if (mode != InputMode.MODE_NORMAL) return false;
+            return true;
+        }
+    }
+
     // イベントコールバック
     private Action<int, Vector3> clickEventCallback;
     private Action<int, Vector3, GameObject> hoverEventCallback;
@@ -237,10 +248,10 @@ public class InputHandler : MonoBehaviour
 
     private void Update()
     {
-        // フライモード中はマウス入力（クリック・ホバー・ドラッグ）を一切受け付けない。
+        // フライ・撮影モード中はマウス入力（クリック・ホバー・ドラッグ）を一切受け付けない。
         // カメラを自由飛行させている間は3Dオブジェクトの選択やホバー（ツールチップ含む）を
         // 完全に無効化するため、他のどの判定よりも先に即抜けする。
-        if (DriveMode.IsOpen || (CameraController.Instance != null && CameraController.Instance.IsFlyMode))
+        if (TutorialRuntime.BlocksWorldInput || DriveMode.IsOpen || (CameraController.Instance != null && CameraController.Instance.BlocksWorldInput))
         {
             ClearHover();
             TooltipManager.Instance?.Hide();

@@ -21,7 +21,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 | `src/local-constants.ts` | UI独自の定数と、自動生成に載らないバックエンド定数の写し |
 | `src/App.css` | 全ウィンドウ共通のグローバルスタイル |
 | `src-tauri/` | Rust側(ウィンドウ管理・MMF IPC・セッションポーリング)。`config/window-registry.json`=ポップアップ定義、`window-mutex-groups.json`=同時に開けない組 |
-| `tools/` | 開発補助スクリプト(翻訳キー整合検査・プロップサムネイル生成・Unity音源の再生成・開発プロセス掃除 ほか) |
+| `tools/` | 開発補助スクリプト(翻訳キー整合検査・プロップサムネイル生成・地形PNG一括再生成 `regenerate_terrain_thumbnails.py`・Unity音源の再生成・開発プロセス掃除 ほか) |
 | `scripts/` | 河川生成(`terrainRiver.ts`)の開発用検証スクリプト(`npx tsx`。CI外) |
 | `*-launch.toml` | Rust側が子プロセスとしてバックエンド/Unityを起動するコマンド |
 | `public/debug/`・`SPEC.md` | 素のHTMLのデバッグページ・初期設計時の仕様書(現行の正ではない) |
@@ -63,7 +63,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 
 | ファイル | 内容 |
 | --- | --- |
-| `api.ts` | `fetchApi<T>()` / `buildApiUrl()`。HTTPの唯一の窓口 |
+| `api.ts` | `fetchApi<T>()` / `buildApiUrl()`。HTTPの唯一の窓口。`cache`オプションで取得時のHTTPキャッシュ方針を指定できる |
 | `ipc.ts` | Unityへのイベント送信(`send*`) |
 | `notification.ts` / `tutorial.ts` | 通知ウィンドウ・チュートリアルウィンドウの表示 |
 | `cityNotifications.ts` | L1通知(重大通知)の取得・文言化・詳細ウィンドウ対応表 |
@@ -85,6 +85,14 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 
 ## 詳細の参照先
 
+- チュートリアルの定義と進行基盤は `src/tutorial/`。シナリオ作者向け設計は `../docs/tutorials/`、通信・制約・永続化の契約は `../docs/docs/programs/チュートリアル基盤.md`。操作名や条件を追加したらJSON Schemaと `npm run test:tutorial` を揃える。
+
 - 公開ドキュメント(`../docs/docs/programs/`): コンポーネント連携(ウィンドウ構成・セッション状態・初期ロード・多言語対応・共通スタイル)、IPC連携の整理(MMF・イベント一覧・起動フロー)、モックバックエンド、ファイル配置、通知レベル管理、素材クレジット管理、サウンドシステム、建設プロジェクト管理。プロップ分類とサムネイルは `geometries/M_地形プロップ.md` §M.7.8、車両外観カタログは `geometries/O_車両の走行描画.md`。
 - Skill: `genesis-ipc`(Unityとの通信イベント・APIの追加)、`asset-credits`(素材の取り込み)、`consts-sync`(コア側。共有定数の同期)。
 - 配下: `src/components/AGENTS.md`(共通部品・HUD・ウィンドウ追加手順・各パネルの契約)、`src-tauri/AGENTS.md`(Rust側)。
+
+## 版情報とシナリオ
+
+- フロントの版の正は `../version.json`。`npm run sync:version` でTauri・Unityの配布設定を同期する。開発・ビルド前処理も同じ同期を使う。
+- `utils/api.ts` の `configureBackendRequests` は既存のバイナリHTTP取得も含めてコアの通信契約を照合する。API互換性検証・ヘッダー付与を各画面へ複製しない。
+- 保存データの型・ロード前確認・エラー表示は `utils/saves.ts`。新しいロード入口も `prepareSaveLoad` を通し、確認後にRustの開始コマンドを呼ぶ。
