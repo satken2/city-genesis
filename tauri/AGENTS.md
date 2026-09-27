@@ -85,6 +85,8 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 
 ## 詳細の参照先
 
+- チュートリアルの定義と進行基盤は `src/tutorial/`。シナリオ作者向け設計は `../docs/tutorials/`、通信・制約・永続化の契約は `../docs/docs/programs/チュートリアル基盤.md`。操作名や条件を追加したらJSON Schemaと `npm run test:tutorial` を揃える。
+
 - 公開ドキュメント(`../docs/docs/programs/`): コンポーネント連携(ウィンドウ構成・セッション状態・初期ロード・多言語対応・共通スタイル)、IPC連携の整理(MMF・イベント一覧・起動フロー)、モックバックエンド、ファイル配置、通知レベル管理、素材クレジット管理、サウンドシステム、建設プロジェクト管理。プロップ分類とサムネイルは `geometries/M_地形プロップ.md` §M.7.8、車両外観カタログは `geometries/O_車両の走行描画.md`。
 - Skill: `genesis-ipc`(Unityとの通信イベント・APIの追加)、`asset-credits`(素材の取り込み)、`consts-sync`(コア側。共有定数の同期)。
 - 配下: `src/components/AGENTS.md`(共通部品・HUD・ウィンドウ追加手順・各パネルの契約)、`src-tauri/AGENTS.md`(Rust側)。

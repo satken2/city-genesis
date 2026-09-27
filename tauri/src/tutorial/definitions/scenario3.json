@@ -1,0 +1,249 @@
+{
+  "version": 1,
+  "id": "scenario3",
+  "setup": [
+    {
+      "type": "create",
+      "resource": "paths",
+      "bind": "infra.road",
+      "body": {
+        "paths": [
+          {
+            "path_temp_id": "tutorial_infra_main",
+            "path_type": {
+              "$constant": "PATH_STREET"
+            },
+            "path_variant": {
+              "$constant": "TUTORIAL_STREET"
+            },
+            "start_point": [
+              -200,
+              0,
+              0
+            ],
+            "end_point": [
+              200,
+              0,
+              0
+            ],
+            "curved": false
+          }
+        ]
+      }
+    },
+    {
+      "type": "completeConstruction",
+      "target": "infra.road"
+    },
+    {
+      "type": "create",
+      "resource": "zones",
+      "bind": "infra.zone",
+      "body": {
+        "path_ids": [
+          {
+            "$ref": "infra.road"
+          }
+        ]
+      }
+    },
+    {
+      "type": "create",
+      "resource": "parcels",
+      "bind": "solar_site",
+      "body": {
+        "mode": "empty_area",
+        "picked_position": [
+          -178.0,
+          0,
+          26.0
+        ],
+        "width": 24,
+        "height": 32,
+        "angle": 0
+      }
+    },
+    {
+      "type": "create",
+      "resource": "parcels",
+      "bind": "house_site",
+      "body": {
+        "mode": "empty_area",
+        "picked_position": [
+          117.0,
+          0,
+          17.0
+        ],
+        "width": 14,
+        "height": 14,
+        "angle": 0
+      }
+    },
+    {
+      "type": "create",
+      "resource": "parcels",
+      "bind": "substation_site",
+      "body": {
+        "mode": "empty_area",
+        "picked_position": [
+          135.0,
+          0,
+          17.0
+        ],
+        "width": 14,
+        "height": 14,
+        "angle": 0
+      }
+    },
+    {
+      "type": "create",
+      "resource": "buildings",
+      "bind": "house",
+      "body": {
+        "parcel_id": {
+          "$ref": "house_site"
+        },
+        "variant": {
+          "$constant": "VARIANT_APARTMENT"
+        }
+      }
+    },
+    {
+      "type": "completeConstruction",
+      "target": "house"
+    },
+    {
+      "type": "reload"
+    }
+  ],
+  "steps": [
+    {
+      "id": "scenario3.house",
+      "legacyStep": 2,
+      "phases": [
+        {
+          "id": "open",
+          "textKey": "tutorial.scenario3.step2.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": []
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                117,
+                0,
+                17
+              ]
+            ]
+          },
+          "until": {
+            "type": "window",
+            "window": "agent_detail",
+            "target": "house"
+          }
+        }
+      ]
+    },
+    {
+      "id": "scenario3.solar",
+      "legacyStep": 3,
+      "phases": [
+        {
+          "id": "place",
+          "textKey": "tutorial.scenario3.step3.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -178,
+                0,
+                26
+              ]
+            ]
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "buildings",
+        "where": [
+          {
+            "field": "variant",
+            "equals": {
+              "$constant": "VARIANT_SOLAR_PLANT"
+            }
+          },
+          {
+            "field": "parcel_id",
+            "equals": {
+              "$ref": "solar_site"
+            }
+          }
+        ],
+        "bind": "solar_plant"
+      }
+    },
+    {
+      "id": "scenario3.skip_solar",
+      "legacyStep": 4,
+      "phases": [
+        {
+          "id": "confirm",
+          "textKey": "tutorial.scenario3.step4.description",
+          "ui": {
+            "policy": "strict",
+            "allow": [],
+            "highlight": []
+          },
+          "world": {
+            "mode": "blocked"
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "buildings",
+        "target": "solar_plant",
+        "where": [
+          {
+            "field": "variant",
+            "equals": {
+              "$constant": "VARIANT_SOLAR_PLANT"
+            }
+          },
+          {
+            "field": "parcel_id",
+            "equals": {
+              "$ref": "solar_site"
+            }
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "completeConstruction",
+          "target": "solar_plant"
+        },
+        {
+          "type": "reload"
+        }
+      ]
+    }
+  ]
+}

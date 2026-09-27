@@ -319,11 +319,12 @@ export function PathBuildSections({
             <button className="pc-btn" type="button" onClick={handleOpenShapeEditor}>
               {t("path_construction.openShapeEditor")}
             </button>
-            <button className="pc-btn" type="button" onClick={onCancel}>
+            <button data-guide="path.cancel" className="pc-btn" type="button" onClick={onCancel}>
               {t("path_construction.cancel")}
             </button>
             <button
               className="pc-btn pc-btn-confirm"
+              data-guide="path.confirm"
               // 資金不足(推定総額 > 利用可能額)と線形制約違反(急カーブ・急勾配)は確定させない。
               // バックエンドも同じ基準で拒否する(INSUFFICIENT_FUNDS / CREATEPATH_CURVE_TOO_TIGHT / CREATEPATH_GRADE_TOO_STEEP)。
               disabled={

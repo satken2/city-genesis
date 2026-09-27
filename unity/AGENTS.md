@@ -16,6 +16,7 @@ City Genesis の3D描画プログラム。バックエンド(FastAPI)とは HTTP
 | `InputHandlers/` | クリック・ドラッグ・キー入力=入力モード(`InputHandlers/AGENTS.md`) |
 | `VisualHandlers/` | 表示/非表示・ハイライト・データ可視化=ビジュアルモードと常駐オーバーレイ(`VisualHandlers/AGENTS.md`) |
 | `IPC/` | Tauri との MemoryMappedFile 通信、編集ステート・表示状態の同期(`IPC/AGENTS.md`) |
+| `Tutorial/` | Tauriの指示に従う一時マーカーと操作制限。都市データ・シナリオ進捗を保持しない |
 | `Vehicles/` | 描画専用の交通演出(一般車・公共交通・歩行者・路駐・索道・環境演出)(`Vehicles/AGENTS.md`) |
 | `Weather/` | 天気・時刻・環境光・降水と、環境音・工事音・走行音(`Weather/AGENTS.md`) |
 | `Utils/`、`Utils.cs` | 汎用ユーティリティ。新しい汎用処理を書く前に必ず確認(`Utils/AGENTS.md`) |

@@ -33,6 +33,8 @@ Tauri(Rust)側。ウィンドウ管理(HUD・ポップアップ・Tips)、Unity�
 
 ### ウィンドウ
 
+- `close_window_by_label` は `tutorial:window_visibility` をTutorialへ送る。非表示WebViewは再利用されアンマウントされないので、この通知とUI側の実表示判定を併用してチュートリアルのウィンドウ条件を失効させる。
+
 - エポック演出は`epoch_presentation_id`で開始から結果画面クローズまで保持する。`epoch_result`の`params.extra.epochPresentationId`を`close_window_by_label`で照合して終了する(Reactのアンマウントに頼らない)。Tipsは`open_tips_window_with_mode`の引数で初期ロード/エポックを切り替え、エポック側は処理完了時に閉じる。
 
 - ウィンドウを生成する(`WebviewWindowBuilder::build()`に至る)コマンドは必ず`async fn`。同期コマンドはメインスレッドで走り、`build()`はイベントループへ投げて完了を待つので自分で塞いだままフリーズする。コマンド以外(イベントハンドラ等)から生成するときは`std::thread::spawn`で逃がす(`enqueue_notification`が実例)。

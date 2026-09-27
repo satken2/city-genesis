@@ -10,6 +10,11 @@
 
 import { invoke } from "@tauri-apps/api/core";
 
+/** チュートリアル案内は変更時とUnity再接続時に全置換する。周期送信しない。 */
+export async function sendTutorialGuide(state: import("../tutorial/model").Snapshot): Promise<void> {
+  await invoke("send_window_action", { windowType: "tutorial", entity: null, action: "tutorial:apply", params: state });
+}
+
 export const IPC_EVENT_WEATHER_STATE = "weather:state";
 /** 乗車選択と走行HUDはUnityが表示する。文言はUIの現在言語で一括して渡す。 */
 export async function openDriveMode(labels: Record<string, string>): Promise<void> {

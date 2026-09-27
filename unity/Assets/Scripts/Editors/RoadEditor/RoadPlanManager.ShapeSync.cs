@@ -136,6 +136,7 @@ public partial class RoadPlanManager
             return;
         }
         if (isDragging) return;
+        if (TutorialRuntime.PathRestricted || TutorialRuntime.BlocksWorldInput) return;
 
         switch (cmd.op)
         {

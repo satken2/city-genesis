@@ -1042,6 +1042,10 @@ pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) 
     if let Some(window) = app.get_webview_window(label) {
         let _ = window.hide();
     }
+    // 再利用するWebViewはアンマウントされないため、案内の表示条件を明示的に失効させる。
+    let _ = app.emit_to("tutorial", "tutorial:window_visibility", serde_json::json!({
+        "label": label, "window": window_type, "entity": entity_id, "visible": false
+    }));
 
     Ok(())
 }

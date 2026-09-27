@@ -6,6 +6,8 @@ Tauri製UI(`city-genesis/tauri`)とのMemoryMappedFile(MMF)通信を担当する
 
 ## ファイル一覧
 
+`tutorial:apply` は `TutorialRuntime` へ委譲し、適用通知を `tutorial:applied` で返す。`session:reset` と `game:end` ではチュートリアル制限を解除する。定義とrevisionの契約は `docs/docs/programs/チュートリアル基盤.md` を参照する。
+
 | ファイル | 内容 |
 | --- | --- |
 | `IpcClient.cs` | シングルトンの高レベルクライアント。型付きの`On*`イベントと`Emit*`送信API。受信はMMF読み取りスレッドから`Update()`でメインスレッドへディスパッチされるので、購読ハンドラからUnity APIを直接呼べる |

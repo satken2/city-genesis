@@ -1,0 +1,319 @@
+{
+  "version": 1,
+  "id": "basic",
+  "steps": [
+    {
+      "id": "basic.road",
+      "legacyStep": 2,
+      "phases": [
+        {
+          "id": "open",
+          "textKey": "tutorial.guide.openRoad",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road"
+            ],
+            "highlight": [
+              "hud.road"
+            ]
+          },
+          "world": {
+            "mode": "blocked",
+            "markers": [
+              [
+                -100,
+                0,
+                0
+              ],
+              [
+                100,
+                0,
+                0
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  -100,
+                  0,
+                  0
+                ],
+                [
+                  100,
+                  0,
+                  0
+                ]
+              ],
+              "radius": 12,
+              "variant": {
+                "$constant": "TUTORIAL_STREET"
+              },
+              "bind": "basic.road"
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "path_build"
+          }
+        },
+        {
+          "id": "variant",
+          "textKey": "tutorial.guide.selectRoad",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.type",
+              "path.variant"
+            ],
+            "highlight": [
+              "path.type",
+              "path.variant"
+            ]
+          },
+          "world": {
+            "mode": "blocked",
+            "markers": [
+              [
+                -100,
+                0,
+                0
+              ],
+              [
+                100,
+                0,
+                0
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  -100,
+                  0,
+                  0
+                ],
+                [
+                  100,
+                  0,
+                  0
+                ]
+              ],
+              "radius": 12,
+              "variant": {
+                "$constant": "TUTORIAL_STREET"
+              },
+              "bind": "basic.road"
+            }
+          },
+          "until": {
+            "type": "pathVariant",
+            "value": {
+              "$constant": "TUTORIAL_STREET"
+            }
+          }
+        },
+        {
+          "id": "start",
+          "textKey": "tutorial.guide.placeStart",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.cancel"
+            ],
+            "highlight": []
+          },
+          "world": {
+            "mode": "path",
+            "markers": [
+              [
+                -100,
+                0,
+                0
+              ],
+              [
+                100,
+                0,
+                0
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  -100,
+                  0,
+                  0
+                ],
+                [
+                  100,
+                  0,
+                  0
+                ]
+              ],
+              "radius": 12,
+              "variant": {
+                "$constant": "TUTORIAL_STREET"
+              },
+              "bind": "basic.road"
+            }
+          },
+          "until": {
+            "type": "pathPoints",
+            "count": 1
+          }
+        },
+        {
+          "id": "end",
+          "textKey": "tutorial.guide.placeEnd",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.cancel"
+            ],
+            "highlight": []
+          },
+          "world": {
+            "mode": "path",
+            "markers": [
+              [
+                -100,
+                0,
+                0
+              ],
+              [
+                100,
+                0,
+                0
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  -100,
+                  0,
+                  0
+                ],
+                [
+                  100,
+                  0,
+                  0
+                ]
+              ],
+              "radius": 12,
+              "variant": {
+                "$constant": "TUTORIAL_STREET"
+              },
+              "bind": "basic.road"
+            }
+          },
+          "until": {
+            "type": "pathPoints",
+            "count": 2,
+            "phase": "editing"
+          }
+        },
+        {
+          "id": "confirm",
+          "textKey": "tutorial.guide.confirmRoad",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.cancel",
+              "path.confirm"
+            ],
+            "highlight": [
+              "path.confirm"
+            ]
+          },
+          "world": {
+            "mode": "path",
+            "markers": [
+              [
+                -100,
+                0,
+                0
+              ],
+              [
+                100,
+                0,
+                0
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  -100,
+                  0,
+                  0
+                ],
+                [
+                  100,
+                  0,
+                  0
+                ]
+              ],
+              "radius": 12,
+              "variant": {
+                "$constant": "TUTORIAL_STREET"
+              },
+              "bind": "basic.road"
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "paths",
+        "target": "basic.road",
+        "where": [
+          {
+            "field": "path_variant",
+            "equals": {
+              "$constant": "TUTORIAL_STREET"
+            }
+          },
+          {
+            "field": "start_point",
+            "equals": [
+              -100,
+              0,
+              0
+            ]
+          },
+          {
+            "field": "end_point",
+            "equals": [
+              100,
+              0,
+              0
+            ]
+          },
+          {
+            "field": "curved",
+            "equals": false
+          },
+          {
+            "field": "status",
+            "oneOf": [
+              {
+                "$constant": "STATUS_SCHEDULED_CONSTRUCTION"
+              },
+              {
+                "$constant": "STATUS_CONSTRUCTING"
+              },
+              {
+                "$constant": "STATUS_ACTIVE"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

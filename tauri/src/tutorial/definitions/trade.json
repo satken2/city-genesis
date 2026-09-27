@@ -1,0 +1,197 @@
+{
+  "version": 1,
+  "id": "trade",
+  "setup": [],
+  "steps": [
+    {
+      "id": "trade.1",
+      "legacyStep": 1,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.trade.step1.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -247,
+                0,
+                80
+              ]
+            ]
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.port",
+            "equals": true
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "trade",
+          "action": "commission_port"
+        },
+        {
+          "type": "scenarioAction",
+          "scenario": "trade",
+          "action": "port_trade"
+        },
+        {
+          "type": "reload"
+        }
+      ]
+    },
+    {
+      "id": "trade.2",
+      "legacyStep": 2,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.trade.step2.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.execute"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -247,
+                0,
+                80
+              ]
+            ]
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.exports",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "trade.3",
+      "legacyStep": 3,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.trade.step3.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                30,
+                0,
+                155
+              ]
+            ]
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.freight",
+            "equals": true
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "trade",
+          "action": "commission_freight"
+        },
+        {
+          "type": "scenarioAction",
+          "scenario": "trade",
+          "action": "rail_trade"
+        },
+        {
+          "type": "reload"
+        }
+      ]
+    },
+    {
+      "id": "trade.4",
+      "legacyStep": 4,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.trade.step4.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.execute"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                30,
+                0,
+                155
+              ]
+            ]
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.imports",
+            "equals": true
+          }
+        ]
+      }
+    }
+  ]
+}

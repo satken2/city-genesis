@@ -4,6 +4,8 @@
 
 ## ファイル一覧
 
+チュートリアルの `world.mode=blocked` は `InputHandler` の入口でワールド編集を停止する。カメラ操作はこのゲートの外にある。指定位置への道路配置は `TutorialRuntime` と `RoadPlanManager.Tutorial` が通常の建設条件へ追加する制約であり、通常プレイでは無効。
+
 | ファイル | 内容 |
 | --- | --- |
 | `InputHandler.cs` | 中核。レイキャスト、タグによる種別判定、クリック/ドラッグ判定、モード定数(`InputMode`/`InputModePreset`/`InputObjectType`)、入力ゲート |

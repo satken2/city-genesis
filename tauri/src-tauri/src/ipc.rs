@@ -497,6 +497,9 @@ pub async fn handle_incoming_message(
         "edit_path:select_node" => {
             let _ = app.emit("edit_path:select_node", envelope.payload);
         }
+        "tutorial:applied" => {
+            let _ = app.emit_to("tutorial", "tutorial:applied", envelope.payload);
+        }
         "edit_path:update_shape" => {
             let _ = app.emit("edit_path:update_shape", envelope.payload);
         }

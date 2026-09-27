@@ -10,6 +10,7 @@ docs/
 ├── mkdocs.yml          # MkDocs 設定。新規ページは nav に追記する
 ├── requirements.txt
 ├── fetch_openapi.py    # バックエンドから openapi.json を取得する
+├── tutorials/          # シナリオ作者向けの32ステップ設計と共通部品表(MkDocsソース階層外)
 ├── docs/               # ビルドソース(実ファイルはこの1段深い階層)
 │   ├── index.md
 │   ├── overrides/      # テンプレート上書き

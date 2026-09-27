@@ -446,6 +446,7 @@ async fn create_session(
         simulation_days: Option<u32>,
         is_tutorial: Option<bool>,
         template_mode: Option<bool>,
+        tutorial_id: Option<String>,
     }
     let query_params = SessionParams {
         terrain_map_id: terrain_map_id.clone(),
@@ -455,6 +456,7 @@ async fn create_session(
         simulation_days,
         is_tutorial,
         template_mode,
+        tutorial_id: tutorial_id.clone(),
     };
 
     let client = reqwest::Client::new();

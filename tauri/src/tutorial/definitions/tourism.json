@@ -1,0 +1,184 @@
+{
+  "version": 1,
+  "id": "tourism",
+  "setup": [
+    {
+      "type": "scenarioAction",
+      "scenario": "tourism",
+      "action": "baseline"
+    }
+  ],
+  "steps": [
+    {
+      "id": "tourism.1",
+      "legacyStep": 1,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.tourism.step1.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                225,
+                0,
+                85
+              ]
+            ]
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.hotel",
+            "equals": true
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "tourism",
+          "action": "commission_hotel"
+        },
+        {
+          "type": "reload"
+        }
+      ]
+    },
+    {
+      "id": "tourism.2",
+      "legacyStep": 2,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.tourism.step2.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -247,
+                0,
+                90
+              ]
+            ]
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.terminal",
+            "equals": true
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "tourism",
+          "action": "commission_terminal"
+        },
+        {
+          "type": "reload"
+        },
+        {
+          "type": "scenarioAction",
+          "scenario": "tourism",
+          "action": "operations"
+        }
+      ]
+    },
+    {
+      "id": "tourism.3",
+      "legacyStep": 3,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.tourism.step3.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.execute"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.epoch_advanced",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "tourism.4",
+      "legacyStep": 4,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.tourism.step4.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.transport"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.growth",
+            "equals": true
+          }
+        ]
+      }
+    }
+  ]
+}

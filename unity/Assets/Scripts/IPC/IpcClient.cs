@@ -323,6 +323,9 @@ public class IpcClient : MonoBehaviour
 
             switch (action)
             {
+                case "tutorial:apply":
+                    TutorialRuntime.ApplyFromIpc(GetParamsDictionary(payload));
+                    break;
                 case "world:change_state":
                     {
                         string state = GetParamString(payload, "state");
@@ -754,6 +757,7 @@ public class IpcClient : MonoBehaviour
                     break;
 
                 case "session:reset":
+                    TutorialRuntime.Clear();
                     Debug.Log("IpcClient: session:reset");
                     OnSessionReset?.Invoke();
                     break;
@@ -815,6 +819,7 @@ public class IpcClient : MonoBehaviour
                     break;
 
                 case "game:end":
+                    TutorialRuntime.Clear();
                     Debug.Log("IpcClient: game:end");
                     OnGameEnd?.Invoke();
                     break;
@@ -1605,6 +1610,11 @@ public class IpcClient : MonoBehaviour
     /// <summary>
     /// エンベロープを作成してTauriに送信する。
     /// </summary>
+    public void EmitTutorialApplied(string runId, int revision)
+    {
+        SendEnvelope("tutorial:applied", new Dictionary<string, object> { ["runId"] = runId, ["revision"] = revision });
+    }
+
     private void SendEnvelope(string eventName, object payload)
     {
         if (_writer == null) return;

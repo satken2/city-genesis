@@ -85,6 +85,7 @@ import { NotificationWindow } from "./components/notification/NotificationWindow
 import { TipsWindow } from "./components/tips/TipsWindow";
 import { Hintbar } from "./components/hintbar/Hintbar";
 import { Tutorial } from "./components/tutorial/Tutorial";
+import { TutorialLayer } from "./tutorial/TutorialLayer";
 import { MasterDataProvider } from "./contexts/MasterDataContext";
 
 /**
@@ -305,6 +306,7 @@ function App() {
 
   return (
     <MasterDataProvider apiBaseUrl={apiBaseUrl}>
+      <TutorialLayer windowType={context?.window_type ?? windowKind} entity={context?.entity?.id} />
       {windowKind === "topmenu" ? (
         <TopMenu />
       ) : windowKind === "icon-panel" ? (

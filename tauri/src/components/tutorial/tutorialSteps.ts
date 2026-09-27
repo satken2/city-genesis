@@ -1,3 +1,4 @@
+import { DEFINITIONS } from "../../tutorial/definitions";
 /**
  * チュートリアルの各ステップ定義とバリデーションロジック
  *
@@ -7,7 +8,7 @@
  * ステップの追加・変更があった場合はこのファイルを編集する。
  */
 
-import { fetchApi } from "../../utils/api";
+import { fetchLessonApi as fetchApi } from "../../tutorial/legacyApi";
 import { sendSessionReload } from "../../utils/ipc";
 import {
   PATH_STREET,
@@ -1014,6 +1015,12 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
     ],
   },
 ];
+
+for (const id of ["trade", "highway", "mining", "tourism"]) {
+  TUTORIAL_SCENARIOS.push({ id, titleKey: `tutorial.${id}.title`, descriptionKey: `tutorial.${id}.description`,
+    steps: DEFINITIONS[id].steps.map(step => ({ id: step.legacyStep, image: "", titleKey: `tutorial.${id}.step${step.legacyStep}.title`,
+      descriptionKey: step.phases[0].textKey, validate: async () => false })) });
+}
 
 /** 互換性のための定義 */
 export const TUTORIAL_STEPS = TUTORIAL_SCENARIOS[0].steps;

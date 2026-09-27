@@ -4,6 +4,8 @@
 
 ## フォルダ一覧
 
+チュートリアルの表示は `tutorial/`、JSON定義・進行・各WebViewの制限は `../tutorial/`。通常コンポーネントは安定した操作名の `data-guide` と観測・確定直前の接点を提供し、シナリオ固有の条件を持たない。登録済み操作名は `../tutorial/definitions.ts` が正。
+
 | フォルダ | 内容 |
 | --- | --- |
 | `agent` / `citizen` | 経済主体・建物・世帯・市民の詳細パネル(`AgentDetailPanel`とタブ群) |

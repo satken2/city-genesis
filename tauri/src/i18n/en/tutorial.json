@@ -150,7 +150,111 @@
     "checking": "Verifying...",
     "failed": "Condition not met. Please try again.",
     "completed": "Tutorial complete! Well done.",
-    "stepProgress": "Step {{current}} / {{total}}"
+    "stepProgress": "Step {{current}} / {{total}}",
+    "guide": {
+      "openRoad": "Open the construction panel using the road icon.",
+      "selectRoad": "Select the ground-level two-lane street. Only the required variant is available.",
+      "placeStart": "Left-click inside the cyan circle to place the start of the road.",
+      "placeEnd": "Right-click inside the yellow circle to place the end of the road.",
+      "confirmRoad": "Confirm in the construction panel to save the road, then press Complete.",
+      "failed": "Setup or communication failed. Retry; if the problem persists, exit and start the tutorial in a new city.",
+      "retry": "Retry",
+      "exit": "Exit",
+      "placementRequired": "Use the road variant and positions shown by the guide.",
+      "preparing": "Preparing the tutorial city."
+    },
+    "trade": {
+      "title": "Start international trade",
+      "description": "Export food through a container port and import by rail. A municipal food factory, freight route and depot are ready.",
+      "step1": {
+        "title": "Build a container port",
+        "description": "Build a container terminal on the marked coastal parcel. Confirmation completes construction."
+      },
+      "step2": {
+        "title": "Confirm food exports",
+        "description": "Advance epochs and inspect food exports at your port. Production and transport may need several epochs."
+      },
+      "step3": {
+        "title": "Build an international freight station",
+        "description": "Build the station on the marked parcel beside the railway leading off the map. The cross-border freight route is ready."
+      },
+      "step4": {
+        "title": "Confirm rail imports",
+        "description": "Advance epochs and inspect imports at your international freight station. Port imports do not count."
+      }
+    },
+    "highway": {
+      "title": "Build a motorway",
+      "description": "Cross a street with an elevated motorway, name it and connect an interchange. The support district is to the east.",
+      "step1": {
+        "title": "Cross above the street",
+        "description": "Build a motorway across the central street at least 6 m above ground. A north–south route at 10 m works. Confirmation completes it."
+      },
+      "step2": {
+        "title": "Name the motorway",
+        "description": "Register the new motorway as a named road and enter its name in the details panel."
+      },
+      "step3": {
+        "title": "Build a ramp",
+        "description": "Connect the elevated motorway to the central street with a ramp. Confirmation completes construction and checks for an interchange."
+      },
+      "step4": {
+        "title": "Inspect the interchange",
+        "description": "Open the interchange details and confirm the connection between the street and motorway."
+      }
+    },
+    "mining": {
+      "title": "Mine resources",
+      "description": "Carry inland ore by rail and export it through a bulk port. The freight route and depot are ready.",
+      "step1": {
+        "title": "Inspect the ore deposit",
+        "description": "Enable natural resources and open the marked inland deposit details."
+      },
+      "step2": {
+        "title": "Build a quarry",
+        "description": "Build a quarry on the marked ore parcel. Confirmation completes each facility."
+      },
+      "step3": {
+        "title": "Build an ore loading station",
+        "description": "Build an ore loading station on the parcel beside the track north of the quarry."
+      },
+      "step4": {
+        "title": "Build an ore unloading station",
+        "description": "Build an ore unloading station beside the coastal track to receive ore from trains."
+      },
+      "step5": {
+        "title": "Build a bulk port",
+        "description": "Build a bulk port on the marked coastal parcel."
+      },
+      "step6": {
+        "title": "Advance an epoch",
+        "description": "Run an epoch to start mining, loading, transport, unloading and trade."
+      },
+      "step7": {
+        "title": "Confirm ore exports",
+        "description": "Inspect ore exports at the bulk port. Advance more epochs if needed."
+      }
+    },
+    "tourism": {
+      "title": "Develop tourism",
+      "description": "A town with ancient ruins, a municipal restaurant and a bus route to the coast. Add accommodation and a passenger gateway.",
+      "step1": {
+        "title": "Build a hotel by the ruins",
+        "description": "Build a tourist hotel on the parcel east of the ruins. Confirmation completes construction."
+      },
+      "step2": {
+        "title": "Build a passenger terminal",
+        "description": "Build a passenger terminal on the marked coastal parcel. The bus route and depot are ready."
+      },
+      "step3": {
+        "title": "Advance epochs",
+        "description": "Advance epochs to welcome visitors. Operations may take several epochs to start."
+      },
+      "step4": {
+        "title": "Check revenue and bus ridership",
+        "description": "Inspect restaurant revenue and bus ridership. Both must exceed their starting values and tourists must have arrived."
+      }
+    }
   },
   "tips": {
     "startGame": "Start Game",
