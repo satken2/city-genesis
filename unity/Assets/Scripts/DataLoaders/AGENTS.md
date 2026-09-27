@@ -14,6 +14,7 @@
 | `TerrainManager.cs` / `TerrainManager.Background.cs` | 地形タイルのストリーミングとLRU・超遠景・海岸線と水面の取得・地形の版API / 都市外の背景地形 |
 | `TerrainTileResources.cs` / `HeightmapTextureManager.cs` / `GroundCoverPalette.cs` | タイル専用資源 / GPU高さ窓 / 地表種別の見た目 |
 | `CoastlineStore.cs` / `RiverStore.cs` / `WaterSurfaceStore.cs` / `WaterSurfaceManager.cs` / `RiverSurfaceManager.cs` | 海岸線・川・湖の静的ストア(湖は `WaterSurfaceManager` が水面の生成時に登録) / 湖の水面 / 川の水面と川床マスク |
+| `ReclaimedLandStore.cs` / `ReclaimedLandManager.cs` | 埋立地の静的ストア(帯の天端 `TryGetBandTop`・港向けの岸壁区間 `GetQuaySegments`・中身の版 `ContentVersion`) / 岸壁(天端と垂直の面)の GameObject・地形の版による作り直し・`OnContentChanged` |
 | `PathManager.cs` / `SplinePartLod.cs` / `RoadMarkingAtlas.cs` | 道路・線路・ノード・交差点 / 長い道路の区間LOD / 路面標示画像の予算 |
 | `BuildingManager.cs` / `BuildingExteriorRenderer.cs` / `FarBuildingBatcher.cs` / `ConstructionCraneAnimator.cs` | 建物 / 敷地装飾 / 遠景結合 / クレーン演出 |
 | `ParcelManager.cs` / `ZoneManager.cs` / `ResourceManager.cs` | 区画 / 地区 / 天然資源ヒートマップ |
@@ -24,7 +25,7 @@
 
 ## ロードの流れ(順序を変えない)
 
-1. `TerrainManager.FetchCoastline` が `/terrain/settings` → 海岸線・湖・川・地表種別を読む。マップ寸法より先に常駐集合を算出するとマップ外セルを要求し、`/terrain/surface` の400再試行から抜けられない。
+1. `TerrainManager.FetchCoastline` が `/terrain/settings` → 地表種別・海岸線・湖・川・埋立地を読む(初回・強制リロード・毎回の `session:reload`。海岸線は埋立の完了で広がる)。マップ寸法より先に常駐集合を算出するとマップ外セルを要求し、`/terrain/surface` の400再試行から抜けられない。
 2. 地形タイル → 既存物の地形追従 → 区画(完了待ち) → 建物・道路 → 地区・資源・プロップ(`LoadObjectManagers`)。海上区画の建物の接地高が区画に依存する。
 3. `session:reset` から `session:reload` までカメラ由来のロードは無視する(準備中の都市のタイルは同版の差分で更新されない)。
 
@@ -48,6 +49,8 @@
 - `OnAllTerrainLodLoaded` は全タイルの `OnTerrainTileReady` の後に発火する契約。
 - 地表種別の値の正は `Resources/Terrain/GroundCoverPalette.asset`、反映は `GroundCoverProfile.ApplyTo` だけ。
 - 川の「範囲内の水面標高 = プロファイル線上の最近点のy」は地形エディタ・バックエンドと共通の契約(`RiverStore`)。
+- 埋立地の天端の高さ・岸壁区間・壁・帯は `GET /terrain/reclaimed-lands` の派生値をそのまま使い、Unity で判定しない(`CoastlineStore.IsLand` で岸壁を求め直さない)。取得のたびに中身を比べて変わった埋立地だけ作り直し、先に消さない(湖・川の「消してから取得」を写すとエポックごとにちらつく)。`ContentVersion` は中身が変わったときだけ進む(`CoastlineStore.Version` は取得のたびに進むので版に使えない)。
+- 帯の中の接地は `Utils.GetGroundHeight` が max(地形, 天端) で返す。ストアの更新・消去(`ReclaimedLandStore.Replace` / `Clear`)は `Utils.InvalidateHeightCache()` を伴う。岸壁の GameObject は背景地形のチャンクと同じ構成(Ground レイヤー、`MeshFilter`→`MeshRenderer`→`MeshCollider`→`VisualTerrainObject`→`TerrainInputHandler` の順、タグ無し)。
 
 ### 道路 (PathManager)
 - キャッシュ操作はヘルパー経由: パス=`SavePathToCache` / `RemovePathFromCache`(`pathsByNodeIndex`・通過セル・工事音を同期)、GO=`SetPathObject` / `RemovePathObject`、ノード=`nodeDataCache` 書込み時に `IndexNodeCell`。
@@ -64,6 +67,7 @@
 
 ### 建物 (BuildingManager)
 - 見た目に効くフィールドを足したら `HashBuildingShape` にも足す(再利用キー `BuildingRenderKey` の形状ハッシュ)。
+- 港(MODEL_PORT)は区画が埋立地の岸壁に面するかで形が変わるが、埋立で version は変わらない。再利用キーは港の詳細(Far 以外)だけ `ReclaimedLandStore.ContentVersion` を混ぜ、`ReclaimedLandManager.OnContentChanged` を購読する `OnReclaimedLandsChanged` が逆引き `portBuildingIds` から表示中の詳細な港を作り直す(視野外は遅延キュー)。`portBuildingIds` の登録・削除は他の逆引きと同じ経路(`RegisterBuildingDataToCache` / `SyncBuildingsInCells` / `ClearAllCells`)。
 - 配置Yは `ResolveBuildingBaseHeight` の1箇所。陸上は model_type によらず `center_point` の地形標高、海上区画(`PARCEL_WATER`)だけ `parcel.altitude`(地形をサンプルすると海底が返る)。区画側の同じ入口は `ParcelManager.GetParcelBaseY`。
 - `parcel.altitude` は海面基準の絶対標高(接道の路面標高、接道なしは区画中心の地形標高)。パス・ノードのYは地面からの相対高さなので混ぜない。陸上の建物の接地に使うと、区画が分かる経路(プレビュー等)と分からない一括ロードで高さが食い違う。
 - `buildingDataCache` への登録は `RegisterBuildingDataToCache`(逆引きと工事音を同期)、表示物セルは `RegisterBuildingCell(id, pos, shown)`(データだけなら `shown:false`)、詳細化の遅延投入は `QueueDeferredDetail`(遅延中は version をキャッシュしない)。

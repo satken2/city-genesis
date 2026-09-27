@@ -69,6 +69,9 @@
     "PATH_TOO_FEW_POINTS": "至少需要2个点。",
     "PATH_MAX_SPAN_EXCEEDED": "节点间距过长。请添加中间点。",
     "PATH_ELEVATION_CONFLICT": "检测到立体交叉。请调整高度。",
-    "INSUFFICIENT_FUNDS": "资金不足，无法下达建设指令。"
+    "INSUFFICIENT_FUNDS": "资金不足，无法下达建设指令。",
+    "GRADING_VALIDATION_ERROR": "该范围无法施工。请查看土方工程窗口中显示的原因。",
+    "CREATEPATH_SEA_LAKE_CROSSING": "路径不能在地面上经过海面或湖面。请改为高出水面足够高度的桥梁，或从地下通过。",
+    "CREATEPATH_QUAY_BAND_CROSSING": "路径不能在地面上横穿填海地的岸壁。请以高架或地下方式通过，并将端点和途经点置于岸壁顶面之外。"
   }
 }

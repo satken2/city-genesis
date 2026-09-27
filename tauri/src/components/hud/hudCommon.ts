@@ -62,6 +62,7 @@ export const MENU_ICONS: HudIconDef[] = [
   { id: "track", src: "menu_track.png", tooltipKey: "taskbar.menuTrack", windowType: "track_build" },
   { id: "infra", src: "menu_infra.png", tooltipKey: "taskbar.menuInfra", windowType: "infra_build" },
   { id: "land", src: "menu_land.png", tooltipKey: "taskbar.menuLand", windowType: "parcel_creation" },
+  { id: "grading", src: "menu_grading.png", tooltipKey: "taskbar.menuGrading", windowType: "grading", hintKey: "hint.grading" },
   { id: "district", src: "menu_district.png", tooltipKey: "taskbar.menuDistrict" },
   { id: "construction", src: "menu_construction.png", tooltipKey: "taskbar.menuConstruction", windowType: "building_construction", enabledWhenLocked: true },
   // 建設プロジェクト(タグ単位の工事一覧)。専用アイコンが未用意のため建設と同じ画像を仮当てしている。
@@ -115,6 +116,7 @@ export const EDIT_MODE_WINDOW_TYPES = new Set<string>([
   "prop_placement",
   "resource_edit",
   "agent_creation",
+  "grading",
 ]);
 
 /** レジストリ定義のウィンドウを開く。失敗してもHUDは壊さず、コンソールに残すだけにする。 */

@@ -233,6 +233,7 @@ public class IpcViewCoordinator : MonoBehaviour
             case "STATE_MERGE_PATH":
             case "STATE_SPLIT_PATH":
             case "STATE_EDIT_ROAD_MEMBERS":
+            case "STATE_EDIT_GRADING":
                 ApplyConstructionPreset("border", null);
                 break;
 
@@ -363,10 +364,10 @@ public class IpcViewCoordinator : MonoBehaviour
     }
 
     /// <summary>
-    /// 道路・線路・インフラ・建物の敷設/建設中の表示。
+    /// 道路・線路・インフラ・建物の敷設/建設中と、造成範囲の作図中の表示。
     /// 計画中の構造物と、位置決めの手がかりになるもの(区画・地区・等高線)をすべて出し、
     /// 視界を遮るプロップだけを消す。区画の色モードだけは呼び出し側が決める
-    /// (建物建設=建設可能な区画の色分け、それ以外=境界線)。
+    /// (建物建設=建設可能な区画の色分け、それ以外=境界線。造成は既存区画との重なりを境界線で見せる)。
     /// </summary>
     private void ApplyConstructionPreset(string parcelMode, string parcelSubMode)
     {

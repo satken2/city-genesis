@@ -1,0 +1,39 @@
+{
+  "grading": {
+    "kindLabel": "类型",
+    "kind": {
+      "land": "陆地平整",
+      "shore": "填海"
+    },
+    "targetHeight": "目标高度",
+    "cutVolume": "挖方量",
+    "fillVolume": "填方量",
+    "quayLength": "岸壁长度",
+    "quayArea": "岸壁面积",
+    "unit": {
+      "height": "{{value}} m",
+      "length": "{{value, number}} m",
+      "area": "{{value, number}} m²",
+      "volume": "{{value, number}} m³"
+    },
+    "reasons": {
+      "invalid_polygon": "范围的形状无效。请画成各边互不相交的形状。",
+      "outside_city": "范围超出了城市。",
+      "too_large": "范围过大（上限 {{limit}} km²）。",
+      "on_water": "完全位于海上的范围无法施工。请画到陆地上。",
+      "no_land_overlap": "请将范围画得与陆地重叠（否则岸边与范围之间会留下海面）。",
+      "overlaps_parcel": "与现有地块重叠。",
+      "overlaps_path": "与道路、轨道等路径重叠。",
+      "overlaps_water": "触及河流或湖泊。",
+      "overlaps_quay_band": "触及填海地的岸壁。",
+      "no_surface_frontage": "未临接地面道路。陆地平整会把地面整平到所临道路的路面高度。",
+      "too_narrow": "范围过窄，岸壁内侧没有可以填筑的部分。",
+      "no_work": "地面已经处于目标高度，无需施工。",
+      "insufficient_funds": "资金不足，无法下达建设指令。"
+    },
+    "confirm": "确定",
+    "confirming": "确定中...",
+    "cancel": "取消",
+    "confirmFailed": "土方工程下单失败。"
+  }
+}

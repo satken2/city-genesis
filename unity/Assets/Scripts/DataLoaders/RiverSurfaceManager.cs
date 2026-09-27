@@ -21,8 +21,8 @@ using Newtonsoft.Json.Linq;
 /// マテリアルは海面(SeaObject)の material を複製し、流れモード(_FlowEnabled)を有効にして使う。
 /// 頂点の UV2 に流下方向(XZ単位ベクトル)を載せ、Custom/WaterLit がさざ波・泡をその向きへ流す。
 ///
-/// 川はマップ固有の静的データ(init_game 時に確定)なので、海岸線・湖と同じセッション初期化
-/// タイミング(<see cref="TerrainManager.FetchCoastline"/>)で一度だけ取得・生成する。
+/// 川はマップ固有の静的データ(init_game 時に確定)だが、海岸線・湖と同じく
+/// <see cref="TerrainManager.FetchCoastline"/> から初回ロード・強制リロード・session:reload のたびに取得・生成し直す。
 /// </summary>
 public class RiverSurfaceManager : MonoBehaviour
 {

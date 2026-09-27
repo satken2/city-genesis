@@ -48,7 +48,8 @@ public static class Utils
     }
 
     /// <summary>
-    /// 指定位置の地形高さを返す。同一フレームかつ同一XZ座標の場合はキャッシュを利用する。
+    /// 指定位置の地面の高さを返す。同一フレームかつ同一XZ座標の場合はキャッシュを利用する。
+    /// 埋立地の帯の中は max(地形, 天端) を返す(<see cref="ReclaimedLandStore.TryGetBandTop"/>)。
     /// タイルの高さ更新・差し替え時は InvalidateHeightCache() を呼ぶこと。
     /// </summary>
     public static float GetGroundHeight(Vector3 position)
@@ -72,6 +73,14 @@ public static class Utils
     }
 
     private static float ComputeGroundHeight(Vector3 position)
+    {
+        float height = ComputeTerrainHeight(position);
+        // 埋立地の帯の中は天端(コンクリート)の上面が地面。バックエンドの勾配・パス検証の max(地形, 天端) と同じ規則。
+        if (ReclaimedLandStore.TryGetBandTop(position.x, position.z, out float top) && top > height) return top;
+        return height;
+    }
+
+    private static float ComputeTerrainHeight(Vector3 position)
     {
         Terrain terrain = GetTerrainAtPosition(position);
         if (terrain != null)

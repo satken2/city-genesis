@@ -57,7 +57,8 @@ export type GraphicState =
   | "STATE_REMOVE_OBJECTS"
   | "STATE_MERGE_PATH"
   | "STATE_SPLIT_PATH"
-  | "STATE_EDIT_ROAD_MEMBERS";
+  | "STATE_EDIT_ROAD_MEMBERS"
+  | "STATE_EDIT_GRADING";
 
 /* ---- ui -> graphic 方向の送信 ---- */
 
@@ -611,6 +612,22 @@ export async function sendEditTransitFinish(): Promise<void> {
     windowType: "transit_creation",
     entity: null,
     action: "edit_transit:finish",
+    params: {},
+  });
+}
+
+/**
+ * `edit_grading:finish`
+ * 造成範囲の作図モードを終了する。POST /api/v1/grading は UI が直接送るため、これは発注成功後の後始末だけを担う。
+ * Unity はこの1イベントで作図の片付け→通常ステートへの復帰→データの再取得までを行うので、
+ * パネルは `STATE_NORMAL` を別送しない。確定後にパネルを閉じると Rust の close_window_by_label が
+ * `STATE_NORMAL` を送るが、Unity は既に通常ステートなので表示・入力を再適用するだけで、再取得は取り消されない(冗長だが無害)。
+ */
+export async function sendEditGradingFinish(): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "grading",
+    entity: null,
+    action: "edit_grading:finish",
     params: {},
   });
 }
@@ -1400,6 +1417,13 @@ export const IPC_EVENT_VIEW_GRID_TOGGLED = "view:grid_toggled";
 
 /** 資源編集モードにおいて、編集中のポリゴンが変更された */
 export const IPC_EVENT_EDIT_RESOURCE_UPDATE_SHAPE = "edit_resource:update_shape";
+
+/**
+ * 造成範囲の作図モードにおいて、描画中の範囲ポリゴンが変更された(Unity → UI)。
+ * ペイロードは { polygon: number[][], finalized: boolean }([x, z] の頂点列)。
+ * finalized は範囲が閉じて頂点編集に移った後だけ true になり、GradingPanel はそのときだけ見積もりを取る。
+ */
+export const IPC_EVENT_EDIT_GRADING_UPDATE_SHAPE = "edit_grading:update_shape";
 
 /**
  * 公共交通の路線設置モードにおいて、配置中の巡回点(停留所・経由点)が変更された(Unity → UI)。

@@ -114,6 +114,15 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         return FindAnyObjectByType<ResourceAreaEditManager>();
     }
 
+    /// <summary>
+    /// GradingAreaEditManager を動的に検索して返す。
+    /// STATE_EDIT_GRADING への遷移時に動的生成されるため、Start() ではなく呼び出し時に毎回検索する。
+    /// </summary>
+    private GradingAreaEditManager GetGradingAreaEditManager()
+    {
+        return FindAnyObjectByType<GradingAreaEditManager>();
+    }
+
 
     /// <summary>
     /// TransitPlanManager を動的に検索して返す。
@@ -153,9 +162,11 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         // 端点近傍の分割になって拒否されるため。onHover 側と条件を揃える)。
         // 駅パッケージ配置も共通吸着を掛けない。中心線は複線の「間」を通るため、既存の線路や
         // ノードへ引き寄せられると意図した位置から半間隔ぶんずれる(位置と角度は数値入力で決める)。
+        // 造成範囲の作図も共通吸着を掛けない。頂点が道路の中心線に乗ると範囲がパスに掛かり、発注で必ず拒否されるため。
         if (mode != InputMode.MODE_ROAD_CONSTRUCTION && mode != InputMode.MODE_PATH_SPLIT
             && mode != InputMode.MODE_BUILDING_CONSTRUCTION && mode != InputMode.MODE_EDIT_PROP
-            && mode != InputMode.MODE_EDIT_STATION && mode != InputMode.MODE_PARCEL_SHAPE_EDIT)
+            && mode != InputMode.MODE_EDIT_STATION && mode != InputMode.MODE_PARCEL_SHAPE_EDIT
+            && mode != InputMode.MODE_EDIT_GRADING)
         {
             clickPosition = ApplySnapping(clickPosition);
         }
@@ -209,6 +220,9 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
                         resourceEditManager.OnTerrainLeftClick(clickPosition);
                     }
                 }
+                break;
+            case InputMode.MODE_EDIT_GRADING:
+                GetGradingAreaEditManager()?.OnTerrainLeftClick(clickPosition);
                 break;
             case InputMode.MODE_EDIT_TRANSIT:
                 {
@@ -264,7 +278,8 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         clickPosition.y = Utils.GetGroundHeight(clickPosition);
         // 道路/鉄道建設モードは RoadPlanManager が自前の吸着半径で吸着するため共通吸着はしない
         // (onClick と同じ理由。二重吸着で RoadPlanManager 側の半径が効かなくなるのを防ぐ)。
-        if (mode != InputMode.MODE_ROAD_CONSTRUCTION && mode != InputMode.MODE_PARCEL_SHAPE_EDIT)
+        if (mode != InputMode.MODE_ROAD_CONSTRUCTION && mode != InputMode.MODE_PARCEL_SHAPE_EDIT
+            && mode != InputMode.MODE_EDIT_GRADING)
         {
             clickPosition = ApplySnapping(clickPosition);
         }
@@ -298,6 +313,9 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
                         resourceEditManager.OnTerrainRightClick(clickPosition);
                     }
                 }
+                break;
+            case InputMode.MODE_EDIT_GRADING:
+                GetGradingAreaEditManager()?.OnTerrainRightClick(clickPosition);
                 break;
             case InputMode.MODE_EDIT_TRANSIT:
                 {
@@ -366,6 +384,7 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
         // バックエンドに拒否されるため。分割点は中心線への射影(PathTopologyEditManager)で決める。
         bool skipSnap = mode == InputMode.MODE_EDIT_CONNECTOR
                      || mode == InputMode.MODE_PARCEL_SHAPE_EDIT
+                     || mode == InputMode.MODE_EDIT_GRADING
                      || mode == InputMode.MODE_EDIT_PROP
                      || mode == InputMode.MODE_EDIT_STATION
                      || mode == InputMode.MODE_BUILDING_CONSTRUCTION
@@ -420,6 +439,9 @@ public class TerrainInputHandler : MonoBehaviour, IInputHandler
                         resourceEditManager.OnTerrainHover(finalPosition);
                     }
                 }
+                break;
+            case InputMode.MODE_EDIT_GRADING:
+                GetGradingAreaEditManager()?.OnTerrainHover(finalPosition);
                 break;
             case InputMode.MODE_EDIT_TRANSIT:
                 {

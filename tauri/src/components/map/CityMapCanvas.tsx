@@ -18,7 +18,10 @@
  * 上下逆に見えるため、その描画に限りY方向を打ち消す(mapLabels.tsのdrawMapLabels等)。
  *
  * レイヤー(propsのlayersでON/OFF):
- *   - elevation : 標高に応じた色分け(近景標高マップを最大解像度で色付け。地形エディタと同方式)
+ *   - elevation : 標高に応じた色分け(近景標高マップを最大解像度で色付け。地形エディタと同方式)。
+ *     近景標高マップは初期地形なので、埋立地(GET /api/v1/terrain/reclaimed-lands)は海の色にならないよう
+ *     陸の最低標高の色で塗る(天端の高さは保存されない派生値なので、実際の標高の色にはしない)。
+ *     レイヤーOFFの陸色は海岸線ポリゴンの塗りで、埋立で海岸線が広がれば自動で陸色になる。
  *   - contours  : 等高線(近景標高マップからMarching Squaresで構築。ズームに応じて間隔を細分化)
  *   - grid      : 100m間隔のグリッド(セル境界=cell_size間隔は濃く強調)
  *   - coastline : 海岸線ポリゴン(陸地の外縁+内陸の湖・池の岸線=穴リング)
@@ -81,7 +84,7 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import type { InterchangeListResponse, InterchangeSummary, MasterData } from "../../types";
-import { computePixelRGB, decodeFloat16Array, normalizeGroundCover } from "../terrain/terrainData";
+import { computePixelRGB, decodeFloat16Array, normalizeGroundCover, terrainColor } from "../terrain/terrainData";
 import {
   PATH_MOTORWAY,
   PATH_STREET,
@@ -463,6 +466,8 @@ type TerrainState = {
   spacing: number;
   minLand: number;
   maxLand: number;
+  /** 陸の最低標高の色(標高レイヤーONで埋立地を塗る色) */
+  lowestLandColor: string;
 };
 
 /** 水域の背景色。海岸線の穴に含まれる川・湖も同じ青で表す。 */
@@ -1315,6 +1320,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       let gridMinor: Path2D | null = null;
       let gridCell: Path2D | null = null;
       let coastPath: Path2D | null = null;
+      let reclaimedPath: Path2D | null = null;
 
       // 等高線間隔のズーム追従(地形エディタと同じ方式)。
       // contourBaseInterval/contourBaseZoomは全体フィット表示時の間隔とズーム倍率で、
@@ -1448,6 +1454,10 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
             settings.map_height
           );
           ctx.restore();
+          if (L.elevation && reclaimedPath) {
+            ctx.fillStyle = terrain.lowestLandColor;
+            ctx.fill(reclaimedPath);
+          }
         }
 
         // 陸地の外周と川・湖の穴を一緒に塗り、標高表示に依らず水域を残す。
@@ -1750,6 +1760,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
             spacing,
             minLand,
             maxLand,
+            lowestLandColor: `rgb(${terrainColor(0, groundCover).join(",")})`,
           };
 
           // 等高線を基準間隔で構築する。基準ズームは初期ビュー確定後に設定され、
@@ -1807,6 +1818,25 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
             ? buildCoastlinePath(geo) : null;
         } catch (err) {
           if (!abort.signal.aborted) console.warn("[CityMapCanvas] failed to load coastline:", err);
+        }
+      };
+
+      /* ---- 埋立地(標高レイヤーONの塗りだけに使う) ---- */
+      const loadReclaimedLands = async () => {
+        try {
+          const res = await fetchApi<{ reclaimed_lands?: { polygon?: [number, number][] }[] }>(
+            buildApiUrl(apiBaseUrl, "/api/v1/terrain/reclaimed-lands"),
+            { signal: abort.signal }
+          );
+          const lands = res.reclaimed_lands ?? [];
+          reclaimedPath = lands.length > 0
+            ? buildCoastlinePath({
+                type: "MultiPolygon",
+                coordinates: lands.map((land) => [land.polygon ?? []]),
+              })
+            : null;
+        } catch (err) {
+          if (!abort.signal.aborted) console.warn("[CityMapCanvas] failed to load reclaimed lands:", err);
         }
       };
 
@@ -2423,7 +2453,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         heat.loadedKind = "none";
         heat.binPaths = null;
         void (async () => {
-          await Promise.all([loadTerrain(), loadCoastline()]);
+          await Promise.all([loadTerrain(), loadCoastline(), loadReclaimedLands()]);
           if (disposed) return;
           fetchVectorsForViewport();
           void loadHeatmap(heatmapRef.current);
@@ -2493,7 +2523,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
 
       resizeCanvas();
       void (async () => {
-        await Promise.all([loadTerrain(), loadCoastline()]);
+        await Promise.all([loadTerrain(), loadCoastline(), loadReclaimedLands()]);
         if (disposed) return;
         resetView();
         // 等高線細分化の基準ズームは初期ビュー(全体フィット、または

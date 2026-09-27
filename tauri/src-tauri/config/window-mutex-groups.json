@@ -66,6 +66,9 @@
   "resource_edit": [
     "resource_edit"
   ],
+  "grading": [
+    "grading"
+  ],
   "save_load": [
     "save_load"
   ],

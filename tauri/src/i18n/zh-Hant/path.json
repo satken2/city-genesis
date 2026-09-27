@@ -112,6 +112,7 @@
     "validationGrade": "路線{{track}}：距起點{{start}}～{{end}}m處的坡度超過規定上限。",
     "validationPathCollision": "道路或軌道的占用範圍重疊。請檢查紅色占用範圍。",
     "validationRiverCollision": "路線在地表橫穿河流。請調整高度或路線。",
+    "validationGradingSite": "路徑不能穿過土方工程的施工範圍，高架或地下也不行。請在工程完成前避開該範圍。",
     "validationRejected": "不符合建設條件。請檢查形狀和設定。",
     "validationFailed": "建設條件驗證失敗：{{reason}}",
     "validationUnavailable": "未設定伺服器連線，無法驗證建設條件。",

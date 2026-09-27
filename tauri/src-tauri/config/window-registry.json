@@ -430,6 +430,15 @@
     "layout": "left_panel_narrow",
     "actions": []
   },
+  "grading": {
+    "title": "造成",
+    "width": 800,
+    "height": 600,
+    "resizable": true,
+    "policy": "single",
+    "layout": "left_panel_narrow",
+    "actions": []
+  },
   "prop_placement": {
     "title": "プロップ配置",
     "width": 800,

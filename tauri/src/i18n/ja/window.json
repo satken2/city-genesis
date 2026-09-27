@@ -42,7 +42,8 @@
     "infra_build": "インフラ建設",
     "mashup_edit": "サブ建物の配置",
     "city_rename": "都市名の変更",
-    "path_shape_editor": "パス形状編集"
+    "path_shape_editor": "パス形状編集",
+    "grading": "造成"
   },
   "cityRename": {
     "label": "都市名",
@@ -92,6 +93,7 @@
     "menuTransport": "公共交通機関",
     "menuStat": "統計情報",
     "menuLand": "土地区画",
+    "menuGrading": "造成",
     "menuDistrict": "地区",
     "menuRegulation": "規制",
     "menuCity": "政策",

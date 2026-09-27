@@ -42,7 +42,8 @@
     "transit_detail": "Line Detail",
     "prop_placement": "Prop Placement",
     "mashup_edit": "Sub-Building Layout",
-    "path_shape_editor": "Path Shape Editor"
+    "path_shape_editor": "Path Shape Editor",
+    "grading": "Earthworks"
   },
   "cityMap": {
     "layers": {
@@ -92,6 +93,7 @@
     "menuTransport": "Public Transport",
     "menuStat": "Statistics",
     "menuLand": "Land Parcels",
+    "menuGrading": "Earthworks",
     "menuDistrict": "District",
     "menuRegulation": "Regulations",
     "menuCity": "Policies",

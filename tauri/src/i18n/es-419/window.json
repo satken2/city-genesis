@@ -42,7 +42,8 @@
     "transit_detail": "Detalle de la línea",
     "prop_placement": "Colocación de props",
     "mashup_edit": "Distribución de anexos",
-    "path_shape_editor": "Editor de forma de vía"
+    "path_shape_editor": "Editor de forma de vía",
+    "grading": "Movimiento de tierras"
   },
   "cityMap": {
     "layers": {
@@ -92,6 +93,7 @@
     "menuTransport": "Transporte público",
     "menuStat": "Estadísticas",
     "menuLand": "Parcelas",
+    "menuGrading": "Movimiento de tierras",
     "menuDistrict": "Distritos",
     "menuRegulation": "Normativas",
     "menuCity": "Políticas",

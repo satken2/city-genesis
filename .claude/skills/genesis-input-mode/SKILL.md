@@ -14,13 +14,13 @@ description: City GenesisのUnity入力モード(InputMode: クリック/ドラ�
 - 該当なし
 
 ## 読むべきAGENTS.md
-- `city-genesis/unity/Assets/Scripts/InputHandlers/AGENTS.md` (最重要。ハンドラ一覧、クリック/ドラッグ判定と入力ゲートの罠、海面クリックの特殊扱い。`InputMode`定数の値域とプリセットは公開ドキュメント `Unity入力制御.md` §2 が正)
+- `city-genesis/unity/Assets/Scripts/InputHandlers/AGENTS.md` (最重要。ハンドラ一覧、クリック/ドラッグ判定と入力ゲートの罠、海面クリックの特殊扱い、背景地形・埋立地の岸壁を地形として扱う判定。`InputMode`定数の値域とプリセットは公開ドキュメント `Unity入力制御.md` §2 が正で、新しいモード・プリセットの値はそこで空きを確かめる)
 - `city-genesis/unity/Assets/Scripts/Editors/AGENTS.md` (入力モードから編集フローへの委譲の流れ)
 - `city-genesis/unity/AGENTS.md` (「モード系は2系統ある」の節でVisualModeとの区別を明記)
 
 ## 編集対象になりやすいディレクトリ/ファイル
 - `city-genesis/unity/Assets/Scripts/InputHandlers/InputSystemManager.cs`, `IInputHandler.cs`, `InputHandler.cs`, `BuildingInputHandler.cs`, `ParcelInputHandler.cs`, `PathInputHandler.cs`, `NodeInputHandler.cs`, `TerrainInputHandler.cs`, `RemovalManager.cs`, `TransitSelection.cs`
-- 関連(編集フローへの委譲先): `city-genesis/unity/Assets/Scripts/Editors/`配下(`RoadEditor/RoadPlanManager.cs`, `BuildingEditor/BuildingPlanManager.cs`, `ParcelManager/ParcelEditorManager.cs`)
+- 関連(編集フローへの委譲先): `city-genesis/unity/Assets/Scripts/Editors/`配下(`RoadEditor/RoadPlanManager.cs`, `BuildingEditor/BuildingPlanManager.cs`, `ParcelManager/ParcelEditorManager.cs`, 任意ポリゴン編集の共通基底 `PolygonAreaEditManager.cs` とその派生の資源エリア・区画形状・造成範囲(`GradingEditor/GradingAreaEditManager.cs`)の作図)
 
 ## 進め方
 1. `InputHandlers/AGENTS.md`でハンドラ一覧と判定の罠を把握する。新規ハンドラは既存ハンドラ(`IInputHandler`実装。コライダーとタグが必須)のパターンを踏襲する

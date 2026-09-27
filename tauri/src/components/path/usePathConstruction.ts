@@ -798,6 +798,14 @@ export function usePathConstruction(
         : validation.error !== undefined
           ? [t("path_construction.validationFailed", { reason: validation.error })]
           : validation.result ? describePathValidation(validation.result, t) : [];
+  // 確定欄に出す理由。区間ごとの形状の違反(ノード間距離・曲線半径・勾配)は形状編集パネルの吹き出しが区間を示すので
+  // 「形状にエラーがあります」の1行に畳み、ほかの理由は validationMessages と同じ文言で出す。
+  const shapeErrorMessage = t("path_construction.shapeError");
+  const confirmMessages = maxSpanViolations.length > 0
+    ? [shapeErrorMessage]
+    : localCanConfirm && apiBaseUrl && validation?.key === validationKey && validation.result
+      ? describePathValidation(validation.result, t, shapeErrorMessage)
+      : validationMessages;
   const validatedAlignment = validation?.key === validationKey && validation.result?.alignments
     ? summarizeAlignment(validation.result.alignments) : null;
   const displayAlignment = validatedAlignment ?? alignment;
@@ -1247,6 +1255,7 @@ export function usePathConstruction(
     confirmPath,
     canConfirm,
     validationMessages,
+    confirmMessages,
     canRetryValidation,
     retryValidation,
   };

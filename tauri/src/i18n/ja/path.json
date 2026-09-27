@@ -112,6 +112,7 @@
     "validationGrade": "線路{{track}}：始点から{{start}}〜{{end}}mの勾配が規格の上限を超えています。",
     "validationPathCollision": "道路・線路の占有範囲が干渉しています。赤い占有範囲を確認してください。",
     "validationRiverCollision": "川を地表で横断しています。高さや経路を調整してください。",
+    "validationGradingSite": "造成工事の範囲には、高架や地下を含めてパスを通せません。工事が終わるまで範囲を避けてください。",
     "validationRejected": "敷設条件を満たしていません。形状や設定を確認してください。",
     "validationFailed": "敷設条件の検証に失敗しました：{{reason}}",
     "validationUnavailable": "接続先が未設定のため敷設条件を検証できません。",

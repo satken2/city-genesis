@@ -772,8 +772,8 @@ public class CellDataLoader : MonoBehaviour
     {
         ClearAllManagerData();
 
-        // ClearAllManagerData が海岸線・水面・川のストアも空にするため、
-        // 建物・道路の生成より先に取り直す(港湾の岸壁判定と川横断判定が参照する)。
+        // ClearAllManagerData が海岸線・水面・川・埋立地のストアも空にするため、
+        // 建物・道路の生成より先に取り直す(港湾の岸壁判定・川横断判定・帯の中の接地が参照する)。
         if (terrainManager != null)
         {
             yield return terrainManager.FetchCoastline();
@@ -797,7 +797,7 @@ public class CellDataLoader : MonoBehaviour
     }
 
     /// <summary>
-    /// 各マネージャーの全データ、内部状態キャッシュ、および各種ストア（海岸線、水面、路線、アラート等）を完全にクリアする。
+    /// 各マネージャーの全データ、内部状態キャッシュ、および各種ストア（海岸線、水面、川、埋立地、路線、アラート等）を完全にクリアする。
     /// 単一シーン内でゲームセッションをロード・アンロードして切り替えるため、
     /// 前回のセッションにおけるカメラのセル位置（currentCenterCell）やLODキャッシュ（currentCellTiers）、
     /// ストリーミング処理のバッチ状態をすべて初期状態に巻き戻す必要がある。
@@ -866,6 +866,15 @@ public class CellDataLoader : MonoBehaviour
         else
         {
             RiverStore.Clear();
+        }
+        // 埋立地のストアは接地(帯の中の天端)に効くので、次の都市の地形より先に空にする。
+        if (ReclaimedLandManager.Instance != null)
+        {
+            ReclaimedLandManager.Instance.Clear();
+        }
+        else
+        {
+            ReclaimedLandStore.Clear();
         }
         if (TransitOverlayManager.Instance != null)
         {

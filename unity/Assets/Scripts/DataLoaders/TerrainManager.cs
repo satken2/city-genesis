@@ -2076,9 +2076,9 @@ public partial class TerrainManager : BaseApiDataManager
     }
 
     /// <summary>
-    /// 海岸線（陸地の境界ポリゴン）を取得して <see cref="CoastlineStore"/> に格納する。
+    /// 海岸線（陸地の境界ポリゴン）を取得して <see cref="CoastlineStore"/> に格納し、続けて湖・川・埋立地を取得する。
     /// レスポンスは GeoJSON ライク（Polygon / MultiPolygon）。座標はワールド座標。
-    /// 海岸線は far_map ベースで init_game 時に確定し以降不変なので、セッション開始時に一度取得すればよい。
+    /// 海岸線は埋立の完了で広がるので、初回ロード・強制リロードに加えて session:reload のたびに取り直す。
     /// </summary>
     public IEnumerator FetchCoastline()
     {
@@ -2116,8 +2116,7 @@ public partial class TerrainManager : BaseApiDataManager
             Debug.Log($"TerrainManager: Coastline loaded (hasCoastline={CoastlineStore.HasCoastline}).");
         }
 
-        // 水面(海面以外の湖など)も海岸線と同じセッション初期化タイミングで取得・生成する。
-        // 水面はマップ固有の静的データで、海岸線と同様 init_game 時に確定し以降不変。
+        // 水面(海面以外の湖など)も海岸線と同じタイミングで取得・生成する。
         // WaterSurfaceManager は AfterSceneLoad で自己生成されるため通常は Instance が存在する。
         if (WaterSurfaceManager.Instance != null)
         {
@@ -2128,6 +2127,12 @@ public partial class TerrainManager : BaseApiDataManager
         if (RiverSurfaceManager.Instance != null)
         {
             yield return RiverSurfaceManager.Instance.LoadAndBuild();
+        }
+        // 埋立地(岸壁の天端と面)。接地(Utils.GetGroundHeight)が帯の中で天端を返し、港が岸壁区間を参照するので、
+        // 区画・建物のロードより先に ReclaimedLandStore を揃える。中身が変わらなければ作り直さない。
+        if (ReclaimedLandManager.Instance != null)
+        {
+            yield return ReclaimedLandManager.Instance.LoadAndBuild();
         }
     }
 

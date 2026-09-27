@@ -1,0 +1,39 @@
+{
+  "grading": {
+    "kindLabel": "Tipo",
+    "kind": {
+      "land": "Nivelación del terreno",
+      "shore": "Relleno costero"
+    },
+    "targetHeight": "Altura objetivo",
+    "cutVolume": "Volumen de corte",
+    "fillVolume": "Volumen de relleno",
+    "quayLength": "Longitud del muelle",
+    "quayArea": "Superficie del paramento del muelle",
+    "unit": {
+      "height": "{{value}} m",
+      "length": "{{value, number}} m",
+      "area": "{{value, number}} m²",
+      "volume": "{{value, number}} m³"
+    },
+    "reasons": {
+      "invalid_polygon": "La forma del área no es válida. Dibújala sin que los lados se crucen.",
+      "outside_city": "El área se sale de la ciudad.",
+      "too_large": "El área es demasiado grande (límite: {{limit}} km²).",
+      "on_water": "No se puede acondicionar un área que está solo sobre el mar. Dibújala de modo que llegue a tierra.",
+      "no_land_overlap": "Dibuja el área de modo que se superponga a la tierra (si no, queda una franja de mar entre la costa y el área).",
+      "overlaps_parcel": "El área se superpone a una parcela existente.",
+      "overlaps_path": "El área se superpone a una calle, vía u otro trazado.",
+      "overlaps_water": "El área toca un río o un lago.",
+      "overlaps_quay_band": "El área se superpone al muelle de un terreno ganado al mar.",
+      "no_surface_frontage": "El área no da a una calle a nivel del suelo. La nivelación iguala el terreno a la altura de la calzada a la que da.",
+      "too_narrow": "El área es demasiado estrecha; no queda nada que rellenar dentro del muelle.",
+      "no_work": "El terreno ya está a la altura objetivo, así que no hace falta ninguna obra.",
+      "insufficient_funds": "Fondos insuficientes para realizar este pedido."
+    },
+    "confirm": "Confirmar",
+    "confirming": "Confirmando...",
+    "cancel": "Cancelar",
+    "confirmFailed": "No se pudo encargar el movimiento de tierras."
+  }
+}

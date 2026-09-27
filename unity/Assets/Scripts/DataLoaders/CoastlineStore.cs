@@ -12,8 +12,8 @@ using Newtonsoft.Json.Linq;
 ///
 /// 港湾（MODEL_PORT）の岸壁メッシュ生成（<see cref="PortBuildingMeshBuilder"/>）で
 /// 「底面ポリゴンのどの辺が海岸線に接しているか」を判定するために使う。
-/// 海岸線は far_map ベースで init_game 時に確定し以降不変なので、
-/// セッション開始時に一度ロードすればよい。
+/// 海岸線は新規都市の作成時に地形から抽出され、以後は埋立の完了で埋立地の範囲が足されて広がる。
+/// そのため FetchCoastline が session:reload のたびに取り直す（<see cref="Version"/> は取り直すたびに進む）。
 /// </summary>
 public static class CoastlineStore
 {

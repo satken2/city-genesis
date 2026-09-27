@@ -42,7 +42,8 @@
     "transit_detail": "Détail de la ligne",
     "prop_placement": "Placement de décors",
     "mashup_edit": "Disposition des annexes",
-    "path_shape_editor": "Édition de la forme de la voie"
+    "path_shape_editor": "Édition de la forme de la voie",
+    "grading": "Terrassement"
   },
   "cityMap": {
     "layers": {
@@ -92,6 +93,7 @@
     "menuTransport": "Transports publics",
     "menuStat": "Statistiques",
     "menuLand": "Parcelles",
+    "menuGrading": "Terrassement",
     "menuDistrict": "Quartiers",
     "menuRegulation": "Réglementations",
     "menuCity": "Politiques",

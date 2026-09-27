@@ -112,6 +112,7 @@
     "validationGrade": "Path {{track}}: grade exceeds the maximum from {{start}} to {{end}} m from the start.",
     "validationPathCollision": "Road or track occupancy overlaps. Check the red occupancy volumes.",
     "validationRiverCollision": "The path crosses a river at ground level. Adjust the elevation or route.",
+    "validationGradingSite": "A path cannot pass through an earthworks site, even elevated or underground. Keep clear of the site until the work is finished.",
     "validationRejected": "Construction requirements are not met. Check the shape and settings.",
     "validationFailed": "Construction validation failed: {{reason}}",
     "validationUnavailable": "Cannot validate construction without a server connection setting.",

@@ -53,6 +53,12 @@ public class BuildingManager : BaseApiDataManager
     private Dictionary<int, HashSet<int>> buildingIdsByParcel = new Dictionary<int, HashSet<int>>();
 
     /// <summary>
+    /// 港（MODEL_PORT）の建物agent_idの集合。埋立地の中身が変わったときに作り直す港を、全建物走査なしで引くために使う。
+    /// 管理規約は buildingIdByInfraNodeId と同じ(登録は RegisterBuildingDataToCache、削除は SyncBuildingsInCells / ClearAllCells)。
+    /// </summary>
+    private readonly HashSet<int> portBuildingIds = new HashSet<int>();
+
+    /// <summary>
     /// バックエンドから取得した建物のversionをキャッシュする。
     /// 差分更新時にバックエンドのversionと比較し、変更があった場合のみオブジェクトを再作成する。
     /// 視野外のため生成を遅延した建物にはversionをキャッシュしない
@@ -219,6 +225,7 @@ public class BuildingManager : BaseApiDataManager
 
         BuildingMeshUtils.InitializeCache();
         TerrainManager.OnTerrainTileReady += OnTerrainTileReadyHandler;
+        ReclaimedLandManager.OnContentChanged += OnReclaimedLandsChanged;
         // 公共施設ハイライトの光オーバーレイ(建物データを参照する常駐描画)を用意する。
         PublicFacilityGlowOverlay.Ensure();
         // 視野外のため生成を遅延した詳細メッシュを消化する常駐ワーカー。
@@ -278,6 +285,7 @@ public class BuildingManager : BaseApiDataManager
     {
         lodCache.Clear();
         TerrainManager.OnTerrainTileReady -= OnTerrainTileReadyHandler;
+        ReclaimedLandManager.OnContentChanged -= OnReclaimedLandsChanged;
     }
 
     public void BeginDeferredTerrainTileBuildingRebuilds()
@@ -398,6 +406,7 @@ public class BuildingManager : BaseApiDataManager
         buildingIdByInfraNodeId.Clear();
         buildingIdByDepotNodeId.Clear();
         buildingIdsByParcel.Clear();
+        portBuildingIds.Clear();
         buildingIdsByCell.Clear();
         buildingCellById.Clear();
         loadedCells.Clear();
@@ -910,6 +919,7 @@ public class BuildingManager : BaseApiDataManager
                     if (byParcel.Count == 0) buildingIdsByParcel.Remove(removedData.parcel_id);
                 }
             }
+            portBuildingIds.Remove(id);
             buildingDataCache.Remove(id);
             ConstructionAmbience.Unregister(ConstructionAmbience.Kind.Building, id);
             // 視野ゲート・LRU関連の台帳も同期して外す
@@ -1755,8 +1765,10 @@ public class BuildingManager : BaseApiDataManager
     private static ParcelKeyPart GetParcelKeyPart(ParcelSummary parcel) => parcelKeyParts.GetValue(parcel, createParcelKeyPart);
 
     /// <summary>
-    /// 描画物の再利用キー。形状・外観・状態・サブ建物・区画・形状版・描画LOD・接地範囲の地形版を区別し、
+    /// 描画物の再利用キー。形状・外観・状態・サブ建物・区画・形状版・描画LOD・接地範囲の地形版・埋立地の版(港の詳細だけ)を区別し、
     /// version だけの変化では変わらない。同じデータからは常に同じキーになる(テストがキーを外から計算して照合する)。
+    /// 港の詳細は区画が埋立地の岸壁に面するかで形が変わるので <see cref="ReclaimedLandStore.ContentVersion"/> を混ぜる。
+    /// 港の遠景の箱と港以外は埋立地に依存しないので "-"(埋立のたびに作り直さない)。
     /// </summary>
     private string BuildingRenderKey(BuildingSummary data, DrawLod lod)
     {
@@ -1764,11 +1776,13 @@ public class BuildingManager : BaseApiDataManager
         var terrain = Utils.CachedTerrainManager;
         string surface = terrain != null ? terrain.GetSurfaceStamp(GetBuildingTerrainBounds(data, parcel)) : "none";
         buildingGeometryRevisions.TryGetValue(data.agent_id, out int revision);
+        string reclaimed = lod != DrawLod.Far && BuildingMeshBuilder.GetModelType(data) == Constants.MODEL_PORT
+            ? ReclaimedLandStore.ContentVersion.ToString(CultureInfo.InvariantCulture) : "-";
         return string.Concat(new[]
         {
             data.agent_id.ToString(CultureInfo.InvariantCulture), ":", buildingShapeKeys.GetValue(data, createBuildingShapeKey), ":",
             revision.ToString(CultureInfo.InvariantCulture), ":", parcel != null ? GetParcelKeyPart(parcel).token : "-", ":",
-            ((int)lod).ToString(CultureInfo.InvariantCulture), ":", surface,
+            ((int)lod).ToString(CultureInfo.InvariantCulture), ":", surface, ":", reclaimed,
         });
     }
 
@@ -2039,6 +2053,9 @@ public class BuildingManager : BaseApiDataManager
         buildingBoundsRadius.Remove(buildingData.agent_id);
         SyncConstructionSound(buildingData);
 
+        if (BuildingMeshBuilder.GetModelType(buildingData) == Constants.MODEL_PORT) portBuildingIds.Add(buildingData.agent_id);
+        else portBuildingIds.Remove(buildingData.agent_id);
+
         if (buildingData.infra_node_id > 0)
         {
             buildingIdByInfraNodeId[buildingData.infra_node_id] = buildingData.agent_id;
@@ -2116,6 +2133,42 @@ public class BuildingManager : BaseApiDataManager
         // データの版は変わらないので、形状版を進めて退避キャッシュや表示中オブジェクトの再利用を外す。
         buildingGeometryRevisions[building.agent_id] = ++buildingGeometryRevisionCounter;
         CreateOrUpdateBuildingObject(building, IsBuildingInDynamicCell(building), forceRebuild: true, drawLod: GetCurrentDrawLod(building.agent_id));
+    }
+
+    /// <summary>
+    /// 埋立地の中身（<see cref="ReclaimedLandStore.ContentVersion"/>）が変わったときに
+    /// <see cref="ReclaimedLandManager.OnContentChanged"/> から呼ばれる。港（MODEL_PORT）は区画が埋立地の岸壁に面するかで
+    /// 形が変わるが、埋立で港自身の version は変わらないので、表示中の詳細な港をここで作り直す。
+    /// 視野内は即時、視野外は遅延キューへ積む。退避中・未生成の港は再利用キーに版が入っているので次の生成で新しい形になり、
+    /// 遠景の箱は埋立地に依存しないので作り直さない。
+    /// </summary>
+    public void OnReclaimedLandsChanged()
+    {
+        if (portBuildingIds.Count == 0) return;
+        Camera cam = Camera.main;
+        Vector3 camPos = cam != null ? cam.transform.position : Vector3.zero;
+        Vector3 camFwd = cam != null ? GetHorizontalForward(cam) : Vector3.forward;
+        // 作り直しは RegisterBuildingDataToCache を通って集合を書き換えうるので写してから回す。
+        foreach (int id in new List<int>(portBuildingIds))
+        {
+            if (!buildingObjectsCache.TryGetValue(id, out GameObject obj) || obj == null || !obj.activeSelf) continue;
+            if (!buildingDataCache.TryGetValue(id, out BuildingSummary building)) continue;
+            DrawLod lod = DrawLodInfo.GetDrawLod(obj, DrawLod.Normal);
+            if (lod == DrawLod.Far) continue;
+            // 1棟の生成失敗で残りの港の作り直しを止めない。
+            try
+            {
+                bool isDynamic = IsBuildingInDynamicCell(building);
+                if (cam == null || IsPositionInGenerationView(obj.transform.position, camPos, camFwd))
+                    CreateOrUpdateBuildingObject(building, isDynamic, forceRebuild: true, drawLod: lod);
+                else
+                    QueueDeferredDetail(id, building, isDynamic, lod);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"BuildingManager: 埋立地の変更に伴う港の作り直しに失敗 agent_id={id}: {e}");
+            }
+        }
     }
 
     /// <summary>生成済みオブジェクトの描画LOD(未生成なら Normal)。個別更新で現在の詳細度を維持するために使う。</summary>

@@ -14,6 +14,7 @@ public class ModeTextDisplay : MonoBehaviour
         ("STATE_EDIT_PROP", "Prop Placement"),
         ("STATE_EDIT_STATION", "Station Placement"),
         ("STATE_EDIT_ROAD_MEMBERS", "Road Segment Edit"),
+        ("STATE_EDIT_GRADING", "Land Grading"),
         // フライモードはUI(Tauri)を経由しないUnityローカルのステート。
         // 抜け方（Shift + F）をキャプションに含めて案内する。
         ("STATE_FLY_MODE", "STATE_FLY_MODE (Shift + F to exit)"),

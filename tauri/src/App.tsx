@@ -51,6 +51,7 @@ const EditorWindow = lazy(() => import("./components/taskbar/EditorWindow").then
 const ResourceDetailPanel = lazy(() => import("./components/resource/ResourceDetailPanel").then(m => ({ default: m.ResourceDetailPanel })));
 const ResourceConstructionPanel = lazy(() => import("./components/resource/ResourceConstructionPanel").then(m => ({ default: m.ResourceConstructionPanel })));
 const PropPlacementPanel = lazy(() => import("./components/prop/PropPlacementPanel").then(m => ({ default: m.PropPlacementPanel })));
+const GradingPanel = lazy(() => import("./components/grading/GradingPanel").then(m => ({ default: m.GradingPanel })));
 const AchievementsWindow = lazy(() => import("./components/achievement/AchievementsWindow").then(m => ({ default: m.AchievementsWindow })));
 const QuestEditPanel = lazy(() => import("./components/achievement/QuestEditPanel").then(m => ({ default: m.QuestEditPanel })));
 const CityTaxWindow = lazy(() => import("./components/tax/CityTaxWindow").then(m => ({ default: m.CityTaxWindow })));
@@ -91,7 +92,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * 専用パネルが実装されているウィンドウタイプのセット
  * これらのタイプはジェネリックな JSON 表示ではなく、専用コンポーネントでレンダリングする
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "diagnosis", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "infra_build", "track_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "new_game", "city_rename", "template_editor", "resource_detail", "resource_edit", "prop_placement", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "street_grid", "agent_creation"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "diagnosis", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "infra_build", "track_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "new_game", "city_rename", "template_editor", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "street_grid", "agent_creation"]);
 
 
 function App() {
@@ -469,6 +470,11 @@ function App() {
               />
             ) : context.window_type === "prop_placement" ? (
               <PropPlacementPanel
+                apiBaseUrl={context.api_base_url}
+                onClose={closeWindow}
+              />
+            ) : context.window_type === "grading" ? (
+              <GradingPanel
                 apiBaseUrl={context.api_base_url}
                 onClose={closeWindow}
               />

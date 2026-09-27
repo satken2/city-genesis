@@ -77,6 +77,8 @@ public static class InputMode
     // 道路(名前付き道路)の区間編集モード。街路・高速道路の区間のクリックを UI へ通知するだけで、
     // 所属の付け外しは UI が API で行う。実処理は RoadMemberEditManager。
     public const int MODE_EDIT_ROAD_MEMBERS = 22;
+    // 造成範囲の作図モード。資源エリアの作図と同じ地形クリック・頂点ドラッグで、実処理は GradingAreaEditManager。
+    public const int MODE_EDIT_GRADING = 23;
 }
 
 /// <summary>
@@ -112,6 +114,8 @@ public static class InputModePreset
     public const int STATION_PLACEMENT = 20;
     // 道路の区間編集プリセット。パスだけをクリック可能にする(パス結合の相手選択と同型)。
     public const int ROAD_MEMBER_EDIT = 21;
+    // 造成範囲の作図プリセット。地形だけをクリック可能にする(資源エリアの作図と同型)。
+    public const int EDIT_GRADING = 22;
 }
 
 /// <summary>
@@ -594,7 +598,7 @@ public class InputHandler : MonoBehaviour
         foreach (var hit in hits)
         {
             GameObject hitObject = hit.collider.gameObject;
-            if (hitObject.GetComponent<Terrain>() != null || IsBackgroundTerrain(hitObject))
+            if (hitObject.GetComponent<Terrain>() != null || IsTerrainSurfaceObject(hitObject))
             {
                 posX = hit.point.x;
                 posZ = hit.point.z;
@@ -654,7 +658,7 @@ public class InputHandler : MonoBehaviour
         GameObject hitObject = hit.collider.gameObject;
 
         // 地形の場合は継続的にホバー処理を呼び出し
-        if (hitObject.GetComponent<Terrain>() != null || IsBackgroundTerrain(hitObject))
+        if (hitObject.GetComponent<Terrain>() != null || IsTerrainSurfaceObject(hitObject))
         {
             var terrainHandler = hitObject.GetComponent<IInputHandler>();
             terrainHandler?.onHover(GetModeForObjectType(InputObjectType.TERRAIN));
@@ -759,17 +763,19 @@ public class InputHandler : MonoBehaviour
         if (obj.CompareTag("ZoneObject")) return InputObjectType.ZONE;
         if (obj.CompareTag("SeaObject")) return InputObjectType.TERRAIN;
         if (obj.GetComponent<Terrain>() != null) return InputObjectType.TERRAIN;
-        if (IsBackgroundTerrain(obj)) return InputObjectType.TERRAIN;
+        if (IsTerrainSurfaceObject(obj)) return InputObjectType.TERRAIN;
 
         return -1; // 不明なタイプ
     }
 
     /// <summary>
-    /// マップの外の背景地形か。背景チャンクは Terrain コンポーネントを持たない板ポリゴンだが、
-    /// 都市外の設備(国境の貨物駅に停める路線の停留所など)を置く・選ぶため地形タイルと同じに扱う。
+    /// Terrain コンポーネントを持たないが地形タイルと同じに扱う面か。
+    /// マップの外の背景地形のチャンクは、都市外の設備(国境の貨物駅に停める路線の停留所など)を置く・選ぶため。
+    /// 埋立地の岸壁(天端と垂直の面)は、その上のカーソル位置がコライダーを越えて海底へ抜けないようにするため。
     /// </summary>
-    private bool IsBackgroundTerrain(GameObject obj) =>
-        cachedTerrainManager != null && cachedTerrainManager.IsBackgroundTerrain(obj);
+    private bool IsTerrainSurfaceObject(GameObject obj) =>
+        (cachedTerrainManager != null && cachedTerrainManager.IsBackgroundTerrain(obj)) ||
+        (ReclaimedLandManager.Instance != null && ReclaimedLandManager.Instance.IsQuayObject(obj));
 
     private int GetModeForObjectType(int objectType)
     {
@@ -888,6 +894,23 @@ public class InputHandler : MonoBehaviour
                 }
             }
         }
+        else if (currentMode == InputMode.MODE_EDIT_GRADING)
+        {
+            var gradingEditManager = FindAnyObjectByType<GradingAreaEditManager>();
+            if (gradingEditManager != null && gradingEditManager.IsEditingPhase)
+            {
+                // 頂点上でドラッグ開始した場合は Editor ドラッグを開始する(Editingフェーズのみ)
+                if (gradingEditManager.IsMouseOverVertex(InputUtil.MousePosition, Camera.main))
+                {
+                    isDragging = true;
+                    dragStartPosition = new Vector3(posX, 0, posZ);
+                    draggedObject = null;
+                    draggedObjectType = InputObjectType.TERRAIN;
+                    gradingEditManager.StartDrag(InputUtil.MousePosition);
+                    return;
+                }
+            }
+        }
         else if (currentMode == InputMode.MODE_EDIT_TRANSIT)
         {
             var transitPlanManager = FindAnyObjectByType<TransitPlanManager>();
@@ -950,6 +973,11 @@ public class InputHandler : MonoBehaviour
                 var resourceEditManager = FindAnyObjectByType<ResourceAreaEditManager>();
                 resourceEditManager?.ProcessMouseDrag(currentPosition);
             }
+            else if (terrainMode == InputMode.MODE_EDIT_GRADING)
+            {
+                var gradingEditManager = FindAnyObjectByType<GradingAreaEditManager>();
+                gradingEditManager?.ProcessMouseDrag(currentPosition);
+            }
             else if (terrainMode == InputMode.MODE_EDIT_TRANSIT)
             {
                 var transitPlanManager = FindAnyObjectByType<TransitPlanManager>();
@@ -1002,6 +1030,11 @@ public class InputHandler : MonoBehaviour
                 {
                     var resourceEditManager = FindAnyObjectByType<ResourceAreaEditManager>();
                     resourceEditManager?.ProcessMouseDragEnd(endPosition);
+                }
+                else if (terrainMode == InputMode.MODE_EDIT_GRADING)
+                {
+                    var gradingEditManager = FindAnyObjectByType<GradingAreaEditManager>();
+                    gradingEditManager?.ProcessMouseDragEnd(endPosition);
                 }
                 else if (terrainMode == InputMode.MODE_EDIT_TRANSIT)
                 {
@@ -1187,6 +1220,16 @@ public class InputHandler : MonoBehaviour
                 Debug.Log("InputHandler: 資源エリア編集モードプリセットを設定しました");
                 break;
 
+            case InputModePreset.EDIT_GRADING:
+                SetMode(InputObjectType.TERRAIN, InputMode.MODE_EDIT_GRADING);
+                SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
+                SetMode(InputObjectType.PATH, InputMode.MODE_NONE);
+                SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
+                SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
+                SetMode(InputObjectType.ZONE, InputMode.MODE_NONE);
+                Debug.Log("InputHandler: 造成範囲の作図モードプリセットを設定しました");
+                break;
+
 
             case InputModePreset.TRANSIT_CONSTRUCTION:
                 // 停留所の設置は地形クリックで行う。下地パス(道路・駅パス)は貫通させて
@@ -1348,6 +1391,7 @@ public class InputHandler : MonoBehaviour
             case InputMode.MODE_EDIT_PROP: return "プロップ配置";
             case InputMode.MODE_EDIT_CONNECTOR: return "接続点編集";
             case InputMode.MODE_EDIT_ROAD_MEMBERS: return "道路の区間編集";
+            case InputMode.MODE_EDIT_GRADING: return "造成範囲の作図";
             default: return "UNKNOWN";
         }
     }
