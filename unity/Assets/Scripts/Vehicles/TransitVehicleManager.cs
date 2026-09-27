@@ -151,13 +151,17 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
         if (line.keys == null || line.keys.Length != cars) { line.keys = new string[cars]; line.modelKeys = new string[cars]; }
         float spacing = line.data.length_per_vehicle > 0 ? line.data.length_per_vehicle : VehicleModelResolver.GetVehicleLength(line.type);
         int stride = Math.Max(1,(int)Math.Ceiling((double)trains / Math.Max(1,maxVisibleCars/cars*4)));
+        // 編成は実効運行間隔(コアの transit_capacity.effective_headway と同じ式)ずつずらして発車する。
+        double headway = Math.Max(line.data.target_headway * 60.0, line.motion.Duration / trains);
+        double cycle = headway * trains;
         for (int train = 0; train < trains; train += stride)
         {
             // 路線の選択外観を全編成で使い、候補外のときだけ路線IDと編成番号で固定する。往復・プール復帰でも全車を揃える。
             int variant = VehicleModelResolver.PickTransitVariantId(line.type, line.data.vehicle_model, unchecked(line.data.line_agent_id * 397 + train));
             bool driven = line.data.line_agent_id == DrivenLineId && train == 0;
-            double trainTime = clock + line.motion.Duration*train/trains + (driven ? driveOffset : 0);
-            int step = line.motion.AtTime(trainTime, out double distance, out bool stopped);
+            double trainTime = clock + headway*train + (driven ? driveOffset : 0);
+            double runTime = line.motion.Schedule(trainTime, cycle);
+            int step = line.motion.AtTime(runTime, out double distance, out bool stopped);
             if (step < 0) continue;
             bool reversed = line.motion.Reversed[step];
             var positions = line.positions; var directions = line.directions;
@@ -179,7 +183,7 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
                 {
                     double offset = ((cars-1)*.5-car)*spacing;
                     if (!routeGeometry.Sample(line,distance+offset,distance,forward,out positions[car],out directions[car])) { ready = false; break; }
-                    if (stopped) BusTurnaround(line,step,trainTime,ref positions[car],ref directions[car]);
+                    if (stopped) BusTurnaround(line,step,runTime,ref positions[car],ref directions[car]);
                 }
                 Vector3 delta = positions[car]-center; delta.y = 0;
                 near |= delta.sqrMagnitude <= renderRadius*renderRadius;

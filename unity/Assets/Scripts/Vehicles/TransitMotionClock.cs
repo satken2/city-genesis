@@ -48,6 +48,18 @@ public sealed class TransitMotionClock
         return index;
     }
 
+    /// <summary>
+    /// 周期 cycle 秒で発車する編成の時刻を、1周の時計の時刻へ写す。1周(Duration)を終えた編成は周期の残りを
+    /// 先頭の停留所で停車して待つ(コアの実効運行間隔と同じ規則)。cycle が1周以下なら走り続ける。
+    /// </summary>
+    public double Schedule(double seconds, double cycle)
+    {
+        if (Duration <= 0 || cycle <= Duration) return seconds;
+        double phase = ((seconds % cycle) + cycle) % cycle;
+        // 待っている間は、最後の区間(先頭の停留所への到着)の停車時間の終わりにとどめる。
+        return phase < Duration ? phase : Duration * (1 - 1e-9);
+    }
+
     public int AtDistance(double distance) => Steps.Count == 0 ? -1 : Find(Distances, Math.Clamp(distance, 0, Length));
 
     private static int Find(List<double> values, double value)
