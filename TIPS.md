@@ -15,6 +15,11 @@
 - 海面は Y≈0 の板で、海岸線のマスクは無い。湖は footprint 全体を水位の高さの板で描く。どちらも地形を水位より下げると、バックエンドの海岸線や区画種別と関係なくその場所に水が見える。
 - `CoastlineStore.IsLand` は呼ぶたびに全リングの全辺を走査する(父島・香港の海岸線で数千〜約7千頂点)。敷設中のように毎フレーム多数の点を判定するときは、地形高さなど安い条件で先に候補を絞ってから呼ぶ(`RoadPlanManager.CheckSeaLakeCrossings` は「地形が水面より低い点」だけを判定する)。
 - 組み立て後の建物メッシュの頂点数がパーツの取り込み頂点数よりずっと大きいときは、元メッシュのサブメッシュごとの `GetIndices` の最小〜最大の幅の和と比べる。`Mesh.CombineMeshes` はサブメッシュ単位の結合でもこの幅を丸ごと写すので、和が組み立て後の頂点数とほぼ一致すれば、材質をまたいで溶接された頂点による範囲の重なりが原因。`CombineModuleMeshes` を通るパーツはこれを詰め直すが、通らない経路の未参照頂点は2026-09-27の全バリアント測定で、モジュラー建物(model_type 1)の最終メッシュの約17%(壁・角・エントランス等の直接配置)、車両基地(model_type 9)の約16%(線路タイルの切り詰めで末尾に頂点を足してから `SetTriangles` するため)。
+- Git Bash の `sed -i` は CRLF のファイル(このレポジトリの作業ツリーは `core.autocrlf=true` で全行 CRLF)を書き戻すとき、置換しなかった行の CR も落として LF にする。`.mat` / `.meta` を複製して一部だけ書き換えるときは、書き換え後に行末をそろえ直すか、Edit で直接書き換える。
+- `ReclaimedLandMeshBuilder` や `ReclaimedLandStore` のように Unity のネイティブ API(Mesh・Terrain・Debug)を通らない純データのクラスは、`Tests/BuildRuntime.ps1` の出力 DLL と `UnityEngine.CoreModule.dll`・NTS・Newtonsoft を参照する .NET 8 のコンソールから直接呼んで検査できる(`Tests/Intersections` と同じ形。private の入れ子型もリフレクションで Newtonsoft に渡せる)。
+- `TerrainCollider` のレイが当たる地形の三角形は、ハイトマップの各マスを (0,0)-(1,1) の対角線で切ったもの(`TerrainData.GetInterpolatedHeight` と同じ)。もう一方の対角線で計算すると、起伏の大きい所で数mずれる(2026-09-27、`Tests/Quay` の照合)。
+- 描画を使わない独立検証の Unity プロジェクトは、`Packages/manifest.json` を組み込みモジュール(`com.unity.modules.physics` / `terrain` / `terrainphysics` など、使うものだけ)にするとパッケージの解決を待たずに起動し、`Tests/Quay` は起動から終了まで約1分で済む。
+- 検証用の Unity スクリプトの構文だけを先に確かめるなら、`UnityEngine.CoreModule.dll` などを HintPath で参照する netstandard2.1 の csproj をレポジトリの外に作って `dotnet build` すると数秒で済む(Unity の起動を待たない)。
  
 ## UI / Tauri
 

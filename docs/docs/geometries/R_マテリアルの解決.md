@@ -79,7 +79,8 @@ source（プレハブの sharedMaterial 等）
 | パス本体のプレハブが無いとき（明灰色の板フォールバック）・パーツの材質配列が空のとき | URP対応の `Resources/BuildingMaterial` → `GetOrCreateRoadMaterialByName` の共有プール |
 | 交差点アスファルト | 代表バリアントのマスターの `body_material`（§2.3）→ 代表バリアントの `body` プレハブ → `Resources/PATH_ASPHALT` → `Resources/NodeMaterial` |
 | 交差点の歩道コネクタ・エンドキャップ | 通常道路と同じ `sidewalk` プレハブ → `GetOrCreateRoadMaterial` |
-| 駅ホームのデッキ | `platform_panel` プレハブ → `GetOrCreateRoadMaterial` → `Resources/COMMON_CONCRETE` |
+| 駅ホームのデッキ | `platform_panel` プレハブのマテリアル → `GetOrCreateRoadMaterial`。プレハブが無いときは共通コンクリート（§3.4） |
+| LRT停留所のホームの簡易スラブ（`lrt_platform` パーツが無いときの代替） | 共通コンクリート（§3.4） |
 | 工事中パスの土ストリップ | 建物と共通の土マテリアル（§3.4）→ `GetOrCreateRoadMaterial` |
 | 一方通行線路の進行方向矢印 | `Resources/PathColorMaterial` の複製に色を焼き込んだ専用マテリアル（静的キャッシュ） |
 | ノードマーカー・遠景（Far）の簡易パス | `Resources/NodeMaterial` |
@@ -156,8 +157,15 @@ null → 地面パネルを描画しない（既定マテリアルへはフォ�
 | 用途 | 解決順 |
 | --- | --- |
 | 既定の建物マテリアル（白い箱・遠景の箱・全フォールバックの終着点） | `Resources/BuildingMaterial` |
-| コンクリート基盤（傾斜地の谷側を埋める柱状の押し出し） | `Resources/COMMON_CONCRETE` → `Resources/BuildingMaterial` |
+| 共通コンクリート（`BuildingMeshBuilder.GetCommonConcreteMaterial`） | `Resources/COMMON_CONCRETE` → `Resources/BuildingMaterial`（`.mat` が無いときは警告を出す） |
 | 工事現場の土（建物の土マウンド／パスの土ストリップ共用） | `Resources/ConstructionDirt` → `Resources/ConstructionMaterial` → `Resources/BuildingMaterial` |
+
+共通コンクリート（無彩色のグレー）を使う面は次のとおり。
+
+- コンクリート基盤（傾斜地の谷側を埋める柱状の押し出し。[F_建物メッシュの生成](F_建物メッシュの生成.md) §8.2）
+- オープンスペースの面のうち、`floor` パーツも床材の指定も無いもの（[F10_オープンスペースのメッシュ生成](F10_オープンスペースのメッシュ生成.md)）
+- 駅ホームのデッキ（`platform_panel` プレハブが無いとき）と、LRT停留所のホームの簡易スラブ（`lrt_platform` パーツが無いとき）
+- 埋立地の岸壁の天端と垂直の面（[D_地形形状](D_地形形状.md) §D.17.5）。地形より手前に描くため、建物と同じ共有の DepthOffset 版（`BuildingManager.GetSharedDepthOffsetMaterials`）にして使う
 
 ### 3.5 最終保険とサブメッシュ統合
 

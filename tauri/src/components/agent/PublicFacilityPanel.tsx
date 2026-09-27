@@ -15,6 +15,7 @@
  *
  * 非建物の公共施設(公営サービス事業者など)は放棄できず、修繕・停止/開始も
  * 対象外のため、取り壊し(計画中は削除)のみを表示する。
+ * 造成工事(isGradingVariant)は取り壊しと編集を出さない(中止は保留にしてから削除する)。
  * 市政府(TYPE_CITY)は恒久的な存在であり操作を持たないため、このカード自体を表示しない。
  */
 
@@ -36,6 +37,7 @@ import {
 import { fetchApi } from "../../utils/api";
 import { sendSessionReload } from "../../utils/ipc";
 import { useMasterData } from "../../contexts/MasterDataContext";
+import { isGradingVariant } from "../grading/grading";
 import bulldozeIcon from "../../assets/images/bulldoze.png";
 import pauseIcon from "../../assets/images/ui/pause.png";
 import playIcon from "../../assets/images/ui/play.png";
@@ -213,6 +215,8 @@ export function PublicFacilityPanel({
   const isCollapsed = status === STATUS_COLLAPSED;
   const isBuilding = agent.is_bd;
   const isAbandoned = !!agent.abandoned;
+  // 造成工事は完了すると主体ごと消えるので取り壊しが無い。範囲は建物建設ウィンドウでは編集できない(変えるなら削除して造成ウィンドウで発注し直す)。
+  const isGrading = isGradingVariant(agent.variant);
   // 稼働中/停止中は放棄・修繕・停止開始トグルの操作対象となる状態。
   const isRunningState = status === STATUS_ACTIVE || status === STATUS_PAUSED;
   const isPaused = status === STATUS_PAUSED;
@@ -250,7 +254,7 @@ export function PublicFacilityPanel({
                 />
               </button>
             )}
-            {isBuilding && (
+            {isBuilding && !isGrading && (
               <button
                 className="operation-btn"
                 type="button"
@@ -360,19 +364,21 @@ export function PublicFacilityPanel({
               </button>
             )}
 
-            <button
-              className="operation-btn"
-              type="button"
-              title={
-                status === STATUS_SCHEDULED_DEMOLITION
-                  ? t("agent.action.cancelBulldoze")
-                  : t("agent.action.bulldoze")
-              }
-              disabled={lockedByAbandon}
-              onClick={() => void handleBulldoze()}
-            >
-              <img src={bulldozeIcon} alt={t("agent.action.bulldoze")} />
-            </button>
+            {!isGrading && (
+              <button
+                className="operation-btn"
+                type="button"
+                title={
+                  status === STATUS_SCHEDULED_DEMOLITION
+                    ? t("agent.action.cancelBulldoze")
+                    : t("agent.action.bulldoze")
+                }
+                disabled={lockedByAbandon}
+                onClick={() => void handleBulldoze()}
+              >
+                <img src={bulldozeIcon} alt={t("agent.action.bulldoze")} />
+              </button>
+            )}
           </>
         )}
 

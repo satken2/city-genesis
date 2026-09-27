@@ -41,12 +41,12 @@ City Genesis の3D描画プログラム。バックエンド(FastAPI)とは HTTP
 - ワールド原点はマップ中心(東=+X、北=+Z)。バックエンドのセルは左下原点の非負番号、Unity のセル番号は負値を取る。変換は必ず `TerrainManager.UnityCellToBackendCell` / `BackendCellToUnityCells`。
 - カメラ距離による原点シフトは行わない。Transform だけ動かすとセル判定・高さ参照・保存座標が食い違う。
 - ノード・パスの Y は地面からの相対高さ。Y=0 のパスは3D上で浮いて見えても「完全に地面に沿っている」とみなし、高架扱いにしない。内部計算では道路を平面上にあるものとして扱う(`geometries/A_パス形状.md`)。
-- 地形高さは `Utils.GetGroundHeight` だけを使い、別名のラッパーを置かない。タイル差し替え時は `Utils.InvalidateHeightCache()`。
+- 地形高さは `Utils.GetGroundHeight` だけを使い、別名のラッパーを置かない。埋立地の帯の中は max(地形, 岸壁の天端) を返す。タイル差し替え時は `Utils.InvalidateHeightCache()`。
 
 ### オブジェクトの識別(変更禁止級)
 
 - GameObject 名は `Building_{agentId}` / `Path_{pathId}` / `Parcel_{parcelId}` / `Node_{nodeId}`。メタデータは `ObjectIdInfo`(`id` / `status` / `isFarObject` / `role`)で持ち、名前の文字列パースはしない。
-- 入力のタイプ判定はタグ(`BuildingObject` / `ParcelObject` / `PathObject` / `PathNode` / `ZoneObject` / `SeaObject`)。コライダーとタグが無いとクリックできない。海面は `Terrain` を持たないため `SeaObject` で地形扱い。
+- 入力のタイプ判定はタグ(`BuildingObject` / `ParcelObject` / `PathObject` / `PathNode` / `ZoneObject` / `SeaObject`)。コライダーとタグが無いとクリックできない。海面は `Terrain` を持たないため `SeaObject` で地形扱い。都市外の背景地形と埋立地の岸壁はタグ無しで、`InputHandler.IsTerrainSurfaceObject` が地形扱いにする。
 
 ### モード系は2系統
 

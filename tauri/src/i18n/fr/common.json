@@ -69,6 +69,9 @@
     "PATH_TOO_FEW_POINTS": "Au moins 2 points sont requis.",
     "PATH_MAX_SPAN_EXCEEDED": "La distance entre les nœuds est trop grande. Ajoutez des points intermédiaires.",
     "PATH_ELEVATION_CONFLICT": "Un croisement à niveaux différents a été détecté. Ajustez la hauteur.",
-    "INSUFFICIENT_FUNDS": "Fonds insuffisants pour passer cette commande."
+    "INSUFFICIENT_FUNDS": "Fonds insuffisants pour passer cette commande.",
+    "GRADING_VALIDATION_ERROR": "Cette zone ne peut pas être aménagée. Consultez les raisons affichées dans la fenêtre de terrassement.",
+    "CREATEPATH_SEA_LAKE_CROSSING": "Un tracé ne peut pas passer sur la mer ou un lac au niveau du sol. Faites-le passer sur un pont bien au-dessus de l'eau, ou en souterrain.",
+    "CREATEPATH_QUAY_BAND_CROSSING": "Un tracé ne peut pas traverser le quai d'un terrain gagné sur la mer au niveau du sol. Faites-le passer en viaduc ou en souterrain, et placez ses extrémités et points de passage hors de la plateforme du quai."
   }
 }

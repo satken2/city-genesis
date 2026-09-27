@@ -1,0 +1,39 @@
+{
+  "grading": {
+    "kindLabel": "種類",
+    "kind": {
+      "land": "陸地整地",
+      "shore": "埋立"
+    },
+    "targetHeight": "目標の高さ",
+    "cutVolume": "切土量",
+    "fillVolume": "盛土量",
+    "quayLength": "岸壁の長さ",
+    "quayArea": "岸壁の面積",
+    "unit": {
+      "height": "{{value}} m",
+      "length": "{{value, number}} m",
+      "area": "{{value, number}} m²",
+      "volume": "{{value, number}} m³"
+    },
+    "reasons": {
+      "invalid_polygon": "範囲の形が正しくありません。辺が交差しない形で描いてください。",
+      "outside_city": "範囲が都市の外にはみ出しています。",
+      "too_large": "範囲が広すぎます（上限 {{limit}} km²）。",
+      "on_water": "海の上だけの範囲は造成できません。陸地に掛かるように描いてください。",
+      "no_land_overlap": "範囲を陸地に重ねて描いてください（岸と範囲の間に海が残るため）。",
+      "overlaps_parcel": "既存の土地区画と重なっています。",
+      "overlaps_path": "道路・線路などのパスと重なっています。",
+      "overlaps_water": "川や湖に掛かっています。",
+      "overlaps_quay_band": "埋立地の岸壁に掛かっています。",
+      "no_surface_frontage": "地表の道路に接していません。陸地整地は接する道路の路面の高さに揃えます。",
+      "too_narrow": "範囲が狭すぎて、岸壁の内側に造成できる部分がありません。",
+      "no_work": "地面がすでに目標の高さで、工事の必要がありません。",
+      "insufficient_funds": "資金が不足しているため発注できません。"
+    },
+    "confirm": "確定",
+    "confirming": "確定中...",
+    "cancel": "キャンセル",
+    "confirmFailed": "造成の発注に失敗しました。"
+  }
+}

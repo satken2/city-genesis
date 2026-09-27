@@ -43,6 +43,7 @@
     "prop_placement": "Colocación de props",
     "mashup_edit": "Distribución de anexos",
     "path_shape_editor": "Editor de forma de vía",
+    "grading": "Movimiento de tierras",
     "scenario_manager": "Gestor de escenarios",
     "scenario_metadata": "Información"
   },
@@ -94,6 +95,7 @@
     "menuTransport": "Transporte público",
     "menuStat": "Estadísticas",
     "menuLand": "Parcelas",
+    "menuGrading": "Movimiento de tierras",
     "menuDistrict": "Distritos",
     "menuRegulation": "Normativas",
     "menuCity": "Políticas",

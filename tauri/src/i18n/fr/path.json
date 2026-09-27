@@ -112,6 +112,7 @@
     "validationGrade": "Voie {{track}} : pente supérieure au maximum entre {{start}} et {{end}} m depuis le départ.",
     "validationPathCollision": "Les volumes occupés des routes ou voies se chevauchent. Vérifiez les volumes rouges.",
     "validationRiverCollision": "Le tracé traverse une rivière au niveau du sol. Ajustez la hauteur ou le tracé.",
+    "validationGradingSite": "Un tracé ne peut pas traverser un chantier de terrassement, même en viaduc ou en souterrain. Contournez la zone jusqu'à la fin des travaux.",
     "validationRejected": "Les conditions de construction ne sont pas remplies. Vérifiez le tracé et les paramètres.",
     "validationFailed": "Échec de la validation : {{reason}}",
     "validationUnavailable": "Impossible de valider sans configuration de connexion au serveur.",

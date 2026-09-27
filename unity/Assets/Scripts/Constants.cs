@@ -120,6 +120,8 @@ public static class Constants
     public const int VARIANT_SUBSTATION = 1062;
     public const int VARIANT_APARTMENT = 2001;
     public const int VARIANT_INTERCITY_GATEWAY_OUTSIDE = 1069;
+    public const int VARIANT_GRADING_LAND = 3006;
+    public const int VARIANT_GRADING_SHORE = 3007;
     public const int PATH_VARIANT_ROPEWAY = 601;
     public const int PATH_VARIANT_ROPEWAY_STATION = 602;
     public const int PATH_VARIANT_GRID = 1101;
@@ -259,6 +261,12 @@ public static class Constants
     public const float INFRA_TAP_HEIGHT_TOLERANCE = 3.0f;
     public const float RAIL_MIN_HEADWAY_MIN = 2.0f;
     public const float WATER_BRIDGE_MIN_CLEARANCE = 0.5f;
+    public const float QUAY_KEEP_WIDTH = 2.8f;
+    public const float QUAY_BAND_WIDTH = 5.6f;
+    public const float QUAY_PROBE_DISTANCE = 0.5f;
+    public const float SEA_GRADING_TOP = 3.0f;
+    public const float GRADING_MAX_AREA = 4000000.0f;
+    public const float GRADING_MIN_LAND_OVERLAP = 1.0f;
     public const int GROUND_COVER_GRASSLAND = 1;
     public const int GROUND_COVER_DESERT = 2;
     public const int GROUND_COVER_LUSH = 3;
@@ -383,6 +391,8 @@ public static class Constants
     };
 
     public static readonly int[] OFF_MARKET_GOODS_TYPES = new int[] { GOODS_INFRASTRUCTURE, GOODS_TRANSIT };
+
+    public static readonly int[] GRADING_VARIANTS = new int[] { VARIANT_GRADING_LAND, VARIANT_GRADING_SHORE };
 
     public static readonly int[] ALL_ROUTES = new int[] { ROUTE_PEDESTRIAN, ROUTE_AUTOMOBILE };
 

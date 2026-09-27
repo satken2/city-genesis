@@ -808,7 +808,7 @@ X方向（辺の長さ方向）については、建物の壁と同じ敷き詰�
 | **`GableRoofBuilder.cs`**                   | **static クラス**。切妻屋根メッシュ（厚みのある勾配面2枚＋妻壁）を生成して返す。屋根面と妻壁でサブメッシュ・マテリアルを分ける（[[F1_モジュラー建物のメッシュ生成]] §3）。 |
 | **`ShedRoofBuilder.cs`**                    | **static クラス**。片流れ屋根メッシュ（薄い勾配面1枚＋妻壁）を生成して返す。サブメッシュ・マテリアルの分け方は切妻屋根と同じ（[[F1_モジュラー建物のメッシュ生成]] §4）。 |
 | **`PreBuiltBuildingMeshBuilder.cs`**        | `IBuildingMeshGenerator`。既成パーツ組み立て（[[F3_既成建物のメッシュ生成]]）。                                                                         |
-| **`PortBuildingMeshBuilder.cs`**            | `IBuildingMeshGenerator`。海岸線で底面ポリゴンをカットし、厚みのある岸壁スラブを押し出して塔屋・荷役クレーンを配置する（[[F4_港湾岸壁のメッシュ生成]]）。                                                  |
+| **`PortBuildingMeshBuilder.cs`**            | `IBuildingMeshGenerator`。海岸線で底面ポリゴンをカットし、厚みのある岸壁スラブを押し出して塔屋・荷役クレーンを配置する。埋立地の岸壁に面する港はスラブを作らず、その岸壁に沿ってクレーンを並べる（[[F4_港湾岸壁のメッシュ生成]]）。                                                  |
 | **`MashupBuildingMeshBuilder.cs`**          | `IBuildingMeshGenerator`。`sub_buildings` の配置計画に従い、複数のサブ建物を既成パーツと同じ積み上げ規則で配置する（[[F6_マッシュアップ建物のメッシュ生成]]）。                                        |
 | **`RailYardBuildingMeshBuilder.cs`**        | `IBuildingMeshGenerator`。フットプリントと接続端子ノード位置から並行線路・集約曲線・架線・検修庫をプロシージャルに配置する（[[F9_車両基地のメッシュ生成]]）。 |
 | **`ConstructingBuildingMeshBuilder.cs`**    | `IBuildingMeshGenerator`。工事中専用の「工事現場」メッシュ（土マウンド + 足場リング + クレーン）を生成する（[[F5_工事中建物のメッシュ生成]]）。model_type 分岐より先に status で分岐する。 |

@@ -43,6 +43,7 @@ public class IpcStateCoordinator : MonoBehaviour
             IpcClient.Instance.OnEditPathFinishTopologyEdit += HandleEditPathFinishTopologyEdit;
             IpcClient.Instance.OnBuildingConstructionPickSource += HandleBuildingConstructionPickSource;
             IpcClient.Instance.OnEditRoadCancel += HandleEditRoadCancel;
+            IpcClient.Instance.OnEditGradingFinish += HandleEditGradingFinish;
         }
     }
 
@@ -69,6 +70,7 @@ public class IpcStateCoordinator : MonoBehaviour
             IpcClient.Instance.OnEditPathFinishTopologyEdit -= HandleEditPathFinishTopologyEdit;
             IpcClient.Instance.OnBuildingConstructionPickSource -= HandleBuildingConstructionPickSource;
             IpcClient.Instance.OnEditRoadCancel -= HandleEditRoadCancel;
+            IpcClient.Instance.OnEditGradingFinish -= HandleEditGradingFinish;
         }
     }
 
@@ -151,6 +153,13 @@ public class IpcStateCoordinator : MonoBehaviour
             FindAnyObjectByType<StationPlanManager>()?.FinishPlacement();
         }
 
+        // 造成範囲の作図から別モードへ直接遷移した場合にも、作図中のポリゴンとオーバーレイを片付ける
+        // (STATE_NORMAL 経由なら ApplyStateNormal 内でも終了するが冪等なので問題ない)。
+        if (state != "STATE_EDIT_GRADING")
+        {
+            FindAnyObjectByType<GradingAreaEditManager>()?.FinishEditMode();
+        }
+
         // 一方通行線路の進行方向矢印は道路敷設モードでのみ表示する
         // （既存線路に向きの対を作って接続する際の編集支援表示のため）。
         TrackDirectionArrows.SetVisible(state == "STATE_EDIT_PATH" || state == "STATE_EDIT_STATION");
@@ -193,6 +202,11 @@ public class IpcStateCoordinator : MonoBehaviour
 
             case "STATE_EDIT_RESOURCE":
                 ApplyStateEditResource(ipcParams);
+                WindowUtil.BringToForeground();
+                break;
+
+            case "STATE_EDIT_GRADING":
+                ApplyStateEditGrading(ipcParams);
                 WindowUtil.BringToForeground();
                 break;
 
@@ -320,6 +334,13 @@ public class IpcStateCoordinator : MonoBehaviour
         if (resourceAreaEditManager != null)
         {
             resourceAreaEditManager.FinishEditMode();
+        }
+
+        // 造成範囲の作図を終了
+        var gradingAreaEditManager = FindAnyObjectByType<GradingAreaEditManager>();
+        if (gradingAreaEditManager != null)
+        {
+            gradingAreaEditManager.FinishEditMode();
         }
 
         // 公共交通の路線設置を終了
@@ -912,6 +933,56 @@ public class IpcStateCoordinator : MonoBehaviour
         resourceAreaEditManager.InitializeCreateMode();
 
         Debug.Log("IpcStateCoordinator: 資源エリア編集モードを適用しました");
+    }
+
+    /// <summary>
+    /// STATE_EDIT_GRADING: 造成範囲の作図モード(新規作成)。params は無い。
+    /// 陸地整地か埋立かと目標の高さは、描いた範囲からバックエンドが決める。
+    /// Unity は範囲を edit_grading:update_shape で送るだけで、見積もりと発注は UI が行う。
+    /// </summary>
+    private void ApplyStateEditGrading(Dictionary<string, object> ipcParams)
+    {
+        if (InputSystemManager.Instance != null)
+        {
+            InputSystemManager.Instance.SetModePreset(InputModePreset.EDIT_GRADING);
+        }
+
+        // VisualMode の適用は IpcViewCoordinator.SyncFromState(ステート別の表示プリセット)が行う。
+
+        var gradingAreaEditManager = FindAnyObjectByType<GradingAreaEditManager>();
+        if (gradingAreaEditManager == null)
+        {
+            var go = new GameObject("GradingAreaEditManager");
+            gradingAreaEditManager = go.AddComponent<GradingAreaEditManager>();
+        }
+        gradingAreaEditManager.InitializeCreateMode();
+
+        Debug.Log("IpcStateCoordinator: 造成範囲の作図モードを適用しました");
+    }
+
+    /// <summary>
+    /// edit_grading:finish: 造成の発注が確定した(UIがバックエンドへの送信に成功した)。
+    /// 作図の終了・通常モードへの復帰・データ再取得をこの順に1つのハンドラで行う
+    /// (edit_path:finish_topology_edit と同じ理由)。発注の時点では地形も海岸線も変わらないので、
+    /// 海岸線は取り直さない。作図中でなければ(別の編集モードへ移った後に届いた場合)
+    /// そのモードを巻き込まないよう、再取得だけを行う。
+    /// UI は確定の後に造成ウィンドウを閉じるので、Rust のウィンドウを閉じる処理(× と同じ経路)から
+    /// 冗長な STATE_NORMAL が続けて届く。ここで既に通常ステートへ戻しており、STATE_NORMAL の処理は
+    /// 表示と入力を適用し直すだけで差分リロードを取り消さないので害は無い。
+    /// </summary>
+    private void HandleEditGradingFinish()
+    {
+        var gradingAreaEditManager = FindAnyObjectByType<GradingAreaEditManager>();
+        if (gradingAreaEditManager != null && gradingAreaEditManager.IsEditMode)
+        {
+            gradingAreaEditManager.FinishEditMode();
+            ReturnToNormalState();
+        }
+
+        // 再取得は最後に開始する(通常モードへの復帰の後に置き、このハンドラの中で再取得と状態遷移が
+        // 前後しないようにする)。差分リロードを取り消すのは、新しい再取得・カメラのセル移動・セッションの
+        // 切り替えだけで、後から届く STATE_NORMAL は取り消さない。
+        CellDataLoader.Instance?.ReloadAllData();
     }
 
     /// <summary>

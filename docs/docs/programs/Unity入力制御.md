@@ -20,7 +20,7 @@ Rayが命中したオブジェクトはTagまたはコンポーネントの有�
 | `PARCEL` | 2 | Tag `ParcelObject` |
 | `PATH` | 3 | Tag `PathObject` |
 | `NODE` | 4 | Tag `PathNode` |
-| `TERRAIN` | 5 | Tag `SeaObject`、`Terrain` コンポーネントの有無、または都市外の背景地形のチャンク(`TerrainManager.IsBackgroundTerrain`) |
+| `TERRAIN` | 5 | Tag `SeaObject`、`Terrain` コンポーネントの有無、都市外の背景地形のチャンク(`TerrainManager.IsBackgroundTerrain`)、または埋立地の岸壁(`ReclaimedLandManager.IsQuayObject`) |
 | `ZONE` | 6 | Tag `ZoneObject` |
 | `PROP` | 7 | 地形プロップ（個体ごとのColliderを持たないためレイキャストでは判定しない。配置は地形クリック、ブルドーザの削除は `RemovalManager` が画面レイで `PropManager.TryPick` のAABB判定を行い、この値は削除済み集合のキーにだけ使う） |
 
@@ -29,6 +29,8 @@ Rayが命中したオブジェクトはTagまたはコンポーネントの有�
 海面は `TerrainManager` が管理する地形タイルではなく、`Terrain` コンポーネントを持たない板ポリゴンである。そのため `SeaObject` タグで `TERRAIN` に分類し、`InputHandler` の初期化時に海面へ `TerrainInputHandler` を付与する（既に付いていれば付与しない）。これにより**海面のクリック・ホバーは地形と完全に同じ経路**を流れ、地形と同じモード別の挙動になる。土地区画作成（点選択）も海の上で成立し、そこに作られた区画は海上区画（`PARCEL_WATER`）になる（[土地形状](../geometries/B_土地形状.md) B.5）。
 
 都市外の背景地形（[地形形状](../geometries/D_地形形状.md)「都市外の背景地形」）のチャンクも `Terrain` コンポーネントを持たない板ポリゴンである。`TerrainManager` がチャンクの生成時に `TerrainInputHandler` を付与し、`TerrainManager.IsBackgroundTerrain` で `TERRAIN` に分類する。カーソル位置（`posX` / `posZ`）も地形タイルと同じく背景の起伏の上で解決し、ホバーも地形と同じ経路を流れる。テンプレートモードで都市外に道路・線路・建物を置く操作と、都市外のコンテナ貨物PFに国際貨物輸送路線の停留所を置く操作がこの経路を通る。
+
+埋立地の岸壁（帯を覆うコンクリートの天端と、外周の垂直の面。[地形形状](../geometries/D_地形形状.md) D.17）も `Terrain` コンポーネントを持たないメッシュで、背景地形のチャンクと同じ構成（Ground レイヤー、`MeshCollider`、`TerrainInputHandler`。タグは付けない）で作られる。天端の上ではレイが最初に当たるのは岸壁のコライダーなので、これを地形として扱わないとカーソルのレイが天端を越えて海底に当たり、指している位置が大きくずれる。背景地形と岸壁の判定は `InputHandler.IsTerrainSurfaceObject` の1つにまとめ、カーソル位置の解決（`UpdateTerrainPosition`）・地形ホバー（`HandleTerrainHover`）・タイプ判定（`GetObjectType`）の3か所がこれを使う。岸壁の上のクリック・ホバーは地形と同じモード別の挙動になり、カーソルの高さ（`Utils.GetGroundHeight`）は天端の高さになる。
 
 ### 2.2. 入力モード
 
@@ -58,6 +60,7 @@ Rayが命中したオブジェクトはTagまたはコンポーネントの有�
 | `MODE_PICK_BUILDING` | 20 | 既存建物のコピー建設・経済主体作成の入居先の選択。建物だけをクリック可能にする |
 | `MODE_EDIT_STATION` | 21 | 駅パッケージ配置モード（軌道建設パネルの簡易モードの駅タブ）。TERRAIN に適用する |
 | `MODE_EDIT_ROAD_MEMBERS` | 22 | 道路（名前付き道路）の区間編集モード。街路・高速道路の区間のクリックをUIへ通知する |
+| `MODE_EDIT_GRADING` | 23 | 造成（整地・埋立）の範囲の作図モード。TERRAIN に適用し、資源エリアの作図と同じ地形クリック・頂点ドラッグで範囲を描く。共通吸着を通さない（§10） |
 
 接続点編集（`STATE_EDIT_CONNECTOR`）の端子マーカー（逆四角錐）はノード実体の上空に浮くオーバーレイで、ノードのコライダーとは位置がずれる。そのためノードへのレイキャストではなく TERRAIN の `MODE_EDIT_CONNECTOR` の地形ドラッグとして受け、`ConnectorEditManager` がスクリーン座標のマーカー当たり判定で掴む対象を決める（NODE は `MODE_NONE` で貫通させる）。
 
@@ -87,6 +90,7 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 | `PATH_SPLIT` | PATH_SPLIT | PATH_SPLIT | NONE | NONE | NONE | NONE |
 | `PICK_BUILDING` | NONE | NONE | NONE | NONE | PICK_BUILDING | NONE |
 | `ROAD_MEMBER_EDIT` | NONE | EDIT_ROAD_MEMBERS | NONE | NONE | NONE | NONE |
+| `EDIT_GRADING` | EDIT_GRADING | NONE | NONE | NONE | NONE | NONE |
 
 表の「—」はプリセットで明示的に設定されないオブジェクトタイプを示す（前回の設定が維持される）。
 
@@ -95,6 +99,8 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 `PROP_PLACEMENT` は `STATE_EDIT_PROP`（プロップ配置）で適用され、地形クリックでプロップを配置する。`IpcStateCoordinator.ApplyStateEditProp` が `PropPlacementManager` を動的生成し、個別配置（`edit_prop:update_instances`）／範囲散布（`edit_prop:update_shape`）のモードごとに処理する。詳細は `IPC連携の整理.md` の `STATE_EDIT_PROP` を参照。
 
 `ROAD_MEMBER_EDIT` は `STATE_EDIT_ROAD_MEMBERS`（道路の区間編集）で適用され、PATH だけを `MODE_EDIT_ROAD_MEMBERS` にして他のオブジェクトタイプはクリックを無効化する（パス結合の相手選択と同型）。`IpcStateCoordinator.ApplyStateEditRoadMembers` が `RoadMemberEditManager` を生成して開始し、区間のクリックは `RoadMemberEditManager.OnPathClicked` が `edit_road:toggle_path` として UI へ送る。所属の付け外しは UI が API で行うので、Unity は所属を書き換えない。詳細は[道路の詳細と道路名の区間編集モード](道路の詳細と道路名.md#区間編集モード)を参照。
+
+`EDIT_GRADING` は `STATE_EDIT_GRADING`（造成範囲の作図）で適用され、TERRAIN だけを `MODE_EDIT_GRADING` にして他のオブジェクトタイプを貫通させる（資源エリアの作図 `EDIT_RESOURCE` と同型）。区画・道路・建物の上でも、その下の地面（埋立地の岸壁の天端を含む）に頂点を置ける。`IpcStateCoordinator.ApplyStateEditGrading` が `GradingAreaEditManager`（任意ポリゴン編集の共通基底 `PolygonAreaEditManager` の派生。§8）を生成し、Placing から作図を始める。範囲の変化は `edit_grading:update_shape` でUIへ送るだけで、見積もりと発注はUIとバックエンドが行う。資源エリアの作図と違い、頂点は吸着せず（§10）、Esc でもモードから抜けない（`CancelOnEscape=false`）。共通基底の Esc は入力プリセットを `ALL_NORMAL` に戻すだけでステート遷移もUIへの通知も伴わず、ウィンドウが開いたまま編集用の表示も残るためである。抜けるのはウィンドウを閉じたとき（Rust が `STATE_NORMAL` を送る）と確定後の `edit_grading:finish` だけ（[IPC連携の整理](IPC連携の整理.md)）。
 
 ## 3. 入力フロー
 
@@ -163,6 +169,7 @@ UI上にポインタがある間・カメラドラッグ中・フライ/撮影�
 | `MODE_PARCEL_CREATION_POINT` | 土地区画エディタに点を通知 | — | 配置マーカー表示 |
 | `MODE_PARCEL_SHAPE_EDIT` | `ParcelShapeEditManager.OnTerrainLeftClick` に委譲 | 同右 | 頂点ホバー判定 |
 | `MODE_EDIT_RESOURCE` | `ResourceAreaEditManager.OnTerrainLeftClick` に委譲 | 同右 | 同 `OnTerrainHover` に委譲 |
+| `MODE_EDIT_GRADING` | `GradingAreaEditManager.OnTerrainLeftClick` に委譲（Placing=頂点を末尾に追加／Editing=頂点の選択・辺上への頂点挿入）。共通吸着なし | 同右（Placing=頂点3以上で形を閉じて Editing へ／Editing=頂点削除。3頂点は残す）。共通吸着なし | 同 `OnTerrainHover` に委譲（ホバー判定は毎フレームの更新で行う）。共通吸着なし |
 | `MODE_EDIT_TRANSIT` | `TransitPlanManager.OnTerrainLeftClick` に委譲 | 同右 | 同 `OnTerrainHover` に委譲 |
 | `MODE_EDIT_PROP` | `PropPlacementManager.OnTerrainLeftClick` に委譲（個別=1個配置／範囲=頂点追加） | 同右（個別=直近取消／範囲=直近頂点取消） | 同 `OnTerrainHover` に委譲（個別=ゴースト追従。中ボタン回転中は位置を固定） |
 | `MODE_REMOVE` | 何もしない（地形に埋もれた空き区画は `InputHandler` の地形→区画置換で区画へ配送される。地形プロップは配送前に `InputHandler` が判定する） | — | — |
@@ -240,6 +247,7 @@ UI上にポインタがある間・カメラドラッグ中・フライ/撮影�
 | `MODE_PARCEL_CREATION_POINT` | `ParcelEditorManager` | 土地区画の回転操作 |
 | `MODE_PARCEL_SHAPE_EDIT` | `ParcelShapeEditManager` | 土地区画頂点のドラッグ移動 |
 | `MODE_EDIT_RESOURCE` | `ResourceAreaEditManager` | 資源エリア頂点のドラッグ移動 |
+| `MODE_EDIT_GRADING` | `GradingAreaEditManager` | 造成範囲の頂点のドラッグ移動（Editing のみ。吸着なし） |
 | `MODE_EDIT_TRANSIT` | `TransitPlanManager` | 停留所・経由点の移動、区間のドラッグでの経由点の挿入 |
 | `MODE_EDIT_CONNECTOR` | `ConnectorEditManager` | 接続端子マーカーのドラッグ移動（XZは施設が立地する土地区画の内側へクランプ） |
 
@@ -247,6 +255,8 @@ UI上にポインタがある間・カメラドラッグ中・フライ/撮影�
 制御点上でなければ地形ドラッグとして道路のポイント移動を開始する。
 
 地形コライダー（Terrain／海面）にヒットした通常のケースでは、ドラッグはオブジェクトクリック候補（type=TERRAIN）から `StartDrag()` → `UpdateDrag()` と流れ、各マネージャの掴み開始処理（`StartDrag`）は呼ばれずに `ProcessMouseDrag(worldPos)` だけが毎フレーム届く。`InputHandler.StartTerrainDrag()` はレイキャストが何にもヒットしなかった場合のフォールバックでしかない。そのため地形ドラッグを受けるマネージャ（`RoadPlanManager`・`ConnectorEditManager`・`TransitPlanManager`）は、`ProcessMouseDrag` の初回呼び出しで現在のマウス位置から掴む対象を決める（遅延グラブ）。掴みたい対象の上でカメラドラッグが先に始まらないよう、`CameraController.IsMouseOverEditHandle` にもその対象の当たり判定を加える。
+
+造成範囲の作図（`MODE_EDIT_GRADING`）は遅延グラブを使わず、`InputHandler.StartDrag()` がドラッグ開始の時点でマウスが頂点の上か（`GradingAreaEditManager.IsMouseOverVertex`。Editing のときだけ真）を調べ、頂点の上なら `GradingAreaEditManager.StartDrag` で掴む。造成範囲の頂点は `CameraController.IsMouseOverEditHandle` の判定にも含まれ、頂点のドラッグがカメラのパンに奪われない。
 
 ### 5.4. カメラドラッグ
 
@@ -332,7 +342,7 @@ Unity側の実装で守る点は次の3つ。
 
 `ParcelShapeEditManager` は既存の土地区画のポリゴン頂点をドラッグで編集する機能を提供する。
 頂点編集そのもの（ヒット判定・ドラッグ・辺への頂点挿入・削除・オーバーレイ描画）は任意ポリゴン編集の共通基底
-`PolygonAreaEditManager`（天然資源エリアの作成と共用）にあり、`ParcelShapeEditManager` は保存済みポリゴンを読み込んで
+`PolygonAreaEditManager`（天然資源エリアの作成・造成範囲の作図と共用）にあり、`ParcelShapeEditManager` は保存済みポリゴンを読み込んで
 編集フェーズから始めることと、`edit_parcel:update_shape` への通知だけを担う。
 `InputHandler` からのドラッグイベントを以下のように処理する。
 
@@ -358,6 +368,7 @@ Unity側の実装で守る点は次の3つ。
 | `STATE_EDIT_CONNECTOR` | `CONNECTOR_EDIT` | `ConnectorEditManager.EnterEditMode`（接続端子ノードの強調＋ドラッグ有効化） |
 | `STATE_EDIT_ROAD_MEMBERS` | `ROAD_MEMBER_EDIT` | `RoadMemberEditManager.Begin`（所属区間を道路色の帯で表示。詳細パネルを操作し続けるため Unity ウィンドウは最前面化しない） |
 | `STATE_EDIT_RESOURCE` | `EDIT_RESOURCE` | `ResourceAreaEditManager` の初期化（天然資源エリアの新規作成） |
+| `STATE_EDIT_GRADING` | `EDIT_GRADING` | `GradingAreaEditManager` を動的生成して `InitializeCreateMode`（造成範囲の作図。Placing から開始。再送されると描いた範囲を捨てて描き直す） |
 | `STATE_EDIT_TRANSIT` | `TRANSIT_CONSTRUCTION` | `TransitPlanManager` を動的生成して `InitializeTransitPlacement`（`points` があれば経路編集として Editing から開始） |
 | `STATE_EDIT_STATION` | `STATION_PLACEMENT` | `StationPlanManager` を動的生成（駅パッケージ配置） |
 | `STATE_MERGE_PATH` / `STATE_SPLIT_PATH` | `PATH_MERGE` / `PATH_SPLIT` | `PathTopologyEditManager.BeginMergeMode` / `BeginSplitMode`（Unity ウィンドウは最前面化しない） |
@@ -372,7 +383,7 @@ Unity側の実装で守る点は次の3つ。
 
 | ステート（操作） | 強制する表示 |
 |---|---|
-| `STATE_EDIT_PATH` / `STATE_EDIT_STATION` / `STATE_MERGE_PATH` / `STATE_SPLIT_PATH` / `STATE_EDIT_ROAD_MEMBERS` / `STATE_EDIT_BUILDING`（道路・線路・インフラ・建物の設置、道路の区間編集） | 区画（建物建設は建設可能な区画の色分け、他は境界線）・地区・等高線を表示、計画中の道路と建物を表示、プロップを非表示 |
+| `STATE_EDIT_PATH` / `STATE_EDIT_STATION` / `STATE_MERGE_PATH` / `STATE_SPLIT_PATH` / `STATE_EDIT_ROAD_MEMBERS` / `STATE_EDIT_GRADING` / `STATE_EDIT_BUILDING`（道路・線路・インフラ・建物の設置、道路の区間編集、造成範囲の作図） | 区画（建物建設は建設可能な区画の色分け、他は境界線）・地区・等高線を表示、計画中の道路と建物を表示、プロップを非表示 |
 | `STATE_EDIT_PARCEL`（土地区画編集） | 区画・地区を表示、計画中の道路と建物を表示 |
 | `STATE_EDIT_ZONE`（地区編集） | 区画・地区を表示、道路のみ地区色分け、計画中表示と公共施設ハイライトはOFF |
 | `STATE_EDIT_TRANSIT` ＋ プリセット `transit`（公共交通の一覧・新設） | 公共交通路線を全種別表示、計画中の道路と建物を表示 |
@@ -410,7 +421,7 @@ Unity側の実装で守る点は次の3つ。
 `RoadPlanManager` は TerrainInputHandler の共通スナップに加えて、直角スナップを独自に実装している。
 直角スナップは、ノードまたは道路セグメント上に配置されたポイントから既存の道路に直角に交わる方向へのスナップを提供する。
 
-共通吸着は `TerrainInputHandler.onClick/onRightClick/onHover` の冒頭で全モードに掛かる（既定半径10m・バリアントフィルタ無し）が、次のモードは通さない。道路・線路の建設（`MODE_ROAD_CONSTRUCTION`）は `RoadPlanManager` が自前の吸着半径 `snapThreshold` と網互換フィルタで一度だけ吸着する（共通吸着も掛けると二重吸着になり、`snapThreshold` を変えても吸着範囲が変わらない）。接続点編集（`MODE_EDIT_CONNECTOR`）はドラッグ中の端子が自分の旧位置へ吸着し続けるのを防ぐため、パス分割（`MODE_PATH_SPLIT`）は端点へ引き寄せられると常に「端点に近すぎる」分割になるため、駅パッケージ配置（`MODE_EDIT_STATION`）とプロップ配置（`MODE_EDIT_PROP`）は任意の地点に置くため、それぞれ通さない。
+共通吸着は `TerrainInputHandler.onClick/onRightClick/onHover` の冒頭で全モードに掛かる（既定半径10m・バリアントフィルタ無し）が、次のモードは通さない。道路・線路の建設（`MODE_ROAD_CONSTRUCTION`）は `RoadPlanManager` が自前の吸着半径 `snapThreshold` と網互換フィルタで一度だけ吸着する（共通吸着も掛けると二重吸着になり、`snapThreshold` を変えても吸着範囲が変わらない）。接続点編集（`MODE_EDIT_CONNECTOR`）はドラッグ中の端子が自分の旧位置へ吸着し続けるのを防ぐため、パス分割（`MODE_PATH_SPLIT`）は端点へ引き寄せられると常に「端点に近すぎる」分割になるため、駅パッケージ配置（`MODE_EDIT_STATION`）とプロップ配置（`MODE_EDIT_PROP`）は任意の地点に置くため、土地区画の形状編集（`MODE_PARCEL_SHAPE_EDIT`）と造成範囲の作図（`MODE_EDIT_GRADING`）は頂点を吸着なしで置くため（§12）、それぞれ通さない。造成範囲の頂点が道路の中心線へ吸い付くと範囲がパスに掛かり、発注で必ず拒否される。
 
 吸着で引き継ぐ相対高さは、バックエンドが保存している相対Yから取る（ノード＝ノードの相対高さ、パス区間＝アンカー相対YのXZ最近傍区間での線形補間、建設中の端点＝その端点の相対Y。保存設計標高のある線路だけは基準線の絶対標高から地形を引いて求める）。描画用点列の絶対Yから逆算してはならない。描画点列には地形起伏・描画オフセット・高さ源の違いによる残差が乗るため、地面のパスへ吸着しただけで端点が地下／空中扱いになり、見た目は繋がっているのにインフラのT字タップがバックエンドの高さ判定で成立しない「幽霊接続」になる。
 
@@ -522,11 +533,13 @@ Unity側の実装で守る点は次の3つ。
   隣の区画との間に使えないスリバーが残る）。
 ### 土地区画の形状編集
 
-既存区画の形状編集は`ParcelShapeEditManager`が保存済みポリゴンを読み込み、共通基底`PolygonAreaEditManager`が頂点ドラッグ・辺クリックでの頂点挿入・右クリックでの頂点削除を扱う。この共通基底は天然資源エリアの編集にも使う。
+既存区画の形状編集は`ParcelShapeEditManager`が保存済みポリゴンを読み込み、共通基底`PolygonAreaEditManager`が頂点ドラッグ・辺クリックでの頂点挿入・右クリックでの頂点削除を扱う。この共通基底は天然資源エリアの作成と造成範囲の作図（`GradingAreaEditManager`）にも使う。
 
 頂点ドラッグのXZは、道路編集と同じく`InputHandler`がカメラレイと地形の交点から求めた`worldPos`を使う（地形にヒットしなければY=0平面との交点）。`Utils.GetGroundHeight`で高さを合わせる。固定されたカメラ奥行きで逆投影してからYだけ地面に戻すと、斜め視点でカーソルと頂点がずれるため、この変換は行わない。
 
 土地区画の形状編集は、頂点移動・辺への頂点挿入とも吸着なし固定。道路・ノード・グリッドなどへの吸着は行わず、Ctrlメニューなどで吸着を切り替える操作も持たない。`TerrainInputHandler`はこのモードのクリック・右クリック・ホバーで共通吸着を省略し、`ParcelShapeEditManager`は`UseDragSnapping=false`でドラッグ時も吸着を省略する。道路編集の共有吸着設定は書き換えず、天然資源エリア編集では共通吸着を使う。
+
+造成範囲の作図も同じく吸着なし固定で、`TerrainInputHandler`は`MODE_EDIT_GRADING`のクリック・右クリック・ホバーで共通吸着を省略し、`GradingAreaEditManager`は`UseDragSnapping=false`でドラッグ時も省略する。ホバーで吸着した座標をカーソル位置へ書き戻すと後続のドラッグにも混入するため、ドラッグ側だけで無効にしても足りない。
 
 ## 補正済み線路への標高吸着
 

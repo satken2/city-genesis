@@ -115,6 +115,8 @@ export const VARIANT_SOLAR_PLANT: number = 1054;
 export const VARIANT_SUBSTATION: number = 1062;
 export const VARIANT_APARTMENT: number = 2001;
 export const VARIANT_INTERCITY_GATEWAY_OUTSIDE: number = 1069;
+export const VARIANT_GRADING_LAND: number = 3006;
+export const VARIANT_GRADING_SHORE: number = 3007;
 export const PATH_VARIANT_ROPEWAY: number = 601;
 export const PATH_VARIANT_ROPEWAY_STATION: number = 602;
 export const PATH_VARIANT_GRID: number = 1101;
@@ -254,6 +256,12 @@ export const PATH_TANGENT_ALIGN_MAX_ANGLE_DEG: number = 20.0;
 export const INFRA_TAP_HEIGHT_TOLERANCE: number = 3.0;
 export const RAIL_MIN_HEADWAY_MIN: number = 2.0;
 export const WATER_BRIDGE_MIN_CLEARANCE: number = 0.5;
+export const QUAY_KEEP_WIDTH: number = 2.8;
+export const QUAY_BAND_WIDTH: number = 5.6;
+export const QUAY_PROBE_DISTANCE: number = 0.5;
+export const SEA_GRADING_TOP: number = 3.0;
+export const GRADING_MAX_AREA: number = 4000000.0;
+export const GRADING_MIN_LAND_OVERLAP: number = 1.0;
 export const GROUND_COVER_GRASSLAND: number = 1;
 export const GROUND_COVER_DESERT: number = 2;
 export const GROUND_COVER_LUSH: number = 3;
@@ -376,6 +384,8 @@ export const STATUS_NAME_MAP: Record<number, string> = {
 };
 
 export const OFF_MARKET_GOODS_TYPES: number[] = [4, 5];
+
+export const GRADING_VARIANTS: number[] = [3006, 3007];
 
 export const ALL_ROUTES: number[] = [0, 1];
 

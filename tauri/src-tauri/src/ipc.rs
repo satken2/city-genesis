@@ -586,6 +586,9 @@ pub async fn handle_incoming_message(
         "edit_resource:update_shape" => {
             let _ = app.emit("edit_resource:update_shape", envelope.payload);
         }
+        "edit_grading:update_shape" => {
+            let _ = app.emit("edit_grading:update_shape", envelope.payload);
+        }
         "edit_transit:update_points" => {
             let _ = app.emit("edit_transit:update_points", envelope.payload);
         }

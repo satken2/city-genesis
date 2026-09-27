@@ -15,6 +15,7 @@
 | `road` / `intersection` | 名前付き道路の詳細、インターチェンジ詳細 |
 | `transit` | 公共交通の管理ウィンドウ、路線詳細、路線新設/経路編集、収支見込み |
 | `resource` / `prop` / `terrain` | 天然資源、プロップ配置、地形エディタ(2D `TerrainEditorCanvas`・3D `Terrain3DPreviewCanvas`) |
+| `grading` | 造成(整地・埋立)の範囲作図ウィンドウ、造成工事の建設工事タブ、造成バリアントの判定と見積もりの型(`grading.ts`) |
 | `map` | 2D都市マップ。`CityMapCanvas`は共通地図部品で、局所地図が要るパネルは新規実装せずこれを埋め込む |
 | `budget` / `tax` / `regulation` / `statistics` / `achievement` | 市政系ウィンドウ(予算・公共施設、税、規制、統計、達成目標) |
 | `construction` / `diagnosis` / `notification` | 建設プロジェクト、診断、通知トースト+L1通知一覧 |
@@ -59,7 +60,7 @@
 | `AgentLink` / `CitizenLink` / `PathLink` / `ZoneLink` | 名前をクリックで詳細を開く。エンティティ名を生テキストで出さない |
 | `InfoHeader` / `EditableLabel` | 見出しとインライン改名。改名可否は呼び出し側が決める |
 | `ConfirmDialogWindow` | 直接開かず`requestConfirm()`経由 |
-| `ConstructionInfoCard` | 建設コスト・期間・需給見通し・資金・線形の表示。確定可否は`utils/constructionFunding`と同じ判定 |
+| `ConstructionInfoCard` | 建設コスト・期間・需給見通し・資金・線形の表示。確定可否は`utils/constructionFunding`と同じ判定。ドメイン固有の数量は`leadingRows`で表の先頭に足す(造成の種類・切盛土量など) |
 | `TagPicker` / `TagSelect` / `TagRow` | 建設プロジェクトのタグ。現在値は詳細レスポンスに載らず`GET /tags/object`で引く。変更後は`tags:changed`をemit |
 | `Meter` / `DonutGauge` | 0〜1のメーター。`polarity="negative"`で悪さ指標。1超は全箇所一律に頭打ち+赤紫の発光 |
 | `FiscalSankey` | 財政Sankey。歳入項目の定義と支出カテゴリ色はここに置き、予算ウィンドウも共用 |
@@ -92,10 +93,15 @@
 - 公共施設(`agent/PublicFacilityPanel`): 放棄中は解除以外を無効化。`status_from`の見出しは`resolveStatusSinceLabel`で選ぶ(再開でも更新されるので一律「竣工日」にしない)。
 - パス建設(`path/`): `path_build`と`infra_build`は同じ`PathConstructionPanel`を`category` propで使い分ける。曲線/直線・吸着はUnity側で、`curveMode`の書き込み元は`edit_path:update_shape`の`is_curved`だけ。
   - 確定は`usePathConstruction.canConfirm`(Unityの`can_confirm`∧全線`/paths/validate`。先頭1本だけの検証は禁止)。成功のたびに`notifyRoadsChanged`。
+  - 確定欄は`confirmMessages`を並べる。区間ごとの形状の違反(ノード間距離・曲線半径・勾配)は形状編集パネルの吹き出しが区間を示すので「形状にエラーがあります」の1行に畳み、ほかの拒否理由(干渉・川・海湖・岸壁の天端・工事中の造成)は`pathValidation.describePathValidation`の文言で出す。`/paths/validate`に`colliding_*`が増えたらそこへ文言を足す(足さないと汎用の「敷設条件を満たしていません」になる)。
   - 複線はUIが平行な単線群へ展開するが、`railBuild.isSingleRailPathVariant`(LRT専用軌道・人員搬送)は`DIR_BOTH`の1本で送る。
   - 駅の簡易建設(`useStationConstruction`)は`usePathConstruction`を使わず、幾何はUnity(`StationPlanManager`)の`placement_state`をそのまま表示する。
 - 結合・分割(`path/PathTopologyEditPanel`): アンマウントで必ず`sendEndPathTopologyEdit`。確定成功は`sendFinishPathTopologyEdit`を1発だけ(リロードと`STATE_NORMAL`を分けると差分リロードに割り込んで形状が壊れる)。
 - 2D形状編集(`path/PathShapeEditorPanel`): 形状の真実源はUnity(`RoadPlanManager`)。操作結果はドラッグ終了時に1回送る。地図は`initialBounds`を決めてからマウントする。
+- 造成(`grading/`): 範囲の形の正はUnity(`edit_grading:update_shape`の`{polygon, finalized}`)。見積もり(`POST /grading/preview`)は`finalized`かつ3点以上のときだけ、デバウンスと古い要求の中断つきで取る(Unityは頂点ドラッグ中に毎フレーム送る)。
+  - 確定可否は今の範囲に対する応答の`valid`∧`affordable`。確定は`POST /grading`→主体の詳細を開く→`sendEditGradingFinish`→閉じる。finishの中でUnityが通常ステートへ戻して再取得するので、パネル自身は`STATE_NORMAL`を送らない(閉じるときにRustが×と同じ経路で`STATE_NORMAL`を送るが、冗長なだけで再取得は妨げない)。キャンセルは`STATE_EDIT_GRADING`の再送で描き直す。
+  - 発注が拒否されたら(400/409)見積もりを取り直し、新しい応答が来るまで確定を押せなくする(拒否の理由と資金は見積もりの表示で見せる)。
+  - 造成工事の主体の判定は`isGradingVariant`(TYPE_OPEN_SPACEの広場とtypeが同じ)。建設工事タブは`GET /grading/{agent_id}`(プレビューは自分の区画に当たって拒否される)、公共施設パネルは取り壊しと編集を出さない、建物建設の一覧から外す。
 - 制限速度: 送信値と応答の比較は許容差で行う(バックエンドはfloat32)。規制タブ(`SpeedLimitTab`)は許可リスト`EDITABLE_PATH_TYPE_IDS`で、保存は全バリアント分を送る。
 - 予算(`budget/CityBudgetWindow`): 比率は自動保存で`AUTO_SAVE_DEBOUNCE_MS`のデバウンス必須(PATCHは再導出を伴い重い)。rechartsはCSS変数を解決できないのでグラフ色だけ直値定数。
 - 公共交通(`transit/`): 路線カラーの正はバックエンドの`line_color`。作成/更新/削除後は`emit("transit:lines_changed")`。収支見込みはバックエンドの試算を並べるだけ。貨物は `TransitMasterEntry.freight` で判定し、編成の総両数（機関車1両を含む）の下限を2にする。外観候補は新設・詳細が `TransitVehicleSelector` と同じカタログを共有する。

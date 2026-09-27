@@ -43,6 +43,7 @@
     "prop_placement": "프롭 배치",
     "mashup_edit": "부속 건물 배치",
     "path_shape_editor": "경로 형상 편집",
+    "grading": "부지 조성",
     "scenario_manager": "시나리오 관리",
     "scenario_metadata": "소개 정보"
   },
@@ -94,6 +95,7 @@
     "menuTransport": "대중교통",
     "menuStat": "통계 정보",
     "menuLand": "토지 구획",
+    "menuGrading": "부지 조성",
     "menuDistrict": "지구",
     "menuRegulation": "규제",
     "menuCity": "정책",

@@ -60,6 +60,7 @@ import { BuildingFacilityInfoCard } from "./BuildingFacilityInfoCard";
 import { BuildingFloorSpecs } from "./BuildingFloorSpecs";
 import { showNotification } from "../../utils/notification";
 import { BUILDING_PUBLIC, PARCEL_LAND, VARIANT_CITY } from "../../constants";
+import { isGradingVariant } from "../grading/grading";
 import "./BuildingConstructionPanel.css";
 
 // 直接配置モードで default_width が未設定のバリアント用のフォールバック(m)。
@@ -384,11 +385,12 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
    * 全ての建設可能エージェントを含む。建物種類(bd_type)でグループ化して表示する。
    * template_only のバリアント(国境検問所・観光名所)はシナリオ制作専用なので、
    * テンプレートモードでないときは候補から外す。
+   * 造成工事は範囲を描いて発注する造成ウィンドウ専用なので、常に外す。
    */
   const buildingVariants = useMemo(() => {
     if (!masterData) return [];
     return Object.entries(masterData.agents).filter(
-      ([, entry]) => entry.building && (templateMode || !entry.template_only)
+      ([id, entry]) => entry.building && (templateMode || !entry.template_only) && !isGradingVariant(Number(id))
     ) as [string, AgentMasterEntry][];
   }, [masterData, templateMode]);
 

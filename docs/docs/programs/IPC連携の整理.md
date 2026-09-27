@@ -117,6 +117,8 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `edit_parcel:update_shape`      | `graphic -> ui`  | 土地区画形状編集モードでポリゴンが変更された                   |
 | `edit_resource:update_shape`    | `graphic -> ui`  | 資源エリア編集モード(新規作成)において、編集中のポリゴンが変更された(polygon のみ、新規エリアのためIDは含まない) |
 | `edit_resource:finish`          | `ui -> graphic`  | 資源エリア編集モードを終了する。UI側が `POST /api/v1/resources` の送信に成功した後に送信され、Unity側の編集状態をリセットしてデータをリロードする（`edit_path:finish` と同じ役割） |
+| `edit_grading:update_shape`     | `graphic -> ui`  | 造成（陸地の整地・海の埋立）の範囲作図モード（`STATE_EDIT_GRADING`）において、作図中の範囲ポリゴンが変わった（`{polygon: [[x, z], ...], finalized}`）。`finalized` は右クリックで形を閉じて頂点編集（Editing）に移った後だけ `true` で、閉じる前の折れ線は `false`。Unity は頂点のドラッグ中に毎フレーム送るので、造成パネル（`grading`）は `finalized` かつ3点以上のときだけ、入力が落ち着くのを待ってから見積もり（`POST /api/v1/grading/preview`）を取り、古い要求は中断する。整地か埋立か・目標の高さ・見積もりはバックエンドが範囲から決め、パネルは範囲を Unity へ送り返さない。Rust `ipc.rs` の中継が必要なイベントで、全ウィンドウへ送られる |
+| `edit_grading:finish`           | `ui -> graphic`  | 造成範囲の作図モードを終える（`{}`）。UI側が `POST /api/v1/grading`（発注）に成功した後に送る。Unity は「作図の片付け → 通常ステートへの復帰 → データの再取得」を1つのハンドラでこの順に行う（作図中でなければ、ほかの編集モードを巻き込まないよう再取得だけを行う）。発注の時点では地形も海岸線も変わらないので、海岸線は取り直さない。`ui:action` の汎用転送なので Rust の変更は要らない |
 | `edit_transit:update_points`    | `graphic -> ui`  | 公共交通の路線設置モードにおいて、配置中の巡回点（停留所・経由点を巡回順に並べたもの）が変更された（`{ points: [{ kind: "stop" | "waypoint", position: [x,y,z] }, ...] }`。公共交通パスは相対Y=0のため y は0）。新設・経路編集パネルが停留所・経由点の数の表示と確定で送る巡回点を更新する |
 | `edit_transit:finish`           | `ui -> graphic`  | 公共交通の路線設置モードを終了する。UI側が `POST /api/v1/transit/lines`（新設）または `PUT /api/v1/transit/lines/{id}/route`（経路編集）の送信に成功した後に送信され、Unity側の巡回点の配置状態をリセットしてデータをリロードする（`edit_resource:finish` と同じ役割） |
 | `edit_prop:change_settings`     | `ui -> graphic`  | プロップ配置モードにおいて、回転角/スケール(個別)・密度/seed(範囲)を変更する（送られてきたキーのみを含む `{ rotation?, scale?, density?, seed? }`）。Unity は配置中のゴースト/散布プレビューに即反映する |
@@ -183,37 +185,46 @@ Unityは `GET /buildings/{id}` の最新状態が `STATUS_COLLAPSED` である�
 
 建設・編集の「確定」をバックエンドへ送信する責務は、**確定操作を所有する側**が持つ。
 
-- **パネル確定型**（建物建設・パス敷設・土地区画の作成/形状編集・資源エリア・公共交通・プロップ配置）: UI(Tauri)のパネルに確定ボタンがあるため、**UIが直接バックエンドへPOST/PATCHする**。成功後に `edit_*:finish` 系イベント（または `session:reload`）を送り、Unity側の編集状態をリセットしてデータをリロードさせる。Unityは形状の組み立てと `edit_*:update_*` 系イベントによるUIへの逐次通知のみを担う。
+- **パネル確定型**（建物建設・パス敷設・土地区画の作成/形状編集・資源エリア・造成・公共交通・プロップ配置）: UI(Tauri)のパネルに確定ボタンがあるため、**UIが直接バックエンドへPOST/PATCHする**。成功後に `edit_*:finish` 系イベント（または `session:reload`）を送り、Unity側の編集状態をリセットしてデータをリロードさせる。Unityは形状の組み立てと `edit_*:update_*` 系イベントによるUIへの逐次通知のみを担う。
 - **3Dジェスチャ完結型**（地区の塗り分け＝クリック/ドラッグの即時割当、接続端子ノードのドラッグ移動）: パネルの確定ボタンを持たず3D上の操作で完結するため、**Unityが直接バックエンドへ送信する**。
 
 確定後の後始末（編集状態のリセット・消えたオブジェクトの破棄・通常モードへの復帰・データの再取得）は `edit_*:finish` 系の1イベントにまとめ、Unity がその中で順序を持って実行する。`session:reload` と `world:change_state` を別々に送ってはいけない。差分リロードは複数フレームにまたがる処理で、後続の状態遷移が割り込むと再生成・削除が中途半端に終わる。確定しないキャンセルは `STATE_NORMAL` の送信で足りる。
+
+`edit_*:finish` 系を送ったパネル自身は、続けて `STATE_NORMAL` を送らない。ただし確定後にウィンドウを閉じるパネル（造成など）では、閉じる処理が×ボタンと同じ Rust の経路（`window.rs` の `close_window_by_label`）を通るので、そのウィンドウ種別が `EDIT_MODE_WINDOW_TYPES` に載っていれば、ほかに編集モードのウィンドウが表示されていない限り Rust が `STATE_NORMAL` を送る。Unity は finish の中で既に通常ステートへ戻しており、`STATE_NORMAL` の処理は入力と表示の適用し直しだけで差分リロードを取り消さない（取り消すのは新しい再取得・カメラのセル移動・セッションの切り替え）。この `STATE_NORMAL` は冗長だが、再取得を妨げない。
 
 # グラフィックプログラムのステート
 
 Unityのグラフィックプログラムは、いくつかのステートを持つ。各モードの実体はUnityのC#で定義された「表示モード（`VisualMode`）」「入力モード（`InputMode`）」のセットである。
 ステートごとに以下のようになる。空欄は何もしないという意味。
 
-|                         | `STATE_NORMAL` | `STATE_EDIT_PATH` | `STATE_EDIT_BUILDING` | `STATE_EDIT_ZONE` | `STATE_EDIT_PARCEL_SHAPE` | `STATE_EDIT_RESOURCE` | `STATE_EDIT_ROAD_MEMBERS` |
-| ----------------------- | -------------- | ----------------- | --------------------- | ----------------- | ------------------------- | ---------------------- | ---------------------- |
-| `Parcel - VisualMode`   | 表示しない          | 表示する              | 表示する                  | 表示する              | 境界線表示（編集対象のみ非表示）          | 境界線表示                  | 表示する |
-| `Parcel - Click`        | 詳細情報表示         | -                 | 建設場所選択                | -                 | -                         | -                      | - |
-| `Parcel - Mouseover`    | ハイライト          | -                 | ハイライト                 | -                 | -                         | -                      | - |
-| `Building - VisualMode` | 通常表示           | 計画中の建物も表示         | 計画中の建物も表示             | 計画中の建物も表示         | 計画中の建物も表示                 | 計画中の建物も表示              | 計画中の建物も表示 |
-| `Building - Click`      | 詳細情報表示         | -                 | -                     | -                 | -                         | -                      | - |
-| `Building - Mouseover`  | ハイライト          | -                 | -                     | -                 | -                         | -                      | - |
-| `Path - VisualMode`     | 通常表示           | 計画中のパスも表示         | 計画中のパスも表示             | 地区色分け表示           | 計画中のパスも表示                 | 計画中のパスも表示              | 計画中のパスも表示（所属区間を道路色の帯で強調） |
-| `Path - Click`          | 詳細情報表示         | -                 | -                     | 選択中地区へ即時割当（Shift+クリックで新規作成） | -                         | -                      | 街路・高速道路の区間の付け外しをUIへ通知（`edit_road:toggle_path`） |
-| `Path - Mouseover`      | ハイライト          | -                 | -                     | 操作案内ツールチップ表示      | -                         | -                      | 街路・高速道路の区間をハイライト＋操作案内ツールチップ（他の種別は拒否のツールチップ） |
-| `Terrain - VisualMode`  | 通常表示           | 通常表示              | 通常表示                  | 通常表示              | 通常表示                      | 通常表示                   | 通常表示 |
-| `Terrain - Click`       | -              | ノード追加             | 直接配置: 地点確定          | -                 | 頂点ドラッグ/辺上追加               | 頂点追加（Placing）/ 頂点ドラッグ・辺上追加（Editing） | - |
-| `Terrain - Mouseover`   | -              | マーカー移動            | 直接配置: 矩形ゴースト追従       | -                 | 辺ハイライト                    | 辺ハイライト（Editingのみ）       | - |
-| `Zone - VisualMode`     | 表示しない          | 表示する              | 表示する                  | 表示する              | 非表示                       | 非表示                    | 表示する |
-| `Zone - Click`          | 詳細情報表示         | -                 | -                     | -                 | -                         | -                      | - |
-| `Zone - Mouseover`      | ハイライト          | -                 | -                     | -                 |                           |                        | - |
+|                         | `STATE_NORMAL` | `STATE_EDIT_PATH` | `STATE_EDIT_BUILDING` | `STATE_EDIT_ZONE` | `STATE_EDIT_PARCEL_SHAPE` | `STATE_EDIT_RESOURCE` | `STATE_EDIT_ROAD_MEMBERS` | `STATE_EDIT_GRADING` |
+| ----------------------- | -------------- | ----------------- | --------------------- | ----------------- | ------------------------- | ---------------------- | ---------------------- | ---------------------- |
+| `Parcel - VisualMode`   | 表示しない          | 表示する              | 表示する                  | 表示する              | 境界線表示（編集対象のみ非表示）          | 境界線表示                  | 表示する | 境界線表示 |
+| `Parcel - Click`        | 詳細情報表示         | -                 | 建設場所選択                | -                 | -                         | -                      | - | - |
+| `Parcel - Mouseover`    | ハイライト          | -                 | ハイライト                 | -                 | -                         | -                      | - | - |
+| `Building - VisualMode` | 通常表示           | 計画中の建物も表示         | 計画中の建物も表示             | 計画中の建物も表示         | 計画中の建物も表示                 | 計画中の建物も表示              | 計画中の建物も表示 | 計画中の建物も表示 |
+| `Building - Click`      | 詳細情報表示         | -                 | -                     | -                 | -                         | -                      | - | - |
+| `Building - Mouseover`  | ハイライト          | -                 | -                     | -                 | -                         | -                      | - | - |
+| `Path - VisualMode`     | 通常表示           | 計画中のパスも表示         | 計画中のパスも表示             | 地区色分け表示           | 計画中のパスも表示                 | 計画中のパスも表示              | 計画中のパスも表示（所属区間を道路色の帯で強調） | 計画中のパスも表示 |
+| `Path - Click`          | 詳細情報表示         | -                 | -                     | 選択中地区へ即時割当（Shift+クリックで新規作成） | -                         | -                      | 街路・高速道路の区間の付け外しをUIへ通知（`edit_road:toggle_path`） | - |
+| `Path - Mouseover`      | ハイライト          | -                 | -                     | 操作案内ツールチップ表示      | -                         | -                      | 街路・高速道路の区間をハイライト＋操作案内ツールチップ（他の種別は拒否のツールチップ） | - |
+| `Terrain - VisualMode`  | 通常表示           | 通常表示              | 通常表示                  | 通常表示              | 通常表示                      | 通常表示                   | 通常表示 | 通常表示 |
+| `Terrain - Click`       | -              | ノード追加             | 直接配置: 地点確定          | -                 | 頂点ドラッグ/辺上追加               | 頂点追加（Placing）/ 頂点ドラッグ・辺上追加（Editing） | - | 頂点追加（Placing）/ 頂点ドラッグ・辺上追加（Editing）。吸着なし |
+| `Terrain - Mouseover`   | -              | マーカー移動            | 直接配置: 矩形ゴースト追従       | -                 | 辺ハイライト                    | 辺ハイライト（Editingのみ）       | - | 辺ハイライト（Editingのみ） |
+| `Zone - VisualMode`     | 表示しない          | 表示する              | 表示する                  | 表示する              | 非表示                       | 非表示                    | 表示する | 表示する |
+| `Zone - Click`          | 詳細情報表示         | -                 | -                     | -                 | -                         | -                      | - | - |
+| `Zone - Mouseover`      | ハイライト          | -                 | -                     | -                 |                           |                        | - | - |
 
 `STATE_EDIT_BUILDING` の**直接配置**（土地区画外への建設）では、底面が「回転付き矩形」でありUnity単独で生成できるため、地形ホバー中にカーソル追従のリアルタイム矩形ゴーストを表示する（`BuildingPlanManager` が `edit_building:update_direct_params` で受け取った `width`/`depth`/`angle`/`floors` からローカル生成する。バックエンド往復不要）。中ボタンドラッグで矩形を1度単位で即時回転でき（地点確定の前後どちらでも有効）、回転はリリース時に `edit_building:update_direct_angle` でUIへ1回だけ通知して回転ステッパーに反映する。左クリックで地点を確定（`edit_building:select_point` に確定時の `angle` を含めてUIへ通知）すると、以降はUIの `POST /api/v1/buildings/preview-direct` → `edit_building:update_shape` が権威プレビューとなる（回転角の正規化=mod 360 はUIの確定送信 `POST /api/v1/buildings/direct` 時のみ）。土地区画上へのホバーではゴーストを表示せず区画ハイライトへ切り替わる。土地区画への設置は回転角指定・リアルタイムゴーストの対象外（形状はバックエンド依存のため）。
 
 `STATE_EDIT_RESOURCE` はテンプレート作成モード専用で、天然資源エリアの新規作成にのみ使用する（既存エリアの編集はまだ実装されていない）。Terrain上の操作は2フェーズに分かれる: Placing(左クリックで頂点を末尾に追加していく)→Editing(頂点数3以上で右クリックすると形状が確定し、`STATE_EDIT_PARCEL_SHAPE` と同じ操作感の頂点ドラッグ・辺クリック挿入・右クリック削除に切り替わる)。バックエンドへの確定送信(`POST /api/v1/resources`)はUI側が直接行い、成功後に `edit_resource:finish` を送信してUnity側の編集状態をリセットする。
+
+`STATE_EDIT_GRADING` は造成（陸地の整地・海の埋立。[造成](../economics/34_造成.md)）の範囲を描くモードで、造成ウィンドウ（`grading`）を開くと遷移する（params は無い。送信元の `window_type` は `grading`）。Unity は `GradingAreaEditManager` が担い、Terrain上の操作は `STATE_EDIT_RESOURCE` と同じ2フェーズ（Placing: 左クリックで頂点を末尾に追加 → 頂点数3以上で右クリックすると形が閉じて Editing: 頂点ドラッグ・辺クリックでの挿入・右クリックでの削除）になる。範囲が変わるたびに `edit_grading:update_shape` を送るだけで、整地か埋立か・目標の高さ・見積もりはバックエンドが範囲から決める。資源エリアの作図と違う点は次の2つ。
+
+- **吸着しない。** 頂点の配置・移動・挿入とも道路・ノード・グリッドへ吸着しない。道路の中心線へ吸い付くと範囲がパスに掛かり、発注で必ず拒否されるため（頂点は道路の縁の外に置く）。
+- **Esc で抜けない。** Esc で Unity の入力だけが通常に戻ると（ステート遷移もUIへの通知も伴わない）、ウィンドウが開いたまま編集用の表示プリセットも残るため。抜けるのはウィンドウを閉じたとき（Rust が `STATE_NORMAL` を送る）と、確定後の `edit_grading:finish` だけ。
+
+表示はステート別の表示プリセット（区画の境界線・地区・等高線・計画中の道路と建物を表示、プロップを非表示。[Unity入力制御 §9.1](Unity入力制御.md#91-ステート別の表示プリセット)）。埋立地の岸壁の天端と面は地形としてクリックでき、その上にも頂点を置ける。確定の送信（`POST /api/v1/grading`）はUI側が直接行い、成功後に造成工事の主体の詳細ウィンドウ（`agent_detail`）を開いてから `edit_grading:finish` を送り、造成ウィンドウを閉じる（閉じたときの `STATE_NORMAL` の扱いは[建設・編集](#建設編集)）。発注が拒否されたら見積もりを取り直す。パネルのキャンセルはウィンドウを閉じず、`STATE_EDIT_GRADING` を送り直して作図を初めからやり直させる。
 
 `STATE_EDIT_TRANSIT` は公共交通の路線設置モードで、公共交通の新設パネル（`transit_creation`）で路線種別を選ぶと遷移する。路線詳細の「経路を編集」も同じパネルを経路編集モード（ウィンドウを開くときの `params.extra.editLineId`）で開いて遷移する。`world:change_state` の params は次のとおり。
 

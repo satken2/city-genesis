@@ -43,6 +43,7 @@
     "prop_placement": "Placement de décors",
     "mashup_edit": "Disposition des annexes",
     "path_shape_editor": "Édition de la forme de la voie",
+    "grading": "Terrassement",
     "scenario_manager": "Gestion des scénarios",
     "scenario_metadata": "Présentation"
   },
@@ -94,6 +95,7 @@
     "menuTransport": "Transports publics",
     "menuStat": "Statistiques",
     "menuLand": "Parcelles",
+    "menuGrading": "Terrassement",
     "menuDistrict": "Quartiers",
     "menuRegulation": "Réglementations",
     "menuCity": "Politiques",

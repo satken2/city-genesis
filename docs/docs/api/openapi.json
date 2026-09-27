@@ -510,6 +510,26 @@
         }
       }
     },
+    "/api/v1/terrain/reclaimed-lands": {
+      "get": {
+        "tags": [
+          "terrain"
+        ],
+        "summary": "Get Reclaimed Lands",
+        "description": "埋立地の一覧を返す。\n\nレスポンス形式:\n  {\"reclaimed_lands\": [\n     {\"reclaimed_land_id\": 1, \"polygon\": [[x, z], ...], \"version\": 1,\n      \"top_height\": 3.0 | null,\n      \"quays\": [{\"a\": [x, z], \"b\": [x, z], \"normal\": [nx, nz]}, ...],\n      \"walls\": [{\"a\": [x, z], \"b\": [x, z], \"normal\": [nx, nz]}, ...],\n      \"band\": [[外周, 穴...], ...]},\n     ...\n  ]}\n\npolygon と version は保存値、それ以外は海岸線と地形から求めた派生値（geo_reclaimed_land）。\nquays は海に面する岸壁区間、walls は垂直の面を張る外周の区間（岸壁と袖）、band は天端の\n多角形（GeoJSON MultiPolygon の coordinates と同じ形）、normal は外向きの単位ベクトル。\nUnity は判定を再実装せず、これを描くだけにする。埋立地が無ければ空リストを返す。",
+        "operationId": "get_reclaimed_lands_api_v1_terrain_reclaimed_lands_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/terrain/rivers": {
       "get": {
         "tags": [
@@ -9710,6 +9730,131 @@
             }
           }
         },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/grading/preview": {
+      "post": {
+        "tags": [
+          "grading"
+        ],
+        "summary": "Preview Grading Endpoint",
+        "description": "造成範囲の審査と見積もり（何も作らない）。\n\nリクエスト: {\"polygon\": [[x, z], ...]}（3点以上。閉じていなくてよい）\n応答: valid・reasons（理由コードの配列）・kind・variant・parcel_type・target_height・area・\ncut_volume・fill_volume・quay_length・quay_area・work_volume・estimated_construction_cost・\nstandard_construction_cost（常に null）・estimated_duration_days・next_epoch_construction_budget・\nconstruction_supply_ratio・expected_duration_days と資金審査の affordable・required_total・\navailable_funds・funds_shortfall・unlimited。",
+        "operationId": "preview_grading_endpoint_api_v1_grading_preview_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Data"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/grading": {
+      "post": {
+        "tags": [
+          "grading"
+        ],
+        "summary": "Create Grading Endpoint",
+        "description": "造成を発注する（範囲の市有区画と造成主体を作る）。リクエストはプレビューと同じ。\n応答はプレビューと同じ見積もりに agent_id・parcel_id を足したもの。\n発注できない理由があれば 400 GRADING_VALIDATION_ERROR（reasons 付き）、資金だけが足りなければ\n409 INSUFFICIENT_FUNDS。",
+        "operationId": "create_grading_endpoint_api_v1_grading_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Data"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/grading/{agent_id}": {
+      "get": {
+        "tags": [
+          "grading"
+        ],
+        "summary": "Get Grading Estimate",
+        "description": "既存の造成主体の見積もり（工事中の詳細ウィンドウ用）。プレビューと同じキー（valid=true・\nreasons=[]）に agent_id・parcel_id・status を足して返す。造成主体でなければ 404 NOT_FOUND。",
+        "operationId": "get_grading_estimate_api_v1_grading__agent_id__get",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Agent Id"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",

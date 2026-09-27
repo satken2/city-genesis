@@ -99,6 +99,7 @@ public class IpcClient : MonoBehaviour
     // 2Dパス形状編集パネルが開いた直後の現在形状の問い合わせ。update_shape を1回返す。
     public event Action OnEditPathQueryShape;
     public event Action OnEditResourceFinish;
+    public event Action OnEditGradingFinish;
     public event Action OnEditTransitFinish;
     // 駅パッケージ配置(軌道建設パネルの簡易モード)の設定変更。送られてきたキーだけを辞書で渡す
     // (platform_variant / house_variant / platform_length / track_spacing / height / angle /
@@ -494,6 +495,13 @@ public class IpcClient : MonoBehaviour
                     {
                         Debug.Log("IpcClient: edit_resource:finish received");
                         OnEditResourceFinish?.Invoke();
+                    }
+                    break;
+
+                case "edit_grading:finish":
+                    {
+                        Debug.Log("IpcClient: edit_grading:finish received");
+                        OnEditGradingFinish?.Invoke();
                     }
                     break;
 
@@ -1360,6 +1368,22 @@ public class IpcClient : MonoBehaviour
         };
 
         SendEnvelope("edit_resource:update_shape", payload);
+    }
+
+    /// <summary>
+    /// edit_grading:update_shape イベントを送信する。
+    /// 造成範囲の作図中のポリゴンが変わったことをUIに通知する。各頂点は [x, z]。
+    /// finalized は右クリックで形を閉じた後(Editingフェーズ)か。UIは閉じる前の折れ線では見積もりを取らない。
+    /// </summary>
+    public void EmitEditGradingUpdateShape(List<List<float>> polygon, bool finalized)
+    {
+        var payload = new Dictionary<string, object>
+        {
+            ["polygon"] = polygon,
+            ["finalized"] = finalized
+        };
+
+        SendEnvelope("edit_grading:update_shape", payload);
     }
 
     /// <summary>

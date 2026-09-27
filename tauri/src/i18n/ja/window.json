@@ -43,6 +43,7 @@
     "mashup_edit": "サブ建物の配置",
     "city_rename": "都市設定",
     "path_shape_editor": "パス形状編集",
+    "grading": "造成",
     "scenario_manager": "シナリオ管理",
     "scenario_metadata": "紹介情報"
   },
@@ -94,6 +95,7 @@
     "menuTransport": "公共交通機関",
     "menuStat": "統計情報",
     "menuLand": "土地区画",
+    "menuGrading": "造成",
     "menuDistrict": "地区",
     "menuRegulation": "規制",
     "menuCity": "政策",

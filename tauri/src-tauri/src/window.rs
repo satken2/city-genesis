@@ -796,6 +796,7 @@ const EDIT_MODE_WINDOW_TYPES: &[&str] = &[
     "transit_creation",
     // 建物の選択で入力プリセットを上書きする(MODE_PICK_BUILDING)。選択待ちのまま閉じても戻すため。
     "agent_creation",
+    "grading",
 ];
 
 /// セッション切り替えでは、古いHTTP応答でTipsや結果を再表示させない。

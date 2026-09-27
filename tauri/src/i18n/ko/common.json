@@ -69,6 +69,9 @@
     "PATH_TOO_FEW_POINTS": "2개 이상의 점이 필요합니다.",
     "PATH_MAX_SPAN_EXCEEDED": "노드 사이의 거리가 너무 깁니다. 중간점을 추가하세요.",
     "PATH_ELEVATION_CONFLICT": "입체 교차가 감지되었습니다. 높이를 변경하세요.",
-    "INSUFFICIENT_FUNDS": "자금이 부족하여 발주할 수 없습니다."
+    "INSUFFICIENT_FUNDS": "자금이 부족하여 발주할 수 없습니다.",
+    "GRADING_VALIDATION_ERROR": "이 범위는 조성할 수 없습니다. 부지 조성 창에 표시된 이유를 확인하세요.",
+    "CREATEPATH_SEA_LAKE_CROSSING": "바다나 호수 위를 지상으로 지날 수 없습니다. 수면보다 충분히 높은 다리로 만들거나 지하로 통과시키세요.",
+    "CREATEPATH_QUAY_BAND_CROSSING": "매립지의 안벽을 지상에서 가로지를 수 없습니다. 고가나 지하로 통과시키고, 끝점과 경유점은 안벽 상부 밖에 두세요."
   }
 }

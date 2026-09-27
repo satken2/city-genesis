@@ -1,0 +1,39 @@
+{
+  "grading": {
+    "kindLabel": "Type",
+    "kind": {
+      "land": "Nivellement du terrain",
+      "shore": "Remblaiement sur la mer"
+    },
+    "targetHeight": "Hauteur cible",
+    "cutVolume": "Volume de déblai",
+    "fillVolume": "Volume de remblai",
+    "quayLength": "Longueur du quai",
+    "quayArea": "Surface du parement du quai",
+    "unit": {
+      "height": "{{value}} m",
+      "length": "{{value, number}} m",
+      "area": "{{value, number}} m²",
+      "volume": "{{value, number}} m³"
+    },
+    "reasons": {
+      "invalid_polygon": "La forme de la zone n'est pas valide. Tracez-la sans que les côtés se croisent.",
+      "outside_city": "La zone dépasse les limites de la ville.",
+      "too_large": "La zone est trop grande (limite : {{limit}} km²).",
+      "on_water": "Une zone entièrement en mer ne peut pas être aménagée. Tracez-la de façon à atteindre la terre.",
+      "no_land_overlap": "Tracez la zone de façon à chevaucher la terre (sinon une bande de mer reste entre la côte et la zone).",
+      "overlaps_parcel": "La zone chevauche une parcelle existante.",
+      "overlaps_path": "La zone chevauche une route, une voie ou un autre tracé.",
+      "overlaps_water": "La zone touche une rivière ou un lac.",
+      "overlaps_quay_band": "La zone chevauche le quai d'un terrain gagné sur la mer.",
+      "no_surface_frontage": "La zone ne donne pas sur une route au niveau du sol. Le nivellement aligne le terrain sur la chaussée de la route qui la borde.",
+      "too_narrow": "La zone est trop étroite ; il ne reste rien à remblayer à l'intérieur du quai.",
+      "no_work": "Le terrain est déjà à la hauteur cible ; aucun travail n'est nécessaire.",
+      "insufficient_funds": "Fonds insuffisants pour passer cette commande."
+    },
+    "confirm": "Valider",
+    "confirming": "Validation...",
+    "cancel": "Annuler",
+    "confirmFailed": "Échec de la commande du terrassement."
+  }
+}

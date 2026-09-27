@@ -17,9 +17,8 @@ using Newtonsoft.Json.Linq;
 /// 海面と同じ理屈で回避される。岸(水面より高い地形)では per-cell 地形が
 /// ワールドYの差で自然に手前に描画される。
 ///
-/// 水面はマップ固有の静的データ(海岸線と同様 init_game 時に確定)なので、
-/// セッション開始時に一度だけ取得・生成する。<see cref="TerrainManager.FetchCoastline"/>
-/// の直後(=海岸線取得と同じセッション初期化タイミング)から呼ばれる。
+/// 水面はマップ固有の静的データ(init_game 時に確定)だが、<see cref="TerrainManager.FetchCoastline"/>
+/// が海岸線の直後に毎回呼ぶので、初回ロード・強制リロード・session:reload のたびに取得・生成し直す。
 ///
 /// シーンに事前配置する必要はなく、AfterSceneLoad で自己生成する。
 /// </summary>
@@ -72,7 +71,7 @@ public class WaterSurfaceManager : MonoBehaviour
 
     /// <summary>
     /// バックエンドから水面ポリゴンを取得し、水面メッシュを再生成する。
-    /// セッション開始時・全量リロード時(TerrainManager.FetchCoastline)から呼ばれる。
+    /// 初回ロード・強制リロード・session:reload の TerrainManager.FetchCoastline から呼ばれる。
     /// 呼び出しのたびに既存の水面を破棄してから作り直す(冪等)。
     /// </summary>
     public IEnumerator LoadAndBuild()

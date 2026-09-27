@@ -98,6 +98,7 @@ public partial class CameraController : MonoBehaviour
     private ParcelShapeEditManager parcelShapeEditManagerRef;
     private RoadPlanManager roadPlanManagerRef;
     private TransitPlanManager transitPlanManagerRef;
+    private GradingAreaEditManager gradingAreaEditManagerRef;
 
     // フライモードの有効状態を外部へ公開する（他システムからの参照用）。
     public bool IsFlyMode => isFlyMode;
@@ -1327,7 +1328,7 @@ public partial class CameraController : MonoBehaviour
     }
 
     /// <summary>
-    /// マウス位置が土地区画編集中の頂点または道路編集中のハンドル上にあるか判定する。
+    /// マウス位置が土地区画・造成範囲の編集中の頂点または道路編集中のハンドル上にあるか判定する。
     /// 編集ハンドル上ではカメラドラッグを開始しないようにするために使用する。
     /// </summary>
     private bool IsMouseOverEditHandle()
@@ -1343,6 +1344,14 @@ public partial class CameraController : MonoBehaviour
             {
                 return true;
             }
+        }
+
+        // GradingAreaEditManager(造成範囲の作図)の頂点判定。IsMouseOverVertex は Editing フェーズの間だけ真を返す。
+        if (gradingAreaEditManagerRef == null) gradingAreaEditManagerRef = FindAnyObjectByType<GradingAreaEditManager>();
+        if (gradingAreaEditManagerRef != null && gradingAreaEditManagerRef.IsEditMode
+            && gradingAreaEditManagerRef.IsMouseOverVertex(mouseScreen, cam))
+        {
+            return true;
         }
 
         // RoadPlanManager の編集ハンドル判定

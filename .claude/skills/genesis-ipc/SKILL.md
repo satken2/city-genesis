@@ -24,6 +24,7 @@ description: City Genesisのモジュール間通信(HTTP API、MemoryMappedFile
 ## 編集対象になりやすいディレクトリ/ファイル
 - Unity(MMF): `city-genesis/unity/Assets/Scripts/IPC/IpcClient.cs`, `IpcTransport.cs`, `IpcEnvelope.cs`, `IpcEventHandler.cs`, `IpcStateCoordinator.cs`, `IpcViewCoordinator.cs`
 - UI(MMF): `city-genesis/tauri/src-tauri/src/ipc.rs`, `messages.rs`, `city-genesis/tauri/src/utils/ipc.ts`
+- 編集ステート(`STATE_EDIT_*`)に入るウィンドウを足すとき: `city-genesis/tauri/src-tauri/src/window.rs` の `EDIT_MODE_WINDOW_TYPES`(閉じたときに Rust が `STATE_NORMAL` を送る)と、`city-genesis/tauri/src/components/hud/hudCommon.ts` の `EDIT_MODE_WINDOW_TYPES`(開いたときにブルドーザ・地区編集のトグルを OFF にする。Rust の一覧とは用途が違い、中身も同じではない)。確定後の `edit_*:finish` とウィンドウを閉じたときの `STATE_NORMAL` の関係は `IPC連携の整理.md` の「確定送信の責務分担」
 - HTTP: `genesis-core/app/controllers/`配下、Unity側`city-genesis/unity/Assets/Scripts/API/ApiClient.cs`(`GeneratedModels.cs`は自動生成のため直接編集禁止)、UI側`city-genesis/tauri/src/utils/api.ts`
 
 ## 進め方

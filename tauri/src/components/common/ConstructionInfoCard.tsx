@@ -3,13 +3,17 @@
  *
  * 建設の見積もり情報(推定建設コスト・標準コストに対する倍率バッジ・推定建設期間)と、
  * 建設中・解体中の実績情報(1エポックあたりのコスト・残りエポック数)を表示する共通カード。
- * 以下の4箇所で共用する。
+ * 以下の6箇所で共用する。
  * - 建物建設パネル (building/BuildingConstructionPanel)
  * - 道路建設パネル (path/PathConstructionPanel)
  * - 経済主体詳細パネルの建設工事タブ (agent/BuildingConstructionInfoPanel)
  * - パス詳細パネルの建設工事情報 (path/PathConstructionInfoPanel)
+ * - 造成パネル (grading/GradingPanel)
+ * - 経済主体詳細パネルの造成工事の建設工事タブ (grading/GradingConstructionInfoPanel)
  *
  * 表示ルール:
+ * - leadingRows を渡すと、呼び出し側が組んだ行をグリッドの先頭に付ける(造成の種類・切土量など、
+ *   ドメイン固有の数量をコストと同じ表の見た目で並べるため)。
  * - buildingArea / totalHeight / totalFloorArea を渡すと物理情報の行が先頭に付く
  *   (建物系のみ。パス系は渡さない=非表示。null は取得中・未確定として "—" を表示)。
  * - 標準コストが正の値のときのみ、推定コストの右に「x1.3」のような倍率バッジを表示する
@@ -29,6 +33,7 @@
  *   (確定ボタンの無効化は呼び出し側=PathBuildSections が alignmentOk で行う)。
  */
 
+import { Fragment, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import type { PathAlignmentSummary } from "../../types";
 import { Money } from "./Money";
@@ -51,9 +56,16 @@ type ConstructionPerEpochInfo = {
   isDemolishing: boolean;
 };
 
+export type ConstructionInfoRow = {
+  label: string;
+  value: ReactNode;
+};
+
 type ConstructionInfoCardProps = {
   /** カード見出し。省略時は見出しなし(呼び出し側のセクション見出しに任せる) */
   title?: string;
+  /** グリッドの先頭に付ける行(翻訳済みのラベルと整形済みの値) */
+  leadingRows?: ConstructionInfoRow[];
   /** 建築面積(m²)。undefined なら行ごと非表示(パス系)、null なら "—" */
   buildingArea?: number | null;
   /** 建物高さ(m)。undefined なら行ごと非表示、null なら "—" */
@@ -90,6 +102,7 @@ type ConstructionInfoCardProps = {
 
 export function ConstructionInfoCard({
   title,
+  leadingRows,
   buildingArea,
   totalHeight,
   totalFloorArea,
@@ -125,6 +138,13 @@ export function ConstructionInfoCard({
       {title && <div className="construction-info-title">{title}</div>}
 
       <div className="construction-info-grid">
+        {leadingRows?.map((row) => (
+          <Fragment key={row.label}>
+            <span className="construction-info-label">{row.label}</span>
+            <span className="construction-info-value">{row.value}</span>
+          </Fragment>
+        ))}
+
         {buildingArea !== undefined && (
           <>
             <span className="construction-info-label">{t("construction.buildingArea")}</span>

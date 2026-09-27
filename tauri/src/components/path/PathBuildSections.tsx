@@ -307,7 +307,8 @@ export function PathBuildSections({
         <div className="pc-action-bar">
           {pc.nodes.length >= 2 && (!pc.canConfirm || !pc.alignmentOk) && (
             <div className="pc-validation-message" role="status">
-              <p>{t("path_construction.shapeError")}</p>
+              {(pc.canConfirm ? [t("path_construction.shapeError")] : pc.confirmMessages)
+                .map((message, index) => <p key={index}>{message}</p>)}
               {pc.canRetryValidation && (
                 <button className="pc-btn" type="button" onClick={pc.retryValidation}>
                   {t("path_construction.validationRetry")}

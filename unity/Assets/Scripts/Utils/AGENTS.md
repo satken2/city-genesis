@@ -36,7 +36,7 @@
 
 ## `Utils.cs`(Scripts 直下)
 
-- `GetGroundHeight(Vector3)`: 実タイルの高さ。同一フレーム・同一XZだけキャッシュし、近傍座標へ丸めない(傾斜地で問い合わせ順に依存する)。地形の更新・登録・除去時は `InvalidateHeightCache()`。未常駐の位置は全景・背景へフォールバックする。
+- `GetGroundHeight(Vector3)`: 地面の高さ。実タイルの高さ(未常駐の位置は全景・背景へフォールバック)で、埋立地の帯の中は max(地形, 天端)(`ReclaimedLandStore.TryGetBandTop`。バックエンドの勾配・パス検証と同じ規則)。同一フレーム・同一XZだけキャッシュし、近傍座標へ丸めない(傾斜地で問い合わせ順に依存する)。地形の更新・登録・除去と埋立地のストアの更新時は `InvalidateHeightCache()`。
 - `TryGetTerrainGrid(Vector3, out origin, out spacing)`: 実タイルの格子原点と間隔。
 - `ApplyDepthOffsetShader(MeshRenderer, contextName, onInstantiated)`: `DepthOffsetLit` を適用。レンダラーごとに材質を複製するので大量の描画物には使わず、建物は `BuildingManager.GetSharedDepthOffsetMaterials`、道路遠景は `PathManager` の共有材質を使う。路面標示用 `Custom/RoadSurface` は保持する(置き換えると標示が消える)。
 - `DestroyObjectAfterFrames(MonoBehaviour, GameObject)`: 2フレーム遅延の破棄(ポッピング防止)。

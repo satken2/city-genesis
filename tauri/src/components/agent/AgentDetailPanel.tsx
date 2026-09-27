@@ -57,6 +57,8 @@ import { EmploymentInfoPanel } from "./EmploymentInfoPanel";
 import { AgentOperationPanel } from "./AgentOperationPanel";
 import { PublicFacilityPanel } from "./PublicFacilityPanel";
 import { BuildingConstructionInfoPanel } from "./BuildingConstructionInfoPanel";
+import { GradingConstructionInfoPanel } from "../grading/GradingConstructionInfoPanel";
+import { isGradingVariant } from "../grading/grading";
 import "./AgentDetailPanel.css";
 // アイコンボタン(.operation-panel / .operation-btn)を借りるため明示的に読み込む
 import "./AgentOperationPanel.css";
@@ -661,11 +663,19 @@ export function AgentDetailPanel({
           )}
 
           {activeTab === "construction" && showConstructionTab && (
-            <BuildingConstructionInfoPanel
-              agent={agentData}
-              apiBaseUrl={apiBaseUrl}
-              refreshKey={refreshKey}
-            />
+            isGradingVariant(agentData.variant) ? (
+              <GradingConstructionInfoPanel
+                agent={agentData}
+                apiBaseUrl={apiBaseUrl}
+                refreshKey={refreshKey}
+              />
+            ) : (
+              <BuildingConstructionInfoPanel
+                agent={agentData}
+                apiBaseUrl={apiBaseUrl}
+                refreshKey={refreshKey}
+              />
+            )
           )}
         </div>
       )}

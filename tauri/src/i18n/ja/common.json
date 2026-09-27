@@ -69,6 +69,9 @@
     "PATH_TOO_FEW_POINTS": "2点以上のポイントが必要です。",
     "PATH_MAX_SPAN_EXCEEDED": "ノード間の距離が長すぎます。中間点を追加してください。",
     "PATH_ELEVATION_CONFLICT": "立体交差が検出されました。高さを変更してください。",
-    "INSUFFICIENT_FUNDS": "資金が不足しているため発注できません。"
+    "INSUFFICIENT_FUNDS": "資金が不足しているため発注できません。",
+    "GRADING_VALIDATION_ERROR": "この範囲は造成できません。造成ウィンドウに表示される理由を確認してください。",
+    "CREATEPATH_SEA_LAKE_CROSSING": "海や湖の上を地表で通ることはできません。水面より十分高い橋にするか、地下で通してください。",
+    "CREATEPATH_QUAY_BAND_CROSSING": "埋立地の岸壁を地表で横切ることはできません。高架か地下で通し、端点と経由点は岸壁の天端の外に置いてください。"
   }
 }

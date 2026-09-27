@@ -115,6 +115,9 @@
     "resource_edit",
     "prop_placement"
   ],
+  "grading": [
+    "grading"
+  ],
   "save_load": [
     "save_load"
   ],
