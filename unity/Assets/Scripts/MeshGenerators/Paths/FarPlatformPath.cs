@@ -5,8 +5,12 @@ using UnityEngine;
 /// <summary>遠景の乗り場。通常パーツの材質で大きな断面だけを押し出し、小物や8mタイル反復を省く。</summary>
 public static class FarPlatformPath
 {
+    // 463 は貨物PF(貨物列車専用のホーム)。
+    const int FreightPlatformVariant = 463;
+
     public static bool Handles(PathSummary path) => path != null &&
-        (path.path_variant == 451 || path.path_variant == 461 || path.path_variant == 462 || path.path_variant == 502 || path.path_variant == Constants.PATH_VARIANT_ROPEWAY_STATION);
+        (path.path_variant == 451 || path.path_variant == 461 || path.path_variant == 462 || path.path_variant == FreightPlatformVariant
+         || path.path_variant == 502 || path.path_variant == Constants.PATH_VARIANT_ROPEWAY_STATION);
 
     public static void GenerateInto(GameObject root, PathSummary path, List<Vector3> points)
     {
@@ -93,6 +97,14 @@ public static class FarPlatformPath
 
         public void Platform(int side, int type)
         {
+            if (type == FreightPlatformVariant)
+            {
+                // 貨物のホームは荷役用の広い床だけで、旅客の上屋・点字ブロック・柵を持たない。
+                float width = MasterDataStore.Instance?.GetPathMaster(type)?.platform_width ?? 6f;
+                Box("PATH_CONCRETE", 2.3f, 2.3f + width, -.3f, 1.2f, side);
+                Box("PATH_ASPHALT", 2.3f, 2.3f + width, 1.2f, 1.21f, side);
+                return;
+            }
             float outer = type == 502 ? 4.5f : 5.5f;
             Box("PATH_CONCRETE",type == 502 ? .3f : 2.3f,outer,type == 502 ? -1.08f : -.3f,type == 502 ? -.83f : .10f,side);
             Posts(side,outer-.2f,type == 502 ? -.83f : .10f,1.2f,"PATH_CONCRETE");

@@ -17,6 +17,8 @@
     "description": "Ce pôle importe des marchandises de l'extérieur de la région pour approvisionner les marchés de la ville, et rachète la production excédentaire de la ville pour l'exporter.",
     "capacity": "Capacité de traitement",
     "perEpochPerDirection": "/époque (pour chaque sens)",
+    "linkCapacity": "Capacité de fret international",
+    "areaCapacity": "Limite selon la surface",
     "importHandled": "Volume importé",
     "exportHandled": "Volume exporté",
     "utilization": "Utilisation",

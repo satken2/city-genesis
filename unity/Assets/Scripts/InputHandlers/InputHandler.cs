@@ -593,7 +593,8 @@ public class InputHandler : MonoBehaviour
         bool foundTerrain = false;
         foreach (var hit in hits)
         {
-            if (hit.collider.gameObject.GetComponent<Terrain>() != null)
+            GameObject hitObject = hit.collider.gameObject;
+            if (hitObject.GetComponent<Terrain>() != null || IsBackgroundTerrain(hitObject))
             {
                 posX = hit.point.x;
                 posZ = hit.point.z;
@@ -653,7 +654,7 @@ public class InputHandler : MonoBehaviour
         GameObject hitObject = hit.collider.gameObject;
 
         // 地形の場合は継続的にホバー処理を呼び出し
-        if (hitObject.GetComponent<Terrain>() != null)
+        if (hitObject.GetComponent<Terrain>() != null || IsBackgroundTerrain(hitObject))
         {
             var terrainHandler = hitObject.GetComponent<IInputHandler>();
             terrainHandler?.onHover(GetModeForObjectType(InputObjectType.TERRAIN));
@@ -758,9 +759,17 @@ public class InputHandler : MonoBehaviour
         if (obj.CompareTag("ZoneObject")) return InputObjectType.ZONE;
         if (obj.CompareTag("SeaObject")) return InputObjectType.TERRAIN;
         if (obj.GetComponent<Terrain>() != null) return InputObjectType.TERRAIN;
+        if (IsBackgroundTerrain(obj)) return InputObjectType.TERRAIN;
 
         return -1; // 不明なタイプ
     }
+
+    /// <summary>
+    /// マップの外の背景地形か。背景チャンクは Terrain コンポーネントを持たない板ポリゴンだが、
+    /// 都市外の設備(国境の貨物駅に停める路線の停留所など)を置く・選ぶため地形タイルと同じに扱う。
+    /// </summary>
+    private bool IsBackgroundTerrain(GameObject obj) =>
+        cachedTerrainManager != null && cachedTerrainManager.IsBackgroundTerrain(obj);
 
     private int GetModeForObjectType(int objectType)
     {

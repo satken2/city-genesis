@@ -126,7 +126,9 @@
       "trainStandard": "Standard",
       "trainFuturistic": "Futuristic",
       "trainRetro": "Retro",
-      "monorail": "Monorail"
+      "monorail": "Monorail",
+      "freightRed": "Red locomotive",
+      "freightBlue": "Blue locomotive"
     }
   }
 }

@@ -99,6 +99,11 @@ function num(v?: number | null, digits = 0): string {
       });
 }
 
+/** 重さ(t)を桁区切りと単位つきで表示する(港湾の取扱能力・取扱量) */
+function tons(v?: number | null): string {
+  return v == null ? "—" : `${num(v, 0)} t`;
+}
+
 /** 割合をパーセント表記にする */
 function pct(v?: number): string {
   return v == null ? "—" : `${Math.round(v * 100)}%`;
@@ -239,21 +244,21 @@ function buildColumns(variant: CardVariant, t: TFn2): ColumnDef[] {
           key: "capacity",
           label: t("publicFacilities.capacity"),
           align: "right" as const,
-          render: (a: PublicFacilityAgent) => num(a.capacity, 0),
+          render: (a: PublicFacilityAgent) => tons(a.capacity),
           sortValue: (a: PublicFacilityAgent) => a.capacity ?? 0,
         },
         {
           key: "import_handling",
           label: t("publicFacilities.importHandling"),
           align: "right" as const,
-          render: (a: PublicFacilityAgent) => num(a.import_handling, 0),
+          render: (a: PublicFacilityAgent) => tons(a.import_handling),
           sortValue: (a: PublicFacilityAgent) => a.import_handling ?? 0,
         },
         {
           key: "export_handling",
           label: t("publicFacilities.exportHandling"),
           align: "right" as const,
-          render: (a: PublicFacilityAgent) => num(a.export_handling, 0),
+          render: (a: PublicFacilityAgent) => tons(a.export_handling),
           sortValue: (a: PublicFacilityAgent) => a.export_handling ?? 0,
         },
         {

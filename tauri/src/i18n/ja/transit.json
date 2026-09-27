@@ -126,7 +126,9 @@
       "trainStandard": "標準",
       "trainFuturistic": "近未来",
       "trainRetro": "レトロ",
-      "monorail": "モノレール"
+      "monorail": "モノレール",
+      "freightRed": "赤い機関車",
+      "freightBlue": "青い機関車"
     }
   }
 }

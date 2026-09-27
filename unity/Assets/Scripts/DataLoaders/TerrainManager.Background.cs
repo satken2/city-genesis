@@ -18,7 +18,15 @@ public partial class TerrainManager
     private float backgroundMinHeight, backgroundMaxHeight;
     private Material backgroundMaterial;
     private readonly List<GameObject> backgroundObjects = new List<GameObject>();
+    // 入力判定(InputHandler)が背景チャンクを地形として扱うための所属表。
+    private readonly HashSet<GameObject> backgroundObjectSet = new HashSet<GameObject>();
     private readonly List<Mesh> backgroundMeshes = new List<Mesh>();
+
+    /// <summary>
+    /// マップの外の背景地形のチャンクか。都市外にある設備(国境の貨物駅など)を選ぶクリックや
+    /// カーソル位置は、マップ内の地形タイルと同じくこのチャンクの上でも解決する。
+    /// </summary>
+    public bool IsBackgroundTerrain(GameObject go) => go != null && backgroundObjectSet.Contains(go);
 
     public bool IsCityCell(Vector2Int cell) =>
         cell.x * CellSize >= -GetMapWidth() * .5f && (cell.x + 1) * CellSize <= GetMapWidth() * .5f &&
@@ -70,6 +78,7 @@ public partial class TerrainManager
         foreach (var go in backgroundObjects) if (go != null) Destroy(go);
         foreach (var mesh in backgroundMeshes) if (mesh != null) Destroy(mesh);
         backgroundObjects.Clear();
+        backgroundObjectSet.Clear();
         backgroundMeshes.Clear();
         if (backgroundMaterial != null) Destroy(backgroundMaterial);
         backgroundMaterial = null;
@@ -170,7 +179,8 @@ public partial class TerrainManager
                     go.AddComponent<MeshRenderer>().sharedMaterial = backgroundMaterial;
                     go.AddComponent<MeshCollider>().sharedMesh = mesh;
                     go.AddComponent<VisualTerrainObject>();
-                    backgroundMeshes.Add(mesh); backgroundObjects.Add(go);
+                    go.AddComponent<TerrainInputHandler>();
+                    backgroundMeshes.Add(mesh); backgroundObjects.Add(go); backgroundObjectSet.Add(go);
                 }
                 yield return RenderWorkScheduler.Continue;
             }

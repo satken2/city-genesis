@@ -126,7 +126,9 @@
       "trainStandard": "標準",
       "trainFuturistic": "未來風",
       "trainRetro": "復古",
-      "monorail": "單軌列車"
+      "monorail": "單軌列車",
+      "freightRed": "紅色機車",
+      "freightBlue": "藍色機車"
     }
   }
 }

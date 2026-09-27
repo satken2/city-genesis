@@ -17,6 +17,8 @@
     "description": "이 거점은 역외에서 상품을 수입해 도시 내 시장에 공급하고, 도시 내 잉여 생산물을 매입해 역외로 수출합니다.",
     "capacity": "취급 능력",
     "perEpochPerDirection": "/에포크(수출입 각각)",
+    "linkCapacity": "국제 화물 수송 틀",
+    "areaCapacity": "면적에 따른 상한",
     "importHandled": "수입 취급량",
     "exportHandled": "수출 취급량",
     "utilization": "가동률",

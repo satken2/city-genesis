@@ -17,6 +17,8 @@
     "description": "此據點從境外進口商品供應給城市內的市場，並收購城市內的過剩產品出口到境外。",
     "capacity": "處理能力",
     "perEpochPerDirection": "/紀元（進出口各自）",
+    "linkCapacity": "國際貨運運力",
+    "areaCapacity": "按面積的上限",
     "importHandled": "進口處理量",
     "exportHandled": "出口處理量",
     "utilization": "使用率",

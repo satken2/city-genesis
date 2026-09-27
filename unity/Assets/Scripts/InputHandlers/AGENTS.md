@@ -13,7 +13,7 @@
 | `ParcelInputHandler.cs` | `ParcelManager`が付与。建設モードでは区画データを添えて`BuildingPlanManager.OnParcelClick`へ渡す(`parcel_type`の一致判定に必要) |
 | `PathInputHandler.cs` | `PathManager`が付与(駅舎の建屋コライダーには`StationHousePath`が付与)。地区編集・区画作成の道路選択・結合/分割・区間編集の振り分け |
 | `NodeInputHandler.cs` | `PathManager`がノード生成時に付与(端子ノードには`ConnectorEditManager`が後付け)。ドラッグ移動と`PATCH /nodes/{id}`、失敗時のロールバック |
-| `TerrainInputHandler.cs` | `TerrainManager`が地形タイルごとに付与し、`InputHandler.Start`が海面(`SeaObject`タグ)にも付与。地形クリックの委譲先分岐、共通吸着`ApplySnapping`、吸着フラグ(static) |
+| `TerrainInputHandler.cs` | `TerrainManager`が地形タイルと都市外の背景地形のチャンクごとに付与し、`InputHandler.Start`が海面(`SeaObject`タグ)にも付与。地形クリックの委譲先分岐、共通吸着`ApplySnapping`、吸着フラグ(static) |
 | `RemovalManager.cs` | ブルドーザ(`MODE_REMOVE`)の実処理。プロップはコライダーが無いので`InputHandler`がクリック配送前に`TryRemovePropAt`で判定する |
 | `TransitSelection.cs` | 通常モードで公共交通の帯・停留所・車両をスクリーン座標で選択。物理レイキャストより先に呼ぶ |
 
@@ -37,6 +37,7 @@
 ## 海面(Sea)のクリック
 
 - 海面はシーン静置の板(`Sea`、Y=0.001、Layer=Water)で`Terrain`コンポーネントを持たない。`SeaObject`タグで`TERRAIN`に分類し`TerrainInputHandler`を後付けするので、地形と同じ経路を流れる。区画種別はUnityもUIも送らず、バックエンドが位置から沿岸/海上/陸地を判定する。
+- 都市外(マップの外)の背景地形のチャンク(`TerrainManager.Background.cs`)も`Terrain`コンポーネントを持たない板ポリゴン。`TerrainManager.IsBackgroundTerrain`で`TERRAIN`に分類し、カーソル位置(`UpdateTerrainPosition`)も背景の起伏上で解決する。国境の貨物駅(都市外の貨物PF)に路線の停留所を置く操作や、テンプレート作成モードで都市外にパスを敷く操作がこの経路を通る。
 - 海上では`Utils.GetGroundHeight`が海底(負のY)を返す。海上へ出す表示物は海面板より上へクランプする(地形マーカー`SeaMarkerMinY`=0.05m、区画プレビュー枠`ParcelPlanRenderer.SeaSurfaceY`=0.01m)。
 - `terrainLayerMask`にWaterは含まれないが、海域ではy=0平面との交点フォールバックで`posX/posZ`が正しく出る。
 

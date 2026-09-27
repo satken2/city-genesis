@@ -17,6 +17,8 @@
     "description": "This hub imports goods from outside the region to supply the city's markets, and buys the city's surplus production to export it out of the region.",
     "capacity": "Throughput Capacity",
     "perEpochPerDirection": "/epoch (each direction)",
+    "linkCapacity": "International freight slots",
+    "areaCapacity": "Limit by floor area",
     "importHandled": "Import Handled",
     "exportHandled": "Export Handled",
     "utilization": "Utilization",
