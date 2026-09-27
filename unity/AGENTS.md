@@ -24,7 +24,7 @@ City Genesis の3D描画プログラム。バックエンド(FastAPI)とは HTTP
 | `AppRoot.cs` | 起動処理。天気・音・エフェクトのシングルトンをここで生成する(シーン配置しない) |
 | `GameStateManager.cs` | ゲーム状態(シングルトン)と状態変化イベント。`IsGameStarted()`=データ取得の許可、`IsWorldVisible`=表示の許可 |
 | `MasterDataStore.cs` | マスターデータの保持。道路幅・車線数などの描画パラメータの正 |
-| `CameraController.cs` / `CameraCellChecker.cs` | カメラ操作とバックエンド `City.camera` との視点同期 / 視野中心セルの判定と `CellDataLoader` への通知(ロードの起点) |
+| `CameraController.cs` / `.Cinematic.cs` / `CameraCellChecker.cs` | カメラ操作・撮影モードとバックエンド `City.camera` との視点同期 / 視野中心セルの判定と `CellDataLoader` への通知(ロードの起点) |
 | `Constants.cs` / `LocalConstants.cs` | 共有定数(自動生成) / Unity ローカルの定数とログフラグ |
 | `ZoneEditContext.cs`、`InputUtil.cs`、`LoadingOverlay.cs` | 地区編集の状態、入力抑制、ロード中の黒画面 |
 
@@ -51,6 +51,7 @@ City Genesis の3D描画プログラム。バックエンド(FastAPI)とは HTTP
 
 - 入力モード(`InputSystemManager` / `InputHandlers/`)はクリックで何が起きるか、ビジュアルモード(`VisualModeHandler` / `VisualHandlers/`)はどう見えるか。編集モードでは UI からの IPC を起点に両方をセットで切り替える(`programs/Unity入力制御.md` §9、`programs/Unity表示モード.md`)。
 - ドライブ(`Vehicles/DriveMode`)は描画専用の乗車操作で、両モードの定数を増やさない(`geometries/O_車両の走行描画.md` §O.12)。
+- 撮影(`CameraController.Cinematic.cs`)もUnity内のカメラ操作として管理する。`GameScene`の`MinimapToggleButton`を`cinematicModeButton`へ接続し、モード1=画面中央の地面・建物・海面の周回、モード2=視線角と絶対高度を保つ水平移動。回転軸取得・周回計算・操作中断は通常カメラと共有する。編集との排他は`InputHandler.IsNormalMode`、3D選択の抑止は`CameraController.BlocksWorldInput`を使う。操作・速度・復帰の仕様は`programs/Unity入力制御.md`「撮影モード」、検証は`Tests/Camera/run-unity.ps1`。
 
 ### ロードと生成予算
 

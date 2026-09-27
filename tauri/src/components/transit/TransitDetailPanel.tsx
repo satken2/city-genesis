@@ -326,6 +326,9 @@ export function TransitDetailPanel({
     carsPerTrain !== Math.max(1, Math.round(line.cars_per_train ?? 1));
   // 外観の候補を持たない種別(カタログ未登録)は、外観の行ごと出さない。
   const hasVehicleOptions = transitVehicleOptions(line.path_variant).length > 0;
+  const freight = Object.values(masterData?.transit ?? {}).some(
+    (entry) => entry.transit_path_id === line.path_variant && entry.freight,
+  );
 
   const tabs: { id: TabId; label: string }[] = [
     { id: "basic", label: t("transit.tabBasicInfo") },
@@ -507,9 +510,10 @@ export function TransitDetailPanel({
                 </span>
                 <span className="agent-detail-label">{t("transit.carsPerTrain")}</span>
                 <span className="agent-detail-value">
-                  <NumberStepper value={carsPerTrain} onChange={setCarsPerTrain} min={1} max={20} step={1} integerOnly={true} />
+                  <NumberStepper value={carsPerTrain} onChange={setCarsPerTrain} min={freight ? 2 : 1} max={20} step={1} integerOnly={true} />
                   <span className="transit-detail__unit">{t("transit.carsUnit")}</span>
                 </span>
+                {freight && <p className="transit-detail__note">{t("transit.freightConsistNote")}</p>}
                 {/* 採算に効くのは上の3項目だけなので、その直下で変更のたびに試算し直す */}
                 <div className="transit-detail__estimate">
                   <div className="transit-detail__estimate-title">

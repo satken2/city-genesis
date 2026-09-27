@@ -83,9 +83,7 @@ public class PreBuiltBuildingMeshBuilder : IBuildingMeshGenerator
         Quaternion? rotation = null;
         if (footprint != null && footprint.Length >= 2)
         {
-            Vector2 firstEdge = (footprint[1] - footprint[0]).normalized;
-            float edgeAngle = Mathf.Atan2(firstEdge.y, firstEdge.x) * Mathf.Rad2Deg;
-            rotation = Quaternion.Euler(0, -edgeAngle + 90f, 0);
+            rotation = BuildingRoadAccess.PrebuiltRotation(footprint);
         }
 
         // fitHeight=null は「スケールせず実寸で置く」を意味する（base / top）。mid だけ階高へYスケールする。

@@ -21,7 +21,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 | `src/local-constants.ts` | UI独自の定数と、自動生成に載らないバックエンド定数の写し |
 | `src/App.css` | 全ウィンドウ共通のグローバルスタイル |
 | `src-tauri/` | Rust側(ウィンドウ管理・MMF IPC・セッションポーリング)。`config/window-registry.json`=ポップアップ定義、`window-mutex-groups.json`=同時に開けない組 |
-| `tools/` | 開発補助スクリプト(翻訳キー整合検査・プロップサムネイル生成・Unity音源の再生成・開発プロセス掃除 ほか) |
+| `tools/` | 開発補助スクリプト(翻訳キー整合検査・プロップサムネイル生成・地形PNG一括再生成 `regenerate_terrain_thumbnails.py`・Unity音源の再生成・開発プロセス掃除 ほか) |
 | `scripts/` | 河川生成(`terrainRiver.ts`)の開発用検証スクリプト(`npx tsx`。CI外) |
 | `*-launch.toml` | Rust側が子プロセスとしてバックエンド/Unityを起動するコマンド |
 | `public/debug/`・`SPEC.md` | 素のHTMLのデバッグページ・初期設計時の仕様書(現行の正ではない) |
@@ -63,7 +63,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 
 | ファイル | 内容 |
 | --- | --- |
-| `api.ts` | `fetchApi<T>()` / `buildApiUrl()`。HTTPの唯一の窓口 |
+| `api.ts` | `fetchApi<T>()` / `buildApiUrl()`。HTTPの唯一の窓口。`cache`オプションで取得時のHTTPキャッシュ方針を指定できる |
 | `ipc.ts` | Unityへのイベント送信(`send*`) |
 | `notification.ts` / `tutorial.ts` | 通知ウィンドウ・チュートリアルウィンドウの表示 |
 | `cityNotifications.ts` | L1通知(重大通知)の取得・文言化・詳細ウィンドウ対応表 |

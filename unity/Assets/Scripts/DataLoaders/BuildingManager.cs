@@ -276,6 +276,7 @@ public class BuildingManager : BaseApiDataManager
 
     private void OnDestroy()
     {
+        BuildingRoadAccessIndex.Clear();
         lodCache.Clear();
         TerrainManager.OnTerrainTileReady -= OnTerrainTileReadyHandler;
     }
@@ -394,6 +395,7 @@ public class BuildingManager : BaseApiDataManager
         lodCache.Clear();
         buildingObjectsCache.Clear();
         buildingDataCache.Clear();
+        BuildingRoadAccessIndex.Clear();
         ConstructionAmbience.Clear(ConstructionAmbience.Kind.Building);
         buildingIdByInfraNodeId.Clear();
         buildingIdByDepotNodeId.Clear();
@@ -911,6 +913,7 @@ public class BuildingManager : BaseApiDataManager
                 }
             }
             buildingDataCache.Remove(id);
+            BuildingRoadAccessIndex.Remove(id);
             ConstructionAmbience.Unregister(ConstructionAmbience.Kind.Building, id);
             // 視野ゲート・LRU関連の台帳も同期して外す
             detailedBuildingIds.Remove(id);
@@ -2036,6 +2039,7 @@ public class BuildingManager : BaseApiDataManager
         }
 
         buildingDataCache[buildingData.agent_id] = buildingData;
+        BuildingRoadAccessIndex.Register(buildingData);
         buildingBoundsRadius.Remove(buildingData.agent_id);
         SyncConstructionSound(buildingData);
 

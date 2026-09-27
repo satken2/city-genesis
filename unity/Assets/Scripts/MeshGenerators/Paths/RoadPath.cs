@@ -603,10 +603,47 @@ public class RoadPath : IPathMeshGenerator
         }
         SealSplineMesh(splineMesh);
 
+        if (!singleSpan && !isDashed && (prefabName.EndsWith("/body", StringComparison.Ordinal)
+            || prefabName.EndsWith("/sidewalk", StringComparison.Ordinal) || prefabName.EndsWith("/lrt_track", StringComparison.Ordinal)))
+            RemoveInternalTileCaps(go.GetComponent<MeshFilter>()?.sharedMesh, channel);
+
         if (normalizeBodySurface && prefabName.EndsWith("/body", StringComparison.Ordinal))
             parent.GetComponentInParent<RoadMarkingContext>()?.Apply(go);
 
         return go;
+    }
+
+    /// <summary>連続する舗装・軌道の内部端面が斜光で細かな影を作るのを防ぎ、敷設区間の両端だけを閉じる。</summary>
+    private static void RemoveInternalTileCaps(Mesh mesh, SplineMesh.Channel channel)
+    {
+        if (mesh == null || channel == null || channel.count < 2 || channel.GetMeshCount() != 1
+            || channel.type != SplineMesh.Channel.Type.Extrude || channel.spacing != 0f) return;
+        var source = channel.GetMesh(0).vertices;
+        int stride = source.Length;
+        // Dreamteck の Extrude/Combine は元頂点の順序を保ったままタイル順に連結する。
+        // 変形後の座標では判定しないため、曲線・勾配・ミラーでも同じ端面を選べる。
+        if (stride == 0 || mesh.vertexCount != (long)stride * channel.count) return;
+        float min = float.MaxValue, max = float.MinValue;
+        foreach (var vertex in source) { min = Mathf.Min(min, vertex.z); max = Mathf.Max(max, vertex.z); }
+        if (max - min < 0.001f) return;
+        var ends = new int[stride];
+        for (int i = 0; i < stride; i++)
+            ends[i] = Mathf.Abs(source[i].z - min) < 0.00001f ? -1 : Mathf.Abs(source[i].z - max) < 0.00001f ? 1 : 0;
+        for (int submesh = 0; submesh < mesh.subMeshCount; submesh++)
+        {
+            var triangles = mesh.GetTriangles(submesh);
+            var kept = new List<int>(triangles.Length);
+            for (int i = 0; i < triangles.Length; i += 3)
+            {
+                int a = triangles[i], b = triangles[i + 1], c = triangles[i + 2];
+                int tile = a / stride, end = ends[a % stride];
+                bool cap = end != 0 && b / stride == tile && c / stride == tile
+                    && ends[b % stride] == end && ends[c % stride] == end;
+                if (cap && (end < 0 ? tile > 0 : tile < channel.count - 1)) continue;
+                kept.Add(a); kept.Add(b); kept.Add(c);
+            }
+            if (kept.Count != triangles.Length) mesh.SetTriangles(kept, submesh, false);
+        }
     }
 
     /// <summary>
@@ -829,6 +866,9 @@ public class RoadPath : IPathMeshGenerator
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[RoadPath] --- 道路パーツ生成開始 ---");
 
         var markingContext = RoadMarkingContext.Create(container, spline, pathData, startApproach, endApproach);
+        var access = RoadAccessPlan.Create(pathData, spline, controlPoints, width);
+        markingContext?.OverrideSideLine(true, access.Left, false);
+        markingContext?.OverrideSideLine(false, access.Right, false);
 
         // 高速道路の本線とランプが近接する区間は一つの路面として描く(RoadAdjacency)。
         // 路側線の描き分けは body の生成時にシェーダーへ渡るので、body より先に決める。
@@ -864,6 +904,7 @@ public class RoadPath : IPathMeshGenerator
             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] body: モデルなしのため白い板にフォールバック");
         }
         if (corridor != null && !ramp) CreateMergeFillers(container, corridor, width * 0.5f, ResolveBodyMaterial(pathData, variantBase, typeBase));
+        access.GenerateSurface(container, ResolveBodyMaterial(pathData, variantBase, typeBase) ?? roadBody.GetComponent<MeshRenderer>()?.sharedMaterial);
 
         // 併用軌道(222/242/303)と停留所のホーム。303 はホーム区間に沿道設備を置かない(下の RoadEquipmentGenerator)。
         List<LrtPlatformParts.Span> lrtPlatforms = segmentPlatformZones == null
@@ -892,9 +933,13 @@ public class RoadPath : IPathMeshGenerator
         if (hasLine)
         {
             // 左側は mirrorX で反転させ、プレハブが非対称でも左右対称に見えるようにする。
-            GameObject leftLine = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, -sideLineCenterOffset, lineOffsetY, true, $"{typeBase}/line");
+            GameObject leftLine = null;
+            foreach (var range in access.Remaining(-1))
+                leftLine = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, -sideLineCenterOffset, lineOffsetY, true, $"{typeBase}/line", clipFrom: range.x, clipTo: range.y);
             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] side line(左): {(leftLine != null ? "生成成功" : "生成失敗")}");
-            GameObject rightLine = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, sideLineCenterOffset, lineOffsetY, false, $"{typeBase}/line");
+            GameObject rightLine = null;
+            foreach (var range in access.Remaining(1))
+                rightLine = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, sideLineCenterOffset, lineOffsetY, false, $"{typeBase}/line", clipFrom: range.x, clipTo: range.y);
             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] side line(右): {(rightLine != null ? "生成成功" : "生成失敗")}");
         }
         else
@@ -960,9 +1005,13 @@ public class RoadPath : IPathMeshGenerator
             GetSidewalkClipRange(splineLenForClip, startSidewalkSetback.LeftOutwardSetback, endSidewalkSetback.RightOutwardSetback, out double leftClipFrom, out double leftClipTo);
             GetSidewalkClipRange(splineLenForClip, startSidewalkSetback.RightOutwardSetback, endSidewalkSetback.LeftOutwardSetback, out double rightClipFrom, out double rightClipTo);
 
-            GameObject leftSidewalk = CreateSplineMesh(container, spline, $"{variantBase}/sidewalk", sidewalkWidth, -sidewalkCenterOffset, RoadPartHeights.SIDEWALK_ABOVE_SPLINE, false, $"{typeBase}/sidewalk", clipFrom: leftClipFrom, clipTo: leftClipTo);
+            GameObject leftSidewalk = null;
+            foreach (var range in access.Remaining(-1, leftClipFrom, leftClipTo))
+                leftSidewalk = CreateSplineMesh(container, spline, $"{variantBase}/sidewalk", sidewalkWidth, -sidewalkCenterOffset, RoadPartHeights.SIDEWALK_ABOVE_SPLINE, false, $"{typeBase}/sidewalk", clipFrom: range.x, clipTo: range.y);
             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] sidewalk(左): {(leftSidewalk != null ? "生成成功" : "生成失敗")} clip=({leftClipFrom:F3}〜{leftClipTo:F3})");
-            GameObject rightSidewalk = CreateSplineMesh(container, spline, $"{variantBase}/sidewalk", sidewalkWidth, sidewalkCenterOffset, RoadPartHeights.SIDEWALK_ABOVE_SPLINE, true, $"{typeBase}/sidewalk", clipFrom: rightClipFrom, clipTo: rightClipTo);
+            GameObject rightSidewalk = null;
+            foreach (var range in access.Remaining(1, rightClipFrom, rightClipTo))
+                rightSidewalk = CreateSplineMesh(container, spline, $"{variantBase}/sidewalk", sidewalkWidth, sidewalkCenterOffset, RoadPartHeights.SIDEWALK_ABOVE_SPLINE, true, $"{typeBase}/sidewalk", clipFrom: range.x, clipTo: range.y);
             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] sidewalk(右・ミラー): {(rightSidewalk != null ? "生成成功" : "生成失敗")} clip=({rightClipFrom:F3}〜{rightClipTo:F3})");
         }
         else
@@ -979,9 +1028,11 @@ public class RoadPath : IPathMeshGenerator
             // 高速道路の本線とランプの結合区間では、間の壁と相手の路面に掛かる壁を立てない。
             float wallCenterOffset = (width * 0.5f) + (wallWidth * 0.5f);
             foreach (var range in WallRanges(corridor, left: true))
-                CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, -wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, true, $"{typeBase}/wall", clipFrom: range.From, clipTo: range.To);
+                foreach (var remaining in access.Remaining(-1, range.From, range.To))
+                    CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, -wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, true, $"{typeBase}/wall", clipFrom: remaining.x, clipTo: remaining.y);
             foreach (var range in WallRanges(corridor, left: false))
-                CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, false, $"{typeBase}/wall", clipFrom: range.From, clipTo: range.To);
+                foreach (var remaining in access.Remaining(1, range.From, range.To))
+                    CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, false, $"{typeBase}/wall", clipFrom: remaining.x, clipTo: remaining.y);
         }
         else
         {
@@ -992,7 +1043,7 @@ public class RoadPath : IPathMeshGenerator
         RoadEquipmentGenerator.Generate(container, spline, pathData, width, sidewalkWidth, treeSpacing,
             pathData.path_variant == 303
                 ? segmentPlatformZones ?? LrtPlatformParts.ZoneRanges(lrtPlatforms, LrtRoadParts.PlatformRampLength(303), LrtRoadParts.PLATFORM_EQUIPMENT_ZONE_MARGIN)
-                : corridor != null ? SplineDistances(corridor.GetMergedPercentRanges(null), spline.CalculateLength()) : null);
+                : corridor != null ? SplineDistances(corridor.GetMergedPercentRanges(null), spline.CalculateLength()) : null, access);
         SuspensionBridgeGenerator.Generate(container, spline, pathData, width);
 
         // 柱
@@ -1336,6 +1387,15 @@ public class RoadPath : IPathMeshGenerator
                         MeshRenderer mr = cornerObj.AddComponent<MeshRenderer>();
                         if (cornerResult.Material != null) mr.material = cornerResult.Material;
                         if (cornerResult.Markings != null) cornerObj.AddComponent<RoadMarkingSurface>().Configure(cornerResult.Markings);
+
+                        // 折れ点も実ノードと同じ接続形状を使い、切断した本線の間を軌道と架線でつなぐ。
+                        if (cornerResult.RailConnectors != null)
+                        {
+                            GameObject railGO = new GameObject("Rail");
+                            railGO.transform.SetParent(cornerObj.transform, false);
+                            for (int j = 0; j < cornerResult.RailConnectors.Count; j++)
+                                TrackPath.CreateRailConnectorObject(railGO.transform, cornerResult.RailConnectors[j], j);
+                        }
 
                         if (cornerResult.SidewalkConnectors != null && cornerResult.SidewalkConnectors.Count > 0)
                         {

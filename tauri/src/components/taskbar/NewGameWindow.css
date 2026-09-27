@@ -127,7 +127,7 @@
   border-radius: 0;
   background-size: cover;
   background-position: center;
-  /* <img>でサムネイル画像(160x120)を表示する場合の枠へのフィット指定。
+  /* <img>でシナリオ画像を表示する場合の枠へのフィット指定。
      プレースホルダー用のdiv(背景色のみ)には影響しない。 */
   object-fit: cover;
   flex-shrink: 0;
@@ -214,6 +214,12 @@
 
 .new-game-detail-image--terrain {
   background-color: #3a6b3a;
+}
+
+/* 海は透過のまま、縦長・横長の地形も全域が見えるように収める。 */
+.new-game-tile-image.terrain-map-thumbnail,
+.new-game-detail-image.terrain-map-thumbnail {
+  object-fit: contain;
 }
 
 .new-game-detail-image--template {

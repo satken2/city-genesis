@@ -33,6 +33,7 @@ public static class OpenSpaceLayout
         public readonly List<Prop> Props = new List<Prop>();
         public readonly List<Vector2[]> ParkingBays = new List<Vector2[]>();
         public readonly List<Vector2> AccessCells = new List<Vector2>();
+        public readonly List<BuildingRoadOpening> Openings = new List<BuildingRoadOpening>();
         public bool HasLoop;
     }
     sealed class Grid
@@ -455,6 +456,7 @@ public static class OpenSpaceLayout
         var roadFull = Largest(And(road, site));
         if (roadFull == null || !roadFull.Contains(island)) return false;
         var plaza = Minus(site, roadFull);
+        AddRoadOpenings(p, f, roadFull, halfFront, accesses);
         p.HasLoop = true;
 
         // 面: 周回路・歩道(縁石で上げる)・島(芝と縁石)・縁石の天端の帯
@@ -620,6 +622,7 @@ public static class OpenSpaceLayout
         var road = Largest(bay);
         if (road == null) return;
         var plaza = Minus(site, road);
+        AddRoadOpenings(p, f, road, halfFront, null);
         Emit(p, f, road, "site_asphalt", .012f);
         Emit(p, f, plaza, "site_paving", Curb, "site_curb");
         Emit(p, f, And(plaza, road.Buffer(.3, Round())), "site_curb", Curb + .003f);
@@ -631,6 +634,48 @@ public static class OpenSpaceLayout
         placer.Put("site_bench", -half * .5 - 2.5, 7.2, 0, -1, 2.0, .7, space);
         placer.Put("site_vending", half * .5 + 2.5, 7.2, 0, -1, 2.2, .9, space);
     }
+    /// <summary>すみ切り後の車路と接道辺の交線が実際の間口。構内セルや車線の公称幅とは区別する。</summary>
+    static void AddRoadOpenings(Plan p, Frame f, Geometry road, double halfFront,
+        List<(double s, double width, bool entry, bool exit)> accesses)
+    {
+        var boundary = Nts.CreateLineString(new[] { new Coordinate(-halfFront, 0), new Coordinate(halfFront, 0) });
+        var crossing = And(road, boundary);
+        var lines = new List<LineString>();
+        void Collect(Geometry geometry)
+        {
+            if (geometry is LineString line && line.Length > .000001) lines.Add(line);
+            else if (geometry is GeometryCollection group)
+                for (int i = 0; i < group.NumGeometries; i++) Collect(group.GetGeometryN(i));
+        }
+        Collect(crossing);
+        lines.Sort((a, b) => a.EnvelopeInternal.MinX.CompareTo(b.EnvelopeInternal.MinX));
+        var intervals = new List<(double lo, double hi)>();
+        foreach (var line in lines)
+        {
+            double lo = line.EnvelopeInternal.MinX, hi = line.EnvelopeInternal.MaxX;
+            if (intervals.Count > 0 && lo <= intervals[intervals.Count - 1].hi + .0001)
+                intervals[intervals.Count - 1] = (intervals[intervals.Count - 1].lo, Math.Max(hi, intervals[intervals.Count - 1].hi));
+            else intervals.Add((lo, hi));
+        }
+        foreach (var (lo, hi) in intervals)
+        {
+            if (hi - lo < .2) continue;
+            Vector2 a = f.World(lo, 0), b = f.World(hi, 0), outward = f.World(0, 0) - f.World(0, 1);
+            var apron = Largest(And(road, Rect(lo, 0, hi, BuildingRoadAccess.ApronDepth)));
+            if (apron == null) continue;
+            var ring = apron.ExteriorRing.Coordinates;
+            var points = new Vector2[ring.Length - 1];
+            for (int i = 0; i < points.Length; i++) points[i] = f.World(ring[i].X, ring[i].Y);
+            string flow = "both";
+            if (accesses != null)
+                foreach (var access in accesses)
+                    if (access.s >= lo && access.s <= hi) flow = access.entry && access.exit ? "both" : access.entry ? "entry" : "exit";
+            float pavement = ModularBodyBuilder.GROUND_OFFSET + .012f;
+            p.Openings.Add(new BuildingRoadOpening { A = new Vector3(a.x, pavement, a.y), B = new Vector3(b.x, pavement, b.y),
+                Outward = new Vector3(outward.x, 0, outward.y).normalized, Apron = points, FollowsTerrain = true, Flow = flow });
+        }
+    }
+
     static float Cross(Vector2 a,Vector2 b) => a.x*b.y-a.y*b.x;
     static bool Intersects(Vector2 a,Vector2 b,Vector2 c,Vector2 d)
     {

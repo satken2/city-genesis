@@ -33,28 +33,35 @@ public static class VehicleModelResolver
     }
 
     /// <summary>
-    /// 路線車両の1両を生成する。中間車は外観の middle 系モデル、無ければ外観0の middle、それも無ければ先頭車を使う。
+    /// 路線車両の1両を生成する。part は外観番号、middle 系、または路線種別が指定する wagon 系。
+    /// liveryVariant が負の貨車は路線色で塗らない。
     /// 帯の塗装スロットは <see cref="TransitLivery"/> へ生成時に登録し、配置のたびに路線色で塗る。
     /// </summary>
-    public static GameObject CreateTransitCar(int type, bool middle, Transform parent, int variantId = 0)
+    public static GameObject CreateTransitCar(int type, string part, Transform parent, int liveryVariant = 0)
     {
-        var car = CreateTransitModel(type, middle, parent, variantId);
-        TransitLivery.Register(car, type, variantId);
+        var car = CreateTransitModel(type, part, parent, liveryVariant);
+        if (liveryVariant >= 0) TransitLivery.Register(car, type, liveryVariant);
         return car;
     }
 
-    private static GameObject CreateTransitModel(int type, bool middle, Transform parent, int variantId)
+    private static GameObject CreateTransitModel(int type, string part, Transform parent, int variantId)
     {
-        if (!middle) return CreateInstance(type,variantId,parent);
-        string part = variantId == 0 ? "middle" : $"middle_{variantId}";
+        if (int.TryParse(part, out int lead)) return CreateInstance(type,lead,parent);
+        bool middle = part.StartsWith("middle", System.StringComparison.Ordinal);
         var prefab = ModelManager.Instance?.GetModel($"Models/Vehicles/{type}/{part}",suppressWarning:true);
-        if (prefab == null)
+        if (prefab == null && middle)
         {
             part = "middle";
             prefab = ModelManager.Instance?.GetModel($"Models/Vehicles/{type}/{part}",suppressWarning:true);
         }
-        if (prefab == null) return CreateInstance(type,variantId,parent);
+        if (prefab == null && middle) return CreateInstance(type,variantId,parent);
         var root = new GameObject("TransitCar"); root.transform.SetParent(parent,false);
+        if (prefab == null)
+        {
+            // 貨車が欠けても機関車へ置き換えない。欠落したモデルは既存の代替箱で示す。
+            BuildFallbackBox(type, root.transform);
+            root.SetActive(false); return root;
+        }
         var model = Object.Instantiate(prefab,root.transform);
         model.transform.localPosition = Vector3.zero; model.transform.localRotation = Quaternion.identity;
         model.SetActive(true); NormalizeModel(root.transform,model.transform);

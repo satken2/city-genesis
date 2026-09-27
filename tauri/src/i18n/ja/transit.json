@@ -82,6 +82,7 @@
     "fleetMoreTrains": "ほか {{count}} 編成",
     "fleetShortage": "{{count}} 編成ぶんの車両が調達できていません。",
     "vehicleModel": "車両",
+    "freightConsistNote": "機関車1両を含む総両数です。積載量は貨車の両数で決まり、最低2両が必要です。",
     "vehicleModelNote": "車両の見た目だけが変わります。定員・費用・速度は変わりません。車体の帯は路線カラーで塗られます。",
     "estimate": {
       "title": "収支見込み",
@@ -127,8 +128,9 @@
       "trainFuturistic": "近未来",
       "trainRetro": "レトロ",
       "monorail": "モノレール",
-      "freightRed": "赤い機関車",
-      "freightBlue": "青い機関車"
+      "freightJr": "JR貨物風",
+      "freightAmerican": "アメリカ風",
+      "freightIndian": "インド国鉄風"
     }
   }
 }

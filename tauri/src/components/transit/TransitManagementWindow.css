@@ -3,20 +3,21 @@
 
    ポップアップ土台(.popup-shell のグラデーション)の上にじかに描く。ルートに地色・枠線・角丸・
    落ち影を持たせると、ウィンドウの中にもう1枚カードが浮いて見えるため持たせない。
-   上段=種別タブ(意匠は詳細パネルのタブ .agent-detail-tab と同じ下線式)+新設ボタン、
-   下段=路線の表。ボタン・入力欄の面は App.css の --flat-* を参照する。
+   左側=路線種別の縦並びタブ+新設ボタン、右側=路線の表。
+   ボタン・入力欄の面は App.css の --flat-* を参照する。
 
    運行状態バッジ(.transit-badge)は路線詳細パネルも import して使う。
    ========================================================================== */
 
 .transit-window {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  flex-direction: row;
+  gap: 14px;
   height: 100%;
   min-height: 0;
   color: #e2e8f0;
   font-size: 0.8rem;
+  overflow: hidden;
 }
 
 .transit-window__loading,
@@ -32,38 +33,72 @@
   color: var(--flat-danger);
 }
 
-/* ---- 種別タブ + 新設ボタン ---- */
-.transit-window__bar {
-  display: flex;
-  align-items: flex-end;
-  gap: 12px;
+/* ---- 左サイドバー: 路線新設ボタン + 種別タブ ---- */
+.transit-sidebar {
+  width: 176px;
+  min-width: 160px;
   flex-shrink: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  padding-right: 10px;
 }
 
-/* 種別が増えて収まらないときは横にスクロールさせ、新設ボタンを押し出さない */
+.transit-window__new-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  flex-shrink: 0;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background: var(--flat-selected);
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: var(--flat-shadow-sm);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.transit-window__new-btn:hover {
+  background: var(--flat-selected-hover);
+}
+
+.transit-window__new-btn svg {
+  flex-shrink: 0;
+}
+
+/* 種別タブ一覧(縦並び) */
 .transit-tabs {
   display: flex;
-  gap: 2px;
-  min-width: 0;
-  overflow-x: auto;
+  flex-direction: column;
+  gap: 3px;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .transit-tab {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  width: 100%;
   flex-shrink: 0;
-  padding: 6px 12px;
-  border: none;
-  border-bottom: 2px solid transparent;
-  border-radius: 4px 4px 0 0;
+  padding: 7px 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
   background: transparent;
   color: #9db0c5;
   font-size: 0.8rem;
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
+  text-align: left;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
@@ -74,17 +109,37 @@
 
 .transit-tab--active,
 .transit-tab--active:hover {
-  background: rgba(78, 161, 255, 0.1);
+  background: rgba(78, 161, 255, 0.12);
   color: #4ea1ff;
-  border-bottom-color: #4ea1ff;
+  border-color: rgba(78, 161, 255, 0.35);
 }
 
-/* アイコンで行の高さが伸びないよう、上下にはみ出させる */
 .transit-tab__icon {
-  width: 18px;
-  height: 18px;
-  margin: -2px 0;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
   object-fit: contain;
+}
+
+.transit-tab__icon--all {
+  color: #9db0c5;
+  transition: color 0.15s;
+}
+
+.transit-tab:hover .transit-tab__icon--all {
+  color: #f6fbff;
+}
+
+.transit-tab--active .transit-tab__icon--all {
+  color: #4ea1ff;
+}
+
+.transit-tab__label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .transit-tab__count {
@@ -97,6 +152,8 @@
   line-height: 16px;
   text-align: center;
   font-variant-numeric: tabular-nums;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .transit-tab--active .transit-tab__count {
@@ -104,25 +161,14 @@
   color: #cfe4ff;
 }
 
-.transit-window__new-btn {
-  flex-shrink: 0;
-  margin: 0 0 5px auto;
-  padding: 5px 12px;
-  border: none;
-  border-radius: 5px;
-  background: var(--flat-selected);
-  color: #ffffff;
-  font-size: 0.76rem;
-  font-weight: 600;
-  line-height: 1.2;
-  white-space: nowrap;
-  box-shadow: var(--flat-shadow-sm);
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.transit-window__new-btn:hover {
-  background: var(--flat-selected-hover);
+/* ---- 右メイン領域 ---- */
+.transit-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
 }
 
 .transit-window__error-inline {

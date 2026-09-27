@@ -82,6 +82,7 @@
     "fleetMoreTrains": "y {{count}} tren(es) más",
     "fleetShortage": "No se pudieron formar {{count}} tren(es) por falta de vehículos.",
     "vehicleModel": "Vehículo",
+    "freightConsistNote": "El total incluye una locomotora. Solo los vagones transportan carga; se requieren al menos dos vehículos.",
     "vehicleModelNote": "Solo cambia el aspecto de los vehículos. La capacidad, el costo y la velocidad no cambian. Las franjas de la carrocería se pintan con el color de la línea.",
     "estimate": {
       "title": "Balance previsto",
@@ -127,8 +128,9 @@
       "trainFuturistic": "Futurista",
       "trainRetro": "Retro",
       "monorail": "Monorriel",
-      "freightRed": "Locomotora roja",
-      "freightBlue": "Locomotora azul"
+      "freightJr": "Estilo de carga japonés",
+      "freightAmerican": "Estilo estadounidense",
+      "freightIndian": "Estilo ferroviario indio"
     }
   }
 }

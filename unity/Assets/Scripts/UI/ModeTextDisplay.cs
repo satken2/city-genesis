@@ -19,8 +19,11 @@ public class ModeTextDisplay : MonoBehaviour
         ("STATE_FLY_MODE", "STATE_FLY_MODE (Shift + F to exit)"),
     };
 
-    // 直近に適用されたステート。フライモード終了時にこのキャプションへ戻すために保持する。
+    // 直近に適用されたステート。カメラ専用モード終了時に戻すために保持する。
     private string lastState = "STATE_NORMAL";
+    private RectTransform cinematicCaptionPanel;
+    private Vector2 savedCaptionSize;
+    private Vector2 savedCaptionPosition;
 
     // IPC の world:change_state ではなく、Unity が実際に適用したステートを購読する。
     // パネルを閉じたときの編集モードの打ち切りや Esc など、Unity 内部で通常モードへ戻る経路にも追従するため。
@@ -37,10 +40,10 @@ public class ModeTextDisplay : MonoBehaviour
 
     private void OnStateChanged(string state)
     {
-        // フライモード中にIPCステートが届いた場合でも、直近ステートは記録しておき、
-        // 表示自体はフライモードのキャプションを優先する（終了時に正しく復帰させるため）。
+        // カメラ専用モード中も直近のステートを記録し、終了時に正しい表示へ復帰させる。
         lastState = state;
-        if (CameraController.Instance != null && CameraController.Instance.IsFlyMode) return;
+        if (CameraController.Instance != null &&
+            (CameraController.Instance.IsFlyMode || CameraController.Instance.IsCinematicMode)) return;
         ApplyStateText(state);
     }
 
@@ -69,14 +72,43 @@ public class ModeTextDisplay : MonoBehaviour
     /// </summary>
     public void ShowFlyMode()
     {
+        RestoreCaptionLayout();
         ApplyStateText("STATE_FLY_MODE");
     }
 
     /// <summary>
-    /// フライモード終了時に呼ぶ。直前のIPCステートのキャプションへ戻す。
+    /// カメラ専用モード終了時に呼ぶ。直前のIPCステートのキャプションへ戻す。
     /// </summary>
-    public void HideFlyMode()
+    public void RestoreState()
     {
+        RestoreCaptionLayout();
         ApplyStateText(lastState);
+    }
+
+    public void ShowCinematicMode(bool orbit, bool paused, bool hasPivot, bool reversed)
+    {
+        if (modeText == null) return;
+        if (cinematicCaptionPanel == null && modeText.transform.parent is RectTransform panel)
+        {
+            cinematicCaptionPanel = panel;
+            savedCaptionSize = panel.sizeDelta;
+            savedCaptionPosition = panel.anchoredPosition;
+            float height = Mathf.Max(72f, panel.rect.height);
+            float increase = height - panel.rect.height;
+            panel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
+            panel.anchoredPosition -= Vector2.up * (increase * (1f - panel.pivot.y));
+        }
+        string status = orbit && !hasPivot ? "No target (Space: retry)" : paused ? "Paused" : "Playing";
+        string controls = orbit ? "" : "\nA/D: heading +/-5° | Arrows: move | R/F: height";
+        modeText.text = $"Camera {(orbit ? "1: Orbit" : "2: Travel")} | {status}{(reversed ? " | Reversed" : "")}\n"
+            + "Shift: mode | Space: pause | Backspace: reverse | Esc: exit" + controls;
+    }
+
+    private void RestoreCaptionLayout()
+    {
+        if (cinematicCaptionPanel == null) return;
+        cinematicCaptionPanel.sizeDelta = savedCaptionSize;
+        cinematicCaptionPanel.anchoredPosition = savedCaptionPosition;
+        cinematicCaptionPanel = null;
     }
 }

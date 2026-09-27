@@ -63,7 +63,7 @@ export class ApiError extends Error {
  */
 export async function fetchApi<T>(
   url: string,
-  options?: { method?: string; headers?: Record<string, string>; body?: string; signal?: AbortSignal }
+  options?: { method?: string; headers?: Record<string, string>; body?: string; signal?: AbortSignal; cache?: RequestCache }
 ): Promise<T> {
   const response = await fetch(url, {
     method: options?.method ?? "GET",
@@ -73,6 +73,7 @@ export async function fetchApi<T>(
     },
     body: options?.body,
     signal: options?.signal,
+    cache: options?.cache,
   });
   if (!response.ok) {
     const errorData: Partial<ApiErrorResponse> = await response

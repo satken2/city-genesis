@@ -16,6 +16,7 @@
 | `CoastlineStore.cs` / `RiverStore.cs` / `WaterSurfaceStore.cs` / `WaterSurfaceManager.cs` / `RiverSurfaceManager.cs` | 海岸線・川・湖の静的ストア(湖は `WaterSurfaceManager` が水面の生成時に登録) / 湖の水面 / 川の水面と川床マスク |
 | `PathManager.cs` / `SplinePartLod.cs` / `RoadMarkingAtlas.cs` | 道路・線路・ノード・交差点 / 長い道路の区間LOD / 路面標示画像の予算 |
 | `BuildingManager.cs` / `BuildingExteriorRenderer.cs` / `FarBuildingBatcher.cs` / `ConstructionCraneAnimator.cs` | 建物 / 敷地装飾 / 遠景結合 / クレーン演出 |
+| `BuildingRoadAccessIndex.cs` | 建物データに同期する道路間口と配置計画の索引。GOのアンロードでは消さず、実削除・全消去で解除。変更時はPathManagerがセル逆引きで道路の描画版と再生成キューを更新する |
 | `ParcelManager.cs` / `ZoneManager.cs` / `ResourceManager.cs` | 区画 / 地区 / 天然資源ヒートマップ |
 | `PropManager.cs` ほか `Prop*.cs` / `StableSample.cs` / `ForestRenderer.cs` / `ForestOverview.cs` | プロップ(下記) |
 | `AlertManager.cs` / `FireEffectManager.cs` | アラートアイコン / 火災パーティクル |

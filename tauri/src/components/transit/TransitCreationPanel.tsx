@@ -170,7 +170,10 @@ export function TransitCreationPanel({
     if (!selectedEntry) return;
     const initialPoints = isEdit && editedLine ? editedLine.route_points : [];
     setPoints(initialPoints);
-    if (!isEdit) setVehicleModel(defaultTransitVehicleModel(selectedEntry.transit_path_id));
+    if (!isEdit) {
+      setVehicleModel(defaultTransitVehicleModel(selectedEntry.transit_path_id));
+      setCarsPerTrain((cars) => Math.max(selectedEntry.freight ? 2 : 1, cars));
+    }
     void sendChangeState(
       "STATE_EDIT_TRANSIT",
       {
@@ -365,9 +368,10 @@ export function TransitCreationPanel({
                 <div className="bc-split-col">
                   <div className="bc-section-title">{t("transit.carsPerTrain")}</div>
                   <div className="bc-stepper-row">
-                    <NumberStepper value={carsPerTrain} onChange={setCarsPerTrain} min={1} max={20} step={1} integerOnly={true} />
+                    <NumberStepper value={carsPerTrain} onChange={setCarsPerTrain} min={selectedEntry.freight ? 2 : 1} max={20} step={1} integerOnly={true} />
                     <span className="bc-stepper-unit">{t("transit.carsUnit")}</span>
                   </div>
+                  {selectedEntry.freight && <p className="bc-description-text">{t("transit.freightConsistNote")}</p>}
                 </div>
               </div>
             </>

@@ -441,6 +441,7 @@ public class PathManager : BaseApiDataManager
         PowerLinePath.ConnectedPaths = GetPathsConnectedToNode;
         TrackPath.InfrastructureConnectionProvider = IsInfrastructureConnection;
         LrtPlatformParts.PolylineProvider = GetLrtPlatformPolyline;
+        BuildingRoadAccessIndex.Changed += OnBuildingRoadAccessChanged;
     }
 
     /// <summary>LRT停留所のホームの範囲を、車両と同じ未切断点列と切断位置で解決するための点列。</summary>
@@ -456,6 +457,7 @@ public class PathManager : BaseApiDataManager
 
     private void OnDestroy()
     {
+        BuildingRoadAccessIndex.Changed -= OnBuildingRoadAccessChanged;
         if (RoadMarkingRules.ConnectedPaths == (Func<int, List<PathSummary>>)GetPathsConnectedToNode)
         {
             RoadMarkingRules.ConnectedPaths = null;
@@ -1060,6 +1062,7 @@ public class PathManager : BaseApiDataManager
         closePathIds.Clear();
         lodCache.Clear();
         geometryRevisions.Clear();
+        pendingBuildingAccessRebuilds.Clear();
         anchorPolylineCache.Clear();
         untrimmedPointsCache.Clear();
         connectionRevisions.Clear();
@@ -4533,9 +4536,38 @@ public class PathManager : BaseApiDataManager
         }
     }
 
+    private readonly Dictionary<int, long> pendingBuildingAccessRebuilds = new();
+
+    private void OnBuildingRoadAccessChanged(IReadOnlyList<BuildingRoadAccessIndex.Opening> openings)
+    {
+        var changed = new HashSet<int>();
+        foreach (var opening in openings)
+            foreach (var position in BuildingRoadAccessIndex.Samples(opening))
+                foreach (var path in GetPathsNearCircle(position, 64f))
+                {
+                    if (path.path_type != Constants.PATH_STREET || changed.Contains(path.path_id)) continue;
+                    if (!TryGetUntrimmedPolylineShared(path.path_id, out var points) || points.Count < 2)
+                    { changed.Add(path.path_id); continue; }
+                    // セルは候補抽出だけに使う。間口の標本間隔も含む距離で絞り、大きなセル全体を再生成しない。
+                    float reach = GetRoadWidth(path.path_variant) * .5f + RoadAccessPlan.MaxGap + 16f;
+                    for (int i = 1; i < points.Count; i++)
+                        if (Utils.XZDistanceSquared(position, PolylineUtils.ClosestPointOnSegmentXZ(position, points[i - 1], points[i])) <= reach * reach)
+                        { changed.Add(path.path_id); break; }
+                }
+        foreach (int id in changed)
+        {
+            geometryRevisions.TryGetValue(id, out int revision);
+            geometryRevisions[id] = revision + 1;
+            pendingBuildingAccessRebuilds[id] = pathBuildSerialCounter;
+        }
+    }
+
     private void LateUpdate()
     {
         if (isLodPathBatchActive) return;
+        foreach (var entry in pendingBuildingAccessRebuilds)
+            if (pathDataCache.ContainsKey(entry.Key)) EnqueueTerrainFollowPath(entry.Key, entry.Value, TerrainFollowQueueReason.Other);
+        pendingBuildingAccessRebuilds.Clear();
         if (pendingLrtPlatformRebuildSerials.Count > 0)
         {
             foreach (var kvp in pendingLrtPlatformRebuildSerials)

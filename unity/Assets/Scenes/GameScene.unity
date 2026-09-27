@@ -1143,6 +1143,11 @@ MonoBehaviour:
   flyModeButton: {fileID: 1358878183}
   flyModeOnIcon: {fileID: 21300000, guid: 7bbcdd7e5616519488e8e7176961f061, type: 3}
   flyModeOffIcon: {fileID: 21300000, guid: 175074b13c8d0e34590dd81dca7b3812, type: 3}
+  cinematicModeButton: {fileID: 778018351}
+  cinematicOrbitSpeed: 3
+  cinematicMoveSpeed: 5
+  cinematicManualMoveSpeed: 20
+  cinematicHeightSpeed: 5
   flyMouseSensitivity: 0.1
   flySpeedMultiplier: 0.3
   moveHeightSpeedMultiplier: 0.5

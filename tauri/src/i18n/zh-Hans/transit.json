@@ -82,6 +82,7 @@
     "fleetMoreTrains": "另有 {{count}} 列",
     "fleetShortage": "因车辆不足，有 {{count}} 列无法编组。",
     "vehicleModel": "车辆",
+    "freightConsistNote": "总节数包含1台机车。载货量由货车节数决定，每列至少需要2节。",
     "vehicleModelNote": "只改变车辆的外观，载客量、费用和速度不变。车身的色带会涂成线路颜色。",
     "estimate": {
       "title": "收支预测",
@@ -127,8 +128,9 @@
       "trainFuturistic": "未来风",
       "trainRetro": "复古",
       "monorail": "单轨列车",
-      "freightRed": "红色机车",
-      "freightBlue": "蓝色机车"
+      "freightJr": "JR货物风格",
+      "freightAmerican": "美式风格",
+      "freightIndian": "印度国铁风格"
     }
   }
 }

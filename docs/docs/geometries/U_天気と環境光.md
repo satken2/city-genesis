@@ -158,6 +158,8 @@ Cockpitは幅800px・高さ76pxの独立したWebViewウィンドウである。
 
 シーンの `RenderSettings.sun`、または有効なDirectional Lightのうち最も強いものを太陽として使う。追加の太陽を重ねない。方向・色・強度・影の濃さを毎フレーム時刻と天気から決め、既存のURPのソフトシャドウ設定を使う。PC用RPAssetの影距離・解像度・カスケード設定はそのまま利用するため、遠景の建物の影が表示される距離は元の描画設定に従う。
 
+`PC_RPAsset` の影の Depth Bias は1、Normal Biasは0.5とする。斜光での自己遮蔽の誤判定を抑えつつ、過大な補正による影の浮きを避ける。道路・軌道の周期的な縞は補正値だけに頼らず、[道路メッシュ](G_道路メッシュの生成.md)の内部端面除去でも抑える。
+
 地上の雲影には128×128の周期的なグレースケールCookieを使用し、URPの `UniversalAdditionalLightData.lightCookieSize` で投影サイズを指定する。空の雲と同じ被覆率・厚さを使うが、雲形状と地上の影を物理的に1対1で対応させるものではない。天気の移り変わりの途中は、雲量か厚さが一定以上変わるたびに作り直す（最短0.5秒間隔）。[UnityのLight設定](https://docs.unity3d.com/ja/current/Manual/urp/light-component.html)も参照。
 
 環境光は上空と地平線の色から球面調和関数(SH)を作り、`AmbientMode.Custom` と `RenderSettings.ambientProbe` で設定する。霞はLinear Fogで制御する。Fog非対応の独自シェーダーやUnlitの表示は、そのマテリアル自身の実装に従う。64pxのRealtime Reflection Probeは空だけを描く。太陽が動き続けるので3秒ごとに面ごとの分割更新で描き直し、天気を即座に切り替えたときはその場で描き直す。都市のメッシュを反射用に再描画しない。ローカルな既存プローブを優先できるよう、天気プローブのimportanceは低くする。

@@ -21,7 +21,8 @@ public static partial class VehicleQA
         {
             var names = (HashSet<string>)livery.GetMethod("GetMaterialNames").Invoke(null, new object[]{type, variant});
             Check(names != null && names.Count > 0, $"Livery material is not configured: {type}/{variant}");
-            var car = (GameObject)resolver.GetMethod("CreateTransitCar").Invoke(null, new object[]{type, middle, null, variant});
+            string part = middle ? (variant == 0 ? "middle" : "middle_" + variant) : variant.ToString();
+            var car = (GameObject)resolver.GetMethod("CreateTransitCar").Invoke(null, new object[]{type, part, null, variant});
             var originals = new Dictionary<Renderer, Material[]>();
             foreach (var renderer in car.GetComponentsInChildren<Renderer>(true)) originals[renderer] = renderer.sharedMaterials;
             var lod = car.GetComponent<LODGroup>();

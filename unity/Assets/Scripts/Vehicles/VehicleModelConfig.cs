@@ -23,16 +23,46 @@ public static class VehicleModelConfig
     private const string ResourcePath = "Config/vehicle_model_config";
     private static readonly Dictionary<int, List<int>> variantsByType = new();
     private static bool isLoaded;
-    private static Dictionary<string, int> transitTypes;
+    private static Dictionary<int, TransitDefinition> transitTypes;
 
-    public static int GetTransitVehicleType(int pathVariant)
+    private sealed class TransitDefinition
+    {
+        public int vehicle_type;
+        public string wagon;
+    }
+
+    /// <summary>編成内の実体モデル。貨車の種類は機関車の外観から独立し、プールも実体モデルごとに共有する。</summary>
+    public readonly struct TransitCarModel
+    {
+        public readonly string Part;
+        public readonly int LiveryVariant;
+        public readonly bool ReverseBody;
+        public TransitCarModel(string part, int liveryVariant, bool reverseBody)
+        { Part = part; LiveryVariant = liveryVariant; ReverseBody = reverseBody; }
+    }
+
+    private static TransitDefinition GetTransitDefinition(int pathVariant)
     {
         if (transitTypes == null)
         {
             var asset = Resources.Load<TextAsset>("Config/transit_vehicle_models");
-            transitTypes = asset != null ? JsonConvert.DeserializeObject<Dictionary<string,int>>(asset.text) : new();
+            transitTypes = asset != null ? JsonConvert.DeserializeObject<Dictionary<int, TransitDefinition>>(asset.text) : new();
         }
-        return transitTypes.TryGetValue(pathVariant.ToString(), out int type) ? type : 0;
+        return transitTypes.TryGetValue(pathVariant, out var definition) ? definition : null;
+    }
+
+    public static int GetTransitVehicleType(int pathVariant) => GetTransitDefinition(pathVariant)?.vehicle_type ?? 0;
+
+    /// <summary>identity は折り返しても変わらない車両番号。貨物は0が機関車、それ以外が路線種別の貨車。</summary>
+    public static TransitCarModel GetTransitCarModel(int pathVariant, int variant, int identity, int cars)
+    {
+        var definition = GetTransitDefinition(pathVariant);
+        if (!string.IsNullOrEmpty(definition?.wagon))
+            return identity == 0 ? new TransitCarModel(variant.ToString(), variant, false)
+                : new TransitCarModel(definition.wagon, -1, false);
+        bool middle = identity > 0 && identity < cars - 1;
+        string part = middle ? (variant == 0 ? "middle" : $"middle_{variant}") : variant.ToString();
+        return new TransitCarModel(part, variant, identity == cars - 1 && cars > 1 && definition?.vehicle_type != Constants.VEHICLE_BUS);
     }
 
     /// <summary>指定車種のバリアントID一覧を返す(未定義なら空リスト)。</summary>

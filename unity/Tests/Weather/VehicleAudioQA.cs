@@ -50,6 +50,39 @@ public sealed class VehicleAudioQaHost : MonoBehaviour
         }
         checks++;
     }
+
+    private void CheckDistanceResponse(AudioSource source)
+    {
+        var lowPass = source.GetComponent<AudioLowPassFilter>();
+        Check(source.rolloffMode == AudioRolloffMode.Custom && lowPass != null && lowPass.enabled,
+            "every vehicle layer has distance attenuation and a low-pass filter: " + source.name);
+        Check(!source.bypassEffects && lowPass.lowpassResonanceQ == 1f, "distance filter is audible without resonance boost");
+        var gain = source.GetCustomCurve(AudioSourceCurveType.CustomRolloff);
+        var cutoff = lowPass.customCutoffCurve;
+        float previousGain = 1f, previousCutoff = 22000f;
+        for (int distance = 0; distance <= (int)source.maxDistance; distance++)
+        {
+            float t = distance / source.maxDistance;
+            float g = gain.Evaluate(t), hz = cutoff.Evaluate(t);
+            Check(g >= 0f && g <= previousGain + 0.0001f, "moving away never increases volume");
+            Check(hz >= 2000f && hz <= previousCutoff + 1f, "moving away softens highs without excessive muffling");
+            previousGain = g;
+            previousCutoff = hz;
+        }
+        Check(gain.Evaluate(source.minDistance / source.maxDistance) > 0.99f && cutoff.Evaluate(0f) > 20000f,
+            "nearby vehicles retain volume and clarity");
+        Check(gain.Evaluate(1f) == 0f && gain.Evaluate(1.1f) == 0f, "audible range ends in silence");
+        if (source.maxDistance == VehicleAmbience.TrainMaxDistance)
+        {
+            float distantGain = gain.Evaluate(100f / source.maxDistance);
+            Check(distantGain >= 0.35f && distantGain <= 0.5f, "100m train remains audible with clear distance attenuation");
+            Check(gain.Evaluate(300f / source.maxDistance) >= 0.03f, "300m train retains a distant rumble");
+            float hz = cutoff.Evaluate(100f / source.maxDistance);
+            Check(hz >= 4000f && hz <= 8000f, "100m train loses sharp highs but retains body");
+        }
+        else Check(gain.Evaluate(100f / source.maxDistance) < 0.15f, "cars retain strong distance attenuation");
+    }
+
     private IEnumerator Start()
     {
         new GameObject("Game state").AddComponent<GameStateManager>();
@@ -58,6 +91,7 @@ public sealed class VehicleAudioQaHost : MonoBehaviour
         camera.gameObject.AddComponent<AudioListener>();
         var ambience = new GameObject("Ambience").AddComponent<VehicleAmbience>();
         ambience.SetVolume(0.5f);
+        foreach (var source in FindObjectsByType<AudioSource>(FindObjectsSortMode.None)) CheckDistanceResponse(source);
         foreach (string name in new[] { "vehicle-train", "vehicle-train-slow", "vehicle-train-fast", "vehicle-train-motor" })
         {
             var clip = Resources.Load<AudioClip>("Audio/Vehicles/" + name);
@@ -108,6 +142,21 @@ public sealed class VehicleAudioQaHost : MonoBehaviour
         yield return new WaitForSecondsRealtime(1.7f);
         foreach (var layer in rollingLayers) Check(!layer.isPlaying, "stale train stops every rolling loop");
         Check(!motor.isPlaying, "stale train stops motor");
+        // 音源プールを遠景で再使用し、リスナーの移動で範囲外・近景へ切り替える。
+        foreach (float cameraZ in new[] { -100f, -VehicleAmbience.TrainMaxDistance, 190f })
+        {
+            camera.transform.position = new Vector3(0f, 0f, cameraZ);
+            float until = Time.unscaledTime + 0.9f;
+            while (Time.unscaledTime < until)
+            {
+                VehicleAmbience.Report(VehicleAmbience.Kind.Train, 3, new Vector3(0f, 0f, 200f), 15f);
+                yield return null;
+            }
+            Check(ambience.PlayingCount == (cameraZ == -VehicleAmbience.TrainMaxDistance ? 0 : 1), "listener movement updates audible train selection");
+            foreach (var source in FindObjectsByType<AudioSource>(FindObjectsSortMode.None))
+                if (source.isPlaying) CheckDistanceResponse(source);
+        }
+        camera.transform.position = Vector3.zero;
         VehicleAmbience.Report(VehicleAmbience.Kind.Train, 3, Vector3.zero, 10f);
         yield return new WaitForSecondsRealtime(0.4f);
         ambience.enabled = false;

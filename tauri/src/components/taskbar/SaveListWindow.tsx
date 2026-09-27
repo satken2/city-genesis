@@ -14,6 +14,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { EpochDate } from "../common/EpochDate";
+import { fetchApi } from "../../utils/api";
 import "./SaveListWindow.css";
 
 type SaveListWindowProps = {
@@ -23,7 +24,7 @@ type SaveListWindowProps = {
 
 /**
  * セーブデータのメタデータエントリ
- * GET /api/v1/system/saves の各要素の型
+ * GET /api/v1/saves の各要素の型
  */
 type SaveEntry = {
   id: string;
@@ -38,7 +39,7 @@ type SaveEntry = {
 };
 
 /**
- * GET /api/v1/system/saves レスポンスの型
+ * GET /api/v1/saves レスポンスの型
  */
 type SavesResponse = {
   success: boolean;
@@ -73,6 +74,7 @@ export function SaveListWindow({ apiBaseUrl, onClose }: SaveListWindowProps) {
   /**
    * ウィンドウ初期化時にセーブデータ一覧とセッション情報を同時に取得する。
    * セッション情報は現在のセーブIDを取得するために使用する(ハイライト表示用)。
+   * 上書き保存や削除を即座に反映するため、HTTPキャッシュを使わず再取得する。
    */
   useEffect(() => {
     if (!apiBaseUrl) return;
@@ -81,21 +83,21 @@ export function SaveListWindow({ apiBaseUrl, onClose }: SaveListWindowProps) {
     async function fetchData() {
       setLoading(true);
       try {
-        const [savesRes, sessionRes] = await Promise.all([
-          fetch(`${base}/api/v1/saves`),
-          fetch(`${base}/api/v1/sessions`),
+        const [savesResult, sessionResult] = await Promise.allSettled([
+          fetchApi<SavesResponse>(`${base}/api/v1/saves`, { cache: "reload" }),
+          fetchApi<SessionInfo>(`${base}/api/v1/sessions`, { cache: "reload" }),
         ]);
 
-        if (savesRes.ok) {
-          const savesData: SavesResponse = await savesRes.json();
+        if (savesResult.status === "fulfilled") {
+          const savesData = savesResult.value;
           if (savesData.success && savesData.saves) {
             const entries = Object.values(savesData.saves);
             setSaveEntries(entries);
           }
         }
 
-        if (sessionRes.ok) {
-          const sessionData: SessionInfo = await sessionRes.json();
+        if (sessionResult.status === "fulfilled") {
+          const sessionData = sessionResult.value;
           setCurrentSaveId(sessionData.current_save_id);
         }
       } catch {

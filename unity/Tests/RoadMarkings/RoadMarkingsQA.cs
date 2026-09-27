@@ -231,7 +231,7 @@ public static class RoadMarkingsQA
                 references[f].SetTriangles(kept, s);
             }
         }
-        Require(removed > 100, "Seam fixture includes repeated internal cap faces");
+        Require(removed == 0, "Road generation omits repeated internal cap faces");
         var position = camera.transform.position; var rotation = camera.transform.rotation;
         foreach (var view in new[] { ("road", position), ("road-oblique", new Vector3(80, 95, -90)), ("road-low", new Vector3(-70, 50, -100)) })
         {
@@ -247,7 +247,7 @@ public static class RoadMarkingsQA
         }
         for (int f = 0; f < filters.Length; f++) { filters[f].sharedMesh = originals[f]; UnityEngine.Object.DestroyImmediate(references[f]); }
         camera.transform.SetPositionAndRotation(position, rotation);
-        report.Add("PASS: repeated FBX cap faces produce no surface seams from top, oblique and low views");
+        report.Add("PASS: no internal FBX cap faces or surface seams from top, oblique and low views");
     }
 
     static void CheckRoad()
