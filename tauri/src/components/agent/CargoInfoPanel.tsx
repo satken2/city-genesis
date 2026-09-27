@@ -3,7 +3,8 @@
  *
  * 輸出入拠点(TYPE_TRADE)の詳細パネルに表示される荷役情報セクション。
  * 取扱能力・稼働率のサマリーに続けて、輸入(都市への販売)と輸出(都市からの買取)の
- * 品目別の割当量・取扱実績を横棒グラフで表示する。
+ * 品目別の割当量・取扱実績を横棒グラフで表示する。取扱能力とその合計は重さ(t)で、
+ * 品目別のグラフは品目ごとの単位で表す。
  *
  * データは専用エンドポイント GET /api/v1/agents/{id}/cargo から取得する
  * (品目別データがSoAとrow-storeに分散しており、single_agentスキーマに含まれないため)。
@@ -28,7 +29,11 @@ type CargoProduct = {
 };
 
 type CargoInfoResponse = {
+  /** 方向別の取扱能力(t/エポック) */
   capacity_per_epoch: number;
+  /** 方向別の取扱実績の合計(t)。品目ごとに単位が違うため、能力と比べられる合計はトンで受け取る */
+  import_handled_tons: number;
+  export_handled_tons: number;
   imports: CargoProduct[];
   exports: CargoProduct[];
 };
@@ -190,8 +195,6 @@ export function CargoInfoPanel({ agent, apiBaseUrl }: CargoInfoPanelProps) {
     );
   }
 
-  const importHandled = cargo.imports.reduce((sum, p) => sum + p.handled, 0);
-  const exportHandled = cargo.exports.reduce((sum, p) => sum + p.handled, 0);
 
   return (
     <section className="agent-detail-section cargo">
@@ -207,17 +210,17 @@ export function CargoInfoPanel({ agent, apiBaseUrl }: CargoInfoPanelProps) {
       <div className="agent-detail-grid">
         <span className="agent-detail-label">{t("cargo.capacity", "取扱能力")}</span>
         <span className="agent-detail-value">
-          {formatAmount(cargo.capacity_per_epoch)}
+          {formatAmount(cargo.capacity_per_epoch)} t
           <span className="cargo-unit-suffix">
             {t("cargo.perEpochPerDirection", "/エポック(輸出入それぞれ)")}
           </span>
         </span>
 
         <span className="agent-detail-label">{t("cargo.importHandled", "輸入取扱量")}</span>
-        <span className="agent-detail-value">{formatAmount(importHandled)}</span>
+        <span className="agent-detail-value">{formatAmount(cargo.import_handled_tons)} t</span>
 
         <span className="agent-detail-label">{t("cargo.exportHandled", "輸出取扱量")}</span>
-        <span className="agent-detail-value">{formatAmount(exportHandled)}</span>
+        <span className="agent-detail-value">{formatAmount(cargo.export_handled_tons)} t</span>
 
         {agent.utilization != null && (
           <>
