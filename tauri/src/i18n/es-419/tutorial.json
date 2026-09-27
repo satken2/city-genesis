@@ -165,7 +165,7 @@
     },
     "trade": {
       "title": "Iniciar el comercio internacional",
-      "description": "Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas.",
+      "description": "Aprende a exportar mercancías por mar e importarlas por ferrocarril construyendo un puerto de contenedores y una estación internacional de carga.",
       "step1": {
         "title": "Construir un puerto de contenedores",
         "description": "Construir un puerto de contenedores。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
@@ -185,7 +185,7 @@
     },
     "highway": {
       "title": "Construir una autopista",
-      "description": "Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas.",
+      "description": "Aprende a construir una autopista elevada y rampas para crear un enlace con las calles locales.",
       "step1": {
         "title": "Cruzar la calle con un viaducto",
         "description": "Cruzar la calle con un viaducto。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
@@ -205,7 +205,7 @@
     },
     "mining": {
       "title": "Extraer recursos",
-      "description": "Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas.",
+      "description": "Aprende a extraer mineral, transportarlo por ferrocarril y exportarlo construyendo una mina, estaciones de carga y un puerto de graneles.",
       "step1": {
         "title": "Inspeccionar el yacimiento",
         "description": "Inspeccionar el yacimiento。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."
@@ -237,7 +237,7 @@
     },
     "tourism": {
       "title": "Desarrollar el turismo",
-      "description": "Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas.",
+      "description": "Aprende a atraer turistas y fomentar el uso de restaurantes y autobuses construyendo un hotel y una terminal de pasajeros.",
       "step1": {
         "title": "Construir un hotel junto a las ruinas",
         "description": "Construir un hotel junto a las ruinas。 Sigue el marcador amarillo. Confirma para terminar la construcción. El comercio y el turismo pueden necesitar varias épocas."

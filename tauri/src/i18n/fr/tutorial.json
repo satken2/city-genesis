@@ -165,7 +165,7 @@
     },
     "trade": {
       "title": "Développer le commerce international",
-      "description": "Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques.",
+      "description": "Apprenez à exporter des marchandises par mer et à en importer par rail en construisant un port à conteneurs et une gare de fret internationale.",
       "step1": {
         "title": "Construire un port à conteneurs",
         "description": "Construire un port à conteneurs。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
@@ -185,7 +185,7 @@
     },
     "highway": {
       "title": "Construire une autoroute",
-      "description": "Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques.",
+      "description": "Apprenez à construire une autoroute surélevée et des bretelles pour créer un échangeur relié aux routes locales.",
       "step1": {
         "title": "Croiser la rue en viaduc",
         "description": "Croiser la rue en viaduc。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
@@ -205,7 +205,7 @@
     },
     "mining": {
       "title": "Extraire des ressources",
-      "description": "Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques.",
+      "description": "Apprenez à extraire du minerai, à le transporter par rail et à l’exporter en aménageant une mine, des gares de fret et un port de vrac.",
       "step1": {
         "title": "Inspecter le gisement",
         "description": "Inspecter le gisement。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."
@@ -237,7 +237,7 @@
     },
     "tourism": {
       "title": "Développer le tourisme",
-      "description": "Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques.",
+      "description": "Apprenez à attirer des touristes et à développer la fréquentation des restaurants et des bus en construisant un hôtel et un terminal de passagers.",
       "step1": {
         "title": "Construire un hôtel près des ruines",
         "description": "Construire un hôtel près des ruines。 Suivez le repère jaune. Confirmez pour terminer la construction. Les résultats du commerce et du tourisme nécessitent plusieurs époques."

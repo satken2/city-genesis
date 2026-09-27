@@ -165,7 +165,7 @@
     },
     "trade": {
       "title": "Start international trade",
-      "description": "Export food through a container port and import by rail. A municipal food factory, freight route and depot are ready.",
+      "description": "Learn how to export goods by sea and import them by rail by building a container port and an international freight station.",
       "step1": {
         "title": "Build a container port",
         "description": "Build a container terminal on the marked coastal parcel. Confirmation completes construction."
@@ -185,7 +185,7 @@
     },
     "highway": {
       "title": "Build a motorway",
-      "description": "Cross a street with an elevated motorway, name it and connect an interchange. The support district is to the east.",
+      "description": "Learn how to build an elevated motorway and ramps to create an interchange connecting to local streets.",
       "step1": {
         "title": "Cross above the street",
         "description": "Build a motorway across the central street at least 6 m above ground. A north–south route at 10 m works. Confirmation completes it."
@@ -205,7 +205,7 @@
     },
     "mining": {
       "title": "Mine resources",
-      "description": "Carry inland ore by rail and export it through a bulk port. The freight route and depot are ready.",
+      "description": "Learn how to mine ore, transport it by rail, and export it by building a mine, freight stations, and a bulk port.",
       "step1": {
         "title": "Inspect the ore deposit",
         "description": "Enable natural resources and open the marked inland deposit details."
@@ -237,7 +237,7 @@
     },
     "tourism": {
       "title": "Develop tourism",
-      "description": "A town with ancient ruins, a municipal restaurant and a bus route to the coast. Add accommodation and a passenger gateway.",
+      "description": "Learn how to attract tourists and encourage visits to restaurants and use of bus services by building a hotel and a passenger terminal.",
       "step1": {
         "title": "Build a hotel by the ruins",
         "description": "Build a tourist hotel on the parcel east of the ruins. Confirmation completes construction."

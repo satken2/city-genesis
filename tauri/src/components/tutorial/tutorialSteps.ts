@@ -43,6 +43,10 @@ import basicScenarioThumbnail from "../../assets/images/scenarios/basic.png";
 import scenario2Thumbnail from "../../assets/images/scenarios/scenario2.png";
 import scenario3Thumbnail from "../../assets/images/scenarios/scenario3.png";
 import scenario4Thumbnail from "../../assets/images/scenarios/scenario4.png";
+import tradeScenarioThumbnail from "../../assets/images/scenarios/trade.png";
+import highwayScenarioThumbnail from "../../assets/images/scenarios/highway.png";
+import miningScenarioThumbnail from "../../assets/images/scenarios/mining.png";
+import tourismScenarioThumbnail from "../../assets/images/scenarios/tourism.png";
 
 /**
  * シナリオ2で「右上の道路」の現在の所属地区 ID を取得するヘルパー。
@@ -1016,10 +1020,27 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
   },
 ];
 
+const scenarioThumbnails: Record<string, string> = {
+  trade: tradeScenarioThumbnail,
+  highway: highwayScenarioThumbnail,
+  mining: miningScenarioThumbnail,
+  tourism: tourismScenarioThumbnail,
+};
+
 for (const id of ["trade", "highway", "mining", "tourism"]) {
-  TUTORIAL_SCENARIOS.push({ id, titleKey: `tutorial.${id}.title`, descriptionKey: `tutorial.${id}.description`,
-    steps: DEFINITIONS[id].steps.map(step => ({ id: step.legacyStep, image: "", titleKey: `tutorial.${id}.step${step.legacyStep}.title`,
-      descriptionKey: step.phases[0].textKey, validate: async () => false })) });
+  TUTORIAL_SCENARIOS.push({
+    id,
+    titleKey: `tutorial.${id}.title`,
+    descriptionKey: `tutorial.${id}.description`,
+    image: scenarioThumbnails[id],
+    steps: DEFINITIONS[id].steps.map((step) => ({
+      id: step.legacyStep,
+      image: "",
+      titleKey: `tutorial.${id}.step${step.legacyStep}.title`,
+      descriptionKey: step.phases[0].textKey,
+      validate: async () => false,
+    })),
+  });
 }
 
 /** 互換性のための定義 */
