@@ -55,11 +55,14 @@ public sealed class TutorialRuntime : MonoBehaviour
             && Vector2.Distance(new Vector2(rule.path.points[0][0], rule.path.points[0][2]), new Vector2(rule.path.points[1][0], rule.path.points[1][2])) >= 1);
     }
     private static Vector3 GroundPoint(float[] p) { var pos = new Vector3(p[0], 0, p[2]); pos.y = Utils.GetGroundHeight(pos) + p[1]; return pos; }
-    /// <summary>左クリックは始点、右クリックは終点だけを受け付ける。</summary>
+    /// <summary>始終点を左クリックで置き、2点を置いた後の右クリックで形状を確定する。</summary>
     public static bool AllowRoadClick(Vector3 raw, int count, bool rightClick, int variant, bool placing)
     {
         if (!PathRestricted) return !BlocksWorldInput;
-        if (Instance.current.world.mode != "path" || variant != CurrentPath.variant || !placing || count != (rightClick ? 1 : 0)) return false;
+        if (Instance.current.world.mode != "path" || variant != CurrentPath.variant || !placing) return false;
+        // 右クリックは配置済みの終点を確定するため、ポインタの位置を制限しない。
+        if (rightClick) return count == 2;
+        if (count < 0 || count > 1) return false;
         return TrySnap(raw, count, out _);
     }
     public static bool TrySnap(Vector3 raw, int index, out Vector3 position)

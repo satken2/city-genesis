@@ -15,6 +15,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import "./ScenarioInfoSection.css";
+import { ScenarioTextFields } from "../common/ScenarioTextFields";
 
 type ScenarioInfoSectionProps = {
   apiBaseUrl: string;
@@ -60,9 +61,8 @@ export function ScenarioInfoSection({ apiBaseUrl, templateMode }: ScenarioInfoSe
         // 既存のサムネイル画像の取得を試みる
         try {
           const thumbUrl = buildApiUrl(apiBaseUrl, "/api/v1/templates/thumbnail");
-          const thumbRes = await fetch(thumbUrl, { signal: controller.signal });
-          if (thumbRes.ok) {
-            const blob = await thumbRes.blob();
+          const blob = await fetchApi<Blob>(thumbUrl, { signal: controller.signal, responseType: "blob" });
+          {
             if (!controller.signal.aborted) {
               setImagePreview(URL.createObjectURL(blob));
             }
@@ -113,7 +113,7 @@ export function ScenarioInfoSection({ apiBaseUrl, templateMode }: ScenarioInfoSe
 
       // サムネイル画像が選択されていればアップロード
       if (imageFile) {
-        await fetch(buildApiUrl(apiBaseUrl, "/api/v1/templates/thumbnail"), {
+        await fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/templates/thumbnail"), {
           method: "POST",
           headers: { "Content-Type": imageFile.type || "image/png" },
           body: imageFile,
@@ -175,41 +175,8 @@ export function ScenarioInfoSection({ apiBaseUrl, templateMode }: ScenarioInfoSe
             </div>
           </div>
 
-          <label className="scenario-info__field">
-            <span className="scenario-info__label">{t("achievements.scenarioTitleLabel")}</span>
-            <input
-              className="scenario-info__input"
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder={t("achievements.scenarioTitlePlaceholder")}
-              disabled={saving}
-            />
-          </label>
-
-          <label className="scenario-info__field">
-            <span className="scenario-info__label">{t("achievements.scenarioDescriptionLabel")}</span>
-            <textarea
-              className="scenario-info__textarea"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder={t("achievements.scenarioDescriptionPlaceholder")}
-              disabled={saving}
-              rows={3}
-            />
-          </label>
-
-          <label className="scenario-info__field">
-            <span className="scenario-info__label">{t("achievements.scenarioObjectiveLabel")}</span>
-            <textarea
-              className="scenario-info__textarea"
-              value={objective}
-              onChange={(e) => setObjective(e.target.value)}
-              placeholder={t("achievements.scenarioObjectivePlaceholder")}
-              disabled={saving}
-              rows={3}
-            />
-          </label>
+          <ScenarioTextFields value={{ scenario_title: title, scenario_description: description, scenario_objective: objective }} disabled={saving}
+            onChange={value => { setTitle(value.scenario_title); setDescription(value.scenario_description); setObjective(value.scenario_objective); }} />
 
           <div className="scenario-info__actions">
             <button

@@ -1,7 +1,9 @@
+import { invoke } from "@tauri-apps/api/core";
 /**
  * APIリクエストのヘルパー関数
  */
 
+import { frontendVersion } from "./version";
 import { decode } from "@msgpack/msgpack";
 
 /**
@@ -53,6 +55,42 @@ export class ApiError extends Error {
   }
 }
 
+const nativeFetch = globalThis.fetch.bind(globalThis);
+let configuredBase = "";
+let versionCheck: Promise<void> | null = null;
+let checkedAt = 0;
+
+/** 旧画面のバイナリ取得も同じHTTP契約を通す。コア再起動に備え短時間だけ結果を共有する。 */
+export function configureBackendRequests(baseUrl: string) {
+  if (!baseUrl || configuredBase === baseUrl.replace(/\/+$/, "")) return;
+  configuredBase = baseUrl.replace(/\/+$/, "");
+  versionCheck = null; checkedAt = 0;
+  globalThis.fetch = async (input, init) => {
+    const url = input instanceof Request ? input.url : String(input);
+    if (!url.startsWith(`${configuredBase}/api/v1/`)) return nativeFetch(input, init);
+    if (!url.endsWith("/system/version") && !url.includes("/system/shutdown")) {
+      if (!versionCheck || (checkedAt !== 0 && Date.now() - checkedAt > 5000)) {
+        versionCheck = (async () => {
+          const response = await nativeFetch(`${configuredBase}/api/v1/system/version`, { cache: "no-store" });
+          if (!response.ok) throw new ApiError("API_CONTRACT_MISMATCH", "Core version unavailable", response.status);
+          const version = await response.json();
+          if (version.api_contract_version !== frontendVersion.api_contract_version) {
+            throw new ApiError("API_CONTRACT_MISMATCH", `API: core ${version.api_contract_version ?? "?"} / UI ${frontendVersion.api_contract_version}`, 409);
+          }
+          const frontend = await invoke<{ error: string | null }>("get_frontend_status");
+          if (frontend.error) throw new ApiError(frontend.error, frontend.error, 409);
+          checkedAt = Date.now();
+        })().catch(error => { versionCheck = null; throw error; });
+      }
+      await versionCheck;
+    }
+    const headers = new Headers(input instanceof Request ? input.headers : undefined);
+    new Headers(init?.headers).forEach((value, key) => headers.set(key, value));
+    headers.set("X-City-Genesis-API", String(frontendVersion.api_contract_version));
+    return nativeFetch(input, { ...init, headers });
+  };
+}
+
 /**
  * APIからデータを取得する。
  * 常にAcceptヘッダでMessagePackを受け入れ可能と宣言し、レスポンスの
@@ -63,12 +101,13 @@ export class ApiError extends Error {
  */
 export async function fetchApi<T>(
   url: string,
-  options?: { method?: string; headers?: Record<string, string>; body?: string; signal?: AbortSignal; cache?: RequestCache }
+  options?: { method?: string; headers?: Record<string, string>; body?: BodyInit; responseType?: "blob"; signal?: AbortSignal; cache?: RequestCache }
 ): Promise<T> {
   const response = await fetch(url, {
     method: options?.method ?? "GET",
     headers: {
       Accept: `${MSGPACK_MEDIA_TYPE}, application/json`,
+      "X-City-Genesis-API": String(frontendVersion.api_contract_version),
       ...options?.headers,
     },
     body: options?.body,
@@ -85,6 +124,8 @@ export async function fetchApi<T>(
       response.status
     );
   }
+  if (response.status === 204) return undefined as T;
+  if (options?.responseType === "blob") return await response.blob() as T;
   const contentType = response.headers.get("content-type") ?? "";
   if (contentType.includes(MSGPACK_MEDIA_TYPE)) {
     // MessagePackバイナリ: 巨大な座標配列を含む一括取得レスポンスの高速デコード経路。

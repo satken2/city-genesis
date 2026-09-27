@@ -26,8 +26,12 @@ export async function createEnvironment(base: string, saveId: string, bindings: 
     async read(resource, id) {
       const data = await fetchApi<Record<string, unknown>>(request(resource, id));
       assertCurrent();
-      if (!id && Array.isArray(data[resource])) return data[resource] as Record<string, unknown>[];
-      return [(data[single[resource]] ?? data) as Record<string, unknown>];
+      const rows = !id && Array.isArray(data[resource])
+        ? data[resource] as Record<string, unknown>[]
+        : [(data[single[resource]] ?? data) as Record<string, unknown>];
+      // 道路APIの真偽フラグは0/1で返るため、定義のbooleanへ読み取り境界で揃える。
+      return resource === "paths" ? rows.map(row => row.curved === 0 || row.curved === 1
+        ? { ...row, curved: row.curved === 1 } : row) : rows;
     },
     async create(resource, payload) {
       await assertSession();

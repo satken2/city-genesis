@@ -27,6 +27,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { TUTORIAL_SCENARIOS } from "./tutorialSteps";
 import { runTutorialSetup } from "./tutorialSetup";
 import { useTutorialGuide } from "../../tutorial/useTutorialGuide";
+import { fetchApi } from "../../utils/api";
+import { showNotification } from "../../utils/notification";
 import "./Tutorial.css";
 
 /** localStorage にチュートリアル進捗を保存する際のキーのプレフィックス */
@@ -189,6 +191,8 @@ export function Tutorial() {
           // セーブ ID が変化した場合のみ進捗を復元する
           if (current_save_id !== prevSaveIdRef.current) {
             prevSaveIdRef.current = current_save_id;
+            setReturningToMenu(false);
+            setCheckState("idle");
             const storedStep = loadProgress(current_save_id, activeTutorialId, activeTotalSteps);
             if (storedStep >= activeTotalSteps) {
               // 既に完了している場合は即座に非表示にする
@@ -201,6 +205,12 @@ export function Tutorial() {
               setShowComplete(false);
             }
           }
+        } else {
+          prevSaveIdRef.current = null;
+          setSaveId(null);
+          setVisible(false);
+          setReturningToMenu(false);
+          setCheckState("idle");
         }
 
         // API URL はセッションペイロードから取得する
@@ -346,11 +356,12 @@ export function Tutorial() {
     if (returningToMenu || !apiBaseUrl) return;
     setReturningToMenu(true);
     try {
-      await fetch(`${apiBaseUrl}/api/v1/sessions`, { method: "DELETE" });
+      await fetchApi(`${apiBaseUrl}/api/v1/sessions`, { method: "DELETE" });
     } catch {
-      // 通信エラーでも UI 側のポーリングが状態変化を検知して画面遷移する
+      setReturningToMenu(false);
+      void showNotification({ message: t("tutorial.guide.exitFailed") });
     }
-  }, [returningToMenu, apiBaseUrl]);
+  }, [returningToMenu, apiBaseUrl, t]);
 
   if (!visible) {
     return null;

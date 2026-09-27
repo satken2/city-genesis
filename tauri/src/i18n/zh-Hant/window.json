@@ -42,7 +42,9 @@
     "transit_detail": "路線詳情",
     "prop_placement": "裝飾物配置",
     "mashup_edit": "附屬建築配置",
-    "path_shape_editor": "路徑形狀編輯"
+    "path_shape_editor": "路徑形狀編輯",
+    "scenario_manager": "場景管理",
+    "scenario_metadata": "介紹資訊"
   },
   "cityMap": {
     "layers": {

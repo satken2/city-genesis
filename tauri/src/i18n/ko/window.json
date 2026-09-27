@@ -42,7 +42,9 @@
     "transit_detail": "노선 상세",
     "prop_placement": "프롭 배치",
     "mashup_edit": "부속 건물 배치",
-    "path_shape_editor": "경로 형상 편집"
+    "path_shape_editor": "경로 형상 편집",
+    "scenario_manager": "시나리오 관리",
+    "scenario_metadata": "소개 정보"
   },
   "cityMap": {
     "layers": {

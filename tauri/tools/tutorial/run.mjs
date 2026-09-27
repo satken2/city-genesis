@@ -12,6 +12,12 @@ await build({ entryPoints: ["tools/tutorial/hook-tests.tsx"], outfile: hookOutpu
   plugin.onResolve({ filter: /\/(environment|MasterDataContext|ipc)$/ }, args => args.importer.replaceAll("\\", "/").includes("/src/tutorial/") ? { path: mock } : undefined);
 } }] });
 await import(pathToFileURL(hookOutput).href + `?run=${Date.now()}`);
+const componentOutput = resolve("node_modules/.cache/tutorial-component-tests.mjs");
+await build({ entryPoints: ["tools/tutorial/component-tests.tsx"], outfile: componentOutput, bundle: true, platform: "node", format: "esm", packages: "external", loader: { ".css": "empty" }, define: { "import.meta.env.DEV": "false" }, alias: { "@tauri-apps/api/event": mock, "@tauri-apps/api/window": mock, "@tauri-apps/api/core": mock, "react-i18next": mock }, plugins: [{ name: "tutorial-component-boundaries", setup(plugin) {
+  plugin.onResolve({ filter: /\/(environment|MasterDataContext|ipc)$/ }, args => args.importer.replaceAll("\\", "/").includes("/src/tutorial/") ? { path: mock } : undefined);
+  plugin.onResolve({ filter: /\/?(tutorialSteps|tutorialSetup|notification)$/ }, args => args.importer.replaceAll("\\", "/").endsWith("/src/components/tutorial/Tutorial.tsx") ? { path: mock } : undefined);
+} }] });
+await import(pathToFileURL(componentOutput).href + `?run=${Date.now()}`);
 const registry = JSON.parse(await readFile("src-tauri/config/window-registry.json", "utf8"));
 for (const name of ["basic", "scenario3"]) {
   const definition = JSON.parse(await readFile(`src/tutorial/definitions/${name}.json`, "utf8"));

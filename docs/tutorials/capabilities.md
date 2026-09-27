@@ -31,13 +31,13 @@
 | `world.mode` | `observe` は制限なし、`blocked` はワールド編集停止、`path` は指定道路配置 |
 | `world.markers` | `[x, 地面相対y, z]` の配列。保存されない描画物 |
 | `world.path` | `points` は始終点2点、`radius` はクリック許容半径m、`variant` はバリアント、`bind` は保存IDの格納名 |
-| 道路の範囲 | v1は地上・直線・相対高さ0・盛土0。水色の始点を左クリック、黄色の終点を右クリック。普通の建設可否も通る必要がある |
+| 道路の範囲 | v1は地上・直線・相対高さ0・盛土0。水色の始点と黄色の終点を左クリックし、右クリックで形状確定。確定の右クリック位置は問わない。普通の建設可否も通る必要がある |
 | `$constant` | 共有定数名、または `TUTORIAL_STREET`。後者は街路・2車線・高さ編集不可・接道可のマスター候補が1件のときだけ解決 |
 | `$ref` | 名前付き対象の数値ID。文字列埋め込み・任意式・コード実行は不可 |
 
 利用できるHUD操作名は `hud.road`、`hud.construction`、`hud.land`、`hud.district`、`hud.execute`、`hud.visibility`、`hud.track`、`hud.transport`。道路パネル内は `path.type`、`path.variant`、`path.confirm`、`path.cancel`。ウィンドウ単位の許可は `window.path_build`、`window.agent_detail`。新しい対象は実要素に `data-guide` を付け、`definitions.ts` の登録表・テスト・本表を同時に更新する。
 
-ウィンドウ移動・閉じるための `.titlebar` と明示した `data-guide-escape`、チュートリアル・通知・Tipsは操作制限の対象外。スクロールとカメラは保持する。通常のdisabledは解除しない。別WebViewはそれぞれ同じ案内を受け取り、自分のDOMへ適用する。
+ウィンドウ移動・閉じるための `.titlebar` と明示した `data-guide-escape`、チュートリアル・通知・Tipsは操作制限の対象外。システムトレイと設定・クレジット・セーブ/ロード・セーブ一覧・新規ゲーム・確認ダイアログも常に操作できる。除外一覧は `dom.ts` が管理する。スクロールとカメラは保持する。通常のdisabledは解除しない。別WebViewはそれぞれ同じ案内を受け取り、自分のDOMへ適用する。
 
 ## 判定と代行
 
@@ -53,6 +53,8 @@
 | `connected` | `from` / `to` の対象の `terminal` ノード間に、`where` を満たすパス列が存在 |
 
 `where` は項目名 `field` と `equals` / `oneOf` / `greaterThan` のいずれか。`field` はドット区切りで辞書を読める。一覧に無い項目は単体APIで補う。対象のIDは種類ごとに読むため、建物の区画IDを建物IDとして扱わない。条件は都市を書き換えず、束縛だけを更新する。ノードのそれぞれに別々の線があるだけでは `connected` を満たさない。
+
+道路の `curved` はAPIの数値0/1を読み取り時にbooleanへ正規化するため、定義では `false` / `true` と比較する。それ以外の項目で文字列・数値・booleanを同一視する変換は行わない。
 
 アクションは `create`、`completeConstruction`、`reload`。`create` は1アクション1対象で、道路・地区・区画・建物を `bind` へ保存する。区画は現行APIの `mode: empty_area` と中心座標・幅・高さを用いる。`completeConstruction` は `target` だけを完成し、結果を読み直す。新規作成の成功はすぐ記録する。応答が失われて作成結果を特定できない場合は自動再POSTしない。新しい都市での再開始を案内する。
 

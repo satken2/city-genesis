@@ -11,6 +11,15 @@ export async function listen(name: string, fn: (event: { payload: any }) => void
 }
 export async function sendTutorialGuide() {}
 export function useMasterData() { return master; }
+const appWindow = { listen, hide: async () => {} };
+export function getCurrentWindow() { return appWindow; }
+const t = (key: string) => key;
+export function useTranslation() { return { t }; }
+export async function invoke() {}
+export const notifications: string[] = [];
+export async function showNotification({ message }: { message: string }) { notifications.push(message); }
+export async function runTutorialSetup() {}
+export const TUTORIAL_SCENARIOS = [{ id: "basic", steps: [1, 2, 3].map(id => ({ id, image: "", titleKey: `step${id}`, descriptionKey: `description${id}`, validate: async () => true })) }];
 export async function createEnvironment(_base: string, _save: string, bindings: Bindings, pendingCreates: Record<string, boolean>, facts: Facts, _master: unknown, checkpoint: () => void, assertCurrent: () => void): Promise<Environment> {
   return { bindings, pendingCreates, facts, checkpoint, assertCurrent, constants: { ...constants, TUTORIAL_STREET: 221 },
     read: async (kind, id) => id ? [fixture.records.get(`${kind}:${id}`)!].filter(Boolean) : [...fixture.records].filter(([key]) => key.startsWith(kind + ":")).map(([, value]) => value),

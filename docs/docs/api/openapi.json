@@ -5,6 +5,64 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/api/v1/tutorials": {
+      "get": {
+        "tags": [
+          "tutorials"
+        ],
+        "summary": "Get Tutorial",
+        "operationId": "get_tutorial_api_v1_tutorials_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tutorials/actions": {
+      "post": {
+        "tags": [
+          "tutorials"
+        ],
+        "summary": "Tutorial Action",
+        "operationId": "tutorial_action_api_v1_tutorials_actions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TutorialAction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/terrain/maps": {
       "get": {
         "tags": [
@@ -237,7 +295,7 @@
           "terrain"
         ],
         "summary": "Get Terrain Map Thumbnail",
-        "description": "指定した地形マップIDのサムネイル画像(160x120のPNG)を返す。\n\nサムネイルは地形エディタ(Tauri側)の「.npyへエクスポート」機能が.npyファイルと同じ場所に\n書き出したものを、そのまま配信する。組み込みマップや未エクスポートのマップはサムネイルが\n存在しないため404を返す。フロントエンド側(TerrainMapThumbnail共通部品)は404時に\nプレースホルダー表示へフォールバックする想定。",
+        "description": "指定した地形マップIDのサムネイル画像(長辺512pxの透過PNG)を返す。\n\nサムネイルは地形エディタ(Tauri側)の「.npyへエクスポート」機能が.npyファイルと同じ場所に\n書き出したもの、または一括生成したものを配信する。画像は2時間キャッシュできる。\n未生成時は404をキャッシュさせず、画像追加後の取得を妨げない。",
         "operationId": "get_terrain_map_thumbnail_api_v1_terrain_maps__map_id__thumbnail_get",
         "parameters": [
           {
@@ -5077,6 +5135,25 @@
         }
       }
     },
+    "/api/v1/system/version": {
+      "get": {
+        "tags": [
+          "system"
+        ],
+        "summary": "Get Version",
+        "operationId": "get_version_api_v1_system_version_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/system/init": {
       "post": {
         "tags": [
@@ -5470,6 +5547,16 @@
             }
           },
           {
+            "name": "tutorial_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "basic",
+              "title": "Tutorial Id"
+            }
+          },
+          {
             "name": "template_mode",
             "in": "query",
             "required": false,
@@ -5477,6 +5564,16 @@
               "type": "boolean",
               "default": false,
               "title": "Template Mode"
+            }
+          },
+          {
+            "name": "accept_balance_change",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Accept Balance Change"
             }
           }
         ],
@@ -5677,13 +5774,63 @@
         }
       }
     },
+    "/api/v1/saves/{save_id}/validation": {
+      "get": {
+        "tags": [
+          "saves"
+        ],
+        "summary": "Validate Save",
+        "operationId": "validate_save_api_v1_saves__save_id__validation_get",
+        "parameters": [
+          {
+            "name": "save_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Save Id"
+            }
+          },
+          {
+            "name": "template",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Template"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/saves/{save_id}/thumbnail": {
       "get": {
         "tags": [
           "saves"
         ],
         "summary": "Get Save Thumbnail",
-        "description": "指定した save_id のセーブデータ（またはシナリオ/テンプレート）のサムネイル画像を取得する。\nクエリパラメータ template=true を付与するとシナリオ（テンプレート）から検索する。\n画像が存在しない場合は 404 を返す。",
+        "description": "指定した save_id のセーブデータ（またはシナリオ/テンプレート）のサムネイル画像を取得する。\nクエリパラメータ template=true を付与するとシナリオ（テンプレート）から検索する。\n画像は2時間キャッシュできる。未登録時の404はキャッシュさせない。",
         "operationId": "get_save_thumbnail_api_v1_saves__save_id__thumbnail_get",
         "parameters": [
           {
@@ -5771,6 +5918,174 @@
             "schema": {
               "type": "string",
               "title": "Save Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/scenarios": {
+      "get": {
+        "tags": [
+          "scenarios"
+        ],
+        "summary": "List Scenarios",
+        "operationId": "list_scenarios_api_v1_scenarios_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/scenarios/import": {
+      "post": {
+        "tags": [
+          "scenarios"
+        ],
+        "summary": "Import Scenario",
+        "operationId": "import_scenario_api_v1_scenarios_import_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/scenarios/{scenario_id}": {
+      "patch": {
+        "tags": [
+          "scenarios"
+        ],
+        "summary": "Edit Scenario",
+        "operationId": "edit_scenario_api_v1_scenarios__scenario_id__patch",
+        "parameters": [
+          {
+            "name": "scenario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Scenario Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScenarioMetadata"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/scenarios/{scenario_id}/export": {
+      "get": {
+        "tags": [
+          "scenarios"
+        ],
+        "summary": "Export Scenario",
+        "operationId": "export_scenario_api_v1_scenarios__scenario_id__export_get",
+        "parameters": [
+          {
+            "name": "scenario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Scenario Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/scenarios/{scenario_id}/upload": {
+      "post": {
+        "tags": [
+          "scenarios"
+        ],
+        "summary": "Upload Scenario",
+        "operationId": "upload_scenario_api_v1_scenarios__scenario_id__upload_post",
+        "parameters": [
+          {
+            "name": "scenario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Scenario Id"
             }
           }
         ],
@@ -5900,7 +6215,7 @@
           "templates"
         ],
         "summary": "Upload Current Template Thumbnail",
-        "description": "現在編集中のテンプレート（テンプレート作成モード）にサムネイル画像を設定する。\n次回テンプレート保存時にも反映されるよう一時保持し、既存セーブIDがあれば即座に保存する。",
+        "description": "現在編集中のテンプレート（テンプレート作成モード）にサムネイル画像を設定する。\n次回の保存でアーカイブに含めるため、一時保持する。",
         "operationId": "upload_current_template_thumbnail_api_v1_templates_thumbnail_put",
         "responses": {
           "200": {
@@ -5918,7 +6233,7 @@
           "templates"
         ],
         "summary": "Upload Current Template Thumbnail",
-        "description": "現在編集中のテンプレート（テンプレート作成モード）にサムネイル画像を設定する。\n次回テンプレート保存時にも反映されるよう一時保持し、既存セーブIDがあれば即座に保存する。",
+        "description": "現在編集中のテンプレート（テンプレート作成モード）にサムネイル画像を設定する。\n次回の保存でアーカイブに含めるため、一時保持する。",
         "operationId": "upload_current_template_thumbnail_api_v1_templates_thumbnail_post",
         "responses": {
           "200": {
@@ -11489,6 +11804,49 @@
         ],
         "title": "RouteRequest"
       },
+      "ScenarioMetadata": {
+        "properties": {
+          "scenario_title": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Scenario Title",
+            "default": ""
+          },
+          "scenario_description": {
+            "type": "string",
+            "maxLength": 8000,
+            "title": "Scenario Description",
+            "default": ""
+          },
+          "scenario_objective": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Scenario Objective",
+            "default": ""
+          },
+          "author": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Author",
+            "default": ""
+          },
+          "category": {
+            "type": "string",
+            "pattern": "^(sandbox|challenge|tutorial)$",
+            "title": "Category",
+            "default": "sandbox"
+          },
+          "language": {
+            "type": "string",
+            "pattern": "^(ja|en|es-419|zh-Hans|zh-Hant|fr|ko)$",
+            "title": "Language",
+            "default": "ja"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ScenarioMetadata"
+      },
       "ScoreData": {
         "properties": {
           "epoch": {
@@ -11523,6 +11881,11 @@
           "save_id": {
             "type": "string",
             "title": "Save Id"
+          },
+          "accept_balance_change": {
+            "type": "boolean",
+            "title": "Accept Balance Change",
+            "default": false
           }
         },
         "type": "object",
@@ -11680,6 +12043,29 @@
           "template_mode"
         ],
         "title": "TemplateModeRequest"
+      },
+      "TutorialAction": {
+        "properties": {
+          "save_id": {
+            "type": "string",
+            "title": "Save Id"
+          },
+          "scenario": {
+            "type": "string",
+            "title": "Scenario"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          }
+        },
+        "type": "object",
+        "required": [
+          "save_id",
+          "scenario",
+          "action"
+        ],
+        "title": "TutorialAction"
       },
       "ValidationError": {
         "properties": {

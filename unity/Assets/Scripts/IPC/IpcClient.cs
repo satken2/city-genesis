@@ -276,6 +276,8 @@ public class IpcClient : MonoBehaviour
         }
     }
 
+    public bool ProtocolCompatible { get; private set; }
+
     private void DispatchIncomingEvent(IpcEnvelope envelope)
     {
         string eventName = envelope.@event;
@@ -290,7 +292,16 @@ public class IpcClient : MonoBehaviour
         switch (eventName)
         {
             case "system:ready":
-                IsConnected = true;
+                var version = Newtonsoft.Json.Linq.JObject.FromObject(envelope.payload);
+                ProtocolCompatible = (int?)version["ipc_contract_version"] == FrontendVersion.IpcContract
+                    && (int?)version["api_contract_version"] == FrontendVersion.ApiContract
+                    && (bool?)version["accepted"] != false;
+                IsConnected = ProtocolCompatible;
+                if (!ProtocolCompatible) {
+                    GameStateManager.Instance?.SetGameStarted(false, null);
+                    Debug.LogError("IPC_CONTRACT_MISMATCH");
+                }
+                if (version["accepted"] == null && BackendCompatibility.Compatible) EmitGraphicReady();
                 Debug.Log("IpcClient: system:ready を受信しました");
                 break;
 
@@ -320,6 +331,7 @@ public class IpcClient : MonoBehaviour
 
             string action = payload.ContainsKey("action") ? payload["action"]?.ToString() : null;
             if (action == null) return;
+            if ((!ProtocolCompatible || !BackendCompatibility.Compatible) && action != "app:quit") return;
 
             switch (action)
             {
@@ -1589,7 +1601,12 @@ public class IpcClient : MonoBehaviour
     /// </summary>
     public void EmitGraphicReady()
     {
-        SendEnvelope("system:graphic_ready", new Dictionary<string, object>());
+        SendEnvelope("system:graphic_ready", new Dictionary<string, object> {
+            { "frontend_version", FrontendVersion.Version },
+            { "api_contract_version", FrontendVersion.ApiContract },
+            { "ipc_contract_version", FrontendVersion.IpcContract },
+            { "core_compatible", BackendCompatibility.Compatible }
+        });
     }
 
     /// <summary>

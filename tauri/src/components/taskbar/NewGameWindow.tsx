@@ -35,6 +35,9 @@ import { normalizeClimate, normalizeGroundCover } from "../terrain/terrainData";
 import { getTerrainProfile } from "../../data/terrainProfiles";
 import { GroundCoverIcon } from "./GroundCoverIcon";
 import "./NewGameWindow.css";
+import { fetchApi } from "../../utils/api";
+import { SaveEntry, prepareSaveLoad, saveError } from "../../utils/saves";
+import { SaveVersionInfo } from "../common/SaveVersionInfo";
 
 type NewGameWindowProps = {
   apiBaseUrl: string;
@@ -61,24 +64,9 @@ type TerrainMapEntry = {
  * GET /api/v1/saves?template=true の各要素の型
  *
  * scenario_* と terrain_map_* はシナリオ紹介用の項目。
- * これらの項目を持たない時期に保存されたテンプレートも読めるよう、すべて省略可能とする。
+ * 紹介文は任意項目。読み込み可否は保存版と本体の検証結果で判断する。
  */
-type TemplateEntry = {
-  id: string;
-  city_name: string;
-  population: number;
-  current_date: string;
-  epoch: number;
-  simulation_days: number;
-  saved_at: string;
-  is_scenario: boolean;
-  language: string;
-  scenario_title?: string;
-  scenario_description?: string;
-  scenario_objective?: string;
-  terrain_map_id?: string;
-  terrain_map_name?: string;
-};
+type TemplateEntry = SaveEntry;
 
 /**
  * ステータスメッセージの型
@@ -203,25 +191,13 @@ export function NewGameWindow({
     async function fetchData() {
       setLoading(true);
       try {
-        const [terrainRes, templateRes] = await Promise.all([
-          fetch(`${base}/api/v1/terrain/maps`).catch(() => null),
-          fetch(`${base}/api/v1/saves?template=true`).catch(() => null),
+        const [terrainRes, templateRes] = await Promise.allSettled([
+          fetchApi<{ maps: TerrainMapEntry[] }>(`${base}/api/v1/terrain/maps`),
+          fetchApi<{ saves: Record<string, TemplateEntry> }>(`${base}/api/v1/saves?template=true`),
         ]);
+        if (terrainRes.status === "fulfilled") setTerrainMaps(terrainRes.value.maps);
+        if (templateRes.status === "fulfilled") setTemplates(Object.values(templateRes.value.saves));
 
-        if (terrainRes?.ok) {
-          const terrainData: { maps: TerrainMapEntry[] } = await terrainRes.json();
-          if (terrainData.maps) {
-            setTerrainMaps(terrainData.maps);
-          }
-        }
-
-        if (templateRes?.ok) {
-          const templateData: { success: boolean; saves: Record<string, TemplateEntry> } =
-            await templateRes.json();
-          if (templateData.success && templateData.saves) {
-            setTemplates(Object.values(templateData.saves));
-          }
-        }
       } catch {
         /* 取得失敗時は空配列のまま */
       } finally {
@@ -411,7 +387,11 @@ export function NewGameWindow({
     setBusy(true);
     setStatus({ text: t("newGame.starting"), type: "info" });
     try {
+      if (confirmSelection.templateId && !await prepareSaveLoad(apiBaseUrl, confirmSelection.templateId, true, t)) {
+        setBusy(false); setStatus(null); return;
+      }
       await invoke("create_session", {
+        acceptBalanceChange: true,
         terrainMapId: confirmSelection.terrainId,
         templateId: confirmSelection.templateId,
         cityName: cityName || null,
@@ -424,12 +404,12 @@ export function NewGameWindow({
       onClose();
     } catch (error) {
       setStatus({
-        text: error instanceof Error ? error.message : t("newGame.startFailed"),
+        text: saveError(error, t),
         type: "error",
       });
       setBusy(false);
     }
-  }, [t, onClose, confirmSelection, cityName, language, simulationDays, isScenarioEditor]);
+  }, [apiBaseUrl, t, onClose, confirmSelection, cityName, language, simulationDays, isScenarioEditor]);
 
   /**
    * 設定確認モーダルを閉じてタイル選択画面に戻る
@@ -572,7 +552,7 @@ export function NewGameWindow({
                   ))
                 }
 
-                {/* テンプレートシナリオ: 常に選択可能 */}
+                {/* 読み込めない作品も選択し、詳細で理由を確認できる。 */}
                 {templates.map((tmpl) => (
                   <button
                     key={tmpl.id}
@@ -586,7 +566,7 @@ export function NewGameWindow({
                   >
                     <ScenarioThumbnail
                       apiBaseUrl={apiBaseUrl}
-                      templateId={tmpl.id}
+                      templateId={tmpl.id} revision={tmpl.content_revision}
                       terrainMapId={tmpl.terrain_map_id}
                     />
                     <span className="new-game-tile-name">
@@ -662,6 +642,7 @@ export function NewGameWindow({
 
             <div className="new-game-detail-content">
               <h2 className="new-game-detail-title">{detail.title}</h2>
+              {detail.templateId && templates.filter(entry => entry.id === detail.templateId).map(entry => <SaveVersionInfo key={entry.id} entry={entry} />)}
               <p className="new-game-detail-desc">{detail.description}</p>
 
               {detail.mapName && (

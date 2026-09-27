@@ -114,3 +114,9 @@
   - 概念とAPI: `economics/`の3_道路網・6_公共交通機関・12_建物・19_環境・22_予算管理・29_駅と駅舎。地形エディタは`geometries/D_地形形状.md` §D.10〜D.16、プロップは`M_地形プロップ.md`。
 - 親の`tauri/AGENTS.md`(utils一覧、フラット意匠トークン、多言語、マスターデータ、車両外観カタログ)。
 - Skill: `genesis-ipc`(IPC/API)、`genesis-input-mode`(Unity側の編集モード)、`genesis-visual-mode`(表示モード)、`asset-credits`(素材)。
+
+## シナリオの管理と紹介情報
+
+- `template/ScenarioManagerWindow` は同梱・ダウンロード・自作のカード一覧。`scenario_manager` / `scenario_metadata` はレジストリ駆動のポップアップで、後者へ `params.extra.scenarioId` を渡す。
+- 紹介文入力は `common/ScenarioTextFields`、画像は `ScenarioThumbnail`、保存版と互換性は `SaveVersionInfo`。同じ項目の入力・表示を各画面で再実装しない。
+- 変更通知は `scenarios:changed`。保存成功後に紹介情報を開き、投稿は別操作として確認する。投稿先の可否はコアの一覧レスポンスに従う。

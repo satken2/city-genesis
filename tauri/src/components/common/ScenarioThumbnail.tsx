@@ -13,6 +13,7 @@ import { TerrainMapThumbnail } from "./TerrainMapThumbnail";
 type ScenarioThumbnailProps = {
   apiBaseUrl: string;
   templateId: string;
+  revision?: number;
   terrainMapId?: string | null;
   /** 画像・プレースホルダ双方に付けるサイズ用クラス */
   className?: string;
@@ -23,6 +24,7 @@ type ScenarioThumbnailProps = {
 export function ScenarioThumbnail({
   apiBaseUrl,
   templateId,
+  revision,
   terrainMapId,
   className = "new-game-tile-image",
   placeholderModifier = "new-game-tile-image--template",
@@ -37,7 +39,7 @@ export function ScenarioThumbnail({
     return (
       <img
         className={className}
-        src={`${base}/api/v1/saves/${templateId}/thumbnail?template=true`}
+        src={`${base}/api/v1/saves/${encodeURIComponent(templateId)}/thumbnail?template=true${revision === undefined ? "" : `&revision=${revision}`}`}
         alt=""
         onError={() => setFailedId(templateId)}
       />

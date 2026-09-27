@@ -42,7 +42,9 @@
     "transit_detail": "Line Detail",
     "prop_placement": "Prop Placement",
     "mashup_edit": "Sub-Building Layout",
-    "path_shape_editor": "Path Shape Editor"
+    "path_shape_editor": "Path Shape Editor",
+    "scenario_manager": "Scenario manager",
+    "scenario_metadata": "Metadata"
   },
   "cityMap": {
     "layers": {

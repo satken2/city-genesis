@@ -1,7 +1,14 @@
 import type { Phase } from "./model";
 
+/** 保存・復旧・終了とその関連画面は、シナリオの許可リストに依存させない。 */
+const unrestrictedWindows = new Set([
+  "tutorial", "notification", "tips", "system-tray", "settings", "credits",
+  "save_load", "save_list", "new_game", "confirm_dialog",
+]);
+
 /** 各WebViewに同じポリシーを適用する。Reactの無効状態を上書きせず、解除時は自分のinertだけ戻す。 */
 export function installUiGuide(ui: Phase["ui"], windowType: string): () => void {
+  if (unrestrictedWindows.has(windowType)) return () => {};
   const highlighted = new Set<HTMLElement>(), blocked = new Set<HTMLElement>();
   const targetName = (el: Element | null) => {
     const target = el?.closest<HTMLElement>("[data-guide]");

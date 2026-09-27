@@ -210,6 +210,56 @@
           },
           "until": {
             "type": "pathPoints",
+            "count": 2
+          }
+        },
+        {
+          "id": "finalize",
+          "textKey": "tutorial.guide.finalizeRoad",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "hud.road",
+              "path.cancel"
+            ],
+            "highlight": []
+          },
+          "world": {
+            "mode": "path",
+            "markers": [
+              [
+                -100,
+                0,
+                0
+              ],
+              [
+                100,
+                0,
+                0
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  -100,
+                  0,
+                  0
+                ],
+                [
+                  100,
+                  0,
+                  0
+                ]
+              ],
+              "radius": 12,
+              "variant": {
+                "$constant": "TUTORIAL_STREET"
+              },
+              "bind": "basic.road"
+            }
+          },
+          "until": {
+            "type": "pathPoints",
             "count": 2,
             "phase": "editing"
           }

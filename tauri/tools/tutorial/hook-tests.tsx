@@ -25,7 +25,14 @@ await observation({ pathShape: { selected_points: [[-100, 0, 0]], phase: "placin
 await settle(() => emit("tutorial:window_visibility", { label: "road", window: "path_build", visible: false }));
 assert.equal(snapshot()?.phaseId, "open");
 await observation({ label: "road", window: "path_build", visible: true, pathVariant: 221 }); assert.equal(snapshot()?.phaseId, "start");
+await observation({ pathShape: { selected_points: [[-100, 0, 0], [100, 0, 0]], phase: "placing" } }); assert.equal(snapshot()?.phaseId, "finalize");
+await settle(async () => { assert.equal(await guide!.check(), false); });
 await observation({ pathShape: { selected_points: [[-100, 0, 0], [100, 0, 0]], phase: "editing" } }); assert.equal(snapshot()?.phaseId, "confirm");
+fixture.records.set("paths:9", { path_id: 9, path_variant: 221, start_point: [-100, 0, 0], end_point: [100, 0, 0], curved: false, status: 3 });
+await observation({ savedPaths: [9] });
+await observation({ pathShape: { selected_points: [], phase: "placing" } });
+assert.equal(snapshot()?.phaseId, "confirm");
+await settle(async () => { assert.equal(await guide!.check(), true); });
 const former = snapshot()!;
 await settle(() => root.render(<Harness scenario="basic" step={2} save="B" />));
 assert.equal(snapshot()?.phaseId, "open");

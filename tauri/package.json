@@ -1,15 +1,19 @@
 {
   "name": "city-genesis/tauri",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "sync:version": "node tools/sync-version.mjs",
+    "predev": "npm run sync:version",
+    "prebuild": "npm run sync:version",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tauri": "tauri",
     "mock-parent": "node tools/mock-parent/server.mjs",
     "cleanup-dev": "powershell -ExecutionPolicy Bypass -File tools/cleanup-dev.ps1",
+    "test:scenarios": "node tools/scenarios/run.mjs",
     "test:tutorial": "node tools/tutorial/run.mjs",
     "check:tutorial": "node tools/tutorial/run.mjs"
   },

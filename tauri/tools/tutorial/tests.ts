@@ -7,6 +7,7 @@ import { installUiGuide } from "../../src/tutorial/dom";
 import { createEnvironment } from "../../src/tutorial/environment";
 import type { Action, Environment, Snapshot } from "../../src/tutorial/model";
 import type { MasterData } from "../../src/types";
+import { PATH_STREET } from "../../src/constants";
 let checks = 0;
 const check = (actual: unknown, expected: unknown, label: string) => { assert.deepEqual(actual, expected, label); checks++; };
 const throws = (fn: () => void, label: string) => { assert.throws(fn, undefined, label); checks++; };
@@ -21,15 +22,17 @@ env.facts.pathVariant = 221;
 check(await findPhase(basic, env), 2, "place start");
 env.facts.pathShape = { phase: "placing", selected_points: [[-100, 0, 0]] };
 check(await findPhase(basic, env), 3, "place end");
+env.facts.pathShape = { phase: "placing", selected_points: [[-100, 0, 0], [100, 0, 0]] };
+check(await findPhase(basic, env), 4, "right-click confirmation follows left-click endpoint");
 env.facts.pathShape = { phase: "editing", selected_points: [[-100, 0, 0], [100, 0, 0]] };
-check(await findPhase(basic, env), 4, "confirm only after both points");
+check(await findPhase(basic, env), 5, "panel confirmation follows finalized shape");
 env.facts.windows.road.visible = false;
 check(await findPhase(basic, env), 0, "closing panel rewinds");
 env.facts.windows.road.visible = true; delete env.facts.pathShape;
 check(await findPhase(basic, env), 2, "cancel rewinds placement");
 env.bindings["basic.road"] = { kind: "paths", id: 9 };
 env.read = async () => [{ path_id: 9, path_variant: 221, start_point: [-100, 0, 0], end_point: [100, 0, 0], curved: false, status: 1 }];
-check(await findPhase(basic, env), 4, "saved road survives closed panel");
+check(await findPhase(basic, env), 5, "saved road survives closed panel");
 env.bindings.house = { kind: "buildings", id: 30 };
 env.facts.windows.detail = { visible: true, window: "agent_detail", entity: 31 };
 const house = DEFINITIONS.scenario3.steps[0].phases[0].until;
@@ -98,7 +101,38 @@ check(appended.inert, true, "late-mounted controls gated");
 cleanup(); check(other.inert, false, "cleanup restores interaction"); check((document.getElementById("existing") as HTMLElement).inert, true, "existing inert preserved");
 const related = installUiGuide({ policy: "related", allow: ["window.path_build"], highlight: [] }, "path_build"); check(other.inert, false, "related allows selected window"); related();
 const highlight = installUiGuide({ policy: "highlight", allow: [], highlight: ["hud.road"] }, "icon-panel"); check(other.inert, false, "highlight allows other operations"); highlight();
+for (const windowType of ["system-tray", "settings", "save_load", "save_list", "new_game", "credits", "confirm_dialog", "tutorial", "notification", "tips"]) {
+  document.body.innerHTML = '<button id="settings">Settings</button><button id="save">Save</button><button id="reload">Reload</button><input><button disabled>Busy</button>';
+  let handled = 0;
+  const release = installUiGuide({ policy: "strict", allow: [], highlight: [] }, windowType);
+  for (const button of document.querySelectorAll<HTMLButtonElement>("button:not(:disabled)")) {
+    button.addEventListener("click", () => handled++);
+    check(button.inert, false, `${windowType}: control stays focusable`);
+    button.click();
+  }
+  check(handled, 3, `${windowType}: strict guide permits application controls`);
+  check(document.querySelector<HTMLInputElement>("input")!.inert, false, `${windowType}: form fields stay usable`);
+  check(document.querySelector<HTMLButtonElement>("button:disabled")!.disabled, true, `${windowType}: native busy state preserved`);
+  release();
+}
 await browser.happyDOM.close();
+
+// 実APIの道路応答から必要な項目を抜粋。curvedはJSONのbooleanではなく数値で届く。
+const pathResponse = { path_id: 9, path_variant: 221, start_point: [-100, 0, 0], end_point: [100, 0, 0], curved: 0, status: 3 };
+const originalFetch = globalThis.fetch;
+try {
+  globalThis.fetch = async input => Response.json(String(input).endsWith("/paths") ? { paths: [pathResponse] } : pathResponse);
+  const master = { paths: { 221: { type: PATH_STREET, lanes: 2, height_editable: false, frontage_allowed: true } } } as unknown as MasterData;
+  const live = await createEnvironment("http://fixture", "A", { "basic.road": { kind: "paths", id: 9 } }, {}, { windows: {} }, master, () => {}, () => {});
+  check(await evaluate(basic.complete!, live), true, "numeric straight-road API response passes completion");
+  check((await live.read("paths"))[0].curved, false, "path list uses the same boolean normalization");
+  check(await findPhase(basic, live), 5, "saved API road survives cleared editor facts");
+  pathResponse.curved = 1;
+  check(await evaluate(basic.complete!, live), false, "curved road remains rejected");
+  pathResponse.curved = 0;
+  pathResponse.end_point = [99, 0, 0];
+  check(await evaluate(basic.complete!, live), false, "wrong endpoint remains rejected after normalization");
+} finally { globalThis.fetch = originalFetch; }
 
 // 実HTTPでも同じアダプタを通す。専用のテスト都市を持つプロセスだけを指定する。
 if (process.env.TUTORIAL_API_TEST_URL) {

@@ -79,3 +79,7 @@ City Genesis の3D描画プログラム。バックエンド(FastAPI)とは HTTP
 ## 参照
 
 上記以外の入口: `geometries/K_Unity差分ロード整理.md`(差分ロード・初期ロード完了)、`M_地形プロップ.md`、`programs/コンポーネント連携.md`(起動順序・セッション・カメラ同期)、`programs/IPC連携の整理.md`、`geometries/U_天気と環境光.md`、`programs/サウンドシステム.md`。
+
+## フロントの版
+
+`FrontendVersion.cs` は公開リポジトリ直下 `version.json` から生成する。同期は `tauri` で `npm run sync:version`。`FrontendVersionCheck` はPlay開始・Playerビルド時に同期を検査する。`BackendCompatibility` とIPCの照合が成立してからマスター取得・セッション復帰を始める。

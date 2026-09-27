@@ -35,7 +35,7 @@ export function TutorialLayer({ windowType, entity }: { windowType: string; enti
   }, [windowType, entity, state?.runId, state?.revision]);
 
   useEffect(() => {
-    if (!state?.active || ["tutorial", "notification", "tips"].includes(windowType)) return;
+    if (!state?.active) return;
     return installUiGuide(state.ui, windowType);
   }, [state, windowType]);
   return null;
