@@ -101,12 +101,15 @@
     "directPlaceable": "可在此處建設",
     "fixedFootprintNote": "此建築的底面為 {{width}}m × {{height}}m 的固定尺寸",
     "confirmFailed": "建設失敗",
+    "relocateConfirm": "確定遷移",
+    "relocateTitle": "遷移市政廳",
     "estimateFailed": "無法取得預覽與建設費用",
     "directInvalid": {
       "overlap_parcel": "與既有地塊重疊",
       "overlap_city_building": "與市政設施或計畫建設用地重疊",
       "overlap_path": "與道路重疊",
       "incompatible_parcel_type": "此處的地形無法建造此建築",
+      "not_city_land": "與非市政府所有的地塊重疊",
       "generic": "無法在此處建設"
     },
     "directAcquisitionRequired": "與 {{count}} 個私有地塊重疊（確認後將自動收購）",

@@ -68,7 +68,7 @@
 
 ### 建物 (BuildingManager)
 - 見た目に効くフィールドを足したら `HashBuildingShape` にも足す(再利用キー `BuildingRenderKey` の形状ハッシュ)。
-- 港(MODEL_PORT)は区画が埋立地の岸壁に面するかで形が変わるが、埋立で version は変わらない。再利用キーは港の詳細(Far 以外)だけ `ReclaimedLandStore.ContentVersion` を混ぜ、`ReclaimedLandManager.OnContentChanged` を購読する `OnReclaimedLandsChanged` が逆引き `portBuildingIds` から表示中の詳細な港を作り直す(視野外は遅延キュー)。`portBuildingIds` の登録・削除は他の逆引きと同じ経路(`RegisterBuildingDataToCache` / `SyncBuildingsInCells` / `ClearAllCells`)。
+- 港(MODEL_PORT)は区画が埋立地の岸壁に面するかで形が変わるが、埋立で version は変わらない。再利用キーは港だけ全LODで `ReclaimedLandStore.ContentVersion` を混ぜ(遠景も岸壁と `_far` パーツの組み立て)、`ReclaimedLandManager.OnContentChanged` を購読する `OnReclaimedLandsChanged` が逆引き `portBuildingIds` から表示中の港を作り直す(遠景は即時、詳細の視野外は遅延キュー)。`portBuildingIds` の登録・削除は他の逆引きと同じ経路(`RegisterBuildingDataToCache` / `SyncBuildingsInCells` / `ClearAllCells`)。
 - 配置Yは `ResolveBuildingBaseHeight` の1箇所。陸上は model_type によらず `center_point` の地形標高、海上区画(`PARCEL_WATER`)だけ `parcel.altitude`(地形をサンプルすると海底が返る)。区画側の同じ入口は `ParcelManager.GetParcelBaseY`。
 - `parcel.altitude` は海面基準の絶対標高(接道の路面標高、接道なしは区画中心の地形標高)。パス・ノードのYは地面からの相対高さなので混ぜない。陸上の建物の接地に使うと、区画が分かる経路(プレビュー等)と分からない一括ロードで高さが食い違う。
 - `buildingDataCache` への登録は `RegisterBuildingDataToCache`(逆引きと工事音を同期)、表示物セルは `RegisterBuildingCell(id, pos, shown)`(データだけなら `shown:false`)、詳細化の遅延投入は `QueueDeferredDetail`(遅延中は version をキャッシュしない)。

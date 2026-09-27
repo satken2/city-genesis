@@ -101,12 +101,15 @@
     "directPlaceable": "Constructible ici",
     "fixedFootprintNote": "L'emprise de ce bâtiment est fixe : {{width}} m × {{height}} m",
     "confirmFailed": "Échec de la construction",
+    "relocateConfirm": "Valider le déménagement",
+    "relocateTitle": "Déménagement de l'hôtel de ville",
     "estimateFailed": "Impossible d'obtenir l'aperçu et le coût de construction",
     "directInvalid": {
       "overlap_parcel": "Chevauche une parcelle existante",
       "overlap_city_building": "Chevauche une installation municipale ou un site de construction planifié",
       "overlap_path": "Chevauche une route",
       "incompatible_parcel_type": "Ce bâtiment ne peut pas être construit sur ce type de terrain",
+      "not_city_land": "Chevauche une parcelle qui n'appartient pas à la ville",
       "generic": "Construction impossible à cet endroit"
     },
     "directAcquisitionRequired": "Chevauche {{count}} parcelle(s) privée(s) (la confirmation déclenchera une acquisition automatique)",

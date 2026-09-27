@@ -476,7 +476,7 @@
           "terrain"
         ],
         "summary": "Get Coastline",
-        "description": "海岸線（陸地の境界ポリゴン）を GeoJSON ライクな形式で返す。\n\nレスポンス形式:\n  {\"type\": \"Polygon\"|\"MultiPolygon\", \"coordinates\": [...]}\n\n座標系はワールド座標（マップ中心が(0,0)）。複数島がある場合は MultiPolygon になる。\n\n海岸線は near_map の「標高0m超＝陸地」の等高線を Marching Squares で抽出したもので、\ninit_game 実行時に算出・キャッシュされる。dynamicティアの地形編集では更新されない。\n海岸線データが未設定の場合は空の coordinates を返す。",
+        "description": "海岸線（陸地の境界ポリゴン）を GeoJSON ライクな形式で返す。\n\nレスポンス形式:\n  {\"type\": \"Polygon\"|\"MultiPolygon\", \"coordinates\": [...]}\n\n座標系はワールド座標（マップ中心が(0,0)）。複数島がある場合は MultiPolygon になる。\n\n海岸線は新規都市の作成時に near_map の「標高0m超＝陸地」の等高線を Marching Squares で\n抽出したもので、セーブに保存される（ロードでは抽出し直さない）。埋立の完了で埋立地の範囲が\n和集合で足される。道路などの地形編集（dynamicティア）では更新されない。\n海岸線データが未設定の場合は空の coordinates を返す。",
         "operationId": "get_coastline_api_v1_terrain_coastline_get",
         "responses": {
           "200": {
@@ -833,6 +833,26 @@
         ],
         "summary": "Get Background",
         "operationId": "get_background_api_v1_terrain_background_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/terrain/background/coastline": {
+      "get": {
+        "tags": [
+          "terrain"
+        ],
+        "summary": "Get Background Coastline",
+        "description": "背景地形の遠景用海岸線(標高0m超の陸地の粗い輪郭)を、ワールド座標の MultiPolygon で返す。\n\n都市マップが都市の外の陸地を塗るためのもの。マップ作成時に背景と一緒に作った\n.coastline.json を登録表の原点へ平行移動するだけで、ここでは計算しない。背景が無い都市は空。",
+        "operationId": "get_background_coastline_api_v1_terrain_background_coastline_get",
         "responses": {
           "200": {
             "description": "Successful Response",

@@ -34,7 +34,8 @@ Tauri製UI(`city-genesis/tauri`)とのMemoryMappedFile(MMF)通信を担当する
 - プリセットで強制するレイヤーは`NORMAL_DEFAULTS`にも載せる(無いと`STATE_NORMAL`復帰で編集中の表示が残る)。`view:change_view`の`flags`はnull=維持・空文字=全OFF。
 - Unity→UIの状態通知(`*:placement_state`・`edit_path:update_shape`・`edit_prop:placement_settings`等)は「コマンド入力・全状態出力」。UIは受信値をエコーしない前提なので、Unity側でも受信をトリガに同じ値を送り返さない(往復ループ)。
 - 確定後の後始末は`edit_*:finish`系の1イベントにまとめ、順序は`IpcEventHandler`/`IpcStateCoordinator`のハンドラが持つ。UIに`session:reload`と`world:change_state`を別々に送らせない: 差分リロードは複数フレームのコルーチンで、後続の状態遷移が割り込むと再生成・削除が中途半端に終わる。
-- 特定ウィンドウ由来のモードの打ち切りは対象IDを持つ専用イベント(`edit_path:cancel_topology_edit`・`edit_road:cancel {road_id}`・`edit_zone:finish_merge`)で受ける。素の`STATE_NORMAL`はブルドーザ等ウィンドウを持たないモードや別の道路の編集まで巻き込む。
+- 特定ウィンドウ由来のモードの打ち切りは専用イベント(`edit_path:cancel_topology_edit`・`edit_road:cancel {road_id}`・`edit_zone:finish_merge`・`edit_connector:hide`)で受け、自分のモード中のときだけ通常へ戻す。素の`STATE_NORMAL`はブルドーザ等ウィンドウを持たないモードや別の道路の編集、詳細パネルと併存する編集ウィンドウのステートまで巻き込む。
+  - モード中かの判定は各Managerのフラグ(`IsActive`・`IsEditMode`)で行うので、`HandleChangeState`の冒頭で別ステートへの直接遷移でもフラグを落とす(`STATE_NORMAL`でしか落とさないと、別ステートへ移った後に届いたcancelでそのステートを打ち切る)。
 - ポップアップは閉じても非表示になるだけでReactのアンマウントが走らないため、上記の打ち切りはRust `window.rs`(`close_window_by_label`)が送る。新しい編集モードには`EDIT_MODE_WINDOW_TYPES`か専用cancelのどちらかで必ず戻り道を用意する(無いと3Dビューの入力が固まる)。
 - 起動直後に1回だけ届く設定通知(`ambience:volume`)は`IpcClient`が最新値を保持し、購読時に即時再通知する。購読前の1通を取りこぼすと次の変更まで反映されないため、同種の通知を足すときも同じ形にする。
 - 曲線/直線・吸着の正はUnity(`Editors/RoadEditor/RoadEditControlMenu`のCtrlラジアルメニュー)で、UIへは`edit_path:update_shape`の`is_curved`で逆流する。UI側にトグルを足して正を二重にしない。

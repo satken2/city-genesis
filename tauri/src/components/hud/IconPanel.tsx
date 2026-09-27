@@ -25,7 +25,6 @@ import {
 } from "../../utils/ipc";
 import { setHintbarText } from "../../utils/hintbar";
 import {
-  EDIT_MODE_WINDOW_TYPES,
   MENU_ICONS,
   iconUrl,
   openRegisteredWindow,
@@ -141,10 +140,7 @@ export function IconPanel() {
         return;
       }
       if (!icon.windowType) return;
-      // 編集モード系ウィンドウを開くと Unity が STATE を上書きするため、常駐モードを解除する。
-      if (EDIT_MODE_WINDOW_TYPES.has(icon.windowType)) {
-        await setHudMode(null);
-      }
+      // 編集モードのウィンドウなら、開く処理(Rust の apply_mutex_rules)が常駐モードを解除する。
       await setHintbarText(icon.hintKey ? t(icon.hintKey) : "");
       await openRegisteredWindow(icon.windowType);
     },

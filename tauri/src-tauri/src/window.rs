@@ -767,23 +767,19 @@ pub async fn open_window(app: AppHandle, state: SharedState, payload: OpenWindow
     Ok(())
 }
 
-/// 編集モードを持つウィンドウタイプ。
-/// これらのウィンドウが閉じられたとき、グラフィックプログラムに STATE_NORMAL を送信して
-/// 編集モードから抜ける必要がある。
-///
-/// zone_detail は表示専用パネルでステートを変更しないため含めない。
-/// 地区編集(STATE_EDIT_ZONE)はウィンドウを開かないタスクバーのトグルモードのため、ここには含めない
-/// (トグルOFFで Taskbar が直接 STATE_NORMAL を送る。ブルドーザ=STATE_REMOVE_OBJECTS と同じ扱い)。
-/// 閉じたときにUnityを通常モードへ戻すウィンドウ。
+/// 閉じたときにUnityを通常モードへ戻すウィンドウ(編集モードのウィンドウ)。
 /// 「Unityの編集ステート(`STATE_*`)に入るもの」に加えて、
 /// 「開いている間だけ3Dビューの表示を差し替えるもの(公共交通の一覧・新設)」も含める。
 /// 表示を元へ戻すのはUnityの `STATE_NORMAL` 復帰なので、ここに載せないと
 /// ×で閉じたときに差し替えた表示が残り続ける(ウィンドウは非表示になるだけで
 /// React側のアンマウント処理が走らないため、パネル任せにはできない)。
 ///
-/// 一覧の種別が別に表示中だと閉じても STATE_NORMAL を送らないので、ここに足す種別は
-/// `window-mutex-groups.json` で既存の種別と双方向に排他にする(併存させると、後から閉じた側でも
-/// Unity が編集ステートに取り残される)。
+/// Unityの編集ステートは1つしかないので、一覧の種別は互いに同時に開かない。ここに足す種別は
+/// `window-mutex-groups.json` で一覧の全種別と双方向に排他にする(併存させると、先に開いた側の
+/// パネルが別のステートに上書きされたまま残る。下のテストが検査する)。
+///
+/// 地区編集(STATE_EDIT_ZONE)とブルドーザ(STATE_REMOVE_OBJECTS)はウィンドウを開かないHUDのトグルなので
+/// 含めない(トグルOFFでHUDが直接 STATE_NORMAL を送る)。zone_detail は表示専用でステートを変えないので含めない。
 const EDIT_MODE_WINDOW_TYPES: &[&str] = &[
     "parcel_creation",
     "path_build",
@@ -861,29 +857,19 @@ pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) 
     }
 
     // 編集モードのウィンドウが閉じられたら STATE_NORMAL に戻す。
-    // ただし、他に編集モードのウィンドウがまだ表示中の場合は戻さない。
-    // 例えば公共交通の一覧を閉じても、そこから開いた新設パネルの路線設置(STATE_EDIT_TRANSIT)は続ける。
+    // 別の編集モードのウィンドウを開いたことによる排他クローズでは、新しいウィンドウの表示より先に
+    // 送られるので、新しいパネルがマウント時に送る編集ステートを上書きしない。
     // 建設確定後に計画表示に切り替える処理は、UI 側の各パネルで確定ボタン押下時に個別に行う。
     // ここでは一律で view:change_view を送らない。
     if let Some(ref wt) = window_type {
         if EDIT_MODE_WINDOW_TYPES.contains(&wt.as_str()) {
-            let has_other_edit_window = {
-                let guard = state.lock();
-                guard
-                    .open_windows
-                    .values()
-                    .filter(|w| !w.hidden && w.label != label)
-                    .any(|w| EDIT_MODE_WINDOW_TYPES.contains(&w.window_type.as_str()))
-            };
-            if !has_other_edit_window {
-                let _ = ipc::send_ui_action(
-                    state,
-                    wt.clone(),
-                    None,
-                    "world:change_state".to_string(),
-                    json!({ "state": "STATE_NORMAL" }),
-                );
-            }
+            let _ = ipc::send_ui_action(
+                state,
+                wt.clone(),
+                None,
+                "world:change_state".to_string(),
+                json!({ "state": "STATE_NORMAL" }),
+            );
             if wt == "path_build" || wt == "infra_build" {
                 // 道路建設・インフラ建設パネル(同じ PathConstructionPanel)が閉じられた場合、
                 // 描画されているグリッドを確実に非表示にする。
@@ -924,21 +910,16 @@ pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) 
                 );
             }
         } else if wt == "agent_detail" {
-            // 経済主体詳細パネルが閉じられたとき、接続端子のハイライトを消去し、
-            // コネクタ編集モード中だった場合に通常モードへ戻す。
+            // 経済主体詳細パネルが閉じられたとき、接続端子のハイライトを消す。
+            // Unity は接続点編集モード(STATE_EDIT_CONNECTOR)中のときだけ通常モードへ戻す。
+            // 詳細パネルは編集モードのウィンドウと同時に開けるので、STATE_NORMAL を送ると
+            // 後から開いた建物建設などのステートまで打ち切ってしまう(path_detail と同じ理由)。
             let _ = ipc::send_ui_action(
                 state,
                 wt.clone(),
                 None,
                 "edit_connector:hide".to_string(),
                 json!({}),
-            );
-            let _ = ipc::send_ui_action(
-                state,
-                wt.clone(),
-                None,
-                "world:change_state".to_string(),
-                json!({ "state": "STATE_NORMAL" }),
             );
         } else if wt == "diagnosis" {
             // 診断ウィンドウが閉じられたとき、診断木が指すパス・建物のハイライト
@@ -1086,6 +1067,13 @@ pub fn close_windows_by_type(app: &AppHandle, state: &SharedState, window_type: 
 }
 
 fn apply_mutex_rules(app: &AppHandle, state: &SharedState, window_type: &str) -> Result<(), String> {
+    // 編集モードのウィンドウはUnityのステートを上書きするので、HUDの常駐モード(ブルドーザ・地区編集)とも
+    // 排他にする。開く入口(HUDのアイコン・詳細パネルの「編集」ボタン等)を問わず解除するためここで送る。
+    // 状態の正はHUDの全ウィンドウが購読する `hud:mode_changed`(UI側 `hud/hudMode.ts`)。
+    if EDIT_MODE_WINDOW_TYPES.contains(&window_type) {
+        let _ = app.emit("hud:mode_changed", json!({ "mode": null }));
+    }
+
     let blocked_types = {
         let guard = state.lock();
         guard.mutex_groups.get(window_type).cloned().unwrap_or_default()
@@ -1607,4 +1595,28 @@ pub fn reset_window_geometries(app: &AppHandle, state: &SharedState) -> Result<(
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::EDIT_MODE_WINDOW_TYPES;
+    use crate::messages::MutexGroups;
+
+    #[test]
+    fn edit_mode_windows_are_mutually_exclusive() {
+        let groups: MutexGroups = serde_json::from_str(include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/config/window-mutex-groups.json"
+        )))
+        .unwrap();
+        for opening in EDIT_MODE_WINDOW_TYPES {
+            let closes = groups.get(*opening).map(Vec::as_slice).unwrap_or_default();
+            for other in EDIT_MODE_WINDOW_TYPES {
+                assert!(
+                    closes.iter().any(|t| t == other),
+                    "window-mutex-groups.json: {opening} を開いても {other} が閉じない"
+                );
+            }
+        }
+    }
 }

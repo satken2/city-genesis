@@ -101,12 +101,15 @@
     "directPlaceable": "이 위치에 건설할 수 있습니다",
     "fixedFootprintNote": "이 건물의 바닥은 {{width}}m × {{height}}m 고정 크기입니다",
     "confirmFailed": "건설에 실패했습니다",
+    "relocateConfirm": "이전 확정",
+    "relocateTitle": "시청 이전",
     "estimateFailed": "미리보기와 건설비를 가져오지 못했습니다",
     "directInvalid": {
       "overlap_parcel": "기존 토지 구획과 겹칩니다",
       "overlap_city_building": "시의 시설·건설 예정지와 겹칩니다",
       "overlap_path": "도로와 겹칩니다",
       "incompatible_parcel_type": "이 위치의 지형에는 이 건물을 지을 수 없습니다",
+      "not_city_land": "시정부 소유가 아닌 토지 구획과 겹칩니다",
       "generic": "이 위치에는 건설할 수 없습니다"
     },
     "directAcquisitionRequired": "민간 토지 구획 {{count}}건과 겹칩니다(확정 시 자동 매수)",

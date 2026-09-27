@@ -101,12 +101,15 @@
     "directPlaceable": "可在此处建设",
     "fixedFootprintNote": "该建筑的底面为 {{width}}m × {{height}}m 的固定尺寸",
     "confirmFailed": "建设失败",
+    "relocateConfirm": "确定迁移",
+    "relocateTitle": "迁移市政厅",
     "estimateFailed": "无法获取预览和建设费用",
     "directInvalid": {
       "overlap_parcel": "与现有地块重叠",
       "overlap_city_building": "与市政设施或计划建设用地重叠",
       "overlap_path": "与道路重叠",
       "incompatible_parcel_type": "此处的地形无法建造该建筑",
+      "not_city_land": "与非市政府所有的地块重叠",
       "generic": "无法在此处建设"
     },
     "directAcquisitionRequired": "与 {{count}} 个私有地块重叠（确认后将自动收购）",

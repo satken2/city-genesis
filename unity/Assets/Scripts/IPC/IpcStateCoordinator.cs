@@ -160,6 +160,14 @@ public class IpcStateCoordinator : MonoBehaviour
             FindAnyObjectByType<GradingAreaEditManager>()?.FinishEditMode();
         }
 
+        // 接続点編集から別モードへ直接遷移した場合にも、端子のドラッグ受付を終えて読み取り専用の
+        // ハイライトに戻す。edit_connector:hide はこのフラグで接続点編集中かを判断するため、
+        // STATE_NORMAL を経由しない遷移でも残してはいけない。
+        if (state != "STATE_EDIT_CONNECTOR")
+        {
+            ConnectorEditManager.Instance?.ExitEditMode();
+        }
+
         // 一方通行線路の進行方向矢印は道路敷設モードでのみ表示する
         // （既存線路に向きの対を作って接続する際の編集支援表示のため）。
         TrackDirectionArrows.SetVisible(state == "STATE_EDIT_PATH" || state == "STATE_EDIT_STATION");
@@ -226,7 +234,7 @@ public class IpcStateCoordinator : MonoBehaviour
                 break;
 
             case "STATE_EDIT_CONNECTOR":
-                // 接続点編集モード。編集開始/終了のトグルボタンを持つ AgentDetailPanel を
+                // 接続点編集モード。このステートを送った AgentDetailPanel を
                 // 前面に残す必要があるため、他ステートと異なり WindowUtil.BringToForeground() は
                 // 呼ばない（Unity を最前面にすると右パネルが操作できなくなる）。
                 ApplyStateEditConnector(ipcParams);
@@ -382,8 +390,8 @@ public class IpcStateCoordinator : MonoBehaviour
         }
 
         // 接続点編集モードを終了する（マーカーは読み取り専用ハイライトに戻す）。
-        // パネルは開いたままのため、UI 側が続けて edit_connector:show を再送して
-        // ハイライトを維持する。パネルを閉じた場合は edit_connector:hide で完全に消える。
+        // 詳細パネルは開いたままのことがあるのでマーカーは残し、パネルを閉じたときの
+        // edit_connector:hide で消す。
         var connectorEditManager = FindAnyObjectByType<ConnectorEditManager>();
         if (connectorEditManager != null)
         {
@@ -1230,12 +1238,21 @@ public class IpcStateCoordinator : MonoBehaviour
     }
 
     /// <summary>
-    /// edit_connector:hide: パネルが閉じた／別エージェントに切り替わった。ハイライトを消す。
+    /// edit_connector:hide: 経済主体詳細パネルが閉じた／別エージェントに切り替わった。ハイライトを消し、
+    /// 接続点編集モード中なら通常モードへ戻す。
+    ///
+    /// 詳細パネルは建物建設などの編集ウィンドウと同時に開けるので、別のステートへ移った後に届いたときは
+    /// ハイライトを消すだけにする(素の STATE_NORMAL だと後から開いた編集ウィンドウのステートまで打ち切る。
+    /// edit_path:cancel_topology_edit と同じ理由)。
     /// </summary>
     private void HandleEditConnectorHide()
     {
-        var mgr = FindAnyObjectByType<ConnectorEditManager>();
-        if (mgr != null) mgr.Hide();
+        var mgr = ConnectorEditManager.Instance;
+        if (mgr == null) return;
+
+        bool wasEditing = mgr.IsEditMode;
+        mgr.Hide();
+        if (wasEditing) ReturnToNormalState();
     }
 
     private ConnectorEditManager GetOrCreateConnectorEditManager()

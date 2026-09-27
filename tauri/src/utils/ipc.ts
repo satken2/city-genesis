@@ -578,7 +578,8 @@ export async function sendEditConnectorShow(
 /**
  * `edit_connector:hide`
  * 接続端子ノードのハイライト表示をクリアする。パネルを閉じた／別エージェントに
- * 切り替わったときに送信する。
+ * 切り替わったときに送信する。Unity は接続点編集モード(`STATE_EDIT_CONNECTOR`)中の
+ * ときだけ通常モードへ戻し、他のステート中はハイライトを消すだけにする。
  */
 export async function sendEditConnectorHide(): Promise<void> {
   await invoke("send_window_action", {

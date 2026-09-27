@@ -692,6 +692,7 @@ public partial class BuildingPlanManager : MonoBehaviour
         directWidth = 0f;
         directDepth = 0f;
         directAngle = 0f;
+        freeAngle = 0f;
         hasDirectParams = false;
         directCommitted = false;
         directPreviewVisible = false;
@@ -718,6 +719,7 @@ public partial class BuildingPlanManager : MonoBehaviour
         if (!isMiddleDragging)
         {
             directAngle = angle;
+            freeAngle = angle;
         }
 
         // 直接プレビューが表示中(フェーズA:ゴースト or フェーズB:確定済み)なら即再描画。
@@ -826,11 +828,12 @@ public partial class BuildingPlanManager : MonoBehaviour
     /// 中ボタンドラッグによる直接配置の回転を毎フレーム処理する。
     /// フェーズA/B いずれでもローカル即時回転し、ボタンリリース時に確定角度を
     /// edit_building:placement_state でUIへ1回だけ通知する(ドラッグ中は送信しない)。
+    /// 道路沿い配置と、自由配置で道路に吸着している位置決め中(フェーズA)は、向きを道路が決めるので回さない。
     /// </summary>
     private void Update()
     {
         if (!UpdatePlacementInput()) return;
-        if (PlacementMode == BuildingPlacementMode.Roadside) return;
+        if (PlacementMode == BuildingPlacementMode.Roadside || (roadAnchorActive && !directCommitted)) return;
         if (!isBuildingModeActive || isEditMode || !hasDirectParams || !directPreviewVisible)
         {
             // ドラッグ中にモードが外れた等の場合は状態を落とす。
@@ -844,7 +847,7 @@ public partial class BuildingPlanManager : MonoBehaviour
                 placementRevision++;
                 break;
             case MiddleDragRotation.Result.Rotated:
-                directAngle += deltaDegrees;
+                RotateFree(directAngle + deltaDegrees);
                 BuildDirectRectanglePreview();
                 break;
             case MiddleDragRotation.Result.Released:

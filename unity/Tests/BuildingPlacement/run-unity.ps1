@@ -1,4 +1,4 @@
-param([string]$UnityExe)
+﻿param([string]$UnityExe)
 $ErrorActionPreference = 'Stop'
 $unityRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 & (Join-Path $unityRoot 'Tests/BuildRuntime.ps1')

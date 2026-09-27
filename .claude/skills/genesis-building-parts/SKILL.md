@@ -218,7 +218,7 @@ a200  初等学校     11個  base-w1 base-c1 mid-w1 mid-w2 mid-c1 top-w1 top-c1
 
 | 何をしたか | 更新するマスター項目(タブ: agent_master) |
 |---|---|
-| 新しい建物のパーツ一式を作った | `model_type`(1=FLAT/2=HOUSE/3=GABLE/4=GROUND/5=PREBUILT/6=PORT/7=MASHUP/8=SHED/9=RAIL_YARD)。未設定だと意図した組み立て方にならない |
+| 新しい建物のパーツ一式を作った | `model_type`(1=FLAT/2=HOUSE/3=GABLE/4=GROUND/5=PREBUILT/6=PORT/7=MASHUP/8=SHED/9=RAIL_YARD/13=OPEN_PIT)。未設定だと意図した組み立て方にならない |
 | `floor` パーツを作って地面を描きたい | **`draw_floor=yes`**。パーツを置くだけでは地面パネルは描画されない(オプトイン。F doc §8.1) |
 | 屋根の形を変えた(切妻/片流れ/寄棟にした) | `model_type` を 3 / 8 / 2 へ |
 | 階高に合わせてパーツを作った/階高を変えたい | `height_per_floor`(既定4.0)。パーツの著作高さとずれると隙間・めり込みが出る |

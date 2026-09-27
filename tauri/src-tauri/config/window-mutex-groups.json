@@ -26,16 +26,30 @@
     "city_map"
   ],
   "building_construction": [
+    "parcel_creation",
+    "path_build",
+    "infra_build",
+    "track_build",
     "building_construction",
-    "agent_creation",
     "resource_edit",
-    "prop_placement"
+    "prop_placement",
+    "transit_management",
+    "transit_creation",
+    "agent_creation",
+    "grading"
   ],
   "agent_creation": [
+    "parcel_creation",
+    "path_build",
+    "infra_build",
+    "track_build",
     "building_construction",
-    "agent_creation",
     "resource_edit",
-    "prop_placement"
+    "prop_placement",
+    "transit_management",
+    "transit_creation",
+    "agent_creation",
+    "grading"
   ],
   "city_budget": [
     "city_budget"
@@ -51,8 +65,16 @@
   ],
   "parcel_creation": [
     "parcel_creation",
+    "path_build",
+    "infra_build",
+    "track_build",
+    "building_construction",
     "resource_edit",
-    "prop_placement"
+    "prop_placement",
+    "transit_management",
+    "transit_creation",
+    "agent_creation",
+    "grading"
   ],
   "natural_resources": [
     "natural_resources"
@@ -67,29 +89,69 @@
     "achievements"
   ],
   "path_build": [
+    "parcel_creation",
     "path_build",
+    "infra_build",
+    "track_build",
+    "building_construction",
     "resource_edit",
-    "prop_placement"
+    "prop_placement",
+    "transit_management",
+    "transit_creation",
+    "agent_creation",
+    "grading"
   ],
   "infra_build": [
+    "parcel_creation",
+    "path_build",
     "infra_build",
+    "track_build",
+    "building_construction",
     "resource_edit",
-    "prop_placement"
+    "prop_placement",
+    "transit_management",
+    "transit_creation",
+    "agent_creation",
+    "grading"
   ],
   "track_build": [
+    "parcel_creation",
+    "path_build",
+    "infra_build",
     "track_build",
+    "building_construction",
     "resource_edit",
-    "prop_placement"
+    "prop_placement",
+    "transit_management",
+    "transit_creation",
+    "agent_creation",
+    "grading"
   ],
   "transit_management": [
-    "transit_management",
+    "parcel_creation",
+    "path_build",
+    "infra_build",
+    "track_build",
+    "building_construction",
     "resource_edit",
-    "prop_placement"
+    "prop_placement",
+    "transit_management",
+    "transit_creation",
+    "agent_creation",
+    "grading"
   ],
   "transit_creation": [
-    "transit_creation",
+    "parcel_creation",
+    "path_build",
+    "infra_build",
+    "track_build",
+    "building_construction",
     "resource_edit",
-    "prop_placement"
+    "prop_placement",
+    "transit_management",
+    "transit_creation",
+    "agent_creation",
+    "grading"
   ],
   "prop_placement": [
     "parcel_creation",
@@ -97,11 +159,12 @@
     "infra_build",
     "track_build",
     "building_construction",
+    "resource_edit",
+    "prop_placement",
     "transit_management",
     "transit_creation",
     "agent_creation",
-    "resource_edit",
-    "prop_placement"
+    "grading"
   ],
   "resource_edit": [
     "parcel_creation",
@@ -109,13 +172,24 @@
     "infra_build",
     "track_build",
     "building_construction",
+    "resource_edit",
+    "prop_placement",
     "transit_management",
     "transit_creation",
     "agent_creation",
-    "resource_edit",
-    "prop_placement"
+    "grading"
   ],
   "grading": [
+    "parcel_creation",
+    "path_build",
+    "infra_build",
+    "track_build",
+    "building_construction",
+    "resource_edit",
+    "prop_placement",
+    "transit_management",
+    "transit_creation",
+    "agent_creation",
     "grading"
   ],
   "save_load": [

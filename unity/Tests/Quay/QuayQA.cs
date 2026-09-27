@@ -1116,9 +1116,14 @@ public static class QuayQA
                 Require(SameRing(alone.Footprint, beside.Footprint, 1e-3f),
                     $"chord {label}: the reclamation changed the quay footprint ({Describe(alone.Footprint)} -> {Describe(beside.Footprint)})");
             }
+            // 張り出しは水際の両端から左右とも QUAY_PROTRUSION(20m)。区画の海側の奥行き(40m)より短いので頭打ちしない。
             Chord plain = QuayCut(Rect(100, -40, 150, 20), naturalLand);
-            Require(SameRing(plain.Footprint, Rect(100, -8, 150, 20), 1e-3f),
-                $"chord: the quay footprint of a plain port is {Describe(plain.Footprint)} instead of [100,150]x[-8,20]");
+            Require(SameRing(plain.Footprint, Rect(100, -20, 150, 20), 1e-3f),
+                $"chord: the quay footprint of a plain port is {Describe(plain.Footprint)} instead of [100,150]x[-20,20]");
+            // 海側の奥行きが張り出しより浅い区画は、区画の海側の辺で頭打ちになる。
+            Chord shallow = QuayCut(Rect(100, -12, 150, 20), naturalLand);
+            Require(SameRing(shallow.Footprint, Rect(100, -12, 150, 20), 1e-3f),
+                $"chord: the quay footprint of a shallow port is {Describe(shallow.Footprint)} instead of [100,150]x[-12,20]");
         }
         finally
         {
@@ -1139,7 +1144,7 @@ public static class QuayQA
         public Vector2[] Footprint;
     }
 
-    /// <summary>海岸線を rings にして、港の底面(ワールド座標)を PortBuildingMeshBuilder.BuildQuayFootprint で直線カットする(突き出しは最小)。</summary>
+    /// <summary>海岸線を rings にして、港の底面(ワールド座標)を PortBuildingMeshBuilder.BuildQuayFootprint で直線カットする。</summary>
     static Chord QuayCut(Vector2[] portWorld, params Vector2[][] rings)
     {
         SetCoastline(rings);
@@ -1150,9 +1155,9 @@ public static class QuayQA
         for (int i = 0; i < portWorld.Length; i++) local[i] = portWorld[i] - center;
         MethodInfo method = T("PortBuildingMeshBuilder").GetMethod("BuildQuayFootprint", BindingFlags.NonPublic | BindingFlags.Static)
             ?? throw new Exception("PortBuildingMeshBuilder.BuildQuayFootprint not found");
-        object[] args = { local, new Vector3(center.x, 0f, center.y), 0f, 0f, null };
+        object[] args = { local, new Vector3(center.x, 0f, center.y), null };
         var footprint = (Vector2[])method.Invoke(null, args);
-        object seaward = args[4];
+        object seaward = args[2];
         Type edge = seaward.GetType();
         var world = new Vector2[footprint.Length];
         for (int i = 0; i < footprint.Length; i++) world[i] = footprint[i] + center;

@@ -42,10 +42,11 @@ Tauri(Rust)側。ウィンドウ管理(HUD・ポップアップ・Tips)、Unity�
 - topmostの打ち直しは`reassert_topmost`(HWNDへ直接`SetWindowPos(HWND_TOPMOST)`)で行う。`set_always_on_top(true)`ではtaoが新旧フラグに差分が無いと`SetWindowPos`を発行せず、裏に回った状態から戻れない。呼び出し箇所は`set_hud_visible(true)`直後・`WindowEvent::Focused(false)`・`system:focus_gained`・`system:graphic_ready`。
 - ポップアップのクローズは破棄ではなく非表示+LRU再利用(`MAX_HIDDEN_WINDOWS`)。閉じたときの後始末(`STATE_NORMAL`復帰、ハイライト消去、`edit_path:cancel_topology_edit`・`edit_road:cancel`・`edit_zone:finish_merge {merged:0}`等)はReactのアンマウントでは走らないので`close_window_by_label`に書く。LRU上限での本破棄時には再実行しない。
 - `EDIT_MODE_WINDOW_TYPES`は「閉じたらUnityを`STATE_NORMAL`へ戻すウィンドウ」の一覧。編集ステートに入るもの(`resource_edit`・`prop_placement`を含む)に加え、`view:apply_preset`で表示を差し替えるもの(`transit_management`・`transit_creation`)や入力プリセットを上書きするもの(`agent_creation`)も含める。パネルのアンマウント時の`STATE_NORMAL`は×では走らないので、編集ステートに入るウィンドウを足し忘れるとUnityが編集ステートのまま固まる。
-  - 一覧の別の種別が表示中なら送らない。併存させると後から閉じた側でも戻らないので、一覧に足す種別は`window-mutex-groups.json`で既存の種別と双方向に排他にする(キーは開く側の種別なので両方向に書く)。
-  - UI側`hud/hudCommon.ts`の同名の集合は「HUDのアイコンから開くとブルドーザ・地区編集を解除する」一覧で、対象も意味も別。
+  - Unityの編集ステートは1つなので、一覧の種別は互いに同時に開かない。足す種別は`window-mutex-groups.json`で一覧の全種別と双方向に排他にする(キーは開く側の種別なので両方向に書く。`window.rs`のテストが検査する)。併存させると先に開いた側のパネルが別のステートに上書きされたまま残る。
+  - 閉じると常に`STATE_NORMAL`を送る。別の編集ウィンドウを開いたことによる排他クローズでも、新しいウィンドウの表示より先に届くので、新しいパネルの編集ステートを上書きしない。
+  - 一覧の種別を開くと`apply_mutex_rules`が`hud:mode_changed {mode: null}`を全ウィンドウへ送り、HUDの常駐モード(ブルドーザ・地区編集)を解除する。詳細パネルの「編集」等どの入口から開いても解除されるよう、UI側の開く処理ごとには持たない。
 - 排他グループは新規に開くときだけでなく、非表示(再利用待ち)ウィンドウの再表示でも適用する。
-- 他のモードを巻き込んではいけないパネル(`road_detail`・`path_detail`)はこの一覧に入れず、対象IDを載せた専用cancelを送る。
+- 他のモードを巻き込んではいけないパネル(`road_detail`・`path_detail`・`agent_detail`)はこの一覧に入れず、専用cancelを送る(`edit_road:cancel {road_id}`・`edit_path:cancel_topology_edit`・`edit_connector:hide`)。Unityは自分のモード中のときだけ通常へ戻す。編集ウィンドウと併存する詳細パネルの後始末に素の`STATE_NORMAL`を送ると、後から開いた編集ウィンドウのステートまで打ち切る。
 - 再利用でもReactの状態は`open_seq`(世代番号)で必ずリセットされる。非表示→再表示と転用でインクリメントして`WindowContextDto`で配り、`App.tsx`が再マウントキーに含める。表示中への再オープン要求では増やさない。ラベルは不変で、転用は`window-context-updated`で新contextを配る。
 - ジオメトリ記憶(`saved_geometries`)は内側(クライアント領域)基準。`outer_size`で記憶すると復元側の`set_size`が内側基準なので開き直すたびに枠の分だけ膨張する。
 - ポップアップ配置はHUDの占有領域を避ける。定数は`window.rs`冒頭(`HUD_LEFT_RESERVED`/`HUD_BOTTOM_RESERVED`/`HUD_RIGHT_BOTTOM_RESERVED`)。アイコンパネルの高さとシステムトレイの幅はReactが実測して`resize_icon_panel`/`resize_system_tray`で通知する。

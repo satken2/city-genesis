@@ -8,7 +8,7 @@ description: City Genesisの3Dメッシュ生成処理全般(MeshFactoryのデ�
 このSkillはコード本体を持たない「道しるべ」です。実際の仕様・ロジックは以下のドキュメントに書かれているので、実装前に必ず読むこと。
 
 ## 読むべきドキュメント(概念、公開)
-- `city-genesis/docs/docs/geometries/F_建物メッシュの生成.md` (建物の共通仕様。生成方式固有は `F1_`〜`F10_` の別ファイル)
+- `city-genesis/docs/docs/geometries/F_建物メッシュの生成.md` (建物の共通仕様。生成方式固有は `F1_`〜`F11_` の別ファイル)
 - `city-genesis/docs/docs/geometries/G_道路メッシュの生成.md`
 
 ## 読むべきドキュメント(非公開)

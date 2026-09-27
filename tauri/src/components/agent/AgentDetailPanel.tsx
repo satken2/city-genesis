@@ -23,8 +23,9 @@ import {
   sendEditConnectorShow,
   sendEditConnectorHide,
 } from "../../utils/ipc";
-import { 
+import {
   TYPE_BUILDING,
+  TYPE_CITY,
   TYPE_HOUSEHOLD,
   TYPE_TRADE,
   TYPE_STANDARD,
@@ -67,6 +68,21 @@ import subBuildingIcon from "../../assets/images/buildings/bd_16.png";
 
 /** 買収交渉中のアイコン縁取り色。公共施設の黄色と区別するためのオレンジ */
 const ACQUISITION_FRAME_COLOR = "#f97316";
+
+/**
+ * 移転ボタンのアイコン(上下左右の矢印)。外部素材ではなく自前のSVGで描く(素材のクレジット表記を
+ * 増やさないため)。塗りは currentColor なのでボタン側の文字色に追従する。
+ */
+function RelocateIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path
+        d="M12 2 L15.5 5.5 H13 V11 H18.5 V8.5 L22 12 L18.5 15.5 V13 H13 V18.5 H15.5 L12 22 L8.5 18.5 H11 V13 H5.5 V15.5 L2 12 L5.5 8.5 V11 H11 V5.5 H8.5 Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
 
 type AgentDetailPanelProps = {
   apiBaseUrl: string;
@@ -117,7 +133,9 @@ export function AgentDetailPanel({
   // 表示中の施設が接続端子ノード(infra_node_id / depot_node_id)を持つ間、
   // Unity 上にハイライトを表示し、パネルを開いた瞬間からノードをドラッグ移動可能に
   // する（接続点の編集モード）。agent_id / ノードID が変わったとき（別施設へ遷移など）
-  // に張り替え、別施設への遷移／パネルを閉じる直前に通常モードへ戻す。
+  // に張り替える。後始末は edit_connector:hide だけにする(接続点編集中なら Unity が通常モードへ
+  // 戻す。STATE_NORMAL だと同時に開いている建物建設などの編集ステートまで打ち切る)。
+  // ×で閉じたときはアンマウントが走らないので、Rust(window.rs)が同じ通知を送る。
   const highlightInfraNodeId = agentData?.infra_node_id ?? 0;
   const highlightDepotNodeId = agentData?.depot_node_id ?? 0;
   const highlightAgentId = agentData?.agent_id ?? 0;
@@ -134,7 +152,6 @@ export function AgentDetailPanel({
       "agent_detail",
     );
     return () => {
-      void sendChangeState("STATE_NORMAL", undefined, "agent_detail");
       void sendEditConnectorHide();
     };
   }, [highlightAgentId, highlightInfraNodeId, highlightDepotNodeId]);
@@ -361,6 +378,13 @@ export function AgentDetailPanel({
     agentData.is_bd &&
     masterData?.agents[agentData.variant]?.model_type === MODEL_MASHUP;
 
+  /**
+   * 移転できる市庁舎か。市政府は都市創設で市庁舎を配置するまで建物の形(敷地)を持たないので、
+   * 敷地があるときだけ移転ボタンを出す。
+   */
+  const isRelocatableCityHall =
+    agentData.type === TYPE_CITY && agentData.is_bd && (agentData.parcel_id ?? 0) > 0;
+
   // 各詳細セクションの表示条件
   const showBasicInfo = !isImportOrExport;
   const showHouseholdInfo = agentData.type === TYPE_HOUSEHOLD;
@@ -582,6 +606,31 @@ export function AgentDetailPanel({
               src={subBuildingIcon}
               alt={t("agent.editSubBuildings", "サブ建物の配置を編集")}
             />
+          </button>
+        </div>
+      )}
+
+      {/* 市庁舎の移転ボタン。建物建設パネルを移転モードで開き、新規建設と同じ操作で置き直す
+          (費用も工事も発生しない)。 */}
+      {isRelocatableCityHall && (
+        <div className="operation-panel">
+          <button
+            className="operation-btn"
+            type="button"
+            title={t("agent.relocateCityHall")}
+            onClick={() => {
+              void invoke("open_registered_window", {
+                windowType: "building_construction",
+                params: {
+                  extra: {
+                    relocateCityHall: true,
+                    titleKey: "building_construction.relocateTitle",
+                  },
+                },
+              });
+            }}
+          >
+            <RelocateIcon />
           </button>
         </div>
       )}

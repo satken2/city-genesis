@@ -8,6 +8,8 @@
  *
  * モードの副作用(Unityへの`STATE_*`送信、ヒントバー文言、セッションリロード)は
  * 操作したコンポーネント側が実行する。他ウィンドウはこのイベントで表示状態を合わせるだけ。
+ * 編集モードのウィンドウを開いたときは、開く入口を問わずRust(`window.rs` の `apply_mutex_rules`)が
+ * 解除(`mode: null`)を送る。Unityのステートはそのウィンドウが上書きする。
  */
 
 import { useEffect, useState } from "react";

@@ -2,6 +2,7 @@
   "agent": {
     "back": "Volver",
     "editSubBuildings": "Editar distribución de anexos",
+    "relocateCityHall": "Trasladar el palacio municipal",
     "publicFacility": "Servicio público",
     "underAcquisition": "Negociando la compra del terreno",
     "publicFacilityPanel": {

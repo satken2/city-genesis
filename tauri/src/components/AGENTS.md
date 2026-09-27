@@ -40,7 +40,8 @@
   - エラーは`ApiError.code`→`errors.{code}`で`showNotification`。例外は地区の即時割当と接続端子ノードのドラッグ(Unityが直接送信)。
 - Unityから受けた値をそのまま送り返さない(建物配置の寸法、プロップの回転/高さ、パス形状の標高、区画作成モードは双方向同期で、エコーすると往復ループになる)。
 - ポップアップは閉じても非表示になるだけでアンマウントが走らない(`window_type`をまたいで使い回される)。
-  - ×で閉じたときの後始末(ハイライト解除、`edit_zone:finish_merge {merged:0}`、`world:clear_road_focus`+`edit_road:cancel`)はRust側`window.rs`が担う。
+  - ×で閉じたときの後始末(ハイライト解除、`edit_zone:finish_merge {merged:0}`、`world:clear_road_focus`+`edit_road:cancel`、`edit_connector:hide`)はRust側`window.rs`が担う。
+  - 編集ウィンドウと併存する詳細パネル(`agent_detail`等)は、自分が入れたモードの後始末に`STATE_NORMAL`を送らず専用cancelを送る(建物建設など後から開いた編集ステートまで打ち切るため)。
   - 閉じたパネルのリスナーも生きているので、Unityへ送る前に`isVisible`を確かめる。
 - 種別・バリアントIDをハードコードしない(公共交通の種別は`masterData.transit`、判定は`vehicle_type`・`model_type`等の属性で行う)。
 
@@ -49,7 +50,7 @@
 1. ドメインフォルダにコンポーネントを作る
 2. `App.tsx`にimportし、`SPECIALIZED_PANEL_TYPES`に追加して分岐を書く
 3. `src-tauri/config/window-registry.json`に定義(`empty_shell: true`で共通余白`.content`の`padding`が外れ、余白とスクロールをパネルが持つ)
-4. 排他にするウィンドウがあれば`window-mutex-groups.json`に追加。Unityの編集ステートに入るウィンドウは`window.rs`の`EDIT_MODE_WINDOW_TYPES`に足し、既存の編集ウィンドウと双方向に排他にする(`src-tauri/AGENTS.md`)
+4. 排他にするウィンドウがあれば`window-mutex-groups.json`に追加。Unityの編集ステートに入るウィンドウは`window.rs`の`EDIT_MODE_WINDOW_TYPES`に足し、一覧の全種別と双方向に排他にする(`src-tauri/AGENTS.md`)
 
 初期内容や新設/編集の使い分けは`params.extra`(`App.tsx`の`windowExtra`。`titleKey`でタイトル差し替え可)で渡す。イベントを投げてからウィンドウを開くと購読が間に合わない。
 
@@ -73,7 +74,7 @@
 
 - 4枚の専用ウィンドウ(`icon-panel` / `cockpit` / `system-tray` / `display-tray`)。透明領域でもWebViewがクリックを吸うため、パネルの実面積ぴったりに分割する。生成・配置・表示切替はRust(`window.rs`)、Reactは中身だけ。
 - 寸法が変わるものは実測して通知する(`resize_icon_panel` / `resize_system_tray`)。`IconPanel.css`で高さを固定しない。`DisplayTray`の幅の正は`window.rs`の`DISPLAY_TRAY_WIDTH`。
-- 常駐モード(ブルドーザ/地区編集)は排他。状態の正はグローバルイベント`hud:mode_changed`(`hudMode.ts`)で、副作用は操作した側だけが実行する。
+- 常駐モード(ブルドーザ/地区編集)は排他。状態の正はグローバルイベント`hud:mode_changed`(`hudMode.ts`)で、副作用は操作した側だけが実行する。編集モードのウィンドウを開いたときの解除はRust(`window.rs`の`apply_mutex_rules`)が送るので、開く側のコンポーネントで`setHudMode(null)`しない。
 - BGM再生、3Dのオブジェクト選択受信、Unityの確認要求`remove_object:request_confirm`は`Cockpit`だけが受ける。確認結果は取消でも必ず`sendRemoveObjectConfirmResult`で返す(返さないとUnityが待ち続ける)。
 - 地区統合の確認は`IconPanel`が`edit_zone:request_merge`を受けて開く。
 - チュートリアルのハイライトID(`tutorial/tutorialSteps.ts`の`targetElementId`)はHUDのウィンドウをまたぐ。アイコンを消す/移す前に参照先を確認する(消えると無言で進行する)。
@@ -89,6 +90,7 @@
 - エポック実行(`taskbar/EpochConfirmWindow`): HTTPを日没と並行して開始し、黒幕の描画完了後だけ結果またはTipsへ進む。結果を閉じるまでは演出IDとHUD無効化を維持する。結果画面の終了はRustの共通クローズ処理が担当する。`TipsWindow`の`mode="epoch"`は初期ロードの開始ボタンを使わず、呼び出し元が処理完了時に閉じる。
 
 - 建物建設(`building/`): 配置方法・寸法の真実源はUnity(`edit_building:placement_state`)。要求区画種別・観光名所の一点物・構造種別の階数上限はパネル側でも弾く(区画選択後のバリアント変更で不一致が残る)。
+  - 市庁舎の移転は、市庁舎の詳細パネルの移転ボタンが`params.extra.relocateCityHall`で開く移転モード(市庁舎に固定し自由配置から始める)。送信は新規の配置と同じで、配置済みならバックエンドが移転として扱う。創設後の一覧には市政府を出さない。
 - 区画作成(`parcel/ParcelCreationPanel`): 作成方法の真実源はUnity(`edit_parcel:set_mode`はUnity起点だけ)。確定後も`STATE_NORMAL`を送らず連続作成。`parcel_type`は送らない。
 - 公共施設(`agent/PublicFacilityPanel`): 放棄中は解除以外を無効化。`status_from`の見出しは`resolveStatusSinceLabel`で選ぶ(再開でも更新されるので一律「竣工日」にしない)。
 - パス建設(`path/`): `path_build`と`infra_build`は同じ`PathConstructionPanel`を`category` propで使い分ける。曲線/直線・吸着はUnity側で、`curveMode`の書き込み元は`edit_path:update_shape`の`is_curved`だけ。

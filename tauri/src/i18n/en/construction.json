@@ -101,12 +101,15 @@
     "directPlaceable": "Can be built here",
     "fixedFootprintNote": "This building has a fixed {{width}}m × {{height}}m footprint",
     "confirmFailed": "Construction failed",
+    "relocateConfirm": "Confirm Relocation",
+    "relocateTitle": "Relocate City Hall",
     "estimateFailed": "Could not load the preview and construction cost",
     "directInvalid": {
       "overlap_parcel": "Overlaps an existing parcel",
       "overlap_city_building": "Overlaps a city facility or planned construction site",
       "overlap_path": "Overlaps a road",
       "incompatible_parcel_type": "This building cannot be built on this terrain",
+      "not_city_land": "Overlaps a parcel not owned by the city",
       "generic": "Cannot build here"
     },
     "directAcquisitionRequired": "Overlaps {{count}} privately owned parcel(s) (confirming will trigger automatic acquisition)",

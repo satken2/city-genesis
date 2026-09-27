@@ -35,6 +35,57 @@ public static class BuildingPlacementQA
         Call(manager, "OnPlacementCommand", token);
     }
 
+    static bool Near(Vector3 a, Vector3 b) => (a - b).sqrMagnitude < .001f;
+    static bool SameAngle(float a, float b) => Mathf.Abs(Mathf.DeltaAngle(a, b)) < .01f;
+
+    // カーソルの地形ホバー(OnTerrainHoverDirect)のうち、プレビューメッシュの生成を除いた位置と吸着の解決だけを行う。
+    static void Hover(object manager, Vector3 cursor)
+    {
+        Set(manager, "directCenter", new Vector3(cursor.x, 0, cursor.z));
+        Call(manager, "ResolveRoadPlacement", cursor);
+    }
+
+    // 東西に延びる幅12mの街路(中心線 z=0)の上へカーソルを置いたときだけ、自由配置が路肩へ吸着すること。
+    static void CheckFreeRoadSnap(Component manager)
+    {
+        var paths = Add("PathManager");
+        var road = Activator.CreateInstance(source.GetType("GeneratedModels.PathSummary"));
+        Set(road, "path_id", 777);
+        Set(road, "path_variant", 88888);
+        Set(road, "follow_terrain", -1);
+        Call(paths, "RegisterPathSegments", road, new System.Collections.Generic.List<Vector3> { new Vector3(0, 0, 0), new Vector3(200, 0, 0) });
+        Set(manager, "placementPaths", paths);
+        float depth = (float)Property(manager, "PlacementDepth");
+
+        Command(manager, "{\"variant\":99999,\"angle\":30}");
+        Hover(manager, new Vector3(100, 0, -20));
+        Check(!(bool)Property(manager, "HasRoadAnchor") && SameAngle((float)Property(manager, "PlacementAngle"), 30),
+            "free placement off the road follows the cursor with the manual angle");
+        Hover(manager, new Vector3(100, 0, -2));
+        Check((bool)Property(manager, "HasRoadAnchor"), "cursor on the road surface snaps to it");
+        Check(Near((Vector3)Property(manager, "PlacementCenter"), new Vector3(100, 0, -(6.05f + depth * 0.5f))),
+            "front edge sits on the road edge on the cursor side");
+        Check(SameAngle((float)Property(manager, "PlacementAngle"), 180), "building faces the road");
+        Hover(manager, new Vector3(100, 0, 2));
+        Check(Near((Vector3)Property(manager, "PlacementCenter"), new Vector3(100, 0, 6.05f + depth * 0.5f)) &&
+            SameAngle((float)Property(manager, "PlacementAngle"), 0), "crossing the center line switches the roadside");
+        Command(manager, "{\"variant\":99999,\"angle\":45}");
+        Check((bool)Property(manager, "HasRoadAnchor") && SameAngle((float)Property(manager, "PlacementAngle"), 0),
+            "manual rotation while snapped keeps the road orientation");
+        Hover(manager, new Vector3(100, 0, 30));
+        Check(!(bool)Property(manager, "HasRoadAnchor") && SameAngle((float)Property(manager, "PlacementAngle"), 45) &&
+            Near((Vector3)Property(manager, "PlacementCenter"), new Vector3(100, 0, 30)), "leaving the road restores the remembered angle");
+        Hover(manager, new Vector3(100, 0, 2));
+        Set(manager, "directCommitted", true);
+        Command(manager, "{\"variant\":99999,\"angle\":60}");
+        Check(!(bool)Property(manager, "HasRoadAnchor") && SameAngle((float)Property(manager, "PlacementAngle"), 60),
+            "rotating a fixed position releases the road anchor");
+        Command(manager, "{\"variant\":99999,\"angle\":0}");
+        Set(manager, "directCommitted", false);
+        Set(manager, "placementPaths", null);
+        UnityEngine.Object.DestroyImmediate(paths.gameObject);
+    }
+
     static void CheckGuideCoordinates(Component manager)
     {
         var camera = new GameObject("GuideTestCamera").AddComponent<Camera>();
@@ -105,6 +156,12 @@ public static class BuildingPlacementQA
             Set(agent, "type", (int?)1);
             Set(agent, "min_floors", (int?)1);
             ((IDictionary)Get(master, "agentMasterById"))[99999] = agent;
+            var street = Activator.CreateInstance(source.GetType("PathMasterItem"));
+            Set(street, "type", source.GetType("Constants").GetField("PATH_STREET").GetValue(null));
+            Set(street, "width", 12f);
+            Set(street, "frontage_allowed", true);
+            ((IDictionary)Get(master, "pathMasterById"))[88888] = street;
+            master.GetType().GetProperty("IsInitialized").GetSetMethod(true).Invoke(master, new object[] { true });
             var manager = Add("BuildingPlanManager");
             Call(manager, "SetBuildingVariant", 99999);
             Call(manager, "SetNewBuildingMode");
@@ -121,6 +178,7 @@ public static class BuildingPlacementQA
                 "partial width command preserves depth");
             Command(manager, "{\"variant\":99998,\"depth\":55}");
             Check((float)Property(manager, "PlacementDepth") == 18, "old variant command is ignored");
+            CheckFreeRoadSnap(manager);
             Mode(manager, "Roadside");
             Set(manager, "directCommitted", true);
             Set(manager, "roadAnchorActive", true);

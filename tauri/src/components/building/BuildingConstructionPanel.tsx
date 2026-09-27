@@ -15,6 +15,9 @@
  *   7. [建設を確定] で UI が直接バックエンドに送信する(道路建設と同じ責務分担。
  *      区画モード=POST /buildings、直接配置=POST /buildings/direct、
  *      既存建物の編集=PATCH /agents/{id})。成功後は session:reload で Unity に再描画させる
+ *
+ * 市庁舎の詳細パネルの移転ボタンから開くと(relocateCityHall)、選択を市庁舎に固定した移転モードになる。
+ * 操作と送信は新規の配置と同じで、配置済みの市庁舎を置き直すとバックエンドが無料・即時の移転として扱う。
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -92,11 +95,13 @@ type BuildingConstructionPanelProps = {
   apiBaseUrl: string;
   onClose: () => void;
   editAgentId?: number | null;
+  /** 市庁舎の詳細パネルの移転ボタンから開かれたか。配置の操作は新規建設と同じで、確定すると移転になる。 */
+  relocateCityHall?: boolean;
 };
 
 /* ---- メインコンポーネント ---- */
 
-export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: BuildingConstructionPanelProps) {
+export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, relocateCityHall = false }: BuildingConstructionPanelProps) {
   const { t } = useTranslation();
   const masterData = useMasterData();
   // バリアント単位の資金目安(最小規模すら建てられない施設をプルダウンで選ばせない)
@@ -242,6 +247,11 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
   }, [apiBaseUrl]);
 
   const isCityHallPlacedGateActive = !cityHallPlaced && !templateMode;
+  /**
+   * 市庁舎だけを置くモード。都市創設前の配置と、詳細パネルからの移転がこれに当たり、選択を市庁舎に固定する。
+   * 移転もバックエンドへの送信は配置と同じで、配置済みの市庁舎を置き直すとバックエンドが移転として扱う。
+   */
+  const cityHallOnly = isCityHallPlacedGateActive || relocateCityHall;
 
   /* ---- 配置済みの観光名所を取得 ---- */
 
@@ -315,9 +325,9 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
     return () => controller.abort();
   }, [editAgentId, apiBaseUrl]);
 
-  // 市庁舎未設置かつ通常モード（神モード以外）の時に、自動的に「公共施設」の「市政府」を選択状態にする
+  // 市庁舎だけを置くモードでは、自動的に「公共施設」の「市政府」を選択状態にする
   useEffect(() => {
-    if (isCityHallPlacedGateActive && editAgentId == null) {
+    if (cityHallOnly && editAgentId == null) {
       setSelectedBdType(BUILDING_PUBLIC);
       // マスターデータ取得後にのみ市庁舎を自動選択する。未取得のまま選択すると
       // min_floors 等が読めず floors を誤った初期値で固定してしまい、
@@ -339,8 +349,8 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         setVisualVariant(Math.random());
         setVisualVariant2(Math.random());
         setVisualVariant3(Math.random());
-        // 都市創設時は道路も土地区画も無いのが通常なので、配置方法は自由配置から始める
-        // (Ctrlラジアルで区画配置へ戻せる)。
+        // 配置方法は自由配置から始める(Ctrlラジアルで区画配置へ戻せる)。都市創設時は道路も土地区画も
+        // 無いのが通常で、移転ではカーソルを道路に乗せれば道路の脇へ吸着して置ける。
         sendChangeState("STATE_EDIT_BUILDING", {
           building_variant: VARIANT_CITY,
           agent_id: null,
@@ -351,7 +361,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         });
       }
     }
-  }, [isCityHallPlacedGateActive, selectedVariant, masterData, editAgentId]);
+  }, [cityHallOnly, selectedVariant, masterData, editAgentId]);
 
   /* ---- ヒントバー表示 ---- */
 
@@ -386,17 +396,19 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
    * template_only のバリアント(国境検問所・観光名所)はシナリオ制作専用なので、
    * テンプレートモードでないときは候補から外す。
    * 造成工事は範囲を描いて発注する造成ウィンドウ専用なので、常に外す。
+   * 市庁舎は都市に1つだけなので、配置済みなら候補から外す(移転は市庁舎の詳細パネルから開く)。
    */
   const buildingVariants = useMemo(() => {
     if (!masterData) return [];
     return Object.entries(masterData.agents).filter(
       ([id, entry]) => entry.building && (templateMode || !entry.template_only) && !isGradingVariant(Number(id))
+        && !(Number(id) === VARIANT_CITY && cityHallPlaced && !relocateCityHall)
     ) as [string, AgentMasterEntry][];
-  }, [masterData, templateMode]);
+  }, [masterData, templateMode, cityHallPlaced, relocateCityHall]);
 
   /** ユニークな建物タイプ一覧 */
   const availableBdTypes = useMemo(() => {
-    if (isCityHallPlacedGateActive) {
+    if (cityHallOnly) {
       return [BUILDING_PUBLIC];
     }
     const typeSet = new Set<number>();
@@ -406,17 +418,17 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
       }
     }
     return [...typeSet].sort((a, b) => a - b);
-  }, [buildingVariants, isCityHallPlacedGateActive]);
+  }, [buildingVariants, cityHallOnly]);
 
   /** 選択中の建物タイプに属するバリアント */
   const variantsForType = useMemo(() => {
     if (selectedBdType === null) return [];
     const filtered = buildingVariants.filter(([, entry]) => entry.bd_type === selectedBdType);
-    if (isCityHallPlacedGateActive && selectedBdType === BUILDING_PUBLIC) {
+    if (cityHallOnly && selectedBdType === BUILDING_PUBLIC) {
       return filtered.filter(([idStr]) => parseInt(idStr) === VARIANT_CITY);
     }
     return filtered;
-  }, [buildingVariants, selectedBdType, isCityHallPlacedGateActive]);
+  }, [buildingVariants, selectedBdType, cityHallOnly]);
 
   /** 選択中のバリアントのマスターデータ */
   const selectedVariantData = useMemo((): AgentMasterEntry | null => {
@@ -1551,7 +1563,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
           onChange={(e) =>
             handleBdTypeChange(e.target.value ? parseInt(e.target.value) : null)
           }
-          disabled={editAgentId != null || isCityHallPlacedGateActive}
+          disabled={editAgentId != null || cityHallOnly}
         >
           <option value="">{t("building_construction.selectBdType")}</option>
           {availableBdTypes.map((bdType) => (
@@ -1585,7 +1597,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
               }
             }}
             style={{ marginTop: 10 }}
-            disabled={isCityHallPlacedGateActive}
+            disabled={cityHallOnly}
           >
             <option value="">{t("building_construction.selectVariant")}</option>
             {variantsForType.map(([idStr, entry]) => (
@@ -1598,7 +1610,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
         )}
         {/* 既存建物をコピー: バリアント未選択のときだけ表示する。押すと Unity が
             コピー元建物の選択モードに入り、選ばれた建物の見た目・階数・フットプリントを取り込む。 */}
-        {selectedVariant === null && editAgentId == null && !isCityHallPlacedGateActive && (
+        {selectedVariant === null && editAgentId == null && !cityHallOnly && (
           <button
             className="bc-btn"
             type="button"
@@ -2124,7 +2136,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId }: 
                 }
               }}
             >
-              {t("building_construction.confirm")}
+              {t(relocateCityHall ? "building_construction.relocateConfirm" : "building_construction.confirm")}
             </button>
           </div>
         </div>

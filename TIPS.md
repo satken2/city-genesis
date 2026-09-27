@@ -20,12 +20,16 @@
 - `TerrainCollider` のレイが当たる地形の三角形は、ハイトマップの各マスを (0,0)-(1,1) の対角線で切ったもの(`TerrainData.GetInterpolatedHeight` と同じ)。もう一方の対角線で計算すると、起伏の大きい所で数mずれる(2026-09-27、`Tests/Quay` の照合)。
 - 描画を使わない独立検証の Unity プロジェクトは、`Packages/manifest.json` を組み込みモジュール(`com.unity.modules.physics` / `terrain` / `terrainphysics` など、使うものだけ)にするとパッケージの解決を待たずに起動し、`Tests/Quay` は起動から終了まで約1分で済む。
 - 検証用の Unity スクリプトの構文だけを先に確かめるなら、`UnityEngine.CoreModule.dll` などを HintPath で参照する netstandard2.1 の csproj をレポジトリの外に作って `dotnet build` すると数秒で済む(Unity の起動を待たない)。
+- `Tests/*/run*.ps1` を Windows PowerShell 5.1(`powershell.exe`)で動かすとき、BOM無しのUTF-8だと日本語コメントの直後の行が黙って読み飛ばされることがある。2026-09-28 に `Tests/BuildingPlacement/run-unity.ps1` で検証用シェーダーを作る行が実行されず、`CheckGuideCoordinates` が `Shader.Find` の null で落ちていた(BOM付きUTF-8で保存し直して解消)。日本語を含む .ps1 はBOM付きで保存する。
+- 建設可能な区画のハイライト(`ParcelManager.IsBuildable`)は区画の建築規制と区画種別だけを見て、空きや所有者を見ない。敷地が市有地に限られる市庁舎でも民有地の区画が色付きで出て、選ぶとプレビューで拒否される。
  
 ## UI / Tauri
 
 - チュートリアルの初期配置は現行HTTP契約を確認する。`POST /parcels` は `mode: empty_area` などを受け付け、旧チュートリアルにある `mode: manual` は未対応。空き領域作成の成功応答は `{ "parcel": 数値ID }`。道路マスターの名称は「2車線道路」であり、表示文に残る「2車線生活道路」で検索すると見つからない。新基盤は属性でバリアントを解決する。
 
 - セーブデータやシナリオテンプレートのサムネイル画像表示は、シナリオ固有のサムネイル画像が存在すれば最優先で表示し、未設定または404の場合は舞台となる地形マップのサムネイル(`/api/v1/terrain/maps/{id}/thumbnail`)へフォールバックする(`ScenarioThumbnail.tsx`)。
+
+- `utils/ipc.ts` の `sendEditBuildingUpdateDirectParams`(`edit_building:update_direct_params`)はどこからも呼ばれていない。建物の直接配置の寸法・回転角は `edit_building:placement_command` の差分で送っている。
 
 - 別ワークツリーの未コミット編集とのマージ可否を `git merge-file` で試すときは、先に `tr -d '\r'` で改行を揃える。ワークツリー側の作業ファイルはCRLF、`git show` の取り出しはLFなので、揃えないと全行が変更扱いになり、実際には衝突しない変更でもファイル全体が衝突と出る。
 

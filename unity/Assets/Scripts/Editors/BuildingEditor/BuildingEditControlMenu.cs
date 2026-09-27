@@ -84,6 +84,7 @@ public class BuildingEditControlMenu : MonoBehaviour
             manager.PlacementText("placeHint", "左クリック 位置固定 · Ctrl 配置方法"));
         if (mode == 2) text += "\n" + (manager.HasRoadAnchor ? manager.PlacementText("snapped", "道路に吸着中") :
             manager.PlacementText("searching", "道路を探しています"));
+        else if (manager.HasRoadAnchor) text += "\n" + manager.PlacementText("snapped", "道路に吸着中");
         text += "\n" + (manager.SizeEditable ? manager.PlacementText("sizeHint", "1/2 間口 · 3/4 奥行き · Shift 5m") :
             manager.PlacementText("fixed", "寸法固定"));
         if (mode == 1) text += " · " + manager.PlacementText("rotateHint", "中ドラッグ 回転");

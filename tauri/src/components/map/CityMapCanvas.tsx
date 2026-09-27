@@ -43,6 +43,11 @@
  *     中心に記号と名前を描く(未命名は種別の略号+ID)。件数が少ないため地区と同じく
  *     ベクター取得のたびに取り直し、エポック実行や道路編集による検出結果の変化に追従する。
  *
+ * 都市外の陸地:
+ *   背景地形を持つマップでは、遠景用海岸線(GET /api/v1/terrain/background/coastline。マップ作成時に
+ *   作られた粗い輪郭で、プレイ中は変わらない)を都市の矩形の外だけ陸地色で塗る。標高色分け・等高線・
+ *   グリッド・海岸線の線は都市内だけに描く。
+ *
  * ヒートマップ(heatmap propで1種別だけ選ぶ排他表示):
  *   騒音・大気汚染・治安・日照の環境スコアを土地区画の塗り分けで表現する。APIが返すのは
  *   区画中心でサンプリング済みの区画単位スコアなので、塗る単位も区画になる
@@ -1320,6 +1325,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       let gridMinor: Path2D | null = null;
       let gridCell: Path2D | null = null;
       let coastPath: Path2D | null = null;
+      let backgroundLandPath: Path2D | null = null;
       let reclaimedPath: Path2D | null = null;
 
       // 等高線間隔のズーム追従(地形エディタと同じ方式)。
@@ -1441,8 +1447,25 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         const z = view.zoom;
         const px = (w: number) => w / z; // 画面ピクセル単位の線幅をワールド単位へ
 
-        // 標高色分け(最大解像度で色付けした近景マップの画像を世界矩形に張る)
-        if (terrain && settings) {
+        // 都市外の陸地。都市の矩形を1px縮めた外側に塗り、境界の画素を都市の陸地の下に潜らせて
+        // 両者の間に水色の継ぎ目を出さない。
+        if (backgroundLandPath && settings) {
+          const halfW = settings.map_width / 2 - px(1);
+          const halfH = settings.map_height / 2 - px(1);
+          const bounds = getViewBounds();
+          const outside = new Path2D();
+          outside.rect(bounds.x1, bounds.z1, bounds.x2 - bounds.x1, bounds.z2 - bounds.z1);
+          outside.rect(-halfW, -halfH, halfW * 2, halfH * 2);
+          ctx.save();
+          ctx.clip(outside, "evenodd");
+          ctx.fillStyle = COLOR_LAND;
+          ctx.fill(backgroundLandPath, "evenodd");
+          ctx.restore();
+        }
+
+        // 標高色分け(最大解像度で色付けした近景マップの画像を世界矩形に張る)。
+        // 標高OFFで海岸線があるときは、下の海岸線の塗りが陸地をすべて覆うので描かない。
+        if (terrain && settings && (L.elevation || !coastPath)) {
           ctx.save();
           if (coastPath) ctx.clip(coastPath, "evenodd");
           ctx.imageSmoothingEnabled = true;
@@ -1462,9 +1485,6 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
 
         // 陸地の外周と川・湖の穴を一緒に塗り、標高表示に依らず水域を残す。
         if (coastPath && !L.elevation) {
-          ctx.fillStyle = BG_COLOR;
-          const bounds = getViewBounds();
-          ctx.fillRect(bounds.x1, bounds.z1, bounds.x2 - bounds.x1, bounds.z2 - bounds.z1);
           ctx.fillStyle = COLOR_LAND;
           ctx.fill(coastPath, "evenodd");
         }
@@ -1808,16 +1828,31 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
       };
 
       /* ---- 海岸線 ---- */
+
+      /** 陸地の Polygon/MultiPolygon(GeoJSONライク)を返すAPIを取得して Path2D にする */
+      const fetchLandPath = async (path: string): Promise<Path2D | null> => {
+        const geo = await fetchApi<{ type?: string; coordinates?: unknown }>(
+          buildApiUrl(apiBaseUrl, path),
+          { signal: abort.signal }
+        );
+        return geo.coordinates && (geo.type === "Polygon" || geo.type === "MultiPolygon")
+          ? buildCoastlinePath(geo) : null;
+      };
+
       const loadCoastline = async () => {
         try {
-          const geo = await fetchApi<{ type?: string; coordinates?: unknown }>(
-            buildApiUrl(apiBaseUrl, "/api/v1/terrain/coastline"),
-            { signal: abort.signal }
-          );
-          coastPath = geo.coordinates && (geo.type === "Polygon" || geo.type === "MultiPolygon")
-            ? buildCoastlinePath(geo) : null;
+          coastPath = await fetchLandPath("/api/v1/terrain/coastline");
         } catch (err) {
           if (!abort.signal.aborted) console.warn("[CityMapCanvas] failed to load coastline:", err);
+        }
+      };
+
+      /** 都市外の陸地。セッションが変わるとマップも変わりうるので、再読み込みのたびに取り直す */
+      const loadBackgroundLand = async () => {
+        try {
+          backgroundLandPath = await fetchLandPath("/api/v1/terrain/background/coastline");
+        } catch (err) {
+          if (!abort.signal.aborted) console.warn("[CityMapCanvas] failed to load background coastline:", err);
         }
       };
 
@@ -2453,7 +2488,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         heat.loadedKind = "none";
         heat.binPaths = null;
         void (async () => {
-          await Promise.all([loadTerrain(), loadCoastline(), loadReclaimedLands()]);
+          await Promise.all([loadTerrain(), loadCoastline(), loadBackgroundLand(), loadReclaimedLands()]);
           if (disposed) return;
           fetchVectorsForViewport();
           void loadHeatmap(heatmapRef.current);
@@ -2523,7 +2558,7 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
 
       resizeCanvas();
       void (async () => {
-        await Promise.all([loadTerrain(), loadCoastline(), loadReclaimedLands()]);
+        await Promise.all([loadTerrain(), loadCoastline(), loadBackgroundLand(), loadReclaimedLands()]);
         if (disposed) return;
         resetView();
         // 等高線細分化の基準ズームは初期ビュー(全体フィット、または

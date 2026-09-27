@@ -87,6 +87,7 @@ nav:
       - 倒壊建物: geometries/F8_倒壊建物のメッシュ生成.md
       - 車両基地: geometries/F9_車両基地のメッシュ生成.md
       - オープンスペース: geometries/F10_オープンスペースのメッシュ生成.md
+      - 露天掘り: geometries/F11_露天掘りのメッシュ生成.md
     - 道路メッシュの生成: geometries/G_道路メッシュの生成.md
     - バックエンドデータロード: geometries/H_バックエンドデータロード.md
     - 建物パーツ作成マニュアル: geometries/I_建物パーツ作成マニュアル.md

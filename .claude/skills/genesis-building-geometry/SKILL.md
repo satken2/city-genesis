@@ -17,6 +17,7 @@ description: City Genesisの建物のジオメトリ観点のロジック(3D形�
   - `F4_港湾岸壁のメッシュ生成.md` (6=MODEL_PORT)
   - `F6_マッシュアップ建物のメッシュ生成.md` (7=MODEL_MASHUP。複数棟の複合施設)
   - `F9_車両基地のメッシュ生成.md` (9=MODEL_RAIL_YARD)
+  - `F11_露天掘りのメッシュ生成.md` (13=MODEL_OPEN_PIT。穴は地形で、前庭の設備だけをマッシュアップと同じ規則で描く)
 - **statusはmodel_typeより先に分岐する**別軸なので、該当statusを扱うなら必ず読む
   - `F5_工事中建物のメッシュ生成.md` (STATUS_CONSTRUCTING)
   - `F7_解体中建物のメッシュ生成.md` (STATUS_DEMOLISHING)

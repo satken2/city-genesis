@@ -29,6 +29,8 @@ public partial class BuildingPlanManager
     private int placementRevision;
     private bool hasRawPlacementPosition;
     private Vector3 lastRawPlacementPosition;
+    // 自由配置で道路に吸着していないときの向き(度)。吸着中は道路が向きを決め、道路から外れるとこの向きに戻る。
+    private float freeAngle;
     private PathManager placementPaths;
     private bool roadAnchorActive;
     private int roadAnchorId = -1;
@@ -92,6 +94,7 @@ public partial class BuildingPlanManager
         if (!PlacementActive || (!DirectAllowed && mode != BuildingPlacementMode.Parcel) || mode == PlacementMode) return;
         bool keepPosition = directCommitted && mode != BuildingPlacementMode.Parcel;
         PlacementMode = mode;
+        if (mode == BuildingPlacementMode.Free) freeAngle = directAngle;
         ResetRoadAnchor();
         middleDrag.Cancel();
         if (!keepPosition) ResetPlacementSelection(false);
@@ -135,17 +138,31 @@ public partial class BuildingPlanManager
         {
             float width = SizeEditable ? (float?)command["width"] ?? directWidth : directWidth;
             float depth = SizeEditable ? (float?)command["depth"] ?? directDepth : directDepth;
-            float angle = PlacementMode == BuildingPlacementMode.Free ? (float?)command["angle"] ?? directAngle : directAngle;
+            float? rotation = PlacementMode == BuildingPlacementMode.Free ? (float?)command["angle"] : null;
+            float angle = rotation ?? directAngle;
             if (!float.IsNaN(width) && !float.IsInfinity(width) && !float.IsNaN(depth) && !float.IsInfinity(depth) &&
                 !float.IsNaN(angle) && !float.IsInfinity(angle))
             {
                 directWidth = Mathf.Clamp(width, 1f, 500f);
                 directDepth = Mathf.Clamp(depth, 1f, 500f);
-                directAngle = angle;
+                if (rotation.HasValue) RotateFree(angle);
                 RebuildAfterSizeChange();
             }
         }
         EmitPlacementState(false, (string)command["request_id"]);
+    }
+
+    /// <summary>
+    /// 自由配置の向きを手動で変える(パネルの回転角・中ボタンドラッグ)。位置決め中に道路へ吸着している間は
+    /// 道路が向きを決めるので、道路から外れたときの向きとして覚えるだけにする。位置の固定後に回すと
+    /// 道路に沿った向きではなくなるので吸着を外す(以後の寸法変更で道路側の辺に引き戻さない)。
+    /// </summary>
+    private void RotateFree(float angle)
+    {
+        freeAngle = angle;
+        if (roadAnchorActive && !directCommitted) return;
+        directAngle = angle;
+        ResetRoadAnchor();
     }
 
     private void RebuildAfterSizeChange()
@@ -215,12 +232,26 @@ public partial class BuildingPlanManager
             Mathf.Abs(segment.b.y - Utils.GetGroundHeight(segment.b)) < 0.3f;
     }
 
+    /// <summary>
+    /// 道路への吸着を解決する。道路沿い配置は近くの地上道路を探して吸着し、自由配置はカーソルが路面(歩道込み)の
+    /// 上にあるときだけ、カーソルのある側の路肩へ吸着する。吸着の計算(正面を道路の外縁に合わせて道路側へ向け、
+    /// 曲線の内側や交差点に食い込む候補を除く)は共通。自由配置で吸着しないときは手動で決めた向きに戻す。
+    /// </summary>
     private void ResolveRoadPlacement(Vector3 raw)
     {
-        if (PlacementMode != BuildingPlacementMode.Roadside) { ResetRoadAnchor(); return; }
+        bool roadside = PlacementMode == BuildingPlacementMode.Roadside;
+        if (!roadside && PlacementMode != BuildingPlacementMode.Free) { ResetRoadAnchor(); return; }
+        if (TryAnchorToRoad(raw, roadside)) return;
+        ResetRoadAnchor();
+        if (!roadside) directAngle = freeAngle;
+    }
+
+    private bool TryAnchorToRoad(Vector3 raw, bool roadside)
+    {
         if (placementPaths == null) placementPaths = FindAnyObjectByType<PathManager>();
-        if (placementPaths == null) { ResetRoadAnchor(); return; }
-        float radius = directDepth * 0.5f + maxRoadHalfWidth + 12f;
+        if (placementPaths == null) return false;
+        Vector3 cursor = new Vector3(raw.x, 0, raw.z);
+        float radius = roadside ? directDepth * 0.5f + maxRoadHalfWidth + 12f : maxRoadHalfWidth;
         var candidates = placementPaths.QueryNearbySegments(raw, radius);
         roadCandidates.Clear();
         visitedPlacementSegments.Clear();
@@ -233,19 +264,22 @@ public partial class BuildingPlanManager
             if (tangent.sqrMagnitude < 0.0001f) continue;
             tangent.Normalize();
             Vector3 closest = BuildingPlacementGeometry.Closest(raw, segment.a, segment.b);
+            float halfRoad = placementPaths.GetRoadWidth(segment.path.path_variant) * 0.5f;
+            float fromCenterLine = Vector3.Distance(cursor, closest);
+            if (!roadside && fromCenterLine > halfRoad) continue;
             Vector3 normal = new Vector3(-tangent.z, 0, tangent.x);
             float side = Vector3.Dot(raw - closest, normal);
             // 道路中心付近では直前の側を維持し、明確に反対側へ動かしたときだけ反転する。
             if (Mathf.Abs(side) < 1f && roadAnchorActive && roadAnchorId == segment.path.path_id)
                 side = Vector3.Dot(roadOutward, normal);
             normal *= side < 0 ? -1 : 1;
-            float halfRoad = placementPaths.GetRoadWidth(segment.path.path_variant) * 0.5f;
             Vector3 front = closest + normal * (halfRoad + 0.05f);
             Vector3 center = BuildingPlacementGeometry.CenterFromFront(front, normal, directDepth);
             float angle = BuildingPlacementGeometry.AngleFromOutward(normal);
-            float distance = Vector3.Distance(new Vector3(raw.x, 0, raw.z), center);
-            if (distance > directDepth * 0.5f + 12f) continue;
-            float score = distance;
+            float distance = Vector3.Distance(cursor, center);
+            if (roadside && distance > directDepth * 0.5f + 12f) continue;
+            // 道路沿い配置は建物がカーソルに近い候補、自由配置はカーソルの真下に近い道路を選ぶ。
+            float score = roadside ? distance : fromCenterLine;
             if (roadAnchorActive && roadAnchorId == segment.path.path_id && Vector3.Dot(roadOutward, normal) > 0)
                 score -= roadAnchorSegment == segment.segmentIndex ? 1f : 0.6f;
             roadCandidates.Add(new RoadCandidate { segment = segment, front = front, outward = normal,
@@ -277,9 +311,9 @@ public partial class BuildingPlanManager
             roadGuideB = candidate.segment.b + candidate.outward * halfWidth;
             directCenter = candidate.center;
             directAngle = candidate.angle;
-            return;
+            return true;
         }
-        ResetRoadAnchor();
+        return false;
     }
 
     private static long SegmentKey(PathSegment segment) => ((long)segment.path.path_id << 32) | (uint)segment.segmentIndex;

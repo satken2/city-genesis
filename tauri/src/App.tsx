@@ -490,6 +490,7 @@ function App() {
                 apiBaseUrl={context.api_base_url}
                 onClose={closeWindow}
                 editAgentId={windowExtra(context)?.editAgentId as number | undefined}
+                relocateCityHall={windowExtra(context)?.relocateCityHall === true}
               />
             ) : context.window_type === "mashup_edit" ? (
               <MashupEditPanel

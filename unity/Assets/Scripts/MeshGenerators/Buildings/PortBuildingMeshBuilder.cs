@@ -4,40 +4,32 @@ using GeneratedModels;
 using NetTopologySuite.Geometries;
 
 /// <summary>
-/// 海岸の岸壁（MODEL_PORT）のメッシュ生成器。
+/// 港（MODEL_PORT）のメッシュ生成器。
 ///
-/// 海岸土地区画（PARCEL_SHORE）に立地する港湾（BUILDING_PORT）に適用する。
-/// バックエンドは海岸区画のポリゴンを海岸線でクリップせず元の形状のまま保持する（B_土地形状 B.5）。
-/// building_shape=SHAPE_FULL の底面ポリゴン（=土地区画の元形状。海側にはみ出している）の外周に
-/// 区画の中の水際（海岸線）が届く点から岸壁の左端A・右端Bを求め、それぞれを海側へ突き出した2点を結ぶ**直線**で
-/// 底面をカットした形状（海側境界は常に直線）を、厚みのある板（岸壁スラブ）として上下に押し出して生成する。
-/// モジュラーの壁・角パーツは使わず、純粋にプロシージャルにスラブを作る。
+/// 海岸土地区画（PARCEL_SHORE）に立地する港に適用する。水際（船が着く線）と、その陸側のヤード（荷役の地面）を決め、
+/// 水際に荷役クレーン（port_crane）、区画の辺0（道路側）に施設モジュール（port_building。ゲートと建物）、
+/// その間の空きにコンテナ（port_container）を置く。配置は <see cref="PortLayout"/> が決める。
 ///
-/// visual_variant(1)/visual_variant2 … 岸壁の左端/右端の突き出し量（0=最小突き出し、1=区画の海側いっぱいまで）
-/// 上面の高さは海面から2m固定（visual_variant3 は使わない）。
-/// 上面は敷地全体の地面パネル(draw_floor)と同じ floor マテリアルで床続きに描画し、側面/下面は ceil を使う。
-/// 水際（海側の直線エッジ）には荷役クレーン（port_crane）を等間隔に並べる。
+/// 水際とヤードの決め方は2通りで、そこから先の配置の規則は同じ。
+/// - 区画が埋立地の岸壁の陸側にある（<see cref="FindFacingReclaimedQuays"/>。埋立地の上に引いた港）: 水際は埋立地の岸壁
+///   （<see cref="ReclaimedLandManager"/> が天端と垂直の面を描く）に任せてスラブを作らない。水際=面している岸壁区間、
+///   ヤード=区画の陸の部分。
+/// - それ以外（天然の海岸）: バックエンドは海岸区画を海岸線でクリップせず元の形状のまま保持する（B_土地形状 B.5）ので、
+///   区画の中の水際の両端を結ぶ弦を左右とも <see cref="QUAY_PROTRUSION"/> だけ海側へ平行に移した直線で底面をカットし、
+///   厚みのある板（岸壁スラブ）を押し出す。水際=カット直線上の辺、ヤード=スラブの範囲。
 ///
-/// 区画が埋立地の岸壁の陸側にある場合（<see cref="FindFacingReclaimedQuays"/>。埋立地の上に引いた港）は、水際を
-/// 埋立地の岸壁（<see cref="ReclaimedLandManager"/> が描く天端と垂直の面）に任せてスラブを作らず、面している
-/// 岸壁区間に沿ってクレーンを並べる。岸壁の海側にある区画（既存の港の隣の埋立）は今までどおりスラブを作り、
-/// 隣の埋立地が区画の辺や角に接しても、弦は区画の中の水際の両端から取るので斜めにならない（<see cref="CollectQuayEndCandidates"/>）。
+/// visual_variant(1) は他の建物と同じく外観バリアントの閾値フォルダ（F_建物メッシュの生成 §4）、visual_variant2 はコンテナの
+/// 配置の乱数の種に使う。接写は `_close`、遠景は `_far` のパーツで同じ配置を描き、遠景のコンテナは山ごとの箱にする。
 ///
 /// 詳細仕様は city-genesis/docs/docs/geometries/F4_港湾岸壁のメッシュ生成.md を参照。
 /// </summary>
 public class PortBuildingMeshBuilder : IBuildingMeshGenerator
 {
-    /// <summary>岸壁上面の海面からの高さ(m)。visual_variant によらず固定。</summary>
-    private const float QUAY_TOP_HEIGHT = 2f;
+    /// <summary>岸壁上面の海面からの高さ(m)。施設モジュールもこの高さより下には置かない。</summary>
+    public const float QUAY_TOP_HEIGHT = 2f;
 
-    /// <summary>突き出し量の下限（区画の海側奥行きに対する比率）。visual_variant=0 でも岸壁はこの割合だけ海へ張り出す。</summary>
-    private const float MIN_PROTRUSION_RATIO = 0.2f;
-
-    /// <summary>荷役クレーンの設置間隔（パーツ実寸幅に対する倍率）。1.0 だと隣同士が接するため余白を持たせる。</summary>
-    private const float CRANE_SPACING_RATIO = 4.5f;
-
-    /// <summary>1つの岸壁に並べる荷役クレーンの上限。巨大な岸壁でドローコールが膨らむのを防ぐ。</summary>
-    private const int MAX_CRANE_COUNT = 8;
+    /// <summary>天然の海岸の岸壁が、水際の両端（海岸線の上）から海へ張り出す距離(m)。</summary>
+    public const float QUAY_PROTRUSION = 20f;
 
     /// <summary>海側エッジ上とみなす距離の許容差(m)。カット直線と岸壁フットプリントの辺の照合に使う。</summary>
     private const float SEAWARD_EDGE_EPSILON = 0.05f;
@@ -74,28 +66,19 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
     /// <summary>底面外周の上にあるとみなす、区画の陸の部分の頂点の距離(m)。</summary>
     private const double QUAY_END_OUTLINE_TOLERANCE = 0.01;
 
-    /// <summary>
-    /// クレーンを並べる水際1本。座標は center_point 基準のローカルXZ、Normal は海を向く単位法線、Y はローカルの上面高さ。
-    /// </summary>
-    private struct Waterline
-    {
-        public Vector2 P;
-        public Vector2 Q;
-        public Vector2 Normal;
-        public float Y;
-    }
+    /// <summary>コンテナの色違いのパーツ（port_container1, 2, …）を探す上限。</summary>
+    private const int MAX_CONTAINER_PARTS = 16;
 
     /// <summary>
-    /// 岸壁の海側境界（A'-B' の直線カットで生じたエッジ）を表す。
-    /// 塔屋の向きと荷役クレーンの配置に使う。カットできなかった建物では <see cref="Valid"/> が false。
-    /// 座標・方向はすべて center_point 基準のローカルXZ。
+    /// 岸壁の海側境界（直線カットで生じたエッジ）を表す。水際の列挙に使う。
+    /// カットできなかった建物では <see cref="Valid"/> が false。座標・方向はすべて center_point 基準のローカルXZ。
     /// </summary>
     private struct QuaySeawardEdge
     {
         public bool Valid;
         /// <summary>カット直線上の基準点（突き出し後の左端 A'）。</summary>
         public Vector2 Origin;
-        /// <summary>カット直線の向き（A'→B'）。</summary>
+        /// <summary>カット直線の向き（A'→B'。海を左手に見る）。</summary>
         public Vector2 Dir;
         /// <summary>カット直線に垂直な、海を向く単位法線。</summary>
         public Vector2 Normal;
@@ -109,11 +92,11 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
             return BuildingMeshBuilder.GenerateSimpleBuilding(null, 1, LocalConstants.FLOOR_HEIGHT);
         }
 
-        // 底面（CCW、center_point 相対のローカル座標）
+        // 底面（CCW・辺0が道路側、center_point 相対のローカル座標）
         Vector2[] footprint = BuildingMeshUtils.GetFootprint(buildingData);
         string prefix = BuildingMeshUtils.ResolveModelNaming(buildingData).Prefix;
-        float variant1 = Mathf.Clamp01(buildingData.visual_variant);
-        float variant2 = Mathf.Clamp01(buildingData.visual_variant2);
+        int variantNumber = BuildingMeshUtils.ComputeVariantNumber(buildingData.visual_variant);
+        bool far = BuildingMeshUtils.CurrentDrawLod == DrawLod.Far;
 
         // center_point のワールド座標（バックエンド座標）と地形高さ。
         // ModularBuildingMeshBuilder と同じ取得経路（Utils.GetGroundHeight）を使い、
@@ -130,75 +113,146 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         List<CombineInstance> combineInstances = new List<CombineInstance>();
         List<Material> materials = new List<Material>();
         List<Mesh> temporaryMeshes = new List<Mesh>();
-        Material floorMaterial;
-        Vector2[] colliderFootprint;
-        float colliderHeight;
+        string[] prefixes = PartPrefixes(buildingData, prefix);
+        Material floorMaterial = far ? null : BuildingMeshUtils.ResolveFloorMaterialFromMaster(buildingData, prefix);
 
+        // 1. 水際・ヤード・地面の高さ（ヤードの地面は下のクレーン・施設・コンテナの接地に使う）。
+        Vector2[] yard;
+        List<PortLayout.Waterline> waterlines;
+        float yardFloorLocalY;
+        float colliderHeight;
         List<ReclaimedQuay> facingQuays = CollectFacingReclaimedQuays(buildingData, centerPointWorld);
         if (facingQuays.Count > 0)
         {
-            // 1'. 埋立地の岸壁に面する港: スラブを作らず、岸壁区間に沿ってクレーンを並べ、塔屋とコライダーは区画の陸の部分に置く。
-            floorMaterial = BuildingMeshUtils.ResolveFloorMaterialFromMaster(buildingData, prefix);
-            BuildFacingReclaimedQuay(prefix, footprint, centerPointWorld, facingQuays,
-                combineInstances, materials, temporaryMeshes, out colliderFootprint, out colliderHeight);
+            // 1'. 埋立地の岸壁に面する港: スラブを作らず、面している岸壁区間を水際、区画の陸の部分をヤードにする。
+            waterlines = FacingWaterlines(facingQuays, centerPointWorld, out float maxTopLocalY);
+            yard = ExtractLandPart(footprint, centerPointWorld) ?? footprint;
+            yardFloorLocalY = float.NegativeInfinity;
+            colliderHeight = Mathf.Max(0.1f, maxTopLocalY);
             UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
                 $"[PortBMB] agent={buildingData.agent_id} 埋立地の岸壁 {facingQuays.Count} 区間に面するためスラブを省略");
         }
         else
         {
-            // 1. 区画の水際の両端から左端A・右端Bを求め、visual_variant1/2 の突き出しを反映した
-            //    直線カットで岸壁フットプリントを得る。
-            Vector2[] quayFootprint = BuildQuayFootprint(footprint, centerPointWorld, variant1, variant2, out QuaySeawardEdge seaward);
+            // 天然の海岸: 区画の水際の両端から弦を求め、左右とも一定距離だけ海側の直線でカットした岸壁フットプリントを得る。
+            Vector2[] quayFootprint = BuildQuayFootprint(footprint, centerPointWorld, out QuaySeawardEdge seaward);
 
-            // 2. スラブ上面のローカルY。
-            //    上面のワールドY = 海面(0m) + 2m 固定。GameObject は center_point 位置の地形高さに
-            //    配置されるため、ローカルYは centerPointWorld.y を差し引く。
+            // スラブ上面のワールドY = 海面(0m) + 2m 固定。GameObject は center_point 位置の地形高さに
+            // 配置されるため、ローカルYは centerPointWorld.y を差し引く。
             float topLocalY = QUAY_TOP_HEIGHT - centerPointWorld.y;
 
-            // 3. スラブメッシュ（上面=topLocalY、下面=各頂点の地形=海底高さ）。subMesh0=上面、subMesh1=側面+下面。
+            // スラブメッシュ（上面=topLocalY、下面=各頂点の地形=海底高さ）。subMesh0=上面、subMesh1=側面+下面。
             Mesh slabMesh = BuildSlabMesh(quayFootprint, topLocalY, centerPointWorld);
             if (slabMesh == null)
             {
                 return BuildingMeshBuilder.GenerateSimpleBuilding(footprint, 1, LocalConstants.FLOOR_HEIGHT);
             }
 
-            // スラブのマテリアル: 上面=floor（敷地全体の地面パネルと同一マテリアルで床続きにする）、
-            // 側面/下面=ceil（岸壁の壁面）。地面パネルが無効(draw_floor未設定等)の場合は floor パーツ直参照、
-            // それも無ければデフォルトマテリアル。
-            floorMaterial = BuildingMeshUtils.ResolveFloorMaterialFromMaster(buildingData, prefix);
-            Material topMaterial = floorMaterial != null ? floorMaterial : BuildingMeshUtils.SelectFloorMaterial(prefix, 0, null);
-            Material sideMaterial = BuildingMeshUtils.SelectRoofMaterial(prefix, 0, null);
-            UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
-                $"[PortBMB] agent={buildingData.agent_id} prefix={prefix} " +
-                $"topMat={(topMaterial != null ? topMaterial.name : "null")} sideMat={(sideMaterial != null ? sideMaterial.name : "null")} " +
-                $"floorPanel={(floorMaterial != null ? "あり" : "なし")} topY={topLocalY:F2} vv=({variant1:F2},{variant2:F2})");
+            // 上面=floor（敷地全体の地面パネルと同一マテリアルで床続きにする）、側面/下面=ceil（岸壁の壁面）。
+            // 地面パネルが無効(draw_floor未設定等)の場合は floor パーツ直参照、それも無ければデフォルトマテリアル。
+            Material topMaterial = floorMaterial != null ? floorMaterial : ResolvePartMaterial(prefixes, "floor", variantNumber);
+            Material sideMaterial = ResolvePartMaterial(prefixes, "ceil", variantNumber);
             AppendMesh(slabMesh, new[] { topMaterial, sideMaterial }, combineInstances, materials);
             temporaryMeshes.Add(slabMesh);
 
-            // 4. 塔屋（岸壁中央・海側境界方向・上面高さ）。
-            PlaceRoofprop(prefix, quayFootprint, seaward.Dir, topLocalY, combineInstances, materials, temporaryMeshes);
-
-            // 5. 荷役クレーン（水際の直線エッジに沿って等間隔）。
-            PlaceCranesAlongWaterlines(prefix, EnumerateSeawardWaterlines(quayFootprint, seaward, topLocalY),
-                combineInstances, materials, temporaryMeshes);
-
+            waterlines = EnumerateSeawardWaterlines(quayFootprint, seaward, topLocalY);
+            yard = quayFootprint;
+            yardFloorLocalY = topLocalY;
             // クレーンのブームは海側へ張り出すがクリック対象には含めない（工事中のクレーン §19.7 と同じ割り切り）。
-            colliderFootprint = quayFootprint;
             colliderHeight = Mathf.Max(0.1f, topLocalY);
         }
 
-        // 6. 敷地の装飾（フェンス・タイル・地面パネル）。モジュラー/prebuilt と共通の処理で、
-        //    地面パネルは draw_floor=yes のとき敷地（土地区画）全体に地形追従で描かれ、
-        //    岸壁上面と同一の floor マテリアルで床続きになる。
-        Vector2[] fenceFootprint = BuildingMeshUtils.ResolveParcelContext(
-            buildingData, out _, out _);
-        Vector2[] sitePolygon = (fenceFootprint != null && fenceFootprint.Length >= 3) ? fenceFootprint : footprint;
-        ModularBodyBuilder.GenerateSiteDecorations(
-            prefix, 0,
-            fenceFootprint, sitePolygon, sitePolygon,
-            floorMaterial,
-            centerPointWorld, deformToTerrain: isDynamic,
-            combineInstances, materials, temporaryMeshes);
+        // ヤードの地面（スラブの上は max(地形, 天端)）と、施設の下限（海面+2m）。
+        float Ground(Vector2 local)
+        {
+            float terrain = Utils.GetGroundHeight(new Vector3(local.x + centerPointWorld.x, 1000f, local.y + centerPointWorld.z)) - centerPointWorld.y;
+            return Mathf.Max(terrain, yardFloorLocalY);
+        }
+
+        // 2. 配置計画。寸法は描画LODによらず通常モデルで測り、遠景・接写でも同じ位置に置く。
+        GameObject moduleModel = LayoutPart(prefix, "port_building", variantNumber);
+        GameObject craneModel = LayoutPart(prefix, "port_crane", variantNumber);
+        GameObject roofpropModel = LayoutPart(prefix, "roofprop", variantNumber);
+        List<(string prefix, string name)> containerParts = ContainerParts(prefixes, variantNumber);
+
+        Vector2 alongQuay = waterlines.Count > 0
+            ? new Vector2(waterlines[0].Normal.y, -waterlines[0].Normal.x)
+            : (footprint[1] - footprint[0]).normalized;
+        Vector2 roofpropAt = VertexCentroid(yard);
+        Quaternion roofpropRotation = Quaternion.Euler(0, -Mathf.Atan2(alongQuay.y, alongQuay.x) * Mathf.Rad2Deg + 90, 0);
+        Bounds? roofpropBounds = PortLayout.GetModelBounds(roofpropModel);
+        Vector2[] roofpropRect = roofpropBounds.HasValue ? PortLayout.RotatedRect(roofpropAt, roofpropRotation, roofpropBounds.Value) : null;
+
+        PortLayout.Plan plan = PortLayout.Create(footprint, yard, waterlines,
+            PortLayout.GetModelBounds(moduleModel), PortLayout.GetModelBounds(craneModel), roofpropRect,
+            containerParts.Count > 0, buildingData.visual_variant2);
+
+        // 3. 施設モジュール（ゲートと建物）。区画の辺0の中点の地面（海面+2m 以上）に接地する。
+        if (plan.Module != null)
+        {
+            float y = Mathf.Max(Ground(plan.Module.Gate), QUAY_TOP_HEIGHT - centerPointWorld.y);
+            AppendModel(DrawPart(prefix, "port_building", variantNumber),
+                Matrix4x4.TRS(new Vector3(plan.Module.Position.x, y, plan.Module.Position.y), plan.Module.Rotation, Vector3.one),
+                combineInstances, materials, temporaryMeshes);
+        }
+
+        // 4. 荷役クレーン。原点が水際の線上・上面高さ、ローカル+Z が海を向く。スケールしない（実寸）。
+        if (plan.Cranes.Count > 0)
+        {
+            Mesh craneMesh = CombinePart(DrawPart(prefix, "port_crane", variantNumber), out Material[] craneMaterials, temporaryMeshes);
+            if (craneMesh != null)
+            {
+                foreach (PortLayout.Crane crane in plan.Cranes)
+                {
+                    Quaternion rotation = Quaternion.LookRotation(new Vector3(crane.Normal.x, 0f, crane.Normal.y), Vector3.up);
+                    AppendInstance(craneMesh, craneMaterials,
+                        Matrix4x4.TRS(new Vector3(crane.Position.x, crane.Y, crane.Position.y), rotation, Vector3.one),
+                        combineInstances, materials);
+                }
+            }
+        }
+
+        // 5. 塔屋（ヤードの頂点の平均の位置に水際に沿わせて1つ）。
+        if (roofpropRect != null)
+        {
+            AppendModel(DrawPart(prefix, "roofprop", variantNumber),
+                Matrix4x4.TRS(new Vector3(roofpropAt.x, Ground(roofpropAt), roofpropAt.y), roofpropRotation, Vector3.one),
+                combineInstances, materials, temporaryMeshes);
+        }
+
+        // 6. コンテナ。通常・接写はパーツを段に積み、遠景は山ごとの箱。
+        if (plan.Stacks.Count > 0)
+        {
+            if (far)
+            {
+                Mesh boxes = BuildContainerBoxes(plan.Stacks, Ground);
+                AppendMesh(boxes, new Material[] { null }, combineInstances, materials);
+                temporaryMeshes.Add(boxes);
+            }
+            else
+            {
+                AppendContainers(plan.Stacks, containerParts, variantNumber, Ground, combineInstances, materials, temporaryMeshes);
+            }
+        }
+
+        UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
+            $"[PortBMB] agent={buildingData.agent_id} prefix={prefix} lod={BuildingMeshUtils.CurrentDrawLod} 水際{waterlines.Count} " +
+            $"施設{(plan.Module != null ? "あり" : "なし")} クレーン{plan.Cranes.Count}基 コンテナ{plan.Stacks.Count}山");
+
+        // 7. 敷地の装飾（フェンス・タイル・地面パネル）。モジュラー/prebuilt と共通の処理で、
+        //    地面パネルは draw_floor=yes のときヤードに描き、岸壁上面と同一の floor マテリアルで床続きになる。
+        //    区画の海の部分（岸壁より先）には描かない。ヤードは海岸線をまたいで高さが変わる（埋立地の天端と元の陸、
+        //    スラブの下の浜）ので、距離によらず地形に追従させる。遠景では描かない（既成建物と同じ）。
+        if (!far)
+        {
+            Vector2[] fenceFootprint = BuildingMeshUtils.ResolveParcelContext(buildingData, out _, out _);
+            ModularBodyBuilder.GenerateSiteDecorations(
+                prefix, 0,
+                fenceFootprint, yard, yard,
+                floorMaterial,
+                centerPointWorld, deformToTerrain: true,
+                combineInstances, materials, temporaryMeshes);
+        }
 
         // 埋立地の岸壁に面する港はスラブが無いので、パーツが1つも解決できないと空のメッシュになる。
         if (combineInstances.Count == 0)
@@ -210,7 +264,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
             return BuildingMeshBuilder.GenerateSimpleBuilding(footprint, 1, LocalConstants.FLOOR_HEIGHT);
         }
 
-        // 7. メッシュ結合。
+        // 8. メッシュ結合。
         Mesh finalMesh = new Mesh();
         finalMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         finalMesh.CombineMeshes(combineInstances.ToArray(), false, true);
@@ -222,54 +276,241 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
             Object.Destroy(temp);
         }
 
-        // 8. コライダー（岸壁フットプリント、または埋立地に面する港では区画の陸の部分を上面高さまで押し出し）。
-        Mesh colliderMesh = BuildingMeshBuilder.GenerateColliderMesh(colliderFootprint, colliderHeight);
+        // 9. コライダー（ヤードを上面高さまで押し出し）。
+        Mesh colliderMesh = BuildingMeshBuilder.GenerateColliderMesh(yard, colliderHeight);
 
         var result = new BuildingMeshResult(finalMesh, materials.ToArray(), colliderMesh);
         return BuildingMeshBuilder.MergeSubMeshes(result);
     }
 
     /// <summary>
-    /// 埋立地の岸壁に面する港の設備を積む。水際は埋立地の岸壁が描くのでスラブは作らない。
-    /// クレーンは面している岸壁区間ごとに、その外向き法線を海側・その埋立地の天端を上面として並べる。
-    /// 塔屋とコライダーは区画の陸の部分（底面∩陸地の最大の多角形。陸地が取れなければ底面）に置き、
-    /// 塔屋の高さはその重心の地面（帯の中は天端）、向きは最長の岸壁区間に沿わせる。
+    /// 施設モジュール（port_building）の通常モデル。配置と間口は描画LODによらずこのモデルの寸法とマーカーで決める
+    /// （<see cref="BuildingRoadAccess"/> が間口の索引を作るときにも使う）。無ければ null。
     /// </summary>
-    private static void BuildFacingReclaimedQuay(string prefix, Vector2[] footprint, Vector3 centerPointWorld,
-        List<ReclaimedQuay> facingQuays, List<CombineInstance> combineInstances, List<Material> materials,
-        List<Mesh> temporaryMeshes, out Vector2[] colliderFootprint, out float colliderHeight)
+    public static GameObject ResolveModulePart(BuildingSummary buildingData)
+    {
+        string prefix = BuildingMeshUtils.ResolveModelNaming(buildingData).Prefix;
+        return LayoutPart(prefix, "port_building", BuildingMeshUtils.ComputeVariantNumber(buildingData.visual_variant));
+    }
+
+    /// <summary>配置の寸法に使う通常モデル（無印）を閾値フォルダの走査で解決する。描画LODの `_close`/`_far` は見ない。</summary>
+    private static GameObject LayoutPart(string prefix, string partName, int variantNumber)
+    {
+        DrawLod previous = BuildingMeshUtils.CurrentDrawLod;
+        BuildingMeshUtils.CurrentDrawLod = DrawLod.Normal;
+        try
+        {
+            return BuildingMeshUtils.GetPartBySuffixScan(prefix, partName, variantNumber);
+        }
+        finally
+        {
+            BuildingMeshUtils.CurrentDrawLod = previous;
+        }
+    }
+
+    /// <summary>描画に使うパーツ（接写なら `_close` 優先、遠景なら `_far` だけ）を閾値フォルダの走査で解決する。</summary>
+    private static GameObject DrawPart(string prefix, string partName, int variantNumber)
+    {
+        return BuildingMeshUtils.GetPartBySuffixScan(prefix, partName, variantNumber);
+    }
+
+    /// <summary>
+    /// 港のパーツを探すフォルダの順（a{variant} → b{bd_type}）。コンテナ・岸壁のマテリアルのように
+    /// 港の種類をまたいで共有するパーツは b{bd_type} に置き、a{variant} に同名があればそちらを使う。
+    /// </summary>
+    private static string[] PartPrefixes(BuildingSummary buildingData, string prefix)
+    {
+        int bdType = buildingData.bd_type ?? 0;
+        if (MasterDataStore.Instance != null && MasterDataStore.Instance.IsInitialized)
+        {
+            try
+            {
+                bdType = MasterDataStore.Instance.GetAgentMaster(buildingData.variant)?.bd_type ?? bdType;
+            }
+            catch (System.Exception)
+            {
+                // マスターに無いバリアントは建物データの bd_type を使う。
+            }
+        }
+        string bPrefix = $"b{bdType}";
+        return bPrefix == prefix ? new[] { prefix } : new[] { prefix, bPrefix };
+    }
+
+    /// <summary>マテリアル参照専用のパーツ（floor・ceil）の最初のマテリアルを prefixes の順に探す。無ければ既定の建物マテリアル。</summary>
+    private static Material ResolvePartMaterial(string[] prefixes, string partName, int variantNumber)
+    {
+        foreach (string p in prefixes)
+        {
+            GameObject part = BuildingMeshUtils.GetPartBySuffixScan(p, partName, variantNumber);
+            Material[] partMaterials = part != null ? BuildingMeshUtils.GetModuleMaterials(part) : null;
+            if (partMaterials != null && partMaterials.Length > 0 && partMaterials[0] != null)
+            {
+                return partMaterials[0];
+            }
+        }
+        return BuildingMeshBuilder.GetDefaultBuildingMaterial();
+    }
+
+    /// <summary>
+    /// コンテナの色違いのパーツ（port_container1, 2, …）の列。番号は1から連番で探し、最初に見つかったフォルダ
+    /// （a{variant} → b{bd_type}）の分だけを使う。有無は通常モデルで判定する（遠景でも同じ配置にするため）。
+    /// </summary>
+    private static List<(string prefix, string name)> ContainerParts(string[] prefixes, int variantNumber)
+    {
+        var parts = new List<(string prefix, string name)>();
+        foreach (string p in prefixes)
+        {
+            for (int n = 1; n <= MAX_CONTAINER_PARTS; n++)
+            {
+                string name = $"port_container{n}";
+                if (LayoutPart(p, name, variantNumber) == null)
+                {
+                    break;
+                }
+                parts.Add((p, name));
+            }
+            if (parts.Count > 0)
+            {
+                break;
+            }
+        }
+        return parts;
+    }
+
+    /// <summary>
+    /// コンテナの山をパーツの段積みで描く。段 t の色は <see cref="PortLayout.TierColor"/> で選び、山の底は4隅の地面の最も低い高さ
+    /// （斜面で浮かないよう高い側を地面へ少し沈める）。パーツは原点が底面の中心で、ローカル+Z を長手に揃えて置く。
+    /// </summary>
+    private static void AppendContainers(List<PortLayout.Stack> stacks, List<(string prefix, string name)> parts, int variantNumber,
+        System.Func<Vector2, float> ground, List<CombineInstance> combineInstances, List<Material> materials, List<Mesh> temporaryMeshes)
+    {
+        var meshes = new Mesh[parts.Count];
+        var meshMaterials = new Material[parts.Count][];
+        for (int i = 0; i < parts.Count; i++)
+        {
+            meshes[i] = CombinePart(DrawPart(parts[i].prefix, parts[i].name, variantNumber), out meshMaterials[i], temporaryMeshes);
+        }
+
+        foreach (PortLayout.Stack stack in stacks)
+        {
+            float baseY = StackBase(stack, ground);
+            Quaternion rotation = Quaternion.LookRotation(new Vector3(stack.Along.x, 0f, stack.Along.y), Vector3.up);
+            for (int t = 0; t < stack.Tiers; t++)
+            {
+                int color = PortLayout.TierColor(stack, t, meshes.Length);
+                if (meshes[color] == null)
+                {
+                    continue;
+                }
+                var position = new Vector3(stack.Center.x, baseY + t * PortLayout.CONTAINER_TIER_PITCH, stack.Center.y);
+                AppendInstance(meshes[color], meshMaterials[color], Matrix4x4.TRS(position, rotation, Vector3.one),
+                    combineInstances, materials);
+            }
+        }
+    }
+
+    /// <summary>遠景のコンテナ。山ごとに底面 コンテナ1個分・高さ 段数分の箱（底面は張らない）を1つのメッシュにまとめる。</summary>
+    private static Mesh BuildContainerBoxes(List<PortLayout.Stack> stacks, System.Func<Vector2, float> ground)
+    {
+        var vertices = new List<Vector3>(stacks.Count * 20);
+        var triangles = new List<int>(stacks.Count * 30);
+        foreach (PortLayout.Stack stack in stacks)
+        {
+            float y0 = StackBase(stack, ground);
+            float y1 = y0 + stack.Tiers * PortLayout.CONTAINER_TIER_PITCH;
+            Vector2 u = stack.Along * (PortLayout.CONTAINER_LENGTH * 0.5f);
+            Vector2 v = new Vector2(-stack.Along.y, stack.Along.x) * (PortLayout.CONTAINER_WIDTH * 0.5f);
+            Vector2[] c = { stack.Center - u - v, stack.Center + u - v, stack.Center + u + v, stack.Center - u + v };
+            for (int i = 0; i < 4; i++)
+            {
+                Vector2 a = c[i];
+                Vector2 b = c[(i + 1) % 4];
+                int s = vertices.Count;
+                vertices.Add(new Vector3(a.x, y0, a.y));
+                vertices.Add(new Vector3(b.x, y0, b.y));
+                vertices.Add(new Vector3(a.x, y1, a.y));
+                vertices.Add(new Vector3(b.x, y1, b.y));
+                // 四隅は CCW なので、辺ごとの面は GenerateSimpleBuilding と同じ巻きで外向きになる。
+                triangles.Add(s); triangles.Add(s + 2); triangles.Add(s + 1);
+                triangles.Add(s + 1); triangles.Add(s + 2); triangles.Add(s + 3);
+            }
+            int top = vertices.Count;
+            for (int i = 0; i < 4; i++)
+            {
+                vertices.Add(new Vector3(c[i].x, y1, c[i].y));
+            }
+            triangles.Add(top); triangles.Add(top + 2); triangles.Add(top + 1);
+            triangles.Add(top); triangles.Add(top + 3); triangles.Add(top + 2);
+        }
+        var mesh = new Mesh { indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
+        mesh.SetVertices(vertices);
+        mesh.SetTriangles(triangles, 0);
+        mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
+        return mesh;
+    }
+
+    /// <summary>山の底のローカルY。4隅の地面の最も低い高さ。</summary>
+    private static float StackBase(PortLayout.Stack stack, System.Func<Vector2, float> ground)
+    {
+        Vector2 u = stack.Along * (PortLayout.CONTAINER_LENGTH * 0.5f);
+        Vector2 v = new Vector2(-stack.Along.y, stack.Along.x) * (PortLayout.CONTAINER_WIDTH * 0.5f);
+        return Mathf.Min(Mathf.Min(ground(stack.Center - u - v), ground(stack.Center + u - v)),
+            Mathf.Min(ground(stack.Center + u + v), ground(stack.Center - u + v)));
+    }
+
+    /// <summary>プレハブ配下の全メッシュを1つに結合して返す（一時メッシュとして登録する）。パーツが無ければ null。</summary>
+    private static Mesh CombinePart(GameObject part, out Material[] partMaterials, List<Mesh> temporaryMeshes)
+    {
+        partMaterials = null;
+        if (part == null)
+        {
+            return null;
+        }
+        Mesh mesh = BuildingMeshUtils.CombineModuleMeshes(part, out partMaterials);
+        if (mesh != null)
+        {
+            temporaryMeshes.Add(mesh);
+        }
+        return mesh;
+    }
+
+    /// <summary>パーツを変換 matrix で1つ置く。パーツが無ければ何もしない。</summary>
+    private static void AppendModel(GameObject part, Matrix4x4 matrix,
+        List<CombineInstance> combineInstances, List<Material> materials, List<Mesh> temporaryMeshes)
+    {
+        Mesh mesh = CombinePart(part, out Material[] partMaterials, temporaryMeshes);
+        if (mesh != null)
+        {
+            AppendInstance(mesh, partMaterials, matrix, combineInstances, materials);
+        }
+    }
+
+    /// <summary>メッシュの各サブメッシュを変換 matrix 付きで CombineInstance リストへ積む。</summary>
+    private static void AppendInstance(Mesh mesh, Material[] meshMaterials, Matrix4x4 matrix,
+        List<CombineInstance> combineInstances, List<Material> materials)
+    {
+        for (int s = 0; s < mesh.subMeshCount; s++)
+        {
+            combineInstances.Add(new CombineInstance { mesh = mesh, subMeshIndex = s, transform = matrix });
+            materials.Add(meshMaterials != null && meshMaterials.Length > 0 ? meshMaterials[Mathf.Min(s, meshMaterials.Length - 1)] : null);
+        }
+    }
+
+    /// <summary>面している岸壁区間を水際（ローカル座標・区間ごとの外向き法線・その埋立地の天端）にする。</summary>
+    private static List<PortLayout.Waterline> FacingWaterlines(List<ReclaimedQuay> facingQuays, Vector3 centerPointWorld, out float maxTopLocalY)
     {
         var origin = new Vector2(centerPointWorld.x, centerPointWorld.z);
-        var waterlines = new List<Waterline>(facingQuays.Count);
-        float maxTopLocalY = float.NegativeInfinity;
-        Vector2 longestNormal = Vector2.zero;
-        float longestLength = -1f;
+        var waterlines = new List<PortLayout.Waterline>(facingQuays.Count);
+        maxTopLocalY = float.NegativeInfinity;
         foreach (ReclaimedQuay quay in facingQuays)
         {
             ReclaimedLandSegment segment = quay.Segment;
-            Vector2 normal = segment.Normal.normalized;
             float y = quay.TopHeight - centerPointWorld.y;
-            waterlines.Add(new Waterline { P = segment.A - origin, Q = segment.B - origin, Normal = normal, Y = y });
+            waterlines.Add(new PortLayout.Waterline { P = segment.A - origin, Q = segment.B - origin, Normal = segment.Normal.normalized, Y = y });
             maxTopLocalY = Mathf.Max(maxTopLocalY, y);
-            float length = (segment.B - segment.A).magnitude;
-            if (length > longestLength)
-            {
-                longestLength = length;
-                longestNormal = normal;
-            }
         }
-
-        Vector2[] landPart = ExtractLandPart(footprint, centerPointWorld) ?? footprint;
-        Vector2 centroid = VertexCentroid(landPart);
-        float roofpropY = Utils.GetGroundHeight(new Vector3(centroid.x + centerPointWorld.x, 1000f, centroid.y + centerPointWorld.z)) - centerPointWorld.y;
-        // 海を左手に見る向き（直線カットの岸壁の A→B と同じ規約）。
-        Vector2 alongQuay = new Vector2(longestNormal.y, -longestNormal.x);
-        PlaceRoofprop(prefix, landPart, alongQuay, roofpropY, combineInstances, materials, temporaryMeshes);
-
-        PlaceCranesAlongWaterlines(prefix, waterlines, combineInstances, materials, temporaryMeshes);
-
-        colliderFootprint = landPart;
-        colliderHeight = Mathf.Max(0.1f, maxTopLocalY);
+        return waterlines;
     }
 
     /// <summary>
@@ -603,17 +844,14 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
     /// 底面ポリゴン（center_point 相対のローカル座標）から岸壁フットプリントを生成する。
     ///
     /// 区画の水際が底面外周に届く点（<see cref="CollectQuayEndCandidates"/>）のうち最も離れた2点を岸壁の左端A・右端Bとし、
-    /// それぞれを海側へ visual_variant1/2 に応じた距離だけ突き出した A'・B' を結ぶ直線で
-    /// 底面をカットして陸側を残す。海側境界は海岸線をなぞらず、常に1本の直線になる。
-    /// 突き出し距離 = lerp(MIN_PROTRUSION_RATIO, 1, variant) × 奥行き上限
-    /// （奥行き上限 = 弦A-Bから底面の海側最遠頂点までの距離）。
-    /// カットは底面ポリゴンとの交差なので、岸壁は常に土地区画の範囲内に収まる。
+    /// A・B をそれぞれ海側へ <see cref="QUAY_PROTRUSION"/> だけ突き出した2点を結ぶ直線で底面をカットして陸側を残す。
+    /// 海側境界は海岸線をなぞらず、常に弦A-Bと平行な1本の直線になる（左右の張り出しは等しい）。
+    /// 突き出しは弦から底面の海側最遠頂点までの距離（奥行き上限）で頭打ちにし、岸壁は常に土地区画の範囲内に収まる。
     /// 海岸線未ロード・水際の端が2つ未満・海側頂点なし・幾何演算失敗の場合は元の底面をそのまま返す。
     /// 検証ハーネス（Tests/Quay）が <see cref="CoastlineStore"/> に海岸線を入れてリフレクションで呼ぶので、名前と引数を変えないこと。
     /// </summary>
-    /// <param name="seaward">海側境界（直線カットで生じたエッジ）。塔屋の向きと荷役クレーンの配置に使う。カット不能時は Valid=false。</param>
-    private static Vector2[] BuildQuayFootprint(Vector2[] footprint, Vector3 centerPointWorld,
-        float variant1, float variant2, out QuaySeawardEdge seaward)
+    /// <param name="seaward">海側境界（直線カットで生じたエッジ）。水際の列挙に使う。カット不能時は Valid=false。</param>
+    private static Vector2[] BuildQuayFootprint(Vector2[] footprint, Vector3 centerPointWorld, out QuaySeawardEdge seaward)
     {
         seaward = default;
         int n = footprint.Length;
@@ -695,7 +933,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
                     seaOffsets[i] = -seaOffsets[i];
                 }
             }
-            // A→B を「海を左手に見る」向きへ正規化し、左端=A(variant1)・右端=B(variant2) の対応を決定的にする。
+            // A→B を「海を左手に見る」向きへ正規化する（同じ建物では常に同じ対応になる）。
             if (Vector2.Dot(perp, new Vector2(-u.y, u.x)) < 0f)
             {
                 Vector2 tmp = a;
@@ -704,7 +942,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
                 u = -u;
             }
 
-            // 突き出しの奥行き上限 = 弦から底面の海側最遠頂点までの距離。
+            // 奥行き上限 = 弦から底面の海側最遠頂点までの距離。
             float maxDepth = 0f;
             foreach (float s in seaOffsets)
             {
@@ -718,16 +956,15 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
                 return (Vector2[])footprint.Clone();
             }
 
-            float depthLeft = Mathf.Lerp(MIN_PROTRUSION_RATIO, 1f, variant1) * maxDepth;
-            float depthRight = Mathf.Lerp(MIN_PROTRUSION_RATIO, 1f, variant2) * maxDepth;
-            Vector2 aOut = a + perp * depthLeft;
-            Vector2 bOut = b + perp * depthRight;
-            Vector2 edgeDir = (bOut - aOut).normalized;
+            // 水際の両端（海岸線の上）から左右とも同じ距離だけ海側に引く。
+            float depth = Mathf.Min(QUAY_PROTRUSION, maxDepth);
+            Vector2 aOut = a + perp * depth;
+            Vector2 bOut = b + perp * depth;
 
             // カット線 A'-B' の陸側半平面（十分大きな矩形）と底面の交差 = 岸壁フットプリント。
             const float L = 1e4f;
-            Vector2 r1 = aOut - edgeDir * L;
-            Vector2 r2 = bOut + edgeDir * L;
+            Vector2 r1 = aOut - u * L;
+            Vector2 r2 = bOut + u * L;
             Vector2 r3 = r2 - perp * L;
             Vector2 r4 = r1 - perp * L;
             Geometry landSideRect = gf.CreatePolygon(new[]
@@ -757,22 +994,15 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
                 return (Vector2[])footprint.Clone();
             }
 
-            // 海側境界の記述。法線は「カット直線に垂直」かつ「海を向く側」を採る。
-            // 左右の突き出し量が違うと edgeDir は弦 A-B から傾くため、perp をそのまま使わず edgeDir から作り直す。
-            Vector2 cutNormal = new Vector2(edgeDir.y, -edgeDir.x);
-            if (Vector2.Dot(cutNormal, perp) < 0f)
-            {
-                cutNormal = -cutNormal;
-            }
             seaward = new QuaySeawardEdge
             {
                 Valid = true,
                 Origin = new Vector2(aOut.x - centerPointWorld.x, aOut.y - centerPointWorld.z),
-                Dir = edgeDir,
-                Normal = cutNormal,
+                Dir = u,
+                Normal = perp,
             };
             UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
-                $"[PortBMB] 直線カット適用: 頂点 {n}→{quayFootprint.Length}, 突き出し 左{depthLeft:F1}m/右{depthRight:F1}m (上限{maxDepth:F1}m)");
+                $"[PortBMB] 直線カット適用: 頂点 {n}→{quayFootprint.Length}, 張り出し {depth:F1}m (上限{maxDepth:F1}m)");
             return quayFootprint;
         }
         catch (System.Exception ex)
@@ -957,71 +1187,12 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     /// <summary>
-    /// 塔屋（roofprop）を多角形（直線カットの岸壁、または埋立地に面する港では区画の陸の部分）の頂点平均の位置に、
-    /// 水際の向きに合わせて高さ <paramref name="topLocalY"/> で配置する。
-    /// visual_variant によるシード散らしは行わない（§12 の通常塔屋との差分）。
-    /// パーツは閾値フォルダ 0 から取得する（visual_variant は岸壁の幾何に消費されるため）。
-    /// </summary>
-    private static void PlaceRoofprop(string prefix, Vector2[] quayFootprint, Vector2 seawardDir, float topLocalY,
-        List<CombineInstance> combineInstances, List<Material> materials, List<Mesh> temporaryMeshes)
-    {
-        GameObject roofpropModule = BuildingMeshUtils.GetPartNoPosition(prefix, "roofprop", 0, true);
-        if (roofpropModule == null)
-        {
-            return;
-        }
-
-        MeshFilter mf = roofpropModule.GetComponentInChildren<MeshFilter>();
-        if (mf == null || mf.sharedMesh == null)
-        {
-            return;
-        }
-
-        Vector2 centroid = VertexCentroid(quayFootprint);
-
-        // 海側境界の向き（特定できなければ最初の辺の向き）
-        Vector2 dir = seawardDir.sqrMagnitude > 1e-6f
-            ? seawardDir.normalized
-            : (quayFootprint.Length >= 2 ? (quayFootprint[1] - quayFootprint[0]).normalized : Vector2.right);
-        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-        Quaternion rotation = Quaternion.Euler(0, -angle + 90, 0);
-
-        Vector3 position = new Vector3(centroid.x, topLocalY, centroid.y);
-        Mesh meshInstance = Object.Instantiate(mf.sharedMesh);
-        Vector3[] vertices = meshInstance.vertices;
-        Matrix4x4 matrix = Matrix4x4.TRS(position, rotation, Vector3.one);
-        for (int v = 0; v < vertices.Length; v++)
-        {
-            vertices[v] = matrix.MultiplyPoint3x4(vertices[v]);
-        }
-        meshInstance.vertices = vertices;
-        meshInstance.RecalculateNormals();
-        meshInstance.RecalculateBounds();
-
-        Material[] moduleMaterials = BuildingMeshUtils.GetModuleMaterials(roofpropModule);
-        for (int s = 0; s < meshInstance.subMeshCount; s++)
-        {
-            combineInstances.Add(new CombineInstance
-            {
-                mesh = meshInstance,
-                subMeshIndex = s,
-                transform = Matrix4x4.identity
-            });
-            Material mat = (moduleMaterials != null && moduleMaterials.Length > 0)
-                ? moduleMaterials[Mathf.Min(s, moduleMaterials.Length - 1)]
-                : null;
-            materials.Add(mat);
-        }
-        temporaryMeshes.Add(meshInstance);
-    }
-
-    /// <summary>
     /// 直線カットの岸壁の水際＝岸壁フットプリントのうちカット直線上に乗っている辺を、フットプリントの辺の順に列挙する。
     /// 海側境界が特定できなかった建物（海岸線未ロード・カット不能）では水際が定まらないため空。
     /// </summary>
-    private static List<Waterline> EnumerateSeawardWaterlines(Vector2[] quayFootprint, QuaySeawardEdge seaward, float topLocalY)
+    private static List<PortLayout.Waterline> EnumerateSeawardWaterlines(Vector2[] quayFootprint, QuaySeawardEdge seaward, float topLocalY)
     {
-        var waterlines = new List<Waterline>();
+        var waterlines = new List<PortLayout.Waterline>();
         if (!seaward.Valid || quayFootprint == null || quayFootprint.Length < 3)
         {
             return waterlines;
@@ -1039,84 +1210,9 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
             {
                 continue;
             }
-            waterlines.Add(new Waterline { P = p, Q = q, Normal = seaward.Normal, Y = topLocalY });
+            waterlines.Add(new PortLayout.Waterline { P = p, Q = q, Normal = seaward.Normal, Y = topLocalY });
         }
         return waterlines;
-    }
-
-    /// <summary>
-    /// 荷役クレーン（port_crane）を水際に沿って等間隔に並べる。
-    ///
-    /// パーツは一切スケールしない（実寸）。モデル原点が水際の線上・その水際の上面高さに一致し、
-    /// ローカル+Z が水際の法線（海）を向く（＝ローカルXが水際に沿う）ように回転させる。
-    /// 1本の水際の基数は長さ ÷（パーツ実寸幅 × <see cref="CRANE_SPACING_RATIO"/>）で決まり、
-    /// 水際全体に等間隔・両端の余白が等しくなるよう配置する。クレーン1基の幅に満たない水際には置かない。
-    /// 水際の順に置き、合計が <see cref="MAX_CRANE_COUNT"/> に達したら打ち切る。
-    /// </summary>
-    private static void PlaceCranesAlongWaterlines(string prefix, List<Waterline> waterlines,
-        List<CombineInstance> combineInstances, List<Material> materials, List<Mesh> temporaryMeshes)
-    {
-        if (waterlines == null || waterlines.Count == 0)
-        {
-            return;
-        }
-
-        GameObject cranePrefab = BuildingMeshUtils.GetPartNoPosition(prefix, "port_crane", 0, true);
-        if (cranePrefab == null)
-        {
-            return;
-        }
-
-        // 複数オブジェクト構成のFBXでも欠けないよう、プレハブ配下の全メッシュを結合して使う。
-        Mesh craneMesh = BuildingMeshUtils.CombineModuleMeshes(cranePrefab, out Material[] craneMaterials);
-        if (craneMesh == null)
-        {
-            return;
-        }
-        temporaryMeshes.Add(craneMesh);
-
-        float craneWidth = Mathf.Max(craneMesh.bounds.size.x, 0.5f);
-        float spacing = craneWidth * CRANE_SPACING_RATIO;
-
-        int placed = 0;
-        for (int i = 0; i < waterlines.Count && placed < MAX_CRANE_COUNT; i++)
-        {
-            Waterline waterline = waterlines[i];
-            Vector2 p = waterline.P;
-            Vector2 q = waterline.Q;
-
-            float length = (q - p).magnitude;
-            if (length < craneWidth)
-            {
-                continue;
-            }
-
-            Quaternion rotation = Quaternion.LookRotation(new Vector3(waterline.Normal.x, 0f, waterline.Normal.y), Vector3.up);
-            int count = Mathf.Clamp(Mathf.FloorToInt(length / spacing), 1, MAX_CRANE_COUNT - placed);
-            Vector2 dir = (q - p) / length;
-            for (int c = 0; c < count; c++)
-            {
-                Vector2 at = p + dir * (length * (c + 0.5f) / count);
-                Matrix4x4 matrix = Matrix4x4.TRS(new Vector3(at.x, waterline.Y, at.y), rotation, Vector3.one);
-                for (int s = 0; s < craneMesh.subMeshCount; s++)
-                {
-                    combineInstances.Add(new CombineInstance
-                    {
-                        mesh = craneMesh,
-                        subMeshIndex = s,
-                        transform = matrix
-                    });
-                    Material mat = (craneMaterials != null && craneMaterials.Length > 0)
-                        ? craneMaterials[Mathf.Min(s, craneMaterials.Length - 1)]
-                        : null;
-                    materials.Add(mat);
-                }
-                placed++;
-            }
-        }
-
-        UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
-            $"[PortBMB] 荷役クレーン: {placed}基配置 (幅{craneWidth:F1}m 間隔{spacing:F1}m)");
     }
 
     /// <summary>

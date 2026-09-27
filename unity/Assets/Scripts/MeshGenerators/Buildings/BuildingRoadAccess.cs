@@ -9,6 +9,7 @@ public sealed class BuildingRoadOpening
     public Vector3 A, B, Outward;
     public Vector2[] Apron;
     public bool FollowsTerrain;
+    public float? MinGround;  // 舗装の基準の地面の下限(絶対標高)。港の施設は岸壁の天端より下に置かないため
     public string Flow = "both";
     public Vector3 Position => (A + B) * .5f;
     public float Width => Vector3.Distance(A, B);
@@ -67,6 +68,7 @@ public static class BuildingRoadAccess
         if (master == null) return result;
         if (master.model_type == Constants.MODEL_ROTARY)
             return BuildingRoadAccessIndex.GetOpenSpacePlan(data).Openings;
+        if (master.model_type == Constants.MODEL_PORT) return ResolvePort(data);
         if (master.model_type != Constants.MODEL_PREBUILT) return result;
         Vector2[] footprint = BuildingMeshUtils.GetFootprint(data);
         if (footprint == null || footprint.Length < 3) return result;
@@ -88,6 +90,33 @@ public static class BuildingRoadAccess
                 foreach (var opening in result) { opening.A.y *= scaleY; opening.B.y *= scaleY; }
                 UnityEngine.Object.Destroy(mesh);
             }
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// 港の施設モジュール(port_building)のマーカーを、描画と同じ置き方(<see cref="PortLayout.PlaceModule"/>)で建物中心基準へ移す。
+    /// モジュールは区画の辺0の中点の地面(岸壁の天端 <see cref="PortBuildingMeshBuilder.QUAY_TOP_HEIGHT"/> 以上)に接地するので、
+    /// 舗装高は開口の地面に追従させ、同じ下限を持たせる。
+    /// </summary>
+    static List<BuildingRoadOpening> ResolvePort(BuildingSummary data)
+    {
+        var result = new List<BuildingRoadOpening>();
+        Vector2[] footprint = BuildingMeshUtils.GetFootprint(data);
+        if (footprint == null || footprint.Length < 3) return result;
+        var model = PortBuildingMeshBuilder.ResolveModulePart(data);
+        var bounds = PortLayout.GetModelBounds(model);
+        if (bounds == null) return result;
+        var module = PortLayout.PlaceModule(footprint, bounds.Value);
+        if (module == null) return result;
+        var offset = new Vector3(module.Position.x, 0, module.Position.y);
+        foreach (var opening in ReadModel(model, module.Rotation))
+        {
+            opening.A += offset; opening.B += offset;
+            for (int i = 0; i < opening.Apron.Length; i++) opening.Apron[i] += module.Position;
+            opening.FollowsTerrain = true;
+            opening.MinGround = PortBuildingMeshBuilder.QUAY_TOP_HEIGHT;
+            result.Add(opening);
         }
         return result;
     }

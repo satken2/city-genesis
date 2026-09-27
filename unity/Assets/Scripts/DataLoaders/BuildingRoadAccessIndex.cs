@@ -15,7 +15,11 @@ public static class BuildingRoadAccessIndex
         public Vector3 Center;
         public Vector3 A => Center + Local.A;
         public Vector3 B => Center + Local.B;
-        public float Height(Vector3 point) => (Local.FollowsTerrain ? Utils.GetGroundHeight(point) : Utils.GetGroundHeight(Center)) + Local.A.y;
+        public float Height(Vector3 point)
+        {
+            float ground = Local.FollowsTerrain ? Utils.GetGroundHeight(point) : Utils.GetGroundHeight(Center);
+            return (Local.MinGround.HasValue ? Mathf.Max(ground, Local.MinGround.Value) : ground) + Local.A.y;
+        }
     }
     sealed class Entry
     {
@@ -48,7 +52,7 @@ public static class BuildingRoadAccessIndex
     public static void Register(BuildingSummary data)
     {
         int? type = MasterDataStore.Instance?.GetAgentMaster(data.variant)?.model_type;
-        if (type != Constants.MODEL_ROTARY && type != Constants.MODEL_PREBUILT) { Remove(data.agent_id); return; }
+        if (type != Constants.MODEL_ROTARY && type != Constants.MODEL_PREBUILT && type != Constants.MODEL_PORT) { Remove(data.agent_id); return; }
         string signature = Signature(data);
         if (entries.TryGetValue(data.agent_id, out var previous) && previous.Signature == signature) return;
         Remove(data.agent_id);

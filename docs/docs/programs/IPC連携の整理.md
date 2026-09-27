@@ -129,7 +129,7 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `remove_object:request_confirm` | `graphic -> ui`  | ブルドーザモードで、即削除せず確認を要する対象がクリックされた（`{ object_type, id, prop_type }`。`object_type` は現状 `"prop_scatter"`＝範囲配置プロップを散布範囲ごと撤去する不可逆操作のみ）。Rust は常駐する `cockpit` ウィンドウだけへ中継し、コックピットが確認ダイアログを出す。Unity は回答が届くまでその対象を削除せず、別の範囲配置クリックも受け付けない |
 | `remove_object:confirm_result`  | `ui -> graphic`  | 上記の確認ダイアログの回答（`{ object_type, id, accepted }`。accepted は 1/0）。承諾なら Unity が `DELETE /api/v1/props/scatters/{id}` を発行して差分リロードする。取消でも必ず返し、Unity 側の確認待ちを解除する |
 | `edit_connector:show`           | `ui -> graphic`  | 経済主体詳細パネル(AgentDetailPanel)の表示中、施設の接続端子ノード（インフラ接続点 `infra_node_id` / 走行網接続点 `depot_node_id`）を Unity 上に色付きマーカーで読み取り専用ハイライトする。`{ agent_id, infra_node_id, depot_node_id }` を含む。`infra_node_id == depot_node_id`（共用接続ノード）ならマーカーは1つ。0 のノードIDは表示しない |
-| `edit_connector:hide`           | `ui -> graphic`  | 接続端子ノードのハイライト表示をクリアする。パネルを閉じた／別エージェントへ遷移したときに送信する（`parcel:hide_front_path` と同じ役割） |
+| `edit_connector:hide`           | `ui -> graphic`  | 接続端子ノードのハイライト表示をクリアする。Unity は接続点編集モード（`STATE_EDIT_CONNECTOR`）中だった場合のみ、モードを終了して通常モードへ戻す。他のステート中はハイライトを消すだけ（`agent_detail` は建物建設などの編集ウィンドウと同時に開けるため、素の `STATE_NORMAL` だとそちらのステートまで打ち切る。`edit_path:cancel_topology_edit` と同じ考え方）。パネルが別エージェントへ遷移したときは UI が、ウィンドウが閉じられたときは Rust（`window.rs`）が送る |
 | `game:time_update`              | `graphic -> ui`  | ゲーム内時間（エポック・日付）の更新通知                  |
 | `system:shutdown`               | `ui -> graphic`  | グラフィックプログラムを終了する                      |
 | `system:ready`                  | `ui -> graphic`  | UIプログラムの準備完了通知                        |
@@ -190,7 +190,7 @@ Unityは `GET /buildings/{id}` の最新状態が `STATUS_COLLAPSED` である�
 
 確定後の後始末（編集状態のリセット・消えたオブジェクトの破棄・通常モードへの復帰・データの再取得）は `edit_*:finish` 系の1イベントにまとめ、Unity がその中で順序を持って実行する。`session:reload` と `world:change_state` を別々に送ってはいけない。差分リロードは複数フレームにまたがる処理で、後続の状態遷移が割り込むと再生成・削除が中途半端に終わる。確定しないキャンセルは `STATE_NORMAL` の送信で足りる。
 
-`edit_*:finish` 系を送ったパネル自身は、続けて `STATE_NORMAL` を送らない。ただし確定後にウィンドウを閉じるパネル（造成など）では、閉じる処理が×ボタンと同じ Rust の経路（`window.rs` の `close_window_by_label`）を通るので、そのウィンドウ種別が `EDIT_MODE_WINDOW_TYPES` に載っていれば、ほかに編集モードのウィンドウが表示されていない限り Rust が `STATE_NORMAL` を送る。Unity は finish の中で既に通常ステートへ戻しており、`STATE_NORMAL` の処理は入力と表示の適用し直しだけで差分リロードを取り消さない（取り消すのは新しい再取得・カメラのセル移動・セッションの切り替え）。この `STATE_NORMAL` は冗長だが、再取得を妨げない。
+`edit_*:finish` 系を送ったパネル自身は、続けて `STATE_NORMAL` を送らない。ただし確定後にウィンドウを閉じるパネル（造成など）では、閉じる処理が×ボタンと同じ Rust の経路（`window.rs` の `close_window_by_label`）を通るので、そのウィンドウ種別が `EDIT_MODE_WINDOW_TYPES` に載っていれば Rust が `STATE_NORMAL` を送る。Unity は finish の中で既に通常ステートへ戻しており、`STATE_NORMAL` の処理は入力と表示の適用し直しだけで差分リロードを取り消さない（取り消すのは新しい再取得・カメラのセル移動・セッションの切り替え）。この `STATE_NORMAL` は冗長だが、再取得を妨げない。
 
 # グラフィックプログラムのステート
 
@@ -254,7 +254,9 @@ Unity は `PathTopologyEditManager` が対象選択を担う。**結合**では�
 
 選択結果は `edit_path:select_merge_target` / `edit_path:select_split_point` でUIへ返り、UIは同じエンドポイントの `dry_run=true` で結合後・分割後の長さを取得してパネルに表示する。プレイヤーが確定するとUIが `dry_run` なしで再送し、成功後に `edit_path:finish_topology_edit` を**1発だけ**送ってUnity側の後始末（着色・マーカーのクリア、消えたパスの破棄、通常モード復帰、再描画）をまとめて行わせる。キャンセル時のみ `STATE_NORMAL` を送る。長さを確認して確定するパネルを操作し続ける必要があるため、`STATE_EDIT_CONNECTOR` と同じくこのステートでは Unity ウィンドウを最前面化しない。
 
-`STATE_EDIT_CONNECTOR` は施設の接続端子ノード（インフラ接続点 `infra_node_id` / 走行網接続点 `depot_node_id`。[[26_インフラ網]]の接続端子ノード参照）をドラッグで移動する編集モードで、経済主体詳細パネル（`agent_detail`）の「接続点の編集」トグルボタンで遷移する。`world:change_state` の params に `agent_id` / `infra_node_id` / `depot_node_id` を含める。Unity は `ConnectorEditManager` が対象ノードを強制表示・逆四角錐マーカーで強調し、入力プリセット `CONNECTOR_EDIT`（TERRAIN=`MODE_EDIT_CONNECTOR`、他=`MODE_NONE`）でマーカーを地形ドラッグとして掴んで移動する（マーカーはノード実体の上空に浮くため、ノードのコライダーへのレイキャストは使わない。[Unity入力制御](Unity入力制御.md) §5.3）。ドラッグ中のXZは施設が立地する土地区画の内側へクランプし、ドラッグ確定時は `NodeInputHandler` が `PATCH /api/v1/nodes/{node_id}`（position）を送る。**ノード位置の変更はパスが1本も接続されていない場合のみ許可され**、接続済みノードの移動はバックエンドが拒否し、Unity は元位置に自動で戻す（[[26_インフラ網]] §26.3 の端子位置移動制限）。トグルボタンを持つ `agent_detail` パネルを前面に残すため、このステートでは他の編集ステートと異なり Unity ウィンドウを最前面化しない。編集を終了すると `STATE_NORMAL` を送り、パネルが開いている間は `edit_connector:show` を再送して読み取り専用ハイライトに戻す。
+`STATE_EDIT_CONNECTOR` は施設の接続端子ノード（インフラ接続点 `infra_node_id` / 走行網接続点 `depot_node_id`。[[26_インフラ網]]の接続端子ノード参照）をドラッグで移動する編集モードで、経済主体詳細パネル（`agent_detail`）が接続端子ノードを持つ施設を表示すると、`edit_connector:show` に続けて送って遷移する（トグルボタンは無く、表示している間は常に編集できる）。`world:change_state` の params に `agent_id` / `infra_node_id` / `depot_node_id` を含める。Unity は `ConnectorEditManager` が対象ノードを強制表示・逆四角錐マーカーで強調し、入力プリセット `CONNECTOR_EDIT`（TERRAIN=`MODE_EDIT_CONNECTOR`、他=`MODE_NONE`）でマーカーを地形ドラッグとして掴んで移動する（マーカーはノード実体の上空に浮くため、ノードのコライダーへのレイキャストは使わない。[Unity入力制御](Unity入力制御.md) §5.3）。ドラッグ中のXZは施設が立地する土地区画の内側へクランプし、ドラッグ確定時は `NodeInputHandler` が `PATCH /api/v1/nodes/{node_id}`（position）を送る。**ノード位置の変更はパスが1本も接続されていない場合のみ許可され**、接続済みノードの移動はバックエンドが拒否し、Unity は元位置に自動で戻す（[[26_インフラ網]] §26.3 の端子位置移動制限）。`agent_detail` パネルを前面に残すため、このステートでは他の編集ステートと異なり Unity ウィンドウを最前面化しない。
+
+`agent_detail` は編集ウィンドウ（`EDIT_MODE_WINDOW_TYPES`）と排他ではないので、接続点編集中に建物建設などを開くと、そちらのステートへ直接遷移する。このとき Unity は端子のドラッグ受付を終え、マーカーを読み取り専用ハイライトとして残す（`STATE_NORMAL` への復帰でも同じ）。パネルが別エージェントへ遷移したときと閉じられたときは `edit_connector:hide` だけを送り、`STATE_NORMAL` は送らない。Unity は接続点編集モード中のときだけ通常モードへ戻すので、後から開いた編集ウィンドウのステートを打ち切らない。
 
 # 起動フロー
 
@@ -442,7 +444,7 @@ invoke("start_load_game", { saveId })
 
 ## 建物直接配置の状態同期
 
-配置方法の初期値は `STATE_EDIT_BUILDING` の遷移パラメータ `placement_mode`（parcel/free/roadside。省略時はparcel）で指定する。既存建物編集・忠実コピーでは無視される。都市創設時の市庁舎はUIが `free` を指定する。以後の切り替えはUnityのCtrlラジアルメニューが担い、UIは `placement_state` の `mode` に追従する。
+配置方法の初期値は `STATE_EDIT_BUILDING` の遷移パラメータ `placement_mode`（parcel/free/roadside。省略時はparcel）で指定する。既存建物編集・忠実コピーでは無視される。市庁舎の配置（都市創設時と移転）はUIが `free` を指定する。以後の切り替えはUnityのCtrlラジアルメニューが担い、UIは `placement_state` の `mode` に追従する。
 
 `edit_building:placement_command` (ui → graphic)のparams.commandには`variant`と変更したフィールドだけを渡す。任意フィールドは`width`/`depth`/`angle`、`reset=true`(位置選択のみ取消し)、`labels`(翻訳済みCtrlメニュー/HUD文言)。寸法を含まない呼び出しは状態問い合わせとなる。パネルは購読完了後に問い合わせ、初期化通知を取りこぼしても復元できる。
 

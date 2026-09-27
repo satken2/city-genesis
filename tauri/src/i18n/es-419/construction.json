@@ -101,12 +101,15 @@
     "directPlaceable": "Se puede construir aquí",
     "fixedFootprintNote": "La base de este edificio tiene un tamaño fijo de {{width}} m × {{height}} m",
     "confirmFailed": "No se pudo construir",
+    "relocateConfirm": "Confirmar el traslado",
+    "relocateTitle": "Traslado del palacio municipal",
     "estimateFailed": "No se pudieron obtener la vista previa ni el costo de construcción",
     "directInvalid": {
       "overlap_parcel": "Se traslapa con una parcela existente",
       "overlap_city_building": "Se traslapa con una instalación municipal o un sitio de construcción planificado",
       "overlap_path": "Se traslapa con una calle",
       "incompatible_parcel_type": "Este edificio no se puede construir en este tipo de terreno",
+      "not_city_land": "Se traslapa con una parcela que no es propiedad del municipio",
       "generic": "No se puede construir en este lugar"
     },
     "directAcquisitionRequired": "Se traslapa con {{count}} parcela(s) privada(s) (al confirmar se activará la adquisición automática)",

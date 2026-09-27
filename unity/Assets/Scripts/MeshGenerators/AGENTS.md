@@ -54,7 +54,8 @@
 | `BuildingMeshUtils.cs` | パーツ解決(prefix・`_close`・common)・`CombineModuleMeshes`・`AddStackedModule`・`ResolveParcelContext`・`SanitizeRingPolygon`・屋根共通幾何 |
 | `ModularBuildingMeshBuilder.cs` / `ModularBodyBuilder.cs` / `DefaultBodyBuilder.cs` | モジュラー躯体(壁・角の敷き詰め `BuildWallRun`、敷地装飾 `GenerateSiteDecorations`)と白箱フォールバック(F・F1) |
 | `FlatRoofBuilder.cs` / `HouseRoofBuilder.cs` / `GableRoofBuilder.cs` / `ShedRoofBuilder.cs` / `InteriorFloorBuilder.cs` / `ExteriorStairBuilder.cs` | 屋根4種・各階の床(F1)、辺ごとの外階段(F§11.4) |
-| `PreBuiltBuildingMeshBuilder.cs` / `MashupBuildingMeshBuilder.cs` / `PortBuildingMeshBuilder.cs` / `RailYardBuildingMeshBuilder.cs` | 既成・観光名所(F3)、複数棟(F6。割り付けはバックエンド解決済み)、港湾岸壁(F4。区画が埋立地の岸壁の陸側で面していれば(`FindFacingReclaimedQuays`)スラブを作らず、その岸壁区間ごとの外向き法線・天端でクレーンを並べる。面していなければ区画の中の水際の両端を結ぶ弦で直線カットしたスラブ)、車両基地(F9) |
+| `PreBuiltBuildingMeshBuilder.cs` / `MashupBuildingMeshBuilder.cs` / `PortBuildingMeshBuilder.cs` / `RailYardBuildingMeshBuilder.cs` | 既成・観光名所(F3)、複数棟(F6。割り付けはバックエンド解決済み。`openPit` のインスタンスが露天掘りの前庭の設備を描く=F11)、港(F4。区画が埋立地の岸壁の陸側で面していれば(`FindFacingReclaimedQuays`)スラブを作らずその岸壁区間を水際に、面していなければ区画の中の水際の両端を結ぶ弦を20m海側へ移した直線でカットしたスラブの辺を水際にし、`PortLayout` の計画どおり水際に荷役設備・道路側に施設モジュール・間にコンテナを置く)、車両基地(F9) |
+| `PortLayout.cs` | 港の配置計画(施設モジュール・荷役設備・コンテナの置き場)。通常モデルの寸法と入力の形だけで決まる純データ(F4 §5) |
 | `OpenSpaceLayout.cs` / `OpenSpaceBuildingMeshBuilder.cs` | 駐車場・駅前ロータリー・公園(F10) |
 | `BuildingRoadAccess.cs` | 施設側の決定論的な間口(ロータリーの舗装交線・既成モデルのEmpty)。描画GOを間口の正にしない(F§16) |
 | `ConstructingBuildingMeshBuilder.cs` / `ConstructionSiteProfile.cs` / `CollapsedBuildingMeshBuilder.cs` | 工事中・解体中(profile 差分で共用。F5・F7)、倒壊(F8) |
@@ -62,7 +63,7 @@
 ## 描画LOD(DrawLod)が生成器に届く経路
 
 - 生成器はセルのティア表を見ない。DrawLod は呼び出し側が決め、建物は `Generate` の引数、パスは `PathDrawContext.Begin/End` で渡る。コンテキスト外の生成は Normal・全長扱い(E「物体の描画LOD」)。
-- Far は専用経路。建物は `GenerateFarBuilding`(`*-prebuilt_far` が無ければフットプリント押し出しの箱)、パスは PathManager 側の帯で生成器のパーツ組み立ては走らない(例外: `FarPlatformPath`・`PowerLinePath`)。
+- Far は専用経路。建物は `GenerateFarBuilding`(`*-prebuilt_far` が無ければフットプリント押し出しの箱。露天掘りは穴に蓋をしないよう何も描かない。港は海へはみ出す区画の箱にせず、港の生成器が岸壁と `_far` パーツを同じ配置で組み立てる)、パスは PathManager 側の帯で生成器のパーツ組み立ては走らない(例外: `FarPlatformPath`・`PowerLinePath`)。
 - `_close` の解決点は2箇所だけ。建物は `BuildingMeshUtils.GetModelForDrawLod`、パスは `PathDrawContext.ResolvePrefab`(`CreateSplineMesh` で敷くパーツと送電鉄塔のみ。Instantiate 配置の tree/pillar/pole/設備やコネクタは常に無印)。新しいパーツ取得をこの2つを迂回して書かない。
 - `CreateSplineMesh` はクリップ区間と `PathDrawContext` の詳細区間の共通部分にだけ敷く。セグメントごとに別スプラインを作る生成器は割合基準が合わないので冒頭で `SuppressDetailRange = true` にする(`GenerateLinearPathWithCorners` が例)。複数スプラインの生成器を新設するときも同じ。
 - 曲率適応タイル長は `BuildSpline` 直後に `SetAdaptiveTileLength(ComputeAdaptiveTileLength(...))` を呼んで有効化する。`maxTileLength` に明示 `0`(著作長)を渡すパーツには適用されない。
@@ -87,6 +88,8 @@
 - 港が埋立地の岸壁に面しているかは `PortBuildingMeshBuilder.FindFacingReclaimedQuays` の1つの規則(区画を0.1m膨らませた範囲に掛かる岸壁区間が1mより長く、区画がその岸壁の陸側にある=区間から内向き `QUAY_PROBE_DISTANCE` の帯の半分以上を覆う)で決め、岸壁区間は `ReclaimedLandStore.GetQuaySegments`(バックエンドの派生値)から取る。港側で岸壁を求め直さない。既存の港の隣の埋立(岸壁の海側にある区画)は面していないので直線カットのスラブのまま。
   - 直線カットの弦の端は、底面外周と海岸線の交点ではなく区画の中の水際が外周に届く点(`CollectQuayEndCandidates`)。隣の埋立地が区画の辺や角に外から接すると、その辺上の交点で弦が斜めになるため。区画の中に陸が無い(海岸線に外から接するだけの)区画だけ交点をそのまま使う。
   - `FindFacingReclaimedQuays`・`BuildQuayFootprint`(private。`CoastlineStore` に海岸線を入れて呼ぶ)・`ReclaimedLandMeshBuilder.Build` は `Tests/Quay` がリフレクションで名前で呼ぶので、改名・多重定義しない。
+- 港の配置(`PortLayout`)は通常モデル(無印)の寸法で決め、`_close`/`_far` のパーツは同じ位置に置くだけにする。施設モジュール(`port_building`)の置き方は区画と通常モデルだけから決め、海岸線・埋立地に依存させない。`BuildingRoadAccess.Resolve` が建物データの登録時に同じ `PortLayout.PlaceModule` でマーカーを建物中心基準へ移して間口の索引を作るため、描画だけ別の置き方にすると道路の接続面と建物がずれる。
+  - 施設モジュールの接地と開口の舗装高の下限はどちらも海面+2m(`PortBuildingMeshBuilder.QUAY_TOP_HEIGHT`)。片方だけ変えると、道路の接続面と施設の舗装に段差ができる。
 - `UltraFarLandMeshBuilder` は格子点ごとに `CoastlineStore.SignedDistance` を呼ばず一括版 `SampleSignedDistanceGrid` を使う。初期ロードで地形より先に走るので、遅いと `game:loaded` が出ず Tips が止まる。Mesh の組み立てはメインスレッド専用で、ビルダーは純データを返す。
 - 道路系の冗長ログは `UnityLog.If(LocalConstants.UNITY_LOG_ROAD, ...)`。常時 `Debug.Log` しない。
 
@@ -97,12 +100,12 @@
 | `TrackPath.ResolvePlatformExtents`(`platform_side`→左右。`DIR_BACKWARD` は反転) | `geo_paths.get_platform_extension_widths`(ホームの敷地) |
 | `StationHousePath` の専有エリア(`ComputeEndFootprints` / `ResolveHousePosition`) | `geo_station_house.py`(建屋の占有) |
 | `TrackIntersectionMeshGenerator` の転回閾値 `RAIL_MAX_TURN_ANGLE_DEG` | `parameters.yaml` の同名値と経路探索の転回制約 |
-| `Test/TestSubBuildingLayout`(テスト専用の棟配置) | `crud_buildings.generate_sub_building_layout` + `geo_buildings.generate_mashup_cells` |
+| `Test/TestSubBuildingLayout`(テスト専用の棟配置。露天掘りの前庭の絞り込みを含む) | `crud_buildings.generate_sub_building_layout` + `geo_buildings.generate_mashup_cells` + `geo_open_pit.open_pit_yard_cells` |
 | `Tests/Quay/QuayQA.cs` の造成の書き込み規則(埋立地の中で岸壁から `QUAY_KEEP_WIDTH` を超える1m格子点を天端に)と地形タイルの再標本化(500/512m 間隔の双線形) | `geo_grading.compute_grading_heights` + `geo_reclaimed_land` の keep 領域、`terrain_surface.tile` |
 
 ## 参照先
 
-- 仕様: `A_パス形状` / `C_建物形状` / `E_LOD処理` / `F_建物メッシュの生成` と `F1`〜`F10` / `G_道路メッシュの生成` / `J_パスの交差処理` / `N_線路メッシュの生成` / `Q_駅舎パスのメッシュ生成` / `R_マテリアルの解決` / `P_マテリアル共有とエクスポート`
+- 仕様: `A_パス形状` / `C_建物形状` / `E_LOD処理` / `F_建物メッシュの生成` と `F1`〜`F11` / `G_道路メッシュの生成` / `J_パスの交差処理` / `N_線路メッシュの生成` / `Q_駅舎パスのメッシュ生成` / `R_マテリアルの解決` / `P_マテリアル共有とエクスポート`
 - Skill: `genesis-mesh-generation`(横断)、`genesis-building-geometry`、`genesis-path-geometry`。FBX制作は `genesis-building-parts` / `genesis-path-parts` / `genesis-prop-parts`
 - 実FBX回帰検証: `city-genesis/unity/Tests/`(生成器ごとのサブフォルダと README)
 - `unity/AGENTS.md`「Y座標の考え方」(パスの Y は地面からの相対高さ)・「モデルアセットの構成」(FBX とミラープレハブ)
