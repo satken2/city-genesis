@@ -21,6 +21,18 @@
       "prev": "Écran précédent",
       "next": "Écran suivant"
     },
+    "graphicMonitor": {
+      "label": "Écran de la vue 3D"
+    },
+    "multiDisplay": {
+      "label": "Mode multi-écran",
+      "description": "Affiche les fenêtres sur un autre écran que celui du jeu",
+      "on": "Activé",
+      "off": "Désactivé"
+    },
+    "popupMonitor": {
+      "label": "Écran des fenêtres"
+    },
     "hintbar": {
       "label": "Barre d'astuces",
       "show": "Afficher",

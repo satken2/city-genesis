@@ -422,6 +422,39 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     note: "Terrain map: dakar (and its background terrain). Data has been modified: resampled to a 10 m metric grid (background: 50 m), cropped to the tip of the Cap-Vert peninsula, small islets removed and sea floor synthesized. Not endorsed by Copernicus, ESA or Airbus. License verified 2026-09-25. Also used for the plan-view terrain thumbnails.",
   },
   {
+    title: "Copernicus DEM GLO-30 (Chongqing)",
+    category: "data",
+    source: "Copernicus / ESA / Airbus Defence and Space GmbH / DLR",
+    url: "https://registry.opendata.aws/copernicus-dem/",
+    license: "Licence for Copernicus DEM instance COP-DEM-GLO-30-F (Global 30m Full, Free & Open)",
+    requiredText:
+      "produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved\n" +
+      "The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30",
+    note: "Terrain map: chongqing (and its background terrain). Data has been modified: resampled to a 10 m metric grid (background: 50 m), cropped to a 20 km square, void-fill pixels from other DEMs replaced by interpolation, rivers wider than 100 m from the bundled water body mask turned into sea with all elevations lowered by the 168 m river surface, small islets removed and river bed synthesized. Not endorsed by Copernicus, ESA or Airbus. License verified 2026-09-28. Also used for the plan-view terrain thumbnails.",
+  },
+  {
+    title: "Copernicus DEM GLO-30 (Xiamen)",
+    category: "data",
+    source: "Copernicus / ESA / Airbus Defence and Space GmbH / DLR",
+    url: "https://registry.opendata.aws/copernicus-dem/",
+    license: "Licence for Copernicus DEM instance COP-DEM-GLO-30-F (Global 30m Full, Free & Open)",
+    requiredText:
+      "produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved\n" +
+      "The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30",
+    note: "Terrain map: xiamen (and its background terrain). Data has been modified: resampled to a 10 m metric grid (background: 50 m), cropped to a 20 km square around Xiamen Island, void-fill pixels from other DEMs replaced by interpolation, small islets removed and sea floor synthesized. Not endorsed by Copernicus, ESA or Airbus. License verified 2026-09-28. Also used for the plan-view terrain thumbnails.",
+  },
+  {
+    title: "Copernicus DEM GLO-30 (Dalian)",
+    category: "data",
+    source: "Copernicus / ESA / Airbus Defence and Space GmbH / DLR",
+    url: "https://registry.opendata.aws/copernicus-dem/",
+    license: "Licence for Copernicus DEM instance COP-DEM-GLO-30-F (Global 30m Full, Free & Open)",
+    requiredText:
+      "produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved\n" +
+      "The organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30",
+    note: "Terrain map: dalian (and its background terrain). Data has been modified: resampled to a 10 m metric grid (background: 50 m), cropped to a 20 km square around central Dalian, void-fill pixels from other DEMs replaced by interpolation, small islets removed and sea floor synthesized. Not endorsed by Copernicus, ESA or Airbus. License verified 2026-09-28. Also used for the plan-view terrain thumbnails.",
+  },
+  {
     title: "ASTER Global Digital Elevation Map",
     category: "data",
     source: "NASA / METI / AIST / Japan Space Systems / U.S.-Japan ASTER Science Team",

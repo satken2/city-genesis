@@ -21,6 +21,18 @@
       "prev": "Previous Display",
       "next": "Next Display"
     },
+    "graphicMonitor": {
+      "label": "3D View Display"
+    },
+    "multiDisplay": {
+      "label": "Multi-Display Mode",
+      "description": "Shows windows on a different display from the game screen",
+      "on": "On",
+      "off": "Off"
+    },
+    "popupMonitor": {
+      "label": "Window Display"
+    },
     "hintbar": {
       "label": "Hint Bar",
       "show": "Show",

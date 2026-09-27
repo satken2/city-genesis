@@ -20,7 +20,6 @@ import {
   STATUS_CONSTRUCTING,
   BUILDING_MINE,
   VARIANT_SOLAR_PLANT,
-  VARIANT_SUBSTATION,
   PATH_VARIANT_GRID,
   PRODUCT_HIGH_ELECTRICITY,
   PRODUCT_METRO_VEHICLE,
@@ -331,18 +330,20 @@ async function resolveRailTransitVariants(base: string): Promise<Set<number>> {
 }
 
 /**
- * チュートリアルの全ステップ定義
+ * チュートリアルシナリオを表す型
  *
- * ステップ1はウェルカムメッセージ（検証なし）で、常に true を返す。
- * ステップ2〜6は実際のゲーム内操作を検証する。
- * ステップを追加・変更する場合はこの配列を編集し、対応する翻訳キーと画像を用意する。
+ * 開始時の導入は説明ウィンドウ(introKey)が担い、ステップは操作の案内だけで構成する。
+ * ステップを追加・変更する場合は steps を編集し、対応する翻訳キーと画像を用意する。
  */
-/** チュートリアルシナリオを表す型 */
 export interface TutorialScenario {
   id: string;
   titleKey: string;
   descriptionKey: string;
-  /** シナリオ一覧や詳細パネルで表示するサムネイル画像URL */
+  /** 開始時の説明ウィンドウに表示する「このチュートリアルで何をするか」の翻訳キー */
+  introKey: string;
+  /** 開始する地形マップ。教材の座標はこの地形を前提にする */
+  terrainMapId: string;
+  /** シナリオ一覧や詳細パネル、説明ウィンドウで表示するサムネイル画像URL */
   image?: string;
   steps: TutorialStep[];
 }
@@ -355,19 +356,12 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
     id: "basic",
     titleKey: "newGame.tutorialName",
     descriptionKey: "newGame.tutorialDesc",
+    introKey: "tutorial.intro.basic",
+    terrainMapId: DEFINITIONS.basic.terrainMap,
     image: basicScenarioThumbnail,
     steps: [
       {
         id: 1,
-        image: getStepImage(1),
-        titleKey: "tutorial.step1.title",
-        descriptionKey: "tutorial.step1.description",
-        buttonTextKey: "tutorial.startButton",
-        validate: async (): Promise<boolean> => true,
-        targetElementId: undefined,
-      },
-      {
-        id: 2,
         image: getStepImage(2),
         titleKey: "tutorial.step2.title",
         descriptionKey: "tutorial.step2.description",
@@ -391,7 +385,7 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
         targetElementId: "road",
       },
       {
-        id: 3,
+        id: 2,
         image: getStepImage(3),
         titleKey: "tutorial.step3.title",
         descriptionKey: "tutorial.step3.description",
@@ -413,7 +407,7 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
         targetElementId: "budget",
       },
       {
-        id: 4,
+        id: 3,
         image: getStepImage(4),
         titleKey: "tutorial.step4.title",
         descriptionKey: "tutorial.step4.description",
@@ -433,7 +427,7 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
         targetElementId: "execute",
       },
       {
-        id: 5,
+        id: 4,
         image: getStepImage(5),
         titleKey: "tutorial.step5.title",
         descriptionKey: "tutorial.step5.description",
@@ -451,7 +445,7 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
         targetElementId: "land",
       },
       {
-        id: 6,
+        id: 5,
         image: getStepImage(6),
         titleKey: "tutorial.step6.title",
         descriptionKey: "tutorial.step6.description",
@@ -475,7 +469,7 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
         targetElementId: "construction",
       },
       {
-        id: 7,
+        id: 6,
         image: getStepImage(7),
         titleKey: "tutorial.step7.title",
         descriptionKey: "tutorial.step7.description",
@@ -500,22 +494,14 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
     id: "scenario2",
     titleKey: "tutorial.scenario2.title",
     descriptionKey: "tutorial.scenario2.description",
+    introKey: "tutorial.intro.scenario2",
+    terrainMapId: "flat",
     image: scenario2Thumbnail,
     steps: [
       {
-        // イントロ(検証なし)
-        id: 1,
-        image: getStepImage(1),
-        titleKey: "tutorial.scenario2.step1.title",
-        descriptionKey: "tutorial.scenario2.step1.description",
-        buttonTextKey: "tutorial.startButton",
-        validate: async (): Promise<boolean> => true,
-        targetElementId: undefined,
-      },
-      {
         // 右上の道路を新しい地区に分割する。
         // 完了条件: 右上の道路が初期地区とは異なる地区に所属していること。
-        id: 2,
+        id: 1,
         image: getStepImage(2),
         titleKey: "tutorial.scenario2.step2.title",
         descriptionKey: "tutorial.scenario2.step2.description",
@@ -536,7 +522,7 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
       },
       {
         // 地区分割の意味を説明する(検証なし)
-        id: 3,
+        id: 2,
         image: getStepImage(3),
         titleKey: "tutorial.scenario2.step3.title",
         descriptionKey: "tutorial.scenario2.step3.description",
@@ -546,7 +532,7 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
       {
         // 天然資源を表示状態に切り替える。
         // 完了条件: 表示パネルで天然資源が表示状態になっていること(UI状態フラグ)。
-        id: 4,
+        id: 3,
         image: getStepImage(4),
         titleKey: "tutorial.scenario2.step4.title",
         descriptionKey: "tutorial.scenario2.step4.description",
@@ -557,7 +543,7 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
       {
         // 新しい地区の詳細パネルを開く。
         // 完了条件: 地区詳細パネルが開かれていること(UI状態フラグ)。
-        id: 5,
+        id: 4,
         image: getStepImage(5),
         titleKey: "tutorial.scenario2.step5.title",
         descriptionKey: "tutorial.scenario2.step5.description",
@@ -568,7 +554,7 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
       {
         // 地区の建築規制で鉱山のみを許可する。
         // 完了条件: 右上の道路が属する地区の allowed_bd_mask が鉱山のみであること。
-        id: 6,
+        id: 5,
         image: getStepImage(6),
         titleKey: "tutorial.scenario2.step6.title",
         descriptionKey: "tutorial.scenario2.step6.description",
@@ -590,7 +576,7 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
       {
         // 土地区画の詳細パネルを開いて規制の反映を確認する。
         // 完了条件: 土地区画詳細パネルが開かれていること(UI状態フラグ)。
-        id: 7,
+        id: 6,
         image: getStepImage(7),
         titleKey: "tutorial.scenario2.step7.title",
         descriptionKey: "tutorial.scenario2.step7.description",
@@ -600,176 +586,10 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
       },
       {
         // まとめ(検証なし)
-        id: 8,
+        id: 7,
         image: getStepImage(8),
         titleKey: "tutorial.scenario2.step8.title",
         descriptionKey: "tutorial.scenario2.step8.description",
-        validate: async (): Promise<boolean> => true,
-        targetElementId: undefined,
-      },
-    ],
-  },
-  {
-    id: "scenario3",
-    titleKey: "tutorial.scenario3.title",
-    descriptionKey: "tutorial.scenario3.description",
-    image: scenario3Thumbnail,
-    steps: [
-      {
-        // イントロ(検証なし)
-        id: 1,
-        image: getStepImage(1),
-        titleKey: "tutorial.scenario3.step1.title",
-        descriptionKey: "tutorial.scenario3.step1.description",
-        buttonTextKey: "tutorial.startButton",
-        validate: async (): Promise<boolean> => true,
-        targetElementId: undefined,
-      },
-      {
-        // 民家(集合住宅)の詳細を確認する(検証なし)
-        id: 2,
-        image: getStepImage(2),
-        titleKey: "tutorial.scenario3.step2.title",
-        descriptionKey: "tutorial.scenario3.step2.description",
-        validate: async (): Promise<boolean> => true,
-        targetElementId: undefined,
-      },
-      {
-        // 都市左側の広い区画に太陽光発電所を建設する。
-        // 完了条件: 太陽光発電所が建設予定/建設中/稼働中のいずれかで存在すること。
-        id: 3,
-        image: getStepImage(3),
-        titleKey: "tutorial.scenario3.step3.title",
-        descriptionKey: "tutorial.scenario3.step3.description",
-        validate: async (apiBaseUrl: string): Promise<boolean> => {
-          const base = normalizeBaseUrl(apiBaseUrl);
-          try {
-            const solar = await findBuildingByVariant(base, VARIANT_SOLAR_PLANT);
-            return solar != null && isPlacedOrActive(solar.status);
-          } catch {
-            return false;
-          }
-        },
-        targetElementId: "construction",
-      },
-      {
-        // これはチュートリアルなので建設をスキップする(検証なし)。
-        // 完了ボタン押下時に onComplete で太陽光発電所を強制的に稼働状態へ変更し、
-        // Unity に再ロードを指示して3D描画を更新する。
-        id: 4,
-        image: getStepImage(4),
-        titleKey: "tutorial.scenario3.step4.title",
-        descriptionKey: "tutorial.scenario3.step4.description",
-        validate: async (): Promise<boolean> => true,
-        onComplete: async (apiBaseUrl: string): Promise<void> => {
-          const base = normalizeBaseUrl(apiBaseUrl);
-          const solar = await findBuildingByVariant(base, VARIANT_SOLAR_PLANT);
-          if (solar?.agent_id != null && solar.status !== STATUS_ACTIVE) {
-            await fetchApi(`${base}/api/v1/agents/${solar.agent_id}`, {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ status: STATUS_ACTIVE }),
-            });
-            // 稼働状態への変更を3D描画へ反映させる
-            await sendSessionReload().catch(() => {});
-          }
-        },
-        targetElementId: "execute",
-      },
-      {
-        // 民家の隣の空き区画に変電所を建設する。
-        // 完了条件: 変電所が建設予定/建設中/稼働中のいずれかで存在すること。
-        id: 5,
-        image: getStepImage(5),
-        titleKey: "tutorial.scenario3.step5.title",
-        descriptionKey: "tutorial.scenario3.step5.description",
-        validate: async (apiBaseUrl: string): Promise<boolean> => {
-          const base = normalizeBaseUrl(apiBaseUrl);
-          try {
-            const substation = await findBuildingByVariant(base, VARIANT_SUBSTATION);
-            return substation != null && isPlacedOrActive(substation.status);
-          } catch {
-            return false;
-          }
-        },
-        targetElementId: "construction",
-      },
-      {
-        // 太陽光発電所から変電所まで高圧送電線を敷設する。
-        // 完了条件: 両施設の「接続端子ノード」(施設設置時に自動生成され infra_node_id で
-        // 観測できる)のそれぞれに、高圧送電線パスが1本以上接続されていること。
-        // 端点をノードに置くとバックエンドの端点溶接で接続される(=網に参加する)。
-        // 溶接は稼働中になった瞬間にしか起こらないため、判定前に工期をスキップする。
-        id: 6,
-        image: getStepImage(6),
-        titleKey: "tutorial.scenario3.step6.title",
-        descriptionKey: "tutorial.scenario3.step6.description",
-        prepare: async (apiBaseUrl: string): Promise<void> => {
-          const base = normalizeBaseUrl(apiBaseUrl);
-          await activatePathsWhere(base, (p) => isInfraPathType(p.path_type));
-        },
-        validate: async (apiBaseUrl: string): Promise<boolean> => {
-          const base = normalizeBaseUrl(apiBaseUrl);
-          try {
-            const [solar, substation] = await Promise.all([
-              findBuildingByVariant(base, VARIANT_SOLAR_PLANT),
-              findBuildingByVariant(base, VARIANT_SUBSTATION),
-            ]);
-            const solarNode = solar?.infra_node_id ?? -1;
-            const subNode = substation?.infra_node_id ?? -1;
-            if (solarNode <= 0 || subNode <= 0) return false;
-
-            const pathData = await fetchApi<{ paths: InfraPath[] }>(
-              `${base}/api/v1/paths`
-            );
-            // 高圧送電線(インフラパス)のうち、指定ノードを端点に持つものがあるか
-            const touchesNode = (nodeId: number): boolean =>
-              pathData.paths.some(
-                (p) =>
-                  isInfraPathType(p.path_type) &&
-                  p.path_variant === PATH_VARIANT_GRID &&
-                  (p.start_node_id === nodeId || p.end_node_id === nodeId)
-              );
-            return touchesNode(solarNode) && touchesNode(subNode);
-          } catch {
-            return false;
-          }
-        },
-        targetElementId: undefined,
-      },
-      {
-        // 時間を進めて、変電所が高圧電流を受電できているかを確認する。
-        // 完了条件: 変電所の高圧電流の当エポック獲得量(received_amount)が正であること。
-        // remain_amount は生産の原材料消費で減算されて0に戻り得るため判定に使えない。
-        // ※ 実際の配送(InfrastructureMarketPhase)が動くにはマスターデータ側の整備が必要。
-        id: 7,
-        image: getStepImage(7),
-        titleKey: "tutorial.scenario3.step7.title",
-        descriptionKey: "tutorial.scenario3.step7.description",
-        validate: async (apiBaseUrl: string): Promise<boolean> => {
-          const base = normalizeBaseUrl(apiBaseUrl);
-          try {
-            const substation = await findBuildingByVariant(base, VARIANT_SUBSTATION);
-            if (substation?.agent_id == null) return false;
-            // 建物一覧(multi_agent)には received_amount が含まれないため、
-            // 個別の single_agent を取得して高圧電流の受電量を確認する。
-            const detail = await fetchApi<{
-              economic_agent: { received_amount?: Record<string, number> };
-            }>(`${base}/api/v1/agents/${substation.agent_id}`);
-            const received = detail.economic_agent.received_amount ?? {};
-            return (received[String(PRODUCT_HIGH_ELECTRICITY)] ?? 0) > 0;
-          } catch {
-            return false;
-          }
-        },
-        targetElementId: "execute",
-      },
-      {
-        // まとめ(検証なし)
-        id: 8,
-        image: getStepImage(8),
-        titleKey: "tutorial.scenario3.step8.title",
-        descriptionKey: "tutorial.scenario3.step8.description",
         validate: async (): Promise<boolean> => true,
         targetElementId: undefined,
       },
@@ -786,22 +606,14 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
     id: "scenario4",
     titleKey: "tutorial.scenario4.title",
     descriptionKey: "tutorial.scenario4.description",
+    introKey: "tutorial.intro.scenario4",
+    terrainMapId: "flat",
     image: scenario4Thumbnail,
     steps: [
       {
-        // イントロ(検証なし)
-        id: 1,
-        image: getStepImage(1),
-        titleKey: "tutorial.scenario4.step1.title",
-        descriptionKey: "tutorial.scenario4.step1.description",
-        buttonTextKey: "tutorial.startButton",
-        validate: async (): Promise<boolean> => true,
-        targetElementId: undefined,
-      },
-      {
         // 電化された地上線路を敷設する。
         // 完了条件: 電化軌道バリアントのパスが1本以上存在すること。
-        id: 2,
+        id: 1,
         image: getStepImage(2),
         titleKey: "tutorial.scenario4.step2.title",
         descriptionKey: "tutorial.scenario4.step2.description",
@@ -828,7 +640,7 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
       {
         // 鉄道車両基地を空き区画に建設する。
         // 完了条件: 鉄道車両基地が建設予定/建設中/稼働中のいずれかで存在すること。
-        id: 3,
+        id: 2,
         image: getStepImage(3),
         titleKey: "tutorial.scenario4.step3.title",
         descriptionKey: "tutorial.scenario4.step3.description",
@@ -860,7 +672,7 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
         // 完了条件: 車両基地の接続端子ノードを端点に持つ軌道パスが1本以上あること。
         // 端点をノードに置くとバックエンドの端点溶接で接続される(=走行網に参加する)。
         // 溶接は稼働中になった瞬間にしか起こらないため、判定前に工期をスキップする。
-        id: 4,
+        id: 3,
         image: getStepImage(4),
         titleKey: "tutorial.scenario4.step4.title",
         descriptionKey: "tutorial.scenario4.step4.description",
@@ -892,7 +704,7 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
         // 車両基地の共用端子には引き込み線も溶接済みなので、ここが繋がると
         // 発電所 → 送電線 → 車両基地 → 引き込み線 → 電化線路 と電気が回る。
         // 溶接は稼働中になった瞬間にしか起こらないため、判定前に工期をスキップする。
-        id: 5,
+        id: 4,
         image: getStepImage(5),
         titleKey: "tutorial.scenario4.step5.title",
         descriptionKey: "tutorial.scenario4.step5.description",
@@ -931,7 +743,7 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
       {
         // 電化プラットフォーム(駅の軌道)を敷設する。
         // 完了条件: 電化プラットフォームのバリアントのパスが1本以上存在すること。
-        id: 6,
+        id: 5,
         image: getStepImage(6),
         titleKey: "tutorial.scenario4.step6.title",
         descriptionKey: "tutorial.scenario4.step6.description",
@@ -957,7 +769,7 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
       {
         // 駅舎パスをプラットフォームと交差するように敷設する。
         // 完了条件: 駅舎パス(PATH_STATION_HOUSE)が1本以上存在すること。
-        id: 7,
+        id: 6,
         image: getStepImage(7),
         titleKey: "tutorial.scenario4.step7.title",
         descriptionKey: "tutorial.scenario4.step7.description",
@@ -987,7 +799,7 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
       {
         // 鉄道路線を新設する。
         // 完了条件: 走行網に軌道を含む路線種別(=鉄道路線)の路線が1つ以上存在すること。
-        id: 8,
+        id: 7,
         image: getStepImage(8),
         titleKey: "tutorial.scenario4.step8.title",
         descriptionKey: "tutorial.scenario4.step8.description",
@@ -1009,7 +821,7 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
       },
       {
         // まとめ(検証なし)
-        id: 9,
+        id: 8,
         image: getStepImage(9),
         titleKey: "tutorial.scenario4.step9.title",
         descriptionKey: "tutorial.scenario4.step9.description",
@@ -1021,27 +833,31 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
 ];
 
 const scenarioThumbnails: Record<string, string> = {
+  scenario3: scenario3Thumbnail,
   trade: tradeScenarioThumbnail,
   highway: highwayScenarioThumbnail,
   mining: miningScenarioThumbnail,
   tourism: tourismScenarioThumbnail,
 };
 
-for (const id of ["trade", "highway", "mining", "tourism"]) {
-  TUTORIAL_SCENARIOS.push({
-    id,
-    titleKey: `tutorial.${id}.title`,
-    descriptionKey: `tutorial.${id}.description`,
-    image: scenarioThumbnails[id],
-    steps: DEFINITIONS[id].steps.map((step) => ({
-      id: step.legacyStep,
-      image: "",
-      titleKey: `tutorial.${id}.step${step.legacyStep}.title`,
-      descriptionKey: step.phases[0].textKey,
-      validate: async () => false,
-    })),
-  });
-}
+// インフラ編は地区編と鉄道編の間に並べる(一覧の順序は学ぶ順)。
+const generated = ["scenario3", "trade", "highway", "mining", "tourism"].map((id): TutorialScenario => ({
+  id,
+  titleKey: `tutorial.${id}.title`,
+  descriptionKey: `tutorial.${id}.description`,
+  introKey: `tutorial.intro.${id}`,
+  terrainMapId: DEFINITIONS[id].terrainMap,
+  image: scenarioThumbnails[id],
+  steps: DEFINITIONS[id].steps.map((step) => ({
+    id: step.legacyStep,
+    image: "",
+    titleKey: `tutorial.${id}.step${step.legacyStep}.title`,
+    descriptionKey: step.phases[0].textKey,
+    validate: async () => false,
+  })),
+}));
+TUTORIAL_SCENARIOS.splice(2, 0, generated[0]);
+TUTORIAL_SCENARIOS.push(...generated.slice(1));
 
 /** 互換性のための定義 */
 export const TUTORIAL_STEPS = TUTORIAL_SCENARIOS[0].steps;

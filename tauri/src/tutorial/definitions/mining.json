@@ -1,7 +1,7 @@
 {
   "version": 1,
   "id": "mining",
-  "setup": [],
+  "terrainMap": "yoron",
   "steps": [
     {
       "id": "mining.1",
@@ -21,11 +21,21 @@
             "mode": "observe",
             "markers": [
               [
-                235,
+                -419.5,
                 0,
-                40
+                100
               ]
-            ]
+            ],
+            "camera": {
+              "target": [
+                -420,
+                0,
+                100
+              ],
+              "distance": 700,
+              "yaw": 75,
+              "pitch": 40
+            }
           },
           "until": {
             "type": "window",
@@ -52,11 +62,21 @@
             "mode": "observe",
             "markers": [
               [
-                235,
+                -419.5,
                 0,
-                40
+                100
               ]
-            ]
+            ],
+            "camera": {
+              "target": [
+                -420,
+                0,
+                100
+              ],
+              "distance": 420,
+              "yaw": 75,
+              "pitch": 45
+            }
           },
           "until": {
             "type": "ack"
@@ -102,11 +122,21 @@
             "mode": "observe",
             "markers": [
               [
-                220,
+                -947.5,
                 0,
-                125
+                134
               ]
-            ]
+            ],
+            "camera": {
+              "target": [
+                -947,
+                0,
+                150
+              ],
+              "distance": 380,
+              "yaw": 0,
+              "pitch": 50
+            }
           },
           "until": {
             "type": "ack"
@@ -152,11 +182,21 @@
             "mode": "observe",
             "markers": [
               [
-                -90,
+                -1781,
                 0,
-                125
+                134
               ]
-            ]
+            ],
+            "camera": {
+              "target": [
+                -1781,
+                0,
+                150
+              ],
+              "distance": 380,
+              "yaw": 0,
+              "pitch": 50
+            }
           },
           "until": {
             "type": "ack"
@@ -202,11 +242,21 @@
             "mode": "observe",
             "markers": [
               [
-                -247,
+                -1783.5,
                 0,
-                95
+                440
               ]
-            ]
+            ],
+            "camera": {
+              "target": [
+                -1783,
+                0,
+                420
+              ],
+              "distance": 380,
+              "yaw": 0,
+              "pitch": 50
+            }
           },
           "until": {
             "type": "ack"
@@ -231,11 +281,6 @@
         },
         {
           "type": "reload"
-        },
-        {
-          "type": "scenarioAction",
-          "scenario": "mining",
-          "action": "operations"
         }
       ]
     },
@@ -244,8 +289,452 @@
       "legacyStep": 6,
       "phases": [
         {
+          "id": "open",
+          "textKey": "tutorial.mining.step6.open",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.track"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -1005,
+                0,
+                183
+              ],
+              [
+                -890,
+                0,
+                183
+              ]
+            ],
+            "camera": {
+              "target": [
+                -947,
+                0,
+                160
+              ],
+              "distance": 320,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "track_build"
+          }
+        },
+        {
+          "id": "loading",
+          "textKey": "tutorial.mining.step6.loading",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": []
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -1005,
+                0,
+                183
+              ],
+              [
+                -890,
+                0,
+                183
+              ]
+            ],
+            "camera": {
+              "target": [
+                -947,
+                0,
+                160
+              ],
+              "distance": 320,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "entity",
+            "resource": "tutorial",
+            "where": [
+              {
+                "field": "checks.loading_pf",
+                "equals": true
+              }
+            ]
+          }
+        },
+        {
+          "id": "unloading",
+          "textKey": "tutorial.mining.step6.unloading",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": []
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -1835,
+                0,
+                183
+              ],
+              [
+                -1725,
+                0,
+                183
+              ]
+            ],
+            "camera": {
+              "target": [
+                -1780,
+                0,
+                160
+              ],
+              "distance": 320,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.loading_pf",
+            "equals": true
+          },
+          {
+            "field": "checks.unloading_pf",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "mining.7",
+      "legacyStep": 7,
+      "phases": [
+        {
           "id": "perform",
-          "textKey": "tutorial.mining.step6.description",
+          "textKey": "tutorial.mining.step7.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.track"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -1725,
+                0,
+                183
+              ],
+              [
+                -1005,
+                0,
+                183
+              ]
+            ],
+            "camera": {
+              "target": [
+                -1365,
+                0,
+                170
+              ],
+              "distance": 1150,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "beforeCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "mining",
+          "action": "commission_tracks"
+        },
+        {
+          "type": "reload"
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.rail",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "mining.8",
+      "legacyStep": 8,
+      "phases": [
+        {
+          "id": "build",
+          "textKey": "tutorial.mining.step8.build",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -1350,
+                0,
+                136.5
+              ]
+            ],
+            "camera": {
+              "target": [
+                -1350,
+                0,
+                150
+              ],
+              "distance": 320,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "entity",
+            "resource": "tutorial",
+            "where": [
+              {
+                "field": "checks.depot",
+                "equals": true
+              }
+            ]
+          }
+        },
+        {
+          "id": "branch",
+          "textKey": "tutorial.mining.step8.branch",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.track"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -1350,
+                0,
+                166.5
+              ],
+              [
+                -1270,
+                0,
+                183
+              ]
+            ],
+            "camera": {
+              "target": [
+                -1320,
+                0,
+                160
+              ],
+              "distance": 280,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "beforeCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "mining",
+          "action": "commission_depot"
+        },
+        {
+          "type": "scenarioAction",
+          "scenario": "mining",
+          "action": "commission_tracks"
+        },
+        {
+          "type": "reload"
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.depot_rail",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "mining.9",
+      "legacyStep": 9,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.mining.step9.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.infra"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -1455,
+                0,
+                3.5
+              ],
+              [
+                -1350,
+                0,
+                166.5
+              ]
+            ],
+            "camera": {
+              "target": [
+                -1400,
+                0,
+                90
+              ],
+              "distance": 420,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "beforeCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "mining",
+          "action": "commission_power"
+        },
+        {
+          "type": "reload"
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.depot_power",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "mining.10",
+      "legacyStep": 10,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.mining.step10.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.transport"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -947.5,
+                0,
+                183
+              ],
+              [
+                -1780,
+                0,
+                183
+              ]
+            ],
+            "camera": {
+              "target": [
+                -1365,
+                0,
+                170
+              ],
+              "distance": 1150,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.line",
+            "equals": true
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "mining",
+          "action": "operations"
+        }
+      ]
+    },
+    {
+      "id": "mining.11",
+      "legacyStep": 11,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.mining.step11.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -254,7 +743,17 @@
             ]
           },
           "world": {
-            "mode": "observe"
+            "mode": "observe",
+            "camera": {
+              "target": [
+                -1150,
+                0,
+                150
+              ],
+              "distance": 1500,
+              "yaw": 20,
+              "pitch": 48
+            }
           },
           "until": {
             "type": "ack"
@@ -273,12 +772,12 @@
       }
     },
     {
-      "id": "mining.7",
-      "legacyStep": 7,
+      "id": "mining.12",
+      "legacyStep": 12,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.mining.step7.description",
+          "textKey": "tutorial.mining.step12.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -290,11 +789,21 @@
             "mode": "observe",
             "markers": [
               [
-                -247,
+                -1783.5,
                 0,
-                95
+                440
               ]
-            ]
+            ],
+            "camera": {
+              "target": [
+                -1783,
+                0,
+                400
+              ],
+              "distance": 450,
+              "yaw": 0,
+              "pitch": 50
+            }
           },
           "until": {
             "type": "ack"

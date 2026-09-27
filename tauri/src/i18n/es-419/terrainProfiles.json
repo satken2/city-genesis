@@ -54,6 +54,18 @@
       "dakar": {
         "name": "Cabo de la brisa",
         "description": "Una península que se adentra en el océano desde el extremo occidental de un continente. Costas rocosas y playas bordean mesetas bajas y colinas volcánicas. Una larga estación seca da paso a breves lluvias estivales, mientras sopla la brisa marina bajo el sol intenso."
+      },
+      "chongqing": {
+        "name": "Confluencia brumosa",
+        "description": "El borde de una cuenca interior. Estratos plegados levantan largas crestas paralelas, y entre ellas dos grandes ríos serpentean por valles profundos hasta unirse en la punta de una estrecha meseta. Los veranos son calurosos y húmedos; los inviernos, nublados, y una densa niebla suele llenar los valles."
+      },
+      "xiamen": {
+        "name": "Isla entre canales",
+        "description": "Una isla redondeada en una bahía profunda al borde de un continente. Estrechos canales la separan de costas montuosas, y colinas de granito se alzan en su sur. Los inviernos son templados y sin nieve; en verano, los monzones y los tifones traen la lluvia."
+      },
+      "dalian": {
+        "name": "Península de colinas rocosas",
+        "description": "Cerca del extremo sur de una larga península que se adentra en el mar desde un continente. Colinas rocosas llegan hasta la orilla; al norte penetra una bahía profunda y al sur se abre el mar. En invierno soplan vientos fríos y secos con algo de nieve; los veranos son templados y húmedos, y la niebla llega desde el mar."
       }
     }
   }

@@ -1,6 +1,7 @@
 {
   "version": 1,
   "id": "highway",
+  "terrainMap": "flat",
   "setup": [],
   "steps": [
     {
@@ -25,7 +26,17 @@
                 0,
                 0
               ]
-            ]
+            ],
+            "camera": {
+              "target": [
+                20,
+                0,
+                0
+              ],
+              "distance": 520,
+              "yaw": 0,
+              "pitch": 50
+            }
           },
           "until": {
             "type": "ack"
@@ -68,7 +79,17 @@
             ]
           },
           "world": {
-            "mode": "observe"
+            "mode": "observe",
+            "camera": {
+              "target": [
+                20,
+                0,
+                0
+              ],
+              "distance": 520,
+              "yaw": 0,
+              "pitch": 50
+            }
           },
           "until": {
             "type": "ack"
@@ -108,7 +129,17 @@
                 0,
                 0
               ]
-            ]
+            ],
+            "camera": {
+              "target": [
+                100,
+                0,
+                0
+              ],
+              "distance": 400,
+              "yaw": 0,
+              "pitch": 50
+            }
           },
           "until": {
             "type": "ack"
@@ -151,7 +182,17 @@
             ]
           },
           "world": {
-            "mode": "observe"
+            "mode": "observe",
+            "camera": {
+              "target": [
+                100,
+                0,
+                0
+              ],
+              "distance": 400,
+              "yaw": 0,
+              "pitch": 50
+            }
           },
           "until": {
             "type": "window",

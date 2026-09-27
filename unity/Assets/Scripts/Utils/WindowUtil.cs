@@ -1,9 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
 /// <summary>
-/// Windows API を使用して Unity ウィンドウをフォアグラウンドに持ってくるユーティリティ。
+/// Unity ウィンドウの操作(フォアグラウンドへの前面化、隣のディスプレイへの移動)をまとめたユーティリティ。
 ///
 /// UI プログラム(Tauri)から IPC で world:change_state を受信した際、
 /// Unity ウィンドウが背面に回っているとマウスイベントが処理できない。
@@ -52,5 +53,43 @@ public static class WindowUtil
         {
             Debug.LogWarning("[WindowUtil] SetForegroundWindow が失敗しました。ウィンドウが既に前面か、OS制約により拒否された可能性があります。");
         }
+    }
+
+    /// <summary>
+    /// Unity ウィンドウを隣のディスプレイ(direction が正なら次、それ以外は前)へ移す。
+    ///
+    /// UI(Tauri)とはディスプレイの列挙順が一致する保証がないため、UI からは方向だけを受け取り、
+    /// 隣の決定は Unity 自身の列挙(Screen.GetDisplayLayout)で行う。
+    /// 表示先はここでは保存しない。Unity プレイヤーが終了時に自分で記録し(UnitySelectMonitor)、次回起動時に復元する。
+    /// エディタではゲームビューがエディタのウィンドウに属するため何もしない。
+    /// </summary>
+    public static void MoveToAdjacentDisplay(int direction)
+    {
+        if (Application.isEditor)
+        {
+            Debug.Log("[WindowUtil] エディタ実行中のため、ディスプレイの移動をスキップします。");
+            return;
+        }
+
+        var displays = new List<DisplayInfo>();
+        Screen.GetDisplayLayout(displays);
+        int count = displays.Count;
+        if (count <= 1) return;
+
+        DisplayInfo current = Screen.mainWindowDisplayInfo;
+        int index = Math.Max(0, displays.FindIndex(d => d.Equals(current)));
+        DisplayInfo target = displays[direction > 0 ? (index + 1) % count : (index + count - 1) % count];
+
+        // 全画面表示ではウィンドウは移動先ディスプレイの左上に吸着するので、位置は原点でよい
+        AsyncOperation move = Screen.MoveMainWindowTo(target, Vector2Int.zero);
+        move.completed += _ =>
+        {
+            // 起動時と同じく移動先ディスプレイのネイティブ解像度で描く(解像度の違うディスプレイへ移ったとき、移動前の解像度を残さない)
+            if (Screen.fullScreenMode != FullScreenMode.Windowed
+                && (Screen.width != target.width || Screen.height != target.height))
+            {
+                Screen.SetResolution(target.width, target.height, Screen.fullScreenMode);
+            }
+        };
     }
 }

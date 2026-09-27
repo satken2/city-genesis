@@ -9,7 +9,7 @@ const SETTINGS_FILE_NAME: &str = "settings.json";
 /**
  * アプリケーション設定を表す構造体
  *
- * 言語、フォントサイズ、音量、タスクバー表示モニター、ヒントバー表示可否などの
+ * 言語、フォントサイズ、音量、HUDとポップアップの表示モニター、ヒントバー表示可否などの
  * ユーザー設定を一元管理する。
  * serde の default 属性により、設定ファイルに項目が存在しない場合でも
  * 安全にデシリアライズできる。
@@ -22,6 +22,10 @@ pub struct AppSettings {
     pub volumes: HashMap<String, u8>,
     pub monitor_index: usize,
     pub hintbar_visible: bool,
+    /// マルチディスプレイモード(ポップアップをHUDとは別のモニターに出す)
+    pub multi_display: bool,
+    /// マルチディスプレイモードでポップアップを出すモニター
+    pub popup_monitor_index: usize,
 }
 
 impl Default for AppSettings {
@@ -36,6 +40,8 @@ impl Default for AppSettings {
             volumes,
             monitor_index: 0,
             hintbar_visible: true,
+            multi_display: false,
+            popup_monitor_index: 0,
         }
     }
 }

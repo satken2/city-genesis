@@ -1,10 +1,13 @@
 use crate::ipc;
 use crate::messages::{EntityRef, NotificationPayload, OpenWindowPayload, WindowContextDto, WindowDefinition, WindowLayout};
-use crate::state::{OpenWindowState, SharedState, WindowGeometry, MAX_HIDDEN_WINDOWS};
+use crate::state::{AppState, OpenWindowState, SharedState, WindowGeometry, MAX_HIDDEN_WINDOWS};
 use serde_json::{json, Value};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
-use tauri::{AppHandle, Emitter, LogicalPosition, LogicalSize, Manager, Monitor, WebviewUrl, WebviewWindowBuilder};
+use tauri::{
+    AppHandle, Emitter, LogicalPosition, LogicalSize, Manager, Monitor, PhysicalPosition, Runtime, WebviewUrl,
+    WebviewWindow, WebviewWindowBuilder,
+};
 
 /// HUD(ゲーム中に画面へ常駐する操作パネル群)のウィンドウラベル。
 /// 複数枚に分かれているのは、Unityの3Dビューの上に重ねる透明ウィンドウでは
@@ -65,6 +68,140 @@ pub const HUD_LEFT_RESERVED: f64 = ICON_PANEL_WIDTH + HUD_MARGIN;
 
 static NEXT_WINDOW_ID: AtomicU64 = AtomicU64::new(1);
 
+/// ウィンドウの配置。サイズは論理ピクセル、位置は物理ピクセル(仮想スクリーン座標)。
+///
+/// 位置を論理座標のまま渡すと、tao は移動時にはウィンドウが今いるモニターの倍率で、生成時には
+/// 座標を含むモニターを先頭から探してその倍率で物理座標へ換算する。倍率の違うモニターが混在すると
+/// 別の場所(最悪は別のモニター)に出るため、モニター上への配置はすべてこの型を通して物理座標で渡す。
+#[derive(Debug, Clone, Copy)]
+pub struct Placement {
+    pub size: LogicalSize<f64>,
+    pub position: PhysicalPosition<i32>,
+}
+
+impl Placement {
+    /// `monitor` の倍率で計算した論理座標(原点は `monitor.position().to_logical(倍率)`)から配置を作る。
+    /// モニターが取得できないときは倍率1として扱う。
+    pub fn on_monitor(monitor: Option<&Monitor>, size: LogicalSize<f64>, position: LogicalPosition<f64>) -> Self {
+        let scale = monitor.map_or(1.0, |m| m.scale_factor());
+        Self {
+            size,
+            position: position.to_physical(scale),
+        }
+    }
+
+    /// ウィンドウを移動・リサイズする。
+    /// サイズは移動先の倍率で換算させるため移動の後に合わせる。倍率の違うモニターへ移ると
+    /// Windowsが提案する矩形(WM_DPICHANGED)で位置もずれうるので、最後に位置を打ち直す。
+    pub fn apply<R: Runtime>(&self, window: &WebviewWindow<R>) {
+        let _ = window.set_position(self.position);
+        let _ = window.set_size(self.size);
+        let _ = window.set_position(self.position);
+    }
+}
+
+/// ウィンドウを非表示で生成し、`placement` に置いてから `visible` なら表示する。
+/// 生成時の位置指定は tao が推測したモニターの倍率で読まれるため使わない(`Placement` 参照)。
+pub fn build_placed<R: Runtime, M: Manager<R>>(
+    builder: WebviewWindowBuilder<'_, R, M>,
+    placement: Placement,
+    visible: bool,
+) -> Result<WebviewWindow<R>, String> {
+    let window = builder
+        .visible(false)
+        .inner_size(placement.size.width, placement.size.height)
+        .build()
+        .map_err(|e| e.to_string())?;
+    placement.apply(&window);
+    if visible {
+        window.show().map_err(|e| e.to_string())?;
+    }
+    Ok(window)
+}
+
+/// ポップアップを表示するモニターの番号を決める。
+///
+/// 通常はHUDと同じモニター。マルチディスプレイモードではHUDとは別のモニターにし、
+/// 指定のモニターがHUDと同じか接続されていなければHUDの次のモニターを使う
+/// (HUDを指定のモニターへ移したときや、モニターを外したときも別のモニターに出し続けるため)。
+/// モニターが1台ならモードに関わらずHUDと同じになる。
+pub fn resolve_popup_monitor(multi_display: bool, hud: usize, preferred: usize, count: usize) -> usize {
+    if !multi_display || count < 2 {
+        return hud;
+    }
+    if preferred < count && preferred != hud {
+        preferred
+    } else {
+        (hud + 1) % count
+    }
+}
+
+/// ポップアップの表示先を、`current` から `direction` 方向(正で次、負で前)にあるHUDの無いモニターへ送る。
+pub fn next_popup_monitor(hud: usize, current: usize, count: usize, direction: i32) -> usize {
+    if count < 2 {
+        return current;
+    }
+    let mut next = current % count;
+    loop {
+        next = if direction > 0 {
+            (next + 1) % count
+        } else {
+            (next + count - 1) % count
+        };
+        if next != hud {
+            return next;
+        }
+    }
+}
+
+/// ポップアップの表示先モニターの番号と、そこにHUDがあるか。
+fn popup_monitor_of(state: &AppState, monitor_count: usize) -> (usize, bool) {
+    let index = resolve_popup_monitor(
+        state.multi_display,
+        state.current_monitor_index,
+        state.popup_monitor_index,
+        monitor_count,
+    );
+    (index, index == state.current_monitor_index)
+}
+
+/// ポップアップ(`window-registry.json` 駆動のウィンドウ)の表示先。
+struct PopupTarget {
+    monitor: Option<Monitor>,
+    /// 表示先モニターにHUDがあるか。あればHUDの占有領域を避けて配置する。
+    has_hud: bool,
+}
+
+fn popup_target(app: &AppHandle, state: &SharedState) -> PopupTarget {
+    let monitors = app.available_monitors().unwrap_or_default();
+    let (index, has_hud) = popup_monitor_of(&state.lock(), monitors.len());
+    PopupTarget {
+        monitor: monitors.into_iter().nth(index),
+        has_hud,
+    }
+}
+
+/// HUD・ポップアップの表示先の設定を `update` で書き換える。
+/// ポップアップの表示先が変わったら `reset_window_geometries` で開いているポップアップを新しい表示先へ移す。
+/// 記憶した位置・サイズは元のモニターでの値なので、残すと開き直したときに元のモニターへ戻る。
+pub fn update_display_target(
+    app: &AppHandle,
+    state: &SharedState,
+    update: impl FnOnce(&mut AppState),
+) -> Result<(), String> {
+    let count = app.available_monitors().map(|m| m.len()).unwrap_or(0);
+    let moved = {
+        let mut guard = state.lock();
+        let before = popup_monitor_of(&guard, count);
+        update(&mut *guard);
+        before != popup_monitor_of(&guard, count)
+    };
+    if moved {
+        reset_window_geometries(app, state)?;
+    }
+    Ok(())
+}
+
 /// HUDウィンドウのタイトルと初期サイズ。
 /// アイコンパネルの高さだけは中身のアイコン数で変わるため、ここでは既定値を返し、
 /// 実際の高さは React 側の実測値(`resize_icon_panel`)で上書きされる。
@@ -121,61 +258,73 @@ pub fn layout_hud_windows(
     let scale = monitor.scale_factor();
     let m_size = monitor.size().to_logical::<f64>(scale);
     let m_pos = monitor.position().to_logical::<f64>(scale);
+    let place = |win: &WebviewWindow, width: f64, height: f64, x: f64, y: f64| {
+        Placement::on_monitor(Some(monitor), LogicalSize::new(width, height), LogicalPosition::new(x, y)).apply(win);
+    };
+    // 現在の寸法はウィンドウが今いるモニターの倍率で論理値に直す(移動先の倍率で割ると別のモニターから移すときに狂う)
+    let current_size = |win: &WebviewWindow| {
+        let win_scale = win.scale_factor().unwrap_or(scale);
+        win.inner_size().ok().map(|s| s.to_logical::<f64>(win_scale))
+    };
 
     // アイコンパネル: 画面左端に縦置きし、上下方向は中央寄せにする
     if let Some(win) = app.get_webview_window(LABEL_ICON_PANEL) {
-        let current = win
-            .inner_size()
-            .ok()
-            .map(|s| s.to_logical::<f64>(scale).height)
+        let current = current_size(&win)
+            .map(|s| s.height)
             .filter(|h| *h > 1.0)
             .unwrap_or(ICON_PANEL_DEFAULT_HEIGHT);
         let height = icon_panel_height
             .unwrap_or(current)
             .clamp(1.0, m_size.height - HUD_MARGIN * 2.0);
-        let _ = win.set_size(LogicalSize::new(ICON_PANEL_WIDTH, height));
-        let _ = win.set_position(LogicalPosition::new(
+        place(
+            &win,
+            ICON_PANEL_WIDTH,
+            height,
             m_pos.x + HUD_MARGIN,
             m_pos.y + (m_size.height - height) / 2.0,
-        ));
+        );
     }
 
     // コックピット: 画面下部中央
     if let Some(win) = app.get_webview_window(LABEL_COCKPIT) {
-        let _ = win.set_size(LogicalSize::new(COCKPIT_WIDTH, COCKPIT_HEIGHT));
-        let _ = win.set_position(LogicalPosition::new(
+        place(
+            &win,
+            COCKPIT_WIDTH,
+            COCKPIT_HEIGHT,
             m_pos.x + (m_size.width - COCKPIT_WIDTH) / 2.0,
             m_pos.y + m_size.height - COCKPIT_HEIGHT - HUD_MARGIN,
-        ));
+        );
     }
 
     // システムトレイ: 画面右下。幅は中身のボタン数に合わせて右端基準で伸縮する
     if let Some(win) = app.get_webview_window(LABEL_SYSTEM_TRAY) {
-        let current = win
-            .inner_size()
-            .ok()
-            .map(|s| s.to_logical::<f64>(scale).width)
+        let current = current_size(&win)
+            .map(|s| s.width)
             .filter(|w| *w > 1.0)
             .unwrap_or(SYSTEM_TRAY_WIDTH);
         let width = system_tray_width
             .unwrap_or(current)
             .clamp(1.0, m_size.width - HUD_MARGIN * 2.0);
-        let _ = win.set_size(LogicalSize::new(width, SYSTEM_TRAY_HEIGHT));
-        let _ = win.set_position(LogicalPosition::new(
+        place(
+            &win,
+            width,
+            SYSTEM_TRAY_HEIGHT,
             m_pos.x + m_size.width - width - HUD_MARGIN,
             m_pos.y + m_size.height - SYSTEM_TRAY_HEIGHT - HUD_MARGIN,
-        ));
+        );
     }
 
     // 表示トレイ: 画面左下。アイコンパネルと同じく画面左端からマージンだけ空けて置く。
     // 左ドックのポップアップは下端から `HUD_BOTTOM_RESERVED` + マージン分を空けるので、
     // この高さのトレイとは縦に重ならない。
     if let Some(win) = app.get_webview_window(LABEL_DISPLAY_TRAY) {
-        let _ = win.set_size(LogicalSize::new(DISPLAY_TRAY_WIDTH, DISPLAY_TRAY_HEIGHT));
-        let _ = win.set_position(LogicalPosition::new(
+        place(
+            &win,
+            DISPLAY_TRAY_WIDTH,
+            DISPLAY_TRAY_HEIGHT,
             m_pos.x + HUD_MARGIN,
             m_pos.y + m_size.height - DISPLAY_TRAY_HEIGHT - HUD_MARGIN,
-        ));
+        );
     }
 }
 
@@ -340,11 +489,9 @@ pub fn record_window_geometry(app: &AppHandle, state: &SharedState, label: &str,
         return;
     };
 
-    // ドック配置では位置を記憶せず、サイズのみ更新する
+    // ドック配置では位置を記憶せず、サイズのみ更新する。位置は物理座標のまま記憶する(`WindowGeometry`)。
     let pos = if record_position && !is_docked {
-        win.outer_position()
-            .map(|p| p.to_logical::<f64>(scale))
-            .ok()
+        win.outer_position().ok()
     } else {
         None
     };
@@ -362,30 +509,34 @@ pub fn record_window_geometry(app: &AppHandle, state: &SharedState, label: &str,
     }
 }
 
-/// ウィンドウの配置(サイズと位置)をレイアウト種別に応じて計算する。
+/// ポップアップの配置(サイズと位置)をレイアウト種別に応じて計算する。
 ///
-/// 新規ウィンドウの builder 構築と、非表示ウィンドウの再利用時の set_size/set_position
-/// の両方から呼ばれる共通ロジック。レイアウト計算を一元化することで、新規・再利用の
-/// どちらでも同じ位置・サイズが適用される。
+/// 新規ウィンドウの生成と、非表示ウィンドウの再利用・表示先の変更時の再配置のすべてから
+/// 呼ばれる共通ロジック。レイアウト計算を一元化することで、どの経路でも同じ位置・サイズが適用される。
 ///
-/// ドック配置は常駐HUD(左のアイコンパネル・下部中央のコックピット・右下のシステムトレイ)を
-/// 避けた領域に収める。左ドックは `HUD_LEFT_RESERVED` だけ右へ寄せ、丈は下部の占有分を引く。
+/// 表示先モニターにHUDがあれば、ドック配置は常駐HUD(左のアイコンパネル・下部中央のコックピット・
+/// 右下のシステムトレイ)を避けた領域に収める。左ドックは `HUD_LEFT_RESERVED` だけ右へ寄せ、丈は
+/// 下部の占有分を引く。マルチディスプレイモードでHUDの無いモニターに置くときは画面端まで使う。
 ///
-/// - ドック配置(LeftPanel/RightPanel/BottomCenter/LeftTop): モニター情報を基準に位置を決定する。
+/// - ドック配置(LeftPanel/RightPanel/BottomCenter/LeftTop/RightTop): モニター情報を基準に位置を決定する。
 ///   saved_geometry があればサイズを上書きする(位置はレイアウトに従う)。
 /// - 自由配置(Default): saved_geometry があれば位置とサイズをそのまま復元する。
 ///   なければ width_ratio/height_ratio または definition.width/height でサイズを決め、
-///   payload.params.preferred_position またはモニター中央に配置する。
+///   payload.params.preferred_position または表示先モニターの中央に配置する。
 ///
 /// モニターが取得できない場合は definition のサイズと位置 (0,0) にフォールバックする。
 fn compute_window_geometry(
     definition: &WindowDefinition,
     payload: &OpenWindowPayload,
     saved_geometry: Option<WindowGeometry>,
-    monitors: &[Monitor],
-    monitor_index: usize,
-) -> (LogicalSize<f64>, LogicalPosition<f64>) {
-    let monitor = monitors.get(monitor_index);
+    target: &PopupTarget,
+) -> Placement {
+    let monitor = target.monitor.as_ref();
+    let (left_reserved, bottom_reserved, right_bottom_reserved) = if target.has_hud {
+        (HUD_LEFT_RESERVED, HUD_BOTTOM_RESERVED, HUD_RIGHT_BOTTOM_RESERVED)
+    } else {
+        (0.0, 0.0, 0.0)
+    };
 
     if definition.layout == WindowLayout::LeftPanel
         || definition.layout == WindowLayout::LeftPanelNarrow
@@ -409,15 +560,16 @@ fn compute_window_geometry(
                 .filter(|r| *r > 0.0)
                 .unwrap_or(default_ratio);
             let computed_width = (m_size.width * width_ratio).round();
-            let computed_height = m_size.height - HUD_BOTTOM_RESERVED - margin * 2.0;
+            let computed_height = m_size.height - bottom_reserved - margin * 2.0;
 
             // 記憶済みサイズがあればそれを優先する（位置はレイアウトに従う）
             let panel_width = saved_geometry.map(|g| g.width).unwrap_or(computed_width);
             let panel_height = saved_geometry.map(|g| g.height).unwrap_or(computed_height);
 
-            return (
+            return Placement::on_monitor(
+                Some(monitor),
                 LogicalSize::new(panel_width, panel_height),
-                LogicalPosition::new(m_pos.x + HUD_LEFT_RESERVED + margin, m_pos.y + margin),
+                LogicalPosition::new(m_pos.x + left_reserved + margin, m_pos.y + margin),
             );
         }
     } else if definition.layout == WindowLayout::RightPanel {
@@ -429,13 +581,14 @@ fn compute_window_geometry(
 
             let margin = HUD_MARGIN;
             let computed_width = (m_size.width * 0.20).round();
-            let computed_height = m_size.height - HUD_RIGHT_BOTTOM_RESERVED - margin * 2.0;
+            let computed_height = m_size.height - right_bottom_reserved - margin * 2.0;
 
             // 記憶済みサイズがあればそれを優先する。右端配置なので位置は幅に依存する。
             let panel_width = saved_geometry.map(|g| g.width).unwrap_or(computed_width);
             let panel_height = saved_geometry.map(|g| g.height).unwrap_or(computed_height);
 
-            return (
+            return Placement::on_monitor(
+                Some(monitor),
                 LogicalSize::new(panel_width, panel_height),
                 LogicalPosition::new(
                     m_pos.x + m_size.width - panel_width - margin,
@@ -461,9 +614,10 @@ fn compute_window_geometry(
             let panel_height = saved_geometry.map(|g| g.height).unwrap_or(computed_height);
 
             let x = m_pos.x + (m_size.width - panel_width) / 2.0;
-            let y = m_pos.y + m_size.height - HUD_BOTTOM_RESERVED - panel_height - margin;
+            let y = m_pos.y + m_size.height - bottom_reserved - panel_height - margin;
 
-            return (
+            return Placement::on_monitor(
+                Some(monitor),
                 LogicalSize::new(panel_width, panel_height),
                 LogicalPosition::new(x, y),
             );
@@ -479,9 +633,10 @@ fn compute_window_geometry(
             let w = saved_geometry.map(|g| g.width).unwrap_or(definition.width as f64);
             let h = saved_geometry.map(|g| g.height).unwrap_or(definition.height as f64);
 
-            return (
+            return Placement::on_monitor(
+                Some(monitor),
                 LogicalSize::new(w, h),
-                LogicalPosition::new(m_pos.x + HUD_LEFT_RESERVED + margin, m_pos.y + margin),
+                LogicalPosition::new(m_pos.x + left_reserved + margin, m_pos.y + margin),
             );
         }
     } else if definition.layout == WindowLayout::RightTop {
@@ -496,7 +651,7 @@ fn compute_window_geometry(
             let margin = HUD_MARGIN;
             // 既定サイズ: width_ratio があればモニター幅に対する比率で幅を決め、height_ratio が
             // 無ければ正方形にする(コックピットを避けた作業領域の高さでクランプ)。比率が無ければレジストリの実寸。
-            let work_h = (m_size.height - HUD_BOTTOM_RESERVED - margin * 2.0).max(200.0);
+            let work_h = (m_size.height - bottom_reserved - margin * 2.0).max(200.0);
             let (default_w, default_h) = match definition.width_ratio {
                 Some(rw) if rw > 0.0 => {
                     let w = (m_size.width * rw).round();
@@ -511,7 +666,8 @@ fn compute_window_geometry(
             let w = saved_geometry.map(|g| g.width).unwrap_or(default_w);
             let h = saved_geometry.map(|g| g.height).unwrap_or(default_h);
 
-            return (
+            return Placement::on_monitor(
+                Some(monitor),
                 LogicalSize::new(w, h),
                 LogicalPosition::new(m_pos.x + m_size.width - w - margin, m_pos.y + margin),
             );
@@ -519,10 +675,10 @@ fn compute_window_geometry(
     } else {
         // 自由配置: 記憶済みの位置・サイズがあればそれをそのまま復元する。
         if let Some(geo) = saved_geometry {
-            return (
-                LogicalSize::new(geo.width, geo.height),
-                LogicalPosition::new(geo.x, geo.y),
-            );
+            return Placement {
+                size: LogicalSize::new(geo.width, geo.height),
+                position: PhysicalPosition::new(geo.x, geo.y),
+            };
         }
 
         let (win_w, win_h) = match (
@@ -533,42 +689,39 @@ fn compute_window_geometry(
             (Some(rw), Some(rh), Some(monitor)) if rw > 0.0 && rh > 0.0 => {
                 let scale = monitor.scale_factor();
                 let m_size = monitor.size().to_logical::<f64>(scale);
-                let work_h = (m_size.height - HUD_BOTTOM_RESERVED).max(100.0);
+                let work_h = (m_size.height - bottom_reserved).max(100.0);
                 ((m_size.width * rw).round(), (work_h * rh).round())
             }
             _ => (definition.width as f64, definition.height as f64),
         };
 
-        // 親から明示的な位置指定があればそれを使い、なければHUDと同じモニターの中央に配置する
-        let pos = if let Some(position) = payload.params.as_ref().and_then(|p| p.preferred_position.as_ref()) {
-            if let (Some(x), Some(y)) = (position.x, position.y) {
-                LogicalPosition::new(x, y)
-            } else if let Some(monitor) = monitor {
+        // 親から明示的な位置指定があればそれを使い、なければ表示先モニターの中央に配置する
+        let centered = || match monitor {
+            Some(monitor) => {
                 let scale = monitor.scale_factor();
                 let m_size = monitor.size().to_logical::<f64>(scale);
                 let m_pos = monitor.position().to_logical::<f64>(scale);
-                let x = m_pos.x + (m_size.width - win_w) / 2.0;
-                let y = m_pos.y + (m_size.height - HUD_BOTTOM_RESERVED - win_h) / 2.0;
-                LogicalPosition::new(x, y)
-            } else {
-                LogicalPosition::new(0.0, 0.0)
+                LogicalPosition::new(
+                    m_pos.x + (m_size.width - win_w) / 2.0,
+                    m_pos.y + (m_size.height - bottom_reserved - win_h) / 2.0,
+                )
             }
-        } else if let Some(monitor) = monitor {
-            let scale = monitor.scale_factor();
-            let m_size = monitor.size().to_logical::<f64>(scale);
-            let m_pos = monitor.position().to_logical::<f64>(scale);
-            let x = m_pos.x + (m_size.width - win_w) / 2.0;
-            let y = m_pos.y + (m_size.height - HUD_BOTTOM_RESERVED - win_h) / 2.0;
-            LogicalPosition::new(x, y)
-        } else {
-            LogicalPosition::new(0.0, 0.0)
+            None => LogicalPosition::new(0.0, 0.0),
+        };
+        let pos = match payload.params.as_ref().and_then(|p| p.preferred_position.as_ref()) {
+            Some(position) => match (position.x, position.y) {
+                (Some(x), Some(y)) => LogicalPosition::new(x, y),
+                _ => centered(),
+            },
+            None => centered(),
         };
 
-        return (LogicalSize::new(win_w, win_h), pos);
+        return Placement::on_monitor(monitor, LogicalSize::new(win_w, win_h), pos);
     }
 
     // モニターが取得できない場合のフォールバック
-    (
+    Placement::on_monitor(
+        None,
         LogicalSize::new(definition.width as f64, definition.height as f64),
         LogicalPosition::new(0.0, 0.0),
     )
@@ -637,6 +790,13 @@ pub async fn open_window(app: AppHandle, state: SharedState, payload: OpenWindow
         }
 
         if let Some(window) = app.get_webview_window(&label) {
+            // 再利用待ちの最大化ウィンドウは表示先の変更時に置き直せない(`reset_window_geometries`)ので、ここで表示先へ移す
+            if definition.maximized {
+                let target = popup_target(&app, &state);
+                if !is_on_monitor(&window, target.monitor.as_ref()) {
+                    place_popup(&window, compute_window_geometry(&definition, &payload, None, &target), true);
+                }
+            }
             window.show().map_err(|err| err.to_string())?;
             let _ = window.set_focus();
             if let Some(context) = state.lock().to_context(&label) {
@@ -655,12 +815,7 @@ pub async fn open_window(app: AppHandle, state: SharedState, payload: OpenWindow
         let guard = state.lock();
         guard.saved_geometries.get(&payload.window_type).copied()
     };
-    let monitor_index = state.lock().current_monitor_index;
-    let monitors: Vec<_> = app
-        .available_monitors()
-        .unwrap_or_default()
-        .into_iter()
-        .collect();
+    let target = popup_target(&app, &state);
 
     // 優先度2: 非表示(再利用待ち)のポップアップウィンドウがあれば、それを別用途に転用する。
     // Tauri はウィンドウラベルを変更できないため、ラベルはそのままに window_type/entity/
@@ -675,13 +830,7 @@ pub async fn open_window(app: AppHandle, state: SharedState, payload: OpenWindow
         let title = definition.title.clone();
         let params_value = serde_json::to_value(payload.params.clone()).unwrap_or(Value::Null);
 
-        let (size, pos) = compute_window_geometry(
-            &definition,
-            &payload,
-            saved_geometry,
-            &monitors,
-            monitor_index,
-        );
+        let placement = compute_window_geometry(&definition, &payload, saved_geometry, &target);
 
         {
             let mut guard = state.lock();
@@ -703,13 +852,7 @@ pub async fn open_window(app: AppHandle, state: SharedState, payload: OpenWindow
         if let Some(window) = app.get_webview_window(&label) {
             let _ = window.set_title(&title);
             let _ = window.set_resizable(definition.resizable);
-            if definition.maximized {
-                let _ = window.maximize();
-            } else {
-                let _ = window.unmaximize();
-                let _ = window.set_size(size);
-                let _ = window.set_position(pos);
-            }
+            place_popup(&window, placement, definition.maximized);
             window.show().map_err(|err| err.to_string())?;
             let _ = window.set_focus();
             if let Some(context) = state.lock().to_context(&label) {
@@ -743,28 +886,42 @@ pub async fn open_window(app: AppHandle, state: SharedState, payload: OpenWindow
         );
     }
 
-    let (size, pos) = compute_window_geometry(
-        &definition,
-        &payload,
-        saved_geometry,
-        &monitors,
-        monitor_index,
-    );
+    let placement = compute_window_geometry(&definition, &payload, saved_geometry, &target);
 
     let builder = WebviewWindowBuilder::new(&app, label.clone(), WebviewUrl::App("index.html".into()))
         .title(&title)
         .decorations(false)
-        .visible(true)
         .resizable(definition.resizable)
-        .maximized(definition.maximized)
-        .inner_size(size.width, size.height)
-        .position(pos.x, pos.y)
         .always_on_top(true);
 
-    let window = builder.build().map_err(|err| err.to_string())?;
+    // 最大化は今いるモニターに対して効くので、表示先へ置いてから最大化する
+    let window = build_placed(builder, placement, false)?;
+    if definition.maximized {
+        let _ = window.maximize();
+    }
+    window.show().map_err(|err| err.to_string())?;
     let _ = window.set_focus();
 
     Ok(())
+}
+
+/// ポップアップを配置する。最大化するウィンドウは表示先へ移してから最大化する
+/// (最大化は今いるモニターに対して効くため)。
+/// 最大化中のウィンドウは戻した時点で非表示でも表示されるので、非表示のまま置いておく最大化ウィンドウには使わない。
+fn place_popup<R: Runtime>(window: &WebviewWindow<R>, placement: Placement, maximized: bool) {
+    let _ = window.unmaximize();
+    placement.apply(window);
+    if maximized {
+        let _ = window.maximize();
+    }
+}
+
+/// ウィンドウが `monitor` 上にあるか。どちらかが取得できなければ置き直さないよう true とする。
+fn is_on_monitor<R: Runtime>(window: &WebviewWindow<R>, monitor: Option<&Monitor>) -> bool {
+    match (window.current_monitor().ok().flatten(), monitor) {
+        (Some(current), Some(target)) => current.position() == target.position(),
+        _ => true,
+    }
 }
 
 /// 閉じたときにUnityを通常モードへ戻すウィンドウ(編集モードのウィンドウ)。
@@ -1205,7 +1362,7 @@ pub fn open_parameter_setup_window(
     let width = 620.0_f64;
     let height = 560.0_f64;
 
-    let mut builder = WebviewWindowBuilder::new(
+    let builder = WebviewWindowBuilder::new(
         app,
         "parameter-setup",
         WebviewUrl::App("index.html".into()),
@@ -1215,20 +1372,27 @@ pub fn open_parameter_setup_window(
     .transparent(true)
     .always_on_top(true)
     .skip_taskbar(true)
-    .resizable(false)
-    .inner_size(width, height);
+    .resizable(false);
 
-    if let Some(monitor) = monitors.get(monitor_index) {
-        let scale = monitor.scale_factor();
-        let m_size = monitor.size().to_logical::<f64>(scale);
-        let m_pos = monitor.position().to_logical::<f64>(scale);
-        let x = m_pos.x + (m_size.width - width) / 2.0;
-        let y = m_pos.y + (m_size.height - height) / 2.0;
-        builder = builder.position(x, y);
-    }
-
-    builder.build().map_err(|e| e.to_string())?;
+    build_placed(builder, centered_on_monitor(monitors.get(monitor_index), width, height), true)?;
     Ok(())
+}
+
+/// モニター中央に置く配置。モニターが取得できなければ仮想スクリーンの原点に置く。
+pub fn centered_on_monitor(monitor: Option<&Monitor>, width: f64, height: f64) -> Placement {
+    let position = match monitor {
+        Some(monitor) => {
+            let scale = monitor.scale_factor();
+            let m_size = monitor.size().to_logical::<f64>(scale);
+            let m_pos = monitor.position().to_logical::<f64>(scale);
+            LogicalPosition::new(
+                m_pos.x + (m_size.width - width) / 2.0,
+                m_pos.y + (m_size.height - height) / 2.0,
+            )
+        }
+        None => LogicalPosition::new(0.0, 0.0),
+    };
+    Placement::on_monitor(monitor, LogicalSize::new(width, height), position)
 }
 
 /// パラメータ設定ウィンドウを閉じる。存在しない場合は何もしない。
@@ -1269,7 +1433,7 @@ pub fn open_tips_window_with_mode(app: &AppHandle, monitor_index: usize, epoch: 
     let width = 680.0_f64;
     let height = 380.0_f64;
 
-    let mut builder = WebviewWindowBuilder::new(
+    let builder = WebviewWindowBuilder::new(
         app,
         "tips",
         WebviewUrl::App(if epoch { "index.html?tipsMode=epoch" } else { "index.html" }.into()),
@@ -1279,19 +1443,9 @@ pub fn open_tips_window_with_mode(app: &AppHandle, monitor_index: usize, epoch: 
     .transparent(true)
     .always_on_top(true)
     .skip_taskbar(true)
-    .resizable(false)
-    .inner_size(width, height);
+    .resizable(false);
 
-    if let Some(monitor) = monitors.get(monitor_index) {
-        let scale = monitor.scale_factor();
-        let m_size = monitor.size().to_logical::<f64>(scale);
-        let m_pos = monitor.position().to_logical::<f64>(scale);
-        let x = m_pos.x + (m_size.width - width) / 2.0;
-        let y = m_pos.y + (m_size.height - height) / 2.0;
-        builder = builder.position(x, y);
-    }
-
-    let window = builder.build().map_err(|e| e.to_string())?;
+    let window = build_placed(builder, centered_on_monitor(monitors.get(monitor_index), width, height), true)?;
     log::info!("[tips] ウィンドウ作成成功: label={}", window.label());
     Ok(())
 }
@@ -1313,7 +1467,27 @@ const NOTIFICATION_MIN_HEIGHT: f64 = 72.0;
 
 /// 通知ポップアップの最大高さ（論理ピクセル）。
 /// 本文が長い場合でもこの高さを超えないよう、フロントエンド側でスクロールまたは折り返しを行う。
-const NOTIFICATION_MAX_HEIGHT: f64 = 200.0;
+pub const NOTIFICATION_MAX_HEIGHT: f64 = 200.0;
+
+/// 通知ポップアップの配置。HUDのモニターの右下、システムトレイの上に置く。
+pub fn notification_placement(monitor: Option<&Monitor>, height: f64) -> Placement {
+    let size = LogicalSize::new(NOTIFICATION_WIDTH, height);
+    let Some(monitor) = monitor else {
+        return Placement::on_monitor(None, size, LogicalPosition::new(0.0, 0.0));
+    };
+    let scale = monitor.scale_factor();
+    let m_size = monitor.size().to_logical::<f64>(scale);
+    let m_pos = monitor.position().to_logical::<f64>(scale);
+    let margin = 16.0;
+    Placement::on_monitor(
+        Some(monitor),
+        size,
+        LogicalPosition::new(
+            m_pos.x + m_size.width - NOTIFICATION_WIDTH - margin,
+            m_pos.y + m_size.height - HUD_RIGHT_BOTTOM_RESERVED - height - margin,
+        ),
+    )
+}
 
 /// 通知ポップアップをキューに追加し、表示可能であれば即座に表示を開始する。
 ///
@@ -1391,7 +1565,7 @@ fn create_notification_window(app: &AppHandle, state: &SharedState) -> Result<ta
         .into_iter()
         .collect();
 
-    let mut builder = WebviewWindowBuilder::new(
+    let builder = WebviewWindowBuilder::new(
         app,
         "notification",
         WebviewUrl::App("index.html".into()),
@@ -1402,22 +1576,13 @@ fn create_notification_window(app: &AppHandle, state: &SharedState) -> Result<ta
     .shadow(false)
     .always_on_top(true)
     .skip_taskbar(true)
-    .resizable(false)
-    .visible(false)
-    .inner_size(NOTIFICATION_WIDTH, NOTIFICATION_MAX_HEIGHT);
+    .resizable(false);
 
-    if let Some(monitor) = monitors.get(monitor_index) {
-        let scale = monitor.scale_factor();
-        let m_size = monitor.size().to_logical::<f64>(scale);
-        let m_pos = monitor.position().to_logical::<f64>(scale);
-
-        let margin = 16.0;
-        let x = m_pos.x + m_size.width - NOTIFICATION_WIDTH - margin;
-        let y = m_pos.y + m_size.height - HUD_RIGHT_BOTTOM_RESERVED - NOTIFICATION_MAX_HEIGHT - margin;
-        builder = builder.position(x, y);
-    }
-
-    builder.build().map_err(|e| e.to_string())
+    build_placed(
+        builder,
+        notification_placement(monitors.get(monitor_index), NOTIFICATION_MAX_HEIGHT),
+        false,
+    )
 }
 
 /// 通知ウィンドウを非表示にし、キューに残りがあれば次の通知を表示する。
@@ -1466,18 +1631,7 @@ pub fn resize_notification_window(app: &AppHandle, state: &SharedState, height: 
     let clamped_height = height.clamp(NOTIFICATION_MIN_HEIGHT, NOTIFICATION_MAX_HEIGHT);
 
     if let Some(monitor) = monitors.get(monitor_index) {
-        let scale = monitor.scale_factor();
-        let m_size = monitor.size().to_logical::<f64>(scale);
-        let m_pos = monitor.position().to_logical::<f64>(scale);
-
-        let margin = 16.0;
-        let x = m_pos.x + m_size.width - NOTIFICATION_WIDTH - margin;
-        let y = m_pos.y + m_size.height - HUD_RIGHT_BOTTOM_RESERVED - clamped_height - margin;
-
-        win.set_size(LogicalSize::new(NOTIFICATION_WIDTH, clamped_height))
-            .map_err(|e| e.to_string())?;
-        win.set_position(LogicalPosition::new(x, y))
-            .map_err(|e| e.to_string())?;
+        notification_placement(Some(monitor), clamped_height).apply(&win);
     } else {
         win.set_size(LogicalSize::new(NOTIFICATION_WIDTH, clamped_height))
             .map_err(|e| e.to_string())?;
@@ -1553,32 +1707,33 @@ pub fn launch_graphic(state: &SharedState) -> Result<String, String> {
     Ok("launched".to_string())
 }
 
+/// 記憶したポップアップの位置・サイズを捨て、開いている(再利用待ちを含む)ポップアップを
+/// 表示先モニターの初期配置へ戻す。
 pub fn reset_window_geometries(app: &AppHandle, state: &SharedState) -> Result<(), String> {
-    let (open_windows, monitor_index, registry) = {
+    let (open_windows, registry) = {
         let mut guard = state.lock();
         guard.saved_geometries.clear();
-        let open_windows: Vec<(String, String)> = guard
+        let open_windows: Vec<(String, String, bool)> = guard
             .open_windows
             .iter()
-            .map(|(label, w_state)| (label.clone(), w_state.window_type.clone()))
+            .map(|(label, w_state)| (label.clone(), w_state.window_type.clone(), w_state.hidden))
             .collect();
-        let monitor_index = guard.current_monitor_index;
         let registry = guard.registry.clone();
-        (open_windows, monitor_index, registry)
+        (open_windows, registry)
     };
+    let target = popup_target(app, state);
 
-    let monitors: Vec<_> = app.available_monitors()
-        .unwrap_or_default()
-        .into_iter()
-        .collect();
-
-    for (label, window_type) in open_windows {
+    for (label, window_type, hidden) in open_windows {
         let Some(window) = app.get_webview_window(&label) else {
             continue;
         };
         let Some(definition) = registry.get(&window_type) else {
             continue;
         };
+        // 再利用待ちの最大化ウィンドウは動かすと表示されてしまうので、開き直すときに置き直す(`open_window`)
+        if hidden && definition.maximized {
+            continue;
+        }
 
         // 記憶を消した直後の状態＝「初めて開いたときの配置」なので、
         // 新規オープンと同じ計算(saved_geometry なし)をそのまま使う。
@@ -1587,11 +1742,8 @@ pub fn reset_window_geometries(app: &AppHandle, state: &SharedState) -> Result<(
             entity: None,
             params: None,
         };
-        let (size, pos) =
-            compute_window_geometry(definition, &payload, None, &monitors, monitor_index);
-
-        let _ = window.set_size(size);
-        let _ = window.set_position(pos);
+        let placement = compute_window_geometry(definition, &payload, None, &target);
+        place_popup(&window, placement, definition.maximized);
     }
 
     Ok(())
@@ -1599,8 +1751,30 @@ pub fn reset_window_geometries(app: &AppHandle, state: &SharedState) -> Result<(
 
 #[cfg(test)]
 mod tests {
-    use super::EDIT_MODE_WINDOW_TYPES;
+    use super::{next_popup_monitor, resolve_popup_monitor, EDIT_MODE_WINDOW_TYPES};
     use crate::messages::MutexGroups;
+
+    #[test]
+    fn popup_monitor_follows_hud_unless_multi_display() {
+        assert_eq!(resolve_popup_monitor(false, 1, 0, 3), 1);
+        assert_eq!(resolve_popup_monitor(true, 0, 0, 1), 0, "モニター1台ならHUDと同じ");
+    }
+
+    #[test]
+    fn multi_display_never_shares_the_hud_monitor() {
+        assert_eq!(resolve_popup_monitor(true, 0, 2, 3), 2);
+        assert_eq!(resolve_popup_monitor(true, 1, 1, 2), 0, "指定がHUDと同じなら次のモニター");
+        assert_eq!(resolve_popup_monitor(true, 1, 5, 3), 2, "未接続の指定は次のモニター");
+    }
+
+    #[test]
+    fn popup_monitor_switch_skips_the_hud_monitor() {
+        assert_eq!(next_popup_monitor(0, 1, 3, 1), 2);
+        assert_eq!(next_popup_monitor(0, 2, 3, 1), 1);
+        assert_eq!(next_popup_monitor(0, 1, 3, -1), 2);
+        assert_eq!(next_popup_monitor(0, 1, 2, 1), 1, "2台なら切り替え先が無い");
+        assert_eq!(next_popup_monitor(0, 0, 1, 1), 0);
+    }
 
     #[test]
     fn edit_mode_windows_are_mutually_exclusive() {

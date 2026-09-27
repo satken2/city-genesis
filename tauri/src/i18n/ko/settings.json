@@ -21,6 +21,18 @@
       "prev": "이전 디스플레이",
       "next": "다음 디스플레이"
     },
+    "graphicMonitor": {
+      "label": "3D 화면을 표시할 디스플레이"
+    },
+    "multiDisplay": {
+      "label": "멀티 디스플레이 모드",
+      "description": "각종 창을 게임 화면과 다른 디스플레이에 표시합니다",
+      "on": "사용",
+      "off": "사용 안 함"
+    },
+    "popupMonitor": {
+      "label": "창을 표시할 디스플레이"
+    },
     "hintbar": {
       "label": "힌트 바",
       "show": "표시",

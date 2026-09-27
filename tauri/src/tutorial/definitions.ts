@@ -11,7 +11,9 @@ import type { Definition } from "./model";
 import * as constants from "../constants";
 
 /** DOMの構造や翻訳文ではなく、登録済みの操作名だけを定義で指定する。 */
-export const TARGETS = ["hud.road", "hud.construction", "hud.land", "hud.district", "hud.execute", "hud.visibility", "hud.track", "hud.transport", "path.type", "path.variant", "path.confirm", "path.cancel", "window.path_build", "window.agent_detail"];
+export const TARGETS = ["hud.road", "hud.construction", "hud.land", "hud.district", "hud.execute", "hud.visibility", "hud.track", "hud.infra", "hud.transport", "path.type", "path.variant", "path.confirm", "path.cancel", "window.path_build", "window.agent_detail"];
+/** コアが初期配置した対象の名前。束縛はチュートリアル開始時にコアから受け取る。 */
+const CORE_TARGET = /^(support|lesson)\./;
 const validateSchema = new Ajv({ allErrors: true, strict: false }).compile(schema);
 export function validateDefinition(value: unknown): asserts value is Definition {
   if (!validateSchema(value)) throw new Error(JSON.stringify(validateSchema.errors));
@@ -24,7 +26,7 @@ export function validateDefinition(value: unknown): asserts value is Definition 
   walk(definition, node => { if (typeof node.bind === "string") bindings.add(node.bind); });
   walk(definition, node => {
     if (typeof node.$constant === "string" && node.$constant !== "TUTORIAL_STREET" && !(node.$constant in constants)) throw new Error(`Unknown constant: ${node.$constant}`);
-    for (const key of ["$ref", "target", "from", "to"]) if (typeof node[key] === "string" && !bindings.has(node[key] as string)) throw new Error(`Unknown binding: ${node[key]}`);
+    for (const key of ["$ref", "target", "from", "to"]) if (typeof node[key] === "string" && !bindings.has(node[key] as string) && !CORE_TARGET.test(node[key] as string)) throw new Error(`Unknown binding: ${node[key]}`);
     if (("$ref" in node || "$constant" in node) && Object.keys(node).length !== 1) throw new Error("References must have exactly one key");
     if (node.type === "create" && node.resource === "parcels" && (node.body as Record<string, unknown>).mode !== "empty_area") throw new Error("Tutorial parcels use empty_area (one returned ID)");
     if (node.type === "create" && node.resource === "paths" && (!Array.isArray((node.body as Record<string, unknown>).paths) || ((node.body as Record<string, unknown>).paths as unknown[]).length !== 1)) throw new Error("Create one bound path per action");

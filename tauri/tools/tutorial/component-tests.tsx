@@ -3,7 +3,7 @@ import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { Window } from "happy-dom";
 import { Tutorial } from "../../src/components/tutorial/Tutorial";
-import { emit, notifications } from "./mock-runtime";
+import { emit, notifications, invocations } from "./mock-runtime";
 
 const browser = new Window();
 for (const name of ["window", "document", "navigator", "localStorage"]) Object.defineProperty(globalThis, name, { configurable: true, value: name === "window" ? browser : (browser as any)[name] });
@@ -18,6 +18,8 @@ const settle = async (fn: () => void | Promise<void>) => {
 const exitButton = () => [...container.querySelectorAll<HTMLButtonElement>("button")].find(b => b.textContent === "tutorial.guide.exit")!;
 const session = async (id: string | null) => settle(() => emit("session-state", { current_save_id: id, apiBaseUrl: "http://fixture", tutorialId: "basic" }));
 const show = () => settle(() => emit("tutorial:show", "basic"));
+const closeIntro = () => settle(() => emit("tutorial:window_visibility", { label: "tutorial_intro", window: "tutorial_intro", visible: false }));
+const introRequests = () => invocations.filter(([command, args]) => command === "open_registered_window" && (args as { windowType?: string }).windowType === "tutorial_intro").length;
 const originalFetch = globalThis.fetch;
 let requests = 0, finishExit: (response: Response) => void;
 globalThis.fetch = async (_url, options) => {
@@ -28,6 +30,9 @@ globalThis.fetch = async (_url, options) => {
 try {
   await settle(() => root.render(<Tutorial />));
   await session("first"); await show();
+  assert.equal(introRequests(), 1, "a new tutorial opens the intro window once");
+  assert.equal(container.querySelector("button"), null, "guidance waits until the intro window is closed");
+  await closeIntro();
   assert.equal(exitButton().disabled, false);
   await settle(() => exitButton().click());
   assert.equal(exitButton().disabled, true);
@@ -36,7 +41,8 @@ try {
   await settle(() => { finishExit(Response.json({ success: true })); });
   await session(null);
   assert.equal(container.querySelector("button"), null, "session end hides the persistent tutorial window");
-  await session("second"); await show();
+  await session("second"); await show(); await closeIntro();
+  assert.equal(introRequests(), 2, "each new save shows its own intro");
   assert.equal(exitButton().disabled, false, "next tutorial can exit without remounting the window");
   await settle(() => exitButton().click());
   await settle(() => { finishExit(Response.json({ code: "FAILED" }, { status: 500 })); });
@@ -48,8 +54,11 @@ try {
   globalThis.fetch = async () => Response.json({ success: true });
   await settle(() => exitButton().click());
   assert.equal(exitButton().disabled, true);
-  await session("third"); await show();
+  await session("third"); await show(); await closeIntro();
   assert.equal(exitButton().disabled, false, "save change resets exit even if the null session event was missed");
+  await session(null); await session("third"); await show();
+  assert.equal(introRequests(), 3, "a closed intro is not shown again for the same save");
+  assert.equal(exitButton().disabled, false);
 } finally {
   await settle(() => root.unmount());
   globalThis.fetch = originalFetch;

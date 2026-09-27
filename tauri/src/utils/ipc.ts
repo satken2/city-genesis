@@ -43,6 +43,14 @@ export async function setWeather(id: string | null): Promise<void> {
 }
 
 /**
+ * 3D画面(Unityのウィンドウ)を隣のディスプレイへ移す。direction=1で次、-1で前。
+ * UIとUnityではディスプレイの列挙順が一致しないので番号は送らず、隣の決定と表示先の記録はUnityに任せる。
+ */
+export async function sendMoveGraphicDisplay(direction: 1 | -1): Promise<void> {
+  await invoke("send_window_action", { windowType: "settings", entity: null, action: "system:move_display", params: { direction } });
+}
+
+/**
  * グラフィックプログラムのステート種別
  * @see genesis-docs/programs/IPC連携の整理.md「グラフィックプログラムのステート」
  */

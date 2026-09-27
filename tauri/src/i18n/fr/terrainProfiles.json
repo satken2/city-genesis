@@ -54,6 +54,18 @@
       "dakar": {
         "name": "Cap de la brise",
         "description": "Une péninsule s’avance dans l’océan à la pointe occidentale d’un continent. Des côtes rocheuses et des plages bordent de bas plateaux et des collines volcaniques. Une longue saison sèche précède de brèves pluies estivales, sous le souffle des brises marines."
+      },
+      "chongqing": {
+        "name": "Confluent des brumes",
+        "description": "La bordure d’un bassin intérieur. Des strates plissées dressent de longues crêtes parallèles, entre lesquelles deux grands fleuves serpentent dans des vallées profondes avant de se rejoindre à la pointe d’un étroit plateau. L’été est chaud et humide ; l’hiver est couvert, et un épais brouillard emplit souvent les vallées."
+      },
+      "xiamen": {
+        "name": "Île des chenaux",
+        "description": "Une île arrondie au fond d’une baie profonde, au bord d’un continent. D’étroits chenaux la séparent de rivages vallonnés, et des collines de granite s’élèvent dans son sud. L’hiver reste doux et sans neige ; l’été, la mousson et les typhons apportent la pluie."
+      },
+      "dalian": {
+        "name": "Péninsule des collines rocheuses",
+        "description": "Près de l’extrémité sud d’une longue péninsule avancée depuis un continent. Des collines rocheuses descendent jusqu’au rivage ; au nord s’enfonce une baie profonde, au sud s’ouvre la mer. L’hiver apporte des vents froids et secs et un peu de neige ; l’été est doux et humide, et le brouillard monte de la mer."
       }
     }
   }

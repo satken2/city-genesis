@@ -21,6 +21,18 @@
       "prev": "前のディスプレイ",
       "next": "次のディスプレイ"
     },
+    "graphicMonitor": {
+      "label": "3D画面の表示先"
+    },
+    "multiDisplay": {
+      "label": "マルチディスプレイモード",
+      "description": "各種ウィンドウを別のディスプレイに表示します",
+      "on": "使う",
+      "off": "使わない"
+    },
+    "popupMonitor": {
+      "label": "ウィンドウの表示先"
+    },
     "hintbar": {
       "label": "ヒントバー",
       "show": "表示する",

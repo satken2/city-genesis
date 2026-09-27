@@ -918,6 +918,14 @@ public class IpcClient : MonoBehaviour
                     WindowUtil.BringToForeground();
                     break;
 
+                case "system:move_display":
+                    {
+                        int direction = GetParamInt(payload, "direction");
+                        Debug.Log($"IpcClient: system:move_display -> direction={direction}");
+                        WindowUtil.MoveToAdjacentDisplay(direction);
+                    }
+                    break;
+
                 case "system:shutdown":
                     Debug.Log("IpcClient: system:shutdown");
                     OnSystemShutdown?.Invoke();

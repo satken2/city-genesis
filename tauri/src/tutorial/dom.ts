@@ -2,7 +2,7 @@ import type { Phase } from "./model";
 
 /** 保存・復旧・終了とその関連画面は、シナリオの許可リストに依存させない。 */
 const unrestrictedWindows = new Set([
-  "tutorial", "notification", "tips", "system-tray", "settings", "credits",
+  "tutorial", "tutorial_intro", "notification", "tips", "system-tray", "settings", "credits",
   "save_load", "save_list", "new_game", "confirm_dialog",
 ]);
 

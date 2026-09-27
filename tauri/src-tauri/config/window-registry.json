@@ -544,6 +544,14 @@
     "policy": "single",
     "actions": []
   },
+  "tutorial_intro": {
+    "title": "チュートリアル",
+    "width": 520,
+    "height": 620,
+    "resizable": false,
+    "policy": "single",
+    "actions": []
+  },
   "template_editor": {
     "title": "エディタ",
     "width": 1280,

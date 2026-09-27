@@ -6,6 +6,7 @@ import type { Bindings, Environment, Facts, Resource } from "./model";
 import type { MasterData } from "../types";
 
 const routes: Record<Resource, string> = { paths: "paths", parcels: "parcels", buildings: "buildings", agents: "agents", zones: "zones", city: "city", budgets: "city/budgets", lines: "transit/lines", tutorial: "tutorials" };
+const coreKinds: Record<string, Resource> = { agents: "agents", parcels: "parcels", paths: "paths", zones: "zones", lines: "lines" };
 const single: Record<Resource, string> = { paths: "path", parcels: "parcel", buildings: "economic_agent", agents: "economic_agent", zones: "zone", city: "city", budgets: "budgets", lines: "line", tutorial: "tutorial" };
 
 export async function createEnvironment(base: string, saveId: string, bindings: Bindings, pendingCreates: Record<string, boolean>, facts: Facts, master: MasterData, checkpoint: () => void, assertCurrent: () => void): Promise<Environment> {
@@ -66,5 +67,11 @@ export async function createEnvironment(base: string, saveId: string, bindings: 
     },
     async reload() { assertCurrent(); await sendSessionReload(); },
   };
+  // コアが初期配置した対象(support.* / lesson.*)は、定義から同じ名前で参照できるように束縛へ加える。
+  const [tutorial] = await env.read("tutorial");
+  const targets = (tutorial?.targets ?? {}) as Record<string, { kind: string; id: number }>;
+  for (const [name, ref] of Object.entries(targets)) {
+    if (!bindings[name] && ref.kind in coreKinds) bindings[name] = { kind: coreKinds[ref.kind], id: ref.id };
+  }
   return env;
 }

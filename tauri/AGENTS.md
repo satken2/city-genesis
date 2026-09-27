@@ -30,6 +30,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 
 - 1つのReactアプリが全ウィンドウを描く。ラベル `main` / `icon-panel` / `cockpit` / `system-tray` / `display-tray` / `topmenu` / `notification` / `hintbar` / `tutorial` / `parameter-setup` / `tips` はRust側が直接生成する常駐ウィンドウ、それ以外は `window-registry.json` 駆動のポップアップ。
 - HUDは `icon-panel`・`cockpit`・`system-tray`・`display-tray` の4枚。透明WebViewは透明な領域でもクリックを吸うので、1枚の全画面ウィンドウにはできない。生成・配置は `src-tauri/src/window.rs`、中身は `components/hud/`。
+- ポップアップはHUDと同じモニターにあるとは限らない(設定のマルチディスプレイモードでは別のモニターに出る)。ウィンドウの位置はRust側が決め、React側からは動かさない。
 - `WindowContext` を持つのはポップアップだけ。常駐ウィンドウは `App.tsx` の `contextlessLabels` で `get_window_context` の対象から外す。Rust直接生成のウィンドウを追加してここに足し忘れると、起動時に `get_window_context` が失敗し、同じ `initialize()` 内の言語復元まで巻き添えでスキップされる。
 - ポップアップのパネルは必ず `lazy(() => import(...))` で追加する(重い依存をメインバンドルから切り離すため)。`<Suspense>` の key に種別・エンティティID・ラベルを含めてあり、対象の切り替え時に内部が再マウントされる。
 - 追加手順は `components/AGENTS.md`、全体像は `../docs/docs/programs/コンポーネント連携.md` の「UIのウィンドウ構成」。

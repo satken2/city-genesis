@@ -11,7 +11,7 @@ use serde_json::Value;
 use state::SharedState;
 use std::sync::atomic::Ordering;
 use std::time::Duration;
-use tauri::{Emitter, Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent};
+use tauri::{Emitter, LogicalPosition, LogicalSize, Manager, Monitor, WebviewUrl, WebviewWindowBuilder, WindowEvent};
 
 fn load_registry() -> WindowRegistry {
     serde_json::from_str(include_str!(concat!(
@@ -89,6 +89,44 @@ fn load_backend_launch_command() -> String {
 /// トップメニューのサイズ
 const TOPMENU_WIDTH: f64 = 800.0;
 const TOPMENU_HEIGHT: f64 = 600.0;
+
+/// ヒントバーの高さ。CSSでの実際の表示サイズ(padding + border + 2行テキスト)にぴったり合わせ、
+/// 透明なクリックできない余白を作らない。
+const HINTBAR_HEIGHT: f64 = 68.0;
+const TUTORIAL_HEIGHT: f64 = 200.0;
+
+/// モニターの論理座標での位置とサイズ。取得できなければ原点の 1920x1080 とみなす。
+fn monitor_frame(monitor: Option<&Monitor>) -> (LogicalPosition<f64>, LogicalSize<f64>) {
+    match monitor {
+        Some(monitor) => {
+            let scale = monitor.scale_factor();
+            (monitor.position().to_logical(scale), monitor.size().to_logical(scale))
+        }
+        None => (LogicalPosition::new(0.0, 0.0), LogicalSize::new(1920.0, 1080.0)),
+    }
+}
+
+/// ヒントバーの配置: 上部中央、幅は画面の55%(CSS側はウィンドウ幅いっぱいに追従する)。
+fn hintbar_placement(monitor: Option<&Monitor>) -> window::Placement {
+    let (pos, size) = monitor_frame(monitor);
+    let width = size.width * 0.55;
+    window::Placement::on_monitor(
+        monitor,
+        LogicalSize::new(width, HINTBAR_HEIGHT),
+        LogicalPosition::new(pos.x + (size.width - width) / 2.0, pos.y + 4.0),
+    )
+}
+
+/// チュートリアルの配置: ヒントバーの直下(上端4px + ヒントバー + 間隔4px)、幅はヒントバーと同じ。
+fn tutorial_placement(monitor: Option<&Monitor>) -> window::Placement {
+    let (pos, size) = monitor_frame(monitor);
+    let width = size.width * 0.55;
+    window::Placement::on_monitor(
+        monitor,
+        LogicalSize::new(width, TUTORIAL_HEIGHT),
+        LogicalPosition::new(pos.x + (size.width - width) / 2.0, pos.y + 4.0 + HINTBAR_HEIGHT + 4.0),
+    )
+}
 
 #[tauri::command]
 fn get_window_context(window: tauri::Window, state: tauri::State<'_, SharedState>) -> Result<messages::WindowContextDto, String> {
@@ -183,9 +221,11 @@ fn get_topmenu_state(state: tauri::State<'_, SharedState>) -> Value {
     })
 }
 
-/// HUD(アイコンパネル・コックピット・システムトレイ)とトップメニューを別のモニターに移動する
-/// directionが1なら次のモニター、-1なら前のモニターに移動する
-/// モニターが1つしかない場合は何もしない
+/// HUD(アイコンパネル・コックピット・システムトレイ・表示トレイ)とヒントバー・チュートリアル・
+/// トップメニューを別のモニターに移動する。
+/// directionが1なら次のモニター、-1なら前のモニターに移動する。
+/// ポップアップの表示先も変わるとき(通常モード、またはHUDをポップアップの表示先へ移したとき)は
+/// 開いているポップアップも移す。モニターが1つしかない場合は何もしない。
 #[tauri::command]
 fn switch_monitor(app: tauri::AppHandle, state: tauri::State<'_, SharedState>, direction: i32) -> Result<Value, String> {
     let monitors: Vec<_> = app.available_monitors()
@@ -197,52 +237,28 @@ fn switch_monitor(app: tauri::AppHandle, state: tauri::State<'_, SharedState>, d
         return Ok(serde_json::json!({ "monitorIndex": 0 }));
     }
 
-    let new_index = {
-        let mut guard = state.lock();
-        let count = monitors.len();
-        if direction > 0 {
-            guard.current_monitor_index = (guard.current_monitor_index + 1) % count;
+    let count = monitors.len();
+    let mut new_index = 0;
+    window::update_display_target(&app, state.inner(), |guard| {
+        guard.current_monitor_index = if direction > 0 {
+            (guard.current_monitor_index + 1) % count
         } else {
-            guard.current_monitor_index = (guard.current_monitor_index + count - 1) % count;
-        }
-        guard.current_monitor_index
-    };
+            (guard.current_monitor_index + count - 1) % count
+        };
+        new_index = guard.current_monitor_index;
+    })?;
 
     let monitor = monitors.get(new_index).ok_or("monitor index out of range")?;
-    let scale = monitor.scale_factor();
-    let monitor_size = monitor.size().to_logical::<f64>(scale);
-    let monitor_pos = monitor.position().to_logical::<f64>(scale);
-
-    // HUD3枚(左端のアイコンパネル・下部中央のコックピット・右下のシステムトレイ)を対象モニターへ移動する
     window::layout_hud_windows(&app, &monitors, new_index, None, None);
-
-    // ヒントバーも同じモニターの上部中央に移動する。
     if let Some(hintbar) = app.get_webview_window("hintbar") {
-        let hintbar_width = monitor_size.width * 0.55;
-        let hintbar_height = 68.0;
-        let hintbar_x = monitor_pos.x + (monitor_size.width - hintbar_width) / 2.0;
-        let hintbar_y = monitor_pos.y + 4.0;
-        let _ = hintbar.set_size(tauri::LogicalSize::new(hintbar_width, hintbar_height));
-        let _ = hintbar.set_position(tauri::LogicalPosition::new(hintbar_x, hintbar_y));
+        hintbar_placement(Some(monitor)).apply(&hintbar);
     }
-
-    // チュートリアルウィンドウもヒントバーの直下に移動する。
     if let Some(tutorial) = app.get_webview_window("tutorial") {
-        let tutorial_width = monitor_size.width * 0.55;
-        let tutorial_height = 200.0;
-        let tutorial_x = monitor_pos.x + (monitor_size.width - tutorial_width) / 2.0;
-        let tutorial_y = monitor_pos.y + 76.0;
-        let _ = tutorial.set_size(tauri::LogicalSize::new(tutorial_width, tutorial_height));
-        let _ = tutorial.set_position(tauri::LogicalPosition::new(tutorial_x, tutorial_y));
+        tutorial_placement(Some(monitor)).apply(&tutorial);
     }
-
-    // トップメニューも同じモニターの中央に移動する。
-    // ゲーム終了後にトップメニューが表示された際、HUDと同じモニターに
-    // 出現するよう、ここで位置を同期しておく。
+    // ゲーム終了後にトップメニューが表示された際、HUDと同じモニターに出現するよう、ここで位置を同期しておく。
     if let Some(topmenu) = app.get_webview_window("topmenu") {
-        let topmenu_x = monitor_pos.x + (monitor_size.width - TOPMENU_WIDTH) / 2.0;
-        let topmenu_y = monitor_pos.y + (monitor_size.height - TOPMENU_HEIGHT) / 2.0;
-        let _ = topmenu.set_position(tauri::LogicalPosition::new(topmenu_x, topmenu_y));
+        window::centered_on_monitor(Some(monitor), TOPMENU_WIDTH, TOPMENU_HEIGHT).apply(&topmenu);
     }
 
     let mut settings = settings::load_settings(&app);
@@ -250,6 +266,32 @@ fn switch_monitor(app: tauri::AppHandle, state: tauri::State<'_, SharedState>, d
     let _ = settings::save_settings(&app, &settings);
 
     Ok(serde_json::json!({ "monitorIndex": new_index }))
+}
+
+/// マルチディスプレイモード(ポップアップをHUDとは別のモニターに出す)を切り替える。
+/// ポップアップの表示先が変わったら、開いているポップアップも移す。
+#[tauri::command]
+fn set_multi_display(app: tauri::AppHandle, state: tauri::State<'_, SharedState>, enabled: bool) -> Result<(), String> {
+    window::update_display_target(&app, state.inner(), |guard| guard.multi_display = enabled)?;
+    let mut settings = settings::load_settings(&app);
+    settings.multi_display = enabled;
+    settings::save_settings(&app, &settings)
+}
+
+/// マルチディスプレイモードでのポップアップの表示先を、HUDのモニターを飛ばして次(direction>0)/前のモニターへ移す。
+#[tauri::command]
+fn switch_popup_monitor(app: tauri::AppHandle, state: tauri::State<'_, SharedState>, direction: i32) -> Result<(), String> {
+    let count = app.available_monitors().map_err(|err| err.to_string())?.len();
+    let mut new_index = 0;
+    window::update_display_target(&app, state.inner(), |guard| {
+        let hud = guard.current_monitor_index;
+        let current = window::resolve_popup_monitor(true, hud, guard.popup_monitor_index, count);
+        guard.popup_monitor_index = window::next_popup_monitor(hud, current, count, direction);
+        new_index = guard.popup_monitor_index;
+    })?;
+    let mut settings = settings::load_settings(&app);
+    settings.popup_monitor_index = new_index;
+    settings::save_settings(&app, &settings)
 }
 
 #[tauri::command]
@@ -2122,38 +2164,39 @@ pub fn run() {
             ipc::start_ipc(app.handle().clone(), setup_state.clone());
 
             let loaded_settings = settings::load_settings(app.handle());
-            {
-                let mut guard = setup_state.lock();
-                guard.current_monitor_index = loaded_settings.monitor_index;
-            }
-
             let monitors: Vec<_> = app.available_monitors()
                 .unwrap_or_default()
                 .into_iter()
                 .collect();
 
-            let monitor_index = setup_state.lock().current_monitor_index;
+            // 記録したモニターが外れていたらプライマリモニターを使う(設定ファイルの値は残すので、再接続すれば戻る)
+            let monitor_index = if loaded_settings.monitor_index < monitors.len() {
+                loaded_settings.monitor_index
+            } else {
+                let primary = app.primary_monitor().ok().flatten();
+                monitors
+                    .iter()
+                    .position(|m| primary.as_ref().is_some_and(|p| p.position() == m.position()))
+                    .unwrap_or(0)
+            };
+            {
+                let mut guard = setup_state.lock();
+                guard.current_monitor_index = monitor_index;
+                guard.multi_display = loaded_settings.multi_display;
+                guard.popup_monitor_index = loaded_settings.popup_monitor_index;
+            }
+
             let target_monitor = monitors.get(monitor_index)
                 .cloned()
                 .or_else(|| app.primary_monitor().unwrap_or_default());
-
-            let mut size = tauri::LogicalSize::new(1920.0, 1080.0);
-            let mut pos = tauri::LogicalPosition::new(0.0, 0.0);
-
-            if let Some(primary) = target_monitor {
-                let scale = primary.scale_factor();
-                size = primary.size().to_logical::<f64>(scale);
-                pos = primary.position().to_logical::<f64>(scale);
-            } else {
+            if target_monitor.is_none() {
                 log::warn!("No monitor detected. Using default 1920x1080 positioning.");
             }
+            let target_monitor = target_monitor.as_ref();
 
             // トップメニューウィンドウを target_monitor（設定ファイルの monitor_index に対応するモニター、
             // またはプライマリモニター）の中央に生成する
-            let topmenu_x = pos.x + (size.width - TOPMENU_WIDTH) / 2.0;
-            let topmenu_y = pos.y + (size.height - TOPMENU_HEIGHT) / 2.0;
-
-            let _topmenu = WebviewWindowBuilder::new(
+            let topmenu_builder = WebviewWindowBuilder::new(
                 app,
                 "topmenu",
                 WebviewUrl::App("index.html".into()),
@@ -2162,13 +2205,15 @@ pub fn run() {
             .decorations(false)
             .transparent(true)
             .always_on_top(true)
-            .resizable(false)
-            .inner_size(TOPMENU_WIDTH, TOPMENU_HEIGHT)
-            .position(topmenu_x, topmenu_y)
-            .build()
-            .expect("failed to create topmenu window");
+            .resizable(false);
+            window::build_placed(
+                topmenu_builder,
+                window::centered_on_monitor(target_monitor, TOPMENU_WIDTH, TOPMENU_HEIGHT),
+                true,
+            )
+                .expect("failed to create topmenu window");
 
-            // HUDウィンドウ3枚(左端のアイコンパネル・下部中央のコックピット・右下のシステムトレイ)を
+            // HUDウィンドウ4枚(左端のアイコンパネル・下部中央のコックピット・右下のシステムトレイ・左下の表示トレイ)を
             // target_monitor 上に生成する。初期状態では非表示で、
             // GET /api/v1/sessions の current_save_id が非nullになったポーリングで表示される。
             window::create_hud_windows(app.handle(), &monitors, monitor_index)
@@ -2176,15 +2221,7 @@ pub fn run() {
 
             // ヒントバーウィンドウを target_monitor の上部中央に生成する。
             // 初期状態では表示。セッション未ロード時に session-state イベントで非表示となる。
-            // 幅は画面の 55%(CSS 側はウィンドウ幅いっぱいに追従する)。
-            // 高さは CSS での実際の表示サイズ（padding + border + 2行テキスト）にぴったり合わせ、
-            // 透明なクリックできない余白ができないようにする。
-            let hintbar_width = size.width * 0.55;
-            let hintbar_height = 68.0;
-            let hintbar_x = pos.x + (size.width - hintbar_width) / 2.0;
-            let hintbar_y = pos.y + 4.0;
-
-            let hintbar = WebviewWindowBuilder::new(
+            let hintbar_builder = WebviewWindowBuilder::new(
                 app,
                 "hintbar",
                 WebviewUrl::App("index.html".into()),
@@ -2195,24 +2232,14 @@ pub fn run() {
             .shadow(false)
             .always_on_top(true)
             .skip_taskbar(true)
-            .resizable(false)
-            .visible(true)
-            .inner_size(hintbar_width, hintbar_height)
-            .position(hintbar_x, hintbar_y)
-            .build()
-            .expect("failed to create hintbar window");
+            .resizable(false);
+            let hintbar = window::build_placed(hintbar_builder, hintbar_placement(target_monitor), true)
+                .expect("failed to create hintbar window");
             let _ = hintbar.set_ignore_cursor_events(true);
 
-            // チュートリアルウィンドウを target_monitor の上部中央に生成する。
-            // ヒントバーの直下（4px + 68px + 4px = 76px）に配置する。
+            // チュートリアルウィンドウをヒントバーの直下に生成する。
             // 初期状態は非表示で、テンプレートから新規ゲームを開始した際に表示される。
-            // 幅は画面の 55% でヒントバーと同じ、高さは 200px とする。
-            let tutorial_width = size.width * 0.55;
-            let tutorial_height = 200.0;
-            let tutorial_x = pos.x + (size.width - tutorial_width) / 2.0;
-            let tutorial_y = pos.y + 76.0; // hintbar(68px) + gap(4px) + top(4px)
-
-            let _tutorial = WebviewWindowBuilder::new(
+            let tutorial_builder = WebviewWindowBuilder::new(
                 app,
                 "tutorial",
                 WebviewUrl::App("index.html".into()),
@@ -2223,23 +2250,14 @@ pub fn run() {
             .shadow(false)
             .always_on_top(true)
             .skip_taskbar(true)
-            .resizable(false)
-            .visible(false)
-            .inner_size(tutorial_width, tutorial_height)
-            .position(tutorial_x, tutorial_y)
-            .build()
-            .expect("failed to create tutorial window");
+            .resizable(false);
+            window::build_placed(tutorial_builder, tutorial_placement(target_monitor), false)
+                .expect("failed to create tutorial window");
 
             // 通知ポップアップウィンドウを事前に作成しておく。
             // 表示時にウィンドウを都度生成する方式だと、アニメーション開始までの遅延が大きくなるため、
             // 非表示のまま準備しておき、内容が決まってから show() する方式を採用する。
-            let notification_margin = 16.0;
-            let notification_width = 320.0;
-            let notification_max_height = 200.0;
-            let notification_x = pos.x + size.width - notification_width - notification_margin;
-            let notification_y = pos.y + size.height - window::HUD_RIGHT_BOTTOM_RESERVED - notification_max_height - notification_margin;
-
-            let _notification = WebviewWindowBuilder::new(
+            let notification_builder = WebviewWindowBuilder::new(
                 app,
                 "notification",
                 WebviewUrl::App("index.html".into()),
@@ -2249,11 +2267,12 @@ pub fn run() {
             .transparent(true)
             .always_on_top(true)
             .skip_taskbar(true)
-            .resizable(false)
-            .visible(false)
-            .inner_size(notification_width, notification_max_height)
-            .position(notification_x, notification_y)
-            .build()
+            .resizable(false);
+            window::build_placed(
+                notification_builder,
+                window::notification_placement(target_monitor, window::NOTIFICATION_MAX_HEIGHT),
+                false,
+            )
             .expect("failed to create notification window");
 
             start_session_polling(setup_state.clone(), app.handle().clone());
@@ -2350,6 +2369,8 @@ pub fn run() {
             resize_system_tray,
             get_topmenu_state,
             switch_monitor,
+            set_multi_display,
+            switch_popup_monitor,
             open_registered_window,
             close_registered_window,
             launch_graphic,

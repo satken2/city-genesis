@@ -19,7 +19,7 @@ await build({ entryPoints: ["tools/tutorial/component-tests.tsx"], outfile: comp
 } }] });
 await import(pathToFileURL(componentOutput).href + `?run=${Date.now()}`);
 const registry = JSON.parse(await readFile("src-tauri/config/window-registry.json", "utf8"));
-for (const name of ["basic", "scenario3"]) {
+for (const name of ["basic", "scenario3", "trade", "highway", "mining", "tourism"]) {
   const definition = JSON.parse(await readFile(`src/tutorial/definitions/${name}.json`, "utf8"));
   const walk = (value, visit) => { if (value && typeof value === "object") { visit(value); Object.values(value).forEach(v => walk(v, visit)); } };
   for (const lang of ["ja", "en", "es-419", "fr", "ko", "zh-Hans", "zh-Hant"]) {
@@ -30,10 +30,17 @@ for (const name of ["basic", "scenario3"]) {
     });
   }
 }
+for (const lang of ["ja", "en", "es-419", "fr", "ko", "zh-Hans", "zh-Hant"]) {
+  const text = JSON.parse(await readFile(`src/i18n/${lang}/tutorial.json`, "utf8"));
+  for (const id of ["basic", "scenario2", "scenario3", "scenario4", "trade", "highway", "mining", "tourism", "heading"]) {
+    if (!text.tutorial.intro?.[id]) throw new Error(`Missing intro ${lang}:${id}`);
+  }
+}
+if (!registry.tutorial_intro) throw new Error("Intro window is not registered");
 let steps = 0;
 for (const name of ["basic", "scenario2", "scenario3", "scenario4"]) {
   const text = await readFile(`../docs/tutorials/${name}.md`, "utf8");
   steps += [...text.matchAll(/^ID: `/gm)].length;
 }
-if (steps !== 32) throw new Error(`Expected 32 design steps, got ${steps}`);
-console.log("PASS: definitions, translations, window names and 32-step design inventory");
+if (steps !== 27) throw new Error(`Expected 27 design steps, got ${steps}`);
+console.log("PASS: definitions, translations, intro texts, window names and 27-step design inventory");

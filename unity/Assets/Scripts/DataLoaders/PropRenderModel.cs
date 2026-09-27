@@ -17,6 +17,9 @@ public sealed class PropRenderModel : IDisposable
     public readonly List<Part> close = new List<Part>();
     public readonly List<Part> far = new List<Part>();
     public readonly List<Part> distant = new List<Part>();
+    /// <summary>固定名の読み込みで `{名前}_close` / `{名前}_far` の専用モデルを読んだか。false の close は無印、far は自動集約。</summary>
+    public bool DedicatedClose { get; private set; }
+    public bool DedicatedFar { get; private set; }
     public Bounds bounds;
     public float Radius => bounds.extents.magnitude;
     public float Clearance(float scale) => Mathf.Min(8f, Mathf.Max(bounds.extents.x, bounds.extents.z) * 0.15f * scale);
@@ -56,9 +59,11 @@ public sealed class PropRenderModel : IDisposable
         CalculateBounds();
         var closePrefab = manager.GetModel($"Models/Props/{name}_close", true);
         if (closePrefab != null) Extract(closePrefab, close);
+        DedicatedClose = close.Count > 0;
         if (close.Count == 0) close.AddRange(normal);
         var farPrefab = manager.GetModel($"Models/Props/{name}_far", true);
         if (farPrefab != null) Extract(farPrefab, far);
+        DedicatedFar = far.Count > 0;
         if (far.Count == 0)
         {
             // 既に軽いモデルはその形を維持する。複雑なモデルだけ頂点を空間集約し、

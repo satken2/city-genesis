@@ -12,7 +12,6 @@ public partial class CameraController : MonoBehaviour
     public float baseMoveSpeed = 150.0f;    // カメラの移動速度（バックエンド基準）
     public float rotationSpeed = 50f; // 回転速度（スケール無関係）
     public float baseHeightSpeed = 2000f;   // 上下移動速度（バックエンド基準）
-    public float focusDuration = 0.2f;    // フォーカス移動にかける時間（秒）
     public float baseFocusHeight = 100f;  // フォーカス時のカメラ高度（バックエンド基準）
     
     [Header("高度による速度調整設定（バックエンド基準）")]
@@ -62,8 +61,12 @@ public partial class CameraController : MonoBehaviour
 
     private float currentHeight; // 高さを記録
     private bool isFocusing = false; // フォーカス中フラグ
+    private Vector3 focusStartPosition;
+    private Quaternion focusStartRotation;
     private Vector3 focusTargetPosition; // フォーカス対象位置
+    private Quaternion focusTargetRotation;
     private float focusStartTime; // フォーカス開始時間
+    private float focusActiveDuration; // 実行中のフォーカス移動にかける時間（秒）
 
     // シングルトンインスタンス
     public static CameraController Instance { get; private set; }
@@ -1063,18 +1066,49 @@ public partial class CameraController : MonoBehaviour
         return adjustedSpeed;
     }
 
+    /// <summary>
+    /// 注視点を指定した距離・方位・俯角から見る視点へ、滑らかに移動する。
+    /// 方位は北(+Z)を0とする時計回り、俯角は水平からの見下ろし角(度)で、保存視点(camera:state)と同じ定義。
+    /// 移動中にキー・クリック・ホイールの入力があれば、その場で中断してプレイヤーの操作を優先する。
+    /// フライモードと撮影モードは視点を独自に動かすため解除する。真上モードでは向きを真下に保ち、
+    /// 注視点の真上へ同じ高さで移動する。
+    /// </summary>
+    public void FocusOn(Vector3 pivot, float distance, float yawDegrees, float pitchDegrees, float duration)
+    {
+        StopCinematicMode();
+        if (isFlyMode) SetFlyMode(false);
+        if (cam == null) cam = GetComponent<Camera>();
+        CancelCameraGestures();
+
+        Quaternion rotation = Quaternion.Euler(pitchDegrees, yawDegrees, 0f);
+        Vector3 position = pivot - rotation * Vector3.forward * distance;
+        if (isTopDownMode)
+        {
+            rotation = Quaternion.Euler(90f, yawDegrees, 0f);
+            position = new Vector3(pivot.x, pivot.y + distance * Mathf.Sin(pitchDegrees * Mathf.Deg2Rad), pivot.z);
+        }
+        position.y = Mathf.Max(position.y, Utils.GetGroundHeight(position) + 1f);
+
+        focusStartPosition = transform.position;
+        focusStartRotation = transform.rotation;
+        focusTargetPosition = position;
+        focusTargetRotation = rotation;
+        focusActiveDuration = Mathf.Max(duration, 0.01f);
+        focusStartTime = Time.time;
+        isFocusing = true;
+    }
+
     private void UpdateFocusMovement()
     {
-        // 経過時間を計算
-        float elapsedTime = Time.time - focusStartTime;
-        float t = Mathf.Clamp01(elapsedTime / focusDuration);
-
-        Vector3 currentPosition = transform.position;
-        Vector3 newPosition = Vector3.Lerp(currentPosition, focusTargetPosition, t);
-        transform.position = newPosition;
-        
-        // 目標位置に到達したかチェック（誤差0.1以内）
-        if (Vector3.Distance(newPosition, focusTargetPosition) < 0.1f)    
+        float t = Mathf.Clamp01((Time.time - focusStartTime) / focusActiveDuration);
+        float eased = t * t * (3f - 2f * t);
+        transform.position = Vector3.Lerp(focusStartPosition, focusTargetPosition, eased);
+        transform.rotation = Quaternion.Slerp(focusStartRotation, focusTargetRotation, eased);
+        if (isTopDownMode && cam != null)
+        {
+            cam.orthographicSize = transform.position.y;
+        }
+        if (t >= 1f)
         {
             StopFocus();
         }

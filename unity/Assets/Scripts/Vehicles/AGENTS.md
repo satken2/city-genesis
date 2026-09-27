@@ -23,7 +23,8 @@
 | `VehicleModelConfig.cs` / `VehicleModelResolver.cs` | `vehicle_model_config.yaml` の解析と、モデル解決・接地原点/前方軸の正規化・LODGroup 構成 |
 | `DriveMode.cs` | ドライブモードの選択UI・開始位置・走行HUD |
 | `RopewayNetworkStore.cs` / `RopewayNetwork.cs` / `RopewayGeometry.cs` / `RopewayCabinManager.cs` | 索道(PATH_CONVEYOR)の駅間抽出・ケーブル形状・搬器の循環描画 |
-| `AmbientVehicleManager.cs` / `AmbientTrail.cs` | 空と海の環境演出(航空機3種・船舶4種)と飛行機雲・航跡 |
+| `AmbientVehicleManager.cs` / `AmbientTrail.cs` | 空と海の環境演出(航空機3種・船舶5種)と飛行機雲・航跡 |
+| `AmbientVehicleManager.PortCalls.cs` / `SeaRoute.cs` | 稼働中の港へ向かう入港船(抽選・接岸位置・入港の減速と横寄せ) / その航路(海岸線までの距離の格子上の最短経路。バックグラウンドスレッドで動く純データ) |
 
 ## 知らないと事故る不変条件
 
@@ -48,6 +49,8 @@
 - 歩行者の `side` / `lateral` はパス幾何(始点→終点)に対する左右で、反転しても符号を変えない。`PedestrianManager.ResolveBand` は `Tests/Vehicles/VehicleQA.cs` がリフレクションで同じ引数列を呼ぶので、シグネチャを変えたら QA も直す。
 - 索道の body Renderer の抑制・復元は `PathPresentation.SetRendererForceOff` を介し、生成待ちの抑制を解除しない。搬器モデルは吊り点原点なので `VehicleModelResolver` で接地補正しない。
 - 走行音は `Weather/VehicleAmbience.Report` へ通知するだけ(車両側に AudioSource を持たない)。都市切替は `TransitDataStore.Session` でクリアする。
+- 入港船はエポックが進んだときだけ入れ替える。海岸線の世代(`CoastlineStore.Version`)の変化で消すのは沖合の船と航空機だけで、入港船まで消すと建物の編集のたびに船が入れ替わる。港は `TerrainManager.ShoreDataVersion`(埋立地まで取り終えた版)で読み直す。水際は `PortBuildingMeshBuilder.ResolveWorldWaterlines` を使い、別の規則で求め直さない。
+- `SeaRoute` は Unity の Random・地形の高さ・GameObject を使わない(バックグラウンドスレッドで動く)。乱数は要求の `seed` から作る。
 
 ## 参照
 

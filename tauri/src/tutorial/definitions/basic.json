@@ -1,10 +1,11 @@
 {
   "version": 1,
   "id": "basic",
+  "terrainMap": "flat",
   "steps": [
     {
       "id": "basic.road",
-      "legacyStep": 2,
+      "legacyStep": 1,
       "phases": [
         {
           "id": "open",
@@ -50,6 +51,16 @@
                 "$constant": "TUTORIAL_STREET"
               },
               "bind": "basic.road"
+            },
+            "camera": {
+              "target": [
+                0,
+                0,
+                0
+              ],
+              "distance": 320,
+              "yaw": 0,
+              "pitch": 50
             }
           },
           "until": {
@@ -104,6 +115,16 @@
                 "$constant": "TUTORIAL_STREET"
               },
               "bind": "basic.road"
+            },
+            "camera": {
+              "target": [
+                0,
+                0,
+                0
+              ],
+              "distance": 320,
+              "yaw": 0,
+              "pitch": 50
             }
           },
           "until": {
@@ -156,6 +177,16 @@
                 "$constant": "TUTORIAL_STREET"
               },
               "bind": "basic.road"
+            },
+            "camera": {
+              "target": [
+                0,
+                0,
+                0
+              ],
+              "distance": 320,
+              "yaw": 0,
+              "pitch": 50
             }
           },
           "until": {
@@ -206,6 +237,16 @@
                 "$constant": "TUTORIAL_STREET"
               },
               "bind": "basic.road"
+            },
+            "camera": {
+              "target": [
+                0,
+                0,
+                0
+              ],
+              "distance": 320,
+              "yaw": 0,
+              "pitch": 50
             }
           },
           "until": {
@@ -256,6 +297,16 @@
                 "$constant": "TUTORIAL_STREET"
               },
               "bind": "basic.road"
+            },
+            "camera": {
+              "target": [
+                0,
+                0,
+                0
+              ],
+              "distance": 320,
+              "yaw": 0,
+              "pitch": 50
             }
           },
           "until": {
@@ -310,6 +361,16 @@
                 "$constant": "TUTORIAL_STREET"
               },
               "bind": "basic.road"
+            },
+            "camera": {
+              "target": [
+                0,
+                0,
+                0
+              ],
+              "distance": 320,
+              "yaw": 0,
+              "pitch": 50
             }
           },
           "until": {

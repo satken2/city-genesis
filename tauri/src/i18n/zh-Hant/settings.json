@@ -21,6 +21,18 @@
       "prev": "上一個顯示器",
       "next": "下一個顯示器"
     },
+    "graphicMonitor": {
+      "label": "3D畫面所在顯示器"
+    },
+    "multiDisplay": {
+      "label": "多顯示器模式",
+      "description": "在遊戲畫面以外的顯示器上顯示各類視窗",
+      "on": "開啟",
+      "off": "關閉"
+    },
+    "popupMonitor": {
+      "label": "視窗所在顯示器"
+    },
     "hintbar": {
       "label": "提示列",
       "show": "顯示",

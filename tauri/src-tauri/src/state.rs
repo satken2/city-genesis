@@ -6,13 +6,14 @@ use std::process::Child;
 use std::sync::atomic::AtomicBool;
 use std::sync::{Arc, Mutex};
 
-/// ウィンドウの位置とサイズ（論理ピクセル）。
+/// ウィンドウの位置とサイズ。サイズは論理ピクセル、位置は物理ピクセル(仮想スクリーン座標)。
+/// 位置を物理で持つのは、倍率の違うモニターが混在すると論理座標がモニター間で一意に定まらないため。
 /// プロセス起動中のみ記憶され、永続化されない。
 /// ドック配置ウィンドウでは位置（x, y）は無視され、サイズのみ使用される。
 #[derive(Debug, Clone, Copy, Default)]
 pub struct WindowGeometry {
-    pub x: f64,
-    pub y: f64,
+    pub x: i32,
+    pub y: i32,
     pub width: f64,
     pub height: f64,
 }
@@ -37,8 +38,13 @@ pub struct AppState {
     /// UI→Graphic方向のMMFライター。
     pub writer_channel: Option<MmfChannel>,
     pub api_base_url: String,
-    /// タスクバーが現在表示されているモニターのインデックス
+    /// HUD(とヒントバー・チュートリアル・トップメニュー等)を表示しているモニターのインデックス
     pub current_monitor_index: usize,
+    /// マルチディスプレイモード。ポップアップをHUDとは別のモニターに表示する
+    pub multi_display: bool,
+    /// マルチディスプレイモードでポップアップを表示するモニターのインデックス。
+    /// 実際の表示先は `window::resolve_popup_monitor` が決める(HUDと同じ・未接続なら読み替える)
+    pub popup_monitor_index: usize,
     /// 親プロセスから通知されたゲーム内時間情報
     pub game_time: Option<Value>,
     /// Graphic(Unity) プロセスの起動コマンド
@@ -134,6 +140,8 @@ impl SharedState {
             writer_channel: None,
             api_base_url,
             current_monitor_index: 0,
+            multi_display: false,
+            popup_monitor_index: 0,
             game_time: None,
             graphic_launch_command,
             shutdown: Arc::new(AtomicBool::new(false)),

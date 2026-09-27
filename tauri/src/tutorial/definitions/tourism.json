@@ -1,6 +1,7 @@
 {
   "version": 1,
   "id": "tourism",
+  "terrainMap": "yoron",
   "setup": [
     {
       "type": "scenarioAction",
@@ -27,11 +28,21 @@
             "mode": "observe",
             "markers": [
               [
-                225,
+                -1140,
                 0,
-                85
+                356.5
               ]
-            ]
+            ],
+            "camera": {
+              "target": [
+                -1180,
+                0,
+                360
+              ],
+              "distance": 420,
+              "yaw": 0,
+              "pitch": 50
+            }
           },
           "until": {
             "type": "ack"
@@ -77,11 +88,21 @@
             "mode": "observe",
             "markers": [
               [
-                -247,
+                -1783.5,
                 0,
-                90
+                440
               ]
-            ]
+            ],
+            "camera": {
+              "target": [
+                -1783,
+                0,
+                400
+              ],
+              "distance": 420,
+              "yaw": 0,
+              "pitch": 50
+            }
           },
           "until": {
             "type": "ack"
@@ -129,7 +150,17 @@
             ]
           },
           "world": {
-            "mode": "observe"
+            "mode": "observe",
+            "camera": {
+              "target": [
+                -1500,
+                0,
+                330
+              ],
+              "distance": 1000,
+              "yaw": 0,
+              "pitch": 50
+            }
           },
           "until": {
             "type": "ack"
@@ -162,7 +193,24 @@
             ]
           },
           "world": {
-            "mode": "observe"
+            "mode": "observe",
+            "markers": [
+              [
+                -1267.5,
+                0,
+                310.5
+              ]
+            ],
+            "camera": {
+              "target": [
+                -1267,
+                0,
+                330
+              ],
+              "distance": 450,
+              "yaw": 0,
+              "pitch": 50
+            }
           },
           "until": {
             "type": "ack"

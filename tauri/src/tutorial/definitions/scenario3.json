@@ -1,129 +1,15 @@
 {
   "version": 1,
   "id": "scenario3",
-  "setup": [
-    {
-      "type": "create",
-      "resource": "paths",
-      "bind": "infra.road",
-      "body": {
-        "paths": [
-          {
-            "path_temp_id": "tutorial_infra_main",
-            "path_type": {
-              "$constant": "PATH_STREET"
-            },
-            "path_variant": {
-              "$constant": "TUTORIAL_STREET"
-            },
-            "start_point": [
-              -200,
-              0,
-              0
-            ],
-            "end_point": [
-              200,
-              0,
-              0
-            ],
-            "curved": false
-          }
-        ]
-      }
-    },
-    {
-      "type": "completeConstruction",
-      "target": "infra.road"
-    },
-    {
-      "type": "create",
-      "resource": "zones",
-      "bind": "infra.zone",
-      "body": {
-        "path_ids": [
-          {
-            "$ref": "infra.road"
-          }
-        ]
-      }
-    },
-    {
-      "type": "create",
-      "resource": "parcels",
-      "bind": "solar_site",
-      "body": {
-        "mode": "empty_area",
-        "picked_position": [
-          -178.0,
-          0,
-          26.0
-        ],
-        "width": 24,
-        "height": 32,
-        "angle": 0
-      }
-    },
-    {
-      "type": "create",
-      "resource": "parcels",
-      "bind": "house_site",
-      "body": {
-        "mode": "empty_area",
-        "picked_position": [
-          117.0,
-          0,
-          17.0
-        ],
-        "width": 14,
-        "height": 14,
-        "angle": 0
-      }
-    },
-    {
-      "type": "create",
-      "resource": "parcels",
-      "bind": "substation_site",
-      "body": {
-        "mode": "empty_area",
-        "picked_position": [
-          135.0,
-          0,
-          17.0
-        ],
-        "width": 14,
-        "height": 14,
-        "angle": 0
-      }
-    },
-    {
-      "type": "create",
-      "resource": "buildings",
-      "bind": "house",
-      "body": {
-        "parcel_id": {
-          "$ref": "house_site"
-        },
-        "variant": {
-          "$constant": "VARIANT_APARTMENT"
-        }
-      }
-    },
-    {
-      "type": "completeConstruction",
-      "target": "house"
-    },
-    {
-      "type": "reload"
-    }
-  ],
+  "terrainMap": "yoron",
   "steps": [
     {
-      "id": "scenario3.house",
-      "legacyStep": 2,
+      "id": "scenario3.1",
+      "legacyStep": 1,
       "phases": [
         {
-          "id": "open",
-          "textKey": "tutorial.scenario3.step2.description",
+          "id": "perform",
+          "textKey": "tutorial.scenario3.step1.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -133,26 +19,96 @@
             "mode": "observe",
             "markers": [
               [
-                117,
+                -1331.5,
                 0,
-                17
+                80.5
               ]
-            ]
+            ],
+            "camera": {
+              "target": [
+                -1331,
+                0,
+                60
+              ],
+              "distance": 300,
+              "yaw": 0,
+              "pitch": 50
+            }
           },
           "until": {
             "type": "window",
             "window": "agent_detail",
-            "target": "house"
+            "target": "support.housing.building"
           }
         }
       ]
     },
     {
-      "id": "scenario3.solar",
+      "id": "scenario3.2",
+      "legacyStep": 2,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.scenario3.step2.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -2255,
+                0,
+                48.5
+              ]
+            ],
+            "camera": {
+              "target": [
+                -2255,
+                0,
+                60
+              ],
+              "distance": 420,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.solar",
+            "equals": true
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "scenario3",
+          "action": "commission_solar"
+        },
+        {
+          "type": "reload"
+        }
+      ]
+    },
+    {
+      "id": "scenario3.3",
       "legacyStep": 3,
       "phases": [
         {
-          "id": "place",
+          "id": "perform",
           "textKey": "tutorial.scenario3.step3.description",
           "ui": {
             "policy": "highlight",
@@ -165,11 +121,21 @@
             "mode": "observe",
             "markers": [
               [
-                -178,
+                -1368.75,
                 0,
-                26
+                81
               ]
-            ]
+            ],
+            "camera": {
+              "target": [
+                -1350,
+                0,
+                70
+              ],
+              "distance": 300,
+              "yaw": 0,
+              "pitch": 50
+            }
           },
           "until": {
             "type": "ack"
@@ -178,70 +144,175 @@
       ],
       "complete": {
         "type": "entity",
-        "resource": "buildings",
+        "resource": "tutorial",
         "where": [
           {
-            "field": "variant",
-            "equals": {
-              "$constant": "VARIANT_SOLAR_PLANT"
-            }
-          },
-          {
-            "field": "parcel_id",
-            "equals": {
-              "$ref": "solar_site"
-            }
-          }
-        ],
-        "bind": "solar_plant"
-      }
-    },
-    {
-      "id": "scenario3.skip_solar",
-      "legacyStep": 4,
-      "phases": [
-        {
-          "id": "confirm",
-          "textKey": "tutorial.scenario3.step4.description",
-          "ui": {
-            "policy": "strict",
-            "allow": [],
-            "highlight": []
-          },
-          "world": {
-            "mode": "blocked"
-          },
-          "until": {
-            "type": "ack"
-          }
-        }
-      ],
-      "complete": {
-        "type": "entity",
-        "resource": "buildings",
-        "target": "solar_plant",
-        "where": [
-          {
-            "field": "variant",
-            "equals": {
-              "$constant": "VARIANT_SOLAR_PLANT"
-            }
-          },
-          {
-            "field": "parcel_id",
-            "equals": {
-              "$ref": "solar_site"
-            }
+            "field": "checks.substation",
+            "equals": true
           }
         ]
       },
       "afterCheck": [
         {
-          "type": "completeConstruction",
-          "target": "solar_plant"
+          "type": "scenarioAction",
+          "scenario": "scenario3",
+          "action": "commission_substation"
         },
         {
           "type": "reload"
+        }
+      ]
+    },
+    {
+      "id": "scenario3.4",
+      "legacyStep": 4,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.scenario3.step4.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.infra"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -2255,
+                0,
+                3.5
+              ],
+              [
+                -1381,
+                0,
+                81
+              ]
+            ],
+            "camera": {
+              "target": [
+                -1818,
+                0,
+                40
+              ],
+              "distance": 1300,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "beforeCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "scenario3",
+          "action": "commission_grid"
+        },
+        {
+          "type": "reload"
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.grid",
+            "equals": true
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "scenario3",
+          "action": "operations"
+        }
+      ]
+    },
+    {
+      "id": "scenario3.5",
+      "legacyStep": 5,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.scenario3.step5.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.execute"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -1368.75,
+                0,
+                81
+              ]
+            ],
+            "camera": {
+              "target": [
+                -1368,
+                0,
+                70
+              ],
+              "distance": 400,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.received",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "scenario3.6",
+      "legacyStep": 6,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.scenario3.step6.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": []
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                -1800,
+                0,
+                60
+              ],
+              "distance": 1400,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
         }
       ]
     }

@@ -32,6 +32,16 @@ public static class TutorialQA
             }
         });
     }
+    private static void ApplyCamera(string run, int revision, float pitch)
+    {
+        Static("ApplyFromIpc", new Dictionary<string, object> {
+            ["active"] = true, ["runId"] = run, ["revision"] = revision,
+            ["world"] = new Dictionary<string, object> {
+                ["mode"] = "blocked",
+                ["camera"] = new Dictionary<string, object> { ["target"] = new[] { 0f, 0f, 0f }, ["distance"] = 300f, ["yaw"] = 0f, ["pitch"] = pitch }
+            }
+        });
+    }
     static TutorialQA() { if (SessionState.GetBool("TutorialQA.Pending", false)) EditorApplication.delayCall += Run; }
     public static void Run()
     {
@@ -98,6 +108,8 @@ public static class TutorialQA
             Static("Clear"); Check(!Property("PathRestricted"), "session cleanup releases gate");
             Apply("two", 2); Check(!Property("PathRestricted"), "retired run cannot reactivate");
             Apply("three", 1); Apply("three", 2, false); Check(!Property("PathRestricted"), "explicit exit releases gate");
+            ApplyCamera("camera", 1, 45f); Check(Property("BlocksWorldInput"), "camera guidance accepted with the directive");
+            ApplyCamera("camera", 2, 0f); Check(!Property("BlocksWorldInput"), "invalid camera pitch rejects the directive");
             Apply("visual", 1);
             var camera = new GameObject("Camera").AddComponent<Camera>(); camera.tag = "MainCamera";
             camera.transform.position = new Vector3(0, 220, -170); camera.transform.LookAt(Vector3.zero);

@@ -33,7 +33,7 @@ check(await findPhase(basic, env), 2, "cancel rewinds placement");
 env.bindings["basic.road"] = { kind: "paths", id: 9 };
 env.read = async () => [{ path_id: 9, path_variant: 221, start_point: [-100, 0, 0], end_point: [100, 0, 0], curved: false, status: 1 }];
 check(await findPhase(basic, env), 5, "saved road survives closed panel");
-env.bindings.house = { kind: "buildings", id: 30 };
+env.bindings["support.housing.building"] = { kind: "agents", id: 30 };
 env.facts.windows.detail = { visible: true, window: "agent_detail", entity: 31 };
 const house = DEFINITIONS.scenario3.steps[0].phases[0].until;
 check(await evaluate(house, env), false, "wrong house cannot pass");
@@ -82,7 +82,12 @@ for (const mutate of [
   (d: any) => d.steps[0].phases[0].world.path.points[0][1] = 10,
   (d: any) => d.steps[0].phases[0].ui.allow.push("window.path_build"),
   (d: any) => d.steps.push(d.steps[0]),
+  (d: any) => d.steps[0].phases[0].world.camera = { target: [0, 0, 0], distance: 300, yaw: 0, pitch: 0 },
+  (d: any) => d.steps[0].phases[0].world.camera = { target: [0, 0], distance: 300, yaw: 0, pitch: 45 },
+  (d: any) => delete d.terrainMap,
 ]) { const d = structuredClone(DEFINITIONS.basic); mutate(d); throws(() => validateDefinition(d), "invalid definition rejected"); }
+{ const d = structuredClone(DEFINITIONS.scenario3); d.steps[0].phases[0].until = { type: "window", window: "agent_detail", target: "lesson.house" }; validateDefinition(d); checks++; }
+{ const d = structuredClone(DEFINITIONS.scenario3); d.steps[0].phases[0].until = { type: "window", window: "agent_detail", target: "house" }; throws(() => validateDefinition(d), "only core targets may be referenced without a local binding"); }
 const browser = new Window();
 for (const key of ["document", "Element", "HTMLElement", "KeyboardEvent", "MutationObserver"]) Object.assign(globalThis, { [key]: (browser as any)[key] });
 document.body.innerHTML = '<div class="titlebar"><button id="close">×</button></div><button id="road">Road</button><button id="other">Other</button><button id="existing" inert>Inert</button><button data-guide="path.confirm"><span>Confirm</span></button>';
@@ -140,16 +145,7 @@ if (process.env.TUTORIAL_API_TEST_URL) {
   const master = { paths: (await (await fetch(`${base}/api/v1/master/paths`)).json()).paths, agents: (await (await fetch(`${base}/api/v1/master/agents`)).json()).agents } as MasterData;
   const live = await createEnvironment(base, "tutorial-qa-isolated", {}, {}, { windows: {} }, master, () => {}, () => {});
   live.reload = async () => {};
-  await execute(DEFINITIONS.scenario3.setup!, live);
-  const before = await live.read("buildings");
-  check(before.length, 1, "HTTP setup creates one house");
-  check((await live.read("buildings", live.bindings.house.id))[0].status, live.constants.STATUS_ACTIVE, "HTTP house active");
-  await execute(DEFINITIONS.scenario3.setup!, live);
-  check((await live.read("buildings")).length, 1, "HTTP setup rerun has no duplicates");
-  await live.create("buildings", { parcel_id: live.bindings.solar_site.id, variant: live.constants.VARIANT_SOLAR_PLANT });
-  check(await evaluate(DEFINITIONS.scenario3.steps[1].complete!, live), true, "HTTP exact solar site binds");
-  await execute(DEFINITIONS.scenario3.steps[2].afterCheck!, live);
-  check((await live.read("buildings", live.bindings.solar_plant.id))[0].status, live.constants.STATUS_ACTIVE, "HTTP skip completes exact plant");
+  check(typeof live.bindings["support.housing.building"]?.id, "number", "HTTP environment binds core-built targets");
   const wrongSession = await createEnvironment(base, "another-city", {}, {}, { windows: {} }, master, () => {}, () => {});
   await rejects(() => wrongSession.create("buildings", {}), "HTTP writes rejected for another save");
 }

@@ -7,12 +7,17 @@ using UnityEngine;
 public sealed class TutorialRuntime : MonoBehaviour
 {
     [Serializable] public sealed class PathRule { public float[][] points; public float radius; public int variant; public string bind; }
-    [Serializable] public sealed class WorldRule { public string mode; public float[][] markers; public PathRule path; }
+    [Serializable] public sealed class CameraRule { public float[] target; public float distance; public float yaw; public float pitch; }
+    [Serializable] public sealed class WorldRule { public string mode; public float[][] markers; public PathRule path; public CameraRule camera; }
     [Serializable] public sealed class Directive { public bool active; public string runId; public int revision; public WorldRule world; }
     public static TutorialRuntime Instance { get; private set; }
     private Directive current;
     private readonly HashSet<string> retiredRuns = new HashSet<string>();
     private OverlayMeshRenderer overlay;
+    // 同じ案内先への再送(段階の切替・再接続)ではカメラを動かさず、プレイヤーが動かした視点を尊重する。
+    private string lastCameraKey;
+    private CameraRule pendingCamera;
+    private const float CameraMoveSeconds = 1.5f;
     public static bool BlocksWorldInput => Instance != null && Instance.current?.active == true && Instance.current.world.mode == "blocked";
     public static bool PathRestricted => Instance != null && Instance.current?.active == true && Instance.current.world.path != null;
     public static PathRule CurrentPath => PathRestricted ? Instance.current.world.path : null;
@@ -41,13 +46,17 @@ public sealed class TutorialRuntime : MonoBehaviour
         current = directive;
         if (!directive.active) { retiredRuns.Add(directive.runId); HideOverlay(); return; }
         if (PathRestricted) FindAnyObjectByType<RoadPlanManager>()?.ApplyTutorialPathSettings();
+        RequestCamera(directive.world.camera);
         IpcClient.Instance?.EmitTutorialApplied(directive.runId, directive.revision);
     }
     private static bool ValidPoint(float[] p) => p != null && p.Length == 3 && Array.TrueForAll(p, n => !float.IsNaN(n) && !float.IsInfinity(n));
+    private static bool Finite(float n) => !float.IsNaN(n) && !float.IsInfinity(n);
     public static bool Valid(WorldRule rule)
     {
         if (rule == null || (rule.mode != "observe" && rule.mode != "blocked" && rule.mode != "path")) return false;
         if (rule.markers != null && !Array.TrueForAll(rule.markers, ValidPoint)) return false;
+        if (rule.camera != null && !(ValidPoint(rule.camera.target) && Finite(rule.camera.distance) && rule.camera.distance > 0
+            && Finite(rule.camera.yaw) && rule.camera.pitch >= 5 && rule.camera.pitch <= 89)) return false;
         if (rule.mode == "path" && rule.path == null) return false;
         return rule.path == null || (rule.path.points?.Length == 2 && Array.TrueForAll(rule.path.points, ValidPoint)
             && rule.path.radius > 0 && !float.IsInfinity(rule.path.radius) && rule.path.variant > 0
@@ -81,8 +90,27 @@ public sealed class TutorialRuntime : MonoBehaviour
             if (Vector3.Distance(points[i].position, GroundPoint(CurrentPath.points[i])) > .05f || Mathf.Abs(points[i].embankmentHeight) > .001f) return false;
         return true;
     }
+    /// <summary>段階の案内先が前回と違うときだけ、カメラをその場所へ向ける。</summary>
+    private void RequestCamera(CameraRule rule)
+    {
+        if (rule == null) return;
+        string key = string.Join(",", rule.target) + $"|{rule.distance}|{rule.yaw}|{rule.pitch}";
+        if (key == lastCameraKey) return;
+        lastCameraKey = key;
+        pendingCamera = rule;
+    }
+    /// <summary>ロード直後の保存視点の適用より後に動かすため、カメラの準備ができてから移動を始める。</summary>
+    private void ApplyPendingCamera()
+    {
+        var controller = CameraController.Instance;
+        if (pendingCamera == null || controller == null || !controller.IsSessionCameraReady) return;
+        if (GameStateManager.Instance != null && !GameStateManager.Instance.IsGameStarted()) return;
+        controller.FocusOn(GroundPoint(pendingCamera.target), pendingCamera.distance, pendingCamera.yaw, pendingCamera.pitch, CameraMoveSeconds);
+        pendingCamera = null;
+    }
     private void LateUpdate()
     {
+        if (current?.active == true) ApplyPendingCamera();
         if (current?.active != true || Camera.main == null) { HideOverlay(); return; }
         if (overlay == null) overlay = OverlayMeshRenderer.Create("TutorialMarkers", true, transform);
         overlay.gameObject.SetActive(true);
@@ -112,6 +140,8 @@ public sealed class TutorialRuntime : MonoBehaviour
         if (Instance == null) return;
         if (Instance.current != null) Instance.retiredRuns.Add(Instance.current.runId);
         Instance.current = null;
+        Instance.pendingCamera = null;
+        Instance.lastCameraKey = null;
         Instance.HideOverlay();
     }
     private void OnDisable() { Clear(); }

@@ -16,7 +16,7 @@ const settle = async (fn: () => void | Promise<void>) => {
   await act(async () => { await new Promise(r => setTimeout(r, 10)); });
 };
 const observation = async (data: object) => { const current = snapshot()!; await settle(() => emit(GUIDE_OBSERVE, { runId: current.runId, revision: current.revision, ...data })); };
-await settle(() => root.render(<Harness scenario="basic" step={2} />));
+await settle(() => root.render(<Harness scenario="basic" step={1} />));
 assert.equal(guide!.ready, true, JSON.stringify({ guide, snapshot: snapshot() })); assert.equal(snapshot()?.phaseId, "open");
 await observation({ label: "road", window: "path_build", visible: true, pathVariant: 201 });
 assert.equal(snapshot()?.phaseId, "variant");
@@ -34,17 +34,18 @@ await observation({ pathShape: { selected_points: [], phase: "placing" } });
 assert.equal(snapshot()?.phaseId, "confirm");
 await settle(async () => { assert.equal(await guide!.check(), true); });
 const former = snapshot()!;
-await settle(() => root.render(<Harness scenario="basic" step={2} save="B" />));
+await settle(() => root.render(<Harness scenario="basic" step={1} save="B" />));
 assert.equal(snapshot()?.phaseId, "open");
 await settle(() => emit(GUIDE_OBSERVE, { runId: former.runId, revision: former.revision, savedPaths: [999] }));
 assert.equal(JSON.parse(localStorage.getItem("tutorial_runtime_v1:basic:B")!).bindings["basic.road"], undefined);
-fixture.creates = 0; fixture.failComplete = true;
+fixture.actions = 0; fixture.failAction = true;
 // 失敗時のログをこのケースだけ抑え、例外を成功と取り違えないよう状態を確認する。
 const log = console.error; console.error = () => {};
-try { await settle(() => root.render(<Harness scenario="scenario3" step={1} save="C" />)); } finally { console.error = log; }
-assert.equal(guide!.failed, true); assert.equal(guide!.ready, false); assert.equal(fixture.creates, 1);
+try { await settle(() => root.render(<Harness scenario="tourism" step={1} save="C" />)); } finally { console.error = log; }
+assert.equal(guide!.failed, true); assert.equal(guide!.ready, false); assert.equal(fixture.actions, 1);
 await settle(() => guide!.retry());
-assert.equal(guide!.failed, false); assert.equal(guide!.ready, true); assert.equal(fixture.creates, 6);
+assert.equal(guide!.failed, false); assert.equal(guide!.ready, true); assert.equal(fixture.actions, 2);
+assert.deepEqual(snapshot()?.world.camera, { target: [-1180, 0, 360], distance: 420, yaw: 0, pitch: 50 }, "phase camera reaches the snapshot");
 await settle(() => root.unmount());
 assert.equal(snapshot()?.active, false);
 await browser.happyDOM.close();

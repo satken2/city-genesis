@@ -54,6 +54,18 @@
       "dakar": {
         "name": "Sea Breeze Cape",
         "description": "A peninsula projecting into the ocean from a continent's western tip. Rocky shores and sandy beaches fringe low plateaus and volcanic hills. A long dry season gives way to brief summer rains, while sea breezes sweep across the sunlit land."
+      },
+      "chongqing": {
+        "name": "Misty Confluence",
+        "description": "The rim of an inland basin. Folded strata raise long, parallel ridges, and between them two great rivers meander through deep valleys before meeting at the tip of a narrow upland. Summers are hot and humid; winters are overcast, and thick fog often fills the valleys."
+      },
+      "xiamen": {
+        "name": "Channel-Ringed Isle",
+        "description": "A rounded island in a deep bay on a continent's edge. Narrow channels part it from hilly shores across the water, and granite hills rise across its south. Winters stay mild and snowless, while summer monsoons and typhoons bring the rain."
+      },
+      "dalian": {
+        "name": "Rocky Hill Peninsula",
+        "description": "Near the southern end of a long peninsula reaching out from a continent. Rocky hills press down to the shore, with a deep bay cutting in to the north and open sea to the south. Dry, cold winds and light snow mark the winter; summers are mild and humid, with fog drifting in from the sea."
       }
     }
   }

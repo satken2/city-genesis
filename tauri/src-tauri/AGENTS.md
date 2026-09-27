@@ -10,7 +10,7 @@ Tauri(Rust)側。ウィンドウ管理(HUD・ポップアップ・Tips)、Unity�
 | --- | --- |
 | `src/main.rs` | エントリ。`lib.rs`の`run()`を呼ぶだけ |
 | `src/lib.rs` | Tauriコマンドの集約と`setup`。ゲーム開始/ロード(`begin_initial_loading`)、地形エディタのコマンド群(`copy_terrain_for_editor`・`export_terrain_as_npy`等) |
-| `src/window.rs` | ウィンドウ管理の本体。HUD4枚の生成・配置(`create_hud_windows`/`layout_hud_windows`/`set_hud_visible`)、`open_window`(レジストリ駆動のポップアップ生成と再利用)、`close_window_by_label`(閉じたときの後始末)、`reassert_topmost`、通知キュー、`launch_graphic` |
+| `src/window.rs` | ウィンドウ管理の本体。モニター上への配置(`Placement`・`build_placed`)、HUD4枚の生成・配置(`create_hud_windows`/`layout_hud_windows`/`set_hud_visible`)、ポップアップの表示先(`resolve_popup_monitor`・`update_display_target`)、`open_window`(レジストリ駆動のポップアップ生成と再利用)、`close_window_by_label`(閉じたときの後始末)、`reassert_topmost`、通知キュー、`launch_graphic` |
 | `src/ipc.rs` | MMF IPC。リーダースレッド、`send_to_parent`(Unity宛て送信)、Unity→UIイベントをWebViewへ中継するmatch。`CAPACITY`=1MiB |
 | `src/messages.rs` | `Envelope`・`WindowContextDto`等の型 |
 | `src/state.rs` | プロセス全体の共有状態`AppState`(開いているウィンドウ、非表示LRU、ジオメトリ記憶、接続フラグ) |
@@ -48,8 +48,11 @@ Tauri(Rust)側。ウィンドウ管理(HUD・ポップアップ・Tips)、Unity�
 - 排他グループは新規に開くときだけでなく、非表示(再利用待ち)ウィンドウの再表示でも適用する。
 - 他のモードを巻き込んではいけないパネル(`road_detail`・`path_detail`・`agent_detail`)はこの一覧に入れず、専用cancelを送る(`edit_road:cancel {road_id}`・`edit_path:cancel_topology_edit`・`edit_connector:hide`)。Unityは自分のモード中のときだけ通常へ戻す。編集ウィンドウと併存する詳細パネルの後始末に素の`STATE_NORMAL`を送ると、後から開いた編集ウィンドウのステートまで打ち切る。
 - 再利用でもReactの状態は`open_seq`(世代番号)で必ずリセットされる。非表示→再表示と転用でインクリメントして`WindowContextDto`で配り、`App.tsx`が再マウントキーに含める。表示中への再オープン要求では増やさない。ラベルは不変で、転用は`window-context-updated`で新contextを配る。
-- ジオメトリ記憶(`saved_geometries`)は内側(クライアント領域)基準。`outer_size`で記憶すると復元側の`set_size`が内側基準なので開き直すたびに枠の分だけ膨張する。
-- ポップアップ配置はHUDの占有領域を避ける。定数は`window.rs`冒頭(`HUD_LEFT_RESERVED`/`HUD_BOTTOM_RESERVED`/`HUD_RIGHT_BOTTOM_RESERVED`)。アイコンパネルの高さとシステムトレイの幅はReactが実測して`resize_icon_panel`/`resize_system_tray`で通知する。
+- ジオメトリ記憶(`saved_geometries`)のサイズは内側(クライアント領域)基準。`outer_size`で記憶すると復元側の`set_size`が内側基準なので開き直すたびに枠の分だけ膨張する。位置は物理座標で記憶する。
+- モニター上への配置は`Placement`(位置は物理座標)を通し、生成は`build_placed`(非表示で生成→配置→表示)で行う。`set_position(LogicalPosition)`やビルダーの`.position()`は使わない。taoは論理座標を、移動では今いるモニターの倍率で、生成では座標を含む最初のモニターの倍率で換算するので、倍率の違うモニターがあると別の場所・別のモニターに出る。
+- ポップアップ(レジストリ駆動)の表示先は`popup_target`が決め、マルチディスプレイモードではHUDの`current_monitor_index`とは別のモニターになる。HUD側に置くRust直接生成のウィンドウ(Tips・通知など)と取り違えない。表示先に関わる設定(HUDのモニター・モード・ポップアップのモニター)は`update_display_target`で書き換える。表示先が変わったときの開いているポップアップの移動と記憶の破棄を、この関数がまとめて行う。
+  - 最大化中のウィンドウはtaoの最大化解除(`set_position`・`set_size`の内部でも起きる)が`ShowWindow`を伴うので、非表示でも表示されてしまう。再利用待ちの最大化ウィンドウは表示先の変更時に動かさず、`open_window`で開き直すときに表示先へ置き直す。
+- ポップアップ配置は、HUDのあるモニターに置くときだけHUDの占有領域を避ける。定数は`window.rs`冒頭(`HUD_LEFT_RESERVED`/`HUD_BOTTOM_RESERVED`/`HUD_RIGHT_BOTTOM_RESERVED`)。アイコンパネルの高さとシステムトレイの幅はReactが実測して`resize_icon_panel`/`resize_system_tray`で通知する。
 - 表示トレイは`DISPLAY_TRAY_WIDTH/HEIGHT`が正で、`DisplayTray.css`と食い違うとボタンが切れる/透明領域がクリックを吸う。
 - Unity→UIイベントを受けてウィンドウを開くときは、内容をウィンドウコンテキスト(`params.extra`)に載せる(`zone_merge`の`pendingMerge`)。イベントを投げてからウィンドウを開くと購読が間に合わず届かない。
 

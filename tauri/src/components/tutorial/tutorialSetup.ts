@@ -20,7 +20,6 @@ import {
   STATUS_ACTIVE,
   PATH_STREET,
   PARCEL_LAND,
-  VARIANT_APARTMENT,
   VARIANT_SOLAR_PLANT,
 } from "../../constants";
 import type { PathListResponse } from "../../types/generated";
@@ -55,18 +54,6 @@ export const TUTORIAL2_MAIN_ZONE_KEY = "tutorial2_main_zone_id";
 export const TUTORIAL_FLAG_RESOURCE_VISIBLE = "tutorial2_resource_visible";
 export const TUTORIAL_FLAG_ZONE_PANEL_OPEN = "tutorial2_zone_panel_open";
 export const TUTORIAL_FLAG_PARCEL_PANEL_OPEN = "tutorial2_parcel_panel_open";
-
-/**
- * シナリオ3「インフラを整備しよう」で構築した土地区画の ID を記録する localStorage キー。
- * セットアップ時に確定した区画 ID をステップの完了判定(tutorialSteps.ts)から参照し、
- * 「左の広い区画に太陽光発電所」「民家隣の空き区画に変電所」といった立地の妥当性確認に用いる。
- * - SOLAR_PARCEL: 都市左側の広い区画(太陽光発電所を建てる場所)
- * - SUBSTATION_PARCEL: 都市右側・民家の隣の空き区画(変電所を建てる場所)
- * - HOUSE_PARCEL: 民家(集合住宅)が最初から建っている区画
- */
-export const TUTORIAL3_SOLAR_PARCEL_KEY = "tutorial3_solar_parcel_id";
-export const TUTORIAL3_SUBSTATION_PARCEL_KEY = "tutorial3_substation_parcel_id";
-export const TUTORIAL3_HOUSE_PARCEL_KEY = "tutorial3_house_parcel_id";
 
 /**
  * シナリオ4「鉄道を建設しよう」で構築した土地区画の ID を記録する localStorage キー。
@@ -297,45 +284,6 @@ async function setupDistrictScenario(apiBaseUrl: string): Promise<void> {
   await sendSessionReload().catch(() => {});
 }
 
-/**
- * シナリオ3「インフラを整備しよう」の道路・土地区画の座標定義。
- * flat マップの陸地は西・南・北の海岸線がおおよそ ±250 にあり、東だけマップ端まで続く。
- * 区画の奥行き分のバッファを見込んで全要素を x,z ∈ [-200, 200] の範囲に収める(海岸線の外は
- * PathOutsideCoastlineError で作成に失敗する)。中央を東西に貫く1本の長い道路と、
- * その左端・右端に土地区画を配置する。
- * 座標は道路端点が [x, y, z](y は街路なので常に 0)、区画ポリゴンは [x, z] の2次元。
- */
-const INFRA_ROAD_START: [number, number, number] = [-200, 0, 0];
-const INFRA_ROAD_END: [number, number, number] = [200, 0, 0];
-
-/**
- * 3つの土地区画のポリゴン([x, z] の頂点列)。すべて x,z ∈ [-200, 200] に収める。
- * - SOLAR(左): 太陽光発電所を建てる区画。発電所用にやや大きめに取る。
- * - HOUSE(右): 民家(集合住宅)が最初から建っている区画。
- * - SUBSTATION(右): 民家の隣にある空き区画。ここに変電所を建てさせる。
- * 前面(道路側)の辺を街路のすぐ脇(z=2)に置き、道路に接するように配置する
- * (街路の幅は数m程度のため、この位置で区画の前面が道路縁に接する)。
- * 民家と変電所は道路の同じ側で x 方向に隣り合うように並べる。
- */
-const INFRA_SOLAR_POLYGON: [number, number][] = [
-  [-190, 2],
-  [-166, 2],
-  [-166, 34],
-  [-190, 34],
-];
-const INFRA_HOUSE_POLYGON: [number, number][] = [
-  [110, 2],
-  [124, 2],
-  [124, 16],
-  [110, 16],
-];
-const INFRA_SUBSTATION_POLYGON: [number, number][] = [
-  [128, 2],
-  [142, 2],
-  [142, 16],
-  [128, 16],
-];
-
 /** GET /api/v1/master/agents のレスポンス(自動生成の型が無いためここで定義する)。
  * 各バリアントは建設に必要な type(経済主体種別)と階数の下限 min_floors を持つ。 */
 type AgentMasterResponse = {
@@ -346,22 +294,6 @@ type AgentMasterResponse = {
 type BuildingCreateResponse = {
   agent_id: number;
 };
-
-/**
- * バックエンドが既にシナリオ3の初期状態を持っているかを判定する。
- * 初期配置の民家(集合住宅)が存在すれば構築済みとみなす(冪等性の担保)。
- * シナリオ2の判定(街路5本)とは初期構成が異なるため、専用のロジックを用いる。
- */
-async function isInfraAlreadyBuilt(base: string): Promise<boolean> {
-  try {
-    const data = await fetchApi<{ buildings: { variant?: number }[] }>(
-      `${base}/api/v1/buildings`
-    );
-    return data.buildings.some((b) => b.variant === VARIANT_APARTMENT);
-  } catch {
-    return false;
-  }
-}
 
 /**
  * 都市左側に1つの土地区画を manual モードで作成し、その parcel_id を返す。
@@ -389,96 +321,6 @@ async function createTutorialParcel(
     console.warn("[tutorialSetup] 土地区画の作成に失敗:", e);
     return null;
   }
-}
-
-/**
- * シナリオ3「インフラを整備しよう」の初期状態を構築する。
- *
- * 1. 都市中央を東西に貫く長い道路を1本 POST し、template_mode で直接 ACTIVE に PATCH する
- *    (端点ノードの生成はバックエンドのアクティブ化カスケードが行う)。
- * 2. その道路を含む地区を作成し、以降に作る土地区画の所属地区を確定させる。
- * 3. 道路の左端に広い区画(太陽光発電所用)、右端に2つの区画(民家用・変電所用)を作成する。
- * 4. 民家(集合住宅)を右端の一方の区画に建設し、template_mode で即 ACTIVE(完成)にする。
- *
- * これにより「電力の供給されていない民家が既にある都市」を再現し、
- * プレイヤーに発電所・変電所・送電線を整備させる導線を用意する。
- */
-async function setupInfraScenario(apiBaseUrl: string): Promise<void> {
-  const base = normalizeBaseUrl(apiBaseUrl);
-
-  if (await isInfraAlreadyBuilt(base)) {
-    return;
-  }
-
-  const streetVariant = await resolveStreetVariant(base);
-
-  // 1. 東西に貫く長い道路を1本作成する
-  const createRes = await fetchApi<{ paths: { path_temp_id: string; path_id: number }[] }>(
-    `${base}/api/v1/paths`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        paths: [
-          {
-            path_temp_id: "main_road",
-            path_type: PATH_STREET,
-            path_variant: streetVariant,
-            start_point: INFRA_ROAD_START,
-            end_point: INFRA_ROAD_END,
-            curved: false,
-          },
-        ],
-      }),
-    }
-  );
-
-  const roadId = createRes.paths.find((p) => p.path_temp_id === "main_road")?.path_id;
-  if (roadId == null) {
-    console.warn("[tutorialSetup] 道路の作成に失敗したため初期化を中断します");
-    return;
-  }
-
-  // 2. 道路を ACTIVE 化する。端点ノードの生成はバックエンドのアクティブ化カスケードに任せる。
-  await fetchApi(`${base}/api/v1/paths/${roadId}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status: STATUS_ACTIVE }),
-  });
-
-  // 3. 道路を含む地区を作成する(土地区画の所属地区を確定させるため)
-  try {
-    await fetchApi(`${base}/api/v1/zones`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ path_ids: [roadId] }),
-    });
-  } catch (e) {
-    console.warn("[tutorialSetup] 地区の作成に失敗:", e);
-  }
-
-  // 4. 3つの土地区画(左=太陽光用、右=民家用・変電所用)を作成し、ID を記録する
-  const solarParcelId = await createTutorialParcel(base, INFRA_SOLAR_POLYGON);
-  const houseParcelId = await createTutorialParcel(base, INFRA_HOUSE_POLYGON);
-  const substationParcelId = await createTutorialParcel(base, INFRA_SUBSTATION_POLYGON);
-
-  if (solarParcelId != null) {
-    localStorage.setItem(TUTORIAL3_SOLAR_PARCEL_KEY, String(solarParcelId));
-  }
-  if (houseParcelId != null) {
-    localStorage.setItem(TUTORIAL3_HOUSE_PARCEL_KEY, String(houseParcelId));
-  }
-  if (substationParcelId != null) {
-    localStorage.setItem(TUTORIAL3_SUBSTATION_PARCEL_KEY, String(substationParcelId));
-  }
-
-  // 5. 民家(集合住宅)を右端の区画に建設し、template_mode で即 ACTIVE(完成)にする
-  if (houseParcelId != null) {
-    await createCompletedBuilding(base, houseParcelId, VARIANT_APARTMENT);
-  }
-
-  // Unity 側に最新状態を再ロードさせる
-  await sendSessionReload().catch(() => {});
 }
 
 /**
@@ -662,7 +504,6 @@ async function setupRailScenario(apiBaseUrl: string): Promise<void> {
  */
 const SCENARIO_SETUPS: Record<string, (apiBaseUrl: string) => Promise<void>> = {
   scenario2: setupDistrictScenario,
-  scenario3: setupInfraScenario,
   scenario4: setupRailScenario,
 };
 

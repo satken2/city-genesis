@@ -4,10 +4,11 @@ using UnityEngine.Rendering;
 
 /// <summary>
 /// 空と海の環境演出。高高度を横切る航空機と、沖合をゆっくり進む船舶を経済シミュレーションと無関係に流す。
+/// 稼働中の港へ向かう入港船は AmbientVehicleManager.PortCalls.cs。
 /// 乗り物は GameObject を持たず、保存座標(FloatingOrigin のずれを含まない)で状態を持ち、
 /// 毎フレーム Graphics.RenderMesh で描く。仕様は公開 V 文書(V_環境演出の乗り物.md)。
 /// </summary>
-public sealed class AmbientVehicleManager : MonoBehaviour
+public sealed partial class AmbientVehicleManager : MonoBehaviour
 {
     public static AmbientVehicleManager Instance { get; private set; }
 
@@ -45,6 +46,17 @@ public sealed class AmbientVehicleManager : MonoBehaviour
         new Spec { model = "ambient_fishing_boat", minSpeed = 3, maxSpeed = 5, turnRate = 5f, length = 18, weight = 3.5f,
                    trailLife = 30, trailSpacing = 5, trailStart = 2.5f, trailEnd = 9, trailAlpha = .35f },
     };
+    private static readonly Spec BulkCarrier = new Spec { model = "ambient_bulk_carrier",
+        trailLife = 80, trailSpacing = 40, trailStart = 18, trailEnd = 90, trailAlpha = .3f };
+
+    // 港の種類ごとの入港船。速度は港外の航路の速さ(9〜12ノット)、停泊時間は実際の港での荷役・寄港の時間。漁港は対象外。
+    private static readonly PortSpec[] PortSpecs =
+    {
+        new PortSpec { variant = 401, ship = BulkCarrier, minSpeed = 4.6f, maxSpeed = 5.4f, minStayHours = 36, maxStayHours = 84 },   // バルク港
+        new PortSpec { variant = 402, ship = SeaSpecs[1], minSpeed = 4.6f, maxSpeed = 5.4f, minStayHours = 18, maxStayHours = 36 },   // タンカー埠頭
+        new PortSpec { variant = 403, ship = SeaSpecs[0], minSpeed = 5.6f, maxSpeed = 6.4f, minStayHours = 12, maxStayHours = 24 },   // コンテナ埠頭
+        new PortSpec { variant = 1068, ship = SeaSpecs[2], minSpeed = 5.6f, maxSpeed = 6.4f, minStayHours = 8, maxStayHours = 11 },   // 客船ターミナル
+    };
 
     private sealed class Vehicle
     {
@@ -55,7 +67,8 @@ public sealed class AmbientVehicleManager : MonoBehaviour
         public float heading;           // 進行方位 [deg]。0=+Z、時計回り
         public float targetHeading, speed, decisionTimer, travelled, routeLength;
         public float expiresAt;         // 船の寿命(Time.time)。過ぎたら画面外に出た時点で消す
-        public bool dead;               // 岸に乗り上げた船。次の更新で消す
+        public bool dead;               // 岸に乗り上げた船・停泊を終えた入港船。次の更新で消す
+        public PortCall call;           // 入港船の航路と接岸位置。環境演出の船と航空機は null
         public Vector3 Direction => new Vector3(Mathf.Sin(heading * Mathf.Deg2Rad), 0, Mathf.Cos(heading * Mathf.Deg2Rad));
     }
 
@@ -118,11 +131,21 @@ public sealed class AmbientVehicleManager : MonoBehaviour
         if (!visible) Clear();
     }
 
-    /// <summary>全ての乗り物を消す。セッション切り替えで前の都市の船や飛行機が残らないようにする。</summary>
+    /// <summary>全ての乗り物と入港船の抽選を消す。セッション切り替えで前の都市の船や飛行機が残らないようにする。</summary>
     public void Clear()
     {
-        foreach (var v in vehicles) v.trail?.Dispose();
-        vehicles.Clear();
+        RemoveVehicles(_ => true);
+        ResetPortCalls();
+    }
+
+    private void RemoveVehicles(System.Predicate<Vehicle> match)
+    {
+        for (int i = vehicles.Count - 1; i >= 0; i--)
+        {
+            if (!match(vehicles[i])) continue;
+            vehicles[i].trail?.Dispose();
+            vehicles.RemoveAt(i);
+        }
     }
 
     private void Update()
@@ -133,9 +156,16 @@ public sealed class AmbientVehicleManager : MonoBehaviour
             ipc = IpcClient.Instance;
             if (ipc != null) ipc.OnSessionReset += Clear;
         }
-        if (!visible || GameStateManager.Instance == null || !GameStateManager.Instance.IsGameStarted() || !CoastlineStore.IsLoaded)
+        if (!visible || GameStateManager.Instance == null || !GameStateManager.Instance.IsGameStarted())
         {
-            if (vehicles.Count > 0) Clear();
+            if (vehicles.Count > 0 || HasPortCallState) Clear();
+            shoreVersion = TerrainManager.ShoreDataVersion;
+            return;
+        }
+        // 入港船はエポックが進むまで残すので、海岸線の取り直しの間も消さない。
+        if (!CoastlineStore.IsLoaded)
+        {
+            RemoveVehicles(v => v.call == null);
             return;
         }
         if (terrain == null) terrain = FindAnyObjectByType<TerrainManager>();
@@ -146,16 +176,19 @@ public sealed class AmbientVehicleManager : MonoBehaviour
         if (coastVersion != CoastlineStore.Version)
         {
             coastVersion = CoastlineStore.Version;
-            Clear();
+            RemoveVehicles(v => v.call == null);
             expectedShips = EstimateSeaAreaKm2() * ShipsPerKm2;
             SeedShips(camera);
         }
+        UpdatePortCalls();
         SpawnAircraft(dt, camera);
         SpawnShips(dt, camera);
         for (int i = vehicles.Count - 1; i >= 0; i--)
         {
             var v = vehicles[i];
-            if (v.spec.air) MoveAircraft(v, dt); else MoveShip(v, dt);
+            if (v.spec.air) MoveAircraft(v, dt);
+            else if (v.call != null) MovePortShip(v, dt, camera);
+            else MoveShip(v, dt);
             if (v.dead || v.travelled >= v.routeLength)
             {
                 v.trail?.Dispose();
@@ -302,7 +335,7 @@ public sealed class AmbientVehicleManager : MonoBehaviour
         int ships = 0;
         foreach (var existing in vehicles)
         {
-            if (existing.spec.air) continue;
+            if (existing.spec.air || existing.call != null) continue;
             ships++;
             if (Time.time > existing.expiresAt && (existing.position - camera).sqrMagnitude > DrawDistance * DrawDistance)
                 existing.dead = true;

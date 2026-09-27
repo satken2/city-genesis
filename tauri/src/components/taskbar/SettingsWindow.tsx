@@ -8,7 +8,8 @@
  * 設定項目は5つのグループに分けて並べる:
  * - 一般: 言語（対応言語は utils/locale.ts の SUPPORTED_LANGUAGES）、
  *   文字サイズ（プリセット大・中・小またはカスタム入力 8〜32px）、ヒントバーの表示
- * - 画面: HUD(アイコンパネル・コックピット・システムトレイ)を別のモニターに移動する、
+ * - 画面: HUD(アイコンパネル・コックピット・システムトレイ)と3D画面(Unityのウィンドウ)をそれぞれ別のモニターに移動する、
+ *   マルチディスプレイモード(各種ウィンドウをHUDとは別のモニターに出す)とその表示先、
  *   ウィンドウ位置・サイズのリセット
  * - サウンド: マスターボリューム・BGM・サウンドエフェクトのスライダー（ダミー）
  * - システム: GPUアクセラレーションのCPU/GPU切り替え
@@ -27,6 +28,7 @@ import { FONT_SIZE_PRESETS, useFontSize } from "../../contexts/FontSizeContext";
 import { loadAppSettings, saveAppSettings, type AppSettings } from "../../utils/settings";
 import { fetchApi, ApiError } from "../../utils/api";
 import { requestConfirm } from "../../utils/confirmDialog";
+import { sendMoveGraphicDisplay } from "../../utils/ipc";
 import {
   SUPPORTED_LANGUAGES,
   isSupportedLanguage,
@@ -86,6 +88,8 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   /** 画面上部のヒントバーを表示するか。設定ファイルに未記録の場合は表示扱い。 */
   const [hintbarVisible, setHintbarVisible] = useState(true);
 
+  const [multiDisplay, setMultiDisplay] = useState(false);
+
   /** GPU設定の状態: enabled=config.tomlの設定, active=実際にCuPyが動作中 */
   const [gpuEnabled, setGpuEnabled] = useState(false);
   const [gpuActive, setGpuActive] = useState(false);
@@ -115,6 +119,7 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
           setVolumes((prev) => ({ ...prev, ...settings.volumes }));
         }
         setHintbarVisible(settings.hintbar_visible !== false);
+        setMultiDisplay(settings.multi_display === true);
       })
       .catch((err) => {
         console.error("failed to load settings", err);
@@ -165,6 +170,37 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       await invoke<{ monitorIndex: number }>("switch_monitor", { direction });
     } catch (error) {
       console.error("failed to switch monitor", error);
+    }
+  }
+
+  /** 3D画面(Unityのウィンドウ)を隣のディスプレイへ移す。HUD・ポップアップの表示先とは連動しない。 */
+  async function handleMoveGraphicDisplay(direction: 1 | -1) {
+    try {
+      await sendMoveGraphicDisplay(direction);
+    } catch (error) {
+      console.error("failed to move graphic display", error);
+    }
+  }
+
+  /**
+   * マルチディスプレイモードの切り替え。表示先の決定・開いているウィンドウの移動・保存は Rust 側が行う。
+   * この設定ウィンドウ自身もポップアップなので、切り替えると表示先のモニターへ移る。
+   */
+  async function handleMultiDisplayChange(next: boolean) {
+    setMultiDisplay(next);
+    try {
+      await invoke("set_multi_display", { enabled: next });
+    } catch (error) {
+      console.error("failed to set multi display", error);
+    }
+  }
+
+  /** マルチディスプレイモードでのウィンドウの表示先を、HUDのあるモニターを飛ばして切り替える */
+  async function handleSwitchPopupMonitor(direction: number) {
+    try {
+      await invoke("switch_popup_monitor", { direction });
+    } catch (error) {
+      console.error("failed to switch popup monitor", error);
     }
   }
 
@@ -387,6 +423,64 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
               className="settings-btn"
               onClick={() => void handleSwitchMonitor(-1)}
               type="button"
+              title={t("settings.monitor.next")}
+            >
+              {t("settings.monitor.next")} <span className="settings-btn-chevron">&#x203A;</span>
+            </button>
+          </SettingsRow>
+
+          <SettingsRow label={t("settings.graphicMonitor.label")}>
+            <button
+              className="settings-btn"
+              onClick={() => void handleMoveGraphicDisplay(-1)}
+              type="button"
+              title={t("settings.monitor.prev")}
+            >
+              <span className="settings-btn-chevron">&#x2039;</span> {t("settings.monitor.prev")}
+            </button>
+            <button
+              className="settings-btn"
+              onClick={() => void handleMoveGraphicDisplay(1)}
+              type="button"
+              title={t("settings.monitor.next")}
+            >
+              {t("settings.monitor.next")} <span className="settings-btn-chevron">&#x203A;</span>
+            </button>
+          </SettingsRow>
+
+          <SettingsRow
+            label={t("settings.multiDisplay.label")}
+            description={t("settings.multiDisplay.description")}
+          >
+            <div className="settings-seg">
+              {([true, false] as const).map((value) => (
+                <button
+                  key={value ? "on" : "off"}
+                  className={`settings-seg-btn ${multiDisplay === value ? "active" : ""}`}
+                  onClick={() => void handleMultiDisplayChange(value)}
+                  type="button"
+                >
+                  {t(value ? "settings.multiDisplay.on" : "settings.multiDisplay.off")}
+                </button>
+              ))}
+            </div>
+          </SettingsRow>
+
+          <SettingsRow label={t("settings.popupMonitor.label")} disabled={!multiDisplay}>
+            <button
+              className="settings-btn"
+              onClick={() => void handleSwitchPopupMonitor(-1)}
+              type="button"
+              disabled={!multiDisplay}
+              title={t("settings.monitor.prev")}
+            >
+              <span className="settings-btn-chevron">&#x2039;</span> {t("settings.monitor.prev")}
+            </button>
+            <button
+              className="settings-btn"
+              onClick={() => void handleSwitchPopupMonitor(1)}
+              type="button"
+              disabled={!multiDisplay}
               title={t("settings.monitor.next")}
             >
               {t("settings.monitor.next")} <span className="settings-btn-chevron">&#x203A;</span>

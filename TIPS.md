@@ -18,10 +18,15 @@
 - Git Bash の `sed -i` は CRLF のファイル(このレポジトリの作業ツリーは `core.autocrlf=true` で全行 CRLF)を書き戻すとき、置換しなかった行の CR も落として LF にする。`.mat` / `.meta` を複製して一部だけ書き換えるときは、書き換え後に行末をそろえ直すか、Edit で直接書き換える。
 - `ReclaimedLandMeshBuilder` や `ReclaimedLandStore` のように Unity のネイティブ API(Mesh・Terrain・Debug)を通らない純データのクラスは、`Tests/BuildRuntime.ps1` の出力 DLL と `UnityEngine.CoreModule.dll`・NTS・Newtonsoft を参照する .NET 8 のコンソールから直接呼んで検査できる(`Tests/Intersections` と同じ形。private の入れ子型もリフレクションで Newtonsoft に渡せる)。
 - `TerrainCollider` のレイが当たる地形の三角形は、ハイトマップの各マスを (0,0)-(1,1) の対角線で切ったもの(`TerrainData.GetInterpolatedHeight` と同じ)。もう一方の対角線で計算すると、起伏の大きい所で数mずれる(2026-09-27、`Tests/Quay` の照合)。
+- Unity プレイヤー(Windows)は表示ディスプレイ・解像度・全画面モードを終了時にレジストリ `HKCU\Software\<companyName>\<productName>`(この作品は `DefaultCompany\Realcity`)の `UnitySelectMonitor_h…`・`Screenmanager Resolution Width/Height_h…`・`Screenmanager Fullscreen mode_h…` に記録し、次回起動時に復元する。3D画面の表示先の不具合はここを見る。`companyName` は Unity 既定値の `DefaultCompany` のままなので、変えると記録先が変わり、一度だけ既定の表示先に戻る。
 - 描画を使わない独立検証の Unity プロジェクトは、`Packages/manifest.json` を組み込みモジュール(`com.unity.modules.physics` / `terrain` / `terrainphysics` など、使うものだけ)にするとパッケージの解決を待たずに起動し、`Tests/Quay` は起動から終了まで約1分で済む。
 - 検証用の Unity スクリプトの構文だけを先に確かめるなら、`UnityEngine.CoreModule.dll` などを HintPath で参照する netstandard2.1 の csproj をレポジトリの外に作って `dotnet build` すると数秒で済む(Unity の起動を待たない)。
 - `Tests/*/run*.ps1` を Windows PowerShell 5.1(`powershell.exe`)で動かすとき、BOM無しのUTF-8だと日本語コメントの直後の行が黙って読み飛ばされることがある。2026-09-28 に `Tests/BuildingPlacement/run-unity.ps1` で検証用シェーダーを作る行が実行されず、`CheckGuideCoordinates` が `Shader.Find` の null で落ちていた(BOM付きUTF-8で保存し直して解消)。日本語を含む .ps1 はBOM付きで保存する。
 - 建設可能な区画のハイライト(`ParcelManager.IsBuildable`)は区画の建築規制と区画種別だけを見て、空きや所有者を見ない。敷地が市有地に限られる市庁舎でも民有地の区画が色付きで出て、選ぶとプレビューで拒否される。
+- 地形に接地させる生成器を独立の Unity プロジェクトで検査するときは、`Terrain.CreateTerrainGameObject` で Terrain を1枚置けば、`TerrainManager` が無くても `Utils.GetGroundHeight` が `Terrain.activeTerrains` から高さを拾う。`drawHeightmap = false` にすれば描画だけ止められる(撮影用の地面は別のメッシュで描く)。高さを変えたら `Utils.InvalidateHeightCache` を呼ぶ。
+- 本編の Unity エディタが開いていると、Blender から書き出した新しい FBX はエディタが先に取り込み、`.meta` とミラープレハブ(`ModelPrefabGenerator`)を作る。独立プロジェクトの生成物を本編へ写すときは、既にあるものを上書きしない(GUID が変わり、先に作られたミラーの参照が切れる)。
+- 建物ライブラリの `BD_WINDOW_LIGHT` はほぼ黒(RGB 0.07, 0.11, 0.11)で、ガラス張りの建物全体に使うと黒い箱に見える。全面ガラスの外壁には `BD_BLUE_GLASS`(0.13, 0.31, 0.51)を使う。
+- 幾何だけの静的処理(`CoastlineStore`・`SeaRoute`・`PortBuildingMeshBuilder.ResolveWorldWaterlines` など)は、`Tests/BuildRuntime.ps1` が作る `Temp/bin/Debug/Assembly-CSharp.dll` と `UnityEngine.CoreModule.dll`・`Newtonsoft.Json.dll`・`Assets/Plugins/NetTopologySuite.dll` を参照する net8.0 のコンソールから実行して検査できる(`CoastlineStore.SetFromGeoJson` に合成の海岸線を入れる)。`Debug.Log` などネイティブ呼び出しを通る経路と `Time`・`Random` は落ちるので、ログ用フラグが偽の経路だけを呼ぶ。private static はリフレクションで呼べる。
  
 ## UI / Tauri
 
@@ -32,6 +37,14 @@
 - `utils/ipc.ts` の `sendEditBuildingUpdateDirectParams`(`edit_building:update_direct_params`)はどこからも呼ばれていない。建物の直接配置の寸法・回転角は `edit_building:placement_command` の差分で送っている。
 
 - 別ワークツリーの未コミット編集とのマージ可否を `git merge-file` で試すときは、先に `tr -d '\r'` で改行を揃える。ワークツリー側の作業ファイルはCRLF、`git show` の取り出しはLFなので、揃えないと全行が変更扱いになり、実際には衝突しない変更でもファイル全体が衝突と出る。
+
+- 起動中のTauriアプリの各ウィンドウを外から操作して検証するには、環境変数 `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=<ポート>` を付けて起動し、`http://127.0.0.1:<ポート>/json/list` の各ページへCDPの `Runtime.evaluate` で `window.__TAURI_INTERNALS__.invoke(...)` を送る(どのウィンドウかは `__TAURI_INTERNALS__.metadata.currentWindow.label` で分かる)。ウィンドウの実際の位置は、`SetThreadDpiAwarenessContext(-4)` でモニター別DPI対応にしたPowerShellから `GetWindowRect` で物理座標のまま測る。1420番を他の作業が使っているときは、別ポートでViteを立てて `tauri dev --no-watch --config '{"build":{"devUrl":"http://localhost:<ポート>","beforeDevCommand":""}}'` で向け先を変えられる。
+
+- 接続先のバックエンドが無い状態(`GENESIS_UI_API_BASE_URL` を空きポートにする)で起動すると、各ウィンドウのReactは初期化待ちのまま何も描かない。ウィンドウの生成・配置の検証だけならこの状態で足りる。
+
+- taoの `unmaximize()` と、内部で最大化フラグを落とす `set_position` / `set_size` は、最大化中のウィンドウに `ShowWindow(SW_RESTORE)` を発行するので、非表示のウィンドウでも表示されてしまう(tao 0.35.3 のソースで確認)。
+
+- Git Bash からネイティブのコマンド(node など)へ `//` で始まる引数を渡すと、MSYSのパス変換で先頭の `//` が `/` に縮む。`///` で始まるコメント行を検索キーとして渡すと1文字ずれた位置に一致し、置換後に `/` が1本余る。
 
 ## docs
 

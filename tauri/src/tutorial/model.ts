@@ -19,10 +19,13 @@ export type Action =
   | { type: "completeConstruction"; target: string }
   | { type: "scenarioAction"; scenario: string; action: string }
   | { type: "reload" };
+/** 段階の開始時にカメラを向ける先。target は地面相対の [x, y, z]、yaw は北を0とする時計回り、pitch は見下ろし角(度)。 */
+export type CameraGuide = { target: number[]; distance: number; yaw: number; pitch: number };
 export type WorldGuide = {
   mode: "observe" | "blocked" | "path";
   markers?: number[][];
   path?: { points: number[][]; radius: number; variant: Value; bind?: string };
+  camera?: CameraGuide;
 };
 export type Phase = {
   id: string;
@@ -32,7 +35,7 @@ export type Phase = {
   until: Condition;
 };
 export type GuideStep = { id: string; legacyStep: number; phases: Phase[]; beforeCheck?: Action[]; complete?: Condition; afterCheck?: Action[] };
-export type Definition = { version: 1; id: string; setup?: Action[]; steps: GuideStep[] };
+export type Definition = { version: 1; id: string; terrainMap: string; setup?: Action[]; steps: GuideStep[] };
 export type Facts = {
   windows: Record<string, { window: string; visible: boolean; entity?: number }>;
   pathVariant?: number;

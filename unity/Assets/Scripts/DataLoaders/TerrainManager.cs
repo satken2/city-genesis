@@ -2076,6 +2076,13 @@ public partial class TerrainManager : BaseApiDataManager
     }
 
     /// <summary>
+    /// <see cref="FetchCoastline"/> が海岸線・湖・川・埋立地を取り終えるたびに進む版。
+    /// <see cref="CoastlineStore.Version"/> は海岸線だけを入れた時点で進むので、埋立地の岸壁まで揃ってから使う処理
+    /// （入港する船の接岸位置）はこちらを見る。
+    /// </summary>
+    public static int ShoreDataVersion { get; private set; }
+
+    /// <summary>
     /// 海岸線（陸地の境界ポリゴン）を取得して <see cref="CoastlineStore"/> に格納し、続けて湖・川・埋立地を取得する。
     /// レスポンスは GeoJSON ライク（Polygon / MultiPolygon）。座標はワールド座標。
     /// 海岸線は埋立の完了で広がるので、初回ロード・強制リロードに加えて session:reload のたびに取り直す。
@@ -2134,6 +2141,7 @@ public partial class TerrainManager : BaseApiDataManager
         {
             yield return ReclaimedLandManager.Instance.LoadAndBuild();
         }
+        ShoreDataVersion++;
     }
 
     /// <summary>

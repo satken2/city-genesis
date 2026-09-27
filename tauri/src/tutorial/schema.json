@@ -82,6 +82,7 @@
               },
               "scenario": {
                 "enum": [
+                  "scenario3",
                   "trade",
                   "highway",
                   "mining",
@@ -216,6 +217,38 @@
                         "variant"
                       ],
                       "additionalProperties": false
+                    },
+                    "camera": {
+                      "type": "object",
+                      "properties": {
+                        "target": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "minItems": 3,
+                          "maxItems": 3
+                        },
+                        "distance": {
+                          "type": "number",
+                          "exclusiveMinimum": 0
+                        },
+                        "yaw": {
+                          "type": "number"
+                        },
+                        "pitch": {
+                          "type": "number",
+                          "minimum": 5,
+                          "maximum": 89
+                        }
+                      },
+                      "required": [
+                        "target",
+                        "distance",
+                        "yaw",
+                        "pitch"
+                      ],
+                      "additionalProperties": false
                     }
                   },
                   "required": [
@@ -312,6 +345,7 @@
                     },
                     "scenario": {
                       "enum": [
+                        "scenario3",
                         "trade",
                         "highway",
                         "mining",
@@ -410,6 +444,7 @@
                     },
                     "scenario": {
                       "enum": [
+                        "scenario3",
                         "trade",
                         "highway",
                         "mining",
@@ -439,12 +474,17 @@
         ],
         "additionalProperties": false
       }
+    },
+    "terrainMap": {
+      "type": "string",
+      "minLength": 1
     }
   },
   "required": [
     "version",
     "id",
-    "steps"
+    "steps",
+    "terrainMap"
   ],
   "additionalProperties": false,
   "$schema": "http://json-schema.org/draft-07/schema#",
@@ -786,6 +826,7 @@
             },
             "scenario": {
               "enum": [
+                "scenario3",
                 "trade",
                 "highway",
                 "mining",

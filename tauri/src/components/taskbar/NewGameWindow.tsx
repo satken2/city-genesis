@@ -261,14 +261,13 @@ export function NewGameWindow({
 
   /**
    * チュートリアルミッションでの開始。
-   * チュートリアルは常に平坦な地形マップ(`flat`)をチュートリアルモードでロードする。
-   * チュートリアルは道路・地区・建物の操作手順を学ぶためのものであり、
-   * 地形の起伏に左右されず常に同じ初期状態から始められるよう、
-   * assets/terrain_maps.yaml で定義された `flat` マップを明示的に選択する。
-   * `flat` マップが取得できていない場合はエラーメッセージを表示する。
+   * 教材の初期配置は特定の地形を前提にするため、シナリオが指定する地形マップ
+   * (TutorialScenario.terrainMapId)をチュートリアルモードでロードする。
+   * 地形マップが取得できていない場合はエラーメッセージを表示する。
    */
   const handleStartTutorial = useCallback(async (tutorialId: string) => {
-    const terrainMap = terrainMaps.find((m) => m.id === "flat");
+    const scenario = TUTORIAL_SCENARIOS.find((s) => s.id === tutorialId);
+    const terrainMap = terrainMaps.find((m) => m.id === scenario?.terrainMapId);
     if (!terrainMap) {
       setStatus({
         text: t("newGame.tutorialNoTerrain"),
@@ -323,7 +322,8 @@ export function NewGameWindow({
     if (selection.kind === "tutorial") {
       const scenario = TUTORIAL_SCENARIOS.find((s) => s.id === selection.id);
       if (!scenario) return null;
-      const flatMap = terrainMaps.find((m) => m.id === "flat");
+      const map = terrainMaps.find((m) => m.id === scenario.terrainMapId);
+      const profile = getTerrainProfile(scenario.terrainMapId);
       return {
         thumbnailUrl: scenario.image || null,
         templateId: null,
@@ -331,10 +331,10 @@ export function NewGameWindow({
         placeholderModifier: `new-game-detail-image--tutorial new-game-detail-image--${scenario.id}`,
         title: t(scenario.titleKey),
         description: t(scenario.descriptionKey),
-        mapName: flatMap ? t("terrainProfiles.maps.flat.name") : null,
-        mapSize: formatMapSize(flatMap?.settings, i18n.language),
-        groundCover: flatMap ? normalizeGroundCover(flatMap.ground_cover) : null,
-        climate: normalizeClimate(flatMap?.climate),
+        mapName: profile ? t(`terrainProfiles.maps.${profile.id}.name`) : map?.name ?? null,
+        mapSize: formatMapSize(map?.settings, i18n.language),
+        groundCover: map ? normalizeGroundCover(map.ground_cover) : null,
+        climate: normalizeClimate(map?.climate),
         objective: t("newGame.tutorialObjective"),
         startLabel: t("newGame.startScenarioButton"),
         onStart: () => void handleStartTutorial(scenario.id),

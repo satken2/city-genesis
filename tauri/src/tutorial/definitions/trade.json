@@ -1,7 +1,7 @@
 {
   "version": 1,
   "id": "trade",
-  "setup": [],
+  "terrainMap": "flat",
   "steps": [
     {
       "id": "trade.1",
@@ -21,11 +21,21 @@
             "mode": "observe",
             "markers": [
               [
-                -247,
+                -243.5,
                 0,
                 80
               ]
-            ]
+            ],
+            "camera": {
+              "target": [
+                -220,
+                0,
+                60
+              ],
+              "distance": 380,
+              "yaw": 0,
+              "pitch": 50
+            }
           },
           "until": {
             "type": "ack"
@@ -76,11 +86,21 @@
             "mode": "observe",
             "markers": [
               [
-                -247,
+                -243.5,
                 0,
                 80
               ]
-            ]
+            ],
+            "camera": {
+              "target": [
+                -150,
+                0,
+                20
+              ],
+              "distance": 600,
+              "yaw": 0,
+              "pitch": 50
+            }
           },
           "until": {
             "type": "ack"
@@ -116,11 +136,21 @@
             "mode": "observe",
             "markers": [
               [
-                30,
+                20,
                 0,
-                155
+                39
               ]
-            ]
+            ],
+            "camera": {
+              "target": [
+                20,
+                0,
+                60
+              ],
+              "distance": 380,
+              "yaw": 0,
+              "pitch": 55
+            }
           },
           "until": {
             "type": "ack"
@@ -144,11 +174,6 @@
           "action": "commission_freight"
         },
         {
-          "type": "scenarioAction",
-          "scenario": "trade",
-          "action": "rail_trade"
-        },
-        {
           "type": "reload"
         }
       ]
@@ -158,8 +183,404 @@
       "legacyStep": 4,
       "phases": [
         {
+          "id": "open",
+          "textKey": "tutorial.trade.step4.open",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.track"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -50,
+                0,
+                110
+              ],
+              [
+                90,
+                0,
+                110
+              ]
+            ],
+            "camera": {
+              "target": [
+                20,
+                0,
+                80
+              ],
+              "distance": 320,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "track_build"
+          }
+        },
+        {
+          "id": "place",
+          "textKey": "tutorial.trade.step4.place",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": []
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -50,
+                0,
+                110
+              ],
+              [
+                90,
+                0,
+                110
+              ]
+            ],
+            "camera": {
+              "target": [
+                20,
+                0,
+                80
+              ],
+              "distance": 320,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.freight_pf",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "trade.5",
+      "legacyStep": 5,
+      "phases": [
+        {
           "id": "perform",
-          "textKey": "tutorial.trade.step4.description",
+          "textKey": "tutorial.trade.step5.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.track"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                90,
+                0,
+                110
+              ],
+              [
+                350,
+                0,
+                110
+              ]
+            ],
+            "camera": {
+              "target": [
+                220,
+                0,
+                100
+              ],
+              "distance": 520,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "beforeCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "trade",
+          "action": "commission_tracks"
+        },
+        {
+          "type": "reload"
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.rail",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "trade.6",
+      "legacyStep": 6,
+      "phases": [
+        {
+          "id": "build",
+          "textKey": "tutorial.trade.step6.build",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                200,
+                0,
+                39
+              ]
+            ],
+            "camera": {
+              "target": [
+                220,
+                0,
+                70
+              ],
+              "distance": 320,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "entity",
+            "resource": "tutorial",
+            "where": [
+              {
+                "field": "checks.depot",
+                "equals": true
+              }
+            ]
+          }
+        },
+        {
+          "id": "branch",
+          "textKey": "tutorial.trade.step6.branch",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.track"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                200,
+                0,
+                71.5
+              ],
+              [
+                270,
+                0,
+                110
+              ]
+            ],
+            "camera": {
+              "target": [
+                230,
+                0,
+                90
+              ],
+              "distance": 280,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "beforeCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "trade",
+          "action": "commission_depot"
+        },
+        {
+          "type": "scenarioAction",
+          "scenario": "trade",
+          "action": "commission_tracks"
+        },
+        {
+          "type": "reload"
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.depot_rail",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "trade.7",
+      "legacyStep": 7,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.trade.step7.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.infra"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                461.5,
+                0,
+                -177.5
+              ],
+              [
+                200,
+                0,
+                71.5
+              ]
+            ],
+            "camera": {
+              "target": [
+                330,
+                0,
+                -50
+              ],
+              "distance": 650,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "beforeCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "trade",
+          "action": "commission_power"
+        },
+        {
+          "type": "reload"
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.depot_power",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "trade.8",
+      "legacyStep": 8,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.trade.step8.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.transport"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                20,
+                0,
+                110
+              ],
+              [
+                420,
+                0,
+                110
+              ]
+            ],
+            "camera": {
+              "target": [
+                200,
+                0,
+                100
+              ],
+              "distance": 700,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.line",
+            "equals": true
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "trade",
+          "action": "rail_trade"
+        }
+      ]
+    },
+    {
+      "id": "trade.9",
+      "legacyStep": 9,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.trade.step9.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -171,11 +592,21 @@
             "mode": "observe",
             "markers": [
               [
-                30,
+                20,
                 0,
-                155
+                39
               ]
-            ]
+            ],
+            "camera": {
+              "target": [
+                20,
+                0,
+                60
+              ],
+              "distance": 400,
+              "yaw": 0,
+              "pitch": 50
+            }
           },
           "until": {
             "type": "ack"

@@ -5,7 +5,9 @@ import { emit } from "@tauri-apps/api/event";
  * アプリケーション設定の型定義
  *
  * Rust 側の settings::AppSettings と対応する。
- * 言語、フォントサイズ、音量、タスクバー表示モニター、ヒントバー表示可否などを含む。
+ * 言語、フォントサイズ、音量、HUDとポップアップの表示モニター、ヒントバー表示可否などを含む。
+ * モニター関連の3項目は Rust のコマンド(`switch_monitor` / `set_multi_display` / `switch_popup_monitor`)が
+ * 保存するので、UI からは書き換えない。
  */
 export type AppSettings = {
   language: string;
@@ -14,6 +16,10 @@ export type AppSettings = {
   monitor_index: number;
   /** 画面上部のヒントバーを表示するか */
   hintbar_visible: boolean;
+  /** マルチディスプレイモード(ポップアップをHUDとは別のモニターに出す) */
+  multi_display: boolean;
+  /** マルチディスプレイモードでポップアップを出すモニター */
+  popup_monitor_index: number;
 };
 
 /**

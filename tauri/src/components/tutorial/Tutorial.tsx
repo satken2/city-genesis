@@ -22,7 +22,7 @@
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { emit } from "@tauri-apps/api/event";
+import { emit, listen } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import { TUTORIAL_SCENARIOS } from "./tutorialSteps";
 import { runTutorialSetup } from "./tutorialSetup";
@@ -33,6 +33,9 @@ import "./Tutorial.css";
 
 /** localStorage にチュートリアル進捗を保存する際のキーのプレフィックス */
 const TUTORIAL_STORAGE_KEY_PREFIX = "tutorial_step_";
+
+/** 開始時の説明ウィンドウを閉じたことを記録するキーのプレフィックス(シナリオ・セーブID単位) */
+const TUTORIAL_INTRO_KEY_PREFIX = "tutorial_intro_seen_";
 
 /** localStorage にチュートリアル完了フラグを保存する際のキー。
  * セーブ ID に依存しないグローバルなフラグで、
@@ -102,6 +105,9 @@ export function Tutorial() {
   const [showComplete, setShowComplete] = useState(false);
   /** セッション終了中（DELETEリクエスト送信後）かどうか */
   const [returningToMenu, setReturningToMenu] = useState(false);
+  /** 開始時の説明ウィンドウを閉じたか。閉じるまでは案内と操作制限を始めない */
+  const [introDone, setIntroDone] = useState(true);
+  const introOpenedRef = useRef<string | null>(null);
 
   const currentScenario = useMemo(() => {
     return TUTORIAL_SCENARIOS.find((s) => s.id === tutorialId) || TUTORIAL_SCENARIOS[0];
@@ -109,11 +115,11 @@ export function Tutorial() {
 
   const steps = currentScenario.steps;
   const totalSteps = steps.length;
-  const guide = useTutorialGuide(visible && !completed && !showComplete, tutorialId, currentStep + 1, saveId, apiBaseUrl);
+  const guide = useTutorialGuide(visible && !completed && !showComplete && introDone, tutorialId, currentStep + 1, saveId, apiBaseUrl);
 
   // チュートリアルの有効状態とターゲットボタンの同期処理
   useEffect(() => {
-    const active = visible && !completed && !showComplete;
+    const active = visible && !completed && !showComplete && introDone;
     const target = active && !guide.managed ? steps[currentStep]?.targetElementId : undefined;
 
     localStorage.setItem("tutorial_active", String(active));
@@ -136,7 +142,7 @@ export function Tutorial() {
         targetElementId: undefined,
       }).catch(console.error);
     };
-  }, [visible, completed, currentStep, showComplete, guide.managed, steps]);
+  }, [visible, completed, currentStep, showComplete, guide.managed, steps, introDone]);
 
   /**
    * 前回のセーブ ID を保持する ref。
@@ -165,6 +171,26 @@ export function Tutorial() {
     setupRanForRef.current = key;
     void runTutorialSetup(tutorialId, apiBaseUrl);
   }, [visible, apiBaseUrl, saveId, tutorialId, guide.hasSetup]);
+
+  /** 説明ウィンドウを1セッションにつき1回開く。閉じられたら(開始ボタン・×とも)案内を始める */
+  useEffect(() => {
+    if (!visible || introDone || !saveId || completed) return;
+    const key = `${saveId}_${tutorialId}`;
+    if (introOpenedRef.current === key) return;
+    introOpenedRef.current = key;
+    void invoke("open_registered_window", { windowType: "tutorial_intro", params: { extra: { tutorialId } } }).catch(console.error);
+  }, [visible, introDone, saveId, tutorialId, completed]);
+
+  useEffect(() => {
+    if (introDone || !saveId) return;
+    let stop: (() => void) | undefined, disposed = false;
+    void listen<{ window: string; visible: boolean }>("tutorial:window_visibility", (event) => {
+      if (event.payload.window !== "tutorial_intro" || event.payload.visible) return;
+      localStorage.setItem(`${TUTORIAL_INTRO_KEY_PREFIX}${tutorialId}_${saveId}`, "1");
+      setIntroDone(true);
+    }).then((fn) => { if (disposed) fn(); else stop = fn; });
+    return () => { disposed = true; stop?.(); };
+  }, [introDone, saveId, tutorialId]);
 
   useEffect(() => {
     let unlistenSession: (() => void) | undefined;
@@ -203,6 +229,8 @@ export function Tutorial() {
               setCurrentStep(storedStep);
               setCompleted(false);
               setShowComplete(false);
+              // 説明ウィンドウは最初のステップから始めるときだけ出す(途中から再開したときは出さない)。
+              setIntroDone(storedStep > 0 || localStorage.getItem(`${TUTORIAL_INTRO_KEY_PREFIX}${activeTutorialId}_${current_save_id}`) === "1");
             }
           }
         } else {
@@ -363,7 +391,7 @@ export function Tutorial() {
     }
   }, [returningToMenu, apiBaseUrl, t]);
 
-  if (!visible) {
+  if (!visible || !introDone) {
     return null;
   }
 

@@ -26,7 +26,7 @@
 
 ## ロードの流れ(順序を変えない)
 
-1. `TerrainManager.FetchCoastline` が `/terrain/settings` → 地表種別・海岸線・湖・川・埋立地を読む(初回・強制リロード・毎回の `session:reload`。海岸線は埋立の完了で広がる)。マップ寸法より先に常駐集合を算出するとマップ外セルを要求し、`/terrain/surface` の400再試行から抜けられない。
+1. `TerrainManager.FetchCoastline` が `/terrain/settings` → 地表種別・海岸線・湖・川・埋立地を読む(初回・強制リロード・毎回の `session:reload`。海岸線は埋立の完了で広がる)。マップ寸法より先に常駐集合を算出するとマップ外セルを要求し、`/terrain/surface` の400再試行から抜けられない。`CoastlineStore.Version` は海岸線を入れた時点で進み、埋立地まで取り終えた版は `TerrainManager.ShoreDataVersion`。
 2. 地形タイル → 既存物の地形追従 → 区画(完了待ち) → 建物・道路 → 地区・資源・プロップ(`LoadObjectManagers`)。海上区画の建物の接地高が区画に依存する。
 3. `session:reset` から `session:reload` までカメラ由来のロードは無視する(準備中の都市のタイルは同版の差分で更新されない)。
 

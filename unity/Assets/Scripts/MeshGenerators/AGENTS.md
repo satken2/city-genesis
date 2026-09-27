@@ -88,6 +88,7 @@
 - 港が埋立地の岸壁に面しているかは `PortBuildingMeshBuilder.FindFacingReclaimedQuays` の1つの規則(区画を0.1m膨らませた範囲に掛かる岸壁区間が1mより長く、区画がその岸壁の陸側にある=区間から内向き `QUAY_PROBE_DISTANCE` の帯の半分以上を覆う)で決め、岸壁区間は `ReclaimedLandStore.GetQuaySegments`(バックエンドの派生値)から取る。港側で岸壁を求め直さない。既存の港の隣の埋立(岸壁の海側にある区画)は面していないので直線カットのスラブのまま。
   - 直線カットの弦の端は、底面外周と海岸線の交点ではなく区画の中の水際が外周に届く点(`CollectQuayEndCandidates`)。隣の埋立地が区画の辺や角に外から接すると、その辺上の交点で弦が斜めになるため。区画の中に陸が無い(海岸線に外から接するだけの)区画だけ交点をそのまま使う。
   - `FindFacingReclaimedQuays`・`BuildQuayFootprint`(private。`CoastlineStore` に海岸線を入れて呼ぶ)・`ReclaimedLandMeshBuilder.Build` は `Tests/Quay` がリフレクションで名前で呼ぶので、改名・多重定義しない。
+  - 入港船(`Vehicles/AmbientVehicleManager.PortCalls.cs`)は `ResolveWorldWaterlines` で同じ規則の水際をワールド座標で受け取る。水際の決め方を変えたら両方に効くので、描画側だけの分岐を足さない。
 - 港の配置(`PortLayout`)は通常モデル(無印)の寸法で決め、`_close`/`_far` のパーツは同じ位置に置くだけにする。施設モジュール(`port_building`)の置き方は区画と通常モデルだけから決め、海岸線・埋立地に依存させない。`BuildingRoadAccess.Resolve` が建物データの登録時に同じ `PortLayout.PlaceModule` でマーカーを建物中心基準へ移して間口の索引を作るため、描画だけ別の置き方にすると道路の接続面と建物がずれる。
   - 施設モジュールの接地と開口の舗装高の下限はどちらも海面+2m(`PortBuildingMeshBuilder.QUAY_TOP_HEIGHT`)。片方だけ変えると、道路の接続面と施設の舗装に段差ができる。
 - `UltraFarLandMeshBuilder` は格子点ごとに `CoastlineStore.SignedDistance` を呼ばず一括版 `SampleSignedDistanceGrid` を使う。初期ロードで地形より先に走るので、遅いと `game:loaded` が出ず Tips が止まる。Mesh の組み立てはメインスレッド専用で、ビルダーは純データを返す。

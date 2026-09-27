@@ -148,7 +148,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
                 return BuildingMeshBuilder.GenerateSimpleBuilding(footprint, 1, LocalConstants.FLOOR_HEIGHT);
             }
 
-            // 上面=floor（敷地全体の地面パネルと同一マテリアルで床続きにする）、側面/下面=ceil（岸壁の壁面）。
+            // 上面=floor（ヤードの地面パネルと同一マテリアルで床続きにする）、側面/下面=ceil（岸壁の壁面）。
             // 地面パネルが無効(draw_floor未設定等)の場合は floor パーツ直参照、それも無ければデフォルトマテリアル。
             Material topMaterial = floorMaterial != null ? floorMaterial : ResolvePartMaterial(prefixes, "floor", variantNumber);
             Material sideMaterial = ResolvePartMaterial(prefixes, "ceil", variantNumber);
@@ -162,7 +162,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
             colliderHeight = Mathf.Max(0.1f, topLocalY);
         }
 
-        // ヤードの地面（スラブの上は max(地形, 天端)）と、施設の下限（海面+2m）。
+        // ヤードの地面のローカルY。天然の海岸はスラブがヤードを覆うので max(地形, 上面)。
         float Ground(Vector2 local)
         {
             float terrain = Utils.GetGroundHeight(new Vector3(local.x + centerPointWorld.x, 1000f, local.y + centerPointWorld.z)) - centerPointWorld.y;
@@ -291,6 +291,40 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
     {
         string prefix = BuildingMeshUtils.ResolveModelNaming(buildingData).Prefix;
         return LayoutPart(prefix, "port_building", BuildingMeshUtils.ComputeVariantNumber(buildingData.visual_variant));
+    }
+
+    /// <summary>
+    /// 船が横付けする水際を、メッシュ生成と同じ規則で求めてワールド座標で返す（P・Q はワールドXZ、Y は岸壁の天端の標高）。
+    /// 建物の GameObject やセルの常駐によらず、建物データ・海岸線・埋立地のストアだけで決まる（入港する船の接岸位置に使う）。
+    /// 水際が定まらなければ空。
+    /// </summary>
+    public static List<PortLayout.Waterline> ResolveWorldWaterlines(BuildingSummary buildingData)
+    {
+        var result = new List<PortLayout.Waterline>();
+        if (buildingData?.polygonArray == null || buildingData.polygonArray.Length < 3 ||
+            buildingData.centerPointArray == null || buildingData.centerPointArray.Length < 2)
+        {
+            return result;
+        }
+        // 高さ0の中心で求めると、ローカルの Y がそのままワールドの標高になる。
+        var centerPointWorld = new Vector3(buildingData.centerPointArray[0], 0f, buildingData.centerPointArray[1]);
+        List<ReclaimedQuay> facingQuays = CollectFacingReclaimedQuays(buildingData, centerPointWorld);
+        List<PortLayout.Waterline> local;
+        if (facingQuays.Count > 0)
+        {
+            local = FacingWaterlines(facingQuays, centerPointWorld, out _);
+        }
+        else
+        {
+            Vector2[] quayFootprint = BuildQuayFootprint(BuildingMeshUtils.GetFootprint(buildingData), centerPointWorld, out QuaySeawardEdge seaward);
+            local = EnumerateSeawardWaterlines(quayFootprint, seaward, QUAY_TOP_HEIGHT);
+        }
+        var origin = new Vector2(centerPointWorld.x, centerPointWorld.z);
+        foreach (PortLayout.Waterline waterline in local)
+        {
+            result.Add(new PortLayout.Waterline { P = waterline.P + origin, Q = waterline.Q + origin, Normal = waterline.Normal, Y = waterline.Y });
+        }
+        return result;
     }
 
     /// <summary>配置の寸法に使う通常モデル（無印）を閾値フォルダの走査で解決する。描画LODの `_close`/`_far` は見ない。</summary>
