@@ -343,7 +343,7 @@ public class RailYardBuildingMeshBuilder : IBuildingMeshGenerator
 
         // 線路直下の道床はyard_trackが持つ。線路のない余白には敷地全面パネルを張らない。
         Vector2[] parcelPolygon = BuildingMeshUtils.ResolveParcelContext(
-            buildingData, useParcelAltitude: false, out _, out _);
+            buildingData, out _, out _);
         Vector2[] sitePolygon = (parcelPolygon != null && parcelPolygon.Length >= 3) ? parcelPolygon : footprint;
         ModularBodyBuilder.GenerateSiteDecorations(
             prefix, 0,

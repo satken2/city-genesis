@@ -1,0 +1,60 @@
+{
+  "terrainProfiles": {
+    "unknown": "Inconnu",
+    "noDescription": "Aucune description géographique n’est encore disponible pour ce terrain.",
+    "maps": {
+      "flat": {
+        "name": "Côte plate",
+        "description": "Une plaine littorale s’étend vers l’horizon oriental. La côte est douce, sans hautes montagnes ni vallées profondes."
+      },
+      "yoron": {
+        "name": "Île de Yoron",
+        "description": "Une île basse dans des eaux chaudes. Des calcaires coralliens soulevés forment de doux plateaux, bordés de plages blanches et de lagons peu profonds. Les étés sont chauds et humides ; la mer adoucit les hivers."
+      },
+      "aogashima": {
+        "name": "Aogashima",
+        "description": "Une petite île volcanique surgit de l’océan. Des falaises abruptes entourent une profonde caldeira dont le fond porte un autre cône. Les courants chauds baignent des versants balayés par la pluie et les vents marins humides."
+      },
+      "kumejima": {
+        "name": "Île de Kume",
+        "description": "Une île accidentée dans des eaux chaudes. Des montagnes du nord et du sud, les pentes descendent vers des terres basses, des récifs et des bancs de sable blanc. Les longs étés humides apportent pluies saisonnières et violentes tempêtes."
+      },
+      "iejima": {
+        "name": "Île d’Ie",
+        "description": "Une île basse dans une mer peu profonde. Un pic rocheux aigu se dresse sur un vaste plateau calcaire. Plages et falaises alternent sur le rivage ; l’été est moite et les vents marins traversent l’île en hiver."
+      },
+      "ikishima": {
+        "name": "Île d’Iki",
+        "description": "Une île entourée de courants chauds. De douces collines basaltiques alternent avec des terres basses, entre criques, rochers et plages. Les étés sont humides et les hivers soumis à des vents saisonniers froids."
+      },
+      "naoshima": {
+        "name": "Naoshima",
+        "description": "Une petite île dans une mer intérieure abritée. De basses collines granitiques rejoignent la côte, laissant quelques plaines et criques au débouché des vallées. Les montagnes alentour retiennent les nuages et limitent les pluies."
+      },
+      "chichijima": {
+        "name": "Chichijima",
+        "description": "Une île chaude isolée par une vaste mer. De profondes vallées entaillent les reliefs volcaniques et des baies interrompent les falaises. L’hiver reste doux ; une verdure dense couvre les pentes et les vents marins franchissent les crêtes."
+      },
+      "santorini": {
+        "name": "Santorin",
+        "description": "Un arc de terre volcanique dans une mer d’un bleu profond. De hautes falaises entourent une caldeira envahie par les eaux ; les pentes extérieures descendent vers le rivage. L’été est très ensoleillé et presque sans pluie ; les précipitations se concentrent en hiver."
+      },
+      "hongkong": {
+        "name": "Île de Hong Kong",
+        "description": "Une île montagneuse au bord d’un continent. De courtes vallées plongent des crêtes abruptes vers une côte découpée, séparée des îles voisines par des détroits. La mousson estivale apporte des pluies abondantes ; l’hiver est plus frais et sec."
+      },
+      "manhattan": {
+        "name": "Île de Manhattan",
+        "description": "Une île longue et étroite à l’embouchure d’un grand fleuve. Un large cours d’eau à l’ouest et un détroit soumis aux marées à l’est encadrent reliefs rocheux et terres basses. Les étés moites contrastent avec les hivers froids et neigeux."
+      },
+      "bahrain": {
+        "name": "Île de Bahreïn",
+        "description": "Une île aride dans un golfe peu profond. Des terres sableuses basses et des plaines calcaires entourent des collines desséchées. L’été est torride ; les rares pluies tombent surtout en hiver."
+      },
+      "dakar": {
+        "name": "Dakar (presqu’île du Cap-Vert)",
+        "description": "Une péninsule s’avance dans l’océan à la pointe occidentale d’un continent. Des côtes rocheuses et des plages bordent de bas plateaux et des collines volcaniques. Une longue saison sèche précède de brèves pluies estivales, sous le souffle des brises marines."
+      }
+    }
+  }
+}

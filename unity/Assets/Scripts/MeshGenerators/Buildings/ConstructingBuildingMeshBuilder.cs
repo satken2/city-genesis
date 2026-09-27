@@ -75,9 +75,7 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
 
         // 敷地コンテキスト（区画ポリゴンは center_point 基準のローカルXZ座標）。
         // 高さの基準は完成品の描画と同じ規則にし、工事中→完成の切り替えで建物が上下に跳ねないようにする
-        Vector2[] parcelFootprint = BuildingMeshUtils.ResolveParcelContext(
-            buildingData, useParcelAltitude: BuildingMeshBuilder.IsApplicableModelType(modelType),
-            out ParcelSummary parcel, out Vector3 centerPointWorld);
+        Vector2[] parcelFootprint = BuildingMeshUtils.ResolveParcelContext(buildingData, out ParcelSummary parcel, out Vector3 centerPointWorld);
 
         // 土マウンドの対象ポリゴン（ローカルXZ）。区画が無ければ建物底面を使う
         Vector2[] dirtPolygon = parcelFootprint ?? footprint;

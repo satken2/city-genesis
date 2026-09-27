@@ -94,7 +94,7 @@
           "terrain"
         ],
         "summary": "Get Terrain Map Features",
-        "description": "既存マップの再編集で川・水面・カメラを引き継ぐ。現在の都市は参照しない。",
+        "description": "既存マップの再編集で川・水面・カメラ・地表種別・気候区分を引き継ぐ。現在の都市は参照しない。",
         "operationId": "get_terrain_map_features_api_v1_terrain_maps__map_id__features_get",
         "parameters": [
           {
@@ -1067,7 +1067,7 @@
           "buildings"
         ],
         "summary": "Create Building",
-        "description": "建物agentを作成する。\nリクエストボディに parcel_id, type, variant, construction_ratio, floors が必須。\n作成後の建物は public_facility フラグが常に真（1）として登録される。",
+        "description": "建物agentを作成する。\nリクエストボディに parcel_id, type, variant, construction_ratio, floors が必須。\n任意の tag（建設プロジェクトのタグ）を渡すと、作成した建物に付ける。\n作成後の建物は public_facility フラグが常に真（1）として登録される。",
         "operationId": "create_building_api_v1_buildings__post",
         "requestBody": {
           "required": true,
@@ -1461,6 +1461,47 @@
         }
       }
     },
+    "/api/v1/buildings/{agent_id}": {
+      "get": {
+        "tags": [
+          "buildings"
+        ],
+        "summary": "Get Building",
+        "description": "建物1棟を建物一覧(GET /buildings)の1要素と同じ形式で取得する。\n\nUnity が爆破通知(building:exploded)を受けて対象1棟だけを瓦礫へ描き直すときに使う。\n一覧と同じ multi_agent スキーマ+サブ建物配置で返すため、Unity は一括ロードと同じ\n生成経路で扱える。一覧に載らない経済主体(建物でない・物理ボディ未付与)は 404。",
+        "operationId": "get_building_api_v1_buildings__agent_id__get",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Agent Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/buildings/construction-cost": {
       "post": {
         "tags": [
@@ -1551,7 +1592,7 @@
           "buildings"
         ],
         "summary": "Create Direct",
-        "description": "直接配置モードで建物を作成する。矩形の土地区画を自動生成し、その全面に建物を建てる。\n\n必須フィールド: variant, type, position, floors\n任意フィールド: width, depth, angle, visual_variant 系,\n                acknowledge_acquisition（民間区画の自動買収の承諾。preview-direct が\n                requires_acquisition=True を返した位置への確定に必須）。\n作成後の建物は create_building と同じく public_facility フラグが常に真（1）として登録される。",
+        "description": "直接配置モードで建物を作成する。矩形の土地区画を自動生成し、その全面に建物を建てる。\n\n必須フィールド: variant, type, position, floors\n任意フィールド: width, depth, angle, visual_variant 系,\n                acknowledge_acquisition（民間区画の自動買収の承諾。preview-direct が\n                requires_acquisition=True を返した位置への確定に必須）,\n                tag（建設プロジェクトのタグ）。\n作成後の建物は create_building と同じく public_facility フラグが常に真（1）として登録される。",
         "operationId": "create_direct_api_v1_buildings_direct_post",
         "requestBody": {
           "content": {
@@ -1990,7 +2031,7 @@
           "paths"
         ],
         "summary": "Create Paths",
-        "description": "新規パス（道路・線路等）を一括作成するエンドポイント。\nフロントエンドで使用される一時ID(temp_id)と実際に生成されたパスIDの\nマッピング情報を返却する。",
+        "description": "新規パス（道路・線路等）を一括作成するエンドポイント。\nフロントエンドで使用される一時ID(temp_id)と実際に生成されたパスIDの\nマッピング情報を返却する。\n各パスに任意の tag（建設プロジェクトのタグ）を渡すと、作成したパスに付ける。",
         "operationId": "create_paths_api_v1_paths__post",
         "requestBody": {
           "required": true,
@@ -4309,7 +4350,7 @@
           "city"
         ],
         "summary": "Get Public Facilities",
-        "description": "公共施設エージェント一覧を、UIの公共施設タブに対応するグループ単位で取得する。\n各施設にはグループの種類に応じてカード表示用のメトリクスを付与する。\n\nグループキーは agents SoA の type / public_facility / supply_product_id から決定する:\n  - TYPE_CITY                          → \"city\"（市政府）\n  - TYPE_EDUCATION                     → \"education\"（教育機関）\n  - TYPE_TRADE                        → \"port\"（港湾施設）\n  - TYPE_BUILDING かつ public_facility==1 → \"real_estate\"（不動産）\n  - TYPE_STANDARD かつ public_facility==1:\n      - regulated 財を供給          → str(product_id)（公共サービスの製品別タブ）\n      - それ以外                    → \"public_standard\"（公営施設）\n  - 上記いずれにも該当しないエージェント（世帯・民間施設・仮想建設代理エージェント等）は除外する。\n\nTYPE_CITY / TYPE_EDUCATION / TYPE_TRADE は本来的に公共主体であるため\npublic_facility フラグに依らず type のみで抽出する。仮想建設代理エージェントは type==0 の\nため、いずれの type 条件にも合致せず自然に除外される。\n\n各グループのメトリクス（type ごとに付与するフィールドが異なる）:\n  - 不動産（TYPE_BUILDING）: supply_floor / occupancy_rate / rent / balance / utilization_rate\n  - 港湾（TYPE_TRADE）: capacity / import_handling / export_handling / utilization_rate（取扱量は方向別）\n  - サービス・公営（TYPE_STANDARD）: production_capacity / production / sold_amount / price\n                                    / balance / utilization_rate\n  - 市政府・教育（TYPE_CITY / TYPE_EDUCATION）: カード基本情報のみ（メトリクスフィールドなし）\n\nname / import_capacity / export_capacity は SoA ではなく Python オブジェクト側の\n__slots__ プロパティに保持されるため、ループ内で個別に取得する。",
+        "description": "公共施設エージェント一覧を、UIの公共施設タブに対応するグループ単位で取得する。\n各施設にはグループの種類に応じてカード表示用のメトリクスを付与する。\n\nグループキーは agents SoA の type / public_facility / supply_product_id から決定する:\n  - TYPE_CITY                          → \"city\"（市政府）\n  - TYPE_EDUCATION                     → \"education\"（教育機関）\n  - TYPE_TRADE                        → \"port\"（港湾施設）\n  - TYPE_BUILDING かつ public_facility==1 → \"real_estate\"（不動産）\n  - TYPE_STANDARD かつ public_facility==1:\n      - regulated 財を供給          → str(product_id)（公共サービスの製品別タブ）\n      - それ以外                    → \"public_standard\"（公営施設）\n  - 上記いずれにも該当しないエージェント（世帯・民間施設・仮想建設代理エージェント等）は除外する。\n\nTYPE_CITY / TYPE_EDUCATION / TYPE_TRADE は本来的に公共主体であるため\npublic_facility フラグに依らず type のみで抽出する。仮想建設代理エージェントは type==0 の\nため、いずれの type 条件にも合致せず自然に除外される。\n\n各グループのメトリクス（type ごとに付与するフィールドが異なる）:\n  - 不動産（TYPE_BUILDING）: supply_floor / occupancy_rate / rent / balance / utilization_rate\n  - 港湾（TYPE_TRADE）: capacity / import_handling / export_handling / utilization_rate（取扱量は方向別。いずれもt）\n  - サービス・公営（TYPE_STANDARD）: production_capacity / production / sold_amount / price\n                                    / balance / utilization_rate\n  - 市政府・教育（TYPE_CITY / TYPE_EDUCATION）: カード基本情報のみ（メトリクスフィールドなし）\n\nname / import_capacity / export_capacity は SoA ではなく Python オブジェクト側の\n__slots__ プロパティに保持されるため、ループ内で個別に取得する。",
         "operationId": "get_public_facilities_api_v1_city_budgets_public_facilities_get",
         "responses": {
           "200": {
@@ -4690,7 +4731,7 @@
           "agents"
         ],
         "summary": "Get Agent Cargo",
-        "description": "輸出入拠点(TYPE_TRADE)の荷役情報を取得する。\n\n品目別の割当枠・実績は SoA(demand_amount/received_amount)と row-store(multi_supply)に\n分散しており、endpoints.yaml(自動生成)の single_agent スキーマでは表現できないため、\nアラート・統計系と同方針の手書きレスポンス(プレーンJSON)で返す。\n\nレスポンス:\n- capacity_per_epoch: 方向別スループット(capacity_per_space × 床面積 × エポック日数)。\n  輸入と輸出は別枠でそれぞれこの量を使える。品目別の固定枠は持たず、\n  方向内の全品目がこのキャパシティを分け合う。\n- imports / exports: 品目ごとの荷役実績のリスト(マスターの品目順)。\n  - allocation: 当エポックの割当量(需給シグナルに基づく前方視配分の結果)\n  - handled: 当エポックの取扱実績(輸入=都市への販売量、輸出=都市からの買取量)\n  - price: 単価(輸入=販売価格、輸出=買取上限価格。いずれも域外価格×為替の自国通貨建て)\n  - lost: 機会損失(輸入のみ。割当在庫の不足で売り逃した量)",
+        "description": "輸出入拠点(TYPE_TRADE)の荷役情報を取得する。\n\n品目別の割当枠・実績は SoA(demand_amount/received_amount)と row-store(multi_supply)に\n分散しており、endpoints.yaml(自動生成)の single_agent スキーマでは表現できないため、\nアラート・統計系と同方針の手書きレスポンス(プレーンJSON)で返す。\n\nレスポンス:\n- capacity_per_epoch: 方向別スループット(t。capacity_per_space × 床面積 × エポック日数。\n  原材料を持つ拠点は、当エポックに受け取った原材料で取り扱える量との小さい方)。\n  輸入と輸出は別枠でそれぞれこの量を使える。品目別の固定枠は持たず、\n  方向内の全品目が1単位の重さで換算した量でこのキャパシティを分け合う。\n- area_capacity_per_epoch: 床面積だけで決まるスループット(t/エポック)。\n- material_capacity_per_epoch: 当エポックに受け取った原材料で取り扱える量(t)。国際貨物駅では\n  国際貨物輸送路線から受け取った枠。原材料を持たない拠点(港など)は null。\n- import_handled_tons / export_handled_tons: 方向別の取扱実績の合計(t)。品目ごとの単位が\n  違うため、能力と比べられる合計はトンで返す。\n- imports / exports: 品目ごとの荷役実績のリスト(マスターの品目順)。\n  - allocation: 当エポックの割当量(需給シグナルに基づく前方視配分の結果)\n  - handled: 当エポックの取扱実績(輸入=都市への販売量、輸出=都市からの買取量)\n  - price: 単価(輸入=販売価格、輸出=買取上限価格。いずれも域外価格×為替の自国通貨建て)\n  - lost: 機会損失(輸入のみ。割当在庫の不足で売り逃した量)",
         "operationId": "get_agent_cargo_api_v1_agents__agent_id__cargo_get",
         "parameters": [
           {
@@ -5636,6 +5677,125 @@
         }
       }
     },
+    "/api/v1/saves/{save_id}/thumbnail": {
+      "get": {
+        "tags": [
+          "saves"
+        ],
+        "summary": "Get Save Thumbnail",
+        "description": "指定した save_id のセーブデータ（またはシナリオ/テンプレート）のサムネイル画像を取得する。\nクエリパラメータ template=true を付与するとシナリオ（テンプレート）から検索する。\n画像が存在しない場合は 404 を返す。",
+        "operationId": "get_save_thumbnail_api_v1_saves__save_id__thumbnail_get",
+        "parameters": [
+          {
+            "name": "save_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Save Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "saves"
+        ],
+        "summary": "Upload Save Thumbnail",
+        "description": "指定した save_id のセーブデータ（またはシナリオ/テンプレート）にサムネイル画像を設定・保存する。\nクエリパラメータ template=true を付与するとシナリオ（テンプレート）へ保存する。",
+        "operationId": "upload_save_thumbnail_api_v1_saves__save_id__thumbnail_put",
+        "parameters": [
+          {
+            "name": "save_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Save Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "saves"
+        ],
+        "summary": "Upload Save Thumbnail",
+        "description": "指定した save_id のセーブデータ（またはシナリオ/テンプレート）にサムネイル画像を設定・保存する。\nクエリパラメータ template=true を付与するとシナリオ（テンプレート）へ保存する。",
+        "operationId": "upload_save_thumbnail_api_v1_saves__save_id__thumbnail_post",
+        "parameters": [
+          {
+            "name": "save_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Save Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/parameters": {
       "get": {
         "tags": [
@@ -5716,6 +5876,62 @@
         }
       }
     },
+    "/api/v1/templates/thumbnail": {
+      "get": {
+        "tags": [
+          "templates"
+        ],
+        "summary": "Get Current Template Thumbnail",
+        "description": "現在編集中のテンプレート（または現在セッション）のサムネイル画像を取得する。",
+        "operationId": "get_current_template_thumbnail_api_v1_templates_thumbnail_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "templates"
+        ],
+        "summary": "Upload Current Template Thumbnail",
+        "description": "現在編集中のテンプレート（テンプレート作成モード）にサムネイル画像を設定する。\n次回テンプレート保存時にも反映されるよう一時保持し、既存セーブIDがあれば即座に保存する。",
+        "operationId": "upload_current_template_thumbnail_api_v1_templates_thumbnail_put",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "templates"
+        ],
+        "summary": "Upload Current Template Thumbnail",
+        "description": "現在編集中のテンプレート（テンプレート作成モード）にサムネイル画像を設定する。\n次回テンプレート保存時にも反映されるよう一時保持し、既存セーブIDがあれば即座に保存する。",
+        "operationId": "upload_current_template_thumbnail_api_v1_templates_thumbnail_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/templates/complete-construction": {
       "post": {
         "tags": [
@@ -5784,7 +6000,7 @@
           "templates"
         ],
         "summary": "Tenant Agent Endpoint",
-        "description": "既存の共用建物へ、建物ではない経済主体を入居済み・稼働中で作成する\n(*テンプレート作成モードでのみ実行可能)。\n\nリクエストボディ:\n  variant: 経済主体のバリアント(type が TYPE_STANDARD / TYPE_TRADE かつ building=False。必須)\n  building_agent_id: 入居先の建物エージェントID(TYPE_BUILDING。必須)\n  floors: 占有する階数(共有建物のみ有効。占有面積 = 階数 × 建物の1フロア面積。省略時1)\n\nスポーン・転居フェーズを経ずに入居させるため、占有量の加算・地区/区画の継承・家賃と賃金の\nシード・創業計画(生産目標と雇用枠)・ACTIVE化をまとめて行う。非共有建物は階数にかかわらず\n全床を占有する。空き不足・種別不一致・面積範囲外は 400(VALIDATION_ERROR)。",
+        "description": "既存の建物へ、建物ではない経済主体を入居済み・稼働中で作成する\n(*テンプレート作成モードでのみ実行可能)。\n\nリクエストボディ:\n  variant: 経済主体のバリアント(type が TYPE_STANDARD / TYPE_TRADE かつ building=False。必須)\n  building_agent_id: 入居先の建物エージェントID(TYPE_BUILDING か TYPE_DEFAULT の建物。必須)\n  floors: 占有する階数(共有建物と台帳入居の建物で有効。占有面積 = 階数 × 建物の1フロア面積。省略時1)\n\nスポーン・転居フェーズを経ずに入居させるため、占有量の加算・地区/区画の継承・家賃と賃金の\nシード・創業計画(生産目標と雇用枠)・ACTIVE化をまとめて行う。非共有建物は階数にかかわらず\n全床を占有する。TYPE_DEFAULT の建物(国境検問所)は台帳入居で、床種別と空きを検査せず占有量も\n加算しない。空き不足・種別不一致・面積範囲外は 400(VALIDATION_ERROR)。",
         "operationId": "tenant_agent_endpoint_api_v1_templates_tenant_agent_post",
         "requestBody": {
           "content": {
@@ -7604,7 +7820,7 @@
           "resources"
         ],
         "summary": "Create Resource",
-        "description": "天然資源エリアを新規作成する(*テンプレート作成モード(gd3.template_mode)でのみ実行可能)。\n\nペイロード: polygon(必須, [[x, z], ...]) / resource_type(必須) /\nmax_amount(必須, 埋蔵上限量) / recovery_rate(任意, 1エポックあたりの回復率)。\n実際のバリデーション・登録処理は app.services.crud.crud_resources.add_resource が行う。",
+        "description": "天然資源エリアを新規作成する(*テンプレート作成モード(gd3.template_mode)でのみ実行可能)。\n\nペイロード: polygon(必須, [[x, z], ...]) / resource_type(必須) /\nmax_amount(必須, 埋蔵上限量) / recovery_rate(任意, 埋蔵上限量に対する1日あたりの回復割合)。\n実際のバリデーション・登録処理は app.services.crud.crud_resources.add_resource が行う。",
         "operationId": "create_resource_api_v1_resources_post",
         "requestBody": {
           "content": {
@@ -8187,7 +8403,7 @@
           "transit"
         ],
         "summary": "Post Transit Line",
-        "description": "路線を新規作成する。\n\nペイロード例:\n  {\n    \"path_variant\": 1001,             # 区間パスのバリアント(transit_master の transit_path_id)\n    \"stops\": [[x,y,z], [x,y,z], ...], # 停留所座標(任意。各停留所は種別の stop_path_variants 上のみ)\n    \"fare_price\": 200,                # 運賃(任意, 既定0)\n    \"target_headway\": 10,             # 目標運行間隔(分, 任意, 既定10)\n    \"cars_per_train\": 1               # 1編成の車両数(任意, 既定1, >=1)\n  }",
+        "description": "路線を新規作成する。\n\nペイロード例:\n  {\n    \"path_variant\": 1001,             # 区間パスのバリアント(transit_master の transit_path_id)\n    \"points\": [                       # 巡回点(巡回順。最後の点の次は先頭の点に戻る)\n      {\"kind\": \"stop\", \"position\": [x,y,z]},      # 停留所(種別の stop_path_variants 上のみ)\n      {\"kind\": \"waypoint\", \"position\": [x,y,z]},  # 経由点(停車せずに通る。走行網のパス上のみ)\n      ...\n    ],                                # 停留所だけなら代わりに \"stops\": [[x,y,z], ...] でもよい\n    \"fare_price\": 200,                # 運賃(任意, 既定0)\n    \"target_headway\": 10,             # 目標運行間隔(分, 任意, 既定10)\n    \"cars_per_train\": 1,              # 1編成の車両数(任意, 既定1, >=1)\n    \"line_color\": \"#0079c2\",          # 路線カラー(任意。省略時はパレットから既定色)\n    \"vehicle_model\": 0                # 車両の外観番号(任意, 既定0, >=0。描画専用で性能は変わらない)\n  }",
         "operationId": "post_transit_line_api_v1_transit_lines_post",
         "requestBody": {
           "content": {
@@ -8243,6 +8459,149 @@
         }
       }
     },
+    "/api/v1/transit/lines/estimate": {
+      "post": {
+        "tags": [
+          "transit"
+        ],
+        "summary": "Post Transit Line Estimate",
+        "description": "まだ作成していない路線の収支見込みを取得する(都市は変更しない)。\n\nペイロードは POST /lines と同じ(path_variant 必須、points・fare_price・target_headway・cars_per_train)。\n経路編集では line_agent_id(編集中の路線)も渡し、線路容量の判定でその路線の現在の便数を合算から外させる。\n路線の新設パネルと経路編集が巡回点を置くたびに呼ぶ。応答は下の既存路線版と同じ形。",
+        "operationId": "post_transit_line_estimate_api_v1_transit_lines_estimate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Data"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/transit/lines/route-preview": {
+      "post": {
+        "tags": [
+          "transit"
+        ],
+        "summary": "Post Transit Route Preview",
+        "description": "巡回点を置いている途中の路線の下地経路を、3D上の経路プレビュー用に取得する(都市は変更しない)。\n\nペイロードは {path_variant, points, cars_per_train(任意)}。応答は {ok, reason, blocked_legs, legs} で、\nlegs[k] は停留所 k から次の停留所までの区間の journey(路線一覧の journeys の要素と同じ形)、\n下地でつながらない区間は null。Unity の路線設置エディタが巡回点の変更のたびに呼ぶ。",
+        "operationId": "post_transit_route_preview_api_v1_transit_lines_route_preview_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Data"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/transit/lines/{line_agent_id}/estimate": {
+      "post": {
+        "tags": [
+          "transit"
+        ],
+        "summary": "Post Existing Transit Line Estimate",
+        "description": "既存路線の設定を変えた場合の収支見込みを取得する(路線は変更しない)。\n\nペイロードは {fare_price, target_headway, cars_per_train}(いずれも任意。未指定は現在の値)。\n応答は必要編成数・車両数・輸送容量、1エポックあたりの運営原価(車両リース費)・想定乗車率での運賃収入・収支、\n試算できないときの理由(reason)。",
+        "operationId": "post_existing_transit_line_estimate_api_v1_transit_lines__line_agent_id__estimate_post",
+        "parameters": [
+          {
+            "name": "line_agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Line Agent Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Data"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/transit/lines/{line_agent_id}": {
       "get": {
         "tags": [
@@ -8288,7 +8647,7 @@
           "transit"
         ],
         "summary": "Patch Transit Line",
-        "description": "路線の運賃・運行間隔・1編成の車両数(cars_per_train)・路線名を更新する。",
+        "description": "路線の運賃・運行間隔・1編成の車両数(cars_per_train)・路線カラー(line_color)・\n車両の外観(vehicle_model)・路線名を更新する。",
         "operationId": "patch_transit_line_api_v1_transit_lines__line_agent_id__patch",
         "parameters": [
           {
@@ -8352,6 +8711,59 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/transit/lines/{line_agent_id}/route": {
+      "put": {
+        "tags": [
+          "transit"
+        ],
+        "summary": "Put Transit Line Route",
+        "description": "路線の経路(巡回点=停留所・経由点)を置き換える。\n\nペイロードは {points}(形式は POST /lines と同じ)。編成長・線路容量の事前検証に通らなければ何も変更しない。\n運賃などの設定・収支・乗車回数は引き継ぐ。",
+        "operationId": "put_transit_line_route_api_v1_transit_lines__line_agent_id__route_put",
+        "parameters": [
+          {
+            "name": "line_agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Line Agent Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "title": "Data"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -8629,6 +9041,360 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/roads/": {
+      "get": {
+        "tags": [
+          "roads"
+        ],
+        "summary": "Get Roads",
+        "description": "全道路の一覧(road_id 昇順)と、再描画判定用の version。",
+        "operationId": "get_roads_api_v1_roads__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "roads"
+        ],
+        "summary": "Post Road",
+        "description": "道路を作成する。ペイロード: {name, color?, path_ids}(path_ids は1本以上)。",
+        "operationId": "post_road_api_v1_roads__post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Data"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/roads/trace": {
+      "get": {
+        "tags": [
+          "roads"
+        ],
+        "summary": "Get Road Trace",
+        "description": "直進方向の自動延長の候補 {path_ids, bbox} を返す。path_id と road_id のどちらかが必須。\n\nbbox は候補の中心線の外接矩形 [minx, minz, maxx, maxz](候補が無ければ null)。",
+        "operationId": "get_road_trace_api_v1_roads_trace_get",
+        "parameters": [
+          {
+            "name": "path_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "この区間の両端から直進方向へたどる",
+              "title": "Path Id"
+            },
+            "description": "この区間の両端から直進方向へたどる"
+          },
+          {
+            "name": "road_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "この道路の端から外側へたどる。既存の区間は結果に含めない",
+              "title": "Road Id"
+            },
+            "description": "この道路の端から外側へたどる。既存の区間は結果に含めない"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/roads/extension-candidates": {
+      "post": {
+        "tags": [
+          "roads"
+        ],
+        "summary": "Post Extension Candidates",
+        "description": "新しく敷く道路の端点が既存の道路の端に接していれば、その道路を延長の候補として返す。",
+        "operationId": "post_extension_candidates_api_v1_roads_extension_candidates_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Data"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/roads/{road_id}": {
+      "get": {
+        "tags": [
+          "roads"
+        ],
+        "summary": "Get Road",
+        "description": "道路の詳細(区間の並べ方・集計・交差・停留所など)。",
+        "operationId": "get_road_api_v1_roads__road_id__get",
+        "parameters": [
+          {
+            "name": "road_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Road Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "roads"
+        ],
+        "summary": "Patch Road",
+        "description": "名前・色の変更と起点と終点の入れ替え。ペイロード: {name?, color?, reverse?}。",
+        "operationId": "patch_road_api_v1_roads__road_id__patch",
+        "parameters": [
+          {
+            "name": "road_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Road Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "title": "Data"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "roads"
+        ],
+        "summary": "Remove Road",
+        "description": "道路を削除する。区間は名もなき道に戻る。",
+        "operationId": "remove_road_api_v1_roads__road_id__delete",
+        "parameters": [
+          {
+            "name": "road_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Road Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/roads/{road_id}/members": {
+      "post": {
+        "tags": [
+          "roads"
+        ],
+        "summary": "Post Road Members",
+        "description": "所属区間の一括追加・削除。ペイロード: {add?: int[], remove?: int[]}。",
+        "operationId": "post_road_members_api_v1_roads__road_id__members_post",
+        "parameters": [
+          {
+            "name": "road_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Road Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "title": "Data"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful Response",

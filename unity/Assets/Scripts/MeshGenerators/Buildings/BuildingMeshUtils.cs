@@ -184,7 +184,7 @@ public static class BuildingMeshUtils
     /// またいで1つにまとめる(実寸キューブ投影UVでは、同じ向きで面一に接する別材質の面の頂点が一致する)ため、
     /// 後のサブメッシュの範囲が前のサブメッシュの区画まで伸び、間にある未参照の頂点まで複製される。
     /// 区画内は元の頂点順を保ち、複数のサブメッシュが共有する頂点はサブメッシュごとに持たせる。
-    /// どちらも CombineMeshes が元から写していたとおりなので、結合結果は未参照の頂点が消える以外は変わらない。
+    /// どちらも詰め直さずに結合した場合と同じ並び・同じ複製なので、結合結果の違いは未参照の頂点が無いことだけになる。
     /// 頂点はストリームのバイト列のまま写すので、属性の種類と形式も元のメッシュと同じになる。
     /// </summary>
     private static Mesh CompactSubMeshVertices(Mesh mesh)
@@ -265,8 +265,7 @@ public static class BuildingMeshUtils
                     }
                 }
 
-                packed.SetIndexBufferParams(packedIndexCount, UnityEngine.Rendering.IndexFormat.UInt32);
-                NativeArray<uint> packedIndices = packed.GetIndexData<uint>();
+                uint[] packedIndices = new uint[packedIndexCount];
                 var descriptors = new UnityEngine.Rendering.SubMeshDescriptor[subMeshCount];
                 int[] remap = new int[vertexCount];
                 int nextVertex = 0;
@@ -320,6 +319,8 @@ public static class BuildingMeshUtils
                     nextIndex += indices.Length;
                 }
 
+                packed.SetIndexBufferParams(packedIndexCount, UnityEngine.Rendering.IndexFormat.UInt32);
+                packed.GetIndexData<uint>().CopyFrom(packedIndices);
                 packed.subMeshCount = subMeshCount;
                 for (int s = 0; s < subMeshCount; s++)
                 {
@@ -847,10 +848,11 @@ public static class BuildingMeshUtils
     ///   ローカルXZ座標(建物 footprint と同じ規約)。区画が取得できない場合は null。
     ///   ParcelManager の区画ポリゴンはワールド座標だが、メッシュ生成側は建物GameObject
     ///   (center_point 位置に配置される)のローカル空間で頂点を組み立てるため、ここで変換して返す。
-    /// - centerPointWorld のYは、区画が取得できて useParcelAltitude が true なら parcel.altitude、
-    ///   それ以外は建物中心位置の地形標高になる。
+    /// - centerPointWorld のYは建物中心位置の地形標高。敷地装飾の地形追従・基盤・土盛りは
+    ///   これを基準にローカルYを決める。海上区画の建物はGameObjectが海面（parcel.altitude）に
+    ///   置かれるが、ここを海面にすると地形追従の頂点が海底まで沈むので、どの区画でも地形標高のままにする。
     /// </summary>
-    public static Vector2[] ResolveParcelContext(BuildingSummary buildingData, bool useParcelAltitude,
+    public static Vector2[] ResolveParcelContext(BuildingSummary buildingData,
         out ParcelSummary parcel, out Vector3 centerPointWorld)
     {
         parcel = null;
@@ -879,16 +881,7 @@ public static class BuildingMeshUtils
         {
             cx = buildingData.centerPointArray[0];
             cz = buildingData.centerPointArray[1];
-            float cy;
-            if (parcel != null && useParcelAltitude)
-            {
-                cy = parcel.altitude;
-            }
-            else
-            {
-                cy = Utils.GetGroundHeight(new Vector3(cx, 1000f, cz));
-            }
-            centerPointWorld = new Vector3(cx, cy, cz);
+            centerPointWorld = new Vector3(cx, Utils.GetGroundHeight(new Vector3(cx, 1000f, cz)), cz);
         }
 
         if (parcel != null)

@@ -42,7 +42,7 @@
 - **取得範囲**: カメラ移動では未ロード・要再取得(`MarkLoadedCellsStale`)・ティア変化のセルだけを取得する。取得対象外セルの建物は生成しない
 - **アンロード**: 離脱セルの建物は分割ワーカーが退避キャッシュへ移し、再入場時にキーで復元する
 - **Status変化検知**: 受信した `status` を既存オブジェクトの `ObjectIdInfo.status` と比較する(status は再利用キーの形状ハッシュにも含まれる)
-- **個別取得**: `CellDataLoader.FetchBuilding(agentId)`
+- **個別取得**: `CellDataLoader.FetchBuilding(agentId)` → `GET /api/v1/buildings/{agent_id}`。応答は一覧(`GET /api/v1/buildings`)の1要素と同じ形式(サブ建物配置を含む)なので、一括ロードと同じ生成経路で描き直せる。呼び出し元は爆破通知 `building:exploded`
 
 ### PathManager
 
@@ -141,7 +141,7 @@ PathManager.LoadCellDataAtTier (isDiff=true)
 CellDataLoader.UpdateManagers は以下の順序でマネージャーに指示を出す：
 
 1. **Terrain** — 地形タイルを取得・公開し、既存の道路・建物・プロップを新しい地形へ追従させる（他マネージャーが `GetGroundHeight` を使う）
-2. **Parcel** — 区画を取得し、適用の完了を待つ（建物の基準標高が区画に依存するため、区画を先に確定させる）
+2. **Parcel** — 区画を取得し、適用の完了を待つ（海上区画の建物の接地高が区画の基準標高に依存するため、区画を先に確定させる）
 3. **Building** → **Path** — 地形と区画に追従して配置する。道路は交差点メッシュも生成する
 4. **Zone** → **Resource** → **Prop** — 地区は全量の版差分、資源は一覧の再取得、プロップは常駐セルの配置・障害物のスナップショット
 

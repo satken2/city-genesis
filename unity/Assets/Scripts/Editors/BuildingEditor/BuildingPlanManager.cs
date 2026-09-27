@@ -2,10 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Networking;
-using Newtonsoft.Json;
 using System;
-using System.Globalization;
 using GeneratedModels;
 
 /// <summary>
@@ -19,7 +16,6 @@ public partial class BuildingPlanManager : MonoBehaviour
     public int bdType = 0;        // 建物タイプ（bd_type）
     public int agentType = 0;        // エージェントタイプ（agent_type）
     public int agentVariant = 0;     // エージェントバリアント（agent_variant）
-    public float defaultConstructionRatio = 0.8f; // デフォルトの建蔽率
     public int defaultFloors = 3;           // デフォルトの階数
 
     /// <summary>
@@ -31,7 +27,6 @@ public partial class BuildingPlanManager : MonoBehaviour
     public static int SelectedParcelType { get; private set; }
 
     // 実際に使用する建設値（入力値）
-    private float currentConstructionRatio = 0.8f;
     private int currentFloors = 3;
     // 外観バリアント(visual_variant1/2/3)。0.0〜1.0の値で建物の外観を決定する。
     // UIの外観乱数スライダーと連動し、プレビューメッシュの生成時にBuildingSummaryへ設定される。
@@ -68,8 +63,6 @@ public partial class BuildingPlanManager : MonoBehaviour
 
     // 効果音再生用
     private AudioSource audioSource;
-
-    private Coroutine shapeCoroutine;
 
     // 現在のモード（新規建設 or 編集）
     private bool isEditMode = false;
@@ -161,14 +154,6 @@ public partial class BuildingPlanManager : MonoBehaviour
         public int? structure;
         // 観光名所の種別(観光名所でなければ null → 0 扱い)
         public int? landmark;
-    }
-
-    [Serializable]
-    private class BuildingShape
-    {
-        public List<List<float>> polygon;
-        public float height;
-        public List<float> center_point;
     }
 
     [Serializable]
@@ -292,11 +277,9 @@ public partial class BuildingPlanManager : MonoBehaviour
                 // 現在の設定を建物データから読み込み
                 agentType = editingBuildingData.bd_type;
                 agentVariant = editingBuildingData.bd_variant;
-                defaultConstructionRatio = editingBuildingData.construction_ratio;
                 defaultFloors = editingBuildingData.floors;
 
                 // 現在の建設値も更新
-                currentConstructionRatio = editingBuildingData.construction_ratio;
                 currentFloors = editingBuildingData.floors;
                 currentStructure = editingBuildingData.structure ?? 0;
                 currentLandmark = editingBuildingData.landmark ?? 0;
@@ -443,13 +426,6 @@ public partial class BuildingPlanManager : MonoBehaviour
 
     private void ResetBuildingConstruction()
     {
-        // プレビュー形状取得コルーチンが実行中ならキャンセルする
-        if (shapeCoroutine != null)
-        {
-            StopCoroutine(shapeCoroutine);
-            shapeCoroutine = null;
-        }
-
         isEditMode = false;
         editingBuildingId = -1;
         editingBuildingData = null;
@@ -458,7 +434,6 @@ public partial class BuildingPlanManager : MonoBehaviour
         SelectedParcelType = 0;
 
         // 現在の建設値をデフォルト値にリセット
-        currentConstructionRatio = defaultConstructionRatio;
         currentFloors = defaultFloors;
         // 外観バリアントもデフォルト(0.5)にリセット
         currentVisualVariant = 0.5f;
@@ -487,8 +462,8 @@ public partial class BuildingPlanManager : MonoBehaviour
     /// <summary>
     /// IPC経由で建物形状変更を受信したときの処理。
     /// UI側がバックエンドのPOST /api/v1/buildings/previewから取得した形状データを
-    /// 受け取り、直接3Dプレビューメッシュを生成する。
-    /// FetchBuildingShape()は使わず、提供されたデータから直接メッシュを構築する。
+    /// 受け取り、直接3Dプレビューメッシュを生成する。区画上のプレビュー形状の供給元はこの経路だけで、
+    /// Unity はバックエンドへ形状を問い合わせない。
     /// </summary>
     public void OnUpdateShapeFromIpc(float[][] polygon, int floors, float[] centerPoint, float height, int revision = -1)
     {
@@ -626,6 +601,10 @@ public partial class BuildingPlanManager : MonoBehaviour
         effectRangeOverlay = overlayObj.AddComponent<EffectRangeOverlay>();
     }
 
+    /// <summary>
+    /// 階数を設定する。作り直すのは直接配置のローカル矩形ゴーストだけで、区画上のプレビュー形状は
+    /// UI が同じ階数変更で POST /buildings/preview を取り直し、edit_building:update_shape で届ける。
+    /// </summary>
     public void SetFloors(int floors)
     {
         bool changed = currentFloors != floors;
@@ -633,7 +612,6 @@ public partial class BuildingPlanManager : MonoBehaviour
         if (changed) PlaySound(changeFloorsSound);
         if (IsDirectPlacement && directPreviewVisible) BuildDirectRectanglePreview();
         Debug.Log($"BuildingPlanManager: 階数を設定しました: {floors}");
-        UpdateBuildingShape();
     }
 
     /// <summary>
@@ -875,126 +853,6 @@ public partial class BuildingPlanManager : MonoBehaviour
                     EmitPlacementState();
                 }
                 break;
-        }
-    }
-
-    private void UpdateBuildingShape()
-    {
-        if (selectedParcelId <= 0) return;
-        if (shapeCoroutine != null)
-        {
-            StopCoroutine(shapeCoroutine);
-        }
-        shapeCoroutine = StartCoroutine(FetchBuildingShape());
-    }
-
-    private IEnumerator FetchBuildingShape()
-    {
-        string url = $"{ApiClient.BASE_URL}/buildings/shape?parcel_id={selectedParcelId}&floors={currentFloors}&building_ratio={currentConstructionRatio.ToString(CultureInfo.InvariantCulture)}&building_variant={agentVariant}";
-        Debug.Log($"BuildingPlanManager: 建物形状取得URL: {url}");
-        using (UnityWebRequest request = UnityWebRequest.Get(url))
-        {
-            yield return request.SendWebRequest();
-
-            if (request.result == UnityWebRequest.Result.Success)
-            {
-                string json = request.downloadHandler.text;
-                BuildingShape shape = JsonConvert.DeserializeObject<BuildingShape>(json);
-                if (shape != null && shape.polygon != null)
-                {
-                    // ポリゴン座標を BuildingSummary の polygon (List<object>) 形式で構築
-                    var polygonObjList = new List<object>();
-                    // 同時にfloat[][]形式も構築し、外観バリアント変更時の再生成用にキャッシュする
-                    var polygonFloatArray = new float[shape.polygon.Count][];
-                    for (int i = 0; i < shape.polygon.Count; i++)
-                    {
-                        var p = shape.polygon[i];
-                        if (p.Count >= 2)
-                        {
-                            polygonObjList.Add(new List<object> { p[0], p[1] });
-                            polygonFloatArray[i] = new float[] { p[0], p[1] };
-                        }
-                    }
-
-                    // プレビュー形状をキャッシュ。外観バリアント変更時にこのポリゴンから再生成する。
-                    cachedPolygon = polygonFloatArray;
-                    cachedHeight = shape.height;
-                    if (shape.center_point != null && shape.center_point.Count >= 2)
-                    {
-                        cachedCenterPoint = new float[] { shape.center_point[0], shape.center_point[1] };
-                    }
-
-                    BuildingSummary buildingData = new BuildingSummary
-                    {
-                        agent_id = -1,
-                        parcel_id = selectedParcelId,
-                        type = agentType,
-                        variant = agentVariant,
-                        bd_type = bdType,
-                        floors = currentFloors,
-                        height = shape.height,
-                        polygon = polygonObjList,
-                        structure = currentStructure,
-                        landmark = currentLandmark,
-                        visual_variant = currentVisualVariant,
-                        visual_variant2 = currentVisualVariant2,
-                        visual_variant3 = currentVisualVariant3,
-                        center_point = shape.center_point != null && shape.center_point.Count >= 2 
-                            ? new List<object> { shape.center_point[0], shape.center_point[1] }
-                            : null
-                    };
-
-                    // BuildingMeshBuilderを使用してメッシュを生成（プレビューモード）
-                    BuildingMeshResult meshResult = new BuildingMeshBuilder().Generate(
-                        buildingData
-                    );
-
-                    // 中心位置を計算
-                    Vector3 centerPosition = Vector3.zero;
-                    if (shape.center_point != null && shape.center_point.Count >= 2)
-                    {
-                        float cx = shape.center_point[0];
-                        float cz = shape.center_point[1];
-                        // 地面の高さを取得して設定（Zファイティングを防ぐため少し浮かせる）
-                        float groundHeight = Utils.GetGroundHeight(new Vector3(cx, 1000f, cz));
-                        float buildingBaseHeight = groundHeight + 0.01f;
-                        centerPosition = new Vector3(cx, buildingBaseHeight, cz);
-                    }
-                    else
-                    {
-                        // center_pointがない場合はpolygonから重心を計算
-                        List<Vector3> points = new List<Vector3>();
-                        foreach (var p in shape.polygon)
-                        {
-                            if (p.Count >= 2)
-                            {
-                                float x = p[0];
-                                float z = p[1];
-                                points.Add(new Vector3(x, 0, z));
-                            }
-                        }
-                        if (points.Count > 0)
-                        {
-                            Vector3 sum = Vector3.zero;
-                            foreach (var p in points)
-                            {
-                                sum += p;
-                            }
-                            centerPosition = sum / points.Count;
-                            // 地面の高さを取得して設定（Zファイティングを防ぐため少し浮かせる）
-                            float groundHeight = Utils.GetGroundHeight(new Vector3(centerPosition.x, 1000f, centerPosition.z));
-                            float buildingBaseHeight = groundHeight + 0.01f;
-                            centerPosition = new Vector3(centerPosition.x, buildingBaseHeight, centerPosition.z);
-                        }
-                    }
-
-                    SetBuildingPreviewMesh(meshResult, centerPosition, previewMaterial);
-                }
-            }
-            else
-            {
-                Debug.LogError($"建物形状取得に失敗: {request.error}");
-            }
         }
     }
 

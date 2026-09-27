@@ -77,7 +77,10 @@
       "locked": "Verrouillé",
       "completed": "Accompli",
       "failed": "Expiré"
-    }
+    },
+    "scenarioImageLabel": "Image (Miniature)",
+    "scenarioImageSelect": "Sélectionner une image...",
+    "scenarioImageClear": "Supprimer"
   },
   "achievementQuests": {
     "createTitle": "Créer un objectif",

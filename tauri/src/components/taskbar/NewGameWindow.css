@@ -194,21 +194,22 @@
 .new-game-detail {
   display: flex;
   flex-direction: column;
-  width: 400px;
+  width: 460px;
   flex-shrink: 0;
   background-color: #16202e;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   overflow: hidden;
 }
 
-/* 画像は上端いっぱいに横幅を使い、4:3で切り出す */
+/* 紹介文とカードの高さを優先し、画像は残りの高さに合わせて縮める。 */
 .new-game-detail-image {
   width: 100%;
-  aspect-ratio: 4 / 3;
+  height: 170px;
+  min-height: 0;
   object-fit: cover;
   background-size: cover;
   background-position: center;
-  flex-shrink: 0;
+  flex: 0 1 170px;
 }
 
 .new-game-detail-image--terrain {
@@ -223,15 +224,20 @@
   background-color: #45543a;
 }
 
-/* 説明文エリアだけがスクロールし、開始ボタンは常に見える位置に留まる */
+/* 地形紹介は全文を見せる。任意長のシナリオ本文だけはスクロールできる。 */
 .new-game-detail-content {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   padding: 16px;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+}
+
+.new-game-detail--terrain .new-game-detail-content {
+  flex: 1 0 auto;
+  overflow: visible;
 }
 
 .new-game-detail-title {
@@ -256,6 +262,58 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.new-game-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.new-game-fact {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+  background: var(--flat-raised);
+  box-shadow: var(--flat-shadow-sm);
+}
+
+.new-game-fact dt {
+  color: var(--flat-text-label);
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.new-game-fact dd {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-height: 40px;
+  margin: 0;
+  color: var(--flat-text);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.new-game-fact .new-game-fact-size {
+  font-size: 16px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.new-game-ground-icon {
+  width: 44px;
+  height: 44px;
+  color: var(--flat-text-body);
+}
+
+.new-game-fact--climate {
+  grid-column: 1 / -1;
 }
 
 .new-game-detail-block-title {

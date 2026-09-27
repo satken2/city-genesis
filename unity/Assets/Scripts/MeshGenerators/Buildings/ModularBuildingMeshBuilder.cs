@@ -26,9 +26,7 @@ public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
         int modelType = GetModelType(buildingData);
         int buildingShape = GetBuildingShape(buildingData);
 
-        Vector2[] fenceFootprint = BuildingMeshUtils.ResolveParcelContext(
-            buildingData, useParcelAltitude: BuildingMeshBuilder.IsApplicableModelType(modelType),
-            out ParcelSummary parcel, out Vector3 centerPointWorld);
+        Vector2[] fenceFootprint = BuildingMeshUtils.ResolveParcelContext(buildingData, out ParcelSummary parcel, out Vector3 centerPointWorld);
 
         // MODEL_MODULAR_GROUND で parcel が取得できない場合は building footprint を fence 用にフォールバックする
         if (fenceFootprint == null && modelType == Constants.MODEL_MODULAR_GROUND)

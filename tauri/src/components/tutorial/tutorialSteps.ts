@@ -38,6 +38,10 @@ import {
   TUTORIAL_FLAG_ZONE_PANEL_OPEN,
   TUTORIAL_FLAG_PARCEL_PANEL_OPEN,
 } from "./tutorialSetup";
+import basicScenarioThumbnail from "../../assets/images/scenarios/basic.png";
+import scenario2Thumbnail from "../../assets/images/scenarios/scenario2.png";
+import scenario3Thumbnail from "../../assets/images/scenarios/scenario3.png";
+import scenario4Thumbnail from "../../assets/images/scenarios/scenario4.png";
 
 /**
  * シナリオ2で「右上の道路」の現在の所属地区 ID を取得するヘルパー。
@@ -333,6 +337,8 @@ export interface TutorialScenario {
   id: string;
   titleKey: string;
   descriptionKey: string;
+  /** シナリオ一覧や詳細パネルで表示するサムネイル画像URL */
+  image?: string;
   steps: TutorialStep[];
 }
 
@@ -344,6 +350,7 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
     id: "basic",
     titleKey: "newGame.tutorialName",
     descriptionKey: "newGame.tutorialDesc",
+    image: basicScenarioThumbnail,
     steps: [
       {
         id: 1,
@@ -488,6 +495,7 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
     id: "scenario2",
     titleKey: "tutorial.scenario2.title",
     descriptionKey: "tutorial.scenario2.description",
+    image: scenario2Thumbnail,
     steps: [
       {
         // イントロ(検証なし)
@@ -600,6 +608,7 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
     id: "scenario3",
     titleKey: "tutorial.scenario3.title",
     descriptionKey: "tutorial.scenario3.description",
+    image: scenario3Thumbnail,
     steps: [
       {
         // イントロ(検証なし)
@@ -772,6 +781,7 @@ export const TUTORIAL_SCENARIOS: TutorialScenario[] = [
     id: "scenario4",
     titleKey: "tutorial.scenario4.title",
     descriptionKey: "tutorial.scenario4.description",
+    image: scenario4Thumbnail,
     steps: [
       {
         // イントロ(検証なし)

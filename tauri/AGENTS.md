@@ -13,7 +13,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 | `src/contexts/` | `MasterDataContext`(マスターデータ)・`FontSizeContext` |
 | `src/hooks/` | 共通Reactフック。仕様は各ファイル冒頭のコメント |
 | `src/utils/` | 共通処理(下記の一覧) |
-| `src/data/` | 静的な掲載データ。`credits.ts`(クレジット表示の正)・`propCategories.json`・`transitVehicleModels.json`・`resourcePresets.ts` |
+| `src/data/` | 静的な掲載データ。`credits.ts`(クレジット表示の正)・`propCategories.json`・`transitVehicleModels.json`・`resourcePresets.ts`・`terrainProfiles.ts`(翻訳された地形紹介を持つマップID) |
 | `src/i18n/` | 翻訳リソース `<言語コード>/<ドメイン>.json`(`index.ts` がglobで集約) |
 | `src/assets/` | 画像(`images/`)と音声(`sounds/`) |
 | `src/types.ts` | 手書きの共通型(`WindowContext` など) |

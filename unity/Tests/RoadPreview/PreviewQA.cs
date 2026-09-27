@@ -83,7 +83,8 @@ public static class PreviewQA
             CheckAuthoritativeAlignment(asm);
             CheckRouteProposals(asm, item);
             CheckMaxSpan(asm, item);
-            File.WriteAllText(result, "PASS: 100 preview updates; alignment curves, grades and controls; route proposal apply, undo, fixed endpoints, stale revisions, generated-point promotion and editing phase.");
+            CheckSeaLakeCrossings(asm);
+            File.WriteAllText(result, "PASS: 100 preview updates; alignment curves, grades and controls; route proposal apply, undo, fixed endpoints, stale revisions, generated-point promotion and editing phase; sea and lake crossings.");
             EditorApplication.Exit(0);
         }
         catch (Exception ex)
@@ -575,4 +576,131 @@ public static class PreviewQA
         finally { UnityEngine.Object.DestroyImmediate(manager.gameObject); }
     }
 
+    private static void CheckSeaLakeCrossings(Assembly asm)
+    {
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
+        // 標高10mの台地に、x=150〜250の入り江(海底-3m)とその両側の砂浜(+0.2m)、x・z=62.5〜106.25の湖の窪地(底5m)を作る。
+        // 陸地ポリゴンは入り江を砂浜ごと抜き(海岸線の簡略化で水際からずれた状態)、湖は窪地だけを抜く。湖の水位は8m。
+        var data = new TerrainData { heightmapResolution = 65, size = new Vector3(400, 100, 400) };
+        var heights = new float[65, 65];
+        for (int z = 0; z < 65; z++)
+        for (int x = 0; x < 65; x++)
+        {
+            float wx = x * 6.25f, wz = z * 6.25f;
+            float y = 10f;
+            if (wx >= 137.5f && wx <= 262.5f) y = 0.2f;
+            if (wx >= 150f && wx <= 250f) y = -3f;
+            if (wx >= 62.5f && wx <= 106.25f && wz >= 62.5f && wz <= 106.25f) y = 5f;
+            heights[z, x] = (y + 20f) / 100f;
+        }
+        data.SetHeights(0, 0, heights);
+        var terrain = Terrain.CreateTerrainGameObject(data);
+        terrain.transform.position = new Vector3(0, -20, 0);
+        var utils = asm.GetType("Utils");
+        var terrainManagerType = asm.GetType("TerrainManager");
+        var terrainManager = new GameObject("SeaLakeTerrainManager").AddComponent(terrainManagerType);
+        utils.GetMethod("RegisterTerrainManager").Invoke(null, new object[] { null });
+        var settingsField = terrainManagerType.GetField("terrainSettings", flags);
+        var settings = Activator.CreateInstance(settingsField.FieldType);
+        void MapSize(int size)
+        {
+            settings.GetType().GetField("map_width").SetValue(settings, size);
+            settings.GetType().GetField("map_height").SetValue(settings, size);
+            settingsField.SetValue(terrainManager, settings);
+        }
+        var coastline = asm.GetType("CoastlineStore");
+        var jtoken = coastline.GetMethod("SetFromGeoJson").GetParameters()[0].ParameterType;
+        object Json(string text) => jtoken.GetMethod("Parse", new[] { typeof(string) }).Invoke(null, new object[] { text });
+        var waterStore = asm.GetType("WaterSurfaceStore");
+        var riverStore = asm.GetType("RiverStore");
+        var masterStore = asm.GetType("MasterDataStore").GetProperty("Instance", BindingFlags.Public | BindingFlags.Static).GetValue(null);
+        var dict = (IDictionary)masterStore.GetType().GetField("pathMasterById", flags).GetValue(masterStore);
+        var itemType = asm.GetType("PathMasterItem");
+        void Variant(int id, bool follows, bool overWater)
+        {
+            var item = Activator.CreateInstance(itemType);
+            itemType.GetField("width").SetValue(item, 8f);
+            itemType.GetField("height").SetValue(item, 5f);
+            itemType.GetField("follow_terrain").SetValue(item, follows);
+            itemType.GetField("over_water_allowed").SetValue(item, overWater);
+            dict[id] = item;
+        }
+        var type = asm.GetType("RoadPlanManager");
+        var manager = new GameObject("SeaLakeManager").AddComponent(type);
+        type.GetField("phase", flags).SetValue(manager, Enum.Parse(asm.GetType("RoadEditorPhase"), "Editing"));
+        var anchors = (IList)type.GetField("points", flags).GetValue(manager);
+        var pt = asm.GetType("PathBuildPoint");
+        var role = asm.GetType("PathPointRole");
+        IList Evaluate(int variant, int pathType, Vector3 a, Vector3 b)
+        {
+            type.GetField("PathSubtype").SetValue(manager, variant);
+            type.GetField("PathType", flags).SetValue(manager, pathType);
+            anchors.Clear();
+            anchors.Add(Activator.CreateInstance(pt, a, Enum.Parse(role, "Start")));
+            anchors.Add(Activator.CreateInstance(pt, b, Enum.Parse(role, "End")));
+            utils.GetMethod("InvalidateHeightCache").Invoke(null, null);
+            type.GetMethod("InvalidateShapeCache", flags).Invoke(manager, null);
+            return (IList)type.GetMethod("CheckSeaLakeCrossings", flags).Invoke(manager, null);
+        }
+        Vector3 west = new Vector3(100, 10, 200), east = new Vector3(300, 10, 200);
+        try
+        {
+            MapSize(1000);
+            Variant(900, true, false);
+            Variant(901, false, false);
+            Variant(902, true, true);
+            coastline.GetMethod("SetFromGeoJson").Invoke(null, new[] { Json(
+                "[[[-500,-500],[500,-500],[500,500],[-500,500]],[[135,10],[265,10],[265,390],[135,390]],"
+                + "[[62.5,62.5],[106.25,62.5],[106.25,106.25],[62.5,106.25]]]") });
+            var lake = Activator.CreateInstance(asm.GetType("WaterSurfaceRecord"));
+            lake.GetType().GetField("Id").SetValue(lake, "lake_qa");
+            lake.GetType().GetField("Level").SetValue(lake, 8f);
+            lake.GetType().GetMethod("AddRing").Invoke(lake, new object[] { new List<Vector2> {
+                new Vector2(55, 55), new Vector2(115, 55), new Vector2(115, 115), new Vector2(55, 115) } });
+            waterStore.GetMethod("Add").Invoke(null, new[] { lake });
+
+            var hits = Evaluate(900, 1, west, east);
+            Require(hits.Count > 0, "Ground road across the bay must be rejected");
+            foreach (var hit in hits)
+            {
+                var (a, b) = ((Vector3, Vector3))hit;
+                Require(a.x > 140f && b.x < 260f && a.y < 0f, "Violation outside the water: " + a + " " + b);
+            }
+            Require(Evaluate(901, 1, west, east).Count == 0, "Bridge deck over the bay must pass");
+            Require(Evaluate(901, 1, new Vector3(100, 0.3f, 200), new Vector3(300, 0.3f, 200)).Count > 0, "Deck below the sea clearance must be rejected");
+            Require(Evaluate(901, 1, new Vector3(100, 0.7f, 200), new Vector3(300, 0.7f, 200)).Count == 0, "Deck above the sea clearance must pass");
+            Require(Evaluate(901, 1, new Vector3(100, -12, 200), new Vector3(300, -12, 200)).Count == 0, "Buried tunnel under the bay must pass");
+            Require(Evaluate(901, 1, new Vector3(100, -2, 200), new Vector3(300, -2, 200)).Count > 0, "Shallow underwater deck must be rejected");
+            Require(Evaluate(900, 1, new Vector3(40, 10, 85), new Vector3(130, 10, 85)).Count > 0, "Ground road across the lake must be rejected");
+            Require(Evaluate(901, 1, new Vector3(40, 8.3f, 85), new Vector3(130, 8.3f, 85)).Count > 0, "Deck below the lake clearance must be rejected");
+            Require(Evaluate(901, 1, new Vector3(40, 8.7f, 85), new Vector3(130, 8.7f, 85)).Count == 0, "Deck above the lake clearance must pass");
+            Require(Evaluate(900, 1, new Vector3(140, 0.2f, 50), new Vector3(140, 0.2f, 350)).Count == 0, "Dry beach outside the simplified coastline must pass");
+            Require(Evaluate(900, 1, new Vector3(200, -3, 50), new Vector3(200, -3, 350)).Count > 0, "Road on the bay floor must be rejected");
+            Require(Evaluate(900, 11, west, east).Count == 0, "Infra path must be exempt");
+            Require(Evaluate(902, 1, west, east).Count == 0, "over_water_allowed variant must be exempt");
+            riverStore.GetMethod("SetFromJson").Invoke(null, new[] { Json(
+                "[{\"id\":\"river_qa\",\"polygon\":{\"type\":\"Polygon\",\"coordinates\":[[[135,150],[265,150],[265,250],[135,250]]]},"
+                + "\"profile\":[[200,0.2,150],[200,0.2,250]]}]") });
+            Require(Evaluate(900, 1, west, east).Count == 0, "River range must be left to the river check");
+            Require(((IList)type.GetMethod("CheckRiverCrossings", flags).Invoke(manager, null)).Count == 1, "River check must report the crossing");
+            riverStore.GetMethod("Clear").Invoke(null, null);
+            MapSize(280);
+            Require(Evaluate(900, 1, west, east).Count == 0, "Outside the city must not be treated as sea");
+            MapSize(1000);
+            coastline.GetMethod("Clear").Invoke(null, null);
+            Require(Evaluate(900, 1, west, east).Count == 0, "Without coastline data nothing is water");
+        }
+        finally
+        {
+            coastline.GetMethod("Clear").Invoke(null, null);
+            waterStore.GetMethod("Clear").Invoke(null, null);
+            riverStore.GetMethod("Clear").Invoke(null, null);
+            foreach (int id in new[] { 900, 901, 902 }) dict.Remove(id);
+            UnityEngine.Object.DestroyImmediate(manager.gameObject);
+            UnityEngine.Object.DestroyImmediate(terrainManager.gameObject);
+            UnityEngine.Object.DestroyImmediate(terrain);
+            UnityEngine.Object.DestroyImmediate(data);
+            utils.GetMethod("InvalidateHeightCache").Invoke(null, null);
+        }
+    }
 }

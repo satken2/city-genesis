@@ -1248,15 +1248,15 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     /// <summary>
-    /// 傾斜地対応（区画基準標高への接地 + 底面フットプリントを押し出したコンクリート基盤の生成）の
-    /// 対象となる model_type かどうかを返す。
+    /// 傾斜地対応（底面フットプリントを押し出したコンクリート基盤の生成）の対象となる
+    /// model_type かどうかを返す。接地の高さはどの model_type も建物中心位置の地形標高
+    /// （海上区画だけ海面）で、この判定では変わらない。
     ///
-    /// - 対象: MODEL_MODULAR_FLAT / HOUSE / GABLE / SHED。建物は parcel.altitude（接道の路面高さ）の
-    ///   水平面に接地し、傾斜地の谷側の隙間は基盤（GenerateFoundationMesh）が埋める。
+    /// - 対象: MODEL_MODULAR_FLAT / HOUSE / GABLE / SHED。建物本体は接地高の水平面に載るので、
+    ///   傾斜地の谷側の隙間を基盤（GenerateFoundationMesh）が埋める。
     /// - 対象外: MODEL_MODULAR_GROUND（畑・庭は地形に沿う地面表現）、MODEL_PREBUILT、
     ///   MODEL_PORT（岸壁は独自の海底追従スラブを持つ）、MODEL_MASHUP（各サブ建物が
-    ///   自分の配置座標の地形標高に個別に接地する）。これらは建物中心位置の地形標高に
-    ///   直接接地し、基盤も生成しない。
+    ///   自分の配置座標の地形標高に個別に接地する）。これらは基盤を生成しない。
     /// </summary>
     public static bool IsApplicableModelType(int modelType)
     {
@@ -1353,9 +1353,9 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// <summary>
     /// 建物底面（footprint）をY方向に押し出したコンクリート基盤メッシュを生成する（建物ローカル座標）。
     ///
-    /// 傾斜地対応の対象建物（IsApplicableModelType）は土地区画の基準標高（parcel.altitude =
-    /// 接道の路面高さ）の水平面に接地するため、谷側では底面と地形の間に隙間ができて建物が
-    /// 浮いて見える。この隙間を埋めるため、上面 = 建物の接地面（ローカルY=0）、下面 = 底面頂点で
+    /// 傾斜地対応の対象建物（IsApplicableModelType）は建物中心位置の地形標高の水平面に接地するため、
+    /// 谷側では底面と地形の間に隙間ができて建物が浮いて見える。
+    /// この隙間を埋めるため、上面 = 建物の接地面（ローカルY=0）、下面 = 底面頂点で
     /// サンプリングした最低地形標高の5m下（最低でも接地面の10m下）までの柱状メッシュを張る。
     /// 頂点間で地形が局所的に落ち込んでも突き抜けないよう、下面には余裕を持たせている。
     ///
@@ -1368,7 +1368,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     {
         if (footprint == null || footprint.Length < 3) return null;
 
-        float altitude = centerPointWorld.y;
+        float baseY = centerPointWorld.y;
         int n = footprint.Length;
 
         // 底面頂点位置の地形標高の最低値。基盤の下端はここからさらに5m下げ、
@@ -1383,10 +1383,10 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
                 minTerrainHeight = h;
             }
         }
-        if (minTerrainHeight == float.MaxValue) minTerrainHeight = altitude - 5f;
+        if (minTerrainHeight == float.MaxValue) minTerrainHeight = baseY - 5f;
 
         float topLocalY = 0f;
-        float bottomLocalY = Mathf.Min(minTerrainHeight - 5f - altitude, -10f);
+        float bottomLocalY = Mathf.Min(minTerrainHeight - 5f - baseY, -10f);
 
         List<int> polygonTriangles = TriangulateOrFan(footprint);
         if (polygonTriangles.Count < 3) return null;

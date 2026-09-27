@@ -484,7 +484,7 @@ export function ParcelDetailPanel({
 
           <span className="agent-detail-label">{t("parcel.altitude")}</span>
           <span className="agent-detail-value">
-            {t("parcel.altitudeValue", { value: parcelData.altitude })}
+            {t("parcel.altitudeValue", { value: Math.round(parcelData.altitude * 10) / 10 })}
           </span>
 
           {(hasFrontPath || frontPathCandidates.length > 0) && (

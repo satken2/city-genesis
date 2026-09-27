@@ -9,5 +9,13 @@
 - `Awake` が例外を投げたコンポーネントは Unity が無効化し、以後 `Update` / `LateUpdate` が呼ばれない。他スクリプトから直接呼ぶメソッドは動くため、「操作は通るのに何も描かれない」形で現れる(例: 公共交通の路線設置で、停留所は置けるのにマーカーが一切出なかった)。
 - 超遠景の陸地(`UltraFarLandMeshBuilder`)は、地形セルの版の合計が変わったときだけ作り直される(`TerrainManager.EnsureOverview`)。`CoastlineStore.Version` が変わっただけでは作り直されないので、海岸線だけが変わる機能を足すときは再構築の契機を別に足す。
 - `InputHandler.UpdateTerrainPosition` は `Terrain` コンポーネントを持つ最初の当たりからカーソルのXZを取り、y=0平面との交点は地形に何も当たらないときだけ使う。`terrainLayerMask` に Ground が入っていれば、常駐セルの海の上では海面ではなく海底に当たった位置のXZになる(シーンの設定値は未確認。InputHandlers/AGENTS.md の「海域ではy=0平面との交点フォールバックで正しく出る」と食い違う)。
-- `GET /buildings`(multi_agent)の応答には `parcel_id` が無い。そのため `BuildingManager.ResolveBuildingBaseHeight` の「モジュラー建物は `parcel.altitude` に接地する」分岐は一括ロードの建物では通らず、建物は中心点の地形標高に置かれている。`parcel.altitude` は接道パスの地面からの相対高さ(地表の道路なら0)なので、一括ロードに `parcel_id` を足すとモジュラー建物がワールドY≈0へ沈む。
+- `GET /buildings`(multi_agent)の応答には `parcel_id` が無い。区画に依存する処理(`ResolveParcelContext` の区画ポリゴンを使うフェンス・敷地装飾、`buildingIdsByParcel`、車・歩行者の建物出入口 `RoadsideAccess`)は一括ロードの建物では働かず、区画が取れるのは建設プレビューだけ。接地高は区画に依存しない(陸上は中心点の地形標高、海上区画だけ座標から引いた区画の `altitude`)。
+- `unity/Assembly-CSharp.csproj` は `dotnet build Assembly-CSharp.csproj -nologo -clp:ErrorsOnly` で数秒のコンパイル確認に使える(出力は `unity/Temp` 配下)。Unity が再生成するまで新しい .cs は載らないので、2026-09-27 時点では `WaterSurfaceStore` 関連の無関係なエラーが4件出る。それ以外のエラーは同じ実行で報告されるので確認には使える。
 - 海面は Y≈0 の板で、海岸線のマスクは無い。湖は footprint 全体を水位の高さの板で描く。どちらも地形を水位より下げると、バックエンドの海岸線や区画種別と関係なくその場所に水が見える。
+- `CoastlineStore.IsLand` は呼ぶたびに全リングの全辺を走査する(父島・香港の海岸線で数千〜約7千頂点)。敷設中のように毎フレーム多数の点を判定するときは、地形高さなど安い条件で先に候補を絞ってから呼ぶ(`RoadPlanManager.CheckSeaLakeCrossings` は「地形が水面より低い点」だけを判定する)。
+- 組み立て後の建物メッシュの頂点数がパーツの取り込み頂点数よりずっと大きいときは、元メッシュのサブメッシュごとの `GetIndices` の最小〜最大の幅の和と比べる。`Mesh.CombineMeshes` はサブメッシュ単位の結合でもこの幅を丸ごと写すので、和が組み立て後の頂点数とほぼ一致すれば、材質をまたいで溶接された頂点による範囲の重なりが原因。`CombineModuleMeshes` を通るパーツはこれを詰め直すが、通らない経路の未参照頂点は2026-09-27の全バリアント測定で、モジュラー建物(model_type 1)の最終メッシュの約17%(壁・角・エントランス等の直接配置)、車両基地(model_type 9)の約16%(線路タイルの切り詰めで末尾に頂点を足してから `SetTriangles` するため)。
+ 
+## UI / Tauri
+
+- セーブデータやシナリオテンプレートのサムネイル画像表示は、シナリオ固有のサムネイル画像が存在すれば最優先で表示し、未設定または404の場合は舞台となる地形マップのサムネイル(`/api/v1/terrain/maps/{id}/thumbnail`)へフォールバックする(`ScenarioThumbnail.tsx`)。
+

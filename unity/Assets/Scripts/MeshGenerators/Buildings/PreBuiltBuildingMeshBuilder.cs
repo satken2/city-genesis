@@ -29,8 +29,8 @@ using GeneratedModels;
 /// 配置する。いずれも該当パーツが存在する場合のみ描画されるオプション要素
 /// （地面パネルは floor パーツがあるときだけ。デフォルトマテリアルへのフォールバックはしない）。
 ///
-/// 傾斜地対応（IsApplicableModelType）の対象外: 建物は区画基準標高ではなく中心位置の
-/// 地形標高に接地し（BuildingManager 側の配置規則）、コンクリート基盤も生成しない。
+/// 傾斜地対応（IsApplicableModelType）の対象外: 建物は中心位置の地形標高に接地し
+/// （BuildingManager 側の配置規則）、コンクリート基盤を生成しない。
 /// このため超近景（isDynamic）ではフェンス・タイル・地面パネルを地形に追従させる
 /// （MODEL_MODULAR_GROUND と同じ扱い）。
 /// </summary>
@@ -125,7 +125,7 @@ public class PreBuiltBuildingMeshBuilder : IBuildingMeshGenerator
         if (BuildingMeshUtils.CurrentDrawLod != DrawLod.Far)
         {
             Vector2[] fenceFootprint = BuildingMeshUtils.ResolveParcelContext(
-                buildingData, useParcelAltitude: false, out _, out Vector3 centerPointWorld);
+                buildingData, out _, out Vector3 centerPointWorld);
             Vector2[] sitePolygon = (fenceFootprint != null && fenceFootprint.Length >= 3) ? fenceFootprint : footprint;
             Material floorMaterial = BuildingMeshUtils.ResolveFloorMaterialFromMaster(buildingData, glbPrefix);
             ModularBodyBuilder.GenerateSiteDecorations(

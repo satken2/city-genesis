@@ -178,6 +178,8 @@ public partial class RoadPlanManager : MonoBehaviour
 
     // TerrainInputHandlerへの参照（スナップ処理の共通化用）
     private TerrainInputHandler terrainInputHandler;
+    // 海・湖の横断判定で都市範囲(マップ寸法)を引くための参照。初回の判定時に解決する。
+    private TerrainManager terrainManager;
 
     /// <summary>
     /// UIから通知された現在の標高（相対高さ）。
@@ -216,7 +218,9 @@ public partial class RoadPlanManager : MonoBehaviour
     private List<(int segIndex, PathSegment otherSeg)> cachedElevationViolations;
     // 編集中パスが地表レベルで横切っている川と、その違反サンプル点(絶対座標)のローカル判定キャッシュ。
     private List<(RiverRecord river, List<Vector3> points)> cachedRiverViolations;
-    // 川の横断判定でパス中心線を標本化する間隔(m)。バックエンドは1m間隔だが、ドラッグ中の
+    // 編集中パスが地表レベルで海・湖の上を通っている区間(中心線上の路面の小区間。絶対座標)のローカル判定キャッシュ。
+    private List<(Vector3 a, Vector3 b)> cachedSeaLakeViolations;
+    // 川・海・湖の横断判定でパス中心線を標本化する間隔(m)。バックエンドは1m間隔だが、ドラッグ中の
     // リアルタイム判定なので粗くし、川幅(最小でも十数m)に対して取りこぼしが無い程度に留める。
     private const float RiverCrossingSampleStep = 2f;
     // 線形(曲線半径・勾配)のローカル推定に使う中心線の標本間隔(m)。バックエンドの1m間隔と同じ
@@ -250,6 +254,7 @@ public partial class RoadPlanManager : MonoBehaviour
         cachedRenderPoints = null;
         cachedElevationViolations = null;
         cachedRiverViolations = null;
+        cachedSeaLakeViolations = null;
         cachedCollisionVolume = null;
         cachedBuildingVolume = null;
         cachedMaxSpanViolations = null;
@@ -3452,7 +3457,7 @@ public partial class RoadPlanManager : MonoBehaviour
         // 描画用のローカル推定をゲートにすると、権威検証自体が呼ばれず誤判定から復帰できない。
         IpcClient.Instance.EmitEditPathUpdateShape(pathId, PathType, pointsList, startControl, endControl, embankmentHeights, waypointControls, Curved, PathFollowTerrainOverride, finalized,
             phase == RoadEditorPhase.Editing && points.Count >= 2 && CheckElevationIntersections().Count == 0
-            && CheckRiverCrossings().Count == 0 && CheckMaxSpanViolations().Count == 0
+            && CheckRiverCrossings().Count == 0 && CheckSeaLakeCrossings().Count == 0 && CheckMaxSpanViolations().Count == 0
             && (!RoadPath.IsRopewayVariant(PathSubtype) || !HasAlignmentViolation),
             BuildShapeSyncExtras());
     }
@@ -4312,8 +4317,8 @@ public partial class RoadPlanManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 衝突する道路区間の幅と占有高さ、および地表レベルで横切っている川の範囲(横断付近)を
-    /// 半透明の箱で示す。
+    /// 衝突する道路区間の幅と占有高さ、地表レベルで横切っている川の範囲(横断付近)、
+    /// および地表レベルで海・湖の上を通っている道路区間を半透明の箱で示す。
     /// </summary>
     private void DrawElevationIntersections(Camera cam)
     {
@@ -4355,6 +4360,12 @@ public partial class RoadPlanManager : MonoBehaviour
             {
                 RiverStore.AddOccupancyBox(cachedCollisionVolume, river, violationPoints, RiverOccupancyBoxRadius);
             }
+            // 海・湖は川と違って範囲の格子を持たないため、水の上を通っている道路区間そのものを占有箱で示す
+            foreach (var (a, b) in CheckSeaLakeCrossings())
+            {
+                OccupancyVolumeUtil.AddSegment(cachedCollisionVolume, a, b,
+                    pathManager.GetRoadWidth(PathSubtype), GetPathHeightFromMaster(PathSubtype));
+            }
         }
         overlayRenderer.AddPreTriangulated(cachedCollisionVolume, OccupancyVolumeUtil.WarningColor);
     }
@@ -4363,7 +4374,7 @@ public partial class RoadPlanManager : MonoBehaviour
     /// 編集中パスが川の範囲(RiverStore)を地表レベルで横切っていないかをローカル判定する。
     ///
     /// バックエンド geo_rivers.validate_path_river_crossings と同じ規則:
-    /// 川の範囲内の各サンプル点で「路面絶対標高 ≥ 水面標高 + RIVER_BRIDGE_MIN_CLEARANCE(橋)」
+    /// 川の範囲内の各サンプル点で「路面絶対標高 ≥ 水面標高 + WATER_BRIDGE_MIN_CLEARANCE(橋)」
     /// または「地形標高 − 路面標高 > バリアントのクリアランス高さ(完全埋設トンネル)」の
     /// いずれかを要求する。地形追従スパンは路面＝川床(水面より下)なので必ず違反になる。
     /// インフラパス(電線・導水管・パイプライン)は地表を占有しないため対象外。
@@ -4404,7 +4415,7 @@ public partial class RoadPlanManager : MonoBehaviour
                 float roadY = seg.follows ? terrainY : Mathf.Lerp(seg.absYA, seg.absYB, t);
                 if (terrainY - roadY > clearance) continue; // 完全埋設トンネル
                 float waterY = river.WaterLevelAt(x, z);
-                if (roadY >= waterY + Constants.RIVER_BRIDGE_MIN_CLEARANCE) continue; // 橋
+                if (roadY >= waterY + Constants.WATER_BRIDGE_MIN_CLEARANCE) continue; // 橋
                 if (!byRiver.TryGetValue(river, out var list))
                 {
                     list = new List<Vector3>();
@@ -4417,6 +4428,75 @@ public partial class RoadPlanManager : MonoBehaviour
 
         cachedRiverViolations = violations;
         return cachedRiverViolations;
+    }
+
+    /// <summary>
+    /// 編集中パスが海・湖の上を地表レベルで通っていないかをローカル判定する。
+    ///
+    /// バックエンド geo_sea_lake.validate_path_sea_lake_crossings と同じ規則:
+    /// 水の上の各サンプル点で「路面絶対標高 ≥ 水面標高 + WATER_BRIDGE_MIN_CLEARANCE(橋)」または
+    /// 「地形標高 − 路面標高 > バリアントのクリアランス高さ(完全埋設トンネル)」のいずれかを要求する。
+    /// 水の上とは、都市範囲内で陸地(CoastlineStore)の外にあり、地形が水面より低い点。水面標高は
+    /// 湖の footprint(WaterSurfaceStore)内ならその水位、それ以外は海面の0。海岸線は頂点を間引いた形で
+    /// 水際から数メートルずれるため、地形の条件が無いと乾いた岸を通る道路まで違反になる。
+    /// 川の範囲は CheckRiverCrossings が扱う。インフラパスと海上敷設を許すバリアント(over_water_allowed)は対象外。
+    ///
+    /// 標本化は CheckRiverCrossings と同じ。戻り値は違反サンプル点を中心とする標本間隔ぶんの路面の小区間
+    /// (絶対座標)で、占有箱の描画に使う。
+    /// </summary>
+    private List<(Vector3 a, Vector3 b)> CheckSeaLakeCrossings()
+    {
+        if (cachedSeaLakeViolations != null)
+            return cachedSeaLakeViolations;
+
+        var violations = new List<(Vector3 a, Vector3 b)>();
+        cachedSeaLakeViolations = violations;
+        if (!CoastlineStore.HasCoastline || points.Count < 2 || InfraNetworkUtil.IsInfraPathType(PathType))
+            return violations;
+        var master = MasterDataStore.Instance != null ? MasterDataStore.Instance.GetPathMaster(PathSubtype) : null;
+        if (master != null && master.over_water_allowed)
+            return violations;
+        if (terrainManager == null) terrainManager = FindAnyObjectByType<TerrainManager>();
+        // 都市範囲が分からないうちは海と都市外を区別できないので判定しない(権威はバックエンド)
+        if (terrainManager == null || !terrainManager.HasTerrainSettings)
+            return violations;
+        float halfW = terrainManager.GetMapWidth() * 0.5f;
+        float halfH = terrainManager.GetMapHeight() * 0.5f;
+
+        Vector3 RoadPoint(ElevationSegment seg, float t)
+        {
+            float x = Mathf.Lerp(seg.a.x, seg.b.x, t);
+            float z = Mathf.Lerp(seg.a.z, seg.b.z, t);
+            float y = seg.follows ? Utils.GetGroundHeight(new Vector3(x, 0f, z)) : Mathf.Lerp(seg.absYA, seg.absYB, t);
+            return new Vector3(x, y, z);
+        }
+
+        float clearance = GetPathHeightFromMaster(PathSubtype);
+        foreach (var seg in BuildEditingElevationSegments())
+        {
+            float dx = seg.b.x - seg.a.x;
+            float dz = seg.b.z - seg.a.z;
+            float length = Mathf.Sqrt(dx * dx + dz * dz);
+            int steps = Mathf.Max(1, Mathf.CeilToInt(length / RiverCrossingSampleStep));
+            for (int k = 0; k <= steps; k++)
+            {
+                float t = (float)k / steps;
+                float x = seg.a.x + dx * t;
+                float z = seg.a.z + dz * t;
+                if (Mathf.Abs(x) > halfW || Mathf.Abs(z) > halfH) continue;
+                var lake = WaterSurfaceStore.FindAt(x, z);
+                float waterY = lake != null ? lake.Level : 0f;
+                float terrainY = Utils.GetGroundHeight(new Vector3(x, 0f, z));
+                if (terrainY >= waterY) continue;
+                if (RiverStore.FindAt(x, z) != null || CoastlineStore.IsLand(x, z)) continue;
+                float roadY = seg.follows ? terrainY : Mathf.Lerp(seg.absYA, seg.absYB, t);
+                if (terrainY - roadY > clearance) continue; // 完全埋設トンネル
+                if (roadY >= waterY + Constants.WATER_BRIDGE_MIN_CLEARANCE) continue; // 橋
+                float half = 0.5f / steps;
+                violations.Add((RoadPoint(seg, Mathf.Max(0f, t - half)), RoadPoint(seg, Mathf.Min(1f, t + half))));
+            }
+        }
+        return violations;
     }
 
     /// <summary>

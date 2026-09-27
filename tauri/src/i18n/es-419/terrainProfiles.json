@@ -1,0 +1,60 @@
+{
+  "terrainProfiles": {
+    "unknown": "Desconocido",
+    "noDescription": "Todavía no hay una descripción geográfica de este terreno.",
+    "maps": {
+      "flat": {
+        "name": "Costa llana",
+        "description": "Una llanura junto al mar se extiende hacia el horizonte oriental. La costa es suave, sin grandes montañas ni valles profundos."
+      },
+      "yoron": {
+        "name": "Isla Yoron",
+        "description": "Una isla baja en aguas cálidas. La caliza coralina elevada forma mesetas suaves, con lagunas poco profundas frente a playas blancas. Los veranos son calurosos y húmedos; el mar suaviza los inviernos."
+      },
+      "aogashima": {
+        "name": "Aogashima",
+        "description": "Una pequeña isla volcánica se alza sobre el océano abierto. Acantilados abruptos rodean una caldera profunda con otro cono en su interior. Las corrientes cálidas envuelven laderas bañadas por lluvia y vientos marinos húmedos."
+      },
+      "kumejima": {
+        "name": "Isla Kume",
+        "description": "Una isla accidentada en aguas cálidas. Desde las montañas del norte y del sur, las laderas bajan hacia tierras bajas, arrecifes y bancos de arena blanca. Sus largos veranos húmedos traen lluvias estacionales y fuertes tormentas."
+      },
+      "iejima": {
+        "name": "Isla Ie",
+        "description": "Una isla baja en aguas poco profundas. Un pico rocoso sobresale de una extensa meseta caliza. Playas y acantilados alternan en la costa; el verano es bochornoso y los vientos marinos recorren la isla en invierno."
+      },
+      "ikishima": {
+        "name": "Isla Iki",
+        "description": "Una isla rodeada de corrientes cálidas. Suaves colinas de basalto se alternan con tierras bajas, entre costas rocosas, playas y ensenadas. El verano es húmedo y el invierno trae vientos fríos estacionales."
+      },
+      "naoshima": {
+        "name": "Naoshima",
+        "description": "Una pequeña isla en un mar interior tranquilo. Colinas bajas de granito llegan hasta la costa y dejan pequeñas llanuras y ensenadas a la salida de los valles. Las montañas circundantes frenan las nubes y limitan las lluvias."
+      },
+      "chichijima": {
+        "name": "Chichijima",
+        "description": "Una isla cálida aislada por un mar inmenso. Valles profundos surcan las montañas volcánicas y las bahías interrumpen los acantilados. El invierno sigue siendo templado; una vegetación densa cubre las laderas y el viento marino cruza las crestas."
+      },
+      "santorini": {
+        "name": "Santorini",
+        "description": "Un arco de tierra volcánica en un mar azul profundo. Altos acantilados rodean una caldera inundada, mientras las laderas exteriores descienden hacia la costa. El verano tiene sol intenso y muy poca lluvia; las precipitaciones se concentran en invierno."
+      },
+      "hongkong": {
+        "name": "Isla de Hong Kong",
+        "description": "Una isla montañosa junto al borde de un continente. Valles cortos bajan desde crestas abruptas hasta una costa recortada; estrechos la separan de otras islas. Los monzones traen lluvias abundantes en verano y el invierno es más fresco y seco."
+      },
+      "manhattan": {
+        "name": "Isla de Manhattan",
+        "description": "Una isla alargada en la desembocadura de un gran río. Un cauce ancho al oeste y un estrecho de mareas al este enmarcan elevaciones rocosas y tierras bajas. Los veranos húmedos y calurosos contrastan con inviernos fríos y nevados."
+      },
+      "bahrain": {
+        "name": "Isla de Baréin",
+        "description": "Una isla seca en un golfo poco profundo. Arenales bajos y llanuras calizas rodean colinas interiores áridas. El calor del verano es intenso y las escasas lluvias llegan principalmente en invierno."
+      },
+      "dakar": {
+        "name": "Dakar (península de Cabo Verde)",
+        "description": "Una península que se adentra en el océano desde el extremo occidental de un continente. Costas rocosas y playas bordean mesetas bajas y colinas volcánicas. Una larga estación seca da paso a breves lluvias estivales, mientras sopla la brisa marina bajo el sol intenso."
+      }
+    }
+  }
+}

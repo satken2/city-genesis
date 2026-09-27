@@ -6,11 +6,11 @@
  *
  * 左カラム（一覧）は2つのセクションを縦に並べる:
  *
- * 1. 地形から始める … バックエンドの assets/terrain_maps.yaml に登録された地形マップ一覧を
- *    タイル表示する。チュートリアル未クリアでも選択可能。
- * 2. シナリオから始める … チュートリアルミッション（常に表示）と
+ * 1. シナリオから始める … チュートリアルミッション（常に表示）と
  *    バックエンドのテンプレート一覧を並べて表示する。
  *    チュートリアルミッションは平坦な地形マップ（flat）をチュートリアルONでロードする。
+ * 2. 地形から始める … バックエンドの assets/terrain_maps.yaml に登録された地形マップ一覧を
+ *    タイル表示する。チュートリアル未クリアでも選択可能。
  *
  * 一覧のタイルはサムネイルと名前だけを出す。説明・達成条件は右カラムに集約する。
  *
@@ -27,10 +27,13 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { loadAppSettings } from "../../utils/settings";
-import { SUPPORTED_LANGUAGES, resolveSupportedLanguage } from "../../utils/locale";
+import { SUPPORTED_LANGUAGES, resolveIntlLocale, resolveSupportedLanguage } from "../../utils/locale";
 import { TUTORIAL_SCENARIOS } from "../tutorial/tutorialSteps";
 import { TerrainMapThumbnail } from "../common/TerrainMapThumbnail";
+import { ScenarioThumbnail } from "../common/ScenarioThumbnail";
 import { normalizeClimate, normalizeGroundCover } from "../terrain/terrainData";
+import { getTerrainProfile } from "../../data/terrainProfiles";
+import { GroundCoverIcon } from "./GroundCoverIcon";
 import "./NewGameWindow.css";
 
 type NewGameWindowProps = {
@@ -47,9 +50,9 @@ type TerrainMapEntry = {
   id: string;
   name: string;
   settings: Record<string, unknown>;
-  /** 地表種別(GROUND_COVER_*)。詳細パネルに種別名を出す */
+  /** 地表種別(GROUND_COVER_*)。詳細パネルにアイコンを出す */
   ground_cover?: number;
-  /** 気候区分(CLIMATE_*)。詳細パネルに気候名を出す */
+  /** マップに設定された気候区分(CLIMATE_*) */
   climate?: number;
 };
 
@@ -100,6 +103,10 @@ type Selection =
  * この形だけを知っていればよいようにする。
  */
 type DetailView = {
+  /** サムネイル画像URL（チュートリアル用等）。指定されている場合は最優先表示 */
+  thumbnailUrl: string | null;
+  /** テンプレートID。ScenarioThumbnailでの取得に使用 */
+  templateId: string | null;
   /** サムネイルとして使う地形マップID。解決できない場合は null（プレースホルダー表示） */
   terrainMapId: string | null;
   /** サムネイルが無いときに使うプレースホルダーのCSS修飾子 */
@@ -108,12 +115,12 @@ type DetailView = {
   description: string;
   /** 舞台となるマップ名。地形選択時は自明なので null */
   mapName: string | null;
-  /** マップサイズの表示文字列（例: 7000m × 6000m）。不明なら null */
+  /** マップサイズの表示文字列（例: 7 × 6 km）。不明なら null */
   mapSize: string | null;
-  /** 地表種別の表示名。マップが特定できないときは null */
-  groundCover: string | null;
-  /** 気候区分の表示名。マップが特定できないときは null */
-  climate: string | null;
+  /** 地表種別。マップが特定できないときは null */
+  groundCover: number | null;
+  /** マップの気候区分。未指定・未知の値はゲームと同じ温暖湿潤に正規化する */
+  climate: number;
   /** 達成条件のフリーテキスト。未設定なら null */
   objective: string | null;
   /** 開始ボタンのラベル */
@@ -150,15 +157,16 @@ const AVAILABLE_LANGUAGES = SUPPORTED_LANGUAGES;
 const SIMULATION_DAYS_OPTIONS = [7, 30] as const;
 
 /**
- * 地形マップ定義の settings から「幅m × 高さm」の表示文字列を組み立てる。
+ * 地形マップ定義の settings からキロメートル単位の表示文字列を組み立てる。
  * map_width / map_height はメートル単位の整数。欠けている場合は null を返す。
  */
-function formatMapSize(settings: Record<string, unknown> | undefined): string | null {
+function formatMapSize(settings: Record<string, unknown> | undefined, language: string): string | null {
   if (!settings) return null;
   const width = settings.map_width;
   const height = settings.map_height;
-  if (typeof width !== "number" || typeof height !== "number") return null;
-  return `${width.toLocaleString()}m × ${height.toLocaleString()}m`;
+  if (typeof width !== "number" || typeof height !== "number" || !Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return null;
+  const format = new Intl.NumberFormat(resolveIntlLocale(language), { maximumFractionDigits: 3 });
+  return `${format.format(width / 1000)} × ${format.format(height / 1000)} km`;
 }
 
 export function NewGameWindow({
@@ -318,15 +326,18 @@ export function NewGameWindow({
     if (selection.kind === "terrain") {
       const map = terrainMaps.find((m) => m.id === selection.id);
       if (!map) return null;
+      const profile = getTerrainProfile(map.id);
       return {
+        thumbnailUrl: null,
+        templateId: null,
         terrainMapId: map.id,
         placeholderModifier: "new-game-detail-image--terrain",
-        title: map.name,
-        description: t("newGame.terrainDetailDesc"),
+        title: profile ? t(`terrainProfiles.maps.${profile.id}.name`) : map.name,
+        description: profile ? t(`terrainProfiles.maps.${profile.id}.description`) : t("terrainProfiles.noDescription"),
         mapName: null,
-        mapSize: formatMapSize(map.settings),
-        groundCover: t(`groundCover.${normalizeGroundCover(map.ground_cover)}`),
-        climate: t(`climate.${normalizeClimate(map.climate)}`),
+        mapSize: formatMapSize(map.settings, i18n.language),
+        groundCover: normalizeGroundCover(map.ground_cover),
+        climate: normalizeClimate(map.climate),
         objective: null,
         startLabel: t("newGame.startTerrainButton"),
         onStart: () => void handleStartTerrain(map.id),
@@ -338,15 +349,16 @@ export function NewGameWindow({
       if (!scenario) return null;
       const flatMap = terrainMaps.find((m) => m.id === "flat");
       return {
-        // チュートリアルは専用の絵柄を持つため、地形サムネイルは使わない。
+        thumbnailUrl: scenario.image || null,
+        templateId: null,
         terrainMapId: null,
         placeholderModifier: `new-game-detail-image--tutorial new-game-detail-image--${scenario.id}`,
         title: t(scenario.titleKey),
         description: t(scenario.descriptionKey),
-        mapName: flatMap ? flatMap.name : null,
-        mapSize: formatMapSize(flatMap?.settings),
-        groundCover: flatMap ? t(`groundCover.${normalizeGroundCover(flatMap.ground_cover)}`) : null,
-        climate: flatMap ? t(`climate.${normalizeClimate(flatMap.climate)}`) : null,
+        mapName: flatMap ? t("terrainProfiles.maps.flat.name") : null,
+        mapSize: formatMapSize(flatMap?.settings, i18n.language),
+        groundCover: flatMap ? normalizeGroundCover(flatMap.ground_cover) : null,
+        climate: normalizeClimate(flatMap?.climate),
         objective: t("newGame.tutorialObjective"),
         startLabel: t("newGame.startScenarioButton"),
         onStart: () => void handleStartTutorial(scenario.id),
@@ -358,7 +370,10 @@ export function NewGameWindow({
     const terrainMap = template.terrain_map_id
       ? terrainMaps.find((m) => m.id === template.terrain_map_id)
       : undefined;
+    const profile = getTerrainProfile(template.terrain_map_id ?? "");
     return {
+      thumbnailUrl: null,
+      templateId: template.id,
       terrainMapId: template.terrain_map_id || null,
       placeholderModifier: "new-game-detail-image--template",
       title:
@@ -366,10 +381,10 @@ export function NewGameWindow({
         template.city_name ||
         `Template ${template.id.slice(0, 8)}`,
       description: template.scenario_description || t("newGame.detailNoDescription"),
-      mapName: terrainMap?.name || template.terrain_map_name || null,
-      mapSize: formatMapSize(terrainMap?.settings),
-      groundCover: terrainMap ? t(`groundCover.${normalizeGroundCover(terrainMap.ground_cover)}`) : null,
-      climate: terrainMap ? t(`climate.${normalizeClimate(terrainMap.climate)}`) : null,
+      mapName: profile ? t(`terrainProfiles.maps.${profile.id}.name`) : terrainMap?.name || template.terrain_map_name || null,
+      mapSize: formatMapSize(terrainMap?.settings, i18n.language),
+      groundCover: terrainMap ? normalizeGroundCover(terrainMap.ground_cover) : null,
+      climate: normalizeClimate(terrainMap?.climate),
       objective: template.scenario_objective || null,
       startLabel: t("newGame.startScenarioButton"),
       onStart: () => void handleStartTemplate(template),
@@ -379,6 +394,7 @@ export function NewGameWindow({
     terrainMaps,
     templates,
     t,
+    i18n.language,
     handleStartTerrain,
     handleStartTemplate,
     handleStartTutorial,
@@ -526,32 +542,6 @@ export function NewGameWindow({
           <div className="new-game-loading">{t("newGame.loading")}</div>
         ) : (
           <>
-            {/* 地形から始めるセクション（チュートリアル未クリアでも選択可能） */}
-            <section className="new-game-section">
-              <h2 className="new-game-section-title">{t("newGame.fromTerrain")}</h2>
-              {terrainMaps.length === 0 ? (
-                <div className="new-game-empty">{t("newGame.noTerrainMaps")}</div>
-              ) : (
-                <div className="new-game-tiles">
-                  {terrainMaps.map((map) => (
-                    <button
-                      key={map.id}
-                      className={`new-game-tile ${
-                        selection?.kind === "terrain" && selection.id === map.id ? "selected" : ""
-                      }`}
-                      onClick={() => setSelection({ kind: "terrain", id: map.id })}
-                      disabled={busy}
-                      type="button"
-                      title={map.name}
-                    >
-                      <TerrainMapThumbnail apiBaseUrl={apiBaseUrl} mapId={map.id} />
-                      <span className="new-game-tile-name">{map.name}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </section>
-
             {/* シナリオセクション（チュートリアル + テンプレートを統合） */}
             <section className="new-game-section">
               <h2 className="new-game-section-title">{t("newGame.fromScenario")}</h2>
@@ -572,7 +562,11 @@ export function NewGameWindow({
                       title={t(scenario.titleKey)}
                     >
                       <span className="new-game-tile-badge">{t("newGame.tutorialBadge")}</span>
-                      <div className={`new-game-tile-image new-game-tile-image--tutorial new-game-tile-image--${scenario.id}`} />
+                      {scenario.image ? (
+                        <img className="new-game-tile-image" src={scenario.image} alt="" />
+                      ) : (
+                        <div className={`new-game-tile-image new-game-tile-image--tutorial new-game-tile-image--${scenario.id}`} />
+                      )}
                       <span className="new-game-tile-name">{t(scenario.titleKey)}</span>
                     </button>
                   ))
@@ -590,11 +584,11 @@ export function NewGameWindow({
                     type="button"
                     title={tmpl.scenario_title || tmpl.city_name || tmpl.id}
                   >
-                    {tmpl.terrain_map_id ? (
-                      <TerrainMapThumbnail apiBaseUrl={apiBaseUrl} mapId={tmpl.terrain_map_id} />
-                    ) : (
-                      <div className="new-game-tile-image new-game-tile-image--template" />
-                    )}
+                    <ScenarioThumbnail
+                      apiBaseUrl={apiBaseUrl}
+                      templateId={tmpl.id}
+                      terrainMapId={tmpl.terrain_map_id}
+                    />
                     <span className="new-game-tile-name">
                       {tmpl.scenario_title || tmpl.city_name || `Template ${tmpl.id.slice(0, 8)}`}
                     </span>
@@ -607,15 +601,55 @@ export function NewGameWindow({
                 <div className="new-game-empty">{t("newGame.noTemplates")}</div>
               )}
             </section>
+
+            {/* 地形から始めるセクション（チュートリアル未クリアでも選択可能） */}
+            <section className="new-game-section">
+              <h2 className="new-game-section-title">{t("newGame.fromTerrain")}</h2>
+              {terrainMaps.length === 0 ? (
+                <div className="new-game-empty">{t("newGame.noTerrainMaps")}</div>
+              ) : (
+                <div className="new-game-tiles">
+                  {terrainMaps.map((map) => (
+                    <button
+                      key={map.id}
+                      className={`new-game-tile ${
+                        selection?.kind === "terrain" && selection.id === map.id ? "selected" : ""
+                      }`}
+                      onClick={() => setSelection({ kind: "terrain", id: map.id })}
+                      disabled={busy}
+                      type="button"
+                      title={getTerrainProfile(map.id) ? t(`terrainProfiles.maps.${map.id}.name`) : map.name}
+                    >
+                      <TerrainMapThumbnail apiBaseUrl={apiBaseUrl} mapId={map.id} />
+                      <span className="new-game-tile-name">{getTerrainProfile(map.id) ? t(`terrainProfiles.maps.${map.id}.name`) : map.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </section>
           </>
         )}
       </div>
 
       {/* 詳細パネル（固定幅） */}
-      <aside className="new-game-detail">
+      <aside className={`new-game-detail${selection?.kind === "terrain" ? " new-game-detail--terrain" : ""}`}>
         {detail ? (
           <>
-            {detail.terrainMapId ? (
+            {detail.thumbnailUrl ? (
+              <img
+                className="new-game-detail-image"
+                src={detail.thumbnailUrl}
+                alt=""
+              />
+            ) : detail.templateId ? (
+              <ScenarioThumbnail
+                apiBaseUrl={apiBaseUrl}
+                templateId={detail.templateId}
+                terrainMapId={detail.terrainMapId}
+                className="new-game-detail-image"
+                placeholderModifier={detail.placeholderModifier}
+              />
+            ) : detail.terrainMapId ? (
               <TerrainMapThumbnail
                 apiBaseUrl={apiBaseUrl}
                 mapId={detail.terrainMapId}
@@ -637,26 +671,24 @@ export function NewGameWindow({
                 </div>
               )}
 
-              {detail.mapSize && (
-                <div className="new-game-detail-block">
-                  <h3 className="new-game-detail-block-title">{t("newGame.detailMapSizeLabel")}</h3>
-                  <p className="new-game-detail-block-text">{detail.mapSize}</p>
+              <dl className="new-game-facts">
+                <div className="new-game-fact">
+                  <dt>{t("newGame.detailMapSizeLabel")}</dt>
+                  <dd className="new-game-fact-size">{detail.mapSize ?? t("terrainProfiles.unknown")}</dd>
                 </div>
-              )}
-
-              {detail.groundCover && (
-                <div className="new-game-detail-block">
-                  <h3 className="new-game-detail-block-title">{t("groundCover.label")}</h3>
-                  <p className="new-game-detail-block-text">{detail.groundCover}</p>
+                <div className="new-game-fact">
+                  <dt>{t("groundCover.label")}</dt>
+                  <dd>
+                    {detail.groundCover !== null ? (
+                      <GroundCoverIcon cover={detail.groundCover} label={t(`groundCover.${detail.groundCover}`)} />
+                    ) : t("terrainProfiles.unknown")}
+                  </dd>
                 </div>
-              )}
-
-              {detail.climate && (
-                <div className="new-game-detail-block">
-                  <h3 className="new-game-detail-block-title">{t("climate.label")}</h3>
-                  <p className="new-game-detail-block-text">{detail.climate}</p>
+                <div className="new-game-fact new-game-fact--climate">
+                  <dt>{t("climate.label")}</dt>
+                  <dd>{t(`climate.${detail.climate}`)}</dd>
                 </div>
-              )}
+              </dl>
 
               {detail.objective && (
                 <div className="new-game-detail-block">

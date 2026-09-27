@@ -77,7 +77,10 @@
       "locked": "未解放",
       "completed": "達成済み",
       "failed": "期限切れ"
-    }
+    },
+    "scenarioImageLabel": "画像（サムネイル）",
+    "scenarioImageSelect": "画像を選択...",
+    "scenarioImageClear": "削除"
   },
   "achievementQuests": {
     "createTitle": "クエスト作成",

@@ -245,8 +245,8 @@ public static class ModularBodyBuilder
         // パネルが建物本体の真下に隠れて見えないため。区画が取得できない場合は建物底面へフォールバックする。
         // 傾斜地対応の対象建物(IsApplicableModelType=FLAT/HOUSE/GABLE)は建物本体こそ水平面+
         // コンクリート基盤で接地するが、敷地の装飾（フェンス・タイル・地面パネル）は地形に追従させる。
-        // 追従計算は centerPointWorld.y 基準（IsApplicableModelType では parcel.altitude、
-        // それ以外は地形標高）で、BuildingManager.UpdateBuildingHeight の配置高さと一致する。
+        // 追従計算は centerPointWorld.y（建物中心位置の地形標高）基準で、陸上では
+        // BuildingManager.ResolveBuildingBaseHeight の配置高さと一致する。
         bool deformToTerrain = isDynamic;
         Vector2[] sitePolygon = fenceFootprint != null && fenceFootprint.Length >= 3
             ? fenceFootprint : footprint;

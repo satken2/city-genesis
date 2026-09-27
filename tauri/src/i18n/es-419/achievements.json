@@ -77,7 +77,10 @@
       "locked": "Bloqueado",
       "completed": "Completado",
       "failed": "Vencido"
-    }
+    },
+    "scenarioImageLabel": "Imagen (Miniatura)",
+    "scenarioImageSelect": "Seleccionar imagen...",
+    "scenarioImageClear": "Eliminar"
   },
   "achievementQuests": {
     "createTitle": "Crear objetivo",

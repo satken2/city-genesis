@@ -117,9 +117,10 @@ public class WaterSurfaceManager : MonoBehaviour
         ClearWaterObjects();
     }
 
-    /// <summary>生成済みの水面 GameObject / Mesh をすべて破棄する。</summary>
+    /// <summary>生成済みの水面 GameObject / Mesh と判定用ストアをすべて破棄する。</summary>
     private void ClearWaterObjects()
     {
+        WaterSurfaceStore.Clear();
         foreach (var go in waterObjects)
         {
             if (go != null) Destroy(go);
@@ -170,6 +171,7 @@ public class WaterSurfaceManager : MonoBehaviour
     /// <summary>
     /// 水面1枚分の GameObject を生成する。polygon(Polygon/MultiPolygon)を water_level の
     /// 水平面として三角形分割し、water_level の高さにメッシュを置く。
+    /// 敷設中パスの横断判定用に、穴も含めた範囲を WaterSurfaceStore へ登録する。
     /// </summary>
     private void BuildOneWaterSurface(WaterSurfaceDto ws, Material mat)
     {
@@ -178,6 +180,14 @@ public class WaterSurfaceManager : MonoBehaviour
         // polygon から (外周リング, 穴リスト) のリストを取り出す。
         List<(List<Vector2> exterior, List<List<Vector2>> holes)> parts = ParsePolygon(ws.polygon);
         if (parts.Count == 0) return;
+
+        var record = new WaterSurfaceRecord { Id = ws.id, Level = level };
+        foreach (var (exterior, holes) in parts)
+        {
+            record.AddRing(exterior);
+            foreach (var hole in holes) record.AddRing(hole);
+        }
+        WaterSurfaceStore.Add(record);
 
         var vertices = new List<Vector3>();
         var triangles = new List<int>();

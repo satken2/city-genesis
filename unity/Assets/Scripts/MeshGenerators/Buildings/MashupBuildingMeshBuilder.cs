@@ -52,10 +52,9 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
         List<Material> materials = new List<Material>();
         List<Mesh> temporaryMeshes = new List<Mesh>();
 
-        // 土地区画ポリゴン（center_point基準ローカルXZ）と配置基準のワールド座標。
-        // マッシュアップ建物は中心位置の地形標高に接地するため useParcelAltitude は false。
+        // 土地区画ポリゴン（center_point基準ローカルXZ）と配置基準のワールド座標（中心位置の地形標高）。
         Vector2[] fenceFootprint = BuildingMeshUtils.ResolveParcelContext(
-            buildingData, useParcelAltitude: false, out _, out Vector3 centerPointWorld);
+            buildingData, out _, out Vector3 centerPointWorld);
 
         // --- サブ建物の積み上げ ---
         // maxTopY は描画された最も高いサブ建物の天端（ローカルY）。コライダーの高さに使う。

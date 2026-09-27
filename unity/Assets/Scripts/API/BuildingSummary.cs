@@ -20,10 +20,9 @@ namespace GeneratedModels
     }
 
     /// <summary>
-    /// single_agentスキーマにpolygon, center_point, visual_variant等を追加した拡張版。
-    /// 建物一覧API（GET /buildings/）はsingle_agentスキーマを使用するが、
-    /// メッシュ生成や配置座標の決定にpolygon, center_point, visual_variantが必要なため
-    /// これらをAgentDataに統合して扱う。
+    /// 建物一覧API（GET /buildings/）の1要素と建物単体取得（GET /buildings/{id}）の応答。
+    /// どちらもバックエンドの multi_agent スキーマ+サブ建物配置で、AgentData(single_agent)に無い
+    /// polygon, center_point, visual_variant 等(メッシュ生成と配置座標の決定に使う)をここで足す。
     /// </summary>
     [Serializable]
     public class BuildingSummary : AgentData

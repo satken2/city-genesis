@@ -77,7 +77,10 @@
       "locked": "未解锁",
       "completed": "已完成",
       "failed": "已过期"
-    }
+    },
+    "scenarioImageLabel": "图片（缩略图）",
+    "scenarioImageSelect": "选择图片...",
+    "scenarioImageClear": "删除"
   },
   "achievementQuests": {
     "createTitle": "创建任务",

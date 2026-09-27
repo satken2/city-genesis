@@ -5942,6 +5942,12 @@ public class PathMasterItem
     public bool frontage_allowed;
 
     /// <summary>
+    /// 海岸線の外(海上・海底)へ敷設してよいバリアントか(海底送電線・海底石油パイプライン)。
+    /// 敷設中の海・湖の横断判定の対象外になる。バックエンドの海岸線検証の免除と同じ列。
+    /// </summary>
+    public bool over_water_allowed;
+
+    /// <summary>
     /// インターチェンジのランプ用バリアントか。バックエンドはランプの連結成分を起点にIC/JCTを自動検出する
     /// (検出結果は InterchangeManager が表示する)。描画では、ランプでない高速道路を本線とみなし、
     /// ランプを本線の路面へ結合・取り込む(RoadAdjacency / MotorwayMergeLayout)。

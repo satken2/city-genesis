@@ -77,7 +77,10 @@
       "locked": "Locked",
       "completed": "Completed",
       "failed": "Expired"
-    }
+    },
+    "scenarioImageLabel": "Image (Thumbnail)",
+    "scenarioImageSelect": "Select Image...",
+    "scenarioImageClear": "Remove"
   },
   "achievementQuests": {
     "createTitle": "Create Quest",

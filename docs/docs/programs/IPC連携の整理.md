@@ -95,7 +95,7 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `edit_building:update_direct_params` | `ui -> graphic` | 旧定義。現行の建物直接配置は`placement_command`/`placement_state`を使用する |
 | `edit_building:update_direct_angle` | `graphic -> ui` | 旧定義。現行の建物直接配置は`placement_command`/`placement_state`を使用する |
 | `edit_building:update_shape`    | `ui -> graphic`  | 建物建設モードにおいて、建物の底面形状を変更した              |
-| `edit_building:update_floors`   | `ui -> graphic`  | 建物建設モードにおいて、建物の階数を変更した                |
+| `edit_building:update_floors`   | `ui -> graphic`  | 建物建設モードにおいて、建物の階数を変更した。Unityは階数の保持・効果音・直接配置のローカル矩形ゴーストの作り直しだけを行い、バックエンドへ形状を問い合わせない。土地区画上のプレビュー形状は、UIが同じ階数変更で `POST /api/v1/buildings/preview` を取り直し `edit_building:update_shape` で届ける |
 | `edit_building:update_structure` | `ui -> graphic` | 建物建設モードにおいて、構造種別 `structure`（木造=1・準耐火=2・耐火=3。0=構造なし）を変更した。Unityはキャッシュ済みの底面から、構造つきパーツフォルダ（`a{variant}s{structure}` 等）でプレビューを再生成する。`STATE_EDIT_BUILDING` の遷移パラメータにも `structure` が含まれ、`building_construction:copy_source` はコピー元の `structure` を返す |
 | `edit_building:update_landmark` | `ui -> graphic` | 建物建設モードにおいて、観光名所 `landmark`（`landmark_master` のID。0=観光名所ではない）を変更した。Unityは名所専用モデル（`Resources/Models/Buildings/landmark-{model_prefix}`）でプレビューを再生成する。`STATE_EDIT_BUILDING` の遷移パラメータにも `landmark` が含まれる |
 | `edit_building:update_visual_variant` | `ui -> graphic` | 建物建設モードにおいて、外観バリアント(visual_variant1/2/3)を変更した |
@@ -235,7 +235,7 @@ Unityのグラフィックプログラムは、いくつかのステートを持
 
 Unity は `StationPlanManager` が担う。カーソル追従の半透明ゴースト（プラットフォーム2本＋駅舎1本を実パスと同じメッシュ生成器で描く）→ 左クリックで配置地点を固定 → パネルの確定ボタンで発注、という流れで、**建物の自由配置・プロップの個別配置と同じ操作**（中ボタンドラッグで回転、PageUp/PageDown で高さ、Esc または右クリックで地点の固定解除）を共通部品 `Editors/PlacementInput.cs` で提供する。形状は固定なので折れ線の編集・曲線・吸着・グリッドは持たない（**共通吸着も適用しない**——中心線は複線の「間」を通るため、既存の線路やノードへ吸着すると半間隔ぶんずれる）。プラットフォームは中心点の地盤標高＋指定の高さで水平に揃え、駅舎の線は地面に沿わせる（連絡橋のデッキ高さは駅舎プレハブの造形が持つため）。駅舎の線の長さはプラットフォームの外縁より外で終わる長さを自動で取る。建屋は線路に重なると外側へスライドするが、敷設中の線路はまだ存在せずスライド計算に入らないため、最初から外側で終わらせないとプレビューと確定後で建屋の位置がずれる。
 
-確定送信は UI 側が `POST /api/v1/paths`（プラットフォーム2本＋駅舎1本、`align_station_tracks: true`）で1回にまとめて行い、成功後に `edit_path:finish` で Unity 側の状態をリセットしてから `STATE_EDIT_STATION` を再送して連続設置に戻す。干渉・川横断・線形の検証も UI 側の `POST /paths/validate`（全3本）が権威で、Unity 側はローカル判定を持たない。
+確定送信は UI 側が `POST /api/v1/paths`（プラットフォーム2本＋駅舎1本、`align_station_tracks: true`）で1回にまとめて行い、成功後に `edit_path:finish` で Unity 側の状態をリセットしてから `STATE_EDIT_STATION` を再送して連続設置に戻す。干渉・川/海・湖の横断・線形の検証も UI 側の `POST /paths/validate`（全3本）が権威で、Unity 側はローカル判定を持たない。
 
 `STATE_MERGE_PATH` / `STATE_SPLIT_PATH` は既存パスの結合・分割の「対象選択モード」で、パス詳細パネル（`path_detail`）の操作パネルにある結合／分割ボタンで遷移する。`world:change_state` の params に操作対象の `path_id`（結合では結合後に残る側＝survivor、分割では分割元）を含める。どちらも稼働中（`STATUS_ACTIVE`）のパスにのみ表示される。
 
@@ -466,7 +466,7 @@ world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地�
 
 ### パスの確定可否
 
-`edit_path:update_shape` は `can_confirm` を常送します。これはUnityの形状確定状態とローカル交差検証（立体交差と川の横断）を合わせた真偽値で、形状が未確定または干渉中ならfalseです。Tauriはこの値だけで確定を許可せず、同じ全線ペイロードの `/paths/validate` 応答も照合します。既存の `world:highlight_objects` によるパス・建物の警告は、メッシュ着色ではなく半透明の占有箱として描画します。同イベントの params には `colliding_river_ids`（地表レベルで横切っている川のID文字列の配列。`/paths/validate` と `/paths/interference` の同名フィールドをそのまま渡す）も含み、Unity は該当する川の範囲を同じ占有箱で示します。
+`edit_path:update_shape` は `can_confirm` を常送します。これはUnityの形状確定状態とローカル交差検証（立体交差と川・海・湖の横断）を合わせた真偽値で、形状が未確定または干渉中ならfalseです。Tauriはこの値だけで確定を許可せず、同じ全線ペイロードの `/paths/validate` 応答も照合します。既存の `world:highlight_objects` によるパス・建物の警告は、メッシュ着色ではなく半透明の占有箱として描画します。同イベントの params には `colliding_river_ids`（地表レベルで横切っている川のID文字列の配列。`/paths/validate` と `/paths/interference` の同名フィールドをそのまま渡す）も含み、Unity は該当する川の範囲を同じ占有箱で示します。
 敷設パネルは `/paths/validate` の `alignment_violations` を保持し、線番号（1始まり）と各線の始点からの距離区間を添えて曲率・勾配違反を表示します。パス干渉・川横断・形状未確定・検証待ち・検証エラーを区別し、APIエラーの理由は省略せず再試行ボタンを出します。原因不明の拒否を赤い干渉と断定しません。送信直前の再検証でも同じ説明を使い、古い形状の結果は表示しません。2D表示はUnityの推定値なので、全線検証で拒否された区間を敷設パネルの案内で確認できます。費用欄は確定不可でも2点以上あれば表示します。
 
 # 天気の表示と選択

@@ -109,7 +109,6 @@ public partial class BuildingPlanManager
         HideDirectGhost();
         ClearPreview();
         effectRangeOverlay?.Clear();
-        if (shapeCoroutine != null) { StopCoroutine(shapeCoroutine); shapeCoroutine = null; }
         RefreshPlacementPreview();
         if (notify) EmitPlacementState();
     }

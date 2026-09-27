@@ -77,7 +77,10 @@
       "locked": "잠김",
       "completed": "달성",
       "failed": "기한 만료"
-    }
+    },
+    "scenarioImageLabel": "이미지 (썸네일)",
+    "scenarioImageSelect": "이미지 선택...",
+    "scenarioImageClear": "삭제"
   },
   "achievementQuests": {
     "createTitle": "퀘스트 작성",

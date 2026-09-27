@@ -42,9 +42,7 @@ public class CollapsedBuildingMeshBuilder : IBuildingMeshGenerator
             : null;
 
         // 敷地コンテキスト。高さ基準は工事現場・完成品と同じ規則にし、状態遷移で建物が上下に跳ねないようにする
-        Vector2[] parcelFootprint = BuildingMeshUtils.ResolveParcelContext(
-            buildingData, useParcelAltitude: BuildingMeshBuilder.IsApplicableModelType(modelType),
-            out ParcelSummary parcel, out Vector3 centerPointWorld);
+        Vector2[] parcelFootprint = BuildingMeshUtils.ResolveParcelContext(buildingData, out ParcelSummary parcel, out Vector3 centerPointWorld);
 
         // 瓦礫マウンドの対象ポリゴン（ローカルXZ）。区画が無ければ建物底面を使う
         Vector2[] rubblePolygon = parcelFootprint ?? footprint;

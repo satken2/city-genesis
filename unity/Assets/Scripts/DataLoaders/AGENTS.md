@@ -13,7 +13,7 @@
 | `RenderWorkScheduler.cs` / `PerformanceConfig.cs` / `RenderObjectCache.cs` / `MeshBakeService.cs` | 共通フレーム予算ポンプ / 予算値 / 非表示GOのLRU退避 / 非同期コライダーベイク |
 | `TerrainManager.cs` / `TerrainManager.Background.cs` | 地形タイルのストリーミングとLRU・超遠景・海岸線と水面の取得・地形の版API / 都市外の背景地形 |
 | `TerrainTileResources.cs` / `HeightmapTextureManager.cs` / `GroundCoverPalette.cs` | タイル専用資源 / GPU高さ窓 / 地表種別の見た目 |
-| `CoastlineStore.cs` / `RiverStore.cs` / `WaterSurfaceManager.cs` / `RiverSurfaceManager.cs` | 海岸線・川の静的ストア / 湖の水面 / 川の水面と川床マスク |
+| `CoastlineStore.cs` / `RiverStore.cs` / `WaterSurfaceStore.cs` / `WaterSurfaceManager.cs` / `RiverSurfaceManager.cs` | 海岸線・川・湖の静的ストア(湖は `WaterSurfaceManager` が水面の生成時に登録) / 湖の水面 / 川の水面と川床マスク |
 | `PathManager.cs` / `SplinePartLod.cs` / `RoadMarkingAtlas.cs` | 道路・線路・ノード・交差点 / 長い道路の区間LOD / 路面標示画像の予算 |
 | `BuildingManager.cs` / `BuildingExteriorRenderer.cs` / `FarBuildingBatcher.cs` / `ConstructionCraneAnimator.cs` | 建物 / 敷地装飾 / 遠景結合 / クレーン演出 |
 | `ParcelManager.cs` / `ZoneManager.cs` / `ResourceManager.cs` | 区画 / 地区 / 天然資源ヒートマップ |
@@ -25,7 +25,7 @@
 ## ロードの流れ(順序を変えない)
 
 1. `TerrainManager.FetchCoastline` が `/terrain/settings` → 海岸線・湖・川・地表種別を読む。マップ寸法より先に常駐集合を算出するとマップ外セルを要求し、`/terrain/surface` の400再試行から抜けられない。
-2. 地形タイル → 既存物の地形追従 → 区画(完了待ち) → 建物・道路 → 地区・資源・プロップ(`LoadObjectManagers`)。建物の基準標高が区画に依存する。
+2. 地形タイル → 既存物の地形追従 → 区画(完了待ち) → 建物・道路 → 地区・資源・プロップ(`LoadObjectManagers`)。海上区画の建物の接地高が区画に依存する。
 3. `session:reset` から `session:reload` までカメラ由来のロードは無視する(準備中の都市のタイルは同版の差分で更新されない)。
 
 ## 知らないと事故るポイント
@@ -64,11 +64,12 @@
 
 ### 建物 (BuildingManager)
 - 見た目に効くフィールドを足したら `HashBuildingShape` にも足す(再利用キー `BuildingRenderKey` の形状ハッシュ)。
-- 配置Yは `ResolveBuildingBaseHeight` の1箇所。海上区画(`PARCEL_WATER`)は必ず `parcel.altitude`(地形をサンプルすると海底が返る)。区画側の同じ入口は `ParcelManager.GetParcelBaseY`。
+- 配置Yは `ResolveBuildingBaseHeight` の1箇所。陸上は model_type によらず `center_point` の地形標高、海上区画(`PARCEL_WATER`)だけ `parcel.altitude`(地形をサンプルすると海底が返る)。区画側の同じ入口は `ParcelManager.GetParcelBaseY`。
+- `parcel.altitude` は海面基準の絶対標高(接道の路面標高、接道なしは区画中心の地形標高)。パス・ノードのYは地面からの相対高さなので混ぜない。陸上の建物の接地に使うと、区画が分かる経路(プレビュー等)と分からない一括ロードで高さが食い違う。
 - `buildingDataCache` への登録は `RegisterBuildingDataToCache`(逆引きと工事音を同期)、表示物セルは `RegisterBuildingCell(id, pos, shown)`(データだけなら `shown:false`)、詳細化の遅延投入は `QueueDeferredDetail`(遅延中は version をキャッシュしない)。
 - メッシュを作り直す目的なら `CreateOrUpdateBuildingObject(..., forceRebuild: true)`(false はプール再利用で早期return)。`LoadMergedBuildings` 中は `cellBuildingLod` でなく desiredTier を渡す。
 - 詳細数上限(`maxDetailedBuildingObjects`)のLRU破棄では、表示可能セルの建物を必ず Far の箱に置き換える(置かないと再入場まで消える)。
-- `buildingIdsByParcel` は一括ロードの `multi_agent` スキーマに `parcel_id` が無いため実質空。区画→建物は `ParcelManager.GetParcelIdAtPoint` などの空間判定で解く。
+- `buildingIdsByParcel` は一括ロード・単体再取得(`FetchBuilding` → `GET /buildings/{id}`。一覧の1要素と同形式)の `multi_agent` スキーマに `parcel_id` が無いため実質空。区画→建物は `ParcelManager.GetParcelIdAtPoint` などの空間判定で解く。
 
 ### 区画・地区 (ParcelManager / ZoneManager)
 - 区画の `land_price` / `front_path_id` は version が同じでも変わる(`VERSION_TRIGGER_PROPS` 外)。版一致時も `RefreshCachedSummary` で更新する。

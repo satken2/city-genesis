@@ -1462,31 +1462,23 @@ public class BuildingManager : BaseApiDataManager
         return false;
     }
 
-    private bool IsBuildingApplicableForAltitude(BuildingSummary buildingData)
-    {
-        int modelType = BuildingMeshBuilder.GetModelType(buildingData);
-        return BuildingMeshBuilder.IsApplicableModelType(modelType);
-    }
-
     /// <summary>建物を地表からわずかに浮かせ、Zファイティングを避けるオフセット（メートル）。</summary>
     private const float BuildingBaseLift = 0.01f;
 
     /// <summary>
-    /// 建物の基底高（ワールドY）を決める。敷地の代表標高（parcel.altitude）に載せるか、
-    /// 建物中心の地形標高に載せるかの分岐をここに集約する。
+    /// 建物の基底高（ワールドY）を決める。陸上の建物は model_type によらず建物中心の地形標高に置く
+    /// （傾斜地の谷側の隙間はモジュラー建物の基盤が埋める）。
     ///
-    /// 海上区画（PARCEL_WATER）だけはモデル種別によらず必ず altitude を使う。
+    /// 海上区画（PARCEL_WATER）だけは区画の基準標高（parcel.altitude＝海面）に置く。
     /// 地形をサンプルすると海底（worldY&lt;0）が返り、洋上風車などが海面下へ沈むため。
     /// </summary>
-    private float ResolveBuildingBaseHeight(BuildingSummary buildingData, ParcelSummary parcel, float cx, float cz)
+    private float ResolveBuildingBaseHeight(ParcelSummary parcel, float cx, float cz)
     {
         if (parcel == null)
         {
             parcel = ResolveParcelBelowSeaLevel(cx, cz);
         }
-        bool useParcelAltitude = parcel != null
-            && (parcel.parcel_type == Constants.PARCEL_WATER || IsBuildingApplicableForAltitude(buildingData));
-        float ground = useParcelAltitude
+        float ground = parcel != null && parcel.parcel_type == Constants.PARCEL_WATER
             ? parcel.altitude
             : Utils.GetGroundHeight(new Vector3(cx, 1000f, cz));
         return ground + BuildingBaseLift;
@@ -1548,7 +1540,7 @@ public class BuildingManager : BaseApiDataManager
             float cx = cp != null && cp.Length >= 2 ? cp[0] : buildingGO.transform.position.x;
             float cz = cp != null && cp.Length >= 2 ? cp[1] : buildingGO.transform.position.z;
 
-            float buildingBaseHeight = ResolveBuildingBaseHeight(buildingData, parcel, cx, cz);
+            float buildingBaseHeight = ResolveBuildingBaseHeight(parcel, cx, cz);
             buildingGO.transform.position = new Vector3(cx, buildingBaseHeight, cz);
         }
         else
@@ -1906,7 +1898,7 @@ public class BuildingManager : BaseApiDataManager
                 }
             }
 
-            float buildingBaseHeight = ResolveBuildingBaseHeight(buildingData, parcel, cx, cz);
+            float buildingBaseHeight = ResolveBuildingBaseHeight(parcel, cx, cz);
             buildingGO.transform.position = new Vector3(cx, buildingBaseHeight, cz);
             RecordBuildingTerrainSignature(buildingData);
             RegisterBuildingCell(buildingData.agent_id, buildingGO.transform.position);
@@ -2449,7 +2441,7 @@ public class BuildingManager : BaseApiDataManager
                 }
             }
 
-            float buildingBaseHeight = ResolveBuildingBaseHeight(buildingData, parcel, cx, cz);
+            float buildingBaseHeight = ResolveBuildingBaseHeight(parcel, cx, cz);
             buildingGO.transform.position = new Vector3(cx, buildingBaseHeight, cz);
             RecordBuildingTerrainSignature(buildingData);
             RegisterBuildingCell(buildingData.agent_id, buildingGO.transform.position);
@@ -2612,7 +2604,7 @@ public class BuildingManager : BaseApiDataManager
                         explodedVersions[agentId] = building.version;
                         float radius = FireEffectManager.ResolveFootprintRadius(building, cp[0], cp[1]);
                         var parcel = building.parcel_id > 0 ? GetParcelManager()?.GetParcelSummary(building.parcel_id) : null;
-                        float baseHeight = ResolveBuildingBaseHeight(building, parcel, cp[0], cp[1]);
+                        float baseHeight = ResolveBuildingBaseHeight(parcel, cp[0], cp[1]);
                         // 建物の子にはしない。LOD再生成で煙や音の余韻が途中で消えるのを防ぐ。
                         VisualEffectManager.Instance?.PlayExplosion(new Vector3(cp[0], baseHeight + 0.5f, cp[1]), radius);
                     }

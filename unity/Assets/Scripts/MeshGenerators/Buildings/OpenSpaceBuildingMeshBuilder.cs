@@ -13,7 +13,7 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
     const float SideFooting=.05f; // 側面の下端を地面より下げ、斜面で隙間を見せない量(m)
     public BuildingMeshResult Generate(BuildingSummary data,bool isDynamic=false)
     {
-        BuildingMeshUtils.ResolveParcelContext(data,false,out _,out Vector3 center);
+        BuildingMeshUtils.ResolveParcelContext(data,out _,out Vector3 center);
         // SHAPE_FULLの建物輪郭は区画全面かつ最初の辺が接道側に正規化されている。
         var polygon=BuildingMeshUtils.GetFootprint(data);
         var naming=BuildingMeshUtils.ResolveModelNaming(data);

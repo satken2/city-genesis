@@ -122,7 +122,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         //    地面パネルは draw_floor=yes のとき敷地（土地区画）全体に地形追従で描かれ、
         //    岸壁上面と同一の floor マテリアルで床続きになる。
         Vector2[] fenceFootprint = BuildingMeshUtils.ResolveParcelContext(
-            buildingData, useParcelAltitude: false, out _, out _);
+            buildingData, out _, out _);
         Vector2[] sitePolygon = (fenceFootprint != null && fenceFootprint.Length >= 3) ? fenceFootprint : footprint;
         ModularBodyBuilder.GenerateSiteDecorations(
             prefix, 0,
