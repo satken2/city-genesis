@@ -67,6 +67,7 @@ nav:
     - 駅と駅舎: economics/29_駅と駅舎.md
     - 人員搬送設備: economics/30_人員搬送設備.md
     - 観光: economics/31_観光.md
+    - 貨物輸送: economics/33_貨物輸送.md
   - 幾何・グラフィック:
     - パス形状: geometries/A_パス形状.md
     - 土地形状: geometries/B_土地形状.md

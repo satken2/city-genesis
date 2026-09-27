@@ -20,13 +20,15 @@ Rayが命中したオブジェクトはTagまたはコンポーネントの有�
 | `PARCEL` | 2 | Tag `ParcelObject` |
 | `PATH` | 3 | Tag `PathObject` |
 | `NODE` | 4 | Tag `PathNode` |
-| `TERRAIN` | 5 | Tag `SeaObject`、または `Terrain` コンポーネントの有無 |
+| `TERRAIN` | 5 | Tag `SeaObject`、`Terrain` コンポーネントの有無、または都市外の背景地形のチャンク(`TerrainManager.IsBackgroundTerrain`) |
 | `ZONE` | 6 | Tag `ZoneObject` |
 | `PROP` | 7 | 地形プロップ（個体ごとのColliderを持たないためレイキャストでは判定しない。配置は地形クリック、ブルドーザの削除は `RemovalManager` が画面レイで `PropManager.TryPick` のAABB判定を行い、この値は削除済み集合のキーにだけ使う） |
 
 `MODE_NONE` に設定されたオブジェクトタイプはRayを貫通し、背後にあるオブジェクトが選択対象となる。
 
 海面は `TerrainManager` が管理する地形タイルではなく、`Terrain` コンポーネントを持たない板ポリゴンである。そのため `SeaObject` タグで `TERRAIN` に分類し、`InputHandler` の初期化時に海面へ `TerrainInputHandler` を付与する（既に付いていれば付与しない）。これにより**海面のクリック・ホバーは地形と完全に同じ経路**を流れ、地形と同じモード別の挙動になる。土地区画作成（点選択）も海の上で成立し、そこに作られた区画は海上区画（`PARCEL_WATER`）になる（[土地形状](../geometries/B_土地形状.md) B.5）。
+
+都市外の背景地形（[地形形状](../geometries/D_地形形状.md)「都市外の背景地形」）のチャンクも `Terrain` コンポーネントを持たない板ポリゴンである。`TerrainManager` がチャンクの生成時に `TerrainInputHandler` を付与し、`TerrainManager.IsBackgroundTerrain` で `TERRAIN` に分類する。カーソル位置（`posX` / `posZ`）も地形タイルと同じく背景の起伏の上で解決し、ホバーも地形と同じ経路を流れる。テンプレートモードで都市外に道路・線路・建物を置く操作と、都市外のコンテナ貨物PFに国際貨物輸送路線の停留所を置く操作がこの経路を通る。
 
 ### 2.2. 入力モード
 

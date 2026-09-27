@@ -37,7 +37,7 @@
 ## 海面(Sea)のクリック
 
 - 海面はシーン静置の板(`Sea`、Y=0.001、Layer=Water)で`Terrain`コンポーネントを持たない。`SeaObject`タグで`TERRAIN`に分類し`TerrainInputHandler`を後付けするので、地形と同じ経路を流れる。区画種別はUnityもUIも送らず、バックエンドが位置から沿岸/海上/陸地を判定する。
-- 都市外(マップの外)の背景地形のチャンク(`TerrainManager.Background.cs`)も`Terrain`コンポーネントを持たない板ポリゴン。`TerrainManager.IsBackgroundTerrain`で`TERRAIN`に分類し、カーソル位置(`UpdateTerrainPosition`)も背景の起伏上で解決する。国境の貨物駅(都市外の貨物PF)に路線の停留所を置く操作や、テンプレート作成モードで都市外にパスを敷く操作がこの経路を通る。
+- 都市外(マップの外)の背景地形のチャンク(`TerrainManager.Background.cs`)も`Terrain`コンポーネントを持たない板ポリゴン。`TerrainManager.IsBackgroundTerrain`で`TERRAIN`に分類し、カーソル位置(`UpdateTerrainPosition`)も背景の起伏上で解決する。都市外のコンテナ貨物PFに国際貨物輸送路線の停留所を置く操作や、テンプレート作成モードで都市外にパス・建物を置く操作がこの経路を通る。
 - 海上では`Utils.GetGroundHeight`が海底(負のY)を返す。海上へ出す表示物は海面板より上へクランプする(地形マーカー`SeaMarkerMinY`=0.05m、区画プレビュー枠`ParcelPlanRenderer.SeaSurfaceY`=0.01m)。
 - `terrainLayerMask`にWaterは含まれないが、海域ではy=0平面との交点フォールバックで`posX/posZ`が正しく出る。
 

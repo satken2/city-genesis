@@ -29,12 +29,12 @@ type CargoProduct = {
 };
 
 type CargoInfoResponse = {
-  /** 方向別の取扱能力(t/エポック)。国際貨物駅は面積の上限と受け取った輸送枠の小さい方 */
+  /** 方向別の取扱能力(t/エポック)。原材料を持つ拠点は面積の上限と受け取った原材料の分の小さい方 */
   capacity_per_epoch: number;
   /** 床面積だけで決まる取扱能力(t/エポック) */
   area_capacity_per_epoch: number;
-  /** 国際貨物駅が国際貨物輸送路線から受け取った輸送枠(t/エポック)。港など輸送枠で縛られない拠点は null */
-  link_capacity_per_epoch: number | null;
+  /** 受け取った原材料で取り扱える量(t/エポック)。国際貨物駅では国際貨物輸送路線で届いた枠。原材料を持たない港などは null */
+  material_capacity_per_epoch: number | null;
   /** 方向別の取扱実績の合計(t)。品目ごとに単位が違うため、能力と比べられる合計はトンで受け取る */
   import_handled_tons: number;
   export_handled_tons: number;
@@ -220,10 +220,10 @@ export function CargoInfoPanel({ agent, apiBaseUrl }: CargoInfoPanelProps) {
           </span>
         </span>
 
-        {cargo.link_capacity_per_epoch != null && (
+        {cargo.material_capacity_per_epoch != null && (
           <>
-            <span className="agent-detail-label">{t("cargo.linkCapacity", "国際貨物の輸送枠")}</span>
-            <span className="agent-detail-value">{formatAmount(cargo.link_capacity_per_epoch)} t</span>
+            <span className="agent-detail-label">{t("cargo.materialCapacity", "原材料による上限")}</span>
+            <span className="agent-detail-value">{formatAmount(cargo.material_capacity_per_epoch)} t</span>
 
             <span className="agent-detail-label">{t("cargo.areaCapacity", "面積による上限")}</span>
             <span className="agent-detail-value">{formatAmount(cargo.area_capacity_per_epoch)} t</span>
