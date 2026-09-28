@@ -618,15 +618,3 @@ export function polygonArea(polygon: WaterPolygonGeoJson | null | undefined): nu
   }
   return Math.max(0, area);
 }
-
-/** ポリゴンの全頂点を (dx, dz) だけ平行移動した新しいポリゴンを返す(マップリサイズ追従用) */
-export function translatePolygon(polygon: WaterPolygonGeoJson, dx: number, dz: number): WaterPolygonGeoJson {
-  const shiftRing = (ring: number[][]) => ring.map((p) => [p[0] + dx, p[1] + dz]);
-  if (polygon.type === "Polygon") {
-    return { type: "Polygon", coordinates: (polygon.coordinates as number[][][]).map(shiftRing) };
-  }
-  return {
-    type: "MultiPolygon",
-    coordinates: (polygon.coordinates as number[][][][]).map((part) => part.map(shiftRing)),
-  };
-}

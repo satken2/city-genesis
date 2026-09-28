@@ -57,7 +57,7 @@ import { RiverProfileSampler, buildRiverSurfaceMesh } from "./riverGeometry";
 import "./Terrain3DPreviewCanvas.css";
 
 type Terrain3DPreviewCanvasProps = {
-  /** プレビュー対象の地形マップID。window-registry の entity_id 経由で渡される。 */
+  /** プレビュー対象の地形エディタの作業コピーのID(editor_id)。window-registry の entity_id 経由で渡される。 */
   mapId: string;
 };
 

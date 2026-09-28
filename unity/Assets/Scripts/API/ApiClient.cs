@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -7,7 +9,10 @@ using UnityEngine.Networking;
 using Newtonsoft.Json;
 
 /// <summary>
-/// HTTPリクエストを統一的に処理する共通APIクライアント
+/// HTTPリクエストを統一的に処理する共通APIクライアント。
+/// バックエンドは通信契約ヘッダーと認証トークンの無い要求を拒否する(401)ため、
+/// ローカル API への要求はすべてここ(<see cref="Get{T}"/> などの定型か <see cref="Request"/>)を通す。
+/// UnityWebRequest を直接作るとヘッダーが付かない(本番の死活監視 AppRoot.BackendHealthPolling なら 401 続きでアプリが終了する)。
 /// </summary>
 public static class ApiClient
 {
@@ -18,17 +23,149 @@ public static class ApiClient
     /// </summary>
     public static string BASE_URL = "http://127.0.0.1:5000/api/v1";
 
+    public const string CONTRACT_HEADER = "X-City-Genesis-API";
+    public const string TOKEN_HEADER = "X-City-Genesis-Token";
+
+    /// <summary>トークン欠落・不一致の 401 応答に入るコード。エンドポイント自身の 401(Steam チケット無効など)と区別するのに使う。</summary>
+    public const string TOKEN_REJECTED_CODE = "API_TOKEN_REQUIRED";
+
+    private const string TOKEN_ENV = "GENESIS_API_TOKEN";
+    private const string TOKEN_FILE_NAME = "api_token";
+    private const string APP_DATA_DIR_NAME = "UrbanGenesis";
+
+    private static string apiToken;
+    private static bool apiTokenResolved;
+
+    #region 認証トークン
+
+    /// <summary>
+    /// 通信契約ヘッダーと認証トークンを付け、付けたトークン(見つからなければ null)を返す。
+    /// 要求の組み立ては <see cref="ApiRequest"/> が行うので、呼び出し元は <see cref="Request"/> を使う。
+    /// </summary>
+    internal static string ApplyHeaders(UnityWebRequest request)
+    {
+        request.SetRequestHeader(CONTRACT_HEADER, FrontendVersion.ApiContract.ToString());
+        if (!apiTokenResolved)
+        {
+            apiToken = ResolveApiToken();
+            apiTokenResolved = true;
+        }
+        if (apiToken != null) request.SetRequestHeader(TOKEN_HEADER, apiToken);
+        return apiToken;
+    }
+
+    /// <summary>
+    /// 401 を受けたときに呼ぶ。トークンを解決し直し、拒否されたものと違う値が得られたら true(作り直して再送してよい)を返す。
+    /// バックエンドは起動のたびにトークンを作り直すので、開発時にバックエンドだけ再起動しても追従できる。
+    /// 並列の要求が同時に 401 を受けても、先に解決し直した結果を共有してファイルを読み直さない。
+    /// </summary>
+    internal static bool RefreshApiToken(string rejectedToken)
+    {
+        if (!apiTokenResolved || string.Equals(apiToken, rejectedToken, StringComparison.Ordinal))
+        {
+            apiToken = ResolveApiToken();
+            apiTokenResolved = true;
+        }
+        return apiToken != null && !string.Equals(apiToken, rejectedToken, StringComparison.Ordinal);
+    }
+
+    /// <summary>応答が認証トークンの拒否(エンドポイント自身の判断ではない 401)かどうか。</summary>
+    public static bool IsTokenRejected(long responseCode, string responseBody)
+    {
+        return responseCode == 401 && responseBody != null && responseBody.Contains(TOKEN_REJECTED_CODE);
+    }
+
+    /// <summary>
+    /// 環境変数 GENESIS_API_TOKEN → ユーザーフォルダの api_token の順で探す。
+    /// 製品では genesis.py が環境変数で子プロセスへ渡す。手動で起動した開発中の Unity は、
+    /// バックエンドが起動時に書くファイルから読む(Webページはローカルファイルを読めないので CSRF 対策が成り立つ)。
+    /// </summary>
+    private static string ResolveApiToken()
+    {
+        string fromEnv = NormalizeToken(Environment.GetEnvironmentVariable(TOKEN_ENV));
+        if (fromEnv != null) return fromEnv;
+
+        string path = Path.Combine(GetAppDataDir(), TOKEN_FILE_NAME);
+        try
+        {
+            return File.Exists(path) ? NormalizeToken(File.ReadAllText(path)) : null;
+        }
+        catch (Exception e) when (e is IOException || e is UnauthorizedAccessException)
+        {
+            Debug.LogWarning($"ApiClient: API トークンのファイルを読めません ({path}): {e.Message}");
+            return null;
+        }
+    }
+
+    /// <summary>前後の空白を除く。空や、HTTP ヘッダーに載らない文字を含む値は無いものとして扱う。</summary>
+    private static string NormalizeToken(string raw)
+    {
+        string token = raw?.Trim();
+        if (string.IsNullOrEmpty(token)) return null;
+        foreach (char c in token)
+        {
+            if (c < '!' || c > '~')
+            {
+                Debug.LogWarning("ApiClient: API トークンに使えない文字が含まれているため無視します");
+                return null;
+            }
+        }
+        return token;
+    }
+
+    /// <summary>コアの consts._get_appdata_dir と同じ規則で決めるユーザーフォルダ。ずれるとトークンファイルを見つけられない。</summary>
+    private static string GetAppDataDir()
+    {
+        string baseDir;
+        switch (Application.platform)
+        {
+            case RuntimePlatform.WindowsPlayer:
+            case RuntimePlatform.WindowsEditor:
+                baseDir = NonEmptyEnv("LOCALAPPDATA") ?? NonEmptyEnv("APPDATA") ?? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                break;
+            case RuntimePlatform.OSXPlayer:
+            case RuntimePlatform.OSXEditor:
+                baseDir = Path.Combine(HomeDir(), "Library", "Application Support");
+                break;
+            default:
+                baseDir = NonEmptyEnv("XDG_DATA_HOME") ?? Path.Combine(HomeDir(), ".local", "share");
+                break;
+        }
+        return Path.Combine(baseDir, APP_DATA_DIR_NAME);
+    }
+
+    private static string NonEmptyEnv(string name)
+    {
+        string value = Environment.GetEnvironmentVariable(name);
+        return string.IsNullOrEmpty(value) ? null : value;
+    }
+
+    private static string HomeDir()
+    {
+        return NonEmptyEnv("HOME") ?? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+    }
+
+    #endregion
+
+    /// <summary>
+    /// 定型(Get/GetBulk/Post/Patch)に当てはまらない要求を作る(まだ送らない)。
+    /// path は BASE_URL からの相対パス(クエリ文字列含む)、json を渡すと本文として送る。
+    /// <see cref="ApiRequest.Send"/> で送って待ち、結果は <see cref="ApiRequest.Web"/> から読む。using で破棄すること。
+    /// </summary>
+    public static ApiRequest Request(string method, string path, string json = null, int timeoutSeconds = 0)
+    {
+        return new ApiRequest(method, $"{BASE_URL}{path}", json, timeoutSeconds);
+    }
+
     /// <summary>
     /// GETリクエストを送信
     /// </summary>
     public static IEnumerator Get<T>(string path, Action<T> onSuccess, Action<string> onError = null)
     {
-        string url = $"{BASE_URL}{path}";
-        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        using (ApiRequest call = Request("GET", path, timeoutSeconds: 10))
         {
-            request.timeout = 10;
-            request.SetRequestHeader("X-City-Genesis-API", FrontendVersion.ApiContract.ToString());
-            yield return request.SendWebRequest();
+            yield return call.Send();
+            UnityWebRequest request = call.Web;
 
             if (request.result == UnityWebRequest.Result.Success)
             {
@@ -88,26 +225,17 @@ public static class ApiClient
         string label = timingLabel ?? path;
         var swNet = System.Diagnostics.Stopwatch.StartNew();
 
-        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        using (ApiRequest call = Request("GET", path, timeoutSeconds: timeoutSeconds)
+            .WithHeader("Cache-Control", "no-cache")
+            .WithHeader("Accept", BULK_ACCEPT_HEADER))
         {
-            request.timeout = timeoutSeconds;
-            request.SetRequestHeader("Cache-Control", "no-cache");
-            request.SetRequestHeader("Accept", BULK_ACCEPT_HEADER);
-
-            request.SetRequestHeader("X-City-Genesis-API", FrontendVersion.ApiContract.ToString());
-            UnityWebRequestAsyncOperation operation = request.SendWebRequest();
-            if (isCanceled == null) yield return operation;
-            else
+            yield return call.Send(isCanceled);
+            if (isCanceled != null && isCanceled())
             {
-                // WaitUntil はスケジューラ上でネイティブ待機として扱われ、共通予算を消費しない。
-                yield return new WaitUntil(() => operation.isDone || isCanceled());
-                if (isCanceled())
-                {
-                    if (!operation.isDone) request.Abort();
-                    RenderWorkScheduler.CountEvent("api.bulkCanceled");
-                    yield break;
-                }
+                RenderWorkScheduler.CountEvent("api.bulkCanceled");
+                yield break;
             }
+            UnityWebRequest request = call.Web;
 
             if (request.result != UnityWebRequest.Result.Success)
             {
@@ -160,18 +288,12 @@ public static class ApiClient
     /// </summary>
     public static IEnumerator Post<T>(string path, object payload, Action<T> onSuccess, Action<long, string> onError = null)
     {
-        string url = $"{BASE_URL}{path}";
         string json = JsonConvert.SerializeObject(payload, Formatting.Indented);
-        byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
 
-        using (UnityWebRequest request = new UnityWebRequest(url, "POST"))
+        using (ApiRequest call = Request("POST", path, json))
         {
-            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            request.downloadHandler = new DownloadHandlerBuffer();
-            request.SetRequestHeader("Content-Type", "application/json");
-            
-            request.SetRequestHeader("X-City-Genesis-API", FrontendVersion.ApiContract.ToString());
-            yield return request.SendWebRequest();
+            yield return call.Send();
+            UnityWebRequest request = call.Web;
 
             if (request.result == UnityWebRequest.Result.Success)
             {
@@ -202,18 +324,12 @@ public static class ApiClient
     /// </summary>
     public static IEnumerator Patch(string path, object payload, Action onSuccess, Action<long, string> onError = null)
     {
-        string url = $"{BASE_URL}{path}";
         string json = JsonConvert.SerializeObject(payload);
-        byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
 
-        using (UnityWebRequest request = new UnityWebRequest(url, "PATCH"))
+        using (ApiRequest call = Request("PATCH", path, json))
         {
-            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-            request.downloadHandler = new DownloadHandlerBuffer();
-            request.SetRequestHeader("Content-Type", "application/json");
-
-            request.SetRequestHeader("X-City-Genesis-API", FrontendVersion.ApiContract.ToString());
-            yield return request.SendWebRequest();
+            yield return call.Send();
+            UnityWebRequest request = call.Web;
 
             if (request.result == UnityWebRequest.Result.Success)
             {
@@ -230,3 +346,99 @@ public static class ApiClient
 
 }
 
+/// <summary>
+/// ローカル API への1件の要求(<see cref="ApiClient.Request"/> で作る)。
+/// 送るたびに <see cref="ApiClient.ApplyHeaders"/> でヘッダーを付け、401 を受けてトークンを解決し直せたら
+/// 1回だけ作り直して再送する(UnityWebRequest は再送できないため、送信のたびに作り直す)。
+/// </summary>
+public sealed class ApiRequest : IDisposable
+{
+    private readonly string method;
+    private readonly string url;
+    private readonly byte[] body;
+    private readonly int timeoutSeconds;
+    private List<KeyValuePair<string, string>> extraHeaders;
+    private UnityWebRequestAsyncOperation operation;
+    private string sentToken;
+    private bool retried;
+
+    /// <summary>最後に送った要求。<see cref="Send"/> の完了後に結果を読む。</summary>
+    public UnityWebRequest Web { get; private set; }
+
+    /// <summary>Send の isCanceled により通信を中断した。</summary>
+    public bool Aborted { get; private set; }
+
+    internal ApiRequest(string method, string url, string json, int timeoutSeconds)
+    {
+        this.method = method;
+        this.url = url;
+        body = json != null ? Encoding.UTF8.GetBytes(json) : null;
+        this.timeoutSeconds = timeoutSeconds;
+    }
+
+    /// <summary>再送時にも付け直す追加ヘッダー。</summary>
+    public ApiRequest WithHeader(string name, string value)
+    {
+        (extraHeaders ??= new List<KeyValuePair<string, string>>()).Add(new KeyValuePair<string, string>(name, value));
+        return this;
+    }
+
+    /// <summary>送信を始めるだけで待たない。複数の要求を並列に送るときは、全部 Begin してから1件ずつ Send で待つ。</summary>
+    public ApiRequest Begin()
+    {
+        Web?.Dispose();
+        Web = new UnityWebRequest(url, method, new DownloadHandlerBuffer(), body != null ? new UploadHandlerRaw(body) : null);
+        if (body != null) Web.SetRequestHeader("Content-Type", "application/json");
+        if (timeoutSeconds > 0) Web.timeout = timeoutSeconds;
+        if (extraHeaders != null)
+        {
+            foreach (var header in extraHeaders) Web.SetRequestHeader(header.Key, header.Value);
+        }
+        sentToken = ApiClient.ApplyHeaders(Web);
+        operation = Web.SendWebRequest();
+        return this;
+    }
+
+    /// <summary>
+    /// 完了まで待つ(未送信なら送る)。isCanceled が真になったら通信を中断して <see cref="Aborted"/> を立てる。
+    /// </summary>
+    public IEnumerator Send(Func<bool> isCanceled = null)
+    {
+        if (operation == null) Begin();
+        while (true)
+        {
+            if (isCanceled == null) yield return operation;
+            else
+            {
+                // WaitUntil はスケジューラ上でネイティブ待機として扱われ、共通予算を消費しない。
+                yield return new WaitUntil(() => operation.isDone || isCanceled());
+                if (!operation.isDone)
+                {
+                    Web.Abort();
+                    Aborted = true;
+                    yield break;
+                }
+            }
+            if (!RetryIfUnauthorized()) yield break;
+        }
+    }
+
+    /// <summary>
+    /// 完了した要求が 401 で、トークンを解決し直せたら作り直して送り直す(1回だけ)。送り直したら true。
+    /// コルーチンで待たない呼び出し元(エディタ拡張の Update でのポーリングなど)が完了を検知したときに呼ぶ。
+    /// </summary>
+    public bool RetryIfUnauthorized()
+    {
+        if (retried || Web == null || Web.responseCode != 401 || !ApiClient.RefreshApiToken(sentToken)) return false;
+        retried = true;
+        Begin();
+        return true;
+    }
+
+    public void Dispose()
+    {
+        Web?.Dispose();
+        Web = null;
+        operation = null;
+    }
+}

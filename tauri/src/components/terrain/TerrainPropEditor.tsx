@@ -10,16 +10,9 @@ export type TerrainPropScatter = {
   id: string; prop_type: number; polygon: number[][]; density: number; seed: number;
   edge_fade_width: number; allow_water: boolean;
 };
-/** 地形の作業コピーと .props.json に保存する配置定義。y は地面からの相対高さ。 */
+/** シナリオの地形 API で送受信する配置定義(保存では全置換)。y は地面からの相対高さ。 */
 export type TerrainProps = { instances: TerrainPropInstance[]; scatters: TerrainPropScatter[] };
 export const emptyTerrainProps = (): TerrainProps => ({ instances: [], scatters: [] });
-
-export function translateTerrainProps(data: TerrainProps, dx: number, dz: number): TerrainProps {
-  return {
-    instances: data.instances.map(p => ({ ...p, x: p.x + dx, z: p.z + dz })),
-    scatters: data.scatters.map(p => ({ ...p, polygon: p.polygon.map(([x, z]) => [x + dx, z + dz]) })),
-  };
-}
 
 export function useTerrainPropEditor(beforeChange: () => void, redraw: () => void) {
   const data = useRef<TerrainProps>(emptyTerrainProps());
@@ -68,15 +61,6 @@ export function useTerrainPropEditor(beforeChange: () => void, redraw: () => voi
     data.current = { instances: data.current.instances.filter(p => p.id !== id), scatters: data.current.scatters.filter(p => p.id !== id) };
     refresh();
   }
-  function shift(dx: number, dz: number) {
-    data.current = translateTerrainProps(data.current, dx, dz);
-    draft.current = {
-      ...draft.current,
-      instances: draft.current.instances.map(p => ({ ...p, x: p.x + dx, z: p.z + dz })),
-      polygon: draft.current.polygon.map(([x, z]) => [x + dx, z + dz]),
-    };
-    refresh();
-  }
   function painter(ctx: CanvasRenderingContext2D, zoom: number, cursor: { x: number; z: number } | null) {
     function region(points: number[][], closed: boolean, pending: boolean) {
       if (!points.length) return;
@@ -120,7 +104,7 @@ export function useTerrainPropEditor(beforeChange: () => void, redraw: () => voi
     edgeFadeWidth, setEdgeFadeWidth, allowWater, setAllowWater,
     setMode: (v: "instance" | "scatter") => { setMode(v); reset(); },
     setType: (v: number | null) => { setType(v); reset(); },
-    reset, restore, click, closePolygon, confirm, remove, shift, drawPlaced, drawDraft };
+    reset, restore, click, closePolygon, confirm, remove, drawPlaced, drawDraft };
   const latest = useRef(actions);
   latest.current = actions;
   useEffect(() => { redraw(); }, [revision, mode, type, height, rotation, scale, density, seed]);

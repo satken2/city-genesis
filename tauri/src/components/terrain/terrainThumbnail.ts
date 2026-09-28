@@ -14,7 +14,7 @@ const THUMBNAIL_LONG_EDGE = 512;
 const SAMPLES_PER_AXIS = 2;
 
 /**
- * 保存時と一括再生成で共用する平面図。DOM・WebGLには依存しない。
+ * オリジナル地形のサムネイル(一括再生成 `tools/regenerate_terrain_thumbnails.py`)の平面図。DOM・WebGLには依存しない。
  * 格子の行0は南端なので画像の行順を反転し、北を上・東を右にする。
  * 海岸の各画素を4点で評価し、陸地の被覆率をアルファにすることで海の色が縁に混ざるのを防ぐ。
  */
@@ -60,18 +60,4 @@ export function renderTerrainThumbnail(input: TerrainThumbnailInput) {
     }
   }
   return { width, height, pixels };
-}
-
-/** 現在の標高を透過PNGにし、Rustの保存コマンドへ渡す素のbase64文字列を返す。 */
-export function captureTerrainThumbnail(input: TerrainThumbnailInput): string {
-  const { width, height, pixels } = renderTerrainThumbnail(input);
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Terrain thumbnail canvas is unavailable");
-  const image = ctx.createImageData(width, height);
-  image.data.set(pixels);
-  ctx.putImageData(image, 0, 0);
-  return canvas.toDataURL("image/png").replace(/^data:image\/png;base64,/, "");
 }

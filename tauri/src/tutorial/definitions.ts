@@ -1,5 +1,4 @@
-import Ajv from "ajv";
-import schema from "./schema.json";
+import { validate as validateGeneratedSchema } from "./schemaValidator.generated";
 import basic from "./definitions/basic.json";
 import district from "./definitions/scenario2.json";
 import infra from "./definitions/scenario3.json";
@@ -18,7 +17,8 @@ export const TARGETS = ["hud.road", "hud.construction", "hud.land", "hud.distric
 export const VALUE_TARGETS = ["path.type", "path.variant", "building.category", "building.variant"];
 /** コアが初期配置した対象の名前。束縛はチュートリアル開始時にコアから受け取る。 */
 const CORE_TARGET = /^(support|lesson)\./;
-const validateSchema = new Ajv({ allErrors: true, strict: false }).compile(schema);
+/** schema.json の検証。CSP で eval を許さないため、Ajv の事前生成コードを使う(npm run gen:tutorial-validator)。 */
+const validateSchema = validateGeneratedSchema as ((data: unknown) => boolean) & { errors?: unknown };
 export function validateDefinition(value: unknown): asserts value is Definition {
   if (!validateSchema(value)) throw new Error(JSON.stringify(validateSchema.errors));
   const definition = value as Definition;

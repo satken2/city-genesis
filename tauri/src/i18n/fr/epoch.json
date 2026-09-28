@@ -8,6 +8,7 @@
     "yes": "Oui",
     "executing": "Exécution de l'époque...",
     "errorSteamLimit": "L'authentification Steam n'a pas pu être vérifiée : aucune époque supplémentaire ne peut être exécutée. (Sans vérification, 10 époques au maximum sont jouables.)",
+    "errorAlreadyRunning": "Une autre époque est déjà en cours d’exécution. Réessayez lorsqu’elle sera terminée.",
     "errorFailed": "Échec de l'exécution de l'époque : {{reason}}"
   },
   "epochResult": {

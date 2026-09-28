@@ -2,16 +2,15 @@
  * バックエンドが管理する地形マップ(GET /api/v1/terrain/maps で一覧取得できるもの)の
  * サムネイル画像を表示する共通部品。
  *
- * サムネイルは GET /api/v1/terrain/maps/{map_id}/thumbnail から取得する。地形エディタで
- * .npyエクスポート時または一括再生成ツールで、海が透過の平面図PNGを生成する。
- * 未生成のマップでは404になる。その場合は
- * プレースホルダ(背景色のみのdiv)にフォールバックする。
+ * サムネイルは GET /api/v1/terrain/maps/{map_id}/thumbnail から取得する(認証ヘッダーが要るので
+ * `useApiImageUrl` で Blob URL にして表示する)。海が透過の平面図PNGで、未生成のマップでは404になる。
+ * 取得できなければプレースホルダ(背景色のみのdiv)にフォールバックする。
  *
  * サイズはCSSクラスで決まる。既定はタイル用(new-game-tile-image)で、
  * ニューゲーム画面の詳細パネルのように大きく出したい場合は className を渡す。
  */
 
-import { useState } from "react";
+import { useApiImageUrl } from "../../hooks/useApiImageUrl";
 
 type TerrainMapThumbnailProps = {
   apiBaseUrl: string;
@@ -28,21 +27,23 @@ export function TerrainMapThumbnail({
   className = "new-game-tile-image",
   placeholderModifier = "new-game-tile-image--terrain",
 }: TerrainMapThumbnailProps) {
-  // 404だったマップIDを覚える。真偽値で持つと、同じ要素位置でmapIdだけが
-  // differ した場合(詳細パネルの選択切り替え)に前のマップの失敗状態を引き継いでしまう。
-  const [failedId, setFailedId] = useState<string | null>(null);
+  const url = apiBaseUrl
+    ? `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/terrain/maps/${encodeURIComponent(mapId)}/thumbnail`
+    : null;
+  const { src, failed, onError } = useApiImageUrl(url);
 
-  if (!apiBaseUrl || failedId === mapId) {
+  if (!url || failed) {
     return <div className={`${className} ${placeholderModifier}`} />;
   }
-
-  const base = apiBaseUrl.replace(/\/+$/, "");
+  if (!src) {
+    return <div className={className} />;
+  }
   return (
     <img
       className={`${className} terrain-map-thumbnail`}
-      src={`${base}/api/v1/terrain/maps/${encodeURIComponent(mapId)}/thumbnail`}
+      src={src}
       alt=""
-      onError={() => setFailedId(mapId)}
+      onError={onError}
     />
   );
 }

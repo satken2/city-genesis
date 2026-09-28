@@ -69,220 +69,14 @@
           "terrain"
         ],
         "summary": "Get Terrain Maps",
-        "description": "ゲーム用地形、またはエディタの複製元に限定した標高原本を列挙する。",
+        "description": "オリジナル地形(ゲーム用の登録表)を列挙する。シナリオ管理の「地形を取り込む」とチュートリアルが使う。",
         "operationId": "get_terrain_maps_api_v1_terrain_maps_get",
-        "parameters": [
-          {
-            "name": "original",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false,
-              "title": "Original"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/terrain/maps/{map_id}/props": {
-      "get": {
-        "tags": [
-          "terrain"
-        ],
-        "summary": "Get Terrain Map Props",
-        "description": "編集中の都市に依存せず、登録マップの個別配置・範囲散布定義を返す。",
-        "operationId": "get_terrain_map_props_api_v1_terrain_maps__map_id__props_get",
-        "parameters": [
-          {
-            "name": "map_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Map Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/terrain/maps/{map_id}/features": {
-      "get": {
-        "tags": [
-          "terrain"
-        ],
-        "summary": "Get Terrain Map Features",
-        "description": "既存マップの再編集で川・水面・カメラ・地表種別・気候区分を引き継ぐ。現在の都市は参照しない。",
-        "operationId": "get_terrain_map_features_api_v1_terrain_maps__map_id__features_get",
-        "parameters": [
-          {
-            "name": "map_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Map Id"
-            }
-          },
-          {
-            "name": "original",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false,
-              "title": "Original"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/terrain/maps/{map_id}/resources": {
-      "get": {
-        "tags": [
-          "terrain"
-        ],
-        "summary": "Get Terrain Map Resources",
-        "description": "エディタ取り込み用に、IDとGeoJSON形状を保ったマップ固有の資源定義を返す。",
-        "operationId": "get_terrain_map_resources_api_v1_terrain_maps__map_id__resources_get",
-        "parameters": [
-          {
-            "name": "map_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Map Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/terrain/maps/{map_id}/near": {
-      "get": {
-        "tags": [
-          "terrain"
-        ],
-        "summary": "Get Terrain Map Near",
-        "description": "指定した地形マップIDの近景標高マップをrawバイナリ(float16 LE)で返す。\n\n地形エディタが編集対象の地形を取り込むために使用する。\n現在ゲームで読み込み済みの地形(Terrainシングルトン)とは無関係に、\nterrain_maps.yaml に定義された任意のマップを取り出せる点が /api/v1/terrain/near と異なる。\n\nレスポンスボディ: float16 LE バイト列 (rows * cols * 2 バイト)\nレスポンスヘッダ:\n  X-Map-Width, X-Map-Height: マップ全体のサイズ(m)\n  X-Near-Spacing, X-Far-Spacing, X-Dynamic-Spacing, X-Cell-Size: 各種グリッド間隔(m)\n  X-Grid-Rows, X-Grid-Cols: 返却データのグリッド数(縦・横)",
-        "operationId": "get_terrain_map_near_api_v1_terrain_maps__map_id__near_get",
-        "parameters": [
-          {
-            "name": "map_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Map Id"
-            }
-          },
-          {
-            "name": "original",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false,
-              "title": "Original"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
               }
             }
           }
@@ -295,7 +89,7 @@
           "terrain"
         ],
         "summary": "Get Terrain Map Thumbnail",
-        "description": "指定した地形マップIDのサムネイル画像(長辺512pxの透過PNG)を返す。\n\nサムネイルは地形エディタ(Tauri側)の「.npyへエクスポート」機能が.npyファイルと同じ場所に\n書き出したもの、または一括生成したものを配信する。画像は2時間キャッシュできる。\n未生成時は404をキャッシュさせず、画像追加後の取得を妨げない。",
+        "description": "指定したオリジナル地形のサムネイル画像(長辺512pxの透過PNG)を返す。\n\n.npy と同じ場所に置いた同名の .png を配信する。画像は2時間キャッシュできる。\n未生成時は404をキャッシュさせず、画像追加後の取得を妨げない。",
         "operationId": "get_terrain_map_thumbnail_api_v1_terrain_maps__map_id__thumbnail_get",
         "parameters": [
           {
@@ -344,46 +138,6 @@
             "content": {
               "application/json": {
                 "schema": {}
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "terrain"
-        ],
-        "summary": "Update Terrain Settings",
-        "description": "地形設定値を更新する。\n地形設定は都市創設（市庁舎配置）前のゲーム準備段階で設定される想定。",
-        "operationId": "update_terrain_settings_api_v1_terrain_settings_patch",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": true,
-                "type": "object",
-                "title": "Data"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
               }
             }
           }
@@ -476,7 +230,7 @@
           "terrain"
         ],
         "summary": "Get Coastline",
-        "description": "海岸線（陸地の境界ポリゴン）を GeoJSON ライクな形式で返す。\n\nレスポンス形式:\n  {\"type\": \"Polygon\"|\"MultiPolygon\", \"coordinates\": [...]}\n\n座標系はワールド座標（マップ中心が(0,0)）。複数島がある場合は MultiPolygon になる。\n\n海岸線は新規都市の作成時に near_map の「標高0m超＝陸地」の等高線を Marching Squares で\n抽出したもので、セーブに保存される（ロードでは抽出し直さない）。埋立の完了で埋立地の範囲が\n和集合で足される。道路などの地形編集（dynamicティア）では更新されない。\n海岸線データが未設定の場合は空の coordinates を返す。",
+        "description": "海岸線（陸地の境界ポリゴン）を GeoJSON ライクな形式で返す。\n\nレスポンス形式:\n  {\"type\": \"Polygon\"|\"MultiPolygon\", \"coordinates\": [...]}\n\n座標系はワールド座標（マップ中心が(0,0)）。複数島がある場合は MultiPolygon になる。\n\n海岸線は新規都市の作成時に near_map の「標高0m超＝陸地」の等高線を Marching Squares で\n抽出したもので、セーブに保存される（ロードでは抽出し直さない）。埋立の完了で埋立地の範囲が\n和集合で足され、シナリオの地形 API で標高・水面・川を変えたときは抽出し直す。\n道路などの地形編集（dynamicティア）では更新されない。\n海岸線データが未設定の場合は空の coordinates を返す。",
         "operationId": "get_coastline_api_v1_terrain_coastline_get",
         "responses": {
           "200": {
@@ -496,7 +250,7 @@
           "terrain"
         ],
         "summary": "Get Water Surfaces",
-        "description": "水面（海面以外の湖など）のポリゴン一覧を返す。\n\nレスポンス形式:\n  {\"water_surfaces\": [\n     {\"id\": ..., \"water_level\": <Y標高m>, \"kind\": <種別>,\n      \"polygon\": {\"type\": \"Polygon\"|\"MultiPolygon\", \"coordinates\": [...]}},\n     ...\n  ]}\n\n座標系はワールド座標（マップ中心が(0,0)）。water_level は heightmap と同じ絶対標高\nフレーム（海面=0）で、水面の平面Y高さを表す。フロントエンド（Unity）はこのポリゴンを\nwater_level のYで三角形分割して水面メッシュを描く。\n\n水面は init_game 実行時にマップのサイドカーJSONから読み込まれ、\ncity.terrains[\"water_surfaces\"] にキャッシュされる。海面(Y=0の板)はこの一覧には含めず、\n従来通り別枠で描画する。水面が未設定のマップでは空リストを返す。",
+        "description": "水面（海面以外の湖など）のポリゴン一覧を返す。\n\nレスポンス形式:\n  {\"water_surfaces\": [\n     {\"id\": ..., \"water_level\": <Y標高m>, \"kind\": <種別>,\n      \"polygon\": {\"type\": \"Polygon\"|\"MultiPolygon\", \"coordinates\": [...]}},\n     ...\n  ]}\n\n座標系はワールド座標（マップ中心が(0,0)）。water_level は heightmap と同じ絶対標高\nフレーム（海面=0）で、水面の平面Y高さを表す。フロントエンド（Unity）はこのポリゴンを\nwater_level のYで三角形分割して水面メッシュを描く。\n\n水面は都市の保存値 city.terrains[\"water_surfaces\"] で、シナリオの地形 API\n(PUT /api/v1/scenarios/{id}/terrain)だけが変更する。海面(Y=0の板)はこの一覧には含めず、\n別枠で描画する。水面が無い都市では空リストを返す。",
         "operationId": "get_water_surfaces_api_v1_terrain_water_get",
         "responses": {
           "200": {
@@ -536,7 +290,7 @@
           "terrain"
         ],
         "summary": "Get Rivers",
-        "description": "川の一覧を返す。\n\nレスポンス形式:\n  {\"rivers\": [\n     {\"id\": ..., \"kind\": \"river\",\n      \"polygon\": {\"type\": \"Polygon\"|\"MultiPolygon\", \"coordinates\": [...]},\n      \"profile\": [[x, waterY, z], ...]},\n     ...\n  ]}\n\npolygon は川の範囲（XZワールド座標。穴=中州）、profile は水面標高のプロファイル線\n（上流→下流。y は海面=0 の絶対標高）。範囲内の任意地点の水面標高は「profile 上の最近点の y」\nで決まる。川床は標高データに彫り込み済みなので、フロントエンド（Unity）はこの範囲を覆う\n格子面を profile の標高に置いて水面を描く（RiverSurfaceManager）。\n\n川は init_game 実行時にマップのサイドカーJSON（.rivers.json）から読み込まれ、\ncity.terrains[\"rivers\"] にキャッシュされる。川が無いマップでは空リストを返す。",
+        "description": "川の一覧を返す。\n\nレスポンス形式:\n  {\"rivers\": [\n     {\"id\": ..., \"kind\": \"river\",\n      \"polygon\": {\"type\": \"Polygon\"|\"MultiPolygon\", \"coordinates\": [...]},\n      \"profile\": [[x, waterY, z], ...]},\n     ...\n  ]}\n\npolygon は川の範囲（XZワールド座標。穴=中州）、profile は水面標高のプロファイル線\n（上流→下流。y は海面=0 の絶対標高）。範囲内の任意地点の水面標高は「profile 上の最近点の y」\nで決まる。川床は標高データに彫り込み済みなので、フロントエンド（Unity）はこの範囲を覆う\n格子面を profile の標高に置いて水面を描く（RiverSurfaceManager）。\n\n川は都市の保存値 city.terrains[\"rivers\"] で、シナリオの地形 API\n(PUT /api/v1/scenarios/{id}/terrain)だけが変更する。川が無い都市では空リストを返す。",
         "operationId": "get_rivers_api_v1_terrain_rivers_get",
         "responses": {
           "200": {
@@ -671,74 +425,6 @@
             "schema": {
               "type": "integer",
               "title": "Cell Z"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/terrain/dynamic/rect": {
-      "put": {
-        "tags": [
-          "terrain"
-        ],
-        "summary": "Update Dynamic Map Rect",
-        "description": "超近景標高マップをrawバイナリ(float16 LE)で更新する。\nrows, colsでデータの2次元形状を指定する。\n\nリクエストボディ: float16 LE バイト列（rows * cols * 2 バイト）",
-        "operationId": "update_dynamic_map_rect_api_v1_terrain_dynamic_rect_put",
-        "parameters": [
-          {
-            "name": "x",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "number",
-              "title": "X"
-            }
-          },
-          {
-            "name": "z",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "number",
-              "title": "Z"
-            }
-          },
-          {
-            "name": "rows",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Rows"
-            }
-          },
-          {
-            "name": "cols",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Cols"
             }
           }
         ],
@@ -3496,7 +3182,7 @@
           "epochs"
         ],
         "summary": "Run Epochs",
-        "description": "シミュレーションを実行(countが未指定の場合は1エポック実行)\n\nレスポンスの epoch_report には以下が含まれる:\n- construction_progress: 実行開始時点で建設予定/建設中だった市政府建設物\n  (public_facility=1 の建物と全ての道路)の進捗遷移(before_pct → after_pct)\n- maintenance_items: エポック完了時点で修繕中(under_maintenance=1)の公共建物・道路の一覧。\n  プレイヤーはエポック結果ウィンドウで個別に修繕のキャンセルが可能。\n- rebuild_items: エポック完了時点で造り替え(バリアント変更)中の道路の一覧。\n  キャンセルは DELETE /api/v1/paths/{path_id}/rebuild で行う。\n- population: 実行による人口動態(出生/死亡/転入/転出の累計、および前後人口)\n- exchange_rate: 前後の為替レート\n- statistics: 統計タイル用の現在値と、指標ごとの直近 trend_window エポック分の履歴(history)",
+        "description": "シミュレーションを実行(countが未指定の場合は1エポック実行)\n\nレスポンスの epoch_report には以下が含まれる:\n- construction_progress: 実行開始時点で建設予定/建設中だった市政府建設物\n  (public_facility=1 の建物と全ての道路)の進捗遷移(before_pct → after_pct)\n- maintenance_items: エポック完了時点で修繕中(under_maintenance=1)の公共建物・道路の一覧。\n  プレイヤーはエポック結果ウィンドウで個別に修繕のキャンセルが可能。\n- rebuild_items: エポック完了時点で造り替え(バリアント変更)中の道路の一覧。\n  キャンセルは DELETE /api/v1/paths/{path_id}/rebuild で行う。\n- population: 実行による人口動態(出生/死亡/転入/転出の累計、および前後人口)\n- exchange_rate: 前後の為替レート\n- statistics: 統計タイル用の現在値と、指標ごとの直近 trend_window エポック分の履歴(history)\n\nエポック実行は直列化されており、別の実行の最中に来た要求は 409 EPOCH_ALREADY_RUNNING になる。",
         "operationId": "run_epochs_api_v1_epochs_post",
         "parameters": [
           {
@@ -3505,6 +3191,7 @@
             "required": false,
             "schema": {
               "type": "integer",
+              "maximum": 10000,
               "minimum": 1,
               "default": 1,
               "title": "Count"
@@ -5031,35 +4718,13 @@
         }
       }
     },
-    "/api/v1/system/init": {
-      "post": {
-        "tags": [
-          "system"
-        ],
-        "summary": "App Init",
-        "description": "シミュレーションの初期化を行うエンドポイント",
-        "operationId": "app_init_api_v1_system_init_post",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MessageResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/system/debug-init": {
       "post": {
         "tags": [
           "system"
         ],
         "summary": "App Debug Init",
-        "description": "デバッグ用のシミュレーション初期化を行うエンドポイント。\n\nterrain_map_id を指定した場合は、指定した地形マップでまっさらな新規ゲームを\n開始する。テスト用の建物や道路などの臨時データは投入しない。\n\nterrain_map_id を指定しない場合は従来通り、与論島の地形に加えて\nテスト用の建物・道路・ゾーンなどの臨時データを作成する。\n\n開発環境(生 Python 実行)専用。Nuitka ビルド(製品版・モック版とも)では\nis_debug_enabled() が常に False であり、501 を返す。テストデータ投入の実装\n(app.services.debug)もビルドには含まれないため、遅延 import で参照する。",
+        "description": "デバッグ用のシミュレーション初期化を行うエンドポイント。\n\n保存操作のロックで直列化するので、シナリオのヘッドレス処理(読み込み→編集→保存)の途中で\n都市が作り直されることはない(処理が終わってセッションなしに戻ってから実行される)。\n\nterrain_map_id を指定した場合は、指定した地形マップでまっさらな新規ゲームを\n開始する。テスト用の建物や道路などの臨時データは投入しない。\n\nterrain_map_id を指定しない場合は従来通り、与論島の地形に加えて\nテスト用の建物・道路・ゾーンなどの臨時データを作成する。\n\n開発環境(生 Python 実行)専用。Nuitka ビルド(製品版・モック版とも)では\nis_debug_enabled() が常に False であり、501 を返す。テストデータ投入の実装\n(app.services.debug)もビルドには含まれないため、遅延 import で参照する。",
         "operationId": "app_debug_init_api_v1_system_debug_init_post",
         "parameters": [
           {
@@ -5080,64 +4745,6 @@
                 "schema": {
                   "$ref": "#/components/schemas/MessageResponse"
                 }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/system/load-template": {
-      "post": {
-        "tags": [
-          "system"
-        ],
-        "summary": "Load Template Data",
-        "description": "シナリオ（テンプレート）データをロードする。",
-        "operationId": "load_template_data_api_v1_system_load_template_post",
-        "parameters": [
-          {
-            "name": "lang",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Lang"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SetCurrentSave"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
               }
             }
           },
@@ -5178,7 +4785,7 @@
           "system"
         ],
         "summary": "Verify Ticket",
-        "description": "Steam認証チケットを検証するエンドポイント。\n\nUnity(Steamworks.NET)が GetAuthTicketForWebApi で取得したチケットを\nhex文字列で送信し、コアが外部検証サーバー経由で Steam Web API の\nAuthenticateUserTicket による検証を行う。\n\nステータスコード:\n    200: 検証成功(テスト環境のダミー成功を含む)\n    401: チケット無効(確定失敗。クライアントは再送しない)\n    502: 検証サーバーに到達不能/一時障害(クライアントは新しいチケットで再送してよい)",
+        "description": "Steam認証チケットを検証するエンドポイント。\n\nUnity(Steamworks.NET)が GetAuthTicketForWebApi で取得したチケットを hex 文字列で送り、\nコアが検証サーバーへ転送して、署名付きの応答を検証する。申告された app_id は\ntrust_anchors.STEAM_APP_ID と一致しなければ失敗にする。\n\nステータスコード:\n    200: 検証成功(開発環境のダミー成功を含む)\n    401: 失敗(チケット無効・応答不正・App ID 不一致。クライアントは再送しない)\n    502: 検証サーバーに到達不能/一時障害(クライアントは新しいチケットで再送してよい)",
         "operationId": "verify_ticket_api_v1_system_verify_post",
         "requestBody": {
           "content": {
@@ -5280,7 +4887,7 @@
           "sessions"
         ],
         "summary": "Get Session",
-        "description": "現在のゲームセッション状態を返す。\nGameData3のプロパティをそのままレスポンスとして返却する。",
+        "description": "現在のゲームセッション状態を返す。\nGameData3のプロパティをそのままレスポンスとして返却する。\n\nシナリオの地形編集などでセッションを使わずに都市を組み立てている間(gd3.headless_job)は、\n内部で一時的に採番したIDがあっても current_save_id を null で返す。Tauri・Unity はこの値で\nゲームの開始を検知するため、ヘッドレスの処理をゲーム開始と誤認させない。",
         "operationId": "get_session_api_v1_sessions_get",
         "responses": {
           "200": {
@@ -5298,6 +4905,7 @@
           "sessions"
         ],
         "summary": "Update Session",
+        "description": "template_mode(神モード)を切り替える。\n\n有効化できるのは開発時だけ。本番でAPIから神モードに入れると一括完成・資金チェック免除などが\n誰でも使えてしまうため。無効化はいつでもできる(チュートリアル完了処理が使う)。\n本番で神モードに入る正規の経路は POST /sessions の template_mode・is_tutorial だけ。",
         "operationId": "update_session_api_v1_sessions_patch",
         "requestBody": {
           "required": true,
@@ -5335,7 +4943,7 @@
           "sessions"
         ],
         "summary": "Create Session",
-        "description": "ゲームセッションを作成する。\n\n優先順位:\n  1. save_id … 通常のセーブデータをロードする\n  2. template_id … シナリオ（テンプレート）データをロードする\n  3. terrain_map_id … 指定した地形マップでまっさらな新規ゲームを開始する\n  4. 何も指定しない … デフォルトの平坦な地形で新規ゲームを開始する\n\nセッション作成時の追加パラメータ（新規ゲーム・テンプレートロード共に使用可能）:\n  - city_name: 都市名。指定しない場合はデフォルト値が使用される。\n  - language: 都市の言語。指定しない場合はデフォルト(\"ja\")が使用される。\n  - simulation_days: 1エポックあたりのシミュレーション日数。7または30のみ許可。",
+        "description": "ゲームセッションを作成する。\n\n優先順位:\n  1. save_id … 通常のセーブデータをロードする\n  2. template_id … シナリオ（テンプレート）データをロードする\n  3. terrain_map_id … 指定した地形マップでまっさらな新規ゲームを開始する\n  4. 何も指定しない … デフォルトの平坦な地形で新規ゲームを開始する\n\nセッション作成時の追加パラメータ（新規ゲーム・テンプレートロード共に使用可能）:\n  - city_name: 都市名。指定しない場合はデフォルト値が使用される。\n  - language: 都市の言語。指定しない場合はデフォルト(\"ja\")が使用される。\n  - simulation_days: 1エポックあたりのシミュレーション日数。7または30のみ許可。\n\nセッションの作成・終了は保存操作と直列化する。セッションを使わないシナリオの処理\n(headless_job)の途中で都市を差し替えると、その処理が別の都市を保存してしまうため。",
         "operationId": "create_session_api_v1_sessions_post",
         "parameters": [
           {
@@ -5480,7 +5088,7 @@
           "sessions"
         ],
         "summary": "Delete Session",
-        "description": "現在のゲームセッションを終了する。\n\ncurrent_save_id を null に戻し、データベースおよび各種状態をリセットする。\n次に POST /api/v1/sessions が呼ばれた際に、init_game 内でテーブルが再作成されるよう、\nデータベースのテーブル定義も含めて初期化する。",
+        "description": "現在のゲームセッションを終了する。\n\ncurrent_save_id を null に戻し、データベースおよび各種状態(神モード・編集中シナリオ・\n保留中のサムネイル・出自 required_packs / derived_from)をリセットする。\n次に POST /api/v1/sessions が呼ばれた際に、init_game 内でテーブルが再作成されるよう、\nデータベースのテーブル定義も含めて初期化する。",
         "operationId": "delete_session_api_v1_sessions_delete",
         "responses": {
           "200": {
@@ -5538,7 +5146,7 @@
           "saves"
         ],
         "summary": "Overwrite Current Save",
-        "description": "指定した save_id のセーブデータを、現在のゲーム状態で上書き保存する。\n現在ロード中のセーブIDと一致しない場合は 409 Conflict を返す。",
+        "description": "指定した save_id の通常セーブを、現在のゲーム状態で上書き保存する。\n現在ロード中のセーブIDと一致しない場合は 409 Conflict を返す。\nシナリオの上書きは POST /api/v1/templates(自作シナリオとして保存)を使う。",
         "operationId": "overwrite_current_save_api_v1_saves__save_id__put",
         "parameters": [
           {
@@ -5577,7 +5185,7 @@
           "saves"
         ],
         "summary": "Delete Save Data",
-        "description": "指定した save_id のセーブデータを削除する。\n対象が存在しない場合は 404 を返す。",
+        "description": "指定した save_id のセーブデータを削除する。\n対象が存在しない場合は 404 を返す。template=true のとき削除できるのは自作シナリオだけ\n(コミュニティ・DLCは 422 SCENARIO_READ_ONLY)。",
         "operationId": "delete_save_data_api_v1_saves__save_id__delete",
         "parameters": [
           {
@@ -5657,6 +5265,7 @@
           "saves"
         ],
         "summary": "Validate Save",
+        "description": "保存ファイル全体を検査する。暗号化されたファイルは必要パックを所有しているときだけ検査できる。",
         "operationId": "validate_save_api_v1_saves__save_id__validation_get",
         "parameters": [
           {
@@ -5707,7 +5316,7 @@
           "saves"
         ],
         "summary": "Get Save Thumbnail",
-        "description": "指定した save_id のセーブデータ（またはシナリオ/テンプレート）のサムネイル画像を取得する。\nクエリパラメータ template=true を付与するとシナリオ（テンプレート）から検索する。\n画像は2時間キャッシュできる。未登録時の404はキャッシュさせない。",
+        "description": "指定した save_id のセーブデータ（またはシナリオ/テンプレート）のサムネイル画像を取得する。\nクエリパラメータ template=true を付与するとシナリオ（テンプレート）から検索する。\n暗号化されたファイルも平文ヘッダーの画像を返すので、パックを所有していなくても表示できる。\n画像は2時間キャッシュできる。未登録時の404はキャッシュさせない。",
         "operationId": "get_save_thumbnail_api_v1_saves__save_id__thumbnail_get",
         "parameters": [
           {
@@ -5746,7 +5355,7 @@
           "saves"
         ],
         "summary": "Upload Save Thumbnail",
-        "description": "指定した save_id のセーブデータ（またはシナリオ/テンプレート）にサムネイル画像を設定・保存する。\nクエリパラメータ template=true を付与するとシナリオ（テンプレート）へ保存する。",
+        "description": "指定した save_id のセーブデータ（またはシナリオ/テンプレート）にサムネイル画像を設定・保存する。\nクエリパラメータ template=true を付与するとシナリオ（テンプレート）へ保存する。\n変更できるシナリオは自作だけ(コミュニティ・DLCは 422 SCENARIO_READ_ONLY)。暗号化は維持される。",
         "operationId": "upload_save_thumbnail_api_v1_saves__save_id__thumbnail_put",
         "parameters": [
           {
@@ -5785,7 +5394,7 @@
           "saves"
         ],
         "summary": "Upload Save Thumbnail",
-        "description": "指定した save_id のセーブデータ（またはシナリオ/テンプレート）にサムネイル画像を設定・保存する。\nクエリパラメータ template=true を付与するとシナリオ（テンプレート）へ保存する。",
+        "description": "指定した save_id のセーブデータ（またはシナリオ/テンプレート）にサムネイル画像を設定・保存する。\nクエリパラメータ template=true を付与するとシナリオ（テンプレート）へ保存する。\n変更できるシナリオは自作だけ(コミュニティ・DLCは 422 SCENARIO_READ_ONLY)。暗号化は維持される。",
         "operationId": "upload_save_thumbnail_api_v1_saves__save_id__thumbnail_post",
         "parameters": [
           {
@@ -5826,6 +5435,7 @@
           "scenarios"
         ],
         "summary": "List Scenarios",
+        "description": "自作・コミュニティ・DLCのシナリオをまとめた一覧(キーは保存元つきのID)。\n\n各エントリは origin・read_only・encrypted・required_packs・pack_status・official と、\n読み込めない理由(compatibility.code)を持つ。暗号化されたシナリオも鍵なしで一覧に載る。",
         "operationId": "list_scenarios_api_v1_scenarios_get",
         "responses": {
           "200": {
@@ -5839,19 +5449,130 @@
         }
       }
     },
-    "/api/v1/scenarios/import": {
+    "/api/v1/scenarios/from-terrain": {
       "post": {
         "tags": [
           "scenarios"
         ],
-        "summary": "Import Scenario",
-        "operationId": "import_scenario_api_v1_scenarios_import_post",
+        "summary": "Create Scenario From Terrain",
+        "description": "オリジナル地形から新しい自作シナリオを作り、`{\"id\": \"local~<id>\"}` を返す(ゲームは始まらない)。\n\n水面・川・資源・プロップ・カメラは空で、地表種別・気候区分はオリジナル地形の値。\nゲームのセッション中は 409 SESSION_ACTIVE、未登録の地形は 404 NOT_FOUND。",
+        "operationId": "create_scenario_from_terrain_api_v1_scenarios_from_terrain_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScenarioFromTerrain"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/scenarios/{scenario_id}/terrain": {
+      "get": {
+        "tags": [
+          "scenarios"
+        ],
+        "summary": "Get Scenario Terrain",
+        "description": "自作シナリオの地形を地形エディタの形式で返す(セッションは使わない)。\n\n標高は近景格子の float16 LE を base64 にした near_base64。locks.heights_locked が真なら\n標高・水面・川は保存できない(理由コードは locks.reasons)。\nコミュニティ・DLCは SCENARIO_READ_ONLY、ゲームのセッション中は 409 SESSION_ACTIVE、\nDLC 由来で暗号化された自作シナリオは 409 SCENARIO_ENCRYPTED(地形 API の対象外)。",
+        "operationId": "get_scenario_terrain_api_v1_scenarios__scenario_id__terrain_get",
+        "parameters": [
+          {
+            "name": "scenario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Scenario Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "scenarios"
+        ],
+        "summary": "Put Scenario Terrain",
+        "description": "地形エディタの編集内容を自作シナリオへ保存する(セッションは使わない)。\n\n標高・水面・川は null なら変更しない。ロック中に送ると 409 TERRAIN_LOCKED、格子数が違う標高は\n422 TERRAIN_SIZE_MISMATCH、形の崩れた値・有限でない数値は 422 TERRAIN_INVALID、DLC 由来で\n暗号化されたシナリオは本文を検証する前に 409 SCENARIO_ENCRYPTED。資源は ID で差分適用し、\n新しく作った資源は応答の resource_ids({エディタ側の ID: DB の ID})で返す。プロップは全置換する。\n保存後の content_revision は1つ上がる。",
+        "operationId": "put_scenario_terrain_api_v1_scenarios__scenario_id__terrain_put",
+        "parameters": [
+          {
+            "name": "scenario_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Scenario Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScenarioTerrainUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
               }
             }
           }
@@ -5864,6 +5585,7 @@
           "scenarios"
         ],
         "summary": "Edit Scenario",
+        "description": "自作シナリオの紹介情報を更新する(コミュニティ・DLCは SCENARIO_READ_ONLY)。",
         "operationId": "edit_scenario_api_v1_scenarios__scenario_id__patch",
         "parameters": [
           {
@@ -5908,52 +5630,13 @@
         }
       }
     },
-    "/api/v1/scenarios/{scenario_id}/export": {
-      "get": {
-        "tags": [
-          "scenarios"
-        ],
-        "summary": "Export Scenario",
-        "operationId": "export_scenario_api_v1_scenarios__scenario_id__export_get",
-        "parameters": [
-          {
-            "name": "scenario_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Scenario Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/scenarios/{scenario_id}/upload": {
       "post": {
         "tags": [
           "scenarios"
         ],
         "summary": "Upload Scenario",
+        "description": "自作シナリオを設定された投稿先へ送る(コミュニティ・DLCは SCENARIO_READ_ONLY)。",
         "operationId": "upload_scenario_api_v1_scenarios__scenario_id__upload_post",
         "parameters": [
           {
@@ -6012,7 +5695,7 @@
           "parameters"
         ],
         "summary": "Set Parameters",
-        "description": "ゲームパラメータを更新する。\n都市創設（市庁舎配置）前、またはテンプレート作成モード（神モード）でのみ変更可能。\n判定は city.can_edit_parameters に集約している。\nAPIで見える値は都市濃縮度適用後の実効値であり、PATCH値も再スケールせず\nそのまま実効値として扱う。CITY_CONDENSATION_FACTOR 自体は変更不可\n（ロード後の変更は濃縮済みマスターデータを再スケールできないため）。",
+        "description": "ゲームパラメータを更新する。\n都市創設（市庁舎配置）前、またはテンプレート作成モード（神モード）でのみ変更可能。\n保存操作のロックで直列化し、シナリオのヘッドレス処理の途中の都市へ値が混ざらないようにする。\n判定は city.can_edit_parameters に集約している。\nAPIで見える値は都市濃縮度適用後の実効値であり、PATCH値も再スケールせず\nそのまま実効値として扱う。CITY_CONDENSATION_FACTOR 自体は変更不可\n（ロード後の変更は濃縮済みマスターデータを再スケールできないため）。",
         "operationId": "set_parameters_api_v1_parameters_patch",
         "requestBody": {
           "content": {
@@ -6054,7 +5737,7 @@
           "templates"
         ],
         "summary": "Create Template",
-        "description": "現在のゲーム状態をシナリオ（テンプレート）データとして新規保存する。\n*が付いたエンドポイントはテンプレ作成モード(gd3.template_mode)でしか編集不可。",
+        "description": "現在のゲーム状態を自作シナリオとして保存する(編集中の自作シナリオがあれば上書き、なければ新規)。\nコミュニティ・DLCのシナリオから開いた都市(コピーして編集)は新しい自作シナリオになり、\n出自(必要パック・元シナリオ)を引き継ぐ。必要パックがあれば暗号化して書く。\n*が付いたエンドポイントはテンプレ作成モード(gd3.template_mode)でしか編集不可。",
         "operationId": "create_template_api_v1_templates_post",
         "responses": {
           "200": {
@@ -8460,93 +8143,6 @@
               "type": "integer",
               "title": "Prop Instance Id"
             }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/util/text-image": {
-      "get": {
-        "tags": [
-          "util"
-        ],
-        "summary": "Get Text Image",
-        "description": "指定されたテキストを画像化して透過PNGとして返す。\nUnity等のフロントエンドで多言語テキストを表示するために利用する。\n\nテキストに含まれる文字体系に応じて自動的に最適なWindows標準フォントを選択する。\n- ブラーフミー系文字（ヒンディー語・タミル語などのインド・東南アジア文字）を含む場合は Nirmala UI を優先\n- CJK文字を含む場合は Meiryo / Yu Gothic などのCJK対応プロポーショナルフォントを優先\n- それ以外は Segoe UI（アラビア文字・ヘブライ文字などをカバーするプロポーショナルフォント）を優先\nこれにより、多言語表示と自然な字詰まりをプレイヤーのPC環境のみで実現する。",
-        "operationId": "get_text_image_api_v1_util_text_image_get",
-        "parameters": [
-          {
-            "name": "text",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "description": "画像化するテキスト",
-              "title": "Text"
-            },
-            "description": "画像化するテキスト"
-          },
-          {
-            "name": "font_size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "maximum": 200,
-              "minimum": 1,
-              "description": "フォントサイズ",
-              "default": 24,
-              "title": "Font Size"
-            },
-            "description": "フォントサイズ"
-          },
-          {
-            "name": "color",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "description": "文字色(16進数。例: #FF0000)",
-              "default": "#FFFFFF",
-              "title": "Color"
-            },
-            "description": "文字色(16進数。例: #FF0000)"
-          },
-          {
-            "name": "font_path",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "フォントファイルの絶対パス",
-              "title": "Font Path"
-            },
-            "description": "フォントファイルの絶対パス"
           }
         ],
         "responses": {
@@ -11806,6 +11402,33 @@
         ],
         "title": "RouteRequest"
       },
+      "ScenarioFromTerrain": {
+        "properties": {
+          "terrain_map_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Terrain Map Id"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Title",
+            "default": ""
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "default": "ja"
+          }
+        },
+        "type": "object",
+        "required": [
+          "terrain_map_id"
+        ],
+        "title": "ScenarioFromTerrain",
+        "description": "POST /api/v1/scenarios/from-terrain の本文。"
+      },
       "ScenarioMetadata": {
         "properties": {
           "scenario_title": {
@@ -11849,6 +11472,84 @@
         "type": "object",
         "title": "ScenarioMetadata"
       },
+      "ScenarioTerrainUpdate": {
+        "properties": {
+          "near_base64": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Near Base64"
+          },
+          "water_surfaces": {
+            "anyOf": [
+              {
+                "items": {},
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Water Surfaces"
+          },
+          "rivers": {
+            "anyOf": [
+              {
+                "items": {},
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rivers"
+          },
+          "resources": {
+            "items": {},
+            "type": "array",
+            "title": "Resources"
+          },
+          "props": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Props"
+          },
+          "camera": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Camera"
+          },
+          "ground_cover": {
+            "type": "integer",
+            "title": "Ground Cover"
+          },
+          "climate": {
+            "type": "integer",
+            "title": "Climate"
+          }
+        },
+        "type": "object",
+        "required": [
+          "resources",
+          "props",
+          "ground_cover",
+          "climate"
+        ],
+        "title": "ScenarioTerrainUpdate",
+        "description": "PUT /api/v1/scenarios/{id}/terrain の本文。標高・水面・川は null なら変更しない。"
+      },
       "ScoreData": {
         "properties": {
           "epoch": {
@@ -11877,24 +11578,6 @@
         ],
         "title": "ScoreData",
         "description": "エポック完了時点の施政スコア。simulation_manager.economic_simulation() が返す\nscore ブロックと1対1で対応する（累積スコアの概念は持たない。\ndocs/economics/24_施政スコア計算詳細ロジック.md 参照）。"
-      },
-      "SetCurrentSave": {
-        "properties": {
-          "save_id": {
-            "type": "string",
-            "title": "Save Id"
-          },
-          "accept_balance_change": {
-            "type": "boolean",
-            "title": "Accept Balance Change",
-            "default": false
-          }
-        },
-        "type": "object",
-        "required": [
-          "save_id"
-        ],
-        "title": "SetCurrentSave"
       },
       "SimulationResult": {
         "properties": {
@@ -12117,18 +11800,8 @@
           },
           "ticket": {
             "type": "string",
+            "maxLength": 8192,
             "title": "Ticket"
-          },
-          "identity": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Identity"
           }
         },
         "type": "object",
@@ -12136,7 +11809,8 @@
           "app_id",
           "ticket"
         ],
-        "title": "VerifyRequest"
+        "title": "VerifyRequest",
+        "description": "identity は受け取っても使わない(検証サーバーへは STEAM_TICKET_IDENTITY を送る)。"
       }
     }
   }

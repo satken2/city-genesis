@@ -8,6 +8,7 @@
     "yes": "Sí",
     "executing": "Ejecutando la época...",
     "errorSteamLimit": "No se pudo verificar la autenticación de Steam, por lo que no es posible ejecutar más épocas. (Sin verificar se puede jugar hasta 10 épocas).",
+    "errorAlreadyRunning": "Ya se está ejecutando otra época. Vuelve a intentarlo cuando termine.",
     "errorFailed": "No se pudo ejecutar la época: {{reason}}"
   },
   "epochResult": {

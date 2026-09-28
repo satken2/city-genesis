@@ -8,6 +8,7 @@
     "yes": "是",
     "executing": "纪元执行中...",
     "errorSteamLimit": "无法确认Steam认证，因此无法继续执行纪元。（未认证状态下最多可游玩10个纪元）",
+    "errorAlreadyRunning": "另一个纪元正在执行。请在其完成后再试。",
     "errorFailed": "纪元执行失败：{{reason}}"
   },
   "epochResult": {

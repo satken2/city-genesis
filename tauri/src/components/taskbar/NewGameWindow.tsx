@@ -2,22 +2,18 @@
  * ニューゲームウィンドウコンポーネント
  *
  * トップメニューの「ニューゲーム」ボタンから開かれるポップアップウィンドウ。
- * 左右2カラム構成で、左に選択肢の一覧、右に固定幅の詳細パネルを置く。
+ * 上部のタブは「シナリオを選択」と「シナリオを探す」(共有シナリオの閲覧。未提供なので無効)。
  *
- * 左カラム（一覧）は2つのセクションを縦に並べる:
+ * 「シナリオを選択」は左右2カラム構成で、左に選択肢の一覧、右に固定幅の詳細パネルを置く。
+ * 一覧はチュートリアルミッション(常に表示)と、全保存元(自作・コミュニティ・DLC)のシナリオ
+ * (GET /api/v1/scenarios)を並べる。地形から直接始める入口は無く、地形はシナリオ管理で
+ * シナリオにしてから遊ぶ。チュートリアルだけは教材が前提とする地形から直接始める。
  *
- * 1. シナリオから始める … チュートリアルミッション（常に表示）と
- *    バックエンドのテンプレート一覧を並べて表示する。
- *    チュートリアルミッションは平坦な地形マップ（flat）をチュートリアルONでロードする。
- * 2. 地形から始める … バックエンドの assets/terrain_maps.yaml に登録された地形マップ一覧を
- *    タイル表示する。チュートリアル未クリアでも選択可能。
- *
- * 一覧のタイルはサムネイルと名前だけを出す。説明・達成条件は右カラムに集約する。
- *
- * 右カラム（詳細パネル）はタイルをクリックして選択した対象の内容を表示する。
- * サムネイルを大きく出し、その下にタイトル・説明・舞台となるマップ(大きさ・地表・気候)・達成条件を並べる。
- * シナリオの説明文・達成条件はテンプレート作成者が記入するフリーテキストで、
- * セーブデータのメタデータ（GET /api/v1/saves?template=true）に含まれる。
+ * 一覧のタイルはサムネイルと名前と保存元の札だけを出す。説明・達成条件は右カラムに集約する。
+ * 右カラム(詳細パネル)はサムネイルを大きく出し、その下にタイトル・説明・舞台となるマップ
+ * (大きさ・地表・気候)・達成条件を並べる。シナリオの説明文・達成条件は作者のフリーテキスト。
+ * シナリオの地表・気候は地形エディタで変えられるので、一覧の要素(都市が持つ値)を優先する。
+ * マップの寸法は変えられないので、大きさはオリジナル地形の登録表から引く。
  *
  * 詳細パネルの開始ボタンで「ゲーム設定の確認」画面に切り替わり、
  * 都市名・都市の言語・シミュレーション日数を設定してからゲームを開始する。
@@ -26,14 +22,16 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { loadAppSettings } from "../../utils/settings";
-import { SUPPORTED_LANGUAGES, resolveIntlLocale, resolveSupportedLanguage } from "../../utils/locale";
+import { SUPPORTED_LANGUAGES, resolveSupportedLanguage } from "../../utils/locale";
 import { TUTORIAL_SCENARIOS } from "../tutorial/tutorialSteps";
-import { TerrainMapThumbnail } from "../common/TerrainMapThumbnail";
 import { ScenarioThumbnail } from "../common/ScenarioThumbnail";
 import { normalizeClimate, normalizeGroundCover } from "../terrain/terrainData";
-import { getTerrainProfile } from "../../data/terrainProfiles";
-import { GroundCoverIcon } from "./GroundCoverIcon";
+import { formatMapSize, terrainMapTitle, type TerrainMapEntry } from "../../utils/terrainMaps";
+import { FlatTabs } from "../common/FlatTabs";
+import { TerrainFacts } from "../common/TerrainFacts";
+import { ScenarioOriginBadges } from "../common/ScenarioSource";
 import "./NewGameWindow.css";
 import { fetchApi } from "../../utils/api";
 import { SaveEntry, prepareSaveLoad, saveError } from "../../utils/saves";
@@ -42,31 +40,15 @@ import { SaveVersionInfo } from "../common/SaveVersionInfo";
 type NewGameWindowProps = {
   apiBaseUrl: string;
   onClose: () => void;
-  isScenarioEditor?: boolean;
 };
 
 /**
- * 地形マップエントリ
- * GET /api/v1/terrain/maps の各要素の型
- */
-type TerrainMapEntry = {
-  id: string;
-  name: string;
-  settings: Record<string, unknown>;
-  /** 地表種別(GROUND_COVER_*)。詳細パネルにアイコンを出す */
-  ground_cover?: number;
-  /** マップに設定された気候区分(CLIMATE_*) */
-  climate?: number;
-};
-
-/**
- * テンプレート（シナリオ）セーブデータのメタデータエントリ
- * GET /api/v1/saves?template=true の各要素の型
- *
- * scenario_* と terrain_map_* はシナリオ紹介用の項目。
- * 紹介文は任意項目。読み込み可否は保存版と本体の検証結果で判断する。
+ * シナリオ一覧(GET /api/v1/scenarios)の要素。
+ * scenario_* と terrain_map_* は紹介用の項目で、紹介文は任意。読み込み可否はコアの検証結果に従う。
  */
 type TemplateEntry = SaveEntry;
+
+type NewGameTab = "select" | "browse";
 
 /**
  * ステータスメッセージの型
@@ -81,47 +63,47 @@ type StatusMessage = {
  * 一覧のタイルをクリックすると設定される（この時点ではまだゲームは始まらない）。
  */
 type Selection =
-  | { kind: "terrain"; id: string }
   | { kind: "tutorial"; id: string }
   | { kind: "template"; id: string };
 
 /**
  * 詳細パネルの描画に必要な項目へ正規化した表示データ。
- * 地形・チュートリアル・テンプレートで供給元が異なるため、パネル側は
+ * チュートリアルとシナリオで供給元が異なるため、パネル側は
  * この形だけを知っていればよいようにする。
  */
 type DetailView = {
   /** サムネイル画像URL（チュートリアル用等）。指定されている場合は最優先表示 */
   thumbnailUrl: string | null;
-  /** テンプレートID。ScenarioThumbnailでの取得に使用 */
-  templateId: string | null;
-  /** サムネイルとして使う地形マップID。解決できない場合は null（プレースホルダー表示） */
+  /** シナリオ一覧の要素。チュートリアルでは null */
+  template: TemplateEntry | null;
+  /** シナリオ固有の画像が無いときにサムネイルとして使う地形マップID */
   terrainMapId: string | null;
   /** サムネイルが無いときに使うプレースホルダーのCSS修飾子 */
   placeholderModifier: string;
   title: string;
   description: string;
-  /** 舞台となるマップ名。地形選択時は自明なので null */
+  /** 舞台となるマップ名 */
   mapName: string | null;
   /** マップサイズの表示文字列（例: 7 × 6 km）。不明なら null */
   mapSize: string | null;
-  /** 地表種別。マップが特定できないときは null */
+  /** 地表種別。値の供給元(シナリオの一覧要素・登録表)がどちらも無いときは null */
   groundCover: number | null;
-  /** マップの気候区分。未指定・未知の値はゲームと同じ温暖湿潤に正規化する */
+  /** 気候区分。未指定・未知の値はゲームと同じ温暖湿潤に正規化する */
   climate: number;
   /** 達成条件のフリーテキスト。未設定なら null */
   objective: string | null;
   /** 開始ボタンのラベル */
   startLabel: string;
+  /** 読み込めないシナリオは詳細で理由を見せ、開始だけ止める */
+  startDisabled: boolean;
   onStart: () => void;
 };
 
 /**
  * 設定確認モーダルの選択状態
  *
- * terrainId / templateId のどちらか一方がセットされ、
+ * チュートリアルは terrainId(教材が前提とする地形)、シナリオは templateId をセットし、
  * もう一方は null になる。
- * isTutorial が true の場合、チュートリアルモードでゲームを開始する。
  */
 type ConfirmSelection = {
   terrainId: string | null;
@@ -144,23 +126,9 @@ const AVAILABLE_LANGUAGES = SUPPORTED_LANGUAGES;
  */
 const SIMULATION_DAYS_OPTIONS = [7, 30] as const;
 
-/**
- * 地形マップ定義の settings からキロメートル単位の表示文字列を組み立てる。
- * map_width / map_height はメートル単位の整数。欠けている場合は null を返す。
- */
-function formatMapSize(settings: Record<string, unknown> | undefined, language: string): string | null {
-  if (!settings) return null;
-  const width = settings.map_width;
-  const height = settings.map_height;
-  if (typeof width !== "number" || typeof height !== "number" || !Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return null;
-  const format = new Intl.NumberFormat(resolveIntlLocale(language), { maximumFractionDigits: 3 });
-  return `${format.format(width / 1000)} × ${format.format(height / 1000)} km`;
-}
-
 export function NewGameWindow({
   apiBaseUrl,
   onClose,
-  isScenarioEditor = false,
 }: NewGameWindowProps) {
   const { t, i18n } = useTranslation();
   const [terrainMaps, setTerrainMaps] = useState<TerrainMapEntry[]>([]);
@@ -181,56 +149,33 @@ export function NewGameWindow({
   const [simulationDays, setSimulationDays] = useState(30);
 
   /**
-   * ウィンドウ初期化時に地形マップ一覧とテンプレート一覧を並列で取得する。
+   * ウィンドウ初期化時に地形マップ一覧とシナリオ一覧を並列で取得する。
+   * 地形マップはチュートリアルの開始と、詳細パネルの舞台の名前・大きさ(チュートリアルは地表・気候も)に使う。
    * いずれかの取得に失敗しても、成功した方は表示する。
+   * シナリオ管理でシナリオが増減したら(scenarios:changed)シナリオ一覧だけ取り直す。
    */
   useEffect(() => {
     if (!apiBaseUrl) return;
     const base = apiBaseUrl.replace(/\/+$/, "");
+    let active = true;
+    const fetchTemplates = () => fetchApi<{ scenarios: Record<string, TemplateEntry> }>(`${base}/api/v1/scenarios`, { cache: "reload" })
+      .then(data => { if (active) setTemplates(Object.values(data.scenarios)); });
 
     async function fetchData() {
       setLoading(true);
-      try {
-        const [terrainRes, templateRes] = await Promise.allSettled([
-          fetchApi<{ maps: TerrainMapEntry[] }>(`${base}/api/v1/terrain/maps`),
-          fetchApi<{ saves: Record<string, TemplateEntry> }>(`${base}/api/v1/saves?template=true`),
-        ]);
-        if (terrainRes.status === "fulfilled") setTerrainMaps(terrainRes.value.maps);
-        if (templateRes.status === "fulfilled") setTemplates(Object.values(templateRes.value.saves));
-
-      } catch {
-        /* 取得失敗時は空配列のまま */
-      } finally {
-        setLoading(false);
-      }
+      const [terrainRes] = await Promise.allSettled([
+        fetchApi<{ maps: TerrainMapEntry[] }>(`${base}/api/v1/terrain/maps`),
+        fetchTemplates(),
+      ]);
+      if (!active) return;
+      if (terrainRes.status === "fulfilled") setTerrainMaps(terrainRes.value.maps);
+      setLoading(false);
     }
 
     void fetchData();
+    const listener = listen("scenarios:changed", () => { void fetchTemplates().catch(() => {}); });
+    return () => { active = false; void listener.then(unlisten => unlisten()); };
   }, [apiBaseUrl]);
-
-  /**
-   * 地形での開始。設定確認モーダルを開き、デフォルト値をセットする。
-   * チュートリアル未クリアでも選択可能。
-   */
-  const handleStartTerrain = useCallback(
-    async (mapId: string) => {
-      const settings = await loadAppSettings();
-      const defaultLang = resolveSupportedLanguage(settings.language || i18n.language);
-      setCityName("");
-      setLanguage(defaultLang);
-      setSimulationDays(30);
-      setConfirmSelection({
-        terrainId: mapId,
-        templateId: null,
-        defaultCityName: "",
-        defaultLanguage: defaultLang,
-        defaultSimulationDays: 30,
-        isTutorial: false,
-        tutorialId: null,
-      });
-    },
-    [i18n]
-  );
 
   /**
    * テンプレート（シナリオ）での開始。
@@ -298,45 +243,24 @@ export function NewGameWindow({
   const detail = useMemo<DetailView | null>(() => {
     if (!selection) return null;
 
-    if (selection.kind === "terrain") {
-      const map = terrainMaps.find((m) => m.id === selection.id);
-      if (!map) return null;
-      const profile = getTerrainProfile(map.id);
-      return {
-        thumbnailUrl: null,
-        templateId: null,
-        terrainMapId: map.id,
-        placeholderModifier: "new-game-detail-image--terrain",
-        title: profile ? t(`terrainProfiles.maps.${profile.id}.name`) : map.name,
-        description: profile ? t(`terrainProfiles.maps.${profile.id}.description`) : t("terrainProfiles.noDescription"),
-        mapName: null,
-        mapSize: formatMapSize(map.settings, i18n.language),
-        groundCover: normalizeGroundCover(map.ground_cover),
-        climate: normalizeClimate(map.climate),
-        objective: null,
-        startLabel: t("newGame.startTerrainButton"),
-        onStart: () => void handleStartTerrain(map.id),
-      };
-    }
-
     if (selection.kind === "tutorial") {
       const scenario = TUTORIAL_SCENARIOS.find((s) => s.id === selection.id);
       if (!scenario) return null;
       const map = terrainMaps.find((m) => m.id === scenario.terrainMapId);
-      const profile = getTerrainProfile(scenario.terrainMapId);
       return {
         thumbnailUrl: scenario.image || null,
-        templateId: null,
+        template: null,
         terrainMapId: null,
         placeholderModifier: `new-game-detail-image--tutorial new-game-detail-image--${scenario.id}`,
         title: t(scenario.titleKey),
         description: t(scenario.descriptionKey),
-        mapName: profile ? t(`terrainProfiles.maps.${profile.id}.name`) : map?.name ?? null,
+        mapName: terrainMapTitle({ id: scenario.terrainMapId, name: map?.name ?? scenario.terrainMapId }, t),
         mapSize: formatMapSize(map?.settings, i18n.language),
         groundCover: map ? normalizeGroundCover(map.ground_cover) : null,
         climate: normalizeClimate(map?.climate),
         objective: t("newGame.tutorialObjective"),
         startLabel: t("newGame.startScenarioButton"),
+        startDisabled: false,
         onStart: () => void handleStartTutorial(scenario.id),
       };
     }
@@ -346,10 +270,9 @@ export function NewGameWindow({
     const terrainMap = template.terrain_map_id
       ? terrainMaps.find((m) => m.id === template.terrain_map_id)
       : undefined;
-    const profile = getTerrainProfile(template.terrain_map_id ?? "");
     return {
       thumbnailUrl: null,
-      templateId: template.id,
+      template,
       terrainMapId: template.terrain_map_id || null,
       placeholderModifier: "new-game-detail-image--template",
       title:
@@ -357,12 +280,17 @@ export function NewGameWindow({
         template.city_name ||
         `Template ${template.id.slice(0, 8)}`,
       description: template.scenario_description || t("newGame.detailNoDescription"),
-      mapName: profile ? t(`terrainProfiles.maps.${profile.id}.name`) : terrainMap?.name || template.terrain_map_name || null,
+      mapName: template.terrain_map_id
+        ? terrainMapTitle({ id: template.terrain_map_id, name: terrainMap?.name || template.terrain_map_name || template.terrain_map_id }, t)
+        : null,
       mapSize: formatMapSize(terrainMap?.settings, i18n.language),
-      groundCover: terrainMap ? normalizeGroundCover(terrainMap.ground_cover) : null,
-      climate: normalizeClimate(terrainMap?.climate),
+      groundCover: template.ground_cover !== undefined || terrainMap
+        ? normalizeGroundCover(template.ground_cover ?? terrainMap?.ground_cover)
+        : null,
+      climate: normalizeClimate(template.climate ?? terrainMap?.climate),
       objective: template.scenario_objective || null,
       startLabel: t("newGame.startScenarioButton"),
+      startDisabled: template.compatibility?.loadable === false,
       onStart: () => void handleStartTemplate(template),
     };
   }, [
@@ -371,7 +299,6 @@ export function NewGameWindow({
     templates,
     t,
     i18n.language,
-    handleStartTerrain,
     handleStartTemplate,
     handleStartTutorial,
   ]);
@@ -380,6 +307,7 @@ export function NewGameWindow({
    * 設定確認モーダルで「開始」を押した時のハンドラ。
    * Rust 側の create_session を呼び出し、Unity 起動 → LoadingWindow 表示 →
    * バックエンド POST → ポーリング待機 → HUD 表示 のフローを実行する。
+   * create_session は開いているポップアップをすべて閉じる(確認画面の注記で予告する)。
    */
   const handleConfirmStart = useCallback(async () => {
     if (!confirmSelection) return;
@@ -398,7 +326,6 @@ export function NewGameWindow({
         language,
         simulationDays,
         isTutorial: confirmSelection.isTutorial,
-        templateMode: isScenarioEditor,
         tutorialId: confirmSelection.tutorialId || null,
       });
       onClose();
@@ -409,7 +336,7 @@ export function NewGameWindow({
       });
       setBusy(false);
     }
-  }, [apiBaseUrl, t, onClose, confirmSelection, cityName, language, simulationDays, isScenarioEditor]);
+  }, [apiBaseUrl, t, onClose, confirmSelection, cityName, language, simulationDays]);
 
   /**
    * 設定確認モーダルを閉じてタイル選択画面に戻る
@@ -419,138 +346,152 @@ export function NewGameWindow({
     setStatus(null);
   }, []);
 
+  // 「シナリオを探す」は共有シナリオの閲覧画面の予定地。未提供なので常に「シナリオを選択」を表示する。
+  const tabs = (
+    <FlatTabs<NewGameTab>
+      label={t("topmenu.newGame")}
+      active="select"
+      onChange={() => {}}
+      tabs={[
+        { id: "select", label: t("newGame.tabSelect") },
+        { id: "browse", label: t("newGame.tabBrowse"), disabled: true, badge: t("newGame.comingSoon") },
+      ]}
+    />
+  );
+
   // 設定確認モーダル表示中
   if (confirmSelection) {
     return (
-      <div className="new-game-body new-game-body--confirm">
-        <div className="new-game-confirm">
-          <h2 className="new-game-confirm-title">{t("newGame.confirmTitle")}</h2>
+      <div className="new-game-window">
+        {tabs}
+        <div className="new-game-body new-game-body--confirm">
+          <div className="new-game-confirm">
+            <h2 className="new-game-confirm-title">{t("newGame.confirmTitle")}</h2>
 
-          {/* 都市名 */}
-          <div className="new-game-confirm-field">
-            <label className="new-game-confirm-label">
-              {t("newGame.cityNameLabel")}
-            </label>
-            <input
-              className="new-game-confirm-input"
-              type="text"
-              value={cityName}
-              onChange={(e) => setCityName(e.target.value)}
-              placeholder={t("newGame.cityNamePlaceholder")}
-              disabled={busy}
-            />
-          </div>
-
-          {/* 都市の言語 */}
-          <div className="new-game-confirm-field">
-            <label className="new-game-confirm-label">
-              {t("newGame.languageLabel")}
-            </label>
-            <div className="new-game-confirm-select-wrap">
-              <select
-                className="new-game-confirm-select"
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
+            {/* 都市名 */}
+            <div className="new-game-confirm-field">
+              <label className="new-game-confirm-label">
+                {t("newGame.cityNameLabel")}
+              </label>
+              <input
+                className="new-game-confirm-input"
+                type="text"
+                value={cityName}
+                onChange={(e) => setCityName(e.target.value)}
+                placeholder={t("newGame.cityNamePlaceholder")}
                 disabled={busy}
-              >
-                {AVAILABLE_LANGUAGES.map((lang) => (
-                  <option key={lang} value={lang}>
-                    {t(`settings.language.${lang}`)}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
-            <span className="new-game-confirm-note">{t("newGame.languageNote")}</span>
-          </div>
 
-          {/* シミュレーション日数 */}
-          <div className="new-game-confirm-field">
-            <label className="new-game-confirm-label">
-              {t("newGame.simulationDaysLabel")}
-            </label>
-            <div className="new-game-confirm-days">
-              {SIMULATION_DAYS_OPTIONS.map((days) => (
-                <button
-                  key={days}
-                  className={`new-game-confirm-days-btn ${simulationDays === days ? "active" : ""}`}
-                  onClick={() => setSimulationDays(days)}
+            {/* 都市の言語 */}
+            <div className="new-game-confirm-field">
+              <label className="new-game-confirm-label">
+                {t("newGame.languageLabel")}
+              </label>
+              <div className="new-game-confirm-select-wrap">
+                <select
+                  className="new-game-confirm-select"
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
                   disabled={busy}
-                  type="button"
                 >
-                  {t("newGame.daysOption", { days })}
-                </button>
-              ))}
+                  {AVAILABLE_LANGUAGES.map((lang) => (
+                    <option key={lang} value={lang}>
+                      {t(`settings.language.${lang}`)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <span className="new-game-confirm-note">{t("newGame.languageNote")}</span>
             </div>
-            <span className="new-game-confirm-note">{t("newGame.simulationDaysNote")}</span>
+
+            {/* シミュレーション日数 */}
+            <div className="new-game-confirm-field">
+              <label className="new-game-confirm-label">
+                {t("newGame.simulationDaysLabel")}
+              </label>
+              <div className="new-game-confirm-days">
+                {SIMULATION_DAYS_OPTIONS.map((days) => (
+                  <button
+                    key={days}
+                    className={`new-game-confirm-days-btn ${simulationDays === days ? "active" : ""}`}
+                    onClick={() => setSimulationDays(days)}
+                    disabled={busy}
+                    type="button"
+                  >
+                    {t("newGame.daysOption", { days })}
+                  </button>
+                ))}
+              </div>
+              <span className="new-game-confirm-note">{t("newGame.simulationDaysNote")}</span>
+            </div>
+
+            {/* ボタン */}
+            <p className="new-game-confirm-note new-game-confirm-warning">{t("newGame.closeWindowsNote")}</p>
+            <div className="new-game-confirm-actions">
+              <button
+                className="new-game-confirm-btn new-game-confirm-btn--back"
+                onClick={handleCancelConfirm}
+                disabled={busy}
+                type="button"
+              >
+                {t("newGame.backButton")}
+              </button>
+              <button
+                className="new-game-confirm-btn new-game-confirm-btn--start"
+                onClick={() => void handleConfirmStart()}
+                disabled={busy}
+                type="button"
+              >
+                {t("newGame.startButton")}
+              </button>
+            </div>
           </div>
 
-          {/* ボタン */}
-          <div className="new-game-confirm-actions">
-            <button
-              className="new-game-confirm-btn new-game-confirm-btn--back"
-              onClick={handleCancelConfirm}
-              disabled={busy}
-              type="button"
-            >
-              {t("newGame.backButton")}
-            </button>
-            <button
-              className="new-game-confirm-btn new-game-confirm-btn--start"
-              onClick={() => void handleConfirmStart()}
-              disabled={busy}
-              type="button"
-            >
-              {t("newGame.startButton")}
-            </button>
-          </div>
+          {status && (
+            <div className={`new-game-status new-game-status--${status.type}`}>
+              {status.text}
+            </div>
+          )}
         </div>
-
-        {status && (
-          <div className={`new-game-status new-game-status--${status.type}`}>
-            {status.text}
-          </div>
-        )}
       </div>
     );
   }
 
   // タイル選択画面
   return (
-    <div className="new-game-body new-game-body--select">
-      <div className="new-game-list">
-        {loading ? (
-          <div className="new-game-loading">{t("newGame.loading")}</div>
-        ) : (
-          <>
-            {/* シナリオセクション（チュートリアル + テンプレートを統合） */}
+    <div className="new-game-window">
+      {tabs}
+      <div className="new-game-body new-game-body--select">
+        <div className="new-game-list">
+          {loading ? (
+            <div className="new-game-loading">{t("newGame.loading")}</div>
+          ) : (
             <section className="new-game-section">
-              <h2 className="new-game-section-title">{t("newGame.fromScenario")}</h2>
               <div className="new-game-tiles">
                 {/* チュートリアルミッション: 常に表示、常に選択可能 */}
-                {!isScenarioEditor &&
-                  TUTORIAL_SCENARIOS.map((scenario) => (
-                    <button
-                      key={scenario.id}
-                      className={`new-game-tile new-game-tile--tutorial ${
-                        selection?.kind === "tutorial" && selection.id === scenario.id
-                          ? "selected"
-                          : ""
-                      }`}
-                      onClick={() => setSelection({ kind: "tutorial", id: scenario.id })}
-                      disabled={busy}
-                      type="button"
-                      title={t(scenario.titleKey)}
-                    >
-                      <span className="new-game-tile-badge">{t("newGame.tutorialBadge")}</span>
-                      {scenario.image ? (
-                        <img className="new-game-tile-image" src={scenario.image} alt="" />
-                      ) : (
-                        <div className={`new-game-tile-image new-game-tile-image--tutorial new-game-tile-image--${scenario.id}`} />
-                      )}
-                      <span className="new-game-tile-name">{t(scenario.titleKey)}</span>
-                    </button>
-                  ))
-                }
+                {TUTORIAL_SCENARIOS.map((scenario) => (
+                  <button
+                    key={scenario.id}
+                    className={`new-game-tile new-game-tile--tutorial ${
+                      selection?.kind === "tutorial" && selection.id === scenario.id
+                        ? "selected"
+                        : ""
+                    }`}
+                    onClick={() => setSelection({ kind: "tutorial", id: scenario.id })}
+                    disabled={busy}
+                    type="button"
+                    title={t(scenario.titleKey)}
+                  >
+                    <span className="new-game-tile-badge">{t("newGame.tutorialBadge")}</span>
+                    {scenario.image ? (
+                      <img className="new-game-tile-image" src={scenario.image} alt="" />
+                    ) : (
+                      <div className={`new-game-tile-image new-game-tile-image--tutorial new-game-tile-image--${scenario.id}`} />
+                    )}
+                    <span className="new-game-tile-name">{t(scenario.titleKey)}</span>
+                  </button>
+                ))}
 
                 {/* 読み込めない作品も選択し、詳細で理由を確認できる。 */}
                 {templates.map((tmpl) => (
@@ -572,134 +513,89 @@ export function NewGameWindow({
                     <span className="new-game-tile-name">
                       {tmpl.scenario_title || tmpl.city_name || `Template ${tmpl.id.slice(0, 8)}`}
                     </span>
+                    <ScenarioOriginBadges entry={tmpl} />
                   </button>
                 ))}
               </div>
 
-              {/* テンプレートがない場合の空状態メッセージ */}
+              {/* チュートリアル以外のシナリオがない場合の空状態メッセージ */}
               {templates.length === 0 && (
                 <div className="new-game-empty">{t("newGame.noTemplates")}</div>
               )}
             </section>
+          )}
+        </div>
 
-            {/* 地形から始めるセクション（チュートリアル未クリアでも選択可能） */}
-            <section className="new-game-section">
-              <h2 className="new-game-section-title">{t("newGame.fromTerrain")}</h2>
-              {terrainMaps.length === 0 ? (
-                <div className="new-game-empty">{t("newGame.noTerrainMaps")}</div>
+        {/* 詳細パネル（固定幅） */}
+        <aside className="new-game-detail">
+          {detail ? (
+            <>
+              {detail.thumbnailUrl ? (
+                <img
+                  className="new-game-detail-image"
+                  src={detail.thumbnailUrl}
+                  alt=""
+                />
+              ) : detail.template ? (
+                <ScenarioThumbnail
+                  apiBaseUrl={apiBaseUrl}
+                  templateId={detail.template.id}
+                  revision={detail.template.content_revision}
+                  terrainMapId={detail.terrainMapId}
+                  className="new-game-detail-image"
+                  placeholderModifier={detail.placeholderModifier}
+                />
               ) : (
-                <div className="new-game-tiles">
-                  {terrainMaps.map((map) => (
-                    <button
-                      key={map.id}
-                      className={`new-game-tile ${
-                        selection?.kind === "terrain" && selection.id === map.id ? "selected" : ""
-                      }`}
-                      onClick={() => setSelection({ kind: "terrain", id: map.id })}
-                      disabled={busy}
-                      type="button"
-                      title={getTerrainProfile(map.id) ? t(`terrainProfiles.maps.${map.id}.name`) : map.name}
-                    >
-                      <TerrainMapThumbnail apiBaseUrl={apiBaseUrl} mapId={map.id} />
-                      <span className="new-game-tile-name">{getTerrainProfile(map.id) ? t(`terrainProfiles.maps.${map.id}.name`) : map.name}</span>
-                    </button>
-                  ))}
-                </div>
+                <div className={`new-game-detail-image ${detail.placeholderModifier}`} />
               )}
-            </section>
-          </>
+
+              <div className="new-game-detail-content">
+                <h2 className="new-game-detail-title">{detail.title}</h2>
+                {detail.template && <>
+                  <ScenarioOriginBadges entry={detail.template} />
+                  <SaveVersionInfo entry={detail.template} />
+                </>}
+                <p className="new-game-detail-desc">{detail.description}</p>
+
+                {detail.mapName && (
+                  <div className="new-game-detail-block">
+                    <h3 className="new-game-detail-block-title">{t("newGame.detailMapLabel")}</h3>
+                    <p className="new-game-detail-block-text">{detail.mapName}</p>
+                  </div>
+                )}
+
+                <TerrainFacts mapSize={detail.mapSize} groundCover={detail.groundCover} climate={detail.climate} />
+
+                {detail.objective && (
+                  <div className="new-game-detail-block">
+                    <h3 className="new-game-detail-block-title">
+                      {t("newGame.detailObjectiveLabel")}
+                    </h3>
+                    <p className="new-game-detail-block-text">{detail.objective}</p>
+                  </div>
+                )}
+              </div>
+
+              <button
+                className="new-game-detail-start"
+                onClick={detail.onStart}
+                disabled={busy || detail.startDisabled}
+                type="button"
+              >
+                {detail.startLabel}
+              </button>
+            </>
+          ) : (
+            <div className="new-game-detail-placeholder">{t("newGame.detailPlaceholder")}</div>
+          )}
+        </aside>
+
+        {status && (
+          <div className={`new-game-status new-game-status--${status.type}`}>
+            {status.text}
+          </div>
         )}
       </div>
-
-      {/* 詳細パネル（固定幅） */}
-      <aside className={`new-game-detail${selection?.kind === "terrain" ? " new-game-detail--terrain" : ""}`}>
-        {detail ? (
-          <>
-            {detail.thumbnailUrl ? (
-              <img
-                className="new-game-detail-image"
-                src={detail.thumbnailUrl}
-                alt=""
-              />
-            ) : detail.templateId ? (
-              <ScenarioThumbnail
-                apiBaseUrl={apiBaseUrl}
-                templateId={detail.templateId}
-                terrainMapId={detail.terrainMapId}
-                className="new-game-detail-image"
-                placeholderModifier={detail.placeholderModifier}
-              />
-            ) : detail.terrainMapId ? (
-              <TerrainMapThumbnail
-                apiBaseUrl={apiBaseUrl}
-                mapId={detail.terrainMapId}
-                className="new-game-detail-image"
-                placeholderModifier={detail.placeholderModifier}
-              />
-            ) : (
-              <div className={`new-game-detail-image ${detail.placeholderModifier}`} />
-            )}
-
-            <div className="new-game-detail-content">
-              <h2 className="new-game-detail-title">{detail.title}</h2>
-              {detail.templateId && templates.filter(entry => entry.id === detail.templateId).map(entry => <SaveVersionInfo key={entry.id} entry={entry} />)}
-              <p className="new-game-detail-desc">{detail.description}</p>
-
-              {detail.mapName && (
-                <div className="new-game-detail-block">
-                  <h3 className="new-game-detail-block-title">{t("newGame.detailMapLabel")}</h3>
-                  <p className="new-game-detail-block-text">{detail.mapName}</p>
-                </div>
-              )}
-
-              <dl className="new-game-facts">
-                <div className="new-game-fact">
-                  <dt>{t("newGame.detailMapSizeLabel")}</dt>
-                  <dd className="new-game-fact-size">{detail.mapSize ?? t("terrainProfiles.unknown")}</dd>
-                </div>
-                <div className="new-game-fact">
-                  <dt>{t("groundCover.label")}</dt>
-                  <dd>
-                    {detail.groundCover !== null ? (
-                      <GroundCoverIcon cover={detail.groundCover} label={t(`groundCover.${detail.groundCover}`)} />
-                    ) : t("terrainProfiles.unknown")}
-                  </dd>
-                </div>
-                <div className="new-game-fact new-game-fact--climate">
-                  <dt>{t("climate.label")}</dt>
-                  <dd>{t(`climate.${detail.climate}`)}</dd>
-                </div>
-              </dl>
-
-              {detail.objective && (
-                <div className="new-game-detail-block">
-                  <h3 className="new-game-detail-block-title">
-                    {t("newGame.detailObjectiveLabel")}
-                  </h3>
-                  <p className="new-game-detail-block-text">{detail.objective}</p>
-                </div>
-              )}
-            </div>
-
-            <button
-              className="new-game-detail-start"
-              onClick={detail.onStart}
-              disabled={busy}
-              type="button"
-            >
-              {detail.startLabel}
-            </button>
-          </>
-        ) : (
-          <div className="new-game-detail-placeholder">{t("newGame.detailPlaceholder")}</div>
-        )}
-      </aside>
-
-      {status && (
-        <div className={`new-game-status new-game-status--${status.type}`}>
-          {status.text}
-        </div>
-      )}
     </div>
   );
 }

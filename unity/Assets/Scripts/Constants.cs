@@ -7,12 +7,10 @@ using UnityEngine;
 /// </summary>
 public static class Constants
 {
-    public const string VERIFICATION_SERVER_URL = "http://127.0.0.1:8080";
-    public const string TEMPLATE_PUBLIC_URL = "https://storage.googleapis.com/cg2025/initial_saves_metadata.json";
     public const string STEAM_TICKET_IDENTITY = "city-genesis";
     public const int GAME_VERIFIED = 0;
     public const int GAME_UNVERIFIED = 1;
-    public const string CITY_TEMPLATE_DIR = "UrbanGenesis/templates";
+    public const string CITY_SCENARIO_DIR = "UrbanGenesis/scenarios";
     public const string CITY_SAVE_DIR = "UrbanGenesis/saves";
     public const int HISTORY_COUNT = 120;
     public const float DAYS_PER_YEAR = 365.0f;

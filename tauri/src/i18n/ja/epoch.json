@@ -8,6 +8,7 @@
     "no": "いいえ",
     "executing": "エポック実行中...",
     "errorSteamLimit": "Steamの認証が確認できないため、これ以上エポックを実行できません。(未認証では10エポックまでプレイできます)",
+    "errorAlreadyRunning": "別のエポックを実行中です。終わってからもう一度実行してください。",
     "errorFailed": "エポックの実行に失敗しました: {{reason}}"
   },
   "epochResult": {

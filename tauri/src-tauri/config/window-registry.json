@@ -531,22 +531,13 @@
     "policy": "single",
     "actions": []
   },
-  "template_editor": {
-    "title": "エディタ",
-    "width": 1280,
-    "height": 800,
-    "resizable": true,
-    "policy": "single",
-    "empty_shell": true,
-    "actions": []
-  },
   "terrain_editor": {
     "title": "地形エディタ",
     "width": 1600,
     "height": 900,
     "resizable": true,
     "policy": "single_per_entity",
-    "entity_type": "terrain_map",
+    "entity_type": "scenario_terrain_editor",
     "maximized": true,
     "actions": []
   },
@@ -556,7 +547,7 @@
     "height": 700,
     "resizable": true,
     "policy": "single_per_entity",
-    "entity_type": "terrain_map",
+    "entity_type": "scenario_terrain_editor",
     "actions": []
   },
   "god_edit": {

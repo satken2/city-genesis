@@ -1318,10 +1318,13 @@ pub fn close_all_popup_windows(app: &AppHandle, state: &SharedState) {
     }
 }
 
+/// WebView がバックエンドへ直接送るリクエスト用の接続情報。`api_token` は 401 を受けるたびに取り直される。
 pub fn get_connection_status(state: &SharedState) -> Value {
+    let api_token = crate::version::api_token();
     let guard = state.lock();
     json!({
         "api_base_url": guard.api_base_url,
+        "api_token": api_token,
         // 非表示(再利用待ち)ウィンドウは表示中のポップアップ数に含めない。
         "open_window_count": guard.open_windows.values().filter(|w| !w.hidden).count(),
     })

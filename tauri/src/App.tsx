@@ -1,4 +1,4 @@
-import { configureBackendRequests } from "./utils/api";
+import { configureBackendRequests, setApiToken } from "./utils/api";
 import { useEffect, useMemo, useState, lazy, Suspense, type MouseEvent as ReactMouseEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
@@ -49,7 +49,6 @@ const ScenarioMetadataWindow = lazy(() => import("./components/template/Scenario
 const SaveListWindow = lazy(() => import("./components/taskbar/SaveListWindow").then(m => ({ default: m.SaveListWindow })));
 const NewGameWindow = lazy(() => import("./components/taskbar/NewGameWindow").then(m => ({ default: m.NewGameWindow })));
 const CityRenameWindow = lazy(() => import("./components/taskbar/CityRenameWindow").then(m => ({ default: m.CityRenameWindow })));
-const EditorWindow = lazy(() => import("./components/taskbar/EditorWindow").then(m => ({ default: m.EditorWindow })));
 const ResourceDetailPanel = lazy(() => import("./components/resource/ResourceDetailPanel").then(m => ({ default: m.ResourceDetailPanel })));
 const ResourceConstructionPanel = lazy(() => import("./components/resource/ResourceConstructionPanel").then(m => ({ default: m.ResourceConstructionPanel })));
 const PropPlacementPanel = lazy(() => import("./components/prop/PropPlacementPanel").then(m => ({ default: m.PropPlacementPanel })));
@@ -96,7 +95,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * 専用パネルが実装されているウィンドウタイプのセット
  * これらのタイプはジェネリックな JSON 表示ではなく、専用コンポーネントでレンダリングする
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "diagnosis", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_metadata", "new_game", "city_rename", "template_editor", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "tutorial_intro", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "street_grid", "agent_creation"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "diagnosis", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_metadata", "new_game", "city_rename", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "tutorial_intro", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "street_grid", "agent_creation"]);
 
 
 function App() {
@@ -138,7 +137,8 @@ function App() {
       } else if (label !== "main") {
         setWindowKind("popup");
       }
-      const status = await invoke<{ api_base_url: string; open_window_count: number }>("get_connection_status");
+      const status = await invoke<{ api_base_url: string; api_token: string | null; open_window_count: number }>("get_connection_status");
+      setApiToken(status.api_token);
       if (!disposed) {
         setApiBaseUrl(status.api_base_url);
         setOpenWindowCount(status.open_window_count);
@@ -531,9 +531,6 @@ function App() {
               <NewGameWindow apiBaseUrl={context.api_base_url} onClose={closeWindow} />
             ) : context.window_type === "city_rename" ? (
               <CityRenameWindow apiBaseUrl={context.api_base_url} onClose={closeWindow} />
-            ) : context.window_type === "template_editor" ? (
-              <EditorWindow apiBaseUrl={context.api_base_url} onClose={closeWindow} />
-
             ) : context.window_type === "terrain_editor" ? (
               <TerrainEditorCanvas mapId={context.entity?.id ?? ""} />
 

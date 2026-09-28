@@ -54,8 +54,8 @@
 | `BuildingMeshUtils.cs` | パーツ解決(prefix・`_close`・common)・`CombineModuleMeshes`・`AddStackedModule`・`ResolveParcelContext`・`SanitizeRingPolygon`・屋根共通幾何 |
 | `ModularBuildingMeshBuilder.cs` / `ModularBodyBuilder.cs` / `DefaultBodyBuilder.cs` | モジュラー躯体(壁・角の敷き詰め `BuildWallRun`、敷地装飾 `GenerateSiteDecorations`)と白箱フォールバック(F・F1) |
 | `FlatRoofBuilder.cs` / `HouseRoofBuilder.cs` / `GableRoofBuilder.cs` / `ShedRoofBuilder.cs` / `InteriorFloorBuilder.cs` / `ExteriorStairBuilder.cs` | 屋根4種・各階の床(F1)、辺ごとの外階段(F§11.4) |
-| `PreBuiltBuildingMeshBuilder.cs` / `MashupBuildingMeshBuilder.cs` / `PortBuildingMeshBuilder.cs` / `RailYardBuildingMeshBuilder.cs` | 既成・観光名所(F3)、複数棟(F6。割り付けはバックエンド解決済み。`openPit` のインスタンスが露天掘りの前庭の設備を描く=F11)、港(F4。区画が埋立地の岸壁の陸側で面していれば(`FindFacingReclaimedQuays`)スラブを作らずその岸壁区間を水際に、面していなければ区画の中の水際の両端を結ぶ弦を20m海側へ移した直線でカットしたスラブの辺を水際にし、`PortLayout` の計画どおり水際に荷役設備・道路側に施設モジュール・間にコンテナを置く)、車両基地(F9) |
-| `PortLayout.cs` | 港の配置計画(施設モジュール・荷役設備・コンテナの置き場)。通常モデルの寸法と入力の形だけで決まる純データ(F4 §5) |
+| `PreBuiltBuildingMeshBuilder.cs` / `MashupBuildingMeshBuilder.cs` / `PortBuildingMeshBuilder.cs` / `RailYardBuildingMeshBuilder.cs` | 既成・観光名所(F3)、複数棟(F6。割り付けはバックエンド解決済み。`openPit` のインスタンスが露天掘りの前庭の設備を描く=F11)、港(F4。区画が埋立地の岸壁の陸側で面していれば(`FindFacingReclaimedQuays`)スラブを作らずその岸壁区間を水際に、面していなければ区画の中の水際の両端を結ぶ弦を20m海側へ移した直線でカットしたスラブの辺を水際にし、`PortLayout` の計画どおり水際に荷役設備・道路側に施設モジュール・間に港ごとのヤードの荷(403 はコンテナ `port_container` の段積み、401・402・1001 は `port_cargo` を積まずに並べる。荷のパーツは各港の `a{variant}` にだけ置き、`b128` に置くと他の港へフォールバックする)を置く)、車両基地(F9) |
+| `PortLayout.cs` | 港の配置計画(施設モジュール・荷役設備・ヤードの荷の置き場)。通常モデルの寸法と入力の形だけで決まる純データ(F4 §5)。荷の置き方は `CargoSpec`(コンテナは `ContainerSpec`、並べる荷は `GroundCargoSpec` がパーツの外接箱から作る) |
 | `OpenSpaceLayout.cs` / `OpenSpaceBuildingMeshBuilder.cs` | 駐車場・駅前ロータリー・公園(F10) |
 | `BuildingRoadAccess.cs` | 施設側の決定論的な間口(ロータリーの舗装交線・既成モデルのEmpty)。描画GOを間口の正にしない(F§16) |
 | `ConstructingBuildingMeshBuilder.cs` / `ConstructionSiteProfile.cs` / `CollapsedBuildingMeshBuilder.cs` | 工事中・解体中(profile 差分で共用。F5・F7)、倒壊(F8) |

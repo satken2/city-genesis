@@ -13,12 +13,6 @@ public class ParcelApiClient : MonoBehaviour
 {
     public static ParcelApiClient Instance { get; private set; }
 
-    /// <summary>
-    /// バックエンド API のベース URL。
-    /// ApiClient.BASE_URL と同一値を使用し、起動時の --api-base-url 引数に対応する。
-    /// </summary>
-    private static string API_BASE_URL => ApiClient.BASE_URL;
-
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -46,9 +40,10 @@ public class ParcelApiClient : MonoBehaviour
             "\"dry_run\": " + (dry_run ? "true" : "false") +
         "}";
         
-        using (UnityWebRequest request = CreatePostRequest($"{API_BASE_URL}/parcels/create_path_parcel", jsonData))
+        using (ApiRequest call = ApiClient.Request("POST", "/parcels/create_path_parcel", jsonData))
         {
-            yield return request.SendWebRequest();
+            yield return call.Send();
+            UnityWebRequest request = call.Web;
 
             if (request.result != UnityWebRequest.Result.Success)
             {
@@ -69,23 +64,6 @@ public class ParcelApiClient : MonoBehaviour
                 onFailure?.Invoke("レスポンスのパースに失敗しました");
             }
         }
-    }
-
-    #endregion
-
-    #region ヘルパーメソッド
-
-    /// <summary>
-    /// POST リクエストを作成
-    /// </summary>
-    private UnityWebRequest CreatePostRequest(string url, string jsonData)
-    {
-        UnityWebRequest request = new UnityWebRequest(url, "POST");
-        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
-        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
-        request.downloadHandler = new DownloadHandlerBuffer();
-        request.SetRequestHeader("Content-Type", "application/json");
-        return request;
     }
 
     #endregion

@@ -2,19 +2,6 @@
   "terrain3dPreview": {
     "waitingForEditor": "En attente des données de l'éditeur de terrain…"
   },
-  "editor": {
-    "originalTerrains": "Terrain original",
-    "originalTerrainsHelp": "Données de terrain uniquement.",
-    "gameTerrains": "Modifier une carte existante",
-    "terrainTab": "Éditeur de terrain",
-    "scenarioTab": "Éditeur de scénarios",
-    "addNewTerrain": "Ajouter un nouveau terrain",
-    "creating": "Création...",
-    "createFailed": "Échec de la création du nouveau terrain",
-    "copying": "Copie...",
-    "copyFailed": "Échec de la récupération des données de terrain",
-    "gameTerrainsHelp": "Contient les rivières, les ressources, les éléments décoratifs et plus encore."
-  },
   "groundCover": {
     "label": "Couverture du sol",
     "hint": "Change la couleur et la texture du sol dans le jeu ainsi que les couleurs des cartes 2D. N'affecte pas la simulation.",

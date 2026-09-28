@@ -177,7 +177,8 @@ Assets/Resources/Models/
 │   │       ├── entrance.prefab      # エントランス（前面の辺の中央・地面レベル）
 │   │       ├── port_crane.prefab    # 荷役設備（MODEL_PORT 専用。水際に実寸配置）
 │   │       ├── port_building.prefab # 施設モジュール（MODEL_PORT 専用。道路側の辺に実寸配置、道路間口のマーカーを持つ）
-│   │       ├── port_container1.prefab # 段積みコンテナ（MODEL_PORT 専用。色ごとに連番。港で共有するものは b{bd_type}）
+│   │       ├── port_container1.prefab # 段積みコンテナ（MODEL_PORT のコンテナ埠頭 a403 だけ。色ごとに連番）
+│   │       ├── port_cargo1.prefab     # 積まずに並べるヤードの荷（MODEL_PORT。野積みの山・油槽など。種類ごとに連番）
 │   │       ├── yard_track.prefab    # 線路タイル（MODEL_RAIL_YARD 専用。+Zが線路方向）
 │   │       ├── yard_wire.prefab     # 架線タイル（同上。線路タイルと同一TRSで重ねる）
 │   │       ├── yard_pole.prefab     # 架線柱（同上。「右側用」著作）
@@ -816,8 +817,8 @@ X方向（辺の長さ方向）については、建物の壁と同じ敷き詰�
 | **`GableRoofBuilder.cs`**                   | **static クラス**。切妻屋根メッシュ（厚みのある勾配面2枚＋妻壁）を生成して返す。屋根面と妻壁でサブメッシュ・マテリアルを分ける（[[F1_モジュラー建物のメッシュ生成]] §3）。 |
 | **`ShedRoofBuilder.cs`**                    | **static クラス**。片流れ屋根メッシュ（薄い勾配面1枚＋妻壁）を生成して返す。サブメッシュ・マテリアルの分け方は切妻屋根と同じ（[[F1_モジュラー建物のメッシュ生成]] §4）。 |
 | **`PreBuiltBuildingMeshBuilder.cs`**        | `IBuildingMeshGenerator`。既成パーツ組み立て（[[F3_既成建物のメッシュ生成]]）。                                                                         |
-| **`PortBuildingMeshBuilder.cs`**            | `IBuildingMeshGenerator`。海岸線で底面ポリゴンをカットし、厚みのある岸壁スラブを押し出す。埋立地の岸壁に面する港はスラブを作らず、その岸壁を水際にする。水際に荷役設備、道路側に施設モジュール、その間にコンテナを `PortLayout` の計画どおりに置き、遠景も同じ配置で組み立てる（[[F4_港湾岸壁のメッシュ生成]]）。                                                  |
-| **`PortLayout.cs`**                         | **static クラス**。港の配置計画（施設モジュール・荷役設備・コンテナの置き場）を通常モデルの寸法と入力の形から決める純データ。施設モジュールの置き方は区画だけで決まり、道路への開口（§16）と共有する（[[F4_港湾岸壁のメッシュ生成]] §5）。 |
+| **`PortBuildingMeshBuilder.cs`**            | `IBuildingMeshGenerator`。海岸線で底面ポリゴンをカットし、厚みのある岸壁スラブを押し出す。埋立地の岸壁に面する港はスラブを作らず、その岸壁を水際にする。水際に荷役設備、道路側に施設モジュール、その間に港ごとのヤードの荷（コンテナの段積み、または野積みの山・油槽などを並べる）を `PortLayout` の計画どおりに置き、遠景も同じ配置で組み立てる（[[F4_港湾岸壁のメッシュ生成]]）。                                                  |
+| **`PortLayout.cs`**                         | **static クラス**。港の配置計画（施設モジュール・荷役設備・ヤードの荷の置き場）を通常モデルの寸法と入力の形から決める純データ。施設モジュールの置き方は区画だけで決まり、道路への開口（§16）と共有する（[[F4_港湾岸壁のメッシュ生成]] §5）。 |
 | **`MashupBuildingMeshBuilder.cs`**          | `IBuildingMeshGenerator`。`sub_buildings` の配置計画に従い、複数のサブ建物を既成パーツと同じ積み上げ規則で配置する（[[F6_マッシュアップ建物のメッシュ生成]]）。`openPit` を指定したインスタンスが露天掘り（[[F11_露天掘りのメッシュ生成]]）を担う。                                        |
 | **`RailYardBuildingMeshBuilder.cs`**        | `IBuildingMeshGenerator`。フットプリントと接続端子ノード位置から並行線路・集約曲線・架線・検修庫をプロシージャルに配置する（[[F9_車両基地のメッシュ生成]]）。 |
 | **`ConstructingBuildingMeshBuilder.cs`**    | `IBuildingMeshGenerator`。工事中専用の「工事現場」メッシュ（土マウンド + 足場リング + クレーン）を生成する（[[F5_工事中建物のメッシュ生成]]）。model_type 分岐より先に status で分岐する。 |

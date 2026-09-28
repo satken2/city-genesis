@@ -27,7 +27,7 @@ export type WaterPolygonGeoJson = {
 
 /**
  * 水面1枚分(海面以外の湖など)の定義。
- * バックエンドの /terrain/water、地形エディタの meta.json / サイドカーJSON、
+ * バックエンドの /terrain/water とシナリオの地形 API、地形エディタの作業コピー(meta.json)、
  * Unityの WaterSurfaceManager すべてで共通の契約。
  */
 export type WaterSurfacePayload = {
@@ -41,13 +41,13 @@ export type WaterSurfacePayload = {
 
 /**
  * 川1本分の保存契約。
- * 地形エディタの meta.json / サイドカーJSON(map_xxx.rivers.json)と、バックエンド
+ * 地形エディタの作業コピー(meta.json)・シナリオの地形 API と、バックエンド
  * (GET /terrain/rivers)・Unity 描画で共通の契約。水面(WaterSurfacePayload)とは別系統で保存する。
  * 湖の契約は単一 water_level の水平面だが、川は流下方向に水面標高が変化するため互換性が無い。
  *
  * 川は「範囲(polygon)」と「水面標高のプロファイル線(profile)」の2つで定義する。
  * 川床を彫り込むときのスプライン(流路・幅・深さ)はエディタ内部の中間データであり、
- * 標高データ(.npy)に焼き込まれた時点で役目を終える。ゲーム側が知る必要があるのは
+ * 標高データに焼き込まれた時点で役目を終える。ゲーム側が知る必要があるのは
  * 「どの範囲が川で」「その範囲の各地点の水面が何mか」だけなので、それだけを保存する。
  * 仕様の正は genesis-docs/docs/geometries/D_地形形状.md §D.11。
  */
@@ -67,10 +67,11 @@ export type RiverPayload = {
 
 /**
  * 天然資源エリア1件分の保存契約。
- * 地形エディタの meta.json / サイドカーJSON(map_xxx.resources.json)と、バックエンド
- * (terrain_registry.load_map_resources → init_game での資源エンティティ生成)で共通の契約。
+ * 地形エディタの作業コピー(meta.json)とシナリオの地形 API で共通の契約。id は資源の DB ID の文字列で、
+ * 保存時はコアが ID で差分適用する(知らない ID は新規の資源になる)。エディタで作った資源は保存まで仮のIDで、
+ * 保存の応答の resource_ids で DB の ID に替える(resourceIdReplacer)。
  * 経済シミュレーション上の意味(埋蔵量・回復率・分配)は genesis-docs/docs/economics/21_天然資源.md、
- * サイドカーの仕様の正は genesis-docs/docs/geometries/D_地形形状.md §D.12。
+ * 仕様の正は genesis-docs/docs/geometries/D_地形形状.md §D.12。
  */
 export type ResourceAreaPayload = {
   id: string;
@@ -85,7 +86,7 @@ export type ResourceAreaPayload = {
 
 /**
  * カメラ初期状態の保存契約。
- * 地形エディタの meta.json / terrain_maps.yaml の `camera`、バックエンドの City.camera
+ * 地形エディタの作業コピー(meta.json)・シナリオの地形 API の `camera`、バックエンドの City.camera
  * (GET/PATCH /api/v1/city)、Unity の CameraController.CameraStatePayload で共通の契約。
  * 仕様の正は genesis-docs/docs/geometries/D_地形形状.md §D.13。
  */
@@ -100,9 +101,21 @@ export type TerrainCameraPayload = {
   pitch: number;
 };
 
-/** バックエンドの地形エディタ用データ取得コマンドの戻り値型 */
+/**
+ * 標高・水面・川のロック。建設物(道路・建物・造成跡・埋立)があるシナリオでは heights_locked になり、
+ * 保存時に標高・水面・川を送るとコアが 409 TERRAIN_LOCKED で拒否する。reasons は理由コード
+ * (PATHS_EXIST・BUILDINGS_EXIST・TERRAIN_MODIFIED・RECLAIMED_LAND)。
+ */
+export type TerrainEditorLocks = { heights_locked: boolean; reasons: string[] };
+
+/** Rust の load_terrain_editor_data の戻り値。シナリオの地形 API から作った作業コピーの中身 */
 export type TerrainEditorData = {
-  map_id: string;
+  scenario_id: string;
+  /** シナリオの元になったオリジナル地形のID */
+  terrain_map_id: string | null;
+  /** シナリオのタイトル(見出しに出す) */
+  title: string | null;
+  locks: unknown;
   map_width: number;
   map_height: number;
   near_spacing: number;
@@ -121,12 +134,97 @@ export type TerrainEditorData = {
   props: TerrainProps;
   /** カメラ初期状態。未設定なら null。 */
   camera: TerrainCameraPayload | null;
-  background: { file_name: string; origin?: [number, number] } | null;
   /** 地表種別(GROUND_COVER_*)。未設定なら null(草原として扱う)。 */
   ground_cover: number | null;
   /** 気候区分(CLIMATE_*)。未設定なら null(温暖湿潤として扱う)。 */
   climate: number | null;
 };
+
+/**
+ * 作業コピーのロック情報を正規化する。形が崩れていればロック扱いにする(保存がコアに拒否されるより、
+ * 編集できない方を選ぶ)。理由は文字列コードか `{code}` を受け付ける。
+ */
+export function normalizeTerrainEditorLocks(value: unknown): TerrainEditorLocks {
+  const locks = value as { heights_locked?: unknown; reasons?: unknown } | null;
+  if (!locks || typeof locks !== "object" || typeof locks.heights_locked !== "boolean") {
+    return { heights_locked: true, reasons: [] };
+  }
+  const reasons = Array.isArray(locks.reasons)
+    ? locks.reasons
+        .map((reason) => (typeof reason === "string" ? reason : (reason as { code?: unknown } | null)?.code))
+        .filter((code): code is string => typeof code === "string" && code.length > 0)
+    : [];
+  return { heights_locked: locks.heights_locked, reasons };
+}
+
+/** シナリオへ保存する地形エディタの編集内容 */
+export type ScenarioTerrainContent = {
+  elev: Float32Array;
+  waterSurfaces: WaterSurfacePayload[];
+  rivers: RiverPayload[];
+  resources: ResourceAreaPayload[];
+  props: TerrainProps;
+  camera: TerrainCameraPayload | null;
+  groundCover: number;
+  climate: number;
+};
+
+/**
+ * Rust の save_scenario_terrain の引数。標高がロックされているときは標高・水面・川を null にする
+ * (コアの契約。値を送ると 409 TERRAIN_LOCKED)。標高は送るときだけ符号化する。
+ */
+export function scenarioTerrainSaveArgs(editorId: string, heightsLocked: boolean, content: ScenarioTerrainContent) {
+  return {
+    editorId,
+    nearBase64: heightsLocked ? null : uint8ToBase64(encodeFloat16Array(content.elev)),
+    waterSurfaces: heightsLocked ? null : content.waterSurfaces,
+    rivers: heightsLocked ? null : content.rivers,
+    resources: content.resources,
+    props: content.props,
+    camera: content.camera,
+    groundCover: content.groundCover,
+    climate: content.climate,
+  };
+}
+
+/** Rust の save_scenario_terrain の戻り値(コアの PUT 応答のうちエディタが使う項目) */
+export type ScenarioTerrainSaveResult = {
+  content_revision: number;
+  /** 保存前に判定したロック */
+  locks: TerrainEditorLocks;
+  /** 今回新しく作った資源の {エディタ側の仮ID: DB の ID の文字列} */
+  resource_ids: Record<string, string>;
+};
+
+/**
+ * 保存で作られた資源の仮IDを DB の ID に置き換える関数を作る。仮IDのまま次に保存すると、コアは前回作った資源を
+ * 削除して別のIDで作り直してしまうため、現在の一覧にも Undo/Redo の履歴にも使う。
+ * 資源オブジェクトは書き換えずに差し替え、同じオブジェクトはどの一覧から渡しても同じ差し替え先にする
+ * (履歴と現在の一覧が同じオブジェクトを共有している関係を保つ)。置き換えの無い一覧は同じ配列を返す。
+ */
+export function resourceIdReplacer<T extends { id: string }>(
+  resourceIds: Record<string, string> | null | undefined,
+): (areas: T[]) => T[] {
+  const ids = new Map(
+    Object.entries(resourceIds ?? {}).filter((entry) => typeof entry[1] === "string" && entry[1].length > 0),
+  );
+  const replaced = new Map<T, T>();
+  return (areas) => {
+    let changed = false;
+    const next = areas.map((area) => {
+      const id = ids.get(area.id);
+      if (id === undefined) return area;
+      changed = true;
+      let copy = replaced.get(area);
+      if (!copy) {
+        copy = { ...area, id };
+        replaced.set(area, copy);
+      }
+      return copy;
+    });
+    return changed ? next : areas;
+  };
+}
 
 /** float16(IEEE 754 half)のビット表現を float32 相当に変換する */
 export function decodeFloat16(bits: number): number {
@@ -390,8 +488,8 @@ export function applyElevRectInto(dst: Float32Array, cols: number, rect: GridRec
  * 地形エディタ(terrain_editor)⇔ 3Dプレビュー(terrain_3d_preview) 間のイベント契約
  *
  * 別ウィンドウ同士のリアルタイム同期は、このアプリの既存パターン(FontSizeContext等)に
- * 倣い、Tauriの emit/listen による全ウィンドウブロードキャスト + mapId によるフィルタで
- * 行う(emitTo による特定ウィンドウ宛て送信は使わない)。
+ * 倣い、Tauriの emit/listen による全ウィンドウブロードキャスト + mapId(作業コピーのID。両ウィンドウの
+ * entity_id)によるフィルタで行う(emitTo による特定ウィンドウ宛て送信は使わない)。
  *
  * エディタは request_state を送ってきて detach していないプレビューがあるときだけ状態を送る。
  * 全状態は標高を丸ごと符号化するため大きなマップでは数十MBになり、プレビューを開いていない

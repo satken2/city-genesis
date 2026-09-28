@@ -8,6 +8,7 @@
     "yes": "Yes",
     "executing": "Running simulation...",
     "errorSteamLimit": "Steam verification could not be confirmed, so no more epochs can be run. (Up to 10 epochs can be played without verification.)",
+    "errorAlreadyRunning": "Another epoch is already running. Try again after it finishes.",
     "errorFailed": "Failed to run the epoch: {{reason}}"
   },
   "epochResult": {

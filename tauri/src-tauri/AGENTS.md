@@ -1,6 +1,6 @@
 # src-tauri フォルダ
 
-Tauri(Rust)側。ウィンドウ管理(HUD・ポップアップ・Tips)、UnityとのMMF IPC、地形エディタのファイル入出力を担当する。React側は`../src`(`../AGENTS.md`)。
+Tauri(Rust)側。ウィンドウ管理(HUD・ポップアップ・Tips)、UnityとのMMF IPC、バックエンドへのHTTP(版・認証ヘッダー)、地形エディタの作業コピーとシナリオへの保存を担当する。React側は`../src`(`../AGENTS.md`)。
 
 プロトコル・起動フロー・ウィンドウ管理の仕様の正は公開docs(`docs/docs/programs/IPC連携の整理.md`・`コンポーネント連携.md`)。ここにはRust実装の不変条件と罠だけを書く。
 
@@ -9,17 +9,17 @@ Tauri(Rust)側。ウィンドウ管理(HUD・ポップアップ・Tips)、Unity�
 | ファイル | 内容 |
 | --- | --- |
 | `src/main.rs` | エントリ。`lib.rs`の`run()`を呼ぶだけ |
-| `src/lib.rs` | Tauriコマンドの集約と`setup`。ゲーム開始/ロード(`begin_initial_loading`)、地形エディタのコマンド群(`copy_terrain_for_editor`・`export_terrain_as_npy`等) |
+| `src/lib.rs` | Tauriコマンドの集約と`setup`。ゲーム開始/ロード(`begin_initial_loading`)、セッションポーリング、地形エディタのコマンド群(`prepare_scenario_terrain_editor`・`load_terrain_editor_data`・`save_scenario_terrain`) |
+| `src/version.rs` | `../../version.json` の埋め込み定義、HTTPの共通ヘッダー `headers()`(版 `X-City-Genesis-API` と認証 `X-City-Genesis-Token`)とクライアント `client()`、認証トークンの解決 `api_token()`、ユーザーフォルダ `user_data_dir()`、コア照合、ロード事前検証 |
 | `src/window.rs` | ウィンドウ管理の本体。モニター上への配置(`Placement`・`build_placed`)、HUD4枚の生成・配置(`create_hud_windows`/`layout_hud_windows`/`set_hud_visible`)、ポップアップの表示先(`resolve_popup_monitor`・`update_display_target`)、`open_window`(レジストリ駆動のポップアップ生成と再利用)、`close_window_by_label`(閉じたときの後始末)、`reassert_topmost`、通知キュー、`launch_graphic` |
 | `src/ipc.rs` | MMF IPC。リーダースレッド、`send_to_parent`(Unity宛て送信)、Unity→UIイベントをWebViewへ中継するmatch。`CAPACITY`=1MiB |
 | `src/messages.rs` | `Envelope`・`WindowContextDto`等の型 |
 | `src/state.rs` | プロセス全体の共有状態`AppState`(開いているウィンドウ、非表示LRU、ジオメトリ記憶、接続フラグ) |
 | `src/settings.rs` | アプリ設定の永続化 |
-| `src/terrain_export_paths.rs` | 地形エクスポート先の検証(原本ディレクトリの拒否) |
 | `config/window-registry.json` | 全ポップアップの定義(サイズ・layout・インスタンスポリシー)。新しいウィンドウはここに定義を足す |
 | `config/window-mutex-groups.json` | 同時に開けないウィンドウのグループ |
 | `capabilities/default.json` | Tauriコマンドを呼べるウィンドウラベルの許可リスト |
-| `tauri.conf.json` / `build.rs` | Tauri設定とビルドスクリプト |
+| `tauri.conf.json` / `build.rs` | Tauri設定(WebViewのCSPを含む)とビルドスクリプト |
 
 ## 知らないと危険なこと
 
@@ -56,21 +56,38 @@ Tauri(Rust)側。ウィンドウ管理(HUD・ポップアップ・Tips)、Unity�
 - 表示トレイは`DISPLAY_TRAY_WIDTH/HEIGHT`が正で、`DisplayTray.css`と食い違うとボタンが切れる/透明領域がクリックを吸う。
 - Unity→UIイベントを受けてウィンドウを開くときは、内容をウィンドウコンテキスト(`params.extra`)に載せる(`zone_merge`の`pendingMerge`)。イベントを投げてからウィンドウを開くと購読が間に合わず届かない。
 
+### HTTPと認証
+
+- バックエンドへの要求には必ず `version::headers()`(版と認証トークン)を付ける。単発の要求は `version::client()`(呼ぶたびに `headers()` を既定ヘッダーにして作る)か、要求ごとの `.headers(version::headers())` で送る。トークンが無いとコアが401 `API_TOKEN_REQUIRED` を返し、セッションポーリングは失敗に数える(本番では2回連続でアプリが終了する)。
+- `api_token()` は呼ぶたびに環境変数 `GENESIS_API_TOKEN` → `<ユーザーフォルダ>/api_token` の順で読み直し、キャッシュしない。バックエンドの再起動でトークンが変わるため。ユーザーフォルダ(`<ベース>/UrbanGenesis`)は `setup` の先頭で `version::init_user_data_dir` が一度だけ決め、`version::user_data_dir()` で引く。ベースはコア・Unityと同じ決め方で、Windowsは環境変数 `LOCALAPPDATA` → `APPDATA` → 既知フォルダ(LocalAppData)、それ以外は `app_local_data_dir()` の親(Linuxは `XDG_DATA_HOME` を反映)。既知フォルダを先に使うと、`LOCALAPPDATA` の無い環境でコアが書いたトークンファイルを読めない。セーブの置き場(`open_save_directory`)と地形エディタの作業コピー(`terrain_editor_dir`)もここを基準にし、パスを各所で組み立てない。
+- 長く使い回すクライアント(セッションポーリングの `reqwest::blocking::Client`)に `headers()` を既定ヘッダーとして持たせない。作ったときのトークンを掴み続け、バックエンドの再起動後に401が続く。周回ごとに `headers()` を作り直して各要求に付ける。
+- トークンは `HeaderValue::set_sensitive(true)` で扱い、ログ・エラー文に出さない。
+- WebViewへは `get_connection_status` の `api_token` で渡す(React側 `utils/api.ts` が保持し、401のたびにこのコマンドで取り直す)。
+- `tauri.conf.json` の `csp` はスクリプトを `'self'` に限り、`eval` を許さない。`dangerousDisableAssetCspModification: ["style-src"]` は、Tauri が style-src へハッシュ・nonce を足すと `'unsafe-inline'` が無効になり、React の `style` 属性が本番だけ効かなくなるのを防ぐため。デスクトップの `tauri dev` は `devUrl`(Vite)を直接読むため、`csp` は適用されない(Tauri がCSPを付けるのは tauri プロトコルで組み込みアセットを配るときだけ)。そのため `devCsp` は置かず、CSP違反は `tauri build` の成果物で確認する。画像・通信の許可は `http://127.0.0.1:*`・`http://localhost:*` なので、接続先に `[::1]` は使えない。
+- `Cargo.toml` の tauri は `devtools` 機能を持たない(本番ビルドに開発者ツールを含めない)。
+
 ### 地形エディタ
 
-- 出力先は`terrain_export_paths.rs`が検証し、`terrains/original/`配下(リンク先を含む)を拒否する。付随JSONを含め最初の書き込みより前に止める。
-- `.npy`は`build_npy_float16`が自前でヘッダを組む。外部の`python`に依存させない(Storeエイリアスやnumpy未導入で失敗する)。
-- `terrain_maps.yaml`への追記(`upsert_terrain_yaml_entry`)は行単位のテキスト置換。serde_yamlで再シリアライズすると他エントリのコメント・空行が消える。
-- `AppData/UrbanGenesis/terrain_editor/{editor_id}/`はウィンドウ間の初期データ受け渡し専用。編集途中の保存・再開・一覧のコマンドは持たない。
+- 地形エディタはシナリオの地形を編集する。`prepare_scenario_terrain_editor(scenario_id)` が `GET /api/v1/scenarios/{id}/terrain` から作業コピー(`terrain_editor/<editor_id>/meta.json`・`near.bin`)を作って `editor_id` を返し、`save_scenario_terrain(editor_id, …)` が `PUT /api/v1/scenarios/{id}/terrain` へ保存する。形式の正は公開docs `geometries/D_地形形状.md` §D.14.3。
+- `save_scenario_terrain` は応答を `ScenarioTerrainSaveResult`(`content_revision`・`locks`・`resource_ids`)で読んでUIへ返す。`resource_ids`(新しく作った資源の {仮ID: DB ID})が無いとUIが仮IDのまま次に送り、コアが資源を作り直すので、応答の形が合わなければ失敗にする。成功したら作業コピー(`meta.json`、標高を送ったときは `near.bin`)を保存した内容に合わせ、資源のIDも置き換える(`saved_terrain_editor_meta`)。水面・川は null(変更しない)なら書かない。書き込みの失敗は保存を失敗にせずログに残す。
+- `editor_id` は `Uuid::to_string()` と同じ正規形(小文字・ハイフン区切り)だけを通す(`is_terrain_editor_id`)。区切り文字や `..` で `terrain_editor/` の外を指させない。
+- 保存先のシナリオはUIから受け取らず、作業コピーの `meta.json` の `scenario_id` から引く。
+- 作業コピーの `locks.heights_locked` が真(欠けている・形が崩れているときも真とみなす)なら、標高・水面・川は `None` で送る決まり。値が来たらコアへ送る前に `TERRAIN_LOCKED:` で拒否する。
+- 作業コピーを作るときは、標高のバイト数が `grid_rows × grid_cols × 2` と一致しなければ拒否する。GET 応答の `locks` は必須。
+- 同じシナリオの地形エディタが表示中なら、新しい作業コピーを作らずにその `editor_id` を返す(開き直しで未保存の編集を捨てず、2枚の保存が上書きし合わないため)。準備のたびに、どのウィンドウにも結び付かず作成から1時間を過ぎた作業コピーを削除する。
+- コアのエラーは「`CODE`: 本文」の文字列で返す(`scenario_api_error`)。UIは先頭のコードで翻訳文を引く。コードの無い失敗(通信・ファイル・形式の検査)は本文が日本語固定なので、UIは汎用の翻訳文(`scenarios.terrainOpenFailed`・`terrainEditor.saveFailed`)を出し、本文は `console.error` でログにだけ残す。
+- `load_terrain_editor_data` は大きな `near.bin` を読むので `async fn`。
+- 地形エディタ・3Dプレビューのウィンドウは `window-registry.json` の `entity_type` が `scenario_terrain_editor` で、対象IDは `editor_id`。
+- `AppData/UrbanGenesis/terrain_editor/{editor_id}/`はウィンドウ間の初期データ受け渡し専用。書き換えるのは保存の成功時(保存した内容に合わせる)だけで、編集途中の保存・再開・一覧のコマンドは持たない。
 
 ## 参照
 
-- docs: `programs/IPC連携の整理.md`(イベント一覧・起動フロー・初期ロードの表示契約)、`programs/コンポーネント連携.md`(プロセス構成・セッション・UIのウィンドウ管理)、`geometries/L_地形データ作成マニュアル.md`と`D_地形形状.md` §D.10〜D.14(地形エディタの入出力)
+- docs: `programs/IPC連携の整理.md`(イベント一覧・起動フロー・初期ロードの表示契約)、`programs/コンポーネント連携.md`(プロセス構成・セッション・ローカルAPIの認証とCSP・UIのウィンドウ管理)、`geometries/L_地形データ作成マニュアル.md`と`D_地形形状.md` §D.10〜D.16(地形エディタの入出力)
 - Skill: `genesis-ipc`
 - React側のウィンドウ追加手順・HUD構成: `../AGENTS.md`。Unity側の契約: `unity/Assets/Scripts/IPC/AGENTS.md`
 
 ## 版の照合
 
-- `src/version.rs` は `../../version.json` の埋め込み定義、HTTP契約ヘッダー、コア照合、ロード事前検証、シナリオ書き出しの共通窓口。
+- `src/version.rs` は `../../version.json` の埋め込み定義、HTTPの共通ヘッダー(版・認証トークン)、コア照合、ロード事前検証の共通窓口。
 - Unityは `system:graphic_ready` にフロント版・API契約・IPC契約・コア照合結果を付ける。`system:ready` で照合結果を返す。不一致は `graphic_contract_error` に保持し、Unityなしの開発起動として迂回しない。
 - ゲーム開始コマンドは、ポップアップや現セッションを閉じる前に版・保存データ・確認済みフラグを検査する。

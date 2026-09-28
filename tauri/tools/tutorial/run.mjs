@@ -2,6 +2,10 @@ import { build } from "esbuild";
 import { mkdir, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { readSchemaValidator, renderSchemaValidator } from "./generate-schema-validator.mjs";
+if (renderSchemaValidator() !== readSchemaValidator()) {
+  throw new Error("src/tutorial/schemaValidator.generated.ts is out of date. Run npm run gen:tutorial-validator.");
+}
 const output = resolve("node_modules/.cache/tutorial-tests.mjs");
 await mkdir(resolve("node_modules/.cache"), { recursive: true });
 await build({ entryPoints: ["tools/tutorial/tests.ts"], outfile: output, bundle: true, platform: "node", format: "esm", packages: "external" });

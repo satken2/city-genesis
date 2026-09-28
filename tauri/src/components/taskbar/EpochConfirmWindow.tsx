@@ -24,9 +24,10 @@
  * ウィンドウを開かず通知ポップアップ(showNotification)で軽く知らせる。
  * いずれの場合も、確認ウィンドウ自身は役目を終えて onClose で閉じる。
  *
- * バックエンドが実行を拒否した場合(403=Steam未認証のエポック上限、503=シャットダウン中 等)や
- * 通信エラーの場合は、演出とタスクバー無効化を解除して確認ウィンドウを再表示する。
- * エラーレスポンス時はさらに、その理由を通知ポップアップで表示する。
+ * バックエンドが実行を拒否した場合(403=Steam未認証のエポック上限、409 EPOCH_ALREADY_RUNNING=別の実行の最中、
+ * 503=シャットダウン中 等)や通信エラーの場合は、演出とタスクバー無効化を解除して確認ウィンドウを再表示する。
+ * エラーレスポンス時はさらに、その理由を通知ポップアップで表示する(コアの本文は英語固定なので、
+ * 理由の分かる拒否は専用の翻訳文にする)。
  */
 
 import { useEffect, useRef, useState } from "react";
@@ -188,7 +189,9 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
       void showNotification({
         message: error instanceof ApiError && error.status === 403
           ? t("epochConfirm.errorSteamLimit")
-          : t("epochConfirm.errorFailed", { reason: error instanceof Error ? error.message : String(error) }),
+          : error instanceof ApiError && error.code === "EPOCH_ALREADY_RUNNING"
+            ? t("epochConfirm.errorAlreadyRunning")
+            : t("epochConfirm.errorFailed", { reason: error instanceof Error ? error.message : String(error) }),
         durationMs: 8000,
       });
       setExecuting(false);

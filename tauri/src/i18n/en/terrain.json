@@ -2,19 +2,6 @@
   "terrain3dPreview": {
     "waitingForEditor": "Waiting for data from the terrain editor…"
   },
-  "editor": {
-    "originalTerrains": "Original terrain",
-    "originalTerrainsHelp": "Terrain data only.",
-    "gameTerrains": "Edit an existing map",
-    "terrainTab": "Terrain Editor",
-    "scenarioTab": "Scenario Editor",
-    "addNewTerrain": "Add New Terrain",
-    "creating": "Creating...",
-    "createFailed": "Failed to create new terrain",
-    "copying": "Copying...",
-    "copyFailed": "Failed to fetch terrain data",
-    "gameTerrainsHelp": "Includes rivers, resources, props, and more."
-  },
   "groundCover": {
     "label": "Ground Cover",
     "hint": "Changes the color and texture of the ground in the game and the colors of 2D maps. It does not affect the simulation.",

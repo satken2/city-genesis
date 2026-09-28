@@ -1,0 +1,53 @@
+/* 地形の事実欄。大きさと地表を2列に、気候は名称が長いので全幅に置く。 */
+.terrain-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.terrain-fact {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+  background: var(--flat-raised);
+  box-shadow: var(--flat-shadow-sm);
+}
+
+.terrain-fact dt {
+  color: var(--flat-text-label);
+  font-size: 1.11rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.terrain-fact dd {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-height: 40px;
+  margin: 0;
+  color: var(--flat-text);
+  font-size: 1.2rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.terrain-fact .terrain-fact-size {
+  font-size: 1.48rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.terrain-fact--climate {
+  grid-column: 1 / -1;
+}
+
+/* GroundCoverIcon の寸法。SVG側のクラス名はニューゲーム由来のまま */
+.new-game-ground-icon {
+  width: 44px;
+  height: 44px;
+  color: var(--flat-text-body);
+}
