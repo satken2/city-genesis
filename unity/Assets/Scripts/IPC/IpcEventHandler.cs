@@ -28,7 +28,6 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnEditPathQueryShape += HandleEditPathQueryShape;
             IpcClient.Instance.OnEditResourceFinish += HandleEditResourceFinish;
             IpcClient.Instance.OnEditTransitFinish += HandleEditTransitFinish;
-            IpcClient.Instance.OnEditStationPlacementCommand += HandleEditStationPlacementCommand;
             IpcClient.Instance.OnEditPropChangeSettings += HandleEditPropChangeSettings;
             IpcClient.Instance.OnEditPropFinish += HandleEditPropFinish;
             IpcClient.Instance.OnEditPropReset += HandleEditPropReset;
@@ -69,7 +68,6 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnEditPathQueryShape -= HandleEditPathQueryShape;
             IpcClient.Instance.OnEditResourceFinish -= HandleEditResourceFinish;
             IpcClient.Instance.OnEditTransitFinish -= HandleEditTransitFinish;
-            IpcClient.Instance.OnEditStationPlacementCommand -= HandleEditStationPlacementCommand;
             IpcClient.Instance.OnEditPropChangeSettings -= HandleEditPropChangeSettings;
             IpcClient.Instance.OnEditPropFinish -= HandleEditPropFinish;
             IpcClient.Instance.OnEditPropReset -= HandleEditPropReset;
@@ -136,22 +134,10 @@ public class IpcEventHandler : MonoBehaviour
         {
             rpm.FinishRoadPlacement();
         }
-        // 駅パッケージ配置(軌道建設パネルの簡易モード)も同じ確定送信の後始末に乗る。
-        // 発注直後は連続設置のため STATE_EDIT_STATION が再送されるので、ここではプレビューを消すだけでよい。
-        FindAnyObjectByType<StationPlanManager>()?.FinishPlacement();
         if (CellDataLoader.Instance != null)
         {
             CellDataLoader.Instance.ReloadAllData();
         }
-    }
-
-    /// <summary>
-    /// edit_station.placement_command → StationPlanManager.ApplyPlacementCommand()
-    /// 簡易モードの駅タブでホーム長・高さ・角度・規格を変えたときに届く(変更キーのみ)。
-    /// </summary>
-    private void HandleEditStationPlacementCommand(System.Collections.Generic.Dictionary<string, object> command)
-    {
-        FindAnyObjectByType<StationPlanManager>()?.ApplyPlacementCommand(command);
     }
 
     /// <summary>

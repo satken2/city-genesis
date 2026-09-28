@@ -58,7 +58,6 @@ Rayが命中したオブジェクトはTagまたはコンポーネントの有�
 | `MODE_PATH_MERGE` | 18 | パス結合の相手選択。候補パスのクリックだけを受け付ける |
 | `MODE_PATH_SPLIT` | 19 | パス分割の分割点選択。PATH と TERRAIN に適用し、どちらのクリックも対象パスの中心線へ射影する |
 | `MODE_PICK_BUILDING` | 20 | 既存建物のコピー建設・経済主体作成の入居先の選択。建物だけをクリック可能にする |
-| `MODE_EDIT_STATION` | 21 | 駅パッケージ配置モード（軌道建設パネルの簡易モードの駅タブ）。TERRAIN に適用する |
 | `MODE_EDIT_ROAD_MEMBERS` | 22 | 道路（名前付き道路）の区間編集モード。街路・高速道路の区間のクリックをUIへ通知する |
 | `MODE_EDIT_GRADING` | 23 | 造成（整地・埋立）の範囲の作図モード。TERRAIN に適用し、資源エリアの作図と同じ地形クリック・頂点ドラッグで範囲を描く。共通吸着を通さない（§10） |
 
@@ -83,7 +82,6 @@ Tauri UIプロセスからの `world.change_state` イベントに応じて、`I
 | `EDIT_RESOURCE` | EDIT_RESOURCE | NONE | NONE | NONE | NONE | NONE |
 | `TRANSIT_CONSTRUCTION` | EDIT_TRANSIT | NONE | NONE | NONE | NONE | NONE |
 | `PROP_PLACEMENT` | EDIT_PROP | NONE | NONE | NONE | NONE | NONE |
-| `STATION_PLACEMENT` | EDIT_STATION | NONE | NONE | NONE | NONE | NONE |
 | `CONNECTOR_EDIT` | EDIT_CONNECTOR | NONE | NONE | NONE | NONE | NONE |
 | `REMOVE_OBJECTS` | REMOVE | REMOVE | NONE | REMOVE | REMOVE | NONE |
 | `PATH_MERGE` | NONE | PATH_MERGE | NONE | NONE | NONE | NONE |
@@ -299,7 +297,7 @@ Y軸ドラッグは、ポイントを通りカメラ正面を向いた鉛直平�
 標高（PageUp/PageDown または 1/2 キー、±1m）と盛土（3/4 キー、±1m）はキーボードで変更する（標高は上記のY軸ドラッグでも変更できる）。
 `Editing` フェーズで選択中ノードがあればそのノードの値を、選択がない場合（`Placing` フェーズを含む）は
 「次に配置するノード」に適用される値（`currentHeight` / `currentEmbankmentHeight`）を変更する。
-標高・盛土は道路建設パネルのステッパーからも変更でき（`edit_path:change_node` / `edit_path:change_embankment`）、
+標高・盛土はパス建設パネルのステッパーからも変更でき（`edit_path:change_node` / `edit_path:change_embankment`）、
 既存ノードを選んで数値で微調整する用途に使う。キー操作・選択で変わった値は `edit_path:select_node` で
 パネルへ返り、双方向に同期する。曲線/直線と吸着の切り替えはCtrlラジアルメニュー（後述の11章）で行う。
 
@@ -370,7 +368,6 @@ Unity側の実装で守る点は次の3つ。
 | `STATE_EDIT_RESOURCE` | `EDIT_RESOURCE` | `ResourceAreaEditManager` の初期化（天然資源エリアの新規作成） |
 | `STATE_EDIT_GRADING` | `EDIT_GRADING` | `GradingAreaEditManager` を動的生成して `InitializeCreateMode`（造成範囲の作図。Placing から開始。再送されると描いた範囲を捨てて描き直す） |
 | `STATE_EDIT_TRANSIT` | `TRANSIT_CONSTRUCTION` | `TransitPlanManager` を動的生成して `InitializeTransitPlacement`（`points` があれば経路編集として Editing から開始） |
-| `STATE_EDIT_STATION` | `STATION_PLACEMENT` | `StationPlanManager` を動的生成（駅パッケージ配置） |
 | `STATE_MERGE_PATH` / `STATE_SPLIT_PATH` | `PATH_MERGE` / `PATH_SPLIT` | `PathTopologyEditManager.BeginMergeMode` / `BeginSplitMode`（Unity ウィンドウは最前面化しない） |
 | `STATE_REMOVE_OBJECTS` | `REMOVE_OBJECTS` | ブルドーザ（`RemovalManager`） |
 | `STATE_SET_GRID` | `SET_GRID` | `GridSetManager`（吸着フラグを退避して「ノード吸着のみON」にする。10章） |
@@ -383,7 +380,7 @@ Unity側の実装で守る点は次の3つ。
 
 | ステート（操作） | 強制する表示 |
 |---|---|
-| `STATE_EDIT_PATH` / `STATE_EDIT_STATION` / `STATE_MERGE_PATH` / `STATE_SPLIT_PATH` / `STATE_EDIT_ROAD_MEMBERS` / `STATE_EDIT_GRADING` / `STATE_EDIT_BUILDING`（道路・線路・インフラ・建物の設置、道路の区間編集、造成範囲の作図） | 区画（建物建設は建設可能な区画の色分け、他は境界線）・地区・等高線を表示、計画中の道路と建物を表示、プロップを非表示 |
+| `STATE_EDIT_PATH` / `STATE_MERGE_PATH` / `STATE_SPLIT_PATH` / `STATE_EDIT_ROAD_MEMBERS` / `STATE_EDIT_GRADING` / `STATE_EDIT_BUILDING`（道路・線路・インフラ・建物の設置、道路の区間編集、造成範囲の作図） | 区画（建物建設は建設可能な区画の色分け、他は境界線）・地区・等高線を表示、計画中の道路と建物を表示、プロップを非表示 |
 | `STATE_EDIT_PARCEL`（土地区画編集） | 区画・地区を表示、計画中の道路と建物を表示 |
 | `STATE_EDIT_ZONE`（地区編集） | 区画・地区を表示、道路のみ地区色分け、計画中表示と公共施設ハイライトはOFF |
 | `STATE_EDIT_TRANSIT` ＋ プリセット `transit`（公共交通の一覧・新設） | 公共交通路線を全種別表示、計画中の道路と建物を表示 |
@@ -421,7 +418,7 @@ Unity側の実装で守る点は次の3つ。
 `RoadPlanManager` は TerrainInputHandler の共通スナップに加えて、直角スナップを独自に実装している。
 直角スナップは、ノードまたは道路セグメント上に配置されたポイントから既存の道路に直角に交わる方向へのスナップを提供する。
 
-共通吸着は `TerrainInputHandler.onClick/onRightClick/onHover` の冒頭で全モードに掛かる（既定半径10m・バリアントフィルタ無し）が、次のモードは通さない。道路・線路の建設（`MODE_ROAD_CONSTRUCTION`）は `RoadPlanManager` が自前の吸着半径 `snapThreshold` と網互換フィルタで一度だけ吸着する（共通吸着も掛けると二重吸着になり、`snapThreshold` を変えても吸着範囲が変わらない）。接続点編集（`MODE_EDIT_CONNECTOR`）はドラッグ中の端子が自分の旧位置へ吸着し続けるのを防ぐため、パス分割（`MODE_PATH_SPLIT`）は端点へ引き寄せられると常に「端点に近すぎる」分割になるため、駅パッケージ配置（`MODE_EDIT_STATION`）とプロップ配置（`MODE_EDIT_PROP`）は任意の地点に置くため、土地区画の形状編集（`MODE_PARCEL_SHAPE_EDIT`）と造成範囲の作図（`MODE_EDIT_GRADING`）は頂点を吸着なしで置くため（§12）、それぞれ通さない。造成範囲の頂点が道路の中心線へ吸い付くと範囲がパスに掛かり、発注で必ず拒否される。
+共通吸着は `TerrainInputHandler.onClick/onRightClick/onHover` の冒頭で全モードに掛かる（既定半径10m・バリアントフィルタ無し）が、次のモードは通さない。道路・線路の建設（`MODE_ROAD_CONSTRUCTION`）は `RoadPlanManager` が自前の吸着半径 `snapThreshold` と網互換フィルタで一度だけ吸着する（共通吸着も掛けると二重吸着になり、`snapThreshold` を変えても吸着範囲が変わらない）。接続点編集（`MODE_EDIT_CONNECTOR`）はドラッグ中の端子が自分の旧位置へ吸着し続けるのを防ぐため、パス分割（`MODE_PATH_SPLIT`）は端点へ引き寄せられると常に「端点に近すぎる」分割になるため、プロップ配置（`MODE_EDIT_PROP`）は任意の地点に置くため、土地区画の形状編集（`MODE_PARCEL_SHAPE_EDIT`）と造成範囲の作図（`MODE_EDIT_GRADING`）は頂点を吸着なしで置くため（§12）、それぞれ通さない。造成範囲の頂点が道路の中心線へ吸い付くと範囲がパスに掛かり、発注で必ず拒否される。
 
 吸着で引き継ぐ相対高さは、バックエンドが保存している相対Yから取る（ノード＝ノードの相対高さ、パス区間＝アンカー相対YのXZ最近傍区間での線形補間、建設中の端点＝その端点の相対Y。保存設計標高のある線路だけは基準線の絶対標高から地形を引いて求める）。描画用点列の絶対Yから逆算してはならない。描画点列には地形起伏・描画オフセット・高さ源の違いによる残差が乗るため、地面のパスへ吸着しただけで端点が地下／空中扱いになり、見た目は繋がっているのにインフラのT字タップがバックエンドの高さ判定で成立しない「幽霊接続」になる。
 
@@ -613,7 +610,7 @@ MODE_EDIT_PROPはクリック・ホバーともTerrainInputHandlerの共通吸�
 
 造成後の地上路面は、地形を距離幅の移動平均で平滑化した標高を使う。端部は端点を中心に地形を点対称に延長して平均するため、曲線の外挿で終端だけが沈んだり跳ね上がったりしない。短い坂も一定勾配を保つ。この標高はバックエンドの造成プレビュー・勾配検証・施工で共通であり、操作停止後の3Dモデルと勾配ラベルにも反映される。
 
-駅舎の通路方式は建設パネルの上空/地上/地下から選び、配置中にもプレビューへ反映する。建屋配置端はTrackConstructionPanel内だけで選択する。既存形状編集は保存済みhouse_endsとpassage_modeを保持する。
+駅舎の通路方式は建設パネルの上空/地上/地下から選び、配置中にもプレビューへ反映する。建屋配置端はパス建設パネル（PathConstructionPanel）で駅舎を新しく敷くときだけ選択する。既存形状編集は保存済みhouse_endsとpassage_modeを保持する。
 
 ## ドライブの入力
 

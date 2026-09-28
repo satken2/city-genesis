@@ -1,14 +1,14 @@
 /**
  * 軌道(線路・モノレール・人員搬送)の複線敷設ロジック
  *
- * 建設パネルの軌道カテゴリでは、プリセットの複合パス(combined_paths)を選ぶ代わりに、
+ * パス建設パネルで軌道のバリアントを選ぶと、プリセットの複合パス(combined_paths)を選ぶ代わりに、
  * プレイヤーが「線路数・各線の進行方向・線路間隔」を直接指定して複線を構成する。
  * 線路間隔の既定はバリアントのマスター幅(width)(=コリドーが隙間なく隣接)で、
  * パネルの広げる/縮めるボタンで一定範囲内を調整できる。
  * 本モジュールはその設定から、1本の中心線を平行な単線パス群へ展開するための
  * コンポーネント定義(CombinedPathComponent 相当)を生成する純粋関数群を提供する。
  *
- * 人員搬送(PATH_CONVEYOR。ロープウェイ等)は軌道カテゴリの敷設UIに属するが、描画・敷設とも
+ * 人員搬送(PATH_CONVEYOR。ロープウェイ等)は軌道として扱うが、描画・敷設とも
  * 道路と同じ扱い(両方向のロープが張られたメッシュを単一パス1本で配置)のため、複線展開の対象外。
  * 経済上は路線ではなく「乗降区間からしか乗れない速い歩道」であり、路線・停留所は作らない。
  *
@@ -36,7 +36,7 @@ import {
   PRODUCT_HIGH_ELECTRICITY,
 } from "../../constants";
 
-/** 軌道カテゴリ(軌道建設パネル)で敷設する path_type(鉄道・モノレール・人員搬送) */
+/** 軌道として敷設する path_type(鉄道・モノレール・人員搬送) */
 export const RAIL_TYPES: readonly number[] = [PATH_TRACK, PATH_MONORAIL, PATH_CONVEYOR];
 
 /**
@@ -45,8 +45,8 @@ export const RAIL_TYPES: readonly number[] = [PATH_TRACK, PATH_MONORAIL, PATH_CO
  */
 const TRACK_COUNT_PATH_TYPES: readonly number[] = [PATH_TRACK, PATH_MONORAIL];
 
-/** 規格プルダウンにおける構造(track_type)の並び順(通常→橋梁→駅) */
-export const TRACK_TYPE_ORDER: readonly number[] = [TRACK_NORMAL, TRACK_BRIDGE, TRACK_STATION];
+/** バリアント一覧における構造(track_type)の並び順(通常→橋梁→駅) */
+const TRACK_TYPE_ORDER: readonly number[] = [TRACK_NORMAL, TRACK_BRIDGE, TRACK_STATION];
 
 /** 線路数の下限・上限(パネルのステッパー) */
 export const MIN_TRACK_COUNT = 1;
@@ -122,37 +122,23 @@ export function isSingleRailPathVariant(entry: PathMasterEntry | null | undefine
   return entry?.type === PATH_CONVEYOR || isMultiTrackRailVariant(entry);
 }
 
-/** 実際にバリアントが存在する軌道カテゴリ(鉄道/モノレール/人員搬送)を規定順で返す。 */
-export function availableRailTypes(masterData: MasterData | null): number[] {
-  if (!masterData?.paths) return [];
-  const present = new Set<number>();
-  for (const key in masterData.paths) {
-    const data = masterData.paths[key];
-    if (isRailType(data.type)) present.add(data.type);
-  }
-  return RAIL_TYPES.filter((type) => present.has(type));
-}
-
 /**
- * (軌道カテゴリ, 許可する track_type 群) に一致する軌道バリアント(複線一体の線路を含む)を全て返す。
- * 構造(通常/橋梁)・電化/非電化・線路規格(軌間・設計速度など)の違いは
- * すべてバリアントの違いとして1本のプルダウンに並べ、プレイヤーに直接選ばせる。
- * 地上/高架/地下はバリアントではなくノードの高さで決まるので、選択肢には現れない。
+ * 軌道の種別(鉄道/モノレール/人員搬送)のバリアント(複線一体の線路を含む)を、パス建設パネルの
+ * カード一覧の並び順で返す。構造(通常/橋梁/駅)・電化/非電化・線路規格(軌間・設計速度など)の違いは
+ * すべてバリアントの違いとして並べ、プレイヤーに直接選ばせる。
+ * 地上/高架/地下はバリアントではなくノードの高さで決まるので、一覧には現れない。
  * 並び順は 構造(通常→橋梁→駅) → 複線一体の線路は後ろ → 非電化→電化 → ID昇順。
- * 軌道パネルは候補の先頭を既定に選ぶので、複線一体の線路(LRT専用軌道)を後ろへ回して
- * 既定を線路数などを設定できる通常の線路にしている。
+ * 複線一体の線路(LRT専用軌道)は線路数などを設定できないので、設定できる通常の線路より後ろに置く。
  */
-export function railVariantsForTrackTypes(
+export function railVariantsInOrder(
   masterData: MasterData | null,
   railType: number,
-  trackTypes: readonly number[]
 ): { id: number; data: PathMasterEntry }[] {
   if (!masterData?.paths) return [];
   const matches: { id: number; data: PathMasterEntry }[] = [];
   for (const key in masterData.paths) {
     const data = masterData.paths[key];
     if (data.type !== railType) continue;
-    if (!trackTypes.includes(variantTrackType(data))) continue;
     matches.push({ id: parseInt(key), data });
   }
   matches.sort((a, b) => {

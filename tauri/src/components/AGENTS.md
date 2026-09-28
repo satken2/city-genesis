@@ -11,7 +11,7 @@
 | `agent` / `citizen` | 経済主体・建物・世帯・市民の詳細パネル(`AgentDetailPanel`とタブ群) |
 | `building` | 建物建設パネル、用地買収の確認、マッシュアップ建物のサブ建物配置 |
 | `parcel` / `zone` | 土地区画の作成・詳細・操作、地区詳細、地区統合の確認 |
-| `path` | 道路/インフラ/軌道の建設、パス詳細(駅情報・交通・設備・結合分割)、2D形状編集、経路提案 |
+| `path` | 道路・鉄道・インフラの建設、パス詳細(駅情報・交通・設備・結合分割)、2D形状編集、経路提案 |
 | `road` / `intersection` | 名前付き道路の詳細、インターチェンジ詳細 |
 | `transit` | 公共交通の管理ウィンドウ、路線詳細、路線新設/経路編集、収支見込み |
 | `resource` / `prop` / `terrain` | 天然資源、プロップ配置、地形エディタ(2D `TerrainEditorCanvas`・3D `Terrain3DPreviewCanvas`) |
@@ -94,11 +94,12 @@
   - 市庁舎の移転は、市庁舎の詳細パネルの移転ボタンが`params.extra.relocateCityHall`で開く移転モード(市庁舎に固定し自由配置から始める)。送信は新規の配置と同じで、配置済みならバックエンドが移転として扱う。創設後の一覧には市政府を出さない。
 - 区画作成(`parcel/ParcelCreationPanel`): 作成方法の真実源はUnity(`edit_parcel:set_mode`はUnity起点だけ)。確定後も`STATE_NORMAL`を送らず連続作成。`parcel_type`は送らない。
 - 公共施設(`agent/PublicFacilityPanel`): 放棄中は解除以外を無効化。`status_from`の見出しは`resolveStatusSinceLabel`で選ぶ(再開でも更新されるので一律「竣工日」にしない)。
-- パス建設(`path/`): `path_build`と`infra_build`は同じ`PathConstructionPanel`を`category` propで使い分ける。曲線/直線・吸着はUnity側で、`curveMode`の書き込み元は`edit_path:update_shape`の`is_curved`だけ。
+- パス建設(`path/`): 道路・鉄道・インフラは`path_build`の`PathConstructionPanel`1つで敷く。曲線/直線・吸着はUnity側で、`curveMode`の書き込み元は`edit_path:update_shape`の`is_curved`だけ。
+  - 選択は建物建設と同じカテゴリのタイル→バリアントのカード一覧→建設画面の3段。カテゴリは`path_type`そのもので、対象と並びは`local-constants`の`PATH_BUILD_CATEGORIES`、一覧の中身と並びは`pathBuildCategories`(駅舎は独立したカテゴリを持たず鉄道・モノレールの一覧の末尾)。カード(`PathVariantCard`)は一覧の項目と建設画面の概要に共用する。カテゴリのアイコンは`utils/pathCategoryIcon`の専用画像だけで、無ければ枠を空けておく。
+  - 建設画面の設定(複線構成・ホーム設置側・駅舎の配置端と通路方式・所属道路・タグ)は選んだバリアントの種別で決まり、新規敷設でだけ出す。既存パスの形状編集(`params.extra.editPathId`)は建設画面から始まり、カテゴリへ戻れない。
   - 確定は`usePathConstruction.canConfirm`(Unityの`can_confirm`∧全線`/paths/validate`。先頭1本だけの検証は禁止)。成功のたびに`notifyRoadsChanged`。
   - 確定欄は`confirmMessages`を並べる。区間ごとの形状の違反(ノード間距離・曲線半径・勾配)は形状編集パネルの吹き出しが区間を示すので「形状にエラーがあります」の1行に畳み、ほかの拒否理由(干渉・川・海湖・岸壁の天端・工事中の造成)は`pathValidation.describePathValidation`の文言で出す。`/paths/validate`に`colliding_*`が増えたらそこへ文言を足す(足さないと汎用の「敷設条件を満たしていません」になる)。
   - 複線はUIが平行な単線群へ展開するが、`railBuild.isSingleRailPathVariant`(LRT専用軌道・人員搬送)は`DIR_BOTH`の1本で送る。
-  - 駅の簡易建設(`useStationConstruction`)は`usePathConstruction`を使わず、幾何はUnity(`StationPlanManager`)の`placement_state`をそのまま表示する。
 - 結合・分割(`path/PathTopologyEditPanel`): アンマウントで必ず`sendEndPathTopologyEdit`。確定成功は`sendFinishPathTopologyEdit`を1発だけ(リロードと`STATE_NORMAL`を分けると差分リロードに割り込んで形状が壊れる)。
 - 2D形状編集(`path/PathShapeEditorPanel`): 形状の真実源はUnity(`RoadPlanManager`)。操作結果はドラッグ終了時に1回送る。地図は`initialBounds`を決めてからマウントする。
 - 造成(`grading/`): 範囲の形の正はUnity(`edit_grading:update_shape`の`{polygon, finalized}`)。見積もり(`POST /grading/preview`)は`finalized`かつ3点以上のときだけ、デバウンスと古い要求の中断つきで取る(Unityは頂点ドラッグ中に毎フレーム送る)。

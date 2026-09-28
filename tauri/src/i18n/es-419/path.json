@@ -122,9 +122,18 @@
     "collisionUnready": "Confirma el trazado y resuelve las colisiones indicadas por los volúmenes rojos.",
     "alignmentUnready": "Una curva o pendiente supera los límites de este estándar. Suaviza el trazado.",
     "constructionSpeed": "Velocidad de construcción",
-    "selectType": "-- Selecciona el tipo --",
-    "selectTypeFirst": "Selecciona un tipo",
-    "noVariants": "Sin coincidencias",
+    "back": "Volver",
+    "category": {
+      "1": "Calles",
+      "2": "Autopistas",
+      "3": "Vías peatonales",
+      "4": "Ferrocarril",
+      "5": "Monorriel",
+      "6": "Teleférico",
+      "11": "Electricidad",
+      "12": "Agua",
+      "13": "Petróleo"
+    },
     "shape": "Forma",
     "elevation": "Altitud (Y)",
     "embankmentHeight": "Altura del terraplén",
@@ -141,18 +150,13 @@
     "costInfo": "Costo de construcción",
     "costRatioHelp": "Construir vías elevadas o subterráneas, o sobre terrenos complejos, aumenta el costo de la obra.",
     "placedContinue": "Vía colocada. Coloca la siguiente vía.",
+    "stationHouseHint": "Traza la línea del edificio de estación. Los andenes que cruce la línea pertenecerán a esta estación. En ambos extremos de la línea se colocan los edificios y a lo largo de ella se tiende un puente de conexión. El edificio de estación no se ajusta a las vías ni a las calles existentes (solo se aplica el ajuste a la cuadrícula).",
     "platformSide": "Lado del andén",
     "platformSideOutside": "Exterior",
     "platformSideInside": "Interior",
     "platformSideBoth": "Ambos lados",
-    "infra": {
-      "electricity": "Electricidad",
-      "water": "Agua",
-      "oil": "Petróleo"
-    },
     "rail": {
       "parallel": "Vías paralelas",
-      "noVariantForCombo": "No hay vía férrea que corresponda a esta combinación",
       "trackCount": "Número de vías",
       "trackSpacing": "Separación entre vías",
       "spacingWiden": "Ampliar",
@@ -174,27 +178,6 @@
       "extending": "Se prolonga {{name}}",
       "newNote": "Al confirmar, se creará una nueva carretera con los tramos construidos.",
       "createFailed": "Los tramos se construyeron, pero no se pudo crear la nueva carretera."
-    }
-  },
-  "track_construction": {
-    "simpleMode": "Simple",
-    "detailMode": "Detallado",
-    "trackTab": "Vía férrea",
-    "platformTab": "Andén",
-    "houseTab": "Edificio de estación",
-    "stationTab": "Estación",
-    "station": {
-      "hint": "Haz clic en la vista 3D para colocar la estación. Arrastra con el botón central del ratón para girar y usa RePág/AvPág para cambiar la altura. Haz clic derecho o pulsa Esc para elegir otro punto.",
-      "houseVariant": "Tipo de edificio",
-      "settings": "Ajustes de la estación",
-      "carCount": "Longitud del andén",
-      "carCountUnit": "vagones ({{length}} m)",
-      "angle": "Ángulo",
-      "fixedNote": "Fijo como vía doble con andenes laterales (uno a cada lado). Usa el modo detallado para cambiar el número de vías o la disposición de los andenes.",
-      "pickPointFirst": "Haz clic en la vista 3D para colocar la estación"
-    },
-    "house": {
-      "hint": "Traza la línea del edificio de estación. Los andenes que cruce la línea pertenecerán a esta estación. En ambos extremos de la línea se colocan los edificios y a lo largo de ella se tiende un puente de conexión. El edificio de estación no se ajusta a las vías ni a las calles existentes (solo se aplica el ajuste a la cuadrícula)."
     }
   },
   "path_shape_editor": {

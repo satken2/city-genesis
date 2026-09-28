@@ -14,7 +14,7 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.track"
+              "hud.road"
             ]
           },
           "world": {
@@ -44,7 +44,7 @@
           },
           "until": {
             "type": "window",
-            "window": "track_build"
+            "window": "path_build"
           }
         },
         {
@@ -155,7 +155,7 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.track"
+              "hud.road"
             ]
           },
           "world": {
@@ -201,7 +201,7 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.track"
+              "hud.road"
             ]
           },
           "world": {
@@ -260,7 +260,7 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.track"
+              "hud.road"
             ]
           },
           "world": {
@@ -385,7 +385,7 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.track"
+              "hud.road"
             ]
           },
           "world": {
@@ -450,7 +450,7 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.infra"
+              "hud.road"
             ]
           },
           "world": {

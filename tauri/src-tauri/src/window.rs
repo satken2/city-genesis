@@ -940,8 +940,6 @@ fn is_on_monitor<R: Runtime>(window: &WebviewWindow<R>, monitor: Option<&Monitor
 const EDIT_MODE_WINDOW_TYPES: &[&str] = &[
     "parcel_creation",
     "path_build",
-    "infra_build",
-    "track_build",
     "building_construction",
     "resource_edit",
     "prop_placement",
@@ -1027,9 +1025,8 @@ pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) 
                 "world:change_state".to_string(),
                 json!({ "state": "STATE_NORMAL" }),
             );
-            if wt == "path_build" || wt == "infra_build" {
-                // 道路建設・インフラ建設パネル(同じ PathConstructionPanel)が閉じられた場合、
-                // 描画されているグリッドを確実に非表示にする。
+            if wt == "path_build" {
+                // パス建設パネルが閉じられた場合、描画されているグリッドを確実に非表示にする。
                 // ウィンドウは非表示(再利用待ち)になるだけでReact側のアンマウント処理による
                 // クリーンアップ送信が走らないため、Rustのウィンドウクローズ処理側で明示的にオフを送る。
                 let _ = ipc::send_ui_action(
@@ -1047,9 +1044,7 @@ pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) 
                     "world:clear_highlights".to_string(),
                     json!({ "source": "path_build" }),
                 );
-            }
-            if wt == "path_build" || wt == "infra_build" || wt == "track_build" {
-                // 敷設セッションの持ち主である敷設パネルが閉じられたら、付随する2Dパス形状編集
+                // 敷設セッションの持ち主であるパス建設パネルが閉じられたら、付随する2Dパス形状編集
                 // パネルも閉じる。逆(2Dパネルを閉じる)は敷設セッションを終わらせない。
                 close_windows_by_type(app, state, "path_shape_editor");
             }

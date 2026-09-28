@@ -122,9 +122,18 @@
     "collisionUnready": "Finalisez le tracé et résolvez les collisions signalées par les volumes rouges.",
     "alignmentUnready": "Une courbe ou une pente dépasse les limites de cette norme. Adoucissez le tracé.",
     "constructionSpeed": "Vitesse de construction",
-    "selectType": "-- Choisir le type --",
-    "selectTypeFirst": "Choisissez un type",
-    "noVariants": "Aucun résultat",
+    "back": "Retour",
+    "category": {
+      "1": "Rues",
+      "2": "Autoroutes",
+      "3": "Voies piétonnes",
+      "4": "Chemin de fer",
+      "5": "Monorail",
+      "6": "Téléphérique",
+      "11": "Électricité",
+      "12": "Eau",
+      "13": "Pétrole"
+    },
     "shape": "Forme",
     "elevation": "Altitude (Y)",
     "embankmentHeight": "Hauteur du remblai",
@@ -141,18 +150,13 @@
     "costInfo": "Coût de construction",
     "costRatioHelp": "Construire des voies en viaduc ou en souterrain, ou sur un terrain complexe, augmente le coût de la construction.",
     "placedContinue": "Voie placée. Placez la voie suivante.",
+    "stationHouseHint": "Tracez la ligne du bâtiment de gare. Les quais traversés par cette ligne sont rattachés à cette gare. Un bâtiment est placé à chaque extrémité de la ligne, reliés par une passerelle le long de celle-ci. Le bâtiment de gare ne s'aligne jamais sur les routes ou les voies existantes (seul l'alignement sur la grille s'applique).",
     "platformSide": "Côté du quai",
     "platformSideOutside": "Extérieur",
     "platformSideInside": "Intérieur",
     "platformSideBoth": "Des deux côtés",
-    "infra": {
-      "electricity": "Électricité",
-      "water": "Eau",
-      "oil": "Pétrole"
-    },
     "rail": {
       "parallel": "Voies parallèles",
-      "noVariantForCombo": "Aucune voie ferrée ne correspond à cette combinaison",
       "trackCount": "Nombre de voies",
       "trackSpacing": "Écartement entre voies",
       "spacingWiden": "Élargir",
@@ -174,27 +178,6 @@
       "extending": "Prolonge {{name}}",
       "newNote": "À la confirmation, une nouvelle route sera créée avec les tronçons construits.",
       "createFailed": "Les tronçons ont été construits, mais la nouvelle route n'a pas pu être créée."
-    }
-  },
-  "track_construction": {
-    "simpleMode": "Simple",
-    "detailMode": "Détaillé",
-    "trackTab": "Voie ferrée",
-    "platformTab": "Quai",
-    "houseTab": "Bâtiment de gare",
-    "stationTab": "Gare",
-    "station": {
-      "hint": "Cliquez dans la vue 3D pour placer la gare. Faites glisser avec le bouton central de la souris pour pivoter et utilisez Page préc./Page suiv. pour changer la hauteur. Clic droit ou Échap pour choisir un autre emplacement.",
-      "houseVariant": "Type de bâtiment",
-      "settings": "Réglages de la gare",
-      "carCount": "Longueur du quai",
-      "carCountUnit": "voitures ({{length}} m)",
-      "angle": "Angle",
-      "fixedNote": "Fixé en double voie avec quais latéraux (un de chaque côté). Utilisez le mode détaillé pour changer le nombre de voies ou la disposition des quais.",
-      "pickPointFirst": "Cliquez dans la vue 3D pour placer la gare"
-    },
-    "house": {
-      "hint": "Tracez la ligne du bâtiment de gare. Les quais traversés par cette ligne sont rattachés à cette gare. Un bâtiment est placé à chaque extrémité de la ligne, reliés par une passerelle le long de celle-ci. Le bâtiment de gare ne s'aligne jamais sur les routes ou les voies existantes (seul l'alignement sur la grille s'applique)."
     }
   },
   "path_shape_editor": {

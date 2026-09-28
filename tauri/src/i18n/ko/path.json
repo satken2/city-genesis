@@ -122,9 +122,18 @@
     "collisionUnready": "경로를 확정하고 빨간 입체 영역으로 표시된 충돌을 해결하세요.",
     "alignmentUnready": "급한 곡선 또는 경사가 규격 제한을 초과합니다. 형상을 완만하게 하세요.",
     "constructionSpeed": "건설 속도",
-    "selectType": "-- 종류 선택 --",
-    "selectTypeFirst": "종류를 선택하세요",
-    "noVariants": "해당 없음",
+    "back": "뒤로",
+    "category": {
+      "1": "일반 도로",
+      "2": "고속도로",
+      "3": "보행로",
+      "4": "철도",
+      "5": "모노레일",
+      "6": "로프웨이",
+      "11": "전기",
+      "12": "상수도",
+      "13": "석유"
+    },
     "shape": "형상",
     "elevation": "표고 (Y)",
     "embankmentHeight": "성토 높이",
@@ -141,18 +150,13 @@
     "costInfo": "건설 비용",
     "costRatioHelp": "고가 도로나 지하 도로, 또는 복잡한 지형 위에 도로를 건설하면 건설 비용이 올라갑니다.",
     "placedContinue": "경로를 배치했습니다. 다음 경로를 배치하세요.",
+    "stationHouseHint": "역사 선을 부설합니다. 선과 교차한 승강장이 이 역사의 역에 소속됩니다. 선의 양 끝에 역사 건물이 놓이고, 선을 따라 연결 다리가 놓입니다. 역사는 기존 도로·선로에 흡착되지 않습니다(그리드 흡착만 적용).",
     "platformSide": "승강장 설치 측",
     "platformSideOutside": "바깥쪽",
     "platformSideInside": "안쪽",
     "platformSideBoth": "양쪽",
-    "infra": {
-      "electricity": "전기",
-      "water": "상수도",
-      "oil": "석유"
-    },
     "rail": {
       "parallel": "병주",
-      "noVariantForCombo": "이 조합에 대응하는 선로가 없습니다",
       "trackCount": "선로 수",
       "trackSpacing": "선로 간격",
       "spacingWiden": "넓히기",
@@ -174,27 +178,6 @@
       "extending": "{{name}}을(를) 연장합니다",
       "newNote": "확정하면 부설한 구간으로 새 도로를 만듭니다.",
       "createFailed": "구간은 부설했지만 새 도로를 만들지 못했습니다."
-    }
-  },
-  "track_construction": {
-    "simpleMode": "간편",
-    "detailMode": "상세",
-    "trackTab": "궤도",
-    "platformTab": "승강장",
-    "houseTab": "역사",
-    "stationTab": "역",
-    "station": {
-      "hint": "3D 뷰에서 역을 놓을 지점을 클릭하세요. 마우스 가운데 버튼 드래그로 회전, PageUp/PageDown으로 높이를 조정합니다. 오른쪽 클릭 또는 Esc로 지점을 다시 고릅니다.",
-      "houseVariant": "역사 종류",
-      "settings": "역 설정",
-      "carCount": "승강장 길이",
-      "carCountUnit": "량 ({{length}}m)",
-      "angle": "각도",
-      "fixedNote": "복선 상대식 승강장(좌우 1개씩)으로 고정입니다. 선로 수나 승강장 형태를 바꾸려면 상세 모드를 사용하세요.",
-      "pickPointFirst": "3D 뷰에서 역을 놓을 지점을 클릭하세요"
-    },
-    "house": {
-      "hint": "역사 선을 부설합니다. 선과 교차한 승강장이 이 역사의 역에 소속됩니다. 선의 양 끝에 역사 건물이 놓이고, 선을 따라 연결 다리가 놓입니다. 역사는 기존 도로·선로에 흡착되지 않습니다(그리드 흡착만 적용)."
     }
   },
   "path_shape_editor": {

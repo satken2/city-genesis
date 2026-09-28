@@ -390,27 +390,6 @@
     "empty_shell": true,
     "actions": []
   },
-  "track_build": {
-    "title": "軌道建設",
-    "width": 800,
-    "height": 600,
-    "resizable": true,
-    "policy": "single",
-    "layout": "left_panel_narrow",
-    "width_ratio": 0.26,
-    "empty_shell": true,
-    "actions": []
-  },
-  "infra_build": {
-    "title": "インフラ建設",
-    "width": 800,
-    "height": 600,
-    "resizable": true,
-    "policy": "single",
-    "layout": "left_panel_narrow",
-    "empty_shell": true,
-    "actions": []
-  },
   "path_shape_editor": {
     "title": "パス形状編集",
     "width": 800,

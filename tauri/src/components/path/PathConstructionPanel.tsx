@@ -1,30 +1,28 @@
 /**
- * 道路建設パネル / インフラ建設パネル
+ * パス建設パネル
  *
- * window_type="path_build"(道路)と "infra_build"(インフラ=電気・水道)の2つのポップアップ
- * ウィンドウで共用する専用パネル。どちらのカテゴリを扱うかは `category` prop で固定し、
- * パネル内でカテゴリを切り替える手段は持たない(プレイヤーには道路とインフラは別の道具に
- * 見えるため入口=アイコンパネルのボタンを分けている。入力UIは同一なのでコードは共有する)。
- * 軌道は TrackConstructionPanel(track_build)が担う。
- * BuildingConstructionPanel と同じ単列レイアウト。
+ * window_type="path_build" のポップアップ。道路・鉄道・インフラなど、線を引いて敷くもの(パス)の新規敷設と、
+ * 既存パスの形状編集(パス詳細の「編集」が params.extra.editPathId 付きで開く)を1つのパネルで扱う。
  *
- * 操作フロー:
- *   1. 種別タブ(道路: 街路/高速道路/歩道、インフラ: 電気/水道)を選ぶ → バリアントのプルダウンが出る
- *   2. バリアントを選択 → IPCでグラフィックプログラムに敷設モードを通知
- *   3. グラフィックプログラム側でノードを配置 → IPCでノード情報がパネルに通知される
- *   4. プレビューキャンバスにパス形状が表示される
- *   5. [確定] でバックエンドに送信
+ * 選択は建物建設パネルと同じ3段で、左上の戻るで1段ずつ戻る。
+ *   1. カテゴリのタイル: カテゴリは path_type そのもの(local-constants の PATH_BUILD_CATEGORIES)
+ *   2. バリアントのカード一覧: 並び順は pathBuildCategories が決める(鉄道・モノレールは末尾に駅舎)
+ *   3. 建設画面: 選んだバリアントのカードを概要として先頭に出し、その下に敷設の設定と確定/キャンセルを並べる
+ * 既存パスの形状編集は種別・バリアントを変えないので、建設画面から始まり戻れない。
  *
- * 曲線/直線・吸着の設定はUnity側の操作系(Ctrlラジアルメニュー・カーソルHUD)が担い、
- * このパネルには置かない。標高・盛土は既存ノードを選んで数値で微調整する用途があるため
- * パネルにもステッパーを残す(Unityのキー操作と双方向同期)。
- * パネルが持つのはバリアント選択・標高/盛土・ホーム設置側・グリッド設定(サイズ/角度)・
- * 形状プレビュー・コスト・確定/キャンセル。
- * 街路・高速道路の新規敷設では、所属道路(名前付き道路)の選択も持つ(PathRoadAssignmentSection)。
- * 新規敷設では、敷くパスに付ける建設プロジェクトのタグも選べる(PathTagSection)。
+ * 建設画面の操作フロー:
+ *   1. カードを選ぶ → IPCでグラフィックプログラムに敷設モード(STATE_EDIT_PATH)を通知
+ *   2. グラフィックプログラム側でノードを配置 → IPCでノード情報がパネルに通知される
+ *   3. [確定] でバックエンドに送信(新規敷設は連続設置で、同じバリアントのまま次を敷ける)
+ *
+ * 建設画面の設定は選んだバリアントの種別で決まる。軌道(線路・モノレール)は線路数・進行方向・線路間隔と
+ * 駅のホーム設置側、駅舎は建屋の配置端と通路方式、街路・高速道路は所属道路を持つ。これらと建設プロジェクトの
+ * タグは新規敷設でだけ選ぶ(建設後は変えられないか、パス詳細で変える)。
+ * 曲線/直線・吸着の設定はUnity側の操作系(Ctrlラジアルメニュー・カーソルHUD)が担い、このパネルには置かない。
+ * 駅舎の敷設中はUnityが既存の道路・線路への吸着を止める(グリッド吸着だけは有効)。
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
@@ -33,58 +31,76 @@ import { useMasterData } from "../../contexts/MasterDataContext";
 
 import { setHintbarText } from "../../utils/hintbar";
 import { showNotification } from "../../utils/notification";
-import { ApiError } from "../../utils/api";
+import { ApiError, fetchApi } from "../../utils/api";
+import { resolvePathCategoryIcon } from "../../utils/pathCategoryIcon";
 import { usePathConstruction } from "./usePathConstruction";
 import { useVariantAffordability } from "../../hooks/useVariantAffordability";
 import { sendEditPathFinish, sendSetGrid, sendChangeDisplay, sendChangeState, sendFocusGraphic, IPC_EVENT_VIEW_GRID_TOGGLED } from "../../utils/ipc";
 import type { GridDisplayMode } from "./GridSettingsPanel";
 import { isInfraPathType } from "../../local-constants";
-import { RoadVariantSelector } from "./RoadVariantSelector";
-import { InfraVariantSelector } from "./InfraVariantSelector";
-import { PathVariantDescription } from "./PathVariantDescription";
+import { PATH_STATION_HOUSE } from "../../constants";
+import { tutorialVariantAllowed } from "../../tutorial/TutorialLayer";
+import { availableBuildCategories, buildCategoryVariants } from "./pathBuildCategories";
+import { isRailType } from "./railBuild";
+import { PathVariantCard } from "./PathVariantCard";
+import { RailTrackLayoutSettings } from "./RailTrackLayoutSettings";
+import { StationHouseEndsSelect } from "./StationHouseEndsSelect";
+import { StationPassageModeSelect } from "./StationPassageModeSelect";
 import { PathBuildSections } from "./PathBuildSections";
 import { PathRoadAssignmentSection } from "./PathRoadAssignmentSection";
 import { PathTagSection } from "./PathTagSection";
 import { TAGS_CHANGED_EVENT } from "../../utils/constructionTags";
 import { usePathRoadAssignment } from "./usePathRoadAssignment";
 import { isNamedRoadPathType } from "../road/roadApi";
-import type { PathCategory } from "./usePathConstruction";
+import turnBackIcon from "../../assets/images/ui/turn-back.png";
 import "./PathConstructionPanel.css";
-
-/** このパネルが扱うカテゴリ。軌道("rail")は TrackConstructionPanel の担当なので受け付けない。 */
-export type PathConstructionCategory = Exclude<PathCategory, "rail">;
+import "../building/BuildingConstructionPanel.css";
 
 type PathConstructionPanelProps = {
   apiBaseUrl?: string;
   onClose: () => void;
   editPathId?: number | null;
-  /** 新規敷設時に固定するカテゴリ。既存パス編集時はパスの種別から決まるため参照しない。 */
-  category: PathConstructionCategory;
 };
 
-export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId, category }: PathConstructionPanelProps) {
+export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathConstructionPanelProps) {
   const { t } = useTranslation();
   const masterData = useMasterData();
+  const isNewBuild = editPathId == null;
   const pathConstruction = usePathConstruction(masterData, apiBaseUrl, editPathId ?? null);
   // バリアント単位の資金目安(今の資金では平地の基準延長すら敷けない規格を選ばせない)
   const { affordability: variantAffordability, refresh: refreshAffordability } =
     useVariantAffordability("paths", apiBaseUrl);
+  const isVariantUnaffordable = (variantId: number) =>
+    variantAffordability != null
+    && !variantAffordability.unlimited
+    && variantAffordability.variants[variantId]?.affordable === false;
+
+  // カード一覧を表示しているカテゴリ(path_type)。null のときはカテゴリのタイルを表示する。
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+
+  const selectedVariantData = pathConstruction.selectedVariantData;
+  const selectedPathType = selectedVariantData?.type ?? null;
+
+  /* ---- 新規敷設: 開いた時点でUnityの編集状態を通常へ戻す ---- */
+  // バリアントを選ぶまでは敷設モードに入らないので、直前のモード(ブルドーザなど)を残さない。
+  useEffect(() => {
+    if (isNewBuild) pathConstruction.deselectVariant();
+    // マウント時に一度だけ実行する(deselectVariant は安定)。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isNewBuild]);
 
   /* ---- 既存パス編集モード: データ取得 ---- */
+  // バリアントの種別はマスターから引いて敷設モードへ渡すので、マスターの取得を待ってから選ぶ。
+  const masterDataLoaded = masterData != null;
   useEffect(() => {
-    if (editPathId == null || !apiBaseUrl) return;
+    if (editPathId == null || !apiBaseUrl || !masterDataLoaded) return;
     const controller = new AbortController();
 
-    fetch(`${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/${editPathId}`, {
+    fetchApi<{ path_variant: number }>(`${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/${editPathId}`, {
       signal: controller.signal,
     })
-      .then(async (res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json() as Promise<{ path_type: number; path_variant: number }>;
-      })
       .then((data) => {
         if (controller.signal.aborted) return;
-        pathConstruction.onTypeChange(data.path_type);
         pathConstruction.selectVariant(data.path_variant);
       })
       .catch((err: unknown) => {
@@ -95,7 +111,7 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId, categor
 
     return () => controller.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [editPathId, apiBaseUrl]);
+  }, [editPathId, apiBaseUrl, masterDataLoaded]);
 
   /* ---- グリッド設定状態（デフォルト非表示） ---- */
   const [gridMode, setGridMode] = useState<GridDisplayMode>("off");
@@ -134,40 +150,27 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId, categor
     }
   }, []);
 
-  /* ---- カテゴリの固定 ---- */
-
-  /**
-   * 新規敷設ではウィンドウ種別で決まるカテゴリをフックに固定する(軌道建設パネルと同じ方式)。
-   * 既存パス編集はパス取得時の onTypeChange が種別からカテゴリを補完するため、ここでは触らない。
-   */
-  useEffect(() => {
-    if (editPathId == null) {
-      pathConstruction.onCategoryChange(category);
-    }
-    // マウント時に一度だけ実行する(pathConstruction.onCategoryChange は安定)。
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category, editPathId]);
-
-  /**
-   * 表示に使うカテゴリ。既存パス編集ではフック側(種別から補完した値)が正、
-   * 新規敷設では prop が正(フックの値は上の useEffect で追従するまで一瞬 null になりうる)。
-   */
-  const activeCategory: PathCategory | null =
-    editPathId != null ? pathConstruction.category : category;
+  /* ---- カテゴリとバリアントの候補 ---- */
+  // タイル・カードの選択可否はチュートリアルの案内状態にも依存する。案内状態が変わると
+  // usePathConstruction(内部で useGuideSnapshot を購読)がパネルを描き直すので、描画のたびに判定すればよい。
+  const availableCategories = useMemo(() => availableBuildCategories(masterData), [masterData]);
+  const variantsForCategory = useMemo(
+    () => (selectedCategory === null ? [] : buildCategoryVariants(masterData, selectedCategory)),
+    [masterData, selectedCategory],
+  );
 
   /**
    * 所属道路の選択は、街路・高速道路の新規敷設のときだけ扱う(既存パスの形状編集では所属を変えない。
    * 所属の変更はパス詳細・道路詳細で行う)。
    */
-  const roadAssignmentEnabled = editPathId == null && activeCategory === "road"
-    && pathConstruction.selectedVariant !== null && isNamedRoadPathType(pathConstruction.selectedType);
+  const roadAssignmentEnabled = isNewBuild && pathConstruction.selectedVariant !== null && isNamedRoadPathType(selectedPathType);
   const roadAssignment = usePathRoadAssignment(apiBaseUrl, roadAssignmentEnabled, pathConstruction.rawPoints);
 
   /* ---- ハンドラ ---- */
 
   /**
    * パネル全体のクリックイベントを捕捉する共通のハンドラ。
-   * ボタン要素やバリアントタイルなど、ユーザーが明示的に対話する要素をクリックした際に、
+   * ボタン要素やカードなど、ユーザーが明示的に対話する要素をクリックした際に、
    * 直後にUnity側での3Dビュー操作をシームレスに行えるよう、Unityにフォーカスを強制する。
    * 数値入力欄（NumberStepperのインプット）など、入力フォーカスを維持すべき要素をクリックした場合は
    * Unityへのフォーカス移動を行わないよう、対象を制限している。
@@ -179,6 +182,12 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId, categor
       sendFocusGraphic().catch(() => {});
     }
   }, []);
+
+  /** バリアントのカードを選ぶ。チュートリアルが敷くバリアントを指定している間は、それ以外を選ばせない。 */
+  const handleVariantSelect = useCallback((variantId: number) => {
+    if (!tutorialVariantAllowed(variantId)) return;
+    pathConstruction.selectVariant(variantId);
+  }, [pathConstruction]);
 
   /**
    * 確定ボタンを押した際のハンドラ。
@@ -248,7 +257,7 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId, categor
 
   /**
    * キャンセルボタンを押した際のハンドラ。
-   * バリアント選択・カテゴリ選択は解除せず、Unity側に配置中の仮形状(まだ確定していない
+   * バリアント選択は解除せず、Unity側に配置中の仮形状(まだ確定していない
    * ノード列)だけをクリアして、同じバリアントで再び配置できる状態へ戻す
    * (同じパスの引き直しを想定するため、線路間隔の調整も維持する)。
    * continuePlacement は配置状態をリセットしつつ STATE_EDIT_PATH を再送するため、
@@ -260,10 +269,10 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId, categor
 
   /* ---- インフラパス選択時にグリッドを自動オフ ---- */
   useEffect(() => {
-    if (isInfraPathType(pathConstruction.selectedType)) { // 送電・導水・パイプライン（PATH_TYPES_INFRA）
+    if (isInfraPathType(selectedPathType)) { // 送電・導水・パイプライン（PATH_TYPES_INFRA）
       setGridMode("off");
     }
-  }, [pathConstruction.selectedType]);
+  }, [selectedPathType]);
 
   /* ---- コンポーネント破棄時にグリッドを確実に OFF にする ---- */
   useEffect(() => {
@@ -298,9 +307,8 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId, categor
     if (pathConstruction.selectedVariant !== null) {
       sendSetGrid(gridMode, gridSize, gridAngle, gridOrigin?.x, gridOrigin?.z).catch(() => {});
     } else {
-      // バリアント未選択(＝建設のキャンセル・種別変更・タイル再クリックによる解除を含む)
-      // になったら必ずグリッドを消す。handleCancel を経由しない解除パスでも
-      // グリッドが残らないよう、ここで一元的に OFF を送る。
+      // バリアント未選択(＝戻るボタンによる選択解除を含む)になったら必ずグリッドを消す。
+      // handleCancel を経由しない解除パスでもグリッドが残らないよう、ここで一元的に OFF を送る。
       sendSetGrid("off").catch(() => {});
     }
   }, [gridMode, gridSize, gridAngle, gridOrigin, pathConstruction.selectedVariant]);
@@ -308,19 +316,18 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId, categor
   /* ---- ヒントバー表示 ---- */
 
   /**
-   * パネルが開いたとき、および選択中バリアントの height_editable が変化したときに、
-   * ヒントバーに道路建設の操作説明を表示する。
-   * height_editable が true の場合は高さ変更のショートカットキー案内を含む。
+   * パネルが開いたとき、および選択中バリアントが変わったときに、ヒントバーに敷設の操作説明を表示する。
+   * 駅舎は線とプラットフォームの関係の説明、height_editable のバリアントは高さ変更のショートカットキー案内を含む。
    * パネルが閉じられたときにヒントをクリアする。
    */
+  const hintKey = selectedPathType === PATH_STATION_HOUSE
+    ? "path_construction.stationHouseHint"
+    : pathConstruction.heightEditable
+      ? "hint.pathConstructionElevated"
+      : "hint.pathConstruction";
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      const hintKey = pathConstruction.heightEditable
-        ? "hint.pathConstructionElevated"
-        : "hint.pathConstruction";
-      await setHintbarText(t(hintKey));
-    })().catch((err) => {
+    setHintbarText(t(hintKey)).catch((err) => {
       if (!cancelled) {
         console.error("[PathConstruction] setHintbarText failed:", err);
       }
@@ -329,7 +336,7 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId, categor
       cancelled = true;
       void setHintbarText("");
     };
-  }, [t, pathConstruction.heightEditable]);
+  }, [t, hintKey]);
 
   /* ---- マスターデータ未取得時 ---- */
 
@@ -339,43 +346,89 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId, categor
 
   /* ---- レンダリング ---- */
 
+  if (selectedVariantData === null) {
+    // 既存パスの編集はバリアントを読み込んだら建設画面から始まる
+    if (!isNewBuild) {
+      return <p className="pc-muted">{t("common.loading")}</p>;
+    }
+    return (
+      <div className="pc-layout" onClick={handlePanelClick}>
+        <div className="pc-section">
+          {selectedCategory === null ? (
+            <div className="bc-tile-grid">
+              {availableCategories.map((category) => (
+                <CategoryTile
+                  key={category}
+                  icon={resolvePathCategoryIcon(category)}
+                  name={t(`path_construction.category.${category}`)}
+                  disabled={!buildCategoryVariants(masterData, category).some((v) => tutorialVariantAllowed(v.id))}
+                  onClick={() => setSelectedCategory(category)}
+                />
+              ))}
+            </div>
+          ) : (
+            <>
+              <div className="bc-selection-header">
+                <BackButton onClick={() => setSelectedCategory(null)} />
+              </div>
+              <div className="bc-variant-card-list">
+                {variantsForCategory.map(({ id, data }) => {
+                  const unaffordable = isVariantUnaffordable(id);
+                  return (
+                    <PathVariantCard
+                      key={id}
+                      entry={data}
+                      disabled={unaffordable || !tutorialVariantAllowed(id)}
+                      titleSuffix={unaffordable ? t("construction.variantUnaffordableSuffix") : undefined}
+                      onClick={() => handleVariantSelect(id)}
+                    />
+                  );
+                })}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="pc-layout" onClick={handlePanelClick}>
-      {/* カテゴリ別バリアント選択(カテゴリはウィンドウ種別で固定。軌道は track_build が担う) */}
-      {activeCategory === "road" && (
-        <RoadVariantSelector
-          masterData={masterData}
-          selectedType={pathConstruction.selectedType}
-          selectedVariant={pathConstruction.selectedVariant}
-          variantsForType={pathConstruction.variantsForType}
-          onSelectType={pathConstruction.onTypeChange}
-          onSelectVariant={pathConstruction.selectVariant}
-          disabled={editPathId != null}
-          affordability={variantAffordability}
-        />
-      )}
-      {activeCategory === "infra" && (
-        <InfraVariantSelector
-          masterData={masterData}
-          selectedType={pathConstruction.selectedType}
-          selectedVariant={pathConstruction.selectedVariant}
-          variantsForType={pathConstruction.variantsForType}
-          onSelectType={pathConstruction.onTypeChange}
-          onSelectVariant={pathConstruction.selectVariant}
-          disabled={editPathId != null}
-          affordability={variantAffordability}
-        />
+      {/* 選択中のバリアントの概要。戻るとカテゴリのカード一覧へ戻る */}
+      <div className="pc-section">
+        {isNewBuild && <BackButton onClick={pathConstruction.deselectVariant} />}
+        <PathVariantCard entry={selectedVariantData} />
+      </div>
+
+      {/* 駅舎の建屋の配置端と通路方式は建設時に決める(配置端は着工後に変えられない) */}
+      {isNewBuild && selectedPathType === PATH_STATION_HOUSE && (
+        <div className="pc-section">
+          <StationHouseEndsSelect value={pathConstruction.houseEnds} onChange={pathConstruction.setHouseEnds} />
+          <StationPassageModeSelect value={pathConstruction.passageMode} onChange={pathConstruction.setPassageMode} />
+        </div>
       )}
 
-      {/* 選択中バリアントの説明カード */}
-      <PathVariantDescription entry={pathConstruction.selectedVariantData} />
+      {/* 線路数・進行方向・線路間隔は軌道の複線構成専用(軌道以外・人員搬送では何も描かない) */}
+      {isNewBuild && (
+        <RailTrackLayoutSettings
+          variant={selectedVariantData}
+          trackCount={pathConstruction.trackCount}
+          trackSpacing={pathConstruction.trackSpacing}
+          canWidenSpacing={pathConstruction.canWidenTrackSpacing}
+          canShrinkSpacing={pathConstruction.canShrinkTrackSpacing}
+          trackDirections={pathConstruction.trackDirections}
+          onChangeTrackCount={pathConstruction.changeTrackCount}
+          onAdjustSpacing={pathConstruction.adjustTrackSpacing}
+          onCycleDirection={pathConstruction.cycleTrackDirection}
+        />
+      )}
 
       {roadAssignmentEnabled && (
         <PathRoadAssignmentSection assignment={roadAssignment} disabled={isConfirming} />
       )}
 
       {/* 既存パスの形状編集ではタグを変えない(タグの付け替えはパス詳細で行う)。 */}
-      {editPathId == null && pathConstruction.selectedVariant !== null && (
+      {isNewBuild && (
         <PathTagSection
           apiBaseUrl={apiBaseUrl ?? ""}
           value={projectTag}
@@ -385,9 +438,8 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId, categor
       )}
 
       {/*
-        説明カードより下の共通ボディ(形状・グリッド・プレビュー・コスト・確定/キャンセル)は
-        軌道建設パネルと共有する PathBuildSections に集約している。
-        道路/インフラではホーム設置側トグルは出さない(showPlatformSide=false)。
+        説明カードより下の共通ボディ(形状・グリッド・コスト・確定/キャンセル)。
+        ホーム設置側は建設時にしか指定できないので、軌道の新規敷設でだけ出す(駅のバリアントに限られる)。
       */}
       <PathBuildSections
         pc={pathConstruction}
@@ -404,8 +456,34 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId, categor
         isConfirming={isConfirming}
         onConfirm={handleConfirm}
         onCancel={handleCancel}
-        showPlatformSide={false}
+        showPlatformSide={isNewBuild && isRailType(selectedPathType)}
       />
     </div>
+  );
+}
+
+/** カテゴリのタイル。アイコン画像が無いものは枠だけ空けておく(意匠は建物建設パネルの分類タイルと共通)。 */
+function CategoryTile({ icon, name, disabled, onClick }: {
+  icon: string;
+  name: string;
+  disabled: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button className="bc-tile" type="button" data-guide="path.type" disabled={disabled} onClick={onClick}>
+      <span className="bc-tile-icon">{icon && <img src={icon} alt="" draggable={false} />}</span>
+      <span className="bc-tile-name">{name}</span>
+    </button>
+  );
+}
+
+/** 1段前の選択へ戻るボタン(意匠は建物建設パネルと共通)。 */
+function BackButton({ onClick }: { onClick: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <button className="bc-header-btn bc-back-btn" type="button" onClick={onClick}>
+      <img src={turnBackIcon} alt="" className="bc-header-btn-icon" draggable={false} />
+      <span>{t("path_construction.back")}</span>
+    </button>
   );
 }

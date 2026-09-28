@@ -13,7 +13,7 @@ import type { Definition } from "./model";
 import * as constants from "../constants";
 
 /** DOMの構造や翻訳文ではなく、登録済みの操作名だけを定義で指定する。 */
-export const TARGETS = ["hud.road", "hud.construction", "hud.land", "hud.district", "hud.execute", "hud.visibility", "hud.track", "hud.infra", "hud.transport", "path.type", "path.variant", "path.confirm", "path.cancel", "window.path_build", "window.agent_detail"];
+export const TARGETS = ["hud.road", "hud.construction", "hud.land", "hud.district", "hud.execute", "hud.visibility", "hud.transport", "path.type", "path.variant", "path.confirm", "path.cancel", "window.path_build", "window.agent_detail"];
 /** コアが初期配置した対象の名前。束縛はチュートリアル開始時にコアから受け取る。 */
 const CORE_TARGET = /^(support|lesson)\./;
 const validateSchema = new Ajv({ allErrors: true, strict: false }).compile(schema);

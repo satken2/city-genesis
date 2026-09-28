@@ -122,9 +122,18 @@
     "collisionUnready": "请确定路线形状，并消除红色立体区域所示的碰撞。",
     "alignmentUnready": "弯道或坡度超出此规格的限制。请放缓线形。",
     "constructionSpeed": "建设速度",
-    "selectType": "-- 请选择种类 --",
-    "selectTypeFirst": "请选择种类",
-    "noVariants": "无符合项",
+    "back": "返回",
+    "category": {
+      "1": "街道",
+      "2": "高速公路",
+      "3": "步行道",
+      "4": "铁路",
+      "5": "单轨铁路",
+      "6": "缆车",
+      "11": "电力",
+      "12": "供水",
+      "13": "石油"
+    },
     "shape": "形状",
     "elevation": "海拔 (Y)",
     "embankmentHeight": "填土高度",
@@ -141,18 +150,13 @@
     "costInfo": "建设费用",
     "costRatioHelp": "建造高架道路、地下道路，或在复杂地形上建造道路，会提高建设成本。",
     "placedContinue": "已放置路径。请放置下一条路径。",
+    "stationHouseHint": "铺设站房线路。与该线路相交的站台将归属于此站房所在的车站。线路两端会放置站房建筑，并沿线架设连接桥。站房不会吸附到已有的道路或轨道上（仅网格吸附有效）。",
     "platformSide": "站台设置侧",
     "platformSideOutside": "外侧",
     "platformSideInside": "内侧",
     "platformSideBoth": "两侧",
-    "infra": {
-      "electricity": "电力",
-      "water": "供水",
-      "oil": "石油"
-    },
     "rail": {
       "parallel": "并行",
-      "noVariantForCombo": "没有对应该组合的线路",
       "trackCount": "线路数",
       "trackSpacing": "线路间距",
       "spacingWiden": "加宽",
@@ -174,27 +178,6 @@
       "extending": "将延长“{{name}}”",
       "newNote": "确定后，将用铺设的路段新建道路。",
       "createFailed": "路段已铺设，但无法新建道路。"
-    }
-  },
-  "track_construction": {
-    "simpleMode": "简易",
-    "detailMode": "详细",
-    "trackTab": "轨道",
-    "platformTab": "站台",
-    "houseTab": "站房",
-    "stationTab": "车站",
-    "station": {
-      "hint": "在3D视图中点击放置车站的位置。按住鼠标中键拖动可旋转，使用 PageUp/PageDown 可调整高度。右键或 Esc 可重新选点。",
-      "houseVariant": "站房类型",
-      "settings": "车站设置",
-      "carCount": "站台长度",
-      "carCountUnit": "节 ({{length}}m)",
-      "angle": "角度",
-      "fixedNote": "固定为复线相对式站台（左右各一条）。若要更改线路数量或站台形式，请使用详细模式。",
-      "pickPointFirst": "请在3D视图中点击放置车站的位置"
-    },
-    "house": {
-      "hint": "铺设站房线路。与该线路相交的站台将归属于此站房所在的车站。线路两端会放置站房建筑，并沿线架设连接桥。站房不会吸附到已有的道路或轨道上（仅网格吸附有效）。"
     }
   },
   "path_shape_editor": {

@@ -101,10 +101,6 @@ public class IpcClient : MonoBehaviour
     public event Action OnEditResourceFinish;
     public event Action OnEditGradingFinish;
     public event Action OnEditTransitFinish;
-    // 駅パッケージ配置(軌道建設パネルの簡易モード)の設定変更。送られてきたキーだけを辞書で渡す
-    // (platform_variant / house_variant / platform_length / track_spacing / height / angle /
-    //  house_ends / travel_directions / reset)。空の辞書は現在の配置状態の問い合わせ。
-    public event Action<Dictionary<string, object>> OnEditStationPlacementCommand;
     // プロップ配置。change_settings は (rotation?, scale?, density?, seed?) を辞書で渡す。
     public event Action<Dictionary<string, object>> OnEditPropChangeSettings;
     public event Action OnEditPropFinish;
@@ -527,14 +523,6 @@ public class IpcClient : MonoBehaviour
                     {
                         Debug.Log("IpcClient: edit_transit:finish received");
                         OnEditTransitFinish?.Invoke();
-                    }
-                    break;
-
-                case "edit_station:placement_command":
-                    {
-                        // 駅パッケージ配置の設定変更。変更されたキーだけが届く(空=状態問い合わせ)。
-                        var stationParams = GetParamsDictionary(payload);
-                        OnEditStationPlacementCommand?.Invoke(stationParams);
                     }
                     break;
 
@@ -1458,19 +1446,6 @@ public class IpcClient : MonoBehaviour
         };
 
         SendEnvelope("edit_prop:update_shape", payload);
-    }
-
-    /// <summary>
-    /// edit_station:placement_state イベントを送信する。
-    /// 駅パッケージ配置(軌道建設パネルの簡易モード)の現在の配置状態を通知する。
-    /// payload は StationPlanManager が組み立てた {revision, position, angle, height,
-    /// platform_length, track_spacing, platform_variant, house_variant, house_ends,
-    /// platforms, house}。platforms / house は確定送信にそのまま使える中心線で、
-    /// position が null の間はカーソル追従中(地点未固定)を意味する。
-    /// </summary>
-    public void EmitEditStationPlacementState(Dictionary<string, object> payload)
-    {
-        SendEnvelope("edit_station:placement_state", payload);
     }
 
     /// <summary>

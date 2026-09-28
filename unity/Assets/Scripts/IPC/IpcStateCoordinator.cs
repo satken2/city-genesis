@@ -146,13 +146,6 @@ public class IpcStateCoordinator : MonoBehaviour
             RoadMemberEditManager.Instance.End();
         }
 
-        // 駅パッケージ配置から別モードへ直接遷移した場合にも、駅のゴーストを確実に片付ける
-        // (STATE_NORMAL 経由なら ApplyStateNormal 内でも終了するが冪等なので問題ない)。
-        if (state != "STATE_EDIT_STATION")
-        {
-            FindAnyObjectByType<StationPlanManager>()?.FinishPlacement();
-        }
-
         // 造成範囲の作図から別モードへ直接遷移した場合にも、作図中のポリゴンとオーバーレイを片付ける
         // (STATE_NORMAL 経由なら ApplyStateNormal 内でも終了するが冪等なので問題ない)。
         if (state != "STATE_EDIT_GRADING")
@@ -170,7 +163,7 @@ public class IpcStateCoordinator : MonoBehaviour
 
         // 一方通行線路の進行方向矢印は道路敷設モードでのみ表示する
         // （既存線路に向きの対を作って接続する際の編集支援表示のため）。
-        TrackDirectionArrows.SetVisible(state == "STATE_EDIT_PATH" || state == "STATE_EDIT_STATION");
+        TrackDirectionArrows.SetVisible(state == "STATE_EDIT_PATH");
 
         switch (state)
         {
@@ -225,11 +218,6 @@ public class IpcStateCoordinator : MonoBehaviour
 
             case "STATE_EDIT_PROP":
                 ApplyStateEditProp(ipcParams);
-                WindowUtil.BringToForeground();
-                break;
-
-            case "STATE_EDIT_STATION":
-                ApplyStateEditStation(ipcParams);
                 WindowUtil.BringToForeground();
                 break;
 
@@ -363,13 +351,6 @@ public class IpcStateCoordinator : MonoBehaviour
         if (propPlacementManager != null)
         {
             propPlacementManager.FinishPlacement();
-        }
-
-        // 駅パッケージ配置(軌道建設パネルの簡易モード)を終了
-        var stationPlanManager = FindAnyObjectByType<StationPlanManager>();
-        if (stationPlanManager != null)
-        {
-            stationPlanManager.FinishPlacement();
         }
 
         // 建物建設モードを終了する。
@@ -1131,69 +1112,6 @@ public class IpcStateCoordinator : MonoBehaviour
         propPlacementManager.InitializePlacement(placementMode, propType, rotation, scale, density, seed, height);
 
         Debug.Log($"IpcStateCoordinator: プロップ配置モード -> prop_type={propType}, mode={placementMode}");
-    }
-
-    /// <summary>
-    /// STATE_EDIT_STATION: 駅パッケージ配置モード(軌道建設パネルの簡易モード → 駅タブ)。
-    /// ipcParams にはプラットフォーム・駅舎の規格と、ホーム長・線路間隔・高さ・角度・
-    /// 各線の進行方向・建屋の配置端が含まれる。StationPlanManager を初期化する(無ければ動的生成)。
-    /// 確定送信(プラットフォーム2本+駅舎1本の一括POST)は UI(Tauri)側が行う。
-    /// </summary>
-    private void ApplyStateEditStation(Dictionary<string, object> ipcParams)
-    {
-        // 軌道タブから駅タブへ直接移ったときに、進行中のパス敷設セッション(プレビューメッシュ・
-        // 配置済みノード)を引き取って片付ける。STATE_NORMAL を挟まない遷移があるため。
-        FindAnyObjectByType<RoadPlanManager>()?.FinishRoadPlacement();
-
-        // InputMode: 駅配置プリセット(地形クリックで地点を固定する)。
-        if (InputSystemManager.Instance != null)
-        {
-            InputSystemManager.Instance.SetModePreset(InputModePreset.STATION_PLACEMENT);
-        }
-
-        // VisualMode の適用は IpcViewCoordinator.SyncFromState(ステート別の表示プリセット)が行う。
-
-        int platformVariant = 0;
-        int houseVariant = 0;
-        float platformLength = 80f;
-        float trackSpacing = 5f;
-        float height = 0f;
-        float angle = 0f;
-        string houseEnds = "both";
-        string passageMode = "elevated";
-        int[] travelDirections = Array.Empty<int>();
-        if (ipcParams != null)
-        {
-            if (ipcParams.TryGetValue("platform_variant", out object pvObj) && pvObj != null)
-                platformVariant = Convert.ToInt32(pvObj);
-            if (ipcParams.TryGetValue("house_variant", out object hvObj) && hvObj != null)
-                houseVariant = Convert.ToInt32(hvObj);
-            if (ipcParams.TryGetValue("platform_length", out object plObj) && plObj != null)
-                platformLength = Convert.ToSingle(plObj);
-            if (ipcParams.TryGetValue("track_spacing", out object tsObj) && tsObj != null)
-                trackSpacing = Convert.ToSingle(tsObj);
-            if (ipcParams.TryGetValue("height", out object hObj) && hObj != null)
-                height = Convert.ToSingle(hObj);
-            if (ipcParams.TryGetValue("angle", out object aObj) && aObj != null)
-                angle = Convert.ToSingle(aObj);
-            if (ipcParams.TryGetValue("house_ends", out object heObj) && heObj != null)
-                houseEnds = Convert.ToString(heObj);
-            if (ipcParams.TryGetValue("passage_mode", out object pmObj) && pmObj != null)
-                passageMode = Convert.ToString(pmObj);
-            if (ipcParams.TryGetValue("travel_directions", out object tdObj) && tdObj != null)
-                travelDirections = ReadIntArray(tdObj);
-        }
-
-        var stationPlanManager = FindAnyObjectByType<StationPlanManager>();
-        if (stationPlanManager == null)
-        {
-            var go = new GameObject("StationPlanManager");
-            stationPlanManager = go.AddComponent<StationPlanManager>();
-        }
-        stationPlanManager.InitializeStationPlacement(platformVariant, houseVariant, platformLength,
-            trackSpacing, height, angle, travelDirections, houseEnds, passageMode);
-
-        Debug.Log($"IpcStateCoordinator: 駅配置モード -> platform={platformVariant}, house={houseVariant}, length={platformLength}");
     }
 
     /// <summary>

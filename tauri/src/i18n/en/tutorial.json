@@ -70,7 +70,7 @@
         "title": "Build a Substation"
       },
       "step4": {
-        "description": "Open \"Infrastructure\" on the icon panel and choose \"Power Line\" under \"Electricity\". Draw a line from the solar power plant's connection terminal to the connection terminal of the substation in town. Even though they're far apart, you can draw it as a single line by linking the terminals in a straight line. Once confirmed, the power line is completed and the connection is checked.",
+        "description": "Open \"Roads, Rail & Infrastructure\" on the icon panel and choose \"Power Line\" under \"Electricity\". Draw a line from the solar power plant's connection terminal to the substation's terminal in town. Even though they're far apart, a straight line between the terminals does it in one go. Once confirmed, the power line is completed and the connection is checked.",
         "title": "Connect with a Power Line"
       },
       "step5": {
@@ -87,18 +87,18 @@
       "description": "Learn how to open a rail line linking the town's apartment building and a commercial building by setting up platforms, station houses, track, a depot and power lines.",
       "step1": {
         "title": "Build the Platforms",
-        "open": "First, the platforms where passengers wait for trains. Open \"Track Construction\" on the icon panel and choose \"Rail Platform\" on the \"Platform\" tab. Use a single track.",
+        "open": "First, the platforms where passengers wait for trains. Open \"Roads, Rail & Infrastructure\" on the icon panel and choose \"Rail Platform\" under \"Railways\". Use a single track.",
         "town": "Near the apartment building in town, click the two yellow markers from west to east to lay a platform. Check in the preview that the platform is on the north side (the apartment side) before confirming.",
         "new": "Near the commercial building to the west, also click the two yellow markers from west to east to lay a platform with the boarding side to the north. When you're done, press \"Next\"."
       },
       "step2": {
         "title": "Build the Station Houses",
-        "town": "A platform alone isn't a station yet. Choose \"Simple Station House\" on the \"Station House\" tab and draw a line between the two yellow markers so that it crosses the town-side platform. Platforms crossed by the line are gathered into that station.",
+        "town": "A platform alone isn't a station yet. Press \"Back\" to return to the list, choose \"Simple Station House\", and draw a line between the two yellow markers so that it crosses the town-side platform. Platforms crossed by the line are gathered into that station.",
         "new": "Do the same for the western platform: draw a \"Simple Station House\" line between the two yellow markers. When you're done, press \"Next\"."
       },
       "step3": {
         "title": "Link the Two Stations by Track",
-        "description": "Choose \"Railway Track\" on the \"Track\" tab and lay track from the west end of the town-side platform to the east end of the western platform (a single track). Press \"Next\" to complete the track and stations and check the connection."
+        "description": "Press \"Back\" to return to the list, choose \"Railway Track\", and lay track from the west end of the town-side platform to the east end of the western platform (a single track). Press \"Next\" to complete the track and stations and check the connection."
       },
       "step4": {
         "title": "Build a Depot",
@@ -106,11 +106,11 @@
       },
       "step5": {
         "title": "Connect the Depot to the Main Line",
-        "description": "Lay a siding from the connection terminal on the south side of the depot to the main line, using \"Railway Track\" on the \"Track\" tab between the two yellow markers. The trick is to join the main line at a shallow angle heading east."
+        "description": "Lay a siding from the connection terminal on the south side of the depot to the main line, using \"Railway Track\" under \"Railways\" between the two yellow markers. The trick is to join the main line at a shallow angle heading east."
       },
       "step6": {
         "title": "Send Power to the Depot",
-        "description": "The track is electrified, and power flows into it from the depot's connection terminal. Open \"Infrastructure\" on the icon panel and use \"Power Line\" under \"Electricity\" to connect the connection terminal of the town's solar power plant to the depot's connection terminal."
+        "description": "The track is electrified, and power flows into it from the depot's connection terminal. Open \"Roads, Rail & Infrastructure\" on the icon panel and use \"Power Line\" under \"Electricity\" to connect the connection terminal of the town's solar power plant to the depot's connection terminal."
       },
       "step7": {
         "title": "Open the Line",
@@ -164,12 +164,12 @@
         "title": "Build an international freight station"
       },
       "step4": {
-        "open": "Open \"Track Construction\" on the icon panel and choose \"Container Freight Platform\" on the \"Platform\" tab.",
+        "open": "Open \"Roads, Rail & Infrastructure\" on the icon panel and choose \"Container Freight Platform\" under \"Railways\".",
         "place": "Lay a platform north of the international freight station, parallel to it. Switch \"Platform Side\" so that the platform is on the station building's side (the south side) before confirming. If you lay it from west to east, choose \"Inside\". When you're done, press \"Next\".",
         "title": "Build a platform beside the station"
       },
       "step5": {
-        "description": "Using \"Railway Track\" on the \"Track\" tab, lay track from the east end of the platform to the west end of the border freight station's platform. Once confirmed, the track is completed and the connection is checked.",
+        "description": "Press \"Back\" to return to the list, choose \"Railway Track\", and lay track from the east end of the platform to the west end of the border freight station's platform. Once confirmed, the track is completed and the connection is checked.",
         "title": "Lay track to the border"
       },
       "step6": {
@@ -181,7 +181,7 @@
         "description": "Lay a siding from the connection terminal on the north side of the depot to the main line. Join the main line at a shallow angle heading east rather than at a right angle. When you're done, press \"Next\"."
       },
       "step8": {
-        "description": "Open \"Infrastructure\" on the icon panel and use \"Power Line\" under \"Electricity\" to connect the connection terminal of the solar power plant east of town to the depot's connection terminal.",
+        "description": "Open \"Roads, Rail & Infrastructure\" on the icon panel and use \"Power Line\" under \"Electricity\" to connect the connection terminal of the solar power plant east of town to the depot's connection terminal.",
         "title": "Supply power to the depot"
       },
       "step9": {
@@ -237,13 +237,13 @@
         "title": "Build a bulk port"
       },
       "step6": {
-        "open": "Open \"Track Construction\" on the icon panel and choose \"Ore Freight Platform\" on the \"Platform\" tab.",
+        "open": "Open \"Roads, Rail & Infrastructure\" on the icon panel and choose \"Ore Freight Platform\" under \"Railways\".",
         "loading": "Lay a platform north of the loading station, parallel to it. Switch \"Platform Side\" so the platform is on the station building's side (south) before confirming; from west to east, that's \"Inside\". The site slopes steeply downhill: if you get a grade error, adjust the \"Embankment Height\" to keep the platform level.",
         "unloading": "Lay a platform north of the unloading station in the same way, so that the platform is on the station building's side. When you're done, press \"Next\".",
         "title": "Build platforms beside the stations"
       },
       "step7": {
-        "description": "Using \"Railway Track\" on the \"Track\" tab, lay track from the east end of the unloading station's platform to the west end of the loading station's platform (a single track is fine). Once confirmed, the track and platforms are completed and the connection is checked.",
+        "description": "Press \"Back\" to return to the list, choose \"Railway Track\", and lay track from the east end of the unloading station's platform to the west end of the loading station's platform (a single track is fine). Once confirmed, the track and platforms are completed and the connection is checked.",
         "title": "Connect the two stations by rail"
       },
       "step8": {
@@ -255,7 +255,7 @@
         "description": "Lay a siding from the connection terminal on the north side of the depot to the main line. The trick is to join the main line at a shallow angle heading east rather than at a right angle (real turnouts can't turn at large angles). When you're done, press \"Next\"."
       },
       "step10": {
-        "description": "The track is electrified, and power flows into it from the depot's connection terminal. Open \"Infrastructure\" on the icon panel and use \"Power Line\" under \"Electricity\" to connect the connection terminal of the town's solar power plant to the depot's connection terminal.",
+        "description": "The track is electrified, and power flows into it from the depot's connection terminal. Open \"Roads, Rail & Infrastructure\" on the icon panel and use \"Power Line\" under \"Electricity\" to connect the connection terminal of the town's solar power plant to the depot's connection terminal.",
         "title": "Supply power to the depot"
       },
       "step11": {

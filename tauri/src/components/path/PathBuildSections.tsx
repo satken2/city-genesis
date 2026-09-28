@@ -1,16 +1,13 @@
 /**
- * パス建設パネルの共有ボディ
+ * パス建設パネル(PathConstructionPanel)の建設画面の共通ボディ
  *
- * 道路建設(PathConstructionPanel)と軌道建設(TrackConstructionPanel)は、
- * バリアント選択UI(カテゴリ別セレクタ)より下のセクション ——
+ * バリアントの種別によらず共通のセクション ——
  * 形状(標高/地形追従/盛土/ホーム設置側)・グリッド設定・
- * 建設費用カード(パス長/推定コスト/工期)・確定/キャンセルのアクションバー —— が完全に共通である。
- * 説明カード(PathVariantDescription)はパネルごとに表示位置が違うためここには含めない。
- * この重複(~250行)を避けるため、その共通ボディをこのコンポーネントへ切り出し、
- * 両パネルから `usePathConstruction` の結果とグリッド状態・確定/キャンセルハンドラを
- * 受け取って描画する。
+ * 建設費用カード(パス長/推定コスト/工期)・確定/キャンセルのアクションバー —— を描く。
+ * 種別ごとの設定(軌道の複線構成・駅舎の配置端・所属道路など)はパネル側がこの上に並べる。
+ * `usePathConstruction` の結果とグリッド状態・確定/キャンセルハンドラを受け取って描画する。
  *
- * ここに置く設定の意図(道路建設パネルから継承):
+ * ここに置く設定の意図:
  *   - 曲線/直線・吸着の操作はUnity側(Ctrlラジアルメニュー)へ移管済みのため置かない。
  *   - 標高・盛土は既存ノードを選んで数値で微調整する用途があるためステッパーを残す
  *     (真実源はUnity。ステッパー変更を change_node/change_embankment で送り返す双方向同期)。
@@ -33,7 +30,7 @@ import {
   PLATFORM_SIDE_BOTH,
 } from "../../constants";
 
-/** usePathConstruction フックの返り値型。両パネルから丸ごと受け取って共有する。 */
+/** usePathConstruction フックの返り値型。パネルから丸ごと受け取る。 */
 export type PathBuildState = ReturnType<typeof usePathConstruction>;
 
 type PathBuildSectionsProps = {
@@ -59,7 +56,7 @@ type PathBuildSectionsProps = {
 
   /**
    * ホーム設置側(外側/内側/両側)トグルを表示してよいか。
-   * 道路/インフラでは false、軌道のプラットフォームタブでのみ true にする。
+   * 軌道の新規敷設でだけ true にする(ホーム設置側は建設後に変えられない)。
    * 実際の表示は pc.hasPlatform(platform_width>0)との論理積で決まる。
    */
   showPlatformSide: boolean;

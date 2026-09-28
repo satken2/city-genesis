@@ -27,6 +27,7 @@
 - 本編の Unity エディタが開いていると、Blender から書き出した新しい FBX はエディタが先に取り込み、`.meta` とミラープレハブ(`ModelPrefabGenerator`)を作る。独立プロジェクトの生成物を本編へ写すときは、既にあるものを上書きしない(GUID が変わり、先に作られたミラーの参照が切れる)。
 - 建物ライブラリの `BD_WINDOW_LIGHT` はほぼ黒(RGB 0.07, 0.11, 0.11)で、ガラス張りの建物全体に使うと黒い箱に見える。全面ガラスの外壁には `BD_BLUE_GLASS`(0.13, 0.31, 0.51)を使う。
 - 幾何だけの静的処理(`CoastlineStore`・`SeaRoute`・`PortBuildingMeshBuilder.ResolveWorldWaterlines` など)は、`Tests/BuildRuntime.ps1` が作る `Temp/bin/Debug/Assembly-CSharp.dll` と `UnityEngine.CoreModule.dll`・`Newtonsoft.Json.dll`・`Assets/Plugins/NetTopologySuite.dll` を参照する net8.0 のコンソールから実行して検査できる(`CoastlineStore.SetFromGeoJson` に合成の海岸線を入れる)。`Debug.Log` などネイティブ呼び出しを通る経路と `Time`・`Random` は落ちるので、ログ用フラグが偽の経路だけを呼ぶ。private static はリフレクションで呼べる。
+- 別ワークツリーの Unity スクリプトをコンパイル確認するときは、本体の `Assembly-CSharp.csproj` を写してレポジトリの外に置き、`Assets\Scripts` の明示列挙をワークツリーの `Assets\Scripts\**\*.cs` のワイルドカードに、相対の `HintPath`(`Library\...`)を本体の絶対パスに置き換える。Dreamteck の `ProjectReference` は本体の `Library\ScriptAssemblies\Dreamteck.*.dll` への参照に替える(プロジェクト参照のままだと本体の `Temp` にビルド成果物を書く)。ワイルドカードにすれば、Unity が csproj を再生成していない新しい .cs も載る。
 - API の地区ポリゴン(`zone.polygon`)は外周が時計回り(XZで符号付き面積が負)で、末尾に始点と同じ点が付いて届く(穴は含まない)。`BuildingMeshBuilder.TriangulateEarClip` / `TriangulateOrFan` は反時計回り前提なので、そのまま渡すと必ず耳切りに失敗して扇形分割に落ち、凹型の地区では三角形が外へはみ出して重なる(2026-09-28、地区編集のホバー塗りで発生。Editor.log に「耳が見つかりませんでした」が出る)。`WaterSurfaceManager.AppendRingMesh` と同じく、閉じ点を除いて `PolygonUtils.SignedArea` が負なら反転してから渡す。
  
 ## UI / Tauri
@@ -56,6 +57,8 @@
 - チュートリアルウィンドウの案内文は3行で切れる(`Tutorial.css` の `-webkit-line-clamp: 3`、ウィンドウの高さは200px固定)。日本語はおよそ200字、英語などはおよそ390字までに収める。
 
 - 開発用バックエンドの実データで UI をブラウザに描いて確かめるときは、確認用の Vite で `server.proxy` を使い `/backend` → `http://127.0.0.1:5000` へ GET だけを中継し、POST などは `window.fetch` の差し替えでモックすると、都市の状態を変えずに済む。
+
+- 別ワークツリーの `tauri/node_modules` を本体の `tauri/node_modules` へのジャンクションにすると、`tsc` はそのまま動くが、書き込みを伴う道具は本体の `node_modules` を汚す。確認用の Vite は `cacheDir` を指定しないと本体の開発サーバーと同じ `node_modules/.vite` に書き、`npm run test:tutorial`(`tools/tutorial/run.mjs`)はバンドルを `node_modules/.cache` に書く。後者は `run.mjs` の出力先だけを書き換えた写しをレポジトリの外に置き、ワークツリーの `tauri` をカレントにして動かす(出力先の隣にも `node_modules` のジャンクションを置く。バンドルは外部パッケージを出力先から解決するため)。
 
 ## docs
 

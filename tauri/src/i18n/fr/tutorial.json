@@ -70,7 +70,7 @@
         "title": "Construisons un poste électrique"
       },
       "step4": {
-        "description": "Ouvrez « Infrastructures » dans le panneau d'icônes et choisissez « Ligne de transmission » sous « Électricité ». Tracez une ligne depuis la borne de raccordement de la centrale solaire jusqu'à celle du poste électrique de la ville. Même s'ils sont éloignés, vous pouvez la tracer d'un seul tenant en reliant les bornes en ligne droite. Après confirmation, la ligne de transmission est achevée et la liaison est vérifiée.",
+        "description": "Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d'icônes et choisissez « Ligne de transmission » sous « Électricité ». Tracez une ligne de la borne de raccordement de la centrale solaire à celle du poste électrique de la ville. Malgré la distance, une seule ligne droite entre les bornes suffit. Après confirmation, la ligne est achevée et la liaison est vérifiée.",
         "title": "Raccordons par une ligne de transmission"
       },
       "step5": {
@@ -87,18 +87,18 @@
       "description": "Apprenez à mettre en service une ligne ferroviaire reliant le logement collectif de la ville à un immeuble commercial en préparant les quais, les bâtiments de gare, la voie, un dépôt et la ligne de transmission.",
       "step1": {
         "title": "Construisons les quais",
-        "open": "D'abord, les quais où les voyageurs attendent le train. Ouvrez « Voies ferrées » dans le panneau d'icônes et choisissez « Quai ferroviaire » dans l'onglet « Quai ». Utilisez une seule voie.",
+        "open": "D'abord, les quais où les voyageurs attendent le train. Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d'icônes et choisissez « Quai ferroviaire » dans « Chemin de fer ». Utilisez une seule voie.",
         "town": "Près du logement collectif de la ville, cliquez sur les deux repères jaunes d'ouest en est pour poser un quai. Vérifiez dans l'aperçu que le quai se trouve du côté nord (côté logement) avant de valider.",
         "new": "Près de l'immeuble commercial à l'ouest, cliquez aussi sur les deux repères jaunes d'ouest en est pour poser un quai dont le côté d'embarquement est au nord. Une fois la pose terminée, appuyez sur « Suivant »."
       },
       "step2": {
         "title": "Construisons les bâtiments de gare",
-        "town": "Un quai seul n'est pas encore une gare. Choisissez « Gare simple » dans l'onglet « Bâtiment de gare » et tracez une ligne entre les deux repères jaunes qui croise le quai côté ville. Les quais croisés par la ligne sont regroupés dans cette gare.",
+        "town": "Un quai seul n'est pas encore une gare. Appuyez sur « Retour » pour revenir à la liste, choisissez « Gare simple » et tracez une ligne entre les deux repères jaunes qui croise le quai côté ville. Les quais croisés par la ligne sont regroupés dans cette gare.",
         "new": "Faites de même pour le quai ouest : tracez la ligne de « Gare simple » entre les deux repères jaunes. Une fois le tracé terminé, appuyez sur « Suivant »."
       },
       "step3": {
         "title": "Relions les deux gares par la voie",
-        "description": "Choisissez « Voie de chemin de fer » dans l'onglet « Voie ferrée » et posez la voie depuis l'extrémité ouest du quai côté ville jusqu'à l'extrémité est du quai ouest (une seule voie). En appuyant sur « Suivant », la voie et les gares sont achevées et la liaison est vérifiée."
+        "description": "Appuyez sur « Retour » pour revenir à la liste, choisissez « Voie de chemin de fer » et posez la voie depuis l'extrémité ouest du quai côté ville jusqu'à l'extrémité est du quai ouest (une seule voie). En appuyant sur « Suivant », la voie et les gares sont achevées et la liaison est vérifiée."
       },
       "step4": {
         "title": "Construisons le dépôt",
@@ -106,11 +106,11 @@
       },
       "step5": {
         "title": "Relions le dépôt à la ligne principale",
-        "description": "Posez une voie de desserte depuis la borne de raccordement au sud du dépôt jusqu'à la ligne principale, avec « Voie de chemin de fer » dans l'onglet « Voie ferrée », entre les deux repères jaunes. L'astuce est de la raccorder à la ligne principale avec un angle faible en direction de l'est."
+        "description": "Posez une voie de desserte depuis la borne de raccordement au sud du dépôt jusqu'à la ligne principale, avec « Voie de chemin de fer » dans « Chemin de fer », entre les deux repères jaunes. L'astuce est de la raccorder à la ligne principale avec un angle faible en direction de l'est."
       },
       "step6": {
         "title": "Alimentons le dépôt en électricité",
-        "description": "La voie est électrifiée : l'électricité y circule depuis la borne de raccordement du dépôt. Ouvrez « Infrastructures » dans le panneau d'icônes et, avec « Ligne de transmission » sous « Électricité », reliez la borne de raccordement de la centrale solaire de la ville à celle du dépôt."
+        "description": "La voie est électrifiée : l'électricité y circule depuis la borne de raccordement du dépôt. Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d'icônes et, avec « Ligne de transmission » sous « Électricité », reliez la borne de raccordement de la centrale solaire de la ville à celle du dépôt."
       },
       "step7": {
         "title": "Mettons la ligne en service",
@@ -164,12 +164,12 @@
         "title": "Construire une gare de fret internationale"
       },
       "step4": {
-        "open": "Ouvrez « Voies ferrées » dans le panneau d'icônes et choisissez « Quai de fret pour conteneurs » dans l'onglet « Quai ».",
+        "open": "Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d'icônes et choisissez « Quai de fret pour conteneurs » dans « Chemin de fer ».",
         "place": "Posez un quai au nord de la gare de fret internationale, parallèlement à celle-ci. Changez le « Côté du quai » pour que le quai se trouve du côté du bâtiment de la gare (côté sud) avant de valider. Si vous le posez d'ouest en est, choisissez « Intérieur ». Une fois la pose terminée, appuyez sur « Suivant ».",
         "title": "Construire un quai à côté de la gare"
       },
       "step5": {
-        "description": "Avec « Voie de chemin de fer » dans l'onglet « Voie ferrée », posez la voie depuis l'extrémité est du quai jusqu'à l'extrémité ouest du quai de la gare de fret frontalière. Après confirmation, la voie est achevée et la liaison est vérifiée.",
+        "description": "Appuyez sur « Retour » pour revenir à la liste, choisissez « Voie de chemin de fer » et posez la voie depuis l'extrémité est du quai jusqu'à l'extrémité ouest du quai de la gare de fret frontalière. Après confirmation, la voie est achevée et la liaison est vérifiée.",
         "title": "Poser la voie jusqu'à la frontière"
       },
       "step6": {
@@ -181,7 +181,7 @@
         "description": "Posez une voie de desserte depuis la borne de raccordement située au nord du dépôt jusqu'à la ligne principale. Raccordez-la à la ligne principale non pas à angle droit, mais avec un angle faible en direction de l'est. Une fois la pose terminée, appuyez sur « Suivant »."
       },
       "step8": {
-        "description": "Ouvrez « Infrastructures » dans le panneau d'icônes et, avec « Ligne de transmission » sous « Électricité », reliez la borne de raccordement de la centrale solaire située à l'est de la ville à celle du dépôt.",
+        "description": "Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d'icônes et, avec « Ligne de transmission » sous « Électricité », reliez la borne de raccordement de la centrale solaire située à l'est de la ville à celle du dépôt.",
         "title": "Alimenter le dépôt en électricité"
       },
       "step9": {
@@ -237,13 +237,13 @@
         "title": "Construire un port de vrac"
       },
       "step6": {
-        "open": "Ouvrez « Voies ferrées » dans le panneau d'icônes et choisissez « Quai de fret pour minerai » dans l'onglet « Quai ».",
+        "open": "Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d'icônes et choisissez « Quai de fret pour minerai » dans « Chemin de fer ».",
         "loading": "Posez un quai au nord de la gare de chargement, parallèlement à celle-ci. Réglez le « Côté du quai » pour que le quai soit du côté du bâtiment de la gare (sud) avant de valider ; d'ouest en est, c'est « Intérieur ». Le terrain descend en pente raide : en cas d'erreur de pente, réglez la « Hauteur du remblai » pour que le quai soit horizontal.",
         "unloading": "De la même manière, posez aussi un quai au nord de la gare de déchargement, en le plaçant du côté du bâtiment de la gare. Une fois la pose terminée, appuyez sur « Suivant ».",
         "title": "Construire des quais à côté des gares"
       },
       "step7": {
-        "description": "Avec « Voie de chemin de fer » dans l'onglet « Voie ferrée », posez la voie depuis l'extrémité est du quai de la gare de déchargement jusqu'à l'extrémité ouest du quai de la gare de chargement (une seule voie suffit). Après confirmation, la voie et les quais sont achevés et la liaison est vérifiée.",
+        "description": "Appuyez sur « Retour » pour revenir à la liste, choisissez « Voie de chemin de fer » et posez la voie depuis l'extrémité est du quai de la gare de déchargement jusqu'à l'extrémité ouest du quai de la gare de chargement (une seule voie suffit). Après confirmation, la voie et les quais sont achevés et la liaison est vérifiée.",
         "title": "Relier les deux gares par le rail"
       },
       "step8": {
@@ -255,7 +255,7 @@
         "description": "Posez une voie de desserte depuis la borne de raccordement située au nord du dépôt jusqu'à la ligne principale. L'astuce est de la raccorder à la ligne principale non pas à angle droit, mais avec un angle faible en direction de l'est (un véritable aiguillage ne permet pas de bifurquer selon un grand angle). Une fois la pose terminée, appuyez sur « Suivant »."
       },
       "step10": {
-        "description": "La voie est électrifiée : l'électricité y circule depuis la borne de raccordement du dépôt. Ouvrez « Infrastructures » dans le panneau d'icônes et, avec « Ligne de transmission » sous « Électricité », reliez la borne de raccordement de la centrale solaire de la ville à celle du dépôt.",
+        "description": "La voie est électrifiée : l'électricité y circule depuis la borne de raccordement du dépôt. Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d'icônes et, avec « Ligne de transmission » sous « Électricité », reliez la borne de raccordement de la centrale solaire de la ville à celle du dépôt.",
         "title": "Alimenter le dépôt en électricité"
       },
       "step11": {

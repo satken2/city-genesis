@@ -122,9 +122,18 @@
     "collisionUnready": "形状を確定し、赤い占有範囲の干渉を解消してください。",
     "alignmentUnready": "急なカーブや勾配が規格の制限を超えています。形状を緩めてください。",
     "constructionSpeed": "建設スピード",
-    "selectType": "-- 種別を選択 --",
-    "selectTypeFirst": "種別を選択してください",
-    "noVariants": "該当なし",
+    "back": "戻る",
+    "category": {
+      "1": "街路",
+      "2": "高速道路",
+      "3": "歩道",
+      "4": "鉄道",
+      "5": "モノレール",
+      "6": "ロープウェイ",
+      "11": "電気",
+      "12": "水道",
+      "13": "石油"
+    },
     "shape": "形状",
     "elevation": "標高 (Y)",
     "embankmentHeight": "盛土高さ",
@@ -141,18 +150,13 @@
     "costInfo": "建設費用",
     "costRatioHelp": "高架道路や地下道路、あるいは複雑な地形の上に道路を建設すると、建設コストが上がります。",
     "placedContinue": "パスを配置しました。次のパスを配置してください。",
+    "stationHouseHint": "駅舎の線を敷設します。線と交差したプラットフォームがこの駅舎の駅に所属します。線の両端に駅舎の建屋が置かれ、線に沿って連絡橋が架かります。駅舎は既存の道路・線路には吸着しません(グリッド吸着のみ有効)。",
     "platformSide": "ホーム設置側",
     "platformSideOutside": "外側",
     "platformSideInside": "内側",
     "platformSideBoth": "両側",
-    "infra": {
-      "electricity": "電気",
-      "water": "水道",
-      "oil": "石油"
-    },
     "rail": {
       "parallel": "並走",
-      "noVariantForCombo": "この組み合わせに対応する線路がありません",
       "trackCount": "線路数",
       "trackSpacing": "線路間隔",
       "spacingWiden": "広げる",
@@ -174,27 +178,6 @@
       "extending": "「{{name}}」を延長します",
       "newNote": "確定すると、敷設した区間で新しい道路を作成します。",
       "createFailed": "道路は敷設しましたが、新しい道路を作成できませんでした。"
-    }
-  },
-  "track_construction": {
-    "simpleMode": "簡易",
-    "detailMode": "詳細",
-    "trackTab": "軌道",
-    "platformTab": "プラットフォーム",
-    "houseTab": "駅舎",
-    "stationTab": "駅",
-    "station": {
-      "hint": "3Dビューで駅を置く地点をクリックします。中ボタンドラッグで回転、PageUp/PageDownで高さを変えられます。右クリックまたはEscで地点を選び直します。",
-      "houseVariant": "駅舎の種類",
-      "settings": "駅の設定",
-      "carCount": "ホーム長",
-      "carCountUnit": "両 ({{length}}m)",
-      "angle": "角度",
-      "fixedNote": "複線の相対式ホーム(左右に1本ずつ)で固定です。線路の本数やホームの形を変えるには詳細モードを使ってください。",
-      "pickPointFirst": "3Dビューで駅を置く地点をクリックしてください"
-    },
-    "house": {
-      "hint": "駅舎の線を敷設します。線と交差したプラットフォームがこの駅舎の駅に所属します。線の両端に駅舎の建屋が置かれ、線に沿って連絡橋が架かります。駅舎は既存の道路・線路には吸着しません(グリッド吸着のみ有効)。"
     }
   },
   "path_shape_editor": {

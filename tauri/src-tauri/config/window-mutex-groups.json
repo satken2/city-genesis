@@ -28,8 +28,6 @@
   "building_construction": [
     "parcel_creation",
     "path_build",
-    "infra_build",
-    "track_build",
     "building_construction",
     "resource_edit",
     "prop_placement",
@@ -41,8 +39,6 @@
   "agent_creation": [
     "parcel_creation",
     "path_build",
-    "infra_build",
-    "track_build",
     "building_construction",
     "resource_edit",
     "prop_placement",
@@ -66,8 +62,6 @@
   "parcel_creation": [
     "parcel_creation",
     "path_build",
-    "infra_build",
-    "track_build",
     "building_construction",
     "resource_edit",
     "prop_placement",
@@ -91,34 +85,6 @@
   "path_build": [
     "parcel_creation",
     "path_build",
-    "infra_build",
-    "track_build",
-    "building_construction",
-    "resource_edit",
-    "prop_placement",
-    "transit_management",
-    "transit_creation",
-    "agent_creation",
-    "grading"
-  ],
-  "infra_build": [
-    "parcel_creation",
-    "path_build",
-    "infra_build",
-    "track_build",
-    "building_construction",
-    "resource_edit",
-    "prop_placement",
-    "transit_management",
-    "transit_creation",
-    "agent_creation",
-    "grading"
-  ],
-  "track_build": [
-    "parcel_creation",
-    "path_build",
-    "infra_build",
-    "track_build",
     "building_construction",
     "resource_edit",
     "prop_placement",
@@ -130,8 +96,6 @@
   "transit_management": [
     "parcel_creation",
     "path_build",
-    "infra_build",
-    "track_build",
     "building_construction",
     "resource_edit",
     "prop_placement",
@@ -143,8 +107,6 @@
   "transit_creation": [
     "parcel_creation",
     "path_build",
-    "infra_build",
-    "track_build",
     "building_construction",
     "resource_edit",
     "prop_placement",
@@ -156,8 +118,6 @@
   "prop_placement": [
     "parcel_creation",
     "path_build",
-    "infra_build",
-    "track_build",
     "building_construction",
     "resource_edit",
     "prop_placement",
@@ -169,8 +129,6 @@
   "resource_edit": [
     "parcel_creation",
     "path_build",
-    "infra_build",
-    "track_build",
     "building_construction",
     "resource_edit",
     "prop_placement",
@@ -182,8 +140,6 @@
   "grading": [
     "parcel_creation",
     "path_build",
-    "infra_build",
-    "track_build",
     "building_construction",
     "resource_edit",
     "prop_placement",

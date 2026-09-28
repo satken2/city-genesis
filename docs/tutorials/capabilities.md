@@ -38,7 +38,7 @@
 | `$ref` | 名前付き対象の数値ID。文字列埋め込み・任意式・コード実行は不可 |
 | コアの対象名 | `support.<名前>`・`lesson.<名前>` はコアが作った初期都市の対象。定義内の `bind` なしで `target` 等から参照できる |
 
-利用できるHUD操作名は `hud.road`、`hud.construction`、`hud.land`、`hud.district`、`hud.execute`、`hud.visibility`、`hud.track`、`hud.infra`、`hud.transport`。道路パネル内は `path.type`、`path.variant`、`path.confirm`、`path.cancel`。ウィンドウ単位の許可は `window.path_build`、`window.agent_detail`。新しい対象は実要素に `data-guide` を付け、`definitions.ts` の登録表・テスト・本表を同時に更新する。
+利用できるHUD操作名は `hud.road`、`hud.construction`、`hud.land`、`hud.district`、`hud.execute`、`hud.visibility`、`hud.transport`。道路・鉄道・インフラはすべて `hud.road` のパス建設パネルで敷き、パネル内は `path.type`(カテゴリのタイル)、`path.variant`(バリアントのカード)、`path.confirm`、`path.cancel`。ウィンドウ単位の許可は `window.path_build`、`window.agent_detail`。新しい対象は実要素に `data-guide` を付け、`definitions.ts` の登録表・テスト・本表を同時に更新する。
 
 ウィンドウ移動・閉じるための `.titlebar` と明示した `data-guide-escape`、チュートリアル・通知・Tipsは操作制限の対象外。システムトレイと設定・クレジット・セーブ/ロード・セーブ一覧・新規ゲーム・確認ダイアログも常に操作できる。除外一覧は `dom.ts` が管理する。スクロールとカメラは保持する。通常のdisabledは解除しない。別WebViewはそれぞれ同じ案内を受け取り、自分のDOMへ適用する。
 

@@ -6,7 +6,7 @@
 
 - `RoadEditor/RoadPlanManager.Tutorial.cs` はチュートリアルの地上直線制約との接点。マーカー・吸着・許可判定は `Tutorial/TutorialRuntime.cs` にまとめる。3D入力、Ctrlメニュー、2D形状変更と確定通知に同じ制約を適用し、シナリオIDを道路エディタで分岐しない。
 
-- パネル確定型(道路・建物・区画・資源・造成・公共交通・プロップ・駅パッケージ・結合/分割・区間編集)の確定はUI(Tauri)が直接バックエンドへ送る。ここは`edit_*:update_*`で形状を逐次通知し、成功後の`edit_*:finish`系(または`session:reload`)でリセットするだけ。
+- パネル確定型(道路・建物・区画・資源・造成・公共交通・プロップ・結合/分割・区間編集)の確定はUI(Tauri)が直接バックエンドへ送る。ここは`edit_*:update_*`で形状を逐次通知し、成功後の`edit_*:finish`系(または`session:reload`)でリセットするだけ。
 - 3Dジェスチャ完結型(地区の作成・拡張、接続端子のドラッグ移動)だけはUnityが直接送信する。地区の統合は不可逆なのでUIの確認ウィンドウを経由する。
 - ローカル判定(交差・川/海・湖の横断・線形・干渉)は表示用の推定で、権威はバックエンド(`/paths/validate`等)。ローカル線形推定で`can_confirm`を拒否しない。例外はロープウェイの折れ角(地形に依存せず確定的なので直接禁止)。
 - 詳細は`docs/programs/IPC連携の整理.md`の「確定送信の責務分担」「グラフィックプログラムのステート」。
@@ -20,7 +20,6 @@
 | `RoadEditor/RoadParallelSnapGeometry.cs` | 並行吸着のXZ射影計算 |
 | `RoadEditor/RoadEarthworkPreview.cs` | `/paths/earthwork-preview`の`path_profiles`(造成後の絶対標高)を取得するだけ。切土・盛土の体積は表示しない |
 | `RoadEditor/RoadEditControlMenu.cs` | 道路編集のCtrlラジアルメニュー+カーソルHUD。曲線/直線と吸着フラグの切替はここだけ |
-| `RoadEditor/StationPlanManager.cs` | 駅パッケージ配置(`STATE_EDIT_STATION`)。形状固定のゴースト配置で、共通吸着を掛けない |
 | `RoadEditor/PathTopologyEditManager.cs` | 既存パスの結合相手・分割点の選択。候補の前段フィルタだけ持ち、残りの条件はバックエンドのdry_run |
 | `RoadEditor/RoadMemberEditManager.cs` | 名前付き道路の区間編集。クリックを`edit_road:toggle_path`で知らせるだけで所属は書き換えない |
 | `BuildingEditor/` | 建物建設。`BuildingPlanManager`(区画配置)、`.Placement`(自由/道路沿い配置)、`BuildingPlacementGeometry`、`BuildingEditControlMenu`(基底に乗らない独自実装)、`EffectRangeOverlay` |

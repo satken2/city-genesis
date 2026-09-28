@@ -30,7 +30,6 @@ const ZoneMergeConfirmWindow = lazy(() => import("./components/zone/ZoneMergeCon
 const ConfirmDialogWindow = lazy(() => import("./components/common/ConfirmDialogWindow").then(m => ({ default: m.ConfirmDialogWindow })));
 const BuildingDirectAcquisitionConfirmWindow = lazy(() => import("./components/building/BuildingDirectAcquisitionConfirmWindow").then(m => ({ default: m.BuildingDirectAcquisitionConfirmWindow })));
 const PathConstructionPanel = lazy(() => import("./components/path/PathConstructionPanel").then(m => ({ default: m.PathConstructionPanel })));
-const TrackConstructionPanel = lazy(() => import("./components/path/TrackConstructionPanel").then(m => ({ default: m.TrackConstructionPanel })));
 const PathShapeEditorPanel = lazy(() => import("./components/path/PathShapeEditorPanel").then(m => ({ default: m.PathShapeEditorPanel })));
 const PathDetailPanel = lazy(() => import("./components/path/PathDetailPanel").then(m => ({ default: m.PathDetailPanel })));
 const BuildingConstructionPanel = lazy(() => import("./components/building/BuildingConstructionPanel").then(m => ({ default: m.BuildingConstructionPanel })));
@@ -97,7 +96,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * 専用パネルが実装されているウィンドウタイプのセット
  * これらのタイプはジェネリックな JSON 表示ではなく、専用コンポーネントでレンダリングする
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "diagnosis", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "infra_build", "track_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_metadata", "new_game", "city_rename", "template_editor", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "tutorial_intro", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "street_grid", "agent_creation"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "diagnosis", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "citizen_detail", "top_page", "building_construction", "mashup_edit", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_metadata", "new_game", "city_rename", "template_editor", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_hall", "city_regulation", "city_statistics", "financial_policy", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "tutorial_intro", "terrain_editor", "terrain_3d_preview", "god_edit", "quest_edit", "city_map", "street_grid", "agent_creation"]);
 
 
 function App() {
@@ -448,28 +447,14 @@ function App() {
               <PathConstructionPanel
                 apiBaseUrl={context.api_base_url}
                 onClose={closeWindow}
-                category="road"
                 editPathId={
                   (context.params as Record<string, unknown> | null)?.extra
                     ? ((context.params as Record<string, unknown>).extra as Record<string, unknown>).editPathId as number | undefined
                     : undefined
                 }
               />
-            ) : context.window_type === "infra_build" ? (
-              // インフラ(電気・水道)の敷設。パネルは道路建設と共用でカテゴリだけ固定する。
-              // 既存パスの編集は種別を問わず path_build 側(パス詳細パネル起点)で行う。
-              <PathConstructionPanel
-                apiBaseUrl={context.api_base_url}
-                onClose={closeWindow}
-                category="infra"
-              />
-            ) : context.window_type === "track_build" ? (
-              <TrackConstructionPanel
-                apiBaseUrl={context.api_base_url}
-                onClose={closeWindow}
-              />
             ) : context.window_type === "path_shape_editor" ? (
-              // 敷設中パスの2D形状編集。敷設パネル(path_build/track_build/infra_build)と並行して開く
+              // 敷設中パスの2D形状編集。パス建設パネル(path_build)と並行して開く
               <PathShapeEditorPanel apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "resource_edit" ? (
               <ResourceConstructionPanel

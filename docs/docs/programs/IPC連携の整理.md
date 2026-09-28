@@ -70,7 +70,7 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `view:query_object_filter`      | `ui -> graphic`  | オブジェクト単位の表示フィルタの現在値を問い合わせる（パネルを開いたときに送る） |
 | `view:object_filter_state`      | `graphic -> ui`  | `view:query_object_filter`への応答、およびフィルタ適用後の通知（`{hidden_building_ids, hidden_path_ids}`）。表示状態の正はUnity側にあり、複数のパネルがこれを受けて表示を揃える |
 | `view:set_grid`                 | `ui -> graphic`  | グリッドの表示有無や設定を切り替え。Unity側はグリッド表示とグリッド吸着を連動させる（表示ON=吸着ON） |
-| `view:grid_toggled`             | `graphic -> ui`  | 3Dビューのラジアルメニューでグリッド表示がトグルされた（`{ visible }`）。UI側は道路建設パネルのグリッド設定UIの表示状態を追従させる |
+| `view:grid_toggled`             | `graphic -> ui`  | 3Dビューのラジアルメニューでグリッド表示がトグルされた（`{ visible }`）。UI側はパス建設パネルのグリッド設定UIの表示状態を追従させる |
 | `camera:query_state`            | `ui -> graphic`  | 3Dカメラの現在位置と視線方位を問い合わせる。2D都市マップがカメラマーカーを描くために、開いたときと再読み込みのときに送る |
 | `camera:state`                  | `graphic -> ui`  | `camera:query_state`への応答。3Dカメラの現在位置と視線方位（`{ position:[x,y,z], yaw }`）。`yaw` は北（ワールド+Z）を0とする時計回りの度。**カメラの動きへの追従配信は行わない**（問い合わせ1回につき1回だけ送る） |
 | `edit_path:select_node`         | `graphic -> ui`  | パス敷設モードにおいて、敷設済みノードを選択した（`node_id`, `height`=相対標高, `embankment_height` を含む。`node_id=-1` は次回配置ノードの値）。UIパネルの標高・盛土ステッパーの表示と編集対象ノードを同期する。Unityのキー操作や吸着で値が変わったときも送られる |
@@ -86,8 +86,6 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `edit_path:select_split_point`  | `graphic -> ui`  | パス分割の分割点選択モード（`STATE_SPLIT_PATH`）において、分割点がクリックされた（`point`=[x,y,z]。対象パスの中心線へ射影済み）。UIはこの地点で `POST /api/v1/paths/{id}/split`（`dry_run=true`）を叩き、前半・後半の長さを表示してから確定する |
 | `edit_path:finish_topology_edit` | `ui -> graphic` | パスの結合／分割の確定送信に成功したことを通知する（`removed_path_id`＝結合で吸収されて消えたパスID。分割時は0）。Unity は「選択モード終了 → 消えたパスの即時破棄 → 通常モードへ復帰 → データ再取得」を1つのハンドラでこの順に行う。**`session:reload` と `world:change_state` を別々に送ってはいけない**——差分リロードは複数フレームにまたがるコルーチンで、後続の状態遷移が割り込むと再生成・削除が中途半端に終わり、形状が更新されない／消えたはずのパスが残る（道路敷設の `edit_path:finish` が1イベントにまとまっているのと同じ理由） |
 | `edit_path:cancel_topology_edit` | `ui -> graphic` | パス詳細パネル（`path_detail`）のウィンドウが閉じられたときに Rust（`window.rs`）が送る打ち切り通知。Unity は結合／分割の対象選択モード中だった場合のみ、モードを終了して通常モードへ戻す（**ポップアップは閉じても破棄されず非表示になるだけで React のアンマウント処理が走らないため、パネル任せにすると選択モードのまま入力が固まる**）。選択モード中でなければ何もしない＝ブルドーザ等の他モードを巻き込まないための専用イベント |
-| `edit_station:placement_command` | `ui -> graphic` | 駅パッケージ配置モード（`STATE_EDIT_STATION`）において、設定を変更する。変更したキーだけを送る（`platform_variant` / `house_variant` / `platform_length`（m） / `track_spacing`（m） / `height`（相対m） / `angle`（度） / `house_ends` / `travel_directions`）。`reset: true` は地点の固定だけを解除する（寸法・角度・高さは維持。パネルのキャンセル用）。キーを含まない呼び出しは現在の配置状態の問い合わせになる。Unity はゴーストへ即反映し、`edit_station:placement_state` で全状態を返す（建物直接配置の `placement_command`/`placement_state` と同じ構図） |
-| `edit_station:placement_state`  | `graphic -> ui`  | 駅パッケージ配置の現在の状態（`{revision, position, angle, height, platform_length, track_spacing, platform_variant, house_variant, house_ends, platforms, house}`）。`position` は固定済みの配置地点 `[x, z]` で、カーソル追従中は `null`（確定できない）。`platforms` は複線の各線（index は横オフセットの左→右）、`house` は駅舎の中心線で、どちらも `[始点, 終点]` の `[x, 相対高さ, z]`。**確定送信にそのまま使える値をUnityが解決して渡す**（幾何計算をUIに二重に持たせないため）。ホバー移動では送らず、地点の固定・回転のリリース・高さ変更・`placement_command` の受信でのみ送る |
 | `edit_building:select_parcel`   | `graphic -> ui`  | 建物建設モードにおいて、土地区画を選択した（parcel_id, polygon, position 等を含む） |
 | `edit_building:select_point` | `graphic -> ui` | 旧定義。現行の建物直接配置は`placement_command`/`placement_state`を使用する |
 | `edit_building:invalid_parcel`  | `graphic -> ui`  | 建物建設モードにおいて、選択中の建物種類と互換性のない土地区画がクリックされた（parcel_id を含む） |
@@ -243,12 +241,6 @@ Unityのグラフィックプログラムは、いくつかのステートを持
 設置済みの公共交通パス（`PATH_TRANSPORT`）は、`view:change_view` の `transit` レイヤーで路線種別ごとに表示ON/OFFできる（`sub_mode` に表示する `transit_path_id` のCSV文字列を渡す）。Unity は種別色の帯（オーバーレイ）として下地道路の上に描画する。
 
 `STATE_EDIT_PROP` は地形プロップ（森・岩・茂みなどの装飾）の配置モードで、プロップ配置パネル（`prop_placement`）で種別を選ぶと遷移する。`world:change_state` の params に `prop_type`・`placement_mode`（`"instance"` | `"scatter"`）・初期設定 `rotation`/`scale`（個別）・`density`/`seed`（範囲）を含める。配置には2モードある。**個別モード**は左クリックで1個ずつ配置（カーソル追従は半透明ゴースト、確定すると不透明の実モデル、右クリックで直近を取り消し）し、配置列を `edit_prop:update_instances` でUIへ送出する。**範囲モード**は左クリックで散布範囲のポリゴン頂点を置き（3頂点以上でseedベースの散布ゴーストを簡易プレビュー、右クリックで直近頂点を取り消し）、ポリゴンを `edit_prop:update_shape` でUIへ送出する。回転/スケール/密度/seed の変更は `edit_prop:change_settings` でプレビューに即反映する。個別モードでは3D側でも中ボタンドラッグで回転、PageUp/PageDown で高さを変えられ、結果は `edit_prop:placement_settings` でパネルへ書き戻す。確定送信（個別=`POST /api/v1/props/instances`、範囲=`POST /api/v1/props/scatters`）はUI側が直接行い、成功後に `edit_prop:finish` を送信してUnity側の配置状態をリセットする。既存プロップの削除は配置パネルではなく `STATE_REMOVE_OBJECTS`（ブルドーザ）で行い、範囲配置は `remove_object:request_confirm` / `remove_object:confirm_result` の確認を挟む。プロップはゼロコストの装飾のため `template_mode` ゲートはない。詳細な仕様は `genesis-docs/docs/geometries/M_地形プロップ.md` を参照。
-
-`STATE_EDIT_STATION` は駅パッケージ配置モードで、軌道建設パネル（`track_build`）の**簡易モードの「駅」タブ**が使う。プラットフォーム（複線の相対式＝対面ホーム）と駅舎をひとまとめにして1クリックで置くためのモードで、`world:change_state` の params に `platform_variant` / `house_variant` / `platform_length`（m） / `track_spacing`（m） / `height`（相対m） / `angle`（度。北＝ワールド+Zが0の時計回り） / `travel_directions`（各線の `DIR_*`） / `house_ends` を含める。
-
-Unity は `StationPlanManager` が担う。カーソル追従の半透明ゴースト（プラットフォーム2本＋駅舎1本を実パスと同じメッシュ生成器で描く）→ 左クリックで配置地点を固定 → パネルの確定ボタンで発注、という流れで、**建物の自由配置・プロップの個別配置と同じ操作**（中ボタンドラッグで回転、PageUp/PageDown で高さ、Esc または右クリックで地点の固定解除）を共通部品 `Editors/PlacementInput.cs` で提供する。形状は固定なので折れ線の編集・曲線・吸着・グリッドは持たない（**共通吸着も適用しない**——中心線は複線の「間」を通るため、既存の線路やノードへ吸着すると半間隔ぶんずれる）。プラットフォームは中心点の地盤標高＋指定の高さで水平に揃え、駅舎の線は地面に沿わせる（連絡橋のデッキ高さは駅舎プレハブの造形が持つため）。駅舎の線の長さはプラットフォームの外縁より外で終わる長さを自動で取る。建屋は線路に重なると外側へスライドするが、敷設中の線路はまだ存在せずスライド計算に入らないため、最初から外側で終わらせないとプレビューと確定後で建屋の位置がずれる。
-
-確定送信は UI 側が `POST /api/v1/paths`（プラットフォーム2本＋駅舎1本、`align_station_tracks: true`）で1回にまとめて行い、成功後に `edit_path:finish` で Unity 側の状態をリセットしてから `STATE_EDIT_STATION` を再送して連続設置に戻す。干渉・川/海・湖の横断・線形の検証も UI 側の `POST /paths/validate`（全3本）が権威で、Unity 側はローカル判定を持たない。
 
 `STATE_MERGE_PATH` / `STATE_SPLIT_PATH` は既存パスの結合・分割の「対象選択モード」で、パス詳細パネル（`path_detail`）の操作パネルにある結合／分割ボタンで遷移する。`world:change_state` の params に操作対象の `path_id`（結合では結合後に残る側＝survivor、分割では分割元）を含める。どちらも稼働中（`STATUS_ACTIVE`）のパスにのみ表示される。
 
@@ -473,7 +465,7 @@ world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地�
 `path_shape_editor` ウィンドウ（`PathShapeEditorPanel`）は、敷設中パスのノードとベジエ制御点を都市マップ（`CityMapCanvas`）の上で編集する。形状の真実源はUnity（`RoadPlanManager`）のままで、パネルは `edit_path:update_shape` を受けて描き、操作の結果だけを `edit_path:shape_command` で送る（コマンド入力・全状態出力。建物直接配置の `placement_command`/`placement_state` と同じ構図）。UIは受信値を再送しないためループしない。
 
 - 開く: `edit_path:update_shape` の `is_finalized && is_curved`（曲線モードでの右クリック確定）を受けた敷設パネル（`usePathConstruction`）が `open_registered_window("path_shape_editor")` で自動的に開く。直線モードや配置中は敷設パネルの「2Dで編集」ボタンで手動で開く。
-- 閉じる: 敷設パネルの確定ボタン（`close_registered_window("path_shape_editor")`）、敷設パネル（`path_build`/`track_build`/`infra_build`）のクローズ（Rust `window.rs` の後始末）、`update_shape` の `phase=inactive` 受信（パネルが自分を閉じる）。**2Dパネルを閉じても敷設セッションは続く**（Unityへは何も送らない）。
+- 閉じる: 敷設パネルの確定ボタン（`close_registered_window("path_shape_editor")`）、パス建設パネル（`path_build`）のクローズ（Rust `window.rs` の後始末）、`update_shape` の `phase=inactive` 受信（パネルが自分を閉じる）。**2Dパネルを閉じても敷設セッションは続く**（Unityへは何も送らない）。
 - 編集できるのは `phase=editing` のときだけ。配置中（`placing`）は表示のみ。標高・盛土は2Dでは編集せず、ノード選択（`select_node`）で敷設パネルのステッパーの対象を切り替える。
 - 曲率・勾配はUnityのローカル推定（`alignment`）をそのまま色分け・区間ラベルに使う。権威値は従来どおり `/paths/construction-cost` を敷設パネルの費用カードが表示する。
 - 高架・地下（`height_editable`）のバリアントでは地図の下に**縦断面ストリップ**（`PathProfileStrip`）を出す。横軸は曲線を伸ばした始点からの距離、縦軸は標高で、`alignment.samples` の路面・地盤プロファイルと `alignment.nodes` のアンカー位置から描く（線形評価の対象外の種別では折れ線長と相対高さだけの相対表示）。ここではノードを**上下ドラッグで高さ（地面相対）だけ**変更し、ドラッグ終了時に既存の `edit_path:change_node` を1回送る（Unityが `min_height` でクランプして適用し `update_shape`／`select_node` で返す）。横方向には動かせない。勾配の区間ラベル（`labels` の勾配側）も同じ位置に描く。
@@ -517,11 +509,11 @@ world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地�
 
 `edit_path:update_shape.max_span_violations` は `[{segment_index, distance, limit}]`。添字は区間の始点ノードの0始まり、距離と上限はm単位。Unityの赤線と同じ `max_span` 判定を使い、曲線長や高低差ではなく隣接アンカーのXZ直線距離を比較する。上限と等しい距離は許可する。違反解消時・制限なし・点不足では空配列を送る。
 
-違反があるとUnityの `can_confirm` はfalse。Tauriの形状編集パネルは対象区間の中央に、距離・上限を示す引出線付き吹き出しを描く。カーブ・勾配と同じ描画処理を使い、ドラッグ中は再評価前の警告を非表示にする。道路・軌道建設の確定欄は「形状にエラーがあります」の簡潔な表示とし、パネル本文と同じ1remの文字サイズを使う。共通の `usePathConstruction` は違反を受けた時点で確定を禁止し、送信直前のガードにも反映する。
+違反があるとUnityの `can_confirm` はfalse。Tauriの形状編集パネルは対象区間の中央に、距離・上限を示す引出線付き吹き出しを描く。カーブ・勾配と同じ描画処理を使い、ドラッグ中は再評価前の警告を非表示にする。パス建設パネルの確定欄は「形状にエラーがあります」の簡潔な表示とし、パネル本文と同じ1remの文字サイズを使う。共通の `usePathConstruction` は違反を受けた時点で確定を禁止し、送信直前のガードにも反映する。
 
 ## 線形警告と検証結果の共有
 
-道路・軌道の建設パネルが確定送信と同じ全線を `/paths/validate` へ渡し、返された線形指標と描画用の違反区間をUnityへ共有する。形状編集パネルは独自に検証を問い合わせず、Unityから再配信された同じ結果を表示する。単線・複線とも、建設パネルと2Dの要約は全線の最悪値、3Dと2Dの吹き出しは各違反区間の最悪値となる。
+パス建設パネルが確定送信と同じ全線を `/paths/validate` へ渡し、返された線形指標と描画用の違反区間をUnityへ共有する。形状編集パネルは独自に検証を問い合わせず、Unityから再配信された同じ結果を表示する。単線・複線とも、建設パネルと2Dの要約は全線の最悪値、3Dと2Dの吹き出しは各違反区間の最悪値となる。
 
 `edit_path:update_shape` の `revision` は形状・設定変更で更新される。建設パネルは検証時の世代を付けた `edit_path:shape_command`（`op=apply_alignment`、`alignment_json` に `alignments` のJSON）を送り、Unityは世代が一致する編集状態でだけ採用する。nullは検証待ちへの切替を表す。応答待ちの操作・取消し・別セッションへの切替後に、以前の検証を採用しない。
 
@@ -529,7 +521,7 @@ world:change_stateのSTATE_EDIT_PROPとedit_prop:change_settingsはheight（地�
 
 操作中・結果待ちはUnityの暫定推定を使う。造成後縦断の非同期受信でも3Dと2Dを再通知するが、同じ世代の全線検証がすでにあればその結果を維持する。選択や警告だけの通知では建設パネルの検証を再起動せず、往復ループを防ぐ。
 
-駅舎通路のpassage_mode（elevated/ground/underground）はSTATE_EDIT_PATH/STATE_EDIT_STATIONと、edit_path:change_passage_mode、edit_station:placement_command/stateで共有する。プレビューと保存で同じ方式を使う。
+駅舎通路のpassage_mode（elevated/ground/underground）は `STATE_EDIT_PATH` の params と `edit_path:change_passage_mode` で渡す。プレビューと保存で同じ方式を使う。
 
 ## ドライブの開始
 

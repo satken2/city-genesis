@@ -122,9 +122,18 @@
     "collisionUnready": "Finalize the shape and resolve any collisions shown by red volumes.",
     "alignmentUnready": "A curve or grade exceeds the limits of this standard. Ease the alignment.",
     "constructionSpeed": "Construction Speed",
-    "selectType": "-- Select Type --",
-    "selectTypeFirst": "Please select a type",
-    "noVariants": "No variants available",
+    "back": "Back",
+    "category": {
+      "1": "Streets",
+      "2": "Motorways",
+      "3": "Walkways",
+      "4": "Railways",
+      "5": "Monorail",
+      "6": "Ropeway",
+      "11": "Electricity",
+      "12": "Water",
+      "13": "Oil"
+    },
     "shape": "Shape",
     "elevation": "Elevation (Y)",
     "embankmentHeight": "Embankment Height",
@@ -141,18 +150,13 @@
     "costInfo": "Construction Cost",
     "costRatioHelp": "Building roads on elevated or underground structures, or over complex terrain, increases the construction cost.",
     "placedContinue": "Path placed. Place the next path.",
+    "stationHouseHint": "Draw the station building line. Platforms crossed by the line belong to this station. Buildings are placed at both ends of the line, connected by an overhead bridge. Station buildings never snap to existing roads or tracks (only grid snapping applies).",
     "platformSide": "Platform Side",
     "platformSideOutside": "Outside",
     "platformSideInside": "Inside",
     "platformSideBoth": "Both",
-    "infra": {
-      "electricity": "Electricity",
-      "water": "Water",
-      "oil": "Oil"
-    },
     "rail": {
       "parallel": "Parallel Tracks",
-      "noVariantForCombo": "No track matches this combination",
       "trackCount": "Tracks",
       "trackSpacing": "Spacing",
       "spacingWiden": "Widen",
@@ -174,27 +178,6 @@
       "extending": "Extends {{name}}",
       "newNote": "When you confirm, a new road is created from the sections you build.",
       "createFailed": "The sections were built, but the new road could not be created."
-    }
-  },
-  "track_construction": {
-    "simpleMode": "Simple",
-    "detailMode": "Detailed",
-    "trackTab": "Track",
-    "platformTab": "Platform",
-    "houseTab": "Station Building",
-    "stationTab": "Station",
-    "station": {
-      "hint": "Click in the 3D view to place the station. Drag with the middle mouse button to rotate, and use PageUp/PageDown to change the height. Right-click or press Esc to pick a different spot.",
-      "houseVariant": "Station building",
-      "settings": "Station settings",
-      "carCount": "Platform length",
-      "carCountUnit": "cars ({{length}}m)",
-      "angle": "Angle",
-      "fixedNote": "Fixed as a double track with side platforms (one on each side). Use detailed mode to change the number of tracks or the platform layout.",
-      "pickPointFirst": "Click in the 3D view to place the station"
-    },
-    "house": {
-      "hint": "Draw the station building line. Platforms crossed by the line belong to this station. Buildings are placed at both ends of the line, connected by an overhead bridge. Station buildings never snap to existing roads or tracks (only grid snapping applies)."
     }
   },
   "path_shape_editor": {

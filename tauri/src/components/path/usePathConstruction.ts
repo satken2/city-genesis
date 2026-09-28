@@ -1,14 +1,13 @@
 /**
- * 道路建設パネル用の状態管理フック
+ * パス建設パネル用の状態管理フック
  *
  * グラフィックプログラム(Unity)側でマップ上のノード配置を行う前提のため、
  * マウスイベントハンドラは含まず、設定とIPCからのノード受信に専念する。
  *
- * 選択は3カテゴリ(道路 road / 軌道 rail / インフラ infra)に分かれる。
- *   - 道路・インフラ: path_type を選び、プルダウンで単一バリアントを選ぶ(selectedVariant)。
- *   - 軌道: 構造(通常/橋梁/駅)・電化/非電化の違いもバリアントの違いとして扱い、
- *     規格プルダウンで単線バリアントを確定して、線路数・進行方向・線路間隔で複線を構成する
- *     (候補の絞り込みは軌道建設パネル側の鉄道種別プルダウン・タブが行う)。
+ * 敷設の振る舞いは選んだバリアントの種別だけで決まる(カテゴリの選択はパネル側の表示の都合)。
+ *   - 道路・インフラ・駅舎: 選んだバリアントを単一パスとして敷く。
+ *   - 軌道(線路・モノレール): 構造(通常/橋梁/駅)・電化/非電化の違いもバリアントの違いとして扱い、
+ *     選んだ単線バリアントを線路数・進行方向・線路間隔で複線に構成する。
  *     線路間隔の既定はバリアントのマスター幅で、広げる/縮めるボタンで一定範囲内を
  *     調整できる(パス1本確定ごとに既定へ戻る)。
  *     複線は中心線を平行な単線パス群へ展開して一括敷設する(railComponents)。
@@ -17,8 +16,6 @@
  *     (判定は railBuild.isSingleRailPathVariant)。
  *
  * 状態:
- *   category: 選択中のカテゴリ("road" | "rail" | "infra")
- *   selectedType: 選択中の path_type(軌道では鉄道/モノレール/人員搬送の type)
  *   selectedVariant: 敷設する単一(=軌道では中心線の代表)バリアントID
  *   curveMode: 描画モード (straight/curved)。真実源はUnity側(ラジアルメニューで切替)であり、
  *              edit_path.update_shape の is_curved 受信によってのみ更新される。
@@ -95,17 +92,6 @@ import {
 
 /** 地形追従の個別設定の「未設定」(バリアント既定に従う)を表すセンチネル。バックエンド VALUE_NONE と一致。 */
 export const FOLLOW_TERRAIN_UNSET = -1;
-
-/** 建設パネルの3カテゴリ */
-export type PathCategory = "road" | "rail" | "infra";
-
-/** path_type からカテゴリを判定する(既存パス編集の読み込み時に使う)。 */
-function categoryOfType(type: number | null): PathCategory | null {
-  if (type == null) return null;
-  if (isRailType(type)) return "rail";
-  if (isInfraPathType(type)) return "infra";
-  return "road";
-}
 
 function clampInt(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, Math.round(value)));
@@ -216,8 +202,6 @@ export function usePathConstruction(
 ) {
   const { t } = useTranslation();
   useGuideSnapshot();
-  const [category, setCategory] = useState<PathCategory | null>(null);
-  const [selectedType, setSelectedType] = useState<number | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<number | null>(null);
   // 曲線モードの真実源はUnity側。update_shape の is_curved 受信でのみ更新され、
   // 確定送信(curved)・形状プレビュー・コスト見積りが参照する。
@@ -292,23 +276,6 @@ export function usePathConstruction(
   const costAbortControllerRef = useRef<AbortController | null>(null);
 
   /* ---- 派生データ ---- */
-
-  const variantsForType = useCallback(
-    (type: number): { id: number; data: PathMasterEntry }[] => {
-      if (!masterData?.paths) return [];
-      const variants: { id: number; data: PathMasterEntry }[] = [];
-      for (const key in masterData.paths) {
-        const entry = masterData.paths[key];
-        if (entry.type === type) {
-          variants.push({ id: parseInt(key), data: entry });
-        }
-      }
-      return variants;
-    },
-    [masterData]
-  );
-
-  const isRail = category === "rail";
 
   const selectedVariantData = useMemo((): PathMasterEntry | null => {
     if (selectedVariant === null || !masterData?.paths) return null;
@@ -395,17 +362,16 @@ export function usePathConstruction(
 
   /**
    * 軌道複線を中心線から展開するためのコンポーネント群。
-   * 新規敷設の軌道カテゴリでのみ生成し、道路・インフラ・既存パス編集では null。
+   * 軌道の新規敷設でのみ生成し、道路・インフラ・駅舎・既存パス編集では null。
    * null のときは単一パスとして扱う(confirmPath / コスト見積り / プレビュー共通)。
    * 単線(trackCount=1)でも travel_direction を送るためコンポーネント経路を使う。
    * 人員搬送(ロープウェイ等)と複線一体の線路(LRT専用軌道)は「両方向の単一パス1本」なので複線展開しない。
    */
   const railComponents = useMemo((): CombinedPathComponent[] | null => {
-    if (!isRail || selectedVariant === null || pathId != null) return null;
-    // 複線展開するのは単線の線路・モノレールだけ。駅舎パスなど軌道以外の type も単一パス扱い。
+    if (selectedVariant === null || pathId != null) return null;
     if (!isRailType(selectedVariantData?.type) || isSingleRailPathVariant(selectedVariantData)) return null;
     return buildRailComponents(selectedVariant, trackCount, trackSpacing, trackDirections);
-  }, [isRail, selectedVariant, selectedVariantData, pathId, trackCount, trackSpacing, trackDirections]);
+  }, [selectedVariant, selectedVariantData, pathId, trackCount, trackSpacing, trackDirections]);
 
   /**
    * 敷設中パス(中心線)の水平長(m)。ノードが2点未満なら null。
@@ -451,7 +417,7 @@ export function usePathConstruction(
 
   /**
    * バリアントを選び、Unity を敷設モード(STATE_EDIT_PATH)に遷移させる。
-   * 道路・インフラ・軌道とも、選択コンポーネントのプルダウンから直接呼ばれる。
+   * パネルのバリアントのカードと、既存パス編集の読み込みから呼ばれる。
    * 曲線モードの初期化(曲線許可なら curved、不許可なら straight)はUnity側の
    * InitializeRoadPlacement が行い、update_shape の is_curved で同期される。
    */
@@ -476,11 +442,8 @@ export function usePathConstruction(
     });
   }, [masterData, pathId, houseEnds, passageMode, platformSide, lateralOffsetsForVariant, travelDirectionsForVariant]);
 
-  /* ---- カテゴリ/種別の選択ハンドラ ---- */
-
-  /** 選択・配置状態をクリアして Unity を通常状態へ戻す(カテゴリは変えない)。 */
-  const clearSelection = useCallback(() => {
-    setSelectedType(null);
+  /** バリアントの選択と配置状態をクリアして Unity を通常状態へ戻す(パネルの戻るボタン)。 */
+  const deselectVariant = useCallback(() => {
     setSelectedVariant(null);
     setTrackSpacingDelta(0);
     setHeight(0);
@@ -502,29 +465,14 @@ export function usePathConstruction(
     });
   }, []);
 
-  /** 3カテゴリ(道路/軌道/インフラ)の切り替え。選択・配置をリセットする。 */
-  const onCategoryChange = useCallback((next: PathCategory | null) => {
-    clearSelection();
-    setCategory(next);
-  }, [clearSelection]);
-
-  /** 道路・インフラの path_type 選択(バリアントはプルダウンで別途選ぶ)。 */
-  const onTypeChange = useCallback((type: number | null) => {
-    setSelectedType(type);
-    setSelectedVariant(null);
-    // 既存パス編集の読み込み経路(onTypeChange → selectVariant)からも呼ばれるため、
-    // 未設定ならカテゴリを type から補完する。
-    setCategory((prev) => prev ?? categoryOfType(type));
-  }, []);
-
-  /** 軌道カテゴリ: 線路数(1〜10)。既定の進行方向を引き直す(上書きはクリア)。 */
+  /** 軌道: 線路数(1〜10)。既定の進行方向を引き直す(上書きはクリア)。 */
   const changeTrackCount = useCallback((n: number) => {
     const c = clampInt(n, MIN_TRACK_COUNT, MAX_TRACK_COUNT);
     setTrackCount(c);
     setDirectionOverrides(Array(c).fill(null));
   }, []);
 
-  /** 軌道カテゴリ: index番目の線の進行方向を 順→逆→両 と循環させる。 */
+  /** 軌道: index番目の線の進行方向を 順→逆→両 と循環させる。 */
   const cycleTrackDirection = useCallback((index: number) => {
     setDirectionOverrides((prev) => {
       const defaults = defaultTravelDirections(trackCount, trafficHand);
@@ -570,11 +518,6 @@ export function usePathConstruction(
       console.error("[usePathConstruction] sendEditPathSetFollowTerrain failed:", err);
     });
   }, []);
-
-  const resetPath = useCallback(() => {
-    setCategory(null);
-    clearSelection();
-  }, [clearSelection]);
 
   /**
    * 連続設置: 1本目のパス確定後に、選択中のバリアント・軌道設定を維持したまま
@@ -1209,8 +1152,6 @@ export function usePathConstruction(
   }, [apiBaseUrl, selectedVariant, constructionBody]);
 
   return {
-    category,
-    selectedType,
     selectedVariant,
     height,
     embankmentHeight,
@@ -1221,7 +1162,6 @@ export function usePathConstruction(
     startControl,
     endControl,
     waypointControls: rawWaypointControls,
-    variantsForType,
     selectedVariantData,
     unityPathType,
     unityPathVariant,
@@ -1265,12 +1205,10 @@ export function usePathConstruction(
     alignment: displayAlignment,
     alignmentOk: displayAlignment == null || (!displayAlignment.curveViolated && !displayAlignment.gradeViolated),
     // 選択・敷設
-    onCategoryChange,
-    onTypeChange,
     selectVariant,
+    deselectVariant,
     updateHeight,
     updateEmbankmentHeight,
-    resetPath,
     continuePlacement,
     confirmPath,
     canConfirm,

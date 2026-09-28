@@ -58,9 +58,7 @@ export type HudIconDef = {
  * `IconPanel` 側で個別に処理する。
  */
 export const MENU_ICONS: HudIconDef[] = [
-  { id: "road", src: "menu_road.png", tooltipKey: "taskbar.menuRoad", windowType: "path_build" },
-  { id: "track", src: "menu_track.png", tooltipKey: "taskbar.menuTrack", windowType: "track_build" },
-  { id: "infra", src: "menu_infra.png", tooltipKey: "taskbar.menuInfra", windowType: "infra_build" },
+  { id: "road", src: "menu_road.png", tooltipKey: "taskbar.menuRoad", windowType: "path_build" }, // 道路・鉄道・インフラのパスをまとめて敷く
   { id: "land", src: "menu_land.png", tooltipKey: "taskbar.menuLand", windowType: "parcel_creation" },
   { id: "grading", src: "menu_grading.png", tooltipKey: "taskbar.menuGrading", windowType: "grading", hintKey: "hint.grading" },
   { id: "district", src: "menu_district.png", tooltipKey: "taskbar.menuDistrict" },

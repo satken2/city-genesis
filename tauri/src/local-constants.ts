@@ -69,30 +69,6 @@ export const TRANSIT_LINE_COLOR_PRESETS: readonly string[] = [
   "#6cbb5a", // 黄緑
 ];
 
-/**
- * 軌道建設パネルの簡易モード(駅タブ)で、ホーム長を「両数」で指定するための換算値。
- * マスターに車両長の項目が無いため UI 側で持つ。1両20m + 停止位置の余裕を両端に取る。
- * バックエンドはホーム長を m でしか扱わないので、この換算は表示と入力のためだけのもの。
- */
-export const STATION_CAR_LENGTH_M = 20;
-export const STATION_PLATFORM_MARGIN_M = 10;
-export const STATION_MIN_CAR_COUNT = 1;
-export const STATION_MAX_CAR_COUNT = 20;
-export const STATION_DEFAULT_CAR_COUNT = 4;
-
-/** 両数からホーム長(m)を求める。 */
-export function stationPlatformLength(carCount: number): number {
-  return carCount * STATION_CAR_LENGTH_M + STATION_PLATFORM_MARGIN_M;
-}
-
-/**
- * 複合パス(combined_paths)用のUI専用の擬似パスタイプ。
- * バックエンドの path_type としては存在せず、PathConstructionPanel の
- * タイププルダウンで複合パスカテゴリを表すためだけに使われる。
- * 実際に作成されるパスは各コンポーネントの path_variant のタイプになる。
- */
-export const PATH_TYPE_COMBINED: number = 1000;
-
 /** 路線の種別(path_variant)から路線図の描画色を引く */
 export function resolveTransitColor(pathVariant: number): string {
   return TRANSIT_VARIANT_COLOR[pathVariant] ?? TRANSIT_DEFAULT_COLOR;
@@ -153,6 +129,29 @@ export const PATH_TYPES_INFRA: readonly number[] = [PATH_ELECTRICITY, PATH_WATER
 export function isInfraPathType(pathType: number | null | undefined): boolean {
   return pathType != null && PATH_TYPES_INFRA.includes(pathType);
 }
+
+/**
+ * パス建設パネルの最上位カテゴリ(カテゴリ=path_type)。この順にタイルを並べる。
+ * 仮想道路・公共交通の区間パスはプレイヤーが敷くものではないので含めない。
+ * 駅舎(PATH_STATION_HOUSE)は独立したカテゴリにせず、PATH_TYPES_WITH_STATION_HOUSE の一覧に含める。
+ */
+export const PATH_BUILD_CATEGORIES: readonly number[] = [
+  PATH_STREET,
+  PATH_MOTORWAY,
+  PATH_WALKWAY,
+  PATH_TRACK,
+  PATH_MONORAIL,
+  PATH_CONVEYOR,
+  PATH_ELECTRICITY,
+  PATH_WATER,
+  PATH_PIPELINE,
+];
+
+/**
+ * パス建設パネルで、バリアント一覧の末尾に駅舎を並べるカテゴリ。
+ * 駅舎は軌道の種別を問わずプラットフォームを束ねるが、ロープウェイは乗り場のパス自体が駅で駅舎を持たない。
+ */
+export const PATH_TYPES_WITH_STATION_HOUSE: readonly number[] = [PATH_TRACK, PATH_MONORAIL];
 
 /**
  * 形状から最小曲線半径・最大勾配を算出するパス種別。

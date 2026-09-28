@@ -70,7 +70,7 @@
         "title": "Construyamos una subestación"
       },
       "step4": {
-        "description": "Abre «Infraestructura» en el panel de iconos y elige «Línea de transmisión» en «Electricidad». Traza la línea desde el terminal de conexión de la central solar hasta el terminal de conexión de la subestación del pueblo. Aunque estén lejos, puedes tenderla como una sola línea si unes los terminales en línea recta. Al confirmar, se completará la línea de transmisión y se comprobará la conexión.",
+        "description": "Abre «Calles, ferrocarril e infraestructura» en el panel de iconos y elige «Línea de transmisión» en «Electricidad». Traza la línea desde el terminal de conexión de la central solar hasta el de la subestación del pueblo. Aunque estén lejos, basta con una sola línea recta entre los terminales. Al confirmar, se completará la línea de transmisión y se comprobará la conexión.",
         "title": "Conectemos con una línea de transmisión"
       },
       "step5": {
@@ -87,18 +87,18 @@
       "description": "Aprende a poner en servicio una línea ferroviaria que une la vivienda colectiva del pueblo con un edificio comercial preparando andenes, edificios de estación, vías, un depósito y la línea de transmisión.",
       "step1": {
         "title": "Construyamos los andenes",
-        "open": "Primero, los andenes donde los pasajeros esperan el tren. Abre «Vías férreas» en el panel de iconos y elige «Andén ferroviario» en la pestaña «Andén». Usa una sola vía.",
+        "open": "Primero, los andenes donde los pasajeros esperan el tren. Abre «Calles, ferrocarril e infraestructura» en el panel de iconos y elige «Andén ferroviario» en «Ferrocarril». Usa una sola vía.",
         "town": "Junto a la vivienda colectiva del pueblo, haz clic en los dos marcadores amarillos de oeste a este para tender un andén. Comprueba en la vista previa que el andén quede del lado norte (el de la vivienda) antes de confirmar.",
         "new": "Junto al edificio comercial del oeste, haz clic también en los dos marcadores amarillos de oeste a este para tender un andén con el lado de embarque hacia el norte. Cuando termines, pulsa «Siguiente»."
       },
       "step2": {
         "title": "Construyamos los edificios de estación",
-        "town": "Un andén solo todavía no es una estación. Elige «Estación sencilla» en la pestaña «Edificio de estación» y traza una línea entre los dos marcadores amarillos que cruce el andén del pueblo. Los andenes que cruza la línea se agrupan en esa estación.",
+        "town": "Un andén solo todavía no es una estación. Pulsa «Volver» para regresar a la lista, elige «Estación sencilla» y traza una línea entre los dos marcadores amarillos que cruce el andén del pueblo. Los andenes que cruza la línea se agrupan en esa estación.",
         "new": "Haz lo mismo en el andén del oeste: traza la línea de «Estación sencilla» entre los dos marcadores amarillos. Cuando termines, pulsa «Siguiente»."
       },
       "step3": {
         "title": "Unamos las dos estaciones con vía",
-        "description": "Elige «Vía de ferrocarril» en la pestaña «Vía férrea» y tiende la vía desde el extremo oeste del andén del pueblo hasta el extremo este del andén del oeste (una sola vía). Al pulsar «Siguiente», se completarán la vía y las estaciones y se comprobará la conexión."
+        "description": "Pulsa «Volver» para regresar a la lista, elige «Vía de ferrocarril» y tiende la vía desde el extremo oeste del andén del pueblo hasta el extremo este del andén del oeste (una sola vía). Al pulsar «Siguiente», se completarán la vía y las estaciones y se comprobará la conexión."
       },
       "step4": {
         "title": "Construyamos el depósito",
@@ -106,11 +106,11 @@
       },
       "step5": {
         "title": "Conectemos el depósito a la línea principal",
-        "description": "Tiende una vía de acceso desde el terminal de conexión del lado sur del depósito hasta la línea principal, con «Vía de ferrocarril» de la pestaña «Vía férrea», entre los dos marcadores amarillos. La clave es empalmarla con la línea principal en un ángulo suave hacia el este."
+        "description": "Tiende una vía de acceso desde el terminal de conexión del lado sur del depósito hasta la línea principal, con «Vía de ferrocarril» de «Ferrocarril», entre los dos marcadores amarillos. La clave es empalmarla con la línea principal en un ángulo suave hacia el este."
       },
       "step6": {
         "title": "Llevemos electricidad al depósito",
-        "description": "La vía está electrificada: la electricidad pasa del terminal de conexión del depósito a la vía. Abre «Infraestructura» en el panel de iconos y, con «Línea de transmisión» de «Electricidad», conecta el terminal de conexión de la central solar del pueblo con el terminal de conexión del depósito."
+        "description": "La vía está electrificada: la electricidad pasa del terminal de conexión del depósito a la vía. Abre «Calles, ferrocarril e infraestructura» en el panel de iconos y, con «Línea de transmisión» de «Electricidad», conecta el terminal de conexión de la central solar del pueblo con el terminal de conexión del depósito."
       },
       "step7": {
         "title": "Pongamos la línea en servicio",
@@ -164,12 +164,12 @@
         "title": "Construir una estación internacional de carga"
       },
       "step4": {
-        "open": "Abre «Vías férreas» en el panel de iconos y elige «Andén de carga de contenedores» en la pestaña «Andén».",
+        "open": "Abre «Calles, ferrocarril e infraestructura» en el panel de iconos y elige «Andén de carga de contenedores» en «Ferrocarril».",
         "place": "Tiende un andén al norte de la estación internacional de carga, paralelo a ella. Cambia «Lado del andén» para que el andén quede del lado del edificio de la estación (el lado sur) antes de confirmar. Si lo tiendes de oeste a este, elige «Interior». Cuando termines, pulsa «Siguiente».",
         "title": "Construir un andén junto a la estación"
       },
       "step5": {
-        "description": "Con «Vía de ferrocarril» de la pestaña «Vía férrea», tiende la vía desde el extremo este del andén hasta el extremo oeste del andén de la estación fronteriza de carga. Al confirmar, se completará la vía y se comprobará la conexión.",
+        "description": "Pulsa «Volver» para regresar a la lista, elige «Vía de ferrocarril» y tiende la vía desde el extremo este del andén hasta el extremo oeste del andén de la estación fronteriza de carga. Al confirmar, se completará la vía y se comprobará la conexión.",
         "title": "Tender la vía hasta la frontera"
       },
       "step6": {
@@ -181,7 +181,7 @@
         "description": "Tiende una vía de acceso desde el terminal de conexión del lado norte del depósito hasta la línea principal. Empálmala con la línea principal en un ángulo suave hacia el este, no en ángulo recto. Cuando termines, pulsa «Siguiente»."
       },
       "step8": {
-        "description": "Abre «Infraestructura» en el panel de iconos y, con «Línea de transmisión» de «Electricidad», conecta el terminal de conexión de la central solar del este del pueblo con el terminal de conexión del depósito.",
+        "description": "Abre «Calles, ferrocarril e infraestructura» en el panel de iconos y, con «Línea de transmisión» de «Electricidad», conecta el terminal de conexión de la central solar del este del pueblo con el terminal de conexión del depósito.",
         "title": "Llevar electricidad al depósito"
       },
       "step9": {
@@ -237,13 +237,13 @@
         "title": "Construir un puerto de graneles"
       },
       "step6": {
-        "open": "Abre «Vías férreas» en el panel de iconos y elige «Andén de carga de mineral» en la pestaña «Andén».",
+        "open": "Abre «Calles, ferrocarril e infraestructura» en el panel de iconos y elige «Andén de carga de mineral» en «Ferrocarril».",
         "loading": "Tiende un andén al norte de la estación de carga, paralelo a ella. Cambia «Lado del andén» para que el andén quede del lado del edificio de la estación (sur) antes de confirmar; de oeste a este es «Interior». El terreno baja en pendiente pronunciada: si aparece un error de pendiente, ajusta la «Altura del terraplén» para dejar el andén horizontal.",
         "unloading": "Del mismo modo, tiende también un andén al norte de la estación de descarga, de manera que quede del lado del edificio de la estación. Cuando termines, pulsa «Siguiente».",
         "title": "Construir andenes junto a las estaciones"
       },
       "step7": {
-        "description": "Con «Vía de ferrocarril» de la pestaña «Vía férrea», tiende la vía desde el extremo este del andén de la estación de descarga hasta el extremo oeste del andén de la estación de carga (basta con una sola vía). Al confirmar, se completarán la vía y los andenes y se comprobará la conexión.",
+        "description": "Pulsa «Volver» para regresar a la lista, elige «Vía de ferrocarril» y tiende la vía desde el extremo este del andén de la estación de descarga hasta el extremo oeste del andén de la estación de carga (basta con una sola vía). Al confirmar, se completarán la vía y los andenes y se comprobará la conexión.",
         "title": "Unir las dos estaciones con vías"
       },
       "step8": {
@@ -255,7 +255,7 @@
         "description": "Tiende una vía de acceso desde el terminal de conexión del lado norte del depósito hasta la línea principal. La clave es empalmarla con la línea principal en un ángulo suave hacia el este, no en ángulo recto (los desvíos reales no pueden girar en ángulos grandes). Cuando termines, pulsa «Siguiente»."
       },
       "step10": {
-        "description": "La vía está electrificada: la electricidad pasa del terminal de conexión del depósito a la vía. Abre «Infraestructura» en el panel de iconos y, con «Línea de transmisión» de «Electricidad», conecta el terminal de conexión de la central solar del pueblo con el terminal de conexión del depósito.",
+        "description": "La vía está electrificada: la electricidad pasa del terminal de conexión del depósito a la vía. Abre «Calles, ferrocarril e infraestructura» en el panel de iconos y, con «Línea de transmisión» de «Electricidad», conecta el terminal de conexión de la central solar del pueblo con el terminal de conexión del depósito.",
         "title": "Llevar electricidad al depósito"
       },
       "step11": {

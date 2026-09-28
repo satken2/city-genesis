@@ -1,9 +1,9 @@
 /**
- * 選択中パスバリアントの説明カード(アイコン+名称+説明文+線形・構造の規格値)。
+ * パスバリアントのカード(アイコン+名称+説明文+線形・構造の規格値)
  *
- * 表示位置がパネルごとに違う(道路建設=バリアント選択の直下、軌道建設=規格プルダウンと
- * 線路構成の設定の間)ため、共通ボディ(PathBuildSections)には含めず独立したセクションにしている。
- * 未選択のときは何も描画しない(=区切り線も出ない)。
+ * パス建設パネルで次の2通りに使う(建物建設パネルの BuildingVariantCard と同じ構図)。
+ * 1. カテゴリ選択後のバリアント一覧(onClick あり): 押せるボタンとして描画する
+ * 2. バリアント選択後の建設画面(onClick なし): 選択中のバリアントの概要を示す静的なカードとして流用する
  *
  * 説明文の下には、敷設時の検証で効くバリアントの制約値を小さなアイコン+数値だけで並べる
  * (最小曲線半径・最大勾配・最大スパン長・最小高さ)。項目名はアイコンのツールチップで示す。
@@ -14,9 +14,17 @@
 import { useTranslation } from "react-i18next";
 import type { PathMasterEntry } from "../../types";
 import { resolvePathIcon } from "../../utils/pathIcon";
+import "./PathConstructionPanel.css";
+import "../building/BuildingConstructionPanel.css";
 
-type PathVariantDescriptionProps = {
-  entry: PathMasterEntry | null;
+type PathVariantCardProps = {
+  entry: PathMasterEntry;
+  /** 資金不足・チュートリアルの制限などで選べない場合に true */
+  disabled?: boolean;
+  /** 名称の後ろに付ける補足(「（資金不足）」など) */
+  titleSuffix?: string;
+  /** 指定すると押せるボタンとして描画する */
+  onClick?: () => void;
 };
 
 /** 規格値1項目。i18nキーは path_construction.spec 配下、value は単位付きの表示文字列。 */
@@ -91,36 +99,51 @@ function collectSpecs(entry: PathMasterEntry): SpecItem[] {
   return specs;
 }
 
-export function PathVariantDescription({ entry }: PathVariantDescriptionProps) {
+export function PathVariantCard({ entry, disabled = false, titleSuffix, onClick }: PathVariantCardProps) {
   const { t } = useTranslation();
-  if (!entry) return null;
-
   const specs = collectSpecs(entry);
 
-  return (
-    <div className="pc-section">
-      <div className="pc-description-frame">
-        <img
-          src={resolvePathIcon(entry.type)}
-          alt={entry.display_name}
-          className="pc-description-icon"
-          draggable={false}
-        />
-        <div className="pc-description-body">
-          <div className="pc-description-name">{entry.display_name}</div>
-          <div className="pc-description-text">{entry.description || "—"}</div>
-          {specs.length > 0 && (
-            <div className="pc-description-specs">
-              {specs.map((spec) => (
-                <span key={spec.key} className="pc-spec" title={t(`path_construction.spec.${spec.key}`)}>
-                  {spec.icon}
-                  <span className="pc-spec-value">{spec.value}</span>
-                </span>
-              ))}
-            </div>
-          )}
+  const cardBody = (
+    <>
+      <img
+        src={resolvePathIcon(entry.type)}
+        alt={entry.display_name}
+        className="pc-description-icon"
+        draggable={false}
+      />
+      <div className="pc-description-body">
+        <div className="pc-description-name">
+          {entry.display_name}
+          {titleSuffix}
         </div>
+        <div className="pc-description-text">{entry.description || "—"}</div>
+        {specs.length > 0 && (
+          <div className="pc-description-specs">
+            {specs.map((spec) => (
+              <span key={spec.key} className="pc-spec" title={t(`path_construction.spec.${spec.key}`)}>
+                {spec.icon}
+                <span className="pc-spec-value">{spec.value}</span>
+              </span>
+            ))}
+          </div>
+        )}
       </div>
-    </div>
+    </>
   );
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        data-guide="path.variant"
+        className="pc-description-frame bc-variant-card-btn"
+        disabled={disabled}
+        onClick={onClick}
+      >
+        {cardBody}
+      </button>
+    );
+  }
+
+  return <div className="pc-description-frame">{cardBody}</div>;
 }

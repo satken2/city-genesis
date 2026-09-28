@@ -11,7 +11,7 @@
  * (算出は railBuild.defaultTravelDirections)。
  *
  * 人員搬送(ロープウェイ等)は描画・敷設とも道路と同じ「両方向の単一パス1本」扱いのため、
- * セクションごと描画しない(区切り線も出ない)。
+ * 軌道以外(駅舎など)と同じくセクションごと描画しない(区切り線も出ない)。
  *
  * 複線一体の線路(LRT専用軌道。線路系で lanes≥2)も単一パス1本で敷くので線路数・進行方向・
  * 線路間隔は出さず、「1本で上下線を表す」注記だけを同じ位置に出す(規格の切り替えで
@@ -22,15 +22,13 @@ import { useTranslation } from "react-i18next";
 import { PATH_CONVEYOR, DIR_FORWARD, DIR_BACKWARD } from "../../constants";
 import type { PathMasterEntry } from "../../types";
 import { NumberStepper } from "../common/NumberStepper";
-import { MIN_TRACK_COUNT, MAX_TRACK_COUNT, isMultiTrackRailVariant } from "./railBuild";
+import { MIN_TRACK_COUNT, MAX_TRACK_COUNT, isMultiTrackRailVariant, isRailType } from "./railBuild";
 import upArrowIcon from "../../assets/images/ui/up-arrow.png";
 import downArrowIcon from "../../assets/images/ui/down-arrow.png";
 import bothArrowIcon from "../../assets/images/ui/both-arrow.png";
 
 type RailTrackLayoutSettingsProps = {
-  /** 選択中の鉄道種別(人員搬送は複線構成を持たない) */
-  railType: number | null;
-  /** 選択中の規格(バリアント)。複線一体の線路なら設定の代わりに注記を出す。 */
+  /** 選択中のバリアント。複線一体の線路なら設定の代わりに注記を出す。 */
   variant: PathMasterEntry | null;
   trackCount: number;
   /** 実効の線路間隔(m)。表示専用で、変更は onAdjustSpacing 経由で行う。 */
@@ -46,7 +44,6 @@ type RailTrackLayoutSettingsProps = {
 };
 
 export function RailTrackLayoutSettings({
-  railType,
   variant,
   trackCount,
   trackSpacing,
@@ -77,7 +74,7 @@ export function RailTrackLayoutSettings({
     return t("path_construction.rail.dirBoth", "両方向");
   };
 
-  if (railType === null || railType === PATH_CONVEYOR) return null;
+  if (!variant || !isRailType(variant.type) || variant.type === PATH_CONVEYOR) return null;
 
   if (isMultiTrackRailVariant(variant)) {
     return (

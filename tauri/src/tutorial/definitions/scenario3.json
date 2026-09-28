@@ -172,7 +172,7 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.infra"
+              "hud.road"
             ]
           },
           "world": {

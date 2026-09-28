@@ -65,7 +65,6 @@ export type GraphicState =
   | "STATE_EDIT_RESOURCE"
   | "STATE_EDIT_TRANSIT"
   | "STATE_EDIT_PROP"
-  | "STATE_EDIT_STATION"
   | "STATE_EDIT_CONNECTOR"
   | "STATE_REMOVE_OBJECTS"
   | "STATE_MERGE_PATH"
@@ -665,34 +664,6 @@ export async function sendEditPropChangeSettings(params: {
     entity: null,
     action: "edit_prop:change_settings",
     params,
-  });
-}
-
-/**
- * `edit_station:placement_command`
- * 駅パッケージ配置モード(軌道建設パネルの簡易モード → 駅タブ)の設定を変更する。
- * 変更したキーだけを送り、Unity は3Dのゴーストへ即反映して `edit_station:placement_state` で
- * 全状態を返す(建物直接配置の `placement_command` / `placement_state` と同じ構図)。
- * `reset: true` は地点の固定だけを解除する(寸法・角度・高さは維持。確定後の連続設置と
- * パネルのキャンセルで使う)。キーを含まない呼び出しは現在の配置状態の問い合わせになる。
- */
-export async function sendStationPlacementCommand(command: {
-  platform_variant?: number;
-  house_variant?: number;
-  platform_length?: number;
-  track_spacing?: number;
-  height?: number;
-  angle?: number;
-  house_ends?: string;
-  passage_mode?: string;
-  travel_directions?: number[];
-  reset?: boolean;
-}): Promise<void> {
-  await invoke("send_window_action", {
-    windowType: "track_build",
-    entity: null,
-    action: "edit_station:placement_command",
-    params: command,
   });
 }
 
@@ -1486,34 +1457,6 @@ export const IPC_EVENT_EDIT_PROP_UPDATE_SHAPE = "edit_prop:update_shape";
  * (建物直接配置の `edit_building:update_direct_angle` と同じ扱い)。
  */
 export const IPC_EVENT_EDIT_PROP_PLACEMENT_SETTINGS = "edit_prop:placement_settings";
-
-/**
- * 駅パッケージ配置(軌道建設パネルの簡易モード)の配置状態が変わった(Unity → UI)。
- * カーソル追従中は `position` が null で、左クリックで地点を固定すると座標と
- * 確定送信に使う中心線(`platforms` / `house`)が入る。
- */
-export const IPC_EVENT_EDIT_STATION_PLACEMENT_STATE = "edit_station:placement_state";
-
-/**
- * `edit_station:placement_state` のペイロード。
- * `platforms` は複線の各線(index は線路間隔の左→右)、`house` は駅舎の中心線で、
- * どちらも `[始点, 終点]` の `[x, 相対高さ, z]`。幾何計算はUnity側に一本化してあるため、
- * UIはこの値をそのまま確定送信のパスへ載せる。
- */
-export type StationPlacementState = {
-  revision: number;
-  position: number[] | null;
-  angle: number;
-  height: number;
-  platform_length: number;
-  track_spacing: number;
-  platform_variant: number;
-  house_variant: number;
-  house_ends: string;
-  passage_mode: string;
-  platforms: number[][][] | null;
-  house: number[][] | null;
-};
 
 /**
  * ブルドーザモードで、Unity が即削除せず確認を求める対象をクリックした(Unity → UI。コックピット宛)。
