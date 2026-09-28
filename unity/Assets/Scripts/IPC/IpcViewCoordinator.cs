@@ -20,6 +20,12 @@ public class IpcViewCoordinator : MonoBehaviour
     /// </summary>
     public const string PRESET_TRANSIT = "transit";
 
+    /// <summary>
+    /// 土地区画詳細パネルが開いている間の表示プリセット名。
+    /// 区画の枠線を強制表示し、パネルを閉じたら元の表示へ復帰する。
+    /// </summary>
+    public const string PRESET_PARCEL_DETAIL = "parcel_detail";
+
     private Dictionary<string, string> _layerModes = new Dictionary<string, string>
     {
         { "terrain", "default" },
@@ -315,6 +321,9 @@ public class IpcViewCoordinator : MonoBehaviour
             case PRESET_TRANSIT:
                 ApplyTransitPreset();
                 break;
+            case PRESET_PARCEL_DETAIL:
+                ApplyParcelDetailPreset();
+                break;
             default:
                 Debug.LogWarning($"IpcViewCoordinator: 未知の表示プリセット: {preset}");
                 return;
@@ -322,6 +331,116 @@ public class IpcViewCoordinator : MonoBehaviour
 
         Debug.Log($"IpcViewCoordinator: ApplyPreset -> {preset}");
         NotifyStateChanged();
+    }
+
+    /// <summary>
+    /// 土地区画詳細パネルが開いている間の表示。
+    /// 選択中の区画や敷地の形状を確認できるよう、土地区画の境界線を強制表示する。
+    /// </summary>
+    private void ApplyParcelDetailPreset()
+    {
+        ForceLayer("parcel", "border");
+    }
+
+    /// <summary>
+    /// ウィンドウ単位の表示プリセットを解除し、元の表示状態へ復帰する(view.restore_preset)。
+    /// 編集ステートと併存しうる詳細パネルが、STATE_NORMAL を送らずに自身のプリセットだけを
+    /// 安全に解除するために使う。
+    /// </summary>
+    public void RestorePreset(string preset)
+    {
+        switch (preset)
+        {
+            case PRESET_PARCEL_DETAIL:
+                RestoreParcelDetailPreset();
+                break;
+            case PRESET_TRANSIT:
+                RestoreTransitPreset();
+                break;
+            default:
+                Debug.LogWarning($"IpcViewCoordinator: 未知の復帰プリセット: {preset}");
+                return;
+        }
+
+        Debug.Log($"IpcViewCoordinator: RestorePreset -> {preset}");
+        NotifyStateChanged();
+    }
+
+    private void RestoreParcelDetailPreset()
+    {
+        if (_currentState == "STATE_NORMAL")
+        {
+            RestoreLayerToNormal("parcel");
+        }
+        else
+        {
+            SyncFromState(_currentState);
+        }
+    }
+
+    private void RestoreTransitPreset()
+    {
+        if (_currentState == "STATE_NORMAL")
+        {
+            RestoreLayerToNormal("road");
+            RestoreLayerToNormal("building");
+            RestoreLayerToNormal("transit");
+        }
+        else
+        {
+            SyncFromState(_currentState);
+        }
+    }
+
+    /// <summary>
+    /// 指定レイヤーを通常状態の記憶(_normalStateMemory または NORMAL_DEFAULTS)へ復元し、描画へ反映する。
+    /// </summary>
+    private void RestoreLayerToNormal(string layer)
+    {
+        if (layer == "terrain")
+        {
+            if (_normalStateMemory.TryGetValue("terrain", out var terrainMem))
+            {
+                _layerModes["terrain"] = terrainMem.mode;
+                if (!string.IsNullOrEmpty(terrainMem.subMode))
+                {
+                    _layerSubModes["terrain"] = terrainMem.subMode;
+                }
+                else
+                {
+                    _layerSubModes.Remove("terrain");
+                }
+            }
+            else
+            {
+                _layerSubModes.Remove("terrain");
+            }
+        }
+        else if (NORMAL_DEFAULTS.TryGetValue(layer, out var defaultVal))
+        {
+            var value = _normalStateMemory.TryGetValue(layer, out var mem) ? mem : defaultVal;
+            _layerModes[layer] = value.mode;
+            if (!string.IsNullOrEmpty(value.subMode))
+            {
+                _layerSubModes[layer] = value.subMode;
+            }
+            else
+            {
+                _layerSubModes.Remove(layer);
+            }
+            if (!string.IsNullOrEmpty(value.flags))
+            {
+                _layerFlags[layer] = value.flags;
+            }
+            else
+            {
+                _layerFlags.Remove(layer);
+            }
+        }
+
+        if (VisualModeHandler.Instance == null) return;
+        string effectiveFlags = _layerFlags.TryGetValue(layer, out var f) ? f : "";
+        ApplyLayerMode(layer, _layerModes[layer], _layerSubModes.TryGetValue(layer, out var s) ? s : null, effectiveFlags);
     }
 
     /// <summary>

@@ -5,9 +5,9 @@
  * 分類(マスターの bd_category)と建物(バリアント)の選択、階数設定、形状プレビューを行う。
  *
  * 操作フロー:
- *   1. 分類タイルを選ぶ → その分類の建物タイルに切り替わる
- *   2. 建物タイルを選ぶ → タイルが消えて説明文と建設の設定欄が表示される
- *      (左上の戻るボタンで建物タイル、さらに分類タイルへ1段ずつ戻れる)
+ *   1. 分類タイルを選ぶ → その分類の建物カード一覧に切り替わる
+ *   2. 建物カードを選ぶ → 一覧が消えて概要カードと建設の設定欄が表示される
+ *      (左上の戻るボタンで建物カード一覧、さらに分類タイルへ1段ずつ戻れる)
  *   3. IPC で graphic モジュールに STATE_EDIT_BUILDING を指示
  *   4. graphic 側で土地区画が選択されると edit_building.select_parcel が通知される
  *      Ctrlで自由/道路沿い配置を選んだ場合はplacement_stateで矩形と位置を受け取る
@@ -27,7 +27,6 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
 import { emit, listen } from "@tauri-apps/api/event";
 import type { AgentMasterEntry, LandmarkMasterEntry, ParcelData, StructureMasterEntry } from "../../types";
-import { resolveAgentIcon, resolveAgentVariantIcon } from "../../utils/agentIcon";
 import { resolveBdCategoryIcon } from "../../utils/bdCategoryIcon";
 import { resolveParcelIcon } from "../../utils/parcelIcon";
 
@@ -62,10 +61,12 @@ import { ConstructionInfoCard } from "../common/ConstructionInfoCard";
 import { isConstructionAffordable } from "../../utils/constructionFunding";
 import { useVariantAffordability } from "../../hooks/useVariantAffordability";
 import { BuildingFacilityInfoCard } from "./BuildingFacilityInfoCard";
-import { BuildingFloorSpecs } from "./BuildingFloorSpecs";
+import { BuildingVariantCard } from "./BuildingVariantCard";
 import { showNotification } from "../../utils/notification";
 import { BD_CATEGORY_OTHER, PARCEL_LAND, VARIANT_CITY } from "../../constants";
 import { isGradingVariant } from "../grading/grading";
+import copyIcon from "../../assets/images/ui/copy.png";
+import turnBackIcon from "../../assets/images/ui/turn-back.png";
 import "./BuildingConstructionPanel.css";
 
 // 直接配置モードで default_width が未設定のバリアント用のフォールバック(m)。
@@ -1291,7 +1292,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
   }
 
   /**
-   * 建設画面から建物タイルへ戻る。戻り先は選んでいた建物の分類で、既存建物の編集やコピー建設のように
+   * 建設画面から建物カード一覧へ戻る。戻り先は選んでいた建物の分類で、既存建物の編集やコピー建設のように
    * 分類タイルを経ずに建物が決まった場合も同じ規則で決まる。
    */
   function handleVariantDeselect() {
@@ -1549,93 +1550,90 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
 
   return (
     <div className="bc-layout" onClick={handlePanelClick}>
-      {/* 分類タイル → 建物タイル。市庁舎だけを置くモードは選択が固定なので出さない。
-          既存建物の編集は分類を変えられないため、分類タイルを出さず建物タイルから戻れない。 */}
+      {/* 分類タイル → 建物カード一覧。市庁舎だけを置くモードは選択が固定なので出さない。
+          既存建物の編集は分類を変えられないため、分類タイルを出さず建物カードから戻れない。 */}
       {selectedVariant === null && !cityHallOnly && (
         <div className="bc-section">
-          {selectedCategory !== null && editAgentId == null && (
-            <button className="bc-back-btn" type="button" onClick={() => setSelectedCategory(null)}>
-              ← {t("building_construction.back")}
-            </button>
+          {editAgentId == null && (
+            <div className="bc-selection-header">
+              {selectedCategory !== null && (
+                <button
+                  className="bc-header-btn bc-back-btn"
+                  type="button"
+                  onClick={() => setSelectedCategory(null)}
+                >
+                  <img src={turnBackIcon} alt="" className="bc-header-btn-icon" draggable={false} />
+                  <span>{t("building_construction.back")}</span>
+                </button>
+              )}
+              {/* 既存建物をコピー: 押すと Unity がコピー元建物の選択モードに入り、
+                  選ばれた建物の見た目・階数・フットプリントを取り込む。 */}
+              <button
+                className="bc-header-btn bc-copy-btn"
+                type="button"
+                onClick={() => {
+                  sendPickCopySource().catch((err) => {
+                    console.error("[BuildingConstruction] sendPickCopySource failed:", err);
+                  });
+                }}
+              >
+                <img src={copyIcon} alt="" className="bc-header-btn-icon" draggable={false} />
+                <span>{t("building_construction.copyExisting")}</span>
+              </button>
+            </div>
           )}
           {selectedCategory === null && editAgentId != null ? (
             <p className="bc-muted">{t("common.loading")}</p>
-          ) : (
+          ) : selectedCategory === null ? (
             <div className="bc-tile-grid">
-              {selectedCategory === null
-                ? availableCategories.map((category) => (
-                    <SelectionTile
-                      key={category}
-                      icon={resolveBdCategoryIcon(category)}
-                      name={t(`building_construction.category.${category}`)}
-                      onClick={() => setSelectedCategory(category)}
-                    />
-                  ))
-                : variantsForCategory.map(([idStr, entry]) => {
-                    const variantId = Number(idStr);
-                    const unaffordable = isVariantUnaffordable(variantId);
-                    return (
-                      <SelectionTile
-                        key={idStr}
-                        icon={resolveAgentVariantIcon(variantId)}
-                        name={entry.display_name + (unaffordable ? t("construction.variantUnaffordableSuffix") : "")}
-                        disabled={unaffordable}
-                        onClick={() => handleVariantSelect(variantId)}
-                      />
-                    );
-                  })}
+              {availableCategories.map((category) => (
+                <SelectionTile
+                  key={category}
+                  icon={resolveBdCategoryIcon(category)}
+                  name={t(`building_construction.category.${category}`)}
+                  onClick={() => setSelectedCategory(category)}
+                />
+              ))}
             </div>
-          )}
-          {/* 既存建物をコピー: 押すと Unity がコピー元建物の選択モードに入り、
-              選ばれた建物の見た目・階数・フットプリントを取り込む。 */}
-          {editAgentId == null && (
-            <button
-              className="bc-btn"
-              type="button"
-              style={{ marginTop: 10 }}
-              onClick={() => {
-                sendPickCopySource().catch((err) => {
-                  console.error("[BuildingConstruction] sendPickCopySource failed:", err);
-                });
-              }}
-            >
-              {t("building_construction.copyExisting")}
-            </button>
+          ) : (
+            <div className="bc-variant-card-list">
+              {variantsForCategory.map(([idStr, entry]) => {
+                const variantId = Number(idStr);
+                const unaffordable = isVariantUnaffordable(variantId);
+                return (
+                  <BuildingVariantCard
+                    key={idStr}
+                    variantId={variantId}
+                    entry={entry}
+                    disabled={unaffordable}
+                    titleSuffix={unaffordable ? t("construction.variantUnaffordableSuffix") : undefined}
+                    onClick={() => handleVariantSelect(variantId)}
+                  />
+                );
+              })}
+            </div>
           )}
         </div>
       )}
 
-      {/* 説明文 */}
+      {/* 選択建物の概要カード */}
       {selectedVariantData && (
         <div className="bc-section">
           {!cityHallOnly && (
-            <button className="bc-back-btn" type="button" onClick={handleVariantDeselect}>
-              ← {t("building_construction.back")}
+            <button
+              className="bc-header-btn bc-back-btn"
+              type="button"
+              onClick={handleVariantDeselect}
+            >
+              <img src={turnBackIcon} alt="" className="bc-header-btn-icon" draggable={false} />
+              <span>{t("building_construction.back")}</span>
             </button>
           )}
-          <div className="bc-description-frame">
-            <img
-              src={resolveAgentIcon(
-                selectedVariant!,
-                selectedVariantData.type,
-                selectedVariantData.building ?? false,
-                selectedVariantData.bd_type ?? 0
-              )}
-              alt={selectedVariantData.display_name}
-              className="bc-description-icon"
-              draggable={false}
-            />
-            <div className="bc-description-body">
-              <div className="bc-description-name">{selectedVariantData.display_name}</div>
-              <div className="bc-description-text">
-                {selectedVariantData.description || "—"}
-              </div>
-              <BuildingFloorSpecs
-                entry={selectedVariantData}
-                fixedFloors={selectedLandmarkData?.floors ?? null}
-              />
-            </div>
-          </div>
+          <BuildingVariantCard
+            variantId={selectedVariant!}
+            entry={selectedVariantData}
+            fixedFloors={selectedLandmarkData?.floors ?? null}
+          />
 
           {/* 構造種別の選択(構造を持つバリアントのみ)。上位ほど建設費が高く、耐用年数・耐火性が上がる。 */}
           {structureOptions.length > 0 && (

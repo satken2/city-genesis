@@ -382,6 +382,24 @@ public class IpcClient : MonoBehaviour
                     }
                     break;
 
+                case "view:restore_preset":
+                    {
+                        // 表示プリセットの解除通知。
+                        // 詳細パネルなど編集ステートを持たないウィンドウが閉じた際に、
+                        // STATE_NORMAL を送らずに自身のプリセットのみを安全に解除する。
+                        string preset = GetParamString(payload, "preset");
+                        Debug.Log($"IpcClient: view:restore_preset -> {preset}");
+                        if (preset != null)
+                        {
+                            var viewCoordinator = UnityEngine.Object.FindAnyObjectByType<IpcViewCoordinator>();
+                            if (viewCoordinator != null)
+                            {
+                                viewCoordinator.RestorePreset(preset);
+                            }
+                        }
+                    }
+                    break;
+
                 case "view:set_object_filter":
                     {
                         int[] hiddenBuildings = GetParamInt1D(payload, "hidden_building_ids");

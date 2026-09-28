@@ -59,15 +59,106 @@
   font-size: 0.9rem;
 }
 
-/* ---- 分類・建物の選択タイル ---- */
-.bc-back-btn {
-  display: block;
-  width: fit-content;
+/* ---- 分類・建物の選択 ---- */
+.bc-selection-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 8px;
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-size: 1rem;
+  min-height: 32px;
 }
+
+/* ヘッダーボタン(戻るボタン、既存建物をコピーボタン共通の枠なしスタイル) */
+.bc-header-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: #e5eef9;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: background 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+
+.bc-header-btn:hover {
+  background: rgba(255, 255, 255, 0.10);
+  color: #ffffff;
+}
+
+.bc-header-btn:active {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.bc-header-btn:focus-visible {
+  outline: 2px solid #4ea1ff;
+  outline-offset: 1px;
+}
+
+/* ヘッダーボタン内のアイコン画像 */
+.bc-header-btn-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
+}
+
+/* 既存建物をコピーボタン: 常に右端へ寄せる */
+.bc-copy-btn {
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+/* 戻るボタン単体の余白(ヘッダー外に置かれた場合) */
+.bc-back-btn {
+  margin-bottom: 8px;
+}
+
+.bc-selection-header .bc-back-btn {
+  margin-bottom: 0;
+}
+
+.bc-variant-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bc-variant-card-btn {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  box-sizing: border-box;
+  margin: 0;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.bc-variant-card-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.bc-variant-card-btn:focus-visible {
+  outline: 2px solid #4ea1ff;
+  outline-offset: 1px;
+}
+
+.bc-variant-card-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 
 .bc-tile-grid {
   display: grid;

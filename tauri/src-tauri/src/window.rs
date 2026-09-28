@@ -1103,13 +1103,20 @@ pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) 
                 json!({ "merged": 0 }),
             );
         } else if wt == "parcel_detail" {
-            // 土地区画詳細パネルが閉じられたとき、接道表示をクリアする。
+            // 土地区画詳細パネルが閉じられたとき、接道表示をクリアし、土地区画枠線の表示プリセットを解除する。
             let _ = ipc::send_ui_action(
                 state,
                 wt.clone(),
                 None,
                 "parcel:hide_front_path".to_string(),
                 json!({}),
+            );
+            let _ = ipc::send_ui_action(
+                state,
+                wt.clone(),
+                None,
+                "view:restore_preset".to_string(),
+                json!({ "preset": "parcel_detail" }),
             );
         } else if wt == "road_detail" {
             // 道路詳細パネルが閉じられたとき、3Dの道路の強調帯を消し、この道路の区間編集モード中なら打ち切る。

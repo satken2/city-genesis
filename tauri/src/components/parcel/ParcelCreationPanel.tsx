@@ -62,7 +62,7 @@ function isPointCreationMode(mode: CreationMode | null): boolean {
  */
 const SIZE_INPUT_PRESETS: Record<string, { width: number; height: number; min: number; max: number; step: number }> = {
   empty_area: { width: 10, height: 20, min: 1, max: 200, step: 1 },
-  along_path: { width: 10, height: 20, min: 1, max: 100, step: 1 },
+  along_path: { width: 20, height: 20, min: 1, max: 100, step: 1 },
   random: { width: 200, height: 200, min: 1, max: 400, step: 10 },
   block: { width: 200, height: 200, min: 20, max: 400, step: 10 },
 };

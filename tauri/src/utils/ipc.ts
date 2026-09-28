@@ -1230,9 +1230,11 @@ export async function sendViewQueryState(): Promise<void> {
 
 /**
  * 表示プリセットの名前。Unity側(`IpcViewCoordinator`の`PRESET_*`)と一致させること。
- * 公共交通の一覧・新設パネルが開いている間の表示(全路線+計画中の道路・建物)。
+ * - 公共交通の一覧・新設パネルが開いている間の表示(全路線+計画中の道路・建物)。
+ * - 土地区画詳細パネルが開いている間の表示(土地区画境界線の表示)。
  */
 export const VIEW_PRESET_TRANSIT = "transit";
+export const VIEW_PRESET_PARCEL_DETAIL = "parcel_detail";
 
 /**
  * `view.apply_preset`
@@ -1252,6 +1254,22 @@ export async function sendViewApplyPreset(preset: string, windowType: string): P
     windowType,
     entity: null,
     action: "view:apply_preset",
+    params: { preset },
+  });
+}
+
+/**
+ * `view.restore_preset`
+ * ウィンドウ単位の表示プリセットを解除し、元の表示状態へ復帰する。
+ *
+ * 詳細パネルのように編集ステートを持たず、かつ他の編集ステートと併存しうるウィンドウが、
+ * `STATE_NORMAL` を送らずに自身の表示プリセットのみを安全に解除するために使う。
+ */
+export async function sendViewRestorePreset(preset: string, windowType: string): Promise<void> {
+  await invoke("send_window_action", {
+    windowType,
+    entity: null,
+    action: "view:restore_preset",
     params: { preset },
   });
 }

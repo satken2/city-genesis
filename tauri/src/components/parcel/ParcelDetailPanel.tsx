@@ -38,6 +38,9 @@ import {
   sendEditParcelFinishShapeEdit,
   sendShowParcelFrontPath,
   sendHideParcelFrontPath,
+  sendViewApplyPreset,
+  sendViewRestorePreset,
+  VIEW_PRESET_PARCEL_DETAIL,
 } from "../../utils/ipc";
 import { IPC_EVENT_EDIT_PARCEL_UPDATE_SHAPE } from "../../utils/ipc";
 import { STATUS_ACTIVE } from "../../constants";
@@ -104,6 +107,16 @@ export function ParcelDetailPanel({
     limit_height: null,
     min_structure: 0,
   });
+
+  // パネル表示中、3Dビューの土地区画枠線を自動的にONにする。
+  // マウント時に表示プリセットを適用し、アンマウント時に元の表示状態へ復元する。
+  // ×ボタンで閉じられた場合も window.rs のクローズ処理で確実に復帰される。
+  useEffect(() => {
+    void sendViewApplyPreset(VIEW_PRESET_PARCEL_DETAIL, "parcel_detail").catch(console.error);
+    return () => {
+      void sendViewRestorePreset(VIEW_PRESET_PARCEL_DETAIL, "parcel_detail").catch(console.error);
+    };
+  }, []);
 
   // パネル表示中、選択中区画の接道(front_path)を Unity の3Dビューに青い矢印で可視化する。
   // マウント時に表示要求、アンマウント時にクリア要求を送る。Unity 側が parcel_id から

@@ -63,7 +63,8 @@ Offset  8: Ring buffer data (1048568 bytes)
 | `world:change_state`            | `ui -> graphic`  | グラフィックのモード(通常モード、土地区画作成モード、etc.)を切り替え |
 | `view:change_view`              | `ui -> graphic`  | 地形、建物、区画、道路、環境、アラートなどの表示モードを切り替え（`{layer, mode, sub_mode, flags}`）。`flags` は色モードと独立した表示トグルのCSV文字列（`plan`=計画中の表示、`public`=公共施設ハイライト、`speed_limit`=道路・線路の制限速度標識。road/building レイヤーのみ使用）。**`flags` が `null`（またはキー欠落）の場合は現在のフラグを維持**し、空文字は全トグルOFFを意味する |
 | `view:query_state`              | `ui -> graphic`  | グラフィックプログラムに現在の表示状態を問い合わせる            |
-| `view:apply_preset`             | `ui -> graphic`  | ウィンドウを開いている間だけ表示を差し替える（`{preset}`）。プリセットの中身はUnity側が持ち、UIは名前だけを指定する。**専用の編集ステート（`STATE_*`）を持たないウィンドウ専用**で、ステートを持つ操作ではUnityがステート別の表示プリセットを自動適用する。元の表示への復帰は `STATE_NORMAL` への復帰が担う（[Unity入力制御 §9.1](Unity入力制御.md#91-ステート別の表示プリセット)）。現在のプリセットは `transit`（公共交通の一覧・新設） |
+| `view:apply_preset`             | `ui -> graphic`  | ウィンドウを開いている間だけ表示を差し替える（`{preset}`）。プリセットの中身はUnity側が持ち、UIは名前だけを指定する。**専用の編集ステート（`STATE_*`）を持たないウィンドウ専用**で、ステートを持つ操作ではUnityがステート別の表示プリセットを自動適用する。元の表示への復帰は `STATE_NORMAL` への復帰、または `view:restore_preset` が担う（[Unity入力制御 §9.1](Unity入力制御.md#91-ステート別の表示プリセット)）。現在のプリセットは `transit`（公共交通の一覧・新設）、`parcel_detail`（土地区画詳細） |
+| `view:restore_preset`           | `ui -> graphic`  | ウィンドウ単位の表示プリセットを解除し、元の表示状態へ復帰する（`{preset}`）。詳細パネルのように編集ステートを持たず、かつ他の編集ステートと併存しうるウィンドウが、`STATE_NORMAL` を送らずに自身の表示プリセットのみを安全に解除するために使う |
 | `view:current_state`            | `graphic -> ui`  | `view:query_state`への応答、およびステート変更時の表示状態通知。各レイヤーは `{mode, sub_mode, flags}`（`flags` はONのトグルのCSV。無ければ空文字） |
 | `view:set_object_filter`        | `ui -> graphic`  | 建物・道路を**オブジェクト単位**で非表示にする集合を送る（`{hidden_building_ids, hidden_path_ids}`）。差分ではなく毎回「今隠しているものの全集合」を送る。レイヤー単位の`view:change_view`とは直交し、こちらが立っているオブジェクトは色モード・計画中表示に関わらず消える（クリックも拾わない）。状態はUnityのセッション内だけに存在し、バックエンドにもセーブにも残らない。詳細は[建設プロジェクト管理](建設プロジェクト管理.md) |
 | `view:query_object_filter`      | `ui -> graphic`  | オブジェクト単位の表示フィルタの現在値を問い合わせる（パネルを開いたときに送る） |
