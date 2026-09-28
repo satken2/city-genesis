@@ -24,7 +24,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 | `tools/` | 開発補助スクリプト(翻訳キー整合検査・プロップサムネイル生成・地形PNG一括再生成 `regenerate_terrain_thumbnails.py`・Unity音源の再生成・開発プロセス掃除 ほか) |
 | `scripts/` | 河川生成(`terrainRiver.ts`)の開発用検証スクリプト(`npx tsx`。CI外) |
 | `*-launch.toml` | Rust側が子プロセスとしてバックエンド/Unityを起動するコマンド |
-| `public/debug/`・`SPEC.md` | 素のHTMLのデバッグページ・初期設計時の仕様書(現行の正ではない) |
+| `SPEC.md` | 初期設計時の仕様書(現行の正ではない) |
 
 ## ウィンドウ構成(知らないと分からない)
 

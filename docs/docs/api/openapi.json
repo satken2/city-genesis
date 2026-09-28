@@ -1648,7 +1648,7 @@
           "buildings"
         ],
         "summary": "Preview Direct",
-        "description": "直接配置モード（土地区画外への建設）の形状プレビューと設置可否を返す。\n\n必須フィールド: variant, position（[x, z] または Unity 由来の [x, y, z]）, floors\n任意フィールド: width, depth（resizable=false のバリアントでは default_width に強制される）,\n                angle（回転角、度数法）, landmark（観光名所ID。底面寸法・階数が名所行に固定される）,\n                exclude_agent_id（編集モードの編集対象。名所の一点物判定から自身を外す）\n\n返却値: polygon（中心点原点の相対座標）, height, center_point, area,\n        valid（設置可否）, invalid_reason（不可の理由コード）,\n        requires_acquisition（民間区画の自動買収を承諾すれば確定できるか）,\n        acquisition（買収対象区画・件数・費用見積）,\n        interference（パス敷設と同形式のハイライトペイロード）,\n        width, depth, angle, resizable。\n設置可否の判定は create-direct と同一基準（既存区画・道路との重なり、建物種類と\n土地区画種類の物理的互換性）で行う。民間区画との重なりは\nrequires_acquisition=True として返り、確定時に acknowledge_acquisition=True を\n渡すことで自動用地買収つきで確定できる。",
+        "description": "直接配置モード（土地区画外への建設）の形状プレビューと設置可否を返す。\n\n必須フィールド: variant, position（[x, z] または Unity 由来の [x, y, z]）, floors\n任意フィールド: width, depth（resizable=false のバリアントでは default_width に強制される）,\n                angle（回転角、度数法）, landmark（観光名所ID。底面寸法・階数が名所行に固定される）,\n                exclude_agent_id（編集モードの編集対象。名所の一点物判定から自身を外す）\n\n返却値: polygon（中心点原点の相対座標）, height, center_point, area,\n        valid（設置可否）, invalid_reason（不可の理由コード）,\n        requires_acquisition（民間区画の自動買収を承諾すれば確定できるか）,\n        acquisition（買収対象区画・件数・費用見積）,\n        interference（パス敷設と同形式のハイライトペイロード）,\n        width, depth, angle, resizable。\n設置可否の判定は create-direct と同一基準（既存区画・道路との重なり、建物種類と\n土地区画種類の物理的互換性）で行う。民間区画との重なりは\nrequires_acquisition=True として返り、確定時に acknowledge_acquisition=True を\n渡すことで自動用地買収つきで確定できる。\n市庁舎（VARIANT_CITY）は配置・移転と同一基準で判定する。今の敷地は重なりに数えず、\n市有地以外との重なりは not_city_land（買収は提示しない）になる。",
         "operationId": "preview_direct_api_v1_buildings_preview_direct_post",
         "requestBody": {
           "content": {
@@ -3830,130 +3830,6 @@
         }
       }
     },
-    "/api/v1/debug/map": {
-      "get": {
-        "tags": [
-          "debug"
-        ],
-        "summary": "Map Ui",
-        "description": "デバッグ用都市マップ描画UI（HTML）を返す。",
-        "operationId": "map_ui_api_v1_debug_map_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "text/html": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/debug/css/common": {
-      "get": {
-        "tags": [
-          "debug"
-        ],
-        "summary": "Css Common",
-        "description": "debug画面共通CSSを返す。",
-        "operationId": "css_common_api_v1_debug_css_common_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/debug/css/map": {
-      "get": {
-        "tags": [
-          "debug"
-        ],
-        "summary": "Css Map",
-        "description": "都市マップページ専用CSSを返す。",
-        "operationId": "css_map_api_v1_debug_css_map_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/debug/css/path-build": {
-      "get": {
-        "tags": [
-          "debug"
-        ],
-        "summary": "Css Path Build",
-        "description": "パス建設ページ専用CSSを返す。",
-        "operationId": "css_path_build_api_v1_debug_css_path_build_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/debug/js/city-map": {
-      "get": {
-        "tags": [
-          "debug"
-        ],
-        "summary": "Js City Map",
-        "description": "再利用可能な都市マップ描画モジュール(JS)を返す。",
-        "operationId": "js_city_map_api_v1_debug_js_city_map_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/debug/path-build": {
-      "get": {
-        "tags": [
-          "debug"
-        ],
-        "summary": "Path Build Ui",
-        "description": "パス新規建設UI（HTML）を返す。",
-        "operationId": "path_build_ui_api_v1_debug_path_build_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "text/html": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/city/": {
       "get": {
         "tags": [
@@ -5086,45 +4962,6 @@
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
                 }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/data/visual-snapshot": {
-      "get": {
-        "tags": [
-          "data"
-        ],
-        "summary": "Get Visual Snapshot",
-        "operationId": "get_visual_snapshot_data_visual_snapshot_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      }
-    },
-    "/data/visual": {
-      "get": {
-        "tags": [
-          "data"
-        ],
-        "summary": "Get All Tables",
-        "description": "すべてのテーブル情報をHTMLで表示するエンドポイント\n---\ntags:\n  - logs\nresponses:\n  200:\n    description: すべてのテーブル情報のHTMLを返却\n    content:\n      text/html:\n        schema:\n          type: string\n          description: テーブル情報を表示するHTML",
-        "operationId": "get_all_tables_data_visual_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
               }
             }
           }
