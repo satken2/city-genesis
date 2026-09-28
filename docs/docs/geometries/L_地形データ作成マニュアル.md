@@ -55,7 +55,7 @@ terrain_editor/
 {
   "scenario_id": "local~0f8fad5b-d9cb-469f-a165-70867728950e",
   "terrain_map_id": "yoron",
-  "title": "珊瑚の浅瀬",
+  "title": "与論島",
   "locks": { "heights_locked": false, "reasons": [] },
   "map_width": 12000,
   "map_height": 8000,
@@ -189,7 +189,7 @@ my_island:
 
 | フィールド | 意味 |
 |---|---|
-| `id` | 地形を識別する固有のキー。UIはこのIDで翻訳された名前と紹介文(`terrainProfiles`)を引く |
+| `id` | 地形を識別する固有のキー。UIはこのIDで翻訳された名前(`terrainProfiles`)を引く |
 | `name` | 翻訳の無い地形の表示名 |
 | `file_name` | `.npy` ファイルの `assets/` 基準の相対パス。サムネイルは拡張子を `.png` に置き換えたパスを機械的に探す |
 | `src_spacing` | `.npy` のグリッド間隔(m)。読み込み時に `near_map_spacing` へリサンプリングする。`.npy` が既に `near_map_spacing` 解像度なら同じ値にする |
@@ -218,7 +218,7 @@ python tauri/tools/regenerate_terrain_thumbnails.py /path/to/assets/terrains/ter
 
 ### 4.4. ゲームで確認する
 
-登録表はバックエンドの起動時に読み込まれるため、バックエンドを再起動してからシナリオ管理の「地形を取り込む」タブを開く。新しい地形が一覧に表示され、「シナリオを作成」でその地形のシナリオを作れる。表示名と紹介文を翻訳するには、全7言語の `terrainProfiles.json` と `src/data/terrainProfiles.ts` に追加する([コンポーネント連携](../programs/コンポーネント連携.md#ニューゲームと地形紹介))。
+登録表はバックエンドの起動時に読み込まれるため、バックエンドを再起動してからシナリオ管理の「地形を取り込む」タブを開く。新しい地形が一覧に表示され、「シナリオを作成」でその地形のシナリオを作れる。表示名を翻訳するには、全7言語の `terrainProfiles.json` と `src/data/terrainProfiles.ts` に追加する([コンポーネント連携](../programs/コンポーネント連携.md#ニューゲームと地形紹介))。
 
 ## 5. 注意事項
 

@@ -1,4 +1,4 @@
-/** 名称と自然地形の紹介文を翻訳リソースに持つマップ。気候はAPIの設定値を使う。 */
+/** 表示名(実在の地名)を翻訳リソースに持つマップ。 */
 const TERRAIN_PROFILE_IDS = [
   "flat", "yoron", "aogashima", "kumejima", "iejima", "ikishima", "naoshima",
   "chichijima", "santorini", "hongkong", "manhattan", "bahrain", "dakar", "chongqing",

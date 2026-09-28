@@ -38,7 +38,6 @@
     "created": "Scénario créé.",
     "terrainHint": "Choisissez un terrain pour y créer votre propre scénario. La partie ne démarre pas. Ensuite, utilisez « Modifier la ville » et « Modifier le terrain » dans l’onglet Scénarios pour le développer.",
     "terrainEmpty": "Aucun terrain disponible.",
-    "terrainPlaceholder": "Choisissez un terrain dans la liste de gauche.",
     "terrainOpenFailed": "Impossible d’ouvrir le terrain du scénario.",
     "terrainEncryptedHint": "Ce scénario a été créé à partir d’une ville de DLC et il est chiffré : l’éditeur de terrain ne peut pas l’ouvrir. Utilisez « Modifier la ville » pour modifier les ressources et les objets décoratifs."
   },

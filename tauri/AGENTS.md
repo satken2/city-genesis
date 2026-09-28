@@ -13,7 +13,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 | `src/contexts/` | `MasterDataContext`(マスターデータ)・`FontSizeContext` |
 | `src/hooks/` | 共通Reactフック。仕様は各ファイル冒頭のコメント。APIの画像は `useApiImageUrl`(fetch→Blob URL)で表示する |
 | `src/utils/` | 共通処理(下記の一覧) |
-| `src/data/` | 静的な掲載データ。`credits.ts`(クレジット表示の正)・`propCategories.json`・`transitVehicleModels.json`・`resourcePresets.ts`・`terrainProfiles.ts`(翻訳された地形紹介を持つマップID) |
+| `src/data/` | 静的な掲載データ。`credits.ts`(クレジット表示の正)・`propCategories.json`・`transitVehicleModels.json`・`resourcePresets.ts`・`terrainProfiles.ts`(翻訳された表示名を持つマップID) |
 | `src/i18n/` | 翻訳リソース `<言語コード>/<ドメイン>.json`(`index.ts` がglobで集約) |
 | `src/assets/` | 画像(`images/`)と音声(`sounds/`) |
 | `src/types.ts` | 手書きの共通型(`WindowContext` など) |
@@ -87,7 +87,7 @@ City GenesisのUI(Tauri + React + TypeScript)。Unityのグラフィックの上
 | `agentIcon.ts` / `parcelIcon.ts` / `pathIcon.ts` / `resourceIcon.ts` / `ledgerIcon.ts` / `bdCategoryIcon.ts` / `pathCategoryIcon.ts` | 各種アイコン画像の解決。`bdCategoryIcon` は建物建設パネルの分類(`assets/images/bd_categories/{id}.png`)、`pathCategoryIcon` はパス建設パネルのカテゴリ(`assets/images/paths/path_{path_type}.png`)。`agentIcon` の `resolveAgentVariantIcon` はバリアント専用画像だけを返す(無ければ空文字) |
 | `propThumbnail.ts` | プロップサムネイルの解決。画像のglobはここ1箇所だけ |
 | `saves.ts` | 保存データの型(`SaveEntry`・保存元 `ScenarioOrigin`・パック所有状況 `PackStatus`)、ロード前確認 `prepareSaveLoad`、理由コードの取り出し `errorCode`(`ApiError` の code、Rust の「CODE: 本文」の先頭)、エラー表示 `saveError`(`saveCompatibility.<code>` で翻訳。コードが無ければ本文のまま) |
-| `terrainMaps.ts` | オリジナル地形の一覧要素 `TerrainMapEntry`、表示名 `terrainMapTitle`・紹介文 `terrainMapDescription`(翻訳の無い地形は登録表の名前と共通の文言)、大きさの整形 `formatMapSize` |
+| `terrainMaps.ts` | オリジナル地形の一覧要素 `TerrainMapEntry`、表示名 `terrainMapTitle`(翻訳の無い地形は登録表の名前)、大きさの整形 `formatMapSize` |
 
 ## 詳細の参照先
 

@@ -38,7 +38,6 @@
     "created": "Scenario created.",
     "terrainHint": "Choose a terrain to create your own scenario on it. The game does not start. Afterwards, use Edit city and Edit terrain on the Scenarios tab to build it out.",
     "terrainEmpty": "No terrains available.",
-    "terrainPlaceholder": "Select a terrain from the list on the left.",
     "terrainOpenFailed": "Could not open the scenario terrain.",
     "terrainEncryptedHint": "This scenario was made from a DLC city and is encrypted, so the terrain editor cannot open it. Use Edit city to edit resources and props."
   },

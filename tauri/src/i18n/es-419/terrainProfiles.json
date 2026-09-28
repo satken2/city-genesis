@@ -1,71 +1,54 @@
 {
   "terrainProfiles": {
     "unknown": "Desconocido",
-    "noDescription": "Todavía no hay una descripción geográfica de este terreno.",
     "maps": {
       "flat": {
-        "name": "Costa llana",
-        "description": "Una llanura junto al mar se extiende hacia el horizonte oriental. La costa es suave, sin grandes montañas ni valles profundos."
+        "name": "Costa llana"
       },
       "yoron": {
-        "name": "Bajíos de coral",
-        "description": "Una isla baja en aguas cálidas. La caliza coralina elevada forma mesetas suaves, con lagunas poco profundas frente a playas blancas. Los veranos son calurosos y húmedos; el mar suaviza los inviernos."
+        "name": "Isla Yoron"
       },
       "aogashima": {
-        "name": "Cráter dentro del cráter",
-        "description": "Una pequeña isla volcánica se alza sobre el océano abierto. Acantilados abruptos rodean una caldera profunda con otro cono en su interior. Las corrientes cálidas envuelven laderas bañadas por lluvia y vientos marinos húmedos."
+        "name": "Aogashima"
       },
       "kumejima": {
-        "name": "Cola de arena blanca",
-        "description": "Una isla accidentada en aguas cálidas. Desde las montañas del norte y del sur, las laderas bajan hacia tierras bajas, arrecifes y bancos de arena blanca. Sus largos veranos húmedos traen lluvias estacionales y fuertes tormentas."
+        "name": "Isla Kume"
       },
       "iejima": {
-        "name": "Meseta del pico solitario",
-        "description": "Una isla baja en aguas poco profundas. Un pico rocoso sobresale de una extensa meseta caliza. Playas y acantilados alternan en la costa; el verano es bochornoso y los vientos marinos recorren la isla en invierno."
+        "name": "Isla Ie"
       },
       "ikishima": {
-        "name": "Calas y colinas",
-        "description": "Una isla rodeada de corrientes cálidas. Suaves colinas de basalto se alternan con tierras bajas, entre costas rocosas, playas y ensenadas. El verano es húmedo y el invierno trae vientos fríos estacionales."
+        "name": "Isla Iki"
       },
       "naoshima": {
-        "name": "Isla en calma",
-        "description": "Una pequeña isla en un mar interior tranquilo. Colinas bajas de granito llegan hasta la costa y dejan pequeñas llanuras y ensenadas a la salida de los valles. Las montañas circundantes frenan las nubes y limitan las lluvias."
+        "name": "Naoshima"
       },
       "chichijima": {
-        "name": "Bahía de verdor",
-        "description": "Una isla cálida aislada por un mar inmenso. Valles profundos surcan las montañas volcánicas y las bahías interrumpen los acantilados. El invierno sigue siendo templado; una vegetación densa cubre las laderas y el viento marino cruza las crestas."
+        "name": "Chichijima"
       },
       "santorini": {
-        "name": "Media luna azul",
-        "description": "Un arco de tierra volcánica en un mar azul profundo. Altos acantilados rodean una caldera inundada, mientras las laderas exteriores descienden hacia la costa. El verano tiene sol intenso y muy poca lluvia; las precipitaciones se concentran en invierno."
+        "name": "Santorini"
       },
       "hongkong": {
-        "name": "Estrecho montañoso",
-        "description": "Una isla montañosa junto al borde de un continente. Valles cortos bajan desde crestas abruptas hasta una costa recortada; estrechos la separan de otras islas. Los monzones traen lluvias abundantes en verano y el invierno es más fresco y seco."
+        "name": "Isla de Hong Kong"
       },
       "manhattan": {
-        "name": "Isla esbelta del estuario",
-        "description": "Una isla alargada en la desembocadura de un gran río. Un cauce ancho al oeste y un estrecho de mareas al este enmarcan elevaciones rocosas y tierras bajas. Los veranos húmedos y calurosos contrastan con inviernos fríos y nevados."
+        "name": "Isla de Manhattan"
       },
       "bahrain": {
-        "name": "Llanuras de arena",
-        "description": "Una isla seca en un golfo poco profundo. Arenales bajos y llanuras calizas rodean colinas interiores áridas. El calor del verano es intenso y las escasas lluvias llegan principalmente en invierno."
+        "name": "Isla de Baréin"
       },
       "dakar": {
-        "name": "Cabo de la brisa",
-        "description": "Una península que se adentra en el océano desde el extremo occidental de un continente. Costas rocosas y playas bordean mesetas bajas y colinas volcánicas. Una larga estación seca da paso a breves lluvias estivales, mientras sopla la brisa marina bajo el sol intenso."
+        "name": "Dakar (península de Cabo Verde)"
       },
       "chongqing": {
-        "name": "Confluencia brumosa",
-        "description": "El borde de una cuenca interior. Estratos plegados levantan largas crestas paralelas, y entre ellas dos grandes ríos serpentean por valles profundos hasta unirse en la punta de una estrecha meseta. Los veranos son calurosos y húmedos; los inviernos, nublados, y una densa niebla suele llenar los valles."
+        "name": "Chongqing"
       },
       "xiamen": {
-        "name": "Isla entre canales",
-        "description": "Una isla redondeada en una bahía profunda al borde de un continente. Estrechos canales la separan de costas montuosas, y colinas de granito se alzan en su sur. Los inviernos son templados y sin nieve; en verano, los monzones y los tifones traen la lluvia."
+        "name": "Isla de Xiamen"
       },
       "dalian": {
-        "name": "Península de colinas rocosas",
-        "description": "Cerca del extremo sur de una larga península que se adentra en el mar desde un continente. Colinas rocosas llegan hasta la orilla; al norte penetra una bahía profunda y al sur se abre el mar. En invierno soplan vientos fríos y secos con algo de nieve; los veranos son templados y húmedos, y la niebla llega desde el mar."
+        "name": "Dalian"
       }
     }
   }

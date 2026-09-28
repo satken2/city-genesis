@@ -71,7 +71,7 @@
 | `ScenarioSource`(`ScenarioOriginBadges` / `RequiredPacks`) | シナリオの保存元(自作/コミュニティ/DLC)と公式の札、都市に刻まれた必要パックと所有状況。読み込めるかの判定はコアの `compatibility` が正で、ここは表示だけ |
 | `SaveVersionInfo` | 保存版・互換性・必要パックの表示。セーブ一覧・ニューゲーム・シナリオ管理で共通 |
 | `ScenarioThumbnail` / `TerrainMapThumbnail` | シナリオ・オリジナル地形の画像。`hooks/useApiImageUrl` で取得した Blob URL を表示し(APIの画像を `<img src>` で直接読まない)、シナリオ画像が無ければ地形画像、それも無ければプレースホルダー |
-| `TerrainFacts` | 地形の大きさ・地表・気候の欄(シナリオ管理の地形タブ・ニューゲームの詳細)。値の整形は `utils/terrainMaps.ts` |
+| `TerrainFacts` | 地形の大きさ・地表・気候の欄(ニューゲームの詳細)。値の整形は `utils/terrainMaps.ts` |
 
 このほか`SatisfactionFace`・`SpeedLimitSign`・グラフ類・`NumberStepper`・`Money`等がある。フック`hooks/useVariantAffordability`は資金目安で選択肢(プルダウンの項目・建物建設のタイル)を無効化する。
 
@@ -90,7 +90,7 @@
 
 - 都市設定(`taskbar/CityRenameWindow`、種別 `city_rename`): コックピットの都市名から開く。保存する値は都市名のみ。近似設定は Coming soon の無効な表示で、値の保持・送信を行わない。不可逆の警告は名称変更ではなく近似設定の節に置く。
 
-- ニューゲーム(`taskbar/NewGameWindow`): `FlatTabs` で「シナリオを選択」「シナリオを探す」(未提供。無効+Coming soon)の2タブ。一覧はチュートリアルと `GET /api/v1/scenarios`(全保存元)で、`scenarios:changed` で取り直す。地形から直接始める入口は持たない(チュートリアル用に `GET /api/v1/terrain/maps` だけ取る)。読み込めないシナリオは開始ボタンを無効にし、開始の確認画面に「開いているウィンドウをすべて閉じ、地形エディタの未保存の編集は失われる」旨を出す。地形の名称・自然地理の説明は全7言語の`terrainProfiles.json`に置き、`data/terrainProfiles.ts`で対象IDを管理する。収録地形の表示名は地形や景観を表す短い名称とし、実在・架空の固有地名を使わない。説明にも固有名詞・人間の都市・歴史・文化を含めない。マップIDは表示名と分けて維持する。気候はAPIの`climate`を`normalizeClimate`で正規化して`climate.<値>`で表示する。シナリオの地表・気候は一覧の要素の`ground_cover`・`climate`(都市が持つ値。地形エディタで変わる)を優先し、無いときだけ登録表の値を使う。大きさは寸法を変えられないので登録表から引く。マップIDから別の気候を割り当てない。未指定時の既定は温暖湿潤であり、「未分類」ではない。サイズはkm、地表は`GroundCoverIcon`の自作SVGで表示する。
+- ニューゲーム(`taskbar/NewGameWindow`): `FlatTabs` で「シナリオを選択」「シナリオを探す」(未提供。無効+Coming soon)の2タブ。一覧はチュートリアルと `GET /api/v1/scenarios`(全保存元)で、`scenarios:changed` で取り直す。地形から直接始める入口は持たない(チュートリアル用に `GET /api/v1/terrain/maps` だけ取る)。読み込めないシナリオは開始ボタンを無効にし、開始の確認画面に「開いているウィンドウをすべて閉じ、地形エディタの未保存の編集は失われる」旨を出す。地形の名称は全7言語の`terrainProfiles.json`に置き、`data/terrainProfiles.ts`で対象IDを管理する。収録地形の表示名は実在の地名(与論島・マンハッタン島など)で、紹介文は持たない。マップIDは表示名と分けて維持する。気候はAPIの`climate`を`normalizeClimate`で正規化して`climate.<値>`で表示する。シナリオの地表・気候は一覧の要素の`ground_cover`・`climate`(都市が持つ値。地形エディタで変わる)を優先し、無いときだけ登録表の値を使う。大きさは寸法を変えられないので登録表から引く。マップIDから別の気候を割り当てない。未指定時の既定は温暖湿潤であり、「未分類」ではない。サイズはkm、地表は`GroundCoverIcon`の自作SVGで表示する。
 - エポック実行(`taskbar/EpochConfirmWindow`): HTTPを日没と並行して開始し、黒幕の描画完了後だけ結果またはTipsへ進む。結果を閉じるまでは演出IDとHUD無効化を維持する。結果画面の終了はRustの共通クローズ処理が担当する。`TipsWindow`の`mode="epoch"`は初期ロードの開始ボタンを使わず、呼び出し元が処理完了時に閉じる。
 
 - 建物建設(`building/`): 配置方法・寸法の真実源はUnity(`edit_building:placement_state`)。要求区画種別・観光名所の一点物・構造種別の階数上限はパネル側でも弾く(区画選択後のバリアント変更で不一致が残る)。
@@ -141,6 +141,6 @@
 
 - `template/ScenarioManagerWindow` はトップメニューの「シナリオ管理」から開き、Unityを起動しない。`FlatTabs` で「シナリオ」「地形を取り込む」の2タブ。`scenario_manager` / `scenario_metadata` はレジストリ駆動のポップアップで、後者へ `params.extra.scenarioId` を渡す。
 - シナリオタブは `GET /api/v1/scenarios` の全保存元(自作・コミュニティ・DLC)を1つの一覧にする。自作(`origin === "local" && !read_only`)のカードは「都市を編集」「地形を編集」「紹介情報」「アップロード」、それ以外は「コピーして編集」だけ。都市を開く2つは `create_session {templateId, templateMode: true, acceptBalanceChange: true}` で、ポップアップが全部閉じるので確認文で地形エディタの未保存の編集に触れる。「地形を編集」は `invoke("prepare_scenario_terrain_editor", {scenarioId})` の戻り値で `terrain_editor` を開く。自作でも `encrypted`(DLC由来)なら「地形を編集」を無効にし、理由をツールチップ(`scenarios.terrainEncryptedHint`)で出す(作業コピーが平文で残るため、コアも409 `SCENARIO_ENCRYPTED` で断る)。
-- 地形を取り込むタブは初回表示で `GET /api/v1/terrain/maps` を取り、以後は隠すだけで選択を保つ。「シナリオを作成」は `POST /api/v1/scenarios/from-terrain {terrain_map_id, title: 翻訳名, language: アプリ設定の言語}` → 一覧の取り直し → シナリオタブへ切り替えて新しいカードを選択 → `scenarios:changed`。
+- 地形を取り込むタブは初回表示で `GET /api/v1/terrain/maps` を取り、以後は隠すだけで選択を保つ。地形はタイル(サムネイル・翻訳名・大きさ)だけで並べ、詳細欄は持たない。登録表の地表・気候はシナリオの初期値にすぎないので表示しない。「シナリオを作成」はツールバーに置き、選択するまで無効。押すと `POST /api/v1/scenarios/from-terrain {terrain_map_id, title: 翻訳名, language: アプリ設定の言語}` → 一覧の取り直し → シナリオタブへ切り替えて新しいカードを選択 → `scenarios:changed`。
 - 紹介文入力は `common/ScenarioTextFields`、画像は `ScenarioThumbnail`、保存元の札と必要パックは `ScenarioSource`、保存版と互換性は `SaveVersionInfo`。同じ項目の入力・表示を各画面で再実装しない。
 - 変更通知は `scenarios:changed`。保存成功後に紹介情報を開き、投稿は別操作として確認する。投稿先の可否はコアの一覧レスポンスに従う。

@@ -14,18 +14,12 @@ export type TerrainMapEntry = {
 };
 
 /**
- * 地形の表示名。紹介を翻訳リソースに持つ地形は翻訳名を使う。
- * 登録表の name はマップIDと同じ内部名(固有地名を含みうる)なので、翻訳の無い地形だけの代用にする。
+ * 地形の表示名。翻訳リソースに名前を持つ地形は翻訳名を使う。
+ * 登録表の name はマップIDと同じ内部名(yoron など)なので、翻訳の無い地形だけの代用にする。
  */
 export function terrainMapTitle(map: Pick<TerrainMapEntry, "id" | "name">, t: TFunction): string {
   const profile = getTerrainProfile(map.id);
   return profile ? t(`terrainProfiles.maps.${profile.id}.name`) : map.name;
-}
-
-/** 地形の自然地理の紹介文。翻訳が無い地形は共通の「説明なし」文言を返す。 */
-export function terrainMapDescription(mapId: string, t: TFunction): string {
-  const profile = getTerrainProfile(mapId);
-  return profile ? t(`terrainProfiles.maps.${profile.id}.description`) : t("terrainProfiles.noDescription");
 }
 
 /**

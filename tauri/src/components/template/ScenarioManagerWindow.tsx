@@ -6,7 +6,8 @@
  *   コミュニティ・DLC は読み取り専用なので「コピーして編集」だけを出す(保存すると自作になる)。
  *   DLC 由来の暗号化された自作シナリオは地形を編集できない(作業コピーが平文でディスクに残るため、コアが
  *   SCENARIO_ENCRYPTED で断る)ので、「地形を編集」を無効にして理由をツールチップで示す。
- * - 地形を取り込むタブ: オリジナル地形から新しい自作シナリオを作る(ゲームは始まらない)。
+ * - 地形を取り込むタブ: オリジナル地形をタイルで並べ、選んだ地形から新しい自作シナリオを作る(ゲームは始まらない)。
+ *   地表・気候はシナリオ側で決める値なので出さず、タイルには名前と大きさだけを載せる。
  *   作成後はシナリオタブへ切り替え、新しいカードを選択状態にする。
  *
  * 都市の編集は create_session でポップアップをすべて閉じるので、確認文で地形エディタの未保存の編集に触れる。
@@ -20,14 +21,12 @@ import { errorCode, prepareSaveLoad, SaveEntry, saveError } from "../../utils/sa
 import { requestConfirm } from "../../utils/confirmDialog";
 import { loadAppSettings } from "../../utils/settings";
 import { resolveSupportedLanguage } from "../../utils/locale";
-import { formatMapSize, terrainMapDescription, terrainMapTitle, type TerrainMapEntry } from "../../utils/terrainMaps";
-import { normalizeClimate, normalizeGroundCover } from "../terrain/terrainData";
+import { formatMapSize, terrainMapTitle, type TerrainMapEntry } from "../../utils/terrainMaps";
 import { FlatTabs } from "../common/FlatTabs";
 import { ScenarioThumbnail } from "../common/ScenarioThumbnail";
 import { TerrainMapThumbnail } from "../common/TerrainMapThumbnail";
 import { SaveVersionInfo } from "../common/SaveVersionInfo";
 import { ScenarioOriginBadges } from "../common/ScenarioSource";
-import { TerrainFacts } from "../common/TerrainFacts";
 import "./Scenarios.css";
 
 type Catalog = { scenarios: Record<string, SaveEntry>; upload_available: boolean; upload_host: string | null };
@@ -154,7 +153,7 @@ export function ScenarioManagerWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   </div>;
 }
 
-/** オリジナル地形のタイルと詳細。一度開いたら選択を保つため、タブを離れても隠すだけにする。 */
+/** オリジナル地形のタイル一覧。一度開いたら選択を保つため、タブを離れても隠すだけにする。 */
 function TerrainImportPanel({ apiBaseUrl, hidden, busy, error, onCreate }: {
   apiBaseUrl: string; hidden: boolean; busy: boolean; error: string; onCreate: (map: TerrainMapEntry) => void;
 }) {
@@ -171,33 +170,26 @@ function TerrainImportPanel({ apiBaseUrl, hidden, busy, error, onCreate }: {
   }, [apiBaseUrl, t]);
   const selected = maps?.find(map => map.id === selectedId) ?? null;
 
-  return <div className="scenario-manager-body scenario-terrain" hidden={hidden}>
-    <div className="scenario-terrain-list">
+  return <div className="scenario-manager-body" hidden={hidden}>
+    <div className="scenario-toolbar">
       <p className="scenario-hint">{t("scenarios.terrainHint")}</p>
-      {(loadError || error) && <p className="scenario-error" role="alert">{loadError || error}</p>}
-      {maps === null ? <p className="scenario-empty">{t("newGame.loading")}</p>
-        : maps.length === 0 ? <p className="scenario-empty">{t("scenarios.terrainEmpty")}</p>
-        : <div className="scenario-terrain-tiles">
-          {maps.map(map => <button key={map.id} type="button" className="scenario-terrain-tile" aria-pressed={map.id === selectedId}
+      <button type="button" className="scenario-primary" disabled={busy || !selected} onClick={() => { if (selected) onCreate(selected); }}>
+        {busy ? t("scenarios.creating") : t("scenarios.createFromTerrain")}
+      </button>
+    </div>
+    {(loadError || error) && <p className="scenario-error" role="alert">{loadError || error}</p>}
+    {maps === null ? <p className="scenario-empty">{t("newGame.loading")}</p>
+      : maps.length === 0 ? <p className="scenario-empty">{t("scenarios.terrainEmpty")}</p>
+      : <div className="scenario-terrain-tiles">
+        {maps.map(map => {
+          const size = formatMapSize(map.settings, i18n.language);
+          return <button key={map.id} type="button" className="scenario-terrain-tile" aria-pressed={map.id === selectedId}
             title={terrainMapTitle(map, t)} onClick={() => setSelectedId(map.id)}>
             <TerrainMapThumbnail apiBaseUrl={apiBaseUrl} mapId={map.id} className="scenario-terrain-tile-image" placeholderModifier="scenario-terrain-placeholder" />
-            <span>{terrainMapTitle(map, t)}</span>
-          </button>)}
-        </div>}
-    </div>
-    <aside className="scenario-terrain-detail">
-      {selected ? <>
-        <TerrainMapThumbnail apiBaseUrl={apiBaseUrl} mapId={selected.id} className="scenario-terrain-detail-image" placeholderModifier="scenario-terrain-placeholder" />
-        <div className="scenario-terrain-detail-content">
-          <h3>{terrainMapTitle(selected, t)}</h3>
-          <p className="scenario-description">{terrainMapDescription(selected.id, t)}</p>
-          <TerrainFacts mapSize={formatMapSize(selected.settings, i18n.language)}
-            groundCover={normalizeGroundCover(selected.ground_cover)} climate={normalizeClimate(selected.climate)} />
-        </div>
-        <button type="button" className="scenario-primary" disabled={busy} onClick={() => onCreate(selected)}>
-          {busy ? t("scenarios.creating") : t("scenarios.createFromTerrain")}
-        </button>
-      </> : <p className="scenario-placeholder">{t("scenarios.terrainPlaceholder")}</p>}
-    </aside>
+            <span className="scenario-terrain-tile-name">{terrainMapTitle(map, t)}</span>
+            {size && <span className="scenario-terrain-tile-size">{size}</span>}
+          </button>;
+        })}
+      </div>}
   </div>;
 }

@@ -1,71 +1,54 @@
 {
   "terrainProfiles": {
     "unknown": "Unknown",
-    "noDescription": "A geographical description is not yet available for this terrain.",
     "maps": {
       "flat": {
-        "name": "Flat Coast",
-        "description": "Flat land beside the sea stretches toward the eastern horizon. A gentle coastline unfolds without high mountains or deep valleys."
+        "name": "Flat Coast"
       },
       "yoron": {
-        "name": "Coral Shallows",
-        "description": "A low island in warm seas. Uplifted coral limestone forms gentle plateaus, with shallow lagoons beyond white beaches. Summers are hot and humid; the sea keeps winters mild."
+        "name": "Yoron Island"
       },
       "aogashima": {
-        "name": "Crater Within a Crater",
-        "description": "A small volcanic island rises steeply from the open ocean. Sea cliffs enclose a deep caldera with another cone on its floor. Warm currents surround slopes swept by moist sea winds and rain."
+        "name": "Aogashima"
       },
       "kumejima": {
-        "name": "White Sand Tail",
-        "description": "A rugged island in warm seas. Slopes descend from northern and southern uplands to low ground, coral reefs and white sandbars. Long, humid summers bring seasonal rains and fierce storms."
+        "name": "Kume Island"
       },
       "iejima": {
-        "name": "Lone Peak Plateau",
-        "description": "A low island in shallow seas. A single sharp rocky peak rises from a broad limestone plateau. Beaches alternate with cliffs; summers are hot and humid, while winter winds sweep in from the sea."
+        "name": "Ie Island"
       },
       "ikishima": {
-        "name": "Coves and Hills",
-        "description": "An island surrounded by warm currents. Gentle basalt hills give way to lowlands, with rocky shores and beaches along an indented coast. Summers are humid, and winters bring cold seasonal winds."
+        "name": "Iki Island"
       },
       "naoshima": {
-        "name": "Isle of Calm",
-        "description": "A small island in a sheltered inland sea. Low granite hills reach the shore, leaving small plains and coves at the mouths of valleys. Surrounding mountains intercept rain clouds, keeping rainfall relatively low."
+        "name": "Naoshima"
       },
       "chichijima": {
-        "name": "Deep Green Bay",
-        "description": "A warm island isolated by wide seas. Deep valleys cut through volcanic hills, and bays interrupt steep coastal cliffs. Winters remain mild, dense greenery covers the slopes, and sea winds cross the ridges."
+        "name": "Chichijima"
       },
       "santorini": {
-        "name": "Azure Crescent",
-        "description": "A volcanic arc of land in a deep blue sea. High cliffs encircle a sea-filled caldera, while outer slopes descend to the coast. Summers bring intense sunshine and scant rain; most precipitation falls in winter."
+        "name": "Santorini"
       },
       "hongkong": {
-        "name": "Mountain Strait",
-        "description": "A mountainous island beside a continental shore. Short valleys fall from steep ridges to an indented coast, with straits winding between nearby islands. Summer monsoons bring abundant rain; winters are cooler and dry."
+        "name": "Hong Kong Island"
       },
       "manhattan": {
-        "name": "Slender Estuary Isle",
-        "description": "A long, narrow island at a great river's mouth. A broad river to the west and a tidal strait to the east enclose rocky rises and lowlands. Humid summers give way to cold, snowy winters."
+        "name": "Manhattan Island"
       },
       "bahrain": {
-        "name": "Sandy Plains",
-        "description": "A dry island in a shallow gulf. Low sandy ground and limestone plains surround parched inland hills. Summers bring intense heat, and the little rain that falls arrives mainly in winter."
+        "name": "Bahrain Island"
       },
       "dakar": {
-        "name": "Sea Breeze Cape",
-        "description": "A peninsula projecting into the ocean from a continent's western tip. Rocky shores and sandy beaches fringe low plateaus and volcanic hills. A long dry season gives way to brief summer rains, while sea breezes sweep across the sunlit land."
+        "name": "Dakar (Cap-Vert Peninsula)"
       },
       "chongqing": {
-        "name": "Misty Confluence",
-        "description": "The rim of an inland basin. Folded strata raise long, parallel ridges, and between them two great rivers meander through deep valleys before meeting at the tip of a narrow upland. Summers are hot and humid; winters are overcast, and thick fog often fills the valleys."
+        "name": "Chongqing"
       },
       "xiamen": {
-        "name": "Channel-Ringed Isle",
-        "description": "A rounded island in a deep bay on a continent's edge. Narrow channels part it from hilly shores across the water, and granite hills rise across its south. Winters stay mild and snowless, while summer monsoons and typhoons bring the rain."
+        "name": "Xiamen Island"
       },
       "dalian": {
-        "name": "Rocky Hill Peninsula",
-        "description": "Near the southern end of a long peninsula reaching out from a continent. Rocky hills press down to the shore, with a deep bay cutting in to the north and open sea to the south. Dry, cold winds and light snow mark the winter; summers are mild and humid, with fog drifting in from the sea."
+        "name": "Dalian"
       }
     }
   }

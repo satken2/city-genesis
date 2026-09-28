@@ -38,7 +38,6 @@
     "created": "Escenario creado.",
     "terrainHint": "Elige un terreno para crear tu propio escenario sobre él. La partida no comienza. Después, usa Editar ciudad y Editar terreno en la pestaña Escenarios para desarrollarlo.",
     "terrainEmpty": "No hay terrenos disponibles.",
-    "terrainPlaceholder": "Elige un terreno de la lista de la izquierda.",
     "terrainOpenFailed": "No se pudo abrir el terreno del escenario.",
     "terrainEncryptedHint": "Este escenario se creó a partir de una ciudad de un DLC y está cifrado, por lo que el editor de terreno no puede abrirlo. Usa Editar ciudad para editar los recursos y los objetos decorativos."
   },

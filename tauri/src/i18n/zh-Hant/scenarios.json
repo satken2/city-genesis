@@ -38,7 +38,6 @@
     "created": "場景已建立。",
     "terrainHint": "選擇地形，以此建立你自己的場景。不會開始遊戲。建立後可在「場景」分頁中透過「編輯城市」與「編輯地形」繼續製作。",
     "terrainEmpty": "沒有可匯入的地形。",
-    "terrainPlaceholder": "請從左側列表中選擇地形。",
     "terrainOpenFailed": "無法開啟場景地形。",
     "terrainEncryptedHint": "此場景由 DLC 城市建立並已加密，因此無法在地形編輯器中開啟。可透過「編輯城市」編輯資源與裝飾物。"
   },

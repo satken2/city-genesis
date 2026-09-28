@@ -14,26 +14,21 @@
 .scenario-card h3, .scenario-card p, .scenario-manager-body p { margin: 0; }
 .scenario-description { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 8em; overflow-y: auto; }
 .scenario-thumbnail { display: block; width: 100%; height: 160px; object-fit: cover; background: var(--flat-sunken); }
-.scenario-hint, .scenario-empty, .scenario-placeholder { color: var(--flat-text-label); font-size: .85rem; }
-.scenario-empty, .scenario-placeholder { padding: 24px; text-align: center; color: var(--flat-text-muted); font-size: 1rem; }
+.scenario-hint, .scenario-empty { color: var(--flat-text-label); font-size: .85rem; }
+.scenario-empty { padding: 24px; text-align: center; color: var(--flat-text-muted); font-size: 1rem; }
 .scenario-error { color: var(--flat-danger); }
 .scenario-status { color: var(--flat-good); }
 .scenario-editor { display: flex; flex-direction: column; gap: 14px; height: 100%; box-sizing: border-box; padding: 20px; overflow-y: auto; color: var(--flat-text-body); }
 .scenario-editor select { background: var(--flat-sunken); color: var(--flat-text); padding: 8px; border: 0; font: inherit; }
 
-/* 地形を取り込むタブ: 左=地形タイル(伸縮) / 右=詳細(固定幅)。ニューゲームと同じ2カラム */
-.scenario-manager-body.scenario-terrain { flex-direction: row; gap: 20px; }
-.scenario-terrain-list { display: flex; flex-direction: column; gap: 12px; flex: 1; min-width: 0; overflow-y: auto; }
-.scenario-terrain-tiles { display: flex; flex-wrap: wrap; gap: 16px; padding: 4px; }
-.scenario-manager .scenario-terrain-tile { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 160px; padding: 12px; background: var(--flat-raised); box-shadow: var(--flat-shadow); text-align: center; }
+/* 地形を取り込むタブ: 地形のタイルだけを並べ、作成ボタンはツールバーに置く */
+.scenario-toolbar .scenario-hint { flex: 1; min-width: 0; }
+.scenario-terrain-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; overflow-y: auto; min-height: 0; align-content: start; padding: 4px; }
+.scenario-manager .scenario-terrain-tile { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; padding: 12px; background: var(--flat-raised); box-shadow: var(--flat-shadow); text-align: center; }
 .scenario-manager .scenario-terrain-tile[aria-pressed="true"] { background: var(--flat-selected); box-shadow: inset 4px 0 0 var(--flat-accent), var(--flat-shadow); }
-.scenario-terrain-tile-image { width: 136px; height: 96px; flex-shrink: 0; object-fit: contain; }
+.scenario-terrain-tile-image { width: 100%; height: 130px; flex-shrink: 0; object-fit: contain; }
 .scenario-terrain-placeholder { background: var(--flat-sunken); }
-.scenario-terrain-detail { display: flex; flex-direction: column; width: 420px; flex-shrink: 0; background: var(--flat-surface); box-shadow: var(--flat-shadow); overflow: hidden; }
-.scenario-terrain-detail-image { width: 100%; height: 170px; flex: 0 1 170px; min-height: 0; object-fit: contain; background: var(--flat-sunken); }
-.scenario-terrain-detail-content { display: flex; flex-direction: column; gap: 12px; padding: 16px; flex: 1; min-height: 0; overflow-y: auto; }
-.scenario-terrain-detail-content h3 { margin: 0; color: var(--flat-text); font-size: 1.5rem; }
-.scenario-terrain-detail-content .scenario-description { max-height: none; line-height: 1.7; }
-.scenario-placeholder { margin: auto; }
-.scenario-manager .scenario-primary { flex-shrink: 0; margin: 0 16px 16px; padding: 12px 20px; background: var(--flat-selected); font-size: 1.2rem; font-weight: 600; box-shadow: var(--flat-shadow); }
+.scenario-terrain-tile-name { color: var(--flat-text); font-weight: 600; }
+.scenario-terrain-tile-size { color: var(--flat-text-label); font-size: .85rem; }
+.scenario-manager .scenario-primary { flex-shrink: 0; padding: 9px 20px; background: var(--flat-selected); font-weight: 600; box-shadow: var(--flat-shadow); }
 .scenario-manager .scenario-primary:hover:not(:disabled) { background: var(--flat-selected-hover); }

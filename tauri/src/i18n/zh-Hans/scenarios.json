@@ -38,7 +38,6 @@
     "created": "场景已创建。",
     "terrainHint": "选择地形，以此创建你自己的场景。不会开始游戏。创建后可在“场景”标签页中通过“编辑城市”和“编辑地形”继续制作。",
     "terrainEmpty": "没有可导入的地形。",
-    "terrainPlaceholder": "请从左侧列表中选择地形。",
     "terrainOpenFailed": "无法打开场景地形。",
     "terrainEncryptedHint": "此场景由 DLC 城市创建并已加密，因此无法在地形编辑器中打开。可通过“编辑城市”编辑资源和装饰物。"
   },
