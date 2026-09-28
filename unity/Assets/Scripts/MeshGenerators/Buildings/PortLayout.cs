@@ -5,10 +5,11 @@ using UnityEngine;
 
 /// <summary>
 /// 港（MODEL_PORT）の陸側の配置計画。水際・ヤード・区画の辺0（道路側）から、施設モジュール（port_building）・
-/// 荷役クレーン（port_crane）・コンテナ（port_container）の置き場を決める純データ。
+/// 荷役クレーン（port_crane）・ヤードの荷（段積みするコンテナ port_container、または地面に1個ずつ置く荷 port_cargo）の
+/// 置き場を決める純データ。
 ///
 /// 座標はすべて center_point 基準のローカルXZ。配置は通常モデル（無印）の寸法と入力の形だけで決まり、
-/// 描画LODで変わらない（接写・遠景へ切り替えても建物やコンテナの位置がずれない）。
+/// 描画LODで変わらない（接写・遠景へ切り替えても建物や荷の位置がずれない）。
 /// 施設モジュールの置き方は区画と通常モデルだけから決め、海岸線・埋立地に依存させない。
 /// 間口の索引（<see cref="BuildingRoadAccess"/>）が建物データの登録時に同じ置き方を求めるため。
 /// 仕様は city-genesis/docs/docs/geometries/F4_港湾岸壁のメッシュ生成.md。
@@ -24,13 +25,13 @@ public static class PortLayout
     /// <summary>クレーンの陸側の端の後ろに空ける荷役用の車路の幅(m)。</summary>
     public const float APRON_LANE = 6f;
 
-    /// <summary>施設モジュール・塔屋の周りにコンテナを置かない幅(m)。</summary>
+    /// <summary>施設モジュール・塔屋の周りに荷を置かない幅(m)。</summary>
     public const float FACILITY_CLEARANCE = 3f;
 
-    /// <summary>ゲート（区画の辺0の中点）から水際の車路へ抜ける構内道路の幅(m)。コンテナを置かない。</summary>
+    /// <summary>ゲート（区画の辺0の中点）から水際の車路へ抜ける構内道路の幅(m)。荷を置かない。</summary>
     public const float DRIVE_WIDTH = 12f;
 
-    /// <summary>ヤードの縁からコンテナまでの距離(m)。</summary>
+    /// <summary>ヤードの縁から荷までの距離(m)。</summary>
     public const float YARD_MARGIN = 1.5f;
 
     /// <summary>コンテナ（20ft ISO）の長さ・幅・高さ(m)。パーツ port_container はこの寸法で著作する。</summary>
@@ -42,13 +43,60 @@ public static class PortLayout
     public const float CONTAINER_TIER_PITCH = CONTAINER_HEIGHT + 0.02f;
 
     private const float CONTAINER_GAP = 0.35f;          // 隣り合うコンテナの隙間(m)
-    private const int BLOCK_BAYS = 8;                    // 水際に沿う方向の1ブロックの個数
-    private const int BLOCK_ROWS = 6;                    // 奥行き方向の1ブロックの列数
+    private const int BLOCK_BAYS = 8;                    // コンテナの1ブロックの、水際に沿う方向の個数
+    private const int BLOCK_ROWS = 6;                    // コンテナの1ブロックの、奥行き方向の列数
     private const float BLOCK_AISLE = 8f;                // ブロックの間の通路(m)
-    private const int MAX_TIERS = 4;                     // 段数の上限
-    private const float FILL_RATIO = 0.8f;               // 置き場のうち実際に積む割合
-    private const int MAX_STACKS = 800;                  // 1つの港に積む山の上限（巨大な区画で頂点が膨らむのを防ぐ）
+    private const int MAX_TIERS = 4;                     // コンテナの段数の上限
+    private const float FILL_RATIO = 0.8f;               // 置き場のうち実際に置く割合
+    private const int MAX_STACKS = 800;                  // 1つの港に置く山の上限（巨大な区画で頂点が膨らむのを防ぐ）
     private const float FOOTPRINT_TOLERANCE = 0.05f;     // 施設モジュールが区画に収まるかの判定の余裕(m)
+    private const float CARGO_GAP = 1f;                  // 地面に置く荷の隣との隙間(m)
+    private const float MIN_CARGO_SIZE = 0.5f;           // 地面に置く荷の置き場の辺の下限(m)。寸法の無いパーツで格子が潰れないように
+
+    /// <summary>
+    /// 地面に置く荷のブロックの目安の大きさ(m)。コンテナの1ブロックと同じ大きさにそろえ、荷の種類が違っても通路の間隔を揃える。
+    /// </summary>
+    private const float CARGO_BLOCK_LENGTH = BLOCK_BAYS * (CONTAINER_LENGTH + CONTAINER_GAP);
+    private const float CARGO_BLOCK_DEPTH = BLOCK_ROWS * (CONTAINER_WIDTH + CONTAINER_GAP);
+
+    /// <summary>
+    /// ヤードの荷の置き方。置き場（格子の1区画）の大きさ・隙間と、ブロックの個数・列数、段数の上限。
+    /// Length は主な水際に沿う長さ、Width は奥行き(m)。
+    /// </summary>
+    public struct CargoSpec
+    {
+        public float Length;
+        public float Width;
+        public float Gap;
+        public int Bays;
+        public int Rows;
+        public int MaxTiers;
+    }
+
+    /// <summary>20ft コンテナを段積みする置き方（port_container）。</summary>
+    public static readonly CargoSpec ContainerSpec = new CargoSpec
+    {
+        Length = CONTAINER_LENGTH, Width = CONTAINER_WIDTH, Gap = CONTAINER_GAP, Bays = BLOCK_BAYS, Rows = BLOCK_ROWS, MaxTiers = MAX_TIERS,
+    };
+
+    /// <summary>
+    /// 地面に1個ずつ置く荷（port_cargo。野積みの山・油槽・魚箱など）の置き方。bounds はパーツの外接箱の和（ローカル+Z が水際に沿う向き）。
+    /// 置き場はそれを原点について対称に広げた矩形（原点が底面の中心から外れていても隣と重ならないように）で、荷は積まない。
+    /// </summary>
+    public static CargoSpec GroundCargoSpec(Bounds bounds)
+    {
+        float length = Mathf.Max(MIN_CARGO_SIZE, 2f * Mathf.Max(Mathf.Abs(bounds.min.z), Mathf.Abs(bounds.max.z)));
+        float width = Mathf.Max(MIN_CARGO_SIZE, 2f * Mathf.Max(Mathf.Abs(bounds.min.x), Mathf.Abs(bounds.max.x)));
+        return new CargoSpec
+        {
+            Length = length,
+            Width = width,
+            Gap = CARGO_GAP,
+            Bays = Mathf.Max(1, Mathf.RoundToInt(CARGO_BLOCK_LENGTH / length)),
+            Rows = Mathf.Max(1, Mathf.RoundToInt(CARGO_BLOCK_DEPTH / width)),
+            MaxTiers = 1,
+        };
+    }
 
     /// <summary>
     /// クレーンを並べる水際1本。P→Q は水際の線分、Normal は海を向く単位法線、Y はローカルの上面高さ。
@@ -80,8 +128,8 @@ public static class PortLayout
     }
 
     /// <summary>
-    /// コンテナの山1つ。Center は底面の中心、Along はコンテナの長手の向き（主な水際に沿う）。
-    /// Hash は段ごとの色を引く乱数の元で、同じ入力からは同じ値になる。
+    /// 荷の山1つ（コンテナは段積み、地面に置く荷は1個）。Center は底面の中心、Along は荷の長手の向き（主な水際に沿う）。
+    /// Hash は段ごとの色を引く乱数の元、RowHash はブロックの1列で共通の乱数の元で、どちらも同じ入力からは同じ値になる。
     /// </summary>
     public struct Stack
     {
@@ -89,6 +137,7 @@ public static class PortLayout
         public Vector2 Along;
         public int Tiers;
         public uint Hash;
+        public uint RowHash;
     }
 
     public sealed class Plan
@@ -96,18 +145,19 @@ public static class PortLayout
         public Module Module;
         public readonly List<Crane> Cranes = new List<Crane>();
         public readonly List<Stack> Stacks = new List<Stack>();
+        public CargoSpec Cargo;     // Stacks の置き方（Stacks が空なら意味を持たない）
     }
 
     /// <summary>
     /// 配置計画を作る。
-    /// footprint は区画（SHAPE_FULL の底面。CCW・辺0が道路側）、yard はコンテナを積める地面（岸壁フットプリント、
+    /// footprint は区画（SHAPE_FULL の底面。CCW・辺0が道路側）、yard は荷を置ける地面（岸壁フットプリント、
     /// または埋立地の上の港では区画の陸の部分）、waterlines はクレーンを並べる水際。
     /// moduleBounds・craneBounds は通常モデルのローカルの外接箱（パーツが無ければ null）。
-    /// obstacle は塔屋などコンテナを避ける追加の多角形（無ければ null）。
-    /// コンテナはクレーンが1基以上ある港で stackContainers のときだけ積む（クレーンと建物の間の荷役の空間を埋めるもの）。
+    /// obstacle は塔屋など荷を避ける追加の多角形（無ければ null）。
+    /// 荷はクレーンが1基以上ある港で cargo が与えられたときだけ置く（クレーンと建物の間の荷役の空間を埋めるもの）。
     /// </summary>
     public static Plan Create(Vector2[] footprint, Vector2[] yard, IReadOnlyList<Waterline> waterlines,
-        Bounds? moduleBounds, Bounds? craneBounds, Vector2[] obstacle, bool stackContainers, float visualVariant2)
+        Bounds? moduleBounds, Bounds? craneBounds, Vector2[] obstacle, CargoSpec? cargo, float visualVariant2)
     {
         var plan = new Plan();
         if (footprint == null || footprint.Length < 3)
@@ -122,11 +172,12 @@ public static class PortLayout
         {
             PlaceCranes(plan, waterlines, craneBounds.Value);
         }
-        if (stackContainers && plan.Cranes.Count > 0 && yard != null && yard.Length >= 3)
+        if (cargo.HasValue && plan.Cranes.Count > 0 && yard != null && yard.Length >= 3)
         {
             uint seed = (uint)Mathf.RoundToInt(Mathf.Clamp01(visualVariant2) * 1000000f);
             float craneDepth = craneBounds.HasValue ? Mathf.Max(0f, -craneBounds.Value.min.z) : 0f;
-            StackContainers(plan, yard, waterlines, craneDepth, obstacle, seed);
+            plan.Cargo = cargo.Value;
+            PlaceCargo(plan, cargo.Value, yard, waterlines, craneDepth, obstacle, seed);
         }
         return plan;
     }
@@ -224,15 +275,15 @@ public static class PortLayout
     }
 
     /// <summary>
-    /// ヤードの空きにコンテナを積む。主な水際（最長）の向きに長手を揃えた格子を、水際の車路の陸側の端から
-    /// 奥へ <see cref="BLOCK_ROWS"/> 列×<see cref="BLOCK_BAYS"/> 個のブロックと通路で区切り、ヤードの縁から
-    /// <see cref="YARD_MARGIN"/> 内側に収まり、次を避ける置き場だけに積む。
+    /// ヤードの空きに荷を置く。主な水際（最長）の向きに長手を揃えた格子を、水際の車路の陸側の端から
+    /// 奥へ spec.Rows 列×spec.Bays 個のブロックと通路で区切り、ヤードの縁から
+    /// <see cref="YARD_MARGIN"/> 内側に収まり、次を避ける置き場だけに置く。
     /// - 各水際のクレーン帯（水際から クレーンの陸側の端 + <see cref="APRON_LANE"/>）
     /// - 施設モジュールと追加の障害物の周り <see cref="FACILITY_CLEARANCE"/>
     /// - ゲートから内向きに伸びる幅 <see cref="DRIVE_WIDTH"/> の構内道路
-    /// 積むかどうか・段数は置き場の格子番号と種から引くので、他の置き場の有無や列挙の順に影響されない。
+    /// 置くかどうか・段数は置き場の格子番号と種から引くので、他の置き場の有無や列挙の順に影響されない。
     /// </summary>
-    private static void StackContainers(Plan plan, Vector2[] yard, IReadOnlyList<Waterline> waterlines,
+    private static void PlaceCargo(Plan plan, CargoSpec spec, Vector2[] yard, IReadOnlyList<Waterline> waterlines,
         float craneDepth, Vector2[] obstacle, uint seed)
     {
         try
@@ -250,7 +301,7 @@ public static class PortLayout
             }
             IPreparedGeometry allowed = PreparedGeometryFactory.Prepare(inner);
 
-            // 主な水際と、コンテナの格子の向き。u=水際に沿う向き、v=陸へ向かう向き。
+            // 主な水際と、荷の格子の向き。u=水際に沿う向き、v=陸へ向かう向き。
             Waterline main = waterlines[0];
             float mainLength = -1f;
             foreach (Waterline w in waterlines)
@@ -291,8 +342,10 @@ public static class PortLayout
             }
             IPreparedGeometry blockedAll = PreparedGeometryFactory.Prepare(gf.BuildGeometry(blocked).Union());
 
-            // 格子の原点は主な水際の始点からクレーン帯の奥行きだけ陸側。ヤードの範囲を (u, v) で測って走査する。
-            Vector2 origin = main.P + v * zoneDepth;
+            // 格子の原点は主な水際の始点から、水際に沿ってヤードの縁の余白だけ内側、クレーン帯の奥行きだけ陸側。
+            // 始点はヤードの縁にあるので、余白をずらさないと端の置き場が縁の余白に掛かって必ず欠ける（小さな港で荷が無くなる）。
+            // ヤードの範囲を (u, v) で測って走査する。
+            Vector2 origin = main.P + u * YARD_MARGIN + v * zoneDepth;
             float uMin = float.PositiveInfinity, uMax = float.NegativeInfinity;
             float vMin = float.PositiveInfinity, vMax = float.NegativeInfinity;
             foreach (Vector2 p in yard)
@@ -303,23 +356,24 @@ public static class PortLayout
                 vMin = Mathf.Min(vMin, pv); vMax = Mathf.Max(vMax, pv);
             }
 
-            float slotU = CONTAINER_LENGTH + CONTAINER_GAP;
-            float slotV = CONTAINER_WIDTH + CONTAINER_GAP;
-            float pitchU = BLOCK_BAYS * slotU + BLOCK_AISLE;
-            float pitchV = BLOCK_ROWS * slotV + BLOCK_AISLE;
+            float slotU = spec.Length + spec.Gap;
+            float slotV = spec.Width + spec.Gap;
+            float pitchU = spec.Bays * slotU + BLOCK_AISLE;
+            float pitchV = spec.Rows * slotV + BLOCK_AISLE;
             int blockU0 = Mathf.FloorToInt(uMin / pitchU), blockU1 = Mathf.FloorToInt(uMax / pitchU);
             int blockV0 = Mathf.FloorToInt(vMin / pitchV), blockV1 = Mathf.FloorToInt(vMax / pitchV);
-            Vector2 halfU = u * (CONTAINER_LENGTH * 0.5f);
-            Vector2 halfV = v * (CONTAINER_WIDTH * 0.5f);
+            Vector2 halfU = u * (spec.Length * 0.5f);
+            Vector2 halfV = v * (spec.Width * 0.5f);
 
             for (int bv = blockV0; bv <= blockV1; bv++)
             {
-                for (int row = 0; row < BLOCK_ROWS; row++)
+                for (int row = 0; row < spec.Rows; row++)
                 {
                     float cv = bv * pitchV + row * slotV + slotV * 0.5f;
                     for (int bu = blockU0; bu <= blockU1; bu++)
                     {
-                        for (int bay = 0; bay < BLOCK_BAYS; bay++)
+                        uint rowHash = Hash(Hash(Hash(seed, bu), bv), -1 - row);
+                        for (int bay = 0; bay < spec.Bays; bay++)
                         {
                             if (plan.Stacks.Count >= MAX_STACKS)
                             {
@@ -340,8 +394,9 @@ public static class PortLayout
                             {
                                 continue;
                             }
-                            int tiers = Mathf.Min(MAX_TIERS, 1 + Mathf.FloorToInt(Unit(Hash(hash, 1)) * MAX_TIERS));
-                            plan.Stacks.Add(new Stack { Center = center, Along = u, Tiers = tiers, Hash = hash });
+                            int maxTiers = Mathf.Max(1, spec.MaxTiers);
+                            int tiers = Mathf.Min(maxTiers, 1 + Mathf.FloorToInt(Unit(Hash(hash, 1)) * maxTiers));
+                            plan.Stacks.Add(new Stack { Center = center, Along = u, Tiers = tiers, Hash = hash, RowHash = rowHash });
                         }
                     }
                 }
@@ -349,7 +404,7 @@ public static class PortLayout
         }
         catch (System.Exception ex)
         {
-            Debug.LogWarning($"[PortLayout] コンテナの配置に失敗しました: {ex.Message}。コンテナを置きません。");
+            Debug.LogWarning($"[PortLayout] ヤードの荷の配置に失敗しました: {ex.Message}。荷を置きません。");
             plan.Stacks.Clear();
         }
     }
@@ -358,6 +413,15 @@ public static class PortLayout
     public static int TierColor(Stack stack, int tier, int count)
     {
         return count <= 0 ? 0 : (int)(Hash(stack.Hash, 2 + tier) % (uint)count);
+    }
+
+    /// <summary>
+    /// 地面に置く荷の種類の番号（0〜count−1）。ブロックの1列で同じ種類にする。
+    /// 野積みの山や油槽は品目ごとにまとめて並べるのが普通で、置き場ごとに変えると品目がまだらに混ざるため。
+    /// </summary>
+    public static int CargoKind(Stack stack, int count)
+    {
+        return count <= 0 ? 0 : (int)(Hash(stack.RowHash, 2) % (uint)count);
     }
 
     /// <summary>

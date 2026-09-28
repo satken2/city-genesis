@@ -8,7 +8,8 @@ using NetTopologySuite.Geometries;
 ///
 /// 海岸土地区画（PARCEL_SHORE）に立地する港に適用する。水際（船が着く線）と、その陸側のヤード（荷役の地面）を決め、
 /// 水際に荷役クレーン（port_crane）、区画の辺0（道路側）に施設モジュール（port_building。ゲートと建物）、
-/// その間の空きにコンテナ（port_container）を置く。配置は <see cref="PortLayout"/> が決める。
+/// その間の空きに港の種類ごとのヤードの荷（段積みするコンテナ port_container、または地面に1個ずつ置く荷 port_cargo）を置く。
+/// 配置は <see cref="PortLayout"/> が決める。
 ///
 /// 水際とヤードの決め方は2通りで、そこから先の配置の規則は同じ。
 /// - 区画が埋立地の岸壁の陸側にある（<see cref="FindFacingReclaimedQuays"/>。埋立地の上に引いた港）: 水際は埋立地の岸壁
@@ -18,7 +19,7 @@ using NetTopologySuite.Geometries;
 ///   区画の中の水際の両端を結ぶ弦を左右とも <see cref="QUAY_PROTRUSION"/> だけ海側へ平行に移した直線で底面をカットし、
 ///   厚みのある板（岸壁スラブ）を押し出す。水際=カット直線上の辺、ヤード=スラブの範囲。
 ///
-/// visual_variant(1) は他の建物と同じく外観バリアントの閾値フォルダ（F_建物メッシュの生成 §4）、visual_variant2 はコンテナの
+/// visual_variant(1) は他の建物と同じく外観バリアントの閾値フォルダ（F_建物メッシュの生成 §4）、visual_variant2 はヤードの荷の
 /// 配置の乱数の種に使う。接写は `_close`、遠景は `_far` のパーツで同じ配置を描き、遠景のコンテナは山ごとの箱にする。
 ///
 /// 詳細仕様は city-genesis/docs/docs/geometries/F4_港湾岸壁のメッシュ生成.md を参照。
@@ -66,8 +67,8 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
     /// <summary>底面外周の上にあるとみなす、区画の陸の部分の頂点の距離(m)。</summary>
     private const double QUAY_END_OUTLINE_TOLERANCE = 0.01;
 
-    /// <summary>コンテナの色違いのパーツ（port_container1, 2, …）を探す上限。</summary>
-    private const int MAX_CONTAINER_PARTS = 16;
+    /// <summary>ヤードの荷の種類違いのパーツ（port_cargo1, 2, … / port_container1, 2, …）を探す上限。</summary>
+    private const int MAX_CARGO_PARTS = 16;
 
     /// <summary>
     /// 岸壁の海側境界（直線カットで生じたエッジ）を表す。水際の列挙に使う。
@@ -116,7 +117,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         string[] prefixes = PartPrefixes(buildingData, prefix);
         Material floorMaterial = far ? null : BuildingMeshUtils.ResolveFloorMaterialFromMaster(buildingData, prefix);
 
-        // 1. 水際・ヤード・地面の高さ（ヤードの地面は下のクレーン・施設・コンテナの接地に使う）。
+        // 1. 水際・ヤード・地面の高さ（ヤードの地面は下のクレーン・施設・荷の接地に使う）。
         Vector2[] yard;
         List<PortLayout.Waterline> waterlines;
         float yardFloorLocalY;
@@ -173,7 +174,12 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         GameObject moduleModel = LayoutPart(prefix, "port_building", variantNumber);
         GameObject craneModel = LayoutPart(prefix, "port_crane", variantNumber);
         GameObject roofpropModel = LayoutPart(prefix, "roofprop", variantNumber);
-        List<(string prefix, string name)> containerParts = ContainerParts(prefixes, variantNumber);
+        List<(string prefix, string name)> cargoParts = YardCargoParts(prefixes, variantNumber, out bool stacked);
+        PortLayout.CargoSpec? cargoSpec = null;
+        if (cargoParts.Count > 0)
+        {
+            cargoSpec = stacked ? PortLayout.ContainerSpec : PortLayout.GroundCargoSpec(CargoBounds(cargoParts, variantNumber));
+        }
 
         Vector2 alongQuay = waterlines.Count > 0
             ? new Vector2(waterlines[0].Normal.y, -waterlines[0].Normal.x)
@@ -185,7 +191,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
 
         PortLayout.Plan plan = PortLayout.Create(footprint, yard, waterlines,
             PortLayout.GetModelBounds(moduleModel), PortLayout.GetModelBounds(craneModel), roofpropRect,
-            containerParts.Count > 0, buildingData.visual_variant2);
+            cargoSpec, buildingData.visual_variant2);
 
         // 3. 施設モジュール（ゲートと建物）。区画の辺0の中点の地面（海面+2m 以上）に接地する。
         if (plan.Module != null)
@@ -220,10 +226,15 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
                 combineInstances, materials, temporaryMeshes);
         }
 
-        // 6. コンテナ。通常・接写はパーツを段に積み、遠景は山ごとの箱。
+        // 6. ヤードの荷。コンテナは通常・接写ではパーツを段に積み、遠景は山ごとの箱。
+        //    地面に置く荷は描画LODのパーツ（接写は `_close` 優先、遠景は `_far` だけ）を置き場ごとに1個置く。
         if (plan.Stacks.Count > 0)
         {
-            if (far)
+            if (!stacked)
+            {
+                AppendGroundCargo(plan.Stacks, plan.Cargo, cargoParts, variantNumber, Ground, combineInstances, materials, temporaryMeshes);
+            }
+            else if (far)
             {
                 Mesh boxes = BuildContainerBoxes(plan.Stacks, Ground);
                 AppendMesh(boxes, new Material[] { null }, combineInstances, materials);
@@ -231,13 +242,13 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
             }
             else
             {
-                AppendContainers(plan.Stacks, containerParts, variantNumber, Ground, combineInstances, materials, temporaryMeshes);
+                AppendContainers(plan.Stacks, cargoParts, variantNumber, Ground, combineInstances, materials, temporaryMeshes);
             }
         }
 
         UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
             $"[PortBMB] agent={buildingData.agent_id} prefix={prefix} lod={BuildingMeshUtils.CurrentDrawLod} 水際{waterlines.Count} " +
-            $"施設{(plan.Module != null ? "あり" : "なし")} クレーン{plan.Cranes.Count}基 コンテナ{plan.Stacks.Count}山");
+            $"施設{(plan.Module != null ? "あり" : "なし")} クレーン{plan.Cranes.Count}基 {(stacked ? "コンテナ" : "荷")}{plan.Stacks.Count}山");
 
         // 7. 敷地の装飾（フェンス・タイル・地面パネル）。モジュラー/prebuilt と共通の処理で、
         //    地面パネルは draw_floor=yes のときヤードに描き、岸壁上面と同一の floor マテリアルで床続きになる。
@@ -349,7 +360,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     /// <summary>
-    /// 港のパーツを探すフォルダの順（a{variant} → b{bd_type}）。コンテナ・岸壁のマテリアルのように
+    /// 港のパーツを探すフォルダの順（a{variant} → b{bd_type}）。岸壁のマテリアルのように
     /// 港の種類をまたいで共有するパーツは b{bd_type} に置き、a{variant} に同名があればそちらを使う。
     /// </summary>
     private static string[] PartPrefixes(BuildingSummary buildingData, string prefix)
@@ -386,29 +397,91 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     /// <summary>
-    /// コンテナの色違いのパーツ（port_container1, 2, …）の列。番号は1から連番で探し、最初に見つかったフォルダ
-    /// （a{variant} → b{bd_type}）の分だけを使う。有無は通常モデルで判定する（遠景でも同じ配置にするため）。
+    /// ヤードの荷の種類違いのパーツの列。フォルダ（a{variant} → b{bd_type}）の順に、地面に置く荷 port_cargo1, 2, … →
+    /// 段積みするコンテナ port_container1, 2, … を1から連番で探し、最初に見つかった1組だけを使う（stacked はコンテナの組か）。
+    /// 港の種類ごとに荷が違う（バルク港は野積みの山、タンカー埠頭は油槽）ので、荷は各港の a{variant} に置く。
+    /// 有無は通常モデルで判定する（遠景でも同じ配置にするため）。
     /// </summary>
-    private static List<(string prefix, string name)> ContainerParts(string[] prefixes, int variantNumber)
+    private static List<(string prefix, string name)> YardCargoParts(string[] prefixes, int variantNumber, out bool stacked)
     {
         var parts = new List<(string prefix, string name)>();
+        stacked = false;
         foreach (string p in prefixes)
         {
-            for (int n = 1; n <= MAX_CONTAINER_PARTS; n++)
+            foreach (string stem in new[] { "port_cargo", "port_container" })
             {
-                string name = $"port_container{n}";
-                if (LayoutPart(p, name, variantNumber) == null)
+                for (int n = 1; n <= MAX_CARGO_PARTS; n++)
                 {
-                    break;
+                    string name = $"{stem}{n}";
+                    if (LayoutPart(p, name, variantNumber) == null)
+                    {
+                        break;
+                    }
+                    parts.Add((p, name));
                 }
-                parts.Add((p, name));
-            }
-            if (parts.Count > 0)
-            {
-                break;
+                if (parts.Count > 0)
+                {
+                    stacked = stem == "port_container";
+                    return parts;
+                }
             }
         }
         return parts;
+    }
+
+    /// <summary>地面に置く荷の通常モデルの外接箱の和（置き場の大きさを決める）。</summary>
+    private static Bounds CargoBounds(List<(string prefix, string name)> parts, int variantNumber)
+    {
+        Bounds? result = null;
+        foreach ((string prefix, string name) in parts)
+        {
+            Bounds? b = PortLayout.GetModelBounds(LayoutPart(prefix, name, variantNumber));
+            if (!b.HasValue)
+            {
+                continue;
+            }
+            if (result.HasValue)
+            {
+                Bounds grown = result.Value;
+                grown.Encapsulate(b.Value);
+                result = grown;
+            }
+            else
+            {
+                result = b;
+            }
+        }
+        return result ?? new Bounds(Vector3.zero, Vector3.zero);
+    }
+
+    /// <summary>
+    /// 地面に置く荷を置き場ごとに1個置く。種類は <see cref="PortLayout.CargoKind"/>（ブロックの1列で同じ）で選び、
+    /// 底は置き場の4隅の地面の最も低い高さ。パーツは原点が底面の中心で、ローカル+Z を水際に沿わせる。
+    /// 描画LODのパーツが無い種類（遠景を持たない小物など）は描かない。
+    /// </summary>
+    private static void AppendGroundCargo(List<PortLayout.Stack> stacks, PortLayout.CargoSpec spec,
+        List<(string prefix, string name)> parts, int variantNumber, System.Func<Vector2, float> ground,
+        List<CombineInstance> combineInstances, List<Material> materials, List<Mesh> temporaryMeshes)
+    {
+        var meshes = new Mesh[parts.Count];
+        var meshMaterials = new Material[parts.Count][];
+        for (int i = 0; i < parts.Count; i++)
+        {
+            meshes[i] = CombinePart(DrawPart(parts[i].prefix, parts[i].name, variantNumber), out meshMaterials[i], temporaryMeshes);
+        }
+
+        foreach (PortLayout.Stack stack in stacks)
+        {
+            int kind = PortLayout.CargoKind(stack, meshes.Length);
+            if (meshes[kind] == null)
+            {
+                continue;
+            }
+            float baseY = StackBase(stack, spec.Length, spec.Width, ground);
+            Quaternion rotation = Quaternion.LookRotation(new Vector3(stack.Along.x, 0f, stack.Along.y), Vector3.up);
+            AppendInstance(meshes[kind], meshMaterials[kind],
+                Matrix4x4.TRS(new Vector3(stack.Center.x, baseY, stack.Center.y), rotation, Vector3.one), combineInstances, materials);
+        }
     }
 
     /// <summary>
@@ -427,7 +500,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
 
         foreach (PortLayout.Stack stack in stacks)
         {
-            float baseY = StackBase(stack, ground);
+            float baseY = StackBase(stack, PortLayout.CONTAINER_LENGTH, PortLayout.CONTAINER_WIDTH, ground);
             Quaternion rotation = Quaternion.LookRotation(new Vector3(stack.Along.x, 0f, stack.Along.y), Vector3.up);
             for (int t = 0; t < stack.Tiers; t++)
             {
@@ -450,7 +523,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         var triangles = new List<int>(stacks.Count * 30);
         foreach (PortLayout.Stack stack in stacks)
         {
-            float y0 = StackBase(stack, ground);
+            float y0 = StackBase(stack, PortLayout.CONTAINER_LENGTH, PortLayout.CONTAINER_WIDTH, ground);
             float y1 = y0 + stack.Tiers * PortLayout.CONTAINER_TIER_PITCH;
             Vector2 u = stack.Along * (PortLayout.CONTAINER_LENGTH * 0.5f);
             Vector2 v = new Vector2(-stack.Along.y, stack.Along.x) * (PortLayout.CONTAINER_WIDTH * 0.5f);
@@ -484,11 +557,11 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         return mesh;
     }
 
-    /// <summary>山の底のローカルY。4隅の地面の最も低い高さ。</summary>
-    private static float StackBase(PortLayout.Stack stack, System.Func<Vector2, float> ground)
+    /// <summary>山の底のローカルY。長さ length・幅 width の置き場の4隅の地面の最も低い高さ。</summary>
+    private static float StackBase(PortLayout.Stack stack, float length, float width, System.Func<Vector2, float> ground)
     {
-        Vector2 u = stack.Along * (PortLayout.CONTAINER_LENGTH * 0.5f);
-        Vector2 v = new Vector2(-stack.Along.y, stack.Along.x) * (PortLayout.CONTAINER_WIDTH * 0.5f);
+        Vector2 u = stack.Along * (length * 0.5f);
+        Vector2 v = new Vector2(-stack.Along.y, stack.Along.x) * (width * 0.5f);
         return Mathf.Min(Mathf.Min(ground(stack.Center - u - v), ground(stack.Center + u - v)),
             Mathf.Min(ground(stack.Center + u + v), ground(stack.Center - u + v)));
     }
