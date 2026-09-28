@@ -377,7 +377,7 @@ export const CREDIT_ENTRIES: CreditEntry[] = [
     url: "https://www.usgs.gov/3d-elevation-program",
     license: "U.S. Public Domain",
     requiredText: "Map services and data available from U.S. Geological Survey, National Geospatial Program.",
-    note: "Terrain map: manhattan. Data has been modified: reprojected to a 10 m metric grid, cropped to Manhattan Island, small islets removed and sea floor synthesized. Not approved or endorsed by the USGS. License verified 2026-09-20. Also used for the plan-view terrain thumbnails.",
+    note: "Terrain map: manhattan and its distant background. Data has been modified: reprojected to a metric grid (10 m for the map, 50 m for the background), cropped to a 17 km x 26 km area around Manhattan (37 km x 46 km for the background), small islets removed from the map and sea floor synthesized. Not approved or endorsed by the USGS. License verified 2026-09-20. Also used for the plan-view terrain thumbnails.",
   },
   {
     title: "Digital Terrain Model (DTM), 5m grid (Hong Kong Island)",

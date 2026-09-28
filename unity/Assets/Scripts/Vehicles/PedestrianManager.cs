@@ -33,6 +33,7 @@ public sealed class PedestrianManager : MonoBehaviour
     [SerializeField] private float shoulderWidth = 1f;
     [SerializeField] private float connectorTension = .3f;
     [SerializeField] private float fadeDuration = .4f;
+    [SerializeField] private float stepLength = .65f;   // 歩幅(m)。半歩進むごとに姿勢モデルを差し替える
     [SerializeField] private bool showDebugOverlay;
 
     private readonly List<Pedestrian> active = new List<Pedestrian>();
@@ -58,6 +59,8 @@ public sealed class PedestrianManager : MonoBehaviour
     private List<Matrix4x4>[] batches = new List<Matrix4x4>[0];
     private static readonly Matrix4x4[] chunk = new Matrix4x4[1023];
     private const int MaxModelVariants = 16;
+    private static readonly string[] PoseSuffixes = { "", "_right", "_left" };   // 姿勢番号 0=両足を揃える / 1=右足前 / 2=左足前
+    private static readonly int[] GaitCycle = { 1, 0, 2, 0 };                    // 半歩ごとの姿勢番号の並び
 
     private sealed class Walk
     {
@@ -92,8 +95,8 @@ public sealed class PedestrianManager : MonoBehaviour
     }
     private sealed class Model
     {
-        public PropRenderModel source;
-        public List<PropRenderModel.Part> parts;
+        public readonly List<PropRenderModel> sources = new List<PropRenderModel>();
+        public List<PropRenderModel.Part>[] poses;   // 姿勢番号順。歩行姿勢のモデルが揃わない番号は両足を揃えた姿勢だけ
     }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -150,7 +153,8 @@ public sealed class PedestrianManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        foreach (var model in models) model.source?.Dispose();
+        foreach (var model in models)
+            foreach (var source in model.sources) source.Dispose();
         models.Clear();
     }
 
@@ -532,6 +536,7 @@ public sealed class PedestrianManager : MonoBehaviour
         {
             variant = Random.Range(0, MaxModelVariants),
             speed = Mathf.Max(.1f, walkSpeed * (1 + Random.Range(-walkSpeedJitter, walkSpeedJitter))),
+            walked = Random.value * stepLength * 2,
         };
         p.SetPath(walk.data.path_id, walk.line, forward, s);
         PlaceOnBand(p, walk, true);
@@ -569,6 +574,7 @@ public sealed class PedestrianManager : MonoBehaviour
             float remaining = dt;
             bool invalid = false;
             int transitions = 0;
+            float walkedBefore = p.walked;
             while (remaining > .00001f)
             {
                 if (p.fading) { p.fadeElapsed += remaining; remaining = 0; break; }
@@ -617,6 +623,7 @@ public sealed class PedestrianManager : MonoBehaviour
                 }
                 break;
             }
+            p.moving = p.walked > walkedBefore;
             if (invalid || p.fadeElapsed >= Mathf.Max(.01f, fadeDuration)) { Despawn(i); continue; }
             if (!p.Entering)
             {
@@ -684,9 +691,10 @@ public sealed class PedestrianManager : MonoBehaviour
         if (active.Count == 0) return;
         EnsureModels();
         if (models.Count == 0) return;
-        if (batches.Length != models.Count)
+        int poseSlots = PoseSuffixes.Length;
+        if (batches.Length != models.Count * poseSlots)
         {
-            batches = new List<Matrix4x4>[models.Count];
+            batches = new List<Matrix4x4>[models.Count * poseSlots];
             for (int i = 0; i < batches.Length; i++) batches[i] = new List<Matrix4x4>();
         }
         foreach (var list in batches) list.Clear();
@@ -697,29 +705,43 @@ public sealed class PedestrianManager : MonoBehaviour
             tangent.y = 0;
             if (tangent.sqrMagnitude < .0001f) tangent = Vector3.forward;
             float scale = Mathf.Clamp01(p.fading ? 1 - p.fadeElapsed / fadeTime : p.age / fadeTime);
-            batches[p.variant % models.Count].Add(Matrix4x4.TRS(position, Quaternion.LookRotation(tangent, Vector3.up), Vector3.one * scale));
+            int m = p.variant % models.Count;
+            int pose = models[m].poses.Length == poseSlots ? ResolvePose(p.walked, stepLength, p.moving) : 0;
+            batches[m * poseSlots + pose].Add(Matrix4x4.TRS(position, Quaternion.LookRotation(tangent, Vector3.up), Vector3.one * scale));
         }
         float radius = renderRadius + despawnMargin;
         var bounds = new Bounds(lastCenter, new Vector3(radius * 2, 2000, radius * 2));
         for (int m = 0; m < models.Count; m++)
-        {
-            var list = batches[m];
-            if (list.Count == 0) continue;
-            foreach (var part in models[m].parts)
+            for (int pose = 0; pose < models[m].poses.Length; pose++)
             {
-                var rp = new RenderParams(part.material) { worldBounds = bounds, shadowCastingMode = ShadowCastingMode.On, receiveShadows = true };
-                for (int start = 0; start < list.Count; start += chunk.Length)
+                var list = batches[m * poseSlots + pose];
+                if (list.Count == 0) continue;
+                foreach (var part in models[m].poses[pose])
                 {
-                    int count = Mathf.Min(chunk.Length, list.Count - start);
-                    for (int i = 0; i < count; i++) chunk[i] = list[start + i] * part.local;
-                    Graphics.RenderMeshInstanced(rp, part.mesh, part.submesh, chunk, count);
+                    var rp = new RenderParams(part.material) { worldBounds = bounds, shadowCastingMode = ShadowCastingMode.On, receiveShadows = true };
+                    for (int start = 0; start < list.Count; start += chunk.Length)
+                    {
+                        int count = Mathf.Min(chunk.Length, list.Count - start);
+                        for (int i = 0; i < count; i++) chunk[i] = list[start + i] * part.local;
+                        Graphics.RenderMeshInstanced(rp, part.mesh, part.submesh, chunk, count);
+                    }
                 }
             }
-        }
     }
 
     /// <summary>
-    /// Models/Props/pedestrian_{n} を0から順に読む。1つも無ければ人型の箱で描く(FBX未導入でも動作させる)。
+    /// 歩いた距離から描く姿勢番号(0=両足を揃える / 1=右足前 / 2=左足前)を決める。
+    /// 半歩ごとに 右足前→揃い→左足前→揃い の順に差し替えるので、速く歩く個体ほど足の運びも速い。立ち止まっている間は揃い。
+    /// </summary>
+    public static int ResolvePose(float walked, float stepLength, bool moving)
+    {
+        if (!moving || stepLength <= 0) return 0;
+        return GaitCycle[(int)(Mathf.Repeat(walked, stepLength * 2) / (stepLength * .5f)) & 3];
+    }
+
+    /// <summary>
+    /// Models/Props/pedestrian_{n} を0から順に読み、同じ番号の歩行姿勢 _right・_left も読む。
+    /// 歩行姿勢が片方でも欠ける番号は両足を揃えた姿勢だけで描き、1つも無ければ人型の箱で描く(FBX未導入でも動作させる)。
     /// ModelManager が未生成のフレームでは判定を持ち越す。
     /// </summary>
     private void EnsureModels()
@@ -728,18 +750,31 @@ public sealed class PedestrianManager : MonoBehaviour
         modelsProbed = true;
         for (int i = 0; i < MaxModelVariants; i++)
         {
-            if (ModelManager.Instance.GetModel($"Models/Props/pedestrian_{i}", true) == null) break;
-            var source = new PropRenderModel($"pedestrian_{i}");
-            if (source.normal.Count == 0) { source.Dispose(); break; }
-            models.Add(new Model { source = source, parts = source.normal });
+            var model = new Model();
+            foreach (string suffix in PoseSuffixes)
+            {
+                string name = $"pedestrian_{i}{suffix}";
+                if (ModelManager.Instance.GetModel($"Models/Props/{name}", true) == null) break;
+                var source = new PropRenderModel(name);
+                if (source.normal.Count == 0) { source.Dispose(); break; }
+                model.sources.Add(source);
+            }
+            if (model.sources.Count == 0) break;
+            if (model.sources.Count < PoseSuffixes.Length)
+            {
+                for (int s = 1; s < model.sources.Count; s++) model.sources[s].Dispose();
+                model.sources.RemoveRange(1, model.sources.Count - 1);
+            }
+            model.poses = model.sources.ConvertAll(source => source.normal).ToArray();
+            models.Add(model);
         }
         if (models.Count > 0) return;
         var mesh = Resources.GetBuiltinResource<Mesh>("Cube.fbx");
         var shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
         var material = new Material(shader) { name = "PedestrianBoxMaterial", enableInstancing = true };
         material.SetColor("_BaseColor", new Color(.85f, .75f, .6f)); material.SetColor("_Color", new Color(.85f, .75f, .6f));
-        models.Add(new Model { parts = new List<PropRenderModel.Part> { new PropRenderModel.Part { mesh = mesh, submesh = 0, material = material,
-            local = Matrix4x4.TRS(new Vector3(0, .85f, 0), Quaternion.identity, new Vector3(.4f, 1.7f, .3f)) } } });
+        models.Add(new Model { poses = new[] { new List<PropRenderModel.Part> { new PropRenderModel.Part { mesh = mesh, submesh = 0, material = material,
+            local = Matrix4x4.TRS(new Vector3(0, .85f, 0), Quaternion.identity, new Vector3(.4f, 1.7f, .3f)) } } } });
     }
 
     private static bool Walkable(PathSummary p) => p != null && p.status == Constants.STATUS_ACTIVE &&

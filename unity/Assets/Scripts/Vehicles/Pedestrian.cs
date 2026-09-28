@@ -12,6 +12,8 @@ public sealed class Pedestrian
     public int side;                 // パス幾何に対する左右(+1=右 / -1=左)。中心帯を歩く歩行者専用道路は0
     public float lateral;            // 中心線からの符号付き横位置(m)
     public float surface;            // 点列(スプライン基準面)からの高さ
+    public float walked;             // 歩行姿勢の位相に使う累積歩行距離(m)。初期値は個体ごとの乱数で、全員が揃って足を出さないようにする
+    public bool moving;              // 直近の移動処理で前進したか。立ち止まっている間は揃い姿勢で描く
     public VehiclePolyline road, connector;
     public float connectorS;
     public bool arrivalPending, fading;
@@ -50,6 +52,7 @@ public sealed class Pedestrian
         float used = Mathf.Min(seconds, Mathf.Max(0, remaining) / velocity);
         float distance = used * velocity;
         age += used;
+        walked += distance;
         if (InConnector) connectorS += distance;
         else
         {

@@ -13,7 +13,7 @@
 | `VehicleManager.cs` / `.Drive.cs` | 一般車の道路スナップショット・分岐・密度調整・プール・沿道到着。`VehiclePopulationBudget`(全体枠)も同居。Drive はドライブモードの1台 |
 | `RoadMotionData.cs` | `/paths/motion` の自由秒数・混雑込み秒数と、前車追従の速度制御 `RoadMotionControl` |
 | `RoadsideAccess.cs` | 建物入口の幾何と有効性検査。車と歩行者で共有 |
-| `Pedestrian.cs` / `PedestrianManager.cs` | 歩行者(GameObject なしの instanced 描画) |
+| `Pedestrian.cs` / `PedestrianManager.cs` | 歩行者(GameObject なしの instanced 描画。歩いた距離で3姿勢のモデルを差し替える) |
 | `ParkedVehicleManager.cs` / `ParkedVehicleLayout.cs` | 路上駐車(`PathSummary.parked_cars` の静止台数を GPU インスタンシング) |
 | `TransitDataStore.cs` | 路線一覧の共有ストア(5秒ポーリング+明示 Refresh)。`Session` が都市切替の世代 |
 | `TransitMotionClock.cs` | コアの `journeys.steps` を時刻から参照する純粋な時計 |
@@ -46,7 +46,8 @@
 - 路線カラーは `MaterialPropertyBlock` を使わない(SRP Batcher から外れる)。塗る材質の唯一の正は `Resources/Config/transit_vehicle_livery.json`。新しい外観は帯を専用材質で著作して表に登録する。
 - モデル対応は `Resources/Config/transit_vehicle_models.json`（路線種別→`vehicle_type`・任意の`wagon`）、候補番号は Tauri の `tauri/src/data/transitVehicleModels.json` と揃える。編成内の実体モデル・塗装対象・後尾反転は `VehicleModelConfig.GetTransitCarModel` を描画と事前生成で共有する。貨物は機関車1両＋路線種別の貨車で、総両数と公称車長は路線サマリに従う。折り返しで機関車を先頭へ移さない。
   - モノレール(車種24)の FBX は手動配置プロップ308/309と同一ファイルのコピー。308/309を書き出し直したら24にも置き直す(`Tests/Vehicles` がバイト一致を検査)。
-- 歩行者の `side` / `lateral` はパス幾何(始点→終点)に対する左右で、反転しても符号を変えない。`PedestrianManager.ResolveBand` は `Tests/Vehicles/VehicleQA.cs` がリフレクションで同じ引数列を呼ぶので、シグネチャを変えたら QA も直す。
+- 歩行者の `side` / `lateral` はパス幾何(始点→終点)に対する左右で、反転しても符号を変えない。`PedestrianManager.ResolveBand` と `ResolvePose` は `Tests/Vehicles/VehicleQA.cs` がリフレクションで同じ引数列を呼ぶので、シグネチャを変えたら QA も直す。
+  - 手足は `pedestrian_{n}`(揃い)・`_right`・`_left` の3モデルの差し替えで動かし、位置を補正しない。3姿勢は同じ原点で著作されている前提で、姿勢ごとにオフセットを足さない。
 - 索道の body Renderer の抑制・復元は `PathPresentation.SetRendererForceOff` を介し、生成待ちの抑制を解除しない。搬器モデルは吊り点原点なので `VehicleModelResolver` で接地補正しない。
 - 走行音は `Weather/VehicleAmbience.Report` へ通知するだけ(車両側に AudioSource を持たない)。都市切替は `TransitDataStore.Session` でクリアする。
 - 入港船はエポックが進んだときだけ入れ替える。海岸線の世代(`CoastlineStore.Version`)の変化で消すのは沖合の船と航空機だけで、入港船まで消すと建物の編集のたびに船が入れ替わる。港は `TerrainManager.ShoreDataVersion`(埋立地まで取り終えた版)で読み直す。水際は `PortBuildingMeshBuilder.ResolveWorldWaterlines` を使い、別の規則で求め直さない。

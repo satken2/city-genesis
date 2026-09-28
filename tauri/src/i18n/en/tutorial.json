@@ -84,38 +84,45 @@
     },
     "scenario4": {
       "title": "Build a Railway",
-      "description": "Learn how to open a rail line by building tracks, a depot, power lines, a platform, and a station house in order.",
+      "description": "Learn how to open a rail line linking the town's apartment building and a commercial building by setting up platforms, station houses, track, a depot and power lines.",
+      "step1": {
+        "title": "Build the Platforms",
+        "open": "First, the platforms where passengers wait for trains. Open \"Track Construction\" on the icon panel and choose \"Rail Platform\" on the \"Platform\" tab. Use a single track.",
+        "town": "Near the apartment building in town, click the two yellow markers from west to east to lay a platform. Check in the preview that the platform is on the north side (the apartment side) before confirming.",
+        "new": "Near the commercial building to the west, also click the two yellow markers from west to east to lay a platform with the boarding side to the north. When you're done, press \"Next\"."
+      },
       "step2": {
-        "title": "Lay the Track",
-        "description": "First, the track the trains will run on. Open 'Track Construction' from the icon panel on the left and pick 'Electrified Surface Track' on the 'Track' tab. A single track only runs one way, so you need a double track for round trips. Set the parallel track count to 2, then lay it straight east–west on the open land north of the road. Left-click to add a vertex and right-click to confirm."
+        "title": "Build the Station Houses",
+        "town": "A platform alone isn't a station yet. Choose \"Simple Station House\" on the \"Station House\" tab and draw a line between the two yellow markers so that it crosses the town-side platform. Platforms crossed by the line are gathered into that station.",
+        "new": "Do the same for the western platform: draw a \"Simple Station House\" line between the two yellow markers. When you're done, press \"Next\"."
       },
       "step3": {
-        "title": "Build the Depot",
-        "description": "Track without rolling stock still won't move anyone. Vehicles are supplied to a line from a depot. Open 'Construction' from the icon panel, choose 'Rail Depot', and build it on the empty parcel prepared along the road. Construction would normally take time, but this is a tutorial, so it finishes as soon as you press the completion button."
+        "title": "Link the Two Stations by Track",
+        "description": "Choose \"Railway Track\" on the \"Track\" tab and lay track from the west end of the town-side platform to the east end of the western platform (a single track). Press \"Next\" to complete the track and stations and check the connection."
       },
       "step4": {
-        "title": "Connect a Siding",
-        "description": "A depot that isn't connected to the track can't send out any vehicles. The depot has a 'connection terminal' node. Open 'Track Construction' again, pick 'Electrified Surface Track' (a single track is fine here), and lay a siding from that terminal to the main line. Snap one end to the depot terminal and the other to the main track."
+        "title": "Build a Depot",
+        "description": "Trains are dispatched from a depot. Choose \"Rail Depot\" under \"Construction\" on the icon panel and build it on the parcel with the yellow marker along the street. Press \"Next\" and, since this is a tutorial, the construction period is skipped."
       },
       "step5": {
-        "title": "Connect the Power Line",
-        "description": "An electrified track only moves trains once current flows through its overhead wires. Open 'Road' from the icon panel, choose 'Power Line' under 'Electricity' on the 'Infrastructure' tab, and connect the solar power plant's terminal to the depot's terminal. The depot terminal accepts both track and power connections, so once power reaches it, it flows through the siding to the whole track network."
+        "title": "Connect the Depot to the Main Line",
+        "description": "Lay a siding from the connection terminal on the south side of the depot to the main line, using \"Railway Track\" on the \"Track\" tab between the two yellow markers. The trick is to join the main line at a shallow angle heading east."
       },
       "step6": {
-        "title": "Build the Platform",
-        "description": "Next comes the platform where passengers wait. On the 'Platform' tab of 'Track Construction', choose 'Electrified Surface Rail Platform' and lay a short section along the main line. A platform is a kind of track too, so the trick is to lay it so it joins the main line smoothly. Use the platform side setting to choose which side of the track the platform sits on."
+        "title": "Send Power to the Depot",
+        "description": "The track is electrified, and power flows into it from the depot's connection terminal. Open \"Infrastructure\" on the icon panel and use \"Power Line\" under \"Electricity\" to connect the connection terminal of the town's solar power plant to the depot's connection terminal."
       },
       "step7": {
-        "title": "Build the Station House",
-        "description": "A platform on its own doesn't belong to any station yet. On the 'Station House' tab of 'Track Construction', choose 'Simple Overbridge Station House' and draw its line so that it crosses the platform you just built. Every platform crossed by that line is gathered into one station, and station buildings are placed at both ends of the line."
+        "title": "Open the Line",
+        "description": "In \"Public Transport\" on the icon panel, press \"+ New line\", choose \"Medium-Distance Rail Line\" as the type, and place stops on the two platforms. If the fare is high, walking pays off, so set the Fare to 0 and the Headway to 5 minutes before pressing \"Create\"."
       },
       "step8": {
-        "title": "Open the Line",
-        "description": "Finally, create the line the trains will run on. Open 'Public Transport' from the icon panel and press '+ New Line'. Choose 'Medium-Distance Rail Line' as the type, then click on the platform in the 3D view to place stops. Set the fare and the target headway, and press 'Create' to open the line."
+        "title": "Check the Passengers",
+        "description": "Town residents work at the grocery store in the western commercial building. Advance epochs: vehicles are procured, trains start running, and people use them to commute. In the \"Public Transport\" window, check that the line's Ridership is no longer 0. It takes a few epochs to get going."
       },
       "step9": {
         "title": "The Railway Opens",
-        "description": "Well done. Track to run on, a depot to supply vehicles, power lines to feed the wires, a platform and station house to form a station, and a line running over it all — a railway is built from all of these pieces together. Advance time and the trains will start running and earning fares. Stations make the area around them convenient, so try attracting housing and commerce nearby."
+        "description": "Well done. Stations built from platforms and station houses, track linking them, a depot sending out vehicles, power lines feeding the wires, and a line running over it all — a railway runs on all of these pieces together."
       }
     },
     "complete": {
@@ -134,7 +141,7 @@
       "placeStart": "Left-click inside the cyan circle to place the start of the road.",
       "placeEnd": "Left-click inside the yellow circle to place the end of the road.",
       "finalizeRoad": "Right-click in the 3D view to finish the road shape.",
-      "confirmRoad": "Confirm in the construction panel to save the road, then press Complete.",
+      "confirmRoad": "Confirm in the construction panel to save the road, then press \"Next\".",
       "failed": "Setup or communication failed. Retry; if the problem persists, exit and start the tutorial in a new city.",
       "retry": "Retry",
       "placementRequired": "Use the road variant and positions shown by the guide.",
@@ -158,7 +165,7 @@
       },
       "step4": {
         "open": "Open \"Track Construction\" on the icon panel and choose \"Container Freight Platform\" on the \"Platform\" tab.",
-        "place": "Lay a platform north of the international freight station, parallel to it. Switch \"Platform Side\" so that the platform is on the station building's side (the south side) before confirming. If you lay it from west to east, choose \"Inside\". When you're done, press the \"Completed\" button.",
+        "place": "Lay a platform north of the international freight station, parallel to it. Switch \"Platform Side\" so that the platform is on the station building's side (the south side) before confirming. If you lay it from west to east, choose \"Inside\". When you're done, press \"Next\".",
         "title": "Build a platform beside the station"
       },
       "step5": {
@@ -166,19 +173,22 @@
         "title": "Lay track to the border"
       },
       "step6": {
-        "build": "Build a \"Rail Depot\" on the parcel with the yellow marker along the road.",
-        "branch": "Lay a siding from the connection terminal on the north side of the depot to the main line. Join the main line at a shallow angle heading east rather than at a right angle. When you're done, press the \"Completed\" button.",
-        "title": "Build a depot and connect it to the main line"
+        "title": "Build a Depot",
+        "description": "Build a \"Rail Depot\" on the parcel with the yellow marker along the road. Press \"Next\" and, since this is a tutorial, the construction period is skipped."
       },
       "step7": {
+        "title": "Connect the Depot to the Main Line",
+        "description": "Lay a siding from the connection terminal on the north side of the depot to the main line. Join the main line at a shallow angle heading east rather than at a right angle. When you're done, press \"Next\"."
+      },
+      "step8": {
         "description": "Open \"Infrastructure\" on the icon panel and use \"Power Line\" under \"Electricity\" to connect the connection terminal of the solar power plant east of town to the depot's connection terminal.",
         "title": "Supply power to the depot"
       },
-      "step8": {
+      "step9": {
         "description": "In \"Public Transport\", press \"+ New line\" and choose \"International Freight Line\" as the line type. Place stops on the platforms of the international freight station and the border freight station, and open the line. Once confirmed, the city's import gateway switches from the port to the international freight station.",
         "title": "Open the international freight line"
       },
-      "step9": {
+      "step10": {
         "description": "Advance epochs and check the imports in the international freight station's details. Procuring vehicles and getting transport up and running takes a few epochs.",
         "title": "Confirm rail imports"
       }
@@ -228,8 +238,8 @@
       },
       "step6": {
         "open": "Open \"Track Construction\" on the icon panel and choose \"Ore Freight Platform\" on the \"Platform\" tab.",
-        "loading": "Lay a platform north of the loading station, parallel to it. Switching \"Platform Side\" changes where the platform appears in the preview, so make sure the platform is on the station building's side (the south side) before confirming. If you lay it from west to east, choose \"Inside\". The site slopes steeply downhill. If you get a grade error, adjust the \"Embankment Height\" to keep the platform level.",
-        "unloading": "Lay a platform north of the unloading station in the same way, so that the platform is on the station building's side. When you're done, press the \"Completed\" button.",
+        "loading": "Lay a platform north of the loading station, parallel to it. Switch \"Platform Side\" so the platform is on the station building's side (south) before confirming; from west to east, that's \"Inside\". The site slopes steeply downhill: if you get a grade error, adjust the \"Embankment Height\" to keep the platform level.",
+        "unloading": "Lay a platform north of the unloading station in the same way, so that the platform is on the station building's side. When you're done, press \"Next\".",
         "title": "Build platforms beside the stations"
       },
       "step7": {
@@ -237,23 +247,26 @@
         "title": "Connect the two stations by rail"
       },
       "step8": {
-        "build": "Trains are dispatched from a depot. Build a \"Rail Depot\" on the parcel with the yellow marker along the main street.",
-        "branch": "Lay a siding from the connection terminal on the north side of the depot to the main line. The trick is to join the main line at a shallow angle heading east rather than at a right angle (real turnouts can't turn at large angles). When you're done, press the \"Completed\" button.",
-        "title": "Build a depot and connect it to the main line"
+        "title": "Build a Depot",
+        "description": "Trains are dispatched from a depot. Build a \"Rail Depot\" on the parcel with the yellow marker along the main street. Press \"Next\" and, since this is a tutorial, the construction period is skipped."
       },
       "step9": {
+        "title": "Connect the Depot to the Main Line",
+        "description": "Lay a siding from the connection terminal on the north side of the depot to the main line. The trick is to join the main line at a shallow angle heading east rather than at a right angle (real turnouts can't turn at large angles). When you're done, press \"Next\"."
+      },
+      "step10": {
         "description": "The track is electrified, and power flows into it from the depot's connection terminal. Open \"Infrastructure\" on the icon panel and use \"Power Line\" under \"Electricity\" to connect the connection terminal of the town's solar power plant to the depot's connection terminal.",
         "title": "Supply power to the depot"
       },
-      "step10": {
+      "step11": {
         "description": "In \"Public Transport\" on the icon panel, press \"+ New line\" and choose \"Ore Freight Line\" as the line type. Click on the platforms at the loading and unloading stations to place stops, then press \"Create\" to open the line.",
         "title": "Open the ore freight line"
       },
-      "step11": {
+      "step12": {
         "description": "Run epochs to get mining, loading, rail transport, unloading, and exports going. Procuring vehicles and getting transport up and running takes a few epochs.",
         "title": "Advance epochs"
       },
-      "step12": {
+      "step13": {
         "description": "Check the ore exports in the bulk port's details. If nothing has been exported yet, advance more epochs.",
         "title": "Confirm ore exports"
       }
@@ -282,7 +295,7 @@
       "basic": "Welcome! You are the mayor of this city. In this tutorial, you'll learn the basic flow of city building: laying a road, waiting for it to be completed, and putting up a building on land parcels.",
       "scenario2": "You can manage a city by dividing it into \"districts\". In this tutorial, you'll learn how to create a new district by selecting roads, check where natural resources are found, and regulate which buildings can be built in each district.",
       "scenario3": "The setting is a harbor town in the northwest of an island surrounded by coral shallows. The town has no electricity yet. You'll build a solar power plant on the flat land to the west, away from town, deliver power to the town's substation through a power line, and learn how power infrastructure is made up of three stages: generation, transmission, and transformation.",
-      "scenario4": "Laying track alone won't get trains running. In this tutorial, you'll set up the track, a depot, power lines, a platform, and a station building in order, then finally open a line, learning how a railway runs on a combination of many elements.",
+      "scenario4": "Laying track alone won't get trains running. In this tutorial, you'll link the apartment building in town with a commercial building at the west end of the street by rail. You'll build stations from platforms and station houses, set up the track, a depot and power lines, open a line, and see residents ride the train to work at the grocery store in the commercial building.",
       "trade": "This city is connected by rail to a neighboring country at its eastern border and faces the sea to the west. In this tutorial, you'll create two trade routes: exporting a factory's food by sea through a container port, and importing goods by rail over a freight line you lay to the border.",
       "highway": "As a city grows, local streets alone can no longer handle all the cars. In this tutorial, you'll learn how to build an elevated motorway that crosses over a local street, then connect the two with ramps to create an interchange.",
       "mining": "The setting is an island surrounded by coral shallows. An ore vein lies untouched in the central mountain. In this tutorial, you'll learn the whole flow — mining ore in the mountain, carrying it by freight rail from a loading station at the foot of the mountain to the harbor town, and exporting it overseas from a bulk port — while building the track and depot yourself.",

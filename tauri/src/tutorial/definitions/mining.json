@@ -304,12 +304,12 @@
               [
                 -1005,
                 0,
-                183
+                176
               ],
               [
                 -890,
                 0,
-                183
+                176
               ]
             ],
             "camera": {
@@ -342,12 +342,12 @@
               [
                 -1005,
                 0,
-                183
+                176
               ],
               [
                 -890,
                 0,
-                183
+                176
               ]
             ],
             "camera": {
@@ -386,12 +386,12 @@
               [
                 -1835,
                 0,
-                183
+                176
               ],
               [
                 -1725,
                 0,
-                183
+                176
               ]
             ],
             "camera": {
@@ -445,12 +445,12 @@
               [
                 -1725,
                 0,
-                183
+                176
               ],
               [
                 -1005,
                 0,
-                183
+                176
               ]
             ],
             "camera": {
@@ -495,8 +495,8 @@
       "legacyStep": 8,
       "phases": [
         {
-          "id": "build",
-          "textKey": "tutorial.mining.step8.build",
+          "id": "perform",
+          "textKey": "tutorial.mining.step8.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -510,34 +510,53 @@
               [
                 -1350,
                 0,
-                136.5
+                137.25
               ]
             ],
             "camera": {
               "target": [
                 -1350,
                 0,
-                150
+                145
               ],
-              "distance": 320,
+              "distance": 380,
               "yaw": 0,
               "pitch": 55
             }
           },
           "until": {
-            "type": "entity",
-            "resource": "tutorial",
-            "where": [
-              {
-                "field": "checks.depot",
-                "equals": true
-              }
-            ]
+            "type": "ack"
           }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.depot",
+            "equals": true
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "mining",
+          "action": "commission_depot"
         },
         {
-          "id": "branch",
-          "textKey": "tutorial.mining.step8.branch",
+          "type": "reload"
+        }
+      ]
+    },
+    {
+      "id": "mining.branch",
+      "legacyStep": 9,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.mining.step9.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -551,21 +570,21 @@
               [
                 -1350,
                 0,
-                166.5
+                168
               ],
               [
-                -1270,
+                -1304.6,
                 0,
-                183
+                176
               ]
             ],
             "camera": {
               "target": [
-                -1320,
+                -1330,
                 0,
                 160
               ],
-              "distance": 280,
+              "distance": 250,
               "yaw": 0,
               "pitch": 60
             }
@@ -576,11 +595,6 @@
         }
       ],
       "beforeCheck": [
-        {
-          "type": "scenarioAction",
-          "scenario": "mining",
-          "action": "commission_depot"
-        },
         {
           "type": "scenarioAction",
           "scenario": "mining",
@@ -603,11 +617,11 @@
     },
     {
       "id": "mining.power",
-      "legacyStep": 9,
+      "legacyStep": 10,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.mining.step9.description",
+          "textKey": "tutorial.mining.step10.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -626,7 +640,7 @@
               [
                 -1350,
                 0,
-                166.5
+                168
               ]
             ],
             "camera": {
@@ -668,11 +682,11 @@
     },
     {
       "id": "mining.line",
-      "legacyStep": 10,
+      "legacyStep": 11,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.mining.step10.description",
+          "textKey": "tutorial.mining.step11.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -686,12 +700,12 @@
               [
                 -947.5,
                 0,
-                183
+                176
               ],
               [
                 -1780,
                 0,
-                183
+                176
               ]
             ],
             "camera": {
@@ -730,11 +744,11 @@
     },
     {
       "id": "mining.epoch",
-      "legacyStep": 11,
+      "legacyStep": 12,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.mining.step11.description",
+          "textKey": "tutorial.mining.step12.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -773,11 +787,11 @@
     },
     {
       "id": "mining.exports",
-      "legacyStep": 12,
+      "legacyStep": 13,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.mining.step12.description",
+          "textKey": "tutorial.mining.step13.description",
           "ui": {
             "policy": "highlight",
             "allow": [],

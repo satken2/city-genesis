@@ -27,7 +27,7 @@
       "description": "Apprenez à découper la ville en quartiers et à définir une réglementation de construction pour chacun.",
       "step1": {
         "title": "Créons un quartier",
-        "description": "Le quartier est l'unité qui découpe la ville en zones ; il se définit sur les routes. Appuyez sur le bouton des quartiers du panneau d'icônes pour entrer en mode d'édition des quartiers : vous verrez que le réseau de routes en H forme un seul quartier. Avec l'outil de création (état initial), cliquez sur la route au repère jaune pour en faire, avec les parcelles qui la bordent, un nouveau quartier."
+        "description": "Le quartier découpe la ville en zones et se définit sur les routes. Appuyez sur le bouton des quartiers du panneau d'icônes pour entrer en mode d'édition : le réseau de routes en H forme un seul quartier. Avec l'outil de création (état initial), cliquez sur la route au repère jaune pour en faire, avec les parcelles qui la bordent, un nouveau quartier."
       },
       "step2": {
         "title": "Le quartier est découpé",
@@ -84,38 +84,45 @@
     },
     "scenario4": {
       "title": "Construisons un chemin de fer",
-      "description": "Apprenez à mettre une ligne ferroviaire en service en préparant tour à tour la voie, le dépôt, la ligne de transmission, le quai et le bâtiment de gare.",
+      "description": "Apprenez à mettre en service une ligne ferroviaire reliant le logement collectif de la ville à un immeuble commercial en préparant les quais, les bâtiments de gare, la voie, un dépôt et la ligne de transmission.",
+      "step1": {
+        "title": "Construisons les quais",
+        "open": "D'abord, les quais où les voyageurs attendent le train. Ouvrez « Voies ferrées » dans le panneau d'icônes et choisissez « Quai ferroviaire » dans l'onglet « Quai ». Utilisez une seule voie.",
+        "town": "Près du logement collectif de la ville, cliquez sur les deux repères jaunes d'ouest en est pour poser un quai. Vérifiez dans l'aperçu que le quai se trouve du côté nord (côté logement) avant de valider.",
+        "new": "Près de l'immeuble commercial à l'ouest, cliquez aussi sur les deux repères jaunes d'ouest en est pour poser un quai dont le côté d'embarquement est au nord. Une fois la pose terminée, appuyez sur « Suivant »."
+      },
       "step2": {
-        "title": "Posons la voie",
-        "description": "D'abord la voie sur laquelle rouleront les trains. Ouvrez « Construction ferroviaire » dans le panneau d'icônes à gauche et, dans l'onglet « Voie ferrée », choisissez « Voie électrifiée de surface ». Une voie seule est une voie unique : pour un aller-retour, il faut une double voie. Réglez le nombre de voies « parallèles » sur 2, puis posez-les bien droites d'est en ouest sur le terrain libre au nord (au fond) de la route. Dans la vue 3D, le clic gauche ajoute des sommets et le clic droit valide."
+        "title": "Construisons les bâtiments de gare",
+        "town": "Un quai seul n'est pas encore une gare. Choisissez « Gare simple » dans l'onglet « Bâtiment de gare » et tracez une ligne entre les deux repères jaunes qui croise le quai côté ville. Les quais croisés par la ligne sont regroupés dans cette gare.",
+        "new": "Faites de même pour le quai ouest : tracez la ligne de « Gare simple » entre les deux repères jaunes. Une fois le tracé terminé, appuyez sur « Suivant »."
       },
       "step3": {
-        "title": "Construisons le dépôt",
-        "description": "Même avec une voie, sans matériel roulant le chemin de fer ne fonctionne pas. Les rames sont fournies à la ligne depuis le dépôt. Dans « Construction » du panneau d'icônes, choisissez « Dépôt ferroviaire » et construisez-le sur la parcelle libre prévue le long de la route. Normalement l'achèvement prend du temps, mais comme il s'agit d'un tutoriel, le bouton de finalisation le termine immédiatement."
+        "title": "Relions les deux gares par la voie",
+        "description": "Choisissez « Voie de chemin de fer » dans l'onglet « Voie ferrée » et posez la voie depuis l'extrémité ouest du quai côté ville jusqu'à l'extrémité est du quai ouest (une seule voie). En appuyant sur « Suivant », la voie et les gares sont achevées et la liaison est vérifiée."
       },
       "step4": {
-        "title": "Raccordons par une voie de desserte",
-        "description": "Le dépôt ne peut pas faire sortir de rames s'il n'est pas relié à la voie. Le dépôt dispose d'un nœud « borne de raccordement ». Choisissez de nouveau « Voie électrifiée de surface » dans « Construction ferroviaire » (une seule voie suffit) et posez depuis cette borne une voie de desserte jusqu'à la ligne principale. Accrochez une extrémité à la borne du dépôt et l'autre à la voie principale."
+        "title": "Construisons le dépôt",
+        "description": "Les trains partent du dépôt. Choisissez « Dépôt ferroviaire » dans « Construction » du panneau d'icônes et construisez-le sur la parcelle au repère jaune le long de la rue. En appuyant sur « Suivant », comme il s'agit d'un tutoriel, la durée du chantier est ignorée."
       },
       "step5": {
-        "title": "Raccordons la ligne de transmission",
-        "description": "Une voie électrifiée ne peut faire circuler des trains que si la caténaire est sous tension. Ouvrez « Routes » dans le panneau d'icônes, choisissez « Ligne de transmission » sous « Électricité » dans l'onglet « Infrastructures » et reliez la borne de raccordement de la centrale solaire à celle du dépôt. La borne du dépôt est mutualisée : elle accepte aussi bien les voies que les lignes de transmission, de sorte qu'une fois l'électricité arrivée là, elle se diffuse par la voie de desserte à tout le réseau ferré."
+        "title": "Relions le dépôt à la ligne principale",
+        "description": "Posez une voie de desserte depuis la borne de raccordement au sud du dépôt jusqu'à la ligne principale, avec « Voie de chemin de fer » dans l'onglet « Voie ferrée », entre les deux repères jaunes. L'astuce est de la raccorder à la ligne principale avec un angle faible en direction de l'est."
       },
       "step6": {
-        "title": "Construisons le quai",
-        "description": "Vient ensuite le quai où les voyageurs attendent le train. Dans l'onglet « Quai » de « Construction ferroviaire », choisissez « Quai ferroviaire électrifié de surface » et posez-en un court au milieu de la ligne principale. Le quai est lui aussi une sorte de voie : l'astuce est de le poser de façon à ce qu'il se raccorde en douceur à la ligne principale. Le côté du quai permet de choisir de quel côté de la voie il se place."
+        "title": "Alimentons le dépôt en électricité",
+        "description": "La voie est électrifiée : l'électricité y circule depuis la borne de raccordement du dépôt. Ouvrez « Infrastructures » dans le panneau d'icônes et, avec « Ligne de transmission » sous « Électricité », reliez la borne de raccordement de la centrale solaire de la ville à celle du dépôt."
       },
       "step7": {
-        "title": "Construisons le bâtiment de gare",
-        "description": "Avec le quai seul, celui-ci n'appartient encore à aucune gare. Dans l'onglet « Bâtiment de gare » de « Construction ferroviaire », choisissez « Gare passerelle simple » et tracez une ligne qui croise le quai que vous venez de poser. Les quais croisés par cette ligne seront regroupés en une même gare, et les bâtiments de gare s'élèveront aux deux extrémités de la ligne."
+        "title": "Mettons la ligne en service",
+        "description": "Dans « Transports publics » du panneau d'icônes, appuyez sur « ＋ Nouvelle ligne », choisissez « Ligne ferroviaire moyenne distance » comme type et placez les arrêts sur les deux quais. Si le tarif est élevé, marcher devient plus avantageux : réglez le Tarif sur 0 et l'Intervalle sur 5 minutes avant d'appuyer sur « Créer »."
       },
       "step8": {
-        "title": "Mettons la ligne en service",
-        "description": "Enfin, créons la ligne qui fera circuler les trains. Ouvrez « Transports publics » dans le panneau d'icônes et appuyez sur « ＋ Nouvelle ligne ». Choisissez « Ligne ferroviaire moyenne distance » comme type de ligne et cliquez sur le quai dans la vue 3D pour y placer un arrêt. Fixez le tarif et l'intervalle, puis appuyez sur « Créer » pour l'inaugurer."
+        "title": "Vérifions les voyageurs",
+        "description": "Des habitants de la ville travaillent à l'épicerie de l'immeuble commercial ouest. En faisant avancer les époques, les véhicules sont acquis, les trains se mettent à rouler et servent aux trajets domicile-travail. Dans la fenêtre « Transports publics », vérifiez que les Voyages de la ligne ne sont plus nuls. Le démarrage prend quelques époques."
       },
       "step9": {
         "title": "Chemin de fer inauguré",
-        "description": "Bravo ! Poser la voie, fournir le matériel depuis le dépôt, acheminer l'électricité par la ligne de transmission, former la gare avec un quai et un bâtiment, puis y faire passer une ligne : le chemin de fer fonctionne grâce à l'empilement de tous ces éléments. Il ne reste qu'à faire avancer le temps pour que les trains se mettent à rouler et que les recettes tarifaires arrivent. Les abords de la gare deviennent attractifs : essayez d'y concentrer logements et commerces."
+        "description": "Bravo ! Former des gares avec des quais et des bâtiments, les relier par la voie, faire sortir les trains du dépôt, les alimenter par la ligne de transmission et y faire passer une ligne : le chemin de fer fonctionne grâce à l'assemblage de tous ces éléments."
       }
     },
     "complete": {
@@ -134,7 +141,7 @@
       "placeStart": "Faites un clic gauche dans le cercle cyan pour placer le début de la route.",
       "placeEnd": "Faites un clic gauche dans le cercle jaune pour placer la fin de la route.",
       "finalizeRoad": "Faites un clic droit dans la vue 3D pour terminer le tracé de la route.",
-      "confirmRoad": "Confirmez dans le panneau de construction pour enregistrer la route, puis appuyez sur Terminer.",
+      "confirmRoad": "Confirmez dans le panneau de construction pour enregistrer la route, puis appuyez sur « Suivant ».",
       "failed": "Échec de la préparation ou de la communication. Réessayez ; si le problème persiste, quittez et lancez le tutoriel dans une nouvelle ville.",
       "retry": "Réessayer",
       "placementRequired": "Utilisez la variante et les positions indiquées pour la route.",
@@ -158,7 +165,7 @@
       },
       "step4": {
         "open": "Ouvrez « Voies ferrées » dans le panneau d'icônes et choisissez « Quai de fret pour conteneurs » dans l'onglet « Quai ».",
-        "place": "Posez un quai au nord de la gare de fret internationale, parallèlement à celle-ci. Changez le « Côté du quai » pour que le quai se trouve du côté du bâtiment de la gare (côté sud) avant de valider. Si vous le posez d'ouest en est, choisissez « Intérieur ». Une fois la pose terminée, appuyez sur le bouton « J'ai terminé ».",
+        "place": "Posez un quai au nord de la gare de fret internationale, parallèlement à celle-ci. Changez le « Côté du quai » pour que le quai se trouve du côté du bâtiment de la gare (côté sud) avant de valider. Si vous le posez d'ouest en est, choisissez « Intérieur ». Une fois la pose terminée, appuyez sur « Suivant ».",
         "title": "Construire un quai à côté de la gare"
       },
       "step5": {
@@ -166,19 +173,22 @@
         "title": "Poser la voie jusqu'à la frontière"
       },
       "step6": {
-        "build": "Construisez un « Dépôt ferroviaire » sur la parcelle au repère jaune le long de la route.",
-        "branch": "Posez une voie de desserte depuis la borne de raccordement située au nord du dépôt jusqu'à la ligne principale. Raccordez-la à la ligne principale non pas à angle droit, mais avec un angle faible en direction de l'est. Une fois la pose terminée, appuyez sur le bouton « J'ai terminé ».",
-        "title": "Construire le dépôt et le relier à la ligne principale"
+        "title": "Construire le dépôt",
+        "description": "Construisez un « Dépôt ferroviaire » sur la parcelle au repère jaune le long de la route. En appuyant sur « Suivant », comme il s'agit d'un tutoriel, la durée du chantier est ignorée."
       },
       "step7": {
+        "title": "Relier le dépôt à la ligne principale",
+        "description": "Posez une voie de desserte depuis la borne de raccordement située au nord du dépôt jusqu'à la ligne principale. Raccordez-la à la ligne principale non pas à angle droit, mais avec un angle faible en direction de l'est. Une fois la pose terminée, appuyez sur « Suivant »."
+      },
+      "step8": {
         "description": "Ouvrez « Infrastructures » dans le panneau d'icônes et, avec « Ligne de transmission » sous « Électricité », reliez la borne de raccordement de la centrale solaire située à l'est de la ville à celle du dépôt.",
         "title": "Alimenter le dépôt en électricité"
       },
-      "step8": {
+      "step9": {
         "description": "Dans « Transports publics », appuyez sur « ＋ Nouvelle ligne » et choisissez « Ligne de fret internationale » comme type de ligne. Placez des arrêts sur les quais de la gare de fret internationale et de la gare de fret frontalière, puis mettez la ligne en service. Après confirmation, le point d'entrée des importations passe du port à la gare de fret internationale.",
         "title": "Mettre en service la ligne de fret internationale"
       },
-      "step9": {
+      "step10": {
         "description": "Faites avancer les époques et vérifiez les importations dans le détail de la gare de fret internationale. L'acquisition des véhicules et la montée en puissance du transport prennent quelques époques.",
         "title": "Vérifier les importations ferroviaires"
       }
@@ -228,8 +238,8 @@
       },
       "step6": {
         "open": "Ouvrez « Voies ferrées » dans le panneau d'icônes et choisissez « Quai de fret pour minerai » dans l'onglet « Quai ».",
-        "loading": "Posez un quai au nord de la gare de chargement, parallèlement à celle-ci. Changer le « Côté du quai » déplace le quai dans l'aperçu : réglez-le pour que le quai se trouve du côté du bâtiment de la gare (côté sud) avant de valider. Si vous le posez d'ouest en est, choisissez « Intérieur ». Le terrain descend en pente raide. En cas d'erreur de pente, réglez la « Hauteur du remblai » pour que le quai soit horizontal.",
-        "unloading": "De la même manière, posez aussi un quai au nord de la gare de déchargement, en le plaçant du côté du bâtiment de la gare. Une fois la pose terminée, appuyez sur le bouton « J'ai terminé ».",
+        "loading": "Posez un quai au nord de la gare de chargement, parallèlement à celle-ci. Réglez le « Côté du quai » pour que le quai soit du côté du bâtiment de la gare (sud) avant de valider ; d'ouest en est, c'est « Intérieur ». Le terrain descend en pente raide : en cas d'erreur de pente, réglez la « Hauteur du remblai » pour que le quai soit horizontal.",
+        "unloading": "De la même manière, posez aussi un quai au nord de la gare de déchargement, en le plaçant du côté du bâtiment de la gare. Une fois la pose terminée, appuyez sur « Suivant ».",
         "title": "Construire des quais à côté des gares"
       },
       "step7": {
@@ -237,23 +247,26 @@
         "title": "Relier les deux gares par le rail"
       },
       "step8": {
-        "build": "Les trains partent du dépôt. Construisez un « Dépôt ferroviaire » sur la parcelle au repère jaune le long de la rue principale.",
-        "branch": "Posez une voie de desserte depuis la borne de raccordement située au nord du dépôt jusqu'à la ligne principale. L'astuce est de la raccorder à la ligne principale non pas à angle droit, mais avec un angle faible en direction de l'est (un véritable aiguillage ne permet pas de bifurquer selon un grand angle). Une fois la pose terminée, appuyez sur le bouton « J'ai terminé ».",
-        "title": "Construire le dépôt et le relier à la ligne principale"
+        "title": "Construire le dépôt",
+        "description": "Les trains partent du dépôt. Construisez un « Dépôt ferroviaire » sur la parcelle au repère jaune le long de la rue principale. En appuyant sur « Suivant », comme il s'agit d'un tutoriel, la durée du chantier est ignorée."
       },
       "step9": {
+        "title": "Relier le dépôt à la ligne principale",
+        "description": "Posez une voie de desserte depuis la borne de raccordement située au nord du dépôt jusqu'à la ligne principale. L'astuce est de la raccorder à la ligne principale non pas à angle droit, mais avec un angle faible en direction de l'est (un véritable aiguillage ne permet pas de bifurquer selon un grand angle). Une fois la pose terminée, appuyez sur « Suivant »."
+      },
+      "step10": {
         "description": "La voie est électrifiée : l'électricité y circule depuis la borne de raccordement du dépôt. Ouvrez « Infrastructures » dans le panneau d'icônes et, avec « Ligne de transmission » sous « Électricité », reliez la borne de raccordement de la centrale solaire de la ville à celle du dépôt.",
         "title": "Alimenter le dépôt en électricité"
       },
-      "step10": {
+      "step11": {
         "description": "Dans « Transports publics » du panneau d'icônes, appuyez sur « ＋ Nouvelle ligne » et choisissez « Ligne de transport de minerai » comme type de ligne. Cliquez sur les quais des gares de chargement et de déchargement pour placer les arrêts, puis appuyez sur « Créer » pour mettre la ligne en service.",
         "title": "Mettre en service la ligne de transport de minerai"
       },
-      "step11": {
+      "step12": {
         "description": "Exécutez des époques pour lancer l'extraction, le chargement, le transport ferroviaire, le déchargement et l'exportation. L'acquisition des véhicules et la montée en puissance du transport prennent quelques époques.",
         "title": "Avancer les époques"
       },
-      "step12": {
+      "step13": {
         "description": "Vérifiez les exportations de minerai dans le détail du port de vrac. S'il n'y a pas encore d'exportations, faites avancer d'autres époques.",
         "title": "Vérifier les exportations de minerai"
       }
@@ -282,7 +295,7 @@
       "basic": "Bienvenue ! Vous êtes le maire de cette ville. Dans ce tutoriel, vous apprendrez les étapes de base de la construction d'une ville : tracer une route, attendre la fin des travaux, puis construire un bâtiment sur des parcelles.",
       "scenario2": "Une ville peut être gérée en la découpant en « quartiers ». Dans ce tutoriel, vous apprendrez à créer un nouveau quartier en sélectionnant des routes, à repérer la répartition des ressources naturelles et à réglementer les bâtiments constructibles dans chaque quartier.",
       "scenario3": "L'action se déroule dans une ville portuaire au nord-ouest d'une île entourée de hauts-fonds coralliens. Cette ville n'a pas encore l'électricité. Vous construirez une centrale solaire sur le terrain plat à l'ouest, loin de la ville, acheminerez l'électricité jusqu'au poste électrique de la ville par une ligne de transmission, et découvrirez que l'infrastructure électrique repose sur trois étapes : production, transport et transformation.",
-      "scenario4": "Poser des rails ne suffit pas à faire circuler des trains. Dans ce tutoriel, vous aménagerez tour à tour la voie, le dépôt, la ligne de transmission, le quai et le bâtiment de gare, puis mettrez enfin une ligne en service, pour comprendre que le chemin de fer fonctionne grâce à l'assemblage de nombreux éléments.",
+      "scenario4": "Poser des rails ne suffit pas à faire circuler des trains. Dans ce tutoriel, vous relierez par le rail le logement collectif de la ville à un immeuble commercial au bout ouest de la rue. Vous formerez les gares avec des quais et des bâtiments de gare, aménagerez la voie, le dépôt et la ligne de transmission, mettrez une ligne en service et verrez les habitants aller en train travailler à l'épicerie de l'immeuble commercial.",
       "trade": "Cette ville est reliée par le rail au pays voisin à sa frontière est et donne sur la mer à l'ouest. Dans ce tutoriel, vous créerez deux routes commerciales : exporter par la mer les produits alimentaires d'une usine depuis un port à conteneurs, et importer par le rail grâce à une ligne de fret posée jusqu'à la frontière.",
       "highway": "Quand la ville s'agrandit, les routes locales ne suffisent plus à absorber la circulation. Dans ce tutoriel, vous apprendrez à construire une autoroute surélevée qui enjambe une route locale, puis à les relier par des bretelles pour créer un échangeur.",
       "mining": "L'action se déroule sur une île entourée de hauts-fonds coralliens. Un filon de minerai sommeille dans la montagne centrale. Dans ce tutoriel, vous apprendrez tout le processus — extraire le minerai dans la montagne, l'acheminer par train de fret depuis la gare de chargement au pied de la montagne jusqu'à la ville portuaire, puis l'exporter à l'étranger depuis le port de vrac — en construisant vous-même les voies et le dépôt.",

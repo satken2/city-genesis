@@ -27,7 +27,7 @@
       "description": "Aprende a dividir la ciudad en distritos y a definir normativa de construcción para cada uno.",
       "step1": {
         "title": "Creemos un distrito",
-        "description": "El distrito es la unidad que divide la ciudad en zonas y se define sobre las calles. Pulsa el botón de distritos del panel de iconos para entrar en el modo de edición de distritos: verás que la red de calles en forma de H forma un solo distrito. Con la herramienta de creación (estado inicial), haz clic en la calle del marcador amarillo para convertirla, junto con las parcelas que dan a ella, en un distrito nuevo."
+        "description": "El distrito divide la ciudad en zonas y se define sobre las calles. Pulsa el botón de distritos del panel de iconos para entrar en el modo de edición: verás que la red de calles en forma de H es un solo distrito. Con la herramienta de creación (estado inicial), haz clic en la calle del marcador amarillo para convertirla, con las parcelas que dan a ella, en un distrito nuevo."
       },
       "step2": {
         "title": "El distrito quedó dividido",
@@ -84,38 +84,45 @@
     },
     "scenario4": {
       "title": "Construyamos un ferrocarril",
-      "description": "Aprende a poner en servicio una línea ferroviaria preparando en orden las vías, el depósito, la línea de transmisión, el andén y el edificio de estación.",
+      "description": "Aprende a poner en servicio una línea ferroviaria que une la vivienda colectiva del pueblo con un edificio comercial preparando andenes, edificios de estación, vías, un depósito y la línea de transmisión.",
+      "step1": {
+        "title": "Construyamos los andenes",
+        "open": "Primero, los andenes donde los pasajeros esperan el tren. Abre «Vías férreas» en el panel de iconos y elige «Andén ferroviario» en la pestaña «Andén». Usa una sola vía.",
+        "town": "Junto a la vivienda colectiva del pueblo, haz clic en los dos marcadores amarillos de oeste a este para tender un andén. Comprueba en la vista previa que el andén quede del lado norte (el de la vivienda) antes de confirmar.",
+        "new": "Junto al edificio comercial del oeste, haz clic también en los dos marcadores amarillos de oeste a este para tender un andén con el lado de embarque hacia el norte. Cuando termines, pulsa «Siguiente»."
+      },
       "step2": {
-        "title": "Tendamos las vías",
-        "description": "Primero, la vía por donde circularán los trenes. Abre «Construcción ferroviaria» en el panel de iconos de la izquierda y, en la pestaña «Vía férrea», elige «Vía electrificada de superficie». Una sola vía es vía única, así que para ir y volver hace falta doble vía. Pon el número de vías «paralelas» en 2 y tiéndelas rectas en dirección este-oeste sobre el terreno libre al norte (al fondo) de la calle. En la vista 3D, el clic izquierdo añade vértices y el derecho confirma."
+        "title": "Construyamos los edificios de estación",
+        "town": "Un andén solo todavía no es una estación. Elige «Estación sencilla» en la pestaña «Edificio de estación» y traza una línea entre los dos marcadores amarillos que cruce el andén del pueblo. Los andenes que cruza la línea se agrupan en esa estación.",
+        "new": "Haz lo mismo en el andén del oeste: traza la línea de «Estación sencilla» entre los dos marcadores amarillos. Cuando termines, pulsa «Siguiente»."
       },
       "step3": {
-        "title": "Construyamos el depósito",
-        "description": "Aunque haya vías, sin trenes que circulen el ferrocarril no funciona. Los trenes se suministran a la línea desde el depósito. En «Construcción» del panel de iconos elige «Depósito ferroviario» y constrúyelo en la parcela libre preparada junto a la calle. Normalmente tarda en terminarse, pero como es un tutorial quedará listo de inmediato con el botón de finalizar."
+        "title": "Unamos las dos estaciones con vía",
+        "description": "Elige «Vía de ferrocarril» en la pestaña «Vía férrea» y tiende la vía desde el extremo oeste del andén del pueblo hasta el extremo este del andén del oeste (una sola vía). Al pulsar «Siguiente», se completarán la vía y las estaciones y se comprobará la conexión."
       },
       "step4": {
-        "title": "Conectemos con una vía de acceso",
-        "description": "El depósito no puede sacar trenes si no está conectado a la vía. El depósito cuenta con un nodo de «terminal de conexión». Elige de nuevo «Vía electrificada de superficie» en «Construcción ferroviaria» (basta con una sola vía) y tiende desde ese terminal una vía de acceso hasta la línea principal. Engancha un extremo al terminal del depósito y el otro a la vía principal."
+        "title": "Construyamos el depósito",
+        "description": "Los trenes salen del depósito. Elige «Depósito ferroviario» en «Construcción» del panel de iconos y constrúyelo en la parcela del marcador amarillo junto a la calle. Al pulsar «Siguiente», como es un tutorial, se omitirá el plazo de obra."
       },
       "step5": {
-        "title": "Conectemos la línea de transmisión",
-        "description": "Una vía electrificada solo puede mover trenes cuando circula electricidad por la catenaria. Abre «Calles» en el panel de iconos, elige «Línea de transmisión» en «Electricidad» dentro de la pestaña «Infraestructura» y conecta el terminal de la central solar con el terminal del depósito. El terminal del depósito es compartido y acepta tanto vías como líneas de transmisión, de modo que si la electricidad llega ahí se distribuye por la vía de acceso a toda la red ferroviaria."
+        "title": "Conectemos el depósito a la línea principal",
+        "description": "Tiende una vía de acceso desde el terminal de conexión del lado sur del depósito hasta la línea principal, con «Vía de ferrocarril» de la pestaña «Vía férrea», entre los dos marcadores amarillos. La clave es empalmarla con la línea principal en un ángulo suave hacia el este."
       },
       "step6": {
-        "title": "Construyamos el andén",
-        "description": "Ahora el andén donde los pasajeros esperan el tren. En la pestaña «Andén» de «Construcción ferroviaria» elige «Andén ferroviario electrificado de superficie» y tiéndelo, corto, en un tramo intermedio de la línea principal. El andén también es un tipo de vía, así que la clave es tenderlo de forma que empalme suavemente con la línea principal. Con el lado del andén puedes elegir de qué lado de la vía se coloca."
+        "title": "Llevemos electricidad al depósito",
+        "description": "La vía está electrificada: la electricidad pasa del terminal de conexión del depósito a la vía. Abre «Infraestructura» en el panel de iconos y, con «Línea de transmisión» de «Electricidad», conecta el terminal de conexión de la central solar del pueblo con el terminal de conexión del depósito."
       },
       "step7": {
-        "title": "Construyamos el edificio de estación",
-        "description": "Con solo el andén, este todavía no pertenece a ninguna estación. En la pestaña «Edificio de estación» de «Construcción ferroviaria» elige «Estación elevada sencilla» y traza una línea que cruce el andén que acabas de tender. Los andenes que crucen esa línea se agruparán en una misma estación y en ambos extremos de la línea se levantarán los edificios de la estación."
+        "title": "Pongamos la línea en servicio",
+        "description": "En «Transporte público» del panel de iconos, pulsa «＋ Nueva línea», elige «Línea ferroviaria de media distancia» como tipo y coloca las paradas sobre los dos andenes. Si la tarifa es alta, conviene más caminar, así que pon la Tarifa en 0 y el Intervalo en 5 minutos antes de pulsar «Crear»."
       },
       "step8": {
-        "title": "Pongamos la línea en servicio",
-        "description": "Por último, crearemos la línea que hará circular los trenes. Abre «Transporte público» en el panel de iconos y pulsa «＋ Nueva línea». Elige «Línea ferroviaria de media distancia» como tipo de línea y haz clic sobre el andén en la vista 3D para colocar una parada. Define la tarifa y el intervalo, y pulsa «Crear» para inaugurarla."
+        "title": "Comprobemos los pasajeros",
+        "description": "Vecinos del pueblo trabajan en la tienda de alimentos del edificio comercial del oeste. Al avanzar épocas se consiguen los vehículos, los trenes empiezan a circular y la gente los usa para ir al trabajo. En la ventana de «Transporte público», comprueba que los Viajes de la línea ya no sean 0. Arrancar lleva unas cuantas épocas."
       },
       "step9": {
         "title": "Ferrocarril inaugurado",
-        "description": "¡Buen trabajo! Tender la vía, suministrar trenes desde el depósito, llevar electricidad con la línea de transmisión, formar la estación con andén y edificio, y hacer pasar una línea por encima: el ferrocarril funciona gracias a la suma de todos esos elementos. Ahora solo tienes que avanzar el tiempo para que los trenes empiecen a circular y lleguen los ingresos por tarifa. Los alrededores de la estación ganan en comodidad, así que intenta concentrar ahí vivienda y comercio."
+        "description": "¡Buen trabajo! Formar estaciones con andenes y edificios, unirlas con vía, sacar trenes del depósito, llevar electricidad con la línea de transmisión y hacer pasar una línea por encima: el ferrocarril funciona gracias a la suma de todos esos elementos."
       }
     },
     "complete": {
@@ -134,7 +141,7 @@
       "placeStart": "Haz clic izquierdo dentro del círculo celeste para colocar el inicio de la carretera.",
       "placeEnd": "Haz clic izquierdo dentro del círculo amarillo para colocar el final de la carretera.",
       "finalizeRoad": "Haz clic derecho en la vista 3D para finalizar la forma de la carretera.",
-      "confirmRoad": "Confirma en el panel de construcción para guardar la carretera y luego pulsa Completar.",
+      "confirmRoad": "Confirma en el panel de construcción para guardar la carretera y luego pulsa «Siguiente».",
       "failed": "Falló la preparación o la comunicación. Reintenta; si el problema persiste, sal e inicia el tutorial en una ciudad nueva.",
       "retry": "Reintentar",
       "placementRequired": "Usa la variante y las posiciones de carretera indicadas.",
@@ -158,7 +165,7 @@
       },
       "step4": {
         "open": "Abre «Vías férreas» en el panel de iconos y elige «Andén de carga de contenedores» en la pestaña «Andén».",
-        "place": "Tiende un andén al norte de la estación internacional de carga, paralelo a ella. Cambia «Lado del andén» para que el andén quede del lado del edificio de la estación (el lado sur) antes de confirmar. Si lo tiendes de oeste a este, elige «Interior». Cuando termines, pulsa el botón «Ya terminé».",
+        "place": "Tiende un andén al norte de la estación internacional de carga, paralelo a ella. Cambia «Lado del andén» para que el andén quede del lado del edificio de la estación (el lado sur) antes de confirmar. Si lo tiendes de oeste a este, elige «Interior». Cuando termines, pulsa «Siguiente».",
         "title": "Construir un andén junto a la estación"
       },
       "step5": {
@@ -166,19 +173,22 @@
         "title": "Tender la vía hasta la frontera"
       },
       "step6": {
-        "build": "Construye un «Depósito ferroviario» en la parcela del marcador amarillo junto a la calle.",
-        "branch": "Tiende una vía de acceso desde el terminal de conexión del lado norte del depósito hasta la línea principal. Empálmala con la línea principal en un ángulo suave hacia el este, no en ángulo recto. Cuando termines, pulsa el botón «Ya terminé».",
-        "title": "Construir el depósito y conectarlo a la línea principal"
+        "title": "Construir el depósito",
+        "description": "Construye un «Depósito ferroviario» en la parcela del marcador amarillo junto a la calle. Al pulsar «Siguiente», como es un tutorial, se omitirá el plazo de obra."
       },
       "step7": {
+        "title": "Conectar el depósito a la línea principal",
+        "description": "Tiende una vía de acceso desde el terminal de conexión del lado norte del depósito hasta la línea principal. Empálmala con la línea principal en un ángulo suave hacia el este, no en ángulo recto. Cuando termines, pulsa «Siguiente»."
+      },
+      "step8": {
         "description": "Abre «Infraestructura» en el panel de iconos y, con «Línea de transmisión» de «Electricidad», conecta el terminal de conexión de la central solar del este del pueblo con el terminal de conexión del depósito.",
         "title": "Llevar electricidad al depósito"
       },
-      "step8": {
+      "step9": {
         "description": "En «Transporte público», pulsa «＋ Nueva línea» y elige «Línea internacional de carga» como tipo de línea. Coloca paradas sobre los andenes de la estación internacional de carga y de la estación fronteriza de carga, e inaugura la línea. Al confirmar, la entrada de las importaciones pasará del puerto a la estación internacional de carga.",
         "title": "Inaugurar la línea internacional de carga"
       },
-      "step9": {
+      "step10": {
         "description": "Avanza épocas y revisa las importaciones en el detalle de la estación internacional de carga. Conseguir los vehículos y arrancar el transporte lleva algunas épocas.",
         "title": "Confirmar importaciones por tren"
       }
@@ -228,8 +238,8 @@
       },
       "step6": {
         "open": "Abre «Vías férreas» en el panel de iconos y elige «Andén de carga de mineral» en la pestaña «Andén».",
-        "loading": "Tiende un andén al norte de la estación de carga, paralelo a ella. Al cambiar «Lado del andén», cambia la posición del andén en la vista previa; ajústalo para que el andén quede del lado del edificio de la estación (el lado sur) antes de confirmar. Si lo tiendes de oeste a este, elige «Interior». El terreno baja en pendiente pronunciada. Si aparece un error de pendiente, ajusta la «Altura del terraplén» para dejar el andén horizontal.",
-        "unloading": "Del mismo modo, tiende también un andén al norte de la estación de descarga, de manera que quede del lado del edificio de la estación. Cuando termines, pulsa el botón «Ya terminé».",
+        "loading": "Tiende un andén al norte de la estación de carga, paralelo a ella. Cambia «Lado del andén» para que el andén quede del lado del edificio de la estación (sur) antes de confirmar; de oeste a este es «Interior». El terreno baja en pendiente pronunciada: si aparece un error de pendiente, ajusta la «Altura del terraplén» para dejar el andén horizontal.",
+        "unloading": "Del mismo modo, tiende también un andén al norte de la estación de descarga, de manera que quede del lado del edificio de la estación. Cuando termines, pulsa «Siguiente».",
         "title": "Construir andenes junto a las estaciones"
       },
       "step7": {
@@ -237,23 +247,26 @@
         "title": "Unir las dos estaciones con vías"
       },
       "step8": {
-        "build": "Los trenes salen del depósito. Construye un «Depósito ferroviario» en la parcela del marcador amarillo junto a la calle principal.",
-        "branch": "Tiende una vía de acceso desde el terminal de conexión del lado norte del depósito hasta la línea principal. La clave es empalmarla con la línea principal en un ángulo suave hacia el este, no en ángulo recto (los desvíos reales no pueden girar en ángulos grandes). Cuando termines, pulsa el botón «Ya terminé».",
-        "title": "Construir el depósito y conectarlo a la línea principal"
+        "title": "Construir el depósito",
+        "description": "Los trenes salen del depósito. Construye un «Depósito ferroviario» en la parcela del marcador amarillo junto a la calle principal. Al pulsar «Siguiente», como es un tutorial, se omitirá el plazo de obra."
       },
       "step9": {
+        "title": "Conectar el depósito a la línea principal",
+        "description": "Tiende una vía de acceso desde el terminal de conexión del lado norte del depósito hasta la línea principal. La clave es empalmarla con la línea principal en un ángulo suave hacia el este, no en ángulo recto (los desvíos reales no pueden girar en ángulos grandes). Cuando termines, pulsa «Siguiente»."
+      },
+      "step10": {
         "description": "La vía está electrificada: la electricidad pasa del terminal de conexión del depósito a la vía. Abre «Infraestructura» en el panel de iconos y, con «Línea de transmisión» de «Electricidad», conecta el terminal de conexión de la central solar del pueblo con el terminal de conexión del depósito.",
         "title": "Llevar electricidad al depósito"
       },
-      "step10": {
+      "step11": {
         "description": "En «Transporte público» del panel de iconos, pulsa «＋ Nueva línea» y elige «Línea de transporte de mineral» como tipo de línea. Haz clic sobre los andenes de las estaciones de carga y de descarga para colocar las paradas, y pulsa «Crear» para inaugurar la línea.",
         "title": "Inaugurar la línea de transporte de mineral"
       },
-      "step11": {
+      "step12": {
         "description": "Ejecuta épocas para poner en marcha la extracción, la carga, el transporte ferroviario, la descarga y la exportación. Conseguir los vehículos y arrancar el transporte lleva algunas épocas.",
         "title": "Avanzar épocas"
       },
-      "step12": {
+      "step13": {
         "description": "Revisa las exportaciones de mineral en el detalle del puerto de graneles. Si todavía no hay exportaciones, avanza más épocas.",
         "title": "Confirmar exportaciones de mineral"
       }
@@ -282,7 +295,7 @@
       "basic": "¡Bienvenido! Eres el alcalde de esta ciudad. En este tutorial aprenderás el flujo básico para construir una ciudad: tender una calle, esperar a que se termine y levantar un edificio en las parcelas.",
       "scenario2": "La ciudad se puede administrar dividiéndola en «distritos». En este tutorial aprenderás a crear un distrito nuevo seleccionando calles, a revisar la distribución de los recursos naturales y a restringir qué edificios pueden construirse en cada distrito.",
       "scenario3": "La historia transcurre en un pueblo portuario del noroeste de una isla rodeada de bajíos de coral. Este pueblo todavía no tiene electricidad. Construirás una central solar en el terreno llano del oeste, lejos del pueblo, llevarás la electricidad hasta la subestación del pueblo con una línea de transmisión y aprenderás que la infraestructura eléctrica se compone de tres etapas: generación, transmisión y transformación.",
-      "scenario4": "Un ferrocarril no funciona solo con tender vías. En este tutorial prepararás en orden la vía, el depósito, la línea de transmisión, el andén y el edificio de estación, y al final pondrás en servicio una línea para aprender que el ferrocarril funciona gracias a la combinación de muchos elementos.",
+      "scenario4": "Un ferrocarril no funciona solo con tender vías. En este tutorial unirás por ferrocarril la vivienda colectiva del pueblo con un edificio comercial al extremo oeste de la calle. Formarás las estaciones con andenes y edificios de estación, prepararás la vía, el depósito y la línea de transmisión, pondrás en servicio una línea y verás a los vecinos ir en tren a trabajar a la tienda de alimentos del edificio comercial.",
       "trade": "Esta ciudad está conectada por ferrocarril con el país vecino en su frontera este y da al mar por el oeste. En este tutorial crearás dos rutas comerciales: exportarás por mar los alimentos de una fábrica desde un puerto de contenedores, y tenderás una línea de carga hasta la frontera para importar por ferrocarril.",
       "highway": "Cuando la ciudad crece, las calles locales ya no dan abasto con tantos autos. En este tutorial aprenderás a construir una autopista elevada que pase por encima de una calle local y a conectarlas con rampas para crear un intercambiador.",
       "mining": "La historia transcurre en una isla rodeada de bajíos de coral. En la montaña central yace una veta de mineral. En este tutorial aprenderás todo el proceso —extraer el mineral en la montaña, llevarlo en tren de carga desde la estación de carga al pie de la montaña hasta el pueblo portuario y exportarlo al extranjero desde el puerto de graneles— construyendo tú mismo las vías y el depósito.",

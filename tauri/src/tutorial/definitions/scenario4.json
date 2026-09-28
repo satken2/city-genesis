@@ -1,0 +1,646 @@
+{
+  "version": 1,
+  "id": "scenario4",
+  "terrainMap": "flat",
+  "steps": [
+    {
+      "id": "scenario4.platforms",
+      "legacyStep": 1,
+      "phases": [
+        {
+          "id": "open",
+          "textKey": "tutorial.scenario4.step1.open",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.track"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                230,
+                0,
+                -42.5
+              ],
+              [
+                330,
+                0,
+                -42.5
+              ]
+            ],
+            "camera": {
+              "target": [
+                280,
+                0,
+                -40
+              ],
+              "distance": 330,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "track_build"
+          }
+        },
+        {
+          "id": "town",
+          "textKey": "tutorial.scenario4.step1.town",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": []
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                230,
+                0,
+                -42.5
+              ],
+              [
+                330,
+                0,
+                -42.5
+              ]
+            ],
+            "camera": {
+              "target": [
+                280,
+                0,
+                -40
+              ],
+              "distance": 330,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "entity",
+            "resource": "tutorial",
+            "where": [
+              {
+                "field": "checks.pf_town",
+                "equals": true
+              }
+            ]
+          }
+        },
+        {
+          "id": "new",
+          "textKey": "tutorial.scenario4.step1.new",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": []
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -225,
+                0,
+                -42.5
+              ],
+              [
+                -125,
+                0,
+                -42.5
+              ]
+            ],
+            "camera": {
+              "target": [
+                -175,
+                0,
+                -40
+              ],
+              "distance": 330,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.pf_town",
+            "equals": true
+          },
+          {
+            "field": "checks.pf_new",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "scenario4.stations",
+      "legacyStep": 2,
+      "phases": [
+        {
+          "id": "town",
+          "textKey": "tutorial.scenario4.step2.town",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.track"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                290,
+                0,
+                -62
+              ],
+              [
+                290,
+                0,
+                -24
+              ]
+            ],
+            "camera": {
+              "target": [
+                280,
+                0,
+                -40
+              ],
+              "distance": 330,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "entity",
+            "resource": "tutorial",
+            "where": [
+              {
+                "field": "checks.station_town",
+                "equals": true
+              }
+            ]
+          }
+        },
+        {
+          "id": "new",
+          "textKey": "tutorial.scenario4.step2.new",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.track"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -175,
+                0,
+                -62
+              ],
+              [
+                -175,
+                0,
+                -24
+              ]
+            ],
+            "camera": {
+              "target": [
+                -175,
+                0,
+                -40
+              ],
+              "distance": 330,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.station_town",
+            "equals": true
+          },
+          {
+            "field": "checks.station_new",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "scenario4.rail",
+      "legacyStep": 3,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.scenario4.step3.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.track"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                230,
+                0,
+                -42.5
+              ],
+              [
+                -125,
+                0,
+                -42.5
+              ]
+            ],
+            "camera": {
+              "target": [
+                50,
+                0,
+                -40
+              ],
+              "distance": 800,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "beforeCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "scenario4",
+          "action": "commission_tracks"
+        },
+        {
+          "type": "reload"
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.rail",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "scenario4.depot",
+      "legacyStep": 4,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.scenario4.step4.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.construction"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -60,
+                0,
+                -21
+              ]
+            ],
+            "camera": {
+              "target": [
+                -50,
+                0,
+                -30
+              ],
+              "distance": 300,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.depot",
+            "equals": true
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "scenario4",
+          "action": "commission_depot"
+        },
+        {
+          "type": "reload"
+        }
+      ]
+    },
+    {
+      "id": "scenario4.branch",
+      "legacyStep": 5,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.scenario4.step5.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.track"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                -60,
+                0,
+                -35.5
+              ],
+              [
+                0,
+                0,
+                -42.5
+              ]
+            ],
+            "camera": {
+              "target": [
+                -30,
+                0,
+                -40
+              ],
+              "distance": 220,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "beforeCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "scenario4",
+          "action": "commission_tracks"
+        },
+        {
+          "type": "reload"
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.depot_rail",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "scenario4.power",
+      "legacyStep": 6,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.scenario4.step6.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.infra"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                461.5,
+                0,
+                -177.5
+              ],
+              [
+                -60,
+                0,
+                -35.5
+              ]
+            ],
+            "camera": {
+              "target": [
+                200,
+                0,
+                -100
+              ],
+              "distance": 850,
+              "yaw": 0,
+              "pitch": 60
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "beforeCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "scenario4",
+          "action": "commission_power"
+        },
+        {
+          "type": "reload"
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.depot_power",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "scenario4.line",
+      "legacyStep": 7,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.scenario4.step7.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.transport"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "markers": [
+              [
+                320,
+                0,
+                -42.5
+              ],
+              [
+                -175,
+                0,
+                -42.5
+              ]
+            ],
+            "camera": {
+              "target": [
+                50,
+                0,
+                -40
+              ],
+              "distance": 800,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.line",
+            "equals": true
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "scenario4",
+          "action": "operations"
+        }
+      ]
+    },
+    {
+      "id": "scenario4.riders",
+      "legacyStep": 8,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.scenario4.step8.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [
+              "hud.transport"
+            ],
+            "highlight": [
+              "hud.execute"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                50,
+                0,
+                -40
+              ],
+              "distance": 800,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.riders",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "scenario4.summary",
+      "legacyStep": 9,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.scenario4.step9.description",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": []
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                50,
+                0,
+                -40
+              ],
+              "distance": 800,
+              "yaw": 0,
+              "pitch": 50
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ]
+    }
+  ]
+}

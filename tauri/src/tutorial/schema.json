@@ -83,6 +83,7 @@
               "scenario": {
                 "enum": [
                   "scenario3",
+                  "scenario4",
                   "trade",
                   "highway",
                   "mining",
@@ -346,6 +347,7 @@
                     "scenario": {
                       "enum": [
                         "scenario3",
+                        "scenario4",
                         "trade",
                         "highway",
                         "mining",
@@ -445,6 +447,7 @@
                     "scenario": {
                       "enum": [
                         "scenario3",
+                        "scenario4",
                         "trade",
                         "highway",
                         "mining",
@@ -835,6 +838,7 @@
             "scenario": {
               "enum": [
                 "scenario3",
+                "scenario4",
                 "trade",
                 "highway",
                 "mining",

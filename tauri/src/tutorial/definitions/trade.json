@@ -341,8 +341,8 @@
       "legacyStep": 6,
       "phases": [
         {
-          "id": "build",
-          "textKey": "tutorial.trade.step6.build",
+          "id": "perform",
+          "textKey": "tutorial.trade.step6.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -371,19 +371,38 @@
             }
           },
           "until": {
-            "type": "entity",
-            "resource": "tutorial",
-            "where": [
-              {
-                "field": "checks.depot",
-                "equals": true
-              }
-            ]
+            "type": "ack"
           }
+        }
+      ],
+      "complete": {
+        "type": "entity",
+        "resource": "tutorial",
+        "where": [
+          {
+            "field": "checks.depot",
+            "equals": true
+          }
+        ]
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "trade",
+          "action": "commission_depot"
         },
         {
-          "id": "branch",
-          "textKey": "tutorial.trade.step6.branch",
+          "type": "reload"
+        }
+      ]
+    },
+    {
+      "id": "trade.branch",
+      "legacyStep": 7,
+      "phases": [
+        {
+          "id": "perform",
+          "textKey": "tutorial.trade.step7.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -425,11 +444,6 @@
         {
           "type": "scenarioAction",
           "scenario": "trade",
-          "action": "commission_depot"
-        },
-        {
-          "type": "scenarioAction",
-          "scenario": "trade",
           "action": "commission_tracks"
         },
         {
@@ -449,11 +463,11 @@
     },
     {
       "id": "trade.power",
-      "legacyStep": 7,
+      "legacyStep": 8,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.trade.step7.description",
+          "textKey": "tutorial.trade.step8.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -514,11 +528,11 @@
     },
     {
       "id": "trade.line",
-      "legacyStep": 8,
+      "legacyStep": 9,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.trade.step8.description",
+          "textKey": "tutorial.trade.step9.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -576,11 +590,11 @@
     },
     {
       "id": "trade.imports",
-      "legacyStep": 9,
+      "legacyStep": 10,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.trade.step9.description",
+          "textKey": "tutorial.trade.step10.description",
           "ui": {
             "policy": "highlight",
             "allow": [],

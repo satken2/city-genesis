@@ -49,8 +49,8 @@ public static partial class VehicleQA
             }
             if (Array.IndexOf(args, "-pedestrianModelsOnly") >= 0)
             {
-                PedestrianModels();
-                File.WriteAllText(result, "PASS\nPedestrian FBX topology, normals, budgets, scale and ground\n" + string.Join("\n", accessTimings));
+                PedestrianModels(); PedestrianPoses(); accessTimings.Add(PedestrianDrawTiming());
+                File.WriteAllText(result, "PASS\nPedestrian FBX topology, normals, budgets, scale, ground, walking poses and draw timing\n" + string.Join("\n", accessTimings));
                 EditorApplication.Exit(0);
                 return;
             }
@@ -68,10 +68,12 @@ public static partial class VehicleQA
             }
             StreetParking();
             Geometry(); Budget(); Junction(); RoadsideExit(); MotionContract(); TransitModels(); TransitPlacement(); TransitConsistGeometry(); TransitHighlightSelection(); DriveCamera();
-            PedestrianBands(); PedestrianModels();
+            PedestrianBands(); PedestrianModels(); PedestrianPoses(); accessTimings.Add(PedestrianDrawTiming());
             var report = new List<string>();
             foreach(int split in new[]{1,5}) report.Add(PedestrianNetwork(split,12,1200,false,true));
-            report.Add(PedestrianNetwork(5,.2f,1200,false,false));
+            // 端数枠は入口のある網で測る(閉じた網は補充を止めて既存の歩行者を残すので平均が下がらない)。入口を過ぎた歩行者は
+            // 1周(遅い人で約970秒)してから入り、その超過を端数枠の繰り越しが後で相殺するので、平均が収まるまで長く歩かせる。
+            report.Add(PedestrianNetwork(5,.2f,30000,false,true));
             // 歩行者は1.1m/sなので、入口のある1辺へ戻るまで800mの環状路で最大約730秒かかる。
             report.Add(PedestrianNetwork(5,12,2400,true,true));
             report.Add(PedestrianNetwork(5,12,600,true,false));
@@ -534,6 +536,10 @@ public static partial class VehicleQA
 
     static void Junction()
     {
+        var master=new GameObject("JunctionMaster").AddComponent(game.GetType("MasterDataStore"));
+        game.GetType("MasterDataStore").GetField("<Instance>k__BackingField",Flags).SetValue(null,master);
+        // side_width 未設定=区画線なしのバリアントにして、車線別の進入制限を掛けずに交通量の重みだけで分岐させる。
+        ((IDictionary)Get(master,"pathMasterById"))[0]=New("PathMasterItem");
         var paths=new GameObject("JunctionPaths").AddComponent(game.GetType("PathManager"));
         var manager=new GameObject("JunctionVehicles").AddComponent(game.GetType("VehicleManager"));
         Set(manager,"pathManager",paths);
@@ -583,7 +589,7 @@ public static partial class VehicleQA
             Check(((IList)Get(manager,"active")).Count==0,"Driven car remains after exit");
             ((IDictionary)Get(manager,"exitRanks")).Clear();
         }
-        UnityEngine.Object.DestroyImmediate(manager.gameObject);UnityEngine.Object.DestroyImmediate(paths.gameObject);
+        UnityEngine.Object.DestroyImmediate(manager.gameObject);UnityEngine.Object.DestroyImmediate(paths.gameObject);UnityEngine.Object.DestroyImmediate(master.gameObject);
     }
 
     static void DriveCamera()
@@ -644,6 +650,7 @@ public static partial class VehicleQA
         game.GetType("MasterDataStore").GetField("<Instance>k__BackingField",Flags).SetValue(null,master);
         var item=New("PathMasterItem");Set(item,"frontage_allowed",true);
         ((IDictionary)Get(master,"pathMasterById"))[0]=item;
+        ((IDictionary)Get(master,"agentMasterById"))[0]=New("MasterDataStore+AgentMasterItem");   // 建物の登録は間口索引のために建物マスターを引く(未登録だと例外)
         var parcels=new GameObject("AccessParcels").AddComponent(game.GetType("ParcelManager"));cleanup.Add(parcels.gameObject);
         var buildings=new GameObject("AccessBuildings").AddComponent(game.GetType("BuildingManager"));cleanup.Add(buildings.gameObject);
         Set(manager,"parcelManager",parcels);Set(manager,"buildingManager",buildings);
@@ -856,6 +863,7 @@ public static partial class VehicleQA
         foreach (double volume in volumes.Values)
             Check(volume > 1e-8, "Pedestrian body part faces inward");
     }
+    static readonly string[] PedestrianPoseSuffixes={"","_right","_left"};
     static void PedestrianModels()
     {
         var manager=new GameObject("PedestrianModelsQA").AddComponent(game.GetType("ModelManager"));
@@ -864,39 +872,123 @@ public static partial class VehicleQA
         int count=0;
         for(int i=0;i<16;i++)
         {
-            var prefab=(GameObject)getModel.Invoke(manager,new object[]{$"Models/Props/pedestrian_{i}",true});
-            if(prefab==null)break;
-            count++;
-            var filters=prefab.GetComponentsInChildren<MeshFilter>(true);Check(filters.Length>0,"Pedestrian FBX has no mesh");
-            int triangles=0;Bounds bounds=default;bool any=false;
-            foreach(var filter in filters)
+            if(getModel.Invoke(manager,new object[]{$"Models/Props/pedestrian_{i}",true})==null) break;
+            Bounds standing=default,standingHair=default;
+            for(int pose=0;pose<PedestrianPoseSuffixes.Length;pose++)
             {
-                Check(filter.sharedMesh.isReadable,"Pedestrian FBX is not readable");
-                triangles+=filter.sharedMesh.triangles.Length/3;
-                CheckPedestrianSurface(filter.sharedMesh);
-                var b=filter.sharedMesh.bounds;var m=prefab.transform.worldToLocalMatrix*filter.transform.localToWorldMatrix;
-                for(int c=0;c<8;c++){var point=m.MultiplyPoint3x4(b.center+Vector3.Scale(b.extents,new Vector3((c&1)==0?-1:1,(c&2)==0?-1:1,(c&4)==0?-1:1)));if(!any){bounds=new Bounds(point,Vector3.zero);any=true;}else bounds.Encapsulate(point);}
+                string name=$"pedestrian_{i}{PedestrianPoseSuffixes[pose]}";
+                var prefab=(GameObject)getModel.Invoke(manager,new object[]{$"Models/Props/{name}",true});
+                Check(prefab!=null,$"{name} is missing while pedestrian_{i} exists");
+                var filters=prefab.GetComponentsInChildren<MeshFilter>(true);Check(filters.Length>0,"Pedestrian FBX has no mesh");
+                int triangles=0;Bounds bounds=default,hair=default;bool any=false,anyHair=false;
+                Vector3 front=new Vector3(0,0,float.NegativeInfinity);
+                foreach(var filter in filters)
+                {
+                    Check(filter.sharedMesh.isReadable,"Pedestrian FBX is not readable");
+                    triangles+=filter.sharedMesh.triangles.Length/3;
+                    CheckPedestrianSurface(filter.sharedMesh);
+                    var m=prefab.transform.worldToLocalMatrix*filter.transform.localToWorldMatrix;
+                    var vertices=filter.sharedMesh.vertices;
+                    foreach(var v in vertices)
+                    {
+                        var point=m.MultiplyPoint3x4(v);
+                        if(!any){bounds=new Bounds(point,Vector3.zero);any=true;}else bounds.Encapsulate(point);
+                        if(point.y<.06f && point.z>front.z) front=point;
+                    }
+                    var materials=filter.GetComponent<MeshRenderer>().sharedMaterials;
+                    for(int s=0;s<filter.sharedMesh.subMeshCount && s<materials.Length;s++)
+                    {
+                        if(materials[s]==null || !materials[s].name.Contains("HAIR")) continue;
+                        foreach(int index in filter.sharedMesh.GetIndices(s))
+                        {
+                            var point=m.MultiplyPoint3x4(vertices[index]);
+                            if(!anyHair){hair=new Bounds(point,Vector3.zero);anyHair=true;}else hair.Encapsulate(point);
+                        }
+                    }
+                }
+                Check(anyHair,$"{name} has no hair part");
+                Check(triangles<400,$"{name} exceeds 400 triangles: {triangles}");
+                Check(bounds.size.y>1.4f && bounds.size.y<2f,$"{name} height is not human scale: {bounds.size}");
+                Check(Mathf.Abs(bounds.min.y)<.05f,$"{name} is not grounded: {bounds.min.y}");
+                Check(Mathf.Abs(bounds.center.x)<.3f && Mathf.Abs(bounds.center.z)<.3f,$"{name} is off centre: {bounds.center}");
+                if(pose==0){standing=bounds;standingHair=hair;}
+                else
+                {
+                    // 描画は姿勢を差し替えるだけで位置を補正しないので、頭が揃い姿勢と同じ位置に無いと差し替えのたびに跳ねる。
+                    Check(Vector3.Distance(hair.center,standingHair.center)<.001f && Vector3.Distance(hair.size,standingHair.size)<.001f,
+                        $"{name} head does not align with the standing pose: {hair.center} vs {standingHair.center}");
+                    Check(bounds.size.z>standing.size.z+.2f,$"{name} does not open the legs: {bounds.size.z} vs {standing.size.z}");
+                    // 前方は+Z、人物の右手側は+X。一番前の靴底が名前どおりの足にあること。
+                    Check(pose==1 ? front.x>0 : front.x<0,$"{name} puts the wrong foot forward: {front}");
+                }
+                accessTimings.Add($"{name} triangles={triangles} size={bounds.size}");
             }
-            Check(triangles<400,$"pedestrian_{i} exceeds 400 triangles: {triangles}");
-            Check(bounds.size.y>1.4f && bounds.size.y<2f,$"pedestrian_{i} height is not human scale: {bounds.size}");
-            Check(Mathf.Abs(bounds.min.y)<.05f,$"pedestrian_{i} is not grounded: {bounds.min.y}");
-            Check(Mathf.Abs(bounds.center.x)<.3f && Mathf.Abs(bounds.center.z)<.3f,$"pedestrian_{i} is off centre: {bounds.center}");
-            accessTimings.Add($"pedestrian_{i} triangles={triangles} size={bounds.size}");
+            count++;
         }
         Check(count>=1,"No pedestrian model found");
         UnityEngine.Object.DestroyImmediate(manager.gameObject);
     }
-    static void PedestrianAccessFixture(object manager, List<GameObject> cleanup)
+    static void PedestrianPoses()
+    {
+        var resolve=game.GetType("PedestrianManager").GetMethod("ResolvePose");
+        Func<float,float,bool,int> pose=(walked,step,moving)=>(int)resolve.Invoke(null,new object[]{walked,step,moving});
+        var sequence=new List<int>();var runs=new List<float>();float runStart=0;
+        for(int i=0;i<=260;i++)
+        {
+            float walked=i*.01f;int current=pose(walked,.65f,true);
+            Check(pose(walked,.65f,false)==0,"Standing pedestrian is not drawn in the standing pose");
+            if(sequence.Count>0 && sequence[sequence.Count-1]==current) continue;
+            if(sequence.Count>0) runs.Add(walked-runStart);
+            sequence.Add(current);runStart=walked;
+        }
+        Check(string.Join(",",sequence)=="1,0,2,0,1,0,2,0,1",$"Gait order is not right-standing-left-standing: {string.Join(",",sequence)}");
+        foreach(float run in runs) Near(run,.325f,.011f,"Pose does not change every half step");
+        Check(pose(1f,0f,true)==0,"Zero step length must not animate");
+    }
+    // 1000人を同じ行列計算と描画要求で描き、全員を揃い姿勢にしたとき(姿勢で描画呼び出しが分かれない)との差を測る。
+    static string PedestrianDrawTiming()
+    {
+        var models=new GameObject("PedestrianTimingModels").AddComponent(game.GetType("ModelManager"));
+        game.GetType("ModelManager").GetProperty("Instance").SetValue(null,models);
+        var manager=new GameObject("PedestrianTiming").AddComponent(game.GetType("PedestrianManager"));
+        var active=(IList)Get(manager,"active");
+        var line=Line(new Vector3(-500,0,0),new Vector3(500,0,0));
+        UnityEngine.Random.InitState(99);
+        for(int i=0;i<1000;i++)
+        {
+            var p=New("Pedestrian");Call(p,"SetPath",i+1,line,i%2==0,UnityEngine.Random.value*1000f);
+            Set(p,"variant",i%16);Set(p,"lateral",4f);Set(p,"age",10f);Set(p,"walked",UnityEngine.Random.value*10f);Set(p,"moving",true);
+            active.Add(p);
+        }
+        Func<int,double> measure=frames=>
+        {
+            for(int i=0;i<5;i++) Call(manager,"LateUpdate");
+            var watch=System.Diagnostics.Stopwatch.StartNew();
+            for(int i=0;i<frames;i++) Call(manager,"LateUpdate");
+            return watch.Elapsed.TotalMilliseconds/frames;
+        };
+        double walking=measure(200);
+        int slots=0;foreach(IList list in (IList)Get(manager,"batches")) if(list.Count>0) slots++;
+        foreach(var p in active) Set(p,"moving",false);
+        double standing=measure(200);
+        Check(((IList)Get(manager,"models")).Count>0,"Timing ran without pedestrian models");
+        Call(manager,"OnDestroy");
+        UnityEngine.Object.DestroyImmediate(manager.gameObject);UnityEngine.Object.DestroyImmediate(models.gameObject);
+        return $"pedestrian draw 1000 people: walking={walking:F3}ms/frame (model x pose groups={slots}) standing-only={standing:F3}ms/frame";
+    }
+    static void PedestrianAccessFixture(object manager, List<GameObject> cleanup, int frontPath)
     {
         var master=new GameObject("PedestrianMaster").AddComponent(game.GetType("MasterDataStore"));cleanup.Add(master.gameObject);
         game.GetType("MasterDataStore").GetField("<Instance>k__BackingField",Flags).SetValue(null,master);
         var item=New("PathMasterItem");Set(item,"frontage_allowed",true);
         ((IDictionary)Get(master,"pathMasterById"))[0]=item;
+        // 建物の登録は間口索引のためにバリアントの建物マスターを引く(未登録だと例外になる)。
+        ((IDictionary)Get(master,"agentMasterById"))[0]=New("MasterDataStore+AgentMasterItem");
         var parcels=new GameObject("PedestrianParcels").AddComponent(game.GetType("ParcelManager"));cleanup.Add(parcels.gameObject);
         var buildings=new GameObject("PedestrianBuildings").AddComponent(game.GetType("BuildingManager"));cleanup.Add(buildings.gameObject);
         Set(manager,"parcelManager",parcels);Set(manager,"buildingManager",buildings);
         int active=(int)game.GetType("Constants").GetField("STATUS_ACTIVE").GetRawConstantValue();
-        var parcel=New("GeneratedModels.ParcelSummary");Set(parcel,"parcel_id",100);Set(parcel,"front_path_id",1);Set(parcel,"status",active);
+        var parcel=New("GeneratedModels.ParcelSummary");Set(parcel,"parcel_id",100);Set(parcel,"front_path_id",frontPath);Set(parcel,"status",active);
         Set(parcel,"polygon",new List<object>{new List<object>{-3f,-94f},new List<object>{3f,-94f},new List<object>{3f,-80f},new List<object>{-3f,-80f}});
         Call(parcels,"RegisterParcelDataForLines",parcel);
         var building=New("GeneratedModels.BuildingSummary");Set(building,"agent_id",100);Set(building,"parcel_id",100);Set(building,"status",active);Set(building,"is_bd",true);
@@ -904,8 +996,9 @@ public static partial class VehicleQA
         Action refresh=()=>{var work=(IEnumerator)Call(manager,"UpdateAccess",Vector3.zero);while(work.MoveNext()){}};
         refresh();
         var entrances=(IDictionary)Get(manager,"entrances");
-        Check(((IList)entrances[1]).Count>0,"Pedestrian frontage entrance missing");
-        foreach(var entry in (IList)entrances[1]) Check((int)Get(entry,"side")==1,"Entrance side is not the parcel side");
+        Check(((IList)entrances[frontPath]).Count>0,"Pedestrian frontage entrance missing");
+        // 接道する道路は東向き(+X)で、区画はその北側(+Z)=パス幾何の左(-1)にある。
+        foreach(var entry in (IList)entrances[frontPath]) Check((int)Get(entry,"side")==-1,"Entrance side is not the parcel side");
         int generation=(int)Get(manager,"accessGeneration");refresh();
         Check((int)Get(manager,"accessGeneration")==generation,"Unchanged data rebuilds pedestrian entrances");
     }
@@ -941,7 +1034,7 @@ public static partial class VehicleQA
             buckets.Add(bucket);lookup.Add(i+1,bucket);
         }
         var fixtureObjects=new List<GameObject>();
-        if(withAccess) PedestrianAccessFixture(manager,fixtureObjects);
+        if(withAccess) PedestrianAccessFixture(manager,fixtureObjects,subdivisions/2+1);   // 南辺のうち区画(x=±3)の前を通る分割
         int observed=0,peak=0,transitions=0,forwardSeen=0,backwardSeen=0;double sum=0;
         var priorPaths=new Dictionary<object,int>();
         for(int tick=0;tick<seconds*hz;tick++)
@@ -961,6 +1054,8 @@ public static partial class VehicleQA
                 object[] sample={null,null};Call(p,"Sample",sample);var position=(Vector3)sample[0];
                 Check(!float.IsNaN(position.x) && !float.IsNaN(position.z),"Non-finite pedestrian position");
                 Check(active.Count<=1000,"Global hard cap");
+                // 環状路では建物に入って縮小する間だけ立ち止まる。発生直後(age=0)はまだ移動処理を経ていない。
+                if((float)Get(p,"age")>0 && !(bool)Get(p,"fading")) Check((bool)Get(p,"moving"),"Walking pedestrian is drawn in the standing pose");
                 if((bool)p.GetType().GetProperty("InConnector").GetValue(p)) continue;
                 var road=Get(p,"road");float s=(float)Call(road,"Project",position);
                 Sample(road,s,true,out var centre,out _);
