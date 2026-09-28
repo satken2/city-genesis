@@ -21,7 +21,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.construction"
+              "hud.construction",
+              "building.category:6",
+              "building.variant:2016"
             ]
           },
           "world": {
@@ -81,7 +83,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.construction"
+              "hud.construction",
+              "building.category:12",
+              "building.variant:1068"
             ]
           },
           "world": {

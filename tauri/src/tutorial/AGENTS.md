@@ -5,6 +5,6 @@
 - `environment.ts` だけがHTTPと再描画のアダプタを持つ。開始時にコアが作った初期都市の対象(`support.*` / `lesson.*`)を束縛へ取り込むので、定義はそれらを `bind` なしで参照できる。取得済みMasterDataを受け取る。道路APIの `curved` (0/1)はここでbooleanへ正規化する。書き込み前のセーブID確認を外さない。
 - `useTutorialGuide.ts` が専用ウィンドウ内の進行管理。束縛・作成結果不明の記録はシナリオとセーブIDで隔離する。HTTP作成の結果が不明なら再POSTしない。
 - `bus.ts` は各WebViewの現在の案内。制限状態を永続化しない。終了したrunIdと古いrevisionを受理しない。
-- `TutorialLayer.tsx` / `dom.ts` は操作名で案内・制限を適用する。強調の見た目もここだけが付ける。アイコンパネルは方針に関わらず段階の `allow`・`highlight` にあるボタンだけを押せる。システムトレイと設定・保存/ロード・新規ゲーム・確認ダイアログなどの関連画面は制限対象外。除外一覧は `dom.ts` が正。既存のdisabledを上書きしない。解除時に他の処理が設定したinertを消さない。
+- `TutorialLayer.tsx` / `dom.ts` は操作名で案内・制限を適用する。強調の見た目もここだけが付け、押せない(`disabled`)要素には付けない。同じ操作名が並ぶタイル・カードは `data-guide-value` を持ち、定義の `名前:値` で1つだけを指す(値を取れる名前は `definitions.ts` の `VALUE_TARGETS`)。アイコンパネルは方針に関わらず段階の `allow`・`highlight` にあるボタンだけを押せる。システムトレイと設定・保存/ロード・新規ゲーム・確認ダイアログなどの関連画面は制限対象外。除外一覧は `dom.ts` が正。既存のdisabledを上書きしない。解除時に他の処理が設定したinertを消さない。
 - 全チュートリアルの全ステップを定義で書く。`components/tutorial/tutorialSteps.ts` は定義から一覧・タイトル・進捗表示の情報を導くだけで判定を持たない。ステップのタイトルは `tutorial.<シナリオID>.step<legacyStep>.title`。
 - 作者の設計書は `docs/tutorials/`、公開契約は `docs/docs/programs/チュートリアル基盤.md`。`npm run test:tutorial` と7言語の翻訳整合を検証する。

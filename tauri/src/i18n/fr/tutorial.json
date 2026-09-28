@@ -88,8 +88,8 @@
       "step1": {
         "title": "Construisons les quais",
         "open": "D'abord, les quais où les voyageurs attendent le train. Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d'icônes et choisissez « Quai ferroviaire » dans « Chemin de fer ». Utilisez une seule voie.",
-        "town": "Près du logement collectif de la ville, cliquez sur les deux repères jaunes d'ouest en est pour poser un quai. Vérifiez dans l'aperçu que le quai se trouve du côté nord (côté logement) avant de valider.",
-        "new": "Près de l'immeuble commercial à l'ouest, cliquez aussi sur les deux repères jaunes d'ouest en est pour poser un quai dont le côté d'embarquement est au nord. Une fois la pose terminée, appuyez sur « Suivant »."
+        "town": "Près du logement collectif de la ville, faites un clic gauche dans le cercle cyan (ouest) pour placer le début, puis dans le cercle jaune (est) pour placer la fin, et faites un clic droit dans la vue 3D pour terminer le tracé. Vérifiez dans l'aperçu que le quai se trouve du côté nord (côté logement), puis validez dans le panneau de construction.",
+        "new": "Près de l'immeuble commercial à l'ouest, procédez de même : clic gauche dans le cercle cyan (ouest), puis dans le cercle jaune (est), et clic droit pour terminer le tracé, afin de poser un quai dont le côté d'embarquement est au nord. Une fois la pose terminée, appuyez sur « Suivant »."
       },
       "step2": {
         "title": "Construisons les bâtiments de gare",
@@ -144,7 +144,7 @@
       "confirmRoad": "Confirmez dans le panneau de construction pour enregistrer la route, puis appuyez sur « Suivant ».",
       "failed": "Échec de la préparation ou de la communication. Réessayez ; si le problème persiste, quittez et lancez le tutoriel dans une nouvelle ville.",
       "retry": "Réessayer",
-      "placementRequired": "Utilisez la variante et les positions indiquées pour la route.",
+      "placementRequired": "Utilisez la variante et les positions indiquées.",
       "preparing": "Préparation de la ville du tutoriel.",
       "finishFailed": "Impossible de terminer le tutoriel. Veuillez réessayer."
     },
@@ -165,7 +165,7 @@
       },
       "step4": {
         "open": "Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d'icônes et choisissez « Quai de fret pour conteneurs » dans « Chemin de fer ».",
-        "place": "Posez un quai au nord de la gare de fret internationale, parallèlement à celle-ci. Changez le « Côté du quai » pour que le quai se trouve du côté du bâtiment de la gare (côté sud) avant de valider. Si vous le posez d'ouest en est, choisissez « Intérieur ». Une fois la pose terminée, appuyez sur « Suivant ».",
+        "place": "Posez un quai au nord de la gare de fret internationale, parallèlement à celle-ci. Faites un clic gauche dans le cercle cyan (ouest) pour placer le début, puis dans le cercle jaune (est) pour placer la fin, et faites un clic droit dans la vue 3D pour terminer le tracé. Réglez le « Côté du quai » sur « Intérieur » et vérifiez que le quai se trouve du côté du bâtiment de la gare (côté sud) avant de valider. Une fois la pose terminée, appuyez sur « Suivant ».",
         "title": "Construire un quai à côté de la gare"
       },
       "step5": {

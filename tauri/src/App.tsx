@@ -589,7 +589,7 @@ function App() {
                       if (quests.some((q) => q.notify === "modal")) {
                         await invoke("open_registered_window", {
                           windowType: "quest_complete",
-                          params: { extra: { quests } },
+                          params: { extra: { quests, openedAt: Date.now() } },
                         });
                       }
                       await closeWindow();
@@ -604,6 +604,7 @@ function App() {
                     | { quests?: QuestNotification[] }
                     | undefined)?.quests) ?? []
                 }
+                openedAt={Number(windowExtra(context)?.openedAt) || undefined}
                 onClose={closeWindow}
               />
             ) : context.window_type === "tutorial_intro" ? (

@@ -295,6 +295,7 @@ export function TransitCreationPanel({
           ) : (
             <select
               className="bc-select"
+              data-guide="transit.type"
               value={selectedTransitId ?? ""}
               onChange={(e) => setSelectedTransitId(e.target.value ? parseInt(e.target.value) : null)}
             >

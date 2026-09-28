@@ -85,6 +85,9 @@ acceptSnapshot({ ...state, runId: "test2", revision: 2, active: false }); accept
 check(snapshot()?.active, false, "retired run cannot reactivate");
 for (const mutate of [
   (d: any) => d.steps[0].phases[0].ui.allow.push("unknown"),
+  (d: any) => d.steps[0].phases[0].ui.highlight.push("hud.road:1"),
+  (d: any) => d.steps[0].phases[0].ui.highlight.push("path.variant:street"),
+  (d: any) => d.steps[0].phases[0].ui.highlight.push("path.variant:"),
   (d: any) => d.steps[0].phases[0].world.path.variant = { $constant: "TYPO" },
   (d: any) => d.steps[0].complete.target = "typo",
   (d: any) => d.steps[0].phases[0].world.path.points[0][1] = 10,
@@ -120,6 +123,23 @@ menu();
 const menuOnly = installUiGuide({ policy: "highlight", allow: [], highlight: ["hud.road"] }, "icon-panel");
 check([(document.getElementById("road") as HTMLElement).inert, other.inert], [false, true], "icon panel disables buttons the step does not use");
 menuOnly();
+{
+  document.body.innerHTML = '<button data-guide="path.variant" data-guide-value="221">Street</button><button data-guide="path.variant" data-guide-value="222" disabled>Lane</button>'
+    + '<button data-guide="building.variant" data-guide-value="1054">Solar</button><button data-guide="building.variant" data-guide-value="1062">Substation</button>';
+  const lit = () => [...document.querySelectorAll("[data-tutorial-highlight]")].map(el => el.textContent);
+  const cards = () => [...document.querySelectorAll<HTMLElement>("[data-guide='building.variant']")].map(el => el.inert);
+  const generic = installUiGuide({ policy: "highlight", allow: [], highlight: ["path.variant"] }, "path_build");
+  check(lit(), ["Street"], "cards that cannot be pressed are not highlighted");
+  document.querySelector<HTMLButtonElement>("[data-guide-value='222']")!.disabled = false; await new Promise(r => setTimeout(r, 0));
+  check(lit(), ["Street", "Lane"], "a card enabled later is highlighted");
+  generic();
+  const exact = installUiGuide({ policy: "highlight", allow: [], highlight: ["building.variant:1054"] }, "building_construction");
+  check(lit(), ["Solar"], "a valued target highlights only its own card"); exact();
+  const allowOne = installUiGuide({ policy: "strict", allow: ["building.variant:1062"], highlight: [] }, "building_construction");
+  check(cards(), [true, false], "a valued target allows only its own card"); allowOne();
+  const allowAll = installUiGuide({ policy: "strict", allow: ["building.variant"], highlight: [] }, "building_construction");
+  check(cards(), [false, false], "a plain target covers every card of the name"); allowAll();
+}
 for (const windowType of ["system-tray", "settings", "save_load", "save_list", "new_game", "credits", "confirm_dialog", "tutorial", "notification", "tips"]) {
   document.body.innerHTML = '<button id="settings">Settings</button><button id="save">Save</button><button id="reload">Reload</button><input><button disabled>Busy</button>';
   let handled = 0;

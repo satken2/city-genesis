@@ -18,6 +18,8 @@ import "./PathConstructionPanel.css";
 import "../building/BuildingConstructionPanel.css";
 
 type PathVariantCardProps = {
+  /** バリアント番号。チュートリアルの案内がカードを1枚だけ指すのに使う(data-guide-value) */
+  variantId?: number;
   entry: PathMasterEntry;
   /** 資金不足・チュートリアルの制限などで選べない場合に true */
   disabled?: boolean;
@@ -99,7 +101,7 @@ function collectSpecs(entry: PathMasterEntry): SpecItem[] {
   return specs;
 }
 
-export function PathVariantCard({ entry, disabled = false, titleSuffix, onClick }: PathVariantCardProps) {
+export function PathVariantCard({ variantId, entry, disabled = false, titleSuffix, onClick }: PathVariantCardProps) {
   const { t } = useTranslation();
   const specs = collectSpecs(entry);
 
@@ -136,6 +138,7 @@ export function PathVariantCard({ entry, disabled = false, titleSuffix, onClick 
       <button
         type="button"
         data-guide="path.variant"
+        data-guide-value={variantId}
         className="pc-description-frame bc-variant-card-btn"
         disabled={disabled}
         onClick={onClick}

@@ -88,8 +88,8 @@
       "step1": {
         "title": "Construyamos los andenes",
         "open": "Primero, los andenes donde los pasajeros esperan el tren. Abre «Calles, ferrocarril e infraestructura» en el panel de iconos y elige «Andén ferroviario» en «Ferrocarril». Usa una sola vía.",
-        "town": "Junto a la vivienda colectiva del pueblo, haz clic en los dos marcadores amarillos de oeste a este para tender un andén. Comprueba en la vista previa que el andén quede del lado norte (el de la vivienda) antes de confirmar.",
-        "new": "Junto al edificio comercial del oeste, haz clic también en los dos marcadores amarillos de oeste a este para tender un andén con el lado de embarque hacia el norte. Cuando termines, pulsa «Siguiente»."
+        "town": "Junto a la vivienda colectiva del pueblo, haz clic izquierdo dentro del círculo celeste (oeste) para colocar el inicio y dentro del círculo amarillo (este) para colocar el final; luego haz clic derecho en la vista 3D para finalizar la forma. Comprueba en la vista previa que el andén quede del lado norte (el de la vivienda) y confirma en el panel de construcción.",
+        "new": "Junto al edificio comercial del oeste, haz lo mismo: clic izquierdo en el círculo celeste (oeste), luego en el círculo amarillo (este), y clic derecho para finalizar la forma, tendiendo un andén con el lado de embarque hacia el norte. Cuando termines, pulsa «Siguiente»."
       },
       "step2": {
         "title": "Construyamos los edificios de estación",
@@ -144,7 +144,7 @@
       "confirmRoad": "Confirma en el panel de construcción para guardar la carretera y luego pulsa «Siguiente».",
       "failed": "Falló la preparación o la comunicación. Reintenta; si el problema persiste, sal e inicia el tutorial en una ciudad nueva.",
       "retry": "Reintentar",
-      "placementRequired": "Usa la variante y las posiciones de carretera indicadas.",
+      "placementRequired": "Usa la variante y las posiciones indicadas.",
       "preparing": "Preparando la ciudad del tutorial.",
       "finishFailed": "No se pudo terminar el tutorial. Inténtalo de nuevo."
     },
@@ -165,7 +165,7 @@
       },
       "step4": {
         "open": "Abre «Calles, ferrocarril e infraestructura» en el panel de iconos y elige «Andén de carga de contenedores» en «Ferrocarril».",
-        "place": "Tiende un andén al norte de la estación internacional de carga, paralelo a ella. Cambia «Lado del andén» para que el andén quede del lado del edificio de la estación (el lado sur) antes de confirmar. Si lo tiendes de oeste a este, elige «Interior». Cuando termines, pulsa «Siguiente».",
+        "place": "Tiende un andén al norte de la estación internacional de carga, paralelo a ella. Haz clic izquierdo dentro del círculo celeste (oeste) para colocar el inicio y dentro del círculo amarillo (este) para colocar el final; luego haz clic derecho en la vista 3D para finalizar la forma. Cambia «Lado del andén» a «Interior» y comprueba que el andén quede del lado del edificio de la estación (el lado sur) antes de confirmar. Cuando termines, pulsa «Siguiente».",
         "title": "Construir un andén junto a la estación"
       },
       "step5": {

@@ -55,7 +55,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.construction"
+              "hud.construction",
+              "building.category:5",
+              "building.variant:1022"
             ]
           },
           "world": {
@@ -115,7 +117,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.construction"
+              "hud.construction",
+              "building.category:11",
+              "building.variant:1077"
             ]
           },
           "world": {
@@ -175,7 +179,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.construction"
+              "hud.construction",
+              "building.category:11",
+              "building.variant:1078"
             ]
           },
           "world": {
@@ -235,7 +241,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.construction"
+              "hud.construction",
+              "building.category:12",
+              "building.variant:401"
             ]
           },
           "world": {
@@ -295,7 +303,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.road"
+              "hud.road",
+              "path.type:4",
+              "path.variant:464"
             ]
           },
           "world": {
@@ -436,7 +446,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.road"
+              "hud.road",
+              "path.type:4",
+              "path.variant:411"
             ]
           },
           "world": {
@@ -501,7 +513,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.construction"
+              "hud.construction",
+              "building.category:11",
+              "building.variant:1060"
             ]
           },
           "world": {
@@ -561,7 +575,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.road"
+              "hud.road",
+              "path.type:4",
+              "path.variant:411"
             ]
           },
           "world": {
@@ -626,7 +642,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.road"
+              "hud.road",
+              "path.type:11",
+              "path.variant:1101"
             ]
           },
           "world": {
@@ -691,7 +709,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.transport"
+              "hud.transport",
+              "transit.new",
+              "transit.type"
             ]
           },
           "world": {

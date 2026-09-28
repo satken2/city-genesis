@@ -88,8 +88,8 @@
       "step1": {
         "title": "Build the Platforms",
         "open": "First, the platforms where passengers wait for trains. Open \"Roads, Rail & Infrastructure\" on the icon panel and choose \"Rail Platform\" under \"Railways\". Use a single track.",
-        "town": "Near the apartment building in town, click the two yellow markers from west to east to lay a platform. Check in the preview that the platform is on the north side (the apartment side) before confirming.",
-        "new": "Near the commercial building to the west, also click the two yellow markers from west to east to lay a platform with the boarding side to the north. When you're done, press \"Next\"."
+        "town": "Near the apartment building in town, left-click inside the cyan circle (west) to place the start and inside the yellow circle (east) to place the end, then right-click in the 3D view to finish the shape. Check in the preview that the platform is on the north side (the apartment side), then confirm in the construction panel.",
+        "new": "Near the commercial building to the west, do the same: left-click the cyan circle (west), then the yellow circle (east), and right-click to finish the shape, laying a platform with the boarding side to the north. When you're done, press \"Next\"."
       },
       "step2": {
         "title": "Build the Station Houses",
@@ -144,7 +144,7 @@
       "confirmRoad": "Confirm in the construction panel to save the road, then press \"Next\".",
       "failed": "Setup or communication failed. Retry; if the problem persists, exit and start the tutorial in a new city.",
       "retry": "Retry",
-      "placementRequired": "Use the road variant and positions shown by the guide.",
+      "placementRequired": "Use the variant and positions shown by the guide.",
       "preparing": "Preparing the tutorial city.",
       "finishFailed": "Could not finish the tutorial. Please try again."
     },
@@ -165,7 +165,7 @@
       },
       "step4": {
         "open": "Open \"Roads, Rail & Infrastructure\" on the icon panel and choose \"Container Freight Platform\" under \"Railways\".",
-        "place": "Lay a platform north of the international freight station, parallel to it. Switch \"Platform Side\" so that the platform is on the station building's side (the south side) before confirming. If you lay it from west to east, choose \"Inside\". When you're done, press \"Next\".",
+        "place": "Lay a platform north of the international freight station, parallel to it. Left-click inside the cyan circle (west) to place the start and inside the yellow circle (east) to place the end, then right-click in the 3D view to finish the shape. Switch \"Platform Side\" to \"Inside\" and check that the platform is on the station building's side (the south side) before confirming. When you're done, press \"Next\".",
         "title": "Build a platform beside the station"
       },
       "step5": {

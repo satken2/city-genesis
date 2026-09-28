@@ -288,7 +288,7 @@ export function TransitManagementWindow({
     <div className="transit-window">
       {/* 左サイドバー: 路線新設ボタンと路線種別の縦並びタブ */}
       <aside className="transit-sidebar">
-        <button className="transit-window__new-btn" type="button" onClick={openCreation}>
+        <button className="transit-window__new-btn" type="button" data-guide="transit.new" onClick={openCreation}>
           <PlusIcon />
           <span>{t("transit.newLine")}</span>
         </button>

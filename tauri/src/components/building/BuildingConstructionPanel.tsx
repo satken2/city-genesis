@@ -1589,6 +1589,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
               {availableCategories.map((category) => (
                 <SelectionTile
                   key={category}
+                  category={category}
                   icon={resolveBdCategoryIcon(category)}
                   name={t(`building_construction.category.${category}`)}
                   onClick={() => setSelectedCategory(category)}
@@ -2128,15 +2129,16 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
   );
 }
 
-/** 分類・建物の選択タイル。アイコン画像が無いものは枠だけ空けておく。 */
-function SelectionTile({ icon, name, disabled = false, onClick }: {
+/** 分類(bd_category)の選択タイル。アイコン画像が無いものは枠だけ空けておく。 */
+function SelectionTile({ category, icon, name, disabled = false, onClick }: {
+  category: number;
   icon: string;
   name: string;
   disabled?: boolean;
   onClick: () => void;
 }) {
   return (
-    <button className="bc-tile" type="button" disabled={disabled} onClick={onClick}>
+    <button className="bc-tile" type="button" data-guide="building.category" data-guide-value={category} disabled={disabled} onClick={onClick}>
       <span className="bc-tile-icon">{icon && <img src={icon} alt="" draggable={false} />}</span>
       <span className="bc-tile-name">{name}</span>
     </button>

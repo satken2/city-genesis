@@ -14,7 +14,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.construction"
+              "hud.construction",
+              "building.category:12",
+              "building.variant:403"
             ]
           },
           "world": {
@@ -129,7 +131,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.construction"
+              "hud.construction",
+              "building.category:11",
+              "building.variant:404"
             ]
           },
           "world": {
@@ -189,11 +193,13 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.road"
+              "hud.road",
+              "path.type:4",
+              "path.variant:463"
             ]
           },
           "world": {
-            "mode": "observe",
+            "mode": "blocked",
             "markers": [
               [
                 -50,
@@ -206,6 +212,22 @@
                 110
               ]
             ],
+            "path": {
+              "points": [
+                [
+                  -50,
+                  0,
+                  110
+                ],
+                [
+                  90,
+                  0,
+                  110
+                ]
+              ],
+              "radius": 12,
+              "variant": 463
+            },
             "camera": {
               "target": [
                 20,
@@ -223,15 +245,18 @@
           }
         },
         {
-          "id": "place",
-          "textKey": "tutorial.trade.step4.place",
+          "id": "variant",
+          "textKey": "tutorial.trade.step4.open",
           "ui": {
             "policy": "highlight",
             "allow": [],
-            "highlight": []
+            "highlight": [
+              "path.type:4",
+              "path.variant:463"
+            ]
           },
           "world": {
-            "mode": "observe",
+            "mode": "blocked",
             "markers": [
               [
                 -50,
@@ -244,6 +269,76 @@
                 110
               ]
             ],
+            "path": {
+              "points": [
+                [
+                  -50,
+                  0,
+                  110
+                ],
+                [
+                  90,
+                  0,
+                  110
+                ]
+              ],
+              "radius": 12,
+              "variant": 463
+            },
+            "camera": {
+              "target": [
+                20,
+                0,
+                80
+              ],
+              "distance": 320,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "pathVariant",
+            "value": 463
+          }
+        },
+        {
+          "id": "place",
+          "textKey": "tutorial.trade.step4.place",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": []
+          },
+          "world": {
+            "mode": "path",
+            "markers": [
+              [
+                -50,
+                0,
+                110
+              ],
+              [
+                90,
+                0,
+                110
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  -50,
+                  0,
+                  110
+                ],
+                [
+                  90,
+                  0,
+                  110
+                ]
+              ],
+              "radius": 12,
+              "variant": 463
+            },
             "camera": {
               "target": [
                 20,
@@ -282,7 +377,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.road"
+              "hud.road",
+              "path.type:4",
+              "path.variant:411"
             ]
           },
           "world": {
@@ -347,7 +444,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.construction"
+              "hud.construction",
+              "building.category:11",
+              "building.variant:1060"
             ]
           },
           "world": {
@@ -407,7 +506,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.road"
+              "hud.road",
+              "path.type:4",
+              "path.variant:411"
             ]
           },
           "world": {
@@ -472,7 +573,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.road"
+              "hud.road",
+              "path.type:11",
+              "path.variant:1101"
             ]
           },
           "world": {
@@ -537,7 +640,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.transport"
+              "hud.transport",
+              "transit.new",
+              "transit.type"
             ]
           },
           "world": {

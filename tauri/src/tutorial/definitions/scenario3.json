@@ -52,7 +52,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.construction"
+              "hud.construction",
+              "building.category:7",
+              "building.variant:1054"
             ]
           },
           "world": {
@@ -112,7 +114,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.construction"
+              "hud.construction",
+              "building.category:7",
+              "building.variant:1062"
             ]
           },
           "world": {
@@ -172,7 +176,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.road"
+              "hud.road",
+              "path.type:11",
+              "path.variant:1101"
             ]
           },
           "world": {

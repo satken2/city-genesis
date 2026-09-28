@@ -14,11 +14,13 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.road"
+              "hud.road",
+              "path.type:4",
+              "path.variant:461"
             ]
           },
           "world": {
-            "mode": "observe",
+            "mode": "blocked",
             "markers": [
               [
                 230,
@@ -31,6 +33,22 @@
                 -42.5
               ]
             ],
+            "path": {
+              "points": [
+                [
+                  230,
+                  0,
+                  -42.5
+                ],
+                [
+                  330,
+                  0,
+                  -42.5
+                ]
+              ],
+              "radius": 12,
+              "variant": 461
+            },
             "camera": {
               "target": [
                 280,
@@ -48,15 +66,18 @@
           }
         },
         {
-          "id": "town",
-          "textKey": "tutorial.scenario4.step1.town",
+          "id": "variant",
+          "textKey": "tutorial.scenario4.step1.open",
           "ui": {
             "policy": "highlight",
             "allow": [],
-            "highlight": []
+            "highlight": [
+              "path.type:4",
+              "path.variant:461"
+            ]
           },
           "world": {
-            "mode": "observe",
+            "mode": "blocked",
             "markers": [
               [
                 230,
@@ -69,6 +90,76 @@
                 -42.5
               ]
             ],
+            "path": {
+              "points": [
+                [
+                  230,
+                  0,
+                  -42.5
+                ],
+                [
+                  330,
+                  0,
+                  -42.5
+                ]
+              ],
+              "radius": 12,
+              "variant": 461
+            },
+            "camera": {
+              "target": [
+                280,
+                0,
+                -40
+              ],
+              "distance": 330,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "pathVariant",
+            "value": 461
+          }
+        },
+        {
+          "id": "town",
+          "textKey": "tutorial.scenario4.step1.town",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": []
+          },
+          "world": {
+            "mode": "path",
+            "markers": [
+              [
+                230,
+                0,
+                -42.5
+              ],
+              [
+                330,
+                0,
+                -42.5
+              ]
+            ],
+            "path": {
+              "points": [
+                [
+                  230,
+                  0,
+                  -42.5
+                ],
+                [
+                  330,
+                  0,
+                  -42.5
+                ]
+              ],
+              "radius": 12,
+              "variant": 461
+            },
             "camera": {
               "target": [
                 280,
@@ -100,7 +191,7 @@
             "highlight": []
           },
           "world": {
-            "mode": "observe",
+            "mode": "path",
             "markers": [
               [
                 -225,
@@ -113,6 +204,22 @@
                 -42.5
               ]
             ],
+            "path": {
+              "points": [
+                [
+                  -225,
+                  0,
+                  -42.5
+                ],
+                [
+                  -125,
+                  0,
+                  -42.5
+                ]
+              ],
+              "radius": 12,
+              "variant": 461
+            },
             "camera": {
               "target": [
                 -175,
@@ -155,7 +262,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.road"
+              "hud.road",
+              "path.type:4",
+              "path.variant:2001"
             ]
           },
           "world": {
@@ -201,7 +310,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.road"
+              "hud.road",
+              "path.type:4",
+              "path.variant:2001"
             ]
           },
           "world": {
@@ -260,7 +371,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.road"
+              "hud.road",
+              "path.type:4",
+              "path.variant:411"
             ]
           },
           "world": {
@@ -325,7 +438,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.construction"
+              "hud.construction",
+              "building.category:11",
+              "building.variant:1060"
             ]
           },
           "world": {
@@ -385,7 +500,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.road"
+              "hud.road",
+              "path.type:4",
+              "path.variant:411"
             ]
           },
           "world": {
@@ -450,7 +567,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.road"
+              "hud.road",
+              "path.type:11",
+              "path.variant:1101"
             ]
           },
           "world": {
@@ -515,7 +634,9 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.transport"
+              "hud.transport",
+              "transit.new",
+              "transit.type"
             ]
           },
           "world": {

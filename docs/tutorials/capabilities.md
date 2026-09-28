@@ -29,16 +29,18 @@
 | --- | --- |
 | `ui.policy` | `highlight` は制限なし、`related` は許可ウィンドウ内も操作可能、`strict` は個別操作のみ |
 | `ui.allow` / `highlight` | 許可対象と強調対象の配列。別々に指定する |
-| `world.mode` | `observe` は制限なし、`blocked` はワールド編集停止、`path` は指定道路配置 |
+| `world.mode` | `observe` は制限なし、`blocked` はワールド編集停止、`path` は指定パス(道路・プラットフォーム)の配置 |
 | `world.markers` | `[x, 地面相対y, z]` の配列。保存されない描画物 |
 | `world.camera` | `target`(地面相対の `[x, y, z]`)、`distance`、`yaw`(北=0の時計回り)、`pitch`(5〜89度)。直前と違う案内先のときだけカメラが滑らかに移動する |
-| `world.path` | `points` は始終点2点、`radius` はクリック許容半径m、`variant` はバリアント、`bind` は保存IDの格納名 |
-| 道路の範囲 | v1は地上・直線・相対高さ0・盛土0。水色の始点と黄色の終点を左クリックし、右クリックで形状確定。確定の右クリック位置は問わない。普通の建設可否も通る必要がある |
+| `world.path` | `points` は始終点2点、`radius` はクリック許容半径m、`variant` はバリアント、`bind` は保存IDの格納名。この項目がある段階では、パス建設パネルで `variant` 以外のカテゴリ・カードを選べない |
+| パスの範囲 | v1は地上・直線・相対高さ0・盛土0・線路1本。道路と同じ敷設エディタで敷くプラットフォームにも使える(ホームの側は検証しない)。水色の始点と黄色の終点を左クリックし、右クリックで形状確定。確定の右クリック位置は問わない。普通の建設可否も通る必要がある |
 | `$constant` | 共有定数名、または `TUTORIAL_STREET`。後者は街路・2車線・高さ編集不可・接道可のマスター候補が1件のときだけ解決 |
 | `$ref` | 名前付き対象の数値ID。文字列埋め込み・任意式・コード実行は不可 |
 | コアの対象名 | `support.<名前>`・`lesson.<名前>` はコアが作った初期都市の対象。定義内の `bind` なしで `target` 等から参照できる |
 
-利用できるHUD操作名は `hud.road`、`hud.construction`、`hud.land`、`hud.district`、`hud.execute`、`hud.visibility`、`hud.transport`。道路・鉄道・インフラはすべて `hud.road` のパス建設パネルで敷き、パネル内は `path.type`(カテゴリのタイル)、`path.variant`(バリアントのカード)、`path.confirm`、`path.cancel`。ウィンドウ単位の許可は `window.path_build`、`window.agent_detail`。新しい対象は実要素に `data-guide` を付け、`definitions.ts` の登録表・テスト・本表を同時に更新する。
+利用できるHUD操作名は `hud.road`、`hud.construction`、`hud.land`、`hud.district`、`hud.execute`、`hud.visibility`、`hud.transport`。道路・鉄道・インフラはすべて `hud.road` のパス建設パネルで敷き、パネル内は `path.type`(カテゴリのタイル)、`path.variant`(バリアントのカード)、`path.confirm`、`path.cancel`。建物建設パネル(`hud.construction`)は `building.category`(分類のタイル)、`building.variant`(建物のカード)。公共交通(`hud.transport`)は `transit.new`(路線の新設ボタン)、`transit.type`(路線種別の選択)。ウィンドウ単位の許可は `window.path_build`、`window.agent_detail`。新しい対象は実要素に `data-guide` を付け、`definitions.ts` の登録表・テスト・本表を同時に更新する。
+
+タイルとカード(`path.type`・`path.variant`・`building.category`・`building.variant`)は `名前:値` で1枚だけを指せる。値はカテゴリ(`path_type`・`bd_category`)またはバリアントの番号で、例えば `["hud.construction", "building.category:7", "building.variant:1054"]` は建設アイコン・発電所の分類・太陽光発電所のカードを順に強調する。値の無い名前はその名前の要素すべてを指す。押せない(`disabled`)タイル・カードは強調しないので、`world.path` で選べるバリアントが1つに絞られる段階は値の無い名前でもその1枚だけが光る。建設や敷設を案内するステップは、HUDのアイコンに加えてパネル内で選ぶタイルとカードを強調する。
 
 ウィンドウ移動・閉じるための `.titlebar` と明示した `data-guide-escape`、チュートリアル・通知・Tipsは操作制限の対象外。システムトレイと設定・クレジット・セーブ/ロード・セーブ一覧・新規ゲーム・確認ダイアログも常に操作できる。除外一覧は `dom.ts` が管理する。スクロールとカメラは保持する。通常のdisabledは解除しない。別WebViewはそれぞれ同じ案内を受け取り、自分のDOMへ適用する。
 

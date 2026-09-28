@@ -170,7 +170,7 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
         // レポートが無くお祝い対象のクエストだけある場合は、クエストウィンドウを直接開く。
         await invoke("open_registered_window", {
           windowType: "quest_complete",
-          params: { extra: { quests } },
+          params: { extra: { quests, openedAt: Date.now() } },
         });
       }
 

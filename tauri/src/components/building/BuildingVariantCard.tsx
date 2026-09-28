@@ -64,6 +64,8 @@ export function BuildingVariantCard({
     return (
       <button
         type="button"
+        data-guide="building.variant"
+        data-guide-value={variantId}
         className="bc-description-frame bc-variant-card-btn"
         disabled={disabled}
         onClick={onClick}

@@ -18,11 +18,17 @@ import type { QuestNotification, QuestTier } from "../../types";
 // 音声は必ず import 経由で参照する。パス文字列を直接 Audio に渡すとバンドル対象から
 // 外れ、本番ビルドではファイルが存在せず無音になる。
 import tadaSound from "../../assets/sounds/tada.opus";
+import { logInfoToFile } from "../../utils/log";
 import "./QuestCompleteWindow.css";
 
 type QuestCompleteWindowProps = {
   quests: QuestNotification[];
   onClose: () => void;
+  /**
+   * 開いた時刻。表示中のウィンドウへ開き直すと再マウントされないため、
+   * この値が変わったらファンファーレを鳴らし直す。
+   */
+  openedAt?: number;
 };
 
 /** tier の表示順（豪華なものから見せる） */
@@ -46,7 +52,17 @@ function formatValue(v: number | null): string {
     : v.toLocaleString(undefined, { maximumFractionDigits: 2 });
 }
 
-export function QuestCompleteWindow({ quests, onClose }: QuestCompleteWindowProps) {
+/** 再生の成否を tauri.log に残す。無音になったとき、その理由を実機のログで確かめられるようにする */
+function playFanfare(audio: HTMLAudioElement): void {
+  audio.play()
+    .then(() => logInfoToFile("quest_complete: fanfare started"))
+    .catch((e: unknown) => {
+      const error = e instanceof Error ? e : null;
+      console.error("[quest_complete] fanfare failed:", error?.name, error?.message ?? String(e));
+    });
+}
+
+export function QuestCompleteWindow({ quests, onClose, openedAt }: QuestCompleteWindowProps) {
   const { t } = useTranslation();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [pageIndex, setPageIndex] = useState(0);
@@ -61,15 +77,14 @@ export function QuestCompleteWindow({ quests, onClose }: QuestCompleteWindowProp
   );
 
   useEffect(() => {
-    audioRef.current = new Audio(tadaSound);
-    audioRef.current.play().catch(() => {});
+    const audio = new Audio(tadaSound);
+    audioRef.current = audio;
+    playFanfare(audio);
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
+      audio.pause();
+      if (audioRef.current === audio) audioRef.current = null;
     };
-  }, []);
+  }, [openedAt]);
 
   if (modalQuests.length === 0) {
     return null;
@@ -86,7 +101,7 @@ export function QuestCompleteWindow({ quests, onClose }: QuestCompleteWindowProp
     } else {
       setPageIndex((i) => i + 1);
       // ページ送りのたびにファンファーレを鳴らし直す
-      audioRef.current?.play().catch(() => {});
+      if (audioRef.current) playFanfare(audioRef.current);
     }
   }
 

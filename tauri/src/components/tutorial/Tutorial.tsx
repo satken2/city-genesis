@@ -283,6 +283,7 @@ export function Tutorial() {
                   params: {
                     extra: {
                       quests: [{ ...tutorialQuest, notify: "modal", status: "completed" }],
+                      openedAt: Date.now(),
                     },
                   },
                 });

@@ -359,6 +359,7 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
               {availableCategories.map((category) => (
                 <CategoryTile
                   key={category}
+                  category={category}
                   icon={resolvePathCategoryIcon(category)}
                   name={t(`path_construction.category.${category}`)}
                   disabled={!buildCategoryVariants(masterData, category).some((v) => tutorialVariantAllowed(v.id))}
@@ -377,6 +378,7 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
                   return (
                     <PathVariantCard
                       key={id}
+                      variantId={id}
                       entry={data}
                       disabled={unaffordable || !tutorialVariantAllowed(id)}
                       titleSuffix={unaffordable ? t("construction.variantUnaffordableSuffix") : undefined}
@@ -463,14 +465,15 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
 }
 
 /** カテゴリのタイル。アイコン画像が無いものは枠だけ空けておく(意匠は建物建設パネルの分類タイルと共通)。 */
-function CategoryTile({ icon, name, disabled, onClick }: {
+function CategoryTile({ category, icon, name, disabled, onClick }: {
+  category: number;
   icon: string;
   name: string;
   disabled: boolean;
   onClick: () => void;
 }) {
   return (
-    <button className="bc-tile" type="button" data-guide="path.type" disabled={disabled} onClick={onClick}>
+    <button className="bc-tile" type="button" data-guide="path.type" data-guide-value={category} disabled={disabled} onClick={onClick}>
       <span className="bc-tile-icon">{icon && <img src={icon} alt="" draggable={false} />}</span>
       <span className="bc-tile-name">{name}</span>
     </button>

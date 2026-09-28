@@ -15,7 +15,8 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.road"
+              "hud.road",
+              "path.type:2"
             ]
           },
           "world": {
@@ -118,7 +119,8 @@
             "policy": "highlight",
             "allow": [],
             "highlight": [
-              "hud.road"
+              "hud.road",
+              "path.type:2"
             ]
           },
           "world": {

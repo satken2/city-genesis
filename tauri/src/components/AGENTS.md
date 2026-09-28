@@ -4,7 +4,7 @@
 
 ## フォルダ一覧
 
-チュートリアルの表示は `tutorial/`(ヒントバー型の `Tutorial` と開始時の説明ウィンドウ `TutorialIntroWindow`)、JSON定義・進行・各WebViewの制限は `../tutorial/`。通常コンポーネントは安定した操作名の `data-guide` と観測・確定直前の接点を提供し、シナリオ固有の条件を持たない。登録済み操作名は `../tutorial/definitions.ts` が正。
+チュートリアルの表示は `tutorial/`(ヒントバー型の `Tutorial` と開始時の説明ウィンドウ `TutorialIntroWindow`)、JSON定義・進行・各WebViewの制限は `../tutorial/`。通常コンポーネントは安定した操作名の `data-guide`(同じ名前が並ぶタイル・カードは番号の `data-guide-value` も)と観測・確定直前の接点を提供し、シナリオ固有の条件を持たない。登録済み操作名は `../tutorial/definitions.ts` が正。
 
 | フォルダ | 内容 |
 | --- | --- |

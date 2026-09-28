@@ -60,6 +60,10 @@
 
 - 別ワークツリーの `tauri/node_modules` を本体の `tauri/node_modules` へのジャンクションにすると、`tsc` はそのまま動くが、書き込みを伴う道具は本体の `node_modules` を汚す。確認用の Vite は `cacheDir` を指定しないと本体の開発サーバーと同じ `node_modules/.vite` に書き、`npm run test:tutorial`(`tools/tutorial/run.mjs`)はバンドルを `node_modules/.cache` に書く。後者は `run.mjs` の出力先だけを書き換えた写しをレポジトリの外に置き、ワークツリーの `tauri` をカレントにして動かす(出力先の隣にも `node_modules` のジャンクションを置く。バンドルは外部パッケージを出力先から解決するため)。
 
+- クエスト達成(目標達成)のファンファーレが鳴らなかったときは、`tauri.log` の `quest_complete: fanfare started`(再生開始)と `[quest_complete] fanfare failed:`(例外名と理由)を見る。どちらも無ければウィンドウの中身が再マウントされず、再生処理そのものが走っていない。`NotAllowedError` は自動再生の制限、`AbortError` は再生直後に止められた、`NotSupportedError` は音声の読み込み失敗。
+
+- チュートリアルの段階に `world.path` を書くと、パス建設パネルは指定バリアント以外のカテゴリとカードを選べなくなる(`tutorialVariantAllowed`)。プラットフォームも道路と同じ敷設エディタなので、同じ制約(水色・黄色の円への吸着)がそのまま効く。
+
 ## docs
 
 - この環境には mkdocs が入っておらず、`python` はストアのエイリアスで起動しない。`py -m venv outputs/mkdocs-venv` に `docs/requirements.txt` を入れ、`docs/` で `outputs/mkdocs-venv/Scripts/python.exe -m mkdocs build --strict -d <リポジトリ外>` を実行すると、既定の `site/` を上書きせずに strict 検査だけできる。
